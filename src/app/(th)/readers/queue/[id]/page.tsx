@@ -74,7 +74,7 @@ export default function CustomerQueuePage() {
   if (loading && !data) {
     return (
       <main id="main-content" tabIndex={-1} className="min-h-[70vh] bg-[#F6F1E9] text-ink flex items-center justify-center p-4">
-        <div className="bg-surface border border-line rounded-2xl p-8 text-center space-y-3 z-10 shadow-sm">
+        <div className="altar-card-porcelain p-8 text-center space-y-3 z-10">
           <div className="h-8 w-8 mx-auto border-2 border-gold-ink border-t-transparent rounded-full animate-spin" />
           <p className="text-xs text-muted font-serif-th">กำลังตรวจสอบข้อมูลคิวของคุณ…</p>
         </div>
@@ -106,7 +106,7 @@ export default function CustomerQueuePage() {
         <div className="flex items-center justify-between border-b border-line pb-4">
           <Link
             href="/readers"
-            className="inline-flex items-center gap-1.5 text-xs text-gold-ink hover:text-gold-ink-deep transition-colors py-1.5 px-3 rounded-xl bg-surface border border-line font-serif-th"
+            className="altar-card-porcelain !rounded-xl inline-flex items-center gap-1.5 text-xs text-gold-ink hover:text-gold-ink-deep transition-colors py-1.5 px-3 font-serif-th"
           >
             <span>←</span> หน้ารวมแม่หมอ
           </Link>
@@ -114,10 +114,10 @@ export default function CustomerQueuePage() {
         </div>
 
         {/* Main Status Board */}
-        <div className="bg-surface rounded-3xl p-6 sm:p-8 space-y-6 border border-line shadow-sm">
+        <div className="altar-card-porcelain p-6 sm:p-8 space-y-6">
           {/* Reader Profile Header */}
-          <div className="flex items-center gap-4 bg-surface-warm p-4 rounded-2xl border border-line">
-            <div className="h-14 w-14 shrink-0 rounded-full border-2 border-line bg-surface overflow-hidden flex items-center justify-center text-xl font-bold text-gold-ink">
+          <div className="altar-card-porcelain flex items-center gap-4 p-4">
+            <div className="glass-chip h-14 w-14 shrink-0 overflow-hidden flex items-center justify-center text-xl font-bold text-gold-ink">
               {reader.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={reader.avatarUrl} alt="" /* ภาพประกอบล้วน — <h2> ข้าง ๆ พิมพ์ชื่อแม่หมออยู่แล้ว (INC-0125) */ className="h-full w-full object-cover" />
@@ -129,7 +129,7 @@ export default function CustomerQueuePage() {
               <h2 className="font-serif-th font-bold text-ink text-base">{reader.displayName}</h2>
               <div className="flex flex-wrap gap-1 mt-1">
                 {reader.specialties.slice(0, 3).map((s, idx) => (
-                  <span key={idx} className="text-[13px] px-2 py-0.5 rounded-full bg-surface border border-line text-muted">
+                  <span key={idx} className="glass-chip text-[13px] px-2 py-0.5 text-muted">
                     {s}
                   </span>
                 ))}
@@ -271,7 +271,7 @@ export default function CustomerQueuePage() {
                         setCancelError(null);
                       }}
                       disabled={cancelling}
-                      className="tap-overlay-y text-xs px-3 py-1.5 rounded-lg border border-line bg-surface text-ink hover:bg-surface-warm font-serif-th transition-colors"
+                      className="altar-card-porcelain !rounded-lg tap-overlay-y text-xs px-3 py-1.5 text-ink font-serif-th transition-colors"
                     >
                       ย้อนกลับ
                     </button>

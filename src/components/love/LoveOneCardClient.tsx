@@ -306,7 +306,7 @@ export function LoveOneCardClient() {
                       <div>
                         <div className="flex items-center justify-between gap-1.5 mb-2">
                           {/* ชิปบอกชื่อไพ่ประจำสถานะ — เดิมชิปนี้พิมพ์ชื่อสถานะซ้ำกับหัวข้อข้างล่างเป๊ะ ๆ */}
-                          <span className="text-[10px] sm:text-[11px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-surface border-line text-gold-ink shadow-2xs">
+                          <span className="glass-chip text-[10px] sm:text-[11px] font-serif-th font-semibold px-2 py-0.5 text-gold-ink">
                             {isEnglish ? opt.cardNameEn : opt.cardNameTh}
                           </span>
                           <span
@@ -362,7 +362,7 @@ export function LoveOneCardClient() {
                   value={yourName}
                   onChange={(e) => setYourName(e.target.value)}
                   placeholder={isEnglish ? "e.g. Alex" : "เช่น แพรว, แบงค์"}
-                  className="w-full rounded-xl border border-line-interactive bg-surface-warm px-3.5 py-2 text-xs font-sans text-ink focus:border-gold focus:outline-hidden focus:ring-1 focus:ring-gold transition-colors"
+                  className="glass-field w-full rounded-xl border border-line-interactive px-3.5 py-2 text-xs font-sans text-ink focus:border-gold focus:outline-hidden focus:ring-1 focus:ring-gold transition-colors"
                 />
               </div>
               <div>
@@ -375,7 +375,7 @@ export function LoveOneCardClient() {
                   value={partnerName}
                   onChange={(e) => setPartnerName(e.target.value)}
                   placeholder={isEnglish ? "e.g. Crush, Ex" : "เช่น คนคุย, คนรักเก่า"}
-                  className="w-full rounded-xl border border-line-interactive bg-surface-warm px-3.5 py-2 text-xs font-sans text-ink focus:border-gold focus:outline-hidden focus:ring-1 focus:ring-gold transition-colors"
+                  className="glass-field w-full rounded-xl border border-line-interactive px-3.5 py-2 text-xs font-sans text-ink focus:border-gold focus:outline-hidden focus:ring-1 focus:ring-gold transition-colors"
                 />
               </div>
             </div>
@@ -385,10 +385,10 @@ export function LoveOneCardClient() {
           <div className="space-y-6 text-left">
             {/* Meta Tags */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-inset border border-line-warm text-xs font-serif-th font-semibold text-gold-ink">
+              <span className="glass-chip px-3 py-1 text-xs font-serif-th font-semibold text-gold-ink">
                 {isEnglish ? `Status: ${currentStatusObj?.titleEn}` : `สถานะ: ${currentStatusObj?.titleTh}`}
               </span>
-              <span className="px-3 py-1 rounded-full bg-surface-warm border border-line-warm text-xs font-sans font-medium text-muted">
+              <span className="glass-chip px-3 py-1 text-xs font-sans font-medium text-muted">
                 {card.arcana === "major" ? "Major Arcana" : "Minor Arcana"} · ธาตุ{card.element}
               </span>
               {savedToHistory && (
@@ -459,7 +459,7 @@ export function LoveOneCardClient() {
               <button
                 type="button"
                 onClick={() => handleShare(card)}
-                className="tap-overlay-y px-5 py-2 rounded-full bg-ink hover:bg-gold text-surface-warm text-xs font-serif-th font-bold transition-colors cursor-pointer shadow-xs"
+                className="btn-gold-glass tap-overlay-y px-5 py-2 text-xs font-serif-th font-bold cursor-pointer"
               >
                 {copied
                   ? isEnglish
@@ -472,7 +472,7 @@ export function LoveOneCardClient() {
 
               <Link
                 href={`/cards/${card.id}`}
-                className="px-5 py-2 rounded-full bg-inset border border-line-warm hover:bg-line text-ink text-xs font-serif-th font-semibold transition-colors shadow-xs"
+                className="glass-chip px-5 py-2 text-ink text-xs font-serif-th font-semibold transition-colors"
               >
                 {isEnglish ? "Card Meaning" : "อ่านความหมายไพ่ใบนี้"}
               </Link>
@@ -497,7 +497,7 @@ export function LoveOneCardClient() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <Link
                 href="/spreads/love"
-                className="group p-4 rounded-xl border border-line-warm hover:border-gold-ink bg-surface transition duration-300 hover:-translate-y-0.5 shadow-xs block"
+                className="altar-card-porcelain !rounded-xl group p-4 transition duration-300 hover:-translate-y-0.5 block"
               >
                 <div className="text-[10px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-[#FBF2EC] text-[#9E4E28] border-[#E8D0C3] inline-block mb-2">
                   5 Cards
@@ -514,7 +514,7 @@ export function LoveOneCardClient() {
 
               <Link
                 href="/spreads/love-six"
-                className="group p-4 rounded-xl border border-line-warm hover:border-gold-ink bg-surface transition duration-300 hover:-translate-y-0.5 shadow-xs block"
+                className="altar-card-porcelain !rounded-xl group p-4 transition duration-300 hover:-translate-y-0.5 block"
               >
                 <div className="text-[10px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-[#FBF2EC] text-[#9E4E28] border-[#E8D0C3] inline-block mb-2">
                   6 Cards
@@ -531,9 +531,9 @@ export function LoveOneCardClient() {
 
               <Link
                 href="/readers"
-                className="group p-4 rounded-xl border border-line-warm hover:border-gold-ink bg-surface transition duration-300 hover:-translate-y-0.5 shadow-xs block"
+                className="altar-card-porcelain !rounded-xl group p-4 transition duration-300 hover:-translate-y-0.5 block"
               >
-                <div className="text-[10px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-inset text-[#5E5240] border-line inline-block mb-2">
+                <div className="glass-chip text-[10px] font-serif-th font-semibold px-2 py-0.5 text-[#5E5240] inline-block mb-2">
                   Personal Readers
                 </div>
                 <div className="text-sm font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">

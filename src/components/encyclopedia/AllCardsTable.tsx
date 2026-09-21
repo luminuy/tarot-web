@@ -81,7 +81,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
   return (
     <div className="space-y-6">
       {/* Controls Bar: Search & Filter Tabs */}
-      <div className="rounded-2xl border border-line bg-surface p-4 sm:p-6 shadow-xs space-y-4">
+      <div className="altar-card-porcelain p-4 sm:p-6 space-y-4">
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
           <div className="relative flex-1 max-w-md">
             <input
@@ -90,7 +90,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={isEnglish ? "Search card name, keyword, element..." : "ค้นหาชื่อไพ่, คำสำคัญ, ธาตุ..."}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-line-interactive bg-surface-warm text-xs sm:text-sm font-serif-th text-ink placeholder:text-muted/60 focus:outline-none focus:border-gold-ink focus:ring-1 focus:ring-gold-ink"
+              className="glass-field w-full px-3.5 py-2.5 rounded-xl border border-line-interactive text-xs sm:text-sm font-serif-th text-ink placeholder:text-muted/60 focus:outline-none focus:border-gold-ink focus:ring-1 focus:ring-gold-ink"
             />
             {query && (
               <button
@@ -123,7 +123,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
                 onClick={() => setActiveSuit(tab.id)}
                 className={`tap-overlay-y px-3 py-1.5 rounded-xl border text-xs font-serif-th font-bold shrink-0 transition-colors flex items-center gap-1.5 cursor-pointer ${
                   isActive
-                    ? "border-gold-ink bg-ink text-canvas"
+                    ? "btn-gold-glass border-gold-ink"
                     : "border-line bg-surface-warm text-muted hover:bg-surface hover:text-ink"
                 }`}
               >
@@ -136,7 +136,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
       </div>
 
       {/* Master 78-Card Table */}
-      <div className="rounded-2xl border border-line bg-surface shadow-xs overflow-hidden">
+      <div className="altar-card-porcelain overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs sm:text-sm font-serif-th">
             <thead>
@@ -177,7 +177,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
                          * เพราะลิงก์จะกลายเป็นลิงก์ไร้ชื่อ ผิด WCAG 2.4.4 (บทเรียน INC-0125)
                          */
                         aria-label={isEnglish ? card.nameEn : card.nameTh}
-                        className="inline-block w-9 h-15 rounded overflow-hidden border border-line bg-inset hover:border-gold-ink transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
+                        className="glass-tile !rounded inline-block w-9 h-15 overflow-hidden transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
                       >
                         <CardImage
                           image={card.image}
@@ -220,7 +220,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
                         {uprightKws.map((kw, i) => (
                           <span
                             key={i}
-                            className="text-[11px] px-1.5 py-0.5 rounded bg-surface-warm text-ink border border-line"
+                            className="altar-card-porcelain !rounded text-[11px] px-1.5 py-0.5 text-ink"
                           >
                             {kw}
                           </span>
@@ -234,7 +234,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
                         {reversedKws.map((kw, i) => (
                           <span
                             key={i}
-                            className="text-[11px] px-1.5 py-0.5 rounded bg-surface-warm/60 text-muted border border-line/70"
+                            className="altar-card-porcelain !rounded text-[11px] px-1.5 py-0.5 text-muted"
                           >
                             {kw}
                           </span>

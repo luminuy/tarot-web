@@ -78,7 +78,7 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
       <div className="flex items-start justify-between gap-4 border-b border-line/60 pb-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-serif-th font-semibold px-2.5 py-0.5 rounded-full bg-surface border border-line text-gold-ink shadow-2xs">
+            <span className="glass-chip text-xs font-serif-th font-semibold px-2.5 py-0.5 text-gold-ink">
               {isEnglish ? "Semantic Wisdom Search" : "ค้นหาด้วยความรู้สึกและเจตจำนง"}
             </span>
           </div>
@@ -97,7 +97,7 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
             type="button"
             onClick={() => fetchResults(query)}
             disabled={state === "loading"}
-            className="tap-overlay-y text-xs font-serif-th font-bold text-gold-ink hover:text-ink px-3 py-1.5 rounded-lg border border-line bg-white hover:border-gold transition-colors cursor-pointer disabled:opacity-50"
+            className="altar-card-porcelain !rounded-lg tap-overlay-y text-xs font-serif-th font-bold text-gold-ink hover:text-ink px-3 py-1.5 transition-colors cursor-pointer disabled:opacity-50"
           >
             {isEnglish ? "Search Again" : "ค้นหาใหม่"}
           </button>
@@ -120,7 +120,7 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
           {[1, 2, 3, 4].map((n) => (
             <div
               key={n}
-              className="rounded-xl border border-line/60 bg-white/70 p-3.5 flex items-center gap-3 animate-pulse"
+              className="altar-card-porcelain !rounded-xl p-3.5 flex items-center gap-3 animate-pulse"
             >
               <div className="w-12 h-18 rounded bg-inset shrink-0" />
               <div className="space-y-2 flex-1">
@@ -135,7 +135,7 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
 
       {/* Error / Degraded State */}
       {(state === "error" || isDegraded) && (
-        <div className="p-4 rounded-xl border border-line bg-white text-center space-y-2">
+        <div className="altar-card-porcelain !rounded-xl p-4 text-center space-y-2">
           <p className="text-xs sm:text-sm font-serif-th text-muted">
             {isDegraded
               ? isEnglish
@@ -150,7 +150,7 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
 
       {/* Done & Empty State */}
       {state === "done" && validCards.length === 0 && (
-        <div className="p-6 rounded-xl border border-line bg-white text-center space-y-2">
+        <div className="altar-card-porcelain !rounded-xl p-6 text-center space-y-2">
           <p className="text-xs sm:text-sm font-serif-th text-muted">
             {isEnglish
               ? "No archetype directly matches this expression. Try describing your situation or emotional state with different words."
@@ -167,9 +167,9 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
             const keywords = card.keywords.upright.slice(0, 2).join(", ");
 
             const content = (
-              <div className="flex items-center gap-3.5 p-3 rounded-xl border border-line bg-white hover:border-gold transition duration-200 shadow-xs group h-full">
+              <div className="altar-card-porcelain !rounded-xl flex items-center gap-3.5 p-3 transition duration-200 group h-full">
                 {/* 1909 Rider-Waite Authentic Artwork */}
-                <div className="w-12 h-20 shrink-0 overflow-hidden rounded-lg border border-line bg-inset relative">
+                <div className="glass-tile !rounded-lg w-12 h-20 shrink-0 overflow-hidden relative">
                   <CardImage
                     image={card.image}
                     cardId={card.id}

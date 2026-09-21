@@ -156,7 +156,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
         </section>
 
         {/* Section 5: AI Disclosure */}
-        <section className="space-y-3 p-5 rounded-xl bg-surface border border-line shadow-[0_10px_30px_rgba(42,38,31,0.04)]">
+        <section className="altar-card-porcelain !rounded-xl space-y-3 p-5">
           <h2 className="text-lg font-bold text-gold font-serif">
             5. Algorithmic Transparency &amp; AI Persona Disclosures
           </h2>
@@ -178,7 +178,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
         </section>
 
         {/* Section 6: Safety Guardrails */}
-        <section className="space-y-3 p-5 rounded-xl bg-surface border border-line shadow-[0_10px_30px_rgba(42,38,31,0.04)]">
+        <section className="altar-card-porcelain !rounded-xl space-y-3 p-5">
           <h2 className="text-lg font-bold text-err font-serif">
             6. User Safety Guardrails &amp; Health Disclaimers
           </h2>
@@ -222,7 +222,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
             <a
               href="/api/account/export"
               download
-              className="px-5 py-2.5 rounded-full bg-surface border border-line text-ink text-xs font-bold hover:bg-canvas hover:border-gold transition cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
+              className="glass-chip px-5 py-2.5 text-ink text-xs font-bold hover:bg-canvas transition cursor-pointer inline-flex items-center gap-1.5"
             >
               <span>Download My Data (Export JSON)</span>
             </a>
@@ -234,7 +234,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
         <div className="text-center pt-6">
           <a
             href="/en"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-ink hover:bg-gold text-canvas font-bold text-sm transition shadow-sm"
+            className="btn-gold-glass inline-flex items-center gap-2 px-6 py-3 font-bold text-sm"
           >
             &larr; Return to Tarot Sanctuary
           </a>

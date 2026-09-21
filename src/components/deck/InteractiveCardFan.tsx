@@ -255,7 +255,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
         {!isComplete ? (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="space-y-1.5">
             {/* Status Pill Badge — Warm Minimalist Luxury */}
-            <div className="inline-flex items-center gap-2 bg-surface border border-line-warm px-3.5 sm:px-5 py-1 sm:py-1.5 rounded-full ">
+            <div className="glass-chip inline-flex items-center gap-2 px-3.5 sm:px-5 py-1 sm:py-1.5">
               <span className="w-2 h-2 rounded-full bg-gold-ink animate-ping" />
               <span className="text-[13px] sm:text-xs font-serif-th font-bold text-ink-deep">
                 {isEnglish
@@ -296,7 +296,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
       </div>
 
       {/* Unified Masterpiece Altar Stage (No Row-Level Clipping) */}
-      <div className="w-full relative rounded-lg border border-line-warm bg-surface overflow-hidden">
+      <div className="altar-card-porcelain !rounded-lg w-full relative overflow-hidden">
         {/* UNIFIED STAGE — พัดไพ่ทั้ง 3 ชั้นย่อพอดีความกว้าง ไม่ต้องเลื่อน (P1-U10) */}
         <div
           ref={stageRef}
@@ -349,8 +349,8 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
           <div className="flex items-center gap-3 w-full sm:w-auto">
             {/* Tarot Deck Seal Icon */}
             <div className="relative w-9 h-12 sm:w-11 sm:h-15 flex-shrink-0 group">
-              <div className="absolute inset-0 translate-x-1 -translate-y-0.5 rounded-lg bg-inset-warm border border-line-warm transform rotate-4 opacity-70" />
-              <div className="absolute inset-0 rounded-lg border-2 border-line-warm overflow-hidden bg-surface transform -rotate-1 group-hover:rotate-0 transition-transform duration-300">
+              <div className="glass-tile !rounded-lg absolute inset-0 translate-x-1 -translate-y-0.5 transform rotate-4 opacity-70" />
+              <div className="altar-card-porcelain !rounded-lg absolute inset-0 overflow-hidden transform -rotate-1 group-hover:rotate-0 transition-transform duration-300">
                 <CardImage
                   image="major-01.jpg"
                   alt="Sacred Tarot Altar"
@@ -369,13 +369,13 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                   
                   <span>{isEnglish ? "Sacred Card Selection" : "ความคืบหน้าพิธีจับไพ่"}</span>
                 </span>
-                <span className="text-[13px] sm:text-xs font-mono font-bold text-ink-deep bg-surface border border-line-warm px-2 py-0.2 rounded-full ">
+                <span className="glass-chip text-[13px] sm:text-xs font-mono font-bold text-ink-deep px-2 py-0.2">
                   {pickedIndices.length} / {targetCount}
                 </span>
               </div>
 
               {/* Luminous Animated Progress Bar */}
-              <div className="w-full h-1.5 sm:h-2 rounded-full bg-surface border border-line-warm overflow-hidden p-0.5 relative">
+              <div className="glass-chip w-full h-1.5 sm:h-2 overflow-hidden p-0.5 relative">
                 <motion.div
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: pickedIndices.length / targetCount }}
@@ -416,7 +416,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                     type="button"
                     onClick={handleAutoPick}
                     disabled={disabled}
-                    className="tap-overlay-y flex-shrink-0 text-[13px] sm:text-[13px] text-ink-deep hover:text-gold-ink bg-surface hover:bg-inset-warm border border-line-warm hover:border-gold-ink px-2.5 py-0.5 rounded-lg transition cursor-pointer font-serif-th focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
+                    className="altar-card-porcelain !rounded-lg tap-overlay-y flex-shrink-0 text-[13px] sm:text-[13px] text-ink-deep hover:text-gold-ink px-2.5 py-0.5 transition cursor-pointer font-serif-th focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
                     aria-label={isEnglish ? "Auto-draw next card" : "สุ่มเลือกไพ่ใบถัดไปอัตโนมัติ"}
                   >
                     {isEnglish ? "Draw for Me" : "สุ่มเลือกให้ฉัน"}

@@ -3,7 +3,7 @@
 import React, { forwardRef } from "react";
 
 const base =
-  "w-full rounded-lg bg-surface border border-line-warm px-3.5 py-2.5 text-sm text-ink-deep " +
+  "altar-card-porcelain !rounded-lg w-full px-3.5 py-2.5 text-sm text-ink-deep" +
   "placeholder:text-muted transition-colors duration-[var(--dur-fast)] " +
   "focus-visible:outline-none focus-visible:border-line-warm focus-visible:ring-2 focus-visible:ring-gold-ink/30 shadow-xs " +
   "disabled:opacity-50 disabled:cursor-not-allowed";

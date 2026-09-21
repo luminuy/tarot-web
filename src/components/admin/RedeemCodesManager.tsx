@@ -309,7 +309,7 @@ export default function RedeemCodesManager() {
     <div className="space-y-6">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 rounded-xl bg-ink px-4 py-2.5 text-xs text-white shadow-lg border border-gold/40">
+        <div className="btn-gold-glass !rounded-xl fixed bottom-6 right-6 z-50 px-4 py-2.5 text-xs border-gold/40">
           {toastMessage}
         </div>
       )}
@@ -333,15 +333,15 @@ export default function RedeemCodesManager() {
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="rounded-xl border border-line bg-white p-4 shadow-sm">
+        <div className="altar-card-porcelain !rounded-xl p-4">
           <p className="text-xs text-muted">รหัสทั้งหมดในระบบ</p>
           <p className="mt-1 text-2xl font-bold text-ink">{summary.total}</p>
         </div>
-        <div className="rounded-xl border border-line bg-white p-4 shadow-sm">
+        <div className="altar-card-porcelain !rounded-xl p-4">
           <p className="text-xs text-muted">รหัสที่พร้อมใช้งาน</p>
           <p className="mt-1 text-2xl font-bold text-emerald-700">{summary.active}</p>
         </div>
-        <div className="rounded-xl border border-line bg-white p-4 shadow-sm">
+        <div className="altar-card-porcelain !rounded-xl p-4">
           <p className="text-xs text-muted">ยอดแลกรับสิทธิ์รวม</p>
           <p className="mt-1 text-2xl font-bold text-gold-ink">{summary.totalRedemptions} ครั้ง</p>
         </div>
@@ -362,7 +362,7 @@ export default function RedeemCodesManager() {
             onClick={() => setFilter("all")}
             className={`tap-overlay-y px-3 py-1.5 rounded-lg border transition-colors ${
               filter === "all"
-                ? "bg-ink text-white border-ink"
+                ? "btn-gold-glass border-ink"
                 : "bg-white text-muted border-line hover:bg-canvas"
             }`}
           >
@@ -439,7 +439,7 @@ export default function RedeemCodesManager() {
               return (
                 <div
                   key={c.code}
-                  className="rounded-xl border border-line bg-white p-4 shadow-2xs space-y-3"
+                  className="altar-card-porcelain !rounded-xl p-4 space-y-3"
                 >
                   {/* Top: Code & Status */}
                   <div className="flex items-center justify-between gap-2 border-b border-line/60 pb-2.5">
@@ -534,7 +534,7 @@ export default function RedeemCodesManager() {
                       <button
                         type="button"
                         onClick={() => openEditModal(c)}
-                        className="tap-overlay-y rounded-lg border border-line bg-white px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-canvas transition-colors shrink-0"
+                        className="altar-card-porcelain !rounded-lg tap-overlay-y px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-canvas transition-colors shrink-0"
                       >
                         แก้ไข
                       </button>
@@ -546,7 +546,7 @@ export default function RedeemCodesManager() {
           </div>
 
           {/* Desktop & Tablet Full-Width Responsive Table (Zero Scroll, Fits Entire Page) */}
-          <div className="hidden md:block w-full overflow-hidden rounded-xl border border-line bg-white shadow-sm">
+          <div className="altar-card-porcelain !rounded-xl hidden md:block w-full overflow-hidden">
             <table className="w-full border-collapse text-left text-xs">
               <thead>
                 <tr className="border-b border-line bg-canvas font-semibold text-muted">
@@ -677,7 +677,7 @@ export default function RedeemCodesManager() {
                           <button
                             type="button"
                             onClick={() => openEditModal(c)}
-                            className="tap-overlay-y rounded-lg border border-line bg-white px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-canvas transition-colors whitespace-nowrap shrink-0"
+                            className="altar-card-porcelain !rounded-lg tap-overlay-y px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-canvas transition-colors whitespace-nowrap shrink-0"
                           >
                             แก้ไข
                           </button>
@@ -824,7 +824,7 @@ export default function RedeemCodesManager() {
               min={todayISO()}
               value={createExpiryDate}
               onChange={(e) => setCreateExpiryDate(e.target.value)}
-              className="w-full rounded-xl border border-line-interactive bg-white px-3 py-2 text-xs text-ink focus:border-gold focus:outline-none"
+              className="glass-field w-full rounded-xl border border-line-interactive px-3 py-2 text-xs text-ink focus:border-gold focus:outline-none"
             />
             <p className="text-[11px] text-muted">
               หมดอายุ ณ 23:59:59 ของวันที่เลือก (ค่าเริ่มต้น 30 วันนับจากวันนี้)
@@ -916,7 +916,7 @@ export default function RedeemCodesManager() {
                 required
                 value={editExpiryDate}
                 onChange={(e) => setEditExpiryDate(e.target.value)}
-                className="w-full rounded-xl border border-line-interactive bg-white px-3 py-2 text-xs text-ink focus:border-gold focus:outline-none"
+                className="glass-field w-full rounded-xl border border-line-interactive px-3 py-2 text-xs text-ink focus:border-gold focus:outline-none"
               />
               <p className="text-[11px] text-muted">
                 รหัสเก่าที่ยังไม่มีวันหมดอายุ กดบันทึกครั้งเดียวก็ได้วันตายทันที
@@ -974,7 +974,7 @@ export default function RedeemCodesManager() {
               ยังไม่มีผู้ใช้แลกรับสิทธิ์จากรหัสนี้
             </div>
           ) : (
-            <div className="max-h-[380px] overflow-y-auto rounded-xl border border-line bg-white">
+            <div className="altar-card-porcelain !rounded-xl max-h-[380px] overflow-y-auto">
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-line bg-canvas text-muted sticky top-0">

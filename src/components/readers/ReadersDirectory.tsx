@@ -43,7 +43,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
   return (
     <div className="space-y-6">
       {/* Search and Filter Bar */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-surface border border-line-warm p-4 rounded-lg ">
+      <div className="altar-card-porcelain !rounded-lg flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-4">
         {/* Search Input */}
         <div className="relative flex-1">
           <input
@@ -52,7 +52,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ค้นหาแม่หมอ, ความถนัด (เช่น ความรัก, การงาน)…"
-            className="w-full bg-surface border border-line-interactive rounded-xl px-4 py-2.5 text-xs sm:text-sm text-ink placeholder-muted/60 focus:outline-none focus:border-gold transition-colors"
+            className="glass-field w-full border border-line-interactive rounded-xl px-4 py-2.5 text-xs sm:text-sm text-ink placeholder-muted/60 focus:outline-none focus:border-gold transition-colors"
           />
           {search && (
             <button
@@ -80,7 +80,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
             onClick={() => setSelectedSpecialty("all")}
             className={`tap-overlay-y px-3.5 py-1 rounded-full text-xs font-serif-th transition duration-200 cursor-pointer ${
               selectedSpecialty === "all"
-                ? "bg-ink text-canvas font-bold shadow-xs"
+                ? "btn-gold-glass font-bold"
                 : "bg-inset text-ink border border-line hover:border-gold"
             }`}
           >
@@ -93,7 +93,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
               onClick={() => setSelectedSpecialty(spec)}
               className={`tap-overlay-y px-3.5 py-1 rounded-full text-xs font-serif-th transition duration-200 cursor-pointer ${
                 selectedSpecialty === spec
-                  ? "bg-ink text-canvas font-bold shadow-xs"
+                  ? "btn-gold-glass font-bold"
                   : "bg-inset text-ink border border-line hover:border-gold"
               }`}
             >
@@ -105,7 +105,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
 
       {/* Readers Grid */}
       {filtered.length === 0 ? (
-        <div className="bg-surface border border-line rounded-xl p-12 text-center space-y-3 shadow-[0_10px_30px_rgba(42,38,31,0.06)]">
+        <div className="altar-card-porcelain !rounded-xl p-12 text-center space-y-3">
           <p className="text-sm font-semibold text-ink font-serif-th">ไม่พบแม่หมอที่ตรงกับเงื่อนไขการค้นหา</p>
           <p className="text-xs text-muted font-serif-th">ลองล้างคำค้นหา หรือเลือกหมวดหมู่อื่นเพื่อค้นหาแม่หมอท่านอื่น</p>
           <button
@@ -114,7 +114,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
               setSearch("");
               setSelectedSpecialty("all");
             }}
-            className="tap-overlay-y mt-3 px-5 py-2 rounded-full bg-ink hover:bg-gold text-xs text-canvas transition-colors cursor-pointer font-bold font-serif-th shadow-sm"
+            className="btn-gold-glass tap-overlay-y mt-3 px-5 py-2 text-xs cursor-pointer font-bold font-serif-th"
           >
             ล้างตัวกรองทั้งหมด
           </button>
@@ -124,12 +124,12 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
           {filtered.map((reader) => (
             <div
               key={reader.id}
-              className="bg-surface border border-line rounded-xl p-5 flex flex-col justify-between hover:border-gold transition duration-300 group shadow-[0_10px_30px_rgba(42,38,31,0.06)]"
+              className="altar-card-porcelain !rounded-xl p-5 flex flex-col justify-between transition duration-300 group"
             >
               <div className="space-y-4">
                 {/* Header: Avatar + Name */}
                 <div className="flex items-center gap-3.5">
-                  <div className="h-14 w-14 shrink-0 rounded-full border border-line bg-inset overflow-hidden flex items-center justify-center text-xl font-bold text-ink shadow-inner">
+                  <div className="glass-chip h-14 w-14 shrink-0 overflow-hidden flex items-center justify-center text-xl font-bold text-ink">
                     {reader.avatarUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={reader.avatarUrl} alt="" /* ภาพประกอบล้วน — <h3> ข้าง ๆ พิมพ์ชื่อแม่หมออยู่แล้ว (INC-0125) */ className="h-full w-full object-cover" />
@@ -159,7 +159,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
                   {reader.specialties.map((s, idx) => (
                     <span
                       key={idx}
-                      className="px-2.5 py-0.5 rounded-full bg-inset border border-line text-[13px] text-ink font-medium font-serif-th"
+                      className="glass-chip px-2.5 py-0.5 text-[13px] text-ink font-medium font-serif-th"
                     >
                       {s}
                     </span>
@@ -171,7 +171,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
               <div className="pt-5 border-t border-line/40 mt-4">
                 <Link
                   href={`/readers/${reader.id}`}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full bg-ink hover:bg-gold text-canvas text-xs font-serif-th font-bold transition shadow-sm"
+                  className="btn-gold-glass w-full flex items-center justify-center gap-2 py-2.5 text-xs font-serif-th font-bold"
                 >
                   <span>ดูโปรไฟล์ &amp; จองคิว</span>
                   <span>→</span>

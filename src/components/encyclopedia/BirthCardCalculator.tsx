@@ -29,7 +29,7 @@ const TarotCard = dynamic(
   () => import("@/components/card/TarotCard").then((mod) => mod.TarotCard),
   {
     loading: () => (
-      <div className="w-[140px] h-[238px] rounded-xl border border-line-warm bg-surface-warm animate-pulse" />
+      <div className="altar-card-porcelain !rounded-xl w-[140px] h-[238px] animate-pulse" />
     ),
   },
 );
@@ -268,7 +268,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
               aria-describedby={errorMsg ? "birth-card-error" : undefined}
               value={day}
               onChange={(e) => setDay(Number.parseInt(e.target.value, 10))}
-              className="w-full rounded-xl border border-line-interactive-warm bg-surface-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
+              className="glass-field w-full rounded-xl border border-line-interactive-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
             >
               {Array.from(
                 {
@@ -308,7 +308,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                 const maxD = getMaxDaysInMonth(currentY, newMonth);
                 if (day > maxD) setDay(maxD);
               }}
-              className="w-full rounded-xl border border-line-interactive-warm bg-surface-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
+              className="glass-field w-full rounded-xl border border-line-interactive-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
             >
               {MONTHS.map((m) => (
                 <option key={m.value} value={m.value}>
@@ -330,7 +330,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                   onClick={() => setEra("be")}
                   className={`tap-overlay-y px-2 py-0.5 rounded transition-colors ${
                     era === "be"
-                      ? "bg-ink text-surface-warm font-bold"
+                      ? "btn-gold-glass font-bold"
                       : "text-[#7A6F5D] hover:text-ink"
                   }`}
                 >
@@ -342,7 +342,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                   onClick={() => setEra("ce")}
                   className={`tap-overlay-y px-2 py-0.5 rounded transition-colors ${
                     era === "ce"
-                      ? "bg-ink text-surface-warm font-bold"
+                      ? "btn-gold-glass font-bold"
                       : "text-[#7A6F5D] hover:text-ink"
                   }`}
                 >
@@ -358,7 +358,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
               value={yearInput}
               onChange={(e) => setYearInput(e.target.value)}
               placeholder={era === "be" ? "2540" : "1997"}
-              className="w-full rounded-xl border border-line-interactive-warm bg-surface-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
+              className="glass-field w-full rounded-xl border border-line-interactive-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
             />
           </div>
         </div>
@@ -378,7 +378,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
         <button
           type="submit"
           disabled={oracle.isPreparing}
-          className="w-full py-3 px-6 rounded-full bg-ink text-surface-warm text-xs sm:text-sm font-serif-th font-bold hover:bg-gold transition duration-200 cursor-pointer shadow-raised active:scale-95 tracking-wide disabled:opacity-60 disabled:cursor-wait"
+          className="btn-gold-glass w-full py-3 px-6 text-xs sm:text-sm font-serif-th font-bold duration-200 cursor-pointer active:scale-95 tracking-wide disabled:opacity-60 disabled:cursor-wait"
         >
           {oracle.isPreparing
             ? isEnglish
@@ -402,7 +402,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
         <div className="altar-panel rounded-2xl p-6 sm:p-8 max-w-4xl mx-auto space-y-8 anim-swap-rise">
           {/* Header & Arithmetic Trail */}
           <div className="text-center space-y-2.5 border-b border-line-warm/40 pb-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-line-warm bg-surface-warm text-xs font-sans font-semibold text-gold-ink">
+            <div className="glass-chip inline-flex items-center gap-2 px-3.5 py-1 text-xs font-sans font-semibold text-gold-ink">
               <span>{isEnglish ? "Birth Date:" : "วันเกิด:"}</span>
               <span>
                 {result.day} {isEnglish ? MONTHS[result.month - 1].nameEn : MONTHS[result.month - 1].nameTh} {result.yearBe} (ค.ศ. {result.yearCe})
@@ -420,7 +420,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
             </p>
 
             <div className="pt-1">
-              <span className="inline-block px-3 py-1 rounded-full bg-surface-warm border border-line-warm text-[11px] font-sans text-[#7A6F5D]">
+              <span className="glass-chip inline-block px-3 py-1 text-[11px] font-sans text-[#7A6F5D]">
                 {isEnglish
                   ? `Numerological Sum: ${result.day} + ${result.month} + ${result.yearCe} = ${result.calculatedSum} → Card #${result.primaryNumber}`
                   : `ผลรวมเลขศาสตร์: ${result.day} + ${result.month} + ${result.yearCe} = ${result.calculatedSum} → ไพ่หมายเลข ${result.primaryNumber}`}
@@ -437,7 +437,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
             >
               {/* Primary Card (Personality Card) */}
               <div className="altar-card-porcelain rounded-xl p-5 sm:p-6 space-y-4 flex flex-col items-center text-center shadow-xs">
-                <span className="px-3 py-1 rounded-full bg-surface-warm border border-line-warm text-xs font-serif-th font-semibold text-gold-ink">
+                <span className="glass-chip px-3 py-1 text-xs font-serif-th font-semibold text-gold-ink">
                   {isEnglish ? "Personality Card" : "ไพ่บุคลิกภาพ & พลังงานหลัก"}
                 </span>
 
@@ -482,7 +482,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
               {/* Secondary Card (Soul Card) */}
               {result.secondaryCard && (
                 <div className="altar-card-porcelain rounded-xl p-5 sm:p-6 space-y-4 flex flex-col items-center text-center shadow-xs">
-                  <span className="px-3 py-1 rounded-full bg-surface-warm border border-line-warm text-xs font-serif-th font-semibold text-gold-ink">
+                  <span className="glass-chip px-3 py-1 text-xs font-serif-th font-semibold text-gold-ink">
                     {isEnglish ? "Soul Card" : "ไพ่จิตวิญญาณ & เจตนารมณ์ลึก"}
                   </span>
 
@@ -550,7 +550,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
               <button
                 type="button"
                 onClick={handleShare}
-                className="tap-overlay-y w-full sm:w-auto px-6 py-2.5 rounded-full border border-line-warm bg-white hover:border-gold-ink text-xs font-serif-th font-bold text-ink transition cursor-pointer shadow-xs"
+                className="glass-chip tap-overlay-y w-full sm:w-auto px-6 py-2.5 text-xs font-serif-th font-bold text-ink transition cursor-pointer"
               >
                 <span>
                   {copied
@@ -565,7 +565,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
               <Link
                 href="/spreads/celtic-cross"
-                className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-ink text-surface-warm text-xs font-serif-th font-bold text-center hover:bg-gold transition shadow-xs"
+                className="btn-gold-glass w-full sm:w-auto px-6 py-2.5 text-xs font-serif-th font-bold text-center"
               >
                 {isEnglish ? "10-Card Celtic Cross Life Reading" : "เปิดผังเซลติกครอส 10 ใบ พยากรณ์ชะตาชีวิต"}
               </Link>
@@ -582,7 +582,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <Link
                   href="/daily"
-                  className="p-4 rounded-xl border border-line-warm bg-surface hover:border-gold-ink text-center transition duration-300 group block shadow-xs"
+                  className="altar-card-porcelain !rounded-xl p-4 text-center transition duration-300 group block"
                 >
                   <div className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
                     {isEnglish ? "Daily Tarot Oracle" : "ดูดวงไพ่ยิปซีรายวัน"}
@@ -594,7 +594,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
                 <Link
                   href="/love/1-card"
-                  className="p-4 rounded-xl border border-line-warm bg-surface hover:border-gold-ink text-center transition duration-300 group block shadow-xs"
+                  className="altar-card-porcelain !rounded-xl p-4 text-center transition duration-300 group block"
                 >
                   <div className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
                     {isEnglish ? "Love Tarot 1 Card" : "ดูดวงความรัก 1 ใบ"}
@@ -606,7 +606,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
                 <Link
                   href="/readers"
-                  className="p-4 rounded-xl border border-line-warm bg-surface hover:border-gold-ink text-center transition duration-300 group block shadow-xs"
+                  className="altar-card-porcelain !rounded-xl p-4 text-center transition duration-300 group block"
                 >
                   <div className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
                     {isEnglish ? "Personal Readers" : "ปรึกษาแม่หมอตัวจริง"}
@@ -623,7 +623,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
       {/* ด่านความปลอดภัย: สัญญาณวิกฤต ➔ สายด่วน (กฎเหล็กข้อ 6) */}
       {oracle.crisisMessage && (
-        <div className="rounded-xl border border-line-warm bg-surface-warm p-5 text-sm leading-relaxed text-ink whitespace-pre-line max-w-2xl mx-auto">
+        <div className="altar-card-porcelain !rounded-xl p-5 text-sm leading-relaxed text-ink whitespace-pre-line max-w-2xl mx-auto">
           {oracle.crisisMessage}
         </div>
       )}

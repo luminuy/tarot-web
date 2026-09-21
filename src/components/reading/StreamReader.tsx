@@ -153,7 +153,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
   const totalCards = drawnCards.length;
 
   return (
-    <div className="w-full rounded-lg border border-line-warm bg-surface p-5 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden">
+    <div className="altar-card-porcelain !rounded-lg w-full p-5 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden">
       {/* Background Sacred Geometric Aura */}
 
       {/* Oracle Guide Header & Streaming Status */}
@@ -183,7 +183,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
         {/* Live Status Pill */}
         {isStreaming ? (
-          <span className="text-xs font-semibold bg-inset-warm text-ink-deep border border-line-warm px-3.5 py-1.5 rounded-full flex items-center gap-2 ">
+          <span className="glass-chip text-xs font-semibold text-ink-deep px-3.5 py-1.5 flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-gold-ink animate-ping" /> {isEnglish ? "Oracle is channeling the tarot..." : "แม่หมอกำลังอ่านคำทำนาย..."}
           </span>
         ) : (
@@ -195,7 +195,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
       {/* Querent Sacred Question Banner */}
       {question && (
-        <div className="anim-page-transition p-4 rounded-xl bg-surface-warm border border-line-warm space-y-1.5 shadow-2xs">
+        <div className="altar-card-porcelain !rounded-xl anim-page-transition p-4 space-y-1.5">
           <div className="flex items-center justify-between text-xs text-gold-ink font-serif-th font-semibold">
             <span>{isEnglish ? "Your Sacred Question" : "คำถามที่คุณตั้งจิตถาม"}</span>
             {nickname && (
@@ -257,7 +257,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       {readingId && (
         <Link
           href="/reading/chat"
-          className="group flex w-full items-center justify-between gap-3 rounded-lg border border-line-warm bg-inset-warm px-4 py-3 text-left transition hover:border-gold-ink hover:bg-surface cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+          className="glass-tile !rounded-lg group flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
         >
           <span className="min-w-0">
             <span className="block font-serif-th text-xs font-bold text-ink-deep sm:text-sm [text-wrap:balance]">
@@ -283,7 +283,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
             <div
               role="alert"
               aria-live="assertive"
-              className="anim-page-transition p-4 rounded-lg bg-surface border border-line-warm flex flex-col sm:flex-row sm:items-center justify-between gap-3 "
+              className="altar-card-porcelain !rounded-lg anim-page-transition p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
             >
               <div className="flex items-start gap-2.5 text-xs sm:text-sm text-ink-deep font-serif-th">
                 
@@ -336,7 +336,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           {/* Active Card Interpretation Showcase */}
           <div
             key={activeCardIndex}
-            className="anim-page-transition p-5 sm:p-6 rounded-lg bg-surface border border-line-warm space-y-4"
+            className="altar-card-porcelain !rounded-lg anim-page-transition p-5 sm:p-6 space-y-4"
           >
             {/* Position & Card Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-line-warm/30">
@@ -394,7 +394,7 @@ isEnglish
 
               {/* Elemental & Meaning Tag */}
               {(activeDrawnCard?.position.meaningEn || activeDrawnCard?.position.meaning) && (
-                <span className="text-[13px] text-ink-deep bg-inset-warm/25 border border-line-warm px-2.5 py-1 rounded-full font-serif-th self-start sm:self-auto">
+                <span className="glass-chip text-[13px] text-ink-deep px-2.5 py-1 font-serif-th self-start sm:self-auto">
                   {isEnglish
                     ? (activeDrawnCard.position.meaningEn || activeDrawnCard.position.meaning)
                     : (activeDrawnCard.position.meaning || activeDrawnCard.position.meaningEn)}
@@ -420,7 +420,7 @@ isEnglish
                   {keywords.map((kw: string, idx: number) => (
                     <span
                       key={idx}
-                      className="text-[13px] text-ink-deep bg-inset-warm border border-line-warm px-2 py-0.5 rounded"
+                      className="glass-tile !rounded text-[13px] text-ink-deep px-2 py-0.5"
                     >
                       {kw}
                     </span>
@@ -547,14 +547,14 @@ isEnglish
         <div className="space-y-4">
           {/* Opening Greeting */}
           {reading?.opening && (
-            <div className="p-4 rounded-lg bg-inset-warm border border-line-warm text-xs sm:text-sm text-ink-deep font-serif-th leading-relaxed italic">
+            <div className="glass-tile !rounded-lg p-4 text-xs sm:text-sm text-ink-deep font-serif-th leading-relaxed italic">
               “{reading.opening}”
             </div>
           )}
 
           {/* Connections */}
           {reading?.connections && (
-            <div className="p-5 rounded-lg bg-surface border border-line-warm space-y-1.5 ">
+            <div className="altar-card-porcelain !rounded-lg p-5 space-y-1.5">
               <h5 className="font-serif-th text-xs sm:text-sm font-bold text-ink-deep flex items-center gap-2">
                  {isEnglish ? "Spread Synergy & Resonance" : "ความเชื่อมโยงของไพ่ทั้งชุด"}
               </h5>
@@ -610,7 +610,7 @@ isEnglish
 
           {/* Actionable Advice Checklist */}
           {reading?.advice && reading.advice.length > 0 && (
-            <div className="p-5 rounded-lg bg-inset-warm border border-line-warm space-y-2.5">
+            <div className="glass-tile !rounded-lg p-5 space-y-2.5">
               <h5 className="font-serif-th text-xs sm:text-sm font-bold text-ink-deep flex items-center gap-2">
                 {isEnglish ? "Actionable Guidance & Next Steps" : "คำแนะนำและสิ่งที่ควรทำ"}
               </h5>
@@ -667,7 +667,7 @@ isEnglish
           />
 
           {/* Real Human Reader Marketplace Consultation CTA */}
-          <div className="p-5 rounded-lg bg-inset-warm border border-line-warm space-y-3 relative overflow-hidden">
+          <div className="glass-tile !rounded-lg p-5 space-y-3 relative overflow-hidden">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">

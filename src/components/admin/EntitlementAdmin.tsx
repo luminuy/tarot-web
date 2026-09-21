@@ -164,7 +164,7 @@ export default function EntitlementAdmin() {
       {msg ? <p className="text-xs text-muted">{msg}</p> : null}
 
       {/* ── สถานะฐานข้อมูล ── */}
-      <div className="altar-panel rounded-2xl border border-line bg-white p-5 shadow-xs">
+      <div className="altar-card-porcelain altar-panel p-5">
         <div className="flex items-center justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-ink">
@@ -192,7 +192,7 @@ export default function EntitlementAdmin() {
       </div>
 
       {/* ── โบนัสเปลี่ยนผ่าน ── */}
-      <div className="altar-panel rounded-2xl border border-line bg-white p-5 shadow-xs">
+      <div className="altar-card-porcelain altar-panel p-5">
         <h3 className="text-sm font-semibold text-ink">2 · โบนัสเปลี่ยนผ่านผู้ใช้เดิม (10 ครั้ง)</h3>
         <p className="mt-1 mb-3 text-xs text-muted">
           ทำครั้งเดียวก่อนเปิดระบบ — ผู้ใช้ที่สมัคร <strong>ก่อน</strong> วันตัด จะได้โบนัส 10 ครั้ง (ไม่หมดอายุ) · กดซ้ำได้
@@ -223,7 +223,7 @@ export default function EntitlementAdmin() {
       </div>
 
       {/* ── แบนเนอร์ประกาศล่วงหน้า ── */}
-      <div className="altar-panel rounded-2xl border border-line bg-white p-5 shadow-xs">
+      <div className="altar-card-porcelain altar-panel p-5">
         <h3 className="text-sm font-semibold text-ink">3 · แบนเนอร์ประกาศล่วงหน้า</h3>
         <p className="mt-1 mb-3 text-xs text-muted">
           แสดงบนหน้าแรกเมื่อระบบยังปิด — เปิดล่วงหน้าอย่างน้อย <strong>7 วัน</strong> ก่อนเปิดระบบจริง
@@ -265,7 +265,7 @@ export default function EntitlementAdmin() {
             {s.announce ? "ประกาศเปิดอยู่ — กดเพื่อปิด" : "ประกาศปิดอยู่ — กดเพื่อเปิด"}
           </Button>
         </div>
-        <p className="mt-3 rounded-xl border border-line bg-surface-warm p-3 text-xs text-muted">
+        <p className="altar-card-porcelain !rounded-xl mt-3 p-3 text-xs text-muted">
           ตัวอย่างแบนเนอร์:{" "}
           <span className="text-ink font-semibold">
             เร็ว ๆ นี้ การเปิดไพ่จะปรับเป็น{" "}
@@ -316,7 +316,7 @@ export default function EntitlementAdmin() {
           การ์ดจัดการรหัสเคยอยู่ตรงนี้ แต่ซ้ำกับแท็บ "รหัสแลกสิทธิ์" ที่อีกสายทำมาพร้อมกัน
           (สองหน้าจอ + สอง API เขียนตารางเดียวกันคนละกติกา = ที่มาของข้อมูลเพี้ยน)
           จึงเหลือทางเดียวคือแท็บนั้น ที่นี่เก็บไว้แค่ป้ายบอกทาง */}
-      <div className="altar-panel rounded-2xl border border-line bg-white p-5 shadow-xs">
+      <div className="altar-card-porcelain altar-panel p-5">
         <h3 className="text-sm font-semibold text-ink">5 · รหัสแลกสิทธิ์</h3>
         <p className="mt-1 text-xs text-muted">
           สร้าง/ปิดรหัส · ดูยอดแลกและรายชื่อผู้แลก อยู่ที่แท็บ{" "}
@@ -328,11 +328,11 @@ export default function EntitlementAdmin() {
       </div>
 
       {/* ── Metric เฝ้าดู 48 ชม.แรก ── */}
-      <div className="altar-panel rounded-2xl border border-line bg-white p-5 shadow-xs">
+      <div className="altar-card-porcelain altar-panel p-5">
         <h3 className="text-sm font-semibold text-ink">สถิติระบบสิทธิ์ (7 วันล่าสุด)</h3>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {Object.entries(METRIC_LABEL).map(([k, label]) => (
-            <div key={k} className="rounded-xl border border-line bg-surface-warm p-3">
+            <div key={k} className="altar-card-porcelain !rounded-xl p-3">
               <p className="text-[13px] text-muted">{label}</p>
               <p className="mt-0.5 text-lg font-bold text-ink">
                 {(s.metrics[k] ?? 0).toLocaleString("th-TH")}
@@ -346,7 +346,7 @@ export default function EntitlementAdmin() {
       </div>
 
       {/* ── สุขภาพฐานข้อมูลสิทธิ์ (7 วันล่าสุด) ── */}
-      <div className="altar-panel rounded-2xl border border-line bg-white p-5 shadow-xs">
+      <div className="altar-card-porcelain altar-panel p-5">
         <h3 className="text-sm font-semibold text-ink">สุขภาพฐานข้อมูลสิทธิ์ (7 วันล่าสุด)</h3>
         <p className="mt-1 text-xs text-muted">
           ทุกค่าควรเป็น <strong>0</strong> — ถ้าไม่ใช่ แปลว่าโควตาอาจไม่ถูกบังคับจริงในช่วงนั้น

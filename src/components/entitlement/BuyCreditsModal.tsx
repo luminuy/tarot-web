@@ -320,7 +320,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
                         onChange={(e) => setRedeemCode(e.target.value)}
                         placeholder={isEn ? "e.g. VIP3-TAROT-2026" : "เช่น VIP3-TAROT-2026"}
                         disabled={redeemLoading}
-                        className="flex-1 px-3 py-2 text-xs uppercase font-mono tracking-wider rounded-lg bg-white border border-line-interactive-warm text-ink-deep focus:outline-none focus:border-gold-ink"
+                        className="glass-field flex-1 px-3 py-2 text-xs uppercase font-mono tracking-wider rounded-lg border border-line-interactive-warm text-ink-deep focus:outline-none focus:border-gold-ink"
                       />
                       <button
                         type="submit"
@@ -338,7 +338,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
         ) : (
           /* Payment Screen */
           <div className="text-center space-y-4">
-            <div className="p-4 rounded-lg bg-surface border border-line-warm space-y-3 ">
+            <div className="altar-card-porcelain !rounded-lg p-4 space-y-3">
               <div className="flex items-center justify-between text-xs text-muted font-serif-th border-b border-line-warm/30 pb-2">
                 <span>{isEn ? "Selected Item" : "รายการ"}</span>
                 <span className="font-bold text-ink-deep">
@@ -354,14 +354,14 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
             </div>
 
             {checkoutData.qrCodeUri ? (
-              <div className="flex flex-col items-center gap-2 p-4 rounded-lg bg-white text-ink-deep max-w-[240px] mx-auto border border-line-warm">
+              <div className="altar-card-porcelain !rounded-lg flex flex-col items-center gap-2 p-4 text-ink-deep max-w-[240px] mx-auto">
                 <img src={checkoutData.qrCodeUri} alt="PromptPay QR Code" className="w-48 h-48 object-contain" />
                 <span className="text-[13px] text-muted font-serif-th">
                   {isEn ? "Scan with any Thai mobile banking app" : "สแกนด้วยแอปพลิเคชันธนาคารทุกแห่ง"}
                 </span>
               </div>
             ) : (
-              <div className="p-5 rounded-lg bg-inset-warm border border-line-warm text-center space-y-2 ">
+              <div className="glass-tile !rounded-lg p-5 text-center space-y-2">
                 
                 <h4 className="font-serif-th text-sm font-bold text-ink-deep">
                   {isEn ? "Payment Gateway Test Simulator" : "ระบบจำลองการชำระเงิน (Test Gateway Simulator)"}

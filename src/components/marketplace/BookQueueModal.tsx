@@ -104,7 +104,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
         )}
 
         {/* Live Availability Status */}
-        <div className="flex items-center justify-between rounded-lg bg-surface border border-line-warm p-3 text-xs ">
+        <div className="altar-card-porcelain !rounded-lg flex items-center justify-between p-3 text-xs">
           <span className="text-muted">สถานะการเปิดรับคิวสด:</span>
           {isLiveOpen ? (
             <span className="inline-flex items-center gap-1 font-semibold text-ok">
@@ -145,7 +145,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
         )}
 
         {/* Service Fee Display */}
-        <div className="flex items-center justify-between rounded-lg bg-surface border border-line-warm p-3 text-xs ">
+        <div className="altar-card-porcelain !rounded-lg flex items-center justify-between p-3 text-xs">
           <div className="flex items-center gap-2">
             <span className="text-gold-ink font-bold text-sm">ค่าบริการ / บูชาครู</span>
             <span className="text-[13px] text-muted">(30 นาที)</span>
@@ -181,7 +181,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
         </Field>
 
         {/* PDPA Consent Checkbox */}
-        <div className="rounded-lg bg-inset-warm border border-line-warm p-3.5 space-y-2 ">
+        <div className="glass-tile !rounded-lg p-3.5 space-y-2">
           <label className="flex items-start gap-2.5 cursor-pointer text-xs text-ink-deep select-none">
             <input
               type="checkbox"

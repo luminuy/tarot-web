@@ -213,7 +213,7 @@ export function OneCardRitual({
                 type="button"
                 onClick={handleDraw}
                 disabled={oracle.isPreparing}
-                className="w-full sm:w-auto disabled:opacity-60 disabled:cursor-wait px-10 py-3.5 sm:py-4 rounded-full bg-ink text-surface-warm font-serif-th text-sm sm:text-base font-bold shadow-raised hover:bg-gold active:scale-[0.98] transition cursor-pointer tracking-wide flex items-center justify-center gap-2"
+                className="btn-gold-glass w-full sm:w-auto disabled:opacity-60 disabled:cursor-wait px-10 py-3.5 sm:py-4 font-serif-th text-sm sm:text-base font-bold active:scale-[0.98] cursor-pointer tracking-wide flex items-center justify-center gap-2"
               >
                 <span>
                   {oracle.isPreparing
@@ -237,7 +237,7 @@ export function OneCardRitual({
           <div key="ready" className="anim-step-in altar-cloth p-8 sm:p-12 flex flex-col items-center justify-center space-y-6 text-center shadow-inner">
             {/* ป้ายระบุบริบท/สถานะเต็มความยาว ไม่ถูกตัดขอบ (แก้ปัญหา label ถูกตัดครึ่ง) */}
             <div className="space-y-2 max-w-lg mx-auto">
-              <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-line bg-surface text-xs sm:text-sm font-serif-th font-semibold text-gold-ink shadow-2xs">
+              <div className="glass-chip inline-flex items-center gap-1.5 px-4 py-1.5 text-xs sm:text-sm font-serif-th font-semibold text-gold-ink">
                 <span>{deckLabel}</span>
               </div>
               <h3 className="text-lg sm:text-2xl font-serif-th font-bold text-ink tracking-tight">
@@ -295,7 +295,7 @@ export function OneCardRitual({
               {/* Card Editorial Dossier */}
               <div className="space-y-3 flex-1 text-center md:text-left">
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                  <span className="px-3 py-1 rounded-full bg-surface border border-line text-xs font-serif-th font-semibold text-gold-ink">
+                  <span className="glass-chip px-3 py-1 text-xs font-serif-th font-semibold text-gold-ink">
                     {drawnCard.arcana === "major"
                       ? isEn
                         ? "Major Arcana"
@@ -304,7 +304,7 @@ export function OneCardRitual({
                       ? "Minor Arcana"
                       : "Minor Arcana (ชุดเล็ก)"}
                   </span>
-                  <span className="px-3 py-1 rounded-full bg-surface border border-line text-xs font-serif-th text-muted">
+                  <span className="glass-chip px-3 py-1 text-xs font-serif-th text-muted">
                     {isEn ? `Element: ${elementEnMap[drawnCard.element] || drawnCard.element}` : `ธาตุ${drawnCard.element}`}
                   </span>
                 </div>
@@ -358,7 +358,7 @@ export function OneCardRitual({
               <button
                 type="button"
                 onClick={handleRestart}
-                className="w-full sm:w-auto px-6 py-3 rounded-full border border-line bg-surface-warm hover:bg-surface text-xs sm:text-sm font-serif-th font-semibold text-ink shadow-raised transition cursor-pointer"
+                className="glass-chip w-full sm:w-auto px-6 py-3 text-xs sm:text-sm font-serif-th font-semibold text-ink transition cursor-pointer"
               >
                 {isEn ? "← Draw Another Reading" : "← เริ่มเปิดไพ่อีกครั้ง"}
               </button>
@@ -366,7 +366,7 @@ export function OneCardRitual({
               <button
                 type="button"
                 onClick={handleShare}
-                className="w-full sm:w-auto px-6 py-3 rounded-full bg-ink hover:bg-gold text-xs sm:text-sm font-serif-th font-semibold text-surface-warm shadow-raised transition cursor-pointer"
+                className="btn-gold-glass w-full sm:w-auto px-6 py-3 text-xs sm:text-sm font-serif-th font-semibold cursor-pointer"
               >
                 {copied
                   ? isEn
@@ -389,7 +389,7 @@ export function OneCardRitual({
 
         {/* ด่านความปลอดภัย: สัญญาณวิกฤต ➔ สายด่วน (กฎเหล็กข้อ 6) */}
         {oracle.crisisMessage && (
-          <div className="rounded-xl border border-line bg-surface p-5 text-sm leading-relaxed text-ink whitespace-pre-line">
+          <div className="altar-card-porcelain !rounded-xl p-5 text-sm leading-relaxed text-ink whitespace-pre-line">
             {oracle.crisisMessage}
           </div>
         )}

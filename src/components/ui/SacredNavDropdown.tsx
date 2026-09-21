@@ -342,7 +342,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
                 <span className="font-serif-th text-sm font-bold text-ink truncate leading-[1.7]">
                   {isEnglish ? "Tarot Sanctuary" : "วิหารพยากรณ์"}
                 </span>
-                <span className="text-ink text-[10px] font-mono tracking-wider bg-inset border border-line px-1.5 py-0.2 rounded-full font-bold shrink-0">
+                <span className="glass-chip text-ink text-[10px] font-mono tracking-wider px-1.5 py-0.2 font-bold shrink-0">
                   1909 RWS
                 </span>
               </div>
@@ -441,7 +441,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
               soundManager.playMenuTapSound();
               setIsOpen(false);
             }}
-            className="tap-overlay-y flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-line bg-surface px-3 py-2.5 font-serif-th text-xs font-bold text-ink transition-colors hover:border-gold hover:text-gold-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
+            className="altar-card-porcelain !rounded-xl tap-overlay-y flex min-h-[44px] w-full items-center justify-center gap-2 px-3 py-2.5 font-serif-th text-xs font-bold text-ink transition-colors hover:text-gold-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
           >
             <svg
               viewBox="0 0 24 24"
