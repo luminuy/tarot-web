@@ -72,7 +72,11 @@ export function ConsentBanner() {
           จอกว้าง (≥1024px): ลิงก์นโยบายยืนอยู่ในแถวเดียวกับปุ่ม เพื่อให้ข้อความด้านซ้ายได้อยู่บรรทัดเดียวจริง
           จอแคบกว่านั้น: `order-last w-full` ดันลิงก์ลงไปอยู่ใต้ปุ่ม (ปุ่มต้องได้ความกว้างเต็มเพื่อให้กดถนัด)
         */}
-        <div className="flex shrink-0 flex-wrap items-center gap-2 lg:flex-nowrap lg:gap-3">
+        <div /*
+            `items-stretch` ตอนจอแคบ — ปุ่มที่ตัวหนังสือตัดสองบรรทัดจะสูงกว่าเพื่อน
+            ถ้าใช้ `items-center` ปุ่มสองใบจะสูงไม่เท่ากันจนดูเบี้ยว (INC-0215)
+          */
+          className="flex shrink-0 flex-wrap items-stretch gap-2 lg:flex-nowrap lg:items-center lg:gap-3">
           {/*
             ⚠️ ต้องเป็น `LocaleLink` ไม่ใช่ `next/link` (ด่านที่ 44 จับได้เมื่อ 2026-09-21)
             `/privacy` ย้ายไป Astro แล้ว = ไฟล์ HTML ที่ตอบจากขอบ ไม่มีเพย์โหลด RSC ให้ router ดึง
@@ -93,7 +97,15 @@ export function ConsentBanner() {
             type="button"
             data-consent-reject=""
             onClick={() => decide("denied")}
-            className="btn-glass-ghost tap-target flex-1 whitespace-nowrap px-4 py-2 text-[13px] font-bold lg:flex-none"
+            /*
+              ⛔ ห้ามใส่ `whitespace-nowrap` คู่กับ `flex-1` ที่นี่ (INC-0215)
+              `flex-1` = `flex-basis: 0` + ยอมให้หด ส่วน `nowrap` = ตัวหนังสือหดตามไม่ได้
+              สองอย่างนี้ขัดกันเอง พอจอแคบ (320px) ปุ่มถูกหดเหลือ 122px แต่คำว่า
+              "Only what's needed" ต้องการ 127px ตัวหนังสือจึงล้นออกนอกพื้นปุ่มไป 5px
+              (`overflow: visible` ไม่มีอะไรมาตัด) — วัดจากการเรนเดอร์จริง
+              ปล่อยให้ตัดบรรทัดในปุ่มได้แทน ปุ่มสูงขึ้นสองบรรทัดยังอ่านออก ดีกว่าตัวหนังสือหลุดกรอบ
+            */
+            className="btn-glass-ghost tap-target min-w-0 flex-1 px-4 py-2 text-[13px] font-bold lg:flex-none"
           >
             {isEnglish ? "Only what's needed" : "เฉพาะที่จำเป็น"}
           </button>
@@ -101,7 +113,8 @@ export function ConsentBanner() {
             type="button"
             data-consent-accept=""
             onClick={() => decide("granted")}
-            className="btn-glass-primary tap-target flex-1 whitespace-nowrap px-5 py-2 text-[13px] font-bold lg:flex-none"
+            /* เหตุผลเดียวกับปุ่มด้านบน (INC-0215) — `flex-1` กับ `nowrap` อยู่ด้วยกันไม่ได้ */
+            className="btn-glass-primary tap-target min-w-0 flex-1 px-5 py-2 text-[13px] font-bold lg:flex-none"
           >
             {isEnglish ? "Allow" : "ยินยอม"}
           </button>
