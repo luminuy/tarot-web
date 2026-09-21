@@ -106,50 +106,57 @@ export function SiteHeader({
         ref={headerRef}
         data-site-header=""
         data-variant={variant}
-        className="site-header-glass w-full fixed top-0 inset-x-0 z-50"
+        className="site-header-shell w-full fixed top-0 inset-x-0 z-50"
       >
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          {/* Luxury Brand Logo & Return to Home */}
-          <Link
-            href="/"
-            prefetch={false}
-            aria-label={isEnglish ? "SeerTarot — Return to Home" : "ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"}
-            className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
-          >
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-line overflow-hidden relative flex-shrink-0 bg-canvas group-hover:scale-105 transition duration-300">
-              <img
-                src="/logo.webp"
-                alt="SeerTarot"
-                width={44}
-                height={44}
-                className="w-full h-full object-cover"
-                loading="eager"
-              />
-            </div>
+        {/*
+          แถบกระจกลอย — <header> ตัวนอกยังกางเต็มจอเสมอ (ด่านที่ 40 บังคับ `inset-x-0`)
+          ส่วนที่ตาเห็นคือ <div> ชั้นนี้ที่เว้นขอบเข้ามาและมีมุมโค้งชุดเดียวกับแผงอื่นในหน้า
+          ⚠️ ห้ามใส่ `overflow-hidden` ที่ชั้นนี้ — เมนู dropdown ที่กางลงมาจะถูกตัดหาย
+        */}
+        <div className="site-header-glass mx-3 mt-1.5 mb-2 max-w-6xl sm:mx-6 xl:mx-auto">
+          <div className="px-3.5 sm:px-5 py-2 sm:py-2.5 flex items-center justify-between">
+            {/* Luxury Brand Logo & Return to Home */}
+            <Link
+              href="/"
+              prefetch={false}
+              aria-label={isEnglish ? "SeerTarot — Return to Home" : "ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"}
+              className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
+            >
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-line overflow-hidden relative flex-shrink-0 bg-canvas group-hover:scale-105 transition duration-300">
+                <img
+                  src="/logo.webp"
+                  alt="SeerTarot"
+                  width={44}
+                  height={44}
+                  className="w-full h-full object-cover"
+                  loading="eager"
+                />
+              </div>
 
-            <div className="hidden min-w-0 flex-col justify-center sm:flex">
-              <div className="flex min-w-0 items-center">
-                <span className="font-serif-th text-sm sm:text-lg font-bold text-ink tracking-wide leading-snug py-0.5 whitespace-nowrap">
-                  {isEnglish ? "SeerTarot Sanctuary" : "ดูดวงไพ่ทาโรต์"}
+              <div className="hidden min-w-0 flex-col justify-center sm:flex">
+                <div className="flex min-w-0 items-center">
+                  <span className="font-serif-th text-sm sm:text-lg font-bold text-ink tracking-wide leading-snug py-0.5 whitespace-nowrap">
+                    {isEnglish ? "SeerTarot Sanctuary" : "ดูดวงไพ่ทาโรต์"}
+                  </span>
+                </div>
+                <span className="hidden sm:block text-[13px] tracking-[0.22em] text-muted font-mono uppercase font-semibold">
+                  1909 RIDER-WAITE TAROT
                 </span>
               </div>
-              <span className="hidden sm:block text-[13px] tracking-[0.22em] text-muted font-mono uppercase font-semibold">
-                1909 RIDER-WAITE TAROT
-              </span>
+            </Link>
+
+            {/* Right Toolbar, Language Switcher & Navigation */}
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+              <LanguageSwitcher />
+              {toolbar}
+              {nav ?? <SacredNavDropdown />}
             </div>
-          </Link>
-
-          {/* Right Toolbar, Language Switcher & Navigation */}
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
-            <LanguageSwitcher />
-            {toolbar}
-            {nav ?? <SacredNavDropdown />}
           </div>
-        </div>
 
-        {breadcrumb ? (
-          <div className="max-w-6xl mx-auto px-4 pb-2.5 -mt-0.5">{breadcrumb}</div>
-        ) : null}
+          {breadcrumb ? (
+            <div className="px-4 pb-2.5 -mt-0.5 sm:px-5">{breadcrumb}</div>
+          ) : null}
+        </div>
       </header>
     </>
   );

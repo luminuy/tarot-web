@@ -112,7 +112,7 @@
   9. dark      : #171512 (Near Black — Dark Footer, Deep Reading Mode)
 */
 @theme {
-  --color-canvas: #F2ECE1;
+  --color-canvas: #F7EDDC;
   --color-surface: #FFFFFF;
   --color-inset: #EAE7E0;
   --color-line: #D5CEC2;
@@ -351,30 +351,49 @@
      🚨 ห้ามเติม backdrop-filter / backdrop-blur ที่ใดก็ตามในธีมนี้ (INC-0056 · ด่านที่ 43)
         ความเป็น "กระจก" มาจากความโปร่ง + ขอบสะท้อนแสง ไม่ได้มาจากการเบลอ */
 
-  /* พื้นของแผงกระจก — ค่านี้คือ "พื้นความทึบขั้นต่ำ" ห้ามลดลงต่ำกว่านี้เด็ดขาด
+  /* พื้นของแผงกระจก — ขาวอมครีม ไม่ใช่ขาวบริสุทธิ์
+     (ขาวล้วนบนพื้นอุ่นสายตาอ่านเป็น "กระดาษ" ไม่ใช่ "กระจก")
+     ค่านี้คือ "พื้นความทึบขั้นต่ำ" ห้ามลดลงต่ำกว่านี้เด็ดขาด
      เพราะคอนทราสต์ของตัวอักษรทุกตัวบนแผงคำนวณจากค่านี้ (ดู 2.4) */
-  --glass-fill: rgba(255, 255, 255, 0.58);
+  --glass-fill: rgba(255, 252, 246, 0.62);
 
-  /* ประกายแสงบนผิวกระจก — เป็น background-image ทับบน --glass-fill อีกชั้น
-     บวกความทึบเพิ่มเท่านั้น ไม่เคยลด จึงไม่ทำให้คอนทราสต์ตก */
-  --glass-sheen: linear-gradient(
-    158deg,
-    rgba(255, 255, 255, 0.30) 0%,
-    rgba(255, 255, 255, 0) 55%,
-    rgba(255, 255, 255, 0.14) 100%
-  );
+  /* ประกายแสงบนผิวกระจก — สองชั้นซ้อน เป็น background-image ทับบน --glass-fill
+       ชั้นบน  = ไฮไลต์นุ่มที่มุมบนซ้าย (แสงตกกระทบผิวโค้ง)
+       ชั้นล่าง = แถบสะท้อนทแยงที่จางกลางแผ่นแล้วสว่างกลับที่ขอบล่าง (ความหนาของกระจก)
+     ทุก stop บวกความทึบอย่างเดียว ไม่เคยลด จึงไม่ทำให้คอนทราสต์ตก */
+  --glass-sheen:
+    radial-gradient(130% 92% at 12% -16%, rgba(255, 255, 255, 0.70) 0%, rgba(255, 255, 255, 0) 56%),
+    linear-gradient(
+      158deg,
+      rgba(255, 255, 255, 0.32) 0%,
+      rgba(255, 255, 255, 0.05) 44%,
+      rgba(255, 246, 232, 0.12) 70%,
+      rgba(255, 255, 255, 0.30) 100%
+    );
 
-  --glass-edge: rgba(255, 255, 255, 0.78);   /* ขอบกระจกปกติ */
+  --glass-edge: rgba(255, 255, 255, 0.92);   /* ขอบในของกระจก — เส้นแสงที่ริมแผ่น */
   --glass-edge-on: #938265;                  /* ขอบตอนถูกเลือก/hover — 3.27:1 ผ่านเกณฑ์ non-text */
-  --glass-radius: 20px;
 
-  --glass-shadow: 0 1px 0 rgba(255, 255, 255, 0.95) inset,
-                  0 -1px 0 rgba(46, 33, 26, 0.06) inset,
-                  0 18px 40px -14px rgba(78, 54, 32, 0.28);
+  /* วงแหวนบางนอกขอบ — ตัวที่ทำให้แผงกระจก "มีรูปร่าง" บนพื้นครีมสว่าง
+     ขอบขาวอย่างเดียวจะจมหายไปกับพื้น ตาจึงอ่านการ์ดเป็นกระดาษแบน (อาการที่เจ้าของทักรอบ 115) */
+  --glass-ring: rgba(120, 88, 54, 0.11);
+  --glass-radius: 22px;
 
-  --glass-shadow-lift: 0 1px 0 rgba(255, 255, 255, 0.95) inset,
-                       0 -1px 0 rgba(46, 33, 26, 0.06) inset,
-                       0 26px 54px -16px rgba(78, 54, 32, 0.38);
+  /* เงาสองจังหวะ: เงาสัมผัสสั้นใต้ขอบ + เงาฟุ้งกว้างที่อุ่นและลึก
+     เงาชั้นเดียวให้ความรู้สึก "สติกเกอร์แปะ" เสมอ ไม่ว่าจะจางแค่ไหน */
+  --glass-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 -1px 0 rgba(70, 48, 30, 0.07) inset,
+    0 0 0 1px var(--glass-ring),
+    0 2px 5px -2px rgba(78, 54, 32, 0.14),
+    0 20px 44px -20px rgba(78, 54, 32, 0.40);
+
+  --glass-shadow-lift:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 -1px 0 rgba(70, 48, 30, 0.07) inset,
+    0 0 0 1px var(--glass-ring),
+    0 3px 8px -3px rgba(78, 54, 32, 0.18),
+    0 30px 58px -22px rgba(78, 54, 32, 0.46);
 
   --dur-instant: 80ms;
   --dur-fast: 140ms;
@@ -388,7 +407,19 @@
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-emphasis: cubic-bezier(0.2, 0, 0, 1);
 
-  /* ความสูงจริงของ [data-site-header] — วัดจริงด้วย Chromium ได้ 69px มือถือ / 82px เดสก์ท็อป
+  /* รัศมี "แนวนอน" ของกลีบแสงบนพื้นหลัง — เป็น % ของความกว้างจอเสมอ (เหตุผลอยู่ที่บล็อก body)
+     จอแคบต้องใช้ % ใหญ่กว่ามาก ไม่งั้นกลีบแสงแคบกว่าจอจนเห็นเป็นครีมซีดทั้งหน้า
+     🚨 ห้ามเขียนเป็น `max(560px, 92%)` ในตำแหน่งรัศมีของ radial-gradient เด็ดขาด
+        ทดสอบกับ Chromium จริงแล้ว ทั้งประกาศกลายเป็น `background-image: none`
+        = พื้นหลังหายทั้งเว็บแบบเงียบสนิท ไม่มี error ให้เห็น (เหยียบมาแล้วรอบ 115) */
+  --glow-amber-w: 52%;
+  --glow-crown-w: 92%;
+  --glow-rose-w: 48%;
+  --glow-pool-w: 88%;
+
+  /* ความสูงจริงของ [data-site-header] — วัดจริงด้วย Chromium ได้ 76px มือถือ / 93px เดสก์ท็อป
+     (ค่าเดิม 69/82 เป็นของหัวเว็บแบบแถบเต็มกว้าง — แถบกระจกลอยมีระยะขอบบน 6px ล่าง 8px
+      และเส้นขอบบน-ล่างอีกด้านละ 1px รวมเข้ามาด้วย · วัดใหม่ทุกครั้งที่แตะระยะของแถบ)
      ต้องบวก safe-area-inset-top ด้วย เพราะหัวเว็บกันพื้นที่ใต้ status bar ไว้เองแล้ว
      ตอนเปิดจากไอคอนหน้าจอโฮม (display: standalone) — ในเบราว์เซอร์ปกติค่านี้ = 0
 
@@ -397,12 +428,21 @@
      ด้วยค่านี้โดยตรง — เผื่อเกิน = เห็นเป็นช่องว่างใต้หัวเว็บทุกหน้า / ขาด = หัวเว็บทับเนื้อหา
      ระยะหายใจของ anchor ย้ายไปบวกที่ `scroll-padding-top` แทนแล้ว
      SiteHeader.tsx ยังวัดของจริงด้วย ResizeObserver แล้วเขียนทับค่านี้ให้อีกชั้น */
-  --site-header-h: calc(69px + env(safe-area-inset-top, 0px));
+  --site-header-h: calc(76px + env(safe-area-inset-top, 0px));
+}
+
+@media (max-width: 639px) {
+  :root {
+    --glow-amber-w: 105%;
+    --glow-crown-w: 150%;
+    --glow-rose-w: 100%;
+    --glow-pool-w: 150%;
+  }
 }
 
 @media (min-width: 640px) {
   :root {
-    --site-header-h: calc(82px + env(safe-area-inset-top, 0px));
+    --site-header-h: calc(93px + env(safe-area-inset-top, 0px));
   }
 }
 
@@ -430,8 +470,14 @@ body {
    * เห็นความต่างแค่ ~1% ของช่วง = ตาอ่านว่า "พื้นเรียบสีเดียว"
    * ภาพตัวอย่างที่เจ้าของอนุมัติเป็นกรอบสูงจอเดียว แสงจึงอัดแน่นกว่ามาก
    *
-   * px ทำให้แสงอยู่ที่เดิมเสมอไม่ว่าหน้าจะยาวแค่ไหน — ยาวเกิน 1,200px
-   * แถบไล่สีจะค้างที่สีปลาย `#EFE2CF` ซึ่งตั้งใจ (ครึ่งล่างของหน้ายาวเป็นพื้นนิ่ง)
+   * px ทำให้แสงอยู่ที่เดิมเสมอไม่ว่าหน้าจะยาวแค่ไหน — ยาวเกิน 1,600px
+   * แถบไล่สีจะค้างที่สีปลาย `#F2E3CC` ซึ่งตั้งใจ (ครึ่งล่างของหน้ายาวเป็นพื้นนิ่ง)
+   *
+   * ⚠️ แต่ "รัศมีแนวนอน" ต้องเป็น % ไม่ใช่ px — กล่อง `body` กว้างเท่าจอเสมอ
+   * (ที่ยืดผิดรูปคือแกนตั้งอย่างเดียว) รัศมีแนวนอนเป็น px ทำให้บนจอ 1440px
+   * แสงทองกองเป็นหย่อมเดียวที่มุมซ้ายบนแล้วที่เหลือเป็นครีมเรียบ
+   * ซึ่งคืออาการ "สียังไม่ค่อยสวย" ที่เจ้าของทักในรอบ 115
+   * ค่า % อยู่ที่โทเคน --glow-*-w (จอแคบใช้ค่าที่ใหญ่กว่า)
    *
    * 🎨 คอนทราสต์หลังตรึงค่า (คำนวณ WCAG จริง สุ่ม 61×61 จุด ทั้งกว้าง 375/768/1440)
    *   จุดมืดที่สุดของพื้นหลัง = #D9DCD0 (เดิม #DBDCD0)
@@ -439,10 +485,11 @@ body {
    *   บนแผงกระจก #EFF0EB: ink 13.19 ✅ · muted 5.85 ✅ · gold-ink 4.94 ✅
    */
   background-image:
-    radial-gradient(760px 520px at 12% 48px,   rgba(255, 214, 150, 0.70) 0%, rgba(255, 214, 150, 0) 68%),
-    radial-gradient(680px 460px at 92% 320px,  rgba(224, 196, 224, 0.38) 0%, rgba(224, 196, 224, 0) 66%),
-    radial-gradient(900px 560px at 50% 1180px, rgba(184, 210, 210, 0.42) 0%, rgba(184, 210, 210, 0) 70%),
-    linear-gradient(170deg, #FBF1E2 0px, #EFE2CF 1200px);
+    radial-gradient(var(--glow-amber-w) 620px at 0% 60px,    rgba(255, 186, 96, 0.36) 0%, rgba(255, 186, 96, 0) 76%),
+    radial-gradient(var(--glow-crown-w) 820px at 50% -140px, rgba(255, 208, 130, 0.80) 0%, rgba(255, 208, 130, 0) 76%),
+    radial-gradient(var(--glow-rose-w) 560px at 100% 300px,  rgba(238, 170, 166, 0.30) 0%, rgba(238, 170, 166, 0) 74%),
+    radial-gradient(var(--glow-pool-w) 700px at 50% 1320px,  rgba(232, 196, 150, 0.32) 0%, rgba(232, 196, 150, 0) 74%),
+    linear-gradient(168deg, #FCF1DF 0px, #F6E7D0 820px, #F2E3CC 1600px);
   background-repeat: no-repeat;
   /* 🚨 ห้ามใช้ background-attachment: fixed เด็ดขาด
      `fixed` บังคับให้เบราว์เซอร์วาดพื้นหลังใหม่ทุกเฟรมที่เลื่อนจอ
@@ -491,10 +538,13 @@ body::before {
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  /* ⚠️ ความทึบของกลีบนี้ต้องต่ำ (≤0.30) และเป็น "ขาวอมครีม" ไม่ใช่ขาวเกือบทึบ
+     ของเดิมเป็น #FFFDF9 ทึบเต็ม 100% ที่ใจกลาง มันจึงฟอกแสงทองของพื้นหลังทิ้ง
+     ทั้งแถบบนสุด จอแรกที่ผู้ใช้เห็นจึงเหลือแค่ครีมซีด (แก้ในรอบ 115) */
   background-image: radial-gradient(
-    120% 75% at 50% -8%,
-    #FFFDF9 0%,
-    rgba(255, 253, 249, 0) 62%
+    110% 62% at 50% -14%,
+    rgba(255, 250, 238, 0.28) 0%,
+    rgba(255, 250, 238, 0) 62%
   );
 }
 
@@ -631,11 +681,43 @@ body > *:not(.fixed):not([data-floating]):not([data-site-header]) {
  *
  * 🚨 ห้ามเติม backdrop-filter ที่นี่เด็ดขาด (INC-0056 · ด่านที่ 43)
  */
+.site-header-shell {
+  /* เปลือกโปร่งของหัวเว็บ — ไม่ใช่แถบที่ตาเห็น แต่เป็นชั้นไล่จางที่ทำสองหน้าที่:
+       1. ปล่อยให้แสงทองของพื้นหลังวิ่งถึงขอบบนสุดของจอ (ไม่มีแถบขาวพาดทับอีกแล้ว)
+       2. กลบเนื้อหาที่เลื่อนลอดใต้ช่องว่างรอบแถบกระจกให้จางหาย แทนที่จะถูกตัดด้วยเส้นแข็ง
+     สีที่ใช้คือครีมอุ่นชุดเดียวกับ --color-canvas ไม่ใช่สีขาว จึงไม่ฟอกแสงทองให้ซีด */
+  background-image: linear-gradient(
+    180deg,
+    rgba(250, 238, 216, 0.94) 0%,
+    rgba(250, 238, 216, 0.74) 46%,
+    rgba(250, 238, 216, 0) 100%
+  );
+}
+
+/*
+ * แถบกระจกลอยของหัวเว็บ — ชิ้นที่ตาเห็นจริง
+ *
+ * ทำไมเป็นแถบลอย ไม่ใช่แถบเต็มกว้างแบบเดิม: แถบเต็มกว้างที่มีเส้นขอบล่างคม
+ * ตัดจอออกเป็นสองส่วนเสมอ และเป็นเส้นตรงเส้นเดียวในหน้าที่ขัดกับมุมโค้ง 22px ของทุกแผง
+ * แถบลอยที่ใช้มุมโค้งและผิวกระจกชุดเดียวกันทำให้หัวเว็บเป็น "ของชิ้นหนึ่งในธีม"
+ * ไม่ใช่กรอบของระบบที่แปะทับหน้าเว็บไว้
+ *
+ * ทึบกว่าแผงกระจกทั่วไป (0.78 > --glass-fill 0.62) เพราะเนื้อหาเลื่อนลอดใต้ตลอดเวลา
+ * ถ้าโปร่งเท่ากัน ตัวหนังสือในหัวเว็บจะอ่านยากตอนภาพไพ่เลื่อนผ่านใต้พอดี
+ *
+ * 🚨 ห้ามเติม backdrop-filter ที่นี่เด็ดขาด (INC-0056 · ด่านที่ 43)
+ * 🚨 ห้ามใส่ overflow: hidden ที่นี่หรือที่ <header> — จะตัดโล่กันเนื้อหาโผล่ทิ้ง (INC-0108)
+ */
 .site-header-glass {
-  background-color: rgba(255, 255, 255, 0.62);
+  background-color: rgba(255, 252, 246, 0.78);
   background-image: var(--glass-sheen);
-  border-bottom: 1px solid var(--glass-edge);
-  box-shadow: 0 10px 26px -20px rgba(78, 54, 32, 0.45);
+  border: 1px solid var(--glass-edge);
+  border-radius: 18px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 -1px 0 rgba(70, 48, 30, 0.06) inset,
+    0 0 0 1px var(--glass-ring),
+    0 14px 32px -18px rgba(78, 54, 32, 0.42);
 }
 
 /* ตัวอักษรสีทองศักดิ์สิทธิ์ตามระบบ V2 — คมชัด ผ่าน WCAG AA */
@@ -676,39 +758,58 @@ body > *:not(.fixed):not([data-floating]):not([data-site-header]) {
   border-radius: var(--glass-radius);
   box-shadow: var(--glass-shadow);
   /* ⚠️ ห้ามเขียน `transition: all` เด็ดขาด — คงรายชื่อเดิมไว้ทั้งบรรทัด (ด่านที่ 43) */
-  transition-property: border-color, box-shadow, transform;
-  transition-duration: 0.2s;
+  transition-property: border-color, background-color, box-shadow, transform;
+  transition-duration: 0.22s;
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .altar-card-porcelain:hover {
   border-color: var(--glass-edge-on);
+  background-color: rgba(255, 253, 249, 0.74);
   box-shadow: var(--glass-shadow-lift);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
 
 /* ผ้าปูไพ่ — โปร่งกว่าแผง เพื่อให้ลำดับสายตาเป็น: ไพ่ > แผง > ผ้าปู */
 .altar-cloth {
-  background-color: rgba(255, 255, 255, 0.34);
-  border: 1px solid rgba(255, 255, 255, 0.62);
-  border-radius: var(--glass-radius);
+  background-color: rgba(250, 242, 228, 0.42);
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.40) 0%,
+    rgba(255, 255, 255, 0) 62%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 16px;
+  /* เงาเว้า + เส้นแสงที่ขอบล่าง — ทำให้ไพ่ดูวางอยู่ "ใน" ถาด ไม่ใช่ลอยบนแผ่นแบน
+     ถาดที่เป็นขาวโปร่งล้วนจะกลืนหายไปกับแผงกระจกที่มันเกาะอยู่ */
+  box-shadow:
+    inset 0 2px 6px rgba(70, 48, 30, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
 /* ปุ่มหลักและปุ่มโปร่ง ธีมกระจกอุ่น */
 .btn-glass-primary {
-  background-image: linear-gradient(180deg, #4A3526 0%, #33241A 100%);
-  color: #FDF7EC;                 /* 13.99:1 — ผ่าน AAA */
+  /* ไล่สีสามช่วง — ช่วงบนอุ่นกว่าเล็กน้อยให้เหมือนมีแสงตกที่หลังปุ่ม
+     (สองช่วงตรง ๆ ได้ปุ่มที่ดูเหมือนบล็อกสีทึบ) */
+  background-image: linear-gradient(180deg, #5A4130 0%, #3E2C20 52%, #2F2117 100%);
+  color: #FDF7EC;                 /* 11.9:1 บนช่วงสีที่อ่อนที่สุดของปุ่ม (#5A4130) — ผ่าน AAA */
   border-radius: 16px;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.28) inset,
-              0 12px 26px -10px rgba(51, 36, 26, 0.60);
+  box-shadow:
+    0 1px 0 rgba(255, 233, 199, 0.30) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.22) inset,
+    0 1px 2px rgba(51, 36, 26, 0.24),
+    0 16px 30px -12px rgba(51, 36, 26, 0.58);
 }
 
 .btn-glass-ghost {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.50));
+  background-image: linear-gradient(180deg, rgba(255, 253, 248, 0.86), rgba(255, 250, 242, 0.56));
   color: var(--color-ink);
   border: 1px solid var(--glass-edge);
   border-radius: 16px;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.95) inset;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 0 0 1px var(--glass-ring),
+    0 8px 18px -12px rgba(78, 54, 32, 0.34);
 }
 
 /*
@@ -720,9 +821,11 @@ body > *:not(.fixed):not([data-floating]):not([data-site-header]) {
  * ค่านี้ทึบกว่าแผงเล็กน้อยพอให้ตัวอักษรอ่านออก แต่ยังเป็นกระจกชุดเดียวกัน
  */
 .glass-chip {
-  background-color: rgba(255, 255, 255, 0.62);
+  background-color: rgba(255, 252, 246, 0.70);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
   border: 1px solid var(--glass-edge);
   border-radius: 999px;
+  box-shadow: 0 0 0 1px var(--glass-ring);
 }
 
 /* ลวดลายหลังไพ่ศักดิ์สิทธิ์ (Warm Chocolate & Celestial Gold Inset) */
