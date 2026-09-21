@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+// ลิงก์ภายในต้องรู้ทั้งภาษาของหน้าและเครื่องมือเรนเดอร์ปลายทาง — ดู src/components/ui/LocaleLink.tsx
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 
 import { useLocale } from "@/lib/i18n";
 import { applyConsentChoice } from "@/lib/analytics-bootstrap";
@@ -13,8 +14,9 @@ import { applyConsentChoice } from "@/lib/analytics-bootstrap";
  * `analytics_storage: 'denied'` และ Meta Pixel ยังไม่ถูก init เลย
  * (ดู `src/components/analytics/AnalyticsTracker.tsx`)
  *
- * ตั้งใจให้เรียบและไม่บังเนื้อหา — ลอยอยู่มุมล่าง ไม่ใช่ม่านทึบกลางจอ
- * เพราะหน้าแรกคือหน้าที่ผู้ใช้มาเพื่อเปิดไพ่ ไม่ใช่มาอ่านประกาศ
+ * ตั้งใจให้เรียบและไม่บังเนื้อหา — เป็นแถบเตี้ยยาวเต็มความกว้างที่ขอบล่าง
+ * ไม่ใช่ม่านทึบกลางจอ เพราะหน้าแรกคือหน้าที่ผู้ใช้มาเพื่อเปิดไพ่ ไม่ใช่มาอ่านประกาศ
+ * (เดิมเป็นกล่องเล็กมุมขวาล่าง · เจ้าของสั่งเปลี่ยนเป็นแถบเดียวยาว ๆ เมื่อ 2026-09-21)
  *
  * ⚠️ markup ของแถบนี้ต้องอยู่ใน HTML ตั้งแต่แรกเสมอ ห้ามกลับไปเรนเดอร์หลัง mount
  * ---------------------------------------------------------------------------
@@ -48,48 +50,63 @@ export function ConsentBanner() {
       data-consent-banner=""
       role="region"
       aria-label={isEnglish ? "Cookie and analytics consent" : "การขอความยินยอมเก็บสถิติการใช้งาน"}
-      className="fixed bottom-3 left-3 right-[4.75rem] sm:right-4 sm:left-auto sm:right-4 sm:bottom-4 sm:max-w-sm z-[var(--z-consent)] rounded-xl border border-line bg-surface shadow-[0_10px_30px_rgba(42,38,31,0.14)] p-4"
+      className="consent-dock fixed inset-x-0 bottom-0 z-[var(--z-consent)]"
     >
-      <p className="text-[13px] font-bold text-gold-ink mb-1.5">
-        {isEnglish ? "Before we begin" : "ก่อนเริ่มดูดวง"}
-      </p>
-      <p className="text-[13px] leading-relaxed text-ink">
-        {isEnglish
-          ? "We'd like to collect anonymous usage statistics to improve the site. Your questions and readings are never sent to analytics."
-          : "เราขอเก็บสถิติการใช้งานแบบไม่ระบุตัวตน เพื่อนำไปปรับปรุงเว็บให้ดีขึ้น คำถามและคำทำนายของคุณไม่ถูกส่งเข้าระบบสถิติแน่นอน"}
-      </p>
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          data-consent-accept=""
-          onClick={() => decide("granted")}
-          className="tap-target flex-1 min-w-[120px] rounded-lg bg-ink px-3 py-2 text-[13px] font-bold text-canvas hover:bg-[#3D382F] transition-colors"
-        >
-          {isEnglish ? "Allow" : "ยินยอม"}
-        </button>
-        <button
-          type="button"
-          data-consent-reject=""
-          onClick={() => decide("denied")}
-          className="tap-target flex-1 min-w-[120px] rounded-lg border border-line px-3 py-2 text-[13px] font-bold text-ink hover:border-gold transition-colors"
-        >
-          {isEnglish ? "Only what's needed" : "เฉพาะที่จำเป็น"}
-        </button>
-      </div>
       {/*
-        ⚠️ `prefetch={false}` ห้ามถอดออก — แบนเนอร์นี้อยู่ในวิวพอร์ตตั้งแต่เฟรมแรกของทุกหน้า
-        ตั้งแต่ย้ายมาเรนเดอร์ฝั่งเซิร์ฟเวอร์ · ค่าเริ่มต้นของ Next คือพรีเฟตช์ลิงก์ที่มองเห็น
-        ทำให้ทุกคนที่เปิดเว็บครั้งแรกดึง `/privacy` มา **3 คำขอ 14 KB** ทิ้งไว้เฉย ๆ
-        แย่งแบนด์วิดท์จากไฟล์ที่ใช้วาดหน้าจริง (วัดจาก Lighthouse network log 2026-09-14)
+        แถบเดียวยาวเต็มความกว้าง (คำสั่งเจ้าของ 2026-09-21) — เดิมเป็นกล่องเล็กมุมขวาล่าง
+        เดสก์ท็อปได้เป็นแถวเดียวจริง: ข้อความซ้าย · ปุ่มขวา · ลิงก์นโยบายอยู่ในบรรทัดเดียวกับข้อความ
+        จอแคบวางซ้อนเป็นสองชั้น (ข้อความบน · ปุ่มล่างเต็มความกว้าง) เพราะแถวเดียวจะบีบปุ่มจนกดยาก
       */}
-      <Link
-        href={isEnglish ? "/privacy" : "/privacy"}
-        prefetch={false}
-        className="tap-overlay-y mt-2.5 inline-block text-[12px] text-muted underline underline-offset-2 hover:text-gold-ink"
-      >
-        {isEnglish ? "Read our privacy policy" : "อ่านนโยบายความเป็นส่วนตัว"}
-      </Link>
+      <div className="consent-bar mx-auto flex max-w-6xl flex-col gap-2.5 px-4 py-3 lg:flex-row lg:items-center lg:gap-4 lg:py-2.5 lg:pl-5 lg:pr-3">
+        <p className="min-w-0 flex-1 text-[13px] leading-relaxed text-ink">
+          <span className="font-bold text-gold-ink">
+            {isEnglish ? "Before we begin" : "ก่อนเริ่มดูดวง"}
+          </span>
+          <span aria-hidden="true"> · </span>
+          {isEnglish
+            ? "We collect anonymous usage stats to improve the site. Your questions and readings are never sent to analytics."
+            : "เราเก็บสถิติการใช้งานแบบไม่ระบุตัวตนเพื่อปรับปรุงเว็บ คำถามและคำทำนายของคุณไม่ถูกส่งเข้าระบบสถิติ"}
+        </p>
+
+        {/*
+          จอกว้าง (≥1024px): ลิงก์นโยบายยืนอยู่ในแถวเดียวกับปุ่ม เพื่อให้ข้อความด้านซ้ายได้อยู่บรรทัดเดียวจริง
+          จอแคบกว่านั้น: `order-last w-full` ดันลิงก์ลงไปอยู่ใต้ปุ่ม (ปุ่มต้องได้ความกว้างเต็มเพื่อให้กดถนัด)
+        */}
+        <div className="flex shrink-0 flex-wrap items-center gap-2 lg:flex-nowrap lg:gap-3">
+          {/*
+            ⚠️ ต้องเป็น `LocaleLink` ไม่ใช่ `next/link` (ด่านที่ 44 จับได้เมื่อ 2026-09-21)
+            `/privacy` ย้ายไป Astro แล้ว = ไฟล์ HTML ที่ตอบจากขอบ ไม่มีเพย์โหลด RSC ให้ router ดึง
+            ถ้าใช้ `next/link` ทุกคลิกจะเสียคำขอฟรีหนึ่งเส้นก่อนโหลดหน้าจริงอยู่ดี
+            และผู้ใช้หน้าอังกฤษจะถูกพากลับไปหน้านโยบายภาษาไทย (ของเดิมเป็นแบบนั้นจริง)
+            `prefetch={false}` คงไว้เหมือนเดิม — แบนเนอร์นี้อยู่ในวิวพอร์ตตั้งแต่เฟรมแรกของทุกหน้า
+            ถ้าปล่อยให้พรีเฟตช์ ทุกคนที่เปิดเว็บครั้งแรกจะดึง `/privacy` มา 3 คำขอ 14 KB ทิ้งไว้เฉย ๆ
+            (วัดจาก Lighthouse network log 2026-09-14)
+          */}
+          <Link
+            href="/privacy"
+            prefetch={false}
+            className="tap-overlay-y order-last w-full whitespace-nowrap text-[12px] text-muted underline underline-offset-2 hover:text-gold-ink lg:order-none lg:w-auto"
+          >
+            {isEnglish ? "Privacy policy" : "นโยบายความเป็นส่วนตัว"}
+          </Link>
+          <button
+            type="button"
+            data-consent-reject=""
+            onClick={() => decide("denied")}
+            className="btn-glass-ghost tap-target flex-1 whitespace-nowrap px-4 py-2 text-[13px] font-bold lg:flex-none"
+          >
+            {isEnglish ? "Only what's needed" : "เฉพาะที่จำเป็น"}
+          </button>
+          <button
+            type="button"
+            data-consent-accept=""
+            onClick={() => decide("granted")}
+            className="btn-glass-primary tap-target flex-1 whitespace-nowrap px-5 py-2 text-[13px] font-bold lg:flex-none"
+          >
+            {isEnglish ? "Allow" : "ยินยอม"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
-
