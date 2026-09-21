@@ -260,7 +260,7 @@ export function QuickFortunePicker({
       {/* ส่วนหัวแนะนำการทำนายด่วน สไตล์วิหารพยากรณ์ */}
       <div className="text-center space-y-2.5 sm:space-y-3 max-w-2xl mx-auto px-4">
         {/* ป้ายกล่องทองคำเปลว */}
-        <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 rounded-full text-[11px] font-serif-th font-semibold tracking-wide bg-[#FBF8F3] border border-line text-gold-ink shadow-xs">
+        <div className="glass-chip inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 text-[11px] font-serif-th font-semibold tracking-wide text-gold-ink">
           
           <span>
             {isEnglish
