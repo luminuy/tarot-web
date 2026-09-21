@@ -66,7 +66,7 @@
   },
   "devDependencies": {
     "@astrojs/react": "6.0.6",
-    "@eslint/js": "^9.39.5",
+    "@eslint/js": "^10.0.1",
     "@next/eslint-plugin-next": "^16.3.5",
     "@opennextjs/cloudflare": "^1.20.4",
     "@tailwindcss/postcss": "^4.3.3",
