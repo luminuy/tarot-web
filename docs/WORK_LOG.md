@@ -38,6 +38,39 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-09-21 (รอบ 114): 🤖 PR ของ dependabot แดงยกชุด 5 ใบ — และตัวเลข "2/3 เขียว" ที่หลอกตา (INC-0206)
+
+**อาการที่เจ้าของแจ้ง**: หน้ารายการ PR มี dependabot ค้างอยู่ 5 ใบ ทุกใบขึ้นกากบาทแดงพร้อมเลข `2/3`
+
+**ต้นเหตุ (ตรวจจากล็อกจริงของ job)**: dependabot แก้ **เฉพาะ `package.json` ไม่แตะ `package-lock.json` เลยสักใบ**
+ขั้น `npm ci` ของ `pr.yml` จึงตกตั้งแต่วินาทีที่ 13–20 ก่อนถึงด่านตรวจด่านแรกด้วยซ้ำ:
+
+```
+npm error Invalid: lock file's @astrojs/react@6.0.5 does not satisfy @astrojs/react@6.0.6
+npm error Invalid: lock file's eslint@9.39.5 does not satisfy eslint@10.11.0   (+20 แพ็กเกจลูกโซ่)
+```
+
+**เรื่องที่ใหญ่กว่า — ตัวเลข `2/3` ไม่ได้แปลว่าเกือบผ่าน**:
+| เช็ก | ผลจริง | ความหมาย |
+| :--- | :--- | :--- |
+| 🧪 Automated Verification | ❌ failure | **ด่านเดียวที่ branch protection บังคับ** |
+| 🔀 Auto-Merge & Deploy Dispatch | ⏭️ skipped | ถูกนับรวมเป็น "ไม่แดง" |
+| ⚡ Dependabot Auto-Merge | ✅ success | **เขียวหลอก** — `dependabot-automerge.yml` หุ้ม `pulls.merge()` ด้วย `try/catch` แล้ว log เฉย ๆ job จึงเขียวทุกครั้งแม้ merge ไม่ได้เลย |
+
+**สิ่งที่ทำ**:
+1. เติม `package-lock.json` ที่ตรงกันให้ #541 · #543 · #545 · #542 — ทุกใบผ่าน CI และ auto-merge เข้า `main` แล้ว
+2. **#544 (typescript 7.0.2) ปิดไปก่อน** — โค้ดเราพร้อม (`npx -p typescript@7.0.2 tsc --noEmit` ➔ **0 errors**) แต่ `typescript-eslint@8.70.0` ตรึง `peer typescript ">=4.8.4 <6.1.0"` ➔ `npm ci` ตกด้วย ERESOLVE · ขึ้นทะเบียนเป็น **ISSUE-053** รอต้นทาง
+3. **ลบ `dependabot-automerge.yml` ทิ้ง** — ซ้ำซ้อนกับขั้น auto-merge ใน `pr.yml` ที่รันหลังด่านผ่านและ `core.setFailed()` จริงเมื่อ merge ไม่ได้ ตัวเก่ามีแต่ทำให้ตัวเลขเช็กหลอกตา
+4. `.github/dependabot.yml` — ถอด `labels:` ที่ชี้ไปยังป้ายที่ไม่มีอยู่จริง (`dependencies` · `automated-pr`) ซึ่งทำให้ dependabot คอมเมนต์เตือนทุกใบ
+5. ด่านตรวจใหม่ใน `scripts/qa/test-ci-supply-chain.ts` — เทียบ `package.json` กับ `package-lock.json` ทุกแพ็กเกจ **แบบออฟไลน์** จึงตกตั้งแต่ pre-commit ไม่ต้องรอ CI (ทดสอบด้วยการทำให้พังจริงแล้ว: ดัน `astro` เป็น 8.0.0 ➔ ด่านตก พร้อมบอกชื่อแพ็กเกจ)
+6. `npm run deps:relock` — ทางแก้บรรทัดเดียว และขั้นติดตั้งใน `pr.yml` พิมพ์ `::error` บอกทางแก้ตรงหัว PR
+7. `.gitignore` — คอมเมนต์เดิมเขียนว่า "CI ใช้ `pnpm install --no-frozen-lockfile` (ไม่มี lockfile ในรีโปนี้)" ซึ่ง**ไม่จริงมาตั้งแต่ R-13** แก้ให้ตรงกับของจริงแล้ว
+
+**ของแถมที่เจอระหว่างทาง**: PR #553 ไม่มีด่านรันเลยสักตัว เพราะใช้กิ่งเดิมที่ #552 squash-merge ไปแล้ว ➔ GitHub คำนวณ merge commit ไม่ได้ `pr.yml` จึงไม่ทำงาน แก้ด้วยการ merge `main` เข้ากิ่ง (ไม่ rebase เพื่อไม่แก้ประวัติกิ่ง) ➔ ต้นไม้ผลลัพธ์เท่ากับการ cherry-pick ลง `main` สดเป๊ะ (`git diff` ว่าง)
+
+**ตรวจแล้ว**: `npm run repo:verify` **ผ่านครบ 80/80 ด่าน** ทุกกิ่งก่อนดัน · บิลด์ใหม่ทั้งสองเครื่องมือ · `eslint v10.11.0` lint 0 errors · typecheck 0 errors
+
+**กับดักที่เหยียบเองระหว่างทำ**: สลับกิ่งแล้วไม่ล้าง `.next`/`dist` ก่อน ➔ ด่านงบบันเดิลอ่านผลบิลด์ของกิ่งก่อนหน้าแล้วรายงาน `/pick-a-card` 143 KB เกินงบ ทั้งที่บิลด์ใหม่ได้ 101 KB (ตระกูลเดียวกับ R-06 — ด่านตรวจของที่ไม่ใช่ของ commit นี้)
 ### 🗓️ 2026-09-21 (รอบ 113): 🪟 "ทำไมของจริงไม่สวยเท่าภาพตัวอย่าง" — หัวเว็บกระจก + ตรึงแสงเป็น px
 
 **คำถามจากเจ้าของ**: สีในภาพตัวอย่างที่อนุมัติสวยกว่าของจริงบนเว็บ

@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0206 · 2026-09-21 17:09 · 🟡 Medium · PR ของ dependabot แดงยกชุด 5 ใบ เพราะแก้ package.json โดยไม่แตะ package-lock.json
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | PR #541-#545 ของ dependabot ขึ้นแดงทุกใบตั้งแต่วินาทีที่ 13-20 โดยหน้ารายการ PR แสดงว่า 2/3 เขียว ทำให้ดูเหมือนติดแค่ด่านเดียวเล็กน้อย ทั้งที่ด่านจริงด่านเดียวที่บังคับ merge ตกทั้งหมด |
+| **สาเหตุราก** | dependabot อัปเดตเฉพาะ package.json ไม่ได้อัปเดต package-lock.json ให้ ขั้น npm ci ใน pr.yml จึงตกทันทีด้วย EUSAGE lock file does not satisfy ก่อนถึงด่านตรวจด่านแรกด้วยซ้ำ และ workflow dependabot-automerge.yml หุ้มการ merge ไว้ด้วย try/catch แล้ว log เฉย ๆ job จึงขึ้นเขียวทุกครั้งทั้งที่ merge ไม่ได้ กลายเป็นตัวเลข 2/3 ที่หลอกตา |
+| **การแก้ไข** | เติม package-lock.json ที่ตรงกันให้ทั้ง 4 ใบที่เป็นไปได้ (#541 #543 #545 #542) แล้ว merge เข้า main ครบ ส่วน #544 typescript 7 ปิดไปเพราะ typescript-eslint 8.70.0 ยังตรึง peer ไว้ที่ typescript น้อยกว่า 6.1.0 ลบ workflow dependabot-automerge.yml ที่ซ้ำซ้อนและรายงานเขียวหลอก (pr.yml มีขั้น auto-merge หลังด่านผ่านอยู่แล้วและ setFailed จริงเมื่อ merge ไม่ได้) เพิ่มด่านตรวจ lockfile ใน test-ci-supply-chain.ts และสคริปต์ deps:relock |
+| **🛡️ กฎป้องกันถาวร** | **ด่าน CI supply chain ตรวจว่า package.json กับ package-lock.json ตรงกันทุกแพ็กเกจแบบออฟไลน์ตั้งแต่ pre-commit และขั้นติดตั้งใน pr.yml พิมพ์ annotation บอกทางแก้ตรงหัว PR ห้ามมี job ที่กลืน error แล้วรายงานสำเร็จอีก** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/charming-turing-bj32hv` · commit `3157c48` |
+
+
 ### INC-0205 · 2026-09-21 12:42 · 🟡 Medium · ตัวตรวจผลหลังเขียนกฎยิงเร็วเกินไป รายงานว่าล้มเหลวทั้งที่กฎถูกสร้างสำเร็จแล้ว
 
 | หัวข้อ | รายละเอียด |

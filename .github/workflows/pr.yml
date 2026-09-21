@@ -43,8 +43,16 @@ jobs:
       # คนละชุดกับที่ทดสอบในเครื่อง — ใน job ที่ถือ `CLOUDFLARE_API_TOKEN` และคีย์ AI
       # `npm ci` ล้มทันทีถ้า lockfile ไม่ตรงกับ package.json ซึ่งเป็นสิ่งที่เราต้องการ
       # และแคชของ setup-node ใช้ได้เลยเพราะ `package-lock.json` มีอยู่จริง (กับดักเดิมหายไปเอง)
+      #
+      # 🪧 ถ้า lockfile ไม่ตรงกับ package.json ให้ขึ้นเป็น annotation บนหัว PR เลย
+      #    ไม่ต้องให้คนไล่เปิดล็อกของ job อ่าน npm error 30 บรรทัดเอง (INC-0206)
+      #    เคสที่เจอบ่อยสุดคือ PR ของ dependabot ที่แก้ package.json แต่ไม่แตะ lockfile
       - name: 📦 Install dependencies
-        run: npm ci
+        run: |
+          if ! npm ci; then
+            echo "::error title=lockfile ไม่ตรงกับ package.json::รัน \`npm run deps:relock\` แล้ว commit package-lock.json ตามไปด้วย — PR ที่แก้เฉพาะ package.json จะตกด่านนี้เสมอ"
+            exit 1
+          fi
 
       # ♻️ แคชผลกลางของตัวคอมไพล์ — ลดเวลาของขั้นที่แพงที่สุดใน PR
       # ---------------------------------------------------------------------------
