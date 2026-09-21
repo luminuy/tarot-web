@@ -136,6 +136,9 @@ npm run pr:auto -- "<title>" "<body>" --wait
 # เก็บกวาด branch ที่ PR merge ไปแล้ว ทั้งในเครื่องและบน remote
 npm run git:tidy
 
+# ตรวจว่าโฮสต์ www เด้ง 301 กลับโดเมนหลักหรือยัง (ถอด --check = ดันกฎขึ้นชั้นขอบ Cloudflare)
+npm run cf:canonical-host -- --check
+
 # ซิงก์สถานะงานอัตโนมัติลงใน docs/WORK_LOG.md
 npm run log:sync
 
