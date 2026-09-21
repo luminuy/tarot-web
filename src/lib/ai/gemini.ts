@@ -528,11 +528,18 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
   }
 
   recordEvent(`ai_incomplete_reading:${lastFailure ?? "unknown"}`);
+  /*
+   * 📣 ถ้อยคำตรงนี้ต้องพูดถึง "คำทำนายที่แม่หมอเขียน" เท่านั้น (INC-0213)
+   * ห้ามเขียนทำนองว่า "ยังเปิดไพ่ไม่ครบ" เด็ดขาด — ผู้ใช้เปิดไพ่ครบไปแล้ว
+   * (หน้าจอเดียวกันมีป้าย "เปิดไพ่ครบแล้ว" อยู่ข้าง ๆ) ข้อความเก่าจึงขัดกับสิ่งที่ตาเห็น
+   * ผู้ทดสอบถ่ายภาพสองอย่างนี้อยู่ติดกันมาให้ดูแล้ว — อ่านแล้วงงว่าต้องไปกดอะไรอีก
+   * สิ่งที่ไม่ครบคือ "คำอ่าน" ไม่ใช่ "การเปิดไพ่ของผู้ใช้"
+   */
   yield {
     type: "error",
     message:
       ctx.lang === "en"
-        ? "The reading was cut off before every card was covered. Nothing was charged — please reload and draw again."
-        : "คำอ่านขาดกลางคัน ยังเปิดไพ่ได้ไม่ครบทุกใบ ระบบไม่ได้หักสิทธิ์ของคุณ กรุณาโหลดใหม่อีกครั้งนะคะ",
+        ? "The oracle's writing stopped partway, so it doesn't cover every card you opened. Nothing was charged — please reload and try again."
+        : "แม่หมอเขียนคำทำนายไม่จบ จึงยังอ่านไม่ครบทุกใบที่คุณเปิดไว้ ระบบไม่ได้หักสิทธิ์ของคุณ กดโหลดใหม่อีกครั้งได้เลยนะคะ",
   };
 }

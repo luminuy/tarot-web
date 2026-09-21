@@ -7,6 +7,7 @@ import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import type { Reading } from "@/lib/schema/reading";
 import { soundManager } from "@/lib/utils/audio";
 import { CardImage } from "@/components/card/CardImage";
+import { fitTextToWidth, sliceThaiSafe } from "@/lib/text/thai-truncate";
 import { getCardImageSrc } from "@/lib/tarot/card-image";
 import { cardSummaryByIndex as cardByIndex } from "@/data/cards/summary";
 import { trackEvent } from "@/lib/analytics";
@@ -139,7 +140,12 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
           ctx.fillStyle = "#2E211A";
           ctx.font = "italic 28px 'Cinzel', 'Noto Serif Thai', serif, sans-serif";
           ctx.textAlign = "center";
-          ctx.fillText(`“${question.slice(0, 48)}${question.length > 48 ? "..." : ""}”`, width / 2, nextY);
+          /* ย่อตามความกว้างจริงของกรอบ ไม่ใช่นับตัวอักษร (INC-0213) */
+          ctx.fillText(
+            `“${fitTextToWidth(question, (t) => ctx.measureText(t).width, width - 280)}”`,
+            width / 2,
+            nextY,
+          );
           nextY += 45;
         }
 
@@ -225,7 +231,16 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
           ctx.fillStyle = "#8F5C1A";
           ctx.font = `bold ${isSingle ? "22px" : "16px"} 'Noto Sans Thai', sans-serif`;
           ctx.textAlign = "center";
-          ctx.fillText(posName.slice(0, 18), cx + cardW / 2, cardY - 16);
+          /*
+           * ⛔ ห้ามกลับไปใช้ `slice(0, n)` (INC-0213)
+           * ตัวเลขตายตัวไม่รู้ว่าฟอนต์กว้างเท่าไหร่ และตัดกลางคลัสเตอร์ไทยจนสระ/วรรณยุกต์ลอย
+           * วัดความกว้างจริงจาก canvas แล้วย่อให้พอดีช่องของไพ่ใบนั้น (เผื่อขอบ 6px สองข้าง)
+           */
+          ctx.fillText(
+            fitTextToWidth(posName, (t) => ctx.measureText(t).width, cardW + gap - 12),
+            cx + cardW / 2,
+            cardY - 16,
+          );
 
           // ชื่อไพ่ — ใต้ไพ่
           const cardName = isEnglish
@@ -233,7 +248,11 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
             : (cardObj?.nameTh || "ไพ่ทาโรต์");
           ctx.fillStyle = "#2E211A";
           ctx.font = `bold ${isSingle ? "26px" : "19px"} 'Cinzel', 'Noto Serif Thai', serif, sans-serif`;
-          ctx.fillText(cardName, cx + cardW / 2, cardY + cardH + 30);
+          ctx.fillText(
+            fitTextToWidth(cardName, (t) => ctx.measureText(t).width, cardW + gap - 12),
+            cx + cardW / 2,
+            cardY + cardH + 30,
+          );
 
           // สถานะหัวตั้ง/กลับหัว
           ctx.fillStyle = c.isReversed ? "#A6392C" : "#3A7044";
@@ -364,9 +383,15 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
 
     // Twitter / X
     if (brand === "twitter") {
+      /*
+       * ย่อคำทำนายก่อนยัดลงทวีต — เดิมใช้ `slice(0, 90)` ดิบ ๆ ซึ่งตัดกลางคลัสเตอร์ไทย
+       * จนสระ/วรรณยุกต์ลอยไปโผล่บนไทม์ไลน์คนอื่น (INC-0213)
+       */
+      const rawSummary = reading?.summary ?? "";
+      const tweetSummary = rawSummary ? `${sliceThaiSafe(rawSummary, 90)}…` : "";
       const tweetText = isEnglish
-        ? `1909 Rider-Waite Tarot Reading by SeerTarot\nSpread: ${spreadName}\nQuestion: "${question || defaultQuestion}"\nOracle insight from ${personaName}: "${reading?.summary ? reading.summary.slice(0, 90) + "..." : ""}"\n\n#tarot #oracle #archetypes #SeerTarot`
-        : `ดูดวงไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot\nผัง: ${spreadName}\nคำถาม: "${question || "ภาพรวมดวงชะตา"}"\nคำทำนายจากแม่หมอ ${persona.nameTh}: "${reading?.summary ? reading.summary.slice(0, 90) + "..." : ""}"\n\n#ไพ่ทาโรต์ #ดูดวง #SeerTarot`;
+        ? `1909 Rider-Waite Tarot Reading by SeerTarot\nSpread: ${spreadName}\nQuestion: "${question || defaultQuestion}"\nOracle insight from ${personaName}: "${tweetSummary}"\n\n#tarot #oracle #archetypes #SeerTarot`
+        : `ดูดวงไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot\nผัง: ${spreadName}\nคำถาม: "${question || "ภาพรวมดวงชะตา"}"\nคำทำนายจากแม่หมอ ${persona.nameTh}: "${tweetSummary}"\n\n#ไพ่ทาโรต์ #ดูดวง #SeerTarot`;
       openOrRedirect(
         `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`
       );

@@ -27,12 +27,14 @@ import path from "node:path";
 
 const ROOT = process.cwd();
 /** โฟลเดอร์ที่ข้อความในนั้น "ผู้ใช้เห็นจริง" หรือเป็นข้อความ SEO */
-const SCAN_DIRS = ["src/data", "src/components", "src/app"];
+const SCAN_DIRS = ["src/data", "src/components", "src/app", "src/lib"];
 
 /** ไฟล์ที่ข้อความผิดเป็นเจตนา ไม่ใช่ข้อบกพร่อง */
 const EXEMPT = new Set([
   "src/lib/ai/thai-quality.ts",
   "src/lib/safety/crisis-lexicon.ts",
+  /* อธิบายคำที่ "สะกดผิด" ไว้ในคอมเมนต์เพื่อบอกว่าเราแก้อะไรให้โมเดล — ไม่ใช่ข้อความที่ผู้ใช้เห็น */
+  "src/lib/ai/language.ts",
 ]);
 
 let pass = 0;
@@ -66,6 +68,11 @@ interface Rule {
   pattern: RegExp;
   /** คำอธิบายวิธีแก้ */
   fix: string;
+  /**
+   * ตรวจเฉพาะบรรทัดที่เป็นโค้ดจริง ข้ามคอมเมนต์
+   * ใช้กับกฎที่พูดถึง "ถ้อยคำที่ผู้ใช้เห็น" — คอมเมนต์ที่ยกคำต้องห้ามมาอธิบายไม่ใช่ความผิด
+   */
+  codeOnly?: boolean;
 }
 
 /**
@@ -91,6 +98,19 @@ const RULES: Rule[] = [
     pattern: /เเ/,
     fix: 'เขียน "แ" ตัวเดียว ไม่ใช่ "เ" สองตัวติดกัน',
   },
+  {
+    /*
+     * 🚨 INC-0213 — ห้ามโทษผู้ใช้ว่า "ยังเปิดไพ่ไม่ครบ"
+     * ตอน AI เขียนคำทำนายไม่จบ ระบบเคยขึ้นแถบแดงว่า "ยังเปิดไพ่ได้ไม่ครบทุกใบ"
+     * ทั้งที่หน้าจอเดียวกันมีป้าย "เปิดไพ่ครบแล้ว" อยู่ข้าง ๆ — ผู้ทดสอบถ่ายภาพมาให้ดู
+     * สิ่งที่ไม่ครบคือ "คำอ่าน" ไม่ใช่ "การเปิดไพ่ของผู้ใช้" ต้องเขียนให้ตรงตัวการเสมอ
+     */
+    code: "BLAME_USER_CARD_OPENING",
+    label: "ข้อความแจ้งเตือนห้ามบอกว่าผู้ใช้ยังเปิดไพ่ไม่ครบ (INC-0213)",
+    pattern: /(?:ยัง)?เปิดไพ่(?:ได้)?ไม่ครบ/,
+    fix: 'เขียนให้ตรงตัวการ เช่น "แม่หมอเขียนคำทำนายไม่จบ จึงยังอ่านไม่ครบทุกใบที่คุณเปิดไว้"',
+    codeOnly: true,
+  },
 ];
 
 console.log("✍️ [QA] คุณภาพภาษาไทยของข้อความที่เราเขียนเอง (ไม่ใช่แค่ผลจากโมเดล)\n");
@@ -110,7 +130,10 @@ for (const file of files) {
   scanned++;
 
   src.split("\n").forEach((line, i) => {
+    const trimmed = line.trimStart();
+    const isComment = trimmed.startsWith("*") || trimmed.startsWith("//") || trimmed.startsWith("/*");
     for (const rule of RULES) {
+      if (rule.codeOnly && isComment) continue;
       if (rule.pattern.test(line)) {
         const list = offendersByRule.get(rule.code) ?? [];
         list.push(`${rel}:${i + 1} → ${line.trim().slice(0, 100)}`);
