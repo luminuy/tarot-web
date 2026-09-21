@@ -387,22 +387,28 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 onFocus={() => {
                   if (!isLocked && onProceed) prefetchModal();
                 }}
-                className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-lg border transition duration-300 transform-gpu hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink group/card ${
+                /*
+                 * พื้นผิวของการ์ดมาจากคลาสกระจกกลางใน `globals.css` เท่านั้น
+                 * ⚠️ ห้ามใส่ `bg-surface` / `rounded-*` / `border-*` กลับมาทับ
+                 * คลาส `.altar-*` เขียนไว้นอก cascade layer จึงชนะ utility ของ Tailwind เสมอ
+                 * ผลคือ utility พวกนั้นจะไม่มีผลอะไรเลยนอกจากทำให้คนอ่านเข้าใจผิดว่าการ์ดเป็นสีขาวทึบ
+                 */
+                className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink transition duration-300 transform-gpu cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink group/card ${
                   isSelected
-                    ? "bg-surface border-2 border-line-warm ring-4 ring-gold-ink/20 shadow-overlay"
+                    ? "altar-panel-active ring-4 ring-gold-ink/20"
                     : isLocked
-                      ? "bg-surface/90 border border-line-warm/50 hover:border-gold-ink hover:bg-surface-warm opacity-90 hover:opacity-100"
-                      : "bg-surface border border-line-warm/50 hover:border-gold-ink hover:shadow-overlay"
+                      ? "altar-card-porcelain opacity-90 hover:opacity-100"
+                      : "altar-card-porcelain"
                 }`}
                 style={{ minHeight: "320px" }}
               >
                 {/* Top Card Header Tags */}
                 <div className="flex items-center justify-between z-10 pb-1">
-                  <span className="text-[13px] text-ink-deep bg-surface px-2.5 py-0.5 rounded-full border border-line-warm/60 font-semibold font-mono ">
+                  <span className="glass-chip text-[13px] text-ink-deep px-2.5 py-0.5 font-semibold font-mono ">
                     {spread.positions.length} {isEnglish ? "Cards" : "ใบ"}
                   </span>
                   {isLocked ? (
-                    <span className="text-[12px] text-muted bg-surface border border-line-warm/60 px-2.5 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1 ">
+                    <span className="glass-chip text-[12px] text-muted px-2.5 py-0.5 font-serif-th font-bold flex items-center gap-1 ">
                       <SealedLockIcon className="w-3 h-3 text-gold-ink" />
                       <span>{isEnglish ? "Master Tier" : "ญาณพิเศษ"}</span>
                     </span>
@@ -416,7 +422,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 {/* 1909 Tarot Spread Centerpiece on Dedicated Altar Pad */}
                 <div className="my-auto py-2 flex flex-col items-center justify-center gap-2 relative">
                   <div
-                    className={`w-full flex items-center justify-center p-3 rounded-lg bg-surface border border-line-warm/25 shadow-inner relative group-hover/card:scale-105 transition-transform duration-300 ${
+                    className={`altar-cloth w-full flex items-center justify-center p-3 relative group-hover/card:scale-105 transition-transform duration-300 ${
                       isLocked ? "opacity-65 saturate-[0.9] group-hover/card:opacity-90" : ""
                     }`}
                   >
@@ -436,7 +442,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
 
                   {/* ตราผนึกญาณพิเศษ */}
                   {isLocked && (
-                    <div className="z-20 flex items-center gap-1.5 rounded-full border border-line-warm bg-surface px-3 py-1 group-hover/card:border-line-warm transition duration-300">
+                    <div className="glass-chip z-20 flex items-center gap-1.5 px-3 py-1 transition duration-300">
                       <SealedLockIcon className="w-3.5 h-3.5 text-gold-ink flex-shrink-0" />
                       <span className="text-[13px] font-serif-th font-bold text-ink-deep whitespace-nowrap">
                         {isEnglish ? "Tap to unlock this spread" : "แตะเพื่อปลดล็อกผังนี้"}
@@ -527,7 +533,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
         <div className="text-center pt-1 pb-1">
           <LocaleLink
             href="/spreads"
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border border-line-interactive-warm bg-surface/80 hover:bg-surface text-ink-deep hover:text-gold-ink hover:border-gold-ink font-serif-th text-xs sm:text-sm font-semibold transition-colors duration-200 shadow-2xs"
+            className="btn-glass-ghost inline-flex items-center gap-1.5 px-5 py-2.5 hover:text-gold-ink font-serif-th text-xs sm:text-sm font-semibold transition-colors duration-200"
           >
             <span>
               {isEnglish
@@ -541,7 +547,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
 
       {/* Selected Spread In-Focus Action Bar */}
       {onProceed && (
-        <div className="anim-swap-rise-sm pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 rounded-lg bg-surface border border-line-warm/50 shadow-overlay">
+        <div className="altar-panel anim-swap-rise-sm mt-2 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5">
           <div className="flex items-center gap-3.5">
             {/* Real 1909 Rider-Waite Spread Card Emblem */}
             <div className="w-9 h-14 sm:w-10 sm:h-15 rounded-lg border-2 border-line-warm overflow-hidden bg-surface relative flex-shrink-0">

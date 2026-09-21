@@ -7,6 +7,7 @@
   "packageManager": "pnpm@9.15.4",
   "scripts": {
     "dev": "next dev --webpack",
+    "dev:astro": "ASTRO_TELEMETRY_DISABLED=1 astro dev --port 4321",
     "build": "next build --webpack && ASTRO_TELEMETRY_DISABLED=1 astro build",
     "build:astro": "ASTRO_TELEMETRY_DISABLED=1 astro build",
     "start": "next start",

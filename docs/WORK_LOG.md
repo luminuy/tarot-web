@@ -38,6 +38,37 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-09-21 (รอบ 112): 🪟 ธีมกระจกลงแล้วแต่ "ไม่มีใครเห็น" — ต่อธีมเข้ากับพื้นผิวจริงของหน้าแรก
+
+**อาการที่เจ้าของแจ้ง**: ธีมกระจกที่ทีมก่อนหน้าทำมา **ไม่ตรงกับแบบที่ออกแบบไว้เลย**
+
+**สิ่งที่วัดได้จริงก่อนแก้** (dev server หน้าแรกฝั่ง Astro · อ่านค่าจาก `getComputedStyle`):
+- `<main>` ของหน้าแรกใส่ `bg-canvas` ➔ `rgb(242,236,225)` ทึบ 100% **ทาทับพื้นหลังไล่สีอุ่นทั้งผืน** ที่วาดไว้ที่ `body` จึงไม่มีใครเห็นสักพิกเซล
+- `document.querySelectorAll('.altar-panel,.altar-card-porcelain,.altar-cloth,.altar-panel-active').length` = **0** — ธีมไปลงที่ 4 คลาส `.altar-*` ซึ่ง **หน้าแรกไม่ได้ใช้เลยสักตัว**
+- การ์ดผังจริงใน `SpreadCardSelector` ใช้ utility ตรง ๆ: `bg-surface` = ขาวทึบ · `rounded-lg` = 8px (สเปกคือ 20px) · `box-shadow: none`
+- สรุป: สิ่งเดียวที่เห็นผลคือปุ่ม `.btn-glass-primary` — ส่วนโครง "ประตูเดียว" ของรอบ 111 ถูกต้องครบแล้ว ปัญหาอยู่ที่ธีมล้วน ๆ
+
+**ต้นเหตุ**: แผนส่งต่อหัวข้อ 2.2 เขียนค่าธีมไว้ครบแต่ลงเฉพาะ 4 คลาส `.altar-*`
+โดยสมมติว่าหน้าแรกใช้คลาสพวกนั้น ทั้งที่ของจริงเขียนด้วย utility ของ Tailwind ทุกชิ้น
+
+**สิ่งที่แก้ (ขอบเขต = หน้าแรกก่อน ตามที่เจ้าของเคาะ)**:
+1. `src/components/home/TarotFlow.tsx` — ถอด `bg-canvas` ออกจาก `<main>` พร้อมคอมเมนต์กันใส่กลับ
+2. `src/components/spread/SpreadCardSelector.tsx` — การ์ดผัง/ป้าย/แท่นวางภาพ/แถบสรุป/ลิงก์ "ดูผังทั้งหมด" ใช้ `.altar-card-porcelain` · `.altar-panel-active` · `.altar-cloth` · `.altar-panel` · `.glass-chip` · `.btn-glass-ghost` แทน utility พื้นทึบ
+3. `src/components/reading/QuickFortunePicker.tsx` — การ์ด 4 หัวข้อเปลี่ยนจากพื้นไล่สีทึบเป็น `.altar-card-porcelain` (สีประจำหัวข้อยังอยู่ที่ป้ายและขอบภาพไพ่) + ลบฟิลด์สีที่ไม่ได้ใช้แล้ว 4 ตัว (`border` · `borderHover` · `bgGradient` · `glow`)
+4. `src/components/reading/DailyCardStrip.tsx` — แถบไพ่ประจำวันและโครงร่างตอนโหลดเป็นกระจก
+5. `src/app/globals.css` — เพิ่ม `.glass-chip` (ป้ายเล็กในการ์ด) ทึบกว่าแผงเล็กน้อยเพื่อไม่ให้กลับลำดับสายตา
+
+**ผลหลังแก้ (วัดจาก `getComputedStyle` บนหน้าแรกจริง)**:
+- `<main>` = `rgba(0,0,0,0)` — พื้นหลังไล่สีโผล่ครบทั้งหน้า
+- การ์ดผัง = `rgba(255,255,255,0.58)` · มุม 20px · เงา 3 ชั้นตามโทเคน `--glass-shadow`
+- element ที่เป็นกระจกบนหน้าแรก: **0 ➔ 17 ชิ้น**
+
+**ตรวจแล้ว**: `npm run typecheck` 0 errors · `npm run repo:verify` **ผ่านครบ 80/80 ด่าน** (รวม `test-palette-drift` · `test-a11y-critical` · `test-motion-quality`)
+
+**ยังเหลือ (เจตนาไม่ทำรอบนี้)**: หัวเว็บ (`SiteHeader`) ยังเป็นขาวทึบ `rgb(255,255,255)` และอีก 86 จุดทั่วเว็บยังใส่ `bg-canvas` ทับพื้นหลังไล่สีอยู่ — เป็นงานรอบถัดไป เพราะกระทบทุกหน้า ต้องไล่ตรวจคอนทราสต์ทีละหน้า
+
+---
+
 ### 🗓️ 2026-09-21 (รอบ 111): 🪟 ดำเนินการสมบูรณ์ — ธีมกระจกอุ่น (Warm Liquid Glass) + โครงหน้าแรก "ประตูเดียว"
 
 **เป้าหมาย & สเปกที่ปฏิบัติตาม**:

@@ -26,15 +26,11 @@ export interface QuickTopic {
   elementalGlyph: string;
   elementalGlyphEn?: string;
   themeColors: {
-    border: string;
-    borderHover: string;
-    bgGradient: string;
     badgeBg: string;
     badgeText: string;
     badgeBorder: string;
     accentText: string;
     cardBorder: string;
-    glow: string;
   };
 }
 
@@ -58,15 +54,11 @@ export const QUICK_TOPICS: QuickTopic[] = [
     elementalGlyph: "ธาตุน้ำ · สายใยหัวใจ",
     elementalGlyphEn: "Water Element · Heartspace Bonds",
     themeColors: {
-      border: "border-[#EADFD5]",
-      borderHover: "hover:border-[#C48464]",
-      bgGradient: "bg-gradient-to-br from-surface via-[#FDFBF9] to-[#F7EFE9]",
       badgeBg: "bg-[#FBF2EC]",
       badgeText: "text-[#9E4E28]",
       badgeBorder: "border-[#E8D0C3]",
       accentText: "text-[#9E4E28]",
       cardBorder: "#E0C9BB",
-      glow: "shadow-[0_4px_20px_-4px_rgba(158,78,40,0.08)] hover:shadow-[0_8px_30px_-4px_rgba(158,78,40,0.18)]",
     },
   },
   {
@@ -88,15 +80,11 @@ export const QUICK_TOPICS: QuickTopic[] = [
     elementalGlyph: "ธาตุไฟ · ศักยภาพ & ลงมือทำ",
     elementalGlyphEn: "Fire Element · Agency & Action",
     themeColors: {
-      border: "border-[#E6DEC9]",
-      borderHover: "hover:border-gold-ink",
-      bgGradient: "bg-gradient-to-br from-surface via-[#FCFAF5] to-[#F5EEE0]",
       badgeBg: "bg-[#F6EFE0]",
       badgeText: "text-gold-ink",
       badgeBorder: "border-[#E2D4BE]",
       accentText: "text-gold-ink",
       cardBorder: "#D9C8AC",
-      glow: "shadow-[0_4px_20px_-4px_rgba(143,92,26,0.08)] hover:shadow-[0_8px_30px_-4px_rgba(143,92,26,0.18)]",
     },
   },
   {
@@ -118,15 +106,11 @@ export const QUICK_TOPICS: QuickTopic[] = [
     elementalGlyph: "ธาตุดิน · ความมั่นคง & โชคลาภ",
     elementalGlyphEn: "Earth Element · Grounding & Wealth",
     themeColors: {
-      border: "border-[#E6E0CB]",
-      borderHover: "hover:border-[#B38728]",
-      bgGradient: "bg-gradient-to-br from-surface via-[#FCFAF2] to-[#F3ECCE]",
       badgeBg: "bg-[#F7F3DC]",
       badgeText: "text-[#8C6615]",
       badgeBorder: "border-[#E0D8B4]",
       accentText: "text-[#8C6615]",
       cardBorder: "#D8CEAA",
-      glow: "shadow-[0_4px_20px_-4px_rgba(179,135,40,0.08)] hover:shadow-[0_8px_30px_-4px_rgba(179,135,40,0.18)]",
     },
   },
   {
@@ -148,15 +132,11 @@ export const QUICK_TOPICS: QuickTopic[] = [
     elementalGlyph: "นภากาศ · สัจธรรม & พลังบวก",
     elementalGlyphEn: "Quintessence · Cosmic Illumination",
     themeColors: {
-      border: "border-[#E2DED5]",
-      borderHover: "hover:border-[#6B6152]",
-      bgGradient: "bg-gradient-to-br from-surface via-[#F9F8F5] to-[#EFECE3]",
       badgeBg: "bg-[#F0EEE6]",
       badgeText: "text-[#595042]",
       badgeBorder: "border-[#DAD4C7]",
       accentText: "text-[#595042]",
       cardBorder: "#D2CCC0",
-      glow: "shadow-[0_4px_20px_-4px_rgba(107,97,82,0.08)] hover:shadow-[0_8px_30px_-4px_rgba(107,97,82,0.18)]",
     },
   },
 ];
@@ -324,7 +304,13 @@ export function QuickFortunePicker({
                   handleCardClick(topic);
                 }
               }}
-              className={`w-[82vw] max-w-[280px] shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink group relative flex flex-col justify-between p-4 sm:p-4.5 rounded-2xl border ${topic.themeColors.border} ${topic.themeColors.borderHover} ${topic.themeColors.bgGradient} ${topic.themeColors.glow} transition duration-300 transform-gpu hover:-translate-y-1 hover:shadow-md cursor-pointer select-none text-left overflow-hidden min-h-[368px] sm:min-h-[392px]`}
+              /*
+                 * พื้นผิวการ์ดมาจาก `.altar-card-porcelain` (ธีมกระจกอุ่น) เท่านั้น
+                 * สีประจำหัวข้อยังอยู่ครบที่ป้ายด้านบนกับขอบภาพไพ่ จึงไม่ได้เสียเอกลักษณ์ไป
+                 * ⚠️ ห้ามเอาพื้นไล่สีทึบ (`from-surface …`) กลับมา — ทึบ 100% บนพื้นหลังไล่สี
+                 * จะอ่านเป็นกล่องขาวลอย ไม่ใช่กระจก
+                 */
+                className="altar-card-porcelain w-[82vw] max-w-[280px] shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink group relative flex flex-col justify-between p-4 sm:p-4.5 transform-gpu cursor-pointer select-none text-left overflow-hidden min-h-[368px] sm:min-h-[392px]"
             >
               {/* สัญลักษณ์มุมการ์ดทองคำเปลว */}
               

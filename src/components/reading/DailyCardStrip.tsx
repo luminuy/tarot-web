@@ -73,7 +73,7 @@ export function DailyCardStrip() {
     return (
       <div
         aria-hidden="true"
-        className="mx-auto mb-6 flex h-[96px] max-w-2xl items-center gap-4 rounded-lg border border-line-warm/40 bg-white/60 px-4 py-2.5 animate-pulse"
+        className="altar-cloth mx-auto mb-6 flex h-[96px] max-w-2xl items-center gap-4 px-4 py-2.5 animate-pulse"
       >
         <div className="h-14 w-9 shrink-0 rounded border border-line-warm/30 bg-inset-warm/50" />
         <div className="min-w-0 flex-1 space-y-2">
@@ -103,7 +103,7 @@ export function DailyCardStrip() {
          ของ "ไพ่ประจำวัน" มา 15 KB ทิ้งไว้เฉย ๆ ทั้งที่ส่วนใหญ่ไม่ได้กด
          (วัดจาก Lighthouse network log 2026-09-14) */
       prefetch={false}
-      className="group mx-auto mb-6 flex h-[96px] max-w-2xl items-center gap-4 rounded-lg border border-line-warm bg-white px-4 py-2.5 shadow-raised transition-colors hover:border-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+      className="altar-card-porcelain group mx-auto mb-6 flex h-[96px] max-w-2xl items-center gap-4 px-4 py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
       title={isEnglish ? `Daily Card ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…` : `ไพ่ประจำวัน ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…`}
     >
       <div className="relative h-14 w-9 shrink-0 overflow-hidden rounded border border-line-warm bg-inset-warm shadow-xs">
@@ -135,7 +135,7 @@ export function DailyCardStrip() {
           {displayKeywords.map((kw) => (
             <span
               key={kw}
-              className="shrink-0 rounded-full border border-line-warm bg-inset-warm px-2 py-0.5 font-serif-th text-xs text-muted"
+              className="glass-chip shrink-0 px-2 py-0.5 font-serif-th text-xs text-muted"
             >
               {kw}
             </span>
