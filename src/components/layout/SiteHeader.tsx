@@ -106,7 +106,7 @@ export function SiteHeader({
         ref={headerRef}
         data-site-header=""
         data-variant={variant}
-        className="w-full border-b border-line bg-surface fixed top-0 inset-x-0 z-50 shadow-raised"
+        className="site-header-glass w-full fixed top-0 inset-x-0 z-50"
       >
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Luxury Brand Logo & Return to Home */}
