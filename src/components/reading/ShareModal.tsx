@@ -584,8 +584,18 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
                       isSingle ? "w-32 sm:w-40" : "w-24 sm:w-28"
                     }`}
                   >
-                    {/* Position Name */}
-                    <span className="text-[13px] sm:text-xs text-gold-ink font-serif-th tracking-wide block font-bold whitespace-nowrap">
+                    {/*
+                      ชื่อตำแหน่งในผัง (INC-0211)
+                      ⛔ ห้ามใส่ `whitespace-nowrap` ที่นี่เด็ดขาด
+                      ชื่อตำแหน่งของผังใหญ่ยาว 160-229px (เช่น "1. แก่นของเรื่อง (หัวใจของสถานการณ์)")
+                      แต่คอลัมน์กว้างแค่ 96px · `nowrap` ทำให้มันล้นออกนอกคอลัมน์ทั้งสองข้าง
+                      แล้วไป **ทับชื่อของไพ่ใบข้าง ๆ** จนอ่านไม่ออก (ใบแรกล้นออกนอกการ์ดด้วยซ้ำ)
+                      ต้องให้ตัดบรรทัดได้ · จำกัด 2 บรรทัดด้วย `line-clamp-2`
+                      และจองความสูง 2 บรรทัดไว้เสมอ (`min-h-[3.4em]` = 2 x leading 1.7)
+                      เพื่อให้ไพ่ทุกใบในแถวเรียงตรงกันไม่ว่าชื่อจะยาวกี่บรรทัด
+                      `leading-[1.7]` ห้ามลดลงต่ำกว่า 1.6 — หัวสระไทยจะโดนเฉือน (INC-0197)
+                    */}
+                    <span className="w-full text-[13px] sm:text-xs text-gold-ink font-serif-th tracking-wide font-bold leading-[1.7] line-clamp-2 min-h-[3.4em]">
                       {isEnglish ? (c.position.nameEn || c.position.nameTh) : c.position.nameTh}
                     </span>
 
@@ -644,9 +654,15 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
             )}
 
             {/* 5. Footer Watermark */}
-            <div className="pt-2 border-t border-line-warm/20 relative z-10 flex items-center justify-between px-2 text-[12px] text-muted font-mono tracking-widest uppercase font-bold">
-              <span>PROVABLY-FAIR SHA-256</span>
-              <span>SEERTAROT.NET</span>
+            {/*
+              ลายน้ำท้ายการ์ด (INC-0211)
+              ⚠️ ทั้งสองก้อนต้อง `whitespace-nowrap` และแถวต้อง `flex-wrap`
+              ของเดิมปล่อยให้ตัดบรรทัดกลางคำ — บนจอแคบเห็นเป็น "SEERTAROT.NE" ขึ้นบรรทัดใหม่เป็น "T"
+              ให้ทั้งก้อนย้ายลงบรรทัดใหม่ทั้งคำแทน · `tracking-wider` แทน `widest` ซื้อที่คืนมาราว 10%
+            */}
+            <div className="pt-2 border-t border-line-warm/20 relative z-10 flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 px-2 text-[12px] text-muted font-mono tracking-wider uppercase font-bold">
+              <span className="whitespace-nowrap">PROVABLY-FAIR SHA-256</span>
+              <span className="whitespace-nowrap">SEERTAROT.NET</span>
             </div>
           </div>
 

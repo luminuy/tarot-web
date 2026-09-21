@@ -16,7 +16,7 @@
  * บทเรียน (หลักการข้อ 0.8): กฎที่ไม่มีเครื่องตรวจ คือกฎที่จะถูกละเมิดอีกแน่นอน
  *
  * ────────────────────────────────────────────────────────────────
- * กฎที่ตรวจ (10 ข้อ):
+ * กฎที่ตรวจ (11 ข้อ):
  *  1. `<header>` ของ SiteHeader ต้องมี `data-site-header` + `fixed` + `top-0` + กางเต็มกว้าง
  *     + z-index — และ **ห้ามกลับไปใช้ `sticky`** (INC-0109)
  *  2. globals.css ต้องมีบล็อก `[data-site-header]` ที่บังคับเลเยอร์ compositor ด้วย translateZ(0)
@@ -26,7 +26,7 @@
  *  2.6 ลิ้นชักนำทาง: กฎตอนปิด (`-base`) ต้อง `100lvh` (คงที่ · ไม่รีโฟลว์ตามแถบ URL)
  *     กฎตอนเปิด (`-entering`) ต้อง `100dvh` (พอดีจอจริง) · หัวลิ้นชักห้ามใช้ `truncate`
  *     ไม่งั้นเมนูคลุมจอไม่ครบ / ทั้งเว็บหน่วง / ตัวหนังสือหายบน iOS Safari (INC-0209 ➜ INC-0210)
- *  3. กฎ `body > *` ต้องยกเว้น `[data-site-header]` เสมอ (INC-0081)
+ *  2.7 `.site-header-glass` ต้องทึบ >= 0.96 — ไม่งั้นเนื้อหาข้างหลังทะลุขึ้นมาซ้อนบนหัวเว็บ (INC-0211)\n *  3. กฎ `body > *` ต้องยกเว้น `[data-site-header]` เสมอ (INC-0081)
  *  4. `html` ต้องเป็น `overflow-x: clip` และห้ามมี `overflow-x: hidden` ที่ html/body (INC-0067)
  *  4.5 CSS ที่ build ออกมาจริงต้องยังมี transform 3 มิติ · โล่ ::before · และตัวกันที่ (INC-0108)
  *  5. ห้ามมี `position: fixed` ในต้นไม้ของหัวเว็บ (ยกเว้นตัว <header> เอง) — เพราะ transform
@@ -272,6 +272,31 @@ for (const [cls, unit] of DRAWER_HEIGHT_RULES) {
     failures.push(
       "SacredNavDropdown.tsx: หัวลิ้นชักห้ามใช้ `truncate` — Safari เฉือนชื่อ \"วิหารพยากรณ์\" กับ " +
         "\"RIDER-WAITE TAROT\" หายทั้งบรรทัด ข้อความสองบรรทัดนี้สั้นและคงที่ ใช้ `whitespace-nowrap` พอ (INC-0200 ➜ INC-0209)",
+    );
+  }
+}
+
+// ───────────────────────────────────────────────────────────────
+// 2.7 แถบกระจกของหัวเว็บต้องทึบพอที่เนื้อหาข้างหลังจะไม่ทะลุขึ้นมา (INC-0211)
+//
+// หัวเว็บเป็น `fixed` ลอยทับเนื้อหาที่เลื่อนอยู่ข้างหลัง "ตลอดเวลา" ไม่ได้ลอยบนฉากหรี่
+// เหมือนหน้าต่างลอย ที่ความทึบ 0.78 หมึก #29261F ข้างหลังผสมออกมาเป็น ~208 บนพื้น 253
+// ผู้ใช้จึงเห็นเป็นตัวหนังสือซ้อนกันสองชั้นตรงหัวเว็บ (เจ้าของถ่ายภาพมายืนยัน)
+// ที่ 0.97 ผสมได้ ~248 เทียบพื้น 253 = แทบมองไม่เห็น — เหตุผลเดียวกับ `.altar-modal`
+const MIN_HEADER_OPACITY = 0.96;
+const headerGlass = css.match(/\.site-header-glass\s*\{([^}]*)\}/);
+if (!headerGlass) {
+  failures.push("globals.css: ไม่พบบล็อก `.site-header-glass { ... }` (INC-0211)");
+} else {
+  const bg = headerGlass[1].match(/background-color:\s*rgba\([^)]*?,\s*([\d.]+)\s*\)/);
+  if (!bg) {
+    failures.push(
+      "globals.css: `.site-header-glass` ต้องตั้ง `background-color: rgba(...)` ที่อ่านค่าความทึบได้ (INC-0211)",
+    );
+  } else if (Number(bg[1]) < MIN_HEADER_OPACITY) {
+    failures.push(
+      `globals.css: \`.site-header-glass\` ทึบแค่ ${bg[1]} (ต้อง >= ${MIN_HEADER_OPACITY}) — ` +
+        "เนื้อหาที่เลื่อนอยู่ข้างหลังจะทะลุขึ้นมาเห็นเป็นตัวหนังสือซ้อนกันบนหัวเว็บ (INC-0211)",
     );
   }
 }
