@@ -318,8 +318,8 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-gold/40 to-transparent shrink-0" />
 
         {/* Drawer Header: Brand, 1909 RWS Badge & Close Button */}
-        <div className="px-4 py-3 sm:py-3.5 border-b border-line flex items-center justify-between bg-surface shrink-0">
-          <div className="flex items-center gap-2.5 min-w-0">
+        <div className="px-4 py-3 sm:py-3.5 border-b border-line flex items-center justify-between gap-2 bg-surface shrink-0">
+          <div className="flex min-w-0 flex-1 items-center gap-2.5">
             <div className="w-8 h-8 rounded-full border border-line overflow-hidden relative flex-shrink-0 bg-canvas">
               <img
                 src="/logo.webp"
@@ -331,22 +331,26 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
               />
             </div>
             {/*
-              ⚠️ ต้องมี `flex-1` คู่กับ `min-w-0` เสมอ (INC-0200 · หัวลิ้นชักหายบน iOS Safari)
-              ลูกทั้งสองบรรทัดใช้ `truncate` ซึ่งมี min-content เป็น 0
-              Safari คิดความกว้างคอลัมน์นี้แบบ shrink-to-fit แล้วยุบเหลือเท่าป้าย 1909 RWS
-              (ป้ายเป็น shrink-0 จึงรอด) ชื่อ "วิหารพยากรณ์" กับบรรทัด RIDER-WAITE TAROT
-              จึงกว้าง 0 และหายไปทั้งคู่ · Chrome ใช้ max-content จึงไม่เห็นอาการ
+              ⛔ ห้ามใส่ `truncate` ให้สองบรรทัดนี้อีก (INC-0200 ➜ INC-0209 · หัวลิ้นชักหายบน iOS Safari)
+              รอบแรกแก้ด้วยการเติม `flex-1` ให้คอลัมน์ — วัดจากภาพที่เจ้าของส่งมารอบสองแล้ว
+              คอลัมน์กว้างถูกแล้วจริง (ป้าย 1909 RWS ถูกดันไปอยู่ตำแหน่งที่ควรเป็นเป๊ะ) แต่ตัวหนังสือยังหาย
+              ตัวการ์จริงคือ `truncate` เอง — มันสร้าง `overflow: hidden` เป็นกล่องตัดของตัวเอง
+              ที่ Safari คิดความกว้างแบบ shrink-to-fit ได้ 0 ตัวอักษรจึงถูกตัดทิ้งทั้งบรรทัด
+              ทั้งที่มีที่ว่างให้วาง · ป้าย "1909 RWS" ไม่มี `truncate` จึงรอดมาใบเดียว — นั่นคือเบาะแสที่ชี้ตัวจริง
+
+              ข้อความสองบรรทัดนี้เป็นค่าคงที่ ยาวสุด ~175px ในลิ้นชักที่กว้างอย่างน้อย 340px
+              จึงไม่มีทางล้น ใช้ `whitespace-nowrap` พอ ไม่ต้องมีกล่องตัดให้ Safari ยุบ
             */}
             <div className="flex flex-col min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
-                <span className="font-serif-th text-sm font-bold text-ink truncate leading-[1.7]">
+                <span className="font-serif-th text-sm font-bold text-ink whitespace-nowrap leading-[1.7]">
                   {isEnglish ? "Tarot Sanctuary" : "วิหารพยากรณ์"}
                 </span>
                 <span className="glass-chip text-ink text-[10px] font-mono tracking-wider px-1.5 py-0.2 font-bold shrink-0">
                   1909 RWS
                 </span>
               </div>
-              <span className="text-[10px] tracking-[0.16em] text-muted font-mono uppercase font-semibold truncate mt-0.5">
+              <span className="text-[10px] tracking-[0.16em] text-muted font-mono uppercase font-semibold whitespace-nowrap mt-0.5">
                 RIDER-WAITE TAROT
               </span>
             </div>

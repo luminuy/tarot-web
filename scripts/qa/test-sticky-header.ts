@@ -16,13 +16,15 @@
  * บทเรียน (หลักการข้อ 0.8): กฎที่ไม่มีเครื่องตรวจ คือกฎที่จะถูกละเมิดอีกแน่นอน
  *
  * ────────────────────────────────────────────────────────────────
- * กฎที่ตรวจ (9 ข้อ):
+ * กฎที่ตรวจ (10 ข้อ):
  *  1. `<header>` ของ SiteHeader ต้องมี `data-site-header` + `fixed` + `top-0` + กางเต็มกว้าง
  *     + z-index — และ **ห้ามกลับไปใช้ `sticky`** (INC-0109)
  *  2. globals.css ต้องมีบล็อก `[data-site-header]` ที่บังคับเลเยอร์ compositor ด้วย translateZ(0)
  *     และกันพื้นที่ใต้ status bar ด้วย env(safe-area-inset-top)
  *  2.5 ต้องมีตัวกันที่: SiteHeader.tsx เรนเดอร์ `data-site-header-spacer` และ globals.css
  *     ตั้งความสูงให้มันจาก `--site-header-h` (ไม่มี = หัวเว็บทับเนื้อหาบรรทัดแรกทุกหน้า)
+ *  2.6 ลิ้นชักนำทาง (`.nav-drawer-panel-base` / `.nav-drawer-scrim-base`) ต้องสูง `100dvh`
+ *     และหัวลิ้นชักห้ามใช้ `truncate` — ไม่งั้นเมนูคลุมจอไม่ครบ/ตัวหนังสือหายบน iOS Safari (INC-0209)
  *  3. กฎ `body > *` ต้องยกเว้น `[data-site-header]` เสมอ (INC-0081)
  *  4. `html` ต้องเป็น `overflow-x: clip` และห้ามมี `overflow-x: hidden` ที่ html/body (INC-0067)
  *  4.5 CSS ที่ build ออกมาจริงต้องยังมี transform 3 มิติ · โล่ ::before · และตัวกันที่ (INC-0108)
@@ -205,6 +207,54 @@ if (!spacerRule) {
     "globals.css: `[data-site-header-spacer]` ต้องตั้ง `height: var(--site-header-h)` " +
       "เพื่อให้ความสูงตัวกันที่ · scroll-padding-top · และค่าที่ ResizeObserver เขียนทับ เป็นค่าเดียวกันเสมอ (INC-0109)",
   );
+}
+
+// ───────────────────────────────────────────────────────────────
+// 2.6 ลิ้นชักนำทางต้องคลุมจอจริงทั้งใบ (INC-0209)
+//
+// ลิ้นชักกับฉากหลังเป็น `absolute` ที่เกาะกับ <header> ซึ่งเป็น `fixed` (ข้อ 5 ห้าม fixed
+// ในต้นไม้หัวเว็บ) containing block จึงสูงแค่ ~76px ใช้ `bottom: 0` ไม่ได้
+// ความสูงต้องบอกด้วยหน่วยจอเอง และต้องเป็น `dvh` เท่านั้น:
+//   `svh` = ความสูงตอนแถบเครื่องมือมือถือกางเต็ม — บน iOS Safari ที่เลื่อนลงมาแล้ว
+//           (แถบหุบ) เตี้ยกว่าพื้นที่จริงราว 100px ➔ เมนูจบกลางอากาศ เห็นหน้าเว็บโผล่
+//           ใต้เมนูแบบไม่ถูกหรี่ และกดทะลุไปโดนของข้างหลังได้ (เจ้าของส่งภาพยืนยัน)
+//   `vh`/`lvh` = ความสูงตอนแถบหุบ ➔ ตอนแถบกางเต็ม ท้ายลิ้นชักมุดใต้แถบ URL
+// Chrome เดสก์ท็อปให้ค่าทั้งสามเท่ากัน อาการจึงไม่มีทางโผล่ตอนรีวิว
+const DRAWER_FULLSCREEN_RULES = ["nav-drawer-panel-base", "nav-drawer-scrim-base"];
+for (const cls of DRAWER_FULLSCREEN_RULES) {
+  const rule = css.match(new RegExp(`\\.${cls}\\s*\\{([^}]*)\\}`));
+  if (!rule) {
+    failures.push(`globals.css: ไม่พบบล็อก \`.${cls} { ... }\` — ลิ้นชักนำทางต้องมีกฎนี้ (INC-0209)`);
+    continue;
+  }
+  const height = rule[1].match(/height:\s*([^;]+);/);
+  if (!height) {
+    failures.push(`globals.css: \`.${cls}\` ต้องกำหนด \`height\` ให้ชัด ไม่งั้นลิ้นชักสูงตามเนื้อหา (INC-0209)`);
+  } else if (!/100dvh/.test(height[1])) {
+    failures.push(
+      `globals.css: \`.${cls}\` ต้องสูง \`100dvh\` เท่านั้น (พบ: "${height[1].trim()}") — ` +
+        `svh/vh/lvh ทำให้เมนูคลุมจอไม่ครบบน iOS Safari (INC-0209)`,
+    );
+  }
+}
+
+// หัวลิ้นชัก: ชื่อวิหารกับบรรทัดรองห้ามมี `truncate` อีก (INC-0200 ➜ INC-0209)
+// `truncate` = `overflow: hidden` ที่ Safari คิดความกว้างได้ 0 แล้วเฉือนตัวอักษรทิ้งทั้งบรรทัด
+// ทั้งที่คอลัมน์กว้างถูกแล้ว · ป้าย "1909 RWS" ที่ไม่มี truncate รอดมาใบเดียวคือเบาะแส
+{
+  const navSource = fs.readFileSync(path.join(ROOT, "src/components/ui/SacredNavDropdown.tsx"), "utf-8");
+  const drawerHead = navSource.match(/Drawer Header:[\s\S]*?data-nav-close/);
+  if (!drawerHead) {
+    failures.push(
+      "SacredNavDropdown.tsx: หาบล็อกหัวลิ้นชัก (Drawer Header ➔ data-nav-close) ไม่เจอ — ด่านนี้ตรวจไม่ได้ (INC-0209)",
+    );
+  } else if (/className="[^"]*\btruncate\b/.test(drawerHead[0])) {
+    // ตรวจเฉพาะใน `className=` ไม่ใช่ทั้งบล็อก — คอมเมนต์เตือนตรงนั้นพิมพ์คำว่า truncate ไว้ด้วย
+    failures.push(
+      "SacredNavDropdown.tsx: หัวลิ้นชักห้ามใช้ `truncate` — Safari เฉือนชื่อ \"วิหารพยากรณ์\" กับ " +
+        "\"RIDER-WAITE TAROT\" หายทั้งบรรทัด ข้อความสองบรรทัดนี้สั้นและคงที่ ใช้ `whitespace-nowrap` พอ (INC-0200 ➜ INC-0209)",
+    );
+  }
 }
 
 if (!/body\s*>\s*\*[^{]*:not\(\[data-site-header\]\)/.test(css)) {
