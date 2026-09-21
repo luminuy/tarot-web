@@ -54,7 +54,7 @@ function pass(msg: string) {
 interface ReportShape {
   promptVersion?: string;
   cases?: unknown[];
-  summary?: { total?: number; succeeded?: number };
+  summary?: { total?: number; succeeded?: number; judged?: number };
 }
 
 function reportsFor(version: string): string[] {
@@ -170,6 +170,72 @@ if (mine.length === 0) {
   } else {
     pass(`${newest}: สำเร็จ ${ok}/${total} เคส (${pct}%)`);
   }
+
+  /*
+   * ความครอบคลุมของ "ผู้ตัดสิน" คนละตัวกับความครอบคลุมของ "คำอ่าน"
+   * baseline 20260911-1 มี succeeded 16 แต่ judged แค่ 9 ➔ ค่า rubric ที่เอาไปโชว์
+   * (onQuestion 4.44) มาจาก 9 เคส ไม่ใช่ 30 · ถ้าไม่เตือน คนอ่านจะเข้าใจผิดทุกครั้ง
+   */
+  const judged = data.summary?.judged;
+  if (typeof judged !== "number") {
+    warn(
+      `${newest}: รายงานนี้ไม่มีเลข "judged" — สร้างก่อน INC-0207 จึงบอกไม่ได้ว่าค่า rubric เฉลี่ยจากกี่เคส`
+    );
+  } else if (ok > 0 && judged < ok) {
+    warn(
+      `${newest}: ผู้ตัดสินให้คะแนนจริงแค่ ${judged}/${ok} เคสที่ได้คำอ่าน — ค่า rubric ทุกตัวเฉลี่ยจาก ${judged} เคสเท่านั้น\n` +
+        `      ➔ อย่านำไปอ้างว่าเป็นคะแนนของทั้งชุด ${total} เคส`
+    );
+  } else {
+    pass(`${newest}: ผู้ตัดสินให้คะแนนครบ ${judged}/${ok} เคสที่ได้คำอ่าน`);
+  }
+}
+
+/*
+ * ── 3.5 เครื่องมือวัดต้องเดินเส้นทางเดียวกับ production ──
+ * ถ้าตัววัดยิงแค่ Groq แต่เว็บจริงมี failover ไป Gemini ตัวเลขที่ได้จะเป็นของคนละระบบ
+ * และจะขึ้นว่า "ล้มเหลว 14/30" ทั้งที่ผู้ใช้จริงได้คำอ่านครบ (INC-0207)
+ *
+ * ตรวจจาก **ซอร์สจริงของทั้งสองฝั่ง** ไม่ใช่เชื่อคอมเมนต์: อ่านว่าเส้นทาง production
+ * เรียกผู้ให้บริการใดบ้าง แล้วบังคับให้เครื่องมือวัดเรียกครบชุดเดียวกัน
+ * วันไหนเพิ่มชั้นที่ 3 ใน production ด่านนี้จะตกทันทีถ้าไม่ตามไปเพิ่มในตัววัด
+ */
+console.log("\n   ตรวจว่าเครื่องมือวัดเดินเส้นทางเดียวกับ production:");
+const runnerPath = path.join(process.cwd(), "scripts/qa/run-golden-judge.ts");
+const routePath = path.join(process.cwd(), "src/app/api/reading/[id]/read/route.ts");
+const runnerSrc = fs.readFileSync(runnerPath, "utf-8");
+const routeSrc = fs.readFileSync(routePath, "utf-8");
+
+const PROVIDER_CALLS = ["streamGroqReading", "streamGeminiReading"] as const;
+
+/*
+ * ⚠️ ต้องเทียบด้วย **ขอบเขตคำ** ห้ามใช้ `includes()` เฉย ๆ
+ * `"streamGeminiReadingXX".includes("streamGeminiReading")` เป็น true ➔ ด่านจะผ่าน
+ * ทั้งที่ตัววัดไม่ได้เรียกฟังก์ชันนั้นแล้วจริง ๆ (ทดสอบด้วยการทำให้พังแล้วเจอเองรอบแรก)
+ */
+const calls = (src: string, fn: string) => new RegExp(`\\b${fn}\\b`).test(src);
+const inProduction = PROVIDER_CALLS.filter((fn) => calls(routeSrc, fn));
+if (inProduction.length === 0) {
+  fail(
+    "อ่านเส้นทาง production ไม่เจอผู้ให้บริการสักตัว — เส้นทางย้ายที่แล้วหรือชื่อฟังก์ชันเปลี่ยน\n" +
+      "      ➔ ด่านนี้จะกลายเป็นของประดับทันทีถ้าปล่อยผ่าน ต้องตามไปแก้รายชื่อใน PROVIDER_CALLS"
+  );
+} else {
+  const missing = inProduction.filter((fn) => !calls(runnerSrc, fn));
+  if (missing.length > 0) {
+    fail(
+      `run-golden-judge.ts ไม่ได้เรียก ${missing.join(" · ")} ทั้งที่ production เรียกครบ ${inProduction.length} ชั้น\n` +
+        "      ➔ ตัววัดที่เดินคนละเส้นทางกับของจริง จะรายงานว่าล้มเหลวทั้งที่ผู้ใช้ได้คำอ่านครบ (INC-0207)"
+    );
+  } else {
+    pass(`run-golden-judge.ts เรียกผู้ให้บริการครบชุดเดียวกับ production (${inProduction.join(" ➔ ")})`);
+  }
+}
+
+if (!runnerSrc.includes("judged: judgedCount")) {
+  fail("run-golden-judge.ts ไม่ได้บันทึกจำนวนเคสที่ผู้ตัดสินให้คะแนน (summary.judged)");
+} else {
+  pass("run-golden-judge.ts บันทึก summary.judged ให้ตรวจย้อนได้");
 }
 
 // ── 4. ตรรกะเทียบก่อน/หลัง ต้องไม่ตัดสินข้ามชุดเคส ──
