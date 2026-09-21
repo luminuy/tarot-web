@@ -373,6 +373,46 @@ export function runTocCases(): string[] {
   return failures;
 }
 
+/**
+ * 🥊 `flex-1` กับ `whitespace-nowrap` อยู่ด้วยกันไม่ได้ (INC-0215)
+ *
+ * `flex-1` = `flex-basis: 0` + ยอมให้หด ➔ กล่องจะถูกบีบตามที่ว่างที่เหลือ
+ * `whitespace-nowrap` = ตัวหนังสือหดตามไม่ได้ ➔ พอที่ไม่พอ มันล้นออกนอกกล่อง
+ * ถ้าไม่มีอะไรมาตัด (`overflow: visible` ซึ่งเป็นค่าเริ่มต้น) ผู้ใช้เห็นตัวหนังสือ
+ * **หลุดออกนอกพื้นปุ่ม/พื้นป้าย** ไปทับของข้าง ๆ
+ *
+ * เจอจริงตอนกวาดทั้งเว็บด้วยการเรนเดอร์: ปุ่ม "Only what's needed" ของแถบคุกกี้
+ * ที่ 320px ถูกบีบเหลือ 122px แต่ตัวหนังสือต้องการ 127px ➔ ล้นออกนอกปุ่ม 5px
+ *
+ * ✅ ยกเว้นเมื่อมีตัวตัดของล้นอยู่แล้ว (`truncate` · `overflow-hidden` · `text-ellipsis`)
+ *    เพราะนั่นคือแพตเทิร์น "ย่อด้วยจุดไข่ปลา" ที่ตั้งใจ ไม่ใช่ตัวหนังสือหลุดกรอบ
+ */
+const FLEX_GROW_TOKEN = /\b(flex-1|grow)\b/;
+const HAS_CLIPPER = /\b(truncate|overflow-hidden|overflow-clip|text-ellipsis)\b/;
+
+type SqueezeFinding = { file: string; line: number; classes: string };
+
+export function scanNowrapInsideFlexGrow(files: string[]): SqueezeFinding[] {
+  const findings: SqueezeFinding[] = [];
+  for (const file of files) {
+    const lines = fs.readFileSync(file, "utf-8").split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trimStart();
+      if (trimmed.startsWith("*") || trimmed.startsWith("//")) continue;
+      /* ต้องดู "ทีละสตริง" ไม่ใช่รวมทั้งบรรทัด — คลาสคนละก้อนไม่ได้อยู่บน element เดียวกัน */
+      const quoted = [...line.matchAll(/["'`]([^"'`]*)["'`]/g)].map((m) => m[1]);
+      for (const cls of quoted) {
+        if (!/\bwhitespace-nowrap\b/.test(cls)) continue;
+        if (!FLEX_GROW_TOKEN.test(cls)) continue;
+        if (HAS_CLIPPER.test(cls)) continue;
+        findings.push({ file: path.relative(ROOT, file), line: i + 1, classes: cls.slice(0, 120) });
+      }
+    }
+  }
+  return findings;
+}
+
 if (process.argv[1] && process.argv[1].endsWith("test-invisible-element.ts")) {
   const tsxFiles = walkTsx(SRC);
   assertNonEmptyCorpus("ไฟล์ .tsx ใน src/", tsxFiles, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
@@ -432,4 +472,18 @@ if (process.argv[1] && process.argv[1].endsWith("test-invisible-element.ts")) {
   }
 
   console.log(`✅ สารบัญบทความ: เลขข้อมีชั้นเดียวและจุดไม่ตกบรรทัด (${TOC_CASES.length} เคส)`);
+
+  const squeezed = scanNowrapInsideFlexGrow(tsxFiles);
+  if (squeezed.length > 0) {
+    console.error(`\n❌ พบกล่องที่ยอมให้หดแต่ตัวหนังสือหดตามไม่ได้ ${squeezed.length} จุด\n`);
+    for (const f of squeezed) {
+      console.error(`   ${f.file}:${f.line}`);
+      console.error(`      "${f.classes}"`);
+      console.error(`      \`flex-1\`/\`grow\` คู่กับ \`whitespace-nowrap\` = ตัวหนังสือล้นออกนอกกล่องเมื่อจอแคบ`);
+      console.error(`      แก้: ถอด \`whitespace-nowrap\` ให้ตัดบรรทัดได้ หรือเติม \`truncate\` ถ้าตั้งใจย่อด้วยจุดไข่ปลา (INC-0215)\n`);
+    }
+    process.exit(1);
+  }
+
+  console.log("✅ ไม่มีกล่องที่ `flex-1`/`grow` คู่กับ `whitespace-nowrap` โดยไม่มีตัวตัดของล้น");
 }
