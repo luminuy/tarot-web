@@ -148,7 +148,7 @@ export function LoveOneCardBodyTh({ ritual }: { ritual: ReactNode }) {
         dangerouslySetInnerHTML={{ __html: jsonLdScript(softwareApplicationJsonLd) }}
       />
 
-      <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink py-6 sm:py-10 px-4 sm:px-6 font-sans relative overflow-x-clip">
+      <main id="main-content" tabIndex={-1} className="min-h-screen text-ink py-6 sm:py-10 px-4 sm:px-6 font-sans relative overflow-x-clip">
         <div className="max-w-4xl mx-auto space-y-12">
           {ritual}
 

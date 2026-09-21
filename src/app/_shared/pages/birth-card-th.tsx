@@ -150,7 +150,7 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
   ];
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink py-6 sm:py-10 px-4 sm:px-6 font-sans relative overflow-x-clip">
+    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink py-6 sm:py-10 px-4 sm:px-6 font-sans relative overflow-x-clip">
       {/* Schema.org Structured Data */}
       <script
         type="application/ld+json"

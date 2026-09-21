@@ -148,7 +148,7 @@ export function PickACardBodyEn({ ritual }: { ritual: ReactNode }) {
         dangerouslySetInnerHTML={{ __html: jsonLdScript(softwareApplicationJsonLd) }}
       />
 
-      <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas py-6 sm:py-10 px-4 sm:px-6">
+      <main id="main-content" tabIndex={-1} className="min-h-screen py-6 sm:py-10 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto space-y-8">
           {ritual}
 

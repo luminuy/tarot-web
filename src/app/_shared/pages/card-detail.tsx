@@ -176,7 +176,7 @@ function buildCardCrumbs(card: (typeof DECK)[number], locale: Locale): Crumb[] {
  *    ถ้าก็อปคลาสไปเขียนซ้ำ วันหนึ่งสองฝั่งจะหน้าตาไม่เหมือนกันโดยไม่มีใครเห็น
  */
 export const CARD_DETAIL_MAIN_CLASS =
-  "min-h-screen bg-surface-warm text-ink-deep p-4 sm:p-8 font-sans relative overflow-x-clip";
+  "min-h-screen text-ink-deep p-4 sm:p-8 font-sans relative overflow-x-clip";
 
 /**
  * ไพ่ก่อนหน้า/ถัดไป และลำดับในสำรับ — ใช้ทั้งสองเครื่องมือเรนเดอร์

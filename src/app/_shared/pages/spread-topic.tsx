@@ -141,7 +141,7 @@ export function SpreadTopicContent({
   };
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink p-4 sm:p-8 font-sans relative overflow-x-clip">
+    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink p-4 sm:p-8 font-sans relative overflow-x-clip">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdScript(collectionJsonLd) }}

@@ -134,7 +134,7 @@ export function BlogIndexBody({ locale, list }: { locale: Locale; list: ReactNod
   ]);
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink p-4 sm:p-8 font-sans selection:bg-gold/20 selection:text-ink">
+    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink p-4 sm:p-8 font-sans selection:bg-gold/20 selection:text-ink">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(blogJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbsJsonLd) }} />
 

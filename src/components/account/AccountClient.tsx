@@ -273,7 +273,7 @@ export function AccountClient() {
       <main
         id="main-content"
         tabIndex={-1}
-        className="min-h-screen bg-canvas text-ink px-4 py-6 sm:px-8 sm:py-10 font-sans selection:bg-gold/20 selection:text-ink"
+        className="min-h-screen text-ink px-4 py-6 sm:px-8 sm:py-10 font-sans selection:bg-gold/20 selection:text-ink"
       >
         <div className="mx-auto max-w-3xl space-y-5">
           {/* Top back navigation */}

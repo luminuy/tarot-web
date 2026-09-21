@@ -330,7 +330,7 @@ function AdminContent() {
 
   if (authState !== "ready") {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-surface-warm text-sm text-muted">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 text-sm text-muted">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" />
         <p className="font-sans">กำลังตรวจสอบสิทธิ์ผู้ดูแลระบบ…</p>
       </div>
@@ -348,7 +348,7 @@ function AdminContent() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-warm text-ink">
+    <div className="min-h-screen text-ink">
       {/* ─── Top Executive Bar ──────────────────────────────────────── */}
       <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-line bg-white px-4 sm:px-6 lg:px-8 shadow-2xs">
         <div className="flex items-center gap-3">
@@ -659,7 +659,7 @@ export default function AdminHome() {
           tabIndex={-1}
           role="status"
           aria-busy="true"
-          className="flex min-h-screen flex-col items-center justify-center gap-3 bg-surface-warm text-sm text-muted"
+          className="flex min-h-screen flex-col items-center justify-center gap-3 text-sm text-muted"
         >
           <h1 className="sr-only">แผงควบคุมผู้ดูแลระบบ</h1>
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" />

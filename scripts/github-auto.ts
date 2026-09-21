@@ -333,6 +333,11 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
     args: ["scripts/qa/test-card-tile-height.ts"],
   },
   {
+    label: "🪟 ที่ครอบหน้าไม่ปูพื้นทึบทับพื้นหลังของธีม (กันหน้าอื่นสีเพี้ยนจากหน้าแรกเงียบ ๆ)",
+    cmd: TSX,
+    args: ["scripts/qa/test-page-background.ts"],
+  },
+  {
     label:
       "✦ คุณภาพโมชั่นทั้งเว็บ (ไม่มี transition-all · ไม่มี backdrop-filter · ลูปไม่รู้จบต้องเป็น CSS · โทเคนจังหวะกลางผูกอยู่)",
     cmd: TSX,
