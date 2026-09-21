@@ -18,6 +18,7 @@
     "preview:worker": "opennextjs-cloudflare preview",
     "deploy": "tsx scripts/bump-sw-version.ts && npm run build:astro && opennextjs-cloudflare build && tsx scripts/merge-astro-assets.ts && opennextjs-cloudflare deploy",
     "cf:phase1": "tsx scripts/cloudflare-phase1.ts",
+    "cf:canonical-host": "tsx scripts/cloudflare-canonical-host.ts",
     "i18n:export": "tsx scripts/i18n-export.ts",
     "i18n:status": "tsx scripts/i18n-export.ts status",
     "i18n:import": "tsx scripts/i18n-import.ts",

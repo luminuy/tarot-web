@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 
+import { ALTERNATE_HOSTS, CANONICAL_ORIGIN } from "./src/lib/config/canonical-host";
 import { SECURITY_HEADERS } from "./src/lib/config/security-headers";
 
 const nextConfig: NextConfig = {
@@ -43,47 +44,55 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       /**
-       * 🌐 www.seertarot.net ➔ seertarot.net (301) — กันเนื้อหาซ้ำสองโฮสต์
+       * 🌐 โฮสต์รอง (www.*) ➔ โดเมนหลัก ด้วย 301 — กันเนื้อหาซ้ำสองโฮสต์
        *
-       * ทั้งสองโฮสต์ชี้มาที่ Worker ตัวเดียวกัน ของเดิมจึงตอบ 200 เหมือนกันทั้งคู่
+       * ทั้งสองโฮสต์ชี้มาที่ Worker ตัวเดียวกัน ถ้าไม่เด้งก็ตอบ 200 เหมือนกันทั้งคู่
        * `canonical` ช่วยบอก Google ไว้แล้วก็จริง แต่เป็นแค่ "คำแนะนำ" ไม่ใช่คำสั่ง
        * ลิงก์ที่คนอื่นแปะมาที่ www จึงกระจายน้ำหนัก SEO ออกไปอีกโฮสต์
        *
        * ⚠️ ต้องอยู่ **บนสุด** ของรายการ เพราะ Next.js ไล่กฎจากบนลงล่างแล้วหยุดที่ตัวแรกที่ตรง
-       *
-       * 💡 ทางที่ถูกกว่านี้: ตั้ง Redirect Rule บน Cloudflare (เด้งที่ขอบ ไม่ต้องปลุก Worker เลย)
-       *    แต่ต้องใช้สิทธิ์ dashboard ของเจ้าของ — กฎนี้จึงทำหน้าที่แทนไปก่อนและอยู่ร่วมกันได้
-       *    ถ้าวันหนึ่งตั้ง Redirect Rule แล้ว คำขอจะถูกเด้งตั้งแต่ขอบ กฎนี้จะไม่ถูกเรียกเอง
+       * รายชื่อโฮสต์อยู่ที่ `src/lib/config/canonical-host.ts` ที่เดียว (ชั้นขอบอ่านไฟล์เดียวกัน)
        */
       /**
-       * 🐞 หน้าแรกของ www ต้องมีกฎของตัวเอง — `/:path*` ครอบไม่ถึง (วัดจริง 2026-09-09)
+       * 🔴 **กฎชุดนี้เป็นชั้นสำรอง ไม่ใช่ชั้นหลักอีกต่อไป** (INC-0203)
        *
-       *   $ curl -sI https://www.seertarot.net/
-       *   location: https://seertarot.net/:path*      ← ตัวอักษรดิบ ไม่ถูกแทนค่า → 404
-       *   $ curl -sI https://www.seertarot.net/cards
-       *   location: https://seertarot.net/cards        ← path ที่มีค่าจริงถูกต้องอยู่แล้ว
+       * ตั้งแต่หน้าเนื้อหาย้ายไป Astro หน้าเหล่านั้นถูก Cloudflare ตอบจากชั้น assets
+       * **ก่อนถึง Worker** กฎใน `redirects()` จึงไม่ถูกเรียกเลยสำหรับหน้าเหล่านั้น
+       * วัดจริงบน production 2026-09-21 ตอนที่มีแต่ชั้นนี้ชั้นเดียว:
        *
-       * เมื่อ catch-all ที่เป็น optional จับได้ "ว่างเปล่า" Next.js ไม่ได้ลบโทเคน `:path*`
-       * ออกจาก destination ที่เป็น URL เต็ม — หน้าแรกซึ่งเป็น URL ที่คนแปะลิงก์มามากที่สุด
-       * จึงเด้งไปหน้า 404 มาตั้งแต่วันที่วางกฎ www
+       *   https://www.seertarot.net/cards      ➔ 200 (เนื้อหาเต็ม · เว็บซ้ำสองโฮสต์)
+       *   https://www.seertarot.net/robots.txt ➔ 301 (อยู่ใน `run_worker_first` จึงถึง Worker)
        *
-       * ⚠️ ต้องอยู่ **เหนือ** กฎ `/:path*` ด้านล่าง เพราะ Next.js หยุดที่กฎแรกที่ตรง
+       * ชั้นที่ครอบคลุมจริงคือ Single Redirect บนขอบ — ดัน/ตรวจด้วย
+       * `npm run cf:canonical-host` (สคริปต์อ่านรายชื่อโฮสต์จากไฟล์เดียวกันนี้)
+       * ชั้นนี้ยังเก็บไว้เพราะไม่เสียอะไร และรับหน้าที่ทันทีถ้ากฎบนขอบถูกลบ
        */
-      {
-        source: "/",
-        has: [{ type: "host", value: "www.seertarot.net" }],
-        destination: "https://seertarot.net/",
-        statusCode: 301,
-      },
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: "www.seertarot.net" }],
-        destination: "https://seertarot.net/:path*",
-        // ใช้ 301 ตรง ๆ แทน `permanent: true` (ซึ่งให้ 308)
-        // 308 ถูกต้องตามสเปกและ Google มองเท่ากัน แต่ 301 คือรหัสมาตรฐานของการย้ายโฮสต์
-        // ที่เครื่องมือ SEO และบอตรุ่นเก่ารู้จักกันทั่วหน้า จึงไม่มีเหตุให้เสี่ยง
-        statusCode: 301,
-      },
+      ...ALTERNATE_HOSTS.flatMap((host) => [
+        /**
+         * 🐞 หน้าแรกต้องมีกฎของตัวเอง — `/:path*` ครอบไม่ถึง (วัดจริง 2026-09-09)
+         *
+         *   $ curl -sI https://www.seertarot.net/
+         *   location: https://seertarot.net/:path*      ← ตัวอักษรดิบ ไม่ถูกแทนค่า → 404
+         *
+         * เมื่อ catch-all ที่เป็น optional จับได้ "ว่างเปล่า" Next.js ไม่ได้ลบโทเคน `:path*`
+         * ออกจาก destination ที่เป็น URL เต็ม — จึงต้องแยกกฎของ `/` ไว้ **เหนือ** กฎล่าง
+         */
+        {
+          source: "/",
+          has: [{ type: "host" as const, value: host }],
+          destination: `${CANONICAL_ORIGIN}/`,
+          statusCode: 301,
+        },
+        {
+          source: "/:path*",
+          has: [{ type: "host" as const, value: host }],
+          destination: `${CANONICAL_ORIGIN}/:path*`,
+          // ใช้ 301 ตรง ๆ แทน `permanent: true` (ซึ่งให้ 308)
+          // 308 ถูกต้องตามสเปกและ Google มองเท่ากัน แต่ 301 คือรหัสมาตรฐานของการย้ายโฮสต์
+          // ที่เครื่องมือ SEO และบอตรุ่นเก่ารู้จักกันทั่วหน้า จึงไม่มีเหตุให้เสี่ยง
+          statusCode: 301,
+        },
+      ]),
       {
         source: "/blog/celtic-cross-spread-deep-dive",
         destination: "/blog/celtic-cross-spread-guide",
