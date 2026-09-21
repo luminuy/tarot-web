@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { splitTocNumber } from "@/lib/text/toc-label";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import type { Article } from "@/data/articles";
 import {
@@ -92,14 +93,29 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
               : "สารบัญคัมภีร์ความรู้ (Table of Contents)"}
           </div>
           <ul className="space-y-2 text-xs sm:text-sm font-serif-th text-ink">
-            {effectiveToc.map((item, idx) => (
-              <li key={item.id} className="flex items-start gap-2">
-                <span className="text-gold-ink font-mono text-xs font-bold">{idx + 1}.</span>
-                <a href={`#${item.id}`} className="hover:text-gold hover:underline transition-colors">
-                  {item.title}
-                </a>
-              </li>
-            ))}
+            {effectiveToc.map((item, idx) => {
+              /*
+               * 🔢 เลขข้อต้องมีชั้นเดียว (INC-0214)
+               * ชื่อหัวข้อของบางบทความเขียนเลขนำหน้ามาด้วย ("1. แก่นแท้ของความรัก…")
+               * ถ้าเรนเดอร์ `idx + 1` ทับไปอีกชั้น ผู้ใช้จะเห็น "1. 1. แก่นแท้…"
+               */
+              const { marker, label } = splitTocNumber(item.title, idx + 1);
+              return (
+                <li key={item.id} className="flex items-start gap-2">
+                  {/*
+                    ⛔ `shrink-0` ห้ามหาย — ไม่งั้นเลขข้อถูกบีบจนจุดตกไปอยู่บรรทัดใหม่
+                    (เห็นเป็น "3" บรรทัดหนึ่ง "." อีกบรรทัดหนึ่ง เฉพาะข้อที่ชื่อยาวสองบรรทัด)
+                    เป็นอาการเดียวกับ INC-0211 ที่ลายน้ำการ์ดแชร์ถูกบีบจนตัดกลางคำ
+                  */}
+                  <span className="shrink-0 tabular-nums text-gold-ink font-mono text-xs font-bold">
+                    {marker}.
+                  </span>
+                  <a href={`#${item.id}`} className="hover:text-gold hover:underline transition-colors">
+                    {label}
+                  </a>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
