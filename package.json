@@ -65,7 +65,7 @@
     "zod": "^4.5.2"
   },
   "devDependencies": {
-    "@astrojs/react": "6.0.5",
+    "@astrojs/react": "6.0.6",
     "@eslint/js": "^9.39.5",
     "@next/eslint-plugin-next": "^16.3.5",
     "@opennextjs/cloudflare": "^1.20.4",
@@ -74,8 +74,8 @@
     "@types/node": "^26.4.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
-    "astro": "7.3.2",
-    "eslint": "^9.39.5",
+    "astro": "7.3.3",
+    "eslint": "^10.10.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-unused-imports": "^4.4.1",
     "postcss": "^8.5.26",
