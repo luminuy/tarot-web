@@ -80,6 +80,72 @@ check(
 );
 
 /*
+ * 🔒 package.json กับ package-lock.json ต้องพูดตรงกัน — ตรวจแบบออฟไลน์
+ * ---------------------------------------------------------------------------
+ * `npm ci` ตรวจข้อนี้ให้อยู่แล้ว **แต่ตรวจบน CI เท่านั้น** คือหลังจากเปิด PR ไปแล้ว
+ * เสียรอบ CI ทั้งรอบกว่าจะรู้ว่าพังเพราะอะไร
+ *
+ * เคสจริงที่ทำให้ต้องเพิ่มด่านนี้ (INC-0206): dependabot ยิง PR 5 ใบติดกัน
+ * โดยแก้ **เฉพาะ `package.json`** ไม่แตะ lockfile เลยสักใบ ทุกใบตายที่
+ * `npm ci` วินาทีที่ 13–20 ด้วยข้อความ `lock file's eslint@9.39.5 does not
+ * satisfy eslint@10.11.0` — ซึ่งไม่มีใครเห็นจนกว่าจะเปิดล็อกของ job
+ *
+ * ด่านนี้อ่านสองไฟล์ตรง ๆ ไม่ต่อเน็ต ไม่ติดตั้งอะไร จึงรันได้ตั้งแต่ก่อน commit
+ * (pre-commit เรียก repo:verify อยู่แล้ว) และบอกชื่อแพ็กเกจที่เพี้ยนพร้อมทางแก้
+ */
+const lockRaw = fs.existsSync(path.join(ROOT, "package-lock.json"))
+  ? JSON.parse(fs.readFileSync(path.join(ROOT, "package-lock.json"), "utf-8"))
+  : null;
+
+if (lockRaw) {
+  const pkgJson = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf-8"));
+  const lockRoot = lockRaw.packages?.[""] ?? {};
+  const FIELDS = ["dependencies", "devDependencies", "optionalDependencies"] as const;
+
+  const drift: string[] = [];
+  for (const field of FIELDS) {
+    const wanted: Record<string, string> = pkgJson[field] ?? {};
+    const locked: Record<string, string> = lockRoot[field] ?? {};
+    for (const [name, range] of Object.entries(wanted)) {
+      if (locked[name] === undefined) {
+        drift.push(`   · ${name} — มีใน package.json (${field}) แต่ lockfile ไม่รู้จักเลย`);
+      } else if (locked[name] !== range) {
+        drift.push(`   · ${name} — package.json ขอ ${range} · lockfile จำไว้ว่า ${locked[name]}`);
+      }
+    }
+    for (const name of Object.keys(locked)) {
+      if (wanted[name] === undefined) {
+        drift.push(`   · ${name} — lockfile ยังจำว่าเป็น ${field} แต่ package.json ถอดออกไปแล้ว`);
+      }
+    }
+  }
+
+  check(
+    "package.json กับ package-lock.json ตรงกันทุกแพ็กเกจ (`npm ci` จะไม่ตก)",
+    drift.length === 0,
+    drift.join("\n") + "\n   ➔ แก้ด้วย `npm run deps:relock` แล้ว commit lockfile ไปด้วยกันเสมอ",
+  );
+
+  /*
+   * ช่วงที่ประกาศไว้ต้องมีของจริงในล็อกให้ติดตั้งด้วย
+   * (dependabot รุ่นที่พลาดทิ้ง "Missing: <pkg> from lock file" ไว้เป็นกอง)
+   */
+  const missingTree: string[] = [];
+  for (const field of FIELDS) {
+    for (const name of Object.keys(pkgJson[field] ?? {})) {
+      if (!lockRaw.packages?.[`node_modules/${name}`]) {
+        missingTree.push(`   · ${name} — ไม่มีระเบียน node_modules/${name} ในล็อก`);
+      }
+    }
+  }
+  check(
+    "ทุกแพ็กเกจที่ประกาศไว้มีระเบียนจริงใน lockfile",
+    missingTree.length === 0,
+    missingTree.join("\n") + "\n   ➔ แก้ด้วย `npm run deps:relock`",
+  );
+}
+
+/*
  * ถ้าวันหนึ่งจะกลับไปใช้ pnpm ก็ทำได้ — แต่ต้อง commit `pnpm-lock.yaml` มาด้วย
  * สิ่งที่ห้ามคือ "ประกาศว่าใช้ pnpm แต่ไม่มี lockfile ของ pnpm" ซึ่งคือสภาพเดิม
  */
