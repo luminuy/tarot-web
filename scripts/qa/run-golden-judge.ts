@@ -10,7 +10,7 @@
  *
  * ขั้นตอน:
  *   1. อ่าน `fixtures/golden-readings.json` → ประกอบ `ReadingContext` จริง
- *   2. ยิงผ่านเส้นทางเดียวกับ production (`streamGroqReading`)
+ *   2. ยิงผ่านเส้นทางเดียวกับ production ครบทั้ง 2 ชั้น (Groq ➔ failover Gemini)
  *   3. ตรวจด้วยโค้ด: `checkReadingConsistency()` + `checkThaiQuality()` (ต้นทุน 0)
  *   4. ส่งให้ **LLM Judge** ให้คะแนน 6 เกณฑ์ (ภาคผนวก B ของแผน)
  *   5. เขียนรายงาน `scripts/qa/reports/judge-<PROMPT_VERSION>-<timestamp>.json`
@@ -30,6 +30,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { streamGroqReading } from "../../src/lib/ai/groq";
+import { streamGeminiReading } from "../../src/lib/ai/gemini";
 import { getSpread } from "../../src/data/spreads";
 import { cardById } from "../../src/data/cards";
 import { checkReadingConsistency } from "../../src/lib/ai/consistency";
@@ -193,20 +194,56 @@ async function runCase(gold: GoldenCase, judgeKey: string | null): Promise<CaseR
 
   const startedAt = Date.now();
   let reading: Reading | null = null;
-  try {
-    for await (const event of streamGroqReading(ctx)) {
-      if (event.type === "done") {
-        reading = event.reading;
-        base.model = event.model ?? null;
+  const providerNotes: string[] = [];
+
+  /*
+   * ⚠️ ต้องเดินเส้นทางเดียวกับ production เป๊ะ ๆ (Groq ➔ Gemini)
+   * ---------------------------------------------------------------------------
+   * ของเดิมเรียก `streamGroqReading` ตัวเดียวจบ แต่ `/api/reading/[id]/read`
+   * มี failover 2 ชั้น: Groq ทุกโมเดลไม่คืน `done` ➔ ตกไป Gemini
+   * (และผังใหญ่เกินเพดาน TPM ของ Groq จะถูกข้ามไป Gemini ตั้งแต่ต้น — INC-0136)
+   *
+   * ผลของการวัดคนละเส้นทาง: รายงาน baseline `20260911-1` ขึ้นว่า "ล้มเหลว 14/30 เคส"
+   * ทั้งที่ผู้ใช้จริงได้คำอ่านครบทุกเคส ตัวเลขที่ได้จึงเป็นของ "Groq เดี่ยว"
+   * ไม่ใช่ของเว็บที่ deploy อยู่ และคะแนน rubric ก็เอียงไปทางเคสที่ Groq บังเอิญตอบจบ
+   */
+  if (process.env.GROQ_API_KEY) {
+    try {
+      for await (const event of streamGroqReading(ctx)) {
+        if (event.type === "done") {
+          reading = event.reading;
+          base.model = event.model ?? null;
+          base.provider = "groq";
+        }
       }
+      if (!reading) providerNotes.push("Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์");
+    } catch (err) {
+      providerNotes.push(`Groq ล้มเหลว: ${err instanceof Error ? err.message : String(err)}`);
     }
-  } catch (err) {
-    base.error = err instanceof Error ? err.message : String(err);
+  } else {
+    providerNotes.push("ไม่มี GROQ_API_KEY — ข้ามชั้นที่ 1 เหมือน production");
   }
-  base.elapsedMs = Date.now() - startedAt;
 
   if (!reading) {
-    base.error = base.error ?? "โมเดล Groq ไม่คืนคำอ่านที่สมบูรณ์";
+    try {
+      for await (const event of streamGeminiReading(ctx)) {
+        if (event.type === "done") {
+          reading = event.reading;
+          base.model = event.model ?? null;
+          base.provider = "gemini";
+        }
+      }
+      if (!reading) providerNotes.push("Gemini ไม่คืนคำอ่านที่สมบูรณ์");
+    } catch (err) {
+      providerNotes.push(`Gemini ล้มเหลว: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
+  base.elapsedMs = Date.now() - startedAt;
+  if (providerNotes.length > 0) base.providerNotes = providerNotes;
+
+  if (!reading) {
+    base.error = providerNotes.join(" · ") || "ไม่มีผู้ให้บริการใดคืนคำอ่านที่สมบูรณ์";
     return base;
   }
   base.ok = true;
@@ -238,9 +275,17 @@ function summarize(cases: CaseResult[]): JudgeReport["summary"] {
   }
   const rubricVals = Object.values(rubric).filter((v) => v > 0);
 
+  /*
+   * จำนวนเคสที่ **ผู้ตัดสินให้คะแนนจริง** — คนละตัวกับ `succeeded`
+   * baseline `20260911-1`: total 30 · succeeded 16 · judged 9
+   * ➔ `onQuestion 4.44` มาจาก 9 เคส ไม่ใช่ 30 ถ้าไม่พิมพ์เลขนี้กำกับ คนอ่านจะเข้าใจผิดทุกครั้ง
+   */
+  const judgedCount = cases.filter((c) => RUBRIC.some((r) => typeof c.judge[r.key] === "number")).length;
+
   return {
     total: cases.length,
     succeeded: succeeded.length,
+    judged: judgedCount,
     avgThaiScore:
       succeeded.length > 0
         ? Math.round(succeeded.reduce((a, c) => a + c.thaiScore, 0) / succeeded.length)

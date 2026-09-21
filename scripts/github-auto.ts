@@ -200,7 +200,7 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   {
     label: "🧑‍⚖️ Golden Set พร้อมยิงเข้าโมเดลจริง (ซ้อมแห้ง ไม่มีต้นทุน AI · หมวด/ผัง/ไพ่ต้องตรงกัน)",
     cmd: TSX,
-    args: ["scripts/qa/run-golden-judge.ts", "--dry-run"],
+    args: ["--tsconfig", "tsconfig.scripts.json", "scripts/qa/run-golden-judge.ts", "--dry-run"],
   },
   {
     label: "📈 ระบบวัดผลและติดตามเหตุการณ์ (GA4 / Meta Pixel / Consent Mode v2 / Event Contract)",

@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0207 · 2026-09-21 17:48 · 🟠 High · เครื่องมือวัดคุณภาพ AI ยิงแค่ Groq ทั้งที่ production มี failover 2 ชั้น รายงานจึงบอกว่าล้มเหลว 14/30 เคสทั้งที่ผู้ใช้จริงได้คำอ่านครบ
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | รายงาน judge-20260911-1 สรุปว่า total 30 succeeded 16 และคะแนน rubric อย่าง onQuestion 4.44 notVague 4.67 ถูกนำไปอ้างเป็นคะแนนของทั้งชุด ทั้งที่ผู้ตัดสินให้คะแนนจริงเพียง 9 เคส |
+| **สาเหตุราก** | scripts/qa/run-golden-judge.ts เรียก streamGroqReading ตัวเดียวจบ แต่เส้นทางจริงที่ /api/reading/[id]/read มีสองชั้นคือ Groq ทุกโมเดลไม่คืน done แล้วตกไป Gemini เครื่องมือวัดจึงวัดคนละระบบกับที่ deploy อยู่ และ summary ก็นับแค่ succeeded ไม่เคยนับจำนวนเคสที่ผู้ตัดสินให้คะแนน คนอ่านรายงานจึงเข้าใจว่าค่าเฉลี่ยมาจาก 30 เคส |
+| **การแก้ไข** | ให้ run-golden-judge.ts เดิน failover เหมือน production ครบสองชั้น บันทึก provider ที่ผลิตคำอ่านจริงและ providerNotes ของชั้นที่ล้ม เพิ่ม summary.judged เข้ารายงาน เพิ่ม tsconfig.scripts.json กับสตับ server-only เพื่อให้ tsx รัน gemini.ts ได้โดยไม่ต้องถอดด่าน server-only ออกจากแอปจริง และขยายพจนานุกรม Barnum จาก 8 เป็น 25 วลีพร้อมลดเพดานผ่อนจาก 2 เหลือ 1 |
+| **🛡️ กฎป้องกันถาวร** | **ด่าน test-judge-baseline อ่านซอร์สของเส้นทาง production กับของเครื่องมือวัดมาเทียบกันว่าเรียกผู้ให้บริการครบชุดเดียวกัน เทียบด้วยขอบเขตคำไม่ใช่ includes เพราะ includes จับ streamGeminiReadingXX ว่าผ่าน และเตือนเมื่อ judged น้อยกว่า succeeded ทุกค่าเฉลี่ยที่รายงานออกมาต้องพิมพ์ขนาดกลุ่มตัวอย่างกำกับเสมอ** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/charming-turing-bj32hv` · commit `6ede69e` |
+
+
 ### INC-0206 · 2026-09-21 17:09 · 🟡 Medium · PR ของ dependabot แดงยกชุด 5 ใบ เพราะแก้ package.json โดยไม่แตะ package-lock.json
 
 | หัวข้อ | รายละเอียด |
