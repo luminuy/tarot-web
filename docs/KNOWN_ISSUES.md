@@ -203,10 +203,15 @@ $ curl -sS -v --http2 -o /dev/null https://seertarot.net/spreads
 
 | ทาง | ขั้นตอน | ผลที่ได้ |
 | :--- | :--- | :--- |
-| **อัตโนมัติ (แนะนำ)** | เติมสิทธิ์ `Zone · Transform Rules · Edit` ให้ secret `CLOUDFLARE_API_TOKEN` | รอบ deploy ถัดไปขั้น "🌐 Canonical Host Redirect" จะดันกฎขึ้นเองและยืนยันผลให้ · รอบต่อ ๆ ไปดูแลตัวเองตลอด |
+| **อัตโนมัติ (แนะนำ)** | เติมสิทธิ์ `Zone · Single Redirect · Edit` ให้ secret `CLOUDFLARE_API_TOKEN` | รอบ deploy ถัดไปขั้น "🌐 Canonical Host Redirect" จะดันกฎขึ้นเองและยืนยันผลให้ · รอบต่อ ๆ ไปดูแลตัวเองตลอด |
 | **กดเองครั้งเดียว** | Cloudflare ➔ Rules ➔ Redirect Rules ➔ Create rule · เงื่อนไข `Hostname equals www.seertarot.net` · ปลายทาง Dynamic `concat("https://seertarot.net", http.request.uri.path)` · 301 · ติ๊ก Preserve query string | ขั้นใน deploy จะเห็นว่า "ของจริงเด้งแล้ว" และผ่านเป็นสีเขียวเอง (พร้อมเตือนว่า token ยังเขียนไม่ได้) |
 
 **ตรวจสถานะได้ทุกเมื่อ** (ไม่ต้องใช้ token): `npm run cf:canonical-host -- --check`
+
+> ⚠️ **กับดักชื่อสิทธิ์ที่เหยียบมาแล้ว (INC-0204)** — ต้องเป็น **Single Redirect**
+> (บาง dashboard เรียก "Dynamic Redirect") **ไม่ใช่ "Transform Rules"** ทั้งสองชื่ออยู่ใต้หมวด Rules
+> เหมือนกัน แต่ `Transform Rules` คุมแค่ URL Rewrite กับ Header Transform
+> ให้ผิดตัวจะ **อ่าน ruleset ได้แต่เขียนไม่ได้** แล้วล้มด้วย `request is not authorized`
 
 > ⚠️ อย่าตรวจด้วย `https://www.seertarot.net/robots.txt` เส้นเดียว — เส้นนั้นอยู่ใน `run_worker_first`
 > จึงเด้ง 301 ถูกต้องมาตลอดแม้ทั้งเว็บจะยังซ้ำสองโฮสต์ (กับดักที่ทำให้เรื่องนี้ถูกมองข้ามมานาน)

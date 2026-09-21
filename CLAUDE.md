@@ -114,5 +114,5 @@
 - `npx tsx scripts/github-auto.ts status` — สถานะ repo/PR/CI ล่าสุด
 - `npm run pr:auto -- "<title>" "<body>"` — ตรวจ + push + สร้าง PR (เติม `--wait` ให้รอ merge แล้วเก็บกวาด branch)
 - `npm run git:tidy` — เก็บกวาด branch ที่ merge แล้ว (`--dry-run` เพื่อดูก่อน)
-- `npm run cf:canonical-host -- --check` — ยิงจริงดูว่าโฮสต์ `www` เด้ง 301 กลับโดเมนหลักหรือยัง (ถอด `--check` = ดันกฎขึ้นขอบ · ต้องมี `CLOUDFLARE_API_TOKEN`)
+- `npm run cf:canonical-host -- --check` — ยิงจริงดูว่าโฮสต์ `www` เด้ง 301 กลับโดเมนหลักหรือยัง (ถอด `--check` = ดันกฎขึ้นขอบ · ต้องมี `CLOUDFLARE_API_TOKEN` สิทธิ์ `Zone · Single Redirect · Edit` **ไม่ใช่ `Transform Rules`**)
 - `npm run dev` — รันเซิร์ฟเวอร์พัฒนา
