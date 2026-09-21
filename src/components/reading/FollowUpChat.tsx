@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { splitChatParagraphs, stripStrayBoldMarkers } from "@/lib/chat/format-chat-text";
 import { motion, AnimatePresence } from "motion/react";
 import type { Persona } from "@/data/personas";
 import { CardImage } from "@/components/card/CardImage";
@@ -67,7 +68,7 @@ function renderFormattedText(text: string) {
         </strong>
       );
     }
-    return <span key={idx}>{part}</span>;
+    return <span key={idx}>{stripStrayBoldMarkers(part)}</span>;
   });
 }
 
@@ -90,15 +91,7 @@ const ChatMessageRenderer = React.memo<{ text: string; isError?: boolean }>(({ t
   // 2. แยกลำดับขั้นตอน 1. 2. 3. ออกเป็นข้อ ๆ
   const paragraphs = useMemo<string[]>(() => {
     if (isError) return [];
-    return text
-      .replace(/\s+[-–—]\s*([^\n:]+):/g, "\n\n• **$1:**")
-      .replace(/[\u2726•\-]\s*([^\n:]+):/g, "\n\n• **$1:**")
-      .replace(/([^\n])\s+(\d+\.\s+\*\*)/g, "$1\n\n$2")
-      .replace(/([^\n])\s+(\d+\.\s+[ก-๙a-zA-Z])/g, "$1\n\n$2")
-      .trim()
-      .split(/\n\s*\n+/)
-      .map((p) => p.trim())
-      .filter(Boolean);
+    return splitChatParagraphs(text);
   }, [text, isError]);
 
   if (isError) {

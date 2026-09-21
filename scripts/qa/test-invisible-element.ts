@@ -36,6 +36,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { assertNonEmptyCorpus } from "./lib/corpus";
+import { splitChatParagraphs, stripStrayBoldMarkers } from "../../src/lib/chat/format-chat-text";
 
 const ROOT = process.cwd();
 const SRC = path.join(ROOT, "src");
@@ -236,6 +237,69 @@ export function scanShareCardText(root: string): ShareFinding[] {
   return out;
 }
 
+/**
+ * 💬 ข้อความแชทของแม่หมอต้องไม่ถูกผ่ากลางคำ (INC-0212)
+ *
+ * ตัวจัดย่อหน้าเคยนับ "ขีดกลาง" เป็นสัญลักษณ์หัวข้อย่อยโดยไม่สนว่ามีช่องว่างขนาบไหม
+ * คำว่า `(De-load Routine):` จึงถูกผ่าครึ่งเป็นสองย่อหน้า ผู้ใช้เห็นคำขาดหายกลางคัน
+ * พร้อม `**` โผล่ดิบ ๆ · ยิงเคสจริงผ่านฟังก์ชันตัวเดียวกับที่หน้าเว็บใช้ ไม่ใช่สแกนข้อความ
+ */
+type ChatCase = { label: string; input: string; expect: (out: string[]) => string | null };
+
+const CHAT_CASES: ChatCase[] = [
+  {
+    label: "ยัติภังค์กลางคำห้ามถูกผ่า (เคสที่ผู้ทดสอบเจอ)",
+    input:
+      "1. **ทำกิจวัตรลดภาระ (De-load Routine):** จดรายการทั้งหมดออกมาค่ะ\n" +
+      "2. **สร้างกระบวนการอัตโนมัติ (Automation & Process):** หาเครื่องมือมาช่วยค่ะ",
+    expect: (out) =>
+      out.length === 2 && out[0].includes("(De-load Routine):")
+        ? null
+        : `ควรได้ 2 ย่อหน้าและคำว่า "(De-load Routine):" ต้องอยู่ครบ — ได้ ${JSON.stringify(out)}`,
+  },
+  {
+    label: "คำที่มียัติภังค์อื่น ๆ ต้องไม่ถูกผ่า",
+    input: "ลอง self-care ดูนะคะ อย่าลืม work-life balance และ e-mail หาเพื่อนบ้างค่ะ",
+    expect: (out) =>
+      out.length === 1 && out[0].includes("self-care") && out[0].includes("work-life") && out[0].includes("e-mail")
+        ? null
+        : `ต้องเหลือย่อหน้าเดียวและคำครบ — ได้ ${JSON.stringify(out)}`,
+  },
+  {
+    label: "หัวข้อย่อยจริงที่เขียนด้วยขีดต้องยังแยกการ์ดได้",
+    input: "สรุปไพ่ที่ได้ค่ะ - ตำแหน่งหัวใจ (9 ดาบ): ความกังวลที่สะสม - ตำแหน่งอนาคต (ดวงอาทิตย์): ทางที่สว่างขึ้น",
+    expect: (out) =>
+      out.length === 3 && out[1].startsWith("• **ตำแหน่งหัวใจ (9 ดาบ):**")
+        ? null
+        : `ควรแยกเป็นหัวข้อย่อย 2 ใบ — ได้ ${JSON.stringify(out)}`,
+  },
+  {
+    label: "ห้ามมีดาวซ้อนสี่ตัว (ห่อซ้ำ) ในผลลัพธ์",
+    input: "สรุปค่ะ - ตำแหน่งหัวใจ: ความกังวล\n• ตำแหน่งอนาคต: ทางสว่าง\nไพ่สิบไม้เท้า — ภาระหนัก: แบกเกินตัวค่ะ",
+    expect: (out) =>
+      out.some((o) => o.includes("****"))
+        ? `เจอ \`****\` แปลว่าถูกห่อซ้ำ หัวข้อสีทองจะกลายเป็นสตริงว่าง — ได้ ${JSON.stringify(out)}`
+        : null,
+  },
+  {
+    label: "ดาวที่ไม่ครบคู่ต้องถูกกวาดทิ้งตอนเรนเดอร์",
+    input: "",
+    expect: () => (stripStrayBoldMarkers("1. **หัวข้อที่ดาวไม่ปิด ข้อความต่อ").includes("**")
+      ? "stripStrayBoldMarkers ยังปล่อย `**` หลุดออกไปถึงผู้ใช้"
+      : null),
+  },
+];
+
+export function runChatFormatCases(): string[] {
+  const failures: string[] = [];
+  for (const c of CHAT_CASES) {
+    const out = c.input ? splitChatParagraphs(c.input) : [];
+    const problem = c.expect(out);
+    if (problem) failures.push(`${c.label} — ${problem}`);
+  }
+  return failures;
+}
+
 if (process.argv[1] && process.argv[1].endsWith("test-invisible-element.ts")) {
   const tsxFiles = walkTsx(SRC);
   assertNonEmptyCorpus("ไฟล์ .tsx ใน src/", tsxFiles, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
@@ -277,4 +341,13 @@ if (process.argv[1] && process.argv[1].endsWith("test-invisible-element.ts")) {
   }
 
   console.log("✅ การ์ดแชร์: ชื่อตำแหน่งตัดบรรทัดได้และจำกัดบรรทัด · ลายน้ำท้ายการ์ดไม่ตัดกลางคำ");
+
+  const chat = runChatFormatCases();
+  if (chat.length > 0) {
+    console.error(`\n❌ ข้อความแชทของแม่หมอถูกผ่ากลางคำ/ดาวหลุด ${chat.length} เคส\n`);
+    for (const f of chat) console.error(`   ${f}\n`);
+    process.exit(1);
+  }
+
+  console.log(`✅ ข้อความแชท: ยัติภังค์กลางคำไม่ถูกผ่า · หัวข้อย่อยจริงยังแยกได้ · ไม่มีดาวหลุด (${CHAT_CASES.length} เคส)`);
 }
