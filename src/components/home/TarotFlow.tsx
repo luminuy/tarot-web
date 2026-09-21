@@ -1414,7 +1414,13 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         }
       />
 
-      <main id="main-content" tabIndex={-1} className="min-h-screen text-ink relative overflow-x-clip bg-canvas">
+      {/*
+        ⚠️ ห้ามใส่ `bg-canvas` (หรือพื้นทึบใด ๆ) กลับมาที่ <main> ของหน้าแรก
+        พื้นหลังไล่สีอุ่นของธีมกระจกวาดอยู่ที่ `body` ใน globals.css
+        ถ้า <main> ทาสีทึบทับ กระจกทุกแผงจะไปซ้อนบนพื้นเรียบสีเดียว
+        = เห็นเป็นกล่องสีครีมธรรมดา ไม่มีอะไรให้ "โปร่งทะลุ" ได้เลย (ต้นเหตุรอบแรกของธีมนี้)
+      */}
+      <main id="main-content" tabIndex={-1} className="min-h-screen text-ink relative overflow-x-clip">
       {/* Hardware Anchor for Immediate Viewport Alignment */}
       <div id="sanctuary-top-anchor" className="absolute top-0 left-0 w-0 h-0 pointer-events-none" />
 

@@ -674,6 +674,20 @@ body > *:not(.fixed):not([data-floating]):not([data-site-header]) {
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.95) inset;
 }
 
+/*
+ * ป้าย/ชิปกระจก — ใช้กับป้ายเล็กในการ์ด (จำนวนไพ่ · ป้ายยอดนิยม · ตราผนึก)
+ *
+ * ⚠️ ทำไมต้องมีคลาสนี้ ไม่ใช้ `bg-surface` เดิม
+ * `bg-surface` คือขาวทึบ 100% พอเอาไปวางบนแผงกระจกที่โปร่ง 0.58
+ * ป้ายจะกลายเป็นชิ้นที่ "ทึบกว่าแผงที่มันเกาะอยู่" ซึ่งกลับลำดับสายตาทั้งใบ
+ * ค่านี้ทึบกว่าแผงเล็กน้อยพอให้ตัวอักษรอ่านออก แต่ยังเป็นกระจกชุดเดียวกัน
+ */
+.glass-chip {
+  background-color: rgba(255, 255, 255, 0.62);
+  border: 1px solid var(--glass-edge);
+  border-radius: 999px;
+}
+
 /* ลวดลายหลังไพ่ศักดิ์สิทธิ์ (Warm Chocolate & Celestial Gold Inset) */
 .card-back-pattern {
   background-color: #382518;
