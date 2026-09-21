@@ -200,30 +200,28 @@ $ curl -sS -v --http2 -o /dev/null https://seertarot.net/spreads
 
 ---
 
-### ISSUE-052 · กฎ "www ➔ โดเมนหลัก" บนชั้นขอบยังไม่ถูกตั้ง — รอสิทธิ์ของเจ้าของ (พบ 2026-09-21)
+### ISSUE-052 · ✅ กฎ "www ➔ โดเมนหลัก" บนชั้นขอบ — ปิดเคสแล้ว 2026-09-21
 
-**สถานะ**: โค้ดและเครื่องมือพร้อมครบแล้ว (INC-0203) เหลือขั้นเดียวที่ต้องใช้สิทธิ์ Cloudflare ของเจ้าของ
+ตั้งกฎขึ้นชั้นขอบสำเร็จแล้วด้วย `npm run cf:canonical-host` (ขั้นในสายพาน deploy เป็นคนดันให้เอง
+หลังเจ้าของเติมสิทธิ์ให้ token) — ยิงจริงยืนยันครบทุกรูปแบบ:
 
-ต้นเรื่องเต็มอยู่ใน `docs/INCIDENT_LOG.md` (INC-0203) และ `docs/WORK_LOG.md` รอบ 108 — สรุปสั้น:
-โฮสต์ `www.seertarot.net` เสิร์ฟเนื้อหาเต็มด้วยสถานะ 200 (เว็บซ้ำสองโฮสต์) เพราะกฎ 301 ที่มีอยู่
-เขียนไว้ในชั้น Worker ซึ่งหน้าที่เสิร์ฟจากชั้น assets ไม่เคยวิ่งผ่าน
+| URL ที่ยิง | ผล |
+| :--- | :--- |
+| `https://www.seertarot.net/` | **301** ➔ `https://seertarot.net/` |
+| `https://www.seertarot.net/cards/major-00` | **301** ➔ เส้นทางเดิมของโดเมนหลัก |
+| `https://www.seertarot.net/en/blog` | **301** ➔ เส้นทางเดิมของโดเมนหลัก |
+| `https://www.seertarot.net/cards?utm_source=fb&x=1` | **301** ➔ **query string ติดไปครบ** |
+| `http://www.seertarot.net/spreads` | **301** ➔ https + โดเมนหลัก ในกระโดดเดียว |
 
-**ปิดเคสนี้ได้ด้วยทางใดทางหนึ่ง**:
-
-| ทาง | ขั้นตอน | ผลที่ได้ |
-| :--- | :--- | :--- |
-| **อัตโนมัติ (แนะนำ)** | เติมสิทธิ์ `Zone · Single Redirect · Edit` ให้ secret `CLOUDFLARE_API_TOKEN` | รอบ deploy ถัดไปขั้น "🌐 Canonical Host Redirect" จะดันกฎขึ้นเองและยืนยันผลให้ · รอบต่อ ๆ ไปดูแลตัวเองตลอด |
-| **กดเองครั้งเดียว** | Cloudflare ➔ Rules ➔ Redirect Rules ➔ Create rule · เงื่อนไข `Hostname equals www.seertarot.net` · ปลายทาง Dynamic `concat("https://seertarot.net", http.request.uri.path)` · 301 · ติ๊ก Preserve query string | ขั้นใน deploy จะเห็นว่า "ของจริงเด้งแล้ว" และผ่านเป็นสีเขียวเอง (พร้อมเตือนว่า token ยังเขียนไม่ได้) |
-
-**ตรวจสถานะได้ทุกเมื่อ** (ไม่ต้องใช้ token): `npm run cf:canonical-host -- --check`
+**สิทธิ์ที่ token ต้องมี** (เผื่อวันหนึ่งต้องออก token ใหม่): `Zone · Single Redirect · Edit`
 
 > ⚠️ **กับดักชื่อสิทธิ์ที่เหยียบมาแล้ว (INC-0204)** — ต้องเป็น **Single Redirect**
 > (บาง dashboard เรียก "Dynamic Redirect") **ไม่ใช่ "Transform Rules"** ทั้งสองชื่ออยู่ใต้หมวด Rules
 > เหมือนกัน แต่ `Transform Rules` คุมแค่ URL Rewrite กับ Header Transform
 > ให้ผิดตัวจะ **อ่าน ruleset ได้แต่เขียนไม่ได้** แล้วล้มด้วย `request is not authorized`
 
-> ⚠️ อย่าตรวจด้วย `https://www.seertarot.net/robots.txt` เส้นเดียว — เส้นนั้นอยู่ใน `run_worker_first`
-> จึงเด้ง 301 ถูกต้องมาตลอดแม้ทั้งเว็บจะยังซ้ำสองโฮสต์ (กับดักที่ทำให้เรื่องนี้ถูกมองข้ามมานาน)
+ตรวจซ้ำได้ทุกเมื่อ (ไม่ต้องใช้ token): `npm run cf:canonical-host -- --check`
+ที่มาของเรื่องทั้งหมดอยู่ใน `docs/INCIDENT_LOG.md` INC-0203 · INC-0204 · INC-0205
 
 ---
 
