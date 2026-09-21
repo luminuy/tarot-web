@@ -1476,7 +1476,20 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         >
           {currentStep === "SPREAD_SELECT" && (
             <div className="space-y-10">
-              <div className="space-y-10">
+              {/* ──────────────────────────────────────────────────────────────
+                  ลำดับหน้าแรก (คำสั่งเจ้าของ 2026-09-21 รอบ 2):
+                    1. <h1> + คำโปรย        — ต้องอยู่บนสุดเสมอ (ลำดับหัวข้อ h1 ➔ h2 ของ SEO)
+                    2. <DailyCardStrip />   — แถบไพ่ประจำวัน สูงคงที่ 96px ไม่ดันหน้า (CLS 0)
+                    3. <QuickFortunePicker />— "เปิดไพ่ด่วน 1 ใบ" คนใช้เยอะที่สุด จึงอยู่ส่วนแรก
+                    4. ปุ่ม "เริ่มดูดวงฟรี" + <SpreadCardSelector /> — ทางเลือกอ่านละเอียด
+                    5. {seoContent}
+
+                  ⚠️ ของเดิม (PR #556 "ประตูเดียว") เอาผังขึ้นก่อนและดันสองบล็อกนี้ลงล่าง
+                     รอบนี้สลับตามพฤติกรรมผู้ใช้จริง — ห้ามสลับกลับโดยไม่ถามเจ้าของ
+                  ⚠️ ห้ามย้าย <h1> ลงไปใต้บล็อกอื่น จะทำให้ <h2> ของ QuickFortunePicker
+                     ขึ้นก่อน <h1> (ผิดลำดับหัวข้อ และเคยเป็นข้อจำกัดเดิมของไฟล์นั้น)
+                  ────────────────────────────────────────────────────────── */}
+              <div className="space-y-6">
                 <div className="text-center space-y-2.5 sm:space-y-3 pt-2">
                   <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
                     {isEnglish ? "Interactive 1909 Rider-Waite Tarot with AI Oracle" : "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ออนไลน์ ฟรี กับแม่หมอ AI"}
@@ -1485,6 +1498,30 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     {isEnglish
                       ? "Shuffle and select cards from the authentic 78-card deck with provably-fair SHA-256 randomness and archetypal psychological insights."
                       : "สับไพ่และเลือกหยิบไพ่ด้วยตัวคุณเอง จากสำรับ 1909 Rider-Waite แท้ 78 ใบ พร้อมคำพยากรณ์เจาะลึกและระบบสุ่มโปร่งใส Provably-Fair SHA-256"}
+                  </p>
+                </div>
+
+                {/* ไพ่ประจำวัน — แตะดูเฉย ๆ ไม่กินโควตา จึงเป็นจุดเริ่มที่เบาที่สุดของหน้า */}
+                <DailyCardStrip />
+              </div>
+
+              {/* บล็อกทำนายด่วน 1 ใบ (4 การ์ดยอดนิยม) — ทางหลักของผู้ใช้ส่วนใหญ่ */}
+              <QuickFortunePicker
+                currentNickname={nickname}
+                onSelectTopic={handleQuickFortuneSelect}
+                isLoading={loading}
+              />
+
+              {/* ผังเต็ม — สำหรับคนที่อยากอ่านละเอียดกว่าไพ่ใบเดียว */}
+              <div className="space-y-6">
+                <div className="text-center space-y-1.5">
+                  <h2 className="text-base sm:text-lg font-serif-th font-semibold text-ink-deep pt-1">
+                    {isEnglish ? "Choose Your Tarot Spread" : "เลือกผังการเปิดไพ่พยากรณ์"}
+                  </h2>
+                  <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed max-w-xl mx-auto [text-wrap:balance]">
+                    {isEnglish
+                      ? "Want more depth than a single card? Open several cards at once and let the oracle read the full picture."
+                      : "อยากได้คำตอบที่ละเอียดกว่าไพ่ใบเดียว เปิดหลายใบพร้อมกันแล้วให้แม่หมออ่านภาพรวมให้"}
                   </p>
                 </div>
 
@@ -1502,56 +1539,37 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                   </span>
                 </div>
 
-                {/* Featured Spreads Section */}
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <h2 className="text-base sm:text-lg font-serif-th font-semibold text-ink-deep pt-1">
-                      {isEnglish ? "Choose Your Tarot Spread" : "เลือกผังการเปิดไพ่พยากรณ์"}
-                    </h2>
-                  </div>
-
-                  <SpreadCardSelector
-                    variant="featured"
-                    selectedSpread={selectedSpread}
-                    onSelectSpread={(sp) => {
-                      soundManager.playCardSelectSound();
-                      // ผู้ใช้เริ่มลงมือจริงแล้ว — อุ่นสิทธิ์ไว้เลย จะได้ไม่ต้องรอตอนกด "เริ่มดูดวง"
-                      void ensureEntitlement();
-                      setSelectedSpread(sp);
-                      trackEvent("spread_select", {
-                        spread_id: sp.id,
-                        spread_name: sp.nameTh,
-                        card_count: sp.positions.length,
-                        category: sp.defaultCategory,
-                      });
-                    }}
-                    isPassHolder={isPassHolder}
-                    proceedLabel={
-                      entitlementView?.blocked
-                        ? entitlementView.blockedReason === "daily_exhausted"
-                          ? (isEnglish ? "Refill Quota to Continue" : "เติมรอบเพื่อเปิดไพ่ต่อ")
-                          : (isEnglish ? "Sign Up Free to Draw Cards" : "สมัครสมาชิกฟรีเพื่อเปิดไพ่")
-                        : !isPassHolder && !isStandardSpread(selectedSpread.id)
-                          ? (isEnglish ? "Unlock Spread to Draw Cards" : "ปลดล็อกผังนี้เพื่อเปิดไพ่")
-                          : undefined
-                    }
-                    onRequireUpgrade={() => {
-                      openAccessDialog("grand_spread");
-                    }}
-                    onProceed={handleBeginReading}
-                  />
-                </div>
+                <SpreadCardSelector
+                  variant="featured"
+                  selectedSpread={selectedSpread}
+                  onSelectSpread={(sp) => {
+                    soundManager.playCardSelectSound();
+                    // ผู้ใช้เริ่มลงมือจริงแล้ว — อุ่นสิทธิ์ไว้เลย จะได้ไม่ต้องรอตอนกด "เริ่มดูดวง"
+                    void ensureEntitlement();
+                    setSelectedSpread(sp);
+                    trackEvent("spread_select", {
+                      spread_id: sp.id,
+                      spread_name: sp.nameTh,
+                      card_count: sp.positions.length,
+                      category: sp.defaultCategory,
+                    });
+                  }}
+                  isPassHolder={isPassHolder}
+                  proceedLabel={
+                    entitlementView?.blocked
+                      ? entitlementView.blockedReason === "daily_exhausted"
+                        ? (isEnglish ? "Refill Quota to Continue" : "เติมรอบเพื่อเปิดไพ่ต่อ")
+                        : (isEnglish ? "Sign Up Free to Draw Cards" : "สมัครสมาชิกฟรีเพื่อเปิดไพ่")
+                      : !isPassHolder && !isStandardSpread(selectedSpread.id)
+                        ? (isEnglish ? "Unlock Spread to Draw Cards" : "ปลดล็อกผังนี้เพื่อเปิดไพ่")
+                        : undefined
+                  }
+                  onRequireUpgrade={() => {
+                    openAccessDialog("grand_spread");
+                  }}
+                  onProceed={handleBeginReading}
+                />
               </div>
-
-              {/* ไพ่ประจำวัน */}
-              <DailyCardStrip />
-
-              {/* บล็อกทำนายด่วน 1 ใบ (4 การ์ดยอดนิยม) */}
-              <QuickFortunePicker
-                currentNickname={nickname}
-                onSelectTopic={handleQuickFortuneSelect}
-                isLoading={loading}
-              />
             </div>
           )}
 

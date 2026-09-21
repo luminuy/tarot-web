@@ -272,7 +272,8 @@ export function QuickFortunePicker({
 
         {/*
           * หัวข้อส่วนทำนายด่วน 1 ใบ: ใช้ `<h2>` ได้ถูกต้องตามลำดับเอกสาร (h1 ➔ h2 ➔ h3)
-          * เนื่องจากบล็อกนี้ถูกย้ายมาอยู่ถัดจากบล็อกเลือกผัง (ใต้ `<h1>` ของหน้าแรก)
+          * เพราะบล็อกนี้อยู่ใต้ `<h1>` ของหน้าแรกเสมอ (ดูลำดับใน `TarotFlow.tsx`)
+          * ⚠️ ห้ามย้ายบล็อกนี้ขึ้นเหนือ `<h1>` — `<h2>` จะโผล่ก่อน `<h1>` ผิดลำดับหัวข้อทันที
           */}
         <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-ink tracking-wide leading-snug [text-wrap:balance]">
           {isEnglish
