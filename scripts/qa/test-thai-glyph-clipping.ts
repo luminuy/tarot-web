@@ -46,6 +46,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { assertNonEmptyCorpus } from "./lib/corpus";
+import { fitTextToWidth, sliceThaiSafe, trimThaiOrphans } from "../../src/lib/text/thai-truncate";
 
 const ROOT = process.cwd();
 const SRC = path.join(ROOT, "src");
@@ -159,6 +160,111 @@ function selfTest(): boolean {
   return ok;
 }
 
+/**
+ * ✂️ การตัดข้อความด้วย "จำนวนตัวอักษร" ทำให้คลัสเตอร์ไทยขาดครึ่ง (INC-0213)
+ *
+ * `slice(0, 18)` ไม่รู้ว่าฟอนต์กว้างเท่าไหร่ และไม่รู้ว่าตัวที่ 18 เป็นวรรณยุกต์หรือสระหน้า
+ * ผลคือได้สระลอยไม่มีพยัญชนะ หรือทัณฑฆาตหายไปทั้งที่คำยังไม่จบ
+ * ยิงเคสจริงผ่านฟังก์ชันตัวเดียวกับที่ตัวเรนเดอร์ภาพแชร์ใช้ ไม่ใช่สแกนข้อความ
+ */
+const THAI_ORPHAN_TAIL = /[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E\u0E40-\u0E44]$/;
+
+/** วัดความกว้างแบบหยาบ ๆ แทน canvas: ตัวอักษรที่ "ไม่กินที่" (สระบน/ล่าง/วรรณยุกต์) กว้าง 0 */
+function fakeMeasure(text: string): number {
+  return Array.from(text).reduce((w, ch) => w + (/[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]/.test(ch) ? 0 : 10), 0);
+}
+
+type TruncCase = { label: string; run: () => string | null };
+
+const TRUNC_CASES: TruncCase[] = [
+  {
+    label: "ท้ายข้อความห้ามเหลือวรรณยุกต์/สระหน้าลอย",
+    run: () => {
+      const src = "1. แก่นของเรื่อง (หัวใจของสถานการณ์)";
+      for (let w = 40; w <= 260; w += 10) {
+        const out = fitTextToWidth(src, fakeMeasure, w);
+        const body = out.endsWith("…") ? out.slice(0, -1) : out;
+        if (THAI_ORPHAN_TAIL.test(body)) return `กว้าง ${w} ได้ "${out}" ซึ่งจบด้วยเครื่องหมายลอย`;
+      }
+      return null;
+    },
+  },
+  {
+    label: "ผลลัพธ์ต้องไม่กว้างเกินกรอบที่ให้",
+    run: () => {
+      const src = "2. สิ่งที่ขวางอยู่ (อุปสรรคตรงหน้า)";
+      for (let w = 40; w <= 260; w += 10) {
+        const out = fitTextToWidth(src, fakeMeasure, w);
+        if (fakeMeasure(out) > w) return `กว้าง ${w} ได้ "${out}" ซึ่งวัดได้ ${fakeMeasure(out)}`;
+      }
+      return null;
+    },
+  },
+  {
+    label: "ข้อความที่พอดีอยู่แล้วต้องไม่ถูกแตะ",
+    run: () => {
+      const src = "อดีต";
+      const out = fitTextToWidth(src, fakeMeasure, 500);
+      return out === src ? null : `ควรได้ "${src}" แต่ได้ "${out}"`;
+    },
+  },
+  {
+    label: "trimThaiOrphans ต้องคืนทัณฑฆาต/สระที่ลอยออกไป",
+    run: () => {
+      const out = sliceThaiSafe("สถานการณ์", 8); // จุดตัดลงพอดีหน้าทัณฑฆาต ➔ ต้องถอยทั้งคลัสเตอร์
+      return out === "สถานการ" ? null : `ควรได้ "สถานการ" แต่ได้ "${out}"`;
+    },
+  },
+  {
+    label: "สระหน้าที่ไม่มีพยัญชนะตามต้องถูกตัดทิ้ง",
+    run: () => {
+      const out = trimThaiOrphans("ความรักเ");
+      return out === "ความรัก" ? null : `ควรได้ "ความรัก" แต่ได้ "${out}"`;
+    },
+  },
+];
+
+export function runThaiTruncateCases(): string[] {
+  const failures: string[] = [];
+  for (const c of TRUNC_CASES) {
+    const problem = c.run();
+    if (problem) failures.push(`${c.label} — ${problem}`);
+  }
+  return failures;
+}
+
+/**
+ * ตัวเรนเดอร์ภาพแชร์ (canvas) ห้ามตัดข้อความด้วยจำนวนตัวอักษรอีก (INC-0213)
+ * ต้องวัดความกว้างจริงผ่าน `fitTextToWidth` เท่านั้น
+ */
+export function scanCanvasCharSlice(): string[] {
+  const file = path.join(ROOT, "src/components/reading/ShareModal.tsx");
+  if (!fs.existsSync(file)) {
+    return ["หาไฟล์ ShareModal.tsx ไม่เจอ — ด่านนี้ตรวจไม่ได้ อย่าปล่อยผ่านเงียบ ๆ (INC-0213)"];
+  }
+  const out: string[] = [];
+  const lines = fs.readFileSync(file, "utf-8").split("\n");
+  /*
+   * สนใจเฉพาะ `.slice(0, n)` ที่เป็น "การย่อข้อความให้คนอ่าน" เท่านั้น
+   * ดูจากสองสัญญาณในบรรทัดเดียวกัน: ต่อท้ายด้วยจุดไข่ปลา หรือส่งเข้า `fillText`
+   * `cards.slice(0, 5)` (หยิบไพ่ 5 ใบแรกมาโชว์) ไม่ใช่การย่อข้อความ จึงไม่โดนจับ
+   */
+  const TEXT_TRUNCATION_HINT = /(\.\.\.|…|fillText)/;
+  lines.forEach((line, i) => {
+    if (line.trimStart().startsWith("*") || line.trimStart().startsWith("//")) return;
+    if (!/\.slice\(0,\s*\d+\)/.test(line)) return;
+    if (!TEXT_TRUNCATION_HINT.test(line)) return;
+    out.push(
+      `ShareModal.tsx:${i + 1} ยังย่อข้อความด้วยจำนวนตัวอักษร — ตัดกลางคลัสเตอร์ไทยได้ ` +
+        `ใช้ fitTextToWidth() (วัดความกว้างจริง) หรือ trimThaiOrphans() แทน (INC-0213)`,
+    );
+  });
+  if (!fs.readFileSync(file, "utf-8").includes("fitTextToWidth")) {
+    out.push("ShareModal.tsx ไม่ได้เรียก fitTextToWidth() เลย — ตัวเรนเดอร์ภาพแชร์ต้องย่อข้อความตามความกว้างจริง (INC-0213)");
+  }
+  return out;
+}
+
 if (process.argv[1] && process.argv[1].endsWith("test-thai-glyph-clipping.ts")) {
   if (!fs.existsSync(SRC)) {
     console.error(`\n❌ ไม่พบโฟลเดอร์ ${SRC} — ด่านนี้ตรวจอะไรไม่ได้เลย จึงถือว่าตก`);
@@ -187,4 +293,13 @@ if (process.argv[1] && process.argv[1].endsWith("test-thai-glyph-clipping.ts")) 
   }
 
   console.log(`✅ ไม่มีกล่องข้อความที่ตัดของล้นทิ้งพร้อม line-height ต่ำกว่า ${MIN_LEADING}`);
+
+  const truncFailures = [...runThaiTruncateCases(), ...scanCanvasCharSlice()];
+  if (truncFailures.length > 0) {
+    console.error(`\n❌ การตัดข้อความไทยยังเฉือนคลัสเตอร์ขาด ${truncFailures.length} จุด\n`);
+    for (const f of truncFailures) console.error(`   ${f}\n`);
+    process.exit(1);
+  }
+
+  console.log(`✅ การย่อข้อความวัดจากความกว้างจริงและไม่ทิ้งสระ/วรรณยุกต์ลอย (${TRUNC_CASES.length} เคส)`);
 }
