@@ -20,22 +20,27 @@ if (tablist && panel) {
   const tabs = Array.from(tablist.querySelectorAll<HTMLButtonElement>("[data-spread-tab]"));
   const cards = Array.from(panel.querySelectorAll<HTMLElement>("[data-spread-card]"));
 
-  /** คลาสของแท็บที่ "ไม่ได้เลือก" — ตรงกับที่ `SpreadsLibrary.tsx` เรนเดอร์ออกมา */
-  const IDLE_TAB = ["bg-inset", "text-ink", "hover:text-gold", "border", "border-line", "hover:border-gold"];
+  /**
+   * คลาสของแท็บแต่ละสถานะ — **ต้องตรงกับที่ `SpreadsLibrary.tsx` เรนเดอร์ออกมาเป๊ะ ๆ**
+   * ⚠️ แก้ที่ไฟล์ใดไฟล์หนึ่งแล้วต้องแก้อีกไฟล์ทันที ไม่งั้นแท็บจะเปลี่ยนหน้าตาไม่ได้ตอนกด
+   *    (หน้านี้ไม่มี React คอยเรนเดอร์ใหม่ให้ สถานะทั้งหมดมาจากการสลับคลาสในไฟล์นี้)
+   */
+  const ACTIVE_TAB = ["btn-gold-glass"];
+  const IDLE_TAB = ["glass-chip", "text-ink", "hover:text-gold-ink"];
 
   function select(id: string, moveFocus: boolean): void {
     for (const tab of tabs) {
       const isActive = tab.dataset.spreadTab === id;
       tab.setAttribute("aria-selected", String(isActive));
       tab.tabIndex = isActive ? 0 : -1;
-      tab.classList.toggle("text-canvas", isActive);
+      for (const cls of ACTIVE_TAB) tab.classList.toggle(cls, isActive);
       for (const cls of IDLE_TAB) tab.classList.toggle(cls, !isActive);
-      // ไอคอนกับตัวเลขนับใช้สีตามสถานะแท็บ
-      tab.querySelector("svg")?.classList.toggle("text-gold", isActive);
+      // ไอคอนกับตัวเลขนับใช้สีตามสถานะแท็บ (ตัวหนังสือของแท็บที่เลือกมาจาก `.btn-gold-glass` เอง)
+      tab.querySelector("svg")?.classList.toggle("text-white", isActive);
       tab.querySelector("svg")?.classList.toggle("text-muted", !isActive);
       const badge = tab.querySelector<HTMLElement>("span:last-child");
       badge?.classList.toggle("bg-white/20", isActive);
-      badge?.classList.toggle("text-canvas", isActive);
+      badge?.classList.toggle("text-white", isActive);
       badge?.classList.toggle("bg-black/5", !isActive);
       badge?.classList.toggle("text-muted", !isActive);
       if (isActive && moveFocus) tab.focus();

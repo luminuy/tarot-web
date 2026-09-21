@@ -133,9 +133,9 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
       </nav>
 
       {/* Header & Editorial Hero */}
-      <header className="rounded-2xl border border-line bg-surface p-6 sm:p-10 shadow-xs relative overflow-hidden">
+      <header className="altar-panel p-6 sm:p-10 relative overflow-hidden">
         <div className="max-w-3xl space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gold/40 bg-surface-warm text-gold-ink text-xs font-serif-th font-bold">
+          <div className="glass-chip inline-flex items-center gap-2 px-3 py-1 text-gold-ink text-xs font-serif-th font-bold">
             <span>{isEnglish ? "Tarot Compendium" : "คัมภีร์ไพ่ยิปซี 1909"}</span>
             <span className="w-1 h-1 rounded-full bg-gold" />
             <span>{cards.length} {isEnglish ? "Cards" : "ใบ"}</span>
@@ -167,7 +167,7 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
             {intro.highlights.map((h, idx) => (
               <div
                 key={idx}
-                className="p-3.5 rounded-xl border border-line bg-surface-warm space-y-1"
+                className="glass-tile p-3.5 !rounded-xl space-y-1"
               >
                 <h2 className="font-serif-th text-xs font-bold text-gold-ink">
                   {h.title}
@@ -195,8 +195,8 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
                 href={tab.href}
                 className={`p-2.5 rounded-xl border text-center transition duration-200 flex flex-col items-center justify-center gap-1 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
                   isActive
-                    ? "border-2 border-gold bg-surface shadow-xs"
-                    : "border border-line bg-surface-warm hover:border-gold hover:bg-surface"
+                    ? "altar-panel-active"
+                    : "glass-tile"
                 }`}
               >
                 <tab.Icon className={`w-4 h-4 ${isActive ? "text-gold-ink" : "text-gold"}`} />
@@ -237,10 +237,10 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
                    ใช้ได้เพราะแถวคีย์เวิร์ดด้านล่างถูกล็อกความสูงแล้ว การ์ดทุกใบจึงสูงเท่ากัน
                    ห้ามแก้สัดส่วนภาพ/ระยะห่างของการ์ดโดยไม่อัปเดตสูตรใน globals.css — ด่าน
                    `test-card-tile-height.ts` จะตกทันทีถ้าของที่สูตรพึ่งพาถูกแก้ (กริด · gap · padding · สัดส่วนภาพ) */
-                className="card-tile-cv rounded-xl border border-line bg-surface p-3 flex flex-col justify-between hover:border-gold transition duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+                className="card-tile-cv altar-card-porcelain !rounded-xl p-3 flex flex-col justify-between group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
               >
                 {/* Card Artwork */}
-                <div className="relative aspect-[7/12] w-full rounded-lg overflow-hidden border border-line bg-inset mb-2.5">
+                <div className="glass-tile relative aspect-[7/12] w-full !rounded-lg overflow-hidden mb-2.5">
                   <CardImage
                     image={card.image}
                     cardId={card.id}
@@ -252,7 +252,7 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
 
                   {/* Top Badge: Number / Arcana & Element */}
                   <div className="absolute top-1.5 left-1.5 right-1.5 flex items-center justify-between pointer-events-none">
-                    <span className="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-ink text-canvas border border-line">
+                    <span className="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-gold-ink text-white">
                       {card.arcana === "major" ? `#${card.number}` : card.suit?.toUpperCase().slice(0, 1)}
                     </span>
                     <span

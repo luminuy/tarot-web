@@ -33,7 +33,7 @@ export const CardYesNoAnswer: React.FC<CardYesNoAnswerProps> = ({ card, isEnglis
         <div
           key={key}
           data-when={key}
-          className="rounded-xl border border-line bg-surface p-4 sm:p-5 space-y-3 hover:border-gold transition shadow-xs"
+          className="altar-card-porcelain p-4 sm:p-5 space-y-3"
         >
           <div className="space-y-1.5">
             <h3 className="font-serif-th text-xs sm:text-sm font-bold text-ink">

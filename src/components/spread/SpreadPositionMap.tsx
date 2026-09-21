@@ -27,7 +27,7 @@ export function SpreadPositionMap({
 
   return (
     <div
-      className="relative w-full rounded-xl border border-line bg-inset"
+      className="glass-tile relative w-full !rounded-xl"
       style={{ paddingBottom: `${(layout.boxHeight * 100).toFixed(2)}%` }}
       role="img"
       aria-label={
@@ -39,7 +39,7 @@ export function SpreadPositionMap({
       {positions.map((pos, idx) => (
         <div
           key={idx}
-          className="absolute flex items-center justify-center rounded-[4px] border border-gold bg-surface text-[12px] font-bold text-ink shadow-sm"
+          className="glass-chip absolute flex items-center justify-center !rounded-[4px] border-gold text-[12px] font-bold text-ink"
           style={{
             left: `${pos.x * 100}%`,
             // แกน y วัดเป็นหน่วยเดียวกับแกน x (เทียบความกว้างกรอบ) แล้วหารด้วยความสูงกรอบ

@@ -142,8 +142,8 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           <div className="relative group">
             {/* ใส่คลาสอนิเมชันเฉพาะหลัง mount — เรนเดอร์แรกฝั่งเซิร์ฟเวอร์ต้องออกมา
                 ที่สถานะปลายทางเสมอ ไม่งั้นภาพไพ่ซึ่งเป็น LCP ของหน้าถูกส่งไปแบบ opacity 0 */}
-            <div className="relative w-64 sm:w-72 aspect-[7/12] rounded-xl overflow-hidden border-2 border-line p-1.5 bg-surface shadow-[0_10px_30px_rgba(42,38,31,0.08)]">
-              <div className="relative w-full h-full rounded-lg overflow-hidden bg-inset">
+            <div className="altar-panel relative w-64 sm:w-72 aspect-[7/12] !rounded-xl overflow-hidden p-1.5">
+              <div className="glass-tile relative w-full h-full !rounded-lg overflow-hidden">
                 <div className="w-full h-full card-orientation-flip">
                   <CardImage
                     image={card.image}
@@ -165,7 +165,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
 
                 {/* Top Floating Badge */}
                 <div className="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
-                  <span className="text-[13px] font-mono font-bold px-2 py-0.5 rounded bg-ink text-canvas border border-line">
+                  <span className="text-[13px] font-mono font-bold px-2 py-0.5 rounded bg-gold-ink text-white">
                     {card.arcana === "major" ? `Major #${card.number}` : card.suit?.toUpperCase()}
                   </span>
                   <span
@@ -179,7 +179,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           </div>
 
           {/* Upright / Reversed Orientation Switcher */}
-          <div className="flex items-center justify-center p-1 rounded-full bg-inset border border-line w-full max-w-xs select-none">
+          <div className="glass-chip flex items-center justify-center p-1 w-full max-w-xs select-none">
             <button
               type="button"
               data-orientation-set="upright"
@@ -204,7 +204,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
               {isEnglish ? `Element: ${ELEMENT_EN[card.element] || card.element}` : `ธาตุ${card.element}`}
             </span>
             {card.astrology && (
-              <span className="px-3 py-1 rounded-full border border-line bg-surface text-ink">
+              <span className="glass-chip px-3 py-1 text-ink">
                 {isEnglish && card.astrologyEn ? card.astrologyEn : card.astrology}
               </span>
             )}
@@ -228,7 +228,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
         <div className="md:col-span-7 lg:col-span-8 space-y-6">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-xs font-mono text-gold-ink">
-              <span className="px-2.5 py-0.5 rounded-full bg-inset border border-line font-semibold uppercase text-ink">
+              <span className="glass-chip px-2.5 py-0.5 font-semibold uppercase text-ink">
                 {card.arcana === "major" ? "Major Arcana" : `${card.suit} Suit`}
               </span>
               {!isEnglish && card.nameEn && (
@@ -256,7 +256,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                 {keywordsByOrientation[o.key].map((kw, i) => (
                   <span
                     key={i}
-                    className="text-xs px-3 py-1.5 rounded-full border border-line bg-surface text-ink font-serif-th font-semibold shadow-xs"
+                    className="glass-chip text-xs px-3 py-1.5 text-ink font-serif-th font-semibold"
                   >
                     {kw}
                   </span>
@@ -285,7 +285,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                   return (
                     <div
                       key={cat.id}
-                      className="rounded-xl border border-line bg-surface p-4 sm:p-5 space-y-2 hover:border-gold transition group shadow-xs"
+                      className="altar-card-porcelain p-4 sm:p-5 space-y-2 group"
                     >
                       <div className="flex items-center gap-2">
                         <span style={{ color: cat.color }} className="text-sm">
@@ -313,7 +313,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                     ? "/?spread=career"
                     : "/?spread=three-card"
               }
-              className="px-7 py-3 rounded-full text-xs sm:text-sm font-serif-th font-bold bg-ink hover:bg-gold-ink text-canvas transition flex items-center gap-2 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
+              className="btn-gold-glass px-7 py-3 text-xs sm:text-sm font-serif-th font-bold flex items-center gap-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
             >
               {isEnglish ? "Open Interactive Tarot Reading" : "เปิดไพ่พยากรณ์จริงกับแม่หมอ AI"}
             </Link>
@@ -335,9 +335,9 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
         {prevCard ? (
           <Link
             href={`/cards/${prevCard.id}`}
-            className="flex items-center gap-3 p-3.5 rounded-xl border border-line hover:border-gold bg-surface hover:bg-inset transition group max-w-[48%] shadow-xs"
+            className="altar-card-porcelain flex items-center gap-3 p-3.5 !rounded-xl group max-w-[48%]"
           >
-            <div className="w-9 h-14 rounded-lg overflow-hidden border border-line flex-shrink-0 bg-inset">
+            <div className="glass-tile w-9 h-14 !rounded-lg overflow-hidden flex-shrink-0">
               <CardImage
                 image={prevCard.image}
                 cardId={prevCard.id}
@@ -362,7 +362,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
         {nextCard ? (
           <Link
             href={`/cards/${nextCard.id}`}
-            className="flex items-center gap-3 p-3.5 rounded-xl border border-line hover:border-gold bg-surface hover:bg-inset transition group max-w-[48%] text-right shadow-xs"
+            className="altar-card-porcelain flex items-center gap-3 p-3.5 !rounded-xl group max-w-[48%] text-right"
           >
             <div className="text-right overflow-hidden">
               <span className="text-[13px] font-mono text-muted block">
@@ -372,7 +372,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                 {isEnglish ? nextCard.nameEn : nextCard.nameTh}
               </span>
             </div>
-            <div className="w-9 h-14 rounded-lg overflow-hidden border border-line flex-shrink-0 bg-inset">
+            <div className="glass-tile w-9 h-14 !rounded-lg overflow-hidden flex-shrink-0">
               <CardImage
                 image={nextCard.image}
                 cardId={nextCard.id}

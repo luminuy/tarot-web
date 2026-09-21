@@ -116,7 +116,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
       {/* Dynamic Bilingual Hero Header */}
       <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
         <div>
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-line bg-surface text-xs text-gold-ink font-serif-th font-bold shadow-xs">
+          <span className="glass-chip inline-flex items-center gap-2 px-4 py-1.5 text-xs text-gold-ink font-serif-th font-bold">
             {isEnglish ? "25 CLASSIC DIVINATION SPREADS" : "25 ผังการเปิดไพ่มาตรฐานสากล"}
           </span>
         </div>
@@ -151,15 +151,17 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
               aria-selected={isActive}
               tabIndex={isActive ? 0 : -1}
               type="button"
-              className={`tap-overlay-y px-4 py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold aria-selected:bg-ink aria-selected:text-canvas aria-selected:shadow-sm ${
-                isActive ? "" : "bg-inset text-ink hover:text-gold border border-line hover:border-gold"
+              /* แท็บที่เลือกอยู่ใช้ผิวทองกระจกชุดเดียวกับปุ่มหลักทั้งเว็บ (เดิมเป็นก้อนดำ `bg-ink`)
+                 ส่วนแท็บที่ยังไม่เลือกเป็นชิปกระจก จึงเข้าชุดกับการ์ดผังที่อยู่ใต้มัน */
+              className={`tap-overlay-y px-4 py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
+                isActive ? "btn-gold-glass" : "glass-chip text-ink hover:text-gold-ink"
               }`}
             >
-              <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-gold" : "text-muted"}`} />
+              <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-white" : "text-muted"}`} />
               <span>{cat.label}</span>
               <span
                 className={`text-[12px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
-                  isActive ? "bg-white/20 text-canvas" : "bg-black/5 text-muted"
+                  isActive ? "bg-white/20 text-white" : "bg-black/5 text-muted"
                 }`}
               >
                 {cat.count}
@@ -190,16 +192,16 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
               data-spread-card
               data-cats={cats}
               hidden={!cats.split(" ").includes(DEFAULT_TAB)}
-              className="rounded-xl border border-line bg-surface p-5 sm:p-6 flex flex-col justify-between space-y-4 hover:border-gold transition duration-300 relative overflow-hidden group shadow-[0_10px_30px_rgba(42,38,31,0.06)]"
+              className="altar-card-porcelain p-5 sm:p-6 flex flex-col justify-between space-y-4 relative overflow-hidden group"
             >
               {/* Header Tag */}
               <div className="flex items-center justify-between z-10">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[13px] font-mono font-bold text-ink bg-inset px-2.5 py-0.5 rounded-full border border-line">
+                  <span className="glass-chip text-[13px] font-mono font-bold text-ink px-2.5 py-0.5">
                     {spread.positions.length} {isEnglish ? "Cards" : "ใบ"}
                   </span>
                   {!isStandardSpread(spread.id) && (
-                    <span className="text-[12px] text-gold-ink bg-surface border border-line px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1">
+                    <span className="glass-chip text-[12px] text-gold-ink px-2 py-0.5 font-serif-th font-bold flex items-center gap-1">
                       <SealedLockIcon className="w-3 h-3" />
                       <span>{isEnglish ? "Grand Spread" : "ญาณพิเศษ"}</span>
                     </span>
@@ -213,7 +215,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
               </div>
 
               {/* Interactive Spread Visual Diagram on Illuminated Pedestal */}
-              <div className="h-44 flex items-center justify-center my-1 relative select-none rounded-xl bg-inset border border-line p-2 group-hover:border-gold transition-colors">
+              <div className="glass-tile h-44 flex items-center justify-center my-1 relative select-none p-2">
                 {renderSpreadIllustration(spread.id)}
               </div>
 
@@ -251,7 +253,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                   {spread.positions.map((pos, idx) => (
                     <div
                       key={idx}
-                      className="text-[13px] p-2 rounded-lg bg-inset border border-line flex items-start gap-2"
+                      className="glass-tile text-[13px] p-2 flex items-start gap-2"
                     >
                       <span className="text-gold-ink font-mono font-bold flex-shrink-0 text-[13px]">#{idx + 1}</span>
                       <div>
@@ -269,7 +271,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
               <Link
                 href={`/?spread=${spread.id}`}
                 prefetch={false}
-                className="w-full py-3 rounded-full bg-ink hover:bg-gold text-canvas font-serif-th font-bold text-xs sm:text-sm text-center active:scale-[0.98] transition cursor-pointer flex items-center justify-center gap-1.5 z-10 shadow-sm"
+                className="btn-gold-glass w-full py-3 font-serif-th font-bold text-xs sm:text-sm text-center active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5 z-10"
               >
                 <span>
                   {isEnglish

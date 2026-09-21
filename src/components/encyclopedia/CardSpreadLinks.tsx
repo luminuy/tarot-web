@@ -78,7 +78,7 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
             <Link
               key={spread.id}
               href={href(`/spreads/${spread.id}`)}
-              className="p-3.5 rounded-xl border border-line bg-surface hover:border-gold-ink hover:bg-surface-warm transition-colors flex flex-col justify-between group shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
+              className="altar-card-porcelain p-3.5 !rounded-xl flex flex-col justify-between group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
             >
               <div>
                 <span className="text-[11px] font-mono font-bold text-gold-ink block mb-1">
@@ -123,7 +123,7 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
               <Link
                 key={article.slug}
                 href={`/blog/${article.slug}`}
-                className="p-3.5 rounded-xl border border-line bg-surface hover:border-gold-ink hover:bg-surface-warm transition-colors flex flex-col justify-between group shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
+                className="altar-card-porcelain p-3.5 !rounded-xl flex flex-col justify-between group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
               >
                 <div>
                   <span className="text-[11px] font-serif-th text-gold-ink block mb-1">
