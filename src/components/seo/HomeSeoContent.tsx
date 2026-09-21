@@ -241,7 +241,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           {ritualSteps.map((step) => (
             <div
               key={step.stepNum}
-              className="rounded-2xl bg-gradient-to-b from-surface via-surface-warm to-[#F7F3EB] border border-line-warm hover:border-gold-ink p-5 lg:p-4 xl:p-5 shadow-[0_2px_8px_rgba(41,38,31,0.04)] hover:shadow-[0_8px_24px_rgba(143,92,26,0.10)] transition duration-300 group flex flex-col justify-between relative overflow-hidden select-none"
+              className="altar-card-porcelain p-5 lg:p-4 xl:p-5 group flex flex-col justify-between relative overflow-hidden select-none"
             >
               <div className="space-y-3.5">
                 {/* Step Header */}
@@ -249,7 +249,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                   <span className="text-xs font-serif-th font-bold tracking-wider text-gold-ink uppercase flex items-center gap-1.5">
                     {isEnglish ? `Step ${step.stepNum}` : `ขั้นที่ ${step.stepNum}`}
                   </span>
-                  <span className="text-[11px] font-serif-th font-medium text-muted px-2.5 py-0.5 rounded-full bg-surface border border-line-warm/60 shadow-2xs">
+                  <span className="glass-chip text-[11px] font-serif-th font-medium text-muted px-2.5 py-0.5">
                     {step.phase}
                   </span>
                 </div>
@@ -348,7 +348,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
         {/* 3 Pillars of Wisdom */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Pillar 1: 1909 Historic Heritage */}
-          <div className="p-7 sm:p-8 rounded-2xl bg-gradient-to-b from-surface to-surface-warm border border-line-warm shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-lg hover:border-gold-ink transition duration-300 flex flex-col justify-between space-y-6 group">
+          <div className="altar-card-porcelain p-7 sm:p-8 flex flex-col justify-between space-y-6 group">
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-3 py-2">
                 <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-line-warm shadow-md -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300 bg-inset-warm">
@@ -383,7 +383,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           </div>
 
           {/* Pillar 2: Provably Fair Cryptographic Randomness */}
-          <div className="p-7 sm:p-8 rounded-2xl bg-gradient-to-b from-surface to-surface-warm border border-line-warm shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-lg hover:border-gold-ink transition duration-300 flex flex-col justify-between space-y-6 group">
+          <div className="altar-card-porcelain p-7 sm:p-8 flex flex-col justify-between space-y-6 group">
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-3 py-2">
                 <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-line-warm shadow-md -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300 bg-inset-warm">
@@ -418,7 +418,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           </div>
 
           {/* Pillar 3: Jungian Psychology & Empathetic AI */}
-          <div className="p-7 sm:p-8 rounded-2xl bg-gradient-to-b from-surface to-surface-warm border border-line-warm shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-lg hover:border-gold-ink transition duration-300 flex flex-col justify-between space-y-6 group">
+          <div className="altar-card-porcelain p-7 sm:p-8 flex flex-col justify-between space-y-6 group">
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-3 py-2">
                 <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-line-warm shadow-md -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300 bg-inset-warm">
@@ -510,7 +510,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           <Link
             href={href("/spreads/celtic-cross")}
             prefetch={false}
-            className="p-6 rounded-2xl bg-gradient-to-b from-surface to-surface-warm border border-line-warm hover:border-gold-ink transition duration-300 shadow-xs hover:shadow-md group block space-y-4"
+            className="altar-card-porcelain p-6 group block space-y-4"
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-17 rounded-lg overflow-hidden border-2 border-line-warm group-hover:border-gold-ink flex-shrink-0 bg-inset-warm transition-colors shadow-2xs">
@@ -536,7 +536,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           <Link
             href={href("/spreads/three-card")}
             prefetch={false}
-            className="p-6 rounded-2xl bg-gradient-to-b from-surface to-surface-warm border border-line-warm hover:border-gold-ink transition duration-300 shadow-xs hover:shadow-md group block space-y-4"
+            className="altar-card-porcelain p-6 group block space-y-4"
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-17 rounded-lg overflow-hidden border-2 border-line-warm group-hover:border-gold-ink flex-shrink-0 bg-inset-warm transition-colors shadow-2xs">
@@ -562,7 +562,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           <Link
             href={href("/spreads/decision")}
             prefetch={false}
-            className="p-6 rounded-2xl bg-gradient-to-b from-surface to-surface-warm border border-line-warm hover:border-gold-ink transition duration-300 shadow-xs hover:shadow-md group block space-y-4"
+            className="altar-card-porcelain p-6 group block space-y-4"
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-17 rounded-lg overflow-hidden border-2 border-line-warm group-hover:border-gold-ink flex-shrink-0 bg-inset-warm transition-colors shadow-2xs">
@@ -587,7 +587,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
         </div>
 
         {/* Featured Major Arcana Cards Grid */}
-        <div className="p-6 sm:p-8 rounded-2xl bg-surface border border-line-warm shadow-xs space-y-5">
+        <div className="altar-panel p-6 sm:p-8 space-y-5">
           <div className="flex items-center justify-between pb-3 border-b border-line-warm/40">
             <h3 className="font-serif-th font-bold text-base text-ink flex items-center gap-2">
               
@@ -607,7 +607,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                 key={card.id}
                 href={`/cards/${card.id}`}
                 prefetch={false}
-                className="group flex flex-col items-center p-3 sm:p-4 rounded-xl border border-line-warm/50 hover:border-gold-ink bg-surface-warm hover:bg-surface transition duration-200 shadow-2xs hover:shadow-xs"
+                className="glass-tile group flex flex-col items-center p-3 sm:p-4"
               >
                 <div className="w-14 h-21 rounded-md overflow-hidden border border-line-warm mb-2.5 shadow-2xs group-hover:scale-105 transition-transform duration-200 bg-inset-warm">
                   {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <span> ใต้ภาพพิมพ์ชื่อไพ่อยู่แล้วทั้งสองภาษา */}
@@ -672,7 +672,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
               key={art.slug}
               href={`/blog/${art.slug}`}
               prefetch={false}
-              className="p-6 rounded-2xl bg-gradient-to-b from-surface to-surface-warm border border-line-warm hover:border-gold-ink transition duration-300 shadow-xs hover:shadow-md group flex items-start gap-4 sm:gap-5"
+              className="altar-card-porcelain p-6 group flex items-start gap-4 sm:gap-5"
             >
               <div className="w-14 h-21 sm:w-16 sm:h-24 rounded-lg overflow-hidden border-2 border-line-warm group-hover:border-gold-ink flex-shrink-0 bg-inset-warm transition-colors shadow-2xs group-hover:scale-105 duration-300">
                 {/* ภาพประกอบล้วน — ป้ายหมวดหมู่และ <h3> ในลิงก์เดียวกันบอกเรื่องบทความอยู่แล้ว (INC-0125) */}
@@ -680,7 +680,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
               </div>
 
               <div className="space-y-2 min-w-0 flex-1">
-                <span className="text-[11px] font-serif-th font-semibold text-gold-ink bg-surface px-3 py-0.5 rounded-full border border-line-warm/70 inline-block shadow-2xs">
+                <span className="glass-chip text-[11px] font-serif-th font-semibold text-gold-ink px-3 py-0.5 inline-block">
                   {art.category}
                 </span>
                 <h3 className="font-serif-th font-bold text-base sm:text-lg text-ink group-hover:text-gold-ink transition-colors line-clamp-2 leading-snug">
@@ -736,7 +736,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           {homeFaqs.map((faq) => (
             <details
               key={faq.id}
-              className="group rounded-2xl border bg-surface border-line-warm/80 transition duration-300 overflow-hidden open:border-gold-ink open:shadow-sm hover:border-gold-ink hover:shadow-2xs"
+              className="altar-card-porcelain group overflow-hidden open:border-[color:var(--glass-edge-on)]"
             >
               <summary className="w-full p-5 sm:p-6 flex items-center justify-between gap-4 text-left font-serif-th font-bold text-base text-ink hover:text-gold-ink transition-colors cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                 <span className="flex items-center gap-3 sm:gap-3.5">
@@ -745,12 +745,12 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                 </span>
                 <span
                   aria-hidden="true"
-                  className="text-xs text-gold-ink font-mono transition-transform duration-300 flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center bg-surface-warm border border-line-warm/50 group-open:rotate-180 group-open:bg-gold-ink group-open:text-surface group-open:border-gold-ink"
+                  className="glass-chip text-xs text-gold-ink font-mono transition-transform duration-300 flex-shrink-0 w-7 h-7 flex items-center justify-center group-open:rotate-180 group-open:bg-gold-ink group-open:text-surface"
                 >
                   ▼
                 </span>
               </summary>
-              <div className="px-6 pb-6 pt-2 text-xs sm:text-sm font-serif-th text-muted leading-relaxed border-t border-line-warm/30 bg-surface-warm/40">
+              <div className="px-6 pb-6 pt-2 text-xs sm:text-sm font-serif-th text-muted leading-relaxed border-t border-line-warm/30">
                 {faq.answer}
               </div>
             </details>
