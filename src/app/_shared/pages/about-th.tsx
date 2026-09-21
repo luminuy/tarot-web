@@ -187,7 +187,7 @@ export function AboutBodyTh() {
             ถ้าระบบตรวจพบว่าคำถามของคุณมีสัญญาณของการทำร้ายตัวเอง เราจะหยุดการทำนายทันที
             และแสดงช่องทางขอความช่วยเหลือแทน เพราะเรื่องแบบนี้ไม่ควรฝากไว้กับไพ่
           </p>
-          <div className="rounded-xl border border-line bg-surface p-4 space-y-1">
+          <div className="altar-card-porcelain p-4 space-y-1">
             <p className="text-sm text-ink font-serif-th">
               <strong>สายด่วนสุขภาพจิต กรมสุขภาพจิต — โทร 1323</strong> (ฟรี ตลอด 24 ชั่วโมง)
             </p>

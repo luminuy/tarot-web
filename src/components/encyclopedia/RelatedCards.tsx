@@ -29,9 +29,9 @@ export function RelatedCards({ cardId }: { cardId: string }) {
           <Link
             key={c.id}
             href={`/cards/${c.id}`}
-            className="group flex items-center gap-2.5 p-2.5 rounded-xl border border-line bg-white hover:border-gold transition-colors shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+            className="altar-card-porcelain group flex items-center gap-2.5 p-2.5 !rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
           >
-            <div className="w-8 h-12 shrink-0 overflow-hidden rounded border border-line bg-inset">
+            <div className="glass-tile w-8 h-12 shrink-0 overflow-hidden !rounded">
               <CardImage
                 image={c.image}
                 cardId={c.id}

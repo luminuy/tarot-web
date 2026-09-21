@@ -147,13 +147,13 @@ export const SpreadDetailClient: React.FC<Props> = ({
       {/* Header */}
       <header className="space-y-4">
         <div className="flex flex-wrap items-center gap-2 text-[13px] font-serif-th">
-          <span className="rounded-full border border-line bg-inset px-2.5 py-0.5 font-mono font-bold">
+          <span className="glass-chip px-2.5 py-0.5 font-mono font-bold">
             {spread.positions.length} {isEnglish ? "Cards" : "ใบ"}
           </span>
-          <span className="rounded-full border border-line bg-white px-2.5 py-0.5">
+          <span className="glass-chip px-2.5 py-0.5">
             {isEnglish ? `Category: ${categoryLabel}` : `หมวด ${categoryLabel}`}
           </span>
-          <span className="rounded-full border border-line bg-white px-2.5 py-0.5">
+          <span className="glass-chip px-2.5 py-0.5">
             {standard ? (isEnglish ? "Standard Spread" : "ผังมาตรฐาน") : (isEnglish ? "Grand Spread" : "ญาณพิเศษ")}
           </span>
         </div>
@@ -166,7 +166,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
         </p>
         <Link
           href={`/?spread=${spread.id}`}
-          className="inline-flex items-center gap-1.5 rounded-full bg-ink px-6 py-3 font-serif-th text-sm font-bold text-canvas transition hover:bg-gold active:scale-[0.98]"
+          className="btn-gold-glass inline-flex items-center gap-1.5 px-6 py-3 font-serif-th text-sm font-bold active:scale-[0.98]"
         >
           
           <span>
@@ -195,10 +195,10 @@ export const SpreadDetailClient: React.FC<Props> = ({
                 ? "Each card role answers a specific dimension of your inquiry:"
                 : "แต่ละตำแหน่งทำหน้าที่ตอบคำถามเฉพาะมิติเพื่อเชื่อมโยงภาพรวมของคำทำนาย:"}
             </p>
-            <div className="mt-4 overflow-x-auto rounded-xl border border-line bg-white shadow-xs">
+            <div className="altar-panel mt-4 overflow-x-auto">
               <table className="w-full text-left text-xs font-serif-th border-collapse">
                 <thead>
-                  <tr className="border-b border-line bg-surface-warm text-[#5E5240]">
+                  <tr className="glass-divider-b text-[#5E5240]">
                     <th scope="col" className="py-2.5 px-3 font-mono font-bold w-12 text-center">#</th>
                     <th scope="col" className="py-2.5 px-3 font-bold w-36 sm:w-44">{isEnglish ? "Position Name" : "ชื่อตำแหน่ง"}</th>
                     <th scope="col" className="py-2.5 px-3 font-bold">{isEnglish ? "Divinatory Role & Meaning" : "คำถามที่ตำแหน่งนี้ตอบ / บทบาทการตีความ"}</th>
@@ -206,7 +206,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
                 </thead>
                 <tbody className="divide-y divide-line-soft">
                   {spread.positions.map((pos, idx) => (
-                    <tr key={idx} className="hover:bg-surface-warm/60 transition-colors">
+                    <tr key={idx} className="transition-colors hover:bg-[rgba(255,252,246,0.55)]">
                       <td className="py-2.5 px-3 font-mono font-bold text-gold-ink text-center">{idx + 1}</td>
                       <td className="py-2.5 px-3 font-bold text-ink align-top">{getPositionName(pos, isEnglish)}</td>
                       <td className="py-2.5 px-3 text-[#5E5240] leading-relaxed align-top">{getPositionMeaning(pos, isEnglish)}</td>
@@ -227,7 +227,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
         <ol className="mt-4 space-y-3">
           {howToSteps.map((step, idx) => (
             <li key={idx} className="flex items-start gap-3 font-serif-th">
-              <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-ink text-xs font-bold text-canvas">
+              <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gold-ink text-xs font-bold text-white">
                 {idx + 1}
               </span>
               <div>
@@ -248,7 +248,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
           {faqs.map((faq, idx) => (
             <details
               key={idx}
-              className="rounded-lg border border-line bg-white p-4 font-serif-th"
+              className="altar-card-porcelain p-4 font-serif-th"
             >
               <summary className="cursor-pointer font-bold text-ink">{faq.question}</summary>
               <p className="mt-2 leading-relaxed text-muted">{faq.answer}</p>
@@ -288,7 +288,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
             <Link
               key={s.id}
               href={`/spreads/${s.id}`}
-              className="rounded-lg border border-line bg-white p-4 transition-colors hover:border-gold"
+              className="altar-card-porcelain p-4"
             >
               <p className="font-serif-th font-bold text-ink">{getSpreadName(s, isEnglish)}</p>
               <p className="mt-1 font-serif-th text-xs text-muted">{getSpreadTagline(s, isEnglish)}</p>

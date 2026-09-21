@@ -297,8 +297,8 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
              */
             const cardClass = `group relative flex flex-col w-[36vw] max-w-[136px] shrink-0 snap-center sm:w-full sm:max-w-[140px] sm:mx-auto p-2 rounded-xl border transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
               isActive
-                ? "bg-surface border-gold shadow-xs"
-                : "bg-inset/40 hover:bg-inset border-line/50 hover:border-line"
+                ? "altar-panel-active"
+                : "glass-tile"
             }`;
 
             /**
@@ -427,7 +427,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
           className="space-y-6 pt-2"
         >
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-inset border border-line text-xs font-serif-th text-muted">
+            <div className="glass-chip inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-serif-th text-muted">
               <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" aria-hidden="true" />
               <span>
                 {isEnglish
@@ -466,7 +466,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                   }}
                   role="button"
                   tabIndex={0}
-                  className="group relative flex flex-col items-center text-center w-[62vw] max-w-[240px] shrink-0 snap-center sm:w-auto sm:max-w-none p-4 sm:p-5 rounded-2xl bg-surface/80 hover:bg-surface border border-line/80 hover:border-gold transition-colors duration-200 cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                  className="altar-card-porcelain group relative flex flex-col items-center text-center w-[62vw] max-w-[240px] shrink-0 snap-center sm:w-auto sm:max-w-none p-4 sm:p-5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                   aria-label={
                     isEnglish
                       ? `Select Pile ${pile.number}: ${pile.crystalEn}`
@@ -474,7 +474,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                   }
                 >
                   {/* Number & Crystal Badge */}
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-inset border border-line text-[11px] font-mono font-medium text-ink mb-4 group-hover:border-gold/60 transition-colors">
+                  <div className="glass-chip flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-mono font-medium text-ink mb-4">
                     <span className={`w-1.5 h-1.5 rounded-full ${styling.dot}`} aria-hidden="true" />
                     <span>{isEnglish ? `Pile ${pile.number}` : `กองที่ ${pile.number}`}</span>
                   </div>
@@ -538,9 +538,9 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
           className="space-y-8"
         >
           {/* Top Bar for Selected Pile */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-surface border border-line">
+          <div className="altar-panel flex flex-col sm:flex-row items-center justify-between gap-4 p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-inset border border-line flex items-center justify-center text-base font-bold font-serif-th text-gold-ink">
+              <div className="glass-tile w-10 h-10 !rounded-xl flex items-center justify-center text-base font-bold font-serif-th text-gold-ink">
                 {selectedSlot?.number}
               </div>
               <div>
@@ -556,13 +556,13 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
             <div className="flex items-center gap-2.5 w-full sm:w-auto">
               <button
                 onClick={handleRevealAll}
-                className="flex-1 sm:flex-initial min-h-[44px] px-4 py-2 rounded-xl bg-inset hover:bg-inset/80 border border-line text-xs font-serif-th text-ink transition-colors cursor-pointer"
+                className="glass-tile flex-1 sm:flex-initial min-h-[44px] px-4 py-2 !rounded-xl text-xs font-serif-th text-ink cursor-pointer"
               >
                 {isEnglish ? "Reveal All Cards" : "เปิดไพ่ทั้งหมด"}
               </button>
               <button
                 onClick={handleResetPile}
-                className="flex-1 sm:flex-initial min-h-[44px] px-4 py-2 rounded-xl bg-surface hover:bg-inset border border-line text-xs font-serif-th text-muted hover:text-ink transition-colors cursor-pointer"
+                className="glass-tile flex-1 sm:flex-initial min-h-[44px] px-4 py-2 !rounded-xl text-xs font-serif-th text-muted hover:text-ink cursor-pointer"
               >
                 {isEnglish ? "Choose Another Pile" : "เลือกกองอื่น"}
               </button>
@@ -574,7 +574,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
             ⚠️ ห้ามวาดไพ่สำรองขึ้นมาระหว่างรอเด็ดขาด (กฎเหล็กข้อ 14) หน้าจอนี้จึงมีแต่ข้อความ
           */}
           {drawnCards.length === 0 ? (
-            <div className="p-6 sm:p-8 rounded-2xl border border-line bg-surface text-center space-y-4">
+            <div className="altar-card-porcelain p-6 sm:p-8 text-center space-y-4">
               <p className="text-sm sm:text-base font-serif-th text-ink leading-relaxed">
                 {oracle.isPreparing
                   ? isEnglish
@@ -593,14 +593,14 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                     if (slotIndex >= 0) void runPile(activeTopic.id, slotIndex);
                   }}
                   disabled={oracle.isPreparing}
-                  className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-xl bg-ink text-surface-warm text-xs font-serif-th font-semibold shadow-raised hover:bg-gold disabled:opacity-60 disabled:cursor-wait transition cursor-pointer"
+                  className="btn-gold-glass w-full sm:w-auto min-h-[44px] px-5 py-2.5 text-xs font-serif-th font-semibold disabled:opacity-60 disabled:cursor-wait cursor-pointer"
                 >
                   {isEnglish ? "Try again" : "ลองอีกครั้ง"}
                 </button>
                 <button
                   type="button"
                   onClick={handleResetPile}
-                  className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-xl bg-surface hover:bg-inset border border-line text-xs font-serif-th text-muted hover:text-ink transition-colors cursor-pointer"
+                  className="glass-tile w-full sm:w-auto min-h-[44px] px-5 py-2.5 !rounded-xl text-xs font-serif-th text-muted hover:text-ink cursor-pointer"
                 >
                   {isEnglish ? "Choose Another Pile" : "เลือกกองอื่น"}
                 </button>
@@ -636,10 +636,10 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                       แต่ละใบมี "ช่องของตัวเอง" — กรอบบาง ๆ พร้อมพื้นหลังอ่อน
                       ทำให้ไพ่ดูเป็นสัดเป็นส่วนแทนที่จะลอยติดกันเป็นพืด
                     */
-                    className="flex flex-col items-center space-y-2.5 w-[66vw] max-w-[212px] shrink-0 snap-center sm:w-full p-3 rounded-2xl border border-line/60 bg-surface/50"
+                    className="glass-tile flex flex-col items-center space-y-2.5 w-[66vw] max-w-[212px] shrink-0 snap-center sm:w-full p-3 !rounded-2xl"
                   >
                     {/* Position Label Tag */}
-                    <div className="px-3 py-1 rounded-full bg-inset border border-line/80 text-[11.5px] font-serif-th text-muted font-medium text-center truncate w-full">
+                    <div className="glass-chip px-3 py-1 text-[11.5px] font-serif-th text-muted font-medium text-center truncate w-full">
                       {positionLabel}
                     </div>
 
@@ -681,7 +681,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
           {revealedIndices.size > 0 && (
             <article
               aria-label={isEnglish ? "Card Pile Reading" : "คำทำนายประจำกองไพ่"}
-              className="p-5 sm:p-8 rounded-2xl bg-surface border border-line space-y-6 shadow-sm"
+              className="altar-panel p-5 sm:p-8 space-y-6"
             >
               {/*
                 คำอ่านหลักมาจากแม่หมอ AI เสมอ — ขึ้นเมื่อผู้ใช้พลิกครบทั้งสามใบ
@@ -729,7 +729,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                       revealedIndices.has(idx) ? (
                         <div
                           key={`${item.cardId}-body-${idx}`}
-                          className="p-4 rounded-xl bg-inset/50 border border-line/60 space-y-1"
+                          className="glass-tile p-4 !rounded-xl space-y-1"
                         >
                           <h3 className="text-xs font-mono text-gold-ink uppercase tracking-wider">
                             {`${idx + 1}. ${isEnglish ? item.positionEn : item.positionTh}`}
@@ -744,7 +744,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
 
                   {/* Affirmation Frame */}
                   {revealedIndices.size === drawnCards.length && (
-                    <div className="p-4 sm:p-5 rounded-xl bg-surface border-2 border-line-warm/60 text-center space-y-1.5">
+                    <div className="altar-card-porcelain p-4 sm:p-5 text-center space-y-1.5">
                       <div className="text-[10.5px] font-mono text-gold-ink uppercase tracking-[0.18em]">
                         {isEnglish ? "AFFIRMATION FOR YOUR SOUL" : "ข้อคิดเตือนใจประจำกองไพ่"}
                       </div>

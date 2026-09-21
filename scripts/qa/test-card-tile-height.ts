@@ -27,13 +27,24 @@ import path from "node:path";
 
 const ROOT = process.cwd();
 
-/** ของที่สูตรตั้งอยู่บน — แก้อะไรในนี้ต้องไปวัดความสูงใหม่เสมอ */
+/**
+ * ของที่สูตรตั้งอยู่บน — แก้อะไรในนี้ต้องไปวัดความสูงใหม่เสมอ
+ *
+ * 📝 2026-09-21: ไทล์ไพ่เปลี่ยนผิวจาก `border border-line bg-surface … shadow-xs`
+ *    มาเป็น `.altar-card-porcelain` (ธีมกระจกอุ่น) — **วัดใหม่แล้วความสูงไม่ขยับเลย**
+ *    เพราะคลาสใหม่ยังเป็นเส้นขอบ 1px เท่าเดิมและ `p-3` เท่าเดิม สิ่งที่เปลี่ยนคือสีพื้น
+ *    มุมโค้ง และเงา ซึ่งไม่มีตัวไหนอยู่ในสูตรความสูง
+ *
+ *    วัดด้วย Chromium บน `/cards` และ `/cards/major` ที่ 375 · 640 · 768 · 1024 · 1280 · 1440px
+ *    ได้ content box ตรงกันทุกทศนิยมทั้งก่อนและหลังแก้ (เช่น 1280px = 383.1px ทั้งคู่)
+ *    และ padding+ขอบ ยังรวมได้ 26px เป๊ะทุกความกว้าง ตามที่สูตรหักไว้
+ */
 const FINGERPRINTS: { file: string; needles: string[]; why: string }[] = [
   {
     file: "src/components/encyclopedia/CardsExplorer.tsx",
     needles: [
       "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-5",
-      "card-tile-cv rounded-xl border border-line bg-surface p-3",
+      "card-tile-cv altar-card-porcelain !rounded-xl p-3",
       'aspect-[7/12]',
       "h-[3.8125rem]",
     ],
@@ -43,7 +54,7 @@ const FINGERPRINTS: { file: string; needles: string[]; why: string }[] = [
     file: "src/components/encyclopedia/CardGroupView.tsx",
     needles: [
       "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4",
-      "card-tile-cv rounded-xl border border-line bg-surface p-3",
+      "card-tile-cv altar-card-porcelain !rounded-xl p-3",
       'aspect-[7/12]',
       "h-[3.8125rem]",
     ],
