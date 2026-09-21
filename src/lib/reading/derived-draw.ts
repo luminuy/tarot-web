@@ -39,6 +39,12 @@
  */
 import { DECK } from "@/data/cards";
 import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
+/*
+ * ⚠️ โมดูลนี้เป็นของฝั่งเซิร์ฟเวอร์ล้วน ๆ จึง import คลังคำอ่านทั้งก้อนได้โดยไม่กระทบบันเดิล
+ * (ถ้าวันหนึ่งมีใครเอาไฟล์นี้ไปใช้ฝั่งเบราว์เซอร์ น้ำหนัก 1,600 บรรทัดจะตามไปด้วย — ดู ISSUE-050)
+ */
+import { PICK_A_CARD_POOLS } from "@/data/pick-a-card-readings";
+import { composeFromDerived, type ComposedReading } from "@/lib/pick-a-card/compose";
 import { seededOrder } from "@/lib/pick-a-card/daily";
 import { calculateBirthCard } from "@/lib/tarot/birth-card";
 import type { DrawnCard } from "@/lib/tarot/shuffle";
@@ -81,10 +87,18 @@ export type DerivedDrawDetail =
       topicId: string;
       slotIndex: number;
       dayKey: string;
-      /** ดัชนีในคลังคำอ่านของแต่ละตำแหน่ง — หน้าเว็บใช้หยิบย่อหน้าที่เขียนคู่กับไพ่ใบนั้น */
+      /** ดัชนีในคลังคำอ่านของแต่ละตำแหน่ง (ไว้ตรวจสอบย้อนหลังและใช้ในด่านตรวจ) */
       anchor: number;
       hidden: number;
       advice: number;
+      /**
+       * บทเสริมที่เขียนไว้ล่วงหน้าของรอบนี้ — **เซิร์ฟเวอร์ประกอบให้แล้ว**
+       *
+       * เดิมหน้าเว็บเป็นผู้ประกอบเอง จึงต้องแบกคลังคำอ่านทั้ง 8 หัวข้อ (≈1,600 บรรทัด)
+       * ไว้ในบันเดิลตั้งแต่ไบต์แรก ทั้งที่ผู้ใช้เห็นก็ต่อเมื่อเปิดกองแล้ว (ISSUE-050)
+       * · `null` = ประกอบไม่ได้ ➔ หน้าเว็บแสดงเฉพาะคำอ่านของแม่หมอ ไม่ต้องมีบทเสริม
+       */
+      script: ComposedReading | null;
     };
 
 export interface DerivedDrawResult {
@@ -212,7 +226,10 @@ function mod(value: number, size: number): number {
  * ไพ่แต่ละตำแหน่งมาจากคลังคนละชิ้นตามโครง INC-0199b (ตำแหน่ง 1 จาก anchor · 2 จาก hidden ·
  * 3 จาก advice) จึงต้องหยิบใบให้ตรงตำแหน่งเป๊ะ ๆ ไม่งั้นย่อหน้าที่เขียนคู่กันไว้จะพูดถึงไพ่ผิดใบ
  */
-function derivePickACard(spec: Extract<DerivedDrawSpec, { kind: "pick-a-card" }>): DerivedDrawResult | undefined {
+function derivePickACard(
+  spec: Extract<DerivedDrawSpec, { kind: "pick-a-card" }>,
+  lang: "th" | "en",
+): DerivedDrawResult | undefined {
   const topic = PICK_A_CARD_TOPICS.find((t) => t.id === spec.topicId);
   if (!topic) return undefined;
   if (!Number.isInteger(spec.slotIndex) || spec.slotIndex < 0 || spec.slotIndex >= topic.slots.length) {
@@ -220,8 +237,9 @@ function derivePickACard(spec: Extract<DerivedDrawSpec, { kind: "pick-a-card" }>
   }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(spec.dayKey)) return undefined;
 
-  const poolSize = topic.pool.length;
-  if (poolSize === 0) return undefined;
+  const pool = PICK_A_CARD_POOLS[topic.id];
+  const poolSize = pool?.length ?? 0;
+  if (!pool || poolSize === 0) return undefined;
 
   const dayNumber = dayNumberOf(spec.dayKey);
   if (!Number.isFinite(dayNumber)) return undefined;
@@ -247,9 +265,9 @@ function derivePickACard(spec: Extract<DerivedDrawSpec, { kind: "pick-a-card" }>
   const adviceIndex = adviceOrder[mod(dayNumber + 2 * spec.slotIndex + adviceBlockStep * dayBlock, poolSize)];
 
   const picked = [
-    topic.pool[anchorIndex]?.cards[0],
-    topic.pool[hiddenIndex]?.cards[1],
-    topic.pool[adviceIndex]?.cards[2],
+    pool[anchorIndex]?.cards[0],
+    pool[hiddenIndex]?.cards[1],
+    pool[adviceIndex]?.cards[2],
   ];
 
   const drawn: DrawnCard[] = [];
@@ -271,6 +289,11 @@ function derivePickACard(spec: Extract<DerivedDrawSpec, { kind: "pick-a-card" }>
       anchor: anchorIndex,
       hidden: hiddenIndex,
       advice: adviceIndex,
+      script: composeFromDerived(
+        pool,
+        { anchor: anchorIndex, hidden: hiddenIndex, advice: adviceIndex },
+        lang === "en",
+      ),
     },
   };
 }
@@ -278,9 +301,10 @@ function derivePickACard(spec: Extract<DerivedDrawSpec, { kind: "pick-a-card" }>
 /**
  * คำนวณไพ่จากสเปกที่ตรึงไว้แล้ว
  *
+ * @param lang ภาษาของบทเสริมที่เซิร์ฟเวอร์ประกอบให้ (ของ Pick A Card) — ค่าตั้งต้นเป็นไทย
  * @returns `undefined` เมื่อสเปกใช้ไม่ได้หรือหาไพ่ไม่เจอ — ผู้เรียกต้องตอบผู้ใช้ว่า
  * "กรุณาโหลดใหม่อีกครั้ง" ห้ามเดินต่อด้วยไพ่ที่กุขึ้นมาเอง (กฎเหล็กข้อ 14)
  */
-export function deriveDrawn(spec: DerivedDrawSpec): DerivedDrawResult | undefined {
-  return spec.kind === "birth-card" ? deriveBirthCard(spec) : derivePickACard(spec);
+export function deriveDrawn(spec: DerivedDrawSpec, lang: "th" | "en" = "th"): DerivedDrawResult | undefined {
+  return spec.kind === "birth-card" ? deriveBirthCard(spec) : derivePickACard(spec, lang);
 }

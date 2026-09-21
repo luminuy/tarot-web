@@ -11,8 +11,6 @@ import { TarotCard } from "@/components/card/TarotCard";
 import { CardImage } from "@/components/card/CardImage";
 import { soundManager } from "@/lib/utils/audio";
 import { copyToClipboard } from "@/lib/utils/clipboard";
-// ประกอบเนื้อหาที่เขียนไว้แล้วให้ตรงกับไพ่ที่ "เซิร์ฟเวอร์" คำนวณมา (INC-0198b · INC-0199b)
-import { composeFromDerived } from "@/lib/pick-a-card/compose";
 // ป้ายวันของสำรับประจำวัน — วันนี้ทั้งเว็บเห็นชุดเดียวกัน พรุ่งนี้เปลี่ยนใหม่
 import { dayLabel } from "@/lib/pick-a-card/daily";
 /*
@@ -72,12 +70,15 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
   const derivedDetail = oracle.derived?.kind === "pick-a-card" ? oracle.derived : null;
 
   /**
-   * เนื้อหาที่เขียนไว้แล้วของรอบนี้ — ใช้เป็น "บทเสริม" ใต้คำอ่านของแม่หมอ
+   * บทเสริมที่เขียนไว้ล่วงหน้าของรอบนี้ — **เซิร์ฟเวอร์ประกอบมาให้แล้ว** ใต้คำอ่านของแม่หมอ
    *
-   * ⚠️ แสดงได้ก็ต่อเมื่อรหัสไพ่ทั้งสามใบตรงกับไพ่ที่เซิร์ฟเวอร์เปิดจริงเท่านั้น
-   * ไม่ตรงเมื่อไหร่ต้องทิ้งทั้งก้อน — ย่อหน้าที่พูดถึงไพ่ที่ไม่ได้อยู่ตรงหน้าคือการกุไพ่ (กฎเหล็กข้อ 14)
+   * เดิมหน้านี้ประกอบเอง จึงต้องแบกคลังคำอ่านทั้ง 8 หัวข้อไว้ในบันเดิลตั้งแต่ไบต์แรก
+   * ทั้งที่ผู้ใช้เห็นก็ต่อเมื่อเปิดกองแล้ว (ISSUE-050) ตอนนี้มากับคำตอบของ `/shuffle` แทน
+   *
+   * ⚠️ ยังต้องเทียบรหัสไพ่ทั้งสามใบกับไพ่ที่เปิดจริงก่อนแสดงเสมอ — ถ้าคลังถูกแก้คนละรอบกับ
+   * ตัวคำนวณ ย่อหน้าจะพูดถึงไพ่ที่ไม่ได้อยู่ตรงหน้า = กุไพ่ ผิดกฎเหล็กข้อ 14
    */
-  const composed = derivedDetail ? composeFromDerived(activeTopic, derivedDetail, isEnglish) : null;
+  const composed = derivedDetail?.script ?? null;
   const scriptMatchesCards = Boolean(
     composed &&
       drawnCards.length === composed.cards.length &&

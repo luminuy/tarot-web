@@ -40,7 +40,7 @@
  * (`composeFromDerived`) — ตัวจั่วฝั่งเบราว์เซอร์ถูกถอดออกทั้งหมด ห้ามเอากลับมา
  * เพราะไพ่ที่หน้าเว็บจั่วเองจะไม่ตรงกับไพ่ที่แม่หมอกำลังอ่านอยู่
  */
-import type { PickACardCardItem, PickACardTopic } from "@/data/pick-a-card";
+import type { PickACardCardItem, PickACardEntry } from "@/data/pick-a-card";
 
 /** ผลการจั่วหนึ่งรอบ — เก็บแยกตามตำแหน่ง ไม่ได้ผูกเป็นกองอีกแล้ว */
 export interface PickACardDraw {
@@ -66,23 +66,27 @@ export interface ComposedReading {
 /**
  * ประกอบเนื้อหาที่เขียนไว้แล้ว ให้ตรงกับผลที่ **เซิร์ฟเวอร์** คำนวณมาในรอบนี้
  *
- * @param picks ดัชนีคลังของแต่ละตำแหน่งที่ได้จาก `/api/reading/[id]/shuffle`
+ * @param pool คลังคำอ่านของหัวข้อนั้น (`PICK_A_CARD_POOLS[topicId]`) — **ฝั่งเซิร์ฟเวอร์เท่านั้น**
+ * @param picks ดัชนีคลังของแต่ละตำแหน่งที่เซิร์ฟเวอร์คำนวณได้ในรอบนี้
+ *
+ * ผู้เรียกตัวจริงคือ `/api/reading/[id]/shuffle` ซึ่งประกอบเสร็จแล้วส่งข้อความไปให้หน้าเว็บเลย
+ * (หน้าเว็บจึงไม่ต้องโหลดคลังคำอ่านเข้าบันเดิลอีกต่อไป — ISSUE-050)
  *
  * ⚠️ ผู้เรียกต้องเทียบรหัสไพ่ที่ได้กับไพ่ที่เซิร์ฟเวอร์เปิดจริงก่อนแสดงย่อหน้าเสมอ
  * ถ้าไม่ตรง (เช่นคลังถูกแก้คนละรอบกับที่เซิร์ฟเวอร์คำนวณ) ให้ทิ้งย่อหน้าไป ห้ามแสดงคู่กัน
  * เพราะย่อหน้าจะพูดถึงไพ่ที่ไม่ได้อยู่ตรงหน้า = กุไพ่ ผิดกฎเหล็กข้อ 14
  */
 export function composeFromDerived(
-  topic: PickACardTopic,
+  pool: readonly PickACardEntry[] | undefined,
   picks: { anchor: number; hidden: number; advice: number },
   isEnglish: boolean
 ): ComposedReading | null {
-  const size = topic.pool.length;
-  if (size === 0) return null;
+  const size = pool?.length ?? 0;
+  if (!pool || size === 0) return null;
 
-  const anchor = topic.pool[picks.anchor % size];
-  const hidden = topic.pool[picks.hidden % size];
-  const advice = topic.pool[picks.advice % size];
+  const anchor = pool[picks.anchor % size];
+  const hidden = pool[picks.hidden % size];
+  const advice = pool[picks.advice % size];
   if (!anchor || !hidden || !advice) return null;
 
   const frame = isEnglish ? anchor.readingEn : anchor.readingTh;
