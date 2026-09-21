@@ -581,7 +581,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
           <button
             type="button"
             onClick={onProceed}
-            className="w-full sm:w-auto px-8 py-3.5 sm:py-4 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-white font-bold font-serif-th text-sm sm:text-base active:scale-[0.98] transition cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap group"
+            className="btn-gold-glass w-full sm:w-auto px-8 py-3.5 sm:py-4 font-bold font-serif-th text-sm sm:text-base active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap group"
           >
             <span>{proceedLabel ?? (isEnglish ? "Next: Set Intention & Choose Reader" : "ถัดไป: ตั้งคำถามและเลือกแม่หมอ")}</span>
             <span className="group-hover:translate-x-1 transition-transform">→</span>
@@ -626,7 +626,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
               <button
                 type="button"
                 onClick={() => setShowStartModal(false)}
-                className="w-full sm:w-auto px-5 py-3 rounded-full border border-line-warm text-ink-deep font-serif-th text-sm font-semibold hover:bg-surface-warm transition-colors cursor-pointer"
+                className="btn-glass-ghost w-full sm:w-auto px-5 py-3 !rounded-full text-ink-deep font-serif-th text-sm font-semibold hover:text-gold-ink transition-colors cursor-pointer"
               >
                 {isEnglish ? "Browse Other Spreads" : "ดูผังอื่นก่อน"}
               </button>
@@ -636,7 +636,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                   setShowStartModal(false);
                   onProceed();
                 }}
-                className="w-full sm:flex-1 px-6 py-3 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-white font-bold font-serif-th text-sm active:scale-[0.98] transition cursor-pointer flex items-center justify-center gap-2 group"
+                className="btn-gold-glass w-full sm:flex-1 px-6 py-3 font-bold font-serif-th text-sm active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2 group"
               >
                 <span>{proceedLabel ?? (isEnglish ? "Start Reading Now" : "เริ่มการดูดวงเลย")}</span>
                 <span className="group-hover:translate-x-1 transition-transform" aria-hidden="true">→</span>

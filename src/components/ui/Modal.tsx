@@ -128,13 +128,16 @@ export const Modal: React.FC<ModalProps> = ({
       <div
         ref={modalContainerRef}
         tabIndex={-1}
-        className={`relative z-10 w-full ${maxWidthClass} max-h-[90svh] flex flex-col bg-white border border-line-warm rounded-lg shadow-overlay text-ink-deep overflow-hidden focus:outline-none ${
+        /* 🪟 ผิวแผงเป็นกระจกอุ่นชุดเดียวกับทั้งเว็บ (`.altar-modal` ใน globals.css)
+           ของเดิมเป็น `bg-white` + มุม 8px + เงาก้อนเดียว ซึ่งอ่านเป็นกล่องกระดาษสีขาว
+           ลอยอยู่บนเว็บกระจก — เจ้าของทักว่าไม่เข้ากัน (2026-09-21) */
+        className={`relative z-10 w-full ${maxWidthClass} max-h-[90svh] flex flex-col altar-modal text-ink-deep overflow-hidden focus:outline-none ${
           isClosing ? "anim-modal-sink" : "anim-modal-rise"
         } ${className}`}
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-start justify-between p-6 pb-4 border-b border-line-warm">
+          <div className="glass-divider-b flex items-start justify-between p-6 pb-4">
             <div>
               {title && <h2 className="text-xl sm:text-2xl font-bold font-mystic-gold">{title}</h2>}
               {description && <div className="mt-1 text-xs sm:text-sm text-muted">{description}</div>}
@@ -144,7 +147,7 @@ export const Modal: React.FC<ModalProps> = ({
                 type="button"
                 onClick={onClose}
                 aria-label={isEnglish ? "Close dialog" : "ปิดหน้าต่าง"}
-                className="w-11 h-11 flex items-center justify-center rounded bg-inset-warm border border-line-warm text-muted hover:text-ink-deep hover:border-gold-ink hover:bg-[rgba(143,92,26,0.08)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink cursor-pointer"
+                className="glass-chip w-11 h-11 shrink-0 flex items-center justify-center text-muted hover:text-ink-deep hover:border-gold-ink transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink cursor-pointer"
               >
                 ✕
               </button>
