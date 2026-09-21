@@ -18,7 +18,7 @@
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
 - **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
-- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 79/79 ด่าน (สมบูรณ์ 100%)**
+- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 80/80 ด่าน (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **25 ผังพยากรณ์ยอดนิยม** (124 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
 
@@ -37,6 +37,62 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
+
+### 🗓️ 2026-09-21 (รอบ 108): 🌐 เว็บถูกเสิร์ฟครบทั้งสองโฮสต์เงียบ ๆ — กฎ www ที่ "มีอยู่แต่ไม่เคยถูกเรียก" (INC-0203)
+
+**ที่มา**: เจ้าของสังเกตว่า Google Search Console สอง property (Domain `seertarot.net` กับ URL prefix `https://seertarot.net/`) รายงานตัวเลขไม่ตรงกันหลายจุด ระหว่างไล่หาคำอธิบายจึงยิง curl ใส่โฮสต์ www แล้วพบของจริงที่ใหญ่กว่าคำถามตั้งต้น
+
+**อาการที่วัดได้บน production (2026-09-21)**:
+
+| URL | ก่อนแก้ | ควรเป็น |
+| :--- | :--- | :--- |
+| `https://www.seertarot.net/` | **200** (เนื้อหาเต็ม) | 301 ➔ โดเมนหลัก |
+| `https://www.seertarot.net/cards` | **200** (เนื้อหาเต็ม) | 301 ➔ โดเมนหลัก |
+| `https://www.seertarot.net/blog` | **200** (เนื้อหาเต็ม) | 301 ➔ โดเมนหลัก |
+| `https://www.seertarot.net/robots.txt` | 301 ✅ | 301 |
+| `https://www.seertarot.net/sitemap.xml` | 301 ✅ | 301 |
+
+**สาเหตุราก — ไม่ใช่ "ลืมเขียนกฎ" แต่เป็น "กฎย้ายชั้นไปอยู่ใต้ทางลัด"**:
+กฎ `www ➔ โดเมนหลัก` อยู่ใน `next.config.ts` → `redirects()` ครบถ้วนถูกต้องมาตลอด
+แต่ `redirects()` ถูกเรียก **ก็ต่อเมื่อคำขอวิ่งถึง Worker** — ตอนเขียนกฎนั้น Next เรนเดอร์ทุกหน้า
+กฎจึงครอบทั้งเว็บจริง ๆ พอคลื่นย้ายไป Astro ทำให้หน้าเนื้อหา 334 หน้าถูก Cloudflare ตอบจาก
+ชั้น assets **ก่อนถึง Worker** กฎเดิมก็เงียบไปเองโดยไม่มีไฟล์ไหนถูกแก้ ไม่มีด่านไหนแดง
+
+```
+ลำดับจริงของ Cloudflare:  WAF / Redirect Rules ➔ assets ➔ Worker ➔ Cache
+                                                  └─ หน้า Astro จบตรงนี้ กฎของ Next ไม่เคยถูกเรียก
+```
+
+สองเส้นที่ยังเด้งถูก (`/robots.txt` · `/sitemap.xml`) คือเส้นที่อยู่ใน `run_worker_first` พอดี
+— ซึ่งทำให้การตรวจแบบสุ่มเส้นเดียวได้ผล "เขียวปลอม" ด้วย
+
+**ผลกระทบด้าน SEO**: เนื้อหาชุดเดียวกันถูกเสิร์ฟสองโฮสต์ · ลิงก์ที่คนอื่นแปะมาที่ www กระจายน้ำหนัก
+ออกไปอีกโฮสต์ · Googlebot ไล่คลานซ้ำสองเท่าบนเว็บที่มีงานค้างในคิว "พบแล้ว - ยังไม่ได้จัดทำดัชนี" อยู่ 268 หน้า
+· ตรงกับแถว "หน้าเว็บสำรองที่มีแท็กตามรูปแบบบัญญัติที่ถูกต้อง 15 หน้า" ใน GSC พอดี
+(`canonical` ที่ทุกหน้ามีครบช่วยประคองไว้ระดับหนึ่ง แต่เป็นแค่ "คำแนะนำ" ไม่ใช่คำสั่ง)
+
+**สิ่งที่ทำ**:
+1. `src/lib/config/canonical-host.ts` (ใหม่) — รายชื่อโฮสต์หลัก/โฮสต์รองไฟล์เดียวจบ ทั้งสองชั้นอ่านจากที่นี่
+2. `scripts/cloudflare-canonical-host.ts` (ใหม่) — ดัน Single Redirect ขึ้น **ชั้นขอบ** ผ่าน Cloudflare API
+   (เฟส `http_request_dynamic_redirect` ซึ่งทำงานก่อนชั้น assets จึงครอบคลุมทุกเส้นทาง)
+   idempotent ด้วย marker `[canonical-host]` · มี `--dry-run` และ `--check` (ตรวจของจริงโดยไม่ต้องใช้ token)
+3. `next.config.ts` — กฎเดิมยังอยู่ในฐานะ **ชั้นสำรอง** แต่เลิกฮาร์ดโค้ดชื่อโฮสต์ หันมาสร้างจากไฟล์กลาง
+4. `.github/workflows/deploy.yml` — ขั้นใหม่หลัง deploy: ดันกฎขึ้นขอบแล้วยิงจริงยืนยัน
+   ถ้า token เขียน ruleset ไม่ได้แต่กฎถูกตั้งด้วยมือไว้แล้ว ก็ยังผ่าน (ตัดสินจากของจริง ไม่ใช่จากผลการเขียน)
+5. **ด่านที่ 80** `scripts/qa/test-canonical-host.ts` — บังคับว่า "กฎระดับโฮสต์ต้องมีสองชั้นเสมอ"
+   ตรวจออฟไลน์ 100% (เรียก `redirects()` ของจริงมาตรวจ · ห้ามโฮสต์ฮาร์ดโค้ด · ชั้นขอบต้องผูกกับ deploy)
+   พร้อมโหมด `--live` สำหรับยิงจริงหลัง deploy
+
+**ยังค้าง (ต้องใช้สิทธิ์ของเจ้าของ)**: กฎบนขอบจะถูกดันอัตโนมัติในรอบ deploy ถัดไป **ถ้า** `CLOUDFLARE_API_TOKEN`
+มีสิทธิ์ `Zone · Transform Rules · Edit` — ถ้ายังไม่มี ขั้นนั้นจะขึ้นแดงพร้อมวิธีกดเองใน Dashboard
+ตรวจสถานะได้ทุกเมื่อด้วย `npm run cf:canonical-host -- --check`
+
+**ผลตรวจอื่นในรอบเดียวกัน (ยิงจริงบน production ทั้งหมด — ไม่พบปัญหา)**:
+`sitemap.xml` 330 URL เป็นโดเมนหลัก https ล้วน มี `lastmod` ครบทุกเส้น · `robots.txt` ชี้ sitemap ถูก ·
+`canonical` + `hreflang` (th-TH · en-US · x-default) ตรงกันสองทางทั้งหน้าไทยและอังกฤษ ·
+`http://` เด้ง 301 เป็น https ทั้งสองโฮสต์ · URL มั่ว ตอบ 404 จริง (ไม่ใช่ soft 404) ·
+`/cards/` · `/cards.html` · `/en/` เด้งรวมเป็นเส้นเดียว (307 จากชั้น assets ของ Cloudflare — ปรับไม่ได้จากโค้ด แต่ Google ตามได้) ·
+`?lang=en` ไม่สร้างหน้าซ้ำ (canonical ชี้กลับเส้นสะอาด) · ไม่มี `X-Robots-Tag` หลุดที่หน้าไหน
 
 ### 🗓️ 2026-09-19 (รอบ 107): 🛡️ แก้ไขข้อบกพร่องเชิงลึก i18n API Error Leaks, PDPA Queue Retention Cleanup, และ Knip Config Hygiene (INC-0202)
 
@@ -70,7 +126,7 @@
 - `npx tsx scripts/qa/test-shuffle.ts` ➔ ผ่านครบ 21/21 ข้อ
 - `npx tsx scripts/qa/test-no-fake-card.ts` ➔ ผ่านครบ 39/39 ข้อ
 - `npm run deadcode` ➔ รันผ่านโดยไม่มี configuration hints
-- `npm run repo:verify` ➔ ผ่านครบทั้ง 79/79 ด่านสมบูรณ์ 100%
+- `npm run repo:verify` ➔ ผ่านครบทั้ง 80/80 ด่านสมบูรณ์ 100%
 
 ### 🗓️ 2026-09-19 (รอบ 106): 🛡️ แก้ไขความปลอดภัย Host Header Injection, สถาปัตยกรรม Storage Key (R-30), i18n Auth, และ Next 16 Dev Runtime (ISSUE-051)
 
@@ -104,7 +160,7 @@
 - `npx tsx scripts/qa/test-sticky-header.ts` & `test-worker-first-routes.ts` ➔ ผ่าน 100%
 - `npx tsx scripts/qa/test-email-auth.ts` & `test-password.ts` ➔ ผ่าน 100%
 - `npm run dev` (`next dev --webpack`) ➔ บูตพร้อมทำงาน, ตอบกลับ 200 และ 404 ถูกต้อง 100%
-- `npm run repo:verify` ➔ ผ่านครบทั้ง 79/79 ด่านสมบูรณ์ 100%
+- `npm run repo:verify` ➔ ผ่านครบทั้ง 80/80 ด่านสมบูรณ์ 100%
 
 ### 🗓️ 2026-09-19 (รอบ 105): 🚀 ยกระดับประสิทธิภาพ Mobile Lighthouse (ลด LCP จาก 3.3s สู่ <2.0s & ขจัดคอขวด /api/daily-card 4,987ms)
 
@@ -134,14 +190,14 @@
 - `npx tsx scripts/qa/test-daily-card.ts` ➔ ผ่าน 7/7 ข้อ
 - `npx tsx scripts/qa/test-bundle-budget.ts` ➔ ผ่านงบประมาณทุกเส้นทาง 100%
 - `npx tsx scripts/qa/test-render-parity.ts` ➔ ผ่านความสมบูรณ์ 100%
-- `npm run repo:verify` ➔ ผ่านครบทั้ง 79/79 ด่านสมบูรณ์
+- `npm run repo:verify` ➔ ผ่านครบทั้ง 80/80 ด่านสมบูรณ์
 
 ---
 
 ### 🗓️ 2026-09-19 (รอบ 104): ⚡ ติดตั้ง Linter มาตรฐานสำหรับโปรเจกต์ (ESLint 9 + React Hooks + Unused Imports)
 
 **ที่มาและเหตุผล (มิติความเร็วและประสิทธิภาพ ข้อ 2)**:
-โปรเจกต์เดิมพึ่งพา `tsc --noEmit` (Typecheck) และ `knip@5` (Deadcode) ร่วมกับ 79 ด่าน CI แต่ยังขาด Linter มาตรฐานอุตสาหกรรมใน `package.json` เพื่อตรวจจับ Unused Imports และ React Hooks Dependency หลุดล่วงหน้าก่อนเข้าสู่ด่าน CI
+โปรเจกต์เดิมพึ่งพา `tsc --noEmit` (Typecheck) และ `knip@5` (Deadcode) ร่วมกับ 80 ด่าน CI แต่ยังขาด Linter มาตรฐานอุตสาหกรรมใน `package.json` เพื่อตรวจจับ Unused Imports และ React Hooks Dependency หลุดล่วงหน้าก่อนเข้าสู่ด่าน CI
 
 **สถาปัตยกรรมและการลงมือทำตามมาตรฐานระดับโลก**:
 1. **ESLint 9 Flat Config (`eslint.config.mjs`)**:
@@ -166,7 +222,7 @@
 - `npm run lint` ➔ 0 errors, 0 warnings (สะอาด 100%)
 - `npm run typecheck` ➔ 0 errors
 - `npm run test:budget` ➔ หน้าแรก 157 KB (< 200 KB), หน้าไพ่ 5 KB ผ่าน 100%
-- `npm run repo:verify` ➔ ผ่านครบทั้ง 79/79 ด่าน
+- `npm run repo:verify` ➔ ผ่านครบทั้ง 80/80 ด่าน
 
 ### 🗓️ 2026-09-19 (รอบ 103): 🅰️ เซกชัน "ใช่หรือไม่" (Yes / No) ครบ 78 หน้าไพ่สารานุกรม (SEO Traffic Capture & Rich Snippet)
 
@@ -181,7 +237,7 @@
 5. **`src/components/encyclopedia/CardSpreadLinks.tsx`**: เชื่อมโยงผัง `yes-no` เข้าสู่รายการผังคลาสสิกที่แนะนำในทุกหน้าไพ่
 
 **การพิสูจน์ความสมบูรณ์**:
-- `npm run repo:verify` ผ่านครบทั้ง 79/79 ด่าน
+- `npm run repo:verify` ผ่านครบทั้ง 80/80 ด่าน
 - `npm run verify:cards` สำรับผ่านการตรวจ 100% (ใช่ 38 / ไม่ใช่ 22 / ไม่แน่ 18)
 - `test-en-thai-leak` โหมดภาษาอังกฤษเรนเดอร์จริง 41 จอ ไร้อักษรไทยหลุด 100%
 - `test-meta-length` ทุกหน้าผ่านเกณฑ์ SERP (title <= 60, description <= 160)
@@ -230,7 +286,7 @@
   สัญญาของ `/start` · `/shuffle` · โทเคน · หลักฐาน · ห้ามหน้าไพ่คำนวณโชว์แผงตรวจของการจั่ว)
   **พิสูจน์แล้วว่าจับได้จริง** ด้วยการย้อนโค้ดกลับเป็นเวอร์ชันบั๊ก 3 แบบ (ไพ่หัวกลับ · ไม่ตรวจขอบกอง · เรียก `drawCards` ในเส้นคำนวณ) ➔ ตกด่านทั้งสามครั้ง
 - `test-pick-a-card.ts` เขียนใหม่ให้ตรวจ **ผลลัพธ์ที่เซิร์ฟเวอร์คำนวณ** แทนตัวจั่วฝั่งเบราว์เซอร์ที่ถอดไปแล้ว (21/21 ผ่าน)
-- รวมด่านทั้งหมด 78 ➔ **79 ด่าน** (อัปเดตตัวเลขในเอกสารทุกไฟล์ตามด่าน `test-docs-numbers`)
+- รวมด่านทั้งหมด 78 ➔ **80 ด่าน** (อัปเดตตัวเลขในเอกสารทุกไฟล์ตามด่าน `test-docs-numbers`)
 
 **ของแถมด้านน้ำหนัก**: `use-ai-reading` เลิก import ข้อมูลผังทั้งก้อนตอนเปิดหน้า
 เปลี่ยนเป็นโหลดตอนต้องแปลงไพ่จริงเท่านั้น ➔ วัดจากบิลด์จริงหลังแก้: `/daily` **122 ➔ 112 KB**

@@ -62,6 +62,20 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0203 · 2026-09-21 11:55 · 🟠 High · โฮสต์ www เสิร์ฟเว็บซ้ำทั้งเว็บ เพราะกฎ 301 อยู่ชั้นที่คำขอไม่เคยวิ่งผ่าน
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ยิง https://www.seertarot.net/cards บน production ได้ 200 พร้อมเนื้อหาเต็ม เหมือนโดเมนหลักทุกประการ — เนื้อหาชุดเดียวกันจึงถูกเสิร์ฟสองโฮสต์ ส่วน /robots.txt กับ /sitemap.xml กลับเด้ง 301 ถูกต้อง ทำให้การสุ่มตรวจเส้นเดียวได้ผลเขียวปลอมมาตลอด |
+| **ผลกระทบ** | น้ำหนักลิงก์กระจายไปอีกโฮสต์ · Googlebot คลานซ้ำสองเท่าทั้งที่ยังมีคิวรอจัดทำดัชนี 268 หน้า · ตรงกับแถวหน้าเว็บสำรองที่มีแท็กตามรูปแบบบัญญัติ 15 หน้า ใน Search Console |
+| **สาเหตุราก** | กฎ www ไปโดเมนหลักเขียนไว้ใน next.config.ts redirects() ซึ่งถูกเรียกเฉพาะคำขอที่วิ่งถึง Worker ตอนวางกฎนั้น Next เรนเดอร์ทุกหน้า กฎจึงครอบทั้งเว็บจริง พอคลื่นย้ายไป Astro ทำให้หน้าเนื้อหาถูก Cloudflare ตอบจากชั้น assets ก่อนถึง Worker กฎเดิมก็หยุดทำงานไปเองโดยไม่มีไฟล์ไหนถูกแก้ ไม่มีด่านไหนแดง สองเส้นที่ยังเด้งได้คือเส้นที่บังเอิญอยู่ใน run_worker_first |
+| **หลักฐาน** | curl -sS -o /dev/null -w '%{http_code}' https://www.seertarot.net/cards ได้ 200 ส่วน /robots.txt ได้ 301 · เอกสาร Cloudflare ระบุว่า _redirects ของ Workers Assets ไม่รองรับ domain-level redirect จึงต้องใช้ Single Redirect ระดับโซน |
+| **การแก้ไข** | แยกรายชื่อโฮสต์มาไว้ที่ src/lib/config/canonical-host.ts ไฟล์เดียว แล้วต่อสองชั้น — ชั้นขอบของจริงด้วย scripts/cloudflare-canonical-host.ts (Single Redirect เฟส http_request_dynamic_redirect ทำงานก่อนชั้น assets) ที่ deploy.yml เรียกทุกรอบ และชั้นสำรองใน next.config.ts ที่สร้างกฎจากไฟล์กลางแทนการฮาร์ดโค้ด |
+| **🛡️ กฎป้องกันถาวร** | **ด่านที่ 80 scripts/qa/test-canonical-host.ts บังคับว่ากฎระดับโฮสต์ต้องมีสองชั้นเสมอ ตรวจออฟไลน์โดยเรียก redirects() ของจริงมาดู ห้ามมีชื่อโฮสต์ฮาร์ดโค้ด และบังคับว่าชั้นขอบต้องผูกอยู่กับสายพาน deploy จริง พร้อมโหมด --live ไว้ยิงของจริงหลัง deploy** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npm run repo:verify ผ่านครบ 80/80 ด่าน · npm run cf:canonical-host -- --check ยังรายงานแดง 3 เส้นตามจริง (กฎบนขอบรอสิทธิ์เจ้าของ ขึ้นทะเบียน ISSUE-052 ไว้แล้ว) |
+| **บันทึกโดย** | Claude Opus 5 · branch `claude/zealous-euler-s8u27e` · commit `edbbbe2` |
+
+
 ### INC-0202 · 2026-09-19 20:54 · 🟡 Medium · Fix API error i18n leaks, PDPA queue cleanup retention, and knip config hygiene
 
 | หัวข้อ | รายละเอียด |

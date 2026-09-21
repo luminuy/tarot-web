@@ -39,10 +39,7 @@ function sh(cmd: string, args: string[]): string {
   try {
     return execFileSync(cmd, args, { encoding: "utf-8", stdio: "pipe" }).trim();
   } catch (error: any) {
-    const out = [error.stdout?.toString(), error.stderr?.toString()]
-      .filter(Boolean)
-      .join("\n")
-      .trim();
+    const out = [error.stdout?.toString(), error.stderr?.toString()].filter(Boolean).join("\n").trim();
     throw new Error(`คำสั่งล้มเหลว: ${cmd} ${args.join(" ")}\n${out || error.message}`);
   }
 }
@@ -59,7 +56,10 @@ function shQuiet(cmd: string, args: string[]): string | null {
 /** เยื้องทุกบรรทัดให้เท่ากัน — จำเป็นเพราะ sh() ตัดช่องว่างหัวท้ายทิ้ง */
 function indent(text: string | null, fallback: string): string {
   if (!text) return `  ${fallback}`;
-  return text.split("\n").map((l) => `  ${l}`).join("\n");
+  return text
+    .split("\n")
+    .map((l) => `  ${l}`)
+    .join("\n");
 }
 
 /** รันโดยให้ output ไหลออกหน้าจอสด ๆ (ใช้กับคำสั่งที่ใช้เวลานาน) */
@@ -95,78 +95,365 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🚨 ตัวกรองคำถามอันตราย (Safety Guardrails)", cmd: TSX, args: ["scripts/qa/test-safety.ts"] },
   { label: "🎲 ระบบสับไพ่ Provably Fair", cmd: TSX, args: ["scripts/qa/test-shuffle.ts"] },
   { label: "🖼️  การอ้างอิง path ภาพไพ่ถูกต้อง", cmd: TSX, args: ["scripts/qa/test-image-paths.ts"] },
-  { label: "✍️  Live content override ปลอดภัย (ไม่แตะโครงไพ่)", cmd: TSX, args: ["scripts/qa/test-overrides-safety.ts"] },
+  {
+    label: "✍️  Live content override ปลอดภัย (ไม่แตะโครงไพ่)",
+    cmd: TSX,
+    args: ["scripts/qa/test-overrides-safety.ts"],
+  },
   { label: "🤖 อ่านคำตอบ Gemini ถูกวิธี (ข้าม part ความคิด)", cmd: TSX, args: ["scripts/qa/test-gemini-parts.ts"] },
-  { label: "🔐 Client-Server Shuffle Parity (Web Crypto 1,000 เคส)", cmd: TSX, args: ["scripts/verify-shuffle-parity.ts"] },
-  { label: "🔮 Marketplace แม่หมอและการปกป้องข้อมูล (D1 / PDPA)", cmd: TSX, args: ["scripts/qa/test-marketplace-readers.ts"] },
-  { label: "📖 สมุดบันทึกดวงชะตา & User Retention Sync (D1 / SQLite)", cmd: TSX, args: ["scripts/qa/test-journal-sync.ts"] },
+  {
+    label: "🔐 Client-Server Shuffle Parity (Web Crypto 1,000 เคส)",
+    cmd: TSX,
+    args: ["scripts/verify-shuffle-parity.ts"],
+  },
+  {
+    label: "🔮 Marketplace แม่หมอและการปกป้องข้อมูล (D1 / PDPA)",
+    cmd: TSX,
+    args: ["scripts/qa/test-marketplace-readers.ts"],
+  },
+  {
+    label: "📖 สมุดบันทึกดวงชะตา & User Retention Sync (D1 / SQLite)",
+    cmd: TSX,
+    args: ["scripts/qa/test-journal-sync.ts"],
+  },
   { label: "🔑 การแฮชรหัสผ่าน & Email Auth Schema (PBKDF2/D1)", cmd: TSX, args: ["scripts/qa/test-password.ts"] },
-  { label: "📧 ระบบตรวจสอบเส้นทาง Email & Password Auth (Endpoints/Tokens)", cmd: TSX, args: ["scripts/qa/test-email-auth.ts"] },
-  { label: "🎟 แกนสิทธิ์การเปิดไพ่ (โควตารายวัน / โบนัส / กันหักซ้ำ / รหัสแลกสิทธิ์)", cmd: TSX, args: ["scripts/qa/test-entitlement.ts"] },
-  { label: "📬 ดวงประจำวันทางอีเมล (opt-in · กันส่งซ้ำ · ลิงก์ยกเลิกไม่ต้องล็อกอิน · ห้ามกุไพ่)", cmd: TSX, args: ["scripts/qa/test-digest.ts"] },
-  { label: "🎫 บัญชีปลดล็อกไม่จำกัด (tarot_tester + allowlist อีเมล · ไม่ให้สิทธิ์แอดมิน)", cmd: TSX, args: ["scripts/qa/test-tester.ts"] },
-  { label: "🔐 เซสชันล็อกอิน (tokenVersion · host injection · rate limit ไม่ล็อกเจ้าของบัญชี)", cmd: TSX, args: ["scripts/qa/test-session-guard.ts"] },
-  { label: "💎 ระบบล็อกฟีเจอร์พรีเมียม (ผังใหญ่ 15 แบบ & ปรมาจารย์ลับ 2 ท่าน)", cmd: TSX, args: ["scripts/qa/test-feature-gating.ts"] },
-  { label: "💬 ความยืดหยุ่นของประวัติแชทแม่หมอ (Zod BodySchema & Error Handling)", cmd: TSX, args: ["scripts/qa/test-chat-history-schema.ts"] },
-  { label: "🃏 Zero Fabricated Cards Policy (ห้ามกุหรือมโนไพ่ปลอมทุกใบใน 78 ใบเด็ดขาด · ให้โหลดใหม่)", cmd: TSX, args: ["scripts/qa/test-no-fake-card.ts"] },
-  { label: "⚡ ระบบ AI สองประสาน (Multi-Provider Failover ด้วย Groq LPU & Gemini)", cmd: TSX, args: ["scripts/qa/test-groq-failover.ts"] },
-  { label: "🛟 คำอ่านสำรองออฟไลน์ (ครบ 5 บุคลิก · อังกฤษไม่มีไทยหลุด · ฟันธง ใช่/ไม่ใช่ · จดสถิติ)", cmd: TSX, args: ["scripts/qa/test-mock-reading.ts"] },
-  { label: "🔮 สัญญา prompt คำอ่านไพ่ (reasoning_format · max_tokens · ความยาวตามจำนวนไพ่ · ReadingSchema)", cmd: TSX, args: ["scripts/qa/test-ai-reading-golden.ts"] },
-  { label: "🌅 ไพ่ประจำวันของทุกคน (deterministic + กระจายทั่วสำรับ + provably-fair proof)", cmd: TSX, args: ["scripts/qa/test-daily-card.ts"] },
-  { label: "🔎 corpus ค้นหาเชิงความหมาย (ไพ่ 78 + บทความครบ · metadata Vectorize ถูกฟอร์แมต)", cmd: TSX, args: ["scripts/qa/test-search-corpus.ts"] },
-  { label: "📊 คุณภาพคำอ่าน AI & Telemetry (Consistency Checker / Karmic Bridge / Golden Set / reading_quality)", cmd: TSX, args: ["scripts/qa/test-reading-quality.ts"] },
-  { label: "🧑‍⚖️ เวอร์ชัน prompt มีผลวัด ai:judge รองรับ (ขึ้นเวอร์ชันแล้วต้องมีรายงาน)", cmd: TSX, args: ["scripts/qa/test-judge-baseline.ts"] },
-  { label: "✍️ ภาษาไทยของแม่หมอ (ค่ะ/คะ · ไม้ยมก · สระ แ · กันผลบวกลวง · prompt กับ persona ต้องสะอาด)", cmd: TSX, args: ["scripts/qa/test-thai-quality.ts"] },
-  { label: "🧑‍⚖️ Golden Set พร้อมยิงเข้าโมเดลจริง (ซ้อมแห้ง ไม่มีต้นทุน AI · หมวด/ผัง/ไพ่ต้องตรงกัน)", cmd: TSX, args: ["scripts/qa/run-golden-judge.ts", "--dry-run"] },
-  { label: "📈 ระบบวัดผลและติดตามเหตุการณ์ (GA4 / Meta Pixel / Consent Mode v2 / Event Contract)", cmd: TSX, args: ["scripts/qa/test-analytics-integrity.ts"] },
-  { label: "⚡ ระบบทำนายด่วน (Quick Fortune 1 ใบ / 4 หัวข้อยอดนิยม / Provably Fair)", cmd: TSX, args: ["scripts/qa/test-quick-fortune.ts"] },
-  { label: "🖥️ วินัยการใช้ GPU layer ใน CSS (will-change เฉพาะสถานะ active/animating)", cmd: TSX, args: ["scripts/qa/test-will-change.ts"] },
-  { label: "🔒 ความปลอดภัยของ Modal Lifecycle & Scroll Lock (deps ไร้ onClose · ป้องกันโฟกัสหลุด)", cmd: TSX, args: ["scripts/qa/test-modal-effect-deps.ts"] },
-  { label: "🪟 หน้าต่างลอยไม่ตกขอบจอ (เพดานความสูงผูกกับจอ + ชั้นเลื่อนได้ · ขอบบนต้องเข้าถึงได้เสมอ)", cmd: TSX, args: ["scripts/qa/test-modal-viewport-fit.ts"] },
+  {
+    label: "📧 ระบบตรวจสอบเส้นทาง Email & Password Auth (Endpoints/Tokens)",
+    cmd: TSX,
+    args: ["scripts/qa/test-email-auth.ts"],
+  },
+  {
+    label: "🎟 แกนสิทธิ์การเปิดไพ่ (โควตารายวัน / โบนัส / กันหักซ้ำ / รหัสแลกสิทธิ์)",
+    cmd: TSX,
+    args: ["scripts/qa/test-entitlement.ts"],
+  },
+  {
+    label: "📬 ดวงประจำวันทางอีเมล (opt-in · กันส่งซ้ำ · ลิงก์ยกเลิกไม่ต้องล็อกอิน · ห้ามกุไพ่)",
+    cmd: TSX,
+    args: ["scripts/qa/test-digest.ts"],
+  },
+  {
+    label: "🎫 บัญชีปลดล็อกไม่จำกัด (tarot_tester + allowlist อีเมล · ไม่ให้สิทธิ์แอดมิน)",
+    cmd: TSX,
+    args: ["scripts/qa/test-tester.ts"],
+  },
+  {
+    label: "🔐 เซสชันล็อกอิน (tokenVersion · host injection · rate limit ไม่ล็อกเจ้าของบัญชี)",
+    cmd: TSX,
+    args: ["scripts/qa/test-session-guard.ts"],
+  },
+  {
+    label: "💎 ระบบล็อกฟีเจอร์พรีเมียม (ผังใหญ่ 15 แบบ & ปรมาจารย์ลับ 2 ท่าน)",
+    cmd: TSX,
+    args: ["scripts/qa/test-feature-gating.ts"],
+  },
+  {
+    label: "💬 ความยืดหยุ่นของประวัติแชทแม่หมอ (Zod BodySchema & Error Handling)",
+    cmd: TSX,
+    args: ["scripts/qa/test-chat-history-schema.ts"],
+  },
+  {
+    label: "🃏 Zero Fabricated Cards Policy (ห้ามกุหรือมโนไพ่ปลอมทุกใบใน 78 ใบเด็ดขาด · ให้โหลดใหม่)",
+    cmd: TSX,
+    args: ["scripts/qa/test-no-fake-card.ts"],
+  },
+  {
+    label: "⚡ ระบบ AI สองประสาน (Multi-Provider Failover ด้วย Groq LPU & Gemini)",
+    cmd: TSX,
+    args: ["scripts/qa/test-groq-failover.ts"],
+  },
+  {
+    label: "🛟 คำอ่านสำรองออฟไลน์ (ครบ 5 บุคลิก · อังกฤษไม่มีไทยหลุด · ฟันธง ใช่/ไม่ใช่ · จดสถิติ)",
+    cmd: TSX,
+    args: ["scripts/qa/test-mock-reading.ts"],
+  },
+  {
+    label: "🔮 สัญญา prompt คำอ่านไพ่ (reasoning_format · max_tokens · ความยาวตามจำนวนไพ่ · ReadingSchema)",
+    cmd: TSX,
+    args: ["scripts/qa/test-ai-reading-golden.ts"],
+  },
+  {
+    label: "🌅 ไพ่ประจำวันของทุกคน (deterministic + กระจายทั่วสำรับ + provably-fair proof)",
+    cmd: TSX,
+    args: ["scripts/qa/test-daily-card.ts"],
+  },
+  {
+    label: "🔎 corpus ค้นหาเชิงความหมาย (ไพ่ 78 + บทความครบ · metadata Vectorize ถูกฟอร์แมต)",
+    cmd: TSX,
+    args: ["scripts/qa/test-search-corpus.ts"],
+  },
+  {
+    label: "📊 คุณภาพคำอ่าน AI & Telemetry (Consistency Checker / Karmic Bridge / Golden Set / reading_quality)",
+    cmd: TSX,
+    args: ["scripts/qa/test-reading-quality.ts"],
+  },
+  {
+    label: "🧑‍⚖️ เวอร์ชัน prompt มีผลวัด ai:judge รองรับ (ขึ้นเวอร์ชันแล้วต้องมีรายงาน)",
+    cmd: TSX,
+    args: ["scripts/qa/test-judge-baseline.ts"],
+  },
+  {
+    label: "✍️ ภาษาไทยของแม่หมอ (ค่ะ/คะ · ไม้ยมก · สระ แ · กันผลบวกลวง · prompt กับ persona ต้องสะอาด)",
+    cmd: TSX,
+    args: ["scripts/qa/test-thai-quality.ts"],
+  },
+  {
+    label: "🧑‍⚖️ Golden Set พร้อมยิงเข้าโมเดลจริง (ซ้อมแห้ง ไม่มีต้นทุน AI · หมวด/ผัง/ไพ่ต้องตรงกัน)",
+    cmd: TSX,
+    args: ["scripts/qa/run-golden-judge.ts", "--dry-run"],
+  },
+  {
+    label: "📈 ระบบวัดผลและติดตามเหตุการณ์ (GA4 / Meta Pixel / Consent Mode v2 / Event Contract)",
+    cmd: TSX,
+    args: ["scripts/qa/test-analytics-integrity.ts"],
+  },
+  {
+    label: "⚡ ระบบทำนายด่วน (Quick Fortune 1 ใบ / 4 หัวข้อยอดนิยม / Provably Fair)",
+    cmd: TSX,
+    args: ["scripts/qa/test-quick-fortune.ts"],
+  },
+  {
+    label: "🖥️ วินัยการใช้ GPU layer ใน CSS (will-change เฉพาะสถานะ active/animating)",
+    cmd: TSX,
+    args: ["scripts/qa/test-will-change.ts"],
+  },
+  {
+    label: "🔒 ความปลอดภัยของ Modal Lifecycle & Scroll Lock (deps ไร้ onClose · ป้องกันโฟกัสหลุด)",
+    cmd: TSX,
+    args: ["scripts/qa/test-modal-effect-deps.ts"],
+  },
+  {
+    label: "🪟 หน้าต่างลอยไม่ตกขอบจอ (เพดานความสูงผูกกับจอ + ชั้นเลื่อนได้ · ขอบบนต้องเข้าถึงได้เสมอ)",
+    cmd: TSX,
+    args: ["scripts/qa/test-modal-viewport-fit.ts"],
+  },
   { label: "🃏 สารานุกรมไพ่ยิปซี 7 หน้าใหม่ (SEO Wave 2)", cmd: TSX, args: ["scripts/qa/test-seo-wave2.ts"] },
-  { label: "📐 ผังพยากรณ์ 25 แบบ & 6 หน้ารวมตามหมวดชีวิต (SEO Wave 3)", cmd: TSX, args: ["scripts/qa/test-seo-wave3.ts"] },
-  { label: "🔮 เครื่องมือไพ่ประจำตัว & ตารางตำแหน่ง & SEO แตกต่าง (SEO Wave 4)", cmd: TSX, args: ["scripts/qa/test-seo-wave4.ts"] },
-  { label: "⚡ งบน้ำหนักหน้าเว็บและขนาดบันเดิล (Performance Budget Gate)", cmd: TSX, args: ["scripts/qa/test-bundle-budget.ts"] },
-  { label: "🌐 เส้นทางสองภาษา /en (ไฟล์จริง · hreflang ไม่โกหก · sitemap ชี้กันครบ)", cmd: TSX, args: ["scripts/qa/test-en-routing.ts"] },
-  { label: "🗺️ หน้าที่ประกาศใน sitemap ต้องมีอยู่จริงทุกเส้น (กันหน้าหายเงียบ · ด่านไม่ผูกกับเครื่องมือเรนเดอร์)", cmd: TSX, args: ["scripts/qa/test-rendered-coverage.ts"] },
-  { label: "🗺️ เส้นทางทุกเส้นมีเจ้าของเครื่องมือเรนเดอร์เดียว (ห้ามหน้าเดียวอยู่สองที่ · ฝาแฝดย้ายตามกัน)", cmd: TSX, args: ["scripts/qa/test-astro-routes.ts"] },
-  { label: "🪞 สองเครื่องมือเรนเดอร์ให้ <head> ชุดเดียวกัน (ฟอนต์ · viewport · JSON-LD · PDPA · speculation rules)", cmd: TSX, args: ["scripts/qa/test-render-parity.ts"] },
-  { label: "🌍 ภาษาต่างด้าวหลุดคำอ่านไม่ได้ รวมภาษาอักษรละติน (โปรตุเกส/สเปน/ฝรั่งเศส/เยอรมัน/เวียดนาม) · อังกฤษต้องไม่ถูกแตะ", cmd: TSX, args: ["scripts/qa/test-foreign-leak.ts"] },
-  { label: "🚪 หน้า Next ทุกหน้าไปถึง Worker ได้จริง (run_worker_first ครบ · URL ตายตอบจากขอบ · หน้า 404 สองภาษา)", cmd: TSX, args: ["scripts/qa/test-worker-first-routes.ts"] },
-  { label: "🛡️ ไฟล์ static ได้ส่วนหัวความปลอดภัยชุดเดียวกับ Worker (CSP/HSTS ไม่หายครึ่งเว็บ · กฎแคชไม่ครอบหน้าเว็บ)", cmd: TSX, args: ["scripts/qa/test-static-headers.ts"] },
-  { label: "🔌 ชั้นแปลงปลั๊กครบทุก next/* ที่ฝั่ง Astro ใช้ (กัน island ลากรันไทม์ของ Next ติดไปเงียบ ๆ)", cmd: TSX, args: ["scripts/qa/test-astro-shim-coverage.ts"] },
-  { label: "🔗 next กับ @opennextjs/cloudflare เดินคู่กัน (กัน merge ผ่านแต่ deploy ล้มบน main)", cmd: TSX, args: ["scripts/qa/test-next-adapter-pair.ts"] },
+  {
+    label: "📐 ผังพยากรณ์ 25 แบบ & 6 หน้ารวมตามหมวดชีวิต (SEO Wave 3)",
+    cmd: TSX,
+    args: ["scripts/qa/test-seo-wave3.ts"],
+  },
+  {
+    label: "🔮 เครื่องมือไพ่ประจำตัว & ตารางตำแหน่ง & SEO แตกต่าง (SEO Wave 4)",
+    cmd: TSX,
+    args: ["scripts/qa/test-seo-wave4.ts"],
+  },
+  {
+    label: "⚡ งบน้ำหนักหน้าเว็บและขนาดบันเดิล (Performance Budget Gate)",
+    cmd: TSX,
+    args: ["scripts/qa/test-bundle-budget.ts"],
+  },
+  {
+    label: "🌐 เส้นทางสองภาษา /en (ไฟล์จริง · hreflang ไม่โกหก · sitemap ชี้กันครบ)",
+    cmd: TSX,
+    args: ["scripts/qa/test-en-routing.ts"],
+  },
+  {
+    label: "🗺️ หน้าที่ประกาศใน sitemap ต้องมีอยู่จริงทุกเส้น (กันหน้าหายเงียบ · ด่านไม่ผูกกับเครื่องมือเรนเดอร์)",
+    cmd: TSX,
+    args: ["scripts/qa/test-rendered-coverage.ts"],
+  },
+  {
+    label: "🗺️ เส้นทางทุกเส้นมีเจ้าของเครื่องมือเรนเดอร์เดียว (ห้ามหน้าเดียวอยู่สองที่ · ฝาแฝดย้ายตามกัน)",
+    cmd: TSX,
+    args: ["scripts/qa/test-astro-routes.ts"],
+  },
+  {
+    label: "🪞 สองเครื่องมือเรนเดอร์ให้ <head> ชุดเดียวกัน (ฟอนต์ · viewport · JSON-LD · PDPA · speculation rules)",
+    cmd: TSX,
+    args: ["scripts/qa/test-render-parity.ts"],
+  },
+  {
+    label:
+      "🌍 ภาษาต่างด้าวหลุดคำอ่านไม่ได้ รวมภาษาอักษรละติน (โปรตุเกส/สเปน/ฝรั่งเศส/เยอรมัน/เวียดนาม) · อังกฤษต้องไม่ถูกแตะ",
+    cmd: TSX,
+    args: ["scripts/qa/test-foreign-leak.ts"],
+  },
+  {
+    label: "🚪 หน้า Next ทุกหน้าไปถึง Worker ได้จริง (run_worker_first ครบ · URL ตายตอบจากขอบ · หน้า 404 สองภาษา)",
+    cmd: TSX,
+    args: ["scripts/qa/test-worker-first-routes.ts"],
+  },
+  {
+    label: "🛡️ ไฟล์ static ได้ส่วนหัวความปลอดภัยชุดเดียวกับ Worker (CSP/HSTS ไม่หายครึ่งเว็บ · กฎแคชไม่ครอบหน้าเว็บ)",
+    cmd: TSX,
+    args: ["scripts/qa/test-static-headers.ts"],
+  },
+  {
+    label: "🔌 ชั้นแปลงปลั๊กครบทุก next/* ที่ฝั่ง Astro ใช้ (กัน island ลากรันไทม์ของ Next ติดไปเงียบ ๆ)",
+    cmd: TSX,
+    args: ["scripts/qa/test-astro-shim-coverage.ts"],
+  },
+  {
+    label: "🔗 next กับ @opennextjs/cloudflare เดินคู่กัน (กัน merge ผ่านแต่ deploy ล้มบน main)",
+    cmd: TSX,
+    args: ["scripts/qa/test-next-adapter-pair.ts"],
+  },
   { label: "🖼️  มาตรฐานภาพแชร์ OpenGraph 1200x630 ทั่วเว็บ", cmd: TSX, args: ["scripts/qa/test-og-images.ts"] },
-  { label: "🤖 นโยบายบอตสองชั้นพูดตรงกัน (robots.ts ↔ กฎ WAF · บอตค้นหา AI ต้องเข้าได้)", cmd: TSX, args: ["scripts/qa/test-bot-policy.ts"] },
-  { label: "🔁 กันลูป prefetch ยิงคำขอไม่รู้จบ (cache interception ปิด · segment prefetch ทำงาน)", cmd: TSX, args: ["scripts/qa/test-prefetch-loop.ts"] },
-  { label: "📏 ความยาว title / description ทุกหน้าอยู่ในเพดาน SERP", cmd: TSX, args: ["scripts/qa/test-meta-length.ts"] },
-  { label: "📚 ตัวเลขในเอกสารแม่บทตรงกับของจริง (ด่าน/ผัง/ตำแหน่ง/ไพ่)", cmd: TSX, args: ["scripts/qa/test-docs-numbers.ts"] },
-  { label: "🧭 หัวเว็บอยู่นิ่งตอนเลื่อน & ทุกหน้าทั้งเว็บมีหัวเว็บ+ฟุตเตอร์ครบ (เลเยอร์ compositor · safe-area · ไม่มี scroll container ครอบ · 404 ทั้งสองไฟล์)", cmd: TSX, args: ["scripts/qa/test-sticky-header.ts"] },
-  { label: "🌐 โหมดอังกฤษไม่มีภาษาไทยหลุด (เรนเดอร์จริง 41 จอทั่วเว็บ · คำสำคัญไพ่ 78 ใบครบสองภาษา)", cmd: TSX, args: ["scripts/qa/test-en-thai-leak.tsx"] },
-  { label: "⚡ งบคำขอต่อการเปิดหน้า (ผู้ชมที่ไม่ล็อกอินต้องไม่ยิง /api/* เลย · ล็อกอินแล้วใช้ /api/bootstrap เส้นเดียว)", cmd: TSX, args: ["scripts/qa/test-request-budget.ts"] },
-  { label: "📐 สูตรความสูงการ์ดไพ่ยังตรงกับของจริง (กัน content-visibility จองความสูงผิดแล้วจอกระตุก · INC-0174)", cmd: TSX, args: ["scripts/qa/test-card-tile-height.ts"] },
-  { label: "✦ คุณภาพโมชั่นทั้งเว็บ (ไม่มี transition-all · ไม่มี backdrop-filter · ลูปไม่รู้จบต้องเป็น CSS · โทเคนจังหวะกลางผูกอยู่)", cmd: TSX, args: ["scripts/qa/test-motion-quality.ts"] },
-  { label: "♿ a11y ระดับวิกฤตทุกหน้าที่เรนเดอร์จริง ทั้งสองเครื่องมือ (สายด่วนอ่านออกบนพื้นมืด · เส้นขอบตัวควบคุม 3:1 · ข้อความผิดพลาดถูกประกาศ · ลิงก์ในรายการแยกจากกันได้ · h1 เดี่ยว · ลำดับหัวข้อ)", cmd: TSX, args: ["scripts/qa/test-a11y-critical.ts"] },
-  { label: "🎨 พาเลตยังเป็นชุดเดียว (สีฮาร์ดโค้ดไม่เพิ่ม · ไม่มีสีที่ถอดไปแล้วกลับมา · gold ห้ามเป็นตัวอักษรเล็ก)", cmd: TSX, args: ["scripts/qa/test-palette-drift.ts"] },
-  { label: "🎯 พื้นที่กดขั้นต่ำ (ปุ่มเล็กกว่าเกณฑ์ต้องไม่เพิ่มขึ้น · หัวเว็บต้องใช้ tap-overlay เท่านั้น)", cmd: TSX, args: ["scripts/qa/test-tap-target.ts"] },
-  { label: "👻 ของประดับต้องไม่ล่องหน (จุด/เหรียญทรงกลมห้ามใช้สีพื้นเดียวกับกล่องที่ครอบอยู่)", cmd: TSX, args: ["scripts/qa/test-invisible-element.ts"] },
-  { label: "🃏 สารานุกรมไพ่ 78 ใบภาษาอังกฤษ (5 มิติ · โหราศาสตร์ · เลขศาสตร์ · คีย์เวิร์ด)", cmd: TSX, args: ["scripts/qa/test-card-meanings-en.ts"] },
-  { label: "🔮 ระบบถามกลับเพื่อความชัดเจนก่อนสับไพ่ (AI Clarification Engine · B-04)", cmd: TSX, args: ["scripts/qa/test-clarify.ts"] },
-  { label: "🎟️ ระบบรหัสแลกสิทธิ์ VIP3 & จัดการโควตา (59 เคส · Concurrency · D1)", cmd: TSX, args: ["scripts/qa/test-redeem-code.ts"] },
-  { label: "🌐 ความสมบูรณ์ของระบบแปลภาษา (318 หน่วยแปล · i18n Verification)", cmd: TSX, args: ["scripts/i18n-import.ts", "--verify-only"] },
-  { label: "🧾 JSON-LD ทุกบล็อกผ่านตัวเขียนที่ escape แล้ว (ห้าม JSON.stringify เปล่าใน dangerouslySetInnerHTML)", cmd: TSX, args: ["scripts/qa/test-json-ld-escape.ts"] },
-  { label: "🧱 กันการฉีดคำสั่งเข้า prompt (ผู้ใช้ปิดแท็บของ prompt ไม่ได้ · ขอบเขตความเชื่อถืออยู่หลังบล็อกผู้ใช้)", cmd: TSX, args: ["scripts/qa/test-prompt-injection.ts"] },
-  { label: "✍️ คุณภาพภาษาไทยของข้อความที่เราเขียนเอง (ไม้ยมกเว้นวรรค · นะคะ · สระ แ) ไม่ใช่แค่ผลจากโมเดล", cmd: TSX, args: ["scripts/qa/test-thai-content-quality.ts"] },
-  { label: "🔌 Service Worker ไม่ทำให้ผู้ใช้ใหม่โหลดหน้าสองรอบ (controllerchange ครั้งแรกต้องไม่ reload)", cmd: TSX, args: ["scripts/qa/test-sw-reload.ts"] },
-  { label: "🛡️ ด่านตรวจด่านด้วยกันเอง (ห้ามข้ามเงียบเมื่อไฟล์หาย · ห้ามวนคลังว่างแล้วขึ้นผ่าน)", cmd: TSX, args: ["scripts/qa/test-gate-integrity.ts"] },
-  { label: "💰 เส้นทางเงิน (เครดิตเพิ่มเท่าขนาดแพ็กพอดี · ยิงซ้ำได้ครั้งเดียว · ล้มเหลวต้องไม่ใช่ 2xx และยอดไม่ขยับ)", cmd: TSX, args: ["scripts/qa/test-money-path.ts"] },
-  { label: "🔗 ห่วงโซ่อุปทานของ CI (บังคับ lockfile · แอ็กชันผูก SHA · สิทธิ์แคบ · มีทางถอย · ห้าม import ของที่ไม่ได้ประกาศ)", cmd: TSX, args: ["scripts/qa/test-ci-supply-chain.ts"] },
-  { label: "🧱 หนี้โค้ด (เส้นแบ่งวันกรุงเทพฯ ที่เดียว · คีย์ในเบราว์เซอร์มีทะเบียน · ห้าม catch เปล่า · แผงแอดมินแยกพังจากไม่มีข้อมูล)", cmd: TSX, args: ["scripts/qa/test-code-debt.ts"] },
-  { label: "🎛️ สถานะหน้าต่างลอยของ TarotFlow (เปิดสองบานพร้อมกันไม่ได้ · ปิดผิดบานไม่ได้ · useState เป็น ratchet)", cmd: TSX, args: ["scripts/qa/test-flow-overlay.ts"] },
-  { label: "🃏 หน้า Pick A Card (กองเดิมต้องไม่ให้ไพ่ชุดเดิมซ้ำ · เข้าถึงได้ทุกชุด · หลังไพ่เป็นลายเดียวกับทั้งเว็บ · INC-0198b)", cmd: TSX, args: ["scripts/qa/test-pick-a-card.ts"] },
-  { label: "✂️ หัวสระ/วรรณยุกต์ไทยต้องไม่ถูกกล่องที่ตัดของล้นเฉือนทิ้ง (truncate + leading ต่ำกว่า 1.6 · INC-0197)", cmd: TSX, args: ["scripts/qa/test-thai-glyph-clipping.ts"] },
-  { label: "🧭 สถานะการดูดวงของ TarotFlow (สำรับคว่ำหน้าเสมอ · พลิกไพ่ผีไม่ได้ · โทเคนไม่ถูกทับด้วยค่าว่าง · เฟรมที่มาช้าเขียนทับไม่ได้)", cmd: TSX, args: ["scripts/qa/test-flow-state.ts"] },
-  { label: "🎯 ไพ่ที่คำนวณได้ (ไพ่วันเกิด · สำรับประจำวันของกอง — ตรึงที่เซิร์ฟเวอร์ · ไม่ปนกับการจั่ว · ไม่มีไพ่สำรอง)", cmd: TSX, args: ["scripts/qa/test-derived-draw.ts"] },
+  {
+    label: "🤖 นโยบายบอตสองชั้นพูดตรงกัน (robots.ts ↔ กฎ WAF · บอตค้นหา AI ต้องเข้าได้)",
+    cmd: TSX,
+    args: ["scripts/qa/test-bot-policy.ts"],
+  },
+  {
+    label: "🔁 กันลูป prefetch ยิงคำขอไม่รู้จบ (cache interception ปิด · segment prefetch ทำงาน)",
+    cmd: TSX,
+    args: ["scripts/qa/test-prefetch-loop.ts"],
+  },
+  {
+    label: "📏 ความยาว title / description ทุกหน้าอยู่ในเพดาน SERP",
+    cmd: TSX,
+    args: ["scripts/qa/test-meta-length.ts"],
+  },
+  {
+    label: "📚 ตัวเลขในเอกสารแม่บทตรงกับของจริง (ด่าน/ผัง/ตำแหน่ง/ไพ่)",
+    cmd: TSX,
+    args: ["scripts/qa/test-docs-numbers.ts"],
+  },
+  {
+    label:
+      "🧭 หัวเว็บอยู่นิ่งตอนเลื่อน & ทุกหน้าทั้งเว็บมีหัวเว็บ+ฟุตเตอร์ครบ (เลเยอร์ compositor · safe-area · ไม่มี scroll container ครอบ · 404 ทั้งสองไฟล์)",
+    cmd: TSX,
+    args: ["scripts/qa/test-sticky-header.ts"],
+  },
+  {
+    label: "🌐 โหมดอังกฤษไม่มีภาษาไทยหลุด (เรนเดอร์จริง 41 จอทั่วเว็บ · คำสำคัญไพ่ 78 ใบครบสองภาษา)",
+    cmd: TSX,
+    args: ["scripts/qa/test-en-thai-leak.tsx"],
+  },
+  {
+    label:
+      "⚡ งบคำขอต่อการเปิดหน้า (ผู้ชมที่ไม่ล็อกอินต้องไม่ยิง /api/* เลย · ล็อกอินแล้วใช้ /api/bootstrap เส้นเดียว)",
+    cmd: TSX,
+    args: ["scripts/qa/test-request-budget.ts"],
+  },
+  {
+    label: "📐 สูตรความสูงการ์ดไพ่ยังตรงกับของจริง (กัน content-visibility จองความสูงผิดแล้วจอกระตุก · INC-0174)",
+    cmd: TSX,
+    args: ["scripts/qa/test-card-tile-height.ts"],
+  },
+  {
+    label:
+      "✦ คุณภาพโมชั่นทั้งเว็บ (ไม่มี transition-all · ไม่มี backdrop-filter · ลูปไม่รู้จบต้องเป็น CSS · โทเคนจังหวะกลางผูกอยู่)",
+    cmd: TSX,
+    args: ["scripts/qa/test-motion-quality.ts"],
+  },
+  {
+    label:
+      "♿ a11y ระดับวิกฤตทุกหน้าที่เรนเดอร์จริง ทั้งสองเครื่องมือ (สายด่วนอ่านออกบนพื้นมืด · เส้นขอบตัวควบคุม 3:1 · ข้อความผิดพลาดถูกประกาศ · ลิงก์ในรายการแยกจากกันได้ · h1 เดี่ยว · ลำดับหัวข้อ)",
+    cmd: TSX,
+    args: ["scripts/qa/test-a11y-critical.ts"],
+  },
+  {
+    label: "🎨 พาเลตยังเป็นชุดเดียว (สีฮาร์ดโค้ดไม่เพิ่ม · ไม่มีสีที่ถอดไปแล้วกลับมา · gold ห้ามเป็นตัวอักษรเล็ก)",
+    cmd: TSX,
+    args: ["scripts/qa/test-palette-drift.ts"],
+  },
+  {
+    label: "🎯 พื้นที่กดขั้นต่ำ (ปุ่มเล็กกว่าเกณฑ์ต้องไม่เพิ่มขึ้น · หัวเว็บต้องใช้ tap-overlay เท่านั้น)",
+    cmd: TSX,
+    args: ["scripts/qa/test-tap-target.ts"],
+  },
+  {
+    label: "👻 ของประดับต้องไม่ล่องหน (จุด/เหรียญทรงกลมห้ามใช้สีพื้นเดียวกับกล่องที่ครอบอยู่)",
+    cmd: TSX,
+    args: ["scripts/qa/test-invisible-element.ts"],
+  },
+  {
+    label: "🃏 สารานุกรมไพ่ 78 ใบภาษาอังกฤษ (5 มิติ · โหราศาสตร์ · เลขศาสตร์ · คีย์เวิร์ด)",
+    cmd: TSX,
+    args: ["scripts/qa/test-card-meanings-en.ts"],
+  },
+  {
+    label: "🔮 ระบบถามกลับเพื่อความชัดเจนก่อนสับไพ่ (AI Clarification Engine · B-04)",
+    cmd: TSX,
+    args: ["scripts/qa/test-clarify.ts"],
+  },
+  {
+    label: "🎟️ ระบบรหัสแลกสิทธิ์ VIP3 & จัดการโควตา (59 เคส · Concurrency · D1)",
+    cmd: TSX,
+    args: ["scripts/qa/test-redeem-code.ts"],
+  },
+  {
+    label: "🌐 ความสมบูรณ์ของระบบแปลภาษา (318 หน่วยแปล · i18n Verification)",
+    cmd: TSX,
+    args: ["scripts/i18n-import.ts", "--verify-only"],
+  },
+  {
+    label: "🧾 JSON-LD ทุกบล็อกผ่านตัวเขียนที่ escape แล้ว (ห้าม JSON.stringify เปล่าใน dangerouslySetInnerHTML)",
+    cmd: TSX,
+    args: ["scripts/qa/test-json-ld-escape.ts"],
+  },
+  {
+    label: "🧱 กันการฉีดคำสั่งเข้า prompt (ผู้ใช้ปิดแท็บของ prompt ไม่ได้ · ขอบเขตความเชื่อถืออยู่หลังบล็อกผู้ใช้)",
+    cmd: TSX,
+    args: ["scripts/qa/test-prompt-injection.ts"],
+  },
+  {
+    label: "✍️ คุณภาพภาษาไทยของข้อความที่เราเขียนเอง (ไม้ยมกเว้นวรรค · นะคะ · สระ แ) ไม่ใช่แค่ผลจากโมเดล",
+    cmd: TSX,
+    args: ["scripts/qa/test-thai-content-quality.ts"],
+  },
+  {
+    label: "🔌 Service Worker ไม่ทำให้ผู้ใช้ใหม่โหลดหน้าสองรอบ (controllerchange ครั้งแรกต้องไม่ reload)",
+    cmd: TSX,
+    args: ["scripts/qa/test-sw-reload.ts"],
+  },
+  {
+    label: "🛡️ ด่านตรวจด่านด้วยกันเอง (ห้ามข้ามเงียบเมื่อไฟล์หาย · ห้ามวนคลังว่างแล้วขึ้นผ่าน)",
+    cmd: TSX,
+    args: ["scripts/qa/test-gate-integrity.ts"],
+  },
+  {
+    label: "💰 เส้นทางเงิน (เครดิตเพิ่มเท่าขนาดแพ็กพอดี · ยิงซ้ำได้ครั้งเดียว · ล้มเหลวต้องไม่ใช่ 2xx และยอดไม่ขยับ)",
+    cmd: TSX,
+    args: ["scripts/qa/test-money-path.ts"],
+  },
+  {
+    label:
+      "🔗 ห่วงโซ่อุปทานของ CI (บังคับ lockfile · แอ็กชันผูก SHA · สิทธิ์แคบ · มีทางถอย · ห้าม import ของที่ไม่ได้ประกาศ)",
+    cmd: TSX,
+    args: ["scripts/qa/test-ci-supply-chain.ts"],
+  },
+  {
+    label:
+      "🧱 หนี้โค้ด (เส้นแบ่งวันกรุงเทพฯ ที่เดียว · คีย์ในเบราว์เซอร์มีทะเบียน · ห้าม catch เปล่า · แผงแอดมินแยกพังจากไม่มีข้อมูล)",
+    cmd: TSX,
+    args: ["scripts/qa/test-code-debt.ts"],
+  },
+  {
+    label: "🎛️ สถานะหน้าต่างลอยของ TarotFlow (เปิดสองบานพร้อมกันไม่ได้ · ปิดผิดบานไม่ได้ · useState เป็น ratchet)",
+    cmd: TSX,
+    args: ["scripts/qa/test-flow-overlay.ts"],
+  },
+  {
+    label:
+      "🃏 หน้า Pick A Card (กองเดิมต้องไม่ให้ไพ่ชุดเดิมซ้ำ · เข้าถึงได้ทุกชุด · หลังไพ่เป็นลายเดียวกับทั้งเว็บ · INC-0198b)",
+    cmd: TSX,
+    args: ["scripts/qa/test-pick-a-card.ts"],
+  },
+  {
+    label: "✂️ หัวสระ/วรรณยุกต์ไทยต้องไม่ถูกกล่องที่ตัดของล้นเฉือนทิ้ง (truncate + leading ต่ำกว่า 1.6 · INC-0197)",
+    cmd: TSX,
+    args: ["scripts/qa/test-thai-glyph-clipping.ts"],
+  },
+  {
+    label:
+      "🧭 สถานะการดูดวงของ TarotFlow (สำรับคว่ำหน้าเสมอ · พลิกไพ่ผีไม่ได้ · โทเคนไม่ถูกทับด้วยค่าว่าง · เฟรมที่มาช้าเขียนทับไม่ได้)",
+    cmd: TSX,
+    args: ["scripts/qa/test-flow-state.ts"],
+  },
+  {
+    label: "🌐 โฮสต์รองต้องเด้ง 301 กลับโดเมนหลัก (กฎระดับโฮสต์ต้องมีชั้นขอบ ไม่ใช่แค่ชั้น Worker · INC-0203)",
+    cmd: TSX,
+    args: ["scripts/qa/test-canonical-host.ts"],
+  },
+  {
+    label:
+      "🎯 ไพ่ที่คำนวณได้ (ไพ่วันเกิด · สำรับประจำวันของกอง — ตรึงที่เซิร์ฟเวอร์ · ไม่ปนกับการจั่ว · ไม่มีไพ่สำรอง)",
+    cmd: TSX,
+    args: ["scripts/qa/test-derived-draw.ts"],
+  },
 ];
 
 /**
@@ -260,8 +547,18 @@ function actionPr(argv: string[]): void {
 
     // ถ้ามี PR ของ branch นี้เปิดค้างอยู่แล้ว ให้ใช้ตัวเดิม ไม่สร้างซ้ำ
     const existing = shQuiet("gh", [
-      "pr", "list", "-R", repo, "--head", branch, "--state", "open",
-      "--json", "number", "-q", ".[0].number",
+      "pr",
+      "list",
+      "-R",
+      repo,
+      "--head",
+      branch,
+      "--state",
+      "open",
+      "--json",
+      "number",
+      "-q",
+      ".[0].number",
     ]);
 
     let prNumber: string;
@@ -273,10 +570,7 @@ function actionPr(argv: string[]): void {
       const tmp = path.join(os.tmpdir(), `pr-body-${process.pid}.md`);
       fs.writeFileSync(tmp, body, "utf-8");
       try {
-        const url = sh("gh", [
-          "pr", "create", "-R", repo, "--base", "main",
-          "--title", title, "--body-file", tmp,
-        ]);
+        const url = sh("gh", ["pr", "create", "-R", repo, "--base", "main", "--title", title, "--body-file", tmp]);
         prNumber = url.trim().split("/").pop() || "";
         console.log(`✨ สร้าง PR สำเร็จ: ${url}`);
       } finally {
@@ -293,8 +587,7 @@ function actionPr(argv: string[]): void {
     // GitHub native auto-merge ใช้ได้เฉพาะเมื่อเปิดสวิตช์ไว้ในตั้งค่า repo เท่านั้น
     // ถ้ายังปิดอยู่แล้วเรียก --auto จะได้ error: "Auto merge is not allowed for this repository"
     // เช็กก่อนจะได้ไม่ต้องล้มทั้งคำสั่งทั้งที่ PR สร้างสำเร็จไปแล้ว
-    const autoMergeAllowed =
-      shQuiet("gh", ["api", `repos/${repo}`, "--jq", ".allow_auto_merge"]) === "true";
+    const autoMergeAllowed = shQuiet("gh", ["api", `repos/${repo}`, "--jq", ".allow_auto_merge"]) === "true";
 
     if (autoMergeAllowed) {
       // -R บังคับให้ gh ทำงานแบบ remote-only จึงใช้ใน git worktree ได้
@@ -310,7 +603,10 @@ function actionPr(argv: string[]): void {
     console.log("⚡ เมื่อ merge เข้า main แล้ว deploy.yml จะ deploy ขึ้น Cloudflare Workers อัตโนมัติ");
 
     if (flags.has("--wait")) waitForMergeThenTidy(repo, prNumber, branch);
-    else console.log(`\n💡 เมื่อ PR merge แล้ว สั่ง \`npm run git:tidy\` เพื่อเก็บกวาด branch (หรือใช้ --wait ให้ทำให้เอง)`);
+    else
+      console.log(
+        `\n💡 เมื่อ PR merge แล้ว สั่ง \`npm run git:tidy\` เพื่อเก็บกวาด branch (หรือใช้ --wait ให้ทำให้เอง)`
+      );
   } catch (e: any) {
     console.error(`\n❌ ผิดพลาด: ${e.message}`);
     console.error("\n💡 ถ้าติดที่ขั้นตอน merge: PR ถูกสร้างไว้แล้ว สั่ง merge เองได้จากหน้าเว็บ GitHub");
@@ -371,7 +667,7 @@ function actionTidy(dryRun = false): void {
     (shQuiet("git", ["worktree", "list", "--porcelain"]) ?? "")
       .split("\n")
       .filter((l) => l.startsWith("branch "))
-      .map((l) => l.replace("branch refs/heads/", "").trim()),
+      .map((l) => l.replace("branch refs/heads/", "").trim())
   );
 
   // กรอง "(HEAD detached at ...)" ที่ git แสดงเป็นบรรทัดหนึ่งในรายการ branch ออกด้วย
@@ -417,9 +713,7 @@ function actionTidy(dryRun = false): void {
 
       const aheadNoGh = Number(shQuiet("git", ["rev-list", "--count", `origin/main..${branch}`]) ?? "0");
       if (aheadNoGh > 0) {
-        console.log(
-          `  ❓ ${branch} — มี ${aheadNoGh} commit นำหน้า main · ตรวจไม่ได้ว่ามี PR หรือยัง (ไม่มี gh)`,
-        );
+        console.log(`  ❓ ${branch} — มี ${aheadNoGh} commit นำหน้า main · ตรวจไม่ได้ว่ามี PR หรือยัง (ไม่มี gh)`);
         console.log(`      ถ้ายังไม่ได้เปิด PR ให้เปิดผ่าน GitHub API/MCP — ห้ามหยุดแค่ push (INC-0043)`);
       } else {
         console.log(`  ⏭️  ${branch} — ไม่มี commit ค้าง (ข้าม)`);
@@ -431,8 +725,18 @@ function actionTidy(dryRun = false): void {
     // อ่าน JSON ดิบแล้ว parse ในโค้ด แทนการใช้ jq interpolation
     // (สตริง `\(...)` ของ jq จะถูก JS กลืน backslash ทิ้งจนคำสั่งเพี้ยน)
     const raw = shQuiet("gh", [
-      "pr", "list", "-R", repo, "--head", branch, "--state", "all",
-      "--json", "state,number", "--limit", "1",
+      "pr",
+      "list",
+      "-R",
+      repo,
+      "--head",
+      branch,
+      "--state",
+      "all",
+      "--json",
+      "state,number",
+      "--limit",
+      "1",
     ]);
     const pr = raw ? (JSON.parse(raw)[0] as { state?: string; number?: number } | undefined) : undefined;
 
@@ -440,19 +744,19 @@ function actionTidy(dryRun = false): void {
       // ถ้าไม่มี PR แต่ branch มี commit นำหน้า origin/main = งานค้างที่ลืมเปิด PR
       // (INC-0015: push commit เฉยๆ ไม่ทำให้ automation ทำงาน ต้อง `npm run pr:auto` ด้วย)
       if (!pr) {
-        const ahead = Number(
-          shQuiet("git", ["rev-list", "--count", `origin/main..${branch}`]) ?? "0",
-        );
+        const ahead = Number(shQuiet("git", ["rev-list", "--count", `origin/main..${branch}`]) ?? "0");
         if (ahead > 0) {
           console.log(
-            `  ⚠️  ${branch} — มี ${ahead} commit นำหน้า main แต่ยังไม่ได้เปิด PR! → \`npm run pr:auto -- "<title>"\``,
+            `  ⚠️  ${branch} — มี ${ahead} commit นำหน้า main แต่ยังไม่ได้เปิด PR! → \`npm run pr:auto -- "<title>"\``
           );
           orphanWork.push(branch);
           skipped++;
           continue;
         }
       }
-      console.log(`  ⏭️  ${branch} — ${pr ? `PR #${pr.number} ยังเป็น ${pr.state}` : "ไม่มี PR (ไม่มี commit ค้าง)"} (ข้าม)`);
+      console.log(
+        `  ⏭️  ${branch} — ${pr ? `PR #${pr.number} ยังเป็น ${pr.state}` : "ไม่มี PR (ไม่มี commit ค้าง)"} (ข้าม)`
+      );
       skipped++;
       continue;
     }
@@ -489,11 +793,11 @@ function actionTidy(dryRun = false): void {
 
   if (orphanWork.length > 0) {
     console.log(
-      `\n🚨 มี ${orphanWork.length} branch ที่มีงานค้าง "ยังไม่ได้เปิด PR" — automation จะไม่ merge/deploy ให้จนกว่าจะเปิด PR:`,
+      `\n🚨 มี ${orphanWork.length} branch ที่มีงานค้าง "ยังไม่ได้เปิด PR" — automation จะไม่ merge/deploy ให้จนกว่าจะเปิด PR:`
     );
     for (const b of orphanWork) console.log(`   • ${b}`);
     console.log(
-      `   บทเรียน INC-0015: การ push branch ไม่ทำให้ automation ทำงาน ต้องรัน \`npm run pr:auto\` เสมอ (ดู docs/INCIDENT_LOG.md)\n`,
+      `   บทเรียน INC-0015: การ push branch ไม่ทำให้ automation ทำงาน ต้องรัน \`npm run pr:auto\` เสมอ (ดู docs/INCIDENT_LOG.md)\n`
     );
   } else {
     console.log("");
@@ -571,21 +875,46 @@ function actionStatus(): void {
   if (!repo) return;
 
   const mine = shQuiet("gh", [
-    "pr", "list", "-R", repo, "--head", branch, "--state", "open",
-    "--json", "number,title,url", "-q", '.[] | "#\\(.number) \\(.title)\\n   \\(.url)"',
+    "pr",
+    "list",
+    "-R",
+    repo,
+    "--head",
+    branch,
+    "--state",
+    "open",
+    "--json",
+    "number,title,url",
+    "-q",
+    '.[] | "#\\(.number) \\(.title)\\n   \\(.url)"',
   ]);
   console.log(`\nPR ของ branch นี้:\n${indent(mine, "ยังไม่มี PR สำหรับ branch นี้")}`);
 
   const open = shQuiet("gh", [
-    "pr", "list", "-R", repo, "--state", "open",
-    "--json", "number,title", "-q", '.[] | "#\\(.number) \\(.title)"',
+    "pr",
+    "list",
+    "-R",
+    repo,
+    "--state",
+    "open",
+    "--json",
+    "number,title",
+    "-q",
+    '.[] | "#\\(.number) \\(.title)"',
   ]);
   console.log(`\nPR ที่เปิดค้างทั้งหมด:\n${indent(open, "ไม่มี PR ที่เปิดค้างอยู่")}`);
 
   const runs = shQuiet("gh", [
-    "run", "list", "-R", repo, "--limit", "3",
-    "--json", "status,conclusion,headBranch,workflowName",
-    "-q", '.[] | "\\(.conclusion // .status) · \\(.headBranch) · \\(.workflowName)"',
+    "run",
+    "list",
+    "-R",
+    repo,
+    "--limit",
+    "3",
+    "--json",
+    "status,conclusion,headBranch,workflowName",
+    "-q",
+    '.[] | "\\(.conclusion // .status) · \\(.headBranch) · \\(.workflowName)"',
   ]);
   console.log(`\nCI ล่าสุด 3 รอบ:\n${indent(runs, "(อ่านไม่ได้)")}`);
   console.log("");
@@ -595,10 +924,8 @@ function actionStatus(): void {
 // Entry point
 // ============================================================================
 
-const isDirectRun = process.argv[1] && (
-  process.argv[1].endsWith("github-auto.ts") ||
-  process.argv[1].endsWith("github-auto")
-);
+const isDirectRun =
+  process.argv[1] && (process.argv[1].endsWith("github-auto.ts") || process.argv[1].endsWith("github-auto"));
 
 if (isDirectRun) {
   for (let i = 0; i < process.argv.length; i++) {
@@ -627,4 +954,3 @@ if (isDirectRun) {
       break;
   }
 }
-

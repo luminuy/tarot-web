@@ -198,3 +198,35 @@ jobs:
             echo "::error::เติมสิทธิ์ 'Zone · Cache Purge · Purge' ให้ CLOUDFLARE_API_TOKEN แล้ว re-run job นี้"
             exit 1
           fi
+
+      # ── ดันกฎ "โฮสต์รอง ➔ โดเมนหลัก" ขึ้นชั้นขอบ แล้วยิงจริงเพื่อยืนยัน (INC-0203) ──────
+      # กฎ www ➔ โดเมนหลักใน `next.config.ts` ครอบเฉพาะคำขอที่วิ่งถึง Worker
+      # หน้าเนื้อหาที่ย้ายไป Astro ถูกตอบจากชั้น assets ก่อนถึง Worker กฎนั้นจึงเงียบไปเอง
+      # โดยไม่มีอะไรพัง — เว็บถูกเสิร์ฟครบทั้งสองโฮสต์อยู่หลายวันกว่าจะมีคนยิง curl เจอ
+      #
+      # ขั้นนี้จึง "ดันกฎขึ้นขอบทุกครั้งที่ปล่อยเวอร์ชัน" แทนที่จะหวังว่าจะมีคนจำได้
+      # ถ้า token ยังไม่มีสิทธิ์เขียน ruleset ก็ยังผ่านได้ถ้ากฎถูกตั้งไว้ด้วยมือแล้ว
+      # (ตัดสินจาก "ของจริงเด้งหรือยัง" ไม่ใช่จาก "เขียนสำเร็จไหม")
+      - name: 🌐 Canonical Host Redirect (www ➔ โดเมนหลัก)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+        run: |
+          if npm run cf:canonical-host; then
+            echo "✅ กฎบนขอบเป็นปัจจุบันและยิงจริงแล้วเด้งถูกต้อง"
+            exit 0
+          fi
+
+          echo "::warning::เขียนกฎขึ้นขอบไม่สำเร็จ — กำลังตรวจว่าของจริงเด้งอยู่แล้วหรือไม่"
+
+          if npm run cf:canonical-host -- --check; then
+            echo "::warning::กฎถูกตั้งไว้ด้วยมือแล้ว (ของจริงเด้ง 301 ครบ) แต่ token เขียน ruleset ไม่ได้"
+            echo "::warning::เติมสิทธิ์ 'Zone · Transform Rules · Edit' ให้ CLOUDFLARE_API_TOKEN เพื่อให้ขั้นนี้ดูแลกฎเองได้"
+            exit 0
+          fi
+
+          echo "::error::โฮสต์รองยังตอบ 200 = เว็บถูกจัดทำดัชนีสองโฮสต์ (น้ำหนัก SEO กระจาย · เปลือง crawl budget)"
+          echo "::error::โค้ดใหม่ขึ้น production แล้ว ขั้นนี้แดงเพื่อเตือนเรื่องนี้อย่างเดียว"
+          echo "::error::แก้ได้ 2 ทาง — (1) เติมสิทธิ์ 'Zone · Transform Rules · Edit' ให้ token แล้ว re-run"
+          echo "::error::                (2) Cloudflare ➔ Rules ➔ Redirect Rules ➔ Create rule ตามที่สคริปต์พิมพ์ไว้ด้านบน"
+          exit 1
