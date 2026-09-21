@@ -448,7 +448,9 @@ export function QuickFortunePicker({
         >
           <div
             ref={nicknamePanelRef}
-            className={`w-full max-w-md max-h-[calc(100svh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border border-line bg-gradient-to-b from-surface via-[#FDFBF9] to-[#F7F4EE] p-6 shadow-overlay space-y-4 text-left${
+            /* 🪟 ผิวกระจกอุ่นชุดเดียวกับ `Modal.tsx` — ของเดิมเป็นไล่สีทึบสามช่วง
+               ซึ่งอ่านเป็นกล่องกระดาษขาว ไม่เข้ากับธีมกระจกของทั้งเว็บ (เจ้าของทัก 2026-09-21) */
+            className={`altar-modal w-full max-w-md max-h-[calc(100svh-2rem)] overflow-y-auto overscroll-contain p-6 space-y-4 text-left${
               isNicknameClosing ? "" : " anim-modal-rise"
             }`}
           >
@@ -456,7 +458,7 @@ export function QuickFortunePicker({
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   {selectedPendingTopic && (
-                    <span className="text-[11px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-[#F6EFE0] text-gold-ink border-[#E2D4BE]">
+                    <span className="glass-chip text-[11px] font-serif-th font-semibold px-2.5 py-0.5 text-gold-ink">
                       {isEnglish
                         ? (selectedPendingTopic.titleEn || selectedPendingTopic.title)
                         : selectedPendingTopic.title}
@@ -469,7 +471,7 @@ export function QuickFortunePicker({
                 <button
                   type="button"
                   onClick={closeNicknameModal}
-                  className="tap-overlay-y text-xs text-muted hover:text-ink p-1 rounded-md hover:bg-[#F0ECE1] transition-colors"
+                  className="glass-chip tap-overlay-y grid h-8 w-8 shrink-0 place-items-center text-xs text-muted hover:text-ink hover:border-gold-ink transition-colors"
                   aria-label={isEnglish ? "Close" : "ปิด"}
                 >
                   ✕
@@ -502,7 +504,7 @@ export function QuickFortunePicker({
                   }}
                   placeholder={isEnglish ? "e.g., Alex, Jordan, Taylor..." : "เช่น บี, น้ำ, เจมส์, วิน..."}
                   maxLength={40}
-                  className="w-full px-3.5 py-2 text-sm font-serif-th rounded-xl border border-line-interactive focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold bg-surface-warm text-ink"
+                  className="glass-field w-full px-3.5 py-2 text-sm font-serif-th rounded-xl border border-line-interactive focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold text-ink"
                 />
                 {/* ♿ R-21: ชื่อเล่นที่กรอกผิดต้องถูกประกาศ ไม่งั้นผู้ใช้กดต่อไม่ได้โดยไม่รู้สาเหตุ */}
                 {nicknameError && (
@@ -550,7 +552,7 @@ export function QuickFortunePicker({
                       : (isEnglish ? "Type your question here..." : "พิมพ์คำถามของคุณที่นี่...")
                   }
                   maxLength={300}
-                  className="w-full px-3.5 py-2 text-sm font-serif-th rounded-xl border border-line-interactive focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold bg-surface-warm text-ink resize-none"
+                  className="glass-field w-full px-3.5 py-2 text-sm font-serif-th rounded-xl border border-line-interactive focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold text-ink resize-none"
                 />
                 <div className="flex items-center justify-between text-[11px] font-serif-th text-muted mt-1">
                   <span>
@@ -562,7 +564,7 @@ export function QuickFortunePicker({
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-line/40">
+              <div className="glass-divider-t flex items-center justify-end gap-2.5 pt-3">
                 <button
                   type="button"
                   onClick={closeNicknameModal}
@@ -573,7 +575,7 @@ export function QuickFortunePicker({
                 <button
                   type="submit"
                   disabled={isLoading || !inputNickname.trim()}
-                  className="tap-overlay-y px-5 py-2 text-xs font-serif-th font-semibold rounded-xl bg-ink text-surface-warm hover:bg-[#3D372E] border border-gold-ink/40 disabled:opacity-50 transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+                  className="btn-gold-glass tap-overlay-y px-5 py-2.5 text-xs font-serif-th font-semibold disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
                 >
                   <span>{isEnglish ? "Begin Reading Now" : "เริ่มทำนายทันที"}</span>
                   <span aria-hidden="true">➔</span>

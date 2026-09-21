@@ -33,6 +33,8 @@ import { trackEvent } from "@/lib/analytics";
 import {
   DAILY_LIMIT,
   GUEST_BLOCK_REASON,
+  READINGS_EN,
+  REQUIRE_SIGNUP_TO_READ,
   describeEntitlement,
   type UpgradeReason,
   isStandardSpread,
@@ -1517,11 +1519,30 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     </span>
                   </p>
 
-                  {/* แถวชิปความน่าเชื่อถือ — `whitespace-nowrap` กันคำในชิปแตกคนละบรรทัดแบบคำโปรยเดิม */}
+                  {/*
+                    แถวชิปความน่าเชื่อถือ — `whitespace-nowrap` กันคำในชิปแตกคนละบรรทัดแบบคำโปรยเดิม
+
+                    ⚠️ ชิปใบที่สามต้องอ่านค่าจริงจาก `REQUIRE_SIGNUP_TO_READ` / `DAILY_LIMIT` เสมอ
+                       ห้ามพิมพ์ "ฟรี · ไม่ต้องสมัคร" ทิ้งไว้ตรง ๆ — ตอนนี้ `GUEST_LIMIT = 0`
+                       แปลว่าเว็บบังคับสมัครก่อนเปิดไพ่ ข้อความเดิมจึงโกหกผู้ใช้ (เจ้าของทัก 2026-09-21)
+                       ถ้าวันหนึ่งเปิดสิทธิ์ทดลองกลับมา ชิปนี้จะเปลี่ยนถ้อยคำตามให้เอง
+                  */}
                   <ul className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
                     {(isEnglish
-                      ? ["Authentic 1909 Rider-Waite · 78 cards", "Provably-Fair SHA-256 randomness", "Free · No sign-up"]
-                      : ["สำรับ 1909 Rider-Waite แท้ 78 ใบ", "สุ่มโปร่งใส Provably-Fair SHA-256", "ฟรี · ไม่ต้องสมัคร"]
+                      ? [
+                          "Authentic 1909 Rider-Waite · 78 cards",
+                          "Provably-Fair SHA-256 randomness",
+                          REQUIRE_SIGNUP_TO_READ
+                            ? `Free account · ${DAILY_LIMIT} ${READINGS_EN} a day`
+                            : "Free · No sign-up",
+                        ]
+                      : [
+                          "สำรับ 1909 Rider-Waite แท้ 78 ใบ",
+                          "สุ่มโปร่งใส Provably-Fair SHA-256",
+                          REQUIRE_SIGNUP_TO_READ
+                            ? `สมัครสมาชิกฟรี · เปิดไพ่ได้วันละ ${DAILY_LIMIT} ครั้ง`
+                            : "ฟรี · ไม่ต้องสมัคร",
+                        ]
                     ).map((fact) => (
                       <li
                         key={fact}
