@@ -28,6 +28,12 @@ import {
   type ReadingAction,
 } from "../../src/components/home/flow-reading";
 import type { DrawnSlotCard } from "../../src/components/spread/SpreadBoard";
+import {
+  decideSpreadAccess,
+  decideStartSessionAccess,
+  isPassHolderOf,
+} from "../../src/components/home/flow-access";
+import type { ClientEntitlement } from "../../src/lib/entitlement/use-entitlement";
 
 let pass = 0;
 let fail = 0;
@@ -345,6 +351,94 @@ if (!fs.existsSync(FLOW)) {
     "ไม่มีตัวตั้งค่าแบบเดิมหลงเหลือ",
     forbidden.length === 0,
     `พบ: ${forbidden.join(", ")}\n      ➔ ใช้ dispatchDeck / dispatchSession / dispatchRead แทน`,
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+console.log("\n\n── 13. ด่านสิทธิ์ก่อนเริ่มพิธี (flow-access.ts) ──");
+// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * ⚠️ ยิงเคสจริงใส่ฟังก์ชัน ไม่ได้ค้นข้อความในซอร์ส
+ *
+ * ทางเข้าสู่ขั้นตั้งจิตมีสามทาง (ปุ่มหน้าแรก · ลิงก์ `/?spread=` · ตอนยิงเซสชันจริง)
+ * ทั้งสามต้องตัดสินด้วยตรรกะก้อนเดียวกัน ไม่งั้นผังใหญ่หลุดฟรีทางใดทางหนึ่งได้
+ */
+const ent = (over: Partial<ClientEntitlement> = {}): ClientEntitlement => ({
+  enabled: true,
+  canStartReading: true,
+  canChat: true,
+  remaining: 1,
+  limit: 1,
+  weeklyRemaining: null,
+  bonusRemaining: 0,
+  resetAt: null,
+  kind: "member",
+  ...over,
+});
+
+const MEMBER = ent();
+const MEMBER_OUT = ent({ remaining: 0, canStartReading: false });
+const GUEST = ent({ kind: "guest", remaining: 0, limit: 0, canStartReading: false });
+const PAID = ent({ hasPaidCredits: true });
+const UNLIMITED = ent({ role: "unlimited" });
+const SYSTEM_OFF = ent({ enabled: false });
+
+/** `celtic-cross` = ผังใหญ่ (ไม่อยู่ใน STANDARD_SPREAD_IDS) · `daily` = ผังมาตรฐาน */
+check("สมาชิกที่ยังมีสิทธิ์ ➔ เข้าผังมาตรฐานได้", decideSpreadAccess(MEMBER, "daily").allowed === true);
+check(
+  "สมาชิกที่ยังมีสิทธิ์แต่ไม่ได้จ่ายเงิน ➔ ผังใหญ่ติดกำแพง `grand_spread`",
+  (() => {
+    const d = decideSpreadAccess(MEMBER, "celtic-cross");
+    return !d.allowed && d.reason === "grand_spread";
+  })(),
+);
+check(
+  "โควตาหมด ➔ ติดกำแพงตั้งแต่ชั้นแรก ไม่ใช่ชั้นผังใหญ่",
+  (() => {
+    const d = decideSpreadAccess(MEMBER_OUT, "celtic-cross");
+    return !d.allowed && d.reason !== "grand_spread";
+  })(),
+);
+check("ผู้ชมที่ยังไม่ล็อกอินและไม่มีสิทธิ์ฟรี ➔ ติดกำแพง", decideSpreadAccess(GUEST, "daily").allowed === false);
+check("คนที่ซื้อเครดิตแล้ว ➔ เปิดผังใหญ่ได้", decideSpreadAccess(PAID, "celtic-cross").allowed === true);
+check("บัญชีไม่จำกัดสิทธิ์ ➔ เปิดผังใหญ่ได้", decideSpreadAccess(UNLIMITED, "celtic-cross").allowed === true);
+check(
+  "แอดมินปิดระบบสิทธิ์ทั้งเว็บ ➔ ไม่มีกำแพงให้ใครเลย แม้แต่ผังใหญ่",
+  decideSpreadAccess(SYSTEM_OFF, "celtic-cross").allowed === true && isPassHolderOf(SYSTEM_OFF),
+);
+check(
+  "ยังไม่รู้สิทธิ์ (null) ➔ ผังมาตรฐานผ่าน แต่ผังใหญ่ยังกั้นไว้ก่อน",
+  decideSpreadAccess(null, "daily").allowed === true && decideSpreadAccess(null, "celtic-cross").allowed === false,
+);
+check(
+  "ชั้นที่ 3: แม่หมอปรมาจารย์สงวนไว้ให้ผู้ถือสิทธิ์เต็มเท่านั้น",
+  (() => {
+    const blocked = decideStartSessionAccess(MEMBER, "daily", "master");
+    return !blocked.allowed && blocked.reason === "master_persona" && decideStartSessionAccess(PAID, "daily", "master").allowed === true;
+  })(),
+);
+check(
+  "ชั้นผังใหญ่มาก่อนชั้นแม่หมอเสมอ (ผู้ใช้เห็นกำแพงเดียว ไม่สลับไปมา)",
+  (() => {
+    const d = decideStartSessionAccess(MEMBER, "celtic-cross", "master");
+    return !d.allowed && d.reason === "grand_spread";
+  })(),
+);
+
+// ทางเข้าทั้งสามใน TarotFlow ต้องเรียกตรรกะก้อนนี้ ห้ามคัดลอกเงื่อนไขไปเขียนเองอีก
+if (!fs.existsSync(FLOW)) {
+  check("หาไฟล์ TarotFlow.tsx เจอ (ตรวจทางเข้าสู่ขั้นตั้งจิต)", false, "ไฟล์ถูกย้าย/เปลี่ยนชื่อ — ด่านนี้ตรวจอะไรไม่ได้");
+} else {
+  const flowSrc = fs.readFileSync(FLOW, "utf-8");
+  check("TarotFlow ใช้ `decideSpreadAccess` (ปุ่มหน้าแรก + ลิงก์ `?spread=`)", flowSrc.includes("decideSpreadAccess("));
+  check("TarotFlow ใช้ `decideStartSessionAccess` ตอนยิงเซสชันจริง", flowSrc.includes("decideStartSessionAccess("));
+  /**
+   * ลิงก์ `/?spread=<id>` ต้อง "เริ่มพิธีให้เลย" — ผู้ใช้กดคำว่าเริ่มดูดวงมาแล้วหนึ่งที
+   * ถ้าการเรียกนี้หายไป หน้าแรกจะกลับไปนิ่งอยู่ขั้นเลือกผังเหมือนเดิม
+   */
+  check(
+    "ลิงก์ `?spread=` เริ่มพิธีให้อัตโนมัติ ไม่ใช่แค่เลือกผังค้างไว้",
+    /searchParams\.get\("spread"\)/.test(flowSrc) && /beginFromDeepLink\(/.test(flowSrc),
   );
 }
 

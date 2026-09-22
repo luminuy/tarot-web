@@ -1,4 +1,6 @@
-import { SPREADS } from "../../src/data/spreads";
+import { readFileSync } from "node:fs";
+
+import { SPREADS, PUBLIC_SPREADS } from "../../src/data/spreads";
 import { DECK_SIZE } from "../../src/data/cards";
 import {
   mapLayout,
@@ -157,6 +159,37 @@ for (const spread of SPREADS) {
     }
   }
 }
+
+// ──────────────────────────────────────────────────────────────────────────────
+// ด่านกันผังภายในหลุดเข้าคลังผังสาธารณะ
+//
+// `SPREADS` มีผังภายในปนอยู่ (`internal: true`) ซึ่งเป็นท่อให้หน้าเฉพาะทางเรียกใช้
+// ไม่ใช่ผังที่ผู้ใช้เลือกเองได้ และ **ไม่มีหน้าคู่มือ `/spreads/[id]` ของตัวเอง**
+// (หน้านั้นสร้างจาก `PUBLIC_SPREADS`) ถ้าหลุดเข้าคลังผังเมื่อไร ผู้ใช้จะกด
+// "อ่านคู่มือผังนี้" แล้วเจอ 404 และเลขบนแท็บ "ผังทั้งหมด" จะขัดกับหัวข้อของหน้าเดียวกัน
+const libraryIsland = readFileSync(new URL("../../astro/islands/SpreadIslands.tsx", import.meta.url), "utf8");
+const libraryUsage = libraryIsland.match(/<SpreadsLibrary\s+spreads=\{([A-Za-z_$][\w$]*)\}/);
+check("คลังผัง `/spreads` รับข้อมูลผังมาเป็นชุดเดียว (เจอ `<SpreadsLibrary spreads={...}>`)", !!libraryUsage);
+check(
+  `คลังผัง \`/spreads\` ต้องรับ \`PUBLIC_SPREADS\` เท่านั้น ไม่ใช่ \`${libraryUsage?.[1] ?? "?"}\` (ผังภายในห้ามโผล่)`,
+  libraryUsage?.[1] === "PUBLIC_SPREADS",
+);
+check(
+  "ผังภายในไม่มีทางมีหน้าคู่มือของตัวเอง — ยืนยันว่า `PUBLIC_SPREADS` กรอง `internal` ออกจริง",
+  PUBLIC_SPREADS.every((s) => !s.internal) && PUBLIC_SPREADS.length === SPREADS.filter((s) => !s.internal).length,
+);
+
+// จำนวนผังที่ประกาศบนหน้าคลังผังต้องนับจากรายการจริง ห้ามพิมพ์ตัวเลขค้างไว้
+// (ของเดิมหัวข้อเขียน "25" ตายตัว แต่แท็บนับจากรายการจริงได้ 28 — ขัดกันเองในจอเดียว)
+const librarySource = readFileSync(new URL("../../src/components/spread/SpreadsLibrary.tsx", import.meta.url), "utf8");
+const heroBlock = librarySource.slice(
+  librarySource.indexOf("Dynamic Bilingual Hero Header"),
+  librarySource.indexOf("Category Tabs with Editorial Styling"),
+);
+check(
+  "หัวข้อหน้าคลังผังไม่พิมพ์จำนวนผังค้างไว้ (ต้องอ่านจาก `spreads.length`)",
+  heroBlock.length > 0 && !/\d{2,}/.test(heroBlock.replace(/[\w-]+-\d+|\bpy-\d|\bpt-\d/g, "")),
+);
 
 console.log(`\n${pass}/${pass + fail} ผ่าน (${SPREADS.length} spreads, ${SPREADS.reduce((a, s) => a + s.positions.length, 0)} ตำแหน่งรวม)`);
 if (fail > 0) process.exit(1);
