@@ -392,6 +392,87 @@ const HAS_CLIPPER = /\b(truncate|overflow-hidden|overflow-clip|text-ellipsis)\b/
 
 type SqueezeFinding = { file: string; line: number; classes: string };
 
+/**
+ * 🃏 ป้ายลอยสองอันบนไพ่ใบเดียวกันต้องอยู่คนละขอบบน-ล่าง (บทเรียนรอบ 133)
+ * ---------------------------------------------------------------------------
+ * ไพ่ในผังกว้างแค่ **96px** บนมือถือ (`w-24`) แต่ของที่ลอยทับอยู่มีสองชิ้น:
+ *
+ *   • ป้าย "กลับหัว" ใน `TarotCard.tsx`     — กว้าง 55px
+ *   • ปุ่ม "ขยาย" ใน `SpreadBoard.tsx`      — กว้าง 70px (ยื่นออกนอกไพ่ 10px)
+ *
+ * 55 + 70 = 125px > 96px ➔ **ถ้าอยู่แถวเดียวกัน ยังไงก็ทับกัน** ไม่ว่าจะชิดซ้ายชิดขวาแค่ไหน
+ * วัดจริงตอนทั้งคู่อยู่แถวบน: ทับกัน **13×8px** ที่ 320 · 360 · 390 · 430px
+ * (จอ ≥640px ไพ่กว้าง 112px จึงพอดีเฉียดไม่ทับ — บั๊กนี้เลยโผล่เฉพาะมือถือ)
+ *
+ * กฎจึงเป็น: **ทั้งสองชิ้นต้องอยู่คนละขอบ (บน/ล่าง) เสมอ**
+ * ย้ายชิ้นไหนก็ได้ แต่ห้ามให้ไปกองอยู่แถวเดียวกันอีก
+ *
+ * ⚠️ "เลื่อนไปทางขวา" แก้ไม่ได้ — ปุ่มขยายยื่นพ้นขอบไพ่ไป 10px อยู่แล้ว
+ *    และแผงผังไพ่เป็น `overflow-hidden` ที่ 320px เหลือที่ว่างถึงขอบแผงแค่ 9px
+ */
+export interface CardBadgeFinding {
+  rule: string;
+  hint: string;
+}
+
+/** ป้ายลอยชิ้นนี้เกาะขอบบนหรือขอบล่างของไพ่ */
+function edgeBandOf(classes: string): "top" | "bottom" | "unknown" {
+  if (/(^|\s|-)top-/.test(classes)) return "top";
+  if (/(^|\s|-)bottom-/.test(classes)) return "bottom";
+  return "unknown";
+}
+
+export function scanCardFloatingBadges(root: string): CardBadgeFinding[] {
+  const out: CardBadgeFinding[] = [];
+
+  const cardFile = path.join(root, "src/components/card/TarotCard.tsx");
+  const boardFile = path.join(root, "src/components/spread/SpreadBoard.tsx");
+  for (const f of [cardFile, boardFile]) {
+    if (!fs.existsSync(f)) {
+      out.push({ rule: `หาไฟล์ ${path.relative(root, f)} ไม่เจอ`, hint: "ไฟล์ถูกย้าย/เปลี่ยนชื่อ — ด่านนี้ตรวจอะไรไม่ได้" });
+      return out;
+    }
+  }
+
+  // ป้าย "กลับหัว" — กล่อง absolute ที่อยู่เหนือข้อความ "กลับหัว" ที่ใกล้ที่สุด
+  const cardSrc = fs.readFileSync(cardFile, "utf-8").split("\n");
+  const badgeTextLine = cardSrc.findIndex((l) => l.includes('"Reversed" : "กลับหัว"'));
+  const badgeBoxLine = badgeTextLine < 0 ? -1 : cardSrc.slice(0, badgeTextLine).map((l, i) => ({ l, i })).reverse().find((x) => x.l.includes("absolute"))?.i ?? -1;
+
+  // ปุ่ม "ขยาย" ของผังไพ่ — className ของปุ่มที่อยู่เหนือข้อความ "ขยาย" ที่ใกล้ที่สุด
+  const boardSrc = fs.readFileSync(boardFile, "utf-8").split("\n");
+  const zoomTextLine = boardSrc.findIndex((l) => l.includes('"Zoom" : "ขยาย"'));
+  const zoomBoxLine = zoomTextLine < 0 ? -1 : boardSrc.slice(0, zoomTextLine).map((l, i) => ({ l, i })).reverse().find((x) => x.l.includes("absolute"))?.i ?? -1;
+
+  if (badgeBoxLine < 0 || zoomBoxLine < 0) {
+    out.push({
+      rule: "หาป้าย \"กลับหัว\" หรือปุ่ม \"ขยาย\" ในซอร์สไม่เจอ",
+      hint: "ถ้าย้ายที่อยู่ของสองชิ้นนี้ ต้องอัปเดตด่านนี้ให้ตรวจของจริงต่อได้ ห้ามปล่อยให้ด่านเงียบ",
+    });
+    return out;
+  }
+
+  const badgeBand = edgeBandOf(cardSrc[badgeBoxLine]);
+  const zoomBand = edgeBandOf(boardSrc[zoomBoxLine]);
+
+  if (badgeBand === "unknown" || zoomBand === "unknown") {
+    out.push({
+      rule: `อ่านขอบที่ป้ายเกาะอยู่ไม่ออก (กลับหัว=${badgeBand} · ขยาย=${zoomBand})`,
+      hint: "ทั้งสองชิ้นต้องระบุขอบบน/ล่างให้ชัดด้วยคลาส `top-*` หรือ `bottom-*`",
+    });
+    return out;
+  }
+
+  if (badgeBand === zoomBand) {
+    out.push({
+      rule: `ป้าย "กลับหัว" กับปุ่ม "ขยาย" ไปกองอยู่ขอบ${badgeBand === "top" ? "บน" : "ล่าง"}ด้วยกัน`,
+      hint: "ไพ่กว้าง 96px บนมือถือ แต่สองชิ้นรวมกัน 125px ➔ ทับกันแน่นอน · ย้ายชิ้นใดชิ้นหนึ่งไปอีกขอบ",
+    });
+  }
+
+  return out;
+}
+
 export function scanNowrapInsideFlexGrow(files: string[]): SqueezeFinding[] {
   const findings: SqueezeFinding[] = [];
   for (const file of files) {
@@ -486,4 +567,16 @@ if (process.argv[1] && process.argv[1].endsWith("test-invisible-element.ts")) {
   }
 
   console.log("✅ ไม่มีกล่องที่ `flex-1`/`grow` คู่กับ `whitespace-nowrap` โดยไม่มีตัวตัดของล้น");
+
+  const badges = scanCardFloatingBadges(ROOT);
+  if (badges.length > 0) {
+    console.error(`\n❌ ป้ายลอยบนไพ่ทับกัน ${badges.length} จุด\n`);
+    for (const f of badges) {
+      console.error(`   ${f.rule}`);
+      console.error(`      ${f.hint}\n`);
+    }
+    process.exit(1);
+  }
+
+  console.log('✅ ป้าย "กลับหัว" กับปุ่ม "ขยาย" อยู่คนละขอบของไพ่ จึงทับกันไม่ได้');
 }
