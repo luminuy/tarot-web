@@ -40,6 +40,7 @@ import {
   isStandardSpread,
 } from "@/lib/entitlement/copy";
 import { decideSpreadAccess, decideStartSessionAccess, isPassHolderOf } from "@/components/home/flow-access";
+import { resolveEntryIntent } from "@/components/home/flow-entry";
 import { onUpgradeRequest } from "@/lib/entitlement/upgrade-bus";
 import { ensureEntitlement, refreshEntitlement, useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useLocale } from "@/lib/i18n";
@@ -397,10 +398,46 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     if (resumeDoneRef.current) return; // กัน StrictMode รันซ้ำ
     resumeDoneRef.current = true;
 
+    /**
+     * ✦ ลำดับความสำคัญ: **ลิงก์ `?spread=` ชนะรอบที่ค้างไว้เสมอ**
+     *
+     * ผู้ใช้กดปุ่มที่เขียนว่า "เริ่มดูดวงด้วยผังนี้" มาจากหน้าอื่น = สั่งเริ่มรอบใหม่ชัดเจน
+     * ของเดิมให้ตัวกู้คืนรอบค้างมาก่อน ➔ คนที่เคยเปิดไพ่ในแท็บนี้ภายในชั่วโมงเดียวกัน
+     * กดผังใหม่แล้ว "เหมือนไม่มีอะไรเกิดขึ้น" เพราะถูกพากลับไปรอบเก่าผังเก่าเงียบ ๆ
+     * (อาการที่เจ้าของเจอ: กดผัง 10 ใบในแท็บผังใหญ่แล้วเด้งกลับหน้าแรกเหมือนเดิม)
+     *
+     * ⚠️ ต้องล้าง `?spread=` ออกจาก URL ทันทีหลังรับคำสั่ง ไม่งั้นการ "รีเฟรช" ระหว่าง
+     *    ดูดวงจะถูกตีความเป็นคำสั่งเริ่มใหม่ซ้ำ แล้วล้างรอบที่กำลังเปิดไพ่อยู่ทิ้ง
+     */
+    const rememberNickname = () => {
+      try {
+        const remembered = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEYS.nickname) : null;
+        if (remembered) setNickname(remembered);
+      } catch {
+        /* จำชื่อเล่นไม่ได้ในโหมดส่วนตัว — ผู้ใช้กรอกใหม่ได้ ไม่ต้องนับเป็นความล้มเหลว (R-27) */
+      }
+    };
+
     const saved = loadFlowState();
-    // กู้คืนเฉพาะเมื่อผู้ใช้ "เริ่มดูดวงไปแล้วจริง ๆ" (พ้นขั้นเลือกผัง) — ถ้ายังอยู่ขั้น 1
-    // ให้ถือว่าไม่มีอะไรค้าง แล้วเปิดทางให้ `?spread=` ทำงานแทน
-    if (saved && saved.currentStep !== "SPREAD_SELECT") {
+    const intent = resolveEntryIntent({
+      spreadParam: new URLSearchParams(window.location.search).get("spread"),
+      isKnownSpread: (id) => Boolean(getSpread(id)),
+      savedStep: saved?.currentStep ?? null,
+    });
+
+    if (intent.kind === "deepLink") {
+      const deepLinkSpread = getSpread(intent.spreadId)!;
+      // รอบเก่าถูกบันทึกลงประวัติตั้งแต่ตอนอ่านจบแล้ว — ของที่ทิ้งคือ "ค้างกลางทาง" ไม่ใช่ผลคำอ่าน
+      clearFlowState();
+      const cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete("spread");
+      window.history.replaceState({}, "", cleanUrl.toString());
+
+      setSelectedSpread(deepLinkSpread);
+      rememberNickname();
+      void beginFromDeepLink(deepLinkSpread, () => deepLinkCancelledRef.current);
+    } else if (intent.kind === "resume" && saved) {
+      // กู้คืนเฉพาะเมื่อผู้ใช้ "เริ่มดูดวงไปแล้วจริง ๆ" (พ้นขั้นเลือกผัง)
       const spread = getSpread(saved.spreadId);
       if (spread) setSelectedSpread(spread);
       setSelectedPersona(getPersona(saved.personaId));
@@ -436,22 +473,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         dispatchRead({ type: "fail", message: isEn ? "The reading stream was interrupted. Please click reload to continue." : "การอ่านไพ่ค้างไว้ตอนหน้าเว็บรีเฟรช กรุณากดโหลดใหม่อีกครั้งเพื่ออ่านคำทำนายต่อ" });
       }
     } else {
-      const searchParams = new URLSearchParams(window.location.search);
-      const spreadParam = searchParams.get("spread");
-      if (spreadParam) {
-        const match = getSpread(spreadParam);
-        if (match) {
-          setSelectedSpread(match);
-          // ผู้ใช้กด "เริ่มดูดวงด้วยผังนี้" มาจากคลังผัง = ตั้งใจเริ่มแล้ว ไม่ใช่มาเลือกผังใหม่
-          void beginFromDeepLink(match, () => deepLinkCancelledRef.current);
-        }
-      }
-      try {
-        const remembered = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEYS.nickname) : null;
-        if (remembered) setNickname(remembered);
-      } catch {
-        /* จำชื่อเล่นไม่ได้ในโหมดส่วนตัว — ผู้ใช้กรอกใหม่ได้ ไม่ต้องนับเป็นความล้มเหลว (R-27) */
-      }
+      rememberNickname();
     }
 
     // Auto-sync anonymous history to server upon login or app mount & handle Auth query toasts

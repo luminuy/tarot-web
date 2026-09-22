@@ -28,11 +28,13 @@ import {
   type ReadingAction,
 } from "../../src/components/home/flow-reading";
 import type { DrawnSlotCard } from "../../src/components/spread/SpreadBoard";
+import type { RitualStep } from "../../src/components/home/ritual-step";
 import {
   decideSpreadAccess,
   decideStartSessionAccess,
   isPassHolderOf,
 } from "../../src/components/home/flow-access";
+import { resolveEntryIntent } from "../../src/components/home/flow-entry";
 import type { ClientEntitlement } from "../../src/lib/entitlement/use-entitlement";
 
 let pass = 0;
@@ -438,7 +440,48 @@ if (!fs.existsSync(FLOW)) {
    */
   check(
     "ลิงก์ `?spread=` เริ่มพิธีให้อัตโนมัติ ไม่ใช่แค่เลือกผังค้างไว้",
-    /searchParams\.get\("spread"\)/.test(flowSrc) && /beginFromDeepLink\(/.test(flowSrc),
+    /\.get\("spread"\)/.test(flowSrc) && /void beginFromDeepLink\(/.test(flowSrc),
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+console.log("\n\n── 14. เปิดหน้าแรกครั้งนี้เพราะอะไร (flow-entry.ts) ──");
+// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * ⚠️ ยิงเคสจริงใส่ฟังก์ชัน ไม่ได้ค้นข้อความในซอร์ส
+ *
+ * ลำดับที่ต้องไม่สลับ: ปุ่มที่ผู้ใช้เพิ่งกด (`?spread=`) ชนะรอบที่ค้างอยู่ในแท็บเสมอ
+ * ของเดิมสลับลำดับกัน คนที่เพิ่งเปิดไพ่ในแท็บนี้จึงกดผังใหม่ไม่ติดเลยสักครั้ง
+ */
+const known = (id: string) => ["daily", "celtic-cross", "three-card"].includes(id);
+const intent = (spreadParam: string | null, savedStep: RitualStep | null) =>
+  resolveEntryIntent({ spreadParam, isKnownSpread: known, savedStep });
+
+check("กดปุ่มผังใหม่ ทั้งที่ยังไม่มีอะไรค้าง ➔ เริ่มผังนั้น", intent("celtic-cross", null).kind === "deepLink");
+for (const step of ["INTENTION_SELECT", "SHUFFLE", "PICK_CARDS", "READING", "SUMMARY"] as RitualStep[]) {
+  const got = intent("celtic-cross", step);
+  check(
+    `กดปุ่มผังใหม่ ขณะค้างอยู่ขั้น ${step} ➔ ผังที่กดต้องชนะ (ไม่ใช่ลากกลับรอบเก่า)`,
+    got.kind === "deepLink" && got.spreadId === "celtic-cross",
+  );
+}
+check("ไม่ได้กดอะไร แต่มีรอบค้างอยู่ ➔ กู้คืนรอบเดิม", intent(null, "READING").kind === "resume");
+check("ไม่ได้กดอะไร และค้างที่ขั้นเลือกผัง ➔ ถือว่าไม่มีอะไรค้าง", intent(null, "SPREAD_SELECT").kind === "fresh");
+check("ไม่ได้กดอะไร และไม่มีอะไรค้าง ➔ หน้าเปล่า", intent(null, null).kind === "fresh");
+check(
+  "`?spread=` ที่ไม่มีผังอยู่จริง ➔ ไม่ใช่คำสั่ง ห้ามทับรอบที่ค้างอยู่",
+  intent("ผังมั่ว", "READING").kind === "resume" && intent("ผังมั่ว", null).kind === "fresh",
+);
+
+// URL ต้องถูกล้าง `?spread=` ทิ้งหลังรับคำสั่ง ไม่งั้นรีเฟรชระหว่างดูดวง = เริ่มใหม่ทับของเดิม
+if (!fs.existsSync(FLOW)) {
+  check("หาไฟล์ TarotFlow.tsx เจอ (ตรวจการล้าง ?spread= ออกจาก URL)", false, "ไฟล์ถูกย้าย/เปลี่ยนชื่อ");
+} else {
+  const flowSrc = fs.readFileSync(FLOW, "utf-8");
+  check("TarotFlow ตัดสินทางเข้าด้วย `resolveEntryIntent`", flowSrc.includes("resolveEntryIntent("));
+  check(
+    "ล้าง `?spread=` ออกจาก URL หลังรับคำสั่งแล้ว (กันรีเฟรชแล้วเริ่มใหม่ทับรอบที่ค้าง)",
+    /searchParams\.delete\("spread"\)/.test(flowSrc) && /history\.replaceState/.test(flowSrc),
   );
 }
 
