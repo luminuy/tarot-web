@@ -38,8 +38,8 @@ import {
   describeEntitlement,
   type UpgradeReason,
   isStandardSpread,
-  isMasterPersona,
 } from "@/lib/entitlement/copy";
+import { decideSpreadAccess, decideStartSessionAccess, isPassHolderOf } from "@/components/home/flow-access";
 import { onUpgradeRequest } from "@/lib/entitlement/upgrade-bus";
 import { ensureEntitlement, refreshEntitlement, useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useLocale } from "@/lib/i18n";
@@ -211,9 +211,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   // แอดมินปิดระบบสิทธิ์ทั้งเว็บ (/admin → เปิดระบบสิทธิ์จริง → ปิด) = ไม่มีลิมิตให้ใครเลย
   // รวมถึงผังใหญ่ + ปรมาจารย์ลับด้วย — ผูก entitlement.enabled เข้ามาไม่งั้นการ์ดจะค้าง "ล็อก"
   // ทั้งที่หลังบ้านอนุญาตให้เปิดผังใหญ่แล้ว (describeEntitlement คืน null ตอนปิดจึงไม่มี isUnlimited)
-  const isPassHolder = Boolean(
-    entitlementView?.isUnlimited || entitlement?.hasPaidCredits || (entitlement && !entitlement.enabled),
-  );
+  const isPassHolder = isPassHolderOf(entitlement);
 
   /**
    * ทางเข้าเดียวของกำแพงสิทธิ์ — ทุกจุดที่ผู้ใช้ถูกกั้นต้องเรียกผ่านนี้
@@ -354,22 +352,47 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
    * ⚠️ ด่านสิทธิ์สามชั้นด้านล่างคือของเดิมทั้งหมด ห้ามตัดออกแม้แต่ชั้นเดียว
    */
   const handleBeginReading = useCallback(() => {
-    if (entitlementView?.blocked) {
-      openAccessDialog(entitlementView.blockedReason ?? GUEST_BLOCK_REASON);
-      return;
-    }
-    if (!isPassHolder && !isStandardSpread(selectedSpread.id)) {
-      openAccessDialog("grand_spread");
+    const decision = decideSpreadAccess(entitlement, selectedSpread.id);
+    if (!decision.allowed) {
+      openAccessDialog(decision.reason);
       return;
     }
     soundManager.playCardSelectSound();
     scrollToSanctuaryTop();
     navigateStep("INTENTION_SELECT");
-  }, [entitlementView, isPassHolder, selectedSpread, openAccessDialog, navigateStep]);
+  }, [entitlement, selectedSpread, openAccessDialog, navigateStep]);
+
+  /**
+   * ✦ ลิงก์ `/?spread=<id>` ต้อง "เริ่มพิธีให้เลย" ไม่ใช่แค่เลือกผังค้างไว้ที่ขั้น 1
+   *
+   * ปุ่ม "เริ่มดูดวงด้วยผังนี้" ในคลังผัง · หน้าคู่มือรายผัง · หน้าหมวด · หน้าไพ่รายใบ
+   * ทุกปุ่มพามาที่ `/?spread=<id>` เหมือนกันหมด ของเดิมมาถึงแล้วแค่ตั้งค่าผังที่เลือกไว้
+   * ผู้ใช้จึงเห็นแค่ "เด้งกลับหน้าแรก" แล้วต้องกดปุ่มเริ่มซ้ำอีกครั้งด้วยตัวเอง
+   * ทั้งที่กดคำว่า "เริ่มดูดวง" มาแล้วหนึ่งที (คำร้องจากเจ้าของโปรเจกต์ 2026-09-22)
+   *
+   * ⚠️ **ต้องรอคำตอบเรื่องสิทธิ์ก่อนตัดสินเสมอ** — ผู้ชมที่ยังไม่ล็อกอินจะไม่ถูกถามสิทธิ์
+   *    ตอนเปิดหน้า (ดู `use-entitlement.ts`) ค่าที่ hook ถืออยู่ตอนนี้จึงอาจยังเป็น `null`
+   *    ถ้าตัดสินจากค่านั้นเลย คนที่จ่ายเงินแล้วจะโดนกำแพงผังใหญ่ใส่หน้าทั้งที่มีสิทธิ์เต็ม
+   *
+   * ⚠️ ด่านสิทธิ์ใช้ `decideSpreadAccess` ชุดเดียวกับปุ่มบนหน้าแรก ห้ามลัดชั้นใดชั้นหนึ่ง
+   */
+  const beginFromDeepLink = async (spread: Spread, isCancelled: () => boolean) => {
+    const currentEntitlement = entitlement ?? (await ensureEntitlement());
+    if (isCancelled()) return;
+
+    const decision = decideSpreadAccess(currentEntitlement, spread.id);
+    if (!decision.allowed) {
+      openAccessDialog(decision.reason);
+      return;
+    }
+    navigateStep("INTENTION_SELECT");
+  };
 
   // ── P1-U4: กู้คืน flow ที่ค้างไว้ + P1-U5: รับผัง `?spread=` จากคลังผัง ──────
   // ก่อนหน้านี้ refresh / back / สลับแท็บ = เด้งกลับขั้น 1 ทั้งที่ server session ยังอยู่ ~60 นาที
   const resumeDoneRef = useRef(false);
+  /** ถอดหน้าออกจากจอระหว่างรอคำตอบเรื่องสิทธิ์ = ห้ามพาไปขั้นถัดไปแล้ว */
+  const deepLinkCancelledRef = useRef(false);
   useEffect(() => {
     if (resumeDoneRef.current) return; // กัน StrictMode รันซ้ำ
     resumeDoneRef.current = true;
@@ -417,7 +440,11 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       const spreadParam = searchParams.get("spread");
       if (spreadParam) {
         const match = getSpread(spreadParam);
-        if (match) setSelectedSpread(match);
+        if (match) {
+          setSelectedSpread(match);
+          // ผู้ใช้กด "เริ่มดูดวงด้วยผังนี้" มาจากคลังผัง = ตั้งใจเริ่มแล้ว ไม่ใช่มาเลือกผังใหม่
+          void beginFromDeepLink(match, () => deepLinkCancelledRef.current);
+        }
       }
       try {
         const remembered = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEYS.nickname) : null;
@@ -593,6 +620,11 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         });
       }
     }
+
+    // ถอดหน้าออกจากจอระหว่างรอคำตอบเรื่องสิทธิ์ของลิงก์ `?spread=` = ห้ามพาไปขั้นถัดไปแล้ว
+    return () => {
+      deepLinkCancelledRef.current = true;
+    };
   }, [isEnglish]);
 
   // คอมโพเนนต์ลึก (เช่นช่องแชทที่ล็อกใน FollowUpChat) ขอเปิดหน้าต่างสิทธิ์พร้อม "เหตุผล"
@@ -689,21 +721,17 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
      * ถ้าข้ามไปเลยโดยไม่ถาม ผู้ใช้จะถูกพาเข้าขั้นตอนเปิดไพ่แล้วไปเจอ 403 กลางทาง
      */
     const currentEntitlement = entitlement ?? (await ensureEntitlement());
-    const currentView = describeEntitlement(currentEntitlement);
 
-    // สิทธิ์หมดตั้งแต่ยังไม่ยิง API — อธิบายด้วยหน้าต่างเดียว ไม่ต้องมีแถบแดงซ้อน
-    if (currentView?.blocked) {
-      openAccessDialog(currentView.blockedReason ?? GUEST_BLOCK_REASON);
-      return;
-    }
-
-    if (!isPassHolder && !isStandardSpread(selectedSpread.id)) {
-      openAccessDialog("grand_spread");
-      return;
-    }
-
-    if (!isPassHolder && isMasterPersona(selectedPersona.id)) {
-      openAccessDialog("master_persona");
+    /*
+     * ด่านสิทธิ์สามชั้น — อธิบายด้วยหน้าต่างเดียว ไม่ต้องมีแถบแดงซ้อน
+     *
+     * ⚠️ ต้องตัดสินจาก `currentEntitlement` ที่เพิ่งได้มา ไม่ใช่ `isPassHolder` ที่ค้างอยู่
+     *    ในคลอเชอร์ ของเดิมถามสิทธิ์ใหม่แล้วแต่ยังเอาค่าเก่ามาตัดสินชั้นที่ 2 กับ 3
+     *    คนที่เพิ่งเปิดหน้าแล้วกดเปิดผังใหญ่ทันทีจึงโดนกำแพงทั้งที่จ่ายเงินมาแล้ว
+     */
+    const decision = decideStartSessionAccess(currentEntitlement, selectedSpread.id, selectedPersona.id);
+    if (!decision.allowed) {
+      openAccessDialog(decision.reason);
       return;
     }
 

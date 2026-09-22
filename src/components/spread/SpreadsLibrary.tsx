@@ -117,11 +117,15 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
       <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
         <div>
           <span className="glass-chip inline-flex items-center gap-2 px-4 py-1.5 text-xs text-gold-ink font-serif-th font-bold">
-            {isEnglish ? "25 CLASSIC DIVINATION SPREADS" : "25 ผังการเปิดไพ่มาตรฐานสากล"}
+            {isEnglish
+              ? `${spreads.length} CLASSIC DIVINATION SPREADS`
+              : `${spreads.length} ผังการเปิดไพ่มาตรฐานสากล`}
           </span>
         </div>
         <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-ink tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]">
-          {isEnglish ? "25 Sacred Tarot Spreads & Layouts" : "ผังการเปิดไพ่ทาโรต์ 25 รูปแบบ"}
+          {isEnglish
+            ? `${spreads.length} Sacred Tarot Spreads & Layouts`
+            : `ผังการเปิดไพ่ทาโรต์ ${spreads.length} รูปแบบ`}
         </h1>
         <p className="text-xs sm:text-sm text-muted max-w-2xl mx-auto leading-relaxed font-serif-th [text-wrap:balance]">
           {isEnglish
