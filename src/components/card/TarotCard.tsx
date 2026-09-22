@@ -353,9 +353,15 @@ export const TarotCard: React.FC<TarotCardProps> = ({
             )}
           </div>
 
-          {/* Sleek Floating Reversed Badge if applicable */}
+          {/*
+            ป้าย "กลับหัว" — อยู่ **มุมล่างซ้าย** ของไพ่ (ไม่ใช่มุมบน)
+            ปุ่ม "ขยาย" ของผังไพ่ (`SpreadBoard`) เกาะอยู่ที่มุมบนขวาและยื่นออกนอกไพ่ 10px
+            บนจอมือถือ (ไพ่กว้าง 96px) ป้ายที่มุมบนซ้ายกับปุ่มนั้น **ทับกัน 13×8px** พอดี
+            (วัดจริงที่ 320 · 360 · 390 · 430px — จอ ≥640px ไพ่กว้างขึ้นจึงไม่ทับ จึงไม่มีใครเห็น)
+            ⚠️ ห้ามย้ายกลับไปไว้แถวบนของไพ่ ถ้าไม่ได้ย้ายปุ่มขยายออกจากมุมบนขวาพร้อมกัน
+          */}
           {isReversed && (
-            <div className="absolute top-2 left-2 z-20 pointer-events-none">
+            <div className="absolute bottom-2 left-2 z-20 pointer-events-none">
               <span className="text-[12px] font-bold font-serif-th bg-ink-deep/90 text-surface border border-line-warm/80 px-2 py-0.5 rounded-full ">
                 {isEnglish ? "Reversed" : "กลับหัว"}
               </span>
