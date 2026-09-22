@@ -9,6 +9,7 @@ import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
 import { ExpandTabIcon } from "@/components/ui/TarotArtIcons";
 import { useMotionSafe } from "@/lib/use-motion-safe";
+import { useNarrowViewport } from "@/lib/use-narrow-viewport";
 
 export interface DrawnSlotCard {
   order: number;
@@ -63,7 +64,25 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
   const [canScrollRight, setCanScrollRight] = React.useState(false);
 
-  const useRail = spread.positions.length >= RAIL_THRESHOLD;
+  /**
+   * 📱 บนมือถือให้ผังไพ่เป็น "รางเลื่อนทีละใบ" เสมอ ไม่ว่าผังจะกี่ใบ (คำสั่งเจ้าของ รอบ 134)
+   *
+   * ทำไมถึงคุ้มกว่าการวางให้ครบในตาเดียว — วัดจากการเรนเดอร์จริงที่ 320–430px:
+   *   • ที่ความกว้างเหล่านั้น แผงมีที่ให้ไพ่แถวละ **2 ใบ** เท่านั้น
+   *     ผัง 3 ใบจึงตัดบรรทัดเป็น 2+1 อยู่แล้ว — "เห็นผังครบในตาเดียว" จึงไม่เคยเกิดขึ้นจริงบนมือถือ
+   *   • ไพ่กว้าง 96px = ภาพ 1909 เล็กจนดูรายละเอียดไม่ออก
+   *   • ป้ายชื่อตำแหน่งกว้างแค่ 112px ➔ ถูกย่อด้วยจุดไข่ปลาทุกใบทุกผัง
+   *     ("1. อดีต (ที่มาของเ…") ผู้ใช้อ่านไม่ออกว่าไพ่ใบนั้นตอบอะไร ซึ่งคือหัวใจของการดูผัง
+   *
+   * พอเหลือใบเดียวต่อหน้าจอ: ไพ่กว้างขึ้นเป็น 176px · ชื่อตำแหน่งขึ้นครบไม่ต้องย่อ
+   * และรางตัวนี้ **เลื่อนตามไพ่ที่แม่หมอกำลังอ่านให้เอง** อยู่แล้ว (เอฟเฟกต์ด้านบน)
+   *
+   * จอ `sm:` ขึ้นไปยังเป็นแท่นบูชาแบบเดิมทุกประการ — ที่นั่นไพ่เรียงครบได้จริง
+   */
+  const isPhone = useNarrowViewport();
+  const useRail = isPhone || spread.positions.length >= RAIL_THRESHOLD;
+  /** หนึ่งใบต่อหนึ่งหน้าจอ (โผล่ใบถัดไปนิดหน่อยให้รู้ว่าปัดต่อได้) */
+  const oneUp = isPhone;
 
   /**
    * ♿ T-33: ประกาศผลการพลิกไพ่ผ่านโหนด live region ที่ซ่อนไว้
@@ -171,7 +190,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
         transition={{ duration: 0.4, delay: pos.index * 0.06 }}
         className={`flex flex-col items-center cursor-pointer focus-visible:outline-none group rounded-lg ${
           useRail ? "snap-center flex-shrink-0" : ""
-        }`}
+        } ${oneUp ? "basis-[74%] max-w-[74%]" : ""}`}
         onClick={() => handleCardClick(pos.index)}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
@@ -212,22 +231,29 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
               isReversed={drawn.isReversed}
               isRevealed={isRevealed}
               isHighlighted={isCurrentReading}
-              className="w-24 h-[163px] sm:w-28 sm:h-[190px]"
+              className={oneUp ? "w-44 h-[299px]" : "w-24 h-[163px] sm:w-28 sm:h-[190px]"}
             />
           ) : (
-            <div className="w-24 h-[163px] sm:w-28 sm:h-[190px] rounded-lg border-2 border-dashed border-line-warm bg-inset-warm flex items-center justify-center text-xs text-muted">
+            <div className={`${oneUp ? "w-44 h-[299px]" : "w-24 h-[163px] sm:w-28 sm:h-[190px]"} rounded-lg border-2 border-dashed border-line-warm bg-inset-warm flex items-center justify-center text-xs text-muted`}>
               {pos.index + 1}
             </div>
           )}
         </div>
 
         {/* Slot Position Name Tag */}
-        <div className="text-center mt-2.5 w-28 sm:w-32">
+        <div className={`text-center mt-2.5 ${oneUp ? "w-full px-1" : "w-28 sm:w-32"}`}>
           <span className="text-[13px] text-gold-ink font-mono block font-semibold">
             {isEnglish ? `Card #${pos.index + 1}` : `ใบที่ ${pos.index + 1}`}
           </span>
+          {/*
+            บนมือถือ (หนึ่งใบต่อหน้าจอ) มีที่พอให้ชื่อตำแหน่งขึ้นครบ จึงไม่ย่อด้วยจุดไข่ปลา
+            — ชื่อตำแหน่งคือสิ่งที่บอกว่าไพ่ใบนั้นตอบคำถามอะไร ย่อทิ้งเท่ากับทิ้งความหมายของผัง
+            จอกว้างยังต้องย่ออยู่ เพราะไพ่เรียงกันหลายใบและกล่องกว้างแค่ 112–128px
+          */}
           <span
-            className="text-xs font-serif-th font-bold text-ink-deep leading-snug py-0.5 block truncate"
+            className={`text-xs font-serif-th font-bold text-ink-deep leading-snug py-0.5 block ${
+              oneUp ? "[text-wrap:balance]" : "truncate"
+            }`}
             title={posName}
           >
             {posName}

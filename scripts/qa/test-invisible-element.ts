@@ -473,6 +473,61 @@ export function scanCardFloatingBadges(root: string): CardBadgeFinding[] {
   return out;
 }
 
+/**
+ * 📱 ผังไพ่บนมือถือต้องเป็น "รางเลื่อนทีละใบ" และห้ามย่อชื่อตำแหน่งทิ้ง (บทเรียนรอบ 134)
+ * ---------------------------------------------------------------------------
+ * วัดจากการเรนเดอร์จริงที่ 320 · 390 · 430px ก่อนแก้:
+ *   • ผัง 3 ใบตัดบรรทัดเป็น **2 แถว (2+1)** — "เห็นผังครบในตาเดียว" ไม่เคยเกิดขึ้นจริงบนมือถือ
+ *   • ชื่อตำแหน่งถูกย่อด้วยจุดไข่ปลา **ทุกใบทุกผัง** (3/3 · 10/10 · 1/1)
+ *     ผู้ใช้จึงอ่านไม่ออกว่าไพ่ใบนั้นตอบอะไร ซึ่งคือความหมายทั้งหมดของการดูผัง
+ *
+ * หลังเปลี่ยนเป็นรางทีละใบ: ไพ่กว้าง 108 ➔ 172px · ชื่อตำแหน่งถูกย่อ **0 ใบ** ทุกความกว้าง
+ *
+ * ด่านนี้จึงคุมกลไกไว้สองข้อ: ผังต้องรู้จัก "จอแคบ" และโหมดทีละใบต้องไม่ย่อชื่อตำแหน่ง
+ */
+export interface BoardLayoutFinding {
+  rule: string;
+  hint: string;
+}
+
+export function scanSpreadBoardPhoneLayout(root: string): BoardLayoutFinding[] {
+  const out: BoardLayoutFinding[] = [];
+  const boardFile = path.join(root, "src/components/spread/SpreadBoard.tsx");
+  if (!fs.existsSync(boardFile)) {
+    out.push({ rule: "หาไฟล์ SpreadBoard.tsx ไม่เจอ", hint: "ไฟล์ถูกย้าย/เปลี่ยนชื่อ — ด่านนี้ตรวจอะไรไม่ได้" });
+    return out;
+  }
+  const src = fs.readFileSync(boardFile, "utf-8");
+
+  if (!/useNarrowViewport\(\)/.test(src)) {
+    out.push({
+      rule: "ผังไพ่ไม่ได้ถามว่าตอนนี้อยู่บนจอแคบหรือเปล่า",
+      hint: "ต้องเรียก `useNarrowViewport()` แล้วเปิดรางเลื่อนทีละใบบนมือถือ ไม่งั้นไพ่จะเล็กและชื่อตำแหน่งถูกย่อทิ้งทุกใบ",
+    });
+    return out;
+  }
+
+  // รางเลื่อนต้องเปิดเพราะจอแคบด้วย ไม่ใช่เพราะจำนวนไพ่อย่างเดียว
+  const railLine = src.split("\n").find((l) => /const useRail\s*=/.test(l)) ?? "";
+  if (!/isPhone/.test(railLine)) {
+    out.push({
+      rule: "รางเลื่อนไม่ได้ผูกกับจอแคบ",
+      hint: "`useRail` ต้องเป็นจริงเมื่ออยู่บนมือถือด้วย (ผังเล็กบนจอแคบตัดบรรทัดเป็นหลายแถวอยู่ดี)",
+    });
+  }
+
+  // โหมดทีละใบต้องไม่ย่อชื่อตำแหน่งด้วยจุดไข่ปลา
+  const labelBlock = src.slice(src.indexOf("Slot Position Name Tag"), src.indexOf("Slot Position Name Tag") + 1200);
+  if (!/oneUp\s*\?/.test(labelBlock) || /oneUp\s*\?\s*"[^"]*truncate/.test(labelBlock)) {
+    out.push({
+      rule: "ชื่อตำแหน่งใต้ไพ่ยังถูกย่อด้วยจุดไข่ปลาในโหมดทีละใบ",
+      hint: "โหมดทีละใบมีที่พอให้ขึ้นครบ — `truncate` ต้องใช้เฉพาะตอนไพ่เรียงกันหลายใบเท่านั้น",
+    });
+  }
+
+  return out;
+}
+
 export function scanNowrapInsideFlexGrow(files: string[]): SqueezeFinding[] {
   const findings: SqueezeFinding[] = [];
   for (const file of files) {
@@ -579,4 +634,16 @@ if (process.argv[1] && process.argv[1].endsWith("test-invisible-element.ts")) {
   }
 
   console.log('✅ ป้าย "กลับหัว" กับปุ่ม "ขยาย" อยู่คนละขอบของไพ่ จึงทับกันไม่ได้');
+
+  const boardLayout = scanSpreadBoardPhoneLayout(ROOT);
+  if (boardLayout.length > 0) {
+    console.error(`\n❌ ผังไพ่บนมือถือกลับไปเบียดกันเหมือนเดิม ${boardLayout.length} จุด\n`);
+    for (const f of boardLayout) {
+      console.error(`   ${f.rule}`);
+      console.error(`      ${f.hint}\n`);
+    }
+    process.exit(1);
+  }
+
+  console.log("✅ ผังไพ่บนมือถือเป็นรางเลื่อนทีละใบ และไม่ย่อชื่อตำแหน่งทิ้ง");
 }
