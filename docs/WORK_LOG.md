@@ -38,6 +38,21 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-09-23 (รอบ 147): 🚦 เพดานถี่เส้นเปิดไพ่ย้ายจาก KV ไป D1 แบบ atomic + ต่อ `/shuffle` · ปิด S-03 · สั่งรัน ai:judge
+
+**คำสั่งเจ้าของ**: "แก้ได้ ทำต่อได้เลย" (งานค้าง 3 ข้อจาก `docs:status`)
+
+| เรื่อง | ก่อน | หลัง |
+| :--- | :--- | :--- |
+| ที่เก็บ `edge-ratelimit.ts` | KV อ่าน ➔ +1 ➔ เขียน (ไม่ atomic · ยิงพร้อมกันทะลุได้ · กินโควตาเขียน KV 1,000/วัน) ทั้งที่แผนเขียนว่า "บน D1" | D1 `edge_rate_buckets` (migrations/0018) `INSERT … ON CONFLICT … RETURNING` แพตเทิร์นเดียวกับ `auth-ratelimit.ts` |
+| หลายชั้น (IP + userId) | peek แล้วค่อยนับ (race) | นับจริงทุกชั้น ชั้นไหนเกิน ➔ คืนสิทธิ์ทุกชั้นที่นับไปแล้ว |
+| `/api/reading/[id]/shuffle` | มีแค่ `checkRateLimit` ในหน่วยความจำต่อ isolate | + `consumeEdgeRateLimits` 30 ครั้ง/นาทีต่อ IP |
+| S-03 (ไพ่ 80 ใบใน DOM) | "ยังไม่ได้ตรวจ" | ✅ ปิดด้วย `card-tile-cv` แล้ว (ตรวจโค้ด) — ไพ่ครบใน HTML ตามข้อห้าม SEO |
+| ai:judge `20260911-2` | รอคนกด | สั่งรัน `ai-judge.yml` แล้ว — workflow จะเปิด PR รายงานกลับมาเอง |
+
+**ด่าน**: `scripts/qa/test-session-guard.ts` ข้อ 7 — ยิงพร้อมกัน 40 คำขอ (เพดาน 10) ต้องผ่าน 10 พอดี · ชั้นหลังเต็มต้องคืนสิทธิ์ชั้นแรก
+**ต้องทำหลัง deploy**: ไม่มี — `deploy.yml` รัน `db:migrate` ให้เอง (ถ้าตารางยังไม่มี จะถอยไปหน่วยความจำ + ยิง `ratelimit_store_degraded:d1`)
+
 ### 🗓️ 2026-09-23 (รอบ 146): 🧾 MASTER_PLAN ตารางงานค้างล้าไป 5 จาก 8 ข้อ — ตรวจกับโค้ดแล้วแก้ให้ตรง
 
 **คำถามเจ้าของ**: "MASTER_PLAN ค้างอะไรบ้าง" ➔ ใช้กฎใหม่ (INC-0229) ตรวจโค้ดก่อนตอบ พบว่าตาราง (ตรวจล่าสุด 2026-09-14) ล้าสมัย

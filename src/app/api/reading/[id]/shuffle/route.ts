@@ -8,6 +8,7 @@ import { deriveDrawn, type DerivedDrawDetail } from "@/lib/reading/derived-draw"
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { getReading, updateReading, persistReading } from "@/server/store";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
+import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
 
 export const runtime = "nodejs";
 
@@ -36,6 +37,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   if (!privileged) {
     const clientIp = getClientIdentifier(request);
+    // 🚦 เพดานจริงข้าม isolate อยู่บน D1 — `checkRateLimit` ข้างล่างเป็นแค่ด่านเร็วต่อ isolate
+    const edge = await consumeEdgeRateLimits([
+      { key: edgeRateLimitKey("shuffle:ip", clientIp), config: { max: 30, windowSec: 60 } },
+    ]);
+    if (!edge.allowed) {
+      return createRateLimitResponse(edge.retryAfterSec, "ส่งคำขอเร็วเกินไป กรุณารอสักครู่");
+    }
+
     const limit = checkRateLimit(`shuffle:${clientIp}`, {
       maxRequests: 30,
       windowSeconds: 60,

@@ -43,11 +43,9 @@ docs/
     └── plans/
 <!-- PLANS_TREE_START · สร้างด้วย npm run docs:index — ห้ามแก้มือ -->
         ├── MASTER_PLAN_2026-09-06.md               # 🚧 🗺️ แผนแม่บทรวม — ทุกงานที่ค้างอยู่
-        ├── HANDOFF_SMOOTH_FAST_2026-09-06.md       # 🚧 ✦ แผนทำให้เว็บ "สมูทและไว" ระดับโลก — ทุกหน้า ทุกจังหวะ (2026-09-06)
         ├── HANDOFF_OMNI_YESNO_2026-09-06.md        # 🚧 🎯 แผนส่งต่องาน 3 ชิ้น — Yes/No 78 หน้า · Omnichannel · Daily Digest
         ├── HANDOFF_AI_ACCURACY_THAI_2026-09-07.md  # 🚧 🧠 แผนยกระดับ "ความแม่น" ของคำอ่าน + "ภาษาไทยที่ถูกต้อง" ของแม่หมอ AI
         ├── AI_INTELLIGENCE_PLAN.md                 # 🚧 🧠 แผนแม่บทยกระดับความฉลาดของแม่หมอ AI
-        ├── AI_COST_CONTROL_PLAN.md                 # 🚧 💸 แผนคุมต้นทุน AI + รหัสทดสอบข้าม rate limit — handoff ให้ทีม Gemini
         ├── HANDOFF_AI_JUDGE_BASELINE_2026-09-11.md # ⏸️ 🔑 ชีทส่งต่อ — รัน `ai:judge` เก็บ baseline `20260911-1` แล้วลุยคลื่น B ต่อ
         ├── SITE_SHELL_SEO_PLAN.md                  # ✅ 🏛️ แผนลงมือ: Site Shell กลาง + Internal Link ที่บอทมองเห็น
         ├── RETENTION_PLAN.md                       # ✅ 👤 แผนสร้าง Consumer Retention Infra — handoff ให้ทีม Gemini
@@ -56,6 +54,7 @@ docs/
         ├── PROVABLY_FAIR_PLAN.md                   # ✅ 🔐 แผนปิดช่องว่าง Provably-Fair ที่เหลือ 2 จุด — handoff ให้ Gemini
         ├── HANDOFF_UX_UI_AUDIT_2026-09-11.md       # ✅ 🔍 แผนส่งต่อ — ผลตรวจ UX/UI ทั้งเว็บ (รอบ 2026-09-11)
         ├── HANDOFF_THEME_THREE_PAGES_2026-09-06.md # ✅ ✦ แผนส่งต่องาน — ตัดขั้นตอนสับ/เลือกไพ่ ให้ 3 หน้า one-card เร็วแบบ "เปิดไพ่ด่วน"
+        ├── HANDOFF_SMOOTH_FAST_2026-09-06.md       # ✅ ✦ แผนทำให้เว็บ "สมูทและไว" ระดับโลก — ทุกหน้า ทุกจังหวะ (2026-09-06)
         ├── HANDOFF_SEO_WAVE2-4_2026-09-05.md       # ✅ 🌊 แผนส่งต่องาน SEO คลื่นที่ 2–4 (ยึด /cards · ลอกหมวดหมู่ MyHora · งานระยะยาว)
         ├── HANDOFF_SEO_WAVE1_2026-09-05.md         # ✅ 🌊 แผนส่งต่องาน SEO คลื่นที่ 1 — เติมคำว่า "ไพ่ยิปซี" ทั่วเว็บ
         ├── HANDOFF_SEMANTIC_SEARCH_2026-09-06.md   # ✅ 🔎 แผนต่อ UI ค้นหาเชิงความหมาย — ปลุก Vectorize + Workers AI ที่สร้างไว้แล้วให้ได้ใช้จริง (2026-09-06)
@@ -79,6 +78,7 @@ docs/
         ├── ENTITLEMENT_PLAN.md                     # ✅ 🎟 ระบบสมาชิกและโควตาเปิดไพ่ — แผนลงมือสำหรับทีม Antigravity
         ├── EMAIL_AUTH_PLAN.md                      # ✅ 📧 แผนเพิ่ม "เข้าสู่ระบบด้วยอีเมล + รหัสผ่าน" — handoff ให้ทีมอีกทีม
         ├── CLOUDFLARE_FREE_STACK.md                # ✅ ☁️ แผนใช้บริการฟรีของ Cloudflare ต่อยอด SeerTarot
+        ├── AI_COST_CONTROL_PLAN.md                 # ✅ 💸 แผนคุมต้นทุน AI + รหัสทดสอบข้าม rate limit — handoff ให้ทีม Gemini
         ├── UX_PERF_PLAN.md                         # 📚 🎯 แผนยกเครื่อง UX · ความไว · ความสมูท — 2026-09-01
         ├── TRAFFIC_CAPTURE_PLAN_2026-09-05.md      # 📚 🎯 แผนแย่งทราฟฟิกจาก MyHora และเจ้าตลาดดูดวงไทย (Traffic Capture Plan)
         ├── HANDOFF_CF_REQUEST_REVIEW_2026-09-08.md # 📚 🔍 ตรวจข้อเสนอ 12 ข้อ "ลด Request บน Cloudflare" (2026-09-08)
