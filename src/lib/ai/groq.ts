@@ -40,7 +40,8 @@ import type { ReadingEvent } from "@/lib/ai/types";
  */
 export const WORKING_GROQ_MODELS = [
   "qwen/qwen3.8-27b",
-  "qwen/qwen3.6-27b",
+  // ⛔ ห้ามใส่ `qwen/qwen3.6-27b` กลับมา — Groq ตอบ 404 model_not_found (2026-09-23)
+  //    หน้า Limits ของ Groq ยังติ๊กชื่ออยู่ แต่ไม่มีแถวในตาราง Chat Completions = เรียกแชทไม่ได้แล้ว
   "openai/gpt-oss-120b",
   "openai/gpt-oss-20b",
 ] as const;
@@ -335,7 +336,7 @@ export async function probeGroqHealth(apiKey?: string): Promise<GroqProbeResult[
 /**
  * 🔮 สตรีมคำทำนายไพ่ทาโรต์เชิงลึกด้วย Groq LPU (Ultra-Fast 300+ tok/s)
  * ------------------------------------------------------------------
- * - โมเดล: qwen3.8-27b → qwen3.6-27b → gpt-oss-120b (Qwen ภาษาไทยสวย · 120b reasoning ลึก ไม่หลุดจีน)
+ * - โมเดล: qwen3.8-27b → gpt-oss-120b → gpt-oss-20b (Qwen ภาษาไทยสวย · 120b reasoning ลึก ไม่หลุดจีน)
  * - `reasoning_format: "hidden"` — แยกโทเค็นความคิดออกจาก content (สำคัญมากกับ reasoning model)
  * - `max_tokens` ปรับตามจำนวนไพ่ (1,600 + 480/ใบ) กันคำอ่านโดนตัดกลาง
  * - Foreign Script Circuit Breaker: อักษรต่างด้าวใน content สะสม ≥ 14 ตัว → สลับโมเดล + นับสถิติ
@@ -359,31 +360,18 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
   });
 
   /*
-   * 🔄 หมุนลำดับ Qwen สองตัวแบบ 50/50 — เพดาน TPM ของ Groq **แยกรายโมเดล**
-   * ---------------------------------------------------------------------------
-   * เดิมทุกคำขอเริ่มที่ `qwen3.8-27b` เสมอ แล้วค่อยไล่ลงเมื่อล้ม = failover ล้วน
-   * ผลคือ qwen3.8 โดนถลุงโควตาต่อนาทีอยู่ตัวเดียว ส่วนตัวอื่นนั่งว่าง
-   * พอทราฟฟิกมาพร้อมกันจึงโดน 429 ทั้งที่โควตารวมยังเหลือ
+   * ลำดับโมเดลของคำอ่าน — Qwen มาก่อนเสมอ (ภาษาไทยดีที่สุด) แล้วไล่ลง gpt-oss เมื่อล้ม
+   * เพดาน TPM/TPD ของ Groq **แยกรายโมเดล** ตัวสำรองจึงมีโควตาเต็มของตัวเองเสมอ
    *
-   * หมุนเฉพาะ **ในกลุ่ม Qwen ที่ภาษาไทยดีเท่ากัน** จึงไม่ขัดกฎ "Qwen มาก่อน"
-   * ที่ล็อกไว้ในคอมเมนต์ของ WORKING_GROQ_MODELS — ผู้ใช้ยังได้ Qwen เป็นตัวแรกเสมอ
-   *
-   * ใช้สุ่มแทนตัวนับ เพราะบน Cloudflare Workers แต่ละ isolate มีตัวนับของตัวเอง
-   * ตัวนับจะเริ่มที่ 0 ทุก isolate = ไม่กระจายจริง
-   *
-   * ⚠️ ไม่กระทบ Provably Fair แม้แต่น้อย — ตรงนี้เลือกแค่ "ใครเป็นคนเขียนข้อความ"
-   *    ไม่ได้แตะการสับไพ่หรือการเลือกไพ่ซึ่งอยู่คนละเส้นทางโดยสิ้นเชิง
+   * เดิมหมุน 50/50 ระหว่าง qwen3.8 กับ qwen3.6 เพื่อกระจายโควตา แต่ qwen3.6 ตอบ 404
+   * model_not_found (2026-09-23) คำอ่านครึ่งหนึ่งจึงเสียรอบเรียกโมเดลที่ไม่มีอยู่ก่อนทุกครั้ง
    */
-  const readingModels = (
-    Math.random() < 0.5
-      ? ["qwen/qwen3.8-27b", "qwen/qwen3.6-27b"]
-      : ["qwen/qwen3.6-27b", "qwen/qwen3.8-27b"]
-  ).concat([
+  const readingModels = [
+    "qwen/qwen3.8-27b",
     "openai/gpt-oss-120b",
-    // เติม gpt-oss-20b ท้ายแถว — เดิมอยู่ใน WORKING_GROQ_MODELS (ใช้กับแชท)
-    // แต่ไม่เคยถูกใช้กับคำอ่านเลย ทั้งที่มีโควตา TPM/RPD ของตัวเองเต็ม ๆ
+    // gpt-oss-20b ท้ายแถว — มีโควตา TPM/RPD ของตัวเองเต็ม ๆ
     "openai/gpt-oss-20b",
-  ]);
+  ];
 
   /*
    * 📏 ประเมินโทเค็นก่อนยิง แล้วตัดของเสริมถ้าจะชนเพดาน TPM

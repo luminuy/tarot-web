@@ -116,7 +116,7 @@ npm run pr:auto -- "<title>" --body-file <path>
 
 | ค่า | ค่าปัจจุบัน | ที่อยู่ |
 | :--- | :-- | :--- |
-| ลำดับโมเดล Groq | `qwen/qwen3.8-27b` → `qwen/qwen3.6-27b` → `openai/gpt-oss-120b` → `openai/gpt-oss-20b` | `groq.ts:39` |
+| ลำดับโมเดล Groq | `qwen/qwen3.8-27b` → `openai/gpt-oss-120b` → `openai/gpt-oss-20b` (ถอด `qwen3.6-27b` 2026-09-23 · Groq ตอบ 404) | `groq.ts:39` |
 | ลำดับโมเดล Gemini | `gemini-3.5-flash-lite` → `gemini-3.6-flash` | `gemini.ts:99` |
 | `temperature` คำอ่าน | `0.6` | `groq.ts:349` |
 | `max_tokens` คำอ่าน | `1,600 + 340 × จำนวนไพ่` | `groq.ts:275` (คอมเมนต์) |
