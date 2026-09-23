@@ -11,6 +11,7 @@ import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { TTSReaderButton } from "./TTSReaderButton";
 import { trackEvent } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n";
+import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 
 interface Message {
   id: string;
@@ -212,7 +213,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
     const scrollBottom = () => {
       el.scrollTo({
         top: el.scrollHeight,
-        behavior: "smooth",
+        behavior: smoothScrollBehavior(),
       });
     };
     scrollBottom();

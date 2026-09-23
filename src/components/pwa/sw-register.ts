@@ -21,7 +21,20 @@ export interface SwContainerLike {
   register(
     url: string,
     options?: { scope?: string },
-  ): Promise<{ installing: { state: string; onstatechange: (() => void) | null } | null; onupdatefound: (() => void) | null }>;
+  ): Promise<SwRegistrationLike>;
+}
+
+/** worker ที่รอขึ้นทำงาน — ใช้แค่ state กับ postMessage */
+export interface SwWorkerLike {
+  state: string;
+  onstatechange: (() => void) | null;
+  postMessage?: (message: unknown) => void;
+}
+
+export interface SwRegistrationLike {
+  installing: SwWorkerLike | null;
+  waiting?: SwWorkerLike | null;
+  onupdatefound: (() => void) | null;
 }
 
 /** สภาพแวดล้อมที่ `setupServiceWorker()` ต้องใช้ — ฉีดเข้ามาได้ทั้งหมดเพื่อให้ทดสอบได้ */
@@ -33,6 +46,16 @@ export interface SwEnv {
   isDocumentReady: () => boolean;
   onWindowLoad: (fn: () => void) => void;
   offWindowLoad: (fn: () => void) => void;
+  /**
+   * A4-06: ผูกตัวจับ "ผู้ใช้กำลังออกจากหน้านี้" (ของจริงคือ `pagehide`) — คืนฟังก์ชันถอดสาย
+   * ไม่ส่งมา = ไม่สั่ง SKIP_WAITING เลย (พฤติกรรมเดิม)
+   */
+  onPageHide?: (fn: () => void) => () => void;
+  /**
+   * ธงข้ามหน้า (ของจริงคือ sessionStorage) ว่าหน้าก่อนเพิ่งสั่ง SKIP_WAITING ไป
+   * หน้าใหม่ที่เพิ่งโหลดจากเครือข่าย (network-first) สดอยู่แล้ว เจอ controllerchange ไม่ต้องรีโหลดซ้ำ
+   */
+  skipFlag?: { mark: () => void; consumeRecent: () => boolean };
   /** บันทึกเหตุการณ์ (ของจริงคือ `console`) */
   log?: (level: "info" | "warn", message: string, detail?: unknown) => void;
 }
@@ -65,21 +88,45 @@ export function setupServiceWorker(env: SwEnv): () => void {
   let reloading = false;
   const onControllerChange = () => {
     if (!hadController) return; // ยึดครั้งแรก — ไม่ใช่การเปลี่ยนเวอร์ชัน
+    // หน้านี้เพิ่งโหลดสด ๆ หลังหน้าก่อนสั่งตัวใหม่ขึ้นทำงาน — ไม่มี chunk เก่าให้ซิงก์
+    if (env.skipFlag?.consumeRecent()) return;
     if (reloading) return;
     reloading = true;
     reload();
   };
   container.addEventListener("controllerchange", onControllerChange);
 
+  /*
+   * A4-06: ตัวใหม่ค้าง waiting ตลอดถ้าไม่มีใครส่ง SKIP_WAITING — เพราะมันจะขึ้นทำงานได้ก็ต่อเมื่อ
+   * ไม่มีแท็บไหนถูกตัวเก่าคุมอยู่ การรีโหลด/เปลี่ยนหน้าในแท็บเดียวไม่พอ
+   * จังหวะที่ปลอดภัยคือ "ตอนผู้ใช้ออกจากหน้านี้" (pagehide) — ไม่รีโหลดหน้าที่เขากำลังใช้อยู่
+   * และหน้าถัดไปโหลดจากเครือข่าย (network-first) จึงได้ของรุ่นใหม่อยู่แล้ว
+   */
+  let waitingWorker: SwWorkerLike | null = null;
+  let detachPageHide: (() => void) | null = null;
+  const armSkipWaiting = (worker: SwWorkerLike | null | undefined) => {
+    if (!worker || !container.controller || !env.onPageHide || typeof worker.postMessage !== "function") return;
+    waitingWorker = worker;
+    if (detachPageHide) return;
+    detachPageHide = env.onPageHide(() => {
+      if (!waitingWorker?.postMessage) return;
+      env.skipFlag?.mark();
+      waitingWorker.postMessage({ type: "SKIP_WAITING" });
+      waitingWorker = null;
+    });
+  };
+
   const registerSW = () => {
     void container
       .register("/sw.js", { scope: "/" })
       .then((registration) => {
+        armSkipWaiting(registration.waiting);
         registration.onupdatefound = () => {
           const installingWorker = registration.installing;
           if (installingWorker == null) return;
           installingWorker.onstatechange = () => {
             if (installingWorker.state !== "installed") return;
+            armSkipWaiting(installingWorker);
             log(
               "info",
               container.controller
@@ -102,6 +149,7 @@ export function setupServiceWorker(env: SwEnv): () => void {
 
   return () => {
     container.removeEventListener("controllerchange", onControllerChange);
+    detachPageHide?.();
     offWindowLoad(registerSW);
   };
 }
@@ -113,4 +161,36 @@ export function isServiceWorkerAllowed(protocol: string, hostname: string): bool
     hostname === "[::1]" ||
     /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/.test(hostname);
   return protocol === "https:" || isLocalhost;
+}
+
+/** ธงข้ามหน้าบน sessionStorage — อายุ 30 วินาที กันธงค้างไปกดทับการรีโหลดที่จำเป็นในภายหลัง */
+export function createSessionSkipFlag(storage: Pick<Storage, "getItem" | "setItem" | "removeItem"> | null, key: string, now: () => number = Date.now) {
+  return {
+    mark: () => {
+      try {
+        storage?.setItem(key, String(now()));
+      } catch {
+        // โหมดส่วนตัว/ที่เก็บเต็ม — ไม่มีธงก็แค่รีโหลดเพิ่มหนึ่งครั้ง
+      }
+    },
+    consumeRecent: () => {
+      try {
+        const raw = storage?.getItem(key);
+        if (!raw) return false;
+        storage?.removeItem(key);
+        return now() - Number(raw) < 30_000;
+      } catch {
+        return false;
+      }
+    },
+  };
+}
+
+/** sessionStorage ของเบราว์เซอร์ — เข้าถึงแล้ว throw ได้ (คุกกี้ถูกบล็อก/โหมดส่วนตัวบางเครื่อง) */
+export function safeSessionStorage(): Storage | null {
+  try {
+    return typeof window === "undefined" ? null : window.sessionStorage;
+  } catch {
+    return null;
+  }
 }

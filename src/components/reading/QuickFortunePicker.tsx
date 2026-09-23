@@ -6,6 +6,7 @@ import { CardImage } from "@/components/card/CardImage";
 
 import { useLocale } from "@/lib/i18n";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
+import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 
 export interface QuickTopic {
   id: "love" | "work" | "money" | "general";
@@ -250,7 +251,7 @@ export function QuickFortunePicker({
     if (!el) return;
     const cards = el.querySelectorAll<HTMLElement>("[data-card-index]");
     if (cards[index]) {
-      cards[index].scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      cards[index].scrollIntoView({ behavior: smoothScrollBehavior(), inline: "center", block: "nearest" });
       setActiveIndex(index);
     }
   };

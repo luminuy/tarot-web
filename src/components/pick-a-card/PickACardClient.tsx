@@ -19,6 +19,7 @@ import { dayLabel } from "@/lib/pick-a-card/daily";
  */
 import { useAiReading } from "@/lib/reading/use-ai-reading";
 import { AiReadingPanel } from "@/components/reading/ai/AiReadingPanel";
+import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 /* 💤 กล่องสิทธิ์/กล่องสมัครสมาชิกโหลดตอนถูกเรียกใช้จริงเท่านั้น (บทเรียนงบบันเดิลของ `/daily`) */
 const AccessDialog = React.lazy(() =>
   import("@/components/entitlement/AccessDialog").then((m) => ({ default: m.AccessDialog }))
@@ -119,7 +120,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
     if (nearest !== topicIndex) setTopicIndex(nearest);
   };
 
-  const scrollTopicIntoView = (index: number, behavior: ScrollBehavior = "smooth") => {
+  const scrollTopicIntoView = (index: number, behavior: ScrollBehavior = smoothScrollBehavior()) => {
     const rail = topicRailRef.current;
     if (!rail) return;
     const cards = rail.querySelectorAll<HTMLElement>("[data-topic-index]");
@@ -698,7 +699,10 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                   state={oracle.state}
                   isEn={isEnglish}
                   onRetry={() => {
-                    if (slotIndex >= 0) void runPile(activeTopic.id, slotIndex);
+                    // A3-10: อ่านกองเดิมซ้ำโดยไม่เปิดเซสชันใหม่ (ไม่หักสิทธิ์ซ้ำ)
+                    void oracle.retryRead().then((ok) => {
+                      if (!ok && slotIndex >= 0) void runPile(activeTopic.id, slotIndex);
+                    });
                   }}
                   cardLabels={positionLabels}
                   title={isEnglish ? "The Oracle Reads Your Pile" : "คำอ่านจากแม่หมอ"}

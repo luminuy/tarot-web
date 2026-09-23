@@ -420,8 +420,8 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                   }`}
                 >
                   {isEn
-                    ? `⏳ In Progress (${readings.filter((r) => !r.outcome || r.outcome === "PENDING").length})`
-                    : `⏳ รอผล (${readings.filter((r) => !r.outcome || r.outcome === "PENDING").length})`}
+                    ? `In Progress (${readings.filter((r) => !r.outcome || r.outcome === "PENDING").length})`
+                    : `รอผล (${readings.filter((r) => !r.outcome || r.outcome === "PENDING").length})`}
                 </button>
               </div>
 
@@ -629,7 +629,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                               : "bg-surface text-muted border border-line"
                           }`}
                         >
-                          {isEn ? "⏳ In Progress" : "⏳ รอผล"}
+                          {isEn ? "In Progress" : "รอผล"}
                         </button>
 
                         <button
@@ -727,7 +727,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         )}
                         {item.timing && (
                           <div className="text-[13px] text-muted font-serif-th">
-                            {isEn ? "⏳ Timing: " : "⏳ ช่วงเวลา: "}
+                            {isEn ? "Timing: " : "ช่วงเวลา: "}
                             <span className="text-ink font-bold">{item.timing}</span>
                           </div>
                         )}

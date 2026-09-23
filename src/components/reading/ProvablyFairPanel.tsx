@@ -378,6 +378,9 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                     <button
                       type="button"
                       onClick={() => setShowIndependentGuide((prev) => !prev)}
+                      // A5-20: บอกสถานะกาง/หุบ + ชี้แผงที่กาง
+                      aria-expanded={showIndependentGuide}
+                      aria-controls={showIndependentGuide ? "pf-independent-guide" : undefined}
                       className="tap-overlay-y w-full flex items-center justify-between text-left text-xs text-ink-deep hover:text-gold-ink py-1 cursor-pointer font-serif-th"
                     >
                       <span className="flex items-center gap-1.5">
@@ -389,18 +392,20 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                         </span>
                       </span>
                       <span className="text-xs font-mono">
+                        <span aria-hidden="true">{showIndependentGuide ? "▲ " : "▼ "}</span>
                         {showIndependentGuide
                           ? isEnglish
-                            ? "▲ Close"
-                            : "▲ ปิด"
+                            ? "Close"
+                            : "ปิด"
                           : isEnglish
-                            ? "▼ View audit instructions"
-                            : "▼ ดูวิธีคำนวณ"}
+                            ? "View audit instructions"
+                            : "ดูวิธีคำนวณ"}
                       </span>
                     </button>
 
                     {showIndependentGuide && (
                       <div
+                        id="pf-independent-guide"
                         className="altar-card-porcelain !rounded-lg anim-swap-rise-sm mt-3 p-4 space-y-3 text-xs"
                       >
                         <p className="text-muted font-serif-th leading-relaxed">

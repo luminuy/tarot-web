@@ -22,14 +22,16 @@ if (bar) {
   if (button && label) {
     const original = label.textContent ?? "";
     const copiedLabel = button.dataset.labelCopied ?? original;
+    const failedLabel = button.dataset.labelFailed ?? original;
     let resetTimer: ReturnType<typeof setTimeout> | undefined;
 
     button.addEventListener("click", async () => {
       soundManager.playMenuTapSound();
       const ok = await copyToClipboard(window.location.href);
-      if (!ok) return;
 
-      label.textContent = copiedLabel;
+      // A5-16: คัดลอกพลาด (LINE in-app · iOS WebView · http) ต้องบอกผู้ใช้ ไม่ใช่เงียบ
+      // ป้ายมี aria-live="polite" — ทั้งสำเร็จและพลาดถูกประกาศให้ screen reader
+      label.textContent = ok ? copiedLabel : failedLabel;
       if (resetTimer) clearTimeout(resetTimer);
       resetTimer = setTimeout(() => {
         label.textContent = original;

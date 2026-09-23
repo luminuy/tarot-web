@@ -48,6 +48,8 @@ export const STORAGE_KEYS = {
   announcementDismissed: "tarot_entitlement_announce_dismissed",
   /** ซ่อนการ์ดชวนสมัครถึงเวลาใด (epoch ms) */
   signupCardDismissedUntil: "tarot_signup_card_dismissed_until",
+  /** เวลาที่หน้าก่อนสั่ง Service Worker รุ่นใหม่ขึ้นทำงานตอนออกจากหน้า (sessionStorage · A4-06) */
+  swSkipRequestedAt: "tarot_sw_skip_requested_at",
   /** ค่าตั้งเครื่องมือวัดผลที่ดึงมาจาก API (sessionStorage) */
   analyticsConfig: "tarot_analytics_config",
   /** เปิด/ปิดเสียง */

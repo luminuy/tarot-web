@@ -22,13 +22,16 @@ export const SECURITY_HEADERS: { key: string; value: string }[] = [
       // `static.cloudflareinsights.com` = beacon ของ Cloudflare Web Analytics ที่ Cloudflare
       // แทรกให้อัตโนมัติทุกหน้า (ISSUE-035) ของเดิมไม่มีในรายการนี้ CSP จึงบล็อกทิ้งทุกครั้ง
       // ➔ บริการเปิดอยู่แต่ไม่เคยเก็บข้อมูลได้เลยสักหน้าเดียว
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com https://connect.facebook.net https://static.cloudflareinsights.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://*.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://www.google.com https://connect.facebook.net https://static.cloudflareinsights.com",
       // next/font โฮสต์ฟอนต์เองในโดเมนเรา จึงไม่เคยเรียก fonts.googleapis.com / fonts.gstatic.com เลย
       "style-src 'self' 'unsafe-inline'",
       "font-src 'self' data:",
       "img-src 'self' data: blob: https:",
-      "connect-src 'self' https://generativelanguage.googleapis.com https://api.groq.com https://ik.imagekit.io https://res.cloudinary.com https://challenges.cloudflare.com https://www.google-analytics.com https://region1.google-analytics.com https://www.facebook.com https://cloudflareinsights.com https://static.cloudflareinsights.com",
-      "frame-src 'self' https://challenges.cloudflare.com",
+      "connect-src 'self' https://generativelanguage.googleapis.com https://api.groq.com https://ik.imagekit.io https://res.cloudinary.com https://challenges.cloudflare.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://www.google.com https://pagead2.googlesyndication.com https://www.facebook.com https://cloudflareinsights.com https://static.cloudflareinsights.com",
+      // A4-05: โดเมนตามคู่มือ CSP ของ Google Tag — Google Signals ยิงไป *.analytics.google.com
+      // และ Google Ads conversion ใช้ googleadservices/doubleclick/google.com + iframe td.doubleclick.net
+      // ขาดตัวใดตัวหนึ่ง = ยอด GA4/conversion หายเงียบ เห็นแค่ใน console
+      "frame-src 'self' https://challenges.cloudflare.com https://td.doubleclick.net https://www.googletagmanager.com",
       "base-uri 'none'",
       "frame-ancestors 'none'",
       "object-src 'none'",

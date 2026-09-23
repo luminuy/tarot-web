@@ -11,7 +11,7 @@ const locale = "en" as const;
 ---
 
 <BaseLayout locale={locale} metadata={pickACardMetadataEn}>
-  <SiteHeaderRoot locale={locale} />
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
   <PickACardBodyEnRoot>
     <Fragment slot="ritual">
       <PickACardIsland locale={locale} client:load />

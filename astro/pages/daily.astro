@@ -11,7 +11,7 @@ const locale = "th" as const;
 ---
 
 <BaseLayout locale={locale} metadata={dailyMetadataTh}>
-  <SiteHeaderRoot locale={locale} />
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
   <DailyBodyThRoot>
     <Fragment slot="ritual">
       <DailyRitualRoot locale={locale} client:load />

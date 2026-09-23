@@ -90,8 +90,14 @@ export function CardImage({
     onError?.();
   };
 
+  /*
+   * A3-06: key={src} บังคับ remount เมื่อเปลี่ยนภาพ — handleImgError แก้ DOM ตรง
+   * (ธง data-fell-back + ถอด <source>) ซึ่ง React ไม่รู้ ถ้าใช้โหนดเดิมต่อ
+   * ภาพใบถัดไปจะถอยไปไฟล์ในเครื่องไม่ได้อีก
+   */
   const img = (
     <img
+      key={src}
       src={src}
       alt={alt}
       width={300}
@@ -122,7 +128,7 @@ export function CardImage({
   const avifSrcSet = getCardAvifSrcSet(image, cardId);
 
   return (
-    <picture className="contents">
+    <picture key={src} className="contents">
       {avifSrcSet && <source type="image/avif" srcSet={avifSrcSet} sizes={sizes} />}
       <source type="image/webp" srcSet={webpSrcSet} sizes={sizes} />
       {img}

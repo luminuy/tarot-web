@@ -379,7 +379,16 @@ export function OneCardRitual({
             </div>
 
             {/* คำอ่านของแม่หมอ — สตรีมสดจาก AI ทุกครั้ง */}
-            <AiReadingPanel state={oracle.state} isEn={isEn} onRetry={handleDraw} />
+            <AiReadingPanel
+              state={oracle.state}
+              isEn={isEn}
+              onRetry={() => {
+                // A3-10: อ่านไพ่ใบเดิมซ้ำ — ห้ามจั่วใบใหม่ให้ผู้ใช้ที่เห็นไพ่ไปแล้ว
+                void oracle.retryRead().then((ok) => {
+                  if (!ok) void handleDraw();
+                });
+              }}
+            />
 
             {/* เนื้อหาเสริมเฉพาะหน้า (ถ้ามี) */}
             {renderReading?.(drawnCard)}

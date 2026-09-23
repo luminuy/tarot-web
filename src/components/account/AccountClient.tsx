@@ -3,6 +3,7 @@
 import { useEffect, useId, useState } from "react";
 import dynamic from "next/dynamic";
 import { RouteLink as Link } from "@/components/ui/RouteLink";
+import { withMotionScope } from "@/components/providers/with-motion-scope";
 import { ChangePasswordCard } from "@/components/account/ChangePasswordCard";
 import { EntitlementStatusCard } from "@/components/entitlement/EntitlementStatusCard";
 import { DeleteAllDataButton } from "@/components/ui/DeleteAllDataButton";
@@ -15,9 +16,9 @@ import type { UpgradeReason } from "@/lib/entitlement/copy";
 const AuthModal = dynamic(() => import("@/components/auth/AuthModal").then((m) => m.AuthModal), {
   ssr: false,
 });
-const ReadingHistoryModal = dynamic(
-  () => import("@/components/history/ReadingHistoryModal").then((m) => m.ReadingHistoryModal),
-  { ssr: false },
+// A5-08: สมุดบันทึกใช้ motion ข้างใน — ต้องห่อ withMotionScope ให้เคารพ reduced-motion เหมือนหน้าแรก
+const ReadingHistoryModal = withMotionScope(() =>
+  import("@/components/history/ReadingHistoryModal").then((m) => m.ReadingHistoryModal),
 );
 const AccessDialog = dynamic(
   () => import("@/components/entitlement/AccessDialog").then((m) => m.AccessDialog),

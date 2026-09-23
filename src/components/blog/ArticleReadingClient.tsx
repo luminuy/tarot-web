@@ -66,7 +66,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
             {articleCat}
           </span>
           <span className="text-muted">
-            {isEnglish ? `⏱ ${readTimeFormatted}` : `⏱ เวลาอ่าน ${article.readTime}`}
+            {isEnglish ? `${readTimeFormatted}` : `เวลาอ่าน ${article.readTime}`}
           </span>
           <span className="text-muted">·</span>
           <span className="text-muted">
@@ -243,9 +243,12 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
             type="button"
             data-copy-link=""
             data-label-copied={isEnglish ? "Link Copied!" : "คัดลอกลิงก์สำเร็จ!"}
+            data-label-failed={
+              isEnglish ? "Can't copy — press and hold the address bar instead" : "คัดลอกไม่ได้ ลองกดค้างที่แถบที่อยู่แทน"
+            }
             className="glass-chip tap-overlay-y px-3.5 py-1.5 text-ink hover:text-gold-ink transition-colors flex items-center gap-1.5 cursor-pointer"
           >
-            <span data-copy-label="">{isEnglish ? "Copy Link" : "คัดลอกลิงก์"}</span>
+            <span data-copy-label="" aria-live="polite">{isEnglish ? "Copy Link" : "คัดลอกลิงก์"}</span>
           </button>
         </div>
         <Link href="/blog" className="text-gold-ink hover:underline font-bold">
@@ -282,7 +285,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
                     </h3>
                   </div>
                   <div className="text-[13px] text-muted font-mono pt-2 border-t border-line/40">
-                    ⏱ {relReadTime}
+                    {relReadTime}
                   </div>
                 </Link>
               );

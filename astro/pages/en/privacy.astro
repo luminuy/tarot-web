@@ -14,7 +14,7 @@ const locale = "en" as const;
 ---
 
 <BaseLayout locale={locale} metadata={privacyMetadataEn}>
-  <SiteHeaderRoot locale={locale} />
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
   <PrivacyBodyEnRoot>
     <Fragment slot="deleteButton">
       <DeleteAllDataRoot locale={locale} />

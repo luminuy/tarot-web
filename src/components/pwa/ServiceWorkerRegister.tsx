@@ -2,8 +2,12 @@
 
 import { useEffect } from "react";
 
+import { STORAGE_KEYS } from "@/lib/storage/keys";
+
 import {
+  createSessionSkipFlag,
   isServiceWorkerAllowed,
+  safeSessionStorage,
   setupServiceWorker,
   type SwContainerLike,
 } from "./sw-register";
@@ -31,6 +35,11 @@ export function ServiceWorkerRegister() {
       isDocumentReady: () => document.readyState === "complete",
       onWindowLoad: (fn) => window.addEventListener("load", fn, { once: true }),
       offWindowLoad: (fn) => window.removeEventListener("load", fn),
+      onPageHide: (fn) => {
+        window.addEventListener("pagehide", fn);
+        return () => window.removeEventListener("pagehide", fn);
+      },
+      skipFlag: createSessionSkipFlag(safeSessionStorage(), STORAGE_KEYS.swSkipRequestedAt),
       log: (level, message, detail) => {
         if (level === "warn") console.warn(message, detail);
         else console.info(message);

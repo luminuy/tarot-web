@@ -534,7 +534,12 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
             <AiReadingPanel
               state={oracle.state}
               isEn={isEnglish}
-              onRetry={() => handleCalculate()}
+              onRetry={() => {
+                // A3-10: อ่านไพ่ชุดเดิมซ้ำ ไม่เปิดเซสชันใหม่ (ไม่หักสิทธิ์ซ้ำ)
+                void oracle.retryRead().then((ok) => {
+                  if (!ok) handleCalculate();
+                });
+              }}
               cardLabels={
                 isEnglish
                   ? ["Personality Card", "Soul Card"]

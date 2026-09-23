@@ -77,6 +77,12 @@ export default defineConfig({
       "process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME": JSON.stringify(
         process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? "",
       ),
+      /* A4-12: ขาดสองตัวนี้ Vite แทนด้วย {} ➔ หน้า Astro ไม่มี Google Ads/conversion แม้ตั้งค่าแล้ว
+         ด่าน test-code-debt ตรวจว่าทุก process.env.NEXT_PUBLIC_* ที่โค้ดอ้างมี define ครบ */
+      "process.env.NEXT_PUBLIC_GOOGLE_ADS_ID": JSON.stringify(process.env.NEXT_PUBLIC_GOOGLE_ADS_ID ?? ""),
+      "process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL": JSON.stringify(
+        process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL ?? "",
+      ),
     },
   },
 });

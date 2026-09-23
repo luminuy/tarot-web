@@ -10,7 +10,7 @@ const locale = "en" as const;
 ---
 
 <BaseLayout locale={locale} metadata={contactMetadataEn}>
-  <SiteHeaderRoot locale={locale} />
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
   <ContactBodyEnRoot />
   <SiteFooterRoot locale={locale} spacing="tight" />
 </BaseLayout>

@@ -21,7 +21,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { isServiceWorkerAllowed, setupServiceWorker, type SwContainerLike } from "../../src/components/pwa/sw-register";
+import { createSessionSkipFlag, isServiceWorkerAllowed, setupServiceWorker, type SwContainerLike } from "../../src/components/pwa/sw-register";
 
 const ROOT = process.cwd();
 
@@ -125,6 +125,96 @@ console.log("🔌 [QA] Service Worker ต้องไม่ทำให้ผู
   env.fireControllerChange({ scriptURL: "/sw.js?v=3" });
   check("ผู้ใช้เดิม: controllerchange ซ้ำไม่ทำให้โหลดซ้ำ", env.reloadCount === 1);
   env.teardown();
+}
+
+// ── A4-06: ตัวใหม่ค้าง waiting ต้องถูกสั่ง SKIP_WAITING ตอนออกจากหน้า ─────────
+async function skipWaitingScenario(opts: { hasController: boolean; withPageHide: boolean }) {
+  const messages: unknown[] = [];
+  const pageHide: Array<() => void> = [];
+  const store = new Map<string, string>();
+  const storage = {
+    getItem: (k: string) => store.get(k) ?? null,
+    setItem: (k: string, v: string) => void store.set(k, v),
+    removeItem: (k: string) => void store.delete(k),
+  };
+  const listeners: Array<() => void> = [];
+  let reloads = 0;
+  const container: SwContainerLike = {
+    controller: opts.hasController ? { scriptURL: "/sw.js" } : null,
+    addEventListener: (_t, l) => void listeners.push(l),
+    removeEventListener: (_t, l) => {
+      const i = listeners.indexOf(l);
+      if (i >= 0) listeners.splice(i, 1);
+    },
+    register: async () => ({
+      installing: null,
+      waiting: { state: "installed", onstatechange: null, postMessage: (m: unknown) => void messages.push(m) },
+      onupdatefound: null,
+    }),
+  };
+  const teardown = setupServiceWorker({
+    container,
+    reload: () => void reloads++,
+    isDocumentReady: () => true,
+    onWindowLoad: () => {},
+    offWindowLoad: () => {},
+    onPageHide: opts.withPageHide
+      ? (fn) => {
+          pageHide.push(fn);
+          return () => {
+            const i = pageHide.indexOf(fn);
+            if (i >= 0) pageHide.splice(i, 1);
+          };
+        }
+      : undefined,
+    skipFlag: createSessionSkipFlag(storage, "k"),
+  });
+  await new Promise((r) => setTimeout(r, 0)); // ให้ register() resolve
+  return { messages, pageHide, storage, listeners, get reloads() { return reloads; }, container, teardown };
+}
+
+{
+  const s = await skipWaitingScenario({ hasController: true, withPageHide: true });
+  check("A4-06: มีตัวใหม่รอ + ยังไม่ออกจากหน้า ➔ ยังไม่สั่ง SKIP_WAITING (ไม่ขัดจังหวะหน้าที่ใช้อยู่)", s.messages.length === 0);
+  for (const fn of [...s.pageHide]) fn();
+  check(
+    "A4-06: ออกจากหน้า (pagehide) ➔ ส่ง SKIP_WAITING ให้ตัวที่รอ",
+    s.messages.length === 1 && (s.messages[0] as { type?: string })?.type === "SKIP_WAITING",
+    `ได้ ${JSON.stringify(s.messages)}`,
+  );
+  check("A4-06: ตั้งธงข้ามหน้าไว้ให้หน้าถัดไป", s.storage.getItem("k") !== null);
+  s.teardown();
+  check("A4-06: teardown ถอดตัวจับ pagehide", s.pageHide.length === 0);
+}
+{
+  const s = await skipWaitingScenario({ hasController: false, withPageHide: true });
+  check("A4-06: ผู้เข้าชมใหม่ (ไม่มีตัวคุม) ไม่ผูก pagehide", s.pageHide.length === 0);
+  s.teardown();
+}
+{
+  // หน้าถัดไป: หน้าก่อนเพิ่งสั่งตัวใหม่ขึ้นทำงาน — หน้านี้โหลดสดจากเครือข่ายแล้ว ห้ามรีโหลดซ้ำ
+  const s = await skipWaitingScenario({ hasController: true, withPageHide: true });
+  createSessionSkipFlag(s.storage, "k").mark();
+  s.container.controller = { scriptURL: "/sw.js?v=2" };
+  for (const l of [...s.listeners]) l();
+  check("A4-06: หน้าที่เพิ่งโหลดหลังสั่ง SKIP_WAITING เจอ controllerchange ➔ ไม่รีโหลดซ้ำ", s.reloads === 0, `reload ${s.reloads} ครั้ง`);
+  // ธงถูกใช้ไปแล้ว — เปลี่ยนตัวคุมครั้งถัดไปต้องรีโหลดตามปกติ
+  for (const l of [...s.listeners]) l();
+  check("A4-06: ธงใช้ได้ครั้งเดียว — เปลี่ยนตัวคุมครั้งต่อไปรีโหลดตามเดิม", s.reloads === 1);
+  s.teardown();
+}
+{
+  let t = 0;
+  const store = new Map<string, string>();
+  const storage = {
+    getItem: (k: string) => store.get(k) ?? null,
+    setItem: (k: string, v: string) => void store.set(k, v),
+    removeItem: (k: string) => void store.delete(k),
+  };
+  const flag = createSessionSkipFlag(storage, "k", () => t);
+  flag.mark();
+  t = 60_000;
+  check("A4-06: ธงเก่าเกิน 30 วินาทีใช้ไม่ได้ (กันกดทับการรีโหลดที่จำเป็น)", flag.consumeRecent() === false);
 }
 
 // ── เงื่อนไขความปลอดภัยของ origin ────────────────────────────────────────────

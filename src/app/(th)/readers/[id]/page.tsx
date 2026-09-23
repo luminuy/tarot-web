@@ -184,7 +184,7 @@ export default async function ReaderDetailPage({
             <ReaderDetailClient reader={reader} isLiveOpen={isLiveOpen} />
 
             <p className="text-[13px] text-muted text-center pt-2 font-serif-th">
-              🔒 ข้อมูลคำถามจะถูกส่งต่อไปยังแม่หมอโดยตรง และจะถูกลบออกจากระบบภายใน 30 วันตามมาตรฐาน PDPA
+              ข้อมูลคำถามจะถูกส่งต่อไปยังแม่หมอโดยตรง และจะถูกลบออกจากระบบภายใน 30 วันตามมาตรฐาน PDPA
             </p>
           </div>
         </div>
