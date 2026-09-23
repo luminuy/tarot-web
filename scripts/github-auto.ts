@@ -208,6 +208,11 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
     args: ["scripts/qa/test-analytics-integrity.ts"],
   },
   {
+    label: "📊 ตัวเลขแผงสถิติแอดมินมาจากของจริง (โควตา AI ผ่าน Redis · ชื่อเมตริกมีคนบันทึก)",
+    cmd: TSX,
+    args: ["scripts/qa/test-admin-stats-keys.ts"],
+  },
+  {
     label: "⚡ ระบบทำนายด่วน (Quick Fortune 1 ใบ / 4 หัวข้อยอดนิยม / Provably Fair)",
     cmd: TSX,
     args: ["scripts/qa/test-quick-fortune.ts"],

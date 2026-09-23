@@ -33,6 +33,40 @@ export async function isAiCapReached(tier: "guest" | "member" = "guest"): Promis
   return count >= effective;
 }
 
+export interface AiUsageToday {
+  /** วัน UTC ที่ตัวนับใช้เป็นคีย์ (ตัดรอบ 07:00 น. เวลาไทย) */
+  day: string;
+  usedToday: number;
+  dailyCap: number;
+  /** เพดานของผู้เยี่ยมชม (70% ของเพดานรวม) */
+  guestCap: number;
+  memberCapReached: boolean;
+  guestCapReached: boolean;
+}
+
+/**
+ * ยอดเรียก AI วันนี้เทียบเพดาน — **หน้าแอดมินทุกหน้าต้องอ่านผ่านตัวนี้เท่านั้น**
+ *
+ * ⚠️ ห้ามอ่าน `KEY.aiCap(day)` ด้วย `kvGetJSON` ตรง ๆ: เมื่อเปิด Upstash อยู่ `bumpCounter()`
+ * เขียนตัวนับลง Redis อย่างเดียว KV จึงว่างตลอด ➔ แผงแอดมินเคยขึ้น "0 / 2,000" ทั้งที่
+ * เรียก AI ไปหลายร้อยครั้ง · `readCounter()` อ่าน Redis ก่อนแล้วค่อยถอยไป KV
+ * (ด่าน `scripts/qa/test-admin-stats-keys.ts` เฝ้าอยู่)
+ */
+export async function getAiUsageToday(): Promise<AiUsageToday> {
+  const day = utcDay();
+  const usedToday = await readCounter(KEY.aiCap(day)).catch(() => 0);
+  const dailyCap = getAiDailyCap();
+  const guestCap = Math.floor(dailyCap * GUEST_CAP_RATIO);
+  return {
+    day,
+    usedToday,
+    dailyCap,
+    guestCap,
+    memberCapReached: usedToday >= dailyCap,
+    guestCapReached: usedToday >= guestCap,
+  };
+}
+
 /**
  * เรียกหลังจุด Gemini call สำเร็จ (ใน done handler) — สะสมใน buffer แล้ว flush รวมทีเดียว
  */
