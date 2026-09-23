@@ -67,6 +67,11 @@ for (const [href, expected] of [
   ["/account", true],
   ["/accountant", false],
   ["/reading/chat", true],
+  /* หน้าดูดวงรายผัง — prefix `/read` ต้องไม่ครอบ `/readers` (ยังเป็นหน้าไดนามิกของ Next) */
+  ["/read/celtic-cross", true],
+  ["/en/read/daily", true],
+  ["/readers", false],
+  ["/readers/abc", false],
   /* ⚠️ เส้นที่ "ขึ้นต้นเหมือนกันแต่คนละหน้า" ต้องไม่ถูกครอบ */
   ["/cardsomething", false],
   ["/blogger", false],

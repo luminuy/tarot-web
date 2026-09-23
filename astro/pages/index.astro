@@ -1,5 +1,6 @@
 ---
 import { buildHomeMetadata, homeJsonLdBlocks } from "@/app/_shared/pages/home";
+import { readSpreadStaticParams } from "@/app/_shared/pages/read-spread";
 
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { HomeSeoRoot } from "../components/HomeSeoRoot";
@@ -12,9 +13,25 @@ import { TarotFlowRoot } from "../islands/TarotFlowRoot";
  *    ของตัวเองอยู่ข้างในแล้ว (เหมือนตอนอยู่กับ Next เป๊ะ) ถ้าเติมจะได้หัวเว็บซ้อนสองชั้น
  */
 const locale = "th" as const;
+/**
+ * ↪️ ลิงก์เก่า `/?spread=<ผัง>` ➔ หน้าดูดวงรายผัง `/read/<ผัง>` (2026-09-23)
+ *
+ * ปุ่มทุกปุ่มในเว็บชี้ `/read/<ผัง>` แล้ว แต่ลิงก์แบบเก่ายังค้างอยู่ในบุ๊กมาร์ก · ลิงก์ที่แชร์ไปแล้ว
+ * และแคชของ service worker · เด้งต่อด้วยสคริปต์บรรทัดเดียวก่อนหน้าแรกจะวาด (ผู้ใช้ไม่เห็นหน้าแรก)
+ * ใช้ `replace` ไม่ใช่ `assign` — กดย้อนกลับแล้วต้องไม่วนมาเจอลิงก์เก่าที่เด้งซ้ำไม่จบ
+ * ผังที่ไม่มีอยู่จริง = ไม่ใช่คำสั่ง อยู่หน้าแรกตามเดิม
+ */
+const readSpreadIds = readSpreadStaticParams().map(({ id }) => id);
+const readPrefix = "/read/";
 ---
 
 <BaseLayout locale={locale} metadata={buildHomeMetadata(locale)}>
+  <script is:inline define:vars={{ readSpreadIds, readPrefix }}>
+    try {
+      var legacySpread = new URLSearchParams(location.search).get("spread");
+      if (legacySpread && readSpreadIds.indexOf(legacySpread) !== -1) location.replace(readPrefix + legacySpread);
+    } catch (e) {}
+  </script>
   {homeJsonLdBlocks(locale).map((block) => (
     <script type="application/ld+json" is:inline set:html={JSON.stringify(block)} />
   ))}

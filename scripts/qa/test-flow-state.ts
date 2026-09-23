@@ -35,6 +35,9 @@ import {
   isPassHolderOf,
 } from "../../src/components/home/flow-access";
 import { resolveEntryIntent } from "../../src/components/home/flow-entry";
+import { PUBLIC_SPREADS } from "../../src/data/spreads";
+import { readSpreadMetadata } from "../../src/app/_shared/pages/read-spread";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 import type { ClientEntitlement } from "../../src/lib/entitlement/use-entitlement";
 
 let pass = 0;
@@ -432,83 +435,173 @@ if (!fs.existsSync(FLOW)) {
   check("หาไฟล์ TarotFlow.tsx เจอ (ตรวจทางเข้าสู่ขั้นตั้งจิต)", false, "ไฟล์ถูกย้าย/เปลี่ยนชื่อ — ด่านนี้ตรวจอะไรไม่ได้");
 } else {
   const flowSrc = fs.readFileSync(FLOW, "utf-8");
-  check("TarotFlow ใช้ `decideSpreadAccess` (ปุ่มหน้าแรก + ลิงก์ `?spread=`)", flowSrc.includes("decideSpreadAccess("));
+  check("TarotFlow ใช้ `decideSpreadAccess` (ปุ่มหน้าแรก + หน้า `/read/<ผัง>`)", flowSrc.includes("decideSpreadAccess("));
   check("TarotFlow ใช้ `decideStartSessionAccess` ตอนยิงเซสชันจริง", flowSrc.includes("decideStartSessionAccess("));
   /**
-   * ลิงก์ `/?spread=<id>` ต้อง "เริ่มพิธีให้เลย" — ผู้ใช้กดคำว่าเริ่มดูดวงมาแล้วหนึ่งที
-   * ถ้าการเรียกนี้หายไป หน้าแรกจะกลับไปนิ่งอยู่ขั้นเลือกผังเหมือนเดิม
+   * หน้า `/read/<ผัง>` ต้องเปิดมาที่ขั้นตั้งคำถาม **ตั้งแต่ค่าเริ่มต้นของ state** (HTML ที่บิลด์ไว้)
+   * ไม่ใช่เลื่อนขั้นใน effect — ไม่งั้นผู้ใช้เห็นหน้าแรกแวบหนึ่งก่อน = อาการ "เด้งกลับหน้าแรก" เดิม
+   * และต้องตรวจสิทธิ์ทันทีที่เปิด ไม่ใช่ปล่อยให้พิมพ์คำถามจนเสร็จแล้วค่อยเจอกำแพง
    */
   check(
-    "ลิงก์ `?spread=` เริ่มพิธีให้อัตโนมัติ ไม่ใช่แค่เลือกผังค้างไว้",
-    /\.get\("spread"\)/.test(flowSrc) && /void beginFromDeepLink\(/.test(flowSrc),
+    "หน้า `/read/<ผัง>` เริ่มที่ขั้นตั้งคำถามตั้งแต่ค่าเริ่มต้นของ state",
+    /useState<RitualStep>\(routeSpread \? "INTENTION_SELECT" : "SPREAD_SELECT"\)/.test(flowSrc) &&
+      /useState<Spread>\(routeSpread \?\?/.test(flowSrc),
+  );
+  check("หน้า `/read/<ผัง>` ตรวจสิทธิ์ทันทีที่เปิด", /void checkRouteAccess\(routeSpread,/.test(flowSrc));
+  /**
+   * หน้า `/read/<ผัง>` ไม่มีขั้นเลือกผัง — "เปลี่ยนผัง"/"เริ่มดูดวงใหม่" ต้องออกไปหน้าแรก
+   * และต้องกั้นตัวบันทึกไว้ ไม่งั้น `pagehide` เขียนรอบที่เพิ่งล้างคืน หน้าแรกกู้กลับมาเป็นผังเดิม
+   */
+  check(
+    "หน้า `/read/<ผัง>` ไปขั้นเลือกผัง = ออกไปหน้าแรก พร้อมกั้นตัวบันทึก",
+    /next === "SPREAD_SELECT" && routeSpread/.test(flowSrc) &&
+      /leavingRef\.current = true/.test(flowSrc) &&
+      (flowSrc.match(/!leavingRef\.current/g) ?? []).length >= 3,
+    "ตัวบันทึกทั้งสามจุด (หน่วง 400 ms · cleanup · pagehide) ต้องเช็ก leavingRef",
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-console.log("\n\n── 14. เปิดหน้าแรกครั้งนี้เพราะอะไร (flow-entry.ts) ──");
+console.log("\n\n── 14. เปิดพิธีดูดวงครั้งนี้เพราะอะไร (flow-entry.ts) ──");
 // ─────────────────────────────────────────────────────────────────────────────
 /**
  * ⚠️ ยิงเคสจริงใส่ฟังก์ชัน ไม่ได้ค้นข้อความในซอร์ส
  *
- * ลำดับที่ต้องไม่สลับ: ปุ่มที่ผู้ใช้เพิ่งกด (`?spread=`) ชนะรอบที่ค้างอยู่ในแท็บเสมอ
- * ของเดิมสลับลำดับกัน คนที่เพิ่งเปิดไพ่ในแท็บนี้จึงกดผังใหม่ไม่ติดเลยสักครั้ง
+ * ลำดับที่ต้องไม่สลับ: หน้า `/read/<ผัง>` ที่ผู้ใช้เพิ่งกดเข้ามา ชนะรอบที่ค้างอยู่ในแท็บเสมอ
+ * ของเดิมสลับลำดับกัน คนที่เพิ่งเปิดไพ่ในแท็บนี้จึงกดผังใหม่ไม่ติดเลยสักครั้ง (รอบ 132)
+ * ยกเว้น "รีเฟรช/ย้อนกลับมา" หน้าเดิมผังเดิม = กู้คืน ไม่งั้นรีเฟรชกลางพิธีล้างไพ่ทิ้ง
  */
 const known = (id: string) => ["daily", "celtic-cross", "three-card"].includes(id);
-const intent = (spreadParam: string | null, savedStep: RitualStep | null) =>
-  resolveEntryIntent({ spreadParam, isKnownSpread: known, savedStep });
+const intent = (
+  routeSpread: string | null,
+  savedStep: RitualStep | null,
+  opts: { returning?: boolean; savedSpread?: string | null } = {},
+) => resolveEntryIntent({ routeSpread, isKnownSpread: known, savedStep, ...opts });
 
-check("กดปุ่มผังใหม่ ทั้งที่ยังไม่มีอะไรค้าง ➔ เริ่มผังนั้น", intent("celtic-cross", null).kind === "deepLink");
+check("เปิดหน้า `/read/<ผัง>` ทั้งที่ยังไม่มีอะไรค้าง ➔ เริ่มผังนั้น", intent("celtic-cross", null).kind === "deepLink");
 for (const step of ["INTENTION_SELECT", "SHUFFLE", "PICK_CARDS", "READING", "SUMMARY"] as RitualStep[]) {
-  const got = intent("celtic-cross", step);
+  const got = intent("celtic-cross", step, { savedSpread: "daily" });
   check(
-    `กดปุ่มผังใหม่ ขณะค้างอยู่ขั้น ${step} ➔ ผังที่กดต้องชนะ (ไม่ใช่ลากกลับรอบเก่า)`,
+    `กดเข้าผังใหม่ ขณะค้างอยู่ขั้น ${step} ของอีกผัง ➔ ผังที่กดต้องชนะ (ไม่ใช่ลากกลับรอบเก่า)`,
     got.kind === "deepLink" && got.spreadId === "celtic-cross",
   );
 }
-check("ไม่ได้กดอะไร แต่มีรอบค้างอยู่ ➔ กู้คืนรอบเดิม", intent(null, "READING").kind === "resume");
-check("ไม่ได้กดอะไร และค้างที่ขั้นเลือกผัง ➔ ถือว่าไม่มีอะไรค้าง", intent(null, "SPREAD_SELECT").kind === "fresh");
-check("ไม่ได้กดอะไร และไม่มีอะไรค้าง ➔ หน้าเปล่า", intent(null, null).kind === "fresh");
 check(
-  "`?spread=` ที่ไม่มีผังอยู่จริง ➔ ไม่ใช่คำสั่ง ห้ามทับรอบที่ค้างอยู่",
+  "กดลิงก์เข้าผังเดิมใหม่อีกครั้ง (ไม่ใช่รีเฟรช) ➔ เริ่มรอบใหม่ ไม่ลากกลับหน้าสรุปรอบเก่า",
+  intent("celtic-cross", "SUMMARY", { savedSpread: "celtic-cross" }).kind === "deepLink",
+);
+for (const step of ["INTENTION_SELECT", "SHUFFLE", "PICK_CARDS", "READING", "SUMMARY"] as RitualStep[]) {
+  check(
+    `รีเฟรช/ย้อนกลับมาหน้าเดิมขณะอยู่ขั้น ${step} ➔ กู้คืนรอบเดิม (ไม่ล้างไพ่ที่เปิดอยู่)`,
+    intent("celtic-cross", step, { returning: true, savedSpread: "celtic-cross" }).kind === "resume",
+  );
+}
+check(
+  "ย้อนกลับมาหน้าผังหนึ่ง แต่รอบที่ค้างเป็นอีกผัง ➔ เริ่มผังของหน้านี้",
+  intent("celtic-cross", "READING", { returning: true, savedSpread: "daily" }).kind === "deepLink",
+);
+check("หน้าแรก: มีรอบค้างอยู่ ➔ กู้คืนรอบเดิม", intent(null, "READING").kind === "resume");
+check("หน้าแรก: ค้างที่ขั้นเลือกผัง ➔ ถือว่าไม่มีอะไรค้าง", intent(null, "SPREAD_SELECT").kind === "fresh");
+check("หน้าแรก: ไม่มีอะไรค้าง ➔ หน้าเปล่า", intent(null, null).kind === "fresh");
+check(
+  "ผังที่ไม่มีอยู่จริง ➔ ไม่ใช่คำสั่ง ห้ามทับรอบที่ค้างอยู่",
   intent("ผังมั่ว", "READING").kind === "resume" && intent("ผังมั่ว", null).kind === "fresh",
 );
 
-/**
- * ผังที่กดมาแล้วติดกำแพงเข้าสู่ระบบ (`pendingSpread`) — อาการที่เจ้าของเจอ 2026-09-23:
- * กด "เริ่มดูดวงด้วยผังนี้" ➔ ขึ้นหน้าต่างเข้าสู่ระบบ ➔ ล็อกอินเสร็จกลับมาหน้าแรกเปล่า ๆ ผังหาย
- */
-const withPending = (spreadParam: string | null, pendingSpread: string | null, savedStep: RitualStep | null) =>
-  resolveEntryIntent({ spreadParam, pendingSpread, isKnownSpread: known, savedStep });
-{
-  const got = withPending(null, "celtic-cross", null);
-  check("ล็อกอินกลับมาหลังติดกำแพง ➔ เริ่มผังที่กดไว้ต่อ", got.kind === "deepLink" && got.spreadId === "celtic-cross");
-  const overResume = withPending(null, "celtic-cross", "READING");
-  check(
-    "ผังที่ค้างจากกำแพงชนะรอบเก่าในแท็บ (เหตุผลเดียวกับลิงก์)",
-    overResume.kind === "deepLink" && overResume.spreadId === "celtic-cross",
-  );
-  const linkWins = withPending("daily", "celtic-cross", null);
-  check("กดลิงก์ผังใหม่ ➔ ชนะผังที่ค้างจากกำแพงรอบก่อน", linkWins.kind === "deepLink" && linkWins.spreadId === "daily");
-  check(
-    "ผังค้างที่ไม่มีอยู่จริง ➔ ไม่ใช่คำสั่ง",
-    withPending(null, "ผังมั่ว", "READING").kind === "resume" && withPending(null, "ผังมั่ว", null).kind === "fresh",
-  );
-}
-
-// URL ต้องถูกล้าง `?spread=` ทิ้งหลังรับคำสั่ง ไม่งั้นรีเฟรชระหว่างดูดวง = เริ่มใหม่ทับของเดิม
 if (!fs.existsSync(FLOW)) {
-  check("หาไฟล์ TarotFlow.tsx เจอ (ตรวจการล้าง ?spread= ออกจาก URL)", false, "ไฟล์ถูกย้าย/เปลี่ยนชื่อ");
+  check("หาไฟล์ TarotFlow.tsx เจอ (ตรวจการตัดสินทางเข้า)", false, "ไฟล์ถูกย้าย/เปลี่ยนชื่อ");
 } else {
   const flowSrc = fs.readFileSync(FLOW, "utf-8");
   check("TarotFlow ตัดสินทางเข้าด้วย `resolveEntryIntent`", flowSrc.includes("resolveEntryIntent("));
   check(
-    "ลิงก์ที่ติดกำแพงสิทธิ์ถูกจำไว้ แล้วหน้าแรกหยิบมาเริ่มต่อหลังล็อกอิน",
-    /savePendingSpread\(spread\.id\)/.test(flowSrc) && /pendingSpread:\s*takePendingSpread\(\)/.test(flowSrc),
+    "TarotFlow แยก \"รีเฟรช/ย้อนกลับ\" ออกจาก \"กดเข้ามาใหม่\" (กันรีเฟรชกลางพิธีแล้วล้างไพ่ทิ้ง)",
+    /returning:\s*isReturnVisit\(\)/.test(flowSrc) && /"reload"/.test(flowSrc) && /"back_forward"/.test(flowSrc),
   );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+console.log("\n\n── 15. ปุ่ม \"เริ่มดูดวงด้วยผังนี้\" ทุกปุ่มชี้หน้า `/read/<ผัง>` ──");
+// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * อาการที่เจ้าของเจอ 2026-09-23: กดปุ่มที่หน้าผังแล้ว "เด้งกลับหน้าแรก" ทุกครั้ง
+ * เพราะทุกปุ่มชี้ `/?spread=<id>` = โหลดหน้าแรกทั้งหน้าก่อนแล้วค่อยกระโดดข้ามขั้น
+ * ปุ่มใหม่ที่ใครเพิ่มทีหลังแล้วลอกลิงก์แบบเก่ามาใช้ = อาการเดิมกลับมาทันที
+ */
+{
+  const ROOT = process.cwd();
+  const offenders: string[] = [];
+  const scanned: string[] = [];
+  const walk = (dir: string) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (/\.(tsx?|astro)$/.test(entry.name)) {
+        scanned.push(full);
+        const src = fs.readFileSync(full, "utf-8");
+        // ลิงก์ (ไม่ใช่คอมเมนต์) ที่ชี้หน้าแรกพร้อม ?spread=
+        if (/(href=|["'`])\/(en)?\?spread=/.test(src.replace(/^\s*(\*|\/\/).*$/gm, ""))) {
+          offenders.push(path.relative(ROOT, full));
+        }
+      }
+    }
+  };
+  for (const dir of ["src", "astro"]) {
+    const abs = path.join(ROOT, dir);
+    if (!fs.existsSync(abs)) {
+      check(`หาโฟลเดอร์ ${dir}/ เจอ (สแกนลิงก์ \`?spread=\`)`, false, "โฟลเดอร์ถูกย้าย — ด่านนี้ตรวจอะไรไม่ได้");
+      continue;
+    }
+    walk(abs);
+  }
+  assertNonEmptyCorpus("ไฟล์ .ts/.tsx/.astro ที่สแกนหาลิงก์ `?spread=`", scanned);
   check(
-    "ล้าง `?spread=` ออกจาก URL หลังรับคำสั่งแล้ว (กันรีเฟรชแล้วเริ่มใหม่ทับรอบที่ค้าง)",
-    /searchParams\.delete\("spread"\)/.test(flowSrc) && /history\.replaceState/.test(flowSrc),
+    "ไม่มีลิงก์ `/?spread=` เหลือในโค้ด (ต้องชี้ `/read/<ผัง>`)",
+    offenders.length === 0,
+    offenders.length ? `พบใน ${offenders.join(", ")}` : undefined,
   );
+
+  // หน้า `/read/<ผัง>` มีเฉพาะผังสาธารณะ — ปลายทางที่ไม่มีหน้า = 404 ทันทีที่กด
+  const publicIds = new Set(PUBLIC_SPREADS.map((s) => s.id));
+  const targets = new Set<string>();
+  const collectTargets = (dir: string) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) collectTargets(full);
+      else if (/\.(tsx?)$/.test(entry.name)) {
+        const src = fs.readFileSync(full, "utf-8");
+        for (const m of src.matchAll(/["'`]\/read\/([a-z0-9-]+)["'`]/g)) targets.add(m[1]);
+        for (const m of src.matchAll(/targetSpreadId:\s*"([a-z0-9-]+)"/g)) targets.add(m[1]);
+      }
+    }
+  };
+  collectTargets(path.join(ROOT, "src"));
+  const missing = [...targets].filter((id) => !publicIds.has(id));
+  check(
+    `ปลายทาง \`/read/<ผัง>\` ทุกตัวในโค้ด (${targets.size} ผัง) มีหน้าจริง`,
+    targets.size > 0 && missing.length === 0,
+    missing.length ? `ไม่มีหน้า: ${missing.join(", ")}` : undefined,
+  );
+
+  // หน้า `/read/<ผัง>` ต้อง noindex และไม่มี canonical (เคาะกับเจ้าของแล้ว — ห้ามแย่งอันดับหน้าคู่มือผัง)
+  const allNoindex = [...publicIds].every((id) =>
+    (["th", "en"] as const).every((locale) => {
+      const meta = readSpreadMetadata(id, locale);
+      const robots = meta.robots as { index?: boolean; follow?: boolean } | undefined;
+      return robots?.index === false && robots?.follow === true && !meta.alternates?.canonical;
+    }),
+  );
+  check("หน้า `/read/<ผัง>` ทุกหน้าทั้งสองภาษาเป็น noindex, follow และไม่มี canonical", allNoindex);
+
+  for (const page of ["astro/pages/read/[id].astro", "astro/pages/en/read/[id].astro"]) {
+    const abs = path.join(ROOT, page);
+    const src = fs.existsSync(abs) ? fs.readFileSync(abs, "utf-8") : "";
+    check(`${page} ส่งผังเข้า TarotFlow`, /initialSpreadId=\{spreadId\}/.test(src), src ? undefined : "ไม่พบไฟล์");
+  }
+  for (const page of ["astro/pages/index.astro", "astro/pages/en/index.astro"]) {
+    const abs = path.join(ROOT, page);
+    const src = fs.existsSync(abs) ? fs.readFileSync(abs, "utf-8") : "";
+    check(`${page} เด้งลิงก์เก่า \`?spread=\` ไปหน้า \`/read/<ผัง>\``, /location\.replace\(readPrefix/.test(src));
+  }
 }
 
 console.log(`\n📊 สรุป: ผ่าน ${pass} ข้อ | ล้มเหลว ${fail} ข้อ\n`);

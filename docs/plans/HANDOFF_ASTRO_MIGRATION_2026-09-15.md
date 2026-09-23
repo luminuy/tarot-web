@@ -8,8 +8,9 @@
 > คลื่นที่ 4 `/reading/chat` · `/daily` · `/love/1-card` · **หน้าแรก** · `/account` (PR #520)
 > และ `/pick-a-card` ที่เกิดใหม่บน Astro ตั้งแต่ต้น ไม่เคยผ่าน Next เลย
 >
-> **วัดจากบิลด์จริงวันนี้ (`npm run build`): Astro 334 หน้า · Next 9 เส้นทาง**
-> (ตัวเก็บกลาง `scripts/qa/lib/rendered-pages.ts` เห็น 339 หน้า = Astro 334 + Next 5
+> **วัดจากบิลด์จริง 2026-09-23 (`npm run build:astro`): Astro 384 หน้า · Next 9 เส้นทาง**
+> (+50 หน้าจากหน้าดูดวงรายผัง `/read/<ผัง>` · `/en/read/<ผัง>` ผังละหน้า 25 × 2 ภาษา · noindex ทั้งหมด)
+> (ตัวเก็บกลาง `scripts/qa/lib/rendered-pages.ts` เห็น 389 หน้า = Astro 384 + Next 5
 > เพราะ 4 ใน 9 เส้นของ Next เป็น `force-dynamic` จึงไม่มีไฟล์ HTML ให้เก็บ)
 >
 > **ทั้ง 9 เส้นที่เหลือเป็นของที่ย้ายไม่ได้หรือไม่ควรย้าย**

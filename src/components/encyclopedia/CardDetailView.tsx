@@ -308,10 +308,10 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
             <Link
               href={
                 card.suit === "cups" || card.id === "major-06"
-                  ? "/?spread=how-they-feel"
+                  ? "/read/how-they-feel"
                   : card.suit === "wands" || card.suit === "pentacles"
-                    ? "/?spread=career"
-                    : "/?spread=three-card"
+                    ? "/read/career"
+                    : "/read/three-card"
               }
               className="btn-gold-glass px-7 py-3 text-xs sm:text-sm font-serif-th font-bold flex items-center gap-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
             >

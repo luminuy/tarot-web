@@ -39,6 +39,8 @@ export const ASTRO_ROUTE_PREFIXES = [
   "/daily",
   "/love",
   "/pick-a-card",
+  /* หน้าดูดวงรายผัง `/read/<ผัง>` — ⚠️ ไม่ชน `/reading` (เทียบด้วย `/read/` มีทับท้าย) และไม่ชน `/readers` ของ Next */
+  "/read",
 ] as const;
 
 /** ตัด `/en` นำหน้าออก เพื่อเทียบกับรายการฝั่งไทยชุดเดียว */
