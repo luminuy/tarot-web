@@ -105,7 +105,7 @@ export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
             {/* CTAs */}
             <div className="grid grid-cols-2 gap-2 pt-3 border-t border-line-soft z-10">
               <Link
-                href={`/?spread=${spread.id}`}
+                href={`/read/${spread.id}`}
                 className="btn-gold-glass !rounded-lg w-full py-2 px-3 text-xs font-serif-th font-bold text-center hover:bg-[#3D382E]"
               >
                 {isEnglish ? "Begin Reading" : "เริ่มเปิดไพ่"}

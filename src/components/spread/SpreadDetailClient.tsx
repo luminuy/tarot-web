@@ -165,7 +165,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
           {spreadDesc}
         </p>
         <Link
-          href={`/?spread=${spread.id}`}
+          href={`/read/${spread.id}`}
           className="btn-gold-glass inline-flex items-center gap-1.5 px-6 py-3 font-serif-th text-sm font-bold active:scale-[0.98]"
         >
           

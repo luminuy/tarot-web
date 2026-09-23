@@ -273,7 +273,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
 
               {/* Primary Action Button: Link directly to Altar */}
               <Link
-                href={`/?spread=${spread.id}`}
+                href={`/read/${spread.id}`}
                 prefetch={false}
                 className="btn-gold-glass w-full py-3 font-serif-th font-bold text-xs sm:text-sm text-center active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5 z-10"
               >

@@ -23,14 +23,7 @@ import type { RitualStep } from "@/components/home/ritual-step";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";
-import {
-  saveFlowState,
-  loadFlowState,
-  clearFlowState,
-  savePendingSpread,
-  takePendingSpread,
-  clearPendingSpread,
-} from "@/lib/utils/flow-persistence";
+import { saveFlowState, loadFlowState, clearFlowState } from "@/lib/utils/flow-persistence";
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
 import { prefetchTurnstile } from "@/lib/auth/turnstile";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -164,9 +157,40 @@ function createClientSeed(): string {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode }) {
+/**
+ * เปิดหน้านี้ด้วยการรีเฟรชหรือกดย้อนกลับมา (ไม่ใช่กดลิงก์เข้ามาใหม่) — ใช้ตัดสินหน้า `/read/<ผัง>`
+ * ว่าจะกู้คืนรอบที่ค้างหรือเริ่มรอบใหม่ (เหตุผลเต็มอยู่ใน `flow-entry.ts`)
+ *
+ * เบราว์เซอร์ที่ไม่รู้จัก Navigation Timing ถือว่า "เข้ามาใหม่" — เสียแค่รอบที่ค้าง ไม่ใช่ลากคนกลับรอบเก่า
+ */
+function isReturnVisit(): boolean {
+  try {
+    const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+    return nav?.type === "reload" || nav?.type === "back_forward";
+  } catch {
+    return false;
+  }
+}
+
+export default function TarotFlow({
+  seoContent,
+  initialSpreadId,
+}: {
+  seoContent?: React.ReactNode;
+  /** ผังของหน้าดูดวงรายผัง `/read/<ผัง>` — หน้าแรกไม่ส่ง */
+  initialSpreadId?: string;
+}) {
   const { locale, isEnglish } = useLocale();
-  const [currentStep, setCurrentStep] = useState<RitualStep>("SPREAD_SELECT");
+  /**
+   * ✦ หน้าดูดวงรายผัง `/read/<ผัง>` — เปิดมาอยู่ขั้นตั้งคำถามของผังนั้นทันที (ทางเลือก ข. 2026-09-23)
+   *
+   * ⚠️ ต้องตั้งเป็น **ค่าเริ่มต้นของ state** ไม่ใช่เลื่อนขั้นใน effect — HTML ที่บิลด์ไว้
+   *    จึงเป็นขั้นตั้งคำถามตั้งแต่เฟรมแรก ไม่มีหน้าแรกโผล่ขึ้นมาแวบหนึ่งก่อนกระโดด
+   *    (อาการ "เด้งกลับหน้าแรก" ของลิงก์ `/?spread=` เดิมเกิดจากตรงนี้พอดี)
+   * ⚠️ หน้านี้ไม่มีขั้นเลือกผัง — ทุกทางที่พาไป `SPREAD_SELECT` ต้องออกไปหน้าแรกแทน (ดู `navigateStep`)
+   */
+  const routeSpread = initialSpreadId ? getSpread(initialSpreadId) : undefined;
+  const [currentStep, setCurrentStep] = useState<RitualStep>(routeSpread ? "INTENTION_SELECT" : "SPREAD_SELECT");
 
   // ทิศทางการเปลี่ยนขั้น (+1 = เดินหน้า, -1 = ย้อนกลับ) → เลือกคีย์เฟรมผ่าน `data-dir`
   // ⚠️ ต้องเป็น state ไม่ใช่ ref — ref ที่ถูกอ่านระหว่างเรนเดอร์ทำให้ HTML ฝั่งเซิร์ฟเวอร์
@@ -187,7 +211,19 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
    * state ที่ตั้งจากการกดของผู้ใช้ไม่มีปัญหานี้ เพราะเปลี่ยนพร้อมกับ `key` ในเรนเดอร์เดียวกัน
    */
   const [hasNavigatedStep, setHasNavigatedStep] = useState(false);
+  /**
+   * กำลังออกจากหน้า `/read/<ผัง>` ไปเลือกผังที่หน้าแรก — ห้ามเขียนรอบนี้ลงแท็บอีก
+   * ตัวบันทึกมีทั้งตัวหน่วง 400 ms และตัว flush ตอน `pagehide` (T-45) ถ้าไม่กั้น
+   * รอบที่เพิ่งล้างจะถูกเขียนคืน แล้วหน้าแรกกู้คืนกลับมาเป็นขั้นตั้งคำถามของผังเดิม
+   */
+  const leavingRef = useRef(false);
   const navigateStep = (next: RitualStep) => {
+    if (next === "SPREAD_SELECT" && routeSpread) {
+      leavingRef.current = true;
+      clearFlowState();
+      window.location.assign(isEnglish ? "/en" : "/");
+      return;
+    }
     const curIdx = STEP_ORDER.indexOf(currentStep);
     const nxtIdx = STEP_ORDER.indexOf(next);
     setStepDirection(nxtIdx >= curIdx ? 1 : -1);
@@ -223,22 +259,6 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   const isPassHolder = isPassHolderOf(entitlement);
 
   /**
-   * ผังจากลิงก์ที่ติดกำแพงสิทธิ์อยู่ตอนนี้ — ใช้คู่กับ `savePendingSpread` (ตั้งใน `beginFromDeepLink`)
-   *
-   * `AccessDialog` / `BuyCreditsModal` เรียก `onClose()` ของตัวเอง **ก่อน** พาไปหน้าเข้าสู่ระบบเสมอ
-   * ถ้าล้างของที่จำไว้ตอนปิดอย่างเดียว ผังจะหายก่อนผู้ใช้ได้ล็อกอินพอดี
-   * จึงล้างตอนปิด แล้วเขียนคืนจากตัวนี้ทุกครั้งที่ผู้ใช้เลือกเดินต่อ (สมัคร/เข้าสู่ระบบ/เติมรอบ)
-   */
-  const blockedSpreadRef = useRef<string | null>(null);
-  const keepBlockedSpread = () => {
-    if (blockedSpreadRef.current) savePendingSpread(blockedSpreadRef.current);
-  };
-  const dropBlockedSpread = () => {
-    blockedSpreadRef.current = null;
-    clearPendingSpread();
-  };
-
-  /**
    * ทางเข้าเดียวของกำแพงสิทธิ์ — ทุกจุดที่ผู้ใช้ถูกกั้นต้องเรียกผ่านนี้
    * ห้ามเปิด AuthModal หรือ BuyCreditsModal ตรง ๆ พร้อมกับขึ้นแถบ error อีก
    * (ของเดิมทำสองอย่างพร้อมกัน ผู้ใช้เลยเจอข้อความซ้อนกันสองชั้น)
@@ -249,8 +269,6 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
    */
   const openAccessDialog = (reason: UpgradeReason) => {
     trackEvent("upgrade_dialog_open", { reason });
-    // กำแพงใหม่ทุกครั้งเริ่มจาก "ไม่มีผังค้าง" — กันผังจากลิงก์รอบก่อนถูกเขียนคืนตอนติดกำแพงเรื่องอื่น
-    blockedSpreadRef.current = null;
     if (isSignInOnlyReason(reason)) {
       // ไปหน้าเข้าสู่ระบบตรง ๆ (ไม่ส่ง fromWall เพื่อไม่ให้มีรายการสิทธิ์มาอธิบายซ้ำอีกชั้น)
       openAuth("signin", false);
@@ -301,7 +319,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   }, [isAuthOpen]);
 
   // Selection state
-  const [selectedSpread, setSelectedSpread] = useState<Spread>(PUBLIC_SPREADS[3]); // Default: 3-card
+  const [selectedSpread, setSelectedSpread] = useState<Spread>(routeSpread ?? PUBLIC_SPREADS[3]); // Default: 3-card
   const [selectedPersona, setSelectedPersona] = useState<Persona>(PERSONAS[0]); // Default: warm
   const [selectedCategory, setSelectedCategory] = useState<Category>("general");
   const [question, setQuestion] = useState("");
@@ -390,36 +408,30 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   }, [entitlement, selectedSpread, openAccessDialog, navigateStep]);
 
   /**
-   * ✦ ลิงก์ `/?spread=<id>` ต้อง "เริ่มพิธีให้เลย" ไม่ใช่แค่เลือกผังค้างไว้ที่ขั้น 1
+   * ✦ ด่านสิทธิ์ของหน้าดูดวงรายผัง `/read/<ผัง>`
    *
-   * ปุ่ม "เริ่มดูดวงด้วยผังนี้" ในคลังผัง · หน้าคู่มือรายผัง · หน้าหมวด · หน้าไพ่รายใบ
-   * ทุกปุ่มพามาที่ `/?spread=<id>` เหมือนกันหมด ของเดิมมาถึงแล้วแค่ตั้งค่าผังที่เลือกไว้
-   * ผู้ใช้จึงเห็นแค่ "เด้งกลับหน้าแรก" แล้วต้องกดปุ่มเริ่มซ้ำอีกครั้งด้วยตัวเอง
-   * ทั้งที่กดคำว่า "เริ่มดูดวง" มาแล้วหนึ่งที (คำร้องจากเจ้าของโปรเจกต์ 2026-09-22)
+   * หน้านี้เปิดมาอยู่ขั้นตั้งคำถามแล้วตั้งแต่ HTML (ไม่ต้องพาไปไหน) — ตัวนี้แค่ตรวจว่าผู้ใช้
+   * เปิดผังนี้ได้ไหม ถ้าไม่ได้ก็เปิดกำแพงให้เห็นทันที ไม่ใช่ปล่อยให้พิมพ์คำถามจนเสร็จแล้วค่อยเจอ
    *
    * ⚠️ **ต้องรอคำตอบเรื่องสิทธิ์ก่อนตัดสินเสมอ** — ผู้ชมที่ยังไม่ล็อกอินจะไม่ถูกถามสิทธิ์
    *    ตอนเปิดหน้า (ดู `use-entitlement.ts`) ค่าที่ hook ถืออยู่ตอนนี้จึงอาจยังเป็น `null`
    *    ถ้าตัดสินจากค่านั้นเลย คนที่จ่ายเงินแล้วจะโดนกำแพงผังใหญ่ใส่หน้าทั้งที่มีสิทธิ์เต็ม
    *
    * ⚠️ ด่านสิทธิ์ใช้ `decideSpreadAccess` ชุดเดียวกับปุ่มบนหน้าแรก ห้ามลัดชั้นใดชั้นหนึ่ง
+   *    และตอนกดเริ่มจริง `executeStartSession` ยังตรวจชั้นที่ 3 ซ้ำอีกรอบเสมอ
+   *
+   * ℹ️ ล็อกอินจากกำแพงนี้แล้วกลับมาที่หน้าเดิมได้เอง — Google/LINE ส่งกลับ URL ปัจจุบัน
+   *    และล็อกอินด้วยอีเมลก็ส่งกลับ `/read/<ผัง>` (ดู `AuthModal.tsx`) ไม่ต้องจำผังไว้ที่ไหนอีก
    */
-  const beginFromDeepLink = async (spread: Spread, isCancelled: () => boolean) => {
+  const checkRouteAccess = async (spread: Spread, isCancelled: () => boolean) => {
     const currentEntitlement = entitlement ?? (await ensureEntitlement());
     if (isCancelled()) return;
 
     const decision = decideSpreadAccess(currentEntitlement, spread.id);
-    if (!decision.allowed) {
-      // `?spread=` ถูกล้างจาก URL ไปแล้ว — จำผังไว้ให้ ล็อกอิน/เติมรอบเสร็จกลับมาจะได้เริ่มผังนี้ต่อ
-      // ไม่ใช่ตกลงหน้าแรกเปล่า ๆ แล้วต้องไปหาผังในคลังใหม่ (ปลดเมื่อผู้ใช้ปิดหน้าต่างเอง)
-      savePendingSpread(spread.id);
-      openAccessDialog(decision.reason);
-      blockedSpreadRef.current = spread.id;
-      return;
-    }
-    navigateStep("INTENTION_SELECT");
+    if (!decision.allowed) openAccessDialog(decision.reason);
   };
 
-  // ── P1-U4: กู้คืน flow ที่ค้างไว้ + P1-U5: รับผัง `?spread=` จากคลังผัง ──────
+  // ── P1-U4: กู้คืน flow ที่ค้างไว้ + หน้าดูดวงรายผัง `/read/<ผัง>` ──────
   // ก่อนหน้านี้ refresh / back / สลับแท็บ = เด้งกลับขั้น 1 ทั้งที่ server session ยังอยู่ ~60 นาที
   const resumeDoneRef = useRef(false);
   /** ถอดหน้าออกจากจอระหว่างรอคำตอบเรื่องสิทธิ์ = ห้ามพาไปขั้นถัดไปแล้ว */
@@ -429,15 +441,14 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     resumeDoneRef.current = true;
 
     /**
-     * ✦ ลำดับความสำคัญ: **ลิงก์ `?spread=` ชนะรอบที่ค้างไว้เสมอ**
+     * ✦ ลำดับความสำคัญ: **หน้า `/read/<ผัง>` ชนะรอบที่ค้างไว้เสมอ** (ลำดับเต็มอยู่ใน `flow-entry.ts`)
      *
      * ผู้ใช้กดปุ่มที่เขียนว่า "เริ่มดูดวงด้วยผังนี้" มาจากหน้าอื่น = สั่งเริ่มรอบใหม่ชัดเจน
      * ของเดิมให้ตัวกู้คืนรอบค้างมาก่อน ➔ คนที่เคยเปิดไพ่ในแท็บนี้ภายในชั่วโมงเดียวกัน
-     * กดผังใหม่แล้ว "เหมือนไม่มีอะไรเกิดขึ้น" เพราะถูกพากลับไปรอบเก่าผังเก่าเงียบ ๆ
-     * (อาการที่เจ้าของเจอ: กดผัง 10 ใบในแท็บผังใหญ่แล้วเด้งกลับหน้าแรกเหมือนเดิม)
+     * กดผังใหม่แล้ว "เหมือนไม่มีอะไรเกิดขึ้น" เพราะถูกพากลับไปรอบเก่าผังเก่าเงียบ ๆ (รอบ 132)
      *
-     * ⚠️ ต้องล้าง `?spread=` ออกจาก URL ทันทีหลังรับคำสั่ง ไม่งั้นการ "รีเฟรช" ระหว่าง
-     *    ดูดวงจะถูกตีความเป็นคำสั่งเริ่มใหม่ซ้ำ แล้วล้างรอบที่กำลังเปิดไพ่อยู่ทิ้ง
+     * ⚠️ ยกเว้น "รีเฟรช/กดย้อนกลับมา" หน้าเดิมที่ผังเดียวกัน = กู้คืน ไม่งั้นรีเฟรชกลางพิธี
+     *    จะล้างไพ่ที่เปิดอยู่ทิ้ง (URL `/read/<ผัง>` อยู่ถาวร ล้างทิ้งแบบ `?spread=` เดิมไม่ได้)
      */
     const rememberNickname = () => {
       try {
@@ -450,23 +461,19 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
     const saved = loadFlowState();
     const intent = resolveEntryIntent({
-      spreadParam: new URLSearchParams(window.location.search).get("spread"),
-      pendingSpread: takePendingSpread(),
+      routeSpread: routeSpread?.id ?? null,
       isKnownSpread: (id) => Boolean(getSpread(id)),
+      returning: isReturnVisit(),
       savedStep: saved?.currentStep ?? null,
+      savedSpread: saved?.spreadId ?? null,
     });
 
-    if (intent.kind === "deepLink") {
-      const deepLinkSpread = getSpread(intent.spreadId)!;
+    if (intent.kind === "deepLink" && routeSpread) {
+      // ผังและขั้นตั้งคำถามถูกตั้งไว้ตั้งแต่ค่าเริ่มต้นของ state แล้ว เหลือแค่ทิ้งรอบเก่ากับตรวจสิทธิ์
       // รอบเก่าถูกบันทึกลงประวัติตั้งแต่ตอนอ่านจบแล้ว — ของที่ทิ้งคือ "ค้างกลางทาง" ไม่ใช่ผลคำอ่าน
       clearFlowState();
-      const cleanUrl = new URL(window.location.href);
-      cleanUrl.searchParams.delete("spread");
-      window.history.replaceState({}, "", cleanUrl.toString());
-
-      setSelectedSpread(deepLinkSpread);
       rememberNickname();
-      void beginFromDeepLink(deepLinkSpread, () => deepLinkCancelledRef.current);
+      void checkRouteAccess(routeSpread, () => deepLinkCancelledRef.current);
     } else if (intent.kind === "resume" && saved) {
       // กู้คืนเฉพาะเมื่อผู้ใช้ "เริ่มดูดวงไปแล้วจริง ๆ" (พ้นขั้นเลือกผัง)
       const spread = getSpread(saved.spreadId);
@@ -494,6 +501,10 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       });
       dispatchRead({ type: "restore", reading: saved.readingResult });
       setCurrentStep(saved.currentStep);
+      // รีเฟรชหน้า `/read/<ผัง>` ตอนยังพิมพ์คำถามอยู่ = ยังไม่เคยผ่านด่านสิทธิ์ของรอบนี้ ตรวจให้เหมือนเปิดใหม่
+      if (routeSpread && saved.currentStep === "INTENTION_SELECT") {
+        void checkRouteAccess(routeSpread, () => deepLinkCancelledRef.current);
+      }
       // ตรวจสอบความสมบูรณ์ของไพ่ที่กู้คืน — ถ้าไพ่สูญหายหรือข้อมูลไม่สมบูรณ์ ห้ามกุ The Fool
       const isCorrupted =
         saved.drawnCards && saved.drawnCards.some((d) => !d || d.cardIndex === undefined || !d.card?.nameTh);
@@ -674,7 +685,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       }
     }
 
-    // ถอดหน้าออกจากจอระหว่างรอคำตอบเรื่องสิทธิ์ของลิงก์ `?spread=` = ห้ามพาไปขั้นถัดไปแล้ว
+    // ถอดหน้าออกจากจอระหว่างรอคำตอบเรื่องสิทธิ์ของหน้า `/read/<ผัง>` = ห้ามเปิดกำแพงค้างไว้แล้ว
     return () => {
       deepLinkCancelledRef.current = true;
     };
@@ -716,12 +727,14 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       lang: isEnglish ? "en" : "th",
     };
     const snapshot = latestFlowRef.current;
-    const t = setTimeout(() => saveFlowState(snapshot), 400);
+    const t = setTimeout(() => {
+      if (!leavingRef.current) saveFlowState(snapshot);
+    }, 400);
     // ⚠️ cleanup ต้อง flush ด้วย ไม่ใช่ `clearTimeout` เฉย ๆ — การยกเลิกตัวจับเวลาอย่างเดียว
     // คือการทิ้งการเขียนครั้งสุดท้ายทุกครั้งที่คอมโพเนนต์ถูกถอด
     return () => {
       clearTimeout(t);
-      if (latestFlowRef.current) saveFlowState(latestFlowRef.current);
+      if (latestFlowRef.current && !leavingRef.current) saveFlowState(latestFlowRef.current);
     };
   }, [
     currentStep,
@@ -752,7 +765,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
    */
   useEffect(() => {
     const flush = () => {
-      if (latestFlowRef.current) saveFlowState(latestFlowRef.current);
+      if (latestFlowRef.current && !leavingRef.current) saveFlowState(latestFlowRef.current);
     };
     const onVisibility = () => {
       if (document.visibilityState === "hidden") flush();
@@ -1549,6 +1562,14 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           </div>
         )}
 
+        {/* หน้า `/read/<ผัง>` ไม่มีขั้นเลือกผัง (ที่มี <h1> ของหน้าแรก) — หัวเรื่องของหน้าจึงต้องมาจากตรงนี้
+            ไม่งั้นทั้งหน้าไม่มี <h1> ให้โปรแกรมอ่านหน้าจอกระโดดไปเลย (ขั้นต่าง ๆ ใช้ <h2>) */}
+        {routeSpread && (
+          <h1 className="sr-only">
+            {isEnglish ? `Tarot reading — ${routeSpread.nameEn}` : `ดูดวงด้วยผัง${routeSpread.nameTh}`}
+          </h1>
+        )}
+
         {/* ── Directional Step Transitions (P1-M1) ─────────────────────────
             เดิมใช้ประตูสลับขั้นแบบ "รอตัวเก่าออกให้จบก่อน" ของไลบรารี `motion`
             ตอนนี้เป็นคีย์เฟรม CSS (`.anim-step-in` ใน globals.css) ซึ่งได้ทั้งเล็กลงและลื่นขึ้น:
@@ -2065,7 +2086,6 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         isOpen={isAuthOpen}
         onClose={() => {
           dispatchOverlay({ type: "close", kind: "auth" });
-          dropBlockedSpread(); // ปิดเองโดยไม่ล็อกอิน = ไม่เอาผังนั้นแล้ว ห้ามเด้งเข้าผังทีหลัง
           refreshEntitlement(); // ปิดหน้าต่างแล้วสิทธิ์อาจเปลี่ยน (เพิ่งสมัคร/เข้าสู่ระบบ)
         }}
         initialMode={authMode}
@@ -2076,15 +2096,9 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       {buyCreditsModalMounted && (
       <BuyCreditsModal
         isOpen={isBuyCreditsOpen}
-        onClose={() => {
-          dispatchOverlay({ type: "close", kind: "buyCredits" });
-          clearPendingSpread();
-        }}
+        onClose={() => dispatchOverlay({ type: "close", kind: "buyCredits" })}
         user={currentUser}
-        onRequireAuth={() => {
-          keepBlockedSpread();
-          openAuth("signup", true);
-        }}
+        onRequireAuth={() => openAuth("signup", true)}
       />
       )}
 
@@ -2092,22 +2106,10 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       {accessDialogMounted && (
       <AccessDialog
         reason={accessReason}
-        onClose={() => {
-          dispatchOverlay({ type: "close", kind: "upgrade" });
-          clearPendingSpread();
-        }}
-        onSignup={() => {
-          keepBlockedSpread();
-          openAuth("signup", true);
-        }}
-        onSignin={() => {
-          keepBlockedSpread();
-          openAuth("signin", true);
-        }}
-        onBuyCredits={() => {
-          keepBlockedSpread();
-          dispatchOverlay({ type: "openBuyCredits" });
-        }}
+        onClose={() => dispatchOverlay({ type: "close", kind: "upgrade" })}
+        onSignup={() => openAuth("signup", true)}
+        onSignin={() => openAuth("signin", true)}
+        onBuyCredits={() => dispatchOverlay({ type: "openBuyCredits" })}
       />
       )}
 

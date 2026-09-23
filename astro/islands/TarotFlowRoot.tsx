@@ -15,11 +15,22 @@ import type { Locale } from "@/lib/i18n/types";
  *
  * ⚠️ `seoContent` มาจาก slot ของ Astro (HTML ที่เรนเดอร์เสร็จแล้ว) เนื้อหา SEO ยาว ๆ
  *    ของหน้าแรกจึงไม่กินบันเดิลเลยสักไบต์ และบอตยังเห็นครบเหมือนเดิม
+ *
+ * ✦ `initialSpreadId` — มาจากหน้าดูดวงรายผัง `/read/<ผัง>` เท่านั้น (หน้าแรกไม่ส่ง)
+ *    ส่งเป็นสตริงเปล่า ๆ ห้ามส่งอ็อบเจกต์ผังทั้งก้อนข้าม island (กติกา island ข้อ 1)
  */
-export function TarotFlowRoot({ locale, seoContent }: { locale: Locale; seoContent?: ReactNode }) {
+export function TarotFlowRoot({
+  locale,
+  seoContent,
+  initialSpreadId,
+}: {
+  locale: Locale;
+  seoContent?: ReactNode;
+  initialSpreadId?: string;
+}) {
   return (
     <LocaleProvider forcedLocale={locale}>
-      <TarotFlow seoContent={seoContent} />
+      <TarotFlow seoContent={seoContent} initialSpreadId={initialSpreadId} />
     </LocaleProvider>
   );
 }

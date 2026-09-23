@@ -1,0 +1,26 @@
+---
+import { readSpreadMetadata, readSpreadStaticParams } from "@/app/_shared/pages/read-spread";
+
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { TarotFlowRoot } from "../../../islands/TarotFlowRoot";
+
+/**
+ * 🔮 หน้าดูดวงรายผัง 25 หน้า (ต้นไม้ภาษาอังกฤษ) — ปลายทางของปุ่ม "เริ่มดูดวงด้วยผังนี้" ทุกปุ่ม
+ *
+ * ⚠️ ห้ามใส่ `SiteHeaderRoot` / `SiteFooterRoot` — `TarotFlow` เรนเดอร์หัวเว็บ/ฟุตเตอร์ของตัวเอง
+ *    (เหตุผลเดียวกับหน้าแรก · INC-0130)
+ * ⚠️ ห้ามนำเข้าข้อมูลผังในไฟล์ island — ส่งแค่ `initialSpreadId` (สตริง) เข้าไป
+ *    ข้อมูลผังอยู่ในบันเดิลของ `TarotFlow` อยู่แล้ว
+ */
+const locale = "en" as const;
+
+export function getStaticPaths() {
+  return readSpreadStaticParams().map(({ id }) => ({ params: { id } }));
+}
+
+const spreadId = Astro.params.id!;
+---
+
+<BaseLayout locale={locale} metadata={readSpreadMetadata(spreadId, locale)}>
+  <TarotFlowRoot locale={locale} initialSpreadId={spreadId} client:load />
+</BaseLayout>

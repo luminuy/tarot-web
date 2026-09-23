@@ -789,7 +789,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                 </button>
 
                 <Link
-                  href={`/?spread=${script?.targetSpreadId ?? "three-card"}`}
+                  href={`/read/${script?.targetSpreadId ?? "three-card"}`}
                   className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-xl bg-surface-dark text-canvas border border-line text-xs sm:text-sm font-serif-th font-semibold hover:border-gold transition-colors flex items-center justify-center gap-2"
                 >
                   <span>

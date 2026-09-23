@@ -44,6 +44,21 @@ const FieldIcon: React.FC<{ variant: "person" | "mail" | "key"; className?: stri
   </svg>
 );
 
+/**
+ * ล็อกอิน/สมัครด้วยอีเมลเสร็จแล้วพาไปไหน
+ *
+ * ปกติไปหน้าแรก (ที่แสดงข้อความต้อนรับ) · ยกเว้นหน้าดูดวงรายผัง `/read/<ผัง>` ต้องกลับหน้าเดิม
+ * — คนที่ติดกำแพงเข้าสู่ระบบตอนกด "เริ่มดูดวงด้วยผังนี้" ล็อกอินเสร็จแล้วต้องได้ดูผังนั้นต่อทันที
+ * ไม่ใช่ตกหน้าแรกแล้วต้องย้อนไปหาผังในคลังใหม่ (หน้านั้นมี `TarotFlow` ที่อ่าน `auth_success` ได้เหมือนหน้าแรก)
+ * Google/LINE ทำแบบนี้อยู่แล้วเพราะส่ง URL ปัจจุบันไปเป็น `returnUrl`
+ */
+function afterEmailAuthUrl(isEn: boolean, query: string): string {
+  if (typeof window !== "undefined" && /^(\/en)?\/read\/[a-z0-9-]+\/?$/.test(window.location.pathname)) {
+    return `${window.location.pathname}?${query}`;
+  }
+  return isEn ? `/en?${query}` : `/?${query}`;
+}
+
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
@@ -259,7 +274,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         );
         soundManager.playCardSelectSound();
         invalidateSessionCache();
-        window.location.href = isEn ? "/en?auth_success=1" : "/?auth_success=1";
+        window.location.href = afterEmailAuthUrl(isEn, "auth_success=1");
       } else if (mode === "signup") {
         const data = await postJson(
           "/api/auth/email/signup",
@@ -269,7 +284,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         soundManager.playCardSelectSound();
         if (data.user) {
           invalidateSessionCache();
-          window.location.href = isEn ? "/en?auth_success=1&new_user=1" : "/?auth_success=1&new_user=1";
+          window.location.href = afterEmailAuthUrl(isEn, "auth_success=1&new_user=1");
         } else {
           setSuccessMsg(data.message || (isEn ? "A verification link has been sent to your email." : "ระบบได้ส่งข้อมูลการยืนยันไปยังอีเมลของคุณเรียบร้อยแล้ว"));
         }
