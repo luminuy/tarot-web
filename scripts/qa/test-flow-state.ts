@@ -473,12 +473,38 @@ check(
   intent("ผังมั่ว", "READING").kind === "resume" && intent("ผังมั่ว", null).kind === "fresh",
 );
 
+/**
+ * ผังที่กดมาแล้วติดกำแพงเข้าสู่ระบบ (`pendingSpread`) — อาการที่เจ้าของเจอ 2026-09-23:
+ * กด "เริ่มดูดวงด้วยผังนี้" ➔ ขึ้นหน้าต่างเข้าสู่ระบบ ➔ ล็อกอินเสร็จกลับมาหน้าแรกเปล่า ๆ ผังหาย
+ */
+const withPending = (spreadParam: string | null, pendingSpread: string | null, savedStep: RitualStep | null) =>
+  resolveEntryIntent({ spreadParam, pendingSpread, isKnownSpread: known, savedStep });
+{
+  const got = withPending(null, "celtic-cross", null);
+  check("ล็อกอินกลับมาหลังติดกำแพง ➔ เริ่มผังที่กดไว้ต่อ", got.kind === "deepLink" && got.spreadId === "celtic-cross");
+  const overResume = withPending(null, "celtic-cross", "READING");
+  check(
+    "ผังที่ค้างจากกำแพงชนะรอบเก่าในแท็บ (เหตุผลเดียวกับลิงก์)",
+    overResume.kind === "deepLink" && overResume.spreadId === "celtic-cross",
+  );
+  const linkWins = withPending("daily", "celtic-cross", null);
+  check("กดลิงก์ผังใหม่ ➔ ชนะผังที่ค้างจากกำแพงรอบก่อน", linkWins.kind === "deepLink" && linkWins.spreadId === "daily");
+  check(
+    "ผังค้างที่ไม่มีอยู่จริง ➔ ไม่ใช่คำสั่ง",
+    withPending(null, "ผังมั่ว", "READING").kind === "resume" && withPending(null, "ผังมั่ว", null).kind === "fresh",
+  );
+}
+
 // URL ต้องถูกล้าง `?spread=` ทิ้งหลังรับคำสั่ง ไม่งั้นรีเฟรชระหว่างดูดวง = เริ่มใหม่ทับของเดิม
 if (!fs.existsSync(FLOW)) {
   check("หาไฟล์ TarotFlow.tsx เจอ (ตรวจการล้าง ?spread= ออกจาก URL)", false, "ไฟล์ถูกย้าย/เปลี่ยนชื่อ");
 } else {
   const flowSrc = fs.readFileSync(FLOW, "utf-8");
   check("TarotFlow ตัดสินทางเข้าด้วย `resolveEntryIntent`", flowSrc.includes("resolveEntryIntent("));
+  check(
+    "ลิงก์ที่ติดกำแพงสิทธิ์ถูกจำไว้ แล้วหน้าแรกหยิบมาเริ่มต่อหลังล็อกอิน",
+    /savePendingSpread\(spread\.id\)/.test(flowSrc) && /pendingSpread:\s*takePendingSpread\(\)/.test(flowSrc),
+  );
   check(
     "ล้าง `?spread=` ออกจาก URL หลังรับคำสั่งแล้ว (กันรีเฟรชแล้วเริ่มใหม่ทับรอบที่ค้าง)",
     /searchParams\.delete\("spread"\)/.test(flowSrc) && /history\.replaceState/.test(flowSrc),
