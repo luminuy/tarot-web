@@ -5,6 +5,7 @@
  * หน้าแรกถูกเปิดได้สามแบบ และสามแบบนี้ **แย่งกันเอง** ถ้าไม่ตัดสินลำดับให้ชัด:
  *
  *   1. `deepLink` — มาจากปุ่ม "เริ่มดูดวงด้วยผังนี้" ที่หน้าอื่น (`/?spread=<id>`)
+ *                   หรือเพิ่งล็อกอินกลับมาหลังติดกำแพงตอนกดปุ่มนั้น (ผังที่ค้างใน `pendingSpread`)
  *   2. `resume`   — มีรอบดูดวงค้างอยู่ในแท็บนี้ (ยังไม่เกิน 60 นาที)
  *   3. `fresh`    — เปิดเปล่า ๆ เริ่มที่ขั้นเลือกผัง
  *
@@ -29,16 +30,22 @@ export type EntryIntent =
 export interface EntryContext {
   /** ค่า `?spread=` ดิบจาก URL (ยังไม่รู้ว่ามีผังนี้จริงไหม) */
   spreadParam: string | null;
+  /** ผังที่กดเริ่มมาแล้วแต่ติดกำแพงเข้าสู่ระบบ — `null` = ไม่มี */
+  pendingSpread?: string | null;
   /** ผังนี้มีอยู่จริงในสารบบไหม — ส่งเข้ามาเพื่อไม่ให้ไฟล์นี้ต้องแตะข้อมูลผัง 85 KB */
   isKnownSpread: (id: string) => boolean;
   /** ขั้นของรอบที่ค้างอยู่ในแท็บนี้ — `null` = ไม่มีอะไรค้าง */
   savedStep: RitualStep | null;
 }
 
-export function resolveEntryIntent({ spreadParam, isKnownSpread, savedStep }: EntryContext): EntryIntent {
+export function resolveEntryIntent({ spreadParam, pendingSpread, isKnownSpread, savedStep }: EntryContext): EntryIntent {
   // ผังที่ไม่มีอยู่จริง (ลิงก์เก่า/พิมพ์มั่ว) = ไม่ใช่คำสั่ง — ปล่อยให้ของค้างหรือหน้าเปล่าทำงานต่อ
   if (spreadParam && isKnownSpread(spreadParam)) {
     return { kind: "deepLink", spreadId: spreadParam };
+  }
+  // ล็อกอินกลับมาหลังติดกำแพง = คำสั่งเดิมที่ยังไม่ได้ทำ ชนะรอบค้างด้วยเหตุผลเดียวกับลิงก์
+  if (pendingSpread && isKnownSpread(pendingSpread)) {
+    return { kind: "deepLink", spreadId: pendingSpread };
   }
   // ค้างอยู่ที่ขั้นเลือกผัง = ยังไม่ได้เริ่มอะไรเลย ไม่มีอะไรให้กู้คืน
   if (savedStep && savedStep !== "SPREAD_SELECT") {

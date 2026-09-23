@@ -38,6 +38,8 @@ export const STORAGE_PREFIX = "tarot_" as const;
 export const STORAGE_KEYS = {
   /** สถานะขั้นตอนเปิดไพ่ที่ค้างอยู่ (sessionStorage) */
   flowState: "tarot_flow_state_v1",
+  /** ผังที่ผู้ใช้กด "เริ่มดูดวงด้วยผังนี้" แต่ติดกำแพงเข้าสู่ระบบ — พากลับมาเริ่มผังเดิมหลังล็อกอิน (sessionStorage) */
+  pendingSpread: "tarot_pending_spread",
   /** สมุดบันทึกการเปิดไพ่ในเครื่อง */
   journal: "tarot_reading_journal_v1",
   /** ธงว่าเคยแจ้งผู้ใช้แล้วว่าสมุดบันทึกถูกตัดให้สั้นลง */
