@@ -337,6 +337,14 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
       );
       CREATE INDEX IF NOT EXISTS idx_auth_rate_reset ON auth_rate_buckets(reset_at);
 
+      -- 🚦 เพดานถี่เส้นทางเปิดไพ่/แชทแบบ atomic ข้าม isolate (migrations/0018)
+      CREATE TABLE IF NOT EXISTS edge_rate_buckets (
+        key       TEXT PRIMARY KEY,
+        count     INTEGER NOT NULL,
+        reset_at  INTEGER NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_edge_rate_reset ON edge_rate_buckets(reset_at);
+
       -- 📊 ตัวนับสถิติแบบ atomic (migrations/0017 · A2-16)
       CREATE TABLE IF NOT EXISTS stat_counters (
         day     TEXT NOT NULL,

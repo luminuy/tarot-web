@@ -9,6 +9,8 @@
  *  2. ลิงก์ในอีเมลถูกประกอบจาก `X-Forwarded-Host` ที่ผู้โจมตีส่งมาได้
  *     (password reset link poisoning)
  *  3. ข้อความ error จาก `?auth_error=` ถูกเอาไปแสดงดิบ ๆ บนหน้าเว็บ
+ *  4. เพดานถี่ของเส้นเปิดไพ่/แชท (`edge-ratelimit.ts`) นับแบบ อ่าน ➔ +1 ➔ เขียน บน KV
+ *     ยิงพร้อมกันทะลุเพดานได้ + กินโควตาเขียน KV — ย้ายไป D1 แบบ atomic แล้ว (ข้อ 7)
  */
 
 import { signUserSession, verifyUserSession, type UserProfile } from "../../src/lib/auth/edge-auth";
@@ -20,6 +22,7 @@ import {
   releaseAuthAttempt,
   reserveAuthAttempt,
 } from "../../src/lib/security/auth-ratelimit";
+import { consumeEdgeRateLimits, edgeRateLimitKey } from "../../src/lib/security/edge-ratelimit";
 
 function baseProfile(overrides: Partial<UserProfile> = {}): UserProfile {
   return {
@@ -203,6 +206,40 @@ async function run() {
     throw new Error(`❌ A1-02: ยิงล็อกอินแอดมินพร้อมกัน 50 คำขอ ผ่านได้ ${passed} คำขอ (เพดาน 8) — ตัวนับไม่ atomic`);
   }
   console.log("  ✓ 6. Rate limit ล็อกอิน: นับเฉพาะครั้งที่ผิด · กันเดารหัสผ่าน · ไม่เปิดช่องล็อกเจ้าของบัญชีออก · ยิงพร้อมกันทะลุไม่ได้ (A1-02)");
+
+  // ── 7. เพดานถี่เส้นเปิดไพ่/แชท (edge-ratelimit) ต้อง atomic ข้าม isolate ──────
+  const edgeId = `edge-${Date.now()}-${Math.random()}`;
+  const edgeKey = edgeRateLimitKey("qa:burst", edgeId);
+  const edgeBurst = await Promise.all(
+    Array.from({ length: 40 }, () => consumeEdgeRateLimits([{ key: edgeKey, config: { max: 10, windowSec: 60 } }])),
+  );
+  const edgePassed = edgeBurst.filter((r) => r.allowed).length;
+  if (edgePassed !== 10) {
+    throw new Error(`❌ edge-ratelimit: ยิงพร้อมกัน 40 คำขอ ผ่านได้ ${edgePassed} คำขอ (ต้องได้ 10 พอดี) — ตัวนับไม่ atomic`);
+  }
+  const denied = edgeBurst.find((r) => !r.allowed);
+  if (!denied || denied.retryAfterSec < 1 || denied.retryAfterSec > 60) {
+    throw new Error(`❌ edge-ratelimit: retryAfterSec ของคำขอที่ถูกปฏิเสธผิด (${String(denied?.retryAfterSec)})`);
+  }
+
+  // 7.2 ชั้นหลังเต็ม ➔ ชั้นแรกต้องถูกคืนสิทธิ์ (ไม่งั้นคนที่ติดเพดานรายวันจะเผาเพดานรายนาทีทิ้งฟรี)
+  const layerA = edgeRateLimitKey("qa:layerA", edgeId);
+  const layerB = edgeRateLimitKey("qa:layerB", edgeId);
+  const layers = [
+    { key: layerA, config: { max: 3, windowSec: 60 } },
+    { key: layerB, config: { max: 1, windowSec: 60 } },
+  ];
+  if (!(await consumeEdgeRateLimits(layers)).allowed) throw new Error("❌ edge-ratelimit: คำขอแรกถูกปฏิเสธ");
+  for (let i = 0; i < 5; i++) {
+    if ((await consumeEdgeRateLimits(layers)).allowed) throw new Error("❌ edge-ratelimit: ชั้นที่สองเต็มแล้วยังผ่าน");
+  }
+  const onlyA = await consumeEdgeRateLimits([layers[0]]);
+  if (!onlyA.allowed || onlyA.remaining !== 1) {
+    throw new Error(
+      `❌ edge-ratelimit: คำขอที่ถูกปฏิเสธเพราะชั้นหลังเต็มไปกินโควตาชั้นแรก (เหลือ ${onlyA.remaining} ต้องเหลือ 1)`,
+    );
+  }
+  console.log("  ✓ 7. เพดานถี่เส้นเปิดไพ่/แชท: ยิงพร้อมกันทะลุไม่ได้ · ชั้นที่ถูกปฏิเสธคืนสิทธิ์ครบ");
 
   console.log("✅ [QA] ด่านกันบั๊กเซสชันและการเข้าสู่ระบบผ่านครบทุกข้อ\n");
 }
