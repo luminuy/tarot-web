@@ -83,6 +83,16 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 | **🛡️ กฎป้องกันถาวร** | **test-code-debt ข้อ 12 (14 เช็ก: ป้ายสถานะ · key={src} · ไทม์เมอร์ · retryRead ทั้ง 3 หน้า · pathname ทุก SiteHeaderRoot · โดเมน CSP · define ครบทุก NEXT_PUBLIC_* ที่โค้ดอ้าง · สแกนอิโมจิการ์ตูนนอกหลังบ้าน · label · tabpanel · สีเลขหลังไพ่ · live region · aria-expanded · ห้าม behavior "smooth" ตายตัว) · test-motion-quality กฎ 13b ห้าม `dynamic()` เปล่ากับคอมโพเนนต์ที่ใช้ motion · test-sw-reload เพิ่ม 7 สถานการณ์ SKIP_WAITING** |
 | **การพิสูจน์ว่าแก้ได้จริง** | ย้อน src/astro ของคลื่นนี้แล้ว test-code-debt ตก 14 ข้อ · ย้อน AccountClient แล้วกฎ 13b ชี้บรรทัด 18 · ถอด armSkipWaiting แล้ว test-sw-reload ตก 2 ข้อ · test-static-headers ผ่าน (CSP สองที่ตรงกัน) |
 | **บันทึกโดย** | ไม่ระบุ · branch `claude/brave-mayer-5p2kld` |
+### INC-0227b · 2026-09-23 16:07 · 🟠 High · กดเริ่มดูดวงจากหน้าผังแล้วติดหน้าเข้าสู่ระบบ ล็อกอินเสร็จผังหาย ตกหน้าแรกเปล่า
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ผู้เยี่ยมชมกด เริ่มดูดวงด้วยผังนี้ ที่ /spreads แล้วเด้งหน้าต่างเข้าสู่ระบบทับหน้าแรก ล็อกอินเสร็จกลับมา / เปล่า ต้องย้อนไปเลือกผังใหม่ |
+| **สาเหตุราก** | หน้าแรกล้าง ?spread= ออกจาก URL ก่อนตรวจสิทธิ์ OAuth จึงส่งกลับ URL ที่ถูกล้างแล้ว และล็อกอินอีเมลส่งไป /?auth_success=1 ตายตัว ผังที่เลือกไม่มีที่เก็บข้ามการล็อกอิน · รอบ 131-132 ทดสอบเฉพาะคนที่ล็อกอินอยู่ |
+| **การแก้ไข** | savePendingSpread ตอนติดกำแพง · takePendingSpread ตอนเปิดหน้า · resolveEntryIntent รับ pendingSpread · blockedSpreadRef เขียนคืนเมื่อ AccessDialog/BuyCredits ปิดตัวเองก่อนพาไปล็อกอิน |
+| **🛡️ กฎป้องกันถาวร** | **test-flow-state หัวข้อ 14 เพิ่มเคสผังค้างจากกำแพง 5 ข้อ · ทางเข้าหน้าแรกทุกทางต้องทดสอบทั้งสถานะผู้เยี่ยมชมและสมาชิก** |
+| **บันทึกโดย** | claude-spread-deeplink · branch `claude/horoscope-page-navigation-aosx7p` · commit `153ab06` |
+
 
 ### INC-0226 · 2026-09-23 11:55 · 🟡 Medium · ผลตรวจใหญ่ 2026-09-23 คลื่น 7 — 🟡 ฝั่งเซิร์ฟเวอร์ 15 ข้อ (PDPA ส่งออก/ลบไม่ครบ · checkout รั่ว error · แผงแอดมินรายงานผิด · streak ฟรี · วันผิดตอนดึก · ฉีดคำสั่งผ่านสมุดบันทึก · สรุปรายเดือนเชื่อไคลเอนต์ · อัปโหลดภาพไม่จำกัด · ยกเลิก digest โดยสแกนเนอร์ · เรียก AI ซ้ำ · สถิติหาย · อีเมลไม่มี timeout · /read ช้า)
 

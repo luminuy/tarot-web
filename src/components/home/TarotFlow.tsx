@@ -23,7 +23,14 @@ import type { RitualStep } from "@/components/home/ritual-step";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";
-import { saveFlowState, loadFlowState, clearFlowState } from "@/lib/utils/flow-persistence";
+import {
+  saveFlowState,
+  loadFlowState,
+  clearFlowState,
+  savePendingSpread,
+  takePendingSpread,
+  clearPendingSpread,
+} from "@/lib/utils/flow-persistence";
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
 import { prefetchTurnstile } from "@/lib/auth/turnstile";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -216,6 +223,22 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   const isPassHolder = isPassHolderOf(entitlement);
 
   /**
+   * ผังจากลิงก์ที่ติดกำแพงสิทธิ์อยู่ตอนนี้ — ใช้คู่กับ `savePendingSpread` (ตั้งใน `beginFromDeepLink`)
+   *
+   * `AccessDialog` / `BuyCreditsModal` เรียก `onClose()` ของตัวเอง **ก่อน** พาไปหน้าเข้าสู่ระบบเสมอ
+   * ถ้าล้างของที่จำไว้ตอนปิดอย่างเดียว ผังจะหายก่อนผู้ใช้ได้ล็อกอินพอดี
+   * จึงล้างตอนปิด แล้วเขียนคืนจากตัวนี้ทุกครั้งที่ผู้ใช้เลือกเดินต่อ (สมัคร/เข้าสู่ระบบ/เติมรอบ)
+   */
+  const blockedSpreadRef = useRef<string | null>(null);
+  const keepBlockedSpread = () => {
+    if (blockedSpreadRef.current) savePendingSpread(blockedSpreadRef.current);
+  };
+  const dropBlockedSpread = () => {
+    blockedSpreadRef.current = null;
+    clearPendingSpread();
+  };
+
+  /**
    * ทางเข้าเดียวของกำแพงสิทธิ์ — ทุกจุดที่ผู้ใช้ถูกกั้นต้องเรียกผ่านนี้
    * ห้ามเปิด AuthModal หรือ BuyCreditsModal ตรง ๆ พร้อมกับขึ้นแถบ error อีก
    * (ของเดิมทำสองอย่างพร้อมกัน ผู้ใช้เลยเจอข้อความซ้อนกันสองชั้น)
@@ -226,6 +249,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
    */
   const openAccessDialog = (reason: UpgradeReason) => {
     trackEvent("upgrade_dialog_open", { reason });
+    // กำแพงใหม่ทุกครั้งเริ่มจาก "ไม่มีผังค้าง" — กันผังจากลิงก์รอบก่อนถูกเขียนคืนตอนติดกำแพงเรื่องอื่น
+    blockedSpreadRef.current = null;
     if (isSignInOnlyReason(reason)) {
       // ไปหน้าเข้าสู่ระบบตรง ๆ (ไม่ส่ง fromWall เพื่อไม่ให้มีรายการสิทธิ์มาอธิบายซ้ำอีกชั้น)
       openAuth("signin", false);
@@ -384,7 +409,11 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
     const decision = decideSpreadAccess(currentEntitlement, spread.id);
     if (!decision.allowed) {
+      // `?spread=` ถูกล้างจาก URL ไปแล้ว — จำผังไว้ให้ ล็อกอิน/เติมรอบเสร็จกลับมาจะได้เริ่มผังนี้ต่อ
+      // ไม่ใช่ตกลงหน้าแรกเปล่า ๆ แล้วต้องไปหาผังในคลังใหม่ (ปลดเมื่อผู้ใช้ปิดหน้าต่างเอง)
+      savePendingSpread(spread.id);
       openAccessDialog(decision.reason);
+      blockedSpreadRef.current = spread.id;
       return;
     }
     navigateStep("INTENTION_SELECT");
@@ -422,6 +451,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     const saved = loadFlowState();
     const intent = resolveEntryIntent({
       spreadParam: new URLSearchParams(window.location.search).get("spread"),
+      pendingSpread: takePendingSpread(),
       isKnownSpread: (id) => Boolean(getSpread(id)),
       savedStep: saved?.currentStep ?? null,
     });
@@ -2035,6 +2065,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         isOpen={isAuthOpen}
         onClose={() => {
           dispatchOverlay({ type: "close", kind: "auth" });
+          dropBlockedSpread(); // ปิดเองโดยไม่ล็อกอิน = ไม่เอาผังนั้นแล้ว ห้ามเด้งเข้าผังทีหลัง
           refreshEntitlement(); // ปิดหน้าต่างแล้วสิทธิ์อาจเปลี่ยน (เพิ่งสมัคร/เข้าสู่ระบบ)
         }}
         initialMode={authMode}
@@ -2045,9 +2076,15 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       {buyCreditsModalMounted && (
       <BuyCreditsModal
         isOpen={isBuyCreditsOpen}
-        onClose={() => dispatchOverlay({ type: "close", kind: "buyCredits" })}
+        onClose={() => {
+          dispatchOverlay({ type: "close", kind: "buyCredits" });
+          clearPendingSpread();
+        }}
         user={currentUser}
-        onRequireAuth={() => openAuth("signup", true)}
+        onRequireAuth={() => {
+          keepBlockedSpread();
+          openAuth("signup", true);
+        }}
       />
       )}
 
@@ -2055,10 +2092,22 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       {accessDialogMounted && (
       <AccessDialog
         reason={accessReason}
-        onClose={() => dispatchOverlay({ type: "close", kind: "upgrade" })}
-        onSignup={() => openAuth("signup", true)}
-        onSignin={() => openAuth("signin", true)}
-        onBuyCredits={() => dispatchOverlay({ type: "openBuyCredits" })}
+        onClose={() => {
+          dispatchOverlay({ type: "close", kind: "upgrade" });
+          clearPendingSpread();
+        }}
+        onSignup={() => {
+          keepBlockedSpread();
+          openAuth("signup", true);
+        }}
+        onSignin={() => {
+          keepBlockedSpread();
+          openAuth("signin", true);
+        }}
+        onBuyCredits={() => {
+          keepBlockedSpread();
+          dispatchOverlay({ type: "openBuyCredits" });
+        }}
       />
       )}
 
