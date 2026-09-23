@@ -28,6 +28,7 @@
  */
 
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { streamGroqReading } from "../../src/lib/ai/groq";
 import { streamGeminiReading } from "../../src/lib/ai/gemini";
@@ -246,6 +247,17 @@ async function runCase(gold: GoldenCase, judgeKey: string | null): Promise<CaseR
     base.error = providerNotes.join(" · ") || "ไม่มีผู้ให้บริการใดคืนคำอ่านที่สมบูรณ์";
     return base;
   }
+
+  /*
+   * ⚠️ `streamGeminiReading` ถอยไปคำอ่านสำรองออฟไลน์ (`mock-gemini`) เมื่อ Gemini ทุกโมเดลล้ม
+   * เพื่อไม่ให้ผู้ใช้จริงรอเปล่า — แต่ในการวัดผล นั่นคือ "ไม่ได้วัด prompt เลย"
+   * รอบ 2026-09-23 โควตา Gemini หมด (429) ได้ mock 23/30 เคส แต่รายงานขึ้น "สำเร็จ 30/30"
+   */
+  if (base.model?.startsWith("mock")) {
+    base.fallback = true;
+    base.error = `ได้คำอ่านสำรองออฟไลน์ (${base.model}) — โมเดลจริงไม่ตอบ (มักเป็นโควตาหมด) ไม่นับเป็นผลวัด`;
+    return base;
+  }
   base.ok = true;
 
   const consistency = checkReadingConsistency(reading, ctx.cards, {
@@ -447,7 +459,7 @@ async function main() {
     let result = await runCase(gold, judgeKey);
 
     let retries = 0;
-    while (!result.ok && retries < 3) {
+    while (!result.ok && !result.fallback && retries < 3) {
       retries++;
       process.stdout.write(`⚠️ ลองใหม่รอบที่ ${retries} (รอ 35s) ... `);
       await new Promise((r) => setTimeout(r, 35000));
@@ -485,6 +497,27 @@ async function main() {
     summary: summarize(results),
   };
   fs.writeFileSync(outPath, JSON.stringify(report, null, 2), "utf-8");
+
+  /*
+   * 🚫 รายงานที่ไม่มีคะแนนผู้ตัดสินเลยสักเคส (ทั้งที่มีคีย์) หรือไม่มีเคสสำเร็จเลย = ใช้เทียบอะไรไม่ได้
+   * ย้ายออกจาก `scripts/qa/reports/` — workflow `ai-judge.yml` จะเห็นว่าไม่มีไฟล์ใหม่แล้วไม่เปิด PR
+   * (รอบ 2026-09-23 เปิด PR #590 พร้อมรายงาน judged 0/30 ซึ่งถ้า merge จะกลายเป็น "ผลวัด" ปลอมของ prompt)
+   */
+  const unusable = report.summary.succeeded === 0 || (judgeKey !== null && report.summary.judged === 0);
+  if (unusable) {
+    const invalidPath = path.join(os.tmpdir(), path.basename(outPath));
+    fs.renameSync(outPath, invalidPath);
+    const fallbacks = results.filter((r) => r.fallback).length;
+    console.log("\n" + "═".repeat(70));
+    console.log(
+      `❌ รายงานนี้ใช้เป็นผลวัดไม่ได้ — สำเร็จ ${report.summary.succeeded}/${report.summary.total} · ` +
+        `ผู้ตัดสินให้คะแนน ${report.summary.judged} เคส · ได้คำอ่านสำรองออฟไลน์ ${fallbacks} เคส`,
+    );
+    console.log("   ➔ มักเกิดจากโควตา Gemini/Groq ของวันนั้นหมด (ดู 429 ใน log) — รอโควตารีเซ็ตแล้วรันใหม่");
+    console.log(`   ➔ ย้ายรายงานไปไว้ที่ ${invalidPath} (ไม่เก็บเข้ารีโป)`);
+    process.exitCode = 1;
+    return;
+  }
 
   console.log("\n" + "═".repeat(70));
   console.log(`📊 สรุปผล (${report.summary.succeeded}/${report.summary.total} เคสสำเร็จ)`);

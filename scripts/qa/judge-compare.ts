@@ -39,6 +39,11 @@ export interface CaseResult {
   elapsedMs: number;
   ok: boolean;
   error?: string;
+  /**
+   * คำอ่านมาจากตัวสำรองออฟไลน์ (`mock-*`) เพราะโมเดลจริงทุกเจ้าล้ม (มักเป็นโควตาหมด)
+   * ไม่ใช่ผลงานของ prompt ➔ ไม่นับเป็นเคสสำเร็จ และไม่ลองซ้ำ (ลองซ้ำ = เผาโควตาที่หมดแล้วต่อ)
+   */
+  fallback?: boolean;
   consistencyIssues: string[];
   thaiScore: number;
   thaiIssues: string[];
