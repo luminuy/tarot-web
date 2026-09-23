@@ -71,13 +71,4 @@ export async function getStats(rangeDays = 30): Promise<StatsSnapshot> {
   return { allTime, range, rangeDays, daily, generatedAt: Date.now() };
 }
 
-/** แยก metric ที่มี prefix (เช่น "spread:") ออกมาเป็น { ค่าหลัง prefix: count } เรียงมากไปน้อย */
-export function breakdown(
-  source: Record<string, number>,
-  prefix: string,
-): Array<{ key: string; count: number }> {
-  return Object.entries(source)
-    .filter(([k]) => k.startsWith(prefix))
-    .map(([k, count]) => ({ key: k.slice(prefix.length), count }))
-    .sort((a, b) => b.count - a.count);
-}
+export { breakdown } from "@/lib/stats/breakdown";

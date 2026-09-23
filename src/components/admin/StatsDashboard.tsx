@@ -95,7 +95,7 @@ function BarList({
 
 import DailyStatsTable from "@/components/admin/DailyStatsTable";
 /* 🧹 R-31: สำเนาของ breakdown() ที่เคยประกาศในไฟล์นี้ถูกลบแล้ว — ใช้ตัวกลางตัวเดียว */
-import { breakdown } from "@/lib/stats/read";
+import { breakdown } from "@/lib/stats/breakdown";
 import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
 import { useAdminResource } from "@/lib/admin/use-admin-resource";
 

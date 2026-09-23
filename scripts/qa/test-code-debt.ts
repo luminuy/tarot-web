@@ -559,5 +559,50 @@ check(
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 11. INC-0226 (บิลด์ล้ม): ไฟล์ "use client" ต้องไม่ลากโมดูลที่ใช้ node:sqlite เข้าบันเดิล
+//     ไล่ import แบบ transitive — ตรวจได้ในไม่กี่วินาที ไม่ต้องรอ next build 10 นาที
+// ─────────────────────────────────────────────────────────────────────────────
+{
+  const SERVER_ONLY = new Set([path.join(ROOT, "src/lib/platform/db.ts")]);
+  const resolveAlias = (spec: string): string | null => {
+    if (!spec.startsWith("@/")) return null;
+    const base = path.join(ROOT, "src", spec.slice(2));
+    for (const ext of ["", ".ts", ".tsx", "/index.ts", "/index.tsx"]) {
+      const f = base + ext;
+      if (fs.existsSync(f) && fs.statSync(f).isFile()) return f;
+    }
+    return null;
+  };
+  const importsOf = (file: string): string[] => {
+    const code = stripComments(fs.readFileSync(file, "utf-8"));
+    const out: string[] = [];
+    // ข้าม import type (ถูกลบตอนคอมไพล์) · นับทั้ง static import และ export ... from
+    for (const m of code.matchAll(/^\s*(?:import|export)\s+(?!type\b)[^;]*?from\s+["']([^"']+)["']/gm)) {
+      const r = resolveAlias(m[1]);
+      if (r) out.push(r);
+    }
+    return out;
+  };
+  const leaks: string[] = [];
+  const clientFiles = sources.filter((f) => /^\s*["']use client["']/.test(fs.readFileSync(f, "utf-8")));
+  for (const entry of clientFiles) {
+    const seen = new Set<string>();
+    const stack: Array<{ f: string; trail: string[] }> = [{ f: entry, trail: [] }];
+    while (stack.length) {
+      const { f, trail } = stack.pop()!;
+      if (seen.has(f)) continue;
+      seen.add(f);
+      if (SERVER_ONLY.has(f)) {
+        leaks.push([entry, ...trail].map((x) => path.relative(ROOT, x)).join(" → "));
+        break;
+      }
+      for (const next of importsOf(f)) stack.push({ f: next, trail: [...trail, next] });
+    }
+  }
+  check(`ไม่มีไฟล์ "use client" ลาก platform/db (node:sqlite) เข้าบันเดิล (ตรวจ ${clientFiles.length} ไฟล์)`, leaks.length === 0);
+  for (const l of leaks.slice(0, 5)) console.log(`     ↳ ${l}`);
+}
+
 console.log(`\n📊 ผ่าน ${pass} ข้อ | ล้มเหลว ${fail} ข้อ\n`);
 if (fail > 0) process.exit(1);
