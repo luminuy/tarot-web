@@ -12,14 +12,14 @@
 ## เอเจนท์และขอบเขต
 | # | เอเจนท์ | ไฟล์ผล | สถานะ |
 |---|---|---|---|
-| A1 | Backend · auth/สิทธิ์/แอดมิน | `A1-backend-auth.md` | ⏳ |
-| A2 | Backend · คำทำนาย/AI/API อื่น | `A2-backend-reading.md` | ⏳ |
-| A3 | Frontend · ระบบเปิดไพ่ | `A3-frontend-reading.md` | ⏳ |
-| A4 | Frontend · Astro islands/เชลล์ | `A4-frontend-shell.md` | ⏳ |
-| A5 | UX/UI + a11y + ภาษาไทย | `A5-ux-ui.md` | ⏳ |
-| A6 | SEO | `A6-seo.md` | ⏳ |
-| A7 | Dead code | `A7-deadcode.md` | ⏳ |
-| A8 | Performance | `A8-perf.md` | ⏳ |
+| A1 | Backend · auth/สิทธิ์/แอดมิน | `A1-backend-auth.md` | ✔ ตรวจเสร็จ |
+| A2 | Backend · คำทำนาย/AI/API อื่น | `A2-backend-reading.md` | ✔ ตรวจเสร็จ |
+| A3 | Frontend · ระบบเปิดไพ่ | `A3-frontend-reading.md` | ✔ ตรวจเสร็จ |
+| A4 | Frontend · Astro islands/เชลล์ | `A4-frontend-shell.md` | ✔ ตรวจเสร็จ |
+| A5 | UX/UI + a11y + ภาษาไทย | `A5-ux-ui.md` | ✔ ตรวจเสร็จ |
+| A6 | SEO | `A6-seo.md` | ✔ ตรวจเสร็จ |
+| A7 | Dead code | `A7-deadcode.md` | ✔ ตรวจเสร็จ |
+| A8 | Performance | `A8-perf.md` | ✔ ตรวจเสร็จ |
 
 ## ผู้คุมงาน: รายการแก้ (อัปเดตหลังตรวจสอบซ้ำ)
 | ID | ที่มา | เรื่อง | สถานะ |
