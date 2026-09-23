@@ -19,6 +19,15 @@ on:
         description: "เคสจาก golden-readings.json (ค่าเริ่มต้น gold-021 = เซลติกครอส 10 ใบ)"
         required: false
         default: "gold-021"
+      only:
+        description: "วัดเฉพาะโมเดลเหล่านี้ คั่นด้วย , (เว้นว่าง = ทุกตัวฟรี) — ประหยัดโควตาฟรีรายวัน"
+        required: false
+        default: ""
+      skip_quick:
+        description: "ข้ามขั้นถามสั้น ไปเขียนคำอ่านเต็มเลย (ใช้คู่กับ only)"
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: ai-probe-openrouter
@@ -60,13 +69,20 @@ jobs:
           # ⚠️ ห้ามยัด ${{ inputs.* }} ลงสคริปต์เชลล์ตรง ๆ — ส่งผ่าน env แล้วตรวจรูปแบบก่อน
           PROBE_READING: ${{ inputs.reading }}
           PROBE_CASE: ${{ inputs.case }}
+          PROBE_ONLY: ${{ inputs.only }}
+          PROBE_SKIP_QUICK: ${{ inputs.skip_quick }}
         run: |
           set -o pipefail
           READING="${PROBE_READING:-8}"
           case "$READING" in ''|*[!0-9]*) echo "::error::reading ต้องเป็นตัวเลขล้วน (ได้มา: $READING)"; exit 1;; esac
           CASE_ID="${PROBE_CASE:-gold-021}"
           case "$CASE_ID" in gold-[0-9][0-9][0-9]) ;; *) echo "::error::case ต้องเป็นรูปแบบ gold-001 (ได้มา: $CASE_ID)"; exit 1;; esac
-          npm run ai:probe-openrouter -- --reading "$READING" --case "$CASE_ID" 2>&1 | tee probe-output.txt
+          ONLY="${PROBE_ONLY:-}"
+          case "$ONLY" in *[!a-zA-Z0-9/.:,_-]*) echo "::error::only มีอักขระที่ไม่อนุญาต (ได้มา: $ONLY)"; exit 1;; esac
+          ARGS=(--reading "$READING" --case "$CASE_ID")
+          if [ -n "$ONLY" ]; then ARGS+=(--only "$ONLY"); fi
+          if [ "$PROBE_SKIP_QUICK" = "true" ]; then ARGS+=(--skip-quick); fi
+          npm run ai:probe-openrouter -- "${ARGS[@]}" 2>&1 | tee probe-output.txt
 
       - name: 📊 สรุปผลขึ้นหน้า workflow
         if: always()

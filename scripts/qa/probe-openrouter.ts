@@ -161,7 +161,7 @@ interface GoldenCase {
 
 /** บริบทเดียวกับ `run-golden-judge.ts` — ห้ามแต่งไพ่เอง ใช้ไพ่จาก fixture เท่านั้น */
 function goldenContext(caseId: string): ReadingContext {
-  const fixture = path.join(__dirname, "fixtures", "golden-readings.json");
+  const fixture = path.resolve(process.cwd(), "scripts/qa/fixtures/golden-readings.json");
   const all = JSON.parse(fs.readFileSync(fixture, "utf-8")) as GoldenCase[];
   const gold = all.find((g) => g.id === caseId);
   if (!gold) throw new Error(`ไม่พบเคส ${caseId} ใน golden-readings.json`);
@@ -205,35 +205,52 @@ async function probeReading(apiKey: string, model: string, ctx: ReadingContext):
     summaryPreview: "",
   };
   try {
+    // เหมือน production (openrouter.ts): ขอโหมด JSON ก่อน ถ้าโมเดลไม่รองรับ (400) ยิงใหม่แบบไม่ขอ
+    // ⏱️ เพดานเวลาครอบทั้งคำขอ **รวมการอ่านเนื้อหา** — รอบ 2026-09-23 ตั้งไว้แค่ถึงหัว response
+    //    แล้ว `res.json()` ของโมเดลที่เขียนช้ารอเกิน 25 นาทีจน workflow ต้องถูกยกเลิก
+    //    ผู้ใช้จริงไม่รอเกิน 90 วินาทีแน่นอน ช้ากว่านี้ = ใช้ไม่ได้อยู่แล้ว
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 120000);
-    const res = await fetch(OPENROUTER_CHAT_URL, {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://tarot-web.local",
-        "X-Title": "tarot-web reading probe",
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: buildSystemPrompt(ctx.personaId, { lang: "th" }) },
-          { role: "user", content: buildReadingMessage(ctx) },
-        ],
-        response_format: { type: "json_object" },
-        max_tokens: resolveMaxReadingTokens(ctx.drawn.length, 12000),
-        temperature: 0.6,
-      }),
-    });
-    clearTimeout(timeoutId);
+    const hardTimeout = setTimeout(() => controller.abort(), 90000);
+    const send = (jsonMode: boolean) =>
+      fetch(OPENROUTER_CHAT_URL, {
+        method: "POST",
+        signal: controller.signal,
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://tarot-web.local",
+          "X-Title": "tarot-web reading probe",
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: buildSystemPrompt(ctx.personaId, { lang: "th" }) },
+            { role: "user", content: buildReadingMessage(ctx) },
+          ],
+          ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
+          reasoning: { exclude: true },
+          max_tokens: resolveMaxReadingTokens(ctx.drawn.length, 12000),
+          temperature: 0.6,
+        }),
+      });
+    let res = await send(true);
+    if (res.status === 400) {
+      const errText = await res.text().catch(() => "");
+      if (/support/i.test(errText)) res = await send(false);
+      else {
+        base.elapsedMs = Date.now() - startedAt;
+        base.error = `HTTP 400: ${errText.slice(0, 200)}`;
+        return base;
+      }
+    }
     base.elapsedMs = Date.now() - startedAt;
     if (!res.ok) {
       base.error = `HTTP ${res.status}: ${(await res.text().catch(() => "")).slice(0, 200)}`;
       return base;
     }
     const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    clearTimeout(hardTimeout);
+    base.elapsedMs = Date.now() - startedAt;
     const text = data?.choices?.[0]?.message?.content ?? "";
     base.outputChars = text.length;
     if (!text) {
@@ -252,7 +269,10 @@ async function probeReading(apiKey: string, model: string, ctx: ReadingContext):
     base.thaiIssues = thai.issues.map((i) => i.code);
     base.summaryPreview = String((parsed.data as { summary?: string }).summary ?? "").slice(0, 120);
     base.ok = !base.foreignLeak;
-    if (base.foreignLeak) base.error = "มีอักษรต่างด้าวปนคำอ่าน";
+    if (base.foreignLeak) {
+      const m = text.match(/[^\u0000-\u024F\u0E00-\u0E7F\u2000-\u206F\u2190-\u27BF\s]{1,12}/);
+      base.error = `มีอักษรต่างด้าวปนคำอ่าน${m ? ` (เช่น "${m[0]}")` : ""}`;
+    }
     return base;
   } catch (err) {
     base.elapsedMs = Date.now() - startedAt;
@@ -275,22 +295,32 @@ async function main() {
 
   console.log("🔎 ดึงลิสต์โมเดลฟรีจาก OpenRouter...\n");
   const freeModels = await fetchFreeModels();
+  /*
+   * `--only a:free,b:free` = วัดเฉพาะรายชื่อนี้ (ต้องเป็นโมเดลฟรีที่ยังอยู่ในลิสต์สด)
+   * โควตาโมเดลฟรีนับรวมทั้งบัญชีต่อวัน — รอบซ้ำไม่ควรยิงทั้ง 20 กว่าตัวใหม่ทุกครั้ง
+   */
+  const onlyIdx = process.argv.indexOf("--only");
+  const only = onlyIdx >= 0 ? (process.argv[onlyIdx + 1] ?? "").split(",").map((x) => x.trim()).filter(Boolean) : [];
   const toTest = (limit ? freeModels.slice(0, limit) : freeModels).filter(
     // ตัดโมเดลที่ไม่ใช่ text chat ออก (เช่น lyria = สร้างเพลง)
-    (m) => !m.id.includes("lyria"),
+    (m) => !m.id.includes("lyria") && (only.length === 0 || only.includes(m.id)),
   );
 
   console.log(`พบโมเดลฟรีทั้งหมด ${freeModels.length} ตัว — จะทดสอบ ${toTest.length} ตัว\n`);
 
+  /* `--skip-quick` + `--only`: ข้ามขั้นถามสั้น ไปเขียนคำอ่านเต็มเลย (ประหยัดโควตาฟรี) */
+  const skipQuick = process.argv.includes("--skip-quick") && only.length > 0;
   const results: ProbeResult[] = [];
-  for (const m of toTest) {
+  for (const m of skipQuick ? [] : toTest) {
     process.stdout.write(`  กำลังยิง ${m.id} ... `);
     const r = await probeModel(apiKey, m.id);
     results.push(r);
     console.log(r.ok && !r.hasForeignLeak ? `✅ ${r.elapsedMs}ms` : `❌ ${r.error || "มีอักษรต่างด้าวปน"}`);
   }
 
-  const good = results
+  const good = skipQuick
+    ? toTest.map((m) => ({ model: m.id, ok: true, status: null, elapsedMs: 0, hasForeignLeak: false, answerPreview: "", error: null }))
+    : results
     .filter((r) => r.ok && !r.hasForeignLeak)
     .sort((a, b) => a.elapsedMs - b.elapsedMs);
   const bad = results.filter((r) => !r.ok || r.hasForeignLeak);

@@ -11,6 +11,7 @@ import {
   generateGroqChatReply,
   probeGroqHealth,
 } from "../../src/lib/ai/groq";
+import { OPENROUTER_FREE_MODELS, freeOnly, stripCodeFence } from "../../src/lib/ai/openrouter";
 import {
   FOREIGN_LEAK_SWITCH_THRESHOLD,
   SEVERE_FOREIGN_LEAK_THRESHOLD,
@@ -162,6 +163,36 @@ async function main() {
     groqSrc.includes("consumeReadingDelta(") &&
       groqSrc.includes("resolveForeignBreaker(") &&
       groqSrc.includes("state.foreignCircuitBreaker"),
+  );
+
+  // ── ชั้นสำรองที่ 3: OpenRouter — ฟรีเท่านั้น (คำสั่งเจ้าของ 2026-09-23) ──────────
+  check(
+    "OPENROUTER_FREE_MODELS มีแต่ชื่อที่ลงท้าย :free (ห้ามเรียกโมเดลเสียเงินเด็ดขาด)",
+    OPENROUTER_FREE_MODELS.every((m) => m.endsWith(":free")),
+  );
+  check(
+    "freeOnly() ตัดโมเดลเสียเงินทิ้งตอนรัน ต่อให้หลุดเข้ารายชื่อมา",
+    JSON.stringify(freeOnly(["a/paid-model", "b/free-model:free", "c/x:free-ish"])) === JSON.stringify(["b/free-model:free"]),
+  );
+  check(
+    "stripCodeFence แกะ ```json ... ``` ที่โมเดลฟรีชอบห่อมา",
+    stripCodeFence('```json\n{"a":1}\n```') === '{"a":1}' && stripCodeFence('{"a":1}') === '{"a":1}',
+  );
+  const openrouterSrc = fs.readFileSync(path.resolve(process.cwd(), "src/lib/ai/openrouter.ts"), "utf-8");
+  check(
+    "openrouter.ts คัดโมเดลผ่าน freeOnly() ก่อนยิงทุกครั้ง",
+    /freeOnly\(OPENROUTER_FREE_MODELS\)/.test(openrouterSrc),
+  );
+  const orIdx = geminiSource.indexOf("streamOpenRouterReading(ctx)");
+  const mockIdx = geminiSource.indexOf('streamMockGeminiReading(ctx, "all_models_down")');
+  check(
+    "gemini.ts ลอง OpenRouter ก่อนตกไปคำอ่านสำรองออฟไลน์ (Groq ➔ Gemini ➔ OpenRouter ➔ mock)",
+    orIdx > 0 && mockIdx > 0 && orIdx < mockIdx,
+  );
+  const deploySrc = fs.readFileSync(path.resolve(process.cwd(), ".github/workflows/deploy.yml"), "utf-8");
+  check(
+    "deploy.yml ส่ง OPENROUTER_API_KEY เข้า Worker (INC-0152: ลืม = Worker ไม่มีวันเห็นคีย์)",
+    deploySrc.includes("OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}"),
   );
 
   console.log(`\n📊 ผลสรุป: ผ่าน ${pass} / ล้มเหลว ${fail}`);
