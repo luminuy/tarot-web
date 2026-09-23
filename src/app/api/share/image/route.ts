@@ -1,3 +1,4 @@
+import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
 import { NextResponse } from "next/server";
 
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
@@ -24,6 +25,18 @@ export async function POST(request: Request) {
   }
 
   const clientId = getClientIdentifier(request);
+  /*
+   * 🚦 เพดานที่บังคับได้จริงข้าม isolate (A2-09 · บทเรียน T-11)
+   * `checkRateLimit` เก็บใน Map ต่อ isolate — สคริปต์ยิงขนานไปหลาย isolate อัปโหลด PNG 1.2 MB
+   * ได้ไม่จำกัด ค่า R2 พุ่ง และ /s/<id> กลายเป็นที่ฝากภาพสาธารณะบนโดเมนเรา
+   */
+  const edge = await consumeEdgeRateLimits([
+    { key: edgeRateLimitKey("share_img:ip", clientId), config: { max: 20, windowSec: 3600 } },
+    { key: edgeRateLimitKey("share_img:ip:day", clientId), config: { max: 60, windowSec: 86400 } },
+  ]);
+  if (!edge.allowed) {
+    return createRateLimitResponse(edge.retryAfterSec, "สร้างลิงก์แชร์บ่อยเกินไป รออีกสักครู่นะ");
+  }
   const rl = checkRateLimit(`share_img:${clientId}`, { maxRequests: 12, windowSeconds: 600 });
   if (!rl.allowed) {
     rl.releaseConcurrency();

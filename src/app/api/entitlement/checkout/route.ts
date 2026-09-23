@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { recordEvent } from "@/lib/stats/record";
 import { getSessionUser } from "@/lib/auth/session";
 import { getCreditPackageById } from "@/lib/entitlement/packages";
 import { createGatewayCharge } from "@/lib/marketplace/payment-gateway";
@@ -100,10 +101,13 @@ export async function POST(request: Request) {
       authorizeUri: charge.authorizeUri,
       isTestMode: charge.isTestMode,
     });
-  } catch (error: any) {
+  } catch (error) {
+    // ⚠️ ห้ามส่ง error.message ดิบกลับหน้าเว็บ (A1-08) — ข้อความจาก Omise/D1
+    //    เปิดเผยโครงสร้างตาราง (`D1_ERROR: no such column ...`) และผู้ใช้อ่านไม่รู้เรื่อง
     console.error("[Credit Checkout Error]:", error);
+    recordEvent("checkout_failed");
     return NextResponse.json(
-      { error: error?.message || "ไม่สามารถสร้างรายการสั่งซื้อได้" },
+      { error: "ไม่สามารถสร้างรายการสั่งซื้อได้ กรุณาลองใหม่อีกครั้ง" },
       { status: 500 }
     );
   }

@@ -1,3 +1,4 @@
+import { bangkokDayKey } from "@/lib/time/bangkok";
 /**
  * 🌙 Real-Time Cosmic & Moon Phase Grounding Engine
  * --------------------------------------------------
@@ -128,8 +129,13 @@ export function calculateMoonPhase(date: Date = new Date()): MoonPhaseInfo {
  * คำนวณดาวครองวันและธาตุประจำวันตามศาสตร์โบราณ
  */
 export function calculateDayRuler(date: Date = new Date()): DayRulerInfo {
-  // getDay(): 0 = อาทิตย์, 1 = จันทร์, ..., 6 = เสาร์
-  const dayIndex = date.getDay();
+  /*
+   * ⚠️ "วันไหน" ต้องเป็นวันตามเวลาไทยเสมอ (A2-05) — Workers รันเป็น UTC
+   * เดิมใช้ `date.getDay()` ช่วง 00:00–06:59 น. ไทยจึงได้วันของเมื่อวาน แม่หมอพูดชื่อวัน/ธาตุผิดทุกคืน
+   * ใช้วิธีเดียวกับ bangkokWeekKey: เอาวันที่ไทยมาวางเที่ยงวัน UTC แล้วอ่าน getUTCDay()
+   * 0 = อาทิตย์, 1 = จันทร์, ..., 6 = เสาร์
+   */
+  const dayIndex = new Date(`${bangkokDayKey(date)}T12:00:00Z`).getUTCDay();
 
   switch (dayIndex) {
     case 0:

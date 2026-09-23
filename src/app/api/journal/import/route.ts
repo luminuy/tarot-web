@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { JournalItemSchema } from "@/lib/journal/journal.schema";
 import { getSessionUser } from "@/lib/auth/session";
 import { bulkImportJournal } from "@/lib/journal/journal.repo";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
@@ -7,33 +8,11 @@ import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 
 export const runtime = "nodejs";
 
-const CardDetailSchema = z.object({
-  order: z.number(),
-  positionName: z.string(),
-  cardIndex: z.number(),
-  cardNameTh: z.string(),
-  cardNameEn: z.string().optional(),
-  isReversed: z.boolean(),
-  element: z.string().optional(),
-});
-
-const ImportItemSchema = z.object({
-  id: z.string(),
-  date: z.string(),
-  nickname: z.string().optional(),
-  question: z.string().min(1),
-  spreadId: z.string().min(1),
-  spreadName: z.string().min(1),
-  category: z.string().min(1),
-  personaId: z.string().min(1),
-  personaName: z.string().min(1),
-  cards: z.array(CardDetailSchema),
-  summary: z.string().default(""),
-  advice: z.array(z.string()).optional(),
-  timing: z.string().optional(),
-  outcome: z.enum(["PENDING", "ACCURATE", "PARTIAL", "NOT_HAPPENED"]).optional(),
-  userNote: z.string().optional(),
-  outcomeUpdatedAt: z.string().optional(),
+// สคีมากลาง (มีเพดานความยาว + กันฉีดคำสั่ง) — ข้อความนี้ไหลเข้า prompt ครั้งถัดไป (A2-07)
+const ImportItemSchema = JournalItemSchema.extend({
+  id: z.string().max(100),
+  date: z.string().max(40),
+  outcomeUpdatedAt: z.string().max(40).optional(),
 });
 
 const ImportPayloadSchema = z.object({

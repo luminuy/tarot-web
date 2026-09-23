@@ -111,6 +111,11 @@ export async function POST(request: Request) {
         `ไพ่นำทางวันนี้: ${daily.nameTh}`,
         dailyDigestHtml(payload),
         dailyDigestText(payload),
+        // one-click unsubscribe ตามกติกาผู้ส่งจำนวนมากของ Gmail/Yahoo (RFC 8058 · A2-11)
+        {
+          "List-Unsubscribe": `<${unsubUrl}>`,
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        },
       );
 
       if (res.success) {

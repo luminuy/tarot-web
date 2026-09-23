@@ -22,11 +22,16 @@ function htmlToText(html: string): string {
     .trim();
 }
 
+/** เพดานเวลาเรียก Resend — ทุกเส้นที่ต่อบริการภายนอกในบ้านนี้ต้องมี (บทเรียน INC-0053 · A2-18) */
+const SEND_TIMEOUT_MS = 8000;
+
 export async function sendEmail(
   to: string,
   subject: string,
   html: string,
-  text?: string
+  text?: string,
+  /** หัวอีเมลเพิ่มเติม เช่น `List-Unsubscribe` ของ digest (A2-11) */
+  extraHeaders?: Record<string, string>
 ): Promise<{ success: boolean; messageId?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM || DEFAULT_EMAIL_FROM;
@@ -39,8 +44,11 @@ export async function sendEmail(
   }
 
   try {
+    // ⚠️ ต้องมี timeout (A2-18) — Resend ค้างแล้ว cron digest ที่ส่งทีละคนค้างทั้งรอบ
+    //    คนที่ถูกจองสิทธิ์ส่งไว้แล้วค้างสถานะ "sending" ส่งซ้ำวันนั้นไม่ได้ · หน้าสมัครสมาชิกหมุนค้าง
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
+      signal: AbortSignal.timeout(SEND_TIMEOUT_MS),
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
@@ -52,6 +60,7 @@ export async function sendEmail(
         subject,
         html,
         text: plainText,
+        ...(extraHeaders ? { headers: extraHeaders } : {}),
       }),
     });
 

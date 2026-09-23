@@ -197,6 +197,26 @@ async function main() {
     unsubRoute.length > 0 && !unsubRoute.includes("getSessionUser"),
   );
 
+  // A2-11: GET ต้องไม่เปลี่ยนสถานะ (ตัวสแกนลิงก์เปิดทุกลิงก์) · POST รับ one-click · อีเมลมีหัว List-Unsubscribe
+  {
+    const { GET: unsubGet, POST: unsubPost } = await import("../../src/app/api/digest/unsubscribe/route");
+    const scanUser = await makeUser("scanner", { marketing: true, digest: true, verified: true });
+    const tok = await signDigestUnsubToken(scanUser);
+    const url = `https://seertarot.net/api/digest/unsubscribe?t=${encodeURIComponent(tok)}`;
+    await unsubGet(new Request(url));
+    const afterGet = (await listDigestRecipients(sendDate, 500)).some((r) => r.id === scanUser);
+    check("A2-11: เปิดลิงก์ยกเลิก (GET) ไม่ยกเลิกเอง — ตัวสแกนลิงก์ขององค์กรกดแทนผู้ใช้ไม่ได้", afterGet);
+    await unsubPost(new Request(url, { method: "POST", body: "List-Unsubscribe=One-Click" }));
+    const afterPost = (await listDigestRecipients(sendDate, 500)).some((r) => r.id === scanUser);
+    check("A2-11: POST (ปุ่มยืนยัน / one-click ของแอปอีเมล) ยกเลิกได้จริง", !afterPost);
+    await softDeleteUser(scanUser);
+  }
+  check(
+    "A2-11: อีเมล digest มีหัว List-Unsubscribe + List-Unsubscribe-Post",
+    cronRoute.includes('"List-Unsubscribe"') && cronRoute.includes("List-Unsubscribe=One-Click"),
+  );
+  check("A2-18: sendEmail มีเพดานเวลา (AbortSignal.timeout)", readSrc("src/lib/email/send.ts").includes("AbortSignal.timeout("));
+
   const workflow = readSrc(".github/workflows/daily-digest.yml");
   check("มีตัวจับเวลาจริง (workflow มี schedule)", workflow.includes("schedule:") && workflow.includes("cron:"));
   // ดูที่บรรทัด `uses:` จริง ไม่ใช่ชื่อที่ถูกเอ่ยในคอมเมนต์เตือน ไม่งั้นคอมเมนต์จะทำให้ด่านตก

@@ -336,6 +336,14 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
         reset_at  INTEGER NOT NULL
       );
       CREATE INDEX IF NOT EXISTS idx_auth_rate_reset ON auth_rate_buckets(reset_at);
+
+      -- 📊 ตัวนับสถิติแบบ atomic (migrations/0017 · A2-16)
+      CREATE TABLE IF NOT EXISTS stat_counters (
+        day     TEXT NOT NULL,
+        metric  TEXT NOT NULL,
+        n       INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (day, metric)
+      );
     `);
 
     // Safe Alter & Index for local SQLite migration

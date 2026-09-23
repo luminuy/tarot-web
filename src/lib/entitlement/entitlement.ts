@@ -367,13 +367,20 @@ export async function consumeReading(
   readingId: string,
   spreadId?: string
 ): Promise<ConsumeOutcome> {
-  const userKey = v.kind === "member" ? v.userId : `guest_${v.gid}`;
-
-  // บันทึก streak สำหรับผัง daily
-  if (spreadId === "daily") {
+  const outcome = await consumeReadingInner(v, readingId);
+  /*
+   * บันทึก streak ของผัง daily **หลัง** รู้ผลการหักสิทธิ์เท่านั้น (A1-13)
+   * เดิมบันทึกก่อนตรวจโควตา โดนปฏิเสธ (403) ก็ยังได้ streak +1 · AI ล่มแล้วคืนสิทธิ์ก็ได้ streak ฟรี
+   * (การคืนสิทธิ์ลบแถว streak ของรอบนั้นด้วย — ดู refundReading)
+   */
+  if (spreadId === "daily" && outcome.status !== "denied") {
+    const userKey = v.kind === "member" ? v.userId : `guest_${v.gid}`;
     await recordDailyReading(userKey, readingId).catch(() => {});
   }
+  return outcome;
+}
 
+async function consumeReadingInner(v: Viewer, readingId: string): Promise<ConsumeOutcome> {
   if (v.kind === "guest") {
     // การนับจริงของผู้เยี่ยมชมอยู่ที่คุกกี้ (PR C) — ที่นี่แค่ตรวจว่ายังมีสิทธิ์
     // ไม่มีแถวใน DB ให้คืน จึงไม่ใช่ "inserted" ที่ refund ได้
@@ -476,6 +483,8 @@ export async function refundReading(readingId: string, usageId: string): Promise
       .prepare(`DELETE FROM reading_usage WHERE reading_id = ? AND id = ?`)
       .bind(readingId, usageId)
       .run();
+    // คืนสิทธิ์ = รอบนี้ไม่นับ ➔ ไม่นับ streak ของรอบนี้ด้วย (A1-13)
+    await db.prepare(`DELETE FROM daily_readings WHERE reading_id = ?`).bind(readingId).run();
   } catch (e) {
     // คืนสิทธิ์ไม่สำเร็จ = ผู้ใช้เสียสิทธิ์ทั้งที่ระบบเราพัง — ห้ามเงียบ
     // ไม่ throw ต่อ เพราะจุดเรียกอยู่ใน error path ของ stream อยู่แล้ว

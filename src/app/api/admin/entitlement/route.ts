@@ -38,7 +38,9 @@ export async function GET() {
   const r = stats?.range ?? {};
   return NextResponse.json({
     enabled: truthy(enabledRaw),
-    announce: truthy(announceRaw),
+    // ⚠️ "ประกาศ" ค่าเริ่มต้นคือปิด — ห้ามใช้ truthy() ที่ถือว่าไม่มีค่า = เปิด (A1-09)
+    //    ต้องอ่านแบบเดียวกับตัวอ่านฝั่งผู้ใช้ (snapshot.ts) ไม่งั้นแผงแอดมินบอกว่าเปิดทั้งที่ผู้ใช้ไม่เห็น
+    announce: announceRaw?.value === true,
     announceResetDate: announceRaw?.resetDate ?? "",
     metrics: {
       blockedStart: r.entitlement_blocked_start ?? 0,

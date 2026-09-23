@@ -1,5 +1,6 @@
 import { getWaitUntil } from "@/lib/platform/cf";
 import { kvGetJSON, kvPutJSON } from "@/lib/platform/kv-store";
+import { getAppDB } from "@/lib/platform/db";
 
 /**
  * เก็บสถิติการใช้งานแบบ observational (ไม่ใช่ตัวเลขบัญชี)
@@ -9,6 +10,11 @@ import { kvGetJSON, kvPutJSON } from "@/lib/platform/kv-store";
  *   - `app:stat:day:<YYYY-MM-DD>`  → { metric: count }  (หมดอายุ 400 วัน)
  *   - `app:stat:all`               → { metric: count }  (สะสมตลอดกาล)
  * ยอมรับการสูญเสีย < FLUSH_DEBOUNCE_MS วินาทีต่อ isolate ถ้า worker ถูก recycle
+ *
+ * 🔁 A2-16 (ผลตรวจ 2026-09-23): ที่เก็บหลักย้ายไปตาราง D1 `stat_counters` (migrations/0017)
+ *    บวกด้วย `ON CONFLICT DO UPDATE SET n = n + ?` = atomic ข้าม isolate
+ *    (JSON ก้อนเดียวบน KV แบบ อ่าน ➔ บวก ➔ เขียน ทำให้ isolate ที่ flush พร้อมกันเขียนทับกัน)
+ *    D1 ใช้ไม่ได้เมื่อไหร่ถอยไปใช้ KV แบบเดิม — ตัวอ่าน (read.ts) รวมทั้งสองแหล่งเสมอ
  *
  * ⚠️ metric string ต้องเป็น enum/dimension ที่ไม่มี PII เท่านั้น
  *    (เช่น "reading_started", "spread:celtic-cross", "safety_flag:crisis")
@@ -22,6 +28,7 @@ type StatGlobal = {
   __tarot_stat_buf__?: Buffer;
   __tarot_stat_lastFlush__?: number;
   __tarot_stat_flushing__?: boolean;
+  __tarot_stat_scheduled__?: boolean;
 };
 
 function g(): StatGlobal {
@@ -56,12 +63,51 @@ export function recordEvents(metrics: Array<string | [string, number]>): void {
 async function scheduleFlush(): Promise<void> {
   const gg = g();
   const now = Date.now();
-  if (gg.__tarot_stat_flushing__) return;
-  if (gg.__tarot_stat_lastFlush__ && now - gg.__tarot_stat_lastFlush__ < FLUSH_DEBOUNCE_MS) return;
+  if (gg.__tarot_stat_flushing__ || gg.__tarot_stat_scheduled__) return;
+
+  const waitUntil = await getWaitUntil();
+  const sinceLast = gg.__tarot_stat_lastFlush__ ? now - gg.__tarot_stat_lastFlush__ : Infinity;
+  if (sinceLast < FLUSH_DEBOUNCE_MS) {
+    /*
+     * ⚠️ ห้าม return ทิ้งเฉย ๆ (A2-16) — เดิม event ในช่วง debounce ค้างใน buffer จนกว่าจะมี
+     * event ถัดไป "หลัง" 20 วินาทีใน isolate เดียวกัน ถ้า isolate ถูกเก็บก่อน ข้อมูลหายเงียบ
+     * ➔ นัด flush ครั้งเดียวเมื่อพ้นช่วง debounce
+     */
+    gg.__tarot_stat_scheduled__ = true;
+    waitUntil(
+      new Promise<void>((resolve) => setTimeout(resolve, FLUSH_DEBOUNCE_MS - sinceLast))
+        .then(() => {
+          gg.__tarot_stat_scheduled__ = false;
+          gg.__tarot_stat_lastFlush__ = Date.now();
+          return flush();
+        }),
+    );
+    return;
+  }
 
   gg.__tarot_stat_lastFlush__ = now;
-  const waitUntil = await getWaitUntil();
   waitUntil(flush());
+}
+
+/** บวกเข้าตาราง D1 แบบ atomic — คืน false ถ้า D1 ใช้ไม่ได้ (ให้ถอยไป KV) */
+async function flushToD1(day: string, drained: Map<string, number>): Promise<boolean> {
+  try {
+    const db = await getAppDB();
+    const sql = `INSERT INTO stat_counters (day, metric, n) VALUES (?, ?, ?)
+                 ON CONFLICT(day, metric) DO UPDATE SET n = n + excluded.n`;
+    const statements = [...drained].flatMap(([metric, count]) => [
+      db.prepare(sql).bind(day, metric, count),
+      db.prepare(sql).bind("all", metric, count),
+    ]);
+    if (db.batch) {
+      await db.batch(statements);
+    } else {
+      for (const st of statements) await st.run();
+    }
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** เขียน buffer ปัจจุบันลง KV (merge-add) */
@@ -75,6 +121,9 @@ export async function flush(): Promise<void> {
   buf.clear();
 
   try {
+    if (await flushToD1(utcDay(), drained)) return;
+
+    // D1 ใช้ไม่ได้ (ตารางยังไม่ migrate / ล่ม) ➔ วิธีเดิมบน KV
     const dayKey = `app:stat:day:${utcDay()}`;
     const allKey = "app:stat:all";
 

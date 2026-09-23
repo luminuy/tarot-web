@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { JournalItemSchema, JournalOutcomeSchema } from "@/lib/journal/journal.schema";
 import { getSessionUser } from "@/lib/auth/session";
 import { updateJournalOutcome, deleteJournalItem } from "@/lib/journal/journal.repo";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
@@ -7,8 +8,8 @@ import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 export const runtime = "nodejs";
 
 const UpdateOutcomeSchema = z.object({
-  outcome: z.enum(["PENDING", "ACCURATE", "PARTIAL", "NOT_HAPPENED"]),
-  userNote: z.string().optional(),
+  outcome: JournalOutcomeSchema,
+  userNote: JournalItemSchema.shape.userNote,
 });
 
 async function getAuthenticatedUserId(): Promise<string | null> {

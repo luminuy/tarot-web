@@ -28,6 +28,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const { id } = await params;
   let record = getReading(id);
+  // หน่วยความจำของ isolate นี้อาจค้างรุ่นเก่า (มีไพ่ แต่ยังไม่มีคำอ่านที่อีก isolate เขียนไว้แล้ว — A2-14)
+  const cameFromMemory = Boolean(record?.drawn);
 
   // Durable KV failover recovery: if memory was lost on edge worker isolate
   if (!record || !record.drawn) {
@@ -103,8 +105,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     // 🚦 T-11: เพดานจริงที่บังคับได้ข้าม isolate — ของเดิมอยู่ใน `Map` ต่อ isolate
-    const edge = await consumeEdgeRateLimits([
-      { key: edgeRateLimitKey("read:ip", clientIp), config: { max: 15, windowSec: 600 } },
+    // ⚡ A8-07: โควตาต่อ IP เป็นการอ่านล้วน — ยิงพร้อมกับเพดานถี่ ไม่ต้องรอกันเป็นทอด (ลำดับการปฏิเสธคงเดิม)
+    const { checkPerIpReadQuota } = await import("@/lib/security/ai-budget");
+    const [edge, quota] = await Promise.all([
+      consumeEdgeRateLimits([
+        { key: edgeRateLimitKey("read:ip", clientIp), config: { max: 15, windowSec: 600 } },
+      ]),
+      checkPerIpReadQuota(clientIp),
     ]);
     if (!edge.allowed) {
       limit.releaseConcurrency();
@@ -116,8 +123,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       );
     }
 
-    const { checkPerIpReadQuota } = await import("@/lib/security/ai-budget");
-    const quota = await checkPerIpReadQuota(clientIp);
     if (!quota.allowed) {
       // ⚠️ ต้องคืน slot ก่อน return ทุกครั้ง — `maxConcurrent: 1` ถูกจองไปแล้วตั้งแต่ checkRateLimit
       // ถ้าไม่คืน `concurrent` จะค้างที่ 1 ตลอดอายุ isolate · พอโควตารีเซ็ตวันรุ่งขึ้น
@@ -130,6 +135,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           ? "You have reached your daily reading quota. Please rest and return tomorrow."
           : "คุณเปิดไพ่ครบโควตาสูงสุดของวันนี้แล้ว พักผ่อนแล้วกลับมาใหม่พรุ่งนี้นะ"
       );
+    }
+  }
+
+  /*
+   * A2-14: หน่วยความจำมีไพ่แต่ไม่มีคำอ่าน ≠ "ยังไม่เคยอ่าน" — อีก isolate อาจอ่านจบและ persist ไว้แล้ว
+   * (/shuffle ตก isolate A · /read ครั้งแรกตก B · กดโหลดใหม่กลับมาตก A) ถ้าไม่ดู KV
+   * จะเรียก AI ใหม่ฟรีอีกรอบ และผู้ใช้เห็นคำทำนายเปลี่ยนไปจากเดิม (ทับของเก่าด้วย)
+   */
+  if (cameFromMemory && !record.result) {
+    const { loadReadingFromKV, saveReading } = await import("@/server/store");
+    const persisted = await loadReadingFromKV(id).catch(() => null);
+    if (persisted?.result && persisted.drawn) {
+      record = persisted;
+      saveReading(persisted);
     }
   }
 
@@ -148,6 +167,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   let guestNeedsConsume = false; // ผู้เยี่ยมชมผ่าน gate → ต้องออก ticket หลังอ่านสำเร็จจริง
   let guestGid: string | null = null; // gid ของผู้เยี่ยมชม — ใช้ mark ฝั่ง server ตอนอ่านจบ
   let memberUserId: string | null = null;
+  const { isAiCapReached } = await import("@/lib/security/ai-budget");
+  const aiCapResponse = () => {
+    recordEvent("ai_cap_hit");
+    return Response.json(
+      {
+        error: isEn
+          ? "The reading service is experiencing high demand today. Please return tomorrow or try again later."
+          : "ระบบดูดวงมีผู้ใช้จำนวนมากในวันนี้ กรุณากลับมาใหม่พรุ่งนี้ หรือลองอีกครั้งในภายหลัง",
+      },
+      { status: 503 },
+    );
+  };
+  let capChecked = false;
   if (!privileged) {
     const { isEntitlementEnabled } = await import("@/lib/entitlement/flag");
     const { getViewer } = await import("@/lib/entitlement/viewer");
@@ -166,6 +198,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       capTier = viewer.kind;
       if (viewer.kind === "member") {
         memberUserId = viewer.userId;
+      }
+      // ⚡ A8-07: ตรวจเพดานค่า AI "ก่อน" หักสิทธิ์ — เดิมหักก่อนแล้วค่อยพบว่าเพดานเต็ม
+      //    ต้องเขียน consume แล้ว refund ทิ้งอีก 2 write ต่อคำขอในวันที่ระบบแน่นที่สุด
+      capChecked = true;
+      if (await isAiCapReached(capTier)) {
+        limit.releaseConcurrency();
+        return aiCapResponse();
       }
       const outcome = await consumeReading(viewer, id, record.spreadId);
       if (outcome.status === "inserted") consumedUsageId = outcome.usageId;
@@ -230,19 +269,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   };
 
   // World-Class AI Spend Cap & Financial Circuit Breaker (เพดานสองชั้น: guest 70% / member 100%)
-  const { isAiCapReached, recordAiCall, recordPerIpReadQuota } = await import("@/lib/security/ai-budget");
-  if (!privileged && (await isAiCapReached(capTier))) {
+  const { recordAiCall, recordPerIpReadQuota } = await import("@/lib/security/ai-budget");
+  if (!privileged && !capChecked && (await isAiCapReached(capTier))) {
     limit.releaseConcurrency();
     await refundIfConsumed();
-    recordEvent("ai_cap_hit");
-    return Response.json(
-      {
-        error: isEn
-          ? "The reading service is experiencing high demand today. Please return tomorrow or try again later."
-          : "ระบบดูดวงมีผู้ใช้จำนวนมากในวันนี้ กรุณากลับมาใหม่พรุ่งนี้ หรือลองอีกครั้งในภายหลัง",
-      },
-      { status: 503 },
-    );
+    return aiCapResponse();
   }
 
   updateReading(id, { status: "READING" });
