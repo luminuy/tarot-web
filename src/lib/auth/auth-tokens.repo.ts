@@ -114,6 +114,49 @@ export async function consumeToken(
 }
 
 /**
+ * อ่านเจ้าของ token ที่ยังใช้ได้ **โดยไม่เผาทิ้ง** — ใช้ตรวจเงื่อนไขก่อนเท่านั้น
+ * ⚠️ ห้ามใช้ผลจากฟังก์ชันนี้เป็นสิทธิ์ทำรายการ ต้อง `consumeToken` ทุกครั้งก่อนเปลี่ยนข้อมูลจริง
+ *    (A1-01: เดิมรีเซ็ตรหัสผ่านเผา token ก่อนตรวจนโยบายรหัสผ่าน กรอกรหัสไม่ผ่านเกณฑ์ครั้งเดียว
+ *    ลิงก์ก็ตาย ต้องไปขออีเมลใหม่)
+ */
+export async function peekToken(
+  rawToken: string,
+  kind: AuthTokenKind
+): Promise<{ userId: string } | null> {
+  if (!rawToken || typeof rawToken !== "string") {
+    return null;
+  }
+  const db = await getAppDB();
+  const row = await db
+    .prepare(
+      `SELECT user_id FROM auth_tokens
+        WHERE token_hash = ? AND kind = ? AND used_at IS NULL AND expires_at >= ?
+        LIMIT 1`
+    )
+    .bind(hashToken(rawToken), kind, Date.now())
+    .first<{ user_id: string }>();
+  return row ? { userId: row.user_id } : null;
+}
+
+/**
+ * เจ้าของ token ที่ **ถูกใช้ไปแล้ว** — ใช้แยก "ลิงก์ถูกใช้แล้วโดยตัวสแกนลิงก์ของอีเมล"
+ * (Outlook Safe Links ฯลฯ เปิดลิงก์ก่อนผู้ใช้) ออกจาก "ลิงก์หมดอายุจริง"
+ * ⚠️ ห้ามใช้ผลนี้ให้สิทธิ์ใด ๆ — ใช้แค่เลือกข้อความที่แสดง
+ */
+export async function findUsedTokenOwner(
+  rawToken: string,
+  kind: AuthTokenKind
+): Promise<{ userId: string } | null> {
+  if (!rawToken || typeof rawToken !== "string") return null;
+  const db = await getAppDB();
+  const row = await db
+    .prepare(`SELECT user_id FROM auth_tokens WHERE token_hash = ? AND kind = ? AND used_at IS NOT NULL LIMIT 1`)
+    .bind(hashToken(rawToken), kind)
+    .first<{ user_id: string }>();
+  return row ? { userId: row.user_id } : null;
+}
+
+/**
  * ยกเลิก Token ทั้งหมดของผู้ใช้ในประเภทที่ระบุ (เช่น เมื่อมีการขอรีเซ็ตใหม่หรือเปลี่ยนรหัสผ่านสำเร็จ)
  */
 export async function invalidateUserTokens(

@@ -4,7 +4,7 @@ import { signUserSession } from "@/lib/auth/edge-auth";
 import { setAuthCookie } from "@/lib/auth/session";
 import { isPasswordConfigError, verifyPassword } from "@/lib/auth/password";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
-import { clearAuthRateLimit, peekAuthRateLimit, recordAuthFailure } from "@/lib/security/auth-ratelimit";
+import { releaseAuthAttempt, reserveAuthAttempt } from "@/lib/security/auth-ratelimit";
 import { getRequestIp, verifyTurnstile } from "@/lib/security/turnstile";
 import { getUserByEmail, getUserPasswordHash, normalizeEmail, touchLastSeen } from "@/lib/users/users.repo";
 
@@ -58,11 +58,11 @@ export async function POST(request: Request) {
     const { email, password } = parsed.data;
     const emailLower = normalizeEmail(email);
 
-    // ── Rate Limit: "ตรวจก่อน นับเฉพาะที่ผิด" ────────────────────────────────
-    // ห้ามนับทุกครั้งที่เรียก — ของเดิมนับรวมครั้งที่ล็อกอินสำเร็จด้วย ทำให้
-    // (1) ใครก็ได้ที่รู้อีเมลของเหยื่อ ยิงรหัสผ่านมั่ว ๆ ให้ครบเพดานเพื่อล็อกเจ้าของบัญชีออก
-    // (2) คนใช้เน็ตมือถือที่แชร์ IP กัน (CGNAT) กินโควตากันเองจนล็อกอินไม่ได้
-    const limit = await peekAuthRateLimit(request, "login", emailLower);
+    // ── Rate Limit: "จองก่อน คืนเมื่อสำเร็จ" (A1-02) ─────────────────────────
+    // นับทุกครั้งที่ลองแบบ atomic **ก่อน** ตรวจรหัสผ่าน แล้วคืนให้เมื่อสำเร็จ
+    // ผลรวมยังเป็น "นับเฉพาะครั้งที่ผิด" (กันล็อกเจ้าของบัญชีออก · กัน CGNAT กินโควตากันเอง)
+    // แต่เดิม peek ก่อนแล้วค่อยนับหลัง PBKDF2 — ยิงพร้อมกันทุกคำขอ peek ได้ค่าเดิมแล้วผ่านหมด
+    const limit = await reserveAuthAttempt(request, "login", emailLower);
     if (!limit.allowed) {
       return NextResponse.json(
         { error: isEnglish ? `Too many failed login attempts. Please wait ${limit.retryAfterSec || 60} seconds.` : `คุณลองเข้าสู่ระบบผิดบ่อยเกินไป กรุณารออีก ${limit.retryAfterSec || 60} วินาที` },
@@ -70,8 +70,8 @@ export async function POST(request: Request) {
       );
     }
 
+    // ครั้งที่ผิดถูกนับไปแล้วตอนจอง — ไม่ต้องนับซ้ำ
     const invalidCredentials = async () => {
-      await recordAuthFailure(request, "login", emailLower);
       return NextResponse.json({ error: isEnglish ? "Invalid email or password" : "อีเมลหรือรหัสผ่านไม่ถูกต้อง" }, { status: 401 });
     };
 
@@ -95,8 +95,9 @@ export async function POST(request: Request) {
       return invalidCredentials();
     }
 
-    // ล็อกอินสำเร็จ → ล้างถังของบัญชีนี้ (ถัง IP ยังคงอยู่ เพื่อกันการไล่เดารหัสผ่านเป็นชุด)
-    await clearAuthRateLimit(request, "login", emailLower);
+    // ล็อกอินสำเร็จ → คืนครั้งที่จองไว้ในถัง IP + ล้างถังของบัญชีนี้
+    // (ครั้งที่ผิดก่อนหน้าในถัง IP ยังคงอยู่ เพื่อกันการไล่เดารหัสผ่านเป็นชุด)
+    await releaseAuthAttempt(request, "login", emailLower);
 
     // อัปเดตเวลาใช้งานล่าสุด
     await touchLastSeen(user.id);

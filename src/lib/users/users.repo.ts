@@ -115,12 +115,16 @@ export async function upsertUserOnLogin(p: {
  * - ใช้ id เดิม (เหตุผลเดียวกับ reviveEmailUser: กันลบแล้วสมัครใหม่วนรับโบนัส)
  * - ขึ้น token_version เสมอ — คุกกี้ที่ออกก่อนลบบัญชีต้องไม่ฟื้นกลับมาใช้ได้พร้อมบัญชี
  * - ไม่แตะอีเมล: ระหว่างที่บัญชีถูกลบ อีเมลนั้นอาจถูกคนอื่นสมัครไปแล้ว (UNIQUE ชนกัน)
+ * - ล้างรหัสผ่านเดิมทิ้ง: บัญชีที่เจ้าของลบไปแล้วต้องไม่ฟื้นรหัสผ่านเก่าขึ้นมาเป็นทางเข้าอีกทาง
+ *   (อยากใช้อีเมล+รหัสผ่านอีกให้กด "ลืมรหัสผ่าน")
+ * - `emailVerifiedByProvider` = ผู้ให้บริการยืนยันแล้วว่าคนนี้เป็นเจ้าของอีเมลของแถวนี้ (A1-07)
  */
 export async function reviveOAuthUser(p: {
   id: string;
   provider: "google" | "line";
   name: string;
   avatarUrl?: string | null;
+  emailVerifiedByProvider?: boolean;
 }): Promise<AppUser> {
   const db = await getAppDB();
   const now = Date.now();
@@ -131,11 +135,13 @@ export async function reviveOAuthUser(p: {
        SET deleted_at = NULL,
            name = ?,
            avatar_url = COALESCE(?, avatar_url),
+           password_hash = NULL,
+           email_verified = CASE WHEN ? = 1 THEN 1 ELSE email_verified END,
            token_version = token_version + 1,
            last_seen_at = ?
        WHERE id = ? AND deleted_at IS NOT NULL`
     )
-    .bind(p.name, p.avatarUrl || null, now, p.id)
+    .bind(p.name, p.avatarUrl || null, p.emailVerifiedByProvider ? 1 : 0, now, p.id)
     .run();
 
   // ไม่มีแถวให้คืนชีพ (แถวผู้ใช้หายไปทั้งแถว) ➔ สร้างใหม่ด้วย id เดิมที่ identity ชี้อยู่

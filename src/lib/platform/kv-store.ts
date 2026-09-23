@@ -19,8 +19,7 @@ export const KEY = {
   stat: (metric: string, bucket: string) => `app:stat:${metric}:${bucket}`,
   /** prefix สำหรับ list ตัวนับของ metric หนึ่ง */
   statPrefix: (metric: string) => `app:stat:${metric}:`,
-  /** audit log entry (append-only, key เรียงตามเวลา) */
-  audit: (ts: number, rand: string) => `app:audit:${ts}:${rand}`,
+  /** audit log รุ่นเก่าบน KV — ย้ายไป D1 `admin_audit` แล้ว (A1-10) เหลือไว้อ่านของค้างจนหมดอายุ */
   auditPrefix: () => "app:audit:",
   /** reading session state (cross-isolate durable backstop) */
   reading: (id: string) => `app:reading:${id}`,

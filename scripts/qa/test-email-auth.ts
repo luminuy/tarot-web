@@ -191,6 +191,89 @@ async function runEmailAuthQATests() {
   await softDeleteUser(oauthId);
   console.log("  ✓ 10. OAuth ที่เคยลบบัญชี: ล็อกอินกลับได้ + ขึ้น token_version (A1-05)");
 
+  // IP ต่างกันทุกรอบ — ถังกันเดารหัสอยู่ใน D1 (.dev-marketplace.db) และค้างข้ามรอบรันในเครื่อง
+  const runOctet = Math.floor(Math.random() * 250);
+  const runIp = (n: number) => `198.51.${runOctet}.${n}`;
+
+  // 11. (A1-01) รหัสผ่านใหม่ไม่ผ่านเกณฑ์ ➔ ลิงก์รีเซ็ตต้องยังใช้ได้ (ห้ามเผา token ก่อนตรวจนโยบาย)
+  {
+    const { POST: resetRoute } = await import("../../src/app/api/auth/email/reset/route");
+    const policyToken = await issueToken(newUser.id, "reset", 15 * 60 * 1000);
+    const call = (password: string) =>
+      resetRoute(
+        new Request("https://seertarot.net/api/auth/email/reset", {
+          method: "POST",
+          headers: { "content-type": "application/json", origin: "https://seertarot.net", "cf-connecting-ip": runIp(77) },
+          body: JSON.stringify({ token: policyToken, password }),
+        }),
+      );
+    const weak = await call(`${testEmail.split("@")[0]}_pass123`); // มีอีเมลอยู่ในรหัส = ไม่ผ่านเกณฑ์
+    if (weak.status !== 400) throw new Error(`❌ A1-01: รหัสยอดนิยมควรได้ 400 (ได้ ${weak.status})`);
+    const retry = await call("AnotherSacredPassword2026!#");
+    if (retry.status !== 200) {
+      throw new Error(`❌ A1-01: กรอกรหัสไม่ผ่านเกณฑ์ครั้งเดียวแล้วลิงก์รีเซ็ตตาย (ครั้งที่สองได้ ${retry.status})`);
+    }
+    const replay = await call("YetAnotherSacredPassword2026!#");
+    if (replay.status !== 400) throw new Error("❌ A1-01: ลิงก์รีเซ็ตต้องใช้ได้ครั้งเดียว");
+    console.log("  ✓ 11. รีเซ็ตรหัสผ่าน: ตรวจนโยบายก่อนเผาลิงก์ · ลิงก์ยังใช้ได้ครั้งเดียว (A1-01)");
+  }
+
+  // 12. (A1-03) ลิงก์ยืนยันอีเมลต้องไม่ออกคุกกี้เซสชัน (login CSRF)
+  {
+    const { GET: verifyRoute } = await import("../../src/app/api/auth/email/verify/route");
+    const { AUTH_COOKIE_NAME } = await import("../../src/lib/auth/cookie-names");
+    const vToken = await issueToken(newUser.id, "verify", 60 * 60 * 1000);
+    const res = await verifyRoute(
+      new Request(`https://seertarot.net/api/auth/email/verify?token=${encodeURIComponent(vToken)}`, {
+        headers: { "cf-connecting-ip": runIp(78) },
+      }),
+    );
+    if ((res.headers.get("set-cookie") ?? "").includes(`${AUTH_COOKIE_NAME}=`)) {
+      throw new Error("❌ A1-03: ลิงก์ยืนยันอีเมล (GET) ยังออกคุกกี้เซสชันให้คนที่กด");
+    }
+    // ตัวสแกนลิงก์เปิดไปแล้ว ➔ ผู้ใช้กดซ้ำต้องเห็น "สำเร็จ" ไม่ใช่ "หมดอายุ"
+    const again = await verifyRoute(
+      new Request(`https://seertarot.net/api/auth/email/verify?token=${encodeURIComponent(vToken)}`, {
+        headers: { "cf-connecting-ip": runIp(78) },
+      }),
+    );
+    if (!(again.headers.get("location") ?? "").includes("verified=1")) {
+      throw new Error("❌ A1-03: ลิงก์ที่ถูกตัวสแกนเปิดไปแล้วแสดงเป็นหมดอายุ ทั้งที่อีเมลยืนยันแล้ว");
+    }
+    console.log("  ✓ 12. ยืนยันอีเมล: ไม่ออกคุกกี้เซสชันจากลิงก์ · กดซ้ำหลังสแกนเนอร์ยังเห็นสำเร็จ (A1-03)");
+  }
+
+  // 13. (A1-07 · A1-11) ด่านโค้ดที่ทดสอบผ่าน route จริงไม่ได้ (ต้องมี Google/คุกกี้จริง)
+  {
+    const fs = await import("node:fs");
+    const cb = fs.readFileSync("src/app/api/auth/[provider]/callback/route.ts", "utf8");
+    if (!/catch \(dbErr\)[\s\S]{0,600}?return fail\(origin, "server_error"/.test(cb)) {
+      throw new Error("❌ A1-07: OAuth callback ยังกลืน error ของ D1 แล้วออกคุกกี้ต่อ");
+    }
+    if (!/getUserByEmailIncludingDeleted\(profile\.email\)/.test(cb)) {
+      throw new Error("❌ A1-07: OAuth callback ไม่คืนชีพแถวที่ถูกลบซึ่งจองอีเมลนี้ไว้ (ชน UNIQUE)");
+    }
+    const priv = fs.readFileSync("src/lib/security/privileged.ts", "utf8");
+    if (!/isUnlimitedEmail\(user\.email\)\s*&&\s*\(await ownsVerifiedEmail\(/.test(priv)) {
+      throw new Error("❌ A1-11: สิทธิ์ไม่จำกัดให้ตามอีเมลในคุกกี้โดยไม่ตรวจว่ายืนยันอีเมลแล้ว");
+    }
+    console.log("  ✓ 13. OAuth ไม่ออกคุกกี้เมื่อ D1 ล้ม + คืนชีพอีเมลที่ถูกลบ (A1-07) · สิทธิ์ไม่จำกัดต้องยืนยันอีเมล (A1-11)");
+  }
+
+  // 14. (A1-10) บันทึกแอดมินต้องได้ของใหม่สุดก่อนเสมอ
+  {
+    const { recordAudit, listAudit } = await import("../../src/lib/admin/audit");
+    const marker = `qa_audit_${Date.now()}`;
+    await recordAudit(`${marker}_old`);
+    await new Promise((r) => setTimeout(r, 5));
+    await recordAudit(`${marker}_new`);
+    const recent = await listAudit(5);
+    if (recent[0]?.action !== `${marker}_new`) {
+      throw new Error(`❌ A1-10: listAudit ไม่ได้คืนเหตุการณ์ใหม่สุดก่อน (ได้ ${recent[0]?.action})`);
+    }
+    console.log("  ✓ 14. บันทึกแอดมินเรียงใหม่สุดก่อน (A1-10)");
+  }
+
   // Cleanup
   await softDeleteUser(newUser.id);
   console.log("  ✓ 9. Cleanup: ทำความสะอาดข้อมูลทดสอบเรียบร้อย");

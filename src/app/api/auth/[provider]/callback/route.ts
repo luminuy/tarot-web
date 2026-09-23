@@ -208,18 +208,36 @@ export async function GET(
           if (existingEmailUser.name) profile.name = existingEmailUser.name;
           if (existingEmailUser.avatarUrl) profile.avatar = existingEmailUser.avatarUrl;
         } else {
-          // 3. New User with Email
-          const created = await upsertUserOnLogin({
-            id: profile.id,
-            provider: profile.provider,
-            email: profile.email,
-            name: profile.name,
-            avatarUrl: profile.avatar,
-          });
-          profile.tokenVersion = created.tokenVersion;
-          await linkOAuthIdentity(oauthProvider, providerUserId, profile.id);
-          await grantSignupBonus(profile.id);
-          isNewUser = true;
+          // 3. ไม่มีบัญชีที่ใช้งานอยู่ — แต่อาจมีแถวที่ถูกลบจองอีเมลนี้ใน UNIQUE INDEX อยู่ (A1-07)
+          //    INSERT ตรง ๆ จะชน unique แล้ว throw ➔ ล็อกอินไม่ติดถาวร (บั๊กเดียวกับ INC-0048 ฝั่ง signup)
+          //    ผู้ให้บริการเพิ่งยืนยันว่าคนนี้เป็นเจ้าของอีเมล ➔ คืนชีพแถวเดิมให้
+          const { getUserByEmailIncludingDeleted } = await import("@/lib/users/users.repo");
+          const deletedUser = await getUserByEmailIncludingDeleted(profile.email);
+          if (deletedUser) {
+            const revived = await reviveOAuthUser({
+              id: deletedUser.id,
+              provider: oauthProvider,
+              name: profile.name,
+              avatarUrl: profile.avatar,
+              emailVerifiedByProvider: true,
+            });
+            await linkOAuthIdentity(oauthProvider, providerUserId, revived.id);
+            profile.id = revived.id;
+            profile.tokenVersion = revived.tokenVersion;
+            if (revived.name) profile.name = revived.name;
+          } else {
+            const created = await upsertUserOnLogin({
+              id: profile.id,
+              provider: profile.provider,
+              email: profile.email,
+              name: profile.name,
+              avatarUrl: profile.avatar,
+            });
+            profile.tokenVersion = created.tokenVersion;
+            await linkOAuthIdentity(oauthProvider, providerUserId, profile.id);
+            await grantSignupBonus(profile.id);
+            isNewUser = true;
+          }
         }
       } else {
         // 4. OAuth without email (หรืออีเมลที่ผู้ให้บริการยังไม่ยืนยัน)
@@ -236,8 +254,11 @@ export async function GET(
         isNewUser = true;
       }
     } catch (dbErr) {
-      console.error("[OAuth D1 User Upsert Warning]:", dbErr);
-      // Non-blocking fallback: allow login even if D1 transiently fails
+      // ⚠️ ห้ามออกคุกกี้ต่อเมื่อบันทึก/อ่านผู้ใช้ไม่สำเร็จ (A1-07)
+      // เดิม "ปล่อยผ่าน" แล้วออกคุกกี้ให้ id ที่ไม่มีแถวใน DB หรือ tokenVersion ผิด
+      // ➔ /api/auth/me ล้างคุกกี้ทิ้งทันที ผู้ใช้เห็น "ล็อกอินสำเร็จ" แต่ไม่ได้ล็อกอิน และไม่รู้สาเหตุ
+      console.error("[OAuth D1 User Upsert Error]:", dbErr);
+      return fail(origin, "server_error", rawReturnUrl);
     }
 
     const sessionToken = await signUserSession(profile);

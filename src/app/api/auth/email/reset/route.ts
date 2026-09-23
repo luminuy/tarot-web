@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { signUserSession } from "@/lib/auth/edge-auth";
 import { invalidateTokenVersionCache, setAuthCookie } from "@/lib/auth/session";
-import { consumeToken, invalidateUserTokens } from "@/lib/auth/auth-tokens.repo";
+import { consumeToken, peekToken, invalidateUserTokens } from "@/lib/auth/auth-tokens.repo";
 import { hashPassword, isPasswordConfigError } from "@/lib/auth/password";
 import { validatePasswordPolicy } from "@/lib/auth/password-policy";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
@@ -54,16 +54,18 @@ export async function POST(request: Request) {
       );
     }
 
-    // Consume single-use reset token
-    const tokenResult = await consumeToken(token, "reset");
-    if (!tokenResult) {
-      return NextResponse.json(
-        { error: isEnglish ? "This password reset link has expired or has already been used. Please request a new one." : "ลิงก์ตั้งรหัสผ่านนี้หมดอายุหรือถูกใช้งานไปแล้ว กรุณากดขอลิงก์ใหม่อีกครั้ง" },
-        { status: 400 }
-      );
+    const expiredMsg = isEnglish
+      ? "This password reset link has expired or has already been used. Please request a new one."
+      : "ลิงก์ตั้งรหัสผ่านนี้หมดอายุหรือถูกใช้งานไปแล้ว กรุณากดขอลิงก์ใหม่อีกครั้ง";
+
+    // 1) อ่านเจ้าของลิงก์โดยยังไม่เผา — ตรวจนโยบายรหัสผ่านให้ผ่านก่อน (A1-01)
+    //    ไม่งั้นกรอกรหัสไม่ผ่านเกณฑ์ครั้งเดียว ลิงก์ก็ใช้ไม่ได้อีก
+    const peeked = await peekToken(token, "reset");
+    if (!peeked) {
+      return NextResponse.json({ error: expiredMsg }, { status: 400 });
     }
 
-    const user = await getUserById(tokenResult.userId);
+    const user = await getUserById(peeked.userId);
     if (!user) {
       return NextResponse.json({ error: isEnglish ? "User account not found." : "ไม่พบข้อมูลบัญชีผู้ใช้" }, { status: 404 });
     }
@@ -72,6 +74,12 @@ export async function POST(request: Request) {
     const policy = validatePasswordPolicy(password, user.email || undefined, isEnglish ? "en" : "th");
     if (!policy.ok) {
       return NextResponse.json({ error: policy.reason || (isEnglish ? "Password does not meet security requirements" : "รหัสผ่านไม่ผ่านเกณฑ์ความปลอดภัย") }, { status: 400 });
+    }
+
+    // 2) ผ่านเกณฑ์แล้วค่อยเผา token แบบ compare-and-set (คำขอพร้อมกันผ่านได้ใบเดียว)
+    const tokenResult = await consumeToken(token, "reset");
+    if (!tokenResult || tokenResult.userId !== user.id) {
+      return NextResponse.json({ error: expiredMsg }, { status: 400 });
     }
 
     // Hash & Save (bumps token_version automatically)
