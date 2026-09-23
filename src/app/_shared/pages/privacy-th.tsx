@@ -50,7 +50,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 1 */}
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">1. ข้อมูลที่เราเก็บ</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">1. ข้อมูลที่เราเก็บ</h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
               <strong>การระบุตัวตนและโปรไฟล์ (OAuth)</strong> — หากคุณเข้าสู่ระบบผ่าน Google หรือ LINE
@@ -83,7 +83,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 2 */}
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">2. สิ่งที่เราไม่ทำเด็ดขาด (คำมั่นสัญญาความปลอดภัย)</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">2. สิ่งที่เราไม่ทำเด็ดขาด (คำมั่นสัญญาความปลอดภัย)</h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
               <strong>ไม่นำข้อมูลคำถามหรือบันทึกของคุณไปเทรนโมเดล AI</strong> — ข้อมูลการเปิดไพ่และการสะท้อนความคิดเป็นเรื่องส่วนบุคคลสูงสุด จะไม่มีการนำไปใช้ฝึกฝน ปรับแต่ง หรือป้อนเข้าสู่โมเดลปัญญาประดิษฐ์ใด ๆ ทั้งสิ้น
@@ -102,7 +102,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 3 */}
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">
             3. การจัดเก็บข้อมูลและสถาปัตยกรรมคลาวด์ (Data Retention &amp; Storage)
           </h2>
           <div className="text-sm text-ink leading-relaxed space-y-2 font-serif-th">
@@ -121,7 +121,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 4 */}
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">
             4. สิทธิของคุณตามกฎหมาย PDPA และมาตรฐานสากล
           </h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
@@ -150,7 +150,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 5: AI Disclosure */}
         <section className="altar-card-porcelain !rounded-xl space-y-3 p-5">
-          <h2 className="text-lg font-bold text-gold font-serif-th">
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">
             5. การเปิดเผยเรื่อง AI และความโปร่งใส (AI Transparency Disclosure)
           </h2>
           <div className="text-sm text-ink leading-relaxed space-y-2 font-serif-th">
@@ -201,7 +201,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 7: Export & Delete Data */}
         <section className="pt-4 border-t border-line/40 space-y-4 font-serif-th">
-          <h2 className="text-lg font-bold text-gold">7. จัดการข้อมูลส่วนบุคคลของคุณ</h2>
+          <h2 className="text-lg font-bold text-gold-ink">7. จัดการข้อมูลส่วนบุคคลของคุณ</h2>
           <p className="text-xs text-muted">
             คุณสามารถดาวน์โหลดสำเนาข้อมูลของคุณ หรือสั่งลบข้อมูลทั้งหมดทั้งในเครื่องและบนระบบเซิร์ฟเวอร์ได้อย่างสมบูรณ์
           </p>

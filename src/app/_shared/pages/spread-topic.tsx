@@ -157,7 +157,7 @@ export function SpreadTopicContent({
 
       <div className="max-w-6xl mx-auto space-y-10 py-6">
         {/* Breadcrumb Bar */}
-        <nav aria-label="Breadcrumb" className="text-xs font-serif-th text-[#7A6F5D]">
+        <nav aria-label="Breadcrumb" className="text-xs font-serif-th text-muted">
           <ol className="flex items-center gap-2 flex-wrap">
             <li>
               <Link href="/" className="hover:text-ink transition-colors">
@@ -241,7 +241,7 @@ export function SpreadTopicContent({
                 ? "Select a Spread for Your Question"
                 : "เลือกผังพยากรณ์ที่ตรงกับคำถามของคุณ"}
             </h2>
-            <span className="text-xs font-serif-th text-[#7A6F5D]">
+            <span className="text-xs font-serif-th text-muted">
               {spreads.length} {isEnglish ? "spreads" : "รูปแบบ"}
             </span>
           </div>
@@ -257,7 +257,7 @@ export function SpreadTopicContent({
                   ? `Frequently Asked Questions About ${topicName}`
                   : `คำถามพบบ่อยเกี่ยวกับการดูดวงด้าน${topic.nameTh}`}
               </h2>
-              <p className="text-xs text-[#7A6F5D] font-serif-th">
+              <p className="text-xs text-muted font-serif-th">
                 {isEnglish
                   ? "Principles and practical advice for clear, resonant readings"
                   : "หลักการและข้อแนะนำเพื่อการเปิดไพ่ที่ให้คำตอบชัดเจนที่สุด"}
@@ -295,14 +295,14 @@ export function SpreadTopicContent({
                   <div className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink">
                     {tName}
                   </div>
-                  <div className="text-[11px] text-[#7A6F5D] font-mono mt-0.5">
+                  <div className="text-[11px] text-muted font-mono mt-0.5">
                     {t.spreadIds.length} {isEnglish ? "spreads" : "ผัง"}
                   </div>
                 </Link>
               );
             })}
           </div>
-          <div className="flex items-center justify-center gap-4 text-xs font-serif-th text-[#7A6F5D] pt-4">
+          <div className="flex items-center justify-center gap-4 text-xs font-serif-th text-muted pt-4">
             <Link href="/cards" className="hover:text-ink underline underline-offset-4">
               {isEnglish ? "78-Card Encyclopedia" : "สารานุกรมไพ่ 78 ใบ"}
             </Link>

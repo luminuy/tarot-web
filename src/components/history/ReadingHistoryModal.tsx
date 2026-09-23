@@ -106,10 +106,22 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
 
   const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
+    /*
+     * ยืนยันก่อนลบ (A5-19) — ปุ่ม ✕ อยู่ชิดพื้นที่ที่แตะเพื่อกางการ์ด นิ้วพลาดครั้งเดียว
+     * คำทำนายพร้อม "บันทึกผลจริง" ที่พิมพ์ไว้หายถาวร (เก็บในเครื่อง ไม่มีสำรอง)
+     * ตรงกับที่ "ล้างทั้งหมด" ถามยืนยันอยู่แล้ว
+     */
+    const confirmMsg = isEn ? "Delete this reading from your journal?" : "ลบบันทึกคำทำนายนี้ใช่หรือไม่?";
+    if (!window.confirm(confirmMsg)) return;
     mutationRef.current += 1;
     deleteReading(id);
     setReadings(getReadings());
     soundManager.playCardSelectSound();
+    // ปุ่มที่ถือโฟกัสหายไปพร้อมการ์ด ➔ ย้ายโฟกัสไปการ์ดถัดไป (หรือหน้าต่าง) ไม่ให้หลุดไปหลังฉาก
+    requestAnimationFrame(() => {
+      const next = panelRef.current?.querySelector<HTMLElement>("[data-history-toggle]");
+      (next ?? panelRef.current)?.focus();
+    });
   };
 
   const handleClearAll = () => {
@@ -215,6 +227,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 12 }}
           ref={panelRef}
+          tabIndex={-1}
           className="altar-modal !rounded-xl w-full max-w-2xl max-h-[88svh] p-5 sm:p-7 flex flex-col relative space-y-4 overflow-hidden"
         >
           {/* Header */}
@@ -329,7 +342,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                   <ul className="space-y-1 text-[13px] text-ink">
                     {monthlySummary.lifeLessons.map((lesson, idx) => (
                       <li key={idx} className="flex items-start gap-1.5">
-                        <span className="text-gold">✓</span>
+                        <span className="text-gold-ink">✓</span>
                         <span>{lesson}</span>
                       </li>
                     ))}
@@ -358,6 +371,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 <button
                   type="button"
                   onClick={() => setOutcomeFilter("ALL")}
+                  aria-pressed={outcomeFilter === "ALL"}
                   className={`tap-overlay-y px-3.5 py-1 rounded-full transition cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "ALL"
                       ? "btn-gold-glass font-bold"
@@ -369,6 +383,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 <button
                   type="button"
                   onClick={() => setOutcomeFilter("ACCURATE")}
+                  aria-pressed={outcomeFilter === "ACCURATE"}
                   className={`tap-overlay-y px-3.5 py-1 rounded-full transition cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "ACCURATE"
                       ? "bg-ok text-white font-bold"
@@ -382,10 +397,11 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 <button
                   type="button"
                   onClick={() => setOutcomeFilter("PARTIAL")}
+                  aria-pressed={outcomeFilter === "PARTIAL"}
                   className={`tap-overlay-y px-3.5 py-1 rounded-full transition cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "PARTIAL"
                       ? "bg-gold text-white font-bold"
-                      : "bg-inset text-gold border border-line"
+                      : "bg-inset text-gold-ink border border-line"
                   }`}
                 >
                   {isEn
@@ -395,6 +411,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 <button
                   type="button"
                   onClick={() => setOutcomeFilter("PENDING")}
+                  aria-pressed={outcomeFilter === "PENDING"}
                   className={`tap-overlay-y px-3.5 py-1 rounded-full transition cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "PENDING"
                       ? "btn-gold-glass font-bold"
@@ -491,17 +508,31 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         <span className="text-muted">
                           {isEn ? `Topic: ${CATEGORY_MAP_EN[item.category] || item.category}` : `หมวด: ${CATEGORY_MAP_TH[item.category] || item.category}`}
                         </span>
-                        <span className="text-gold">
+                        <span className="text-gold-ink">
                           {isEn ? `· Reader: ${item.personaName}` : `· แม่หมอ ${item.personaName}`}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-2">
                         <span className="text-muted font-mono">{formattedDate}</span>
+                        {/* ปุ่มกางรายละเอียดที่คีย์บอร์ด/screen reader ใช้ได้ (A5-02) — เดิมกางได้ด้วยการคลิกการ์ดเท่านั้น */}
+                        <button
+                          type="button"
+                          data-history-toggle=""
+                          aria-expanded={isExpanded}
+                          aria-controls={`history-detail-${item.id}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setExpandedId(isExpanded ? null : item.id);
+                          }}
+                          className="min-h-6 px-1.5 text-xs text-gold-ink underline-offset-2 hover:underline cursor-pointer"
+                        >
+                          {isExpanded ? (isEn ? "Hide" : "ซ่อน") : isEn ? "Details" : "ดูคำแนะนำ"}
+                        </button>
                         <button
                           type="button"
                           onClick={(e) => handleDelete(e, item.id)}
-                          className="tap-overlay-y text-err hover:text-err p-1 text-xs transition-colors cursor-pointer"
+                          className="min-w-6 min-h-6 grid place-items-center text-err hover:text-err p-1 text-xs transition-colors cursor-pointer"
                           title={isEn ? "Delete entry" : "ลบบันทึกนี้"}
                           aria-label={isEn ? "Delete entry" : "ลบบันทึกนี้"}
                         >
@@ -582,7 +613,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                           className={`tap-overlay-y px-2.5 py-0.5 rounded-full transition cursor-pointer ${
                             outcome === "PARTIAL"
                               ? "bg-gold text-white font-bold"
-                              : "bg-inset text-gold border border-line"
+                              : "bg-inset text-gold-ink border border-line"
                           }`}
                         >
                           {isEn ? "Partially" : "จริงบางส่วน"}
@@ -634,7 +665,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                     {/* Private User Reflection Note Box */}
                     {item.userNote && !isEditingNote && (
                       <div className="glass-tile !rounded-xl p-2.5 text-[13px] text-ink font-serif-th italic">
-                        <span className="font-semibold text-gold">
+                        <span className="font-semibold text-gold-ink">
                           {isEn ? "Real-Life Manifestation:" : "บันทึกผลจริง:"}
                         </span>{" "}
                         {item.userNote}
@@ -680,7 +711,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
 
                     {/* Expanded Advice & Details */}
                     {isExpanded && (
-                      <div className="anim-swap-rise-sm pt-2 border-t border-line/40 space-y-2 text-xs">
+                      <div id={`history-detail-${item.id}`} className="anim-swap-rise-sm pt-2 border-t border-line/40 space-y-2 text-xs">
                         {item.advice && item.advice.length > 0 && (
                           <div>
                             <span className="text-[13px] text-gold-ink font-bold block font-serif-th">

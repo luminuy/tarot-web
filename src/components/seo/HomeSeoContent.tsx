@@ -275,7 +275,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                   <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
                     {step.title}
                   </h3>
-                  <p className="text-xs font-serif-th text-gold-ink/80 font-medium">
+                  <p className="text-xs font-serif-th text-gold-ink font-medium">
                     {step.subtitle}
                   </p>
                 </div>

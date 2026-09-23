@@ -193,6 +193,9 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
         } ${oneUp ? "basis-[74%] max-w-[74%]" : ""}`}
         onClick={() => handleCardClick(pos.index)}
         onKeyDown={(e) => {
+          // กดปุ่มลูก (เช่น "ขยาย") ต้องไม่ถูกช่องไพ่กลืน (A5-17) — preventDefault ตรงนี้ยกเลิก
+          // การ activate ปุ่มลูก Enter/Space บนปุ่มขยายจึงกลายเป็นเลือกไพ่ใบนั้นแทน
+          if (e.target !== e.currentTarget) return;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             handleCardClick(pos.index);

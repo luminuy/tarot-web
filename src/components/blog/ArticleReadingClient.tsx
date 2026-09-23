@@ -48,11 +48,11 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
         aria-label="Breadcrumb"
         className="flex items-center gap-2 text-xs font-serif-th text-muted border-b border-line/40 pb-4 overflow-x-auto whitespace-nowrap"
       >
-        <Link href="/" className="hover:text-gold transition-colors">
+        <Link href="/" className="hover:text-gold-ink transition-colors">
           {isEnglish ? "Home" : "หน้าแรก"}
         </Link>
         <span>/</span>
-        <Link href="/blog" className="hover:text-gold transition-colors">
+        <Link href="/blog" className="hover:text-gold-ink transition-colors">
           {isEnglish ? "Wisdom Codex" : "คัมภีร์บทความ"}
         </Link>
         <span>/</span>
@@ -62,7 +62,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       {/* Article Header */}
       <header className="space-y-4 text-center sm:text-left">
         <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 text-xs font-mono">
-          <span className="glass-chip px-3 py-1 text-gold font-bold">
+          <span className="glass-chip px-3 py-1 text-gold-ink font-bold">
             {articleCat}
           </span>
           <span className="text-muted">
@@ -110,7 +110,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
                   <span className="shrink-0 tabular-nums text-gold-ink font-mono text-xs font-bold">
                     {marker}.
                   </span>
-                  <a href={`#${item.id}`} className="hover:text-gold hover:underline transition-colors">
+                  <a href={`#${item.id}`} className="hover:text-gold-ink hover:underline transition-colors">
                     {label}
                   </a>
                 </li>
@@ -158,7 +158,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
               )
               .replace(/### (.*?)\n/g, '<h3 class="text-base sm:text-xl font-bold text-ink mt-6 mb-3">$1</h3>')
               .replace(/\*\*(.*?)\*\*/g, '<strong class="text-ink font-semibold">$1</strong>')
-              .replace(/\*(.*?)\*/g, '<em class="text-gold font-medium">$1</em>')
+              .replace(/\*(.*?)\*/g, '<em class="text-gold-ink font-medium">$1</em>')
               .replace(/- (.*?)\n/g, '<li class="ml-4 list-disc text-ink my-1">$1</li>')
               .replace(/\n\n/g, '<p class="my-4 leading-relaxed text-ink"></p>')
               .replace(/---/g, '<hr class="border-line/40 my-6" />'),
@@ -243,12 +243,12 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
             type="button"
             data-copy-link=""
             data-label-copied={isEnglish ? "Link Copied!" : "คัดลอกลิงก์สำเร็จ!"}
-            className="glass-chip tap-overlay-y px-3.5 py-1.5 text-ink hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="glass-chip tap-overlay-y px-3.5 py-1.5 text-ink hover:text-gold-ink transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <span data-copy-label="">{isEnglish ? "Copy Link" : "คัดลอกลิงก์"}</span>
           </button>
         </div>
-        <Link href="/blog" className="text-gold hover:underline font-bold">
+        <Link href="/blog" className="text-gold-ink hover:underline font-bold">
           {isEnglish
             ? `← Back to Wisdom Codex (${COUNTS.articles} articles)`
             : `← กลับสู่คัมภีร์ทั้งหมด (${COUNTS.articles} บทความ)`}

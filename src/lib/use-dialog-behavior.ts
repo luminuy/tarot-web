@@ -27,9 +27,20 @@ import { useEffect, useRef, type RefObject } from "react";
  * ⚠️ มีด่าน CI `test-modal-lifecycle` คุมกฎ deps ข้อนี้อยู่ — อย่าแก้ให้ผ่านด้วยการปิดด่าน
  */
 
-/** ตัวเลือกที่ถือว่า "โฟกัสได้" — ชุดเดียวกับที่ `Modal.tsx` ใช้มาแต่เดิม */
+/**
+ * ตัวเลือกที่ถือว่า "โฟกัสได้"
+ * ⚠️ ต้องตัดตัวที่ `disabled` ออก (A5-01) — เดิมนับปุ่ม disabled เป็น "ตัวสุดท้าย" ซึ่งรับโฟกัสไม่ได้
+ *    เงื่อนไข `activeElement === last` จึงไม่มีวันจริง กด Tab แล้วโฟกัสหลุดออกไปหลังฉาก aria-modal
+ */
 const FOCUSABLE_SELECTOR =
-  'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+/** ตัวที่โฟกัสได้จริงตอนนี้ — ตัดตัวที่ซ่อนอยู่ (display:none) ออกด้วย */
+function focusableIn(container: HTMLElement): HTMLElement[] {
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    (el) => el.offsetParent !== null || el === document.activeElement,
+  );
+}
 
 export interface DialogBehaviorOptions {
   /** ปิดการล็อกการเลื่อนหน้า — ใช้กับแผงที่ไม่ได้คลุมเต็มจอ */
@@ -75,14 +86,17 @@ export function useDialogBehavior(
       }
 
       if (e.key === "Tab" && containerRef.current) {
-        const focusable =
-          containerRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+        const focusable = focusableIn(containerRef.current);
         if (focusable.length === 0) return;
 
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
 
-        if (e.shiftKey && document.activeElement === first) {
+        // โฟกัสหลุดออกนอกหน้าต่างไปแล้ว (เช่นปุ่มที่ถือโฟกัสถูกลบทิ้ง) ➔ ดึงกลับเข้ามา
+        if (!containerRef.current.contains(document.activeElement)) {
+          e.preventDefault();
+          (e.shiftKey ? last : first).focus();
+        } else if (e.shiftKey && document.activeElement === first) {
           e.preventDefault();
           last.focus();
         } else if (!e.shiftKey && document.activeElement === last) {

@@ -130,7 +130,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
       {/* Top Header Bar — Card Counter */}
       <div className="flex items-center justify-end border-b border-line/40 pb-4 text-xs font-mono">
         <span className="text-muted">
-          {isEnglish ? "Card " : "ลำดับที่ "}<strong className="text-gold">{currentIndex + 1}</strong> / {totalCards}
+          {isEnglish ? "Card " : "ลำดับที่ "}<strong className="text-gold-ink">{currentIndex + 1}</strong> / {totalCards}
         </span>
       </div>
 
@@ -215,7 +215,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                     ? "border-ok/40 bg-[#EBF3ED] text-ok"
                     : card.yesNo === "no"
                       ? "border-err/40 bg-err-wash text-err"
-                      : "border-line bg-inset text-gold"
+                      : "border-line bg-inset text-gold-ink"
                 }`}
               >
                 Yes/No: {isEnglish ? (card.yesNo === "yes" ? "Yes" : card.yesNo === "no" ? "No" : "Uncertain") : (card.yesNo === "yes" ? "ใช่ (Yes)" : card.yesNo === "no" ? "ไม่ใช่ (No)" : "ไม่แน่ชัด (Maybe)")}

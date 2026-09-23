@@ -248,7 +248,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
           <h2 className="font-serif-th text-xl sm:text-2xl font-bold text-ink">
             {isEnglish ? "Enter Your Date of Birth" : "ใส่วันเดือนปีเกิดของคุณ"}
           </h2>
-          <p className="font-sans text-xs sm:text-sm text-[#7A6F5D]">
+          <p className="font-sans text-xs sm:text-sm text-muted">
             {isEnglish
               ? "Calculated using 1909 Rider-Waite Major Arcana numerological reduction."
               : "ระบบคำนวณตามหลักเลขศาสตร์ไพ่ทาโรต์สากล 1909 Rider-Waite Major Arcana"}
@@ -328,10 +328,11 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                 <button
                   type="button"
                   onClick={() => setEra("be")}
+                  aria-pressed={era === "be"}
                   className={`tap-overlay-y px-2 py-0.5 rounded transition-colors ${
                     era === "be"
                       ? "btn-gold-glass font-bold"
-                      : "text-[#7A6F5D] hover:text-ink"
+                      : "text-muted hover:text-ink"
                   }`}
                 >
                   {isEnglish ? "BE" : "พ.ศ."}
@@ -340,10 +341,11 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                 <button
                   type="button"
                   onClick={() => setEra("ce")}
+                  aria-pressed={era === "ce"}
                   className={`tap-overlay-y px-2 py-0.5 rounded transition-colors ${
                     era === "ce"
                       ? "btn-gold-glass font-bold"
-                      : "text-[#7A6F5D] hover:text-ink"
+                      : "text-muted hover:text-ink"
                   }`}
                 >
                   {isEnglish ? "CE" : "ค.ศ."}
@@ -415,12 +417,12 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                 : `ไพ่ประจำตัวของคุณคือ ${result.primaryCard.nameTh}`}
             </h3>
 
-            <p className="text-xs sm:text-sm font-sans text-[#7A6F5D]">
+            <p className="text-xs sm:text-sm font-sans text-muted">
               {result.primaryCard.nameEn} · {isEnglish ? `Card #${result.primaryNumber} of Major Arcana` : `หมายเลข ${result.primaryNumber} แห่งสำรับไพ่ชุดใหญ่ (Major Arcana)`}
             </p>
 
             <div className="pt-1">
-              <span className="glass-chip inline-block px-3 py-1 text-[11px] font-sans text-[#7A6F5D]">
+              <span className="glass-chip inline-block px-3 py-1 text-[11px] font-sans text-muted">
                 {isEnglish
                   ? `Numerological Sum: ${result.day} + ${result.month} + ${result.yearCe} = ${result.calculatedSum} → Card #${result.primaryNumber}`
                   : `ผลรวมเลขศาสตร์: ${result.day} + ${result.month} + ${result.yearCe} = ${result.calculatedSum} → ไพ่หมายเลข ${result.primaryNumber}`}
@@ -454,7 +456,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                   <div className="text-lg sm:text-xl font-bold font-serif-th text-ink">
                     {result.primaryCard.nameTh} ({result.primaryCard.nameEn})
                   </div>
-                  <div className="text-xs font-sans text-[#7A6F5D]">
+                  <div className="text-xs font-sans text-muted">
                     {isEnglish
                       ? `Element: ${result.primaryCard.element} · Astrology: ${result.primaryCard.astrologyEn || result.primaryCard.astrology}`
                       : `ธาตุ: ${result.primaryCard.element || "มิติแห่งดวงดาว"} · โหราศาสตร์: ${result.primaryCard.astrology}`}
@@ -499,7 +501,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                     <div className="text-lg sm:text-xl font-bold font-serif-th text-ink">
                       {result.secondaryCard.nameTh} ({result.secondaryCard.nameEn})
                     </div>
-                    <div className="text-xs font-sans text-[#7A6F5D]">
+                    <div className="text-xs font-sans text-muted">
                       {isEnglish
                         ? `Element: ${result.secondaryCard.element} · Astrology: ${result.secondaryCard.astrologyEn || result.secondaryCard.astrology}`
                         : `ธาตุ: ${result.secondaryCard.element || "มิติแห่งดวงดาว"} · โหราศาสตร์: ${result.secondaryCard.astrology}`}
@@ -587,7 +589,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                   <div className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
                     {isEnglish ? "Daily Tarot Oracle" : "ดูดวงไพ่ยิปซีรายวัน"}
                   </div>
-                  <p className="text-[11px] font-sans text-[#7A6F5D] mt-1">
+                  <p className="text-[11px] font-sans text-muted mt-1">
                     {isEnglish ? "Check daily energy across 5 chambers" : "เช็กพลังงานประจำวัน 5 มิติ"}
                   </p>
                 </Link>
@@ -599,7 +601,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                   <div className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
                     {isEnglish ? "Love Tarot 1 Card" : "ดูดวงความรัก 1 ใบ"}
                   </div>
-                  <p className="text-[11px] font-sans text-[#7A6F5D] mt-1">
+                  <p className="text-[11px] font-sans text-muted mt-1">
                     {isEnglish ? "Guidance tailored to 4 relationship states" : "ไขคำตอบสถานะหัวใจ 4 มิติ"}
                   </p>
                 </Link>
@@ -611,7 +613,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                   <div className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
                     {isEnglish ? "Personal Readers" : "ปรึกษาแม่หมอตัวจริง"}
                   </div>
-                  <p className="text-[11px] font-sans text-[#7A6F5D] mt-1">
+                  <p className="text-[11px] font-sans text-muted mt-1">
                     {isEnglish ? "Connect with seasoned practitioners" : "พูดคุยกับนักพยากรณ์มืออาชีพ"}
                   </p>
                 </Link>

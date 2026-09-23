@@ -91,7 +91,7 @@ export function ContactBodyEn() {
         </div>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">Electronic Mail</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">Electronic Mail</h2>
           <div className="altar-card-porcelain !rounded-xl p-4 space-y-2">
             <a
               href={`mailto:${DEFAULT_SUPPORT_EMAIL}`}
@@ -107,7 +107,7 @@ export function ContactBodyEn() {
 
         {TIKTOK_URL && (
           <section className="space-y-3">
-            <h2 className="text-lg font-bold text-gold font-serif-th">Official Channels</h2>
+            <h2 className="text-lg font-bold text-gold-ink font-serif-th">Official Channels</h2>
             <div className="altar-card-porcelain !rounded-xl p-4 space-y-2">
               <a
                 href={TIKTOK_URL}
@@ -123,7 +123,7 @@ export function ContactBodyEn() {
         )}
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">Inquiries We Welcome</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">Inquiries We Welcome</h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
               <strong>Technical Support & Platform Glitches</strong> — Card display anomalies, stream interrupts, session recovery, or sign-in concerns. Accompanying screenshots are always appreciated.
@@ -133,7 +133,7 @@ export function ContactBodyEn() {
             </li>
             <li>
               <strong>Data Privacy & Erasure Inquiries</strong> — Initiate self-service data management directly from our{" "}
-              <Link href="/en/privacy" prefetch={false} className="text-gold-ink underline hover:text-gold">
+              <Link href="/en/privacy" prefetch={false} className="text-gold-ink underline hover:text-gold-ink">
                 Privacy Policy
               </Link>{" "}
               page, or write to request manual verification and data deletion under PDPA, GDPR, or CCPA.
@@ -145,10 +145,10 @@ export function ContactBodyEn() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">Matters Outside Our Scope</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">Matters Outside Our Scope</h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             We do not conduct manual readings via email, perform karmic or ritualistic interventions, or provide licensed medical, legal, or financial counsel. If you wish to draw cards, please visit our{" "}
-            <Link href="/en" prefetch={false} className="text-gold-ink underline hover:text-gold">
+            <Link href="/en" prefetch={false} className="text-gold-ink underline hover:text-gold-ink">
               Sanctuary Home
             </Link>{" "}
             to explore our 25 interactive spreads.
@@ -159,10 +159,10 @@ export function ContactBodyEn() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">About the Sanctuary</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">About the Sanctuary</h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             To learn more about our philosophy, cryptographic Provably Fair random generation, and historical 1909 Rider-Waite heritage, visit our{" "}
-            <Link href="/en/about" prefetch={false} className="text-gold-ink underline hover:text-gold">
+            <Link href="/en/about" prefetch={false} className="text-gold-ink underline hover:text-gold-ink">
               About Us
             </Link>{" "}
             page.

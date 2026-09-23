@@ -487,7 +487,7 @@ export function LoveOneCardClient() {
                   ? "Seeking Deeper Clarity on Your Relationship?"
                   : "ต้องการคำตอบเรื่องความรักที่ละเอียดและลึกซึ้งยิ่งขึ้น?"}
               </h3>
-              <p className="text-xs font-sans text-[#7A6F5D]">
+              <p className="text-xs font-sans text-muted">
                 {isEnglish
                   ? "A 1-card oracle provides initial focus. For in-depth relationship dynamics and future timeline, explore these spreads:"
                   : "การเปิดไพ่ 1 ใบให้คำตอบเบื้องต้น หากต้องการวิเคราะห์ใจเขาใจเราและอนาคตความสัมพันธ์ แนะนำผังเหล่านี้:"}

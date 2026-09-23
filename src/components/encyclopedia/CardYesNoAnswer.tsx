@@ -53,7 +53,7 @@ export const CardYesNoAnswer: React.FC<CardYesNoAnswerProps> = ({ card, isEnglis
             </div>
           )}
 
-          <p className="text-[12px] text-muted/80 font-serif-th italic pt-1">
+          <p className="text-[12px] text-muted font-serif-th italic pt-1">
             {isEnglish
               ? "Reflects archetypal tendencies from the 1909 Rider-Waite-Smith system rather than a definitive absolute — consult the cards in a reading to explore your specific context."
               : "เป็นแนวโน้มของไพ่ใบนี้ตามตำรา 1909 ไม่ใช่คำตอบสำเร็จรูปของคำถามคุณ — เปิดไพ่จริงเพื่อดูบริบทของคุณเอง"}

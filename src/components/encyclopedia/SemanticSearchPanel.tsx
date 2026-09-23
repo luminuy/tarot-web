@@ -213,7 +213,7 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
                   </p>
 
                   {keywords && (
-                    <p className="text-[11px] font-serif-th text-muted/80 truncate pt-0.5">
+                    <p className="text-[11px] font-serif-th text-muted truncate pt-0.5">
                       {keywords}
                     </p>
                   )}

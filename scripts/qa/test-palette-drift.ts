@@ -43,8 +43,9 @@ const SRC = path.join(ROOT, "src");
  * ค่าเริ่มต้นมาจากจำนวนจริงหลังกวาดรอบแรก (4,232 → 286) · ลดเป็น 279 เมื่อ 2026-09-14 (ถอดสีฮาร์ดโค้ดหน้า birth-card ทั้ง TH และ EN)
  * ลดเป็น 184 เมื่อ 2026-09-21 — ของจริงต่ำกว่าเพดานอยู่ 95 จุดโดยไม่มีใครรูดเพดานตาม
  * (เพดานที่ห่างจากของจริงขนาดนั้นคือเพดานที่ไม่ได้กันอะไรเลย) · รอบนี้ธีมกระจกถอดออกอีก 2 จุด
+ * ลดเป็น 158 เมื่อ 2026-09-23 — ถอด #8C7A6B / #7A6F5D ที่ตกเกณฑ์คอนทราสต์ออก 26 จุด (A5-09)
  */
-const MAX_HARDCODED_HEX = 184;
+const MAX_HARDCODED_HEX = 158;
 
 /** สีที่ถูกถอดออกจากระบบแล้ว — ห้ามกลับมาไม่ว่ากรณีใด */
 const BANNED: { hex: string; reason: string }[] = [
@@ -53,11 +54,21 @@ const BANNED: { hex: string; reason: string }[] = [
     reason:
       "คอนทราสต์ ~4.4:1 ตกเกณฑ์ WCAG AA — ถูกแทนที่ด้วยโทเคน `muted` (#635B4E ~6:1) ไปแล้ว",
   },
+  {
+    hex: "#8C7A6B",
+    reason: "บนแผงกระจกได้แค่ 3.59:1 (A5-09 · ผลตรวจ 2026-09-23) — ใช้ `text-muted`",
+  },
+  {
+    hex: "#7A6F5D",
+    reason: "บนแผงกระจกได้แค่ 4.31:1 (A5-09 · ผลตรวจ 2026-09-23) — ใช้ `text-muted`",
+  },
 ];
 
 /** คลาสขนาดตัวอักษรที่ถือว่า "เล็ก" จึงต้องผ่านเกณฑ์ 4.5:1 */
 const SMALL_TEXT =
-  /text-\[1[0-3]px\]|text-\[12px\]|\btext-xs\b|\btext-sm\b|\btext-base\b/;
+  /text-\[1[0-3]px\]|text-\[12px\]|\btext-xs\b|\btext-sm\b|\btext-base\b|\btext-lg\b/;
+// ⚠️ `text-lg` (18px) ตัวหนาก็ยัง "ไม่ใช่ตัวใหญ่" ตาม WCAG (ต้อง ≥ 18.66px bold หรือ 24px) — A5-15
+//    เดิมไม่นับ หัวข้อทุกหัวในหน้า about/privacy/contact จึงเป็น `text-gold` 2.87:1 บนแผงกระจกได้
 
 const GOLD_AS_TEXT = /\btext-gold\b(?!-)|text-\[#A58A5C\]/;
 
@@ -182,6 +193,34 @@ if (darkGoldHits.length) {
   );
 } else {
   notes.push("ไม่มีทองเป็นสีตัวอักษรบนพื้นมืด");
+}
+
+// ── กฎ 5 · ห้ามลดความทึบของโทเคนสีตัวอักษร (A5-10) ────────────────────────
+// โทเคนผ่านเกณฑ์ก็จริง แต่ `text-gold-ink/70` เหลือ 2.82–3.08:1 · `text-muted/80` เหลือ 3.75–4.15:1
+// และด่านที่อ่านค่าโทเคนมองไม่เห็น เพราะ `/80` ไม่ใช่สีใหม่ (placeholder ไม่นับ — มีกฎของมันเอง)
+/** ข้อยกเว้นที่ไม่ใช่ข้อความให้คนอ่าน — ต้องเขียนเหตุผลทุกบรรทัด */
+const FADED_EXEMPT: Record<string, string> = {
+  "src/components/ui/SacredNavDropdown.tsx": "ไอคอนลูกศร SVG ที่ aria-hidden — ของประดับ ไม่ใช่ตัวอักษร",
+  "src/components/deck/InteractiveCardFan.tsx": "เลขลำดับบนหลังไพ่ (ปุ่มมี aria-label ของตัวเองแล้ว) — ลวดลายหลังไพ่",
+};
+const fadedHits: string[] = [];
+for (const f of files) {
+  if (FADED_EXEMPT[path.relative(ROOT, f).split(path.sep).join("/")]) continue;
+  const src = fs.readFileSync(f, "utf8");
+  const re = /(?<![\w:-])(?:hover:|group-hover:)?text-(?:muted|gold-ink|ink)\/\d{2}\b/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(src))) {
+    fadedHits.push(`${path.relative(ROOT, f)}:${src.slice(0, m.index).split("\n").length} ${m[0]}`);
+  }
+}
+if (fadedHits.length) {
+  problems.push(
+    `ลดความทึบของโทเคนสีตัวอักษร ${fadedHits.length} จุด — คอนทราสต์ตกเกณฑ์ 4.5:1 ทั้งที่โทเคนผ่าน\n` +
+      `      ➔ ใช้โทเคนเต็ม (\`text-muted\` · \`text-gold-ink\`) ถ้าต้องการสีอ่อนกว่าให้เพิ่มโทเคนที่คำนวณคอนทราสต์แล้ว\n` +
+      fadedHits.slice(0, 8).map((h) => `      • ${h}`).join("\n")
+  );
+} else {
+  notes.push("ไม่มีการลดความทึบของโทเคนสีตัวอักษร");
 }
 
 // ── สรุปผล ────────────────────────────────────────────────────────────────

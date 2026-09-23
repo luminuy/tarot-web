@@ -1,9 +1,9 @@
 "use client";
 
+import { withMotionScope } from "@/components/providers/with-motion-scope";
 import type { Metadata } from "next";
 
 import LocaleLink from "@/components/ui/LocaleLink";
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
 import { getPersona } from "@/data/personas";
@@ -17,9 +17,10 @@ import { useLocale } from "@/lib/i18n";
  * Restores the active reading session from sessionStorage via flow-persistence.
  */
 
-const FollowUpChat = dynamic(
-  () => import("@/components/reading/FollowUpChat").then((m) => m.FollowUpChat),
-  { ssr: false }
+// ห่อด้วย withMotionScope = ได้ `MotionConfig reducedMotion="user"` (A5-07)
+// เดิมโหลดด้วย dynamic() เปล่า ๆ ฟองแชทจึงเด้งทุกข้อความแม้ผู้ใช้เปิด "ลดการเคลื่อนไหว"
+const FollowUpChat = withMotionScope(() =>
+  import("@/components/reading/FollowUpChat").then((m) => m.FollowUpChat),
 );
 
 /**

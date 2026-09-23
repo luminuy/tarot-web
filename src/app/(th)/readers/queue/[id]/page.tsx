@@ -203,7 +203,7 @@ export default function CustomerQueuePage() {
                 !
               </div>
               <h3 className="font-serif-th font-bold text-lg text-rose-800">คิวถูกยกเลิก หรือไม่ผ่านเกณฑ์</h3>
-              <p className="text-xs text-ink/80 font-serif-th leading-relaxed">
+              <p className="text-xs text-ink font-serif-th leading-relaxed">
                 {ticket.screening?.brief || "คำถามหรือคิวนี้ได้รับการยกเลิกแล้ว"}
               </p>
 
