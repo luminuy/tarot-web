@@ -93,30 +93,39 @@ export async function* streamOpenRouterReading(ctx: ReadingContext): AsyncGenera
       const timeoutId = setTimeout(() => controller.abort(), FIRST_BYTE_TIMEOUT_MS);
       unlinkAbort = linkAbortSignal(controller, ctx.abortSignal);
 
-      const res = await fetch(OPENROUTER_CHAT_URL, {
-        method: "POST",
-        signal: controller.signal,
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": "https://seertarot.net",
-          "X-Title": "SeerTarot",
-        },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: "system", content: systemInstruction },
-            { role: "user", content: userMessage },
-          ],
-          response_format: { type: "json_object" },
-          stream: true,
-          // โมเดลที่คิดก่อนตอบ: ซ่อนความคิดออกจาก content (เหตุผลเดียวกับ reasoning_format ของ Groq)
-          reasoning: { exclude: true },
-          usage: { include: true },
-          max_tokens: maxReadingTokens,
-          temperature: 0.6,
-        }),
-      });
+      const send = (jsonMode: boolean) =>
+        fetch(OPENROUTER_CHAT_URL, {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://seertarot.net",
+            "X-Title": "SeerTarot",
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: "system", content: systemInstruction },
+              { role: "user", content: userMessage },
+            ],
+            ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
+            stream: true,
+            // โมเดลที่คิดก่อนตอบ: ซ่อนความคิดออกจาก content (เหตุผลเดียวกับ reasoning_format ของ Groq)
+            reasoning: { exclude: true },
+            usage: { include: true },
+            max_tokens: maxReadingTokens,
+            temperature: 0.6,
+          }),
+        });
+
+      // โมเดลฟรีบางตัวไม่รองรับโหมด JSON (400 "does not support") — ยิงใหม่แบบไม่ขอ
+      // prompt สั่งให้ตอบเป็น JSON อยู่แล้ว และ finalizeReading ตรวจ schema ซ้ำทุกครั้ง
+      let res = await send(true);
+      if (res.status === 400) {
+        const errText = await res.clone().text().catch(() => "");
+        if (/support/i.test(errText)) res = await send(false);
+      }
 
       clearTimeout(timeoutId);
 
