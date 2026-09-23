@@ -58,9 +58,10 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
             <button
               type="button"
               onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted hover:text-ink cursor-pointer"
+              aria-label="ล้างคำค้นหา"
+              className="absolute right-2 top-1/2 -translate-y-1/2 min-w-6 min-h-6 grid place-items-center text-xs text-muted hover:text-ink cursor-pointer"
             >
-              ✕
+              <span aria-hidden="true">✕</span>
             </button>
           )}
         </div>
@@ -78,6 +79,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
           <button
             type="button"
             onClick={() => setSelectedSpecialty("all")}
+            aria-pressed={selectedSpecialty === "all"}
             className={`tap-overlay-y px-3.5 py-1 rounded-full text-xs font-serif-th transition duration-200 cursor-pointer ${
               selectedSpecialty === "all"
                 ? "btn-gold-glass font-bold"
@@ -91,6 +93,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
               key={spec}
               type="button"
               onClick={() => setSelectedSpecialty(spec)}
+              aria-pressed={selectedSpecialty === spec}
               className={`tap-overlay-y px-3.5 py-1 rounded-full text-xs font-serif-th transition duration-200 cursor-pointer ${
                 selectedSpecialty === spec
                   ? "btn-gold-glass font-bold"

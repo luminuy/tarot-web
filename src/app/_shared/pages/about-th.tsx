@@ -112,7 +112,7 @@ export function AboutBodyTh() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">คำทำนายมาจากไหน</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">คำทำนายมาจากไหน</h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             <strong>คำทำนายบนเว็บนี้เขียนโดยปัญญาประดิษฐ์ (AI) ที่เราออกแบบและปรับแต่งเอง</strong> ไม่ใช่หมอดูมนุษย์
             เราบอกเรื่องนี้ตรง ๆ ตั้งแต่ต้น เพราะคิดว่าคุณควรรู้ว่ากำลังอ่านอะไรอยู่
@@ -123,7 +123,7 @@ export function AboutBodyTh() {
           </p>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             ถ้าคุณอยากคุยกับคนจริง ๆ เรามีหน้า{" "}
-            <Link href="/readers" prefetch={false} className="text-gold-ink underline hover:text-gold">
+            <Link href="/readers" prefetch={false} className="text-gold-ink underline hover:text-gold-ink">
               แม่หมอตัวจริง
             </Link>{" "}
             แยกไว้ต่างหาก และจะบอกเสมอว่าอันไหนคือ AI อันไหนคือคน
@@ -131,7 +131,7 @@ export function AboutBodyTh() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">ไพ่ถูกสุ่มจริงไหม — พิสูจน์ได้</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">ไพ่ถูกสุ่มจริงไหม — พิสูจน์ได้</h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             นี่คือเรื่องที่เราให้ความสำคัญที่สุด เว็บดูดวงทั่วไปไม่มีทางให้คุณรู้เลยว่าไพ่ถูกสุ่มจริง
             หรือถูกเลือกมาให้ทีหลังเพื่อให้เข้ากับคำทำนาย
@@ -148,7 +148,7 @@ export function AboutBodyTh() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">สำรับไพ่ที่เราใช้</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">สำรับไพ่ที่เราใช้</h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             เราใช้ภาพไพ่จากสำรับ <strong>1909 Rider-Waite-Smith</strong> ต้นฉบับ ครบทั้ง 78 ใบ
             ซึ่งเป็นสำรับที่เป็นรากของการอ่านไพ่ทาโรต์สมัยใหม่แทบทั้งหมด
@@ -160,7 +160,7 @@ export function AboutBodyTh() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">สิ่งที่เราไม่ใช่ และไม่รับทำ</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">สิ่งที่เราไม่ใช่ และไม่รับทำ</h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
               <strong>ไม่ใช่คำแนะนำทางการแพทย์ กฎหมาย หรือการเงิน</strong> — คำทำนายมีไว้เพื่อทบทวนความคิดและให้กำลังใจ
@@ -174,7 +174,7 @@ export function AboutBodyTh() {
             </li>
             <li>
               <strong>ไม่เอาคำถามหรือบันทึกของคุณไปเทรนโมเดล AI</strong> — รายละเอียดอยู่ใน{" "}
-              <Link href="/privacy" prefetch={false} className="text-gold-ink underline hover:text-gold">
+              <Link href="/privacy" prefetch={false} className="text-gold-ink underline hover:text-gold-ink">
                 นโยบายความเป็นส่วนตัว
               </Link>
             </li>
@@ -182,7 +182,7 @@ export function AboutBodyTh() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">ถ้าคุณกำลังรู้สึกแย่มาก</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">ถ้าคุณกำลังรู้สึกแย่มาก</h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             ถ้าระบบตรวจพบว่าคำถามของคุณมีสัญญาณของการทำร้ายตัวเอง เราจะหยุดการทำนายทันที
             และแสดงช่องทางขอความช่วยเหลือแทน เพราะเรื่องแบบนี้ไม่ควรฝากไว้กับไพ่
@@ -198,17 +198,17 @@ export function AboutBodyTh() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">ติดต่อเรา</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">ติดต่อเรา</h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             มีอะไรอยากบอก อยากติ อยากแจ้งปัญหา หรือเจอคำทำนายที่ไม่เหมาะสม เขียนมาได้เลยที่{" "}
             <a
               href={`mailto:${DEFAULT_SUPPORT_EMAIL}`}
-              className="text-gold-ink underline hover:text-gold break-all"
+              className="text-gold-ink underline hover:text-gold-ink break-all"
             >
               {DEFAULT_SUPPORT_EMAIL}
             </a>{" "}
             เราอ่านทุกฉบับ · ดูช่องทางทั้งหมดได้ที่หน้า{" "}
-            <Link href="/contact" prefetch={false} className="text-gold-ink underline hover:text-gold">
+            <Link href="/contact" prefetch={false} className="text-gold-ink underline hover:text-gold-ink">
               ติดต่อเรา
             </Link>
           </p>

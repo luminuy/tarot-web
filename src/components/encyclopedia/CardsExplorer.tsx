@@ -280,7 +280,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 }`}
               >
                 <div className="flex items-center justify-between w-full mb-1">
-                  <tab.Icon className="w-4 h-4 text-gold" />
+                  <tab.Icon className="w-4 h-4 text-gold-ink" />
                   <span
                     className={`text-[13px] font-mono px-2 py-0.5 rounded-full font-bold ${
                       isActive ? "bg-gold-ink text-white" : "bg-black/5 text-muted group-hover:text-ink"
@@ -292,7 +292,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 <div>
                   <span
                     className={`block font-serif-th text-xs font-bold leading-tight ${
-                      isActive ? "text-gold" : "text-ink group-hover:text-gold"
+                      isActive ? "text-gold-ink" : "text-ink group-hover:text-gold-ink"
                     }`}
                   >
                     {isEnglish ? tab.labelEn : tab.labelTh}

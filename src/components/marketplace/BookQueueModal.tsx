@@ -79,7 +79,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title={`ขอคำปรึกษากับ ${readerName}`}>
       <form onSubmit={handleSubmit} className="space-y-4 pt-2 font-serif-th">
         {error && (
-          <div className="rounded-lg border border-line-warm bg-err-wash p-3 text-xs text-err ">{error}</div>
+          <div role="alert" className="rounded-lg border border-line-warm bg-err-wash p-3 text-xs text-err ">{error}</div>
         )}
 
         {/* Live Availability Status */}
@@ -101,6 +101,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
             <button
               type="button"
               onClick={() => setKind("walkup")}
+              aria-pressed={kind === "walkup"}
               className={`tap-overlay-y rounded-lg py-2 text-xs font-semibold border transition cursor-pointer ${
                 kind === "walkup"
                   ? "bg-gold-ink border-line-warm text-surface"
@@ -112,6 +113,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
             <button
               type="button"
               onClick={() => setKind("booking")}
+              aria-pressed={kind === "booking"}
               className={`tap-overlay-y rounded-lg py-2 text-xs font-semibold border transition cursor-pointer ${
                 kind === "booking"
                   ? "bg-gold-ink border-line-warm text-surface"

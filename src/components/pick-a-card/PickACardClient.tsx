@@ -658,7 +658,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
 
                     {/* Hint text if not flipped */}
                     {!isFlipped && (
-                      <span className="text-[11px] font-mono text-muted/80 animate-pulse">
+                      <span className="text-[11px] font-mono text-muted animate-pulse">
                         {isEnglish ? "TAP TO FLIP" : "แตะเพื่อเปิด"}
                       </span>
                     )}

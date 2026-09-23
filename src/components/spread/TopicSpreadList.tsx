@@ -64,7 +64,7 @@ export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
               <h2 className="font-serif-th text-lg font-bold text-ink leading-snug">
                 {isEnglish ? (spread.nameEn || spread.nameTh) : spread.nameTh}
               </h2>
-              <p className="text-xs font-serif-th text-[#7A6F5D] leading-relaxed line-clamp-1">
+              <p className="text-xs font-serif-th text-muted leading-relaxed line-clamp-1">
                 {isEnglish ? (spread.taglineEn || spread.tagline) : spread.tagline}
               </p>
               <p className="text-xs font-serif-th text-[#4A4338] leading-relaxed line-clamp-3">
@@ -93,7 +93,7 @@ export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
                         {isEnglish ? (pos.nameEn || pos.nameTh) : pos.nameTh}
                       </span>
                       <span className="mx-1 text-line">·</span>
-                      <span className="font-serif-th text-[11px] text-[#7A6F5D]">
+                      <span className="font-serif-th text-[11px] text-muted">
                         {isEnglish ? (pos.meaningEn || pos.meaning) : pos.meaning}
                       </span>
                     </div>

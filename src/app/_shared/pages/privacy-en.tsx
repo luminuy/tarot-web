@@ -50,7 +50,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 1 */}
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif">1. Information We Collect</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif">1. Information We Collect</h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed">
             <li>
               <strong>Identity &amp; Profile Details (OAuth)</strong> — When authenticating via Google or LINE,
@@ -84,7 +84,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 2 */}
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif">2. Prohibited Practices &amp; Core Commitments</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif">2. Prohibited Practices &amp; Core Commitments</h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed">
             <li>
               <strong>Zero AI Training on Personal Readings</strong> — We never use your private questions, drawn
@@ -109,7 +109,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 3 */}
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif">
+          <h2 className="text-lg font-bold text-gold-ink font-serif">
             3. Data Storage, Retention &amp; Cloud Architecture
           </h2>
           <div className="text-sm text-ink leading-relaxed space-y-2">
@@ -128,7 +128,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 4 */}
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif">
+          <h2 className="text-lg font-bold text-gold-ink font-serif">
             4. Your Legal Rights (PDPA, GDPR &amp; CCPA/CPRA)
           </h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed">
@@ -157,7 +157,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 5: AI Disclosure */}
         <section className="altar-card-porcelain !rounded-xl space-y-3 p-5">
-          <h2 className="text-lg font-bold text-gold font-serif">
+          <h2 className="text-lg font-bold text-gold-ink font-serif">
             5. Algorithmic Transparency &amp; AI Persona Disclosures
           </h2>
           <div className="text-sm text-ink leading-relaxed space-y-2">
@@ -213,7 +213,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 7: Export & Delete Data */}
         <section className="pt-4 border-t border-line/40 space-y-4">
-          <h2 className="text-lg font-bold text-gold font-serif">7. Manage Your Personal Data</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif">7. Manage Your Personal Data</h2>
           <p className="text-xs text-muted">
             You can download a complete JSON archive of your personal journal or permanently delete all local and cloud
             records with immediate effect.

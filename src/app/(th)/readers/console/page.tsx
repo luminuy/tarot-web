@@ -207,6 +207,9 @@ function ReaderConsoleInner() {
               type="button"
               onClick={handleToggleLive}
               disabled={actionLoading === "toggle"}
+              role="switch"
+              aria-checked={isLiveOpen}
+              aria-label="เปิดรับคิวสด"
               className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                 isLiveOpen ? "bg-emerald-600" : "bg-line"
               }`}

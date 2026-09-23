@@ -1492,7 +1492,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
         {/* ขั้น SUMMARY มีแบนเนอร์ error ในตัว StreamReader อยู่แล้ว — ไม่ต้องซ้ำด้านบน */}
         {errorMsg && currentStep !== "SUMMARY" && (
-          <div className="mb-6 p-4 rounded-xl bg-err-wash border border-line text-err text-xs sm:text-sm text-center flex flex-col sm:flex-row items-center justify-center gap-3 shadow-xs">
+          <div role="alert" className="mb-6 p-4 rounded-xl bg-err-wash border border-line text-err text-xs sm:text-sm text-center flex flex-col sm:flex-row items-center justify-center gap-3 shadow-xs">
             <span>{errorMsg}</span>
             {readingId && drawnCards.length > 0 && !/โควตา|สิทธิ์|สมาชิก|เติมรอบ|quota|credit|member/.test(errorMsg) && (
               <button

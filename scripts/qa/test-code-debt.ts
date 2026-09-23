@@ -425,5 +425,45 @@ check(
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 8. ผลตรวจ 2026-09-23 คลื่น 5 — คีย์บอร์ด / screen reader
+// ─────────────────────────────────────────────────────────────────────────────
+{
+  const src = (f: string) => stripComments(fs.readFileSync(path.join(ROOT, f), "utf-8"));
+  const dialog = src("src/lib/use-dialog-behavior.ts");
+  check(
+    "A5-01: focus trap ไม่นับปุ่ม disabled + ดึงโฟกัสที่หลุดกลับเข้าหน้าต่าง",
+    /button:not\(\[disabled\]\)/.test(dialog) && /contains\(document\.activeElement\)/.test(dialog),
+  );
+  const history = src("src/components/history/ReadingHistoryModal.tsx");
+  check(
+    "A5-02 · A5-19: สมุดบันทึกมีปุ่มกาง (aria-expanded) + ยืนยันก่อนลบทีละรายการ",
+    /aria-expanded=\{isExpanded\}/.test(history) && /const handleDelete[\s\S]{0,1500}window\.confirm/.test(history),
+  );
+  check(
+    "A5-04: ปุ่มล้างคำค้นหน้าแม่หมอมีชื่อ",
+    /aria-label="ล้างคำค้นหา"/.test(src("src/components/readers/ReadersDirectory.tsx")),
+  );
+  check(
+    "A5-05: สวิตช์เปิดรับคิวสดเป็น role=switch พร้อม aria-checked",
+    /role="switch"[\s\S]{0,80}aria-checked=\{isLiveOpen\}/.test(src("src/app/(th)/readers/console/page.tsx")),
+  );
+  for (const f of ["src/app/_shared/pages/reading-chat-th.tsx", "src/app/_shared/pages/reading-chat-en.tsx"]) {
+    check(`A5-07: ${f} โหลดห้องแชทผ่าน withMotionScope (เคารพ reduced-motion)`, /withMotionScope\(/.test(src(f)));
+  }
+  check(
+    "A5-12: กล่องข้อผิดพลาดหลักของพิธีเปิดไพ่ประกาศให้ screen reader (role=alert)",
+    /\{errorMsg && currentStep !== "SUMMARY" && \(\s*<div role="alert"/.test(src("src/components/home/TarotFlow.tsx")),
+  );
+  check(
+    "A5-13: ปุ่มสลับ พ.ศ./ค.ศ. บอกสถานะด้วย aria-pressed",
+    /aria-pressed=\{era === "be"\}/.test(src("src/components/encyclopedia/BirthCardCalculator.tsx")),
+  );
+  check(
+    "A5-17: ช่องไพ่ในผังไม่กลืน Enter/Space ของปุ่มลูก",
+    /if \(e\.target !== e\.currentTarget\) return;/.test(src("src/components/spread/SpreadBoard.tsx")),
+  );
+}
+
 console.log(`\n📊 ผ่าน ${pass} ข้อ | ล้มเหลว ${fail} ข้อ\n`);
 if (fail > 0) process.exit(1);

@@ -133,11 +133,11 @@ export const SpreadDetailClient: React.FC<Props> = ({
         aria-label="Breadcrumb"
         className="flex items-center gap-2 overflow-x-auto whitespace-nowrap border-b border-line/40 pb-4 font-serif-th text-xs text-muted"
       >
-        <Link href="/" className="transition-colors hover:text-gold">
+        <Link href="/" className="transition-colors hover:text-gold-ink">
           {isEnglish ? "Home" : "หน้าแรก"}
         </Link>
         <span>/</span>
-        <Link href="/spreads" className="transition-colors hover:text-gold">
+        <Link href="/spreads" className="transition-colors hover:text-gold-ink">
           {isEnglish ? "Spreads Library" : "คลังผังพยากรณ์"}
         </Link>
         <span>/</span>
@@ -160,7 +160,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
         <h1 className="font-serif-th text-3xl font-bold leading-tight sm:text-4xl [text-wrap:balance]">
           {isEnglish ? spreadName : (spread.seoTitleTh ?? `ผัง${spread.nameTh}`)}
         </h1>
-        <p className="font-serif-th text-lg text-gold [text-wrap:balance]">{spreadTagline}</p>
+        <p className="font-serif-th text-lg text-gold-ink [text-wrap:balance]">{spreadTagline}</p>
         <p className="max-w-2xl font-serif-th leading-relaxed text-ink [text-wrap:pretty]">
           {spreadDesc}
         </p>
@@ -190,7 +190,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
             <h2 className="font-serif-th text-xl font-bold text-ink">
               {isEnglish ? "Positional Roles & Interpretations" : `ตำแหน่งไพ่ทั้ง ${spread.positions.length} ใบและความหมาย`}
             </h2>
-            <p className="text-xs text-[#7A6F5D] mt-1 font-serif-th">
+            <p className="text-xs text-muted mt-1 font-serif-th">
               {isEnglish
                 ? "Each card role answers a specific dimension of your inquiry:"
                 : "แต่ละตำแหน่งทำหน้าที่ตอบคำถามเฉพาะมิติเพื่อเชื่อมโยงภาพรวมของคำทำนาย:"}
@@ -268,7 +268,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
               <li key={a.slug}>
                 <Link
                   href={`/blog/${a.slug}`}
-                  className="font-serif-th text-gold underline-offset-2 hover:underline"
+                  className="font-serif-th text-gold-ink underline-offset-2 hover:underline"
                 >
                   {getArticleTitle(a, isEnglish)}
                 </Link>

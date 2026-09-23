@@ -203,7 +203,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
 
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="space-y-1.5">
-                  <span className="block text-[11px] font-serif-th font-bold uppercase tracking-[0.18em] text-gold-ink/80">
+                  <span className="block text-[11px] font-serif-th font-bold uppercase tracking-[0.18em] text-gold-ink">
                     {isEnglish ? "Read this first" : "อ่านสรุปนี้ก่อน"}
                   </span>
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold-ink/10 border border-gold-ink/30 text-gold-ink font-serif-th font-bold text-sm tracking-wide">
@@ -224,7 +224,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
                 </p>
               </div>
 
-              <p className="mt-3 text-[11px] font-serif-th text-gold-ink/70">
+              <p className="mt-3 text-[11px] font-serif-th text-gold-ink">
                 {isEnglish
                   ? "Full card interpretation and guidance follow below."
                   : "รายละเอียดไพ่และคำแนะนำแบบเต็มอยู่ด้านล่างนี้"}

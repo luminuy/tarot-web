@@ -94,7 +94,7 @@ export function ContactBodyTh() {
         </div>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">อีเมล</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">อีเมล</h2>
           <div className="altar-card-porcelain !rounded-xl p-4 space-y-2">
             <a
               href={`mailto:${DEFAULT_SUPPORT_EMAIL}`}
@@ -110,7 +110,7 @@ export function ContactBodyTh() {
 
         {TIKTOK_URL && (
           <section className="space-y-3">
-            <h2 className="text-lg font-bold text-gold font-serif-th">ติดตามเรา</h2>
+            <h2 className="text-lg font-bold text-gold-ink font-serif-th">ติดตามเรา</h2>
             <div className="altar-card-porcelain !rounded-xl p-4 space-y-2">
               <a
                 href={TIKTOK_URL}
@@ -126,7 +126,7 @@ export function ContactBodyTh() {
         )}
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">เรื่องที่เขียนมาได้</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">เรื่องที่เขียนมาได้</h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
               <strong>แจ้งปัญหาการใช้งาน</strong> — ไพ่ไม่ขึ้น คำทำนายค้าง เข้าสู่ระบบไม่ได้ ฯลฯ
@@ -138,7 +138,7 @@ export function ContactBodyTh() {
             </li>
             <li>
               <strong>ขอลบข้อมูลส่วนตัว</strong> — ทำเองได้ทันทีจากหน้า{" "}
-              <Link href="/privacy" prefetch={false} className="text-gold-ink underline hover:text-gold">
+              <Link href="/privacy" prefetch={false} className="text-gold-ink underline hover:text-gold-ink">
                 นโยบายความเป็นส่วนตัว
               </Link>{" "}
               หรือเขียนมาให้เราจัดการให้
@@ -150,11 +150,11 @@ export function ContactBodyTh() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">เรื่องที่ตอบให้ไม่ได้</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">เรื่องที่ตอบให้ไม่ได้</h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             เราไม่รับทำนายดวงทางอีเมล ไม่รับแก้กรรม และไม่ให้คำแนะนำทางการแพทย์ กฎหมาย หรือการเงิน
             ถ้าอยากเปิดไพ่ เชิญที่{" "}
-            <Link href="/" prefetch={false} className="text-gold-ink underline hover:text-gold">
+            <Link href="/" prefetch={false} className="text-gold-ink underline hover:text-gold-ink">
               หน้าแรก
             </Link>{" "}
             ได้เลย ฟรีและไม่ต้องรอ
@@ -166,10 +166,10 @@ export function ContactBodyTh() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">อยากรู้จักเราก่อน</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th">อยากรู้จักเราก่อน</h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             อ่านได้ที่หน้า{" "}
-            <Link href="/about" prefetch={false} className="text-gold-ink underline hover:text-gold">
+            <Link href="/about" prefetch={false} className="text-gold-ink underline hover:text-gold-ink">
               เกี่ยวกับเรา
             </Link>{" "}
             ซึ่งอธิบายว่าคำทำนายสร้างขึ้นอย่างไร และระบบสุ่มไพ่ของเราตรวจสอบได้จริงแบบไหน
