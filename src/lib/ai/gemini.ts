@@ -523,6 +523,14 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
    *    ขัดเจตนากฎเหล็กข้อ 14 ที่ว่า "ข้อมูลไพ่ไม่สมบูรณ์ ➔ แจ้งให้โหลดใหม่ทันที"
    *    ตอนนี้ส่ง `error` แทน ซึ่ง route จะคืนสิทธิ์ให้เอง (`refundIfConsumed`)
    */
+  /*
+   * 🛟 ชั้นที่ 3: โมเดลฟรีบน OpenRouter — ลองก่อนทั้งสองกรณีข้างล่าง
+   * (Gemini ไม่ตอบเลย / ตอบแต่เขียนไม่จบ) ไม่มีคีย์หรือไม่มีโมเดลที่วัดแล้วผ่าน = ข้ามเงียบ ๆ
+   * ทุกโมเดลที่ล้มกลางคันส่ง `reset` แล้ว จึงเริ่มสตรีมใหม่ได้โดยไม่ซ้อนเนื้อหาเก่า
+   */
+  const { streamOpenRouterReading } = await import("@/lib/ai/openrouter");
+  if (yield* streamOpenRouterReading(ctx)) return;
+
   if (!sawAnyResponse) {
     console.warn("ทุก Gemini Model ไม่ตอบสนอง ทำการสลับไปใช้ Local Reading Stream เพื่อไม่ให้ผู้ใช้ต้องรอนาน");
     yield* streamMockGeminiReading(ctx, "all_models_down");

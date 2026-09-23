@@ -74,6 +74,9 @@
 └── UNLIMITED_EMAILS          # allowlist อีเมลดูดวงไม่จำกัด
 ```
 
+**ส่งผ่าน `deploy.yml` จาก GitHub Actions secrets (ไม่ได้ตั้งด้วย `wrangler secret put`):**
+- `OPENROUTER_API_KEY` — ชั้นสำรองที่ 3 ของคำอ่าน (หลัง Gemini ก่อนคำอ่านสำรองออฟไลน์) · **ใช้เฉพาะโมเดลฟรี `:free`** · ห้ามเติมเครดิตในบัญชี OpenRouter · ตั้งใน GitHub แล้ว 2026-09-23
+
 **ตัวเลือก (ยังไม่ได้ตั้ง — ไม่บังคับ):**
 - `SUPPORT_EMAIL` — ทับ Reply-To ของอีเมลระบบ (ค่าเริ่มต้น `support@seertarot.net`)
 - `CF_AI_GATEWAY_TOKEN` — ใส่เมื่อเปิด Authenticated Gateway
