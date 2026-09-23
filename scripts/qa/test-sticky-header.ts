@@ -769,6 +769,22 @@ for (const item of INTENTIONALLY_BARE) {
   }
 }
 
+// 9. (A4-02) ปุ่มลอย TikTok ต้องไม่ทับช่องพิมพ์ของห้องแชท — ตรวจจาก HTML ที่บิลด์จริง
+//    หน้า Astro ไม่ hydrate ปุ่มนี้ และ shim `usePathname()` คืน "" เสมอ เงื่อนไขซ่อนจึงเคยไม่ทำงานเลย
+{
+  const floating = 'data-floating="true"';
+  for (const page of ["dist/reading/chat.html", "dist/en/reading/chat.html"]) {
+    const file = path.join(ROOT, page);
+    if (fs.existsSync(file) && fs.readFileSync(file, "utf8").includes(floating)) {
+      failures.push(`${page}: มีปุ่มลอย TikTok ทับช่องพิมพ์ของห้องแชท — ส่ง Astro.url.pathname เข้า FloatingChromeRoot (A4-02)`);
+    }
+  }
+  const control = path.join(ROOT, "dist/cards.html");
+  if (fs.existsSync(control) && !fs.readFileSync(control, "utf8").includes(floating)) {
+    failures.push("dist/cards.html: ปุ่มลอย TikTok หายจากหน้าปกติ — เงื่อนไขซ่อนกว้างเกินไป (A4-02)");
+  }
+}
+
 // ───────────────────────────────────────────────────────────────
 if (failures.length > 0) {
   console.error("\n❌ ด่านหัวเว็บ sticky ไม่ผ่าน:\n");

@@ -399,13 +399,34 @@ async function runTests() {
     { name: "provably_fair_verify", params: { action: "open_modal" } },
     { name: "reader_consult_click", params: { source: "stream_end" } },
     { name: "card_detail_view", params: { card_id: "major-00", card_name: "The Fool" } },
-    { name: "card_search", params: { query: "ดวงอาทิตย์" } },
+    { name: "card_search", params: { query_len: 9 } },
     { name: "blog_read", params: { slug: "tarot-guide", title: "คู่มือทาโรต์" } },
     { name: "upgrade_dialog_open", params: { reason: "daily_exhausted" } },
     { name: "auth_modal_open", params: { mode: "signin" } },
   ];
 
   check("All 20 event schemas pass TypeScript runtime contract", sampleEvents.length === 20);
+
+  // A4-10: ข้อความค้นหาของผู้ใช้ห้ามเข้า GA4/Meta — ส่งได้แค่ความยาว
+  {
+    const searchSources = ["src/components/encyclopedia/SemanticSearchPanel.tsx", "src/components/encyclopedia/CardsExplorer.tsx"]
+      .map((f) => readFileSync(resolve(f), "utf8"))
+      .join("\n");
+    const leaks = [...searchSources.matchAll(/trackEvent\("(?:card_search|semantic_search)",\s*\{([^}]*)\}/g)].filter((m) =>
+      /\bquery\s*:/.test(m[1]),
+    );
+    check("A4-10: event ค้นหาไม่ส่งข้อความที่ผู้ใช้พิมพ์ (ส่งได้แค่ query_len)", leaks.length === 0);
+  }
+
+  // A4-11: trackEvent ต้องต่อคิวไว้เมื่อ gtag ยังไม่พร้อม (หน้า Astro ยิง event ก่อน bootstrap)
+  {
+    const analyticsSrc = readFileSync(resolve("src/lib/analytics.ts"), "utf8");
+    const bootstrapSrc = readFileSync(resolve("src/lib/analytics-bootstrap.ts"), "utf8");
+    check(
+      "A4-11: trackEvent เก็บ event ที่มาก่อน gtag ไว้ และ bootstrap ปล่อยคิวหลังติดตั้ง gtag",
+      /pendingEvents\.push\(/.test(analyticsSrc) && /flushPendingAnalyticsEvents\(\)/.test(bootstrapSrc),
+    );
+  }
 
   // ─────────────────────────────────────────────────────────────────
   // สรุปผล

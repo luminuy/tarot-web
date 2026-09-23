@@ -86,7 +86,11 @@ self.addEventListener("fetch", (event) => {
     url.pathname.startsWith("/admin") ||
     url.pathname.startsWith("/account") ||
     url.pathname.startsWith("/readers/console") ||
-    url.pathname.startsWith("/readers/queue")
+    url.pathname.startsWith("/readers/queue") ||
+    // หน้าที่มีความลับอยู่ใน URL (token ตั้งรหัสผ่านใหม่) — ห้ามเก็บลง Cache Storage ของเครื่อง (A4-14)
+    url.pathname.startsWith("/reset-password") ||
+    url.pathname.startsWith("/en/reset-password") ||
+    url.pathname.startsWith("/tester")
   ) {
     return;
   }

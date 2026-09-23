@@ -26,6 +26,7 @@ import {
   type ConsentChoice,
 } from "@/lib/analytics-consent";
 import {
+  flushPendingAnalyticsEvents,
   setAnalyticsConsent,
   getGaMeasurementId,
   getGoogleAdsId,
@@ -190,6 +191,8 @@ function installGoogleTag(primaryId: string, gaId?: string | null, googleAdsId?:
   if (googleAdsId) {
     gtag("config", googleAdsId, { page_path: window.location.pathname, send_page_view: false });
   }
+  // ปล่อย event ที่หน้าเว็บยิงมาก่อน gtag พร้อม (A4-11) — ต้องหลัง `config` ไม่งั้นไม่มีปลายทางรับ
+  flushPendingAnalyticsEvents();
 
   const tag = document.createElement("script");
   tag.async = true;

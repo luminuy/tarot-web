@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { calculatePasswordStrength } from "@/lib/auth/strength";
@@ -12,7 +12,18 @@ export const dynamic = "force-dynamic";
 function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  /*
+   * ⚠️ token ต้องออกจากแถบ URL ทันทีที่หน้าเปิด (A4-14)
+   * GA4 ส่ง `page_location` เป็น URL เต็มรวม query (บูตหลังผู้ใช้แตะ/พิมพ์ครั้งแรก ซึ่งต้องเกิดแน่
+   * เพราะต้องพิมพ์รหัสใหม่) token ที่ตั้งรหัสผ่านได้จึงไปอยู่ในรายงาน GA4 · เก็บลง state แล้วลบจาก URL
+   * (Service Worker ไม่แคชหน้านี้แล้ว — ดู public/sw.js)
+   */
+  const [token] = useState(() => searchParams.get("token"));
+  useEffect(() => {
+    if (window.location.search.includes("token=")) {
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, []);
   const { locale, isEnglish } = useLocale();
   const isEn = isEnglish || locale === "en";
 

@@ -62,6 +62,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   // null = ด่านปิด/ยังไม่รู้ · "" = ด่านเปิดแต่ยังไม่ผ่าน · string = ผ่านแล้ว
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  /**
+   * นับครั้งที่ส่งฟอร์ม — ใช้รีเซ็ตกล่อง Turnstile ทุกครั้งหลังส่ง (A4-13)
+   * token ของ Turnstile ใช้ได้ครั้งเดียว เดิมรีเซ็ตเฉพาะตอนสลับโหมด พิมพ์รหัสผิดครั้งเดียว
+   * แล้วกดใหม่ siteverify ตอบ duplicate ทุกครั้ง ผู้ใช้เข้าใจว่าล็อกอินพัง
+   */
+  const [turnstileAttempt, setTurnstileAttempt] = useState(0);
   const dialogRef = useRef<HTMLDivElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
 
@@ -281,6 +287,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setErrorMsg(err instanceof Error ? err.message : (isEn ? "An error occurred. Please try again." : "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง"));
     } finally {
       setLoading(false);
+      // token ถูกใช้ไปแล้วไม่ว่าผลจะเป็นอะไร — ขอใบใหม่ทุกครั้ง (เปิดด่านอยู่เท่านั้น)
+      if (turnstileToken !== null) {
+        setTurnstileToken("");
+        setTurnstileAttempt((n) => n + 1);
+      }
     }
   };
 
@@ -532,7 +543,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             )}
 
             {/* ด่านกันบอท (แสดงเฉพาะเมื่อตั้งค่า Turnstile ครบ) */}
-            <TurnstileWidget onToken={setTurnstileToken} resetKey={mode} isEn={isEn} />
+            <TurnstileWidget onToken={setTurnstileToken} resetKey={`${mode}-${turnstileAttempt}`} isEn={isEn} />
 
             {/* กำลังตรวจ Turnstile อยู่ — บอกผู้ใช้ว่าปุ่มกดไม่ได้เพราะอะไร
                 ⚠️ ห่อด้วยกล่องที่จองความสูงไว้ เพราะบรรทัดนี้หายไปเองตอนผู้ใช้ผ่านด่าน

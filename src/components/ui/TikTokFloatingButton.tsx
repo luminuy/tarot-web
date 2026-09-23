@@ -1,5 +1,6 @@
 "use client";
 
+import { stripLocalePrefix } from "@/lib/i18n/paths";
 import { useLocale } from "@/lib/i18n";
 import { BRAND_SOCIAL_PROFILES } from "@/lib/config/site";
 import { usePathname } from "next/navigation";
@@ -21,11 +22,17 @@ import { usePathname } from "next/navigation";
 const TIKTOK_PROFILE_URL =
   BRAND_SOCIAL_PROFILES.find((u) => u.includes("tiktok.com")) ?? BRAND_SOCIAL_PROFILES[0];
 
-export function TikTokFloatingButton() {
+export function TikTokFloatingButton({ pathname: pathnameProp }: { pathname?: string } = {}) {
   const { isEnglish } = useLocale();
-  const pathname = usePathname();
+  const hookPathname = usePathname();
+  /*
+   * ⚠️ หน้า Astro เรนเดอร์ปุ่มนี้เป็น HTML ครั้งเดียวตอนบิลด์ (ไม่ hydrate) และ shim `usePathname()`
+   *    คืน "" เสมอ เงื่อนไขซ่อนจึงไม่เคยจริง ปุ่มลอยทับช่องพิมพ์ของ /reading/chat (A4-02)
+   *    ➔ หน้า Astro ส่ง `Astro.url.pathname` เข้ามาเอง · ตัด `/en` ก่อนเทียบ ให้ซ่อนทั้งสองภาษา
+   */
+  const pathname = stripLocalePrefix(pathnameProp ?? hookPathname ?? "");
   // ซ่อนบนหน้าแอดมิน และหน้าห้องแชท/ผลพยากรณ์ (/reading/chat ฯลฯ) เพื่อไม่ให้ลอยบังปุ่มส่งข้อความหรือแผงสนทนาบนมือถือ
-  if (pathname?.startsWith("/admin") || pathname?.startsWith("/reading")) return null;
+  if (pathname.startsWith("/admin") || pathname.startsWith("/reading")) return null;
 
   return (
     <aside

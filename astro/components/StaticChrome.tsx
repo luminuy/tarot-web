@@ -13,10 +13,10 @@ export function SkipLinkRoot({ locale }: { locale: Locale }) {
 }
 
 /** ปุ่มลอย TikTok — เป็นลิงก์ล้วน ไม่มีสถานะ จึงเรนเดอร์เป็น HTML แล้วจบ ไม่ต้อง hydrate */
-export function FloatingChromeRoot({ locale }: { locale: Locale }) {
+export function FloatingChromeRoot({ locale, pathname }: { locale: Locale; pathname: string }) {
   return (
     <LocaleProvider forcedLocale={locale}>
-      <TikTokFloatingButton />
+      <TikTokFloatingButton pathname={pathname} />
     </LocaleProvider>
   );
 }

@@ -20,7 +20,7 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isDegraded, setIsDegraded] = useState(false);
 
-  const fetchResults = useCallback(async (q: string) => {
+  const fetchResults = useCallback(async (q: string, signal?: AbortSignal) => {
     if (!q.trim() || q.trim().length < 2) {
       setResults([]);
       setState("idle");
@@ -33,7 +33,7 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
     try {
       const res = await fetch(
         `/api/search?q=${encodeURIComponent(q.trim())}&type=card&topK=8`,
-        { credentials: "same-origin" },
+        { credentials: "same-origin", signal },
       );
 
       if (!res.ok) {
@@ -47,18 +47,32 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
       setIsDegraded(Boolean(data.degraded));
       setState("done");
 
+      // ⚠️ ห้ามส่งข้อความค้นหาเข้า GA4/Meta (A4-10) — ช่องนี้ออกแบบให้พิมพ์ความรู้สึกส่วนตัว
+      //    ("เสียใจเรื่องแฟน") และแถบยินยอมสัญญาไว้ว่าคำถามของผู้ใช้ไม่ถูกส่งเข้าระบบสถิติ
       trackEvent("semantic_search", {
-        query: q.trim(),
         query_len: q.trim().length,
         results_count: rawResults.length,
       });
-    } catch {
+    } catch (err) {
+      if ((err as Error)?.name === "AbortError") return; // คำขอเก่าถูกยกเลิกเพราะพิมพ์ต่อ — ไม่ใช่ความผิดพลาด
       setState("error");
     }
   }, []);
 
+  /*
+   * รอให้หยุดพิมพ์ก่อนค่อยค้น + ยกเลิกคำขอเก่า (A4-09)
+   * เดิมยิงทุกตัวอักษร: พิมพ์ 15 ตัว = 15 คำขอ embed + Vectorize และคำตอบของคำที่พิมพ์ค้าง
+   * ที่มาช้ากว่าทับผลของคำเต็ม ผู้ใช้จึงเห็นไพ่ไม่ตรงคำที่พิมพ์
+   */
   useEffect(() => {
-    fetchResults(query);
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      void fetchResults(query, controller.signal);
+    }, 400);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [query, fetchResults]);
 
   // กรองเฉพาะการ์ดที่มีอยู่จริงในสำรับ 78 ใบ (Rule 14: Zero Fabricated Cards Policy)

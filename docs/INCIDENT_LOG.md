@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0223 · 2026-09-23 11:24 · 🟠 High · ผลตรวจใหญ่ 2026-09-23 คลื่น 4 — หน้าเว็บที่ทำเหมือนสำเร็จทั้งที่ไม่สำเร็จ 13 ข้อ (ไพ่ใบเดียวล้มเงียบ · วันที่ค้างวันบิลด์ · โน้ตหาย · ปุ่มแชร์โดนบล็อก · ปุ่มลอยทับแชท · สวิตช์ PDPA หลอก · ปุ่มลบข้อมูลหลอก · ค้นหายิงทุกตัวอักษร · คำค้นส่วนตัวเข้า GA4 · event หน้า Astro หาย · Turnstile ใช้ซ้ำ · token รีเซ็ตรั่ว)
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | กดเปิดไพ่ใบเดียวแล้วถ้าเริ่มไม่สำเร็จปุ่มกลับมากดได้เฉย ๆ ไม่มีข้อความ · ป้ายวันที่หน้า /daily ค้างเป็นวันบิลด์ · โน้ตที่เพิ่งบันทึกหายจากจอ · กดแชร์ Facebook/X/Threads ได้แท็บขาวค้างแล้วแท็บจริงโดนบล็อก · ปุ่ม TikTok ลอยทับช่องพิมพ์ในห้องแชท · กดถอนความยินยอมเห็นสวิตช์ปิดทั้งที่ฐานข้อมูลยังเปิด · กดลบข้อมูลทั้งหมดแล้วบัญชีบนคลาวด์ยังอยู่ · พิมพ์ค้นหา 15 ตัวยิง 15 คำขอและผลสลับลำดับ · คำค้นความรู้สึกส่วนตัวไปอยู่ใน GA4/Meta · ยอดอ่านหน้าไพ่และบทความใน GA4 เป็นศูนย์ · พิมพ์รหัสผิดครั้งเดียวแล้วลองใหม่ไม่ได้ · token ตั้งรหัสผ่านไปอยู่ใน GA4 และแคชของเครื่อง |
+| **สาเหตุราก** | ฝั่งหน้าเว็บไม่ดูผลจริงของสิ่งที่ทำ: fetch ไม่โยนเมื่อได้ 4xx/5xx แต่โค้ดถือว่าสำเร็จ · throw ใน async ลอยที่ไม่มีใครจับ · แสดง error เฉพาะบางสถานะ · คำนวณวันที่ตอน render ในหน้าที่ prerender ตอนบิลด์ · ตัวกันรุ่นไม่ครอบทุกการแก้ไขและเขียน localStorage ก่อนเช็ก · window.open ด้วย noopener คืน null ตามสเปก · shim usePathname คืนค่าว่างบนหน้า Astro · ไม่มี debounce/abort · ส่งพารามิเตอร์ข้อความดิบเข้า analytics · trackEvent ไม่มีคิวเมื่อ gtag ยังไม่มา · token Turnstile ใช้ได้ครั้งเดียวแต่รีเซ็ตเฉพาะตอนสลับโหมด · ไม่ลบความลับออกจาก URL และ SW แคชทุกหน้า |
+| **การแก้ไข** | OneCardRitual แสดง oracle.state.error ในทุกจังหวะก่อนเปิดไพ่ + catch ตอนประกอบไพ่ · DailyClient คำนวณวันที่ใน useEffect ด้วย APP_TIME_ZONE · handleSaveNote นับรุ่น + fetchServerReadings รับ shouldCommit · ShareModal จองแท็บโดยไม่ใส่ noopener แล้วตั้ง opener = null · FloatingChromeRoot รับ Astro.url.pathname + stripLocalePrefix · postConsent เช็ก res.ok และแสดง role=alert · deleteAllData ดู res.ok (401 = ล้างเครื่องต่อได้) ถ้าล้มให้เลือกลบเฉพาะเครื่อง · SemanticSearchPanel debounce 400 ms + AbortController · ตัด query ออกจาก card_search/semantic_search · trackEvent เก็บคิวแล้ว flush หลัง installGoogleTag · AuthModal รีเซ็ต Turnstile ทุกครั้งหลังส่ง · reset-password เก็บ token ใน state แล้ว replaceState + sw.js ไม่แคช /reset-password และ /tester |
+| **🛡️ กฎป้องกันถาวร** | **test-code-debt ข้อ 7 (A3-03/04/08/09 A4-07/09/13/14) และข้อ 2 ปุ่ม PDPA ต้องดู res.ok · test-analytics-integrity ห้าม event ค้นหาส่งข้อความ + trackEvent ต้องมีคิว · test-sticky-header ข้อ 9 ตรวจ HTML ที่บิลด์จริงว่าห้องแชทไม่มีปุ่มลอยแต่หน้าปกติยังมี · กติกา: ทุก fetch ที่เปลี่ยนสถานะบนหน้าจอต้องเช็ก res.ok ก่อน และหน้า prerender ห้ามคำนวณค่าที่ขึ้นกับเวลาตอน render** |
+| **การพิสูจน์ว่าแก้ได้จริง** | mutation test ย้อน src/astro/public ของคลื่นนี้แล้ว test-code-debt ตก 9 ข้อ test-analytics-integrity ตก 2 ข้อ · บิลด์ Astro จริง: /reading/chat และ /en/reading/chat ไม่มีปุ่มลอย ส่วน /cards และ / ยังมี |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/brave-mayer-5p2kld` · commit `33428a5` |
+
+
 ### INC-0222 · 2026-09-23 11:16 · 🟠 High · ผลตรวจใหญ่ 2026-09-23 คลื่น 3 — API คำทำนาย 9 ข้อ (คำอ่านสำรองติดถาวร · แชทรับไพ่ปลอมจากไคลเอนต์ · แชท/clarify ข้ามด่านความปลอดภัย · ไพ่ประจำวันค้างข้ามวัน · digest ส่งแค่ 80 คนแรก · webhook Omise ผิดสเปก · สตรีม AI ค้างไม่มีเพดาน · อีเมลไม่ escape ชื่อ)
 
 | หัวข้อ | รายละเอียด |

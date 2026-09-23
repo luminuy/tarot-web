@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 import { CardImage } from "@/components/card/CardImage";
 import type { TarotCard as TarotCardType } from "@/data/cards/types";
 import { useLocale } from "@/lib/i18n";
+import { APP_TIME_ZONE } from "@/lib/time/bangkok";
 import { saveReading } from "@/lib/utils/history";
 import { soundManager } from "@/lib/utils/audio";
 import { RitualHero } from "@/components/reading/one-card/RitualHero";
@@ -108,13 +109,24 @@ export function DailyClient() {
       ? `Daily guidance for ${currentChamber.titleEn}: ${currentChamber.descEn}`
       : `ขอคำชี้แนะประจำวันเรื่อง${currentChamber.titleTh} — ${currentChamber.descTh}`);
 
-  // วันที่ปัจจุบัน
-  const todayDateString = new Intl.DateTimeFormat(isEnglish ? "en-US" : "th-TH", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(new Date());
+  /*
+   * วันที่ปัจจุบัน — ต้องคำนวณ "หลัง mount" เท่านั้น (A3-04)
+   * หน้านี้ถูก prerender ครั้งเดียวตอนบิลด์ ถ้าคำนวณตอน render ป้ายจะค้างเป็น "วันบิลด์"
+   * (โซนเวลา UTC ของเครื่องบิลด์) และทุกวันที่ไม่ใช่วัน deploy จะ hydration mismatch
+   * จน React ทิ้ง DOM ทั้ง island เรนเดอร์ใหม่ · ระหว่างรอแสดงป้ายกลาง ๆ ที่ไม่ผูกกับวัน
+   */
+  const [todayDateString, setTodayDateString] = useState<string | null>(null);
+  useEffect(() => {
+    setTodayDateString(
+      new Intl.DateTimeFormat(isEnglish ? "en-US" : "th-TH", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        timeZone: APP_TIME_ZONE,
+      }).format(new Date()),
+    );
+  }, [isEnglish]);
 
   const handleRevealed = (card: TarotCardType, isReversed: boolean) => {
     // ประทับตรา "วันนี้มาเปิดไพ่แล้ว" ฝั่งเซิร์ฟเวอร์ — ต้องยิงก่อนทุกกรณี
@@ -175,7 +187,7 @@ export function DailyClient() {
       {/* Hero Header */}
       <RitualHero
         breadcrumbs={breadcrumbs}
-        badgeText={todayDateString}
+        badgeText={todayDateString ?? (isEnglish ? "Today's Card" : "ไพ่ประจำวันนี้")}
         title={isEnglish ? "Daily Tarot Oracle" : "ดูดวงไพ่ยิปซีรายวัน"}
         tagline={
           isEnglish
