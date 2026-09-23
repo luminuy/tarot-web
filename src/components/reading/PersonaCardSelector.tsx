@@ -16,6 +16,7 @@ import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { isMasterPersona } from "@/lib/entitlement/limits";
 
 import { useLocale } from "@/lib/i18n";
+import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 
 interface PersonaCardSelectorProps {
   selectedPersona: Persona;
@@ -98,7 +99,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
     const children = carouselRef.current.children;
     if (children && children[index]) {
       (children[index] as HTMLElement).scrollIntoView({
-        behavior: "smooth",
+        behavior: smoothScrollBehavior(),
         inline: "center",
         block: "nearest",
       });

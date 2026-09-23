@@ -19,7 +19,7 @@ const locale = "th" as const;
 ---
 
 <BaseLayout locale={locale} metadata={privacyMetadataTh}>
-  <SiteHeaderRoot locale={locale} />
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
   <PrivacyBodyThRoot>
     <Fragment slot="deleteButton">
       <DeleteAllDataRoot locale={locale} />

@@ -642,6 +642,35 @@ function checkPointlessMotionScope(violations: Violation[]): void {
 }
 
 /**
+ * กฎ 13b — กลับด้านของกฎ 13 (A5-08): คอมโพเนนต์ที่ใช้ `motion` เองต้องโหลดผ่าน `withMotionScope()`
+ *
+ * `dynamic(() => import(...))` ธรรมดาไม่พา `MotionConfig reducedMotion="user"` ไปด้วย
+ * ผู้ใช้ที่ตั้งลดการเคลื่อนไหวจะเห็นแผงสไลด์/เด้งอยู่ดี — เกิดจริงกับสมุดบันทึกที่เปิดจาก /account
+ * ขณะที่ตัวเดียวกันเปิดจากหน้าแรก (ห่อแล้ว) นิ่งถูกต้อง
+ */
+function checkUnscopedMotionDynamic(violations: Violation[]): void {
+  for (const file of TSX_FILES) {
+    const text = fs.readFileSync(file, "utf-8");
+    if (!text.includes("dynamic(")) continue;
+    const r = rel(file);
+    const re = /(?<![\w.])dynamic\(\s*(?:async\s*)?\(\)\s*=>\s*import\("(@\/[^"]+)"\)/g;
+    for (const m of text.matchAll(re)) {
+      const target = resolveLocalImport(m[1]);
+      if (!target || !usesMotion(target, 0)) continue;
+      if (isAllowed(r, m[1])) continue;
+      const line = text.slice(0, m.index ?? 0).split("\n").length;
+      violations.push({
+        rule: "13b · คอมโพเนนต์ที่ใช้ motion ถูกโหลดด้วย dynamic() เปล่า (A5-08)",
+        file: r,
+        line,
+        code: m[0].slice(0, 160),
+        hint: `"${m[1]}" import motion/react — ต้องใช้ withMotionScope(() => import(...)) ไม่งั้นไม่เคารพ prefers-reduced-motion`,
+      });
+    }
+  }
+}
+
+/**
  * กฎ 10 — ห้ามใช้ `content-visibility` ทั้งเว็บ (INC-0174)
  *
  * ดูเหมือนของฟรี: "ไม่ต้องวาดส่วนที่ยังไม่เข้าจอ" แต่มันมาคู่กับ `contain-intrinsic-size`
@@ -688,6 +717,7 @@ function run(): void {
   checkModalScale(violations);
   checkModalViewportUnit(violations);
   checkPointlessMotionScope(violations);
+  checkUnscopedMotionDynamic(violations);
   checkUnregisteredTransformVars(violations);
   checkCss(violations);
   checkKeyframeCenteringConflict(violations);

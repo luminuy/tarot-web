@@ -11,7 +11,7 @@ const locale = "en" as const;
 ---
 
 <BaseLayout locale={locale} metadata={buildBlogIndexMetadata(locale)}>
-  <SiteHeaderRoot locale={locale} />
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
   <BlogIndexBodyRoot locale={locale}>
     <Fragment slot="list">
       <BlogIndexRoot locale={locale} articles={blogCardItems(locale)} client:idle />

@@ -190,6 +190,11 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           <span className="glass-chip text-xs font-semibold text-ink-deep px-3.5 py-1.5 flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-gold-ink animate-ping" /> {isEnglish ? "Oracle is channeling the tarot..." : "แม่หมอกำลังอ่านคำทำนาย..."}
           </span>
+        ) : errorMsg ? (
+          /* A3-05: สตรีมล้มกลางทาง — ห้ามขึ้นป้าย "ครบถ้วน" คู่กับแบนเนอร์ให้โหลดใหม่ */
+          <span className="glass-chip text-xs font-semibold text-ink-deep px-3.5 py-1.5 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-gold-ink" /> {isEnglish ? "Interpretation incomplete" : "คำทำนายยังไม่ครบ"}
+          </span>
         ) : (
           <span className="text-xs font-semibold bg-[#EBF3ED] text-ok border border-ok/30 px-3.5 py-1.5 rounded-full flex items-center gap-2 ">
             <span className="w-2 h-2 rounded-full bg-ok" /> {isEnglish ? "Interpretation complete" : "อ่านคำทำนายครบถ้วนแล้ว"}
@@ -218,6 +223,15 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       <div
         role="tablist"
         aria-label={isEnglish ? "Tarot interpretation sections" : "ส่วนแสดงผลคำทำนาย"}
+        onKeyDown={(e) => {
+          // A5-11: แพตเทิร์น tab ของ WAI-ARIA — ลูกศร/Home/End สลับแท็บแล้วย้ายโฟกัสตาม
+          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+          e.preventDefault();
+          const next: "card" | "summary" =
+            e.key === "Home" ? "card" : e.key === "End" ? "summary" : activeTab === "card" ? "summary" : "card";
+          setActiveTab(next);
+          document.getElementById(`chamber-tab-${next}`)?.focus();
+        }}
         className="flex items-center gap-2 border-b border-line-warm/30 pb-2 overflow-x-auto no-scrollbar"
       >
         <button
@@ -225,7 +239,9 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           role="tab"
           id="chamber-tab-card"
           aria-selected={activeTab === "card"}
-          aria-controls="chamber-panel-card"
+          // A5-11: แผงถูกเรนเดอร์เฉพาะแท็บที่เลือก — ชี้ aria-controls เฉพาะตอนแผงมีอยู่จริง
+          aria-controls={activeTab === "card" ? "chamber-panel-card" : undefined}
+          tabIndex={activeTab === "card" ? 0 : -1}
           onClick={() => setActiveTab("card")}
           className={`tap-overlay-y px-4 py-2 rounded-lg text-xs font-serif-th font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
             activeTab === "card"
@@ -244,7 +260,8 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           role="tab"
           id="chamber-tab-summary"
           aria-selected={activeTab === "summary"}
-          aria-controls="chamber-panel-summary"
+          aria-controls={activeTab === "summary" ? "chamber-panel-summary" : undefined}
+          tabIndex={activeTab === "summary" ? 0 : -1}
           onClick={() => setActiveTab("summary")}
           className={`tap-overlay-y px-4 py-2 rounded-lg text-xs font-serif-th font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
             activeTab === "summary"
@@ -308,7 +325,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
       {/* TAB 1: CARD-BY-CARD INSPECTION VIEW */}
       {activeTab === "card" && (
-        <div className="space-y-5">
+        <div id="chamber-panel-card" role="tabpanel" aria-labelledby="chamber-tab-card" tabIndex={0} className="space-y-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink rounded-lg">
           {/* Card Selector Pills — ตัดบรรทัดลงมา (flex-wrap) ไม่ใช่เลื่อนแนวนอน
               เพราะผังใหญ่ ๆ ปุ่มใบท้าย ๆ จะหลุดออกนอกกรอบจนกดไม่ถึง (คำร้องเจ้าของโปรเจกต์) */}
           <div className="flex flex-wrap items-center gap-1.5 pb-1">
@@ -548,7 +565,7 @@ isEnglish
 
       {/* TAB 2: OVERVIEW & ACTIONABLE SUMMARY */}
       {activeTab === "summary" && (
-        <div className="space-y-4">
+        <div id="chamber-panel-summary" role="tabpanel" aria-labelledby="chamber-tab-summary" tabIndex={0} className="space-y-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink rounded-lg">
           {/* Opening Greeting */}
           {reading?.opening && (
             <div className="glass-tile !rounded-lg p-4 text-xs sm:text-sm text-ink-deep font-serif-th leading-relaxed italic">

@@ -43,7 +43,9 @@ async function trimCache(cache, maxEntries) {
 // ทิ้ง แล้ว clients.claim() ยึดหน้าที่ผู้ใช้เปิดค้างอยู่ · แต่เอกสารหน้านั้นยังอ้างอิง
 // `/_next/static/chunks/*.js` ชื่อเก่าซึ่งตอนนี้หายไปทั้งจากแคชและจาก origin
 // พอผู้ใช้กดเปิดโมดัลที่โหลดแบบ dynamic (ประวัติ, เติมโควตา, แผงแอดมิน) จะได้ ChunkLoadError
-// ปล่อยให้ตัวใหม่รอเป็น waiting worker แล้วขึ้นทำงานตอนโหลดหน้าครั้งถัดไปแทน
+// ปล่อยให้ตัวใหม่รอเป็น waiting worker แทน — ⚠️ มันไม่ขึ้นทำงานเองตอนโหลดหน้าถัดไป
+// (ต้องไม่มีแท็บไหนถูกตัวเก่าคุมอยู่เลย) · `sw-register.ts` จึงส่ง SKIP_WAITING ให้ตอน
+// ผู้ใช้ออกจากหน้า (pagehide) ซึ่งหน้าถัดไปโหลดสดจากเครือข่ายอยู่แล้ว (A4-06)
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))

@@ -560,18 +560,19 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
             </button>
           </div>
 
-          {/* Toast Notification Banner */}
-          {toastMessage && (
-            <motion.div
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              className="altar-card-porcelain !rounded-lg p-2.5 text-center text-xs text-ink-deep font-serif-th"
-            >
-              
-              {toastMessage}
-            </motion.div>
-          )}
+          {/* Toast Notification Banner — A5-16: live region อยู่ใน DOM ตลอด ข้อความที่ใส่ทีหลังจึงถูกประกาศ */}
+          <div role="status" aria-live="polite">
+            {toastMessage && (
+              <motion.div
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                className="altar-card-porcelain !rounded-lg p-2.5 text-center text-xs text-ink-deep font-serif-th"
+              >
+                {toastMessage}
+              </motion.div>
+            )}
+          </div>
 
           {/* Social Share Preview Card (Redesigned Layout) */}
           <div

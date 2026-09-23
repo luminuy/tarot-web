@@ -11,7 +11,7 @@ const locale = "th" as const;
 ---
 
 <BaseLayout locale={locale} metadata={birthCardMetadataTh}>
-  <SiteHeaderRoot locale={locale} />
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
   <BirthCardBodyThRoot>
     <Fragment slot="calculator">
       <BirthCardCalculatorRoot majorCards={MAJOR_CARDS} locale={locale} client:idle />

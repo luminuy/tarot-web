@@ -98,8 +98,10 @@ const FanCard = React.memo<FanCardProps>(({ cardIdx, posInTier, tierIdx, isPicke
       style={{ zIndex: tierIdx * 40 + posInTier, originY: 1 }}
     >
       <div className="w-[46px] h-[78px] sm:w-[66px] sm:h-[112px] md:w-[74px] md:h-[124px] rounded-lg sm:rounded-lg border-2 card-back-pattern flex flex-col items-center justify-between p-1 sm:p-1.5 relative overflow-hidden transition duration-200 border-line-warm group-hover:border-gold-ink group-hover:ring-2 group-hover:ring-gold-ink/60 group-focus-visible:border-line-warm group-focus-visible:ring-2 group-focus-visible:ring-gold-ink bg-[#382518]">
-        <div className="w-full flex items-center justify-end text-[12px] sm:text-[12px] text-gold-ink/90">
-          <span className="font-mono opacity-80">#{cardIdx + 1}</span>
+        {/* A5-14: หลังไพ่พื้นเข้ม #382518 — gold-ink (ออกแบบให้พื้นสว่าง) ×0.9×0.8 เหลือ ~2:1
+            ใช้ gold-on-dark ทึบเต็ม ≈ 6.3:1 */}
+        <div className="w-full flex items-center justify-end text-[12px] sm:text-[12px] text-gold-on-dark">
+          <span className="font-mono">#{cardIdx + 1}</span>
         </div>
         <div className="gold-foil-sheen absolute inset-0 opacity-20 group-hover:opacity-50 transition-opacity pointer-events-none" />
       </div>

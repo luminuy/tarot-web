@@ -27,7 +27,7 @@ const related = getRelatedArticles(article.slug, 3);
 ---
 
 <BaseLayout locale={locale} metadata={blogDetailMetadata(article.slug, locale)}>
-  <SiteHeaderRoot locale={locale} />
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
   <BlogDetailContentRoot article={article} locale={locale}>
     <Fragment slot="reader">
       <ArticleReaderRoot article={article} relatedArticles={related} locale={locale} />

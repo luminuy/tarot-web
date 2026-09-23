@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { usePathname } from "next/navigation";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CardImage } from "@/components/card/CardImage";
@@ -10,6 +9,7 @@ import { COUNTS } from "@/components/layout/nav-links";
 import { useLocale } from "@/lib/i18n";
 import { stripLocalePrefix } from "@/lib/i18n/paths";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
+import { useCurrentPath } from "@/components/layout/current-path";
 
 interface SacredNavDropdownProps {
   onOpenHistory?: () => void;
@@ -42,8 +42,8 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
   const drawerRef = useRef<HTMLElement>(null);
   const { isEnglish } = useLocale();
 
-  const rawPathname = usePathname() || "/";
-  const currentPath = stripLocalePrefix(rawPathname);
+  // A4-04: หน้า Astro ส่ง path มาทาง provider (หัวเว็บเรนเดอร์ static) · Next ใช้ router
+  const currentPath = stripLocalePrefix(useCurrentPath());
 
   // 🪟 จัดการ Dialog Behavior ครบวงจร (Esc, Focus Trap, Body Scroll Lock, Return Focus)
   useDialogBehavior(isOpen, () => setIsOpen(false), drawerRef);
@@ -244,6 +244,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
             href={item.href || "#"}
             // ⛔ ห้ามเปิด prefetch — บทเรียน INC-0106
             prefetch={false}
+            aria-current={isActive ? "page" : undefined}
             onClick={() => {
               soundManager.playMenuTapSound();
               setIsOpen(false);

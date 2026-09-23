@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useId, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { getCreditPackages, type CreditPackage } from "@/lib/entitlement/packages";
 import { mutateEntitlement } from "@/lib/entitlement/use-entitlement";
@@ -22,6 +22,16 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
   const selectedPkg: CreditPackage = creditPackages.find((p) => p.id === selectedPkgId) || creditPackages[1];
 
   const [loading, setLoading] = useState(false);
+  /* A3-07: ไทม์เมอร์ปิดอัตโนมัติหลังชำระสำเร็จ — ต้องล้างเมื่อปิดเอง/unmount ไม่งั้นไปปิดโมดัลที่เพิ่งเปิดใหม่ */
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearCloseTimer = () => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = null;
+  };
+  useEffect(() => {
+    if (!isOpen) clearCloseTimer();
+    return clearCloseTimer;
+  }, [isOpen]);
   const [checkoutData, setCheckoutData] = useState<{
     orderId: string;
     packageId: string;
@@ -166,7 +176,9 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
           ? `Successfully added +${data.grantedCredits} sacred reading passes!`
           : `เติมรอบเปิดไพ่สำเร็จ +${data.grantedCredits} ครั้งเรียบร้อยแล้ว!`
       );
-      setTimeout(() => {
+      clearCloseTimer();
+      closeTimerRef.current = setTimeout(() => {
+        closeTimerRef.current = null;
         setCheckoutData(null);
         setSuccessMsg(null);
         onClose();
@@ -182,6 +194,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
   };
 
   const resetModalState = () => {
+    clearCloseTimer();
     setCheckoutData(null);
     setSuccessMsg(null);
     setErrorMsg(null);

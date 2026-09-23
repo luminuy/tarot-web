@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useId } from "react";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
@@ -64,6 +64,9 @@ function generateRandomCode(): string {
 }
 
 export default function RedeemCodesManager() {
+  // A5-06: ผูกหัวข้อ "วันหมดอายุ" กับช่องวันที่ — screen reader ไม่ใช่อ่านแค่ "date, required"
+  const createExpiryId = useId();
+  const editExpiryId = useId();
   const [codes, setCodes] = useState<RedeemCodeRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -817,8 +820,9 @@ export default function RedeemCodesManager() {
 
           {/* Expiry Date — บังคับใส่เสมอ (INC-0134) */}
           <div className="space-y-2 rounded-xl border border-line bg-canvas p-3">
-            <span className="text-xs font-semibold text-ink">วันหมดอายุ (เวลาไทย)</span>
+            <label htmlFor={createExpiryId} className="text-xs font-semibold text-ink">วันหมดอายุ (เวลาไทย)</label>
             <input
+              id={createExpiryId}
               type="date"
               required
               min={todayISO()}
@@ -910,8 +914,9 @@ export default function RedeemCodesManager() {
 
             {/* Expiry Date — บังคับใส่เสมอ (INC-0134) */}
             <div className="space-y-2 rounded-xl border border-line bg-canvas p-3">
-              <span className="text-xs font-semibold text-ink">วันหมดอายุ (เวลาไทย)</span>
+              <label htmlFor={editExpiryId} className="text-xs font-semibold text-ink">วันหมดอายุ (เวลาไทย)</label>
               <input
+                id={editExpiryId}
                 type="date"
                 required
                 value={editExpiryDate}

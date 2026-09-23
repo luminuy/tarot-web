@@ -46,3 +46,12 @@ function getServerSnapshot(): boolean {
 export function useMotionSafe(): boolean {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
+
+/**
+ * ♿ A5-21: ค่า `behavior` ของ scrollTo/scrollIntoView ที่เคารพ prefers-reduced-motion
+ * CSS `scroll-behavior: auto !important` คุมไม่ได้เมื่อ JS ส่ง `behavior: "smooth"` ตรง ๆ
+ * เรียกตอนเกิดเหตุการณ์ (ไม่ใช่ตอนเรนเดอร์) จึงอ่าน matchMedia สดได้โดยไม่เสี่ยง hydration
+ */
+export function smoothScrollBehavior(): ScrollBehavior {
+  return getSnapshot() ? "smooth" : "auto";
+}

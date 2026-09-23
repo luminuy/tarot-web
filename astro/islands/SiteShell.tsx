@@ -1,6 +1,7 @@
 import type { ComponentProps } from "react";
 
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { CurrentPathProvider } from "@/components/layout/current-path";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { LocaleProvider } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/types";
@@ -13,10 +14,19 @@ import type { Locale } from "@/lib/i18n/types";
  * ⚠️ หัวเว็บต้อง hydrate (`client:idle`) — มีเมนูดรอปดาวน์ ปุ่มสลับภาษา และแผงบัญชี
  * ⚠️ ฟุตเตอร์ไม่ต้อง hydrate — เป็นลิงก์ล้วน ไม่มีสถานะสักตัว
  */
-export function SiteHeaderRoot({ locale }: { locale: Locale }) {
+export function SiteHeaderRoot({
+  locale,
+  pathname,
+}: {
+  locale: Locale;
+  /** `Astro.url.pathname` — ให้เมนูไฮไลต์หน้าปัจจุบันได้ตั้งแต่ HTML (A4-04) */
+  pathname?: string;
+}) {
   return (
     <LocaleProvider forcedLocale={locale}>
-      <SiteHeader />
+      <CurrentPathProvider pathname={pathname}>
+        <SiteHeader />
+      </CurrentPathProvider>
     </LocaleProvider>
   );
 }

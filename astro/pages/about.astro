@@ -10,7 +10,7 @@ const locale = "th" as const;
 ---
 
 <BaseLayout locale={locale} metadata={aboutMetadataTh}>
-  <SiteHeaderRoot locale={locale} />
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
   <AboutBodyThRoot />
   <SiteFooterRoot locale={locale} spacing="tight" />
 </BaseLayout>

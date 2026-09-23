@@ -604,5 +604,109 @@ check(
   for (const l of leaks.slice(0, 5)) console.log(`     ↳ ${l}`);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 12. INC-0227 — ผลตรวจใหญ่ 2026-09-23 คลื่น 8 (🟡 หน้าเว็บ · a11y)
+// ─────────────────────────────────────────────────────────────────────────────
+{
+  const src = (f: string) => stripComments(fs.readFileSync(path.join(ROOT, f), "utf-8"));
+  const stream = src("src/components/reading/StreamReader.tsx");
+  check(
+    "A3-05: ป้ายสถานะคำทำนายมีสถานะ 'ยังไม่ครบ' เมื่อสตรีมล้ม (ไม่ขึ้น 'ครบถ้วน' คู่กับแบนเนอร์ error)",
+    /\)\s*:\s*errorMsg\s*\?/.test(stream) && stream.includes("คำทำนายยังไม่ครบ"),
+  );
+  const cardImage = src("src/components/card/CardImage.tsx");
+  check("A3-06: CardImage remount ต่อภาพ (key={src} ทั้ง <img> และ <picture>)", /<img\s+key=\{src\}/.test(cardImage) && /<picture key=\{src\}/.test(cardImage));
+  const buy = src("src/components/entitlement/BuyCreditsModal.tsx");
+  check(
+    "A3-07: BuyCreditsModal เก็บไทม์เมอร์ปิดใน ref และล้างตอนปิด/unmount",
+    /closeTimerRef\.current = setTimeout/.test(buy) && /resetModalState = \(\) => \{\s*clearCloseTimer\(\)/.test(buy) && /return clearCloseTimer/.test(buy),
+  );
+  const hook = src("src/lib/reading/use-ai-reading.ts");
+  const retryUsers = [
+    "src/components/reading/one-card/OneCardRitual.tsx",
+    "src/components/pick-a-card/PickACardClient.tsx",
+    "src/components/encyclopedia/BirthCardCalculator.tsx",
+  ];
+  check(
+    "A3-10: ปุ่มลองใหม่ของคำอ่าน AI อ่านไพ่ชุดเดิม (retryRead) ไม่จั่วใหม่ ทั้ง 3 หน้า",
+    /const retryRead = useCallback/.test(hook) &&
+      retryUsers.every((f) => /onRetry=\{\(\) => \{[\s\S]{0,200}oracle\.retryRead\(\)/.test(src(f))) &&
+      !/onRetry=\{handleDraw\}/.test(src(retryUsers[0])),
+  );
+  const walkAny = (dir: string, ext: RegExp, out: string[] = []): string[] => {
+    if (!fs.existsSync(dir)) return out;
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (e.name === "node_modules" || e.name.startsWith(".")) continue;
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) walkAny(full, ext, out);
+      else if (ext.test(e.name)) out.push(full);
+    }
+    return out;
+  };
+  const astroPages = walkAny(path.join(ROOT, "astro/pages"), /\.astro$/);
+  const headerCalls = astroPages.flatMap((f) => fs.readFileSync(f, "utf-8").match(/<SiteHeaderRoot[^>]*>/g) ?? []);
+  check(
+    `A4-04: หน้า Astro ทุกหน้าส่ง path ให้เมนูไฮไลต์ (${headerCalls.length} จุด) + ลิงก์ active มี aria-current`,
+    headerCalls.length > 0 &&
+      headerCalls.every((c) => c.includes("pathname={Astro.url.pathname}")) &&
+      /aria-current=\{isActive \? "page" : undefined\}/.test(src("src/components/ui/SacredNavDropdown.tsx")),
+  );
+  const csp = fs.readFileSync(path.join(ROOT, "src/lib/config/security-headers.ts"), "utf-8");
+  check(
+    "A4-05: CSP ครอบโดเมนของ Google Tag ตามคู่มือ (Signals + Ads conversion)",
+    ["https://*.analytics.google.com", "https://*.google-analytics.com", "https://www.googleadservices.com", "https://td.doubleclick.net"].every((d) => csp.includes(d)),
+  );
+  // A4-12: ทุก process.env.NEXT_PUBLIC_* ที่โค้ดฝั่งเบราว์เซอร์อ้าง ต้องมี define ใน astro.config (ไม่งั้น Vite แทนด้วย {})
+  const astroConfig = fs.readFileSync(path.join(ROOT, "astro.config.mjs"), "utf-8");
+  const referenced = new Set<string>();
+  for (const f of [...sources, ...walkAny(path.join(ROOT, "astro"), /\.(tsx?|astro|mjs)$/)]) {
+    for (const m of fs.readFileSync(f, "utf-8").matchAll(/process\.env\.(NEXT_PUBLIC_[A-Z0-9_]+)/g)) referenced.add(m[1]);
+  }
+  const undefinedInAstro = [...referenced].filter((n) => !astroConfig.includes(`"process.env.${n}"`));
+  check(
+    `A4-12: astro.config define ครบทุก NEXT_PUBLIC_* ที่โค้ดอ้าง (${referenced.size} ตัว)`,
+    referenced.size > 0 && undefinedInAstro.length === 0,
+    `ขาด: ${undefinedInAstro.join(", ")}`,
+  );
+  // A5-03: อิโมจิการ์ตูนในข้อความที่ผู้ใช้เห็น (นอกหลังบ้าน) — กฎเหล็กข้อ 2 อนุญาตแค่ ✦ ✨
+  const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2300}-\u{23FF}]/u;
+  const emojiHits: string[] = [];
+  for (const f of [...sources, ...walkAny(path.join(ROOT, "astro"), /\.(tsx|astro)$/)]) {
+    if (!/\.(tsx|astro)$/.test(f) || /[\\/]admin[\\/]/.test(f)) continue;
+    // ตัดคอมเมนต์ HTML (<!-- -->) ของไฟล์ .astro ด้วย โดยคงจำนวนบรรทัดเดิมไว้
+    const lines = stripComments(fs.readFileSync(f, "utf-8"))
+      .replace(/<!--[\s\S]*?-->/g, (c) => c.replace(/[^\n]/g, " "))
+      .split("\n");
+    lines.forEach((line, i) => {
+        if (/^\s*(\*|\/\/|\{\/\*)/.test(line)) return;
+        // ข้อความใน console ผู้ใช้ไม่เห็น
+        if (/console\./.test(line) || /console\.\w+\(\s*$/.test(lines[i - 1] ?? "")) return;
+        if (EMOJI.test(line)) emojiHits.push(`${path.relative(ROOT, f)}:${i + 1}`);
+      });
+  }
+  check(`A5-03: ไม่มีอิโมจิการ์ตูนในข้อความที่ผู้ใช้เห็น`, emojiHits.length === 0, emojiHits.slice(0, 5).join(" · "));
+  const redeem = src("src/components/admin/RedeemCodesManager.tsx");
+  check("A5-06: ช่องวันหมดอายุทั้งสองช่องมี <label htmlFor>", /htmlFor=\{createExpiryId\}/.test(redeem) && /htmlFor=\{editExpiryId\}/.test(redeem));
+  check(
+    "A5-11: แท็บผลคำทำนายมีแผง role=tabpanel ที่ id ตรงกับ aria-controls + roving tabIndex + ลูกศร",
+    /id="chamber-panel-card" role="tabpanel"/.test(stream) && /id="chamber-panel-summary" role="tabpanel"/.test(stream) && /tabIndex=\{activeTab === "card" \? 0 : -1\}/.test(stream) && /ArrowRight/.test(stream),
+  );
+  check("A5-14: เลขหลังไพ่ในพัดไพ่ใช้ gold-on-dark ทึบเต็ม", /text-gold-on-dark">\s*<span className="font-mono">#\{cardIdx \+ 1\}/.test(src("src/components/deck/InteractiveCardFan.tsx")));
+  check(
+    "A5-16: toast หน้าต่างแชร์อยู่ใน live region ถาวร + คัดลอกลิงก์บทความบอกผลทั้งสำเร็จและพลาด",
+    /<div role="status" aria-live="polite">\s*\{toastMessage &&/.test(src("src/components/reading/ShareModal.tsx")) &&
+      /ok \? copiedLabel : failedLabel/.test(src("astro/scripts/article-share.ts")) &&
+      /data-copy-label="" aria-live="polite"/.test(src("src/components/blog/ArticleReadingClient.tsx")),
+  );
+  const pf = src("src/components/reading/ProvablyFairPanel.tsx");
+  check("A5-20: ปุ่มคู่มือตรวจสอบเองมี aria-expanded + แผงมี id", /aria-expanded=\{showIndependentGuide\}/.test(pf) && /id="pf-independent-guide"/.test(pf));
+  const smoothHits = sources.filter((f) => /behavior:\s*"smooth"|ScrollBehavior = "smooth"/.test(stripComments(fs.readFileSync(f, "utf-8"))));
+  check(
+    "A5-21: ไม่มี scroll behavior \"smooth\" ตายตัวในโค้ด (ใช้ smoothScrollBehavior() ที่เคารพ reduced-motion)",
+    smoothHits.length === 0,
+    smoothHits.map((f) => path.relative(ROOT, f)).join(" · "),
+  );
+}
+
 console.log(`\n📊 ผ่าน ${pass} ข้อ | ล้มเหลว ${fail} ข้อ\n`);
 if (fail > 0) process.exit(1);

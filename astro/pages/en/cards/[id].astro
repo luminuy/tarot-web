@@ -32,7 +32,7 @@ const { currentIndex, totalCards, prevCard, nextCard } = cardNeighbors(card);
 ---
 
 <BaseLayout locale={locale} metadata={cardDetailMetadata(card.id, locale)}>
-  <SiteHeaderRoot locale={locale} />
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
   <main id="main-content" tabindex="-1" class={CARD_DETAIL_MAIN_CLASS}>
     <script type="application/ld+json" is:inline set:html={JSON.stringify(cardDetailJsonLd(card, locale))} />
     <script type="application/ld+json" is:inline set:html={JSON.stringify(cardDetailBreadcrumbJsonLd(card, locale))} />

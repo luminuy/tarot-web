@@ -11,7 +11,7 @@ const groupId = "cups" as const;
 ---
 
 <BaseLayout locale={locale} metadata={buildCardGroupMetadata(groupId, locale)}>
-  <SiteHeaderRoot locale={locale} />
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
   <CardGroupBodyRoot groupId={groupId} locale={locale} />
   <SiteFooterRoot locale={locale} />
 </BaseLayout>

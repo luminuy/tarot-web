@@ -108,6 +108,7 @@ import { renderSpreadIllustration } from "@/components/spread/spread-illustratio
 export { renderSpreadIllustration };
 
 import { useLocale } from "@/lib/i18n";
+import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 
 const FEATURED_SPREAD_IDS = ["three-card", "yes-no", "love"];
 
@@ -216,7 +217,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
     const children = carouselRef.current.children;
     if (children && children[index]) {
       (children[index] as HTMLElement).scrollIntoView({
-        behavior: instant ? "auto" : "smooth",
+        behavior: instant ? "auto" : smoothScrollBehavior(),
         inline: "center",
         block: "nearest",
       });
@@ -228,7 +229,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
   React.useEffect(() => {
     setActiveScrollIndex(0);
     if (carouselRef.current) {
-      carouselRef.current.scrollTo({ left: 0, behavior: "smooth" });
+      carouselRef.current.scrollTo({ left: 0, behavior: smoothScrollBehavior() });
     }
   }, [activeCategory]);
 

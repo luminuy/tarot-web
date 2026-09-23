@@ -11,7 +11,7 @@ const locale = "en" as const;
 ---
 
 <BaseLayout locale={locale} metadata={buildCardsAllMetadata(locale)}>
-  <SiteHeaderRoot locale={locale} />
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
   <CardsAllBodyRoot locale={locale}>
     <Fragment slot="table">
       <AllCardsTableRoot locale={locale} client:idle />

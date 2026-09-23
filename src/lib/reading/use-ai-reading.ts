@@ -123,6 +123,8 @@ export interface AiReadingController {
   crisisMessage: string | null;
   isPreparing: boolean;
   run: (request: AiReadingRequest) => Promise<void>;
+  /** อ่านไพ่ชุดเดิมซ้ำโดยไม่จั่วใหม่ — false = ยังไม่มีไพ่ให้อ่าน */
+  retryRead: () => Promise<boolean>;
   reset: () => void;
   clearGate: () => void;
 }
@@ -149,11 +151,14 @@ export function useAiReading(): AiReadingController {
   const [crisisMessage, setCrisisMessage] = useState<string | null>(null);
   const [isPreparing, setIsPreparing] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  /** เป้าของ /read รอบล่าสุด — ปุ่ม "ลองใหม่" อ่านไพ่ชุดเดิมซ้ำโดยไม่จั่วใหม่ (A3-10) */
+  const readTargetRef = useRef<{ sessionId: string; token: string } | null>(null);
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
+    readTargetRef.current = null;
     dispatch({ type: "reset" });
     setCards([]);
     setRawDrawn([]);
@@ -168,12 +173,146 @@ export function useAiReading(): AiReadingController {
 
   const clearGate = useCallback(() => setGate(null), []);
 
+  /** ขั้นที่ 3: ให้แม่หมออ่านไพ่ที่จั่วแล้ว — โยน Error เมื่อเชื่อมไม่ติด ให้ผู้เรียกจัดการ */
+  const streamRead = useCallback(
+    async (sessionId: string, token: string, signal: AbortSignal) => {
+      const failMessage = isEnglish
+        ? "Oracle connection momentarily lost. Please reload and try again."
+        : "แม่หมอเชื่อมสัญญาณไม่ติดสักครู่ กรุณากดโหลดใหม่อีกครั้ง";
+      /* ── 3. ให้แม่หมออ่าน แล้วสตรีมกลับมาทีละก้อน ─────────────────────── */
+      dispatch({ type: "start" });
+      const readRes = await fetch(`/api/reading/${sessionId}/read`, {
+        method: "POST",
+        signal,
+        headers: {
+          "Content-Type": "application/json",
+          "x-reading-token": token,
+        },
+      });
+
+      if (!readRes.ok || !readRes.body) {
+        const errData = await readRes.json().catch(() => ({}) as { reason?: string; error?: string });
+        const blocked = mapBlockedReason(errData.reason);
+        if (blocked) {
+          dispatch({ type: "stop" });
+          setGate(blocked);
+          return;
+        }
+        throw new Error(errData.error || failMessage);
+      }
+
+      const reader = readRes.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      // ได้ done หรือ error แล้วหรือยัง — สตรีมที่ปิดโดยไม่มีสองอย่างนี้ = ขาดกลางทาง (ห้ามค้าง streaming)
+      let gotTerminal = false;
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const chunks = buffer.split("\n\n");
+        buffer = chunks.pop() || "";
+
+        for (const chunk of chunks) {
+          if (!chunk.trim()) continue;
+          const eventMatch = chunk.match(/^event:\s*(\w+)/m);
+          const dataMatch = chunk.match(/^data:\s*(.+)$/m);
+          if (!eventMatch || !dataMatch) continue;
+
+          let payload: {
+            text?: string;
+            message?: string;
+            reading?: unknown;
+            proof?: ReadingProof;
+            guestConsumeTicket?: string;
+          };
+          try {
+            payload = JSON.parse(dataMatch[1]);
+          } catch {
+            continue;
+          }
+
+          switch (eventMatch[1]) {
+            case "opening":
+              dispatch({ type: "opening", text: payload.text ?? "" });
+              break;
+            case "card":
+              dispatch({ type: "card", card: payload as never });
+              break;
+            case "connections":
+              dispatch({ type: "connections", text: payload.text ?? "" });
+              break;
+            case "summary":
+              dispatch({ type: "summary", text: payload.text ?? "" });
+              break;
+            case "reset":
+              dispatch({ type: "clearPartial" });
+              break;
+            case "done":
+              gotTerminal = true;
+              dispatch({ type: "done", reading: (payload.reading ?? null) as never });
+              if (payload.proof) setProof(payload.proof);
+              break;
+            case "error":
+              gotTerminal = true;
+              dispatch({ type: "fail", message: payload.message || failMessage });
+              break;
+            default:
+              break;
+          }
+        }
+      }
+
+      if (!gotTerminal) {
+        dispatch({
+          type: "fail",
+          message: isEnglish
+            ? "The reading stream was interrupted. Please reload and try again."
+            : "คำทำนายส่งมาไม่ครบ กรุณากดโหลดใหม่อีกครั้ง",
+        });
+      }
+    },
+    [isEnglish]
+  );
+
+  /**
+   * อ่านไพ่ชุดเดิมซ้ำ (A3-10) — ห้ามเรียก run() ใหม่ เพราะ run() เปิดเซสชันและจั่วไพ่ใบใหม่
+   * ผู้ใช้ที่เห็นไพ่ใบหนึ่งแล้วคำอ่านล้ม ต้องได้คำอ่านของใบเดิม ไม่ใช่สุ่มจนกว่าจะถูกใจ
+   * คืน false เมื่อยังไม่มีไพ่ที่จั่วสำเร็จ (ผู้เรียกค่อยเริ่มใหม่ทั้งรอบ)
+   */
+  const retryRead = useCallback(async (): Promise<boolean> => {
+    const target = readTargetRef.current;
+    if (!target) return false;
+    abortRef.current?.abort();
+    const abortController = new AbortController();
+    abortRef.current = abortController;
+    setGate(null);
+    dispatch({ type: "clearError" });
+    try {
+      await streamRead(target.sessionId, target.token, abortController.signal);
+    } catch (err) {
+      if ((err as Error)?.name === "AbortError") return true;
+      dispatch({
+        type: "fail",
+        message:
+          (err as Error)?.message ||
+          (isEnglish
+            ? "Oracle connection momentarily lost. Please reload and try again."
+            : "แม่หมอเชื่อมสัญญาณไม่ติดสักครู่ กรุณากดโหลดใหม่อีกครั้ง"),
+      });
+    }
+    return true;
+  }, [isEnglish, streamRead]);
+
   const run = useCallback(
     async (request: AiReadingRequest) => {
       abortRef.current?.abort();
       const abortController = new AbortController();
       abortRef.current = abortController;
 
+      readTargetRef.current = null;
       setGate(null);
       setCrisisMessage(null);
       /*
@@ -344,107 +483,15 @@ export function useAiReading(): AiReadingController {
         setIsPreparing(false);
         }
 
-        /* ── 3. ให้แม่หมออ่าน แล้วสตรีมกลับมาทีละก้อน ─────────────────────── */
-        dispatch({ type: "start" });
-        const readRes = await fetch(`/api/reading/${sessionId}/read`, {
-          method: "POST",
-          signal: abortController.signal,
-          headers: {
-            "Content-Type": "application/json",
-            "x-reading-token": latestToken,
-          },
-        });
-
-        if (!readRes.ok || !readRes.body) {
-          const errData = await readRes.json().catch(() => ({}) as { reason?: string; error?: string });
-          const blocked = mapBlockedReason(errData.reason);
-          if (blocked) {
-            dispatch({ type: "stop" });
-            setGate(blocked);
-            return;
-          }
-          throw new Error(errData.error || failMessage);
-        }
-
-        const reader = readRes.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-        // ได้ done หรือ error แล้วหรือยัง — สตรีมที่ปิดโดยไม่มีสองอย่างนี้ = ขาดกลางทาง (ห้ามค้าง streaming)
-        let gotTerminal = false;
-
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const chunks = buffer.split("\n\n");
-          buffer = chunks.pop() || "";
-
-          for (const chunk of chunks) {
-            if (!chunk.trim()) continue;
-            const eventMatch = chunk.match(/^event:\s*(\w+)/m);
-            const dataMatch = chunk.match(/^data:\s*(.+)$/m);
-            if (!eventMatch || !dataMatch) continue;
-
-            let payload: {
-              text?: string;
-              message?: string;
-              reading?: unknown;
-              proof?: ReadingProof;
-              guestConsumeTicket?: string;
-            };
-            try {
-              payload = JSON.parse(dataMatch[1]);
-            } catch {
-              continue;
-            }
-
-            switch (eventMatch[1]) {
-              case "opening":
-                dispatch({ type: "opening", text: payload.text ?? "" });
-                break;
-              case "card":
-                dispatch({ type: "card", card: payload as never });
-                break;
-              case "connections":
-                dispatch({ type: "connections", text: payload.text ?? "" });
-                break;
-              case "summary":
-                dispatch({ type: "summary", text: payload.text ?? "" });
-                break;
-              case "reset":
-                dispatch({ type: "clearPartial" });
-                break;
-              case "done":
-                gotTerminal = true;
-                dispatch({ type: "done", reading: (payload.reading ?? null) as never });
-                if (payload.proof) setProof(payload.proof);
-                break;
-              case "error":
-                gotTerminal = true;
-                dispatch({ type: "fail", message: payload.message || failMessage });
-                break;
-              default:
-                break;
-            }
-          }
-        }
-
-        if (!gotTerminal) {
-          dispatch({
-            type: "fail",
-            message: isEnglish
-              ? "The reading stream was interrupted. Please reload and try again."
-              : "คำทำนายส่งมาไม่ครบ กรุณากดโหลดใหม่อีกครั้ง",
-          });
-        }
+        readTargetRef.current = { sessionId, token: latestToken };
+        await streamRead(sessionId, latestToken, abortController.signal);
       } catch (err) {
         if ((err as Error)?.name === "AbortError") return;
         setIsPreparing(false);
         dispatch({ type: "fail", message: (err as Error)?.message || failMessage });
       }
     },
-    [isEnglish, locale]
+    [isEnglish, locale, streamRead]
   );
 
   return {
@@ -459,6 +506,7 @@ export function useAiReading(): AiReadingController {
     crisisMessage,
     isPreparing,
     run,
+    retryRead,
     reset,
     clearGate,
   };

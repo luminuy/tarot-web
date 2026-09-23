@@ -24,7 +24,7 @@ const spreads = getSpreadsForTopic(topic);
 ---
 
 <BaseLayout locale={locale} metadata={spreadTopicMetadata(topic.slug, locale)}>
-  <SiteHeaderRoot locale={locale} />
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
   <SpreadTopicContentRoot topic={topic} locale={locale}>
     <Fragment slot="list">
       <TopicSpreadListRoot spreads={spreads} locale={locale} />

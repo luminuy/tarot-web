@@ -25,7 +25,14 @@
 import { bootstrapAnalytics } from "@/lib/analytics-bootstrap";
 import { setAnalyticsConsent } from "@/lib/analytics";
 import { writeConsent, type ConsentChoice } from "@/lib/analytics-consent";
-import { isServiceWorkerAllowed, setupServiceWorker, type SwContainerLike } from "@/components/pwa/sw-register";
+import {
+  createSessionSkipFlag,
+  isServiceWorkerAllowed,
+  safeSessionStorage,
+  setupServiceWorker,
+  type SwContainerLike,
+} from "@/components/pwa/sw-register";
+import { STORAGE_KEYS } from "@/lib/storage/keys";
 import { SITE_NAME_TH, SITE_ORIGIN } from "@/lib/config/site-constants";
 
 /* ── 1 · เกราะกันดูดเนื้อหา ─────────────────────────────────────────────────
@@ -72,6 +79,11 @@ function installServiceWorker(): void {
     isDocumentReady: () => document.readyState === "complete",
     onWindowLoad: (fn) => window.addEventListener("load", fn, { once: true }),
     offWindowLoad: (fn) => window.removeEventListener("load", fn),
+    onPageHide: (fn) => {
+      window.addEventListener("pagehide", fn);
+      return () => window.removeEventListener("pagehide", fn);
+    },
+    skipFlag: createSessionSkipFlag(safeSessionStorage(), STORAGE_KEYS.swSkipRequestedAt),
     log: (level, message, detail) => {
       if (level === "warn") console.warn(message, detail);
       else console.info(message);

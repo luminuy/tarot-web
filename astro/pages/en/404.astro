@@ -18,7 +18,7 @@ const locale = "en" as const;
 ---
 
 <BaseLayout locale={locale} metadata={notFoundMetadataEn}>
-  <SiteHeaderRoot locale={locale} />
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
   <NotFoundMainEnRoot />
   <SiteFooterRoot locale={locale} spacing="tight" />
 </BaseLayout>
