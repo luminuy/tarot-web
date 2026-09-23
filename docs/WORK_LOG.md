@@ -38,6 +38,19 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-09-23 (รอบ 151): 🔎 เครื่องมือวัดโมเดลฟรีบน OpenRouter ด้วยคำอ่านเต็มจริง (ก่อนต่อเป็นชั้นสำรองที่ 3)
+
+**ที่มา**: แผงแอดมินวันนี้ "ได้คำตอบสำรอง (ไม่ใช่ AI) 21 ครั้ง" — ผัง ≥4 ใบเกินเพดาน 8K ต่อคำขอของ Groq ต้องไป Gemini ทั้งหมด แล้วโควตา Gemini หมด
+เจ้าของมี `OPENROUTER_API_KEY` ➔ จะเพิ่ม OpenRouter เป็นชั้นที่ 3 ก่อนตกไปคำอ่านสำรอง · แต่ INC-0053 บังคับวัดก่อน
+
+| ของใหม่ | รายละเอียด |
+| :--- | :--- |
+| `probe-openrouter.ts --reading N` | N ตัวที่ตอบไทยสั้นได้เร็วสุด ➔ เขียนคำอ่านเต็มด้วย system prompt + ข้อความคำอ่านชุดเดียวกับ production (ผังเซลติกครอส 10 ใบ) ➔ ตรวจ ReadingSchema · อักษรต่างด้าว · คะแนนไทย · เขียน `openrouter-probe.json` |
+| `npm run ai:probe-openrouter` | รันผ่าน `tsconfig.scripts.json` (ใช้โค้ด src ได้) |
+| `.github/workflows/ai-probe-openrouter.yml` | กดรันเองเท่านั้น · สิทธิ์อ่านอย่างเดียว · ใช้คีย์จาก repository secrets |
+
+**ขั้นต่อไป**: กดรัน workflow ➔ เลือกโมเดลจากผลวัด ➔ ต่อ `streamOpenRouterReading` หลัง Gemini ก่อน mock + เติม `OPENROUTER_API_KEY` ใน `deploy.yml`
+
 ### 🗓️ 2026-09-23 (รอบ 150): ✂️ ถอด `qwen/qwen3.6-27b` ออกจากลำดับโมเดล Groq — ตอบ 404 มาตลอด
 
 **หลักฐาน**: log ai:judge (run 35868820380) `status 404 model_not_found` · หน้า Limits ของ Groq (ภาพจากเจ้าของ) ยังติ๊กชื่อ `qwen3.6-27b` แต่ไม่มีแถวในตาราง Chat Completions

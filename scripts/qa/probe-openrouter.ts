@@ -19,9 +19,24 @@
  *   export OPENROUTER_API_KEY=sk-or-...   # สร้างที่ https://openrouter.ai/keys (ฟรี ไม่ต้องผูกบัตร)
  *   npx tsx scripts/qa/probe-openrouter.ts
  *   npx tsx scripts/qa/probe-openrouter.ts --limit 5   # ทดสอบแค่ 5 ตัวแรก (เร็วขึ้น)
+ *   npm run ai:probe-openrouter -- --reading 6         # + ยิงคำอ่านเต็มจริงให้ 6 ตัวที่เร็วสุด
+ *
+ * ขั้นที่ 2 (`--reading N`): ตอบ 2 ประโยคได้ ≠ เขียนคำอ่านได้
+ *   ยิง system prompt + ข้อความคำอ่าน **ชุดเดียวกับ production** (ผังเซลติกครอส 10 ใบ = ผังที่ Groq รับไม่ไหว)
+ *   ขอ JSON แล้วตรวจด้วย ReadingSchema + อักษรต่างด้าว + คะแนนภาษาไทยจากโค้ด
+ *   ผลเขียนลง `openrouter-probe.json` (workflow แนบให้โหลด)
  */
 
+import fs from "node:fs";
+import path from "node:path";
 import { hasForeignScript } from "../../src/lib/ai/language";
+import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "../../src/lib/ai/prompt";
+import { resolveMaxReadingTokens } from "../../src/lib/ai/reading-stream";
+import { ReadingSchema } from "../../src/lib/schema/reading";
+import { checkThaiQualityDeep } from "../../src/lib/ai/thai-quality";
+import { getSpread } from "../../src/data/spreads";
+import { cardById } from "../../src/data/cards";
+import type { Category } from "../../src/data/cards/types";
 
 const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
 const OPENROUTER_CHAT_URL = "https://openrouter.ai/api/v1/chat/completions";
@@ -121,6 +136,131 @@ async function probeModel(apiKey: string, model: string): Promise<ProbeResult> {
   }
 }
 
+interface ReadingProbe {
+  model: string;
+  ok: boolean;
+  elapsedMs: number;
+  schemaOk: boolean;
+  foreignLeak: boolean;
+  thaiScore: number;
+  thaiIssues: string[];
+  outputChars: number;
+  error: string | null;
+  summaryPreview: string;
+}
+
+interface GoldenCase {
+  id: string;
+  category: string;
+  spreadId: string;
+  question: string;
+  cardIds: string[];
+  reversed: boolean[];
+  personaId?: string;
+}
+
+/** บริบทเดียวกับ `run-golden-judge.ts` — ห้ามแต่งไพ่เอง ใช้ไพ่จาก fixture เท่านั้น */
+function goldenContext(caseId: string): ReadingContext {
+  const fixture = path.join(__dirname, "fixtures", "golden-readings.json");
+  const all = JSON.parse(fs.readFileSync(fixture, "utf-8")) as GoldenCase[];
+  const gold = all.find((g) => g.id === caseId);
+  if (!gold) throw new Error(`ไม่พบเคส ${caseId} ใน golden-readings.json`);
+  const spread = getSpread(gold.spreadId);
+  const cards = gold.cardIds.map((id) => cardById(id));
+  if (!spread || cards.some((c) => !c)) throw new Error(`เคส ${caseId} ประกอบผัง/ไพ่ไม่ได้`);
+  return {
+    personaId: gold.personaId ?? null,
+    spread,
+    category: gold.category as Category,
+    question: gold.question,
+    intake: {},
+    drawn: gold.cardIds.map((_, i) => ({ order: i, cardIndex: i, isReversed: Boolean(gold.reversed?.[i]) })),
+    cards: cards as NonNullable<ReturnType<typeof cardById>>[],
+    safety: { flag: "none", block: false },
+    lang: "th",
+  } as ReadingContext;
+}
+
+function extractJson(text: string): unknown {
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const body = (fenced ? fenced[1] : text).trim();
+  const start = body.indexOf("{");
+  const end = body.lastIndexOf("}");
+  if (start < 0 || end <= start) throw new Error("ไม่พบ JSON ในคำตอบ");
+  return JSON.parse(body.slice(start, end + 1));
+}
+
+async function probeReading(apiKey: string, model: string, ctx: ReadingContext): Promise<ReadingProbe> {
+  const startedAt = Date.now();
+  const base: ReadingProbe = {
+    model,
+    ok: false,
+    elapsedMs: 0,
+    schemaOk: false,
+    foreignLeak: false,
+    thaiScore: 0,
+    thaiIssues: [],
+    outputChars: 0,
+    error: null,
+    summaryPreview: "",
+  };
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000);
+    const res = await fetch(OPENROUTER_CHAT_URL, {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://tarot-web.local",
+        "X-Title": "tarot-web reading probe",
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: "system", content: buildSystemPrompt(ctx.personaId, { lang: "th" }) },
+          { role: "user", content: buildReadingMessage(ctx) },
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: resolveMaxReadingTokens(ctx.drawn.length, 12000),
+        temperature: 0.6,
+      }),
+    });
+    clearTimeout(timeoutId);
+    base.elapsedMs = Date.now() - startedAt;
+    if (!res.ok) {
+      base.error = `HTTP ${res.status}: ${(await res.text().catch(() => "")).slice(0, 200)}`;
+      return base;
+    }
+    const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    const text = data?.choices?.[0]?.message?.content ?? "";
+    base.outputChars = text.length;
+    if (!text) {
+      base.error = "200 แต่ไม่มีข้อความตอบกลับ";
+      return base;
+    }
+    const parsed = ReadingSchema.safeParse(extractJson(text));
+    base.schemaOk = parsed.success;
+    base.foreignLeak = hasForeignScript(text);
+    if (!parsed.success) {
+      base.error = `JSON ไม่ตรง ReadingSchema: ${parsed.error.issues.slice(0, 3).map((i) => i.path.join(".")).join(", ")}`;
+      return base;
+    }
+    const thai = checkThaiQualityDeep(parsed.data);
+    base.thaiScore = thai.score;
+    base.thaiIssues = thai.issues.map((i) => i.code);
+    base.summaryPreview = String((parsed.data as { summary?: string }).summary ?? "").slice(0, 120);
+    base.ok = !base.foreignLeak;
+    if (base.foreignLeak) base.error = "มีอักษรต่างด้าวปนคำอ่าน";
+    return base;
+  } catch (err) {
+    base.elapsedMs = Date.now() - startedAt;
+    base.error = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+    return base;
+  }
+}
+
 async function main() {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
@@ -167,6 +307,45 @@ async function main() {
   for (const r of bad) {
     console.log(`  ❌ ${r.model.padEnd(45)} status=${r.status ?? "-"}  ${r.error || "มีอักษรต่างด้าวปนคำตอบ"}`);
   }
+
+  // ── ขั้นที่ 2: คำอ่านเต็มจริง ────────────────────────────────────────────────
+  const readingIdx = process.argv.indexOf("--reading");
+  const readingTop = readingIdx >= 0 ? parseInt(process.argv[readingIdx + 1] ?? "6", 10) || 6 : 0;
+  const caseIdx = process.argv.indexOf("--case");
+  const caseId = caseIdx >= 0 ? process.argv[caseIdx + 1] : "gold-021";
+  const readings: ReadingProbe[] = [];
+
+  if (readingTop > 0 && good.length > 0) {
+    const ctx = goldenContext(caseId);
+    const candidates = good.slice(0, readingTop);
+    console.log(
+      `\n🔮 ขั้นที่ 2 — คำอ่านเต็มด้วย prompt จริง (${caseId} · ผัง ${ctx.spread.id} ${ctx.drawn.length} ใบ) · ${candidates.length} ตัว\n`,
+    );
+    for (const [i, c] of candidates.entries()) {
+      if (i > 0) await new Promise((r) => setTimeout(r, 5000)); // โมเดลฟรีจำกัด ~20 คำขอ/นาที
+      process.stdout.write(`  กำลังยิง ${c.model} ... `);
+      const r = await probeReading(apiKey, c.model, ctx);
+      readings.push(r);
+      console.log(
+        r.ok
+          ? `✅ ${r.elapsedMs}ms · ไทย ${r.thaiScore}/100${r.thaiIssues.length ? ` (${r.thaiIssues.join(",")})` : ""}`
+          : `❌ ${r.error}`,
+      );
+    }
+    const passed = readings.filter((r) => r.ok).sort((a, b) => b.thaiScore - a.thaiScore || a.elapsedMs - b.elapsedMs);
+    console.log("\n📊 เขียนคำอ่านเต็มได้จริง (เรียงตามคะแนนไทย แล้วความเร็ว):\n");
+    if (passed.length === 0) console.log("  (ไม่มีตัวไหนผ่านเลย)");
+    for (const r of passed) {
+      console.log(`  ✅ ${r.model.padEnd(45)} ไทย ${r.thaiScore}/100 · ${r.elapsedMs}ms · "${r.summaryPreview}"`);
+    }
+  }
+
+  fs.writeFileSync(
+    "openrouter-probe.json",
+    JSON.stringify({ probedAt: new Date().toISOString(), caseId, quick: results, readings }, null, 2),
+    "utf-8",
+  );
+  console.log("\n💾 ผลทั้งหมด: openrouter-probe.json");
 }
 
 main().catch((err) => {

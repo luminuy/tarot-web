@@ -1,0 +1,91 @@
+name: 🔎 OpenRouter Probe — วัดโมเดลฟรีก่อนต่อเข้าเว็บ (กดรันเอง)
+run-name: "🔎 [By: ${{ github.actor }}] probe OpenRouter · คำอ่านเต็ม ${{ inputs.reading }} ตัว"
+
+# ⚠️ กดรันเองเท่านั้น — เหมือน ai-judge.yml ห้ามเพิ่ม push / pull_request / schedule
+# ------------------------------------------------------------------------------
+# INC-0053: ห้ามเดาว่าโมเดลไหนใช้ได้ ต้องวัดจริงก่อนต่อเข้าโค้ด production
+# สคริปต์ดึงลิสต์โมเดลฟรีสด ๆ จาก OpenRouter (ไม่ hardcode) แล้ว
+#   1) ถามภาษาไทยสั้น ๆ ทุกตัว  2) ให้ N ตัวที่เร็วสุดเขียนคำอ่านเต็มด้วย prompt จริง (ผัง 10 ใบ)
+# โมเดลฟรีไม่มีค่าใช้จ่าย · คีย์อยู่ใน repository secrets (OPENROUTER_API_KEY)
+
+on:
+  workflow_dispatch:
+    inputs:
+      reading:
+        description: "จำนวนโมเดลที่เร็วสุดที่จะให้เขียนคำอ่านเต็ม (0 = แค่ถามสั้น)"
+        required: false
+        default: "8"
+      case:
+        description: "เคสจาก golden-readings.json (ค่าเริ่มต้น gold-021 = เซลติกครอส 10 ใบ)"
+        required: false
+        default: "gold-021"
+
+concurrency:
+  group: ai-probe-openrouter
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: 🔎 วัดโมเดลฟรีบน OpenRouter
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: ⚙️ Setup Node.js 22
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔑 ตรวจว่ามีคีย์
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          if [ -z "$OPENROUTER_API_KEY" ]; then
+            echo "::error::ไม่มี OPENROUTER_API_KEY ใน repository secrets (Settings ➔ Secrets and variables ➔ Actions)"
+            exit 1
+          fi
+
+      - name: 🔎 วัดจริง
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          # ⚠️ ห้ามยัด ${{ inputs.* }} ลงสคริปต์เชลล์ตรง ๆ — ส่งผ่าน env แล้วตรวจรูปแบบก่อน
+          PROBE_READING: ${{ inputs.reading }}
+          PROBE_CASE: ${{ inputs.case }}
+        run: |
+          set -o pipefail
+          READING="${PROBE_READING:-8}"
+          case "$READING" in ''|*[!0-9]*) echo "::error::reading ต้องเป็นตัวเลขล้วน (ได้มา: $READING)"; exit 1;; esac
+          CASE_ID="${PROBE_CASE:-gold-021}"
+          case "$CASE_ID" in gold-[0-9][0-9][0-9]) ;; *) echo "::error::case ต้องเป็นรูปแบบ gold-001 (ได้มา: $CASE_ID)"; exit 1;; esac
+          npm run ai:probe-openrouter -- --reading "$READING" --case "$CASE_ID" 2>&1 | tee probe-output.txt
+
+      - name: 📊 สรุปผลขึ้นหน้า workflow
+        if: always()
+        run: |
+          {
+            echo "## 🔎 ผล OpenRouter Probe"
+            echo ""
+            echo '```'
+            tail -n 60 probe-output.txt 2>/dev/null || echo "(ไม่มีผลลัพธ์)"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 📎 แนบผลไว้ให้โหลด
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: openrouter-probe
+          path: |
+            openrouter-probe.json
+            probe-output.txt
+          if-no-files-found: warn
+          retention-days: 30
