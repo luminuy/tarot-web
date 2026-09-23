@@ -214,6 +214,31 @@ async function run() {
     callSites.join(" | "),
   );
 
+  // ── 7. ผลตรวจ 2026-09-23 — ท่อ AI กลางของหน้า one-card / pick-a-card / birth-card ──
+  console.log("\n🧯 7. ท่อสตรีมกลาง (useAiReading) และพิธีไพ่ใบเดียว");
+  const hookSrc = fs.readFileSync(path.resolve("src/lib/reading/use-ai-reading.ts"), "utf8");
+  check(
+    'A3-01: useAiReading ฟัง event "error" จากเซิร์ฟเวอร์ (ไม่ตกไป default แล้วค้าง streaming)',
+    /case\s+"error"\s*:[\s\S]{0,200}?type:\s*"fail"/.test(hookSrc),
+  );
+  check(
+    "A3-01: สตรีมปิดโดยไม่มี done/error ต้องขึ้นข้อความผิดพลาด (ด่าน gotTerminal)",
+    /if\s*\(\s*!gotTerminal\s*\)\s*\{[\s\S]{0,120}?type:\s*"fail"/.test(hookSrc),
+  );
+  const ritualSrc = fs.readFileSync(path.resolve("src/components/reading/one-card/OneCardRitual.tsx"), "utf8");
+  check(
+    "A3-02: OneCardRitual อ่านทิศไพ่จากเซิร์ฟเวอร์ (rawDrawn[0].isReversed)",
+    /rawDrawn\[0\]\?\.isReversed/.test(ritualSrc),
+  );
+  check(
+    "A3-02: ไพ่ที่เปิดแล้วส่ง isReversed ให้ TarotCard และห้ามใช้ keywords.upright ตายตัว",
+    /isReversed=\{drawnReversed\}/.test(ritualSrc) && !/keywords\?\.upright/.test(ritualSrc),
+  );
+  for (const client of ["src/components/daily/DailyClient.tsx", "src/components/love/LoveOneCardClient.tsx"]) {
+    const src = fs.readFileSync(path.resolve(client), "utf8");
+    check(`A3-02: ${client} บันทึกทิศจริงลงประวัติ (ไม่ใช่ isReversed: false ตายตัว)`, !/isReversed:\s*false/.test(src));
+  }
+
   // ── สรุป ────────────────────────────────────────────────────────────
   console.log("\n══════════════════════════════════════════════════════════════════");
   console.log(`ผลรวม: ✅ ${passed} ผ่าน · ❌ ${failed} ตก (ไพ่ในสำรับ ${DECK.length} ใบ)`);

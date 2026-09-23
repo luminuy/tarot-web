@@ -143,18 +143,26 @@ export function BlogIndexBody({ locale, list }: { locale: Locale; list: ReactNod
   );
 }
 
-/** 10 ฟิลด์ที่การ์ดบทความใช้จริง — ตัดเนื้อบทความทิ้งตั้งแต่ต้นทาง (ISSUE-043) */
-export function blogCardItems(): BlogCardItem[] {
+/**
+ * ฟิลด์ที่การ์ดบทความใช้จริง — ตัดเนื้อบทความทิ้งตั้งแต่ต้นทาง (ISSUE-043)
+ *
+ * ⚠️ รายการนี้ถูกส่งเป็น prop ของ island จึงถูกฝังลง HTML ทั้งก้อน (A8-01)
+ *    ส่งเฉพาะภาษาของหน้านั้น — อีกภาษาหนึ่งผู้ใช้ไม่เห็นบนการ์ดอยู่แล้ว
+ *    (วัดจริง: ส่งครบสองภาษา HTML /blog โต +7.4 KB gzip · ตัดแล้วเหลือราวครึ่ง)
+ */
+export function blogCardItems(locale: Locale): BlogCardItem[] {
+  const isEnglish = locale === "en";
   return getArticleSummaries().map((a) => ({
     slug: a.slug,
     category: a.category,
-    categoryTh: a.categoryTh,
-    categoryEn: a.categoryEn,
-    title: a.title,
-    titleEn: a.titleEn,
-    description: a.description,
-    descriptionEn: a.descriptionEn,
+    categoryTh: isEnglish ? "" : a.categoryTh,
+    categoryEn: isEnglish ? a.categoryEn : undefined,
+    title: isEnglish ? a.titleEn || a.title : a.title,
+    titleEn: undefined,
+    description: isEnglish ? a.descriptionEn || a.description : a.description,
+    descriptionEn: undefined,
     readTime: a.readTime,
-    keywords: a.keywords,
+    // คีย์เวิร์ดมีแต่ภาษาไทย และหน้าอังกฤษซ่อนป้ายนี้อยู่แล้ว
+    keywords: isEnglish ? [] : a.keywords,
   }));
 }

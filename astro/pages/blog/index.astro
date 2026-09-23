@@ -1,5 +1,5 @@
 ---
-import { buildBlogIndexMetadata } from "@/app/_shared/pages/blog-index";
+import { blogCardItems, buildBlogIndexMetadata } from "@/app/_shared/pages/blog-index";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { BlogIndexBodyRoot } from "../../components/PageBodies";
@@ -14,7 +14,7 @@ const locale = "th" as const;
   <SiteHeaderRoot locale={locale} />
   <BlogIndexBodyRoot locale={locale}>
     <Fragment slot="list">
-      <BlogIndexRoot locale={locale} client:idle />
+      <BlogIndexRoot locale={locale} articles={blogCardItems(locale)} client:idle />
     </Fragment>
   </BlogIndexBodyRoot>
   <SiteFooterRoot locale={locale} />

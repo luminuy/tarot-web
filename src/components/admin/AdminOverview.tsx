@@ -148,7 +148,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
     setRebuildingIndex(true);
     showToast("กำลังสั่งรีบิลด์ Vector Search Index…");
     try {
-      const res = await fetch("/api/admin/rebuild-index", { method: "POST" });
+      const res = await fetch("/api/admin/rebuild-search-index", { method: "POST" });
       const data = await res.json();
       if (res.ok) {
         showToast(data.message || "สร้าง Index สำเร็จเรียบร้อย");

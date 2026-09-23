@@ -166,7 +166,7 @@ export function LoveOneCardClient() {
     }
   };
 
-  const handleRevealed = (card: TarotCardType) => {
+  const handleRevealed = (card: TarotCardType, isReversed: boolean) => {
     try {
       const statusObj = STATUS_OPTIONS.find((s) => s.id === selectedStatus);
       const cardIdx = CARD_SUMMARIES.findIndex((c) => c.id === card.id);
@@ -198,11 +198,11 @@ export function LoveOneCardClient() {
             cardIndex: cardIdx,
             cardNameTh: card.nameTh,
             cardNameEn: card.nameEn,
-            isReversed: false,
+            isReversed,
             element: card.element,
           },
         ],
-        summary: card.meanings.love.upright,
+        summary: isReversed ? card.meanings.love.reversed : card.meanings.love.upright,
       });
       setSavedToHistory(true);
     } catch {

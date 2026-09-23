@@ -59,7 +59,8 @@ export interface OneCardRitualProps {
   deckLabel: string;
   intention?: string;
   drawButtonText?: string;
-  onRevealed: (card: TarotCardType) => void;
+  /** isReversed = ทิศที่เซิร์ฟเวอร์สุ่มจริง (ต้องตรงกับที่ AI อ่าน) */
+  onRevealed: (card: TarotCardType, isReversed: boolean) => void;
   /** เนื้อหาเสริมของแต่ละหน้า — วางใต้คำอ่านของแม่หมอ (คำอ่านหลักมาจาก AI แล้ว) */
   renderReading?: (card: TarotCardType) => React.ReactNode;
   recommendations?: React.ReactNode;
@@ -133,6 +134,8 @@ export function OneCardRitual({
 
   /* ได้เลขไพ่จากเซิร์ฟเวอร์แล้วค่อยเปิดสำรับไทยมาประกอบเป็นไพ่เต็มใบ */
   const drawnIndex = oracle.rawDrawn[0]?.cardIndex;
+  // ทิศไพ่มาจากเซิร์ฟเวอร์เท่านั้น — ภาพ คีย์เวิร์ด และประวัติต้องตรงกับที่ AI อ่าน (Provably Fair)
+  const drawnReversed = !!oracle.rawDrawn[0]?.isReversed;
   React.useEffect(() => {
     if (drawnIndex === undefined) return;
     let cancelled = false;
@@ -160,7 +163,7 @@ export function OneCardRitual({
     if (!drawnCard) return;
     soundManager.playCardFlipSound();
     setStatus("revealed");
-    onRevealed(drawnCard);
+    onRevealed(drawnCard, drawnReversed);
   };
 
   // รีเซ็ตเพื่อเริ่มต้นการดูดวงใหม่
@@ -286,6 +289,7 @@ export function OneCardRitual({
                 <TarotCard
                   size="lg"
                   isRevealed={true}
+                  isReversed={drawnReversed}
                   card={drawnCard}
                   imageFull={true}
                   className="shadow-overlay"
@@ -318,11 +322,17 @@ export function OneCardRitual({
                       ? resolveDisplayKeywords({
                           cardId: drawnCard.id,
                           keywordsEn: drawnCard.keywordsEn,
+                          isReversed: drawnReversed,
                           isEnglish: true,
                         })
                           .slice(0, 4)
                           .join(" — ")
-                      : drawnCard.keywords?.upright?.join(" — ")}
+                      : resolveDisplayKeywords({
+                          cardId: drawnCard.id,
+                          keywords: drawnCard.keywords,
+                          isReversed: drawnReversed,
+                          isEnglish: false,
+                        }).join(" — ")}
                   </p>
                 </div>
 

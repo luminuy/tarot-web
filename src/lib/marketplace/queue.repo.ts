@@ -49,6 +49,20 @@ interface RawTicketRow {
   expires_at: number;
 }
 
+/** ตั๋วฉบับส่งออกนอกเซิร์ฟเวอร์ — ไม่มี `customerRef` */
+export type PublicQueueTicket = Omit<QueueTicket, "customerRef">;
+
+/**
+ * ⚠️ `customerRef` คือความลับแบบ bearer ของลูกค้า (ใครถือ = เป็นเจ้าของตั๋วทุกใบของคนนั้น)
+ * ทุก response ที่ส่งตั๋วออกไป ต้องผ่านฟังก์ชันนี้ก่อนเสมอ — เดิมส่งทั้งแถว
+ * แม่หมอจึงเห็น ref ของลูกค้าทุกคนในคิว แล้วเอาไปแลกเป็นคุกกี้อ่านคิวข้ามแม่หมอได้ (A2-13)
+ */
+export function toPublicTicket(ticket: QueueTicket): PublicQueueTicket {
+  const { customerRef: _secret, ...rest } = ticket;
+  void _secret;
+  return rest;
+}
+
 function mapRowToTicket(row: RawTicketRow): QueueTicket {
   return {
     id: row.id,

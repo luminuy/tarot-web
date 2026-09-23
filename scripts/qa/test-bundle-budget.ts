@@ -192,8 +192,19 @@ export const BUDGETS: RouteBudget[] = [
      * หลังย้าย: HTML 35 ➔ 23 KB และ JS 174 ➔ 143 KB — **ต้องยิง Lighthouse วัดซ้ำ
      * แล้วบันทึกผลลง KNOWN_ISSUES ก่อนปิดเคส** ห้ามสรุปเองว่าหายจากตัวเลขสองตัวนี้
      */
-    maxJsGzipKb: 158, // CI วัดได้ ~152 KB (dev 143 KB) + ระยะหายใจ 10%
-    maxHtmlGzipKb: 30, // วัดจริง 2026-09-15: 23 KB
+    /*
+     * 🔁 **2026-09-23 (A8-01): island เลิกลากบทความเต็ม 26 เรื่องสองภาษาเข้าบันเดิล**
+     * เดิม `BlogIslands.tsx` เรียก `blogCardItems()` เอง — ตัดฟิลด์ตอนรันไทม์ แต่ตัวโมดูล
+     * `@/data/articles` ทั้งไฟล์ถูกมัดไปด้วย (ชังก์ 240 KB ดิบ / 57.1 KB gzip)
+     * ➔ หน้า .astro เรียกตอนบิลด์แล้วส่งเป็น prop (เฉพาะภาษาของหน้า) แทน
+     *
+     * **การแลกที่ตั้งใจ วัดจากบิลด์จริงทั้งสองฝั่ง** (แนวเดียวกับ /spreads ด้านล่าง):
+     *   JS   131 ➔ 79 KB gzip  (−52 — ชังก์ BlogIslands 57.1 ➔ 4.4 KB)
+     *   HTML 25.3 ➔ 29.3 KB gzip (+4.0 — prop ถูกฝังลง HTML ของ island)
+     * ⚠️ เพดาน HTML ที่ขยับขึ้นข้อนี้ **ห้ามใช้เป็นข้ออ้างให้ขยับข้ออื่น**
+     */
+    maxJsGzipKb: 90, // dev วัดได้ 79 KB (2026-09-23) + ระยะหายใจ ~10%
+    maxHtmlGzipKb: 34, // dev วัดได้ 29.3 KB (2026-09-23) + ส่วนต่าง CI ที่เคยเห็นใน /spreads
   },
   {
     route: "/daily",
@@ -664,6 +675,46 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
     );
     for (const issue of r.lcpIssues) {
       console.log(`  ❌ ${issue}`);
+    }
+  }
+
+  // ── ด่านระดับชังก์ (ผลตรวจ 2026-09-23 · A8-01 · A8-04) ───────────────────────
+  // เพดานรายหน้าจับของที่รั่วไม่ได้ ถ้าเพดานหน้านั้นหลวมอยู่แล้ว (/blog เคยตั้ง 158 KB
+  // ขณะที่บทความเต็ม 57 KB รั่วอยู่ในนั้นโดยไม่มีใครเห็น) จึงคุมที่ต้นเหตุโดยตรงด้วย
+  console.log("\n── ชังก์ของ Astro ที่ต้องไม่ลากของฝั่งเซิร์ฟเวอร์มาด้วย ──");
+  const astroChunkDir = path.join(ROOT, "dist/_astro");
+  const astroChunks = fs.existsSync(astroChunkDir)
+    ? fs.readdirSync(astroChunkDir).filter((f) => f.endsWith(".js"))
+    : [];
+  if (astroChunks.length === 0) {
+    console.log("  ❌ ไม่พบชังก์ใน dist/_astro — ต้องบิลด์ Astro ก่อน (ด่านนี้ห้ามผ่านแบบว่างเปล่า)");
+    hasFailure = true;
+  } else {
+    // zod ใช้ตรวจคำขอฝั่งเซิร์ฟเวอร์เท่านั้น — UI ต้องใช้ `import type` หรือไฟล์ค่าคงที่ไร้ zod
+    // (เช่น src/lib/schema/reading-display.ts) ไม่งั้นลาก ~21 KB gzip มาทั้งตัว
+    const zodChunks = astroChunks.filter((f) =>
+      fs.readFileSync(path.join(astroChunkDir, f), "utf8").includes("ZodError"),
+    );
+    if (zodChunks.length > 0) {
+      console.log(`  ❌ ชังก์ไคลเอนต์มี zod ติดมา: ${zodChunks.join(", ")}`);
+      hasFailure = true;
+    } else {
+      console.log(`  ✅ ไม่มีชังก์ไหนลาก zod มาเบราว์เซอร์ (${astroChunks.length} ชังก์)`);
+    }
+
+    const BLOG_ISLAND_MAX_GZIP_KB = 10; // วัดจริง 2026-09-23: 4.4 KB (เดิม 57.1 KB)
+    const blogChunk = astroChunks.find((f) => f.startsWith("BlogIslands."));
+    if (!blogChunk) {
+      console.log("  ❌ หาชังก์ BlogIslands ไม่เจอ — ชื่อ island เปลี่ยน? แก้ชื่อในด่านนี้ให้ตรง");
+      hasFailure = true;
+    } else {
+      const kb = zlib.gzipSync(fs.readFileSync(path.join(astroChunkDir, blogChunk))).length / 1024;
+      const ok = kb <= BLOG_ISLAND_MAX_GZIP_KB;
+      console.log(
+        `  ${ok ? "✅" : "❌"} ชังก์ BlogIslands ${kb.toFixed(1)} KB gzip (≤ ${BLOG_ISLAND_MAX_GZIP_KB})` +
+          (ok ? "" : " — island เผลอ import @/data/articles อีกแล้ว? ส่งรายการเป็น prop จากหน้า .astro"),
+      );
+      if (!ok) hasFailure = true;
     }
   }
 

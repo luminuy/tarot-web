@@ -368,6 +368,8 @@ export function useAiReading(): AiReadingController {
         const reader = readRes.body.getReader();
         const decoder = new TextDecoder();
         let buffer = "";
+        // ได้ done หรือ error แล้วหรือยัง — สตรีมที่ปิดโดยไม่มีสองอย่างนี้ = ขาดกลางทาง (ห้ามค้าง streaming)
+        let gotTerminal = false;
 
         while (true) {
           const { value, done } = await reader.read();
@@ -385,6 +387,7 @@ export function useAiReading(): AiReadingController {
 
             let payload: {
               text?: string;
+              message?: string;
               reading?: unknown;
               proof?: ReadingProof;
               guestConsumeTicket?: string;
@@ -412,13 +415,27 @@ export function useAiReading(): AiReadingController {
                 dispatch({ type: "clearPartial" });
                 break;
               case "done":
+                gotTerminal = true;
                 dispatch({ type: "done", reading: (payload.reading ?? null) as never });
                 if (payload.proof) setProof(payload.proof);
+                break;
+              case "error":
+                gotTerminal = true;
+                dispatch({ type: "fail", message: payload.message || failMessage });
                 break;
               default:
                 break;
             }
           }
+        }
+
+        if (!gotTerminal) {
+          dispatch({
+            type: "fail",
+            message: isEnglish
+              ? "The reading stream was interrupted. Please reload and try again."
+              : "คำทำนายส่งมาไม่ครบ กรุณากดโหลดใหม่อีกครั้ง",
+          });
         }
       } catch (err) {
         if ((err as Error)?.name === "AbortError") return;

@@ -52,15 +52,8 @@ const YES_NO_EN_MAP: Record<string, "ใช่" | "ไม่ใช่" | "ยั
   maybe: "ยังไม่แน่",
 };
 
-/**
- * คำฟันธงสำหรับ "แสดงผล" ฝั่งอังกฤษ — ค่าที่เก็บใน schema เป็นไทยเสมอ (ดู YES_NO_EN_MAP)
- * เดิม UI พิมพ์ค่าดิบออกไปตรง ๆ ผู้ใช้หน้าอังกฤษจึงเห็น "Answer: ใช่"
- */
-export const YES_NO_DISPLAY_EN: Record<string, string> = {
-  ใช่: "Yes",
-  ไม่ใช่: "No",
-  ยังไม่แน่: "Not yet certain",
-};
+// ค่าแสดงผลอยู่ในไฟล์ไร้ zod ให้ UI import ได้โดยไม่ลาก zod ไปเบราว์เซอร์
+export { YES_NO_DISPLAY_EN } from "./reading-display";
 
 const MOOD_EN_MAP: Record<string, "สดใส" | "อบอุ่น" | "สงบ" | "ครุ่นคิด" | "ท้าทาย"> = {
   radiant: "สดใส",

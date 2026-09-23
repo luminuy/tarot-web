@@ -737,6 +737,38 @@ for (const item of INTENTIONALLY_BARE) {
   }
 }
 
+// 8. (A4-03) สคริปต์หัวเว็บ vanilla ต้องไม่ผูกซ้ำกับหัวเว็บ React ที่อยู่ใน island
+//    หน้าแรก `/` · `/en` เรนเดอร์หัวเว็บใน `TarotFlowRoot client:load` — ถ้า `site-header.ts`
+//    ผูกตัวจัดการลิ้นชักซ้ำ cleanup ของ `useDialogBehavior` จะคืน `body.overflow = "hidden"`
+//    ทับตอนปิดเมนู ➔ หน้าแรกเลื่อนไม่ได้อีกจนรีโหลด
+{
+  const scriptSrc = fs.readFileSync(path.join(ROOT, "astro/scripts/site-header.ts"), "utf8");
+  if (!/closest\(\s*["']astro-island["']\s*\)/.test(scriptSrc)) {
+    failures.push(
+      "astro/scripts/site-header.ts: ไม่มีการตรวจ `closest(\"astro-island\")` — สคริปต์จะผูกซ้ำกับหัวเว็บ React " +
+        "บนหน้าแรก แล้วปิดเมนูทีไรหน้าเลื่อนไม่ได้ (A4-03)",
+    );
+  }
+  for (const fn of ["installNavDrawer", "installLanguageSwitcher", "installHeaderHeightObserver"]) {
+    const body = scriptSrc.match(new RegExp(`function ${fn}\\(\\)[^{]*\\{([\\s\\S]*?)\\n\\}`))?.[1] ?? "";
+    if (!/ownedByIsland\(/.test(body)) {
+      failures.push(`astro/scripts/site-header.ts: ${fn}() ต้องข้ามหัวเว็บที่อยู่ใน island (ownedByIsland) — A4-03`);
+    }
+  }
+  // ยืนยันสมมติฐานกับ HTML จริง: หัวเว็บหน้าแรกต้องอยู่ใน island จริง (ถ้าวันหนึ่งย้ายออก ด่านนี้ต้องถูกทบทวน)
+  const homeHtml = path.join(ROOT, "dist/index.html");
+  if (fs.existsSync(homeHtml)) {
+    const html = fs.readFileSync(homeHtml, "utf8");
+    const headerAt = html.indexOf('data-site-header="');
+    const islandAt = html.indexOf("<astro-island");
+    if (headerAt < 0 || islandAt < 0 || islandAt > headerAt) {
+      failures.push(
+        "dist/index.html: หัวเว็บหน้าแรกไม่ได้อยู่ใน <astro-island> แล้ว — ทบทวนด่าน A4-03 และ site-header.ts ให้ตรงกับโครงใหม่",
+      );
+    }
+  }
+}
+
 // ───────────────────────────────────────────────────────────────
 if (failures.length > 0) {
   console.error("\n❌ ด่านหัวเว็บ sticky ไม่ผ่าน:\n");

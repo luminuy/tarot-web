@@ -116,7 +116,7 @@ export function DailyClient() {
     day: "numeric",
   }).format(new Date());
 
-  const handleRevealed = (card: TarotCardType) => {
+  const handleRevealed = (card: TarotCardType, isReversed: boolean) => {
     // ประทับตรา "วันนี้มาเปิดไพ่แล้ว" ฝั่งเซิร์ฟเวอร์ — ต้องยิงก่อนทุกกรณี
     // แม้การบันทึกประวัติด้านล่างจะข้ามไป (ไพ่ไม่ตรงกับ CARD_SUMMARIES)
     // เพราะผู้ใช้ "เปิดไพ่วันนี้" ไปแล้วจริง ๆ ไม่ว่าสมุดบันทึกจะเขียนสำเร็จหรือไม่
@@ -154,11 +154,11 @@ export function DailyClient() {
             cardIndex: cardIdx,
             cardNameTh: card.nameTh,
             cardNameEn: card.nameEn,
-            isReversed: false,
+            isReversed,
             element: card.element,
           },
         ],
-        summary: card.meanings.general.upright,
+        summary: isReversed ? card.meanings.general.reversed : card.meanings.general.upright,
       });
     } catch {
       // Ignored

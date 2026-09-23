@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0220 · 2026-09-23 10:55 · 🔴 Critical · ผลตรวจใหญ่ 2026-09-23 คลื่น 1 — ปิดระดับวิกฤต 8 ข้อ (OAuth คืนชีพ · customerRef รั่ว · สตรีมค้าง · ไพ่กลับหัวหาย · ปุ่มแอดมิน 404 · หน้าแรกเลื่อนไม่ได้ · บันเดิล blog/zod)
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ผู้ใช้ Google/LINE ที่เคยลบบัญชีล็อกอินแล้วเด้งออกทุกครั้ง · แม่หมอเห็นรหัสลับ customerRef ของลูกค้าและแลกเป็นคุกกี้อ่านคิวข้ามแม่หมอได้ · หน้า /daily /love/1-card /pick-a-card birth-card ตัวโหลดหมุนไม่รู้จบเมื่อ AI ล่ม · หน้า one-card โชว์ไพ่หัวตั้งแต่ AI อ่านเป็นกลับหัว · ปุ่มรีบิลด์ดัชนีค้นหาในแอดมินได้ 404 · หน้าแรกปิดเมนูแล้วเลื่อนหน้าไม่ได้ · /blog โหลดบทความเต็มเป็น JS 57 KB และทุกคำทำนายโหลด zod 21 KB |
+| **สาเหตุราก** | ความรู้ที่ต้องตรงกันสองฝั่งไม่มีอะไรบังคับ: softDelete ไม่แตะ oauth_identities และ callback ไม่มีกิ่งคืนชีพ · route รับ customerRef จาก body แล้วเซ็นคุกกี้ และส่งแถวตั๋วทั้งแถวออกไป · useAiReading ลอกตัวอ่านสตรีมจาก TarotFlow มาไม่ครบ (ไม่มี case error/ด่าน done) · OneCardRitual อ่านแค่ cardIndex ทิ้ง isReversed · สตริง path ใน fetch ไม่มี typecheck · site-header.ts ผูกกับหัวเว็บทุกหน้ารวมหัวเว็บ React ใน island · island import โมดูลข้อมูล/สคีมาทั้งไฟล์ ซึ่งตัดทิ้งตอนบิลด์ไม่ได้ และเพดานบันเดิลรายหน้าหลวมจนไม่ฟ้อง |
+| **การแก้ไข** | reviveOAuthUser (id เดิม ขึ้น token_version ไม่แตะอีเมล) · customerRef ออกฝั่งเซิร์ฟเวอร์ + toPublicTicket ทุก response + payments อ่านจากคุกกี้ · useAiReading ฟัง error + gotTerminal · one-card ใช้ rawDrawn[0].isReversed ทั้งภาพ คีย์เวิร์ด และประวัติ · แก้ path เป็น rebuild-search-index · site-header.ts ข้ามหัวเว็บใน astro-island · blog ส่งรายการเป็น prop เฉพาะภาษาของหน้า · YES_NO_DISPLAY_EN ย้ายไป reading-display.ts ไร้ zod |
+| **🛡️ กฎป้องกันถาวร** | **ทุก fetch('/api/...') ฝั่งหน้าเว็บต้องมี route.ts จริง (test-code-debt ข้อ 6) · ห้ามชังก์ใน dist/_astro มี ZodError และชังก์ BlogIslands ต้อง <= 10 KB gzip (test-bundle-budget) · customerRef ห้ามรับจาก body และห้ามอยู่ใน response ใด ๆ (test-marketplace-readers 12.4) · ท่อสตรีมกลางต้องมี case error และด่าน gotTerminal · ไพ่ใบเดียวต้องใช้ทิศจากเซิร์ฟเวอร์ (test-mock-reading ข้อ 7) · สคริปต์หัวเว็บ vanilla ห้ามแตะหัวเว็บใน island (test-sticky-header ข้อ 8) · บัญชี OAuth ที่ลบแล้วต้องคืนชีพได้ (test-email-auth ข้อ 10)** |
+| **การพิสูจน์ว่าแก้ได้จริง** | mutation test ทุกกลุ่ม: ย้อนตัวแก้แล้วด่านใหม่ตกทุกกลุ่ม · Chromium จริงบนหน้าแรก: ก่อนแก้ปิดเมนูแล้ว body.overflow ค้าง hidden หลังแก้คืนค่าว่าง · บิลด์ Astro จริง: BlogIslands 57.1 เป็น 4.3 KB gz · StreamReader 29.5 เป็น 6.3 KB gz · JS หน้า /blog 131 เป็น 79 KB gz |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/brave-mayer-5p2kld` · commit `7275420` |
+
+
 ### INC-0219 · 2026-09-22 12:42 · 🟡 Medium · ผังไพ่บนมือถือเปลี่ยนเป็นรางเลื่อนทีละใบ — ไพ่ใหญ่ขึ้น 60% และชื่อตำแหน่งขึ้นครบ
 
 | หัวข้อ | รายละเอียด |

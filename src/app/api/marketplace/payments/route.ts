@@ -7,6 +7,7 @@ import {
   createPaymentRecord,
   getPaymentByTicketId,
 } from "@/lib/marketplace/payments.repo";
+import { readCustomerRefFromCookie } from "@/lib/marketplace/customer-ref";
 import { getQueueTicketById } from "@/lib/marketplace/queue.repo";
 import { getReaderById } from "@/lib/marketplace/readers.repo";
 import { getAppDB } from "@/lib/platform/db";
@@ -19,10 +20,10 @@ export const runtime = "nodejs";
 // ⚠️ ทั้ง `amountSatang` และ `returnUri` ถูกถอดออกจากสัญญาฝั่งไคลเอนต์โดยตั้งใจ
 //    ราคา = ค่าคงที่ฝั่งเซิร์ฟเวอร์ (กันตั้งราคาเอง) · ปลายทาง redirect = origin ของเราเอง
 //    (กันส่งผู้ใช้ออกไปหน้าฟิชชิงหลังจ่ายเงินผ่าน return_uri ที่ผู้โจมตีกำหนด)
-//    `customerRef` บังคับใส่ เพื่อกันคนนอกเปิดรายการชำระเงินทับตั๋วของคนอื่น
+//    ความเป็นเจ้าของตั๋วอ่านจากคุกกี้ที่เราเซ็นเองเท่านั้น (ไม่รับ customerRef จาก body — A2-13)
+//    เพื่อกันคนนอกเปิดรายการชำระเงินทับตั๋วของคนอื่น
 const CreatePaymentSchema = z.object({
   ticketId: z.string().min(1, "กรุณาระบุ ticketId"),
-  customerRef: z.string().min(6, "รหัสอ้างอิงอุปกรณ์ไม่ถูกต้อง"),
 });
 
 /**
@@ -62,7 +63,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const { ticketId, customerRef } = parsed.data;
+    const { ticketId } = parsed.data;
+    const customerRef = await readCustomerRefFromCookie(request);
     const amountSatang = CONSULTATION_PRICE_SATANG;
 
     // 1. Verify Ticket + ต้องเป็นตั๋วของผู้ขอเองเท่านั้น
@@ -70,7 +72,7 @@ export async function POST(request: Request) {
     if (!ticket) {
       return NextResponse.json({ error: "ไม่พบตั๋วคิวที่ระบุ" }, { status: 404 });
     }
-    if (ticket.customerRef !== customerRef) {
+    if (!customerRef || ticket.customerRef !== customerRef) {
       return NextResponse.json({ error: "ไม่พบตั๋วคิวที่ระบุ" }, { status: 404 });
     }
 

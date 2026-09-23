@@ -332,5 +332,50 @@ check(
     "\n   ➔ ใช้ <AdminErrorBanner /> จาก @/components/admin/AdminErrorBanner",
 );
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 6. A4-01 — ทุก `fetch("/api/...")` ฝั่งหน้าเว็บต้องชี้เส้นทางที่มีอยู่จริง
+// ─────────────────────────────────────────────────────────────────────────────
+/*
+ * ปุ่ม "อัปเดตระบบค้นหา" ในแผงแอดมินยิง `/api/admin/rebuild-index` มาตลอด
+ * ทั้งที่เส้นทางจริงชื่อ `rebuild-search-index` — ได้ 404 ทุกครั้ง แล้ว toast โทษว่า
+ * "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้" ไม่มีด่านไหนจับได้เพราะ typecheck มองสตริงไม่ออก
+ * ด่านนี้จับคู่สตริงกับไฟล์ `src/app/api/<เส้นทาง>/route.ts` (`${...}` = ช่องไดนามิก)
+ */
+const routeSegments = walk(path.join(ROOT, "src/app/api"))
+  .filter((f) => /[\\/]route\.ts$/.test(f))
+  .map((f) =>
+    ["api", ...path.relative(path.join(ROOT, "src/app/api"), path.dirname(f)).split(path.sep)].filter(Boolean),
+  );
+assertNonEmptyCorpus("เส้นทาง API ใน src/app/api", routeSegments, "ตรวจว่า src/app/api ยังอยู่ที่เดิม");
+
+function apiPathExists(literal: string): boolean {
+  const segs = literal.replace(/[?#].*$/, "").replace(/^\/+|\/+$/g, "").split("/");
+  return routeSegments.some(
+    (route) =>
+      route.length === segs.length &&
+      route.every((r, i) => {
+        // ช่อง `${...}` ในสตริงเดาค่าไม่ได้ ➔ ยอมให้ตรงกับทุกช่อง · ช่อง [param] ของเส้นทางรับทุกค่า
+        if (segs[i].includes("${") || /^\[.+\]$/.test(r)) return true;
+        return r === segs[i];
+      }),
+  );
+}
+
+const frontendSources = [...sources, ...walk(path.join(ROOT, "astro"))].filter(
+  (f) => !rel(f).startsWith("src/app/api/"),
+);
+const deadApiCalls: string[] = [];
+for (const file of frontendSources) {
+  const src = stripComments(fs.readFileSync(file, "utf-8"));
+  for (const m of src.matchAll(/fetch\(\s*["'`](\/api\/[^"'`\s]*)["'`]/g)) {
+    if (!apiPathExists(m[1])) deadApiCalls.push(`   · ${rel(file)} ➔ ${m[1]}`);
+  }
+}
+check(
+  "ทุก fetch(\"/api/...\") ฝั่งหน้าเว็บชี้เส้นทางที่มีไฟล์ route.ts จริง",
+  deadApiCalls.length === 0,
+  deadApiCalls.join("\n") + "\n   ➔ สตริงผิดชื่อ = 404 ทุกครั้งที่กด (A4-01) · แก้ชื่อให้ตรงกับโฟลเดอร์ใน src/app/api",
+);
+
 console.log(`\n📊 ผ่าน ${pass} ข้อ | ล้มเหลว ${fail} ข้อ\n`);
 if (fail > 0) process.exit(1);

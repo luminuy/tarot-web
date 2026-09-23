@@ -7,6 +7,7 @@ import {
   getReaderLiveAvailability,
   listReaderQueueTickets,
   setReaderLiveAvailability,
+  toPublicTicket,
   updateTicketStatus,
   type TicketStatus,
 } from "@/lib/marketplace/queue.repo";
@@ -43,7 +44,7 @@ export async function GET(request: Request) {
         commissionPct: reader.commissionPct,
       },
       isLiveOpen,
-      tickets,
+      tickets: tickets.map(toPublicTicket),
       totalWaiting: tickets.filter((t) => t.status === "waiting").length,
     });
   } catch (err) {
@@ -105,7 +106,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({
       success: true,
       isLiveOpen,
-      tickets,
+      tickets: tickets.map(toPublicTicket),
     });
   } catch (err) {
     console.error("[API Console Queue PATCH Error]", err);
