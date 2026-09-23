@@ -1,0 +1,620 @@
+{
+  "promptVersion": "20260911-2",
+  "judgeModel": "gemini-3.6-flash",
+  "startedAt": "2026-09-23T13:41:59.070Z",
+  "cases": [
+    {
+      "id": "gold-001",
+      "category": "love",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2754,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "groq"
+    },
+    {
+      "id": "gold-002",
+      "category": "work",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 22389,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-003",
+      "category": "money",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 18264,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-004",
+      "category": "self",
+      "spreadId": "daily",
+      "personaId": "default",
+      "model": "openai/gpt-oss-120b",
+      "elapsedMs": 5086,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "groq"
+    },
+    {
+      "id": "gold-005",
+      "category": "general",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 40045,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-006",
+      "category": "love",
+      "spreadId": "love",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 24279,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-007",
+      "category": "work",
+      "spreadId": "career",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 24280,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-008",
+      "category": "money",
+      "spreadId": "money",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 24246,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-009",
+      "category": "self",
+      "spreadId": "chakra",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 9611,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-010",
+      "category": "love",
+      "spreadId": "soulmate",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 24279,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-011",
+      "category": "general",
+      "spreadId": "decision",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 9486,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-012",
+      "category": "work",
+      "spreadId": "daily",
+      "personaId": "default",
+      "model": "openai/gpt-oss-20b",
+      "elapsedMs": 11760,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "groq"
+    },
+    {
+      "id": "gold-013",
+      "category": "money",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 21506,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-014",
+      "category": "love",
+      "spreadId": "ex-reconciliation",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 9498,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-015",
+      "category": "self",
+      "spreadId": "mind-body-spirit",
+      "personaId": "default",
+      "model": "openai/gpt-oss-120b",
+      "elapsedMs": 10538,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "groq"
+    },
+    {
+      "id": "gold-016",
+      "category": "general",
+      "spreadId": "weekly",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 9510,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-017",
+      "category": "work",
+      "spreadId": "career-switch",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 24279,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-018",
+      "category": "love",
+      "spreadId": "how-they-feel",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 9480,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-019",
+      "category": "money",
+      "spreadId": "quick",
+      "personaId": "default",
+      "model": "openai/gpt-oss-20b",
+      "elapsedMs": 6853,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "groq"
+    },
+    {
+      "id": "gold-020",
+      "category": "self",
+      "spreadId": "inner-potential",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 9485,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-021",
+      "category": "general",
+      "spreadId": "celtic-cross",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 9752,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-022",
+      "category": "work",
+      "spreadId": "situation-solution",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 24774,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-023",
+      "category": "love",
+      "spreadId": "yes-no",
+      "personaId": "default",
+      "model": "openai/gpt-oss-120b",
+      "elapsedMs": 8972,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "groq"
+    },
+    {
+      "id": "gold-024",
+      "category": "money",
+      "spreadId": "yes-no",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 20706,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-025",
+      "category": "self",
+      "spreadId": "daily",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 18380,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 100,
+      "thaiIssues": [],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-026",
+      "category": "love",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 17552,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-027",
+      "category": "work",
+      "spreadId": "daily",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 36516,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 100,
+      "thaiIssues": [],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-028",
+      "category": "money",
+      "spreadId": "money",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 9487,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-029",
+      "category": "general",
+      "spreadId": "weekly",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 9541,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-030",
+      "category": "self",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 25575,
+      "ok": true,
+      "consistencyIssues": [
+        "ADVICE_MISSING_MINDFUL"
+      ],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    }
+  ],
+  "summary": {
+    "total": 30,
+    "succeeded": 30,
+    "judged": 0,
+    "avgThaiScore": 95,
+    "avgElapsedMs": 16629,
+    "consistencyIssueRate": 80,
+    "rubric": {
+      "onQuestion": 0,
+      "cardGrounded": 0,
+      "actionable": 0,
+      "personaFit": 0,
+      "notVague": 0,
+      "thaiNatural": 0
+    },
+    "overall": 0
+  }
+}
