@@ -93,46 +93,10 @@ const nextConfig: NextConfig = {
           statusCode: 301,
         },
       ]),
-      {
-        source: "/blog/celtic-cross-spread-deep-dive",
-        destination: "/blog/celtic-cross-spread-guide",
-        permanent: true,
-      },
-      {
-        source: "/blog/jungian-psychology-and-tarot",
-        destination: "/blog/tarot-and-carl-jung-psychology",
-        permanent: true,
-      },
-      {
-        source: "/tarot-daily",
-        destination: "/daily",
-        permanent: true,
-      },
-      {
-        source: "/daily-tarot",
-        destination: "/daily",
-        permanent: true,
-      },
-      {
-        source: "/tarot-love",
-        destination: "/love/1-card",
-        permanent: true,
-      },
-      {
-        source: "/love",
-        destination: "/love/1-card",
-        permanent: true,
-      },
-      {
-        source: "/love-tarot",
-        destination: "/love/1-card",
-        permanent: true,
-      },
-      {
-        source: "/tarot",
-        destination: "/",
-        permanent: true,
-      },
+      // ⚠️ redirect ของ URL เก่า (บทความเปลี่ยน slug · /love · /tarot ฯลฯ) ย้ายไป `public/_redirects` แล้ว (A6-05)
+      //    ที่นี่ไม่เคยทำงานบน production: เส้นที่ไม่ตรงไฟล์ static และไม่อยู่ใน `run_worker_first`
+      //    ถูกขอบตอบ 404.html ทันที ไม่ถึง Worker · `_redirects` ของ Workers Assets ทำงานที่ขอบก่อน
+      //    ห้ามเพิ่ม redirect แบบ path ที่นี่อีก — ด่าน test-worker-first-routes จะตก
     ];
   },
   async headers() {

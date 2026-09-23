@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0225 · 2026-09-23 11:39 · 🟡 Medium · ผลตรวจใหญ่ 2026-09-23 คลื่น 6 — SEO + น้ำหนักสำรับไพ่ 7 ข้อ (+2 ที่ผลตรวจพลาด) (ลิงก์ 404 · redirect 301 ตายทั้งชุด · JSON-LD หน้าอังกฤษชี้ไทย · ลิงก์ข้ามภาษา · คำทำนายอังกฤษรั่วเข้าหน้าไทย · โหลดสำรับตอน idle · น้ำตกโหลดสำรับ)
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | หน้าไพ่ 38 หน้าลิงก์ไป /spreads/birth-card ที่เป็น 404 · URL เก่า /love /tarot /tarot-daily และ slug บทความเดิมตอบ 404 บน production · JSON-LD หน้ากลุ่มไพ่อังกฤษ 6 หน้าชี้ URL ไทย · หน้า Pick A Card อังกฤษและหน้าแรกอังกฤษลิงก์ข้ามไปหน้าไทย · หน้า /en/contact ลิงก์ไป /en/about ที่ไม่มีอยู่ · ผู้ใช้ไทยเปิดไพ่ต้องโหลดคำทำนายอังกฤษเกิน 49.7 KB · /daily /love/1-card โหลดสำรับ 83 KB ตอน idle ทุกการเข้าชม · หน้าแรกโหลดสำรับหลังได้คำตอบ /shuffle |
+| **สาเหตุราก** | ลิงก์/URL ถูกประกอบด้วยมือแทนตัวช่วยที่รู้ภาษาและรู้ว่าหน้าไหนมีจริง (SPREADS แทน PUBLIC_SPREADS · SITE_ORIGIN แทน localizedUrl · path ดิบแทน localeHref) · redirect เขียนไว้ใน next.config ซึ่งไม่เคยถึงเพราะขอบตอบ 404.html ก่อน (not_found_handling = 404-page) · ไม่มีด่านไล่ลิงก์ใน HTML ที่บิลด์จริงเลย · คอมโพเนนต์ฝั่งเบราว์เซอร์ import @/data/cards ตัวผสมอังกฤษ ทั้งที่มี deck-th อยู่แล้ว · prefetch ตอน idle โดยไม่ดูเจตนา · import สำรับหลัง await ทั้งที่ไม่ขึ้นกับผลลัพธ์ |
+| **การแก้ไข** | CardSpreadLinks ใช้ PUBLIC_SPREADS · CardGroupView ใช้ localizedUrl ใน JSON-LD · pick-a-card-topic และ HomeSeoContent ใช้ localeHref (ป้ายนับหัวข้อตามจริง) · contact-en ชี้ /about พร้อมบอกว่าเป็นภาษาไทย · ย้าย redirect 8 เส้นไป public/_redirects (Workers Assets ทำงานที่ขอบ) · src/data/cards/client-deck.ts (loadCardResolver/useCardResolver: ไทย = deck-th · อังกฤษ = deck-th + en-enrich) ใช้ใน StreamReader QuickChatResult TarotFlow useAiReading · TarotFlow เริ่มโหลดสำรับก่อนยิง /shuffle ทั้งสองโหมด · OneCardRitual อุ่นสำรับตอนชี้/โฟกัส/กดปุ่มจั่วแทน idle |
+| **🛡️ กฎป้องกันถาวร** | **test-en-routing ไล่ลิงก์ <a> ทุกเส้นใน HTML ที่บิลด์จริง (ห้าม 404 · หน้าอังกฤษห้ามลิงก์ไปหน้าไทยที่มีฝาแฝด · JSON-LD หน้าอังกฤษห้ามชี้ URL ไทย) · test-worker-first-routes ห้าม redirect แบบ path ใน next.config ที่ไม่อยู่ใน run_worker_first + public/_redirects ต้องเป็น 301/308 และไม่ทับเส้นของ Worker · test-code-debt ข้อ 9 ห้ามฝั่งเบราว์เซอร์ import @/data/cards · ห้ามโหลดสำรับตอน idle · ต้องโหลดสำรับขนานกับ /shuffle** |
+| **การพิสูจน์ว่าแก้ได้จริง** | ย้อนไฟล์ SEO 4 ไฟล์แล้วบิลด์ใหม่: ด่านลิงก์ตกครบสามข้อ (404 · ข้ามภาษา 7 ลิงก์ · JSON-LD 146 จุด) · ย้อน next.config: ด่าน redirect รายงานครบ 8 เส้น · บิลด์จริง: ชังก์สำรับผสม cards.*.js หายไป ผู้ใช้ไทยโหลด deck-th 83 KB แทน 133 KB gzip · ยืนยันว่า Workers Assets รองรับ _redirects กับเอกสาร Cloudflare แล้ว |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/brave-mayer-5p2kld` · commit `4eea2e1` |
+
+
 ### INC-0224 · 2026-09-23 11:30 · 🟡 Medium · ผลตรวจใหญ่ 2026-09-23 คลื่น 5 — คีย์บอร์ด/screen reader/คอนทราสต์ 12 ข้อ (focus trap รั่ว · การ์ดกางด้วยเมาส์เท่านั้น · ปุ่มไร้ชื่อ · สวิตช์ไม่บอกสถานะ · แชทไม่เคารพ reduced-motion · สีตกเกณฑ์ 4.5:1 · error ไม่ประกาศ · ปุ่มสลับไม่มี aria-pressed · ปุ่มขยายถูกกลืน · ลบบันทึกแตะเดียว)
 
 | หัวข้อ | รายละเอียด |

@@ -8,7 +8,7 @@ import type { CardGroupInfo } from "@/data/cards/group-seo";
 import { CardImage } from "@/components/card/CardImage";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { useLocale } from "@/lib/i18n";
-import { SITE_ORIGIN } from "@/lib/config/site";
+import { localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
 import {
   AirElementIcon,
   CrownTabIcon,
@@ -52,7 +52,10 @@ const ELEMENT_EN: Record<string, string> = {
 export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }) => {
   const { isEnglish } = useLocale();
   const intro = isEnglish ? groupInfo.introContentEn : groupInfo.introContentTh;
-  const currentUrl = `${SITE_ORIGIN}/cards/${groupInfo.id}`;
+  // ⚠️ URL ใน JSON-LD ต้องตรงภาษาของหน้า (A6-07) — เดิมหน้าอังกฤษ 6 หน้าชี้ URL ไทยทั้งหมด
+  //    (url ≠ canonical · breadcrumb ใน SERP อังกฤษพาไปหน้าไทย) · ภาพไพ่ไม่มีภาษา ใช้ SITE_ORIGIN ได้
+  const locale = isEnglish ? "en" : "th";
+  const currentUrl = localizedUrl(`/cards/${groupInfo.id}`, locale);
 
   const collectionJsonLd = {
     "@context": "https://schema.org",
@@ -68,7 +71,7 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
         "@type": "ListItem",
         position: index + 1,
         name: isEnglish ? card.nameEn : `${card.nameTh} (${card.nameEn})`,
-        url: `${SITE_ORIGIN}/cards/${card.id}`,
+        url: localizedUrl(`/cards/${card.id}`, locale),
         image: `${SITE_ORIGIN}/cards/${card.image}`,
       })),
     },
@@ -82,13 +85,13 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
         "@type": "ListItem",
         position: 1,
         name: isEnglish ? "Home" : "หน้าแรก",
-        item: SITE_ORIGIN,
+        item: localizedUrl("/", locale),
       },
       {
         "@type": "ListItem",
         position: 2,
         name: isEnglish ? "Tarot Encyclopedia" : "คัมภีร์ไพ่ 78 ใบ",
-        item: `${SITE_ORIGIN}/cards`,
+        item: localizedUrl("/cards", locale),
       },
       {
         "@type": "ListItem",

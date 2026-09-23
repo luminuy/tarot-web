@@ -7,7 +7,8 @@ import { STAGGER, DUR, EASE } from "@/lib/motion";
 import type { Reading } from "@/lib/schema/reading";
 import type { Persona } from "@/data/personas";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
-import { cardByIndex, type TarotCard } from "@/data/cards";
+import type { TarotCard } from "@/data/cards/types";
+import { useCardResolver } from "@/data/cards/client-deck";
 import { ElementalBalanceWidget } from "@/components/reading/ElementalBalanceWidget";
 import { OracleMantraCard } from "@/components/reading/OracleMantraCard";
 import { trackEvent } from "@/lib/analytics";
@@ -51,6 +52,8 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
   onRetry,
 }) => {
   const { isEnglish } = useLocale();
+  // สำรับตามภาษาของหน้า — ไม่ลากคำทำนายอังกฤษมาให้ผู้ใช้ไทย (A8-02)
+  const cardByIndex = useCardResolver(isEnglish);
   const drawnCard = drawnCards[0];
   // ไพ่เต็มจากสำรับมาก่อน (มีฟิลด์ภาษาอังกฤษครบ) แล้วค่อยตกมาที่ก้อนย่อจากเซสชัน
   const cardData =
@@ -67,7 +70,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
     } catch {
       return [];
     }
-  }, [drawnCards]);
+  }, [drawnCards, cardByIndex]);
 
   const personaName = isEnglish ? (persona.nameEn || persona.nameTh) : persona.nameTh;
   const personaTagline = isEnglish ? (persona.taglineEn || persona.tagline) : persona.tagline;

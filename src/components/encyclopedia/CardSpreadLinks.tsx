@@ -1,6 +1,6 @@
 import { RouteLink as Link } from "@/components/ui/RouteLink";
 import type { TarotCard } from "@/data/cards/types";
-import { SPREADS } from "@/data/spreads";
+import { PUBLIC_SPREADS } from "@/data/spreads";
 import { ARTICLES } from "@/data/articles";
 import { localeHref } from "@/lib/i18n/paths";
 import type { Locale } from "@/lib/i18n/types";
@@ -36,11 +36,13 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
   const { spreadCat, articleCat } = getCardPrimaryCategory(card);
 
   // 1. Spreads related to this card's theme or classic general spreads
-  const categorySpreads = SPREADS.filter(
+  // ⚠️ ต้องเป็น PUBLIC_SPREADS (A6-03) — ผังภายใน (เช่น birth-card) ไม่มีหน้าของตัวเอง
+  //    เดิมใช้ SPREADS ทั้งก้อน หน้าไพ่ 38 หน้าจึงลิงก์ไป /spreads/birth-card ที่เป็น 404
+  const categorySpreads = PUBLIC_SPREADS.filter(
     (s) => s.defaultCategory === spreadCat && s.id !== "celtic-cross" && s.id !== "three-card"
   ).slice(0, 2);
 
-  const classicSpreads = SPREADS.filter(
+  const classicSpreads = PUBLIC_SPREADS.filter(
     (s) => s.id === "yes-no" || s.id === "three-card" || s.id === "celtic-cross" || s.id === "daily"
   ).slice(0, 2);
 

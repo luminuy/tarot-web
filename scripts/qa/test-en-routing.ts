@@ -476,6 +476,71 @@ for (const entry of phraseLeaks.slice(0, 10)) {
   console.log(`      ↳ ${entry.file} — ${entry.phrases.slice(0, 3).map((p) => `"${p}"`).join(", ")}`);
 }
 
+// ── ลิงก์ภายในใน HTML ที่บิลด์จริง (ผลตรวจ 2026-09-23 · A6-03 · A6-07 · A6-09) ────
+{
+  const allPages = collectRenderedPages();
+  const knownRoutes = new Set(allPages.map((p) => p.route));
+  const redirectSources = new Set(
+    (fs.existsSync(path.join(ROOT, "public/_redirects"))
+      ? fs.readFileSync(path.join(ROOT, "public/_redirects"), "utf-8").split("\n")
+      : []
+    )
+      .map((l) => l.trim())
+      .filter((l) => l && !l.startsWith("#"))
+      .map((l) => l.split(/\s+/)[0]),
+  );
+  // เส้นที่ Worker เป็นคนตอบ (ไม่มีไฟล์ static) — ดู run_worker_first ใน wrangler.jsonc
+  const WORKER_PREFIXES = ["/api/", "/admin", "/readers", "/reset-password", "/s/", "/tester", "/_next/"];
+  const isStaticFile = (href: string) =>
+    /\.[a-z0-9]{2,5}$/i.test(href) &&
+    ["public", "dist"].some((dir) => fs.existsSync(path.join(ROOT, dir, decodeURIComponent(href))));
+
+  const broken = new Map<string, string>();
+  const crossLocale = new Map<string, string>();
+  const jsonLdThai = new Map<string, string>();
+  for (const page of allPages) {
+    const html = fs.readFileSync(page.file, "utf-8");
+    for (const m of html.matchAll(/<a\b[^>]*\shref="(\/[^"#?]*)/g)) {
+      const href = m[1].replace(/\/$/, "") || "/";
+      if (href.startsWith("//")) continue;
+      const ok =
+        knownRoutes.has(href) ||
+        redirectSources.has(href) ||
+        WORKER_PREFIXES.some((p) => href.startsWith(p)) ||
+        isStaticFile(href);
+      if (!ok && !broken.has(href)) broken.set(href, page.route);
+      const isEnPage = page.route === "/en" || page.route.startsWith("/en/");
+      if (isEnPage && !href.startsWith("/en") && hasEnglishTwin(href) && !crossLocale.has(`${page.route} ➔ ${href}`)) {
+        crossLocale.set(`${page.route} ➔ ${href}`, page.route);
+      }
+    }
+    if (page.route === "/en" || page.route.startsWith("/en/")) {
+      for (const block of html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)) {
+        for (const u of block[1].matchAll(new RegExp(`"(?:url|item|@id)":"${SITE_ORIGIN.replace(/[.]/g, "\\.")}(\\/[^"]*)?"`, "g"))) {
+          const p = (u[1] ?? "/").replace(/\\\//g, "/").replace(/#.*$/, "") || "/";
+          // "/" = url ของ Organization/WebSite (ตัวตนของเว็บ ไม่ใช่หน้า) — ไม่นับ
+          if (p !== "/" && !p.startsWith("/en") && !/\.[a-z]{3,4}$/i.test(p) && hasEnglishTwin(p)) jsonLdThai.set(`${page.route} ➔ ${p}`, page.route);
+        }
+      }
+    }
+  }
+  check(
+    "A6-03: ลิงก์ภายในทุกเส้นใน HTML ที่บิลด์จริงชี้หน้าที่มีอยู่ (ไม่มีลิงก์ 404)",
+    broken.size === 0,
+    broken.size ? [...broken].slice(0, 6).map(([h, from]) => `${h} (จาก ${from})`).join(" · ") : undefined,
+  );
+  check(
+    "A6-09: หน้าอังกฤษไม่ลิงก์ข้ามไปหน้าไทยที่มีฝาแฝดอังกฤษ",
+    crossLocale.size === 0,
+    crossLocale.size ? `${crossLocale.size} ลิงก์ · เช่น ${[...crossLocale.keys()].slice(0, 4).join(" · ")}` : undefined,
+  );
+  check(
+    "A6-07: JSON-LD ของหน้าอังกฤษไม่ชี้ URL ไทยที่มีฝาแฝดอังกฤษ",
+    jsonLdThai.size === 0,
+    jsonLdThai.size ? `${jsonLdThai.size} จุด · เช่น ${[...jsonLdThai.keys()].slice(0, 4).join(" · ")}` : undefined,
+  );
+}
+
 console.log("");
 if (failures > 0) {
   console.error(`❌ ล้มเหลว ${failures} ข้อ — เส้นทางสองภาษายังไม่สอดคล้องกัน\n`);

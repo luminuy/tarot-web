@@ -10,6 +10,7 @@ import { withMotionScope } from "@/components/providers/with-motion-scope";
 import { useOnceOpen } from "@/lib/use-once-open";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
+import { loadCardResolver } from "@/data/cards/client-deck";
 import { PUBLIC_SPREADS, getSpread, type Spread } from "@/data/spreads";
 import { PERSONAS, getPersona, type Persona } from "@/data/personas";
 import type { Category } from "@/data/cards/types";
@@ -962,6 +963,11 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         has_situation: false,
       });
 
+      // เริ่มโหลดสำรับขนานกับการยิง /shuffle (A8-06) — เดิมรอคำตอบก่อนค่อยโหลด = น้ำตกสามชั้น
+      // ผลไม่ขึ้นกับคำตอบเลย · สำรับไทยล้วน + อังกฤษเฉพาะหน้าอังกฤษ (A8-02)
+      const deckReady = loadCardResolver(isEnglish);
+      deckReady.catch(() => undefined); // /shuffle ล้มก่อน = ไม่มีใครรอ ห้ามเป็น unhandled rejection
+
       // 2. จั่วไพ่ใบแรกจากเซิร์ฟเวอร์ทันทีด้วย Provably-Fair SHA-256 (ไม่ต้องเลือกจากพัดไพ่)
       const shuffleRes = await fetch(`/api/reading/${sessionReadingId}/shuffle`, {
         method: "POST",
@@ -986,7 +992,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       const latestToken = shuffleData.sessionToken || activeSessionToken;
       dispatchSession({ type: "rotateToken", token: latestToken });
 
-      const { cardByIndex } = await import("@/data/cards");
+      const cardByIndex = await deckReady;
       if (!shuffleData.drawn || !Array.isArray(shuffleData.drawn) || shuffleData.drawn.length === 0) {
         throw new Error(isEnglish ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
       }
@@ -1091,6 +1097,10 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     dispatchRead({ type: "clearError" });
 
     try {
+      // โหลดสำรับระหว่างรอแอนิเมชัน + /shuffle ไปพร้อมกัน (A8-06)
+      const deckReady = loadCardResolver(isEnglish);
+      deckReady.catch(() => undefined);
+
       // Gentle pause for pick animation
       await new Promise((r) => setTimeout(r, 450));
 
@@ -1116,7 +1126,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       }
       dispatchSession({ type: "rotateToken", token: data.sessionToken });
 
-      const { cardByIndex } = await import("@/data/cards");
+      const cardByIndex = await deckReady;
 
       if (!data.drawn || !Array.isArray(data.drawn) || data.drawn.length === 0) {
         throw new Error(isEnglish ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");

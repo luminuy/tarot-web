@@ -25,6 +25,7 @@ import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { PICK_A_CARD_TOPICS, type PickACardTopic } from "@/data/pick-a-card";
 import type { Locale } from "@/lib/i18n/types";
+import { localeHref } from "@/lib/i18n/paths";
 
 interface TopicCopy {
   metaTitleTh: string;
@@ -661,12 +662,20 @@ export function PickACardTopicBody({
     })),
   };
 
+  // ⚠️ ทุกลิงก์ต้องผ่าน localeHref (A6-09) — เดิมหน้าอังกฤษ 8 หน้าลิงก์ข้ามไปหน้าไทยทั้งกล่อง
   const links = PICK_A_CARD_TOPICS.filter((other) => other.id !== topic.id)
     .map((other) => ({
-      href: `/pick-a-card/${other.slug}`,
+      href: localeHref(`/pick-a-card/${other.slug}`, locale),
       label: isEnglish ? other.titleEn : other.titleTh,
     }))
-    .concat([{ href: "/pick-a-card", label: isEnglish ? "All 4 pick a card topics" : "รวมทุกหัวข้อ Pick A Card" }]);
+    .concat([
+      {
+        href: localeHref("/pick-a-card", locale),
+        label: isEnglish
+          ? `All ${PICK_A_CARD_TOPICS.length} pick a card topics`
+          : "รวมทุกหัวข้อ Pick A Card",
+      },
+    ]);
 
   return (
     <>

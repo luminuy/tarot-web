@@ -296,8 +296,9 @@ export function useAiReading(): AiReadingController {
          * (ไพ่ใบเดียว · Pick A Card · ไพ่วันเกิด) จึงไม่ต้องจ่ายน้ำหนักนี้เลยสักไบต์
          * ความถูกต้องของรหัสผังยังถูกตรวจที่เซิร์ฟเวอร์อยู่แล้ว (`/start` ตอบ 404 ถ้าไม่มีผังนั้น)
          */
-        const [{ cardByIndex }, { getSpread }] = await Promise.all([
-          import("@/data/cards"),
+        const [cardByIndex, { getSpread }] = await Promise.all([
+          // สำรับตามภาษาของหน้า — ไม่ลากคำทำนายอังกฤษมาให้ผู้ใช้ไทย (A8-02)
+          import("@/data/cards/client-deck").then((m) => m.loadCardResolver(isEnglish)),
           import("@/data/spreads"),
         ]);
         const spread = getSpread(request.spreadId);
