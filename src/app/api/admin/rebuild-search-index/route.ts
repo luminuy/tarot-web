@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { recordAudit } from "@/lib/admin/audit";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { buildSearchCorpus, rebuildSearchIndex } from "@/lib/search/vectorize";
 
@@ -28,5 +29,6 @@ export async function POST() {
   if (denied) return denied;
 
   const report = await rebuildSearchIndex();
+  await recordAudit("search_index_rebuild", report.ok ? "ok" : "failed");
   return NextResponse.json(report, { status: report.ok ? 200 : 502 });
 }

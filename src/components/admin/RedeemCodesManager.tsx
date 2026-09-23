@@ -317,21 +317,11 @@ export default function RedeemCodesManager() {
         </div>
       )}
 
-      {/* Header & Stats Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line pb-5">
-        <div>
-          <h2 className="text-xl font-bold tracking-tight text-ink">
-            ระบบจัดการรหัสแลกสิทธิ์
-          </h2>
-          <p className="mt-1 text-xs text-muted">
-            สร้างและควบคุมรหัสของขวัญ กำหนดโควตา วันหมดอายุ และตรวจสอบการแลกรับสิทธิ์
-          </p>
-        </div>
-        <div>
-          <Button variant="gold" onClick={openCreateModal} className="w-full sm:w-auto">
-            สร้างรหัสใหม่
-          </Button>
-        </div>
+      {/* ชื่อหน้าอยู่ที่หัวแผงแอดมินแล้ว — ที่นี่เหลือแค่ปุ่มหลัก (เดิมซ้ำหัวข้อสองชั้น) */}
+      <div className="flex justify-end">
+        <Button variant="gold" onClick={openCreateModal} className="w-full sm:w-auto">
+          สร้างรหัสใหม่
+        </Button>
       </div>
 
       {/* Metrics Cards */}

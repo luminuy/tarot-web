@@ -29,7 +29,7 @@ export default function MarketingAudience() {
       <div className="altar-card-porcelain altar-panel p-5">
         <h3 className="text-sm font-semibold text-ink">ผู้ยินยอมรับข่าวสาร (Marketing Consent)</h3>
         <p className="mt-1 text-xs text-muted">
-          รายชื่อสมาชิกที่กดยินยอมรับข่าวสารในหน้า <code className="rounded border border-line bg-[#F2EFE9] px-1 py-0.5 text-ink">/account</code> —
+          รายชื่อสมาชิกที่กดยินยอมรับข่าวสารในหน้า <code className="rounded border border-line bg-canvas px-1 py-0.5 text-ink">/account</code> —
           ดาวน์โหลด CSV ไปใช้กับเครื่องมือส่งอีเมลภายนอกได้ (อย่าลืมใส่ลิงก์ยกเลิกรับข่าวสารทุกฉบับ)
         </p>
 
@@ -52,7 +52,7 @@ export default function MarketingAudience() {
               <a
                 href="/api/admin/marketing?format=csv"
                 download
-                className="btn-gold-glass !rounded-lg inline-flex items-center gap-1.5 border-ink px-3.5 py-2 text-xs font-semibold hover:bg-[#1a1814]"
+                className="btn-gold-glass !rounded-lg inline-flex items-center gap-1.5 border-ink px-3.5 py-2 text-xs font-semibold hover:bg-dark"
               >
                 ดาวน์โหลด CSV
               </a>

@@ -256,7 +256,7 @@ export default function AiHealthPanel() {
                     {Object.keys(quality.byVersion).length > 0 ? (
                       <div className="space-y-1.5 text-xs">
                         {Object.entries(quality.byVersion).map(([ver, stats]) => (
-                          <div key={ver} className="flex items-center justify-between py-1 border-b border-[#F0EBE1] last:border-none">
+                          <div key={ver} className="flex items-center justify-between py-1 border-b border-line-soft last:border-none">
                             <span className="font-mono text-[11px] text-ink font-semibold">{ver}</span>
                             <span className="text-[11px] text-muted">
                               {stats.total} ครั้ง · แม่น {stats.rate}%
@@ -274,7 +274,7 @@ export default function AiHealthPanel() {
                     {Object.keys(quality.byProvider).length > 0 ? (
                       <div className="space-y-1.5 text-xs">
                         {Object.entries(quality.byProvider).map(([prov, stats]) => (
-                          <div key={prov} className="flex items-center justify-between py-1 border-b border-[#F0EBE1] last:border-none">
+                          <div key={prov} className="flex items-center justify-between py-1 border-b border-line-soft last:border-none">
                             <span className="font-mono text-[11px] text-ink font-semibold uppercase">{prov}</span>
                             <span className="text-[11px] text-muted">
                               {stats.total} ครั้ง · แม่น {stats.rate}%

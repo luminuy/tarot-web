@@ -1,0 +1,110 @@
+/*
+ * 🗂️ ธีมแผงแอดมิน — พื้นขาวมาตรฐาน (เจ้าของสั่ง 2026-09-23: "เอาแค่สีขาว ทำแบบมาตรฐาน")
+ * ===========================================================================
+ * โหลดเฉพาะใน `src/app/(th)/admin/layout.tsx` — หน้าเว็บสาธารณะไม่ได้ไฟล์นี้เลย
+ * ธีมกระจกอุ่นของหน้าเว็บจริงจึงไม่ถูกแตะแม้แต่พิกเซลเดียว
+ *
+ * วิธีทำ: สลับค่าโทเคนสีภายใต้ `.admin-shell` แทนการไล่แก้คลาสทีละไฟล์
+ * (Tailwind v4 สร้างคลาสเป็น `var(--color-*)` ค่าใหม่จึงไหลไปทุกแผงเอง)
+ *
+ * คอนทราสต์ (WCAG บนพื้นขาว #FFFFFF):
+ *   ink #111827 = 17.7:1 · muted #4B5563 = 7.6:1 · line-interactive #6B7280 = 4.8:1
+ *   ปุ่มหลัก ขาวบน #111827 = 17.7:1
+ * สีสถานะ (เขียว/แดง/เหลือง) คงไว้ตามเดิม เพราะเป็นความหมาย ไม่ใช่การตกแต่ง
+ *
+ * 🚨 ห้ามใช้ backdrop-filter (INC-0056)
+ */
+
+/* พื้นทั้งหน้าเป็นขาว — ปิดแสงไล่สีและลายผ้าลินินของธีมหน้าเว็บจริง */
+body:has(.admin-shell) {
+  background: #ffffff;
+}
+body:has(.admin-shell)::before,
+body:has(.admin-shell)::after {
+  display: none;
+}
+
+.admin-shell {
+  --color-canvas: #f5f6f8;
+  --color-surface: #ffffff;
+  --color-surface-warm: #f9fafb;
+  --color-inset: #eceef1;
+  --color-inset-warm: #f3f4f6;
+  --color-line: #e3e6ea;
+  --color-line-soft: #eef0f2;
+  --color-line-warm: #e3e6ea;
+  --color-line-interactive: #6b7280;
+  --color-line-interactive-warm: #6b7280;
+  --color-ink: #111827;
+  --color-ink-deep: #111827;
+  --color-ink-soft: #4b5563;
+  --color-muted: #4b5563;
+  --color-gold: #374151;
+  --color-gold-deep: #111827;
+  --color-gold-ink: #111827;
+  --color-gold-ink-deep: #000000;
+  --color-gold-wash: rgba(17, 24, 39, 0.05);
+  --color-dark: #111827;
+
+  --glass-fill: #ffffff;
+  --glass-sheen: none;
+  --glass-edge: #e3e6ea;
+  --glass-edge-on: #c9ced6;
+  --glass-ring: transparent;
+  --glass-radius: 12px;
+  --glass-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --glass-shadow-lift: 0 1px 3px rgba(16, 24, 40, 0.08);
+
+  background: #ffffff;
+  color: var(--color-ink);
+}
+
+/* การ์ดเรียบ ไม่ลอยตอนชี้ (หน้าจอทำงาน ไม่ใช่หน้าโชว์) */
+.admin-shell .altar-card-porcelain:hover {
+  background-color: #ffffff;
+  transform: none;
+}
+
+.admin-shell .altar-modal {
+  background-color: #ffffff;
+  background-image: none;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  box-shadow: 0 20px 40px -12px rgba(16, 24, 40, 0.25);
+}
+
+.admin-shell .glass-chip {
+  background-color: var(--color-canvas);
+  background-image: none;
+  border: 1px solid var(--color-line);
+  box-shadow: none;
+}
+
+.admin-shell .glass-field {
+  background-color: #ffffff;
+  box-shadow: none;
+}
+
+.admin-shell .glass-divider-b {
+  border-bottom-color: var(--color-line);
+}
+.admin-shell .glass-divider-t {
+  border-top-color: var(--color-line);
+}
+
+/* ปุ่ม/ป้ายหลัก: ดำเรียบ ตัวขาว */
+.admin-shell .btn-gold-glass {
+  background-image: none;
+  background-color: #111827;
+  color: #ffffff;
+  box-shadow: none;
+}
+.admin-shell .btn-gold-glass:hover {
+  filter: none;
+  background-color: #000000;
+  box-shadow: none;
+}
+
+.admin-shell .font-mystic-gold {
+  color: var(--color-ink);
+}
