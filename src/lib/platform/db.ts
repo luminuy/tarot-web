@@ -328,6 +328,14 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
       );
       CREATE UNIQUE INDEX IF NOT EXISTS idx_rdm_code_user ON redeem_redemptions(code, user_id);
       CREATE INDEX IF NOT EXISTS idx_rdm_user ON redeem_redemptions(user_id);
+
+      -- 🚦 ถังกันเดารหัสผ่านแบบ atomic (migrations/0016 · A1-02)
+      CREATE TABLE IF NOT EXISTS auth_rate_buckets (
+        key       TEXT PRIMARY KEY,
+        count     INTEGER NOT NULL,
+        reset_at  INTEGER NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_auth_rate_reset ON auth_rate_buckets(reset_at);
     `);
 
     // Safe Alter & Index for local SQLite migration

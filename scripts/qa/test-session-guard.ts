@@ -16,9 +16,9 @@ import { resolveAppOrigin } from "../../src/lib/security/app-origin";
 import { SITE_DOMAIN, SITE_ORIGIN } from "../../src/lib/config/site";
 import { describeAuthError } from "../../src/lib/auth/use-session";
 import {
-  clearAuthRateLimit,
-  peekAuthRateLimit,
-  recordAuthFailure,
+  checkAuthRateLimit,
+  releaseAuthAttempt,
+  reserveAuthAttempt,
 } from "../../src/lib/security/auth-ratelimit";
 
 function baseProfile(overrides: Partial<UserProfile> = {}): UserProfile {
@@ -153,35 +153,56 @@ async function run() {
     });
 
   const victim = `victim_${Date.now()}@example.com`;
-  const attacker = loginReq("203.0.113.9");
+  // IP สุ่มทุกรอบ — ถังอยู่ใน D1 (.dev-marketplace.db) และค้างข้ามรอบรันในเครื่อง
+  const octet = Math.floor(Math.random() * 250);
+  const attacker = loginReq(`203.0.${octet}.9`);
 
-  // 6.1 การ "ตรวจ" ต้องไม่นับเพิ่มเอง — ไม่งั้นล็อกอินสำเร็จก็ยังกินโควตา
+  // 6.1 ล็อกอินสำเร็จต้องไม่กินโควตา — จองแล้วคืนทุกครั้ง 30 รอบต้องยังผ่าน
   for (let i = 0; i < 30; i++) {
-    const peeked = await peekAuthRateLimit(attacker, "login", victim);
-    if (!peeked.allowed) throw new Error("❌ peekAuthRateLimit นับเพิ่มเอง ทั้งที่ต้องแค่ตรวจอย่างเดียว");
+    const r = await reserveAuthAttempt(attacker, "login", victim);
+    if (!r.allowed) throw new Error("❌ ล็อกอินสำเร็จซ้ำ ๆ แล้วโดนกั้น — releaseAuthAttempt ไม่คืนโควตา");
+    await releaseAuthAttempt(attacker, "login", victim);
   }
 
-  // 6.2 ยิงผิดรัว ๆ จาก IP เดียวต้องโดนกั้น
-  for (let i = 0; i < 10; i++) await recordAuthFailure(attacker, "login", victim);
-  if ((await peekAuthRateLimit(attacker, "login", victim)).allowed) {
+  // 6.2 ยิงผิดรัว ๆ จาก IP เดียวต้องโดนกั้น (จองแล้วไม่คืน = ครั้งที่ผิด)
+  for (let i = 0; i < 10; i++) await reserveAuthAttempt(attacker, "login", victim);
+  if ((await reserveAuthAttempt(attacker, "login", victim)).allowed) {
     throw new Error("❌ ยิงรหัสผ่านผิด 10 ครั้งจาก IP เดียวแล้วยังไม่ถูกกั้น");
   }
 
   // 6.3 ⚠️ หัวใจของด่านนี้: ผู้โจมตีต้องล็อกเจ้าของบัญชีตัวจริงออกไม่ได้
-  const owner = loginReq("198.51.100.20");
-  if (!(await peekAuthRateLimit(owner, "login", victim)).allowed) {
+  const owner = loginReq(`198.51.${octet}.20`);
+  if (!(await reserveAuthAttempt(owner, "login", victim)).allowed) {
     throw new Error(
       "❌ ผู้โจมตียิงรหัสผ่านผิดใส่อีเมลของเหยื่อ แล้วเจ้าของบัญชีตัวจริงล็อกอินไม่ได้ตามไปด้วย " +
         "(account lockout DoS) — เพดานที่แคบที่สุดต้องผูกกับ IP ของผู้ยิง ไม่ใช่ผูกกับบัญชีอย่างเดียว",
     );
   }
+  await releaseAuthAttempt(owner, "login", victim);
 
   // 6.4 ล็อกอินสำเร็จต้องล้างถังของบัญชีนี้ทิ้ง
-  await clearAuthRateLimit(attacker, "login", victim);
-  if (!(await peekAuthRateLimit(attacker, "login", victim)).allowed) {
+  await releaseAuthAttempt(attacker, "login", victim);
+  if (!(await reserveAuthAttempt(attacker, "login", victim)).allowed) {
     throw new Error("❌ ล็อกอินสำเร็จแล้วถังยังไม่ถูกล้าง — ผู้ใช้ที่พิมพ์ผิดไปสองสามครั้งจะโดนกั้นต่อทั้งที่เข้าได้แล้ว");
   }
-  console.log("  ✓ 6. Rate limit ล็อกอิน: นับเฉพาะครั้งที่ผิด · กันเดารหัสผ่าน · ไม่เปิดช่องล็อกเจ้าของบัญชีออก");
+  await releaseAuthAttempt(attacker, "login", victim);
+
+  // 6.5 (A1-02) ยิงพร้อมกันต้องทะลุเพดานไม่ได้ — แอดมินเพดาน 8 ครั้ง/15 นาที
+  //     เดิม peek แล้วค่อยนับ ยิง 50 คำขอพร้อมกันผ่านได้ทั้งชุด
+  const burstIp = `192.0.2.${(Date.now() % 200) + 1}`;
+  const burst = await Promise.all(
+    Array.from({ length: 50 }, () =>
+      checkAuthRateLimit(
+        new Request(`${SITE_ORIGIN}/api/admin/login`, { method: "POST", headers: { "cf-connecting-ip": burstIp } }),
+        "admin_login",
+      ),
+    ),
+  );
+  const passed = burst.filter((r) => r.allowed).length;
+  if (passed > 8) {
+    throw new Error(`❌ A1-02: ยิงล็อกอินแอดมินพร้อมกัน 50 คำขอ ผ่านได้ ${passed} คำขอ (เพดาน 8) — ตัวนับไม่ atomic`);
+  }
+  console.log("  ✓ 6. Rate limit ล็อกอิน: นับเฉพาะครั้งที่ผิด · กันเดารหัสผ่าน · ไม่เปิดช่องล็อกเจ้าของบัญชีออก · ยิงพร้อมกันทะลุไม่ได้ (A1-02)");
 
   console.log("✅ [QA] ด่านกันบั๊กเซสชันและการเข้าสู่ระบบผ่านครบทุกข้อ\n");
 }

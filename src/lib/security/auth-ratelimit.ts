@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { getAppKV } from "@/lib/platform/cf";
+import { getAppDB } from "@/lib/platform/db";
 import { isPrivilegedTestRequest } from "@/lib/security/privileged";
 import { getClientIdentifier } from "@/lib/utils/rate-limit";
 
@@ -8,7 +8,7 @@ interface RateLimitBucket {
   resetAt: number;
 }
 
-// In-memory fallback (ใช้เมื่อ KV ยังไม่พร้อม / dev)
+// สำเนาในหน่วยความจำ — ใช้เมื่อ D1 ยังไม่พร้อม (ตารางยังไม่ migrate / ล่ม)
 const memoryBuckets = new Map<string, RateLimitBucket>();
 
 /**
@@ -126,40 +126,56 @@ function pruneExpiredBuckets(now: number): void {
   }
 }
 
-async function readBucket(key: string): Promise<RateLimitBucket | null> {
+/*
+ * 🚦 ที่เก็บถัง = ตาราง D1 `auth_rate_buckets` (migrations/0016 · A1-02)
+ * ---------------------------------------------------------------------------
+ * เดิมเก็บใน KV แบบ อ่าน ➔ +1 ➔ เขียน ซึ่ง **ไม่ atomic** และ KV รับเขียนคีย์เดียวได้
+ * 1 ครั้ง/วินาที (ที่เกินถูกกลืนเงียบ) — ยิงพร้อมกัน 200 คำขอ ทุกตัวอ่านเจอ count < max
+ * แล้วผ่านหมด · ตอนนี้ "นับแล้วคืนค่าที่นับได้" ในคำสั่งเดียว แล้วตัดสินจากค่าที่คืน
+ * ไม่ใช่ค่าที่อ่านไว้ก่อนหน้า — คำขอที่ 9 ของหน้าต่างเดียวกันเห็น 9 เสมอ ไม่ว่าจะยิงพร้อมกันแค่ไหน
+ *
+ * D1 ใช้ไม่ได้ (ตารางยังไม่ migrate / ล่ม) ➔ ถอยไปใช้หน่วยความจำ (ดีกว่าไม่มีด่านเลย)
+ */
+async function incrementBucket(key: string, windowSec: number, delta = 1): Promise<RateLimitBucket> {
+  const now = Date.now();
+  const freshReset = now + windowSec * 1000;
   try {
-    const kv = await getAppKV();
-    const raw = await kv.get(key);
-    if (raw) return JSON.parse(raw) as RateLimitBucket;
+    const db = await getAppDB();
+    const row = await db
+      .prepare(
+        `INSERT INTO auth_rate_buckets (key, count, reset_at) VALUES (?, ?, ?)
+         ON CONFLICT(key) DO UPDATE SET
+           count    = CASE WHEN auth_rate_buckets.reset_at <= ? THEN excluded.count ELSE MAX(0, auth_rate_buckets.count + ?) END,
+           reset_at = CASE WHEN auth_rate_buckets.reset_at <= ? THEN excluded.reset_at ELSE auth_rate_buckets.reset_at END
+         RETURNING count, reset_at`
+      )
+      .bind(key, Math.max(0, delta), freshReset, now, delta, now)
+      .first<{ count: number; reset_at: number }>();
+    if (row) {
+      // กวาดแถวที่หมดอายุทิ้งเป็นครั้งคราว (ราว 1 ใน 100 ครั้ง) — ไม่งั้นตารางโตตาม IP ที่เคยยิงมา
+      if (Math.random() < 0.01) {
+        await db.prepare(`DELETE FROM auth_rate_buckets WHERE reset_at < ?`).bind(now).run().catch(() => undefined);
+      }
+      return { count: Number(row.count), resetAt: Number(row.reset_at) };
+    }
   } catch {
-    // KV ไม่พร้อม / JSON เสีย — ตกไปใช้ในหน่วยความจำ
+    // ตกไปใช้หน่วยความจำ
   }
+  pruneExpiredBuckets(now);
   const cached = memoryBuckets.get(key);
-  if (cached && cached.resetAt <= Date.now()) {
-    memoryBuckets.delete(key);
-    return null;
-  }
-  return cached ?? null;
-}
-
-async function writeBucket(key: string, bucket: RateLimitBucket): Promise<void> {
-  pruneExpiredBuckets(Date.now());
+  const bucket =
+    cached && now < cached.resetAt
+      ? { count: Math.max(0, cached.count + delta), resetAt: cached.resetAt }
+      : { count: Math.max(0, delta), resetAt: freshReset };
   memoryBuckets.set(key, bucket);
-  try {
-    const kv = await getAppKV();
-    // TTL ต้องเหลือเท่าที่หน้าต่างเหลือจริง ไม่ใช่ความยาวหน้าต่างเต็ม
-    const ttl = Math.max(60, Math.ceil((bucket.resetAt - Date.now()) / 1000));
-    await kv.put(key, JSON.stringify(bucket), { expirationTtl: ttl });
-  } catch {
-    // ignore KV write errors in local dev
-  }
+  return bucket;
 }
 
 async function clearBucket(key: string): Promise<void> {
   memoryBuckets.delete(key);
   try {
-    const kv = await getAppKV();
-    await kv.delete(key);
+    const db = await getAppDB();
+    await db.prepare(`DELETE FROM auth_rate_buckets WHERE key = ?`).bind(key).run();
   } catch {
     // ignore
   }
@@ -170,59 +186,51 @@ export interface AuthRateLimitResult {
   retryAfterSec?: number;
 }
 
+/** นับก่อนแล้วตัดสินจากค่าที่นับได้จริง (atomic) — ห้ามกลับไปใช้ peek แล้วค่อยนับ */
+async function reserveUnchecked(
+  request: Request,
+  action: AuthRateLimitAction,
+  identifier?: string
+): Promise<AuthRateLimitResult> {
+  const now = Date.now();
+  const windowSec = ACTION_CONFIGS[action].windowSec;
+  let retryAfterSec = 0;
+  for (const { key, max } of keysFor(request, action, identifier)) {
+    const bucket = await incrementBucket(key, windowSec);
+    if (bucket.count > max) {
+      retryAfterSec = Math.max(retryAfterSec, Math.ceil((bucket.resetAt - now) / 1000));
+    }
+  }
+  return retryAfterSec > 0 ? { allowed: false, retryAfterSec: Math.max(1, retryAfterSec) } : { allowed: true };
+}
+
 /**
- * ตรวจว่าเกินเพดานหรือยัง **โดยไม่นับเพิ่ม**
- * ใช้กับ action ที่ต้องนับเฉพาะครั้งที่ล้มเหลว (เช่น การเข้าสู่ระบบ)
+ * จองสิทธิ์ลองยืนยันตัวตน 1 ครั้ง **ก่อน** ตรวจรหัสผ่าน (atomic — A1-02)
+ * ใช้คู่กับ `releaseAuthAttempt` เมื่อสำเร็จ ผลรวมจึงยังเป็น "นับเฉพาะครั้งที่ผิด" เหมือนเดิม
+ * แต่คำขอที่ยิงพร้อมกันไม่มีทางผ่านเพดานไปได้ เพราะแต่ละคำขอเห็นค่าที่ตัวเองนับเพิ่มแล้ว
  */
-export async function peekAuthRateLimit(
+export async function reserveAuthAttempt(
   request: Request,
   action: AuthRateLimitAction,
   identifier?: string
 ): Promise<AuthRateLimitResult> {
   if (await isPrivilegedTestRequest(request)) return { allowed: true };
-  return peekUnchecked(request, action, identifier);
+  return reserveUnchecked(request, action, identifier);
 }
 
-async function peekUnchecked(
-  request: Request,
-  action: AuthRateLimitAction,
-  identifier?: string
-): Promise<AuthRateLimitResult> {
-  const now = Date.now();
-  for (const { key, max } of keysFor(request, action, identifier)) {
-    const bucket = await readBucket(key);
-    if (bucket && now < bucket.resetAt && bucket.count >= max) {
-      return { allowed: false, retryAfterSec: Math.max(1, Math.ceil((bucket.resetAt - now) / 1000)) };
-    }
-  }
-  return { allowed: true };
-}
-
-/** นับความพยายามที่ล้มเหลวเพิ่ม 1 ครั้ง (ทั้งถัง IP และถังบัญชี) */
-export async function recordAuthFailure(
+/**
+ * คืนสิทธิ์ที่จองไว้เมื่อยืนยันตัวตนสำเร็จ — ถัง IP ลดลง 1 (ครั้งที่สำเร็จไม่นับ)
+ * ส่วนถังของบัญชีล้างทิ้งทั้งถัง (ตรรกะเดียวกับ clearAuthRateLimit)
+ */
+export async function releaseAuthAttempt(
   request: Request,
   action: AuthRateLimitAction,
   identifier?: string
 ): Promise<void> {
-  if (await isPrivilegedTestRequest(request)) return;
-  await recordUnchecked(request, action, identifier);
-}
-
-async function recordUnchecked(
-  request: Request,
-  action: AuthRateLimitAction,
-  identifier?: string
-): Promise<void> {
-  const now = Date.now();
   const windowSec = ACTION_CONFIGS[action].windowSec;
-  for (const { key } of keysFor(request, action, identifier)) {
-    const existing = await readBucket(key);
-    const bucket =
-      existing && now < existing.resetAt
-        ? { count: existing.count + 1, resetAt: existing.resetAt }
-        : { count: 1, resetAt: now + windowSec * 1000 };
-    await writeBucket(key, bucket);
-  }
+  const ipHash = hashKey(`ip:${getClientIp(request)}`);
+  await incrementBucket(`app:authrl:${action}:ip:${ipHash}`, windowSec, -1);
+  await clearAuthRateLimit(request, action, identifier);
 }
 
 /**
@@ -259,9 +267,6 @@ export async function checkAuthRateLimit(
   // ไม่งั้นหนึ่งคำขอจะอ่านคุกกี้ + เทียบ token_version สองรอบโดยไม่จำเป็น
   if (await isPrivilegedTestRequest(request)) return { allowed: true };
 
-  const peeked = await peekUnchecked(request, action, identifier);
-  if (!peeked.allowed) return peeked;
-
-  await recordUnchecked(request, action, identifier);
-  return { allowed: true };
+  // นับและตัดสินในก้าวเดียว (A1-02) — เดิม peek แล้วค่อยนับ ยิงพร้อมกันผ่านได้ทั้งชุด
+  return reserveUnchecked(request, action, identifier);
 }
