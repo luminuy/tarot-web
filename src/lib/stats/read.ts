@@ -38,6 +38,32 @@ async function readD1Counters(days: string[]): Promise<Map<string, Record<string
   return out;
 }
 
+/** อ่านก้อนตัวนับของวันที่ระบุ (KV เดิม + D1) — `docs` เรียงตามลำดับ `days` ที่ส่งเข้าไป */
+async function readDayDocs(days: string[]): Promise<{ allTime: Record<string, number>; docs: Record<string, number>[] }> {
+  const [allTime, ...dayDocs] = await Promise.all([
+    kvGetJSON<Record<string, number>>("app:stat:all").then((r) => r ?? {}),
+    ...days.map((d) => kvGetJSON<Record<string, number>>(`app:stat:day:${d}`).catch(() => null)),
+  ]);
+
+  // ยอดจากตาราง D1 (ที่เก็บหลักตั้งแต่ A2-16) รวมกับยอดเก่าบน KV
+  const fromD1 = await readD1Counters(days);
+  addInto(allTime, fromD1.get("all"));
+
+  const docs = days.map((d, i) => {
+    const doc: Record<string, number> = { ...(dayDocs[i] ?? {}) };
+    addInto(doc, fromD1.get(d));
+    return doc;
+  });
+  return { allTime, docs };
+}
+
+/** วันก่อนหน้าของคีย์วัน `YYYY-MM-DD` (ตามปฏิทิน UTC เดียวกับที่ตัวนับใช้) */
+export function previousDay(day: string): string {
+  const d = new Date(`${day}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - 1);
+  return utcDay(d);
+}
+
 /** ดึงสถิติ — flush buffer ที่ค้างก่อน เพื่อให้ตัวเลขสดที่สุด */
 export async function getStats(rangeDays = 30): Promise<StatsSnapshot> {
   await flush().catch(() => {});
@@ -50,25 +76,95 @@ export async function getStats(rangeDays = 30): Promise<StatsSnapshot> {
     days.push(utcDay(d));
   }
 
-  const [allTime, ...dayDocs] = await Promise.all([
-    kvGetJSON<Record<string, number>>("app:stat:all").then((r) => r ?? {}),
-    ...days.map((d) => kvGetJSON<Record<string, number>>(`app:stat:day:${d}`)),
-  ]);
-
-  // ยอดจากตาราง D1 (ที่เก็บหลักตั้งแต่ A2-16) รวมกับยอดเก่าบน KV
-  const fromD1 = await readD1Counters(days);
-  addInto(allTime, fromD1.get("all"));
+  const { allTime, docs } = await readDayDocs(days);
 
   const range: Record<string, number> = {};
   const daily: Record<string, Record<string, number>> = {};
   days.forEach((d, i) => {
-    const doc: Record<string, number> = { ...(dayDocs[i] ?? {}) };
-    addInto(doc, fromD1.get(d));
-    daily[d] = doc;
-    addInto(range, doc);
+    daily[d] = docs[i];
+    addInto(range, docs[i]);
   });
 
   return { allTime, range, rangeDays, daily, generatedAt: Date.now() };
+}
+
+export interface DayActivity {
+  /** บัญชีสมาชิกที่สร้างในวันนั้น */
+  newUsers: number | null;
+  /** ความเห็นจากผู้ใช้ที่ส่งเข้ามาในวันนั้น */
+  feedback: number | null;
+  /** คะแนนเฉลี่ย (1–5) ของความเห็นที่ให้ดาว */
+  avgRating: number | null;
+}
+
+export interface DayStats {
+  day: string;
+  prevDay: string;
+  current: Record<string, number>;
+  previous: Record<string, number>;
+  activity: DayActivity;
+  prevActivity: DayActivity;
+  generatedAt: number;
+}
+
+/** ช่วงเวลา [เริ่ม, จบ) ของวัน UTC เป็นมิลลิวินาที — ใช้คัดแถว D1 ที่เก็บ `created_at` เป็น epoch ms */
+function dayBounds(day: string): [number, number] {
+  const start = Date.parse(`${day}T00:00:00Z`);
+  return [start, start + 24 * 60 * 60 * 1000];
+}
+
+async function readDayActivity(day: string): Promise<DayActivity> {
+  const [from, to] = dayBounds(day);
+  const out: DayActivity = { newUsers: null, feedback: null, avgRating: null };
+  let db;
+  try {
+    db = await getAppDB();
+  } catch {
+    return out;
+  }
+  // แต่ละตารางแยก try — ตารางไหนยังไม่ migrate ก็ยังเห็นอีกตาราง (null = อ่านไม่ได้ ไม่ใช่ 0)
+  try {
+    const r = await db
+      .prepare("SELECT COUNT(*) AS n FROM users WHERE created_at >= ? AND created_at < ?")
+      .bind(from, to)
+      .first<{ n: number }>();
+    out.newUsers = Number(r?.n ?? 0);
+  } catch {
+    /* ตาราง users ใช้ไม่ได้ */
+  }
+  try {
+    const r = await db
+      .prepare(
+        "SELECT COUNT(*) AS n, AVG(rating) AS avg FROM user_feedback WHERE created_at >= ? AND created_at < ?",
+      )
+      .bind(from, to)
+      .first<{ n: number; avg: number | null }>();
+    out.feedback = Number(r?.n ?? 0);
+    out.avgRating = r?.avg == null ? null : Math.round(Number(r.avg) * 10) / 10;
+  } catch {
+    /* ตาราง user_feedback ใช้ไม่ได้ */
+  }
+  return out;
+}
+
+/** สรุปของวันเดียว + วันก่อนหน้าไว้เทียบ — ใช้กับ "สรุปรายวัน" ที่เลือกวันได้ */
+export async function getDayStats(day: string): Promise<DayStats> {
+  await flush().catch(() => {});
+  const prevDay = previousDay(day);
+  const [{ docs }, activity, prevActivity] = await Promise.all([
+    readDayDocs([day, prevDay]),
+    readDayActivity(day),
+    readDayActivity(prevDay),
+  ]);
+  return {
+    day,
+    prevDay,
+    current: docs[0],
+    previous: docs[1],
+    activity,
+    prevActivity,
+    generatedAt: Date.now(),
+  };
 }
 
 export { breakdown } from "@/lib/stats/breakdown";

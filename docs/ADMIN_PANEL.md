@@ -58,11 +58,16 @@ Local dev: ใส่ `ADMIN_PASSWORD=...` ใน `.env.local`
 | ไฟล์ | หน้าที่ |
 | :-- | :-- |
 | `src/lib/stats/record.ts` | `recordEvent()` — buffer ระดับ isolate + flush debounce 20 วิ ผ่าน `waitUntil` |
-| `src/lib/stats/read.ts` | `getStats(days)` — force-flush ก่อนอ่าน + รวม daily/all-time |
-| `src/components/admin/DailyStatsTable.tsx` | UI ตารางสถิติวันต่อวัน (Day-by-Day Detailed Table), กราฟแนวโน้ม, คลี่ดูข้อมูลย่อย, และส่งออกรายงาน CSV |
-| `src/components/admin/StatsDashboard.tsx` | แดชบอร์ดสถิติ 3 มุมมอง: สถิติรายวัน (Day-by-Day) / สรุปหมวดหมู่ & แม่หมอ / เมตริก AI และเทคนิค |
-| `GET /api/admin/stats?days=` | คืน `{ stats, audit, aiCapToday, aiDailyCap }` (guard requireAdmin) |
+| `src/lib/stats/read.ts` | `getStats(days)` ช่วงวัน · `getDayStats(day)` วันเดียว + วันก่อน + สมาชิกใหม่/ความเห็นจาก D1 — force-flush ก่อนอ่านเสมอ |
+| `src/lib/stats/admin-metrics.ts` | ทะเบียนชื่อเมตริกที่แผงอ่าน + `summarize()` จัดหมวด (การใช้งาน · ความปลอดภัย · สิทธิ์ · AI · ธุรกิจ) — ใช้ร่วมทุกแผง |
+| `src/components/admin/StatsDashboard.tsx` | แดชบอร์ด 3 หมวด: **สรุปรายวัน** (เลือกวันได้) / **แนวโน้ม & ความนิยม** / **AI & ระบบ** |
+| `src/components/admin/DailySummary.tsx` | สรุปของวันเดียว — ปุ่มวันก่อน/ถัดไป/วันนี้ + ปฏิทิน ย้อนได้ 400 วัน · เทียบวันก่อนทุกตัวเลข |
+| `src/components/admin/DailyStatsTable.tsx` | แนวโน้มช่วง 7–90 วัน: กราฟเริ่ม/อ่านจบ · ความนิยม · ตารางย้อนหลัง (กดวัน ➔ เปิดสรุปรายวัน) · CSV |
+| `GET /api/admin/stats?days=N` | คืน `{ stats, audit, ai }` (guard requireAdmin) |
+| `GET /api/admin/stats?day=YYYY-MM-DD` | คืน `{ day, prevDay, current, previous, activity, prevActivity, isToday, ai }` |
 
+- ⚠️ **โควตา AI วันนี้ต้องอ่านผ่าน `getAiUsageToday()` เท่านั้น** — เปิด Upstash อยู่ ตัวนับอยู่ใน Redis, อ่าน KV ตรง ๆ ได้ 0 เสมอ (ด่าน `test-admin-stats-keys` เฝ้า)
+- วันของระบบสถิติคือวัน UTC (ตัดรอบ 07:00 น. เวลาไทย)
 - KV keys: `app:stat:day:<YYYY-MM-DD>` (TTL 400 วัน) + `app:stat:all`
 - การจัดหมวดหมู่ 4 กลุ่มตามภารกิจจริงของมนุษย์ (Human-First Navigation):
   1. **สถิติและรายงาน**: ภาพรวมวิหาร (Overview), สถิติการใช้งานรายวัน (Daily Statistics)

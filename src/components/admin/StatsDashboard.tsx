@@ -2,8 +2,12 @@
 
 import { useMemo, useState } from "react";
 
-import { PERSONAS } from "@/data/personas";
-import { SPREADS } from "@/data/spreads";
+import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
+import DailyStatsTable from "@/components/admin/DailyStatsTable";
+import DailySummary, { statDayKey } from "@/components/admin/DailySummary";
+import { KeyValueList, Meter, SectionTitle, StatCard, fmt, fmtPct } from "@/components/admin/StatsWidgets";
+import { useAdminResource } from "@/lib/admin/use-admin-resource";
+import { summarize } from "@/lib/stats/admin-metrics";
 
 interface StatsSnapshot {
   allTime: Record<string, number>;
@@ -12,313 +16,212 @@ interface StatsSnapshot {
   daily: Record<string, Record<string, number>>;
   generatedAt: number;
 }
-interface AuditEntry {
-  ts: number;
-  action: string;
-  detail?: string;
+
+interface AiUsage {
+  usedToday: number;
+  dailyCap: number;
+  guestCap: number;
+  memberCapReached: boolean;
+  guestCapReached: boolean;
 }
 
-const SPREAD_NAME = Object.fromEntries(SPREADS.map((s) => [s.id, s.nameTh]));
-const PERSONA_NAME = Object.fromEntries(PERSONAS.map((p) => [p.id, p.nameTh]));
-const CATEGORY_NAME: Record<string, string> = {
-  general: "ทั่วไป",
-  love: "ความรัก",
-  work: "การงาน",
-  money: "การเงิน",
-  self: "ตัวเอง",
-};
-const FLAG_NAME: Record<string, string> = {
-  crisis: "สัญญาณวิกฤต (1323)",
-  medical: "สุขภาพ/การแพทย์",
-  legal: "กฎหมาย/คดี",
-  gambling: "หวย/พนัน/หุ้น",
-  third_party: "เรื่องบุคคลที่สาม",
-};
+type SubView = "daily" | "trend" | "ai";
 
-function n(v: number | undefined) {
-  return (v ?? 0).toLocaleString("th-TH");
-}
+const TABS: { id: SubView; label: string }[] = [
+  { id: "daily", label: "สรุปรายวัน" },
+  { id: "trend", label: "แนวโน้ม & ความนิยม" },
+  { id: "ai", label: "AI & ระบบ" },
+];
 
-function pct(part: number, whole: number) {
-  if (!whole) return "0%";
-  return `${Math.round((part / whole) * 100)}%`;
-}
+const RANGES = [7, 14, 30, 90] as const;
 
-
-
-function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <div className="altar-card-porcelain p-4">
-      <p className="text-xs font-semibold text-muted">{label}</p>
-      <p className="mt-1 text-2xl font-bold font-mono text-ink">{value}</p>
-      {sub ? <p className="mt-0.5 text-xs text-muted">{sub}</p> : null}
-    </div>
-  );
-}
-
-function BarList({
-  title,
-  rows,
-  nameMap,
-}: {
-  title: string;
-  rows: { key: string; count: number }[];
-  nameMap?: Record<string, string>;
-}) {
-  const max = Math.max(1, ...rows.map((r) => r.count));
-  return (
-    <div className="altar-card-porcelain p-5">
-      <h3 className="font-mystic-gold text-sm font-bold text-ink">{title}</h3>
-      {rows.length === 0 ? (
-        <p className="mt-3 text-xs text-muted">ยังไม่มีข้อมูล</p>
-      ) : (
-        <ul className="mt-3 flex flex-col gap-2.5">
-          {rows.map((r) => (
-            <li key={r.key} className="flex items-center gap-3">
-              <span className="w-40 shrink-0 truncate text-xs font-medium text-ink" title={nameMap?.[r.key] ?? r.key}>
-                {nameMap?.[r.key] ?? r.key}
-              </span>
-              <span className="h-2 flex-1 overflow-hidden rounded-full bg-inset">
-                <span
-                  className="block h-full rounded-full bg-gold"
-                  style={{ width: `${(r.count / max) * 100}%` }}
-                />
-              </span>
-              <span className="w-12 shrink-0 text-right text-xs font-mono text-muted">{n(r.count)}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-import DailyStatsTable from "@/components/admin/DailyStatsTable";
-/* 🧹 R-31: สำเนาของ breakdown() ที่เคยประกาศในไฟล์นี้ถูกลบแล้ว — ใช้ตัวกลางตัวเดียว */
-import { breakdown } from "@/lib/stats/breakdown";
-import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
-import { useAdminResource } from "@/lib/admin/use-admin-resource";
-
+/**
+ * แผงสถิติแอดมิน 3 หมวด
+ * 1. สรุปรายวัน — เลือกวันได้ เทียบกับวันก่อน (`DailySummary` · `/api/admin/stats?day=`)
+ * 2. แนวโน้ม & ความนิยม — ช่วง 7–90 วัน กราฟ ตาราง CSV (`DailyStatsTable`)
+ * 3. AI & ระบบ — โควตา AI วันนี้ ผู้ให้บริการ ความเสถียร ความเร็ว สิทธิ์ที่กั้นผู้ใช้
+ *
+ * บันทึกการเข้าแอดมินอยู่ที่แผง "ภาพรวมวิหาร" ที่เดียว (เคยซ้ำอยู่ในแท็บ AI ของหน้านี้)
+ */
 export default function StatsDashboard() {
-  const [days, setDays] = useState(14);
-  const [subView, setSubView] = useState<"daily" | "summary" | "tech">("daily");
-  /*
-   * 🔴 R-28: ของเดิมตั้งค่า `err` ไว้แต่ **ไม่เคยเรนเดอร์มันเลยสักที่**
-   * API ตอบ 500 ➔ หน้าจอแสดงตารางว่าง ซึ่งผู้ดูแลอ่านว่า "วันนี้ไม่มีใครเข้าเว็บ"
-   * ไม่ใช่ "ระบบสถิติพัง" — สองอย่างนี้ต้องแยกออกจากกันให้ได้บนหน้าจอเฝ้าระบบ
-   *
-   * 🔴 R-31: ตรรกะชุดนี้เคยถูกลอกไว้ที่นี่ทั้งก้อนทั้งที่ฮุกกลางมีอยู่แล้ว
-   * (`useAdminResource` ถูกเขียนไว้แต่ไม่มีแผงไหนเรียกใช้เลยสักแผง) — ตอนนี้เรียกของกลาง
-   * เปลี่ยนช่วงวัน = `url` เปลี่ยน = ฮุกโหลดใหม่ให้เอง ไม่ต้องมี effect ของตัวเอง
-   */
-  const {
-    data,
-    loading,
-    error: err,
-    reload,
-  } = useAdminResource<{
-    stats: StatsSnapshot;
-    audit: AuditEntry[];
-    aiCapToday?: number;
-    aiDailyCap?: number;
-  }>(`/api/admin/stats?days=${days}`);
+  const [subView, setSubView] = useState<SubView>("daily");
+  const [days, setDays] = useState<number>(14);
+  const [day, setDay] = useState<string>(() => statDayKey());
 
-  const view = useMemo(() => {
-    if (!data) return null;
-    const r = data.stats.range;
-    const started = r.reading_started ?? 0;
-    const completed = r.reading_completed ?? 0;
-    const failed = r.reading_failed ?? 0;
-    const blocked = r.reading_blocked ?? 0;
-    const tokIn = r.ai_tokens_in ?? 0;
-    const tokOut = r.ai_tokens_out ?? 0;
-    const latSum = r.ai_latency_ms ?? 0;
-    const groqCalls = r["ai_call:groq"] ?? 0;
-    const geminiCalls = r["ai_call:gemini"] ?? 0;
-    const aiCalls = groqCalls + geminiCalls;
-    const aiCapHit = r.ai_cap_hit ?? 0;
-    const foreignTrips = breakdown(r, "ai_foreign_trip:").filter((x) => x.key === "groq").reduce((s, x) => s + x.count, 0);
-    const schemaFails = breakdown(r, "ai_schema_fail:").filter((x) => x.key === "groq").reduce((s, x) => s + x.count, 0);
-    return {
-      started,
-      completed,
-      failed,
-      blocked,
-      completionRate: pct(completed, started),
-      tokens: tokIn + tokOut,
-      avgLatency: completed ? `${Math.round(latSum / completed)}ms` : "-",
-      groqCalls,
-      geminiCalls,
-      groqShare: pct(groqCalls, aiCalls),
-      groqFailover: r.ai_failover_groq_to_gemini ?? 0,
-      foreignTrips,
-      schemaFails,
-      aiErrors: (r["ai_error:gemini"] ?? 0) + (r["ai_error:groq"] ?? 0),
-      aiCapHit,
-      chat: r.chat_message ?? 0,
-      spreads: breakdown(r, "spread:"),
-      personas: breakdown(r, "persona:"),
-      categories: breakdown(r, "category:"),
-      flags: breakdown(r, "safety_flag:"),
-    };
-  }, [data]);
+  /*
+   * 🔴 R-28/R-31: โหลดผ่านฮุกกลางเท่านั้น — ล้มเหลวแล้วล้างของเดิม + แสดง AdminErrorBanner
+   * แท็บ "สรุปรายวัน" โหลดของตัวเอง ช่วงวันจึงโหลดเฉพาะตอนเปิดสองแท็บที่เหลือ
+   */
+  const { data, loading, error, reload } = useAdminResource<{ stats: StatsSnapshot; ai: AiUsage }>(
+    `/api/admin/stats?days=${days}`,
+    { immediate: subView !== "daily" },
+  );
+
+  const total = useMemo(() => summarize(data?.stats.range), [data]);
+
+  const openDay = (d: string) => {
+    setDay(d);
+    setSubView("daily");
+  };
 
   return (
     <div className="flex flex-col gap-5">
-      {/* ─── Top Control Bar: Segmented Switcher & Range Selector ──────── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-line pb-4">
-        {/* Segmented Control Switcher */}
-        <div className="inline-flex items-center gap-1 rounded-xl border border-line bg-canvas p-1 text-xs">
-          <button
-            type="button"
-            onClick={() => setSubView("daily")}
-            className={`tap-overlay-y rounded-lg px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
-              subView === "daily"
-                ? "bg-white text-ink shadow-2xs font-semibold border border-line"
-                : "text-muted hover:text-ink"
-            }`}
-          >
-            สถิติการใช้งานและรายวัน
-          </button>
-          <button
-            type="button"
-            onClick={() => setSubView("summary")}
-            className={`tap-overlay-y rounded-lg px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
-              subView === "summary"
-                ? "bg-white text-ink shadow-2xs font-semibold border border-line"
-                : "text-muted hover:text-ink"
-            }`}
-          >
-            เรื่องยอดนิยม & แม่หมอ
-          </button>
-          <button
-            type="button"
-            onClick={() => setSubView("tech")}
-            className={`tap-overlay-y rounded-lg px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
-              subView === "tech"
-                ? "bg-white text-ink shadow-2xs font-semibold border border-line"
-                : "text-muted hover:text-ink"
-            }`}
-          >
-            ประสิทธิภาพระบบ & AI
-          </button>
+      {/* ─── แถบควบคุม ─────────────────────────────────────────────── */}
+      <div className="flex flex-col justify-between gap-3 border-b border-line pb-4 lg:flex-row lg:items-center">
+        <div role="tablist" aria-label="หมวดสถิติ" className="inline-flex w-fit items-center gap-1 rounded-xl border border-line bg-canvas p-1 text-xs">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={subView === t.id}
+              onClick={() => setSubView(t.id)}
+              className={`tap-overlay-y rounded-lg px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+                subView === t.id
+                  ? "border border-line bg-white font-semibold text-ink shadow-2xs"
+                  : "text-muted hover:text-ink"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
 
-        {/* Days Filter Pills & Refresh */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1">
-            <span className="text-xs font-semibold text-muted mr-1 hidden sm:inline">ช่วงเวลา:</span>
-            {[7, 14, 30, 90].map((d) => (
+        {subView !== "daily" ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="mr-1 hidden text-xs font-semibold text-muted sm:inline">ช่วงเวลา:</span>
+            {RANGES.map((d) => (
               <button
                 key={d}
                 type="button"
                 onClick={() => setDays(d)}
+                aria-pressed={days === d}
                 className={`tap-overlay-y rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer ${
-                  days === d
-                    ? "btn-gold-glass"
-                    : "border border-line bg-white text-muted hover:bg-canvas hover:text-ink"
+                  days === d ? "btn-gold-glass" : "border border-line bg-white text-muted hover:bg-canvas hover:text-ink"
                 }`}
               >
-                {d === 30 ? "30 วัน" : d === 90 ? "90 วัน" : `${d} วัน`}
+                {d} วัน
               </button>
             ))}
+            <button
+              type="button"
+              onClick={() => void reload()}
+              disabled={loading}
+              className="altar-card-porcelain !rounded-lg tap-overlay-y inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-ink hover:bg-canvas transition-colors cursor-pointer disabled:opacity-50"
+              title="โหลดตัวเลขล่าสุด"
+            >
+              <span className={loading ? "inline-block animate-spin" : "inline-block"}>↻</span>
+              <span className="hidden sm:inline">โหลดล่าสุด</span>
+            </button>
           </div>
-
-          <button
-            type="button"
-            onClick={reload}
-            className="altar-card-porcelain !rounded-lg tap-overlay-y inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-ink hover:bg-canvas transition-colors cursor-pointer disabled:opacity-50"
-            disabled={loading}
-            title="รีเฟรชข้อมูลล่าสุด"
-          >
-            <span className={loading ? "animate-spin inline-block" : "inline-block"}>↻</span>
-            <span className="hidden sm:inline">โหลดล่าสุด</span>
-          </button>
-        </div>
+        ) : null}
       </div>
 
-      {err ? <p className="text-sm text-rose-700 bg-rose-50 border border-rose-200 p-3 rounded-xl">{err}</p> : null}
-
-      {/* ─── Active Sub-Tab Views ──────────────────────────────────── */}
-      {data && view ? (
-        <>
-          {/* Sub-tab 1: Day-by-Day Detailed Statistics (Primary requested feature) */}
-          {subView === "daily" && (
-            <DailyStatsTable daily={data.stats.daily} rangeDays={days} />
-          )}
-
-          {/* Sub-tab 2: Categories, Spreads, Personas & Flags */}
-          {subView === "summary" && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <StatCard label={`เริ่มเปิดไพ่รวม (${days} วัน)`} value={n(view.started)} />
-                <StatCard label="เปิดจบสมบูรณ์" value={n(view.completed)} sub={`${view.completionRate} ของที่เริ่ม`} />
-                <StatCard label="แชทถามต่อ" value={n(view.chat)} sub="ข้อความคำถาม" />
-                <StatCard label="บล็อกความปลอดภัย" value={`${n(view.blocked)} ครั้ง`} sub="ระบบความปลอดภัย" />
-              </div>
-              <div className="rounded-2xl border border-line bg-canvas p-4 text-xs text-muted">
-                <p className="font-semibold text-ink">สรุปความนิยมในรอบ {days} วัน</p>
-                <p className="mt-0.5">
-                  ความถี่ของแต่ละตัวเลือกที่ผู้ใช้งานเลือกเปิดไพ่ ปรึกษาแม่หมอ และสัดส่วนหมวดหมู่
-                </p>
-              </div>
-              <div className="grid gap-3 lg:grid-cols-2">
-                <BarList title="ผังที่ถูกเลือก" rows={view.spreads} nameMap={SPREAD_NAME} />
-                <BarList title="บุคลิกแม่หมอ" rows={view.personas} nameMap={PERSONA_NAME} />
-                <BarList title="หมวดคำถาม" rows={view.categories} nameMap={CATEGORY_NAME} />
-                <BarList title="ธงความปลอดภัยที่ตรวจพบ" rows={view.flags} nameMap={FLAG_NAME} />
-              </div>
-            </div>
-          )}
-
-          {/* Sub-tab 3: Technical AI Metrics & Access Audit Log */}
-          {subView === "tech" && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <StatCard
-                  label="โควตา AI วันนี้ (Cap)"
-                  value={`${n(data.aiCapToday ?? 0)} / ${n(data.aiDailyCap ?? 2000)}`}
-                  sub={view.aiCapHit > 0 ? `เต็มโควตา ${n(view.aiCapHit)} ครั้ง` : "ใช้งานปกติ"}
-                />
-                <StatCard
-                  label="เรียก AI (Groq / Gemini)"
-                  value={`${n(view.groqCalls)} / ${n(view.geminiCalls)}`}
-                  sub={`Groq ${view.groqShare} · ผิดพลาด ${n(view.aiErrors)} ครั้ง`}
-                />
-                <StatCard
-                  label="Groq เอนจิน — สุขภาพ"
-                  value={`${n(view.groqFailover)} failover`}
-                  sub={`ตัดวงจรอักษรแปลก ${n(view.foreignTrips)} · schema fail ${n(view.schemaFails)}`}
-                />
-                <StatCard label="เวลาเฉลี่ย/คำอ่าน" value={view.avgLatency} sub={`Token รวม: ${n(view.tokens)}`} />
-              </div>
-
-              <div className="altar-card-porcelain p-5">
-                <h3 className="font-mystic-gold text-sm font-bold text-ink">บันทึกการเข้าแอดมิน (ล่าสุด)</h3>
-                <ul className="mt-3 flex flex-col gap-2 text-xs">
-                  {data.audit.length === 0 ? (
-                    <li className="text-muted">ยังไม่มีบันทึก</li>
-                  ) : (
-                    data.audit.slice(0, 20).map((a, i) => (
-                      <li key={i} className="flex justify-between gap-3 border-b border-line-soft pb-1.5 last:border-0 last:pb-0">
-                        <span className="text-ink font-mono">{a.action}</span>
-                        <span className="tabular-nums text-muted">{new Date(a.ts).toLocaleString("th-TH")}</span>
-                      </li>
-                    ))
-                  )}
-                </ul>
-              </div>
-            </div>
-          )}
-        </>
-      ) : loading ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="h-7 w-7 animate-spin rounded-full border-2 border-gold border-t-transparent mb-3" />
-          <p className="text-xs text-muted">กำลังประมวลผลสถิติการใช้งาน…</p>
+      {subView === "daily" ? (
+        <DailySummary day={day} onDayChange={setDay} />
+      ) : error ? (
+        <AdminErrorBanner error={error} onRetry={() => void reload()} />
+      ) : !data ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center" aria-live="polite">
+          <div className="mb-3 h-7 w-7 animate-spin rounded-full border-2 border-gold border-t-transparent" />
+          <p className="text-xs text-muted">กำลังประมวลผลสถิติ…</p>
         </div>
-      ) : err ? (
-        <AdminErrorBanner error={err} onRetry={reload} />
-      ) : null}
+      ) : subView === "trend" ? (
+        <DailyStatsTable
+          daily={data.stats.daily}
+          range={data.stats.range}
+          rangeDays={days}
+          today={statDayKey()}
+          onSelectDay={openDay}
+        />
+      ) : (
+        <div className="space-y-5">
+          {/* ─── โควตา + ผู้ให้บริการ ─────────────────────────────────── */}
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <StatCard
+              label="โควตา AI วันนี้"
+              value={`${fmt(data.ai.usedToday)} / ${fmt(data.ai.dailyCap)}`}
+              sub={
+                data.ai.memberCapReached
+                  ? "เต็มเพดานแล้ว — ทุกคนได้คำตอบสำรอง"
+                  : data.ai.guestCapReached
+                    ? `ผู้เยี่ยมชมเต็มเพดาน (${fmt(data.ai.guestCap)}) · สมาชิกยังใช้ได้`
+                    : `เหลือ ${fmt(data.ai.dailyCap - data.ai.usedToday)} ครั้ง · ผู้เยี่ยมชมตัดที่ ${fmt(data.ai.guestCap)}`
+              }
+            >
+              <Meter value={data.ai.usedToday} max={data.ai.dailyCap} marker={data.ai.guestCap} />
+            </StatCard>
+            <StatCard
+              label={`เรียก AI (${days} วัน)`}
+              value={fmt(total.ai.calls)}
+              sub={`Groq ${fmt(total.ai.groq)} · Gemini ${fmt(total.ai.gemini)} (Groq ${fmtPct(total.ai.groqPct)})`}
+            />
+            <StatCard
+              label="เวลาเฉลี่ยต่อคำอ่าน"
+              value={total.ai.avgLatencyMs == null ? "—" : `${(total.ai.avgLatencyMs / 1000).toFixed(1)} วิ`}
+              sub={`จากคำอ่านที่จบ ${fmt(total.usage.completed)} ครั้ง`}
+            />
+            <StatCard
+              label="Token ที่ใช้"
+              value={fmt(total.ai.tokensIn + total.ai.tokensOut)}
+              sub={
+                total.usage.completed > 0
+                  ? `เฉลี่ย ${fmt(Math.round((total.ai.tokensIn + total.ai.tokensOut) / total.usage.completed))} ต่อคำอ่าน`
+                  : `เข้า ${fmt(total.ai.tokensIn)} · ออก ${fmt(total.ai.tokensOut)}`
+              }
+            />
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <div className="altar-card-porcelain space-y-3 p-5">
+              <SectionTitle title="ความเสถียรของ AI" hint={`${days} วัน`} />
+              <KeyValueList
+                alertWhenPositive
+                items={[
+                  { label: "AI ผิดพลาด", value: total.ai.errors },
+                  { label: "สลับจาก Groq ไป Gemini", value: total.ai.failover, hint: "Groq ทุกโมเดลตอบไม่จบ" },
+                  { label: "โครงคำอ่านไม่ครบ (schema)", value: total.ai.schemaFails },
+                  { label: "ตัดวงจรอักษรแปลกปน", value: total.ai.foreignTrips },
+                  { label: "คำอ่านสำรอง (ไม่ใช่ AI)", value: total.ai.mockServed },
+                  { label: "แชทตอบแบบออฟไลน์", value: total.ai.chatOffline },
+                ]}
+              />
+            </div>
+
+            <div className="altar-card-porcelain space-y-3 p-5">
+              <SectionTitle title="ผลลัพธ์ของการเปิดไพ่" hint={`${days} วัน`} />
+              <KeyValueList
+                items={[
+                  { label: "เริ่มเปิดไพ่", value: total.usage.started },
+                  { label: "อ่านจบสมบูรณ์", value: total.usage.completed, hint: `${fmtPct(total.usage.completionPct)} ของที่เริ่ม` },
+                  { label: "ล้มเหลว", value: total.usage.failed },
+                  { label: "ผู้ใช้ยกเลิกกลางคัน", value: total.usage.cancelled },
+                  { label: "บันทึกคำอ่านไม่สำเร็จ", value: total.usage.persistFailed },
+                  { label: "แม่หมอถามกลับเพื่อความชัด", value: total.usage.clarify },
+                ]}
+              />
+            </div>
+
+            <div className="altar-card-porcelain space-y-3 p-5">
+              <SectionTitle title="ถูกกั้นด้วยสิทธิ์/โควตา" hint={`รวม ${fmt(total.gating.total)}`} />
+              <KeyValueList
+                items={[
+                  { label: "ชนเพดาน AI รายวัน", value: total.gating.aiCapHit },
+                  { label: "เปิดไพ่เกินสิทธิ์", value: total.gating.blockedStart + total.gating.blockedRead },
+                  { label: "ต้องล็อกอินก่อน", value: total.gating.blockedSignin },
+                  { label: "ผัง/แม่หมอพรีเมียม", value: total.gating.blockedPremium },
+                  { label: "แชทเกินสิทธิ์", value: total.gating.blockedChat },
+                  { label: "ผู้เยี่ยมชมเกินเพดาน IP", value: total.gating.guestIpCapped },
+                ]}
+              />
+            </div>
+          </div>
+
+          <p className="text-xs text-muted">
+            ต้องการยิงทดสอบการเชื่อมต่อ AI จริง หรือดูว่าคีย์ใช้ได้ไหม ➔ เมนู &quot;ตรวจสุขภาพระบบ&quot;
+          </p>
+        </div>
+      )}
     </div>
   );
 }

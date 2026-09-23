@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { kvGetJSON, KEY } from "@/lib/platform/kv-store";
-import { utcDay } from "@/lib/stats/record";
-import { getAiDailyCap } from "@/lib/security/ai-budget";
+import { getAiUsageToday } from "@/lib/security/ai-budget";
 import {
   CANDIDATE_GEMINI_MODELS,
   WORKING_GEMINI_MODELS,
@@ -49,16 +47,13 @@ export async function GET() {
     return s.slice(0, 400);
   };
 
-  const day = utcDay();
-  const capDoc = await kvGetJSON<{ count: number }>(KEY.aiCap(day)).catch(() => null);
-  const cap = getAiDailyCap();
-  const usedToday = capDoc?.count ?? 0;
-
+  // ⚠️ อ่านผ่าน getAiUsageToday() เท่านั้น — อ่าน KV ตรง ๆ ได้ 0 เสมอเมื่อเปิด Upstash
+  const usage = await getAiUsageToday();
   const budget = {
-    usedToday,
-    dailyCap: cap,
-    memberCapReached: usedToday >= cap,
-    guestCapReached: usedToday >= Math.floor(cap * 0.7),
+    usedToday: usage.usedToday,
+    dailyCap: usage.dailyCap,
+    memberCapReached: usage.memberCapReached,
+    guestCapReached: usage.guestCapReached,
   };
 
   const key = {
@@ -185,7 +180,7 @@ export async function GET() {
   let nextStep: string;
   if (ok && budget.memberCapReached) {
     verdict = "ai_daily_cap";
-    summary = `AI เรียกได้ปกติ แต่วันนี้ใช้ครบเพดานแล้ว (${usedToday}/${cap} ครั้ง) ระบบจึงตัดไปใช้คำตอบสำรอง`;
+    summary = `AI เรียกได้ปกติ แต่วันนี้ใช้ครบเพดานแล้ว (${budget.usedToday}/${budget.dailyCap} ครั้ง) ระบบจึงตัดไปใช้คำตอบสำรอง`;
     nextStep = "ขยายเพดานด้วย env AI_DAILY_CALL_CAP หรือรอรีเซ็ตเที่ยงคืน UTC";
   } else if (ok) {
     verdict = "healthy";
