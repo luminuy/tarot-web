@@ -123,8 +123,9 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
   useEffect(() => {
     if (!searchQuery.trim()) return;
     const timer = setTimeout(() => {
+      // ส่งแค่ความยาว ไม่ส่งข้อความที่พิมพ์ (A4-10 — คำสัญญาในแถบยินยอม)
       trackEvent("card_search", {
-        query: searchQuery.trim(),
+        query_len: searchQuery.trim().length,
         results_count: filteredCards.length,
       });
     }, 1000);

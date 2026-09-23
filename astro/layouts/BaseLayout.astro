@@ -173,7 +173,7 @@ const consentScript = `try{if(!localStorage.getItem(${JSON.stringify(CONSENT_STO
     <SkipLinkRoot locale={locale} />
     <ConsentBannerRoot locale={locale} />
     <slot />
-    <FloatingChromeRoot locale={locale} />
+    <FloatingChromeRoot locale={locale} pathname={Astro.url.pathname} />
 
     {/*
       🧩 ของล่องหนของทุกหน้า (เกราะกันดูดเนื้อหา · Service Worker · เครื่องมือวัดผล ·

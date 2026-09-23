@@ -210,14 +210,15 @@ export type TarotAnalyticsEvent =
   | {
       name: "card_search";
       params: {
-        query: string;
+        /** ⚠️ ห้ามเพิ่มฟิลด์ข้อความค้นหากลับมา (A4-10) — ส่งได้แค่ความยาว */
+        query_len: number;
         results_count?: number;
       };
     }
   | {
       name: "semantic_search";
       params: {
-        query?: string;
+        /** ⚠️ ห้ามเพิ่มฟิลด์ข้อความค้นหากลับมา (A4-10) — ผู้ใช้พิมพ์ความรู้สึกส่วนตัวลงช่องนี้ */
         query_len?: number;
         results_count?: number;
       };
@@ -245,6 +246,24 @@ export type TarotAnalyticsEvent =
     };
 
 /**
+ * event ที่ยิงมาก่อน gtag/fbq พร้อม (A4-11)
+ * `bootstrapAnalytics()` ตั้งใจเลื่อนการติดตั้ง gtag ไปจนผู้ใช้โต้ตอบ แต่สคริปต์หน้าไพ่/บทความ
+ * ของ Astro ยิง `card_detail_view` · `blog_read` ทันทีตอนโหลด เดิมถูกข้ามเงียบ ๆ ทุกครั้ง
+ * (ยอดอ่านไพ่ 156 หน้า + บทความทุกหน้าใน GA4 จึงเป็นศูนย์) · เก็บไว้แล้วปล่อยเมื่อพร้อม
+ */
+const pendingEvents: Array<[string, Record<string, unknown>]> = [];
+const MAX_PENDING_EVENTS = 30;
+
+/** เรียกจาก `installGoogleTag()` หลังตั้ง `window.gtag` + `config` แล้ว */
+export function flushPendingAnalyticsEvents(): void {
+  if (typeof window === "undefined" || typeof window.gtag !== "function") return;
+  const queued = pendingEvents.splice(0, pendingEvents.length);
+  for (const [name, payload] of queued) {
+    trackEvent(name as TarotAnalyticsEvent["name"], payload as never);
+  }
+}
+
+/**
  * ส่ง Event ไปยัง Google Analytics 4 (GA4) และ Meta Pixel
  */
 export function trackEvent<T extends TarotAnalyticsEvent>(
@@ -255,6 +274,11 @@ export function trackEvent<T extends TarotAnalyticsEvent>(
 
   try {
     const payload = (params || {}) as Record<string, unknown>;
+
+    if (typeof window.gtag !== "function" && typeof window.fbq !== "function") {
+      if (pendingEvents.length < MAX_PENDING_EVENTS) pendingEvents.push([name, payload]);
+      return;
+    }
 
     // 1. Google Analytics 4
     if (typeof window.gtag === "function") {

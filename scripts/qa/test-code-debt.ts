@@ -166,6 +166,12 @@ if (!fs.existsSync(deleteLogic)) {
     /localStorage\.clear\(\)/.test(btn) && /sessionStorage\.clear\(\)/.test(btn),
     "   ➔ ห้ามเปลี่ยนไปวนลบจากทะเบียน — ทะเบียนที่ขาดไปหนึ่งคีย์แปลว่าข้อมูลผู้ใช้ยังค้างอยู่จริง",
   );
+  // A4-08 · A7-01: ลบบนเซิร์ฟเวอร์ล้มแล้วต้องไม่ทำเหมือนสำเร็จ
+  check(
+    "ปุ่ม PDPA ดูผลของ DELETE /api/account (res.ok) ก่อนบอกว่าลบแล้ว",
+    /res\.ok/.test(btn) && !/method: "DELETE" \}\)\.catch\(\(\) => \{\}\)/.test(btn),
+    "   ➔ fetch ไม่โยนเมื่อได้ 4xx/5xx · ลบบนคลาวด์ล้มแต่ผู้ใช้เข้าใจว่าใช้สิทธิ์ลบข้อมูลแล้ว",
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -376,6 +382,48 @@ check(
   deadApiCalls.length === 0,
   deadApiCalls.join("\n") + "\n   ➔ สตริงผิดชื่อ = 404 ทุกครั้งที่กด (A4-01) · แก้ชื่อให้ตรงกับโฟลเดอร์ใน src/app/api",
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 7. ผลตรวจ 2026-09-23 คลื่น 4 — ฝั่งหน้าเว็บที่ "ทำเหมือนสำเร็จ" ทั้งที่ไม่สำเร็จ
+// ─────────────────────────────────────────────────────────────────────────────
+{
+  const src = (f: string) => stripComments(fs.readFileSync(path.join(ROOT, f), "utf-8"));
+
+  const ritual = src("src/components/reading/one-card/OneCardRitual.tsx");
+  check(
+    "A3-03: พิธีไพ่ใบเดียวแสดง error ของขั้นเริ่ม/สับไพ่ และจับ error ตอนประกอบไพ่",
+    /oracle\.state\.error/.test(ritual) && /setLoadError\(/.test(ritual) && /role="alert"/.test(ritual),
+  );
+  check(
+    "A3-04: /daily ไม่คำนวณวันที่ตอน render (หน้า prerender ตอนบิลด์)",
+    !/format\(new Date\(\)\)/.test(src("src/components/daily/DailyClient.tsx").replace(/useEffect\([\s\S]*?\}, \[isEnglish\]\);/, "")),
+  );
+  const historyModal = src("src/components/history/ReadingHistoryModal.tsx");
+  const saveNote = historyModal.match(/const handleSaveNote[\s\S]*?\n  \};/)?.[0] ?? "";
+  check(
+    "A3-08: บันทึกโน้ตนับรุ่น + fetchServerReadings ถามก่อนเขียนทับ localStorage",
+    /mutationRef\.current \+= 1/.test(saveNote) && /shouldCommit/.test(historyModal) && /shouldCommit/.test(src("src/lib/utils/history.ts")),
+  );
+  check(
+    "A3-09: ShareModal ไม่จองแท็บด้วย noopener (ทำให้ window.open คืน null เสมอ)",
+    !/window\.open\([^)]*"about:blank"[^)]*noopener/.test(src("src/components/reading/ShareModal.tsx")),
+  );
+  check(
+    "A4-07: สวิตช์ความยินยอมเช็ก res.ok ก่อนเปลี่ยนสถานะ",
+    /if \(res\.ok\) return true;/.test(src("src/components/account/AccountClient.tsx")),
+  );
+  const semantic = src("src/components/encyclopedia/SemanticSearchPanel.tsx");
+  check("A4-09: ค้นหาด้วยความรู้สึกมี debounce + ยกเลิกคำขอเก่า", /setTimeout\(/.test(semantic) && /controller\.abort\(\)/.test(semantic));
+  check(
+    "A4-13: รีเซ็ตกล่อง Turnstile ทุกครั้งหลังส่งฟอร์ม",
+    /resetKey=\{`\$\{mode\}-\$\{turnstileAttempt\}`\}/.test(src("src/components/auth/AuthModal.tsx")),
+  );
+  check(
+    "A4-14: token รีเซ็ตรหัสผ่านถูกลบจาก URL + Service Worker ไม่แคชหน้านี้",
+    /history\.replaceState/.test(src("src/app/(th)/reset-password/page.tsx")) &&
+      /startsWith\("\/reset-password"\)/.test(fs.readFileSync(path.join(ROOT, "public/sw.js"), "utf-8")),
+  );
+}
 
 console.log(`\n📊 ผ่าน ${pass} ข้อ | ล้มเหลว ${fail} ข้อ\n`);
 if (fail > 0) process.exit(1);

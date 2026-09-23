@@ -157,6 +157,8 @@ export function AccountClient() {
   const [resendStatus, setResendStatus] = useState<string | null>(null);
   const [isUpdatingConsent, setIsUpdatingConsent] = useState(false);
   const [isUpdatingDigest, setIsUpdatingDigest] = useState(false);
+  /** บันทึกความยินยอมไม่สำเร็จ — ต้องบอกผู้ใช้ ห้ามให้สวิตช์แสดงว่าบันทึกแล้ว (A4-07) */
+  const [consentError, setConsentError] = useState<string | null>(null);
 
   // Modal control states
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -181,19 +183,38 @@ export function AccountClient() {
     };
   }, [user]);
 
+
+  /*
+   * ⚠️ `fetch` ไม่โยนเมื่อได้ 4xx/5xx — ต้องเช็ก `res.ok` เองก่อนเปลี่ยนสวิตช์ (A4-07)
+   * เดิมเปลี่ยนสวิตช์ทันที เซสชันหมดอายุ/D1 ล่ม ผู้ใช้กดถอนความยินยอม (PDPA opt-out) เห็นสวิตช์ปิด
+   * แต่ฐานข้อมูลยังเปิด แล้วยังได้อีเมลต่อ = ละเมิดการถอนความยินยอมโดยไม่รู้ตัว
+   */
+  const postConsent = async (body: Record<string, boolean>): Promise<boolean> => {
+    setConsentError(null);
+    try {
+      const res = await fetch("/api/account/consent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify(body),
+      });
+      if (res.ok) return true;
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      setConsentError(
+        data.error ||
+          (isEn ? "Could not save your preference. Please try again." : "บันทึกการตั้งค่าไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"),
+      );
+    } catch {
+      setConsentError(isEn ? "Connection lost. Your preference was not saved." : "เชื่อมต่อไม่ได้ การตั้งค่ายังไม่ถูกบันทึก");
+    }
+    return false;
+  };
+
   const handleUpdateConsent = async (consent: boolean) => {
     soundManager.playMenuTapSound();
     setIsUpdatingConsent(true);
     try {
-      await fetch("/api/account/consent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        body: JSON.stringify({ marketing: consent }),
-      });
-      patchSessionUser({ marketingConsent: consent });
-    } catch {
-      // ต่อเซิร์ฟเวอร์ไม่ได้ — คงค่าเดิมไว้ ไม่แกล้งทำเป็นบันทึกสำเร็จ
+      if (await postConsent({ marketing: consent })) patchSessionUser({ marketingConsent: consent });
     } finally {
       setIsUpdatingConsent(false);
     }
@@ -207,15 +228,9 @@ export function AccountClient() {
     soundManager.playMenuTapSound();
     setIsUpdatingDigest(true);
     try {
-      await fetch("/api/account/consent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        body: JSON.stringify({ digest: enabled }),
-      });
-      patchSessionUser(enabled ? { digestEmail: true, marketingConsent: true } : { digestEmail: false });
-    } catch {
-      // ต่อเซิร์ฟเวอร์ไม่ได้ — คงค่าเดิมไว้ ไม่แกล้งทำเป็นบันทึกสำเร็จ
+      if (await postConsent({ digest: enabled })) {
+        patchSessionUser(enabled ? { digestEmail: true, marketingConsent: true } : { digestEmail: false });
+      }
     } finally {
       setIsUpdatingDigest(false);
     }
@@ -503,6 +518,11 @@ export function AccountClient() {
                   onChange={handleUpdateDigest}
                 />
               </div>
+              {consentError && (
+                <p role="alert" className="mt-3 text-xs font-serif-th text-err">
+                  {consentError}
+                </p>
+              )}
             </SectionCard>
           )}
 

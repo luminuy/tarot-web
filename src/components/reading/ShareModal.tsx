@@ -363,10 +363,21 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
 
     // ⚠️ ต้องเปิดแท็บเปล่าไว้ "ทันทีแบบ sync" ในนี้ก่อน await ใด ๆ ทั้งสิ้น
     const needsPopup = brand === "twitter" || brand === "facebook" || brand === "threads";
+    /*
+     * ⚠️ ห้ามใส่ `noopener` ตอนจองแท็บ (A3-09) — ตามสเปก HTML `window.open(..., "noopener")`
+     * คืน `null` เสมอ (แต่ยังเปิดแท็บว่างจริง) ตัวแปรนี้จึงเป็น null ทุกครั้ง แล้วไปเปิดแท็บจริง
+     * หลัง `await` ซึ่งหมด user activation แล้ว ➔ โดนตัวบล็อกป็อปอัป + เหลือแท็บขาวค้าง
+     * จองแบบไม่มี noopener แล้วตัด `opener` เองทันที ได้ความปลอดภัยเท่ากันและได้ reference กลับมา
+     */
     const pendingPopup =
-      needsPopup && typeof window !== "undefined"
-        ? window.open("about:blank", "_blank", "noopener,noreferrer,width=600,height=550")
-        : null;
+      needsPopup && typeof window !== "undefined" ? window.open("", "_blank", "width=600,height=550") : null;
+    if (pendingPopup) {
+      try {
+        pendingPopup.opener = null;
+      } catch {
+        // บางเบราว์เซอร์ไม่ให้ตั้งค่า — แท็บยังเป็นหน้าว่างของเราเอง ไม่มีอะไรรั่ว
+      }
+    }
     const openOrRedirect = (target: string) => {
       if (pendingPopup && !pendingPopup.closed) {
         pendingPopup.location.href = target;

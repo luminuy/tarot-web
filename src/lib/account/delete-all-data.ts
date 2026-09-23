@@ -30,18 +30,28 @@ export function deleteAllDataConfirmMessage(isEn: boolean): string {
 /**
  * ถามยืนยัน → ลบบนเซิร์ฟเวอร์ → ล้างที่เก็บในเครื่อง → พากลับหน้าแรก
  *
- * คืนค่า `false` เมื่อผู้ใช้กดยกเลิก (ปลายทางจะได้เลิกโชว์สถานะ "กำลังลบ")
+ * คืนค่า `false` เมื่อผู้ใช้กดยกเลิก หรือลบบนเซิร์ฟเวอร์ไม่สำเร็จแล้วเลือกไม่ล้างเครื่อง
+ * (ปลายทางจะได้เลิกโชว์สถานะ "กำลังลบ" ให้กดใหม่ได้)
  * ถ้าลบสำเร็จจะไม่คืนค่าอะไรที่ใช้ได้ เพราะหน้าถูกพาออกไปแล้ว
  */
 export async function deleteAllData(isEn: boolean): Promise<boolean> {
   if (!window.confirm(deleteAllDataConfirmMessage(isEn))) return false;
 
-  /* ฝั่งเซิร์ฟเวอร์ล้มก็ต้องล้างเครื่องต่อให้จบ — ผู้ใช้กดลบแล้ว ห้ามค้างครึ่งทาง
-     (เคสจริง: ออฟไลน์ หรือเซสชันหมดอายุจน API ตอบ 401) */
-  try {
-    await fetch("/api/account", { method: "DELETE" }).catch(() => {});
-  } catch {
-    // ไม่มีอะไรให้ทำต่อ — ขั้นล้างเครื่องข้างล่างสำคัญกว่า
+  /*
+   * ⚠️ ต้องดูผลของฝั่งเซิร์ฟเวอร์ (A4-08 · A7-01) — เดิม `.catch(() => {})` แล้วล้างเครื่อง + พากลับหน้าแรก
+   * เสมอ D1 ล้ม (500) / กดซ้ำเกินเพดาน (429) / origin ไม่ผ่าน (403) บัญชีบนคลาวด์จึงยังอยู่ครบ
+   * คุกกี้ยังล็อกอิน แต่ผู้ใช้เชื่อว่าใช้สิทธิ์ลบข้อมูลตาม PDPA แล้ว
+   *   • สำเร็จ หรือ 401 (ไม่มีบัญชี/เซสชันหมดอายุ = ไม่มีอะไรบนคลาวด์ให้ลบ) ➔ ล้างเครื่องต่อ
+   *   • ล้ม/ออฟไลน์ ➔ บอกตรง ๆ ว่าบนบัญชียังไม่ถูกลบ แล้วให้เลือกว่าจะล้างเฉพาะเครื่องนี้ไหม
+   */
+  const res = await fetch("/api/account", { method: "DELETE" }).catch(() => null);
+  if (!res || (!res.ok && res.status !== 401)) {
+    const localOnly = window.confirm(
+      isEn
+        ? "We could not delete your account data on the server (your cloud history and account are still there). Please try again later.\n\nDelete the data stored on this device only for now?"
+        : "ลบข้อมูลบนบัญชีไม่สำเร็จ (ประวัติบนคลาวด์และบัญชียังอยู่) กรุณาลองใหม่อีกครั้งภายหลัง\n\nต้องการลบเฉพาะข้อมูลที่อยู่ในเครื่องนี้ไปก่อนไหม?",
+    );
+    if (!localOnly) return false;
   }
 
   try {

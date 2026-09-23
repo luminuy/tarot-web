@@ -92,6 +92,8 @@ export function OneCardRitual({
   const [drawnCard, setDrawnCard] = useState<TarotCardType | null>(null);
   const [copied, setCopied] = useState(false);
   const [authMode, setAuthMode] = useState<"signin" | "signup" | null>(null);
+  /** ประกอบไพ่จากสำรับไม่สำเร็จ (โหลดชังก์ล้ม · หาไพ่ไม่เจอ) — ต้องบอกผู้ใช้ ห้ามเงียบ (A3-03) */
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   /*
    * ทุกการเปิดไพ่เดินผ่านท่อเดียวกับหน้าแรก (คำสั่งเจ้าของโปรเจกต์ 2026-09-18)
@@ -117,6 +119,7 @@ export function OneCardRitual({
   // จังหวะที่ 1 ➔ จังหวะที่ 2: สุ่มไพ่ทันทีด้วย Web Crypto API โดยไม่ผ่านหน้าจอสับหรือพัดไพ่
   const handleDraw = async () => {
     soundManager.playCardSelectSound();
+    setLoadError(null);
 
     /*
      * ⚠️ `resolveCards: false` — ให้ท่อคืนแต่เลขไพ่ แล้วหน้านี้เปิดสำรับ `deck-th` เอง
@@ -141,16 +144,27 @@ export function OneCardRitual({
     let cancelled = false;
 
     void (async () => {
-      const { DECK_TH } = await getDeck();
-      const baseCard = DECK_TH[drawnIndex];
-      // 🃏 กฎเหล็กข้อ 14 — ไม่เจอไพ่ใบนั้นห้ามกุใบใหม่ขึ้นมาแทนเด็ดขาด
-      if (!baseCard) throw new Error("ไม่พบข้อมูลไพ่ กรุณาโหลดใหม่อีกครั้ง");
-      const card = isEn ? (await getEnEnricher()).enrichCardEn(baseCard) : baseCard;
-      if (cancelled) return;
-      startTransition(() => {
-        setDrawnCard(card);
-        setStatus("ready");
-      });
+      try {
+        const { DECK_TH } = await getDeck();
+        const baseCard = DECK_TH[drawnIndex];
+        // 🃏 กฎเหล็กข้อ 14 — ไม่เจอไพ่ใบนั้นห้ามกุใบใหม่ขึ้นมาแทนเด็ดขาด
+        if (!baseCard) throw new Error("missing card");
+        const card = isEn ? (await getEnEnricher()).enrichCardEn(baseCard) : baseCard;
+        if (cancelled) return;
+        startTransition(() => {
+          setDrawnCard(card);
+          setStatus("ready");
+        });
+      } catch {
+        // เดิม throw ใน async ลอยที่ไม่มีใครจับ — ผู้ใช้เสียโควตาไปแล้วแต่ค้างหน้าเดิมเงียบ ๆ
+        if (!cancelled) {
+          setLoadError(
+            isEn
+              ? "Could not load your card. Please reload and try again."
+              : "โหลดข้อมูลไพ่ไม่สำเร็จ กรุณาโหลดใหม่อีกครั้ง",
+          );
+        }
+      }
     })();
 
     return () => {
@@ -204,8 +218,16 @@ export function OneCardRitual({
     }
   };
 
+  // ข้อผิดพลาดของขั้น start/shuffle — เดิมแสดงเฉพาะตอนเปิดไพ่แล้ว ปุ่มจึงกลับมากดได้เฉย ๆ ไม่มีข้อความ (A3-03)
+  const idleError = status !== "revealed" ? loadError || oracle.state.error : null;
+
   return (
     <div className="altar-panel rounded-2xl p-5 sm:p-8 space-y-8">
+        {idleError && (
+          <div role="alert" className="rounded-lg border border-line-warm bg-err-wash p-3 text-center text-xs sm:text-sm text-err font-serif-th">
+            {idleError}
+          </div>
+        )}
         {/* จังหวะที่ 1: เลือกหัวข้อ/สถานะ ➔ กดปุ่มเปิดไพ่ */}
         {status === "idle" && (
           <div key="idle" className="anim-step-in space-y-6">

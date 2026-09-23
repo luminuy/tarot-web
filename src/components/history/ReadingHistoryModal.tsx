@@ -94,7 +94,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
       // Dual-mode server sync refresh
       const generation = mutationRef.current;
       import("@/lib/utils/history").then((m) => {
-        m.fetchServerReadings().then((serverItems) => {
+        m.fetchServerReadings({ shouldCommit: () => generation === mutationRef.current }).then((serverItems) => {
           if (generation !== mutationRef.current) return; // ผู้ใช้แก้ไขรายการไปแล้ว — ทิ้งคำตอบนี้
           if (serverItems && serverItems.length > 0) {
             setReadings(serverItems);
@@ -141,6 +141,8 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
   const handleSaveNote = (e: React.MouseEvent, id: string, currentOutcome: ReadingOutcome = "PENDING") => {
     e.stopPropagation();
     soundManager.playCardSelectSound();
+    // นับเป็นการแก้ไขด้วย — ไม่งั้นคำตอบของ GET ที่ค้างอยู่จะทับโน้ตที่เพิ่งบันทึกหายจากจอ (A3-08)
+    mutationRef.current += 1;
     updateReadingOutcome(id, currentOutcome, noteDraft);
     setReadings(getReadings());
     setEditingNoteId(null);

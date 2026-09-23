@@ -129,7 +129,13 @@ export function getReadings(): SavedReadingItem[] {
 /**
  * ดึงประวัติจากเซิร์ฟเวอร์สำหรับผู้ใช้ที่ล็อกอิน พร้อมซิงก์อัปเดตลง LocalStorage Cache
  */
-export async function fetchServerReadings(): Promise<SavedReadingItem[]> {
+export async function fetchServerReadings(opts?: {
+  /**
+   * ถามก่อนเขียนทับ localStorage — คืน false = ผู้เรียกแก้รายการไปแล้วระหว่างรอ (A3-08)
+   * เดิมเขียนทับก่อนผู้เรียกจะได้เช็กรุ่น รายการที่เพิ่งลบจึงกลับมาในแคชของหน้าอื่น
+   */
+  shouldCommit?: () => boolean;
+}): Promise<SavedReadingItem[]> {
   if (typeof window === "undefined") return [];
   // ประวัติฝั่งเซิร์ฟเวอร์มีเฉพาะของสมาชิก — ผู้ชมที่ยังไม่ล็อกอินเคยยิงเส้นนี้ทุกครั้งที่
   // เปิดหน้าแรกแล้วได้ 401 กลับมาเปล่า ๆ (คำขอที่ปลุก Worker ทิ้งฟรี ๆ หนึ่งครั้งต่อหนึ่งวิว)
@@ -145,6 +151,7 @@ export async function fetchServerReadings(): Promise<SavedReadingItem[]> {
     }
     const data = (await res.json()) as { readings?: SavedReadingItem[] };
     if (data.readings && Array.isArray(data.readings)) {
+      if (opts?.shouldCommit && !opts.shouldCommit()) return getReadings();
       writeStorage(JSON.stringify(data.readings.slice(0, LOCAL_HISTORY_LIMIT)));
       return data.readings;
     }
