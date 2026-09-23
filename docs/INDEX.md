@@ -41,44 +41,51 @@ docs/
 │
 └── 📦 แผนพัฒนาตามหมุดหมาย (Milestone Plans Archive)
     └── plans/
-        ├── MASTER_PLAN_2026-09-06.md      # 🗺️ เริ่มอ่านที่นี่ — ทุกงานที่ค้างในตารางเดียว (ตรวจใหม่ทั้งแผ่น 2026-09-14)
-        ├── HANDOFF_ASTRO_MIGRATION_2026-09-15.md # 🪶 แผนสถาปัตยกรรม Astro 7 + React 19 Islands (305 หน้า SSG Zero-Runtime ตอบจาก Edge)
-        ├── HANDOFF_CARD_TILE_CV_2026-09-15.md    # 📐 สูตรความสูงการ์ดไพ่และกฎ content-visibility ต่อ breakpoint (ด่านที่ 62)
-        ├── HANDOFF_ADMIN_REDEEM_2026-09-12.md    # 🎟️ แผนสร้างหน้าจัดการรหัสแลกสิทธิ์ให้แอดมิน (/admin?tab=redeem)
-        ├── AI_COST_CONTROL_PLAN.md      # แผนควบคุมต้นทุน AI และ Rate Limit Bypass (PR 1-5)
-        ├── EMAIL_AUTH_PLAN.md           # แผนระบบสมัครสมาชิกด้วยอีเมลและรหัสผ่าน (PR 0-5)
-        ├── PROVABLY_FAIR_PLAN.md        # แผนระบบสับไพ่ที่ตรวจสอบความยุติธรรมได้ (PR 1-4)
-        ├── RETENTION_PLAN.md            # แผนระบบบันทึกดวงและฐานข้อมูลผู้ใช้ D1 (PR 0-4)
-        ├── UX_PERF_PLAN.md              # แผนเพิ่มความเร็ว 60fps และลดขนาดภาพไพ่ (PR 1-4)
-        ├── ENTITLEMENT_PLAN.md          # แผนระบบสิทธิ์เปิดไพ่ — ต้องสมัครก่อนเล่น · สมาชิกวันละ 1 ครั้ง
-        ├── AGENTS_TASK_PLAN.md          # แผนกระจายงาน 5 AI Agents เฉพาะทาง
-        ├── CLOUDFLARE_FREE_STACK.md     # แผนใช้บริการฟรี CF ต่อยอด (AI Gateway/Turnstile/KV/R2/Vectorize/DO) 4 Wave
-        ├── AUDIT_2026-09-01.md          # รายงานการตรวจสุขภาพระบบประจำวันที่ 1 ก.ย. 2569
-        ├── HANDOFF_2026-09-04.md        # 📦 แผนส่งต่องานค้างหลังตรวจใหญ่ (ISSUE-017 ถึง 023) — ปิดครบแล้ว
-        ├── AI_INTELLIGENCE_PLAN.md      # 🧠 แผนแม่บทยกระดับแม่หมอ AI — เอกสารเดียวจบ (เหตุผล + วิธีลงมือ + เกณฑ์ผ่าน)
-        ├── HANDOFF_AI_ACCURACY_THAI_2026-09-07.md  # 🧠 แผนยกระดับความแม่นคำอ่าน + ภาษาไทยถูกต้อง (ต่อยอดแผนแม่บท · 11 งาน 3 คลื่น)
-        ├── HANDOFF_AI_JUDGE_BASELINE_2026-09-11.md  # 🔑 ชีทส่งต่อให้ทีมที่มีคีย์ — รัน ai:judge เก็บ baseline 20260911-1 แล้วลุย B-02/B-03/B-04
-        ├── QUICK_FORTUNE_PLAN.md        # ⚡ แผนฟีเจอร์ "ทำนายด่วน" ไพ่ 1 ใบ ไม่ต้องเลือกไพ่ (เสร็จแล้ว)
-        ├── QUICK_CHAT_RESULT_PLAN.md    # ⚡ แผนหน้าผลลัพธ์ทำนายด่วนแบบสั้น แยกจากหน้าฝังใหญ่ (รอทีมรับไปทำ)
-        ├── HANDOFF_HEADER_20260905.md   # 🧭 แผนแก้ "แถบ header ค้าง" (ISSUE-024 ถึง 030) — ปิดครบแล้ว
-        ├── HANDOFF_BLOG_TBT_2026-09-12.md    # ✅ TBT หน้า /blog (ISSUE-043) — ปิดเคสแล้ว 2026-09-15 (TBT 660 ➔ 24 ms · เบาที่สุดในเว็บ) · เก็บไว้เป็นวิธีวัด + 4 กับดัก + ที่มาของ ISSUE-047
-        ├── HANDOFF_UX_UI_AUDIT_2026-09-11.md # ✅ ผลตรวจ UX/UI ทั้งเว็บ — ปิดครบ 20/20 · เก็บไว้เป็นบันทึกวิธีตรวจ + บทเรียน 4 ข้อ
-        ├── HANDOFF_GLASS_HOME_2026-09-21.md # 🪟 ธีมกระจกอุ่น (Warm Liquid Glass) + หน้าแรก "ประตูเดียว" — ค่าคัดลอกไปวางได้ · ตารางคอนทราสต์ที่คำนวณแล้ว · กับดัก 7 ข้อ (✅ ใช้งานจริงครบทั้งเว็บแล้ว · PR #551–#562)
-        ├── HANDOFF_ROUND2_CLOSEOUT_2026-09-17.md # 🧾 ปิดสี่เรื่องสุดท้ายของผลตรวจรอบ 2 (ISSUE-049) — ปิด 3 · เหลือเรื่องสไตล์ชีต/hydration พร้อมตัวเลข Lighthouse 13.4.1 ที่วัดเอง
-        ├── TRAFFIC_CAPTURE_PLAN_2026-09-05.md  # 🎯 แผนแย่งทราฟฟิกจาก MyHora (SERP จริง + 4 คลื่น)
-        ├── HANDOFF_SEO_WAVE1_2026-09-05.md     # 🌊 แผนส่งต่อ SEO คลื่น 1 — เติมคำ "ไพ่ยิปซี" ทั่วเว็บ
-        ├── HANDOFF_SEO_WAVE2-4_2026-09-05.md   # 🌊 แผนส่งต่อ SEO คลื่น 2–4 — /cards, หมวดหมู่ MyHora, งานระยะยาว
-        ├── HANDOFF_DOCS_TRUTH_2026-09-06.md    # 🧾 แผนปิดหนี้หลังคลื่น 2–4 — ด่านตรวจเลขเอกสาร + บทนำ 300 คำ + วัดผล GSC
-        ├── HANDOFF_OMNI_YESNO_2026-09-06.md    # 🎯 แผนส่งต่อ 3 งานจากบทวิเคราะห์คู่แข่งภายนอก — Yes/No 78 หน้า + Omnichannel 6 ช่อง + Daily Digest
-        ├── HANDOFF_THEME_THREE_PAGES_2026-09-06.md  # ✦ แผนตัดขั้นตอน 3 หน้า one-card ให้เร็วแบบเปิดไพ่ด่วน (รอบ 2 หลัง PR #293 — ยุบ OneCardRitual 5 สเตป → 2 จังหวะ)
-        ├── SITE_SHELL_SEO_PLAN.md       # 🏛️ แผน Header/Footer กลางทั้งเว็บ + RelatedCards ฝั่งเซิร์ฟเวอร์ (PR A-C)
-        ├── HANDOFF_MEDIA_FIX_2026-09-06.md   # 🖼️ แผนแก้ท่อสื่อหลัง PR #319–325 (ภาพแชร์ Cloudinary พัง + ImageKit ไม่มีทางถอย)
-        ├── HANDOFF_SMOOTH_FAST_2026-09-06.md  # ✦ แผนทำเว็บสมูท+ไวระดับโลก (บันเดิล · แอนิเมชัน · เปลี่ยนหน้า)
-        ├── HANDOFF_SEMANTIC_SEARCH_2026-09-06.md # 🔎 แผนต่อ UI ค้นหาเชิงความหมาย (Vectorize + Workers AI ที่กำพร้าอยู่)
-        ├── HANDOFF_OG_IMAGES_2026-09-07.md   # 🖼️ แผนยกเครื่องภาพแชร์ 299 หน้า (Cloudinary ที่ใช้อยู่จุดเดียว + บั๊ก 400 จากอักขระ , /)
-        ├── HANDOFF_CF_REQUEST_REVIEW_2026-09-08.md # 🔍 ตรวจข้อเสนอ 12 ข้อ "ลด Request บน Cloudflare" (ทำจริง 4 ห้ามทำ 5 · กับดัก Block AI Scrapers)
-        ├── HANDOFF_EN_BIRTH_CARD_2026-09-09.md # 🎂 แผนเปิดหน้าอังกฤษ /en/cards/birth-card ที่ยัง 404 (เครื่องคำนวณพร้อมแล้ว เหลือบทความ 600–800 คำ + ปลดล็อก 2 จุด)
-        └── BACKLOG.md                   # คลังรายการงานที่ทำเสร็จแล้วย้อนหลัง
+<!-- PLANS_TREE_START · สร้างด้วย npm run docs:index — ห้ามแก้มือ -->
+        ├── MASTER_PLAN_2026-09-06.md               # 🚧 🗺️ แผนแม่บทรวม — ทุกงานที่ค้างอยู่
+        ├── HANDOFF_SMOOTH_FAST_2026-09-06.md       # 🚧 ✦ แผนทำให้เว็บ "สมูทและไว" ระดับโลก — ทุกหน้า ทุกจังหวะ (2026-09-06)
+        ├── HANDOFF_OMNI_YESNO_2026-09-06.md        # 🚧 🎯 แผนส่งต่องาน 3 ชิ้น — Yes/No 78 หน้า · Omnichannel · Daily Digest
+        ├── HANDOFF_BUNDLE_DIET_2026-09-07.md       # 🚧 ⚡ แผนส่งต่องาน — ลดน้ำหนัก JS รอบสุดท้ายให้เข้าเกณฑ์ระดับโลก
+        ├── HANDOFF_AI_ACCURACY_THAI_2026-09-07.md  # 🚧 🧠 แผนยกระดับ "ความแม่น" ของคำอ่าน + "ภาษาไทยที่ถูกต้อง" ของแม่หมอ AI
+        ├── AI_INTELLIGENCE_PLAN.md                 # 🚧 🧠 แผนแม่บทยกระดับความฉลาดของแม่หมอ AI
+        ├── AI_COST_CONTROL_PLAN.md                 # 🚧 💸 แผนคุมต้นทุน AI + รหัสทดสอบข้าม rate limit — handoff ให้ทีม Gemini
+        ├── HANDOFF_AI_JUDGE_BASELINE_2026-09-11.md # ⏸️ 🔑 ชีทส่งต่อ — รัน `ai:judge` เก็บ baseline `20260911-1` แล้วลุยคลื่น B ต่อ
+        ├── SITE_SHELL_SEO_PLAN.md                  # ✅ 🏛️ แผนลงมือ: Site Shell กลาง + Internal Link ที่บอทมองเห็น
+        ├── RETENTION_PLAN.md                       # ✅ 👤 แผนสร้าง Consumer Retention Infra — handoff ให้ทีม Gemini
+        ├── QUICK_FORTUNE_PLAN.md                   # ✅ ⚡ แผนฟีเจอร์ "ทำนายด่วน" (Quick Fortune — 1 ใบ ไม่ต้องเลือกไพ่)
+        ├── QUICK_CHAT_RESULT_PLAN.md               # ✅ ⚡ แผนฟีเจอร์ "หน้าผลลัพธ์ทำนายด่วน" (Quick Chat Result — แยกจากหน้าฝังใหญ่)
+        ├── PROVABLY_FAIR_PLAN.md                   # ✅ 🔐 แผนปิดช่องว่าง Provably-Fair ที่เหลือ 2 จุด — handoff ให้ Gemini
+        ├── HANDOFF_UX_UI_AUDIT_2026-09-11.md       # ✅ 🔍 แผนส่งต่อ — ผลตรวจ UX/UI ทั้งเว็บ (รอบ 2026-09-11)
+        ├── HANDOFF_THEME_THREE_PAGES_2026-09-06.md # ✅ ✦ แผนส่งต่องาน — ตัดขั้นตอนสับ/เลือกไพ่ ให้ 3 หน้า one-card เร็วแบบ "เปิดไพ่ด่วน"
+        ├── HANDOFF_SEO_WAVE2-4_2026-09-05.md       # ✅ 🌊 แผนส่งต่องาน SEO คลื่นที่ 2–4 (ยึด /cards · ลอกหมวดหมู่ MyHora · งานระยะยาว)
+        ├── HANDOFF_SEO_WAVE1_2026-09-05.md         # ✅ 🌊 แผนส่งต่องาน SEO คลื่นที่ 1 — เติมคำว่า "ไพ่ยิปซี" ทั่วเว็บ
+        ├── HANDOFF_SEMANTIC_SEARCH_2026-09-06.md   # ✅ 🔎 แผนต่อ UI ค้นหาเชิงความหมาย — ปลุก Vectorize + Workers AI ที่สร้างไว้แล้วให้ได้ใช้จริง (2026-09-06)
+        ├── HANDOFF_ROUND2_CLOSEOUT_2026-09-17.md   # ✅ 🧾 ปิดสี่เรื่องสุดท้ายของผลตรวจรอบ 2 (ISSUE-049)
+        ├── HANDOFF_QA_SPREADS_2026-09-06.md        # ✅ 🧪 แผนส่งต่องาน QA — พิสูจน์ผังใหม่ทั้ง 5 ด้วยการใช้งานจริง + ปิดช่องโหว่ `guestAllowed` ที่ไม่มีผลบังคับ
+        ├── HANDOFF_PERF_SEO_AUDIT_2026-09-06.md    # ✅ ⚡ แผนยกเครื่องประสิทธิภาพ · โค้ดตาย · SEO — รอบตรวจใหญ่ 2026-09-06
+        ├── HANDOFF_OG_IMAGES_2026-09-07.md         # ✅ 🖼️ แผนส่งต่อ — ยกเครื่องภาพแชร์ทั้งเว็บ 299 หน้า (OG Image Overhaul)
+        ├── HANDOFF_MEDIA_FIX_2026-09-06.md         # ✅ 🖼️ แผนแก้ท่อสื่อและกับดักที่เหลือ — ตรวจหลัง PR #319–#325 (2026-09-06)
+        ├── HANDOFF_HEADER_20260905.md              # ✅ 🧭 บันทึกส่งต่อและผลการแก้ไข "แถบ header ค้าง" (Header Hang — Resolved & Verified Record)
+        ├── HANDOFF_GLASS_HOME_2026-09-21.md        # ✅ ✦ แผนส่งต่องาน — หน้าแรก "ประตูเดียว" + ธีมกระจกอุ่น (Warm Liquid Glass)
+        ├── HANDOFF_EN_TRANSLATION_2026-09-06.md    # ✅ 🌏 แผนส่งงานแปลไทย → อังกฤษ (ขั้น C ของแผนเปิด SEO ภาษาอังกฤษ)
+        ├── HANDOFF_EN_ROUTING_2026-09-06.md        # ✅ 🌐 แผนเปิด SEO ภาษาอังกฤษจริง — เส้นทางแยก `/en/...` แบบ prerender สองภาษา
+        ├── HANDOFF_EN_BIRTH_CARD_2026-09-09.md     # ✅ 🎂 แผนเปิดหน้าอังกฤษ `/en/cards/birth-card` (ขั้น C ก้อนสุดท้ายของเส้นทางสองภาษา)
+        ├── HANDOFF_DOCS_TRUTH_2026-09-06.md        # ✅ 🧾 แผนส่งต่องาน — ปิดหนี้ที่เหลือหลัง SEO คลื่น 2–4 (เอกสารตรงกับของจริง + บทนำถึงเกณฑ์)
+        ├── HANDOFF_CARD_TILE_CV_2026-09-15.md      # ✅ 📐 คู่มือสูตรความสูงการ์ดไพ่ + วิธีวัดใหม่ (ทำวันที่ 2026-09-15)
+        ├── HANDOFF_BLOG_TBT_2026-09-12.md          # ✅ ⚡ แผนส่งต่อ — หา TBT ที่หายไปของหน้า `/blog` (ทำวันที่ 2026-09-12)
+        ├── HANDOFF_ASTRO_MIGRATION_2026-09-15.md   # ✅ 🪶 แผนย้ายเว็บไปสถาปัตยกรรม Astro + React Island
+        ├── HANDOFF_ADMIN_REDEEM_2026-09-12.md      # ✅ 🎟️ แผนส่งต่อ — หน้าจัดการรหัสแลกสิทธิ์ในแผงแอดมิน (Admin Redeem Code Manager)
+        ├── HANDOFF_2026-09-04.md                   # ✅ 📦 แผนส่งต่องานที่ยังค้าง หลังการตรวจใหญ่ 2026-09-04 (Handoff Plan)
+        ├── ENTITLEMENT_PLAN.md                     # ✅ 🎟 ระบบสมาชิกและโควตาเปิดไพ่ — แผนลงมือสำหรับทีม Antigravity
+        ├── EMAIL_AUTH_PLAN.md                      # ✅ 📧 แผนเพิ่ม "เข้าสู่ระบบด้วยอีเมล + รหัสผ่าน" — handoff ให้ทีมอีกทีม
+        ├── CLOUDFLARE_FREE_STACK.md                # ✅ ☁️ แผนใช้บริการฟรีของ Cloudflare ต่อยอด SeerTarot
+        ├── UX_PERF_PLAN.md                         # 📚 🎯 แผนยกเครื่อง UX · ความไว · ความสมูท — 2026-09-01
+        ├── TRAFFIC_CAPTURE_PLAN_2026-09-05.md      # 📚 🎯 แผนแย่งทราฟฟิกจาก MyHora และเจ้าตลาดดูดวงไทย (Traffic Capture Plan)
+        ├── HANDOFF_CF_REQUEST_REVIEW_2026-09-08.md # 📚 🔍 ตรวจข้อเสนอ 12 ข้อ "ลด Request บน Cloudflare" (2026-09-08)
+        ├── BACKLOG.md                              # 📚 📋 Backlog — งานที่ยังเหลือ (2026-09-04)
+        ├── AUDIT_2026-09-01.md                     # 📚 🔍 รายงานตรวจสอบเต็มรูปแบบ (Full Audit) — 2026-09-01
+        └── AGENTS_TASK_PLAN.md                     # 📚 🤖 แผนงานและการแบ่งหน้าที่สำหรับ AI Agents (Multi-Agent Task Orchestration)
+<!-- PLANS_TREE_END -->
 ```
 
 ---

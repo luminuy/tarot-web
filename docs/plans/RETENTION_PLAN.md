@@ -1,5 +1,7 @@
 # 👤 แผนสร้าง Consumer Retention Infra — handoff ให้ทีม Gemini
 
+> **สถานะ**: ✅ เสร็จแล้ว — สมุดบันทึก · streak · ความทรงจำแม่หมอ · Daily Digest ใช้งานจริง · **ตรวจล่าสุด**: 2026-09-23
+
 > ปิดช่องว่างข้อ 2 ของ valuation: "ไม่มี retention infra" — login ตอนนี้ cosmetic (ไม่มี user record), journal ยัง localStorage อย่างเดียว, ไม่มี email list, reading flow ไม่รู้จัก auth
 > ตรวจโค้ด `origin/main` `856d093` แล้ว — มี D1 (`APP_DB`) + edge OAuth (Google/LINE) + `UserProfileBadge`/`AuthModal` wire เข้า `page.tsx` แล้ว แต่ยังไม่มี **users table** และ callback ไม่เคย `INSERT` user
 > **5 PR** · PR 0 เป็น hotfix ความปลอดภัย (ทำก่อนด่วน)

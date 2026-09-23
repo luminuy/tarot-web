@@ -6,6 +6,9 @@
 > 1. **[docs/INCIDENT_LOG.md](docs/INCIDENT_LOG.md)** — ความผิดพลาดที่เคยเกิดขึ้นพร้อมกฎป้องกันถาวร **ทำผิดซ้ำเรื่องที่มีบันทึกแล้ว = ความบกพร่องร้ายแรงที่สุด**
 > 2. **[docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)** — บั๊กที่ยืนยันแล้วแต่ยังไม่ได้แก้ กันแก้ซ้ำซ้อนกับ Agent อื่น
 > 3. **[docs/AI_COLLABORATION_GUIDELINES.md](docs/AI_COLLABORATION_GUIDELINES.md)** — คู่มือแม่บท (หัวข้อ 0 คือมาตรฐานการทำงานที่บังคับใช้เสมอ)
+>
+> 🔎 **สถานะแผนงานทุกแผน** ดูที่ตาราง "📋 แผนงานทั้งหมด" ใน [CLAUDE.md](CLAUDE.md) (สร้างอัตโนมัติจากหัวไฟล์แผน) หรือรัน `npm run docs:status`
+> ก่อนบอกเจ้าของว่างานไหนค้าง/เสร็จ **ต้องยืนยันกับโค้ดจริงหรือ `git log` ทุกครั้ง** (INC-0229)
 
 ---
 
@@ -21,12 +24,12 @@
 5. **[docs/ADMIN_PANEL.md](docs/ADMIN_PANEL.md)**: คู่มือและสถาปัตยกรรมแผงควบคุมผู้ดูแลระบบ (Admin Panel & Cloud Health)
 6. **[docs/specs/INTERACTIVE_CARD_PICKING.md](docs/specs/INTERACTIVE_CARD_PICKING.md)**: รายละเอียดระบบและ Component สำหรับการให้คนจับไพ่ด้วยตนเอง
 7. **[docs/plans/AGENTS_TASK_PLAN.md](docs/plans/AGENTS_TASK_PLAN.md)**: แผนการกระจายงาน 5 เอเจนท์เฉพาะทาง และ Milestone การพัฒนา
-8. **[docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md](docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md)**: 🪶 แผนสถาปัตยกรรม Astro 7 + React 19 Islands (305 หน้า SSG Zero-Runtime ตอบจาก Edge)
+8. **[docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md](docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md)**: 🪶 แผนสถาปัตยกรรม Astro 7 + React 19 Islands (ทุกหน้าสาธารณะา SSG Zero-Runtime ตอบจาก Edge)
 9. **[docs/plans/HANDOFF_CARD_TILE_CV_2026-09-15.md](docs/plans/HANDOFF_CARD_TILE_CV_2026-09-15.md)**: 📐 สูตรความสูงการ์ดไพ่และกฎ content-visibility ต่อ breakpoint (ด่านที่ 62)
 10. **[docs/TAROT_CARD_FEATURES.md](docs/TAROT_CARD_FEATURES.md)**: 🃏 **(CANONICAL SPEC)** สเปกระบบและสารบบไพ่ทาโรต์ 78 ใบ, 5 มิติความหมาย, ผัง 25 แบบ, Pick A Card 8 หัวข้อ, Provably Fair Flow
 
 > 🪶 **หมายเหตุด้านสถาปัตยกรรม (Astro + Next.js Hybrid)**:
-> หน้าสาธารณะและเนื้อหา 305 หน้า (`/cards/**`, `/spreads/**`, `/blog/**`, `/about`, `/privacy`, `/contact` ฯลฯ) ถูกสร้างด้วย Astro SSG เป็น Zero-Runtime HTML ใน `.open-next/assets` ตอบจาก Cloudflare Edge โดยตรงโดยไม่ปลุก Worker
+> หน้าสาธารณะและเนื้อหาทั้งหมด (`/cards/**`, `/spreads/**`, `/blog/**`, `/about`, `/privacy`, `/contact` ฯลฯ) ถูกสร้างด้วย Astro SSG เป็น Zero-Runtime HTML ใน `.open-next/assets` ตอบจาก Cloudflare Edge โดยตรงโดยไม่ปลุก Worker
 > ส่วนหน้าที่ต้องการเซสชัน/ระบบสมาชิก/แผงควบคุมหลังบ้าน (`/account`, `/admin`, `/readers`, `/api/*`) ทำงานบน Next.js 16.3 (OpenNext on Cloudflare Workers)
 > **กติกา Island**: ห้ามนำเข้าชุดข้อมูลก้อนใหญ่ลง Island, ใช้ `client:idle` เป็นหลัก และแยก Static HTML ออกจาก Island เสมอ
 
@@ -35,7 +38,7 @@
 ## 🏛️ สรุปกฎเหล็ก 14 ประการสำหรับวิศวกรและ AI ทุกตัว
 
 0. **บันทึกบทเรียนทุกครั้งที่แก้บั๊ก (สำคัญที่สุด)**: commit ประเภท `fix` **ต้องมี `--cause` และ `--prevention`** ไม่งั้นระบบจะบล็อกให้อัตโนมัติ ระบบจะเขียนบันทึกลง `docs/INCIDENT_LOG.md` ให้เอง เพื่อไม่ให้ AI ตัวไหนทำผิดซ้ำเรื่องเดิม
-1. **บันทึกงานทุกครั้ง**: ทำอะไรเสร็จ แก้บั๊ก หรือเพิ่มฟีเจอร์ ต้องอัปเดต `docs/WORK_LOG.md` ทันที
+1. **บันทึกงานทุกครั้ง**: ทำอะไรเสร็จ แก้บั๊ก หรือเพิ่มฟีเจอร์ ต้องอัปเดต `docs/WORK_LOG.md` ทันที · **งานนั้นอยู่ในแผนไหน → แก้บรรทัด `> **สถานะ**:` ของแผนนั้น + รัน `npm run docs:index` ใน PR เดียวกัน** (ด่าน CI ตรวจ · INC-0229)
 2. **ห้ามใช้อิโมจิหรือสัญลักษณ์ดวงดาวแฟนซี (✦, ✨, ✧, ฯลฯ)**: ออกแบบด้วยตัวพิมพ์ Editorial Luxury Typography ระดับสากลที่สะอาด เรียบหรู ไร้สิ่งรบกวนสายตา ห้ามใส่อิโมจิการ์ตูนหรือสัญลักษณ์ดวงดาวในหัวข้อ ปุ่มกด ป้ายแท็ก หรือข้อความ UI เด็ดขาด เพื่อคงมาตรฐานความน่าเชื่อถือระดับพรีเมียม
 3. **Zero-Clipping Architecture**: ห้ามใส่ `overflow-hidden` หรือ `overflow-x-auto` ย่อยในแต่ละแถวของการ์ด ต้องใช้ Unified Altar Canvas
 4. **Manual Self-Reveal**: ไพ่บนผังพยากรณ์เริ่มต้นในสถานะคว่ำหน้าเสมอ ผู้ใช้แตะพลิก 3D ด้วยตนเอง

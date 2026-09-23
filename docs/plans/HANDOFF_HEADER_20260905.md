@@ -1,8 +1,10 @@
 # 🧭 บันทึกส่งต่อและผลการแก้ไข "แถบ header ค้าง" (Header Hang — Resolved & Verified Record)
 
+> **สถานะ**: ✅ เสร็จแล้ว — ISSUE-024 ถึง 030 ปิดครบ · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: PR #277 · #280
+
 > **ผู้ตรวจและส่งมอบการวิเคราะห์**: Claude · 2026-09-05 · branch `claude/header-hang-issue-0c30b9`
 > **ผู้รับช่วงและดำเนินการแก้ไข**: Antigravity AI · 2026-09-05 · branch `fix/header-hang-and-ui-latency` (PR #277 · commit `82efa0b`)
-> **สถานะ**: ✅ **แก้ไขเสร็จสิ้นสมบูรณ์ 100% (Fully Resolved & Verified in Production)**
+> **สถานะตอนเขียนแผน**: ✅ **แก้ไขเสร็จสิ้นสมบูรณ์ 100% (Fully Resolved & Verified in Production)**
 > **บันทึก Incident**: [INC-0086](../INCIDENT_LOG.md#inc-0086--2026-09-05-2055---high--แก้ปัญหาแถบ-header-ค้าง-ui-latency-ในการสลับภาษา-state-purity-และ-focus-stealing-issue-024-ถึง-issue-030) ใน `docs/INCIDENT_LOG.md`
 > **สถานะปัญหา**: ปิด ISSUE-024 ถึง ISSUE-030 ครบทั้ง 7 ข้อใน [`docs/KNOWN_ISSUES.md`](../KNOWN_ISSUES.md)
 > **โค้ดอ้างอิงและแก้จริง**: รวมเข้าสู่ `main` แล้วใน PR #277 (commit `82efa0b`)

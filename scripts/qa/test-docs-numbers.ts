@@ -346,4 +346,37 @@ function checkIncidentIds() {
   console.log(`✅ ทะเบียนเลข INC ไม่ซ้ำและไม่มีการอ้างเลขที่ไม่มีอยู่จริง (${seen.size} รายการ)`);
 }
 
+/**
+ * INC-0229 — สถานะของแผนต้องมาจากไฟล์แผนที่เดียว และตารางใน CLAUDE.md / INDEX.md ต้องสร้างจากมัน
+ * เคยเกิด: ธีมกระจกลงครบทั้งเว็บ (#551–#562) แต่ CLAUDE.md ยังเขียน "รอทีมรับไปทำ"
+ * ➔ เอเจนท์รายงานเจ้าของผิดว่างานยังค้าง · ตรวจทั้งโฟลเดอร์พบอีก 5 แผนที่ทำแล้วแต่เอกสารยังบอกว่ายังไม่ลงมือ
+ */
+async function checkPlanStatusIndex() {
+  const { expectedFiles, readAllPlans } = await import("../docs-index");
+  const { plans, errors } = readAllPlans();
+  if (errors.length > 0) {
+    console.error("❌ หัวสถานะของไฟล์แผนไม่ถูกรูปแบบ:");
+    for (const e of errors) console.error(`  - ${e}`);
+    process.exit(1);
+  }
+  const plansDir = path.join(ROOT, "docs/plans");
+  const total = fs.readdirSync(plansDir).filter((n) => n.endsWith(".md")).length;
+  if (plans.length === 0 || plans.length !== total) {
+    console.error(`❌ อ่านหัวสถานะได้ ${plans.length}/${total} แผน — ด่านนี้ต้องครอบทุกไฟล์ใน docs/plans`);
+    process.exit(1);
+  }
+  const { claude, index } = expectedFiles();
+  const drift: string[] = [];
+  if (fs.readFileSync(path.join(ROOT, "CLAUDE.md"), "utf8") !== claude) drift.push("CLAUDE.md");
+  if (fs.readFileSync(path.join(ROOT, "docs/INDEX.md"), "utf8") !== index) drift.push("docs/INDEX.md");
+  if (drift.length > 0) {
+    console.error(`❌ ตารางแผนงานใน ${drift.join(" · ")} ไม่ตรงกับหัวสถานะของไฟล์แผน`);
+    console.error("💡 วิธีแก้: แก้บรรทัด `> **สถานะ**:` ในไฟล์แผน แล้วรัน `npm run docs:index` (ห้ามแก้ตารางมือ)\n");
+    process.exit(1);
+  }
+  const open = plans.filter((p) => p.emoji !== "✅" && p.emoji !== "📚").length;
+  console.log(`✅ สถานะแผน ${plans.length} ไฟล์ตรงกับตารางใน CLAUDE.md และ INDEX.md (ยังเปิด ${open} แผน — ดู npm run docs:status)`);
+}
+
 checkDocs();
+await checkPlanStatusIndex();

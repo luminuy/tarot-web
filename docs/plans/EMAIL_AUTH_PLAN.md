@@ -1,5 +1,7 @@
 # 📧 แผนเพิ่ม "เข้าสู่ระบบด้วยอีเมล + รหัสผ่าน" — handoff ให้ทีมอีกทีม
 
+> **สถานะ**: ✅ เสร็จแล้ว — ล็อกอินอีเมล/รหัสผ่านใช้งานจริง · ด่าน test-email-auth เฝ้าอยู่ · **ตรวจล่าสุด**: 2026-09-23
+
 > ตอนนี้ล็อกอินได้แค่ Google + LINE OAuth (`AuthModal.tsx`) · เพิ่ม email/password auth เต็มรูปแบบ: สมัคร → ยืนยันอีเมล → เข้าสู่ระบบ → ลืมรหัสผ่าน → เปลี่ยนรหัส
 > ตรวจ `origin/main` `cefc64d` แล้ว — มี `users` table (D1) + `edge-auth.ts` (HMAC session 30 วัน) + `users.repo.ts` + `/api/auth/{me,logout,[provider]}` · **ยังไม่มี:** password field, email verification, email sending
 > **5 PR** · depends on: RETENTION PR 1-4 (landed #72-76) · เกี่ยวกับ `PLAN_SEQUENCING.md` (แตะ `callback/route.ts`, `users.repo.ts`, `me/route.ts`, `AuthModal.tsx`, `db.ts` inline block)

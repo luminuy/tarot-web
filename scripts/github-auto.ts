@@ -306,7 +306,7 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
     args: ["scripts/qa/test-meta-length.ts"],
   },
   {
-    label: "📚 ตัวเลขในเอกสารแม่บทตรงกับของจริง (ด่าน/ผัง/ตำแหน่ง/ไพ่)",
+    label: "📚 ตัวเลขและสถานะแผนในเอกสารแม่บทตรงกับของจริง (ด่าน/ผัง/ตำแหน่ง/ไพ่ · ตารางแผนสร้างจากไฟล์แผน)",
     cmd: TSX,
     args: ["scripts/qa/test-docs-numbers.ts"],
   },
