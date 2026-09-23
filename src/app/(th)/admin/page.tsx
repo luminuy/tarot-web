@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/Button";
 // Dynamic Admin Panels
 const AdminOverview = dynamic(() => import("@/components/admin/AdminOverview"), {
   ssr: false,
-  loading: () => <AdminLoading label="กำลังโหลดภาพรวมระบบ…" />,
+  loading: () => <AdminLoading label="กำลังโหลดภาพรวม…" />,
 });
 const StatsDashboard = dynamic(() => import("@/components/admin/StatsDashboard"), {
   ssr: false,
@@ -48,13 +48,17 @@ const EntitlementAdmin = dynamic(() => import("@/components/admin/EntitlementAdm
   ssr: false,
   loading: () => <AdminLoading label="กำลังโหลดสิทธิ์และโควตา…" />,
 });
-const MarketingAudience = dynamic(() => import("@/components/admin/MarketingAudience"), {
+const MembersPanel = dynamic(() => import("@/components/admin/MembersPanel"), {
   ssr: false,
-  loading: () => <AdminLoading label="กำลังโหลดระบบข่าวสาร…" />,
+  loading: () => <AdminLoading label="กำลังโหลดรายชื่อสมาชิก…" />,
+});
+const FeedbackPanel = dynamic(() => import("@/components/admin/FeedbackPanel"), {
+  ssr: false,
+  loading: () => <AdminLoading label="กำลังโหลดความเห็นจากผู้ใช้…" />,
 });
 const RedeemCodesManager = dynamic(() => import("@/components/admin/RedeemCodesManager"), {
   ssr: false,
-  loading: () => <AdminLoading label="กำลังโหลดระบบรหัสแลกสิทธิ์…" />,
+  loading: () => <AdminLoading label="กำลังโหลดรหัสแลกสิทธิ์…" />,
 });
 
 function AdminLoading({ label }: { label: string }) {
@@ -66,20 +70,20 @@ function AdminLoading({ label }: { label: string }) {
   );
 }
 
-export type TabId =
+type TabId =
   | "overview"
   | "stats"
-  | "health"
-  | "content"
-  | "entitlement"
+  | "members"
+  | "feedback"
   | "redeem"
+  | "entitlement"
+  | "content"
   | "readers"
-  | "marketing";
+  | "health";
 
 interface NavItem {
   id: TabId;
   label: string;
-  badge?: string;
   description: string;
 }
 
@@ -88,163 +92,94 @@ interface NavSection {
   items: NavItem[];
 }
 
+/**
+ * เมนูจัดตามงานที่แอดมินทำจริง: ดูตัวเลข ➔ ดูแลผู้ใช้ ➔ ตั้งค่าบริการ ➔ ดูแลระบบ
+ * (เดิม "สิทธิ์ & โควตา" อยู่ใต้ "ปรับแต่งเนื้อหาและไพ่" และ "รายชื่อสมาชิก" มีแค่รายชื่อรับข่าวสาร)
+ */
 const NAV_SECTIONS: NavSection[] = [
   {
-    group: "สถิติและรายงาน",
+    group: "ภาพรวม",
     items: [
-      {
-        id: "overview",
-        label: "ภาพรวมวิหาร",
-        description: "ศูนย์สรุปสถานะรวมของวิหาร สถิติสดประจำวัน และบันทึกประวัติกิจกรรม",
-      },
+      { id: "overview", label: "ภาพรวม", description: "สถานะระบบ ตัวเลขสำคัญ 7 วัน และกิจกรรมแอดมินล่าสุด" },
       {
         id: "stats",
-        label: "สถิติการใช้งานรายวัน",
-        badge: "ใหม่",
+        label: "สถิติการใช้งาน",
         description: "สรุปรายวันแบบเลือกวันได้ · แนวโน้มและความนิยม · โควตาและความเสถียรของ AI",
       },
     ],
   },
   {
-    group: "บริการและสมาชิก",
+    group: "ผู้ใช้",
     items: [
       {
-        id: "redeem",
-        label: "รหัสของขวัญ & สิทธิ์พิเศษ",
-        description: "สร้างโค้ดโปรโมชั่น สุ่มรหัส กำหนดโควตา และตรวจสอบประวัติการแลก",
+        id: "members",
+        label: "สมาชิก",
+        description: "ค้นหาสมาชิก ดูสิทธิ์คงเหลือ ให้สิทธิ์เพิ่ม และรายชื่อผู้รับข่าวสาร",
       },
-      {
-        id: "marketing",
-        label: "รายชื่อสมาชิก & ข่าวสาร",
-        description: "รายชื่อสมาชิกที่ยินยอมรับข่าวสาร และการส่งออกรายชื่อผู้รับข้อมูล",
-      },
-      {
-        id: "readers",
-        label: "หมอดูพาร์ทเนอร์",
-        description: "จัดการคิวงาน ตรวจสอบคุณสมบัติ และโปรไฟล์แม่หมอตัวจริง",
-      },
+      { id: "feedback", label: "ความเห็นจากผู้ใช้", description: "คะแนนและข้อความที่ผู้ใช้ส่งเข้ามา" },
+      { id: "redeem", label: "รหัสแลกสิทธิ์", description: "สร้างรหัส กำหนดเพดานและวันหมดอายุ ดูประวัติการแลก" },
     ],
   },
   {
-    group: "ปรับแต่งเนื้อหาและไพ่",
+    group: "ตั้งค่าบริการ",
     items: [
-      {
-        id: "content",
-        label: "แม่หมอ & ไพ่ 78 ใบ",
-        description: "แก้ไขข้อความต้อนรับ บุคลิกแม่หมอ 6 สไตล์ และความหมายไพ่ 78 ใบ",
-      },
-      {
-        id: "entitlement",
-        label: "สิทธิ์ & โควตาการเปิดไพ่",
-        description: "กำหนดโควตาฟรีรายวัน ควบคุมสวิตช์จำกัดสิทธิ์ และตรวจสอบความพร้อม",
-      },
+      { id: "entitlement", label: "สิทธิ์ & โควตา", description: "สวิตช์ระบบสิทธิ์ ประกาศล่วงหน้า และตัวเลขการถูกกั้นสิทธิ์" },
+      { id: "content", label: "แม่หมอ & ไพ่ 78 ใบ", description: "แก้คำสั่งระบบ บุคลิกแม่หมอ และความหมายไพ่แบบสด" },
+      { id: "readers", label: "หมอดูพาร์ทเนอร์", description: "รับสมัคร ตรวจสอบ และจัดการโปรไฟล์หมอดูตัวจริง" },
     ],
   },
   {
-    group: "ห้องช่างและระบบคลาวด์",
+    group: "ระบบ",
     items: [
       {
         id: "health",
-        label: "ตรวจสุขภาพระบบ & AI",
-        badge: "ขั้นสูง",
-        description: "สัญญาณสด Cloudflare D1, KV, Google/LINE Login, และเอนจิน AI",
+        label: "สุขภาพระบบ & AI",
+        description: "ตรวจ D1 · KV · ล็อกอิน · อีเมล และยิงทดสอบ AI จริง",
       },
     ],
   },
 ];
 
+const ALL_TABS = NAV_SECTIONS.flatMap((s) => s.items.map((i) => i.id));
+
+/** ลิงก์เก่าที่ยังถูกบุ๊กมาร์กไว้ ➔ แท็บปัจจุบัน */
+const TAB_ALIASES: Record<string, TabId> = { marketing: "members" };
+
 // SVG Icons for clean, standardized executive feel (No cartoon emojis)
 function TabIcon({ id, className = "w-4 h-4" }: { id: TabId; className?: string }) {
-  switch (id) {
-    case "overview":
-      return (
-        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.8}
-            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-          />
-        </svg>
-      );
-    case "stats":
-      return (
-        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.8}
-            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-          />
-        </svg>
-      );
-    case "health":
-      return (
-        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.8}
-            d="M13 10V3L4 14h7v7l9-11h-7z"
-          />
-        </svg>
-      );
-    case "content":
-      return (
-        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.8}
-            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-          />
-        </svg>
-      );
-    case "entitlement":
-      return (
-        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.8}
-            d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
-          />
-        </svg>
-      );
-    case "redeem":
-      return (
-        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.8}
-            d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
-          />
-        </svg>
-      );
-    case "readers":
-      return (
-        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.8}
-            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-          />
-        </svg>
-      );
-    case "marketing":
-      return (
-        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.8}
-            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-          />
-        </svg>
-      );
-  }
+  const d: Record<TabId, string> = {
+    overview:
+      "M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z",
+    stats:
+      "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
+    members:
+      "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z",
+    feedback:
+      "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z",
+    redeem:
+      "M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z",
+    entitlement:
+      "M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z",
+    content:
+      "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10",
+    readers: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
+    health: "M13 10V3L4 14h7v7l9-11h-7z",
+  };
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d={d[id]} />
+    </svg>
+  );
+}
+
+/** แปลงค่าจาก URL/ปุ่มลัด เป็นแท็บจริง (+ แท็บย่อยของหน้าสุขภาพระบบ) */
+function resolveTab(raw: string | null): { tab: TabId; health?: "system" | "ai" } {
+  if (!raw) return { tab: "overview" };
+  if (raw === "system") return { tab: "health", health: "system" };
+  if (raw === "ai") return { tab: "health", health: "ai" };
+  if (TAB_ALIASES[raw]) return { tab: TAB_ALIASES[raw] };
+  if ((ALL_TABS as string[]).includes(raw)) return { tab: raw as TabId };
+  return { tab: "overview" };
 }
 
 function AdminContent() {
@@ -254,29 +189,12 @@ function AdminContent() {
   const [authState, setAuthState] = useState<"loading" | "ready" | "denied">("loading");
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [healthSubTab, setHealthSubTab] = useState<"system" | "ai">("system");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Sync tab from URL query params
   useEffect(() => {
-    const rawTab = searchParams.get("tab");
-    if (!rawTab) {
-      setActiveTab("overview");
-      return;
-    }
-
-    if (rawTab === "system") {
-      setActiveTab("health");
-      setHealthSubTab("system");
-    } else if (rawTab === "ai") {
-      setActiveTab("health");
-      setHealthSubTab("ai");
-    } else if (
-      ["overview", "stats", "health", "content", "readers", "entitlement", "redeem", "marketing"].includes(
-        rawTab,
-      )
-    ) {
-      setActiveTab(rawTab as TabId);
-    }
+    const r = resolveTab(searchParams.get("tab"));
+    setActiveTab(r.tab);
+    if (r.health) setHealthSubTab(r.health);
   }, [searchParams]);
 
   // Authenticate session
@@ -298,26 +216,12 @@ function AdminContent() {
 
   const selectTab = useCallback(
     (tabId: string) => {
-      let resolvedTab: TabId = "overview";
-      if (tabId === "system") {
-        resolvedTab = "health";
-        setHealthSubTab("system");
-      } else if (tabId === "ai") {
-        resolvedTab = "health";
-        setHealthSubTab("ai");
-      } else if (
-        ["overview", "stats", "health", "content", "readers", "entitlement", "redeem", "marketing"].includes(
-          tabId,
-        )
-      ) {
-        resolvedTab = tabId as TabId;
-      }
-
-      setActiveTab(resolvedTab);
-      setMobileMenuOpen(false);
+      const r = resolveTab(tabId);
+      setActiveTab(r.tab);
+      if (r.health) setHealthSubTab(r.health);
 
       const params = new URLSearchParams(window.location.search);
-      params.set("tab", resolvedTab);
+      params.set("tab", r.tab);
       router.replace(`/admin?${params.toString()}`, { scroll: false });
     },
     [router],
@@ -337,191 +241,73 @@ function AdminContent() {
     );
   }
 
-  // Find active metadata for header breadcrumb
-  let activeItem: NavItem | undefined;
-  for (const sec of NAV_SECTIONS) {
-    const it = sec.items.find((i) => i.id === activeTab);
-    if (it) {
-      activeItem = it;
-      break;
-    }
-  }
+  const activeItem = NAV_SECTIONS.flatMap((s) => s.items).find((i) => i.id === activeTab);
 
   return (
     <div className="min-h-screen text-ink">
-      {/* ─── Top Executive Bar ──────────────────────────────────────── */}
-      <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-line bg-white px-4 sm:px-6 lg:px-8 shadow-2xs">
+      {/* ─── แถบบน ──────────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-line bg-white px-4 sm:px-6">
         <div className="flex items-center gap-3">
-          {/* Mobile hamburger button */}
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="altar-card-porcelain !rounded-lg tap-overlay-y flex h-9 w-9 items-center justify-center text-ink lg:hidden transition-colors"
-            aria-label="เปิดเมนูนำทาง"
-          >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              {mobileMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
-          </button>
-
-          <div className="flex items-center gap-3">
-            {/* Official Brand Logo */}
-            <div className="w-10 h-10 rounded-full border border-line overflow-hidden relative flex-shrink-0 bg-canvas shadow-2xs">
-              <img
-                src="/logo.webp"
-                alt="SeerTarot Admin"
-                width={40}
-                height={40}
-                className="w-full h-full object-cover"
-                loading="eager"
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-mystic-gold text-base sm:text-lg font-bold tracking-tight text-ink">
-                  SeerTarot Admin
-                </span>
-                <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-emerald-600/25 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                  LIVE
-                </span>
-              </div>
-              <p className="hidden md:block text-[11px] text-muted">
-                ศูนย์บริหารจัดการวิหารพยากรณ์ไพ่ทาโรต์ระดับพรีเมียม
-              </p>
-            </div>
-          </div>
+          <img
+            src="/logo.webp"
+            alt=""
+            width={32}
+            height={32}
+            className="h-8 w-8 shrink-0 rounded-full border border-line object-cover"
+            loading="eager"
+          />
+          <span className="text-sm font-bold text-ink sm:text-base">SeerTarot Admin</span>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <a
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="altar-card-porcelain !rounded-xl inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-ink transition"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-line bg-white px-3 text-xs font-medium text-ink hover:bg-canvas"
           >
-            <span>เปิดหน้าเว็บจริง</span>
-            <span className="text-[11px] text-muted">↗</span>
+            เปิดหน้าเว็บ <span aria-hidden className="text-muted">↗</span>
           </a>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={logout}
-            className="text-xs text-muted hover:text-rose-600 hover:bg-rose-50 transition-colors"
-          >
+          <Button variant="ghost" size="sm" onClick={logout} className="text-xs text-muted hover:text-rose-700">
             ออกจากระบบ
           </Button>
         </div>
       </header>
 
-      {/* ─── Main Admin Workspace (Full Width & Responsive) ────────── */}
-      <div className="flex w-full flex-col lg:flex-row min-h-[calc(100vh-4rem)]">
-        {/* ─── Desktop Sidebar ────────────────────────────────────── */}
-        <aside className="hidden w-64 shrink-0 border-r border-line bg-white p-4 lg:block">
-          <div className="sticky top-20 space-y-6">
+      <div className="flex w-full flex-col lg:flex-row min-h-[calc(100vh-3.5rem)]">
+        {/* ─── เมนูข้าง (เดสก์ท็อป) ────────────────────────────────── */}
+        <aside className="hidden w-60 shrink-0 border-r border-line bg-white p-3 lg:block">
+          <nav aria-label="เมนูแอดมิน" className="sticky top-[4.5rem] space-y-5">
             {NAV_SECTIONS.map((section) => (
-              <div key={section.group} className="space-y-1.5">
-                <p className="px-3 text-[11px] font-semibold uppercase tracking-wider text-muted">
-                  {section.group}
-                </p>
-                <nav className="space-y-1">
-                  {section.items.map((item) => {
-                    const isActive = activeTab === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => selectTab(item.id)}
-                        className={`tap-overlay-y group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-xs font-medium transition ${
-                          isActive
-                            ? "bg-canvas text-ink font-semibold border border-line shadow-2xs"
-                            : "text-muted hover:bg-surface-warm hover:text-ink"
-                        }`}
-                      >
-                        <span
-                          className={`transition-colors ${
-                            isActive ? "text-gold" : "text-muted group-hover:text-ink"
-                          }`}
-                        >
-                          <TabIcon id={item.id} className="w-4 h-4" />
-                        </span>
-                        <span className="flex-1 truncate">{item.label}</span>
-                        {item.badge && (
-                          <span
-                            className={`rounded-full px-2 py-0.5 text-[9px] font-medium transition-colors ${
-                              isActive
-                                ? "btn-gold-glass"
-                                : "bg-canvas text-muted border border-line"
-                            }`}
-                          >
-                            {item.badge}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </nav>
+              <div key={section.group} className="space-y-1">
+                <p className="px-3 text-[11px] font-semibold text-muted">{section.group}</p>
+                {section.items.map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => selectTab(item.id)}
+                      aria-current={isActive ? "page" : undefined}
+                      className={`tap-overlay-y flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                        isActive ? "bg-canvas font-semibold text-ink" : "text-muted hover:bg-canvas hover:text-ink"
+                      }`}
+                    >
+                      <TabIcon id={item.id} className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{item.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             ))}
-
-            <div className="altar-card-porcelain !rounded-xl p-3 text-[11px] text-muted">
-              <div className="flex items-center gap-1.5 font-semibold text-ink">
-                
-                <span>มาตรฐานระบบ</span>
-              </div>
-              <p className="mt-1 text-[11px] leading-relaxed text-muted">
-                Provably-Fair Tarot 100% ควบคุมด้วย Cloudflare Workers & D1 Architecture
-              </p>
-            </div>
-          </div>
+          </nav>
         </aside>
 
-        {/* ─── Mobile Drawer Menu ──────────────────────────────────── */}
-        {mobileMenuOpen && (
-          <div className="border-b border-line bg-white p-4 lg:hidden anim-drop-in">
-            <div className="space-y-4">
-              {NAV_SECTIONS.map((section) => (
-                <div key={section.group} className="space-y-1">
-                  <p className="px-2 text-[11px] font-semibold uppercase tracking-wider text-muted">
-                    {section.group}
-                  </p>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {section.items.map((item) => {
-                      const isActive = activeTab === item.id;
-                      return (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => selectTab(item.id)}
-                          className={`tap-overlay-y flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs transition-colors ${
-                            isActive
-                              ? "btn-gold-glass font-semibold"
-                              : "bg-surface-warm text-ink border border-line hover:bg-white"
-                          }`}
-                        >
-                          <TabIcon id={item.id} className="w-3.5 h-3.5 shrink-0" />
-                          <span className="truncate flex-1">{item.label}</span>
-                          {item.badge && (
-                            <span className="rounded-full bg-white/20 px-1.5 py-0.2 text-[8px] font-bold">
-                              {item.badge}
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ─── Mobile Horizontal Quick Pill Strip ───────────────────── */}
-        <div className="flex overflow-x-auto border-b border-line bg-white px-4 py-2.5 gap-1.5 lg:hidden no-scrollbar">
+        {/* ─── แถบเมนู (มือถือ/แท็บเล็ต) ──────────────────────────────── */}
+        <nav
+          aria-label="เมนูแอดมิน"
+          className="flex gap-1.5 overflow-x-auto border-b border-line bg-white px-4 py-2 lg:hidden no-scrollbar"
+        >
           {NAV_SECTIONS.flatMap((s) => s.items).map((item) => {
             const isActive = activeTab === item.id;
             return (
@@ -529,110 +315,81 @@ function AdminContent() {
                 key={item.id}
                 type="button"
                 onClick={() => selectTab(item.id)}
-                className={`tap-overlay-y flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs transition-colors ${
-                  isActive
-                    ? "btn-gold-glass font-semibold"
-                    : "border border-line bg-surface-warm text-muted hover:text-ink"
+                aria-current={isActive ? "page" : undefined}
+                className={`tap-overlay-y flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs transition-colors ${
+                  isActive ? "btn-gold-glass font-semibold" : "border border-line bg-white text-muted hover:text-ink"
                 }`}
               >
-                <TabIcon id={item.id} className="w-3 h-3" />
+                <TabIcon id={item.id} className="h-3.5 w-3.5" />
                 <span>{item.label}</span>
               </button>
             );
           })}
-        </div>
+        </nav>
 
-        {/* ─── Tab Content Workspace ──────────────────────────────── */}
+        {/* ─── พื้นที่ทำงาน ───────────────────────────────────────── */}
         <main id="main-content" tabIndex={-1} className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
           {/*
             ⚠️ ทุกหน้าต้องมี <h1> หนึ่งอันเสมอ — มันคือ "ชื่อของหน้า" ที่ screen reader
             ใช้บอกผู้ใช้ว่าตอนนี้อยู่หน้าไหน และเป็นรากของสารบัญหัวข้อทั้งหน้า
-            หน้านี้เคยมีแต่ <h2> ของชื่อแท็บ ไม่มี <h1> เลยสักอัน
-            (ตรวจเจอตอนขยายด่าน a11y ให้ครอบทั้งเว็บ ไม่ใช่แค่หน้าแรก)
-
-            ใช้ `sr-only` เพราะดีไซน์ตั้งใจให้ชื่อแท็บเป็นตัวเด่นบนจอ —
-            h1 ทำหน้าที่เป็น "ชื่อหน้า" ให้ screen reader ส่วน h2 ยังเป็นชื่อแท็บตามเดิม
-            ⚠️ ห้ามลบ — ด่าน `test-a11y-critical` ตรวจทั้ง 309 หน้าแล้ว
+            ใช้ `sr-only` เพราะชื่อแท็บ (h2) คือตัวเด่นบนจอ
+            ⚠️ ห้ามลบ — ด่าน `test-a11y-critical` ตรวจทุกหน้า
           */}
           <h1 className="sr-only">แผงควบคุมผู้ดูแลระบบ</h1>
 
-          {/* Header Description Banner */}
           {activeItem && (
-            <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line pb-4">
+            <div className="mb-6 flex flex-col gap-2 border-b border-line pb-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="flex items-center gap-2">
-                  
-                  <h2 className="text-lg sm:text-xl font-bold text-ink font-mystic-gold">
-                    {activeItem.label}
-                  </h2>
-                </div>
-                <p className="text-xs text-muted mt-0.5">
-                  {activeItem.description}
-                </p>
+                <h2 className="text-lg font-bold text-ink sm:text-xl">{activeItem.label}</h2>
+                <p className="mt-0.5 text-xs text-muted">{activeItem.description}</p>
               </div>
 
-              {/* Special Sub-navigation when on "health" tab */}
               {activeTab === "health" && (
-                <div className="altar-card-porcelain !rounded-xl flex items-center gap-1 p-1 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setHealthSubTab("system")}
-                    className={`tap-overlay-y rounded-lg px-3 py-1 text-xs font-medium transition-colors ${
-                      healthSubTab === "system"
-                        ? "bg-white text-ink shadow-2xs font-semibold border border-line"
-                        : "text-muted hover:text-ink"
-                    }`}
-                  >
-                    Cloudflare & D1
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setHealthSubTab("ai")}
-                    className={`tap-overlay-y rounded-lg px-3 py-1 text-xs font-medium transition-colors ${
-                      healthSubTab === "ai"
-                        ? "bg-white text-ink shadow-2xs font-semibold border border-line"
-                        : "text-muted hover:text-ink"
-                    }`}
-                  >
-                    ประสิทธิภาพ AI
-                  </button>
+                <div role="tablist" aria-label="หมวดสุขภาพระบบ" className="flex w-fit items-center gap-1 rounded-lg border border-line bg-canvas p-1 text-xs">
+                  {(
+                    [
+                      ["system", "Cloudflare & D1"],
+                      ["ai", "AI"],
+                    ] as const
+                  ).map(([id, label]) => (
+                    <button
+                      key={id}
+                      type="button"
+                      role="tab"
+                      aria-selected={healthSubTab === id}
+                      onClick={() => setHealthSubTab(id)}
+                      className={`tap-overlay-y rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                        healthSubTab === id ? "border border-line bg-white font-semibold text-ink" : "text-muted hover:text-ink"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
           )}
 
-          {/* Active Panel View */}
           <div className="space-y-6">
-            {activeTab === "overview" && (
-              <AdminOverview onNavigateTab={selectTab} />
-            )}
-
+            {activeTab === "overview" && <AdminOverview onNavigateTab={selectTab} />}
             {activeTab === "stats" && <StatsDashboard />}
-
-            {activeTab === "health" && (
-              <div>
-                {healthSubTab === "system" ? (
-                  <SystemHealthPanel
-                    onSwitchTab={(target) => {
-                      if (target === "ai") setHealthSubTab("ai");
-                      else selectTab(target);
-                    }}
-                  />
-                ) : (
-                  <AiHealthPanel />
-                )}
-              </div>
-            )}
-
-            {activeTab === "content" && <ContentEditor />}
-
-            {activeTab === "readers" && <ReadersManager />}
-
-            {activeTab === "entitlement" && <EntitlementAdmin />}
-
+            {activeTab === "members" && <MembersPanel />}
+            {activeTab === "feedback" && <FeedbackPanel />}
             {activeTab === "redeem" && <RedeemCodesManager />}
-
-            {activeTab === "marketing" && <MarketingAudience />}
+            {activeTab === "entitlement" && <EntitlementAdmin />}
+            {activeTab === "content" && <ContentEditor />}
+            {activeTab === "readers" && <ReadersManager />}
+            {activeTab === "health" &&
+              (healthSubTab === "system" ? (
+                <SystemHealthPanel
+                  onSwitchTab={(target) => {
+                    if (target === "ai") setHealthSubTab("ai");
+                    else selectTab(target);
+                  }}
+                />
+              ) : (
+                <AiHealthPanel />
+              ))}
           </div>
         </main>
       </div>

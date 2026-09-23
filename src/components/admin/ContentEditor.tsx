@@ -128,7 +128,7 @@ export default function ContentEditor() {
               className={`tap-overlay-y rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
                 sub === id
                   ? "btn-gold-glass border-ink"
-                  : "border-line bg-white text-muted hover:bg-[#F2EFE9] hover:text-ink"
+                  : "border-line bg-white text-muted hover:bg-canvas hover:text-ink"
               }`}
             >
               {label}
@@ -416,7 +416,7 @@ function CardTab({
                 className={`tap-overlay-y rounded-lg px-2 py-1 text-[11px] font-medium transition-colors ${
                   active
                     ? "btn-gold-glass"
-                    : "border border-line bg-white text-muted hover:bg-[#F2EFE9] hover:text-ink"
+                    : "border border-line bg-white text-muted hover:bg-canvas hover:text-ink"
                 }`}
               >
                 {opt.label}
@@ -457,7 +457,7 @@ function CardTab({
                     onClick={() => setSelId(c.id)}
                     className={`tap-overlay-y flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition-colors ${
                       isSelected
-                        ? "border border-ink bg-[#F2EFE9] font-medium text-ink"
+                        ? "border border-ink bg-canvas font-medium text-ink"
                         : "text-ink hover:bg-surface-warm"
                     }`}
                   >
@@ -508,7 +508,7 @@ function CardTab({
                   <h3 className="text-base font-semibold text-ink">
                     {detail.nameTh}
                   </h3>
-                  <span className="rounded border border-line bg-[#F2EFE9] px-1.5 py-0.5 text-[10px] text-muted font-mono">
+                  <span className="rounded border border-line bg-canvas px-1.5 py-0.5 text-[10px] text-muted font-mono">
                     {detail.id}
                   </span>
                 </div>

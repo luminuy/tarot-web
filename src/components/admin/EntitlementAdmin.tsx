@@ -50,7 +50,7 @@ const METRIC_LABEL: Record<string, string> = {
 const DB_HEALTH_METRICS: { key: string; label: string; hint: string }[] = [
   { key: "dbError", label: "DB สิทธิ์ล่ม", hint: "โควตาไม่ได้ถูกบังคับจริงในช่วงนั้น" },
   { key: "dbSelfheal", label: "สร้างตารางใหม่อัตโนมัติ", hint: "ตารางเคยหาย ระบบซ่อมเองสำเร็จ" },
-  { key: "dbSelfhealFailed", label: "ซ่อมตารางไม่สำเร็จ", hint: "ต้องกดปุ่ม “เตรียมฐานข้อมูล” ด้านบนเอง" },
+  { key: "dbSelfhealFailed", label: "ซ่อมตารางไม่สำเร็จ", hint: "กดปุ่ม “เตรียมฐานข้อมูล” ในหัวข้องานตั้งค่าครั้งแรกด้านล่าง" },
 ];
 
 async function ops(action: string, before?: string) {
@@ -145,7 +145,7 @@ export default function EntitlementAdmin() {
         setGfResult(data.error || "ทำรายการไม่สำเร็จ");
       } else if (run) {
         setGfResult(
-          `✅ ให้โบนัสแล้ว ${data.granted} คน${data.remaining ? ` (เหลืออีก ${data.remaining} — กดซ้ำได้)` : ""}`,
+          `ให้โบนัสแล้ว ${data.granted} คน${data.remaining ? ` (เหลืออีก ${data.remaining} — กดซ้ำได้)` : ""}`,
         );
         load();
       } else {
@@ -159,77 +159,112 @@ export default function EntitlementAdmin() {
   if (loadError) return <AdminErrorBanner error={loadError} onRetry={load} />;
   if (!s) return <p className="text-sm text-muted">กำลังโหลด…</p>;
 
+  const policyText = REQUIRE_SIGNUP_TO_READ
+    ? `ผู้เยี่ยมชมต้องสมัครสมาชิกก่อนเปิดไพ่ · สมาชิกวันละ ${DAILY_LIMIT} ครั้ง · แชทเฉพาะสมาชิก`
+    : `ผู้เยี่ยมชม ${GUEST_LIMIT} ครั้ง · สมาชิกวันละ ${DAILY_LIMIT} ครั้ง · แชทเฉพาะสมาชิก`;
+
   return (
     <div className="flex flex-col gap-5">
-      {msg ? <p className="text-xs text-muted">{msg}</p> : null}
-
-      {/* ── สถานะฐานข้อมูล ── */}
-      <div className="altar-card-porcelain altar-panel p-5">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h3 className="text-sm font-semibold text-ink">
-              1 · เตรียมฐานข้อมูล{" "}
-              {dbReady === null ? (
-                <span className="text-muted text-xs font-normal">(กำลังตรวจ…)</span>
-              ) : dbReady ? (
-                <span className="inline-flex items-center rounded border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800">
-                  ✓ พร้อม
-                </span>
-              ) : (
-                <span className="inline-flex items-center rounded border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-800">
-                  ✗ ยังไม่พร้อม
-                </span>
-              )}
-            </h3>
-            <p className="mt-1 text-xs text-muted">
-              สร้างตารางเก็บโควตา (ทำครั้งเดียว · กดซ้ำได้ ปลอดภัย)
-            </p>
-          </div>
-          <Button size="sm" variant={dbReady ? "outline" : "gold"} isLoading={dbBusy} onClick={initDb}>
-            {dbReady ? "เตรียมซ้ำ" : "เตรียมฐานข้อมูล"}
-          </Button>
-        </div>
-      </div>
-
-      {/* ── โบนัสเปลี่ยนผ่าน ── */}
-      <div className="altar-card-porcelain altar-panel p-5">
-        <h3 className="text-sm font-semibold text-ink">2 · โบนัสเปลี่ยนผ่านผู้ใช้เดิม (10 ครั้ง)</h3>
-        <p className="mt-1 mb-3 text-xs text-muted">
-          ทำครั้งเดียวก่อนเปิดระบบ — ผู้ใช้ที่สมัคร <strong>ก่อน</strong> วันตัด จะได้โบนัส 10 ครั้ง (ไม่หมดอายุ) · กดซ้ำได้
+      {msg ? (
+        <p role="status" className="text-xs text-muted">
+          {msg}
         </p>
-        <div className="flex flex-wrap items-end gap-3">
-          <Field label="วันตัด">
-            {(field) => (
-              <Input
-                {...field}
-                type="date"
-                max={todayISO()}
-                value={gfDate}
-                onChange={(e) => setGfDate(e.target.value)}
-              />
-            )}
-          </Field>
-          <Button size="sm" variant="outline" isLoading={gfBusy} onClick={() => setGfDate(todayISO())}>
-            ใช้วันนี้
-          </Button>
-          <Button size="sm" variant="outline" isLoading={gfBusy} onClick={() => grandfather(false)}>
-            ตรวจจำนวน
-          </Button>
-          <Button size="sm" variant="gold" isLoading={gfBusy} onClick={() => grandfather(true)}>
-            ให้โบนัส
+      ) : null}
+
+      {/* ── สวิตช์หลัก ── */}
+      <section
+        className={`rounded-xl border bg-white p-5 ${s.enabled ? "border-line" : "border-rose-300"}`}
+        aria-labelledby="ent-switch"
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 id="ent-switch" className="flex flex-wrap items-center gap-2 text-sm font-semibold text-ink">
+              ระบบสิทธิ์เปิดไพ่
+              <span
+                className={`rounded border px-2 py-0.5 text-xs font-semibold ${
+                  s.enabled ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-rose-200 bg-rose-50 text-rose-800"
+                }`}
+              >
+                {s.enabled ? "เปิดใช้งาน" : "ปิดอยู่"}
+              </span>
+              {dbReady === false ? (
+                <span className="rounded border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-800">
+                  ตารางฐานข้อมูลยังไม่พร้อม
+                </span>
+              ) : null}
+            </h3>
+            <p className="mt-1 text-xs text-muted">กติกาปัจจุบัน: {policyText}</p>
+            {!s.enabled ? (
+              <p className="mt-1 text-xs font-semibold text-rose-700">
+                ปิดอยู่ = โควตาไม่ถูกบังคับ ผังใหญ่และปรมาจารย์ลับไม่ถูกล็อก
+              </p>
+            ) : null}
+          </div>
+          <Button
+            size="sm"
+            variant={s.enabled ? "outline" : "gold"}
+            isLoading={saving}
+            disabled={!dbReady}
+            onClick={() => {
+              const q = s.enabled
+                ? "ยืนยันปิดระบบสิทธิ์? ผู้ใช้จะเปิดไพ่ได้ไม่จำกัดจนกว่าจะเปิดใหม่"
+                : "ยืนยันเปิดระบบสิทธิ์? โควตาจะถูกบังคับทันที";
+              if (!confirm(q)) return;
+              save({ enabled: !s.enabled });
+            }}
+          >
+            {s.enabled ? "ปิดระบบสิทธิ์" : "เปิดระบบสิทธิ์"}
           </Button>
         </div>
-        {gfResult ? <p className="mt-3 text-xs text-ink font-medium">{gfResult}</p> : null}
-      </div>
+      </section>
+
+      {/* ── ตัวเลข 7 วัน ── */}
+      <section className="altar-card-porcelain p-5" aria-labelledby="ent-metrics">
+        <div className="flex items-center justify-between">
+          <h3 id="ent-metrics" className="text-sm font-semibold text-ink">
+            ตัวเลขระบบสิทธิ์ (7 วันล่าสุด)
+          </h3>
+          <Button variant="outline" size="sm" onClick={load} className="text-xs">
+            โหลดล่าสุด
+          </Button>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {Object.entries(METRIC_LABEL).map(([k, label]) => (
+            <div key={k} className="rounded-lg border border-line p-3">
+              <p className="text-xs text-muted">{label}</p>
+              <p className="mt-0.5 font-mono text-lg font-bold text-ink">{(s.metrics[k] ?? 0).toLocaleString("th-TH")}</p>
+            </div>
+          ))}
+        </div>
+
+        <h4 className="mt-5 text-xs font-semibold text-ink">สุขภาพฐานข้อมูลสิทธิ์ — ทุกค่าควรเป็น 0</h4>
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {DB_HEALTH_METRICS.map(({ key, label, hint }) => {
+            const value = s.metrics[key] ?? 0;
+            const bad = value > 0;
+            return (
+              <div key={key} className={`rounded-lg border p-3 ${bad ? "border-rose-200 bg-rose-50" : "border-line"}`}>
+                <p className="text-xs text-muted">{label}</p>
+                <p className={`mt-0.5 font-mono text-lg font-bold ${bad ? "text-rose-700" : "text-ink"}`}>
+                  {value.toLocaleString("th-TH")}
+                </p>
+                <p className="mt-1 text-[11px] leading-snug text-muted">{hint}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       {/* ── แบนเนอร์ประกาศล่วงหน้า ── */}
-      <div className="altar-card-porcelain altar-panel p-5">
-        <h3 className="text-sm font-semibold text-ink">3 · แบนเนอร์ประกาศล่วงหน้า</h3>
+      <section className="altar-card-porcelain p-5" aria-labelledby="ent-announce">
+        <h3 id="ent-announce" className="text-sm font-semibold text-ink">
+          แบนเนอร์ประกาศเปลี่ยนกติกา
+        </h3>
         <p className="mt-1 mb-3 text-xs text-muted">
-          แสดงบนหน้าแรกเมื่อระบบยังปิด — เปิดล่วงหน้าอย่างน้อย <strong>7 วัน</strong> ก่อนเปิดระบบจริง
+          ขึ้นบนหน้าแรกเมื่อจะเปลี่ยนกติกาการเปิดไพ่ — ควรประกาศล่วงหน้าอย่างน้อย 7 วัน
         </p>
         <div className="flex flex-wrap items-end gap-3">
-          <Field label="เลือกวันเริ่มใช้">
+          <Field label="วันเริ่มใช้">
             {(field) => (
               <Input
                 {...field}
@@ -243,7 +278,7 @@ export default function EntitlementAdmin() {
               />
             )}
           </Field>
-          <Field label="ข้อความที่จะขึ้นในแบนเนอร์ (แก้เองได้)">
+          <Field label="ข้อความวันที่ในแบนเนอร์">
             {(field) => (
               <Input
                 {...field}
@@ -251,23 +286,18 @@ export default function EntitlementAdmin() {
                 placeholder="15 กันยายน 2569"
                 defaultValue={s.announceResetDate}
                 onBlur={(e) => {
-                  if (e.target.value !== s.announceResetDate)
-                    save({ announceResetDate: e.target.value });
+                  if (e.target.value !== s.announceResetDate) save({ announceResetDate: e.target.value });
                 }}
               />
             )}
           </Field>
-          <Button
-            size="sm"
-            variant={s.announce ? "gold" : "outline"}
-            onClick={() => save({ announce: !s.announce })}
-          >
-            {s.announce ? "ประกาศเปิดอยู่ — กดเพื่อปิด" : "ประกาศปิดอยู่ — กดเพื่อเปิด"}
+          <Button size="sm" variant={s.announce ? "gold" : "outline"} onClick={() => save({ announce: !s.announce })}>
+            {s.announce ? "แบนเนอร์แสดงอยู่ — กดเพื่อซ่อน" : "แบนเนอร์ซ่อนอยู่ — กดเพื่อแสดง"}
           </Button>
         </div>
-        <p className="altar-card-porcelain !rounded-xl mt-3 p-3 text-xs text-muted">
-          ตัวอย่างแบนเนอร์:{" "}
-          <span className="text-ink font-semibold">
+        <p className="mt-3 rounded-lg border border-line bg-canvas p-3 text-xs text-muted">
+          ตัวอย่าง:{" "}
+          <span className="font-semibold text-ink">
             เร็ว ๆ นี้ การเปิดไพ่จะปรับเป็น{" "}
             {REQUIRE_SIGNUP_TO_READ
               ? `สมัครสมาชิกฟรีก่อนเปิดไพ่ · สมาชิกฟรีวันละ ${DAILY_LIMIT} ครั้ง`
@@ -275,105 +305,55 @@ export default function EntitlementAdmin() {
             {s.announceResetDate?.trim() ? ` เริ่ม ${s.announceResetDate.trim()}` : ""}
           </span>
         </p>
-      </div>
+      </section>
 
-      {/* ── ธงเปิดระบบจริง ── */}
-      <div className="altar-panel rounded-2xl border border-rose-300 bg-white p-5 shadow-xs">
-        <div className="flex items-center justify-between gap-4">
+      {/*
+        ── งานตั้งค่าครั้งแรก ──
+        ระบบเปิดใช้จริงแล้ว สองปุ่มนี้แทบไม่ต้องกดอีก จึงพับเก็บไว้ (เดิมเป็นข้อ 1–2 บนสุดของหน้า)
+        ยังต้องมีไว้: ถ้าตารางหาย ปุ่ม "เตรียมฐานข้อมูล" คือทางซ่อมที่ไม่ต้องใช้ terminal
+        (การ์ด "รหัสแลกสิทธิ์" ที่เคยอยู่ตรงนี้ถูกถอด — ซ้ำกับเมนู "รหัสแลกสิทธิ์")
+      */}
+      <details className="altar-card-porcelain p-5" open={dbReady === false}>
+        <summary className="cursor-pointer text-sm font-semibold text-ink">
+          งานตั้งค่าครั้งแรก (ทำครั้งเดียว)
+        </summary>
+
+        <div className="mt-4 flex flex-col gap-3 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-ink">4 · เปิดระบบสิทธิ์จริง</h3>
-            <p className="mt-1 text-xs text-muted">
-              เปิด ={" "}
-              {REQUIRE_SIGNUP_TO_READ
-                ? `ผู้เยี่ยมชมต้องสมัครสมาชิกก่อนเปิดไพ่ · สมาชิกวันละ ${DAILY_LIMIT} ครั้ง · แชทเฉพาะสมาชิก`
-                : `ผู้เยี่ยมชม ${GUEST_LIMIT} ครั้ง · สมาชิกวันละ ${DAILY_LIMIT} ครั้ง · แชทเฉพาะสมาชิก`}
-              <br />
-              <strong className="text-rose-700">
-                ⚠️ ทำข้อ 1–3 ให้ครบและรอประกาศ ≥ 7 วันก่อน — จะลดสิทธิ์ผู้ใช้เดิมทันที
-              </strong>
+            <p className="text-sm font-medium text-ink">
+              เตรียมตารางฐานข้อมูลสิทธิ์{" "}
+              <span className="text-xs font-normal text-muted">
+                ({dbReady === null ? "กำลังตรวจ…" : dbReady ? "พร้อมแล้ว" : "ยังไม่พร้อม"})
+              </span>
             </p>
+            <p className="mt-0.5 text-xs text-muted">กดซ้ำได้ ปลอดภัย — ใช้ซ่อมเมื่อตารางหาย</p>
           </div>
-          <Button
-            size="sm"
-            variant={s.enabled ? "gold" : "outline"}
-            isLoading={saving}
-            disabled={!dbReady}
-            onClick={() => {
-              if (
-                !s.enabled &&
-                !confirm("ยืนยันเปิดระบบสิทธิ์จริง? จะลดสิทธิ์ผู้ใช้เดิมทันที")
-              )
-                return;
-              save({ enabled: !s.enabled });
-            }}
-          >
-            {s.enabled ? "เปิดอยู่ — กดเพื่อปิด" : "ปิดอยู่ — กดเพื่อเปิด"}
+          <Button size="sm" variant={dbReady ? "outline" : "gold"} isLoading={dbBusy} onClick={initDb}>
+            {dbReady ? "เตรียมซ้ำ" : "เตรียมฐานข้อมูล"}
           </Button>
         </div>
-      </div>
 
-      {/* ── ทางลัดไปหน้าจัดการรหัสแลกสิทธิ์ ──
-          การ์ดจัดการรหัสเคยอยู่ตรงนี้ แต่ซ้ำกับแท็บ "รหัสแลกสิทธิ์" ที่อีกสายทำมาพร้อมกัน
-          (สองหน้าจอ + สอง API เขียนตารางเดียวกันคนละกติกา = ที่มาของข้อมูลเพี้ยน)
-          จึงเหลือทางเดียวคือแท็บนั้น ที่นี่เก็บไว้แค่ป้ายบอกทาง */}
-      <div className="altar-card-porcelain altar-panel p-5">
-        <h3 className="text-sm font-semibold text-ink">5 · รหัสแลกสิทธิ์</h3>
-        <p className="mt-1 text-xs text-muted">
-          สร้าง/ปิดรหัส · ดูยอดแลกและรายชื่อผู้แลก อยู่ที่แท็บ{" "}
-          <a href="/admin?tab=redeem" className="font-semibold text-ink underline">
-            รหัสแลกสิทธิ์
-          </a>{" "}
-          — ทุกใบต้องมีเพดานจำนวนคนและวันหมดอายุเสมอ (INC-0134)
-        </p>
-      </div>
-
-      {/* ── Metric เฝ้าดู 48 ชม.แรก ── */}
-      <div className="altar-card-porcelain altar-panel p-5">
-        <h3 className="text-sm font-semibold text-ink">สถิติระบบสิทธิ์ (7 วันล่าสุด)</h3>
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {Object.entries(METRIC_LABEL).map(([k, label]) => (
-            <div key={k} className="altar-card-porcelain !rounded-xl p-3">
-              <p className="text-[13px] text-muted">{label}</p>
-              <p className="mt-0.5 text-lg font-bold text-ink">
-                {(s.metrics[k] ?? 0).toLocaleString("th-TH")}
-              </p>
-            </div>
-          ))}
+        <div className="mt-4 border-t border-line pt-4">
+          <p className="text-sm font-medium text-ink">โบนัสเปลี่ยนผ่านผู้ใช้เดิม (10 ครั้ง)</p>
+          <p className="mt-0.5 mb-3 text-xs text-muted">
+            ผู้ใช้ที่สมัครก่อนวันตัดได้โบนัส 10 ครั้ง (ไม่หมดอายุ) · กดซ้ำได้ ไม่ให้ซ้ำคนเดิม
+          </p>
+          <div className="flex flex-wrap items-end gap-3">
+            <Field label="วันตัด">
+              {(field) => (
+                <Input {...field} type="date" max={todayISO()} value={gfDate} onChange={(e) => setGfDate(e.target.value)} />
+              )}
+            </Field>
+            <Button size="sm" variant="outline" isLoading={gfBusy} onClick={() => grandfather(false)}>
+              ตรวจจำนวน
+            </Button>
+            <Button size="sm" variant="gold" isLoading={gfBusy} onClick={() => grandfather(true)}>
+              ให้โบนัส
+            </Button>
+          </div>
+          {gfResult ? <p className="mt-3 text-xs font-medium text-ink">{gfResult}</p> : null}
         </div>
-        <button onClick={load} className="mt-3 text-xs text-muted hover:text-ink">
-          รีเฟรช
-        </button>
-      </div>
-
-      {/* ── สุขภาพฐานข้อมูลสิทธิ์ (7 วันล่าสุด) ── */}
-      <div className="altar-card-porcelain altar-panel p-5">
-        <h3 className="text-sm font-semibold text-ink">สุขภาพฐานข้อมูลสิทธิ์ (7 วันล่าสุด)</h3>
-        <p className="mt-1 text-xs text-muted">
-          ทุกค่าควรเป็น <strong>0</strong> — ถ้าไม่ใช่ แปลว่าโควตาอาจไม่ถูกบังคับจริงในช่วงนั้น
-        </p>
-        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-          {DB_HEALTH_METRICS.map(({ key, label, hint }) => {
-            const value = s.metrics[key] ?? 0;
-            const bad = value > 0;
-            return (
-              <div
-                key={key}
-                className={`rounded-xl p-3 border ${
-                  bad
-                    ? "bg-rose-50 border-rose-200"
-                    : "bg-surface-warm border-line"
-                }`}
-              >
-                <p className="text-[13px] text-muted">{label}</p>
-                <p className={`mt-0.5 text-lg font-bold ${bad ? "text-rose-700" : "text-emerald-700"}`}>
-                  {value.toLocaleString("th-TH")}
-                </p>
-                <p className="mt-1 text-[11px] leading-snug text-muted">{hint}</p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      </details>
     </div>
   );
 }

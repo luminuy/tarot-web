@@ -263,7 +263,7 @@ export default function ReadersManager() {
               className={`tap-overlay-y rounded-full px-3 py-1.5 font-medium transition-colors ${
                 statusFilter === tab.id
                   ? "btn-gold-glass"
-                  : "border border-line bg-white text-muted hover:bg-[#F2EFE9] hover:text-ink"
+                  : "border border-line bg-white text-muted hover:bg-canvas hover:text-ink"
               }`}
             >
               {tab.label}
@@ -399,7 +399,7 @@ export default function ReadersManager() {
                   )}
                   <button
                     onClick={() => openEditModal(r)}
-                    className="altar-card-porcelain !rounded-lg tap-overlay-y flex-1 py-1.5 text-xs font-medium text-ink hover:bg-[#F2EFE9] transition-colors"
+                    className="altar-card-porcelain !rounded-lg tap-overlay-y flex-1 py-1.5 text-xs font-medium text-ink hover:bg-canvas transition-colors"
                   >
                     แก้ไข
                   </button>
@@ -408,7 +408,7 @@ export default function ReadersManager() {
                 <div className="flex gap-2 text-[13px]">
                   <button
                     onClick={() => copyConsoleLink(r)}
-                    className="altar-card-porcelain !rounded-lg tap-overlay-y flex-1 py-1 text-ink hover:bg-[#EAE5DC] transition-colors"
+                    className="altar-card-porcelain !rounded-lg tap-overlay-y flex-1 py-1 text-ink hover:bg-inset transition-colors"
                   >
                     ลิงก์แผงแม่หมอ
                   </button>
