@@ -38,6 +38,37 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-09-23 (รอบ 135): 🔴 ผลตรวจใหญ่ 99 ข้อ — คลื่น 1 ปิดระดับวิกฤตครบ 8 ข้อ (INC-0220)
+
+**คำสั่งเจ้าของ**: "แก้ต่อจากเอเจนท์อื่นหน่อย" — รอบแก้เดิม (4 เอเจนท์) ล้มกลางทางเพราะชนเพดานค่าใช้จ่าย
+และไม่มีอะไรถูก commit ➔ ดึงผลตรวจจากกิ่ง `upbeat-dijkstra` มาแล้วแก้ใหม่ทั้งคลื่นในเซสชันเดียว (ไม่แตกเอเจนท์)
+ผลตรวจเต็ม: `docs/audits/2026-09-23/` · กระดาน: `PROGRESS.md`
+
+| ID | อาการ | แก้ | ด่านกันซ้ำ |
+| :--- | :--- | :--- | :--- |
+| A1-05 | ผู้ใช้ Google/LINE ที่เคยลบบัญชี ล็อกอินแล้วเด้งออกทุกครั้ง | callback คืนชีพด้วย `reviveOAuthUser` (id เดิม · ขึ้น token_version · ไม่แตะอีเมล) | `test-email-auth` ข้อ 10 |
+| A2-13 | แม่หมอเห็น `customerRef` ลูกค้า แล้วเอาไปแลกเป็นคุกกี้อ่านคิวข้ามแม่หมอ (PDPA) | ref ออกฝั่งเซิร์ฟเวอร์เท่านั้น · `toPublicTicket` ทุก response · payments อ่านจากคุกกี้ | `test-marketplace-readers` ข้อ 12.4 |
+| A3-01 | `/daily` `/love/1-card` `/pick-a-card` birth-card: AI ล่มแล้วตัวโหลดหมุนไม่รู้จบ | `useAiReading` ฟัง `event: error` + สตรีมจบโดยไม่มี done = fail | `test-mock-reading` ข้อ 7 |
+| A3-02 | one-card โชว์ไพ่หัวตั้ง แต่ AI อ่านเป็นกลับหัว | ภาพ/คีย์เวิร์ด/ประวัติใช้ `rawDrawn[0].isReversed` | `test-mock-reading` ข้อ 7 |
+| A4-01 | ปุ่มรีบิลด์ดัชนีค้นหาในแอดมินได้ 404 ทุกครั้ง | `/api/admin/rebuild-search-index` | `test-code-debt` ข้อ 6 (ทุก `fetch("/api/...")` ต้องมี route จริง) |
+| A4-03 | หน้าแรกปิดเมนูแล้วเลื่อนหน้าไม่ได้อีก | `site-header.ts` ข้ามหัวเว็บที่อยู่ใน `<astro-island>` | `test-sticky-header` ข้อ 8 |
+| A8-01 | `/blog` โหลดบทความเต็ม 26 เรื่องสองภาษาเป็น JS | ส่งรายการเป็น prop เฉพาะภาษาของหน้า | `test-bundle-budget` ชังก์ BlogIslands ≤ 10 KB |
+| A8-04 | ทุกคำทำนายโหลด zod ~21 KB มาเบราว์เซอร์ | ค่าคงที่ย้ายไป `reading-display.ts` | `test-bundle-budget` ห้ามชังก์ไหนมี `ZodError` |
+
+#### วัดจริง (บิลด์ Astro บนเครื่อง dev)
+
+| เรื่อง | ก่อน | หลัง |
+| :--- | :--- | :--- |
+| ชังก์ `BlogIslands` | 57.1 KB gz | **4.3 KB gz** |
+| JS หน้า `/blog` | 131 KB gz | **79 KB gz** (เพดาน 158 ➔ 90) |
+| HTML หน้า `/blog` | 25.3 KB gz | 29.3 KB gz (แลกตั้งใจ · เพดาน 30 ➔ 34 พร้อมเหตุผลในด่าน) |
+| ชังก์ `StreamReader` | 29.5 KB gz | **6.3 KB gz** |
+| หน้าแรก: ปิดเมนูแล้ว `body.style.overflow` | `"hidden"` (ค้าง) | `""` (Chromium จริง · Esc และปุ่มปิด) |
+
+**mutation test**: ย้อนตัวแก้ทีละกลุ่มแล้วด่านใหม่ตกทุกกลุ่ม (marketplace · stream/one-card 6 ข้อ · header 4 ข้อ · zod ในชังก์ · fetch path)
+
+**ที่ยังค้าง**: 🟠 47 ข้อ + 🟡 ที่เหลือในผลตรวจ — คลื่นถัดไปแบ่งตามโดเมนตามกระดาน `PROGRESS.md`
+
 ### 🗓️ 2026-09-22 (รอบ 134): 📱 ผังไพ่บนมือถือ = รางเลื่อนทีละใบ (INC-0219)
 
 **คำสั่งเจ้าของ**: "เราทำโชว์ทีละใบ เลื่อนเอา หน้าจะแก้ปัญหาได้ไหม"

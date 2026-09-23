@@ -14,8 +14,10 @@ import {
   linkOAuthIdentity,
   markEmailVerified,
   normalizeEmail,
+  reviveOAuthUser,
   setPasswordHash,
   softDeleteUser,
+  upsertUserOnLogin,
 } from "../../src/lib/users/users.repo";
 
 async function runEmailAuthQATests() {
@@ -164,6 +166,30 @@ async function runEmailAuthQATests() {
     }
   }
   console.log("  ✓ 8. Malformed & Empty JSON Resilience: ตอบ HTTP 400 ป้องกัน 500 error ทุกเส้นทาง");
+
+  // 10. (A1-05) ผู้ใช้ Google/LINE ที่ลบบัญชีแล้วกลับมาล็อกอินใหม่ต้องเข้าได้
+  //     softDelete แตะแค่ deleted_at แถว oauth_identities ยังชี้ id เดิม ➔ callback ต้องคืนชีพ
+  const oauthId = `google_revive_${Date.now()}`;
+  const oauthSub = `g_sub_revive_${Date.now()}`;
+  const oauthUser = await upsertUserOnLogin({ id: oauthId, provider: "google", name: "ผู้ใช้กลับมา" });
+  await linkOAuthIdentity("google", oauthSub, oauthId);
+  await softDeleteUser(oauthId);
+  if (await getUserById(oauthId)) throw new Error("❌ softDeleteUser ไม่ได้ลบบัญชี");
+  if ((await findUserIdByOAuth("google", oauthSub)) !== oauthId) {
+    throw new Error("❌ สมมติฐานของเทสต์ผิด: identity ควรยังชี้ id เดิมหลังลบบัญชี");
+  }
+  const revived = await reviveOAuthUser({ id: oauthId, provider: "google", name: "ผู้ใช้กลับมา" });
+  if (!(await getUserById(oauthId))) throw new Error("❌ A1-05: reviveOAuthUser ไม่คืนชีพบัญชี");
+  if (revived.tokenVersion <= oauthUser.tokenVersion) {
+    throw new Error("❌ A1-05: คืนชีพแล้วต้องขึ้น token_version (คุกกี้ก่อนลบบัญชีห้ามฟื้น)");
+  }
+  const fs = await import("node:fs");
+  const callbackSrc = fs.readFileSync("src/app/api/auth/[provider]/callback/route.ts", "utf8");
+  if (!/getUserById\(existingLinkedUserId\)\)\s*\?\?\s*\(await reviveOAuthUser/.test(callbackSrc)) {
+    throw new Error("❌ A1-05: OAuth callback ไม่คืนชีพบัญชีที่ถูกลบในกิ่ง 'ผูกไว้แล้ว'");
+  }
+  await softDeleteUser(oauthId);
+  console.log("  ✓ 10. OAuth ที่เคยลบบัญชี: ล็อกอินกลับได้ + ขึ้น token_version (A1-05)");
 
   // Cleanup
   await softDeleteUser(newUser.id);

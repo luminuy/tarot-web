@@ -278,6 +278,48 @@ async function runTest() {
   }
   console.log("  ✓ 12. PDPA Cookie Auth: ป้องกัน URL Enumeration และยืนยันตัวตนผ่าน Signed Cookie สำเร็จ 100%");
 
+  // 12.4 (A2-13) customerRef = ความลับแบบ bearer ห้ามหลุดออกไปใน response ใด ๆ
+  //      และ POST /tickets ต้องไม่ยอมเซ็นคุกกี้ให้ ref ที่ส่งมาใน body (เดิมแลกเป็นคุกกี้ของเหยื่อได้)
+  const ownerRaw = JSON.stringify(ownerJson);
+  if (ownerRaw.includes("customerRef") || ownerRaw.includes("cust_client_device_1")) {
+    throw new Error("❌ A2-13: GET /tickets/[id] ยังส่ง customerRef ออกไป");
+  }
+  const { POST: postTicketForRef } = await import("../../src/app/api/marketplace/tickets/route");
+  const stealRes = await postTicketForRef(
+    new Request("https://seertarot.net/api/marketplace/tickets", {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: "https://seertarot.net" },
+      body: JSON.stringify({
+        readerId: created.id,
+        kind: "booking",
+        customerRef: "cust_client_device_1",
+        nickname: "ผู้บุกรุก",
+        question: "ขอดูคิวของคนอื่นหน่อย",
+        consent: true,
+      }),
+    }),
+  );
+  if (stealRes.status !== 200) {
+    throw new Error(`❌ A2-13: POST /tickets (booking) expected 200, got ${stealRes.status}`);
+  }
+  const stealJson = JSON.stringify(await stealRes.json());
+  if (stealJson.includes("customerRef") || stealJson.includes("cust_client_device_1")) {
+    throw new Error("❌ A2-13: POST /tickets ยังส่ง customerRef ออกไปใน response");
+  }
+  const stolenCookie = (stealRes.headers.get("set-cookie") ?? "").match(
+    new RegExp(`${CUSTOMER_REF_COOKIE}=([^;]*)`),
+  )?.[1];
+  const { readCustomerRefFromCookie } = await import("../../src/lib/marketplace/customer-ref");
+  const issuedRef = stolenCookie
+    ? await readCustomerRefFromCookie(
+        new Request("https://seertarot.net/", { headers: { cookie: `${CUSTOMER_REF_COOKIE}=${stolenCookie}` } }),
+      )
+    : null;
+  if (!issuedRef || issuedRef === "cust_client_device_1") {
+    throw new Error(`❌ A2-13: POST /tickets เซ็นคุกกี้ให้ ref จาก body (ได้ ${issuedRef})`);
+  }
+  console.log("  ✓ 12.4 customerRef ไม่หลุดออกใน response และแลก ref จาก body เป็นคุกกี้ไม่ได้ (A2-13)");
+
   await cancelQueueTicket(ticket2.id);
   const purgedCount = await cleanupExpiredTickets();
   console.log(`  ✓ 13. PDPA Data Retention: Auto-cleanup expired tickets (${purgedCount} purged)`);

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { cancelQueueTicket, getQueueTicketById } from "@/lib/marketplace/queue.repo";
+import { cancelQueueTicket, getQueueTicketById, toPublicTicket } from "@/lib/marketplace/queue.repo";
 import { getReaderById } from "@/lib/marketplace/readers.repo";
 import { readCustomerRefFromCookie } from "@/lib/marketplace/customer-ref";
 import { requireReader } from "@/lib/auth/reader-auth";
@@ -41,7 +41,7 @@ export async function GET(
     const canAccessLine = ticket.status === "ready" || ticket.status === "handed_off";
 
     return NextResponse.json({
-      ticket,
+      ticket: toPublicTicket(ticket),
       reader: {
         id: reader.id,
         displayName: reader.displayName,

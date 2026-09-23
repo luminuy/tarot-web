@@ -1,18 +1,19 @@
-import { BlogIndexClient } from "@/components/blog/BlogIndexClient";
-import { blogCardItems } from "@/app/_shared/pages/blog-index";
+import { BlogIndexClient, type BlogCardItem } from "@/components/blog/BlogIndexClient";
 import { LocaleProvider } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/types";
 
 /**
  * 📚 ส่วนที่ต้องใช้ JS จริงของหน้ารวมบทความ (/blog)
  *
- * ⚠️ `blogCardItems()` ถูกเรียกในไฟล์นี้โดยตั้งใจ — มันตัดเหลือ 10 ฟิลด์ที่การ์ดใช้จริง
- *    (ISSUE-043) จึงเบาพอที่จะอยู่ในบันเดิล และไม่ต้องฝังลง HTML เป็น prop ทุกหน้า
+ * ⚠️ ห้าม import `@/data/articles` (หรือไฟล์ที่ import มัน) ในไฟล์นี้เด็ดขาด — กติกา island ข้อ 1
+ *    เดิมเรียก `blogCardItems()` ตรงนี้ คิดว่าตัดเหลือ 10 ฟิลด์แล้ว "เบาพอ" แต่ตัดตอนรันไทม์
+ *    ตัวโมดูลบทความเต็ม 26 เรื่องสองภาษาจึงถูกมัดทั้งก้อน = 57 KB gzip (ผลตรวจ A8-01)
+ *    ➔ หน้า .astro เรียก `blogCardItems()` ตอนบิลด์แล้วส่งเข้ามาเป็น prop แทน
  */
-export function BlogIndexRoot({ locale }: { locale: Locale }) {
+export function BlogIndexRoot({ locale, articles }: { locale: Locale; articles: BlogCardItem[] }) {
   return (
     <LocaleProvider forcedLocale={locale}>
-      <BlogIndexClient articles={blogCardItems()} />
+      <BlogIndexClient articles={articles} />
     </LocaleProvider>
   );
 }

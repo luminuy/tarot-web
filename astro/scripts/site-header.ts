@@ -20,11 +20,22 @@ import { LOCALE_COOKIE_KEY } from "@/lib/i18n/types";
 const FOCUSABLE_SELECTOR =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
+/**
+ * หัวเว็บที่อยู่ใน island (หน้าแรก `/` · `/en` — `TarotFlow` เรนเดอร์หัวเว็บ React ของตัวเอง)
+ * React คุมลิ้นชัก/ปุ่มภาษา/ความสูงเองครบแล้ว ถ้าสคริปต์นี้ผูกซ้ำจะมีตัวจัดการสองชุดแย่งกัน:
+ * ปิดเมนูแล้ว cleanup ของ `useDialogBehavior` คืน `body.overflow = "hidden"` ทับ ➔ หน้าเลื่อนไม่ได้อีก (A4-03)
+ * กติกา: สคริปต์นี้แตะเฉพาะหัวเว็บ static เท่านั้น
+ */
+function ownedByIsland(el: Element | null | undefined): boolean {
+  return !!el?.closest("astro-island");
+}
+
 /** ปุ่ม/แผงของลิ้นชัก — ชื่อคลาสต้องตรงกับที่ `globals.css` และ React ใช้ทุกตัว */
 function installNavDrawer(): void {
   const trigger = document.querySelector<HTMLButtonElement>('[aria-controls="sacred-nav-panel"]');
   const panel = document.getElementById("sacred-nav-panel");
   if (!trigger || !panel) return;
+  if (ownedByIsland(trigger) || ownedByIsland(panel)) return;
 
   const scrim = document.querySelector<HTMLElement>("[data-nav-scrim]");
   const closeButton = panel.querySelector<HTMLButtonElement>("[data-nav-close]");
@@ -112,7 +123,9 @@ function installNavDrawer(): void {
  * หน้าที่ยังไม่มีฝาแฝดจะจำภาษาไว้ที่เครื่องอย่างเดียว ดีกว่าพาผู้ใช้ไปชน 404
  */
 function installLanguageSwitcher(): void {
-  const buttons = document.querySelectorAll<HTMLButtonElement>("[data-locale-switch]");
+  const buttons = Array.from(
+    document.querySelectorAll<HTMLButtonElement>("[data-locale-switch]"),
+  ).filter((button) => !ownedByIsland(button));
   if (buttons.length === 0) return;
 
   buttons.forEach((button) => {
@@ -154,6 +167,7 @@ function installLanguageSwitcher(): void {
 function installHeaderHeightObserver(): void {
   const header = document.querySelector<HTMLElement>("[data-site-header]");
   if (!header || typeof ResizeObserver === "undefined") return;
+  if (ownedByIsland(header)) return;
 
   let rafId: number | undefined;
   let lastHeight = 0;

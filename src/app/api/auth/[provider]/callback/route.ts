@@ -161,6 +161,7 @@ export async function GET(
         getUserByEmail,
         getUserById,
         linkOAuthIdentity,
+        reviveOAuthUser,
         upsertUserOnLogin,
       } = await import("@/lib/users/users.repo");
       const { grantSignupBonus } = await import("@/lib/entitlement/entitlement");
@@ -172,7 +173,16 @@ export async function GET(
         // ผูกไว้แล้ว → ต้องใช้ id เดิมเสมอ แม้จะอ่านแถวผู้ใช้ไม่สำเร็จ
         // ไม่งั้นจะได้เซสชันภายใต้ id ใหม่ แล้วประวัติ/สิทธิ์ของเจ้าตัวหายไปทั้งชุด
         profile.id = existingLinkedUserId;
-        const linkedUser = await getUserById(existingLinkedUserId);
+        // identity ยังชี้อยู่แต่อ่านแถวผู้ใช้ไม่เจอ = บัญชีถูกลบไปแล้ว ➔ คืนชีพ (A1-05)
+        // ห้ามปล่อยให้ออกคุกกี้ให้ id ที่ถูกลบ — `/api/auth/me` จะล้างคุกกี้ทิ้งทุกครั้ง
+        const linkedUser =
+          (await getUserById(existingLinkedUserId)) ??
+          (await reviveOAuthUser({
+            id: existingLinkedUserId,
+            provider: oauthProvider,
+            name: profile.name,
+            avatarUrl: profile.avatar,
+          }));
         if (linkedUser) {
           profile.tokenVersion = linkedUser.tokenVersion;
           if (linkedUser.name) profile.name = linkedUser.name;

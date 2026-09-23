@@ -6,7 +6,6 @@ import { Modal } from "@/components/ui/Modal";
 import { Field } from "@/components/ui/Field";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { STORAGE_KEYS } from "@/lib/storage/keys";
 
 interface BookQueueModalProps {
   isOpen: boolean;
@@ -35,25 +34,6 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Generate or retrieve persistent customerRef from localStorage
-  const getCustomerRef = (): string => {
-    if (typeof window === "undefined") return "cust_anon";
-    try {
-      let ref = localStorage.getItem(STORAGE_KEYS.customerRef);
-      if (!ref) {
-        const randomPart =
-          typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-            ? crypto.randomUUID().replace(/-/g, "").slice(0, 16)
-            : Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
-        ref = `cust_${randomPart}`;
-        localStorage.setItem(STORAGE_KEYS.customerRef, ref);
-      }
-      return ref;
-    } catch {
-      return `cust_${Math.random().toString(36).substring(2, 18)}`;
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!consent) {
@@ -65,14 +45,13 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
     setError(null);
 
     try {
-      const customerRef = getCustomerRef();
+      // ตัวตนลูกค้า (customerRef) เซิร์ฟเวอร์ออกให้เองผ่านคุกกี้ HttpOnly — ไคลเอนต์ไม่ต้องรู้ค่า (A2-13)
       const res = await fetch("/api/marketplace/tickets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           readerId,
           kind,
-          customerRef,
           nickname: nickname.trim(),
           question: question.trim(),
           readingSnapshot: readingSnapshot || undefined,

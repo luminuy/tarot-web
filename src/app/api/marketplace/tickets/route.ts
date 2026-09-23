@@ -5,6 +5,7 @@ import {
   createQueueTicket,
   getReaderLiveAvailability,
   listActiveTicketsForCustomer,
+  toPublicTicket,
 } from "@/lib/marketplace/queue.repo";
 import { getReaderById } from "@/lib/marketplace/readers.repo";
 import {
@@ -19,7 +20,6 @@ export const runtime = "nodejs";
 const CreateTicketSchema = z.object({
   readerId: z.string().min(1, "กรุณาระบุรหัสแม่หมอ"),
   kind: z.enum(["walkup", "booking"]).default("walkup"),
-  customerRef: z.string().min(6, "รหัสอ้างอิงอุปกรณ์ไม่ถูกต้อง"),
   nickname: z.string().trim().min(1, "กรุณาระบุชื่อเล่น").max(40, "ชื่อเล่นยาวเกินไป"),
   question: z.string().trim().min(3, "กรุณาระบุคำถามอย่างน้อย 3 ตัวอักษร").max(1000, "คำถามยาวเกินไป"),
   readingSnapshot: z.string().max(2000).optional(),
@@ -40,7 +40,7 @@ export async function GET(request: Request) {
     }
 
     const tickets = await listActiveTicketsForCustomer(customerRef);
-    return NextResponse.json({ tickets });
+    return NextResponse.json({ tickets: tickets.map(toPublicTicket) });
   } catch (err) {
     console.error("[API Tickets GET Error]", err);
     return NextResponse.json({ error: "ไม่สามารถดึงข้อมูลคิวได้" }, { status: 500 });
@@ -84,7 +84,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const { readerId, kind, customerRef, nickname, question, readingSnapshot, slotStart } = parsed.data;
+    const { readerId, kind, nickname, question, readingSnapshot, slotStart } = parsed.data;
+
+    // 🔒 customerRef ออกโดยเซิร์ฟเวอร์เท่านั้น — ห้ามรับจาก body (A2-13)
+    //    เดิมรับค่าจาก body แล้วเซ็นคุกกี้ให้ทันที ใครรู้ ref ของคนอื่นก็แลกเป็นคุกกี้อ่านคิวเขาได้
+    //    มีคุกกี้อยู่แล้ว = ลูกค้าคนเดิม ใช้ค่าเดิม · ไม่มี = ลูกค้าใหม่ สุ่มให้ใหม่
+    const customerRef =
+      (await readCustomerRefFromCookie(request)) ??
+      `cust_${crypto.randomUUID().replace(/-/g, "")}`;
 
     // Verify Reader
     const reader = await getReaderById(readerId);
@@ -116,7 +123,7 @@ export async function POST(request: Request) {
 
     const res = NextResponse.json({
       success: true,
-      ticket,
+      ticket: toPublicTicket(ticket),
       redirectUrl: `/readers/queue/${ticket.id}`,
     });
     return await attachCustomerRefCookie(res, customerRef);

@@ -105,6 +105,52 @@ export async function upsertUserOnLogin(p: {
 }
 
 /**
+ * คืนชีพบัญชีที่ถูกลบ เมื่อเจ้าของกลับมาล็อกอินด้วย Google/LINE ที่ผูกไว้เดิม
+ *
+ * `softDeleteUser` แตะแค่ `deleted_at` — แถว `oauth_identities` ยังชี้ id เดิมอยู่
+ * callback จึงเข้ากิ่ง "ผูกไว้แล้ว" ทุกครั้ง แต่ `getUserById` กรองแถวที่ถูกลบทิ้ง
+ * เดิมไม่มีใครคืนชีพ ➔ ออกคุกกี้ให้ id ที่ถูกลบ ➔ `/api/auth/me` ล้างคุกกี้ทิ้งทันที
+ * ผู้ใช้เห็น "ล็อกอินสำเร็จ" แต่ไม่เคยเข้าได้อีกเลย (A1-05)
+ *
+ * - ใช้ id เดิม (เหตุผลเดียวกับ reviveEmailUser: กันลบแล้วสมัครใหม่วนรับโบนัส)
+ * - ขึ้น token_version เสมอ — คุกกี้ที่ออกก่อนลบบัญชีต้องไม่ฟื้นกลับมาใช้ได้พร้อมบัญชี
+ * - ไม่แตะอีเมล: ระหว่างที่บัญชีถูกลบ อีเมลนั้นอาจถูกคนอื่นสมัครไปแล้ว (UNIQUE ชนกัน)
+ */
+export async function reviveOAuthUser(p: {
+  id: string;
+  provider: "google" | "line";
+  name: string;
+  avatarUrl?: string | null;
+}): Promise<AppUser> {
+  const db = await getAppDB();
+  const now = Date.now();
+
+  const res = await db
+    .prepare(
+      `UPDATE users
+       SET deleted_at = NULL,
+           name = ?,
+           avatar_url = COALESCE(?, avatar_url),
+           token_version = token_version + 1,
+           last_seen_at = ?
+       WHERE id = ? AND deleted_at IS NOT NULL`
+    )
+    .bind(p.name, p.avatarUrl || null, now, p.id)
+    .run();
+
+  // ไม่มีแถวให้คืนชีพ (แถวผู้ใช้หายไปทั้งแถว) ➔ สร้างใหม่ด้วย id เดิมที่ identity ชี้อยู่
+  if (!res.meta?.changes) {
+    return upsertUserOnLogin({ id: p.id, provider: p.provider, name: p.name, avatarUrl: p.avatarUrl });
+  }
+
+  const user = await getUserById(p.id);
+  if (!user) {
+    throw new Error("ไม่สามารถคืนชีพบัญชีผู้ใช้ได้");
+  }
+  return user;
+}
+
+/**
  * สร้างผู้ใช้ใหม่สำหรับการสมัครผ่านอีเมลและรหัสผ่าน (Email Provider)
  */
 export async function createEmailUser(p: {
