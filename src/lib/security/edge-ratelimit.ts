@@ -155,9 +155,10 @@ async function tally(key: string, windowSec: number, delta: number): Promise<Tal
 function toResult(t: Tally, config: EdgeRateLimitConfig, now: number): EdgeRateLimitResult {
   if (t.count > config.max) {
     // Redis ไม่รู้เวลาหมดอายุจริงของคีย์ — บอกให้รอทั้งหน้าต่าง (เหมือนเดิม)
-    return t.store === "redis"
-      ? { allowed: false, remaining: 0, retryAfterSec: config.windowSec }
-      : denyResult(t.resetAt, now);
+    if (t.store === "redis") return { allowed: false, remaining: 0, retryAfterSec: config.windowSec };
+    // `now` ถูกจับก่อน `tally()` ตั้ง resetAt ไม่กี่มิลลิวินาที — ปัดขึ้นแล้วจะได้ 61 จากหน้าต่าง 60
+    const deny = denyResult(t.resetAt, now);
+    return { ...deny, retryAfterSec: Math.min(deny.retryAfterSec, config.windowSec) };
   }
   return { allowed: true, remaining: config.max - t.count, retryAfterSec: 0 };
 }
