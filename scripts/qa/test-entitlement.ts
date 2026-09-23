@@ -405,6 +405,31 @@ async function main() {
   // ── 13. รหัสแลกสิทธิ์ (โค้ดแจก / โค้ด VIP) ──
   // รวมไว้ในด่านนี้แทนการเพิ่มด่านใหม่ — `test-redeem-code.ts` เคยเป็นเทสต์กำพร้าที่ไม่มีใครรัน
   // จึงพังเงียบตอนเพดานโควตาเปลี่ยนเป็น 1 ครั้ง/วัน โดยไม่มีด่านไหนจับได้
+  // ── A1-13: streak ของผัง daily ต้องนับเฉพาะรอบที่หักสิทธิ์ได้จริง ──
+  console.log("\n🔥 streak ไพ่ประจำวัน (A1-13):");
+  {
+    const streakUid = `streak_${Date.now()}`;
+    await upsertUserOnLogin({ id: streakUid, provider: "google", name: "สตรีค" });
+    const streakMember: Viewer = { kind: "member", userId: streakUid };
+    const db = await getAppDB();
+    const dailyRows = async () =>
+      Number(
+        (await db.prepare(`SELECT COUNT(*) AS n FROM daily_readings WHERE user_key = ?`).bind(streakUid).first<{ n: number }>())?.n ?? 0,
+      );
+    // ใช้โควตาวันนี้จนหมด แล้วเปิดไพ่ประจำวันอีกครั้ง = ต้องโดนปฏิเสธ และห้ามได้ streak
+    for (let i = 0; i < DAILY_LIMIT; i++) await consumeReading(streakMember, `r_${streakUid}_q${i}`);
+    const denied = await consumeReading(streakMember, `r_${streakUid}_daily_denied`, "daily");
+    check("โควตาหมดแล้วเปิดไพ่ประจำวัน = denied", denied.status === "denied");
+    check("ถูกปฏิเสธแล้วต้องไม่ได้ streak", (await dailyRows()) === 0);
+    // คืนสิทธิ์ของรอบที่นับ streak ไปแล้ว ➔ streak ของรอบนั้นหายด้วย
+    await db.prepare(`DELETE FROM reading_usage WHERE user_id = ?`).bind(streakUid).run();
+    const ok = await consumeReading(streakMember, `r_${streakUid}_daily_ok`, "daily");
+    check("โควตายังเหลือ เปิดไพ่ประจำวัน = หักสิทธิ์ได้ + ได้ streak", ok.status === "inserted" && (await dailyRows()) === 1);
+    if (ok.status === "inserted") await refundReading(`r_${streakUid}_daily_ok`, ok.usageId);
+    check("AI ล่มแล้วคืนสิทธิ์ = streak ของรอบนั้นหายด้วย", (await dailyRows()) === 0);
+    await softDeleteUser(streakUid);
+  }
+
   console.log("\n🎟 รหัสแลกสิทธิ์:");
   const { runRedeemTests } = await import("./test-redeem-code");
   const redeem = await runRedeemTests();

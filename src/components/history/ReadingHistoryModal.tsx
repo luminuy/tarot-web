@@ -169,8 +169,9 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
     try {
       const res = await fetch("/api/journal/monthly-summary", {
         method: "POST",
+        // เซิร์ฟเวอร์อ่านประวัติจากบัญชีเอง ไม่รับจากเบราว์เซอร์แล้ว (A2-08)
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ readings }),
+        body: "{}",
       });
 
       const data = (await res.json().catch(() => ({}))) as MonthlySummaryResult & { error?: string };

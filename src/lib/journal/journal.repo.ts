@@ -108,6 +108,21 @@ export async function listJournal(
 }
 
 /**
+ * สมุดบันทึก "ทั้งเล่ม" สำหรับส่งออกข้อมูลตาม PDPA เท่านั้น (A1-04)
+ * ⚠️ `listJournal` มีเพดาน 200 แถวเพื่อหน้าจอ — ใช้กับการส่งออกแล้วผู้ใช้ที่เปิดไพ่เกิน 200 ครั้ง
+ *    ได้สำเนาข้อมูลไม่ครบ (และไฟล์รายงานยอดผิด) ซึ่งขัดสิทธิ์ขอสำเนาข้อมูล
+ *    เส้นส่งออกมีเพดานถี่อยู่แล้ว (5 ครั้ง/5 นาที) จึงอ่านทั้งเล่มได้
+ */
+export async function listAllJournalForExport(userId: string): Promise<SavedReadingItem[]> {
+  const db = await getAppDB();
+  const { results } = await db
+    .prepare(`SELECT * FROM reading_journal WHERE user_id = ? ORDER BY created_at DESC`)
+    .bind(userId)
+    .all<RawJournalRow>();
+  return (results || []).map(mapRowToItem);
+}
+
+/**
  * เพิ่มบันทึกการดูดวงใหม่ของผู้ใช้ (พร้อมระบบ Deduplication ป้องกันการบันทึกซ้ำ)
  */
 export async function insertJournal(

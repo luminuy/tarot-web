@@ -1,38 +1,16 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
 import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { getSessionUser } from "@/lib/auth/session";
 import { isAiCapReached, recordAiCall } from "@/lib/security/ai-budget";
+import { listJournal } from "@/lib/journal/journal.repo";
+import { cardByIndex } from "@/data/cards";
+import { sanitizePromptValue } from "@/lib/ai/prompt-guard";
+import { checkQuestion } from "@/lib/safety/guardrails";
 
 export const runtime = "nodejs";
-
-const JournalItemSchema = z.object({
-  id: z.string(),
-  date: z.string(),
-  question: z.string(),
-  spreadName: z.string(),
-  cards: z.array(
-    z.object({
-      order: z.number(),
-      positionName: z.string(),
-      cardIndex: z.number(),
-      cardNameTh: z.string(),
-      cardNameEn: z.string().optional(),
-      isReversed: z.boolean(),
-      element: z.string().optional(),
-    })
-  ),
-  summary: z.string(),
-  outcome: z.enum(["PENDING", "ACCURATE", "PARTIAL", "NOT_HAPPENED"]).optional(),
-  userNote: z.string().optional(),
-});
-
-const RequestSchema = z.object({
-  readings: z.array(JournalItemSchema).min(1, "ต้องมีประวัติการเปิดไพ่อาวุโสอย่างน้อย 1 รายการ"),
-});
 
 export async function POST(request: Request) {
   try {
@@ -86,17 +64,37 @@ export async function POST(request: Request) {
       return createRateLimitResponse(limit.retryAfterSeconds, "คุณขอสรุปบทเรียนดวงบ่อยเกินไป กรุณารอสักครู่");
     }
 
-    const body = await request.json().catch(() => ({}));
-    const parsed = RequestSchema.safeParse(body);
-
-    if (!parsed.success) {
+    /*
+     * ⚠️ อ่านประวัติจากฐานข้อมูลของเจ้าของบัญชีเอง ไม่รับจาก body (A2-08)
+     * เดิมรับ `readings[]` จากไคลเอนต์ทั้งก้อน ไม่มีเพดานความยาว ไม่กันฉีดคำสั่ง
+     * สมาชิกฟรีใช้เป็น LLM ทั่วไปด้วยข้อความหลายหมื่นตัวต่อคำขอได้ (prompt แพงสุดของเว็บ)
+     * ชื่อไพ่มาจากสำรับจริงด้วย cardIndex · ข้อความผู้ใช้ผ่าน sanitizePromptValue ทุกช่อง
+     */
+    const journal = await listJournal(user.id, { limit: 15 });
+    if (journal.length === 0) {
       return NextResponse.json(
-        { error: "ข้อมูลบันทึกไม่ถูกต้อง หรือยังไม่มีประวัติการเปิดไพ่" },
+        { error: "ยังไม่มีประวัติการเปิดไพ่ที่บันทึกไว้ในบัญชี ลองเปิดไพ่และบันทึกผลก่อนนะ" },
         { status: 400 }
       );
     }
+    const readings = journal.map((r) => ({
+      date: r.date,
+      question: sanitizePromptValue(r.question, 300),
+      summary: sanitizePromptValue(r.summary, 200),
+      outcome: r.outcome,
+      userNote: sanitizePromptValue(r.userNote, 300) || undefined,
+      cards: (r.cards || []).flatMap((c) => {
+        const card = cardByIndex(c.cardIndex);
+        // กฎเหล็กข้อ 14 — หาไพ่ไม่เจอให้ข้าม ห้ามเดาใบแทน
+        return card ? [{ cardNameTh: card.nameTh, element: String(card.element), isReversed: c.isReversed }] : [];
+      }),
+    }));
 
-    const readings = parsed.data.readings.slice(0, 15); // Analyze up to 15 recent readings
+    // 🚨 กฎเหล็กข้อ 6 — โน้ต/คำถามที่มีสัญญาณวิกฤต ต้องได้สายด่วน ไม่ใช่ "คำคมพลังใจ"
+    const safety = checkQuestion(readings.map((r) => `${r.question} ${r.userNote ?? ""}`).join("\n"));
+    if (safety.block) {
+      return NextResponse.json({ error: safety.message, crisis: true }, { status: 422 });
+    }
 
     // Summarize card frequencies and elements
     const cardFreq: Record<string, { count: number; nameTh: string; element?: string }> = {};

@@ -1,5 +1,7 @@
 import { listJournal } from "@/lib/journal/journal.repo";
 import type { PastReadingSnapshot } from "@/lib/ai/karmic";
+import { cardByIndex } from "@/data/cards";
+import { sanitizePromptValue } from "@/lib/ai/prompt-guard";
 
 /**
  * 🧠 ความทรงจำข้ามครั้งของแม่หมอ (Cross-Session Karmic Memory)
@@ -26,22 +28,30 @@ export async function loadKarmicMemory(
     const latest = past[0];
     if (!latest?.cards || latest.cards.length === 0) return undefined;
 
-    const primaryCard = latest.cards[0];
-    const cardName = primaryCard.cardNameTh
-      ? `${primaryCard.cardNameTh}${primaryCard.cardNameEn ? ` (${primaryCard.cardNameEn})` : ""}`
-      : primaryCard.cardNameEn || "ไพ่ใบสำคัญ";
+    /*
+     * ⚠️ ข้อมูลในสมุดบันทึกมาจากไคลเอนต์ (A2-07) — ห้ามวางลง prompt ดิบ
+     *  • ชื่อไพ่ อ่านจากสำรับจริงด้วย cardIndex ไม่ใช่ cardNameTh ที่ไคลเอนต์ส่งมา (กุได้)
+     *    หาไม่เจอ = ไม่พูดถึงไพ่ใบนั้น (กฎเหล็กข้อ 14 — ห้ามเดาใบแทน)
+     *  • คำถาม/สรุป ผ่าน sanitizePromptValue (ปิดแท็บของ prompt ไม่ได้ + มีเพดานความยาว)
+     */
+    const nameOf = (idx: number | undefined): string | undefined => {
+      const card = typeof idx === "number" ? cardByIndex(idx) : undefined;
+      return card ? `${card.nameTh} (${card.nameEn})` : undefined;
+    };
+    const primaryCardName = nameOf(latest.cards[0]?.cardIndex);
+    if (!primaryCardName) return undefined;
 
     return {
-      primaryCardName: cardName,
-      question: latest.question,
+      primaryCardName,
+      question: sanitizePromptValue(latest.question, 300) || undefined,
       outcome: latest.outcome,
       daysAgo: Math.max(0, Math.floor((Date.now() - new Date(latest.date).getTime()) / 86_400_000)),
       recentPrimaryCards: past
         .slice(1)
-        .map((r) => r.cards[0]?.cardNameTh)
+        .map((r) => nameOf(r.cards[0]?.cardIndex))
         .filter((name): name is string => Boolean(name)),
       date: latest.date,
-      summary: latest.summary,
+      summary: sanitizePromptValue(latest.summary, 600) || undefined,
     };
   } catch (err) {
     console.warn("[karmic memory] อ่านประวัติไม่สำเร็จ:", err);

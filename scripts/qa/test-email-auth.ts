@@ -175,8 +175,19 @@ async function runEmailAuthQATests() {
   await linkOAuthIdentity("google", oauthSub, oauthId);
   await softDeleteUser(oauthId);
   if (await getUserById(oauthId)) throw new Error("❌ softDeleteUser ไม่ได้ลบบัญชี");
-  if ((await findUserIdByOAuth("google", oauthSub)) !== oauthId) {
-    throw new Error("❌ สมมติฐานของเทสต์ผิด: identity ควรยังชี้ id เดิมหลังลบบัญชี");
+  // A1-06: ลบบัญชี = ล้างข้อมูลส่วนบุคคล + ถอดการผูก OAuth (ไม่ใช่แค่ตั้ง deleted_at)
+  if ((await findUserIdByOAuth("google", oauthSub)) !== null) {
+    throw new Error("❌ A1-06: ลบบัญชีแล้วการผูก Google ยังค้างอยู่");
+  }
+  {
+    const { getAppDB } = await import("../../src/lib/platform/db");
+    const row = await (await getAppDB())
+      .prepare(`SELECT name, avatar_url, password_hash, marketing_consent FROM users WHERE id = ?`)
+      .bind(oauthId)
+      .first<{ name: string; avatar_url: string | null; password_hash: string | null; marketing_consent: number }>();
+    if (!row || row.name !== "" || row.avatar_url !== null || row.password_hash !== null || row.marketing_consent !== 0) {
+      throw new Error(`❌ A1-06: ลบบัญชีแล้วข้อมูลส่วนบุคคลยังค้าง (${JSON.stringify(row)})`);
+    }
   }
   const revived = await reviveOAuthUser({ id: oauthId, provider: "google", name: "ผู้ใช้กลับมา" });
   if (!(await getUserById(oauthId))) throw new Error("❌ A1-05: reviveOAuthUser ไม่คืนชีพบัญชี");
@@ -189,7 +200,7 @@ async function runEmailAuthQATests() {
     throw new Error("❌ A1-05: OAuth callback ไม่คืนชีพบัญชีที่ถูกลบในกิ่ง 'ผูกไว้แล้ว'");
   }
   await softDeleteUser(oauthId);
-  console.log("  ✓ 10. OAuth ที่เคยลบบัญชี: ล็อกอินกลับได้ + ขึ้น token_version (A1-05)");
+  console.log("  ✓ 10. ลบบัญชีล้างข้อมูลส่วนบุคคลจริง (A1-06) · OAuth ที่เคยลบบัญชีล็อกอินกลับได้ + ขึ้น token_version (A1-05)");
 
   // IP ต่างกันทุกรอบ — ถังกันเดารหัสอยู่ใน D1 (.dev-marketplace.db) และค้างข้ามรอบรันในเครื่อง
   const runOctet = Math.floor(Math.random() * 250);

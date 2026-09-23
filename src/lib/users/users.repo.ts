@@ -437,10 +437,31 @@ export async function softDeleteUser(id: string): Promise<void> {
   const db = await getAppDB();
   const now = Date.now();
 
+  /*
+   * ⚠️ ลบบัญชี = ล้างข้อมูลส่วนบุคคลจริง ไม่ใช่แค่ตั้ง deleted_at (A1-06)
+   * เดิมชื่อ · รูป · แฮชรหัสผ่าน · การผูก Google/LINE ค้างอยู่ครบ ทั้งที่หน้าเว็บบอกว่า "ลบทั้งหมดแล้ว"
+   * ฐานข้อมูลรั่วเมื่อไหร่ คนที่ลบบัญชีไปแล้วก็รั่วด้วย
+   *
+   * เก็บไว้เท่าที่จำเป็นเท่านั้น: `id` + อีเมล — ใช้กันการลบบัญชีแล้วสมัครใหม่วนรับโบนัส
+   * (ดู reviveEmailUser) และเป็นกุญแจ UNIQUE ที่กันการสมัครซ้อนอีเมลเดียวกัน
+   * ถอดการผูก OAuth ทิ้ง — กลับมาล็อกอินใหม่จะเข้าเส้นทางคืนชีพด้วยอีเมล/ id เดิมเอง (A1-05 · A1-07)
+   */
   await db
-    .prepare(`UPDATE users SET deleted_at = ? WHERE id = ?`)
+    .prepare(
+      `UPDATE users
+          SET deleted_at = ?,
+              name = '',
+              avatar_url = NULL,
+              password_hash = NULL,
+              marketing_consent = 0,
+              consent_at = NULL,
+              digest_email = 0,
+              token_version = token_version + 1
+        WHERE id = ?`
+    )
     .bind(now, id)
     .run();
+  await db.prepare(`DELETE FROM oauth_identities WHERE user_id = ?`).bind(id).run();
 
   try {
     const { purgeEntitlementData } = await import("@/lib/entitlement/entitlement");
@@ -458,7 +479,8 @@ export async function listConsentedUsersWithEmail(): Promise<AppUser[]> {
   const { results } = await db
     .prepare(
       `SELECT * FROM users
-       WHERE marketing_consent = 1 AND email IS NOT NULL AND deleted_at IS NULL`
+       WHERE marketing_consent = 1 AND email IS NOT NULL AND deleted_at IS NULL
+         AND email_verified = 1`
     )
     .all<RawUserRow>();
 

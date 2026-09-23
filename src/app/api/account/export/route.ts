@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth/session";
 import { getUserById } from "@/lib/users/users.repo";
-import { listJournal } from "@/lib/journal/journal.repo";
+import { listAllJournalForExport } from "@/lib/journal/journal.repo";
 import { SITE_DOMAIN, SITE_NAME_TH } from "@/lib/config/site";
 import { checkRateLimit, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
@@ -23,7 +23,7 @@ export async function GET() {
     }
 
     const dbUser = await getUserById(user.id);
-    const journal = await listJournal(user.id, { limit: 200 });
+    const journal = await listAllJournalForExport(user.id);
 
     const exportData = {
       exportedAt: new Date().toISOString(),
@@ -50,6 +50,8 @@ export async function GET() {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
         "Content-Disposition": `attachment; filename="${fileName}"`,
+        // ข้อมูลส่วนบุคคลทั้งก้อน — ห้ามเก็บในแคชระหว่างทางหรือแคชของเบราว์เซอร์ (A1-04)
+        "Cache-Control": "no-store, private",
       },
     });
   } catch (error) {
