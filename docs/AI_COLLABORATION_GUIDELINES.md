@@ -99,8 +99,11 @@ npm run repo:verify
 npm run commit -- --agent <ชื่อคุณ> --type <feat|fix|perf|refactor|docs> --scope <หมวด> --msg "..." --files "<ไฟล์ของคุณ>"
 
 # 6. ปลดล็อคและซิงก์บันทึกงาน
+#    งานนี้อยู่ในแผนไหน (docs/plans/*) → แก้บรรทัด "> **สถานะ**:" ของแผนนั้น แล้วสร้างตารางใหม่
+#    ห้ามแก้ตารางแผนใน CLAUDE.md / INDEX.md ด้วยมือ — ด่าน CI เทียบทุกไบต์ (INC-0229)
 npm run agent:unlock -- --agent <ชื่อคุณ>
 npm run log:sync
+npm run docs:index
 
 # 7. เปิด PR (ระบบจะตรวจครบ 81 ด่านซ้ำ + merge + deploy ให้เอง)
 #    ⚠️ ขั้นนี้ "ห้ามข้าม" — ดู INC-0015 ด้านล่าง

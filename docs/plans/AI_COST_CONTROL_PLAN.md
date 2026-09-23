@@ -1,5 +1,7 @@
 # 💸 แผนคุมต้นทุน AI + รหัสทดสอบข้าม rate limit — handoff ให้ทีม Gemini
 
+> **สถานะ**: 🚧 ทำแล้วบางส่วน — ทำแล้วส่วนใหญ่ — เพดานงบ AI รวมทั้งระบบ (`src/lib/security/ai-budget.ts`) + เพดานถี่ข้าม isolate บน D1 (`consumeEdgeRateLimits`) ของเส้นหลัก · ที่ยังเหลือ: `rate-limit.ts` ยังเก็บในหน่วยความจำต่อ isolate สำหรับเส้นรอง · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: ผลตรวจ 2026-09-23 A2 · A8-07
+
 > ปิดข้อ 4 ของ valuation: "ค่า AI ไม่มีเพดาน" · ตรวจ `origin/main` `c7a57b9` แล้ว
 > **สถานะปัจจุบัน:** IP ปลอมไม่ได้แล้ว (`cf-connecting-ip` มาก่อน) ✅ · แต่ rate limit ยัง **in-memory ต่อ isolate** (`rate-limit.ts:17`, `store.ts:130`) → ไม่ hold ข้าม edge fleet · **ไม่มี global spend cap** · `/read` ไม่มี origin guard · Turnstile ถูกลบทิ้ง (ไม่มี bot challenge)
 > **5 PR** · PR 1 = รหัสทดสอบ (ship ก่อน เพื่อให้เจ้าของทดสอบได้ไม่ติดลิมิตระหว่างทำ PR ที่เหลือ)

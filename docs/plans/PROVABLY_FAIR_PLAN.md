@@ -1,5 +1,7 @@
 # 🔐 แผนปิดช่องว่าง Provably-Fair ที่เหลือ 2 จุด — handoff ให้ Gemini
 
+> **สถานะ**: ✅ เสร็จแล้ว — แกนหลักปิดแล้ว · ด่าน Provably Fair / Shuffle Parity เฝ้าอยู่ · **ตรวจล่าสุด**: 2026-09-23
+
 > ต่อจาก `docs/AUDIT_2026-09-01.md` (P0-1/P0-2/P0-3) ที่แก้ไปแล้ว
 > สถานะปัจจุบัน (ตรวจโค้ด `origin/main` `1e9e475`): แกนหลักปิดแล้ว — `serverSeed` ไม่รั่วก่อนจั่ว (`session-token.ts:65`), secret throw ใน prod (`:26-32`), token มี `exp` 2 ชม., `/shuffle` มี replay guard (`:72`) + origin + rate limit
 > **เหลือ 2 จุด** ที่ทำให้เคลม "provably-fair ที่ตรวจสอบได้จริง" ไม่เต็มปาก — เอกสารนี้คือแผนปิดทั้งคู่
