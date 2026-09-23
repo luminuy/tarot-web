@@ -38,7 +38,7 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
-### 🗓️ 2026-09-23 (รอบ 143): 🟡 ผลตรวจใหญ่ คลื่น 9 — SEO · โค้ดตาย · perf (INC-0228) · ✅ ปิดกระดานผลตรวจครบ 99 ข้อ
+### 🗓️ 2026-09-23 (รอบ 144): 🟡 ผลตรวจใหญ่ คลื่น 9 — SEO · โค้ดตาย · perf (INC-0228) · ✅ ปิดกระดานผลตรวจครบ 99 ข้อ
 
 | ID | แก้ |
 | :--- | :--- |
