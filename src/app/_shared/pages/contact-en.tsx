@@ -53,7 +53,7 @@ export const contactMetadataEn: Metadata = {
 export function ContactBodyEn() {
   const jsonLdBreadcrumbs = buildBreadcrumbJsonLd("en", [
     homeCrumb("en"),
-    { name: "Contact Us", path: "/en/contact" },
+    { name: "Contact Us", path: "/contact" },
   ]);
 
   const jsonLdContact = {

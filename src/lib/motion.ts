@@ -1,4 +1,4 @@
-import type { Transition, Variants } from "motion/react";
+import type { Transition } from "motion/react";
 
 /**
  * 🔮 Motion Token System — วิหารทาโรต์ออราเคิล
@@ -35,40 +35,8 @@ export const STAGGER = {
   fanStep: 0.012,
 } as const;
 
-export const TWEEN = {
-  fast: { duration: DUR.fast, ease: EASE.out } as Transition,
-  base: { duration: DUR.base, ease: EASE.standard } as Transition,
-  page: { duration: DUR.page, ease: EASE.out } as Transition,
-  slow: { duration: DUR.slow, ease: EASE.out } as Transition,
-} as const;
-
-export const stepVariants: Variants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? 40 : -40,
-    opacity: 0,
-  }),
-  center: {
-    x: 0,
-    opacity: 1,
-    transition: TWEEN.page,
-  },
-  exit: (direction: number) => ({
-    x: direction < 0 ? 40 : -40,
-    opacity: 0,
-    transition: TWEEN.fast,
-  }),
-};
-
-// re-export ไว้เพื่อไม่ให้ผู้เรียกเดิมพัง
-
-/**
- * ♿ ตัวตรวจว่าผู้ใช้ขอลดการเคลื่อนไหวหรือไม่
- *
- * ⚠️ ตัวจริงย้ายไป `@/lib/use-motion-safe` แล้ว และ **ห้ามย้ายกลับมา**
- * ของเดิมเรียก `useReducedMotion()` ของ `motion` ซึ่งเป็น import แบบ runtime
- * ทำให้ไฟล์นี้ (ที่มีแต่ค่าคงที่กับ type) ลากไลบรารี 40 KB เข้าบันเดิลของทุกไฟล์ที่ import มัน
- * รวมถึงเปลือกหน้าแรก · re-export ไว้ตรงนี้เพื่อไม่ให้ผู้เรียกเดิมพัง
- *
- * 📌 ไฟล์นี้ต้องเหลือแต่ `import type` จาก `motion/react` เท่านั้น (type ถูกลบทิ้งตอน build)
+/*
+ * A7-04: `TWEEN` · `stepVariants` · re-export `useMotionSafe` ถูกลบแล้ว (ไม่มีผู้เรียก)
+ * ♿ ตัวตรวจ reduced-motion อยู่ที่ `@/lib/use-motion-safe` เท่านั้น — ห้ามย้ายกลับมาที่นี่
+ *    ไฟล์นี้ต้องเหลือแต่ `import type` จาก `motion/react` (runtime import = ลาก 40 KB เข้าเปลือกหน้าแรก)
  */
-export { useMotionSafe } from "@/lib/use-motion-safe";

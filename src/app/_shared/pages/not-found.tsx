@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { noindexAlternates } from "@/lib/config/site";
 
 /**
  * 🚧 เนื้อหน้า 404 — ใช้ร่วมกันสองที่ (INC-0112)
@@ -20,12 +21,16 @@ export const notFoundMetadata: Metadata = {
   title: "ไม่พบหน้าที่คุณกำลังตามหา",
   description: "หน้าที่คุณเปิดอาจถูกย้ายหรือไม่มีอยู่แล้ว กลับไปเลือกผังพยากรณ์หรือเปิดคัมภีร์ไพ่ 78 ใบได้ที่นี่",
   robots: { index: false, follow: true },
+  // A6-01: หน้า noindex ห้ามสืบทอด canonical/hreflang ของหน้าแรก (สัญญาณขัดกัน) — ตัดทิ้ง
+  alternates: noindexAlternates(),
 };
 
 export const notFoundMetadataEn: Metadata = {
   title: "Page Not Found",
   description: "The page you are looking for may have been moved or does not exist.",
   robots: { index: false, follow: true },
+  // A6-01: หน้า noindex ห้ามสืบทอด canonical/hreflang ของหน้าแรก (สัญญาณขัดกัน) — ตัดทิ้ง
+  alternates: noindexAlternates(),
 };
 
 const COPY = {

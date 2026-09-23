@@ -38,11 +38,6 @@ export type ConsumeOutcome =
   /** สิทธิ์ไม่พอ */
   | { status: "denied" };
 
-/** true = คำขอผ่านด่านสิทธิ์ (ไม่ว่าจะเป็นคนหักเองหรือหักไปแล้ว) */
-export function isConsumeAllowed(outcome: ConsumeOutcome): boolean {
-  return outcome.status !== "denied";
-}
-
 /** true เฉพาะเมื่อ error คือการชน UNIQUE/constraint จริง ๆ (= เคยหักสิทธิ์ไปแล้ว) */
 function isUniqueViolation(e: unknown): boolean {
   const msg = String((e as { message?: unknown })?.message ?? e ?? "");

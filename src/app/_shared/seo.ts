@@ -34,6 +34,13 @@ export interface Crumb {
 
 /** BreadcrumbList JSON-LD ที่ทุกรายการชี้ไปยัง URL ของภาษาเดียวกันเสมอ */
 export function buildBreadcrumbJsonLd(locale: Locale, crumbs: Crumb[]) {
+  // A6-08: path ต้องเป็น path กลาง (ไม่มีคำนำหน้าภาษา) — localizedUrl เติม /en ให้เอง
+  // ส่ง "/en/contact" มา = ได้ /en/en/contact (404) ใน JSON-LD
+  for (const crumb of crumbs) {
+    if (/^\/en(\/|$)/.test(crumb.path)) {
+      throw new Error(`buildBreadcrumbJsonLd: path "${crumb.path}" ต้องไม่มีคำนำหน้า /en — ส่ง path กลางแทน`);
+    }
+  }
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

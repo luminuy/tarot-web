@@ -2,24 +2,16 @@ import { MetadataRoute } from "next";
 import { SITE_ORIGIN } from "@/lib/config/site";
 
 /**
- * เส้นทางที่ห้ามบอตทุกตัวคลาน (หน้าส่วนตัว / หลังบ้าน / API)
+ * เส้นทางที่ห้ามบอตทุกตัวคลาน — เหลือแค่ API
  * ⚠️ ต้องใช้ชุดเดียวกันทั้งกฎของบอตทั่วไปและกฎของบอต AI search
- * ถ้าแยกกันเขียนแล้วลืมอัปเดตที่ใดที่หนึ่ง บอต AI จะคลานเข้าหน้าบัญชีผู้ใช้ได้
+ *
+ * A6-06: หน้าส่วนตัว (/account · /admin · /tester · /reset-password · /readers/console · /readers/queue)
+ * **ห้ามใส่ Disallow** — ทุกหน้าประกาศ `noindex` ในตัวอยู่แล้ว (ด่าน test-code-debt ข้อ 13 ตรวจ)
+ * ถ้าบล็อกการคลาน บอตจะไม่เคยเห็น noindex แล้ว URL ที่มีลิงก์เข้า (/account อยู่ในหัวเว็บทุกหน้า)
+ * จะโผล่ใน Google แบบ "Indexed, though blocked by robots.txt" ไม่มีคำอธิบาย
+ * หน้าเหล่านี้ต้องล็อกอินหรือโทเคนอยู่แล้ว บอตคลานเข้าไปก็เห็นแค่เปลือกหน้า
  */
-const PRIVATE_PATHS = [
-  "/api/",
-  "/admin",
-  "/admin/",
-  "/account",
-  "/account/",
-  "/tester",
-  "/tester/",
-  "/reset-password",
-  "/reset-password/",
-  "/readers/console",
-  "/readers/console/",
-  "/readers/queue/",
-];
+const PRIVATE_PATHS = ["/api/"];
 
 export default function robots(): MetadataRoute.Robots {
   return {

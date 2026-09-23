@@ -98,15 +98,8 @@ const faqJsonLd = {
 
 const softwareApplicationJsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
+  "@type": "WebPage",
   name: "SeerTarot Pick A Card Oracle",
-  applicationCategory: "LifestyleApplication",
-  operatingSystem: "All",
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    priceCurrency: "USD",
-  },
   url: `${SITE_ORIGIN}/en/pick-a-card`,
 };
 

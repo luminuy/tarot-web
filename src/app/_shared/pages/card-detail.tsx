@@ -1,30 +1,19 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 
 import { DECK, cardById } from "@/data/cards";
 import { CARD_MEANINGS_EN } from "@/data/cards/meanings-en";
 import type { TarotCard } from "@/data/cards/types";
-import { CardDetailView, type CardNavRef } from "@/components/encyclopedia/CardDetailView";
+import { type CardNavRef } from "@/components/encyclopedia/CardDetailView";
 import { RelatedCards } from "@/components/encyclopedia/RelatedCards";
 import { CardSpreadLinks } from "@/components/encyclopedia/CardSpreadLinks";
 import { CARD_GROUPS } from "@/data/cards/group-seo";
 import { buildYesNoAnswer } from "@/data/cards/yes-no";
-import { buildAlternates, localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, localizedUrl, SITE_ORIGIN, noindexAlternates } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { clampDescription, pickTitle } from "@/lib/config/meta-length";
 import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, homeCrumb, type Crumb } from "../seo";
-import { jsonLdScript } from "@/lib/seo/json-ld";
-
-export interface CardDetailPageProps {
-  params: Promise<{ id: string }>;
-}
-
-/** พารามิเตอร์ของหน้าไพ่ 78 ใบ — ใช้ชุดเดียวกันทั้งสองภาษา */
-export function cardStaticParams() {
-  return DECK.map((card) => ({ id: card.id }));
-}
 
 /**
  * ⚙️ แกนกลางแบบซิงโครนัส — ใช้ได้ทั้งสองเครื่องมือเรนเดอร์
@@ -40,6 +29,7 @@ export function cardDetailMetadata(id: string, locale: Locale): Metadata {
     return {
       title: locale === "en" ? "Tarot card not found" : "ไม่พบไพ่ทาโรต์",
       robots: { index: false, follow: true },
+      alternates: noindexAlternates(),
     };
   }
 
@@ -131,14 +121,6 @@ export function cardDetailMetadata(id: string, locale: Locale): Metadata {
   };
 }
 
-export async function buildCardDetailMetadata(
-  { params }: CardDetailPageProps,
-  locale: Locale,
-): Promise<Metadata> {
-  const { id } = await params;
-  return cardDetailMetadata(id, locale);
-}
-
 /**
  * Breadcrumb ลำดับชั้นสมบูรณ์: หน้าแรก › คัมภีร์ไพ่ › [ชุดใหญ่/ชุดเล็ก › ดอก] › ชื่อไพ่
  * ทุกลิงก์ต้องอยู่ในภาษาเดียวกับหน้าเสมอ (`/en/...` ต้องไม่ชี้กลับไปหน้าไทย)
@@ -165,11 +147,6 @@ function buildCardCrumbs(card: (typeof DECK)[number], locale: Locale): Crumb[] {
   return crumbs;
 }
 
-/**
- * ⚙️ เนื้อหาหน้าไพ่รายใบแบบซิงโครนัส — รับไพ่ที่หาเจอแล้วเข้ามาตรง ๆ
- * Astro เรียกตัวนี้ (React ฝั่ง SSR เรนเดอร์คอมโพเนนต์แบบ async ไม่ได้)
- * ส่วน Next เรียกผ่าน `CardDetailBody` ด้านล่างซึ่งรอ `params` ให้ก่อน
- */
 /**
  * คลาสของ `<main>` หน้าไพ่รายใบ — ประกาศที่นี่ที่เดียว
  * ⚠️ หน้า `.astro` เรนเดอร์ `<main>` เอง (เพราะ island ต้องอยู่ระดับเทมเพลตของ Astro)
@@ -314,44 +291,4 @@ export function CardDetailRelated({ card, locale }: { card: TarotCard; locale: L
       <CardSpreadLinks card={card} locale={locale} />
     </>
   );
-}
-
-export function CardDetailContent({
-  card,
-  locale,
-}: {
-  card: TarotCard;
-  locale: Locale;
-}) {
-  const { currentIndex, totalCards, prevCard, nextCard } = cardNeighbors(card);
-
-  return (
-    <main id="main-content" tabIndex={-1} className={CARD_DETAIL_MAIN_CLASS}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(cardDetailJsonLd(card, locale)) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(cardDetailBreadcrumbJsonLd(card, locale)) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(cardDetailFaqJsonLd(card, locale)) }} />
-      <CardDetailView
-        card={card}
-        prevCard={prevCard}
-        nextCard={nextCard}
-        totalCards={totalCards}
-        currentIndex={currentIndex}
-        related={<CardDetailRelated card={card} locale={locale} />}
-      />
-    </main>
-  );
-}
-
-export async function CardDetailBody({
-  params,
-  locale,
-}: CardDetailPageProps & { locale: Locale }) {
-  const { id } = await params;
-  const card = cardById(id);
-
-  if (!card) {
-    notFound();
-  }
-
-  return <CardDetailContent card={card} locale={locale} />;
 }

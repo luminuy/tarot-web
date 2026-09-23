@@ -143,5 +143,4 @@ export async function loadReadingFromKV(id: string): Promise<ReadingRecord | nul
   }
 }
 
-export { getClientIdentifier as clientKeyFromRequest } from "@/lib/utils/rate-limit";
 

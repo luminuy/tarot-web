@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 
@@ -8,18 +7,13 @@ import {
   getSpreadTopic,
   getSpreadsForTopic,
 } from "@/data/spread-topics";
-import { TopicSpreadList } from "@/components/spread/TopicSpreadList";
 import type { ReactNode } from "react";
-import { buildAlternates, localizedUrl } from "@/lib/config/site";
+import { buildAlternates, localizedUrl, noindexAlternates } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { getCategoryCardImage } from "@/lib/media/og-card-art";
 import type { Locale } from "@/lib/i18n/types";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
-
-export interface SpreadTopicPageProps {
-  params: Promise<{ category: string }>;
-}
 
 export function spreadTopicStaticParams() {
   return getAllTopicSlugs().map((slug) => ({ category: slug }));
@@ -36,6 +30,7 @@ export function spreadTopicMetadata(category: string, locale: Locale): Metadata 
     return {
       title: locale === "en" ? "Spread Topic Not Found" : "ไม่พบหมวดหมู่ผังพยากรณ์",
       robots: { index: false, follow: true },
+      alternates: noindexAlternates(),
     };
   }
 
@@ -319,31 +314,4 @@ export function SpreadTopicContent({
       </div>
     </main>
   );
-}
-
-/** ฝั่ง Next — รอ `params` แล้วจัดการ 404 ก่อนส่งต่อให้เนื้อหา */
-export async function SpreadTopicBody({
-  params,
-  locale,
-}: SpreadTopicPageProps & { locale: Locale }) {
-  const { category } = await params;
-  const topic = getSpreadTopic(category);
-  if (!topic) notFound();
-
-  return (
-    <SpreadTopicContent
-      topic={topic}
-      locale={locale}
-      list={<TopicSpreadList spreads={getSpreadsForTopic(topic)} />}
-    />
-  );
-}
-
-/** ฝั่ง Next — รอ `params` แล้วเรียกแกนกลางตัวเดียวกัน */
-export async function buildSpreadTopicMetadata(
-  { params }: SpreadTopicPageProps,
-  locale: Locale,
-): Promise<Metadata> {
-  const { category } = await params;
-  return spreadTopicMetadata(category, locale);
 }

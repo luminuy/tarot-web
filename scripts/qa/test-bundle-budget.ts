@@ -21,7 +21,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 import { execSync, spawn, type ChildProcess } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { normalizeRoute, primaryOutputDir, renderedRouteMap } from "./lib/rendered-pages";
+import { collectRenderedPages, normalizeRoute, primaryOutputDir, renderedRouteMap } from "./lib/rendered-pages";
 import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -134,7 +134,7 @@ export const BUDGETS: RouteBudget[] = [
   },
   {
     /*
-     * หน้าแรกภาษาอังกฤษ — เนื้อเดียวกับ `/` เป๊ะ ๆ (ใช้ `HomePageBody` ตัวเดียวกัน)
+     * หน้าแรกภาษาอังกฤษ — เนื้อเดียวกับ `/` เป๊ะ ๆ (หน้า Astro ชุดเดียวกัน)
      *
      * ⚠️ เพิ่มเข้ามาเพราะ **ไม่เคยมีด่านคุมเลย** ทั้งที่หนักเท่า `/` ทุกไบต์
      * และเป็นหนึ่งในสองหน้าที่หนักที่สุดของเว็บมาตลอด · ถ้าคุมแต่ `/` การถอยหลัง
@@ -745,6 +745,56 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
     } else {
       console.log(`  ❌ next.config.ts ไม่ได้ตั้งส่วนหัวแคชของ ${route} — Next จะใส่ no-store ให้เอง`);
       hasFailure = true;
+    }
+  }
+
+  /*
+   * A8-08: หน้าที่ไม่มี `<astro-island>` เลย ต้องไม่โหลด React core ผ่านสคริปต์ธรรมดา
+   * เคยเกิดกับหน้าบทความ 60 หน้า — article-share import เสียงแบบ static แล้ว bundler ผูกชังก์เสียง
+   * กับตัวช่วยที่อยู่ในชังก์ react ➔ React core 3.1 KB gzip ติดมาทุกหน้า ทั้งที่ไม่มีคอมโพเนนต์สักตัว
+   */
+  {
+    const REACT_MARK = /react\.transitional\.element|__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE/;
+    const distRoot = path.join(ROOT, "dist");
+    const cache = new Map<string, boolean>();
+    const hasReact = (url: string, seen: Set<string>): boolean => {
+      const file = path.join(distRoot, url.replace(/^\//, ""));
+      if (seen.has(file) || !fs.existsSync(file)) return false;
+      seen.add(file);
+      if (cache.has(file)) return cache.get(file)!;
+      const code = fs.readFileSync(file, "utf8");
+      let found = REACT_MARK.test(code);
+      if (!found) {
+        for (const spec of code.match(/(?:from|import)\s*"(\.[^"]+\.js)"/g) ?? []) {
+          const rel = (spec.match(/"(\.[^"]+)"/) as RegExpMatchArray)[1];
+          if (hasReact(path.posix.join(path.posix.dirname(url), rel), seen)) {
+            found = true;
+            break;
+          }
+        }
+      }
+      cache.set(file, found);
+      return found;
+    };
+    const offenders: string[] = [];
+    let islandless = 0;
+    for (const page of collectRenderedPages()) {
+      if (page.renderer !== "astro") continue;
+      const html = fs.readFileSync(page.file, "utf8");
+      if (html.includes("<astro-island")) continue;
+      islandless++;
+      const srcs = (html.match(/<script[^>]+src="(\/_astro\/[^"]+)"/g) ?? []).map((m) => (m.match(/src="([^"]+)"/) as RegExpMatchArray)[1]);
+      if (srcs.some((u) => hasReact(u, new Set()))) offenders.push(page.route);
+    }
+    if (islandless === 0) {
+      console.log("  ❌ A8-08: ไม่พบหน้า Astro ที่ไม่มี island เลย — ด่านนี้ไม่ได้ตรวจอะไร (ผิดปกติ)");
+      hasFailure = true;
+    } else if (offenders.length > 0) {
+      console.log(`  ❌ A8-08: หน้าที่ไม่มี island ${offenders.length}/${islandless} หน้าโหลด React core ผ่านสคริปต์ธรรมดา เช่น ${offenders.slice(0, 3).join(" · ")}`);
+      console.log("     💡 ไล่ import ของสคริปต์ใน astro/scripts — ของที่ไม่จำเป็นตอนโหลดหน้าให้ import() ตอนใช้");
+      hasFailure = true;
+    } else {
+      console.log(`  ✅ A8-08: หน้าที่ไม่มี island ${islandless} หน้า ไม่โหลด React core เลย`);
     }
   }
 

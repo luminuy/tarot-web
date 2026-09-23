@@ -307,10 +307,15 @@ const homePageContent = stripComments(fs.readFileSync(homePagePath, "utf-8"));
 const homeBodyContent = stripComments(
   fs.readFileSync(path.join(process.cwd(), "src/app/_shared/pages/home.tsx"), "utf-8"),
 );
+/* A7-02: ตัวห่อ `HomePageBody` ฝั่ง Next ถูกลบแล้ว — เนื้อหา SEO หน้าแรกเรนเดอร์ผ่าน `HomeSeoRoot` ของ Astro */
+const homeSeoRootContent = stripComments(
+  fs.readFileSync(path.join(process.cwd(), "astro/components/HomeSeoRoot.tsx"), "utf-8"),
+);
 assert(
   !homePageContent.includes("getServerLocale()") &&
   !homeBodyContent.includes("getServerLocale()") &&
-  homeBodyContent.includes("<HomeSeoContent isEnglish={isEnglish} />"),
+  homePageContent.includes("<HomeSeoRoot") &&
+  homeSeoRootContent.includes('<HomeSeoContent isEnglish={locale === "en"} />'),
   "หน้าแรกห้ามเรียก getServerLocale() — ต้อง prerender ได้ และรับภาษาจากเส้นทางเท่านั้น (PERF)",
 );
 assert(

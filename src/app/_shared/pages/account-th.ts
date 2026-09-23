@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { noindexAlternates } from "@/lib/config/site";
 
 /**
  * 🔐 metadata ของหน้าบัญชีสมาชิก `/account`
@@ -14,4 +15,6 @@ export const accountMetadataTh: Metadata = {
   title: "บัญชีและประวัติการดูดวง | Sacred Account & Archive",
   description: "จัดการข้อมูลส่วนบุคคล สิทธิ์ความเป็นส่วนตัว และบันทึกประวัติการดูดวงไพ่ทาโรต์",
   robots: { index: false, follow: false },
+  // A6-01: หน้า noindex ห้ามสืบทอด canonical/hreflang ของหน้าแรก (สัญญาณขัดกัน) — ตัดทิ้ง
+  alternates: noindexAlternates(),
 };

@@ -96,13 +96,11 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
 
   const webAppJsonLd = {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
+    "@type": "WebPage",
     name: "ระบบคำนวณไพ่ทาโรต์ประจำตัว (Tarot Birth Card Calculator)",
     description: "เครื่องมือคำนวณไพ่ประจำวันเกิดและไพ่จิตวิญญาณตามหลักเลขศาสตร์ไพ่ทาโรต์สากล",
-    applicationCategory: "LifestyleApplication",
     url,
     inLanguage: "th",
-    operatingSystem: "All",
   };
 
   const breadcrumbsJsonLd = {

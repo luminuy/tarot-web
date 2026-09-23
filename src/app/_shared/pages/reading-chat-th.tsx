@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { getPersona } from "@/data/personas";
 import { loadFlowState, type PersistedFlow } from "@/lib/utils/flow-persistence";
 import { useLocale } from "@/lib/i18n";
+import { noindexAlternates } from "@/lib/config/site";
 
 /**
  * 💬 หน้าแชทเต็มจอกับแม่หมอ (/reading/chat)
@@ -34,7 +35,10 @@ const FollowUpChat = withMotionScope(() =>
  */
 export const readingChatMetadataTh: Metadata = {
   title: "ห้องสนทนากับแม่หมอ",
+  description: "พิมพ์ถามต่อเจาะลึกกับแม่หมอเกี่ยวกับไพ่ที่คุณเพิ่งเปิด ต่อจากรอบดูดวงล่าสุดในเครื่องนี้",
   robots: { index: false, follow: true },
+  // A6-01: หน้า noindex ห้ามสืบทอด canonical/hreflang ของหน้าแรก (สัญญาณขัดกัน) — ตัดทิ้ง
+  alternates: noindexAlternates(),
 };
 
 export function ReadingChatBodyTh() {

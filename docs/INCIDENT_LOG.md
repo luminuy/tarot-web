@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0228 · 2026-09-23 16:30 · 🟡 Medium · ผลตรวจใหญ่ 2026-09-23 คลื่น 9 — 🟡 SEO · โค้ดตาย · perf 9 ข้อ (ปิดกระดานผลตรวจ) (noindex แต่ canonical ชี้หน้าแรก · rich result ไม่ผ่าน 9 บล็อก · robots.txt บังไม่ให้บอตเห็น noindex · breadcrumb /en/en · ตัวห่อตาย 10 ตัว · ไอคอนตาย 7 ตัว · export ตาย 7 ตัว · devDependency ไม่ใช้ · หน้าบทความโหลด React ฟรี)
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | /account · /reading/chat · /404 และหน้าหลังบ้าน (admin · tester · reset-password · readers/console) ประกาศ noindex แต่ canonical/hreflang ชี้หน้าแรก · JSON-LD Software/WebApplication 9 บล็อกไม่มีเรตติ้ง GSC ขึ้น invalid · /account ถูก Disallow จนบอตไม่เคยเห็น noindex (ลิงก์จาก 332 หน้า) · breadcrumb /en/contact ชี้ /en/en/contact (404) · ตัวห่อฝั่ง Next ของหน้าที่ย้ายไป Astro ค้าง 10 ตัว (ถือ redirect ซ้ำกับของจริง) · ไอคอนเมนู 7 ตัว + export 7 ตัวไม่มีผู้เรียก · `@eslint/js` ติดตั้งเปล่า · หน้าบทความ 60 หน้าที่ไม่มี island โหลด React core 3.1 KB gzip |
+| **สาเหตุราก** | ค่าเริ่มต้นที่สืบทอดจากราก (canonical ของหน้าแรก) ไม่ถูกตัดเมื่อหน้าประกาศ noindex · เลือกชนิด schema ตามชื่อที่ฟังดูตรง ไม่ได้ดูเกณฑ์ rich result · robots.txt กับ noindex ถูกใช้ซ้อนกันทั้งที่ขัดกัน · ตัวช่วย breadcrumb รับ path ที่มีคำนำหน้าภาษาได้เงียบ ๆ · ย้ายเครื่องมือเรนเดอร์แล้วไม่เก็บกวาดฝั่งเดิม · import แบบ static ของของที่ใช้ตอนกดปุ่ม (เสียง) ทำให้ bundler ผูกกับชังก์ที่มีตัวช่วย + React |
+| **การแก้ไข** | `alternates: noindexAlternates()` (ตัวช่วยใหม่ใน site.ts — ด่าน seo-wave4 ห้ามเขียน `alternates: {` ดิบ) ในหน้า noindex ทุกหน้า (14 จุด) + description ห้องแชท · เปลี่ยนเป็น `WebPage` (ถอด offers/applicationCategory — ห้ามกุเรตติ้ง) · robots.txt Disallow เหลือ `/api/` · `buildBreadcrumbJsonLd` โยน error เมื่อ path มี `/en` นำหน้า + แก้ contact-en · ลบตัวห่อ 10 ตัว + import ค้าง + คอมเมนต์ที่อ้างถึง + ด่าน seo-wave4 ข้อ 14 เปลี่ยนไปตรวจ `HomeSeoRoot` ของ Astro · ลบไอคอน 7 ตัว · ลบ TWEEN/stepVariants/re-export useMotionSafe/clientKeyFromRequest/canonicalRedirectTarget/isConsumeAllowed/recordDegraded · `npm rm -D @eslint/js` · article-share โหลดเสียงด้วย `import()` ตอนกด (ลอง `codeSplitting.groups` ของ rolldown แยก runtime แล้วไม่มีผล จึงตัดที่ต้นทาง) |
+| **🛡️ กฎป้องกันถาวร** | **test-meta-length ตรวจ HTML จริงทุกหน้า: noindex + canonical ชี้หน้าอื่น = ตก · test-bundle-budget: หน้า Astro ที่ไม่มี island ต้องไม่มี React core ใน closure · test-code-debt ข้อ 13: ห้าม JSON-LD Software/WebApplication · robots.txt ห้าม Disallow หน้าที่มี noindex + หน้าเหล่านั้นต้องยังมี noindex · breadcrumb ปฏิเสธ /en/…** |
+| **การพิสูจน์ว่าแก้ได้จริง** | ย้อน article-share แล้วบิลด์ใหม่: ด่านงบตก 60/299 หน้าตรงกับผลตรวจเป๊ะ · หลังแก้ 299 หน้าไม่มี React · ด่าน noindex บน `.next` รุ่นก่อนแก้จับได้ 5 หน้าหลังบ้านที่ผลตรวจไม่ได้ระบุ (admin · admin/login · readers/console · reset-password · tester) · tsc 0 error หลังลบโค้ดตาย · eslint ยังรันได้หลังถอด @eslint/js |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/brave-mayer-5p2kld` |
+
 ### INC-0227 · 2026-09-23 15:40 · 🟡 Medium · ผลตรวจใหญ่ 2026-09-23 คลื่น 8 — 🟡 หน้าเว็บ/a11y 16 ข้อ (ป้าย "ครบถ้วน" ทั้งที่สตรีมล้ม · ภาพไพ่ถอยได้ครั้งเดียว · ไทม์เมอร์ปิดโมดัลใหม่ · ลองใหม่ = จั่วใบใหม่ · เมนู Astro ไม่ไฮไลต์ · CSP ตัด GA/Ads · SW ค้าง waiting · Astro ไม่มี Ads ID · อิโมจิการ์ตูน · label หาย · reduced-motion รั่ว · แท็บชี้แผงผี · เลขหลังไพ่ 2:1 · แชร์เงียบ · ปุ่มกางไม่บอกสถานะ)
 
 | หัวข้อ | รายละเอียด |

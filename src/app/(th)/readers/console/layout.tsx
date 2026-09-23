@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { noindexAlternates } from "@/lib/config/site";
 
 /**
  * หน้าในกลุ่มนี้เป็น Client Component จึง `export const metadata` เองไม่ได้
@@ -8,6 +9,8 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "แผงคิวของแม่หมอ",
   robots: { index: false, follow: false },
+  // A6-01: หน้า noindex ห้ามสืบทอด canonical/hreflang ของหน้าแรก (สัญญาณขัดกัน) — ตัดทิ้ง
+  alternates: noindexAlternates(),
 };
 
 export default function ReaderConsoleLayout({ children }: { children: React.ReactNode }) {

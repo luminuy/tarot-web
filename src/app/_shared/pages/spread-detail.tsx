@@ -1,23 +1,17 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 
 import { ARTICLES } from "@/data/articles";
 import { PUBLIC_SPREADS, getSpread } from "@/data/spreads";
 import { isStandardSpread } from "@/lib/entitlement/limits";
 import { clampDescription, headline, pickTitle, stripCardCount } from "@/lib/config/meta-length";
-import { buildAlternates, localizedUrl } from "@/lib/config/site";
+import { buildAlternates, localizedUrl, noindexAlternates } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { getCategoryCardImage } from "@/lib/media/og-card-art";
-import { SpreadDetailClient } from "@/components/spread/SpreadDetailClient";
 import type { ReactNode } from "react";
 import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
-
-export interface SpreadDetailPageProps {
-  params: Promise<{ id: string }>;
-}
 
 const CATEGORY_TH: Record<string, string> = {
   general: "ทั่วไป",
@@ -57,6 +51,7 @@ export function spreadDetailMetadata(id: string, locale: Locale): Metadata {
     return {
       title: locale === "en" ? "Spread not found" : "ไม่พบผังพยากรณ์",
       robots: { index: false, follow: true },
+      alternates: noindexAlternates(),
     };
   }
 
@@ -315,31 +310,4 @@ export function spreadDetailProps(spread: NonNullable<ReturnType<typeof getSprea
       ? otherSpreads
       : PUBLIC_SPREADS.filter((s) => s.id !== spread.id).slice(0, 4),
   };
-}
-
-/** ฝั่ง Next — รอ `params` แล้วจัดการ 404 ก่อนส่งต่อให้เนื้อหา */
-export async function SpreadDetailBody({
-  params,
-  locale,
-}: SpreadDetailPageProps & { locale: Locale }) {
-  const { id } = await params;
-  const spread = getSpread(id);
-  if (!spread) notFound();
-
-  return (
-    <SpreadDetailContent
-      spread={spread}
-      locale={locale}
-      detail={<SpreadDetailClient {...spreadDetailProps(spread, locale)} />}
-    />
-  );
-}
-
-/** ฝั่ง Next — รอ `params` แล้วเรียกแกนกลางตัวเดียวกัน */
-export async function buildSpreadDetailMetadata(
-  { params }: SpreadDetailPageProps,
-  locale: Locale,
-): Promise<Metadata> {
-  const { id } = await params;
-  return spreadDetailMetadata(id, locale);
 }

@@ -80,12 +80,9 @@ const DAILY_LINKS_EN = [
 
 const softwareApplicationJsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
+  "@type": "WebPage",
   name: "SeerTarot Daily Tarot",
-  operatingSystem: "All",
-  applicationCategory: "LifestyleApplication",
   url: localizedUrl(PATH, "en"),
-  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
 };
 
 const faqJsonLd = {

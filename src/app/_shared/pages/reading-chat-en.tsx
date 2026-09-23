@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { getPersona } from "@/data/personas";
 import { loadFlowState, type PersistedFlow } from "@/lib/utils/flow-persistence";
 import { useLocale } from "@/lib/i18n";
+import { noindexAlternates } from "@/lib/config/site";
 
 /**
  * 💬 Fullscreen Oracle Chat Chamber (/en/reading/chat)
@@ -31,7 +32,10 @@ const FollowUpChat = withMotionScope(() =>
  */
 export const readingChatMetadataEn: Metadata = {
   title: "Chat with Tarot Oracle",
+  description: "Ask the oracle follow-up questions about the cards you just drew, continuing your latest reading on this device.",
   robots: { index: false, follow: true },
+  // A6-01: หน้า noindex ห้ามสืบทอด canonical/hreflang ของหน้าแรก (สัญญาณขัดกัน) — ตัดทิ้ง
+  alternates: noindexAlternates(),
 };
 
 export function ReadingChatBodyEn() {

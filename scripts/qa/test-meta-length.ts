@@ -106,6 +106,8 @@ export function testMetaLength(): boolean {
   const longDescriptions: string[] = [];
   const missing: string[] = [];
   const doubleBrand: string[] = [];
+  /* A6-01: noindex + canonical ชี้หน้าอื่น = สัญญาณขัดกัน (Google เตือนไม่ให้ผสม) */
+  const mixedSignals: string[] = [];
   let checked = 0;
   let worstTitle = 0;
   let worstDescription = 0;
@@ -116,8 +118,21 @@ export function testMetaLength(): boolean {
     const rel = path.relative(page.renderer === "next" ? APP_DIR : ROOT, file);
     if (allowed.has(rel) || allowed.has(path.basename(rel))) continue;
 
-    const { title, description } = extract(fs.readFileSync(file, "utf-8"));
+    const html = fs.readFileSync(file, "utf-8");
+    const { title, description } = extract(html);
     checked++;
+
+    const robotsMeta = /<meta[^>]+name="robots"[^>]+content="([^"]*)"/i.exec(html)?.[1] ?? "";
+    const canonical = /<link[^>]+rel="canonical"[^>]+href="([^"]*)"/i.exec(html)?.[1];
+    if (/noindex/i.test(robotsMeta) && canonical) {
+      let canonicalPath = canonical;
+      try {
+        canonicalPath = new URL(canonical, "https://seertarot.net").pathname.replace(/\/+$/, "") || "/";
+      } catch {
+        // ปล่อยเป็นสตริงเดิม — เทียบไม่ตรงก็รายงาน
+      }
+      if (canonicalPath !== page.route) mixedSignals.push(`${rel} — noindex แต่ canonical ชี้ ${canonical}`);
+    }
 
     if (!title) {
       missing.push(`${rel} — ไม่มี <title>`);
@@ -159,7 +174,13 @@ export function testMetaLength(): boolean {
   report("ไม่มี title / description", missing);
   report("ชื่อแบรนด์ซ้ำสองรอบใน title", doubleBrand);
 
-  const failed = longTitles.length + longDescriptions.length + missing.length + doubleBrand.length;
+  if (mixedSignals.length > 0) {
+    console.error(`\n❌ หน้า noindex ที่ canonical ชี้หน้าอื่น ${mixedSignals.length} หน้า (A6-01):`);
+    for (const m of mixedSignals) console.error(`   • ${m}`);
+    console.error("   วิธีแก้: ใส่ `alternates: noindexAlternates()` ใน metadata ของหน้า noindex (ตัด canonical/hreflang ที่สืบทอดจากราก)");
+  }
+
+  const failed = longTitles.length + longDescriptions.length + missing.length + doubleBrand.length + mixedSignals.length;
   if (failed > 0) {
     console.error(`\n❌ ไม่ผ่าน — ${failed} รายการ`);
     console.error("   วิธีแก้: สร้าง title ด้วย pickTitle() และ description ด้วย clampDescription()");

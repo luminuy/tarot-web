@@ -5,7 +5,7 @@ import { getReaderLiveAvailability } from "@/lib/marketplace/queue.repo";
 import { ReaderDetailClient } from "@/components/marketplace/ReaderDetailClient";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, SITE_ORIGIN, noindexAlternates } from "@/lib/config/site";
 import type { Metadata } from "next";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 
@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const reader = await getPublicReaderById(id);
   if (!reader) {
-    return { title: "ไม่พบแม่หมอ", robots: { index: false, follow: true } };
+    return { title: "ไม่พบแม่หมอ", robots: { index: false, follow: true }, alternates: noindexAlternates() };
   }
   return {
     title: `${reader.displayName} · ปรึกษาแม่หมอตัวจริง`,
