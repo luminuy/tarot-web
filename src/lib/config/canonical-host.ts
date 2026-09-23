@@ -42,7 +42,3 @@ export const CANONICAL_ORIGIN = SITE_ORIGIN;
  */
 export const ALTERNATE_HOSTS = [`www.${SITE_DOMAIN}`] as const;
 
-/** ปลายทางของโฮสต์รองแต่ละตัว (ใช้ร่วมกันทั้งชั้นขอบและชั้น Worker) */
-export function canonicalRedirectTarget(pathname: string): string {
-  return `${CANONICAL_ORIGIN}${pathname}`;
-}

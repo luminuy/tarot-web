@@ -106,13 +106,11 @@ export function BirthCardBodyEn({ calculator }: { calculator: ReactNode }) {
 
   const webAppJsonLd = {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
+    "@type": "WebPage",
     name: "Tarot Birth Card Calculator",
     description: "Calculate your tarot birth card and soul card based on universal numerology and 1909 Rider-Waite archetypes.",
-    applicationCategory: "LifestyleApplication",
     url,
     inLanguage: "en",
-    operatingSystem: "All",
   };
 
   const breadcrumbJsonLd = buildBreadcrumbJsonLd("en", [

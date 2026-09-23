@@ -11,7 +11,6 @@
 
 import { trackEvent } from "@/lib/analytics";
 import { copyToClipboard } from "@/lib/utils/clipboard";
-import { soundManager } from "@/lib/utils/audio";
 
 const bar = document.querySelector<HTMLElement>("[data-article-share]");
 
@@ -26,7 +25,12 @@ if (bar) {
     let resetTimer: ReturnType<typeof setTimeout> | undefined;
 
     button.addEventListener("click", async () => {
-      soundManager.playMenuTapSound();
+      /*
+       * A8-08: โหลดเสียงตอนกดเท่านั้น — import แบบ static ทำให้ bundler ผูกชังก์ `audio` กับตัวช่วย
+       * ที่อยู่ในชังก์ `react.*.js` ➔ หน้าบทความ (ไม่มี island เลย) โหลด React core ฟรี ๆ ทุกหน้า
+       * ด่าน test-bundle-budget ตรวจว่าหน้าที่ไม่มี island ไม่มี React ใน closure
+       */
+      void import("@/lib/utils/audio").then(({ soundManager }) => soundManager.playMenuTapSound()).catch(() => {});
       const ok = await copyToClipboard(window.location.href);
 
       // A5-16: คัดลอกพลาด (LINE in-app · iOS WebView · http) ต้องบอกผู้ใช้ ไม่ใช่เงียบ

@@ -113,22 +113,10 @@ const faqJsonLd = {
 
 const softwareApplicationJsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
+  "@type": "WebPage",
   name: "SeerTarot Love One-Card Oracle",
-  operatingSystem: "All",
-  applicationCategory: "LifestyleApplication",
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    priceCurrency: "THB",
-  },
-  featureList: [
-    "ระบบคัดเลือกสถานะความรัก 4 รูปแบบ (โสด/คนคุย/มีแฟน/คนเก่า)",
-    "สับไพ่ด้วย Web Crypto API ป้องกันการล็อกผล 100%",
-    "คำทำนายแยกตามสถานะความสัมพันธ์พร้อมคำแนะนำเจาะลึก",
-    "สำรับแท้ 1909 Rider-Waite Smith คมชัดระดับพรีเมียม",
-    "ไม่มีโฆษณาคั่น ไม่ต้องจ่ายเหรียญ ไม่จำกัดจำนวนครั้ง",
-  ],
+  url: `${SITE_ORIGIN}/love/1-card`,
+  inLanguage: "th",
 };
 
 /** `ritual` = พิธีเปิดไพ่ (island ตัวเดียวของหน้านี้) ส่งเข้ามาจากข้างนอก */

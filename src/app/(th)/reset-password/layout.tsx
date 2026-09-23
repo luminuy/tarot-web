@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { noindexAlternates } from "@/lib/config/site";
 
 /**
  * หน้าในกลุ่มนี้เป็น Client Component จึง `export const metadata` เองไม่ได้
@@ -14,6 +15,8 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 export const metadata: Metadata = {
   title: "ตั้งรหัสผ่านใหม่",
   robots: { index: false, follow: false },
+  // A6-01: หน้า noindex ห้ามสืบทอด canonical/hreflang ของหน้าแรก (สัญญาณขัดกัน) — ตัดทิ้ง
+  alternates: noindexAlternates(),
 };
 
 export default function ResetPasswordLayout({ children }: { children: React.ReactNode }) {

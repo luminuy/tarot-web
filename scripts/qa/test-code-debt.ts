@@ -708,5 +708,50 @@ check(
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 13. INC-0228 — ผลตรวจใหญ่ 2026-09-23 คลื่น 9 (🟡 SEO · โค้ดตาย · perf)
+// ─────────────────────────────────────────────────────────────────────────────
+{
+  const src = (f: string) => stripComments(fs.readFileSync(path.join(ROOT, f), "utf-8"));
+  // A6-02: Software/WebApplication บังคับ aggregateRating หรือ review — ห้ามกุเรตติ้ง จึงห้ามใช้ชนิดนี้เลย
+  const appSchema = sources.filter((f) => /"@type":\s*"(SoftwareApplication|WebApplication|MobileApplication)"/.test(fs.readFileSync(f, "utf-8")));
+  check(
+    "A6-02: ไม่มี JSON-LD ชนิด Software/WebApplication ที่ไม่มีเรตติ้ง (ใช้ WebPage แทน · ห้ามกุเรตติ้ง)",
+    appSchema.length === 0,
+    appSchema.map((f) => path.relative(ROOT, f)).join(" · "),
+  );
+  // A6-06: หน้าที่ประกาศ noindex ในตัวต้องไม่ถูก Disallow — ไม่งั้นบอตไม่เคยเห็น noindex
+  const robotsSrc = fs.readFileSync(path.join(ROOT, "src/app/robots.ts"), "utf-8");
+  const privateBlock = /const PRIVATE_PATHS = \[([^\]]*)\]/.exec(robotsSrc)?.[1] ?? "";
+  const disallowed = [...privateBlock.matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+  const noindexPaths = ["/account", "/admin", "/tester", "/reset-password", "/readers/console", "/readers/queue"];
+  const blockedNoindex = noindexPaths.filter((p) => disallowed.some((d) => p === d.replace(/\/$/, "") || p.startsWith(d)));
+  check(
+    "A6-06: robots.txt ไม่ Disallow หน้าที่มี noindex ในตัว (ให้บอตอ่าน noindex ได้)",
+    disallowed.includes("/api/") && blockedNoindex.length === 0,
+    `ยังบล็อก: ${blockedNoindex.join(", ")}`,
+  );
+  check(
+    "A6-06: หน้าส่วนตัวทุกหน้าที่ปลด Disallow ยังประกาศ noindex ในตัว",
+    [
+      "src/app/_shared/pages/account-th.ts",
+      "src/app/(th)/admin/layout.tsx",
+      "src/app/(th)/tester/layout.tsx",
+      "src/app/(th)/reset-password/layout.tsx",
+      "src/app/(th)/readers/console/layout.tsx",
+      "src/app/(th)/readers/queue/layout.tsx",
+    ].every((f) => /index:\s*false/.test(src(f))),
+  );
+  // A6-08: breadcrumb ต้องส่ง path กลาง — ฟังก์ชันโยน error เมื่อได้ /en/...
+  let threw = false;
+  try {
+    const { buildBreadcrumbJsonLd } = await import("../../src/app/_shared/seo");
+    buildBreadcrumbJsonLd("en", [{ name: "x", path: "/en/contact" }]);
+  } catch {
+    threw = true;
+  }
+  check("A6-08: buildBreadcrumbJsonLd ปฏิเสธ path ที่มี /en นำหน้า (กัน /en/en/…)", threw && !/path: "\/en\//.test(src("src/app/_shared/pages/contact-en.tsx")));
+}
+
 console.log(`\n📊 ผ่าน ${pass} ข้อ | ล้มเหลว ${fail} ข้อ\n`);
 if (fail > 0) process.exit(1);

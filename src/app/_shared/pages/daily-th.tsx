@@ -98,16 +98,9 @@ const faqJsonLd = {
 
 const softwareApplicationJsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
+  "@type": "WebPage",
   name: "ดูดวงไพ่ยิปซีรายวัน (SeerTarot Daily Tarot)",
-  operatingSystem: "All",
-  applicationCategory: "LifestyleApplication",
   url: `${SITE_ORIGIN}/daily`,
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    priceCurrency: "THB",
-  },
 };
 
 const DAILY_FAQS = [

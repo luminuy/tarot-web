@@ -78,12 +78,9 @@ const LOVE_LINKS_EN = [
 
 const softwareApplicationJsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
+  "@type": "WebPage",
   name: "SeerTarot Love One-Card Oracle",
-  operatingSystem: "All",
-  applicationCategory: "LifestyleApplication",
   url: localizedUrl(PATH, "en"),
-  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
 };
 
 const faqJsonLd = {

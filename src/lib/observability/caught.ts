@@ -61,16 +61,3 @@ export function recordCaughtError(scope: string, err: unknown): void {
   }
 }
 
-/**
- * เหมือน `recordCaughtError` แต่สำหรับกรณีที่ระบบ **เสื่อมลงแต่ยังทำงานต่อได้**
- * แยก metric กันเพื่อให้ `/admin` แยก "พังจริง" ออกจาก "ถอยไปใช้ทางสำรอง" ได้
- */
-export function recordDegraded(scope: string, detail?: unknown): void {
-  try {
-    const safe = SAFE_SCOPE.test(scope) ? scope : "unknown_scope";
-    recordEvent(`degraded:${safe}`);
-    console.warn(`[degraded] ${safe}${detail === undefined ? "" : ` — ${describe(detail)}`}`);
-  } catch {
-    /* เหมือนข้างบน */
-  }
-}

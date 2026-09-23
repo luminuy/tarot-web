@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 
-import TarotFlow from "@/components/home/TarotFlow";
-import { HomeSeoContent } from "@/components/seo/HomeSeoContent";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { generateFaqJsonLd, generateHowToJsonLd } from "@/data/home-seo";
 import type { Locale } from "@/lib/i18n/types";
-import { jsonLdScript } from "@/lib/seo/json-ld";
 
 /**
  * 🏠 เนื้อหน้าแรก — ใช้ร่วมกันทั้งสองภาษา (`/` และ `/en`)
@@ -57,19 +54,12 @@ export function buildWebAppJsonLd(locale: Locale) {
   const isEnglish = locale === "en";
   return {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
+    "@type": "WebPage",
     name: isEnglish ? "SeerTarot — Online Rider-Waite Tarot Sanctuary" : "วิหารพยากรณ์ไพ่ทาโรต์ (Sacred Oracle Tarot)",
     url: localizedUrl("/", locale),
     description: isEnglish
       ? "Free online 1909 Rider-Waite tarot readings. Shuffle and draw the cards yourself, with an AI tarot reader and provably fair SHA-256 randomness."
       : "เว็บดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite สับไพ่และเลือกจับไพ่ด้วยตนเอง พร้อมแม่หมอ AI และระบบความสุ่มโปร่งใส Provably-Fair SHA-256",
-    applicationCategory: "LifestyleApplication",
-    operatingSystem: "All",
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: isEnglish ? "USD" : "THB",
-    },
     inLanguage: locale,
   };
 }
@@ -81,26 +71,4 @@ export function buildWebAppJsonLd(locale: Locale) {
 export function homeJsonLdBlocks(locale: Locale): object[] {
   const isEnglish = locale === "en";
   return [buildWebAppJsonLd(locale), generateFaqJsonLd(isEnglish), generateHowToJsonLd(isEnglish)];
-}
-
-export function HomePageBody({ locale }: { locale: Locale }) {
-  const isEnglish = locale === "en";
-
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLdScript(buildWebAppJsonLd(locale)) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLdScript(generateFaqJsonLd(isEnglish)) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLdScript(generateHowToJsonLd(isEnglish)) }}
-      />
-      <TarotFlow seoContent={<HomeSeoContent isEnglish={isEnglish} />} />
-    </>
-  );
 }

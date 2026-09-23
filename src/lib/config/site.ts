@@ -169,3 +169,14 @@ export function buildAlternates(path: string = "/", options: AlternatesOptions =
     },
   };
 }
+
+/**
+ * alternates ของหน้า noindex (A6-01) — ตัด canonical/hreflang ที่สืบทอดมาจาก layout ราก
+ *
+ * ไม่ตั้งเลย metadata ของรากจะใส่ canonical ของ "หน้าแรก" ให้ ➔ noindex + canonical ชี้หน้าอื่น
+ * = สัญญาณขัดกันที่ Google เตือนไม่ให้ผสม (เสี่ยงลาก noindex ไปถึงหน้าแรกผ่านคลัสเตอร์ canonical)
+ * ด่าน test-meta-length ตรวจจาก HTML จริงทุกหน้า
+ */
+export function noindexAlternates(): Record<string, never> {
+  return {};
+}
