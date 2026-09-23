@@ -42,6 +42,12 @@ const MAX_MODELS_PER_READING = 2;
 /** โมเดลฟรีช้ากว่า Groq มาก — เผื่อเวลาถึงไบต์แรกไว้พอ แต่ไม่ให้ค้างไม่รู้จบ */
 const FIRST_BYTE_TIMEOUT_MS = 25_000;
 
+/**
+ * เพดานเวลาทั้งคำอ่านต่อโมเดล — ตัวจับเวลาไบต์แรก + idle timeout ไม่พอ
+ * ผลวัด 2026-09-23: โมเดลฟรีบางตัวเขียนคำอ่าน 10 ใบนานกว่า 2 นาที (สตรีมมาเรื่อย ๆ ไม่เคย idle)
+ */
+const TOTAL_TIMEOUT_MS = 60_000;
+
 /** เพดานผลลัพธ์ — โมเดลฟรีส่วนใหญ่รับบริบทยาว ไม่ติดเพดาน TPM แบบ Groq */
 const OPENROUTER_OUTPUT_CEILING = 9000;
 
@@ -141,8 +147,16 @@ export async function* streamOpenRouterReading(ctx: ReadingContext): AsyncGenera
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      const streamStartedAt = Date.now();
+      let timedOut = false;
 
       while (true) {
+        if (Date.now() - streamStartedAt > TOTAL_TIMEOUT_MS) {
+          timedOut = true;
+          recordEvent("ai_openrouter_fail:total_timeout");
+          await reader.cancel().catch(() => undefined);
+          break;
+        }
         const { value, done } = await readWithIdleTimeout(reader, { signal: ctx.abortSignal });
         if (done) break;
 
@@ -179,6 +193,11 @@ export async function* streamOpenRouterReading(ctx: ReadingContext): AsyncGenera
           }
           break;
         }
+      }
+
+      if (timedOut) {
+        if (emittedAny(state)) yield { type: "reset" };
+        continue;
       }
 
       if (state.foreignCircuitBreaker) {

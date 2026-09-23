@@ -206,35 +206,33 @@ async function probeReading(apiKey: string, model: string, ctx: ReadingContext):
   };
   try {
     // เหมือน production (openrouter.ts): ขอโหมด JSON ก่อน ถ้าโมเดลไม่รองรับ (400) ยิงใหม่แบบไม่ขอ
-    const send = async (jsonMode: boolean) => {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 120000);
-      try {
-        return await fetch(OPENROUTER_CHAT_URL, {
-          method: "POST",
-          signal: controller.signal,
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://tarot-web.local",
-            "X-Title": "tarot-web reading probe",
-          },
-          body: JSON.stringify({
-            model,
-            messages: [
-              { role: "system", content: buildSystemPrompt(ctx.personaId, { lang: "th" }) },
-              { role: "user", content: buildReadingMessage(ctx) },
-            ],
-            ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
-            reasoning: { exclude: true },
-            max_tokens: resolveMaxReadingTokens(ctx.drawn.length, 12000),
-            temperature: 0.6,
-          }),
-        });
-      } finally {
-        clearTimeout(timeoutId);
-      }
-    };
+    // ⏱️ เพดานเวลาครอบทั้งคำขอ **รวมการอ่านเนื้อหา** — รอบ 2026-09-23 ตั้งไว้แค่ถึงหัว response
+    //    แล้ว `res.json()` ของโมเดลที่เขียนช้ารอเกิน 25 นาทีจน workflow ต้องถูกยกเลิก
+    //    ผู้ใช้จริงไม่รอเกิน 90 วินาทีแน่นอน ช้ากว่านี้ = ใช้ไม่ได้อยู่แล้ว
+    const controller = new AbortController();
+    const hardTimeout = setTimeout(() => controller.abort(), 90000);
+    const send = (jsonMode: boolean) =>
+      fetch(OPENROUTER_CHAT_URL, {
+        method: "POST",
+        signal: controller.signal,
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://tarot-web.local",
+          "X-Title": "tarot-web reading probe",
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: buildSystemPrompt(ctx.personaId, { lang: "th" }) },
+            { role: "user", content: buildReadingMessage(ctx) },
+          ],
+          ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
+          reasoning: { exclude: true },
+          max_tokens: resolveMaxReadingTokens(ctx.drawn.length, 12000),
+          temperature: 0.6,
+        }),
+      });
     let res = await send(true);
     if (res.status === 400) {
       const errText = await res.text().catch(() => "");
@@ -251,6 +249,8 @@ async function probeReading(apiKey: string, model: string, ctx: ReadingContext):
       return base;
     }
     const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    clearTimeout(hardTimeout);
+    base.elapsedMs = Date.now() - startedAt;
     const text = data?.choices?.[0]?.message?.content ?? "";
     base.outputChars = text.length;
     if (!text) {
