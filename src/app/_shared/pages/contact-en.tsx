@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { RouteLink as Link } from "@/components/ui/RouteLink";
 
 import { BRAND_SOCIAL_PROFILES, buildAlternates, DEFAULT_SUPPORT_EMAIL, SITE_ORIGIN } from "@/lib/config/site";
 import { clampDescription } from "@/lib/config/meta-length";
@@ -162,10 +162,12 @@ export function ContactBodyEn() {
           <h2 className="text-lg font-bold text-gold-ink font-serif-th">About the Sanctuary</h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             To learn more about our philosophy, cryptographic Provably Fair random generation, and historical 1909 Rider-Waite heritage, visit our{" "}
-            <Link href="/en/about" prefetch={false} className="text-gold-ink underline hover:text-gold-ink">
+            {/* ⚠️ ยังไม่มีหน้า /en/about — ลิงก์เดิมชี้ไปหน้านั้นแล้วได้ 404 (พบจากด่านลิงก์ภายใน · 2026-09-23)
+                ชี้หน้าภาษาไทยไปก่อน และบอกผู้อ่านตรง ๆ ว่าเป็นภาษาไทย */}
+            <Link href="/about" prefetch={false} className="text-gold-ink underline hover:text-gold-ink">
               About Us
             </Link>{" "}
-            page.
+            page (in Thai).
           </p>
         </section>
       </div>

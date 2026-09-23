@@ -101,25 +101,22 @@ export function OneCardRitual({
    */
   const oracle = useAiReading();
 
-  // Prefetch deck chunk in idle time so clicking draw is instantaneous
-  React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      if ("requestIdleCallback" in window) {
-        (window as Window & { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(() => {
-          getDeck();
-        });
-      } else {
-        setTimeout(() => {
-          getDeck();
-        }, 800);
-      }
-    }
-  }, []);
+  /*
+   * อุ่นสำรับเมื่อผู้ใช้ "แสดงเจตนา" เท่านั้น (A8-05) — เดิมโหลดสำรับไทยทั้ง 78 ใบ (83 KB gzip / 457 KB ดิบ)
+   * ตอน idle ทุกการเข้าชม ผู้ที่มาจาก Google อ่านแล้วออก (ส่วนใหญ่) จ่ายดาต้า + เวลา parse ฟรี ๆ
+   * ตอนนี้เริ่มโหลดตอนชี้/โฟกัสปุ่มจั่ว และตอนกดจั่ว (ขนานกับการยิง API ซึ่งใช้เวลานานกว่าอยู่แล้ว)
+   */
+  const warmDeck = () => {
+    void getDeck().catch(() => {
+      deckPromise = null; // โหลดล้ม ให้ครั้งถัดไปลองใหม่ได้ (ตัวแสดงข้อผิดพลาดอยู่ที่ effect ประกอบไพ่)
+    });
+  };
 
   // จังหวะที่ 1 ➔ จังหวะที่ 2: สุ่มไพ่ทันทีด้วย Web Crypto API โดยไม่ผ่านหน้าจอสับหรือพัดไพ่
   const handleDraw = async () => {
     soundManager.playCardSelectSound();
     setLoadError(null);
+    warmDeck();
 
     /*
      * ⚠️ `resolveCards: false` — ให้ท่อคืนแต่เลขไพ่ แล้วหน้านี้เปิดสำรับ `deck-th` เอง
@@ -237,6 +234,8 @@ export function OneCardRitual({
               <button
                 type="button"
                 onClick={handleDraw}
+                onPointerEnter={warmDeck}
+                onFocus={warmDeck}
                 disabled={oracle.isPreparing}
                 className="btn-gold-glass w-full sm:w-auto disabled:opacity-60 disabled:cursor-wait px-10 py-3.5 sm:py-4 font-serif-th text-sm sm:text-base font-bold active:scale-[0.98] cursor-pointer tracking-wide flex items-center justify-center gap-2"
               >

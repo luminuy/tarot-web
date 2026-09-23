@@ -186,6 +186,54 @@ for (const [label, file] of [["ไทย", astro404], ["อังกฤษ", ast
   );
 }
 
+// ── 5. redirect แบบ path ต้องไปถึงที่ทำงานจริง (A6-05) ─────────────────────
+console.log("\n── 4. redirect ของ URL เก่า ──");
+{
+  // redirect ใน next.config.ts ที่ไม่ผูกโฮสต์ ทำงานได้เฉพาะเส้นที่อยู่ใน run_worker_first
+  // เดิม 8 เส้น (/love · /tarot · slug บทความเก่า) ตอบ 404 บน production มาตลอด
+  const nextConfig = fs.readFileSync(path.join(ROOT, "next.config.ts"), "utf8");
+  const redirectsBody = nextConfig.slice(
+    nextConfig.indexOf("async redirects()"),
+    nextConfig.indexOf("async headers()"),
+  );
+  check("หา redirects() ใน next.config.ts เจอ (ด่านนี้ห้ามผ่านแบบว่างเปล่า)", redirectsBody.length > 50);
+  const pathRedirects = [...redirectsBody.matchAll(/source:\s*"([^"]+)"(?![\s\S]{0,60}has:)/g)].map((m) => m[1]);
+  const deadNextRedirects = pathRedirects.filter(
+    (src) => src !== "/" && src !== "/:path*" && !patterns.some((p) => matches(src, p)),
+  );
+  check(
+    "redirect แบบ path ใน next.config.ts ต้องอยู่ใน run_worker_first (ไม่งั้นไม่มีวันทำงาน)",
+    deadNextRedirects.length === 0,
+    deadNextRedirects.length ? `ย้ายไป public/_redirects: ${deadNextRedirects.join(" · ")}` : undefined,
+  );
+
+  const redirectsFile = path.join(ROOT, "public/_redirects");
+  const rules = fs.existsSync(redirectsFile)
+    ? fs
+        .readFileSync(redirectsFile, "utf8")
+        .split("\n")
+        .map((l) => l.trim())
+        .filter((l) => l && !l.startsWith("#"))
+        .map((l) => l.split(/\s+/))
+    : [];
+  check("public/_redirects มีกฎ redirect ของ URL เก่า", rules.length >= 8, "ไฟล์หายหรือกฎหาย = URL เก่า 404 ทั้งหมด");
+  const badRules = rules.filter(
+    ([from, to, code]) => !from?.startsWith("/") || !to?.startsWith("/") || !["301", "308"].includes(code ?? ""),
+  );
+  check(
+    "ทุกกฎใน public/_redirects เป็น path ➔ path แบบถาวร (301/308)",
+    badRules.length === 0,
+    badRules.map((r) => r.join(" ")).join(" · ") + " — ค่าเริ่มต้นของ Cloudflare คือ 302 (ไม่ส่งต่อ link equity)",
+  );
+  // ห้ามทับเส้นที่ Worker เป็นคนตอบ — _redirects ไม่ทำงานกับคำขอที่วิ่งเข้า Worker
+  const shadowed = rules.filter(([from]) => patterns.some((p) => matches(from, p)));
+  check(
+    "public/_redirects ไม่มีเส้นที่อยู่ใน run_worker_first (Cloudflare ไม่ใช้ _redirects กับเส้นของ Worker)",
+    shadowed.length === 0,
+    shadowed.map((r) => r[0]).join(" · "),
+  );
+}
+
 // ── สรุป ──────────────────────────────────────────────────────────────────
 if (failed > 0) {
   console.log(`\n❌ ไม่ผ่าน ${failed} ข้อ\n`);

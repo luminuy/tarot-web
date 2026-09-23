@@ -465,5 +465,33 @@ check(
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 9. ผลตรวจ 2026-09-23 คลื่น 6 — น้ำหนักสำรับไพ่ฝั่งเบราว์เซอร์
+// ─────────────────────────────────────────────────────────────────────────────
+{
+  const clientFiles = [...walk(path.join(ROOT, "src/components")), ...walk(path.join(ROOT, "astro")), path.join(ROOT, "src/lib/reading/use-ai-reading.ts")];
+  const mixedDeckImports = clientFiles.filter((f) => {
+    const code = stripComments(fs.readFileSync(f, "utf-8"));
+    return /import\s+(?!type\b)[^;]*from\s+["']@\/data\/cards["']/.test(code) || /import\(\s*["']@\/data\/cards["']\s*\)/.test(code);
+  });
+  check(
+    "A8-02: ฝั่งเบราว์เซอร์ไม่ import `@/data/cards` (สำรับผสมคำทำนายอังกฤษ ~50 KB gzip)",
+    mixedDeckImports.length === 0,
+    mixedDeckImports.map((f) => `   · ${rel(f)}`).join("\n") + "\n   ➔ ใช้ loadCardResolver / useCardResolver จาก @/data/cards/client-deck",
+  );
+  const ritual = stripComments(fs.readFileSync(path.join(ROOT, "src/components/reading/one-card/OneCardRitual.tsx"), "utf-8"));
+  check(
+    "A8-05: พิธีไพ่ใบเดียวไม่โหลดสำรับทั้งสำรับตอน idle (อุ่นเมื่อผู้ใช้แสดงเจตนาเท่านั้น)",
+    !/requestIdleCallback/.test(ritual) && /onPointerEnter=\{warmDeck\}/.test(ritual),
+  );
+  const flow = stripComments(fs.readFileSync(path.join(ROOT, "src/components/home/TarotFlow.tsx"), "utf-8"));
+  const parallelLoads = [...flow.matchAll(/const deckReady = loadCardResolver\([\s\S]{0,1200}?\/shuffle`/g)].length;
+  check(
+    `A8-06: TarotFlow เริ่มโหลดสำรับก่อนยิง /shuffle ทั้งสองโหมด (${parallelLoads}/2)`,
+    parallelLoads === 2,
+    "   ➔ โหลดสำรับหลังได้คำตอบ = น้ำตกสามชั้น (start ➔ shuffle ➔ import) ผู้ใช้เห็นจอค้าง",
+  );
+}
+
 console.log(`\n📊 ผ่าน ${pass} ข้อ | ล้มเหลว ${fail} ข้อ\n`);
 if (fail > 0) process.exit(1);

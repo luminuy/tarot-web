@@ -208,13 +208,18 @@ assert(
   "astro/pages/account.astro ต้องใช้ accountMetadataTh (ไม่งั้น noindex จะหายไปเงียบ ๆ)",
 );
 
-// 9. S-04: /tarot must be redirected in next.config.ts and src/app/tarot must not exist
+// 9. S-04: /tarot must be redirected to / and src/app/tarot must not exist
+// ⚠️ redirect อยู่ที่ `public/_redirects` (ทำงานที่ขอบของ Cloudflare) ไม่ใช่ next.config.ts แล้ว (A6-05)
+//    ด่านเดิมตรวจ next.config.ts ซึ่ง "ผ่าน" มาตลอดทั้งที่ production ตอบ 404 — กฎใน redirects()
+//    ของเส้นที่ไม่อยู่ใน run_worker_first ไม่เคยถึง Worker
 const tarotPageExists = fs.existsSync(path.join(process.cwd(), "src/app/(th)/tarot"));
-assert(!tarotPageExists, "src/app/tarot ต้องถูกลบออก (ย้ายไป redirects ใน next.config.ts แทน)");
-const nextConfigContent = fs.readFileSync(path.join(process.cwd(), "next.config.ts"), "utf-8");
+assert(!tarotPageExists, "src/app/tarot ต้องถูกลบออก (ใช้ redirect แทน)");
+const edgeRedirects = fs.existsSync(path.join(process.cwd(), "public/_redirects"))
+  ? fs.readFileSync(path.join(process.cwd(), "public/_redirects"), "utf-8")
+  : "";
 assert(
-  nextConfigContent.includes('source: "/tarot"') && nextConfigContent.includes('destination: "/"'),
-  "next.config.ts ต้องมี redirect จาก /tarot ไปที่ / แบบ permanent (S-04)",
+  /^\/tarot\s+\/\s+30[18]\s*$/m.test(edgeRedirects),
+  "public/_redirects ต้องมี redirect จาก /tarot ไปที่ / แบบถาวร (S-04 · A6-05)",
 );
 
 /**

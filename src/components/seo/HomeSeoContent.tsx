@@ -605,7 +605,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
             {MAJOR_HIGHLIGHTS.map((card) => (
               <Link
                 key={card.id}
-                href={`/cards/${card.id}`}
+                href={href(`/cards/${card.id}`)}
                 prefetch={false}
                 className="glass-tile group flex flex-col items-center p-3 sm:p-4"
               >
@@ -656,7 +656,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
             </p>
           </div>
           <Link
-            href="/blog"
+            href={href("/blog")}
             prefetch={false}
             className="text-xs font-serif-th font-semibold text-gold-ink hover:text-[#5E390A] transition-colors inline-flex items-center gap-1 group"
           >
@@ -670,7 +670,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           {featuredArticles.map((art) => (
             <Link
               key={art.slug}
-              href={`/blog/${art.slug}`}
+              href={href(`/blog/${art.slug}`)}
               prefetch={false}
               className="altar-card-porcelain p-6 group flex items-start gap-4 sm:gap-5"
             >

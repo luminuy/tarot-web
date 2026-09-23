@@ -8,7 +8,8 @@ import type { Reading } from "@/lib/schema/reading";
 import { YES_NO_DISPLAY_EN } from "@/lib/schema/reading-display";
 import type { Persona } from "@/data/personas";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
-import { cardByIndex, type TarotCard } from "@/data/cards";
+import type { TarotCard } from "@/data/cards/types";
+import { useCardResolver } from "@/data/cards/client-deck";
 import { ElementalBalanceWidget } from "@/components/reading/ElementalBalanceWidget";
 import { OracleMantraCard } from "@/components/reading/OracleMantraCard";
 import { trackEvent } from "@/lib/analytics";
@@ -105,6 +106,8 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
   onRetry,
 }) => {
   const { isEnglish } = useLocale();
+  // สำรับตามภาษาของหน้า — ไม่ลากคำทำนายอังกฤษมาให้ผู้ใช้ไทย (A8-02)
+  const cardByIndex = useCardResolver(isEnglish);
   const [activeTab, setActiveTab] = useState<"card" | "summary">("card");
   // การอ่านออกเสียงย้ายไปอยู่ใน <TTSReaderButton /> ทั้งหมดแล้ว
   // (ของเดิมเหลือ state + handler ค้างไว้ที่นี่โดยไม่มีปุ่มไหนเรียกใช้)
@@ -149,7 +152,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
     } catch {
       return [];
     }
-  }, [drawnCards]);
+  }, [drawnCards, cardByIndex]);
 
   const totalCards = drawnCards.length;
 
