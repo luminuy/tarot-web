@@ -195,14 +195,30 @@ async function runTest() {
   const testPayload = JSON.stringify({
     data: { id: charge.chargeId, status: "successful", amount: 29900 },
   });
-  const secretKey = "test_webhook_secret_key_123";
+  // A2-12: สเปก Omise — secret เป็น base64 · เซ็น `${ts}.${body}` · หลายลายเซ็นคั่นด้วย `,` · เก่าเกิน 5 นาทีปฏิเสธ
+  const secretKey = Buffer.from("test_webhook_secret_key_123").toString("base64");
   const { createHmac } = await import("node:crypto");
-  const validSignature = createHmac("sha256", secretKey).update(testPayload).digest("hex");
+  const nowTs = String(Math.floor(Date.now() / 1000));
+  const sign = (ts: string, body: string, secretB64: string) =>
+    createHmac("sha256", Buffer.from(secretB64, "base64")).update(`${ts}.${body}`).digest("hex");
+  const validSignature = sign(nowTs, testPayload, secretKey);
+  const oldKeySig = sign(nowTs, testPayload, Buffer.from("rotated_old_key").toString("base64"));
 
-  const sigPass = verifyWebhookSignature(testPayload, validSignature, secretKey);
-  const sigFail = verifyWebhookSignature(testPayload, "tampered_signature_hex", secretKey);
-  if (!sigPass || sigFail) {
-    throw new Error("❌ verifyWebhookSignature failed to validate signature integrity");
+  const sigPass = verifyWebhookSignature(testPayload, validSignature, nowTs, secretKey);
+  const sigRotation = verifyWebhookSignature(testPayload, `${oldKeySig},${validSignature}`, nowTs, secretKey);
+  const sigFail = verifyWebhookSignature(testPayload, "tampered_signature_hex", nowTs, secretKey);
+  const staleTs = String(Math.floor(Date.now() / 1000) - 3600);
+  const sigReplay = verifyWebhookSignature(testPayload, sign(staleTs, testPayload, secretKey), staleTs, secretKey);
+  const sigBodyOnly = verifyWebhookSignature(
+    testPayload,
+    createHmac("sha256", Buffer.from(secretKey, "base64")).update(testPayload).digest("hex"),
+    nowTs,
+    secretKey,
+  );
+  if (!sigPass || !sigRotation || sigFail || sigReplay || sigBodyOnly) {
+    throw new Error(
+      `❌ verifyWebhookSignature ไม่ตรงสเปก Omise (pass=${sigPass} rotation=${sigRotation} tampered=${sigFail} replay=${sigReplay} bodyOnly=${sigBodyOnly})`,
+    );
   }
 
   // 4. Update Payment status to 'paid'

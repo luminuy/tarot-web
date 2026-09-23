@@ -22,7 +22,7 @@ import {
   summarizeDigestDay,
 } from "../../src/lib/digest/digest.repo";
 import { signDigestUnsubToken, verifyDigestUnsubToken } from "../../src/lib/digest/unsubscribe-token";
-import { dailyDigestHtml, dailyDigestText } from "../../src/lib/email/templates";
+import { dailyDigestHtml, dailyDigestText, verifyEmailHtml, resetPasswordHtml, accountExistsHtml } from "../../src/lib/email/templates";
 import { computeDailyCard } from "../../src/lib/tarot/daily-card";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -246,6 +246,28 @@ async function main() {
     "คอลัมน์ digest_email ตั้งค่าเริ่มต้นเป็น 0 (opt-in เท่านั้น ห้าม backfill เป็น 1)",
     /digest_email\s+INTEGER NOT NULL DEFAULT 0/.test(migration),
   );
+
+  // ── 6. (A2-10) คิวต้องหมุน — คนที่ได้ล่าสุดไปอยู่ท้ายคิว ไม่ใช่ 80 คนแรกชุดเดิมทุกวัน ──
+  console.log("\n🔁 คิวหมุนเวียน (A2-10):");
+  const repoSrc = readSrc("src/lib/digest/digest.repo.ts");
+  check(
+    "listDigestRecipients เรียงตาม digest_last_sent_at ก่อนวันสมัคร",
+    /ORDER BY COALESCE\(u\.digest_last_sent_at, 0\) ASC/.test(repoSrc),
+  );
+  const cronSrc = readSrc("src/app/api/cron/daily-digest/route.ts");
+  check("รอบส่งรายงานคิวค้าง (remaining + digest_over_cap)", /remaining/.test(cronSrc) && /digest_over_cap/.test(cronSrc));
+
+  // ── 7. (A2-17) ชื่อผู้ใช้ในอีเมลต้องถูก escape ──
+  console.log("\n🧼 ชื่อผู้ใช้ในอีเมล (A2-17):");
+  const evil = '<a href="https://evil.example">กดยืนยันที่นี่</a>';
+  for (const [label, html] of [
+    ["verifyEmailHtml", verifyEmailHtml("https://seertarot.net/x", evil)],
+    ["resetPasswordHtml", resetPasswordHtml("https://seertarot.net/x", evil)],
+    ["accountExistsHtml", accountExistsHtml(evil)],
+    ["dailyDigestHtml", dailyDigestHtml({ name: evil, cardNameTh: "x", cardNameEn: "x", keywords: [], message: "x", proof: "x", dateLabel: "x", readUrl: "https://seertarot.net/daily", unsubUrl: "https://seertarot.net/u" })],
+  ] as const) {
+    check(`${label} ไม่ปล่อยแท็กจากชื่อผู้ใช้ลง HTML`, !html.includes("https://evil.example\">") && !html.includes("<a href=\"https://evil"));
+  }
 
   console.log(`\n${pass}/${pass + fail} ผ่าน`);
   if (fail > 0) process.exit(1);

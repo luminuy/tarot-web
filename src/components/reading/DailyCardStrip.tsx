@@ -46,13 +46,22 @@ export function DailyCardStrip() {
     }
 
     // 2. ดึงจากเซิร์ฟเวอร์ทันที (ไม่หน่วง requestIdleCallback 2 วินาทีซึ่งทำลาย LCP)
-    fetch("/api/daily-card", { credentials: "same-origin" })
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+    // ⚠️ ข้อมูลต้องเป็นของ "วันนี้" จริง (A2-06) — แคชระหว่างทางอาจคืนไพ่เมื่อวานข้ามเที่ยงคืนได้
+    //    ถ้า dateKey ไม่ตรง ยิงใหม่แบบข้ามแคช (`?d=` เปลี่ยน URL + no-store) · เก็บลงเครื่องตาม dateKey ของข้อมูลเท่านั้น
+    const load = (bypass: boolean): Promise<DailyCard> =>
+      fetch(bypass ? `/api/daily-card?d=${today}` : "/api/daily-card", {
+        credentials: "same-origin",
+        ...(bypass ? { cache: "no-store" as const } : {}),
+      }).then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))));
+
+    load(false)
+      .then((d) => (d.dateKey === today ? d : load(true)))
       .then((d: DailyCard) => {
         if (!alive) return;
         setDaily(d);
+        if (d.dateKey !== today) return; // เครื่องกับเซิร์ฟเวอร์เห็นคนละวัน — แสดงได้ แต่ไม่จำ
         try {
-          localStorage.setItem(DAILY_CARD_STORAGE_KEY, JSON.stringify({ dateKey: today, card: d }));
+          localStorage.setItem(DAILY_CARD_STORAGE_KEY, JSON.stringify({ dateKey: d.dateKey, card: d }));
           localStorage.removeItem(LEGACY_DAILY_CARD_STORAGE_KEY);
         } catch {
           // ignore quota exceeded

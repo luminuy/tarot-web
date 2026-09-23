@@ -4,6 +4,7 @@ import { SITE_ORIGIN } from "@/lib/config/site";
 import {
   claimDigestSlot,
   finishDigestSlot,
+  countPendingDigestRecipients,
   listDigestRecipients,
   summarizeDigestDay,
 } from "@/lib/digest/digest.repo";
@@ -128,6 +129,9 @@ export async function POST(request: Request) {
 
   recordEvent("digest_run");
   if (sent > 0) recordEvent("digest_sent", sent);
+  // คิวค้างเพราะชนเพดานต่อรอบ — ต้องเห็นได้บน /admin ไม่ใช่เงียบ (A2-10)
+  const remaining = await countPendingDigestRecipients(sendDate).catch(() => 0);
+  if (remaining > 0) recordEvent("digest_over_cap", remaining);
 
   return NextResponse.json({
     ok: true,
@@ -137,6 +141,7 @@ export async function POST(request: Request) {
     sent,
     skipped,
     failed,
+    remaining,
     dayTotals: await summarizeDigestDay(sendDate).catch(() => ({})),
   });
 }

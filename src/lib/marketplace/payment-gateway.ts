@@ -74,13 +74,25 @@ export async function createGatewayCharge(input: CreateChargeInput): Promise<Cha
   };
 }
 
+/** เวลาเผื่อของ `Omise-Signature-Timestamp` — เก่ากว่านี้ถือเป็น replay (ตามที่เอกสาร Omise แนะนำ) */
+const WEBHOOK_TOLERANCE_SEC = 5 * 60;
+
 /**
- * ตรวจสอบความถูกต้องของ Webhook Signature ป้องกันการปลอมแปลง Event
+ * ตรวจลายเซ็น webhook ตามสเปก Omise (A2-12 · ยืนยันกับ docs.omise.co/api-webhooks แล้ว)
+ * - header `Omise-Signature` (มีได้หลายค่าคั่นด้วย `,` ตอนหมุนคีย์) + `Omise-Signature-Timestamp`
+ * - ข้อความที่เซ็น = `${timestamp}.${rawBody}`
+ * - secret ที่ Omise ให้มาเป็น **base64** ต้องถอดก่อนใช้เป็นกุญแจ HMAC-SHA256 · ผลเป็น hex
+ * - timestamp ห่างจากเวลาจริงเกิน 5 นาที = ปฏิเสธ (กันยิง payload เก่าซ้ำ)
+ *
+ * ⚠️ ของเดิม HMAC(rawBody) ด้วย secret แบบข้อความดิบ และอ่าน header `x-omise-signature`
+ *    วันที่เปิดเกตเวย์จริง webhook ทุกใบจะได้ 401 ลูกค้าจ่ายเงินแล้วไม่ได้เครดิต
  */
 export function verifyWebhookSignature(
   rawBody: string,
   signatureHeader: string | null | undefined,
-  signingSecret?: string
+  timestampHeader: string | null | undefined,
+  signingSecret?: string,
+  nowMs: number = Date.now(),
 ): boolean {
   const secret = signingSecret || process.env.OMISE_WEBHOOK_SECRET || process.env.PAYMENT_WEBHOOK_SECRET;
 
@@ -107,15 +119,21 @@ export function verifyWebhookSignature(
     return false;
   }
 
-  if (!signatureHeader) return false;
+  if (!signatureHeader || !timestampHeader) return false;
+
+  const ts = Number(timestampHeader);
+  if (!Number.isFinite(ts) || Math.abs(nowMs / 1000 - ts) > WEBHOOK_TOLERANCE_SEC) return false;
 
   try {
-    const expectedSignature = createHmac("sha256", secret).update(rawBody).digest("hex");
-    const sigBuf = Buffer.from(signatureHeader);
-    const expBuf = Buffer.from(expectedSignature);
-
-    if (sigBuf.length !== expBuf.length) return false;
-    return timingSafeEqual(sigBuf, expBuf);
+    const key = Buffer.from(secret, "base64");
+    if (key.length === 0) return false;
+    const expected = Buffer.from(
+      createHmac("sha256", key).update(`${timestampHeader}.${rawBody}`).digest("hex"),
+    );
+    return signatureHeader.split(",").some((candidate) => {
+      const got = Buffer.from(candidate.trim());
+      return got.length === expected.length && timingSafeEqual(got, expected);
+    });
   } catch {
     return false;
   }

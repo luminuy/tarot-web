@@ -13,24 +13,6 @@ const BodySchema = z.object({
     )
     .max(50)
     .optional(),
-  readingSnapshot: z
-    .object({
-      question: z.string().max(1000).optional(),
-      spreadId: z.string().max(100).optional(),
-      summary: z.string().max(10000).optional(),
-      personaId: z.string().max(100).optional(),
-      drawn: z
-        .array(
-          z.object({
-            order: z.number().int().min(0).max(77),
-            cardIndex: z.number().int().min(0).max(77),
-            isReversed: z.boolean(),
-          })
-        )
-        .max(78)
-        .optional(),
-    })
-    .optional(),
 });
 
 function validateChatBody(body: unknown): { success: boolean; error?: string } {
@@ -70,23 +52,14 @@ export function runChatSchemaTests() {
   }
   console.log("  ✓ Test 2: In-depth Celtic Cross bot response (4,000+ chars) in history passes smoothly");
 
-  // Test 3: Very large reading summary in snapshot (5,000 chars) MUST PASS!
-  const snapshotRes = validateChatBody({
-    message: "เรื่องที่ต้องระวัง",
-    history: [
-      { sender: "user", text: "ขออย่างความอย่างละเอียด" },
-      { sender: "bot", text: longBotResponse },
-      { sender: "user", text: "สรุปให้หน่อยเป็นข้อๆ" },
-      { sender: "bot", text: "1. สรุปข้อหนึ่ง\n2. สรุปข้อสอง" },
-    ],
-    readingSnapshot: {
-      question: "ความรักในอนาคต",
-      summary: "สรุปคำทำนายยาวๆ ".repeat(150),
-    },
-  });
-  if (!snapshotRes.success) {
-    throw new Error(`Test 3 Failed: long snapshot was rejected: ${snapshotRes.error}`);
+  // Test 3 (A2-02): แชทต้องไม่เชื่อ readingSnapshot จากไคลเอนต์ — เดิมใช้สร้างเรกคอร์ดทั้งก้อน
+  // (ไพ่ที่ไม่ผ่าน PF · ปรมาจารย์ที่สงวนไว้ผู้จ่ายเงิน · summary ยาว 10,000 ตัวที่ไม่ผ่านด่านกันฉีด prompt)
+  const chatRouteSrc = fs.readFileSync(path.join(process.cwd(), "src/app/api/reading/[id]/chat/route.ts"), "utf-8");
+  if (/readingSnapshot:\s*z/.test(chatRouteSrc) || /clientSnapshot/.test(chatRouteSrc)) {
+    throw new Error("Test 3 Failed (A2-02): chat/route.ts ยังรับ readingSnapshot จากไคลเอนต์มาสร้างเรกคอร์ด");
   }
+  console.log("  ✓ Test 3: แชทไม่รับ readingSnapshot จากไคลเอนต์ (A2-02)");
+
   // Test 4: Provably Fair Guard - Ensure no fake card fallback exists in chat/route.ts
   const chatRouteContent = fs.readFileSync(path.join(process.cwd(), "src/app/api/reading/[id]/chat/route.ts"), "utf-8");
   if (chatRouteContent.includes("order: 0, cardIndex: 0, isReversed: false") || chatRouteContent.includes("Safe default reading context fallback")) {
