@@ -161,7 +161,7 @@ interface GoldenCase {
 
 /** บริบทเดียวกับ `run-golden-judge.ts` — ห้ามแต่งไพ่เอง ใช้ไพ่จาก fixture เท่านั้น */
 function goldenContext(caseId: string): ReadingContext {
-  const fixture = path.join(__dirname, "fixtures", "golden-readings.json");
+  const fixture = path.resolve(process.cwd(), "scripts/qa/fixtures/golden-readings.json");
   const all = JSON.parse(fs.readFileSync(fixture, "utf-8")) as GoldenCase[];
   const gold = all.find((g) => g.id === caseId);
   if (!gold) throw new Error(`ไม่พบเคส ${caseId} ใน golden-readings.json`);
@@ -275,9 +275,15 @@ async function main() {
 
   console.log("🔎 ดึงลิสต์โมเดลฟรีจาก OpenRouter...\n");
   const freeModels = await fetchFreeModels();
+  /*
+   * `--only a:free,b:free` = วัดเฉพาะรายชื่อนี้ (ต้องเป็นโมเดลฟรีที่ยังอยู่ในลิสต์สด)
+   * โควตาโมเดลฟรีนับรวมทั้งบัญชีต่อวัน — รอบซ้ำไม่ควรยิงทั้ง 20 กว่าตัวใหม่ทุกครั้ง
+   */
+  const onlyIdx = process.argv.indexOf("--only");
+  const only = onlyIdx >= 0 ? (process.argv[onlyIdx + 1] ?? "").split(",").map((x) => x.trim()).filter(Boolean) : [];
   const toTest = (limit ? freeModels.slice(0, limit) : freeModels).filter(
     // ตัดโมเดลที่ไม่ใช่ text chat ออก (เช่น lyria = สร้างเพลง)
-    (m) => !m.id.includes("lyria"),
+    (m) => !m.id.includes("lyria") && (only.length === 0 || only.includes(m.id)),
   );
 
   console.log(`พบโมเดลฟรีทั้งหมด ${freeModels.length} ตัว — จะทดสอบ ${toTest.length} ตัว\n`);
