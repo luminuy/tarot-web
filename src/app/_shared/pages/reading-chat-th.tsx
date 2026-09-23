@@ -112,17 +112,6 @@ export function ReadingChatBodyTh() {
             persona={persona}
             sessionToken={flow!.sessionToken}
             heightClass="h-[calc(100dvh-5rem-env(safe-area-inset-bottom,0px))] sm:h-[calc(100dvh-6.5rem)]"
-            readingSnapshot={{
-              question: flow!.question || undefined,
-              spreadId: flow!.spreadId,
-              summary: flow!.readingResult?.summary,
-              personaId: persona.id,
-              drawn: (flow!.drawnCards || []).map((d) => ({
-                order: d.order,
-                cardIndex: d.cardIndex,
-                isReversed: !!d.isReversed,
-              })),
-            }}
           />
         ) : (
           <div className="mt-10 space-y-4 rounded-xl border border-line bg-surface p-6 text-center shadow-xs">

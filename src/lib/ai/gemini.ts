@@ -1,7 +1,7 @@
 import "server-only";
 import { parsePartialReading } from "@/lib/utils/partial-json";
 import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/lib/ai/prompt";
-import { linkAbortSignal } from "@/lib/ai/abort";
+import { linkAbortSignal, readWithIdleTimeout } from "@/lib/ai/abort";
 import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
 import { ReadingSchema } from "@/lib/schema/reading";
 import type { ReadingEvent, UsageInfo } from "@/lib/ai/types";
@@ -329,7 +329,9 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
 
     try {
       while (true) {
-        const { value, done } = await reader.read();
+        // เพดานเวลาระหว่างก้อน + ยกเลิกตามลูกค้า (A2-15) — เดิม `reader.read()` รอไม่มีกำหนด
+        // และถอดสายยกเลิกไปตั้งแต่ได้ headers ปิดแท็บแล้ว Gemini ยังผลิตโทเคนต่อ
+        const { value, done } = await readWithIdleTimeout(reader, { signal: ctx.abortSignal });
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });

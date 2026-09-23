@@ -2,6 +2,20 @@
  * อีเมลเทมเพลตมาตรฐานสไตล์พรีเมียมสีทอง/มูเตลู สำหรับส่งให้ผู้ใช้งาน
  */
 
+/**
+ * ⚠️ ทุกค่าที่มาจากผู้ใช้หรือข้อมูลภายนอก ต้องผ่านตัวนี้ก่อนต่อลง HTML ของอีเมล (A2-17)
+ * เดิมไม่มีเลยสักจุด ผู้ไม่หวังดีสมัครด้วยอีเมลเหยื่อ + ชื่อเป็น `<a href="https://evil">กดยืนยันที่นี่</a>`
+ * เหยื่อได้อีเมลของแท้จากโดเมนเรา (ผ่าน SPF/DKIM) ที่มีลิงก์ของผู้โจมตีอยู่เหนือปุ่มจริง
+ */
+export function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function baseLayout(contentHtml: string, title: string, lang: "th" | "en" = "th"): string {
   const isEn = lang === "en";
   return `<!DOCTYPE html>
@@ -110,7 +124,7 @@ function baseLayout(contentHtml: string, title: string, lang: "th" | "en" = "th"
 
 export function verifyEmailHtml(link: string, name?: string, lang: "th" | "en" = "th"): string {
   const isEn = lang === "en";
-  const greeting = name ? (isEn ? `Hello ${name}` : `สวัสดีคุณ ${name}`) : (isEn ? "Greetings, Seeker" : "สวัสดีผู้มีญาณหยั่งรู้");
+  const greeting = name ? (isEn ? `Hello ${escapeHtml(name)}` : `สวัสดีคุณ ${escapeHtml(name)}`) : (isEn ? "Greetings, Seeker" : "สวัสดีผู้มีญาณหยั่งรู้");
   const content = `
     <h1>${isEn ? "Verify Your Email Address" : "ยืนยันที่อยู่อีเมลของคุณ"}</h1>
     <p>${greeting},</p>
@@ -129,7 +143,7 @@ export function verifyEmailHtml(link: string, name?: string, lang: "th" | "en" =
 
 export function resetPasswordHtml(link: string, name?: string, lang: "th" | "en" = "th"): string {
   const isEn = lang === "en";
-  const greeting = name ? (isEn ? `Hello ${name}` : `สวัสดีคุณ ${name}`) : (isEn ? "Greetings, Seeker" : "สวัสดีผู้มีญาณหยั่งรู้");
+  const greeting = name ? (isEn ? `Hello ${escapeHtml(name)}` : `สวัสดีคุณ ${escapeHtml(name)}`) : (isEn ? "Greetings, Seeker" : "สวัสดีผู้มีญาณหยั่งรู้");
   const content = `
     <h1>${isEn ? "Reset Your Password" : "คำขอตั้งรหัสผ่านใหม่"}</h1>
     <p>${greeting},</p>
@@ -148,7 +162,7 @@ export function resetPasswordHtml(link: string, name?: string, lang: "th" | "en"
 
 export function accountExistsHtml(name?: string, lang: "th" | "en" = "th"): string {
   const isEn = lang === "en";
-  const greeting = name ? (isEn ? `Hello ${name}` : `สวัสดีคุณ ${name}`) : (isEn ? "Greetings, Seeker" : "สวัสดีผู้มีญาณหยั่งรู้");
+  const greeting = name ? (isEn ? `Hello ${escapeHtml(name)}` : `สวัสดีคุณ ${escapeHtml(name)}`) : (isEn ? "Greetings, Seeker" : "สวัสดีผู้มีญาณหยั่งรู้");
   const content = `
     <h1>${isEn ? "Account Notification" : "การแจ้งเตือนเกี่ยวกับบัญชีของคุณ"}</h1>
     <p>${greeting},</p>
@@ -258,32 +272,32 @@ export function dailyDigestHtml(params: {
   readUrl: string;
   unsubUrl: string;
 }): string {
-  const greeting = params.name ? `สวัสดีคุณ ${params.name}` : "สวัสดีผู้มีญาณหยั่งรู้";
-  const keywordLine = params.keywords.slice(0, 4).join(" · ");
+  const greeting = params.name ? `สวัสดีคุณ ${escapeHtml(params.name)}` : "สวัสดีผู้มีญาณหยั่งรู้";
+  const keywordLine = escapeHtml(params.keywords.slice(0, 4).join(" · "));
   const content = `
     <h1>ไพ่นำทางของวันนี้</h1>
     <p>${greeting},</p>
-    <p>พลังงานประจำวันที่ ${params.dateLabel} เปิดออกมาเป็นไพ่</p>
+    <p>พลังงานประจำวันที่ ${escapeHtml(params.dateLabel)} เปิดออกมาเป็นไพ่</p>
     <div style="text-align:center;margin:24px 0;padding:20px;background:#F3EDE2;border:1px solid #D9C8AC;border-radius:8px;">
-      <div style="font-size:22px;font-weight:bold;color:#8F5C1A;">${params.cardNameTh}</div>
-      <div style="font-size:13px;color:#6F5B4A;margin-top:4px;">${params.cardNameEn}</div>
+      <div style="font-size:22px;font-weight:bold;color:#8F5C1A;">${escapeHtml(params.cardNameTh)}</div>
+      <div style="font-size:13px;color:#6F5B4A;margin-top:4px;">${escapeHtml(params.cardNameEn)}</div>
       <div style="font-size:13px;color:#2E211A;margin-top:12px;">${keywordLine}</div>
     </div>
-    <p>${params.message}</p>
+    <p>${escapeHtml(params.message)}</p>
     <div class="btn-container">
-      <a href="${params.readUrl}" class="btn">เปิดไพ่ของตัวเองวันนี้</a>
+      <a href="${escapeHtml(params.readUrl)}" class="btn">เปิดไพ่ของตัวเองวันนี้</a>
     </div>
     <div class="fallback">
       รหัสตรวจสอบความโปร่งใสของไพ่วันนี้ (SHA-256):<br>
-      <span style="font-family:monospace;">${params.proof}</span><br>
+      <span style="font-family:monospace;">${escapeHtml(params.proof)}</span><br>
       ไพ่ใบนี้ถูกกำหนดจากวันที่ล่วงหน้า ไม่มีใครแก้ทีหลังได้ ตรวจสอบเองได้ที่หน้าไพ่ประจำวัน
     </div>
     <p style="font-size:12px;color:#6F5B4A;margin-top:24px;text-align:center;">
       คุณได้รับอีเมลนี้เพราะเคยกดสมัครรับดวงประจำวันไว้เอง<br>
-      <a href="${params.unsubUrl}" style="color:#8F5C1A;">ยกเลิกรับดวงประจำวัน</a> — กดครั้งเดียวจบ ไม่ต้องเข้าสู่ระบบ
+      <a href="${escapeHtml(params.unsubUrl)}" style="color:#8F5C1A;">ยกเลิกรับดวงประจำวัน</a> — กดครั้งเดียวจบ ไม่ต้องเข้าสู่ระบบ
     </p>
   `;
-  return baseLayout(content, `ไพ่นำทางวันนี้ ${params.cardNameTh} — SeerTarot`);
+  return baseLayout(content, `ไพ่นำทางวันนี้ ${escapeHtml(params.cardNameTh)} — SeerTarot`);
 }
 
 export function dailyDigestText(params: {

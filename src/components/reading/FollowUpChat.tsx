@@ -27,13 +27,6 @@ interface FollowUpChatProps {
   readingId: string;
   persona: Persona;
   sessionToken?: string | null;
-  readingSnapshot?: {
-    question?: string;
-    spreadId?: string;
-    summary?: string;
-    personaId?: string;
-    drawn?: Array<{ order: number; cardIndex: number; isReversed: boolean }>;
-  };
   /** ความสูงของกล่องแชท — หน้าแชทเต็มจอ (/reading/chat) ส่งค่าเต็มจอมาแทน */
   heightClass?: string;
 }
@@ -190,7 +183,6 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
   readingId,
   persona,
   sessionToken,
-  readingSnapshot,
   heightClass = "h-[660px] sm:h-[720px]",
 }) => {
   const { isEnglish } = useLocale();
@@ -283,9 +275,6 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
           lang: isEnglish ? "en" : "th",
           sessionToken: sessionToken || undefined,
           history: validHistory,
-          readingSnapshot: readingSnapshot || {
-            personaId: persona.id,
-          },
         }),
       });
 

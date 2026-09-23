@@ -58,24 +58,9 @@ const BodySchema = z.object({
     )
     .max(50)
     .optional(),
-  readingSnapshot: z
-    .object({
-      question: noInjection("คำถามตั้งต้น").max(1000).optional(),
-      spreadId: z.string().max(100).optional(),
-      summary: z.string().max(10000).optional(),
-      personaId: z.string().max(100).optional(),
-      drawn: z
-        .array(
-          z.object({
-            order: z.number().int().min(0).max(77),
-            cardIndex: z.number().int().min(0).max(77),
-            isReversed: z.boolean(),
-          })
-        )
-        .max(78)
-        .optional(),
-    })
-    .optional(),
+  // ⚠️ `readingSnapshot` ถูกถอดออกโดยตั้งใจ (A2-02) — ห้ามเพิ่มกลับ
+  //    ไคลเอนต์ส่งไพ่/ปรมาจารย์/สรุปคำทำนายอะไรมาก็ได้ ไม่ผ่าน Provably Fair ไม่ผ่านด่านกันฉีด prompt
+  //    ของที่เชื่อได้มีแค่ หน่วยความจำ ➔ KV ➔ โทเคนเซสชันที่มีลายเซ็น HMAC เท่านั้น
 });
 
 
@@ -347,7 +332,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
      * `.slice(0, 4000)` เอง ทำให้ prompt โตได้ถึง 80,000 ตัวอักษรต่อคำขอโดยไม่มีเพดานรวม
      */
     const history = selectReplayHistory(parsed.data.history || []);
-    const clientSnapshot = parsed.data.readingSnapshot;
 
     recordEvent("chat_message");
 
@@ -392,35 +376,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       }
     }
 
-    if (!record || !record.drawn) {
-      if (clientSnapshot && clientSnapshot.drawn && clientSnapshot.drawn.length > 0) {
-        record = {
-          id,
-          question: clientSnapshot.question || "คำถามทั่วไป",
-          spreadId: clientSnapshot.spreadId || "three-card",
-          personaId: clientSnapshot.personaId || "warm",
-          drawn: clientSnapshot.drawn,
-          result: {
-            opening: "",
-            cards: [],
-            connections: "",
-            summary: clientSnapshot.summary || "ภาพรวมพลังงานกำลังดำเนินไปสู่ทางออกที่ดี",
-            advice: [],
-            timing: "",
-            mood: "อบอุ่น",
-            yesNoAnswer: null,
-          },
-          status: "COMPLETED",
-          category: "general",
-          safetyFlag: "none",
-          commitment: "",
-          serverSeed: "",
-          createdAt: Date.now(),
-          intake: {},
-        };
-      }
-    }
-
     if (!record || !record.drawn || record.drawn.length === 0) {
       return NextResponse.json(
         {
@@ -456,6 +411,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const gazeDialogue = analyzeSpatialGazeDialogue(rawCards);
     const questionDiagnosis = diagnoseQuestionEnergy(userQuestion);
 
+    /*
+     * ข้อพึงระวังพิเศษ (สุขภาพ/กฎหมาย/พนัน/บุคคลที่สาม) — A2-03
+     * `/read` แทรก `promptGuard` ลง prompt แต่แชทเคยใช้แค่เคสวิกฤต แล้วทิ้ง verdict อื่นไป
+     * ถามต่อว่า "ขอเลขเด็ดงวดนี้" / "มะเร็งจะหายไหม" โมเดลจึงไม่มีข้อห้ามเลย
+     * ใช้ของข้อความนี้ก่อน ถ้าไม่มีให้ใช้ของคำถามตั้งต้นของรอบ
+     */
+    const safetyGuard = safetyVerdict.promptGuard || record.safetyGuard || "";
+    const guardSection = safetyGuard
+      ? isEnglish
+        ? `\n## Special Care Required In This Answer\n${safetyGuard}\n`
+        : `\n## ข้อพึงระวังพิเศษในการตอบ\n${safetyGuard}\n`
+      : "";
+
     const systemInstruction = isEnglish
       ? `${buildSystemPrompt(personaId, {
           persona: resolvePersona(overrideDoc, personaId),
@@ -471,6 +439,7 @@ ${cards.join("\n")}
 
 • Previous Reading Summary: "${record.result?.summary || "Energy is moving towards a positive resolution."}"
 ${gazeDialogue.dialogueNarrative ? `\n• Visual Card Dialogue:\n${gazeDialogue.dialogueNarrative}` : ""}
+${guardSection}
 
 ## Consultation Guidelines (Authentic American English Reader)
 1. **Persona Consistency**: Embody the chosen tarot reader persona with warmth, psychological depth, and intuitive wisdom. Speak naturally like a trusted mentor or sister in a private sanctum.
@@ -501,6 +470,7 @@ ${cards.join("\n")}
 • สรุปคำทำนายเดิมที่คุณเคยบอกไว้: "${record.result?.summary || "กำลังอยู่ในช่วงการเปลี่ยนแปลงที่ดี"}"
 ${gazeDialogue.dialogueNarrative ? `\n• บทสนทนาทางสายตาบนหน้าไพ่:\n${gazeDialogue.dialogueNarrative}` : ""}
 ${questionDiagnosis.promptDirective}
+${guardSection}
 
 ## กฎเหล็กการคิดและตอบคำถามต่อยอด (Think & Speak Like The World's Best Tarot Master)
 1. **การรักษาตัวตนและน้ำเสียง (Persona Consistency)**: สวมบทบาทแม่หมอตามบุคลิกที่เลือก 100% พูดจาเป็นธรรมชาติ ไหลลื่น เหมือนเพื่อนสนิท/พี่สาว/ผู้หยั่งรู้ นั่งคุยกันในห้องส่วนตัว

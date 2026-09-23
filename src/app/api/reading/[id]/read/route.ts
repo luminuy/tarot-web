@@ -405,7 +405,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             // แล้วไหลเข้าเส้นหักสิทธิ์ + เรียกโมเดลใหม่ = เว็บจ่ายค่า AI สองรอบ
             // `persistReading()` เลือก Redis ก่อนเสมอเมื่อตั้ง Upstash ไว้ (ดู server/store.ts)
             // จึงไม่กินโควตาเขียน KV ฟรีในสภาพแวดล้อมจริง
-            const completed = updateReading(id, { status: "COMPLETED", result: event.reading });
+            // ⚠️ คำอ่านสำรอง (usage = 0 · AI ล่มทุกโมเดล) ห้ามบันทึกเป็นผลถาวร (A2-01)
+            //    เดิมเก็บทุกกรณี ด่าน `if (record.result) return streamCached` ต้นไฟล์จึงตรึง
+            //    คำอ่านสำรองไว้ 2 ชม. — AI กลับมาแล้วกดโหลดใหม่ก็ยังได้คำอ่านสำรองเดิม
+            //    ไม่มีทางได้คำอ่านจริงของไพ่ชุดนั้นเลย (และแชทต่อยอดใช้ summary สำรองเป็นบริบท)
+            //    คืนสิทธิ์ไปแล้วด้านบน ➔ ปล่อยเซสชันว่างไว้ให้ /read ครั้งถัดไปเรียกโมเดลจริง
+            const completed = realReading
+              ? updateReading(id, { status: "COMPLETED", result: event.reading })
+              : (updateReading(id, { status: "FAILED" }), undefined);
             if (completed) {
               const { persistReading } = await import("@/server/store");
               await persistReading(completed).catch(() => {

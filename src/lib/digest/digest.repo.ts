@@ -24,6 +24,11 @@ export interface DigestRecipient {
 /**
  * คนที่ต้องส่งวันนี้ — ตัดคนที่มีแถวใน `digest_log` ของวันนี้ออกตั้งแต่ระดับ SQL
  * (กันยิงซ้ำชั้นแรก · ชั้นที่กันจริงจังคือ `claimDigestSlot()` ด้านล่าง)
+ *
+ * ⚠️ เรียงตาม "ได้รับล่าสุดเมื่อไหร่" ก่อน ไม่ใช่วันสมัคร (A2-10)
+ * เดิม `ORDER BY created_at ASC LIMIT 80` + รันวันละรอบ = ได้ 80 คนแรกชุดเดิมทุกวัน
+ * ผู้สมัครคนที่ 81 เป็นต้นไปไม่เคยได้อีเมลเลย · ตอนนี้คนที่ห่างหายนานสุด (หรือยังไม่เคยได้) มาก่อน
+ * คิวจึงหมุนครบทุกคนแม้คนสมัครเกินเพดานต่อรอบ
  */
 export async function listDigestRecipients(sendDate: string, limit: number): Promise<DigestRecipient[]> {
   const db = await getAppDB();
@@ -40,7 +45,7 @@ export async function listDigestRecipients(sendDate: string, limit: number): Pro
                 SELECT 1 FROM digest_log d
                  WHERE d.user_id = u.id AND d.send_date = ? AND d.channel = 'email'
               )
-        ORDER BY u.created_at ASC
+        ORDER BY COALESCE(u.digest_last_sent_at, 0) ASC, u.created_at ASC
         LIMIT ?`,
     )
     .bind(sendDate, limit)
@@ -72,6 +77,28 @@ export async function claimDigestSlot(userId: string, sendDate: string): Promise
     .bind(userId, sendDate, Date.now())
     .run();
   return Number(res?.meta?.changes ?? 0) > 0;
+}
+
+/** จำนวนผู้ที่ยังรอรับของวันนี้ — ใช้รายงานว่าคิวค้างเพราะชนเพดานต่อรอบ */
+export async function countPendingDigestRecipients(sendDate: string): Promise<number> {
+  const db = await getAppDB();
+  const row = await db
+    .prepare(
+      `SELECT COUNT(*) AS n
+         FROM users u
+        WHERE u.digest_email = 1
+          AND u.marketing_consent = 1
+          AND u.deleted_at IS NULL
+          AND u.email_verified = 1
+          AND u.email IS NOT NULL
+          AND NOT EXISTS (
+                SELECT 1 FROM digest_log d
+                 WHERE d.user_id = u.id AND d.send_date = ? AND d.channel = 'email'
+              )`,
+    )
+    .bind(sendDate)
+    .first<{ n: number }>();
+  return Number(row?.n ?? 0);
 }
 
 /** ปิดผลของรอบนี้ — เรียกทุกเส้นทางหลังจองแล้ว ไม่ว่าจะสำเร็จหรือไม่ */

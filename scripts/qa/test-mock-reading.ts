@@ -239,6 +239,58 @@ async function run() {
     check(`A3-02: ${client} บันทึกทิศจริงลงประวัติ (ไม่ใช่ isReversed: false ตายตัว)`, !/isReversed:\s*false/.test(src));
   }
 
+  // ── 8. ผลตรวจ 2026-09-23 คลื่น 3 — API คำทำนาย ───────────────────────
+  console.log("\n🛡️ 8. API คำทำนาย (A2)");
+  const readRouteSrc = fs.readFileSync(path.resolve("src/app/api/reading/[id]/read/route.ts"), "utf8");
+  check(
+    "A2-01: คำอ่านสำรอง (usage = 0) ไม่ถูกบันทึกเป็นผลถาวร",
+    /const completed = realReading\s*\?\s*updateReading\(id, \{ status: "COMPLETED", result: event\.reading \}\)/.test(readRouteSrc),
+  );
+  const chatSrc = fs.readFileSync(path.resolve("src/app/api/reading/[id]/chat/route.ts"), "utf8");
+  check(
+    "A2-03: แชทต่อยอดใส่ promptGuard (สุขภาพ/กฎหมาย/พนัน/บุคคลที่สาม) ลง prompt ทั้งสองภาษา",
+    /safetyVerdict\.promptGuard \|\| record\.safetyGuard/.test(chatSrc) && (chatSrc.match(/\$\{guardSection\}/g) ?? []).length === 2,
+  );
+  {
+    const { POST: clarify } = await import("../../src/app/api/reading/clarify/route");
+    const res = await clarify(
+      new Request("https://seertarot.net/api/reading/clarify", {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: "https://seertarot.net" },
+        body: JSON.stringify({ question: "อยากตาย ควรทำยังไงดี", lang: "th" }),
+      }),
+    );
+    const body = (await res.json()) as { needsClarification?: boolean; skipped?: boolean };
+    check("A2-04: คำถามวิกฤตไม่ถูกส่งไปสร้างคำถามกลับ (ไหลเข้า /start ที่แสดงสายด่วนทันที)", body.needsClarification === false && body.skipped === true);
+    const clarifySrc = fs.readFileSync(path.resolve("src/app/api/reading/clarify/route.ts"), "utf8");
+    check("A2-04: clarify เรียก checkQuestion ก่อน evaluateClarification", clarifySrc.indexOf("checkQuestion(") > 0 && clarifySrc.indexOf("checkQuestion(") < clarifySrc.indexOf("await evaluateClarification("));
+  }
+  const dailySrc = fs.readFileSync(path.resolve("src/app/api/daily-card/route.ts"), "utf8");
+  check(
+    "A2-06: /api/daily-card ไม่มี max-age=3600 หรือ SWR 86400 ตายตัวข้ามเที่ยงคืน",
+    /"Cache-Control": `public, max-age=\$\{browserMaxAge\}, s-maxage=\$\{secondsUntilMidnight\}, stale-while-revalidate=\$\{swr\}`/.test(dailySrc) &&
+      !/stale-while-revalidate=86400/.test(dailySrc.replace(/\/\*[\s\S]*?\*\//g, "")),
+  );
+  const stripSrc = fs.readFileSync(path.resolve("src/components/reading/DailyCardStrip.tsx"), "utf8");
+  check("A2-06: DailyCardStrip ตรวจ dateKey ของข้อมูลก่อนจำลงเครื่อง", /d\.dateKey === today/.test(stripSrc));
+  {
+    const { readWithIdleTimeout, StreamIdleTimeoutError } = await import("../../src/lib/ai/abort");
+    const stalled = new ReadableStream<Uint8Array>({ start() {} }).getReader();
+    let idleErr: unknown = null;
+    await readWithIdleTimeout(stalled, { idleMs: 50 }).catch((e) => (idleErr = e));
+    check("A2-15: สตรีมค้างเกินเพดานถูกตัดด้วย StreamIdleTimeoutError", idleErr instanceof StreamIdleTimeoutError);
+    const ac = new AbortController();
+    const stalled2 = new ReadableStream<Uint8Array>({ start() {} }).getReader();
+    const pending = readWithIdleTimeout(stalled2, { idleMs: 5000, signal: ac.signal }).catch((e) => e as Error);
+    ac.abort();
+    const abortErr = await pending;
+    check("A2-15: ลูกค้าปิดแท็บกลางสตรีมแล้วเลิกอ่านทันที (AbortError)", (abortErr as Error)?.name === "AbortError");
+    for (const f of ["src/lib/ai/gemini.ts", "src/lib/ai/groq.ts"]) {
+      const src = fs.readFileSync(path.resolve(f), "utf8");
+      check(`A2-15: ${f} อ่านสตรีมผ่าน readWithIdleTimeout (ไม่มี reader.read() เปล่า)`, /readWithIdleTimeout\(reader/.test(src) && !/await reader\.read\(\)/.test(src));
+    }
+  }
+
   // ── สรุป ────────────────────────────────────────────────────────────
   console.log("\n══════════════════════════════════════════════════════════════════");
   console.log(`ผลรวม: ✅ ${passed} ผ่าน · ❌ ${failed} ตก (ไพ่ในสำรับ ${DECK.length} ใบ)`);

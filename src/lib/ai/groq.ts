@@ -27,7 +27,7 @@ import {
 import { aiGatewayHeaders, groqChatCompletionsEndpoint } from "@/lib/ai/gateway";
 import { recordEvent } from "@/lib/stats/record";
 import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/lib/ai/prompt";
-import { linkAbortSignal } from "@/lib/ai/abort";
+import { linkAbortSignal, readWithIdleTimeout } from "@/lib/ai/abort";
 import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
 import type { ReadingEvent } from "@/lib/ai/types";
 
@@ -496,7 +496,9 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
       let buffer = "";
 
       while (true) {
-        const { value, done } = await reader.read();
+        // เพดานเวลาระหว่างก้อน (A2-15) — ตัวจับเวลาด้านบนถูกเคลียร์ตอนได้ headers แล้ว
+        // ค้างกลางสตรีมเกิน 20 วินาที ➔ ตัดทิ้งแล้วลองโมเดลถัดไป/ตกไป Gemini (ไม่ใช่หมุนค้าง)
+        const { value, done } = await readWithIdleTimeout(reader, { signal: ctx.abortSignal });
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });

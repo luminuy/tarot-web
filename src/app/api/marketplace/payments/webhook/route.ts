@@ -18,13 +18,12 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
     const rawBody = await request.text();
-    const signature =
-      request.headers.get("x-omise-signature") ||
-      request.headers.get("x-signature") ||
-      request.headers.get("signature");
+    // header ตามสเปก Omise (A2-12) — ชื่อ header ไม่สนตัวพิมพ์เล็กใหญ่
+    const signature = request.headers.get("omise-signature");
+    const timestamp = request.headers.get("omise-signature-timestamp");
 
     // Verify webhook signature (Zero-Trust Security Guard)
-    const isValid = verifyWebhookSignature(rawBody, signature);
+    const isValid = verifyWebhookSignature(rawBody, signature, timestamp);
     if (!isValid) {
       return NextResponse.json({ error: "ลายเซ็น Webhook ไม่ถูกต้อง (Invalid signature)" }, { status: 401 });
     }

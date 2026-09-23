@@ -14,14 +14,22 @@ export async function GET() {
     const daily = await getGlobalDailyCard();
     const secondsUntilMidnight = Math.min(
       86400,
-      Math.max(300, Math.floor((new Date(bangkokNextMidnightISO()).getTime() - Date.now()) / 1000)),
+      Math.max(30, Math.floor((new Date(bangkokNextMidnightISO()).getTime() - Date.now()) / 1000)),
     );
+    /*
+     * ⚠️ ทุกชั้นแคชต้องหมดอายุ "ไม่เกินเที่ยงคืนเวลาไทย" (A2-06)
+     * เดิมเบราว์เซอร์ได้ `max-age=3600` ตายตัว + `stale-while-revalidate=86400` ทุกชั้น
+     * เปิดเว็บ 23:40 แล้วกลับมา 00:20 ได้ไพ่ของเมื่อวานจาก HTTP cache แล้วถูกจำเป็น "ไพ่วันนี้" ทั้งวัน
+     * SWR จึงเหลือสั้น ๆ และไม่เลยเที่ยงคืน (ไพ่ของวันใหม่ต้องไม่เสิร์ฟของเก่าแม้แต่คนแรก)
+     */
+    const browserMaxAge = Math.min(3600, secondsUntilMidnight);
+    const swr = Math.min(60, secondsUntilMidnight);
 
     return NextResponse.json(daily, {
       headers: {
-        "Cache-Control": `public, max-age=3600, s-maxage=${secondsUntilMidnight}, stale-while-revalidate=86400`,
-        "CDN-Cache-Control": `public, s-maxage=${secondsUntilMidnight}, stale-while-revalidate=86400`,
-        "Cloudflare-CDN-Cache-Control": `public, s-maxage=${secondsUntilMidnight}, stale-while-revalidate=86400`,
+        "Cache-Control": `public, max-age=${browserMaxAge}, s-maxage=${secondsUntilMidnight}, stale-while-revalidate=${swr}`,
+        "CDN-Cache-Control": `public, s-maxage=${secondsUntilMidnight}, stale-while-revalidate=${swr}`,
+        "Cloudflare-CDN-Cache-Control": `public, s-maxage=${secondsUntilMidnight}, stale-while-revalidate=${swr}`,
       },
     });
   } catch (err) {

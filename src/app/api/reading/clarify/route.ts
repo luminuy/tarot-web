@@ -4,6 +4,8 @@ import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier } from "@/lib/utils/rate-limit";
 import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
 import { evaluateClarification } from "@/lib/ai/clarify";
+import { checkQuestion } from "@/lib/safety/guardrails";
+import { looksLikePromptInjection } from "@/lib/ai/prompt-guard";
 
 export const runtime = "nodejs";
 
@@ -58,6 +60,22 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const parsed = BodySchema.safeParse(body);
     if (!parsed.success) {
+      return NextResponse.json({ needsClarification: false, skipped: true });
+    }
+
+    /*
+     * 🚨 กฎเหล็กข้อ 6 — ด่านวิกฤตต้องมาก่อนเรียกโมเดลทุกครั้ง (A2-04)
+     * เดิมคำถามสั้นทุกคำถามถูกส่งไปสร้าง "คำถามกลับ" ก่อนถึง /start ซึ่งเป็นด่านวิกฤตเดียว
+     * พิมพ์ "อยากตาย ควรทำยังไงดี" ได้คำถามกลับเหมือนดูดวงปกติ ต้องตอบก่อนถึงจะเห็นสายด่วน 1323
+     * ➔ ข้ามการถามกลับ ให้ไหลเข้า /start ซึ่งบล็อกและแสดงสายด่วนทันที (ไม่ส่งข้อความวิกฤตออกไปภายนอก)
+     * ข้อความที่พยายามปิดแท็บของ prompt ก็ไม่ส่งเข้าโมเดลเช่นกัน (/start จะปฏิเสธเอง)
+     */
+    const { question, situation, nickname, lang } = parsed.data;
+    const combined = [question, situation, nickname].filter(Boolean).join(" ");
+    if (
+      checkQuestion(combined, lang).block ||
+      [question, situation, nickname].some((v) => v && looksLikePromptInjection(v))
+    ) {
       return NextResponse.json({ needsClarification: false, skipped: true });
     }
 
