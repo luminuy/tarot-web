@@ -7,6 +7,7 @@ import { SITE_ORIGIN } from "../../src/lib/config/site";
 import { assertNonEmptyCorpus } from "./lib/corpus";
 import { ZODIAC_SIGNS } from "../../src/data/zodiac";
 import { ZODIAC_ASPECTS, zodiacDistance } from "../../src/data/zodiac-compat";
+import { computeZodiacDaily } from "../../src/lib/tarot/zodiac-daily";
 import { CARD_SUMMARIES } from "../../src/data/cards/summary";
 import { decanRanges, findThaiZodiacByDate, findZodiacByDate, thaiRanges } from "../../src/lib/tarot/zodiac";
 
@@ -431,6 +432,32 @@ assert(
     assert(copy.th.advice.includes("{a}") && copy.en.advice.includes("{a}"), `มุม ${d}: คำแนะนำต้องอ้างไพ่ {a}`);
     assert(!/\p{Extended_Pictographic}/u.test(Object.values(copy.th).join(" ") + Object.values(copy.en).join(" ")), `มุม ${d}: ห้ามอิโมจิ`);
   }
+
+  // ดวงรายวัน 12 ราศี + ไพ่ประจำฤดูราศี: คำนวณซ้ำได้ · ครบ 12 · ฤดูถูกต้อง · ไม่เปลี่ยนกลางฤดูตอนข้ามปี
+  const d1 = await computeZodiacDaily("2026-09-24");
+  const d1again = await computeZodiacDaily("2026-09-24");
+  assert(JSON.stringify(d1) === JSON.stringify(d1again), "ดวงรายวัน: วันเดียวกันต้องได้ผลเดิมทุกไบต์");
+  assert(d1.signs.length === 12 && new Set(d1.signs.map((c) => c.sign)).size === 12, "ดวงรายวัน: ครบ 12 ราศีไม่ซ้ำ");
+  assert(d1.signs.every((c) => cardById.has(c.cardId) && /^[0-9a-f]{64}$/.test(c.proof)), "ดวงรายวัน: ไพ่มีจริงทุกใบ + มี proof SHA-256");
+  assert(
+    d1.season.tropical === "libra" && d1.season.thai === "virgo" &&
+      d1.season.nextTropical.sign === "scorpio" && d1.season.nextThai.sign === "libra",
+    `ฤดูราศี 24 ก.ย.: สากลตุลย์ ไทยกันย์ (ได้ ${d1.season.tropical}/${d1.season.thai})`,
+  );
+  const d2 = await computeZodiacDaily("2026-09-25");
+  assert(d1.signs.map((c) => c.cardId).join() !== d2.signs.map((c) => c.cardId).join(), "ดวงรายวัน: วันถัดไปต้องได้ชุดใหม่");
+  assert(d1.season.card.cardId === d2.season.card.cardId, "ไพ่ประจำฤดูต้องคงเดิมตลอดฤดู");
+  const capDec = await computeZodiacDaily("2026-12-28");
+  const capJan = await computeZodiacDaily("2027-01-05");
+  assert(capDec.season.card.cardId === capJan.season.card.cardId, "ไพ่ประจำฤดูมังกรต้องไม่เปลี่ยนตอนข้ามปีใหม่");
+  let badKey = false;
+  try {
+    await computeZodiacDaily("2026-13-40");
+  } catch {
+    badKey = true;
+  }
+  assert(badKey, "ดวงรายวัน: วันที่ผิดรูปต้องโยน error (ห้ามเดาไพ่)");
+  assert(fs.existsSync(path.join(process.cwd(), "src/app/api/daily-card/zodiac/route.ts")), "ต้องมี API /api/daily-card/zodiac");
 
   // หน้าราศีต้องมีจริงทั้งสองภาษา + อยู่ใน sitemap
   for (const f of [

@@ -1,5 +1,6 @@
 import { ZodiacFinder, type ZodiacFinderItem } from "@/components/encyclopedia/ZodiacFinder";
 import { ZodiacCompatibility } from "@/components/encyclopedia/ZodiacCompatibility";
+import { ZodiacDaily, type ZodiacDailySignName } from "@/components/encyclopedia/ZodiacDaily";
 import { LocaleProvider } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/types";
 
@@ -20,6 +21,23 @@ export function ZodiacCompatibilityRoot({ signs, locale }: { signs: ZodiacFinder
   return (
     <LocaleProvider forcedLocale={locale}>
       <ZodiacCompatibility signs={signs} />
+    </LocaleProvider>
+  );
+}
+
+/** ✦ ดวงรายวัน 12 ราศี + ไพ่ประจำฤดูราศี — `sign` ไม่ส่ง = หน้ารวม · ส่ง = หน้ารายราศี */
+export function ZodiacDailyRoot({
+  signs,
+  sign,
+  locale,
+}: {
+  signs: ZodiacDailySignName[];
+  sign?: string;
+  locale: Locale;
+}) {
+  return (
+    <LocaleProvider forcedLocale={locale}>
+      <ZodiacDaily signs={signs} sign={sign} />
     </LocaleProvider>
   );
 }

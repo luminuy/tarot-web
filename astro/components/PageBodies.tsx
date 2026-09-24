@@ -95,23 +95,25 @@ export function ZodiacIndexBodyRoot({
   locale,
   finder,
   compat,
+  daily,
 }: {
   locale: Locale;
   finder: ReactNode;
   compat: ReactNode;
+  daily: ReactNode;
 }) {
   return (
     <LocaleProvider forcedLocale={locale}>
-      <ZodiacIndexBody locale={locale} finder={finder} compat={compat} />
+      <ZodiacIndexBody locale={locale} finder={finder} compat={compat} daily={daily} />
     </LocaleProvider>
   );
 }
 
-/** ✦ ไพ่ประจำราศีรายราศี 12 หน้า — ไม่มีสถานะ จึงไม่ใช้ JS ของตัวเองเลย */
-export function ZodiacSignBodyRoot({ sign, locale }: { sign: ZodiacSign; locale: Locale }) {
+/** ✦ ไพ่ประจำราศีรายราศี 12 หน้า — ส่วนเดียวที่ใช้ JS คือไพ่รายวัน (ส่งเข้ามาทาง slot) */
+export function ZodiacSignBodyRoot({ sign, locale, daily }: { sign: ZodiacSign; locale: Locale; daily: ReactNode }) {
   return (
     <LocaleProvider forcedLocale={locale}>
-      <ZodiacSignBody sign={sign} locale={locale} />
+      <ZodiacSignBody sign={sign} locale={locale} daily={daily} />
     </LocaleProvider>
   );
 }
