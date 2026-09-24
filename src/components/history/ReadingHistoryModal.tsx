@@ -31,6 +31,8 @@ interface MonthlySummaryResult {
   synthesis: string;
   lifeLessons: string[];
   empowermentQuote: string;
+  /** สรุปจากประวัติจริงโดยไม่ผ่าน AI (แม่หมอ AI ไม่ว่าง) — ต้องบอกผู้ใช้ตรง ๆ */
+  fallback?: boolean;
 }
 
 const CATEGORY_MAP_TH: Record<string, string> = {
@@ -330,6 +332,14 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                   {monthlySummary.title}
                 </h4>
               </div>
+
+              {monthlySummary.fallback && (
+                <p role="status" className="text-[13px] text-muted font-serif-th leading-relaxed">
+                  {isEn
+                    ? "✦ The AI oracle is busy right now, so this summary was worked out directly from your saved readings. Try again later for the AI version."
+                    : "✦ ตอนนี้แม่หมอ AI ไม่ว่าง สรุปนี้จึงคำนวณจากประวัติการเปิดไพ่ของคุณโดยตรง ลองกดสรุปใหม่ภายหลังเพื่อรับฉบับจากแม่หมอ AI"}
+                </p>
+              )}
 
               <p className="text-xs text-ink font-serif-th leading-relaxed italic">
                 “{monthlySummary.synthesis}”

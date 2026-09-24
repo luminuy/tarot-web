@@ -158,9 +158,19 @@ async function main() {
     geminiSrc.includes('recordEvent("ai_truncated:gemini")') &&
       geminiSrc.includes('recordEvent("ai_schema_fail:gemini")'),
   );
+  /*
+   * INC-0155 → 2026-09-24: เขียนไม่จบทุกโมเดล = คำอ่านสำรอง **เต็มฉบับ** (ไม่ใช่ error อีกต่อไป)
+   * สิ่งที่ INC-0155 ห้ามยังห้ามอยู่: ห้ามเติมคำอ่านครึ่งทางด้วยข้อความสำเร็จรูป และห้ามหักสิทธิ์
+   * ➔ ตรวจว่าเส้นนี้เรียกคำอ่านสำรองเต็มฉบับ (usage = 0 · route คืนสิทธิ์) และยังจดสถิติไว้
+   */
   check(
-    "gemini.ts ส่ง error ให้ผู้ใช้โหลดใหม่เมื่อไพ่ไม่ครบ แทนการยัดคำอ่านสำรอง",
-    /yield \{\s*type: "error"/.test(geminiSrc) && geminiSrc.includes("ai_incomplete_reading"),
+    "gemini.ts เขียนไม่จบทุกโมเดล ➔ คำอ่านสำรองเต็มฉบับ (ไม่เติมของครึ่งทาง · ไม่หักสิทธิ์) + จดสถิติ",
+    geminiSrc.includes("ai_incomplete_reading") &&
+      geminiSrc.includes('streamMockGeminiReading(ctx, "incomplete_output")') &&
+      // ตัดคอมเมนต์ทิ้งก่อนตรวจ — คอมเมนต์เล่าประวัติข้อความเก่าไว้ได้ แต่โค้ดห้ามมี
+      !/cardsResult\.push|FALLBACK_TEXT|จงเชื่อมั่นในสัญชาตญาณ/.test(
+        geminiSrc.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, ""),
+      ),
   );
   check(
     "gemini.ts ลองโมเดลถัดไปก่อนยอมแพ้ (ลูปครอบทั้งยิง+สตรีม+ตรวจ ไม่ใช่แค่ตอนขอ response)",

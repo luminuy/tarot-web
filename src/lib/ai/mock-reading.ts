@@ -29,8 +29,9 @@ const DEFAULT_USAGE: UsageInfo = {
 /**
  * เหตุผลที่ต้องเสิร์ฟคำอ่านสำรอง — จดสถิติแยกกัน เพราะความหมายต่างกันคนละเรื่อง
  * `no_api_key` = ตั้งค่าผิด/ลืมใส่คีย์ (ต้องรีบแก้) · `all_models_down` = ปลายทางล่มชั่วคราว
+ * `incomplete_output` = โมเดลตอบแต่เขียนไม่จบทุกตัว (โดนตัด/JSON ไม่ครบ) — ทิ้งของที่ขาดทั้งหมดแล้วใช้คำอ่านสำรองเต็มฉบับ
  */
-export type MockReason = "no_api_key" | "all_models_down";
+export type MockReason = "no_api_key" | "all_models_down" | "incomplete_output";
 
 
 
@@ -459,7 +460,7 @@ function buildSummary(views: DrawnView[], lang: Lang): string {
   return parts.join(" ");
 }
 
-const ADVICE: Record<string, Record<Lang, string[]>> = {
+export const MOCK_ADVICE: Record<string, Record<Lang, string[]>> = {
   ไฟ: {
     th: ["เลือกเรื่องที่ค้างอยู่มา 1 เรื่อง แล้วเริ่มลงมือภายใน 24 ชั่วโมงนี้", "ก่อนคุยเรื่องสำคัญ รอให้ใจเย็นลงสักคืนแล้วค่อยพูด"],
     en: ["Pick one thing you have been putting off and start it within the next 24 hours.", "Before any important conversation, sleep on it once so you speak from a calm place."],
@@ -485,7 +486,7 @@ const MINDFUL_EN: Record<string, string> = {
   ดิน: "🧘 One-minute practice: feet flat on the floor, notice the weight of your body, then write down the smallest next step.",
 };
 
-const TIMING: Record<string, Record<Lang, string>> = {
+export const MOCK_TIMING: Record<string, Record<Lang, string>> = {
   ไฟ: { th: "ภายใน 1-2 สัปดาห์นี้", en: "within the next one to two weeks" },
   น้ำ: { th: "ภายใน 1 เดือนนี้", en: "within about a month" },
   ลม: { th: "เร็ว ๆ นี้ภายในไม่กี่วัน", en: "within the next few days" },
@@ -590,7 +591,7 @@ export async function* streamMockGeminiReading(
   const mindful = isEn
     ? MINDFUL_EN[dominantElement] ?? MINDFUL_EN.ดิน
     : generateMindfulMicroRitual(lacking, dominantElement).adviceString;
-  const adviceList = [...(ADVICE[dominantElement] ?? ADVICE.ดิน)[lang], mindful];
+  const adviceList = [...(MOCK_ADVICE[dominantElement] ?? MOCK_ADVICE.ดิน)[lang], mindful];
 
   const light = views.filter((v) => v.tone === "light").length;
   const shadow = views.filter((v) => v.tone === "shadow").length;
@@ -601,7 +602,7 @@ export async function* streamMockGeminiReading(
     connections,
     summary,
     advice: adviceList,
-    timing: (TIMING[dominantElement] ?? TIMING.ดิน)[lang],
+    timing: (MOCK_TIMING[dominantElement] ?? MOCK_TIMING.ดิน)[lang],
     // mood เป็น enum ภายในสำหรับเลือกโทนสีหน้าเว็บ ไม่ได้แสดงผลเป็นข้อความ จึงคงค่าไทยไว้ทั้งสองภาษา
     mood: shadow > light ? "ท้าทาย" : light > shadow ? "อบอุ่น" : "ครุ่นคิด",
     yesNoAnswer,
