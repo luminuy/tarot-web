@@ -81,6 +81,12 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
   const [monthlySummary, setMonthlySummary] = useState<MonthlySummaryResult | null>(null);
   const [summaryError, setSummaryError] = useState<string | null>(null);
 
+  // สลับภาษาแล้ว สรุปเดิมเป็นอีกภาษา — ล้างทิ้งให้ผู้ใช้กดสรุปใหม่ในภาษาที่อ่านอยู่
+  useEffect(() => {
+    setMonthlySummary(null);
+    setSummaryError(null);
+  }, [isEn]);
+
   // ⚠️ ต้องมีตัวนับรุ่น — `fetchServerReadings()` ที่ยิงไปตอนเปิดโมดัลใช้เวลาเดินทาง
   // ถ้าระหว่างนั้นผู้ใช้กด "ลบทั้งหมด" หรือลบทีละรายการ คำตอบเก่าที่กลับมาทีหลัง
   // จะ setReadings ทับ **และ** เขียนรายการที่เพิ่งลบกลับลง localStorage
@@ -169,9 +175,9 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
     soundManager.playOracleRevealSound();
 
     try {
-      const res = await fetch("/api/journal/monthly-summary", {
+      // ภาษาส่งทาง query — เซิร์ฟเวอร์อ่านประวัติจากบัญชีเอง ไม่รับจากเบราว์เซอร์แล้ว (A2-08)
+      const res = await fetch(`/api/journal/monthly-summary?lang=${isEn ? "en" : "th"}`, {
         method: "POST",
-        // เซิร์ฟเวอร์อ่านประวัติจากบัญชีเอง ไม่รับจากเบราว์เซอร์แล้ว (A2-08)
         headers: { "Content-Type": "application/json" },
         body: "{}",
       });
@@ -326,7 +332,13 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
 
               <div className="flex items-center gap-2">
                 <span className="btn-gold-glass text-xs px-2.5 py-0.5 font-bold font-mono text-[13px]">
-                  {isEn ? `Dominant: ${monthlySummary.dominantElement}` : `ธาตุ${monthlySummary.dominantElement}เด่น`}
+                  {isEn
+                    ? monthlySummary.dominantElement === "Balanced"
+                      ? "Balanced elements"
+                      : `Dominant: ${monthlySummary.dominantElement}`
+                    : monthlySummary.dominantElement === "สมดุล"
+                      ? "ธาตุสมดุล"
+                      : `ธาตุ${monthlySummary.dominantElement}เด่น`}
                 </span>
                 <h4 className="font-serif-th text-xs sm:text-sm font-bold text-ink truncate">
                   {monthlySummary.title}
