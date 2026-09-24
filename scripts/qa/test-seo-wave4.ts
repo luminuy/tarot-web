@@ -7,7 +7,7 @@ import { SITE_ORIGIN } from "../../src/lib/config/site";
 import { assertNonEmptyCorpus } from "./lib/corpus";
 import { ZODIAC_SIGNS } from "../../src/data/zodiac";
 import { CARD_SUMMARIES } from "../../src/data/cards/summary";
-import { decanRanges, findZodiacByDate } from "../../src/lib/tarot/zodiac";
+import { decanRanges, findThaiZodiacByDate, findZodiacByDate, thaiRanges } from "../../src/lib/tarot/zodiac";
 
 console.log("\n🧪 กำลังทดสอบระบบ SEO Wave 4: Differentiators (Birth Card, Positions Table, Learn Tarot & Readers)\n");
 
@@ -388,6 +388,29 @@ assert(
     "ช่วงที่ 2 ของมังกรต้องข้ามปี 31 ธ.ค. – 9 ม.ค.",
   );
   assert(ranges.get("aquarius")?.[2]?.end.day === 18, "ช่วงสุดท้ายของกุมภ์ต้องจบ 18 ก.พ.");
+
+  // ราศีแบบไทย (สุริยยาตร์): ทุกวันต้องได้ราศีเดียว · เจ้าเรือนแบบไทยตรงกับไพ่ · ต่างจากสากลแค่ 3 ราศี
+  let thaiUnmapped = 0;
+  for (let m = 1; m <= 12; m++) for (let d = 1; d <= days[m - 1]; d++) if (!findThaiZodiacByDate(ZODIAC_SIGNS, m, d)) thaiUnmapped++;
+  assert(thaiUnmapped === 0, `ราศีไทย: ทุกวันในปีต้องหาราศีเจอ (หาไม่เจอ ${thaiUnmapped} วัน)`);
+  const thaiAt = (m: number, d: number) => findThaiZodiacByDate(ZODIAC_SIGNS, m, d)?.id ?? "none";
+  for (const [m, d, want] of [
+    [4, 1, "pisces"], [4, 13, "pisces"], [4, 14, "aries"], [5, 14, "aries"], [5, 15, "taurus"],
+    [1, 13, "sagittarius"], [1, 14, "capricorn"], [12, 31, "sagittarius"], [2, 29, "aquarius"], [3, 14, "pisces"],
+  ] as const) {
+    assert(thaiAt(m, d) === want, `ราศีไทย ${d}/${m} ต้องได้ ${want} (ได้ ${thaiAt(m, d)})`);
+  }
+  assert(findThaiZodiacByDate(ZODIAC_SIGNS, 2, 30) === undefined, "ราศีไทย 30/2 ไม่มีจริง ต้องคืน undefined");
+  assert(thaiRanges(ZODIAC_SIGNS).get("sagittarius")?.end.day === 13, "ราศีธนูแบบไทยต้องจบ 13 ม.ค. (ข้ามปี)");
+  const differentRulers = ZODIAC_SIGNS.filter((s) => s.thai.rulerCardId !== s.rulerCardId).map((s) => s.id).sort();
+  assert(
+    differentRulers.join(",") === "aquarius,pisces,scorpio",
+    `เจ้าเรือนแบบไทยต้องต่างจากสากลแค่ พิจิก กุมภ์ มีน (ได้ ${differentRulers.join(",")})`,
+  );
+  for (const sign of ZODIAC_SIGNS) {
+    const ruler = cardById.get(sign.thai.rulerCardId);
+    assert(norm(ruler?.astrology ?? "") === norm(sign.thai.rulerTh), `${sign.id}: ไพ่เจ้าเรือนแบบไทยต้องตรงกับ astrology ของไพ่ (${sign.thai.rulerCardId})`);
+  }
 
   // หน้าราศีต้องมีจริงทั้งสองภาษา + อยู่ใน sitemap
   for (const f of [

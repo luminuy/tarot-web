@@ -18,7 +18,7 @@ import { clampDescription, pickTitle } from "@/lib/config/meta-length";
 import { buildAlternates, localizedUrl, noindexAlternates } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
-import { decanRanges, formatMonthDay, ZODIAC_INDEX_PATH, zodiacSignPath } from "@/lib/tarot/zodiac";
+import { decanRanges, formatMonthDay, thaiRanges, ZODIAC_INDEX_PATH, zodiacSignPath } from "@/lib/tarot/zodiac";
 import { localeHref } from "@/lib/i18n/paths";
 import type { Locale } from "@/lib/i18n/types";
 
@@ -40,6 +40,12 @@ function card(id: string): CardSummary {
 }
 
 const RANGES = decanRanges(ZODIAC_SIGNS);
+const THAI_RANGES = thaiRanges(ZODIAC_SIGNS);
+
+function thaiSignRange(sign: ZodiacSign, isEnglish: boolean): string {
+  const r = THAI_RANGES.get(sign.id);
+  return r ? `${formatMonthDay(r.start, isEnglish)} – ${formatMonthDay(r.end, isEnglish)}` : "";
+}
 
 function signRange(sign: ZodiacSign, isEnglish: boolean): string {
   const r = RANGES.get(sign.id);
@@ -63,6 +69,7 @@ export const ZODIAC_FINDER_ITEMS: ZodiacFinderItem[] = ZODIAC_SIGNS.map((s) => {
     nameEn: s.nameEn,
     major: slim(s.majorCardId),
     decans: s.decans.map((d) => ({ start: d.start, card: slim(d.cardId) })),
+    thai: { start: s.thai.start },
   };
 });
 
@@ -205,8 +212,8 @@ const INDEX_FAQ_TH: SeoFaqItem[] = [
     a: "คือไพ่ทาโรต์ที่ผูกกับราศีเกิดของคุณตามระบบ Golden Dawn ซึ่งเป็นระบบที่ผู้สร้างไพ่ 1909 Rider-Waite ใช้ออกแบบสำรับ แต่ละราศีมีไพ่ชุดใหญ่ประจำราศี 1 ใบ ไพ่ของดาวผู้ครองราศี 1 ใบ และไพ่ชุดเล็กประจำช่วงวันเกิดอีก 3 ใบ",
   },
   {
-    q: "ทำไมราศีในหน้านี้ไม่ตรงกับราศีที่เคยรู้?",
-    a: "หน้านี้ใช้ราศีแบบสากล (Tropical) ที่อิงฤดูกาล เช่น ราศีเมษเริ่ม 21 มีนาคม ส่วนโหราศาสตร์ไทยใช้ราศีตามตำแหน่งดาวจริง (Sidereal) ซึ่งเลื่อนไปราว 24 วัน เช่น ราศีเมษแบบไทยเริ่มราว 13–14 เมษายน ไพ่ทาโรต์ถูกออกแบบคู่กับระบบสากล จึงควรใช้ราศีแบบสากลเมื่อดูไพ่ประจำราศี",
+    q: "ราศีแบบสากลกับราศีแบบไทยต่างกันอย่างไร ควรใช้แบบไหน?",
+    a: "ราศีแบบสากล (Tropical) อิงฤดูกาล เช่น ราศีเมษเริ่ม 21 มีนาคม ส่วนโหราศาสตร์ไทยใช้ราศีตามตำแหน่งดาวจริง (สุริยยาตร์ · Sidereal) ซึ่งช้ากว่าราว 24 วัน เช่น ราศีเมษแบบไทยเริ่มราว 14 เมษายน ช่วงวันสงกรานต์ ไพ่ทาโรต์ถูกออกแบบคู่กับระบบสากล แต่เครื่องหาราศีในหน้านี้บอกให้ทั้งสองแบบ ลองอ่านไพ่ของทั้งสองราศีแล้วดูว่าใบไหนตรงกับตัวคุณมากกว่า",
   },
   {
     q: "ไพ่ประจำช่วงวันเกิด (Decan) คืออะไร?",
@@ -224,8 +231,8 @@ const INDEX_FAQ_EN: SeoFaqItem[] = [
     a: "It is the tarot card linked to your sun sign in the Golden Dawn system, the system the creators of the 1909 Rider-Waite deck used. Each sign has one Major Arcana sign card, one card for its ruling planet, and three Minor Arcana decan cards.",
   },
   {
-    q: "Why is my sign different from Thai astrology?",
-    a: "This page uses the tropical zodiac, tied to the seasons (Aries starts March 21). Thai astrology uses the sidereal zodiac, which sits about 24 days later. Tarot was designed alongside the tropical system, so use your tropical sign for tarot correspondences.",
+    q: "What is the difference between the western and Thai zodiac?",
+    a: "The western (tropical) zodiac follows the seasons, so Aries starts March 21. Thai astrology follows the actual stars (sidereal), about 24 days later, so Thai Aries starts around April 14. Tarot was designed with the western system, but the finder on this page shows both. Read both cards and see which feels more like you.",
   },
   {
     q: "What is a decan card?",
@@ -296,7 +303,11 @@ export function ZodiacIndexBody({ locale, finder }: { locale: Locale; finder: Re
                     <span className="text-sm font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
                       {isEnglish ? sign.nameEn : sign.nameTh}
                     </span>
-                    <span className="text-[13px] text-muted font-sans leading-snug">{signRange(sign, isEnglish)}</span>
+                    <span className="text-[13px] text-muted font-sans leading-snug">
+                      {isEnglish ? "Western" : "สากล"} {signRange(sign, isEnglish)}
+                      <br />
+                      {isEnglish ? "Thai" : "ไทย"} {thaiSignRange(sign, isEnglish)}
+                    </span>
                     <span className="text-xs font-serif-th font-semibold text-gold-ink">{major.nameEn}</span>
                   </Link>
                 </li>
@@ -335,10 +346,12 @@ export function ZodiacIndexBody({ locale, finder }: { locale: Locale; finder: Re
                 <li><strong>Ruling planet card</strong> — the Major Arcana card of the planet that rules the sign.</li>
                 <li><strong>Decan cards</strong> — the 2 to 10 of each suit, three per sign, matching its element (Fire = Wands, Earth = Pentacles, Air = Swords, Water = Cups).</li>
               </ol>
-              <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-2">Tropical, not Thai sidereal</h3>
+              <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-2">Western and Thai zodiac</h3>
               <p>
-                Dates here follow the tropical zodiac. If you know your sign from Thai astrology, it may be the
-                previous sign here. Sign changeover days can shift by one day depending on the year.
+                The Golden Dawn built these links on the western (tropical) zodiac, so decan cards follow western
+                dates. Thai astrology keeps the same twelve signs but counts them from the actual stars, about 24
+                days later, and uses the traditional rulers: Mars for Scorpio, Saturn for Aquarius and Jupiter for
+                Pisces. Each sign page lists both date ranges. Changeover days can shift by one day depending on the year.
               </p>
             </div>
           ) : (
@@ -354,10 +367,12 @@ export function ZodiacIndexBody({ locale, finder }: { locale: Locale; finder: Re
                 <li><strong>ไพ่ดาวผู้ครองราศี</strong> — ไพ่ชุดใหญ่ของดาวเคราะห์ที่ครองราศีนั้น</li>
                 <li><strong>ไพ่ประจำช่วงวันเกิด (Decan)</strong> — ไพ่เลข 2–10 ของชุดที่ตรงกับธาตุของราศี ราศีละ 3 ใบ (ไฟ = ไม้เท้า · ดิน = เหรียญ · ลม = ดาบ · น้ำ = ถ้วย)</li>
               </ol>
-              <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-2">ใช้ราศีแบบสากล ไม่ใช่แบบไทย</h3>
+              <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-2">ราศีแบบสากลกับราศีแบบไทย</h3>
               <p>
-                วันที่ในหน้านี้เป็นราศีแบบสากล (Tropical) ถ้าคุณรู้ราศีเกิดจากโหราศาสตร์ไทย ราศีในหน้านี้อาจเป็นราศีก่อนหน้านั้นหนึ่งราศี
-                และวันรอยต่อระหว่างราศีอาจคลาดได้ 1 วันตามแต่ละปี
+                Golden Dawn ผูกไพ่เข้ากับราศีแบบสากล (Tropical) ไพ่ประจำช่วงวันเกิดจึงใช้วันที่แบบสากล
+                ส่วนโหราศาสตร์ไทยใช้ 12 ราศีเดียวกัน แต่นับตามตำแหน่งดาวจริง (สุริยยาตร์) ซึ่งช้ากว่าราว 24 วัน
+                และใช้เจ้าเรือนแบบดั้งเดิม คือ พิจิกมีดาวอังคาร กุมภ์มีดาวเสาร์ และมีนมีดาวพฤหัสบดีเป็นเจ้าเรือน
+                หน้าของแต่ละราศีจึงบอกช่วงวันเกิดไว้ทั้งสองแบบ วันรอยต่อระหว่างราศีอาจคลาดได้ 1 วันตามแต่ละปี
               </p>
             </div>
           )}
@@ -392,7 +407,8 @@ export function ZodiacSignBody({ sign, locale }: { sign: ZodiacSign; locale: Loc
   ]);
 
   const facts = [
-    { label: isEnglish ? "Dates" : "ช่วงวันเกิด", value: signRange(sign, isEnglish) },
+    { label: isEnglish ? "Western dates" : "วันเกิดแบบสากล", value: signRange(sign, isEnglish) },
+    { label: isEnglish ? "Thai dates" : "วันเกิดแบบไทย", value: thaiSignRange(sign, isEnglish) },
     { label: isEnglish ? "Element" : "ธาตุ", value: isEnglish ? `${element.en} · ${element.suitEn}` : `${element.th} · ${element.suitTh}` },
     { label: isEnglish ? "Quality" : "ลักษณะราศี", value: isEnglish ? modality.en : modality.th },
     { label: isEnglish ? "Ruling planet" : "ดาวผู้ครอง", value: isEnglish ? sign.rulerEn : sign.rulerTh },
@@ -426,7 +442,7 @@ export function ZodiacSignBody({ sign, locale }: { sign: ZodiacSign; locale: Loc
         />
 
         {/* ข้อมูลราศีโดยย่อ */}
-        <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <dl className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {facts.map((f) => (
             <div key={f.label} className="altar-card-porcelain rounded-xl p-3 text-center space-y-1">
               <dt className="text-xs font-serif-th font-semibold text-muted">{f.label}</dt>
@@ -450,6 +466,38 @@ export function ZodiacSignBody({ sign, locale }: { sign: ZodiacSign; locale: Loc
             />
           </div>
           <p className="text-sm text-ink font-sans leading-relaxed text-center max-w-2xl mx-auto">{copy.advice}</p>
+        </section>
+
+        {/* ในโหราศาสตร์ไทย — เจ้าเรือนต่างจากสากลเฉพาะพิจิก กุมภ์ มีน */}
+        <section aria-labelledby="zodiac-thai" className="altar-panel rounded-2xl p-5 sm:p-8 space-y-4">
+          <h2 id="zodiac-thai" className="text-lg sm:text-xl font-serif-th font-bold text-ink">
+            {isEnglish ? `${sign.nameEn} in Thai astrology` : `${sign.nameTh}ในโหราศาสตร์ไทย`}
+          </h2>
+          <p className="text-sm text-muted font-sans leading-relaxed">
+            {isEnglish
+              ? `In Thai astrology the sun enters ${sign.nameEn} around ${thaiSignRange(sign, true)}, about 24 days later than the western dates, because Thai astrology follows the actual stars.`
+              : `ในโหราศาสตร์ไทย ดวงอาทิตย์อยู่ใน${sign.nameTh}ราว ${thaiSignRange(sign, false)} ช้ากว่าแบบสากลประมาณ 24 วัน เพราะโหราศาสตร์ไทยนับตามตำแหน่งดาวจริง ถ้าคุณเกิดในช่วงนี้ ไพ่ ${major.nameEn} ก็เป็นไพ่ประจำราศีของคุณตามดวงแบบไทยเช่นกัน`}
+          </p>
+          {sign.thai.rulerCardId !== sign.rulerCardId ? (
+            <div className="flex flex-col sm:flex-row items-center gap-5">
+              <CardTile
+                id={sign.thai.rulerCardId}
+                label={isEnglish ? `Thai ruler: ${sign.thai.rulerEn}` : `เจ้าเรือนแบบไทย: ${sign.thai.rulerTh}`}
+                isEnglish={isEnglish}
+              />
+              <p className="text-sm text-muted font-sans leading-relaxed">
+                {isEnglish
+                  ? `Western astrology gives ${sign.nameEn} to ${sign.rulerEn}, a body only discovered in the last few centuries. Thai astrology keeps the traditional ruler, ${sign.thai.rulerEn}, so its card also speaks for this sign.`
+                  : `โหราศาสตร์สากลยุคใหม่ให้${sign.rulerTh}เป็นเจ้าเรือน แต่โหราศาสตร์ไทยยังใช้เจ้าเรือนแบบดั้งเดิมคือ${sign.thai.rulerTh} ไพ่ของ${sign.thai.rulerTh}จึงเป็นอีกใบที่สะท้อนราศีนี้ตามดวงแบบไทย`}
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-muted font-sans leading-relaxed">
+              {isEnglish
+                ? `Thai and western astrology agree on the ruler: ${sign.rulerEn}.`
+                : `เจ้าเรือนแบบไทยกับแบบสากลตรงกัน คือ${sign.rulerTh}`}
+            </p>
+          )}
         </section>
 
         {/* นิสัย ความรัก การงาน */}
