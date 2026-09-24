@@ -302,11 +302,11 @@ export const UPGRADE_COPY: Record<UpgradeReason, UpgradeCopy> = {
   daily_exhausted: {
     eyebrow: "สิทธิ์ประจำวัน",
     title: "วันนี้เปิดไพ่ฟรีครบแล้ว",
-    body: "สิทธิ์ฟรีจะกลับมาหลังเที่ยงคืน ถ้าอยากดูต่อตอนนี้ เติมรอบแล้วเปิดไพ่ได้ทันที",
-    primaryLabel: "เติมรอบ ดูดวงต่อเลย",
+    body: "พรุ่งนี้เปิดไพ่ฟรีได้อีก หรือถ้ามีเรื่องค้างใจ เติมรอบแล้วเปิดต่อได้เลย",
+    primaryLabel: "เติมรอบ เปิดไพ่ต่อ",
     primaryAction: "credits",
     secondaryLabel: "ไว้พรุ่งนี้ค่อยมาใหม่",
-    reassurance: "รอบที่เติมไม่มีวันหมดอายุ · จ่ายครั้งเดียว ไม่ตัดเงินรายเดือน",
+    reassurance: "รอบที่เติมเก็บไว้ใช้ได้ตลอด ไม่มีวันหมดอายุ · จ่ายครั้งเดียว ไม่มีรายเดือน",
   },
   chat_unlimited: {
     eyebrow: "ถามแม่หมอต่อ",
@@ -446,8 +446,8 @@ export const UPGRADE_COPY_EN: Record<UpgradeReason, UpgradeCopy> = {
   daily_exhausted: {
     eyebrow: "Daily Quota",
     title: "You've used today's free reading",
-    body: "Your free reading comes back after midnight. Want to keep going now? Top up and draw again right away.",
-    primaryLabel: "Top up and continue",
+    body: "Come back tomorrow for another free reading, or top up now if something is still on your mind.",
+    primaryLabel: "Top up and draw again",
     primaryAction: "credits",
     secondaryLabel: "I'll come back tomorrow",
     reassurance: "Credits never expire · One-time payment, no subscription",
