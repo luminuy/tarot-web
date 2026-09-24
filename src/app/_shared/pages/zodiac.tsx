@@ -74,6 +74,9 @@ export const ZODIAC_FINDER_ITEMS: ZodiacFinderItem[] = ZODIAC_SIGNS.map((s) => {
   };
 });
 
+/** ชื่อราศีแบบย่อสำหรับ island ดวงรายวัน */
+export const ZODIAC_SIGN_NAMES = ZODIAC_SIGNS.map((s) => ({ id: s.id, nameTh: s.nameTh, nameEn: s.nameEn }));
+
 /* ───────────────────────── metadata ───────────────────────── */
 
 export function zodiacIndexMetadata(locale: Locale): Metadata {
@@ -245,7 +248,17 @@ const INDEX_FAQ_EN: SeoFaqItem[] = [
   },
 ];
 
-export function ZodiacIndexBody({ locale, finder, compat }: { locale: Locale; finder: ReactNode; compat: ReactNode }) {
+export function ZodiacIndexBody({
+  locale,
+  finder,
+  compat,
+  daily,
+}: {
+  locale: Locale;
+  finder: ReactNode;
+  compat: ReactNode;
+  daily: ReactNode;
+}) {
   const isEnglish = locale === "en";
   const faqs = isEnglish ? INDEX_FAQ_EN : INDEX_FAQ_TH;
   const breadcrumbs = isEnglish
@@ -280,6 +293,8 @@ export function ZodiacIndexBody({ locale, finder, compat }: { locale: Locale; fi
         />
 
         {finder}
+
+        {daily}
 
         <section aria-labelledby="zodiac-grid-title" className="space-y-4">
           <h2 id="zodiac-grid-title" className="text-lg sm:text-xl font-serif-th font-bold text-ink text-center">
@@ -387,7 +402,7 @@ export function ZodiacIndexBody({ locale, finder, compat }: { locale: Locale; fi
 
 /* ───────────────────────── หน้ารายราศี /cards/zodiac/<id> ───────────────────────── */
 
-export function ZodiacSignBody({ sign, locale }: { sign: ZodiacSign; locale: Locale }) {
+export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; locale: Locale; daily: ReactNode }) {
   const isEnglish = locale === "en";
   const copy = isEnglish ? sign.en : sign.th;
   const major = card(sign.majorCardId);
@@ -453,6 +468,21 @@ export function ZodiacSignBody({ sign, locale }: { sign: ZodiacSign; locale: Loc
             </div>
           ))}
         </dl>
+
+        {/* ดวงรายวันของราศีนี้ — หัวข้อเป็น HTML ให้บอทเห็น ตัวไพ่มาจาก island (เปลี่ยนทุกวัน) */}
+        <section aria-labelledby="zodiac-today" className="altar-panel rounded-2xl p-5 sm:p-8 space-y-4">
+          <div className="space-y-1">
+            <h2 id="zodiac-today" className="text-lg sm:text-xl font-serif-th font-bold text-ink">
+              {isEnglish ? `${sign.nameEn} daily tarot: today's card` : `ดวงรายวัน${sign.nameTh} — ไพ่ประจำวันนี้`}
+            </h2>
+            <p className="text-[13px] text-muted font-sans">
+              {isEnglish
+                ? `A new card for ${sign.nameEn} every day at midnight Thai time, the same for everyone in this sign.`
+                : `ไพ่ใบใหม่ของคน${sign.nameTh}ทุกวันตอนเที่ยงคืนเวลาไทย ทุกคนในราศีนี้เห็นใบเดียวกัน`}
+            </p>
+          </div>
+          {daily}
+        </section>
 
         {/* ไพ่สองใบหลัก */}
         <section aria-labelledby="zodiac-main-cards" className="altar-panel rounded-2xl p-5 sm:p-8 space-y-6">
