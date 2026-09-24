@@ -1,0 +1,610 @@
+{
+  "promptVersion": "20260911-2",
+  "judgeModel": "gemini-3.6-flash",
+  "startedAt": "2026-09-24T07:12:00.698Z",
+  "cases": [
+    {
+      "id": "gold-001",
+      "category": "love",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 3113,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "groq"
+    },
+    {
+      "id": "gold-002",
+      "category": "work",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "openai/gpt-oss-20b",
+      "elapsedMs": 6788,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "groq"
+    },
+    {
+      "id": "gold-003",
+      "category": "money",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2799,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "groq"
+    },
+    {
+      "id": "gold-004",
+      "category": "self",
+      "spreadId": "daily",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2512,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "groq"
+    },
+    {
+      "id": "gold-005",
+      "category": "general",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2978,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "groq"
+    },
+    {
+      "id": "gold-006",
+      "category": "love",
+      "spreadId": "love",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 8069,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-007",
+      "category": "work",
+      "spreadId": "career",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 6825,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-008",
+      "category": "money",
+      "spreadId": "money",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 6589,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-009",
+      "category": "self",
+      "spreadId": "chakra",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 8506,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-010",
+      "category": "love",
+      "spreadId": "soulmate",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 6653,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำทำนายตอบตรงคำถามเรื่องช่วงเวลาและวิธีการเปิดใจได้อย่างชัดเจน ถอดรายละเอียดจากภาพไพ่ RWS 1909 ได้ถูกต้อง และมีคำแนะนำที่ปฏิบัติได้จริงอย่างเป็นธรรมชาติ",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 5,
+        "thaiNatural": 5,
+        "average": 5
+      },
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-011",
+      "category": "general",
+      "spreadId": "decision",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 6628,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-012",
+      "category": "work",
+      "spreadId": "daily",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2430,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "groq"
+    },
+    {
+      "id": "gold-013",
+      "category": "money",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2664,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 90,
+      "thaiIssues": [
+        "LATIN_LEAK",
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "groq"
+    },
+    {
+      "id": "gold-014",
+      "category": "love",
+      "spreadId": "ex-reconciliation",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 8089,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-015",
+      "category": "self",
+      "spreadId": "mind-body-spirit",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2905,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำทำนายตอบตรงประเด็นบทเรียนชีวิตอย่างลึกซึ้ง อ้างอิงสัญลักษณ์บนหน้าไพ่ RWS 1909 ได้อย่างแม่นยำ และมีข้อเสนอแนะที่สามารถปฏิบัติตามได้ทันทีอย่างเป็นรูปธรรม",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 5,
+        "thaiNatural": 5,
+        "average": 5
+      },
+      "provider": "groq"
+    },
+    {
+      "id": "gold-016",
+      "category": "general",
+      "spreadId": "weekly",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 7948,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-017",
+      "category": "work",
+      "spreadId": "career-switch",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 6209,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำทำนายตอบตรงคำถามเรื่องการย้ายสายงานไปเทคโนโลยีอย่างชัดเจน การเชื่อมโยงสัญลักษณ์ภาพไพ่ถูกต้องตามสำรับ RWS 1909 และให้คำแนะนำที่นำไปปฏิบัติได้จริง",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 5,
+        "thaiNatural": 5,
+        "average": 5
+      },
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-018",
+      "category": "love",
+      "spreadId": "how-they-feel",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 8431,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำทำนายตอบตรงคำถามเรื่องความรู้สึกได้ชัดเจน อ้างอิงสัญลักษณ์บนไพ่ RWS 1909 ได้ถูกต้อง และมีคำแนะนำที่ทำตามได้จริงในช่วง 24-48 ชั่วโมงด้วยภาษาที่นุ่มนวลเป็นธรรมชาติ",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 5,
+        "thaiNatural": 5,
+        "average": 5
+      },
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-019",
+      "category": "money",
+      "spreadId": "quick",
+      "personaId": "default",
+      "model": "openai/gpt-oss-20b",
+      "elapsedMs": 2697,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "การถอดความหมายและอ้างอิงภาพไพ่ทำได้ถูกต้องดีเยี่ยมและมีแนวทางปฏิบัติชัดเจน แต่คำแนะนำและกรอบเวลา (Timing) ยังไม่สอดคล้องกับคำถามที่เป็นเรื่องโชคลาภประจำวันเท่าที่ควร",
+        "onQuestion": 3,
+        "cardGrounded": 5,
+        "actionable": 4,
+        "personaFit": 4,
+        "notVague": 4,
+        "thaiNatural": 5,
+        "average": 4.17
+      },
+      "provider": "groq"
+    },
+    {
+      "id": "gold-020",
+      "category": "self",
+      "spreadId": "inner-potential",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 7198,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "ถอดรายละเอียดภาพไพ่ RWS 1909 ได้อย่างแม่นยำและร้อยเรียงเข้ากับคำถามเรื่องจิตใต้สำนึกได้อย่างลงตัว ภาษาไทยสละสลวยเป็นธรรมชาติและคำแนะนำสามารถนำไปปฏิบัติตามได้จริงทันที",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 4,
+        "thaiNatural": 5,
+        "average": 4.83
+      },
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-021",
+      "category": "general",
+      "spreadId": "celtic-cross",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 9445,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-022",
+      "category": "work",
+      "spreadId": "situation-solution",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 14051,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "fallback": true,
+      "error": "ได้คำอ่านสำรองออฟไลน์ (mock-gemini) — โมเดลจริงไม่ตอบ (มักเป็นโควตาหมด) ไม่นับเป็นผลวัด"
+    },
+    {
+      "id": "gold-023",
+      "category": "love",
+      "spreadId": "yes-no",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2667,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "groq"
+    },
+    {
+      "id": "gold-024",
+      "category": "money",
+      "spreadId": "yes-no",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 26298,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "fallback": true,
+      "error": "ได้คำอ่านสำรองออฟไลน์ (mock-gemini) — โมเดลจริงไม่ตอบ (มักเป็นโควตาหมด) ไม่นับเป็นผลวัด"
+    },
+    {
+      "id": "gold-025",
+      "category": "self",
+      "spreadId": "daily",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 12932,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-026",
+      "category": "love",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "openai/gpt-oss-120b",
+      "elapsedMs": 6033,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "groq"
+    },
+    {
+      "id": "gold-027",
+      "category": "work",
+      "spreadId": "daily",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2044,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "groq"
+    },
+    {
+      "id": "gold-028",
+      "category": "money",
+      "spreadId": "money",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 9352,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "fallback": true,
+      "error": "ได้คำอ่านสำรองออฟไลน์ (mock-gemini) — โมเดลจริงไม่ตอบ (มักเป็นโควตาหมด) ไม่นับเป็นผลวัด"
+    },
+    {
+      "id": "gold-029",
+      "category": "general",
+      "spreadId": "weekly",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 7709,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ]
+    },
+    {
+      "id": "gold-030",
+      "category": "self",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2491,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "provider": "groq"
+    }
+  ],
+  "summary": {
+    "total": 30,
+    "succeeded": 27,
+    "judged": 6,
+    "avgThaiScore": 95,
+    "avgElapsedMs": 5680,
+    "consistencyIssueRate": 0,
+    "rubric": {
+      "onQuestion": 4.67,
+      "cardGrounded": 5,
+      "actionable": 4.83,
+      "personaFit": 4.83,
+      "notVague": 4.67,
+      "thaiNatural": 5
+    },
+    "overall": 4.83
+  }
+}
