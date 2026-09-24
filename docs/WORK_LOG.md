@@ -38,6 +38,14 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-09-24 (รอบ 163): 🖼️ ภาพไพ่พังถาวรบนหน้า Astro เมื่อ CDN (ImageKit) ตอบ 503
+
+**อาการ** (เจ้าของส่งภาพ): หน้า `/cards/zodiac` ไพ่ Strength ขึ้นแค่ข้อความ alt · ยิงตรวจ: ImageKit ตอบ `503` เป็นพัก ๆ บางขนาด (`major-08` w128/w256 AVIF)
+
+- สาเหตุ: ตัวสำรองของ `<CardImage>` เป็น React `onError` ทำงานเฉพาะใน island ที่ hydrate · เนื้อหาหน้า Astro ส่วนใหญ่ไม่ hydrate ➔ ภาพพังค้างถาวร (ทุกหน้า ไม่ใช่แค่หน้าราศี)
+- แก้: สคริปต์ inline ใน `BaseLayout.astro` ดัก `error` แบบ capture ทั้งเอกสาร ➔ ถอด `<source>` แล้วชี้ไฟล์ในเครื่อง `/cards/<ไฟล์>` · ธง `data-fell-back="global"` ให้ `CardImage` ไม่นับเป็นความล้มเหลวรอบสอง
+- วัดจริง (Chromium · บังคับ ImageKit ตอบ 503 ทุกคำขอ · หน้า `/cards/zodiac`): ก่อน **ภาพพัง 23/23** ➔ หลัง **0/23**
+
 ### 🗓️ 2026-09-24 (รอบ 163): 🧑‍⚖️ ผลวัด ai:judge ของ `PROMPT_VERSION 20260911-2` (รันหลังโควตา Gemini รีเซ็ต)
 
 - **ผล**: คำอ่านจากโมเดลจริง 27/30 เคส (Groq 13 · Gemini 14 · คำอ่านสำรอง 3 เคสถูกตัดออกตามที่แก้ใน #593) · ผู้ตัดสินให้คะแนนได้ **6 เคส** เฉลี่ย **4.83/5** (ภาษาไทยจากโค้ด 95/100 · ความสอดคล้อง 0% ติดด่าน)
