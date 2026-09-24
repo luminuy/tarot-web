@@ -18,6 +18,7 @@ import { clampDescription, pickTitle } from "@/lib/config/meta-length";
 import { buildAlternates, localizedUrl, noindexAlternates } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { ZODIAC_ASPECTS, zodiacDistance } from "@/data/zodiac-compat";
 import { decanRanges, formatMonthDay, thaiRanges, ZODIAC_INDEX_PATH, zodiacSignPath } from "@/lib/tarot/zodiac";
 import { localeHref } from "@/lib/i18n/paths";
 import type { Locale } from "@/lib/i18n/types";
@@ -244,7 +245,7 @@ const INDEX_FAQ_EN: SeoFaqItem[] = [
   },
 ];
 
-export function ZodiacIndexBody({ locale, finder }: { locale: Locale; finder: ReactNode }) {
+export function ZodiacIndexBody({ locale, finder, compat }: { locale: Locale; finder: ReactNode; compat: ReactNode }) {
   const isEnglish = locale === "en";
   const faqs = isEnglish ? INDEX_FAQ_EN : INDEX_FAQ_TH;
   const breadcrumbs = isEnglish
@@ -315,6 +316,8 @@ export function ZodiacIndexBody({ locale, finder }: { locale: Locale; finder: Re
             })}
           </ul>
         </section>
+
+        {compat}
 
         <SeoArticleShell
           eyebrow={isEnglish ? "How it works" : "ไพ่กับดวงดาวเกี่ยวกันอย่างไร"}
@@ -511,6 +514,46 @@ export function ZodiacSignBody({ sign, locale }: { sign: ZodiacSign; locale: Loc
               <p className="text-sm text-muted font-sans leading-relaxed">{s.body}</p>
             </div>
           ))}
+        </section>
+
+        {/* ราศีที่เข้ากัน — คิดจากมุมระหว่างราศี (ข้อมูลเดียวกับเครื่องคำนวณความเข้ากันในหน้ารวม) */}
+        <section aria-labelledby="zodiac-compat" className="altar-panel rounded-2xl p-5 sm:p-8 space-y-4">
+          <h2 id="zodiac-compat" className="text-lg sm:text-xl font-serif-th font-bold text-ink">
+            {isEnglish ? `Who ${sign.nameEn} gets along with` : `${sign.nameTh}เข้ากับราศีไหน`}
+          </h2>
+          <ul className="space-y-3">
+            {([4, 2, 6, 3] as const).map((distance) => {
+              const aspect = ZODIAC_ASPECTS[distance][isEnglish ? "en" : "th"];
+              const matches = ZODIAC_SIGNS.filter((_, i) => zodiacDistance(index, i) === distance);
+              return (
+                <li key={distance} className="space-y-1">
+                  <p className="text-sm font-serif-th font-bold text-ink">
+                    {aspect.name}
+                    <span aria-hidden="true" className="ml-2 text-gold-ink text-xs tracking-[0.2em]">
+                      {"✦".repeat(aspect.harmony)}
+                    </span>
+                  </p>
+                  <p className="flex flex-wrap gap-2">
+                    {matches.map((m) => (
+                      <Link
+                        key={m.id}
+                        href={zodiacSignPath(m.id)}
+                        className="glass-chip px-3 py-1 text-xs font-serif-th font-semibold text-ink hover:text-gold-ink transition-colors"
+                      >
+                        {isEnglish ? m.nameEn : m.nameTh} · {card(m.majorCardId).nameEn}
+                      </Link>
+                    ))}
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
+          <p className="text-[13px] text-muted font-sans">
+            {isEnglish ? "Check any pair with the compatibility tool on " : "ดูความเข้ากันของคู่ไหนก็ได้ที่เครื่องคำนวณใน"}
+            <Link href={INDEX_PATH} className="text-gold-ink hover:underline font-semibold">
+              {isEnglish ? "the zodiac cards page" : "หน้าไพ่ประจำราศี"}
+            </Link>
+          </p>
         </section>
 
         {/* ไพ่ 3 ช่วง */}
