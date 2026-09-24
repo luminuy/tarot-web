@@ -198,7 +198,38 @@ function installAccountDot(): void {
   if (hasSessionHint()) dot.hidden = false;
 }
 
+/**
+ * 6. คนที่ยังไม่ล็อกอินแตะปุ่มบัญชี ➔ เด้งหน้าต่างเข้าสู่ระบบในหน้าเดิม (เหมือนหน้าแรก) แทนการพาไป `/account`
+ *    ล็อกอินอยู่แล้ว ➔ ปล่อยให้ลิงก์พาไปหน้าบัญชีตามปกติ
+ *    React + AuthModal โหลดแยกชิ้น ตอนชี้/โฟกัส (โหลดล่วงหน้า) หรือแตะเท่านั้น — ไม่เข้าบันเดิลหัวเว็บ
+ *    โหลดไม่สำเร็จ (เน็ตหลุด) ➔ ไปหน้า `/account` แทน ซึ่งมีปุ่มเข้าสู่ระบบอยู่ ผู้ใช้ไม่ติดทางตัน
+ */
+function installAccountAuth(): void {
+  const link = document.querySelector<HTMLAnchorElement>("[data-header-account]");
+  if (!link || ownedByIsland(link)) return;
+
+  const load = () => import("./header-auth");
+  const prefetch = () => {
+    if (!hasSessionHint()) void load().catch(() => {});
+  };
+  link.addEventListener("pointerenter", prefetch, { once: true });
+  link.addEventListener("focus", prefetch, { once: true });
+
+  link.addEventListener("click", (event) => {
+    if (hasSessionHint()) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+    event.preventDefault();
+    const locale = document.documentElement.lang === "en" ? "en" : "th";
+    load()
+      .then((m) => m.openHeaderAuth(locale))
+      .catch(() => {
+        window.location.href = link.href;
+      });
+  });
+}
+
 installNavDrawer();
 installLanguageSwitcher();
 installHeaderHeightObserver();
 installAccountDot();
+installAccountAuth();

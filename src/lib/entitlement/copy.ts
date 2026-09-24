@@ -45,6 +45,7 @@ export type UpgradeReason =
   | "signup_required" // ยังไม่ได้เข้าสู่ระบบ — ต้องสมัครสมาชิกฟรีก่อนถึงเปิดไพ่ได้
   | "guest_used" // ผู้เยี่ยมชมใช้สิทธิ์ทดลองฟรีครบแล้ว (ใช้เมื่อเปิดสิทธิ์ทดลองกลับมาเท่านั้น)
   | "daily_exhausted" // สมาชิกใช้โควตารายวันครบแล้ว
+  | "chat_unlimited" // ถามแม่หมอต่อฟรีครบ 2 ข้อแล้ว (สิทธิ์เปิดไพ่อาจยังเหลือ — ห้ามใช้ daily_exhausted แทน)
   | "members_only" // ฟีเจอร์เฉพาะสมาชิก (แชทถามต่อ)
   | "grand_spread" // ผังใหญ่ 5–12 ใบสำหรับผู้ถือญาณพยากรณ์พิเศษ
   | "master_persona" // 2 ปรมาจารย์ลับสำหรับผู้ถือญาณพยากรณ์พิเศษ
@@ -307,6 +308,15 @@ export const UPGRADE_COPY: Record<UpgradeReason, UpgradeCopy> = {
     secondaryLabel: "ไว้พรุ่งนี้ค่อยมาใหม่",
     reassurance: "รอบที่เติมไม่มีวันหมดอายุ · จ่ายครั้งเดียว ไม่ตัดเงินรายเดือน",
   },
+  chat_unlimited: {
+    eyebrow: "ถามแม่หมอต่อ",
+    title: "ถามต่อฟรีครบ 2 ข้อแล้ว",
+    body: "ไพ่ชุดนี้ถามต่อฟรีได้ 2 ข้อ ถ้ายังมีเรื่องอยากถาม เติมรอบแล้วคุยกับแม่หมอต่อได้ไม่จำกัด",
+    primaryLabel: `เติมรอบ ถามต่อไม่จำกัด (เริ่ม ${CHEAPEST_PACKAGE_THB}.-)`,
+    primaryAction: "credits",
+    secondaryLabel: "ไว้ก่อน",
+    reassurance: "รอบที่เติมไม่มีวันหมดอายุ · จ่ายครั้งเดียว ไม่ตัดเงินรายเดือน",
+  },
   members_only: {
     eyebrow: "เฉพาะสมาชิก",
     title: "ถามแม่หมอต่อได้เมื่อสมัครสมาชิก",
@@ -440,6 +450,15 @@ export const UPGRADE_COPY_EN: Record<UpgradeReason, UpgradeCopy> = {
     primaryLabel: "Top up and continue",
     primaryAction: "credits",
     secondaryLabel: "I'll come back tomorrow",
+    reassurance: "Credits never expire · One-time payment, no subscription",
+  },
+  chat_unlimited: {
+    eyebrow: "Follow-up questions",
+    title: "You've used your 2 free follow-up questions",
+    body: "Each reading comes with 2 free follow-up questions. Top up to keep talking with the oracle without limits.",
+    primaryLabel: `Top up for unlimited questions (from ${CHEAPEST_PACKAGE_THB} THB)`,
+    primaryAction: "credits",
+    secondaryLabel: "Not now",
     reassurance: "Credits never expire · One-time payment, no subscription",
   },
   members_only: {

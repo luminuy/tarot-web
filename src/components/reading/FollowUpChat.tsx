@@ -628,7 +628,7 @@ isEnglish
             </div>
             <button
               type="button"
-              onClick={() => requestUpgrade("daily_exhausted")}
+              onClick={() => requestUpgrade("chat_unlimited")}
               className="tap-overlay-y w-full rounded-full bg-gold-ink hover:bg-gold-ink-deep px-4 py-2.5 font-serif-th text-xs font-bold text-surface transition cursor-pointer "
             >
               {isEnglish ? "Unlock Unlimited Consultation" : "เติมรอบดูดวงเพื่อถามต่อได้ไม่จำกัด"}
@@ -707,7 +707,7 @@ isEnglish
                 </span>
                 <button
                   type="button"
-                  onClick={() => requestUpgrade("daily_exhausted")}
+                  onClick={() => requestUpgrade("chat_unlimited")}
                   className="text-gold-ink hover:underline cursor-pointer font-bold"
                 >
                   {isEnglish ? "Unlock Unlimited" : "ปลดล็อกไม่จำกัด"}
