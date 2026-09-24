@@ -500,6 +500,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
                 derivation: record.derivation ? { kind: record.derivation.kind } : undefined,
               },
               usage: event.usage,
+              // คำอ่านจากคลังความหมายไพ่ (AI ทุกเจ้าไม่ว่าง · ไม่หักสิทธิ์) — หน้าเว็บขึ้นป้ายบอก + ปุ่มให้ AI อ่านใหม่
+              fallback: !realReading,
               ...(guestConsumeTicket ? { guestConsumeTicket } : {}),
             });
           } else if (event.type === "error") {

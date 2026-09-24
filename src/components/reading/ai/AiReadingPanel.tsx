@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReadingState } from "@/components/home/flow-reading";
+import { FallbackNotice } from "@/components/reading/FallbackNotice";
 
 /**
  * ✦ คำอ่านของแม่หมอบนหน้าเฉพาะทาง (1–3 ใบ)
@@ -64,6 +65,9 @@ export function AiReadingPanel({
           </span>
         )}
       </div>
+
+      {/* คำอ่านจากคลังความหมายไพ่ (AI ไม่ว่าง) — บอกตรง ๆ และให้แม่หมอ AI อ่านไพ่ชุดเดิมใหม่ได้ */}
+      {state.fallback && state.status === "done" && <FallbackNotice isEn={isEn} onRetry={onRetry} />}
 
       {reading?.opening && (
         <p className="text-sm sm:text-base leading-relaxed text-ink whitespace-pre-line">

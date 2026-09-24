@@ -227,6 +227,8 @@ export function useAiReading(): AiReadingController {
             reading?: unknown;
             proof?: ReadingProof;
             guestConsumeTicket?: string;
+            /** คำอ่านจากคลังความหมายไพ่ (AI ไม่ว่าง) — ดู FallbackNotice */
+            fallback?: boolean;
           };
           try {
             payload = JSON.parse(dataMatch[1]);
@@ -252,7 +254,7 @@ export function useAiReading(): AiReadingController {
               break;
             case "done":
               gotTerminal = true;
-              dispatch({ type: "done", reading: (payload.reading ?? null) as never });
+              dispatch({ type: "done", reading: (payload.reading ?? null) as never, fallback: payload.fallback === true });
               if (payload.proof) setProof(payload.proof);
               break;
             case "error":

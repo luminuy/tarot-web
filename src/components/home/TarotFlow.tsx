@@ -1310,7 +1310,7 @@ export default function TarotFlow({
                 dispatchRead({ type: "clearPartial" });
               } else if (eventType === "done") {
                 streamCompleted = true;
-                dispatchRead({ type: "done", reading: data.reading });
+                dispatchRead({ type: "done", reading: data.reading, fallback: data.fallback === true });
                 dispatchSession({ type: "proven", proof: data.proof });
                 navigateStep("SUMMARY");
                 soundManager.playOracleRevealSound();
@@ -1926,6 +1926,7 @@ export default function TarotFlow({
                       errorMsg={errorMsg}
                       question={question}
                       nickname={nickname}
+                      isFallback={read.fallback}
                       onRetry={() => {
                         if (readingId && drawnCards.length > 0) {
                           startAIStreaming(readingId, drawnCards);
@@ -1945,6 +1946,7 @@ export default function TarotFlow({
                       errorMsg={errorMsg}
                       question={question}
                       nickname={nickname}
+                      isFallback={read.fallback}
                       onRetry={() => {
                         if (readingId && drawnCards.length > 0) {
                           startAIStreaming(readingId, drawnCards);

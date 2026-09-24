@@ -15,6 +15,9 @@
  * 4. ผังปกติต้อง yesNoAnswer = null
  * 5. คำอ่านครบทุกใบ ชื่อไพ่ตรงกับไพ่ที่จั่ว และไม่มีไพ่นอกชุด (กฎเหล็กข้อ 14)
  * 6. ต้องจดสถิติ ai_mock_served ทุกครั้งที่เสิร์ฟ
+ * 7. (ยกเครื่อง 2026-09-24) น้ำเสียงต้องตรงกับไพ่: ไพ่ที่ไม่ใช่ขั้วหนุนห้ามถูกเขียนว่าเป็นแรงหนุน
+ *    · บทเปิด/สรุปอิงไพ่จริง · หาไพ่ปลายทางจากชื่อช่อง · ผังใบเดียวไม่ขึ้น "ทั้ง 1 ใบ"
+ *    · ไม่มีวงเล็บติดอักษรไทย · ข้อสุดท้ายของคำแนะนำเป็นฝึกสติ 🧘 · ไพ่ชุดเดิมได้คำอ่านเดิม
  *
  * รันด้วย: npx tsx scripts/qa/test-mock-reading.ts
  */
@@ -25,7 +28,8 @@ import path from "node:path";
 import { DECK, cardByIndex } from "../../src/data/cards";
 import { getSpread } from "../../src/data/spreads";
 import { PERSONAS } from "../../src/data/personas";
-import { streamMockGeminiReading } from "../../src/lib/ai/mock-reading";
+import { mockCardTone, streamMockGeminiReading } from "../../src/lib/ai/mock-reading";
+import { READING_INITIAL, readingReducer } from "../../src/components/home/flow-reading";
 import { checkReadingConsistency } from "../../src/lib/ai/consistency";
 import type { ReadingEvent } from "../../src/lib/ai/types";
 import { YES_NO_DISPLAY_EN, type Reading } from "../../src/lib/schema/reading";
@@ -290,6 +294,119 @@ async function run() {
       check(`A2-15: ${f} อ่านสตรีมผ่าน readWithIdleTimeout (ไม่มี reader.read() เปล่า)`, /readWithIdleTimeout\(reader/.test(src) && !/await reader\.read\(\)/.test(src));
     }
   }
+
+  // ── 7. คุณภาพเนื้อหา (ยกเครื่อง 2026-09-24) ───────────────────────────
+  console.log("\n✦ 7. น้ำเสียงตรงกับไพ่ · อิงไพ่จริง · ภาษาลื่น");
+  const LIGHT_MARK: Record<"th" | "en", RegExp> = {
+    th: /แรงหนุน|เปิดทางให้|ส่งสัญญาณดี|เกื้อหนุนอย่างเด่นชัด/,
+    en: /source of support|opens the way|sends a good signal/,
+  };
+  const dailySpread = getSpread("daily")!;
+  for (const lang of ["th", "en"] as const) {
+    const bad: string[] = [];
+    for (let idx = 0; idx < DECK.length; idx++) {
+      for (const isReversed of [false, true]) {
+        const card = cardByIndex(idx)!;
+        const ctx = {
+          ...buildCtx({ spreadId: "daily", lang, personaId: "warm" }),
+          spread: dailySpread,
+          drawn: [{ order: 0, cardIndex: idx, isReversed }],
+          cards: [card],
+        };
+        const { reading } = await collect(ctx);
+        const text = reading?.cards[0]?.reading ?? "";
+        if (mockCardTone(card, isReversed) !== "light" && LIGHT_MARK[lang].test(text)) {
+          bad.push(`${card.id}${isReversed ? "(R)" : ""}`);
+        }
+      }
+    }
+    check(
+      `[${lang}] ไพ่ที่ไม่ใช่ขั้วหนุนไม่ถูกเขียนว่าเป็นแรงหนุน (78 ใบ × หัวตั้ง/กลับหัว)`,
+      bad.length === 0,
+      bad.slice(0, 8).join(", "),
+    );
+  }
+  const tenSwords = DECK.find((c) => c.id === "swords-10")!;
+  const tower = DECK.find((c) => c.id === "major-16")!;
+  check("สิบแห่งดาบหัวตั้ง ไม่ถูกนับเป็นไพ่หนุน (บั๊กเดิม: \"สัญญาณเกื้อหนุนอย่างเด่นชัด\")", mockCardTone(tenSwords, false) !== "light");
+  check("หอคอยกลับหัว ไม่ถูกนับเป็นไพ่หนุน (ไพ่ร้ายกลับหัวไม่ได้แปลว่าดี)", mockCardTone(tower, true) !== "light");
+
+  // บทเปิด/บทสรุปต้องเปลี่ยนตามไพ่ ไม่ใช่ประโยคเหมารวม
+  const withCards = (indices: number[], spreadId = "three-card", lang: "th" | "en" = "th") => {
+    const base = buildCtx({ spreadId, lang, personaId: "warm" });
+    const drawn = indices.map((cardIndex, order) => ({ order, cardIndex, isReversed: false }));
+    return { ...base, drawn, cards: drawn.map((d) => cardByIndex(d.cardIndex)!) };
+  };
+  const idxOf = (id: string) => DECK.findIndex((c) => c.id === id);
+  const bright = await collect(withCards([idxOf("major-19"), idxOf("cups-10"), idxOf("major-21")]));
+  const heavy = await collect(withCards([idxOf("swords-10"), idxOf("swords-03"), idxOf("swords-09")]));
+  check("บทเปิดต่างกันเมื่อไพ่ต่างกัน (ไม่ใช่ประโยคเหมารวม)", bright.reading?.opening !== heavy.reading?.opening);
+  check("บทสรุปต่างกันเมื่อไพ่ต่างกัน", bright.reading?.summary !== heavy.reading?.summary);
+  check(
+    "บทสรุปผัง 3 ใบพูดถึงไพ่ปลายทาง (ใบในช่องอนาคต) ด้วยชื่อจริง",
+    Boolean(bright.reading?.summary.includes(cardByIndex(idxOf("major-21"))!.nameTh)),
+  );
+  check("ไม่มีประโยคเหมารวมเดิม \"ทุกอย่างมีทางออกที่ดีเสมอ\"", !/ทุกอย่างมีทางออกที่ดีเสมอ/.test(JSON.stringify(heavy.reading)));
+
+  // ผังใช่/ไม่ใช่: ใบสุดท้ายคือ "ข้อควรระวัง" ห้ามถูกเรียกว่าปลายทาง
+  const yn = await collect(buildCtx({ spreadId: "yes-no", lang: "th", personaId: "warm" }));
+  const ynLastPos = getSpread("yes-no")!.positions.at(-1)!;
+  check(
+    "ผังใช่/ไม่ใช่ ไม่เรียกช่องสุดท้าย (ข้อควรระวัง) ว่าเป็นปลายทาง",
+    !new RegExp(`ปลายทางของเรื่องนี้คือ[^ ]*[^ ]*ในช่อง${ynLastPos.nameTh.replace(/^\d+\.\s*/, "").replace(/\s*\(.*\)$/, "")}`).test(yn.reading?.summary ?? ""),
+    yn.reading?.summary,
+  );
+
+  // ผังใบเดียว · วงเล็บติดไทย · ฝึกสติ · ผลซ้ำได้
+  for (const lang of ["th", "en"] as const) {
+    const one = await collect(buildCtx({ spreadId: "daily", lang, personaId: "mystic" }));
+    check(`[${lang}] ผังใบเดียวไม่ขึ้น "ทั้ง 1 ใบ" / "all 1 cards"`, !/ทั้ง 1 ใบ|all 1 cards/i.test(one.reading?.opening ?? ""), one.reading?.opening);
+    for (const spreadId of ["three-card", "celtic-cross", "yes-no"]) {
+      const ctx = buildCtx({ spreadId, lang, personaId: "warm" });
+      const a = await collect(ctx);
+      const b = await collect(ctx);
+      check(`[${lang} · ${spreadId}] ไพ่ชุดเดิมได้คำอ่านเดิม (ไม่สุ่ม)`, JSON.stringify(a.reading) === JSON.stringify(b.reading));
+      const last = a.reading?.advice.at(-1) ?? "";
+      check(`[${lang} · ${spreadId}] ข้อสุดท้ายของคำแนะนำเป็นฝึกสติ 🧘`, last.includes("🧘"));
+      const issues = checkReadingConsistency(a.reading!, ctx.cards, {
+        drawnCount: ctx.drawn.length,
+        yesNoMode: Boolean(ctx.spread.yesNoMode),
+        pastReading: undefined,
+      }).issues.map((i) => i.code);
+      check(`[${lang} · ${spreadId}] ผ่านตัวตรวจความสอดคล้องไม่มีข้อเตือน`, issues.length === 0, issues.join(","));
+      if (lang === "th") {
+        const glued = JSON.stringify(a.reading).match(/\)[\u0E00-\u0E7F]/);
+        check(`[th · ${spreadId}] ไม่มีวงเล็บติดอักษรไทย`, !glued, glued?.[0]);
+      }
+    }
+  }
+
+  // ── 8. ผู้ใช้ต้องรู้ว่าเป็นคำอ่านสำรอง + กดให้ AI อ่านใหม่ได้ ───────────────
+  console.log("\n🪧 8. ป้ายบอกคำอ่านสำรอง (FallbackNotice)");
+  const routeSrc = fs.readFileSync(path.resolve("src/app/api/reading/[id]/read/route.ts"), "utf8");
+  check("route ส่ง fallback: !realReading ไปกับเฟรม done", /fallback:\s*!realReading/.test(routeSrc));
+  const afterFallback = [{ type: "start" as const }, { type: "done" as const, reading: {}, fallback: true }].reduce(
+    readingReducer,
+    READING_INITIAL,
+  );
+  check("ตัวลดสถานะจำ fallback = true เมื่อเฟรม done บอกมา", afterFallback.fallback === true);
+  check("กดอ่านใหม่ (start) ล้าง fallback ทิ้ง ไม่ค้างป้ายเก่า", readingReducer(afterFallback, { type: "start" }).fallback === false);
+  check(
+    "เฟรม done ปกติ (ไม่มี fallback) ไม่ขึ้นป้าย",
+    [{ type: "start" as const }, { type: "done" as const, reading: {} }].reduce(readingReducer, READING_INITIAL).fallback === false,
+  );
+  for (const f of [
+    "src/components/reading/StreamReader.tsx",
+    "src/components/reading/QuickChatResult.tsx",
+    "src/components/reading/ai/AiReadingPanel.tsx",
+  ]) {
+    check(`${f} แสดง FallbackNotice`, /<FallbackNotice\b/.test(fs.readFileSync(path.resolve(f), "utf8")));
+  }
+  const flowSrc = fs.readFileSync(path.resolve("src/components/home/TarotFlow.tsx"), "utf8");
+  check("TarotFlow ส่ง isFallback ให้หน้าแสดงผลทั้งสองแบบ", (flowSrc.match(/isFallback=\{read\.fallback\}/g) ?? []).length === 2);
+  check("TarotFlow อ่าน data.fallback จากเฟรม done", /type: "done", reading: data\.reading, fallback: data\.fallback === true/.test(flowSrc));
+  const aiHookSrc = fs.readFileSync(path.resolve("src/lib/reading/use-ai-reading.ts"), "utf8");
+  check("useAiReading อ่าน payload.fallback จากเฟรม done", /fallback: payload\.fallback === true/.test(aiHookSrc));
 
   // ── สรุป ────────────────────────────────────────────────────────────
   console.log("\n══════════════════════════════════════════════════════════════════");
