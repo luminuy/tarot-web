@@ -118,7 +118,7 @@ export function SpreadTopicContent({
 
   const breadcrumbsJsonLd = buildBreadcrumbJsonLd(locale, [
     homeCrumb(locale),
-    { name: isEnglish ? "25 Tarot Spreads" : "ผังพยากรณ์ 25 แบบ", path: "/spreads" },
+    { name: isEnglish ? "26 Tarot Spreads" : "ผังพยากรณ์ 26 แบบ", path: "/spreads" },
     { name: topicName, path: currentPath },
   ]);
 
@@ -162,7 +162,7 @@ export function SpreadTopicContent({
             <li aria-hidden="true" className="text-line">/</li>
             <li>
               <Link href="/spreads" className="hover:text-ink transition-colors">
-                {isEnglish ? "25 Tarot Spreads" : "ผังพยากรณ์ 25 แบบ"}
+                {isEnglish ? "26 Tarot Spreads" : "ผังพยากรณ์ 26 แบบ"}
               </Link>
             </li>
             <li aria-hidden="true" className="text-line">/</li>
@@ -178,7 +178,7 @@ export function SpreadTopicContent({
             href="/spreads"
             className="px-4 py-1.5 rounded-full text-xs font-serif-th font-semibold whitespace-nowrap bg-inset text-[#5E5240] hover:bg-[#DDD8CD] transition-colors"
           >
-            {isEnglish ? "All Spreads (25)" : "ผังทั้งหมด (25 ผัง)"}
+            {isEnglish ? "All Spreads (26)" : "ผังทั้งหมด (26 ผัง)"}
           </Link>
           {allTopics.map((t) => {
             const isActive = t.slug === topic.slug;

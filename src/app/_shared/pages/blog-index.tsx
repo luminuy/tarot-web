@@ -14,7 +14,7 @@ const COPY = {
   th: {
     title: "คัมภีร์บทความและคู่มือดูดวงไพ่ยิปซี ทาโรต์ 1909",
     description:
-      "รวมบทความดูดวงไพ่ยิปซี ความรัก การงาน การเงิน ผังพยากรณ์ 25 แบบ และความหมายไพ่ 78 ใบ โดยแม่หมอแห่งวิหาร SeerTarot",
+      "รวมบทความดูดวงไพ่ยิปซี ความรัก การงาน การเงิน ผังพยากรณ์ 26 แบบ และความหมายไพ่ 78 ใบ โดยแม่หมอแห่งวิหาร SeerTarot",
     keywords: [
       "ดูดวงไพ่ยิปซี",
       "บทความไพ่ทาโรต์",
@@ -24,13 +24,13 @@ const COPY = {
       "วิธีดูดวงด้วยตัวเอง",
     ],
     blogName: "คัมภีร์บทความ & คู่มือดูดวงไพ่ยิปซี ทาโรต์ 1909 | SeerTarot Blog",
-    blogDescription: "รวมบทความดูดวงไพ่ยิปซี ความรัก การงาน การเงิน ผังพยากรณ์ 25 แบบ และความหมายไพ่ 78 ใบ",
+    blogDescription: "รวมบทความดูดวงไพ่ยิปซี ความรัก การงาน การเงิน ผังพยากรณ์ 26 แบบ และความหมายไพ่ 78 ใบ",
     crumb: "คัมภีร์บทความ",
   },
   en: {
     title: "Tarot Wisdom Codex: Guides, Meanings & Spreads",
     description:
-      "Comprehensive tarot guides, 78 card meanings, love and career advice, and 25 classical spreads from the 1909 Rider-Waite-Smith tradition.",
+      "Comprehensive tarot guides, 78 card meanings, love and career advice, and 26 classical spreads from the 1909 Rider-Waite-Smith tradition.",
     keywords: [
       "tarot articles",
       "tarot guide",
@@ -41,7 +41,7 @@ const COPY = {
     ],
     blogName: "Tarot Wisdom Codex & Editorial Guides | SeerTarot Blog",
     blogDescription:
-      "In-depth tarot guides, archetypal card interpretations, love and career advice, and 25 classical spreads.",
+      "In-depth tarot guides, archetypal card interpretations, love and career advice, and 26 classical spreads.",
     crumb: "Wisdom Codex",
   },
 } as const;
@@ -53,7 +53,7 @@ export function buildBlogIndexMetadata(locale: Locale): Metadata {
     ? "Tarot Wisdom Codex & Editorial Guides"
     : "คัมภีร์บทความและคู่มือดูดวงไพ่ยิปซี 1909";
   const ogDesc = isEnglish
-    ? "Explore depth psychology, archetypal symbolism, and master guides for love, career, and 25 spreads."
+    ? "Explore depth psychology, archetypal symbolism, and master guides for love, career, and 26 spreads."
     : "รวมบทความเจาะลึกศาสตร์ไพ่ทาโรต์ ความรัก การงาน และจิตวิทยาพยากรณ์";
 
   const ogImages = buildPageOgImage({

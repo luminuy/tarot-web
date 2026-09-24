@@ -122,7 +122,7 @@ const DAILY_LINKS = [
   { href: "/cards", label: "สารานุกรมไพ่ 78 ใบ" },
   { href: "/love/1-card", label: "ดูดวงความรัก 1 ใบ" },
   { href: "/cards/birth-card", label: "คำนวณไพ่ประจำตัว" },
-  { href: "/spreads", label: "ผังพยากรณ์ 25 แบบ" },
+  { href: "/spreads", label: "ผังพยากรณ์ 26 แบบ" },
 ];
 
 /** `ritual` = พิธีเปิดไพ่ (island ตัวเดียวของหน้านี้) ส่งเข้ามาจากข้างนอก */

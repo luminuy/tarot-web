@@ -4,7 +4,7 @@
 export const COUNTS = {
   cards: 78,
   articles: 30,
-  spreads: 25,
+  spreads: 26,
 } as const;
 
 

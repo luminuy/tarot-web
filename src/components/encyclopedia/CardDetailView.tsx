@@ -321,7 +321,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
               href="/spreads"
               className="text-xs sm:text-sm font-serif-th text-muted hover:text-gold-ink transition underline underline-offset-4"
             >
-              {isEnglish ? "Explore 25 Spreads →" : "เลือกผังพยากรณ์ (25 แบบ) →"}
+              {isEnglish ? "Explore 26 Spreads →" : "เลือกผังพยากรณ์ (26 แบบ) →"}
             </Link>
           </div>
         </div>

@@ -32,7 +32,7 @@ docs/
 │       └── ADR-003-cutting-edge-stack-rationale.md # เหตุผลการใช้ React 19.2 + Next 16.3 + Motion 13
 │
 ├── 📐 ข้อกำหนดเชิงฟังก์ชัน (Functional Specifications)
-│   ├── TAROT_CARD_FEATURES.md           # สเปกระบบและสารบบไพ่ทาโรต์ 78 ใบ, 5 มิติ, ผัง 25 แบบ, Pick A Card 8 หัวข้อ
+│   ├── TAROT_CARD_FEATURES.md           # สเปกระบบและสารบบไพ่ทาโรต์ 78 ใบ, 5 มิติ, ผัง 26 แบบ, Pick A Card 8 หัวข้อ
 │   └── specs/
 │       ├── DESIGN_SYSTEM_V2.md          # สเปกระบบดีไซน์ V2 — พื้นหลังและพาเลตต์สี (Warm Minimal Sanctuary)
 │       ├── INTERACTIVE_CARD_PICKING.md   # ระบบแผ่ไพ่ 78 ใบและการแตะเลือกไพ่ 3D
@@ -117,7 +117,7 @@ docs/
 
 | คำสั่ง | หน้าที่และวัตถุประสงค์ |
 | :--- | :--- |
-| `npm run repo:verify` | **ตรวจครบทั้ง 82 ด่านในคำสั่งเดียว** (Typecheck, ไพ่ 78 ใบ, ผัง 25 แบบ, Provably-Fair, D1, Failover, PDPA ฯลฯ) |
+| `npm run repo:verify` | **ตรวจครบทั้ง 82 ด่านในคำสั่งเดียว** (Typecheck, ไพ่ 78 ใบ, ผัง 26 แบบ, Provably-Fair, D1, Failover, PDPA ฯลฯ) |
 | `npm run typecheck` | ตรวจสอบความถูกต้องของ TypeScript Types (ต้องผ่าน 0 Errors) |
 | `npm run agent:status` | ตรวจสอบว่ามี Agent ตัวไหนกำลังทำงานหรือล็อคไฟล์อยู่หรือไม่ |
 | `npm run agent:lock` | ล็อคไฟล์ก่อนเริ่มทำงานป้องกันการชนกันของ AI หลายตัว |

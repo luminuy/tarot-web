@@ -122,7 +122,7 @@ const PICK_A_CARD_LINKS = [
   { href: "/daily", label: "ดูดวงไพ่ยิปซีรายวัน" },
   { href: "/love/1-card", label: "ดูดวงความรัก 1 ใบ" },
   { href: "/cards", label: "สารานุกรมไพ่ 78 ใบ" },
-  { href: "/spreads", label: "ผังพยากรณ์ 25 แบบ" },
+  { href: "/spreads", label: "ผังพยากรณ์ 26 แบบ" },
 ];
 
 export function PickACardBodyTh({ ritual }: { ritual: ReactNode }) {

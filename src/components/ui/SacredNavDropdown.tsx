@@ -131,7 +131,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
 
   const knowledgeItems: NavItem[] = [
     {
-      label: isEnglish ? "Tarot Spreads (25 Spreads)" : "ผังการเปิดไพ่ (25 แบบ)",
+      label: isEnglish ? "Tarot Spreads (26 Spreads)" : "ผังการเปิดไพ่ (26 แบบ)",
       sublabel: isEnglish ? "Love, career, finance & destiny spreads" : "ความรัก การงาน การเงิน และดวงชะตา",
       href: "/spreads",
       cardId: "major-05",

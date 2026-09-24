@@ -41,7 +41,7 @@ const COPY = {
     links: [
       { href: "/", label: "เริ่มดูดวงที่หน้าแรก" },
       { href: "/cards", label: "คัมภีร์ไพ่ 78 ใบ" },
-      { href: "/spreads", label: "ผังพยากรณ์ 25 แบบ" },
+      { href: "/spreads", label: "ผังพยากรณ์ 26 แบบ" },
       { href: "/blog", label: "บทความดูดวง" },
     ],
     helpline: "สายด่วนสุขภาพจิต 1323",
@@ -53,7 +53,7 @@ const COPY = {
     links: [
       { href: "/en", label: "Home Reading Chamber" },
       { href: "/en/cards", label: "Tarot Encyclopedia (78 Cards)" },
-      { href: "/en/spreads", label: "Sacred Spreads (25 Spreads)" },
+      { href: "/en/spreads", label: "Sacred Spreads (26 Spreads)" },
       { href: "/en/daily", label: "Daily Oracle Card" },
     ],
     helpline: "Mental Health Support: Call 1323 (TH) or 988 (US)",

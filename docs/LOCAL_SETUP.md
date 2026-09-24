@@ -98,7 +98,7 @@ PORT=3001 npm run dev
 
 | คำสั่ง | วัตถุประสงค์ |
 | :--- | :--- |
-| `npm run repo:verify` | **(สำคัญที่สุด)** รันชุดตรวจความสมบูรณ์ 82 ด่าน (Typecheck, ไพ่ 78 ใบ, ผัง 25 แบบ, Provably Fair, Agent Lock ฯลฯ) |
+| `npm run repo:verify` | **(สำคัญที่สุด)** รันชุดตรวจความสมบูรณ์ 82 ด่าน (Typecheck, ไพ่ 78 ใบ, ผัง 26 แบบ, Provably Fair, Agent Lock ฯลฯ) |
 | `npm run typecheck` | ตรวจสอบความถูกต้องของ TypeScript Typecheck อย่างเดียว (ต้องได้ 0 errors เสมอ) |
 | `npm run build:astro` | คอมไพล์หน้าสแตติก Astro 305 หน้า (cards, spreads, blog, about, privacy, contact) เข้า `dist/` |
 | `npm run build:worker` | บิลด์ระบบทั้งหมดรวมกัน (Astro + OpenNext Worker) พร้อมรวม assets เตรียม deploy |
