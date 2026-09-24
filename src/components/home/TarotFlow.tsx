@@ -46,6 +46,7 @@ import { onUpgradeRequest } from "@/lib/entitlement/upgrade-bus";
 import { ensureEntitlement, refreshEntitlement, useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useLocale } from "@/lib/i18n";
 import { STORAGE_KEYS, STORAGE_KEY_BUILDERS } from "@/lib/storage/keys";
+import { readMySign } from "@/lib/zodiac/my-sign";
 
 /**
  * ✦ Dynamic Code-Splitting — คอมโพเนนต์หนักทั้งหมดโหลดเมื่อถึงขั้นที่ใช้จริง
@@ -837,6 +838,7 @@ export default function TarotFlow({
           intake: { situation: effectiveSituation || undefined },
           lang: locale,
           clientSeed: freshSeed,
+          zodiac: readMySign(),
         }),
       });
 
@@ -970,6 +972,7 @@ export default function TarotFlow({
           intake: {},
           lang: locale,
           clientSeed: freshSeed,
+          zodiac: readMySign(),
         }),
       });
 

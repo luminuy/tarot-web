@@ -8,6 +8,7 @@ import { analyzeNumerologicalRhythm } from "@/lib/ai/numerology";
 import { diagnoseQuestionEnergy } from "@/lib/ai/intent";
 import { generateMindfulMicroRitual } from "@/lib/ai/ritual";
 import { analyzeKarmicBridge, type PastReadingSnapshot } from "@/lib/ai/karmic";
+import { formatZodiacForPrompt, type SeekerZodiac } from "@/lib/ai/zodiac-context";
 import type { Spread } from "@/data/spreads";
 import { getPersona, type Persona } from "@/data/personas";
 import type { DrawnCard } from "@/lib/tarot/shuffle";
@@ -227,6 +228,8 @@ export interface ReadingContext {
   nickname?: string;
   pastReading?: PastReadingSnapshot;
   lang?: "th" | "en";
+  /** ราศีที่ผู้ถามบอกไว้ (ไม่บังคับ) — เซิร์ฟเวอร์เทียบเองว่าไพ่ใบไหนเป็นไพ่ประจำราศีของผู้ถาม */
+  zodiac?: SeekerZodiac;
   /**
    * สัญญาณยกเลิกของคำขอจริง (`request.signal`) — ผู้ใช้ปิดแท็บเมื่อไหร่ต้องหยุดยิงโมเดลทันที
    * ไม่ส่งมาก็ทำงานได้ แต่จะจ่ายค่าโทเคนให้คำอ่านที่ไม่มีใครได้เห็น (T-06)
@@ -361,6 +364,12 @@ ${karmic.karmicNarrative ? `\n${karmic.karmicNarrative}` : ""}
     sanitizePromptValue(question, 1000) ||
     (isEn ? "General life direction and current energies" : "ภาพรวมพลังงานและทิศทางชีวิตในช่วงนี้");
   const cleanIntakeLines = intakeLines.map((line) => sanitizePromptValue(line, 1000));
+  /*
+   * ✦ ราศีของผู้ถาม (ไม่บังคับ) — ไม่ส่งมา = สตริงว่าง และ prompt เหมือนเดิมทุกตัวอักษร
+   * ⚠️ ห้ามให้บล็อกนี้แตะ prompt ของคำขอที่ไม่มีราศี: เคส golden/ai:judge ไม่มีราศีทั้งหมด
+   *    ผลวัดของ PROMPT_VERSION ปัจจุบันจึงยังใช้ได้ (ด่าน test-ai-reading-golden ตรวจข้อนี้)
+   */
+  const zodiacBlock = formatZodiacForPrompt(ctx.zodiac, cards, lang);
 
   const exemplar = pickExemplar(category, drawn.length, spread.yesNoMode);
   const exemplarBlock = !isEn && !options?.omitExemplar ? formatExemplarForPrompt(exemplar) : "";
@@ -383,7 +392,7 @@ ${karmic.karmicNarrative ? `\n${karmic.karmicNarrative}` : ""}
   ${cosmic.promptAnchor}
   <nickname>${cleanNickname}</nickname>
   <question>${cleanQuestion}</question>
-  ${cleanIntakeLines.length ? `<context_details>\n  ${cleanIntakeLines.join("\n  ")}\n  </context_details>` : ""}
+  ${cleanIntakeLines.length ? `<context_details>\n  ${cleanIntakeLines.join("\n  ")}\n  </context_details>` : ""}${zodiacBlock ? `\n  ${zodiacBlock}` : ""}
 </user_profile>
 
 ## Spread: ${spread.nameEn || spread.nameTh} (${spread.descriptionEn || spread.description})
@@ -431,7 +440,7 @@ ${PROMPT_TRUST_BOUNDARY_EN}`;
   ${cosmic.promptAnchor}
   <nickname>${cleanNickname}</nickname>
   <question>${cleanQuestion}</question>
-  ${cleanIntakeLines.length ? `<context_details>\n  ${cleanIntakeLines.join("\n  ")}\n  </context_details>` : ""}
+  ${cleanIntakeLines.length ? `<context_details>\n  ${cleanIntakeLines.join("\n  ")}\n  </context_details>` : ""}${zodiacBlock ? `\n  ${zodiacBlock}` : ""}
 </user_profile>
 
 ## ผังไพ่ที่ใช้: ${spread.nameTh} (${spread.description})

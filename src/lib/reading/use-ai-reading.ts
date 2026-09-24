@@ -40,6 +40,7 @@ import { createClientSeed } from "@/lib/tarot/client-seed";
  * บันเดิลของทุกหน้าที่ใช้ท่อนี้จะพองขึ้นทันทีหลายร้อย KB (ชนิดข้อมูลถูกลบทิ้งตอนคอมไพล์ แต่ค่าไม่ถูกลบ)
  */
 import type { DerivedDrawDetail, DerivedDrawInput } from "@/lib/reading/derived-draw";
+import { readMySign } from "@/lib/zodiac/my-sign";
 
 /** หลักฐาน Provably Fair ที่เซิร์ฟเวอร์เปิดเผยหลังอ่านจบ */
 export interface ReadingProof {
@@ -356,6 +357,7 @@ export function useAiReading(): AiReadingController {
             lang: locale,
             clientSeed: freshSeed,
             derive: request.derive,
+            zodiac: readMySign(),
           }),
         });
         const startData = await startRes.json().catch(() => ({}));

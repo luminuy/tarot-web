@@ -37,6 +37,8 @@ export interface ReadingRecord {
    * ⚠️ มีค่านี้เมื่อไหร่ แปลว่าห้ามเรียก `drawCards()` และห้ามรับ `pickedIndices` ในเซสชันนั้น
    */
   derivation?: DerivedDrawSpec;
+  /** ✦ ราศีที่ผู้ถามบอกไว้ (ไม่บังคับ) — บริบทของ prompt เท่านั้น ไม่เกี่ยวกับการจั่ว */
+  zodiac?: import("@/lib/ai/zodiac-context").SeekerZodiac;
 
   result?: Reading;
   createdAt: number;
