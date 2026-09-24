@@ -61,10 +61,18 @@ export function HomeZodiacSection({ isEnglish, href }: { isEnglish: boolean; hre
           >
             {isEnglish ? "Tarot × Astrology: Your Zodiac Cards" : "ไพ่ยิปซี × โหราศาสตร์ — ไพ่ประจำ 12 ราศี"}
           </h2>
-          <p className="text-xs sm:text-sm text-muted font-serif-th max-w-2xl [text-wrap:balance]">
-            {isEnglish
-              ? "Every sign has its own Major Arcana card. Look up your sign by the Western or the Thai (sidereal) calendar and meet the cards that belong to you."
-              : "ทุกราศีมีไพ่ชุดใหญ่ประจำตัว ดูได้ทั้งราศีแบบสากลและราศีแบบไทย (สุริยยาตร์) แตะราศีของคุณเพื่อดูไพ่ประจำราศี ดาวเจ้าเรือน และไพ่ประจำช่วงวันเกิด"}
+          {/* แบ่งบรรทัดเองตามจังหวะประโยค — ปล่อยเบราว์เซอร์ตัดเอง คำว่า "สุริยยาตร์" (ไม่อยู่ในพจนานุกรมตัดคำ)
+              ถูกหักกลางคำเป็น "(สุริย / ยาตร์)" เจ้าของเห็นจากภาพหน้าจอ */}
+          <p className="text-xs sm:text-sm text-muted font-serif-th max-w-3xl">
+            {isEnglish ? (
+              "Every sign has its own Major Arcana card. Look up your sign by the Western or the Thai (sidereal) calendar and meet the cards that belong to you."
+            ) : (
+              <>
+                ทุกราศีมีไพ่ชุดใหญ่ประจำตัว ดูได้ทั้งราศีแบบสากลและราศีแบบไทย{" "}
+                <span className="whitespace-nowrap">(สุริยยาตร์)</span>
+                <br className="hidden sm:inline" /> แตะราศีของคุณเพื่อดูไพ่ประจำราศี ดาวเจ้าเรือน และไพ่ประจำช่วงวันเกิด
+              </>
+            )}
           </p>
         </div>
       </div>
