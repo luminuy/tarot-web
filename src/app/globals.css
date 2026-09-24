@@ -2160,6 +2160,17 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
     width: min(31vw, 124px);
   }
 }
+/* การ์ดในแถวปัดบนมือถือ: ไม่มีเงา — กล่องเลื่อน (overflow-x) ตัดเงาขอบล่างทิ้งเหลือเป็นแถบเทาดำ
+   ใต้การ์ด (เจ้าของทักจากภาพหน้าจอ 2026-09-24) · การ์ดยังมีขอบ/พื้นกระจกแยกจากพื้นหลังอยู่
+   `.rail-flat` = แถวปัดฝั่ง React (เปิดไพ่ด่วน · เลือกผัง) ที่ไม่ได้ใช้คลาส `.home-rail` */
+@media (max-width: 639.98px) {
+  .home-rail > *,
+  .home-rail > * > .altar-card-porcelain,
+  .home-rail > * > .glass-tile,
+  .rail-flat > * {
+    box-shadow: none;
+  }
+}
 @media (max-width: 639.98px) and (prefers-reduced-motion: no-preference) {
   .home-rail {
     scroll-behavior: smooth;

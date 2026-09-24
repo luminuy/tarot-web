@@ -332,7 +332,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
           : {})}
         ref={carouselRef}
         onScroll={handleCarouselScroll}
-        className={`${hasSwappedTab ? "anim-swap-rise-sm" : ""} flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:grid ${
+        className={`${hasSwappedTab ? "anim-swap-rise-sm" : ""} rail-flat flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:grid ${
           variant === "featured"
             ? "sm:grid-cols-3"
             : "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
@@ -480,72 +480,17 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
           })}
       </div>
 
-      {/* Interactive Mobile Carousel Navigation Pills */}
       {/*
-        🎯 จุดบอกตำแหน่งสไลด์ — พื้นที่กดต้อง >= 24x24 px (WCAG 2.2 · SC 2.5.8)
-        ---------------------------------------------------------------------------
-        วัดจริงบน production ก่อนแก้: จุดเหล่านี้กว้าง 6 x 6 px เล็กกว่าเกณฑ์ 4 เท่า
-
-        ⚠️ ข้อนี้ "รักษาหน้าตาเดิมเป๊ะทุกพิกเซล" เป็นไปไม่ได้ และนี่คือเหตุผล:
-        ข้อยกเว้น Spacing ของ SC 2.5.8 บอกว่าเป้าที่เล็กกว่า 24px จะผ่านได้ก็ต่อเมื่อ
-        วงกลมเส้นผ่าศูนย์กลาง 24px ที่วางทับจุดกึ่งกลางของแต่ละเป้า ต้องไม่ทับกัน
-        ของเดิมจุดกึ่งกลางห่างกันแค่ 12px (จุด 6px + gap 6px) วงกลมจึงทับกันแน่นอน
-        => จะผ่านเกณฑ์ได้ จุดกึ่งกลางต้องห่างกันอย่างน้อย 24px ไม่มีทางอื่น
-
-        วิธีที่เลือก: ห่อจุดด้วยปุ่ม 24x24 แล้วตัด gap ของแถวนี้เป็น 0
-        => จุดกึ่งกลางห่างกันพอดี 24px (วงกลมชนขอบกันแต่ไม่ทับ = ผ่าน)
-        => ตัวจุดที่ตาเห็นยังขนาดเดิมทุกประการ เปลี่ยนแค่ระยะห่างจาก 6px เป็น 18px
-
-        ⚠️ ห้ามย้าย `aria-label` ไปไว้ที่ <span> ข้างใน — ชื่อต้องอยู่ที่ปุ่ม
-        ส่วน <span> เป็นของประดับล้วน ๆ จึงต้อง `aria-hidden`
-        ⚠️ ห้ามใส่ `gap-*` กลับเข้าไปในแถวนี้ — จุดกึ่งกลางจะเกิน 24px แล้วดูห่างผิดสัดส่วน
+        แถวล่างของสไลด์ (คำสั่งเจ้าของ 2026-09-24 รอบ 2: "ไม่เอาจุด ปุ่มลูกศรโอเคสวยดีแล้ว")
+          มือถือ: ลิงก์ "ดูผังทั้งหมด" ชิดซ้าย · ลูกศรแบบ apple.com ชิดขวา — แถวเดียวจบ ไม่มีปุ่มลอยแยกบรรทัด
+          จอใหญ่: เป็นกริด ไม่มีลูกศร เหลือลิงก์กลางแถว
+        เดิมมีจุดบอกตำแหน่ง (แตะ = เลือกผัง) — ถอดออกแล้ว การ์ดแตะเลือกได้เองอยู่แล้ว
       */}
-      {/* แถวล่างของสไลด์: จุด (แตะ = เลือกผัง) ทางซ้าย + ลูกศรแบบ apple.com (เลื่อนดูอย่างเดียว) ทางขวา */}
-      <div className="flex sm:hidden items-center justify-between gap-3 pt-0.5 pb-1">
-      <div className="flex items-center">
-        {filteredSpreads.map((spread, idx) => {
-          const isCurrentActive = activeScrollIndex === idx;
-          const isSelected = selectedSpread.id === spread.id;
-
-          return (
-            <button
-              key={spread.id}
-              type="button"
-              onClick={() => {
-                onSelectSpread(spread);
-                scrollToCard(idx);
-              }}
-              className="grid h-6 min-w-6 place-items-center cursor-pointer"
-              aria-label={isEnglish ? `Select spread ${spread.nameEn || spread.nameTh}` : `เลือกผัง ${spread.nameTh}`}
-            >
-              <span
-                aria-hidden="true"
-                className={`h-1.5 rounded-full transition-[width,background-color,box-shadow] duration-300 ${
-                  isCurrentActive
-                    ? "w-7 bg-gold-ink"
-                    : isSelected
-                      ? "w-3 bg-gold-ink/60"
-                      : "w-1.5 bg-gold-ink/20 hover:bg-gold-ink-deep/45"
-                }`}
-              />
-            </button>
-          );
-        })}
-      </div>
-        <RailArrows
-          isEnglish={isEnglish}
-          canPrev={activeScrollIndex > 0}
-          canNext={activeScrollIndex < filteredSpreads.length - 1}
-          onPrev={() => scrollToCard(Math.max(0, activeScrollIndex - 1))}
-          onNext={() => scrollToCard(Math.min(filteredSpreads.length - 1, activeScrollIndex + 1))}
-        />
-      </div>
-
-      {variant === "featured" && (
-        <div className="text-center pt-1 pb-1">
+      <div className="flex items-center justify-between gap-3 pt-0.5 pb-1 sm:justify-center">
+        {variant === "featured" ? (
           <LocaleLink
             href="/spreads"
-            className="btn-glass-ghost inline-flex items-center gap-1.5 px-5 py-2.5 hover:text-gold-ink font-serif-th text-xs sm:text-sm font-semibold transition-colors duration-200"
+            className="btn-glass-ghost inline-flex items-center gap-1.5 px-4 py-2 sm:px-5 sm:py-2.5 hover:text-gold-ink font-serif-th text-xs sm:text-sm font-semibold transition-colors duration-200"
           >
             <span>
               {isEnglish
@@ -554,11 +499,24 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
             </span>
             <span aria-hidden="true">→</span>
           </LocaleLink>
+        ) : (
+          <span />
+        )}
+        <div className="sm:hidden">
+          <RailArrows
+            isEnglish={isEnglish}
+            canPrev={activeScrollIndex > 0}
+            canNext={activeScrollIndex < filteredSpreads.length - 1}
+            onPrev={() => scrollToCard(Math.max(0, activeScrollIndex - 1))}
+            onNext={() => scrollToCard(Math.min(filteredSpreads.length - 1, activeScrollIndex + 1))}
+          />
         </div>
-      )}
+      </div>
 
-      {/* Selected Spread In-Focus Action Bar */}
-      {onProceed && (
+      {/* Selected Spread In-Focus Action Bar
+          หน้าแรก (featured) ไม่มีแถบนี้แล้ว — แตะการ์ดเปิดป๊อปอัพ "เริ่มการดูดวงเลย" ได้ทันที แถบสรุปจึงซ้ำหน้าที่
+          (คำสั่งเจ้าของ 2026-09-24: "ตอนนี้กดที่การ์ดได้แล้ว จัดวางใหม่") */}
+      {onProceed && variant !== "featured" && (
         <div className="altar-panel anim-swap-rise-sm mt-2 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5">
           <div className="flex items-center gap-3.5">
             {/* Real 1909 Rider-Waite Spread Card Emblem */}
