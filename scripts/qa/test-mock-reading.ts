@@ -467,6 +467,54 @@ async function run() {
   const historySrc = fs.readFileSync(path.resolve("src/components/history/ReadingHistoryModal.tsx"), "utf8");
   check("หน้าประวัติบอกผู้ใช้เมื่อสรุปรายเดือนไม่ได้มาจาก AI", /monthlySummary\.fallback &&/.test(historySrc));
 
+  // สองภาษา — ผู้ใช้หน้าอังกฤษต้องได้สรุปอังกฤษทั้งฉบับ ไม่มีอักษรไทยหลุดมาสักตัว
+  const thaiChar = /[฀-๿]/;
+  const enJournals = [
+    journalA,
+    [mkEntry(0, "money", [[cups2, false]], "PENDING")],
+    [mkEntry(0, "self", [], "PENDING")],
+    // ธาตุเสมอกันสองธาตุ + ไพ่กลับหัวเยอะ + ผลยังไม่เกิดขึ้น
+    [
+      mkEntry(0, "general", [[towerIdx, true], [cups2, true]], "NOT_HAPPENED"),
+      mkEntry(1, "decision", [[towerIdx, true], [cups2, false]], "NOT_HAPPENED"),
+    ],
+  ];
+  const enMonths = enJournals.map((j) => buildOfflineMonthlySummary(j, "en"));
+  check(
+    "สรุปออฟไลน์ภาษาอังกฤษไม่มีอักษรไทยหลุดสักช่อง (ครบ 4 แบบประวัติ)",
+    enMonths.every((m) => !thaiChar.test(JSON.stringify(m))),
+    enMonths.map((m) => m.synthesis).find((s) => thaiChar.test(s)),
+  );
+  const monthAEn = enMonths[0];
+  check(
+    "สรุปอังกฤษอ้างไพ่ออกซ้ำด้วยชื่ออังกฤษ + คำสำคัญอังกฤษ",
+    monthAEn.synthesis.includes(`${DECK[towerIdx].nameEn} (3 times)`) &&
+      monthAEn.synthesis.includes(`"${DECK[towerIdx].keywordsEn!.upright[0]}"`) &&
+      monthAEn.recurringCards[0] === `${DECK[towerIdx].nameEn} (3 times)`,
+    monthAEn.synthesis,
+  );
+  check("สรุปอังกฤษบอกหมวดที่ถามบ่อย", monthAEn.synthesis.includes("was love (2 times)"), monthAEn.synthesis);
+  check("สรุปอังกฤษนับผลจริง", monthAEn.synthesis.includes("Of the 2 outcomes you recorded, 2 came true"), monthAEn.synthesis);
+  check("ธาตุเด่นคืนเป็นภาษาที่ขอ", monthA.dominantElement === "ไฟ" && monthAEn.dominantElement === "Fire");
+  check("ธาตุเสมอ = Balanced + บอกธาตุที่เสมอตามจริง", enMonths[3].dominantElement === "Balanced" && /Fire and Water showed up equally/.test(enMonths[3].synthesis), enMonths[3].synthesis);
+  check(
+    'หมวดเสมอกัน/ถามครั้งเดียว ไม่เคลมว่า "บ่อยที่สุด" ทั้งสองภาษา',
+    !/asked about most/.test(enMonths[3].synthesis) &&
+      !/ถามบ่อยที่สุด/.test(buildOfflineMonthlySummary(enJournals[3]).synthesis) &&
+      !/ถามบ่อยที่สุด/.test(monthB.synthesis),
+    enMonths[3].synthesis,
+  );
+  check("ไม่ระบุภาษา = ไทย (ของเดิมไม่พัง)", buildOfflineMonthlySummary(journalA).synthesis === buildOfflineMonthlySummary(journalA, "th").synthesis);
+  check("หน้าประวัติส่งภาษาไปกับคำขอสรุป", /monthly-summary\?lang=\$\{isEn \? "en" : "th"\}/.test(historySrc));
+  check(
+    "route สรุปรายเดือนรับภาษา · ส่งภาษาให้ด่านวิกฤต · สรุปออฟไลน์ตามภาษา · มี prompt อังกฤษ",
+    /searchParams\.get\("lang"\) === "en"/.test(monthlySrc) &&
+      /checkQuestion\([\s\S]*?, lang\)/.test(monthlySrc) &&
+      /buildOfflineMonthlySummary\(journal, lang\)/.test(monthlySrc) &&
+      /Reply with JSON only/.test(monthlySrc),
+  );
+  check("route ไม่มีข้อความ error ไทยล้วนหลุดถึงผู้ใช้หน้าอังกฤษ", !/\{ error: "[฀-๿]/.test(monthlySrc));
+
   // ── 10. คำตอบสำรองของแชทถามต่อ ───────────────────────────────────────
   console.log("\n💬 10. คำตอบสำรองของแชท (chat-fallback)");
   const chatDrawn = ["swords-10", "cups-02", "major-19"].map((id, order) => ({
