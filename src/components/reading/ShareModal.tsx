@@ -24,6 +24,34 @@ interface ShareModalProps {
   reading?: Partial<Reading> | null;
 }
 
+interface SocialLogoProps {
+  label: string;
+  className: string;
+  /** มีค่า = ลิงก์จริงเข้าแอป (มือถือ) · ไม่มี = ปุ่ม */
+  href?: string;
+  onClick: () => void;
+  /** กำลังเตรียมลิงก์ — ยังแตะได้ แต่จะขึ้นข้อความให้รอ */
+  busy?: boolean;
+  children: React.ReactNode;
+}
+
+/** โลโก้แอปโซเชียล — เป็น `<a>` เมื่อมีลิงก์ (iOS เด้ง universal link เข้าแอปได้แน่นอนกว่า `window.open`) */
+const SocialLogo: React.FC<SocialLogoProps> = ({ label, className, href, onClick, busy, children }) => {
+  const cls = `${className} ${busy ? "opacity-50 cursor-wait" : ""}`;
+  if (href) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" title={label} aria-label={label} onClick={onClick} className={cls}>
+        {children}
+      </a>
+    );
+  }
+  return (
+    <button type="button" title={label} aria-label={label} aria-busy={busy || undefined} onClick={onClick} className={cls}>
+      {children}
+    </button>
+  );
+};
+
 export const ShareModal: React.FC<ShareModalProps> = ({
   isOpen,
   onClose,
@@ -142,6 +170,46 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
     // วาดใหม่เมื่อเปิดหน้าต่าง หรือคำทำนาย/ไพ่เปลี่ยน
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, reading?.summary, cards.length, question, isEnglish]);
+
+  /*
+   * 📱 มือถือ: โลโก้ LINE / Facebook / X / Threads เปิด "แอปนั้น" ตรง ๆ (เจ้าของสั่ง 2026-09-24)
+   * แลกกับการส่งเป็น "ลิงก์" /s/<id> ซึ่งขึ้นรูปการ์ดเป็นพรีวิวในแชท/โพสต์ แทนไฟล์รูป
+   * (เว็บยัดไฟล์รูปเข้าแอปใดแอปหนึ่งตรง ๆ ไม่ได้ — ทางเดียวคือหน้าต่างแชร์ของเครื่อง ซึ่งเจ้าของไม่อยากให้เด้ง)
+   *
+   * ⚠️ ลิงก์ต้องพร้อม "ก่อน" ผู้ใช้แตะ และปุ่มต้องเป็น `<a href>` จริง — ถ้าไปอัปโหลดหลังแตะ
+   *    สิทธิ์ user activation หมด ป็อปอัปโดนบล็อก และ iOS ไม่ยอมเด้ง universal link เข้าแอป
+   *    จึงอัปโหลดรอไว้ตอนเปิดหน้าต่าง ครั้งเดียวต่อคำทำนาย (เพดาน /api/share/image 20 ครั้ง/ชม.)
+   * IG / TikTok ไม่มีลิงก์แชร์จากเว็บเลย ยังใช้หน้าต่างแชร์ของเครื่อง · คอมพิวเตอร์คงพฤติกรรมเดิมทุกอย่าง
+   */
+  const [isMobile, setIsMobile] = useState(false);
+  const [preparedLink, setPreparedLink] = useState<string | null>(null);
+  const preparedRef = useRef<{ key: string; url: string } | null>(null);
+  const shareKey = `${isEnglish}|${question}|${reading?.summary ?? ""}|${cards
+    .map((c) => `${c.cardIndex}${c.isReversed ? "r" : ""}`)
+    .join(",")}`;
+  useEffect(() => {
+    if (!isOpen || typeof window === "undefined") return;
+    const mobile = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+    setIsMobile(mobile);
+    if (!mobile) return;
+    if (preparedRef.current?.key === shareKey) {
+      setPreparedLink(preparedRef.current.url);
+      return;
+    }
+    let alive = true;
+    setPreparedLink(null);
+    void buildShareLink().then((url) => {
+      if (!alive) return;
+      // จำเฉพาะลิงก์ /s/<id> จริง — ถ้าได้ลิงก์สำรอง (หน้าแรก) เปิดหน้าต่างรอบหน้าจะลองอัปโหลดใหม่
+      if (url.includes("/s/")) preparedRef.current = { key: shareKey, url };
+      setPreparedLink(url);
+    });
+    return () => {
+      alive = false;
+    };
+    // buildShareLink อ่านค่าชุดเดียวกับ shareKey
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, shareKey]);
 
   /** แคปชันสั้นที่แนบไปกับภาพ — ข้อความยาวเต็มอยู่ใน `shareText` (ใช้คัดลอก/Threads) */
   const shortCaption = isEnglish
@@ -302,7 +370,21 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
         ? window.location.origin
         : "https://seertarot.net";
 
-    // Twitter / X
+    if (brand === "facebook") {
+      await copyToClipboard(shareText);
+      showToast(isEnglish ? "Caption copied! Opening Facebook share window..." : "คัดลอกข้อความแล้ว! กำลังเปิดหน้าแชร์ Facebook...");
+    }
+    openOrRedirect(brandShareUrl(brand, shareUrl));
+  };
+
+  type LinkBrand = "line" | "facebook" | "twitter" | "threads";
+
+  /** ลิงก์หน้าโพสต์/แชร์ของแต่ละแอป — บนมือถือ iOS/Android เด้งเข้าแอปนั้นเอง (universal/app link) */
+  const brandShareUrl = (brand: LinkBrand, shareUrl: string): string => {
+    if (brand === "line") {
+      const caption = isEnglish ? "My tarot reading on SeerTarot ✨" : "คำทำนายไพ่ทาโรต์ของฉันจาก SeerTarot ✨";
+      return `https://line.me/R/share?text=${encodeURIComponent(`${caption}\n${shareUrl}`)}`;
+    }
     if (brand === "twitter") {
       /*
        * ย่อคำทำนายก่อนยัดลงทวีต — เดิมใช้ `slice(0, 90)` ดิบ ๆ ซึ่งตัดกลางคลัสเตอร์ไทย
@@ -313,30 +395,38 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
       const tweetText = isEnglish
         ? `1909 Rider-Waite Tarot Reading by SeerTarot\nSpread: ${spreadName}\nQuestion: "${question || defaultQuestion}"\nOracle insight from ${personaName}: "${tweetSummary}"\n\n#tarot #oracle #archetypes #SeerTarot`
         : `ดูดวงไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot\nผัง: ${spreadName}\nคำถาม: "${question || "ภาพรวมดวงชะตา"}"\nคำทำนายจากแม่หมอ ${persona.nameTh}: "${tweetSummary}"\n\n#ไพ่ทาโรต์ #ดูดวง #SeerTarot`;
-      openOrRedirect(
-        `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`
-      );
-      return;
+      return `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`;
     }
-
-    // Threads
     if (brand === "threads") {
       const threadsText = isEnglish
         ? `1909 Rider-Waite Tarot Reading by SeerTarot\nSpread: ${spreadName}\nQuestion: "${question || defaultQuestion}"\nInsight: "${reading?.summary || ""}"\n${shareUrl}`
         : `คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot\nผัง: ${spreadName}\nคำถาม: "${question || "ภาพรวมดวงชะตา"}"\nคำทำนาย: "${reading?.summary || ""}"\n${shareUrl}`;
-      openOrRedirect(`https://www.threads.net/intent/post?text=${encodeURIComponent(threadsText)}`);
-      return;
+      return `https://www.threads.net/intent/post?text=${encodeURIComponent(threadsText)}`;
     }
+    return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+  };
 
-    // Facebook
-    if (brand === "facebook") {
-      // Web fallback
-      await copyToClipboard(shareText);
-      showToast(isEnglish ? "Caption copied! Opening Facebook share window..." : "คัดลอกข้อความแล้ว! กำลังเปิดหน้าแชร์ Facebook...");
-      openOrRedirect(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`);
-      return;
+  /**
+   * พร็อพของโลโก้ LINE / Facebook / X / Threads
+   * มือถือ = `<a href>` เข้าแอปตรง (ดูคอมเมนต์ `isMobile`) · คอมพิวเตอร์ = ปุ่มแบบเดิม
+   */
+  const linkLogoProps = (brand: LinkBrand): Pick<SocialLogoProps, "href" | "onClick" | "busy"> => {
+    if (!isMobile) {
+      return { onClick: () => (brand === "line" ? handleShareLine() : void handleShareToBrand(brand)) };
     }
-
+    if (!preparedLink) {
+      return {
+        busy: true,
+        onClick: () => showToast(isEnglish ? "Preparing your share link…" : "กำลังเตรียมลิงก์แชร์ รอสักครู่นะ"),
+      };
+    }
+    return {
+      href: brandShareUrl(brand, preparedLink),
+      onClick: () => {
+        soundManager.playCardSelectSound();
+        trackEvent("share_click", { platform: brand, spread_id: spreadName });
+      },
+    };
   };
 
   return (
@@ -460,33 +550,29 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
             {isEnglish ? "Or share straight to" : "หรือแชร์ตรงไปที่"}
           </p>
 
-          {/* ปุ่มแชร์ตรงรายแอป (6 แอป) — LINE เปิดแอปผ่าน line.me · IG/TikTok/FB ใช้หน้าต่างแชร์ของเครื่อง · X/Threads ผ่านหน้าโพสต์ของเว็บนั้น */}
+          {/* ปุ่มแชร์ตรงรายแอป (6 แอป) — มือถือ: LINE/FB/X/Threads เปิดแอปตรงพร้อมลิงก์ที่ขึ้นรูปพรีวิว · IG/TikTok ใช้หน้าต่างแชร์ของเครื่อง (ไม่มีลิงก์แชร์จากเว็บ) */}
           <div className="altar-card-porcelain !rounded-lg py-3 px-2 flex items-center justify-center gap-2 sm:gap-5">
-            {/* LINE (#06C755) — คนไทยแชร์ผ่าน LINE มากที่สุด · line.me/R/share เปิดแอปตรง */}
-            <button
-              type="button"
-              title={isEnglish ? "Share to LINE" : "แชร์ไปยัง LINE"}
-              aria-label={isEnglish ? "Share to LINE" : "แชร์ไปยัง LINE"}
-              onClick={handleShareLine}
+            {/* LINE (#06C755) — คนไทยแชร์ผ่าน LINE มากที่สุด */}
+            <SocialLogo
+              label={isEnglish ? "Share to LINE" : "แชร์ไปยัง LINE"}
+              {...linkLogoProps("line")}
               className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#06C755] text-white flex items-center justify-center hover:scale-110 active:scale-95 transition cursor-pointer shrink-0"
             >
               <svg className="w-6 h-6 sm:w-7 sm:h-7" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314" />
               </svg>
-            </button>
+            </SocialLogo>
 
             {/* Facebook (#1877F2) */}
-            <button
-              type="button"
-              title={isEnglish ? "Share to Facebook" : "แชร์ไปยัง Facebook"}
-              aria-label={isEnglish ? "Share to Facebook" : "แชร์ไปยัง Facebook"}
-              onClick={() => handleShareToBrand("facebook")}
+            <SocialLogo
+              label={isEnglish ? "Share to Facebook" : "แชร์ไปยัง Facebook"}
+              {...linkLogoProps("facebook")}
               className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#1877F2] text-white flex items-center justify-center hover:scale-110 active:scale-95 transition cursor-pointer shrink-0"
             >
               <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
               </svg>
-            </button>
+            </SocialLogo>
 
             {/* Instagram (Official Gradient) */}
             <button
@@ -519,30 +605,26 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
             </button>
 
             {/* X / Twitter (#000000) */}
-            <button
-              type="button"
-              title={isEnglish ? "Share to X (Twitter)" : "แชร์ไปยัง X (Twitter)"}
-              aria-label={isEnglish ? "Share to X (Twitter)" : "แชร์ไปยัง X (Twitter)"}
-              onClick={() => handleShareToBrand("twitter")}
+            <SocialLogo
+              label={isEnglish ? "Share to X (Twitter)" : "แชร์ไปยัง X (Twitter)"}
+              {...linkLogoProps("twitter")}
               className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#000000] border border-white/20 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition cursor-pointer shrink-0"
             >
               <svg className="w-4.5 h-4.5 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
               </svg>
-            </button>
+            </SocialLogo>
 
             {/* Threads (#000000) with Official Meta Threads SVG Path */}
-            <button
-              type="button"
-              title={isEnglish ? "Share to Threads" : "แชร์ไปยัง Threads"}
-              aria-label={isEnglish ? "Share to Threads" : "แชร์ไปยัง Threads"}
-              onClick={() => handleShareToBrand("threads")}
+            <SocialLogo
+              label={isEnglish ? "Share to Threads" : "แชร์ไปยัง Threads"}
+              {...linkLogoProps("threads")}
               className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#000000] border border-white/20 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition cursor-pointer shrink-0"
             >
               <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 192 192" fill="currentColor">
                 <path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.7731 51.1409 62.102 62.7807L75.881 72.2328C81.6116 63.5383 90.6052 61.6848 97.2286 61.6848C97.3051 61.6848 97.3819 61.6848 97.4576 61.6855C105.707 61.7381 111.932 64.1366 115.961 68.814C118.893 72.2193 120.854 76.925 121.825 82.8638C114.511 81.6207 106.601 81.2385 98.145 81.7233C74.3247 83.0954 59.0111 96.9879 60.0396 116.292C60.5615 126.084 65.4397 134.508 73.775 140.011C80.8224 144.663 89.899 146.938 99.3323 146.423C111.79 145.74 121.563 140.987 128.381 132.296C133.559 125.696 136.834 117.143 138.28 106.366C144.217 109.949 148.617 114.664 151.047 120.332C155.179 129.967 155.42 145.8 142.501 158.708C131.182 170.016 117.576 174.908 97.0135 175.059C74.2042 174.89 56.9538 167.575 45.7381 153.317C35.2355 139.966 29.8077 120.682 29.6052 96C29.8077 71.3178 35.2355 52.0336 45.7381 38.6827C56.9538 24.4249 74.2039 17.11 97.0132 16.9405C119.988 17.1113 137.539 24.4614 149.184 38.788C154.894 45.8136 159.199 54.6488 162.037 64.9503L178.184 60.6422C174.744 47.9622 169.331 37.0357 161.965 27.974C147.036 9.60668 125.202 0.195148 97.0695 0H96.9569C68.8816 0.19447 47.2921 9.6418 32.7883 28.0793C19.8819 44.4864 13.2244 67.3157 13.0007 95.9325L13 96L13.0007 96.0675C13.2244 124.684 19.8819 147.514 32.7883 163.921C47.2921 182.358 68.8816 191.806 96.9569 192H97.0695C122.03 191.827 139.624 185.292 154.118 170.811C173.081 151.866 172.51 128.119 166.26 113.541C161.776 103.087 153.227 94.5962 141.537 88.9883ZM98.4405 129.507C88.0005 130.095 77.1544 125.409 76.6196 115.372C76.2232 107.93 81.9158 99.626 99.0812 98.6368C101.047 98.5234 102.976 98.468 104.871 98.468C111.106 98.468 116.939 99.0737 122.242 100.233C120.264 124.935 108.662 128.946 98.4405 129.507Z" />
               </svg>
-            </button>
+            </SocialLogo>
           </div>
         </motion.div>
       </motion.div>
