@@ -88,8 +88,16 @@ const CardZoomModal = withMotionScope(() => import("@/components/card/CardZoomMo
  */
 const BuyCreditsModal = dynamic(() => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal), { ssr: false });
 const AccessDialog = dynamic(() => import("@/components/entitlement/AccessDialog").then((m) => m.AccessDialog), { ssr: false });
-const PersonaCardSelector = withMotionScope(() => import("@/components/reading/PersonaCardSelector").then((m) => m.PersonaCardSelector));
-const IntentionAltarInput = withMotionScope(() => import("@/components/reading/IntentionAltarInput").then((m) => m.IntentionAltarInput));
+/**
+ * สองตัวนี้คือเนื้อหาจอแรกของหน้า `/read/<ผัง>` (เปิดมาที่ขั้นตั้งคำถามเลย) แต่มาถึงหลัง hydrate
+ * ถ้าไม่จองที่ไว้ แถบปุ่ม "เปลี่ยนผัง / ต่อไป" ด้านล่างจะขึ้นมาอยู่ใต้หัวข้อก่อน
+ * แล้วโดนดันลงไปเกือบสองจอตอน chunk มาถึง = จอกระโดดทุกครั้งที่เปิดหน้า (INC-0244)
+ * จองไว้คนละหนึ่งจอ (`100svh`) พอ — ของจริงสูงกว่านั้นทุกความกว้างจอ (วัดแล้ว: รวมกัน 1,330–1,860px)
+ * การขยายที่เกิดใต้ขอบจอจึงไม่มีใครเห็น · ไม่ใช้ skeleton กะพริบ (INC-0051) เป็นพื้นเปล่าเฉย ๆ
+ */
+const reserveOneScreen = () => <div aria-hidden="true" className="min-h-svh" />;
+const PersonaCardSelector = withMotionScope(() => import("@/components/reading/PersonaCardSelector").then((m) => m.PersonaCardSelector), reserveOneScreen);
+const IntentionAltarInput = withMotionScope(() => import("@/components/reading/IntentionAltarInput").then((m) => m.IntentionAltarInput), reserveOneScreen);
 /* ไพ่ไขข้อข้องใจ — ไม่ใช้ `motion` เลย จึงไม่ต้องห่อ `withMotionScope()` (INC-0137) */
 const ClarificationCard = dynamic(() => import("@/components/reading/ClarificationCard").then((m) => m.ClarificationCard), { ssr: false });
 /* หน้าต่างสายด่วน — ใช้ `Modal` ซึ่งห่อ AppMotionProvider ให้ในตัวแล้ว จึงไม่ต้องห่อซ้ำเหมือน AccessDialog */

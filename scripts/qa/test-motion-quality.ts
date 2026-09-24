@@ -73,6 +73,12 @@
  * 13. `withMotionScope()` ต้องห่อเฉพาะคอมโพเนนต์ที่ใช้ `motion` จริง (INC-0137)
  *     ห่อตัวที่ไม่ได้ใช้ = ลากไลบรารี 40 KB มาคาทางเปิด ผู้ใช้แตะแล้วต้องรอโหลดของที่ไม่มีใครเรียก
  *
+ * 14. `@view-transition { navigation: auto }` ต้องอยู่ใน `@media` ที่มี `pointer: fine` เท่านั้น (INC-0244)
+ *     บนมือถือมันทำให้เปิดหน้าแล้ว "จอว่างแวบ" ก่อนเนื้อหาจะมา
+ *
+ * 15. HTML ที่บิลด์แล้ว (`dist/`) ห้ามมีคลาสเฟดขาเข้า (`anim-step-in` · `anim-swap-rise*` · ...) (INC-0244)
+ *     คลาสพวกนี้เริ่มจาก opacity 0 ถ้าติดมากับ HTML เนื้อหาจะหายแล้วค่อยจางเข้าทุกครั้งที่เปิดหน้า
+ *
  * 🔒 หลักการ Ratchet: จุดละเมิดเก่าใส่ ALLOWLIST ได้ แต่ห้ามเพิ่มรายการใหม่
  *
  * รันด้วย: npx tsx scripts/qa/test-motion-quality.ts
@@ -706,6 +712,107 @@ function checkContentVisibility(violations: Violation[]): void {
   }
 }
 
+/**
+ * กฎ 14 — เฟดข้ามหน้า (cross-document View Transition) ห้ามเปิดบนจอสัมผัส (INC-0244)
+ *
+ * ปกติตอนเปลี่ยนหน้าเบราว์เซอร์ "ค้างภาพหน้าเก่า" (paint holding) จนหน้าใหม่มีเนื้อหาให้วาด
+ * แต่เมื่อเปิด View Transition มันเริ่มเฟดทันทีที่หน้าใหม่วาดได้เฟรมแรก ซึ่งบนมือถือมักยังมีแค่พื้นหลัง
+ * ➔ หน้าเก่าจางหาย ➔ จอว่าง ➔ เนื้อหาเด้งตามมา = กระพริบ
+ * วัดจริง (Chromium จำลอง Pixel 7): `/cards/major-00` จอว่างทั้งจอ ~430 ms · `/daily` เนื้อหาหาย ~330 ms
+ * เดสก์ท็อปวัดแล้วไม่มีเฟรมว่าง จึงอนุญาตเฉพาะใต้ `@media (... pointer: fine ...)`
+ */
+function checkViewTransitionScope(violations: Violation[]): void {
+  for (const file of CSS_FILES) {
+    const r = rel(file);
+    const text = fs.readFileSync(file, "utf-8").replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^\n]/g, " "));
+    const re = /@view-transition\s*\{[^}]*navigation\s*:\s*auto/g;
+    for (const m of text.matchAll(re)) {
+      const idx = m.index ?? 0;
+      /* หา @media ที่ครอบอยู่: ไล่ย้อนนับวงเล็บปีกกาจนเจอบล็อกแม่ */
+      let depth = 0;
+      let parentHead = "";
+      for (let i = idx - 1; i >= 0; i--) {
+        const ch = text[i];
+        if (ch === "}") depth++;
+        else if (ch === "{") {
+          if (depth === 0) {
+            const lineStart = text.lastIndexOf("\n", i) + 1;
+            parentHead = text.slice(lineStart, i);
+            break;
+          }
+          depth--;
+        }
+      }
+      if (/@media[^{]*pointer\s*:\s*fine/.test(parentHead)) continue;
+      violations.push({
+        file: r,
+        line: text.slice(0, idx).split("\n").length,
+        code: m[0].replace(/\s+/g, " ").slice(0, 160),
+        rule: "14 · View Transition เปิดบนจอสัมผัส (INC-0244)",
+        hint: "ครอบด้วย `@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)` — บนมือถือทำให้เปิดหน้าแล้วจอว่างแวบ",
+      });
+    }
+  }
+}
+
+/**
+ * กฎ 15 — HTML ที่บิลด์แล้วห้ามพาคลาสเฟดขาเข้ามาด้วย (INC-0244)
+ *
+ * `.anim-step-in` · `.anim-swap-rise*` · `.anim-page-transition` ฯลฯ เริ่มที่ opacity 0 (fill-mode both)
+ * ถ้าคอมโพเนนต์ใส่คลาสตั้งแต่เรนเดอร์แรก คลาสจะติดไปกับ HTML ตอนบิลด์ เนื้อหาที่เซิร์ฟเวอร์ส่งมาครบแล้ว
+ * จึงหายแวบแล้วค่อยจางเข้าทุกครั้งที่เปิดหน้า · ต้องใส่คลาสหลังผู้ใช้กดจริงเท่านั้น
+ * (ดู `hasSwappedTab` ใน CardsExplorer / SpreadCardSelector · `hasNavigatedStep` ใน TarotFlow)
+ *
+ * ตรวจของจริงที่ส่งถึงผู้ใช้ ไม่ใช่ซอร์ส — คลาสในซอร์สที่อยู่หลังเงื่อนไขการกดไม่ผิด
+ * ไม่มี `dist/` = ยังไม่บิลด์: บนเครื่องข้ามพร้อมคำเตือน · ใน CI ถือว่าตก (INC-0189b ด่านที่ผ่านเพราะไม่มีอะไรให้ตรวจ)
+ */
+const ENTRANCE_CLASSES = [
+  "anim-step-in",
+  "anim-swap-rise",
+  "anim-swap-rise-sm",
+  "anim-page-transition",
+  "anim-modal-rise",
+  "anim-drop-in",
+  "anim-scrim-in",
+];
+
+function checkEntranceClassesInBuiltHtml(violations: Violation[]): void {
+  const dist = path.join(ROOT, "dist");
+  if (!fs.existsSync(dist)) {
+    if (process.env.CI) {
+      violations.push({
+        file: "dist/",
+        line: 0,
+        code: "(ไม่มีโฟลเดอร์)",
+        rule: "15 · คลาสเฟดขาเข้าใน HTML ที่บิลด์แล้ว (INC-0244)",
+        hint: "CI ต้องบิลด์ก่อนรันด่านนี้ — ไม่มี dist/ แปลว่าด่านไม่ได้ตรวจอะไรเลย",
+      });
+    } else {
+      console.warn("⚠️  กฎ 15 ข้าม — ยังไม่มี dist/ (รัน `npm run build:astro` ก่อนถ้าจะตรวจครบ)");
+    }
+    return;
+  }
+  const htmlFiles = walk(dist, [".html"]);
+  assertNonEmptyCorpus("กฎ 15 · HTML ที่บิลด์แล้ว", htmlFiles);
+  const classAttr = /class="([^"]*)"/g;
+  for (const file of htmlFiles) {
+    const html = fs.readFileSync(file, "utf-8");
+    for (const m of html.matchAll(classAttr)) {
+      const tokens = m[1].split(/\s+/);
+      const hit = tokens.find((t) => ENTRANCE_CLASSES.includes(t));
+      if (!hit) continue;
+      violations.push({
+        file: rel(file),
+        line: html.slice(0, m.index ?? 0).split("\n").length,
+        code: m[0].slice(0, 160),
+        rule: "15 · คลาสเฟดขาเข้าใน HTML ที่บิลด์แล้ว (INC-0244)",
+        hint: `"${hit}" ติดมากับ HTML — เนื้อหาจะหายแวบแล้วจางเข้าทุกครั้งที่เปิดหน้า · ใส่คลาสหลังผู้ใช้กดจริงเท่านั้น (เช่น hasSwappedTab)`,
+      });
+      break; // หนึ่งไฟล์รายงานจุดแรกพอ
+    }
+  }
+}
+
 function run(): void {
   console.log("🔍 ตรวจคุณภาพโมชั่นทั้งเว็บ (Motion Quality Guard)...\n");
 
@@ -723,6 +830,8 @@ function run(): void {
   checkKeyframeCenteringConflict(violations);
   checkTokens(violations);
   checkContentVisibility(violations);
+  checkViewTransitionScope(violations);
+  checkEntranceClassesInBuiltHtml(violations);
 
   if (violations.length > 0) {
     console.error(`❌ พบอนิเมชันที่ผิดกฎ ${violations.length} จุด:\n`);
@@ -739,7 +848,7 @@ function run(): void {
   }
 
   console.log(
-    "\n✅ ผ่านทุกเกณฑ์: ไม่มี transition-all · ไม่มี backdrop-filter · ไม่มีลูปไม่รู้จบบนเธรดหลัก · ไม่มี translate3d(0,0,0) · ไม่มี motion อนิเมตคุณสมบัติเชิง layout · ไม่มี mode=\"wait\" ที่ไม่มี exit · ไม่มี return null เหนือ AnimatePresence · ไม่มีคลาสผีของ tailwindcss-animate · แผงหน้าต่างลอยไม่อนิเมต scale และใช้ svh · ไม่มี withMotionScope() ห่อของที่ไม่ได้ใช้ motion · ไม่มีคีย์เฟรมที่จัดกลางซ้ำกับ translate ของ Tailwind · โทเคนจังหวะกลางยังผูกอยู่ · ไม่มี content-visibility ที่ทำให้จอกระตุกตอนเลื่อนขึ้น\n"
+    "\n✅ ผ่านทุกเกณฑ์: ไม่มี transition-all · ไม่มี backdrop-filter · ไม่มีลูปไม่รู้จบบนเธรดหลัก · ไม่มี translate3d(0,0,0) · ไม่มี motion อนิเมตคุณสมบัติเชิง layout · ไม่มี mode=\"wait\" ที่ไม่มี exit · ไม่มี return null เหนือ AnimatePresence · ไม่มีคลาสผีของ tailwindcss-animate · แผงหน้าต่างลอยไม่อนิเมต scale และใช้ svh · ไม่มี withMotionScope() ห่อของที่ไม่ได้ใช้ motion · ไม่มีคีย์เฟรมที่จัดกลางซ้ำกับ translate ของ Tailwind · โทเคนจังหวะกลางยังผูกอยู่ · ไม่มี content-visibility ที่ทำให้จอกระตุกตอนเลื่อนขึ้น · เฟดข้ามหน้าไม่เปิดบนจอสัมผัส · HTML ไม่พาคลาสเฟดขาเข้ามาด้วย\n"
   );
   process.exit(0);
 }

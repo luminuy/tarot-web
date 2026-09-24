@@ -11,7 +11,7 @@ import { CONSENT_STORAGE_KEY } from "@/lib/analytics-consent";
 import { getImageKitOrigin } from "@/lib/tarot/card-image";
 import type { Locale } from "@/lib/i18n/types";
 
-import { FONT_PRELOADS } from "./root-metadata";
+import { FONT_PRELOADS, FONT_PRELOADS_LOW } from "./root-metadata";
 import { buildSpeculationRules } from "./speculation-rules";
 import { SkipToContent } from "@/components/layout/SkipToContent";
 import { jsonLdScript } from "@/lib/seo/json-ld";
@@ -64,6 +64,10 @@ export function RootHtml({
    */
   for (const file of FONT_PRELOADS) {
     ReactDOM.preload(file, { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
+  }
+  /* น้ำหนักหนา — ลำดับต่ำ ไม่แย่งคิวภาพ LCP แต่ทันเฟรมแรกเมื่ออยู่ในแคช (INC-0244 · ดู root-metadata.ts) */
+  for (const file of FONT_PRELOADS_LOW) {
+    ReactDOM.preload(file, { as: "font", type: "font/woff2", crossOrigin: "anonymous", fetchPriority: "low" });
   }
 
   /* โฮสต์ของ CDN ภาพไพ่ — ว่างเมื่อไม่ได้ตั้งค่า ImageKit (ภาพถูกเสิร์ฟจากโดเมนเราเอง

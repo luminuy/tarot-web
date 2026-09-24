@@ -568,6 +568,8 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
       let fontPreloadBytes = 0;
       for (const m of html.match(/<link[^>]+rel="preload"[^>]*>/g) ?? []) {
         if (!/as="font"/.test(m)) continue;
+        /* `fetchpriority="low"` ไม่แย่งคิวภาพ LCP — ไม่นับในงบนี้ (น้ำหนักหนา · INC-0244 · root-metadata.ts) */
+        if (/fetchpriority="low"/i.test(m)) continue;
         const href = m.match(/href="([^"]+)"/)?.[1];
         if (!href) continue;
         const file = path.join(ROOT, "public", href.replace(/^\//, ""));

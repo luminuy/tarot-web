@@ -36,7 +36,13 @@ import dynamic from "next/dynamic";
  *    เขียนลง inline style ไม่ได้ · ห้ามถอดออกโดยไม่มีอะไรมาแทน
  */
 export function withMotionScope<P extends object>(
-  load: () => Promise<React.ComponentType<P>>
+  load: () => Promise<React.ComponentType<P>>,
+  /**
+   * ของที่วาดแทนระหว่างรอ chunk (รวมถึงใน HTML จากเซิร์ฟเวอร์) — ไม่ใส่ = ไม่วาดอะไร
+   * ใช้จองที่ให้คอมโพเนนต์ที่อยู่ "ในจอแรกตั้งแต่เปิดหน้า" ไม่งั้นของที่อยู่ถัดลงไป
+   * จะโผล่ขึ้นมาก่อนแล้วโดนดันลงตอน chunk มาถึง = จอกระโดด (INC-0244)
+   */
+  loading?: () => React.ReactNode,
 ): React.ComponentType<P> {
   return dynamic(
     async () => {
@@ -55,6 +61,6 @@ export function withMotionScope<P extends object>(
 
       return MotionScoped;
     },
-    { ssr: false }
+    { ssr: false, ...(loading ? { loading } : {}) }
   ) as React.ComponentType<P>;
 }

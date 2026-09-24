@@ -81,6 +81,15 @@ const SemanticSearchPanel = dynamic(
 export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
   const { isEnglish } = useLocale();
   const [activeFilter, setActiveFilter] = useState<string>("all");
+  /* คลาสเฟดขาเข้าของกริดใส่ก็ต่อเมื่อผู้ใช้สลับแท็บเองแล้วเท่านั้น (INC-0244)
+     ถ้าใส่ตั้งแต่เรนเดอร์แรก HTML จากเซิร์ฟเวอร์จะพาคลาสมาด้วย กริด 78 ใบจึงจางหายแล้วค่อยโผล่
+     ทุกครั้งที่เปิดหน้า = กระพริบบนมือถือ (กติกาเดียวกับ `hasSwappedTab` ใน SpreadCardSelector) */
+  const [hasSwappedTab, setHasSwappedTab] = useState(false);
+  const selectFilter = (id: string) => {
+    if (id === activeFilter) return;
+    setHasSwappedTab(true);
+    setActiveFilter(id);
+  };
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [showSemanticSearch, setShowSemanticSearch] = useState<boolean>(false);
 
@@ -200,7 +209,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 onClick={() => {
                   setSearchQuery("");
                   setShowSemanticSearch(false);
-                  setActiveFilter("all");
+                  selectFilter("all");
                 }}
                 className="text-[13px] text-gold-ink hover:underline cursor-pointer font-bold font-serif-th"
               >
@@ -261,14 +270,14 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 aria-selected={isActive}
                 tabIndex={isActive ? 0 : -1}
                 type="button"
-                onClick={() => setActiveFilter(tab.id)}
+                onClick={() => selectFilter(tab.id)}
                 onKeyDown={(e) => {
                   let nextIdx = -1;
                   if (e.key === "ArrowRight") nextIdx = (tabIdx + 1) % SUIT_TABS.length;
                   else if (e.key === "ArrowLeft") nextIdx = (tabIdx - 1 + SUIT_TABS.length) % SUIT_TABS.length;
                   if (nextIdx !== -1) {
                     e.preventDefault();
-                    setActiveFilter(SUIT_TABS[nextIdx].id);
+                    selectFilter(SUIT_TABS[nextIdx].id);
                     const nextTab = document.getElementById(`card-tab-${SUIT_TABS[nextIdx].id}`);
                     nextTab?.focus();
                   }
@@ -371,7 +380,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
         role="tabpanel"
         id={`card-panel-${activeFilter}`}
         aria-labelledby={`card-tab-${activeFilter}`}
-        className="anim-swap-rise"
+        className={hasSwappedTab ? "anim-swap-rise" : undefined}
       >
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-5">
           {filteredCards.map((card, idx) => {
@@ -481,7 +490,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
             type="button"
             onClick={() => {
               setSearchQuery("");
-              setActiveFilter("all");
+              selectFilter("all");
             }}
             className="btn-gold-glass tap-overlay-y px-6 py-2 text-xs font-serif-th font-bold cursor-pointer"
           >

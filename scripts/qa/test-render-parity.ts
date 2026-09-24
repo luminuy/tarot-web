@@ -26,7 +26,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { FONT_PRELOADS, SITE_THEME_COLOR, VIEWPORT_CONTENT } from "../../src/app/_shared/root-metadata";
+import { FONT_PRELOADS, FONT_PRELOADS_LOW, SITE_THEME_COLOR, VIEWPORT_CONTENT } from "../../src/app/_shared/root-metadata";
 import { collectRenderedPages, ROOT } from "./lib/rendered-pages";
 
 let failed = 0;
@@ -47,7 +47,7 @@ console.log("── 1. ท่อฟอนต์ (ไฟล์ · @font-face · �
 
 const globalsCss = fs.readFileSync(path.join(ROOT, "src/app/globals.css"), "utf-8");
 
-for (const href of FONT_PRELOADS) {
+for (const href of [...FONT_PRELOADS, ...FONT_PRELOADS_LOW]) {
   check(`มีไฟล์ฟอนต์จริงที่ public${href}`, fs.existsSync(path.join(ROOT, "public", href)));
   check(
     `globals.css มี @font-face ชี้ไปที่ ${href}`,
@@ -100,6 +100,13 @@ for (const page of pages) {
   const where = `${page.route} [${page.renderer}]`;
 
   if (!FONT_PRELOADS.every((href) => html.includes(`href="${href}"`))) missing.fontPreload.push(where);
+  /* น้ำหนักหนาต้องมาพร้อม `fetchpriority="low"` ทั้งสองเครื่องมือ (INC-0244 · ไม่แย่งคิวภาพ LCP) */
+  if (
+    !FONT_PRELOADS_LOW.every((href) =>
+      new RegExp(`<link[^>]*href="${href}"[^>]*fetchpriority="low"|<link[^>]*fetchpriority="low"[^>]*href="${href}"`, "i").test(html),
+    )
+  )
+    missing.fontPreload.push(`${where} (น้ำหนักหนา fetchpriority="low")`);
   if (!html.includes(`content="${VIEWPORT_CONTENT}"`)) missing.viewport.push(where);
   if (!html.includes(`content="${SITE_THEME_COLOR}"`)) missing.themeColor.push(where);
   if (!html.includes('"@type":"Organization"')) missing.organizationJsonLd.push(where);
