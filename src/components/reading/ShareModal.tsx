@@ -1,14 +1,13 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { Persona } from "@/data/personas";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import type { Reading } from "@/lib/schema/reading";
 import { soundManager } from "@/lib/utils/audio";
-import { CardImage } from "@/components/card/CardImage";
-import { fitTextToWidth, sliceThaiSafe } from "@/lib/text/thai-truncate";
-import { getCardImageSrc } from "@/lib/tarot/card-image";
+import { sliceThaiSafe } from "@/lib/text/thai-truncate";
+import { renderShareCard, type ShareCardItem } from "@/lib/share/share-card";
 import { cardSummaryByIndex as cardByIndex } from "@/data/cards/summary";
 import { trackEvent } from "@/lib/analytics";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
@@ -35,7 +34,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   reading,
 }) => {
   const { isEnglish } = useLocale();
-  const cardRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
   /*
@@ -43,7 +41,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({
    * ปิดด้วย Esc ไม่ได้ · หน้าหลังฉากยังเลื่อนได้ · ปิดแล้วโฟกัสไม่กลับที่เดิม
    */
   useDialogBehavior(isOpen, onClose, panelRef);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const personaName = isEnglish ? (persona.nameEn || persona.nameTh) : persona.nameTh;
@@ -81,249 +78,116 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
 คำทำนายจากแม่หมอ ${persona.nameTh}: "${reading?.summary || "จงเชื่อมั่นในตนเองและก้าวต่อไปอย่างมีสติ"}"
 สัมผัสวิหารไพ่ทาโรต์ออนไลน์: ${typeof window !== "undefined" ? window.location.origin : "https://seertarot.net"}`;
 
-  // Direct HD PNG Image Generation using HTML5 Canvas (returns Promise<Blob>)
-  const createReadingImageBlob = async (format: "post" | "story" = "story"): Promise<Blob> => {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        if (!ctx) throw new Error("Canvas not supported");
-
-        const width = 1080;
-        const height = format === "story" ? 1920 : 1350;
-        canvas.width = width;
-        canvas.height = height;
-
-        // 1. พื้นหลัง — ผ้าลินินครีมอุ่นตามระบบดีไซน์ V2 (canvas → inset)
-        const grad = ctx.createLinearGradient(0, 0, 0, height);
-        grad.addColorStop(0, "#FFFDF9");
-        grad.addColorStop(0.55, "#FAF7F2");
-        grad.addColorStop(1, "#F3EDE2");
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, width, height);
-
-        // 2. กรอบเส้นเดี่ยวบาง ๆ (ไม่มีเงา ไม่มีดาวระยิบ)
-        ctx.strokeStyle = "#D9C8AC";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(48, 48, width - 96, height - 96);
-
-        // 4. Header: Brand & Spread
-        const headerY = format === "story" ? 150 : 110;
-        ctx.fillStyle = "#8F5C1A";
-        ctx.font = "bold 38px 'Cinzel', 'Noto Serif Thai', serif, sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText(
-          isEnglish ? "SEERTAROT · SANCTUARY OF ARCHETYPES" : "SEERTAROT · วิหารพยากรณ์",
-          width / 2,
-          headerY
-        );
-
-        ctx.fillStyle = "#6F5B4A";
-        ctx.font = "bold 24px 'Noto Sans Thai', sans-serif";
-        ctx.fillText(
-          isEnglish ? `Spread: ${spreadName}` : `ผังการวางไพ่: ${spreadName}`,
-          width / 2,
-          headerY + 45
-        );
-
-        // Divider
-        ctx.strokeStyle = "#D9C8AC";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(120, headerY + 70);
-        ctx.lineTo(width - 120, headerY + 70);
-        ctx.stroke();
-
-        // 5. Question Quote
-        let nextY = headerY + 110;
-        if (question) {
-          ctx.fillStyle = "#2E211A";
-          ctx.font = "italic 28px 'Cinzel', 'Noto Serif Thai', serif, sans-serif";
-          ctx.textAlign = "center";
-          /* ย่อตามความกว้างจริงของกรอบ ไม่ใช่นับตัวอักษร (INC-0213) */
-          ctx.fillText(
-            `“${fitTextToWidth(question, (t) => ctx.measureText(t).width, width - 280)}”`,
-            width / 2,
-            nextY,
-          );
-          nextY += 45;
-        }
-
-        // 6. Draw Tarot Cards Showcase
-        const displayCards = cards.slice(0, 5);
-        const totalDisplay = displayCards.length;
-        const isSingle = totalDisplay === 1;
-
-        const cardW = isSingle ? 260 : 165;
-        const cardH = isSingle ? 410 : 260;
-        const gap = isSingle ? 0 : 22;
-        const totalWidth = totalDisplay * cardW + (totalDisplay - 1) * gap;
-        const startX = (width - totalWidth) / 2;
-        const cardY = nextY + 46; // เว้นที่ให้ป้ายตำแหน่งเหนือไพ่
-
-        // Preload card images
-        const loadedImages = await Promise.all(
-          displayCards.map((c) => {
-            return new Promise<HTMLImageElement | null>((res) => {
-              const cardObj = c.card || (c.cardIndex !== undefined ? cardByIndex(c.cardIndex) : null);
-              const imgSrc = getCardImageSrc(cardObj?.image, cardObj?.id);
-              if (!imgSrc) {
-                res(null);
-                return;
-              }
-              let fellBack = false;
-              const img = new Image();
-              img.crossOrigin = "anonymous";
-              img.onload = () => res(img);
-              img.onerror = () => {
-                if (!fellBack) {
-                  fellBack = true;
-                  const localSrc = getCardImageSrc(cardObj?.image, cardObj?.id, { forceLocal: true });
-                  if (localSrc && img.src !== localSrc) {
-                    img.src = localSrc;
-                    return;
-                  }
-                }
-                res(null);
-              };
-              img.src = imgSrc;
-            });
-          })
-        );
-
-        displayCards.forEach((c, idx) => {
-          const cx = startX + idx * (cardW + gap);
-          const cardImg = loadedImages[idx];
-          const cardObj = c.card || (c.cardIndex !== undefined ? cardByIndex(c.cardIndex) : null);
-
-          // พื้นรองไพ่
-          ctx.fillStyle = "#F3EDE2";
-          ctx.beginPath();
-          ctx.roundRect(cx, cardY, cardW, cardH, 8);
-          ctx.fill();
-
-          // Draw Artwork
-          if (cardImg) {
-            ctx.save();
-            ctx.beginPath();
-            ctx.roundRect(cx, cardY, cardW, cardH, 8);
-            ctx.clip();
-
-            if (c.isReversed) {
-              ctx.translate(cx + cardW / 2, cardY + cardH / 2);
-              ctx.rotate(Math.PI);
-              ctx.drawImage(cardImg, -cardW / 2, -cardH / 2, cardW, cardH);
-            } else {
-              ctx.drawImage(cardImg, cx, cardY, cardW, cardH);
-            }
-            ctx.restore();
-          }
-
-          // เส้นขอบไพ่ 1px (ไม่มีเงา)
-          ctx.strokeStyle = "#D9C8AC";
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.roundRect(cx, cardY, cardW, cardH, 8);
-          ctx.stroke();
-
-          // ป้ายตำแหน่ง — เหนือไพ่ ไม่ทับงานศิลป์
-          const posName = isEnglish ? (c.position.nameEn || c.position.nameTh) : c.position.nameTh;
-          ctx.fillStyle = "#8F5C1A";
-          ctx.font = `bold ${isSingle ? "22px" : "16px"} 'Noto Sans Thai', sans-serif`;
-          ctx.textAlign = "center";
-          /*
-           * ⛔ ห้ามกลับไปใช้ `slice(0, n)` (INC-0213)
-           * ตัวเลขตายตัวไม่รู้ว่าฟอนต์กว้างเท่าไหร่ และตัดกลางคลัสเตอร์ไทยจนสระ/วรรณยุกต์ลอย
-           * วัดความกว้างจริงจาก canvas แล้วย่อให้พอดีช่องของไพ่ใบนั้น (เผื่อขอบ 6px สองข้าง)
-           */
-          ctx.fillText(
-            fitTextToWidth(posName, (t) => ctx.measureText(t).width, cardW + gap - 12),
-            cx + cardW / 2,
-            cardY - 16,
-          );
-
-          // ชื่อไพ่ — ใต้ไพ่
-          const cardName = isEnglish
-            ? (cardObj?.nameEn || cardObj?.nameTh || "Tarot Card")
-            : (cardObj?.nameTh || "ไพ่ทาโรต์");
-          ctx.fillStyle = "#2E211A";
-          ctx.font = `bold ${isSingle ? "26px" : "19px"} 'Cinzel', 'Noto Serif Thai', serif, sans-serif`;
-          ctx.fillText(
-            fitTextToWidth(cardName, (t) => ctx.measureText(t).width, cardW + gap - 12),
-            cx + cardW / 2,
-            cardY + cardH + 30,
-          );
-
-          // สถานะหัวตั้ง/กลับหัว
-          ctx.fillStyle = c.isReversed ? "#A6392C" : "#3A7044";
-          ctx.font = `bold ${isSingle ? "18px" : "14px"} 'Noto Sans Thai', sans-serif`;
-          ctx.fillText(
-            c.isReversed
-              ? (isEnglish ? "Reversed ↷" : "กลับหัว ↷")
-              : (isEnglish ? "Upright" : "หัวตั้ง"),
-            cx + cardW / 2,
-            cardY + cardH + 56
-          );
-        });
-
-        // 7. Oracle Summary Block
-        const summaryY = cardY + cardH + 82;
-        const summaryH = height - summaryY - 120;
-
-        ctx.fillStyle = "#FFFFFF";
-        ctx.strokeStyle = "#D9C8AC";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.roundRect(80, summaryY, width - 160, summaryH, 8);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = "#8F5C1A";
-        ctx.font = "bold 26px 'Cinzel', 'Noto Serif Thai', serif, sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText(
-          isEnglish ? `Oracle Insight from ${personaName}` : `สารพยากรณ์จากแม่หมอ ${persona.nameTh}`,
-          width / 2,
-          summaryY + 50
-        );
-
-        // Multi-line wrap summary
-        ctx.fillStyle = "#2E211A";
-        ctx.font = "italic 25px 'Cinzel', 'Noto Serif Thai', serif, sans-serif";
-        ctx.textAlign = "left";
-        const summaryText = reading?.summary || defaultSummary;
-        const tokens = isEnglish ? summaryText.split(" ") : summaryText.split("");
-        let line = "";
-        let lineY = summaryY + 105;
-        for (let n = 0; n < tokens.length; n++) {
-          const testLine = line + (isEnglish ? (line ? " " : "") : "") + tokens[n];
-          const metrics = ctx.measureText(testLine);
-          if (metrics.width > width - 240 && n > 0) {
-            ctx.fillText(line, 120, lineY);
-            line = tokens[n];
-            lineY += 42;
-            if (lineY > summaryY + summaryH - 35) break;
-          } else {
-            line = testLine;
-          }
-        }
-        ctx.fillText(line, 120, lineY);
-
-        // 8. Footer Watermark
-        ctx.fillStyle = "#6F5B4A";
-        ctx.font = "bold 20px 'Noto Sans Thai', sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText("PROVABLY-FAIR SHA-256 · SEERTAROT.NET", width / 2, height - 65);
-
-        // Resolve Blob
-        canvas.toBlob((blob) => {
-          if (blob) resolve(blob);
-          else reject(new Error("Canvas to Blob failed"));
-        }, "image/png");
-      } catch (err) {
-        reject(err);
-      }
+  /*
+   * ✦ ภาพการ์ดแชร์ — ดีไซน์/เหตุผลทั้งหมดอยู่ใน `src/lib/share/share-card.ts`
+   * (ของเดิมวาดใน component นี้เอง: ข้อความเยื้อง · ตัดคำไทยกลางคำ · กล่องว่างครึ่งภาพ)
+   */
+  const shareCardItems = (): ShareCardItem[] =>
+    cards.slice(0, 5).map((c) => {
+      const card = c.card || (c.cardIndex !== undefined ? cardByIndex(c.cardIndex) : null);
+      return {
+        image: card?.image,
+        id: card?.id,
+        // 🃏 กฎข้อ 14: ไม่มีข้อมูลไพ่ = ชื่อกลาง ๆ ไม่ใช่ชื่อไพ่ใบอื่น (ภาพก็เป็นกรอบเปล่า)
+        name: (isEnglish ? card?.nameEn || card?.nameTh : card?.nameTh) || (isEnglish ? "Tarot card" : "ไพ่ทาโรต์"),
+        subName: isEnglish ? undefined : card?.nameEn,
+        position: isEnglish ? c.position.nameEn || c.position.nameTh : c.position.nameTh,
+        isReversed: Boolean(c.isReversed),
+      };
     });
+
+  const createReadingImageBlob = (format: "post" | "story" = "story"): Promise<Blob> =>
+    renderShareCard({
+      format,
+      isEnglish,
+      spreadName,
+      question,
+      personaName,
+      summary: reading?.summary || "",
+      cards: shareCardItems(),
+    });
+
+  /*
+   * 📲 สร้างภาพรอไว้ตั้งแต่เปิดหน้าต่าง — หัวใจของ "แชร์แล้วเด้งเข้าแอปได้"
+   * `navigator.share()` ต้องถูกเรียก *ทันที* ในจังหวะที่ผู้ใช้แตะ (user activation)
+   * ของเดิมแตะปุ่มแล้วค่อยไปโหลดภาพไพ่ + วาด canvas ก่อน กว่าจะเรียก share สิทธิ์นั้นหมดอายุแล้ว
+   * iOS Safari / Android จึงปฏิเสธเงียบ ๆ หน้าต่างแชร์ของเครื่องไม่เด้ง (เจ้าของ: "แชร์ได้ยากมาก")
+   * ตอนนี้ไฟล์พร้อมก่อนผู้ใช้แตะ ปุ่มแชร์เรียก share ได้ในจังหวะเดียวกับการแตะเลย
+   */
+  const storyFileRef = useRef<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [imageError, setImageError] = useState(false);
+  useEffect(() => {
+    if (!isOpen) return;
+    let alive = true;
+    let url: string | null = null;
+    setImageError(false);
+    createReadingImageBlob("story")
+      .then((blob) => {
+        if (!alive) return;
+        storyFileRef.current = new File([blob], "seertarot-reading.png", { type: "image/png" });
+        url = URL.createObjectURL(blob);
+        setPreviewUrl(url);
+      })
+      .catch(() => {
+        if (alive) setImageError(true);
+      });
+    return () => {
+      alive = false;
+      storyFileRef.current = null;
+      setPreviewUrl(null);
+      if (url) URL.revokeObjectURL(url);
+    };
+    // วาดใหม่เมื่อเปิดหน้าต่าง หรือคำทำนาย/ไพ่เปลี่ยน
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, reading?.summary, cards.length, question, isEnglish]);
+
+  /** แคปชันสั้นที่แนบไปกับภาพ — ข้อความยาวเต็มอยู่ใน `shareText` (ใช้คัดลอก/Threads) */
+  const shortCaption = isEnglish
+    ? `My tarot reading on SeerTarot ✨ Draw your free card: ${typeof window !== "undefined" ? window.location.origin : "https://seertarot.net"}`
+    : `คำทำนายไพ่ทาโรต์ของฉันจาก SeerTarot ✨ เปิดไพ่ฟรีที่ ${typeof window !== "undefined" ? window.location.origin : "https://seertarot.net"}`;
+
+  const downloadStory = () => {
+    const file = storyFileRef.current;
+    if (!file) return false;
+    const url = URL.createObjectURL(file);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = file.name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    return true;
+  };
+
+  /** แชร์ภาพผ่านหน้าต่างแชร์ของเครื่อง (เลือก LINE / IG / FB / TikTok ได้ในนั้น) — ต้องเรียกตรงจาก onClick */
+  const handleNativeShare = (source: "native" | "instagram" | "tiktok" | "facebook") => {
+    soundManager.playCardSelectSound();
+    trackEvent("share_click", { platform: source, spread_id: spreadName });
+    const file = storyFileRef.current;
+    const canShareFile = !!file && typeof navigator !== "undefined" && !!navigator.canShare && navigator.canShare({ files: [file] });
+    if (file && canShareFile) {
+      navigator.share({ files: [file], text: shortCaption }).catch((err) => {
+        if (!isUserAbort(err)) {
+          downloadStory();
+          showToast(isEnglish ? "Image saved — post it from your gallery" : "บันทึกรูปแล้ว — เปิดแอปแล้วเลือกรูปจากคลังภาพได้เลย");
+        }
+      });
+      return;
+    }
+    // เครื่องที่แชร์ไฟล์ไม่ได้ (ส่วนใหญ่คือคอมพิวเตอร์) ➔ บันทึกรูป + คัดลอกแคปชัน
+    if (downloadStory()) {
+      void copyToClipboard(shortCaption);
+      showToast(isEnglish ? "Image saved and caption copied" : "บันทึกรูปและคัดลอกแคปชันแล้ว นำไปโพสต์ได้เลย");
+    } else {
+      showToast(isEnglish ? "The image is still being prepared…" : "กำลังเตรียมรูป รอสักครู่แล้วลองอีกครั้ง");
+    }
+  };
+
+  const handleShareLine = () => {
+    soundManager.playCardSelectSound();
+    trackEvent("share_click", { platform: "line", spread_id: spreadName });
+    // line.me/R/share เปิดแอป LINE บนมือถือโดยตรง (บนคอมเปิดหน้าเว็บ LINE)
+    window.open(`https://line.me/R/share?text=${encodeURIComponent(shortCaption)}`, "_blank", "noopener,noreferrer");
   };
 
   /**
@@ -358,8 +222,22 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
   const isUserAbort = (err: unknown) => err instanceof DOMException && err.name === "AbortError";
 
   const handleShareToBrand = async (brand: "facebook" | "instagram" | "tiktok" | "twitter" | "threads") => {
+    // ⚠️ IG / TikTok ต้องเรียก share ทันทีก่อน await ใด ๆ (ดูเหตุผลที่ `storyFileRef`)
+    if (brand === "instagram" || brand === "tiktok") {
+      handleNativeShare(brand);
+      return;
+    }
     soundManager.playCardSelectSound();
     trackEvent("share_click", { platform: brand, spread_id: spreadName });
+
+    // Facebook บนมือถือ: ภาพพร้อมแล้ว ➔ หน้าต่างแชร์ของเครื่องทันที (เลือกแอป Facebook ได้ในนั้น)
+    if (brand === "facebook") {
+      const file = storyFileRef.current;
+      if (file && typeof navigator !== "undefined" && navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], text: shortCaption }).catch(() => {});
+        return;
+      }
+    }
 
     // ⚠️ ต้องเปิดแท็บเปล่าไว้ "ทันทีแบบ sync" ในนี้ก่อน await ใด ๆ ทั้งสิ้น
     const needsPopup = brand === "twitter" || brand === "facebook" || brand === "threads";
@@ -420,29 +298,6 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
 
     // Facebook
     if (brand === "facebook") {
-      // On mobile: try native share sheet first with image if supported
-      if (typeof navigator !== "undefined" && navigator.canShare) {
-        try {
-          const blob = await createReadingImageBlob("story");
-          const file = new File([blob], "seertarot-reading.png", { type: "image/png" });
-          if (navigator.canShare({ files: [file] })) {
-            pendingPopup?.close(); // ใช้ native share sheet แทน ไม่ต้องใช้แท็บที่จองไว้
-            await navigator.share({
-              files: [file],
-              title: isEnglish ? `SeerTarot Reading (${spreadName})` : `คำทำนายไพ่ทาโรต์ SeerTarot (${spreadName})`,
-              text: shareText,
-            });
-            return;
-          }
-        } catch (err) {
-          if (isUserAbort(err)) {
-            // ผู้ใช้กดยกเลิกหน้าต่างแชร์เอง ไม่ใช่ความผิดพลาด ไม่ต้อง fallback ต่อ
-            pendingPopup?.close();
-            return;
-          }
-          // native share ใช้ไม่ได้ด้วยเหตุอื่น ไปต่อ fallback เว็บด้านล่าง
-        }
-      }
       // Web fallback
       await copyToClipboard(shareText);
       showToast(isEnglish ? "Caption copied! Opening Facebook share window..." : "คัดลอกข้อความแล้ว! กำลังเปิดหน้าแชร์ Facebook...");
@@ -450,54 +305,9 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
       return;
     }
 
-    // Instagram & TikTok (ไม่ใช้ window.open เลย — ไม่โดนบล็อกป็อปอัป แต่แก้ปุ่มยกเลิกให้ไม่ขึ้น error)
+    // Instagram & TikTok ไม่มีลิงก์แชร์ทางเว็บ — ทางเดียวที่เด้งเข้าแอปได้คือหน้าต่างแชร์ของเครื่อง
     if (brand === "instagram" || brand === "tiktok") {
-      setIsGenerating(true);
-      try {
-        const blob = await createReadingImageBlob("story");
-        const file = new File([blob], `SeerTarot-${brand.toUpperCase()}-Story.png`, { type: "image/png" });
-
-        // If Web Share API with files is supported (iOS Safari, Android Chrome)
-        if (typeof navigator !== "undefined" && navigator.canShare && navigator.canShare({ files: [file] })) {
-          setIsGenerating(false);
-          await navigator.share({
-            files: [file],
-            title: isEnglish ? `SeerTarot Reading (${spreadName})` : `คำทำนายไพ่ทาโรต์ SeerTarot (${spreadName})`,
-            text: shareText,
-          });
-          showToast(
-            isEnglish
-              ? `Shared to ${brand === "instagram" ? "Instagram" : "TikTok"}`
-              : `เปิดหน้าแชร์ไปยัง ${brand === "instagram" ? "Instagram" : "TikTok"} แล้ว`
-          );
-          return;
-        }
-
-        // Desktop fallback: Download image file & copy text
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `SeerTarot-${brand.toUpperCase()}-Story.png`;
-        a.click();
-        URL.revokeObjectURL(url);
-        await copyToClipboard(shareText);
-        showToast(
-          isEnglish
-            ? `Story card saved (9:16) and caption copied! Ready to post to ${brand === "instagram" ? "Instagram" : "TikTok"}`
-            : `บันทึกการ์ดรูปภาพ (9:16) และคัดลอกแคปชันแล้ว! นำไปโพสต์ใน ${brand === "instagram" ? "Instagram" : "TikTok"} ได้ทันที`
-        );
-      } catch (err) {
-        if (!isUserAbort(err)) {
-          console.error("Share error", err);
-          showToast(
-            isEnglish
-              ? "Unable to open app. Please save the image to your device instead."
-              : "ไม่สามารถเปิดแอปได้ กรุณากดปุ่มบันทึกรูปภาพแทน"
-          );
-        }
-      } finally {
-        setIsGenerating(false);
-      }
+      handleNativeShare(brand);
       return;
     }
   };
@@ -545,8 +355,8 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
                 </h3>
                 <p className="text-[13px] text-muted font-serif-th">
                   {isEnglish
-                    ? "Save HD visual card or share directly to social channels"
-                    : "บันทึกรูปภาพพรีเมียมหรือแชร์ตรงสู่โซเชียลมีเดีย"}
+                    ? "Save the image or send it to any app"
+                    : "บันทึกรูป หรือส่งเข้าแอปที่ชอบได้เลย"}
                 </p>
               </div>
             </div>
@@ -574,137 +384,70 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
             )}
           </div>
 
-          {/* Social Share Preview Card (Redesigned Layout) */}
-          <div
-            ref={cardRef}
-            className="altar-card-porcelain !rounded-lg w-full p-5 sm:p-6 space-y-4 relative overflow-hidden text-center"
-          >
-            {/* Ornate Corner Accents */}
-            
-            
-            
-            
-
-            {/* Background Glow Lights */}
-
-            {/* 1. Brand & Spread Title */}
-            <div className="space-y-1 relative z-10">
-              <div className="flex items-center justify-center gap-2">
-                <span className="h-px w-6 sm:w-10 bg-gradient-to-r from-transparent to-ink-soft" />
-                <span className="text-[13px] sm:text-xs font-serif-th tracking-[0.2em] uppercase text-gold-ink font-bold">
-                  {isEnglish ? "SEERTAROT · SANCTUARY" : "SEERTAROT · วิหารพยากรณ์"}
-                </span>
-                <span className="h-px w-6 sm:w-10 bg-gradient-to-l from-transparent to-ink-soft" />
-              </div>
-              <div className="glass-chip inline-block px-3 py-0.5">
-                <span className="text-[13px] sm:text-xs text-ink-deep font-serif-th font-semibold">
-                  {isEnglish ? `Spread: ${spreadName}` : `ผัง: ${spreadName}`}
-                </span>
-              </div>
-            </div>
-
-            {/* 2. Querent's Sacred Inquiry (คำถาม) */}
-            {question && (
-              <div className="max-w-md mx-auto py-0.5 px-3 relative z-10">
-                <p className="font-serif-th text-xs sm:text-sm text-ink-deep italic leading-relaxed">“{question}”</p>
-              </div>
+          {/* ภาพตัวอย่าง = ภาพจริงที่จะถูกแชร์ (เดิมเป็น HTML อีกชุดที่หน้าตาไม่ตรงกับภาพที่ส่งออกไป) */}
+          <div className="mx-auto w-full max-w-[260px] sm:max-w-[280px] aspect-[9/16] rounded-2xl overflow-hidden border border-line-warm bg-dark grid place-items-center">
+            {previewUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- blob: URL ของภาพที่เพิ่งวาด ไม่ใช่ภาพไพ่ (กฎข้อ 8 ครอบภาพไพ่จาก /cards/)
+              <img
+                src={previewUrl}
+                alt={isEnglish ? "Your reading image to share" : "ภาพคำทำนายที่จะแชร์"}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="px-6 text-center font-serif-th text-xs text-surface/70">
+                {imageError
+                  ? isEnglish
+                    ? "Could not create the image. You can still share the link below."
+                    : "สร้างรูปไม่สำเร็จ ยังแชร์ลิงก์จากปุ่มด้านล่างได้"
+                  : isEnglish
+                    ? "Preparing your image…"
+                    : "กำลังเตรียมรูป…"}
+              </span>
             )}
-
-            {/* 3. Hero Tarot Cards Showcase */}
-            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 py-2 relative z-10">
-              {cards.slice(0, 5).map((c, i) => {
-                const isSingle = cards.length === 1;
-                return (
-                  <div
-                    key={i}
-                    className={`flex flex-col items-center justify-center text-center space-y-1.5 transition-transform hover:scale-105 ${
-                      isSingle ? "w-32 sm:w-40" : "w-24 sm:w-28"
-                    }`}
-                  >
-                    {/*
-                      ชื่อตำแหน่งในผัง (INC-0211)
-                      ⛔ ห้ามใส่ `whitespace-nowrap` ที่นี่เด็ดขาด
-                      ชื่อตำแหน่งของผังใหญ่ยาว 160-229px (เช่น "1. แก่นของเรื่อง (หัวใจของสถานการณ์)")
-                      แต่คอลัมน์กว้างแค่ 96px · `nowrap` ทำให้มันล้นออกนอกคอลัมน์ทั้งสองข้าง
-                      แล้วไป **ทับชื่อของไพ่ใบข้าง ๆ** จนอ่านไม่ออก (ใบแรกล้นออกนอกการ์ดด้วยซ้ำ)
-                      ต้องให้ตัดบรรทัดได้ · จำกัด 2 บรรทัดด้วย `line-clamp-2`
-                      และจองความสูง 2 บรรทัดไว้เสมอ (`min-h-[3.4em]` = 2 x leading 1.7)
-                      เพื่อให้ไพ่ทุกใบในแถวเรียงตรงกันไม่ว่าชื่อจะยาวกี่บรรทัด
-                      `leading-[1.7]` ห้ามลดลงต่ำกว่า 1.6 — หัวสระไทยจะโดนเฉือน (INC-0197)
-                    */}
-                    <span className="w-full text-[13px] sm:text-xs text-gold-ink font-serif-th tracking-wide font-bold leading-[1.7] line-clamp-2 min-h-[3.4em]">
-                      {isEnglish ? (c.position.nameEn || c.position.nameTh) : c.position.nameTh}
-                    </span>
-
-                    {/* Card Frame */}
-                    <div
-                      className={`w-full rounded-lg overflow-hidden relative border-2 border-line-warm bg-inset-warm ${
-                        isSingle ? "h-48 sm:h-60" : "h-32 sm:h-38"
-                      } ${c.isReversed ? "rotate-180" : ""}`}
-                    >
-                      <CardImage
-                        image={c.card?.image}
-                        cardId={c.card?.id}
-                        /* ภาพประกอบล้วน — <h5> ใต้ภาพพิมพ์ชื่อไพ่ใบเดียวกันอยู่แล้ว (INC-0125) */
-                        alt=""
-                        className="w-full h-full object-cover object-center tarot-card-enhance tarot-hd-card-image"
-                        sizes={isSingle ? "256px" : "128px"}
-                      />
-                    </div>
-
-                    {/* Card Title & State */}
-                    <div className="space-y-0.5">
-                      <h5 className="font-serif-th text-xs sm:text-sm font-bold text-ink-deep leading-tight">
-                        {isEnglish
-                          ? (c.card?.nameEn || c.card?.nameTh || `Card ${i + 1}`)
-                          : (c.card?.nameTh || `ใบที่ ${i + 1}`)}
-                      </h5>
-                      <span
-                        className={`text-[12px] px-2 py-0.5 rounded-full font-serif-th inline-block font-semibold ${
-                          c.isReversed
-                            ? "bg-err-wash text-err border border-line-warm"
-                            : "bg-[#EBF3ED] text-ok border border-line-warm"
-                        }`}
-                      >
-                        {c.isReversed
-                          ? (isEnglish ? "Reversed ↷" : "กลับหัว ↷")
-                          : (isEnglish ? "Upright" : "หัวตั้ง")}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* 4. Oracle Prophecy / Interpretation */}
-            {reading?.summary && (
-              <div className="max-w-lg mx-auto pt-2.5 pb-1 px-3 relative z-10 space-y-1 border-t border-line-warm/30">
-                <span className="text-[13px] sm:text-[13px] text-gold-ink font-serif-th tracking-wider uppercase block font-bold">
-                  {isEnglish
-                    ? `Oracle Insight from ${personaName}`
-                    : `สารพยากรณ์จากแม่หมอ ${persona.nameTh}`}
-                </span>
-                <p className="font-serif-th text-xs sm:text-[13px] text-ink-deep leading-relaxed italic">
-                  “{reading.summary}”
-                </p>
-              </div>
-            )}
-
-            {/* 5. Footer Watermark */}
-            {/*
-              ลายน้ำท้ายการ์ด (INC-0211)
-              ⚠️ ทั้งสองก้อนต้อง `whitespace-nowrap` และแถวต้อง `flex-wrap`
-              ของเดิมปล่อยให้ตัดบรรทัดกลางคำ — บนจอแคบเห็นเป็น "SEERTAROT.NE" ขึ้นบรรทัดใหม่เป็น "T"
-              ให้ทั้งก้อนย้ายลงบรรทัดใหม่ทั้งคำแทน · `tracking-wider` แทน `widest` ซื้อที่คืนมาราว 10%
-            */}
-            <div className="pt-2 border-t border-line-warm/20 relative z-10 flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 px-2 text-[12px] text-muted font-mono tracking-wider uppercase font-bold">
-              <span className="whitespace-nowrap">PROVABLY-FAIR SHA-256</span>
-              <span className="whitespace-nowrap">SEERTAROT.NET</span>
-            </div>
           </div>
 
-          {/* Social Sharing Control Bar (5 Official Brand Icons, Perfectly Centered, Zero Clipping) */}
-          <div className="altar-card-porcelain !rounded-lg py-3 px-4 flex items-center justify-center gap-3.5 sm:gap-6">
+          {/* ปุ่มหลัก: แชร์ภาพผ่านหน้าต่างแชร์ของเครื่อง (เลือกแอปได้ทุกแอป) · บันทึกรูป */}
+          <div className="grid grid-cols-2 gap-2.5">
+            <button
+              type="button"
+              onClick={() => handleNativeShare("native")}
+              disabled={!previewUrl}
+              className="btn-gold-glass px-4 py-3 font-serif-th text-sm font-bold disabled:opacity-50 disabled:cursor-wait cursor-pointer"
+            >
+              {isEnglish ? "Share image" : "แชร์รูปนี้"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                trackEvent("share_click", { platform: "story_download", spread_id: spreadName });
+                if (downloadStory()) showToast(isEnglish ? "Image saved" : "บันทึกรูปแล้ว");
+              }}
+              disabled={!previewUrl}
+              className="glass-chip px-4 py-3 font-serif-th text-sm font-semibold text-ink-deep disabled:opacity-50 disabled:cursor-wait cursor-pointer"
+            >
+              {isEnglish ? "Save image" : "บันทึกรูป"}
+            </button>
+          </div>
+
+          <p className="text-center font-serif-th text-[13px] text-muted">
+            {isEnglish ? "Or share straight to" : "หรือแชร์ตรงไปที่"}
+          </p>
+
+          {/* ปุ่มแชร์ตรงรายแอป (6 แอป) — LINE เปิดแอปผ่าน line.me · IG/TikTok/FB ใช้หน้าต่างแชร์ของเครื่อง · X/Threads ผ่านหน้าโพสต์ของเว็บนั้น */}
+          <div className="altar-card-porcelain !rounded-lg py-3 px-2 flex items-center justify-center gap-2 sm:gap-5">
+            {/* LINE (#06C755) — คนไทยแชร์ผ่าน LINE มากที่สุด · line.me/R/share เปิดแอปตรง */}
+            <button
+              type="button"
+              title={isEnglish ? "Share to LINE" : "แชร์ไปยัง LINE"}
+              aria-label={isEnglish ? "Share to LINE" : "แชร์ไปยัง LINE"}
+              onClick={handleShareLine}
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#06C755] text-white flex items-center justify-center hover:scale-110 active:scale-95 transition cursor-pointer shrink-0"
+            >
+              <svg className="w-6 h-6 sm:w-7 sm:h-7" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314" />
+              </svg>
+            </button>
+
             {/* Facebook (#1877F2) */}
             <button
               type="button"
@@ -724,9 +467,9 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
               title={isEnglish ? "Share to Instagram" : "แชร์ไปยัง Instagram"}
               aria-label={isEnglish ? "Share to Instagram" : "แชร์ไปยัง Instagram"}
               onClick={() => handleShareToBrand("instagram")}
-              disabled={isGenerating}
-              aria-busy={isGenerating}
-              className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-tr from-gold-ink via-[#dc2743] to-[#bc1888] text-white flex items-center justify-center hover:scale-110 active:scale-95 transition cursor-pointer shrink-0 ${isGenerating ? "opacity-50 cursor-wait animate-pulse" : ""}`}
+              disabled={!previewUrl}
+              aria-busy={!previewUrl}
+              className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-tr from-gold-ink via-[#dc2743] to-[#bc1888] text-white flex items-center justify-center hover:scale-110 active:scale-95 transition cursor-pointer shrink-0 ${!previewUrl ? "opacity-50 cursor-wait" : ""}`}
             >
               <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
@@ -739,9 +482,9 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
               title={isEnglish ? "Share to TikTok" : "แชร์ไปยัง TikTok"}
               aria-label={isEnglish ? "Share to TikTok" : "แชร์ไปยัง TikTok"}
               onClick={() => handleShareToBrand("tiktok")}
-              disabled={isGenerating}
-              aria-busy={isGenerating}
-              className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#000000] border border-white/20 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition cursor-pointer shrink-0 ${isGenerating ? "opacity-50 cursor-wait animate-pulse" : ""}`}
+              disabled={!previewUrl}
+              aria-busy={!previewUrl}
+              className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#000000] border border-white/20 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition cursor-pointer shrink-0 ${!previewUrl ? "opacity-50 cursor-wait" : ""}`}
             >
               <svg className="w-5 h-5 sm:w-5.5 sm:h-5.5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />

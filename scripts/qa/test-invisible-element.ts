@@ -174,66 +174,64 @@ export function scanCollapsingColumns(files: string[]): CollapseFinding[] {
  * ลายน้ำท้ายการ์ดเป็นอาการกลับกัน: ไม่มี `whitespace-nowrap` เลย บนจอแคบจึงตัดกลางคำ
  * เห็นเป็น "SEERTAROT.NE" แล้วขึ้นบรรทัดใหม่เป็น "T"
  *
- * กฎ: ในบล็อกโชว์ไพ่ของ ShareModal ชื่อตำแหน่งต้องตัดบรรทัดได้และมี `line-clamp-*`
- *     ส่วนลายน้ำท้ายการ์ดต้อง `whitespace-nowrap` ทั้งสองก้อน และแถวต้อง `flex-wrap`
+ * กฎเดิม (ตัวอย่างการ์ดเป็น HTML): ชื่อตำแหน่งต้องตัดบรรทัดได้ + `line-clamp-*` · ลายน้ำต้อง `whitespace-nowrap`
+ *
+ * 2026-09-24: การ์ดแชร์ออกแบบใหม่ — ตัวอย่างในหน้าต่างคือ "ภาพจริง" ที่วาดด้วย canvas
+ * (`src/lib/share/share-card.ts`) ไม่มีคอลัมน์ HTML ให้ล้นทับกันแล้ว อาการเดียวกันย้ายไปอยู่บน canvas:
+ * ชื่อไพ่/ชื่อตำแหน่งยาวกว่าช่องของไพ่ใบนั้น ➔ วาดทับชื่อไพ่ใบข้าง ๆ
+ * กฎใหม่:
+ *   1. ShareModal ต้องแสดงภาพที่วาดแล้ว (`<img src={previewUrl}`) ไม่ใช่มาร์กอัป HTML ชุดที่สอง
+ *      (สองชุดหน้าตาไม่ตรงกัน = ผู้ใช้เห็นอย่างหนึ่ง แชร์ออกไปอีกอย่าง)
+ *   2. ชื่อไพ่และชื่อตำแหน่งใต้ไพ่แต่ละใบ ต้องย่อด้วย `fit(ctx, …, cardW + gap - N)` = ไม่เกินช่องของใบนั้น
+ *   3. ข้อความบน canvas ต้องวางกึ่งกลางด้วย `drawCentered` (วัดเอง) ไม่พึ่ง `textAlign = "center"`
+ *      (ภาพจริงของเจ้าของ: ข้อความทั้งภาพเยื้องไปครึ่งขวา)
  */
 type ShareFinding = { rule: string; hint: string };
 
 export function scanShareCardText(root: string): ShareFinding[] {
   const out: ShareFinding[] = [];
-  const file = path.join(root, "src/components/reading/ShareModal.tsx");
-  if (!fs.existsSync(file)) {
-    return [{ rule: "หาไฟล์ ShareModal.tsx ไม่เจอ", hint: "ด่านนี้ตรวจไม่ได้ — อย่าปล่อยผ่านเงียบ ๆ (INC-0211)" }];
+  const modalFile = path.join(root, "src/components/reading/ShareModal.tsx");
+  const cardFile = path.join(root, "src/lib/share/share-card.ts");
+  for (const f of [modalFile, cardFile]) {
+    if (!fs.existsSync(f)) {
+      return [{ rule: `หาไฟล์ ${path.basename(f)} ไม่เจอ`, hint: "ด่านนี้ตรวจไม่ได้ — อย่าปล่อยผ่านเงียบ ๆ (INC-0211)" }];
+    }
   }
-  const text = fs.readFileSync(file, "utf-8");
+  const modal = fs.readFileSync(modalFile, "utf-8");
+  const card = fs.readFileSync(cardFile, "utf-8");
 
-  const posSpan = text.match(/<span className="([^"]*)"[^>]*>\s*\{isEnglish \? \(c\.position\.nameEn/);
-  if (!posSpan) {
+  if (!/<img\s[^>]*src=\{previewUrl\}/.test(modal)) {
     out.push({
-      rule: "หา <span> ชื่อตำแหน่งในการ์ดแชร์ไม่เจอ",
-      hint: "มาร์กอัปเปลี่ยนไป — แก้ด่านให้ตรงก่อน อย่าปล่อยผ่าน (INC-0211)",
+      rule: "ตัวอย่างในหน้าต่างแชร์ไม่ใช่ภาพที่วาดจริง",
+      hint: "ต้องแสดง `<img src={previewUrl}>` จาก renderShareCard — ห้ามทำมาร์กอัป HTML ชุดที่สอง (INC-0211)",
     });
-  } else {
-    const cls = posSpan[1];
-    if (/\bwhitespace-nowrap\b/.test(cls)) {
+  }
+  if (/\{isEnglish \? \(c\.position\.nameEn/.test(modal)) {
+    out.push({
+      rule: "ShareModal กลับมามีคอลัมน์ชื่อตำแหน่งแบบ HTML",
+      hint: "คอลัมน์แคบ 96px เคยล้นทับชื่อไพ่ใบข้าง ๆ — ให้ canvas วาดแทน (INC-0211)",
+    });
+  }
+  for (const [pattern, label] of [
+    [/fit\(ctx, card\.name, cardW \+ gap - \d+\)/, "ชื่อไพ่"],
+    [/fit\(ctx, label, cardW \+ gap - \d+\)/, "ชื่อตำแหน่ง"],
+  ] as const) {
+    if (!pattern.test(card)) {
       out.push({
-        rule: "ชื่อตำแหน่งในการ์ดแชร์ใช้ `whitespace-nowrap`",
-        hint: "ชื่อยาวกว่าคอลัมน์ 96px เกือบเท่าตัว มันจะล้นไปทับชื่อไพ่ใบข้าง ๆ — เอาออก (INC-0211)",
-      });
-    }
-    if (!/\bline-clamp-\d\b/.test(cls)) {
-      out.push({
-        rule: "ชื่อตำแหน่งในการ์ดแชร์ไม่มี `line-clamp-*`",
-        hint: "ไม่จำกัดจำนวนบรรทัด ความสูงหัวคอลัมน์จะไม่เท่ากัน ไพ่ในแถวเดียวกันเรียงไม่ตรง (INC-0211)",
+        rule: `${label}ใต้ไพ่ในการ์ดแชร์ไม่ได้ย่อให้พอดีช่องของไพ่ใบนั้น`,
+        hint: "ต้องผ่าน `fit(ctx, …, cardW + gap - N)` ไม่งั้นชื่อยาวจะวาดทับชื่อไพ่ใบข้าง ๆ (INC-0211)",
       });
     }
   }
-  /* `className` เป็น optional ในแพตเทิร์น — ถ้าใครถอดออกทั้งก้อน ด่านต้องฟ้องว่า
-     "ไม่มี whitespace-nowrap" ให้ตรงอาการ ไม่ใช่ฟ้องว่าหามาร์กอัปไม่เจอ */
-  const footerRow = text.match(
-    /<div className="([^"]*)"[^>]*>\s*<span(?: className="([^"]*)")?\s*>PROVABLY-FAIR SHA-256<\/span>\s*<span(?: className="([^"]*)")?\s*>SEERTAROT\.NET<\/span>/,
-  );
-  if (!footerRow) {
+  const cardCode = card
+    .split("\n")
+    .filter((l) => !/^\s*(\*|\/\/|\/\*)/.test(l))
+    .join("\n");
+  if (/textAlign\s*=\s*"center"/.test(cardCode)) {
     out.push({
-      rule: "หาแถวลายน้ำท้ายการ์ดแชร์ไม่เจอ",
-      hint: "มาร์กอัปเปลี่ยนไป — แก้ด่านให้ตรงก่อน อย่าปล่อยผ่าน (INC-0211)",
+      rule: "share-card.ts ใช้ `textAlign = \"center\"`",
+      hint: "ใช้ `drawCentered` (วัดความกว้างเอง) — ภาพจริงเคยเยื้องไปครึ่งขวาทั้งภาพ",
     });
-  } else {
-    const [, rowCls, a = "", b = ""] = footerRow;
-    if (!/\bflex-wrap\b/.test(rowCls)) {
-      out.push({
-        rule: "แถวลายน้ำท้ายการ์ดแชร์ไม่มี `flex-wrap`",
-        hint: "จอแคบแล้วสองก้อนเบียดกันจนตัดกลางคำ — ต้องให้ย้ายลงบรรทัดใหม่ทั้งก้อน (INC-0211)",
-      });
-    }
-    for (const [cls, label] of [[a, "PROVABLY-FAIR SHA-256"], [b, "SEERTAROT.NET"]] as const) {
-      if (!/\bwhitespace-nowrap\b/.test(cls)) {
-        out.push({
-          rule: `ลายน้ำ "${label}" ไม่มี \`whitespace-nowrap\``,
-          hint: "บนจอแคบจะถูกตัดกลางคำ (เห็นเป็น SEERTAROT.NE แล้วขึ้นบรรทัดใหม่เป็น T) — INC-0211",
-        });
-      }
-    }
   }
   return out;
 }

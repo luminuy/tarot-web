@@ -236,11 +236,14 @@ export function runThaiTruncateCases(): string[] {
 /**
  * ตัวเรนเดอร์ภาพแชร์ (canvas) ห้ามตัดข้อความด้วยจำนวนตัวอักษรอีก (INC-0213)
  * ต้องวัดความกว้างจริงผ่าน `fitTextToWidth` เท่านั้น
+ *
+ * 2026-09-24: ตัววาดย้ายจาก `ShareModal.tsx` มาอยู่ `src/lib/share/share-card.ts` (ออกแบบการ์ดแชร์ใหม่)
+ * ด่านจึงตามไปตรวจไฟล์นั้น — ShareModal เหลือแค่แสดงภาพที่วาดเสร็จแล้ว
  */
 export function scanCanvasCharSlice(): string[] {
-  const file = path.join(ROOT, "src/components/reading/ShareModal.tsx");
+  const file = path.join(ROOT, "src/lib/share/share-card.ts");
   if (!fs.existsSync(file)) {
-    return ["หาไฟล์ ShareModal.tsx ไม่เจอ — ด่านนี้ตรวจไม่ได้ อย่าปล่อยผ่านเงียบ ๆ (INC-0213)"];
+    return ["หาไฟล์ share-card.ts ไม่เจอ — ด่านนี้ตรวจไม่ได้ อย่าปล่อยผ่านเงียบ ๆ (INC-0213)"];
   }
   const out: string[] = [];
   const lines = fs.readFileSync(file, "utf-8").split("\n");
@@ -255,12 +258,12 @@ export function scanCanvasCharSlice(): string[] {
     if (!/\.slice\(0,\s*\d+\)/.test(line)) return;
     if (!TEXT_TRUNCATION_HINT.test(line)) return;
     out.push(
-      `ShareModal.tsx:${i + 1} ยังย่อข้อความด้วยจำนวนตัวอักษร — ตัดกลางคลัสเตอร์ไทยได้ ` +
+      `share-card.ts:${i + 1} ยังย่อข้อความด้วยจำนวนตัวอักษร — ตัดกลางคลัสเตอร์ไทยได้ ` +
         `ใช้ fitTextToWidth() (วัดความกว้างจริง) หรือ trimThaiOrphans() แทน (INC-0213)`,
     );
   });
   if (!fs.readFileSync(file, "utf-8").includes("fitTextToWidth")) {
-    out.push("ShareModal.tsx ไม่ได้เรียก fitTextToWidth() เลย — ตัวเรนเดอร์ภาพแชร์ต้องย่อข้อความตามความกว้างจริง (INC-0213)");
+    out.push("share-card.ts ไม่ได้เรียก fitTextToWidth() เลย — ตัวเรนเดอร์ภาพแชร์ต้องย่อข้อความตามความกว้างจริง (INC-0213)");
   }
   return out;
 }

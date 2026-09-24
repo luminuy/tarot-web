@@ -178,6 +178,7 @@ export type TarotAnalyticsEvent =
           | "twitter"
           | "threads"
           | "tiktok"
+          | "line"
           | "copy"
           | "native"
           | "story_download"
