@@ -35,7 +35,7 @@ const CATEGORY_EN: Record<string, string> = {
   decision: "decision-making",
 };
 
-/** พารามิเตอร์ของหน้าผัง 25 แบบ — ใช้ชุดเดียวกันทั้งสองภาษา */
+/** พารามิเตอร์ของหน้าผัง 26 แบบ — ใช้ชุดเดียวกันทั้งสองภาษา */
 export function spreadStaticParams() {
   return PUBLIC_SPREADS.map((spread) => ({ id: spread.id }));
 }

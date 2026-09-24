@@ -22,12 +22,13 @@ import {
   StudySpreadArt,
   ThreeCardSpreadArt,
   TwelveMonthsSpreadArt,
+  TwelveHousesSpreadArt,
   WeeklySpreadArt,
   YesNoSpreadArt,
 } from "@/components/ui/TarotArtIcons";
 
 /**
- * ✦ ภาพไดอะแกรมผังพยากรณ์ 25 แบบ
+ * ✦ ภาพไดอะแกรมผังพยากรณ์ 26 แบบ
  *
  * แยกออกมาจาก `SpreadCardSelector.tsx` เพราะไฟล์นั้น import `motion/react`
  * ไว้ที่หัวไฟล์ · หน้า /spreads ต้องการแค่ฟังก์ชันนี้ แต่การ import จากที่เดิม
@@ -76,6 +77,8 @@ export const renderSpreadIllustration = (spreadId: string) => {
       return <CelticCrossSpreadArt className="w-full h-40" />;
     case "year-ahead":
       return <TwelveMonthsSpreadArt className="w-full h-40" />;
+    case "twelve-houses":
+      return <TwelveHousesSpreadArt className="w-full h-40" />;
     case "love-six":
       return <LoveSixSpreadArt className="w-full h-40" />;
     case "monthly-ten":

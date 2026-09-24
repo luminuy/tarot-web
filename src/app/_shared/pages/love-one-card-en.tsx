@@ -71,7 +71,7 @@ const LOVE_FAQS_EN = [
 
 const LOVE_LINKS_EN = [
   { href: "/en/cards/major-06", label: "The Lovers card meaning" },
-  { href: "/en/spreads", label: "25 tarot spreads" },
+  { href: "/en/spreads", label: "26 tarot spreads" },
   { href: "/en/cards", label: "All 78 card meanings" },
   { href: "/en/daily", label: "Daily tarot card" },
 ];

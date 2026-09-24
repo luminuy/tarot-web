@@ -73,6 +73,7 @@ function main() {
   const grandExpected = [
     "celtic-cross",
     "year-ahead",
+    "twelve-houses",
     "chakra",
     "weekly",
     "decision",
@@ -91,11 +92,11 @@ function main() {
     check(`ผังใหญ่ ${id} ถูกล็อกสำหรับบัญชีฟรี`, !isStandardSpread(id));
   }
 
-  // รวมต้องครบ 25 ผังพอดี
-  check("จำนวนผังที่ผู้ใช้เลือกได้ต้องเท่ากับ 25 ผัง", PUBLIC_SPREADS.length === 25);
+  // รวมต้องครบ 26 ผังพอดี (ผังที่ 26 = ดวงชะตา 12 เรือน · 2026-09-24)
+  check("จำนวนผังที่ผู้ใช้เลือกได้ต้องเท่ากับ 26 ผัง", PUBLIC_SPREADS.length === 26);
   check(
-    "ผังทั้งหมดต้องถูกแบ่งเป็น Standard (10) + Grand (15) ครบ 25 ผัง",
-    publicStandardIds.length + (PUBLIC_SPREADS.length - publicStandardIds.length) === 25
+    "ผังทั้งหมดต้องถูกแบ่งเป็น Standard (10) + Grand (16) ครบ 26 ผัง",
+    publicStandardIds.length + (PUBLIC_SPREADS.length - publicStandardIds.length) === 26
   );
 
   // ── 3. แม่หมอพื้นฐาน 3 ท่าน vs ปรมาจารย์ลับ 2 ท่าน ──

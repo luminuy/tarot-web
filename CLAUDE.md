@@ -32,7 +32,7 @@
 | [docs/specs/INTERACTIVE_CARD_PICKING.md](docs/specs/INTERACTIVE_CARD_PICKING.md) | ระบบจับไพ่ด้วยตนเอง 3D |
 | [docs/specs/MARKETPLACE.md](docs/specs/MARKETPLACE.md) | สเปกระบบ Marketplace แม่หมอตัวจริง |
 | [docs/specs/ENTITLEMENT_ABUSE_MODEL.md](docs/specs/ENTITLEMENT_ABUSE_MODEL.md) | ระบบกันโกงสิทธิ์ฟรี — threat model |
-| [docs/TAROT_CARD_FEATURES.md](docs/TAROT_CARD_FEATURES.md) | 🃏 **(CANONICAL SPEC)** สเปกระบบและสารบบไพ่ทาโรต์ 78 ใบ, 5 มิติความหมาย, ผัง 25 แบบ, Pick A Card 8 หัวข้อ, Provably Fair Flow |
+| [docs/TAROT_CARD_FEATURES.md](docs/TAROT_CARD_FEATURES.md) | 🃏 **(CANONICAL SPEC)** สเปกระบบและสารบบไพ่ทาโรต์ 78 ใบ, 5 มิติความหมาย, ผัง 26 แบบ, Pick A Card 8 หัวข้อ, Provably Fair Flow |
 
 
 ### 📋 แผนงานทั้งหมด — สถานะจริงจากไฟล์แผน

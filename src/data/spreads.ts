@@ -1,7 +1,7 @@
 import type { Spread } from "./spreads-helpers";
 
 /**
- * รูปแบบการวางไพ่ (Spread) 25 ผังพยากรณ์ยอดนิยม — ภาษาเข้าใจง่าย กระชับ สมดุล
+ * รูปแบบการวางไพ่ (Spread) 26 ผังพยากรณ์ยอดนิยม — ภาษาเข้าใจง่าย กระชับ สมดุล
  * รองรับทั้งภาษาไทยและ American English ระดับมืออาชีพ
  */
 
@@ -902,6 +902,137 @@ export const SPREADS: Spread[] = [
         y: 0.5 + Math.sin(angle) * 0.38,
       };
     }),
+  },
+
+  {
+    /*
+     * ✦ ผังไพ่ 12 เรือนชะตา — คอลแลประหว่างไพ่ทาโรต์กับโหราศาสตร์ไทย
+     * ชื่อเรือนใช้แบบไทย (ตนุ · กดุมภะ · … · วินาศ) คู่กับความหมายสากลของ 12 เรือน
+     * วางเป็นวงกลมแบบผังดวง: เรือนที่ 1 (ลัคนา) อยู่ซ้ายสุด แล้ววนทวนเข็มนาฬิกาลงล่าง
+     */
+    id: "twelve-houses",
+    nameTh: "ดวงชะตา 12 เรือน (ไพ่ 12 ใบ)",
+    nameEn: "Twelve Houses Horoscope (12 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซี 12 เรือนชะตา ครบทุกด้านของชีวิต",
+    tagline: "วางไพ่หนึ่งใบต่อหนึ่งเรือน เห็นครบทุกเรื่องของชีวิต",
+    taglineEn: "One card for each house of your chart, every area of life at once",
+    description:
+      "ผังไพ่ 12 ใบตาม 12 เรือนชะตาแบบโหราศาสตร์ไทย ตั้งแต่เรือนตนุ (ตัวตน) ถึงเรือนวินาศ (สิ่งที่ซ่อนอยู่) ให้เห็นภาพรวมทั้งการเงิน ครอบครัว ความรัก การงาน และโชคลาภในผังเดียว",
+    descriptionEn:
+      "A 12-card spread mapped to the twelve houses of a Thai astrology chart, from the House of Self to the House of Hidden Matters, covering money, family, love, career, and luck in one layout.",
+    defaultCategory: "general",
+    credits: 8,
+    guestAllowed: false,
+    positions: [
+      {
+        index: 0,
+        nameTh: "1. เรือนตนุ (ตัวตนและบุคลิก)",
+        nameEn: "1. House of Self & Identity (Tanu)",
+        meaning: "ตัวคุณในช่วงนี้ ภาพที่คนอื่นเห็น และพลังชีวิตโดยรวม",
+        meaningEn: "How you show up now, the image others see, and your overall vitality",
+        x: 0.16,
+        y: 0.5,
+      },
+      {
+        index: 1,
+        nameTh: "2. เรือนกดุมภะ (เงินและทรัพย์สิน)",
+        nameEn: "2. House of Money & Resources (Kadumpha)",
+        meaning: "รายได้ ทรัพย์สิน และสิ่งที่คุณให้คุณค่า",
+        meaningEn: "Income, possessions, and what you truly value",
+        x: 0.206,
+        y: 0.69,
+      },
+      {
+        index: 2,
+        nameTh: "3. เรือนสหัชชะ (พี่น้อง เพื่อน และการสื่อสาร)",
+        nameEn: "3. House of Siblings & Communication (Sahatcha)",
+        meaning: "คนใกล้ตัว การพูดคุย การเรียนรู้ และการเดินทางใกล้ ๆ",
+        meaningEn: "People close by, conversations, learning, and short trips",
+        x: 0.33,
+        y: 0.829,
+      },
+      {
+        index: 3,
+        nameTh: "4. เรือนพันธุ (บ้านและครอบครัว)",
+        nameEn: "4. House of Home & Family (Phanthu)",
+        meaning: "บ้าน ครอบครัว รากเหง้า และความรู้สึกปลอดภัย",
+        meaningEn: "Home, family, roots, and your sense of safety",
+        x: 0.5,
+        y: 0.88,
+      },
+      {
+        index: 4,
+        nameTh: "5. เรือนปุตตะ (ความรักและความสุข)",
+        nameEn: "5. House of Love & Joy (Puttha)",
+        meaning: "ความรักโรแมนติก ความสุข งานอดิเรก ความคิดสร้างสรรค์ และลูก",
+        meaningEn: "Romance, pleasure, hobbies, creativity, and children",
+        x: 0.67,
+        y: 0.829,
+      },
+      {
+        index: 5,
+        nameTh: "6. เรือนอริ (อุปสรรคและสุขภาพ)",
+        nameEn: "6. House of Obstacles & Health (Ari)",
+        meaning: "คู่แข่ง อุปสรรค งานประจำวัน และการดูแลสุขภาพ",
+        meaningEn: "Rivals, obstacles, daily work, and health habits",
+        x: 0.794,
+        y: 0.69,
+      },
+      {
+        index: 6,
+        nameTh: "7. เรือนปัตนิ (คู่ครองและหุ้นส่วน)",
+        nameEn: "7. House of Partners & Marriage (Pattani)",
+        meaning: "คนรัก คู่ชีวิต หุ้นส่วน และคนที่คุณต้องร่วมมือด้วย",
+        meaningEn: "Your partner, spouse, business partners, and key collaborators",
+        x: 0.84,
+        y: 0.5,
+      },
+      {
+        index: 7,
+        nameTh: "8. เรือนมรณะ (การเปลี่ยนแปลงครั้งใหญ่)",
+        nameEn: "8. House of Transformation (Marana)",
+        meaning: "การปล่อยวาง การเปลี่ยนผ่าน เงินร่วม และเรื่องที่ต้องจบเพื่อเริ่มใหม่",
+        meaningEn: "Letting go, deep change, shared money, and endings that make room for beginnings",
+        x: 0.794,
+        y: 0.31,
+      },
+      {
+        index: 8,
+        nameTh: "9. เรือนศุภะ (โชค ผู้ใหญ่ และการเรียน)",
+        nameEn: "9. House of Luck, Mentors & Learning (Suppha)",
+        meaning: "โชค ผู้ใหญ่ที่เกื้อหนุน การเรียนสูง ความเชื่อ และการเดินทางไกล",
+        meaningEn: "Fortune, supportive elders, higher learning, beliefs, and long journeys",
+        x: 0.67,
+        y: 0.171,
+      },
+      {
+        index: 9,
+        nameTh: "10. เรือนกัมมะ (การงานและชื่อเสียง)",
+        nameEn: "10. House of Career & Reputation (Kamma)",
+        meaning: "หน้าที่การงาน ความสำเร็จ และชื่อเสียงในสายตาคนอื่น",
+        meaningEn: "Your career, achievements, and public reputation",
+        x: 0.5,
+        y: 0.12,
+      },
+      {
+        index: 10,
+        nameTh: "11. เรือนลาภะ (ลาภผลและเพื่อนฝูง)",
+        nameEn: "11. House of Gains & Friends (Lapha)",
+        meaning: "รายได้พิเศษ ผลตอบแทน เครือข่าย และความหวังที่อยากให้เป็นจริง",
+        meaningEn: "Windfalls, rewards, networks, and hopes you want to come true",
+        x: 0.33,
+        y: 0.171,
+      },
+      {
+        index: 11,
+        nameTh: "12. เรือนวินาศ (สิ่งที่ซ่อนอยู่และการพักใจ)",
+        nameEn: "12. House of Hidden Matters & Rest (Winat)",
+        meaning: "สิ่งที่มองไม่เห็น ความกังวลลึก ๆ การสูญเสีย และการพักใจเพื่อเยียวยา",
+        meaningEn: "The unseen, hidden worries, losses, and retreat for healing",
+        x: 0.206,
+        y: 0.31,
+      },
+    ],
   },
 
   // ==========================================

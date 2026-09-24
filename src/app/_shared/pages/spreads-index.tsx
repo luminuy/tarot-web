@@ -14,28 +14,28 @@ const PATH = "/spreads";
 
 const COPY = {
   th: {
-    title: "ดูดวงไพ่ยิปซี 25 ผัง — 1, 3, 5, 10 ใบ ครบทุกแบบ ฟรี",
+    title: "ดูดวงไพ่ยิปซี 26 ผัง — 1, 3, 5, 10 ใบ ครบทุกแบบ ฟรี",
     description:
-      "รวมผังดูดวงไพ่ยิปซี 25 แบบ ตั้งแต่ไพ่ 1 ใบ ถึงเซลติกครอส 10 ใบ ทั้งความรัก การงาน การเงิน พร้อมภาพจัดวางจริงและความหมายทุกตำแหน่ง",
-    collectionName: "คลัง 25 ผังพยากรณ์ไพ่ทาโรต์ยอดนิยม (Spreads Library)",
+      "รวมผังดูดวงไพ่ยิปซี 26 แบบ ตั้งแต่ไพ่ 1 ใบ ถึงเซลติกครอส 10 ใบ ทั้งความรัก การงาน การเงิน พร้อมภาพจัดวางจริงและความหมายทุกตำแหน่ง",
+    collectionName: "คลัง 26 ผังพยากรณ์ไพ่ทาโรต์ยอดนิยม (Spreads Library)",
     collectionDescription:
-      "รวบรวม 25 ผังพยากรณ์ไพ่ทาโรต์มาตรฐานสากล ความรัก การงาน การเงิน และผังใหญ่เจาะลึก 10 มิติ",
-    crumb: "ผังพยากรณ์ 25 แบบ",
+      "รวบรวม 26 ผังพยากรณ์ไพ่ทาโรต์มาตรฐานสากล ความรัก การงาน การเงิน และผังใหญ่เจาะลึก 10 มิติ",
+    crumb: "ผังพยากรณ์ 26 แบบ",
     directoryTitle: "สารบัญผังพยากรณ์ทั้งหมด",
     directoryLead:
-      "รวมลิงก์ผังพยากรณ์ครบทั้ง 25 แบบไว้ที่เดียว กดเข้าไปอ่านความหมายรายตำแหน่งพร้อมภาพจัดวางจริงได้ทันที",
+      "รวมลิงก์ผังพยากรณ์ครบทั้ง 26 แบบไว้ที่เดียว กดเข้าไปอ่านความหมายรายตำแหน่งพร้อมภาพจัดวางจริงได้ทันที",
   },
   en: {
-    title: "25 Tarot Spreads: 1, 3, 5 & 10-Card Layouts (Free)",
+    title: "26 Tarot Spreads: 1, 3, 5 & 10-Card Layouts (Free)",
     description:
-      "25 tarot spreads in one place — from a single daily card to the 10-card Celtic Cross, each with real card positions and what they mean.",
-    collectionName: "The Tarot Spreads Library — 25 Classic Layouts",
+      "26 tarot spreads in one place — from a single daily card to the 10-card Celtic Cross, each with real card positions and what they mean.",
+    collectionName: "The Tarot Spreads Library — 26 Classic Layouts",
     collectionDescription:
-      "A library of 25 standard tarot spreads for love, career, money, and deep life readings, including the full 10-position Celtic Cross.",
+      "A library of 26 standard tarot spreads for love, career, money, and deep life readings, including the full 10-position Celtic Cross.",
     crumb: "Tarot Spreads",
     directoryTitle: "Every Spread in the Library",
     directoryLead:
-      "All 25 spreads in one list — open any of them for the real card layout and what each position means.",
+      "All 26 spreads in one list — open any of them for the real card layout and what each position means.",
   },
 } as const;
 
@@ -43,7 +43,7 @@ export function buildSpreadsIndexMetadata(locale: Locale): Metadata {
   const copy = COPY[locale];
   const isEnglish = locale === "en";
   const ogImages = buildPageOgImage({
-    title: isEnglish ? "Tarot Spreads Library: 25 Classic Layouts" : "ผังการเปิดไพ่ทาโรต์ 25 แบบ",
+    title: isEnglish ? "Tarot Spreads Library: 26 Classic Layouts" : "ผังการเปิดไพ่ทาโรต์ 26 แบบ",
     eyebrow: isEnglish ? "SPREADS DIRECTORY" : "คู่มือผังพยากรณ์",
     cardImage: "major-01.jpg",
     alt: copy.title,
@@ -110,9 +110,9 @@ export function SpreadsIndexBody({ locale, library }: { locale: Locale; library:
           ➔ HTML ที่เซิร์ฟเวอร์ส่งออกไปมีลิงก์ผังแค่ 7 จาก 25 เส้น ที่เหลือโผล่
           ต่อเมื่อผู้ใช้กดแท็บเท่านั้น
 
-          📌 อัปเดต 2026-09-17 (R-02): คลังผังเลิก hydrate แล้ว การ์ดทั้ง 25 ใบถูกเรนเดอร์
+          📌 อัปเดต 2026-09-17 (R-02): คลังผังเลิก hydrate แล้ว การ์ดทั้ง 26 ใบถูกเรนเดอร์
           เป็น HTML ตั้งแต่ตอนบิลด์ ➔ ทุกผังมีลิงก์ในหน้าอยู่แล้วโดยไม่ต้องพึ่งบล็อกนี้
-          **แต่ยังเก็บบล็อกนี้ไว้**: มันคือรายการเดียวที่ลิงก์ครบ 25 เส้นแบบไม่ขึ้นกับแท็บ
+          **แต่ยังเก็บบล็อกนี้ไว้**: มันคือรายการเดียวที่ลิงก์ครบ 26 เส้นแบบไม่ขึ้นกับแท็บ
           (การ์ดที่อยู่นอกแท็บที่เปิดอยู่ถูกซ่อนด้วย `hidden` ซึ่งบอตบางตัวข้าม)
 
           ผลจริงที่วัดได้ (GSC 2026-09-04): ผัง 21 จาก 25 หน้าติดสถานะ

@@ -438,6 +438,34 @@ export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ classN
   </div>
 );
 
+// ✦ ดวงชะตา 12 เรือน — วงล้อไพ่ประจำ 12 ราศี (Emperor ➔ Moon) วางแบบผังดวง
+// เรือนที่ 1 อยู่ซ้ายสุด แล้ววนทวนเข็มนาฬิกา · โชว์เฉพาะหน้าไพ่ ไม่มีตัวหนังสือทับ (กฎข้อ 7)
+const ZODIAC_WHEEL_CARDS = [
+  "major-04", "major-05", "major-06", "major-07", "major-08", "major-09",
+  "major-11", "major-13", "major-14", "major-15", "major-17", "major-18",
+];
+export const TwelveHousesSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`relative w-28 h-28 mx-auto flex items-center justify-center ${className}`}>
+    <div className="w-7 h-7 rounded-full border-1.5 border-line-warm bg-inset-warm z-10" />
+    {ZODIAC_WHEEL_CARDS.map((cardId, i) => {
+      const angle = 180 - i * 30;
+      const rad = (angle * Math.PI) / 180;
+      const radius = 42;
+      const x = Number((Math.cos(rad) * radius).toFixed(2));
+      const y = Number((-Math.sin(rad) * radius).toFixed(2));
+      return (
+        <div
+          key={cardId}
+          className="absolute w-5 h-[34px] rounded border border-line-warm/70 overflow-hidden shadow"
+          style={{ transform: `translate(${x}px, ${y}px)` }}
+        >
+          <CardImage image={`${cardId}.jpg`} alt="" className="w-full h-full object-cover tarot-hd-card-image" sizes="22px" />
+        </div>
+      );
+    })}
+  </div>
+);
+
 // 11. สถานการณ์ อุปสรรค ทางออก (3 ใบ)
 export const SituationSolutionSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
   <div className={`flex items-center justify-center gap-2.5 relative ${className}`}>

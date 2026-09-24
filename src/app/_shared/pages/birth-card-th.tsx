@@ -184,7 +184,7 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
             { label: "สารานุกรมไพ่ 78 ใบ", href: "/cards" },
             { label: "ดูดวงไพ่ยิปซีรายวัน", href: "/daily" },
             { label: "ดูดวงความรัก 1 ใบ", href: "/love/1-card" },
-            { label: "ผังพยากรณ์ 25 แบบ", href: "/spreads" },
+            { label: "ผังพยากรณ์ 26 แบบ", href: "/spreads" },
             { label: "เริ่มดูดวงที่หน้าแรก", href: "/" },
           ]}
         >

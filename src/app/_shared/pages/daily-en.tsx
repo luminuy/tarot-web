@@ -73,7 +73,7 @@ const DAILY_FAQS_EN = [
 
 const DAILY_LINKS_EN = [
   { href: "/en/cards", label: "All 78 card meanings" },
-  { href: "/en/spreads", label: "25 tarot spreads" },
+  { href: "/en/spreads", label: "26 tarot spreads" },
   { href: "/en/cards/major", label: "Major Arcana" },
   { href: "/en", label: "Start a full reading" },
 ];

@@ -155,7 +155,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
           ["career", "money", "career-switch", "decision", "inner-potential"].includes(s.id)
         );
       case "master":
-        return SPREADS.filter((s) => ["celtic-cross", "year-ahead", "weekly", "chakra", "monthly"].includes(s.id));
+        return SPREADS.filter((s) => ["celtic-cross", "year-ahead", "twelve-houses", "weekly", "chakra", "monthly"].includes(s.id));
       case "all":
       default:
         return SPREADS;

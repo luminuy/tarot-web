@@ -15,7 +15,7 @@
    - 2.1 [ไพ่ชุดใหญ่ Major Arcana (22 ใบ)](#21-ไพ่ชุดใหญ่-major-arcana-22-ใบ)
    - 2.2 [ไพ่ชุดย่อย Minor Arcana (56 ใบ)](#22-ไพ่ชุดย่อย-minor-arcana-56-ใบ)
 3. [มาตรฐานการตีความ 5 มิติ (5-Dimensional Meaning Protocol)](#3-มาตรฐานการตีความ-5-มิติ-5-dimensional-meaning-protocol)
-4. [สารบบผังพยากรณ์ 25 รูปแบบ (25 Golden-Ratio Spreads Specification)](#4-สารบบผังพยากรณ์-25-รูปแบบ-25-golden-ratio-spreads-specification)
+4. [สารบบผังพยากรณ์ 26 รูปแบบ (26 Golden-Ratio Spreads Specification)](#4-สารบบผังพยากรณ์-26-รูปแบบ-26-golden-ratio-spreads-specification)
 5. [ระบบเลือกกองไพ่พยากรณ์ (Pick A Card Multi-Topic Engine)](#5-ระบบเลือกกองไพ่พยากรณ์-pick-a-card-multi-topic-engine)
 6. [กลไกความโปร่งใสทางวิทยาการรหัสลับ (Provably Fair Cryptographic Flow)](#6-กลไกความโปร่งใสทางวิทยาการรหัสลับ-provably-fair-cryptographic-flow)
 7. [วิศวกรรมส่วนหน้าและอินเทอร์แอคชัน 3 มิติ (Frontend UI & Interaction Specs)](#7-วิศวกรรมส่วนหน้าและอินเทอร์แอคชัน-3-มิติ-frontend-ui--interaction-specs)
@@ -216,9 +216,9 @@ export interface TarotCard {
 
 ---
 
-## 4. สารบบผังพยากรณ์ 25 รูปแบบ (25 Golden-Ratio Spreads Specification)
+## 4. สารบบผังพยากรณ์ 26 รูปแบบ (26 Golden-Ratio Spreads Specification)
 
-ระบบบรรจุผังเปิดไพ่พยากรณ์มาตรฐาน 25 แบบ จัดกลุ่มตามเจตนาและบริบทคำถามของผู้ใช้ 4 กลุ่มหลัก:
+ระบบบรรจุผังเปิดไพ่พยากรณ์มาตรฐาน 26 แบบ จัดกลุ่มตามเจตนาและบริบทคำถามของผู้ใช้ 4 กลุ่มหลัก:
 
 | รหัสผัง (`id`) | ชื่อภาษาไทย | จำนวนไพ่ | หมวดหลัก | บริบทการใช้งาน | ระเบียบการจัดวาง Layout |
 | :--- | :--- | :---: | :---: | :--- | :--- |
@@ -247,6 +247,7 @@ export interface TarotCard {
 | `celtic-cross` | เคลติกครอสโบราณ | 10 | Life | ผังมหาศักดิ์สิทธิ์คลาสสิก 10 ทิศทาง | ไม้กางเขนซ้าย + เสาค้ำขวา |
 | `monthly-ten` | ดวงรายเดือน 10 มิติ | 10 | Life | สแกนชีวิตประจำเดือนแบบละเอียดสูงสุด | โครงสร้างพีระมิด 10 จุด |
 | `year-ahead` | แผนผังชีวิตรายปี | 12 | Life | ภาพรวมดวงชะตาตลอด 12 เดือนข้างหน้า | วงล้อสุริยคติ 12 ราศี |
+| `twelve-houses` | ดวงชะตา 12 เรือน | 12 | Life | ไพ่หนึ่งใบต่อหนึ่งเรือนชะตาแบบไทย (ตนุ ➔ วินาศ) ครบทุกด้านของชีวิต | วงล้อผังดวง เรือน 1 (ลัคนา) ซ้ายสุด วนทวนเข็มนาฬิกา |
 
 ### กฎสถาปัตยกรรม Horizontal Spread Bounds
 สำหรับผังที่มีไพ่ 7 ใบขึ้นไป (เช่น `weekly` 7 วัน และ `chakra` 7 จักระ):
@@ -393,7 +394,7 @@ graph TD
 | :--- | :---: | :--- |
 | **สำรับ 78 ใบ 1909 RWS** | 100% | ตรวจสอบผ่าน Type Schema และ Hash รหัสไพ่ |
 | **ความหมาย 5 มิติ (ไทย/อังกฤษ)** | 100% | ฐานข้อมูล Canonical ใน `src/data/cards/` |
-| **ผังพยากรณ์ 25 รูปแบบ** | 100% | ระบบ Normalized Coordinates และ Bounds Guard |
+| **ผังพยากรณ์ 26 รูปแบบ** | 100% | ระบบ Normalized Coordinates และ Bounds Guard |
 | **Pick A Card 8 หัวข้อ** | 100% | Matrix 512 ชุดต่อหัวข้อ และ Daily Seed Rotation |
 | **ความโปร่งใส Provably Fair** | 100% | SHA-256 Commit-Reveal และ Web Crypto Verifier |
 | **ความปลอดภัยผู้ใช้ (Safety)** | 100% | กรองคำถามเสี่ยงและตัดเข้าสายด่วน 1323 ทันที |

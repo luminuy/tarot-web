@@ -80,6 +80,7 @@ const expectedCounts: Record<string, number> = {
   chakra: 7,
   "celtic-cross": 10,
   "year-ahead": 12,
+  "twelve-houses": 12,
   "love-six": 6,
   "monthly-ten": 10,
   family: 5,

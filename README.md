@@ -43,9 +43,9 @@
 - สถาปัตยกรรม **4-Tier Asset Pipeline** (`w128`, `w256`, `w512`, `w1024` ในรูปแบบ WebP/AVIF) ลดขนาดภาพลง 85% โดยคงความคมชัดสูงสุดบนจอ Retina
 - คลังความหมายศาสตร์พยากรณ์ลึกซึ้ง 780 ข้อความ ครอบคลุม 5 มิติ (ทั่วไป, ความรัก, การงาน, การเงิน, ไหวพริบ/คำแนะนำ) พร้อมการถอดรหัสโหราศาสตร์และเลขศาสตร์ประจำใบ
 
-### 2. 📐 25 ผังการเปิดไพ่พยากรณ์ยอดนิยม (Golden Ratio Altar Canvas)
+### 2. 📐 26 ผังการเปิดไพ่พยากรณ์ยอดนิยม (Golden Ratio Altar Canvas)
 - สถาปัตยกรรม **Zero-Clipping Unified Altar Canvas** ไร้การตัดขอบ จัดวางตำแหน่งการ์ดลอย 3D ด้วยสัดส่วนทองคำสมดุล 100%
-- รองรับผังพยากรณ์ 25 แบบ (124 ตำแหน่งพยากรณ์) ตั้งแต่ผัง 1 ใบด่วน (Daily Card, Yes/No), ผัง 3 ใบ (อดีต-ปัจจุบัน-อนาคต, จิตใจ-ร่างกาย-วิญญาณ) ไปจนถึงผังมหาศักดิ์สิทธิ์ Celtic Cross 10 ใบ และ Tree of Life
+- รองรับผังพยากรณ์ 26 แบบ (136 ตำแหน่งพยากรณ์) ตั้งแต่ผัง 1 ใบด่วน (Daily Card, Yes/No), ผัง 3 ใบ (อดีต-ปัจจุบัน-อนาคต, จิตใจ-ร่างกาย-วิญญาณ) ไปจนถึงผังมหาศักดิ์สิทธิ์ Celtic Cross 10 ใบ และ Tree of Life
 - ผังที่มีไพ่ 7 ใบขึ้นไป (ผัง 7 วัน และ 7 จักระ) จัดวางแบบ 2 ชั้นสมดุล (4+3 ใบ) คุมความกว้างไม่เกิน 150px ป้องกันการล้นขอบจอทุกขนาด
 
 ### 3. 🔮 ระบบเลือกกองไพ่พยากรณ์ Pick A Card 8 หัวข้อยอดนิยม (Multi-Topic Oracle Engine)
@@ -112,7 +112,7 @@
 
 ```bash
 # ✅ รัน Verification Suite ทั้ง 82 ด่านในคำสั่งเดียว (ใช้ตัวนี้เป็นหลัก)
-#    Collision Guard · Typecheck · ไพ่ 78 ใบ · ผัง 25 แบบ · Safety Guardrails · Provably Fair · D1 Sync · Entitlement · Failover ฯลฯ
+#    Collision Guard · Typecheck · ไพ่ 78 ใบ · ผัง 26 แบบ · Safety Guardrails · Provably Fair · D1 Sync · Entitlement · Failover ฯลฯ
 npm run repo:verify
 
 # ตรวจสอบ TypeScript Typecheck อย่างเดียว (0 errors)
@@ -162,7 +162,7 @@ npm run dev
 | | **[`docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md`](docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md)** | ⚡ คู่มือการนำเว็บขึ้น Cloudflare Workers & Custom Domain พร้อมระบบ Secret |
 | | **[`docs/ADMIN_PANEL.md`](docs/ADMIN_PANEL.md)** | 📊 คู่มือและสถาปัตยกรรมแผงควบคุมผู้ดูแลระบบ (Admin Panel & Cloud Health) |
 | | **[`docs/WORK_LOG.md`](docs/WORK_LOG.md)** | 📖 ประวัติการพัฒนาและ Audit Trail ส่งต่องานแบบเรียลไทม์ |
-| **📐 สเปกฟังก์ชัน & สารบบไพ่** | **[`docs/TAROT_CARD_FEATURES.md`](docs/TAROT_CARD_FEATURES.md)** | 🃏 **ข้อกำหนดระบบและสารบบความสามารถไพ่ทาโรต์ระดับเวิลด์คลาส** — สำรับ 78 ใบ, 5 มิติความหมาย, ผัง 25 แบบ, Pick A Card 8 หัวข้อ, Provably Fair |
+| **📐 สเปกฟังก์ชัน & สารบบไพ่** | **[`docs/TAROT_CARD_FEATURES.md`](docs/TAROT_CARD_FEATURES.md)** | 🃏 **ข้อกำหนดระบบและสารบบความสามารถไพ่ทาโรต์ระดับเวิลด์คลาส** — สำรับ 78 ใบ, 5 มิติความหมาย, ผัง 26 แบบ, Pick A Card 8 หัวข้อ, Provably Fair |
 | **🪶 สถาปัตยกรรม Astro & ประสิทธิภาพ** | **[`docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md`](docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md)** | 🪶 แผนย้ายเว็บไปสถาปัตยกรรม Astro 7 + React 19 Islands (305 หน้า SSG Zero-Runtime ตอบจาก Edge) |
 | | **[`docs/plans/HANDOFF_CARD_TILE_CV_2026-09-15.md`](docs/plans/HANDOFF_CARD_TILE_CV_2026-09-15.md)** | 📐 สูตรความสูงการ์ดไพ่และกฎ content-visibility ต่อ breakpoint (ด่านที่ 62) |
 
