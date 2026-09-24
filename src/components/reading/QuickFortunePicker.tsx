@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { RailArrows } from "@/components/ui/RailArrows";
 import type { Category } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
@@ -409,7 +410,9 @@ export function QuickFortunePicker({
 
 
       {/* โมดัลระบุชื่อเล่นและคำถามสำหรับรอบใหม่ (Fast & Sacred Sacred Popover) */}
-      {showNicknameModal && (
+      {/* ⚠️ วาดผ่าน portal ไป `<body>` — บล็อกนี้อยู่ใน `.home-band` (`isolation: isolate`)
+          ถ้าวาดตรงนี้ แถบ "เลือกผัง" ถัดลงไปจะวาดทับหน้าต่างตอนเลื่อนจอ (เจ้าของทัก 2026-09-24) */}
+      {showNicknameModal && typeof document !== "undefined" && createPortal(
         <div
           role="dialog"
           aria-modal="true"
@@ -555,7 +558,8 @@ export function QuickFortunePicker({
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

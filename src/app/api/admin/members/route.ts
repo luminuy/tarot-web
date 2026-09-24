@@ -14,12 +14,19 @@ export const runtime = "nodejs";
  * ทำไมต้องมี: เดิมแผงแอดมินมีแค่ "รายชื่อผู้ยินยอมรับข่าวสาร" — เวลาลูกค้าทักมาว่า
  * "เปิดไพ่ไม่ได้ / สิทธิ์หาย" ไม่มีทางค้นหาบัญชี ดูสิทธิ์คงเหลือ หรือชดเชยสิทธิ์ให้ได้เลย
  *
- * GET  ?q=คำค้น      ค้นจากอีเมล · ชื่อ · รหัสผู้ใช้ (ไม่ใส่ = 50 คนที่สมัครล่าสุด)
+ * GET  ?q=คำค้น&page=1&pageSize=50
+ *                   ค้นจากอีเมล · ชื่อ · รหัสผู้ใช้ (ไม่ใส่ q = สมาชิกทุกคน เรียงสมัครล่าสุดก่อน)
+ *                   แบ่งหน้าได้ · pageSize เลือกได้จาก PAGE_SIZES เท่านั้น (ค่าอื่นตกไปที่ 50)
  * GET  ?id=<userId>  รายละเอียด + สิทธิ์คงเหลือ + ประวัติโบนัส
  * POST { userId, amount, note }  ให้สิทธิ์เปิดไพ่เพิ่ม (1–50 ครั้ง) · บันทึกลง audit ทุกครั้ง
  */
 
-const LIST_LIMIT = 50;
+/**
+ * จำนวนต่อหน้าที่แอดมินเลือกได้ — ปิดเพดานไว้ที่ 200 เพราะทุกแถวมี subquery นับ `reading_usage`
+ * เปิดให้ส่งเลขอะไรก็ได้ = ยิงทีเดียวนับทั้งตารางได้ (เดิมตายตัว 50 คน ดูสมาชิกเกินนั้นไม่ได้เลย)
+ */
+const PAGE_SIZES = [25, 50, 100, 200] as const;
+const DEFAULT_PAGE_SIZE = 50;
 const DAY_MS = 86_400_000;
 
 interface MemberRow {
@@ -65,6 +72,10 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const id = url.searchParams.get("id")?.trim();
   const q = (url.searchParams.get("q") ?? "").trim().slice(0, 100);
+  const sizeParam = Number(url.searchParams.get("pageSize"));
+  const pageSize = (PAGE_SIZES as readonly number[]).includes(sizeParam) ? sizeParam : DEFAULT_PAGE_SIZE;
+  const pageParam = Math.floor(Number(url.searchParams.get("page")));
+  const requestedPage = Number.isFinite(pageParam) && pageParam >= 1 ? pageParam : 1;
 
   let db;
   try {
@@ -118,10 +129,30 @@ export async function GET(request: Request) {
   const where = q ? "WHERE (LOWER(COALESCE(u.email, '')) LIKE ? ESCAPE '\\' OR LOWER(u.name) LIKE ? ESCAPE '\\' OR u.id = ?)" : "";
   const args = q ? [likeArg(q), likeArg(q), q] : [];
 
+  // นับจำนวนที่ตรงเงื่อนไขก่อน เพื่อรู้จำนวนหน้า — นับรวมบัญชีที่ลบแล้วเหมือนตัวรายการ (ตารางแสดง "(ลบแล้ว)" ให้)
+  let matched: number;
+  try {
+    const row = await db
+      .prepare(`SELECT COUNT(*) AS n FROM users u ${where}`)
+      .bind(...args)
+      .first<{ n: number }>();
+    matched = Number(row?.n ?? 0);
+  } catch (err) {
+    console.error("[admin/members] count failed:", err);
+    return NextResponse.json({ error: "อ่านรายชื่อสมาชิกไม่สำเร็จ" }, { status: 500 });
+  }
+  const pageCount = Math.max(1, Math.ceil(matched / pageSize));
+  // หน้าที่ขอเกินจำนวนหน้าจริง (เช่นลบสมาชิกไประหว่างดู) ➔ ส่งหน้าสุดท้ายแทนตารางว่าง
+  const page = Math.min(requestedPage, pageCount);
+  const offset = (page - 1) * pageSize;
+
+  // id ต่อท้าย ORDER BY กันแถวที่สมัครมิลลิวินาทีเดียวกันสลับหน้าไปมา (ซ้ำ/หายระหว่างหน้า)
   const listWith = (readingsCol: string) =>
     db
-      .prepare(`SELECT ${BASE_COLUMNS}${readingsCol} FROM users u ${where} ORDER BY u.created_at DESC LIMIT ${LIST_LIMIT}`)
-      .bind(...args)
+      .prepare(
+        `SELECT ${BASE_COLUMNS}${readingsCol} FROM users u ${where} ORDER BY u.created_at DESC, u.id DESC LIMIT ? OFFSET ?`,
+      )
+      .bind(...args, pageSize, offset)
       .all<MemberRow>();
 
   let rows: MemberRow[];
@@ -153,7 +184,11 @@ export async function GET(request: Request) {
   return NextResponse.json({
     query: q,
     members: rows.map(toMember),
-    limit: LIST_LIMIT,
+    page,
+    pageSize,
+    pageCount,
+    matched,
+    pageSizes: PAGE_SIZES,
     totals: {
       total: Number(totals?.total ?? 0),
       new7d: Number(totals?.new7d ?? 0),

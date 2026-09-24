@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useLocale } from "@/lib/i18n";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 
@@ -111,7 +112,14 @@ export const Modal: React.FC<ModalProps> = ({
 
   if (!isMounted) return null;
 
-  return (
+  /*
+   * ⚠️ ต้องวาดผ่าน portal ไปที่ `<body>` เสมอ — ห้าม return ตรงตำแหน่งที่ถูกเรียก
+   * หน้าแรกห่อแต่ละส่วนด้วย `.home-band` (`isolation: isolate`) ซึ่งเป็น stacking context ของตัวเอง
+   * `z-[var(--z-modal)]` จึงสูงแค่ในแถบของมัน แถบถัดไปวาดทับหน้าต่างลอยตอนเลื่อนจอ (เจ้าของทัก 2026-09-24)
+   * รวมถึงบรรพบุรุษที่มี transform (`.anim-step-in`) ก็ทำให้ `fixed` ไม่ยึดจอจริง
+   * (ฝั่งเซิร์ฟเวอร์ไม่มี `document` — เรนเดอร์ตรงที่เดิมแทน ด่าน test-en-thai-leak เรนเดอร์ด้วย SSR)
+   */
+  const dialog = (
     <div
       role="dialog"
       aria-modal="true"
@@ -160,4 +168,6 @@ export const Modal: React.FC<ModalProps> = ({
       </div>
     </div>
   );
+
+  return typeof document === "undefined" ? dialog : createPortal(dialog, document.body);
 };
