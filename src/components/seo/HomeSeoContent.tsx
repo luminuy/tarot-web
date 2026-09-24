@@ -3,6 +3,7 @@ import { localeHref } from "@/lib/i18n/paths";
 import { CardImage } from "@/components/card/CardImage";
 import { getHomeFaqs } from "@/data/home-seo";
 import { COUNTS } from "@/components/layout/nav-links";
+import { HomeZodiacSection } from "@/components/seo/HomeZodiacSection";
 
 /**
  * 5 ขั้นตอนพิธีกรรมพยากรณ์ศักดิ์สิทธิ์ (Thai)
@@ -195,6 +196,19 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
 
   return (
     <div className="w-full mt-4 sm:mt-6 text-ink">
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 0: ไพ่ยิปซี × โหราศาสตร์ (คำสั่งเจ้าของ 2026-09-24 — ให้อยู่หน้าแรก)
+          ═══════════════════════════════════════════════════════════════ */}
+      <HomeZodiacSection isEnglish={isEnglish} href={href} />
+
+      {/* Decorative Gold Divider */}
+      <div className="w-full flex items-center justify-center py-10 sm:py-14" aria-hidden="true">
+        <div className="flex items-center gap-3 text-line-warm/70">
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-line-warm" />
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-line-warm" />
+        </div>
+      </div>
+
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 1: วิธีดูดวงไพ่ทาโรต์ 5 ขั้นตอนศักดิ์สิทธิ์ (Ritual Stations)
           ═══════════════════════════════════════════════════════════════ */}
