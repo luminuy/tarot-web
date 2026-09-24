@@ -73,6 +73,11 @@ export function CardImage({
 
   const handleImgError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const el = e.currentTarget;
+    /* สคริปต์สำรองระดับหน้า (BaseLayout) ถอยให้แล้วในเหตุการณ์เดียวกันนี้ — แค่ยึดธงคืน ไม่ใช่ความล้มเหลวรอบสอง */
+    if (el.dataset.fellBack === "global") {
+      el.dataset.fellBack = "1";
+      return;
+    }
     if (!el.dataset.fellBack) {
       el.dataset.fellBack = "1";
       const fallback = getCardImageSrc(image, cardId, { forceLocal: true });

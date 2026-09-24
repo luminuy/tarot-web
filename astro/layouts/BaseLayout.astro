@@ -120,6 +120,19 @@ const webSiteJsonLd = {
   inLanguage: locale,
 };
 
+/**
+ * 🖼️ ตัวสำรองภาพไพ่ระดับทั้งหน้า — CDN ภาพ (ImageKit) ตอบ 503 เป็นพัก ๆ ในบางขนาด
+ * `<CardImage>` มีตัวสำรองอยู่แล้ว แต่เป็น React `onError` ซึ่ง **ทำงานเฉพาะใน island ที่ hydrate**
+ * เนื้อหาหน้า Astro ส่วนใหญ่ไม่ hydrate เลย ภาพที่ CDN ตอบพังจึงค้างเป็นกรอบเปล่าถาวร
+ * (เจอจริงที่ `/cards/zodiac` 2026-09-24: Strength ขึ้นแค่ alt text)
+ *
+ * ดักเหตุการณ์ error แบบ capture ที่ document (error ของ <img> ไม่ bubble) แล้วทำแบบเดียวกับ
+ * `CardImage`: ถอด <source> ใน <picture> ทิ้ง ชี้ `src` ไปไฟล์ในเครื่อง `/cards/<ไฟล์>`
+ * ติดธง `data-fell-back="global"` ให้ `CardImage` รู้ว่าถอยแล้ว (ไม่เรียก onError ซ้ำ)
+ * ⚠️ ต้องอยู่ใน <head> ก่อนภาพแรกโหลด · ห้ามใส่ defer/async
+ */
+const cardImageFallbackScript = `document.addEventListener('error',function(e){var t=e.target;if(!t||t.tagName!=='IMG'||t.dataset.fellBack)return;var s=t.getAttribute('src')||'';var i=s.indexOf('/cards/');if(i<1)return;t.dataset.fellBack='global';var p=t.parentElement;if(p&&p.tagName==='PICTURE'){var q=p.querySelectorAll('source');for(var k=0;k<q.length;k++)q[k].remove();}t.src=s.slice(i).split('?')[0];},true);`;
+
 const consentScript = `try{if(!localStorage.getItem(${JSON.stringify(CONSENT_STORAGE_KEY)}))document.documentElement.setAttribute('data-consent-ask','')}catch(e){document.documentElement.setAttribute('data-consent-ask','')}`;
 ---
 
@@ -153,6 +166,9 @@ const consentScript = `try{if(!localStorage.getItem(${JSON.stringify(CONSENT_STO
 
     {/* 🍪 สวิตช์ของแถบขอความยินยอม PDPA — ต้องรันก่อนเฟรมแรกจะวาดเสมอ ห้ามใส่ defer/async */}
     <script is:inline set:html={consentScript} />
+
+    {/* 🖼️ ตัวสำรองภาพไพ่เมื่อ CDN ล่ม — ต้องอยู่ก่อนภาพแรก (ดูคำอธิบายที่ cardImageFallbackScript) */}
+    <script is:inline set:html={cardImageFallbackScript} />
 
     {/* Speculation Rules API — กฎอยู่ที่ src/app/_shared/speculation-rules.ts ที่เดียว */}
     <script type="speculationrules" is:inline set:html={JSON.stringify(buildSpeculationRules(isEnglish))} />
