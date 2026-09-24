@@ -208,7 +208,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="how-it-works-title"
-        className="home-band max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
+        className="home-band home-band-tint max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         {/* Section Header */}
         <div className="text-center space-y-2.5 sm:space-y-3">
@@ -315,7 +315,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="heritage-title"
-        className="home-band home-band-tint max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
+        className="home-band max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         {/* Section Header */}
         <div className="text-center space-y-2.5 sm:space-y-3">
@@ -466,7 +466,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="spreads-and-cards-title"
-        className="home-band max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
+        className="home-band home-band-tint max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-line-warm/50">
           <div className="space-y-2">
@@ -635,7 +635,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="articles-title"
-        className="home-band home-band-tint max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
+        className="home-band max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-line-warm/50">
           <div className="space-y-2">
@@ -703,7 +703,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="faq-title"
-        className="home-band max-w-4xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
+        className="home-band home-band-tint max-w-4xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         <div className="text-center space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-center gap-3">

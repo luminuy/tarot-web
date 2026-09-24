@@ -54,7 +54,7 @@ export function HomeZodiacSection({ isEnglish, href }: { isEnglish: boolean; hre
   return (
     <section
       aria-labelledby="home-zodiac-title"
-      className="home-band home-band-tint max-w-6xl mx-auto px-4 sm:px-6 space-y-6 sm:space-y-8"
+      className="home-band max-w-6xl mx-auto px-4 sm:px-6 space-y-6 sm:space-y-8"
     >
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-line-warm/50">
         <div className="space-y-2">
