@@ -292,11 +292,13 @@ export function ZodiacIndexBody({
           }
         />
 
-        {finder}
+        {/* ห่อ div ทุกช่อง — <astro-island> เป็น display:contents จึงไม่รับ margin จาก space-y
+            ถ้าไม่ห่อ ส่วนต่าง ๆ จะชิดกันจนหัวข้อทับขอบกล่องข้างบน (เจ้าของเห็นจากภาพหน้าจอ) */}
+        <div>{finder}</div>
 
-        {daily}
+        <div>{daily}</div>
 
-        {compat}
+        <div>{compat}</div>
 
         {/* รายชื่อ 12 ราศีพร้อมช่วงวันเกิด — กะทัดรัด (วงล้อด้านบนมีภาพไพ่ครบแล้ว) */}
         <section aria-labelledby="zodiac-list-title" className="space-y-4">
