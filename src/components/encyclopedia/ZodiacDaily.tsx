@@ -201,25 +201,30 @@ export function ZodiacDaily({ signs, sign }: { signs: ZodiacDailySignName[]; sig
         })}
       </div>
 
-      <div className="grid gap-5 md:grid-cols-[1.4fr_1fr]">
+      {/* สองกล่องกว้างเท่ากัน · ไพ่ขนาดเท่ากัน · โครงเดียวกัน (ไพ่บน ข้อความล่าง) — เจ้าของขอให้สองฝั่งเท่ากัน
+          กว้างรวม max-w-2xl เท่ากล่องผลหาราศีและกล่องความเข้ากัน ขอบซ้ายขวาจะได้ตรงกันทั้งหน้า */}
+      <div className="grid gap-5 sm:grid-cols-2 max-w-2xl mx-auto">
         {/* ไพ่วันนี้ของราศีที่เลือก */}
-        <div className="altar-panel rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-center gap-5">
+        <div className="altar-panel rounded-2xl p-5 sm:p-6 flex flex-col items-center gap-4 text-center">
           <FlipCard
             key={`day:${chosen.sign}`}
             card={chosen}
             revealed={chosenOpen}
             onReveal={() => reveal(`day:${chosen.sign}`)}
             label={isEnglish ? `Today's card for ${nameOf(chosen.sign)}` : `ไพ่วันนี้ของ${nameOf(chosen.sign)}`}
-            width="w-[130px] sm:w-[150px] shrink-0"
-            sizes="(min-width: 640px) 150px, 130px"
+            width="w-[120px] sm:w-[130px] shrink-0"
+            sizes="(min-width: 640px) 130px, 120px"
           />
-          <div aria-live="polite" className="space-y-2 text-center sm:text-left">
+          {/* ตัวหนังสือโครงเดียวกับกล่องขวา: ป้ายทอง ➔ หัวข้อตัวหนา ➔ คำอธิบาย */}
+          <div aria-live="polite" className="space-y-2">
             <p className="text-xs font-serif-th font-semibold text-gold-ink">
-              {isEnglish ? `${nameOf(chosen.sign)} · today` : `${nameOf(chosen.sign)} · วันนี้`}
+              {isEnglish ? "Today's card for your sign" : "ไพ่วันนี้ของราศีคุณ"}
+            </p>
+            <p className="text-base sm:text-lg font-serif-th font-bold text-ink">
+              {chosenOpen ? cardName(chosen) : nameOf(chosen.sign)}
             </p>
             {chosenOpen ? (
               <>
-                <p className="text-lg font-serif-th font-bold text-ink">{cardName(chosen)}</p>
                 <p className="text-xs font-serif-th font-semibold text-muted">
                   {(isEnglish ? chosen.keywordsEn : chosen.keywords).join(" · ")}
                 </p>
@@ -229,35 +234,35 @@ export function ZodiacDaily({ signs, sign }: { signs: ZodiacDailySignName[]; sig
                 </Link>
               </>
             ) : (
-              <p className="text-sm text-muted font-sans">
-                {isEnglish ? "Tap the card to reveal it." : "แตะไพ่เพื่อพลิกดูไพ่ของวันนี้"}
+              <p className="text-sm text-muted font-sans leading-relaxed">
+                {isEnglish ? "Tap the card to reveal today's card." : "แตะไพ่เพื่อพลิกดูไพ่ของวันนี้ เปลี่ยนใบใหม่ทุกเที่ยงคืน"}
               </p>
             )}
           </div>
         </div>
 
         {/* ไพ่ประจำฤดูราศี — ดวงอาทิตย์ย้ายราศีเดือนละครั้ง */}
-        <div className="rounded-2xl border border-line-warm bg-surface-warm p-5 flex items-center gap-4">
+        <div className="altar-panel rounded-2xl p-5 sm:p-6 flex flex-col items-center gap-4 text-center">
           <FlipCard
             card={season.card}
             revealed={seasonOpen}
             onReveal={() => reveal("season")}
             label={isEnglish ? `Card of the ${nameOf(season.tropical)} season` : `ไพ่ประจำฤดู${nameOf(season.tropical)}`}
-            width="w-[84px] shrink-0"
-            sizes="84px"
+            width="w-[120px] sm:w-[130px] shrink-0"
+            sizes="(min-width: 640px) 130px, 120px"
           />
-          <div className="space-y-1">
+          <div className="space-y-2">
             <p className="text-xs font-serif-th font-semibold text-gold-ink">
               {isEnglish ? "This month's season card" : "ไพ่ประจำฤดูราศีเดือนนี้"}
             </p>
-            <p className="text-sm font-serif-th font-bold text-ink">
+            <p className="text-base sm:text-lg font-serif-th font-bold text-ink">
               {seasonOpen
                 ? cardName(season.card)
                 : isEnglish
                   ? `Sun in ${nameOf(season.tropical)} · ${nameOf(season.thai)} (Thai)`
                   : `ดวงอาทิตย์อยู่${nameOf(season.tropical)} · ${nameOf(season.thai)} (ไทย)`}
             </p>
-            <p className="text-[12px] text-muted font-sans leading-relaxed">
+            <p className="text-sm text-muted font-sans leading-relaxed">
               {seasonOpen
                 ? message(season.card)
                 : isEnglish
