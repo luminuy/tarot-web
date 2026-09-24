@@ -2096,3 +2096,92 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
   white-space: nowrap;
   border: 0;
 }
+
+/* ═════════════════════════════════════════════════════════════════════════
+   หน้าแรกแบบ Apple — แถบสีแบ่งส่วน + สไลด์ปัดบนมือถือ (คำสั่งเจ้าของ 2026-09-24)
+   ─────────────────────────────────────────────────────────────────────────
+   1) `.home-band` — แต่ละส่วนของหน้าแรกเป็นแถบเต็มความกว้างจอ สลับสีพื้นทีละแถบ
+      (แบบ apple.com: ขาว ↔ เทาอ่อน · ของเราคือ ครีมเดิม ↔ งาช้างโปร่ง)
+      วาดสีด้วย ::before กว้าง 100vw จึงไม่ต้องรื้อ max-width / padding ของแต่ละส่วน
+      ⚠️ ห้ามทาสีทึบ — พื้นไล่สีอุ่นของ body ต้องโปร่งทะลุได้ (ดูคอมเมนต์ใน TarotFlow)
+      ⚠️ ห้าม backdrop-filter (INC-0056)
+   2) `.home-rail` — บนมือถือ (< 640px) กริดการ์ดกลายเป็นแถวปัดซ้ายขวา snap ทีละใบ
+      เห็นใบถัดไปโผล่ขอบจอ (บอกว่าปัดได้) · ตั้งแต่ sm ขึ้นไปกลับเป็นกริดเดิมของมันเอง
+      เขียนนอก @layer จึงชนะคลาส `grid` ของ Tailwind ได้โดยไม่ต้อง !important
+      ปุ่มลูกศร (`.home-rail-btn`) ทำงานด้วย `astro/scripts/home-rails.ts`
+   ═════════════════════════════════════════════════════════════════════════ */
+.home-band {
+  position: relative;
+  isolation: isolate;
+  padding-block: 2.75rem;
+}
+@media (min-width: 640px) {
+  .home-band {
+    padding-block: 4rem;
+  }
+}
+.home-band::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset-block: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  background: var(--home-band-bg, transparent);
+  pointer-events: none;
+}
+.home-band-tint {
+  --home-band-bg: rgba(255, 251, 244, 0.62);
+}
+
+@media (max-width: 639.98px) {
+  .home-rail {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 16px;
+    margin-inline: -16px;
+    padding: 6px 16px 18px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .home-rail::-webkit-scrollbar {
+    display: none;
+  }
+  .home-rail > * {
+    flex: 0 0 auto;
+    width: min(80vw, 300px);
+    scroll-snap-align: start;
+  }
+  .home-rail.home-rail-sm > * {
+    width: min(31vw, 124px);
+  }
+}
+@media (max-width: 639.98px) and (prefers-reduced-motion: no-preference) {
+  .home-rail {
+    scroll-behavior: smooth;
+  }
+}
+
+.home-rail-btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  background: rgba(41, 38, 31, 0.08);
+  color: var(--color-ink);
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+  cursor: pointer;
+}
+.home-rail-btn:hover {
+  background: rgba(41, 38, 31, 0.14);
+}
+.home-rail-btn:disabled,
+.home-rail-btn[aria-disabled="true"] {
+  opacity: 0.35;
+  cursor: default;
+}

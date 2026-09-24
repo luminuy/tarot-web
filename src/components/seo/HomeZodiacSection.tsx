@@ -1,5 +1,6 @@
 import { RouteLink as Link } from "@/components/ui/RouteLink";
 import { CardImage } from "@/components/card/CardImage";
+import { HomeRailNav } from "@/components/seo/HomeRailNav";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 import { ZODIAC_SIGNS } from "@/data/zodiac";
 import { ZODIAC_INDEX_PATH, zodiacSignPath } from "@/lib/tarot/zodiac";
@@ -51,7 +52,10 @@ const SUMMARY_BY_ID = new Map(CARD_SUMMARIES.map((card) => [card.id, card]));
 
 export function HomeZodiacSection({ isEnglish, href }: { isEnglish: boolean; href: (path: string) => string }) {
   return (
-    <section aria-labelledby="home-zodiac-title" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-6 sm:space-y-8">
+    <section
+      aria-labelledby="home-zodiac-title"
+      className="home-band home-band-tint max-w-6xl mx-auto px-4 sm:px-6 space-y-6 sm:space-y-8"
+    >
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-line-warm/50">
         <div className="space-y-2">
           <span className="text-gold-ink text-xs font-serif-th tracking-widest uppercase block">TAROT × ASTROLOGY</span>
@@ -91,59 +95,68 @@ export function HomeZodiacSection({ isEnglish, href }: { isEnglish: boolean; hre
             {isEnglish ? "Open the zodiac wheel →" : "เปิดวงล้อจักรราศี →"}
           </Link>
         </div>
-        {/* 6 ใบต่อแถวเหมือนกล่องเมเจอร์ อาร์คานา — 12 ใบแถวเดียวแคบจนชื่อราศี/ชื่อไพ่ขึ้นบรรทัดใหม่ · มือถือ 3 คอลัมน์ (4 คอลัมน์ในกล่องขาวแคบจนชื่อตัดกลางคำ) */}
-        <ul
-          className="grid grid-cols-3 sm:grid-cols-6 gap-2.5 sm:gap-4"
-        >
-          {ZODIAC_SIGNS.map((sign) => {
-            const card = SUMMARY_BY_ID.get(sign.majorCardId);
-            return (
-              <li key={sign.id}>
-                <Link
-                  href={href(zodiacSignPath(sign.id))}
-                  prefetch={false}
-                  className="glass-tile group flex flex-col items-center gap-1.5 p-2 sm:p-4 h-full"
-                >
-                  <div className="glass-tile !rounded-md w-11 sm:w-14 aspect-[2/3] overflow-hidden group-hover:scale-105 transition-transform duration-200">
-                    {/* ภาพประกอบล้วน — ชื่อราศีและชื่อไพ่พิมพ์อยู่ใต้ภาพแล้ว (INC-0125) */}
-                    {card && (
-                      <CardImage image={card.image} alt="" className="w-full h-full object-cover" sizes="(min-width: 640px) 56px, 44px" />
-                    )}
-                  </div>
-                  <span className="text-xs font-serif-th font-bold text-ink text-center leading-tight">
-                    {isEnglish ? sign.nameEn : sign.nameTh}
-                  </span>
-                  {card && <span className="text-[10px] text-muted text-center leading-tight">{card.nameEn}</span>}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        {/* 6 ใบต่อแถวเหมือนกล่องเมเจอร์ อาร์คานา · มือถือเป็นสไลด์ปัด (แบบ apple.com) แทนกริด 4 แถวยาวเหยียด */}
+        <div data-rail>
+          <ul className="home-rail home-rail-sm grid grid-cols-3 sm:grid-cols-6 gap-2.5 sm:gap-4" data-rail-track>
+            {ZODIAC_SIGNS.map((sign) => {
+              const card = SUMMARY_BY_ID.get(sign.majorCardId);
+              return (
+                <li key={sign.id}>
+                  <Link
+                    href={href(zodiacSignPath(sign.id))}
+                    prefetch={false}
+                    className="glass-tile group flex flex-col items-center gap-1.5 p-2 sm:p-4 h-full"
+                  >
+                    <div className="glass-tile !rounded-md w-11 sm:w-14 aspect-[2/3] overflow-hidden group-hover:scale-105 transition-transform duration-200">
+                      {/* ภาพประกอบล้วน — ชื่อราศีและชื่อไพ่พิมพ์อยู่ใต้ภาพแล้ว (INC-0125) */}
+                      {card && (
+                        <CardImage
+                          image={card.image}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          sizes="(min-width: 640px) 56px, 44px"
+                        />
+                      )}
+                    </div>
+                    <span className="text-xs font-serif-th font-bold text-ink text-center leading-tight">
+                      {isEnglish ? sign.nameEn : sign.nameTh}
+                    </span>
+                    {card && <span className="text-[10px] text-muted text-center leading-tight">{card.nameEn}</span>}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+          <HomeRailNav isEnglish={isEnglish} />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {FEATURES.map((feature) => {
-          const copy = isEnglish ? feature.en : feature.th;
-          return (
-            <Link
-              key={feature.th.title}
-              href={`${href(feature.path)}${feature.hash}`}
-              prefetch={false}
-              className="altar-card-porcelain p-5 group flex items-center gap-4"
-            >
-              <div className="glass-tile !rounded-lg w-11 aspect-[2/3] overflow-hidden flex-shrink-0">
-                {/* ภาพประกอบล้วน — หัวข้อในลิงก์เดียวกันบอกชื่อแล้ว (INC-0125) */}
-                <CardImage image={feature.image} alt="" className="w-full h-full object-cover" sizes="44px" />
-              </div>
-              <div className="space-y-1 min-w-0">
-                <h3 className="font-serif-th font-bold text-sm sm:text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
-                  {copy.title}
-                </h3>
-                <p className="text-xs font-serif-th text-muted leading-relaxed">{copy.desc}</p>
-              </div>
-            </Link>
-          );
-        })}
+      <div data-rail>
+        <div className="home-rail grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" data-rail-track>
+          {FEATURES.map((feature) => {
+            const copy = isEnglish ? feature.en : feature.th;
+            return (
+              <Link
+                key={feature.th.title}
+                href={`${href(feature.path)}${feature.hash}`}
+                prefetch={false}
+                className="altar-card-porcelain p-5 group flex items-center gap-4"
+              >
+                <div className="glass-tile !rounded-lg w-11 aspect-[2/3] overflow-hidden flex-shrink-0">
+                  {/* ภาพประกอบล้วน — หัวข้อในลิงก์เดียวกันบอกชื่อแล้ว (INC-0125) */}
+                  <CardImage image={feature.image} alt="" className="w-full h-full object-cover" sizes="44px" />
+                </div>
+                <div className="space-y-1 min-w-0">
+                  <h3 className="font-serif-th font-bold text-sm sm:text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
+                    {copy.title}
+                  </h3>
+                  <p className="text-xs font-serif-th text-muted leading-relaxed">{copy.desc}</p>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+        <HomeRailNav isEnglish={isEnglish} />
       </div>
     </section>
   );
