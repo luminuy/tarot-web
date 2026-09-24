@@ -17,6 +17,7 @@ export const EN_TWIN_ROUTES = [
   "/cards",
   "/cards/all",
   "/cards/birth-card",
+  "/cards/zodiac",
   "/cards/major",
   "/cards/minor",
   "/cards/wands",

@@ -341,6 +341,10 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
             <Link href="/cards/birth-card" className="text-gold-ink hover:underline font-bold">
               {isEnglish ? "Birth Card Tool" : "คำนวณไพ่ประจำตัว"}
             </Link>
+            <span className="text-line" aria-hidden="true">·</span>
+            <Link href="/cards/zodiac" className="text-gold-ink hover:underline font-bold">
+              {isEnglish ? "Zodiac Cards" : "ไพ่ประจำราศี"}
+            </Link>
           </div>
         </div>
       </div>

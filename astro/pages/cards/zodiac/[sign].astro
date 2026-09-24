@@ -1,0 +1,23 @@
+---
+import { zodiacSignMetadata, zodiacStaticParams } from "@/app/_shared/pages/zodiac";
+import { getZodiacSign } from "@/data/zodiac";
+
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { ZodiacSignBodyRoot } from "../../../components/PageBodies";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
+
+/** ✦ ไพ่ประจำราศีรายราศี 12 หน้า (ต้นไม้ภาษาไทย) */
+const locale = "th" as const;
+
+export function getStaticPaths() {
+  return zodiacStaticParams().map(({ sign }) => ({ params: { sign } }));
+}
+
+const sign = getZodiacSign(Astro.params.sign!)!;
+---
+
+<BaseLayout locale={locale} metadata={zodiacSignMetadata(sign.id, locale)}>
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <ZodiacSignBodyRoot sign={sign} locale={locale} />
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>

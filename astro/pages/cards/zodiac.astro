@@ -1,0 +1,21 @@
+---
+import { zodiacIndexMetadata, ZODIAC_FINDER_ITEMS } from "@/app/_shared/pages/zodiac";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { ZodiacIndexBodyRoot } from "../../components/PageBodies";
+import { ZodiacFinderRoot } from "../../islands/ZodiacFinderRoot";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+
+/** ✦ ไพ่ประจำราศี 12 ราศี — หน้ารวม + เครื่องหาราศีจากวันเกิด (ต้นไม้ภาษาไทย) */
+const locale = "th" as const;
+---
+
+<BaseLayout locale={locale} metadata={zodiacIndexMetadata(locale)}>
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <ZodiacIndexBodyRoot locale={locale}>
+    <Fragment slot="finder">
+      <ZodiacFinderRoot signs={ZODIAC_FINDER_ITEMS} locale={locale} client:idle />
+    </Fragment>
+  </ZodiacIndexBodyRoot>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>
