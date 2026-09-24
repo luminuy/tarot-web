@@ -5,6 +5,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { HeaderAccount } from "@/components/layout/HeaderAccount";
 import { useLocale } from "@/lib/i18n";
 
 export interface SiteHeaderProps {
@@ -148,7 +149,8 @@ export function SiteHeader({
             {/* Right Toolbar, Language Switcher & Navigation */}
             <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
               <LanguageSwitcher />
-              {toolbar}
+              {/* ไม่มีใครส่ง toolbar มา (หน้าเนื้อหาทั่วไป) ➔ ใส่ปุ่มบัญชีให้เอง หัวเว็บทุกหน้าจะได้เหมือนหน้าแรก */}
+              {toolbar ?? <HeaderAccount />}
               {nav ?? <SacredNavDropdown />}
             </div>
           </div>

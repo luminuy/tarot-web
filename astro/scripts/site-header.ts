@@ -16,6 +16,7 @@
 
 import { hasEnglishTwin, stripLocalePrefix } from "@/lib/i18n/paths";
 import { LOCALE_COOKIE_KEY } from "@/lib/i18n/types";
+import { hasSessionHint } from "@/lib/auth/session-hint";
 
 const FOCUSABLE_SELECTOR =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -187,6 +188,17 @@ function installHeaderHeightObserver(): void {
   observer.observe(header);
 }
 
+/**
+ * 5. จุดทอง "ล็อกอินอยู่" บนปุ่มบัญชี (`HeaderAccount`) — อ่านจากคุกกี้ใบ้ของเซสชันเท่านั้น
+ *    ไม่ยิง `/api/auth/me` (หน้าเนื้อหาไม่ต้องรู้ว่าใคร แค่รู้ว่ามีเซสชัน) · ตรงกับจุดทองของ `UserProfileBadge`
+ */
+function installAccountDot(): void {
+  const dot = document.querySelector<HTMLElement>("[data-header-account-dot]");
+  if (!dot || ownedByIsland(dot)) return;
+  if (hasSessionHint()) dot.hidden = false;
+}
+
 installNavDrawer();
 installLanguageSwitcher();
 installHeaderHeightObserver();
+installAccountDot();

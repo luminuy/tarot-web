@@ -95,52 +95,77 @@ export function AccessDialog({
       description={<span className="font-serif-th leading-relaxed">{copy.body}</span>}
     >
       <div className="space-y-6 text-ink-deep">
-        {/* ป้ายบอกว่าหน้าต่างนี้เปิดขึ้นเพราะอะไร */}
-        <span className="glass-chip inline-flex items-center gap-1.5 px-3 py-1 font-mono text-[13px] uppercase tracking-[0.18em] text-gold-ink">
-          {showCredits ? (
-            <HourglassIcon className="h-3.5 w-3.5" />
-          ) : reason === "explore" ? (
-            <SparkSealIcon className="h-3.5 w-3.5" />
-          ) : (
-            <SealedLockIcon className="h-3.5 w-3.5" />
-          )}
-          {copy.eyebrow}
-        </span>
+        {/* ป้ายบอกว่าหน้าต่างนี้เปิดขึ้นเพราะอะไร — โควตาหมดไม่ต้องมี กล่องนาฬิกาทรายข้างล่างบอกเองแล้ว */}
+        {reason !== "daily_exhausted" && (
+          <span className="glass-chip inline-flex items-center gap-1.5 px-3 py-1 font-serif-th text-xs font-semibold text-gold-ink">
+            {showCredits ? (
+              <HourglassIcon className="h-3.5 w-3.5" />
+            ) : reason === "explore" ? (
+              <SparkSealIcon className="h-3.5 w-3.5" />
+            ) : (
+              <SealedLockIcon className="h-3.5 w-3.5" />
+            )}
+            {copy.eyebrow}
+          </span>
+        )}
 
         {/* ── สถานะสิทธิ์ปัจจุบัน ─────────────────────────────────── */}
-        {view && (
-          <div className="altar-card-porcelain !rounded-lg p-4 sm:p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="space-y-1">
-                <span className="block font-mono text-[13px] uppercase tracking-[0.16em] text-muted">
-                  {isEn ? "Current Status" : "สถานะตอนนี้"}
-                </span>
-                <span className="block font-serif-th text-sm font-bold text-ink-deep">{view.statusLine}</span>
-              </div>
-              <QuotaPips remaining={view.remaining} limit={view.limit} tone={view.tone} />
-            </div>
-
-            {!isGuest && (
-              <div className="mt-3 flex items-center gap-2 border-t border-line-warm/30 pt-3 font-serif-th text-xs text-muted">
-                <HourglassIcon className="h-3.5 w-3.5 shrink-0 text-gold-ink" />
-                <span>
-                  {isEn
-                    ? `New daily readings arrive${countdown ? ` in ${countdown}` : ""} · Resets ${resetClockLabel(true)}`
-                    : `โควตาฟรีชุดใหม่มาถึง${countdown ? ` ${countdown}` : ""} · รีเซ็ต${resetClockLabel(false)}`}
-                </span>
-              </div>
-            )}
+        {reason === "daily_exhausted" ? (
+          /* โควตาวันนี้หมด: บอกเรื่องเดียวที่ผู้ใช้อยากรู้ — "อีกนานไหม"
+             ไม่โชว์บรรทัด "วันนี้เหลือ X จาก Y" ซ้ำ เพราะถ้าข้อมูลสิทธิ์ยังไม่อัปเดต
+             จะขัดกับหัวเรื่องตรง ๆ (เจ้าของเจอ "วันนี้เหลือ 1 จาก 1 ครั้ง" ใต้หัว "เปิดครบแล้ว") */
+          <div className="altar-panel !rounded-2xl p-5 sm:p-6 text-center space-y-1.5">
+            <span className="glass-tile mx-auto mb-2 flex h-11 w-11 items-center justify-center !rounded-full text-gold-ink">
+              <HourglassIcon className="h-5 w-5" />
+            </span>
+            <p className="font-serif-th text-xs text-muted">
+              {isEn ? "Your free reading returns" : "สิทธิ์ฟรีรอบใหม่มาถึง"}
+            </p>
+            <p className="font-serif-th text-2xl font-bold text-ink-deep">
+              {countdown || (isEn ? "after midnight" : "หลังเที่ยงคืน")}
+            </p>
+            <p className="font-serif-th text-xs text-muted">
+              {isEn ? `Resets every day at ${resetClockLabel(true)}` : `รีเซ็ตทุกวันตอน${resetClockLabel(false)}`}
+            </p>
           </div>
+        ) : (
+          view && (
+            <div className="altar-panel !rounded-2xl p-4 sm:p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <span className="block font-serif-th text-xs text-muted">
+                    {isEn ? "Current status" : "สถานะตอนนี้"}
+                  </span>
+                  <span className="block font-serif-th text-sm font-bold text-ink-deep">{view.statusLine}</span>
+                </div>
+                <QuotaPips remaining={view.remaining} limit={view.limit} tone={view.tone} />
+              </div>
+
+              {!isGuest && (
+                <div className="mt-3 flex items-center gap-2 border-t border-line-warm/30 pt-3 font-serif-th text-xs text-muted">
+                  <HourglassIcon className="h-3.5 w-3.5 shrink-0 text-gold-ink" />
+                  <span>
+                    {isEn
+                      ? `New daily readings arrive${countdown ? ` ${countdown}` : ""} · Resets ${resetClockLabel(true)}`
+                      : `สิทธิ์ฟรีชุดใหม่มาถึง${countdown ? ` ${countdown}` : ""} · รีเซ็ต${resetClockLabel(false)}`}
+                  </span>
+                </div>
+              )}
+            </div>
+          )
         )}
 
         {/* ── สิ่งที่ได้เพิ่ม ─────────────────────────────────────── */}
         {!showCredits && (
           <section className="space-y-3">
             <h3 className="font-serif-th text-sm font-bold text-ink-deep">
-              
               {view?.isMember
-                ? (isEn ? "Your Active Member Benefits" : "สิทธิประโยชน์ที่คุณได้รับ (สมาชิกทั่วไป)")
-                : (isEn ? "Benefits of Creating a Free Account" : "สมัครสมาชิกฟรีแล้วได้อะไรบ้าง")}
+                ? isEn
+                  ? "Your Active Member Benefits"
+                  : "สิทธิประโยชน์ที่คุณได้รับ (สมาชิกทั่วไป)"
+                : isEn
+                  ? "Benefits of Creating a Free Account"
+                  : "สมัครสมาชิกฟรีแล้วได้อะไรบ้าง"}
             </h3>
             <ul className="grid gap-2.5 sm:grid-cols-2">
               {memberBenefits.map((b) => (
@@ -159,28 +184,29 @@ export function AccessDialog({
         )}
 
         {/* ── ทางเลือกเมื่อโควตาวันนี้หมด ─────────────────────────── */}
+        {/* สองกล่องขนาดเท่ากัน โครงเดียวกัน — ทางที่จ่ายเงินแค่มีขอบทองบอกว่าใช้ได้ทันที ไม่ตะโกนใส่ */}
         {showCredits && (
           <section className="grid gap-3 sm:grid-cols-2">
-            <div className="glass-tile !rounded-lg p-4">
-              <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-ink-deep">
+            <div className="glass-tile !rounded-2xl p-4 space-y-1.5">
+              <span className="flex items-center gap-2 font-serif-th text-sm font-bold text-ink-deep">
                 <HourglassIcon className="h-4 w-4 text-gold-ink" />
-                {isEn ? "Wait for Free Daily Renewal" : "รอโควตาฟรีรอบใหม่"}
+                {isEn ? "Wait for tomorrow" : "รอสิทธิ์ฟรีพรุ่งนี้"}
               </span>
               <p className="font-serif-th text-[13px] leading-relaxed text-muted">
                 {isEn
-                  ? `Completely free. Return after midnight for ${DAILY_LIMIT} fresh ${READINGS_EN}${countdown ? ` (${countdown})` : ""}.`
-                  : `ไม่ต้องจ่ายอะไร กลับมาหลังเที่ยงคืนแล้วเปิดไพ่ได้อีก ${DAILY_LIMIT} ครั้ง${countdown ? ` (${countdown})` : ""}`}
+                  ? `Free. Come back after midnight and draw ${DAILY_LIMIT} more ${READINGS_EN}.`
+                  : `ไม่มีค่าใช้จ่าย กลับมาหลังเที่ยงคืน เปิดไพ่ได้อีก ${DAILY_LIMIT} ครั้ง`}
               </p>
             </div>
-            <div className="altar-card-porcelain !rounded-lg p-4">
-              <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-gold-ink">
+            <div className="glass-tile !rounded-2xl p-4 space-y-1.5 ring-1 ring-gold/60">
+              <span className="flex items-center gap-2 font-serif-th text-sm font-bold text-gold-ink">
                 <CoinSealIcon className="h-4 w-4" />
-                {isEn ? "Sacred Tokens (Continue Now)" : "ญาณพยากรณ์พิเศษ (ใช้ต่อได้ทันที)"}
+                {isEn ? "Top up, continue now" : "เติมรอบ ใช้ต่อได้ทันที"}
               </span>
               <p className="font-serif-th text-[13px] leading-relaxed text-ink-deep">
                 {isEn
-                  ? `One-time purchase starting at ${CHEAPEST_PACKAGE_THB} THB · Unlock full 10–12 card spreads and unlimited archetypal dialogue. Never expires.`
-                  : `จ่ายครั้งเดียวเริ่มต้น ${CHEAPEST_PACKAGE_THB} บาท · ปลดล็อกผังใหญ่ 10–12 ใบ และคุยถามแม่หมอเจาะลึกได้ไม่จำกัด ไม่มีวันหมดอายุ`}
+                  ? `From ${CHEAPEST_PACKAGE_THB} THB · Big 10–12 card spreads and unlimited follow-up questions`
+                  : `เริ่มต้น ${CHEAPEST_PACKAGE_THB} บาท · เปิดผังใหญ่ 10–12 ใบ และถามแม่หมอต่อได้ไม่จำกัด`}
               </p>
             </div>
           </section>
@@ -247,9 +273,8 @@ export function AccessDialog({
             <button
               type="button"
               onClick={handlePrimary}
-              className="w-full rounded-full bg-gold-ink hover:bg-gold-ink-deep px-6 py-3.5 font-serif-th text-sm font-bold text-surface transition active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+              className="btn-gold-glass w-full px-6 py-3.5 font-serif-th text-sm font-bold active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
             >
-              
               {copy.primaryLabel}
             </button>
           ) : (
@@ -260,9 +285,8 @@ export function AccessDialog({
                 onClose();
                 onBuyCredits();
               }}
-              className="w-full rounded-full bg-gold-ink hover:bg-gold-ink-deep px-6 py-3.5 font-serif-th text-sm font-bold text-surface transition active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+              className="btn-gold-glass w-full px-6 py-3.5 font-serif-th text-sm font-bold active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
             >
-              
               {isEn
                 ? `Unlock Sacred Tokens (From ${CHEAPEST_PACKAGE_THB}.-)`
                 : `ปลดล็อกญาณพยากรณ์พิเศษ (เริ่ม ${CHEAPEST_PACKAGE_THB}.-)`}
@@ -272,14 +296,12 @@ export function AccessDialog({
           <button
             type="button"
             onClick={handleSecondary}
-            className="glass-tile !rounded-lg w-full px-6 py-3 font-serif-th text-xs text-ink-deep font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+            className="glass-chip w-full px-6 py-3 font-serif-th text-sm text-ink-deep font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
           >
             {copy.secondaryLabel}
           </button>
 
-          <p className="pt-1 text-center font-serif-th text-[13px] leading-relaxed text-muted">
-            {copy.reassurance}
-          </p>
+          <p className="pt-1 text-center font-serif-th text-[13px] leading-relaxed text-muted">{copy.reassurance}</p>
 
           <div className="text-center pt-1">
             <button
@@ -290,7 +312,7 @@ export function AccessDialog({
               }}
               className="text-xs text-gold-ink hover:text-gold-ink-deep font-serif-th underline underline-offset-4 cursor-pointer"
             >
-              {isEn ? "Have a redeem code? Click here" : "มีรหัสแลกสิทธิ์ใช่ไหม? กดที่นี่เพื่อแลกรับสิทธิ์"}
+              {isEn ? "Have a redeem code? Enter it here" : "มีรหัสแลกสิทธิ์? ใส่รหัสที่นี่"}
             </button>
           </div>
         </div>

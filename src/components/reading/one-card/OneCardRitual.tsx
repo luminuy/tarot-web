@@ -247,11 +247,6 @@ export function OneCardRitual({
                     : drawButtonText || (isEn ? "Draw 1 Card" : "เปิดไพ่ 1 ใบ")}
                 </span>
               </button>
-              <p className="text-xs text-muted">
-                {isEn
-                  ? "Cryptographic Web Crypto API randomness · Provably Fair"
-                  : "ระบบสุ่มรหัสลับ Web Crypto API ปราศจากการล็อกผล 100%"}
-              </p>
             </div>
           </div>
         )}

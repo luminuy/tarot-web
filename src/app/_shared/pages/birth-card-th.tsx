@@ -173,7 +173,8 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
         />
 
         {/* Interactive Calculator Component */}
-        {calculator}
+        {/* ห่อ div — <astro-island> เป็น display:contents จึงไม่รับระยะจาก space-y */}
+        <div>{calculator}</div>
 
         {/* Editorial Guide Article */}
         <SeoArticleShell
