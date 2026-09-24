@@ -70,6 +70,8 @@ export const STORAGE_KEYS = {
   analyticsConsent: "seertarot_analytics_consent_v1",
   /** ภาษาที่ผู้ใช้เลือก (ใช้ชื่อเดียวกับคุกกี้โดยตั้งใจ) */
   locale: "seertarot_lang",
+  /** ✦ ราศีของฉันที่บันทึกจากหน้าไพ่ประจำราศี — ส่งไปให้แม่หมอเป็นบริบทตอนเปิดไพ่ */
+  mySign: "tarot_my_zodiac_v1",
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

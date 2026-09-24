@@ -14,6 +14,7 @@ import {
   thaiRanges,
   zodiacSignPath,
 } from "@/lib/tarot/zodiac";
+import { clearMySign, saveMySign } from "@/lib/zodiac/my-sign";
 
 /**
  * ✦ ข้อมูลราศีแบบย่อที่ island ต้องใช้จริงเท่านั้น
@@ -46,6 +47,8 @@ export function ZodiacFinder({ signs }: { signs: ZodiacFinderItem[] }) {
   const [day, setDay] = useState(1);
   const [month, setMonth] = useState(1);
   const [submitted, setSubmitted] = useState<{ day: number; month: number } | null>(null);
+  /** "saved" = บันทึกราศีให้แม่หมอแล้ว · "failed" = เบราว์เซอร์ไม่ยอมให้เก็บ (โหมดส่วนตัว) */
+  const [memory, setMemory] = useState<"idle" | "saved" | "failed" | "cleared">("idle");
 
   const result = submitted ? findZodiacByDate(signs, submitted.month, submitted.day) : undefined;
   const range = result ? decanRanges(signs).get(result.sign.id)?.[result.decanIndex] : undefined;
@@ -59,6 +62,7 @@ export function ZodiacFinder({ signs }: { signs: ZodiacFinderItem[] }) {
     e.preventDefault();
     if (!isValidMonthDay(month, day)) return;
     setSubmitted({ day, month });
+    setMemory("idle");
   };
 
   return (
@@ -182,6 +186,63 @@ export function ZodiacFinder({ signs }: { signs: ZodiacFinderItem[] }) {
                   ? "Tarot was designed with the western zodiac, while Thai astrology follows the actual stars, about 24 days later. Read both cards and notice which one feels more like you."
                   : "ไพ่ทาโรต์ออกแบบคู่กับราศีสากล ส่วนโหราศาสตร์ไทยนับตามตำแหน่งดาวจริงซึ่งช้ากว่าราว 24 วัน ลองอ่านทั้งสองใบ แล้วดูว่าใบไหนตรงกับตัวคุณมากกว่า"}
             </p>
+            {/* ✦ ให้แม่หมอจำราศีไว้ — ส่งไปเป็นบริบทตอนเปิดไพ่ครั้งถัดไป (เก็บในเบราว์เซอร์นี้เท่านั้น) */}
+            <div className="rounded-xl bg-surface-warm border border-line-warm p-4 space-y-2 text-center">
+              {memory === "saved" ? (
+                <>
+                  <p className="text-sm font-serif-th font-bold text-ink">
+                    {isEnglish ? "Saved. The oracle will know your sign next time." : "บันทึกแล้ว แม่หมอจะรู้ราศีของคุณตอนเปิดไพ่ครั้งถัดไป"}
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-3 text-xs font-serif-th">
+                    <Link href="/" className="text-gold-ink font-bold hover:underline">
+                      {isEnglish ? "Start a reading" : "ไปเปิดไพ่เลย"}
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        clearMySign();
+                        setMemory("cleared");
+                      }}
+                      className="tap-overlay-y text-muted hover:text-ink underline cursor-pointer"
+                    >
+                      {isEnglish ? "Forget my sign" : "ลบราศีที่บันทึกไว้"}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-xs text-muted font-sans">
+                    {memory === "failed"
+                      ? isEnglish
+                        ? "This browser does not allow saving (private mode?). Readings still work as usual."
+                        : "เบราว์เซอร์นี้ไม่ให้บันทึก (อาจเป็นโหมดส่วนตัว) เปิดไพ่ได้ตามปกติ แค่แม่หมอจะไม่รู้ราศี"
+                      : memory === "cleared"
+                        ? isEnglish
+                          ? "Your saved sign has been removed."
+                          : "ลบราศีที่บันทึกไว้แล้ว"
+                        : isEnglish
+                          ? "Want the oracle to notice when your own cards appear in a reading?"
+                          : "อยากให้แม่หมอทักเมื่อไพ่ประจำราศีของคุณโผล่ในผังไหม?"}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setMemory(
+                        saveMySign({ tropical: result.sign.id, thai: thaiSign.id, decan: result.decanIndex }) ? "saved" : "failed",
+                      )
+                    }
+                    className="tap-overlay-y glass-chip px-4 py-2 text-xs sm:text-sm font-serif-th font-bold text-ink hover:text-gold-ink transition-colors cursor-pointer"
+                  >
+                    {isEnglish ? "Remember my sign for readings" : "ให้แม่หมอจำราศีของฉัน"}
+                  </button>
+                  <p className="text-[12px] text-muted font-sans">
+                    {isEnglish
+                      ? "Stored only in this browser. Your birthday itself is not sent."
+                      : "เก็บไว้ในเบราว์เซอร์นี้เท่านั้น ไม่ได้ส่งวันเกิดของคุณไปไหน ส่งแค่ชื่อราศี"}
+                  </p>
+                </>
+              )}
+            </div>
             <Link
               href={`/cards/${decanCard.id}`}
               className="group flex items-center gap-4 rounded-xl border border-line-warm p-3 hover:border-gold-ink transition-colors"

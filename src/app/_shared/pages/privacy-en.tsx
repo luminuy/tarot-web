@@ -66,6 +66,11 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
               <strong>Preferred Nickname</strong> — Used strictly to address you warmly during your reading sessions.
             </li>
             <li>
+              <strong>Your zodiac sign (optional)</strong> — When you press &quot;Remember my sign for readings&quot; on the
+              zodiac cards page, we store only the sign name in your browser and send it with reading requests so the oracle
+              can notice your own cards. Your birthday is never sent or stored, and you can remove the sign on the same page.
+            </li>
+            <li>
               <strong>Inquiries &amp; Drawn Cards</strong> — Your submitted questions, selected spreads, and drawn tarot
               cards are processed in real time to generate algorithmic interpretations and preserve your journal history.
             </li>

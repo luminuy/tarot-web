@@ -227,6 +227,24 @@ async function main() {
   check("ผัง 10 ใบ → reading กระชับ 2-3 ประโยค", msg10.includes("2-3 ประโยค คมชัดตรงแก่น"));
   check("ผัง 3 ใบ ใช้โหมดกลาง (3-4 ประโยค)", msg3.includes("3-4 ประโยค"));
 
+  // 5b. ✦ ราศีของผู้ถาม — ไม่ส่งมาต้องไม่แตะ prompt เลย (ผลวัด ai:judge ของเวอร์ชันนี้ยังใช้ได้)
+  const zBase = ctxFor("celtic-cross"); // ไพ่ major-00..09 → มี Strength (ราศีสิงห์) แต่ไม่มี The Sun / The Tower
+  const noZodiac = buildReadingMessage(zBase);
+  const leo = buildReadingMessage({ ...zBase, zodiac: { tropical: "leo", thai: "cancer", decan: 2 } });
+  check("ไม่ส่งราศี → ไม่มีบล็อก <zodiac>", !noZodiac.includes("<zodiac>"));
+  check(
+    "ส่งราศี → ต่างจากเดิมแค่บล็อก <zodiac> (ส่วนอื่นเหมือนเดิมทุกตัวอักษร)",
+    leo.replace(/\n  <zodiac>[\s\S]*?<\/zodiac>/, "") === noZodiac,
+  );
+  check("ราศีสิงห์ + เปิดได้ Strength → บอกโมเดลว่าเป็นไพ่ประจำราศีของผู้ถาม", /Strength\) ที่เปิดได้ คือไพ่ประจำราศีสิงห์/.test(leo));
+  check("ราศีไทยกรกฎ + เปิดได้ The Chariot / The High Priestess → ทักทั้งคู่", leo.includes("ไพ่ประจำราศีกรกฎ") && leo.includes("เจ้าเรือนราศีไทย"));
+  check("ไม่มีไพ่ The Sun ในผัง → ห้ามอ้างถึงดาวผู้ครอง", !leo.includes("ดาวผู้ครองราศีสิงห์"));
+  const capri = buildReadingMessage({ ...ctxFor("three-card"), zodiac: { tropical: "capricorn" } }); // The Devil · The World · 2–4 เหรียญ ไม่อยู่ใน major-00..02
+  check("ราศีที่ไม่มีไพ่ในผังเลย → สั่งห้ามอ้างว่าไพ่ใดเป็นของราศีผู้ถาม", capri.includes("ไม่มีไพ่ใบไหนเป็นไพ่ประจำราศีของผู้ถาม"));
+  check("ราศีไม่ถูกต้อง → ไม่มีบล็อก", !buildReadingMessage({ ...zBase, zodiac: { tropical: "xyz" } }).includes("<zodiac>"));
+  const leoEn = buildReadingMessage({ ...zBase, lang: "en", zodiac: { tropical: "leo" } });
+  check("ภาษาอังกฤษ → บล็อกเป็นอังกฤษล้วน", /<zodiac>[^\u0E00-\u0E7F]*<\/zodiac>/.test(leoEn) && leoEn.includes("the card of Leo"));
+
   // 6. โครงสร้าง prompt ครบ
   for (const [label, msg, n] of [
     ["1 ใบ", msg1, 1],

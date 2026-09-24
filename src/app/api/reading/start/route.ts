@@ -10,6 +10,7 @@ import { saveReading, persistReading } from "@/server/store";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
 import { looksLikePromptInjection } from "@/lib/ai/prompt-guard";
+import { ZODIAC_IDS } from "@/lib/ai/zodiac-context";
 import { recordEvent, recordEvents } from "@/lib/stats/record";
 import { DAILY_LIMIT, GUEST_BLOCK_REASON, REQUIRE_SIGNUP_TO_READ, isStandardSpread, isMasterPersona } from "@/lib/entitlement/limits";
 import { SIGN_IN_GATE_REASON, getSignInGateMessage, isSignInRequired } from "@/lib/entitlement/signin-gate";
@@ -45,6 +46,19 @@ const BodySchema = z.object({
   // ผูกไว้กับ record ตั้งแต่ /start เพื่อให้ตรึงก่อนการจั่วทุกกรณี และกันกรณีที่คำขอ
   // /shuffle สองอันมาพร้อมกันแล้วได้เมล็ดคนละตัวจนจั่วได้ไพ่คนละชุด
   clientSeed: z.string().min(1).max(4096).optional(),
+  /*
+   * ✦ ราศีที่ผู้ใช้บอกไว้ในหน้าไพ่ประจำราศี (ไม่บังคับ) — รับเฉพาะ slug ราศีที่มีจริง
+   * เป็นแค่บริบทให้แม่หมอ ไม่มีผลกับการจั่วไพ่เลย (ไม่แตะ seed · ไม่แตะ derivation)
+   */
+  zodiac: z
+    .object({
+      tropical: z.enum(ZODIAC_IDS),
+      thai: z.enum(ZODIAC_IDS).optional(),
+      decan: z.number().int().min(0).max(2).optional(),
+    })
+    .optional()
+    // ค่าเสียจาก storage ของเบราว์เซอร์ต้องไม่ทำให้ผู้ใช้เปิดไพ่ไม่ได้ — ทิ้งราศีแล้วไปต่อ
+    .catch(undefined),
   intake: z
     .object({
       situation: noInjection("สถานการณ์").max(500).optional(),
@@ -320,6 +334,7 @@ export async function POST(request: Request) {
     serverSeed,
     clientSeed: parsed.data.clientSeed ? normalizeClientSeed(parsed.data.clientSeed) : undefined,
     derivation,
+    zodiac: parsed.data.zodiac,
     createdAt: Date.now(),
   };
 

@@ -353,6 +353,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           cards: resolvedCards as import("@/data/cards").TarotCard[],
           safety: { flag: record.safetyFlag, block: false, promptGuard: record.safetyGuard },
           pastReading,
+          zodiac: record.zodiac,
           lang: record.lang || "th",
           // ผู้ใช้ปิดแท็บ → ยกเลิกคำขอไปยังผู้ให้บริการทันที ไม่จ่ายค่าโทเคนให้คำอ่านที่ไม่มีใครเห็น (T-06)
           abortSignal: clientAbort.signal,
