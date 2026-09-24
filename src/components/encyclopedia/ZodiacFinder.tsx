@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CardImage } from "@/components/card/CardImage";
 import { useLocale } from "@/lib/i18n";
@@ -14,7 +14,7 @@ import {
   thaiRanges,
   zodiacSignPath,
 } from "@/lib/tarot/zodiac";
-import { clearMySign, saveMySign } from "@/lib/zodiac/my-sign";
+import { announceSign, clearMySign, readMySign, saveMySign, type MySign } from "@/lib/zodiac/my-sign";
 
 /**
  * ✦ ข้อมูลราศีแบบย่อที่ island ต้องใช้จริงเท่านั้น
@@ -42,6 +42,29 @@ const MONTHS_TH = ["มกราคม", "กุมภาพันธ์", "ม�
 const MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const DAYS_IN_MONTH = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
+/**
+ * ตำแหน่งบนวงล้อ (%) — เริ่มที่เมษ (ขวาของจุดบนสุด) แล้ววนตามเข็มนาฬิกา
+ *
+ * ⚠️ ทำไมเป็นวงรีในกล่อง 4:5 และเยื้องมุมครึ่งช่อง (15°) — วัดจากจอจริง 390px:
+ *   วงกลมในกล่องจัตุรัสทำให้ไพ่ด้านซ้าย/ขวา (ที่วางซ้อนกันแนวตั้ง) ทับกันและทับชื่อราศี
+ *   ระยะห่างแนวตั้งของคู่ด้านข้าง = 2·sin15°·Ry ต้อง ≥ สูงไพ่ + ชื่อ (~81px ที่ 390px · ~121px ที่ 560px)
+ *   Ry = 39% ของความสูง (5/4 ของกว้าง) ให้ 90px / 142px · คู่แนวทแยงห่างแนวนอน ≥ ความกว้างไพ่ 11%
+ *   ถ้าจะขยายไพ่หรือหดกล่อง ต้องคิดสองค่านี้ใหม่ ไม่งั้นไพ่ด้านข้างกลับมาทับกัน
+ */
+function wheelPoint(index: number): { left: string; top: string } {
+  const angle = ((index + 0.5) / 12) * Math.PI * 2 - Math.PI / 2;
+  return { left: `${50 + Math.cos(angle) * 39}%`, top: `${50 + Math.sin(angle) * 39}%` };
+}
+
+/**
+ * ✦ วงล้อจักรราศี + ช่องใส่วันเกิดกลางวง (หัวหน้า `/cards/zodiac`)
+ *
+ * - ไพ่ประจำ 12 ราศีเป็นลิงก์ไปหน้าราศี (อยู่ใน HTML ตั้งแต่เรนเดอร์ฝั่งเซิร์ฟเวอร์ บอทเห็นครบ)
+ * - หาเจอแล้ว ➔ ไฮไลต์ราศีสากล (วงทองทึบ) + ราศีไทย (วงประ) บนวงล้อ แล้วโชว์ผลใต้วง
+ *   และประกาศให้ island ดวงวันนี้/ความเข้ากันสลับไปราศีเดียวกัน (`announceSign`)
+ * - ฤดูราศีตอนนี้ (ดวงอาทิตย์อยู่ราศีไหน) คิดจากปฏิทินในเครื่อง — เป็นแค่วันที่ ไม่ใช่การจั่วไพ่
+ * - มือถือ: ช่องใส่วันเกิดอยู่ใต้วงล้อ · จอ `sm:` ขึ้นไป: อยู่กลางวง
+ */
 export function ZodiacFinder({ signs }: { signs: ZodiacFinderItem[] }) {
   const { isEnglish } = useLocale();
   const [day, setDay] = useState(1);
@@ -49,6 +72,15 @@ export function ZodiacFinder({ signs }: { signs: ZodiacFinderItem[] }) {
   const [submitted, setSubmitted] = useState<{ day: number; month: number } | null>(null);
   /** "saved" = บันทึกราศีให้แม่หมอแล้ว · "failed" = เบราว์เซอร์ไม่ยอมให้เก็บ (โหมดส่วนตัว) */
   const [memory, setMemory] = useState<"idle" | "saved" | "failed" | "cleared">("idle");
+  /** ราศีที่ผู้ใช้เคยบันทึกไว้ — อ่านหลัง hydrate เท่านั้น (ฝั่งเซิร์ฟเวอร์ไม่มี storage) */
+  const [saved, setSaved] = useState<MySign | undefined>(undefined);
+  const [seasonId, setSeasonId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    setSaved(readMySign());
+    const now = new Date();
+    setSeasonId(findZodiacByDate(signs, now.getMonth() + 1, now.getDate())?.sign.id);
+  }, [signs]);
 
   const result = submitted ? findZodiacByDate(signs, submitted.month, submitted.day) : undefined;
   const range = result ? decanRanges(signs).get(result.sign.id)?.[result.decanIndex] : undefined;
@@ -56,77 +88,140 @@ export function ZodiacFinder({ signs }: { signs: ZodiacFinderItem[] }) {
   const thaiSign = submitted ? findThaiZodiacByDate(signs, submitted.month, submitted.day) : undefined;
   const thaiRange = thaiSign ? thaiRanges(signs).get(thaiSign.id) : undefined;
   const signName = (x: ZodiacFinderItem) => (isEnglish ? x.nameEn : x.nameTh);
+  const shortName = (x: ZodiacFinderItem) => (isEnglish ? x.nameEn : x.nameTh.replace("ราศี", ""));
   const cardName = (c: ZodiacFinderCard) => (isEnglish ? c.nameEn : `${c.nameTh} (${c.nameEn})`);
+
+  /* วงล้อไฮไลต์ผลที่เพิ่งหา ถ้ายังไม่หา ใช้ราศีที่บันทึกไว้ */
+  const markTropical = result?.sign.id ?? saved?.tropical;
+  const markThai = thaiSign?.id ?? saved?.thai;
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isValidMonthDay(month, day)) return;
     setSubmitted({ day, month });
     setMemory("idle");
+    const found = findZodiacByDate(signs, month, day);
+    const foundThai = findThaiZodiacByDate(signs, month, day);
+    if (found) announceSign({ tropical: found.sign.id, thai: foundThai?.id, decan: found.decanIndex });
   };
 
+  const selectClass =
+    "glass-field w-full rounded-xl border border-line-interactive-warm px-3 py-2.5 text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors";
+
   return (
-    <section className="altar-panel rounded-2xl p-6 sm:p-8 max-w-2xl mx-auto space-y-6" aria-labelledby="zodiac-finder-title">
-      <div className="text-center space-y-1.5">
-        <h2 id="zodiac-finder-title" className="text-lg sm:text-xl font-serif-th font-bold text-ink">
-          {isEnglish ? "Find your zodiac tarot cards" : "หาไพ่ประจำราศีจากวันเกิด"}
-        </h2>
-        <p className="text-xs sm:text-sm text-muted font-sans">
-          {isEnglish
-            ? "Pick your birthday — no birth year needed."
-            : "เลือกวันและเดือนเกิด ไม่ต้องใส่ปี (ใช้ราศีแบบสากล)"}
-        </p>
+    <section aria-labelledby="zodiac-finder-title" className="space-y-6">
+      <div className="relative mx-auto w-full max-w-[560px]">
+        {/* ── วงล้อ ── */}
+        <div className="relative w-full aspect-[4/5]">
+          <div aria-hidden="true" className="absolute inset-[4%] rounded-[50%] border border-line-warm/70 bg-surface/40" />
+          <div aria-hidden="true" className="absolute inset-[22%] rounded-[50%] border border-dashed border-line-warm/60" />
+          <ul className="contents">
+            {signs.map((s, i) => {
+              const isMine = markTropical === s.id;
+              const isThai = markThai === s.id && !isMine;
+              const isSeason = seasonId === s.id;
+              return (
+                <li key={s.id} className="absolute w-[11%] -translate-x-1/2 -translate-y-1/2" style={wheelPoint(i)}>
+                  <Link
+                    href={zodiacSignPath(s.id)}
+                    className="group flex flex-col items-center gap-0.5 text-center"
+                    aria-label={`${signName(s)} · ${s.major.nameEn}${isSeason ? (isEnglish ? " · current sun season" : " · ฤดูราศีตอนนี้") : ""}`}
+                  >
+                    <span
+                      className={`relative block w-full rounded-md transition-transform duration-300 group-hover:-translate-y-0.5 ${
+                        isMine
+                          ? "ring-2 ring-gold-ink ring-offset-2 ring-offset-surface"
+                          : isThai
+                            ? "outline-2 outline-dashed outline-gold-ink outline-offset-2"
+                            : ""
+                      }`}
+                    >
+                      <CardImage
+                        image={s.major.image}
+                        cardId={s.major.id}
+                        alt=""
+                        sizes="(min-width: 640px) 62px, 11vw"
+                        className="w-full aspect-[1/1.7] rounded-md border border-line-warm shadow-xs object-cover"
+                      />
+                      {isSeason && (
+                        <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-gold-ink px-1.5 text-[10px] leading-4 font-bold text-surface whitespace-nowrap">
+                          {isEnglish ? "Now" : "ฤดูนี้"}
+                        </span>
+                      )}
+                    </span>
+                    <span
+                      className={`text-[11px] sm:text-[13px] font-serif-th font-bold leading-tight whitespace-nowrap mt-1 ${
+                        isMine || isThai ? "text-gold-ink" : "text-ink group-hover:text-gold-ink"
+                      }`}
+                    >
+                      {shortName(s)}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        {/* ── ช่องใส่วันเกิด: กลางวง (sm+) / ใต้วง (มือถือ) ── */}
+        <form
+          onSubmit={onSubmit}
+          className="mt-4 space-y-3 sm:mt-0 sm:absolute sm:left-1/2 sm:top-1/2 sm:w-[42%] sm:-translate-x-1/2 sm:-translate-y-1/2"
+        >
+          <div className="text-center space-y-0.5">
+            <h2 id="zodiac-finder-title" className="text-base sm:text-lg font-serif-th font-bold text-ink">
+              {isEnglish ? "When were you born?" : "คุณเกิดวันไหน?"}
+            </h2>
+            <p className="text-[12px] text-muted font-sans">
+              {isEnglish ? "No year needed · western + Thai" : "ไม่ต้องใส่ปี · บอกทั้งราศีสากลและไทย"}
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-1">
+            <label className="block">
+              <span className="sr-only">{isEnglish ? "Day" : "วันที่เกิด"}</span>
+              <select id="zodiac-day" value={day} onChange={(e) => setDay(Number.parseInt(e.target.value, 10))} className={selectClass}>
+                {Array.from({ length: DAYS_IN_MONTH[month - 1] }, (_, i) => i + 1).map((d) => (
+                  <option key={d} value={d}>
+                    {isEnglish ? `Day ${d}` : `วันที่ ${d}`}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="sr-only">{isEnglish ? "Month" : "เดือนเกิด"}</span>
+              <select
+                id="zodiac-month"
+                value={month}
+                onChange={(e) => {
+                  const m = Number.parseInt(e.target.value, 10);
+                  setMonth(m);
+                  // 31 ม.ค. ➔ เปลี่ยนเป็น ก.พ. ต้องไม่ค้างวันที่ที่ไม่มีจริง
+                  setDay((d) => Math.min(d, DAYS_IN_MONTH[m - 1]));
+                }}
+                className={selectClass}
+              >
+                {(isEnglish ? MONTHS_EN : MONTHS_TH).map((name, i) => (
+                  <option key={name} value={i + 1}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <button
+            type="submit"
+            className="btn-gold-glass w-full min-h-[44px] py-2.5 px-4 text-sm font-serif-th font-bold duration-200 cursor-pointer active:scale-95"
+          >
+            {isEnglish ? "Find my cards" : "ดูไพ่ของฉัน"}
+          </button>
+        </form>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <label htmlFor="zodiac-day" className="block text-xs font-serif-th font-semibold text-ink">
-              {isEnglish ? "Day" : "วันที่เกิด"}
-            </label>
-            <select
-              id="zodiac-day"
-              value={day}
-              onChange={(e) => setDay(Number.parseInt(e.target.value, 10))}
-              className="glass-field w-full rounded-xl border border-line-interactive-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
-            >
-              {Array.from({ length: DAYS_IN_MONTH[month - 1] }, (_, i) => i + 1).map((d) => (
-                <option key={d} value={d}>
-                  {isEnglish ? `${d}` : `วันที่ ${d}`}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="space-y-1">
-            <label htmlFor="zodiac-month" className="block text-xs font-serif-th font-semibold text-ink">
-              {isEnglish ? "Month" : "เดือนเกิด"}
-            </label>
-            <select
-              id="zodiac-month"
-              value={month}
-              onChange={(e) => {
-                const m = Number.parseInt(e.target.value, 10);
-                setMonth(m);
-                // 31 ม.ค. ➔ เปลี่ยนเป็น ก.พ. ต้องไม่ค้างวันที่ที่ไม่มีจริง
-                setDay((d) => Math.min(d, DAYS_IN_MONTH[m - 1]));
-              }}
-              className="glass-field w-full rounded-xl border border-line-interactive-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
-            >
-              {(isEnglish ? MONTHS_EN : MONTHS_TH).map((name, i) => (
-                <option key={name} value={i + 1}>
-                  {name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <button
-          type="submit"
-          className="btn-gold-glass w-full py-3 px-6 text-xs sm:text-sm font-serif-th font-bold duration-200 cursor-pointer active:scale-95 tracking-wide"
-        >
-          {isEnglish ? "Show my cards" : "ดูไพ่ประจำราศีของฉัน"}
-        </button>
-      </form>
+      <p className="text-center text-[12px] text-muted font-sans">
+        {isEnglish
+          ? "Gold ring = your western sign · dashed ring = your Thai sign · tap any sign to read more"
+          : "กรอบทอง = ราศีสากลของคุณ · กรอบเส้นประ = ราศีไทย · แตะราศีไหนก็ได้เพื่ออ่านต่อ"}
+      </p>
 
       {/* ผลลัพธ์ — aria-live ให้โปรแกรมอ่านหน้าจอประกาศเมื่อผลเปลี่ยน */}
       <div aria-live="polite">
@@ -136,7 +231,7 @@ export function ZodiacFinder({ signs }: { signs: ZodiacFinderItem[] }) {
           </p>
         )}
         {result && decanCard && thaiSign && (
-          <div className="altar-card-porcelain rounded-xl p-5 sm:p-6 space-y-5 anim-swap-rise">
+          <div className="altar-panel rounded-2xl p-5 sm:p-7 space-y-5 max-w-2xl mx-auto anim-swap-rise">
             <p className="text-center text-xs font-serif-th font-semibold text-gold-ink">
               {isEnglish ? "Your sign in both systems" : "ราศีของคุณทั้งสองระบบ"}
             </p>
@@ -201,6 +296,7 @@ export function ZodiacFinder({ signs }: { signs: ZodiacFinderItem[] }) {
                       type="button"
                       onClick={() => {
                         clearMySign();
+                        setSaved(undefined);
                         setMemory("cleared");
                       }}
                       className="tap-overlay-y text-muted hover:text-ink underline cursor-pointer"
@@ -228,7 +324,9 @@ export function ZodiacFinder({ signs }: { signs: ZodiacFinderItem[] }) {
                     type="button"
                     onClick={() =>
                       setMemory(
-                        saveMySign({ tropical: result.sign.id, thai: thaiSign.id, decan: result.decanIndex }) ? "saved" : "failed",
+                        saveMySign({ tropical: result.sign.id, thai: thaiSign.id, decan: result.decanIndex })
+                          ? (setSaved({ tropical: result.sign.id, thai: thaiSign.id, decan: result.decanIndex }), "saved")
+                          : "failed",
                       )
                     }
                     className="tap-overlay-y glass-chip px-4 py-2 text-xs sm:text-sm font-serif-th font-bold text-ink hover:text-gold-ink transition-colors cursor-pointer"

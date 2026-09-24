@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CardImage } from "@/components/card/CardImage";
 import { useLocale } from "@/lib/i18n";
 import { ZODIAC_ASPECTS, zodiacDistance } from "@/data/zodiac-compat";
 import { zodiacSignPath } from "@/lib/tarot/zodiac";
+import { currentSign, onSignAnnounced } from "@/lib/zodiac/my-sign";
 import type { ZodiacFinderItem } from "@/components/encyclopedia/ZodiacFinder";
 
 /**
@@ -17,6 +18,17 @@ export function ZodiacCompatibility({ signs }: { signs: ZodiacFinderItem[] }) {
   const [a, setA] = useState(0);
   const [b, setB] = useState(4);
   const [shown, setShown] = useState<{ a: number; b: number } | null>(null);
+
+  /* ราศีของคุณ = ราศีที่บันทึกไว้ หรือที่เพิ่งหาเจอบนวงล้อ */
+  useEffect(() => {
+    const indexOf = (id?: string) => signs.findIndex((s) => s.id === id);
+    const savedIdx = indexOf(currentSign()?.tropical);
+    if (savedIdx >= 0) setA(savedIdx);
+    return onSignAnnounced((sign) => {
+      const i = indexOf(sign.tropical);
+      if (i >= 0) setA(i);
+    });
+  }, [signs]);
 
   const signA = shown ? signs[shown.a] : undefined;
   const signB = shown ? signs[shown.b] : undefined;

@@ -6,6 +6,7 @@ import { CardImage } from "@/components/card/CardImage";
 import { useLocale } from "@/lib/i18n";
 import { bangkokDayKey } from "@/lib/time/bangkok";
 import { formatMonthDay, zodiacSignPath } from "@/lib/tarot/zodiac";
+import { currentSign, onSignAnnounced } from "@/lib/zodiac/my-sign";
 import type { ZodiacDaily as ZodiacDailyData, ZodiacDayCard } from "@/lib/tarot/zodiac-daily";
 
 /**
@@ -76,7 +77,14 @@ export function ZodiacDaily({ signs, sign }: { signs: ZodiacDailySignName[]; sig
   const [data, setData] = useState<ZodiacDailyData | null>(null);
   const [failed, setFailed] = useState(false);
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
-  const [focus, setFocus] = useState<string | null>(null);
+  /** ราศีที่เลือกดูในหน้ารวม — ค่าเริ่มต้น: ราศีที่บันทึกไว้ ➔ ราศีของฤดูนี้ */
+  const [pick, setPick] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (sign) return;
+    setPick((p) => p ?? currentSign()?.tropical);
+    return onSignAnnounced((s) => setPick(s.tropical));
+  }, [sign]);
 
   useEffect(() => {
     let alive = true;
@@ -107,7 +115,6 @@ export function ZodiacDaily({ signs, sign }: { signs: ZodiacDailySignName[]; sig
   };
   const reveal = (key: string) => {
     setRevealed((r) => ({ ...r, [key]: true }));
-    setFocus(key);
   };
   const message = (c: ZodiacDayCard) => (isEnglish ? c.messageEn || c.message : c.message);
   const cardName = (c: ZodiacDayCard) => (isEnglish ? c.nameEn : `${c.nameTh} (${c.nameEn})`);
@@ -153,83 +160,112 @@ export function ZodiacDaily({ signs, sign }: { signs: ZodiacDailySignName[]; sig
     );
   }
 
-  /* ── หน้ารวม: ฤดูราศี + ไพ่วันนี้ 12 ราศี ── */
+  /* ── หน้ารวม: เลือกราศี ➔ ไพ่วันนี้ใบเดียว + ไพ่ประจำฤดู ──
+     (เดิมเป็นไพ่คว่ำ 12 ใบเรียงเป็นกำแพง เจ้าของเห็นแล้วว่าอ่านยาก — เหลือใบเดียวของราศีที่เลือก) */
   const season = data.season;
-  const focused = focus === "season" ? season.card : data.signs.find((c) => c.sign === focus);
+  const chosen = data.signs.find((c) => c.sign === (pick ?? season.tropical)) ?? data.signs[0];
+  const chosenOpen = !!revealed[`day:${chosen.sign}`];
+  const seasonOpen = !!revealed.season;
   return (
-    <section aria-labelledby="zodiac-daily-title" className="altar-panel rounded-2xl p-5 sm:p-8 space-y-6">
-      <div className="text-center space-y-1.5">
-        <h2 id="zodiac-daily-title" className="text-lg sm:text-xl font-serif-th font-bold text-ink">
-          {isEnglish ? "Today's tarot for all 12 signs" : "ดวงรายวัน 12 ราศี — ไพ่ประจำวันนี้"}
+    <section aria-labelledby="zodiac-daily-title" className="space-y-5">
+      <div className="text-center space-y-1">
+        <h2 id="zodiac-daily-title" className="text-xl sm:text-2xl font-serif-th font-bold text-ink">
+          {isEnglish ? "Today's card for your sign" : "ดวงรายวัน — ไพ่วันนี้ของราศีคุณ"}
         </h2>
         <p className="text-xs sm:text-sm text-muted font-sans">
           {isEnglish
-            ? "One card per sign, the same for everyone today. Tap your sign's card."
-            : "ราศีละหนึ่งใบ ทุกคนในราศีเดียวกันเห็นใบเดียวกันทั้งวัน แตะไพ่ของราศีคุณเพื่อเปิด"}
+            ? "Pick a sign. Everyone in the same sign sees the same card today."
+            : "เลือกราศี ทุกคนในราศีเดียวกันเห็นไพ่ใบเดียวกันทั้งวัน เปลี่ยนใหม่ทุกเที่ยงคืน"}
         </p>
       </div>
 
-      {/* ฤดูราศี — ดวงอาทิตย์ย้ายราศีเดือนละครั้ง */}
-      <div className="rounded-xl border border-line-warm bg-surface-warm p-4 flex flex-col sm:flex-row items-center gap-4">
-        <FlipCard
-          card={season.card}
-          revealed={!!revealed.season}
-          onReveal={() => reveal("season")}
-          label={isEnglish ? `Card of the ${nameOf(season.tropical)} season` : `ไพ่ประจำฤดู${nameOf(season.tropical)}`}
-          width="w-[92px] shrink-0"
-          sizes="92px"
-        />
-        <div className="space-y-1 text-center sm:text-left">
-          <p className="text-sm font-serif-th font-bold text-ink">
-            {isEnglish
-              ? `The sun is in ${nameOf(season.tropical)} (western) · ${nameOf(season.thai)} (Thai)`
-              : `ตอนนี้ดวงอาทิตย์อยู่${nameOf(season.tropical)} (สากล) · ${nameOf(season.thai)} (ไทย)`}
-          </p>
-          <p className="text-[13px] text-muted font-sans leading-relaxed">
-            {isEnglish
-              ? `Next move: ${nameOf(season.nextTropical.sign)} on ${formatMonthDay(season.nextTropical.start, true)} (western) · ${nameOf(season.nextThai.sign)} on ${formatMonthDay(season.nextThai.start, true)} (Thai). The season card stays the same until the sun moves.`
-              : `ย้ายเข้า${nameOf(season.nextTropical.sign)} ${formatMonthDay(season.nextTropical.start, false)} (สากล) · ${nameOf(season.nextThai.sign)} ${formatMonthDay(season.nextThai.start, false)} (ไทย) ไพ่ประจำฤดูจะอยู่กับเราจนกว่าดวงอาทิตย์ย้ายราศี แตะเปิดเพื่อรับพลังของเดือนนี้`}
-          </p>
-        </div>
-      </div>
-
-      <ul className="grid grid-cols-4 sm:grid-cols-6 gap-3 sm:gap-4">
-        {data.signs.map((c) => (
-          <li key={c.sign} className="flex flex-col items-center gap-1.5">
-            <FlipCard
-              card={c}
-              revealed={!!revealed[c.sign]}
-              onReveal={() => reveal(c.sign)}
-              label={isEnglish ? `Today's card for ${nameOf(c.sign)}` : `ไพ่วันนี้ของ${nameOf(c.sign)}`}
-              width="w-full max-w-[84px]"
-              sizes="84px"
-            />
-            <Link
-              href={zodiacSignPath(c.sign)}
-              className="tap-overlay-y text-[12px] sm:text-[13px] font-serif-th font-semibold text-ink hover:text-gold-ink text-center leading-tight"
+      <div role="radiogroup" aria-label={isEnglish ? "Choose a sign" : "เลือกราศี"} className="grid grid-cols-6 gap-1.5 sm:flex sm:flex-wrap sm:justify-center sm:gap-2">
+        {data.signs.map((c) => {
+          const active = c.sign === chosen.sign;
+          return (
+            <button
+              key={c.sign}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => setPick(c.sign)}
+              className={`tap-overlay-y rounded-full border px-1 sm:px-3 py-1.5 text-xs sm:text-sm font-serif-th font-bold whitespace-nowrap transition-colors cursor-pointer ${
+                active
+                  ? "bg-gold-ink border-gold-ink text-surface"
+                  : "bg-surface border-line-warm text-ink hover:border-gold-ink"
+              }`}
             >
               {nameOf(c.sign).replace("ราศี", "")}
-            </Link>
-          </li>
-        ))}
-      </ul>
+            </button>
+          );
+        })}
+      </div>
 
-      <div aria-live="polite">
-        {focused && revealed[focus!] && (
-          <div key={focus} className="altar-card-porcelain rounded-xl p-4 sm:p-5 space-y-1.5 anim-swap-rise">
+      <div className="grid gap-5 md:grid-cols-[1.4fr_1fr]">
+        {/* ไพ่วันนี้ของราศีที่เลือก */}
+        <div className="altar-panel rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-center gap-5">
+          <FlipCard
+            key={`day:${chosen.sign}`}
+            card={chosen}
+            revealed={chosenOpen}
+            onReveal={() => reveal(`day:${chosen.sign}`)}
+            label={isEnglish ? `Today's card for ${nameOf(chosen.sign)}` : `ไพ่วันนี้ของ${nameOf(chosen.sign)}`}
+            width="w-[130px] sm:w-[150px] shrink-0"
+            sizes="(min-width: 640px) 150px, 130px"
+          />
+          <div aria-live="polite" className="space-y-2 text-center sm:text-left">
             <p className="text-xs font-serif-th font-semibold text-gold-ink">
-              {focus === "season"
-                ? isEnglish
-                  ? `Card of the ${nameOf(season.tropical)} season`
-                  : `ไพ่ประจำฤดู${nameOf(season.tropical)}`
-                : isEnglish
-                  ? `${nameOf(focus!)} · today`
-                  : `${nameOf(focus!)} · วันนี้`}
+              {isEnglish ? `${nameOf(chosen.sign)} · today` : `${nameOf(chosen.sign)} · วันนี้`}
             </p>
-            <p className="text-base font-serif-th font-bold text-ink">{cardName(focused)}</p>
-            <p className="text-sm text-muted font-sans leading-relaxed">{message(focused)}</p>
+            {chosenOpen ? (
+              <>
+                <p className="text-lg font-serif-th font-bold text-ink">{cardName(chosen)}</p>
+                <p className="text-xs font-serif-th font-semibold text-muted">
+                  {(isEnglish ? chosen.keywordsEn : chosen.keywords).join(" · ")}
+                </p>
+                <p className="text-sm text-muted font-sans leading-relaxed">{message(chosen)}</p>
+                <Link href={zodiacSignPath(chosen.sign)} className="inline-block text-sm font-serif-th font-bold text-gold-ink hover:underline">
+                  {isEnglish ? `More about ${nameOf(chosen.sign)}` : `อ่านเรื่อง${nameOf(chosen.sign)}ต่อ`}
+                </Link>
+              </>
+            ) : (
+              <p className="text-sm text-muted font-sans">
+                {isEnglish ? "Tap the card to reveal it." : "แตะไพ่เพื่อพลิกดูไพ่ของวันนี้"}
+              </p>
+            )}
           </div>
-        )}
+        </div>
+
+        {/* ไพ่ประจำฤดูราศี — ดวงอาทิตย์ย้ายราศีเดือนละครั้ง */}
+        <div className="rounded-2xl border border-line-warm bg-surface-warm p-5 flex items-center gap-4">
+          <FlipCard
+            card={season.card}
+            revealed={seasonOpen}
+            onReveal={() => reveal("season")}
+            label={isEnglish ? `Card of the ${nameOf(season.tropical)} season` : `ไพ่ประจำฤดู${nameOf(season.tropical)}`}
+            width="w-[84px] shrink-0"
+            sizes="84px"
+          />
+          <div className="space-y-1">
+            <p className="text-xs font-serif-th font-semibold text-gold-ink">
+              {isEnglish ? "This month's season card" : "ไพ่ประจำฤดูราศีเดือนนี้"}
+            </p>
+            <p className="text-sm font-serif-th font-bold text-ink">
+              {seasonOpen
+                ? cardName(season.card)
+                : isEnglish
+                  ? `Sun in ${nameOf(season.tropical)} · ${nameOf(season.thai)} (Thai)`
+                  : `ดวงอาทิตย์อยู่${nameOf(season.tropical)} · ${nameOf(season.thai)} (ไทย)`}
+            </p>
+            <p className="text-[12px] text-muted font-sans leading-relaxed">
+              {seasonOpen
+                ? message(season.card)
+                : isEnglish
+                  ? `Moves to ${nameOf(season.nextTropical.sign)} on ${formatMonthDay(season.nextTropical.start, true)}`
+                  : `ย้ายเข้า${nameOf(season.nextTropical.sign)} ${formatMonthDay(season.nextTropical.start, false)} · แตะไพ่เพื่อรับพลังของเดือนนี้`}
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   );
