@@ -4,8 +4,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { calculatePasswordStrength } from "@/lib/auth/strength";
 import { invalidateSessionCache } from "@/lib/auth/use-session";
 import { soundManager } from "@/lib/utils/audio";
-import { CheckMarkIcon } from "@/components/entitlement/EntitlementIcons";
-import { getMemberBenefits } from "@/lib/entitlement/copy";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useLocale } from "@/lib/i18n";
 
@@ -13,7 +11,11 @@ export interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialMode?: "signin" | "signup" | "forgot";
-  /** true เมื่อผู้ใช้ถูกพามาที่นี่จากกำแพงสิทธิ์ — แสดงสิ่งที่จะได้รับกำกับไว้ด้วย */
+  /**
+   * true เมื่อผู้ใช้ถูกพามาที่นี่จากกำแพงสิทธิ์
+   * เดิมใช้โชว์กล่อง "สิ่งที่จะได้รับ" เหนือแท็บ — เจ้าของสั่งเอาออก (2026-09-24) ตอนนี้ไม่มีผลกับหน้าตาแล้ว
+   * เก็บ prop ไว้ให้ผู้เรียกเดิมไม่พัง
+   */
   fromEntitlementWall?: boolean;
 }
 
@@ -63,7 +65,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
   initialMode = "signin",
-  fromEntitlementWall = false,
 }) => {
   const { locale, isEnglish } = useLocale();
   const isEn = isEnglish || locale === "en";
@@ -382,18 +383,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </p>
             )}
           </div>
-
-          {/* สิ่งที่จะได้รับ — แสดงเมื่อผู้ใช้ถูกพามาจากกำแพงสิทธิ์ จะได้รู้ว่าสมัครไปเพื่ออะไร */}
-          {fromEntitlementWall && mode !== "forgot" && (
-            <ul className="glass-tile !rounded-xl w-full mb-4 grid gap-1.5 p-3">
-              {getMemberBenefits(isEn).map((b) => (
-                <li key={b.title} className="flex items-start gap-2 text-[13px] font-serif-th text-ink">
-                  <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-gold" />
-                  {b.title}
-                </li>
-              ))}
-            </ul>
-          )}
 
           {/* Segmented Mode Switcher (Tab System) */}
           {mode !== "forgot" && (
