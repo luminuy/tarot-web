@@ -115,15 +115,21 @@ export function scheduleWhenUserEngages(run: () => void): () => void {
     }
   };
 
-  function trigger() {
+  function trigger(event?: Event) {
     if (done) return;
+    /* การแตะปุ่มบนแถบขอความยินยอมไม่นับเป็น "เริ่มใช้งาน" (INC-0245)
+       ไม่งั้น pointerdown ของปุ่ม "ยินยอม" ปลุก gtag ก่อน click จะบันทึกความยินยอมทัน
+       page_view แรกของคนที่กดยินยอมจึงถูกส่งแบบ denied (gcs=G100) ซึ่ง GA4 ไม่นับในรายงาน
+       ⚠️ เพราะเหตุนี้ listener จึงห้ามใส่ `once: true` — ถูกข้ามครั้งหนึ่งแล้วต้องยังฟังต่อ */
+    const target = event?.target;
+    if (typeof Element !== "undefined" && target instanceof Element && target.closest("[data-consent-banner]")) return;
     done = true;
     cleanup();
     run();
   }
 
   for (const name of events) {
-    window.addEventListener(name, trigger, { passive: true, once: true });
+    window.addEventListener(name, trigger, { passive: true });
   }
 
   if ("requestIdleCallback" in window) {
@@ -154,8 +160,16 @@ function installGoogleTag(primaryId: string, gaId?: string | null, googleAdsId?:
   w.__seertarotGtagReady = true;
 
   w.dataLayer = w.dataLayer || [];
-  function gtag(...args: unknown[]) {
-    w.dataLayer!.push(args);
+  /* 🚨 ต้อง push อ็อบเจกต์ `arguments` จริงเท่านั้น ห้ามใช้ rest `...args` (INC-0245)
+     gtag.js แยก "คำสั่ง gtag" ออกจากของอื่นใน dataLayer ด้วยชนิด Arguments
+     ถ้า push เป็นอาร์เรย์ มันถูกมองเป็นคำสั่งแบบ GTM แล้วถูกทิ้งเงียบ ๆ ไม่มี error สักบรรทัด
+     = ไม่มี config · ไม่มี page_view · ไม่มี event ใดถึง GA4 เลย
+     เกิดจริง 2026-09-17 ➔ 09-24: ตอนย้ายตรรกะออกจากสตริง `<Script>` (ซึ่งเขียน `arguments` ถูกอยู่แล้ว)
+     มาเป็นโมดูล TS ตรงนี้ · ผู้ใช้ใน GA4 ร่วงจาก ~40 เหลือ 0–7 ต่อวัน
+     ด่าน `test-analytics-integrity` รันฟังก์ชันนี้จริงแล้วตรวจชนิดของทุกรายการใน dataLayer */
+  function gtag(..._args: unknown[]) {
+    // eslint-disable-next-line prefer-rest-params
+    w.dataLayer!.push(arguments);
   }
   w.gtag = w.gtag ?? (gtag as never);
 

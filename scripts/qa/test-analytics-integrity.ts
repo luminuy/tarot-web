@@ -428,6 +428,63 @@ async function runTests() {
     );
   }
 
+  // INC-0245: รันตัวบูตจริงแล้วตรวจ "ชนิด" ของทุกรายการใน dataLayer
+  // gtag.js รับเฉพาะอ็อบเจกต์ `arguments` — อาร์เรย์ถูกทิ้งเงียบ ๆ ทำให้ GA4 ไม่ได้ข้อมูลเลยทั้งเว็บ
+  // (เกิดจริง 2026-09-17 ➔ 09-24) · ตรวจจากการรันจริง ไม่ใช่ regex เพราะหน้าตาโค้ดเขียนได้หลายแบบ
+  console.log("\n🧬 6. ตัวบูตต่อคิว gtag ด้วยอ็อบเจกต์ arguments จริง (INC-0245)");
+  {
+    const listeners: Record<string, () => void> = {};
+    const appended: string[] = [];
+    const store = new Map<string, string>();
+    const storage = {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => void store.set(k, v),
+      removeItem: (k: string) => void store.delete(k),
+    };
+    const prevEnv = process.env.NEXT_PUBLIC_GA_ID;
+    process.env.NEXT_PUBLIC_GA_ID = "G-TEST123456";
+    (global as any).window = {
+      location: { hostname: "seertarot.net", pathname: "/cards" },
+      addEventListener: (name: string, fn: () => void) => {
+        listeners[name] = fn;
+      },
+      removeEventListener: () => {},
+      sessionStorage: storage,
+      localStorage: storage,
+    };
+    (global as any).localStorage = storage;
+    (global as any).document = {
+      createElement: () => ({}) as { src?: string },
+      head: { appendChild: (el: { src?: string }) => void appended.push(el.src ?? "") },
+    };
+
+    const { bootstrapAnalytics } = await import("../../src/lib/analytics-bootstrap");
+    const cleanup = bootstrapAnalytics();
+    listeners.scroll?.(); // จำลองผู้ใช้เริ่มเลื่อนจอ
+    await new Promise((r) => setTimeout(r, 0));
+    cleanup();
+
+    const dl = ((global as any).window.dataLayer ?? []) as unknown[];
+    const kinds = dl.map((e) => Object.prototype.toString.call(e));
+    check("ตัวบูตฉีดแท็ก gtag.js จริง", appended.some((s) => s.includes("gtag/js?id=G-TEST123456")));
+    check("ตัวบูตต่อคิวคำสั่งลง dataLayer", dl.length >= 3, `ได้ ${dl.length} รายการ`);
+    check(
+      "ทุกรายการใน dataLayer เป็นอ็อบเจกต์ arguments (อาร์เรย์ = gtag.js ทิ้งเงียบ ๆ)",
+      dl.length > 0 && kinds.every((k) => k === "[object Arguments]"),
+      kinds.join(", "),
+    );
+    check(
+      "มีคำสั่ง config ของรหัส GA4 อยู่ในคิว",
+      dl.some((e) => (e as ArrayLike<unknown>)[0] === "config" && (e as ArrayLike<unknown>)[1] === "G-TEST123456"),
+    );
+
+    if (prevEnv === undefined) delete process.env.NEXT_PUBLIC_GA_ID;
+    else process.env.NEXT_PUBLIC_GA_ID = prevEnv;
+    delete (global as any).window;
+    delete (global as any).document;
+    delete (global as any).localStorage;
+  }
+
   // ─────────────────────────────────────────────────────────────────
   // สรุปผล
   // ─────────────────────────────────────────────────────────────────
