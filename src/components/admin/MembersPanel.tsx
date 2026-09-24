@@ -25,7 +25,12 @@ interface Member {
 interface ListPayload {
   query: string;
   members: Member[];
-  limit: number;
+  page: number;
+  pageSize: number;
+  pageCount: number;
+  /** จำนวนสมาชิกที่ตรงคำค้น (ไม่ค้น = ทุกบัญชี รวมที่ลบแล้ว) */
+  matched: number;
+  pageSizes: number[];
   totals: { total: number; new7d: number; active7d: number };
 }
 
@@ -40,6 +45,9 @@ interface DetailPayload {
   } | null;
   bonuses: { reason: string; granted: number; grantedAt: number }[];
 }
+
+/** ค่าเริ่มต้นก่อนเซิร์ฟเวอร์ตอบ — เซิร์ฟเวอร์เป็นคนตัดสินรายการจริง (`pageSizes` ในคำตอบ) */
+const FALLBACK_PAGE_SIZES = [25, 50, 100, 200];
 
 const PROVIDER_NAME: Record<string, string> = { google: "Google", line: "LINE", email: "อีเมล" };
 
@@ -63,8 +71,20 @@ export default function MembersPanel() {
   const [input, setInput] = useState("");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
 
-  const list = useAdminResource<ListPayload>(`/api/admin/members?q=${encodeURIComponent(query)}`);
+  const list = useAdminResource<ListPayload>(
+    `/api/admin/members?q=${encodeURIComponent(query)}&page=${page}&pageSize=${pageSize}`,
+  );
+  const data = list.data;
+  // ใช้หน้าที่เซิร์ฟเวอร์ตอบจริง (เซิร์ฟเวอร์หนีบหน้าที่เกินจำนวนหน้าให้แล้ว)
+  const currentPage = data?.page ?? page;
+  const pageCount = data?.pageCount ?? 1;
+  const goTo = (p: number) => {
+    setSelected(null);
+    setPage(Math.min(Math.max(1, p), pageCount));
+  };
 
   return (
     <div className="space-y-6">
@@ -80,7 +100,12 @@ export default function MembersPanel() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div id="members-list">
             <SectionTitle title={query ? `ผลค้นหา “${query}”` : "สมาชิกที่สมัครล่าสุด"} />
-            <p className="mt-0.5 text-xs text-muted">ค้นจากอีเมล ชื่อ หรือรหัสผู้ใช้ · แสดงสูงสุด 50 คน</p>
+            <p className="mt-0.5 text-xs text-muted">
+              ค้นจากอีเมล ชื่อ หรือรหัสผู้ใช้
+              {data && data.matched > 0
+                ? ` · แสดง ${fmt((data.page - 1) * data.pageSize + 1)}–${fmt((data.page - 1) * data.pageSize + data.members.length)} จาก ${fmt(data.matched)} คน`
+                : null}
+            </p>
           </div>
           <form
             role="search"
@@ -88,6 +113,7 @@ export default function MembersPanel() {
             onSubmit={(e) => {
               e.preventDefault();
               setSelected(null);
+              setPage(1);
               setQuery(input.trim());
             }}
           >
@@ -114,6 +140,7 @@ export default function MembersPanel() {
                 onClick={() => {
                   setInput("");
                   setQuery("");
+                  setPage(1);
                   setSelected(null);
                 }}
               >
@@ -178,6 +205,59 @@ export default function MembersPanel() {
             </table>
           </div>
         )}
+
+        {data && data.matched > 0 ? (
+          <nav
+            aria-label="แบ่งหน้ารายชื่อสมาชิก"
+            className="flex flex-col gap-3 border-t border-line pt-3 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div className="flex items-center gap-2 text-xs text-muted">
+              <label htmlFor="member-page-size">แสดงหน้าละ</label>
+              <select
+                id="member-page-size"
+                value={pageSize}
+                onChange={(e) => {
+                  setSelected(null);
+                  setPage(1);
+                  setPageSize(Number(e.target.value));
+                }}
+                className="glass-field min-h-11 rounded-xl border border-line-interactive px-3 text-sm text-ink focus:border-ink focus:outline-none"
+              >
+                {(data.pageSizes ?? FALLBACK_PAGE_SIZES).map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+              <span>คน</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="min-h-11"
+                disabled={currentPage <= 1 || list.loading}
+                onClick={() => goTo(currentPage - 1)}
+              >
+                ← ก่อนหน้า
+              </Button>
+              <span className="min-w-24 text-center text-sm text-ink" aria-live="polite">
+                หน้า {fmt(currentPage)} / {fmt(pageCount)}
+              </span>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="min-h-11"
+                disabled={currentPage >= pageCount || list.loading}
+                onClick={() => goTo(currentPage + 1)}
+              >
+                ถัดไป →
+              </Button>
+            </div>
+          </nav>
+        ) : null}
 
         {selected ? <MemberDetail key={selected} id={selected} onClose={() => setSelected(null)} /> : null}
       </section>
