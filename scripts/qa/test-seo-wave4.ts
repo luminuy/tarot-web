@@ -5,6 +5,9 @@ import { ARTICLES } from "../../src/data/articles";
 import sitemap from "../../src/app/sitemap";
 import { SITE_ORIGIN } from "../../src/lib/config/site";
 import { assertNonEmptyCorpus } from "./lib/corpus";
+import { ZODIAC_SIGNS } from "../../src/data/zodiac";
+import { CARD_SUMMARIES } from "../../src/data/cards/summary";
+import { decanRanges, findZodiacByDate } from "../../src/lib/tarot/zodiac";
 
 console.log("\n🧪 กำลังทดสอบระบบ SEO Wave 4: Differentiators (Birth Card, Positions Table, Learn Tarot & Readers)\n");
 
@@ -326,6 +329,80 @@ assert(
   fs.existsSync(path.join(process.cwd(), "astro/pages/en/index.astro")),
   "ต้องมีหน้าแรกภาษาอังกฤษที่ astro/pages/en/index.astro",
 );
+
+// 15. ✦ ไพ่ × 12 ราศี (`src/data/zodiac.ts`) — ข้อมูลหน้าราศีต้องเล่าเรื่องเดียวกับสารานุกรมไพ่
+{
+  assert(ZODIAC_SIGNS.length === 12, "ต้องมีราศีครบ 12 ราศี");
+  assert(new Set(ZODIAC_SIGNS.map((s) => s.id)).size === 12, "slug ราศีห้ามซ้ำ");
+  const cardById = new Map(CARD_SUMMARIES.map((c) => [c.id, c]));
+  const suitOf = { fire: "wands", earth: "pentacles", air: "swords", water: "cups" } as const;
+  /* สารานุกรมเขียน "ดาวพฤหัส" บางใบ "ดาวพฤหัสบดี" บางใบ — เทียบแบบตัดคำว่า "บดี" ทิ้ง */
+  const norm = (t: string) => t.replace("ดาวพฤหัสบดี", "ดาวพฤหัส");
+  const decanCards = ZODIAC_SIGNS.flatMap((s) => s.decans.map((d) => d.cardId));
+  assert(new Set(decanCards).size === 36, "ไพ่ประจำช่วง (decan) ต้องครบ 36 ใบไม่ซ้ำกัน");
+  for (const sign of ZODIAC_SIGNS) {
+    const major = cardById.get(sign.majorCardId);
+    assert(major?.astrology === sign.nameTh, `${sign.id}: ไพ่ประจำราศีต้องมี astrology = "${sign.nameTh}" (ได้ "${major?.astrology}")`);
+    const ruler = cardById.get(sign.rulerCardId);
+    assert(norm(ruler?.astrology ?? "") === norm(sign.rulerTh), `${sign.id}: ไพ่ดาวผู้ครองต้องตรงกับ astrology ของไพ่ (${sign.rulerCardId})`);
+    for (const d of sign.decans) {
+      const card = cardById.get(d.cardId);
+      assert(
+        !!card && card.suit === suitOf[sign.element] &&
+          norm(card.astrology) === norm(`${d.planetTh}ใน${sign.nameTh}`),
+        `${sign.id}: ${d.cardId} ต้องเป็น "${d.planetTh}ใน${sign.nameTh}" ชุด ${suitOf[sign.element]} (ได้ "${card?.astrology}")`,
+      );
+    }
+    for (const [lang, copy] of [["th", sign.th], ["en", sign.en]] as const) {
+      const text = Object.values(copy).join(" ");
+      assert(!/[✦✨✧⭐🌟]|\p{Extended_Pictographic}/u.test(text), `${sign.id}.${lang}: ห้ามอิโมจิในข้อความ (กฎข้อ 2)`);
+      if (lang === "en") assert(!/[฀-๿]/.test(text), `${sign.id}.en: ห้ามมีอักษรไทยหลุดในข้อความอังกฤษ`);
+      else assert(/[฀-๿]/.test(copy.nature), `${sign.id}.th: ข้อความไทยต้องเป็นภาษาไทย`);
+    }
+  }
+
+  // ทุกวันในปี (รวม 29 ก.พ.) ต้องได้ราศีเดียว และจุดรอยต่อต้องตรงตาราง
+  const days = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  let unmapped = 0;
+  for (let m = 1; m <= 12; m++) for (let d = 1; d <= days[m - 1]; d++) if (!findZodiacByDate(ZODIAC_SIGNS, m, d)) unmapped++;
+  assert(unmapped === 0, `ทุกวันในปีต้องหาราศีเจอ (หาไม่เจอ ${unmapped} วัน)`);
+  const at = (m: number, d: number) => {
+    const r = findZodiacByDate(ZODIAC_SIGNS, m, d);
+    return r ? `${r.sign.id}:${r.decanIndex}` : "none";
+  };
+  for (const [m, d, want] of [
+    [3, 21, "aries:0"], [4, 20, "aries:2"], [4, 21, "taurus:0"], [7, 21, "cancer:2"], [7, 22, "leo:0"],
+    [12, 21, "sagittarius:2"], [12, 22, "capricorn:0"], [12, 31, "capricorn:1"], [1, 1, "capricorn:1"],
+    [1, 19, "capricorn:2"], [1, 20, "aquarius:0"], [2, 29, "pisces:0"], [3, 1, "pisces:1"], [3, 20, "pisces:2"],
+  ] as const) {
+    assert(at(m, d) === want, `${d}/${m} ต้องได้ ${want} (ได้ ${at(m, d)})`);
+  }
+  // กฎข้อ 14 ฉบับราศี: วันที่ไม่มีจริงห้ามเดาราศีให้
+  for (const [m, d] of [[2, 30], [4, 31], [13, 1], [0, 5], [6, 0]] as const) {
+    assert(findZodiacByDate(ZODIAC_SIGNS, m, d) === undefined, `${d}/${m} ไม่มีจริง ต้องคืน undefined`);
+  }
+  const ranges = decanRanges(ZODIAC_SIGNS);
+  const capRanges = ranges.get("capricorn");
+  assert(
+    capRanges?.[1]?.start.month === 12 && capRanges?.[1]?.end.month === 1 && capRanges?.[1]?.end.day === 9,
+    "ช่วงที่ 2 ของมังกรต้องข้ามปี 31 ธ.ค. – 9 ม.ค.",
+  );
+  assert(ranges.get("aquarius")?.[2]?.end.day === 18, "ช่วงสุดท้ายของกุมภ์ต้องจบ 18 ก.พ.");
+
+  // หน้าราศีต้องมีจริงทั้งสองภาษา + อยู่ใน sitemap
+  for (const f of [
+    "astro/pages/cards/zodiac.astro",
+    "astro/pages/cards/zodiac/[sign].astro",
+    "astro/pages/en/cards/zodiac.astro",
+    "astro/pages/en/cards/zodiac/[sign].astro",
+  ]) {
+    assert(fs.existsSync(path.join(process.cwd(), f)), `ต้องมีหน้า ${f}`);
+  }
+  assert(sitemapUrls.has(`${SITE_ORIGIN}/cards/zodiac`), "sitemap ต้องมี /cards/zodiac");
+  for (const sign of ZODIAC_SIGNS) {
+    assert(sitemapUrls.has(`${SITE_ORIGIN}/cards/zodiac/${sign.id}`), `sitemap ต้องมี /cards/zodiac/${sign.id}`);
+  }
+}
 
 console.log(`\n📊 ผลสรุปการทดสอบ: ผ่าน ${passed} ด่าน | ล้มเหลว ${failed} ด่าน\n`);
 

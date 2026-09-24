@@ -25,6 +25,8 @@ import type { Spread } from "@/data/spreads-helpers";
 import { BirthCardBodyEn } from "@/app/_shared/pages/birth-card-en";
 import { BirthCardBodyTh } from "@/app/_shared/pages/birth-card-th";
 import { CardsAllBody } from "@/app/_shared/pages/cards-all";
+import { ZodiacIndexBody, ZodiacSignBody } from "@/app/_shared/pages/zodiac";
+import type { ZodiacSign } from "@/data/zodiac";
 import { CardsIndexBody } from "@/app/_shared/pages/cards-index";
 import { CardGroupBody } from "@/app/_shared/pages/card-group";
 import type { CardGroupInfo } from "@/data/cards/group-seo";
@@ -84,6 +86,24 @@ export function BirthCardBodyEnRoot({ calculator }: { calculator: ReactNode }) {
   return (
     <LocaleProvider forcedLocale="en">
       <BirthCardBodyEn calculator={calculator} />
+    </LocaleProvider>
+  );
+}
+
+/** ✦ ไพ่ประจำราศี — หน้ารวม (มี island หาราศีส่งเข้ามาทาง slot) */
+export function ZodiacIndexBodyRoot({ locale, finder }: { locale: Locale; finder: ReactNode }) {
+  return (
+    <LocaleProvider forcedLocale={locale}>
+      <ZodiacIndexBody locale={locale} finder={finder} />
+    </LocaleProvider>
+  );
+}
+
+/** ✦ ไพ่ประจำราศีรายราศี 12 หน้า — ไม่มีสถานะ จึงไม่ใช้ JS ของตัวเองเลย */
+export function ZodiacSignBodyRoot({ sign, locale }: { sign: ZodiacSign; locale: Locale }) {
+  return (
+    <LocaleProvider forcedLocale={locale}>
+      <ZodiacSignBody sign={sign} locale={locale} />
     </LocaleProvider>
   );
 }

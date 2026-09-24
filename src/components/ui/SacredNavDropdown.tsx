@@ -121,6 +121,12 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       href: "/cards/birth-card",
       cardId: "major-10",
     },
+    {
+      label: isEnglish ? "Zodiac Tarot Cards" : "ไพ่ประจำราศี 12 ราศี",
+      sublabel: isEnglish ? "Your sign's tarot card & birth decan" : "หาไพ่ทาโรต์ประจำราศีจากวันเกิด",
+      href: "/cards/zodiac",
+      cardId: "major-17",
+    },
   ];
 
   const knowledgeItems: NavItem[] = [

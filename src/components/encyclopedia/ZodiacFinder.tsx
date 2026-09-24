@@ -1,0 +1,168 @@
+"use client";
+
+import React, { useState } from "react";
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
+import { CardImage } from "@/components/card/CardImage";
+import { useLocale } from "@/lib/i18n";
+import type { MonthDay } from "@/data/zodiac";
+import { decanRanges, findZodiacByDate, formatMonthDay, isValidMonthDay, zodiacSignPath } from "@/lib/tarot/zodiac";
+
+/**
+ * ✦ ข้อมูลราศีแบบย่อที่ island ต้องใช้จริงเท่านั้น
+ * ⚠️ ห้ามส่งคำอธิบายราศี (`th` / `en`) เข้ามา — ทุกไบต์ของ prop ถูกฝังลง HTML ของหน้า
+ *    คำอธิบายเต็มอยู่ในหน้าราศีแต่ละหน้าที่เรนเดอร์ฝั่งเซิร์ฟเวอร์แล้ว
+ */
+export interface ZodiacFinderCard {
+  id: string;
+  image: string;
+  nameTh: string;
+  nameEn: string;
+}
+
+export interface ZodiacFinderItem {
+  id: string;
+  nameTh: string;
+  nameEn: string;
+  major: ZodiacFinderCard;
+  decans: { start: MonthDay; card: ZodiacFinderCard }[];
+}
+
+const MONTHS_TH = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+const MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const DAYS_IN_MONTH = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+export function ZodiacFinder({ signs }: { signs: ZodiacFinderItem[] }) {
+  const { isEnglish } = useLocale();
+  const [day, setDay] = useState(1);
+  const [month, setMonth] = useState(1);
+  const [submitted, setSubmitted] = useState<{ day: number; month: number } | null>(null);
+
+  const result = submitted ? findZodiacByDate(signs, submitted.month, submitted.day) : undefined;
+  const range = result ? decanRanges(signs).get(result.sign.id)?.[result.decanIndex] : undefined;
+  const decanCard = result ? result.sign.decans[result.decanIndex]?.card : undefined;
+  const cardName = (c: ZodiacFinderCard) => (isEnglish ? c.nameEn : `${c.nameTh} (${c.nameEn})`);
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isValidMonthDay(month, day)) return;
+    setSubmitted({ day, month });
+  };
+
+  return (
+    <section className="altar-panel rounded-2xl p-6 sm:p-8 max-w-2xl mx-auto space-y-6" aria-labelledby="zodiac-finder-title">
+      <div className="text-center space-y-1.5">
+        <h2 id="zodiac-finder-title" className="text-lg sm:text-xl font-serif-th font-bold text-ink">
+          {isEnglish ? "Find your zodiac tarot cards" : "หาไพ่ประจำราศีจากวันเกิด"}
+        </h2>
+        <p className="text-xs sm:text-sm text-muted font-sans">
+          {isEnglish
+            ? "Pick your birthday — no birth year needed."
+            : "เลือกวันและเดือนเกิด ไม่ต้องใส่ปี (ใช้ราศีแบบสากล)"}
+        </p>
+      </div>
+
+      <form onSubmit={onSubmit} className="space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <label htmlFor="zodiac-day" className="block text-xs font-serif-th font-semibold text-ink">
+              {isEnglish ? "Day" : "วันที่เกิด"}
+            </label>
+            <select
+              id="zodiac-day"
+              value={day}
+              onChange={(e) => setDay(Number.parseInt(e.target.value, 10))}
+              className="glass-field w-full rounded-xl border border-line-interactive-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
+            >
+              {Array.from({ length: DAYS_IN_MONTH[month - 1] }, (_, i) => i + 1).map((d) => (
+                <option key={d} value={d}>
+                  {isEnglish ? `${d}` : `วันที่ ${d}`}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label htmlFor="zodiac-month" className="block text-xs font-serif-th font-semibold text-ink">
+              {isEnglish ? "Month" : "เดือนเกิด"}
+            </label>
+            <select
+              id="zodiac-month"
+              value={month}
+              onChange={(e) => {
+                const m = Number.parseInt(e.target.value, 10);
+                setMonth(m);
+                // 31 ม.ค. ➔ เปลี่ยนเป็น ก.พ. ต้องไม่ค้างวันที่ที่ไม่มีจริง
+                setDay((d) => Math.min(d, DAYS_IN_MONTH[m - 1]));
+              }}
+              className="glass-field w-full rounded-xl border border-line-interactive-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
+            >
+              {(isEnglish ? MONTHS_EN : MONTHS_TH).map((name, i) => (
+                <option key={name} value={i + 1}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <button
+          type="submit"
+          className="btn-gold-glass w-full py-3 px-6 text-xs sm:text-sm font-serif-th font-bold duration-200 cursor-pointer active:scale-95 tracking-wide"
+        >
+          {isEnglish ? "Show my cards" : "ดูไพ่ประจำราศีของฉัน"}
+        </button>
+      </form>
+
+      {/* ผลลัพธ์ — aria-live ให้โปรแกรมอ่านหน้าจอประกาศเมื่อผลเปลี่ยน */}
+      <div aria-live="polite">
+        {submitted && !result && (
+          <p role="alert" className="text-center text-sm text-ink font-sans">
+            {isEnglish ? "That date does not exist. Please check and try again." : "ไม่พบวันที่นี้ในปฏิทิน ลองตรวจสอบแล้วเลือกใหม่อีกครั้ง"}
+          </p>
+        )}
+        {result && decanCard && (
+          <div className="altar-card-porcelain rounded-xl p-5 sm:p-6 space-y-5 anim-swap-rise">
+            <div className="text-center space-y-1">
+              <p className="text-xs font-serif-th font-semibold text-gold-ink">
+                {isEnglish ? "Your sign" : "ราศีของคุณ"}
+              </p>
+              <p className="text-2xl font-serif-th font-bold text-ink">
+                {isEnglish ? result.sign.nameEn : result.sign.nameTh}
+              </p>
+              {range && (
+                <p className="text-xs text-muted font-sans">
+                  {isEnglish ? "Your decan" : "ช่วงที่คุณเกิด"}: {result.decanIndex + 1}/3 ·{" "}
+                  {formatMonthDay(range.start, isEnglish)} – {formatMonthDay(range.end, isEnglish)}
+                </p>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { label: isEnglish ? "Zodiac card" : "ไพ่ประจำราศี", card: result.sign.major },
+                { label: isEnglish ? "Decan card" : "ไพ่ประจำช่วงวันเกิด", card: decanCard },
+              ].map(({ label, card }) => (
+                <Link key={card.id} href={`/cards/${card.id}`} className="group flex flex-col items-center text-center gap-2">
+                  <span className="text-xs font-serif-th font-semibold text-muted">{label}</span>
+                  <CardImage
+                    image={card.image}
+                    cardId={card.id}
+                    alt={cardName(card)}
+                    sizes="(min-width: 640px) 140px, 120px"
+                    className="w-[120px] sm:w-[140px] aspect-[1/1.7] rounded-lg border border-line-warm shadow-xs object-cover"
+                  />
+                  <span className="text-xs sm:text-sm font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
+                    {cardName(card)}
+                  </span>
+                </Link>
+              ))}
+            </div>
+            <Link
+              href={zodiacSignPath(result.sign.id)}
+              className="btn-gold-glass block w-full text-center py-3 px-6 text-xs sm:text-sm font-serif-th font-bold"
+            >
+              {isEnglish ? `Read the full ${result.sign.nameEn} guide` : `อ่านคำทำนาย${result.sign.nameTh}ฉบับเต็ม`}
+            </Link>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}

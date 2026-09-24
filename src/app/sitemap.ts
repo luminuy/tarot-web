@@ -3,6 +3,7 @@ import { DECK } from "@/data/cards";
 import { ARTICLES } from "@/data/articles";
 import { PUBLIC_SPREADS } from "@/data/spreads";
 import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
+import { ZODIAC_SIGNS } from "@/data/zodiac";
 import { localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
 import { hasEnglishTwin } from "@/lib/i18n/paths";
 
@@ -186,8 +187,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.9,
   }));
 
+  /** ✦ ไพ่ประจำราศี — หน้ารวม + 12 หน้ารายราศี (คีย์เวิร์ด "ไพ่ประจำราศี<ชื่อราศี>" คนละตัว) */
+  const zodiacRoutes: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/cards/zodiac`, lastModified: now, changeFrequency: "monthly", priority: 0.85 },
+    ...ZODIAC_SIGNS.map((sign) => ({
+      url: `${baseUrl}/cards/zodiac/${sign.id}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    })),
+  ];
+
   const thaiRoutes = [
     ...staticRoutes,
+    ...zodiacRoutes,
     ...cardRoutes,
     ...blogRoutes,
     ...spreadRoutes,
