@@ -9,6 +9,8 @@ import { listJournal } from "@/lib/journal/journal.repo";
 import { cardByIndex } from "@/data/cards";
 import { sanitizePromptValue } from "@/lib/ai/prompt-guard";
 import { checkQuestion } from "@/lib/safety/guardrails";
+import { buildOfflineMonthlySummary } from "@/lib/journal/monthly-offline";
+import { recordEvent } from "@/lib/stats/record";
 
 export const runtime = "nodejs";
 
@@ -30,12 +32,8 @@ export async function POST(request: Request) {
       );
     }
 
-    if (await isAiCapReached("member")) {
-      return NextResponse.json(
-        { error: "ระบบสรุปบทเรียนดวงถึงเพดานการใช้งานของวันนี้แล้ว กรุณาลองใหม่พรุ่งนี้" },
-        { status: 429 }
-      );
-    }
+    // งบ AI ของวันเต็ม ≠ ผู้ใช้ต้องกลับมือเปล่า — สรุปจากประวัติจริงแบบออฟไลน์แทน (ดูด้านล่าง)
+    const aiCapReached = await isAiCapReached("member");
 
     const clientIp = getClientIdentifier(request);
 
@@ -133,22 +131,17 @@ export async function POST(request: Request) {
       })
       .join("\n");
 
-    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    const apiKey = aiCapReached ? undefined : process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+
+    /*
+     * 🛟 สรุปจากประวัติจริงโดยไม่เรียก AI — ใช้ทั้งตอนไม่มีคีย์ · ทุกโมเดลล่ม · และเติมช่องที่โมเดลตอบขาด
+     * (เดิม: ไม่มีคีย์ = ประโยคเหมารวม · โมเดลล่ม = error 500 · JSON ขาด = เติมประโยคเหมารวมเงียบ ๆ)
+     */
+    const offline = buildOfflineMonthlySummary(journal);
 
     if (!apiKey) {
-      return NextResponse.json({
-        title: "กระจกสะท้อนคลื่นพลังงานและบทเรียนชีวิตรอบเดือน",
-        totalReadings: readings.length,
-        accurateReadings: accurateCount,
-        dominantElement,
-        recurringCards: topCards,
-        synthesis: `ตลอดการเปิดไพ่ ${readings.length} ครั้งที่ผ่านมา ${dominantElement === "สมดุล" ? "พลังงานของทุกธาตุมีความสมดุลกลมกลืนกัน" : `พลังงานธาตุ${dominantElement} มีอิทธิพลต่อการตัดสินใจและอารมณ์ของคุณอย่างเด่นชัด`} ไพ่ที่ปรากฏบ่อยเตือนให้คุณรักษาจุดยืน ความสงบในจิตใจ และกล้าที่จะเปลี่ยนแปลงในสิ่งที่ค้างคา`,
-        lifeLessons: [
-          "ทุกทางเลือกในอดีตได้หล่อหลอมให้คุณมีสติและเข้าใจตนเองลึกซึ้งยิ่งขึ้น",
-          "คลื่นพลังงานรอบตัวกำลังเปิดรับโอกาสใหม่ จงเชื่อมั่นในสัญชาตญาณของตนเอง",
-        ],
-        empowermentQuote: "ชะตาชีวิตไม่ใช่สิ่งที่ถูกกำหนดไว้ล่วงหน้า แต่คือผืนผ้าที่คุณเป็นผู้ถักทอด้วยมือของคุณเองทุกวัน",
-      });
+      recordEvent(aiCapReached ? "monthly_offline_fallback:ai_cap" : "monthly_offline_fallback:no_api_key");
+      return NextResponse.json(offline);
     }
 
     const prompt = `คุณคือปรมาจารย์นักจิตวิทยาและนักพยากรณ์ไพ่ทาโรต์ระดับสูง (Tarot Life Synthesizer & Spiritual Mentor)
@@ -223,7 +216,8 @@ ${historyText}
     }
 
     if (!res) {
-      throw new Error("ทุกโมเดล Gemini เรียกไม่สำเร็จ");
+      recordEvent("monthly_offline_fallback:models_down");
+      return NextResponse.json(offline);
     }
 
     const resJson = (await res.json()) as any;
@@ -248,15 +242,24 @@ ${historyText}
       }
     }
 
+    // โมเดลตอบแต่ไม่มีเนื้อหลัก (synthesis) = ใช้ไม่ได้ทั้งก้อน ➔ สรุปออฟไลน์ทั้งฉบับ พร้อมธง fallback
+    const aiSynthesis = typeof parsedAI?.synthesis === "string" && parsedAI.synthesis.trim() ? parsedAI.synthesis : null;
+    if (!aiSynthesis) {
+      recordEvent("monthly_offline_fallback:unusable_output");
+      return NextResponse.json(offline);
+    }
+
+    // ช่องที่โมเดลตอบขาด เติมจากค่าที่คำนวณจากประวัติจริง — ไม่ใช่ประโยคเหมารวม
     return NextResponse.json({
-      title: typeof parsedAI?.title === "string" ? parsedAI.title : "กระจกสะท้อนพลังงานและบทเรียนชีวิตรอบเดือน",
+      title: typeof parsedAI?.title === "string" && parsedAI.title.trim() ? parsedAI.title : offline.title,
       totalReadings: readings.length,
       accurateReadings: accurateCount,
       dominantElement: typeof parsedAI?.dominantElement === "string" ? parsedAI.dominantElement : dominantElement,
       recurringCards: Array.isArray(parsedAI?.recurringCards) && parsedAI.recurringCards.length > 0 ? parsedAI.recurringCards : topCards,
-      synthesis: typeof parsedAI?.synthesis === "string" ? parsedAI.synthesis : "พลังงานโดยรวมของคุณกำลังเคลื่อนเข้าสู่จุดเปลี่ยนที่สำคัญ",
-      lifeLessons: Array.isArray(parsedAI?.lifeLessons) && parsedAI.lifeLessons.length > 0 ? parsedAI.lifeLessons : ["ความเข้าใจตนเองคือกุญแจสู่ทุกทางออก"],
-      empowermentQuote: typeof parsedAI?.empowermentQuote === "string" ? parsedAI.empowermentQuote : "โชคชะตาอยู่ในมือของคุณเสมอ",
+      synthesis: aiSynthesis,
+      lifeLessons: Array.isArray(parsedAI?.lifeLessons) && parsedAI.lifeLessons.length > 0 ? parsedAI.lifeLessons : offline.lifeLessons,
+      empowermentQuote:
+        typeof parsedAI?.empowermentQuote === "string" && parsedAI.empowermentQuote.trim() ? parsedAI.empowermentQuote : offline.empowermentQuote,
     });
   } catch (error) {
     console.error("[Monthly Summary API Error]:", error);

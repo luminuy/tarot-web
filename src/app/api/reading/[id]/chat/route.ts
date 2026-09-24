@@ -18,6 +18,7 @@ import { assessCrisisRisk } from "@/lib/safety/ai-classifier";
 import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
 import { recordEvent, recordEvents } from "@/lib/stats/record";
 import { sanitizeTarotText, stripThinkingTags } from "@/lib/ai/language";
+import { buildOfflineChatReply } from "@/lib/ai/chat-fallback";
 import { getMembersOnlyChatMessage, isSignInRequired } from "@/lib/entitlement/signin-gate";
 
 export const runtime = "nodejs";
@@ -100,134 +101,12 @@ function generateContextualTarotChatReply(params: {
     return safety.message || (lang === "en" ? "If you or someone you know is going through a tough time, please call or text 988 to reach the Suicide & Crisis Lifeline." : "หากคุณกำลังเผชิญช่วงเวลาที่ยากลำบาก สายด่วนสุขภาพจิต 1323 พร้อมรับฟังเสมอค่ะ");
   }
 
-  const cards = (record.drawn?.map((d) => cardByIndex(d.cardIndex)) || []).filter(
-    (c): c is import("@/data/cards").TarotCard => !!c
-  );
-  const primaryCard = cards[0];
-  const cardNameTh = primaryCard ? `ไพ่ ${primaryCard.nameTh}` : "ไพ่ของคุณ";
-  const cardNameThWithOrient = primaryCard
-    ? `ไพ่ ${primaryCard.nameTh}${record.drawn?.[0] ? ` (${record.drawn[0].isReversed ? "กลับหัว" : "หัวตั้ง"})` : ""}`
-    : "ไพ่ของคุณ";
-  const deckRefTh = primaryCard ? `ไพ่ ${primaryCard.nameTh}` : "ไพ่ชุดนี้";
-
-  if (lang === "en") {
-    const cardName = primaryCard?.nameEn || "your cards";
-    if (personaId === "playful") {
-      return `Hey! Looking at ${cardName}, don't sweat the small stuff right now. Take a deep breath, trust your intuition, and focus on what brings you joy today!`;
-    }
-    if (personaId === "master") {
-      return `Regarding your inquiry through ${cardName}: Strategic discernment is vital here. Separate emotional impulses from tangible facts, and take clear, decisive action over the next 48 hours.`;
-    }
-    if (personaId === "direct") {
-      return `Here's the honest truth with ${cardName}: Stop overanalyzing and take decisive action. Face reality directly, set firm boundaries, and take ownership of your path forward.`;
-    }
-    if (personaId === "mystic") {
-      return `The sacred energies of ${cardName} remind you that true clarity emerges in quiet stillness. Release external noise and trust the profound wisdom awakening within your soul.`;
-    }
-    return `Looking at the energy of ${cardName}, be gentle with yourself as you navigate this. Take it one grounded step at a time, trust your resilience, and know that clarity is steadily unfolding.`;
-  }
-
-  const q = userQuestion.toLowerCase();
-  const isDirect = personaId === "direct";
-  const isMystic = personaId === "mystic";
-  const isPlayful = personaId === "playful";
-  const isMaster = personaId === "master";
-
-  // 1. Solution / Action questions ("แก้ยังไง", "ทำไงดี", "ทางออก", "ควรทำยังไง")
-  if (q.includes("แก้") || q.includes("ทำไง") || q.includes("ทางออก") || q.includes("ควรทำ") || q.includes("เริ่มยังไง") || q.includes("ทำตัว")) {
-    if (history.length >= 2) {
-      if (isPlayful) {
-        return `แกรรร สเต็ปนี้ง่ายมาก! จาก${cardNameTh} พักความเครียดไว้ก่อน แล้วเริ่มทำสิ่งเล็ก ๆ ที่ทำเสร็จได้ใน 10 นาทีนี้เลย รับรองว่าพอเครื่องติดแล้วทุกอย่างจะโฟลว์เอง ลุยยย!`;
-      }
-      if (isMaster) {
-        return `สำหรับกลยุทธ์ขั้นต่อไป: ${cardNameTh} ชี้ชัดว่าต้องวางแผน 2 ขั้นตอน: 1) ตัดภาระงานที่ไม่สร้างผลลัพธ์ออกทันที 2) กำหนดเส้นตายการตัดสินใจให้ชัดเจนภายใน 48 ชั่วโมงนี้ครับ`;
-      }
-      return isDirect
-        ? `จุดสำคัญตอนนี้คือ "ลงมือทำทีละสเต็ป" อย่าเพิ่งคิดวนไปไกล จาก${cardNameTh} คุณต้องเด็ดขาดกับสิ่งที่ค้างคา ตัดสิ่งที่ฉุดรั้งแล้วโฟกัสเฉพาะสิ่งที่คุณควบคุมได้จริง ๆ เท่านั้น`
-        : isMystic
-        ? `พลังงานแห่งการคลี่คลายระบุว่า ให้คุณหยุดความคิดที่สับสน แล้วเริ่มจากจุดที่เล็กที่สุดก่อน ${cardNameTh} บ่งบอกว่าเมื่อคุณปลดปล่อยความกังวล ทางออกจะค่อย ๆ ปรากฏขึ้นมาเองอย่างชัดเจน`
-        : `สำหรับทางออกที่แม่หมออยากแนะนำเพิ่มเติมนะคะ ให้คุณเริ่มจากการจัดลำดับความสำคัญก่อน สิ่งไหนเร่งด่วนให้จัดการทีละเรื่อง และอย่าลืมใจดีกับตัวเองด้วยนะ ทุกอย่างกำลังค่อย ๆ ดีขึ้นค่ะ`;
-    }
-    if (isPlayful) {
-      return `โอ๊ยยย ${cardNameThWithOrient} ใบนี้มันบอกว่าอย่าเพิ่งนอยด์ไปแก ทางแก้คือเคลียร์ใจตัวเองก่อน อะไรไม่ชัวร์อย่าเพิ่งไปรับปาก ค่อย ๆ ก้าวไปทีละก้าว เดี๋ยวก็สวยงาม!`;
-    }
-    if (isMaster) {
-      return `แนวทางแก้ไขตามหลักการของ${cardNameTh}: ต้องวิเคราะห์ต้นเหตุอย่างมีเหตุผล แยกแยะข้อเท็จจริงออกจากอารมณ์ แล้วตั้งเป้าหมายระยะสั้นเพื่อควบคุมสถานการณ์ให้ได้ครับ`;
-    }
-    return isDirect
-      ? `วิธีแก้ตรงนี้คือ: จาก${cardNameThWithOrient} คุณต้องเผชิญหน้ากับความจริง ไม่หนีปัญหา สื่อสารให้ชัดเจนและตั้งขอบเขตให้ตัวเองให้ได้`
-      : isMystic
-      ? `คลื่นพลังงานของ${cardNameTh} ชี้ทางสว่างว่า ความชัดเจนจะเกิดขึ้นเมื่อจิตใจคุณสงบ ให้ถอยออกมามองภาพกว้างสักนิด แล้วคุณจะเห็นว่าจุดที่ต้องปรับคือทัศนคติและการปล่อยวาง`
-      : `แม่หมอแนะนำว่า จากพลังของ${cardNameTh} สิ่งที่คุณทำได้ทันทีคือการตั้งสติ ไม่รีบร้อนจนกดดันตัวเอง ลองปรึกษาคนสนิทหรือค่อย ๆ ก้าวทีละขั้น ผลลัพธ์จะออกมาดีแน่นอนค่ะ`;
-  }
-
-  // 2. Love & Relationship ("รัก", "แฟน", "คนคุย", "เขาคิดยังไง", "ความสัมพันธ์")
-  if (q.includes("รัก") || q.includes("แฟน") || q.includes("คนคุย") || q.includes("เขา") || q.includes("ใจ")) {
-    if (isPlayful) {
-      return `เรื่องความรักนี่ขอเม้าท์เลย! ${deckRefTh} บอกว่าถ้าเขาทำตัวลึกลับหรือไม่ชัดเจน เราก็ต้องสวยและเชิ่ดเข้าไว้ รักตัวเองให้สุดแล้วเสน่ห์จะทำงานเองแก!`;
-    }
-    if (isMaster) {
-      return `ในมิติของความสัมพันธ์: ${deckRefTh} บ่งชี้ว่าความชัดเจนคือสิ่งที่ต้องสร้าง ไม่ใช่สิ่งที่ต้องรอ ประเมินความคุ้มค่าทางอารมณ์และตัดสินใจบนพื้นฐานของความเป็นจริงครับ`;
-    }
-    return isDirect
-      ? `เรื่องความสัมพันธ์จาก${deckRefTh} ถ้าเขายังไม่ชัดเจน คุณต้องรักตัวเองให้มากพอ อย่าเสียเวลากับความคลุมเครือ คุยกันตรง ๆ จะได้คำตอบที่แท้จริง`
-      : isMystic
-      ? `ในมิติของความรู้สึก ${deckRefTh} แสดงถึงสายสัมพันธ์ที่กำลังอยู่ในช่วงทดสอบจิตใจ จงฟังเสียงหัวใจตนเองมากกว่าคำพูดคนรอบข้าง`
-      : `ในเรื่องความรักนะคะ ${deckRefTh} บอกว่าความเข้าใจและการเปิดใจคุยกันด้วยความนุ่มนวลคือหัวใจสำคัญที่สุด ค่อย ๆ ให้เวลาซึ่งกันและกันนะคะ`;
-  }
-
-  // 3. Timing ("เมื่อไหร่", "ตอนไหน", "ช่วงไหน", "กี่วัน", "กี่เดือน")
-  if (q.includes("เมื่อไหร่") || q.includes("ตอนไหน") || q.includes("ช่วง") || q.includes("นานไหม")) {
-    if (isPlayful) {
-      return `จังหวะเวลานี้ไพ่กระซิบมาว่า ไวสุดคือ 1-2 สัปดาห์นี้เลยแก! แต่ระหว่างนี้ห้ามนอนเฉย ๆ นะ ต้องเตรียมตัวให้พร้อมรอรับโชคด้วย!`;
-    }
-    if (isMaster) {
-      return `จากการคำนวณวงรอบพลังงานไพ่: กรอบเวลาที่เหตุการณ์จะตกผลึกคือช่วง 2-3 สัปดาห์ข้างหน้านี้ โดยจะเริ่มเห็นสัญญาณบวกแรกภายใน 7 วันครับ`;
-    }
-    return isDirect
-      ? `จังหวะเวลาจากไพ่ชุดนี้จะเริ่มเห็นการเปลี่ยนแปลงชัดเจนภายใน 1-3 สัปดาห์ข้างหน้านี้ อยู่ที่คุณจะกล้าตัดสินใจลงมือเริ่มเมื่อไหร่`
-      : isMystic
-      ? `กระแสพลังงานจะเริ่มหมุนเวียนและปลดล็อคในช่วง 2-4 สัปดาห์นี้ ขอให้รักษาพลังงานบวกและเตรียมตัวให้พร้อม`
-      : `ช่วงเวลาที่พลังงานไพ่ส่งผลเด่นชัดที่สุดคือช่วง 1-2 สัปดาห์นี้เลยค่ะ เป็นจังหวะที่ดีในการเริ่มต้นอะไรใหม่ ๆ นะคะ`;
-  }
-
-  // 4. Caution / Warnings ("ระวัง", "อันตราย", "กลัว", "กังวล")
-  if (q.includes("ระวัง") || q.includes("กังวล") || q.includes("กลัว") || q.includes("ข้อเสีย")) {
-    if (isPlayful) {
-      return `สิ่งที่ต้องระวังสุด ๆ จาก${cardNameTh} คือ "การคิดมากไปเองก่อนนอน" แกเอ๊ยยย พักสมองบ้าง ความกังวล 90% ไม่เคยเกิดขึ้นจริง! `;
-    }
-    if (isMaster) {
-      return `ข้อควรระวังสำคัญ: ${cardNameTh} เตือนเรื่องการตัดสินใจด้วยความรีบร้อนหรือขาดข้อมูลรอบด้าน ต้องตรวจสอบรายละเอียดให้รัดกุมก่อนลงนามหรือตกลงครับ`;
-    }
-    return isDirect
-      ? `สิ่งที่ต้องระวังที่สุดตาม${cardNameTh} คือ "ความลังเลและการผัดวันประกันพรุ่ง" อย่าปล่อยให้ความกลัวมาชี้นำการตัดสินใจ`
-      : isMystic
-      ? `${cardNameTh} เตือนให้ระวังพลังงานลบรอบข้างและความคิดฟุ้งซ่าน อย่าให้คำวิจารณ์ภายนอกมาบดบังญาณหยั่งรู้ของคุณ`
-      : `สิ่งที่แม่หมออยากให้ระวังเป็นพิเศษคือเรื่องสุขภาพและอารมณ์ชั่ววูบค่ะ อย่าเก็บทุกอย่างมาคิดคนเดียว มีอะไรระบายออกมาได้เสมอนะคะ`;
-  }
-
   /*
-   * 5. คำตอบตั้งต้น
-   *
-   * 🔴 บทเรียน T-43: ของเดิมสะท้อนคำถามดิบของผู้ใช้กลับเข้าเทมเพลต (`สำหรับเรื่อง "${userQuestion}" ...`)
-   * React escape ให้ตอนเรนเดอร์จึงไม่ใช่ XSS **แต่หมายความว่าสำนวนวิกฤตที่ชั้นแรกจับไม่ได้
-   * จะถูกยกกลับมาพูดซ้ำในประโยคร่าเริง** ซึ่งเป็นผลลัพธ์ที่แย่ที่สุดสำหรับเคสที่ T-01 อธิบายไว้
-   * (เช่น ผู้ใช้พิมพ์เรื่องที่หนักมาก แล้วได้คำตอบขึ้นต้นว่า `สำหรับเรื่อง "..." สรุปให้ฟังสั้น ๆ เลยนะแก`)
-   *
-   * ตอนนี้อ้างถึงคำถามแบบไม่ยกข้อความมาซ้ำ — เสียความเฉพาะเจาะจงไปนิดเดียว
-   * แลกกับการไม่มีทางพูดประโยคที่ทำร้ายคนในวันที่แย่ที่สุดของเขา
+   * ยกเครื่อง 2026-09-24 — ย้ายไป `lib/ai/chat-fallback.ts` (ทดสอบได้ · อ้างไพ่ทุกใบ + คำอ่านจริง)
+   * ของเดิมดูแค่ไพ่ใบแรกและมีประโยคกุข้อมูล ("สัญญาณบวกแรกภายใน 7 วัน") — ดูหัวไฟล์ใหม่
    */
-  if (isPlayful) {
-    return `จากหน้า${deckRefTh} สรุปให้ฟังสั้น ๆ เลยนะแก: มั่นใจในเสน่ห์และความสามารถของตัวเองเข้าไว้ เส้นทางข้างหน้ามีเรื่องสนุก ๆ รออยู่อีกเพียบ!`;
-  }
-  if (isMaster) {
-    return `สำหรับประเด็นที่ถามมา: เมื่อพิจารณาควบคู่กับ${deckRefTh} ขอให้คุณยึดมั่นในวินัยและเป้าหมายหลัก ทิศทางโดยรวมเป็นบวกและกำลังพัฒนาไปในทางที่ถูกต้องครับ`;
-  }
-  return isDirect
-    ? `สำหรับคำถามนี้ เมื่อมองควบคู่กับ${deckRefTh} สรุปคือจงเชื่อมั่นในตัวเอง วางแผนให้รอบคอบแล้วลุยต่อได้เลย`
-    : isMystic
-    ? `ม่านพลังงานของ${deckRefTh} สะท้อนว่าคุณกำลังเข้าสู่ช่วงแห่งความเข้าใจที่ลึกซึ้งขึ้น จงวางใจในเส้นทางของตนเอง`
-    : `สำหรับคำถามนี้ แม่หมอมองว่าพลังของ${deckRefTh} กำลังช่วยหนุนนำให้คุณพบทางออกที่สบายใจขึ้นเรื่อย ๆ ขอให้มีความมั่นใจและก้าวไปข้างหน้านะคะ`;
+  void history; // ประวัติแชทไม่ใช้กับคำตอบสำรอง — ตอบจากไพ่และคำอ่านจริงเท่านั้น
+  return buildOfflineChatReply({ userQuestion, personaId, lang, record });
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {

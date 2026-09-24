@@ -30,6 +30,9 @@ import { getSpread } from "../../src/data/spreads";
 import { PERSONAS } from "../../src/data/personas";
 import { mockCardTone, streamMockGeminiReading } from "../../src/lib/ai/mock-reading";
 import { READING_INITIAL, readingReducer } from "../../src/components/home/flow-reading";
+import { buildOfflineMonthlySummary } from "../../src/lib/journal/monthly-offline";
+import { buildOfflineChatReply, detectChatIntent } from "../../src/lib/ai/chat-fallback";
+import type { SavedReadingItem } from "../../src/lib/utils/history";
 import { checkReadingConsistency } from "../../src/lib/ai/consistency";
 import type { ReadingEvent } from "../../src/lib/ai/types";
 import { YES_NO_DISPLAY_EN, type Reading } from "../../src/lib/schema/reading";
@@ -214,7 +217,7 @@ async function run() {
   const callSites = geminiSrc.match(/streamMockGeminiReading\(ctx[^)]*\)/g) ?? [];
   check(
     `ทุกจุดที่เรียกคำอ่านสำรองส่งสาเหตุมาด้วย (${callSites.length} จุด)`,
-    callSites.length >= 2 && callSites.every((c) => /"(no_api_key|all_models_down)"/.test(c)),
+    callSites.length >= 3 && callSites.every((c) => /"(no_api_key|all_models_down|incomplete_output)"/.test(c)),
     callSites.join(" | "),
   );
 
@@ -407,6 +410,101 @@ async function run() {
   check("TarotFlow อ่าน data.fallback จากเฟรม done", /type: "done", reading: data\.reading, fallback: data\.fallback === true/.test(flowSrc));
   const aiHookSrc = fs.readFileSync(path.resolve("src/lib/reading/use-ai-reading.ts"), "utf8");
   check("useAiReading อ่าน payload.fallback จากเฟรม done", /fallback: payload\.fallback === true/.test(aiHookSrc));
+
+  // ── 9. สรุปบทเรียนประจำเดือนแบบออฟไลน์ (AI ไม่ว่าง) ─────────────────────
+  console.log("\n📅 9. สรุปประจำเดือนแบบออฟไลน์");
+  const mkEntry = (i: number, category: string, cards: Array<[number, boolean]>, outcome: SavedReadingItem["outcome"]): SavedReadingItem =>
+    ({
+      id: `j${i}`,
+      date: new Date(Date.UTC(2026, 8, i + 1)).toISOString(),
+      question: "คำถามทดสอบ",
+      spreadId: "three-card",
+      spreadName: "อดีต ปัจจุบัน อนาคต",
+      category,
+      personaId: "warm",
+      personaName: "แม่หมอใจดี",
+      cards: cards.map(([cardIndex, isReversed], order) => ({
+        order,
+        positionName: `ตำแหน่ง ${order + 1}`,
+        cardIndex,
+        cardNameTh: cardByIndex(cardIndex)?.nameTh ?? "",
+        isReversed,
+      })),
+      summary: "สรุปทดสอบ",
+      advice: [],
+      outcome,
+    }) as SavedReadingItem;
+  const towerIdx = DECK.findIndex((c) => c.id === "major-16");
+  const cups2 = DECK.findIndex((c) => c.id === "cups-02");
+  const journalA = [
+    mkEntry(0, "love", [[towerIdx, false], [cups2, false]], "ACCURATE"),
+    mkEntry(1, "love", [[towerIdx, true], [cups2, false]], "PARTIAL"),
+    mkEntry(2, "work", [[towerIdx, false], [9999, false]], "PENDING"), // ไพ่นอกสำรับ ต้องถูกข้าม
+  ];
+  const monthA = buildOfflineMonthlySummary(journalA);
+  check("สรุปออฟไลน์ติดธง fallback ให้หน้าเว็บบอกผู้ใช้", monthA.fallback === true);
+  check(
+    "สรุปออฟไลน์อ้างไพ่ที่ออกซ้ำจริงพร้อมจำนวนครั้ง",
+    monthA.synthesis.includes(`${DECK[towerIdx].nameTh} (3 ครั้ง)`) && monthA.recurringCards[0]?.startsWith(DECK[towerIdx].nameTh),
+    monthA.synthesis,
+  );
+  check("สรุปออฟไลน์บอกหมวดที่ถามบ่อยจริง", monthA.synthesis.includes("หมวดความรัก (2 ครั้ง)"), monthA.synthesis);
+  check("สรุปออฟไลน์นับผลจริงที่ผู้ใช้บันทึก", monthA.accurateReadings === 2 && monthA.synthesis.includes("บันทึกผลจริงไว้ 2 ครั้ง"));
+  check("ไพ่นอกสำรับถูกข้าม ไม่เดาใบแทน (กฎเหล็กข้อ 14)", !JSON.stringify(monthA).includes("undefined"));
+  const monthB = buildOfflineMonthlySummary([mkEntry(0, "money", [[cups2, false]], "PENDING")]);
+  check("ประวัติต่างกันได้สรุปต่างกัน (ไม่ใช่ประโยคเหมารวม)", monthA.synthesis !== monthB.synthesis && monthA.title !== monthB.title);
+  check("ประวัติที่ไม่มีไพ่เลยก็ไม่ล้ม", Boolean(buildOfflineMonthlySummary([mkEntry(0, "self", [], "PENDING")]).synthesis));
+  const monthlySrc = fs.readFileSync(path.resolve("src/app/api/journal/monthly-summary/route.ts"), "utf8");
+  check(
+    "route สรุปรายเดือนไม่เหลือประโยคเหมารวมเดิม",
+    !/เคลื่อนเข้าสู่จุดเปลี่ยนที่สำคัญ|ความเข้าใจตนเองคือกุญแจสู่ทุกทางออก|โชคชะตาอยู่ในมือของคุณเสมอ/.test(monthlySrc),
+  );
+  check(
+    "route สรุปรายเดือนใช้สรุปออฟไลน์ทั้งตอนไม่มีคีย์ · งบ AI เต็ม · โมเดลล่ม · ตอบใช้ไม่ได้",
+    ["no_api_key", "ai_cap", "models_down", "unusable_output"].every((r) => monthlySrc.includes(r)) &&
+      !monthlySrc.includes("ทุกโมเดล Gemini เรียกไม่สำเร็จ"),
+  );
+  const historySrc = fs.readFileSync(path.resolve("src/components/history/ReadingHistoryModal.tsx"), "utf8");
+  check("หน้าประวัติบอกผู้ใช้เมื่อสรุปรายเดือนไม่ได้มาจาก AI", /monthlySummary\.fallback &&/.test(historySrc));
+
+  // ── 10. คำตอบสำรองของแชทถามต่อ ───────────────────────────────────────
+  console.log("\n💬 10. คำตอบสำรองของแชท (chat-fallback)");
+  const chatDrawn = ["swords-10", "cups-02", "major-19"].map((id, order) => ({
+    order,
+    cardIndex: DECK.findIndex((c) => c.id === id),
+    isReversed: false,
+  }));
+  const chatRec = { drawn: chatDrawn, spreadId: "three-card", category: "love" };
+  const withResult = {
+    ...chatRec,
+    result: { timing: "ภายใน 1-2 สัปดาห์นี้", advice: ["ส่งข้อความสั้น ๆ ทักเขาก่อน", "อย่ารีบถามเรื่องอนาคต", "🧘 หายใจลึก ๆ"], summary: "ภาพรวมของคำอ่านจริง" },
+  };
+  const ask = (q: string, record: object = chatRec, lang: "th" | "en" = "th", personaId = "warm") =>
+    buildOfflineChatReply({ userQuestion: q, personaId, lang, record: record as never });
+  check("ไม่จับ \"ตัดสินใจ\" เป็นคำถามความรัก (บั๊กเดิม)", detectChatIntent("ตัดสินใจยังไงดี") !== "love");
+  check("\"สรุปอีกทีได้ไหม\" เป็นคำขอสรุป ไม่ใช่คำถามใช่/ไม่ใช่", detectChatIntent("สรุปอีกทีได้ไหม") === "summary");
+  check("ถามเวลา ➔ ใช้กรอบเวลาจากคำอ่านจริงของผู้ใช้", ask("เมื่อไหร่จะได้คุยกัน", withResult).includes("ภายใน 1-2 สัปดาห์นี้"));
+  check("ถามวิธี ➔ ใช้คำแนะนำจากคำอ่านจริง (ไม่เอาข้อฝึกสติ)", ask("ควรทำยังไงดี", withResult).includes("ส่งข้อความสั้น ๆ ทักเขาก่อน") && !ask("ควรทำยังไงดี", withResult).includes("🧘"));
+  check("ขอสรุป ➔ ใช้บทสรุปจากคำอ่านจริง", ask("สรุปอีกทีได้ไหม", withResult).includes("ภาพรวมของคำอ่านจริง"));
+  check("ถามถึงไพ่ตามชื่อ ➔ ตอบเรื่องไพ่ใบนั้นในช่องของมัน", ask("ดวงอาทิตย์หมายถึงอะไร").includes("ดวงอาทิตย์ในช่องอนาคต"));
+  check("ถามข้อควรระวัง ➔ ชี้ไพ่ที่เตือนจริง (สิบแห่งดาบ)", ask("มีอะไรต้องระวังไหม").includes("สิบแห่งดาบ"));
+  check(
+    "เปิดไพ่เรื่องรักแต่ถามเรื่องงาน ➔ ใช้ความหมายหมวดงาน ไม่ใช่หมวดรัก",
+    ask("เรื่องงานจะเป็นยังไง").includes(DECK.find((c) => c.id === "major-19")!.meanings.work.upright.slice(0, 20)),
+  );
+  const chatSamples = ["เขาจะกลับมาไหม", "เมื่อไหร่จะดีขึ้น", "ควรทำยังไงดี", "มีอะไรต้องระวังไหม", "เรื่องงานจะเป็นยังไง"].map((q) => ask(q));
+  check(
+    "ไม่มีประโยคกุข้อมูลเดิม (สัญญาณบวกภายใน 7 วัน · ทิศทางเป็นบวก · ระวังสุขภาพ)",
+    !chatSamples.some((t) => /ภายใน 7 วัน|ทิศทางโดยรวมเป็นบวก|เรื่องสุขภาพ/.test(t)),
+  );
+  check("ทุกคำตอบอ้างไพ่ที่เปิดจริงอย่างน้อยหนึ่งใบ", chatSamples.every((t) => chatDrawn.some((d) => t.includes(cardByIndex(d.cardIndex)!.nameTh))));
+  check("ไม่มีวงเล็บติดอักษรไทยในคำตอบแชท", chatSamples.every((t) => !/\)[\u0E00-\u0E7F]/.test(t)));
+  const enSamples = ["When will things improve?", "What should I do next?", "Should I quit?", "Tell me about The Sun"].map((q) => ask(q, chatRec, "en", "direct"));
+  check("[en] คำตอบแชทไม่มีอักษรไทยหลุด", enSamples.every((t) => !THAI.test(t)), enSamples.find((t) => THAI.test(t)));
+  check("[en] แยกประเภทคำถามได้ (ไม่ใช่ประโยคเดียวกันทุกคำถาม)", new Set(enSamples).size === enSamples.length);
+  check("ไม่มีไพ่ให้อ้าง ➔ บอกให้โหลดใหม่ ไม่เดาคำตอบ (กฎเหล็กข้อ 14)", /โหลดคำอ่านใหม่/.test(ask("อะไรก็ได้", {})));
+  const chatRouteSrc = fs.readFileSync(path.resolve("src/app/api/reading/[id]/chat/route.ts"), "utf8");
+  check("route แชทใช้ buildOfflineChatReply และยังตรวจสัญญาณวิกฤตก่อน", /buildOfflineChatReply\(/.test(chatRouteSrc) && /checkQuestion\(userQuestion, lang\)/.test(chatRouteSrc));
 
   // ── สรุป ────────────────────────────────────────────────────────────
   console.log("\n══════════════════════════════════════════════════════════════════");
