@@ -96,9 +96,10 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
       };
     });
 
-  const createReadingImageBlob = (format: "post" | "story" = "story"): Promise<Blob> =>
+  const createReadingImageBlob = (format: "post" | "story" = "story", mime?: "image/png" | "image/jpeg"): Promise<Blob> =>
     renderShareCard({
       format,
+      mime,
       isEnglish,
       spreadName,
       question,
@@ -122,10 +123,10 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
     let alive = true;
     let url: string | null = null;
     setImageError(false);
-    createReadingImageBlob("story")
+    createReadingImageBlob("story", "image/jpeg")
       .then((blob) => {
         if (!alive) return;
-        storyFileRef.current = new File([blob], "seertarot-reading.png", { type: "image/png" });
+        storyFileRef.current = new File([blob], "seertarot-reading.jpg", { type: "image/jpeg" });
         url = URL.createObjectURL(blob);
         setPreviewUrl(url);
       })
@@ -159,22 +160,59 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
     return true;
   };
 
-  /** แชร์ภาพผ่านหน้าต่างแชร์ของเครื่อง (เลือก LINE / IG / FB / TikTok ได้ในนั้น) — ต้องเรียกตรงจาก onClick */
-  const handleNativeShare = (source: "native" | "instagram" | "tiktok" | "facebook") => {
-    soundManager.playCardSelectSound();
-    trackEvent("share_click", { platform: source, spread_id: spreadName });
+  type ShareTarget = "native" | "line" | "facebook" | "instagram" | "tiktok" | "twitter" | "threads";
+  const APP_NAME: Record<Exclude<ShareTarget, "native">, string> = {
+    line: "LINE",
+    facebook: "Facebook",
+    instagram: "Instagram",
+    tiktok: "TikTok",
+    twitter: "X",
+    threads: "Threads",
+  };
+
+  /** เครื่องนี้ส่ง "ไฟล์รูป" ผ่านหน้าต่างแชร์ของระบบได้ไหม (มือถือแทบทุกรุ่นได้ · คอมส่วนใหญ่ไม่ได้) */
+  const canShareImage = (): boolean => {
     const file = storyFileRef.current;
-    const canShareFile = !!file && typeof navigator !== "undefined" && !!navigator.canShare && navigator.canShare({ files: [file] });
-    if (file && canShareFile) {
-      navigator.share({ files: [file], text: shortCaption }).catch((err) => {
-        if (!isUserAbort(err)) {
-          downloadStory();
-          showToast(isEnglish ? "Image saved — post it from your gallery" : "บันทึกรูปแล้ว — เปิดแอปแล้วเลือกรูปจากคลังภาพได้เลย");
-        }
-      });
-      return;
+    return !!file && typeof navigator !== "undefined" && !!navigator.canShare && navigator.canShare({ files: [file] });
+  };
+
+  /**
+   * 📲 ส่ง "รูป" เข้าแอป — ทุกปุ่ม (แชร์รูปนี้ + ปุ่มโลโก้ทุกแอป) มาจบที่นี่เมื่อเครื่องแชร์ไฟล์ได้
+   *
+   * ทำไมปุ่มโลโก้ไม่เด้งเข้าแอปนั้นตรง ๆ: เว็บไม่มีทางยัดรูปเข้าแอปใดแอปหนึ่งโดยตรง
+   * ลิงก์แชร์ของ LINE / X / Threads / Facebook รับได้แค่ข้อความ+ลิงก์ (เจ้าของกดแล้วได้ "ลิงก์เว็บ" ไม่ใช่รูป)
+   * ทางเดียวที่ส่งรูปเข้าแอปได้คือหน้าต่างแชร์ของระบบ ➔ เปิดหน้าต่างนั้นพร้อมรูป + บอกให้แตะแอปที่เลือก
+   *
+   * ⚠️ ส่ง `files` อย่างเดียว ห้ามแนบ `text` ที่มี URL — แอปอย่าง Facebook / LINE เห็นลิงก์ในข้อความ
+   *    แล้วโชว์เป็นการ์ดลิงก์แทนรูป (อาการเดียวกับที่เจ้าของเจอ) · ในรูปมี seertarot.net อยู่แล้ว
+   * ⚠️ ต้องเรียกตรงจาก onClick ก่อน await ใด ๆ (ดู `storyFileRef`)
+   */
+  const shareImage = (target: ShareTarget): boolean => {
+    const file = storyFileRef.current;
+    if (!file || !canShareImage()) return false;
+    soundManager.playCardSelectSound();
+    trackEvent("share_click", { platform: target, spread_id: spreadName });
+    if (target !== "native") {
+      showToast(
+        isEnglish
+          ? `Tap "${APP_NAME[target]}" in the share sheet to post the image`
+          : `แตะ "${APP_NAME[target]}" ในหน้าต่างแชร์ เพื่อส่งรูปเข้าแอป`,
+      );
     }
+    navigator.share({ files: [file] }).catch((err) => {
+      if (!isUserAbort(err)) {
+        downloadStory();
+        showToast(isEnglish ? "Image saved — post it from your gallery" : "บันทึกรูปแล้ว — เปิดแอปแล้วเลือกรูปจากคลังภาพได้เลย");
+      }
+    });
+    return true;
+  };
+
+  /** ปุ่มหลัก "แชร์รูปนี้" */
+  const handleNativeShare = () => {
+    if (shareImage("native")) return;
     // เครื่องที่แชร์ไฟล์ไม่ได้ (ส่วนใหญ่คือคอมพิวเตอร์) ➔ บันทึกรูป + คัดลอกแคปชัน
+    trackEvent("share_click", { platform: "story_download", spread_id: spreadName });
     if (downloadStory()) {
       void copyToClipboard(shortCaption);
       showToast(isEnglish ? "Image saved and caption copied" : "บันทึกรูปและคัดลอกแคปชันแล้ว นำไปโพสต์ได้เลย");
@@ -184,9 +222,10 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
   };
 
   const handleShareLine = () => {
+    if (shareImage("line")) return;
     soundManager.playCardSelectSound();
     trackEvent("share_click", { platform: "line", spread_id: spreadName });
-    // line.me/R/share เปิดแอป LINE บนมือถือโดยตรง (บนคอมเปิดหน้าเว็บ LINE)
+    // คอมพิวเตอร์: ส่งได้แค่ข้อความ+ลิงก์ผ่าน LINE
     window.open(`https://line.me/R/share?text=${encodeURIComponent(shortCaption)}`, "_blank", "noopener,noreferrer");
   };
 
@@ -222,22 +261,15 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
   const isUserAbort = (err: unknown) => err instanceof DOMException && err.name === "AbortError";
 
   const handleShareToBrand = async (brand: "facebook" | "instagram" | "tiktok" | "twitter" | "threads") => {
-    // ⚠️ IG / TikTok ต้องเรียก share ทันทีก่อน await ใด ๆ (ดูเหตุผลที่ `storyFileRef`)
+    // มือถือ: ทุกแอปส่ง "รูป" ผ่านหน้าต่างแชร์ของระบบ — ต้องเรียกก่อน await ใด ๆ (ดู `shareImage`)
+    if (shareImage(brand)) return;
+    // จากตรงนี้ลงไป = เครื่องที่แชร์ไฟล์ไม่ได้ (คอมพิวเตอร์) ใช้ลิงก์แชร์ของแต่ละเว็บแทน
     if (brand === "instagram" || brand === "tiktok") {
-      handleNativeShare(brand);
+      handleNativeShare();
       return;
     }
     soundManager.playCardSelectSound();
     trackEvent("share_click", { platform: brand, spread_id: spreadName });
-
-    // Facebook บนมือถือ: ภาพพร้อมแล้ว ➔ หน้าต่างแชร์ของเครื่องทันที (เลือกแอป Facebook ได้ในนั้น)
-    if (brand === "facebook") {
-      const file = storyFileRef.current;
-      if (file && typeof navigator !== "undefined" && navigator.canShare && navigator.canShare({ files: [file] })) {
-        navigator.share({ files: [file], text: shortCaption }).catch(() => {});
-        return;
-      }
-    }
 
     // ⚠️ ต้องเปิดแท็บเปล่าไว้ "ทันทีแบบ sync" ในนี้ก่อน await ใด ๆ ทั้งสิ้น
     const needsPopup = brand === "twitter" || brand === "facebook" || brand === "threads";
@@ -305,11 +337,6 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
       return;
     }
 
-    // Instagram & TikTok ไม่มีลิงก์แชร์ทางเว็บ — ทางเดียวที่เด้งเข้าแอปได้คือหน้าต่างแชร์ของเครื่อง
-    if (brand === "instagram" || brand === "tiktok") {
-      handleNativeShare(brand);
-      return;
-    }
   };
 
   return (
@@ -410,7 +437,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
           <div className="grid grid-cols-2 gap-2.5">
             <button
               type="button"
-              onClick={() => handleNativeShare("native")}
+              onClick={handleNativeShare}
               disabled={!previewUrl}
               className="btn-gold-glass px-4 py-3 font-serif-th text-sm font-bold disabled:opacity-50 disabled:cursor-wait cursor-pointer"
             >
