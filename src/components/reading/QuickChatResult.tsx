@@ -1,5 +1,6 @@
 "use client";
 
+import { FallbackNotice } from "@/components/reading/FallbackNotice";
 import React, { useMemo } from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { motion } from "motion/react";
@@ -37,6 +38,8 @@ export interface QuickChatResultProps {
   question?: string;
   nickname?: string;
   onRetry?: () => void;
+  /** คำอ่านมาจากคลังความหมายไพ่ ไม่ใช่แม่หมอ AI — ขึ้น `FallbackNotice` ให้ผู้ใช้รู้และกดอ่านใหม่ได้ */
+  isFallback?: boolean;
 }
 
 export const QuickChatResult: React.FC<QuickChatResultProps> = ({
@@ -50,6 +53,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
   question,
   nickname,
   onRetry,
+  isFallback,
 }) => {
   const { isEnglish } = useLocale();
   // สำรับตามภาษาของหน้า — ไม่ลากคำทำนายอังกฤษมาให้ผู้ใช้ไทย (A8-02)
@@ -152,6 +156,9 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
             </div>
           );
         })()}
+
+      {/* คำอ่านจากคลังความหมายไพ่ (AI ไม่ว่าง) — บอกผู้ใช้ตรง ๆ พร้อมปุ่มให้แม่หมอ AI อ่านไพ่ชุดเดิมอีกรอบ */}
+      {isFallback && !isStreaming && !errorMsg && <FallbackNotice isEn={isEnglish} onRetry={onRetry} />}
 
       {/* Zero Fabricated Cards Fallback (Rule 14) */}
       {!cardData && (

@@ -36,6 +36,11 @@ export interface ReadingState {
   reading: Partial<Reading> | null;
   /** ข้อความผิดพลาดที่แสดงให้ผู้ใช้เห็น — ห้ามมีค่าพร้อมกับ `status === "streaming"` */
   error: string | null;
+  /**
+   * คำอ่านที่ได้มาจากคลังความหมายไพ่ (AI ทุกเจ้าไม่ว่าง) ไม่ใช่จากแม่หมอ AI
+   * ผู้ใช้ต้องรู้ตรง ๆ และกดให้ AI อ่านใหม่ได้ (ดู `FallbackNotice`) — มีค่าได้เฉพาะตอน `done`
+   */
+  fallback: boolean;
 }
 
 export type ReadingAction =
@@ -46,7 +51,7 @@ export type ReadingAction =
   | { type: "summary"; text: string }
   /** เซิร์ฟเวอร์สั่งเริ่มเรียบเรียงใหม่ระหว่างทาง (เฟรม `reset`) */
   | { type: "clearPartial" }
-  | { type: "done"; reading?: Partial<Reading> | null }
+  | { type: "done"; reading?: Partial<Reading> | null; fallback?: boolean }
   /** สตรีมสะดุด / ระบบขัดข้อง / ผู้ใช้กรอกไม่ครบ — ข้อความเดียวกันทั้งหมด */
   | { type: "fail"; message: string }
   /** หยุดสตรีมโดยไม่มีข้อความผิดพลาด (เช่นถูกกำแพงสิทธิ์กั้น — หน้าต่างสิทธิ์อธิบายแทน) */
@@ -56,7 +61,7 @@ export type ReadingAction =
   | { type: "restore"; reading: Partial<Reading> | null }
   | { type: "reset" };
 
-export const READING_INITIAL: ReadingState = { status: "idle", reading: null, error: null };
+export const READING_INITIAL: ReadingState = { status: "idle", reading: null, error: null, fallback: false };
 
 /** รวมคำอ่านรายใบแบบไม่ให้ซ้ำตำแหน่ง และเรียงตามตำแหน่งเสมอ */
 function mergeCard(current: Partial<Reading>, card: CardReading): Partial<Reading> {
@@ -71,7 +76,7 @@ export function readingReducer(state: ReadingState, action: ReadingAction): Read
 
   switch (action.type) {
     case "start":
-      return { status: "streaming", reading: {}, error: null };
+      return { status: "streaming", reading: {}, error: null, fallback: false };
     case "opening":
       return streaming ? { ...state, reading: { ...(state.reading ?? {}), opening: action.text } } : state;
     case "connections":
@@ -84,19 +89,19 @@ export function readingReducer(state: ReadingState, action: ReadingAction): Read
       return streaming ? { ...state, reading: {} } : state;
     case "done":
       if (!streaming) return state;
-      return { status: "done", reading: action.reading ?? state.reading ?? {}, error: null };
+      return { status: "done", reading: action.reading ?? state.reading ?? {}, error: null, fallback: Boolean(action.fallback) };
     case "fail":
       /*
        * หยุดสตรีม (ถ้ากำลังวิ่งอยู่) แล้วขึ้นข้อความ — แต่ **เก็บคำอ่านเท่าที่มาถึงแล้วไว้**
        * ผู้ใช้จะได้อ่านต่อจากตรงนั้นเมื่อกด "โหลดใหม่อีกครั้ง"
        */
-      return { status: streaming ? "idle" : state.status, reading: state.reading, error: action.message };
+      return { status: streaming ? "idle" : state.status, reading: state.reading, error: action.message, fallback: false };
     case "stop":
       return streaming ? { ...state, status: "idle" } : state;
     case "clearError":
       return state.error === null ? state : { ...state, error: null };
     case "restore":
-      return { status: action.reading ? "done" : "idle", reading: action.reading, error: null };
+      return { status: action.reading ? "done" : "idle", reading: action.reading, error: null, fallback: false };
     case "reset":
       return READING_INITIAL;
     default:
