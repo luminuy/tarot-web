@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { SPREADS, PUBLIC_SPREADS, type Spread } from "@/data/spreads";
 import { LocaleLink } from "@/components/ui/LocaleLink";
+import { RailArrows } from "@/components/ui/RailArrows";
 import {
   SparkleTabIcon,
   HeartTabIcon,
@@ -499,7 +500,9 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
         ส่วน <span> เป็นของประดับล้วน ๆ จึงต้อง `aria-hidden`
         ⚠️ ห้ามใส่ `gap-*` กลับเข้าไปในแถวนี้ — จุดกึ่งกลางจะเกิน 24px แล้วดูห่างผิดสัดส่วน
       */}
-      <div className="flex sm:hidden items-center justify-center pt-0.5 pb-1">
+      {/* แถวล่างของสไลด์: จุด (แตะ = เลือกผัง) ทางซ้าย + ลูกศรแบบ apple.com (เลื่อนดูอย่างเดียว) ทางขวา */}
+      <div className="flex sm:hidden items-center justify-between gap-3 pt-0.5 pb-1">
+      <div className="flex items-center">
         {filteredSpreads.map((spread, idx) => {
           const isCurrentActive = activeScrollIndex === idx;
           const isSelected = selectedSpread.id === spread.id;
@@ -528,6 +531,14 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
             </button>
           );
         })}
+      </div>
+        <RailArrows
+          isEnglish={isEnglish}
+          canPrev={activeScrollIndex > 0}
+          canNext={activeScrollIndex < filteredSpreads.length - 1}
+          onPrev={() => scrollToCard(Math.max(0, activeScrollIndex - 1))}
+          onNext={() => scrollToCard(Math.min(filteredSpreads.length - 1, activeScrollIndex + 1))}
+        />
       </div>
 
       {variant === "featured" && (

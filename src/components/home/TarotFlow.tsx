@@ -1591,7 +1591,9 @@ export default function TarotFlow({
           data-dir={stepDirection < 0 ? "back" : "forward"}
         >
           {currentStep === "SPREAD_SELECT" && (
-            <div className="space-y-10">
+            /* แต่ละบล็อกเป็นแถบสีสลับกันแบบ apple.com (`.home-band` ใน globals.css) — ระยะห่างมาจาก
+               padding ของแถบเอง ไม่ใช้ space-y แล้ว ไม่งั้นช่องว่างระหว่างแถบจะเป็นพื้นคนละสี */
+            <div>
               {/* ──────────────────────────────────────────────────────────────
                   ลำดับหน้าแรก (คำสั่งเจ้าของ 2026-09-21 รอบ 2):
                     1. <h1> + คำโปรย        — ต้องอยู่บนสุดเสมอ (ลำดับหัวข้อ h1 ➔ h2 ของ SEO)
@@ -1605,7 +1607,7 @@ export default function TarotFlow({
                   ⚠️ ห้ามย้าย <h1> ลงไปใต้บล็อกอื่น จะทำให้ <h2> ของ QuickFortunePicker
                      ขึ้นก่อน <h1> (ผิดลำดับหัวข้อ และเคยเป็นข้อจำกัดเดิมของไฟล์นั้น)
                   ────────────────────────────────────────────────────────── */}
-              <div className="space-y-6">
+              <div className="space-y-6 pb-11 sm:pb-16">
                 <div className="text-center space-y-3 sm:space-y-3.5 pt-2">
                   <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
                     {isEnglish ? "Interactive 1909 Rider-Waite Tarot with AI Oracle" : "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ออนไลน์ ฟรี กับแม่หมอ AI"}
@@ -1673,11 +1675,13 @@ export default function TarotFlow({
               </div>
 
               {/* บล็อกทำนายด่วน 1 ใบ (4 การ์ดยอดนิยม) — ทางหลักของผู้ใช้ส่วนใหญ่ */}
-              <QuickFortunePicker
-                currentNickname={nickname}
-                onSelectTopic={handleQuickFortuneSelect}
-                isLoading={loading}
-              />
+              <div className="home-band home-band-tint">
+                <QuickFortunePicker
+                  currentNickname={nickname}
+                  onSelectTopic={handleQuickFortuneSelect}
+                  isLoading={loading}
+                />
+              </div>
 
               {/*
                 ผังเต็ม — สำหรับคนที่อยากอ่านละเอียดกว่าไพ่ใบเดียว
@@ -1691,7 +1695,7 @@ export default function TarotFlow({
                    (ทั้งคู่เรียก `handleBeginReading` ตัวเดียวกัน) — ทางเริ่มดูดวงจึงไม่ได้หายไปไหน
                    ยังมีทั้งแถบนั้นและป๊อปอัพ "เริ่มการดูดวงเลย" ที่เด้งทันทีที่แตะการ์ดผัง
               */}
-              <div className="space-y-5 sm:space-y-6">
+              <div className="home-band space-y-5 sm:space-y-6">
                 <div className="text-center space-y-2.5 sm:space-y-3 max-w-2xl mx-auto px-4">
                   <div className="glass-chip inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 text-[11px] font-serif-th font-semibold tracking-wide text-gold-ink">
                     <span>

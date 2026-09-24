@@ -4,6 +4,7 @@ import { CardImage } from "@/components/card/CardImage";
 import { getHomeFaqs } from "@/data/home-seo";
 import { COUNTS } from "@/components/layout/nav-links";
 import { HomeZodiacSection } from "@/components/seo/HomeZodiacSection";
+import { HomeRailNav } from "@/components/seo/HomeRailNav";
 
 /**
  * 5 ขั้นตอนพิธีกรรมพยากรณ์ศักดิ์สิทธิ์ (Thai)
@@ -195,26 +196,19 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
   const homeFaqs = getHomeFaqs(isEnglish);
 
   return (
-    <div className="w-full mt-4 sm:mt-6 text-ink">
+    <div className="w-full text-ink">
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 0: ไพ่ยิปซี × โหราศาสตร์ (คำสั่งเจ้าของ 2026-09-24 — ให้อยู่หน้าแรก)
           ═══════════════════════════════════════════════════════════════ */}
       <HomeZodiacSection isEnglish={isEnglish} href={href} />
 
-      {/* Decorative Gold Divider */}
-      <div className="w-full flex items-center justify-center py-10 sm:py-14" aria-hidden="true">
-        <div className="flex items-center gap-3 text-line-warm/70">
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-line-warm" />
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-line-warm" />
-        </div>
-      </div>
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 1: วิธีดูดวงไพ่ทาโรต์ 5 ขั้นตอนศักดิ์สิทธิ์ (Ritual Stations)
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="how-it-works-title"
-        className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
+        className="home-band max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         {/* Section Header */}
         <div className="text-center space-y-2.5 sm:space-y-3">
@@ -251,82 +245,77 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
         </div>
 
         {/* 5 Sacred Ritual Altar Cards — Spacious, Beautifully Balanced */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 lg:gap-4 xl:gap-5">
-          {ritualSteps.map((step) => (
-            <div
-              key={step.stepNum}
-              className="altar-card-porcelain p-5 lg:p-4 xl:p-5 group flex flex-col justify-between relative overflow-hidden select-none"
-            >
-              <div className="space-y-3.5">
-                {/* Step Header */}
-                <div className="flex items-center justify-between pb-2.5 border-b border-line-warm/40">
-                  <span className="text-xs font-serif-th font-bold tracking-wider text-gold-ink uppercase flex items-center gap-1.5">
-                    {isEnglish ? `Step ${step.stepNum}` : `ขั้นที่ ${step.stepNum}`}
-                  </span>
-                  <span className="glass-chip text-[11px] font-serif-th font-medium text-muted px-2.5 py-0.5">
-                    {step.phase}
-                  </span>
-                </div>
-
-                {/* 1909 Rider-Waite Card Art */}
-                <div className="py-1 flex flex-col items-center">
-                  <div className="glass-tile !rounded-lg w-16 h-24 sm:w-18 sm:h-27 overflow-hidden group-hover:scale-105 transition duration-300">
-                    <CardImage
-                      image={step.cardImage}
-                      /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — span ใต้ภาพพิมพ์ step.cardName อยู่แล้ว */
-                      alt=""
-                      className="w-full h-full object-cover"
-                      sizes="72px"
-                    />
+        <div data-rail>
+          <div className="home-rail grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 lg:gap-4 xl:gap-5" data-rail-track>
+            {ritualSteps.map((step) => (
+              <div
+                key={step.stepNum}
+                className="altar-card-porcelain p-5 lg:p-4 xl:p-5 group flex flex-col justify-between relative overflow-hidden select-none"
+              >
+                <div className="space-y-3.5">
+                  {/* Step Header */}
+                  <div className="flex items-center justify-between pb-2.5 border-b border-line-warm/40">
+                    <span className="text-xs font-serif-th font-bold tracking-wider text-gold-ink uppercase flex items-center gap-1.5">
+                      {isEnglish ? `Step ${step.stepNum}` : `ขั้นที่ ${step.stepNum}`}
+                    </span>
+                    <span className="glass-chip text-[11px] font-serif-th font-medium text-muted px-2.5 py-0.5">
+                      {step.phase}
+                    </span>
                   </div>
-                  <span className="text-[11px] font-mono text-gold-ink font-semibold mt-2.5 text-center">
-                    {step.cardName}
-                  </span>
-                </div>
-
-                {/* Step Title & Subtitle */}
-                <div className="text-center space-y-1">
-                  <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
-                    {step.title}
-                  </h3>
-                  <p className="text-xs font-serif-th text-gold-ink font-medium">
-                    {step.subtitle}
+  
+                  {/* 1909 Rider-Waite Card Art */}
+                  <div className="py-1 flex flex-col items-center">
+                    <div className="glass-tile !rounded-lg w-16 h-24 sm:w-18 sm:h-27 overflow-hidden group-hover:scale-105 transition duration-300">
+                      <CardImage
+                        image={step.cardImage}
+                        /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — span ใต้ภาพพิมพ์ step.cardName อยู่แล้ว */
+                        alt=""
+                        className="w-full h-full object-cover"
+                        sizes="72px"
+                      />
+                    </div>
+                    <span className="text-[11px] font-mono text-gold-ink font-semibold mt-2.5 text-center">
+                      {step.cardName}
+                    </span>
+                  </div>
+  
+                  {/* Step Title & Subtitle */}
+                  <div className="text-center space-y-1">
+                    <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
+                      {step.title}
+                    </h3>
+                    <p className="text-xs font-serif-th text-gold-ink font-medium">
+                      {step.subtitle}
+                    </p>
+                  </div>
+  
+                  {/* Step Description */}
+                  <p className="font-serif-th text-xs text-muted leading-relaxed text-center pt-2.5 border-t border-line-warm/30">
+                    {step.desc}
                   </p>
                 </div>
-
-                {/* Step Description */}
-                <p className="font-serif-th text-xs text-muted leading-relaxed text-center pt-2.5 border-t border-line-warm/30">
-                  {step.desc}
-                </p>
+  
+                {/* Delicate Gold Corner Accents on Hover */}
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                  
+                  
+                  
+                  
+                </div>
               </div>
-
-              {/* Delicate Gold Corner Accents on Hover */}
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                
-                
-                
-                
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          <HomeRailNav isEnglish={isEnglish} />
         </div>
       </section>
 
-      {/* Decorative Gold Divider */}
-      <div className="w-full flex items-center justify-center py-10 sm:py-14" aria-hidden="true">
-        <div className="flex items-center gap-3 text-line-warm/70">
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-line-warm" />
-          
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-line-warm" />
-        </div>
-      </div>
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 2: ศาสตร์ 1909 RWS & PROVABLY FAIR (Sacred Triptych)
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="heritage-title"
-        className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
+        className="home-band home-band-tint max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         {/* Section Header */}
         <div className="text-center space-y-2.5 sm:space-y-3">
@@ -360,129 +349,124 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
         </div>
 
         {/* 3 Pillars of Wisdom */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          {/* Pillar 1: 1909 Historic Heritage */}
-          <div className="altar-card-porcelain p-7 sm:p-8 flex flex-col justify-between space-y-6 group">
-            <div className="space-y-4">
-              <div className="flex items-center justify-center gap-3 py-2">
-                <div className="glass-tile !rounded-lg w-14 h-21 overflow-hidden -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300">
-                  <CardImage image="major-01.jpg" alt="The Magician" className="w-full h-full object-cover" sizes="56px" />
+        <div data-rail>
+          <div className="home-rail grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8" data-rail-track>
+            {/* Pillar 1: 1909 Historic Heritage */}
+            <div className="altar-card-porcelain p-7 sm:p-8 flex flex-col justify-between space-y-6 group">
+              <div className="space-y-4">
+                <div className="flex items-center justify-center gap-3 py-2">
+                  <div className="glass-tile !rounded-lg w-14 h-21 overflow-hidden -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300">
+                    <CardImage image="major-01.jpg" alt="The Magician" className="w-full h-full object-cover" sizes="56px" />
+                  </div>
+                  <div className="glass-tile !rounded-lg w-14 h-21 overflow-hidden rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300">
+                    <CardImage image="major-21.jpg" alt="The World" className="w-full h-full object-cover" sizes="56px" />
+                  </div>
                 </div>
-                <div className="glass-tile !rounded-lg w-14 h-21 overflow-hidden rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300">
-                  <CardImage image="major-21.jpg" alt="The World" className="w-full h-full object-cover" sizes="56px" />
+  
+                <div className="text-center space-y-1">
+                  <span className="text-xs font-serif-th font-bold text-gold-ink tracking-wider uppercase block">
+                    {isEnglish ? "Pillar I" : "เสาเอกที่ ๑"}
+                  </span>
+                  <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
+                    {isEnglish ? "Original 1909 Classic Deck" : "สำรับคลาสสิก 1909 ดั้งเดิม"}
+                  </h3>
                 </div>
+  
+                <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed text-left">
+                  {isEnglish
+                    ? "The 1909 Rider-Waite-Smith deck, illustrated by Pamela Colman Smith, is a monumental work encoded with esoteric symbols, four elemental energies (Fire, Water, Air, Earth), and expressive body language designed to converse with your subconscious naturally and accurately."
+                    : "ไพ่ทาโรต์ชุด 1909 Rider-Waite-Smith รังสรรค์ภาพโดย Pamela Colman Smith เป็นสำรับอันทรงคุณค่าที่บรรจุรหัสสัญลักษณ์ อัญเชิญพลังแห่งธาตุทั้งสี่ (ไฟ น้ำ ลม ดิน) และสะท้อนภาษากาย ทิศทางสายตา เพื่อสื่อสารกับจิตใต้สำนึกได้อย่างแม่นยำและเป็นธรรมชาติที่สุด"}
+                </p>
               </div>
-
-              <div className="text-center space-y-1">
-                <span className="text-xs font-serif-th font-bold text-gold-ink tracking-wider uppercase block">
-                  {isEnglish ? "Pillar I" : "เสาเอกที่ ๑"}
+  
+              <div className="pt-4 border-t border-line-warm/40 text-center">
+                <span className="text-xs font-serif-th text-gold-ink font-semibold">
+                  {isEnglish ? "Authentic, Unaltered 1909 Artworks" : "ศิลปะต้นฉบับคมชัดไร้การดัดแปลง"}
                 </span>
-                <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
-                  {isEnglish ? "Original 1909 Classic Deck" : "สำรับคลาสสิก 1909 ดั้งเดิม"}
-                </h3>
               </div>
-
-              <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed text-left">
-                {isEnglish
-                  ? "The 1909 Rider-Waite-Smith deck, illustrated by Pamela Colman Smith, is a monumental work encoded with esoteric symbols, four elemental energies (Fire, Water, Air, Earth), and expressive body language designed to converse with your subconscious naturally and accurately."
-                  : "ไพ่ทาโรต์ชุด 1909 Rider-Waite-Smith รังสรรค์ภาพโดย Pamela Colman Smith เป็นสำรับอันทรงคุณค่าที่บรรจุรหัสสัญลักษณ์ อัญเชิญพลังแห่งธาตุทั้งสี่ (ไฟ น้ำ ลม ดิน) และสะท้อนภาษากาย ทิศทางสายตา เพื่อสื่อสารกับจิตใต้สำนึกได้อย่างแม่นยำและเป็นธรรมชาติที่สุด"}
-              </p>
             </div>
-
-            <div className="pt-4 border-t border-line-warm/40 text-center">
-              <span className="text-xs font-serif-th text-gold-ink font-semibold">
-                {isEnglish ? "Authentic, Unaltered 1909 Artworks" : "ศิลปะต้นฉบับคมชัดไร้การดัดแปลง"}
-              </span>
+  
+            {/* Pillar 2: Provably Fair Cryptographic Randomness */}
+            <div className="altar-card-porcelain p-7 sm:p-8 flex flex-col justify-between space-y-6 group">
+              <div className="space-y-4">
+                <div className="flex items-center justify-center gap-3 py-2">
+                  <div className="glass-tile !rounded-lg w-14 h-21 overflow-hidden -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300">
+                    <CardImage image="major-10.jpg" alt="Wheel of Fortune" className="w-full h-full object-cover" sizes="56px" />
+                  </div>
+                  <div className="glass-tile !rounded-lg w-14 h-21 overflow-hidden rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300">
+                    <CardImage image="major-11.jpg" alt="Justice" className="w-full h-full object-cover" sizes="56px" />
+                  </div>
+                </div>
+  
+                <div className="text-center space-y-1">
+                  <span className="text-xs font-serif-th font-bold text-gold-ink tracking-wider uppercase block">
+                    {isEnglish ? "Pillar II" : "เสาเอกที่ ๒"}
+                  </span>
+                  <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
+                    {isEnglish ? "Provably Fair Cryptographic Randomness" : "ระบบสุ่มโปร่งใส Provably Fair"}
+                  </h3>
+                </div>
+  
+                <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed text-left">
+                  {isEnglish
+                    ? "Unlike conventional computerized tarot simulators, SeerTarot harnesses SHA-256 cryptographic commitments before any cards are drawn (Commit-Reveal) via Web Crypto API. We guarantee 100% zero outcome manipulation—every card drawn comes purely from your own shuffle and touch."
+                    : "แตกต่างจากระบบสุ่มทาโรต์ทั่วไป SeerTarot ผสานเทคโนโลยีเข้ารหัส SHA-256 ล็อกลำดับสำรับไพ่ล่วงหน้าก่อนเปิด (Commit-Reveal) ผ่าน Web Crypto API การันตี 100% ว่าไม่มีการแทรกแซง ไม่มีการล็อกผล ทุกใบที่ได้มาจากการสับไพ่และเลือกด้วยมือคุณเองอย่างแท้จริง"}
+                </p>
+              </div>
+  
+              <div className="pt-4 border-t border-line-warm/40 text-center">
+                <span className="text-xs font-serif-th text-gold-ink font-semibold">
+                  {isEnglish ? "Independently Verifiable Audit Hashes" : "ตรวจสอบลำดับแฮชย้อนหลังได้ทุกครั้ง"}
+                </span>
+              </div>
+            </div>
+  
+            {/* Pillar 3: Jungian Psychology & Empathetic AI */}
+            <div className="altar-card-porcelain p-7 sm:p-8 flex flex-col justify-between space-y-6 group">
+              <div className="space-y-4">
+                <div className="flex items-center justify-center gap-3 py-2">
+                  <div className="glass-tile !rounded-lg w-14 h-21 overflow-hidden -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300">
+                    <CardImage image="major-02.jpg" alt="The High Priestess" className="w-full h-full object-cover" sizes="56px" />
+                  </div>
+                  <div className="glass-tile !rounded-lg w-14 h-21 overflow-hidden rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300">
+                    <CardImage image="major-17.jpg" alt="The Star" className="w-full h-full object-cover" sizes="56px" />
+                  </div>
+                </div>
+  
+                <div className="text-center space-y-1">
+                  <span className="text-xs font-serif-th font-bold text-gold-ink tracking-wider uppercase block">
+                    {isEnglish ? "Pillar III" : "เสาเอกที่ ๓"}
+                  </span>
+                  <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
+                    {isEnglish ? "Jungian Psychology & Empathetic AI" : "จิตวิทยาและการพยากรณ์ AI"}
+                  </h3>
+                </div>
+  
+                <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed text-left">
+                  {isEnglish
+                    ? "Our AI oracles are grounded in Carl Jung's analytical psychology (Archetypes & Synchronicity) and Golden Dawn elemental dignities. We illuminate the energies beneath your query to provide compassionate, empowering counsel that honors your agency."
+                    : "แม่หมอ AI ของเราได้รับการฝึกฝนบนหลักจิตวิเคราะห์เชิงลึกของ Carl Jung (Archetypes & Synchronicity) และคัมภีร์ Golden Dawn เคมีคู่ธาตุ วิเคราะห์พลังงานใต้คำถามเพื่อให้คำปรึกษาที่โอบอุ้มจิตใจ สร้างมุมมองใหม่ และเสริมพลังเจตจำนงให้คุณก้าวต่อไปได้อย่างมั่นใจ"}
+                </p>
+              </div>
+  
+              <div className="pt-4 border-t border-line-warm/40 text-center">
+                <span className="text-xs font-serif-th text-gold-ink font-semibold">
+                  {isEnglish ? "Empowering Insights & Sovereign Agency" : "คำปรึกษาเชิงบวก เสริมพลังเจตจำนง"}
+                </span>
+              </div>
             </div>
           </div>
-
-          {/* Pillar 2: Provably Fair Cryptographic Randomness */}
-          <div className="altar-card-porcelain p-7 sm:p-8 flex flex-col justify-between space-y-6 group">
-            <div className="space-y-4">
-              <div className="flex items-center justify-center gap-3 py-2">
-                <div className="glass-tile !rounded-lg w-14 h-21 overflow-hidden -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300">
-                  <CardImage image="major-10.jpg" alt="Wheel of Fortune" className="w-full h-full object-cover" sizes="56px" />
-                </div>
-                <div className="glass-tile !rounded-lg w-14 h-21 overflow-hidden rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300">
-                  <CardImage image="major-11.jpg" alt="Justice" className="w-full h-full object-cover" sizes="56px" />
-                </div>
-              </div>
-
-              <div className="text-center space-y-1">
-                <span className="text-xs font-serif-th font-bold text-gold-ink tracking-wider uppercase block">
-                  {isEnglish ? "Pillar II" : "เสาเอกที่ ๒"}
-                </span>
-                <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
-                  {isEnglish ? "Provably Fair Cryptographic Randomness" : "ระบบสุ่มโปร่งใส Provably Fair"}
-                </h3>
-              </div>
-
-              <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed text-left">
-                {isEnglish
-                  ? "Unlike conventional computerized tarot simulators, SeerTarot harnesses SHA-256 cryptographic commitments before any cards are drawn (Commit-Reveal) via Web Crypto API. We guarantee 100% zero outcome manipulation—every card drawn comes purely from your own shuffle and touch."
-                  : "แตกต่างจากระบบสุ่มทาโรต์ทั่วไป SeerTarot ผสานเทคโนโลยีเข้ารหัส SHA-256 ล็อกลำดับสำรับไพ่ล่วงหน้าก่อนเปิด (Commit-Reveal) ผ่าน Web Crypto API การันตี 100% ว่าไม่มีการแทรกแซง ไม่มีการล็อกผล ทุกใบที่ได้มาจากการสับไพ่และเลือกด้วยมือคุณเองอย่างแท้จริง"}
-              </p>
-            </div>
-
-            <div className="pt-4 border-t border-line-warm/40 text-center">
-              <span className="text-xs font-serif-th text-gold-ink font-semibold">
-                {isEnglish ? "Independently Verifiable Audit Hashes" : "ตรวจสอบลำดับแฮชย้อนหลังได้ทุกครั้ง"}
-              </span>
-            </div>
-          </div>
-
-          {/* Pillar 3: Jungian Psychology & Empathetic AI */}
-          <div className="altar-card-porcelain p-7 sm:p-8 flex flex-col justify-between space-y-6 group">
-            <div className="space-y-4">
-              <div className="flex items-center justify-center gap-3 py-2">
-                <div className="glass-tile !rounded-lg w-14 h-21 overflow-hidden -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300">
-                  <CardImage image="major-02.jpg" alt="The High Priestess" className="w-full h-full object-cover" sizes="56px" />
-                </div>
-                <div className="glass-tile !rounded-lg w-14 h-21 overflow-hidden rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300">
-                  <CardImage image="major-17.jpg" alt="The Star" className="w-full h-full object-cover" sizes="56px" />
-                </div>
-              </div>
-
-              <div className="text-center space-y-1">
-                <span className="text-xs font-serif-th font-bold text-gold-ink tracking-wider uppercase block">
-                  {isEnglish ? "Pillar III" : "เสาเอกที่ ๓"}
-                </span>
-                <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
-                  {isEnglish ? "Jungian Psychology & Empathetic AI" : "จิตวิทยาและการพยากรณ์ AI"}
-                </h3>
-              </div>
-
-              <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed text-left">
-                {isEnglish
-                  ? "Our AI oracles are grounded in Carl Jung's analytical psychology (Archetypes & Synchronicity) and Golden Dawn elemental dignities. We illuminate the energies beneath your query to provide compassionate, empowering counsel that honors your agency."
-                  : "แม่หมอ AI ของเราได้รับการฝึกฝนบนหลักจิตวิเคราะห์เชิงลึกของ Carl Jung (Archetypes & Synchronicity) และคัมภีร์ Golden Dawn เคมีคู่ธาตุ วิเคราะห์พลังงานใต้คำถามเพื่อให้คำปรึกษาที่โอบอุ้มจิตใจ สร้างมุมมองใหม่ และเสริมพลังเจตจำนงให้คุณก้าวต่อไปได้อย่างมั่นใจ"}
-              </p>
-            </div>
-
-            <div className="pt-4 border-t border-line-warm/40 text-center">
-              <span className="text-xs font-serif-th text-gold-ink font-semibold">
-                {isEnglish ? "Empowering Insights & Sovereign Agency" : "คำปรึกษาเชิงบวก เสริมพลังเจตจำนง"}
-              </span>
-            </div>
-          </div>
+          <HomeRailNav isEnglish={isEnglish} />
         </div>
       </section>
 
-      {/* Decorative Gold Divider */}
-      <div className="w-full flex items-center justify-center py-10 sm:py-14" aria-hidden="true">
-        <div className="flex items-center gap-3 text-line-warm/70">
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-line-warm" />
-          
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-line-warm" />
-        </div>
-      </div>
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 3: ผังพยากรณ์และสารานุกรม 78 ใบ (Explore Spreads & Cards)
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="spreads-and-cards-title"
-        className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
+        className="home-band max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-line-warm/50">
           <div className="space-y-2">
@@ -520,84 +504,87 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
         </div>
 
         {/* Featured Spreads Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <Link
-            href={href("/spreads/celtic-cross")}
-            prefetch={false}
-            className="altar-card-porcelain p-6 group block space-y-4"
-          >
-            <div className="flex items-center gap-4">
-              <div className="glass-tile !rounded-lg w-12 h-17 overflow-hidden flex-shrink-0 transition-colors">
-                {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h3> ในลิงก์เดียวกันบอกชื่อผังอยู่แล้ว */}
-                <CardImage image="major-10.jpg" alt="" className="w-full h-full object-cover" sizes="48px" />
+        <div data-rail>
+          <div className="home-rail grid grid-cols-1 sm:grid-cols-3 gap-6" data-rail-track>
+            <Link
+              href={href("/spreads/celtic-cross")}
+              prefetch={false}
+              className="altar-card-porcelain p-6 group block space-y-4"
+            >
+              <div className="flex items-center gap-4">
+                <div className="glass-tile !rounded-lg w-12 h-17 overflow-hidden flex-shrink-0 transition-colors">
+                  {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h3> ในลิงก์เดียวกันบอกชื่อผังอยู่แล้ว */}
+                  <CardImage image="major-10.jpg" alt="" className="w-full h-full object-cover" sizes="48px" />
+                </div>
+                <div>
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-gold-ink font-bold block">
+                    {isEnglish ? "10 CARDS · GRAND SPREAD" : "10 CARDS · ผังใหญ่"}
+                  </span>
+                  <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
+                    {isEnglish ? "Celtic Cross Spread" : "ผังเซลติกครอส (Celtic Cross)"}
+                  </h3>
+                </div>
               </div>
-              <div>
-                <span className="text-[11px] font-mono uppercase tracking-wider text-gold-ink font-bold block">
-                  {isEnglish ? "10 CARDS · GRAND SPREAD" : "10 CARDS · ผังใหญ่"}
-                </span>
-                <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
-                  {isEnglish ? "Celtic Cross Spread" : "ผังเซลติกครอส (Celtic Cross)"}
-                </h3>
+              <p className="text-xs sm:text-sm font-serif-th text-muted leading-relaxed">
+                {isEnglish
+                  ? "The crown jewel of tarot spreads. Delve into 10 dimensions of your situation—from subconscious roots and past influences to obstacles and ultimate resolution."
+                  : "ราชาแห่งผังพยากรณ์ ส่องชะตาชีวิตเจาะลึก 10 มิติ ทั้งจิตใต้สำนึก อดีต อุปสรรค และผลลัพธ์สูงสุด"}
+              </p>
+            </Link>
+  
+            <Link
+              href={href("/spreads/three-card")}
+              prefetch={false}
+              className="altar-card-porcelain p-6 group block space-y-4"
+            >
+              <div className="flex items-center gap-4">
+                <div className="glass-tile !rounded-lg w-12 h-17 overflow-hidden flex-shrink-0 transition-colors">
+                  {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h3> ในลิงก์เดียวกันบอกชื่อผังอยู่แล้ว */}
+                  <CardImage image="major-17.jpg" alt="" className="w-full h-full object-cover" sizes="48px" />
+                </div>
+                <div>
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-gold-ink font-bold block">
+                    {isEnglish ? "3 CARDS · POPULAR" : "3 CARDS · ยอดนิยม"}
+                  </span>
+                  <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
+                    {isEnglish ? "3-Card: Past, Present, Future" : "ผัง 3 ใบ: อดีต-ปัจจุบัน-อนาคต"}
+                  </h3>
+                </div>
               </div>
-            </div>
-            <p className="text-xs sm:text-sm font-serif-th text-muted leading-relaxed">
-              {isEnglish
-                ? "The crown jewel of tarot spreads. Delve into 10 dimensions of your situation—from subconscious roots and past influences to obstacles and ultimate resolution."
-                : "ราชาแห่งผังพยากรณ์ ส่องชะตาชีวิตเจาะลึก 10 มิติ ทั้งจิตใต้สำนึก อดีต อุปสรรค และผลลัพธ์สูงสุด"}
-            </p>
-          </Link>
-
-          <Link
-            href={href("/spreads/three-card")}
-            prefetch={false}
-            className="altar-card-porcelain p-6 group block space-y-4"
-          >
-            <div className="flex items-center gap-4">
-              <div className="glass-tile !rounded-lg w-12 h-17 overflow-hidden flex-shrink-0 transition-colors">
-                {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h3> ในลิงก์เดียวกันบอกชื่อผังอยู่แล้ว */}
-                <CardImage image="major-17.jpg" alt="" className="w-full h-full object-cover" sizes="48px" />
+              <p className="text-xs sm:text-sm font-serif-th text-muted leading-relaxed">
+                {isEnglish
+                  ? "The quintessential spread for clarity. Map out your life path, evolving transitions, and emerging trajectories with profound simplicity."
+                  : "ผังพยากรณ์สุดคลาสสิก เห็นภาพรวมเส้นทางชีวิต การเปลี่ยนแปลง และแนวโน้มข้างหน้าอย่างชัดเจน"}
+              </p>
+            </Link>
+  
+            <Link
+              href={href("/spreads/decision")}
+              prefetch={false}
+              className="altar-card-porcelain p-6 group block space-y-4"
+            >
+              <div className="flex items-center gap-4">
+                <div className="glass-tile !rounded-lg w-12 h-17 overflow-hidden flex-shrink-0 transition-colors">
+                  {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h3> ในลิงก์เดียวกันบอกชื่อผังอยู่แล้ว */}
+                  <CardImage image="major-07.jpg" alt="" className="w-full h-full object-cover" sizes="48px" />
+                </div>
+                <div>
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-gold-ink font-bold block">
+                    {isEnglish ? "5 CARDS · CROSSROADS" : "5 CARDS · ทางแยกชีวิต"}
+                  </span>
+                  <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
+                    {isEnglish ? "Two-Path Decision Spread" : "ผังทางแยกการตัดสินใจ"}
+                  </h3>
+                </div>
               </div>
-              <div>
-                <span className="text-[11px] font-mono uppercase tracking-wider text-gold-ink font-bold block">
-                  {isEnglish ? "3 CARDS · POPULAR" : "3 CARDS · ยอดนิยม"}
-                </span>
-                <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
-                  {isEnglish ? "3-Card: Past, Present, Future" : "ผัง 3 ใบ: อดีต-ปัจจุบัน-อนาคต"}
-                </h3>
-              </div>
-            </div>
-            <p className="text-xs sm:text-sm font-serif-th text-muted leading-relaxed">
-              {isEnglish
-                ? "The quintessential spread for clarity. Map out your life path, evolving transitions, and emerging trajectories with profound simplicity."
-                : "ผังพยากรณ์สุดคลาสสิก เห็นภาพรวมเส้นทางชีวิต การเปลี่ยนแปลง และแนวโน้มข้างหน้าอย่างชัดเจน"}
-            </p>
-          </Link>
-
-          <Link
-            href={href("/spreads/decision")}
-            prefetch={false}
-            className="altar-card-porcelain p-6 group block space-y-4"
-          >
-            <div className="flex items-center gap-4">
-              <div className="glass-tile !rounded-lg w-12 h-17 overflow-hidden flex-shrink-0 transition-colors">
-                {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h3> ในลิงก์เดียวกันบอกชื่อผังอยู่แล้ว */}
-                <CardImage image="major-07.jpg" alt="" className="w-full h-full object-cover" sizes="48px" />
-              </div>
-              <div>
-                <span className="text-[11px] font-mono uppercase tracking-wider text-gold-ink font-bold block">
-                  {isEnglish ? "5 CARDS · CROSSROADS" : "5 CARDS · ทางแยกชีวิต"}
-                </span>
-                <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
-                  {isEnglish ? "Two-Path Decision Spread" : "ผังทางแยกการตัดสินใจ"}
-                </h3>
-              </div>
-            </div>
-            <p className="text-xs sm:text-sm font-serif-th text-muted leading-relaxed">
-              {isEnglish
-                ? "Weigh outcomes between two critical paths with balanced clarity, illuminating unseen consequences to empower decisive action."
-                : "เปรียบเทียบผลลัพธ์ของ 2 ทางเลือกอย่างเป็นกลาง ช่วยให้ตัดสินใจเรื่องสำคัญได้อย่างกระจ่างแจ้ง"}
-            </p>
-          </Link>
+              <p className="text-xs sm:text-sm font-serif-th text-muted leading-relaxed">
+                {isEnglish
+                  ? "Weigh outcomes between two critical paths with balanced clarity, illuminating unseen consequences to empower decisive action."
+                  : "เปรียบเทียบผลลัพธ์ของ 2 ทางเลือกอย่างเป็นกลาง ช่วยให้ตัดสินใจเรื่องสำคัญได้อย่างกระจ่างแจ้ง"}
+              </p>
+            </Link>
+          </div>
+          <HomeRailNav isEnglish={isEnglish} />
         </div>
 
         {/* Featured Major Arcana Cards Grid */}
@@ -615,45 +602,40 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
               {isEnglish ? "View All 78 Cards →" : "ดูทั้งหมด 78 ใบ →"}
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 sm:gap-4">
-            {MAJOR_HIGHLIGHTS.map((card) => (
-              <Link
-                key={card.id}
-                href={href(`/cards/${card.id}`)}
-                prefetch={false}
-                className="glass-tile group flex flex-col items-center p-3 sm:p-4"
-              >
-                <div className="glass-tile !rounded-md w-14 h-21 overflow-hidden mb-2.5 group-hover:scale-105 transition-transform duration-200">
-                  {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <span> ใต้ภาพพิมพ์ชื่อไพ่อยู่แล้วทั้งสองภาษา */}
-                  <CardImage image={card.img} alt="" className="w-full h-full object-cover" sizes="56px" />
-                </div>
-                <span className="text-xs font-serif-th font-bold text-ink text-center line-clamp-1">
-                  {isEnglish ? card.nameEn : card.nameTh}
-                </span>
-                <span className="text-[10px] text-muted font-mono text-center line-clamp-1">
-                  {isEnglish ? `Major #${card.num}` : card.nameEn}
-                </span>
-              </Link>
-            ))}
+          <div data-rail>
+            <div className="home-rail home-rail-sm grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 sm:gap-4" data-rail-track>
+              {MAJOR_HIGHLIGHTS.map((card) => (
+                <Link
+                  key={card.id}
+                  href={href(`/cards/${card.id}`)}
+                  prefetch={false}
+                  className="glass-tile group flex flex-col items-center p-3 sm:p-4"
+                >
+                  <div className="glass-tile !rounded-md w-14 h-21 overflow-hidden mb-2.5 group-hover:scale-105 transition-transform duration-200">
+                    {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <span> ใต้ภาพพิมพ์ชื่อไพ่อยู่แล้วทั้งสองภาษา */}
+                    <CardImage image={card.img} alt="" className="w-full h-full object-cover" sizes="56px" />
+                  </div>
+                  <span className="text-xs font-serif-th font-bold text-ink text-center line-clamp-1">
+                    {isEnglish ? card.nameEn : card.nameTh}
+                  </span>
+                  <span className="text-[10px] text-muted font-mono text-center line-clamp-1">
+                    {isEnglish ? `Major #${card.num}` : card.nameEn}
+                  </span>
+                </Link>
+              ))}
+            </div>
+            <HomeRailNav isEnglish={isEnglish} />
           </div>
         </div>
       </section>
 
-      {/* Decorative Gold Divider */}
-      <div className="w-full flex items-center justify-center py-10 sm:py-14" aria-hidden="true">
-        <div className="flex items-center gap-3 text-line-warm/70">
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-line-warm" />
-          
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-line-warm" />
-        </div>
-      </div>
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 4: บทความและสาระน่ารู้ (Featured Articles with Card Companion)
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="articles-title"
-        className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
+        className="home-band home-band-tint max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-line-warm/50">
           <div className="space-y-2">
@@ -680,53 +662,48 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
         </div>
 
         {/* 4 Article Cards with Tarot Artwork Companion */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {featuredArticles.map((art) => (
-            <Link
-              key={art.slug}
-              href={href(`/blog/${art.slug}`)}
-              prefetch={false}
-              className="altar-card-porcelain p-6 group flex items-start gap-4 sm:gap-5"
-            >
-              <div className="glass-tile !rounded-lg w-14 h-21 sm:w-16 sm:h-24 overflow-hidden flex-shrink-0 transition-colors group-hover:scale-105 duration-300">
-                {/* ภาพประกอบล้วน — ป้ายหมวดหมู่และ <h3> ในลิงก์เดียวกันบอกเรื่องบทความอยู่แล้ว (INC-0125) */}
-                <CardImage image={art.cardImage} alt="" className="w-full h-full object-cover" sizes="64px" />
-              </div>
-
-              <div className="space-y-2 min-w-0 flex-1">
-                <span className="glass-chip text-[11px] font-serif-th font-semibold text-gold-ink px-3 py-0.5 inline-block">
-                  {art.category}
-                </span>
-                <h3 className="font-serif-th font-bold text-base sm:text-lg text-ink group-hover:text-gold-ink transition-colors line-clamp-2 leading-snug">
-                  {art.title}
-                </h3>
-                <p className="font-serif-th text-xs sm:text-sm text-muted line-clamp-2 leading-relaxed">
-                  {art.desc}
-                </p>
-                <span className="text-xs font-serif-th font-bold text-gold-ink inline-flex items-center gap-1 pt-1 group-hover:translate-x-0.5 transition-transform">
-                  {isEnglish ? "Read Full Article →" : "อ่านบทความฉบับเต็ม →"}
-                </span>
-              </div>
-            </Link>
-          ))}
+        <div data-rail>
+          <div className="home-rail grid grid-cols-1 md:grid-cols-2 gap-6" data-rail-track>
+            {featuredArticles.map((art) => (
+              <Link
+                key={art.slug}
+                href={href(`/blog/${art.slug}`)}
+                prefetch={false}
+                className="altar-card-porcelain p-6 group flex items-start gap-4 sm:gap-5"
+              >
+                <div className="glass-tile !rounded-lg w-14 h-21 sm:w-16 sm:h-24 overflow-hidden flex-shrink-0 transition-colors group-hover:scale-105 duration-300">
+                  {/* ภาพประกอบล้วน — ป้ายหมวดหมู่และ <h3> ในลิงก์เดียวกันบอกเรื่องบทความอยู่แล้ว (INC-0125) */}
+                  <CardImage image={art.cardImage} alt="" className="w-full h-full object-cover" sizes="64px" />
+                </div>
+  
+                <div className="space-y-2 min-w-0 flex-1">
+                  <span className="glass-chip text-[11px] font-serif-th font-semibold text-gold-ink px-3 py-0.5 inline-block">
+                    {art.category}
+                  </span>
+                  <h3 className="font-serif-th font-bold text-base sm:text-lg text-ink group-hover:text-gold-ink transition-colors line-clamp-2 leading-snug">
+                    {art.title}
+                  </h3>
+                  <p className="font-serif-th text-xs sm:text-sm text-muted line-clamp-2 leading-relaxed">
+                    {art.desc}
+                  </p>
+                  <span className="text-xs font-serif-th font-bold text-gold-ink inline-flex items-center gap-1 pt-1 group-hover:translate-x-0.5 transition-transform">
+                    {isEnglish ? "Read Full Article →" : "อ่านบทความฉบับเต็ม →"}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <HomeRailNav isEnglish={isEnglish} />
         </div>
       </section>
 
-      {/* Decorative Gold Divider */}
-      <div className="w-full flex items-center justify-center py-10 sm:py-14" aria-hidden="true">
-        <div className="flex items-center gap-3 text-line-warm/70">
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-line-warm" />
-          
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-line-warm" />
-        </div>
-      </div>
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 5: คำถามที่พบบ่อย (FAQ Accordion)
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="faq-title"
-        className="max-w-4xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10 pb-16 sm:pb-20"
+        className="home-band max-w-4xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         <div className="text-center space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-center gap-3">

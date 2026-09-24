@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { RailArrows } from "@/components/ui/RailArrows";
 import type { Category } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
 
@@ -414,7 +415,9 @@ export function QuickFortunePicker({
         ส่วน <span> เป็นของประดับล้วน ๆ จึงต้อง `aria-hidden`
         ⚠️ ห้ามใส่ `gap-*` กลับเข้าไปในแถวนี้ — จุดกึ่งกลางจะเกิน 24px แล้วดูห่างผิดสัดส่วน
       */}
-        <div className="flex sm:hidden items-center justify-center pt-1 pb-1">
+        {/* แถวล่างของสไลด์: จุดบอกตำแหน่ง (ซ้าย) + ลูกศรแบบ apple.com (ขวา) */}
+        <div className="flex sm:hidden items-center justify-between gap-3 pt-1 pb-1">
+        <div className="flex items-center">
           {QUICK_TOPICS.map((topic, index) => (
             <button
               key={topic.id}
@@ -433,6 +436,14 @@ export function QuickFortunePicker({
               />
             </button>
           ))}
+        </div>
+          <RailArrows
+            isEnglish={isEnglish}
+            canPrev={activeIndex > 0}
+            canNext={activeIndex < QUICK_TOPICS.length - 1}
+            onPrev={() => scrollToIndex(Math.max(0, activeIndex - 1))}
+            onNext={() => scrollToIndex(Math.min(QUICK_TOPICS.length - 1, activeIndex + 1))}
+          />
         </div>
       </div>
 
