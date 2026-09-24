@@ -296,43 +296,46 @@ export function ZodiacIndexBody({
 
         {daily}
 
-        <section aria-labelledby="zodiac-grid-title" className="space-y-4">
-          <h2 id="zodiac-grid-title" className="text-lg sm:text-xl font-serif-th font-bold text-ink text-center">
-            {isEnglish ? "All 12 signs" : "ไพ่ประจำทั้ง 12 ราศี"}
+        {compat}
+
+        {/* รายชื่อ 12 ราศีพร้อมช่วงวันเกิด — กะทัดรัด (วงล้อด้านบนมีภาพไพ่ครบแล้ว) */}
+        <section aria-labelledby="zodiac-list-title" className="space-y-4">
+          <h2 id="zodiac-list-title" className="text-xl sm:text-2xl font-serif-th font-bold text-ink text-center">
+            {isEnglish ? "All 12 signs and their dates" : "12 ราศีและช่วงวันเกิด"}
           </h2>
-          <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <ul className="grid gap-2 sm:grid-cols-2">
             {ZODIAC_SIGNS.map((sign) => {
               const major = card(sign.majorCardId);
               return (
                 <li key={sign.id}>
                   <Link
                     href={zodiacSignPath(sign.id)}
-                    className="altar-card-porcelain group flex flex-col items-center text-center gap-2 rounded-xl p-3 h-full hover:border-gold-ink transition-colors"
+                    className="group flex items-center gap-3 rounded-xl border border-line-warm bg-surface/70 px-3 py-2 hover:border-gold-ink transition-colors"
                   >
                     <CardImage
                       image={major.image}
                       cardId={major.id}
-                      alt={isEnglish ? `${sign.nameEn}: ${major.nameEn}` : `${sign.nameTh}: ${major.nameEn}`}
-                      sizes="(min-width: 768px) 120px, (min-width: 640px) 30vw, 42vw"
-                      className="w-full max-w-[120px] aspect-[1/1.7] rounded-md border border-line-warm object-cover"
+                      alt=""
+                      sizes="36px"
+                      className="w-9 aspect-[1/1.7] rounded border border-line-warm object-cover shrink-0"
                     />
-                    <span className="text-sm font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
-                      {isEnglish ? sign.nameEn : sign.nameTh}
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-baseline justify-between gap-2">
+                        <span className="text-sm font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
+                          {isEnglish ? sign.nameEn : sign.nameTh}
+                        </span>
+                        <span className="text-xs font-serif-th font-semibold text-gold-ink">{major.nameEn}</span>
+                      </span>
+                      <span className="block text-[12px] text-muted font-sans">
+                        {isEnglish ? "Western" : "สากล"} {signRange(sign, isEnglish)} · {isEnglish ? "Thai" : "ไทย"} {thaiSignRange(sign, isEnglish)}
+                      </span>
                     </span>
-                    <span className="text-[13px] text-muted font-sans leading-snug">
-                      {isEnglish ? "Western" : "สากล"} {signRange(sign, isEnglish)}
-                      <br />
-                      {isEnglish ? "Thai" : "ไทย"} {thaiSignRange(sign, isEnglish)}
-                    </span>
-                    <span className="text-xs font-serif-th font-semibold text-gold-ink">{major.nameEn}</span>
                   </Link>
                 </li>
               );
             })}
           </ul>
         </section>
-
-        {compat}
 
         <SeoArticleShell
           eyebrow={isEnglish ? "How it works" : "ไพ่กับดวงดาวเกี่ยวกันอย่างไร"}

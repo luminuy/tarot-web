@@ -50,3 +50,32 @@ export function clearMySign(): void {
     // storage ถูกปิด — ไม่มีอะไรให้ลบอยู่แล้ว
   }
 }
+
+/**
+ * ✦ บอก island อื่นในหน้าเดียวกันว่าผู้ใช้เพิ่งหาราศีเจอ (วงล้อ ➔ ดวงวันนี้ · ความเข้ากัน)
+ * island แต่ละตัว hydrate แยกกัน จึงคุยกันผ่าน window event แทน state ร่วม
+ */
+const SIGN_EVENT = "seer:zodiac-sign";
+
+/* island ที่ hydrate ทีหลัง (`client:visible`) พลาดเหตุการณ์ไปแล้ว — เก็บค่าล่าสุดไว้ให้อ่านตอนเริ่ม */
+let lastAnnounced: MySign | undefined;
+
+/** ราศีที่วงล้อประกาศล่าสุดในหน้านี้ ไม่มี ➔ ราศีที่บันทึกไว้ */
+export function currentSign(): MySign | undefined {
+  return lastAnnounced ?? readMySign();
+}
+
+export function announceSign(sign: MySign): void {
+  lastAnnounced = sign;
+  try {
+    window.dispatchEvent(new CustomEvent<MySign>(SIGN_EVENT, { detail: sign }));
+  } catch {
+    // ไม่มี window (ฝั่งเซิร์ฟเวอร์) — ไม่มีใครฟังอยู่แล้ว
+  }
+}
+
+export function onSignAnnounced(listener: (sign: MySign) => void): () => void {
+  const handler = (e: Event) => listener((e as CustomEvent<MySign>).detail);
+  window.addEventListener(SIGN_EVENT, handler);
+  return () => window.removeEventListener(SIGN_EVENT, handler);
+}
