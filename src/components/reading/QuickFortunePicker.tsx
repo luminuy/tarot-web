@@ -289,7 +289,7 @@ export function QuickFortunePicker({
         <div
           ref={carouselRef}
           onScroll={handleScroll}
-          className="flex flex-row overflow-x-auto snap-x snap-mandatory gap-3 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible"
+          className="rail-flat flex flex-row overflow-x-auto snap-x snap-mandatory gap-3 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible"
         >
           {QUICK_TOPICS.map((topic, index) => (
             <div
@@ -395,48 +395,8 @@ export function QuickFortunePicker({
           ))}
         </div>
 
-        {/* Pagination Pills เฉพาะหน้าจอมือถือ */}
-      {/*
-        🎯 จุดบอกตำแหน่งสไลด์ — พื้นที่กดต้อง >= 24x24 px (WCAG 2.2 · SC 2.5.8)
-        ---------------------------------------------------------------------------
-        วัดจริงบน production ก่อนแก้: จุดเหล่านี้กว้าง 6 x 6 px เล็กกว่าเกณฑ์ 4 เท่า
-
-        ⚠️ ข้อนี้ "รักษาหน้าตาเดิมเป๊ะทุกพิกเซล" เป็นไปไม่ได้ และนี่คือเหตุผล:
-        ข้อยกเว้น Spacing ของ SC 2.5.8 บอกว่าเป้าที่เล็กกว่า 24px จะผ่านได้ก็ต่อเมื่อ
-        วงกลมเส้นผ่าศูนย์กลาง 24px ที่วางทับจุดกึ่งกลางของแต่ละเป้า ต้องไม่ทับกัน
-        ของเดิมจุดกึ่งกลางห่างกันแค่ 12px (จุด 6px + gap 6px) วงกลมจึงทับกันแน่นอน
-        => จะผ่านเกณฑ์ได้ จุดกึ่งกลางต้องห่างกันอย่างน้อย 24px ไม่มีทางอื่น
-
-        วิธีที่เลือก: ห่อจุดด้วยปุ่ม 24x24 แล้วตัด gap ของแถวนี้เป็น 0
-        => จุดกึ่งกลางห่างกันพอดี 24px (วงกลมชนขอบกันแต่ไม่ทับ = ผ่าน)
-        => ตัวจุดที่ตาเห็นยังขนาดเดิมทุกประการ เปลี่ยนแค่ระยะห่างจาก 6px เป็น 18px
-
-        ⚠️ ห้ามย้าย `aria-label` ไปไว้ที่ <span> ข้างใน — ชื่อต้องอยู่ที่ปุ่ม
-        ส่วน <span> เป็นของประดับล้วน ๆ จึงต้อง `aria-hidden`
-        ⚠️ ห้ามใส่ `gap-*` กลับเข้าไปในแถวนี้ — จุดกึ่งกลางจะเกิน 24px แล้วดูห่างผิดสัดส่วน
-      */}
-        {/* แถวล่างของสไลด์: จุดบอกตำแหน่ง (ซ้าย) + ลูกศรแบบ apple.com (ขวา) */}
-        <div className="flex sm:hidden items-center justify-between gap-3 pt-1 pb-1">
-        <div className="flex items-center">
-          {QUICK_TOPICS.map((topic, index) => (
-            <button
-              key={topic.id}
-              type="button"
-              onClick={() => scrollToIndex(index)}
-              aria-label={isEnglish ? `Navigate to ${topic.titleEn || topic.title}` : `ไปยังหัวข้อ ${topic.title}`}
-              className="grid h-6 min-w-6 place-items-center focus:outline-none"
-            >
-              <span
-                aria-hidden="true"
-                className={`h-1.5 rounded-full transition-[width,background-color,box-shadow] duration-300 ${
-                  activeIndex === index
-                    ? "w-6 bg-gold-ink shadow-xs"
-                    : "w-1.5 bg-line hover:bg-gold/70"
-                }`}
-              />
-            </button>
-          ))}
-        </div>
+        {/* แถวล่างของสไลด์: ลูกศรแบบ apple.com ชิดขวา (เจ้าของสั่งถอดจุดบอกตำแหน่งออก 2026-09-24) */}
+        <div className="flex sm:hidden items-center justify-end pt-1 pb-1">
           <RailArrows
             isEnglish={isEnglish}
             canPrev={activeIndex > 0}
