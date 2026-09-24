@@ -80,7 +80,8 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
    * จอ `sm:` ขึ้นไปยังเป็นแท่นบูชาแบบเดิมทุกประการ — ที่นั่นไพ่เรียงครบได้จริง
    */
   const isPhone = useNarrowViewport();
-  const useRail = isPhone || spread.positions.length >= RAIL_THRESHOLD;
+  /* ผัง 1 ใบไม่มีอะไรให้ปัด — ใช้แท่นบูชาจัดกึ่งกลางแทน (รางชิดซ้ายเพราะ px-6 ไพ่ใบเดียวจึงเยื้อง) */
+  const useRail = (isPhone && spread.positions.length > 1) || spread.positions.length >= RAIL_THRESHOLD;
   /** หนึ่งใบต่อหนึ่งหน้าจอ (โผล่ใบถัดไปนิดหน่อยให้รู้ว่าปัดต่อได้) */
   const oneUp = isPhone;
 
@@ -202,14 +203,13 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
           }
         }}
       >
-        {/* Card Container with Active Glow */}
-        <div
-          className={`relative transition duration-300 rounded-lg group-focus-visible:ring-2 group-focus-visible:ring-gold-ink ${
-            isCurrentReading
-              ? "ring-4 ring-gold-ink ring-offset-2 ring-offset-[#F3EDE2] shadow-overlay scale-105"
-              : "hover:scale-105"
-          }`}
-        >
+        {/*
+          Card Container — ⚠️ ห้ามใส่ `scale-*` / `hover:scale-*` / `ring-*` ของไพ่ที่กำลังอ่านที่ชั้นนี้
+          `TarotCard` ยก+ขยายไพ่เองแล้ว (`.card-lift` = ขึ้น 10px · ขยาย 1.08 · มีวงทองบนหน้าไพ่)
+          ของเดิมขยายซ้ำอีก 1.05 ที่นี่ รวมเป็น ~1.15 เท่า ไพ่จึงล้นทับเส้นหัวแผงด้านบน
+          และทับ "ใบที่ 1" ด้านล่าง (บนมือถือ hover ยังค้างหลังแตะด้วย)
+        */}
+        <div className="relative rounded-lg group-focus-visible:ring-2 group-focus-visible:ring-gold-ink">
           {isRevealed && onZoomCard && drawn && (
             <button
               type="button"
@@ -244,7 +244,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
         </div>
 
         {/* Slot Position Name Tag */}
-        <div className={`text-center mt-2.5 ${oneUp ? "w-full px-1" : "w-28 sm:w-32"}`}>
+        <div className={`text-center mt-3.5 ${oneUp ? "w-full px-1" : "w-28 sm:w-32"}`}>
           <span className="text-[13px] text-gold-ink font-mono block font-semibold">
             {isEnglish ? `Card #${pos.index + 1}` : `ใบที่ ${pos.index + 1}`}
           </span>
@@ -316,7 +316,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
           <div
             ref={railRef}
             onScroll={syncRailEdges}
-            className="flex snap-x snap-mandatory items-start gap-4 sm:gap-6 overflow-x-auto overscroll-x-contain px-6 py-6 no-scrollbar"
+            className="flex snap-x snap-mandatory items-start gap-4 sm:gap-6 overflow-x-auto overscroll-x-contain px-6 pt-8 pb-6 no-scrollbar"
             role="group"
             aria-label={
               isEnglish
@@ -367,7 +367,8 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
         </div>
       ) : (
         /* ── ผังเล็ก: แท่นบูชา Unified Canvas แบบเดิม เห็นครบทุกใบในตาเดียว ── */
-        <div className="w-full flex-1 flex flex-wrap items-center justify-center gap-4 sm:gap-6 py-2 relative z-10 min-h-[220px]">
+        /* pt-8 = ที่ให้ไพ่ที่ถูกยกขึ้น (สูงสุด ~28px เหนือกล่อง) ไม่ข้ามเส้นหัวแผง */
+        <div className="w-full flex-1 flex flex-wrap items-center justify-center gap-4 sm:gap-6 pt-8 pb-2 relative z-10 min-h-[220px]">
           {spread.positions.map((pos) => renderSlot(pos))}
         </div>
       )}
