@@ -36,6 +36,11 @@ export interface ShareCardInput {
   personaName: string;
   summary: string;
   cards: ShareCardItem[];
+  /**
+   * ชนิดไฟล์ — ภาพที่ส่งเข้าแอปผ่านหน้าต่างแชร์ใช้ JPEG (PNG 1080×1920 หนัก ~1.9 MB ช้าตอนส่ง
+   * และบางแอปบีบซ้ำอยู่ดี) · ภาพที่อัปโหลดขึ้นเซิร์ฟเวอร์ (`/api/share/image`) ยังเป็น PNG ตามที่ route รับ
+   */
+  mime?: "image/png" | "image/jpeg";
 }
 
 const W = 1080;
@@ -369,6 +374,10 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
   }
 
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Canvas to Blob failed"))), "image/png");
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("Canvas to Blob failed"))),
+      input.mime ?? "image/png",
+      0.92,
+    );
   });
 }
