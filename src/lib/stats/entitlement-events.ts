@@ -5,7 +5,7 @@
  * ห้ามใส่ PII หรือค่าอิสระจากผู้ใช้ลงในชื่อ metric เด็ดขาด (กฎเดียวกับ `recordEvent`)
  */
 
-const REASONS = ["signup_required", "guest_used", "daily_exhausted", "members_only", "explore"] as const;
+const REASONS = ["signup_required", "guest_used", "daily_exhausted", "chat_unlimited", "members_only", "explore"] as const;
 
 const DIALOG_STAGES = ["shown", "primary", "secondary"] as const;
 

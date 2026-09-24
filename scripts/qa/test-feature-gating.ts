@@ -119,6 +119,15 @@ function main() {
   check("master_persona มี primaryAction เป็น credits", masterCopy?.primaryAction === "credits");
   check("master_persona มีข้อความเริ่ม 59.-", masterCopy?.primaryLabel.includes("59.-") || masterCopy?.primaryLabel.includes("เริ่ม"));
 
+  // ── 4.1 หมดสิทธิ์ถามต่อในแชท ≠ หมดโควตาเปิดไพ่ (เจ้าของเจอ "เปิดไพ่ครบแล้ว" คู่กับ "วันนี้เหลือ 1 จาก 1 ครั้ง") ──
+  const chatCopy = UPGRADE_COPY.chat_unlimited;
+  check("มี copy สำหรับ chat_unlimited (TH/EN)", Boolean(chatCopy) && Boolean(UPGRADE_COPY_EN.chat_unlimited));
+  check("chat_unlimited มี primaryAction เป็น credits", chatCopy?.primaryAction === "credits");
+  check(
+    "FollowUpChat ห้ามเปิดหน้าต่างด้วย daily_exhausted (สิทธิ์เปิดไพ่อาจยังเหลือ)",
+    !readSrc("src/components/reading/FollowUpChat.tsx").includes('requestUpgrade("daily_exhausted")'),
+  );
+
   // ── 4.5 กำแพง "สมัครก่อนเล่น" ต้องพูดความจริงกับคนที่ยังไม่เคยเปิดไพ่ ──
   check("GUEST_BLOCK_REASON = signup_required เมื่อบังคับสมัครก่อนเล่น", GUEST_BLOCK_REASON === "signup_required");
 

@@ -119,13 +119,13 @@ export function AccessDialog({
               <HourglassIcon className="h-5 w-5" />
             </span>
             <p className="font-serif-th text-xs text-muted">
-              {isEn ? "Your free reading returns" : "สิทธิ์ฟรีรอบใหม่มาถึง"}
+              {isEn ? "Your free reading is back" : "เปิดไพ่ฟรีได้อีกครั้ง"}
             </p>
             <p className="font-serif-th text-2xl font-bold text-ink-deep">
-              {countdown || (isEn ? "after midnight" : "หลังเที่ยงคืน")}
+              {countdown || (isEn ? "after midnight" : "หลังเที่ยงคืนนี้")}
             </p>
             <p className="font-serif-th text-xs text-muted">
-              {isEn ? `Resets every day at ${resetClockLabel(true)}` : `รีเซ็ตทุกวันตอน${resetClockLabel(false)}`}
+              {isEn ? `Free readings reset at ${resetClockLabel(true)}` : "สิทธิ์ฟรีรีเซ็ตทุกคืนตอนเที่ยงคืน เวลาไทย"}
             </p>
           </div>
         ) : (
@@ -185,23 +185,27 @@ export function AccessDialog({
 
         {/* ── ทางเลือกเมื่อโควตาวันนี้หมด ─────────────────────────── */}
         {/* สองกล่องขนาดเท่ากัน โครงเดียวกัน — ทางที่จ่ายเงินแค่มีขอบทองบอกว่าใช้ได้ทันที ไม่ตะโกนใส่ */}
+        {/* กล่อง "รอพรุ่งนี้" ใช้ได้เฉพาะตอนโควตาเปิดไพ่หมดจริง — ผังใหญ่ / แม่หมอพิเศษ / ถามต่อไม่จำกัด
+            รอพรุ่งนี้ก็ไม่ได้สิ่งนั้น เหลือกล่องเติมรอบกล่องเดียวเต็มแถว */}
         {showCredits && (
-          <section className="grid gap-3 sm:grid-cols-2">
-            <div className="glass-tile !rounded-2xl p-4 space-y-1.5">
-              <span className="flex items-center gap-2 font-serif-th text-sm font-bold text-ink-deep">
-                <HourglassIcon className="h-4 w-4 text-gold-ink" />
-                {isEn ? "Wait for tomorrow" : "รอสิทธิ์ฟรีพรุ่งนี้"}
-              </span>
-              <p className="font-serif-th text-[13px] leading-relaxed text-muted">
-                {isEn
-                  ? `Free. Come back after midnight and draw ${DAILY_LIMIT} more ${READINGS_EN}.`
-                  : `ไม่มีค่าใช้จ่าย กลับมาหลังเที่ยงคืน เปิดไพ่ได้อีก ${DAILY_LIMIT} ครั้ง`}
-              </p>
-            </div>
+          <section className={`grid gap-3 ${reason === "daily_exhausted" ? "sm:grid-cols-2" : ""}`}>
+            {reason === "daily_exhausted" && (
+              <div className="glass-tile !rounded-2xl p-4 space-y-1.5">
+                <span className="flex items-center gap-2 font-serif-th text-sm font-bold text-ink-deep">
+                  <HourglassIcon className="h-4 w-4 text-gold-ink" />
+                  {isEn ? "Come back tomorrow, free" : "รอพรุ่งนี้ ไม่เสียเงิน"}
+                </span>
+                <p className="font-serif-th text-[13px] leading-relaxed text-muted">
+                  {isEn
+                    ? `Your ${DAILY_LIMIT} free ${READINGS_EN} come back at midnight. Nothing to do.`
+                    : `พ้นเที่ยงคืนได้สิทธิ์เปิดไพ่ฟรี ${DAILY_LIMIT} ครั้งกลับมาเอง ไม่ต้องทำอะไรเพิ่ม`}
+                </p>
+              </div>
+            )}
             <div className="glass-tile !rounded-2xl p-4 space-y-1.5 ring-1 ring-gold/60">
               <span className="flex items-center gap-2 font-serif-th text-sm font-bold text-gold-ink">
                 <CoinSealIcon className="h-4 w-4" />
-                {isEn ? "Top up, continue now" : "เติมรอบ ใช้ต่อได้ทันที"}
+                {isEn ? "Top up, draw now" : "เติมรอบ เปิดต่อได้เลย"}
               </span>
               <p className="font-serif-th text-[13px] leading-relaxed text-ink-deep">
                 {isEn
