@@ -1,5 +1,5 @@
 /**
- * 📐 คลังผังพยากรณ์ 25 แบบ — **เรนเดอร์เป็น HTML ล้วน ไม่มี hydration** (R-02)
+ * 📐 คลังผังพยากรณ์ 26 แบบ — **เรนเดอร์เป็น HTML ล้วน ไม่มี hydration** (R-02)
  * ===========================================================================
  *
  * ## ทำไมไฟล์นี้ถึงไม่มี `useState` และไม่มี `onClick` แม้แต่ตัวเดียว
@@ -22,7 +22,7 @@
  *
  * เดิม HTML ที่เซิร์ฟเวอร์ส่งออกไปมีผังแค่ 6 ใบของแท็บ "ยอดนิยมแนะนำ" อีก 19 ใบโผล่
  * ต่อเมื่อผู้ใช้กดแท็บ (นี่คือเหตุผลที่ต้องมีสารบัญฝั่งเซิร์ฟเวอร์เพิ่มใน `spreads-index.tsx`)
- * ตอนนี้ **เนื้อหาของทั้ง 25 ผังอยู่ใน HTML ดิบครบทุกใบ** ตั้งแต่ไบต์แรกที่บอตและผู้ใช้ได้รับ
+ * ตอนนี้ **เนื้อหาของทั้ง 26 ผังอยู่ใน HTML ดิบครบทุกใบ** ตั้งแต่ไบต์แรกที่บอตและผู้ใช้ได้รับ
  *
  * ⚠️ **ห้ามใส่ `client:*` กลับเข้าไปที่ `<SpreadsLibraryRoot>`** — จะได้ทั้งสองต้นทุนพร้อมกัน
  * (HTML ที่โตขึ้นจากการเรนเดอร์ครบ 25 ใบ + JS ที่ตั้งใจตัดทิ้ง) ด่านงบบันเดิลเฝ้าอยู่
@@ -91,7 +91,7 @@ const TAB_MEMBERS: Record<string, string[]> = {
   recommended: ["daily", "quick", "yes-no", "three-card", "situation-solution", "celtic-cross"],
   love: ["love", "how-they-feel", "ex-reconciliation", "soulmate", "three-card"],
   career: ["career", "money", "career-switch", "decision", "inner-potential"],
-  master: ["celtic-cross", "year-ahead", "weekly", "chakra", "monthly"],
+  master: ["celtic-cross", "year-ahead", "twelve-houses", "weekly", "chakra", "monthly"],
 };
 
 /** แท็บที่เปิดมาเป็นค่าเริ่มต้น — ต้องตรงกับค่าเริ่มต้นในสคริปต์สลับแท็บ */
@@ -176,7 +176,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
       </div>
 
       {/*
-        25 Spreads Grid — เรนเดอร์ครบทุกใบตั้งแต่ตอนบิลด์
+        26 Spreads Grid — เรนเดอร์ครบทุกใบตั้งแต่ตอนบิลด์
         ใบที่ไม่ได้อยู่ในแท็บที่เปิดอยู่ถูกซ่อนด้วยแอตทริบิวต์ `hidden`
         (ซ่อนจากทั้งสายตาและโปรแกรมอ่านหน้าจอ — ไม่ใช่แค่ `opacity: 0`)
       */}

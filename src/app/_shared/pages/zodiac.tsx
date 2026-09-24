@@ -344,6 +344,7 @@ export function ZodiacIndexBody({
           faqs={faqs}
           /* ⚠️ SeoArticleShell ไม่เติม /en ให้เอง (A6-09) — ต้องแปลงเส้นทางตามภาษาก่อนส่งเข้าไป */
           links={[
+            { label: isEnglish ? "Twelve Houses spread" : "ผังไพ่ 12 เรือนชะตา", href: "/spreads/twelve-houses" },
             { label: isEnglish ? "Tarot Birth Card" : "คำนวณไพ่ประจำตัว (Birth Card)", href: "/cards/birth-card" },
             { label: isEnglish ? "All 78 cards" : "สารานุกรมไพ่ 78 ใบ", href: "/cards" },
             { label: isEnglish ? "Daily tarot" : "ดูดวงไพ่ยิปซีรายวัน", href: "/daily" },

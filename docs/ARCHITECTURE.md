@@ -12,7 +12,7 @@ graph TD
     Safety -->|ผ่านการตรวจ| Commit[2. Provably-Fair SHA-256 Commitment]
     Commit --> Fan[3. 3D Interactive Card Fan 78 ใบ]
     Fan -->|ผู้ใช้สัมผัสแตะเลือกด้วยตนเอง| Pick[4. User Card Selection & Shuffle Verification]
-    Pick --> Spread[5. 25 Golden Ratio Spreads Engine]
+    Pick --> Spread[5. 26 Golden Ratio Spreads Engine]
     Spread --> AI[6. Real-Time Gemini AI SSE Streamer]
     AI --> Persona[7. 5 Distinct Human-Like Personas]
     Persona --> Reveal[8. Cryptographic Proof Reveal & Audio Synth]
@@ -61,9 +61,9 @@ graph TD
 
 ---
 
-## 4. 25 ผังพยากรณ์ยอดนิยม (Golden Ratio 25 Spreads Architecture)
+## 4. 26 ผังพยากรณ์ยอดนิยม (Golden Ratio 26 Spreads Architecture)
 
-ระบบรองรับผังการเปิดไพ่ 25 แบบ ครอบคลุม 4 หมวดหมู่ จัดวางด้วยสัดส่วนทองคำแบบ **Zero-Clipping Unified Altar Canvas**:
+ระบบรองรับผังการเปิดไพ่ 26 แบบ ครอบคลุม 4 หมวดหมู่ จัดวางด้วยสัดส่วนทองคำแบบ **Zero-Clipping Unified Altar Canvas**:
 
 1. **ผัง 1 ใบ**: ไพ่ประจำวัน (Daily Card), คำแนะนำด่วน (Quick Oracle), ใช่หรือไม่ (Yes/No Single)
 2. **ผัง 2 ใบ**: ทางแยกสองทาง (Two Paths), ความรักสองหัวใจ (Two Hearts)
@@ -134,14 +134,14 @@ src/
 ├── components/
 │   ├── card/                        # TarotCard 3D, CardImage (WebP/AVIF), CardZoomModal
 │   ├── deck/                        # InteractiveCardFan (78 ใบ), ShuffleRitual
-│   ├── spread/                      # SpreadBoard, SpreadCardSelector (25 ผัง)
+│   ├── spread/                      # SpreadBoard, SpreadCardSelector (26 ผัง)
 │   ├── pick-a-card/                 # PickACardClient, TouchCarousel, CrystalPileSelector
 │   ├── reading/                     # StreamReader, FollowUpChat, ShareModal, PersonaCardSelector
 │   ├── history/, encyclopedia/      # ReadingHistoryModal, CardsExplorer
 │   └── ui/                          # MysticAltarCanvas, TarotArtIcons, Modal, Button
 ├── data/
 │   ├── cards/                       # ข้อมูลไพ่ 78 ใบ (780 ข้อความความหมาย 5 มิติ)
-│   ├── spreads.ts                   # ข้อมูล 25 ผังพยากรณ์และ 124 ตำแหน่ง
+│   ├── spreads.ts                   # ข้อมูล 26 ผังพยากรณ์และ 136 ตำแหน่ง
 │   ├── pick-a-card.ts               # ระบบ Pick A Card 8 หัวข้อ, 4 หินคริสตัล, สำรับหมุนเวียนเที่ยงคืน
 │   └── personas.ts                  # แม่หมอ 5 บุคลิก (warm, playful, direct, master, mystic)
 ├── lib/
@@ -151,7 +151,7 @@ src/
 │   ├── security/                    # Session Token & Stateless HMAC Signature
 │   └── tarot/                       # Provably Fair Shuffle & Single Source Card Resolver
 docs/
-├── TAROT_CARD_FEATURES.md           # สเปกระบบและสารบบไพ่ทาโรต์ 78 ใบ, 5 มิติ, ผัง 25 แบบ, Pick A Card 8 หัวข้อ
+├── TAROT_CARD_FEATURES.md           # สเปกระบบและสารบบไพ่ทาโรต์ 78 ใบ, 5 มิติ, ผัง 26 แบบ, Pick A Card 8 หัวข้อ
 ├── ARCHITECTURE.md                  # สถาปัตยกรรมระดับองค์กร (Enterprise Architecture Blueprint)
 ├── INCIDENT_LOG.md                  # บันทึกบทเรียนความผิดพลาดและกฎป้องกันถาวร
 └── KNOWN_ISSUES.md                  # ดัชนีสถานะบั๊กค้างและข้อจำกัดระบบ

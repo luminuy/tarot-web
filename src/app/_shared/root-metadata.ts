@@ -109,7 +109,7 @@ export const ROOT_KEYWORDS: Record<"th" | "en", string[]> = {
  *     ถ้าจะแก้ให้ดีขึ้นกว่าเดิม ให้แก้เป็นงานแยกที่ตั้งใจ ไม่ใช่ผลข้างเคียงของการย้าย)
  */
 export const ROOT_DESCRIPTION: Record<"th" | "en", string> = {
-  th: "ดูดวงไพ่ยิปซี (ไพ่ทาโรต์) ออนไลน์ฟรี สับไพ่และหยิบไพ่ด้วยมือคุณเอง 78 ใบ ให้แม่หมอ AI ทำนายสดทีละใบ มีผัง 25 แบบ ทั้งรายวัน ความรัก การงาน การเงิน",
+  th: "ดูดวงไพ่ยิปซี (ไพ่ทาโรต์) ออนไลน์ฟรี สับไพ่และหยิบไพ่ด้วยมือคุณเอง 78 ใบ ให้แม่หมอ AI ทำนายสดทีละใบ มีผัง 26 แบบ ทั้งรายวัน ความรัก การงาน การเงิน",
   en: "Free online tarot reading with the original 1909 Rider-Waite deck. Shuffle and draw all 78 cards yourself, then read a live AI interpretation.",
 };
 

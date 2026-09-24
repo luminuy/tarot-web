@@ -122,7 +122,7 @@ const PICK_A_CARD_LINKS_EN = [
   { href: "/en/daily", label: "Daily Tarot Reading" },
   { href: "/en/love/1-card", label: "Love One Card Draw" },
   { href: "/en/cards", label: "78 Tarot Cards Encyclopedia" },
-  { href: "/en/spreads", label: "25 Sacred Spreads" },
+  { href: "/en/spreads", label: "26 Sacred Spreads" },
 ];
 
 export function PickACardBodyEn({ ritual }: { ritual: ReactNode }) {

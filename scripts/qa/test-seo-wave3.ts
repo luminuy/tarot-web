@@ -22,8 +22,8 @@ function assert(condition: boolean, message: string) {
 // 1. Spreads Count & Integrity
 // นับเฉพาะผังที่ผู้ใช้เลือกเองได้ — ผังภายในไม่มีหน้าเว็บของตัวเองจึงไม่เกี่ยวกับ SEO
 assert(
-  PUBLIC_SPREADS.length === 25,
-  `ผังพยากรณ์ที่ผู้ใช้เลือกได้ต้องมีครบ 25 แบบ (ปัจจุบัน: ${PUBLIC_SPREADS.length})`
+  PUBLIC_SPREADS.length === 26,
+  `ผังพยากรณ์ที่ผู้ใช้เลือกได้ต้องมีครบ 26 แบบ (ปัจจุบัน: ${PUBLIC_SPREADS.length})`
 );
 
 const expectedNewSpreads = ["love-six", "monthly-ten", "family", "luck", "study"];

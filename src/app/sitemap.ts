@@ -156,7 +156,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  // All 25 Spread Guide Pages
+  // All 26 Spread Guide Pages
   const spreadRoutes: MetadataRoute.Sitemap = PUBLIC_SPREADS.map((spread) => ({
     url: `${baseUrl}/spreads/${spread.id}`,
     lastModified: now,

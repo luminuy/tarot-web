@@ -445,7 +445,7 @@ export function DailyClient() {
                   {isEnglish ? "Spreads" : "ผังพยากรณ์"}
                 </span>
                 <h4 className="text-sm font-serif-th font-bold text-ink mt-1">
-                  {isEnglish ? "All 25 Tarot Spreads" : "ผังพยากรณ์ 25 แบบ"}
+                  {isEnglish ? "All 26 Tarot Spreads" : "ผังพยากรณ์ 26 แบบ"}
                 </h4>
                 <p className="text-xs text-muted mt-1">
                   {isEnglish

@@ -97,7 +97,7 @@ const BIRTH_CARD_LINKS_EN = [
   { href: "/en/cards", label: "78 Card Encyclopedia" },
   { href: "/en/daily", label: "Daily Tarot Card" },
   { href: "/en/love/1-card", label: "One Card Love Tarot" },
-  { href: "/en/spreads", label: "25 Tarot Spreads" },
+  { href: "/en/spreads", label: "26 Tarot Spreads" },
   { href: "/en", label: "Start a Reading" },
 ];
 

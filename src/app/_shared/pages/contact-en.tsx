@@ -151,7 +151,7 @@ export function ContactBodyEn() {
             <Link href="/en" prefetch={false} className="text-gold-ink underline hover:text-gold-ink">
               Sanctuary Home
             </Link>{" "}
-            to explore our 25 interactive spreads.
+            to explore our 26 interactive spreads.
           </p>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             If you are navigating severe emotional distress or thoughts of self-harm, please connect immediately with professional crisis services: call or text <strong>988</strong> (Suicide & Crisis Lifeline in the US and Canada), dial <strong>111 / 999</strong> (UK), <strong>112</strong> (EU), <strong>1323</strong> (Thailand Mental Health Hotline), or contact your local emergency department. Our email channel cannot provide immediate crisis care.
