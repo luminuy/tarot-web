@@ -6,6 +6,7 @@ import sitemap from "../../src/app/sitemap";
 import { SITE_ORIGIN } from "../../src/lib/config/site";
 import { assertNonEmptyCorpus } from "./lib/corpus";
 import { ZODIAC_SIGNS } from "../../src/data/zodiac";
+import { ZODIAC_ASPECTS, zodiacDistance } from "../../src/data/zodiac-compat";
 import { CARD_SUMMARIES } from "../../src/data/cards/summary";
 import { decanRanges, findThaiZodiacByDate, findZodiacByDate, thaiRanges } from "../../src/lib/tarot/zodiac";
 
@@ -410,6 +411,25 @@ assert(
   for (const sign of ZODIAC_SIGNS) {
     const ruler = cardById.get(sign.thai.rulerCardId);
     assert(norm(ruler?.astrology ?? "") === norm(sign.thai.rulerTh), `${sign.id}: ไพ่เจ้าเรือนแบบไทยต้องตรงกับ astrology ของไพ่ (${sign.thai.rulerCardId})`);
+  }
+
+  // ความเข้ากันของสองราศี: ระยะห่างสมมาตร · มุมหลักตรงกับธาตุ · ข้อความครบทุกมุม
+  const idx = (id: string) => ZODIAC_SIGNS.findIndex((s) => s.id === id);
+  for (const [x, y, want] of [
+    ["aries", "leo", 4], ["aries", "gemini", 2], ["aries", "cancer", 3], ["aries", "libra", 6],
+    ["pisces", "aries", 1], ["capricorn", "gemini", 5], ["virgo", "virgo", 0],
+  ] as const) {
+    assert(zodiacDistance(idx(x), idx(y)) === want && zodiacDistance(idx(y), idx(x)) === want, `ระยะ ${x}–${y} ต้องเป็น ${want} ทั้งสองทิศ`);
+  }
+  let trineSameElement = true;
+  for (let i = 0; i < 12; i++) for (let j = 0; j < 12; j++) {
+    if (zodiacDistance(i, j) === 4 && ZODIAC_SIGNS[i].element !== ZODIAC_SIGNS[j].element) trineSameElement = false;
+  }
+  assert(trineSameElement, "คู่ตรีโกณ (ระยะ 4) ต้องเป็นธาตุเดียวกันทุกคู่");
+  for (const [d, copy] of Object.entries(ZODIAC_ASPECTS)) {
+    assert(!/[\u0E00-\u0E7F]/.test(Object.values(copy.en).join(" ")), `มุม ${d}: ข้อความอังกฤษห้ามมีอักษรไทย`);
+    assert(copy.th.advice.includes("{a}") && copy.en.advice.includes("{a}"), `มุม ${d}: คำแนะนำต้องอ้างไพ่ {a}`);
+    assert(!/\p{Extended_Pictographic}/u.test(Object.values(copy.th).join(" ") + Object.values(copy.en).join(" ")), `มุม ${d}: ห้ามอิโมจิ`);
   }
 
   // หน้าราศีต้องมีจริงทั้งสองภาษา + อยู่ใน sitemap

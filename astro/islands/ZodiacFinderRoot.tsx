@@ -1,4 +1,5 @@
 import { ZodiacFinder, type ZodiacFinderItem } from "@/components/encyclopedia/ZodiacFinder";
+import { ZodiacCompatibility } from "@/components/encyclopedia/ZodiacCompatibility";
 import { LocaleProvider } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/types";
 
@@ -10,6 +11,15 @@ export function ZodiacFinderRoot({ signs, locale }: { signs: ZodiacFinderItem[];
   return (
     <LocaleProvider forcedLocale={locale}>
       <ZodiacFinder signs={signs} />
+    </LocaleProvider>
+  );
+}
+
+/** ✦ ความเข้ากันของสองราศี — island แยกเพราะวางคนละตำแหน่งในหน้า (ใช้ข้อมูลชุดเดียวกัน) */
+export function ZodiacCompatibilityRoot({ signs, locale }: { signs: ZodiacFinderItem[]; locale: Locale }) {
+  return (
+    <LocaleProvider forcedLocale={locale}>
+      <ZodiacCompatibility signs={signs} />
     </LocaleProvider>
   );
 }

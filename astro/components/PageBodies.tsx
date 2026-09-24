@@ -91,10 +91,18 @@ export function BirthCardBodyEnRoot({ calculator }: { calculator: ReactNode }) {
 }
 
 /** ✦ ไพ่ประจำราศี — หน้ารวม (มี island หาราศีส่งเข้ามาทาง slot) */
-export function ZodiacIndexBodyRoot({ locale, finder }: { locale: Locale; finder: ReactNode }) {
+export function ZodiacIndexBodyRoot({
+  locale,
+  finder,
+  compat,
+}: {
+  locale: Locale;
+  finder: ReactNode;
+  compat: ReactNode;
+}) {
   return (
     <LocaleProvider forcedLocale={locale}>
-      <ZodiacIndexBody locale={locale} finder={finder} />
+      <ZodiacIndexBody locale={locale} finder={finder} compat={compat} />
     </LocaleProvider>
   );
 }
