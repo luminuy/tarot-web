@@ -96,3 +96,28 @@ export function decanRanges<T extends ZodiacLookupItem>(
   });
   return out;
 }
+
+/* ───────────── ราศีแบบไทย (สุริยยาตร์) ───────────── */
+
+export interface ThaiZodiacLookupItem {
+  id: string;
+  thai: { start: MonthDay };
+}
+
+/** หาราศีแบบไทยจากวันเดือนเกิด — ใช้ตรรกะเดียวกับราศีสากล (ราศีละหนึ่งช่วง) */
+export function findThaiZodiacByDate<T extends ThaiZodiacLookupItem>(
+  signs: readonly T[],
+  month: number,
+  day: number,
+): T | undefined {
+  const asSingleSpan = signs.map((sign) => ({ id: sign.id, sign, decans: [{ start: sign.thai.start }] }));
+  return findZodiacByDate(asSingleSpan, month, day)?.sign.sign;
+}
+
+/** ช่วงวันของราศีแบบไทยแต่ละราศี */
+export function thaiRanges<T extends ThaiZodiacLookupItem>(
+  signs: readonly T[],
+): Map<string, { start: MonthDay; end: MonthDay }> {
+  const spans = decanRanges(signs.map((sign) => ({ id: sign.id, decans: [{ start: sign.thai.start }] })));
+  return new Map([...spans].map(([id, list]) => [id, list[0]]));
+}

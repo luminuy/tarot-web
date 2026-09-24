@@ -5,7 +5,15 @@ import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CardImage } from "@/components/card/CardImage";
 import { useLocale } from "@/lib/i18n";
 import type { MonthDay } from "@/data/zodiac";
-import { decanRanges, findZodiacByDate, formatMonthDay, isValidMonthDay, zodiacSignPath } from "@/lib/tarot/zodiac";
+import {
+  decanRanges,
+  findThaiZodiacByDate,
+  findZodiacByDate,
+  formatMonthDay,
+  isValidMonthDay,
+  thaiRanges,
+  zodiacSignPath,
+} from "@/lib/tarot/zodiac";
 
 /**
  * ✦ ข้อมูลราศีแบบย่อที่ island ต้องใช้จริงเท่านั้น
@@ -25,6 +33,8 @@ export interface ZodiacFinderItem {
   nameEn: string;
   major: ZodiacFinderCard;
   decans: { start: MonthDay; card: ZodiacFinderCard }[];
+  /** วันที่ดวงอาทิตย์ยกเข้าราศีนี้แบบไทย (สุริยยาตร์) */
+  thai: { start: MonthDay };
 }
 
 const MONTHS_TH = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
@@ -40,6 +50,9 @@ export function ZodiacFinder({ signs }: { signs: ZodiacFinderItem[] }) {
   const result = submitted ? findZodiacByDate(signs, submitted.month, submitted.day) : undefined;
   const range = result ? decanRanges(signs).get(result.sign.id)?.[result.decanIndex] : undefined;
   const decanCard = result ? result.sign.decans[result.decanIndex]?.card : undefined;
+  const thaiSign = submitted ? findThaiZodiacByDate(signs, submitted.month, submitted.day) : undefined;
+  const thaiRange = thaiSign ? thaiRanges(signs).get(thaiSign.id) : undefined;
+  const signName = (x: ZodiacFinderItem) => (isEnglish ? x.nameEn : x.nameTh);
   const cardName = (c: ZodiacFinderCard) => (isEnglish ? c.nameEn : `${c.nameTh} (${c.nameEn})`);
 
   const onSubmit = (e: React.FormEvent) => {
@@ -118,47 +131,76 @@ export function ZodiacFinder({ signs }: { signs: ZodiacFinderItem[] }) {
             {isEnglish ? "That date does not exist. Please check and try again." : "ไม่พบวันที่นี้ในปฏิทิน ลองตรวจสอบแล้วเลือกใหม่อีกครั้ง"}
           </p>
         )}
-        {result && decanCard && (
+        {result && decanCard && thaiSign && (
           <div className="altar-card-porcelain rounded-xl p-5 sm:p-6 space-y-5 anim-swap-rise">
-            <div className="text-center space-y-1">
-              <p className="text-xs font-serif-th font-semibold text-gold-ink">
-                {isEnglish ? "Your sign" : "ราศีของคุณ"}
-              </p>
-              <p className="text-2xl font-serif-th font-bold text-ink">
-                {isEnglish ? result.sign.nameEn : result.sign.nameTh}
-              </p>
-              {range && (
-                <p className="text-xs text-muted font-sans">
-                  {isEnglish ? "Your decan" : "ช่วงที่คุณเกิด"}: {result.decanIndex + 1}/3 ·{" "}
-                  {formatMonthDay(range.start, isEnglish)} – {formatMonthDay(range.end, isEnglish)}
-                </p>
-              )}
-            </div>
+            <p className="text-center text-xs font-serif-th font-semibold text-gold-ink">
+              {isEnglish ? "Your sign in both systems" : "ราศีของคุณทั้งสองระบบ"}
+            </p>
             <div className="grid grid-cols-2 gap-4">
               {[
-                { label: isEnglish ? "Zodiac card" : "ไพ่ประจำราศี", card: result.sign.major },
-                { label: isEnglish ? "Decan card" : "ไพ่ประจำช่วงวันเกิด", card: decanCard },
-              ].map(({ label, card }) => (
-                <Link key={card.id} href={`/cards/${card.id}`} className="group flex flex-col items-center text-center gap-2">
-                  <span className="text-xs font-serif-th font-semibold text-muted">{label}</span>
+                {
+                  key: "tropical",
+                  label: isEnglish ? "Western (tropical)" : "ราศีแบบสากล",
+                  sign: result.sign,
+                  span: range ? `${formatMonthDay(range.start, isEnglish)} – ${formatMonthDay(range.end, isEnglish)}` : "",
+                  spanLabel: isEnglish ? `decan ${result.decanIndex + 1}/3` : `ช่วงที่ ${result.decanIndex + 1}/3`,
+                },
+                {
+                  key: "thai",
+                  label: isEnglish ? "Thai (sidereal)" : "ราศีแบบไทย",
+                  sign: thaiSign,
+                  span: thaiRange ? `${formatMonthDay(thaiRange.start, isEnglish)} – ${formatMonthDay(thaiRange.end, isEnglish)}` : "",
+                  spanLabel: "",
+                },
+              ].map((col) => (
+                <Link key={col.key} href={zodiacSignPath(col.sign.id)} className="group flex flex-col items-center text-center gap-1.5">
+                  <span className="text-xs font-serif-th font-semibold text-muted">{col.label}</span>
+                  <span className="text-lg sm:text-xl font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
+                    {signName(col.sign)}
+                  </span>
                   <CardImage
-                    image={card.image}
-                    cardId={card.id}
-                    alt={cardName(card)}
-                    sizes="(min-width: 640px) 140px, 120px"
-                    className="w-[120px] sm:w-[140px] aspect-[1/1.7] rounded-lg border border-line-warm shadow-xs object-cover"
+                    image={col.sign.major.image}
+                    cardId={col.sign.major.id}
+                    alt={cardName(col.sign.major)}
+                    sizes="(min-width: 640px) 130px, 110px"
+                    className="w-[110px] sm:w-[130px] aspect-[1/1.7] rounded-lg border border-line-warm shadow-xs object-cover"
                   />
-                  <span className="text-xs sm:text-sm font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
-                    {cardName(card)}
+                  <span className="text-xs sm:text-sm font-serif-th font-bold text-ink">{cardName(col.sign.major)}</span>
+                  <span className="text-[13px] text-muted font-sans">
+                    {col.spanLabel ? `${col.spanLabel} · ` : ""}
+                    {col.span}
                   </span>
                 </Link>
               ))}
             </div>
+            <p className="text-[13px] text-muted font-sans leading-relaxed text-center">
+              {result.sign.id === thaiSign.id
+                ? isEnglish
+                  ? "Both systems agree — this sign's cards speak strongly for you."
+                  : "ทั้งสองระบบตรงกัน ไพ่ของราศีนี้จึงสะท้อนตัวคุณได้ชัดเป็นพิเศษ"
+                : isEnglish
+                  ? "Tarot was designed with the western zodiac, while Thai astrology follows the actual stars, about 24 days later. Read both cards and notice which one feels more like you."
+                  : "ไพ่ทาโรต์ออกแบบคู่กับราศีสากล ส่วนโหราศาสตร์ไทยนับตามตำแหน่งดาวจริงซึ่งช้ากว่าราว 24 วัน ลองอ่านทั้งสองใบ แล้วดูว่าใบไหนตรงกับตัวคุณมากกว่า"}
+            </p>
             <Link
-              href={zodiacSignPath(result.sign.id)}
-              className="btn-gold-glass block w-full text-center py-3 px-6 text-xs sm:text-sm font-serif-th font-bold"
+              href={`/cards/${decanCard.id}`}
+              className="group flex items-center gap-4 rounded-xl border border-line-warm p-3 hover:border-gold-ink transition-colors"
             >
-              {isEnglish ? `Read the full ${result.sign.nameEn} guide` : `อ่านคำทำนาย${result.sign.nameTh}ฉบับเต็ม`}
+              <CardImage
+                image={decanCard.image}
+                cardId={decanCard.id}
+                alt={cardName(decanCard)}
+                sizes="64px"
+                className="w-16 aspect-[1/1.7] rounded-md border border-line-warm object-cover shrink-0"
+              />
+              <span className="text-left space-y-0.5">
+                <span className="block text-xs font-serif-th font-semibold text-muted">
+                  {isEnglish ? "Your decan card (western system)" : "ไพ่ประจำช่วงวันเกิด (ระบบสากล)"}
+                </span>
+                <span className="block text-sm font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
+                  {cardName(decanCard)}
+                </span>
+              </span>
             </Link>
           </div>
         )}

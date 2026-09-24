@@ -55,6 +55,20 @@ export interface ZodiacCopy {
   advice: string;
 }
 
+/**
+ * ✦ ราศีแบบไทย (สุริยยาตร์ · Sidereal) — ราศีเดียวกัน แต่ดวงอาทิตย์ย้ายเข้าช้ากว่าแบบสากลราว 24 วัน
+ * วันที่เป็นค่าเฉลี่ยของปีปัจจุบัน (อาทิตย์ยกเข้าราศี) คลาดได้ ±1 วันตามปีและตามตำรา
+ *
+ * เจ้าเรือนใช้ **แบบไทยดั้งเดิม** (ดาว 7 ดวง + ราหู/เกตุ ไม่มีดาวยูเรนัส เนปจูน พลูโต)
+ * ต่างจากแบบสากลแค่ 3 ราศี: พิจิก = อังคาร · กุมภ์ = เสาร์ · มีน = พฤหัสบดี
+ */
+export interface ZodiacThai {
+  start: MonthDay;
+  rulerTh: string;
+  rulerEn: string;
+  rulerCardId: string;
+}
+
 export interface ZodiacSign {
   /** slug ของหน้าราศี (ดู `zodiacSignPath()` ใน src/lib/tarot/zodiac.ts) */
   id: string;
@@ -68,6 +82,8 @@ export interface ZodiacSign {
   rulerTh: string;
   rulerEn: string;
   rulerCardId: string;
+  /** ราศีแบบไทย (สุริยยาตร์) — ใช้กับไพ่ประจำราศี/เจ้าเรือนเท่านั้น (decan ของ Golden Dawn ผูกกับราศีสากล) */
+  thai: ZodiacThai;
   /** 3 ช่วงของราศี เรียงตามวันที่ */
   decans: readonly [ZodiacDecan, ZodiacDecan, ZodiacDecan];
   th: ZodiacCopy;
@@ -100,6 +116,7 @@ export const ZODIAC_SIGNS: readonly ZodiacSign[] = [
     rulerTh: "ดาวอังคาร",
     rulerEn: "Mars",
     rulerCardId: "major-16",
+    thai: { start: md(4, 14), rulerTh: "ดาวอังคาร", rulerEn: "Mars", rulerCardId: "major-16" },
     decans: [
       { start: md(3, 21), cardId: "wands-02", planetTh: "ดาวอังคาร", planetEn: "Mars" },
       { start: md(3, 31), cardId: "wands-03", planetTh: "ดวงอาทิตย์", planetEn: "Sun" },
@@ -136,6 +153,7 @@ export const ZODIAC_SIGNS: readonly ZodiacSign[] = [
     rulerTh: "ดาวศุกร์",
     rulerEn: "Venus",
     rulerCardId: "major-03",
+    thai: { start: md(5, 15), rulerTh: "ดาวศุกร์", rulerEn: "Venus", rulerCardId: "major-03" },
     decans: [
       { start: md(4, 21), cardId: "pentacles-05", planetTh: "ดาวพุธ", planetEn: "Mercury" },
       { start: md(5, 1), cardId: "pentacles-06", planetTh: "ดวงจันทร์", planetEn: "Moon" },
@@ -172,6 +190,7 @@ export const ZODIAC_SIGNS: readonly ZodiacSign[] = [
     rulerTh: "ดาวพุธ",
     rulerEn: "Mercury",
     rulerCardId: "major-01",
+    thai: { start: md(6, 15), rulerTh: "ดาวพุธ", rulerEn: "Mercury", rulerCardId: "major-01" },
     decans: [
       { start: md(5, 21), cardId: "swords-08", planetTh: "ดาวพฤหัสบดี", planetEn: "Jupiter" },
       { start: md(6, 1), cardId: "swords-09", planetTh: "ดาวอังคาร", planetEn: "Mars" },
@@ -208,6 +227,7 @@ export const ZODIAC_SIGNS: readonly ZodiacSign[] = [
     rulerTh: "ดวงจันทร์",
     rulerEn: "Moon",
     rulerCardId: "major-02",
+    thai: { start: md(7, 17), rulerTh: "ดวงจันทร์", rulerEn: "Moon", rulerCardId: "major-02" },
     decans: [
       { start: md(6, 21), cardId: "cups-02", planetTh: "ดาวศุกร์", planetEn: "Venus" },
       { start: md(7, 2), cardId: "cups-03", planetTh: "ดาวพุธ", planetEn: "Mercury" },
@@ -244,6 +264,7 @@ export const ZODIAC_SIGNS: readonly ZodiacSign[] = [
     rulerTh: "ดวงอาทิตย์",
     rulerEn: "Sun",
     rulerCardId: "major-19",
+    thai: { start: md(8, 17), rulerTh: "ดวงอาทิตย์", rulerEn: "Sun", rulerCardId: "major-19" },
     decans: [
       { start: md(7, 22), cardId: "wands-05", planetTh: "ดาวเสาร์", planetEn: "Saturn" },
       { start: md(8, 2), cardId: "wands-06", planetTh: "ดาวพฤหัสบดี", planetEn: "Jupiter" },
@@ -280,6 +301,7 @@ export const ZODIAC_SIGNS: readonly ZodiacSign[] = [
     rulerTh: "ดาวพุธ",
     rulerEn: "Mercury",
     rulerCardId: "major-01",
+    thai: { start: md(9, 17), rulerTh: "ดาวพุธ", rulerEn: "Mercury", rulerCardId: "major-01" },
     decans: [
       { start: md(8, 23), cardId: "pentacles-08", planetTh: "ดวงอาทิตย์", planetEn: "Sun" },
       { start: md(9, 2), cardId: "pentacles-09", planetTh: "ดาวศุกร์", planetEn: "Venus" },
@@ -316,6 +338,7 @@ export const ZODIAC_SIGNS: readonly ZodiacSign[] = [
     rulerTh: "ดาวศุกร์",
     rulerEn: "Venus",
     rulerCardId: "major-03",
+    thai: { start: md(10, 17), rulerTh: "ดาวศุกร์", rulerEn: "Venus", rulerCardId: "major-03" },
     decans: [
       { start: md(9, 23), cardId: "swords-02", planetTh: "ดวงจันทร์", planetEn: "Moon" },
       { start: md(10, 3), cardId: "swords-03", planetTh: "ดาวเสาร์", planetEn: "Saturn" },
@@ -352,6 +375,7 @@ export const ZODIAC_SIGNS: readonly ZodiacSign[] = [
     rulerTh: "ดาวพลูโต",
     rulerEn: "Pluto",
     rulerCardId: "major-20",
+    thai: { start: md(11, 16), rulerTh: "ดาวอังคาร", rulerEn: "Mars", rulerCardId: "major-16" },
     decans: [
       { start: md(10, 23), cardId: "cups-05", planetTh: "ดาวอังคาร", planetEn: "Mars" },
       { start: md(11, 2), cardId: "cups-06", planetTh: "ดวงอาทิตย์", planetEn: "Sun" },
@@ -388,6 +412,7 @@ export const ZODIAC_SIGNS: readonly ZodiacSign[] = [
     rulerTh: "ดาวพฤหัสบดี",
     rulerEn: "Jupiter",
     rulerCardId: "major-10",
+    thai: { start: md(12, 16), rulerTh: "ดาวพฤหัสบดี", rulerEn: "Jupiter", rulerCardId: "major-10" },
     decans: [
       { start: md(11, 23), cardId: "wands-08", planetTh: "ดาวพุธ", planetEn: "Mercury" },
       { start: md(12, 3), cardId: "wands-09", planetTh: "ดวงจันทร์", planetEn: "Moon" },
@@ -424,6 +449,7 @@ export const ZODIAC_SIGNS: readonly ZodiacSign[] = [
     rulerTh: "ดาวเสาร์",
     rulerEn: "Saturn",
     rulerCardId: "major-21",
+    thai: { start: md(1, 14), rulerTh: "ดาวเสาร์", rulerEn: "Saturn", rulerCardId: "major-21" },
     decans: [
       { start: md(12, 22), cardId: "pentacles-02", planetTh: "ดาวพฤหัสบดี", planetEn: "Jupiter" },
       { start: md(12, 31), cardId: "pentacles-03", planetTh: "ดาวอังคาร", planetEn: "Mars" },
@@ -460,6 +486,7 @@ export const ZODIAC_SIGNS: readonly ZodiacSign[] = [
     rulerTh: "ดาวยูเรนัส",
     rulerEn: "Uranus",
     rulerCardId: "major-00",
+    thai: { start: md(2, 13), rulerTh: "ดาวเสาร์", rulerEn: "Saturn", rulerCardId: "major-21" },
     decans: [
       { start: md(1, 20), cardId: "swords-05", planetTh: "ดาวศุกร์", planetEn: "Venus" },
       { start: md(1, 30), cardId: "swords-06", planetTh: "ดาวพุธ", planetEn: "Mercury" },
@@ -496,6 +523,7 @@ export const ZODIAC_SIGNS: readonly ZodiacSign[] = [
     rulerTh: "ดาวเนปจูน",
     rulerEn: "Neptune",
     rulerCardId: "major-12",
+    thai: { start: md(3, 14), rulerTh: "ดาวพฤหัสบดี", rulerEn: "Jupiter", rulerCardId: "major-10" },
     decans: [
       { start: md(2, 19), cardId: "cups-08", planetTh: "ดาวเสาร์", planetEn: "Saturn" },
       { start: md(3, 1), cardId: "cups-09", planetTh: "ดาวพฤหัสบดี", planetEn: "Jupiter" },
