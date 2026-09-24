@@ -1067,7 +1067,7 @@ html {
  *      หน่วงกันจุดละ 160ms) ยังหน่วงเท่าเดิม กลายเป็น "กระตุกทีละจุด" แทนที่จะนิ่งสนิท
  *   2. `scroll-behavior: smooth` — ไม่ถูกแตะเลย หน้าจึงยัง "ไหล" ตอนกดลิงก์ #anchor
  *      หรือ scrollIntoView ซึ่งเป็นการเคลื่อนไหวเต็มจอที่กระตุ้นอาการเวียนหัวมากที่สุด
- *   3. `view-transition` ของการเปลี่ยนหน้า — ปิดไว้แล้วที่ท้ายไฟล์ (`navigation: none`)
+ *   3. `view-transition` ของการเปลี่ยนหน้า — เปิดเฉพาะเมื่อ `prefers-reduced-motion: no-preference` (ท้ายไฟล์)
  *
  * ⚠️ ห้ามใช้ `animation: none !important` แทน — จะฆ่า animation ที่ทำหน้าที่สื่อ "สถานะ"
  * (สปินเนอร์กำลังโหลด) จนผู้ใช้ไม่รู้ว่าระบบยังทำงานอยู่ · ย่อให้สั้นจนมองไม่เห็นคือคำตอบที่ถูก
@@ -1900,21 +1900,26 @@ input.no-focus-ring:focus-visible {
   padding-top: max(1rem, env(safe-area-inset-top));
 }
 
-/* N-01: CSS View Transitions for smooth cross-document page navigation */
-@view-transition {
-  navigation: auto;
+/* N-01: เฟดข้ามหน้า (cross-document View Transition) — **เปิดเฉพาะจอที่ใช้เมาส์เท่านั้น**
+   ─────────────────────────────────────────────────────────────────────────────
+   ⛔ ห้ามเปิดบนมือถือ/จอสัมผัส (INC-0244) — เปิดหน้าแล้ว "จอว่างแวบ" ทุกครั้ง
+   ปกติตอนเปลี่ยนหน้าเบราว์เซอร์ "ค้างภาพหน้าเก่า" (paint holding) ไว้จนหน้าใหม่มีเนื้อหาให้วาดแล้ว
+   แต่พอเปิด View Transition เบราว์เซอร์จะเริ่มเฟดทันทีที่หน้าใหม่วาดได้เฟรมแรก
+   ซึ่งบนมือถือมักเป็นเฟรมที่ยังมีแค่พื้นหลัง (ตัวแยก HTML ยังไปไม่ถึงเนื้อหา)
+   ผลคือหน้าเก่าจางหาย ➔ จอว่างเหลือแต่พื้นครีม ➔ เนื้อหาเด้งตามมา = กระพริบ
+   วัดจริง (Chromium จำลอง Pixel 7): `/cards/major-00` จอว่างทั้งจอ ~430 ms · `/daily` เนื้อหาหาย ~330 ms
+   ปิดแล้วเหลือ 0 เฟรมว่าง · เดสก์ท็อปวัดแล้วไม่มีเฟรมว่าง จึงคงเฟดไว้ให้
+   ด่านกฎ 16 ของ `scripts/qa/test-motion-quality.ts` บังคับให้ `@view-transition` อยู่ในเงื่อนไข `pointer: fine` เสมอ */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
 }
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: 220ms;
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  @view-transition {
-    navigation: none;
-  }
 }
 
 /* ═════════════════════════════════════════════════════════════════════════

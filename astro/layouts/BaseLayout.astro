@@ -6,6 +6,7 @@ import "@/app/globals.css";
 import { buildSpeculationRules } from "@/app/_shared/speculation-rules";
 import {
   FONT_PRELOADS,
+  FONT_PRELOADS_LOW,
   GOOGLE_SITE_VERIFICATION,
   ROOT_ALTERNATES,
   ROOT_DESCRIPTION,
@@ -145,6 +146,10 @@ const consentScript = `try{if(!localStorage.getItem(${JSON.stringify(CONSENT_STO
     {/* ✒️ ฟอนต์ไทยที่ตัดเอง — เหตุผลที่ต้องพรีโหลดครบทุกไฟล์อยู่ใน src/app/globals.css */}
     {FONT_PRELOADS.map((href) => (
       <link rel="preload" href={href} as="font" type="font/woff2" crossorigin="anonymous" />
+    ))}
+    {/* น้ำหนักหนา — ลำดับต่ำ: ไม่แย่งคิวภาพ LCP แต่ทันเฟรมแรกเมื่ออยู่ในแคช หัวข้อจึงไม่กระโดดตอนเปลี่ยนหน้า (INC-0244) */}
+    {FONT_PRELOADS_LOW.map((href) => (
+      <link rel="preload" href={href} as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="low" />
     ))}
     {/*
       🖼️ โลโก้ในหัวเว็บ — **ไม่พรีโหลด** (T-27)

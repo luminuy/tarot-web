@@ -89,6 +89,11 @@ export function OneCardRitual({
   const isEn = isEnglish || localeIsEnglish;
   const [, startTransition] = useTransition();
   const [status, setStatus] = useState<"idle" | "ready" | "revealed">("idle");
+  /* จังหวะแรก ("idle") ห้ามเล่นเฟดขาเข้าตอนเปิดหน้า (INC-0244) — HTML จากเซิร์ฟเวอร์จะพาคลาสมาด้วย
+     แผงทั้งแผงจึงว่างเปล่าแล้วค่อยจางเข้าทุกครั้งที่เปิด `/daily` · `/love/1-card` = กระพริบบนมือถือ
+     เล่นเฉพาะตอนผู้ใช้ย้อนกลับมาจังหวะแรกเอง (ตั้งค่าระหว่างเรนเดอร์ตามแบบที่ React แนะนำ ไม่ใช่ effect) */
+  const [hasLeftIdle, setHasLeftIdle] = useState(false);
+  if (status !== "idle" && !hasLeftIdle) setHasLeftIdle(true);
   const [drawnCard, setDrawnCard] = useState<TarotCardType | null>(null);
   const [copied, setCopied] = useState(false);
   const [authMode, setAuthMode] = useState<"signin" | "signup" | null>(null);
@@ -227,7 +232,7 @@ export function OneCardRitual({
         )}
         {/* จังหวะที่ 1: เลือกหัวข้อ/สถานะ ➔ กดปุ่มเปิดไพ่ */}
         {status === "idle" && (
-          <div key="idle" className="anim-step-in space-y-6">
+          <div key="idle" className={`${hasLeftIdle ? "anim-step-in " : ""}space-y-6`}>
             {headerSlot}
 
             <div className="pt-2 flex flex-col items-center justify-center space-y-3 text-center">

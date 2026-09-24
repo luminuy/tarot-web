@@ -179,13 +179,16 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
         26 Spreads Grid — เรนเดอร์ครบทุกใบตั้งแต่ตอนบิลด์
         ใบที่ไม่ได้อยู่ในแท็บที่เปิดอยู่ถูกซ่อนด้วยแอตทริบิวต์ `hidden`
         (ซ่อนจากทั้งสายตาและโปรแกรมอ่านหน้าจอ — ไม่ใช่แค่ `opacity: 0`)
+        ⚠️ ห้ามใส่ `anim-swap-rise-sm` ที่นี่ (INC-0244) — คลาสจะติดไปกับ HTML ตอนบิลด์
+        กริดทั้งหน้าจึงจางหายแล้วค่อยโผล่ทุกครั้งที่เปิดหน้า · `astro/scripts/spreads-tabs.ts`
+        ใส่คลาสให้เองตอนผู้ใช้สลับแท็บแล้ว
       */}
       <div
         role="tabpanel"
         id="library-panel"
         data-spreads-panel
         aria-labelledby={`library-tab-${DEFAULT_TAB}`}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 anim-swap-rise-sm"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6"
       >
         {spreads.map((spread) => {
           const cats = catsOf(spread.id);
