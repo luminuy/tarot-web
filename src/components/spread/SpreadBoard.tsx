@@ -313,10 +313,17 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
       {useRail ? (
         /* ── ผังใหญ่: รางเลื่อนแนวนอนผืนเดียว (Unified Rail) ── */
         <div className="relative z-10">
+          {/* มือถือ: ช่องไพ่กว้าง 74% ➔ ใส่ตัวเว้นระยะหัว–ท้ายราง (before/after) กว้าง 13% − gap
+              ให้ใบแรก/ใบสุดท้ายเลื่อนมาอยู่กลางได้ (เดิมชิดซ้าย 32–41px เพราะรางเลื่อนต่อไม่ได้แล้ว)
+              ⚠️ ห้ามใช้ px-[13%] แทน — basis 74% คิดจากพื้นที่ด้านในราง ขอบยิ่งกว้างช่องไพ่ยิ่งหด ไม่มีวันตรงกลาง */}
           <div
             ref={railRef}
             onScroll={syncRailEdges}
-            className="flex snap-x snap-mandatory items-start gap-4 sm:gap-6 overflow-x-auto overscroll-x-contain px-6 pt-8 pb-6 no-scrollbar"
+            className={`flex snap-x snap-mandatory items-start gap-4 sm:gap-6 overflow-x-auto overscroll-x-contain pt-8 pb-6 no-scrollbar ${
+              oneUp
+                ? "px-6 before:content-[''] before:shrink-0 before:basis-[calc(13%-1rem)] after:content-[''] after:shrink-0 after:basis-[calc(13%-1rem)]"
+                : "px-6"
+            }`}
             role="group"
             aria-label={
               isEnglish
