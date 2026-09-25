@@ -4,6 +4,7 @@ import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 const dailyOgImages = buildPageOgImage({
   title: "ดูดวงไพ่ยิปซีรายวัน",
@@ -161,9 +162,9 @@ export function DailyBodyTh({ ritual }: { ritual: ReactNode }) {
               และปรากฏการณ์ความพ้องพานของเหตุการณ์ (Synchronicity)
             </p>
 
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2">
-              วิธีรับพลังงานจากไพ่ประจำวันให้เกิดประโยชน์สูงสุด
-            </h3>
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
+              วิธีรับพลังงานจากไพ่ประจำวัน ให้เกิดประโยชน์สูงสุด
+            </ThaiPhrases></h3>
             <ul className="list-disc pl-5 space-y-2 text-muted">
               <li>
                 <strong className="text-ink">การตั้งจิตอธิษฐานในตอนเช้า:</strong> ก่อนเริ่มทำงาน ให้หลับตาและหายใจเข้าลึก ๆ
@@ -180,9 +181,9 @@ export function DailyBodyTh({ ritual }: { ritual: ReactNode }) {
               </li>
             </ul>
 
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2">
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
               ทำไมต้องใช้ระบบสุ่มแบบ Provably Fair?
-            </h3>
+            </ThaiPhrases></h3>
             <p>
               ที่ SeerTarot เรายึดมั่นในความซื่อตรงและความโปร่งใสสูงสุด ทุกครั้งที่คุณกดสับไพ่
               ระบบจะเรียกใช้ Web Crypto API ในการสร้างเลขสุ่มตามหลักการเข้ารหัสสากล

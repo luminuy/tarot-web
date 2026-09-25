@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { soundManager } from "@/lib/utils/audio";
 import { CardImage } from "@/components/card/CardImage";
 import { useLocale } from "@/lib/i18n";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 // useLayoutEffect ฝั่ง server จะเตือน — สลับเป็น useEffect ตอน SSR
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
@@ -267,10 +268,10 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
             </div>
 
             {/* Position Heading with Inline Non-Breaking Quotes */}
-            <h3 className="text-lg sm:text-3xl font-serif-th font-bold font-mystic-gold tracking-wide drop-shadow leading-snug py-0.5 px-2">
+            <h3 className="text-lg sm:text-3xl font-serif-th font-bold font-mystic-gold tracking-wide drop-shadow leading-snug py-0.5 px-2"><ThaiPhrases>
               {isEnglish ? "Choose a card for" : "เลือกไพ่สำหรับ"}{" "}
               <span className="text-gold-ink inline-block font-bold">&ldquo;{positionLabel}&rdquo;</span>
-            </h3>
+            </ThaiPhrases></h3>
             <p className="text-[13px] sm:text-xs text-muted max-w-xl mx-auto leading-normal">
               {isEnglish
                 ? "Tap the card you feel drawn to, or press \u201cDraw for Me\u201d below."

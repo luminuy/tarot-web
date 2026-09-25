@@ -2232,3 +2232,18 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
     transform: rotate(180deg);
   }
 }
+
+/* ✂️ วลีภาษาไทยในหัวข้อ (`ThaiPhrases`) — inline-block ให้เบราว์เซอร์ตัดบรรทัดได้แค่ระหว่างวลี
+   ไม่หักกลางคำ "ทา / โรต์" · วลีที่ยาวเกินบรรทัดยังตัดข้างในได้ (ไม่ล้นจอ) */
+.tp {
+  display: inline-block;
+}
+
+/* 📱 กริดยาว (ไพ่ 78 ใบ · บทความ 30 เรื่อง) บนมือถือโชว์แค่ต้นรายการ แล้วมีปุ่ม "ดูทั้งหมด"
+   ของที่ซ่อนยังอยู่ใน HTML ครบ (บอตเห็นทุกลิงก์) · จอ sm ขึ้นไปแสดงครบตามเดิม */
+@media (max-width: 639.98px) {
+  .mobile-preview-12 > :nth-child(n + 13),
+  .mobile-preview-8 > :nth-child(n + 9) {
+    display: none;
+  }
+}

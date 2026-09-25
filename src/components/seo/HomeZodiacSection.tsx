@@ -4,6 +4,7 @@ import { HomeRailNav } from "@/components/seo/HomeRailNav";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 import { ZODIAC_SIGNS } from "@/data/zodiac";
 import { ZODIAC_INDEX_PATH, zodiacSignPath } from "@/lib/tarot/zodiac";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * ✦ ไพ่ยิปซี × โหราศาสตร์ — ประตูจากหน้าแรกเข้าชุดหน้าราศี
@@ -63,9 +64,9 @@ export function HomeZodiacSection({ isEnglish, href }: { isEnglish: boolean; hre
           <h2
             id="home-zodiac-title"
             className="text-2xl sm:text-3xl font-serif-th font-bold text-ink [text-wrap:balance]"
-          >
+          ><ThaiPhrases>
             {isEnglish ? "Tarot × Astrology: Your Zodiac Cards" : "ไพ่ยิปซี × โหราศาสตร์ — ไพ่ประจำ 12 ราศี"}
-          </h2>
+          </ThaiPhrases></h2>
           {/* แบ่งบรรทัดเองตามจังหวะประโยค — ปล่อยเบราว์เซอร์ตัดเอง คำว่า "สุริยยาตร์" (ไม่อยู่ในพจนานุกรมตัดคำ)
               ถูกหักกลางคำเป็น "(สุริย / ยาตร์)" เจ้าของเห็นจากภาพหน้าจอ */}
           <p className="text-xs sm:text-sm text-muted font-serif-th max-w-3xl">
@@ -85,9 +86,9 @@ export function HomeZodiacSection({ isEnglish, href }: { isEnglish: boolean; hre
       {/* กล่องขาวแบบเดียวกับ "ไพ่ชุดใหญ่เมเจอร์ อาร์คานา" ในส่วนถัดไป — เจ้าของขอให้หน้าตาเข้าชุดกัน */}
       <div className="altar-panel p-4 sm:p-8 space-y-5">
         <div className="flex items-center justify-between gap-3 pb-3 border-b border-line-warm/40">
-          <h3 className="font-serif-th font-bold text-base text-ink">
+          <h3 className="font-serif-th font-bold text-base text-ink"><ThaiPhrases>
             {isEnglish ? "The 12 Zodiac Cards" : "ไพ่ประจำ 12 ราศี"}
-          </h3>
+          </ThaiPhrases></h3>
           <Link
             href={href(ZODIAC_INDEX_PATH)}
             prefetch={false}
@@ -148,9 +149,9 @@ export function HomeZodiacSection({ isEnglish, href }: { isEnglish: boolean; hre
                   <CardImage image={feature.image} alt="" className="w-full h-full object-cover" sizes="44px" />
                 </div>
                 <div className="space-y-1 min-w-0">
-                  <h3 className="font-serif-th font-bold text-sm sm:text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
+                  <h3 className="font-serif-th font-bold text-sm sm:text-base text-ink group-hover:text-gold-ink transition-colors leading-snug"><ThaiPhrases>
                     {copy.title}
-                  </h3>
+                  </ThaiPhrases></h3>
                   <p className="text-xs font-serif-th text-muted leading-relaxed">{copy.desc}</p>
                 </div>
               </Link>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 const privacyOgImages = buildPageOgImage({
   title: "นโยบายความเป็นส่วนตัวและ PDPA",
@@ -11,14 +12,14 @@ const privacyOgImages = buildPageOgImage({
 });
 
 export const privacyMetadataTh: Metadata = {
-  title: "นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA)",
+  title: "นโยบายความเป็นส่วนตัว และการคุ้มครองข้อมูลส่วนบุคคล (PDPA)",
   description:
-    "นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA B.E. 2562) และมาตรฐานสากลของวิหารพยากรณ์ไพ่ทาโรต์ออนไลน์ SeerTarot",
+    "นโยบายความเป็นส่วนตัว และการคุ้มครองข้อมูลส่วนบุคคล (PDPA B.E. 2562) และมาตรฐานสากลของวิหารพยากรณ์ไพ่ทาโรต์ออนไลน์ SeerTarot",
   alternates: buildAlternates("/privacy", { englishTwin: true }),
   openGraph: {
     title: "นโยบายความเป็นส่วนตัวและ PDPA · SeerTarot",
     description:
-      "นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA B.E. 2562) และมาตรฐานสากลของวิหารพยากรณ์ไพ่ทาโรต์ออนไลน์ SeerTarot",
+      "นโยบายความเป็นส่วนตัว และการคุ้มครองข้อมูลส่วนบุคคล (PDPA B.E. 2562) และมาตรฐานสากลของวิหารพยากรณ์ไพ่ทาโรต์ออนไลน์ SeerTarot",
     url: `${SITE_ORIGIN}/privacy`,
     siteName: "SeerTarot",
     type: "website",
@@ -28,7 +29,7 @@ export const privacyMetadataTh: Metadata = {
     card: "summary_large_image",
     title: "นโยบายความเป็นส่วนตัวและ PDPA · SeerTarot",
     description:
-      "นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA B.E. 2562) และมาตรฐานสากลของวิหารพยากรณ์ไพ่ทาโรต์ออนไลน์ SeerTarot",
+      "นโยบายความเป็นส่วนตัว และการคุ้มครองข้อมูลส่วนบุคคล (PDPA B.E. 2562) และมาตรฐานสากลของวิหารพยากรณ์ไพ่ทาโรต์ออนไลน์ SeerTarot",
     images: [privacyOgImages[0].url],
   },
 };
@@ -40,9 +41,9 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-10">
         {/* Header */}
         <div className="text-center space-y-3 pb-6 border-b border-line/40">
-          <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif-th">
-            นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล
-          </h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif-th"><ThaiPhrases>
+            นโยบายความเป็นส่วนตัว และการคุ้มครองข้อมูลส่วนบุคคล
+          </ThaiPhrases></h1>
           <p className="text-xs text-muted">
             กรอบการปฏิบัติตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA) และมาตรฐานสากล (GDPR / CCPA)
           </p>
@@ -50,7 +51,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 1 */}
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th">1. ข้อมูลที่เราเก็บ</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>1. ข้อมูลที่เราเก็บ</ThaiPhrases></h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
               <strong>การระบุตัวตนและโปรไฟล์ (OAuth)</strong> — หากคุณเข้าสู่ระบบผ่าน Google หรือ LINE
@@ -88,7 +89,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 2 */}
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th">2. สิ่งที่เราไม่ทำเด็ดขาด (คำมั่นสัญญาความปลอดภัย)</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>2. สิ่งที่เราไม่ทำเด็ดขาด (คำมั่นสัญญาความปลอดภัย)</ThaiPhrases></h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
               <strong>ไม่นำข้อมูลคำถามหรือบันทึกของคุณไปเทรนโมเดล AI</strong> — ข้อมูลการเปิดไพ่และการสะท้อนความคิดเป็นเรื่องส่วนบุคคลสูงสุด จะไม่มีการนำไปใช้ฝึกฝน ปรับแต่ง หรือป้อนเข้าสู่โมเดลปัญญาประดิษฐ์ใด ๆ ทั้งสิ้น
@@ -107,9 +108,9 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 3 */}
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th">
-            3. การจัดเก็บข้อมูลและสถาปัตยกรรมคลาวด์ (Data Retention &amp; Storage)
-          </h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>
+            3. การจัดเก็บข้อมูล และสถาปัตยกรรมคลาวด์ (Data Retention &amp; Storage)
+          </ThaiPhrases></h2>
           <div className="text-sm text-ink leading-relaxed space-y-2 font-serif-th">
             <p>
               <strong>สำหรับผู้ใช้ทั่วไป (ไม่เข้าสู่ระบบ):</strong> ข้อมูลประวัติการเปิดไพ่ทั้งหมดจัดเก็บใน{" "}
@@ -126,9 +127,9 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 4 */}
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th">
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>
             4. สิทธิของคุณตามกฎหมาย PDPA และมาตรฐานสากล
-          </h2>
+          </ThaiPhrases></h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
               <strong>สิทธิในการลบข้อมูล (Right to Erasure)</strong> —
@@ -155,9 +156,9 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 5: AI Disclosure */}
         <section className="altar-card-porcelain !rounded-xl space-y-3 p-5">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th">
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>
             5. การเปิดเผยเรื่อง AI และความโปร่งใส (AI Transparency Disclosure)
-          </h2>
+          </ThaiPhrases></h2>
           <div className="text-sm text-ink leading-relaxed space-y-2 font-serif-th">
             <p>
               คำทำนายทั้งหมดในวิหารนี้ <strong>สร้างขึ้นโดยปัญญาประดิษฐ์ (AI)</strong>{" "}
@@ -176,9 +177,9 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 6: Safety */}
         <section className="altar-card-porcelain !rounded-xl space-y-3 p-5">
-          <h2 className="text-lg font-bold text-err font-serif-th">
-            6. ความปลอดภัยของผู้ใช้และข้อจำกัดความรับผิดชอบ (Safety Guardrails)
-          </h2>
+          <h2 className="text-lg font-bold text-err font-serif-th"><ThaiPhrases>
+            6. ความปลอดภัยของผู้ใช้ และข้อจำกัดความรับผิดชอบ (Safety Guardrails)
+          </ThaiPhrases></h2>
           <div className="text-sm text-err leading-relaxed space-y-2 font-serif-th">
             <p>ระบบของเรามีตัวกรองความปลอดภัยที่ทำงานตรวจจับความเสี่ยงตลอดเวลา:</p>
             <ul className="space-y-1.5 list-disc list-inside">
@@ -206,7 +207,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
 
         {/* Section 7: Export & Delete Data */}
         <section className="pt-4 border-t border-line/40 space-y-4 font-serif-th">
-          <h2 className="text-lg font-bold text-gold-ink">7. จัดการข้อมูลส่วนบุคคลของคุณ</h2>
+          <h2 className="text-lg font-bold text-gold-ink"><ThaiPhrases>7. จัดการข้อมูลส่วนบุคคลของคุณ</ThaiPhrases></h2>
           <p className="text-xs text-muted">
             คุณสามารถดาวน์โหลดสำเนาข้อมูลของคุณ หรือสั่งลบข้อมูลทั้งหมดทั้งในเครื่องและบนระบบเซิร์ฟเวอร์ได้อย่างสมบูรณ์
           </p>

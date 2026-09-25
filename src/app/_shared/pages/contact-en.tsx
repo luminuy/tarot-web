@@ -6,6 +6,7 @@ import { clampDescription } from "@/lib/config/meta-length";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { buildBreadcrumbJsonLd, homeCrumb } from "@/app/_shared/seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * ✉️ Contact Us Page (English Twin)
@@ -86,12 +87,12 @@ export function ContactBodyEn() {
 
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-10">
         <div className="text-center space-y-3 pb-6 border-b border-line/40">
-          <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif-th">Contact Us</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif-th"><ThaiPhrases>Contact Us</ThaiPhrases></h1>
           <p className="text-xs text-muted">We personally review and attend to every message received.</p>
         </div>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th">Electronic Mail</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>Electronic Mail</ThaiPhrases></h2>
           <div className="altar-card-porcelain !rounded-xl p-4 space-y-2">
             <a
               href={`mailto:${DEFAULT_SUPPORT_EMAIL}`}
@@ -107,7 +108,7 @@ export function ContactBodyEn() {
 
         {TIKTOK_URL && (
           <section className="space-y-3">
-            <h2 className="text-lg font-bold text-gold-ink font-serif-th">Official Channels</h2>
+            <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>Official Channels</ThaiPhrases></h2>
             <div className="altar-card-porcelain !rounded-xl p-4 space-y-2">
               <a
                 href={TIKTOK_URL}
@@ -123,7 +124,7 @@ export function ContactBodyEn() {
         )}
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th">Inquiries We Welcome</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>Inquiries We Welcome</ThaiPhrases></h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
               <strong>Technical Support & Platform Glitches</strong> — Card display anomalies, stream interrupts, session recovery, or sign-in concerns. Accompanying screenshots are always appreciated.
@@ -145,7 +146,7 @@ export function ContactBodyEn() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th">Matters Outside Our Scope</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>Matters Outside Our Scope</ThaiPhrases></h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             We do not conduct manual readings via email, perform karmic or ritualistic interventions, or provide licensed medical, legal, or financial counsel. If you wish to draw cards, please visit our{" "}
             <Link href="/en" prefetch={false} className="text-gold-ink underline hover:text-gold-ink">
@@ -159,7 +160,7 @@ export function ContactBodyEn() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th">About the Sanctuary</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>About the Sanctuary</ThaiPhrases></h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             To learn more about our philosophy, cryptographic Provably Fair random generation, and historical 1909 Rider-Waite heritage, visit our{" "}
             {/* ⚠️ ยังไม่มีหน้า /en/about — ลิงก์เดิมชี้ไปหน้านั้นแล้วได้ 404 (พบจากด่านลิงก์ภายใน · 2026-09-23)

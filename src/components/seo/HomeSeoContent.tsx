@@ -10,6 +10,7 @@ import { HomeZodiacSection } from "@/components/seo/HomeZodiacSection";
 import { HomeMoreWaysSection } from "@/components/seo/HomeMoreWaysSection";
 import { HomeProofSection } from "@/components/seo/HomeProofSection";
 import { HomeRailNav } from "@/components/seo/HomeRailNav";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * 5 ขั้นตอนพิธีกรรมพยากรณ์ศักดิ์สิทธิ์ (Thai)
@@ -161,7 +162,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
         <div className="text-center space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-center gap-3">
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-gold/60" />
-            <span className="font-serif-th text-xs uppercase tracking-[0.25em] text-gold-ink font-bold">
+            <span className={`font-serif-th text-xs text-gold-ink font-bold ${isEnglish ? "uppercase tracking-[0.25em]" : ""}`}>
               {isEnglish ? "THE SACRED ORACLE RITUAL" : "ขั้นตอนพิธีกรรมพยากรณ์"}
             </span>
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-gold/60" />
@@ -169,11 +170,11 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           <h2
             id="how-it-works-title"
             className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-ink tracking-wide [text-wrap:balance]"
-          >
+          ><ThaiPhrases>
             {isEnglish
               ? "How It Works: 5 Sacred Steps to Online Tarot Divination"
               : "วิธีดูดวงไพ่ทาโรต์ออนไลน์ 5 ขั้นตอนศักดิ์สิทธิ์"}
-          </h2>
+          </ThaiPhrases></h2>
           <p className="text-sm sm:text-base text-muted max-w-3xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
             {isEnglish ? (
               <>
@@ -228,9 +229,9 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
   
                   {/* Step Title & Subtitle */}
                   <div className="text-center space-y-1">
-                    <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
+                    <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug"><ThaiPhrases>
                       {step.title}
-                    </h3>
+                    </ThaiPhrases></h3>
                     <p className="text-xs font-serif-th text-gold-ink font-medium">
                       {step.subtitle}
                     </p>
@@ -274,11 +275,11 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
             </span>
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-gold/60" />
           </div>
-          <h2 id="heritage-title" className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-ink tracking-wide [text-wrap:balance]">
+          <h2 id="heritage-title" className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-ink tracking-wide [text-wrap:balance]"><ThaiPhrases>
             {isEnglish
               ? "The Heritage of 1909 Rider-Waite & Uncompromising Integrity"
               : "มนต์เสน่ห์ไพ่ 1909 Rider-Waite & ความโปร่งใสระดับสากล"}
-          </h2>
+          </ThaiPhrases></h2>
           <p className="text-sm sm:text-base text-muted font-serif-th max-w-3xl mx-auto leading-relaxed [text-wrap:balance]">
             {isEnglish ? (
               <>
@@ -315,9 +316,9 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                   <span className="text-xs font-serif-th font-bold text-gold-ink tracking-wider uppercase block">
                     {isEnglish ? "Pillar I" : "เสาเอกที่ ๑"}
                   </span>
-                  <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
+                  <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors"><ThaiPhrases>
                     {isEnglish ? "Original 1909 Classic Deck" : "สำรับคลาสสิก 1909 ดั้งเดิม"}
-                  </h3>
+                  </ThaiPhrases></h3>
                 </div>
   
                 <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed text-left">
@@ -350,9 +351,9 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                   <span className="text-xs font-serif-th font-bold text-gold-ink tracking-wider uppercase block">
                     {isEnglish ? "Pillar II" : "เสาเอกที่ ๒"}
                   </span>
-                  <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
+                  <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors"><ThaiPhrases>
                     {isEnglish ? "Provably Fair Cryptographic Randomness" : "ระบบสุ่มโปร่งใส Provably Fair"}
-                  </h3>
+                  </ThaiPhrases></h3>
                 </div>
   
                 <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed text-left">
@@ -385,9 +386,9 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                   <span className="text-xs font-serif-th font-bold text-gold-ink tracking-wider uppercase block">
                     {isEnglish ? "Pillar III" : "เสาเอกที่ ๓"}
                   </span>
-                  <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
+                  <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors"><ThaiPhrases>
                     {isEnglish ? "Jungian Psychology & Empathetic AI" : "จิตวิทยาและการพยากรณ์ AI"}
-                  </h3>
+                  </ThaiPhrases></h3>
                 </div>
   
                 <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed text-left">
@@ -422,9 +423,9 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
             <span className="text-gold-ink text-xs font-serif-th tracking-widest uppercase block">
               SPREADS &amp; CARDS
             </span>
-            <h2 id="spreads-and-cards-title" className="text-2xl sm:text-3xl font-serif-th font-bold text-ink [text-wrap:balance]">
+            <h2 id="spreads-and-cards-title" className="text-2xl sm:text-3xl font-serif-th font-bold text-ink [text-wrap:balance]"><ThaiPhrases>
               {isEnglish ? "Featured Tarot Spreads & Classic 78-Card Deck" : "ผังการเปิดไพ่พยากรณ์และสำรับไพ่ 78 ใบยอดนิยม"}
-            </h2>
+            </ThaiPhrases></h2>
             <p className="text-xs sm:text-sm text-muted font-serif-th max-w-2xl">
               {isEnglish
                 ? "Explore archetypal layouts designed for every life question, and discover the comprehensive meanings of all 78 Rider-Waite cards."
@@ -469,9 +470,9 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                   <span className="text-[11px] font-mono uppercase tracking-wider text-gold-ink font-bold block">
                     {isEnglish ? "10 CARDS · GRAND SPREAD" : "10 CARDS · ผังใหญ่"}
                   </span>
-                  <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
+                  <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug"><ThaiPhrases>
                     {isEnglish ? "Celtic Cross Spread" : "ผังเซลติกครอส (Celtic Cross)"}
-                  </h3>
+                  </ThaiPhrases></h3>
                 </div>
               </div>
               <p className="text-xs sm:text-sm font-serif-th text-muted leading-relaxed">
@@ -495,9 +496,9 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                   <span className="text-[11px] font-mono uppercase tracking-wider text-gold-ink font-bold block">
                     {isEnglish ? "3 CARDS · POPULAR" : "3 CARDS · ยอดนิยม"}
                   </span>
-                  <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
+                  <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug"><ThaiPhrases>
                     {isEnglish ? "3-Card: Past, Present, Future" : "ผัง 3 ใบ: อดีต-ปัจจุบัน-อนาคต"}
-                  </h3>
+                  </ThaiPhrases></h3>
                 </div>
               </div>
               <p className="text-xs sm:text-sm font-serif-th text-muted leading-relaxed">
@@ -521,9 +522,9 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                   <span className="text-[11px] font-mono uppercase tracking-wider text-gold-ink font-bold block">
                     {isEnglish ? "5 CARDS · CROSSROADS" : "5 CARDS · ทางแยกชีวิต"}
                   </span>
-                  <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
+                  <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug"><ThaiPhrases>
                     {isEnglish ? "Two-Path Decision Spread" : "ผังทางแยกการตัดสินใจ"}
-                  </h3>
+                  </ThaiPhrases></h3>
                 </div>
               </div>
               <p className="text-xs sm:text-sm font-serif-th text-muted leading-relaxed">
@@ -592,9 +593,9 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
             <span className="text-gold-ink text-xs font-serif-th tracking-widest uppercase block">
               WISDOM &amp; ARTICLES
             </span>
-            <h2 id="articles-title" className="text-2xl sm:text-3xl font-serif-th font-bold text-ink [text-wrap:balance]">
-              {isEnglish ? "Wisdom Codex & Esoteric Articles" : "คัมภีร์บทความและสาระน่ารู้เกี่ยวกับไพ่ทาโรต์"}
-            </h2>
+            <h2 id="articles-title" className="text-2xl sm:text-3xl font-serif-th font-bold text-ink [text-wrap:balance]"><ThaiPhrases>
+              {isEnglish ? "Wisdom Codex & Esoteric Articles" : "คัมภีร์บทความ และสาระน่ารู้เกี่ยวกับไพ่ทาโรต์"}
+            </ThaiPhrases></h2>
             <p className="text-xs sm:text-sm text-muted font-serif-th max-w-2xl [text-wrap:balance]">
               {isEnglish
                 ? "Deep dives into divination techniques, ancient iconography, and the psychology of archetypal tarot."
@@ -630,11 +631,11 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                   <span className="glass-chip text-[11px] font-serif-th font-semibold text-gold-ink px-3 py-0.5 inline-block">
                     {getArticleCategory(art, isEnglish)}
                   </span>
-                  <h3 className="font-serif-th font-bold text-base sm:text-lg text-ink group-hover:text-gold-ink transition-colors line-clamp-2 leading-[1.6]">
+                  <h3 className="font-serif-th font-bold text-base sm:text-lg text-ink group-hover:text-gold-ink transition-colors line-clamp-2 leading-[1.6]"><ThaiPhrases>
                     {/* leading 1.6 (ไม่ใช่ snug) — สระบน/วรรณยุกต์ของบรรทัดที่ 3 ที่ถูก clamp ทิ้งจะไม่โผล่ขึ้นมาใต้บรรทัดที่ 2 */}
                     {/* ชื่อสั้นแบบ <title> — พาดหัวเต็มของบทความใหม่ยาวเกินสองบรรทัด โดนตัดจนเหลือเศษสระล่างโผล่ */}
                     {isEnglish ? (art.seoTitleEn ?? getArticleTitle(art, true)) : art.seoTitle}
-                  </h3>
+                  </ThaiPhrases></h3>
                   <p className="font-serif-th text-xs sm:text-sm text-muted line-clamp-2 leading-relaxed">
                     {getArticleDescription(art, isEnglish)}
                   </p>
@@ -666,9 +667,9 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
             </span>
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-gold/60" />
           </div>
-          <h2 id="faq-title" className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-ink tracking-wide [text-wrap:balance]">
-            {isEnglish ? "Frequently Asked Questions (FAQ)" : "คำถามที่พบบ่อยเกี่ยวกับการดูดวงไพ่ทาโรต์ (FAQ)"}
-          </h2>
+          <h2 id="faq-title" className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-ink tracking-wide [text-wrap:balance]"><ThaiPhrases>
+            {isEnglish ? "Frequently Asked Questions (FAQ)" : "คำถามที่พบบ่อย เกี่ยวกับการดูดวงไพ่ทาโรต์ (FAQ)"}
+          </ThaiPhrases></h2>
           <p className="text-sm sm:text-base text-muted font-serif-th max-w-2xl mx-auto leading-relaxed [text-wrap:balance]">
             {isEnglish
               ? "Clarifying questions about our online divination sanctuary, cryptographic accuracy, and AI methodology."

@@ -12,6 +12,7 @@ import {
 } from "@/data/article-helpers";
 import { COUNTS } from "@/components/layout/nav-links";
 import { useLocale } from "@/lib/i18n";
+import { ThaiPhrases, thaiPhrasesHtml } from "@/components/ui/ThaiPhrases";
 
 interface Props {
   article: Article;
@@ -74,9 +75,9 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
           </span>
         </div>
 
-        <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-ink leading-snug sm:leading-normal py-0.5 [text-wrap:balance]">
+        <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-ink leading-snug sm:leading-normal py-0.5 [text-wrap:balance]"><ThaiPhrases>
           {articleTitle}
-        </h1>
+        </ThaiPhrases></h1>
 
         <p className="text-sm sm:text-base text-ink font-serif-th leading-relaxed border-l-2 border-line pl-4 py-1 italic bg-surface rounded-r-xl shadow-xs [text-wrap:pretty]">
           {articleDesc}
@@ -152,11 +153,16 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
         <div
           dangerouslySetInnerHTML={{
             __html: effectiveContent
+              // หัวข้อในเนื้อบทความห่อวลีด้วย `.tp` ด้วย — ไม่งั้น "เซลติกค / รอส" หักกลางคำ (ดู ThaiPhrases.tsx)
               .replace(
                 /## (.*?)\n/g,
-                '<h2 class="text-lg sm:text-2xl font-bold text-ink mt-8 mb-4 border-b border-line/40 pb-2">$1</h2>'
+                (_m, t: string) =>
+                  `<h2 class="text-lg sm:text-2xl font-bold text-ink mt-8 mb-4 border-b border-line/40 pb-2"><ThaiPhrases>${thaiPhrasesHtml(t)}</ThaiPhrases></h2>`
               )
-              .replace(/### (.*?)\n/g, '<h3 class="text-base sm:text-xl font-bold text-ink mt-6 mb-3">$1</h3>')
+              .replace(
+                /### (.*?)\n/g,
+                (_m, t: string) => `<h3 class="text-base sm:text-xl font-bold text-ink mt-6 mb-3"><ThaiPhrases>${thaiPhrasesHtml(t)}</ThaiPhrases></h3>`
+              )
               .replace(/\*\*(.*?)\*\*/g, '<strong class="text-ink font-semibold">$1</strong>')
               .replace(/\*(.*?)\*/g, '<em class="text-gold-ink font-medium">$1</em>')
               .replace(/- (.*?)\n/g, '<li class="ml-4 list-disc text-ink my-1">$1</li>')
@@ -205,11 +211,11 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
         <div className="glass-chip inline-flex items-center gap-2 px-3 py-1 text-[13px] text-gold-ink font-mono font-bold">
           {isEnglish ? "Interactive Provably-Fair Divination" : "Interactive Provably-Fair Reading"}
         </div>
-        <h2 className="font-serif-th text-xl sm:text-3xl font-bold text-ink">
+        <h2 className="font-serif-th text-xl sm:text-3xl font-bold text-ink"><ThaiPhrases>
           {isEnglish
             ? "Ready to Reveal the Hidden Wisdom of Your Path?"
-            : "พร้อมเปิดไพ่รับคำตอบสำหรับชีวิตคุณหรือยัง?"}
-        </h2>
+            : "พร้อมเปิดไพ่ รับคำตอบสำหรับชีวิตคุณหรือยัง?"}
+        </ThaiPhrases></h2>
         <p className="text-xs sm:text-sm text-muted font-serif-th max-w-lg mx-auto leading-relaxed">
           {isEnglish
             ? "Experience 3D tactile card shuffling and draw with free will from the complete 78-card Rider-Waite deck, illuminated by provably-fair cryptography and deep archetypal guidance 24/7."
@@ -261,9 +267,9 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       {/* Related Articles Carousel/Grid */}
       {relatedArticles.length > 0 && (
         <section className="space-y-4 pt-4">
-          <h2 className="font-serif-th text-lg sm:text-xl font-bold text-ink">
+          <h2 className="font-serif-th text-lg sm:text-xl font-bold text-ink"><ThaiPhrases>
             {isEnglish ? "Resonant & Related Articles" : "คัมภีร์บทความที่เกี่ยวข้อง"}
-          </h2>
+          </ThaiPhrases></h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {relatedArticles.map((rel) => {
               const relTitle = getArticleTitle(rel, locale);
@@ -280,9 +286,9 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
                 >
                   <div className="space-y-1.5">
                     <div className="text-[13px] font-mono text-gold-ink font-bold">{relCat}</div>
-                    <h3 className="font-serif-th text-xs sm:text-sm font-bold text-ink group-hover:text-gold-ink transition-colors line-clamp-2">
+                    <h3 className="font-serif-th text-xs sm:text-sm font-bold text-ink group-hover:text-gold-ink transition-colors line-clamp-2"><ThaiPhrases>
                       {relTitle}
-                    </h3>
+                    </ThaiPhrases></h3>
                   </div>
                   <div className="text-[13px] text-muted font-mono pt-2 border-t border-line/40">
                     {relReadTime}

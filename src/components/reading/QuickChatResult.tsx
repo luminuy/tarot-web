@@ -20,6 +20,7 @@ import { CardImage } from "@/components/card/CardImage";
 import { TTSReaderButton } from "./TTSReaderButton";
 import { useLocale } from "@/lib/i18n";
 import { resolveDisplayKeywords } from "@/lib/tarot/keywords";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 export interface QuickChatResultProps {
   reading?: Partial<Reading> | null;
@@ -278,7 +279,7 @@ isEnglish
                         ? `Quick Reading: ${drawnCard?.position.nameEn || drawnCard?.position.nameTh || "Oracle Message"}`
                         : `คำทำนายด่วน: ${drawnCard?.position.nameTh || "สารจากไพ่"}`}
                   </span>
-                  <h3 className="font-serif-th text-lg sm:text-xl font-bold text-ink-deep mt-0.5">
+                  <h3 className="font-serif-th text-lg sm:text-xl font-bold text-ink-deep mt-0.5"><ThaiPhrases>
                     {isEnglish ? (cardData.nameEn || cardData.nameTh) : cardData.nameTh}{" "}
                     {!isEnglish && cardData.nameEn && (
                       <span className="text-xs font-mono font-normal text-muted">({cardData.nameEn})</span>
@@ -288,7 +289,7 @@ isEnglish
                         ? (isEnglish ? "· Reversed" : "· ไพ่กลับหัว")
                         : (isEnglish ? "· Upright" : "· ไพ่หัวตั้ง")}
                     </span>
-                  </h3>
+                  </ThaiPhrases></h3>
                 </div>
               </div>
 

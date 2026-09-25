@@ -114,7 +114,7 @@ const TOPIC_COPY: Record<string, TopicCopy> = {
     metaTitleTh: "Pick A Card ทิศทางความรักในอนาคต",
     metaTitleEn: "Pick A Card: Future Of Your Love Life",
     metaDescTh:
-      "Pick A Card เลือกกองไพ่ดูทิศทางความรักและความสัมพันธ์ในอนาคต จุดเปลี่ยนสำคัญ และผลลัพธ์ปลายทาง ด้วยไพ่ 1909 Rider-Waite แท้ ฟรี ไม่ต้องสมัคร",
+      "Pick A Card เลือกกองไพ่ดูทิศทางความรัก และความสัมพันธ์ในอนาคต จุดเปลี่ยนสำคัญ และผลลัพธ์ปลายทาง ด้วยไพ่ 1909 Rider-Waite แท้ ฟรี ไม่ต้องสมัคร",
     metaDescEn:
       "Pick 1 of 4 tarot piles to see where your love life is heading, the turning point ahead, and the outcome waiting at the end. Free 1909 Rider-Waite reading.",
     keywordsTh: [
@@ -132,7 +132,7 @@ const TOPIC_COPY: Record<string, TopicCopy> = {
     ],
     eyebrowTh: "มองทางข้างหน้าของหัวใจ",
     eyebrowEn: "Looking Down The Road Of The Heart",
-    articleTitleTh: "ทิศทางความรักในอนาคต: จุดเปลี่ยนที่รออยู่และปลายทางที่เป็นไปได้",
+    articleTitleTh: "ทิศทางความรักในอนาคต: จุดเปลี่ยนที่รออยู่ และปลายทางที่เป็นไปได้",
     articleTitleEn: "The Future Of Your Love Life: The Turning Point And What Waits",
     bodyTh: [
       "คนที่ค้นหาเรื่องทิศทางความรักส่วนใหญ่ไม่ได้อยากรู้แค่ว่า &quot;จะได้แต่งงานไหม&quot; แต่อยากรู้ว่าสิ่งที่กำลังทำอยู่ตอนนี้กำลังพาไปทางไหน ความสัมพันธ์ที่ยื้ออยู่ควรไปต่อหรือพอแค่นี้ และถ้าปล่อยมือแล้วข้างหน้ามีอะไรรออยู่บ้าง กองไพ่ในหน้านี้จึงวางไว้สามจังหวะ คือพลังงานตั้งต้น จุดเปลี่ยนสำคัญ และผลลัพธ์ปลายทาง",
@@ -178,7 +178,7 @@ const TOPIC_COPY: Record<string, TopicCopy> = {
     metaTitleTh: "Pick A Card การงานการเงิน ก้าวต่อไป",
     metaTitleEn: "Pick A Card: Your Career & Money Move",
     metaDescTh:
-      "Pick A Card เลือกกองไพ่ดูก้าวต่อไปเรื่องงานและโอกาสการเงินใหม่ ทักษะที่ควรใช้ กระแสโอกาสที่ไหลเข้ามา และผลลัพธ์ ด้วยไพ่ 1909 Rider-Waite ฟรี",
+      "Pick A Card เลือกกองไพ่ดูก้าวต่อไปเรื่องงาน และโอกาสการเงินใหม่ ทักษะที่ควรใช้ กระแสโอกาสที่ไหลเข้ามา และผลลัพธ์ ด้วยไพ่ 1909 Rider-Waite ฟรี",
     metaDescEn:
       "Pick 1 of 4 tarot piles for your next career move: the skill to lean on, the opportunity coming in, and the result ahead. Free 1909 Rider-Waite reading.",
     keywordsTh: [
@@ -323,7 +323,7 @@ const TOPIC_COPY: Record<string, TopicCopy> = {
     ],
     eyebrowTh: "อ่านใจคนที่เดินจากไป",
     eyebrowEn: "Reading The Heart That Walked Away",
-    articleTitleTh: "เขาจะกลับมาไหม: อ่านใจคนที่จากไปและสิ่งที่ขวางอยู่ตรงกลาง",
+    articleTitleTh: "เขาจะกลับมาไหม: อ่านใจคนที่จากไป และสิ่งที่ขวางอยู่ตรงกลาง",
     articleTitleEn: "Will They Come Back: Their Heart, And What Stands Between",
     bodyTh: [
       "คำถามว่า &quot;เขาจะกลับมาไหม&quot; มักเกิดในช่วงที่ยากที่สุดของความสัมพันธ์ คือช่วงที่เรื่องจบไปแล้วแต่ใจยังไม่จบตาม บางคนเจอการหายไปเงียบ ๆ โดยไม่มีคำอธิบาย บางคนเลิกกันแบบมีเหตุผลครบแต่ยังรู้สึกว่ามีอะไรค้างอยู่ การเลือกกองไพ่ในหน้านี้ช่วยให้คุณได้พักจากการไล่หาคำตอบด้วยตัวเองทั้งวัน แล้วมองภาพรวมจากระยะที่ไกลขึ้นสักหน่อย",

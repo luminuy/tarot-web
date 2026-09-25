@@ -1,6 +1,7 @@
 import { RouteLink as Link } from "@/components/ui/RouteLink";
 import { CardImage } from "@/components/card/CardImage";
 import { HomeRailNav } from "@/components/seo/HomeRailNav";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * ✦ "ดูดวงแบบอื่น" — ประตูจากหน้าแรกไปหน้าที่เคยไม่มีลิงก์เข้าเลย
@@ -83,9 +84,9 @@ export function HomeMoreWaysSection({ isEnglish, href }: { isEnglish: boolean; h
         <h2
           id="home-more-ways-title"
           className="text-2xl sm:text-3xl font-serif-th font-bold text-ink [text-wrap:balance]"
-        >
+        ><ThaiPhrases>
           {isEnglish ? "More Ways to Read Your Cards" : "ดูดวงไพ่ยิปซีแบบอื่น ๆ"}
-        </h2>
+        </ThaiPhrases></h2>
         {/* แต่ละวรรคเป็น inline-block — ภาษาไทยไม่มีช่องว่างคั่นคำ ปล่อยเบราว์เซอร์ตัดเองได้ "เลย" ค้างบรรทัดเดียว */}
         <p className="text-xs sm:text-sm text-muted font-serif-th max-w-2xl">
           {isEnglish ? (
@@ -119,9 +120,9 @@ export function HomeMoreWaysSection({ isEnglish, href }: { isEnglish: boolean; h
                     <span className="glass-chip inline-block px-2.5 py-0.5 text-[11px] font-serif-th font-semibold text-gold-ink">
                       {copy.tag}
                     </span>
-                    <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
+                    <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug"><ThaiPhrases>
                       {copy.title}
-                    </h3>
+                    </ThaiPhrases></h3>
                   </div>
                 </div>
                 <p className="text-xs sm:text-sm font-serif-th text-muted leading-relaxed">{copy.desc}</p>

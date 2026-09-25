@@ -24,6 +24,7 @@ import { localeHref } from "@/lib/i18n/paths";
 import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * ✦ ไพ่ทาโรต์ × 12 ราศี — `/cards/zodiac` และ `/cards/zodiac/<ราศี>` (สองภาษา)
@@ -302,9 +303,9 @@ export function ZodiacIndexBody({
 
         {/* รายชื่อ 12 ราศีพร้อมช่วงวันเกิด — กะทัดรัด (วงล้อด้านบนมีภาพไพ่ครบแล้ว) */}
         <section aria-labelledby="zodiac-list-title" className="space-y-4">
-          <h2 id="zodiac-list-title" className="text-xl sm:text-2xl font-serif-th font-bold text-ink text-center">
+          <h2 id="zodiac-list-title" className="text-xl sm:text-2xl font-serif-th font-bold text-ink text-center"><ThaiPhrases>
             {isEnglish ? "All 12 signs and their dates" : "12 ราศีและช่วงวันเกิด"}
-          </h2>
+          </ThaiPhrases></h2>
           <ul className="grid gap-2 sm:grid-cols-2">
             {ZODIAC_SIGNS.map((sign) => {
               const major = card(sign.majorCardId);
@@ -344,7 +345,7 @@ export function ZodiacIndexBody({
           title={
             isEnglish
               ? "The Golden Dawn: where tarot meets the zodiac"
-              : "Golden Dawn: จุดที่ไพ่ทาโรต์กับโหราศาสตร์มาบรรจบกัน"
+              : "Golden Dawn: จุดที่ไพ่ทาโรต์ กับโหราศาสตร์มาบรรจบกัน"
           }
           faqs={faqs}
           /* ⚠️ SeoArticleShell ไม่เติม /en ให้เอง (A6-09) — ต้องแปลงเส้นทางตามภาษาก่อนส่งเข้าไป */
@@ -364,13 +365,13 @@ export function ZodiacIndexBody({
                 these links are built into the imagery itself: the ram heads on The Emperor&apos;s throne are the sign
                 of Aries.
               </p>
-              <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-2">Three layers for every sign</h3>
+              <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-2"><ThaiPhrases>Three layers for every sign</ThaiPhrases></h3>
               <ol className="list-decimal pl-5 space-y-2">
                 <li><strong>Sign card</strong> — twelve Major Arcana cards, one per sign.</li>
                 <li><strong>Ruling planet card</strong> — the Major Arcana card of the planet that rules the sign.</li>
                 <li><strong>Decan cards</strong> — the 2 to 10 of each suit, three per sign, matching its element (Fire = Wands, Earth = Pentacles, Air = Swords, Water = Cups).</li>
               </ol>
-              <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-2">Western and Thai zodiac</h3>
+              <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-2"><ThaiPhrases>Western and Thai zodiac</ThaiPhrases></h3>
               <p>
                 The Golden Dawn built these links on the western (tropical) zodiac, so decan cards follow western
                 dates. Thai astrology keeps the same twelve signs but counts them from the actual stars, about 24
@@ -385,13 +386,13 @@ export function ZodiacIndexBody({
                 A.E. Waite กับ Pamela Colman Smith ผู้สร้างไพ่ 1909 ที่เว็บนี้ใช้ ต่างก็เป็นสมาชิกของสมาคมนี้
                 ความเชื่อมโยงจึงถูกวาดไว้ในภาพไพ่เลย เช่น หัวแกะบนบัลลังก์ของ The Emperor คือสัญลักษณ์ของราศีเมษ
               </p>
-              <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-2">แต่ละราศีมีไพ่ 3 ชั้น</h3>
+              <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-2"><ThaiPhrases>แต่ละราศีมีไพ่ 3 ชั้น</ThaiPhrases></h3>
               <ol className="list-decimal pl-5 space-y-2">
                 <li><strong>ไพ่ประจำราศี</strong> — ไพ่ชุดใหญ่ 12 ใบ ราศีละหนึ่งใบ</li>
                 <li><strong>ไพ่ดาวผู้ครองราศี</strong> — ไพ่ชุดใหญ่ของดาวเคราะห์ที่ครองราศีนั้น</li>
                 <li><strong>ไพ่ประจำช่วงวันเกิด (Decan)</strong> — ไพ่เลข 2–10 ของชุดที่ตรงกับธาตุของราศี ราศีละ 3 ใบ (ไฟ = ไม้เท้า · ดิน = เหรียญ · ลม = ดาบ · น้ำ = ถ้วย)</li>
               </ol>
-              <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-2">ราศีแบบสากลกับราศีแบบไทย</h3>
+              <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-2"><ThaiPhrases>ราศีแบบสากลกับราศีแบบไทย</ThaiPhrases></h3>
               <p>
                 Golden Dawn ผูกไพ่เข้ากับราศีแบบสากล (Tropical) ไพ่ประจำช่วงวันเกิดจึงใช้วันที่แบบสากล
                 ส่วนโหราศาสตร์ไทยใช้ 12 ราศีเดียวกัน แต่นับตามตำแหน่งดาวจริง (สุริยยาตร์) ซึ่งช้ากว่าราว 24 วัน
@@ -478,9 +479,9 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
         {/* ดวงรายวันของราศีนี้ — หัวข้อเป็น HTML ให้บอทเห็น ตัวไพ่มาจาก island (เปลี่ยนทุกวัน) */}
         <section aria-labelledby="zodiac-today" className="altar-panel rounded-2xl p-5 sm:p-8 space-y-4">
           <div className="space-y-1">
-            <h2 id="zodiac-today" className="text-lg sm:text-xl font-serif-th font-bold text-ink">
+            <h2 id="zodiac-today" className="text-lg sm:text-xl font-serif-th font-bold text-ink"><ThaiPhrases>
               {isEnglish ? `${sign.nameEn} daily tarot: today's card` : `ดวงรายวัน${sign.nameTh} — ไพ่ประจำวันนี้`}
-            </h2>
+            </ThaiPhrases></h2>
             <p className="text-[13px] text-muted font-sans">
               {isEnglish
                 ? `A new card for ${sign.nameEn} every day at midnight Thai time, the same for everyone in this sign.`
@@ -492,9 +493,9 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
 
         {/* ไพ่สองใบหลัก */}
         <section aria-labelledby="zodiac-main-cards" className="altar-panel rounded-2xl p-5 sm:p-8 space-y-6">
-          <h2 id="zodiac-main-cards" className="text-lg sm:text-xl font-serif-th font-bold text-ink text-center">
+          <h2 id="zodiac-main-cards" className="text-lg sm:text-xl font-serif-th font-bold text-ink text-center"><ThaiPhrases>
             {isEnglish ? `The cards of ${sign.nameEn}` : `ไพ่หลักของ${sign.nameTh}`}
-          </h2>
+          </ThaiPhrases></h2>
           <div className="grid grid-cols-2 gap-4 sm:gap-8 max-w-md mx-auto">
             <CardTile id={sign.majorCardId} label={isEnglish ? "Sign card" : "ไพ่ประจำราศี"} isEnglish={isEnglish} size="lg" />
             <CardTile
@@ -509,9 +510,9 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
 
         {/* ในโหราศาสตร์ไทย — เจ้าเรือนต่างจากสากลเฉพาะพิจิก กุมภ์ มีน */}
         <section aria-labelledby="zodiac-thai" className="altar-panel rounded-2xl p-5 sm:p-8 space-y-4">
-          <h2 id="zodiac-thai" className="text-lg sm:text-xl font-serif-th font-bold text-ink">
+          <h2 id="zodiac-thai" className="text-lg sm:text-xl font-serif-th font-bold text-ink"><ThaiPhrases>
             {isEnglish ? `${sign.nameEn} in Thai astrology` : `${sign.nameTh}ในโหราศาสตร์ไทย`}
-          </h2>
+          </ThaiPhrases></h2>
           <p className="text-sm text-muted font-sans leading-relaxed">
             {isEnglish
               ? `In Thai astrology the sun enters ${sign.nameEn} around ${thaiSignRange(sign, true)}, about 24 days later than the western dates, because Thai astrology follows the actual stars.`
@@ -541,12 +542,12 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
 
         {/* นิสัย ความรัก การงาน */}
         <section aria-labelledby="zodiac-reading" className="altar-panel rounded-2xl p-5 sm:p-8 space-y-5">
-          <h2 id="zodiac-reading" className="text-lg sm:text-xl font-serif-th font-bold text-ink">
+          <h2 id="zodiac-reading" className="text-lg sm:text-xl font-serif-th font-bold text-ink"><ThaiPhrases>
             {isEnglish ? `${sign.nameEn} through the tarot` : `${sign.nameTh}ในมุมของไพ่ทาโรต์`}
-          </h2>
+          </ThaiPhrases></h2>
           {sections.map((s) => (
             <div key={s.title} className="space-y-1.5">
-              <h3 className="text-base font-serif-th font-bold text-ink">{s.title}</h3>
+              <h3 className="text-base font-serif-th font-bold text-ink"><ThaiPhrases>{s.title}</ThaiPhrases></h3>
               <p className="text-sm text-muted font-sans leading-relaxed">{s.body}</p>
             </div>
           ))}
@@ -554,9 +555,9 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
 
         {/* ราศีที่เข้ากัน — คิดจากมุมระหว่างราศี (ข้อมูลเดียวกับเครื่องคำนวณความเข้ากันในหน้ารวม) */}
         <section aria-labelledby="zodiac-compat" className="altar-panel rounded-2xl p-5 sm:p-8 space-y-4">
-          <h2 id="zodiac-compat" className="text-lg sm:text-xl font-serif-th font-bold text-ink">
+          <h2 id="zodiac-compat" className="text-lg sm:text-xl font-serif-th font-bold text-ink"><ThaiPhrases>
             {isEnglish ? `Who ${sign.nameEn} gets along with` : `${sign.nameTh}เข้ากับราศีไหน`}
-          </h2>
+          </ThaiPhrases></h2>
           <ul className="space-y-3">
             {([4, 2, 6, 3] as const).map((distance) => {
               const aspect = ZODIAC_ASPECTS[distance][isEnglish ? "en" : "th"];
@@ -595,9 +596,9 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
         {/* ไพ่ 3 ช่วง */}
         <section aria-labelledby="zodiac-decans" className="altar-panel rounded-2xl p-5 sm:p-8 space-y-5">
           <div className="space-y-1.5">
-            <h2 id="zodiac-decans" className="text-lg sm:text-xl font-serif-th font-bold text-ink">
+            <h2 id="zodiac-decans" className="text-lg sm:text-xl font-serif-th font-bold text-ink"><ThaiPhrases>
               {isEnglish ? "Your decan card" : "ไพ่ประจำช่วงวันเกิด (Decan)"}
-            </h2>
+            </ThaiPhrases></h2>
             <p className="text-sm text-muted font-sans leading-relaxed">
               {isEnglish
                 ? `${sign.nameEn} is split into three decans of about ten days, each with its own ${element.suitEn} card. Find the one for your birthday.`

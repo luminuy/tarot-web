@@ -5,6 +5,7 @@ import { isStandardSpread } from "@/lib/entitlement/limits";
 import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { renderSpreadIllustration } from "@/components/spread/spread-illustrations";
 import { useLocale } from "@/lib/i18n";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 interface TopicSpreadListProps {
   spreads: Spread[];
@@ -61,9 +62,9 @@ export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
 
             {/* Title & Description */}
             <div className="space-y-2 z-10 pt-2 border-t border-line-soft">
-              <h2 className="font-serif-th text-lg font-bold text-ink leading-snug">
+              <h2 className="font-serif-th text-lg font-bold text-ink leading-snug"><ThaiPhrases>
                 {isEnglish ? (spread.nameEn || spread.nameTh) : spread.nameTh}
-              </h2>
+              </ThaiPhrases></h2>
               <p className="text-xs font-serif-th text-muted leading-relaxed line-clamp-1">
                 {isEnglish ? (spread.taglineEn || spread.tagline) : spread.tagline}
               </p>

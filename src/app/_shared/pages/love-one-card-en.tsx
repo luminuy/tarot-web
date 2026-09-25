@@ -7,6 +7,7 @@ import { buildAlternates, localizedUrl } from "@/lib/config/site";
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * 💗 ดูดวงความรัก 1 ใบ ฉบับภาษาอังกฤษ (`/en/love/1-card`)
@@ -128,9 +129,9 @@ export function LoveOneCardBodyEn({ ritual }: { ritual: ReactNode }) {
               answer that with real precision.
             </p>
 
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2">
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
               Four situations, four different readings
-            </h3>
+            </ThaiPhrases></h3>
             <ul className="list-disc pl-5 space-y-2 text-muted">
               <li>
                 <strong className="text-ink">Single.</strong> The card speaks to what you are carrying into the
@@ -150,9 +151,9 @@ export function LoveOneCardBodyEn({ ritual }: { ritual: ReactNode }) {
               </li>
             </ul>
 
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2">
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
               Why one card, and why it is honest
-            </h3>
+            </ThaiPhrases></h3>
             <p>
               A single card cannot hedge. It gives you one image to sit with instead of a narrative you can rearrange
               until it says what you wanted. The draw itself runs in your own browser through the Web Crypto API, and

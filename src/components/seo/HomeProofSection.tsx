@@ -1,5 +1,6 @@
 import { CardImage } from "@/components/card/CardImage";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * ✦ "คำทำนายหน้าตาเป็นแบบนี้" + ตัวนับคำทำนายจริง (แผนหน้าแรก ข้อ 3)
@@ -62,9 +63,9 @@ export function HomeProofSection({ isEnglish }: { isEnglish: boolean }) {
         <h2
           id="home-proof-title"
           className="text-2xl sm:text-3xl font-serif-th font-bold text-ink [text-wrap:balance]"
-        >
+        ><ThaiPhrases>
           {isEnglish ? "See What a Reading Looks Like" : "คำทำนายของแม่หมอ AI หน้าตาเป็นแบบนี้"}
-        </h2>
+        </ThaiPhrases></h2>
         <p className="text-xs sm:text-sm text-muted font-serif-th max-w-2xl mx-auto [text-wrap:balance]">
           {isEnglish ? (
             "Every card is read in its position and tied back to your question, then you get one thing you can do today."

@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import type { PublicReaderProfile } from "@/lib/marketplace/readers.repo";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 interface ReadersDirectoryProps {
   initialReaders: PublicReaderProfile[];
@@ -142,9 +143,9 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <h3 className="font-serif-th font-bold text-ink text-base group-hover:text-gold-ink transition-colors">
+                      <h3 className="font-serif-th font-bold text-ink text-base group-hover:text-gold-ink transition-colors"><ThaiPhrases>
                         {reader.displayName}
-                      </h3>
+                      </ThaiPhrases></h3>
                     </div>
                     <div className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full bg-[#EBF3ED] border border-line text-[13px] text-ok font-semibold">
                       แม่หมอตัวจริง (ยืนยันแล้ว)

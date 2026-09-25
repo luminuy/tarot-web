@@ -15,6 +15,7 @@ import {
   zodiacSignPath,
 } from "@/lib/tarot/zodiac";
 import { announceSign, clearMySign, readMySign, saveMySign, type MySign } from "@/lib/zodiac/my-sign";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * ✦ ข้อมูลราศีแบบย่อที่ island ต้องใช้จริงเท่านั้น
@@ -169,9 +170,9 @@ export function ZodiacFinder({ signs }: { signs: ZodiacFinderItem[] }) {
           className="mt-4 space-y-3 sm:mt-0 sm:absolute sm:left-1/2 sm:top-1/2 sm:w-[42%] sm:-translate-x-1/2 sm:-translate-y-1/2"
         >
           <div className="text-center space-y-0.5">
-            <h2 id="zodiac-finder-title" className="text-base sm:text-lg font-serif-th font-bold text-ink">
+            <h2 id="zodiac-finder-title" className="text-base sm:text-lg font-serif-th font-bold text-ink"><ThaiPhrases>
               {isEnglish ? "When were you born?" : "คุณเกิดวันไหน?"}
-            </h2>
+            </ThaiPhrases></h2>
             <p className="text-[12px] text-muted font-sans">
               {isEnglish ? "No year needed · western + Thai" : "ไม่ต้องใส่ปี · บอกทั้งราศีสากลและไทย"}
             </p>

@@ -4,6 +4,7 @@ import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 const loveOgImages = buildPageOgImage({
   title: "ดูดวงความรัก 1 ใบ",
@@ -143,7 +144,7 @@ export function LoveOneCardBodyTh({ ritual }: { ritual: ReactNode }) {
 
           <SeoArticleShell
             eyebrow="ศาสตร์แห่งความรัก"
-            title="ศาสตร์แห่งการดูดวงความรัก 1 ใบ: ถอดรหัสใจและสัญชาตญาณความสัมพันธ์"
+            title="ศาสตร์แห่งการดูดวงความรัก 1 ใบ: ถอดรหัสใจ และสัญชาตญาณความสัมพันธ์"
             faqs={[
               {
                 q: "การดูดวงความรัก 1 ใบ เหมาะกับคำถามแบบไหน?",
@@ -177,9 +178,9 @@ export function LoveOneCardBodyTh({ ritual }: { ritual: ReactNode }) {
                 จึงทำหน้าที่เสมือนจุดพักใจให้คุณได้ถอยออกมาหนึ่งก้าวเพื่อมองสถานการณ์ตามความเป็นจริง
               </p>
 
-              <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3">
+              <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3"><ThaiPhrases>
                 เจาะลึก 4 สถานะความสัมพันธ์ผ่านมุมมองไพ่ทาโรต์
-              </h3>
+              </ThaiPhrases></h3>
               <ul className="list-disc pl-5 space-y-2.5 text-[#5E5240]">
                 <li>
                   <strong>คนโสด (Single):</strong> ไพ่จะสะท้อนพลังงานดึงดูดและสภาพจิตใจของคุณเป็นหลัก
@@ -200,9 +201,9 @@ export function LoveOneCardBodyTh({ ritual }: { ritual: ReactNode }) {
                 </li>
               </ul>
 
-              <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3">
+              <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3"><ThaiPhrases>
                 ไพ่ชุดใหญ่ vs ไพ่ชุดเล็ก ในเรื่องความรัก
-              </h3>
+              </ThaiPhrases></h3>
               <p>
                 หากคุณเปิดได้ <strong>ไพ่ชุดใหญ่ (Major Arcana)</strong> เช่น The Lovers, The Empress, The Tower
                 หรือ Judgement แสดงว่าความสัมพันธ์นี้เป็นบทเรียนสำคัญแห่งจิตวิญญาณ (Karmic Lesson)

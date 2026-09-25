@@ -5,6 +5,7 @@ import { calculatePasswordStrength } from "@/lib/auth/strength";
 import { useSessionUser } from "@/lib/auth/use-session";
 import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 export function ChangePasswordCard() {
   const { locale, isEnglish } = useLocale();
@@ -98,11 +99,11 @@ export function ChangePasswordCard() {
     <details className="group rounded-lg border border-line-warm bg-surface p-5 sm:p-6 text-left">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
         <span className="space-y-1">
-          <h2 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">
+          <h2 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold"><ThaiPhrases>
             {hasPassword
               ? (isEn ? "Change Password" : "เปลี่ยนรหัสผ่าน")
               : (isEn ? "Set Email Password" : "ตั้งรหัสผ่านสำหรับเข้าสู่ระบบด้วยอีเมล")}
-          </h2>
+          </ThaiPhrases></h2>
           <span className="block text-xs text-muted leading-relaxed">
             {hasPassword
               ? (isEn

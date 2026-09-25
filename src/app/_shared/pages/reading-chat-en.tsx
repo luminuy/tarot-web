@@ -10,6 +10,7 @@ import { getPersona } from "@/data/personas";
 import { loadFlowState, type PersistedFlow } from "@/lib/utils/flow-persistence";
 import { useLocale } from "@/lib/i18n";
 import { noindexAlternates } from "@/lib/config/site";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * 💬 Fullscreen Oracle Chat Chamber (/en/reading/chat)
@@ -73,9 +74,9 @@ export function ReadingChatBodyEn() {
     <main id="main-content" tabIndex={-1} className="min-h-[100dvh] bg-canvas text-ink">
       <div aria-hidden="true" className="h-14" />
 
-      <h1 className="sr-only">
+      <h1 className="sr-only"><ThaiPhrases>
         Chat with {personaName}
-      </h1>
+      </ThaiPhrases></h1>
 
       <div className="mx-auto w-full max-w-2xl px-3 sm:px-4 py-2 sm:py-4 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
         {flow === undefined ? (

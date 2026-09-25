@@ -13,6 +13,7 @@ import { trackEvent } from "@/lib/analytics";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 import { useLocale } from "@/lib/i18n";
 import { copyToClipboard } from "@/lib/utils/clipboard";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -467,9 +468,9 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
             <div className="flex items-center gap-2">
               
               <div>
-                <h3 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">
+                <h3 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold"><ThaiPhrases>
                   {isEnglish ? "Share Reading" : "แชร์ผลคำทำนาย"}
-                </h3>
+                </ThaiPhrases></h3>
                 <p className="text-[13px] text-muted font-serif-th">
                   {isEnglish
                     ? "Save the image or send it to any app"

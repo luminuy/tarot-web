@@ -9,6 +9,7 @@ import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 const PATH = "/cards/all";
 
@@ -136,7 +137,7 @@ export function CardsAllBody({ locale, table }: { locale: Locale; table: ReactNo
             <span>{copy.badgeRight}</span>
           </div>
 
-          <h1 className="font-serif-th text-2xl sm:text-3xl font-bold text-ink">{copy.title}</h1>
+          <h1 className="font-serif-th text-2xl sm:text-3xl font-bold text-ink"><ThaiPhrases>{copy.title}</ThaiPhrases></h1>
 
           <p className="font-serif-th text-xs sm:text-sm text-muted leading-relaxed max-w-3xl">{copy.lede}</p>
 

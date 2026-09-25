@@ -17,6 +17,7 @@ import { copyToClipboard } from "@/lib/utils/clipboard";
  */
 import { useAiReading } from "@/lib/reading/use-ai-reading";
 import { AiReadingPanel } from "@/components/reading/ai/AiReadingPanel";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 /* 💤 กล่องสิทธิ์/กล่องสมัครสมาชิกโหลดตอนถูกเรียกใช้จริงเท่านั้น (บทเรียนงบบันเดิลของ `/daily`) */
 const AccessDialog = React.lazy(() =>
   import("@/components/entitlement/AccessDialog").then((m) => ({ default: m.AccessDialog }))
@@ -245,9 +246,9 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
           <span className="text-xs uppercase tracking-wider font-serif-th font-semibold text-gold-ink">
             {isEnglish ? "Natal Numerology Oracle" : "เลขศาสตร์วันเกิด"}
           </span>
-          <h2 className="font-serif-th text-xl sm:text-2xl font-bold text-ink">
+          <h2 className="font-serif-th text-xl sm:text-2xl font-bold text-ink"><ThaiPhrases>
             {isEnglish ? "Enter Your Date of Birth" : "ใส่วันเดือนปีเกิดของคุณ"}
-          </h2>
+          </ThaiPhrases></h2>
           <p className="font-sans text-xs sm:text-sm text-muted">
             {isEnglish
               ? "Calculated using 1909 Rider-Waite Major Arcana numerological reduction."
@@ -411,11 +412,11 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
               </span>
             </div>
 
-            <h3 className="text-2xl sm:text-3xl font-bold font-serif-th text-ink">
+            <h3 className="text-2xl sm:text-3xl font-bold font-serif-th text-ink"><ThaiPhrases>
               {isEnglish
                 ? `Your Birth Card is ${result.primaryCard.nameEn}`
                 : `ไพ่ประจำตัวของคุณคือ ${result.primaryCard.nameTh}`}
-            </h3>
+            </ThaiPhrases></h3>
 
             <p className="text-xs sm:text-sm font-sans text-muted">
               {result.primaryCard.nameEn} · {isEnglish ? `Card #${result.primaryNumber} of Major Arcana` : `หมายเลข ${result.primaryNumber} แห่งสำรับไพ่ชุดใหญ่ (Major Arcana)`}

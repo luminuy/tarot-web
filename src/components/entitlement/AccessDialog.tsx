@@ -27,6 +27,7 @@ import {
 import { trackEntitlementEvent } from "@/lib/entitlement/track";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useLocale } from "@/lib/i18n";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * หน้าต่างสิทธิ์การใช้งาน — จุดเดียวที่อธิบายเรื่องสิทธิ์ทั้งหมด
@@ -158,7 +159,7 @@ export function AccessDialog({
         {/* ── สิ่งที่ได้เพิ่ม ─────────────────────────────────────── */}
         {!showCredits && (
           <section className="space-y-3">
-            <h3 className="font-serif-th text-sm font-bold text-ink-deep">
+            <h3 className="font-serif-th text-sm font-bold text-ink-deep"><ThaiPhrases>
               {view?.isMember
                 ? isEn
                   ? "Your Active Member Benefits"
@@ -166,7 +167,7 @@ export function AccessDialog({
                 : isEn
                   ? "Benefits of Creating a Free Account"
                   : "สมัครสมาชิกฟรีแล้วได้อะไรบ้าง"}
-            </h3>
+            </ThaiPhrases></h3>
             <ul className="grid gap-2.5 sm:grid-cols-2">
               {memberBenefits.map((b) => (
                 <li key={b.title} className="glass-tile !rounded-lg flex gap-2.5 p-3">

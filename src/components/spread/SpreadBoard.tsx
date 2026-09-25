@@ -10,6 +10,7 @@ import { useLocale } from "@/lib/i18n";
 import { ExpandTabIcon } from "@/components/ui/TarotArtIcons";
 import { useMotionSafe } from "@/lib/use-motion-safe";
 import { useNarrowViewport } from "@/lib/use-narrow-viewport";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 export interface DrawnSlotCard {
   order: number;
@@ -286,9 +287,9 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
               {spread.positions.length} {isEnglish ? "Cards" : "ใบ"}
             </span>
           </div>
-          <h3 className="font-serif-th text-base sm:text-lg font-bold text-ink-deep mt-0.5">
+          <h3 className="font-serif-th text-base sm:text-lg font-bold text-ink-deep mt-0.5"><ThaiPhrases>
             {spreadNameLocalized}
-          </h3>
+          </ThaiPhrases></h3>
         </div>
 
         {/* Reveal All Cards Action Button or Revealed Badge */}

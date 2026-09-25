@@ -20,6 +20,8 @@ import { dayLabel } from "@/lib/pick-a-card/daily";
 import { useAiReading } from "@/lib/reading/use-ai-reading";
 import { AiReadingPanel } from "@/components/reading/ai/AiReadingPanel";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { RailArrows } from "@/components/ui/RailArrows";
 /* 💤 กล่องสิทธิ์/กล่องสมัครสมาชิกโหลดตอนถูกเรียกใช้จริงเท่านั้น (บทเรียนงบบันเดิลของ `/daily`) */
 const AccessDialog = React.lazy(() =>
   import("@/components/entitlement/AccessDialog").then((m) => ({ default: m.AccessDialog }))
@@ -36,6 +38,7 @@ const CATEGORY_BY_TOPIC = {
 } as const;
 
 export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: string } = {}) {
+  const TopicHeading = initialTopicSlug ? "h1" : "h2";
   const { isEnglish } = useLocale();
 
   // Active topic — หน้า `/pick-a-card/<slug>` ส่ง slug มาเพื่อเปิดหัวข้อนั้นตั้งแต่เฟรมแรก
@@ -274,7 +277,12 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
       <nav aria-label={isEnglish ? "Pick A Card Topics" : "หัวข้อเลือกกองไพ่"} className="space-y-3">
         <div className="flex items-center gap-3" aria-hidden="true">
           <span className="h-px flex-1 bg-gradient-to-r from-transparent to-line" />
-          <span className="text-[10.5px] font-mono uppercase tracking-[0.22em] text-muted whitespace-nowrap">
+          {/* ภาษาไทยห้ามถ่างตัวอักษร (tracking) — อ่านยากเป็น "เ ล ื อ ก" (เจ้าของทัก) · ถ่างเฉพาะภาษาอังกฤษ */}
+          <span
+            className={`text-muted whitespace-nowrap ${
+              isEnglish ? "text-[10.5px] font-mono uppercase tracking-[0.22em]" : "font-serif-th text-xs font-semibold"
+            }`}
+          >
             {isEnglish ? "Select Sacred Topic" : "เลือกหัวข้อพยากรณ์"}
           </span>
           <span className="h-px flex-1 bg-gradient-to-l from-transparent to-line" />
@@ -335,7 +343,11 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                   >
                     {isEnglish ? topic.titleEn : topic.titleTh}
                   </span>
-                  <span className="block text-[9.5px] font-mono uppercase tracking-[0.12em] text-muted mt-0.5">
+                  <span
+                    className={`block text-muted mt-0.5 ${
+                      isEnglish ? "text-[9.5px] font-mono uppercase tracking-[0.12em]" : "text-[10.5px] font-serif-th"
+                    }`}
+                  >
                     {isEnglish ? `${topic.slots.length} Piles` : `${topic.slots.length} กองไพ่`}
                   </span>
                 </span>
@@ -382,40 +394,25 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
           })}
         </div>
 
-        {/*
-          จุดบอกตำแหน่งของแถบหัวข้อ — เฉพาะจอเล็กที่เห็นทีละใบ
-          ⚠️ ห่อจุดด้วยปุ่มขนาด 24px แล้วไม่ใส่ gap (แพตเทิร์นเดียวกับหน้าแรก)
-          เพื่อให้พื้นที่กดผ่านเกณฑ์โดยที่ตัวจุดยังเล็กเท่าเดิม
-        */}
-        <div className="flex sm:hidden items-center justify-center">
-          {PICK_A_CARD_TOPICS.map((topic, index) => (
-            <button
-              key={topic.id}
-              type="button"
-              onClick={() => scrollTopicIntoView(index)}
-              aria-label={
-                isEnglish
-                  ? `Show topic: ${topic.titleEn}`
-                  : `เลื่อนไปที่หัวข้อ ${topic.titleTh}`
-              }
-              className="grid h-6 min-w-6 place-items-center focus:outline-none"
-            >
-              <span
-                aria-hidden="true"
-                className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${
-                  topicIndex === index ? "w-5 bg-gold-ink" : "w-1.5 bg-line"
-                }`}
-              />
-            </button>
-          ))}
+        {/* แถวล่างของสไลด์บนมือถือ: ลูกศรแบบเดียวกับหน้าแรก (เจ้าของสั่งถอดจุดบอกตำแหน่งออกจากทุกสไลด์ 2026-09-24) */}
+        <div className="flex sm:hidden items-center justify-end">
+          <RailArrows
+            isEnglish={isEnglish}
+            canPrev={topicIndex > 0}
+            canNext={topicIndex < PICK_A_CARD_TOPICS.length - 1}
+            onPrev={() => scrollTopicIntoView(Math.max(0, topicIndex - 1))}
+            onNext={() => scrollTopicIntoView(Math.min(PICK_A_CARD_TOPICS.length - 1, topicIndex + 1))}
+          />
         </div>
       </nav>
 
       {/* ── 2. Current Topic Header ── */}
       <header className="text-center max-w-2xl mx-auto space-y-2.5">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-ink leading-tight">
+        {/* หน้า /pick-a-card มี <h1> "Pick A Card" ของหน้าเองแล้ว หัวข้อที่เลือกจึงเป็น <h2>
+            ส่วนหน้า /pick-a-card/<หัวข้อ> หัวข้อนี้คือชื่อหน้า จึงเป็น <h1> */}
+        <TopicHeading className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-ink leading-tight"><ThaiPhrases>
           {isEnglish ? activeTopic.titleEn : activeTopic.titleTh}
-        </h1>
+        </ThaiPhrases></TopicHeading>
         <p className="text-sm sm:text-base font-serif-th text-muted leading-relaxed">
           {isEnglish ? activeTopic.descriptionEn : activeTopic.descriptionTh}
         </p>
@@ -514,9 +511,9 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
 
                   {/* Crystal Title & Meaning */}
                   <div className="mt-3 space-y-1 w-full">
-                    <h2 className="text-sm sm:text-base font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors line-clamp-1">
+                    <h2 className="text-sm sm:text-base font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors line-clamp-1"><ThaiPhrases>
                       {isEnglish ? pile.crystalEn : pile.crystalTh}
-                    </h2>
+                    </ThaiPhrases></h2>
                     <p className="text-xs font-serif-th text-muted leading-relaxed line-clamp-2">
                       {isEnglish ? pile.crystalDescEn : pile.crystalDescTh}
                     </p>
@@ -719,9 +716,9 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                     <span className="text-[11px] font-mono text-gold-ink uppercase tracking-wider">
                       {isEnglish ? "CORE ENERGY" : "พลังงานหลักประจำกอง"}
                     </span>
-                    <h2 className="text-xl sm:text-2xl font-serif-th font-bold text-ink leading-snug">
+                    <h2 className="text-xl sm:text-2xl font-serif-th font-bold text-ink leading-snug"><ThaiPhrases>
                       {script.theme}
-                    </h2>
+                    </ThaiPhrases></h2>
                     <p className="text-sm sm:text-base font-serif-th text-muted leading-relaxed pt-1">
                       {script.overview}
                     </p>
@@ -735,9 +732,9 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                           key={`${item.cardId}-body-${idx}`}
                           className="glass-tile p-4 !rounded-xl space-y-1"
                         >
-                          <h3 className="text-xs font-mono text-gold-ink uppercase tracking-wider">
+                          <h3 className="text-xs font-mono text-gold-ink uppercase tracking-wider"><ThaiPhrases>
                             {`${idx + 1}. ${isEnglish ? item.positionEn : item.positionTh}`}
-                          </h3>
+                          </ThaiPhrases></h3>
                           <p className="text-xs sm:text-sm font-serif-th text-ink leading-relaxed">
                             {script.bodies[idx]}
                           </p>

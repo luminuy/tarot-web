@@ -15,6 +15,7 @@ import type { Article } from "@/data/articles";
 import { getArticleTitle } from "@/data/article-helpers";
 import { SpreadPositionMap } from "@/components/spread/SpreadPositionMap";
 import { useLocale } from "@/lib/i18n";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 interface Props {
   spread: Spread;
@@ -157,9 +158,9 @@ export const SpreadDetailClient: React.FC<Props> = ({
             {standard ? (isEnglish ? "Standard Spread" : "ผังมาตรฐาน") : (isEnglish ? "Grand Spread" : "ญาณพิเศษ")}
           </span>
         </div>
-        <h1 className="font-serif-th text-3xl font-bold leading-tight sm:text-4xl [text-wrap:balance]">
+        <h1 className="font-serif-th text-3xl font-bold leading-tight sm:text-4xl [text-wrap:balance]"><ThaiPhrases>
           {isEnglish ? spreadName : (spread.seoTitleTh ?? `ผัง${spread.nameTh}`)}
-        </h1>
+        </ThaiPhrases></h1>
         <p className="font-serif-th text-lg text-gold-ink [text-wrap:balance]">{spreadTagline}</p>
         <p className="max-w-2xl font-serif-th leading-relaxed text-ink [text-wrap:pretty]">
           {spreadDesc}
@@ -187,9 +188,9 @@ export const SpreadDetailClient: React.FC<Props> = ({
             </p>
           </div>
           <div>
-            <h2 className="font-serif-th text-xl font-bold text-ink">
+            <h2 className="font-serif-th text-xl font-bold text-ink"><ThaiPhrases>
               {isEnglish ? "Positional Roles & Interpretations" : `ตำแหน่งไพ่ทั้ง ${spread.positions.length} ใบและความหมาย`}
-            </h2>
+            </ThaiPhrases></h2>
             <p className="text-xs text-muted mt-1 font-serif-th">
               {isEnglish
                 ? "Each card role answers a specific dimension of your inquiry:"
@@ -221,9 +222,9 @@ export const SpreadDetailClient: React.FC<Props> = ({
 
       {/* How-to Steps */}
       <section>
-        <h2 className="font-serif-th text-xl font-bold">
+        <h2 className="font-serif-th text-xl font-bold"><ThaiPhrases>
           {isEnglish ? "How to Read this Spread" : "วิธีอ่านผังนี้"}
-        </h2>
+        </ThaiPhrases></h2>
         <ol className="mt-4 space-y-3">
           {howToSteps.map((step, idx) => (
             <li key={idx} className="flex items-start gap-3 font-serif-th">
@@ -241,9 +242,9 @@ export const SpreadDetailClient: React.FC<Props> = ({
 
       {/* FAQs */}
       <section>
-        <h2 className="font-serif-th text-xl font-bold">
+        <h2 className="font-serif-th text-xl font-bold"><ThaiPhrases>
           {isEnglish ? "Frequently Asked Questions" : "คำถามที่พบบ่อย"}
-        </h2>
+        </ThaiPhrases></h2>
         <div className="mt-4 space-y-3">
           {faqs.map((faq, idx) => (
             <details
@@ -260,9 +261,9 @@ export const SpreadDetailClient: React.FC<Props> = ({
       {/* Related Articles */}
       {relatedArticles.length > 0 && (
         <section>
-          <h2 className="font-serif-th text-xl font-bold">
+          <h2 className="font-serif-th text-xl font-bold"><ThaiPhrases>
             {isEnglish ? "Related Wisdom Articles" : "บทความที่เกี่ยวข้อง"}
-          </h2>
+          </ThaiPhrases></h2>
           <ul className="mt-4 space-y-2">
             {relatedArticles.map((a) => (
               <li key={a.slug}>
@@ -280,9 +281,9 @@ export const SpreadDetailClient: React.FC<Props> = ({
 
       {/* Other Spreads */}
       <section>
-        <h2 className="font-serif-th text-xl font-bold">
+        <h2 className="font-serif-th text-xl font-bold"><ThaiPhrases>
           {isEnglish ? "Explore Other Spreads" : "ผังอื่นที่น่าสนใจ"}
-        </h2>
+        </ThaiPhrases></h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {fallbackSpreads.map((s) => (
             <Link

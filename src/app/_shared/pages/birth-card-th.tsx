@@ -7,6 +7,7 @@ import { buildPageOgImage } from "@/lib/media/og-image";
 import { DECK } from "@/data/cards";
 import type { BirthCardItem } from "@/lib/tarot/birth-card";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * ⚠️ ส่งเฉพาะฟิลด์ที่ `BirthCardCalculator` ใช้จริงเท่านั้น
@@ -179,7 +180,7 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
         {/* Editorial Guide Article */}
         <SeoArticleShell
           eyebrow="ถอดรหัสจิตวิทยา"
-          title="ศาสตร์แห่งไพ่ทาโรต์ประจำตัว: พิมพ์เขียวพลังงานและกระจกส่องจิตวิญญาณตลอดชีวิต"
+          title="ศาสตร์แห่งไพ่ทาโรต์ประจำตัว: พิมพ์เขียวพลังงาน และกระจกส่องจิตวิญญาณตลอดชีวิต"
           faqs={BIRTH_CARD_FAQS}
           links={[
             { label: "สารานุกรมไพ่ 78 ใบ", href: "/cards" },
@@ -197,9 +198,9 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
               และ Angeles Arrien ซึ่งผสานศาสตร์แห่งสัญลักษณ์วิทยาโบราณเข้ากับทฤษฎีแม่พิมพ์จิตวิทยาดั้งเดิม (Archetypes) ของ คาร์ล ยุง (Carl Gustav Jung)
             </p>
 
-            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3">
+            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3"><ThaiPhrases>
               กลไกการคำนวณและมิติแห่งตัวเลข (Digit Reduction & Major Arcana)
-            </h3>
+            </ThaiPhrases></h3>
             <p>
               การคำนวณไพ่ประจำตัวจะใช้วันที่ เดือน และปีเกิดที่เป็นปีสากล (คริสต์ศักราช ค.ศ.) มาบวกรวมกันเป็นผลรวมเดียว
               จากนั้นจึงทำการลดทอนตัวเลข (Digit Reduction) ให้เหลือค่าที่สอดคล้องกับไพ่ชุดใหญ่ (Major Arcana) หมายเลข 0 ถึง 21
@@ -211,9 +212,9 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
               ส่วนผู้ที่มีผลลัพธ์เป็นตัวเลข 1 ถึง 9 ตั้งแต่แรก จะถือว่ามีพลังงานของไพ่บุคลิกภาพและจิตวิญญาณเป็นหนึ่งเดียวกันอย่างลึกซึ้ง
             </p>
 
-            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3">
+            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3"><ThaiPhrases>
               ความสัมพันธ์ของคู่ไพ่แห่งดวงวิญญาณ (Archetypal Constellations)
-            </h3>
+            </ThaiPhrases></h3>
             <p>
               คู่ไพ่ประจำตัวช่วยให้เราเข้าใจความขัดแย้งและความสมดุลภายในตนเอง ตัวอย่างเช่น:
             </p>
@@ -264,9 +265,9 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
               </li>
             </ul>
 
-            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3">
-              วิธีนำพลังงานไพ่ประจำตัวไปปรับใช้เพื่อการพัฒนาตนเอง
-            </h3>
+            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3"><ThaiPhrases>
+              วิธีนำพลังงานไพ่ประจำตัว ไปปรับใช้เพื่อการพัฒนาตนเอง
+            </ThaiPhrases></h3>
             <p>
               การรู้จักไพ่ทาโรต์ประจำตัวไม่ใช่การทำนายดวงชะตาแบบพยากรณ์ตายตัว แต่เป็นเครื่องมือสำหรับการใคร่ครวญตนเอง (Self-Reflection):
             </p>

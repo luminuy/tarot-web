@@ -8,6 +8,7 @@ import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { CardImage } from "@/components/card/CardImage";
 import { CardYesNoAnswer } from "./CardYesNoAnswer";
 import { useLocale } from "@/lib/i18n";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 export type CardNavRef = Pick<TarotCard, "id" | "image" | "nameTh" | "nameEn">;
 
@@ -135,9 +136,35 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
       </div>
 
       {/* Main Showcase Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+      {/*
+        📱 มือถือ: ชื่อไพ่มาก่อนภาพ — เดิมภาพไพ่เต็มจอแรก ต้องเลื่อนลงถึงเห็นว่าเป็นไพ่อะไร (เจ้าของทัก)
+        🖥️ จอใหญ่: ชื่อไพ่อยู่คอลัมน์ขวาแถวบนเหมือนเดิม (grid แถว auto + 1fr ให้ส่วนที่เหลือต่อท้ายชื่อพอดี)
+      */}
+      <div className="grid grid-cols-1 md:grid-cols-12 md:grid-rows-[auto_1fr] gap-x-8 gap-y-6 md:gap-y-6 items-start">
+        <div className="md:col-span-7 lg:col-span-8 md:col-start-6 lg:col-start-5 md:row-start-1">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-xs font-mono text-gold-ink">
+              <span className="glass-chip px-2.5 py-0.5 font-semibold uppercase text-ink">
+                {card.arcana === "major" ? `Major Arcana · #${card.number}` : `${card.suit} Suit`}
+              </span>
+              {!isEnglish && card.nameEn && (
+                <>
+                  <span className="text-muted">|</span>
+                  <span className="text-ink font-sans tracking-wide">{card.nameEn}</span>
+                </>
+              )}
+            </div>
+            <h1 className="font-serif-th text-3xl sm:text-4xl lg:text-5xl font-bold text-ink leading-tight [text-wrap:balance]"><ThaiPhrases>
+              {isEnglish ? card.nameEn : card.nameTh}
+            </ThaiPhrases></h1>
+            <p className="text-xs sm:text-sm text-muted leading-relaxed pt-1 font-serif-th [text-wrap:pretty]">
+              {isEnglish && card.numerologyEn ? card.numerologyEn : card.numerology}
+            </p>
+          </div>
+        </div>
+
         {/* Left Column: 3D Showcase Card & Orientation Controller */}
-        <div className="md:col-span-5 lg:col-span-4 flex flex-col items-center space-y-5">
+        <div className="md:col-span-5 lg:col-span-4 md:col-start-1 md:row-start-1 md:row-span-2 flex flex-col items-center space-y-5">
           {/* 3D Sacred Card Container */}
           <div className="relative group">
             {/* ใส่คลาสอนิเมชันเฉพาะหลัง mount — เรนเดอร์แรกฝั่งเซิร์ฟเวอร์ต้องออกมา
@@ -163,17 +190,8 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                 </div>
                 <div className="gold-foil-sheen absolute inset-0 opacity-15 group-hover:opacity-30 transition-opacity pointer-events-none" />
 
-                {/* Top Floating Badge */}
-                <div className="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
-                  <span className="text-[13px] font-mono font-bold px-2 py-0.5 rounded bg-gold-ink text-white">
-                    {card.arcana === "major" ? `Major #${card.number}` : card.suit?.toUpperCase()}
-                  </span>
-                  <span
-                    className={`text-[13px] font-mono px-2 py-0.5 rounded border ${elem.border} ${elem.bg} ${elem.text} font-bold`}
-                  >
-                    {elem.icon} {isEnglish ? ELEMENT_EN[card.element] || card.element : card.element}
-                  </span>
-                </div>
+                {/* ⚠️ ไม่มีป้ายทับภาพไพ่แล้ว — เดิมมี "Major #17" กับ "• ลม" ลอยทับมุมภาพ บังรายละเอียดหน้าไพ่ (เจ้าของทัก)
+                    ธาตุแสดงในป้ายใต้ภาพ · เลขไพ่ย้ายไปอยู่ในป้าย "Major Arcana" ข้างชื่อไพ่ */}
               </div>
             </div>
           </div>
@@ -224,28 +242,8 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           </div>
         </div>
 
-        {/* Right Column: Titles, Keywords & Categorized Deep Meanings */}
-        <div className="md:col-span-7 lg:col-span-8 space-y-6">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs font-mono text-gold-ink">
-              <span className="glass-chip px-2.5 py-0.5 font-semibold uppercase text-ink">
-                {card.arcana === "major" ? "Major Arcana" : `${card.suit} Suit`}
-              </span>
-              {!isEnglish && card.nameEn && (
-                <>
-                  <span className="text-muted">|</span>
-                  <span className="text-ink font-sans tracking-wide">{card.nameEn}</span>
-                </>
-              )}
-            </div>
-            <h1 className="font-serif-th text-3xl sm:text-4xl lg:text-5xl font-bold text-ink leading-tight [text-wrap:balance]">
-              {isEnglish ? card.nameEn : card.nameTh}
-            </h1>
-            <p className="text-xs sm:text-sm text-muted leading-relaxed pt-1 font-serif-th [text-wrap:pretty]">
-              {isEnglish && card.numerologyEn ? card.numerologyEn : card.numerology}
-            </p>
-          </div>
-
+        {/* Right Column (ต่อ): Keywords & Categorized Deep Meanings */}
+        <div className="md:col-span-7 lg:col-span-8 md:col-start-6 lg:col-start-5 space-y-6">
           {/* Keywords Ribbon — มีครบทั้งสองหัวไพ่ใน HTML · CSS ซ่อนฝั่งที่ไม่ได้เลือก */}
           {orientations.map((o) => (
             <div key={o.key} data-when={o.key} className="space-y-2">
@@ -291,7 +289,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                         <span style={{ color: cat.color }} className="text-sm">
                           {cat.icon}
                         </span>
-                        <h3 className="font-serif-th text-xs sm:text-sm font-bold text-ink">{isEnglish ? cat.nameEn : cat.nameTh}</h3>
+                        <h3 className="font-serif-th text-xs sm:text-sm font-bold text-ink"><ThaiPhrases>{isEnglish ? cat.nameEn : cat.nameTh}</ThaiPhrases></h3>
                       </div>
                       <p className="font-serif-th text-xs sm:text-sm text-ink leading-relaxed pl-4 border-l-2 border-line group-hover:border-gold transition-colors [text-wrap:pretty]">
                         {text || (isEnglish ? "Archetypal insight gathering in progress" : "กำลังรวบรวมคำแปลมิตินี้")}

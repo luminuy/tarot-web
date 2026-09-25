@@ -47,6 +47,7 @@ import { ensureEntitlement, refreshEntitlement, useEntitlement } from "@/lib/ent
 import { useLocale } from "@/lib/i18n";
 import { STORAGE_KEYS, STORAGE_KEY_BUILDERS } from "@/lib/storage/keys";
 import { readMySign } from "@/lib/zodiac/my-sign";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * ✦ Dynamic Code-Splitting — คอมโพเนนต์หนักทั้งหมดโหลดเมื่อถึงขั้นที่ใช้จริง
@@ -1576,9 +1577,9 @@ export default function TarotFlow({
         {/* หน้า `/read/<ผัง>` ไม่มีขั้นเลือกผัง (ที่มี <h1> ของหน้าแรก) — หัวเรื่องของหน้าจึงต้องมาจากตรงนี้
             ไม่งั้นทั้งหน้าไม่มี <h1> ให้โปรแกรมอ่านหน้าจอกระโดดไปเลย (ขั้นต่าง ๆ ใช้ <h2>) */}
         {routeSpread && (
-          <h1 className="sr-only">
+          <h1 className="sr-only"><ThaiPhrases>
             {isEnglish ? `Tarot reading — ${routeSpread.nameEn}` : `ดูดวงด้วยผัง${routeSpread.nameTh}`}
-          </h1>
+          </ThaiPhrases></h1>
         )}
 
         {/* ── Directional Step Transitions (P1-M1) ─────────────────────────
@@ -1618,9 +1619,9 @@ export default function TarotFlow({
                   ────────────────────────────────────────────────────────── */}
               <div className="space-y-6" data-home-section="hero">
                 <div className="text-center space-y-3 sm:space-y-3.5 pt-2">
-                  <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
+                  <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]"><ThaiPhrases>
                     {isEnglish ? "Interactive 1909 Rider-Waite Tarot with AI Oracle" : "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ออนไลน์ ฟรี กับแม่หมอ AI"}
-                  </h1>
+                  </ThaiPhrases></h1>
 
                   {/*
                     ✦ คำโปรยใต้หัวเรื่อง — เขียนใหม่ให้เป็นประโยคเดียวที่อ่านรวดเดียวจบ
@@ -1723,9 +1724,9 @@ export default function TarotFlow({
                     </span>
                   </div>
 
-                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-ink tracking-wide leading-snug [text-wrap:balance]">
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-ink tracking-wide leading-snug [text-wrap:balance]"><ThaiPhrases>
                     {isEnglish ? "Choose Your Tarot Spread" : "เลือกผังการเปิดไพ่พยากรณ์"}
-                  </h2>
+                  </ThaiPhrases></h2>
                   <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed [text-wrap:balance]">
                     {isEnglish
                       ? "Want more depth than a single card? Open several cards at once and let the oracle read the full picture."
@@ -1773,9 +1774,9 @@ export default function TarotFlow({
               className="space-y-10"
             >
               <div className="text-center space-y-2 sm:space-y-2.5">
-                <h2 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
+                <h2 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink leading-snug sm:leading-normal pt-1 [text-wrap:balance]"><ThaiPhrases>
                   {isEnglish ? "Set Your Intention & Choose Reader" : "ตั้งคำถาม & เลือกแม่หมอ"}
-                </h2>
+                </ThaiPhrases></h2>
                 <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed [text-wrap:balance]">
                   {isEnglish
                     ? "Formulate your question and choose your preferred oracle archetype"

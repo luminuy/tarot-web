@@ -2,6 +2,7 @@
 
 import type { ReadingState } from "@/components/home/flow-reading";
 import { FallbackNotice } from "@/components/reading/FallbackNotice";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * ✦ คำอ่านของแม่หมอบนหน้าเฉพาะทาง (1–3 ใบ)
@@ -56,9 +57,9 @@ export function AiReadingPanel({
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-3">
-        <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink">
+        <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink"><ThaiPhrases>
           {title ?? (isEn ? "The Oracle Reads Your Card" : "คำอ่านจากแม่หมอ")}
-        </h3>
+        </ThaiPhrases></h3>
         {state.status === "streaming" && (
           <span className="text-xs font-serif-th text-gold-ink">
             {isEn ? "reading…" : "กำลังอ่าน…"}

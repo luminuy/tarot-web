@@ -8,6 +8,7 @@ import { DECK } from "@/data/cards";
 import type { BirthCardItem } from "@/lib/tarot/birth-card";
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * 🎂 Tarot Birth Card Calculator — English Edition (`/en/cards/birth-card`)
@@ -189,9 +190,9 @@ export function BirthCardBodyEn({ calculator }: { calculator: ReactNode }) {
               twenty-two cards of the Major Arcana embody timeless patterns of human consciousness.
             </p>
 
-            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3">
+            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3"><ThaiPhrases>
               The Calculation Mechanism and Numerical Reduction
-            </h3>
+            </ThaiPhrases></h3>
             <p>
               The calculation of your birth card begins by summing the four-digit year, month, and day of your birth
               using the standard Gregorian calendar. Through a systematic process of cross-addition and digit reduction,
@@ -207,9 +208,9 @@ export function BirthCardBodyEn({ calculator }: { calculator: ReactNode }) {
               Personality and Soul card, suggesting an innate coherence between outward engagement and inner purpose.
             </p>
 
-            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3">
+            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3"><ThaiPhrases>
               The Twelve Archetypal Constellations and Pairings
-            </h3>
+            </ThaiPhrases></h3>
             <p>
               Working with birth card pairings illuminates the dynamic interplay between your conscious social persona
               and your deeper internal inclinations. Each classic pairing invites you to harmonize two complementary
@@ -278,9 +279,9 @@ export function BirthCardBodyEn({ calculator }: { calculator: ReactNode }) {
               </li>
             </ul>
 
-            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3">
+            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3"><ThaiPhrases>
               Applying Your Birth Card for Conscious Self-Development
-            </h3>
+            </ThaiPhrases></h3>
             <p>
               Your tarot birth card is not a fatalistic forecast or an unalterable verdict; it is an introspective
               framework designed to foster self-inquiry and mindful living:

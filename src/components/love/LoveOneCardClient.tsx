@@ -11,6 +11,7 @@ import { RitualHero } from "@/components/reading/one-card/RitualHero";
 import { OneCardRitual } from "@/components/reading/one-card/OneCardRitual";
 import { CardImage } from "@/components/card/CardImage";
 import { copyToClipboard } from "@/lib/utils/clipboard";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 type RelationshipStatus = "single" | "situationship" | "coupled" | "breakup";
 
@@ -482,11 +483,11 @@ export function LoveOneCardClient() {
         recommendations={
           <div className="space-y-3 pt-4 border-t border-line-warm/40">
             <div className="text-center sm:text-left space-y-1">
-              <h3 className="text-sm sm:text-base font-serif-th font-bold text-ink">
+              <h3 className="text-sm sm:text-base font-serif-th font-bold text-ink"><ThaiPhrases>
                 {isEnglish
                   ? "Seeking Deeper Clarity on Your Relationship?"
                   : "ต้องการคำตอบเรื่องความรักที่ละเอียดและลึกซึ้งยิ่งขึ้น?"}
-              </h3>
+              </ThaiPhrases></h3>
               <p className="text-xs font-sans text-muted">
                 {isEnglish
                   ? "A 1-card oracle provides initial focus. For in-depth relationship dynamics and future timeline, explore these spreads:"

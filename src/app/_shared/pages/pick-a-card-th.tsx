@@ -4,6 +4,7 @@ import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 const pickACardOgImages = buildPageOgImage({
   title: "Pick A Card เลือกกองไพ่พยากรณ์",
@@ -143,6 +144,17 @@ export function PickACardBodyTh({ ritual }: { ritual: ReactNode }) {
 
       <main id="main-content" tabIndex={-1} className="min-h-screen py-6 sm:py-10 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto space-y-8">
+          {/* ชื่อหน้า — เดิมหน้านี้ไม่มีหัวเรื่องบอกว่าเป็นหน้าอะไร <h1> คือหัวข้อที่เลือกอยู่ ("เขาคิดยังไงกับเรา…")
+              ซึ่งไม่ตรงกับชื่อหน้าในผลค้นหา (เจ้าของทัก) · หัวข้อที่เลือกในพิธีจึงลดเป็น <h2> บนหน้านี้ */}
+          <header className="text-center space-y-2 pt-2">
+            <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink leading-snug [text-wrap:balance]">
+              <ThaiPhrases>{"Pick A Card เลือกกองไพ่พยากรณ์"}</ThaiPhrases>
+            </h1>
+            <p className="text-sm sm:text-base text-muted font-serif-th leading-relaxed">
+              <ThaiPhrases>{"เลือกหัวข้อที่อยากรู้ ตั้งจิตถึงเรื่องนั้น แล้วเลือกกองไพ่ที่ใจเรียก"}</ThaiPhrases>
+            </p>
+          </header>
+
           {/* ห่อ div — <astro-island> เป็น display:contents จึงไม่รับระยะจาก space-y ทำให้กล่องพิธีชิดกล่องบทความ */}
           <div>{ritual}</div>
 
@@ -160,9 +172,9 @@ export function PickACardBodyTh({ ritual }: { ritual: ReactNode }) {
               &quot;หมุดหมายแห่งพลังงาน&quot; (Energetic Anchors) ช่วยให้คุณตั้งสมาธิได้ลึกซึ้งยิ่งขึ้น
             </p>
 
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2">
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
               ความหมายของคริสตัลทั้ง 4 ชนิดประจำกองไพ่
-            </h3>
+            </ThaiPhrases></h3>
             <ul className="list-disc pl-5 space-y-2 text-muted">
               <li>
                 <strong className="text-ink">กองที่ 1 โรสควอตซ์ (Rose Quartz):</strong> หินแห่งความอ่อนโยน
@@ -182,9 +194,9 @@ export function PickACardBodyTh({ ritual }: { ritual: ReactNode }) {
               </li>
             </ul>
 
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2">
-              ข้อแนะนำในการนำคำทำนายไปปรับใช้ในชีวิตจริง
-            </h3>
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
+              ข้อแนะนำในการนำคำทำนาย ไปปรับใช้ในชีวิตจริง
+            </ThaiPhrases></h3>
             <p>
               คำทำนายไพ่ทาโรต์ไม่ใช่คำพิพากษาตายตัว หากแต่เป็นเหมือนแผนที่สะท้อนพลังงานในปัจจุบันและทิศทางที่น่าจะเป็นไป
               เมื่อคุณได้รับทราบข้อคิดเตือนใจและคำแนะนำจากไพ่แล้ว คุณยังมีเจตจำนงเสรี (Free Will)

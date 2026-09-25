@@ -8,6 +8,7 @@ import { ZODIAC_ASPECTS, zodiacDistance } from "@/data/zodiac-compat";
 import { zodiacSignPath } from "@/lib/tarot/zodiac";
 import { currentSign, onSignAnnounced } from "@/lib/zodiac/my-sign";
 import type { ZodiacFinderItem } from "@/components/encyclopedia/ZodiacFinder";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * ✦ ความเข้ากันของสองราศี + ไพ่คู่ — ใช้รายการราศีแบบย่อชุดเดียวกับเครื่องหาราศี
@@ -59,9 +60,9 @@ export function ZodiacCompatibility({ signs }: { signs: ZodiacFinderItem[] }) {
   return (
     <section className="altar-panel rounded-2xl p-6 sm:p-8 max-w-2xl mx-auto space-y-6" aria-labelledby="zodiac-compat-title">
       <div className="text-center space-y-1.5">
-        <h2 id="zodiac-compat-title" className="text-lg sm:text-xl font-serif-th font-bold text-ink">
+        <h2 id="zodiac-compat-title" className="text-lg sm:text-xl font-serif-th font-bold text-ink"><ThaiPhrases>
           {isEnglish ? "Zodiac compatibility & your card pair" : "ความเข้ากันของสองราศี + ไพ่คู่"}
-        </h2>
+        </ThaiPhrases></h2>
         <p className="text-xs sm:text-sm text-muted font-sans">
           {isEnglish
             ? "Choose two signs to see how their elements meet and which pair of cards you make."

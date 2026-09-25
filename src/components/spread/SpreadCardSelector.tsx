@@ -110,6 +110,7 @@ export { renderSpreadIllustration };
 
 import { useLocale } from "@/lib/i18n";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 const FEATURED_SPREAD_IDS = ["three-card", "yes-no", "love"];
 
@@ -455,9 +456,9 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
 
                 {/* Card Footer Titles */}
                 <div className="pt-2.5 border-t border-line-warm/30 text-center z-10">
-                  <h3 className="font-serif-th text-base sm:text-lg font-bold text-ink-deep group-hover/card:text-gold-ink transition-colors leading-snug py-0.5 [text-wrap:balance]">
+                  <h3 className="font-serif-th text-base sm:text-lg font-bold text-ink-deep group-hover/card:text-gold-ink transition-colors leading-snug py-0.5 [text-wrap:balance]"><ThaiPhrases>
                     {isEnglish ? (spread.nameEn || spread.nameTh) : spread.nameTh}
-                  </h3>
+                  </ThaiPhrases></h3>
                   <p className="text-[13px] text-muted line-clamp-2 mt-1 leading-relaxed font-serif-th [text-wrap:pretty]">
                     {isEnglish ? (spread.taglineEn || spread.tagline) : spread.tagline}
                   </p>
