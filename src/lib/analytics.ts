@@ -244,6 +244,23 @@ export type TarotAnalyticsEvent =
         mode: "signin" | "signup";
         source?: string;
       };
+    }
+  /**
+   * หน้าแรก: ส่วนไหนถูกเลื่อนมาเห็น / ถูกกด — ไว้ตัดสินใจเรียงส่วนจากพฤติกรรมจริง (แผนหน้าแรก ข้อ 6)
+   * ⚠️ `section` / `target` เป็นชื่อส่วน · path ของลิงก์ · รหัสปุ่มเท่านั้น ห้ามส่งข้อความที่ผู้ใช้พิมพ์
+   */
+  | {
+      name: "home_section_view";
+      params: {
+        section: string;
+      };
+    }
+  | {
+      name: "home_click";
+      params: {
+        section: string;
+        target: string;
+      };
     };
 
 /**

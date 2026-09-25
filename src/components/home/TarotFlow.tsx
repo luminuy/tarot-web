@@ -18,6 +18,8 @@ import { CardImage } from "@/components/card/CardImage";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import { SpreadCardSelector } from "@/components/spread/SpreadCardSelector";
 import { DailyCardStrip } from "@/components/reading/DailyCardStrip";
+import { HomeWelcomeBar } from "@/components/home/HomeWelcomeBar";
+import { HomeStickyCta } from "@/components/home/HomeStickyCta";
 import { QuickFortunePicker, type QuickTopic } from "@/components/reading/QuickFortunePicker";
 import type { RitualStep } from "@/components/home/ritual-step";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
@@ -1616,7 +1618,7 @@ export default function TarotFlow({
                   ⚠️ ห้ามย้าย <h1> ลงไปใต้บล็อกอื่น จะทำให้ <h2> ของ QuickFortunePicker
                      ขึ้นก่อน <h1> (ผิดลำดับหัวข้อ และเคยเป็นข้อจำกัดเดิมของไฟล์นั้น)
                   ────────────────────────────────────────────────────────── */}
-              <div className="space-y-6">
+              <div className="space-y-6" data-home-section="hero">
                 <div className="text-center space-y-3 sm:space-y-3.5 pt-2">
                   <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
                     {isEnglish ? "Interactive 1909 Rider-Waite Tarot with AI Oracle" : "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ออนไลน์ ฟรี กับแม่หมอ AI"}
@@ -1679,12 +1681,21 @@ export default function TarotFlow({
                   </ul>
                 </div>
 
+                {/* แถบต้อนรับคนที่กลับมา — สมาชิกเท่านั้น · สูงคงที่และจองที่ไว้ตั้งแต่ HTML แรก (ดูหัวไฟล์ HomeWelcomeBar) */}
+                <HomeWelcomeBar
+                  isEnglish={isEnglish}
+                  entitlement={entitlement}
+                  view={entitlementView}
+                  name={currentUser?.name}
+                  onOpenHistory={() => dispatchOverlay({ type: "openHistory" })}
+                />
+
                 {/* ไพ่ประจำวัน — แตะดูเฉย ๆ ไม่กินโควตา จึงเป็นจุดเริ่มที่เบาที่สุดของหน้า */}
                 <DailyCardStrip />
               </div>
 
               {/* บล็อกทำนายด่วน 1 ใบ (4 การ์ดยอดนิยม) — ทางหลักของผู้ใช้ส่วนใหญ่ */}
-              <div className="home-band">
+              <div id="home-quick" className="home-band scroll-mt-16" data-home-section="quick">
                 <QuickFortunePicker
                   currentNickname={nickname}
                   onSelectTopic={handleQuickFortuneSelect}
@@ -1704,7 +1715,7 @@ export default function TarotFlow({
                    (ทั้งคู่เรียก `handleBeginReading` ตัวเดียวกัน) — ทางเริ่มดูดวงจึงไม่ได้หายไปไหน
                    ยังมีทั้งแถบนั้นและป๊อปอัพ "เริ่มการดูดวงเลย" ที่เด้งทันทีที่แตะการ์ดผัง
               */}
-              <div className="home-band home-band-tint space-y-5 sm:space-y-6">
+              <div id="home-spreads" className="home-band home-band-tint space-y-5 sm:space-y-6" data-home-section="spread_select">
                 <div className="text-center space-y-2.5 sm:space-y-3 max-w-2xl mx-auto px-4">
                   <div className="glass-chip inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 text-[11px] font-serif-th font-semibold tracking-wide text-gold-ink">
                     <span>
@@ -1755,6 +1766,9 @@ export default function TarotFlow({
                   onProceed={handleBeginReading}
                 />
               </div>
+
+              {/* ปุ่มลอยล่างจอมือถือ — โผล่เมื่อเลื่อนเลยแถบเลือกผังลงไปอ่านเนื้อหาท้ายหน้า */}
+              <HomeStickyCta isEnglish={isEnglish} afterId="home-spreads" targetId="home-quick" />
             </div>
           )}
 

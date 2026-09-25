@@ -296,6 +296,7 @@ export function QuickFortunePicker({
             <div
               key={topic.id}
               data-card-index={index}
+              data-home-target={`quick:${topic.id}`}
               role="button"
               tabIndex={0}
               // ตั้งชื่อให้การ์ดตรง ๆ — ของเดิมไม่มี ชื่อจึงถูกประกอบจากข้อความทุกชิ้นในใบ

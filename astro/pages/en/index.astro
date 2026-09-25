@@ -26,6 +26,14 @@ const readPrefix = "/en/read/";
 ---
 
 <BaseLayout locale={locale} metadata={buildHomeMetadata(locale)}>
+  {/* สมาชิก (มีคุกกี้ใบ้ `tarot_has_session`) ➔ คลาส has-session บน <html> ก่อนเฟรมแรก ให้ `.home-welcome-slot`
+      จองที่ไว้ตั้งแต่ HTML แรก (CLS 0) · คุกกี้ใบ้ไม่ใช่ตัวตัดสินสิทธิ์ ใช้แค่กะที่ว่าง (ดู session-hint.ts) */}
+  <script is:inline>
+    try {
+      if (document.cookie.split("; ").some(function (c) { return c.indexOf("tarot_has_session=1") === 0; }))
+        document.documentElement.classList.add("has-session");
+    } catch (e) {}
+  </script>
   <script is:inline define:vars={{ readSpreadIds, readPrefix }}>
     try {
       var legacySpread = new URLSearchParams(location.search).get("spread");
@@ -40,8 +48,10 @@ const readPrefix = "/en/read/";
       <HomeSeoRoot locale={locale} />
     </Fragment>
   </TarotFlowRoot>
-  {/* ลูกศรของสไลด์การ์ดในเนื้อหาท้ายหน้า (HTML นิ่ง) — ดู astro/scripts/home-rails.ts */}
+  {/* ลูกศรของสไลด์การ์ดในเนื้อหาท้ายหน้า (HTML นิ่ง) — ดู astro/scripts/home-rails.ts
+      นับการเห็น/กดแต่ละส่วน + ตัวนับคำทำนาย — ดู astro/scripts/home-track.ts */}
   <script>
     import "../../scripts/home-rails";
+    import "../../scripts/home-track";
   </script>
 </BaseLayout>

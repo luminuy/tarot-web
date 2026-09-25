@@ -88,6 +88,16 @@ export async function getStats(rangeDays = 30): Promise<StatsSnapshot> {
   return { allTime, range, rangeDays, daily, generatedAt: Date.now() };
 }
 
+/**
+ * ยอด "คำทำนายที่อ่านจบแล้ว" สะสมทั้งหมด — ตัวเลขเดียวที่หน้าแรกแสดงต่อสาธารณะ (แผนหน้าแรก ข้อ 3)
+ * อ่านอย่างเดียว ไม่ `flush()` — เส้นที่เรียกถูกแคชที่ขอบ ต่างจากแผงแอดมินที่ต้องการตัวเลขสดที่สุด
+ * อ่านไม่ได้ทั้งสองแหล่ง = 0 (หน้าเว็บซ่อนตัวนับเองเมื่อยอดยังไม่ถึงเกณฑ์ ไม่มีวันแสดงเลขปลอม)
+ */
+export async function getPublicReadingTotal(): Promise<number> {
+  const { allTime } = await readDayDocs([]);
+  return Math.max(0, Math.floor(Number(allTime.reading_completed ?? 0)));
+}
+
 export interface DayActivity {
   /** บัญชีสมาชิกที่สร้างในวันนั้น */
   newUsers: number | null;

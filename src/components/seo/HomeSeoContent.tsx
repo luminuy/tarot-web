@@ -2,8 +2,13 @@ import { RouteLink as Link } from "@/components/ui/RouteLink";
 import { localeHref } from "@/lib/i18n/paths";
 import { CardImage } from "@/components/card/CardImage";
 import { getHomeFaqs } from "@/data/home-seo";
+import { getFeaturedArticles } from "@/data/articles";
+import { getArticleCategory, getArticleDescription, getArticleTitle } from "@/data/article-helpers";
+import { getArticleCardArt } from "@/data/article-art";
 import { COUNTS } from "@/components/layout/nav-links";
 import { HomeZodiacSection } from "@/components/seo/HomeZodiacSection";
+import { HomeMoreWaysSection } from "@/components/seo/HomeMoreWaysSection";
+import { HomeProofSection } from "@/components/seo/HomeProofSection";
 import { HomeRailNav } from "@/components/seo/HomeRailNav";
 
 /**
@@ -109,74 +114,6 @@ const RITUAL_STEPS_EN = [
 ];
 
 /**
- * บทความแนะนำ พร้อมภาพหน้าไพ่ที่สอดคล้องกับเนื้อหา (Thai)
- */
-const FEATURED_ARTICLES_TH = [
-  {
-    slug: "how-to-read-tarot-for-beginners",
-    title: "วิธีเปิดไพ่ทาโรต์สำหรับผู้เริ่มต้น: จากการตั้งจิตสู่คำทำนายที่แม่นยำ",
-    category: "เทคนิคเปิดไพ่",
-    desc: "คู่มือฉบับสมบูรณ์สำหรับการดูดวงไพ่ทาโรต์ด้วยตัวเอง วิธีตั้งจิตอธิษฐาน และการอ่านไพ่แบบไม่งมงาย",
-    cardImage: "major-01.jpg",
-  },
-  {
-    slug: "tarot-love-reading-guide",
-    title: "ไพ่ทาโรต์บอกความรัก: วิธีดูดวงความสัมพันธ์ เนื้อคู่ และความรู้สึกของเขา",
-    category: "ความรัก & สัมพันธ์",
-    desc: "ถอดรหัสไพ่บอกรัก ไพ่เตือนภัยความสัมพันธ์ และวิธีถามไพ่เรื่องความรักให้ได้คำตอบที่แท้จริง",
-    cardImage: "major-06.jpg",
-  },
-  {
-    slug: "celtic-cross-spread-guide",
-    title: "ถอดรหัสผังเซลติกครอส (Celtic Cross): ความหมายทั้ง 10 ตำแหน่งแบบเจาะลึก",
-    category: "ผังพยากรณ์",
-    desc: "ทำความเข้าใจผังพยากรณ์ยอดนิยมตลอดกาล แกะรอยความเชื่อมโยงของไพ่แต่ละตำแหน่งอย่างละเอียด",
-    cardImage: "major-10.jpg",
-  },
-  {
-    slug: "tarot-and-carl-jung-psychology",
-    title: "จิตวิทยาของ Carl Jung กับไพ่ทาโรต์: สัญลักษณ์ จิตใต้สำนึก และการเติบโต",
-    category: "จิตวิทยา & AI",
-    desc: "สำรวจความเชื่อมโยงระหว่าง Archetypes ของคาร์ล ยุง กับรหัสสัญลักษณ์บนไพ่ทาโรต์ 1909 Rider-Waite",
-    cardImage: "major-09.jpg",
-  },
-];
-
-/**
- * Featured Articles (Authentic American English)
- */
-const FEATURED_ARTICLES_EN = [
-  {
-    slug: "how-to-read-tarot-for-beginners",
-    title: "Tarot for Beginners: From Mental Centering to Precise Divination",
-    category: "Divination Technique",
-    desc: "A comprehensive guide to reading tarot for yourself, cultivating sacred focus, and interpreting cards without superstition.",
-    cardImage: "major-01.jpg",
-  },
-  {
-    slug: "tarot-love-reading-guide",
-    title: "Tarot for Love: Deciphering Relationships, Soulmates & True Feelings",
-    category: "Love & Relationships",
-    desc: "Decode affection cues, relationship hazard signs, and how to frame love inquiries for genuine insight.",
-    cardImage: "major-06.jpg",
-  },
-  {
-    slug: "celtic-cross-spread-guide",
-    title: "Decoding the Celtic Cross: In-Depth Breakdown of All 10 Positions",
-    category: "Tarot Spreads",
-    desc: "Understand history's most renowned spread, tracing relational dynamics between each position with precision.",
-    cardImage: "major-10.jpg",
-  },
-  {
-    slug: "tarot-and-carl-jung-psychology",
-    title: "Carl Jung's Psychology & Tarot: Archetypes, Subconscious & Individuation",
-    category: "Psychology & AI",
-    desc: "Explore the profound connection between Jungian archetypes and the esoteric symbols of the 1909 Rider-Waite deck.",
-    cardImage: "major-09.jpg",
-  },
-];
-
-/**
  * 6 Major Arcana Highlights
  */
 const MAJOR_HIGHLIGHTS = [
@@ -192,7 +129,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
   // Server Component — ใช้ `LocaleLink` (client) ไม่ได้ จึงแปลงลิงก์เองด้วย `localeHref`
   const href = (path: string) => localeHref(path, isEnglish ? "en" : "th");
   const ritualSteps = isEnglish ? RITUAL_STEPS_EN : RITUAL_STEPS_TH;
-  const featuredArticles = isEnglish ? FEATURED_ARTICLES_EN : FEATURED_ARTICLES_TH;
+  const featuredArticles = getFeaturedArticles(4);
   const homeFaqs = getHomeFaqs(isEnglish);
 
   return (
@@ -200,7 +137,16 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 0: ไพ่ยิปซี × โหราศาสตร์ (คำสั่งเจ้าของ 2026-09-24 — ให้อยู่หน้าแรก)
           ═══════════════════════════════════════════════════════════════ */}
+      {/* ═══════════════════════════════════════════════════════════════
+          ลำดับแถบ (สีสลับ ไม่ tint ↔ tint ต่อจากแถบ "เลือกผัง" ที่ tint):
+            ดูดวงแบบอื่น · ราศี (tint) · ตัวอย่างคำทำนาย · 5 ขั้นตอน (tint) · 3 เสาหลัก ·
+            ผังและไพ่ (tint) · บทความ · FAQ (tint) — เพิ่ม/ย้ายส่วนต้องเลื่อน tint ตามให้สลับกันเสมอ
+          ═══════════════════════════════════════════════════════════════ */}
+      <HomeMoreWaysSection isEnglish={isEnglish} href={href} />
+
       <HomeZodiacSection isEnglish={isEnglish} href={href} />
+
+      <HomeProofSection isEnglish={isEnglish} />
 
 
       {/* ═══════════════════════════════════════════════════════════════
@@ -208,6 +154,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="how-it-works-title"
+        data-home-section="how_it_works"
         className="home-band home-band-tint max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         {/* Section Header */}
@@ -315,6 +262,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="heritage-title"
+        data-home-section="heritage"
         className="home-band max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         {/* Section Header */}
@@ -466,6 +414,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="spreads-and-cards-title"
+        data-home-section="spreads_cards"
         className="home-band home-band-tint max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-line-warm/50">
@@ -635,6 +584,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="articles-title"
+        data-home-section="articles"
         className="home-band max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-line-warm/50">
@@ -673,18 +623,20 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
               >
                 <div className="glass-tile !rounded-lg w-14 h-21 sm:w-16 sm:h-24 overflow-hidden flex-shrink-0 transition-colors group-hover:scale-105 duration-300">
                   {/* ภาพประกอบล้วน — ป้ายหมวดหมู่และ <h3> ในลิงก์เดียวกันบอกเรื่องบทความอยู่แล้ว (INC-0125) */}
-                  <CardImage image={art.cardImage} alt="" className="w-full h-full object-cover" sizes="64px" />
+                  <CardImage image={getArticleCardArt(art).image} alt="" className="w-full h-full object-cover" sizes="64px" />
                 </div>
   
                 <div className="space-y-2 min-w-0 flex-1">
                   <span className="glass-chip text-[11px] font-serif-th font-semibold text-gold-ink px-3 py-0.5 inline-block">
-                    {art.category}
+                    {getArticleCategory(art, isEnglish)}
                   </span>
-                  <h3 className="font-serif-th font-bold text-base sm:text-lg text-ink group-hover:text-gold-ink transition-colors line-clamp-2 leading-snug">
-                    {art.title}
+                  <h3 className="font-serif-th font-bold text-base sm:text-lg text-ink group-hover:text-gold-ink transition-colors line-clamp-2 leading-[1.6]">
+                    {/* leading 1.6 (ไม่ใช่ snug) — สระบน/วรรณยุกต์ของบรรทัดที่ 3 ที่ถูก clamp ทิ้งจะไม่โผล่ขึ้นมาใต้บรรทัดที่ 2 */}
+                    {/* ชื่อสั้นแบบ <title> — พาดหัวเต็มของบทความใหม่ยาวเกินสองบรรทัด โดนตัดจนเหลือเศษสระล่างโผล่ */}
+                    {isEnglish ? (art.seoTitleEn ?? getArticleTitle(art, true)) : art.seoTitle}
                   </h3>
                   <p className="font-serif-th text-xs sm:text-sm text-muted line-clamp-2 leading-relaxed">
-                    {art.desc}
+                    {getArticleDescription(art, isEnglish)}
                   </p>
                   <span className="text-xs font-serif-th font-bold text-gold-ink inline-flex items-center gap-1 pt-1 group-hover:translate-x-0.5 transition-transform">
                     {isEnglish ? "Read Full Article →" : "อ่านบทความฉบับเต็ม →"}
@@ -703,6 +655,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="faq-title"
+        data-home-section="faq"
         className="home-band home-band-tint max-w-4xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         <div className="text-center space-y-2.5 sm:space-y-3">

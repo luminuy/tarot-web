@@ -1607,6 +1607,31 @@ export function getArticleBySlug(slug: string): Article | undefined {
   return ARTICLES.find((a) => a.slug === canonicalSlug);
 }
 
+/**
+ * บทความเด่นของหน้าแรก — คัดอัตโนมัติตอนบิลด์ แทนรายการที่เคยพิมพ์ตายตัวไว้ 4 เรื่อง
+ * เรียงใหม่สุดก่อน (`publishedAt` แล้ว `updatedAt`) และไม่ให้หมวดซ้ำจนกว่าจะครบทุกหมวด
+ * (บทความชุดล่าสุดเป็นเรื่องความรักเกือบทั้งหมด ถ้าไม่กระจายหมวดหน้าแรกจะมีแต่ความรัก)
+ * เพิ่มบทความใหม่ในไฟล์นี้แล้ว deploy ➔ หน้าแรกเปลี่ยนตามเอง
+ */
+export function getFeaturedArticles(limit: number = 4): Article[] {
+  const newestFirst = [...ARTICLES].sort(
+    (a, b) => b.publishedAt.localeCompare(a.publishedAt) || b.updatedAt.localeCompare(a.updatedAt),
+  );
+  const picked: Article[] = [];
+  const seen = new Set<Article["category"]>();
+  for (const article of newestFirst) {
+    if (picked.length >= limit) break;
+    if (seen.has(article.category)) continue;
+    seen.add(article.category);
+    picked.push(article);
+  }
+  for (const article of newestFirst) {
+    if (picked.length >= limit) break;
+    if (!picked.includes(article)) picked.push(article);
+  }
+  return picked;
+}
+
 export function getRelatedArticles(currentSlug: string, limit: number = 3): Article[] {
   const canonicalSlug = ARTICLE_SLUG_ALIASES[currentSlug] || currentSlug;
   const current = getArticleBySlug(canonicalSlug);
