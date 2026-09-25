@@ -3,13 +3,19 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { CONSENT_CHANGED_EVENT } from "@/lib/analytics-consent";
+
 /**
  * 📌 ปุ่ม "เริ่มเปิดไพ่" ลอยล่างจอบนมือถือ (แผนหน้าแรก ข้อ 5)
  * ===========================================================================
  * พอเลื่อนเลยแถบ "เลือกผัง" ลงไปอ่านเนื้อหาท้ายหน้า (ยาวราว 8 จอบนมือถือ) จะไม่มีปุ่มเริ่มให้กดอีกเลย
  * ปุ่มนี้โผล่เฉพาะช่วงนั้น แตะแล้วเลื่อนกลับขึ้นไปที่ "เปิดไพ่ด่วน" — ไม่เริ่มพิธีเอง จึงไม่กินสิทธิ์โดยไม่ตั้งใจ
  *
- * ซ่อนเมื่อ: ยังไม่เลื่อนเลยแถบเลือกผัง · ท้ายเว็บ (footer) โผล่ในจอ · แถบคุกกี้ยังเปิด = ยกปุ่มขึ้นเหนือแถบ
+ * ซ่อนเมื่อ: ยังไม่เลื่อนเลยแถบเลือกผัง · ท้ายเว็บ (footer) โผล่ในจอ · แถบขอความยินยอมคุกกี้ยังเปิดอยู่
+ * รูปทรง: ปุ่มเม็ดยาวเล็กมุมซ้ายล่าง แถวเดียวกับปุ่ม TikTok — ไม่ใช่แถบเต็มจอ
+ *
+ * ⚠️ บทเรียนรอบแรก (เจ้าของทักจากภาพหน้าจอ): เคยทำเป็นแถบทองเต็มความกว้าง และ "ยกขึ้นไปวางเหนือแถบคุกกี้"
+ *    ผลคือปุ่มลอยค้างกลางจอ บังการ์ด/ไพ่/ลูกศรของส่วนที่กำลังอ่าน · ห้ามกลับไปทำแบบนั้น
  * ⚠️ วาดผ่าน portal ไป body (INC-0243 — `.home-band` เป็น stacking context แยก)
  * ⚠️ HTML แรกไม่มีปุ่มนี้ (portal เกิดหลัง mount) และเป็น position: fixed จึงไม่ดันหน้า (CLS 0)
  */
@@ -26,9 +32,6 @@ export function HomeStickyCta({
 }) {
   const [mounted, setMounted] = useState(false);
   const [shown, setShown] = useState(false);
-  // ความสูงแถบขอความยินยอมคุกกี้ (ถ้ายังเปิดอยู่) — ยกปุ่มขึ้นไปวางเหนือแถบแทนการซ่อนปุ่มทิ้ง
-  // (คนส่วนใหญ่ไม่กดตอบแถบนั้นเลย ถ้าซ่อนตาม ปุ่มนี้จะแทบไม่เคยโผล่)
-  const [dockHeight, setDockHeight] = useState(0);
 
   useEffect(() => {
     setMounted(true);
@@ -39,9 +42,8 @@ export function HomeStickyCta({
       const footer = document.querySelector("footer");
       const pastSpreads = !!after && after.getBoundingClientRect().bottom < 0;
       const footerVisible = !!footer && footer.getBoundingClientRect().top < window.innerHeight;
-      const dock = document.querySelector(".consent-dock");
-      setDockHeight(dock ? Math.round(dock.getBoundingClientRect().height) : 0);
-      setShown(pastSpreads && !footerVisible);
+      const consentOpen = !!document.querySelector(".consent-dock");
+      setShown(pastSpreads && !footerVisible && !consentOpen);
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);
@@ -49,9 +51,13 @@ export function HomeStickyCta({
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
+    // ตอบแถบคุกกี้แล้วไม่มีการเลื่อนจอเกิดขึ้น — รอให้แถบถอดตัวเองออกก่อนแล้วค่อยเช็กใหม่
+    const onConsent = () => setTimeout(onScroll, 50);
+    window.addEventListener(CONSENT_CHANGED_EVENT, onConsent);
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      window.removeEventListener(CONSENT_CHANGED_EVENT, onConsent);
       if (raf) cancelAnimationFrame(raf);
     };
   }, [afterId]);
@@ -76,13 +82,12 @@ export function HomeStickyCta({
       data-home-section="sticky_cta"
       data-home-no-view
       inert={!shown}
-      style={dockHeight ? { bottom: `calc(${dockHeight}px + 0.75rem)` } : undefined}
     >
       <button
         type="button"
         data-home-target="sticky:quick"
         onClick={goToTarget}
-        className="btn-gold-glass tap-overlay flex h-12 w-full items-center justify-center font-serif-th text-sm font-bold"
+        className="btn-gold-glass tap-overlay inline-flex h-11 items-center justify-center px-5 font-serif-th text-sm font-bold"
       >
         {isEnglish ? "Draw your cards now" : "เริ่มเปิดไพ่เลย"}
       </button>
