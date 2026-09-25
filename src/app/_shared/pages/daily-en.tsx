@@ -7,6 +7,7 @@ import { buildAlternates, localizedUrl } from "@/lib/config/site";
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * 🌅 ไพ่ประจำวันฉบับภาษาอังกฤษ (`/en/daily`)
@@ -129,9 +130,9 @@ export function DailyBodyEn({ ritual }: { ritual: ReactNode }) {
               psychological language — the image does not cause the day, it gives you a vocabulary for reading it.
             </p>
 
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2">
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
               How to get something real out of a one-card pull
-            </h3>
+            </ThaiPhrases></h3>
             <ul className="list-disc pl-5 space-y-2 text-muted">
               <li>
                 <strong className="text-ink">Draw before the day starts.</strong> Take one slow breath, notice the
@@ -151,9 +152,9 @@ export function DailyBodyEn({ ritual }: { ritual: ReactNode }) {
               </li>
             </ul>
 
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2">
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
               Why the shuffle is provably fair
-            </h3>
+            </ThaiPhrases></h3>
             <p>
               Every shuffle here runs in your own browser through the Web Crypto API, and each reading publishes a
               SHA-256 commit-reveal proof so you can confirm the deck order was fixed before you chose. Nothing is

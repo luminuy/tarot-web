@@ -2,6 +2,7 @@ import React from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import type { TarotCard } from "@/data/cards/types";
 import { buildYesNoAnswer, YES_NO_TONE } from "@/data/cards/yes-no";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 interface CardYesNoAnswerProps {
   card: TarotCard;
@@ -36,9 +37,9 @@ export const CardYesNoAnswer: React.FC<CardYesNoAnswerProps> = ({ card, isEnglis
           className="altar-card-porcelain p-4 sm:p-5 space-y-3"
         >
           <div className="space-y-1.5">
-            <h3 className="font-serif-th text-xs sm:text-sm font-bold text-ink">
+            <h3 className="font-serif-th text-xs sm:text-sm font-bold text-ink"><ThaiPhrases>
               {data.headline}
-            </h3>
+            </ThaiPhrases></h3>
             <p className="font-serif-th text-xs sm:text-sm text-ink leading-relaxed pl-4 border-l-2 border-line group-hover:border-gold transition-colors [text-wrap:pretty]">
               {data.body}
             </p>

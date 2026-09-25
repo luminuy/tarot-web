@@ -9,6 +9,7 @@ import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 const PATH = "/spreads";
 
@@ -127,7 +128,7 @@ export function SpreadsIndexBody({ locale, library }: { locale: Locale; library:
           aria-label={copy.directoryTitle}
           className="rounded-2xl border border-[#E4DED2] bg-surface-warm px-5 py-6 sm:px-7 sm:py-7"
         >
-          <h2 className="text-base sm:text-lg font-serif-th font-bold text-ink">{copy.directoryTitle}</h2>
+          <h2 className="text-base sm:text-lg font-serif-th font-bold text-ink"><ThaiPhrases>{copy.directoryTitle}</ThaiPhrases></h2>
           <p className="mt-1.5 text-xs sm:text-sm text-muted leading-relaxed">{copy.directoryLead}</p>
           <ul className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2.5">
             {PUBLIC_SPREADS.map((spread) => (

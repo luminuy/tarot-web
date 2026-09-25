@@ -101,8 +101,8 @@ export function RootHtml({
       availableLanguage: ["th", "en"],
     },
     description: isEnglish
-      ? "A premium online 1909 Rider-Waite-Smith tarot sanctuary with a provably fair SHA-256 shuffle and an AI tarot reader."
-      : "วิหารพยากรณ์ไพ่ทาโรต์ออนไลน์ระดับพรีเมียม 1909 Rider-Waite-Smith พร้อมระบบสุ่มที่พิสูจน์ความยุติธรรมได้ (Provably Fair) และแม่หมอ AI",
+      ? "Online tarot with the authentic 1909 Rider-Waite-Smith deck, a shuffle you can verify, and an AI tarot reader."
+      : "ดูดวงไพ่ทาโรต์ออนไลน์ด้วยไพ่ 1909 Rider-Waite-Smith แท้ สุ่มไพ่แบบตรวจสอบได้ พร้อมแม่หมอ AI อ่านไพ่ให้",
   };
 
   const webSiteJsonLd = {

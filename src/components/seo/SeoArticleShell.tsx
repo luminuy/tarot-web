@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { RouteLink as Link } from "@/components/ui/RouteLink";
 import { useLocale } from "@/lib/i18n";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 export interface SeoFaqItem {
   q: string;
@@ -47,9 +48,9 @@ export function SeoArticleShell({
         <span className="text-xs font-serif-th font-semibold text-gold-ink">
           {eyebrow}
         </span>
-        <h2 className="text-xl sm:text-2xl font-serif-th font-bold text-ink tracking-tight [text-wrap:balance]">
+        <h2 className="text-xl sm:text-2xl font-serif-th font-bold text-ink tracking-tight [text-wrap:balance]"><ThaiPhrases>
           {title}
-        </h2>
+        </ThaiPhrases></h2>
       </div>
 
       {/* Main Editorial Content (Sarabun font for legibility) */}
@@ -66,9 +67,9 @@ export function SeoArticleShell({
             ด่านกันไทยรั่วสองตัวที่มีอยู่จับไม่ได้ เพราะตัวหนึ่งใช้เกณฑ์ "สัดส่วนเกิน 1.5%
             ของหน้า" ซึ่งหัวข้อบรรทัดเดียวคิดเป็น ~0.1% และอีกตัวตรวจเฉพาะคอมโพเนนต์ในลิสต์
           */}
-          <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink">
+          <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink"><ThaiPhrases>
             {isEnglish ? "Frequently Asked Questions (FAQ)" : "คำถามที่พบบ่อย (FAQ)"}
-          </h3>
+          </ThaiPhrases></h3>
           <div className="divide-y divide-line rounded-xl border border-line bg-surface-warm overflow-hidden">
             {faqs.map((faq, idx) => {
               const isOpen = openFaqIndex === idx;

@@ -14,6 +14,7 @@ import { getCategoryCardImage } from "@/lib/media/og-card-art";
 import type { Locale } from "@/lib/i18n/types";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 export function spreadTopicStaticParams() {
   return getAllTopicSlugs().map((slug) => ({ category: slug }));
@@ -206,9 +207,9 @@ export function SpreadTopicContent({
               ? `Topic Category · ${spreads.length} Dedicated Spreads`
               : `หมวดหมู่ผังพยากรณ์ · ${spreads.length} ผังเฉพาะทาง`}
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-serif-th text-ink tracking-tight leading-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-serif-th text-ink tracking-tight leading-tight"><ThaiPhrases>
             {topicHeading}
-          </h1>
+          </ThaiPhrases></h1>
           <p className="text-sm sm:text-base text-muted leading-relaxed font-serif-th">
             {topicTagline}
           </p>
@@ -216,11 +217,11 @@ export function SpreadTopicContent({
 
         {/* Editorial Guide Prose */}
         <section className="altar-card-porcelain p-6 sm:p-8 space-y-4">
-          <h2 className="text-base sm:text-lg font-bold font-serif-th text-ink border-b border-line-soft pb-3">
+          <h2 className="text-base sm:text-lg font-bold font-serif-th text-ink border-b border-line-soft pb-3"><ThaiPhrases>
             {isEnglish
               ? `Guide to Reading ${topicName} Tarot Spreads`
-              : `คู่มือการอ่านไพ่ทาโรต์หมวด${topic.nameTh}`}
-          </h2>
+              : `คู่มือการอ่านไพ่ทาโรต์ หมวด${topic.nameTh}`}
+          </ThaiPhrases></h2>
           <div className="space-y-3 text-xs sm:text-sm text-[#4A4338] font-serif-th leading-relaxed">
             {editorialIntro.map((paragraph, index) => (
               <p key={index}>{paragraph}</p>
@@ -231,11 +232,11 @@ export function SpreadTopicContent({
         {/* Spreads Grid */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold font-serif-th text-ink">
+            <h2 className="text-xl font-bold font-serif-th text-ink"><ThaiPhrases>
               {isEnglish
                 ? "Select a Spread for Your Question"
-                : "เลือกผังพยากรณ์ที่ตรงกับคำถามของคุณ"}
-            </h2>
+                : "เลือกผังพยากรณ์ ที่ตรงกับคำถามของคุณ"}
+            </ThaiPhrases></h2>
             <span className="text-xs font-serif-th text-muted">
               {spreads.length} {isEnglish ? "spreads" : "รูปแบบ"}
             </span>
@@ -247,11 +248,11 @@ export function SpreadTopicContent({
         {faqs.length > 0 && (
           <section className="altar-card-porcelain p-6 sm:p-8 space-y-6">
             <div className="space-y-1">
-              <h2 className="text-lg sm:text-xl font-bold font-serif-th text-ink">
+              <h2 className="text-lg sm:text-xl font-bold font-serif-th text-ink"><ThaiPhrases>
                 {isEnglish
                   ? `Frequently Asked Questions About ${topicName}`
-                  : `คำถามพบบ่อยเกี่ยวกับการดูดวงด้าน${topic.nameTh}`}
-              </h2>
+                  : `คำถามพบบ่อย เกี่ยวกับการดูดวง ด้าน${topic.nameTh}`}
+              </ThaiPhrases></h2>
               <p className="text-xs text-muted font-serif-th">
                 {isEnglish
                   ? "Principles and practical advice for clear, resonant readings"
@@ -261,9 +262,9 @@ export function SpreadTopicContent({
             <div className="divide-y divide-line-soft space-y-4 pt-2">
               {faqs.map((faq, index) => (
                 <div key={index} className="pt-4 first:pt-0 space-y-1.5">
-                  <h3 className="font-serif-th text-sm sm:text-base font-bold text-ink">
+                  <h3 className="font-serif-th text-sm sm:text-base font-bold text-ink"><ThaiPhrases>
                     {faq.question}
-                  </h3>
+                  </ThaiPhrases></h3>
                   <p className="font-serif-th text-xs sm:text-sm text-[#5E5240] leading-relaxed">
                     {faq.answer}
                   </p>
@@ -275,9 +276,13 @@ export function SpreadTopicContent({
 
         {/* Cross-Topic Internal Links Footer */}
         <section className="pt-8 border-t border-line/80 space-y-4">
-          <h3 className="text-xs font-mono uppercase tracking-widest text-gold-ink font-semibold">
+          <h3
+            className={`text-xs text-gold-ink font-semibold ${
+              isEnglish ? "font-mono uppercase tracking-widest" : "font-serif-th"
+            }`}
+          ><ThaiPhrases>
             {isEnglish ? "Explore Other Categories" : "สำรวจหมวดหมู่อื่น ๆ ในวิหารพยากรณ์"}
-          </h3>
+          </ThaiPhrases></h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
             {allTopics.map((t) => {
               const tName = isEnglish && t.nameEn ? t.nameEn : t.nameTh;

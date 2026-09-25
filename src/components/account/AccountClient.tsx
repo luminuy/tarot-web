@@ -11,6 +11,7 @@ import { useSessionUser, patchSessionUser, invalidateSessionCache } from "@/lib/
 import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
 import type { UpgradeReason } from "@/lib/entitlement/copy";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 // INC-0130 / Rule 3.5: Dynamic modal imports placed outside <main> to avoid stacking context traps
 const AuthModal = dynamic(() => import("@/components/auth/AuthModal").then((m) => m.AuthModal), {
@@ -54,7 +55,7 @@ function SectionCard({
   return (
     <section className={`${CARD_SHELL} space-y-4 ${tone === "danger" ? "border-err/30" : ""}`}>
       <div className="space-y-1">
-        <h2 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">{title}</h2>
+        <h2 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold"><ThaiPhrases>{title}</ThaiPhrases></h2>
         {description && (
           <p className="text-xs text-muted font-serif-th leading-relaxed">{description}</p>
         )}
@@ -134,7 +135,14 @@ function HubTile({
       className="glass-tile !rounded-lg group flex w-full flex-col items-start gap-1 p-4 text-left transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
     >
       <span className="flex w-full items-center justify-between gap-2">
-        <span className="font-mono text-xs uppercase tracking-[0.16em] text-muted">{eyebrow}</span>
+        {/* ภาษาไทยห้ามถ่างตัวอักษร — อ่านเป็น "บ ั น ท ึ ก" (ตรวจทั้งเว็บ 2026-09-25) */}
+        <span
+          className={`text-xs text-muted ${
+            /[\u0E00-\u0E7F]/.test(eyebrow) ? "font-serif-th font-semibold" : "font-mono uppercase tracking-[0.16em]"
+          }`}
+        >
+          {eyebrow}
+        </span>
         {badge && (
           <span className="rounded-full bg-gold-ink px-2 py-0.5 font-serif-th text-xs font-bold text-surface">
             {badge}
@@ -307,9 +315,9 @@ export function AccountClient() {
             <span className="glass-chip inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold text-gold-ink">
               Sacred Sanctuary Profile
             </span>
-            <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-ink leading-snug sm:leading-normal [text-wrap:balance]">
+            <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-ink leading-snug sm:leading-normal [text-wrap:balance]"><ThaiPhrases>
               {isEn ? "Your Account & Sacred Archive" : "บัญชีและประวัติของคุณ"}
-            </h1>
+            </ThaiPhrases></h1>
             <p className="mx-auto max-w-lg font-serif-th text-xs sm:text-sm text-muted leading-relaxed [text-wrap:balance]">
               {isEn
                 ? "Manage personal privacy, sacred reading archives, and data rights under PDPA & GDPR standards."
@@ -347,9 +355,9 @@ export function AccountClient() {
                 </svg>
               </div>
               <div className="space-y-1">
-                <h2 className="font-serif-th text-lg font-bold font-mystic-gold">
-                  {isEn ? "Sign In to Access Your Sanctuary Profile" : "เข้าสู่ระบบเพื่อเข้าถึงบัญชีสมาชิกของคุณ"}
-                </h2>
+                <h2 className="font-serif-th text-lg font-bold font-mystic-gold"><ThaiPhrases>
+                  {isEn ? "Sign In to Access Your Sanctuary Profile" : "เข้าสู่ระบบ เพื่อเข้าถึงบัญชีสมาชิกของคุณ"}
+                </ThaiPhrases></h2>
                 <p className="mx-auto max-w-md font-serif-th text-xs text-muted leading-relaxed">
                   {isEn
                     ? "Connect your Google or LINE account to synchronize sacred readings, unlock daily quota benefits, and preserve your reflection history."
@@ -390,9 +398,9 @@ export function AccountClient() {
                   </div>
                   <div className="min-w-0 space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-serif-th text-base sm:text-lg font-bold text-ink-deep">
+                      <h2 className="font-serif-th text-base sm:text-lg font-bold text-ink-deep"><ThaiPhrases>
                         {user.name || (isEn ? "Sacred Member" : "สมาชิกวิหาร")}
-                      </h2>
+                      </ThaiPhrases></h2>
                       <span className="glass-chip px-2 py-0.5 font-mono text-xs text-muted">
                         {providerLabel}
                       </span>

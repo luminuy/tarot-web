@@ -22,6 +22,7 @@ const AuthModal = React.lazy(() =>
   import("@/components/auth/AuthModal").then((m) => ({ default: m.AuthModal }))
 );
 import { AiReadingPanel } from "@/components/reading/ai/AiReadingPanel";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 // โหลดสำรับ "ไทยล้วน" — ไม่ลากคำทำนายอังกฤษ (≈126 KB gzip) เข้าบันเดิลหน้าไทย
 let deckPromise: Promise<typeof import("@/data/cards/deck-th")> | null = null;
@@ -264,9 +265,9 @@ export function OneCardRitual({
               <div className="glass-chip inline-flex items-center gap-1.5 px-4 py-1.5 text-xs sm:text-sm font-serif-th font-semibold text-gold-ink">
                 <span>{deckLabel}</span>
               </div>
-              <h3 className="text-lg sm:text-2xl font-serif-th font-bold text-ink tracking-tight">
+              <h3 className="text-lg sm:text-2xl font-serif-th font-bold text-ink tracking-tight"><ThaiPhrases>
                 {isEn ? "Your Sacred Card Awaits" : "ไพ่ตอบรับเจตจำนงของคุณแล้ว"}
-              </h3>
+              </ThaiPhrases></h3>
               <p className="text-xs sm:text-sm text-muted">
                 {isEn
                   ? "Tap the card to reveal your oracle message in full 3D"
@@ -335,9 +336,9 @@ export function OneCardRitual({
                 </div>
 
                 <div className="space-y-1">
-                  <h2 className="text-xl sm:text-3xl font-serif-th font-bold text-ink tracking-tight">
+                  <h2 className="text-xl sm:text-3xl font-serif-th font-bold text-ink tracking-tight"><ThaiPhrases>
                     {isEn ? (drawnCard.nameEn || drawnCard.nameTh) : `${drawnCard.nameTh} ${drawnCard.nameEn ? `(${drawnCard.nameEn})` : ""}`}
-                  </h2>
+                  </ThaiPhrases></h2>
                   <p className="text-xs sm:text-sm font-serif-th text-gold-ink font-semibold tracking-wide">
                     {isEn
                       ? resolveDisplayKeywords({

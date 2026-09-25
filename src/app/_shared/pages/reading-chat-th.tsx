@@ -10,6 +10,7 @@ import { getPersona } from "@/data/personas";
 import { loadFlowState, type PersistedFlow } from "@/lib/utils/flow-persistence";
 import { useLocale } from "@/lib/i18n";
 import { noindexAlternates } from "@/lib/config/site";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * 💬 หน้าแชทเต็มจอกับแม่หมอ (/reading/chat)
@@ -102,9 +103,9 @@ export function ReadingChatBodyTh() {
         หน้านี้เคยมี <h1> ศูนย์อัน (ตรวจเจอตอนขยายด่าน a11y ให้ครอบทั้งเว็บ)
         ⚠️ ห้ามลบ แม้จะมองไม่เห็นบนจอ — ด่าน `test-a11y-critical` ตรวจทั้ง 309 หน้าแล้ว
       */}
-      <h1 className="sr-only">
+      <h1 className="sr-only"><ThaiPhrases>
         {isEnglish ? `Chat with ${personaName}` : `แชทกับ${persona.nameTh}`}
-      </h1>
+      </ThaiPhrases></h1>
 
       <div className="mx-auto w-full max-w-2xl px-3 sm:px-4 py-2 sm:py-4 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
         {flow === undefined ? (

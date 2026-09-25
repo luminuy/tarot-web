@@ -4,6 +4,7 @@ import { PUBLIC_SPREADS } from "@/data/spreads";
 import { ARTICLES } from "@/data/articles";
 import { localeHref } from "@/lib/i18n/paths";
 import type { Locale } from "@/lib/i18n/types";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * ⚠️ Server Component โดยตั้งใจ — ลิงก์ภายในกว่า 300 เส้นจึงอยู่ใน HTML ตั้งแต่ไบต์แรก
@@ -64,9 +65,9 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
         className="space-y-4"
       >
         <div className="flex items-center justify-between">
-          <h2 className="font-serif-th text-sm font-bold text-gold-ink">
+          <h2 className="font-serif-th text-sm font-bold text-gold-ink"><ThaiPhrases>
             {isEnglish ? "Draw this card in a real spread" : "เปิดไพ่ใบนี้ในผังพยากรณ์จริง"}
-          </h2>
+          </ThaiPhrases></h2>
           <Link
             href={href("/spreads")}
             className="text-xs font-serif-th text-muted hover:text-gold-ink transition-colors"
@@ -109,9 +110,9 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
       {!isEnglish && relatedArticles.length > 0 && (
         <section aria-label="บทความคู่มือที่เกี่ยวข้อง" className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-serif-th text-sm font-bold text-gold-ink">
-              บทความและคู่มือการอ่านไพ่ที่เกี่ยวข้อง
-            </h2>
+            <h2 className="font-serif-th text-sm font-bold text-gold-ink"><ThaiPhrases>
+              บทความและคู่มือการอ่านไพ่ ที่เกี่ยวข้อง
+            </ThaiPhrases></h2>
             <Link
               href="/blog"
               className="text-xs font-serif-th text-muted hover:text-gold-ink transition-colors"
@@ -131,9 +132,9 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
                   <span className="text-[11px] font-serif-th text-gold-ink block mb-1">
                     {article.categoryTh} · อ่าน {article.readTime}
                   </span>
-                  <h3 className="font-serif-th text-xs sm:text-sm font-bold text-ink group-hover:text-gold-ink transition-colors line-clamp-2">
+                  <h3 className="font-serif-th text-xs sm:text-sm font-bold text-ink group-hover:text-gold-ink transition-colors line-clamp-2"><ThaiPhrases>
                     {article.title}
-                  </h3>
+                  </ThaiPhrases></h3>
                   <p className="font-serif-th text-[11px] text-muted mt-1 line-clamp-2">
                     {article.description}
                   </p>

@@ -47,6 +47,7 @@ import { ensureEntitlement, refreshEntitlement, useEntitlement } from "@/lib/ent
 import { useLocale } from "@/lib/i18n";
 import { STORAGE_KEYS, STORAGE_KEY_BUILDERS } from "@/lib/storage/keys";
 import { readMySign } from "@/lib/zodiac/my-sign";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * ✦ Dynamic Code-Splitting — คอมโพเนนต์หนักทั้งหมดโหลดเมื่อถึงขั้นที่ใช้จริง
@@ -1576,9 +1577,9 @@ export default function TarotFlow({
         {/* หน้า `/read/<ผัง>` ไม่มีขั้นเลือกผัง (ที่มี <h1> ของหน้าแรก) — หัวเรื่องของหน้าจึงต้องมาจากตรงนี้
             ไม่งั้นทั้งหน้าไม่มี <h1> ให้โปรแกรมอ่านหน้าจอกระโดดไปเลย (ขั้นต่าง ๆ ใช้ <h2>) */}
         {routeSpread && (
-          <h1 className="sr-only">
+          <h1 className="sr-only"><ThaiPhrases>
             {isEnglish ? `Tarot reading — ${routeSpread.nameEn}` : `ดูดวงด้วยผัง${routeSpread.nameTh}`}
-          </h1>
+          </ThaiPhrases></h1>
         )}
 
         {/* ── Directional Step Transitions (P1-M1) ─────────────────────────
@@ -1616,11 +1617,11 @@ export default function TarotFlow({
                   ⚠️ ห้ามย้าย <h1> ลงไปใต้บล็อกอื่น จะทำให้ <h2> ของ QuickFortunePicker
                      ขึ้นก่อน <h1> (ผิดลำดับหัวข้อ และเคยเป็นข้อจำกัดเดิมของไฟล์นั้น)
                   ────────────────────────────────────────────────────────── */}
-              <div className="space-y-6">
+              <div className="space-y-6" data-home-section="hero">
                 <div className="text-center space-y-3 sm:space-y-3.5 pt-2">
-                  <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
+                  <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]"><ThaiPhrases>
                     {isEnglish ? "Interactive 1909 Rider-Waite Tarot with AI Oracle" : "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ออนไลน์ ฟรี กับแม่หมอ AI"}
-                  </h1>
+                  </ThaiPhrases></h1>
 
                   {/*
                     ✦ คำโปรยใต้หัวเรื่อง — เขียนใหม่ให้เป็นประโยคเดียวที่อ่านรวดเดียวจบ
@@ -1653,38 +1654,47 @@ export default function TarotFlow({
                        ถ้าวันหนึ่งเปิดสิทธิ์ทดลองกลับมา ชิปนี้จะเปลี่ยนถ้อยคำตามให้เอง
                   */}
                   <ul className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+                    {/* มือถือใช้ถ้อยคำสั้น — ถ้อยคำเต็มยาวจนชิปเรียงลงมา 3 บรรทัด กินที่ ~150px ก่อนถึงไพ่ประจำวัน
+                        (เจ้าของขอให้กระชับ) · ถ้อยคำเต็มยังอยู่ใน HTML สำหรับจอใหญ่และ SEO */}
                     {(isEnglish
                       ? [
-                          "Authentic 1909 Rider-Waite · 78 cards",
-                          "Provably-Fair SHA-256 randomness",
+                          ["Authentic 1909 Rider-Waite · 78 cards", "1909 Rider-Waite · 78 cards"],
+                          ["Truly random, verifiable shuffle", "Verifiable shuffle"],
                           REQUIRE_SIGNUP_TO_READ
-                            ? `Free account · ${DAILY_LIMIT} ${READINGS_EN} a day`
-                            : "Free · No sign-up",
+                            ? [`Free account · ${DAILY_LIMIT} ${READINGS_EN} a day`, `Free · ${DAILY_LIMIT}/day`]
+                            : ["Free · No sign-up", "Free · No sign-up"],
                         ]
                       : [
-                          "สำรับ 1909 Rider-Waite แท้ 78 ใบ",
-                          "สุ่มโปร่งใส Provably-Fair SHA-256",
+                          ["สำรับ 1909 Rider-Waite แท้ 78 ใบ", "Rider-Waite แท้ 78 ใบ"],
+                          ["ไพ่สุ่มจริง ตรวจสอบได้", "สุ่มจริง ตรวจสอบได้"],
                           REQUIRE_SIGNUP_TO_READ
-                            ? `สมัครสมาชิกฟรี · เปิดไพ่ได้วันละ ${DAILY_LIMIT} ครั้ง`
-                            : "ฟรี · ไม่ต้องสมัคร",
+                            ? [`สมัครสมาชิกฟรี · เปิดไพ่ได้วันละ ${DAILY_LIMIT} ครั้ง`, `สมัครฟรี · วันละ ${DAILY_LIMIT} ครั้ง`]
+                            : ["ฟรี · ไม่ต้องสมัคร", "ฟรี · ไม่ต้องสมัคร"],
                         ]
-                    ).map((fact) => (
+                    ).map(([fact, short]) => (
                       <li
                         key={fact}
                         className="glass-chip whitespace-nowrap px-2.5 sm:px-3 py-1 font-serif-th text-[11px] sm:text-xs font-semibold text-gold-ink"
                       >
-                        {fact}
+                        <span className="sm:hidden">{short}</span>
+                        <span className="hidden sm:inline">{fact}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                {/* ไพ่ประจำวัน — แตะดูเฉย ๆ ไม่กินโควตา จึงเป็นจุดเริ่มที่เบาที่สุดของหน้า */}
-                <DailyCardStrip />
+                {/* ไพ่ประจำวัน — แตะดูเฉย ๆ ไม่กินโควตา จึงเป็นจุดเริ่มที่เบาที่สุดของหน้า
+                    สมาชิกเห็นวันเปิดไพ่ต่อเนื่องต่อท้ายป้าย "ไพ่ประจำวันนี้" (แผนหน้าแรก ข้อ 2 — เดิมเป็นแถบแยก
+                    เจ้าของสั่งถอดเพราะกินพื้นที่ซ้ำกับแถบนี้) · บัญชีไม่จำกัดสิทธิ์ได้ 99 ตายตัวจาก snapshot จึงไม่นับ */}
+                <DailyCardStrip
+                  streak={
+                    entitlement?.kind === "member" && entitlement.role !== "unlimited" ? (entitlement.dailyStreak ?? 0) : 0
+                  }
+                />
               </div>
 
               {/* บล็อกทำนายด่วน 1 ใบ (4 การ์ดยอดนิยม) — ทางหลักของผู้ใช้ส่วนใหญ่ */}
-              <div className="home-band">
+              <div id="home-quick" className="home-band home-band-snug-top scroll-mt-16" data-home-section="quick">
                 <QuickFortunePicker
                   currentNickname={nickname}
                   onSelectTopic={handleQuickFortuneSelect}
@@ -1704,7 +1714,7 @@ export default function TarotFlow({
                    (ทั้งคู่เรียก `handleBeginReading` ตัวเดียวกัน) — ทางเริ่มดูดวงจึงไม่ได้หายไปไหน
                    ยังมีทั้งแถบนั้นและป๊อปอัพ "เริ่มการดูดวงเลย" ที่เด้งทันทีที่แตะการ์ดผัง
               */}
-              <div className="home-band home-band-tint space-y-5 sm:space-y-6">
+              <div className="home-band home-band-tint space-y-5 sm:space-y-6" data-home-section="spread_select">
                 <div className="text-center space-y-2.5 sm:space-y-3 max-w-2xl mx-auto px-4">
                   <div className="glass-chip inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 text-[11px] font-serif-th font-semibold tracking-wide text-gold-ink">
                     <span>
@@ -1714,9 +1724,9 @@ export default function TarotFlow({
                     </span>
                   </div>
 
-                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-ink tracking-wide leading-snug [text-wrap:balance]">
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-ink tracking-wide leading-snug [text-wrap:balance]"><ThaiPhrases>
                     {isEnglish ? "Choose Your Tarot Spread" : "เลือกผังการเปิดไพ่พยากรณ์"}
-                  </h2>
+                  </ThaiPhrases></h2>
                   <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed [text-wrap:balance]">
                     {isEnglish
                       ? "Want more depth than a single card? Open several cards at once and let the oracle read the full picture."
@@ -1764,9 +1774,9 @@ export default function TarotFlow({
               className="space-y-10"
             >
               <div className="text-center space-y-2 sm:space-y-2.5">
-                <h2 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
+                <h2 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink leading-snug sm:leading-normal pt-1 [text-wrap:balance]"><ThaiPhrases>
                   {isEnglish ? "Set Your Intention & Choose Reader" : "ตั้งคำถาม & เลือกแม่หมอ"}
-                </h2>
+                </ThaiPhrases></h2>
                 <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed [text-wrap:balance]">
                   {isEnglish
                     ? "Formulate your question and choose your preferred oracle archetype"

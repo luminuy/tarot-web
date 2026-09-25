@@ -20,7 +20,7 @@ const LEGACY_DAILY_CARD_STORAGE_KEY = "seer:daily-card";
  * ต่างจากการเปิดไพ่ส่วนตัว — อันนี้แค่ "พลังงานประจำวัน" ให้แตะดูเฉย ๆ ไม่กินโควตา
  * กันที่ว่างไว้ระหว่างโหลด ไม่ให้แถบแทรกเข้ามาแล้วดันทั้งหน้า
  */
-export function DailyCardStrip() {
+export function DailyCardStrip({ streak = 0 }: { streak?: number } = {}) {
   const { isEnglish } = useLocale();
   const [daily, setDaily] = useState<DailyCard | null>(null);
   const [failed, setFailed] = useState(false);
@@ -82,7 +82,7 @@ export function DailyCardStrip() {
     return (
       <div
         aria-hidden="true"
-        className="altar-cloth mx-auto mb-6 flex h-[96px] max-w-2xl items-center gap-4 px-4 py-2.5 animate-pulse"
+        className="altar-cloth mx-auto flex h-[96px] max-w-2xl items-center gap-4 px-4 py-2.5 animate-pulse"
       >
         <div className="h-14 w-9 shrink-0 rounded border border-line-warm/30 bg-inset-warm/50" />
         <div className="min-w-0 flex-1 space-y-2">
@@ -112,8 +112,8 @@ export function DailyCardStrip() {
          ของ "ไพ่ประจำวัน" มา 15 KB ทิ้งไว้เฉย ๆ ทั้งที่ส่วนใหญ่ไม่ได้กด
          (วัดจาก Lighthouse network log 2026-09-14) */
       prefetch={false}
-      className="altar-card-porcelain group mx-auto mb-6 flex h-[96px] max-w-2xl items-center gap-4 px-4 py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
-      title={isEnglish ? `Daily Card ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…` : `ไพ่ประจำวัน ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…`}
+      className="altar-card-porcelain group mx-auto flex h-[96px] max-w-2xl items-center gap-4 px-4 py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+      title={isEnglish ? `Daily Card ${daily.dateKey} · lock code ${daily.proof.slice(0, 16)}…` : `ไพ่ประจำวัน ${daily.dateKey} · รหัสล็อก ${daily.proof.slice(0, 16)}…`}
     >
       <div className="relative h-14 w-9 shrink-0 overflow-hidden rounded border border-line-warm bg-inset-warm shadow-xs">
         <CardImage
@@ -127,8 +127,14 @@ export function DailyCardStrip() {
       </div>
 
       <div className="min-w-0 flex-1 space-y-1">
-        <p className="font-serif-th text-xs font-bold text-gold-ink">
+        {/* วันต่อเนื่องต่อท้ายบรรทัดเดิม — ไม่เพิ่มความสูง (แถบนี้สูงคงที่ 96px) · 1 วันยังไม่นับว่าต่อเนื่อง */}
+        <p className="truncate font-serif-th text-xs font-bold text-gold-ink">
           {isEnglish ? "Card of the Day" : "ไพ่ประจำวันนี้"}
+          {streak >= 2 && (
+            <span className="font-semibold text-muted">
+              {isEnglish ? ` · ${streak}-day streak` : ` · เปิดไพ่ต่อเนื่อง ${streak} วัน`}
+            </span>
+          )}
         </p>
         <p className="font-serif-th text-sm font-bold text-ink-deep truncate">
           {isEnglish ? (
@@ -153,7 +159,7 @@ export function DailyCardStrip() {
       </div>
 
       <span className="hidden shrink-0 font-serif-th text-[13px] font-semibold text-gold-ink group-hover:underline sm:inline">
-        {isEnglish ? "Read Full Archetype →" : "อ่านความหมายเต็ม →"}
+        {isEnglish ? "Read the full meaning →" : "อ่านความหมายเต็ม →"}
       </span>
     </Link>
   );

@@ -8,6 +8,7 @@ import { trackEntitlementEvent } from "@/lib/entitlement/track";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useLocale } from "@/lib/i18n";
 import { STORAGE_KEYS } from "@/lib/storage/keys";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * การ์ดชวนสมัครหลังอ่านไพ่จบ (ENTITLEMENT_PLAN PR E)
@@ -69,11 +70,11 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
             <SparkSealIcon className="h-4.5 w-4.5" />
           </span>
           <div className="min-w-0 space-y-1.5">
-            <h3 className="font-serif-th text-base font-bold text-ink-deep">
+            <h3 className="font-serif-th text-base font-bold text-ink-deep"><ThaiPhrases>
               {usedUpTrial
                 ? (isEn ? "This was your free trial reading" : "นี่คือการเปิดไพ่ทดลองฟรีของคุณ")
                 : (isEn ? "Preserve this oracle and continue reading" : "เก็บดวงนี้ไว้ และเปิดไพ่ต่อได้อีก")}
-            </h3>
+            </ThaiPhrases></h3>
             <p className="font-serif-th text-sm leading-relaxed text-muted">
               {usedUpTrial
                 ? (isEn

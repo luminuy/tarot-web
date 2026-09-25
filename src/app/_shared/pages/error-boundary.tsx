@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { useLocale } from "@/lib/i18n";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * 🚨 หน้าจอเมื่อ render พังกลางคัน — ใช้ร่วมกันทั้งเส้นทางไทยและอังกฤษ
@@ -26,9 +27,9 @@ export function SharedErrorBoundary({ error, reset }: { error: Error & { digest?
         <div className="w-16 h-16 mx-auto rounded-full bg-inset-warm border border-line-warm flex items-center justify-center text-2xl text-gold-ink font-bold font-mono">!</div>
 
         <div className="space-y-2">
-          <h2 className="text-xl font-bold font-serif-th text-ink-deep">
+          <h2 className="text-xl font-bold font-serif-th text-ink-deep"><ThaiPhrases>
             {isEnglish ? "Temporary Display Error" : "เกิดข้อผิดพลาดชั่วคราวในการแสดงผล"}
-          </h2>
+          </ThaiPhrases></h2>
           <p className="text-xs text-muted leading-relaxed font-serif-th">
             {isEnglish
               ? "The sanctuary system has safely recorded this occurrence. You may retry or return to the main hall."

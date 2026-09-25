@@ -6,6 +6,7 @@ import { TarotCard as TarotCardComponent } from "@/components/card/TarotCard";
 import type { TarotCard } from "@/data/cards/types";
 import { useLocale } from "@/lib/i18n";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 const elementEnMap: Record<string, string> = {
   "ไฟ": "Fire",
@@ -108,9 +109,9 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
 
           {/* Card Meta & Details */}
           <div className="space-y-1 w-full">
-            <h3 className="font-serif-th text-lg sm:text-xl font-bold font-mystic-gold">
+            <h3 className="font-serif-th text-lg sm:text-xl font-bold font-mystic-gold"><ThaiPhrases>
               {isEnglish ? (card.nameEn || card.nameTh) : card.nameTh}
-            </h3>
+            </ThaiPhrases></h3>
             <p className="text-xs text-muted font-mono">
               {isEnglish
                 ? (isReversed ? "Reversed" : "Upright")

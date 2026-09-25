@@ -18,6 +18,7 @@ import {
   SparkleTabIcon,
   WaterElementIcon,
 } from "@/components/ui/TarotArtIcons";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 interface CardsExplorerProps {
   cards: readonly CardSummary[];
 }
@@ -38,33 +39,6 @@ const SUIT_TABS = [
     count: 14,
   },
 ];
-
-const ELEMENT_STYLES: Record<string, { bg: string; text: string; border: string; glow: string }> = {
-  ไฟ: {
-    bg: "bg-gold-ink/10",
-    text: "text-gold-ink",
-    border: "border-gold-ink/30",
-    glow: "rgba(143, 92, 26, 0.12)",
-  },
-  น้ำ: {
-    bg: "bg-ink-soft/10",
-    text: "text-muted",
-    border: "border-ink-soft/30",
-    glow: "rgba(143, 92, 26, 0.12)",
-  },
-  ลม: {
-    bg: "bg-ink-soft/10",
-    text: "text-muted",
-    border: "border-ink-soft/30",
-    glow: "rgba(143, 92, 26, 0.12)",
-  },
-  ดิน: {
-    bg: "bg-ok/10",
-    text: "text-ok",
-    border: "border-ok/30",
-    glow: "rgba(143, 92, 26, 0.12)",
-  },
-};
 
 const ELEMENT_EN: Record<string, string> = {
   ไฟ: "Fire",
@@ -91,6 +65,13 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
     setActiveFilter(id);
   };
   const [searchQuery, setSearchQuery] = useState<string>("");
+  /**
+   * 📱 มือถือโชว์ไพ่ 12 ใบแรกก่อน แล้วมีปุ่ม "ดูทั้งหมด" — เดิมกริด 78 ใบ 2 คอลัมน์ยาว ~16,000px (27 จอ · เจ้าของทัก)
+   * ⚠️ ไพ่ทั้ง 78 ใบยังอยู่ใน HTML ครบ (ซ่อนด้วย CSS `.mobile-preview-12` เท่านั้น) — ข้อห้าม SEO "ไพ่ครบใน HTML" ยังจริง
+   *    และไม่แตะสูตรความสูงการ์ด (`card-tile-cv`) เพราะไม่ได้เปลี่ยนคอลัมน์ · gap · ขนาดการ์ด
+   * ย่อเฉพาะมุมมอง "ไพ่ทั้งหมด" ที่ไม่ได้ค้นหา — กดหมวดหรือพิมพ์ค้นหา = เห็นผลครบทันที
+   */
+  const [showAllOnMobile, setShowAllOnMobile] = useState(false);
   const [showSemanticSearch, setShowSemanticSearch] = useState<boolean>(false);
 
   const filteredCards = useMemo(() => {
@@ -128,6 +109,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
       );
     });
   }, [cards, activeFilter, searchQuery]);
+  const previewOnMobile = !showAllOnMobile && activeFilter === "all" && !searchQuery.trim();
 
   useEffect(() => {
     if (!searchQuery.trim()) return;
@@ -152,9 +134,9 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
             
           </span>
         </div>
-        <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-ink tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]">
+        <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-ink tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]"><ThaiPhrases>
           {isEnglish ? "The Complete 78 Tarot Cards & Meanings" : "ความหมายไพ่ทาโรต์ทั้ง 78 ใบ"}
-        </h1>
+        </ThaiPhrases></h1>
         <p className="text-xs sm:text-sm text-muted max-w-2xl mx-auto leading-relaxed font-serif-th [text-wrap:balance]">
           {isEnglish
             ? "Explore depth psychological, archetypal, and practical divinatory meanings across love, career, and finances in the 1909 Rider-Waite lineage."
@@ -173,7 +155,8 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               aria-label={isEnglish ? "Search 78 tarot cards" : "ค้นหาไพ่ทาโรต์ 78 ใบ"}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={isEnglish ? "Search by card name, keyword, zodiac, or element..." : "ค้นหาชื่อไพ่, ภาษาอังกฤษ, ความหมาย, ราศี หรือธาตุ..."}
+              // ข้อความตัวอย่างต้องสั้นพอดีจอมือถือ — เดิมยาวจนถูกตัดครึ่งคำ "ความหม" (เจ้าของทัก) · ช่องค้นหายังค้นได้ทุกอย่างเหมือนเดิม
+              placeholder={isEnglish ? "Search card name or meaning" : "ค้นหาชื่อไพ่ หรือความหมาย"}
               className="glass-field w-full pl-10 pr-10 py-3.5 rounded-xl border border-line-interactive text-ink placeholder-muted/60 text-xs sm:text-sm font-sans focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
             />
             {searchQuery && (
@@ -382,9 +365,12 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
         aria-labelledby={`card-tab-${activeFilter}`}
         className={hasSwappedTab ? "anim-swap-rise" : undefined}
       >
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-5">
+        <div
+          className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-5${
+            previewOnMobile ? " mobile-preview-12" : ""
+          }`}
+        >
           {filteredCards.map((card, idx) => {
-            const elemStyle = (card.element && ELEMENT_STYLES[card.element]) || ELEMENT_STYLES["ไฟ"];
             // แถวแรกของกริดคือผู้สมัคร LCP ของหน้านี้ — ถ้าปล่อย lazy ทั้ง 78 ใบ
             // เบราว์เซอร์จะรู้จักภาพแรกก็ต่อเมื่อจัดเลย์เอาต์เสร็จแล้ว เสียไปหนึ่งรอบเครือข่ายเต็ม ๆ
             const isAboveFold = idx < 6;
@@ -419,11 +405,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                     <span className="text-[12px] font-mono font-bold px-1.5 py-0.5 rounded bg-gold-ink text-white">
                       {card.arcana === "major" ? `#${card.number}` : card.suit?.toUpperCase().slice(0, 1)}
                     </span>
-                    <span
-                      className={`text-[12px] font-mono px-1.5 py-0.5 rounded border ${elemStyle.border} ${elemStyle.bg} ${elemStyle.text} font-bold`}
-                    >
-                      {isEnglish ? (card.element && ELEMENT_EN[card.element]) || card.element : card.element}
-                    </span>
+                    {/* ป้ายธาตุบนภาพไพ่ถอดออก — ทับรายละเอียดหน้าไพ่ (เจ้าของทักที่หน้าไพ่รายใบ · ตามแก้ให้เหมือนกันทั้งเว็บ) */}
                   </div>
 
                   {/* Bottom Hover Action Overlay */}
@@ -474,13 +456,25 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
         </div>
       </div>
 
+      {previewOnMobile && filteredCards.length > 12 && (
+        <div className="sm:hidden flex justify-center">
+          <button
+            type="button"
+            onClick={() => setShowAllOnMobile(true)}
+            className="glass-chip tap-overlay-y px-5 py-2.5 font-serif-th text-sm font-bold text-gold-ink"
+          >
+            {isEnglish ? `Show all ${filteredCards.length} cards` : `ดูไพ่ทั้งหมด ${filteredCards.length} ใบ`}
+          </button>
+        </div>
+      )}
+
       {/* Empty State */}
       {filteredCards.length === 0 && (
         <div className="altar-card-porcelain text-center py-16 p-8 space-y-3">
           <div className="text-sm text-gold-ink font-serif-th">SeerTarot</div>
-          <h2 className="font-serif-th text-lg font-bold text-ink">
+          <h2 className="font-serif-th text-lg font-bold text-ink"><ThaiPhrases>
             {isEnglish ? `No cards matching "${searchQuery}"` : `ไม่พบไพ่ที่ตรงกับ "${searchQuery}"`}
-          </h2>
+          </ThaiPhrases></h2>
           <p className="text-xs text-muted max-w-md mx-auto font-serif-th">
             {isEnglish
               ? 'Try searching by another term such as "Love", "The Sun", "Jupiter", or "Fire".'

@@ -6,6 +6,7 @@ import { invalidateSessionCache } from "@/lib/auth/use-session";
 import { soundManager } from "@/lib/utils/audio";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useLocale } from "@/lib/i18n";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 export interface AuthModalProps {
   isOpen: boolean;
@@ -370,11 +371,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {/* Header Typography */}
           <div className="space-y-1 text-center mb-4">
-            <h3 id="auth-modal-title" className="text-xl sm:text-2xl font-serif-th font-bold text-ink">
+            <h3 id="auth-modal-title" className="text-xl sm:text-2xl font-serif-th font-bold text-ink"><ThaiPhrases>
               {mode === "signin" && (isEn ? "Sign In" : "เข้าสู่ระบบ")}
               {mode === "signup" && (isEn ? "Create Free Account" : "สมัครสมาชิกฟรี")}
               {mode === "forgot" && (isEn ? "Reset Password" : "ตั้งรหัสผ่านใหม่ (ลืมรหัสผ่าน)")}
-            </h3>
+            </ThaiPhrases></h3>
             {mode === "forgot" && (
               <p className="text-xs text-muted font-serif-th max-w-xs mx-auto leading-relaxed">
                 {isEn

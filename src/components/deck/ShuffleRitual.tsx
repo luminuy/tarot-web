@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
 import { copyToClipboard } from "@/lib/utils/clipboard";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 interface ShuffleRitualProps {
   commitment: string;
@@ -222,9 +223,9 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
       <span className="text-[13px] font-serif-th text-ink-deep font-bold bg-inset-warm/30 px-4 py-1 rounded-full border border-line-warm mb-2 inline-block ">
         {isEnglish ? "Sacred Shuffling Ritual" : "ขั้นตอนสับไพ่"}
       </span>
-      <h2 className="text-2xl sm:text-3xl font-serif-th font-bold font-mystic-gold filter py-0.5 leading-normal">
+      <h2 className="text-2xl sm:text-3xl font-serif-th font-bold font-mystic-gold filter py-0.5 leading-normal"><ThaiPhrases>
         {isEnglish ? "Center Your Mind on Your Inquiry" : "ตั้งสมาธิและนึกถึงคำถามของคุณ"}
-      </h2>
+      </ThaiPhrases></h2>
       <p className="text-xs sm:text-sm text-muted mt-1 max-w-md leading-relaxed">
         {isEnglish
           ? `Breathe deeply and hold your question in gentle awareness for the "${spreadName}".`
@@ -235,7 +236,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
       {commitment && (
         <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-inset-warm border border-line-warm text-[13px] font-mono text-muted">
           <span>
-            {isEnglish ? "Transparency Hash (SHA-256): " : "รหัสยืนยันความโปร่งใส (SHA-256): "}
+            {isEnglish ? "Deck lock code: " : "รหัสล็อกลำดับไพ่: "}
             {commitment.slice(0, 16)}…{commitment.slice(-8)}
           </span>
           <button

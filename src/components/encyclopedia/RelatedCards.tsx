@@ -6,6 +6,7 @@ import { CardImage } from "@/components/card/CardImage";
 import { cardSummaryById as cardById } from "@/data/cards/summary";
 import { RELATED_CARDS } from "@/data/cards/related.generated";
 import { useLocale } from "@/lib/i18n";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * ไพ่ที่พลังงานใกล้เคียง — เรนเดอร์ฝั่งเซิร์ฟเวอร์ ลิงก์อยู่ใน HTML ตั้งแต่ต้น (SSR)
@@ -21,9 +22,9 @@ export function RelatedCards({ cardId }: { cardId: string }) {
 
   return (
     <section className="pt-8 border-t border-line/40">
-      <h2 className="font-serif-th text-sm font-bold text-gold-ink mb-4">
+      <h2 className="font-serif-th text-sm font-bold text-gold-ink mb-4"><ThaiPhrases>
         {isEnglish ? "Resonant & Harmonious Cards" : "ไพ่ที่พลังงานใกล้เคียง"}
-      </h2>
+      </ThaiPhrases></h2>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {cards.map((c) => (
           <Link

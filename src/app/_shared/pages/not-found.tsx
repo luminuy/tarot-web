@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { noindexAlternates } from "@/lib/config/site";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * 🚧 เนื้อหน้า 404 — ใช้ร่วมกันสองที่ (INC-0112)
@@ -80,9 +81,9 @@ export function NotFoundMain({ forcedLocale = "th" }: { forcedLocale?: "th" | "e
       <div className="max-w-lg w-full text-center space-y-8">
         <div className="space-y-4">
           <span aria-hidden="true" className="block text-4xl font-serif-th font-bold text-gold">404</span>
-          <h1 className="text-2xl sm:text-3xl font-bold font-serif-th leading-normal pt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold font-serif-th leading-normal pt-1"><ThaiPhrases>
             {copy.title}
-          </h1>
+          </ThaiPhrases></h1>
           <p className="text-sm text-muted font-serif-th leading-relaxed">
             {copy.desc}
           </p>

@@ -42,11 +42,22 @@
  *   ช่องว่างจึงกลายเป็นที่ว่างให้หมึกล้นได้โดยไม่ถูกตัด (เช่น `SpreadBoard.tsx` ที่ใช้ `py-0.5`)
  * - `line-clamp-*` ไม่อยู่ในด่านนี้ เพราะมันจองความสูงเป็นจำนวนบรรทัดของ line-height เอง
  *   อาการจึงเป็นคนละแบบ — ถ้าจะเพิ่มต้องวัดใหม่ก่อน ห้ามเดา
+ *
+ * ## ส่วนที่ 3 · หัวข้อไทยห้ามขึ้นบรรทัดใหม่กลางวลี (2026-09-25 · เจ้าของทักจากภาพ "ทา / โรต์")
+ *
+ * สแกนจริงด้วยเบราว์เซอร์ทั้ง 209 หน้าไทยที่ 390/1280px เจอหัวข้อหักกลางวลี 269 แบบ ➔ แก้ด้วย
+ * `ThaiPhrases` (ห่อวลีด้วย `.tp`) + เว้นวรรคตรงรอยต่อวลีในข้อความที่ยาวติดกัน ➔ เหลือ 0
+ * ด่านนี้อ่าน HTML ที่บิลด์แล้ว (`dist/`) ไม่ต้องเปิดเบราว์เซอร์:
+ *   a) h1–h3 ภาษาไทยที่มีตั้งแต่ 2 วลีขึ้นไป ต้องมี `class="tp"` (ลืมห่อ = ตก)
+ *      ยกเว้นหัวข้อที่เป็นกล่อง flex/grid (span จะกลายเป็น flex item แยกกัน) หรือ truncate
+ *   b) วลีไทยที่ยาวติดกันไม่มีช่องว่างใน h1/h2 ห้ามยาวเกิน `MAX_THAI_RUN` ตัวอักษร
+ *      (ยาวกว่านี้จอมือถือต้องหักกลางวลีแน่นอน — เพิ่มช่องว่างตรงรอยต่อวลีแทน)
  */
 import fs from "node:fs";
 import path from "node:path";
 import { assertNonEmptyCorpus } from "./lib/corpus";
 import { fitTextToWidth, sliceThaiSafe, trimThaiOrphans } from "../../src/lib/text/thai-truncate";
+import { groupThaiPhrases } from "../../src/components/ui/ThaiPhrases";
 
 const ROOT = process.cwd();
 const SRC = path.join(ROOT, "src");
@@ -268,6 +279,80 @@ export function scanCanvasCharSlice(): string[] {
   return out;
 }
 
+/* ── ส่วนที่ 3 · หัวข้อไทยห้ามหักกลางวลี ─────────────────────────────────────── */
+
+/** วลีไทยติดกันยาวสุดที่ยอมให้มีใน h1/h2 — ค่าสูงสุดที่วัดได้ตอนตั้งด่านคือ 39 (ทุกตัวแสดงผลไม่หักกลางวลี) */
+const MAX_THAI_RUN = 40;
+const THAI_CHAR = /[\u0E00-\u0E7F]/;
+
+function walkThaiHtml(dir: string): string[] {
+  const out: string[] = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name !== "en" && entry.name !== "_astro") out.push(...walkThaiHtml(full));
+    } else if (entry.name.endsWith(".html")) out.push(full);
+  }
+  return out;
+}
+
+function decodeEntities(text: string): string {
+  return text
+    .replace(/&nbsp;|&#160;/g, "\u00a0")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&#x27;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+/** ข้อความหัวข้อในหน้า HTML หนึ่งหน้าที่ผิดกติกา (ว่างเปล่า = ผ่าน) */
+export function scanThaiHeadings(html: string): string[] {
+  const out: string[] = [];
+  for (const m of html.matchAll(/<(h[123])\b([^>]*)>([\s\S]*?)<\/\1>/g)) {
+    const [, tag, attrs, inner] = m;
+    const cls = /class="([^"]*)"/.exec(attrs)?.[1] ?? "";
+    const text = decodeEntities(inner.replace(/<[^>]+>/g, "")).trim();
+    if (!THAI_CHAR.test(text)) continue;
+    const groups = groupThaiPhrases(text).filter((g) => THAI_CHAR.test(g));
+    const flexOrClipped = /(^|\s)(inline-)?(flex|grid)(\s|$)|(^|\s)truncate(\s|$)/.test(cls);
+    // `.tp` จาก ThaiPhrases หรือวลีที่ผู้เขียนห่อ inline-block/nowrap เองก็นับว่าห่อแล้ว
+    const wrapped = /class="[^"]*\b(tp|inline-block|whitespace-nowrap)\b/.test(inner);
+    if (groups.length >= 2 && !flexOrClipped && !wrapped) {
+      out.push(`<${tag}> ไม่ได้ห่อวลี: "${text.slice(0, 60)}"`);
+    }
+    if (tag !== "h3") {
+      const longest = groups.reduce((a, g) => (g.length > a.length ? g : a), "");
+      if (longest.length > MAX_THAI_RUN) out.push(`<${tag}> วลีติดกันยาว ${longest.length} ตัวอักษร: "${longest}"`);
+    }
+  }
+  return out;
+}
+
+function runThaiHeadingSelfTest(): string[] {
+  const fails: string[] = [];
+  const cases: Array<[string, boolean]> = [
+    ['<h1 class="x">ผังการเปิดไพ่ทาโรต์ 26 รูปแบบ</h1>', true],
+    ['<h1 class="x"><span class="tp">ผังการเปิดไพ่ทาโรต์</span> <span class="tp">26&nbsp;รูปแบบ</span></h1>', false],
+    ['<h2 class="flex gap-2">ไพ่ชุดใหญ่ เมเจอร์</h2>', false],
+    ["<h2>ดูดวง</h2>", false],
+    ["<h2>Tarot spreads for love</h2>", false],
+    [`<h2><span class="tp">${"ก".repeat(MAX_THAI_RUN + 1)}</span></h2>`, true],
+  ];
+  for (const [html, shouldFail] of cases) {
+    const failed = scanThaiHeadings(html).length > 0;
+    if (failed !== shouldFail) fails.push(`${shouldFail ? "ต้องฟ้องแต่ไม่ฟ้อง" : "ไม่ควรฟ้องแต่ฟ้อง"}: ${html.slice(0, 70)}`);
+  }
+  const g = groupThaiPhrases("ไพ่ 78 ใบ แม่น ๆ (ครบ)");
+  if (g.join("|") !== "ไพ่|78\u00a0ใบ|แม่น\u00a0ๆ\u00a0(ครบ)".replace(/\u00a0/g, "\u00a0")) {
+    // "(ครบ)" ขึ้นต้นด้วยวงเล็บเปิด ไม่ผูกกับคำก่อน — เทียบเฉพาะสองกฎหลัก
+    if (!(g.includes("78\u00a0ใบ") && g.some((x) => x.startsWith("แม่น\u00a0ๆ")))) {
+      fails.push(`groupThaiPhrases ผูกตัวเลข/ไม้ยมกผิด: ${JSON.stringify(g)}`);
+    }
+  }
+  return fails;
+}
+
 if (process.argv[1] && process.argv[1].endsWith("test-thai-glyph-clipping.ts")) {
   if (!fs.existsSync(SRC)) {
     console.error(`\n❌ ไม่พบโฟลเดอร์ ${SRC} — ด่านนี้ตรวจอะไรไม่ได้เลย จึงถือว่าตก`);
@@ -305,4 +390,34 @@ if (process.argv[1] && process.argv[1].endsWith("test-thai-glyph-clipping.ts")) 
   }
 
   console.log(`✅ การย่อข้อความวัดจากความกว้างจริงและไม่ทิ้งสระ/วรรณยุกต์ลอย (${TRUNC_CASES.length} เคส)`);
+
+  const headingSelfTest = runThaiHeadingSelfTest();
+  if (headingSelfTest.length > 0) {
+    console.error("\n❌ ตัวตรวจหัวข้อไทยตรวจตัวเองไม่ผ่าน");
+    for (const f of headingSelfTest) console.error(`   ${f}`);
+    process.exit(1);
+  }
+
+  const dist = path.join(ROOT, "dist");
+  if (!fs.existsSync(dist)) {
+    if (process.env.CI) {
+      console.error("\n❌ ไม่มี dist/ — CI ต้องบิลด์ก่อนรันด่านนี้ ไม่งั้นส่วนหัวข้อไทยไม่ได้ตรวจอะไรเลย (INC-0189b)");
+      process.exit(1);
+    }
+    console.warn("⚠️  ข้ามส่วนหัวข้อไทย — ยังไม่มี dist/ (รัน `npm run build:astro` ก่อนถ้าจะตรวจครบ)");
+  } else {
+    const htmlFiles = walkThaiHtml(dist);
+    assertNonEmptyCorpus("หน้า HTML ภาษาไทยใน dist/", htmlFiles, "ตรวจว่า walkThaiHtml() ชี้ไปที่ dist/ จริง");
+    const headingFindings = htmlFiles.flatMap((f) =>
+      scanThaiHeadings(fs.readFileSync(f, "utf-8")).map((msg) => `${path.relative(ROOT, f)} · ${msg}`),
+    );
+    if (headingFindings.length > 0) {
+      console.error(`\n❌ หัวข้อไทยที่จะหักกลางวลี ${headingFindings.length} จุด\n`);
+      for (const f of headingFindings.slice(0, 40)) console.error(`   ${f}`);
+      console.error("\n   แก้: ห่อเนื้อหัวข้อด้วย <ThaiPhrases> (src/components/ui/ThaiPhrases.tsx)");
+      console.error("        หรือเว้นวรรคตรงรอยต่อวลีถ้าข้อความยาวติดกันเกิน " + MAX_THAI_RUN + " ตัวอักษร\n");
+      process.exit(1);
+    }
+    console.log(`✅ หัวข้อไทยใน ${htmlFiles.length} หน้าห่อวลีครบ และไม่มีวลีติดกันยาวเกิน ${MAX_THAI_RUN} ตัวอักษร`);
+  }
 }

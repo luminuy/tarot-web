@@ -8,6 +8,7 @@ import { bangkokDayKey } from "@/lib/time/bangkok";
 import { formatMonthDay, zodiacSignPath } from "@/lib/tarot/zodiac";
 import { currentSign, onSignAnnounced } from "@/lib/zodiac/my-sign";
 import type { ZodiacDaily as ZodiacDailyData, ZodiacDayCard } from "@/lib/tarot/zodiac-daily";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * ✦ ดวงรายวัน 12 ราศี + ไพ่ประจำฤดูราศี — ข้อมูลจาก `/api/daily-card/zodiac`
@@ -169,9 +170,9 @@ export function ZodiacDaily({ signs, sign }: { signs: ZodiacDailySignName[]; sig
   return (
     <section aria-labelledby="zodiac-daily-title" className="space-y-5">
       <div className="text-center space-y-1">
-        <h2 id="zodiac-daily-title" className="text-xl sm:text-2xl font-serif-th font-bold text-ink">
+        <h2 id="zodiac-daily-title" className="text-xl sm:text-2xl font-serif-th font-bold text-ink"><ThaiPhrases>
           {isEnglish ? "Today's card for your sign" : "ดวงรายวัน — ไพ่วันนี้ของราศีคุณ"}
-        </h2>
+        </ThaiPhrases></h2>
         <p className="text-xs sm:text-sm text-muted font-sans">
           {isEnglish
             ? "Pick a sign. Everyone in the same sign sees the same card today."

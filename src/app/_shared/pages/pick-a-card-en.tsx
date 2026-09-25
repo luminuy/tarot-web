@@ -4,6 +4,7 @@ import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 const pickACardOgImages = buildPageOgImage({
   title: "Pick A Card Tarot Reading",
@@ -143,6 +144,17 @@ export function PickACardBodyEn({ ritual }: { ritual: ReactNode }) {
 
       <main id="main-content" tabIndex={-1} className="min-h-screen py-6 sm:py-10 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto space-y-8">
+          {/* ชื่อหน้า — เดิมหน้านี้ไม่มีหัวเรื่องบอกว่าเป็นหน้าอะไร <h1> คือหัวข้อที่เลือกอยู่ ("เขาคิดยังไงกับเรา…")
+              ซึ่งไม่ตรงกับชื่อหน้าในผลค้นหา (เจ้าของทัก) · หัวข้อที่เลือกในพิธีจึงลดเป็น <h2> บนหน้านี้ */}
+          <header className="text-center space-y-2 pt-2">
+            <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink leading-snug [text-wrap:balance]">
+              <ThaiPhrases>{"Pick A Card Tarot Reading"}</ThaiPhrases>
+            </h1>
+            <p className="text-sm sm:text-base text-muted font-serif-th leading-relaxed">
+              <ThaiPhrases>{"Choose a topic, hold it in mind, and pick the pile that calls to you."}</ThaiPhrases>
+            </p>
+          </header>
+
           {/* ห่อ div — <astro-island> เป็น display:contents จึงไม่รับระยะจาก space-y ทำให้กล่องพิธีชิดกล่องบทความ */}
           <div>{ritual}</div>
 
@@ -159,9 +171,9 @@ export function PickACardBodyEn({ ritual }: { ritual: ReactNode }) {
               or pile acts as a psychological mirror reflecting your present inner climate.
             </p>
 
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2">
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
               Energetic Signatures of the Four Sacred Crystals
-            </h3>
+            </ThaiPhrases></h3>
             <ul className="list-disc pl-5 space-y-2 text-muted">
               <li>
                 <strong className="text-ink">Pile 1 Rose Quartz:</strong> Stone of heart-centered tenderness,
@@ -181,9 +193,9 @@ export function PickACardBodyEn({ ritual }: { ritual: ReactNode }) {
               </li>
             </ul>
 
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2">
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
               Translating Divination into Mindful Sovereignty
-            </h3>
+            </ThaiPhrases></h3>
             <p>
               Tarot cards are not rigid verdicts inscribed in stone; they function as a living compass
               illuminating latent momentum and prospective trajectories. Armed with these archetypal insights,

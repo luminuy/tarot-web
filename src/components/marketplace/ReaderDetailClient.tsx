@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { BookQueueModal } from "@/components/marketplace/BookQueueModal";
 import type { PublicReaderProfile } from "@/lib/marketplace/readers.repo";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 interface ReaderDetailClientProps {
   reader: PublicReaderProfile;
@@ -17,9 +18,9 @@ export const ReaderDetailClient: React.FC<ReaderDetailClientProps> = ({ reader, 
       <div className="altar-card-porcelain !rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4 p-6">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="font-serif-th font-bold text-base text-ink-deep">
+            <h3 className="font-serif-th font-bold text-base text-ink-deep"><ThaiPhrases>
               พร้อมรับคำทำนายจาก {reader.displayName} แล้วหรือยัง?
-            </h3>
+            </ThaiPhrases></h3>
             {isLiveOpen && (
               <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-ok bg-[#EBF3ED] px-2 py-0.5 rounded-full border border-line-warm">
                 <span className="h-1.5 w-1.5 rounded-full bg-ok animate-pulse" />

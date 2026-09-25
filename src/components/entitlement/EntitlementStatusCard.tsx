@@ -11,6 +11,7 @@ import { DailyStreakRibbon } from "@/components/daily/DailyStreakRibbon";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useSessionUser } from "@/lib/auth/use-session";
 import { useLocale } from "@/lib/i18n";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 const BuyCreditsModal = dynamic(
   () => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal),
@@ -61,9 +62,9 @@ export function EntitlementStatusCard({ onBuyCredits }: EntitlementStatusCardPro
     <div className="space-y-4 rounded-lg border border-line-warm bg-surface p-5 sm:p-6">
       <div className="flex items-center gap-2">
         
-        <h2 className="font-serif-th text-base font-bold font-mystic-gold sm:text-lg">
+        <h2 className="font-serif-th text-base font-bold font-mystic-gold sm:text-lg"><ThaiPhrases>
           {isEn ? "My Reading Entitlement" : "สิทธิ์การใช้งานของฉัน"}
-        </h2>
+        </ThaiPhrases></h2>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line-warm bg-inset-warm px-4 py-3">

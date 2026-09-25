@@ -8,8 +8,10 @@ import {
   getArticleDescription,
   getArticleCategory,
 } from "@/data/article-helpers";
+import { getArticleCardArt } from "@/data/article-art";
 import { CardImage } from "@/components/card/CardImage";
 import { useLocale } from "@/lib/i18n";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 const SearchIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
   <svg
@@ -54,60 +56,12 @@ const CATEGORIES = [
   { id: "wisdom", labelTh: "จิตวิทยา & AI", labelEn: "Psychology & AI" },
 ];
 
-/**
- * จับคู่บทความกับภาพหน้าไพ่ 1909 Rider-Waite ประจำบทความอย่างวิจิตร
- */
-const ARTICLE_CARD_MAP: Record<string, string> = {
-  "how-to-read-tarot-for-beginners": "major-01.jpg",
-  "tarot-love-reading-guide": "major-06.jpg",
-  "tarot-love-3-cards-feelings": "cups-02.jpg",
-  "tarot-ex-return-signs": "cups-06.jpg",
-  "top-10-soulmate-tarot-cards": "major-06.jpg",
-  "tarot-single-timing-love": "cups-01.jpg",
-  "tarot-career-change-spread": "major-07.jpg",
-  "tarot-job-interview-one-card": "wands-01.jpg",
-  "tarot-wealth-money-cards": "pentacles-01.jpg",
-  "tarot-business-elements-spread": "major-04.jpg",
-  "celtic-cross-spread-guide": "major-10.jpg",
-  "tarot-daily-card-guide": "major-19.jpg",
-  "tarot-7-chakras-spread": "major-14.jpg",
-  "how-to-ask-tarot-questions": "major-02.jpg",
-  "the-lovers-card-meaning": "major-06.jpg",
-  "the-tower-and-death-meaning": "major-16.jpg",
-  "the-fool-journey-meaning": "major-00.jpg",
-  "the-wheel-of-fortune-meaning": "major-10.jpg",
-  "reversed-tarot-cards-guide": "major-12.jpg",
-  "provably-fair-tarot-guide": "major-11.jpg",
-  "tarot-and-carl-jung-psychology": "major-09.jpg",
-  "ai-tarot-oracle-vs-human-reader": "major-17.jpg",
-  "tarot-history-1909-rider-waite": "major-01.jpg",
-  "major-arcana-22-cards-complete-guide": "major-21.jpg",
-  "minor-arcana-4-suits-guide": "wands-04.jpg",
-  "tarot-yes-no-spread-guide": "swords-01.jpg",
-};
-
-/* คืนเฉพาะชื่อไฟล์ภาพ — ไม่คืน alt เพราะภาพไพ่ประจำบทความเป็นภาพประกอบล้วน
-   หัวข้อบทความที่พิมพ์อยู่ข้าง ๆ ทำหน้าที่บอกชื่อให้แล้ว (INC-0125) */
-function getArticleCardArt(article: { slug: string; category: string }): { image: string } {
-  const image =
-    ARTICLE_CARD_MAP[article.slug] ||
-    (article.category === "love"
-      ? "major-06.jpg"
-      : article.category === "career"
-        ? "pentacles-01.jpg"
-        : article.category === "spreads"
-          ? "major-10.jpg"
-          : article.category === "cards"
-            ? "major-01.jpg"
-            : "major-09.jpg");
-
-  return { image };
-}
-
 export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) => {
   const { isEnglish, locale } = useLocale();
   const [selectedCat, setSelectedCat] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  /** 📱 มือถือโชว์ 8 เรื่องแรกก่อน (เดิม 30 เรื่องยาว ~9,000px) — ที่เหลือยังอยู่ใน HTML ครบ ซ่อนด้วย CSS เท่านั้น */
+  const [showAllOnMobile, setShowAllOnMobile] = useState(false);
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -133,6 +87,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
       );
     });
   }, [articles, selectedCat, searchQuery]);
+  const previewOnMobile = !showAllOnMobile && selectedCat === "all" && !searchQuery.trim();
 
   const featured = articles[0];
 
@@ -145,11 +100,11 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
             ? "SEERTAROT WISDOM CODEX & ESOTERIC ESSAYS"
             : "คลังความรู้และคู่มือศาสตร์พยากรณ์"}
         </p>
-        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold font-serif-th text-ink tracking-tight leading-tight">
+        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold font-serif-th text-ink tracking-tight leading-tight"><ThaiPhrases>
           {isEnglish
             ? "Tarot Wisdom Codex & Divination Essays"
             : "คัมภีร์บทความดูดวงไพ่ยิปซี ทาโรต์ 1909"}
-        </h1>
+        </ThaiPhrases></h1>
         <p className="text-xs sm:text-sm md:text-base text-muted max-w-2xl mx-auto leading-relaxed font-serif-th">
           {isEnglish
             ? "Explore depth psychology, Jungian archetypes, archetypal symbolism, and master guides for love, career, and 26 sacred spreads rooted in the authentic 1909 Rider-Waite lineage."
@@ -168,8 +123,8 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={
               isEnglish
-                ? "Search articles, card meanings, love, career, or spreads..."
-                : "ค้นหาบทความ ความหมายไพ่ ความรัก การงาน หรือผังพยากรณ์..."
+                ? "Search articles or card meanings"
+                : "ค้นหาบทความ หรือความหมายไพ่"
             }
             className="glass-field w-full border border-line-interactive rounded-2xl px-5 py-3.5 pl-11 text-xs sm:text-sm text-ink placeholder:text-muted/70 focus:outline-none focus:border-gold-ink focus:ring-1 focus:ring-gold-ink transition font-serif-th"
           />
@@ -258,9 +213,9 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                   </span>
                 </div>
 
-                <h2 className="font-serif-th text-xl sm:text-2xl lg:text-3xl font-bold text-ink group-hover:text-gold-ink transition-colors leading-snug">
+                <h2 className="font-serif-th text-xl sm:text-2xl lg:text-3xl font-bold text-ink group-hover:text-gold-ink transition-colors leading-snug"><ThaiPhrases>
                   <Link href={`/blog/${featured.slug}`} prefetch={false}>{featTitle}</Link>
-                </h2>
+                </ThaiPhrases></h2>
 
                 <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed line-clamp-3">
                   {featDesc}
@@ -322,7 +277,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className={`grid grid-cols-1 md:grid-cols-2 gap-6${previewOnMobile ? " mobile-preview-8" : ""}`}>
             {filtered.map((article, idx) => {
               const cardArt = getArticleCardArt(article);
               const artTitle = getArticleTitle(article, locale);
@@ -352,9 +307,9 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                     {/* Middle: Content with 1909 Card Companion */}
                     <div className="flex items-start gap-4">
                       <div className="space-y-2 flex-1 min-w-0">
-                        <h3 className="font-serif-th text-base sm:text-lg font-bold text-ink group-hover:text-gold-ink transition-colors leading-snug line-clamp-2">
+                        <h3 className="font-serif-th text-base sm:text-lg font-bold text-ink group-hover:text-gold-ink transition-colors leading-snug line-clamp-2"><ThaiPhrases>
                           <Link href={`/blog/${article.slug}`} prefetch={false}>{artTitle}</Link>
-                        </h3>
+                        </ThaiPhrases></h3>
                         <p className="text-xs text-muted font-serif-th leading-relaxed line-clamp-3">
                           {artDesc}
                         </p>
@@ -404,6 +359,17 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                 </article>
               );
             })}
+          </div>
+        )}
+        {previewOnMobile && filtered.length > 8 && (
+          <div className="sm:hidden flex justify-center pt-2">
+            <button
+              type="button"
+              onClick={() => setShowAllOnMobile(true)}
+              className="glass-chip tap-overlay-y px-5 py-2.5 font-serif-th text-sm font-bold text-gold-ink"
+            >
+              {isEnglish ? `Show all ${filtered.length} articles` : `ดูบทความทั้งหมด ${filtered.length} เรื่อง`}
+            </button>
           </div>
         )}
       </div>

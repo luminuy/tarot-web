@@ -93,7 +93,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
 
   return (
     <section
-      aria-label={isEnglish ? "Provably-Fair Cryptographic Transparency Verification" : "ตรวจสอบความโปร่งใส Provably-Fair"}
+      aria-label={isEnglish ? "Check that your cards were truly random" : "ตรวจสอบว่าไพ่สุ่มจริง"}
       className="glass-tile !rounded-lg my-4 transition overflow-hidden"
     >
       {/* Header — แตะเพื่อยุบ/ขยาย (เริ่มต้นยุบไว้ ไม่ให้หน้ายาว) */}
@@ -119,24 +119,24 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
           <div className="min-w-0">
             <h4 className="font-serif-th text-xs sm:text-sm font-bold text-ink-deep">
               {isEnglish
-                ? "Mathematical Transparency (Provably-Fair Verification)"
-                : "ความโปร่งใสทางคณิตศาสตร์ (Provably-Fair Verification)"}
+                ? "Check your shuffle yourself (Provably Fair)"
+                : "ตรวจเองได้ว่าไพ่สุ่มจริง (Provably Fair)"}
             </h4>
             <p className="text-[13px] text-muted font-serif-th">
               {isPanelOpen
                 ? isEnglish
                   ? "Cryptographically verifiable: cards are predetermined by seeds with zero post-selection bias."
-                  : "พิสูจน์ได้ว่าผลไพ่ถูกกำหนดจาก Seed ล่วงหน้า ไม่มีการเลือกไพ่ทีหลัง"
+                  : "ลำดับไพ่ถูกล็อกไว้ก่อนคุณเลือก ไม่มีใครแอบเปลี่ยนไพ่ทีหลังได้"
                 : isEnglish
-                  ? "Tap to inspect 100% provably fair cryptographic proof"
+                  ? "Tap to see how to check your cards were fair"
                   : "แตะเพื่อดูวิธีตรวจสอบว่าผลไพ่ยุติธรรม 100%"}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="glass-chip hidden sm:inline-block px-2.5 py-0.5 text-[13px] font-mono font-bold text-ink-deep">
-            SHA-256 Commit-Reveal
+          <span className="glass-chip hidden sm:inline-block px-2.5 py-0.5 text-[13px] font-serif-th font-bold text-ink-deep">
+            {isEnglish ? "Verifiable" : "ตรวจสอบได้"}
           </span>
           <span
             className={`font-mono text-xs text-muted transition-transform duration-200 ${
@@ -169,7 +169,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                   <div className="flex items-center justify-between gap-2 flex-wrap text-xs">
                     <span className="text-ink-deep font-serif-th font-bold flex items-center gap-1.5">
                       {" "}
-                      {isEnglish ? "Server Randomness Commitment:" : "คำมั่นความสุ่มที่เซิร์ฟเวอร์ผูกมัดไว้ (Commitment):"}
+                      {isEnglish ? "Lock code for the shuffled deck (commitment):" : "รหัสล็อกลำดับไพ่ (Commitment):"}
                     </span>
                     <button
                       type="button"
@@ -182,11 +182,11 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                           : "✓ คัดลอกแล้ว"
                         : isEnglish
                           ? "Copy Hash"
-                          : "คัดลอก Hash"}
+                          : "คัดลอกรหัส"}
                     </button>
                   </div>
                   <p className="altar-card-porcelain !rounded-lg font-mono text-[13px] text-ink-deep break-all p-2.5 select-all">
-                    {effectiveCommitment || (isEnglish ? "Generating randomness commitment…" : "กำลังสร้างคำมั่นความสุ่ม…")}
+                    {effectiveCommitment || (isEnglish ? "Locking the deck order…" : "กำลังล็อกลำดับไพ่…")}
                   </p>
                   <p className="text-[13px] text-muted font-serif-th leading-relaxed">
                     {isEnglish ? (
@@ -214,7 +214,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                     <div className="altar-card-porcelain !rounded-lg p-3 space-y-1">
                       <div className="flex items-center justify-between text-[13px]">
                         <span className="text-muted font-serif-th">
-                          {isEnglish ? "1. Original Randomness Commitment:" : "1. คำมั่นความสุ่มดั้งเดิม (Commitment):"}
+                          {isEnglish ? "1. Lock code shown before you picked (commitment):" : "1. รหัสล็อกที่โชว์ก่อนคุณเลือกไพ่ (Commitment):"}
                         </span>
                         <button
                           type="button"
@@ -231,7 +231,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                     <div className="altar-card-porcelain !rounded-lg p-3 space-y-1">
                       <div className="flex items-center justify-between text-[13px]">
                         <span className="text-muted font-serif-th">
-                          {isEnglish ? "2. Revealed Server Seed:" : "2. ซี้ดของเซิร์ฟเวอร์ที่เฉลย (Server Seed):"}
+                          {isEnglish ? "2. The deck's random key, revealed now (server seed):" : "2. กุญแจสุ่มของระบบ เปิดเผยตอนนี้ (Server Seed):"}
                         </span>
                         <button
                           type="button"
@@ -248,7 +248,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                     <div className="altar-card-porcelain !rounded-lg p-3 space-y-1">
                       <div className="flex items-center justify-between text-[13px]">
                         <span className="text-muted font-serif-th">
-                          {isEnglish ? "3. Your Entropy from Hand Movement (Client Seed):" : "3. ซี้ดของคุณจากการขยับมือ (Client Seed):"}
+                          {isEnglish ? "3. Your random key from your hand movement (client seed):" : "3. กุญแจสุ่มจากการขยับมือของคุณ (Client Seed):"}
                         </span>
                         <button
                           type="button"
@@ -279,7 +279,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                             : "กำลังคำนวณซ้ำในเบราว์เซอร์ของคุณ…"
                           : isEnglish
                             ? "Verify Cryptographic Fairness Now"
-                            : "ตรวจสอบความโปร่งใสด้วยตนเองเดี๋ยวนี้"}
+                            : "กดตรวจสอบเองเลย"}
                       </span>
                     </button>
                   )}
@@ -308,7 +308,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                               <span>
                                 {isEnglish
                                   ? "This reading is cryptographically verified and 100% fair"
-                                  : "การเปิดไพ่นี้พิสูจน์แล้วว่าโปร่งใสสมบูรณ์แบบ"}
+                                  : "ตรวจแล้ว ไพ่รอบนี้สุ่มจริง ไม่มีการแก้ไข"}
                               </span>
                             </div>
                             <ul className="space-y-1 text-xs text-ok font-serif-th pl-7">
@@ -316,7 +316,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                                 <span>✓</span>
                                 <span>
                                   <strong>
-                                    {isEnglish ? "Commitment matches Seed:" : "คำมั่นตรงกับ Seed:"}
+                                    {isEnglish ? "Lock code matches the key:" : "รหัสล็อกตรงกับกุญแจสุ่ม:"}
                                   </strong>{" "}
                                   <code className="font-mono text-[13px]">SHA256(serverSeed) === commitment</code>
                                 </span>
@@ -348,14 +348,14 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                               <span>
                                 {isEnglish
                                   ? "Discrepancy detected during verification"
-                                  : "พบข้อแตกต่างในการตรวจสอบความสอดคล้อง"}
+                                  : "ข้อมูลไม่ตรงกัน"}
                               </span>
                             </div>
                             <p className="text-xs text-err pl-7 font-serif-th">
                               {result.mismatchDetail ||
                                 (isEnglish
-                                  ? "Commitment or card drawing does not match recorded state."
-                                  : "คำมั่นหรือผลลัพธ์การจั่วไพ่ไม่ตรงกับข้อมูลที่บันทึกไว้")}
+                                  ? "The lock code or the cards drawn do not match the record."
+                                  : "รหัสล็อกหรือไพ่ที่เปิดได้ ไม่ตรงกับที่บันทึกไว้")}
                             </p>
                           </div>
                         )}
@@ -367,7 +367,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                             onClick={handleVerify}
                             className="text-[13px] text-gold-ink hover:text-gold-ink-deep font-serif-th hover:underline cursor-pointer font-semibold"
                           >
-                            {isEnglish ? "Re-run calculation" : "รันการคำนวณซ้ำอีกครั้ง"}
+                            {isEnglish ? "Check again" : "ตรวจอีกครั้ง"}
                           </button>
                         </div>
                       </div>
@@ -388,7 +388,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                         <span className="font-bold">
                           {isEnglish
                             ? "Independent Offline Verification Guide"
-                            : "วิธีตรวจสอบด้วยตนเองแบบอิสระ (Independent Verification)"}
+                            : "ตรวจด้วยโปรแกรมอื่นนอกเว็บเรา (สำหรับคนเขียนโปรแกรม)"}
                         </span>
                       </span>
                       <span className="text-xs font-mono">

@@ -2,9 +2,15 @@ import { RouteLink as Link } from "@/components/ui/RouteLink";
 import { localeHref } from "@/lib/i18n/paths";
 import { CardImage } from "@/components/card/CardImage";
 import { getHomeFaqs } from "@/data/home-seo";
+import { getFeaturedArticles } from "@/data/articles";
+import { getArticleCategory, getArticleDescription, getArticleTitle } from "@/data/article-helpers";
+import { getArticleCardArt } from "@/data/article-art";
 import { COUNTS } from "@/components/layout/nav-links";
 import { HomeZodiacSection } from "@/components/seo/HomeZodiacSection";
+import { HomeMoreWaysSection } from "@/components/seo/HomeMoreWaysSection";
+import { HomeProofSection } from "@/components/seo/HomeProofSection";
 import { HomeRailNav } from "@/components/seo/HomeRailNav";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * 5 ขั้นตอนพิธีกรรมพยากรณ์ศักดิ์สิทธิ์ (Thai)
@@ -32,10 +38,10 @@ const RITUAL_STEPS_TH = [
     stepNum: "๓",
     phase: "สับไพ่",
     title: "สับไพ่ด้วยตนเอง",
-    subtitle: "Provably Fair SHA-256",
+    subtitle: "สุ่มจริง ตรวจสอบได้",
     cardImage: "major-10.jpg",
     cardName: "Wheel of Fortune · ๑๐",
-    desc: "สับสำรับไพ่ 78 ใบด้วยมือคุณเองผ่าน Web Crypto API พร้อมระบบ SHA-256 Commit-Reveal การันตีไร้การแทรกแซง 100%",
+    desc: "สับไพ่ 78 ใบด้วยมือคุณเอง ระบบล็อกลำดับไพ่ไว้ก่อนเปิด ไม่มีใครแก้ผลได้ และตรวจสอบย้อนหลังได้ทุกครั้ง",
   },
   {
     stepNum: "๔",
@@ -65,10 +71,10 @@ const RITUAL_STEPS_EN = [
     stepNum: "1",
     phase: "Prelude",
     title: "Choose Your Spread",
-    subtitle: "20 Archetypal Spreads",
+    subtitle: "26 Spread Layouts",
     cardImage: "major-00.jpg",
     cardName: "The Fool · 0",
-    desc: "Select from 20 time-tested layouts tailored to your question—from a 1-card daily compass to the 10-card Celtic Cross.",
+    desc: "Select from 26 time-tested layouts tailored to your question—from a 1-card daily compass to the 10-card Celtic Cross.",
   },
   {
     stepNum: "2",
@@ -77,16 +83,16 @@ const RITUAL_STEPS_EN = [
     subtitle: "Hear the Inner Voice",
     cardImage: "major-02.jpg",
     cardName: "The High Priestess · II",
-    desc: "Take a deep breath, frame your question sincerely, and choose the AI oracle archetype whose interpretative lineage resonates with you.",
+    desc: "Take a deep breath, write your question simply and honestly, and choose the AI reader whose style suits you.",
   },
   {
     stepNum: "3",
     phase: "Shuffle",
     title: "Shuffle the Deck",
-    subtitle: "Provably Fair SHA-256",
+    subtitle: "Truly random, verifiable",
     cardImage: "major-10.jpg",
     cardName: "Wheel of Fortune · X",
-    desc: "Shuffle the complete 78-card deck with your own touch via Web Crypto API, secured by SHA-256 Commit-Reveal proofs.",
+    desc: "Shuffle all 78 cards yourself. The deck order is locked before you draw, so no one can change the result — and you can check it afterwards.",
   },
   {
     stepNum: "4",
@@ -109,74 +115,6 @@ const RITUAL_STEPS_EN = [
 ];
 
 /**
- * บทความแนะนำ พร้อมภาพหน้าไพ่ที่สอดคล้องกับเนื้อหา (Thai)
- */
-const FEATURED_ARTICLES_TH = [
-  {
-    slug: "how-to-read-tarot-for-beginners",
-    title: "วิธีเปิดไพ่ทาโรต์สำหรับผู้เริ่มต้น: จากการตั้งจิตสู่คำทำนายที่แม่นยำ",
-    category: "เทคนิคเปิดไพ่",
-    desc: "คู่มือฉบับสมบูรณ์สำหรับการดูดวงไพ่ทาโรต์ด้วยตัวเอง วิธีตั้งจิตอธิษฐาน และการอ่านไพ่แบบไม่งมงาย",
-    cardImage: "major-01.jpg",
-  },
-  {
-    slug: "tarot-love-reading-guide",
-    title: "ไพ่ทาโรต์บอกความรัก: วิธีดูดวงความสัมพันธ์ เนื้อคู่ และความรู้สึกของเขา",
-    category: "ความรัก & สัมพันธ์",
-    desc: "ถอดรหัสไพ่บอกรัก ไพ่เตือนภัยความสัมพันธ์ และวิธีถามไพ่เรื่องความรักให้ได้คำตอบที่แท้จริง",
-    cardImage: "major-06.jpg",
-  },
-  {
-    slug: "celtic-cross-spread-guide",
-    title: "ถอดรหัสผังเซลติกครอส (Celtic Cross): ความหมายทั้ง 10 ตำแหน่งแบบเจาะลึก",
-    category: "ผังพยากรณ์",
-    desc: "ทำความเข้าใจผังพยากรณ์ยอดนิยมตลอดกาล แกะรอยความเชื่อมโยงของไพ่แต่ละตำแหน่งอย่างละเอียด",
-    cardImage: "major-10.jpg",
-  },
-  {
-    slug: "tarot-and-carl-jung-psychology",
-    title: "จิตวิทยาของ Carl Jung กับไพ่ทาโรต์: สัญลักษณ์ จิตใต้สำนึก และการเติบโต",
-    category: "จิตวิทยา & AI",
-    desc: "สำรวจความเชื่อมโยงระหว่าง Archetypes ของคาร์ล ยุง กับรหัสสัญลักษณ์บนไพ่ทาโรต์ 1909 Rider-Waite",
-    cardImage: "major-09.jpg",
-  },
-];
-
-/**
- * Featured Articles (Authentic American English)
- */
-const FEATURED_ARTICLES_EN = [
-  {
-    slug: "how-to-read-tarot-for-beginners",
-    title: "Tarot for Beginners: From Mental Centering to Precise Divination",
-    category: "Divination Technique",
-    desc: "A comprehensive guide to reading tarot for yourself, cultivating sacred focus, and interpreting cards without superstition.",
-    cardImage: "major-01.jpg",
-  },
-  {
-    slug: "tarot-love-reading-guide",
-    title: "Tarot for Love: Deciphering Relationships, Soulmates & True Feelings",
-    category: "Love & Relationships",
-    desc: "Decode affection cues, relationship hazard signs, and how to frame love inquiries for genuine insight.",
-    cardImage: "major-06.jpg",
-  },
-  {
-    slug: "celtic-cross-spread-guide",
-    title: "Decoding the Celtic Cross: In-Depth Breakdown of All 10 Positions",
-    category: "Tarot Spreads",
-    desc: "Understand history's most renowned spread, tracing relational dynamics between each position with precision.",
-    cardImage: "major-10.jpg",
-  },
-  {
-    slug: "tarot-and-carl-jung-psychology",
-    title: "Carl Jung's Psychology & Tarot: Archetypes, Subconscious & Individuation",
-    category: "Psychology & AI",
-    desc: "Explore the profound connection between Jungian archetypes and the esoteric symbols of the 1909 Rider-Waite deck.",
-    cardImage: "major-09.jpg",
-  },
-];
-
-/**
  * 6 Major Arcana Highlights
  */
 const MAJOR_HIGHLIGHTS = [
@@ -192,7 +130,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
   // Server Component — ใช้ `LocaleLink` (client) ไม่ได้ จึงแปลงลิงก์เองด้วย `localeHref`
   const href = (path: string) => localeHref(path, isEnglish ? "en" : "th");
   const ritualSteps = isEnglish ? RITUAL_STEPS_EN : RITUAL_STEPS_TH;
-  const featuredArticles = isEnglish ? FEATURED_ARTICLES_EN : FEATURED_ARTICLES_TH;
+  const featuredArticles = getFeaturedArticles(4);
   const homeFaqs = getHomeFaqs(isEnglish);
 
   return (
@@ -200,7 +138,16 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 0: ไพ่ยิปซี × โหราศาสตร์ (คำสั่งเจ้าของ 2026-09-24 — ให้อยู่หน้าแรก)
           ═══════════════════════════════════════════════════════════════ */}
+      {/* ═══════════════════════════════════════════════════════════════
+          ลำดับแถบ (สีสลับ ไม่ tint ↔ tint ต่อจากแถบ "เลือกผัง" ที่ tint):
+            ดูดวงแบบอื่น · ราศี (tint) · ตัวอย่างคำทำนาย · 5 ขั้นตอน (tint) · 3 เสาหลัก ·
+            ผังและไพ่ (tint) · บทความ · FAQ (tint) — เพิ่ม/ย้ายส่วนต้องเลื่อน tint ตามให้สลับกันเสมอ
+          ═══════════════════════════════════════════════════════════════ */}
+      <HomeMoreWaysSection isEnglish={isEnglish} href={href} />
+
       <HomeZodiacSection isEnglish={isEnglish} href={href} />
+
+      <HomeProofSection isEnglish={isEnglish} />
 
 
       {/* ═══════════════════════════════════════════════════════════════
@@ -208,13 +155,14 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="how-it-works-title"
+        data-home-section="how_it_works"
         className="home-band home-band-tint max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         {/* Section Header */}
         <div className="text-center space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-center gap-3">
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-gold/60" />
-            <span className="font-serif-th text-xs uppercase tracking-[0.25em] text-gold-ink font-bold">
+            <span className={`font-serif-th text-xs text-gold-ink font-bold ${isEnglish ? "uppercase tracking-[0.25em]" : ""}`}>
               {isEnglish ? "THE SACRED ORACLE RITUAL" : "ขั้นตอนพิธีกรรมพยากรณ์"}
             </span>
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-gold/60" />
@@ -222,17 +170,17 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           <h2
             id="how-it-works-title"
             className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-ink tracking-wide [text-wrap:balance]"
-          >
+          ><ThaiPhrases>
             {isEnglish
               ? "How It Works: 5 Sacred Steps to Online Tarot Divination"
               : "วิธีดูดวงไพ่ทาโรต์ออนไลน์ 5 ขั้นตอนศักดิ์สิทธิ์"}
-          </h2>
+          </ThaiPhrases></h2>
           <p className="text-sm sm:text-base text-muted max-w-3xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
             {isEnglish ? (
               <>
-                Connect directly with your subconscious mind. Shuffle, cut, and draw cards with your own hands under cryptographic transparency—
+                Shuffle, cut, and draw cards with your own hands, with a shuffle you can check yourself—
                 <br className="hidden sm:inline" />
-                guided by 1909 Rider-Waite symbolism and Carl Jung&apos;s depth psychology.
+                read through the original 1909 Rider-Waite imagery in plain, honest language.
               </>
             ) : (
               <>
@@ -281,9 +229,9 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
   
                   {/* Step Title & Subtitle */}
                   <div className="text-center space-y-1">
-                    <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
+                    <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug"><ThaiPhrases>
                       {step.title}
-                    </h3>
+                    </ThaiPhrases></h3>
                     <p className="text-xs font-serif-th text-gold-ink font-medium">
                       {step.subtitle}
                     </p>
@@ -315,6 +263,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="heritage-title"
+        data-home-section="heritage"
         className="home-band max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         {/* Section Header */}
@@ -326,23 +275,23 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
             </span>
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-gold/60" />
           </div>
-          <h2 id="heritage-title" className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-ink tracking-wide [text-wrap:balance]">
+          <h2 id="heritage-title" className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-ink tracking-wide [text-wrap:balance]"><ThaiPhrases>
             {isEnglish
-              ? "The Heritage of 1909 Rider-Waite & Uncompromising Integrity"
-              : "มนต์เสน่ห์ไพ่ 1909 Rider-Waite & ความโปร่งใสระดับสากล"}
-          </h2>
+              ? "Original 1909 Rider-Waite Cards, Read Honestly"
+              : "ไพ่ 1909 Rider-Waite แท้ อ่านตรงไปตรงมา"}
+          </ThaiPhrases></h2>
           <p className="text-sm sm:text-base text-muted font-serif-th max-w-3xl mx-auto leading-relaxed [text-wrap:balance]">
             {isEnglish ? (
               <>
-                Blending over 110 years of sacred esoteric art with Provably Fair cryptographic randomness
+                The original 1909 artwork, a shuffle you can verify yourself,
                 <br className="hidden sm:inline" />
-                and Jungian archetypal psychology—a sanctuary devoted to holding and uplifting the human spirit.
+                and readings that help you understand what you feel — not just predict what happens.
               </>
             ) : (
               <>
-                ผสานคุณค่าทางประวัติศาสตร์และศิลปะกว่า 110 ปี เข้ากับระบบสุ่มโปร่งใส Provably Fair
+                ภาพไพ่ต้นฉบับอายุกว่า 110 ปี ระบบสุ่มที่คุณตรวจสอบเองได้
                 <br className="hidden sm:inline" />
-                และหลักจิตวิทยาเชิงลึก เพื่อเป็นวิหารพยากรณ์ที่โอบอุ้มจิตใจอย่างแท้จริง
+                และคำทำนายที่ช่วยให้เข้าใจใจตัวเอง ไม่ใช่แค่บอกว่าอะไรจะเกิด
               </>
             )}
           </p>
@@ -365,23 +314,23 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
   
                 <div className="text-center space-y-1">
                   <span className="text-xs font-serif-th font-bold text-gold-ink tracking-wider uppercase block">
-                    {isEnglish ? "Pillar I" : "เสาเอกที่ ๑"}
+                    {isEnglish ? "Pillar I" : "จุดเด่นที่ 1"}
                   </span>
-                  <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
-                    {isEnglish ? "Original 1909 Classic Deck" : "สำรับคลาสสิก 1909 ดั้งเดิม"}
-                  </h3>
+                  <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors"><ThaiPhrases>
+                    {isEnglish ? "The Original 1909 Deck" : "ไพ่ต้นฉบับปี 1909 ของแท้"}
+                  </ThaiPhrases></h3>
                 </div>
   
                 <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed text-left">
                   {isEnglish
-                    ? "The 1909 Rider-Waite-Smith deck, illustrated by Pamela Colman Smith, is a monumental work encoded with esoteric symbols, four elemental energies (Fire, Water, Air, Earth), and expressive body language designed to converse with your subconscious naturally and accurately."
-                    : "ไพ่ทาโรต์ชุด 1909 Rider-Waite-Smith รังสรรค์ภาพโดย Pamela Colman Smith เป็นสำรับอันทรงคุณค่าที่บรรจุรหัสสัญลักษณ์ อัญเชิญพลังแห่งธาตุทั้งสี่ (ไฟ น้ำ ลม ดิน) และสะท้อนภาษากาย ทิศทางสายตา เพื่อสื่อสารกับจิตใต้สำนึกได้อย่างแม่นยำและเป็นธรรมชาติที่สุด"}
+                    ? "The 1909 Rider-Waite-Smith deck, drawn by Pamela Colman Smith, is the most widely used tarot deck in the world. Every card tells a story through its symbols, the four elements, body language and gaze — so you can read the meaning straight from the picture."
+                    : "ไพ่ชุด 1909 Rider-Waite-Smith วาดโดย Pamela Colman Smith เป็นไพ่ทาโรต์ที่คนทั่วโลกใช้มากที่สุด ทุกใบมีภาพเล่าเรื่อง ทั้งสัญลักษณ์ ธาตุไฟ น้ำ ลม ดิน ท่าทาง และสายตาของตัวละคร อ่านจากภาพแล้วเข้าใจความหมายได้ง่ายโดยไม่ต้องท่องจำ"}
                 </p>
               </div>
   
               <div className="pt-4 border-t border-line-warm/40 text-center">
                 <span className="text-xs font-serif-th text-gold-ink font-semibold">
-                  {isEnglish ? "Authentic, Unaltered 1909 Artworks" : "ศิลปะต้นฉบับคมชัดไร้การดัดแปลง"}
+                  {isEnglish ? "Original artwork, unaltered" : "ภาพต้นฉบับ ไม่ดัดแปลง"}
                 </span>
               </div>
             </div>
@@ -400,23 +349,23 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
   
                 <div className="text-center space-y-1">
                   <span className="text-xs font-serif-th font-bold text-gold-ink tracking-wider uppercase block">
-                    {isEnglish ? "Pillar II" : "เสาเอกที่ ๒"}
+                    {isEnglish ? "Pillar II" : "จุดเด่นที่ 2"}
                   </span>
-                  <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
-                    {isEnglish ? "Provably Fair Cryptographic Randomness" : "ระบบสุ่มโปร่งใส Provably Fair"}
-                  </h3>
+                  <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors"><ThaiPhrases>
+                    {isEnglish ? "Truly Random — No One Picks Your Cards" : "ไพ่สุ่มจริง ไม่มีใครแอบเลือกให้"}
+                  </ThaiPhrases></h3>
                 </div>
   
                 <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed text-left">
                   {isEnglish
-                    ? "Unlike conventional computerized tarot simulators, SeerTarot harnesses SHA-256 cryptographic commitments before any cards are drawn (Commit-Reveal) via Web Crypto API. We guarantee 100% zero outcome manipulation—every card drawn comes purely from your own shuffle and touch."
-                    : "แตกต่างจากระบบสุ่มทาโรต์ทั่วไป SeerTarot ผสานเทคโนโลยีเข้ารหัส SHA-256 ล็อกลำดับสำรับไพ่ล่วงหน้าก่อนเปิด (Commit-Reveal) ผ่าน Web Crypto API การันตี 100% ว่าไม่มีการแทรกแซง ไม่มีการล็อกผล ทุกใบที่ได้มาจากการสับไพ่และเลือกด้วยมือคุณเองอย่างแท้จริง"}
+                    ? "Before you pick a card, the whole deck order is locked and a confirmation code is attached to your reading. You can use that code to check the cards were not changed along the way — neither the site nor the reader can alter the result. Every card comes from your own pick."
+                    : "ก่อนคุณเปิดไพ่ ระบบจะล็อกลำดับไพ่ทั้งสำรับไว้ก่อน แล้วแนบรหัสยืนยันมากับคำทำนาย คุณเอารหัสนี้ไปตรวจเองได้ว่าไพ่ไม่ถูกเปลี่ยนระหว่างทาง ทั้งเว็บและแม่หมอแก้ผลไม่ได้ ทุกใบมาจากที่คุณเลือกเอง"}
                 </p>
               </div>
   
               <div className="pt-4 border-t border-line-warm/40 text-center">
                 <span className="text-xs font-serif-th text-gold-ink font-semibold">
-                  {isEnglish ? "Independently Verifiable Audit Hashes" : "ตรวจสอบลำดับแฮชย้อนหลังได้ทุกครั้ง"}
+                  {isEnglish ? "Check it yourself, every time" : "ตรวจสอบย้อนหลังได้ทุกครั้ง"}
                 </span>
               </div>
             </div>
@@ -435,23 +384,23 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
   
                 <div className="text-center space-y-1">
                   <span className="text-xs font-serif-th font-bold text-gold-ink tracking-wider uppercase block">
-                    {isEnglish ? "Pillar III" : "เสาเอกที่ ๓"}
+                    {isEnglish ? "Pillar III" : "จุดเด่นที่ 3"}
                   </span>
-                  <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
-                    {isEnglish ? "Jungian Psychology & Empathetic AI" : "จิตวิทยาและการพยากรณ์ AI"}
-                  </h3>
+                  <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors"><ThaiPhrases>
+                    {isEnglish ? "An AI Reader That Reads You, Not Just the Cards" : "แม่หมอ AI ที่อ่านใจ ไม่ใช่แค่อ่านไพ่"}
+                  </ThaiPhrases></h3>
                 </div>
   
                 <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed text-left">
                   {isEnglish
-                    ? "Our AI oracles are grounded in Carl Jung's analytical psychology (Archetypes & Synchronicity) and Golden Dawn elemental dignities. We illuminate the energies beneath your query to provide compassionate, empowering counsel that honors your agency."
-                    : "แม่หมอ AI ของเราได้รับการฝึกฝนบนหลักจิตวิเคราะห์เชิงลึกของ Carl Jung (Archetypes & Synchronicity) และคัมภีร์ Golden Dawn เคมีคู่ธาตุ วิเคราะห์พลังงานใต้คำถามเพื่อให้คำปรึกษาที่โอบอุ้มจิตใจ สร้างมุมมองใหม่ และเสริมพลังเจตจำนงให้คุณก้าวต่อไปได้อย่างมั่นใจ"}
+                    ? "Our AI reader follows Carl Jung's idea that tarot images mirror what we feel deep inside, and checks how the cards support or clash through fire, water, air and earth. So it does not just tell you what will happen — it helps you see where you stand and what to do next."
+                    : "แม่หมอ AI อ่านไพ่ตามแนวคิดจิตวิทยาของคาร์ล ยุง ที่มองว่าภาพบนไพ่สะท้อนความรู้สึกลึก ๆ ในใจเรา และดูว่าไพ่แต่ละใบเสริมกันหรือขัดกันตามธาตุ ไฟ น้ำ ลม ดิน จึงไม่ได้บอกแค่ว่าจะเกิดอะไร แต่ช่วยให้เห็นว่าใจเราอยู่ตรงไหน และควรก้าวต่ออย่างไร"}
                 </p>
               </div>
   
               <div className="pt-4 border-t border-line-warm/40 text-center">
                 <span className="text-xs font-serif-th text-gold-ink font-semibold">
-                  {isEnglish ? "Empowering Insights & Sovereign Agency" : "คำปรึกษาเชิงบวก เสริมพลังเจตจำนง"}
+                  {isEnglish ? "Kind, practical advice" : "คำแนะนำที่ใจดีและทำได้จริง"}
                 </span>
               </div>
             </div>
@@ -466,6 +415,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="spreads-and-cards-title"
+        data-home-section="spreads_cards"
         className="home-band home-band-tint max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-line-warm/50">
@@ -473,12 +423,12 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
             <span className="text-gold-ink text-xs font-serif-th tracking-widest uppercase block">
               SPREADS &amp; CARDS
             </span>
-            <h2 id="spreads-and-cards-title" className="text-2xl sm:text-3xl font-serif-th font-bold text-ink [text-wrap:balance]">
+            <h2 id="spreads-and-cards-title" className="text-2xl sm:text-3xl font-serif-th font-bold text-ink [text-wrap:balance]"><ThaiPhrases>
               {isEnglish ? "Featured Tarot Spreads & Classic 78-Card Deck" : "ผังการเปิดไพ่พยากรณ์และสำรับไพ่ 78 ใบยอดนิยม"}
-            </h2>
+            </ThaiPhrases></h2>
             <p className="text-xs sm:text-sm text-muted font-serif-th max-w-2xl">
               {isEnglish
-                ? "Explore archetypal layouts designed for every life question, and discover the comprehensive meanings of all 78 Rider-Waite cards."
+                ? "Explore layouts for every kind of question, and discover the comprehensive meanings of all 78 Rider-Waite cards."
                 : "เลือกผังพยากรณ์ที่ตอบโจทย์ชีวิตของคุณ พร้อมเรียนรู้ความหมายไพ่ทาโรต์ 1909 ครบทั้ง 78 ใบ"}
             </p>
           </div>
@@ -520,9 +470,9 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                   <span className="text-[11px] font-mono uppercase tracking-wider text-gold-ink font-bold block">
                     {isEnglish ? "10 CARDS · GRAND SPREAD" : "10 CARDS · ผังใหญ่"}
                   </span>
-                  <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
+                  <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug"><ThaiPhrases>
                     {isEnglish ? "Celtic Cross Spread" : "ผังเซลติกครอส (Celtic Cross)"}
-                  </h3>
+                  </ThaiPhrases></h3>
                 </div>
               </div>
               <p className="text-xs sm:text-sm font-serif-th text-muted leading-relaxed">
@@ -546,9 +496,9 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                   <span className="text-[11px] font-mono uppercase tracking-wider text-gold-ink font-bold block">
                     {isEnglish ? "3 CARDS · POPULAR" : "3 CARDS · ยอดนิยม"}
                   </span>
-                  <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
+                  <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug"><ThaiPhrases>
                     {isEnglish ? "3-Card: Past, Present, Future" : "ผัง 3 ใบ: อดีต-ปัจจุบัน-อนาคต"}
-                  </h3>
+                  </ThaiPhrases></h3>
                 </div>
               </div>
               <p className="text-xs sm:text-sm font-serif-th text-muted leading-relaxed">
@@ -572,9 +522,9 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                   <span className="text-[11px] font-mono uppercase tracking-wider text-gold-ink font-bold block">
                     {isEnglish ? "5 CARDS · CROSSROADS" : "5 CARDS · ทางแยกชีวิต"}
                   </span>
-                  <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
+                  <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug"><ThaiPhrases>
                     {isEnglish ? "Two-Path Decision Spread" : "ผังทางแยกการตัดสินใจ"}
-                  </h3>
+                  </ThaiPhrases></h3>
                 </div>
               </div>
               <p className="text-xs sm:text-sm font-serif-th text-muted leading-relaxed">
@@ -635,6 +585,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="articles-title"
+        data-home-section="articles"
         className="home-band max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-line-warm/50">
@@ -642,12 +593,12 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
             <span className="text-gold-ink text-xs font-serif-th tracking-widest uppercase block">
               WISDOM &amp; ARTICLES
             </span>
-            <h2 id="articles-title" className="text-2xl sm:text-3xl font-serif-th font-bold text-ink [text-wrap:balance]">
-              {isEnglish ? "Wisdom Codex & Esoteric Articles" : "คัมภีร์บทความและสาระน่ารู้เกี่ยวกับไพ่ทาโรต์"}
-            </h2>
+            <h2 id="articles-title" className="text-2xl sm:text-3xl font-serif-th font-bold text-ink [text-wrap:balance]"><ThaiPhrases>
+              {isEnglish ? "Wisdom Codex & Esoteric Articles" : "คัมภีร์บทความ และสาระน่ารู้เกี่ยวกับไพ่ทาโรต์"}
+            </ThaiPhrases></h2>
             <p className="text-xs sm:text-sm text-muted font-serif-th max-w-2xl [text-wrap:balance]">
               {isEnglish
-                ? "Deep dives into divination techniques, ancient iconography, and the psychology of archetypal tarot."
+                ? "Guides to reading the cards, the symbols in the art, and how tarot connects to everyday life."
                 : "เจาะลึกเทคนิคการเปิดไพ่ ความหมายสัญลักษณ์โบราณ และศาสตร์จิตวิทยาไพ่ทาโรต์"}
             </p>
           </div>
@@ -673,18 +624,20 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
               >
                 <div className="glass-tile !rounded-lg w-14 h-21 sm:w-16 sm:h-24 overflow-hidden flex-shrink-0 transition-colors group-hover:scale-105 duration-300">
                   {/* ภาพประกอบล้วน — ป้ายหมวดหมู่และ <h3> ในลิงก์เดียวกันบอกเรื่องบทความอยู่แล้ว (INC-0125) */}
-                  <CardImage image={art.cardImage} alt="" className="w-full h-full object-cover" sizes="64px" />
+                  <CardImage image={getArticleCardArt(art).image} alt="" className="w-full h-full object-cover" sizes="64px" />
                 </div>
   
                 <div className="space-y-2 min-w-0 flex-1">
                   <span className="glass-chip text-[11px] font-serif-th font-semibold text-gold-ink px-3 py-0.5 inline-block">
-                    {art.category}
+                    {getArticleCategory(art, isEnglish)}
                   </span>
-                  <h3 className="font-serif-th font-bold text-base sm:text-lg text-ink group-hover:text-gold-ink transition-colors line-clamp-2 leading-snug">
-                    {art.title}
-                  </h3>
+                  <h3 className="font-serif-th font-bold text-base sm:text-lg text-ink group-hover:text-gold-ink transition-colors line-clamp-2 leading-[1.6]"><ThaiPhrases>
+                    {/* leading 1.6 (ไม่ใช่ snug) — สระบน/วรรณยุกต์ของบรรทัดที่ 3 ที่ถูก clamp ทิ้งจะไม่โผล่ขึ้นมาใต้บรรทัดที่ 2 */}
+                    {/* ชื่อสั้นแบบ <title> — พาดหัวเต็มของบทความใหม่ยาวเกินสองบรรทัด โดนตัดจนเหลือเศษสระล่างโผล่ */}
+                    {isEnglish ? (art.seoTitleEn ?? getArticleTitle(art, true)) : art.seoTitle}
+                  </ThaiPhrases></h3>
                   <p className="font-serif-th text-xs sm:text-sm text-muted line-clamp-2 leading-relaxed">
-                    {art.desc}
+                    {getArticleDescription(art, isEnglish)}
                   </p>
                   <span className="text-xs font-serif-th font-bold text-gold-ink inline-flex items-center gap-1 pt-1 group-hover:translate-x-0.5 transition-transform">
                     {isEnglish ? "Read Full Article →" : "อ่านบทความฉบับเต็ม →"}
@@ -703,6 +656,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="faq-title"
+        data-home-section="faq"
         className="home-band home-band-tint max-w-4xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         <div className="text-center space-y-2.5 sm:space-y-3">
@@ -713,12 +667,12 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
             </span>
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-gold/60" />
           </div>
-          <h2 id="faq-title" className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-ink tracking-wide [text-wrap:balance]">
-            {isEnglish ? "Frequently Asked Questions (FAQ)" : "คำถามที่พบบ่อยเกี่ยวกับการดูดวงไพ่ทาโรต์ (FAQ)"}
-          </h2>
+          <h2 id="faq-title" className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-ink tracking-wide [text-wrap:balance]"><ThaiPhrases>
+            {isEnglish ? "Frequently Asked Questions (FAQ)" : "คำถามที่พบบ่อย เกี่ยวกับการดูดวงไพ่ทาโรต์ (FAQ)"}
+          </ThaiPhrases></h2>
           <p className="text-sm sm:text-base text-muted font-serif-th max-w-2xl mx-auto leading-relaxed [text-wrap:balance]">
             {isEnglish
-              ? "Clarifying questions about our online divination sanctuary, cryptographic accuracy, and AI methodology."
+              ? "Answers about how our online readings work, how the shuffle stays fair, and how the AI reads your cards."
               : "ไขข้อข้องใจเกี่ยวกับระบบดูดวงออนไลน์ ความแม่นยำ และหลักการทำงานของ SeerTarot"}
           </p>
         </div>

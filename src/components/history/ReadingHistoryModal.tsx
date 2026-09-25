@@ -15,6 +15,7 @@ import { soundManager } from "@/lib/utils/audio";
 import { trackEvent } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 interface ReadingHistoryModalProps {
   isOpen: boolean;
@@ -244,9 +245,9 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
             <div className="flex items-center gap-2.5">
               
               <div>
-                <h3 className="font-serif-th text-sm sm:text-base font-bold text-ink">
+                <h3 className="font-serif-th text-sm sm:text-base font-bold text-ink"><ThaiPhrases>
                   {isEn ? "Reading History & Outcome Log" : "ประวัติการดูดวง & บันทึกผลลัพธ์จริง"}
-                </h3>
+                </ThaiPhrases></h3>
                 <p className="text-[13px] text-muted font-serif-th">
                   {isEn
                     ? `Tarot readings and real-life manifestations (${readings.length} ${readings.length === 1 ? "entry" : "entries"})`

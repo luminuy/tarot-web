@@ -2139,6 +2139,16 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
 .home-band-tint {
   --home-band-bg: rgba(255, 251, 244, 0.62);
 }
+/* แถบแรกต่อจากหัวหน้า ("เปิดไพ่ด่วน") ใช้พื้นเดียวกับหัวหน้า — padding บนเต็ม 44/64px ไม่ได้แบ่งสีอะไร
+   กลายเป็นช่องว่างเปล่า (เจ้าของทัก: ใต้ไพ่ประจำวันเว้นไว้เยอะ 71px มือถือ / 91px จอใหญ่) ➔ ลดเหลือ 32/40px */
+.home-band-snug-top {
+  padding-top: 2rem;
+}
+@media (min-width: 640px) {
+  .home-band-snug-top {
+    padding-top: 2.5rem;
+  }
+}
 
 @media (max-width: 639.98px) {
   .home-rail {
@@ -2200,4 +2210,40 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
 .home-rail-btn[aria-disabled="true"] {
   opacity: 0.35;
   cursor: default;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   🪗 ท้ายเว็บบนมือถือ: คอลัมน์ลิงก์พับได้ (`SiteFooter` + `footer-accordion.ts`)
+   ผูกกับคลาส `footer-collapsible` บน <html> ที่สคริปต์ตั้ง — ไม่มีสคริปต์ = กางครบเหมือนเดิม
+   ลิงก์ยังอยู่ใน HTML ครบ (แค่ display:none) บอตเห็นทุกลิงก์
+   ═════════════════════════════════════════════════════════════════════════ */
+.footer-col-toggle {
+  display: none;
+}
+@media (max-width: 639.98px) {
+  html.footer-collapsible .footer-col-toggle {
+    display: flex;
+  }
+  html.footer-collapsible [data-footer-col] > .footer-col-title,
+  html.footer-collapsible [data-footer-col]:not([data-open]) > .footer-col-list {
+    display: none;
+  }
+  html.footer-collapsible [data-footer-col][data-open] .footer-col-chevron {
+    transform: rotate(180deg);
+  }
+}
+
+/* ✂️ วลีภาษาไทยในหัวข้อ (`ThaiPhrases`) — inline-block ให้เบราว์เซอร์ตัดบรรทัดได้แค่ระหว่างวลี
+   ไม่หักกลางคำ "ทา / โรต์" · วลีที่ยาวเกินบรรทัดยังตัดข้างในได้ (ไม่ล้นจอ) */
+.tp {
+  display: inline-block;
+}
+
+/* 📱 กริดยาว (ไพ่ 78 ใบ · บทความ 30 เรื่อง) บนมือถือโชว์แค่ต้นรายการ แล้วมีปุ่ม "ดูทั้งหมด"
+   ของที่ซ่อนยังอยู่ใน HTML ครบ (บอตเห็นทุกลิงก์) · จอ sm ขึ้นไปแสดงครบตามเดิม */
+@media (max-width: 639.98px) {
+  .mobile-preview-12 > :nth-child(n + 13),
+  .mobile-preview-8 > :nth-child(n + 9) {
+    display: none;
+  }
 }

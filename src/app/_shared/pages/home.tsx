@@ -21,8 +21,8 @@ export function buildHomeMetadata(locale: Locale): Metadata {
     ? "Free Online Tarot Readings with AI Reader · SeerTarot"
     : "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับแม่หมอ AI";
   const description = isEnglish
-    ? "Free online 1909 Rider-Waite tarot readings. Shuffle and draw cards yourself, with an AI tarot reader and provably fair SHA-256 randomness."
-    : "สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยมือคุณเอง ให้แม่หมอ AI พยากรณ์ลึกซึ้งทีละใบ พร้อมหลักฐานความโปร่งใส Provably-Fair";
+    ? "Free online 1909 Rider-Waite tarot readings. Shuffle and draw cards yourself, with an AI tarot reader and a shuffle you can verify."
+    : "สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยมือคุณเอง ให้แม่หมอ AI อ่านความหมายทีละใบ สุ่มจริง ตรวจสอบได้";
 
   const ogImages = buildPageOgImage({
     title: isEnglish ? "Online Rider-Waite Tarot Sanctuary" : "วิหารพยากรณ์ไพ่ทาโรต์ 1909",
@@ -55,11 +55,11 @@ export function buildWebAppJsonLd(locale: Locale) {
   return {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: isEnglish ? "SeerTarot — Online Rider-Waite Tarot Sanctuary" : "วิหารพยากรณ์ไพ่ทาโรต์ (Sacred Oracle Tarot)",
+    name: isEnglish ? "SeerTarot — Online Rider-Waite Tarot Sanctuary" : "SeerTarot ดูดวงไพ่ทาโรต์ออนไลน์",
     url: localizedUrl("/", locale),
     description: isEnglish
-      ? "Free online 1909 Rider-Waite tarot readings. Shuffle and draw the cards yourself, with an AI tarot reader and provably fair SHA-256 randomness."
-      : "เว็บดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite สับไพ่และเลือกจับไพ่ด้วยตนเอง พร้อมแม่หมอ AI และระบบความสุ่มโปร่งใส Provably-Fair SHA-256",
+      ? "Free online 1909 Rider-Waite tarot readings. Shuffle and draw the cards yourself, with an AI tarot reader and a shuffle you can verify."
+      : "เว็บดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite สับไพ่และเลือกจับไพ่ด้วยตนเอง พร้อมแม่หมอ AI สุ่มจริง ตรวจสอบได้",
     inLanguage: locale,
   };
 }

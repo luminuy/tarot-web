@@ -2,6 +2,7 @@
 
 import React from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 export interface BreadcrumbItem {
   label: string;
@@ -66,9 +67,9 @@ export function RitualHero({
         </div>
 
         {/* H1 Title */}
-        <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink tracking-tight leading-tight [text-wrap:balance]">
+        <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink tracking-tight leading-tight [text-wrap:balance]"><ThaiPhrases>
           {title}
-        </h1>
+        </ThaiPhrases></h1>
 
         {/* Tagline */}
         <p className="text-xs sm:text-sm text-muted max-w-xl mx-auto leading-relaxed [text-wrap:balance]">

@@ -7,6 +7,7 @@ import { buildPageOgImage } from "@/lib/media/og-image";
 import { DECK } from "@/data/cards";
 import type { BirthCardItem } from "@/lib/tarot/birth-card";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * ⚠️ ส่งเฉพาะฟิลด์ที่ `BirthCardCalculator` ใช้จริงเท่านั้น
@@ -75,7 +76,7 @@ export const birthCardMetadataTh: Metadata = {
 const BIRTH_CARD_FAQS = [
   {
     q: "ไพ่ทาโรต์ประจำตัว (Birth Card) คืออะไร?",
-    a: "ไพ่ทาโรต์ประจำตัวคือไพ่ชุดใหญ่ (Major Arcana) ที่คำนวณจากผลรวมของวัน เดือน และปีเกิดของคุณ ทำหน้าที่เป็นแม่พิมพ์ต้นแบบทางจิตวิทยา (Jungian Archetype) และกระจกสะท้อนบทเรียนชีวิต แก่นแท้ของจิตวิญญาณ และพรสวรรค์ที่ติดตัวคุณมาตั้งแต่กำเนิด",
+    a: "ไพ่ทาโรต์ประจำตัวคือไพ่ชุดใหญ่ (Major Arcana) ที่คำนวณจากผลรวมของวัน เดือน และปีเกิดของคุณ เปรียบเหมือนกระจกที่สะท้อนนิสัยพื้นฐาน บทเรียนชีวิต และพรสวรรค์ที่ติดตัวคุณมาตั้งแต่เกิด",
   },
   {
     q: "ไพ่บุคลิกภาพ (Personality Card) กับ ไพ่จิตวิญญาณ (Soul Card) ต่างกันอย่างไร?",
@@ -169,7 +170,7 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
           breadcrumbs={breadcrumbs}
           badgeText="เลขศาสตร์ทาโรต์สากล"
           title="คำนวณไพ่ทาโรต์ประจำตัว"
-          tagline="ค้นพบแม่พิมพ์จิตวิทยา (Archetype) และเจตนารมณ์แห่งจิตวิญญาณที่ซ่อนอยู่ในวันเกิดของคุณ ด้วยสำรับไพ่ดั้งเดิม 1909 Rider-Waite"
+          tagline="รู้จักนิสัยแท้และบทเรียนชีวิตที่ซ่อนอยู่ในวันเกิดของคุณ ด้วยไพ่ดั้งเดิม 1909 Rider-Waite"
         />
 
         {/* Interactive Calculator Component */}
@@ -179,7 +180,7 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
         {/* Editorial Guide Article */}
         <SeoArticleShell
           eyebrow="ถอดรหัสจิตวิทยา"
-          title="ศาสตร์แห่งไพ่ทาโรต์ประจำตัว: พิมพ์เขียวพลังงานและกระจกส่องจิตวิญญาณตลอดชีวิต"
+          title="ศาสตร์แห่งไพ่ทาโรต์ประจำตัว: พิมพ์เขียวพลังงาน และกระจกส่องจิตวิญญาณตลอดชีวิต"
           faqs={BIRTH_CARD_FAQS}
           links={[
             { label: "สารานุกรมไพ่ 78 ใบ", href: "/cards" },
@@ -191,18 +192,18 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
         >
           <div className="space-y-4 text-xs sm:text-sm text-muted font-sans leading-relaxed">
             <p>
-              ในศาสตร์ไพ่ทาโรต์และเลขศาสตร์สากล วันเกิดของมนุษย์แต่ละคนไม่ใช่เรื่องบังเอิญ แต่เป็นหมุดหมายแห่งกาลเวลาที่กำหนดคลื่นความถี่พลังงาน
-              (Vibrational Blueprint) และพิมพ์เขียวแห่งจิตวิญญาณ การคำนวณหาไพ่ทาโรต์ประจำตัว (Tarot Birth Card) ได้รับการวางรากฐานทางวิชาการ
-              โดยนักค้นคว้าและปรมาจารย์ด้านไพ่ทาโรต์ร่วมสมัย เช่น Mary K. Greer (ผู้เขียนหนังสือ <em>Who Are You in the Tarot?</em>)
-              และ Angeles Arrien ซึ่งผสานศาสตร์แห่งสัญลักษณ์วิทยาโบราณเข้ากับทฤษฎีแม่พิมพ์จิตวิทยาดั้งเดิม (Archetypes) ของ คาร์ล ยุง (Carl Gustav Jung)
+              ในศาสตร์ไพ่ทาโรต์และเลขศาสตร์ เชื่อกันว่าวันเกิดบอกนิสัยพื้นฐานและเรื่องที่เราต้องเรียนรู้ในชีวิตได้
+              วิธีหาไพ่ประจำวันเกิด (Tarot Birth Card) ที่ใช้กันแพร่หลายมาจากนักเขียนไพ่ทาโรต์ชื่อดัง
+              เช่น Mary K. Greer (ผู้เขียนหนังสือ <em>Who Are You in the Tarot?</em>) และ Angeles Arrien
+              ซึ่งมองภาพบนไพ่ชุดใหญ่เป็นเรื่องราวชีวิตที่คนทุกยุคเข้าใจตรงกัน (แนวคิดเดียวกับนักจิตวิทยา คาร์ล ยุง)
             </p>
 
-            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3">
-              กลไกการคำนวณและมิติแห่งตัวเลข (Digit Reduction & Major Arcana)
-            </h3>
+            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3"><ThaiPhrases>
+              วิธีคำนวณไพ่จากวันเกิด
+            </ThaiPhrases></h3>
             <p>
               การคำนวณไพ่ประจำตัวจะใช้วันที่ เดือน และปีเกิดที่เป็นปีสากล (คริสต์ศักราช ค.ศ.) มาบวกรวมกันเป็นผลรวมเดียว
-              จากนั้นจึงทำการลดทอนตัวเลข (Digit Reduction) ให้เหลือค่าที่สอดคล้องกับไพ่ชุดใหญ่ (Major Arcana) หมายเลข 0 ถึง 21
+              จากนั้นเอาเลขแต่ละหลักมาบวกกันซ้ำจนเหลือเลขที่ตรงกับไพ่ชุดใหญ่ (Major Arcana) หมายเลข 0 ถึง 21
               โดยไพ่ชุดใหญ่นี้เปรียบเสมือนการเดินทางของจิตวิญญาณ (The Fool’s Journey) ที่มนุษย์ทุกคนต้องผ่านด่านการเรียนรู้
             </p>
             <p>
@@ -211,9 +212,9 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
               ส่วนผู้ที่มีผลลัพธ์เป็นตัวเลข 1 ถึง 9 ตั้งแต่แรก จะถือว่ามีพลังงานของไพ่บุคลิกภาพและจิตวิญญาณเป็นหนึ่งเดียวกันอย่างลึกซึ้ง
             </p>
 
-            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3">
-              ความสัมพันธ์ของคู่ไพ่แห่งดวงวิญญาณ (Archetypal Constellations)
-            </h3>
+            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3"><ThaiPhrases>
+              ไพ่สองใบของคุณ บอกอะไร
+            </ThaiPhrases></h3>
             <p>
               คู่ไพ่ประจำตัวช่วยให้เราเข้าใจความขัดแย้งและความสมดุลภายในตนเอง ตัวอย่างเช่น:
             </p>
@@ -264,9 +265,9 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
               </li>
             </ul>
 
-            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3">
-              วิธีนำพลังงานไพ่ประจำตัวไปปรับใช้เพื่อการพัฒนาตนเอง
-            </h3>
+            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3"><ThaiPhrases>
+              วิธีนำพลังงานไพ่ประจำตัว ไปปรับใช้เพื่อการพัฒนาตนเอง
+            </ThaiPhrases></h3>
             <p>
               การรู้จักไพ่ทาโรต์ประจำตัวไม่ใช่การทำนายดวงชะตาแบบพยากรณ์ตายตัว แต่เป็นเครื่องมือสำหรับการใคร่ครวญตนเอง (Self-Reflection):
             </p>

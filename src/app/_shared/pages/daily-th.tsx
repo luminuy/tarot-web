@@ -4,6 +4,7 @@ import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 const dailyOgImages = buildPageOgImage({
   title: "ดูดวงไพ่ยิปซีรายวัน",
@@ -154,16 +155,15 @@ export function DailyBodyTh({ ritual }: { ritual: ReactNode }) {
             links={DAILY_LINKS}
           >
             <p>
-              ในวิถีแห่งทาโรต์ดั้งเดิม การเปิดไพ่ประจำวัน (Daily Tarot Draw) มิใช่การทำนายโชคชะตาแบบงมงาย
-              หากแต่เป็นเครื่องมือทางจิตวิทยาที่ทรงพลังในการสร้าง &quot;สติสัมปชัญญะประจำวัน&quot;
-              ตามทฤษฎีจิตวิทยาวิเคราะห์ของ คาร์ล กุสตาฟ ยุง (Carl Gustav Jung) ไพ่ทาโรต์ทำหน้าที่เป็นตัวสะท้อน
-              ภาพสัญลักษณ์ต้นแบบ (Archetypes) จากจิตไร้สำนึกร่วม (Collective Unconscious)
-              และปรากฏการณ์ความพ้องพานของเหตุการณ์ (Synchronicity)
+              การเปิดไพ่ประจำวันไม่ใช่การทำนายโชคชะตาแบบงมงาย แต่เป็นวิธีง่าย ๆ ให้เราหยุดทบทวนใจตัวเองวันละครั้ง
+              ภาพบนไพ่แต่ละใบเป็นเรื่องราวที่คนทุกยุคเข้าใจตรงกัน เช่น การเริ่มต้นใหม่ การรอคอย หรือการปล่อยวาง
+              พอเห็นภาพแล้ว เรามักนึกถึงเรื่องที่กำลังเจออยู่ได้เอง
+              (นักจิตวิทยา คาร์ล ยุง เรียกภาพแบบนี้ว่าภาพต้นแบบในใจคน)
             </p>
 
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2">
-              วิธีรับพลังงานจากไพ่ประจำวันให้เกิดประโยชน์สูงสุด
-            </h3>
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
+              วิธีรับพลังงานจากไพ่ประจำวัน ให้เกิดประโยชน์สูงสุด
+            </ThaiPhrases></h3>
             <ul className="list-disc pl-5 space-y-2 text-muted">
               <li>
                 <strong className="text-ink">การตั้งจิตอธิษฐานในตอนเช้า:</strong> ก่อนเริ่มทำงาน ให้หลับตาและหายใจเข้าลึก ๆ
@@ -180,13 +180,13 @@ export function DailyBodyTh({ ritual }: { ritual: ReactNode }) {
               </li>
             </ul>
 
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2">
-              ทำไมต้องใช้ระบบสุ่มแบบ Provably Fair?
-            </h3>
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
+              ทำไมไพ่ของเราถึงสุ่มจริง ตรวจสอบได้?
+            </ThaiPhrases></h3>
             <p>
               ที่ SeerTarot เรายึดมั่นในความซื่อตรงและความโปร่งใสสูงสุด ทุกครั้งที่คุณกดสับไพ่
-              ระบบจะเรียกใช้ Web Crypto API ในการสร้างเลขสุ่มตามหลักการเข้ารหัสสากล
-              ไม่มีการล็อกผล ไม่มีการแอบแฝงโฆษณา และไม่มีการกุไพ่ใบใดขึ้นมาเองเด็ดขาด
+              ระบบจะสุ่มลำดับไพ่ด้วยตัวสุ่มมาตรฐานเดียวกับที่ใช้ในระบบความปลอดภัย
+              แล้วล็อกลำดับไว้ให้คุณตรวจย้อนหลังได้ ไม่มีการแอบเลือกผล ไม่มีการแอบแฝงโฆษณา และไม่มีการกุไพ่ใบใดขึ้นมาเองเด็ดขาด
               เพื่อให้คุณมั่นใจได้ว่าคำทำนายทุกใบมาจากสมาธิและกระแสจิตของคุณอย่างแท้จริง
             </p>
           </SeoArticleShell>

@@ -134,7 +134,7 @@ export const ROOT_OPEN_GRAPH: Record<"th" | "en", Metadata["openGraph"]> = {
     siteName: "SeerTarot",
     title: "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับแม่หมอ AI",
     description:
-      "สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยมือคุณเอง ให้แม่หมอ AI พยากรณ์ลึกซึ้งทีละใบ พร้อมหลักฐานความโปร่งใส Provably-Fair",
+      "สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยมือคุณเอง ให้แม่หมอ AI อ่านความหมายทีละใบ สุ่มจริง ตรวจสอบได้",
     images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
   },
   en: {
@@ -143,7 +143,7 @@ export const ROOT_OPEN_GRAPH: Record<"th" | "en", Metadata["openGraph"]> = {
     siteName: "SeerTarot",
     title: "Free Online Tarot Reading · Shuffle & Draw With an AI Tarot Reader",
     description:
-      "Shuffle and draw all 78 Rider-Waite cards with your own hand, then read a live card-by-card interpretation — provably fair with SHA-256.",
+      "Shuffle and draw all 78 Rider-Waite cards with your own hand, then read a live card-by-card interpretation — truly random and verifiable.",
     images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
   },
 };
@@ -152,7 +152,7 @@ export const ROOT_TWITTER: Record<"th" | "en", Metadata["twitter"]> = {
   th: {
     card: "summary_large_image",
     title: "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับแม่หมอ AI",
-    description: "ดูดวงไพ่ทาโรต์ออนไลน์ สับไพ่และเลือกหยิบไพ่ด้วยมือคุณเอง พร้อมระบบ Provably-Fair",
+    description: "ดูดวงไพ่ทาโรต์ออนไลน์ สับไพ่และเลือกหยิบไพ่ด้วยมือคุณเอง สุ่มจริง ตรวจสอบได้",
     images: [OG_IMAGE_URL],
   },
   en: {

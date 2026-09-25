@@ -13,6 +13,7 @@ import { trackEvent } from "@/lib/analytics";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 import { useLocale } from "@/lib/i18n";
 import { copyToClipboard } from "@/lib/utils/clipboard";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -72,7 +73,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const personaName = isEnglish ? (persona.nameEn || persona.nameTh) : persona.nameTh;
-  const defaultQuestion = isEnglish ? "General Life & Archetypal Overview" : "ภาพรวมดวงชะตา";
+  const defaultQuestion = isEnglish ? "General life overview" : "ภาพรวมดวงชะตา";
   const defaultSummary = isEnglish ? "Trust your inner wisdom and proceed with mindful intention." : "จงเชื่อมั่นในตนเองและก้าวต่อไปอย่างมีสติ";
 
   const showToast = (msg: string) => {
@@ -467,9 +468,9 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
             <div className="flex items-center gap-2">
               
               <div>
-                <h3 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">
+                <h3 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold"><ThaiPhrases>
                   {isEnglish ? "Share Reading" : "แชร์ผลคำทำนาย"}
-                </h3>
+                </ThaiPhrases></h3>
                 <p className="text-[13px] text-muted font-serif-th">
                   {isEnglish
                     ? "Save the image or send it to any app"

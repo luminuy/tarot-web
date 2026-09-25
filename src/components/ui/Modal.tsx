@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLocale } from "@/lib/i18n";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -147,7 +148,7 @@ export const Modal: React.FC<ModalProps> = ({
         {(title || showCloseButton) && (
           <div className="glass-divider-b flex items-start justify-between p-6 pb-4">
             <div>
-              {title && <h2 className="text-xl sm:text-2xl font-bold font-mystic-gold">{title}</h2>}
+              {title && <h2 className="text-xl sm:text-2xl font-bold font-mystic-gold"><ThaiPhrases>{title}</ThaiPhrases></h2>}
               {description && <div className="mt-1 text-xs sm:text-sm text-muted">{description}</div>}
             </div>
             {showCloseButton && (

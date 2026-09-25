@@ -12,6 +12,7 @@ import { soundManager } from "@/lib/utils/audio";
 import { RitualHero } from "@/components/reading/one-card/RitualHero";
 import { OneCardRitual } from "@/components/reading/one-card/OneCardRitual";
 import { DailyStreakRibbon } from "@/components/daily/DailyStreakRibbon";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 type DailyFocus = "general" | "work" | "money" | "love" | "mind";
 
@@ -36,7 +37,7 @@ const FOCUS_CHAMBERS: FocusChamber[] = [
     titleEn: "Cosmic Totality",
     elementTh: "มิติภาพรวม",
     elementEn: "General Dimension",
-    descTh: "คลื่นพลังงานหลักและเข็มทิศชีวิตประจำวัน",
+    descTh: "คลื่นพลังงานหลัก และเข็มทิศชีวิตประจำวัน",
     descEn: "Overall energy and spiritual alignment",
     cardImage: "major-19.jpg",
     cardNameTh: "ดวงอาทิตย์",
@@ -215,9 +216,9 @@ export function DailyClient() {
                 <span className="text-xs font-serif-th font-semibold text-gold-ink">
                   {isEnglish ? "Step 1: Choose Your Daily Chamber" : "ขั้นที่ 1: เลือกวิหารเจตจำนงของวัน"}
                 </span>
-                <h2 className="text-base sm:text-lg font-serif-th font-bold text-ink">
-                  {isEnglish ? "Select the energy you wish to illuminate today" : "เลือกมิติพลังงานที่ต้องการเปิดรับสารนำทาง"}
-                </h2>
+                <h2 className="text-base sm:text-lg font-serif-th font-bold text-ink"><ThaiPhrases>
+                  {isEnglish ? "Select the energy you wish to illuminate today" : "เลือกมิติพลังงาน ที่ต้องการเปิดรับสารนำทาง"}
+                </ThaiPhrases></h2>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
@@ -272,14 +273,15 @@ export function DailyClient() {
                           </div>
 
                           <div className="min-w-0">
-                            <h3 className="font-serif-th font-bold text-sm sm:text-base text-ink">
+                            <h3 className="font-serif-th font-bold text-sm sm:text-base text-ink"><ThaiPhrases>
                               {isEnglish ? chamber.titleEn : chamber.titleTh}
-                            </h3>
+                            </ThaiPhrases></h3>
                             <span className="block text-[11px] font-mono text-gold-ink font-semibold mt-0.5">
                               {chamber.cardNameEn}
                             </span>
                             <p className="text-xs font-sans text-muted mt-1.5 leading-relaxed line-clamp-2">
-                              {isEnglish ? chamber.descEn : chamber.descTh}
+                              {/* ห่อวลี — เดิมหัก "ประจำ / วัน" กลางคำบนมือถือ (เจ้าของทัก) */}
+                              <ThaiPhrases>{isEnglish ? chamber.descEn : chamber.descTh}</ThaiPhrases>
                             </p>
                           </div>
                         </div>
@@ -324,9 +326,9 @@ export function DailyClient() {
               <span className="text-xs font-serif-th font-semibold text-gold-ink">
                 {isEnglish ? "Daily Oracle Analysis" : "ถอดรหัสสารทำนาย 5 มิติประจำวัน"}
               </span>
-              <h3 className="text-lg sm:text-xl font-serif-th font-bold text-ink">
+              <h3 className="text-lg sm:text-xl font-serif-th font-bold text-ink"><ThaiPhrases>
                 {isEnglish ? "The 5 Pillars of Today" : "แสงสว่างนำทาง 5 มิติ"}
-              </h3>
+              </ThaiPhrases></h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -399,9 +401,9 @@ export function DailyClient() {
         )}
         recommendations={
           <div className="space-y-4">
-            <h3 className="text-base font-serif-th font-bold text-ink text-center sm:text-left">
+            <h3 className="text-base font-serif-th font-bold text-ink text-center sm:text-left"><ThaiPhrases>
               {isEnglish ? "Recommended Sacred Readings" : "ผังพยากรณ์ที่แนะนำเพิ่มเติม"}
-            </h3>
+            </ThaiPhrases></h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <Link
                 href="/love/1-card"

@@ -9,6 +9,7 @@ import { CardImage } from "@/components/card/CardImage";
 import { useLocale } from "@/lib/i18n";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 export interface QuickTopic {
   id: "love" | "work" | "money" | "general";
@@ -278,11 +279,17 @@ export function QuickFortunePicker({
           * เพราะบล็อกนี้อยู่ใต้ `<h1>` ของหน้าแรกเสมอ (ดูลำดับใน `TarotFlow.tsx`)
           * ⚠️ ห้ามย้ายบล็อกนี้ขึ้นเหนือ `<h1>` — `<h2>` จะโผล่ก่อน `<h1>` ผิดลำดับหัวข้อทันที
           */}
-        <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-ink tracking-wide leading-snug [text-wrap:balance]">
-          {isEnglish
-            ? "Choose the area calling for clarity today"
-            : "เลือกเรื่องที่คุณอยากรู้มากที่สุดในตอนนี้"}
-        </h2>
+        <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-ink tracking-wide leading-snug [text-wrap:balance]"><ThaiPhrases>
+          {/* วรรคละ inline-block — ปล่อยเบราว์เซอร์ตัดเองบนมือถือได้ "อยาก / รู้" ขาดกลางคำ (เจ้าของทัก) */}
+          {isEnglish ? (
+            "Choose the area calling for clarity today"
+          ) : (
+            <>
+              <span className="inline-block">เลือกเรื่องที่คุณอยากรู้</span>{" "}
+              <span className="inline-block">มากที่สุดในตอนนี้</span>
+            </>
+          )}
+        </ThaiPhrases></h2>
       </div>
 
       {/* การ์ด 4 หัวข้อยอดนิยม (Mobile: Horizontal Swipe / Desktop: 4-Column Grid พอเหมาะกับเว็บ) */}
@@ -296,6 +303,7 @@ export function QuickFortunePicker({
             <div
               key={topic.id}
               data-card-index={index}
+              data-home-target={`quick:${topic.id}`}
               role="button"
               tabIndex={0}
               // ตั้งชื่อให้การ์ดตรง ๆ — ของเดิมไม่มี ชื่อจึงถูกประกอบจากข้อความทุกชิ้นในใบ
@@ -371,9 +379,9 @@ export function QuickFortunePicker({
                     {isEnglish ? (topic.elementalGlyphEn || topic.elementalGlyph) : topic.elementalGlyph}
                   </div>
                   {/* หัวข้อของการ์ดแต่ละหัวข้อ ใช้ `<h3>` ภายใต้ `<h2>` ของส่วนทำนายด่วน */}
-                  <h3 className="text-sm sm:text-base font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors duration-200 leading-snug">
+                  <h3 className="text-sm sm:text-base font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors duration-200 leading-snug"><ThaiPhrases>
                     {isEnglish ? (topic.titleEn || topic.title) : topic.title}
-                  </h3>
+                  </ThaiPhrases></h3>
                   <p className="text-[11px] sm:text-xs font-serif-th text-muted leading-relaxed line-clamp-2">
                     {isEnglish ? (topic.taglineEn || topic.tagline) : topic.tagline}
                   </p>
@@ -439,9 +447,9 @@ export function QuickFortunePicker({
                         : selectedPendingTopic.title}
                     </span>
                   )}
-                  <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink">
+                  <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink"><ThaiPhrases>
                     {isEnglish ? "Your Name & Question" : "ชื่อเล่นและคำถามของคุณ"}
-                  </h3>
+                  </ThaiPhrases></h3>
                 </div>
                 <button
                   type="button"

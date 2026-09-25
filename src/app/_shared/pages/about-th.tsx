@@ -5,6 +5,7 @@ import { buildAlternates, DEFAULT_SUPPORT_EMAIL, SITE_ORIGIN } from "@/lib/confi
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { buildBreadcrumbJsonLd, homeCrumb } from "@/app/_shared/seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * 🏛️ หน้า "เกี่ยวกับเรา"
@@ -96,7 +97,7 @@ export function AboutBodyTh() {
 
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-10">
         <div className="text-center space-y-3 pb-6 border-b border-line/40">
-          <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif-th">เกี่ยวกับ SeerTarot</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif-th"><ThaiPhrases>เกี่ยวกับ SeerTarot</ThaiPhrases></h1>
           <p className="text-xs text-muted">ใครอยู่เบื้องหลัง และคำทำนายมาจากไหน</p>
         </div>
 
@@ -112,7 +113,7 @@ export function AboutBodyTh() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th">คำทำนายมาจากไหน</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>คำทำนายมาจากไหน</ThaiPhrases></h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             <strong>คำทำนายบนเว็บนี้เขียนโดยปัญญาประดิษฐ์ (AI) ที่เราออกแบบและปรับแต่งเอง</strong> ไม่ใช่หมอดูมนุษย์
             เราบอกเรื่องนี้ตรง ๆ ตั้งแต่ต้น เพราะคิดว่าคุณควรรู้ว่ากำลังอ่านอะไรอยู่
@@ -131,24 +132,24 @@ export function AboutBodyTh() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th">ไพ่ถูกสุ่มจริงไหม — พิสูจน์ได้</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>ไพ่ถูกสุ่มจริงไหม — พิสูจน์ได้</ThaiPhrases></h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             นี่คือเรื่องที่เราให้ความสำคัญที่สุด เว็บดูดวงทั่วไปไม่มีทางให้คุณรู้เลยว่าไพ่ถูกสุ่มจริง
             หรือถูกเลือกมาให้ทีหลังเพื่อให้เข้ากับคำทำนาย
           </p>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
-            เราใช้ระบบ <strong>Provably Fair</strong> แบบเดียวกับที่ใช้ตรวจสอบความยุติธรรมในระบบสุ่มระดับสากล
-            ก่อนคุณจะเลือกไพ่ ระบบจะ <strong>ล็อกลำดับไพ่ทั้งสำรับไว้ก่อนแล้ว</strong> และแสดงค่าแฮช SHA-256
-            ของลำดับนั้นให้คุณเห็น เมื่อเปิดไพ่เสร็จ ระบบจะเปิดเผยลำดับจริงให้คุณนำไปตรวจย้อนได้ว่าตรงกับค่าแฮชเดิม
+            ก่อนคุณจะเลือกไพ่ ระบบจะ <strong>ล็อกลำดับไพ่ทั้งสำรับไว้ก่อนแล้ว</strong> และโชว์ &quot;รหัสล็อก&quot;
+            ของลำดับนั้นให้คุณเห็น (เหมือนปิดผนึกซองไว้ต่อหน้าคุณ) เมื่อเปิดไพ่เสร็จ ระบบจะเปิดลำดับจริงให้ดู
+            คุณเอาไปเทียบได้เองว่าตรงกับรหัสล็อกเดิมไหม (หลักการนี้เรียกว่า Provably Fair)
           </p>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             แปลว่า <strong>เราไม่สามารถเปลี่ยนไพ่ของคุณหลังจากคุณเลือกแล้วได้เลย</strong> แม้จะอยากทำก็ทำไม่ได้
-            เพราะค่าแฮชจะไม่ตรงทันที และคุณตรวจเองได้ทุกครั้ง
+            เพราะรหัสล็อกจะไม่ตรงทันที และคุณตรวจเองได้ทุกครั้ง
           </p>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th">สำรับไพ่ที่เราใช้</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>สำรับไพ่ที่เราใช้</ThaiPhrases></h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             เราใช้ภาพไพ่จากสำรับ <strong>1909 Rider-Waite-Smith</strong> ต้นฉบับ ครบทั้ง 78 ใบ
             ซึ่งเป็นสำรับที่เป็นรากของการอ่านไพ่ทาโรต์สมัยใหม่แทบทั้งหมด
@@ -160,7 +161,7 @@ export function AboutBodyTh() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th">สิ่งที่เราไม่ใช่ และไม่รับทำ</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>สิ่งที่เราไม่ใช่ และไม่รับทำ</ThaiPhrases></h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
               <strong>ไม่ใช่คำแนะนำทางการแพทย์ กฎหมาย หรือการเงิน</strong> — คำทำนายมีไว้เพื่อทบทวนความคิดและให้กำลังใจ
@@ -182,7 +183,7 @@ export function AboutBodyTh() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th">ถ้าคุณกำลังรู้สึกแย่มาก</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>ถ้าคุณกำลังรู้สึกแย่มาก</ThaiPhrases></h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             ถ้าระบบตรวจพบว่าคำถามของคุณมีสัญญาณของการทำร้ายตัวเอง เราจะหยุดการทำนายทันที
             และแสดงช่องทางขอความช่วยเหลือแทน เพราะเรื่องแบบนี้ไม่ควรฝากไว้กับไพ่
@@ -198,7 +199,7 @@ export function AboutBodyTh() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th">ติดต่อเรา</h2>
+          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>ติดต่อเรา</ThaiPhrases></h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             มีอะไรอยากบอก อยากติ อยากแจ้งปัญหา หรือเจอคำทำนายที่ไม่เหมาะสม เขียนมาได้เลยที่{" "}
             <a

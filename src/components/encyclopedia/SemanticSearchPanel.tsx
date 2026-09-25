@@ -7,6 +7,7 @@ import { cardSummaryById } from "@/data/cards/summary";
 import { useLocale } from "@/lib/i18n";
 import { trackEvent } from "@/lib/analytics";
 import type { SearchResult } from "@/lib/search/vectorize";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 export interface SemanticSearchPanelProps {
   query: string;
@@ -96,9 +97,9 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
               {isEnglish ? "Semantic Wisdom Search" : "ค้นหาด้วยความรู้สึกและเจตจำนง"}
             </span>
           </div>
-          <h2 className="text-base sm:text-lg font-serif-th font-bold text-ink">
+          <h2 className="text-base sm:text-lg font-serif-th font-bold text-ink"><ThaiPhrases>
             {isEnglish ? "Cards Resonating with Your Feelings" : "ไพ่ที่ตรงกับความรู้สึกของคุณ"}
-          </h2>
+          </ThaiPhrases></h2>
           <p className="text-xs text-muted font-serif-th">
             {isEnglish
               ? `Showing deep archetypal resonance for "${query.trim()}"`

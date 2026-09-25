@@ -50,6 +50,7 @@ import {
 import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { isStandardSpread } from "@/lib/entitlement/limits";
 import { useLocale } from "@/lib/i18n";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 interface SpreadsLibraryProps {
   spreads: Spread[];
@@ -122,11 +123,11 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
               : `${spreads.length} ผังการเปิดไพ่มาตรฐานสากล`}
           </span>
         </div>
-        <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-ink tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]">
+        <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-ink tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]"><ThaiPhrases>
           {isEnglish
             ? `${spreads.length} Sacred Tarot Spreads & Layouts`
             : `ผังการเปิดไพ่ทาโรต์ ${spreads.length} รูปแบบ`}
-        </h1>
+        </ThaiPhrases></h1>
         <p className="text-xs sm:text-sm text-muted max-w-2xl mx-auto leading-relaxed font-serif-th [text-wrap:balance]">
           {isEnglish
             ? "Select a sacred spread attuned to your inquiry. Explore positional dynamics, archetypal geometry, and card interpretations."
@@ -229,9 +230,9 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
               {/* Titles & Tagline */}
               <div className="space-y-1.5 z-10 pt-3 border-t border-line/40">
                 {/* ชื่อผังแต่ละแบบคือหัวข้อระดับที่สองของหน้า /spreads (h1 = ชื่อหน้า) */}
-                <h2 className="font-serif-th text-base sm:text-lg font-bold text-ink leading-snug py-0.5 [text-wrap:balance]">
+                <h2 className="font-serif-th text-base sm:text-lg font-bold text-ink leading-snug py-0.5 [text-wrap:balance]"><ThaiPhrases>
                   {getSpreadName(spread, isEnglish)}
-                </h2>
+                </ThaiPhrases></h2>
                 <p className="text-xs text-muted leading-relaxed font-serif-th">{getSpreadTagline(spread, isEnglish)}</p>
               </div>
 

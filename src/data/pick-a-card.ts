@@ -129,7 +129,7 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
   {
     id: "love-future",
     slug: "future-of-your-relationship",
-    titleTh: "ทิศทางความรักและความสัมพันธ์ในอนาคต",
+    titleTh: "ทิศทางความรัก และความสัมพันธ์ในอนาคต",
     titleEn: "Future Direction of Your Relationship",
     subtitleTh: "ความรักของคุณกำลังเดินทางไปทางไหน และอะไรคือสิ่งที่จะช่วยให้ความสัมพันธ์เติบโต",
     subtitleEn: "Where is your love journey heading and what will foster profound harmony?",
@@ -175,7 +175,7 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
   {
     id: "career-finance",
     slug: "next-step-career-finance",
-    titleTh: "ก้าวต่อไปเรื่องงานและโอกาสการเงินใหม่",
+    titleTh: "ก้าวต่อไปเรื่องงาน และโอกาสการเงินใหม่",
     titleEn: "Your Next Step in Career & Finances",
     subtitleTh: "ตรวจเช็กจังหวะดวงการงาน การลงทุน และทิศทางสร้างรายได้ระลอกถัดไป",
     subtitleEn: "Discern upcoming professional pivots, financial openings, and strategic moves",
@@ -221,7 +221,7 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
   {
     id: "universe-guidance",
     slug: "urgent-message-from-the-universe",
-    titleTh: "ข้อความเตือนสติที่จักรวาลอยากบอกคุณ",
+    titleTh: "ข้อความเตือนสติ ที่จักรวาลอยากบอกคุณ",
     titleEn: "An Urgent Message from the Universe",
     subtitleTh: "สิ่งที่จิตวิญญาณของคุณต้องการได้ยินในตอนนี้ เพื่อเยียวยาและปลดล็อกพลังในตัวเอง",
     subtitleEn: "What your spirit needs to hear right now to heal, awaken, and flourish",

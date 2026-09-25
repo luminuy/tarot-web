@@ -18,6 +18,7 @@ import {
   WaterElementIcon,
 } from "@/components/ui/TarotArtIcons";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 interface CardGroupViewProps {
   groupInfo: CardGroupInfo;
@@ -34,20 +35,6 @@ const NAV_TABS = [
   { id: "pentacles", href: "/cards/pentacles", labelTh: "เหรียญ (14)", labelEn: "Pentacles (14)", Icon: PentacleTabIcon },
   { id: "table", href: "/cards/all", labelTh: "ตารางสรุป", labelEn: "Summary Table", Icon: SparkleTabIcon },
 ];
-
-const ELEMENT_STYLES: Record<string, { bg: string; text: string; border: string }> = {
-  ไฟ: { bg: "bg-gold-ink/10", text: "text-gold-ink", border: "border-gold-ink/30" },
-  น้ำ: { bg: "bg-ink-soft/10", text: "text-muted", border: "border-ink-soft/30" },
-  ลม: { bg: "bg-ink-soft/10", text: "text-muted", border: "border-ink-soft/30" },
-  ดิน: { bg: "bg-ok/10", text: "text-ok", border: "border-ok/30" },
-};
-
-const ELEMENT_EN: Record<string, string> = {
-  ไฟ: "Fire",
-  น้ำ: "Water",
-  ลม: "Air",
-  ดิน: "Earth",
-};
 
 export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }) => {
   const { isEnglish } = useLocale();
@@ -150,9 +137,9 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
             )}
           </div>
 
-          <h1 className="font-serif-th text-2xl sm:text-3xl lg:text-4xl font-bold text-ink leading-snug">
+          <h1 className="font-serif-th text-2xl sm:text-3xl lg:text-4xl font-bold text-ink leading-snug"><ThaiPhrases>
             {isEnglish ? groupInfo.nameEn : groupInfo.seoTitleTh}
-          </h1>
+          </ThaiPhrases></h1>
 
           <p className="font-serif-th text-sm sm:text-base text-muted leading-relaxed">
             {isEnglish ? groupInfo.heroTaglineEn : groupInfo.heroTaglineTh}
@@ -172,9 +159,9 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
                 key={idx}
                 className="glass-tile p-3.5 !rounded-xl space-y-1"
               >
-                <h2 className="font-serif-th text-xs font-bold text-gold-ink">
+                <h2 className="font-serif-th text-xs font-bold text-gold-ink"><ThaiPhrases>
                   {h.title}
-                </h2>
+                </ThaiPhrases></h2>
                 <p className="font-serif-th text-[11px] text-muted leading-normal">
                   {h.desc}
                 </p>
@@ -186,9 +173,9 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
 
       {/* Group Navigation Bar */}
       <div className="space-y-2">
-        <h2 className="font-serif-th text-xs font-bold text-muted uppercase tracking-wider">
+        <h2 className="font-serif-th text-xs font-bold text-muted uppercase tracking-wider"><ThaiPhrases>
           {isEnglish ? "Browse Deck Categories" : "เลือกหมวดหมู่ไพ่"}
-        </h2>
+        </ThaiPhrases></h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
           {NAV_TABS.map((tab) => {
             const isActive = tab.id === groupInfo.id;
@@ -219,9 +206,9 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
       {/* Cards Grid */}
       <section aria-label={isEnglish ? groupInfo.nameEn : groupInfo.nameTh} className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-serif-th text-base font-bold text-ink">
+          <h2 className="font-serif-th text-base font-bold text-ink"><ThaiPhrases>
             {isEnglish ? `All ${cards.length} Cards in this Group` : `รายชื่อไพ่ทั้งหมด ${cards.length} ใบ ในหมวดนี้`}
-          </h2>
+          </ThaiPhrases></h2>
           <span className="font-serif-th text-xs text-muted">
             {isEnglish ? "1909 Rider-Waite-Smith" : "ภาพต้นฉบับ 1909 Rider-Waite"}
           </span>
@@ -229,7 +216,6 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
           {cards.map((card) => {
-            const elemStyle = ELEMENT_STYLES[card.element] || ELEMENT_STYLES["ไฟ"];
             return (
               <Link
                 key={card.id}
@@ -258,11 +244,7 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
                     <span className="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-gold-ink text-white">
                       {card.arcana === "major" ? `#${card.number}` : card.suit?.toUpperCase().slice(0, 1)}
                     </span>
-                    <span
-                      className={`text-[11px] font-mono px-1.5 py-0.5 rounded border ${elemStyle.border} ${elemStyle.bg} ${elemStyle.text} font-bold`}
-                    >
-                      {isEnglish ? ELEMENT_EN[card.element] || card.element : card.element}
-                    </span>
+                    {/* ป้ายธาตุบนภาพไพ่ถอดออก — ทับรายละเอียดหน้าไพ่ (เจ้าของทักที่หน้าไพ่รายใบ · ตามแก้ให้เหมือนกันทั้งเว็บ) */}
                   </div>
 
                   {/* Hover Overlay */}
