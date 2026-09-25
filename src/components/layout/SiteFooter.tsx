@@ -5,6 +5,8 @@ import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CardImage } from "@/components/card/CardImage";
 import { getFooterColumns } from "@/components/layout/nav-links";
 import { useLocale } from "@/lib/i18n";
+import { useEffect } from "react";
+import { installFooterAccordion } from "@/components/layout/footer-accordion";
 
 export interface SiteFooterProps {
   /** "default" = pt-16 sm:pt-20 (หน้าเนื้อหา) · "tight" = pt-10 sm:pt-12 (หน้ากฎหมาย/บัญชี) */
@@ -18,6 +20,8 @@ export interface SiteFooterProps {
 export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
   const { isEnglish, t } = useLocale();
   const footerColumns = getFooterColumns(isEnglish);
+  // หน้า Next / island ผูกตัวพับคอลัมน์เอง · หน้า Astro ที่ไม่ hydrate ใช้ `astro/scripts/site-chrome.ts` (ตัวเดียวกัน)
+  useEffect(() => installFooterAccordion(), []);
 
   const paddingClass =
     spacing === "tight"
@@ -107,22 +111,58 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
           ⚠️ คอลัมน์สุดท้ายเป็น "สายด่วน/คำเตือน" ที่บางรายการไม่มีลิงก์เลย
           ถึงอย่างนั้นก็ยังควรเป็น nav เพราะรายการที่มีลิงก์ปนอยู่ด้วย
         */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-          {footerColumns.map((col, idx) => (
-            <nav key={idx} aria-label={col.title} className="space-y-3">
-              {/* ⚠️ ห้ามเป็น <h*> — เหตุผลเดียวกับป้าย "ข้อควรทราบ" ด้านบน */}
-              <div className={`font-serif-th font-bold text-sm text-surface-warm border-b border-line/20 pb-2 ${isEnglish ? "uppercase tracking-wider" : ""}`}>
-                {col.title}
-              </div>
-              {"links" in col && col.links ? (
-                <ul className="space-y-2 text-xs font-serif-th text-line/80">
-                  {col.links.map((link, lIdx) => {
-                    return (
-                      <li key={lIdx}>
-                        <Link href={link.href} prefetch={false} className="hover:text-surface-warm transition-colors">
-                          {link.label}
-                        </Link>
-                      </li>
+        {/*
+          🪗 มือถือ: คอลัมน์ที่เป็นลิงก์ล้วนพับได้ (แตะชื่อคอลัมน์เพื่อกาง) — ดู `footer-accordion.ts`
+          ⚠️ คอลัมน์ "ปลอดภัย & โปร่งใส" ไม่พับเด็ดขาด — มีสายด่วน 1323/1669 ต้องเห็นทันที (กฎเหล็กข้อ 6)
+          ⚠️ ไม่มีสคริปต์ = ปุ่มพับไม่แสดง ลิงก์กางครบเหมือนเดิม (CSS ผูกกับคลาส `footer-collapsible` บน <html>)
+        */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-5 sm:gap-8">
+          {footerColumns.map((col, idx) => {
+            const collapsible = "links" in col && Boolean(col.links);
+            const listId = `footer-col-${idx}`;
+            return (
+              <nav
+                key={idx}
+                aria-label={col.title}
+                className="space-y-3"
+                {...(collapsible ? { "data-footer-col": "" } : {})}
+              >
+                {collapsible && (
+                  <button
+                    type="button"
+                    data-footer-toggle
+                    aria-expanded="false"
+                    aria-controls={listId}
+                    className={`footer-col-toggle w-full items-center justify-between gap-3 border-b border-line/20 pb-2 font-serif-th text-sm font-bold text-surface-warm text-left ${isEnglish ? "uppercase tracking-wider" : ""}`}
+                  >
+                    <span>{col.title}</span>
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="footer-col-chevron h-4 w-4 shrink-0 text-line/70"
+                    >
+                      <path d="M5 7.5 10 12.5 15 7.5" />
+                    </svg>
+                  </button>
+                )}
+                {/* ⚠️ ห้ามเป็น <h*> — เหตุผลเดียวกับป้าย "ข้อควรทราบ" ด้านบน */}
+                <div className={`footer-col-title font-serif-th font-bold text-sm text-surface-warm border-b border-line/20 pb-2 ${isEnglish ? "uppercase tracking-wider" : ""}`}>
+                  {col.title}
+                </div>
+                {"links" in col && col.links ? (
+                  <ul id={listId} className="footer-col-list space-y-2 text-xs font-serif-th text-line/80">
+                    {col.links.map((link, lIdx) => {
+                      return (
+                        <li key={lIdx}>
+                          <Link href={link.href} prefetch={false} className="hover:text-surface-warm transition-colors">
+                            {link.label}
+                          </Link>
+                        </li>
                     );
                   })}
                 </ul>
@@ -151,7 +191,8 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                 </ul>
               ) : null}
             </nav>
-          ))}
+            );
+          })}
         </div>
 
         {/* Bottom Copyright & Disclaimer Strip */}

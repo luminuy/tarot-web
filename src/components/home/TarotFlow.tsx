@@ -1653,27 +1653,30 @@ export default function TarotFlow({
                        ถ้าวันหนึ่งเปิดสิทธิ์ทดลองกลับมา ชิปนี้จะเปลี่ยนถ้อยคำตามให้เอง
                   */}
                   <ul className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+                    {/* มือถือใช้ถ้อยคำสั้น — ถ้อยคำเต็มยาวจนชิปเรียงลงมา 3 บรรทัด กินที่ ~150px ก่อนถึงไพ่ประจำวัน
+                        (เจ้าของขอให้กระชับ) · ถ้อยคำเต็มยังอยู่ใน HTML สำหรับจอใหญ่และ SEO */}
                     {(isEnglish
                       ? [
-                          "Authentic 1909 Rider-Waite · 78 cards",
-                          "Provably-Fair SHA-256 randomness",
+                          ["Authentic 1909 Rider-Waite · 78 cards", "1909 Rider-Waite · 78 cards"],
+                          ["Provably-Fair SHA-256 randomness", "Provably fair"],
                           REQUIRE_SIGNUP_TO_READ
-                            ? `Free account · ${DAILY_LIMIT} ${READINGS_EN} a day`
-                            : "Free · No sign-up",
+                            ? [`Free account · ${DAILY_LIMIT} ${READINGS_EN} a day`, `Free · ${DAILY_LIMIT}/day`]
+                            : ["Free · No sign-up", "Free · No sign-up"],
                         ]
                       : [
-                          "สำรับ 1909 Rider-Waite แท้ 78 ใบ",
-                          "สุ่มโปร่งใส Provably-Fair SHA-256",
+                          ["สำรับ 1909 Rider-Waite แท้ 78 ใบ", "Rider-Waite แท้ 78 ใบ"],
+                          ["สุ่มโปร่งใส Provably-Fair SHA-256", "สุ่มโปร่งใส SHA-256"],
                           REQUIRE_SIGNUP_TO_READ
-                            ? `สมัครสมาชิกฟรี · เปิดไพ่ได้วันละ ${DAILY_LIMIT} ครั้ง`
-                            : "ฟรี · ไม่ต้องสมัคร",
+                            ? [`สมัครสมาชิกฟรี · เปิดไพ่ได้วันละ ${DAILY_LIMIT} ครั้ง`, `สมัครฟรี · วันละ ${DAILY_LIMIT} ครั้ง`]
+                            : ["ฟรี · ไม่ต้องสมัคร", "ฟรี · ไม่ต้องสมัคร"],
                         ]
-                    ).map((fact) => (
+                    ).map(([fact, short]) => (
                       <li
                         key={fact}
                         className="glass-chip whitespace-nowrap px-2.5 sm:px-3 py-1 font-serif-th text-[11px] sm:text-xs font-semibold text-gold-ink"
                       >
-                        {fact}
+                        <span className="sm:hidden">{short}</span>
+                        <span className="hidden sm:inline">{fact}</span>
                       </li>
                     ))}
                   </ul>

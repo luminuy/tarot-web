@@ -2211,3 +2211,24 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
   opacity: 0.35;
   cursor: default;
 }
+
+/* ═════════════════════════════════════════════════════════════════════════
+   🪗 ท้ายเว็บบนมือถือ: คอลัมน์ลิงก์พับได้ (`SiteFooter` + `footer-accordion.ts`)
+   ผูกกับคลาส `footer-collapsible` บน <html> ที่สคริปต์ตั้ง — ไม่มีสคริปต์ = กางครบเหมือนเดิม
+   ลิงก์ยังอยู่ใน HTML ครบ (แค่ display:none) บอตเห็นทุกลิงก์
+   ═════════════════════════════════════════════════════════════════════════ */
+.footer-col-toggle {
+  display: none;
+}
+@media (max-width: 639.98px) {
+  html.footer-collapsible .footer-col-toggle {
+    display: flex;
+  }
+  html.footer-collapsible [data-footer-col] > .footer-col-title,
+  html.footer-collapsible [data-footer-col]:not([data-open]) > .footer-col-list {
+    display: none;
+  }
+  html.footer-collapsible [data-footer-col][data-open] .footer-col-chevron {
+    transform: rotate(180deg);
+  }
+}

@@ -279,9 +279,15 @@ export function QuickFortunePicker({
           * ⚠️ ห้ามย้ายบล็อกนี้ขึ้นเหนือ `<h1>` — `<h2>` จะโผล่ก่อน `<h1>` ผิดลำดับหัวข้อทันที
           */}
         <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-ink tracking-wide leading-snug [text-wrap:balance]">
-          {isEnglish
-            ? "Choose the area calling for clarity today"
-            : "เลือกเรื่องที่คุณอยากรู้มากที่สุดในตอนนี้"}
+          {/* วรรคละ inline-block — ปล่อยเบราว์เซอร์ตัดเองบนมือถือได้ "อยาก / รู้" ขาดกลางคำ (เจ้าของทัก) */}
+          {isEnglish ? (
+            "Choose the area calling for clarity today"
+          ) : (
+            <>
+              <span className="inline-block">เลือกเรื่องที่คุณอยากรู้</span>{" "}
+              <span className="inline-block">มากที่สุดในตอนนี้</span>
+            </>
+          )}
         </h2>
       </div>
 
