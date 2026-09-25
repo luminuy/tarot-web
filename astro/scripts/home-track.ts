@@ -109,8 +109,6 @@ function scan(): void {
   document.querySelectorAll(SECTION).forEach((el) => {
     if (watched.has(el)) return;
     watched.add(el);
-    // ปุ่มลอยซ่อนอยู่ด้วย opacity แต่ยัง "อยู่ในจอ" ตลอด — นับแค่การกด ไม่นับการเห็น
-    if (el.hasAttribute("data-home-no-view")) return;
     sectionObserver?.observe(el);
   });
   document.querySelectorAll<HTMLElement>(COUNTER).forEach((el) => {

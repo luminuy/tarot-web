@@ -19,7 +19,6 @@ import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import { SpreadCardSelector } from "@/components/spread/SpreadCardSelector";
 import { DailyCardStrip } from "@/components/reading/DailyCardStrip";
 import { HomeWelcomeBar } from "@/components/home/HomeWelcomeBar";
-import { HomeStickyCta } from "@/components/home/HomeStickyCta";
 import { QuickFortunePicker, type QuickTopic } from "@/components/reading/QuickFortunePicker";
 import type { RitualStep } from "@/components/home/ritual-step";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
@@ -1715,7 +1714,7 @@ export default function TarotFlow({
                    (ทั้งคู่เรียก `handleBeginReading` ตัวเดียวกัน) — ทางเริ่มดูดวงจึงไม่ได้หายไปไหน
                    ยังมีทั้งแถบนั้นและป๊อปอัพ "เริ่มการดูดวงเลย" ที่เด้งทันทีที่แตะการ์ดผัง
               */}
-              <div id="home-spreads" className="home-band home-band-tint space-y-5 sm:space-y-6" data-home-section="spread_select">
+              <div className="home-band home-band-tint space-y-5 sm:space-y-6" data-home-section="spread_select">
                 <div className="text-center space-y-2.5 sm:space-y-3 max-w-2xl mx-auto px-4">
                   <div className="glass-chip inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 text-[11px] font-serif-th font-semibold tracking-wide text-gold-ink">
                     <span>
@@ -1766,9 +1765,6 @@ export default function TarotFlow({
                   onProceed={handleBeginReading}
                 />
               </div>
-
-              {/* ปุ่มลอยล่างจอมือถือ — โผล่เมื่อเลื่อนเลยแถบเลือกผังลงไปอ่านเนื้อหาท้ายหน้า */}
-              <HomeStickyCta isEnglish={isEnglish} afterId="home-spreads" targetId="home-quick" />
             </div>
           )}
 

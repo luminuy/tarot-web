@@ -2213,29 +2213,3 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
 html:not(.has-session) .home-welcome-slot {
   display: none;
 }
-
-/* ปุ่มเปิดไพ่ลอยล่างจอ (`HomeStickyCta`) — มือถือเท่านั้น · ปุ่มเม็ดยาวเล็กมุมซ้ายล่าง
-   กึ่งกลางแนวตั้งตรงกับปุ่ม TikTok (52px) ฝั่งขวา · ห้ามกลับไปเป็นแถบเต็มความกว้าง (เจ้าของทักว่าบังเนื้อหา)
-   ⚠️ ห้าม backdrop-filter (INC-0056) · วาดผ่าน portal ไป body (INC-0243) */
-.home-sticky-cta {
-  position: fixed;
-  z-index: 29;
-  left: calc(1rem + env(safe-area-inset-left, 0px));
-  bottom: calc(1.25rem + 4px + env(safe-area-inset-bottom, 0px));
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-.home-sticky-cta[data-shown="false"] {
-  opacity: 0;
-  transform: translateY(12px);
-  pointer-events: none;
-}
-@media (min-width: 640px) {
-  .home-sticky-cta {
-    display: none;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .home-sticky-cta {
-    transition: none;
-  }
-}
