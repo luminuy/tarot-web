@@ -82,7 +82,7 @@ export function DailyCardStrip({ streak = 0 }: { streak?: number } = {}) {
     return (
       <div
         aria-hidden="true"
-        className="altar-cloth mx-auto mb-6 flex h-[96px] max-w-2xl items-center gap-4 px-4 py-2.5 animate-pulse"
+        className="altar-cloth mx-auto flex h-[96px] max-w-2xl items-center gap-4 px-4 py-2.5 animate-pulse"
       >
         <div className="h-14 w-9 shrink-0 rounded border border-line-warm/30 bg-inset-warm/50" />
         <div className="min-w-0 flex-1 space-y-2">
@@ -112,7 +112,7 @@ export function DailyCardStrip({ streak = 0 }: { streak?: number } = {}) {
          ของ "ไพ่ประจำวัน" มา 15 KB ทิ้งไว้เฉย ๆ ทั้งที่ส่วนใหญ่ไม่ได้กด
          (วัดจาก Lighthouse network log 2026-09-14) */
       prefetch={false}
-      className="altar-card-porcelain group mx-auto mb-6 flex h-[96px] max-w-2xl items-center gap-4 px-4 py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+      className="altar-card-porcelain group mx-auto flex h-[96px] max-w-2xl items-center gap-4 px-4 py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
       title={isEnglish ? `Daily Card ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…` : `ไพ่ประจำวัน ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…`}
     >
       <div className="relative h-14 w-9 shrink-0 overflow-hidden rounded border border-line-warm bg-inset-warm shadow-xs">

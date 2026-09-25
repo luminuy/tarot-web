@@ -1690,7 +1690,7 @@ export default function TarotFlow({
               </div>
 
               {/* บล็อกทำนายด่วน 1 ใบ (4 การ์ดยอดนิยม) — ทางหลักของผู้ใช้ส่วนใหญ่ */}
-              <div id="home-quick" className="home-band scroll-mt-16" data-home-section="quick">
+              <div id="home-quick" className="home-band home-band-snug-top scroll-mt-16" data-home-section="quick">
                 <QuickFortunePicker
                   currentNickname={nickname}
                   onSelectTopic={handleQuickFortuneSelect}
