@@ -26,14 +26,6 @@ const readPrefix = "/read/";
 ---
 
 <BaseLayout locale={locale} metadata={buildHomeMetadata(locale)}>
-  {/* สมาชิก (มีคุกกี้ใบ้ `tarot_has_session`) ➔ คลาส has-session บน <html> ก่อนเฟรมแรก ให้ `.home-welcome-slot`
-      จองที่ไว้ตั้งแต่ HTML แรก (CLS 0) · คุกกี้ใบ้ไม่ใช่ตัวตัดสินสิทธิ์ ใช้แค่กะที่ว่าง (ดู session-hint.ts) */}
-  <script is:inline>
-    try {
-      if (document.cookie.split("; ").some(function (c) { return c.indexOf("tarot_has_session=1") === 0; }))
-        document.documentElement.classList.add("has-session");
-    } catch (e) {}
-  </script>
   <script is:inline define:vars={{ readSpreadIds, readPrefix }}>
     try {
       var legacySpread = new URLSearchParams(location.search).get("spread");

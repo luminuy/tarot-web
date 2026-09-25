@@ -20,7 +20,7 @@ const LEGACY_DAILY_CARD_STORAGE_KEY = "seer:daily-card";
  * ต่างจากการเปิดไพ่ส่วนตัว — อันนี้แค่ "พลังงานประจำวัน" ให้แตะดูเฉย ๆ ไม่กินโควตา
  * กันที่ว่างไว้ระหว่างโหลด ไม่ให้แถบแทรกเข้ามาแล้วดันทั้งหน้า
  */
-export function DailyCardStrip() {
+export function DailyCardStrip({ streak = 0 }: { streak?: number } = {}) {
   const { isEnglish } = useLocale();
   const [daily, setDaily] = useState<DailyCard | null>(null);
   const [failed, setFailed] = useState(false);
@@ -127,8 +127,14 @@ export function DailyCardStrip() {
       </div>
 
       <div className="min-w-0 flex-1 space-y-1">
-        <p className="font-serif-th text-xs font-bold text-gold-ink">
+        {/* วันต่อเนื่องต่อท้ายบรรทัดเดิม — ไม่เพิ่มความสูง (แถบนี้สูงคงที่ 96px) · 1 วันยังไม่นับว่าต่อเนื่อง */}
+        <p className="truncate font-serif-th text-xs font-bold text-gold-ink">
           {isEnglish ? "Card of the Day" : "ไพ่ประจำวันนี้"}
+          {streak >= 2 && (
+            <span className="font-semibold text-muted">
+              {isEnglish ? ` · ${streak}-day streak` : ` · เปิดไพ่ต่อเนื่อง ${streak} วัน`}
+            </span>
+          )}
         </p>
         <p className="font-serif-th text-sm font-bold text-ink-deep truncate">
           {isEnglish ? (

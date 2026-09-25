@@ -18,7 +18,6 @@ import { CardImage } from "@/components/card/CardImage";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import { SpreadCardSelector } from "@/components/spread/SpreadCardSelector";
 import { DailyCardStrip } from "@/components/reading/DailyCardStrip";
-import { HomeWelcomeBar } from "@/components/home/HomeWelcomeBar";
 import { QuickFortunePicker, type QuickTopic } from "@/components/reading/QuickFortunePicker";
 import type { RitualStep } from "@/components/home/ritual-step";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
@@ -1680,17 +1679,14 @@ export default function TarotFlow({
                   </ul>
                 </div>
 
-                {/* แถบต้อนรับคนที่กลับมา — สมาชิกเท่านั้น · สูงคงที่และจองที่ไว้ตั้งแต่ HTML แรก (ดูหัวไฟล์ HomeWelcomeBar) */}
-                <HomeWelcomeBar
-                  isEnglish={isEnglish}
-                  entitlement={entitlement}
-                  view={entitlementView}
-                  name={currentUser?.name}
-                  onOpenHistory={() => dispatchOverlay({ type: "openHistory" })}
+                {/* ไพ่ประจำวัน — แตะดูเฉย ๆ ไม่กินโควตา จึงเป็นจุดเริ่มที่เบาที่สุดของหน้า
+                    สมาชิกเห็นวันเปิดไพ่ต่อเนื่องต่อท้ายป้าย "ไพ่ประจำวันนี้" (แผนหน้าแรก ข้อ 2 — เดิมเป็นแถบแยก
+                    เจ้าของสั่งถอดเพราะกินพื้นที่ซ้ำกับแถบนี้) · บัญชีไม่จำกัดสิทธิ์ได้ 99 ตายตัวจาก snapshot จึงไม่นับ */}
+                <DailyCardStrip
+                  streak={
+                    entitlement?.kind === "member" && entitlement.role !== "unlimited" ? (entitlement.dailyStreak ?? 0) : 0
+                  }
                 />
-
-                {/* ไพ่ประจำวัน — แตะดูเฉย ๆ ไม่กินโควตา จึงเป็นจุดเริ่มที่เบาที่สุดของหน้า */}
-                <DailyCardStrip />
               </div>
 
               {/* บล็อกทำนายด่วน 1 ใบ (4 การ์ดยอดนิยม) — ทางหลักของผู้ใช้ส่วนใหญ่ */}

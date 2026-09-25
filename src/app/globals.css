@@ -2201,15 +2201,3 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
   opacity: 0.35;
   cursor: default;
 }
-
-/* ═════════════════════════════════════════════════════════════════════════
-   แถบต้อนรับคนที่กลับมา (`HomeWelcomeBar`) — จองที่ตั้งแต่ HTML แรกให้เฉพาะเครื่องที่มีคุกกี้ใบ้
-   คลาส `has-session` บน <html> ตั้งโดยสคริปต์ inline ใน astro/pages/index.astro ก่อนเฟรมแรก
-   ➔ สมาชิกเห็นช่องสูงคงที่ตั้งแต่แรก (CLS 0) · คนที่ไม่เคยล็อกอินไม่เห็นช่องว่างเลย
-   ═════════════════════════════════════════════════════════════════════════ */
-.home-welcome-slot {
-  height: 68px;
-}
-html:not(.has-session) .home-welcome-slot {
-  display: none;
-}
