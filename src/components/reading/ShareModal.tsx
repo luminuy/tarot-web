@@ -73,7 +73,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const personaName = isEnglish ? (persona.nameEn || persona.nameTh) : persona.nameTh;
-  const defaultQuestion = isEnglish ? "General Life & Archetypal Overview" : "ภาพรวมดวงชะตา";
+  const defaultQuestion = isEnglish ? "General life overview" : "ภาพรวมดวงชะตา";
   const defaultSummary = isEnglish ? "Trust your inner wisdom and proceed with mindful intention." : "จงเชื่อมั่นในตนเองและก้าวต่อไปอย่างมีสติ";
 
   const showToast = (msg: string) => {

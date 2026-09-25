@@ -108,7 +108,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
   ];
 
   const categories = [
-    { id: "general" as const, nameTh: "ภาพรวมและเส้นทางชีวิต", nameEn: "Life Overview & Archetypal Journey", icon: "•", color: "#8F5C1A" },
+    { id: "general" as const, nameTh: "ภาพรวมและเส้นทางชีวิต", nameEn: "Life overview", icon: "•", color: "#8F5C1A" },
     { id: "love" as const, nameTh: "ความรักและคนในใจ", nameEn: "Love & Relationships", icon: "•", color: "#A6392C" },
     { id: "work" as const, nameTh: "การงานและโครงการ", nameEn: "Career & Ambitions", icon: "•", color: "#6F5B4A" },
     { id: "money" as const, nameTh: "การเงินและโชคลาภ", nameEn: "Finances & Abundance", icon: "◆", color: "#3A7044" },
@@ -292,7 +292,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                         <h3 className="font-serif-th text-xs sm:text-sm font-bold text-ink"><ThaiPhrases>{isEnglish ? cat.nameEn : cat.nameTh}</ThaiPhrases></h3>
                       </div>
                       <p className="font-serif-th text-xs sm:text-sm text-ink leading-relaxed pl-4 border-l-2 border-line group-hover:border-gold transition-colors [text-wrap:pretty]">
-                        {text || (isEnglish ? "Archetypal insight gathering in progress" : "กำลังรวบรวมคำแปลมิตินี้")}
+                        {text || (isEnglish ? "This meaning is still being written" : "กำลังรวบรวมคำแปลมิตินี้")}
                       </p>
                     </div>
                   );

@@ -59,8 +59,8 @@ export const FOOTER_COLUMNS = [
     title: "ปลอดภัย & โปร่งใส",
     items: [
       {
-        title: "Provably Fair SHA-256",
-        description: "การันตีสลับไพ่โปร่งใสตรวจสอบได้",
+        title: "ไพ่สุ่มจริง ตรวจสอบได้",
+        description: "ล็อกลำดับไพ่ไว้ก่อนเปิด ไม่มีใครแก้ผลได้",
         color: "text-[#A58A5C]",
       },
       {
@@ -120,8 +120,8 @@ export function getFooterColumns(isEnglish: boolean) {
       title: "Ethics & Integrity",
       items: [
         {
-          title: "Provably Fair SHA-256",
-          description: "Verifiable cryptographic randomness",
+          title: "Truly random, verifiable",
+          description: "The deck order is locked before you draw",
           color: "text-[#A58A5C]",
         },
         {

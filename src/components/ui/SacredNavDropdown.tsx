@@ -117,7 +117,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
     },
     {
       label: isEnglish ? "Tarot Birth Card" : "คำนวณไพ่ประจำตัว (Birth Card)",
-      sublabel: isEnglish ? "Calculate your personality & soul tarot archetypes" : "คำนวณไพ่บุคลิกภาพและจิตวิญญาณจากวันเกิด",
+      sublabel: isEnglish ? "Find your personality and soul cards from your birthday" : "คำนวณไพ่บุคลิกภาพและจิตวิญญาณจากวันเกิด",
       href: "/cards/birth-card",
       cardId: "major-10",
     },
@@ -144,7 +144,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
     },
     {
       label: isEnglish ? `Sanctuary Journal (${COUNTS.articles})` : `บทความดูดวง & ความรู้ไพ่ (${COUNTS.articles} เรื่อง)`,
-      sublabel: isEnglish ? "Tarot insights, archetypes, love & career guidance" : "ความรู้ไพ่ทาโรต์ ความรัก การงาน และผังยอดนิยม",
+      sublabel: isEnglish ? "Tarot guides, love and career advice" : "ความรู้ไพ่ทาโรต์ ความรัก การงาน และผังยอดนิยม",
       href: "/blog",
       cardId: "major-09",
     },
@@ -484,7 +484,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
             </button>
           )}
           <div className="text-[10px] font-mono tracking-widest text-muted text-center uppercase">
-            1909 RIDER-WAITE TAROT · PROVABLY FAIR
+            {isEnglish ? "1909 RIDER-WAITE TAROT · VERIFIABLE SHUFFLE" : "ไพ่ 1909 Rider-Waite แท้ · สุ่มจริง ตรวจสอบได้"}
           </div>
         </div>
       </nav>

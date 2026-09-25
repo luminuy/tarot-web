@@ -251,7 +251,7 @@ export function LoveOneCardClient() {
       {/* Hero Header */}
       <RitualHero
         breadcrumbs={breadcrumbs}
-        badgeText={isEnglish ? "Provably Fair 78 Cards" : "สำรับ 1909 แท้ 78 ใบ"}
+        badgeText={isEnglish ? "Original 1909 deck · 78 cards" : "สำรับ 1909 แท้ 78 ใบ"}
         title={isEnglish ? "Love Tarot 1 Card Reading" : "ดูดวงความรัก 1 ใบ ไขคำตอบสถานะหัวใจ"}
         tagline={
           isEnglish

@@ -113,7 +113,7 @@ export function DailyCardStrip({ streak = 0 }: { streak?: number } = {}) {
          (วัดจาก Lighthouse network log 2026-09-14) */
       prefetch={false}
       className="altar-card-porcelain group mx-auto flex h-[96px] max-w-2xl items-center gap-4 px-4 py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
-      title={isEnglish ? `Daily Card ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…` : `ไพ่ประจำวัน ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…`}
+      title={isEnglish ? `Daily Card ${daily.dateKey} · lock code ${daily.proof.slice(0, 16)}…` : `ไพ่ประจำวัน ${daily.dateKey} · รหัสล็อก ${daily.proof.slice(0, 16)}…`}
     >
       <div className="relative h-14 w-9 shrink-0 overflow-hidden rounded border border-line-warm bg-inset-warm shadow-xs">
         <CardImage
@@ -159,7 +159,7 @@ export function DailyCardStrip({ streak = 0 }: { streak?: number } = {}) {
       </div>
 
       <span className="hidden shrink-0 font-serif-th text-[13px] font-semibold text-gold-ink group-hover:underline sm:inline">
-        {isEnglish ? "Read Full Archetype →" : "อ่านความหมายเต็ม →"}
+        {isEnglish ? "Read the full meaning →" : "อ่านความหมายเต็ม →"}
       </span>
     </Link>
   );

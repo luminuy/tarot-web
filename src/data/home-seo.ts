@@ -34,9 +34,9 @@ export const HOME_FAQS: HomeFaqItem[] = [
   },
   {
     id: "faq-provably-fair",
-    question: "ระบบสับไพ่ Provably Fair คืออะไร และการันตีความโปร่งใสอย่างไร?",
+    question: "รู้ได้ยังไงว่าไพ่สุ่มจริง ไม่ได้ถูกล็อกผลไว้?",
     answer:
-      "Provably Fair คือเทคโนโลยีการเข้ารหัสทางคณิตศาสตร์ด้วย SHA-256 แบบเดียวกับที่ใช้ในระบบความปลอดภัยระดับสากล ระบบจะเข้ารหัสลำดับของสำรับไพ่ล่วงหน้าก่อนที่คุณจะเริ่มจับไพ่ (Commitment) และส่งหลักฐานกุญแจให้คุณตรวจสอบได้หลังเปิดไพ่เสร็จ (Reveal) เพื่อการันตี 100% ว่าไม่มีการล็อกผล ไม่มีการเปลี่ยนไพ่ลับหลัง และทุกใบมาจากความสุ่มที่บริสุทธิ์",
+      "ก่อนคุณเลือกไพ่ ระบบจะล็อกลำดับไพ่ทั้งสำรับไว้ และโชว์รหัสล็อกให้คุณเห็นก่อน พอเปิดไพ่เสร็จ ระบบจะเฉลยลำดับจริงให้ คุณเอามาเทียบกับรหัสล็อกเดิมได้เองว่าตรงกัน ถ้ามีใครแอบเปลี่ยนไพ่ระหว่างทาง รหัสล็อกจะไม่ตรงทันที วิธีนี้เรียกว่า Provably Fair ใช้การเข้ารหัสแบบ SHA-256 ซึ่งเป็นมาตรฐานเดียวกับระบบความปลอดภัยทั่วโลก",
   },
   {
     id: "faq-frequency",
@@ -79,9 +79,9 @@ export const HOME_FAQS_EN: HomeFaqItem[] = [
   },
   {
     id: "faq-provably-fair",
-    question: "What is Provably Fair shuffling, and how does it guarantee transparency?",
+    question: "How do I know the cards are truly random and not rigged?",
     answer:
-      "Provably Fair is a cryptographic verification system using SHA-256, identical to protocols used in high-security environments. The deck sequence is hashed and sealed before you pick your cards (Commitment), and the cryptographic key is revealed afterward (Reveal) so you can independently verify that the deck was never manipulated.",
+      "Before you pick, the whole deck order is locked and you are shown its lock code. When the reading ends, the real order is revealed so you can check it against that code yourself. If anyone swapped a card along the way, the code would no longer match. This method is called Provably Fair and uses SHA-256, the same standard used in security systems worldwide.",
   },
   {
     id: "faq-frequency",
@@ -129,7 +129,7 @@ export const HOME_HOW_TO_STEPS: HomeHowToStep[] = [
   },
   {
     name: "3. สับไพ่ด้วยตนเอง",
-    text: "กดปุ่มสับไพ่ด้วยมือคุณเอง ระบบจะใช้ Web Crypto API และ Provably Fair SHA-256 ในการเรียงสลับไพ่ 78 ใบอย่างโปร่งใส",
+    text: "กดปุ่มสับไพ่ด้วยมือคุณเอง ระบบจะสุ่มลำดับไพ่ 78 ใบและล็อกไว้ก่อนเปิด ตรวจสอบย้อนหลังได้",
     url: `${SITE_ORIGIN}/#shuffle`,
     image: `${SITE_ORIGIN}/cards/major-10.jpg`,
   },
@@ -150,19 +150,19 @@ export const HOME_HOW_TO_STEPS: HomeHowToStep[] = [
 export const HOME_HOW_TO_STEPS_EN: HomeHowToStep[] = [
   {
     name: "1. Choose Your Spread",
-    text: "Select an archetypal layout tailored to your inquiry, from a 1-card daily compass and 3-card temporal spread to the 10-card Celtic Cross.",
+    text: "Choose a layout that fits your question, from a 1-card daily compass and 3-card temporal spread to the 10-card Celtic Cross.",
     url: `${SITE_ORIGIN}/#spread-select`,
     image: `${SITE_ORIGIN}/cards/major-01.jpg`,
   },
   {
     name: "2. Set Your Intention & Focus",
-    text: "Take a deep breath, formulate your inquiry sincerely, and choose the AI oracle archetype whose tone and lineage best serve you.",
+    text: "Take a deep breath, ask your question honestly, and choose the AI reader whose tone suits you best.",
     url: `${SITE_ORIGIN}/#intention-select`,
     image: `${SITE_ORIGIN}/cards/major-02.jpg`,
   },
   {
     name: "3. Shuffle with Your Own Touch",
-    text: "Shuffle the complete 78-card deck via Web Crypto API with Provably Fair SHA-256 cryptographic randomness.",
+    text: "Shuffle the full 78-card deck yourself. The order is locked before you draw, so you can check it afterwards.",
     url: `${SITE_ORIGIN}/#shuffle`,
     image: `${SITE_ORIGIN}/cards/major-10.jpg`,
   },
@@ -211,8 +211,8 @@ export function generateHowToJsonLd(isEnglishOrLocale?: boolean | string) {
       ? "How to Consult 1909 Rider-Waite Tarot Online with SeerTarot"
       : "วิธีดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับ SeerTarot",
     description: isEn
-      ? "Step-by-step divination: physically shuffle, draw 78 cards with personal agency, and receive interpretations with Provably Fair verification."
-      : "ขั้นตอนการสับไพ่ เลือกไพ่ 78 ใบด้วยตนเอง และรับคำทำนายจากแม่หมอ AI พร้อมระบบตรวจสอบความโปร่งใส Provably Fair",
+      ? "Step by step: shuffle, pick your cards from all 78, and get a reading, with a shuffle you can verify."
+      : "ขั้นตอนการสับไพ่ เลือกไพ่ 78 ใบด้วยตนเอง และรับคำทำนายจากแม่หมอ AI สุ่มจริง ตรวจสอบได้",
     totalTime: "PT3M",
     estimatedCost: {
       "@type": "MonetaryAmount",

@@ -90,7 +90,7 @@ export function zodiacIndexMetadata(locale: Locale): Metadata {
         "Find the tarot card for your zodiac sign, your ruling planet's card and the Minor Arcana card of your birth decan, using the Golden Dawn system behind the 1909 Rider-Waite deck.",
       )
     : clampDescription(
-        "หาไพ่ยิปซีประจำราศีของคุณจากวันเกิด พร้อมไพ่ดาวผู้ครองราศีและไพ่ประจำช่วงวันเกิด ตามระบบ Golden Dawn ต้นแบบของไพ่ 1909 Rider-Waite ครบ 12 ราศี ฟรี",
+        "หาไพ่ยิปซีประจำราศีของคุณจากวันเกิด พร้อมไพ่ดาวผู้ครองราศีและไพ่ประจำช่วงวันเกิด ตามตำราเดียวกับที่ผู้สร้างไพ่ 1909 Rider-Waite ใช้ ครบ 12 ราศี ฟรี",
       );
   const ogImages = buildPageOgImage({
     title: isEnglish ? "Zodiac Tarot Cards" : "ไพ่ประจำราศี 12 ราศี",
@@ -214,7 +214,7 @@ function JsonLd({ data }: { data: unknown }) {
 const INDEX_FAQ_TH: SeoFaqItem[] = [
   {
     q: "ไพ่ประจำราศีคืออะไร?",
-    a: "คือไพ่ทาโรต์ที่ผูกกับราศีเกิดของคุณตามระบบ Golden Dawn ซึ่งเป็นระบบที่ผู้สร้างไพ่ 1909 Rider-Waite ใช้ออกแบบสำรับ แต่ละราศีมีไพ่ชุดใหญ่ประจำราศี 1 ใบ ไพ่ของดาวผู้ครองราศี 1 ใบ และไพ่ชุดเล็กประจำช่วงวันเกิดอีก 3 ใบ",
+    a: "คือไพ่ทาโรต์ที่ผูกกับราศีเกิดของคุณตามตำราของสมาคม Golden Dawn ที่ผู้สร้างไพ่ 1909 Rider-Waite ใช้ออกแบบสำรับ แต่ละราศีมีไพ่ชุดใหญ่ประจำราศี 1 ใบ ไพ่ของดาวผู้ครองราศี 1 ใบ และไพ่ชุดเล็กประจำช่วงวันเกิดอีก 3 ใบ",
   },
   {
     q: "ราศีแบบสากลกับราศีแบบไทยต่างกันอย่างไร ควรใช้แบบไหน?",
@@ -345,7 +345,7 @@ export function ZodiacIndexBody({
           title={
             isEnglish
               ? "The Golden Dawn: where tarot meets the zodiac"
-              : "Golden Dawn: จุดที่ไพ่ทาโรต์ กับโหราศาสตร์มาบรรจบกัน"
+              : "ไพ่ทาโรต์กับราศี เชื่อมกันได้ยังไง"
           }
           faqs={faqs}
           /* ⚠️ SeoArticleShell ไม่เติม /en ให้เอง (A6-09) — ต้องแปลงเส้นทางตามภาษาก่อนส่งเข้าไป */
@@ -382,7 +382,7 @@ export function ZodiacIndexBody({
           ) : (
             <div className="space-y-4 text-xs sm:text-sm text-muted font-sans leading-relaxed">
               <p>
-                ปลายศตวรรษที่ 19 สมาคม Hermetic Order of the Golden Dawn ได้จับคู่ไพ่ทาโรต์ทุกใบเข้ากับดวงดาวและราศี
+                ปลายศตวรรษที่ 19 สมาคมศึกษาศาสตร์ลึกลับในอังกฤษชื่อ Golden Dawn ได้จับคู่ไพ่ทาโรต์ทุกใบเข้ากับดวงดาวและราศี
                 A.E. Waite กับ Pamela Colman Smith ผู้สร้างไพ่ 1909 ที่เว็บนี้ใช้ ต่างก็เป็นสมาชิกของสมาคมนี้
                 ความเชื่อมโยงจึงถูกวาดไว้ในภาพไพ่เลย เช่น หัวแกะบนบัลลังก์ของ The Emperor คือสัญลักษณ์ของราศีเมษ
               </p>
@@ -394,7 +394,7 @@ export function ZodiacIndexBody({
               </ol>
               <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-2"><ThaiPhrases>ราศีแบบสากลกับราศีแบบไทย</ThaiPhrases></h3>
               <p>
-                Golden Dawn ผูกไพ่เข้ากับราศีแบบสากล (Tropical) ไพ่ประจำช่วงวันเกิดจึงใช้วันที่แบบสากล
+                Golden Dawn ผูกไพ่เข้ากับราศีแบบสากล (นับตามวันที่ในปฏิทิน) ไพ่ประจำช่วงวันเกิดจึงใช้วันที่แบบสากล
                 ส่วนโหราศาสตร์ไทยใช้ 12 ราศีเดียวกัน แต่นับตามตำแหน่งดาวจริง (สุริยยาตร์) ซึ่งช้ากว่าราว 24 วัน
                 และใช้เจ้าเรือนแบบดั้งเดิม คือ พิจิกมีดาวอังคาร กุมภ์มีดาวเสาร์ และมีนมีดาวพฤหัสบดีเป็นเจ้าเรือน
                 หน้าของแต่ละราศีจึงบอกช่วงวันเกิดไว้ทั้งสองแบบ วันรอยต่อระหว่างราศีอาจคลาดได้ 1 วันตามแต่ละปี

@@ -443,7 +443,7 @@ isEnglish
           {/* ── ส่วนรอง: ยุบไว้ใน Accordion เพื่อความกระชับ ผู้ใช้แตะเปิดเองได้ ── */}
           <CollapsibleCard
             title={isEnglish ? "In-Depth Insights & Verification" : "รายละเอียดเชิงลึก & ความโปร่งใส"}
-            hint={isEnglish ? "Oracle Wisdom · Elemental Balance · Provably Fair Audit" : "คำคมพลังใจ · สมดุลธาตุ · รหัสตรวจสอบ Provably Fair"}
+            hint={isEnglish ? "Words of encouragement · Element balance · Check your shuffle" : "คำคมพลังใจ · สมดุลธาตุ · ตรวจว่าไพ่สุ่มจริง"}
             
           >
             <div className="space-y-4 pt-1">

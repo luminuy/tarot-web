@@ -38,10 +38,10 @@ const RITUAL_STEPS_TH = [
     stepNum: "๓",
     phase: "สับไพ่",
     title: "สับไพ่ด้วยตนเอง",
-    subtitle: "Provably Fair SHA-256",
+    subtitle: "สุ่มจริง ตรวจสอบได้",
     cardImage: "major-10.jpg",
     cardName: "Wheel of Fortune · ๑๐",
-    desc: "สับสำรับไพ่ 78 ใบด้วยมือคุณเองผ่าน Web Crypto API พร้อมระบบ SHA-256 Commit-Reveal การันตีไร้การแทรกแซง 100%",
+    desc: "สับไพ่ 78 ใบด้วยมือคุณเอง ระบบล็อกลำดับไพ่ไว้ก่อนเปิด ไม่มีใครแก้ผลได้ และตรวจสอบย้อนหลังได้ทุกครั้ง",
   },
   {
     stepNum: "๔",
@@ -71,10 +71,10 @@ const RITUAL_STEPS_EN = [
     stepNum: "1",
     phase: "Prelude",
     title: "Choose Your Spread",
-    subtitle: "20 Archetypal Spreads",
+    subtitle: "26 Spread Layouts",
     cardImage: "major-00.jpg",
     cardName: "The Fool · 0",
-    desc: "Select from 20 time-tested layouts tailored to your question—from a 1-card daily compass to the 10-card Celtic Cross.",
+    desc: "Select from 26 time-tested layouts tailored to your question—from a 1-card daily compass to the 10-card Celtic Cross.",
   },
   {
     stepNum: "2",
@@ -83,16 +83,16 @@ const RITUAL_STEPS_EN = [
     subtitle: "Hear the Inner Voice",
     cardImage: "major-02.jpg",
     cardName: "The High Priestess · II",
-    desc: "Take a deep breath, frame your question sincerely, and choose the AI oracle archetype whose interpretative lineage resonates with you.",
+    desc: "Take a deep breath, write your question simply and honestly, and choose the AI reader whose style suits you.",
   },
   {
     stepNum: "3",
     phase: "Shuffle",
     title: "Shuffle the Deck",
-    subtitle: "Provably Fair SHA-256",
+    subtitle: "Truly random, verifiable",
     cardImage: "major-10.jpg",
     cardName: "Wheel of Fortune · X",
-    desc: "Shuffle the complete 78-card deck with your own touch via Web Crypto API, secured by SHA-256 Commit-Reveal proofs.",
+    desc: "Shuffle all 78 cards yourself. The deck order is locked before you draw, so no one can change the result — and you can check it afterwards.",
   },
   {
     stepNum: "4",
@@ -178,9 +178,9 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           <p className="text-sm sm:text-base text-muted max-w-3xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
             {isEnglish ? (
               <>
-                Connect directly with your subconscious mind. Shuffle, cut, and draw cards with your own hands under cryptographic transparency—
+                Shuffle, cut, and draw cards with your own hands, with a shuffle you can check yourself—
                 <br className="hidden sm:inline" />
-                guided by 1909 Rider-Waite symbolism and Carl Jung&apos;s depth psychology.
+                read through the original 1909 Rider-Waite imagery in plain, honest language.
               </>
             ) : (
               <>
@@ -277,21 +277,21 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           </div>
           <h2 id="heritage-title" className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-ink tracking-wide [text-wrap:balance]"><ThaiPhrases>
             {isEnglish
-              ? "The Heritage of 1909 Rider-Waite & Uncompromising Integrity"
-              : "มนต์เสน่ห์ไพ่ 1909 Rider-Waite & ความโปร่งใสระดับสากล"}
+              ? "Original 1909 Rider-Waite Cards, Read Honestly"
+              : "ไพ่ 1909 Rider-Waite แท้ อ่านตรงไปตรงมา"}
           </ThaiPhrases></h2>
           <p className="text-sm sm:text-base text-muted font-serif-th max-w-3xl mx-auto leading-relaxed [text-wrap:balance]">
             {isEnglish ? (
               <>
-                Blending over 110 years of sacred esoteric art with Provably Fair cryptographic randomness
+                The original 1909 artwork, a shuffle you can verify yourself,
                 <br className="hidden sm:inline" />
-                and Jungian archetypal psychology—a sanctuary devoted to holding and uplifting the human spirit.
+                and readings that help you understand what you feel — not just predict what happens.
               </>
             ) : (
               <>
-                ผสานคุณค่าทางประวัติศาสตร์และศิลปะกว่า 110 ปี เข้ากับระบบสุ่มโปร่งใส Provably Fair
+                ภาพไพ่ต้นฉบับอายุกว่า 110 ปี ระบบสุ่มที่คุณตรวจสอบเองได้
                 <br className="hidden sm:inline" />
-                และหลักจิตวิทยาเชิงลึก เพื่อเป็นวิหารพยากรณ์ที่โอบอุ้มจิตใจอย่างแท้จริง
+                และคำทำนายที่ช่วยให้เข้าใจใจตัวเอง ไม่ใช่แค่บอกว่าอะไรจะเกิด
               </>
             )}
           </p>
@@ -314,23 +314,23 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
   
                 <div className="text-center space-y-1">
                   <span className="text-xs font-serif-th font-bold text-gold-ink tracking-wider uppercase block">
-                    {isEnglish ? "Pillar I" : "เสาเอกที่ ๑"}
+                    {isEnglish ? "Pillar I" : "จุดเด่นที่ 1"}
                   </span>
                   <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors"><ThaiPhrases>
-                    {isEnglish ? "Original 1909 Classic Deck" : "สำรับคลาสสิก 1909 ดั้งเดิม"}
+                    {isEnglish ? "The Original 1909 Deck" : "ไพ่ต้นฉบับปี 1909 ของแท้"}
                   </ThaiPhrases></h3>
                 </div>
   
                 <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed text-left">
                   {isEnglish
-                    ? "The 1909 Rider-Waite-Smith deck, illustrated by Pamela Colman Smith, is a monumental work encoded with esoteric symbols, four elemental energies (Fire, Water, Air, Earth), and expressive body language designed to converse with your subconscious naturally and accurately."
-                    : "ไพ่ทาโรต์ชุด 1909 Rider-Waite-Smith รังสรรค์ภาพโดย Pamela Colman Smith เป็นสำรับอันทรงคุณค่าที่บรรจุรหัสสัญลักษณ์ อัญเชิญพลังแห่งธาตุทั้งสี่ (ไฟ น้ำ ลม ดิน) และสะท้อนภาษากาย ทิศทางสายตา เพื่อสื่อสารกับจิตใต้สำนึกได้อย่างแม่นยำและเป็นธรรมชาติที่สุด"}
+                    ? "The 1909 Rider-Waite-Smith deck, drawn by Pamela Colman Smith, is the most widely used tarot deck in the world. Every card tells a story through its symbols, the four elements, body language and gaze — so you can read the meaning straight from the picture."
+                    : "ไพ่ชุด 1909 Rider-Waite-Smith วาดโดย Pamela Colman Smith เป็นไพ่ทาโรต์ที่คนทั่วโลกใช้มากที่สุด ทุกใบมีภาพเล่าเรื่อง ทั้งสัญลักษณ์ ธาตุไฟ น้ำ ลม ดิน ท่าทาง และสายตาของตัวละคร อ่านจากภาพแล้วเข้าใจความหมายได้ง่ายโดยไม่ต้องท่องจำ"}
                 </p>
               </div>
   
               <div className="pt-4 border-t border-line-warm/40 text-center">
                 <span className="text-xs font-serif-th text-gold-ink font-semibold">
-                  {isEnglish ? "Authentic, Unaltered 1909 Artworks" : "ศิลปะต้นฉบับคมชัดไร้การดัดแปลง"}
+                  {isEnglish ? "Original artwork, unaltered" : "ภาพต้นฉบับ ไม่ดัดแปลง"}
                 </span>
               </div>
             </div>
@@ -349,23 +349,23 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
   
                 <div className="text-center space-y-1">
                   <span className="text-xs font-serif-th font-bold text-gold-ink tracking-wider uppercase block">
-                    {isEnglish ? "Pillar II" : "เสาเอกที่ ๒"}
+                    {isEnglish ? "Pillar II" : "จุดเด่นที่ 2"}
                   </span>
                   <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors"><ThaiPhrases>
-                    {isEnglish ? "Provably Fair Cryptographic Randomness" : "ระบบสุ่มโปร่งใส Provably Fair"}
+                    {isEnglish ? "Truly Random — No One Picks Your Cards" : "ไพ่สุ่มจริง ไม่มีใครแอบเลือกให้"}
                   </ThaiPhrases></h3>
                 </div>
   
                 <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed text-left">
                   {isEnglish
-                    ? "Unlike conventional computerized tarot simulators, SeerTarot harnesses SHA-256 cryptographic commitments before any cards are drawn (Commit-Reveal) via Web Crypto API. We guarantee 100% zero outcome manipulation—every card drawn comes purely from your own shuffle and touch."
-                    : "แตกต่างจากระบบสุ่มทาโรต์ทั่วไป SeerTarot ผสานเทคโนโลยีเข้ารหัส SHA-256 ล็อกลำดับสำรับไพ่ล่วงหน้าก่อนเปิด (Commit-Reveal) ผ่าน Web Crypto API การันตี 100% ว่าไม่มีการแทรกแซง ไม่มีการล็อกผล ทุกใบที่ได้มาจากการสับไพ่และเลือกด้วยมือคุณเองอย่างแท้จริง"}
+                    ? "Before you pick a card, the whole deck order is locked and a confirmation code is attached to your reading. You can use that code to check the cards were not changed along the way — neither the site nor the reader can alter the result. Every card comes from your own pick."
+                    : "ก่อนคุณเปิดไพ่ ระบบจะล็อกลำดับไพ่ทั้งสำรับไว้ก่อน แล้วแนบรหัสยืนยันมากับคำทำนาย คุณเอารหัสนี้ไปตรวจเองได้ว่าไพ่ไม่ถูกเปลี่ยนระหว่างทาง ทั้งเว็บและแม่หมอแก้ผลไม่ได้ ทุกใบมาจากที่คุณเลือกเอง"}
                 </p>
               </div>
   
               <div className="pt-4 border-t border-line-warm/40 text-center">
                 <span className="text-xs font-serif-th text-gold-ink font-semibold">
-                  {isEnglish ? "Independently Verifiable Audit Hashes" : "ตรวจสอบลำดับแฮชย้อนหลังได้ทุกครั้ง"}
+                  {isEnglish ? "Check it yourself, every time" : "ตรวจสอบย้อนหลังได้ทุกครั้ง"}
                 </span>
               </div>
             </div>
@@ -384,23 +384,23 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
   
                 <div className="text-center space-y-1">
                   <span className="text-xs font-serif-th font-bold text-gold-ink tracking-wider uppercase block">
-                    {isEnglish ? "Pillar III" : "เสาเอกที่ ๓"}
+                    {isEnglish ? "Pillar III" : "จุดเด่นที่ 3"}
                   </span>
                   <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors"><ThaiPhrases>
-                    {isEnglish ? "Jungian Psychology & Empathetic AI" : "จิตวิทยาและการพยากรณ์ AI"}
+                    {isEnglish ? "An AI Reader That Reads You, Not Just the Cards" : "แม่หมอ AI ที่อ่านใจ ไม่ใช่แค่อ่านไพ่"}
                   </ThaiPhrases></h3>
                 </div>
   
                 <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed text-left">
                   {isEnglish
-                    ? "Our AI oracles are grounded in Carl Jung's analytical psychology (Archetypes & Synchronicity) and Golden Dawn elemental dignities. We illuminate the energies beneath your query to provide compassionate, empowering counsel that honors your agency."
-                    : "แม่หมอ AI ของเราได้รับการฝึกฝนบนหลักจิตวิเคราะห์เชิงลึกของ Carl Jung (Archetypes & Synchronicity) และคัมภีร์ Golden Dawn เคมีคู่ธาตุ วิเคราะห์พลังงานใต้คำถามเพื่อให้คำปรึกษาที่โอบอุ้มจิตใจ สร้างมุมมองใหม่ และเสริมพลังเจตจำนงให้คุณก้าวต่อไปได้อย่างมั่นใจ"}
+                    ? "Our AI reader follows Carl Jung's idea that tarot images mirror what we feel deep inside, and checks how the cards support or clash through fire, water, air and earth. So it does not just tell you what will happen — it helps you see where you stand and what to do next."
+                    : "แม่หมอ AI อ่านไพ่ตามแนวคิดจิตวิทยาของคาร์ล ยุง ที่มองว่าภาพบนไพ่สะท้อนความรู้สึกลึก ๆ ในใจเรา และดูว่าไพ่แต่ละใบเสริมกันหรือขัดกันตามธาตุ ไฟ น้ำ ลม ดิน จึงไม่ได้บอกแค่ว่าจะเกิดอะไร แต่ช่วยให้เห็นว่าใจเราอยู่ตรงไหน และควรก้าวต่ออย่างไร"}
                 </p>
               </div>
   
               <div className="pt-4 border-t border-line-warm/40 text-center">
                 <span className="text-xs font-serif-th text-gold-ink font-semibold">
-                  {isEnglish ? "Empowering Insights & Sovereign Agency" : "คำปรึกษาเชิงบวก เสริมพลังเจตจำนง"}
+                  {isEnglish ? "Kind, practical advice" : "คำแนะนำที่ใจดีและทำได้จริง"}
                 </span>
               </div>
             </div>
@@ -428,7 +428,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
             </ThaiPhrases></h2>
             <p className="text-xs sm:text-sm text-muted font-serif-th max-w-2xl">
               {isEnglish
-                ? "Explore archetypal layouts designed for every life question, and discover the comprehensive meanings of all 78 Rider-Waite cards."
+                ? "Explore layouts for every kind of question, and discover the comprehensive meanings of all 78 Rider-Waite cards."
                 : "เลือกผังพยากรณ์ที่ตอบโจทย์ชีวิตของคุณ พร้อมเรียนรู้ความหมายไพ่ทาโรต์ 1909 ครบทั้ง 78 ใบ"}
             </p>
           </div>
@@ -598,7 +598,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
             </ThaiPhrases></h2>
             <p className="text-xs sm:text-sm text-muted font-serif-th max-w-2xl [text-wrap:balance]">
               {isEnglish
-                ? "Deep dives into divination techniques, ancient iconography, and the psychology of archetypal tarot."
+                ? "Guides to reading the cards, the symbols in the art, and how tarot connects to everyday life."
                 : "เจาะลึกเทคนิคการเปิดไพ่ ความหมายสัญลักษณ์โบราณ และศาสตร์จิตวิทยาไพ่ทาโรต์"}
             </p>
           </div>
@@ -672,7 +672,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           </ThaiPhrases></h2>
           <p className="text-sm sm:text-base text-muted font-serif-th max-w-2xl mx-auto leading-relaxed [text-wrap:balance]">
             {isEnglish
-              ? "Clarifying questions about our online divination sanctuary, cryptographic accuracy, and AI methodology."
+              ? "Answers about how our online readings work, how the shuffle stays fair, and how the AI reads your cards."
               : "ไขข้อข้องใจเกี่ยวกับระบบดูดวงออนไลน์ ความแม่นยำ และหลักการทำงานของ SeerTarot"}
           </p>
         </div>

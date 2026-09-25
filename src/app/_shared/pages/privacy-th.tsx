@@ -59,8 +59,8 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
               และซิงก์สมุดบันทึกดวงชะตาข้ามอุปกรณ์ของคุณ
             </li>
             <li>
-              <strong>บัญชีอีเมลและรหัสผ่าน (กรณีลงทะเบียนด้วยอีเมล)</strong> — เราจัดเก็บเฉพาะอีเมลและค่าแฮชของรหัสผ่านแบบเค็ม
-              (PBKDF2/SHA-256) โดยไม่มีการจัดเก็บรหัสผ่านจริงในระบบเด็ดขาด
+              <strong>บัญชีอีเมลและรหัสผ่าน (กรณีลงทะเบียนด้วยอีเมล)</strong> — เราเก็บเฉพาะอีเมล ส่วนรหัสผ่านถูกแปลงเป็นรหัสลับทางเดียวก่อนเก็บ
+              (ถอดกลับเป็นรหัสผ่านจริงไม่ได้ · มาตรฐาน PBKDF2/SHA-256) ระบบจึงไม่มีรหัสผ่านจริงของคุณเลย
             </li>
             <li>
               <strong>อีเมลสำหรับการแจ้งเตือน (ไม่บังคับ)</strong> — ใช้สำหรับส่งสรุปดวงประจำวัน (Daily Digest)
@@ -109,7 +109,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
         {/* Section 3 */}
         <section className="space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>
-            3. การจัดเก็บข้อมูล และสถาปัตยกรรมคลาวด์ (Data Retention &amp; Storage)
+            3. เราเก็บข้อมูลไว้ที่ไหน นานแค่ไหน
           </ThaiPhrases></h2>
           <div className="text-sm text-ink leading-relaxed space-y-2 font-serif-th">
             <p>
@@ -118,8 +118,8 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
               เซสชันการประมวลผลคำทำนายชั่วคราวบนเซิร์ฟเวอร์จะหมดอายุอัตโนมัติภายใน 2 ชั่วโมง
             </p>
             <p>
-              <strong>สำหรับผู้ใช้ที่เข้าสู่ระบบ:</strong> บันทึกประวัติดูดวงและข้อมูลบัญชีจะถูกจัดเก็บอย่างปลอดภัยบน Cloudflare D1
-              ฐานข้อมูลแบบกระจายศูนย์ระดับโลก พร้อมการเข้ารหัสความปลอดภัยทั้งขณะจัดเก็บ (Encryption at Rest) และขณะส่งผ่านเครือข่าย (TLS 1.3 In Transit)
+              <strong>สำหรับผู้ใช้ที่เข้าสู่ระบบ:</strong> บันทึกประวัติดูดวงและข้อมูลบัญชีจะถูกเก็บในฐานข้อมูลของ Cloudflare
+              เข้ารหัสทั้งตอนเก็บและตอนส่งผ่านอินเทอร์เน็ต
               โดยคุณมีสิทธิสมบูรณ์ในการขอดาวน์โหลดหรือสั่งลบข้อมูลทั้งหมดได้ตลอดเวลา
             </p>
           </div>
@@ -157,12 +157,12 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
         {/* Section 5: AI Disclosure */}
         <section className="altar-card-porcelain !rounded-xl space-y-3 p-5">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>
-            5. การเปิดเผยเรื่อง AI และความโปร่งใส (AI Transparency Disclosure)
+            5. คำทำนายมาจาก AI
           </ThaiPhrases></h2>
           <div className="text-sm text-ink leading-relaxed space-y-2 font-serif-th">
             <p>
               คำทำนายทั้งหมดในวิหารนี้ <strong>สร้างขึ้นโดยปัญญาประดิษฐ์ (AI)</strong>{" "}
-              ร่วมกับระบบสุ่มไพ่ทางคณิตศาสตร์ที่ตรวจสอบความโปร่งใสได้ (Provably-Fair SHA-256)
+              จากไพ่ที่สุ่มจริงและคุณตรวจสอบย้อนหลังได้เอง
             </p>
             <p>
               &quot;แม่หมอ&quot; ในระบบคือ <strong>บุคลิก AI (Persona)</strong> ที่ถูกออกแบบมาเพื่อมอบมุมมอง
@@ -178,7 +178,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
         {/* Section 6: Safety */}
         <section className="altar-card-porcelain !rounded-xl space-y-3 p-5">
           <h2 className="text-lg font-bold text-err font-serif-th"><ThaiPhrases>
-            6. ความปลอดภัยของผู้ใช้ และข้อจำกัดความรับผิดชอบ (Safety Guardrails)
+            6. ความปลอดภัยของผู้ใช้ และข้อจำกัดความรับผิดชอบ
           </ThaiPhrases></h2>
           <div className="text-sm text-err leading-relaxed space-y-2 font-serif-th">
             <p>ระบบของเรามีตัวกรองความปลอดภัยที่ทำงานตรวจจับความเสี่ยงตลอดเวลา:</p>

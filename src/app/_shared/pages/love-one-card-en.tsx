@@ -156,9 +156,8 @@ export function LoveOneCardBodyEn({ ritual }: { ritual: ReactNode }) {
             </ThaiPhrases></h3>
             <p>
               A single card cannot hedge. It gives you one image to sit with instead of a narrative you can rearrange
-              until it says what you wanted. The draw itself runs in your own browser through the Web Crypto API, and
-              every reading publishes a SHA-256 commit-reveal proof you can check — the deck order was fixed before you
-              chose, and no card is ever invented or swapped.
+              until it says what you wanted. The shuffle is truly random and you can check it
+              yourself: the deck order is locked before you choose, and no card is ever invented or swapped.
             </p>
           </SeoArticleShell>
         </div>

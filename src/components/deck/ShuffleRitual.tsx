@@ -236,7 +236,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
       {commitment && (
         <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-inset-warm border border-line-warm text-[13px] font-mono text-muted">
           <span>
-            {isEnglish ? "Transparency Hash (SHA-256): " : "รหัสยืนยันความโปร่งใส (SHA-256): "}
+            {isEnglish ? "Deck lock code: " : "รหัสล็อกลำดับไพ่: "}
             {commitment.slice(0, 16)}…{commitment.slice(-8)}
           </span>
           <button

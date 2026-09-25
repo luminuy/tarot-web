@@ -208,8 +208,8 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
 
       {/* High-Impact Interactive CTA Box */}
       <div className="altar-card-porcelain !rounded-xl p-6 sm:p-8 text-center space-y-4 relative overflow-hidden">
-        <div className="glass-chip inline-flex items-center gap-2 px-3 py-1 text-[13px] text-gold-ink font-mono font-bold">
-          {isEnglish ? "Interactive Provably-Fair Divination" : "Interactive Provably-Fair Reading"}
+        <div className="glass-chip inline-flex items-center gap-2 px-3 py-1 text-[13px] text-gold-ink font-serif-th font-bold">
+          {isEnglish ? "Draw your own cards · verifiable shuffle" : "เปิดไพ่ด้วยมือคุณเอง · สุ่มจริง ตรวจสอบได้"}
         </div>
         <h2 className="font-serif-th text-xl sm:text-3xl font-bold text-ink"><ThaiPhrases>
           {isEnglish

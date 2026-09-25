@@ -1659,14 +1659,14 @@ export default function TarotFlow({
                     {(isEnglish
                       ? [
                           ["Authentic 1909 Rider-Waite · 78 cards", "1909 Rider-Waite · 78 cards"],
-                          ["Provably-Fair SHA-256 randomness", "Provably fair"],
+                          ["Truly random, verifiable shuffle", "Verifiable shuffle"],
                           REQUIRE_SIGNUP_TO_READ
                             ? [`Free account · ${DAILY_LIMIT} ${READINGS_EN} a day`, `Free · ${DAILY_LIMIT}/day`]
                             : ["Free · No sign-up", "Free · No sign-up"],
                         ]
                       : [
                           ["สำรับ 1909 Rider-Waite แท้ 78 ใบ", "Rider-Waite แท้ 78 ใบ"],
-                          ["สุ่มโปร่งใส Provably-Fair SHA-256", "สุ่มโปร่งใส SHA-256"],
+                          ["ไพ่สุ่มจริง ตรวจสอบได้", "สุ่มจริง ตรวจสอบได้"],
                           REQUIRE_SIGNUP_TO_READ
                             ? [`สมัครสมาชิกฟรี · เปิดไพ่ได้วันละ ${DAILY_LIMIT} ครั้ง`, `สมัครฟรี · วันละ ${DAILY_LIMIT} ครั้ง`]
                             : ["ฟรี · ไม่ต้องสมัคร", "ฟรี · ไม่ต้องสมัคร"],
