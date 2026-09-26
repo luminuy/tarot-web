@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo } from "react";
 import { SPREADS, PUBLIC_SPREADS, type Spread } from "@/data/spreads";
-import { LocaleLink } from "@/components/ui/LocaleLink";
 import { RailArrows } from "@/components/ui/RailArrows";
 import { useRail } from "@/components/ui/use-rail";
 import {
@@ -509,37 +508,19 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
       </div>
 
       {/*
-        แถวล่างของสไลด์ (คำสั่งเจ้าของ 2026-09-24 รอบ 2: "ไม่เอาจุด ปุ่มลูกศรโอเคสวยดีแล้ว")
-          ลิงก์ "ดูผังทั้งหมด" ชิดซ้าย · ลูกศรแบบ apple.com ชิดขวา — แถวเดียวจบ ไม่มีปุ่มลอยแยกบรรทัด
-          จอใหญ่ของหน้าแรก (featured): ลูกศรย้ายไปลอยทับกลางแถวแบบ apple.com (`RailArrows overlay`) เหลือลิงก์ชิดซ้าย
-          โหมด full จอใหญ่ยังเป็นกริด ไม่มีลูกศร
+        แถวล่างของสไลด์ (มือถือเท่านั้น): ลูกศรแบบ apple.com ชิดขวา
+          จอใหญ่ของหน้าแรก (featured) ลูกศรลอยทับกลางแถว (`RailArrows overlay`) · โหมด full จอใหญ่เป็นกริด ไม่มีลูกศร
+        ถอดปุ่ม "ดูผังทั้งหมด 26 แบบ" แล้ว — แถวปัดโชว์ครบทุกผังอยู่แล้ว (คำสั่งเจ้าของ 2026-09-26)
         เดิมมีจุดบอกตำแหน่ง (แตะ = เลือกผัง) — ถอดออกแล้ว การ์ดแตะเลือกได้เองอยู่แล้ว
       */}
-      <div className={`flex items-center justify-between gap-3 pt-0.5 pb-1 ${variant === "featured" ? "" : "sm:justify-center"}`}>
-        {variant === "featured" ? (
-          <LocaleLink
-            href="/spreads"
-            className="btn-glass-ghost inline-flex items-center gap-1.5 px-4 py-2 sm:px-5 sm:py-2.5 hover:text-gold-ink font-serif-th text-xs sm:text-sm font-semibold transition-colors duration-200"
-          >
-            <span>
-              {isEnglish
-                ? `View all ${PUBLIC_SPREADS.length} spreads`
-                : `ดูผังทั้งหมด ${PUBLIC_SPREADS.length} แบบ`}
-            </span>
-            <span aria-hidden="true">→</span>
-          </LocaleLink>
-        ) : (
-          <span />
-        )}
-        <div className="sm:hidden">
-          <RailArrows
-            isEnglish={isEnglish}
-            canPrev={rail.canPrev}
-            canNext={rail.canNext}
-            onPrev={rail.prev}
-            onNext={rail.next}
-          />
-        </div>
+      <div className="flex items-center justify-end gap-3 pt-0.5 pb-1 sm:hidden">
+        <RailArrows
+          isEnglish={isEnglish}
+          canPrev={rail.canPrev}
+          canNext={rail.canNext}
+          onPrev={rail.prev}
+          onNext={rail.next}
+        />
       </div>
 
       {/* Selected Spread In-Focus Action Bar
