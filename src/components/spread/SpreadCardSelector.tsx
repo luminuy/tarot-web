@@ -2,8 +2,8 @@
 
 import React, { useState, useMemo } from "react";
 import { SPREADS, PUBLIC_SPREADS, type Spread } from "@/data/spreads";
-import { LocaleLink } from "@/components/ui/LocaleLink";
 import { RailArrows } from "@/components/ui/RailArrows";
+import { useRail } from "@/components/ui/use-rail";
 import {
   SparkleTabIcon,
   HeartTabIcon,
@@ -60,7 +60,7 @@ interface SpreadCardSelectorProps {
    */
   proceedLabel?: string;
   /**
-   * `"featured"` = โหมดหน้าแรก โชว์ 3 ผังที่คนเลือกบ่อย + ลิงก์ไปหน้ารวม
+   * `"featured"` = โหมดหน้าแรก แถวปัดครบทุกผังสาธารณะ (3 ผังที่คนเลือกบ่อยขึ้นก่อน) + ลิงก์ไปหน้ารวม
    * `"full"` (ค่าเริ่มต้น) = ของเดิมทุกอย่าง แท็บหมวดหมู่ครบ 5 แท็บ
    * ⚠️ ค่าเริ่มต้นต้องเป็น "full" เพื่อไม่ให้ผู้เรียกเดิมทุกจุดเปลี่ยนพฤติกรรมเอง
    */
@@ -112,7 +112,22 @@ import { useLocale } from "@/lib/i18n";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
+/**
+ * หน้าแรก: 3 ผังที่คนเลือกบ่อยขึ้นก่อน แล้วตามด้วยผังสาธารณะที่เหลือครบทุกผัง
+ * (คำสั่งเจ้าของ 2026-09-26: "โชว์ครบ 26 ผัง สไลด์ไปทางขวา")
+ */
 const FEATURED_SPREAD_IDS = ["three-card", "yes-no", "love"];
+
+/**
+ * ความกว้างการ์ดในแถวปัดหน้าแรกตั้งแต่ sm ขึ้นไป — เห็น 2 ใบกับอีกเสี้ยว (แท็บเล็ต) / 3 ใบกับอีกเสี้ยว (จอใหญ่)
+ * ช่องว่าง 16px (`gap-4`) นับรวมแล้ว · เลขเดียวกับ `.home-rail` ใน globals.css แถวอื่นของหน้าแรกจึงกว้างเท่ากัน
+ */
+const SPREAD_RAIL_ITEM =
+  "sm:w-[calc((100%_-_32px)/2.25)] sm:max-w-none lg:w-[calc((100%_-_48px)/3.25)] sm:snap-start";
+const FEATURED_SPREADS: Spread[] = [
+  ...FEATURED_SPREAD_IDS.map((id) => PUBLIC_SPREADS.find((s) => s.id === id)).filter((s): s is Spread => Boolean(s)),
+  ...PUBLIC_SPREADS.filter((s) => !FEATURED_SPREAD_IDS.includes(s.id)),
+];
 
 export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
   selectedSpread,
@@ -138,11 +153,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
   );
 
   const filteredSpreads = useMemo(() => {
-    if (variant === "featured") {
-      return FEATURED_SPREAD_IDS.map((id) => SPREADS.find((s) => s.id === id)).filter(
-        (s): s is Spread => Boolean(s)
-      );
-    }
+    if (variant === "featured") return FEATURED_SPREADS;
     switch (activeCategory) {
       case "recommended":
         return SPREADS.filter((s) =>
@@ -179,7 +190,6 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
    * state ที่ตั้งจากการกดของผู้ใช้ไม่มีปัญหานี้ เพราะเปลี่ยนพร้อมกับ `key` ในเรนเดอร์เดียวกัน
    */
   const [hasSwappedTab, setHasSwappedTab] = useState(false);
-  const [activeScrollIndex, setActiveScrollIndex] = useState(0);
 
   /**
    * ป๊อปอัพ "เริ่มการดูดวงเลย" — เด้งทันทีที่แตะเลือกการ์ดผัง
@@ -190,25 +200,14 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
   const [hasEverOpenedModal, setHasEverOpenedModal] = useState(false);
 
   /*
-   * Sync scroll position with active dot indicator on mobile
+   * สถานะแถวปัด (ใบที่ชิดซ้าย + ลูกศร) — วัดจากการ์ดจริง ใช้ได้ทั้งมือถือและจอใหญ่
    *
-   * ⚠️ หยุดทำงานทันทีที่ป๊อปอัพเปิดอยู่ (INC-0137)
-   * ตอนแตะการ์ด เราสั่งเลื่อนแบบ `smooth` พร้อมกับเปิดป๊อปอัพในจังหวะเดียวกัน
-   * แรงเลื่อนนั้นวิ่งต่ออีกราว 300–500 ms ทับกับอนิเมชันขาเข้าของป๊อปอัพพอดี
-   * และยิง `onScroll` รัวเป็นสิบครั้ง ➔ `setActiveScrollIndex` ➔ เรนเดอร์ใหม่ทั้งแผง
-   * ➔ `isCardVisibleOrNear` พลิกไปมาจน `<CardImage />` ถูกถอด/ใส่กลางอนิเมชัน
-   * ผู้ใช้เห็นเป็นอาการ "กระพริบ" ของฉากหลังและป๊อปอัพกระตุกตามไปด้วย
+   * ⚠️ หยุดฟังการเลื่อนทันทีที่ป๊อปอัพเปิดอยู่ (INC-0137)
+   * ตอนแตะการ์ด เราสั่งเลื่อนพร้อมกับเปิดป๊อปอัพในจังหวะเดียวกัน ถ้ายังฟังอยู่ `onScroll` จะยิงรัว
+   * ➔ เรนเดอร์ใหม่ทั้งแผง ➔ `<CardImage />` ถูกถอด/ใส่กลางอนิเมชัน = ผู้ใช้เห็นเป็นอาการกระพริบ
    */
-  const handleCarouselScroll = () => {
-    if (showStartModal) return;
-    if (!carouselRef.current) return;
-    const { scrollLeft, clientWidth } = carouselRef.current;
-    const cardWidth = Math.min(clientWidth * 0.82, 310) + 16; // 82vw or max 310px + gap
-    const newIdx = Math.round(scrollLeft / cardWidth);
-    if (newIdx >= 0 && newIdx < filteredSpreads.length && newIdx !== activeScrollIndex) {
-      setActiveScrollIndex(newIdx);
-    }
-  };
+  const rail = useRail(carouselRef, filteredSpreads.length, showStartModal);
+  const activeScrollIndex = rail.activeIndex;
 
   /**
    * @param instant เลื่อนแบบตัดภาพทันทีแทนการไหล — ใช้ตอนที่กำลังจะมีป๊อปอัพมาบังจออยู่แล้ว
@@ -220,20 +219,29 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
     if (children && children[index]) {
       (children[index] as HTMLElement).scrollIntoView({
         behavior: instant ? "auto" : smoothScrollBehavior(),
-        inline: "center",
+        inline: "nearest",
         block: "nearest",
       });
-      setActiveScrollIndex(index);
     }
   };
 
   // Reset scroll on category change
   React.useEffect(() => {
-    setActiveScrollIndex(0);
     if (carouselRef.current) {
       carouselRef.current.scrollTo({ left: 0, behavior: smoothScrollBehavior() });
     }
+    rail.sync();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCategory]);
+
+  /**
+   * หน้าแรกมีครบทุกผัง — วาดภาพประกอบเฉพาะใบที่ผู้ใช้เลื่อนมาถึงแล้ว (+ อีก 4 ใบข้างหน้า)
+   * แล้วค้างไว้ไม่ถอดกลับ · ข้อความชื่อผัง/คำโปรยยังอยู่ใน HTML ครบทุกใบ
+   */
+  const [renderedUpTo, setRenderedUpTo] = useState(4);
+  React.useEffect(() => {
+    setRenderedUpTo((n) => Math.max(n, activeScrollIndex + 4));
+  }, [activeScrollIndex]);
 
   // Defer off-screen carousel spread illustrations on mobile to keep initial LCP and image payload minimal
   const [shouldRenderAllSpreads, setShouldRenderAllSpreads] = useState(false);
@@ -322,6 +330,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
 
           `key={activeCategory}` ทำให้ React ถอดของเก่าแล้วสร้างใหม่ คีย์เฟรมจึงเล่นซ้ำทุกครั้ง
           ที่สลับแท็บ โดยไม่ต้องมีไลบรารีคอยคุม lifecycle ให้ */}
+      <div className="rail-wrap">
       <div
         key={variant === "featured" ? "featured" : activeCategory}
         {...(variant !== "featured"
@@ -332,12 +341,14 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
             }
           : {})}
         ref={carouselRef}
-        onScroll={handleCarouselScroll}
-        className={`${hasSwappedTab ? "anim-swap-rise-sm" : ""} rail-flat flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:grid ${
+        onScroll={rail.onScroll}
+        /* หน้าแรก (featured): แถวปัดทุกความกว้างจอ — จอใหญ่จัดวางแบบเดียวกับมือถือ (คำสั่งเจ้าของ 2026-09-26)
+           เห็นใบถัดไปโผล่ขอบขวาเป็นสัญญาณว่าปัดได้ · ความกว้างการ์ดดูที่ `SPREAD_RAIL_ITEM` */
+        className={`${hasSwappedTab ? "anim-swap-rise-sm" : ""} rail-flat flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth ${
           variant === "featured"
-            ? "sm:grid-cols-3"
-            : "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-        } sm:gap-5 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible`}
+            ? "rail-always"
+            : "sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-5 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible"
+        }`}
       >
           {filteredSpreads.map((spread, idx) => {
             const isSelected = selectedSpread.id === spread.id;
@@ -362,7 +373,9 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
             };
 
             const isCardVisibleOrNear =
-              idx <= 1 || shouldRenderAllSpreads || Math.abs(idx - activeScrollIndex) <= 1;
+              variant === "featured"
+                ? idx <= renderedUpTo
+                : idx <= 1 || shouldRenderAllSpreads || Math.abs(idx - activeScrollIndex) <= 1;
 
             return (
               <div
@@ -396,7 +409,9 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                  * คลาส `.altar-*` เขียนไว้นอก cascade layer จึงชนะ utility ของ Tailwind เสมอ
                  * ผลคือ utility พวกนั้นจะไม่มีผลอะไรเลยนอกจากทำให้คนอ่านเข้าใจผิดว่าการ์ดเป็นสีขาวทึบ
                  */
-                className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink transition duration-300 transform-gpu cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink group/card ${
+                className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center ${
+                  variant === "featured" ? SPREAD_RAIL_ITEM : "sm:w-auto sm:max-w-none sm:flex-shrink"
+                } transition duration-300 transform-gpu cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink group/card ${
                   isSelected
                     ? "altar-panel-active ring-4 ring-gold-ink/20"
                     : isLocked
@@ -480,38 +495,32 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
             );
           })}
       </div>
+        {variant === "featured" && (
+          <RailArrows
+            overlay
+            isEnglish={isEnglish}
+            canPrev={rail.canPrev}
+            canNext={rail.canNext}
+            onPrev={rail.prev}
+            onNext={rail.next}
+          />
+        )}
+      </div>
 
       {/*
-        แถวล่างของสไลด์ (คำสั่งเจ้าของ 2026-09-24 รอบ 2: "ไม่เอาจุด ปุ่มลูกศรโอเคสวยดีแล้ว")
-          มือถือ: ลิงก์ "ดูผังทั้งหมด" ชิดซ้าย · ลูกศรแบบ apple.com ชิดขวา — แถวเดียวจบ ไม่มีปุ่มลอยแยกบรรทัด
-          จอใหญ่: เป็นกริด ไม่มีลูกศร เหลือลิงก์กลางแถว
+        แถวล่างของสไลด์ (มือถือเท่านั้น): ลูกศรแบบ apple.com ชิดขวา
+          จอใหญ่ของหน้าแรก (featured) ลูกศรลอยทับกลางแถว (`RailArrows overlay`) · โหมด full จอใหญ่เป็นกริด ไม่มีลูกศร
+        ถอดปุ่ม "ดูผังทั้งหมด 26 แบบ" แล้ว — แถวปัดโชว์ครบทุกผังอยู่แล้ว (คำสั่งเจ้าของ 2026-09-26)
         เดิมมีจุดบอกตำแหน่ง (แตะ = เลือกผัง) — ถอดออกแล้ว การ์ดแตะเลือกได้เองอยู่แล้ว
       */}
-      <div className="flex items-center justify-between gap-3 pt-0.5 pb-1 sm:justify-center">
-        {variant === "featured" ? (
-          <LocaleLink
-            href="/spreads"
-            className="btn-glass-ghost inline-flex items-center gap-1.5 px-4 py-2 sm:px-5 sm:py-2.5 hover:text-gold-ink font-serif-th text-xs sm:text-sm font-semibold transition-colors duration-200"
-          >
-            <span>
-              {isEnglish
-                ? `View all ${PUBLIC_SPREADS.length} spreads`
-                : `ดูผังทั้งหมด ${PUBLIC_SPREADS.length} แบบ`}
-            </span>
-            <span aria-hidden="true">→</span>
-          </LocaleLink>
-        ) : (
-          <span />
-        )}
-        <div className="sm:hidden">
-          <RailArrows
-            isEnglish={isEnglish}
-            canPrev={activeScrollIndex > 0}
-            canNext={activeScrollIndex < filteredSpreads.length - 1}
-            onPrev={() => scrollToCard(Math.max(0, activeScrollIndex - 1))}
-            onNext={() => scrollToCard(Math.min(filteredSpreads.length - 1, activeScrollIndex + 1))}
-          />
-        </div>
+      <div className="flex items-center justify-end gap-3 pt-0.5 pb-1 sm:hidden">
+        <RailArrows
+          isEnglish={isEnglish}
+          canPrev={rail.canPrev}
+          canNext={rail.canNext}
+          onPrev={rail.prev}
+          onNext={rail.next}
+        />
       </div>
 
       {/* Selected Spread In-Focus Action Bar

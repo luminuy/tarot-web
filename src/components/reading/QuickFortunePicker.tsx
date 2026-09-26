@@ -3,12 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { RailArrows } from "@/components/ui/RailArrows";
+import { useRail } from "@/components/ui/use-rail";
 import type { Category } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
 
 import { useLocale } from "@/lib/i18n";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
-import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 export interface QuickTopic {
@@ -236,28 +236,8 @@ export function QuickFortunePicker({
    * ถ้าถอดทันทีจะดับหายวับ ผิดกฎคุณภาพโมชั่นของบ้านนี้
    */
   useDialogBehavior(showNicknameModal, () => closeNicknameModal(), nicknamePanelRef);
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  const handleScroll = () => {
-    const el = carouselRef.current;
-    if (!el) return;
-    const cardWidth = Math.min(el.clientWidth * 0.82, 280);
-    const newIndex = Math.round(el.scrollLeft / (cardWidth + 12));
-    const clamped = Math.max(0, Math.min(newIndex, QUICK_TOPICS.length - 1));
-    if (clamped !== activeIndex) {
-      setActiveIndex(clamped);
-    }
-  };
-
-  const scrollToIndex = (index: number) => {
-    const el = carouselRef.current;
-    if (!el) return;
-    const cards = el.querySelectorAll<HTMLElement>("[data-card-index]");
-    if (cards[index]) {
-      cards[index].scrollIntoView({ behavior: smoothScrollBehavior(), inline: "center", block: "nearest" });
-      setActiveIndex(index);
-    }
-  };
+  /* แถวปัดทุกความกว้างจอ — จอใหญ่จัดวางแบบเดียวกับมือถือ (คำสั่งเจ้าของ 2026-09-26) */
+  const rail = useRail(carouselRef, QUICK_TOPICS.length);
 
   return (
     <div className="space-y-5 sm:space-y-6 w-full">
@@ -293,11 +273,11 @@ export function QuickFortunePicker({
       </div>
 
       {/* การ์ด 4 หัวข้อยอดนิยม (Mobile: Horizontal Swipe / Desktop: 4-Column Grid พอเหมาะกับเว็บ) */}
-      <div className="w-full">
+      <div className="rail-wrap w-full">
         <div
           ref={carouselRef}
-          onScroll={handleScroll}
-          className="rail-flat flex flex-row overflow-x-auto snap-x snap-mandatory gap-3 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible"
+          onScroll={rail.onScroll}
+          className="rail-flat rail-always flex flex-row overflow-x-auto snap-x snap-mandatory gap-3 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:gap-4"
         >
           {QUICK_TOPICS.map((topic, index) => (
             <div
@@ -322,7 +302,7 @@ export function QuickFortunePicker({
                  * ⚠️ ห้ามเอาพื้นไล่สีทึบ (`from-surface …`) กลับมา — ทึบ 100% บนพื้นหลังไล่สี
                  * จะอ่านเป็นกล่องขาวลอย ไม่ใช่กระจก
                  */
-                className="altar-card-porcelain w-[82vw] max-w-[280px] shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink group relative flex flex-col justify-between p-4 sm:p-4.5 transform-gpu cursor-pointer select-none text-left overflow-hidden min-h-[368px] sm:min-h-[392px]"
+                className="altar-card-porcelain w-[82vw] max-w-[280px] shrink-0 snap-center sm:w-[calc((100%_-_32px)/2.25)] sm:max-w-none lg:w-[calc((100%_-_48px)/3.25)] sm:snap-start group relative flex flex-col justify-between p-4 sm:p-4.5 transform-gpu cursor-pointer select-none text-left overflow-hidden min-h-[368px] sm:min-h-[392px]"
             >
               {/* สัญลักษณ์มุมการ์ดทองคำเปลว */}
               
@@ -404,14 +384,24 @@ export function QuickFortunePicker({
           ))}
         </div>
 
-        {/* แถวล่างของสไลด์: ลูกศรแบบ apple.com ชิดขวา (เจ้าของสั่งถอดจุดบอกตำแหน่งออก 2026-09-24) */}
+        {/* จอใหญ่: ลูกศรลอยทับกลางแถว ชิดขอบจอแบบ apple.com Store (2026-09-26) */}
+        <RailArrows
+          overlay
+          isEnglish={isEnglish}
+          canPrev={rail.canPrev}
+          canNext={rail.canNext}
+          onPrev={rail.prev}
+          onNext={rail.next}
+        />
+
+        {/* มือถือ: ลูกศรใต้แถวชิดขวา (เจ้าของสั่งถอดจุดบอกตำแหน่งออก 2026-09-24) */}
         <div className="flex sm:hidden items-center justify-end pt-1 pb-1">
           <RailArrows
             isEnglish={isEnglish}
-            canPrev={activeIndex > 0}
-            canNext={activeIndex < QUICK_TOPICS.length - 1}
-            onPrev={() => scrollToIndex(Math.max(0, activeIndex - 1))}
-            onNext={() => scrollToIndex(Math.min(QUICK_TOPICS.length - 1, activeIndex + 1))}
+            canPrev={rail.canPrev}
+            canNext={rail.canNext}
+            onPrev={rail.prev}
+            onNext={rail.next}
           />
         </div>
       </div>

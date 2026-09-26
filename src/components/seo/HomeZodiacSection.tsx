@@ -1,6 +1,7 @@
 import { RouteLink as Link } from "@/components/ui/RouteLink";
 import { CardImage } from "@/components/card/CardImage";
 import { HomeRailNav } from "@/components/seo/HomeRailNav";
+import { ZodiacWheel, type ZodiacWheelSign } from "@/components/encyclopedia/ZodiacWheel";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 import { ZODIAC_SIGNS } from "@/data/zodiac";
 import { ZODIAC_INDEX_PATH, zodiacSignPath } from "@/lib/tarot/zodiac";
@@ -51,6 +52,20 @@ const FEATURES = [
 
 const SUMMARY_BY_ID = new Map(CARD_SUMMARIES.map((card) => [card.id, card]));
 
+/** ข้อมูลที่วงล้อใช้ — ราศีที่หาไพ่ไม่เจอถูกตัดออก ไม่กุไพ่แทน (กฎเหล็กข้อ 14) */
+const WHEEL_SIGNS: ZodiacWheelSign[] = ZODIAC_SIGNS.flatMap((sign) => {
+  const card = SUMMARY_BY_ID.get(sign.majorCardId);
+  return card
+    ? [{ id: sign.id, nameTh: sign.nameTh, nameEn: sign.nameEn, major: { id: card.id, image: card.image, nameEn: card.nameEn } }]
+    : [];
+});
+
+const MONTHS_TH = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+const MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+const SELECT_CLASS =
+  "glass-field w-full rounded-xl border border-line-interactive-warm px-3 py-2.5 text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors";
+
 export function HomeZodiacSection({ isEnglish, href }: { isEnglish: boolean; href: (path: string) => string }) {
   return (
     <section
@@ -71,12 +86,12 @@ export function HomeZodiacSection({ isEnglish, href }: { isEnglish: boolean; hre
               ถูกหักกลางคำเป็น "(สุริย / ยาตร์)" เจ้าของเห็นจากภาพหน้าจอ */}
           <p className="text-xs sm:text-sm text-muted font-serif-th max-w-3xl">
             {isEnglish ? (
-              "Every sign has its own Major Arcana card. Look up your sign by the Western or the Thai (sidereal) calendar and meet the cards that belong to you."
+              "Every sign has its own Major Arcana card. Enter your birthday in the wheel, or tap your sign, to meet the cards that belong to you in both the Western and the Thai (sidereal) calendar."
             ) : (
               <>
                 ทุกราศีมีไพ่ชุดใหญ่ประจำตัว ดูได้ทั้งราศีแบบสากลและราศีแบบไทย{" "}
                 <span className="whitespace-nowrap">(สุริยยาตร์)</span>
-                <br className="hidden sm:inline" /> แตะราศีของคุณเพื่อดูไพ่ประจำราศี ดาวเจ้าเรือน และไพ่ประจำช่วงวันเกิด
+                <br className="hidden sm:inline" /> ใส่วันเกิดกลางวงล้อ หรือแตะราศีของคุณเพื่อดูไพ่ประจำราศี ดาวเจ้าเรือน และไพ่ประจำช่วงวันเกิด
               </>
             )}
           </p>
@@ -94,43 +109,59 @@ export function HomeZodiacSection({ isEnglish, href }: { isEnglish: boolean; hre
             prefetch={false}
             className="text-xs font-serif-th font-semibold text-gold-ink hover:underline whitespace-nowrap shrink-0"
           >
-            {isEnglish ? "Open the zodiac wheel →" : "เปิดวงล้อจักรราศี →"}
+            {isEnglish ? "All about zodiac cards →" : "ดูไพ่ประจำราศีแบบละเอียด →"}
           </Link>
         </div>
-        {/* 6 ใบต่อแถวเหมือนกล่องเมเจอร์ อาร์คานา · มือถือเป็นสไลด์ปัด (แบบ apple.com) แทนกริด 4 แถวยาวเหยียด */}
-        <div data-rail>
-          <ul className="home-rail home-rail-sm grid grid-cols-3 sm:grid-cols-6 gap-2.5 sm:gap-4" data-rail-track>
-            {ZODIAC_SIGNS.map((sign) => {
-              const card = SUMMARY_BY_ID.get(sign.majorCardId);
-              return (
-                <li key={sign.id}>
-                  <Link
-                    href={href(zodiacSignPath(sign.id))}
-                    prefetch={false}
-                    className="glass-tile group flex flex-col items-center gap-1.5 p-2 sm:p-4 h-full"
-                  >
-                    <div className="glass-tile !rounded-md w-11 sm:w-14 aspect-[2/3] overflow-hidden group-hover:scale-105 transition-transform duration-200">
-                      {/* ภาพประกอบล้วน — ชื่อราศีและชื่อไพ่พิมพ์อยู่ใต้ภาพแล้ว (INC-0125) */}
-                      {card && (
-                        <CardImage
-                          image={card.image}
-                          alt=""
-                          className="w-full h-full object-cover"
-                          sizes="(min-width: 640px) 56px, 44px"
-                        />
-                      )}
-                    </div>
-                    <span className="text-xs font-serif-th font-bold text-ink text-center leading-tight">
-                      {isEnglish ? sign.nameEn : sign.nameTh}
-                    </span>
-                    {card && <span className="text-[10px] text-muted text-center leading-tight">{card.nameEn}</span>}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-          <HomeRailNav isEnglish={isEnglish} />
-        </div>
+        {/*
+          วงล้อจักรราศีตัวเดียวกับหัวหน้า /cards/zodiac (คำสั่งเจ้าของ 2026-09-26 แทนกริด 12 ช่องเดิม)
+          ส่วนนี้เป็น HTML นิ่ง ไม่มี JS — ฟอร์มกลางวงส่งแบบ GET ไปหน้าราศี `?day=&month=`
+          แล้ว `ZodiacFinder` ที่นั่นหาให้ทันที (ไม่ลาก island เข้าหน้าแรก บันเดิลไม่โต)
+          ไม่มีป้าย "ฤดูนี้" เพราะหน้าแรกบิลด์ครั้งเดียว ป้ายจะค้างผิดเดือน
+        */}
+        <ZodiacWheel
+          signs={WHEEL_SIGNS}
+          isEnglish={isEnglish}
+          hrefFor={(id) => href(zodiacSignPath(id))}
+        >
+          <form action={href(ZODIAC_INDEX_PATH)} method="get" className="space-y-3">
+            <div className="text-center space-y-0.5">
+              <p className="text-base sm:text-lg font-serif-th font-bold text-ink">
+                {isEnglish ? "When were you born?" : "คุณเกิดวันไหน?"}
+              </p>
+              <p className="text-[12px] text-muted font-sans">
+                {isEnglish ? "No year needed · western + Thai" : "ไม่ต้องใส่ปี · บอกทั้งราศีสากลและไทย"}
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-1">
+              <label className="block">
+                <span className="sr-only">{isEnglish ? "Day" : "วันที่เกิด"}</span>
+                <select name="day" defaultValue="1" className={SELECT_CLASS}>
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                    <option key={d} value={d}>
+                      {isEnglish ? `Day ${d}` : `วันที่ ${d}`}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block">
+                <span className="sr-only">{isEnglish ? "Month" : "เดือนเกิด"}</span>
+                <select name="month" defaultValue="1" className={SELECT_CLASS}>
+                  {(isEnglish ? MONTHS_EN : MONTHS_TH).map((name, i) => (
+                    <option key={name} value={i + 1}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <button
+              type="submit"
+              className="btn-gold-glass w-full min-h-[44px] py-2.5 px-4 text-sm font-serif-th font-bold duration-200 cursor-pointer active:scale-95"
+            >
+              {isEnglish ? "Find my cards" : "ดูไพ่ของฉัน"}
+            </button>
+          </form>
+        </ZodiacWheel>
       </div>
 
       <div data-rail>
