@@ -331,6 +331,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
 
           `key={activeCategory}` ทำให้ React ถอดของเก่าแล้วสร้างใหม่ คีย์เฟรมจึงเล่นซ้ำทุกครั้ง
           ที่สลับแท็บ โดยไม่ต้องมีไลบรารีคอยคุม lifecycle ให้ */}
+      <div className="rail-wrap">
       <div
         key={variant === "featured" ? "featured" : activeCategory}
         {...(variant !== "featured"
@@ -346,7 +347,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
            เห็นใบถัดไปโผล่ขอบขวาเป็นสัญญาณว่าปัดได้ · ความกว้างการ์ดดูที่ `SPREAD_RAIL_ITEM` */
         className={`${hasSwappedTab ? "anim-swap-rise-sm" : ""} rail-flat flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth ${
           variant === "featured"
-            ? "rail-always sm:mx-0 sm:px-0"
+            ? "rail-always"
             : "sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-5 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible"
         }`}
       >
@@ -495,11 +496,23 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
             );
           })}
       </div>
+        {variant === "featured" && (
+          <RailArrows
+            overlay
+            isEnglish={isEnglish}
+            canPrev={rail.canPrev}
+            canNext={rail.canNext}
+            onPrev={rail.prev}
+            onNext={rail.next}
+          />
+        )}
+      </div>
 
       {/*
         แถวล่างของสไลด์ (คำสั่งเจ้าของ 2026-09-24 รอบ 2: "ไม่เอาจุด ปุ่มลูกศรโอเคสวยดีแล้ว")
           ลิงก์ "ดูผังทั้งหมด" ชิดซ้าย · ลูกศรแบบ apple.com ชิดขวา — แถวเดียวจบ ไม่มีปุ่มลอยแยกบรรทัด
-          หน้าแรก (featured) เป็นแบบนี้ทุกความกว้างจอ (2026-09-26) · โหมด full จอใหญ่ยังเป็นกริด ไม่มีลูกศร
+          จอใหญ่ของหน้าแรก (featured): ลูกศรย้ายไปลอยทับกลางแถวแบบ apple.com (`RailArrows overlay`) เหลือลิงก์ชิดซ้าย
+          โหมด full จอใหญ่ยังเป็นกริด ไม่มีลูกศร
         เดิมมีจุดบอกตำแหน่ง (แตะ = เลือกผัง) — ถอดออกแล้ว การ์ดแตะเลือกได้เองอยู่แล้ว
       */}
       <div className={`flex items-center justify-between gap-3 pt-0.5 pb-1 ${variant === "featured" ? "" : "sm:justify-center"}`}>
@@ -518,7 +531,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
         ) : (
           <span />
         )}
-        <div className={variant === "featured" ? "" : "sm:hidden"}>
+        <div className="sm:hidden">
           <RailArrows
             isEnglish={isEnglish}
             canPrev={rail.canPrev}

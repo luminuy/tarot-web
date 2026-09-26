@@ -273,11 +273,11 @@ export function QuickFortunePicker({
       </div>
 
       {/* การ์ด 4 หัวข้อยอดนิยม (Mobile: Horizontal Swipe / Desktop: 4-Column Grid พอเหมาะกับเว็บ) */}
-      <div className="w-full">
+      <div className="rail-wrap w-full">
         <div
           ref={carouselRef}
           onScroll={rail.onScroll}
-          className="rail-flat rail-always flex flex-row overflow-x-auto snap-x snap-mandatory gap-3 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:gap-4 sm:mx-0 sm:px-0"
+          className="rail-flat rail-always flex flex-row overflow-x-auto snap-x snap-mandatory gap-3 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:gap-4"
         >
           {QUICK_TOPICS.map((topic, index) => (
             <div
@@ -384,8 +384,18 @@ export function QuickFortunePicker({
           ))}
         </div>
 
-        {/* แถวล่างของสไลด์: ลูกศรแบบ apple.com ชิดขวา (เจ้าของสั่งถอดจุดบอกตำแหน่งออก 2026-09-24) */}
-        <div className="flex items-center justify-end pt-1 pb-1">
+        {/* จอใหญ่: ลูกศรลอยทับกลางแถว ชิดขอบจอแบบ apple.com Store (2026-09-26) */}
+        <RailArrows
+          overlay
+          isEnglish={isEnglish}
+          canPrev={rail.canPrev}
+          canNext={rail.canNext}
+          onPrev={rail.prev}
+          onNext={rail.next}
+        />
+
+        {/* มือถือ: ลูกศรใต้แถวชิดขวา (เจ้าของสั่งถอดจุดบอกตำแหน่งออก 2026-09-24) */}
+        <div className="flex sm:hidden items-center justify-end pt-1 pb-1">
           <RailArrows
             isEnglish={isEnglish}
             canPrev={rail.canPrev}

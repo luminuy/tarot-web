@@ -2245,6 +2245,77 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
   cursor: default;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   จอใหญ่ (≥ 640px) แบบ apple.com Store (คำสั่งเจ้าของ 2026-09-26 รอบ 2: "ในคอมเอาแบบนี้ โทรศัพท์แบบเดิม")
+   • แถวลากยาวทะลุขอบจอขวา (และซ้ายเมื่อเลื่อนไปแล้ว) แต่ใบแรกยังตรงแนวหัวข้อของส่วน
+     margin ลบดึงกล่องออกไปชนขอบจอ · padding เท่ากันดันการ์ดกลับเข้าแนว
+     (ความกว้าง content box ของแถว = ความกว้างคอนเทนเนอร์เดิม สูตรความกว้างการ์ดด้านบนจึงใช้ได้ต่อ)
+     ⚠️ ปิด snap บนจอใหญ่ (แบบ apple.com) — `scroll-padding` แบบ % อิงความกว้างของแถวเอง ไม่ใช่ของคอนเทนเนอร์
+        snap จึงดึงใบแรกไปชิดขอบจอตั้งแต่โหลด (วัดจริง: เลื่อนเอง 130px ที่จอ 1364) · ลูกศรเลื่อนทีละใบพอดีแนวอยู่แล้ว
+     ⚠️ ส่วนเกิน 100vw (แถบเลื่อนแนวตั้ง) ถูกตัดด้วย `overflow-x: clip` ที่ <html> อยู่แล้ว
+   • ลูกศรวงกลมลอยทับกลางแถว ชิดขอบจอซ้าย/ขวา · ถึงหัวแถวลูกศรซ้ายหาย ถึงท้ายแถวลูกศรขวาหาย
+     `[data-rail-nav]` = HTML นิ่ง (`HomeRailNav`) · `.rail-nav-overlay` = ฝั่ง React (`RailArrows overlay`)
+   • `.home-rail-sm` (ไพ่เล็กในกล่องขาว) ไม่ทะลุกล่อง — ลูกศรคร่อมขอบกล่องแทน
+   มือถือ (< 640px) ไม่แตะ: ลูกศรอยู่ใต้แถวชิดขวาเหมือนเดิม
+   ───────────────────────────────────────────────────────────────────────── */
+.rail-nav-overlay {
+  display: none;
+}
+@media (min-width: 640px) {
+  [data-rail],
+  .rail-wrap {
+    position: relative;
+  }
+  .home-rail:not(.home-rail-sm),
+  .rail-flat.rail-always {
+    margin-inline: calc(50% - 50vw);
+    padding-inline: calc(50vw - 50%);
+    scroll-snap-type: none;
+  }
+  [data-rail-nav],
+  .rail-nav-overlay {
+    position: absolute;
+    z-index: 2;
+    top: 6px;
+    bottom: 18px;
+    left: calc(50% - 50vw);
+    right: calc(50% - 50vw);
+    margin: 0;
+    padding-inline: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+  [data-rail]:has(> .home-rail-sm) > [data-rail-nav] {
+    left: -22px;
+    right: -22px;
+    padding-inline: 0;
+  }
+  [data-rail-nav] > .home-rail-btn,
+  .rail-nav-overlay > .home-rail-btn {
+    pointer-events: auto;
+    width: 48px;
+    height: 48px;
+    background: rgba(236, 229, 216, 0.92);
+    box-shadow: 0 2px 10px rgba(41, 38, 31, 0.12);
+  }
+  [data-rail-nav] > .home-rail-btn:hover,
+  .rail-nav-overlay > .home-rail-btn:hover {
+    background: rgba(226, 217, 201, 0.96);
+  }
+  [data-rail-nav] > .home-rail-btn:disabled,
+  .rail-nav-overlay > .home-rail-btn:disabled {
+    opacity: 0;
+    pointer-events: none;
+  }
+  [data-rail-nav] > .home-rail-btn svg,
+  .rail-nav-overlay > .home-rail-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
 /* ═════════════════════════════════════════════════════════════════════════
    🪗 ท้ายเว็บบนมือถือ: คอลัมน์ลิงก์พับได้ (`SiteFooter` + `footer-accordion.ts`)
    ผูกกับคลาส `footer-collapsible` บน <html> ที่สคริปต์ตั้ง — ไม่มีสคริปต์ = กางครบเหมือนเดิม

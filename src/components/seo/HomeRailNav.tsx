@@ -7,6 +7,7 @@
  *
  * ปุ่ม "ก่อนหน้า" เริ่มแบบ disabled เพราะแถวเริ่มที่ใบแรกเสมอ · เห็นทุกความกว้างจอ (จอใหญ่เป็นแถวปัดเหมือนมือถือ 2026-09-26)
  * การ์ดพอดีแถว (ไม่ต้องเลื่อน) ➔ สคริปต์ปิดปุ่มทั้งคู่ ➔ CSS `[data-rail-nav]` ซ่อนทั้งแถว
+ * มือถือ: อยู่ใต้แถวชิดขวา · จอใหญ่ (≥ 640px): CSS ย้ายไปลอยทับกลางแถว ชิดขอบจอซ้าย/ขวาแบบ apple.com Store
  */
 export function HomeRailNav({ isEnglish, className = "" }: { isEnglish: boolean; className?: string }) {
   const arrow = (d: string) => (
