@@ -5,6 +5,8 @@
  *   • แตะลูกศร ➔ เลื่อนทีละ 1 ใบ (ความกว้างการ์ด + ช่องว่าง) · ผู้ใช้ปิดแอนิเมชัน = กระโดดทันที
  *   • ถึงหัว/ท้ายแถว ➔ ปุ่มฝั่งนั้นจาง (disabled) แบบ apple.com
  *   • ฟังการเลื่อนแบบ passive + รวบเป็นเฟรมเดียวด้วย rAF — ปัดนิ้วไม่กระตุก
+ *   • จอใหญ่ก็เป็นแถวปัด (2026-09-26) — แถวที่การ์ดพอดีไม่ต้องเลื่อน ปุ่มทั้งคู่ถูกปิด แล้ว CSS ซ่อนแถวปุ่ม
+ *     ตรวจตอนโหลด · ตอนเปลี่ยนขนาดจอ · และตอนเมาส์/นิ้วแตะแถว (กรณี DOM ชุดใหม่จาก `TarotFlow`)
  *
  * ⚠️ ดักที่ระดับ document (event delegation) ไม่ผูกกับปุ่มทีละตัว — เนื้อหานี้เป็น slot ของ `TarotFlow`
  *    ซึ่งถอดออกตอนผู้ใช้เข้าขั้นดูดวง แล้วใส่ DOM ชุดใหม่กลับมาตอนกลับหน้าเลือกผัง
@@ -69,4 +71,31 @@ document.addEventListener(
     }
   },
   { capture: true, passive: true }
+);
+
+/* ตรวจทุกแถวตอนโหลด/เปลี่ยนขนาดจอ — แถวที่ไม่ล้นจะได้ซ่อนลูกศร (สองปุ่ม disabled) */
+function syncAll(): void {
+  document.querySelectorAll<HTMLElement>(TRACK).forEach(syncButtons);
+}
+syncAll();
+let resizeRaf = 0;
+window.addEventListener(
+  "resize",
+  () => {
+    cancelAnimationFrame(resizeRaf);
+    resizeRaf = requestAnimationFrame(syncAll);
+  },
+  { passive: true }
+);
+/* `TarotFlow` ถอด/ใส่เนื้อหาชุดนี้ใหม่ได้ — ชุดใหม่ยังไม่ถูกตรวจ ตรวจตอนผู้ใช้ชี้/แตะแถวครั้งแรก */
+const seen = new WeakSet<HTMLElement>();
+document.addEventListener(
+  "pointerover",
+  (event) => {
+    const track = (event.target as Element | null)?.closest<HTMLElement>("[data-rail]")?.querySelector<HTMLElement>(TRACK);
+    if (!track || seen.has(track)) return;
+    seen.add(track);
+    syncButtons(track);
+  },
+  { passive: true }
 );

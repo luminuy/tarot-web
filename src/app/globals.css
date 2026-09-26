@@ -2110,8 +2110,8 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
       วาดสีด้วย ::before กว้าง 100vw จึงไม่ต้องรื้อ max-width / padding ของแต่ละส่วน
       ⚠️ ห้ามทาสีทึบ — พื้นไล่สีอุ่นของ body ต้องโปร่งทะลุได้ (ดูคอมเมนต์ใน TarotFlow)
       ⚠️ ห้าม backdrop-filter (INC-0056)
-   2) `.home-rail` — บนมือถือ (< 640px) กริดการ์ดกลายเป็นแถวปัดซ้ายขวา snap ทีละใบ
-      เห็นใบถัดไปโผล่ขอบจอ (บอกว่าปัดได้) · ตั้งแต่ sm ขึ้นไปกลับเป็นกริดเดิมของมันเอง
+   2) `.home-rail` — กริดการ์ดกลายเป็นแถวปัดซ้ายขวา snap ทีละใบ ทุกความกว้างจอ (2026-09-26)
+      เห็นใบถัดไปโผล่ขอบ (บอกว่าปัดได้) · คลาส grid-cols-* ที่เหลือใน JSX ไม่มีผลแล้ว (display ถูกทับ)
       เขียนนอก @layer จึงชนะคลาส `grid` ของ Tailwind ได้โดยไม่ต้อง !important
       ปุ่มลูกศร (`.home-rail-btn`) ทำงานด้วย `astro/scripts/home-rails.ts`
    ═════════════════════════════════════════════════════════════════════════ */
@@ -2150,46 +2150,79 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
   }
 }
 
+/* แถวปัดใช้ทุกความกว้างจอ — จอใหญ่จัดวางแบบเดียวกับมือถือ (คำสั่งเจ้าของ 2026-09-26: "ทำให้ตรงกัน")
+   ต่างกันแค่ความกว้างการ์ด: มือถือ ~1.2 ใบ · แท็บเล็ต 2 ใบกับอีกเสี้ยว · จอใหญ่ 3 ใบกับอีกเสี้ยว
+   (เสี้ยวที่โผล่ขอบขวา = สัญญาณว่าปัดได้) · สูตรเดียวกับ `SPREAD_RAIL_ITEM` / การ์ดเปิดไพ่ด่วน
+   การ์ดพอดีแถวไม่ต้องเลื่อน ➔ สคริปต์ปิดปุ่มทั้งคู่ แล้ว `[data-rail-nav]` ซ่อนตัวเอง (ดูท้ายบล็อก) */
+.home-rail {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  padding: 6px 0 18px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.home-rail::-webkit-scrollbar {
+  display: none;
+}
+/* grow 1 = แถวที่การ์ดน้อยพอดีจอ (เช่น 3 ใบ) ยืดเต็มแถว ไม่เหลือที่ว่างขวา · แถวที่ล้นไม่มีที่ว่างให้ยืด จึงไม่มีผล */
+.home-rail > * {
+  flex: 1 0 auto;
+  width: calc((100% - 32px) / 2.25);
+  scroll-snap-align: start;
+}
+.home-rail.home-rail-sm > * {
+  width: calc((100% - 64px) / 4.5);
+}
+@media (min-width: 1024px) {
+  .home-rail > * {
+    width: calc((100% - 48px) / 3.25);
+  }
+  .home-rail.home-rail-sm > * {
+    width: calc((100% - 96px) / 6.5);
+  }
+}
 @media (max-width: 639.98px) {
   .home-rail {
-    display: flex;
     gap: 12px;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
     scroll-padding-inline: 16px;
     margin-inline: -16px;
     padding: 6px 16px 18px;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-  .home-rail::-webkit-scrollbar {
-    display: none;
   }
   .home-rail > * {
-    flex: 0 0 auto;
+    flex-grow: 0;
     width: min(80vw, 300px);
-    scroll-snap-align: start;
   }
   .home-rail.home-rail-sm > * {
     width: min(31vw, 124px);
   }
 }
-/* การ์ดในแถวปัดบนมือถือ: ไม่มีเงา — กล่องเลื่อน (overflow-x) ตัดเงาขอบล่างทิ้งเหลือเป็นแถบเทาดำ
+/* การ์ดในแถวปัด: ไม่มีเงา — กล่องเลื่อน (overflow-x) ตัดเงาขอบล่างทิ้งเหลือเป็นแถบเทาดำ
    ใต้การ์ด (เจ้าของทักจากภาพหน้าจอ 2026-09-24) · การ์ดยังมีขอบ/พื้นกระจกแยกจากพื้นหลังอยู่
-   `.rail-flat` = แถวปัดฝั่ง React (เปิดไพ่ด่วน · เลือกผัง) ที่ไม่ได้ใช้คลาส `.home-rail` */
+   `.rail-flat` = แถวปัดฝั่ง React (เปิดไพ่ด่วน · เลือกผัง) ที่ไม่ได้ใช้คลาส `.home-rail`
+   `.rail-always` = แถวฝั่ง React ที่เป็นแถวปัดทุกความกว้างจอ (หน้าแรก) — แถวอื่นจอใหญ่ยังเป็นกริด มีเงาได้ */
+.home-rail > *,
+.home-rail > * > .altar-card-porcelain,
+.home-rail > * > .glass-tile {
+  box-shadow: none;
+}
 @media (max-width: 639.98px) {
-  .home-rail > *,
-  .home-rail > * > .altar-card-porcelain,
-  .home-rail > * > .glass-tile,
   .rail-flat > * {
     box-shadow: none;
   }
 }
-@media (max-width: 639.98px) and (prefers-reduced-motion: no-preference) {
+.rail-flat.rail-always > * {
+  box-shadow: none;
+}
+@media (prefers-reduced-motion: no-preference) {
   .home-rail {
     scroll-behavior: smooth;
   }
+}
+[data-rail-nav]:has(> [data-rail-prev]:disabled):has(> [data-rail-next]:disabled) {
+  display: none;
 }
 
 .home-rail-btn {

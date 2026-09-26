@@ -1,11 +1,12 @@
 /**
- * ⬅️➡️ ปุ่มลูกศรใต้สไลด์การ์ดบนมือถือ — แบบเดียวกับ apple.com (วงกลมเทาอ่อน ชิดขวา)
+ * ⬅️➡️ ปุ่มลูกศรใต้สไลด์การ์ด — แบบเดียวกับ apple.com (วงกลมเทาอ่อน ชิดขวา)
  * ---------------------------------------------------------------------------
  * ใช้คู่กับคลาส `.home-rail` (globals.css) — ห่อทั้งคู่ด้วย `<div data-rail>` แล้วใส่
  * `data-rail-track` ที่ตัวแถวการ์ด · สคริปต์ `astro/scripts/home-rails.ts` ผูกปุ่มกับแถวให้
  * (ส่วนที่ใช้เป็น HTML นิ่ง ไม่ hydrate จึงผูกด้วยสคริปต์ธรรมดา ไม่ใช่ React)
  *
- * ปุ่ม "ก่อนหน้า" เริ่มแบบ disabled เพราะแถวเริ่มที่ใบแรกเสมอ · ปุ่มเห็นเฉพาะมือถือ (จอใหญ่เป็นกริด)
+ * ปุ่ม "ก่อนหน้า" เริ่มแบบ disabled เพราะแถวเริ่มที่ใบแรกเสมอ · เห็นทุกความกว้างจอ (จอใหญ่เป็นแถวปัดเหมือนมือถือ 2026-09-26)
+ * การ์ดพอดีแถว (ไม่ต้องเลื่อน) ➔ สคริปต์ปิดปุ่มทั้งคู่ ➔ CSS `[data-rail-nav]` ซ่อนทั้งแถว
  */
 export function HomeRailNav({ isEnglish, className = "" }: { isEnglish: boolean; className?: string }) {
   const arrow = (d: string) => (
@@ -23,7 +24,7 @@ export function HomeRailNav({ isEnglish, className = "" }: { isEnglish: boolean;
     </svg>
   );
   return (
-    <div className={`flex sm:hidden justify-end gap-3 -mt-1 ${className}`}>
+    <div data-rail-nav className={`flex justify-end gap-3 -mt-1 ${className}`}>
       <button
         type="button"
         data-rail-prev

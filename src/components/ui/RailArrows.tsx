@@ -1,6 +1,7 @@
 /**
- * ⬅️➡️ ลูกศรใต้สไลด์การ์ดบนมือถือ (ฝั่ง React) — หน้าตาเดียวกับ `HomeRailNav` (ฝั่ง HTML นิ่ง)
+ * ⬅️➡️ ลูกศรใต้สไลด์การ์ด (ฝั่ง React) — หน้าตาเดียวกับ `HomeRailNav` (ฝั่ง HTML นิ่ง)
  * วงกลมเทาอ่อนชิดขวาแบบ apple.com · ถึงหัว/ท้ายแถวปุ่มฝั่งนั้นจาง · ขนาดกดจริง 44px ด้วย `tap-overlay`
+ * การ์ดพอดีแถว ไม่ต้องเลื่อน (สองปุ่มกดไม่ได้ทั้งคู่) ➔ ไม่วาดปุ่มเลย · สถานะมาจาก `useRail`
  */
 export function RailArrows({
   isEnglish,
@@ -15,6 +16,7 @@ export function RailArrows({
   onPrev: () => void;
   onNext: () => void;
 }) {
+  if (!canPrev && !canNext) return null;
   const arrow = (d: string) => (
     <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
       <path d={d} />
