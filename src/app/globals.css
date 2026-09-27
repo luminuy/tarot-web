@@ -1123,9 +1123,76 @@ html {
   transform: translateZ(0);
 }
 
+/*
+ * ✦ แถวผังหน้าแรก — ของประดับที่วาดด้วย pseudo-element แทน element จริง (งบ DOM หน้าแรก ≤ 1,500 · INC-0247)
+ * ─────────────────────────────────────────────────────────────────────────
+ * หน้าตาเท่ากับของเดิมทุกพิกเซล แต่ไม่กินโหนดใน HTML:
+ *   `.spread-chip::after`       = ไอคอนชิปหมวด (เดิม <svg> + <path> 2–4 ชิ้นต่อชิป) · `order:-1` ให้ขึ้นหน้าข้อความ
+ *                                  ⚠️ `::before` เป็นของ `.tap-overlay-y` (พื้นที่กด 44px) ห้ามแย่ง
+ *   `.spread-card-sheen::after` = ชั้นประกายทองของการ์ดผัง (เดิม <div class="gold-foil-sheen">)
+ */
+/* หัวลูกศรของ `RailArrows` (ฝั่ง React) — ทรงเดียวกับ <svg> 20×20 stroke 2 เดิม · ขนาด 16px (มือถือ) / 20px (ลอยทับบนจอใหญ่) */
+.rail-arrow-prev::after,
+.rail-arrow-next::after {
+  content: "";
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  -webkit-mask: var(--rail-arrow) center / contain no-repeat;
+  mask: var(--rail-arrow) center / contain no-repeat;
+}
+.rail-arrow-prev {
+  --rail-arrow: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12.5%204.5%207%2010l5.5%205.5%22%2F%3E%3C%2Fsvg%3E");
+}
+.rail-arrow-next {
+  --rail-arrow: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M7.5%204.5%2013%2010l-5.5%205.5%22%2F%3E%3C%2Fsvg%3E");
+}
+@media (min-width: 640px) {
+  .rail-nav-overlay > .home-rail-btn::after {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.spread-chip::after {
+  content: "";
+  order: -1;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  background-color: var(--color-muted);
+  -webkit-mask: var(--chip-icon) center / contain no-repeat;
+  mask: var(--chip-icon) center / contain no-repeat;
+}
+
+.spread-chip[aria-selected="true"]::after {
+  background-color: currentColor;
+}
+
+.spread-card-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 30%,
+    rgba(228, 216, 196, 0.28) 50%,
+    transparent 80%
+  );
+  opacity: 0.15;
+  transition: opacity 150ms ease;
+  pointer-events: none;
+}
+
+.spread-card-sheen:hover::after {
+  opacity: 0.3;
+}
+
 /* Disable expensive hover effects on touch devices */
 @media (hover: none) and (pointer: coarse) {
-  .gold-foil-sheen {
+  .gold-foil-sheen,
+  .spread-card-sheen::after {
     display: none !important;
   }
   /* แผงแท่นบูชาไม่ใช้ backdrop-filter แล้ว จึงไม่ต้อง override ซ้ำตรงนี้ */
