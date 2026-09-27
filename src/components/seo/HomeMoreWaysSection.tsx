@@ -83,6 +83,7 @@ const POPULAR_SEARCHES = [
   { path: "/spreads/topic/love", th: "ดูดวงไพ่ยิปซีความรัก", en: "Love tarot spreads" },
   { path: "/spreads/three-card", th: "ดูดวงไพ่ยิปซี 3 ใบ", en: "3-card tarot reading" },
   { path: "/spreads/monthly", th: "ดูดวงไพ่ยิปซีรายเดือน", en: "Monthly tarot reading" },
+  { path: "/spreads/celtic-cross", th: "ดูดวงไพ่ยิปซี 10 ใบ", en: "10-card Celtic Cross" },
   { path: "/spreads/yes-no", th: "ไพ่ยิปซี ใช่หรือไม่", en: "Yes or no tarot" },
   { path: "/cards", th: "ความหมายไพ่ทาโร่ 78 ใบ", en: "Tarot card meanings" },
   { path: "/cards/all", th: "ความหมายไพ่ยิปซีทั้งหมด", en: "All 78 cards at a glance" },
