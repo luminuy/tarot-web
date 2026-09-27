@@ -154,23 +154,24 @@ export function HomeMoreWaysSection({ isEnglish, href }: { isEnglish: boolean; h
         <HomeRailNav isEnglish={isEnglish} />
       </div>
 
-      <nav aria-labelledby="home-popular-searches-title" className="pt-2">
-        <h3 id="home-popular-searches-title" className="text-sm font-serif-th font-bold text-ink">
+      {/* ลิงก์อยู่ใน <nav> ตรง ๆ ไม่ห่อ ul/li — หน้าแรกมีงบ DOM ≤ 1,500 (INC-0247) ห่อแล้วเกิน 4 ชิ้น */}
+      <nav
+        aria-labelledby="home-popular-searches-title"
+        className="pt-2 flex flex-wrap gap-x-5 gap-y-2.5"
+      >
+        <h3 id="home-popular-searches-title" className="w-full text-sm font-serif-th font-bold text-ink">
           {isEnglish ? "Popular searches" : "คนค้นหาบ่อย"}
         </h3>
-        <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2.5">
-          {POPULAR_SEARCHES.map((item) => (
-            <li key={item.path}>
-              <Link
-                href={href(item.path)}
-                prefetch={false}
-                className="text-xs sm:text-sm font-serif-th text-muted hover:text-gold-ink underline underline-offset-4 transition-colors"
-              >
-                {isEnglish ? item.en : item.th}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        {POPULAR_SEARCHES.map((item) => (
+          <Link
+            key={item.path}
+            href={href(item.path)}
+            prefetch={false}
+            className="text-xs sm:text-sm font-serif-th text-muted hover:text-gold-ink underline underline-offset-4 transition-colors"
+          >
+            {isEnglish ? item.en : item.th}
+          </Link>
+        ))}
       </nav>
     </section>
   );
