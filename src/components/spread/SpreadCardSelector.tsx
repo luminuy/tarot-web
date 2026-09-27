@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { SPREADS, PUBLIC_SPREADS, type Spread } from "@/data/spreads";
+import { SPREADS, type Spread } from "@/data/spreads";
 import { RailArrows } from "@/components/ui/RailArrows";
 import { useRail } from "@/components/ui/use-rail";
 import {
@@ -10,7 +10,11 @@ import {
   PentacleTabIcon,
   CrystalBallTabIcon,
   AllSpreadsTabIcon,
+  BoltTabIcon,
+  HourglassTabIcon,
+  EyeTabIcon,
 } from "@/components/ui/TarotArtIcons";
+import { SPREADS_BY_CATEGORY, type SpreadCategoryId } from "@/data/spread-categories";
 import { CardImage } from "@/components/card/CardImage";
 import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { isStandardSpread } from "@/lib/entitlement/limits";
@@ -60,7 +64,7 @@ interface SpreadCardSelectorProps {
    */
   proceedLabel?: string;
   /**
-   * `"featured"` = โหมดหน้าแรก แถวปัดครบทุกผังสาธารณะ (3 ผังที่คนเลือกบ่อยขึ้นก่อน) + ลิงก์ไปหน้ารวม
+   * `"featured"` = โหมดหน้าแรก แถวปัด + ชิปหมวดหมู่ (ยอดนิยม · ตามเรื่อง · ผังทั้งหมด) จาก `data/spread-categories.ts`
    * `"full"` (ค่าเริ่มต้น) = ของเดิมทุกอย่าง แท็บหมวดหมู่ครบ 5 แท็บ
    * ⚠️ ค่าเริ่มต้นต้องเป็น "full" เพื่อไม่ให้ผู้เรียกเดิมทุกจุดเปลี่ยนพฤติกรรมเอง
    */
@@ -113,21 +117,11 @@ import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
- * หน้าแรก: 3 ผังที่คนเลือกบ่อยขึ้นก่อน แล้วตามด้วยผังสาธารณะที่เหลือครบทุกผัง
- * (คำสั่งเจ้าของ 2026-09-26: "โชว์ครบ 26 ผัง สไลด์ไปทางขวา")
- */
-const FEATURED_SPREAD_IDS = ["three-card", "yes-no", "love"];
-
-/**
  * ความกว้างการ์ดในแถวปัดหน้าแรกตั้งแต่ sm ขึ้นไป — เห็น 2 ใบกับอีกเสี้ยว (แท็บเล็ต) / 3 ใบกับอีกเสี้ยว (จอใหญ่)
  * ช่องว่าง 16px (`gap-4`) นับรวมแล้ว · เลขเดียวกับ `.home-rail` ใน globals.css แถวอื่นของหน้าแรกจึงกว้างเท่ากัน
  */
 const SPREAD_RAIL_ITEM =
   "sm:w-[calc((100%_-_32px)/2.25)] sm:max-w-none lg:w-[calc((100%_-_48px)/3.25)] sm:snap-start";
-const FEATURED_SPREADS: Spread[] = [
-  ...FEATURED_SPREAD_IDS.map((id) => PUBLIC_SPREADS.find((s) => s.id === id)).filter((s): s is Spread => Boolean(s)),
-  ...PUBLIC_SPREADS.filter((s) => !FEATURED_SPREAD_IDS.includes(s.id)),
-];
 
 export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
   selectedSpread,
@@ -140,6 +134,11 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
 }) => {
   const { isEnglish } = useLocale();
   const [activeCategory, setActiveCategory] = useState<SpreadCategory>("recommended");
+  /**
+   * หน้าแรก: แบ่งหมวด + จัดเรียง (คำสั่งเจ้าของ 2026-09-27) — เปิดมาที่ "ยอดนิยมแนะนำ"
+   * ผังครบทุกผังยังอยู่ในแท็บ "ผังทั้งหมด" (คำสั่ง 2026-09-26 "โชว์ครบ 26 ผัง") เรียงตามหมวดแล้วตามจำนวนไพ่
+   */
+  const [featuredCategory, setFeaturedCategory] = useState<SpreadCategoryId>("popular");
 
   const categories: CategoryTab[] = useMemo(
     () => [
@@ -152,8 +151,22 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
     [isEnglish]
   );
 
+  const featuredCategories: { id: SpreadCategoryId; label: string; Icon: React.FC<{ className?: string }> }[] =
+    useMemo(
+      () => [
+        { id: "popular", label: isEnglish ? "Popular" : "ยอดนิยม", Icon: SparkleTabIcon },
+        { id: "quick", label: isEnglish ? "Quick Answers" : "ถามด่วน", Icon: BoltTabIcon },
+        { id: "love", label: isEnglish ? "Love" : "ความรัก", Icon: HeartTabIcon },
+        { id: "career", label: isEnglish ? "Career & Money" : "งาน & เงิน", Icon: PentacleTabIcon },
+        { id: "time", label: isEnglish ? "Timelines" : "ดวงตามช่วงเวลา", Icon: HourglassTabIcon },
+        { id: "life", label: isEnglish ? "Life & Self" : "ชีวิต & ตัวตน", Icon: EyeTabIcon },
+        { id: "all", label: isEnglish ? "All" : "ทั้งหมด", Icon: AllSpreadsTabIcon },
+      ],
+      [isEnglish]
+    );
+
   const filteredSpreads = useMemo(() => {
-    if (variant === "featured") return FEATURED_SPREADS;
+    if (variant === "featured") return SPREADS_BY_CATEGORY[featuredCategory];
     switch (activeCategory) {
       case "recommended":
         return SPREADS.filter((s) =>
@@ -173,7 +186,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
       default:
         return SPREADS;
     }
-  }, [activeCategory, variant]);
+  }, [activeCategory, featuredCategory, variant]);
 
   const carouselRef = React.useRef<HTMLDivElement>(null);
 
@@ -232,7 +245,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
     }
     rail.sync();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeCategory]);
+  }, [activeCategory, featuredCategory]);
 
   /**
    * หน้าแรกมีครบทุกผัง — วาดภาพประกอบเฉพาะใบที่ผู้ใช้เลื่อนมาถึงแล้ว (+ อีก 4 ใบข้างหน้า)
@@ -265,6 +278,68 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
 
   return (
     <div className="space-y-6 w-full">
+      {/*
+        ชิปหมวดหมู่ของหน้าแรก — หน้าตาชุดเดียวกับแท็บหน้าคลังผัง `/spreads` (`SpreadsLibrary`)
+        มือถือ: แถวเลื่อนข้าง (`w-max mx-auto` — ถ้าใช้ justify-center ตรง ๆ กับกล่อง overflow ชิปซ้ายสุดจะถูกตัดตอนล้นจอ)
+        จอ sm ขึ้นไป: ขึ้นบรรทัดใหม่แทนการล้น ชิปทุกอันจึงมองเห็นครบโดยไม่ต้องเลื่อน
+      */}
+      {variant === "featured" && (
+        <div className="overflow-x-auto no-scrollbar -mx-4 px-4 pb-1 select-none">
+          <div
+            role="tablist"
+            aria-label={isEnglish ? "Spread categories" : "หมวดหมู่ผังพยากรณ์"}
+            className="flex items-center gap-2 w-max mx-auto sm:w-auto sm:flex-wrap sm:justify-center"
+          >
+            {featuredCategories.map((cat, catIdx) => {
+              const isActive = featuredCategory === cat.id;
+              const select = (id: SpreadCategoryId) => {
+                setHasSwappedTab(true);
+                setFeaturedCategory(id);
+              };
+              return (
+                <button
+                  key={cat.id}
+                  role="tab"
+                  id={`spread-tab-${cat.id}`}
+                  aria-controls={`spread-panel-${cat.id}`}
+                  aria-selected={isActive}
+                  tabIndex={isActive ? 0 : -1}
+                  type="button"
+                  onClick={() => select(cat.id)}
+                  onKeyDown={(e) => {
+                    let nextIdx = -1;
+                    if (e.key === "ArrowRight") nextIdx = (catIdx + 1) % featuredCategories.length;
+                    else if (e.key === "ArrowLeft")
+                      nextIdx = (catIdx - 1 + featuredCategories.length) % featuredCategories.length;
+                    if (nextIdx !== -1) {
+                      e.preventDefault();
+                      const next = featuredCategories[nextIdx].id;
+                      select(next);
+                      const nextTab = document.getElementById(`spread-tab-${next}`);
+                      nextTab?.focus();
+                      nextTab?.scrollIntoView({ inline: "nearest", block: "nearest" });
+                    }
+                  }}
+                  className={`tap-overlay-y px-4 py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
+                    isActive ? "btn-gold-glass" : "glass-chip text-ink hover:text-gold-ink"
+                  }`}
+                >
+                  <cat.Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-white" : "text-muted"}`} />
+                  <span>{cat.label}</span>
+                  <span
+                    className={`text-[12px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                      isActive ? "bg-white/20 text-white" : "bg-black/5 text-muted"
+                    }`}
+                  >
+                    {SPREADS_BY_CATEGORY[cat.id].length}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Category Filter Tabs (Linear / Apple Tier Navigation) */}
       {variant !== "featured" && (
         <div
@@ -332,14 +407,10 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
           ที่สลับแท็บ โดยไม่ต้องมีไลบรารีคอยคุม lifecycle ให้ */}
       <div className="rail-wrap">
       <div
-        key={variant === "featured" ? "featured" : activeCategory}
-        {...(variant !== "featured"
-          ? {
-              role: "tabpanel",
-              id: `spread-panel-${activeCategory}`,
-              "aria-labelledby": `spread-tab-${activeCategory}`,
-            }
-          : {})}
+        key={variant === "featured" ? `featured-${featuredCategory}` : activeCategory}
+        role="tabpanel"
+        id={`spread-panel-${variant === "featured" ? featuredCategory : activeCategory}`}
+        aria-labelledby={`spread-tab-${variant === "featured" ? featuredCategory : activeCategory}`}
         ref={carouselRef}
         onScroll={rail.onScroll}
         /* หน้าแรก (featured): แถวปัดทุกความกว้างจอ — จอใหญ่จัดวางแบบเดียวกับมือถือ (คำสั่งเจ้าของ 2026-09-26)
