@@ -53,6 +53,14 @@
   - ทดลองแล้วไม่ใช้: `client:idle` / directive "hydrate หลังวาดเฟรมแรก" — แบบ simulate ดูดีขึ้น (82 ➔ 95) แต่เป็นภาพลวงจาก Chrome headless ในเครื่องนี้ที่นับภาพแรกช้า ~2.4s เสมอ · แบบ devtools throttle ไม่ต่าง (88 · 85–88) · `content-visibility` ห้ามตาม INC-0174
   - **CI #630 ตกงบ DOM หน้าแรก 1,529 > 1,500** (ในเครื่องผ่าน 1,451 เพราะไม่ได้ตั้ง `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT` — CI ตั้ง ➔ ภาพไพ่ทุกใบมี `<source>` AVIF เพิ่ม +78) · ชิปหมวดกิน 41 element ➔ ตัดโดยหน้าตาเท่าเดิม: ไอคอนชิป (`spread-chip-icons.ts` + `.spread-chip::after` mask) · หัวลูกศร `RailArrows` (`.rail-arrow-prev/next::after`) · ประกายการ์ดผังหน้าแรก (`.spread-card-sheen::after`) ➔ แบบ CI: **1,483** (main 1,487) · ถอด `BoltTabIcon`/`HourglassTabIcon`/`EyeTabIcon` ออกจาก TarotArtIcons (ไม่ได้ใช้แล้ว) · ด่านงบ DOM เพิ่มโน้ตวิธีวัดให้ตรง CI
   - งานหนักที่เหลือ: จัดหน้าครั้งแรกระหว่างพาร์ส HTML (long task 116–173ms × 3) · ส่วนที่ DOM เยอะสุดนอกจอแรก = วงล้อจักรราศี 208 · เมนูหัวเว็บ 191
+### 🗓️ 2026-09-27 (รอบ 184): ✦ SEO — อ่านผล GSC แล้วแก้หน้ากำพร้า 14 หน้า (Pick A Card 8 · หมวดผัง 6)
+
+- ดึงผล GSC ผ่าน workflow `seo-gsc.yml` (รัน 28 วัน + สั่งรันเพิ่ม 90 วัน) — หน้าไทยเข้าดัชนีแค่ 50/180 · ที่เหลือส่วนใหญ่ "Google ไม่เคยคลาน"
+- ต้นเหตุที่เจอในโค้ด: หน้า `/pick-a-card` ใช้**ปุ่ม**สลับหัวข้อ ไม่ใช่ลิงก์ ➔ HTML ไม่มีทางไป `/pick-a-card/<slug>` เลย (เข้าดัชนี 0/8) · หน้า `/spreads` ไม่ลิงก์ไป `/spreads/topic/*` (4/6 หน้า "Google ไม่รู้จัก URL")
+- แก้: `pick-a-card-th.tsx` / `pick-a-card-en.tsx` เติมลิงก์ 8 หัวข้อในกล่องลิงก์ท้ายบทความ · `spreads-index.tsx` เติมหมวด "ดูดวงไพ่ยิปซีแยกตามเรื่อง" 6 ลิงก์ในสารบัญผัง (ทั้งไทย/อังกฤษ)
+- ตรวจจาก `dist/` ที่บิลด์จริง: `/pick-a-card` ลิงก์หน้าลูกครบ 8 · `/spreads` ลิงก์หมวดครบ 6 (ทั้งสองภาษา)
+- บันทึกผลคำค้น + หน้าที่ใกล้หน้าแรกไว้ใน `SEO_INDEXING_LOG.md` หัวข้อ "2026-09-27 — อ่านผลเพื่อทำอันดับ"
+
 ### 🗓️ 2026-09-27 (รอบ 183): ✦ SEO — workflow ดึงผล GSC ทุกวันจันทร์ + บันทึกผลจริงครั้งแรก
 
 - เจ้าของสร้าง Service Account `seertarot-gsc` (โปรเจกต์ `tarot-web-507218`) · ให้สิทธิ์ "เต็ม" ใน GSC · ใส่ repository secret `GSC_SERVICE_ACCOUNT_JSON`
