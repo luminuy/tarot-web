@@ -38,6 +38,13 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-09-27 (รอบ 183): ✦ SEO — workflow ดึงผล GSC ทุกวันจันทร์ + บันทึกผลจริงครั้งแรก
+
+- เจ้าของสร้าง Service Account `seertarot-gsc` (โปรเจกต์ `tarot-web-507218`) · ให้สิทธิ์ "เต็ม" ใน GSC · ใส่ repository secret `GSC_SERVICE_ACCOUNT_JSON`
+- เพิ่ม `.github/workflows/seo-gsc.yml` — จันทร์ 09:07 น. + กดรันเองได้ · `permissions: contents: read` · ผลขึ้นหน้า Summary + artifact 90 วัน · ไม่ commit กลับ
+- ผลจริงครั้งแรก (บันทึกใน `SEO_INDEXING_LOG.md`): หน้าไทยเข้าดัชนี 50/180 · คำไทย 59 คำ ติด ≤ 10 แค่ 7 คำหางยาว · 11 หน้าที่ Google ยังไม่รู้จัก
+- ตรวจ: `test-ci-supply-chain` ผ่าน 21/21 · รันทุกคำสั่งกับข้อมูลจริงในเครื่องแล้ว
+
 ### 🗓️ 2026-09-27 (รอบ 182): ✦ SEO — ดึงข้อมูล Google Search Console ผ่าน API ด้วย Service Account ของเราเอง
 
 **คำร้องเจ้าของ**: "seo คำไทย มีติดเยอะไหม" ➔ เช็กจากภายนอกแล้วไม่เจอ seertarot.net ในคำไทยที่ลองค้น 5 คำ (รวมชื่อแบรนด์) แต่ไม่มีตัวเลขจริงจาก Google ➔ "เราทำของเราเอง"
