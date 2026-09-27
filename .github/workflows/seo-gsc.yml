@@ -20,6 +20,11 @@ on:
         description: "ย้อนหลังกี่วัน"
         required: false
         default: "28"
+      submit_sitemap:
+        description: "ส่ง sitemap.xml ให้ Google ใหม่ (หลัง deploy ที่แก้เนื้อหาหลายหน้า)"
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: seo-gsc
@@ -52,6 +57,7 @@ jobs:
           GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
           # ⚠️ ส่ง input ผ่าน env เสมอ — ห้ามฝัง ${{ inputs.* }} ลงในสคริปต์ตรง ๆ (script injection)
           GSC_DAYS: ${{ inputs.days }}
+          GSC_SUBMIT_SITEMAP: ${{ inputs.submit_sitemap }}
         run: |
           set -o pipefail
           if [ -z "$GSC_SERVICE_ACCOUNT_JSON" ]; then
@@ -75,7 +81,11 @@ jobs:
             npm run -s seo:gsc -- inspect --json gsc-report/inspect-th.json
             echo ""
             echo "## Sitemap"
-            npm run -s seo:gsc -- sitemaps
+            if [ "$GSC_SUBMIT_SITEMAP" = "true" ]; then
+              npm run -s seo:gsc -- sitemaps --submit
+            else
+              npm run -s seo:gsc -- sitemaps
+            fi
           } 2>&1 | tee gsc-report/summary.md
 
       - name: 📊 สรุปผลขึ้นหน้า workflow

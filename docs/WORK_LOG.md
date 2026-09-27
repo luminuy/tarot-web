@@ -53,6 +53,13 @@
   - ทดลองแล้วไม่ใช้: `client:idle` / directive "hydrate หลังวาดเฟรมแรก" — แบบ simulate ดูดีขึ้น (82 ➔ 95) แต่เป็นภาพลวงจาก Chrome headless ในเครื่องนี้ที่นับภาพแรกช้า ~2.4s เสมอ · แบบ devtools throttle ไม่ต่าง (88 · 85–88) · `content-visibility` ห้ามตาม INC-0174
   - **CI #630 ตกงบ DOM หน้าแรก 1,529 > 1,500** (ในเครื่องผ่าน 1,451 เพราะไม่ได้ตั้ง `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT` — CI ตั้ง ➔ ภาพไพ่ทุกใบมี `<source>` AVIF เพิ่ม +78) · ชิปหมวดกิน 41 element ➔ ตัดโดยหน้าตาเท่าเดิม: ไอคอนชิป (`spread-chip-icons.ts` + `.spread-chip::after` mask) · หัวลูกศร `RailArrows` (`.rail-arrow-prev/next::after`) · ประกายการ์ดผังหน้าแรก (`.spread-card-sheen::after`) ➔ แบบ CI: **1,483** (main 1,487) · ถอด `BoltTabIcon`/`HourglassTabIcon`/`EyeTabIcon` ออกจาก TarotArtIcons (ไม่ได้ใช้แล้ว) · ด่านงบ DOM เพิ่มโน้ตวิธีวัดให้ตรง CI
   - งานหนักที่เหลือ: จัดหน้าครั้งแรกระหว่างพาร์ส HTML (long task 116–173ms × 3) · ส่วนที่ DOM เยอะสุดนอกจอแรก = วงล้อจักรราศี 208 · เมนูหัวเว็บ 191
+### 🗓️ 2026-09-27 (รอบ 188): ✦ SEO — บอก Google/Bing ว่าหน้าไหนเปลี่ยน หลัง #631 (แทนการกด "ขอการจัดทำดัชนี")
+
+- ปุ่ม "ขอการจัดทำดัชนี" ไม่มีใน API และเซสชันคลาวด์ไม่มีเบราว์เซอร์ที่ล็อกอิน Google ➔ ใช้สัญญาณที่ส่งจากโค้ดได้แทน
+- `src/app/sitemap.ts`: `CONTENT_UPDATED_AT` — lastModified 2026-09-27 เฉพาะ 23 หน้าที่เนื้อหาบนหน้าเปลี่ยนจริง (หน้าแรก · pick-a-card · spreads · topic/love · cards · all · major · minor · ราศี 12) อีก 335 URL คงเดิม
+- `.github/workflows/seo-gsc.yml`: input `submit_sitemap` ➔ `seo:gsc -- sitemaps --submit` ส่ง sitemap ให้ Google ผ่าน API
+- IndexNow (Bing/Yandex ฯลฯ): ยิง 23 URL ที่เปลี่ยน ➔ HTTP 200
+
 ### 🗓️ 2026-09-27 (รอบ 187): ✦ SEO — ราศี 12 หน้าเป็น "ดูดวงราศี…วันนี้" · หน้าความรักลิงก์ "ความรัก 3 ใบ / 10 ใบ"
 
 - Trends ไทย: `ดูดวงราศี` 60 (ใกล้ `ไพ่ยิปซีความรัก` 71) · GSC เห็น `ราศีกรกฎ` `ราศีตุลย์` อันดับ 43–45 แล้ว
