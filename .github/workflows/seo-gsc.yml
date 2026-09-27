@@ -1,0 +1,92 @@
+name: 🔎 SEO รายสัปดาห์ — ดึงผลจาก Google Search Console
+run-name: "🔎 SEO GSC ${{ github.event_name == 'workflow_dispatch' && format('(กดเองโดย {0})', github.actor) || '(ตามเวลา)' }}"
+
+# รัน `npm run seo:gsc` ด้วย repository secret `GSC_SERVICE_ACCOUNT_JSON`
+# ------------------------------------------------------------------------------
+# ทำไมรันบน GitHub: กุญแจ Service Account อยู่ใน repository secrets แล้ว
+# ไม่ต้องอัปโหลดไฟล์กุญแจให้ AI ทุกเซสชัน และ **ห้าม commit กุญแจลงรีโปเด็ดขาด** (รีโปเป็นสาธารณะ)
+#
+# ผลอ่านได้ที่หน้า Summary ของ workflow run · ไฟล์ JSON ดิบแนบเป็น artifact 90 วัน
+# ไม่ commit อะไรกลับเข้ารีโป ➔ ไม่มี PR ขยะทุกสัปดาห์
+#
+# ค่าใช้จ่าย: API ฟรี · `inspect` ใช้โควตา URL Inspection ~180 จาก 2,000 ครั้ง/วัน
+
+on:
+  schedule:
+    - cron: "7 2 * * 1" # จันทร์ 02:07 UTC = 09:07 น. เวลาไทย
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "ย้อนหลังกี่วัน"
+        required: false
+        default: "28"
+
+concurrency:
+  group: seo-gsc
+  cancel-in-progress: false
+
+# 🔒 R-17: อ่านโค้ดอย่างเดียว ไม่เขียนอะไรกลับเข้ารีโป
+permissions:
+  contents: read
+
+jobs:
+  report:
+    name: 🔎 คำค้นไทย · หน้าที่ขึ้นผลค้นหา · สถานะดัชนี
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: ⚙️ Setup Node.js 22
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔎 ดึงผลจาก GSC
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          # ⚠️ ส่ง input ผ่าน env เสมอ — ห้ามฝัง ${{ inputs.* }} ลงในสคริปต์ตรง ๆ (script injection)
+          GSC_DAYS: ${{ inputs.days }}
+        run: |
+          set -o pipefail
+          if [ -z "$GSC_SERVICE_ACCOUNT_JSON" ]; then
+            echo "::error::ไม่มี GSC_SERVICE_ACCOUNT_JSON ใน repository secrets"
+            exit 1
+          fi
+          DAYS="${GSC_DAYS:-28}"
+          case "$DAYS" in ''|*[!0-9]*) echo "::error::days ต้องเป็นตัวเลขล้วน (ได้มา: $DAYS)"; exit 1;; esac
+
+          mkdir -p gsc-report
+          {
+            echo "# 🔎 SEO รายสัปดาห์ ($(date -u +%Y-%m-%d)) — ย้อนหลัง ${DAYS} วัน"
+            echo ""
+            echo "## คำค้นไทย"
+            npm run -s seo:gsc -- queries --days "$DAYS" --limit 50 --json gsc-report/queries-th.json
+            echo ""
+            echo "## หน้าที่ขึ้นผลค้นหา"
+            npm run -s seo:gsc -- pages --days "$DAYS" --limit 30 --json gsc-report/pages.json
+            echo ""
+            echo "## สถานะดัชนีหน้าไทย"
+            npm run -s seo:gsc -- inspect --json gsc-report/inspect-th.json
+            echo ""
+            echo "## Sitemap"
+            npm run -s seo:gsc -- sitemaps
+          } 2>&1 | tee gsc-report/summary.md
+
+      - name: 📊 สรุปผลขึ้นหน้า workflow
+        if: always()
+        run: cat gsc-report/summary.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "(งานล้มก่อนได้ผล)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 📎 แนบผลดิบไว้ให้โหลด
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: gsc-report
+          path: gsc-report/
+          if-no-files-found: warn
+          retention-days: 90
