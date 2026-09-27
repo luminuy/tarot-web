@@ -62,6 +62,19 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0248 · 2026-09-27 14:59 · 🟡 Medium · TBT หน้าแรกมือถือยังสูงหลัง #629 — เขียนค่าเดิมซ้ำลง <html> ตอน hydrate ทำให้คำนวณสไตล์ใหม่ทั้งหน้าสองรอบ
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | Lighthouse มือถือ (devtools throttle) หน้าแรกหลัง #629 ยังมี TBT 318–435ms · trace เห็น UpdateLayoutTree 73–87ms สองก้อนติดกันหลัง hydrate ทั้งที่หน้าไม่เปลี่ยนอะไรให้เห็น |
+| **ผลกระทบ** | ทุกหน้า: ทุก island ที่ hydrate (หน้าแรกหนักสุดเพราะ DOM ~1,450 ชิ้น) · คะแนน Lighthouse มือถือ |
+| **สาเหตุราก** | (1) SiteHeader.tsx และ astro/scripts/site-header.ts ตั้ง --site-header-h บน <html> ทุกครั้งที่ ResizeObserver เรียกครั้งแรก แม้ความสูงจริงตรงกับค่าตั้งต้นใน globals.css อยู่แล้ว — custom property บน root ถูกสืบทอดทั้งหน้า จึงคำนวณสไตล์ใหม่ทุก element (2) LocaleProvider ใน i18n/context.tsx ตั้ง document.documentElement.lang = locale ใน effect ตอน mount แม้ค่าเดิม — การเปลี่ยนแอตทริบิวต์ lang ทำให้ :lang() ถูกคิดใหม่ทั้งหน้า (invalidation tracking: PseudoClass 1,543 element) และเกิดซ้ำทุก island |
+| **การแก้ไข** | เขียนเฉพาะตอนค่าต่างจริง: หัวเว็บเทียบกับ offsetHeight ของ [data-site-header-spacer] (อ่านใน ResizeObserver หลังจัดหน้าเสร็จ ไม่เกิด forced reflow) · lang เช็ก documentElement.lang !== locale ก่อนเขียน |
+| **🛡️ กฎป้องกันถาวร** | **test-sticky-header ข้อ 10 ตกถ้า setProperty('--site-header-h') ไม่มีตัวเช็ก spacer offsetHeight นำหน้า หรือมีการเขียน documentElement.lang มากกว่าจำนวนตัวเช็ก !== (mutation test: ย้อนสองไฟล์กลับ ➔ ตก 2 ข้อ)** |
+| **การพิสูจน์ว่าแก้ได้จริง** | Lighthouse มือถือ devtools throttle บนบิลด์ในเครื่อง 4 รอบ: TBT 334–435 ➔ 281–418 (มัธยฐาน ~400 ➔ ~305) คะแนน 87–91 ➔ 88–92 · trace หลัง hydrate เหลือ UpdateLayoutTree 0 ก้อนที่ใหญ่กว่า 15ms · Playwright: ความสูงหัวเว็บเท่าเดิม = ไม่เขียน · หัวเว็บสูงขึ้น 30px = เขียนค่าใหม่และตัวกันที่ตาม (มือถือ/จอใหญ่ / /en /cards /spreads /blog) |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/eloquent-ramanujan-yw9c72` · commit `45f039d` |
+
+
 ### INC-0247 · 2026-09-27 13:32 · 🟡 Medium · คะแนน Lighthouse มือถือหน้าแรกตกหลัง #623/#624 — forced reflow 198ms จากสคริปต์แถวปัด + DOM บวม 1,933 ชิ้นจากการ์ดผัง 26 ใบ
 
 | หัวข้อ | รายละเอียด |

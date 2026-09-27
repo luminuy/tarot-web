@@ -785,6 +785,34 @@ for (const item of INTENTIONALLY_BARE) {
   }
 }
 
+// 10. (INC-0248) ห้ามเขียนค่าเดิมซ้ำลงบน <html> ตอน hydrate — แต่ละครั้ง = คำนวณสไตล์ใหม่ทั้งหน้า
+//     `--site-header-h` (custom property ที่ทุก element สืบทอด) และ `lang` (`:lang()` ทั้งหน้า)
+//     วัดบนหน้าแรกมือถือจำลอง: 87ms + 73–87ms ของ TBT ทั้งที่ค่าไม่เปลี่ยนเลย
+{
+  const headerFiles = ["src/components/layout/SiteHeader.tsx", "astro/scripts/site-header.ts"];
+  for (const rel of headerFiles) {
+    const src = fs.readFileSync(path.join(ROOT, rel), "utf8");
+    const setAt = src.indexOf('setProperty("--site-header-h"');
+    const guardAt = src.search(/spacer[^;\n]*offsetHeight\s*===/);
+    if (setAt !== -1 && (guardAt === -1 || guardAt > setAt)) {
+      failures.push(
+        `${rel}: ตั้ง --site-header-h โดยไม่เช็กก่อนว่าตัวกันที่สูงเท่านั้นอยู่แล้ว — ค่าเดิมก็ทำให้คำนวณสไตล์ใหม่ทั้งหน้า (INC-0248)`,
+      );
+    }
+  }
+  const i18n = fs.readFileSync(path.join(ROOT, "src/lib/i18n/context.tsx"), "utf8");
+  const bareLangWrites = i18n
+    .split("\n")
+    .filter((line) => /documentElement\.lang\s*=/.test(line))
+    .length;
+  const guardedLangChecks = (i18n.match(/documentElement\.lang\s*!==/g) ?? []).length;
+  if (bareLangWrites > guardedLangChecks) {
+    failures.push(
+      "src/lib/i18n/context.tsx: เขียน document.documentElement.lang โดยไม่เช็ก `!==` ก่อน — ทุก island ที่ hydrate จะทำให้คิด :lang() ใหม่ทั้งหน้า (INC-0248)",
+    );
+  }
+}
+
 // ───────────────────────────────────────────────────────────────
 if (failures.length > 0) {
   console.error("\n❌ ด่านหัวเว็บ sticky ไม่ผ่าน:\n");

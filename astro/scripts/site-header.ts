@@ -179,6 +179,9 @@ function installHeaderHeightObserver(): void {
     const height = Math.ceil(entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height);
     if (height <= 0 || height === lastHeight) return;
     lastHeight = height;
+    // ⚠️ ความสูงตรงกับตัวกันที่อยู่แล้ว = ห้ามเขียน — ตั้ง custom property บน <html> = คำนวณสไตล์ใหม่ทั้งหน้า (INC-0248)
+    const spacer = document.querySelector<HTMLElement>("[data-site-header-spacer]");
+    if (spacer && spacer.offsetHeight === height) return;
     if (rafId) cancelAnimationFrame(rafId);
     rafId = requestAnimationFrame(() => {
       document.documentElement.style.setProperty("--site-header-h", `${height}px`);

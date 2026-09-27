@@ -81,6 +81,15 @@ export function SiteHeader({
       );
       if (h > 0 && h !== lastHeight) {
         lastHeight = h;
+        /*
+         * ⚠️ ความสูงตรงกับที่ตัวกันที่ใช้อยู่แล้ว (เคสปกติเกือบทุกครั้ง) = ห้ามเขียน (INC-0248)
+         * การตั้ง custom property บน <html> ทำให้เบราว์เซอร์คำนวณสไตล์ใหม่ "ทั้งหน้า"
+         * วัดบนหน้าแรก (มือถือจำลอง CPU ช้า 4 เท่า): UpdateLayoutTree 87ms ทุกครั้งที่ hydrate
+         * — เขียนค่าเดิมซ้ำก็โดนเต็ม ๆ · อ่าน `offsetHeight` ตรงนี้ไม่บังคับจัดหน้า
+         *   เพราะ ResizeObserver เรียกกลับหลังจัดหน้าเสร็จแล้ว
+         */
+        const spacer = el.previousElementSibling as HTMLElement | null;
+        if (spacer?.hasAttribute("data-site-header-spacer") && spacer.offsetHeight === h) return;
         if (rafId) cancelAnimationFrame(rafId);
         rafId = requestAnimationFrame(() => {
           document.documentElement.style.setProperty("--site-header-h", `${h}px`);

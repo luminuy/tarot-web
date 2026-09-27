@@ -121,7 +121,7 @@ export function LocaleProvider({
       localStorage.setItem(LOCALE_COOKIE_KEY, nextLocale);
 
       // 3. Update HTML lang tag
-      if (typeof document !== "undefined") {
+      if (typeof document !== "undefined" && document.documentElement.lang !== nextLocale) {
         document.documentElement.lang = nextLocale;
       }
     } catch {
@@ -167,7 +167,10 @@ export function LocaleProvider({
 
   useEffect(() => {
     // Synchronize HTML lang attribute on mount or change
-    if (typeof document !== "undefined") {
+    // ⚠️ เขียนเฉพาะตอนค่าต่างจริง (INC-0248) — ตั้ง `lang` บน <html> แม้ค่าเดิม = เบราว์เซอร์
+    //    คิด `:lang()` ใหม่ทั้งหน้า · หน้าแรกมือถือจำลอง: คำนวณสไตล์ 1,543 element 73–87ms ทุกครั้งที่ hydrate
+    //    (ทุก island มี LocaleProvider ของตัวเอง จึงโดนซ้ำตามจำนวน island)
+    if (typeof document !== "undefined" && document.documentElement.lang !== locale) {
       document.documentElement.lang = locale;
     }
   }, [locale]);
