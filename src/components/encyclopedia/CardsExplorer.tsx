@@ -135,7 +135,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
           </span>
         </div>
         <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-ink tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]"><ThaiPhrases>
-          {isEnglish ? "The Complete 78 Tarot Cards & Meanings" : "ความหมายไพ่ทาโรต์ทั้ง 78 ใบ"}
+          {isEnglish ? "The Complete 78 Tarot Cards & Meanings" : "ความหมายไพ่ทาโร่ ไพ่ยิปซี ทั้ง 78 ใบ"}
         </ThaiPhrases></h1>
         <p className="text-xs sm:text-sm text-muted max-w-2xl mx-auto leading-relaxed font-serif-th [text-wrap:balance]">
           {isEnglish

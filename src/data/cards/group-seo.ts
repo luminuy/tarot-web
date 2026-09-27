@@ -36,7 +36,7 @@ export const CARD_GROUPS: Record<CardGroupInfo["id"], CardGroupInfo> = {
     id: "major",
     nameTh: "ไพ่ชุดใหญ่ (Major Arcana)",
     nameEn: "Major Arcana",
-    seoTitleTh: "ความหมายไพ่ยิปซี ชุดใหญ่ 22 ใบ (Major Arcana) ครบทุกใบ",
+    seoTitleTh: "ความหมายไพ่ทาโร่ ไพ่ยิปซี ชุดใหญ่ 22 ใบ (Major Arcana)",
     descriptionTh:
       "เจาะลึกความหมายไพ่ยิปซีชุดใหญ่ 22 ใบ (Major Arcana) ตั้งแต่ The Fool ถึง The World พร้อมบทเรียนชีวิตและความหมายหัวตั้ง-หัวกลับ ฉบับ 1909 Rider-Waite",
     seoTitleEn: "Major Arcana Meanings: All 22 Tarot Cards Explained",
@@ -95,7 +95,7 @@ export const CARD_GROUPS: Record<CardGroupInfo["id"], CardGroupInfo> = {
     id: "minor",
     nameTh: "ไพ่ชุดเล็ก (Minor Arcana)",
     nameEn: "Minor Arcana",
-    seoTitleTh: "ความหมายไพ่ยิปซี ชุดเล็ก 56 ใบ (Minor Arcana) 4 ดอก",
+    seoTitleTh: "ความหมายไพ่ทาโร่ ไพ่ยิปซี ชุดเล็ก 56 ใบ (Minor Arcana)",
     descriptionTh:
       "รวมความหมายไพ่ยิปซีชุดเล็ก 56 ใบ (Minor Arcana) ครบ 4 ดอก ไม้เท้า ถ้วย ดาบ เหรียญ สะท้อนเหตุการณ์และผู้คนรอบตัว พร้อมคำแปลหัวตั้ง-กลับหัว",
     seoTitleEn: "Minor Arcana Meanings: All 56 Tarot Cards Explained",
