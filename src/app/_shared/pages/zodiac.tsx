@@ -135,14 +135,16 @@ export function zodiacSignMetadata(id: string, locale: Locale): Metadata {
         `${sign.nameEn} Tarot Card: ${major.nameEn} & Decan Cards`,
         `${sign.nameEn} Tarot Card: ${major.nameEn}`,
       ])
-    : pickTitle([
-        `ไพ่ประจำ${sign.nameTh} — ${major.nameEn} (${major.nameTh}) และไพ่ประจำช่วงวันเกิด`,
-        `ไพ่ประจำ${sign.nameTh} — ${major.nameEn} (${major.nameTh})`,
-        `ไพ่ประจำ${sign.nameTh}`,
+    : // คนค้น "ดูดวงราศี…" มากกว่า "ไพ่ประจำราศี…" หลายเท่า (Trends ไทย 2026-09-27) และหน้านี้มีไพ่วันนี้
+      // ของราศีที่ผู้ใช้เปิดได้จริง (`ZodiacDaily`) — ชื่อหน้าจึงตรงกับสิ่งที่คนค้นเจอ ไม่ใช่หลอกคลิก
+      pickTitle([
+        `ดูดวง${sign.nameTh}วันนี้ ไพ่ยิปซี — ไพ่ประจำราศี ${major.nameEn}`,
+        `ดูดวง${sign.nameTh}วันนี้ ไพ่ยิปซี · ${major.nameEn}`,
+        `ดูดวง${sign.nameTh}วันนี้ ด้วยไพ่ยิปซี`,
       ]);
   const description = isEnglish
     ? clampDescription(`${sign.en.tagline} ${sign.nameEn} (${signRange(sign, true)}) is ruled by ${major.nameEn}.`, "Personality, love, work and the three decan cards.")
-    : clampDescription(`${sign.th.tagline} ${sign.nameTh} (${signRange(sign, false)}) มีไพ่ประจำราศีคือ ${major.nameEn}`, "พร้อมนิสัย ความรัก การงาน และไพ่ 3 ช่วงวันเกิด");
+    : clampDescription(`ดูดวง${sign.nameTh}วันนี้ เปิดไพ่ยิปซีประจำวันฟรี ${sign.nameTh} (${signRange(sign, false)}) มีไพ่ประจำราศีคือ ${major.nameEn}`, "พร้อมนิสัย ความรัก การงาน และไพ่ 3 ช่วงวันเกิด");
   const ogImages = buildPageOgImage({
     title: isEnglish ? `${sign.nameEn} · ${major.nameEn}` : `${sign.nameTh} · ${major.nameEn}`,
     eyebrow: isEnglish ? "ZODIAC TAROT CARD" : "ไพ่ประจำราศี",
@@ -462,7 +464,7 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
         <RitualHero
           breadcrumbs={breadcrumbs}
           badgeText={isEnglish ? `${sign.nameEn} · ${major.nameEn}` : `${sign.nameTh} · ${major.nameEn}`}
-          title={isEnglish ? `${sign.nameEn} Tarot Cards` : `ไพ่ประจำ${sign.nameTh}`}
+          title={isEnglish ? `${sign.nameEn} Tarot Cards` : `ดูดวง${sign.nameTh} ไพ่ยิปซีและไพ่ประจำราศี`}
           tagline={copy.tagline}
         />
 
@@ -480,7 +482,7 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
         <section aria-labelledby="zodiac-today" className="altar-panel rounded-2xl p-5 sm:p-8 space-y-4">
           <div className="space-y-1">
             <h2 id="zodiac-today" className="text-lg sm:text-xl font-serif-th font-bold text-ink"><ThaiPhrases>
-              {isEnglish ? `${sign.nameEn} daily tarot: today's card` : `ดวงรายวัน${sign.nameTh} — ไพ่ประจำวันนี้`}
+              {isEnglish ? `${sign.nameEn} daily tarot: today's card` : `ดูดวง${sign.nameTh}วันนี้ — เปิดไพ่ยิปซีประจำวัน`}
             </ThaiPhrases></h2>
             <p className="text-[13px] text-muted font-sans">
               {isEnglish
