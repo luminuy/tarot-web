@@ -42,11 +42,23 @@ export function useRail(ref: RefObject<HTMLElement | null>, count: number, pause
     if (!pausedRef.current) sync();
   }, [sync]);
 
+  /*
+   * ⚠️ ห้ามเรียก `sync()` ตรง ๆ ใน effect ตอน mount (INC-0247) — effect รันกลางงาน hydrate
+   * ก่อนเบราว์เซอร์จัดหน้า การอ่าน `scrollWidth` จึงบังคับจัดทั้งหน้ากลางสคริปต์ (Forced reflow)
+   * `ResizeObserver` เรียกกลับหลังจัดหน้าเสร็จเอง: ครั้งแรกหลัง observe · ทุกครั้งที่แถวเปลี่ยนขนาด
+   * (แทน listener `resize` ของ window เดิม) · `count` เปลี่ยน = observe ใหม่ ได้เรียกกลับรอบใหม่
+   */
   useEffect(() => {
-    sync();
-    window.addEventListener("resize", sync, { passive: true });
-    return () => window.removeEventListener("resize", sync);
-  }, [sync]);
+    const el = ref.current;
+    if (!el) return;
+    if (typeof ResizeObserver === "undefined") {
+      const raf = requestAnimationFrame(sync);
+      return () => cancelAnimationFrame(raf);
+    }
+    const observer = new ResizeObserver(() => sync());
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [ref, sync]);
 
   const go = useCallback(
     (dir: -1 | 1) => {

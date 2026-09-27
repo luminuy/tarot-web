@@ -6,7 +6,7 @@
  *   • ถึงหัว/ท้ายแถว ➔ ปุ่มฝั่งนั้นจาง (disabled) แบบ apple.com
  *   • ฟังการเลื่อนแบบ passive + รวบเป็นเฟรมเดียวด้วย rAF — ปัดนิ้วไม่กระตุก
  *   • จอใหญ่ก็เป็นแถวปัด (2026-09-26) — แถวที่การ์ดพอดีไม่ต้องเลื่อน ปุ่มทั้งคู่ถูกปิด แล้ว CSS ซ่อนแถวปุ่ม
- *     ตรวจตอนโหลด · ตอนเปลี่ยนขนาดจอ · และตอนเมาส์/นิ้วแตะแถว (กรณี DOM ชุดใหม่จาก `TarotFlow`)
+ *     ตรวจด้วย ResizeObserver (หลังเบราว์เซอร์จัดหน้าเสร็จ · ไม่บังคับ reflow) · แถวชุดใหม่จาก `TarotFlow` เริ่มเฝ้าตอนเมาส์/นิ้วแตะแถว
  *
  * ⚠️ ดักที่ระดับ document (event delegation) ไม่ผูกกับปุ่มทีละตัว — เนื้อหานี้เป็น slot ของ `TarotFlow`
  *    ซึ่งถอดออกตอนผู้ใช้เข้าขั้นดูดวง แล้วใส่ DOM ชุดใหม่กลับมาตอนกลับหน้าเลือกผัง
@@ -73,29 +73,39 @@ document.addEventListener(
   { capture: true, passive: true }
 );
 
-/* ตรวจทุกแถวตอนโหลด/เปลี่ยนขนาดจอ — แถวที่ไม่ล้นจะได้ซ่อนลูกศร (สองปุ่ม disabled) */
-function syncAll(): void {
-  document.querySelectorAll<HTMLElement>(TRACK).forEach(syncButtons);
+/*
+ * ตรวจทุกแถวตอนโหลด/เปลี่ยนขนาดจอ — แถวที่ไม่ล้นจะได้ซ่อนลูกศร (สองปุ่ม disabled)
+ *
+ * ⚠️ ห้ามอ่าน `scrollWidth` ตรง ๆ ตอนสคริปต์เริ่ม (INC-0247) — ตอนนั้นเบราว์เซอร์ยังไม่เคยจัดหน้าเลย
+ *    การอ่านขนาดบังคับให้จัดทั้งหน้า (~2,000 ชิ้น) กลางสคริปต์ = Lighthouse "Forced reflow" 198ms
+ *    ใช้ `ResizeObserver` แทน: เรียกกลับหลังเบราว์เซอร์จัดหน้าเสร็จเอง (ตอนเริ่ม observe หนึ่งครั้ง
+ *    และทุกครั้งที่แถวเปลี่ยนขนาด ซึ่งครอบคลุมการหมุนจอ/ย่อหน้าต่างด้วย) อ่านขนาดตรงนั้นจึงไม่บังคับจัดซ้ำ
+ */
+const resizeObserver =
+  "ResizeObserver" in window
+    ? new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const track = entry.target as HTMLElement;
+          // DOM ชุดเก่าที่ `TarotFlow` ถอดทิ้งแล้ว — เลิกเฝ้า ไม่ค้างไว้ในหน่วยความจำ
+          if (!track.isConnected) resizeObserver?.unobserve(track);
+          else syncButtons(track);
+        }
+      })
+    : null;
+const observed = new WeakSet<HTMLElement>();
+function observeRail(track: HTMLElement): void {
+  if (observed.has(track)) return;
+  observed.add(track);
+  if (resizeObserver) resizeObserver.observe(track);
+  else requestAnimationFrame(() => syncButtons(track));
 }
-syncAll();
-let resizeRaf = 0;
-window.addEventListener(
-  "resize",
-  () => {
-    cancelAnimationFrame(resizeRaf);
-    resizeRaf = requestAnimationFrame(syncAll);
-  },
-  { passive: true }
-);
-/* `TarotFlow` ถอด/ใส่เนื้อหาชุดนี้ใหม่ได้ — ชุดใหม่ยังไม่ถูกตรวจ ตรวจตอนผู้ใช้ชี้/แตะแถวครั้งแรก */
-const seen = new WeakSet<HTMLElement>();
+document.querySelectorAll<HTMLElement>(TRACK).forEach(observeRail);
+/* `TarotFlow` ถอด/ใส่เนื้อหาชุดนี้ใหม่ได้ — ชุดใหม่ยังไม่ถูกเฝ้า เริ่มเฝ้าตอนผู้ใช้ชี้/แตะแถวครั้งแรก */
 document.addEventListener(
   "pointerover",
   (event) => {
     const track = (event.target as Element | null)?.closest<HTMLElement>("[data-rail]")?.querySelector<HTMLElement>(TRACK);
-    if (!track || seen.has(track)) return;
-    seen.add(track);
-    syncButtons(track);
+    if (track) observeRail(track);
   },
   { passive: true }
 );

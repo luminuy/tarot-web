@@ -46,6 +46,22 @@
 - `SpreadCardSelector` (featured): ชิปหมวดหน้าตาเดียวกับ `/spreads` (`btn-gold-glass` / `glass-chip`) · มือถือเลื่อนข้าง · จอ ≥ 640px จัดกลาง/ขึ้นบรรทัดใหม่แทนล้น · role tablist/tabpanel + ลูกศรซ้ายขวา · อนิเมชันขาเข้าเฉพาะตอนผู้ใช้สลับแท็บ (`hasSwappedTab` — INC-0244)
 - ไอคอนใหม่ใน `TarotArtIcons`: `BoltTabIcon` · `HourglassTabIcon` · `EyeTabIcon`
 - ตรวจ: typecheck ✓ · eslint ✓ · test-motion-quality ✓ · Chromium 1366/390px: 7 ชิปแถวเดียวบนจอใหญ่ · แท็บความรักได้ 5 ผังเรียง 4-4-5-5-6 · แท็บทั้งหมด 26 ใบ · ไม่มี page error
+### 🗓️ 2026-09-27 (รอบ 182): ✦ SEO — ดึงข้อมูล Google Search Console ผ่าน API ด้วย Service Account ของเราเอง
+
+**คำร้องเจ้าของ**: "seo คำไทย มีติดเยอะไหม" ➔ เช็กจากภายนอกแล้วไม่เจอ seertarot.net ในคำไทยที่ลองค้น 5 คำ (รวมชื่อแบรนด์) แต่ไม่มีตัวเลขจริงจาก Google ➔ "เราทำของเราเอง"
+
+- เพิ่ม `scripts/seo/gsc.ts` + `npm run seo:gsc` — เซ็น JWT ด้วย `node:crypto` เอง (ไม่เพิ่ม dependency) · 4 คำสั่ง: `queries` (ค่าเริ่ม = คำไทย) · `pages` · `inspect` (ไล่ URL จาก sitemap จริง) · `sitemaps [--submit]`
+- ใช้ secret `GSC_SERVICE_ACCOUNT_JSON` · พร็อพเพอร์ตี้เริ่มต้น `sc-domain:seertarot.net` (`GSC_SITE` เปลี่ยนได้) · ขอสิทธิ์แค่ `webmasters.readonly` ยกเว้นตอน `--submit`
+- ตรวจ: ไม่มี env ➔ ออกพร้อมคำแนะนำ ✓ · กุญแจทดสอบ (ไม่ใช่ของจริง) ➔ Google ตอบ `account not found` = ขั้นเซ็น JWT ถูกต้อง ✓ · ยังไม่ได้ยิงกับข้อมูลจริง ⏸️ **รอเจ้าของสร้าง Service Account + ใส่ secret** (ขั้นตอนใน `SEO_INDEXING_LOG.md` หัวข้อ "ดึงข้อมูลผ่าน API")
+### 🗓️ 2026-09-27 (รอบ 183): 🐛 คะแนน Lighthouse มือถือหน้าแรกตก หลัง #623/#624 — forced reflow 198ms · DOM บวม 1,933 ชิ้น (INC-0247)
+
+**คำร้องเจ้าของ** (ยังไม่เอาขึ้น — รอเจ้าของสั่ง): ส่งผล PageSpeed หน้าแรก — "ทำไมคะแนนลด แก้ไขด่วน"
+
+- **สาเหตุ** (วัดเทียบบิลด์ 3ecc922 · 69ef20f · 4ba9449 ด้วย Lighthouse มือถือ): (1) `home-rails.ts` เรียก `syncAll()` ตอนสคริปต์เริ่ม อ่าน `scrollWidth` ทุกแถวก่อนเบราว์เซอร์จัดหน้า = บังคับจัดทั้งหน้ากลางสคริปต์ (PSI: Forced reflow 198ms ที่ `home-track.js` ซึ่งเป็นชังก์ที่รวม home-rails ไว้) · `useRail` ก็อ่านขนาดใน effect ตอน hydrate แบบเดียวกัน (2) แถวเลือกผังใส่การ์ดครบ 26 ใบลง HTML — DOM หน้าแรก 1,319 ➔ 1,933 (แถวเดียว 668 ชิ้น) style+layout ตอนโหลด +50% · HTML gzip 30 ➔ 36 KB
+- **แก้**: `home-rails.ts` + `useRail` วัดผ่าน `ResizeObserver` (เรียกกลับหลังจัดหน้าเสร็จ · ครอบคลุม resize แทน listener เดิม) · `SpreadCardSelector` ข้าม `rail.sync()` รอบ mount · หน้าแรกใส่การ์ดผังใน HTML 4 ใบ ที่เหลือ 22 ใบเติมครั้งเดียวเมื่อผู้ใช้ปัด/ชี้/แตะ/โฟกัส/กดลูกศรที่แถว (ยังครบ 26 ผัง)
+- **ผล** (Lighthouse มือถือ throttle จริง `--throttling-method=devtools` 3 รอบ บนเครื่อง dev): TBT 592–688 ➔ 340–492 ms · คะแนน 79–81 ➔ 83–88 · DOM 1,933 ➔ 1,409 · HTML gzip 36.3 ➔ 31.8 KB · Playwright มือถือ/จอใหญ่: เริ่ม 4 ใบ ➔ ปัดแล้ว 26 ใบ · ลูกศรหัว/ท้ายแถวเหมือนเดิม
+- **ด่านใหม่**: `test-bundle-budget` งบ DOM หน้า `/` และ `/en` ≤ 1,500 element (บิลด์เดิมตก 1,934 / 1,770)
+- **ยังไม่แก้ (บันทึกไว้)**: LCP ของหน้าแรกกลายเป็นข้อความแถบขอความยินยอมตั้งแต่ #623 เพราะ `.tp` (inline-block) ของ ThaiPhrases แบ่ง h1 เป็นชิ้นเล็ก · CSS บล็อกการเรนเดอร์ 26 KB · สาย `/api/daily-card` ต่อท้าย JS — ไม่ใช่ของที่เพิ่งถอยหลัง
 
 ### 🗓️ 2026-09-26 (รอบ 181): ✦ หน้าแรก — ผังครบ 26 แบบในแถวปัด · วงล้อจักรราศีแทนกริด 12 ราศี · จอใหญ่จัดวางแบบเดียวกับมือถือ
 
