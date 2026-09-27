@@ -800,6 +800,34 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
     }
   }
 
+  /*
+   * 🧱 INC-0247: งบจำนวน element ใน HTML ของหน้าแรก
+   * ---------------------------------------------------------------------------
+   * #624 ใส่การ์ดผังครบ 26 ใบลง HTML ตั้งแต่แรก ➔ DOM 1,319 ➔ 1,933 ชิ้น (แถวเดียวกิน 668)
+   * เวลาจัดหน้า (style + layout) ตอนโหลดโต ~50% และคะแนน Lighthouse มือถือตก — แต่ไม่มีด่านไหนเห็น
+   * เพราะ HTML gzip ยังไม่ชนเพดาน 42 KB (class ซ้ำ ๆ บีบอัดได้ดีมาก จึงวัดแค่ไบต์ไม่พอ)
+   * ➔ ของที่อยู่นอกจอและไม่ใช่เนื้อหาหลัก (การ์ดท้ายแถวปัด) ให้เติมตอนผู้ใช้แตะ ไม่ใช่ใส่ใน HTML
+   * ⚠️ ปรับลดได้อย่างเดียว ห้ามขยับขึ้นเพื่อให้ผ่าน
+   */
+  {
+    const MAX_HOME_ELEMENTS = 1_500; // วัดจริง 2026-09-27: 1,408 (ก่อนแก้ 1,933)
+    for (const route of ["/", "/en"]) {
+      const file = htmlFileFor(route);
+      if (!file || !fs.existsSync(file)) {
+        console.log(`  ❌ งบ DOM: หา HTML ของ ${route} ไม่เจอ — ต้องบิลด์ก่อน (ห้ามผ่านแบบว่างเปล่า)`);
+        hasFailure = true;
+        continue;
+      }
+      const count = (fs.readFileSync(file, "utf8").match(/<[a-zA-Z][a-zA-Z0-9-]*[\s/>]/g) ?? []).length;
+      const ok = count <= MAX_HOME_ELEMENTS;
+      console.log(
+        `  ${ok ? "✅" : "❌"} งบ DOM ${route}: ${count.toLocaleString()} element (≤ ${MAX_HOME_ELEMENTS.toLocaleString()})` +
+          (ok ? "" : " — ของนอกจอ (การ์ดท้ายแถวปัด ฯลฯ) ให้เติมตอนผู้ใช้แตะ ไม่ใช่ใส่ใน HTML ตั้งแต่แรก"),
+      );
+      if (!ok) hasFailure = true;
+    }
+  }
+
   console.log("-".repeat(80));
 
   if (hasFailure) {
