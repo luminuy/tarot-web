@@ -38,6 +38,14 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-09-27 (รอบ 182): ✦ SEO — ดึงข้อมูล Google Search Console ผ่าน API ด้วย Service Account ของเราเอง
+
+**คำร้องเจ้าของ**: "seo คำไทย มีติดเยอะไหม" ➔ เช็กจากภายนอกแล้วไม่เจอ seertarot.net ในคำไทยที่ลองค้น 5 คำ (รวมชื่อแบรนด์) แต่ไม่มีตัวเลขจริงจาก Google ➔ "เราทำของเราเอง"
+
+- เพิ่ม `scripts/seo/gsc.ts` + `npm run seo:gsc` — เซ็น JWT ด้วย `node:crypto` เอง (ไม่เพิ่ม dependency) · 4 คำสั่ง: `queries` (ค่าเริ่ม = คำไทย) · `pages` · `inspect` (ไล่ URL จาก sitemap จริง) · `sitemaps [--submit]`
+- ใช้ secret `GSC_SERVICE_ACCOUNT_JSON` · พร็อพเพอร์ตี้เริ่มต้น `sc-domain:seertarot.net` (`GSC_SITE` เปลี่ยนได้) · ขอสิทธิ์แค่ `webmasters.readonly` ยกเว้นตอน `--submit`
+- ตรวจ: ไม่มี env ➔ ออกพร้อมคำแนะนำ ✓ · กุญแจทดสอบ (ไม่ใช่ของจริง) ➔ Google ตอบ `account not found` = ขั้นเซ็น JWT ถูกต้อง ✓ · ยังไม่ได้ยิงกับข้อมูลจริง ⏸️ **รอเจ้าของสร้าง Service Account + ใส่ secret** (ขั้นตอนใน `SEO_INDEXING_LOG.md` หัวข้อ "ดึงข้อมูลผ่าน API")
+
 ### 🗓️ 2026-09-26 (รอบ 181): ✦ หน้าแรก — ผังครบ 26 แบบในแถวปัด · วงล้อจักรราศีแทนกริด 12 ราศี · จอใหญ่จัดวางแบบเดียวกับมือถือ
 
 **คำร้องเจ้าของ** (ยังไม่เอาขึ้น — รอเจ้าของดู): (1) ส่วนเลือกผังหน้าแรกโชว์ครบ 26 ผัง สไลด์ไปทางขวา (2) กล่อง "ไพ่ประจำ 12 ราศี" ใช้วงล้อจากหน้า `/cards/zodiac` (3) จอใหญ่จัดวางให้เหมือนมือถือ (สไตล์ apple.com ที่เพิ่งทำ)
