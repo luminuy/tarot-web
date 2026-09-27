@@ -10,11 +10,9 @@ import {
   PentacleTabIcon,
   CrystalBallTabIcon,
   AllSpreadsTabIcon,
-  BoltTabIcon,
-  HourglassTabIcon,
-  EyeTabIcon,
 } from "@/components/ui/TarotArtIcons";
 import { SPREADS_BY_CATEGORY, type SpreadCategoryId } from "@/data/spread-categories";
+import { SPREAD_CHIP_ICONS } from "@/components/spread/spread-chip-icons";
 import { CardImage } from "@/components/card/CardImage";
 import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { isStandardSpread } from "@/lib/entitlement/limits";
@@ -153,19 +151,18 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
     [isEnglish]
   );
 
-  const featuredCategories: { id: SpreadCategoryId; label: string; Icon: React.FC<{ className?: string }> }[] =
-    useMemo(
-      () => [
-        { id: "popular", label: isEnglish ? "Popular" : "ยอดนิยม", Icon: SparkleTabIcon },
-        { id: "quick", label: isEnglish ? "Quick Answers" : "ถามด่วน", Icon: BoltTabIcon },
-        { id: "love", label: isEnglish ? "Love" : "ความรัก", Icon: HeartTabIcon },
-        { id: "career", label: isEnglish ? "Career & Money" : "งาน & เงิน", Icon: PentacleTabIcon },
-        { id: "time", label: isEnglish ? "Timelines" : "ดวงตามช่วงเวลา", Icon: HourglassTabIcon },
-        { id: "life", label: isEnglish ? "Life & Self" : "ชีวิต & ตัวตน", Icon: EyeTabIcon },
-        { id: "all", label: isEnglish ? "All" : "ทั้งหมด", Icon: AllSpreadsTabIcon },
-      ],
-      [isEnglish]
-    );
+  const featuredCategories: { id: SpreadCategoryId; label: string }[] = useMemo(
+    () => [
+      { id: "popular", label: isEnglish ? "Popular" : "ยอดนิยม" },
+      { id: "quick", label: isEnglish ? "Quick Answers" : "ถามด่วน" },
+      { id: "love", label: isEnglish ? "Love" : "ความรัก" },
+      { id: "career", label: isEnglish ? "Career & Money" : "งาน & เงิน" },
+      { id: "time", label: isEnglish ? "Timelines" : "ดวงตามช่วงเวลา" },
+      { id: "life", label: isEnglish ? "Life & Self" : "ชีวิต & ตัวตน" },
+      { id: "all", label: isEnglish ? "All" : "ทั้งหมด" },
+    ],
+    [isEnglish]
+  );
 
   const filteredSpreads = useMemo(() => {
     if (variant === "featured") return SPREADS_BY_CATEGORY[featuredCategory];
@@ -346,12 +343,14 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                       nextTab?.scrollIntoView({ inline: "nearest", block: "nearest" });
                     }
                   }}
-                  className={`tap-overlay-y px-4 py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
+                  /* ไอคอนวาดด้วย `.spread-chip::after` (mask จาก `spread-chip-icons.ts`) ไม่ใช่ `<svg>`
+                     ชิปละ 2 element แทน ~6 — งบ DOM หน้าแรก (INC-0247) · `::before` เป็นของ `tap-overlay-y` */
+                  style={{ "--chip-icon": SPREAD_CHIP_ICONS[cat.id] } as React.CSSProperties}
+                  className={`spread-chip tap-overlay-y px-4 py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
                     isActive ? "btn-gold-glass" : "glass-chip text-ink hover:text-gold-ink"
                   }`}
                 >
-                  <cat.Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-white" : "text-muted"}`} />
-                  <span>{cat.label}</span>
+                  {cat.label}
                   <span
                     className={`text-[12px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
                       isActive ? "bg-white/20 text-white" : "bg-black/5 text-muted"
@@ -513,7 +512,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                  * ผลคือ utility พวกนั้นจะไม่มีผลอะไรเลยนอกจากทำให้คนอ่านเข้าใจผิดว่าการ์ดเป็นสีขาวทึบ
                  */
                 className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center ${
-                  variant === "featured" ? SPREAD_RAIL_ITEM : "sm:w-auto sm:max-w-none sm:flex-shrink"
+                  variant === "featured" ? `${SPREAD_RAIL_ITEM} spread-card-sheen` : "sm:w-auto sm:max-w-none sm:flex-shrink"
                 } transition duration-300 transform-gpu cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink group/card ${
                   isSelected
                     ? "altar-panel-active ring-4 ring-gold-ink/20"
@@ -592,8 +591,10 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                   </>
                 )}
 
-                {/* Holographic Sheen Layer */}
-                <div className="gold-foil-sheen absolute inset-0 opacity-15 hover:opacity-30 transition-opacity pointer-events-none" />
+                {/* Holographic Sheen Layer — หน้าแรกวาดด้วย `.spread-card-sheen::after` แทน div (งบ DOM · INC-0247) */}
+                {variant !== "featured" && (
+                  <div className="gold-foil-sheen absolute inset-0 opacity-15 hover:opacity-30 transition-opacity pointer-events-none" />
+                )}
               </div>
             );
           })}

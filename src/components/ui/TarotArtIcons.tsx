@@ -863,29 +863,6 @@ export const SpeakerTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) =
 
 
 
-/** แท็บหมวด "คำถามด่วน" ของแถวผังหน้าแรก — ฟ้าผ่า = ได้คำตอบไว */
-export const BoltTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg {...line(className)}>
-    <path d="M13.2 3.5 5.8 13.2h5.6l-1 7.3 7.8-10.1h-5.7z" />
-  </svg>
-);
-
-/** แท็บหมวด "ดวงตามช่วงเวลา" ของแถวผังหน้าแรก — นาฬิกาทราย */
-export const HourglassTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg {...line(className)}>
-    <path d="M6.5 3.8h11M6.5 20.2h11" />
-    <path d="M7.8 3.8c0 4.2 4.2 5.6 4.2 8.2s-4.2 4-4.2 8.2M16.2 3.8c0 4.2-4.2 5.6-4.2 8.2s4.2 4 4.2 8.2" />
-  </svg>
-);
-
-/** แท็บหมวด "ชีวิต & ตัวตน" ของแถวผังหน้าแรก — ดวงตาที่สาม */
-export const EyeTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg {...line(className)}>
-    <path d="M3.5 12s3.2-5.8 8.5-5.8 8.5 5.8 8.5 5.8-3.2 5.8-8.5 5.8S3.5 12 3.5 12Z" />
-    <circle cx="12" cy="12" r="2.6" />
-  </svg>
-);
-
 export const CrownTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
   <svg {...line(className)}>
     <path d="M4 17.5h16" />

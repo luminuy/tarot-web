@@ -44,13 +44,14 @@
 
 - **แหล่งความจริงเดียว** `src/data/spread-categories.ts`: หมวดตามเรื่อง 5 หมวด (ถามด่วน 6 · ความรัก 5 · งาน & เงิน 6 · ดวงตามช่วงเวลา 4 · ชีวิต & ตัวตน 5) แบ่ง 26 ผังสาธารณะครบ ผังละหมวดเดียว + "ยอดนิยม" 6 ผังคัดมือ (ค่าเริ่มต้น) + "ทั้งหมด" 26 = หมวดตามเรื่องต่อกัน · ในหมวดเรียงไพ่น้อย ➔ มาก · เลขบนชิปนับจากตาราง ไม่เขียนตายตัว
 - `SpreadCardSelector` (featured): ชิปหมวดหน้าตาเดียวกับ `/spreads` (`btn-gold-glass` / `glass-chip`) · มือถือเลื่อนข้าง · จอ ≥ 640px จัดกลาง/ขึ้นบรรทัดใหม่แทนล้น · role tablist/tabpanel + ลูกศรซ้ายขวา · อนิเมชันขาเข้าเฉพาะตอนผู้ใช้สลับแท็บ (`hasSwappedTab` — INC-0244)
-- ไอคอนใหม่ใน `TarotArtIcons`: `BoltTabIcon` · `HourglassTabIcon` · `EyeTabIcon`
+- ไอคอนชิป: `spread-chip-icons.ts` (วาดด้วย CSS mask — ดูรอบ 2)
 - ตรวจ: typecheck ✓ · eslint ✓ · test-motion-quality ✓ · Chromium 1366/390px: 7 ชิปแถวเดียวบนจอใหญ่ · แท็บความรักได้ 5 ผังเรียง 4-4-5-5-6 · แท็บทั้งหมด 26 ใบ · ไม่มี page error
 - **รอบ 2 — รวม #629 (INC-0247) + ลด TBT ต่อ** (เจ้าของ: "แก้เพิ่มให้ดีกว่านี้ได้ไหม คะแนนตกลงมาเยอะมาก"):
   - merge #629 เข้ากิ่งนี้ · กดชิปหมวด = เติมการ์ดครบทันที (`mountRest`)
   - **INC-0248**: หลัง hydrate เบราว์เซอร์คำนวณสไตล์ใหม่ทั้งหน้าสองรอบจากการเขียนค่าเดิมซ้ำลง `<html>` — `--site-header-h` (SiteHeader.tsx · site-header.ts) และ `lang` (i18n/context.tsx) ➔ เขียนเฉพาะตอนค่าต่าง · ด่าน test-sticky-header ข้อ 10
   - วัด Lighthouse มือถือ devtools throttle บนบิลด์ในเครื่อง (3–4 รอบ/ชุด): main 80–83 (TBT 578–721) ➔ #629 90–91 (318–354) ➔ #629+ชิปหมวด 87–91 (334–435) ➔ **+INC-0248 88–92 (281–418 · มัธยฐาน ~305)** · FCP=LCP ~1.8s ทุกชุด
   - ทดลองแล้วไม่ใช้: `client:idle` / directive "hydrate หลังวาดเฟรมแรก" — แบบ simulate ดูดีขึ้น (82 ➔ 95) แต่เป็นภาพลวงจาก Chrome headless ในเครื่องนี้ที่นับภาพแรกช้า ~2.4s เสมอ · แบบ devtools throttle ไม่ต่าง (88 · 85–88) · `content-visibility` ห้ามตาม INC-0174
+  - **CI #630 ตกงบ DOM หน้าแรก 1,529 > 1,500** (ในเครื่องผ่าน 1,451 เพราะไม่ได้ตั้ง `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT` — CI ตั้ง ➔ ภาพไพ่ทุกใบมี `<source>` AVIF เพิ่ม +78) · ชิปหมวดกิน 41 element ➔ ตัดโดยหน้าตาเท่าเดิม: ไอคอนชิป (`spread-chip-icons.ts` + `.spread-chip::after` mask) · หัวลูกศร `RailArrows` (`.rail-arrow-prev/next::after`) · ประกายการ์ดผังหน้าแรก (`.spread-card-sheen::after`) ➔ แบบ CI: **1,483** (main 1,487) · ถอด `BoltTabIcon`/`HourglassTabIcon`/`EyeTabIcon` ออกจาก TarotArtIcons (ไม่ได้ใช้แล้ว) · ด่านงบ DOM เพิ่มโน้ตวิธีวัดให้ตรง CI
   - งานหนักที่เหลือ: จัดหน้าครั้งแรกระหว่างพาร์ส HTML (long task 116–173ms × 3) · ส่วนที่ DOM เยอะสุดนอกจอแรก = วงล้อจักรราศี 208 · เมนูหัวเว็บ 191
 ### 🗓️ 2026-09-27 (รอบ 183): ✦ SEO — workflow ดึงผล GSC ทุกวันจันทร์ + บันทึกผลจริงครั้งแรก
 
