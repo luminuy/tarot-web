@@ -6,6 +6,7 @@ import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
 import { ZODIAC_SIGNS } from "@/data/zodiac";
 import { localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
 import { hasEnglishTwin } from "@/lib/i18n/paths";
+import { zodiacSignPath } from "@/lib/tarot/zodiac";
 
 /**
  * วันแก้ไขล่าสุดของหน้าที่เนื้อหาไม่ได้เปลี่ยนตามการ deploy
@@ -14,6 +15,20 @@ import { hasEnglishTwin } from "@/lib/i18n/paths";
  * แล้วเลิกใช้ไปเลย · อัปเดตค่านี้ด้วยมือเมื่อแก้เนื้อหาโครงสร้างจริง ๆ
  */
 const STRUCTURAL_CONTENT_UPDATED_AT = new Date("2026-09-05T00:00:00+07:00");
+
+/**
+ * หน้าที่ "เนื้อหาที่มองเห็น" เปลี่ยนจริงหลังวันข้างบน — ให้ lastModified บอก Google ว่าควรกลับมาอ่าน
+ * ⚠️ ใส่เฉพาะหน้าที่ข้อความ/ลิงก์บนหน้าเปลี่ยนจริง ห้ามใส่หน้าที่แก้แค่ meta (เหตุผลเดียวกับข้างบน)
+ * ปุ่ม "ขอการจัดทำดัชนี" ของ GSC ไม่มีใน API — ค่านี้คือสัญญาณที่ใกล้ที่สุดที่ส่งจากโค้ดได้
+ */
+const CONTENT_UPDATED_AT: Record<string, Date> = Object.fromEntries(
+  [
+    // #631 (2026-09-27): แถว "คนค้นหาบ่อย" · ลิงก์หน้าหัวข้อ/หมวด · หัวข้อ "ไพ่ทาโร่" · ดูดวงราศีวันนี้
+    "/", "/en", "/pick-a-card", "/en/pick-a-card", "/spreads", "/en/spreads", "/spreads/topic/love",
+    "/cards", "/cards/all", "/cards/major", "/cards/minor",
+    ...ZODIAC_SIGNS.map((sign) => zodiacSignPath(sign.id)),
+  ].map((path) => [path, new Date("2026-09-27T17:00:00+07:00")]),
+);
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = SITE_ORIGIN;
@@ -208,7 +223,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...pickACardTopicRoutes,
   ];
 
-  return withEnglishTwins(thaiRoutes);
+  return withEnglishTwins(thaiRoutes).map((route) => {
+    const updated = CONTENT_UPDATED_AT[route.url.replace(SITE_ORIGIN, "") || "/"];
+    return updated ? { ...route, lastModified: updated } : route;
+  });
 }
 
 /**

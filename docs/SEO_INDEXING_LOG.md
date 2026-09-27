@@ -48,6 +48,14 @@ Service Account ที่ใช้: `seertarot-gsc@tarot-web-507218.iam.gservice
 
 ---
 
+## 📡 2026-09-27 (หลัง #631 deploy) — แจ้งเครื่องมือค้นหาว่าหน้าเปลี่ยน
+
+- IndexNow: 23 URL (หน้าแรก · `/en` · `/pick-a-card` · `/spreads` · `/spreads/topic/love` · `/cards` `/cards/all` `/cards/major` `/cards/minor` · `/cards/zodiac/*` 12) ➔ HTTP 200
+- sitemap: lastModified ของ 23 หน้านี้ = 2026-09-27 (ขึ้นจริงหลัง PR รอบ 188 merge) ➔ แล้วสั่ง workflow `seo-gsc.yml` แบบ `submit_sitemap: true`
+- ⚠️ ยังไม่ได้กด "ขอการจัดทำดัชนี" ใน GSC (ไม่มีใน API) — รอบหน้าที่มีเบราว์เซอร์ให้กด 6 หน้า: `/` `/daily` `/spreads/topic/love` `/cards` `/cards/zodiac/cancer` `/pick-a-card`
+
+---
+
 ## 🎯 2026-09-27 — อ่านผลเพื่อทำอันดับ (28 วัน · ต่อจากรอบบน)
 
 **หน้าที่เกือบถึงหน้าแรก (อันดับ 8–17) — ดันง่ายสุด**:
