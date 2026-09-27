@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { PUBLIC_SPREADS } from "@/data/spreads";
+import { SPREAD_TOPICS } from "@/data/spread-topics";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { localeHref } from "@/lib/i18n/paths";
@@ -25,6 +26,7 @@ const COPY = {
     directoryTitle: "สารบัญผังพยากรณ์ทั้งหมด",
     directoryLead:
       "รวมลิงก์ผังพยากรณ์ครบทั้ง 26 แบบไว้ที่เดียว กดเข้าไปอ่านความหมายรายตำแหน่งพร้อมภาพจัดวางจริงได้ทันที",
+    topicsTitle: "ดูดวงไพ่ยิปซีแยกตามเรื่อง",
   },
   en: {
     title: "26 Tarot Spreads: 1, 3, 5 & 10-Card Layouts (Free)",
@@ -37,8 +39,13 @@ const COPY = {
     directoryTitle: "Every Spread in the Library",
     directoryLead:
       "All 26 spreads in one list — open any of them for the real card layout and what each position means.",
+    topicsTitle: "Tarot Spreads by Topic",
   },
 } as const;
+
+/** ลิงก์ในสารบัญผัง (ผังรายตัว + หมวด) ใช้หน้าตาเดียวกัน */
+const DIRECTORY_LINK_CLASS =
+  "text-xs sm:text-sm text-[#5E5240] hover:text-gold-ink underline decoration-[#E4DED2] underline-offset-4 transition-colors";
 
 export function buildSpreadsIndexMetadata(locale: Locale): Metadata {
   const copy = COPY[locale];
@@ -135,9 +142,25 @@ export function SpreadsIndexBody({ locale, library }: { locale: Locale; library:
               <li key={spread.id}>
                 <a
                   href={localeHref(`/spreads/${spread.id}`, locale)}
-                  className="text-xs sm:text-sm text-[#5E5240] hover:text-gold-ink underline decoration-[#E4DED2] underline-offset-4 transition-colors"
+                  className={DIRECTORY_LINK_CLASS}
                 >
                   {isEnglish ? spread.nameEn : spread.nameTh}
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          {/* 🔗 หน้าหมวด `/spreads/topic/*` 6 หน้า — เดิมไม่มีลิงก์จากหน้าไหนเลย (มีแค่ใน sitemap)
+              GSC 2026-09-27: 4 จาก 6 หน้าขึ้นว่า "Google ไม่รู้จัก URL" · ห้ามลบ */}
+          <h3 className="mt-6 text-sm sm:text-base font-serif-th font-bold text-ink"><ThaiPhrases>{copy.topicsTitle}</ThaiPhrases></h3>
+          <ul className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2.5">
+            {Object.values(SPREAD_TOPICS).map((topic) => (
+              <li key={topic.slug}>
+                <a
+                  href={localeHref(`/spreads/topic/${topic.slug}`, locale)}
+                  className={DIRECTORY_LINK_CLASS}
+                >
+                  {isEnglish ? topic.nameEn : topic.titleTh}
                 </a>
               </li>
             ))}

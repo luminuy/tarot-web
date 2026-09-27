@@ -244,6 +244,28 @@ export function SpreadTopicContent({
           {list}
         </section>
 
+        {/* 🔗 ผังทั่วไปที่ใช้ถามเรื่องหมวดนี้ได้ — ข้อความลิงก์ = คำที่คนค้นจริง (ดู `alsoFitsTh`) */}
+        {!isEnglish && topic.alsoFitsTh && topic.alsoFitsTh.length > 0 && (
+          <section className="altar-card-porcelain p-6 sm:p-8 space-y-4">
+            <h2 className="text-base sm:text-lg font-bold font-serif-th text-ink"><ThaiPhrases>
+              {`ถามเรื่อง${topic.nameTh} ด้วยผังทั่วไป`}
+            </ThaiPhrases></h2>
+            <ul className="space-y-3">
+              {topic.alsoFitsTh.map((item) => (
+                <li key={item.spreadId} className="text-xs sm:text-sm font-serif-th text-muted leading-relaxed">
+                  <Link
+                    href={`/spreads/${item.spreadId}`}
+                    className="font-bold text-ink hover:text-gold-ink underline underline-offset-4 transition-colors"
+                  >
+                    {item.label}
+                  </Link>{" "}
+                  — {item.note}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {/* FAQ Section */}
         {faqs.length > 0 && (
           <section className="altar-card-porcelain p-6 sm:p-8 space-y-6">

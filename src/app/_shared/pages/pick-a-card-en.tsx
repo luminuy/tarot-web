@@ -5,6 +5,7 @@ import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
 
 const pickACardOgImages = buildPageOgImage({
   title: "Pick A Card Tarot Reading",
@@ -119,7 +120,10 @@ const PICK_A_CARD_FAQS_EN = [
   },
 ];
 
+// 🔗 หน้าหัวข้อ `/pick-a-card/<slug>` ทั้ง 8 หน้า — ในพิธีเป็นปุ่ม ไม่ใช่ลิงก์ บอตจึงไม่เคยเห็นทางไปหน้าลูก
+// GSC 2026-09-27: หน้าหัวข้อเข้าดัชนี 0/8 · ห้ามลบ
 const PICK_A_CARD_LINKS_EN = [
+  ...PICK_A_CARD_TOPICS.map((topic) => ({ href: `/en/pick-a-card/${topic.slug}`, label: topic.titleEn })),
   { href: "/en/daily", label: "Daily Tarot Reading" },
   { href: "/en/love/1-card", label: "Love One Card Draw" },
   { href: "/en/cards", label: "78 Tarot Cards Encyclopedia" },

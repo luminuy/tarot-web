@@ -58,7 +58,7 @@ export function cardDetailMetadata(id: string, locale: Locale): Metadata {
         "Original 1909 Rider-Waite artwork.",
       )
     : clampDescription(
-        `ความหมายไพ่ยิปซี ${card.nameEn} (${card.nameTh}) ทั้งหัวตั้งและหัวกลับ 5 มิติชีวิต ความรัก การงาน การเงิน โหราศาสตร์ ${card.astrology} ธาตุ${card.element}`,
+        `ความหมายไพ่ทาโร่ ไพ่ยิปซี ${card.nameEn} (${card.nameTh}) ทั้งหัวตั้งและหัวกลับ 5 มิติชีวิต ความรัก การงาน การเงิน โหราศาสตร์ ${card.astrology} ธาตุ${card.element}`,
         "ภาพดั้งเดิม 1909 Rider-Waite",
       );
 
@@ -86,7 +86,9 @@ export function cardDetailMetadata(id: string, locale: Locale): Metadata {
         `${card.nameTh} ความรัก`,
         `${card.nameTh} การงาน`,
         `${card.nameTh} กลับหัว`,
+        `ไพ่ทาโร่ ${card.nameEn}`,
         "ความหมายไพ่ยิปซี",
+        "ความหมายไพ่ทาโร่",
         "ไพ่ทาโรต์ 1909 Rider-Waite",
       ];
 

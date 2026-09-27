@@ -33,7 +33,7 @@ const WAYS = [
     image: "major-19.jpg",
     th: {
       tag: "1 ใบ · รายวัน",
-      title: "ไพ่ยิปซีรายวัน",
+      title: "ดูดวงไพ่ยิปซีรายวัน",
       desc: "เปิดไพ่ 1 ใบดูพลังงานของวันนี้ ทั้งงาน เงิน ความรัก และเรื่องที่ควรระวัง",
     },
     en: {
@@ -61,7 +61,7 @@ const WAYS = [
     image: "major-21.jpg",
     th: {
       tag: "จากวันเกิด",
-      title: "ไพ่ประจำวันเกิด",
+      title: "ไพ่ประจำตัวจากวันเกิด",
       desc: "ใส่วันเกิดเพื่อหาไพ่ประจำตัว (Birth Card) พร้อมความหมายด้านนิสัยและเรื่องที่ควรพัฒนา",
     },
     en: {
@@ -70,6 +70,24 @@ const WAYS = [
       desc: "Enter your birthday to find your birth card and what it says about who you are.",
     },
   },
+] as const;
+
+/**
+ * 🔎 ลิงก์ด้วยคำที่คนค้นจริง — ข้อความในลิงก์ = คำค้นเป้าหมายของหน้านั้น
+ * ที่มา: GSC + Google Trends ไทย 2026-09-27 (ดู docs/SEO_INDEXING_LOG.md)
+ * หน้าดูดวงใช้ "ไพ่ยิปซี" · หน้าความหมายไพ่ใช้ "ไพ่ทาโร่" (Trends: ความหมายไพ่ทาโร่ 47 ≈ ยิปซี 41)
+ * หน้าแรกคือหน้าที่ Google ให้น้ำหนักสุดของเว็บ ลิงก์จากตรงนี้จึงช่วยหน้าลูกมากที่สุด · ห้ามเปลี่ยนเป็นคำกว้าง ๆ
+ */
+const POPULAR_SEARCHES = [
+  { path: "/daily", th: "ดูดวงไพ่ยิปซีรายวัน", en: "Daily tarot reading" },
+  { path: "/spreads/topic/love", th: "ดูดวงไพ่ยิปซีความรัก", en: "Love tarot spreads" },
+  { path: "/spreads/three-card", th: "ดูดวงไพ่ยิปซี 3 ใบ", en: "3-card tarot reading" },
+  { path: "/spreads/monthly", th: "ดูดวงไพ่ยิปซีรายเดือน", en: "Monthly tarot reading" },
+  { path: "/spreads/celtic-cross", th: "ดูดวงไพ่ยิปซี 10 ใบ", en: "10-card Celtic Cross" },
+  { path: "/spreads/yes-no", th: "ไพ่ยิปซี ใช่หรือไม่", en: "Yes or no tarot" },
+  { path: "/cards", th: "ความหมายไพ่ทาโร่ 78 ใบ", en: "Tarot card meanings" },
+  { path: "/cards/all", th: "ความหมายไพ่ยิปซีทั้งหมด", en: "All 78 cards at a glance" },
+  { path: "/cards/birth-card", th: "ไพ่ประจำตัว", en: "Tarot birth card" },
 ] as const;
 
 export function HomeMoreWaysSection({ isEnglish, href }: { isEnglish: boolean; href: (path: string) => string }) {
@@ -135,6 +153,26 @@ export function HomeMoreWaysSection({ isEnglish, href }: { isEnglish: boolean; h
         </div>
         <HomeRailNav isEnglish={isEnglish} />
       </div>
+
+      {/* ลิงก์อยู่ใน <nav> ตรง ๆ ไม่ห่อ ul/li — หน้าแรกมีงบ DOM ≤ 1,500 (INC-0247) ห่อแล้วเกิน 4 ชิ้น */}
+      <nav
+        aria-labelledby="home-popular-searches-title"
+        className="pt-2 flex flex-wrap gap-x-5 gap-y-2.5"
+      >
+        <h3 id="home-popular-searches-title" className="w-full text-sm font-serif-th font-bold text-ink">
+          {isEnglish ? "Popular searches" : "คนค้นหาบ่อย"}
+        </h3>
+        {POPULAR_SEARCHES.map((item) => (
+          <Link
+            key={item.path}
+            href={href(item.path)}
+            prefetch={false}
+            className="text-xs sm:text-sm font-serif-th text-muted hover:text-gold-ink underline underline-offset-4 transition-colors"
+          >
+            {isEnglish ? item.en : item.th}
+          </Link>
+        ))}
+      </nav>
     </section>
   );
 }
