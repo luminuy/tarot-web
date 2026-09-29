@@ -47,6 +47,7 @@ docs/
         ├── HANDOFF_AI_ACCURACY_THAI_2026-09-07.md  # 🚧 🧠 แผนยกระดับ "ความแม่น" ของคำอ่าน + "ภาษาไทยที่ถูกต้อง" ของแม่หมอ AI
         ├── AI_INTELLIGENCE_PLAN.md                 # 🚧 🧠 แผนแม่บทยกระดับความฉลาดของแม่หมอ AI
         ├── HANDOFF_AI_JUDGE_BASELINE_2026-09-11.md # ⏸️ 🔑 ชีทส่งต่อ — รัน `ai:judge` เก็บ baseline `20260911-1` แล้วลุยคลื่น B ต่อ
+        ├── IOS_APP_PLAN_2026-09-29.md              # ⏳ 📱 แผนออกแบบระบบ — แอป SeerTarot บน iPhone (iOS App Store)
         ├── SITE_SHELL_SEO_PLAN.md                  # ✅ 🏛️ แผนลงมือ: Site Shell กลาง + Internal Link ที่บอทมองเห็น
         ├── RETENTION_PLAN.md                       # ✅ 👤 แผนสร้าง Consumer Retention Infra — handoff ให้ทีม Gemini
         ├── QUICK_FORTUNE_PLAN.md                   # ✅ ⚡ แผนฟีเจอร์ "ทำนายด่วน" (Quick Fortune — 1 ใบ ไม่ต้องเลือกไพ่)

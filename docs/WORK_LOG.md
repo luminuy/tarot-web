@@ -53,6 +53,16 @@
   - ทดลองแล้วไม่ใช้: `client:idle` / directive "hydrate หลังวาดเฟรมแรก" — แบบ simulate ดูดีขึ้น (82 ➔ 95) แต่เป็นภาพลวงจาก Chrome headless ในเครื่องนี้ที่นับภาพแรกช้า ~2.4s เสมอ · แบบ devtools throttle ไม่ต่าง (88 · 85–88) · `content-visibility` ห้ามตาม INC-0174
   - **CI #630 ตกงบ DOM หน้าแรก 1,529 > 1,500** (ในเครื่องผ่าน 1,451 เพราะไม่ได้ตั้ง `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT` — CI ตั้ง ➔ ภาพไพ่ทุกใบมี `<source>` AVIF เพิ่ม +78) · ชิปหมวดกิน 41 element ➔ ตัดโดยหน้าตาเท่าเดิม: ไอคอนชิป (`spread-chip-icons.ts` + `.spread-chip::after` mask) · หัวลูกศร `RailArrows` (`.rail-arrow-prev/next::after`) · ประกายการ์ดผังหน้าแรก (`.spread-card-sheen::after`) ➔ แบบ CI: **1,483** (main 1,487) · ถอด `BoltTabIcon`/`HourglassTabIcon`/`EyeTabIcon` ออกจาก TarotArtIcons (ไม่ได้ใช้แล้ว) · ด่านงบ DOM เพิ่มโน้ตวิธีวัดให้ตรง CI
   - งานหนักที่เหลือ: จัดหน้าครั้งแรกระหว่างพาร์ส HTML (long task 116–173ms × 3) · ส่วนที่ DOM เยอะสุดนอกจอแรก = วงล้อจักรราศี 208 · เมนูหัวเว็บ 191
+### 🗓️ 2026-09-29 (รอบ 189): ✦ แผนออกแบบระบบแอป iOS (ยังไม่มีโค้ดแอป)
+
+**คำร้องเจ้าของ**: วางแผนออกแบบระบบเพื่อทำแอปลงมือถือ iOS
+
+- แผนใหม่ `docs/plans/IOS_APP_PLAN_2026-09-29.md` (สถานะ ⏳) — แนะนำ Expo/React Native ใช้แกน TS ร่วมกับเว็บ · หลังบ้านเดิมชุดเดียว
+- ตรวจกับโค้ดจริง: ด่าน `isRequestAuthorizedOrigin` อยู่ใน 33 route ➔ แอป native โดน 403 ทุก POST · เซสชันผูกคุกกี้ httpOnly · สิทธิ์ผู้เยี่ยมชมผูกคุกกี้ `tarot_guest` · ซื้อเครดิตผ่าน Omise (ใช้ในแอป iOS ไม่ได้ ต้อง IAP)
+- งานหลังบ้านเฟส 0: Bearer token · App Attest/DeviceCheck · Sign in with Apple · IAP StoreKit 2 · Push · Universal Links · `minVersion`
+- กฎ App Store ที่เสี่ยง: 4.3(b) หมวดดูดวง · 4.2 เว็บห่อ · 3.1.1 IAP + ห้ามรหัสแลกของเราเอง · 4.8 · 5.1.1(v)
+- ค้าง: เจ้าของตัดสินใจ 5 ข้อในหัวข้อ 9 ของแผน (บัญชี Apple Developer ฯลฯ)
+
 ### 🗓️ 2026-09-27 (รอบ 188): ✦ SEO — บอก Google/Bing ว่าหน้าไหนเปลี่ยน หลัง #631 (แทนการกด "ขอการจัดทำดัชนี")
 
 - ปุ่ม "ขอการจัดทำดัชนี" ไม่มีใน API และเซสชันคลาวด์ไม่มีเบราว์เซอร์ที่ล็อกอิน Google ➔ ใช้สัญญาณที่ส่งจากโค้ดได้แทน
