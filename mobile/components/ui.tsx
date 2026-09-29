@@ -456,6 +456,7 @@ export function Button({
   variant = "primary",
   size = "lg",
   icon,
+  iconRight,
   disabled,
   loading,
   flex,
@@ -466,6 +467,8 @@ export function Button({
   variant?: "primary" | "secondary" | "plain" | "danger" | "ghost";
   size?: "lg" | "md";
   icon?: IconName;
+  /** ไอคอนท้ายปุ่ม — ใช้ลูกศรกับปุ่มที่พาไปข้างหน้า (แทนไอคอนประดับ) */
+  iconRight?: IconName;
   disabled?: boolean;
   loading?: boolean;
   flex?: boolean;
@@ -474,8 +477,8 @@ export function Button({
   const tone = useTone();
   const off = disabled || loading;
   const kind = variant === "ghost" ? "secondary" : variant;
-  // ปุ่มหลัก: กลางวัน = แคปซูลหมึกค่ำ ตัวครีม ไอคอนทอง (หรูและตัดกับพื้นครีมชัด) · กลางคืน = ทองตัวเข้ม (ไม่จมไปกับฟ้าค่ำ)
-  // คอนทราสต์: ครีม #F7EDDC บนหมึก #211B24 ≈ 15:1 · หมึก #171512 บนทอง #D2A354 ≈ 7.8:1
+  // ปุ่มหลักแบนเรียบทึบ ไม่ไล่เฉด ไม่มีไอคอนประดับ: กลางวัน = แคปซูลหมึกค่ำ ตัวครีม · กลางคืน = แคปซูลงาช้าง ตัวหมึก
+  // คอนทราสต์: ครีม #F7EDDC บนหมึก #211B24 ≈ 15:1 · หมึก #171512 บนงาช้าง #F7EEDE ≈ 15.7:1
   const fg =
     kind === "primary"
       ? tone === "night"
@@ -486,7 +489,7 @@ export function Button({
         : tone === "night"
           ? N.text
           : colors.goldInk;
-  const iconColor = kind === "primary" && tone !== "night" ? N.gold : fg;
+  const iconColor = fg;
   const h = size === "lg" ? 56 : 44;
 
   const label = loading ? (
@@ -494,9 +497,10 @@ export function Button({
   ) : (
     <View style={styles.btnInner}>
       {icon ? <Ionicons name={icon} size={size === "lg" ? 20 : 18} color={iconColor} /> : null}
-      <Text style={[size === "lg" ? type.headline : type.subhead, { color: fg, fontWeight: "600" }]} numberOfLines={1}>
+      <Text style={[size === "lg" ? type.headline : type.subhead, { color: fg, fontWeight: "600", letterSpacing: 0.2 }]} numberOfLines={1}>
         {title}
       </Text>
+      {iconRight ? <Ionicons name={iconRight} size={18} color={iconColor} /> : null}
     </View>
   );
 
@@ -514,7 +518,7 @@ export function Button({
         <View style={[styles.btn, { minHeight: h }]}>{label}</View>
       ) : (
         <GlassSurface
-          tone={kind === "primary" ? (tone === "night" ? "gold" : "ink") : tone === "night" ? "night" : "light"}
+          tone={kind === "primary" ? (tone === "night" ? "ivory" : "ink") : tone === "night" ? "night" : "light"}
           radius={radius.pill}
           flat={kind !== "primary"}
           interactive

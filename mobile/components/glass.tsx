@@ -31,7 +31,7 @@ import { motion, night as N, radius as R, shadow } from "@/lib/theme";
  * ⚠️ ข้อห้าม `backdrop-filter` ของเว็บ (INC-0056) เป็นเรื่องประสิทธิภาพเบราว์เซอร์ ไม่เกี่ยวกับ native
  * ⚠️ ตัวอักษรบนกระจกต้องคอนทราสต์ผ่าน AA — แผ่นสีโปร่ง (wash) มี alpha ≥ 0.55 เสมอ ห้ามลดจนอ่านยาก
  */
-export type GlassTone = "light" | "night" | "gold" | "ink";
+export type GlassTone = "light" | "night" | "ivory" | "ink";
 
 export const nativeGlass = Platform.OS === "ios" && isLiquidGlassAvailable();
 
@@ -60,17 +60,18 @@ const TONE = {
     wash: "rgba(33,27,36,0.96)",
     nativeTint: "rgba(33,27,36,0.92)",
     nativeWash: "rgba(33,27,36,0.4)",
-    rim: "rgba(210,163,84,0.5)",
-    highlight: "rgba(255,240,215,0.16)",
+    rim: "rgba(255,255,255,0.1)",
+    highlight: "rgba(255,240,215,0.06)",
   },
-  gold: {
+  // ปุ่มหลักบนฟ้าค่ำ: แคปซูลงาช้างทึบ แบนเรียบ ไม่ไล่เฉด (ไล่เฉดทองดูเก่าและขุ่น) — ตัวหมึกบนงาช้าง ≈ 15:1
+  ivory: {
     intensity: 30,
     tint: "light" as const,
-    wash: "rgba(143,92,26,0.94)",
-    nativeTint: "rgba(143,92,26,0.92)",
-    nativeWash: "rgba(143,92,26,0.35)",
-    rim: "rgba(255,226,170,0.55)",
-    highlight: "rgba(255,255,255,0.32)",
+    wash: "rgba(247,238,222,0.98)",
+    nativeTint: "rgba(247,238,222,0.95)",
+    nativeWash: "rgba(247,238,222,0.55)",
+    rim: "rgba(255,255,255,0.5)",
+    highlight: "rgba(255,255,255,0)",
   },
 };
 

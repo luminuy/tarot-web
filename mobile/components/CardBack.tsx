@@ -5,7 +5,7 @@ import { colors, night, radius } from "@/lib/theme";
 
 /**
  * หลังไพ่ของแอป — ชิ้นเดียวใช้ทุกที่ (สำรับให้เลือก · ไพ่คว่ำบนแผนผัง · ไพ่ประจำวัน · ภาพประกอบหน้าว่าง)
- * ฟ้าค่ำ + กรอบทองสองชั้น + วงแหวนกลางกับ ✦ · ส่ง `label` เพื่อแสดงเลขลำดับแทน ✦ (ไพ่ที่เลือกแล้ว)
+ * ฟ้าค่ำ + กรอบทองสองชั้น + วงแหวนกลางกับข้าวหลามตัดทอง · ส่ง `label` เพื่อแสดงเลขลำดับแทน (ไพ่ที่เลือกแล้ว)
  */
 export function CardBack({
   width,
@@ -30,12 +30,16 @@ export function CardBack({
     >
       <View style={styles.inner}>
         <View style={[styles.ring, { width: ring, height: ring, borderRadius: ring / 2 }]}>
-          <Text
-            style={[styles.glyph, { fontSize: Math.max(11, ring * (label ? 0.42 : 0.5)), lineHeight: Math.max(18, ring * 0.8) }]}
-            allowFontScaling={false}
-          >
-            {label ?? "✦"}
-          </Text>
+          {label ? (
+            <Text style={[styles.glyph, { fontSize: Math.max(11, ring * 0.42), lineHeight: Math.max(18, ring * 0.8) }]} allowFontScaling={false}>
+              {label}
+            </Text>
+          ) : (
+            // ตราเรขาคณิตวาดด้วยเส้น (ข้าวหลามตัดซ้อนวง) — ไม่ใช้ตัวอักษรสัญลักษณ์ที่ iOS อาจวาดออกมาเหมือนอิโมจิ
+            <View style={[styles.diamond, { width: ring * 0.34, height: ring * 0.34 }]}>
+              <View style={[styles.diamondCore, { width: ring * 0.12, height: ring * 0.12 }]} />
+            </View>
+          )}
         </View>
       </View>
     </LinearGradient>
@@ -53,5 +57,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   ring: { borderWidth: 1, borderColor: "rgba(210,163,84,0.45)", alignItems: "center", justifyContent: "center" },
+  diamond: {
+    transform: [{ rotate: "45deg" }],
+    borderWidth: 1,
+    borderColor: colors.goldOnDark,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  diamondCore: { backgroundColor: colors.goldOnDark },
   glyph: { color: colors.goldOnDark, fontWeight: "700", textAlign: "center" },
 });

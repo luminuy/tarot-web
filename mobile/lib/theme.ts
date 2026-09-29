@@ -119,6 +119,9 @@ export const shadow = {
   },
 } as const;
 
+/** ไอคอนเส้นประจำธาตุ (ใช้ร่วมหน้าวันนี้และหน้าไพ่) */
+export const elementIcon = { ไฟ: "flame-outline", น้ำ: "water-outline", ลม: "cloudy-outline", ดิน: "earth-outline" } as const;
+
 /** ความเร็วการเคลื่อนไหวกลาง — ทุกชิ้นใช้ชุดเดียวกันให้จังหวะทั้งแอปเสมอกัน */
 export const motion = { fast: 160, base: 260, slow: 520 } as const;
 

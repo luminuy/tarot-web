@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Alert, Linking, StyleSheet, Text, View } from "react-native";
@@ -41,7 +42,7 @@ export default function AccountScreen() {
       },
     ]);
 
-  const initial = (user?.name ?? user?.email ?? "✦").trim().charAt(0).toUpperCase();
+  const initial = (user?.name ?? user?.email ?? "").trim().charAt(0).toUpperCase();
 
   return (
     <Screen title="บัญชี" right={close} keyboard gap={space.lg}>
@@ -50,7 +51,7 @@ export default function AccountScreen() {
       {token ? (
         <Card style={styles.profile}>
           <View style={styles.avatar}>
-            <Text style={[type.title2, { color: night.gold }]}>{initial}</Text>
+            {initial ? <Text style={[type.title2, { color: night.gold }]}>{initial}</Text> : <Ionicons name="person" size={24} color={night.gold} />}
           </View>
           <View style={{ flex: 1 }}>
             <Text style={[type.headline, { color: colors.ink }]}>{user?.name ?? "สมาชิก"}</Text>

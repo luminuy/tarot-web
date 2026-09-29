@@ -16,9 +16,9 @@ export const TAB_BAR_H = 64;
 /** ไอคอนเส้น (ไม่ใช่อิโมจิ — กฎเหล็กข้อ 2) · แท็บที่เลือกเป็นแบบทึบ */
 export const TAB_ICONS: Record<string, [IconName, IconName]> = {
   index: ["sunny", "sunny-outline"],
-  read: ["sparkles", "sparkles-outline"],
+  read: ["copy", "copy-outline"],
   journal: ["book", "book-outline"],
-  cards: ["albums", "albums-outline"],
+  cards: ["grid", "grid-outline"],
 };
 
 /** ระยะจากขอบล่างจอถึงแท็บบาร์ — หน้าจอใช้คำนวณที่ว่างด้านล่าง */

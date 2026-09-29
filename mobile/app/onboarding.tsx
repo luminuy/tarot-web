@@ -65,7 +65,7 @@ function Art({ kind }: { kind: (typeof SLIDES)[number]["art"] }) {
             key={deg}
             style={[styles.artCard, { zIndex: i === 2 ? 5 : i, transform: [{ translateX: (i - 2) * 34 }, { translateY: i === 2 ? -26 : Math.abs(i - 2) * 8 }, { rotate: `${deg}deg` }] }]}
           >
-            <CardBack width={96} height={164} selected={i === 2} label={i === 2 ? "✦" : undefined} />
+            <CardBack width={96} height={164} selected={i === 2} />
           </View>
         ))}
         <View style={styles.seal}>
@@ -140,7 +140,7 @@ export default function Onboarding() {
               <View key={i} style={[styles.dot, i === page && styles.dotOn]} />
             ))}
           </View>
-          <Button title={last ? "เริ่มเปิดไพ่" : "ต่อไป"} icon={last ? "sparkles" : undefined} onPress={next} />
+          <Button title={last ? "เริ่มใช้งาน" : "ต่อไป"} iconRight="arrow-forward" onPress={next} />
         </View>
       </View>
     </ToneContext.Provider>
