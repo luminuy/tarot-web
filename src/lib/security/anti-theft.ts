@@ -19,7 +19,27 @@
  */
 
 import { isOwnHostname } from "@/lib/config/site";
+
+/**
+ * โทเคนเซสชันจากแอป native: `Authorization: Bearer <payload>.<signature>`
+ * ตรวจแค่ "รูปร่าง" ที่นี่ (ฟังก์ชันนี้เป็น sync) — ความถูกต้องของลายเซ็นและ token_version
+ * ตรวจที่ `getSessionUser()` ทุกครั้ง
+ */
+const BEARER_TOKEN_SHAPE = /^Bearer [A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}$/;
+
+/** อ่านโทเคน Bearer จากคำขอ — คืน `null` ถ้าไม่มีหัวหรือรูปร่างไม่ใช่โทเคนเซสชัน */
+export function readBearerToken(headers: Headers): string | null {
+  const value = headers.get("authorization");
+  if (!value || !BEARER_TOKEN_SHAPE.test(value)) return null;
+  return value.slice("Bearer ".length);
+}
+
 export function isRequestAuthorizedOrigin(request: Request): boolean {
+  // ช่องทางแอป (แผน IOS_APP_PLAN 4.1): ด่านนี้กัน CSRF ซึ่งเกิดจากเบราว์เซอร์แนบคุกกี้ให้เอง
+  // หัว Authorization เบราว์เซอร์ไม่แนบให้ และเว็บอื่นตั้งข้ามโดเมนไม่ได้ถ้าเราไม่เปิด CORS
+  // จึงไม่มีช่อง CSRF — ห้ามเปิด Access-Control-Allow-Headers: authorization เด็ดขาด
+  if (readBearerToken(request.headers)) return true;
+
   const origin = request.headers.get("origin");
   const referer = request.headers.get("referer");
   const secFetchSite = request.headers.get("sec-fetch-site");

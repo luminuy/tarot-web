@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { signUserSession } from "@/lib/auth/edge-auth";
-import { setAuthCookie } from "@/lib/auth/session";
+import { attachSession } from "@/lib/auth/session";
 import { isPasswordConfigError, verifyPassword } from "@/lib/auth/password";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { releaseAuthAttempt, reserveAuthAttempt } from "@/lib/security/auth-ratelimit";
@@ -122,9 +122,7 @@ export async function POST(request: Request) {
       },
     });
 
-    setAuthCookie(response, sessionToken);
-
-    return response;
+    return attachSession(request, response, sessionToken);
   } catch (err) {
     // ⚠️ ระบบตั้งค่าไม่ครบ ต้องไม่ตอบว่า "รหัสผ่านไม่ถูกต้อง" — ผู้ใช้จะนั่งลองรหัสผ่านซ้ำ ๆ
     // และเจ้าของระบบจะไล่หาสาเหตุไม่เจอ เพราะหน้าเว็บชี้ไปผิดที่ (บทเรียน INC-0045)

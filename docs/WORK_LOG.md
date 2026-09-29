@@ -63,6 +63,17 @@
 - กฎ App Store ที่เสี่ยง: 4.3(b) หมวดดูดวง · 4.2 เว็บห่อ · 3.1.1 IAP + ห้ามรหัสแลกของเราเอง · 4.8 · 5.1.1(v)
 - ค้าง: เจ้าของตัดสินใจ 5 ข้อในหัวข้อ 9 ของแผน (บัญชี Apple Developer ฯลฯ)
 
+### 🗓️ 2026-09-29 (รอบ 190): ✦ แอป iOS เฟส 0 ข้อ 0.1–0.2 — หลังบ้านรับ Bearer token
+
+**คำร้องเจ้าของ**: อ่านแผนแล้ว เริ่มสร้างแอป iOS ได้เลย
+
+- `src/lib/security/anti-theft.ts`: `readBearerToken()` + `isRequestAuthorizedOrigin()` ยอมคำขอที่มี `Authorization: Bearer <payload>.<sig>` (ตรวจรูปร่างเท่านั้น — ลายเซ็น/`token_version` ตรวจที่ `getSessionUser()`) · ไม่มีหัว = พฤติกรรมเดิมทุกประการ
+- `src/lib/auth/session.ts`: `getSessionUser()` ใช้ Bearer ก่อนคุกกี้ · `attachSession()` ล็อกอินจากแอป (`X-Client: ios`) ได้ `sessionToken` ใน body และไม่ตั้งคุกกี้ · `POST /api/auth/email/login` ใช้ตัวนี้
+- ข้อ 0.7 (ครึ่งแรก): `GET /api/config/app` (`src/app/api/config/app/route.ts`) คืน `minVersion` / `latestVersion` จาก `APP_MIN_VERSION` / `APP_LATEST_VERSION` (ค่าไม่ถูกรูปแบบ = `1.0.0`) · ไฟล์ AASA รอ Apple Team ID จากเจ้าของ และต้องแก้ `public/_headers` คู่กับด่าน `test-static-headers`
+- เทสต์: ข้อ 8 ใน `scripts/qa/test-session-guard.ts` (Bearer ผ่านด่าน · หัวผิดรูป/ต่างโดเมนยังโดนกั้น · เว็บได้คุกกี้ แอปได้ token)
+- **ยังไม่ทำ (ติดเจ้าของ/ติดข้อ 0.4)**: ล็อกอินอีเมลจากแอปยังต้องผ่าน Turnstile (แอปไม่มี — รอ App Attest) · Sign in with Apple · IAP · Push · `mobile/` (Expo)
+- ⚠️ **WAF ที่ Cloudflare (ISSUE-047 กฎข้อ 4)**: challenge POST เข้า `/api/` ที่ไม่มี `Origin` ของเรา ➔ คำขอแอปจะโดนก่อนถึง Worker ต้องเพิ่มข้อยกเว้นให้คำขอที่มีหัว `Authorization: Bearer` / `X-Client: ios` (สิทธิ์เจ้าของ)
+
 ### 🗓️ 2026-09-27 (รอบ 188): ✦ SEO — บอก Google/Bing ว่าหน้าไหนเปลี่ยน หลัง #631 (แทนการกด "ขอการจัดทำดัชนี")
 
 - ปุ่ม "ขอการจัดทำดัชนี" ไม่มีใน API และเซสชันคลาวด์ไม่มีเบราว์เซอร์ที่ล็อกอิน Google ➔ ใช้สัญญาณที่ส่งจากโค้ดได้แทน

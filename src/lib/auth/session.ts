@@ -1,6 +1,7 @@
-import { cookies } from "next/headers";
-import type { NextResponse } from "next/server";
+import { cookies, headers } from "next/headers";
+import { NextResponse } from "next/server";
 
+import { readBearerToken } from "@/lib/security/anti-theft";
 import {
   AUTH_COOKIE_NAME,
   AUTH_HINT_COOKIE_NAME,
@@ -48,6 +49,32 @@ function hintCookieOptions() {
 export function setAuthCookie(response: NextResponse, token: string): void {
   response.cookies.set(AUTH_COOKIE_NAME, token, authCookieOptions());
   setAuthHintCookie(response);
+}
+
+/** คำขอนี้มาจากแอป iOS ไหม — แอปส่ง `X-Client: ios` (แผน IOS_APP_PLAN 4.1) */
+export function isAppClientRequest(request: Request): boolean {
+  return request.headers.get("x-client") === "ios";
+}
+
+/**
+ * ส่งเซสชันกลับตามช่องทางของผู้เรียก
+ * — เว็บ: Set-Cookie เหมือนเดิมทุกประการ
+ * — แอป (`X-Client: ios`): ใส่ `sessionToken` ใน body ให้แอปเก็บลง Keychain และ **ไม่ตั้งคุกกี้**
+ */
+export async function attachSession(
+  request: Request,
+  response: NextResponse,
+  token: string,
+): Promise<NextResponse> {
+  if (!isAppClientRequest(request)) {
+    setAuthCookie(response, token);
+    return response;
+  }
+  const body = (await response.json()) as Record<string, unknown>;
+  return NextResponse.json(
+    { ...body, sessionToken: token, expiresInSec: AUTH_SESSION_MAX_AGE },
+    { status: response.status },
+  );
 }
 
 /** ย้ำคุกกี้ใบ้อย่างเดียว (ใช้กับ response ที่ยืนยันแล้วว่ามีเซสชันจริง) */
@@ -117,7 +144,8 @@ export async function getRevocationState(user: SessionUser): Promise<RevocationS
 export async function getSessionUser(opts?: { skipRevocationCheck?: boolean }): Promise<SessionUser | null> {
   let token: string | undefined;
   try {
-    token = (await cookies()).get(AUTH_COOKIE_NAME)?.value;
+    // ช่องทางแอป: มี Bearer = ใช้โทเคนนั้นอย่างเดียว ไม่แอบใช้คุกกี้ทับ · ไม่มีหัว = ทำงานแบบเดิม
+    token = readBearerToken(await headers()) ?? (await cookies()).get(AUTH_COOKIE_NAME)?.value;
   } catch {
     // cookies() throw ได้ในบางบริบท (static render) — ถือว่าไม่มีเซสชัน
     return null;

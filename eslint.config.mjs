@@ -14,6 +14,7 @@ export default tseslint.config(
       "**/node_modules/**",
       "**/dist/**",
       "**/public/**",
+      "mobile/**",
       "**/coverage/**",
       "src/data/**", // ไฟล์ข้อมูลไพ่และผังพยากรณ์ขนาดใหญ่ (Pure Data) ข้ามเพื่อความรวดเร็ว
       "**/*.min.js",

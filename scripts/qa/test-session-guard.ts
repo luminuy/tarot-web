@@ -14,6 +14,9 @@
  */
 
 import { signUserSession, verifyUserSession, type UserProfile } from "../../src/lib/auth/edge-auth";
+import { NextResponse } from "next/server";
+import { attachSession } from "../../src/lib/auth/session";
+import { isRequestAuthorizedOrigin, readBearerToken } from "../../src/lib/security/anti-theft";
 import { resolveAppOrigin } from "../../src/lib/security/app-origin";
 import { SITE_DOMAIN, SITE_ORIGIN } from "../../src/lib/config/site";
 import { describeAuthError } from "../../src/lib/auth/use-session";
@@ -240,6 +243,46 @@ async function run() {
     );
   }
   console.log("  ✓ 7. เพดานถี่เส้นเปิดไพ่/แชท: ยิงพร้อมกันทะลุไม่ได้ · ชั้นที่ถูกปฏิเสธคืนสิทธิ์ครบ");
+
+  // ── 8. ช่องทางแอป iOS (Bearer) — แผน IOS_APP_PLAN 4.1 ─────────────────────────
+  const appToken = await signUserSession(baseProfile({ tokenVersion: 2 }));
+  const bearer = (value?: string, extra: Record<string, string> = {}) =>
+    new Request(`${SITE_ORIGIN}/api/reading/start`, {
+      method: "POST",
+      headers: { ...(value ? { authorization: value } : {}), ...extra },
+    });
+
+  // 8.1 Bearer ที่รูปร่างเป็นโทเคนเซสชัน ผ่านด่าน Origin (แอป native ไม่มี Origin)
+  if (!isRequestAuthorizedOrigin(bearer(`Bearer ${appToken}`))) {
+    throw new Error("❌ คำขอจากแอป (Bearer) ถูกด่าน Origin ปฏิเสธ — แอปจะได้ 403 ทุก POST");
+  }
+  // 8.2 ไม่มีหัว / หัวผิดรูป / Basic = พฤติกรรมเดิม (POST ไม่มี Origin ต้องโดนปฏิเสธ)
+  for (const bad of [undefined, "Bearer", "Bearer x", "Bearer nodot", `Basic ${appToken}`, `bearer ${appToken}`]) {
+    if (isRequestAuthorizedOrigin(bearer(bad))) {
+      throw new Error(`❌ หัว Authorization "${String(bad)}" ทำให้ด่าน Origin เปิดทั้งที่ไม่ใช่โทเคนเซสชัน`);
+    }
+  }
+  // 8.3 Origin ของเว็บอื่นยังโดนปฏิเสธเหมือนเดิม
+  if (isRequestAuthorizedOrigin(bearer(undefined, { origin: "https://evil.example" }))) {
+    throw new Error("❌ Origin ต่างโดเมนผ่านด่านโดยไม่มี Bearer");
+  }
+  // 8.4 readBearerToken คืนโทเคนเปล่า (ไม่มีคำนำหน้า) ที่ verifyUserSession ถอดได้
+  const extracted = readBearerToken(new Headers({ authorization: `Bearer ${appToken}` }));
+  const decodedApp = extracted ? await verifyUserSession(extracted) : null;
+  if (decodedApp?.tokenVersion !== 2) {
+    throw new Error("❌ readBearerToken ไม่คืนโทเคนที่ถอดกลับเป็นเซสชันเดิม");
+  }
+  // 8.5 ตัวสลับช่องทางตอบกลับ: เว็บ = คุกกี้ · แอป = sessionToken ใน body ไม่มีคุกกี้
+  const webRes = await attachSession(bearer(), NextResponse.json({ ok: true }), appToken);
+  if (!(webRes.headers.get("set-cookie") || "").includes(appToken) || (await webRes.json()).sessionToken) {
+    throw new Error("❌ ช่องทางเว็บต้องได้คุกกี้และห้ามมี sessionToken ใน body");
+  }
+  const appRes = await attachSession(bearer(undefined, { "x-client": "ios" }), NextResponse.json({ ok: true }), appToken);
+  const appBody = await appRes.json();
+  if (appBody.sessionToken !== appToken || appRes.headers.get("set-cookie")) {
+    throw new Error("❌ ช่องทางแอปต้องได้ sessionToken ใน body และห้ามตั้งคุกกี้");
+  }
+  console.log("  ✓ 8. ช่องทางแอป iOS: Bearer ผ่านด่าน Origin · หัวผิดรูป/ต่างโดเมนยังโดนกั้น · ล็อกอินคืนโทเคนใน body");
 
   console.log("✅ [QA] ด่านกันบั๊กเซสชันและการเข้าสู่ระบบผ่านครบทุกข้อ\n");
 }
