@@ -1,0 +1,55 @@
+name: 📱 Mobile App Checks
+
+# ด่านตรวจของแอป iOS (แผน docs/plans/IOS_APP_PLAN_2026-09-29.md ข้อ 8)
+# รันเฉพาะเมื่อแอปหรือไฟล์แกนกลางที่แอปอ่านร่วมกับเว็บเปลี่ยน — ไม่ใช่ required check ของ main
+# (ด่านบังคับยังเป็น pr.yml) แต่ PR ที่แตะแกนร่วมควรเห็นสีแดงตรงนี้ก่อน merge
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "mobile/**"
+      - "src/data/**"
+      - "src/lib/tarot/**"
+      - ".github/workflows/mobile.yml"
+
+concurrency:
+  group: mobile-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  mobile:
+    name: 📱 typecheck · jest · expo-doctor
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: ⚙️ Setup Node.js 22
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      # เทสต์ Provably Fair เทียบกับ src/lib/tarot/shuffle.ts ของเว็บ — ต้องใช้แค่ node ในตัว ไม่ต้องติดตั้ง dependency ของเว็บ
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔎 Typecheck
+        run: npm run typecheck
+
+      - name: 🧪 Jest (Provably Fair parity · ภาพไพ่ครบ 78 ใบ)
+        run: npm test
+
+      - name: 🩺 expo-doctor
+        run: npx --yes expo-doctor@1.20.4
+        env:
+          CI: "1"
