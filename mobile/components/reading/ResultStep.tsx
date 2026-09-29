@@ -163,7 +163,7 @@ export function ResultStep({ spread, state, verified }: { spread: Spread; state:
 
       {src.summary ? (
         <NightPanel>
-          <Eyebrow>✦ สรุปและคำแนะนำ</Eyebrow>
+          <Eyebrow>สรุปและคำแนะนำ</Eyebrow>
           <Text style={[type.body, { color: night.text }]}>{src.summary}</Text>
         </NightPanel>
       ) : null}

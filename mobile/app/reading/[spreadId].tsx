@@ -114,7 +114,6 @@ function Flow({
             {needsSignIn ? <Button title="เข้าสู่ระบบเพื่ออ่านไพ่" onPress={() => router.push("/login")} /> : null}
             <Button
               title={allFlipped(state) ? "ให้แม่หมออ่านไพ่" : `พลิกไพ่อีก ${(state.shuffle?.cards.length ?? need) - state.flipped.length} ใบ`}
-              icon={allFlipped(state) ? "sparkles" : undefined}
               onPress={() => void read()}
               disabled={!allFlipped(state)}
             />

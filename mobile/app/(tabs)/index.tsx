@@ -23,7 +23,7 @@ import { useSession } from "@/lib/auth/session";
 import { friendlyMessage } from "@/lib/errors";
 import { hasSeenOnboarding } from "@/lib/onboarding";
 import { TOPIC_LABEL, TOPIC_SPREAD, type Topic } from "@/lib/reading-flow";
-import { colors, GUTTER, night, radius, shadow, space, spreadTitle, topicColor, type } from "@/lib/theme";
+import { colors, elementIcon, GUTTER, night, radius, shadow, space, spreadTitle, topicColor, type } from "@/lib/theme";
 import { ALL_CARDS } from "@core/data/cards";
 import { SPREADS_BY_CATEGORY } from "@core/data/spread-categories";
 
@@ -97,7 +97,7 @@ export default function TodayScreen() {
       <DailyHero />
 
       <View style={{ gap: space.xs }}>
-        <Button title="ถามไพ่ตอนนี้" icon="sparkles" onPress={() => router.push(`/reading/${TOPIC_SPREAD.general}`)} />
+        <Button title="ถามไพ่ตอนนี้" iconRight="arrow-forward" onPress={() => router.push(`/reading/${TOPIC_SPREAD.general}`)} />
         <Caption center>ผังอดีต · ปัจจุบัน · อนาคต (3 ใบ) — เปลี่ยนผังได้ในขั้นถัดไป</Caption>
       </View>
 
@@ -269,7 +269,7 @@ function DailyHero() {
             <Animated.View entering={FadeInDown.duration(360)} style={styles.reveal}>
               <Text style={[type.title2, styles.cardName]}>{daily.nameTh}</Text>
               <View style={styles.pills}>
-                <Badge label={`ธาตุ${daily.element}`} icon="sparkles-outline" />
+                <Badge label={`ธาตุ${daily.element}`} icon={elementIcon[daily.element as keyof typeof elementIcon] ?? "ellipse-outline"} />
                 {daily.keywords.slice(0, 3).map((k) => (
                   <Badge key={k} label={k} />
                 ))}

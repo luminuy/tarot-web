@@ -11,7 +11,7 @@ import type { Spread } from "@core/data/spreads";
 type IconName = React.ComponentProps<typeof Ionicons>["name"];
 
 const TOPICS: { id: Topic; icon: IconName }[] = [
-  { id: "general", icon: "sparkles" },
+  { id: "general", icon: "compass" },
   { id: "love", icon: "heart" },
   { id: "work", icon: "briefcase" },
   { id: "money", icon: "wallet" },

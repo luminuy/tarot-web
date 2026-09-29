@@ -9,7 +9,7 @@ import { NightSky } from "@/components/glass";
 import { Badge, Body, Button, Card, Chip, ErrorNote, Eyebrow, IconButton, Screen, Segmented, ToneContext } from "@/components/ui";
 import { cardById } from "@core/data/cards";
 import type { Category } from "@core/data/cards/types";
-import { colors, GUTTER, night, shadow, space, type } from "@/lib/theme";
+import { colors, elementIcon, GUTTER, night, shadow, space, type } from "@/lib/theme";
 
 const CATEGORY_LABEL: Record<Category, string> = {
   general: "ภาพรวม",
@@ -24,7 +24,7 @@ const SUIT_LABEL = { wands: "ดอกไม้เท้า", cups: "ดอก�
 
 type Orientation = "upright" | "reversed";
 
-const ELEMENT_ICON = { ไฟ: "flame-outline", น้ำ: "water-outline", ลม: "cloudy-outline", ดิน: "earth-outline" } as const;
+
 
 /**
  * หน้าความหมายไพ่ — ภาพไพ่ใหญ่บนฟ้าค่ำเต็มขอบ แล้วสลับ "หัวตั้ง/กลับหัว" กับ "หัวข้อ" ในที่เดียว
@@ -68,7 +68,7 @@ export default function CardDetailScreen() {
           <Text style={[type.subhead, { color: night.textSoft }]}>{card.nameEn}</Text>
         </View>
         <View style={styles.pills}>
-          <Badge label={`ธาตุ${card.element}`} icon={ELEMENT_ICON[card.element]} />
+          <Badge label={`ธาตุ${card.element}`} icon={elementIcon[card.element]} />
           <Badge label={card.astrology} icon="planet-outline" />
         </View>
       </View>
@@ -123,7 +123,7 @@ export default function CardDetailScreen() {
 
       <Button
         title="ถามไพ่ตอนนี้"
-        icon="sparkles"
+        iconRight="arrow-forward"
         variant="secondary"
         onPress={() => router.push({ pathname: "/reading/[spreadId]", params: { spreadId: "three-card", topic: category } })}
       />

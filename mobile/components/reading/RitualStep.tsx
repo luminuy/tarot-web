@@ -129,9 +129,6 @@ function FocusOrb({ question, onDone }: { question: string; onDone: () => void }
             <LinearGradient colors={["#F5D796", "#D2A354", "#8F5C1A"]} style={StyleSheet.absoluteFill} />
           </Animated.View>
           <View style={styles.ringInner} />
-          <Text style={styles.orbGlyph} allowFontScaling={false}>
-            ✦
-          </Text>
         </Animated.View>
       </Pressable>
       <Text style={[type.quote, styles.breath]} accessibilityLiveRegion="polite">
@@ -252,7 +249,6 @@ const styles = StyleSheet.create({
   },
   core: { position: "absolute", width: ORB, height: ORB, borderRadius: ORB / 2, overflow: "hidden" },
   ringInner: { position: "absolute", width: ORB - 28, height: ORB - 28, borderRadius: (ORB - 28) / 2, borderWidth: 1, borderColor: "rgba(255,236,200,0.35)" },
-  orbGlyph: { fontSize: 56, lineHeight: 72, color: "#FFF3DA", textShadowColor: "rgba(0,0,0,0.35)", textShadowRadius: 8 },
   slots: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", rowGap: space.sm, columnGap: 2 },
   slotEmpty: {
     borderRadius: radius.xs,
