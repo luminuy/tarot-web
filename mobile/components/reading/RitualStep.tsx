@@ -52,6 +52,15 @@ function FocusOrb({ question, onDone }: { question: string; onDone: () => void }
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pulse = useRef<ReturnType<typeof setInterval> | null>(null);
   const [holding, setHolding] = useState(false);
+  const [inhale, setInhale] = useState(true);
+
+  // คำชวนหายใจสลับตามจังหวะดวงแก้ว (แพทเทิร์น "take a deep breath" ของ Calm บน Mobbin) — 2.2 วินาทีเท่าจังหวะพอง/ยุบ
+  useEffect(() => {
+    if (reduce || holding) return;
+    setInhale(true);
+    const t = setInterval(() => setInhale((v) => !v), 2200);
+    return () => clearInterval(t);
+  }, [reduce, holding]);
 
   // ดวงแก้ว "หายใจ" ช้า ๆ ระหว่างรอ (หยุดเมื่อเปิดลดการเคลื่อนไหว)
   useEffect(() => {
@@ -125,9 +134,10 @@ function FocusOrb({ question, onDone }: { question: string; onDone: () => void }
           </Text>
         </Animated.View>
       </Pressable>
-      <Caption center live>
-        {holding ? "ค้างไว้… ปล่อยใจให้นิ่ง" : "แตะค้างที่ดวงแก้วเพื่อเริ่ม"}
-      </Caption>
+      <Text style={[type.quote, styles.breath]} accessibilityLiveRegion="polite">
+        {holding ? "ค้างไว้… ปล่อยใจให้นิ่ง" : reduce ? "หายใจช้า ๆ" : inhale ? "หายใจเข้า…" : "หายใจออก…"}
+      </Text>
+      {!holding ? <Caption center>แตะค้างที่ดวงแก้วเพื่อเริ่ม</Caption> : null}
     </View>
   );
 }
@@ -215,6 +225,7 @@ function DeckPicker({ spread, state, dispatch }: { spread: Spread; state: FlowSt
 
 const styles = StyleSheet.create({
   focusWrap: { alignItems: "center", gap: space.md, paddingTop: space.md },
+  breath: { color: night.gold, textAlign: "center", fontSize: 21, lineHeight: 36 },
   quote: { color: night.text, textAlign: "center", paddingHorizontal: space.md },
   focusPress: { width: ORB + 80, height: ORB + 80, alignItems: "center", justifyContent: "center", marginVertical: space.sm },
   halo: {
