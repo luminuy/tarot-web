@@ -1,23 +1,31 @@
+import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { useEffect, useRef, useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
-import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from "react-native-reanimated";
-
 import { LinearGradient } from "expo-linear-gradient";
+import { useEffect, useRef, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 
-import { GlassSurface } from "@/components/glass";
+import { CardBack } from "@/components/CardBack";
 import { Body, Caption, H1 } from "@/components/ui";
 import { splitPositionName, type Action, type FlowState } from "@/lib/reading-flow";
-import { colors, radius, space } from "@/lib/theme";
+import { GUTTER, night, radius, space, type } from "@/lib/theme";
 import type { Spread } from "@core/data/spreads";
 
 const DECK_SIZE = 78;
 const HOLD_MS = 3000;
 
 /**
- * ขั้น 3 — ตั้งจิต → เลือกไพ่
- * จังหวะ A: กดค้างวงกลม 3 วินาที (สั่นเป็นจังหวะ) เป็นพิธีตั้งสมาธิ — ไม่มีผลต่อการสุ่ม
- * จังหวะ B: เลื่อนสำรับคว่ำแนวนอน แตะเลือก N ใบ · ช่องตำแหน่งด้านบนเติมทีละช่อง
+ * ขั้น 3 — ตั้งจิต → เลือกไพ่ (โทนค่ำ: ฉากเปลี่ยนเป็นแท่นยามค่ำให้รู้สึกว่าเข้าพิธี)
+ * จังหวะ A: กดค้างดวงแก้ว 3 วินาที (สั่นเป็นจังหวะ) เป็นพิธีตั้งสมาธิ — ไม่มีผลต่อการสุ่ม
+ * จังหวะ B: สำรับคว่ำกางเป็นพัด เลื่อนแนวนอน แตะเลือก N ใบ · ช่องตำแหน่งด้านบนเติมทีละช่อง
  */
 export function RitualStep({
   spread,
@@ -29,19 +37,30 @@ export function RitualStep({
   dispatch: (a: Action) => void;
 }) {
   return state.ritualPhase === "focus" ? (
-    <FocusRing onDone={() => dispatch({ type: "focusDone" })} />
+    <FocusOrb question={state.question} onDone={() => dispatch({ type: "focusDone" })} />
   ) : (
     <DeckPicker spread={spread} state={state} dispatch={dispatch} />
   );
 }
 
-function FocusRing({ onDone }: { onDone: () => void }) {
-  const scale = useSharedValue(1);
-  const fill = useSharedValue(0);
+const ORB = 184;
+
+function FocusOrb({ question, onDone }: { question: string; onDone: () => void }) {
   const reduce = useReducedMotion();
+  const breath = useSharedValue(1);
+  const fill = useSharedValue(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pulse = useRef<ReturnType<typeof setInterval> | null>(null);
   const [holding, setHolding] = useState(false);
+
+  // ดวงแก้ว "หายใจ" ช้า ๆ ระหว่างรอ (หยุดเมื่อเปิดลดการเคลื่อนไหว)
+  useEffect(() => {
+    if (reduce) return;
+    breath.value = withRepeat(
+      withSequence(withTiming(1.05, { duration: 2200, easing: Easing.inOut(Easing.sin) }), withTiming(1, { duration: 2200, easing: Easing.inOut(Easing.sin) })),
+      -1,
+    );
+  }, [reduce, breath]);
 
   const stop = () => {
     if (timer.current) clearTimeout(timer.current);
@@ -53,8 +72,7 @@ function FocusRing({ onDone }: { onDone: () => void }) {
 
   const begin = () => {
     setHolding(true);
-    scale.value = withTiming(reduce ? 1 : 1.12, { duration: HOLD_MS });
-    fill.value = withTiming(1, { duration: HOLD_MS });
+    fill.value = withTiming(1, { duration: HOLD_MS, easing: Easing.linear });
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     pulse.current = setInterval(() => void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light), 600);
     timer.current = setTimeout(() => {
@@ -68,17 +86,25 @@ function FocusRing({ onDone }: { onDone: () => void }) {
     if (!holding) return;
     stop();
     setHolding(false);
-    scale.value = withTiming(1, { duration: 200 });
-    fill.value = withTiming(0, { duration: 200 });
+    fill.value = withTiming(0, { duration: 240 });
   };
 
-  const ring = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  const glow = useAnimatedStyle(() => ({ opacity: 0.15 + fill.value * 0.85 }));
+  const orb = useAnimatedStyle(() => ({ transform: [{ scale: breath.value * (1 + fill.value * 0.08) }] }));
+  const core = useAnimatedStyle(() => ({ opacity: 0.25 + fill.value * 0.75, transform: [{ scale: 0.35 + fill.value * 0.65 }] }));
+  const halo = useAnimatedStyle(() => ({ opacity: 0.25 + fill.value * 0.6, transform: [{ scale: 1 + fill.value * 0.18 }] }));
 
   return (
     <View style={styles.focusWrap}>
-      <H1>หลับตา หายใจลึก ๆ</H1>
-      <Body muted>นึกถึงคำถามของคุณ แล้วกดวงกลมค้างไว้ 3 วินาที</Body>
+      <H1 center>หลับตา หายใจลึก ๆ</H1>
+      <Body muted center>
+        นึกถึงคำถามของคุณ แล้วแตะดวงแก้วค้างไว้จนรู้สึกสั่นครบ 3 วินาที
+      </Body>
+      {question ? (
+        <Text style={[type.quote, styles.quote]} numberOfLines={3}>
+          “{question}”
+        </Text>
+      ) : null}
+
       <Pressable
         onPressIn={begin}
         onPressOut={cancel}
@@ -87,29 +113,39 @@ function FocusRing({ onDone }: { onDone: () => void }) {
         accessibilityHint="กดค้างจนรู้สึกสั่นครบ แล้วระบบจะพาไปเลือกไพ่"
         style={styles.focusPress}
       >
-        <Animated.View style={[styles.ring, ring]}>
-          <Animated.View style={[styles.ringGlow, glow]} />
-          <Text style={styles.ringGlyph}>✦</Text>
+        <Animated.View style={[styles.halo, halo]} />
+        <Animated.View style={[styles.orb, orb]}>
+          <LinearGradient colors={["#4A3A52", "#241D29", "#141116"]} start={{ x: 0.3, y: 0 }} end={{ x: 0.7, y: 1 }} style={StyleSheet.absoluteFill} />
+          <Animated.View style={[styles.core, core]}>
+            <LinearGradient colors={["#F5D796", "#D2A354", "#8F5C1A"]} style={StyleSheet.absoluteFill} />
+          </Animated.View>
+          <View style={styles.ringInner} />
+          <Text style={styles.orbGlyph} allowFontScaling={false}>
+            ✦
+          </Text>
         </Animated.View>
       </Pressable>
-      <Caption>{holding ? "ค้างไว้ … ใกล้แล้ว" : "กดค้างเพื่อเริ่ม"}</Caption>
+      <Caption center live>
+        {holding ? "ค้างไว้… ปล่อยใจให้นิ่ง" : "แตะค้างที่ดวงแก้วเพื่อเริ่ม"}
+      </Caption>
     </View>
   );
 }
 
+const CARD_W = 92;
+const CARD_H = Math.round(CARD_W * (12 / 7));
+const STEP = 44;
+
 function DeckPicker({ spread, state, dispatch }: { spread: Spread; state: FlowState; dispatch: (a: Action) => void }) {
   const need = spread.positions.length;
-  const cardW = 104;
-  const cardH = cardW * (12 / 7);
   const remaining = need - state.picked.length;
+  const slotW = need > 6 ? 38 : 48;
 
   return (
     <>
       <View style={{ gap: space.xs }}>
         <H1>เลือกไพ่ {need} ใบ</H1>
-        <Caption live>
-          {remaining > 0 ? `ให้ใจพาไป — แตะเลือกอีก ${remaining} ใบ` : "ครบแล้ว กดยืนยันด้านล่างได้เลย"}
-        </Caption>
+        <Caption live>{remaining > 0 ? `ให้ใจพาไป แตะเลือกอีก ${remaining} ใบ` : "ครบแล้ว กดยืนยันด้านล่างได้เลย"}</Caption>
       </View>
 
       {/* ช่องตำแหน่ง: เติมทีละช่องตามลำดับที่เลือก */}
@@ -117,37 +153,35 @@ function DeckPicker({ spread, state, dispatch }: { spread: Spread; state: FlowSt
         {spread.positions.map((pos, i) => {
           const filled = i < state.picked.length;
           return (
-            <GlassSurface
-              key={pos.index}
-              radius={radius.md}
-              flat
-              variant={filled ? "dark" : "light"}
-              contentStyle={styles.slot}
-            >
-              <Text style={[styles.slotNum, filled && { color: colors.goldOnDark }]}>{filled ? "✦" : i + 1}</Text>
-              <Text style={[styles.slotName, filled && { color: colors.surface }]} numberOfLines={1}>
+            <View key={pos.index} style={{ width: slotW + 22, alignItems: "center", gap: 4 }}>
+              {filled ? (
+                <CardBack width={slotW} height={slotW * 1.55} label={String(i + 1)} selected />
+              ) : (
+                <View style={[styles.slotEmpty, { width: slotW, height: slotW * 1.55 }]}>
+                  <Text style={[type.caption2, { color: night.gold }]}>{i + 1}</Text>
+                </View>
+              )}
+              <Text style={[type.caption2, { color: filled ? night.text : night.textSoft, textAlign: "center" }]} numberOfLines={2}>
                 {splitPositionName(pos.nameTh).short}
               </Text>
-            </GlassSurface>
+            </View>
           );
         })}
       </View>
 
-      <FlatList
-        data={Array.from({ length: DECK_SIZE }, (_, i) => i)}
+      {/* สำรับกางเป็นพัด: ไพ่ซ้อนกันเหลือขอบกว้าง 44pt (เท่าเป้าแตะขั้นต่ำ) ใบขวาทับใบซ้ายเหมือนสำรับจริง */}
+      <ScrollView
         horizontal
-        keyExtractor={(i) => String(i)}
-        showsHorizontalScrollIndicator
-        style={{ marginHorizontal: -space.md }}
-        contentContainerStyle={{ paddingHorizontal: space.md, gap: 10, paddingVertical: space.md }}
-        getItemLayout={(_, index) => ({ length: cardW + 10, offset: (cardW + 10) * index, index })}
-        initialNumToRender={8}
-        windowSize={7}
-        renderItem={({ item: index }) => {
+        showsHorizontalScrollIndicator={false}
+        style={{ marginHorizontal: -GUTTER, flexGrow: 0 }}
+        contentContainerStyle={{ paddingLeft: GUTTER, paddingRight: GUTTER + CARD_W - STEP, paddingTop: 30, paddingBottom: space.sm }}
+      >
+        {Array.from({ length: DECK_SIZE }, (_, index) => {
           const order = state.picked.indexOf(index);
           const on = order >= 0;
           return (
             <Pressable
+              key={index}
               onPress={() => {
                 void Haptics.selectionAsync();
                 dispatch({ type: "togglePick", index, need });
@@ -155,68 +189,90 @@ function DeckPicker({ spread, state, dispatch }: { spread: Spread; state: FlowSt
               accessibilityRole="button"
               accessibilityState={{ selected: on }}
               accessibilityLabel={on ? `ไพ่ใบที่ ${index + 1} เลือกเป็นลำดับ ${order + 1} แตะเพื่อยกเลิก` : `ไพ่ใบที่ ${index + 1}`}
-              style={[styles.backShadow, { width: cardW, height: cardH }, on && { transform: [{ translateY: -16 }] }]}
+              style={{ width: STEP, height: CARD_H }}
             >
-              <LinearGradient colors={["#2B261E", "#141210"]} style={[styles.back, on && { borderColor: colors.goldOnDark, borderWidth: 3 }]}>
-                <View style={styles.backRing}>
-                  <Text style={styles.backGlyph}>{on ? order + 1 : "✦"}</Text>
-                </View>
-              </LinearGradient>
+              <View style={[styles.deckCard, on && styles.deckCardOn]}>
+                <CardBack width={CARD_W} height={CARD_H} label={on ? String(order + 1) : undefined} selected={on} />
+              </View>
             </Pressable>
           );
-        }}
-      />
-      <Caption>เลื่อนซ้าย–ขวาเพื่อดูสำรับทั้ง 78 ใบ · คำมั่นก่อนสับ (SHA-256): {state.session?.commitment.slice(0, 16)}…</Caption>
+        })}
+      </ScrollView>
+
+      <View style={styles.hintRow}>
+        <Ionicons name="swap-horizontal" size={16} color={night.textSoft} />
+        <Caption>ปัดสำรับซ้าย–ขวาดูครบ 78 ใบ · แตะซ้ำเพื่อยกเลิก</Caption>
+      </View>
+      <View style={styles.commit}>
+        <Ionicons name="shield-checkmark-outline" size={16} color={night.gold} />
+        <Text style={[type.caption2, { color: night.textSoft, flex: 1 }]} numberOfLines={1}>
+          ล็อกผลสับไว้ก่อนคุณเลือก · คำมั่น {state.session?.commitment.slice(0, 12)}…
+        </Text>
+      </View>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  focusWrap: { alignItems: "center", gap: space.md, paddingTop: space.lg },
-  focusPress: { padding: space.lg },
-  ring: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: colors.dark,
-    borderWidth: 3,
-    borderColor: colors.gold,
-    shadowColor: colors.goldInk,
-    shadowOpacity: 0.5,
+  focusWrap: { alignItems: "center", gap: space.md, paddingTop: space.md },
+  quote: { color: night.text, textAlign: "center", paddingHorizontal: space.md },
+  focusPress: { width: ORB + 80, height: ORB + 80, alignItems: "center", justifyContent: "center", marginVertical: space.sm },
+  halo: {
+    position: "absolute",
+    width: ORB + 56,
+    height: ORB + 56,
+    borderRadius: (ORB + 56) / 2,
+    borderWidth: 1,
+    borderColor: night.gold,
+    shadowColor: night.gold,
+    shadowOpacity: 0.8,
     shadowRadius: 30,
-    shadowOffset: { width: 0, height: 10 },
+    shadowOffset: { width: 0, height: 0 },
+  },
+  orb: {
+    width: ORB,
+    height: ORB,
+    borderRadius: ORB / 2,
+    overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
-    overflow: "hidden",
+    borderWidth: 1.5,
+    borderColor: "rgba(210,163,84,0.8)",
   },
-  ringGlow: { ...StyleSheet.absoluteFillObject, backgroundColor: colors.goldInk, borderRadius: 95 },
-  ringGlyph: { fontSize: 64, lineHeight: 80, color: colors.goldOnDark },
-  slots: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  slot: { minWidth: 76, paddingHorizontal: 12, paddingVertical: 8, alignItems: "center" },
-  slotNum: { fontSize: 16, lineHeight: 24, fontWeight: "700", color: colors.goldInk },
-  slotName: { fontSize: 12, lineHeight: 20, color: colors.muted, maxWidth: 96 },
-  backShadow: {
+  core: { position: "absolute", width: ORB, height: ORB, borderRadius: ORB / 2, overflow: "hidden" },
+  ringInner: { position: "absolute", width: ORB - 28, height: ORB - 28, borderRadius: (ORB - 28) / 2, borderWidth: 1, borderColor: "rgba(255,236,200,0.35)" },
+  orbGlyph: { fontSize: 56, lineHeight: 72, color: "#FFF3DA", textShadowColor: "rgba(0,0,0,0.35)", textShadowRadius: 8 },
+  slots: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", rowGap: space.sm, columnGap: 2 },
+  slotEmpty: {
+    borderRadius: radius.xs,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    borderColor: "rgba(210,163,84,0.6)",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,244,222,0.04)",
+  },
+  deckCard: {
+    position: "absolute",
+    left: 0,
+    top: 0,
     borderRadius: radius.sm,
     shadowColor: "#000",
-    shadowOpacity: 0.28,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 4,
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    shadowOffset: { width: -3, height: 4 },
   },
-  back: {
-    flex: 1,
-    borderRadius: radius.sm,
-    borderWidth: 2,
-    borderColor: colors.gold,
-    padding: 5,
-  },
-  backRing: {
-    flex: 1,
-    borderRadius: radius.sm - 4,
-    borderWidth: 1,
-    borderColor: colors.goldOnDark,
+  deckCardOn: { transform: [{ translateY: -24 }], shadowColor: night.gold, shadowOpacity: 0.6, shadowRadius: 16, shadowOffset: { width: 0, height: 0 } },
+  hintRow: { flexDirection: "row", alignItems: "center", gap: 6, justifyContent: "center" },
+  commit: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    gap: 6,
+    paddingHorizontal: space.md - 4,
+    paddingVertical: space.sm,
+    borderRadius: radius.pill,
+    backgroundColor: "rgba(255,244,222,0.07)",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: night.line,
   },
-  backGlyph: { color: colors.goldOnDark, fontSize: 26, lineHeight: 36, fontWeight: "700" },
 });

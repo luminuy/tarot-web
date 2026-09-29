@@ -1,74 +1,72 @@
+import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { CardImageNative } from "@/components/CardImageNative";
-import { GlassSurface } from "@/components/glass";
-import { Caption, H1 } from "@/components/ui";
+import { Body, H1 } from "@/components/ui";
 import type { Action } from "@/lib/reading-flow";
-import { colors, radius, space } from "@/lib/theme";
+import { colors, radius, shadow, space, type } from "@/lib/theme";
 import { PERSONAS } from "@core/data/personas";
 
 /** ภาพประจำตัวแม่หมอเก็บเป็นชื่อไฟล์ "major-02.jpg" — แอปใช้ id ไพ่ */
 const cardIdOf = (image: string) => image.replace(/\.\w+$/, "");
 
-/** ขั้น 2 — เลือกแม่หมอ: ปัดการ์ดแนวนอน (snap) แตะเลือก · การ์ดใหญ่ อ่านน้ำเสียงได้ครบ */
+/**
+ * ขั้น 2 — เลือกแม่หมอ: รายการแนวตั้งแบบปุ่มเลือกเดียว (radio)
+ * เปลี่ยนจากการ์ดปัดแนวนอนของรอบก่อน — ตัวเลือกมี 5 ท่าน เห็นครบในจอเดียวดีกว่าต้องปัดหาทีละใบ
+ */
 export function ReaderStep({ personaId, dispatch }: { personaId: string; dispatch: (a: Action) => void }) {
-  const { width } = useWindowDimensions();
-  const itemW = Math.min(280, width * 0.68);
-
   return (
     <>
       <View style={{ gap: space.xs }}>
-        <H1>เลือกแม่หมอที่ใช่</H1>
-        <Caption>ปัดดูได้ทุกท่าน — คำถามเดียวกัน แต่น้ำเสียงต่างกัน</Caption>
+        <H1>ให้ใครอ่านไพ่ให้ดี</H1>
+        <Body muted>คำถามเดียวกัน แต่น้ำเสียงต่างกัน เลือกแบบที่ใจอยากฟัง</Body>
       </View>
-      <FlatList
-        data={PERSONAS}
-        horizontal
-        keyExtractor={(p) => p.id}
-        snapToInterval={itemW + space.md}
-        decelerationRate="fast"
-        showsHorizontalScrollIndicator={false}
-        // ขยายพ้นขอบ padding ของหน้า เพื่อให้การ์ดแรกเริ่มที่ขอบเดียวกับหัวข้อ
-        style={{ marginHorizontal: -space.md }}
-        contentContainerStyle={{ paddingHorizontal: space.md, gap: space.md, paddingVertical: space.sm }}
-        renderItem={({ item }) => {
-          const selected = item.id === personaId;
+      <View style={{ gap: space.sm + 2 }} accessibilityRole="radiogroup">
+        {PERSONAS.map((p) => {
+          const selected = p.id === personaId;
           return (
             <Pressable
+              key={p.id}
               onPress={() => {
                 void Haptics.selectionAsync();
-                dispatch({ type: "persona", id: item.id });
+                dispatch({ type: "persona", id: p.id });
               }}
               accessibilityRole="radio"
-              accessibilityState={{ selected }}
-              accessibilityLabel={`${item.nameTh} ${item.tagline}`}
-              style={({ pressed }) => [{ width: itemW, transform: [{ scale: pressed ? 0.98 : selected ? 1 : 0.96 }] }]}
+              accessibilityState={{ checked: selected }}
+              accessibilityLabel={`${p.nameTh} ${p.tagline}`}
+              style={({ pressed }) => [styles.row, selected && styles.rowOn, pressed && { transform: [{ scale: 0.985 }] }]}
             >
-              <GlassSurface
-                variant={selected ? "strong" : "light"}
-                radius={radius.xl}
-                contentStyle={[styles.card, selected && styles.cardOn]}
-              >
-                <CardImageNative cardId={cardIdOf(item.cardImage)} width={itemW * 0.5} />
-                <Text style={styles.name}>{item.nameTh}</Text>
-                <Text style={styles.tag}>{item.tagline}</Text>
-                <Text style={[styles.pick, selected && { color: colors.goldInk, fontWeight: "700" }]}>
-                  {selected ? "✦ เลือกแล้ว" : "แตะเพื่อเลือก"}
-                </Text>
-              </GlassSurface>
+              <CardImageNative cardId={cardIdOf(p.cardImage)} width={46} />
+              <View style={{ flex: 1 }}>
+                <Text style={[type.headline, { color: colors.ink }]}>{p.nameTh}</Text>
+                <Text style={[type.footnote, { color: colors.muted }]}>{p.tagline}</Text>
+              </View>
+              <Ionicons
+                name={selected ? "checkmark-circle" : "ellipse-outline"}
+                size={26}
+                color={selected ? colors.goldInk : "rgba(116,73,15,0.3)"}
+              />
             </Pressable>
           );
-        }}
-      />
+        })}
+      </View>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { alignItems: "center", gap: space.sm, padding: space.md, borderRadius: radius.xl },
-  cardOn: { borderWidth: 2, borderColor: colors.goldInk },
-  name: { fontSize: 19, lineHeight: 32, fontWeight: "700", color: colors.ink, textAlign: "center" },
-  tag: { fontSize: 14, lineHeight: 24, color: colors.muted, textAlign: "center", minHeight: 48 },
-  pick: { fontSize: 14, lineHeight: 24, color: colors.muted },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.md - 2,
+    padding: space.sm + 4,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: "rgba(116,73,15,0.12)",
+    backgroundColor: "rgba(255,253,249,0.88)",
+    ...shadow.card,
+  },
+  // ขอบหนาขึ้น 1px จึงลด padding 1px ให้แถวไม่ขยับตอนเลือก
+  rowOn: { borderColor: colors.goldInk, borderWidth: 2, padding: space.sm + 3, backgroundColor: "#FFF8EC" },
 });

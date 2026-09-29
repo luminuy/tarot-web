@@ -2,18 +2,18 @@ import { router, useLocalSearchParams } from "expo-router";
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
 import Animated, { FadeInRight } from "react-native-reanimated";
 
-import { AuroraBackground } from "@/components/glass";
+import { Backdrop } from "@/components/glass";
 import { AskStep } from "@/components/reading/AskStep";
 import { FlowHeader } from "@/components/reading/FlowHeader";
 import { ReaderStep } from "@/components/reading/ReaderStep";
 import { RevealStep } from "@/components/reading/RevealStep";
 import { ResultStep } from "@/components/reading/ResultStep";
 import { RitualStep } from "@/components/reading/RitualStep";
-import { Button, Caption, ErrorNote, StickyBar } from "@/components/ui";
+import { Button, Caption, ErrorNote, StickyBar, ToneContext } from "@/components/ui";
 import { useSession } from "@/lib/auth/session";
 import { allFlipped, canConfirmPick, needsExitConfirm, type Step, type Topic } from "@/lib/reading-flow";
 import { useReadingFlow } from "@/lib/useReadingFlow";
-import { colors, space } from "@/lib/theme";
+import { colors, GUTTER, space, spreadTitle } from "@/lib/theme";
 import { getSpread } from "@core/data/spreads";
 
 const TOPICS: Topic[] = ["general", "love", "work", "money", "self"];
@@ -63,6 +63,8 @@ function Flow({
   const { state, dispatch, busy, needsSignIn, verified, start, confirmPick, read } = useReadingFlow(spread, init);
   const need = spread.positions.length;
   const step: Step = state.streaming ? "result" : state.step;
+  // จังหวะพิธี (ตั้งจิต · เลือก · เปิด) เปลี่ยนฉากเป็นโทนค่ำ — ถามและอ่านคำทำนายเป็นโทนกลางวัน อ่านง่ายกว่า
+  const night = step === "ritual" || step === "reveal";
 
   const close = () => {
     if (!needsExitConfirm(state) && !state.streaming) return router.back();
@@ -82,14 +84,14 @@ function Flow({
   const footer = (() => {
     switch (step) {
       case "ask":
-        return <Button title="ต่อไป — เลือกแม่หมอ" onPress={() => dispatch({ type: "goto", step: "reader" })} />;
+        return <Button title="ต่อไป: เลือกแม่หมอ" onPress={() => dispatch({ type: "goto", step: "reader" })} />;
       case "reader":
         return (
           <>
             {state.error ? <ErrorNote>{state.error}</ErrorNote> : null}
             {needsSignIn ? <Button title="เข้าสู่ระบบเพื่อเปิดไพ่" onPress={() => router.push("/login")} /> : null}
             {signedIn && needsSignIn ? <Caption>เข้าสู่ระบบแล้ว กดปุ่มด้านล่างเพื่อลองอีกครั้ง</Caption> : null}
-            <Button title="ต่อไป — ตั้งจิตและเลือกไพ่" onPress={() => void start()} loading={busy} />
+            <Button title="ต่อไป: ตั้งจิตและเลือกไพ่" onPress={() => void start()} loading={busy} />
           </>
         );
       case "ritual":
@@ -112,6 +114,7 @@ function Flow({
             {needsSignIn ? <Button title="เข้าสู่ระบบเพื่ออ่านไพ่" onPress={() => router.push("/login")} /> : null}
             <Button
               title={allFlipped(state) ? "ให้แม่หมออ่านไพ่" : `พลิกไพ่อีก ${(state.shuffle?.cards.length ?? need) - state.flipped.length} ใบ`}
+              icon={allFlipped(state) ? "sparkles" : undefined}
               onPress={() => void read()}
               disabled={!allFlipped(state)}
             />
@@ -121,7 +124,7 @@ function Flow({
         if (state.streaming) return null;
         return (
           <View style={{ flexDirection: "row", gap: space.sm }}>
-            <Button title="กลับหน้าแรก" variant="ghost" flex onPress={() => router.dismissAll()} />
+            <Button title="กลับหน้าแรก" variant="secondary" flex onPress={() => router.dismissAll()} />
             <Button title="เปิดไพ่ใหม่" flex onPress={() => router.replace("/read")} />
           </View>
         );
@@ -129,25 +132,32 @@ function Flow({
   })();
 
   return (
-    <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <AuroraBackground />
-      <FlowHeader title={spread.nameTh} step={step} onClose={close} onBack={back()} />
-      <ScrollView key={step + state.ritualPhase} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Animated.View entering={FadeInRight.duration(220)} style={{ gap: space.md }}>
-          {step === "ask" && <AskStep spread={spread} state={state} dispatch={dispatch} onChangeSpread={() => router.replace("/read")} />}
-          {step === "reader" && <ReaderStep personaId={state.personaId} dispatch={dispatch} />}
-          {step === "ritual" && <RitualStep spread={spread} state={state} dispatch={dispatch} />}
-          {step === "reveal" && <RevealStep spread={spread} state={state} dispatch={dispatch} />}
-          {step === "result" && <ResultStep spread={spread} state={state} verified={verified} />}
-        </Animated.View>
-      </ScrollView>
-      {footer ? <StickyBar>{footer}</StickyBar> : null}
-    </KeyboardAvoidingView>
+    <ToneContext.Provider value={night ? "night" : "day"}>
+      <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        <Backdrop night={night} />
+        <FlowHeader title={spreadTitle(spread.nameTh)} step={step} onClose={close} onBack={back()} />
+        <ScrollView
+          key={step + state.ritualPhase}
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+        >
+          <Animated.View entering={FadeInRight.duration(240)} style={{ gap: space.md + 4 }}>
+            {step === "ask" && <AskStep spread={spread} state={state} dispatch={dispatch} onChangeSpread={() => router.replace("/read")} />}
+            {step === "reader" && <ReaderStep personaId={state.personaId} dispatch={dispatch} />}
+            {step === "ritual" && <RitualStep spread={spread} state={state} dispatch={dispatch} />}
+            {step === "reveal" && <RevealStep spread={spread} state={state} dispatch={dispatch} />}
+            {step === "result" && <ResultStep spread={spread} state={state} verified={verified} />}
+          </Animated.View>
+        </ScrollView>
+        {footer ? <StickyBar>{footer}</StickyBar> : null}
+      </KeyboardAvoidingView>
+    </ToneContext.Provider>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.canvas },
-  content: { padding: space.md, paddingBottom: space.xl },
+  content: { paddingHorizontal: GUTTER, paddingTop: space.sm, paddingBottom: space.xl },
   center: { flex: 1, backgroundColor: colors.canvas, padding: space.md, gap: space.md, justifyContent: "center" },
 });

@@ -2,9 +2,9 @@ import { useMemo, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { FlipCard } from "@/components/FlipCard";
-import { GlassSurface } from "@/components/glass";
+import { Card, Eyebrow } from "@/components/ui";
 import { splitPositionName } from "@/lib/reading-flow";
-import { colors, radius } from "@/lib/theme";
+import { colors, night, radius, type } from "@/lib/theme";
 import { MAP_CARD_ASPECT, boxOf, mapLayout } from "@core/lib/tarot/spread-map-geometry";
 import type { Spread } from "@core/data/spreads";
 
@@ -76,7 +76,7 @@ export function SpreadBoard({
 
   return (
     <View style={{ gap: 12 }}>
-      <GlassSurface variant="light" radius={radius.xl} style={{ alignSelf: "center", width, height: geo.height * width }} contentStyle={{ width, height: geo.height * width }}>
+      <View style={[styles.board, { width, height: geo.height * width }]}>
         {geo.items.map(({ pos, cx, cy, under }, i) => {
           const card = cards[i];
           const rotated = pos.rotate === 90 || pos.rotate === 270;
@@ -117,53 +117,59 @@ export function SpreadBoard({
             </View>
           );
         })}
-      </GlassSurface>
+      </View>
 
       {selected !== null && cards[selected] && flipped.includes(selected) ? (
-        <GlassSurface variant="strong" radius={radius.lg} contentStyle={styles.detail}>
-          <View accessibilityLiveRegion="polite">
-          <Text style={styles.detailPos}>
-            {selected + 1}. {splitPositionName(spread.positions[selected].nameTh).short}
-          </Text>
-          <Text style={styles.detailName}>
-            {cards[selected].nameTh}
-            {cards[selected].reversed ? " (กลับหัว)" : ""}
-          </Text>
-          <Text style={styles.detailMeaning}>
-            {splitPositionName(spread.positions[selected].nameTh).hint ?? spread.positions[selected].meaning}
-          </Text>
+        <Card>
+          <View accessibilityLiveRegion="polite" style={{ gap: 2 }}>
+            <Eyebrow>
+              ตำแหน่งที่ {selected + 1} · {splitPositionName(spread.positions[selected].nameTh).short}
+            </Eyebrow>
+            <Text style={[type.title2, { color: night.text }]}>
+              {cards[selected].nameTh}
+              {cards[selected].reversed ? " (กลับหัว)" : ""}
+            </Text>
+            <Text style={[type.subhead, { color: night.textSoft }]}>
+              {splitPositionName(spread.positions[selected].nameTh).hint ?? spread.positions[selected].meaning}
+            </Text>
           </View>
-        </GlassSurface>
+        </Card>
       ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  // พื้นแท่นวางไพ่บนฟ้าค่ำ (ขั้นเปิดไพ่อยู่ในโทนค่ำเสมอ)
+  board: {
+    alignSelf: "center",
+    borderRadius: radius.xl,
+    backgroundColor: "rgba(255,244,222,0.05)",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: night.line,
+  },
   placeholder: {
     borderRadius: radius.sm,
     borderWidth: 1,
     borderStyle: "dashed",
-    borderColor: colors.gold,
+    borderColor: "rgba(210,163,84,0.6)",
     alignItems: "center",
     justifyContent: "center",
   },
-  placeholderText: { color: colors.goldInk, fontSize: 13, lineHeight: 20 },
+  placeholderText: { ...type.caption2, color: night.gold },
   badge: {
     position: "absolute",
-    top: -6,
-    left: -6,
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: colors.goldInk,
+    top: -7,
+    left: -7,
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: night.gold,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 4,
+    paddingHorizontal: 5,
+    borderWidth: 1.5,
+    borderColor: night.base,
   },
-  badgeText: { color: colors.surface, fontSize: 11, lineHeight: 16, fontWeight: "700" },
-  detail: { padding: 16, gap: 2 },
-  detailPos: { color: colors.goldInk, fontSize: 14, lineHeight: 24, fontWeight: "600" },
-  detailName: { color: colors.ink, fontSize: 18, lineHeight: 30, fontWeight: "700" },
-  detailMeaning: { color: colors.muted, fontSize: 14, lineHeight: 24 },
+  badgeText: { color: colors.dark, fontSize: 11, lineHeight: 18, fontWeight: "800" },
 });

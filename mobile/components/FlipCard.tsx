@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, { interpolate, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from "react-native-reanimated";
 
+import { CardBack } from "@/components/CardBack";
 import { CardImageNative } from "@/components/CardImageNative";
-import { CARD_ASPECT, colors, radius } from "@/lib/theme";
+import { CARD_ASPECT, colors, type } from "@/lib/theme";
 
 /**
  * ไพ่พลิก 3D — กฎเหล็กข้อ 4: เริ่มต้นคว่ำหน้าเสมอ ผู้ใช้แตะพลิกเอง (ห้ามพลิกให้อัตโนมัติ)
@@ -75,11 +76,7 @@ export function FlipCard({
         style={{ width, height }}
       >
         <Animated.View style={[styles.face, { width, height }, back]}>
-          <View style={styles.backInner}>
-            <View style={styles.backRing}>
-              <Text style={[styles.backGlyph, { fontSize: Math.max(12, width * 0.22) }]}>✦</Text>
-            </View>
-          </View>
+          <CardBack width={width} height={height} />
         </Animated.View>
         <Animated.View style={[styles.face, { width, height }, front]}>
           <CardImageNative cardId={cardId} reversed={reversed} width={width} aspect={aspect} />
@@ -92,25 +89,5 @@ export function FlipCard({
 
 const styles = StyleSheet.create({
   face: { position: "absolute", backfaceVisibility: "hidden" },
-  backInner: {
-    flex: 1,
-    borderRadius: radius.sm,
-    backgroundColor: colors.dark,
-    borderWidth: 2,
-    borderColor: colors.gold,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 4,
-  },
-  backRing: {
-    flex: 1,
-    alignSelf: "stretch",
-    borderRadius: radius.sm - 3,
-    borderWidth: 1,
-    borderColor: colors.goldOnDark,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  backGlyph: { color: colors.goldOnDark },
-  label: { marginTop: 8, color: colors.ink, fontSize: 14, lineHeight: 24, textAlign: "center" },
+  label: { ...type.subhead, marginTop: 8, color: colors.ink, textAlign: "center" },
 });

@@ -1,12 +1,14 @@
-import { Ionicons } from "@expo/vector-icons";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { GlassSurface } from "@/components/glass";
+import { IconButton, useTone } from "@/components/ui";
 import { STEPS, STEP_LABEL, type Step } from "@/lib/reading-flow";
-import { colors, space } from "@/lib/theme";
+import { colors, GUTTER, night, space, type } from "@/lib/theme";
 
-/** หัวจอพิธีเปิดไพ่: ปุ่มปิด + ชื่อผัง + แถบขั้นตอน 5 ขั้น (รู้ตำแหน่งตัวเองตลอด) */
+/**
+ * หัวจอพิธีเปิดไพ่: ปุ่มย้อน/ปิดกระจกลอย + ชื่อผัง + แถบขั้นตอน 5 ช่อง (รู้ตำแหน่งตัวเองตลอด)
+ * ช่องของขั้นปัจจุบันยาวกว่าช่องอื่น — บอกตำแหน่งด้วยรูปทรง ไม่ใช่สีอย่างเดียว
+ */
 export function FlowHeader({
   title,
   step,
@@ -20,43 +22,29 @@ export function FlowHeader({
   onBack?: () => void;
 }) {
   const { top } = useSafeAreaInsets();
+  const tone = useTone();
   const index = STEPS.indexOf(step);
+  const ink = tone === "night" ? night.text : colors.ink;
+  const accent = tone === "night" ? night.gold : colors.goldInk;
+  const track = tone === "night" ? "rgba(255,244,222,0.16)" : "rgba(116,73,15,0.14)";
 
   return (
-    <View style={[styles.wrap, { paddingTop: top + space.sm }]}>
+    <View style={[styles.wrap, { paddingTop: top + space.xs }]}>
       <View style={styles.row}>
-        <Pressable
-          onPress={onBack ?? onClose}
-          accessibilityRole="button"
-          accessibilityLabel={onBack ? "ย้อนกลับ" : "ปิด"}
-          hitSlop={8}
-          style={styles.iconBtn}
-        >
-          <GlassSurface radius={22} flat variant="strong" style={styles.round} contentStyle={styles.roundIn}>
-            <Ionicons name={onBack ? "chevron-back" : "close"} size={22} color={colors.ink} />
-          </GlassSurface>
-        </Pressable>
-        <View style={{ flex: 1, alignItems: "center" }}>
-          <Text style={styles.title} numberOfLines={1}>
+        {onBack ? <IconButton icon="chevron-back" label="ย้อนกลับ" onPress={onBack} /> : <IconButton icon="close" label="ปิดพิธีเปิดไพ่" onPress={onClose} />}
+        <View style={styles.center}>
+          <Text style={[type.headline, { color: ink }]} numberOfLines={1}>
             {title}
           </Text>
-          <Text style={styles.stepLabel} accessibilityLiveRegion="polite">
-            ขั้น {index + 1}/{STEPS.length} · {STEP_LABEL[step]}
+          <Text style={[type.caption2, { color: accent }]} accessibilityLiveRegion="polite">
+            ขั้น {index + 1} จาก {STEPS.length} · {STEP_LABEL[step]}
           </Text>
         </View>
-        {onBack ? (
-          <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="ปิดพิธีเปิดไพ่" hitSlop={8} style={styles.iconBtn}>
-            <GlassSurface radius={22} flat variant="strong" style={styles.round} contentStyle={styles.roundIn}>
-              <Ionicons name="close" size={22} color={colors.ink} />
-            </GlassSurface>
-          </Pressable>
-        ) : (
-          <View style={styles.iconBtn} />
-        )}
+        {onBack ? <IconButton icon="close" label="ปิดพิธีเปิดไพ่" onPress={onClose} /> : <View style={styles.spacer} />}
       </View>
       <View style={styles.bar} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
         {STEPS.map((s, i) => (
-          <View key={s} style={[styles.seg, i <= index && styles.segOn]} />
+          <View key={s} style={[styles.seg, { backgroundColor: i <= index ? accent : track }, i === index && styles.segNow]} />
         ))}
       </View>
     </View>
@@ -64,18 +52,11 @@ export function FlowHeader({
 }
 
 const styles = StyleSheet.create({
-  wrap: {
-    paddingHorizontal: space.md,
-    paddingBottom: space.sm,
-    gap: space.sm,
-  },
-  row: { flexDirection: "row", alignItems: "center" },
-  iconBtn: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
-  round: { width: 44, height: 44 },
-  roundIn: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
-  title: { fontSize: 17, lineHeight: 28, fontWeight: "700", color: colors.ink },
-  stepLabel: { fontSize: 13, lineHeight: 22, color: colors.goldInk },
-  bar: { flexDirection: "row", gap: 4 },
-  seg: { flex: 1, height: 4, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.7)" },
-  segOn: { backgroundColor: colors.goldInk },
+  wrap: { paddingHorizontal: GUTTER - 4, paddingBottom: space.sm, gap: space.sm + 2 },
+  row: { flexDirection: "row", alignItems: "center", gap: space.sm },
+  center: { flex: 1, alignItems: "center" },
+  spacer: { width: 44, height: 44 },
+  bar: { flexDirection: "row", gap: 5, paddingHorizontal: 4 },
+  seg: { flex: 1, height: 4, borderRadius: 2 },
+  segNow: { flex: 2.2 },
 });

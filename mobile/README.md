@@ -20,7 +20,8 @@ npm run typecheck && npm test
 
 | ที่ | หน้าที่ |
 | :-- | :-- |
-| `app/(tabs)/` | 5 แท็บ: วันนี้ · เปิดไพ่ · สมุด · สารานุกรม · บัญชี |
+| `app/(tabs)/` | 4 แท็บ: วันนี้ · เปิดไพ่ · สมุด · คลังไพ่ (บัญชี = `app/account.tsx` แผ่นเด้งจากปุ่มรูปคนบนหน้าวันนี้) |
+| `components/ui.tsx` · `glass.tsx` · `lib/theme.ts` | ระบบดีไซน์ (ดู `DESIGN.md`) — กระจกเฉพาะชั้นนำทาง · เนื้อหาใช้ `Card` · จุดเน้นใช้ `NightPanel` |
 | `app/reading/[spreadId].tsx` | เปิดไพ่ครบวงจร: คำถาม → แม่หมอ → เลือกไพ่เอง → พลิกเอง → คำอ่านสตรีม → ตรวจ Provably Fair |
 | `lib/api/client.ts` | ตัวเรียกหลังบ้านตัวเดียว (Bearer · `X-Client: ios` · `X-App-Version` · SSE ผ่าน `expo/fetch`) |
 | `lib/api/types.ts` | สัญญา response ที่แอปพึ่งพา — เว็บ **เพิ่มฟิลด์ได้อย่างเดียว ห้ามลบ/เปลี่ยนชื่อ** |

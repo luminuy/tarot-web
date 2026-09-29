@@ -1,10 +1,12 @@
-import { useState } from "react";
-import { StyleSheet, TextInput } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useRef, useState } from "react";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 
-import { Body, Button, ErrorNote } from "@/components/ui";
+import { Button, ErrorNote } from "@/components/ui";
 import { apiJson } from "@/lib/api/client";
 import { saveSession, type AppUser } from "@/lib/auth/session";
-import { colors, radius, space } from "@/lib/theme";
+import { friendlyMessage } from "@/lib/errors";
+import { colors, radius, space, type } from "@/lib/theme";
 
 interface LoginResponse {
   ok: boolean;
@@ -12,14 +14,44 @@ interface LoginResponse {
   sessionToken?: string;
 }
 
-/** ฟอร์มเข้าสู่ระบบด้วยอีเมล — ใช้ทั้งแท็บบัญชีและหน้าต่างล็อกอินกลางพิธีเปิดไพ่ (ไม่ทำให้คำถามหาย) */
+type IconName = keyof typeof Ionicons.glyphMap;
+
+function Field({
+  icon,
+  label,
+  inputRef,
+  ...props
+}: React.ComponentProps<typeof TextInput> & { icon: IconName; label: string; inputRef?: React.Ref<TextInput> }) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <View style={{ gap: 6 }}>
+      <Text style={[type.footnote, { color: colors.muted, fontWeight: "600" }]}>{label}</Text>
+      <View style={[styles.field, focused && styles.fieldOn]}>
+        <Ionicons name={icon} size={18} color={focused ? colors.goldInk : colors.muted} />
+        <TextInput
+          ref={inputRef}
+          {...props}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          placeholderTextColor={colors.muted}
+          style={styles.input}
+          accessibilityLabel={label}
+        />
+      </View>
+    </View>
+  );
+}
+
+/** ฟอร์มเข้าสู่ระบบด้วยอีเมล — ใช้ทั้งหน้าบัญชีและหน้าต่างล็อกอินกลางพิธีเปิดไพ่ (ไม่ทำให้คำถามหาย) */
 export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const passwordRef = useRef<TextInput>(null);
 
   const login = async () => {
+    if (!email || !password) return;
     setBusy(true);
     setError(null);
     try {
@@ -33,7 +65,7 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
       setPassword("");
       onSuccess?.();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "เข้าสู่ระบบไม่สำเร็จ ลองใหม่อีกครั้งนะ");
+      setError(friendlyMessage(e, "เข้าสู่ระบบไม่สำเร็จ ลองใหม่อีกครั้งนะ"));
     } finally {
       setBusy(false);
     }
@@ -41,46 +73,54 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
 
   return (
     <>
+      <Text style={[type.subhead, { color: colors.muted }]}>ใช้อีเมลและรหัสผ่านเดียวกับที่สมัครไว้บน seertarot.net</Text>
       {error ? <ErrorNote>{error}</ErrorNote> : null}
-      <Body>เข้าสู่ระบบด้วยอีเมลที่เคยสมัครไว้บน seertarot.net</Body>
-      <TextInput
+      <Field
+        icon="mail-outline"
+        label="อีเมล"
         value={email}
         onChangeText={setEmail}
-        placeholder="อีเมล"
-        placeholderTextColor={colors.muted}
+        placeholder="you@example.com"
         autoCapitalize="none"
         autoComplete="email"
         keyboardType="email-address"
         textContentType="username"
-        style={styles.input}
-        accessibilityLabel="อีเมล"
+        returnKeyType="next"
+        onSubmitEditing={() => passwordRef.current?.focus()}
       />
-      <TextInput
+      <Field
+        inputRef={passwordRef}
+        icon="lock-closed-outline"
+        label="รหัสผ่าน"
         value={password}
         onChangeText={setPassword}
-        placeholder="รหัสผ่าน"
-        placeholderTextColor={colors.muted}
+        placeholder="รหัสผ่านของคุณ"
         secureTextEntry
         autoComplete="password"
         textContentType="password"
-        style={styles.input}
-        accessibilityLabel="รหัสผ่าน"
+        returnKeyType="go"
+        onSubmitEditing={() => void login()}
       />
       <Button title="เข้าสู่ระบบ" onPress={() => void login()} loading={busy} disabled={!email || !password} />
-      <Body muted>ยังไม่มีบัญชี? สมัครได้ที่ seertarot.net แล้วกลับมาเข้าสู่ระบบในแอป</Body>
+      <Text style={[type.footnote, { color: colors.muted, textAlign: "center" }]}>
+        ยังไม่มีบัญชี? สมัครได้ที่ seertarot.net แล้วกลับมาเข้าสู่ระบบในแอป
+      </Text>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  input: {
+  field: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.sm,
     minHeight: 52,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.85)",
-    backgroundColor: "rgba(255,255,255,0.7)",
-    paddingHorizontal: space.md,
-    color: colors.ink,
-    fontSize: 17,
+    borderColor: "rgba(116,73,15,0.16)",
+    backgroundColor: "rgba(255,255,255,0.8)",
+    paddingHorizontal: space.md - 2,
   },
+  fieldOn: { borderColor: colors.goldInk, backgroundColor: colors.surface },
+  input: { flex: 1, minHeight: 50, color: colors.ink, fontSize: 17 },
 });
