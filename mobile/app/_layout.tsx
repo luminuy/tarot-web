@@ -36,6 +36,8 @@ export default function RootLayout() {
           />
           {/* บัญชีและเข้าสู่ระบบเป็นแผ่นเด้งจากล่าง (sheet) — ปิดด้วยการปัดลงหรือปุ่ม ✕ */}
           <Stack.Screen name="account" options={{ headerShown: false, presentation: "modal" }} />
+          {/* หน้าแนะนำแอป: เปิดครั้งแรกครั้งเดียว (หน้าวันนี้เป็นคนเรียก) */}
+          <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: "fullScreenModal", gestureEnabled: false }} />
           <Stack.Screen name="login" options={{ headerShown: false, presentation: "modal" }} />
           {/* หน้าไพ่: หัวจอเป็นภาพไพ่บนฟ้าค่ำเต็มขอบ พร้อมปุ่มย้อนกระจกลอย (ปัดขอบซ้ายย้อนกลับได้ตามปกติ) */}
           <Stack.Screen name="card/[id]" options={{ headerShown: false }} />
