@@ -1,31 +1,51 @@
 import * as Haptics from "expo-haptics";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import Animated, { interpolate, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, { interpolate, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from "react-native-reanimated";
 
 import { CardImageNative } from "@/components/CardImageNative";
 import { CARD_ASPECT, colors, radius } from "@/lib/theme";
 
 /**
  * ไพ่พลิก 3D — กฎเหล็กข้อ 4: เริ่มต้นคว่ำหน้าเสมอ ผู้ใช้แตะพลิกเอง (ห้ามพลิกให้อัตโนมัติ)
- * สั่นเบา ๆ ตอนพลิก (haptics — จุดขายที่เว็บทำไม่ได้)
+ * สั่นเบา ๆ ตอนพลิก · เคารพ "ลดการเคลื่อนไหว" ของระบบ (ตัดเหลือเฟดสั้น ๆ)
+ *
+ * สองโหมด:
+ *  - ไม่ส่ง `flipped` = ควบคุมตัวเอง (หน้า "วันนี้") พลิกแล้วพลิกกลับไม่ได้
+ *  - ส่ง `flipped` = ผู้เรียกควบคุม (แผนผังพิธีเปิดไพ่) — การพลิกต้องมาจากการแตะของผู้ใช้ผ่าน `onFlip` เท่านั้น
  */
 export function FlipCard({
   cardId,
   reversed,
   width,
+  aspect = CARD_ASPECT,
   label,
+  flipped: controlled,
   onFlip,
+  onPressFlipped,
+  accessibilityName,
 }: {
   cardId: string | undefined;
   reversed?: boolean;
   width: number;
+  /** กว้าง/สูง — แผนผังใช้ 2:3 ตามเรขาคณิตของเว็บ */
+  aspect?: number;
   label?: string;
+  flipped?: boolean;
   onFlip?: () => void;
+  /** แตะไพ่ที่พลิกแล้ว (เช่น เลือกดูรายละเอียด) */
+  onPressFlipped?: () => void;
+  accessibilityName?: string;
 }) {
-  const [flipped, setFlipped] = useState(false);
-  const progress = useSharedValue(0);
-  const height = width / CARD_ASPECT;
+  const [own, setOwn] = useState(false);
+  const flipped = controlled ?? own;
+  const reduce = useReducedMotion();
+  const progress = useSharedValue(flipped ? 1 : 0);
+  const height = width / aspect;
+
+  useEffect(() => {
+    progress.value = withTiming(flipped ? 1 : 0, { duration: reduce ? 120 : 520 });
+  }, [flipped, reduce, progress]);
 
   const front = useAnimatedStyle(() => ({
     transform: [{ perspective: 900 }, { rotateY: `${interpolate(progress.value, [0, 1], [180, 360])}deg` }],
@@ -36,29 +56,33 @@ export function FlipCard({
     opacity: progress.value > 0.5 ? 0 : 1,
   }));
 
-  const flip = () => {
-    if (flipped) return;
-    setFlipped(true);
+  const press = () => {
+    if (flipped) {
+      onPressFlipped?.();
+      return;
+    }
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    progress.value = withTiming(1, { duration: 520 });
+    if (controlled === undefined) setOwn(true);
     onFlip?.();
   };
 
   return (
     <View style={{ alignItems: "center", width }}>
       <Pressable
-        onPress={flip}
+        onPress={press}
         accessibilityRole="button"
-        accessibilityLabel={flipped ? (label ?? "ไพ่ที่เปิดแล้ว") : "แตะเพื่อพลิกไพ่"}
+        accessibilityLabel={flipped ? (accessibilityName ?? label ?? "ไพ่ที่เปิดแล้ว") : `แตะเพื่อพลิกไพ่${accessibilityName ? ` ${accessibilityName}` : ""}`}
         style={{ width, height }}
       >
         <Animated.View style={[styles.face, { width, height }, back]}>
           <View style={styles.backInner}>
-            <Text style={styles.backGlyph}>✦</Text>
+            <View style={styles.backRing}>
+              <Text style={[styles.backGlyph, { fontSize: Math.max(12, width * 0.22) }]}>✦</Text>
+            </View>
           </View>
         </Animated.View>
         <Animated.View style={[styles.face, { width, height }, front]}>
-          <CardImageNative cardId={cardId} reversed={reversed} width={width} />
+          <CardImageNative cardId={cardId} reversed={reversed} width={width} aspect={aspect} />
         </Animated.View>
       </Pressable>
       {label ? <Text style={styles.label}>{label}</Text> : null}
@@ -76,7 +100,17 @@ const styles = StyleSheet.create({
     borderColor: colors.gold,
     alignItems: "center",
     justifyContent: "center",
+    padding: 4,
   },
-  backGlyph: { color: colors.goldOnDark, fontSize: 28 },
-  label: { marginTop: 8, color: colors.ink, fontSize: 13, textAlign: "center" },
+  backRing: {
+    flex: 1,
+    alignSelf: "stretch",
+    borderRadius: radius.sm - 3,
+    borderWidth: 1,
+    borderColor: colors.goldOnDark,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  backGlyph: { color: colors.goldOnDark },
+  label: { marginTop: 8, color: colors.ink, fontSize: 14, lineHeight: 24, textAlign: "center" },
 });

@@ -23,7 +23,12 @@ export default function RootLayout() {
         <StatusBar style="dark" />
         <Stack screenOptions={{ contentStyle: { backgroundColor: colors.canvas }, headerTintColor: colors.ink }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="reading/[spreadId]" options={{ title: "เปิดไพ่", headerBackTitle: "กลับ" }} />
+          {/* พิธีเปิดไพ่: เต็มจอ ไม่มี Tab Bar · ปิดด้วยปุ่ม ✕ ของตัวเอง (ปัดลงปิดไม่ได้ กันเสียไพ่ที่เลือกไว้) */}
+          <Stack.Screen
+            name="reading/[spreadId]"
+            options={{ headerShown: false, presentation: "fullScreenModal", gestureEnabled: false }}
+          />
+          <Stack.Screen name="login" options={{ title: "เข้าสู่ระบบ", presentation: "modal", headerBackTitle: "กลับ" }} />
           <Stack.Screen name="card/[id]" options={{ title: "ความหมายไพ่", headerBackTitle: "กลับ" }} />
         </Stack>
       </SafeAreaProvider>

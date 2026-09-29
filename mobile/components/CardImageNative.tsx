@@ -15,15 +15,18 @@ export function CardImageNative({
   cardId,
   reversed = false,
   width,
+  aspect = CARD_ASPECT,
   style,
 }: {
   cardId: string | undefined;
   reversed?: boolean;
   width: number;
+  /** กว้าง/สูง — ค่าเริ่มต้น 7:12 ของภาพต้นฉบับ · แผนผังใช้ 2:3 (ภาพถูกครอบเล็กน้อยด้วย cover) */
+  aspect?: number;
   style?: StyleProp<ViewStyle>;
 }) {
   const source = cardId ? CARD_IMAGES[cardId] : undefined;
-  const box = { width, height: width / CARD_ASPECT };
+  const box = { width, height: width / aspect };
 
   if (!source) {
     return (
@@ -52,7 +55,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: colors.inset,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.line,
+    borderColor: "rgba(255,255,255,0.6)",
   },
   reversed: { transform: [{ rotate: "180deg" }] },
   missing: { alignItems: "center", justifyContent: "center" },
