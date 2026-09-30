@@ -45,6 +45,7 @@
 - ตัด tooltip/กล่องประดับออก (ใช้ `title`) ให้ทั้งกล่องเหลือ aside + a + svg + path — งบ DOM หน้าแรก 1,498 ≤ 1,500 · สีแบรนด์อยู่ใน `fill` ไม่เพิ่มคลาส `[#hex]`
 - อัปเดตผู้ใช้ 3 จุด: `RootHtml.tsx` · `astro/components/StaticChrome.tsx` · `scripts/qa/test-en-thai-leak.tsx`
 - หน้า `/contact` + `/en/contact`: การ์ด "ติดตามเรา" มีโลโก้จริงวงกลมหน้าชื่อช่องทาง · path โลโก้แยกเป็น `src/components/ui/SocialIcons.tsx` ใช้ร่วมกับปุ่มลอย (ไม่ซ้ำสองที่)
+- เจ้าของทัก: 3 ปุ่มโชว์พร้อมกันบังจอมือถือ ➔ เปลี่ยนเป็นปุ่มหลักอันเดียว (ไอคอนแชท) กดแล้วกาง LINE · Facebook · TikTok ขึ้นด้านบน · ไอคอนเปลี่ยนเป็นกากบาทตอนกาง · ใช้ `<details>/<summary>` ไม่ต้อง JS (หน้า Astro ไม่ hydrate) · ไอคอนวาดด้วย mask ใน `::before` (`.social-fab` ใน globals.css) ไม่เพิ่ม element — งบ DOM หน้าแรก 1,499 ≤ 1,500 · ปิดแอนิเมชันเมื่อผู้ใช้ตั้ง reduced motion
 
 ### 🗓️ 2026-09-30 (รอบ 189): ✦ Omnichannel — เพิ่ม Facebook เพจ + LINE OA เข้าเว็บ (sameAs · ท้ายเว็บ · หน้าติดต่อ)
 

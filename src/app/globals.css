@@ -2418,3 +2418,56 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
     display: none;
   }
 }
+
+
+/* ✦ ปุ่มลอยช่องทางทางการ (`SocialFloatingButtons`) — ปุ่มหลักอันเดียว กดแล้วกาง LINE · Facebook · TikTok
+   ใช้ <details> ของเบราว์เซอร์ (ไม่ต้อง JS) · ไอคอนวาดด้วย mask ใน ::before เพื่อไม่เพิ่ม element (งบ DOM หน้าแรก) */
+.social-fab > summary {
+  background-color: var(--color-ink-deep);
+  color: var(--color-surface-warm);
+  box-shadow: 0 8px 22px rgba(40, 28, 14, 0.32), inset 0 0 0 1.5px var(--color-gold);
+}
+.social-fab > summary::-webkit-details-marker {
+  display: none;
+}
+.social-fab > summary::before {
+  content: "";
+  width: 24px;
+  height: 24px;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 11.5a8.4 8.4 0 0 1-9 8.4 9.4 9.4 0 0 1-4-.9L3 20.5l1.4-4.3A8 8 0 0 1 3 11.5 8.6 8.6 0 0 1 12 3a8.6 8.6 0 0 1 9 8.5z'/%3E%3Cpath d='M8.5 11.5h.01M12 11.5h.01M15.5 11.5h.01' stroke-width='2.6'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 11.5a8.4 8.4 0 0 1-9 8.4 9.4 9.4 0 0 1-4-.9L3 20.5l1.4-4.3A8 8 0 0 1 3 11.5 8.6 8.6 0 0 1 12 3a8.6 8.6 0 0 1 9 8.5z'/%3E%3Cpath d='M8.5 11.5h.01M12 11.5h.01M15.5 11.5h.01' stroke-width='2.6'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: transform 0.25s ease;
+}
+/* ตอนกาง: ไอคอนเปลี่ยนเป็นกากบาท */
+.social-fab[open] > summary::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E");
+  transform: rotate(90deg);
+}
+.social-fab[open] > a {
+  animation: socialFabPop 0.22s cubic-bezier(0.2, 0.8, 0.3, 1.2) both;
+}
+.social-fab[open] > a:nth-of-type(2) {
+  animation-delay: 0.04s;
+}
+.social-fab[open] > a:nth-of-type(1) {
+  animation-delay: 0.08s;
+}
+@keyframes socialFabPop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .social-fab[open] > a,
+  .social-fab > summary::before {
+    animation: none;
+    transition: none;
+  }
+}
