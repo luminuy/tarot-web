@@ -55,7 +55,7 @@ import { SiteFooter } from "../../src/components/layout/SiteFooter";
 import { SacredNavDropdown } from "../../src/components/ui/SacredNavDropdown";
 import { ToastNotification } from "../../src/components/ui/ToastNotification";
 import { DeleteAllDataButton } from "../../src/components/ui/DeleteAllDataButton";
-import { TikTokFloatingButton } from "../../src/components/ui/TikTokFloatingButton";
+import { SocialFloatingButtons } from "../../src/components/ui/SocialFloatingButtons";
 import { ConsentBanner } from "../../src/components/analytics/ConsentBanner";
 import { AuthModal } from "../../src/components/auth/AuthModal";
 import { UserProfileBadge } from "../../src/components/auth/UserProfileBadge";
@@ -323,7 +323,7 @@ export function runQa() {
       <ToastNotification toast={{ id: "t", title: "Saved", subtitle: "All good", type: "success" }} onClose={noop} />,
     ],
     ["DeleteAllDataButton", <DeleteAllDataButton />],
-    ["TikTokFloatingButton", <TikTokFloatingButton />],
+    ["SocialFloatingButtons", <SocialFloatingButtons />],
     ["ConsentBanner", <ConsentBanner />],
     ["AuthModal · signin", <AuthModal isOpen onClose={noop} />],
     ["AuthModal · signup", <AuthModal isOpen onClose={noop} initialMode="signup" fromEntitlementWall />],

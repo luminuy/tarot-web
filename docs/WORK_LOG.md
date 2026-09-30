@@ -38,6 +38,13 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-09-30 (รอบ 190): ✦ ปุ่มลอยมุมขวาล่าง — LINE · Facebook · TikTok (เดิมมีแค่ TikTok)
+
+- เจ้าของทัก: เพิ่ม LINE/Facebook แล้วแต่ปุ่มลอยยังมีแค่ TikTok (รอบ 189 เติมแค่ sameAs · ท้ายเว็บ · หน้าติดต่อ)
+- `TikTokFloatingButton.tsx` ➔ `SocialFloatingButtons.tsx`: 3 ปุ่มวงกลมเรียงแนวตั้ง (LINE เขียว · Facebook ฟ้า · TikTok ดำ) โลโก้ทางการ · URL จาก `BRAND_SOCIAL_PROFILES` ที่เดียว · ซ่อนบน /admin และ /reading เหมือนเดิม
+- ตัด tooltip/กล่องประดับออก (ใช้ `title`) ให้ทั้งกล่องเหลือ aside + a + svg + path — งบ DOM หน้าแรก 1,498 ≤ 1,500 · สีแบรนด์อยู่ใน `fill` ไม่เพิ่มคลาส `[#hex]`
+- อัปเดตผู้ใช้ 3 จุด: `RootHtml.tsx` · `astro/components/StaticChrome.tsx` · `scripts/qa/test-en-thai-leak.tsx`
+
 ### 🗓️ 2026-09-30 (รอบ 189): ✦ Omnichannel — เพิ่ม Facebook เพจ + LINE OA เข้าเว็บ (sameAs · ท้ายเว็บ · หน้าติดต่อ)
 
 - เจ้าของเปิดบัญชีแล้ว: Facebook เพจ "SeerTarot ดูดวงไพ่ยิปซี" (`profile.php?id=61594873953953`) · LINE OA `@227pwqtl` (`lin.ee/zVthwqS` ➔ `line.me/R/ti/p/@227pwqtl`) — ยิงตรวจแล้ว 301 ไปหน้าจริงทั้งคู่

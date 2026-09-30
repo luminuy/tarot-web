@@ -49,7 +49,7 @@ export const OG_IMAGE_ALT = "SeerTarot · ดูดวงไพ่ทาโร�
 /**
  * 🔗 โปรไฟล์ทางการของแบรนด์บนแพลตฟอร์มอื่น — แหล่งความจริงเดียว
  *
- * ใช้ 2 ที่: ปุ่มลอย TikTok (`TikTokFloatingButton`) และ `Organization.sameAs`
+ * ใช้ 2 ที่: ปุ่มลอย LINE · Facebook · TikTok (`SocialFloatingButtons`) และ `Organization.sameAs`
  * ใน JSON-LD ที่ `RootHtml.tsx` — **ต้องเป็นค่าเดียวกันเสมอ**
  *
  * ⚠️ `sameAs` คือช่องที่ Google กับเครื่องมือ AI ใช้ยืนยันว่า "เว็บนี้กับบัญชีนั้นคือเจ้าเดียวกัน"

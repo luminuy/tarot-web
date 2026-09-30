@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 
 import { AntiTheftShield } from "@/components/security/AntiTheftShield";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
-import { TikTokFloatingButton } from "@/components/ui/TikTokFloatingButton";
+import { SocialFloatingButtons } from "@/components/ui/SocialFloatingButtons";
 import { LocaleProvider } from "@/lib/i18n";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { BRAND_SOCIAL_PROFILES, DEFAULT_SUPPORT_EMAIL, SITE_ORIGIN } from "@/lib/config/site";
@@ -200,7 +200,7 @@ export function RootHtml({
           <ServiceWorkerRegister />
           <AnalyticsTracker />
           {children}
-          <TikTokFloatingButton />
+          <SocialFloatingButtons />
         </LocaleProvider>
       </body>
     </html>
