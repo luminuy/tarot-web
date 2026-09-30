@@ -38,6 +38,13 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-09-30 (รอบ 189): ✦ Omnichannel — เพิ่ม Facebook เพจ + LINE OA เข้าเว็บ (sameAs · ท้ายเว็บ · หน้าติดต่อ)
+
+- เจ้าของเปิดบัญชีแล้ว: Facebook เพจ "SeerTarot ดูดวงไพ่ยิปซี" (`profile.php?id=61594873953953`) · LINE OA `@227pwqtl` (`lin.ee/zVthwqS` ➔ `line.me/R/ti/p/@227pwqtl`) — ยิงตรวจแล้ว 301 ไปหน้าจริงทั้งคู่
+- `src/lib/config/site.ts`: `BRAND_SOCIAL_PROFILES` 1 ➔ 3 ช่อง (ไหลเข้า `Organization.sameAs` ทุกหน้าอัตโนมัติ) + `BRAND_SOCIAL_LINKS` สำหรับลิงก์ที่ผู้ใช้กด
+- หน้า `/contact` + `/en/contact`: "ติดตามเรา" แสดงครบ 3 ช่องทาง · ท้ายเว็บ: ลิงก์ LINE · Facebook · TikTok ในบรรทัดลิขสิทธิ์ (ไม่เพิ่มกล่อง — งบ DOM หน้าแรก 1,497 ≤ 1,500)
+- แผน `HANDOFF_OMNI_YESNO` + `MASTER_PLAN`: Omnichannel 3/6 ช่องทาง
+
 ### 🗓️ 2026-09-27 (รอบ 182): ✦ หน้าแรก — แถวผังแบ่งหมวดหมู่ + จัดเรียง
 
 **คำร้องเจ้าของ** (ยังไม่เอาขึ้น — รอเจ้าของดู): แถวปัดผังหน้าแรกสวยแล้ว แต่อยากให้แบ่งหมวดหมู่ (ชิปแบบหน้า `/spreads`) และจัดเรียงให้

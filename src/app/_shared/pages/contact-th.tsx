@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { RouteLink as Link } from "@/components/ui/RouteLink";
 
-import { BRAND_SOCIAL_PROFILES, buildAlternates, DEFAULT_SUPPORT_EMAIL, SITE_ORIGIN } from "@/lib/config/site";
+import { BRAND_SOCIAL_LINKS, BRAND_SOCIAL_PROFILES, buildAlternates, DEFAULT_SUPPORT_EMAIL, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { buildBreadcrumbJsonLd, homeCrumb } from "@/app/_shared/seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
@@ -32,6 +32,13 @@ const DESCRIPTION =
   "ช่องทางติดต่อทีมงาน SeerTarot สำหรับแจ้งปัญหาการใช้งาน ติชมคำทำนาย ขอลบข้อมูลส่วนตัว หรือสอบถามเรื่องความร่วมมือ";
 
 const TIKTOK_URL = BRAND_SOCIAL_PROFILES.find((u) => u.includes("tiktok.com"));
+
+const SOCIAL_NOTES: Record<string, string> = {
+  LINE: "ทักแชท รับไพ่ประจำวันและข่าวใหม่",
+  Facebook: "โพสต์ความหมายไพ่และดวงรายสัปดาห์",
+  TikTok: "คลิปสั้นเรื่องความหมายไพ่และวิธีอ่านผัง",
+};
+
 
 export const contactMetadataTh: Metadata = {
   title: TITLE,
@@ -112,17 +119,21 @@ export function ContactBodyTh() {
         {TIKTOK_URL && (
           <section className="space-y-3">
             <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>ติดตามเรา</ThaiPhrases></h2>
-            <div className="altar-card-porcelain !rounded-xl p-4 space-y-2">
-              <a
-                href={TIKTOK_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-base text-gold-ink underline hover:text-gold-ink-deep font-serif-th break-all"
-              >
-                TikTok · @seerada.tarot
-              </a>
-              <p className="text-xs text-muted font-serif-th">คลิปสั้นเรื่องความหมายไพ่และวิธีอ่านผัง</p>
-            </div>
+            <ul className="space-y-3">
+              {BRAND_SOCIAL_LINKS.map((social) => (
+                <li key={social.name} className="altar-card-porcelain !rounded-xl p-4 space-y-2">
+                  <a
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-base text-gold-ink underline hover:text-gold-ink-deep font-serif-th break-all"
+                  >
+                    {social.name} · {social.handle}
+                  </a>
+                  <p className="text-xs text-muted font-serif-th">{SOCIAL_NOTES[social.name]}</p>
+                </li>
+              ))}
+            </ul>
           </section>
         )}
 

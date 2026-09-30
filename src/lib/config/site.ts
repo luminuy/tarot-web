@@ -56,11 +56,23 @@ export const OG_IMAGE_ALT = "SeerTarot · ดูดวงไพ่ทาโร�
  * ถ้าใส่ URL ที่ไม่มีจริงหรือไม่ใช่ของเรา จะกลายเป็นสัญญาณตัวตนที่ผิด แย่กว่าไม่ใส่
  * ➔ เพิ่มได้เฉพาะบัญชีที่ **เปิดสาธารณะจริงและเป็นของโปรเจกต์นี้** เท่านั้น
  *
- * ยังขาดอีกหลายช่องตามแผน Omnichannel (Facebook · Instagram · LINE OA · Threads · X)
+ * ยังขาดอีกหลายช่องตามแผน Omnichannel (Instagram · Threads · X)
  * เติมเมื่อเจ้าของยืนยัน URL จริงแล้วเท่านั้น ห้ามเดา
+ *
+ * 2026-09-30: เจ้าของส่ง Facebook เพจ "SeerTarot ดูดวงไพ่ยิปซี" + LINE OA `@227pwqtl` (ลิงก์ `lin.ee/zVthwqS`)
+ * ตรวจแล้วเปิดได้จริงทั้งคู่ · LINE ใช้ URL เต็มของ line.me (ปลายทางของ lin.ee) เพราะคงที่กว่าลิงก์ย่อ
  */
 export const BRAND_SOCIAL_PROFILES = [
   "https://www.tiktok.com/@seerada.tarot",
+  "https://www.facebook.com/profile.php?id=61594873953953",
+  "https://line.me/R/ti/p/@227pwqtl",
+] as const;
+
+/** ช่องทางติดตามที่โชว์ให้ผู้ใช้กด (หน้าติดต่อ · ท้ายเว็บ) — ดึงจาก `BRAND_SOCIAL_PROFILES` ที่เดียว */
+export const BRAND_SOCIAL_LINKS = [
+  { name: "LINE", handle: "@227pwqtl", url: BRAND_SOCIAL_PROFILES[2] },
+  { name: "Facebook", handle: "SeerTarot ดูดวงไพ่ยิปซี", url: BRAND_SOCIAL_PROFILES[1] },
+  { name: "TikTok", handle: "@seerada.tarot", url: BRAND_SOCIAL_PROFILES[0] },
 ] as const;
 
 /** อีเมลผู้ส่งเริ่มต้น (ทับได้ด้วย env `EMAIL_FROM` เมื่อ verify โดเมนกับผู้ให้บริการอีเมลแล้ว) */
