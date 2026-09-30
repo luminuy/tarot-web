@@ -44,6 +44,7 @@
 - `TikTokFloatingButton.tsx` ➔ `SocialFloatingButtons.tsx`: 3 ปุ่มวงกลมเรียงแนวตั้ง (LINE เขียว · Facebook ฟ้า · TikTok ดำ) โลโก้ทางการ · URL จาก `BRAND_SOCIAL_PROFILES` ที่เดียว · ซ่อนบน /admin และ /reading เหมือนเดิม
 - ตัด tooltip/กล่องประดับออก (ใช้ `title`) ให้ทั้งกล่องเหลือ aside + a + svg + path — งบ DOM หน้าแรก 1,498 ≤ 1,500 · สีแบรนด์อยู่ใน `fill` ไม่เพิ่มคลาส `[#hex]`
 - อัปเดตผู้ใช้ 3 จุด: `RootHtml.tsx` · `astro/components/StaticChrome.tsx` · `scripts/qa/test-en-thai-leak.tsx`
+- หน้า `/contact` + `/en/contact`: การ์ด "ติดตามเรา" มีโลโก้จริงวงกลมหน้าชื่อช่องทาง · path โลโก้แยกเป็น `src/components/ui/SocialIcons.tsx` ใช้ร่วมกับปุ่มลอย (ไม่ซ้ำสองที่)
 
 ### 🗓️ 2026-09-30 (รอบ 189): ✦ Omnichannel — เพิ่ม Facebook เพจ + LINE OA เข้าเว็บ (sameAs · ท้ายเว็บ · หน้าติดต่อ)
 
