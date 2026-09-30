@@ -5,7 +5,8 @@ import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CardImage } from "@/components/card/CardImage";
 import { getFooterColumns } from "@/components/layout/nav-links";
 import { useLocale } from "@/lib/i18n";
-import { useEffect } from "react";
+import { Fragment, useEffect } from "react";
+import { BRAND_SOCIAL_LINKS } from "@/lib/config/site";
 import { installFooterAccordion } from "@/components/layout/footer-accordion";
 
 export interface SiteFooterProps {
@@ -222,6 +223,16 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
             <Link href="/privacy" prefetch={false} className="hover:text-surface-warm transition-colors underline">
               {isEnglish ? "Privacy Policy" : "นโยบายความเป็นส่วนตัว"}
             </Link>
+            {/* ช่องทางทางการ (LINE · Facebook · TikTok) — ลิงก์ตรงในบรรทัดเดิม ไม่เพิ่มกล่อง
+                เพราะท้ายเว็บอยู่ในหน้าแรกด้วย และหน้าแรกมีงบ DOM ≤ 1,500 (INC-0247) */}
+            {BRAND_SOCIAL_LINKS.map((social) => (
+              <Fragment key={social.name}>
+                {" · "}
+                <a href={social.url} target="_blank" rel="noopener noreferrer" className="hover:text-surface-warm transition-colors underline">
+                  {social.name}
+                </a>
+              </Fragment>
+            ))}
           </p>
         </div>
       </div>
