@@ -1,5 +1,5 @@
 import { SkipToContent } from "@/components/layout/SkipToContent";
-import { TikTokFloatingButton } from "@/components/ui/TikTokFloatingButton";
+import { SocialFloatingButtons } from "@/components/ui/SocialFloatingButtons";
 import { LocaleProvider } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/types";
 
@@ -16,7 +16,7 @@ export function SkipLinkRoot({ locale }: { locale: Locale }) {
 export function FloatingChromeRoot({ locale, pathname }: { locale: Locale; pathname: string }) {
   return (
     <LocaleProvider forcedLocale={locale}>
-      <TikTokFloatingButton pathname={pathname} />
+      <SocialFloatingButtons pathname={pathname} />
     </LocaleProvider>
   );
 }

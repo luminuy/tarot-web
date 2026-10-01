@@ -6,6 +6,7 @@ import { clampDescription } from "@/lib/config/meta-length";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { buildBreadcrumbJsonLd, homeCrumb } from "@/app/_shared/seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { SOCIAL_BADGE_STYLE, SocialGlyph } from "@/components/ui/SocialIcons";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
@@ -118,16 +119,25 @@ export function ContactBodyEn() {
             <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>Official Channels</ThaiPhrases></h2>
             <ul className="space-y-3">
               {BRAND_SOCIAL_LINKS.map((social) => (
-                <li key={social.name} className="altar-card-porcelain !rounded-xl p-4 space-y-2">
-                  <a
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-base text-gold-ink underline hover:text-gold-ink-deep font-serif-th break-all"
+                <li key={social.name} className="altar-card-porcelain !rounded-xl p-4 flex items-center gap-4">
+                  <span
+                    aria-hidden="true"
+                    className="flex items-center justify-center w-11 h-11 rounded-full shrink-0 overflow-hidden shadow-[0_4px_12px_rgba(40,28,14,0.18)]"
+                    style={SOCIAL_BADGE_STYLE[social.name]}
                   >
-                    {social.name} · {social.handle}
-                  </a>
-                  <p className="text-xs text-muted font-serif-th">{SOCIAL_NOTES[social.name]}</p>
+                    <SocialGlyph name={social.name} />
+                  </span>
+                  <span className="min-w-0 space-y-1">
+                    <a
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-base text-gold-ink underline hover:text-gold-ink-deep font-serif-th break-all"
+                    >
+                      {social.name} · {social.handle}
+                    </a>
+                    <span className="block text-xs text-muted font-serif-th">{SOCIAL_NOTES[social.name]}</span>
+                  </span>
                 </li>
               ))}
             </ul>
