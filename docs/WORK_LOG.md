@@ -38,6 +38,14 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-01 (รอบ 191): ✦ ปุ่มลอยช่องทางทางการ — ปรับหน้าตาให้ได้มาตรฐาน FAB
+
+- เจ้าของขอ: ปุ่มหลัก (วงกลมดำไอคอนแชท) ให้สวยขึ้นและได้มาตรฐาน
+- ขนาดตามมาตรฐาน FAB (Material / Apple HIG): ปุ่มหลัก 56px · ปุ่มช่องทาง 48px (≥ 44px) · วัดจริงด้วย Playwright ทั้งมือถือ/คอม
+- ปุ่มหลักใช้พื้นทองชุดเดียวกับ `.btn-gold-glass` (ปุ่มหลักทั้งเว็บ) + ไอคอนแชทเส้นหนาขึ้น · hover ยกตัว · กดยุบ · กรอบโฟกัสทอง 3px
+- ตอนกาง: ป้ายชื่อ LINE · Facebook · TikTok ทางซ้ายของแต่ละปุ่ม (แบบ speed dial) จาก `data-label` + `::after` — ไม่เพิ่ม element (งบ DOM หน้าแรก 1,499 ≤ 1,500) · ปุ่มช่องทางมีวงขาวแยกจากพื้นครีม
+- หน้าตาย้ายไปรวมที่ `.social-fab` ใน globals.css · ปิดแอนิเมชันเมื่อ prefers-reduced-motion
+
 ### 🗓️ 2026-09-30 (รอบ 190): ✦ ปุ่มลอยมุมขวาล่าง — LINE · Facebook · TikTok (เดิมมีแค่ TikTok)
 
 - เจ้าของทัก: เพิ่ม LINE/Facebook แล้วแต่ปุ่มลอยยังมีแค่ TikTok (รอบ 189 เติมแค่ sameAs · ท้ายเว็บ · หน้าติดต่อ)

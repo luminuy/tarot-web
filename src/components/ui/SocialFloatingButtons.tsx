@@ -28,14 +28,12 @@ const LINE_URL = BRAND_SOCIAL_PROFILES.find((u) => u.includes("line.me"));
 const FACEBOOK_URL = BRAND_SOCIAL_PROFILES.find((u) => u.includes("facebook.com"));
 const TIKTOK_URL = BRAND_SOCIAL_PROFILES.find((u) => u.includes("tiktok.com"));
 
-const RING =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2";
-
-/** ปุ่มช่องทาง — ซ้อนเหนือปุ่มหลัก (absolute) โผล่เฉพาะตอน `<details open>` */
-const BUTTON = `absolute right-0.5 flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden shadow-[0_6px_18px_rgba(40,28,14,0.28)] hover:scale-105 active:scale-95 transition duration-300 ${RING}`;
-
-/** ปุ่มหลัก — กดแล้วกาง/หุบ (ไม่ต้องใช้ JS · หน้า Astro ส่วนใหญ่ไม่ hydrate) */
-const SUMMARY = `relative flex items-center justify-center w-12 h-12 sm:w-[52px] sm:h-[52px] rounded-full cursor-pointer list-none shadow-[0_8px_22px_rgba(40,28,14,0.32)] active:scale-95 transition duration-300 ${RING}`;
+/**
+ * ขนาดตามมาตรฐานปุ่มลอย (Material FAB / Apple HIG): ปุ่มหลัก 56px · ปุ่มช่องทาง 48px (เกินขั้นต่ำ 44px)
+ * หน้าตา เงา ป้ายชื่อ และแอนิเมชันอยู่ที่ `.social-fab` ใน globals.css
+ */
+const BUTTON = "social-fab__item absolute right-1 flex items-center justify-center w-12 h-12 rounded-full";
+const SUMMARY = "social-fab__main relative flex items-center justify-center w-14 h-14 rounded-full cursor-pointer list-none";
 
 export function SocialFloatingButtons({ pathname: pathnameProp }: { pathname?: string } = {}) {
   const { isEnglish } = useLocale();
@@ -73,7 +71,8 @@ export function SocialFloatingButtons({ pathname: pathnameProp }: { pathname?: s
           rel="noopener noreferrer"
           title={isEnglish ? "Add SeerTarot on LINE" : "เพิ่มเพื่อน SeerTarot ใน LINE"}
           aria-label={isEnglish ? "Add SeerTarot on LINE" : "เพิ่มเพื่อน SeerTarot ใน LINE"}
-          className={`${BUTTON} bottom-[172px] sm:bottom-[184px]`}
+          className={`${BUTTON} bottom-[188px]`}
+          data-label="LINE"
           style={SOCIAL_BADGE_STYLE.LINE}
         >
           <SocialGlyph name="LINE" />
@@ -87,7 +86,8 @@ export function SocialFloatingButtons({ pathname: pathnameProp }: { pathname?: s
           rel="noopener noreferrer"
           title={isEnglish ? "SeerTarot on Facebook" : "เพจ SeerTarot บน Facebook"}
           aria-label={isEnglish ? "SeerTarot on Facebook" : "เพจ SeerTarot บน Facebook"}
-          className={`${BUTTON} bottom-[116px] sm:bottom-[124px]`}
+          className={`${BUTTON} bottom-32`}
+          data-label="Facebook"
           style={SOCIAL_BADGE_STYLE.Facebook}
         >
           <SocialGlyph name="Facebook" />
@@ -101,7 +101,8 @@ export function SocialFloatingButtons({ pathname: pathnameProp }: { pathname?: s
           rel="noopener noreferrer"
           title={isEnglish ? "Follow Seerada on TikTok (@seerada.tarot)" : "ติดตามแม่หมอ Seerada บน TikTok (@seerada.tarot)"}
           aria-label={isEnglish ? "Follow Seerada on TikTok (@seerada.tarot)" : "ติดตามแม่หมอ Seerada บน TikTok (@seerada.tarot)"}
-          className={`${BUTTON} bottom-[60px] sm:bottom-16`}
+          className={`${BUTTON} bottom-[68px]`}
+          data-label="TikTok"
           style={SOCIAL_BADGE_STYLE.TikTok}
         >
           <SocialGlyph name="TikTok" />

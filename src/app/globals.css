@@ -2419,34 +2419,98 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
   }
 }
 
-
 /* ✦ ปุ่มลอยช่องทางทางการ (`SocialFloatingButtons`) — ปุ่มหลักอันเดียว กดแล้วกาง LINE · Facebook · TikTok
-   ใช้ <details> ของเบราว์เซอร์ (ไม่ต้อง JS) · ไอคอนวาดด้วย mask ใน ::before เพื่อไม่เพิ่ม element (งบ DOM หน้าแรก) */
+   - ใช้ <details>/<summary> ของเบราว์เซอร์ (ไม่ต้อง JS · หน้า Astro ไม่ hydrate)
+   - ขนาดตามมาตรฐาน FAB: ปุ่มหลัก 56px · ปุ่มช่องทาง 48px (touch target ≥ 44px)
+   - ไอคอน (::before) และป้ายชื่อ (::after จาก data-label) เป็น pseudo-element ทั้งหมด
+     ไม่เพิ่ม element จริง — หน้าแรกมีงบ DOM ≤ 1,500 (INC-0247)
+   - พื้นปุ่มหลักใช้ทองแบบเดียวกับ `.btn-gold-glass` (ปุ่มหลักทั้งเว็บ) */
 .social-fab > summary {
-  background-color: var(--color-ink-deep);
-  color: var(--color-surface-warm);
-  box-shadow: 0 8px 22px rgba(40, 28, 14, 0.32), inset 0 0 0 1.5px var(--color-gold);
+  background-image: linear-gradient(180deg, #96621C 0%, #8F5C1A 54%, #7A4E14 100%);
+  color: #FFF8EC;
+  box-shadow:
+    0 1px 0 rgba(255, 233, 199, 0.32) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.22) inset,
+    0 2px 4px rgba(51, 36, 26, 0.24),
+    0 12px 28px -8px rgba(122, 78, 20, 0.6);
+  transition: transform var(--dur-fast, 0.18s) ease, box-shadow var(--dur-fast, 0.18s) ease, filter var(--dur-fast, 0.18s) ease;
+  -webkit-tap-highlight-color: transparent;
 }
 .social-fab > summary::-webkit-details-marker {
   display: none;
 }
 .social-fab > summary::before {
   content: "";
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   background-color: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 11.5a8.4 8.4 0 0 1-9 8.4 9.4 9.4 0 0 1-4-.9L3 20.5l1.4-4.3A8 8 0 0 1 3 11.5 8.6 8.6 0 0 1 12 3a8.6 8.6 0 0 1 9 8.5z'/%3E%3Cpath d='M8.5 11.5h.01M12 11.5h.01M15.5 11.5h.01' stroke-width='2.6'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 11.5a8.4 8.4 0 0 1-9 8.4 9.4 9.4 0 0 1-4-.9L3 20.5l1.4-4.3A8 8 0 0 1 3 11.5 8.6 8.6 0 0 1 12 3a8.6 8.6 0 0 1 9 8.5z'/%3E%3Cpath d='M8.5 11.5h.01M12 11.5h.01M15.5 11.5h.01' stroke-width='2.6'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.5 11.6c0 4.4-3.8 7.9-8.5 7.9-1.3 0-2.6-.3-3.7-.8L3.5 20l1.2-3.8a7.6 7.6 0 0 1-1.2-4.6C3.5 7.2 7.3 3.7 12 3.7s8.5 3.5 8.5 7.9z'/%3E%3Cpath d='M8.4 11.7h.01M12 11.7h.01M15.6 11.7h.01' stroke-width='2.8'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.5 11.6c0 4.4-3.8 7.9-8.5 7.9-1.3 0-2.6-.3-3.7-.8L3.5 20l1.2-3.8a7.6 7.6 0 0 1-1.2-4.6C3.5 7.2 7.3 3.7 12 3.7s8.5 3.5 8.5 7.9z'/%3E%3Cpath d='M8.4 11.7h.01M12 11.7h.01M15.6 11.7h.01' stroke-width='2.8'/%3E%3C/svg%3E") center / contain no-repeat;
   transition: transform 0.25s ease;
+}
+@media (hover: hover) {
+  .social-fab > summary:hover {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+    box-shadow:
+      0 1px 0 rgba(255, 233, 199, 0.36) inset,
+      0 -1px 0 rgba(0, 0, 0, 0.22) inset,
+      0 3px 6px rgba(51, 36, 26, 0.24),
+      0 18px 34px -10px rgba(122, 78, 20, 0.65);
+  }
+}
+.social-fab > summary:active {
+  transform: scale(0.96);
+}
+.social-fab > summary:focus-visible,
+.social-fab > a:focus-visible {
+  outline: 3px solid var(--color-gold);
+  outline-offset: 3px;
 }
 /* ตอนกาง: ไอคอนเปลี่ยนเป็นกากบาท */
 .social-fab[open] > summary::before {
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.1' stroke-linecap='round'%3E%3Cpath d='M6.5 6.5l11 11M17.5 6.5l-11 11'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.1' stroke-linecap='round'%3E%3Cpath d='M6.5 6.5l11 11M17.5 6.5l-11 11'/%3E%3C/svg%3E");
   transform: rotate(90deg);
 }
+
+/* ปุ่มช่องทาง — วงขาวบาง ๆ แยกปุ่มออกจากพื้นหลังครีม (Facebook เป็นวงขาวในตัว) */
+.social-fab > a {
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.95),
+    0 2px 4px rgba(51, 36, 26, 0.18),
+    0 10px 22px -8px rgba(51, 36, 26, 0.45);
+  transition: transform var(--dur-fast, 0.18s) ease;
+}
+@media (hover: hover) {
+  .social-fab > a:hover {
+    transform: translateY(-1px) scale(1.04);
+  }
+}
+.social-fab > a:active {
+  transform: scale(0.95);
+}
+/* ป้ายชื่อช่องทางทางซ้ายของปุ่ม (แบบ speed dial ของ Material) */
+.social-fab > a::after {
+  content: attr(data-label);
+  position: absolute;
+  right: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 6px 12px;
+  border-radius: 999px;
+  background-color: var(--color-ink-deep);
+  color: var(--color-surface-warm);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(40, 28, 14, 0.25);
+  pointer-events: none;
+}
 .social-fab[open] > a {
-  animation: socialFabPop 0.22s cubic-bezier(0.2, 0.8, 0.3, 1.2) both;
+  animation: socialFabPop 0.24s cubic-bezier(0.2, 0.8, 0.3, 1.15) both;
 }
 .social-fab[open] > a:nth-of-type(2) {
   animation-delay: 0.04s;
@@ -2457,7 +2521,7 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
 @keyframes socialFabPop {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.85);
+    transform: translateY(14px) scale(0.8);
   }
   to {
     opacity: 1;
@@ -2466,6 +2530,8 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
 }
 @media (prefers-reduced-motion: reduce) {
   .social-fab[open] > a,
+  .social-fab > a,
+  .social-fab > summary,
   .social-fab > summary::before {
     animation: none;
     transition: none;
