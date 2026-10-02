@@ -3,6 +3,8 @@ import { z } from "zod";
 
 import { requireReader } from "@/lib/auth/reader-auth";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
+import { endCall } from "@/lib/marketplace/call.repo";
+import { isTurnConfigured, revokeTurnCredential } from "@/lib/marketplace/turn";
 import {
   getReaderLiveAvailability,
   listReaderQueueTickets,
@@ -46,6 +48,7 @@ export async function GET(request: Request) {
       isLiveOpen,
       tickets: tickets.map(toPublicTicket),
       totalWaiting: tickets.filter((t) => t.status === "waiting").length,
+      videoCallEnabled: isTurnConfigured(),
     });
   } catch (err) {
     console.error("[API Console Queue GET Error]", err);
@@ -97,6 +100,11 @@ export async function PATCH(request: Request) {
       const updated = await updateTicketStatus(parsed.data.ticketId, targetStatus, readerId);
       if (!updated) {
         return NextResponse.json({ error: "ไม่พบคิวที่ระบุ หรือไม่มีสิทธิ์แก้ไข" }, { status: 404 });
+      }
+      // ปิดคิว = วางสายวิดีโอที่อาจค้างอยู่ + เพิกถอนรหัสผ่าน TURN ทันที
+      if (targetStatus === "handed_off" || targetStatus === "cancelled") {
+        const users = await endCall(parsed.data.ticketId, "reader");
+        await Promise.all(users.map(revokeTurnCredential));
       }
     }
 

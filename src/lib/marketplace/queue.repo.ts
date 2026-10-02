@@ -369,7 +369,12 @@ export async function cleanupExpiredTickets(): Promise<number> {
     WHERE ticket_id IN (SELECT id FROM queue_tickets WHERE expires_at < ?)
   `).bind(now).run();
   await db.prepare(`
-    DELETE FROM ai_screening 
+    DELETE FROM ai_screening
+    WHERE ticket_id IN (SELECT id FROM queue_tickets WHERE expires_at < ?)
+  `).bind(now).run();
+  // 📹 ห้องวิดีโอคอลของตั๋วนั้น (migrations/0019) — ต้องลบก่อนตั๋ว เพราะอ้าง FK ถึงกัน
+  await db.prepare(`
+    DELETE FROM call_sessions
     WHERE ticket_id IN (SELECT id FROM queue_tickets WHERE expires_at < ?)
   `).bind(now).run();
 

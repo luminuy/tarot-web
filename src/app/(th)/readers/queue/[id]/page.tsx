@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { VideoCallRoom } from "@/components/marketplace/VideoCallRoom";
 import { useVisibleInterval } from "@/lib/utils/use-visible-interval";
 import type { QueueTicket } from "@/lib/marketplace/queue.repo";
 
@@ -17,6 +18,8 @@ interface PollResponse {
     lineUrl: string | null;
   };
   canAccessLine: boolean;
+  /** แม่หมอเรียกคิวแล้ว + ระบบวิดีโอคอลพร้อม (ตั้งค่า TURN แล้ว) */
+  videoCallAvailable?: boolean;
 }
 
 export default function CustomerQueuePage() {
@@ -95,7 +98,7 @@ export default function CustomerQueuePage() {
     );
   }
 
-  const { ticket, reader, canAccessLine } = data;
+  const { ticket, reader, canAccessLine, videoCallAvailable } = data;
   const isBlocked = ticket.screening?.verdict === "block" || ticket.status === "cancelled";
   const isCrisis = ticket.screening?.flags.includes("self_harm") || ticket.screening?.flags.includes("crisis");
 
@@ -158,7 +161,7 @@ export default function CustomerQueuePage() {
               <div className="space-y-1">
                 <h3 className="font-serif-th font-bold text-lg text-ink">คุณกำลังอยู่ในคิวรอรับคำปรึกษา</h3>
                 <p className="text-xs text-muted font-serif-th">
-                  กรุณาเปิดหน้านี้ทิ้งไว้ เมื่อแม่หมอเรียกคิว ระบบจะแสดงปุ่มเปิด LINE เพื่อเริ่มสนทนาทันที
+                  กรุณาเปิดหน้านี้ทิ้งไว้ เมื่อแม่หมอเรียกคิว ระบบจะแสดงปุ่มเริ่มคุยกับแม่หมอทันที
                 </p>
               </div>
 
@@ -179,7 +182,9 @@ export default function CustomerQueuePage() {
               <div className="space-y-1.5">
                 <h3 className="font-serif-th font-bold text-xl text-emerald-900">ถึงคิวของคุณแล้ว</h3>
                 <p className="text-xs text-emerald-800 font-serif-th leading-relaxed">
-                  {reader.displayName} พร้อมให้คำปรึกษาแล้ว แตะปุ่มด้านล่างเพื่อเริ่มสนทนาผ่าน LINE
+                  {videoCallAvailable
+                    ? `${reader.displayName} พร้อมให้คำปรึกษาแล้ว เลือกคุยผ่านวิดีโอคอลในเว็บนี้ หรือผ่าน LINE ก็ได้`
+                    : `${reader.displayName} พร้อมให้คำปรึกษาแล้ว แตะปุ่มด้านล่างเพื่อเริ่มสนทนาผ่าน LINE`}
                 </p>
               </div>
 
@@ -195,6 +200,12 @@ export default function CustomerQueuePage() {
                 </a>
               )}
             </div>
+          )}
+
+          {/* 📹 วิดีโอคอลตัวต่อตัว — ผ่าน TURN เสมอ (ซ่อน IP ทั้งสองฝั่ง)
+              วางนอกกล่องสีเขียว ให้ภาพได้ความกว้างเต็มการ์ดบนมือถือ */}
+          {videoCallAvailable && (
+            <VideoCallRoom ticketId={ticket.id} role="customer" peerName={reader.displayName} />
           )}
 
           {isBlocked && (

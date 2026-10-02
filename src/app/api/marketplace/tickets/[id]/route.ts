@@ -4,6 +4,7 @@ import { getReaderById } from "@/lib/marketplace/readers.repo";
 import { readCustomerRefFromCookie } from "@/lib/marketplace/customer-ref";
 import { requireReader } from "@/lib/auth/reader-auth";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
+import { isTurnConfigured } from "@/lib/marketplace/turn";
 
 export const runtime = "nodejs";
 
@@ -51,6 +52,8 @@ export async function GET(
         lineUrl: canAccessLine ? reader.lineUrl : null,
       },
       canAccessLine,
+      // 📹 วิดีโอคอลตัวต่อตัว — เปิดเฉพาะตอนแม่หมอเรียกคิวแล้ว และตั้งค่า TURN ไว้แล้ว
+      videoCallAvailable: ticket.status === "ready" && isTurnConfigured(),
     });
   } catch (err) {
     console.error("[API Ticket GET ID Error]", err);

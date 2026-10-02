@@ -229,6 +229,16 @@ export async function updateReader(id: string, input: UpdateReaderInput): Promis
  */
 export async function deleteReader(id: string): Promise<boolean> {
   const db = await getAppDB();
+  // 📹 ห้องวิดีโอคอล (migrations/0019) อ้าง FK ถึงตั๋ว — ต้องลบก่อนตั๋ว · แยก try ไว้
+  // เพราะถ้าฐานข้อมูลเก่ายังไม่มีตารางนี้ ต้องไม่ทำให้การลบที่เหลือข้างล่างถูกข้ามไปทั้งชุด
+  try {
+    await db
+      .prepare("DELETE FROM call_sessions WHERE ticket_id IN (SELECT id FROM queue_tickets WHERE reader_id = ?)")
+      .bind(id)
+      .run();
+  } catch {
+    // ignore if table not yet created
+  }
   try {
     await db.prepare("DELETE FROM payments WHERE booking_id IN (SELECT id FROM bookings WHERE reader_id = ?)").bind(id).run();
     await db.prepare("DELETE FROM payouts WHERE reader_id = ?").bind(id).run();

@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 import { ALTERNATE_HOSTS, CANONICAL_ORIGIN } from "./src/lib/config/canonical-host";
-import { SECURITY_HEADERS } from "./src/lib/config/security-headers";
+import {
+  CALL_PAGE_PERMISSIONS_POLICY,
+  CALL_PAGE_SOURCES,
+  SECURITY_HEADERS,
+} from "./src/lib/config/security-headers";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -105,6 +109,11 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: SECURITY_HEADERS,
       },
+      // 📹 วิดีโอคอลแม่หมอ: เปิดกล้อง/ไมค์เฉพาะสองหน้านี้ (ค่าที่ประกาศทีหลังชนะชุดกลางด้านบน)
+      ...CALL_PAGE_SOURCES.map((source) => ({
+        source,
+        headers: [{ key: "Permissions-Policy", value: CALL_PAGE_PERMISSIONS_POLICY }],
+      })),
       {
         source: "/robots.txt",
         headers: [

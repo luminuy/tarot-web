@@ -97,11 +97,30 @@ npx wrangler d1 create tarot-app-db
 | หัวข้อ | ค่า |
 | :-- | :-- |
 | เปิดคิว | **ทั้ง 2 แบบ** — walk-up live queue + จอง slot ล่วงหน้า |
-| คุยลูกค้า↔แม่หมอ | ส่งต่อไป **LINE/ภายนอก** (เว็บแค่จับคู่ + เผยลิงก์) |
+| คุยลูกค้า↔แม่หมอ | ~~ส่งต่อไป LINE/ภายนอกอย่างเดียว~~ ➔ **วิดีโอคอลตัวต่อตัวในเว็บ** + LINE เป็นทางสำรอง (เคาะ 2026-10-02 · ดูหัวข้อ "วิดีโอคอลตัวต่อตัว" ด้านล่าง) |
 | Payment | **milestone แยกท้ายสุด (M7)** ต้องมี แต่ทำหลังสุด |
 | Storage | D1 (relational) + reuse KV (config/counter) — แยกตามความเหมาะสม |
 
 ---
+
+### 📹 วิดีโอคอลตัวต่อตัว (เคาะ 2026-10-02)
+
+| หัวข้อ | ค่าที่เคาะ | เหตุผล |
+| :-- | :-- | :-- |
+| ผู้ให้บริการ | **Cloudflare Realtime TURN** (ไม่ใช้ SFU / RealtimeKit) | ฟรี 1,000 GB/เดือน · RealtimeKit ไม่มีโควตาฟรี |
+| เส้นทางภาพ | WebRTC แบบ P2P แต่ **บังคับผ่าน TURN ทุกสาย** (`iceTransportPolicy: "relay"`) | ลูกค้า↔แม่หมอเป็นคนแปลกหน้า — **ห้ามเห็น IP ของกันและกัน** |
+| คุณภาพ | ล็อก **720p** · เพดาน 1.5 Mbps | ตัวต่อตัว ~1.35 GB/ชม. ➔ 50 คน × 1.5 ชม. ≈ 100 GB/เดือน (~10% ของโควตาฟรี) |
+| นัดเชื่อมสาย | D1 `call_sessions` (migrations/0019) + ถามสถานะเป็นระยะ ไม่ใช้ WebSocket | ICE แบบไม่ trickle = เขียน 2 ครั้งต่อการต่อสาย |
+| บันทึก | **ไม่บันทึกภาพ เสียง หรือบทสนทนา** · ล้าง SDP ทันทีที่วางสาย · ลบแถวพร้อมตั๋ว (7 วัน) | PDPA |
+
+**ไฟล์**: `src/lib/marketplace/turn.ts` (ออก/เพิกถอนรหัสผ่าน TURN) · `src/lib/marketplace/call.repo.ts` (ห้อง + `sanitizeRelaySdp`) ·
+`src/app/api/marketplace/calls/[ticketId]/route.ts` · `src/components/marketplace/VideoCallRoom.tsx` (ใช้ทั้ง `/readers/queue/[id]` และ `/readers/console`)
+
+**กับดักที่ห้ามพลาด**
+- ทั้งเว็บปิดกล้อง/ไมค์ (`Permissions-Policy: camera=()`) — เปิด `camera=(self)` **เฉพาะสองหน้านี้** ผ่าน `CALL_PAGE_SOURCES` ใน `security-headers.ts` (Next ให้ค่าที่ประกาศทีหลังชนะ)
+- เซิร์ฟเวอร์ล้าง SDP ซ้ำ: ตัด candidate ที่ไม่ใช่ `typ relay` + แทน `raddr` เป็น `0.0.0.0` — ไคลเอนต์ที่ถูกดัดแปลงส่ง IP จริงข้ามฝั่งไม่ได้
+- ยังไม่ตั้ง `CLOUDFLARE_TURN_KEY_ID` / `CLOUDFLARE_TURN_KEY_API_TOKEN` = ปุ่มวิดีโอไม่โผล่ ลูกค้าคุยผ่าน LINE ได้ตามเดิม (ดู `docs/PENDING_SETUP.md`)
+- ด่านตรวจ: `test-marketplace-readers` ข้อ 16.1–16.5
 
 ## 3. สถาปัตยกรรม Storage สำหรับ Phase 2
 
