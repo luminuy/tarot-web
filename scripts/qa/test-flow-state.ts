@@ -36,6 +36,7 @@ import {
   isPassHolderOf,
 } from "../../src/components/home/flow-access";
 import { resolveEntryIntent } from "../../src/components/home/flow-entry";
+import { wantsBackEntry } from "../../src/components/home/use-flow-back";
 import { PUBLIC_SPREADS } from "../../src/data/spreads";
 import { readSpreadMetadata } from "../../src/app/_shared/pages/read-spread";
 import { assertNonEmptyCorpus } from "./lib/corpus";
@@ -444,6 +445,15 @@ check(
 check(
   "ผู้ไม่ล็อกอิน / ผู้ถือสิทธิ์เต็ม ➔ ไม่นับว่ามีสิทธิ์ลอง",
   !hasPremiumTrialOf(ent({ kind: "guest", premiumTrialAvailable: true })) && !hasPremiumTrialOf(ent({ hasPaidCredits: true, premiumTrialAvailable: true })),
+);
+
+// ✦ ปุ่มย้อนกลับของเบราว์เซอร์ — กันชนมีเฉพาะขั้นที่ย้อนได้โดยไม่เสียอะไร (ยังไม่เปิดไพ่)
+check("หน้าแรก: ขั้นตั้งคำถามกดย้อนกลับไปเลือกผังได้", wantsBackEntry("INTENTION_SELECT", true));
+check("หน้า /read/<ผัง>: ขั้นตั้งคำถามคือขั้นแรก ย้อนกลับ = ออกจากหน้าตามปกติ", !wantsBackEntry("INTENTION_SELECT", false));
+check("ขั้นสับไพ่ / เลือกไพ่ ย้อนได้ทั้งสองหน้า", ["SHUFFLE", "PICK_CARDS"].every((s) => wantsBackEntry(s as RitualStep, true) && wantsBackEntry(s as RitualStep, false)));
+check(
+  "เลือกผัง / อ่านคำทำนาย / สรุป ห้ามมีกันชน (เปิดไพ่แล้วย้อนไม่ได้)",
+  (["SPREAD_SELECT", "READING", "SUMMARY"] as RitualStep[]).every((s) => !wantsBackEntry(s, true)),
 );
 
 // ทางเข้าทั้งสามใน TarotFlow ต้องเรียกตรรกะก้อนนี้ ห้ามคัดลอกเงื่อนไขไปเขียนเองอีก

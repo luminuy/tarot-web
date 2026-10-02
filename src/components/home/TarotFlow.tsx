@@ -43,6 +43,7 @@ import {
 } from "@/lib/entitlement/copy";
 import { decideSpreadAccess, decideStartSessionAccess, hasPremiumTrialOf, isPassHolderOf } from "@/components/home/flow-access";
 import { resolveEntryIntent } from "@/components/home/flow-entry";
+import { useFlowBackButton } from "@/components/home/use-flow-back";
 import { onUpgradeRequest } from "@/lib/entitlement/upgrade-bus";
 import { ensureEntitlement, refreshEntitlement, useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useLocale } from "@/lib/i18n";
@@ -1479,6 +1480,18 @@ export default function TarotFlow({
       navigateStep("SHUFFLE");
     }
   };
+
+  // ✦ ปุ่มย้อนกลับของเบราว์เซอร์ = ถอยทีละขั้นก่อนเปิดไพ่ (ตั้งคำถาม ➔ เลือกผัง · สับ ➔ ตั้งคำถาม · เลือกไพ่ ➔ สับ)
+  useFlowBackButton(currentStep, !routeSpread, () => {
+    dispatchOverlay({ type: "closeAll" });
+    if (currentStep === "INTENTION_SELECT") {
+      soundManager.playCardSelectSound();
+      scrollToSanctuaryTop();
+      navigateStep("SPREAD_SELECT");
+    } else {
+      handleStepBack();
+    }
+  });
 
   // overflow-x-clip (ไม่ใช่ overflow-hidden) — overflow-hidden ทำให้ <main id="main-content" tabIndex={-1}> กลายเป็น scroll
   // container ทำให้ position: sticky ของ <header> ข้างในพัง หัวเว็บเลื่อนหลุดตามหน้า พอเปิดเมนู
