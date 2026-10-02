@@ -130,10 +130,12 @@ export default function CustomerQueuePage() {
           <span aria-hidden="true">←</span> แม่หมอทั้งหมด
         </Link>
 
-        <section className="altar-card-porcelain !rounded-3xl">
+        <section className="rounded-[28px] border border-line bg-surface overflow-hidden shadow-[0_20px_40px_-28px_rgba(46,33,26,0.45)]">
+          {/* แถบกำมะหยี่ — ภาษาภาพเดียวกับการ์ดแม่หมอในหน้ารวม */}
+          <div className="consult-stage h-20 !rounded-none !border-0" aria-hidden="true" />
           {/* แม่หมอที่คุณจองไว้ */}
-          <div className="flex items-center gap-4 p-5 sm:p-6 border-b border-line">
-            <div className="glass-chip h-14 w-14 shrink-0 overflow-hidden grid place-items-center text-xl font-bold text-gold-ink">
+          <div className="flex items-end gap-4 px-5 sm:px-6 pb-5 border-b border-line">
+            <div className="-mt-9 h-[72px] w-[72px] shrink-0 rounded-full bg-canvas ring-4 ring-surface overflow-hidden grid place-items-center text-2xl font-bold text-gold-ink shadow-md">
               {reader.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={reader.avatarUrl} alt="" /* ภาพประกอบล้วน — <h2> ข้าง ๆ พิมพ์ชื่อแม่หมออยู่แล้ว (INC-0125) */ className="h-full w-full object-cover" />
@@ -141,7 +143,7 @@ export default function CustomerQueuePage() {
                 reader.displayName.charAt(0).toUpperCase()
               )}
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 pt-3">
               <p className="text-[13px] text-muted">คิวปรึกษากับ</p>
               <h2 className="font-bold text-ink text-lg leading-snug break-words">{reader.displayName}</h2>
               {reader.specialties.length > 0 && (
@@ -201,9 +203,12 @@ export default function CustomerQueuePage() {
 
             {ticket.status === "waiting" && (
               <div className="text-center py-4 space-y-4">
-                <div className="inline-flex flex-col items-center justify-center h-28 w-28 rounded-full border-2 border-gold-ink/40 bg-surface-warm">
-                  <span className="text-[13px] text-muted">คิวที่</span>
-                  <span className="text-4xl font-bold text-gold-ink">{ticket.position || 1}</span>
+                <div className="relative mx-auto h-36 w-36">
+                  <span aria-hidden="true" className="absolute -inset-3 rounded-full bg-gold-ink/10 animate-pulse" />
+                  <div className="consult-stage relative h-full w-full rounded-full flex flex-col items-center justify-center">
+                    <span className="text-[13px] text-gold-on-dark">คิวที่</span>
+                    <span className="text-5xl font-bold text-surface leading-none mt-1">{ticket.position || 1}</span>
+                  </div>
                 </div>
                 <div className="space-y-1.5">
                   <h3 className="font-bold text-lg text-ink">คุณอยู่ในคิวแล้ว</h3>
@@ -238,7 +243,13 @@ export default function CustomerQueuePage() {
 
                 {/* 📹 วิดีโอคอลตัวต่อตัว — ผ่าน TURN เสมอ (ซ่อน IP ทั้งสองฝั่ง) · ทางหลักเมื่อพร้อม */}
                 {videoCallAvailable && (
-                  <VideoCallRoom ticketId={ticket.id} role="customer" peerName={reader.displayName} embedded />
+                  <VideoCallRoom
+                    ticketId={ticket.id}
+                    role="customer"
+                    peerName={reader.displayName}
+                    peerAvatarUrl={reader.avatarUrl}
+                    embedded
+                  />
                 )}
 
                 {canAccessLine && reader.lineUrl && (

@@ -65,8 +65,8 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
   return (
     <section aria-labelledby="readers-list-heading" className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-2">
-        <h2 id="readers-list-heading" className="font-serif-th text-lg sm:text-xl font-bold text-ink">
-          แม่หมอที่เปิดให้คำปรึกษา
+        <h2 id="readers-list-heading" className="font-serif-th text-2xl sm:text-3xl font-bold text-ink-deep">
+          เลือกแม่หมอของคุณ
         </h2>
         <p className="text-[13px] text-muted font-serif-th" aria-live="polite">
           {liveCount > 0 ? `พร้อมคุยตอนนี้ ${liveCount} ท่าน · ` : ""}ทั้งหมด {filtered.length} ท่าน
@@ -135,69 +135,74 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
       ) : (
         <ul
           className={
-            filtered.length === 1 ? "grid max-w-md mx-auto w-full" : "grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+            filtered.length === 1 ? "grid max-w-sm w-full" : "grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
           }
         >
           {filtered.map((reader) => {
             const isLive = live.has(reader.id);
             return (
               <li key={reader.id}>
-                <article className="altar-card-porcelain !rounded-2xl h-full p-5 sm:p-6 flex flex-col gap-4 font-serif-th">
-                  <div className="flex items-center gap-4">
-                    <div className="relative shrink-0">
-                      <div className="glass-chip h-16 w-16 overflow-hidden grid place-items-center text-2xl font-bold text-gold-ink">
-                        {reader.avatarUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={reader.avatarUrl} alt="" /* ภาพประกอบล้วน — <h3> ข้าง ๆ พิมพ์ชื่อแม่หมออยู่แล้ว (INC-0125) */ className="h-full w-full object-cover" />
-                        ) : (
-                          reader.displayName.charAt(0).toUpperCase()
-                        )}
-                      </div>
-                      {isLive && (
-                        <span aria-hidden="true" className="absolute bottom-0.5 right-0.5 h-4 w-4 rounded-full bg-ok ring-2 ring-surface" />
-                      )}
-                    </div>
-                    <div className="min-w-0 space-y-1">
-                      <h3 className="font-bold text-ink text-lg leading-snug break-words">
-                        <ThaiPhrases>{reader.displayName}</ThaiPhrases>
-                      </h3>
-                      <p className={`flex items-center gap-1.5 text-[13px] font-semibold ${isLive ? "text-ok" : "text-muted"}`}>
-                        <span aria-hidden="true" className={`h-2 w-2 rounded-full ${isLive ? "bg-ok animate-pulse" : "bg-line"}`} />
-                        {isLive ? "พร้อมคุยตอนนี้" : "รับจองคิวล่วงหน้า"}
-                      </p>
-                      <p className="text-[13px] text-muted">
-                        <span aria-hidden="true" className="text-ok">✓</span> ยืนยันตัวตนแล้ว
-                      </p>
-                    </div>
+                <article className="group h-full flex flex-col rounded-[28px] border border-line bg-surface overflow-hidden shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_20px_40px_-28px_rgba(46,33,26,0.45)] transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_28px_50px_-26px_rgba(46,33,26,0.5)]">
+                  {/* แถบกำมะหยี่ + สถานะ */}
+                  <div className="consult-stage relative h-24 !rounded-none !border-0 !border-b !border-b-gold-on-dark/30">
+                    <span
+                      className={`consult-stage-bar absolute top-4 right-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[13px] font-semibold ${
+                        isLive ? "text-surface" : "text-gold-on-dark"
+                      }`}
+                    >
+                      <span aria-hidden="true" className={`h-2 w-2 rounded-full ${isLive ? "bg-ok-on-dark animate-pulse" : "bg-gold-on-dark"}`} />
+                      {isLive ? "พร้อมคุยตอนนี้" : "รับจองคิวล่วงหน้า"}
+                    </span>
                   </div>
 
-                  <p className="text-sm text-ink leading-relaxed line-clamp-3">
-                    <ThaiPhrases>{reader.bio || "พร้อมให้คำปรึกษาและชี้แนะแนวทางชีวิตผ่านไพ่ทาโรต์"}</ThaiPhrases>
-                  </p>
+                  <div className="flex-1 flex flex-col gap-4 px-6 pb-6 -mt-10">
+                    <div className="relative h-20 w-20 rounded-full bg-canvas ring-4 ring-surface overflow-hidden grid place-items-center text-3xl font-bold text-gold-ink shadow-md">
+                      {reader.avatarUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={reader.avatarUrl} alt="" /* ภาพประกอบล้วน — <h3> ข้าง ๆ พิมพ์ชื่อแม่หมออยู่แล้ว (INC-0125) */ className="h-full w-full object-cover" />
+                      ) : (
+                        reader.displayName.charAt(0).toUpperCase()
+                      )}
+                    </div>
 
-                  {reader.specialties.length > 0 && (
-                    <ul className="flex flex-wrap gap-1.5" aria-label="ความถนัด">
-                      {reader.specialties.map((s) => (
-                        <li key={s} className="glass-chip px-3 py-1 text-[13px] text-ink">
-                          {s}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                    <div className="space-y-1">
+                      <h3 className="font-bold text-ink-deep text-xl leading-snug break-words">
+                        <ThaiPhrases>{reader.displayName}</ThaiPhrases>
+                      </h3>
+                      <p className="inline-flex items-center gap-1.5 text-[13px] text-ok font-semibold">
+                        <span aria-hidden="true" className="h-4 w-4 rounded-full bg-ok text-white grid place-items-center text-[10px]">✓</span>
+                        ยืนยันตัวตนแล้ว
+                      </p>
+                    </div>
 
-                  <div className="mt-auto pt-4 border-t border-line flex items-center justify-between gap-3">
-                    <p className="text-[13px] text-muted leading-tight">
-                      <span className="block text-base font-bold text-ink">{CONSULTATION_PRICE_THB} บาท</span>
-                      ต่อ {CONSULTATION_MINUTES} นาที
+                    <p className="text-sm text-ink leading-relaxed line-clamp-3">
+                      <ThaiPhrases>{reader.bio || "พร้อมให้คำปรึกษาและชี้แนะแนวทางชีวิตผ่านไพ่ทาโรต์"}</ThaiPhrases>
                     </p>
-                    <Link
-                      href={`/readers/${reader.id}`}
-                      aria-label={`${isLive ? "คุยกับ" : "ดูโปรไฟล์และจองคิว"} ${reader.displayName}`}
-                      className="btn-gold-glass inline-flex items-center justify-center gap-1.5 px-5 py-3 text-sm font-bold whitespace-nowrap"
-                    >
-                      {isLive ? "คุยกับแม่หมอ" : "ดูโปรไฟล์"}
-                      <span aria-hidden="true">→</span>
-                    </Link>
+
+                    {reader.specialties.length > 0 && (
+                      <ul className="flex flex-wrap gap-1.5" aria-label="ความถนัด">
+                        {reader.specialties.map((s) => (
+                          <li key={s} className="rounded-full bg-canvas px-3 py-1 text-[13px] text-ink-deep">
+                            {s}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    <div className="mt-auto pt-5 border-t border-line flex items-center justify-between gap-3">
+                      <p className="text-[13px] text-muted leading-tight">
+                        <span className="block text-xl font-bold text-ink-deep">฿{CONSULTATION_PRICE_THB}</span>
+                        ต่อ {CONSULTATION_MINUTES} นาที
+                      </p>
+                      <Link
+                        href={`/readers/${reader.id}`}
+                        aria-label={`${isLive ? "คุยกับ" : "ดูโปรไฟล์"} ${reader.displayName}`}
+                        className="inline-flex items-center justify-center gap-2 rounded-full bg-ink-deep px-6 py-3 text-sm font-bold text-surface whitespace-nowrap transition-colors hover:bg-gold-ink"
+                      >
+                        {isLive ? "คุยกับแม่หมอ" : "ดูโปรไฟล์"}
+                        <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">→</span>
+                      </Link>
+                    </div>
                   </div>
                 </article>
               </li>

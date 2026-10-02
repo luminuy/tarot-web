@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { listPublicApprovedReaders, type PublicReaderProfile } from "@/lib/marketplace/readers.repo";
 import { listLiveReaderIds } from "@/lib/marketplace/queue.repo";
-import { CONSULTATION_PRICE_LABEL } from "@/lib/marketplace/offer";
+import { CONSULTATION_MINUTES, CONSULTATION_PRICE_THB } from "@/lib/marketplace/offer";
 import { ReadersDirectory } from "@/components/readers/ReadersDirectory";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -10,6 +10,8 @@ import { buildPageOgImage } from "@/lib/media/og-image";
 import type { Metadata } from "next";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { ConsultHeroStage } from "@/components/marketplace/ConsultStage";
+import { BriefIcon, ChevronIcon, ClockIcon, ShieldIcon, VideoIcon } from "@/components/marketplace/ConsultIcons";
 
 export const dynamic = "force-dynamic";
 
@@ -71,76 +73,177 @@ export default async function ReadersPage() {
     ],
   };
 
+  const valueProps = [
+    {
+      Icon: VideoIcon,
+      title: "วิดีโอคอลในเว็บ",
+      body: "กดเข้าห้องได้จากมือถือหรือคอม ไม่ต้องลงแอป ไม่ต้องแอด LINE",
+    },
+    {
+      Icon: ShieldIcon,
+      title: "ความเป็นส่วนตัวมาก่อน",
+      body: "แม่หมอไม่เห็นเบอร์โทรและ IP ของคุณ เว็บไม่บันทึกภาพและเสียง",
+    },
+    {
+      Icon: BriefIcon,
+      title: "แม่หมอรู้เรื่องก่อนคุย",
+      body: "AI สรุปคำถามให้แม่หมออ่านก่อน ไม่ต้องเล่าใหม่ตั้งแต่ต้น",
+    },
+    {
+      Icon: ClockIcon,
+      title: `${CONSULTATION_MINUTES} นาทีเต็ม`,
+      body: `ราคาเดียว ${CONSULTATION_PRICE_THB} บาท รู้ราคาก่อนเข้าคิว`,
+    },
+  ];
+
+  const faqs = [
+    {
+      q: "ต้องลงแอปหรือสมัครอะไรไหม",
+      a: "ไม่ต้อง ใช้เบราว์เซอร์ Chrome หรือ Safari บนมือถือหรือคอมได้เลย ถึงคิวแล้วกดเข้าห้องวิดีโอคอลจากหน้าคิวของคุณ",
+    },
+    {
+      q: "แม่หมอเห็นข้อมูลอะไรของฉันบ้าง",
+      a: "ชื่อเล่น เรื่องที่คุณถาม สรุปจาก AI และภาพกับเสียงระหว่างคุยเท่านั้น แม่หมอไม่เห็นเบอร์โทร อีเมล หรือหมายเลข IP ของคุณ",
+    },
+    {
+      q: "มีการบันทึกวิดีโอไหม",
+      a: "ไม่มี ภาพและเสียงส่งตรงถึงแม่หมอโดยไม่ผ่านการบันทึก ข้อมูลการเชื่อมต่อถูกลบทันทีที่วางสาย",
+    },
+    {
+      q: "ถ้าภาพหรือเสียงมีปัญหาทำอย่างไร",
+      a: "กดปุ่ม \"ต่อสายใหม่\" ในห้อง หรือเลือกคุยกับแม่หมอทาง LINE แทนได้จากหน้าคิวเดียวกัน",
+    },
+  ];
+
   return (
     <>
       <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-ink-deep p-4 sm:p-8 font-sans relative overflow-x-clip">
+      <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-ink-deep px-4 pb-16 sm:px-8 font-serif-th relative overflow-x-clip">
         {/* Schema.org Structured Data */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbsJsonLd) }}
         />
 
-        <div className="max-w-6xl mx-auto space-y-8 sm:space-y-10 relative z-10">
+        <div className="max-w-6xl mx-auto relative z-10">
           {/* Top Breadcrumb */}
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-serif-th text-muted border-b border-[#E4D8C4]/40 pb-4 overflow-x-auto whitespace-nowrap">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 pt-4 text-[13px] text-muted overflow-x-auto whitespace-nowrap">
             <Link href="/" className="hover:text-gold-ink transition-colors">
               หน้าแรก
             </Link>
-            <span>/</span>
-            <span className="text-ink-deep font-bold">ปรึกษาแม่หมอตัวจริง</span>
+            <span aria-hidden="true">/</span>
+            <span className="text-ink-deep font-semibold">ปรึกษาแม่หมอตัวจริง</span>
           </nav>
 
-          {/* Hero — บอกให้จบในจอแรกว่าได้อะไร · คุยยังไง · ราคาเท่าไหร่ */}
-          <header className="text-center space-y-4 pt-2 sm:pt-6">
-            <p className="text-xs sm:text-sm font-bold text-gold-ink font-serif-th">แม่หมอตัวจริง · คุยตัวต่อตัว</p>
-            <h1 className="font-serif-th text-3xl sm:text-5xl font-bold font-mystic-gold tracking-wide leading-normal sm:leading-tight [text-wrap:balance]">
-              ปรึกษาแม่หมอตัวจริง
-            </h1>
-            <p className="text-sm sm:text-base text-ink max-w-2xl mx-auto leading-relaxed font-serif-th [text-wrap:balance]">
-              <ThaiPhrases>
-                คุยกับแม่หมอผ่านวิดีโอคอลในเว็บนี้ได้เลย ไม่ต้องแอด LINE ไม่ต้องให้เบอร์โทร
-                และ AI จะสรุปคำถามให้แม่หมอเข้าใจเรื่องของคุณ ก่อนเริ่มคุย
-              </ThaiPhrases>
-            </p>
-            <ul className="flex flex-wrap justify-center gap-2 pt-1 text-[13px] font-serif-th text-ink">
-              {["วิดีโอคอลในเว็บ", "ไม่เปิดเผยเบอร์และ IP", "ไม่บันทึกภาพและเสียง", CONSULTATION_PRICE_LABEL].map((label) => (
-                <li key={label} className="glass-chip inline-flex items-center gap-1.5 px-3 py-1.5">
-                  <span aria-hidden="true" className="text-ok font-bold">✓</span>
-                  {label}
+          {/* ── Hero: ซ้ายคือคำสัญญา · ขวาคือภาพว่าจะได้อะไร ─────────────────────── */}
+          <section className="grid items-center gap-10 lg:gap-14 lg:grid-cols-[1.05fr_0.95fr] pt-8 sm:pt-12 pb-14 sm:pb-20">
+            <div className="space-y-6 text-center lg:text-left">
+              <p className="inline-flex items-center gap-2 text-[13px] font-bold tracking-wide text-gold-ink">
+                <span aria-hidden="true">✦</span> แม่หมอตัวจริง · คุยตัวต่อตัว
+              </p>
+              <h1 className="text-[2.5rem] leading-[1.15] sm:text-6xl sm:leading-[1.1] font-bold text-ink-deep [text-wrap:balance]">
+                <ThaiPhrases>ปรึกษาแม่หมอ ตัวต่อตัว</ThaiPhrases>
+                <span className="block font-mystic-gold mt-1">ผ่านวิดีโอคอล</span>
+              </h1>
+              <p className="text-base sm:text-lg text-ink leading-relaxed max-w-xl mx-auto lg:mx-0">
+                <ThaiPhrases>
+                  เลือกแม่หมอที่ถนัดเรื่องของคุณ พิมพ์สิ่งที่อยากถาม แล้วคุยกันสด ๆ ในเว็บนี้ ไม่ต้องลงแอป ไม่ต้องแอด LINE
+                </ThaiPhrases>
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                <a href="#readers" className="btn-gold-glass inline-flex items-center justify-center gap-2 px-7 py-3.5 text-base font-bold">
+                  เลือกแม่หมอ <span aria-hidden="true">→</span>
+                </a>
+                <a
+                  href="#how-it-works"
+                  className="inline-flex items-center justify-center px-7 py-3.5 rounded-full border border-line bg-surface text-base font-semibold text-ink hover:border-gold transition"
+                >
+                  ใช้งานอย่างไร
+                </a>
+              </div>
+              <p className="text-[13px] text-muted">
+                {CONSULTATION_PRICE_THB} บาท · {CONSULTATION_MINUTES} นาที · ไม่บันทึกภาพและเสียง
+              </p>
+            </div>
+            <div className="max-w-md w-full mx-auto lg:max-w-none">
+              <ConsultHeroStage />
+            </div>
+          </section>
+
+          {/* ── รายชื่อแม่หมอ ─────────────────────────────────────────────────── */}
+          <div id="readers" className="scroll-mt-24">
+            <ReadersDirectory initialReaders={readers} liveReaderIds={liveReaderIds} />
+          </div>
+
+          {/* ── เหตุผลที่ไว้ใจได้ ─────────────────────────────────────────────── */}
+          <section aria-labelledby="readers-why" className="pt-20 sm:pt-24 space-y-8">
+            <div className="text-center space-y-2">
+              <p className="text-[13px] font-bold text-gold-ink">ทำไมต้องปรึกษาที่นี่</p>
+              <h2 id="readers-why" className="text-2xl sm:text-3xl font-bold text-ink-deep">
+                <ThaiPhrases>สบายใจ ตั้งแต่ก่อนเริ่มคุย</ThaiPhrases>
+              </h2>
+            </div>
+            <ul className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+              {valueProps.map(({ Icon, title, body }) => (
+                <li key={title} className="rounded-3xl border border-line bg-surface p-4 sm:p-6 space-y-2.5 sm:space-y-3">
+                  <span className="h-11 w-11 rounded-2xl bg-gold-ink/10 text-gold-ink grid place-items-center">
+                    <Icon />
+                  </span>
+                  <h3 className="font-bold text-ink-deep">{title}</h3>
+                  <p className="text-[13px] sm:text-sm text-muted leading-relaxed">
+                    <ThaiPhrases>{body}</ThaiPhrases>
+                  </p>
                 </li>
               ))}
             </ul>
-          </header>
+          </section>
 
-          {/* Client Interactive Directory */}
-          <ReadersDirectory initialReaders={readers} liveReaderIds={liveReaderIds} />
-
-          {/* ขั้นตอนใช้งาน — วางหลังรายชื่อ คนที่รู้อยู่แล้วไม่ต้องเลื่อนผ่าน */}
-          <section aria-labelledby="readers-how-it-works" className="space-y-4 pt-4">
-            <h2 id="readers-how-it-works" className="font-serif-th text-lg sm:text-xl font-bold text-ink text-center">
-              ใช้งานง่ายใน 3 ขั้น
-            </h2>
-            <ol className="grid gap-3 sm:grid-cols-3">
+          {/* ── ขั้นตอน ──────────────────────────────────────────────────────── */}
+          <section id="how-it-works" aria-labelledby="readers-how-it-works" className="pt-20 sm:pt-24 space-y-8 scroll-mt-24">
+            <div className="text-center space-y-2">
+              <p className="text-[13px] font-bold text-gold-ink">ใช้งานอย่างไร</p>
+              <h2 id="readers-how-it-works" className="text-2xl sm:text-3xl font-bold text-ink-deep">
+                <ThaiPhrases>สามขั้น จากคำถาม ถึงคำตอบ</ThaiPhrases>
+              </h2>
+            </div>
+            <ol className="relative grid gap-6 sm:grid-cols-3">
+              <span aria-hidden="true" className="hidden sm:block absolute top-6 left-[16.6%] right-[16.6%] h-px bg-line" />
               {[
-                { title: "เลือกแม่หมอ", body: "เลือกคนที่ถนัดเรื่องของคุณ แล้วพิมพ์สิ่งที่อยากถามสั้น ๆ" },
-                { title: "รอคิว", body: "AI สรุปคำถามให้แม่หมออ่านก่อน คุณเปิดหน้าคิวทิ้งไว้ได้เลย" },
+                { title: "เลือกแม่หมอ", body: "ดูความถนัด แล้วพิมพ์สิ่งที่อยากถามสั้น ๆ" },
+                { title: "รอคิวสบาย ๆ", body: "AI สรุปคำถามให้แม่หมออ่านก่อน คุณเปิดหน้าคิวทิ้งไว้ได้เลย" },
                 { title: "คุยผ่านวิดีโอคอล", body: "ถึงคิวแล้วกดเข้าห้อง คุยตัวต่อตัวกับแม่หมอในเว็บนี้" },
               ].map((step, i) => (
-                <li key={step.title} className="altar-card-porcelain !rounded-2xl p-5 flex gap-4 items-start">
-                  <span
-                    aria-hidden="true"
-                    className="h-9 w-9 shrink-0 rounded-full bg-gold-ink text-surface grid place-items-center font-bold font-serif-th"
-                  >
+                <li key={step.title} className="relative text-center space-y-3 px-4">
+                  <span className="relative mx-auto h-12 w-12 rounded-full bg-ink-deep text-surface grid place-items-center text-lg font-bold ring-8 ring-canvas">
                     {i + 1}
                   </span>
-                  <div className="space-y-1 font-serif-th">
-                    <h3 className="font-bold text-ink">{step.title}</h3>
-                    <p className="text-[13px] text-muted leading-relaxed"><ThaiPhrases>{step.body}</ThaiPhrases></p>
-                  </div>
+                  <h3 className="font-bold text-ink-deep text-lg">{step.title}</h3>
+                  <p className="text-sm text-muted leading-relaxed max-w-xs mx-auto">
+                    <ThaiPhrases>{step.body}</ThaiPhrases>
+                  </p>
                 </li>
               ))}
             </ol>
+          </section>
+
+          {/* ── คำถามที่พบบ่อย ───────────────────────────────────────────────── */}
+          <section aria-labelledby="readers-faq" className="pt-20 sm:pt-24 max-w-3xl mx-auto space-y-6">
+            <h2 id="readers-faq" className="text-2xl sm:text-3xl font-bold text-ink-deep text-center">
+              คำถามที่พบบ่อย
+            </h2>
+            <div className="divide-y divide-line rounded-3xl border border-line bg-surface">
+              {faqs.map((f) => (
+                <details key={f.q} className="group px-6">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 font-semibold text-ink-deep [&::-webkit-details-marker]:hidden">
+                    {f.q}
+                    <ChevronIcon className="shrink-0 text-muted transition-transform group-open:rotate-180" />
+                  </summary>
+                  <p className="pb-5 -mt-1 text-sm text-ink leading-relaxed">
+                    <ThaiPhrases>{f.a}</ThaiPhrases>
+                  </p>
+                </details>
+              ))}
+            </div>
           </section>
         </div>
       </main>

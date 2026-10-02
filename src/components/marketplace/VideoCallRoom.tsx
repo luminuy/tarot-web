@@ -274,9 +274,19 @@ export interface VideoCallRoomProps {
   onClose?: () => void;
   /** วางอยู่ในการ์ดของหน้าอยู่แล้ว — ไม่ต้องมีกรอบการ์ดซ้อนอีกชั้น และไม่ต้องมีหัวข้อซ้ำ */
   embedded?: boolean;
+  /** รูปของอีกฝั่ง (ถ้ามี) — แสดงบนเวทีก่อนเข้าห้อง */
+  peerAvatarUrl?: string | null;
 }
 
-export function VideoCallRoom({ ticketId, role, peerName, authToken, onClose, embedded = false }: VideoCallRoomProps) {
+export function VideoCallRoom({
+  ticketId,
+  role,
+  peerName,
+  authToken,
+  onClose,
+  embedded = false,
+  peerAvatarUrl = null,
+}: VideoCallRoomProps) {
   const shell = embedded ? "" : "altar-card-porcelain p-5";
   const endpoint = `/api/marketplace/calls/${encodeURIComponent(ticketId)}`;
   const headers: HeadersInit = authToken ? { Authorization: `Bearer ${authToken}` } : {};
@@ -424,6 +434,26 @@ export function VideoCallRoom({ ticketId, role, peerName, authToken, onClose, em
     const isCustomer = role === "customer";
     return (
       <section aria-label="วิดีโอคอล" className={`${shell} space-y-4 text-left font-serif-th`}>
+        {/* ห้องรอก่อนเข้า (แบบ Meet/FaceTime) — เห็นว่ากำลังจะคุยกับใคร ก่อนเปิดกล้องจริง */}
+        {phase === "idle" && (
+          <div aria-hidden="true" className="consult-stage relative aspect-[16/10] rounded-2xl grid place-items-center overflow-hidden">
+            <div className="relative grid place-items-center">
+              <span className="absolute h-28 w-28 rounded-full border border-gold-on-dark/40 animate-ping [animation-duration:2.6s]" />
+              <div className="h-24 w-24 rounded-full ring-2 ring-gold-on-dark/60 bg-gold-on-dark/15 overflow-hidden grid place-items-center text-4xl font-bold text-surface">
+                {peerAvatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={peerAvatarUrl} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  peerName.replace(/^คุณ/, "").charAt(0).toUpperCase()
+                )}
+              </div>
+            </div>
+            <p className="absolute bottom-4 inset-x-4 text-center text-sm text-surface">
+              {peerName}
+              <span className="block text-[13px] text-gold-on-dark mt-0.5">วิดีโอคอลส่วนตัว · ไม่มีการบันทึก</span>
+            </p>
+          </div>
+        )}
         {phase === "ended" ? (
           <p className="text-sm font-semibold text-ink">
             {endedBy === role ? "คุณวางสายแล้ว" : endedBy ? `${peerName} วางสายแล้ว` : "สายนี้จบแล้ว"}
