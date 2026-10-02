@@ -50,7 +50,6 @@ function installNavDrawer(): void {
 
     trigger.setAttribute("aria-expanded", String(next));
     trigger.classList.toggle("bg-inset", next);
-    trigger.classList.toggle("bg-surface", !next);
 
     panel.setAttribute("aria-hidden", String(!next));
     panel.classList.toggle("nav-drawer-panel-entering", next);
@@ -129,8 +128,20 @@ function installLanguageSwitcher(): void {
   ).filter((button) => !ownedByIsland(button));
   if (buttons.length === 0) return;
 
+  // รายการภาษาเป็น <details> — แตะนอกรายการ / กด Esc ➔ พับ (เบราว์เซอร์ไม่ปิดให้เอง)
+  const menu = document.querySelector<HTMLDetailsElement>("[data-locale-menu]");
+  if (menu && !ownedByIsland(menu)) {
+    document.addEventListener("pointerdown", (e) => {
+      if (menu.open && !menu.contains(e.target as Node)) menu.open = false;
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") menu.open = false;
+    });
+  }
+
   buttons.forEach((button) => {
     button.addEventListener("click", () => {
+      if (menu) menu.open = false;
       const next = button.dataset.localeSwitch === "en" ? "en" : "th";
       if (button.getAttribute("aria-pressed") === "true") return;
 

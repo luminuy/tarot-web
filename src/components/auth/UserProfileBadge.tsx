@@ -46,7 +46,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
       strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="w-4 h-4 sm:w-5 sm:h-5 transition-colors"
+      className="w-5 h-5 transition-colors"
       aria-hidden="true"
     >
       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -55,7 +55,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
   );
 
   const frame =
-    "w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-line bg-surface flex items-center justify-center flex-shrink-0 select-none";
+    "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 select-none";
 
   if (loading) {
     return (
@@ -76,7 +76,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
           soundManager.playMenuTapSound();
           onOpenAuthModal();
         }}
-        className={`tap-overlay ${frame} text-ink hover:text-gold hover:border-gold transition-colors cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold`}
+        className={`tap-overlay ${frame} text-ink hover:bg-inset hover:text-gold-ink transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold`}
         aria-label={isEn ? "Sign In" : "เข้าสู่ระบบ"}
         title={isEn ? "Sign In" : "เข้าสู่ระบบ"}
       >
@@ -89,7 +89,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
     <Link
       href="/account"
       onClick={() => soundManager.playMenuTapSound()}
-      className={`tap-overlay ${frame} relative text-ink hover:text-gold hover:border-gold transition-colors shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold`}
+      className={`tap-overlay ${frame} relative text-ink hover:bg-inset hover:text-gold-ink transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold`}
       aria-label={
         user.name
           ? isEn
@@ -105,7 +105,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
       {/* จุดทองบอกว่า "ล็อกอินอยู่" — ของประดับจุดเดียวที่เหลือ ห้ามใส่ตัวเลขทับ */}
       <span
         aria-hidden="true"
-        className="absolute bottom-1 right-1 w-2 h-2 rounded-full bg-gold ring-2 ring-surface"
+        className="absolute bottom-1.5 right-1.5 w-2 h-2 rounded-full bg-gold ring-2 ring-surface"
       />
     </Link>
   );

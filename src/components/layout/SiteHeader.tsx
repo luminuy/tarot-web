@@ -7,6 +7,9 @@ import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { HeaderAccount } from "@/components/layout/HeaderAccount";
 import { useLocale } from "@/lib/i18n";
+import { stripLocalePrefix } from "@/lib/i18n/paths";
+import { useCurrentPath } from "@/components/layout/current-path";
+import { headerNav, isActiveNavPath } from "@/components/layout/header-nav";
 
 export interface SiteHeaderProps {
   /**
@@ -116,47 +119,40 @@ export function SiteHeader({
         ref={headerRef}
         data-site-header=""
         data-variant={variant}
-        className="site-header-shell w-full fixed top-0 inset-x-0 z-50"
+        className="w-full fixed top-0 inset-x-0 z-50"
       >
         {/*
-          แถบกระจกลอย — <header> ตัวนอกยังกางเต็มจอเสมอ (ด่านที่ 40 บังคับ `inset-x-0`)
-          ส่วนที่ตาเห็นคือ <div> ชั้นนี้ที่เว้นขอบเข้ามาและมีมุมโค้งชุดเดียวกับแผงอื่นในหน้า
-          ⚠️ ห้ามใส่ `overflow-hidden` ที่ชั้นนี้ — เมนู dropdown ที่กางลงมาจะถูกตัดหาย
+          แถบเต็มกว้างแบบ Kazumi Clinic (เจ้าของเลือก 2026-10-02) — พื้นทึบ เส้นขอบล่างบาง ไม่มีมุมโค้ง/เงาลอย
+          ⚠️ ห้ามใส่ `overflow-hidden` ที่ชั้นนี้ — แผงเมนูใหญ่และลิ้นชักที่กางลงมาจะถูกตัดหาย
+          ⚠️ ห้ามใส่ `relative` ให้ชั้นใน — แผงเมนูใหญ่ (`absolute inset-x-0`) ต้องอ้างอิง <header> จึงกางเต็มจอ
         */}
-        <div className="site-header-glass mx-3 mt-1.5 mb-2 max-w-6xl sm:mx-6 xl:mx-auto">
-          <div className="px-3.5 sm:px-5 py-2 sm:py-2.5 flex items-center justify-between">
-            {/* Luxury Brand Logo & Return to Home */}
+        <div className="site-header-glass">
+          <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:h-[68px] sm:px-6">
             <Link
               href="/"
               prefetch={false}
               aria-label={isEnglish ? "SeerTarot — Return to Home" : "ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"}
-              className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
+              className="group flex min-w-0 shrink items-center gap-3 select-none rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
             >
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-line overflow-hidden relative flex-shrink-0 bg-canvas group-hover:scale-105 transition duration-300">
-                <img
-                  src="/logo.webp"
-                  alt="SeerTarot"
-                  width={44}
-                  height={44}
-                  className="w-full h-full object-cover"
-                  loading="eager"
-                />
-              </div>
-
-              <div className="hidden min-w-0 flex-col justify-center sm:flex">
-                <div className="flex min-w-0 items-center">
-                  <span className="font-serif-th text-sm sm:text-lg font-bold text-ink tracking-wide leading-snug py-0.5 whitespace-nowrap">
-                    {isEnglish ? "SeerTarot Sanctuary" : "ดูดวงไพ่ทาโรต์"}
-                  </span>
-                </div>
-                <span className="hidden sm:block text-[13px] tracking-[0.22em] text-muted font-mono uppercase font-semibold">
-                  1909 RIDER-WAITE TAROT
+              <img
+                src="/logo.webp"
+                alt="SeerTarot"
+                width={40}
+                height={40}
+                loading="eager"
+                className="h-10 w-10 shrink-0 rounded-full border border-line object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+              />
+              <span className="flex flex-col whitespace-nowrap leading-none">
+                <span className="font-serif-th text-[1.05rem] tracking-[0.2em] text-ink">SEERTAROT</span>
+                <span className="mt-1.5 font-serif-th text-[11px] tracking-[0.14em] text-muted">
+                  {isEnglish ? "1909 RIDER-WAITE" : "ดูดวงไพ่ทาโรต์"}
                 </span>
-              </div>
+              </span>
             </Link>
 
-            {/* Right Toolbar, Language Switcher & Navigation */}
-            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+            <DesktopNav isEnglish={isEnglish} />
+
+            <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
               <LanguageSwitcher />
               {/* ไม่มีใครส่ง toolbar มา (หน้าเนื้อหาทั่วไป) ➔ ใส่ปุ่มบัญชีให้เอง หัวเว็บทุกหน้าจะได้เหมือนหน้าแรก */}
               {toolbar ?? <HeaderAccount />}
@@ -165,10 +161,85 @@ export function SiteHeader({
           </div>
 
           {breadcrumb ? (
-            <div className="px-4 pb-2.5 -mt-0.5 sm:px-5">{breadcrumb}</div>
+            <div className="mx-auto max-w-6xl px-4 pb-2.5 sm:px-6">{breadcrumb}</div>
           ) : null}
         </div>
       </header>
     </>
+  );
+}
+
+/**
+ * เมนูเรียงกลางแถบ (lg+) — ข้อ "ดูดวง" กางแผงใหญ่เต็มกว้างตอนชี้/โฟกัส ด้วย CSS ล้วน (`group-hover` · `focus-within`)
+ * ไม่ต้องมี state — หัวเว็บของหน้า Astro เป็น HTML นิ่งไม่ hydrate แผงนี้จึงต้องทำงานได้โดยไม่มี JS
+ * ⚠️ แผงต้องเป็น `absolute` (ห้าม `fixed` — หัวเว็บมี transform จึงเป็น containing block ของลูกทุกตัว)
+ */
+function DesktopNav({ isEnglish }: { isEnglish: boolean }) {
+  const currentPath = stripLocalePrefix(useCurrentPath());
+  const nav = headerNav(isEnglish);
+  const linkClass = (href: string) =>
+    `flex h-16 sm:h-[68px] items-center whitespace-nowrap transition-colors hover:text-gold-ink focus-visible:outline-none focus-visible:text-gold-ink ${
+      isActiveNavPath(currentPath, href) ? "text-gold-ink" : ""
+    }`;
+
+  return (
+    <nav
+      aria-label={isEnglish ? "Main menu" : "เมนูหลัก"}
+      className="hidden items-center gap-7 font-serif-th text-[15px] text-ink lg:flex"
+    >
+      <div className="group/mega">
+        <Link href={nav.reading.all.href} prefetch={false} className={`${linkClass("/read")} gap-1`}>
+          {nav.reading.label}
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-3.5 w-3.5 transition-transform group-hover/mega:rotate-180 group-focus-within/mega:rotate-180"
+            aria-hidden="true"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </Link>
+        <div className="invisible absolute inset-x-0 top-full z-50 border-b border-line bg-canvas opacity-0 shadow-[0_24px_48px_-32px_rgba(42,38,31,0.35)] transition-[opacity,visibility] duration-150 group-hover/mega:visible group-hover/mega:opacity-100 group-focus-within/mega:visible group-focus-within/mega:opacity-100">
+          <div className="mx-auto grid max-w-6xl grid-cols-3 gap-x-10 px-6 pb-8 pt-9">
+            {nav.reading.groups.map((group) => (
+              <div key={group.title}>
+                <p className="text-sm font-bold text-ink">{group.title}</p>
+                <ul className="mt-3 space-y-2.5">
+                  {group.links.map((link) => (
+                    <li key={link.href}>
+                      <Link href={link.href} prefetch={false} className="text-sm text-muted transition-colors hover:text-gold-ink focus-visible:text-gold-ink focus-visible:outline-none">
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <div className="border-t border-line">
+            <div className="mx-auto max-w-6xl px-6 py-4">
+              <Link href={nav.reading.all.href} prefetch={false} className="text-sm font-bold text-gold-ink hover:underline focus-visible:underline focus-visible:outline-none">
+                {nav.reading.all.label} →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+      {nav.links.map((link) => (
+        <Link
+          key={link.href}
+          href={link.href}
+          prefetch={false}
+          aria-current={isActiveNavPath(currentPath, link.href) ? "page" : undefined}
+          className={linkClass(link.href)}
+        >
+          {link.label}
+        </Link>
+      ))}
+    </nav>
   );
 }

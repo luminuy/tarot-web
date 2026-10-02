@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { useLocale } from "@/lib/i18n";
@@ -27,8 +28,27 @@ export function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
 
   // ภาษาที่ควรแสดงว่า "เลือกอยู่" — ใช้ค่าที่ผู้ใช้เพิ่งกดถ้ามี (ISSUE-025)
   const shownLocale = pendingLocale ?? locale;
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+
+  // แตะนอกรายการ / กด Esc ➔ พับรายการ (<details> ไม่ปิดเองเมื่อแตะที่อื่น)
+  useEffect(() => {
+    const onPointer = (e: PointerEvent) => {
+      const el = detailsRef.current;
+      if (el?.open && !el.contains(e.target as Node)) el.open = false;
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && detailsRef.current?.open) detailsRef.current.open = false;
+    };
+    document.addEventListener("pointerdown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, []);
 
   const handleSelect = (nextLocale: "th" | "en") => {
+    if (detailsRef.current) detailsRef.current.open = false;
     if (nextLocale === shownLocale) return;
     try {
       soundManager.playMenuTapSound();
@@ -46,50 +66,72 @@ export function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
     if (target !== pathname) router.push(target);
   };
 
-  return (
-    <div
-      role="group"
-      /*
-       * ⚠️ ชื่อของตัวสลับภาษาต้องเป็น "ภาษาของหน้าที่กำลังอ่านอยู่" ไม่ใช่สองภาษาปนกัน
-       * ของเดิมเขียน "Language selector / สลับภาษา" และปุ่ม TH ใช้ aria-label ไทยล้วน
-       * ทำให้หน้าอังกฤษ 148 หน้ามีคำไทยอยู่ใน accessibility tree — screen reader
-       * ภาษาอังกฤษอ่านออกเสียงเพี้ยนทั้งหมด (UX-17)
-       */
-      aria-label={shownLocale === "en" ? "Language selector" : "สลับภาษา"}
-      aria-busy={isSwitchingLocale}
-      className={`inline-flex items-center rounded-full bg-canvas border border-line p-0.5 select-none shadow-xs transition-opacity duration-150 ${
-        isSwitchingLocale ? "opacity-70" : ""
-      } ${className}`}
-    >
-      <button
-        type="button"
-        data-locale-switch="th"
-        onClick={() => handleSelect("th")}
-        aria-pressed={shownLocale === "th"}
-        aria-label={shownLocale === "en" ? "Switch to Thai" : "เปลี่ยนเป็นภาษาไทย"}
-        className={`tap-overlay-y px-2 py-1 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer ${
-          shownLocale === "th"
-            ? "bg-surface text-ink shadow-[0_1px_3px_rgba(42,38,31,0.1)] border border-line"
-            : "text-muted hover:text-ink border border-transparent"
-        }`}
-      >
-        TH
-      </button>
+  const label = shownLocale === "en" ? "Language" : "ภาษา";
 
-      <button
-        type="button"
-        data-locale-switch="en"
-        onClick={() => handleSelect("en")}
-        aria-pressed={shownLocale === "en"}
-        aria-label={shownLocale === "en" ? "Switch to American English" : "เปลี่ยนเป็นภาษาอังกฤษ"}
-        className={`tap-overlay-y px-2 py-1 rounded-full text-xs font-mono font-bold transition duration-200 cursor-pointer ${
-          shownLocale === "en"
-            ? "bg-surface text-ink shadow-[0_1px_3px_rgba(42,38,31,0.1)] border border-line"
-            : "text-muted hover:text-ink border border-transparent"
+  /*
+   * 🌐 ไอคอนลูกโลกแบบ Kazumi — แตะแล้วกางรายการ "ไทย / English"
+   * ใช้ <details> ของเบราว์เซอร์ (เปิด/ปิดได้เองโดยไม่ต้องมี JS) เพราะหัวเว็บของหน้า Astro
+   * เป็น HTML นิ่งไม่ hydrate · ปุ่ม `data-locale-switch` ยังเป็นตัวเดิมที่ `astro/scripts/site-header.ts` ผูกไว้
+   * แตะนอกรายการแล้วปิด: React (หน้าแรก) ปิดในเอฟเฟกต์ด้านบน · หน้า Astro ปิดใน site-header.ts
+   */
+  return (
+    <details ref={detailsRef} data-locale-menu="" className={`group/lang relative ${className}`}>
+      <summary
+        aria-label={label}
+        title={label}
+        aria-busy={isSwitchingLocale}
+        className={`tap-overlay flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-full text-ink transition-colors hover:bg-inset hover:text-gold-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold group-open/lang:bg-inset [&::-webkit-details-marker]:hidden ${
+          isSwitchingLocale ? "opacity-70" : ""
         }`}
       >
-        EN
-      </button>
-    </div>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-5 w-5"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="9" />
+          <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+        </svg>
+      </summary>
+      {/*
+        ⚠️ ชื่อของตัวสลับภาษาต้องเป็น "ภาษาของหน้าที่กำลังอ่านอยู่" ไม่ใช่สองภาษาปนกัน (UX-17)
+        ป้ายในรายการ "ไทย / English" เป็นชื่อภาษาตัวเอง (endonym) ตามมาตรฐานสากล — ไม่นับว่าปนภาษา
+      */}
+      <div
+        role="group"
+        aria-label={shownLocale === "en" ? "Language selector" : "สลับภาษา"}
+        className="absolute right-0 top-full z-50 mt-1.5 flex min-w-[132px] flex-col rounded-xl border border-line bg-surface py-1.5 shadow-[0_12px_32px_-12px_rgba(42,38,31,0.35)]"
+      >
+        <button
+          type="button"
+          data-locale-switch="th"
+          onClick={() => handleSelect("th")}
+          aria-pressed={shownLocale === "th"}
+          lang="th"
+          className={`tap-overlay-y px-4 py-2 text-left font-serif-th text-sm transition-colors hover:bg-inset cursor-pointer ${
+            shownLocale === "th" ? "font-bold text-gold-ink" : "text-ink"
+          }`}
+        >
+          ไทย
+        </button>
+        <button
+          type="button"
+          data-locale-switch="en"
+          onClick={() => handleSelect("en")}
+          aria-pressed={shownLocale === "en"}
+          lang="en"
+          className={`tap-overlay-y px-4 py-2 text-left font-serif-th text-sm transition-colors hover:bg-inset cursor-pointer ${
+            shownLocale === "en" ? "font-bold text-gold-ink" : "text-ink"
+          }`}
+        >
+          English
+        </button>
+      </div>
+    </details>
   );
 }
