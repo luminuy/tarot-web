@@ -1,0 +1,21 @@
+---
+import { pricingMetadataTh } from "@/app/_shared/pages/pricing";
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { PricingBodyRoot } from "../components/PageBodies";
+import { PricingRoot } from "../islands/PricingRoot";
+import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
+
+/** 💳 ราคาและแพ็กเกจ — เนื้อหาเป็น HTML ล้วน · การ์ดแพ็ก (ปุ่มซื้อ) เป็น island เดียว */
+const locale = "th" as const;
+---
+
+<BaseLayout locale={locale} metadata={pricingMetadataTh}>
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <PricingBodyRoot locale={locale}>
+    <Fragment slot="plans">
+      <PricingRoot locale={locale} client:load />
+    </Fragment>
+  </PricingBodyRoot>
+  <SiteFooterRoot locale={locale} spacing="tight" />
+</BaseLayout>

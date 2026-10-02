@@ -220,6 +220,11 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                 {" · "}
               </>
             )}
+            {/* หน้าราคาต้องหาเจอจากทุกหน้า (เจ้าของขอ "หาง่าย") — ลิงก์เดียวในบรรทัดเดิม ไม่เพิ่มกล่อง (งบ DOM หน้าแรก) */}
+            <Link href="/pricing" prefetch={false} className="hover:text-surface-warm transition-colors underline">
+              {isEnglish ? "Pricing" : "ราคาและแพ็กเกจ"}
+            </Link>
+            {" · "}
             <Link href="/privacy" prefetch={false} className="hover:text-surface-warm transition-colors underline">
               {isEnglish ? "Privacy Policy" : "นโยบายความเป็นส่วนตัว"}
             </Link>

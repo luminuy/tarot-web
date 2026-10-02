@@ -57,6 +57,8 @@ for (const [href, expected] of [
   ["/about", true],
   ["/privacy", true],
   ["/contact", true],
+  ["/pricing", true],
+  ["/en/pricing", true],
   ["/en/privacy", true],
   /* หน้าแอปที่ยังเรนเดอร์ด้วย Next (หน้าแรก + หน้าแอป 18 หน้าตามคำสั่งเจ้าของ) */
   ["/", true],

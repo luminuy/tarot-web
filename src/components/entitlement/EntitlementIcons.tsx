@@ -57,3 +57,21 @@ export const CoinSealIcon: FC<IconProps> = ({ className = "w-4 h-4" }) => (
     <path d="M12 7.6v8.8M9.6 9.8h3.6a1.9 1.9 0 010 3.8H9.6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
+
+/** บัตร — ช่องทางชำระด้วยบัตรเครดิต/เดบิต */
+export const PaymentCardIcon: FC<IconProps> = ({ className = "w-4 h-4" }) => (
+  <svg viewBox="0 0 24 24" className={`${base} ${className}`} strokeWidth={1.6} aria-hidden="true">
+    <rect x="3" y="5.5" width="18" height="13" rx="2.5" />
+    <path d="M3 9.8h18M7 15h3.5" strokeLinecap="round" />
+  </svg>
+);
+
+/** คิวอาร์ — ช่องทางชำระด้วย PromptPay */
+export const QrCodeIcon: FC<IconProps> = ({ className = "w-4 h-4" }) => (
+  <svg viewBox="0 0 24 24" className={`${base} ${className}`} strokeWidth={1.6} aria-hidden="true">
+    <rect x="4" y="4" width="6" height="6" rx="1" />
+    <rect x="14" y="4" width="6" height="6" rx="1" />
+    <rect x="4" y="14" width="6" height="6" rx="1" />
+    <path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 20h1M20 14v1" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);

@@ -31,6 +31,7 @@ export const EN_TWIN_ROUTES = [
   "/blog",
   "/privacy",
   "/contact",
+  "/pricing",
 ] as const;
 
 /** เส้นทางที่มีพารามิเตอร์ — ลูกทุกใบใต้ prefix นี้มีฝาแฝดครบ */

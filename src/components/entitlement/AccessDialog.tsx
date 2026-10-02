@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 
 import { Modal } from "@/components/ui/Modal";
 import { QuotaPips } from "@/components/entitlement/QuotaPips";
@@ -293,8 +294,8 @@ export function AccessDialog({
               className="btn-gold-glass w-full px-6 py-3.5 font-serif-th text-sm font-bold active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
             >
               {isEn
-                ? `Unlock Sacred Tokens (From ${CHEAPEST_PACKAGE_THB}.-)`
-                : `ปลดล็อกญาณพยากรณ์พิเศษ (เริ่ม ${CHEAPEST_PACKAGE_THB}.-)`}
+                ? `See top-up packages (from ${CHEAPEST_PACKAGE_THB} THB)`
+                : `ดูแพ็กเติมรอบ (เริ่ม ${CHEAPEST_PACKAGE_THB} บาท)`}
             </button>
           )}
 
@@ -308,7 +309,14 @@ export function AccessDialog({
 
           <p className="pt-1 text-center font-serif-th text-[13px] leading-relaxed text-muted">{copy.reassurance}</p>
 
-          <div className="text-center pt-1">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pt-1">
+            <Link
+              href="/pricing"
+              prefetch={false}
+              className="text-xs text-gold-ink hover:text-gold-ink-deep font-serif-th underline underline-offset-4"
+            >
+              {isEn ? "Compare plans & prices" : "ดูราคาและเทียบสิทธิ์ทั้งหมด"}
+            </Link>
             <button
               type="button"
               onClick={() => {

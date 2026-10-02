@@ -1,10 +1,15 @@
 "use client";
 
-import React, { useEffect, useId, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { getCreditPackages, type CreditPackage } from "@/lib/entitlement/packages";
-import { mutateEntitlement } from "@/lib/entitlement/use-entitlement";
+import { mutateEntitlement, useEntitlement } from "@/lib/entitlement/use-entitlement";
+import { startCheckout, type SimulatedCheckout } from "@/lib/entitlement/start-checkout";
 import { useLocale } from "@/lib/i18n";
+import { CheckMarkIcon } from "@/components/entitlement/EntitlementIcons";
+import { PaymentMethodsNote, creditsLabel, packageBadge, perReadingLabel } from "@/components/entitlement/PackageParts";
+import { RedeemCodeForm } from "@/components/entitlement/RedeemCodeForm";
 
 interface BuyCreditsModalProps {
   isOpen: boolean;
@@ -13,12 +18,21 @@ interface BuyCreditsModalProps {
   onRequireAuth?: () => void;
 }
 
+/**
+ * 💳 หน้าต่างเติมรอบดูดวง
+ * ---------------------------------------------------------------------------
+ * เลือกแพ็ก (กลุ่มปุ่มเลือกแบบ radio) ➔ ปุ่มเดียว "ชำระเงิน ฿xxx" ➔ ไปหน้าจ่ายเงินของ Stripe
+ * จ่ายเสร็จ Stripe ส่งกลับมาที่ /api/entitlement/checkout/confirm ซึ่งตรวจกับ Stripe ก่อนเติมรอบ
+ *
+ * ตัวจำลอง (ยังไม่ใส่คีย์ Stripe / เครื่องพัฒนา) ยังมีหน้ายืนยันของตัวเองเหมือนเดิม
+ */
 export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClose, user, onRequireAuth }) => {
   const { locale, isEnglish } = useLocale();
   const isEn = isEnglish || locale === "en";
   const creditPackages = getCreditPackages(isEn);
+  const ent = useEntitlement();
 
-  const [selectedPkgId, setSelectedPkgId] = useState<string>("pack_10"); // Default: 10 times
+  const [selectedPkgId, setSelectedPkgId] = useState<CreditPackage["id"]>("pack_10");
   const selectedPkg: CreditPackage = creditPackages.find((p) => p.id === selectedPkgId) || creditPackages[1];
 
   const [loading, setLoading] = useState(false);
@@ -40,170 +54,73 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
     window.addEventListener("pageshow", onPageShow);
     return () => window.removeEventListener("pageshow", onPageShow);
   }, []);
-  const [checkoutData, setCheckoutData] = useState<{
-    orderId: string;
-    packageId: string;
-    credits: number;
-    amountSatang: number;
-    provider: "stripe" | "simulator";
-    authorizeUri?: string;
-    isTestMode: boolean;
-  } | null>(null);
+
+  const [simulated, setSimulated] = useState<SimulatedCheckout | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const [redeemCode, setRedeemCode] = useState("");
-  const [redeemLoading, setRedeemLoading] = useState(false);
-  const [redeemError, setRedeemError] = useState<string | null>(null);
-  /* ♿ R-21: ผูกข้อความผิดพลาดของรหัสแลกสิทธิ์เข้ากับช่องกรอกที่ผิด */
-  const redeemErrorId = useId();
-  const [redeemSuccess, setRedeemSuccess] = useState<string | null>(null);
-
-  const handleRedeemCode = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) {
-      if (onRequireAuth) {
-        onClose();
-        onRequireAuth();
-      } else {
-        setRedeemError(
-          isEn
-            ? "You must sign in before redeeming a code."
-            : "กรุณาเข้าสู่ระบบก่อนแลกรับสิทธิ์",
-        );
-      }
-      return;
-    }
-
-    const code = redeemCode.trim();
-    if (!code) return;
-
-    setRedeemLoading(true);
-    setRedeemError(null);
-    setRedeemSuccess(null);
-
-    try {
-      const res = await fetch("/api/entitlement/redeem", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setRedeemError(data.error || (isEn ? "Failed to redeem code" : "ไม่สามารถแลกรับสิทธิ์ได้"));
-      } else {
-        // ฝั่งอังกฤษประกอบข้อความเอง — เซิร์ฟเวอร์ส่งมาเป็นภาษาไทยชุดเดียว
-        // และต้องแยกตามชนิดรหัส: VIP ปลดทุกผัง · โค้ดแจกได้แค่รอบเปิดไพ่เพิ่ม
-        const enMessage =
-          data.kind === "premium"
-            ? `Redeemed successfully — ${data.credits} premium readings unlocked (all spreads and master oracles).`
-            : `Redeemed successfully — ${data.credits} extra readings added (used once today's quota runs out).`;
-        setRedeemSuccess(isEn ? enMessage : data.message || "แลกรับสิทธิ์สำเร็จ");
-        setRedeemCode("");
-        mutateEntitlement();
-      }
-    } catch {
-      setRedeemError(
+  const requireAuth = () => {
+    if (onRequireAuth) {
+      onClose();
+      onRequireAuth();
+    } else {
+      setErrorMsg(
         isEn
-          ? "Network error. Please try again."
-          : "เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง",
+          ? "Please sign in first — your readings will be saved to your account."
+          : "กรุณาเข้าสู่ระบบก่อน — รอบที่เติมจะผูกกับบัญชีของคุณ",
       );
-    } finally {
-      setRedeemLoading(false);
     }
   };
 
   const handleStartCheckout = async () => {
     // เติมรอบต้องผูกกับบัญชี — ถ้ายังไม่ได้เข้าสู่ระบบ ให้บอกตรง ๆ ตรงนี้
     if (!user) {
-      if (onRequireAuth) {
-        onClose();
-        onRequireAuth();
-      } else {
-        setErrorMsg(
-          isEn
-            ? "You must sign in before acquiring reading tokens — tokens will be securely tied to your account."
-            : "ต้องเข้าสู่ระบบก่อนจึงจะเติมรอบเปิดไพ่ได้ — รอบที่เติมจะผูกกับบัญชีของคุณ"
-        );
-      }
+      requireAuth();
       return;
     }
-
     setLoading(true);
     setErrorMsg(null);
-    let redirecting = false;
-
-    try {
-      const res = await fetch("/api/entitlement/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ packageId: selectedPkg.id }),
-      });
-
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || (isEn ? "Unable to initiate payment." : "ไม่สามารถเริ่มการชำระเงินได้"));
-      }
-
-      // Stripe: พาไปหน้าจ่ายเงินของ Stripe (บัตร / PromptPay) — จ่ายเสร็จ Stripe ส่งกลับมาที่
-      // /api/entitlement/checkout/confirm ซึ่งตรวจกับ Stripe เองก่อนเติมรอบ · ปล่อย loading ค้างไว้ระหว่างย้ายหน้า
-      if (data.provider === "stripe" && typeof data.authorizeUri === "string") {
-        redirecting = true;
-        window.location.assign(data.authorizeUri);
-        return;
-      }
-
-      setCheckoutData(data);
-    } catch (err: any) {
-      setErrorMsg(
-        err.message ||
-          (isEn
-            ? "Connection error occurred with the payment system."
-            : "เกิดข้อผิดพลาดในการเชื่อมต่อระบบชำระเงิน")
-      );
-    } finally {
-      if (!redirecting) setLoading(false);
-    }
+    const result = await startCheckout(selectedPkg.id, isEn);
+    // `redirect` = กำลังย้ายไปหน้า Stripe · ปล่อยปุ่มหมุนค้างไว้ระหว่างเปลี่ยนหน้า
+    if (result.kind === "redirect") return;
+    setLoading(false);
+    if (result.kind === "auth_required") requireAuth();
+    else if (result.kind === "error") setErrorMsg(result.message);
+    else setSimulated(result.data);
   };
 
-  const handleConfirmPayment = async () => {
-    if (!checkoutData || !user) return;
+  const handleConfirmSimulated = async () => {
+    if (!simulated || !user) return;
     setLoading(true);
     setErrorMsg(null);
-
     try {
       const res = await fetch("/api/entitlement/checkout/confirm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId: checkoutData.orderId,
-          packageId: checkoutData.packageId,
-          userId: user.id,
-        }),
+        body: JSON.stringify({ orderId: simulated.orderId, packageId: simulated.packageId, userId: user.id }),
       });
-
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.success) {
-        throw new Error(data.error || (isEn ? "Unable to confirm payment." : "ไม่สามารถยืนยันการชำระเงินได้"));
+        throw new Error(data.error || (isEn ? "Unable to confirm payment." : "ยืนยันการชำระเงินไม่สำเร็จ"));
       }
-
       mutateEntitlement();
       setSuccessMsg(
-        isEn
-          ? `Successfully added +${data.grantedCredits} sacred reading passes!`
-          : `เติมรอบเปิดไพ่สำเร็จ +${data.grantedCredits} ครั้งเรียบร้อยแล้ว!`
+        isEn ? `Added ${data.grantedCredits} readings to your account.` : `เติมรอบสำเร็จ +${data.grantedCredits} ครั้ง`,
       );
       clearCloseTimer();
       closeTimerRef.current = setTimeout(() => {
         closeTimerRef.current = null;
-        setCheckoutData(null);
+        setSimulated(null);
         setSuccessMsg(null);
         onClose();
       }, 2000);
-    } catch (err: any) {
+    } catch (err) {
       setErrorMsg(
-        err.message ||
-          (isEn ? "Error occurred while confirming transaction." : "เกิดข้อผิดพลาดในการยืนยันรายการ")
+        err instanceof Error && err.message
+          ? err.message
+          : isEn
+            ? "Something went wrong while confirming."
+            : "เกิดข้อผิดพลาดระหว่างยืนยันรายการ",
       );
     } finally {
       setLoading(false);
@@ -212,208 +129,205 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
 
   const resetModalState = () => {
     clearCloseTimer();
-    setCheckoutData(null);
+    setSimulated(null);
     setSuccessMsg(null);
     setErrorMsg(null);
     onClose();
   };
 
+  const bonus = ent?.bonusRemaining ?? 0;
+  const priceLabel = isEn ? `฿${selectedPkg.priceThb}` : `${selectedPkg.priceThb} บาท`;
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={resetModalState}
-      title={isEn ? "Sacred Reading Passes (Tarot Pass)" : "เติมรอบดูดวง (Tarot Pass)"}
+      maxWidth="lg"
+      title={isEn ? "Top up your readings" : "เติมรอบดูดวง"}
+      description={
+        <span className="font-serif-th leading-relaxed">
+          {isEn
+            ? "Pay once, no subscription · Readings you buy never expire"
+            : "จ่ายครั้งเดียว ไม่มีรายเดือน · รอบที่เติมไม่มีวันหมดอายุ"}
+        </span>
+      }
     >
-      <div className="space-y-6 pt-1 text-muted">
-        {/* ♿ R-21: ข้อความผิดพลาดในกล่องซื้อสิทธิ์ต้องถูกประกาศทันที
-            ผู้ใช้โปรแกรมอ่านหน้าจอเคยกดจ่ายเงินแล้วไม่รู้เลยว่าล้มเหลวเพราะอะไร */}
+      <div className="space-y-5 pt-1 text-ink-deep">
+        {/* ♿ R-21: ข้อความผิดพลาดในกล่องซื้อสิทธิ์ต้องถูกประกาศทันที */}
         {errorMsg && (
-          <div
-            role="alert"
-            className="p-3.5 rounded-lg bg-err/80 border border-err/50 text-err text-xs font-serif-th text-center"
-          >
+          <p role="alert" className="rounded-xl bg-err-wash px-4 py-3 text-center font-serif-th text-sm text-err">
             {errorMsg}
-          </div>
+          </p>
         )}
-
         {successMsg && (
-          <div
-            role="status"
-            className="p-4 rounded-lg bg-[#EBF3ED] border border-line-warm text-ok text-sm font-serif-th text-center font-bold "
-          >
+          <p role="status" className="rounded-xl bg-ok/10 px-4 py-3 text-center font-serif-th text-sm font-bold text-ok">
             {successMsg}
-          </div>
+          </p>
         )}
 
-        {!checkoutData ? (
+        {!simulated ? (
           <>
-            <div className="text-center space-y-1">
-              <p className="text-xs text-muted font-serif-th leading-relaxed">
-                {isEn
-                  ? "Unlock grand 10–12 card spreads and unlimited archetypal dialogue · One-time payment, not a subscription · Tokens never expire"
-                  : "ปลดล็อกผังใหญ่ 10–12 ใบ และคุยถามแม่หมอเจาะลึกได้ไม่จำกัด · จ่ายครั้งเดียว ไม่ใช่รายเดือน · สิทธิ์ไม่มีวันหมดอายุ"}
-              </p>
-            </div>
+            <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 font-serif-th text-[13px] text-ink-deep">
+              {(isEn
+                ? ["Every big 5–12 card spread", "Unlimited follow-up questions", "Never expires"]
+                : ["เปิดผังใหญ่ได้ทุกผัง", "ถามแม่หมอต่อได้ไม่จำกัด", "ไม่มีวันหมดอายุ"]
+              ).map((t) => (
+                <li key={t} className="inline-flex items-center gap-1.5">
+                  <CheckMarkIcon className="h-3.5 w-3.5 shrink-0 text-gold-ink" />
+                  {t}
+                </li>
+              ))}
+            </ul>
 
-            {/* Package Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <fieldset className="space-y-2.5">
+              <legend className="sr-only">{isEn ? "Choose a package" : "เลือกแพ็กเกจ"}</legend>
               {creditPackages.map((pkg) => {
                 const isSelected = selectedPkg.id === pkg.id;
+                const badge = packageBadge(pkg, creditPackages, isEn);
                 return (
-                  <button
+                  <label
                     key={pkg.id}
-                    type="button"
-                    aria-pressed={isSelected}
-                    onClick={() => setSelectedPkgId(pkg.id)}
-                    className={`rounded-lg p-4 border transition duration-200 cursor-pointer flex flex-col justify-between text-left relative select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
+                    className={`relative flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3.5 transition-[border-color,background-color,box-shadow] duration-150 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-gold-ink ${
                       isSelected
-                        ? "bg-surface border-line-warm ring-2 ring-gold-ink/70 scale-[1.02]"
-                        : "bg-surface border-line-warm hover:border-gold-ink hover:bg-inset-warm"
+                        ? "border-gold-ink bg-surface shadow-[0_0_0_1px_var(--color-gold-ink)]"
+                        : "border-line-warm bg-surface-warm hover:border-line-interactive-warm"
                     }`}
                   >
-                    {pkg.badge && (
-                      <span className="absolute -top-2.5 right-3 text-[12px] font-bold px-2 py-0.5 rounded-full bg-gold-ink text-surface ">
-                        {pkg.badge}
-                      </span>
-                    )}
+                    <input
+                      type="radio"
+                      name="credit-package"
+                      value={pkg.id}
+                      checked={isSelected}
+                      onChange={() => setSelectedPkgId(pkg.id)}
+                      className="sr-only"
+                    />
+                    <span
+                      aria-hidden="true"
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
+                        isSelected ? "border-gold-ink" : "border-line-interactive"
+                      }`}
+                    >
+                      {isSelected && <span className="h-2.5 w-2.5 rounded-full bg-gold-ink" />}
+                    </span>
 
-                    <div>
-                      <h4 className="font-serif-th text-sm font-bold text-ink-deep leading-snug">{pkg.name}</h4>
-                      <p className="text-[13px] text-muted mt-1 leading-tight font-serif-th">{pkg.tagline}</p>
-                    </div>
-
-                    <div className="mt-4 pt-3 border-t border-line-warm/30 flex items-baseline justify-between">
-                      <span className="text-lg font-bold font-mono text-gold-ink">฿{pkg.priceThb}</span>
-                      <span className="text-[13px] text-ink-deep font-serif-th font-semibold">
-                        {isEn ? `${pkg.credits} Readings` : `${pkg.credits} ครั้ง`}
+                    <span className="min-w-0 flex-1">
+                      <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className="font-serif-th text-base font-bold text-ink-deep">
+                          {creditsLabel(pkg.credits, isEn)}
+                        </span>
+                        {badge && (
+                          <span
+                            className={`rounded-full px-2 py-0.5 font-serif-th text-[12px] font-bold ${
+                              pkg.isPopular ? "bg-gold-ink text-surface" : "bg-ok/10 text-ok"
+                            }`}
+                          >
+                            {badge}
+                          </span>
+                        )}
                       </span>
-                    </div>
-                  </button>
+                      <span className="mt-0.5 hidden font-serif-th text-[13px] leading-snug text-muted sm:block">{pkg.name}</span>
+                    </span>
+
+                    <span className="shrink-0 text-right">
+                      <span className="block font-serif-th text-lg font-bold text-ink-deep">฿{pkg.priceThb}</span>
+                      <span className="block font-serif-th text-[12px] text-muted">{perReadingLabel(pkg, isEn)}</span>
+                    </span>
+                  </label>
                 );
               })}
-            </div>
+            </fieldset>
 
-            {/* CTA Button */}
-            <button
-              type="button"
-              disabled={loading}
-              onClick={handleStartCheckout}
-              className="w-full py-3.5 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface font-bold font-serif-th text-sm active:scale-[0.98] transition cursor-pointer flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <span>{isEn ? "Preparing transaction..." : "กำลังเตรียมรายการ..."}</span>
-              ) : (
-                <>
-                  <span>
-                    {isEn
-                      ? `Pay ${selectedPkg.priceThb} THB (PromptPay QR)`
-                      : `ชำระเงิน ${selectedPkg.priceThb} บาท (PromptPay QR)`}
-                  </span>
-                  <span>→</span>
-                </>
-              )}
-            </button>
-
-            {/* Redeem Code Section */}
-            <div className="pt-2 border-t border-line-warm/40">
-              <form onSubmit={handleRedeemCode} className="space-y-2 p-3 rounded-xl bg-[#F9F6F0] border border-line-warm/60">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-serif-th font-semibold text-[#4A3B2C]">
-                    {isEn ? "Redeem Code (Tarot Pass)" : "รหัสแลกสิทธิ์ (Redeem Code)"}
-                  </label>
-                </div>
-
-                  {redeemError && (
-                    <div
-                      id={redeemErrorId}
-                      role="alert"
-                      className="p-2 rounded bg-[#C43D3D]/10 text-[#C43D3D] text-xs font-serif-th"
-                    >
-                      {redeemError}
-                    </div>
-                  )}
-
-                  {redeemSuccess && (
-                    <div role="status" className="p-2.5 rounded bg-ok/10 text-ok text-xs font-serif-th font-semibold">
-                      {redeemSuccess}
-                    </div>
-                  )}
-
-                  {!redeemSuccess && (
-                    <div className="flex gap-2">
-                      <input
-                        aria-label={isEn ? "Redeem code" : "รหัสแลกสิทธิ์"}
-                        aria-invalid={redeemError ? true : undefined}
-                        aria-describedby={redeemError ? redeemErrorId : undefined}
-                        type="text"
-                        value={redeemCode}
-                        onChange={(e) => setRedeemCode(e.target.value)}
-                        placeholder={isEn ? "e.g. VIP3-TAROT-2026" : "เช่น VIP3-TAROT-2026"}
-                        disabled={redeemLoading}
-                        className="glass-field flex-1 px-3 py-2 text-xs uppercase font-mono tracking-wider rounded-lg border border-line-interactive-warm text-ink-deep focus:outline-none focus:border-gold-ink"
-                      />
-                      <button
-                        type="submit"
-                        disabled={redeemLoading || !redeemCode.trim()}
-                        className="tap-overlay-y px-4 py-2 text-xs font-bold font-serif-th rounded-lg bg-gold-ink hover:bg-gold-ink-deep disabled:opacity-50 text-white cursor-pointer transition"
-                      >
-                        {redeemLoading ? (isEn ? "Checking..." : "กำลังตรวจ...") : (isEn ? "Redeem" : "แลกสิทธิ์")}
-                      </button>
-                    </div>
-                  )}
-                </form>
-            </div>
-          </>
-
-        ) : (
-          /* Payment Screen */
-          <div className="text-center space-y-4">
-            <div className="altar-card-porcelain !rounded-lg p-4 space-y-3">
-              <div className="flex items-center justify-between text-xs text-muted font-serif-th border-b border-line-warm/30 pb-2">
-                <span>{isEn ? "Selected Item" : "รายการ"}</span>
-                <span className="font-bold text-ink-deep">
-                  {selectedPkg.name} ({isEn ? `${selectedPkg.credits} Readings` : `${selectedPkg.credits} ครั้ง`})
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-xs text-muted font-serif-th">
-                <span>{isEn ? "Total Amount" : "ยอดชำระ"}</span>
-                <span className="text-base font-bold font-mono text-gold-ink">
-                  ฿{selectedPkg.priceThb} {isEn ? "THB" : "บาท"}
-                </span>
-              </div>
-            </div>
-
-            <div className="glass-tile !rounded-lg p-5 text-center space-y-2">
-              <h4 className="font-serif-th text-sm font-bold text-ink-deep">
-                {isEn ? "Payment Gateway Test Simulator" : "ระบบจำลองการชำระเงิน (Test Gateway Simulator)"}
-              </h4>
-              <p className="text-xs text-muted font-serif-th">
-                {isEn
-                  ? "Stripe Checkout opens here once the Stripe secret key is set on Cloudflare Workers."
-                  : "หน้าจ่ายเงิน Stripe จะเปิดแทนส่วนนี้เมื่อตั้งคีย์ Stripe บน Cloudflare Workers แล้ว"}
-              </p>
-            </div>
-
-            <div className="pt-2 flex flex-col gap-2">
+            <div className="space-y-2.5">
               <button
                 type="button"
                 disabled={loading}
-                onClick={handleConfirmPayment}
-                className="w-full py-3.5 rounded-lg bg-ok hover:bg-ok text-white font-bold font-serif-th text-sm active:scale-[0.98] transition cursor-pointer"
+                onClick={handleStartCheckout}
+                className="btn-gold-glass flex min-h-[52px] w-full items-center justify-center gap-2 px-6 font-serif-th text-base font-bold cursor-pointer active:scale-[0.98] disabled:cursor-wait disabled:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2"
               >
                 {loading
-                  ? (isEn ? "Verifying payment..." : "กำลังตรวจสอบรายการ...")
-                  : (isEn ? "Confirm Payment" : "ยืนยันการชำระเงินแล้ว")}
+                  ? isEn
+                    ? "Opening checkout…"
+                    : "กำลังเปิดหน้าชำระเงิน…"
+                  : !user
+                    ? isEn
+                      ? "Sign in to continue"
+                      : "เข้าสู่ระบบเพื่อซื้อ"
+                    : isEn
+                      ? `Continue · ${priceLabel}`
+                      : `ชำระเงิน ${priceLabel}`}
               </button>
-
-              <button
-                type="button"
-                onClick={() => setCheckoutData(null)}
-                className="tap-overlay-y text-xs text-muted hover:text-ink-deep py-1 cursor-pointer font-serif-th"
-              >
-                {isEn ? "← Choose Different Package" : "← เปลี่ยนแพ็กเกจ"}
-              </button>
+              <PaymentMethodsNote isEn={isEn} />
+              {user && bonus > 0 && (
+                <p className="text-center font-serif-th text-xs text-muted">
+                  {isEn ? `You currently have ${bonus} purchased readings` : `ตอนนี้มีรอบที่เติมไว้ ${bonus} ครั้ง`}
+                </p>
+              )}
             </div>
+
+            <div className="flex flex-col items-center gap-2 border-t border-line-warm/50 pt-4">
+              <details className="group w-full">
+                <summary className="tap-overlay-y mx-auto flex w-fit cursor-pointer list-none items-center gap-1 font-serif-th text-sm font-semibold text-ink-deep hover:text-gold-ink">
+                  {isEn ? "Have a redeem code?" : "มีรหัสแลกสิทธิ์?"}
+                  <svg
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                    className="h-4 w-4 fill-none stroke-current text-muted transition-transform duration-150 group-open:rotate-180"
+                    strokeWidth={2}
+                  >
+                    <path d="M5 7.5l5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </summary>
+                <div className="pt-3">
+                  <RedeemCodeForm isEn={isEn} signedIn={!!user} onRequireAuth={requireAuth} />
+                </div>
+              </details>
+              <Link
+                href="/pricing"
+                prefetch={false}
+                className="tap-overlay-y font-serif-th text-xs text-muted underline underline-offset-4 hover:text-ink-deep"
+              >
+                {isEn ? "Compare plans and read the payment FAQ" : "เทียบแพ็กและคำถามเรื่องการชำระเงิน"}
+              </Link>
+            </div>
+          </>
+        ) : (
+          /* หน้าจำลอง — เครื่องพัฒนา / ยังไม่ใส่คีย์ Stripe (production ปฏิเสธรายการจำลองที่ด่านยืนยัน) */
+          <div className="space-y-4 text-center">
+            <div className="altar-card-porcelain !rounded-2xl space-y-2 p-4 font-serif-th text-sm">
+              <div className="flex items-center justify-between text-muted">
+                <span>{isEn ? "Package" : "แพ็กเกจ"}</span>
+                <span className="font-bold text-ink-deep">{creditsLabel(selectedPkg.credits, isEn)}</span>
+              </div>
+              <div className="flex items-center justify-between text-muted">
+                <span>{isEn ? "Total" : "ยอดชำระ"}</span>
+                <span className="text-base font-bold text-ink-deep">฿{selectedPkg.priceThb}</span>
+              </div>
+            </div>
+            <div className="glass-tile !rounded-2xl space-y-1 p-4">
+              <h4 className="font-serif-th text-sm font-bold text-ink-deep">
+                {isEn ? "Test payment simulator" : "ระบบจำลองการชำระเงิน"}
+              </h4>
+              <p className="font-serif-th text-xs text-muted">
+                {isEn
+                  ? "Stripe Checkout opens here once the Stripe secret key is set."
+                  : "หน้าจ่ายเงิน Stripe จะเปิดแทนส่วนนี้เมื่อตั้งคีย์ Stripe แล้ว"}
+              </p>
+            </div>
+            <button
+              type="button"
+              disabled={loading}
+              onClick={handleConfirmSimulated}
+              className="btn-gold-glass min-h-[48px] w-full px-6 font-serif-th text-sm font-bold cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+            >
+              {loading ? (isEn ? "Verifying…" : "กำลังตรวจสอบ…") : isEn ? "Confirm test payment" : "ยืนยันการชำระเงินทดสอบ"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setSimulated(null)}
+              className="tap-overlay-y font-serif-th text-xs text-muted hover:text-ink-deep cursor-pointer"
+            >
+              {isEn ? "← Choose another package" : "← เปลี่ยนแพ็กเกจ"}
+            </button>
           </div>
         )}
       </div>
