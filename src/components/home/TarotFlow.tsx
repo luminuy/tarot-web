@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { overlayReducer, OVERLAY_INITIAL, isOverlay } from "@/components/home/flow-overlay";
 import { deckReducer, DECK_INITIAL } from "@/components/home/flow-deck";
 import { sessionReducer, SESSION_INITIAL } from "@/components/home/flow-session";
@@ -38,9 +38,10 @@ import {
   REQUIRE_SIGNUP_TO_READ,
   describeEntitlement,
   type UpgradeReason,
+  isMasterPersona,
   isStandardSpread,
 } from "@/lib/entitlement/copy";
-import { decideSpreadAccess, decideStartSessionAccess, isPassHolderOf } from "@/components/home/flow-access";
+import { decideSpreadAccess, decideStartSessionAccess, hasPremiumTrialOf, isPassHolderOf } from "@/components/home/flow-access";
 import { resolveEntryIntent } from "@/components/home/flow-entry";
 import { onUpgradeRequest } from "@/lib/entitlement/upgrade-bus";
 import { ensureEntitlement, refreshEntitlement, useEntitlement } from "@/lib/entitlement/use-entitlement";
@@ -104,6 +105,7 @@ const ClarificationCard = dynamic(() => import("@/components/reading/Clarificati
 /* หน้าต่างสายด่วน — ใช้ `Modal` ซึ่งห่อ AppMotionProvider ให้ในตัวแล้ว จึงไม่ต้องห่อซ้ำเหมือน AccessDialog */
 const CrisisNotice = dynamic(() => import("@/components/safety/CrisisNotice").then((m) => m.CrisisNotice), { ssr: false });
 const PostReadingSignup = dynamic(() => import("@/components/entitlement/PostReadingSignup").then((m) => m.PostReadingSignup), { ssr: false });
+const PostReadingUpsell = dynamic(() => import("@/components/entitlement/PostReadingUpsell").then((m) => m.PostReadingUpsell), { ssr: false });
 const AnnouncementBanner = dynamic(() => import("@/components/entitlement/AnnouncementBanner").then((m) => m.AnnouncementBanner), { ssr: false });
 const ToastNotification = dynamic(() => import("@/components/ui/ToastNotification").then((m) => m.ToastNotification), { ssr: false });
 
@@ -267,6 +269,17 @@ export default function TarotFlow({
   // รวมถึงผังใหญ่ + ปรมาจารย์ลับด้วย — ผูก entitlement.enabled เข้ามาไม่งั้นการ์ดจะค้าง "ล็อก"
   // ทั้งที่หลังบ้านอนุญาตให้เปิดผังใหญ่แล้ว (describeEntitlement คืน null ตอนปิดจึงไม่มี isUnlimited)
   const isPassHolder = isPassHolderOf(entitlement);
+  /** ✦ ยังลองผังใหญ่ / แม่หมอพิเศษฟรีได้ 1 ครั้ง — การ์ดที่ล็อกเปลี่ยนเป็นป้าย "ลองฟรี" */
+  const hasPremiumTrial = hasPremiumTrialOf(entitlement);
+  /** ตำแหน่งในผังเซลติกครอสที่ผังมาตรฐานไม่มี — ดึงจากผังจริง (ตัดเลขนำหน้า) ห้ามพิมพ์ชื่อเอง */
+  const upsellPositions = useMemo(() => {
+    const celtic = PUBLIC_SPREADS.find((s) => s.id === "celtic-cross");
+    if (!celtic) return [];
+    return [1, 2, 8, 9]
+      .map((i) => celtic.positions[i])
+      .filter(Boolean)
+      .map((p) => (isEnglish ? p.nameEn || p.nameTh : p.nameTh).replace(/^\d+\.\s*/, ""));
+  }, [isEnglish]);
 
   /**
    * ทางเข้าเดียวของกำแพงสิทธิ์ — ทุกจุดที่ผู้ใช้ถูกกั้นต้องเรียกผ่านนี้
@@ -1749,8 +1762,11 @@ export default function TarotFlow({
                     });
                   }}
                   isPassHolder={isPassHolder}
+                  premiumTrial={hasPremiumTrial}
                   proceedLabel={
-                    entitlementView?.blocked
+                    hasPremiumTrial && !isStandardSpread(selectedSpread.id)
+                      ? (isEnglish ? "Try This Spread Free (1-time trial)" : "ลองผังนี้ฟรี (สิทธิ์ทดลอง 1 ครั้ง)")
+                      : entitlementView?.blocked
                       ? entitlementView.blockedReason === "daily_exhausted"
                         ? (isEnglish ? "Refill Quota to Continue" : "เติมรอบเพื่อเปิดไพ่ต่อ")
                         : (isEnglish ? "Sign Up Free to Draw Cards" : "สมัครสมาชิกฟรีเพื่อเปิดไพ่")
@@ -1795,6 +1811,7 @@ export default function TarotFlow({
                   });
                 }}
                 isPassHolder={isPassHolder}
+                premiumTrial={hasPremiumTrial}
                 onRequireUpgrade={() => {
                   openAccessDialog("master_persona");
                 }}
@@ -2053,6 +2070,21 @@ export default function TarotFlow({
               {currentStep === "SUMMARY" && !isStreaming && (
                 <PostReadingSignup onOpenAuth={() => openAuth("signup", true)} />
               )}
+
+              {/* ✦ ชวนดูผังใหญ่ — เฉพาะสมาชิกที่ยังไม่มีรอบที่ซื้อ และเพิ่งอ่านผังมาตรฐานกับแม่หมอทั่วไป */}
+              {currentStep === "SUMMARY" &&
+                !isStreaming &&
+                entitlement?.kind === "member" &&
+                !isPassHolder &&
+                isStandardSpread(selectedSpread.id) &&
+                !isMasterPersona(selectedPersona.id) &&
+                upsellPositions.length > 0 && (
+                  <PostReadingUpsell
+                    positions={upsellPositions}
+                    premiumTrial={hasPremiumTrial}
+                    onBuyCredits={() => dispatchOverlay({ type: "openBuyCredits" })}
+                  />
+                )}
             </div>
           )}
         </div>

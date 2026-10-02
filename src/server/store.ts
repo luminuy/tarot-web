@@ -37,6 +37,11 @@ export interface ReadingRecord {
    * ⚠️ มีค่านี้เมื่อไหร่ แปลว่าห้ามเรียก `drawCards()` และห้ามรับ `pickedIndices` ในเซสชันนั้น
    */
   derivation?: DerivedDrawSpec;
+  /**
+   * รอบนี้ใช้สิทธิ์ลองผังใหญ่ฟรี 1 ครั้ง — ตัดสินที่ /start ฝั่งเซิร์ฟเวอร์เท่านั้น (ผู้ใช้ส่งค่านี้มาเองไม่ได้)
+   * /read จึงหักเป็นแถว `source = 'trial'` แทนโควตารายวัน
+   */
+  premiumTrial?: boolean;
   /** ✦ ราศีที่ผู้ถามบอกไว้ (ไม่บังคับ) — บริบทของ prompt เท่านั้น ไม่เกี่ยวกับการจั่ว */
   zodiac?: import("@/lib/ai/zodiac-context").SeekerZodiac;
 

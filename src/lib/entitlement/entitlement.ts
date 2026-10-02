@@ -168,6 +168,12 @@ export interface Entitlement {
    * เฉพาะค่า true เท่านั้นที่ปลดล็อกผังใหญ่ + ปรมาจารย์ลับ
    */
   hasPaidCredits: boolean;
+  /**
+   * ✦ สิทธิ์ลองผังใหญ่ / แม่หมอพิเศษฟรี 1 ครั้งต่อบัญชี (ยังไม่เคยใช้ และยังไม่ได้ซื้อรอบ)
+   * รอบทดลองนับเป็นแถว `source = 'trial'` แยกจากโควตารายวัน — ไม่หักสิทธิ์ฟรีของวันนั้น
+   * เหตุผล: คนที่ไม่เคยเห็นผังใหญ่ไม่รู้ว่ามันดีกว่ายังไง ได้ลองครั้งเดียวจะเห็นคุณค่าเอง
+   */
+  premiumTrialAvailable?: boolean;
   /** ISO string เวลาโควตารายวันรีเซ็ต (null สำหรับผู้เยี่ยมชม) */
   resetAt: string | null;
   /** ไพ่ประจำวันฟรีของวันนี้ยังใช้ได้หรือไม่ */
@@ -185,7 +191,7 @@ export interface Entitlement {
  * และฟังก์ชันนี้ถูกเรียกแทบทุกการโหลดหน้า · `db.batch()` ส่งทั้งชุดไปรอบเดียว
  * (ถ้าไดรเวอร์ไหนไม่มี `batch` จะถอยไปใช้ `Promise.all` แบบเดิมอัตโนมัติ)
  */
-async function memberUsage(userId: string): Promise<{ dailyUsed: number; bonusGranted: number; bonusUsed: number; paidGranted: number }> {
+async function memberUsage(userId: string): Promise<{ dailyUsed: number; bonusGranted: number; bonusUsed: number; paidGranted: number; trialUsed: number }> {
   const db = await getAppDB();
   const dk = todayDateKey();
   const wk = weekKey();
@@ -203,7 +209,7 @@ async function memberUsage(userId: string): Promise<{ dailyUsed: number; bonusGr
           WHERE user_id = ?
             AND (
               (source = 'weekly' AND week_key = ?)
-              OR (source NOT IN ('weekly', 'bonus') AND week_key = ?)
+              OR (source NOT IN ('weekly', 'bonus', 'trial') AND week_key = ?)
             )`,
       )
       .bind(userId, wk, dk),
@@ -212,6 +218,8 @@ async function memberUsage(userId: string): Promise<{ dailyUsed: number; bonusGr
     db
       .prepare(`SELECT COALESCE(SUM(granted), 0) AS n FROM user_bonus WHERE user_id = ? AND reason LIKE 'purchase_%'`)
       .bind(userId),
+    // รอบลองผังใหญ่ฟรีที่ใช้ไปแล้ว (มีได้มากสุด 1 แถวต่อคน — ดู consumeReadingInner)
+    db.prepare(`SELECT COUNT(*) AS n FROM reading_usage WHERE user_id = ? AND source = 'trial'`).bind(userId),
   ];
 
   const readOneByOne = async (): Promise<number[]> => {
@@ -247,6 +255,7 @@ async function memberUsage(userId: string): Promise<{ dailyUsed: number; bonusGr
     bonusGranted: counts[1] ?? 0,
     bonusUsed: counts[2] ?? 0,
     paidGranted: counts[3] ?? 0,
+    trialUsed: counts[4] ?? 0,
   };
 }
 
@@ -289,8 +298,8 @@ export async function getEntitlement(v: Viewer): Promise<Entitlement> {
     if (isMissingTable(firstErr) && (await trySelfHeal())) {
       try {
         usage = await memberUsage(v.userId);
-        const { dailyUsed: u2, bonusGranted: bg2, bonusUsed: bu2, paidGranted: pg2 } = usage;
-        return buildMemberEntitlement(u2, bg2, bu2, pg2, dailyFreeAvailable, dailyStreak);
+        const { dailyUsed: u2, bonusGranted: bg2, bonusUsed: bu2, paidGranted: pg2, trialUsed: t2 } = usage;
+        return buildMemberEntitlement(u2, bg2, bu2, pg2, dailyFreeAvailable, dailyStreak, t2);
       } catch {
         /* ซ่อมแล้วยังอ่านไม่ได้ → ตกไปใช้ค่า degrade ด้านล่าง */
       }
@@ -312,8 +321,8 @@ export async function getEntitlement(v: Viewer): Promise<Entitlement> {
       reason: allow ? undefined : "daily_exhausted",
     };
   }
-  const { dailyUsed: usedToday, bonusGranted, bonusUsed, paidGranted } = usage;
-  return buildMemberEntitlement(usedToday, bonusGranted, bonusUsed, paidGranted, dailyFreeAvailable, dailyStreak);
+  const { dailyUsed: usedToday, bonusGranted, bonusUsed, paidGranted, trialUsed } = usage;
+  return buildMemberEntitlement(usedToday, bonusGranted, bonusUsed, paidGranted, dailyFreeAvailable, dailyStreak, trialUsed);
 }
 
 /** ประกอบสิทธิ์ของสมาชิกจากยอดที่อ่านมา — แยกไว้เพราะเรียกจาก 2 ทาง (ปกติ / หลังซ่อมตาราง) */
@@ -324,6 +333,7 @@ function buildMemberEntitlement(
   paidGranted: number,
   dailyFreeAvailable: boolean,
   dailyStreak: number,
+  trialUsed: number = 0,
 ): Entitlement {
   const dailyRemaining = Math.max(0, DAILY_LIMIT - usedToday);
   const bonusRemaining = Math.max(0, bonusGranted - bonusUsed);
@@ -344,6 +354,7 @@ function buildMemberEntitlement(
     weeklyRemaining: dailyRemaining,
     bonusRemaining,
     hasPaidCredits,
+    premiumTrialAvailable: !hasPaidCredits && trialUsed === 0,
     resetAt: nextResetAt(),
     dailyFreeAvailable,
     dailyStreak,
@@ -360,9 +371,10 @@ function buildMemberEntitlement(
 export async function consumeReading(
   v: Viewer,
   readingId: string,
-  spreadId?: string
+  spreadId?: string,
+  opts: { premiumTrial?: boolean } = {},
 ): Promise<ConsumeOutcome> {
-  const outcome = await consumeReadingInner(v, readingId);
+  const outcome = await consumeReadingInner(v, readingId, opts.premiumTrial === true);
   /*
    * บันทึก streak ของผัง daily **หลัง** รู้ผลการหักสิทธิ์เท่านั้น (A1-13)
    * เดิมบันทึกก่อนตรวจโควตา โดนปฏิเสธ (403) ก็ยังได้ streak +1 · AI ล่มแล้วคืนสิทธิ์ก็ได้ streak ฟรี
@@ -375,7 +387,7 @@ export async function consumeReading(
   return outcome;
 }
 
-async function consumeReadingInner(v: Viewer, readingId: string): Promise<ConsumeOutcome> {
+async function consumeReadingInner(v: Viewer, readingId: string, premiumTrial = false): Promise<ConsumeOutcome> {
   if (v.kind === "guest") {
     // การนับจริงของผู้เยี่ยมชมอยู่ที่คุกกี้ (PR C) — ที่นี่แค่ตรวจว่ายังมีสิทธิ์
     // ไม่มีแถวใน DB ให้คืน จึงไม่ใช่ "inserted" ที่ refund ได้
@@ -404,6 +416,21 @@ async function consumeReadingInner(v: Viewer, readingId: string): Promise<Consum
   const usageId = `ru_${crypto.randomUUID()}`;
 
   const doConditionalInsert = async (): Promise<ConsumeOutcome> => {
+    // ── รอบลองผังใหญ่ฟรี (ตัดสินที่ /start แล้วปักไว้ใน ReadingRecord ฝั่งเซิร์ฟเวอร์) ──
+    // แถว `source = 'trial'` ไม่นับเป็นโควตารายวัน · มีได้ครั้งเดียวต่อคน (WHERE NOT EXISTS)
+    // ใช้ไปแล้ว (เปิดสองแท็บพร้อมกัน) = ปฏิเสธ ห้ามตกไปหักโควตาปกติ เพราะผังใหญ่ต้องมีสิทธิ์พิเศษ
+    if (premiumTrial) {
+      const trial = await db
+        .prepare(
+          `INSERT INTO reading_usage (id, user_id, reading_id, week_key, source, consumed_at)
+           SELECT ?, ?, ?, ?, 'trial', ?
+            WHERE NOT EXISTS (SELECT 1 FROM reading_usage WHERE user_id = ? AND source = 'trial')`
+        )
+        .bind(usageId, v.userId, readingId, dk, now, v.userId)
+        .run();
+      return (trial.meta?.changes ?? 0) > 0 ? { status: "inserted", usageId } : { status: "denied" };
+    }
+
     // ── ชั้นที่ 1: โควตารายวัน (`DAILY_LIMIT` ครั้ง/วัน) ──
     // เงื่อนไขนับต้องตรงกับ memberUsage() เป๊ะ ๆ (ป้องกันปัญหาข้ามวันจันทร์ตาม INC-0074)
     const daily = await db
@@ -415,7 +442,7 @@ async function consumeReadingInner(v: Viewer, readingId: string): Promise<Consum
              WHERE user_id = ?
                AND (
                  (source = 'weekly' AND week_key = ?)
-                 OR (source NOT IN ('weekly', 'bonus') AND week_key = ?)
+                 OR (source NOT IN ('weekly', 'bonus', 'trial') AND week_key = ?)
                )
           ) < ?`
       )

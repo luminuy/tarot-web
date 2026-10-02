@@ -55,6 +55,8 @@ interface SpreadCardSelectorProps {
   onSelectSpread: (spread: Spread) => void;
   onProceed?: () => void;
   isPassHolder?: boolean;
+  /** ✦ ยังลองผังใหญ่ฟรีได้ 1 ครั้ง — การ์ดผังใหญ่ไม่ล็อก แต่ติดป้าย "ลองฟรี" แทน */
+  premiumTrial?: boolean;
   onRequireUpgrade?: (reason: "grand_spread", spread: Spread) => void;
   /**
    * ถ้อยคำบนปุ่มเริ่ม — ส่งมาทับได้เมื่อสิทธิ์ยังไม่พอ
@@ -128,6 +130,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
   onSelectSpread,
   onProceed,
   isPassHolder = false,
+  premiumTrial = false,
   onRequireUpgrade,
   proceedLabel,
   variant = "full",
@@ -456,7 +459,8 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
             const isSelected = selectedSpread.id === spread.id;
             const isRecommended = spread.id === "three-card";
             const isGrand = !isStandardSpread(spread.id);
-            const isLocked = isGrand && !isPassHolder;
+            const isTrial = isGrand && !isPassHolder && premiumTrial;
+            const isLocked = isGrand && !isPassHolder && !premiumTrial;
 
             const handleCardClick = () => {
               if (isLocked) {
@@ -527,7 +531,11 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                   <span className="glass-chip text-[13px] text-ink-deep px-2.5 py-0.5 font-semibold font-mono ">
                     {spread.positions.length} {isEnglish ? "Cards" : "ใบ"}
                   </span>
-                  {isLocked ? (
+                  {isTrial ? (
+                    <span className="text-[12px] text-surface bg-ok px-2.5 py-0.5 rounded-full font-serif-th font-bold">
+                      {isEnglish ? "Try free once" : "ลองฟรี 1 ครั้ง"}
+                    </span>
+                  ) : isLocked ? (
                     <span className="glass-chip text-[12px] text-muted px-2.5 py-0.5 font-serif-th font-bold flex items-center gap-1 ">
                       <SealedLockIcon className="w-3 h-3 text-gold-ink" />
                       <span>{isEnglish ? "Master Tier" : "ญาณพิเศษ"}</span>

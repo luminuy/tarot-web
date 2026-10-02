@@ -32,6 +32,7 @@ import type { RitualStep } from "../../src/components/home/ritual-step";
 import {
   decideSpreadAccess,
   decideStartSessionAccess,
+  hasPremiumTrialOf,
   isPassHolderOf,
 } from "../../src/components/home/flow-access";
 import { resolveEntryIntent } from "../../src/components/home/flow-entry";
@@ -428,6 +429,21 @@ check(
     const d = decideStartSessionAccess(MEMBER, "celtic-cross", "master");
     return !d.allowed && d.reason === "grand_spread";
   })(),
+);
+
+// ✦ สิทธิ์ลองผังใหญ่ / แม่หมอพิเศษฟรี 1 ครั้ง — เซิร์ฟเวอร์ตัดสินซ้ำที่ /start เสมอ
+const TRIAL = ent({ premiumTrialAvailable: true });
+const TRIAL_OUT = ent({ premiumTrialAvailable: true, remaining: 0, canStartReading: false, reason: "daily_exhausted" });
+check("มีสิทธิ์ลอง ➔ ผังใหญ่ผ่าน", decideSpreadAccess(TRIAL, "celtic-cross").allowed === true);
+check("มีสิทธิ์ลอง ➔ แม่หมอปรมาจารย์ผ่าน", decideStartSessionAccess(TRIAL, "daily", "master").allowed === true);
+check("มีสิทธิ์ลอง + โควตาวันนี้หมด ➔ ผังใหญ่ยังผ่าน (สิทธิ์ลองไม่หักโควตา)", decideSpreadAccess(TRIAL_OUT, "celtic-cross").allowed === true);
+check(
+  "มีสิทธิ์ลอง + โควตาหมด ➔ ผังมาตรฐานยังติดกำแพง (สิทธิ์ลองใช้กับผังใหญ่เท่านั้น)",
+  decideSpreadAccess(TRIAL_OUT, "daily").allowed === false,
+);
+check(
+  "ผู้ไม่ล็อกอิน / ผู้ถือสิทธิ์เต็ม ➔ ไม่นับว่ามีสิทธิ์ลอง",
+  !hasPremiumTrialOf(ent({ kind: "guest", premiumTrialAvailable: true })) && !hasPremiumTrialOf(ent({ hasPaidCredits: true, premiumTrialAvailable: true })),
 );
 
 // ทางเข้าทั้งสามใน TarotFlow ต้องเรียกตรรกะก้อนนี้ ห้ามคัดลอกเงื่อนไขไปเขียนเองอีก

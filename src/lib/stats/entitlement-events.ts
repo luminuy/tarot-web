@@ -19,6 +19,11 @@ const FLAT_EVENTS = [
   "gate_blocked_shown:signup_required",
   "gate_blocked_shown:guest_used",
   "gate_blocked_shown:daily_exhausted",
+  // การ์ดชวนดูผังใหญ่ท้ายคำทำนายฟรี (PostReadingUpsell) — trial = ยังลองฟรีได้ · credits = ชวนเติมรอบ
+  "upsell_card_shown:trial",
+  "upsell_card_shown:credits",
+  "upsell_card_click:trial",
+  "upsell_card_click:credits",
 ] as const;
 
 export const ENTITLEMENT_EVENTS: readonly string[] = [

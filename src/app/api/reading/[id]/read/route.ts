@@ -206,7 +206,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         limit.releaseConcurrency();
         return aiCapResponse();
       }
-      const outcome = await consumeReading(viewer, id, record.spreadId);
+      const outcome = await consumeReading(viewer, id, record.spreadId, { premiumTrial: record.premiumTrial === true });
       if (outcome.status === "inserted") consumedUsageId = outcome.usageId;
       if (outcome.status === "denied") {
         limit.releaseConcurrency();

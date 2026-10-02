@@ -73,6 +73,9 @@ export function signReadingSessionToken(record: Partial<ReadingRecord>): string 
      * ผู้ใช้จะได้ไพ่คนละชุดกับที่หน้าเว็บกำลังเล่าถึงอยู่ · โทเคนมีลายเซ็น HMAC ปลอมไม่ได้
      */
     derivation: record.derivation,
+    // รอบลองผังใหญ่ฟรีต้องติดไปกับโทเคนด้วย — เซสชันที่กู้คืนจากโทเคนจะได้หักเป็นแถว trial
+    // ไม่ใช่ไปหักโควตารายวัน (หรือถูกปฏิเสธทั้งที่ /start อนุญาตแล้ว) · HMAC กันปลอมอยู่แล้ว
+    premiumTrial: record.premiumTrial,
     result: record.result,
     createdAt: record.createdAt || Date.now(),
     iat: nowSec,

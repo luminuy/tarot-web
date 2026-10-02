@@ -22,6 +22,8 @@ interface PersonaCardSelectorProps {
   selectedPersona: Persona;
   onSelectPersona: (persona: Persona) => void;
   isPassHolder?: boolean;
+  /** ✦ ยังลองแม่หมอพิเศษฟรีได้ 1 ครั้ง — ไม่ล็อก แต่ติดป้าย "ลองฟรี" แทน */
+  premiumTrial?: boolean;
   onRequireUpgrade?: (reason: "master_persona", persona: Persona) => void;
 }
 
@@ -77,7 +79,8 @@ const PERSONA_DETAILS: Record<string, { roleTitle: string; archetypeTh: string; 
 export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
   selectedPersona,
   onSelectPersona,
-  isPassHolder = false,
+  isPassHolder,
+  premiumTrial = false,
   onRequireUpgrade,
 }) => {
   const { isEnglish } = useLocale();
@@ -128,7 +131,8 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
           const isSelected = selectedPersona.id === p.id;
           const meta = PERSONA_DETAILS[p.id] || PERSONA_DETAILS.warm;
           const isMaster = isMasterPersona(p.id);
-          const isLocked = isMaster && !isPassHolder;
+          const isTrial = isMaster && !isPassHolder && premiumTrial;
+          const isLocked = isMaster && !isPassHolder && !premiumTrial;
 
           const handlePersonaClick = () => {
             if (isLocked) {
@@ -175,6 +179,11 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                   <span className="text-[12px] uppercase tracking-widest text-gold-ink font-mono font-semibold block">
                     {meta.roleTitle}
                   </span>
+                  {isTrial && (
+                    <span className="text-[12px] text-surface bg-ok px-2 py-0.5 rounded-full font-serif-th font-bold">
+                      {isEnglish ? "Try free once" : "ลองฟรี 1 ครั้ง"}
+                    </span>
+                  )}
                   {isLocked && (
                     <span className="text-[12px] text-gold-ink bg-inset-warm border border-line-warm px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1">
                       <span>{isEnglish ? "Master Tier" : "ผู้เชี่ยวชาญพิเศษ"}</span>
