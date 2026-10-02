@@ -142,6 +142,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     {
+      /* หน้าราคา — คนค้น "ดูดวงไพ่ทาโรต์ ราคา / ฟรีไหม" ต้องเจอคำตอบได้โดยไม่ต้องกดเข้าหน้าแรก */
+      url: `${baseUrl}/pricing`,
+      lastModified: new Date("2026-10-02T12:00:00+07:00"),
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
       url: `${baseUrl}/contact`,
       lastModified: now,
       changeFrequency: "monthly",

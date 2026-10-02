@@ -120,6 +120,32 @@ export function EntitlementStatusCard({ onBuyCredits }: EntitlementStatusCardPro
         </ul>
       )}
 
+      {view.isMember && !view.isUnlimited && (
+        <div className="flex flex-col gap-3 rounded-lg border border-line-warm bg-inset-warm p-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="font-serif-th text-[13px] leading-relaxed text-ink-deep">
+            {isEn
+              ? "Want more readings today? Packages start small — pay once, no subscription."
+              : "อยากเปิดไพ่เพิ่มวันนี้? เติมรอบได้ จ่ายครั้งเดียว ไม่มีรายเดือน"}
+          </p>
+          <div className="flex shrink-0 items-center gap-3">
+            <Link
+              href="/pricing"
+              prefetch={false}
+              className="tap-overlay-y font-serif-th text-xs font-semibold text-gold-ink underline underline-offset-4 hover:text-gold-ink-deep"
+            >
+              {isEn ? "See pricing" : "ดูราคา"}
+            </Link>
+            <button
+              type="button"
+              onClick={openBuy}
+              className="btn-gold-glass min-h-[44px] px-5 font-serif-th text-sm font-bold cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2"
+            >
+              {isEn ? "Top up readings" : "เติมรอบดูดวง"}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line-warm/30 pt-3">
         {view.isGuest ? (
           <Link href="/" className="text-xs text-gold-ink underline transition-colors hover:text-ink-deep font-bold">
@@ -134,15 +160,6 @@ export function EntitlementStatusCard({ onBuyCredits }: EntitlementStatusCardPro
             className="tap-overlay-y text-xs text-gold-ink underline transition-colors hover:text-ink-deep font-bold cursor-pointer"
           >
             {isEn ? "Have a redeem code? Enter it here" : "มีรหัสแลกสิทธิ์? กดใส่รหัสที่นี่"}
-          </button>
-        )}
-        {view.isMember && !view.isUnlimited && (
-          <button
-            type="button"
-            onClick={openBuy}
-            className="tap-overlay-y min-h-[40px] rounded-full border border-line-warm bg-gold-ink hover:bg-gold-ink-deep px-4 py-2 font-serif-th text-xs font-semibold text-surface transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
-          >
-            {isEn ? "Get Reading Passes" : "เติมรอบเปิดไพ่"}
           </button>
         )}
       </div>

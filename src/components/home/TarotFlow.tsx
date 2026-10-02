@@ -1513,7 +1513,6 @@ export default function TarotFlow({
                 soundManager.playCardSelectSound();
                 dispatchOverlay({ type: "openHistory" });
               }}
-              onOpenPlans={() => openAccessDialog("explore")}
               onReset={handleReset}
               canReset={currentStep !== "SPREAD_SELECT"}
             />

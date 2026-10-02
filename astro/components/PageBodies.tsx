@@ -11,6 +11,7 @@ import { PickACardBodyTh } from "@/app/_shared/pages/pick-a-card-th";
 import { PickACardTopicBody } from "@/app/_shared/pages/pick-a-card-topic";
 import type { PickACardTopic } from "@/data/pick-a-card";
 import { ContactBodyEn } from "@/app/_shared/pages/contact-en";
+import { PricingBody } from "@/app/_shared/pages/pricing";
 import { ContactBodyTh } from "@/app/_shared/pages/contact-th";
 import { PrivacyBodyEn } from "@/app/_shared/pages/privacy-en";
 import { PrivacyBodyTh } from "@/app/_shared/pages/privacy-th";
@@ -312,6 +313,14 @@ export function PickACardTopicBodyRoot({
   return (
     <LocaleProvider forcedLocale={locale}>
       <PickACardTopicBody topic={topic} locale={locale} ritual={ritual} />
+    </LocaleProvider>
+  );
+}
+
+export function PricingBodyRoot({ locale, plans }: { locale: Locale; plans: ReactNode }) {
+  return (
+    <LocaleProvider forcedLocale={locale}>
+      <PricingBody locale={locale} plans={plans} />
     </LocaleProvider>
   );
 }

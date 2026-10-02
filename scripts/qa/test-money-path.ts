@@ -418,6 +418,26 @@ async function main(): Promise<void> {
     );
   }
 
+  console.log("\n── 8. ตัวเลขบนหน้าราคา (ครั้งละกี่บาท · ประหยัดกี่ %) ต้องคำนวณจากราคาจริง ──");
+  {
+    const { pricePerReadingThb, savingsPercent } = await import("../../src/lib/entitlement/pricing");
+    const save = CREDIT_PACKAGES.map((p) => savingsPercent(p, CREDIT_PACKAGES));
+    check(
+      "แพ็กที่แพงที่สุดต่อครั้งไม่มีป้ายประหยัด และแพ็กใหญ่ประหยัดมากกว่าแพ็กเล็ก",
+      Math.min(...save) === 0 && save.every((v, i) => i === 0 || v >= save[i - 1]),
+      `ได้ ${save.join(", ")}`,
+    );
+    check(
+      "ราคาต่อครั้งปัดเป็นบาทเต็มและไม่เกินราคาแพ็กหารจำนวนครั้งเกิน 0.5 บาท",
+      CREDIT_PACKAGES.every((p) => Math.abs(pricePerReadingThb(p) - p.priceThb / p.credits) <= 0.5),
+    );
+    const pricingSrc = readSource("src/app/_shared/pages/pricing.tsx");
+    check(
+      "หน้าราคาไม่พิมพ์ราคาแพ็กลงข้อความเอง (ต้องมาจาก packages.ts)",
+      !CREDIT_PACKAGES.some((p) => new RegExp(`[฿\\s]${p.priceThb}(?!\\d)`).test(pricingSrc)),
+    );
+  }
+
   console.log(`\n📊 สรุป: ผ่าน ${pass} ข้อ | ล้มเหลว ${fail} ข้อ\n`);
   if (fail > 0) process.exit(1);
 }

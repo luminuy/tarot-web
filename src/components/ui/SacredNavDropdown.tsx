@@ -13,7 +13,6 @@ import { useCurrentPath } from "@/components/layout/current-path";
 
 interface SacredNavDropdownProps {
   onOpenHistory?: () => void;
-  onOpenPlans?: () => void;
   onReset?: () => void;
   canReset?: boolean;
 }
@@ -28,7 +27,6 @@ interface NavItem {
 
 export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
   onOpenHistory,
-  onOpenPlans,
   onReset,
   canReset = false,
 }) => {
@@ -148,16 +146,13 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       href: "/blog",
       cardId: "major-09",
     },
-    ...(onOpenPlans
-      ? [
-          {
-            label: isEnglish ? "Passes & Entitlements" : "แพ็กเกจเติมรอบ & สิทธิ์ใช้งาน",
-            sublabel: isEnglish ? "Compare tiers, unlock 12-House spreads & replenish readings" : "เปรียบเทียบสิทธิ์ ปลดล็อกผังใหญ่ 12 ภพ และเติมรอบดูดวง",
-            onClick: onOpenPlans,
-            cardId: "pentacles-01",
-          },
-        ]
-      : []),
+    /* หน้าราคาเป็นลิงก์จริงทุกหน้า (เดิมเป็นปุ่มเปิดหน้าต่างลอย มีแค่หน้าแรก — เจ้าของขอให้เรื่องเงิน "หาง่าย") */
+    {
+      label: isEnglish ? "Pricing & Top-ups" : "ราคาและแพ็กเกจเติมรอบ",
+      sublabel: isEnglish ? "Free daily reading · pay once, no subscription" : "ดูฟรีทุกวัน · เติมรอบจ่ายครั้งเดียว ไม่มีรายเดือน",
+      href: "/pricing",
+      cardId: "pentacles-01",
+    },
     {
       label: isEnglish ? "Consult Live Readers" : "ปรึกษาแม่หมอตัวจริง",
       sublabel: isEnglish ? "Book in-depth consultations with seasoned readers" : "จองคิววิเคราะห์ดวงเชิงลึกกับนักพยากรณ์",

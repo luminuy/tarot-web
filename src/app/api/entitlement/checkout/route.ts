@@ -73,9 +73,9 @@ export async function POST(request: Request) {
     const isEnglish = body?.lang === "en" || /seertarot_lang=en/.test(request.headers.get("cookie") || "") || request.headers.get("referer")?.includes("/en");
     const langQuery = isEnglish ? "&lang=en" : "";
     const returnUri = `${origin}/api/entitlement/checkout/confirm?order_id=${orderId}&package_id=${pkg.id}&user_id=${userId}${langQuery}`;
-    // ยกเลิกในหน้าจ่ายเงิน = กลับหน้าแรกพร้อมข้อความ (TarotFlow อ่าน `purchase_error` แล้วล้างออกจาก URL)
-    const cancelMsg = isEnglish ? "Payment was cancelled" : "ยกเลิกการชำระเงินแล้ว";
-    const cancelUri = `${origin}${isEnglish ? "/en" : "/"}?purchase_error=${encodeURIComponent(cancelMsg)}`;
+    // ยกเลิกในหน้าจ่ายเงิน = กลับหน้าราคาพร้อมข้อความกลาง ๆ ว่ายังไม่ตัดเงิน (ไม่ใช่ "ชำระเงินไม่สำเร็จ" สีแดง)
+    // PricingPlans อ่าน `checkout=cancelled` แล้วล้างออกจาก URL
+    const cancelUri = `${origin}${isEnglish ? "/en" : ""}/pricing?checkout=cancelled`;
     const charge = await createGatewayCharge({
       amountSatang: pkg.amountSatang,
       currency: "THB",

@@ -35,6 +35,7 @@ export const ASTRO_ROUTE_PREFIXES = [
   "/about",
   "/privacy",
   "/contact",
+  "/pricing",
   "/reading",
   "/daily",
   "/love",

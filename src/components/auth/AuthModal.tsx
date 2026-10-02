@@ -56,7 +56,8 @@ const FieldIcon: React.FC<{ variant: "person" | "mail" | "key"; className?: stri
  * Google/LINE ทำแบบนี้อยู่แล้วเพราะส่ง URL ปัจจุบันไปเป็น `returnUrl`
  */
 function afterEmailAuthUrl(isEn: boolean, query: string): string {
-  if (typeof window !== "undefined" && /^(\/en)?\/read\/[a-z0-9-]+\/?$/.test(window.location.pathname)) {
+  // หน้าดูดวงรายผัง / หน้าราคา: ล็อกอินเสร็จต้องกลับมาทำต่อที่เดิม (ไม่เด้งไปหน้าแรก)
+  if (typeof window !== "undefined" && /^(\/en)?\/(read\/[a-z0-9-]+|pricing)\/?$/.test(window.location.pathname)) {
     return `${window.location.pathname}?${query}`;
   }
   return isEn ? `/en?${query}` : `/?${query}`;

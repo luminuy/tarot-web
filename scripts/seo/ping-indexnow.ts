@@ -33,6 +33,7 @@ export function collectAllUrls(): string[] {
     `${SITE_ORIGIN}/love/1-card`,
     `${SITE_ORIGIN}/about`,
     `${SITE_ORIGIN}/contact`,
+    `${SITE_ORIGIN}/pricing`,
     `${SITE_ORIGIN}/privacy`,
     // English core
     `${SITE_ORIGIN}/en`,
@@ -48,6 +49,7 @@ export function collectAllUrls(): string[] {
     `${SITE_ORIGIN}/en/daily`,
     `${SITE_ORIGIN}/en/love/1-card`,
     `${SITE_ORIGIN}/en/contact`,
+    `${SITE_ORIGIN}/en/pricing`,
     `${SITE_ORIGIN}/en/privacy`,
   ];
 
