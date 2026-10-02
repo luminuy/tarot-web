@@ -32,6 +32,14 @@ export interface CreateChargeInput {
   referenceId: string;
   locale?: "th" | "en";
   metadata?: Record<string, string>;
+  /** บรรทัดรองใต้ชื่อสินค้าในหน้าจ่ายเงิน Stripe */
+  productDescription?: string;
+  /** รูปสินค้า (URL สาธารณะ — Stripe ดึงรูปเอง) */
+  imageUrl?: string;
+  /** อีเมลบัญชีที่ล็อกอินอยู่ — เติมให้ในหน้า Stripe ผู้ใช้ไม่ต้องพิมพ์ซ้ำ */
+  customerEmail?: string;
+  /** ข้อความเล็กใต้ปุ่มจ่ายเงิน */
+  submitMessage?: string;
 }
 
 export interface ChargeResult {
@@ -134,10 +142,17 @@ export async function createGatewayCharge(input: CreateChargeInput): Promise<Cha
           price_data: {
             currency: currency.toLowerCase(),
             unit_amount: input.amountSatang,
-            product_data: { name: input.description },
+            product_data: {
+              name: input.description,
+              description: input.productDescription,
+              images: input.imageUrl ? [input.imageUrl] : undefined,
+            },
           },
         },
       ],
+      customer_email: input.customerEmail,
+      submit_type: "pay",
+      custom_text: input.submitMessage ? { submit: { message: input.submitMessage } } : undefined,
       metadata,
       payment_intent_data: { description: input.description, metadata },
     });

@@ -79,9 +79,17 @@ export async function POST(request: Request) {
     const charge = await createGatewayCharge({
       amountSatang: pkg.amountSatang,
       currency: "THB",
-      description: isEnglish
-        ? `SeerTarot reading credits: ${pkg.credits} readings`
-        : `เติมโควตาดูดวง: ${pkg.name} (${pkg.credits} ครั้ง)`,
+      // หน้าจ่ายเงิน Stripe: ชื่อสั้น อ่านจบในบรรทัดเดียว + บรรทัดรองบอกสิ่งที่ได้ (เดิม "เติมโควตาดูดวง: <ชื่อแพ็ก> (10 ครั้ง)" ซ้ำสองรอบ)
+      description: isEnglish ? `${pkg.credits} tarot readings` : `เติมรอบดูดวง ${pkg.credits} ครั้ง`,
+      productDescription: isEnglish
+        ? "Readings with SeerTarot's AI readers · never expire · one-time payment, no subscription"
+        : "เปิดไพ่กับแม่หมอ SeerTarot · รอบไม่มีวันหมดอายุ · จ่ายครั้งเดียว ไม่มีรายเดือน",
+      imageUrl: `${origin}/cards/pentacles-01.jpg`,
+      // อีเมลรูปแบบผิด = Stripe ตอบ 400 ทั้งรายการ — ส่งเฉพาะที่หน้าตาเป็นอีเมลจริง (บัญชี LINE อาจไม่มีอีเมล)
+      customerEmail: user?.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email) ? user.email : undefined,
+      submitMessage: isEnglish
+        ? "Your readings are added to your account right after payment."
+        : "รอบจะเข้าบัญชีของคุณทันทีหลังชำระเงิน",
       returnUri,
       cancelUri,
       referenceId: orderId,
