@@ -117,13 +117,17 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         </span>
         <span className="flex-1 min-w-0 text-left">
           <span
-            className={`block text-[13px] font-serif-th leading-[1.7] truncate transition-colors ${
+            className={`block text-[13px] font-serif-th leading-[1.7] break-words transition-colors ${
               isActive ? "font-bold text-gold-ink" : "font-semibold text-ink group-hover:text-gold-ink"
             }`}
           >
             {item.label}
           </span>
-          <span className="block text-[11.5px] font-serif-th text-muted truncate mt-0.5 leading-[1.7]">{item.sublabel}</span>
+          {/*
+            ⛔ ห้าม `truncate` ในลิ้นชักทั้งไฟล์ (INC-0209 ➜ INC-0252) — iOS Safari คิดความกว้างกล่องตัดได้ 0
+            แล้วเฉือนบรรทัดทิ้งทั้งบรรทัด (เจ้าของเจอบรรทัดคำอธิบายหายบน iPhone) · ข้อความสั้นอยู่แล้ว ปล่อยขึ้นบรรทัดใหม่แทน
+          */}
+          <span className="block text-[11.5px] font-serif-th text-muted break-words mt-0.5 leading-[1.7]">{item.sublabel}</span>
         </span>
       </>
     );

@@ -262,6 +262,12 @@ for (const [cls, unit] of DRAWER_HEIGHT_RULES) {
 // ทั้งที่คอลัมน์กว้างถูกแล้ว · ป้าย "1909 RWS" ที่ไม่มี truncate รอดมาใบเดียวคือเบาะแส
 {
   const navSource = fs.readFileSync(path.join(ROOT, "src/components/ui/SacredNavDropdown.tsx"), "utf-8");
+  // INC-0252: ไม่ใช่แค่หัวลิ้นชัก — แถวรายการ (ชื่อ/คำอธิบาย) ก็โดนเฉือนหายบน iPhone เหมือนกัน ➔ ห้ามทั้งไฟล์
+  if (/className=\{?[`"][^"`]*\btruncate\b/.test(navSource)) {
+    failures.push(
+      "SacredNavDropdown.tsx: ห้ามใช้ `truncate` ในลิ้นชักทั้งไฟล์ — iOS Safari เฉือนบรรทัดทิ้งทั้งบรรทัด (INC-0209 ➜ INC-0252)",
+    );
+  }
   const drawerHead = navSource.match(/Drawer Header:[\s\S]*?data-nav-close/);
   if (!drawerHead) {
     failures.push(
