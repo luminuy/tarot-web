@@ -450,7 +450,6 @@ export function VideoCallRoom({
             </div>
             <p className="absolute bottom-4 inset-x-4 text-center text-sm text-surface">
               {peerName}
-              <span className="block text-[13px] text-gold-on-dark mt-0.5">วิดีโอคอลส่วนตัว · ไม่มีการบันทึก</span>
             </p>
           </div>
         )}
