@@ -80,6 +80,11 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
               empirical outcome records stored to help you evaluate the qualitative resonance of your readings over time.
             </li>
             <li>
+              <strong>Video Calls with a Reader (only after you consent)</strong> — Video and audio are relayed through
+              Cloudflare&apos;s servers so the reader never sees your IP address (and you never see theirs). We do not
+              record any video, audio or conversation, and connection data is deleted as soon as the call ends.
+            </li>
+            <li>
               <strong>Trial Quota Cookie (tarot_guest)</strong> — A strictly functional, first-party cookie containing
               only a cryptographically random identifier and your remaining complimentary trial counter. It collects
               zero personal data, performs zero cross-site tracking, and can be cleared via your browser settings at

@@ -4,6 +4,7 @@ import { Suspense, useCallback, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { VideoCallRoom } from "@/components/marketplace/VideoCallRoom";
 import { useVisibleInterval } from "@/lib/utils/use-visible-interval";
 import type { QueueTicket } from "@/lib/marketplace/queue.repo";
 
@@ -21,6 +22,8 @@ interface ConsoleState {
   isLiveOpen: boolean;
   tickets: QueueTicket[];
   totalWaiting: number;
+  /** ตั้งค่า TURN แล้ว = แม่หมอเปิดวิดีโอคอลกับคิวที่เรียกแล้วได้ */
+  videoCallEnabled?: boolean;
 }
 
 function ReaderConsoleInner() {
@@ -33,6 +36,7 @@ function ReaderConsoleInner() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [activeCallId, setActiveCallId] = useState<string | null>(null);
 
   const getAuthHeaders = useCallback((): HeadersInit => {
     const headers: Record<string, string> = {
@@ -107,7 +111,7 @@ function ReaderConsoleInner() {
       if (res.ok) {
         fetchConsoleData();
         if (action === "accept") setNotice("เรียกคิวเรียบร้อยแล้ว");
-        else if (action === "handoff") setNotice("ส่งต่องานเรียบร้อยแล้ว");
+        else if (action === "handoff") setNotice("ปิดคิวเรียบร้อยแล้ว");
         else setNotice("ยกเลิกคิวเรียบร้อยแล้ว");
       } else {
         const d = await res.json().catch(() => ({}));
@@ -151,7 +155,11 @@ function ReaderConsoleInner() {
     );
   }
 
-  const { reader, isLiveOpen, tickets, totalWaiting } = data;
+  const { reader, isLiveOpen, tickets, totalWaiting, videoCallEnabled } = data;
+  // ห้องวิดีโอแสดงเฉพาะตอนคิวนั้นยังอยู่สถานะ "เรียกแล้ว" — ปิดคิว = ห้องหายและกล้องดับเอง
+  const activeCallTicket = activeCallId
+    ? tickets.find((t) => t.id === activeCallId && t.status === "ready") ?? null
+    : null;
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-ink-deep p-4 sm:p-8 font-sans relative overflow-hidden">
@@ -243,6 +251,18 @@ function ReaderConsoleInner() {
           </button>
         </div>
 
+        {/* 📹 ห้องวิดีโอคอลของคิวที่กำลังคุย */}
+        {videoCallEnabled && activeCallTicket && (
+          <VideoCallRoom
+            key={activeCallTicket.id}
+            ticketId={activeCallTicket.id}
+            role="reader"
+            peerName={`คุณ${activeCallTicket.nickname || "ลูกดวง"}`}
+            authToken={token}
+            onClose={() => setActiveCallId(null)}
+          />
+        )}
+
         {/* Tickets Grid */}
         {tickets.length === 0 ? (
           <div className="altar-card-porcelain altar-panel p-12 text-center space-y-3">
@@ -287,7 +307,7 @@ function ReaderConsoleInner() {
                           : "bg-amber-50 text-amber-700 border border-amber-200"
                       }`}
                     >
-                      {isReady ? "กำลังรอเชื่อมต่อ LINE" : "กำลังรอคิว"}
+                      {isReady ? "เรียกคิวแล้ว" : "กำลังรอคิว"}
                     </span>
                   </div>
 
@@ -342,15 +362,27 @@ function ReaderConsoleInner() {
                         เรียกคิวนี้
                       </Button>
                     ) : (
-                      <Button
-                        variant="gold"
-                        size="sm"
-                        className="flex-1 text-xs bg-emerald-600 hover:bg-emerald-500 text-white"
-                        disabled={actionLoading === ticket.id}
-                        onClick={() => handleTicketAction(ticket.id, "handoff")}
-                      >
-                        ส่งต่อทาง LINE เรียบร้อย
-                      </Button>
+                      <>
+                        {videoCallEnabled && activeCallId !== ticket.id && (
+                          <Button
+                            variant="gold"
+                            size="sm"
+                            className="flex-1 text-xs"
+                            onClick={() => setActiveCallId(ticket.id)}
+                          >
+                            เข้าห้องวิดีโอ
+                          </Button>
+                        )}
+                        <Button
+                          variant="gold"
+                          size="sm"
+                          className="flex-1 text-xs bg-emerald-600 hover:bg-emerald-500 text-white"
+                          disabled={actionLoading === ticket.id}
+                          onClick={() => handleTicketAction(ticket.id, "handoff")}
+                        >
+                          เสร็จสิ้นคิวนี้
+                        </Button>
+                      </>
                     )}
 
                     <Button

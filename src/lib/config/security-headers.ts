@@ -58,3 +58,15 @@ export const SECURITY_HEADERS: { key: string; value: string }[] = [
     value: "max-age=31536000; includeSubDomains; preload",
   },
 ];
+
+/**
+ * 📹 หน้าที่ต้องเปิดกล้อง/ไมค์ได้ — วิดีโอคอลตัวต่อตัวกับแม่หมอ (src/components/marketplace/VideoCallRoom.tsx)
+ *
+ * ทั้งเว็บปิดกล้องและไมค์ไว้ (`camera=()`) — เปิดให้ **เฉพาะโดเมนเราเอง เฉพาะสองเส้นนี้**
+ * `next.config.ts` ใส่หัวนี้ต่อท้ายชุดกลาง ซึ่ง Next ให้ค่าที่ประกาศทีหลังชนะ
+ * ทั้งสองเส้นเรนเดอร์โดย Worker (อยู่ใน `run_worker_first`) จึงไม่ต้องแตะ `public/_headers`
+ * ⚠️ ห้ามเปิดให้ทั้งเว็บ — หน้าที่ไม่ได้ใช้กล้องไม่ควรขอสิทธิ์ได้เลย
+ */
+export const CALL_PAGE_SOURCES = ["/readers/queue/:id", "/readers/console"] as const;
+
+export const CALL_PAGE_PERMISSIONS_POLICY = "camera=(self), microphone=(self), geolocation=(), interest-cohort=()";

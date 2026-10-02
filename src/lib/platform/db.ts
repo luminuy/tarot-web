@@ -122,6 +122,22 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
       CREATE INDEX IF NOT EXISTS idx_tickets_reader_status ON queue_tickets(reader_id, status);
       CREATE INDEX IF NOT EXISTS idx_tickets_cust ON queue_tickets(customer_ref);
 
+      -- 📹 ห้องวิดีโอคอลตัวต่อตัว (migrations/0019)
+      CREATE TABLE IF NOT EXISTS call_sessions (
+        ticket_id          TEXT PRIMARY KEY REFERENCES queue_tickets(id),
+        round              INTEGER NOT NULL DEFAULT 1,
+        offer_sdp          TEXT,
+        answer_sdp         TEXT,
+        customer_seen_at   INTEGER,
+        reader_seen_at     INTEGER,
+        customer_turn_user TEXT,
+        reader_turn_user   TEXT,
+        ended_at           INTEGER,
+        ended_by           TEXT,
+        created_at         INTEGER NOT NULL,
+        updated_at         INTEGER NOT NULL
+      );
+
       CREATE TABLE IF NOT EXISTS bookings (
         id          TEXT PRIMARY KEY,
         ticket_id   TEXT NOT NULL REFERENCES queue_tickets(id),

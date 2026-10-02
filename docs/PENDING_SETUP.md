@@ -47,6 +47,23 @@
 
 ---
 
+## 🟡 1.5 รอเจ้าของตั้งค่า — วิดีโอคอลแม่หมอ (Cloudflare Realtime TURN · เพิ่ม 2026-10-02)
+
+โค้ดพร้อมแล้ว แต่ **ยังไม่ตั้ง = ปุ่มวิดีโอคอลไม่โผล่** (ลูกค้ายังคุยผ่าน LINE ได้ตามเดิม ไม่มีอะไรพัง)
+
+1. Cloudflare Dashboard ➔ **Realtime** ➔ **TURN Server** ➔ **Create** (ตั้งชื่อเช่น `seertarot-call`)
+2. คัดลอก **Turn Token ID** และ **API Token** (API Token เห็นได้ครั้งเดียว)
+3. ใส่เป็น secret ของ Worker:
+   ```
+   npx wrangler secret put CLOUDFLARE_TURN_KEY_ID
+   npx wrangler secret put CLOUDFLARE_TURN_KEY_API_TOKEN
+   ```
+4. ตรวจ: เรียกคิวในแผงแม่หมอ ➔ ต้องเห็นปุ่ม "เข้าห้องวิดีโอ" และหน้าคิวลูกค้าต้องเห็นกล่องวิดีโอคอล
+
+ค่าใช้จ่าย: ฟรี 1,000 GB/เดือน (TURN + SFU ใช้โควตาร่วมกัน) เกินคิด $0.05/GB · ประมาณการ 50 คน × 1.5 ชม. ที่ 720p ≈ 100 GB/เดือน
+
+---
+
 ## 📋 2. รายการ Secrets ทั้งหมดบน Cloudflare Worker (`tarot-web`)
 
 สามารถตรวจสอบได้ด้วยคำสั่ง: `npx wrangler secret list`
