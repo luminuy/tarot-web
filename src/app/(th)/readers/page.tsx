@@ -11,7 +11,8 @@ import type { Metadata } from "next";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { ConsultHeroStage } from "@/components/marketplace/ConsultStage";
-import { BriefIcon, ChevronIcon, ClockIcon, ShieldIcon, VideoIcon } from "@/components/marketplace/ConsultIcons";
+import { ChevronIcon } from "@/components/marketplace/ConsultIcons";
+import { ReadersValueRail } from "@/components/readers/ReadersValueRail";
 
 export const dynamic = "force-dynamic";
 
@@ -72,29 +73,6 @@ export default async function ReadersPage() {
       },
     ],
   };
-
-  const valueProps = [
-    {
-      Icon: VideoIcon,
-      title: "วิดีโอคอลในเว็บ",
-      body: "กดเข้าห้องได้จากมือถือหรือคอม ไม่ต้องลงแอป ไม่ต้องแอด LINE",
-    },
-    {
-      Icon: ShieldIcon,
-      title: "ความเป็นส่วนตัวมาก่อน",
-      body: "แม่หมอไม่เห็นเบอร์โทรและ IP ของคุณ เว็บไม่บันทึกภาพและเสียง",
-    },
-    {
-      Icon: BriefIcon,
-      title: "แม่หมอรู้เรื่องก่อนคุย",
-      body: "AI สรุปคำถามให้แม่หมออ่านก่อน ไม่ต้องเล่าใหม่ตั้งแต่ต้น",
-    },
-    {
-      Icon: ClockIcon,
-      title: `${CONSULTATION_MINUTES} นาทีเต็ม`,
-      body: `ราคาเดียว ${CONSULTATION_PRICE_THB} บาท รู้ราคาก่อนเข้าคิว`,
-    },
-  ];
 
   const faqs = [
     {
@@ -175,28 +153,8 @@ export default async function ReadersPage() {
             <ReadersDirectory initialReaders={readers} liveReaderIds={liveReaderIds} />
           </div>
 
-          {/* ── เหตุผลที่ไว้ใจได้ ─────────────────────────────────────────────── */}
-          <section aria-labelledby="readers-why" className="pt-20 sm:pt-24 space-y-8">
-            <div className="text-center space-y-2">
-              <p className="text-[13px] font-bold text-gold-ink">ทำไมต้องปรึกษาที่นี่</p>
-              <h2 id="readers-why" className="text-2xl sm:text-3xl font-bold text-ink-deep">
-                <ThaiPhrases>สบายใจ ตั้งแต่ก่อนเริ่มคุย</ThaiPhrases>
-              </h2>
-            </div>
-            <ul className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-              {valueProps.map(({ Icon, title, body }) => (
-                <li key={title} className="rounded-3xl border border-line bg-surface p-4 sm:p-6 space-y-2.5 sm:space-y-3">
-                  <span className="h-11 w-11 rounded-2xl bg-gold-ink/10 text-gold-ink grid place-items-center">
-                    <Icon />
-                  </span>
-                  <h3 className="font-bold text-ink-deep">{title}</h3>
-                  <p className="text-[13px] sm:text-sm text-muted leading-relaxed">
-                    <ThaiPhrases>{body}</ThaiPhrases>
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </section>
+          {/* ── เหตุผลที่ไว้ใจได้ — แถวปัดแบบหน้าแรก ───────────────────────────── */}
+          <ReadersValueRail />
 
           {/* ── ขั้นตอน ──────────────────────────────────────────────────────── */}
           <section id="how-it-works" aria-labelledby="readers-how-it-works" className="pt-20 sm:pt-24 space-y-8 scroll-mt-24">

@@ -470,18 +470,6 @@ export function VideoCallRoom({
 
         {isCustomer && phase === "idle" && (
           <div className="space-y-3 text-[13px] leading-relaxed">
-            <ul className="space-y-1.5 text-ink">
-              {[
-                "แม่หมอไม่เห็นเบอร์โทรและหมายเลข IP ของคุณ",
-                "เว็บไม่บันทึกภาพ เสียง หรือบทสนทนาใด ๆ",
-                "ปิดไมค์หรือกล้องได้ตลอดเวลาระหว่างคุย",
-              ].map((line) => (
-                <li key={line} className="flex items-start gap-2">
-                  <span aria-hidden="true" className="text-ok font-bold">✓</span>
-                  <span><ThaiPhrases>{line}</ThaiPhrases></span>
-                </li>
-              ))}
-            </ul>
             <label className="flex items-start gap-3 rounded-xl border border-line bg-surface p-3.5 text-sm text-ink cursor-pointer">
               <input
                 type="checkbox"
