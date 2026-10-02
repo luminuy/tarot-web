@@ -337,8 +337,8 @@ export const UPGRADE_COPY: Record<UpgradeReason, UpgradeCopy> = {
   },
   grand_spread: {
     eyebrow: "ผังใหญ่พิเศษ",
-    title: "ผังพยากรณ์เจาะลึกพิเศษ (5–12 ใบ)",
-    body: "ผังนี้เป็นผังวิเคราะห์เชิงลึกระดับสูง (เช่น Celtic Cross 10 ใบ, จักรราศี 12 ภพ, 7 จักระ) สำหรับผู้ที่เติมรอบเปิดไพ่พิเศษ เพื่อดูดวงชะตาอย่างครอบคลุมทุกมิติ",
+    title: "ผังใหญ่ 5–12 ใบ เปิดได้ด้วยรอบที่เติม",
+    body: "ผังอย่างเซลติกครอส 10 ใบหรือ 12 ภพ อ่านดวงได้ละเอียดทุกด้าน เติมรอบครั้งเดียวเปิดได้ทุกผัง",
     primaryLabel: `เติมรอบเปิดผังนี้ (เริ่ม ${CHEAPEST_PACKAGE_THB}.-)`,
     primaryAction: "credits",
     secondaryLabel: "เลือกผังมาตรฐาน 1–4 ใบไปก่อน",
@@ -346,8 +346,8 @@ export const UPGRADE_COPY: Record<UpgradeReason, UpgradeCopy> = {
   },
   master_persona: {
     eyebrow: "แม่หมอผู้เชี่ยวชาญพิเศษ",
-    title: "แม่หมอวิเคราะห์ดวงเชิงลึกเฉพาะทาง",
-    body: "อาจารย์สายฟันธง และ แม่หมอสายพลัง เป็น 2 ท่านผู้เชี่ยวชาญด้านกลยุทธ์ฟันธงและจิตวิทยาเชิงลึก เฉพาะผู้ที่เติมรอบเปิดไพ่พิเศษ",
+    title: "แม่หมอพิเศษ ปรึกษาได้ด้วยรอบที่เติม",
+    body: "อาจารย์สายฟันธงกับแม่หมอสายพลัง อ่านไพ่เจาะลึกเฉพาะทาง เติมรอบแล้วเลือกปรึกษาได้ทั้งสองท่าน",
     primaryLabel: `เติมรอบเพื่อปรึกษา (เริ่ม ${CHEAPEST_PACKAGE_THB}.-)`,
     primaryAction: "credits",
     secondaryLabel: "เลือกแม่หมอท่านอื่นไปก่อน",
@@ -481,8 +481,8 @@ export const UPGRADE_COPY_EN: Record<UpgradeReason, UpgradeCopy> = {
   },
   grand_spread: {
     eyebrow: "Grand Divination Spread",
-    title: "Grand & Master Spreads (5–12 Cards)",
-    body: "Grand spreads (such as the 10-card Celtic Cross, 12-house Astrological Wheel, and 7 Chakras) provide high-dimensional holistic mapping, available with Tarot Pass credits.",
+    title: "Big 5–12 card spreads need a top-up",
+    body: "Spreads like the 10-card Celtic Cross or the 12 houses read every corner of your life. One top-up opens every spread.",
     primaryLabel: `Top up to unlock (Starts at ฿${CHEAPEST_PACKAGE_THB})`,
     primaryAction: "credits",
     secondaryLabel: "Choose a 1–4 card spread for now",
@@ -490,8 +490,8 @@ export const UPGRADE_COPY_EN: Record<UpgradeReason, UpgradeCopy> = {
   },
   master_persona: {
     eyebrow: "Grand Master Readers",
-    title: "Specialized Master Diviners",
-    body: "The Master Strategist and Astral Star are two specialized masters of strategic clarity and depth psychology, unlocked with Tarot Pass credits.",
+    title: "Master readers need a top-up",
+    body: "The Master Strategist and Astral Star give deeper, specialist readings. Top up once to consult either of them.",
     primaryLabel: `Top up to consult (Starts at ฿${CHEAPEST_PACKAGE_THB})`,
     primaryAction: "credits",
     secondaryLabel: "Choose another reader for now",

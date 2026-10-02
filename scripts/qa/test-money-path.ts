@@ -438,6 +438,41 @@ async function main(): Promise<void> {
     );
   }
 
+  console.log("\n── 9. กดซื้อตอนยังไม่ล็อกอิน ➔ จำแพ็กไว้ ล็อกอินเสร็จพาไปจ่ายต่อ (ใช้ได้ครั้งเดียว · หมดอายุ 30 นาที) ──");
+  {
+    const store = new Map<string, string>();
+    (globalThis as unknown as { sessionStorage: Storage }).sessionStorage = {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => void store.set(k, v),
+      removeItem: (k: string) => void store.delete(k),
+      clear: () => store.clear(),
+      key: () => null,
+      length: 0,
+    } as Storage;
+    const { rememberPendingCheckout, takePendingCheckout, hasPendingCheckout } = await import(
+      "../../src/lib/entitlement/pending-checkout"
+    );
+    rememberPendingCheckout("pack_30");
+    check("จำแพ็กแล้วอ่านคืนได้", hasPendingCheckout() && takePendingCheckout() === "pack_30");
+    check("อ่านแล้วหายทันที (กันเด้งไปหน้าจ่ายเงินซ้ำ)", !hasPendingCheckout() && takePendingCheckout() === null);
+    rememberPendingCheckout("pack_10");
+    check("เกิน 30 นาที = ถือว่าเปลี่ยนใจแล้ว", takePendingCheckout(Date.now() + 31 * 60 * 1000) === null);
+    rememberPendingCheckout("javascript:alert(1)");
+    check("ไม่จำค่าที่ไม่ใช่รหัสแพ็ก", !hasPendingCheckout());
+    const authSrc = readSource("src/components/auth/AuthModal.tsx");
+    const plansSrc = readSource("src/components/entitlement/PricingPlans.tsx");
+    check(
+      "ล็อกอิน (อีเมลและ Google/LINE) พากลับหน้าราคาเมื่อมีแพ็กค้าง และหน้าราคาพาไปจ่ายต่อ",
+      (authSrc.match(/hasPendingCheckout\(\)/g) ?? []).length >= 2 &&
+        /oauthReturnPath\(isEn\)/.test(authSrc) &&
+        /takePendingCheckout\(\)/.test(plansSrc) && /get\("auth_success"\) !== "1"\) return/.test(plansSrc),
+    );
+    check(
+      "สคริปต์ของทุกหน้าไม่แบกโค้ดทำต่อ (งบ JS หน้าเนื้อหา 8 KB)",
+      !/pending-checkout|resume-checkout/.test(readSource("astro/scripts/site-chrome.ts")),
+    );
+  }
+
   console.log(`\n📊 สรุป: ผ่าน ${pass} ข้อ | ล้มเหลว ${fail} ข้อ\n`);
   if (fail > 0) process.exit(1);
 }

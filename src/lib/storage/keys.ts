@@ -72,6 +72,9 @@ export const STORAGE_KEYS = {
   locale: "seertarot_lang",
   /** ✦ ราศีของฉันที่บันทึกจากหน้าไพ่ประจำราศี — ส่งไปให้แม่หมอเป็นบริบทตอนเปิดไพ่ */
   mySign: "tarot_my_zodiac_v1",
+  /** แพ็กที่ผู้ใช้กดซื้อตอนยังไม่ล็อกอิน (sessionStorage · อายุ 30 นาที)
+   *  ล็อกอินเสร็จพากลับมาหน้า /pricing ซึ่งอ่านค่านี้แล้วพาไปหน้าจ่ายเงินต่อ */
+  pendingCheckout: "tarot_pending_checkout",
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

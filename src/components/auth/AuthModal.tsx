@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { hasPendingCheckout, pricingPathFor } from "@/lib/entitlement/pending-checkout";
 import { calculatePasswordStrength } from "@/lib/auth/strength";
 import { invalidateSessionCache } from "@/lib/auth/use-session";
 import { soundManager } from "@/lib/utils/audio";
@@ -55,7 +56,21 @@ const FieldIcon: React.FC<{ variant: "person" | "mail" | "key"; className?: stri
  * ไม่ใช่ตกหน้าแรกแล้วต้องย้อนไปหาผังในคลังใหม่ (หน้านั้นมี `TarotFlow` ที่อ่าน `auth_success` ได้เหมือนหน้าแรก)
  * Google/LINE ทำแบบนี้อยู่แล้วเพราะส่ง URL ปัจจุบันไปเป็น `returnUrl`
  */
+/**
+ * ปลายทางหลังล็อกอิน Google/LINE — ปกติคือหน้าเดิม
+ * แต่ถ้ากดซื้อแพ็กค้างไว้ ➔ หน้าราคา ซึ่งพาไปหน้าจ่ายเงินต่อเอง (INC-0249)
+ */
+function oauthReturnPath(isEn: boolean): string {
+  if (typeof window === "undefined") return isEn ? "/en" : "/";
+  if (hasPendingCheckout()) return pricingPathFor(window.location.pathname);
+  return window.location.pathname + window.location.search || (isEn ? "/en" : "/");
+}
+
 function afterEmailAuthUrl(isEn: boolean, query: string): string {
+  // กดซื้อแพ็กค้างไว้ก่อนล็อกอิน ➔ กลับไปหน้าราคาซึ่งพาไปจ่ายเงินต่อเอง (INC-0249)
+  if (typeof window !== "undefined" && hasPendingCheckout()) {
+    return `${pricingPathFor(window.location.pathname)}?${query}`;
+  }
   // หน้าดูดวงรายผัง / หน้าราคา: ล็อกอินเสร็จต้องกลับมาทำต่อที่เดิม (ไม่เด้งไปหน้าแรก)
   if (typeof window !== "undefined" && /^(\/en)?\/(read\/[a-z0-9-]+|pricing)\/?$/.test(window.location.pathname)) {
     return `${window.location.pathname}?${query}`;
@@ -208,19 +223,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleLoginGoogle = () => {
     soundManager.playCardSelectSound();
-    const currentPath = typeof window !== "undefined"
-      ? (window.location.pathname + window.location.search)
-      : (isEn ? "/en" : "/");
-    const returnUrl = encodeURIComponent(currentPath || (isEn ? "/en" : "/"));
+    const returnUrl = encodeURIComponent(oauthReturnPath(isEn));
     window.location.href = `/api/auth/google?returnUrl=${returnUrl}`;
   };
 
   const handleLoginLine = () => {
     soundManager.playCardSelectSound();
-    const currentPath = typeof window !== "undefined"
-      ? (window.location.pathname + window.location.search)
-      : (isEn ? "/en" : "/");
-    const returnUrl = encodeURIComponent(currentPath || (isEn ? "/en" : "/"));
+    const returnUrl = encodeURIComponent(oauthReturnPath(isEn));
     window.location.href = `/api/auth/line?returnUrl=${returnUrl}`;
   };
 
