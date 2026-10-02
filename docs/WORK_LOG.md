@@ -38,6 +38,12 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-02 (รอบ 196): ✦ อัปเวอร์ชัน `astro` 7.3.4 + `@astrojs/react` 7.0.0 (แทน dependabot #625 · #626)
+
+- PR ของ dependabot สองตัวตกด่าน `npm ci` เพราะแก้แค่ `package.json` ไม่แตะ `package-lock.json` — รวมสองตัวเป็น PR เดียว + `npm run deps:relock`
+- `@astrojs/react` 7 ย้ายไป `@vitejs/plugin-react` v6 (ใช้ Oxc แทน Babel) และถอดตัวเลือก `babel` — เราเรียก `react()` เปล่า ๆ จึงไม่กระทบ · ตัวเลือก `compiler` (React Compiler) ยังไม่เปิด
+- ตรวจในเครื่อง: บิลด์ผ่าน · `repo:verify` ผ่านครบทุกด่าน · น้ำหนัก JS หน้าแรกเท่าเดิม (156 KB)
+
 ### 🗓️ 2026-10-02 (รอบ 195): ✦ หน้าจ่ายเงิน Stripe — ชื่อสินค้าสั้น · รูป · เติมอีเมลให้ · ข้อความใต้ปุ่ม
 
 - เจ้าของขอออกแบบหน้าจ่ายเงินของ Stripe ใหม่ — หน้านั้นเป็นของ Stripe (ปรับโครงไม่ได้) ส่วนที่ปรับได้แบ่งสองทาง:
