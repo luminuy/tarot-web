@@ -124,7 +124,7 @@ function ReaderConsoleInner() {
 
   if (loading && !data) {
     return (
-      <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-ink-deep flex items-center justify-center p-4">
+      <main id="main-content" tabIndex={-1} className="min-h-screen text-ink-deep flex items-center justify-center p-4">
         <div className="altar-panel rounded-2xl p-8 text-center space-y-3 z-10">
           {/*
         ⚠️ ทุกหน้าต้องมี <h1> หนึ่งอันเสมอ — มันคือ "ชื่อของหน้า" ที่ screen reader
@@ -142,7 +142,7 @@ function ReaderConsoleInner() {
 
   if (error || !data) {
     return (
-      <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-ink-deep flex items-center justify-center p-4">
+      <main id="main-content" tabIndex={-1} className="min-h-screen text-ink-deep flex items-center justify-center p-4">
         <div className="altar-panel rounded-2xl p-8 text-center space-y-4 max-w-md z-10 border border-err/40">
           <h1 className="sr-only">แผงควบคุมแม่หมอ</h1>
           <h2 className="text-base font-bold text-err">ไม่สามารถเข้าใช้งานได้</h2>
@@ -162,7 +162,7 @@ function ReaderConsoleInner() {
     : null;
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-ink-deep p-4 sm:p-8 font-sans relative overflow-hidden">
+    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink-deep p-4 sm:p-8 font-sans relative overflow-hidden">
       <div className="max-w-5xl mx-auto space-y-6 relative z-10">
         {notice && (
           <div className="rounded-xl border border-gold-ink/30 bg-gold-ink/10 px-4 py-2.5 text-xs text-ink flex items-center justify-between">
@@ -414,7 +414,7 @@ export default function ReaderConsolePage() {
           tabIndex={-1}
           role="status"
           aria-busy="true"
-          className="min-h-screen bg-[#F6F1E9] text-ink-deep flex items-center justify-center p-4"
+          className="min-h-screen text-ink-deep flex items-center justify-center p-4"
         >
         {/*
           ⚠️ fallback ของ Suspense คือ **HTML ที่ถูก prerender ออกมาจริง**

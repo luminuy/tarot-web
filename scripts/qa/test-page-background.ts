@@ -30,10 +30,20 @@ const ROOT = process.cwd();
 const SCAN_DIRS = ["src", "astro"];
 const EXT = new Set([".tsx", ".astro"]);
 
-/** สูงเต็มจอ = ก้อนที่ครอบทั้งหน้า ไม่ใช่การ์ดย่อย */
-const FULL_HEIGHT = /\bmin-h-(screen|dvh)\b/;
+/** สูงเต็มจอ = ก้อนที่ครอบทั้งหน้า ไม่ใช่การ์ดย่อย (รวม `min-h-[70vh]` แบบที่หน้าคิวแม่หมอใช้) */
+const FULL_HEIGHT = /\bmin-h-(screen|dvh|\[\d+vh\])(?![\w-])/;
 /** พื้นทึบระดับธีมที่จะบังแสงไล่สีทิ้ง */
 const OPAQUE_BG = /\bbg-(canvas|surface|inset)[a-z-]*(?:\/(\d+))?\b/g;
+/**
+ * สีพื้นแบบเขียนค่าเอง เช่น `bg-[#F6F1E9]` — บังแสงไล่สีได้เหมือนกันทุกประการ
+ * รอบ 196: หน้า /readers ทั้งชุดใช้ค่านี้ ด่านเดิมดูแค่ชื่อโทเคน จึงหลุดจนเจ้าของทักว่า "พื้นหลังแปลก ไม่เหมือนหน้าหลัก"
+ */
+const HEX_BG = /(?<![:\w-])bg-\[#[0-9A-Fa-f]{3,8}\](?:\/(\d+))?/g;
+/**
+ * ที่ตั้งใจปูพื้นเอง (มีเหตุผล) — เพิ่มได้เมื่อเปิดดูเทียบกับหน้าแรกแล้วเท่านั้น
+ *   tester/layout.tsx: โหมดผู้ทดสอบเป็นธีมมืดทั้งหน้าโดยเจตนา ไม่ใช่หน้าสาธารณะ
+ */
+const ALLOW_HEX_FILES = new Set(["src/app/(th)/tester/layout.tsx"]);
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -66,6 +76,16 @@ function run(): void {
       for (const raw of line.match(/"[^"\n]*"|`[^`\n]*`/g) ?? []) {
         const body = raw.slice(1, -1);
         if (!FULL_HEIGHT.test(body)) continue;
+        if (!ALLOW_HEX_FILES.has(path.relative(ROOT, file))) {
+          for (const m of body.matchAll(HEX_BG)) {
+            const alpha = m[1] ? Number(m[1]) : 100;
+            if (alpha <= 50) continue;
+            problems.push(
+              `${path.relative(ROOT, file)}:${idx + 1} — \`${m[0]}\` (สีเขียนเอง) อยู่บนก้อนที่สูงเต็มจอ\n` +
+                `      ก้อนนั้นคือ: ${body.slice(0, 110)}${body.length > 110 ? "…" : ""}`,
+            );
+          }
+        }
         for (const m of body.matchAll(OPAQUE_BG)) {
           // โปร่งกว่า 50% ปล่อยผ่าน แสงไล่สียังทะลุขึ้นมาได้
           const alpha = m[2] ? Number(m[2]) : 100;

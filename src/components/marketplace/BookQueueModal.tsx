@@ -6,6 +6,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Field } from "@/components/ui/Field";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { CONSULTATION_MINUTES, CONSULTATION_PRICE_THB } from "@/lib/marketplace/offer";
 
 interface BookQueueModalProps {
   isOpen: boolean;
@@ -129,9 +130,9 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
         <div className="altar-card-porcelain !rounded-lg flex items-center justify-between p-3 text-xs">
           <div className="flex items-center gap-2">
             <span className="text-gold-ink font-bold text-sm">ค่าบริการ / บูชาครู</span>
-            <span className="text-[13px] text-muted">(30 นาที)</span>
+            <span className="text-[13px] text-muted">({CONSULTATION_MINUTES} นาที)</span>
           </div>
-          <span className="font-bold text-gold-ink text-sm">299 บาท</span>
+          <span className="font-bold text-gold-ink text-sm">{CONSULTATION_PRICE_THB} บาท</span>
         </div>
 
         <Field label="ชื่อเล่นของคุณ (Nickname) *">

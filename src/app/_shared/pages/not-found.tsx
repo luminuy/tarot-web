@@ -77,7 +77,7 @@ export function NotFoundMain({ forcedLocale = "th" }: { forcedLocale?: "th" | "e
   const copy = forcedLocale === "en" ? COPY.en : COPY.th;
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-[60vh] bg-canvas text-ink flex items-center justify-center px-6 py-20">
+    <main id="main-content" tabIndex={-1} className="min-h-[60vh] text-ink flex items-center justify-center px-6 py-20">
       <div className="max-w-lg w-full text-center space-y-8">
         <div className="space-y-4">
           <span aria-hidden="true" className="block text-4xl font-serif-th font-bold text-gold">404</span>
