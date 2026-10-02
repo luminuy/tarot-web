@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { createGatewayCharge } from "@/lib/marketplace/payment-gateway";
+import {
+  createGatewayCharge,
+  isStripeTestModeOnProduction,
+  PAYMENTS_NOT_OPEN_MESSAGE,
+} from "@/lib/marketplace/payment-gateway";
+import { isPrivilegedTestRequest } from "@/lib/security/privileged";
 import {
   CONSULTATION_PRICE_SATANG,
   createPaymentRecord,
@@ -44,6 +49,11 @@ export async function POST(request: Request) {
       limit.retryAfterSeconds,
       "คุณทำรายการชำระเงินบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่นะ"
     );
+  }
+
+  // คีย์ทดสอบบนเว็บจริง = เปิดให้เฉพาะผู้ทดสอบ (บัตร 4242 ห้ามได้คิวแม่หมอฟรี)
+  if (isStripeTestModeOnProduction() && !(await isPrivilegedTestRequest(request))) {
+    return NextResponse.json({ error: PAYMENTS_NOT_OPEN_MESSAGE }, { status: 503 });
   }
 
   try {
@@ -122,12 +132,15 @@ export async function POST(request: Request) {
     }
 
     // 4. Create Gateway Charge
-    const defaultReturnUri = `${resolveAppOrigin(request)}/readers/queue/${encodeURIComponent(ticketId)}?paid=1`;
+    const queueUri = `${resolveAppOrigin(request)}/readers/queue/${encodeURIComponent(ticketId)}`;
+    const defaultReturnUri = `${queueUri}?paid=1`;
     const charge = await createGatewayCharge({
       amountSatang,
       currency: "THB",
       description: `ปรึกษาดวงชะตากับ ${reader.displayName} (คิว #${ticket.position || 1})`,
       returnUri: defaultReturnUri,
+      cancelUri: queueUri,
+      referenceId: bookingId,
       metadata: { ticketId, bookingId, readerId: reader.id },
     });
 
@@ -135,7 +148,7 @@ export async function POST(request: Request) {
     const payment = await createPaymentRecord({
       bookingId,
       ticketId,
-      provider: "omise",
+      provider: charge.provider,
       providerRef: charge.chargeId,
       amountSatang,
       currency: "THB",

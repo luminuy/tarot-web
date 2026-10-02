@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { verifyWebhookSignature } from "@/lib/marketplace/payment-gateway";
+import { parseWebhookEvent, verifyWebhookSignature } from "@/lib/marketplace/payment-gateway";
 import { updatePaymentStatus } from "@/lib/marketplace/payments.repo";
 import { getAppDB } from "@/lib/platform/db";
 import { getCreditPackageById } from "@/lib/entitlement/packages";
@@ -13,17 +13,20 @@ import {
 export const runtime = "nodejs";
 
 /**
- * POST /api/marketplace/payments/webhook - รับ Webhook ยืนยันการชำระเงินจาก Payment Gateway
+ * POST /api/marketplace/payments/webhook - รับ Webhook ยืนยันการชำระเงินจาก Stripe
+ *
+ * ตั้งใน Stripe Dashboard ➔ Developers ➔ Webhooks ให้ส่ง 4 event นี้มาที่เส้นนี้:
+ * `checkout.session.completed` · `checkout.session.async_payment_succeeded`
+ * `checkout.session.async_payment_failed` · `checkout.session.expired`
  */
 export async function POST(request: Request) {
   try {
     const rawBody = await request.text();
-    // header ตามสเปก Omise (A2-12) — ชื่อ header ไม่สนตัวพิมพ์เล็กใหญ่
-    const signature = request.headers.get("omise-signature");
-    const timestamp = request.headers.get("omise-signature-timestamp");
+    // ต้องตรวจกับ body ดิบ "ก่อน" parse เสมอ — JSON.stringify ซ้ำได้สตริงคนละตัว ลายเซ็นจะไม่ตรง
+    const signature = request.headers.get("stripe-signature");
 
     // Verify webhook signature (Zero-Trust Security Guard)
-    const isValid = verifyWebhookSignature(rawBody, signature, timestamp);
+    const isValid = verifyWebhookSignature(rawBody, signature);
     if (!isValid) {
       return NextResponse.json({ error: "ลายเซ็น Webhook ไม่ถูกต้อง (Invalid signature)" }, { status: 401 });
     }
@@ -35,16 +38,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "รูปแบบ JSON ของ Webhook ไม่ถูกต้อง" }, { status: 400 });
     }
 
-    const data = (payload.data || payload) as Record<string, unknown>;
-    const chargeId = (data.id || payload.chargeId) as string | undefined;
-    const isPaid =
-      data.status === "successful" ||
-      payload.status === "paid" ||
-      payload.event === "charge.complete";
-
-    if (!chargeId) {
-      return NextResponse.json({ error: "ไม่พบ charge id ใน Webhook payload" }, { status: 400 });
+    const event = parseWebhookEvent(payload);
+    if (!event) {
+      // event ชนิดอื่นที่เราไม่ได้ใช้ — ตอบ 2xx ไม่งั้น Stripe จะยิงซ้ำไปเรื่อย ๆ
+      return NextResponse.json({ received: true, note: "Event ignored" });
     }
+    const chargeId = event.chargeId;
 
     // Look up payment by providerRef (chargeId)
     const db = await getAppDB();
@@ -56,7 +55,7 @@ export async function POST(request: Request) {
     const paymentRow = await db
       .prepare(
         `SELECT id, order_id, booking_id, user_id, ticket_id, amount_satang, currency, status, provider
-           FROM payments WHERE provider_ref = ? LIMIT 1`
+           FROM payments WHERE provider_ref = ? AND provider = 'stripe' LIMIT 1`
       )
       .bind(chargeId)
       .first<PaymentRowForGrant>();
@@ -66,7 +65,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ received: true, note: "Charge not found in active records" });
     }
 
-    if (isPaid) {
+    // ยอดที่ Stripe เก็บได้จริงต้องตรงกับแถวของเรา — ไม่ตรง = ไม่แจกอะไรทั้งนั้น
+    if (
+      event.outcome === "paid" &&
+      (event.charge.amountSatang !== Number(paymentRow.amount_satang) || event.charge.currency !== paymentRow.currency)
+    ) {
+      console.error("[Payment Webhook] ยอดเงินจาก Stripe ไม่ตรงกับรายการ", { chargeId });
+      return NextResponse.json({ received: true, note: "Amount mismatch" });
+    }
+
+    if (event.outcome === "paid") {
       await updatePaymentStatus(paymentRow.id, "paid", {
         providerRef: chargeId,
         webhookLog: rawBody,
@@ -78,9 +86,8 @@ export async function POST(request: Request) {
       // ทำที่นี่ด้วย (ไม่รอ return_uri) เพราะผู้ใช้อาจปิดเบราว์เซอร์หลังจ่ายเงิน
       // แล้วไม่เคยกลับมาที่ `/api/entitlement/checkout/confirm` เลย
       // grantBonus เป็น idempotent ต่อ (user_id, reason) จึงเรียกซ้ำได้ปลอดภัย
-      const metadata = (data.metadata ?? {}) as Record<string, unknown>;
-      const buyerId = typeof metadata.userId === "string" ? metadata.userId : "";
-      const boughtPackageId = typeof metadata.packageId === "string" ? metadata.packageId : "";
+      const buyerId = event.charge.metadata.userId ?? "";
+      const boughtPackageId = event.charge.metadata.packageId ?? "";
       const paidOrderId = orderIdOfPaymentRow(paymentRow);
       if (!paymentRow.ticket_id && buyerId && boughtPackageId) {
         /*
@@ -125,14 +132,15 @@ export async function POST(request: Request) {
           // ignore
         }
       }
-    } else if (data.status === "failed") {
+    } else if (event.outcome === "failed" && paymentRow.status !== "paid") {
+      // ห้ามลดรายการที่จ่ายแล้วกลับเป็น failed (event มาไม่เรียงลำดับได้)
       await updatePaymentStatus(paymentRow.id, "failed", {
         providerRef: chargeId,
         webhookLog: rawBody,
       });
     }
 
-    return NextResponse.json({ received: true, status: isPaid ? "paid" : "processed" });
+    return NextResponse.json({ received: true, status: event.outcome === "paid" ? "paid" : "processed" });
   } catch (err) {
     console.error("[API Payment Webhook Error]", err);
     return NextResponse.json({ error: "เกิดข้อผิดพลาดในการประมวลผล Webhook" }, { status: 500 });

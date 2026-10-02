@@ -32,12 +32,20 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
     if (!isOpen) clearCloseTimer();
     return clearCloseTimer;
   }, [isOpen]);
+  /* กด "ย้อนกลับ" จากหน้าจ่ายเงิน Stripe — เบราว์เซอร์คืนหน้านี้จาก bfcache พร้อมปุ่มที่ยังหมุนอยู่ */
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setLoading(false);
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
   const [checkoutData, setCheckoutData] = useState<{
     orderId: string;
     packageId: string;
     credits: number;
     amountSatang: number;
-    qrCodeUri?: string;
+    provider: "stripe" | "simulator";
     authorizeUri?: string;
     isTestMode: boolean;
   } | null>(null);
@@ -123,6 +131,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
 
     setLoading(true);
     setErrorMsg(null);
+    let redirecting = false;
 
     try {
       const res = await fetch("/api/entitlement/checkout", {
@@ -136,6 +145,14 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
         throw new Error(data.error || (isEn ? "Unable to initiate payment." : "ไม่สามารถเริ่มการชำระเงินได้"));
       }
 
+      // Stripe: พาไปหน้าจ่ายเงินของ Stripe (บัตร / PromptPay) — จ่ายเสร็จ Stripe ส่งกลับมาที่
+      // /api/entitlement/checkout/confirm ซึ่งตรวจกับ Stripe เองก่อนเติมรอบ · ปล่อย loading ค้างไว้ระหว่างย้ายหน้า
+      if (data.provider === "stripe" && typeof data.authorizeUri === "string") {
+        redirecting = true;
+        window.location.assign(data.authorizeUri);
+        return;
+      }
+
       setCheckoutData(data);
     } catch (err: any) {
       setErrorMsg(
@@ -145,7 +162,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
             : "เกิดข้อผิดพลาดในการเชื่อมต่อระบบชำระเงิน")
       );
     } finally {
-      setLoading(false);
+      if (!redirecting) setLoading(false);
     }
   };
 
@@ -366,26 +383,16 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
               </div>
             </div>
 
-            {checkoutData.qrCodeUri ? (
-              <div className="altar-card-porcelain !rounded-lg flex flex-col items-center gap-2 p-4 text-ink-deep max-w-[240px] mx-auto">
-                <img src={checkoutData.qrCodeUri} alt="PromptPay QR Code" className="w-48 h-48 object-contain" />
-                <span className="text-[13px] text-muted font-serif-th">
-                  {isEn ? "Scan with any Thai mobile banking app" : "สแกนด้วยแอปพลิเคชันธนาคารทุกแห่ง"}
-                </span>
-              </div>
-            ) : (
-              <div className="glass-tile !rounded-lg p-5 text-center space-y-2">
-                
-                <h4 className="font-serif-th text-sm font-bold text-ink-deep">
-                  {isEn ? "Payment Gateway Test Simulator" : "ระบบจำลองการชำระเงิน (Test Gateway Simulator)"}
-                </h4>
-                <p className="text-xs text-muted font-serif-th">
-                  {isEn
-                    ? "Ready to bind with Omise PromptPay QR upon configuring Cloudflare Workers secrets."
-                    : "ระบบพร้อมผูกกับ Omise PromptPay QR เมื่อตั้งค่า Secret บน Cloudflare Workers"}
-                </p>
-              </div>
-            )}
+            <div className="glass-tile !rounded-lg p-5 text-center space-y-2">
+              <h4 className="font-serif-th text-sm font-bold text-ink-deep">
+                {isEn ? "Payment Gateway Test Simulator" : "ระบบจำลองการชำระเงิน (Test Gateway Simulator)"}
+              </h4>
+              <p className="text-xs text-muted font-serif-th">
+                {isEn
+                  ? "Stripe Checkout opens here once the Stripe secret key is set on Cloudflare Workers."
+                  : "หน้าจ่ายเงิน Stripe จะเปิดแทนส่วนนี้เมื่อตั้งคีย์ Stripe บน Cloudflare Workers แล้ว"}
+              </p>
+            </div>
 
             <div className="pt-2 flex flex-col gap-2">
               <button

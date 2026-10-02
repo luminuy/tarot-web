@@ -91,7 +91,7 @@ async function insertPaymentRow(row: {
       row.orderId,
       row.userId,
       row.ticketId ?? null,
-      row.provider ?? "omise",
+      row.provider ?? "stripe",
       `chrg_${row.orderId}`,
       row.amountSatang,
       row.currency ?? "THB",
@@ -400,6 +400,15 @@ async function main(): Promise<void> {
     "checkout สร้างแถว payments พร้อม userId เสมอ (เจ้าของรายการต้องพิสูจน์ได้)",
     /createPaymentRecord\(\{[\s\S]{0,400}userId,/.test(checkoutSrc),
   );
+  // คีย์ Stripe ทดสอบบนเว็บจริง: บัตร 4242 ต้องไม่ได้ของฟรี — ทุกจุดที่สร้างรายการชำระเงินต้องมีด่านนี้
+  const marketPaySrc = readSource("src/app/api/marketplace/payments/route.ts");
+  for (const [name, src] of [["checkout", checkoutSrc], ["marketplace/payments", marketPaySrc]] as const) {
+    check(
+      `${name} ปิดรับเงินเมื่อเว็บจริงใช้คีย์ทดสอบ (ยกเว้นผู้ทดสอบ) ก่อนสร้างรายการ`,
+      /isStripeTestModeOnProduction\(\)/.test(src) &&
+        src.indexOf("isStripeTestModeOnProduction()") < src.indexOf("createGatewayCharge({"),
+    );
+  }
 
   console.log("\n── 7. แพ็กเกจทุกตัวต้องมีราคาที่เป็นไปได้ ──");
   for (const p of CREDIT_PACKAGES) {

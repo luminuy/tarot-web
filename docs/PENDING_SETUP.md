@@ -83,23 +83,36 @@
 
 ### 💳 ยังไม่ได้ตั้ง — คีย์ระบบรับชำระเงิน (T-37 · บังคับก่อนเปิดขายจริง)
 
-> ⚠️ **บทเรียน T-37** — โค้ด production อ่านสามตัวนี้ใช้จริงมาตลอด (ถึงขั้นมี
-> `console.error("Missing PAYMENT_WEBHOOK_SECRET in production!")` ใน `payment-gateway.ts`)
+> ⚠️ **บทเรียน T-37** — โค้ด production อ่านตัวแปรกลุ่มนี้ใช้จริงมาตลอด
 > แต่ grep ทั้งรีโปแล้ว **ไม่มีใน `.env.example` · `wrangler.jsonc` · เอกสารนี้เลยสักที่**
 > คนที่มาตั้งค่าต่อจึงไม่มีทางรู้ว่าต้องตั้งอะไรบ้าง และโหมดล้มเหลวเป็นแค่บรรทัด log
 
 | ชื่อ | ใช้ทำอะไร | ไม่ตั้งแล้วเกิดอะไร |
 | :--- | :--- | :--- |
-| `OMISE_SECRET_KEY` | คีย์ฝั่งเซิร์ฟเวอร์ของ Omise (`skey_...`) สำหรับสร้างรายการเรียกเก็บเงินจริง | ระบบใช้ "ตัวจำลอง" (`provider = simulator`) ซึ่งผ่านด่านยืนยันได้เฉพาะนอก production — บน production คือขายของไม่ได้เลย |
-| `OMISE_WEBHOOK_SECRET` | ตรวจลายเซ็น HMAC-SHA256 ของ webhook ที่เกตเวย์ยิงกลับมา | **ปฏิเสธ webhook ทุกใบ** (ตั้งแต่ T-18) → จ่ายเงินสำเร็จแต่สถานะไม่เคยขึ้นเป็น `paid` |
-| `PAYMENT_WEBHOOK_SECRET` | ตัวสำรองของตัวบน (ใช้เมื่อยังไม่ได้ตั้ง `OMISE_WEBHOOK_SECRET`) | เหมือนข้างบน — ต้องตั้งอย่างน้อยหนึ่งในสองตัว |
+| `STRIPE_SECRET_KEY` | คีย์ลับของ Stripe (`sk_live_...` / `sk_test_...` หรือ restricted key `rk_...`) สำหรับสร้างหน้าจ่ายเงิน Stripe Checkout | ระบบใช้ "ตัวจำลอง" (`provider = simulator`) ซึ่งผ่านด่านยืนยันได้เฉพาะนอก production — บน production คือขายของไม่ได้เลย |
+| `STRIPE_WEBHOOK_SECRET` | ตรวจลายเซ็น `Stripe-Signature` ของ webhook (`whsec_...`) | **ปฏิเสธ webhook ทุกใบ** (ตั้งแต่ T-18) → จ่ายเงินสำเร็จแต่สถานะไม่เคยขึ้นเป็น `paid` |
+| `PAYMENT_WEBHOOK_SECRET` | ตัวสำรองของตัวบน (ใช้เมื่อยังไม่ได้ตั้ง `STRIPE_WEBHOOK_SECRET`) | เหมือนข้างบน — ต้องตั้งอย่างน้อยหนึ่งในสองตัว |
 
 ตั้งด้วย:
 
 ```bash
-npx wrangler secret put OMISE_SECRET_KEY
-npx wrangler secret put OMISE_WEBHOOK_SECRET
+npx wrangler secret put STRIPE_SECRET_KEY
+npx wrangler secret put STRIPE_WEBHOOK_SECRET
 ```
+
+หรือ (ทางที่เจ้าของใช้) ใส่ทั้งสองชื่อไว้ที่ GitHub **Settings ➔ Secrets and variables ➔ Actions** —
+ขั้น `💳 Sync Stripe secrets to Worker` ใน `deploy.yml` ดันเข้า Worker ให้ทุกครั้งที่ deploy
+(ไม่ได้ตั้งที่ GitHub = ข้าม ไม่แตะค่าใน Cloudflare)
+
+ฝั่ง Stripe Dashboard (ทำครั้งเดียว):
+1. **Settings ➔ Payment methods** เปิด Cards + **PromptPay** (หน้า Checkout จะโชว์ตามที่เปิดไว้)
+2. **Developers ➔ Webhooks ➔ Add endpoint** `https://seertarot.net/api/marketplace/payments/webhook`
+   เลือก 4 event: `checkout.session.completed` · `checkout.session.async_payment_succeeded` ·
+   `checkout.session.async_payment_failed` · `checkout.session.expired` ➔ คัดลอก Signing secret (`whsec_...`) ไปตั้งข้างบน
+3. ทดสอบด้วยคีย์ `sk_test_...` + บัตร `4242 4242 4242 4242` ก่อนสลับเป็น `sk_live_...`
+   - ⚠️ ระหว่างเว็บจริงใช้คีย์ทดสอบ **เฉพาะผู้ทดสอบ** ซื้อได้ (คุกกี้ `/tester` หรืออีเมลใน `UNLIMITED_EMAILS` ที่ยืนยันแล้ว)
+     คนอื่นได้ 503 "ระบบชำระเงินยังไม่เปิดให้บริการ" — กันบัตร 4242 ได้เครดิตฟรี (`isStripeTestModeOnProduction`)
+   - ใส่ `sk_live_...` เมื่อไหร่ ด่านนี้ปลดเองทันที
 
 > 🚫 `ALLOW_UNSIGNED_WEBHOOKS_DEV=1` เป็นธงสำหรับ **เครื่องพัฒนาเท่านั้น**
 > ห้ามตั้งบน production / preview / staging เด็ดขาด — เท่ากับเปิดให้ใครก็ได้แจกเครดิตให้ตัวเอง

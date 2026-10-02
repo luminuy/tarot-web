@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { recordEvent } from "@/lib/stats/record";
 import { getSessionUser } from "@/lib/auth/session";
 import { getCreditPackageById } from "@/lib/entitlement/packages";
-import { createGatewayCharge } from "@/lib/marketplace/payment-gateway";
+import {
+  createGatewayCharge,
+  isStripeTestModeOnProduction,
+  PAYMENTS_NOT_OPEN_MESSAGE,
+} from "@/lib/marketplace/payment-gateway";
 import { createPaymentRecord } from "@/lib/marketplace/payments.repo";
 import { isPrivilegedTestRequest } from "@/lib/security/privileged";
 import { resolveAppOrigin } from "@/lib/security/app-origin";
@@ -42,6 +46,11 @@ export async function POST(request: Request) {
       );
     }
 
+    // คีย์ทดสอบบนเว็บจริง = เปิดให้เฉพาะผู้ทดสอบ (บัตร 4242 ห้ามได้เครดิตฟรี)
+    if (isStripeTestModeOnProduction() && !isPrivileged) {
+      return NextResponse.json({ error: PAYMENTS_NOT_OPEN_MESSAGE }, { status: 503 });
+    }
+
     const body = await request.json().catch(() => ({}));
     const { packageId } = body;
 
@@ -60,15 +69,23 @@ export async function POST(request: Request) {
     const origin = resolveAppOrigin(request);
     const orderId = `ord_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
 
-    // สร้างรายการชำระเงินผ่าน Gateway (Omise หรือ Simulator)
+    // สร้างรายการชำระเงินผ่าน Gateway (Stripe Checkout หรือ Simulator)
     const isEnglish = body?.lang === "en" || /seertarot_lang=en/.test(request.headers.get("cookie") || "") || request.headers.get("referer")?.includes("/en");
     const langQuery = isEnglish ? "&lang=en" : "";
     const returnUri = `${origin}/api/entitlement/checkout/confirm?order_id=${orderId}&package_id=${pkg.id}&user_id=${userId}${langQuery}`;
+    // ยกเลิกในหน้าจ่ายเงิน = กลับหน้าแรกพร้อมข้อความ (TarotFlow อ่าน `purchase_error` แล้วล้างออกจาก URL)
+    const cancelMsg = isEnglish ? "Payment was cancelled" : "ยกเลิกการชำระเงินแล้ว";
+    const cancelUri = `${origin}${isEnglish ? "/en" : "/"}?purchase_error=${encodeURIComponent(cancelMsg)}`;
     const charge = await createGatewayCharge({
       amountSatang: pkg.amountSatang,
       currency: "THB",
-      description: `เติมโควตาดูดวง: ${pkg.name} (${pkg.credits} ครั้ง)`,
+      description: isEnglish
+        ? `SeerTarot reading credits: ${pkg.credits} readings`
+        : `เติมโควตาดูดวง: ${pkg.name} (${pkg.credits} ครั้ง)`,
       returnUri,
+      cancelUri,
+      referenceId: orderId,
+      locale: isEnglish ? "en" : "th",
       metadata: {
         userId,
         packageId: pkg.id,
@@ -84,7 +101,7 @@ export async function POST(request: Request) {
       orderId,
       userId,
       ticketId: undefined,
-      provider: charge.isTestMode ? "simulator" : "omise",
+      provider: charge.provider,
       providerRef: charge.chargeId,
       amountSatang: pkg.amountSatang,
       currency: "THB",
@@ -97,12 +114,12 @@ export async function POST(request: Request) {
       credits: pkg.credits,
       amountSatang: pkg.amountSatang,
       status: charge.status,
-      qrCodeUri: charge.qrCodeUri,
+      provider: charge.provider,
       authorizeUri: charge.authorizeUri,
       isTestMode: charge.isTestMode,
     });
   } catch (error) {
-    // ⚠️ ห้ามส่ง error.message ดิบกลับหน้าเว็บ (A1-08) — ข้อความจาก Omise/D1
+    // ⚠️ ห้ามส่ง error.message ดิบกลับหน้าเว็บ (A1-08) — ข้อความจาก Stripe/D1
     //    เปิดเผยโครงสร้างตาราง (`D1_ERROR: no such column ...`) และผู้ใช้อ่านไม่รู้เรื่อง
     console.error("[Credit Checkout Error]:", error);
     recordEvent("checkout_failed");

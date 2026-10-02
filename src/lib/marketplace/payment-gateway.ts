@@ -1,100 +1,261 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
+/**
+ * 💳 เกตเวย์รับชำระเงิน — Stripe Checkout (หน้าจ่ายเงินของ Stripe เอง)
+ * ===========================================================================
+ * เราไม่เก็บข้อมูลบัตรเลย: สร้าง Checkout Session แล้วพาผู้ใช้ไปจ่ายที่ `checkout.stripe.com`
+ * (บัตร · PromptPay · ช่องทางอื่นที่เปิดไว้ในแดชบอร์ด Stripe) จากนั้น Stripe ส่งกลับมาที่ `successUri`
+ *
+ * หลักฐานการจ่ายเงินมีได้สองทางเท่านั้น และปลอมไม่ได้ทั้งคู่:
+ *   1. webhook ที่ผ่าน `verifyWebhookSignature` (ลายเซ็น `Stripe-Signature`)
+ *   2. เซิร์ฟเวอร์เราถาม Stripe เองด้วยคีย์ลับ (`retrieveGatewayCharge`)
+ *
+ * ไม่ได้ตั้ง `STRIPE_SECRET_KEY` = ใช้ตัวจำลอง (`provider = simulator`) ซึ่งผ่านด่านยืนยัน
+ * ได้เฉพาะนอก production (ดู `decidePurchaseGrant`)
+ */
+
+const STRIPE_API = "https://api.stripe.com/v1";
+/** Stripe ตอบช้าเกินนี้ = ถือว่าล้ม · ห้ามให้คำขอซื้อค้างไม่มีกำหนด */
+const STRIPE_TIMEOUT_MS = 10_000;
+
+export type GatewayProvider = "stripe" | "simulator";
+
 export interface CreateChargeInput {
   amountSatang: number;
   currency?: string;
   description: string;
+  /** ปลายทางหลังจ่ายสำเร็จ (ต้องมี query string อยู่แล้ว — ตัวจำลองต่อท้ายด้วย `&`) */
   returnUri: string;
+  /** ปลายทางเมื่อผู้ใช้กดยกเลิกในหน้าจ่ายเงิน */
+  cancelUri: string;
+  /** เลขอ้างอิงของเรา (เลขออร์เดอร์ / เลขจอง) — ส่งเป็น `client_reference_id` ให้ค้นในแดชบอร์ด Stripe ได้ */
+  referenceId: string;
+  locale?: "th" | "en";
   metadata?: Record<string, string>;
 }
 
 export interface ChargeResult {
+  /** Checkout Session id (`cs_...`) หรือ id ของตัวจำลอง — เก็บลง `payments.provider_ref` */
   chargeId: string;
   amountSatang: number;
   currency: string;
   status: "pending" | "successful" | "failed";
+  provider: GatewayProvider;
+  /** หน้าที่ต้องพาผู้ใช้ไปจ่ายเงิน */
   authorizeUri?: string;
-  qrCodeUri?: string;
   isTestMode: boolean;
 }
 
+/** คีย์ลับของ Stripe ที่ใช้งานได้จริง (ค่า `mock_...` = ตั้งใจใช้ตัวจำลอง) */
+function stripeSecretKey(): string | null {
+  const key = process.env.STRIPE_SECRET_KEY;
+  return key && !key.startsWith("mock_") ? key : null;
+}
+
 /**
- * สร้างรายการชำระเงิน (Charge / Checkout)
- * รองรับทั้ง Omise Gateway จริงเมื่อมีการตั้งค่า Secret และ Test Mode Simulator เมื่อยังไม่ได้ใส่ Key
+ * 🔒 คีย์ทดสอบ (`sk_test_` / `rk_test_`) บน production — ช่วงทดสอบบนเว็บจริงก่อนเปิดบัญชี live
+ *
+ * ระหว่างนี้ใครก็จ่ายด้วยบัตรทดสอบ `4242 4242 4242 4242` ได้และเว็บจะแจกเครดิตจริง
+ * จุดสร้างรายการชำระเงินทุกจุดจึงต้องเรียกฟังก์ชันนี้ แล้วเปิดให้เฉพาะผู้ทดสอบ (`isPrivilegedTestRequest`)
+ * พอเปลี่ยนเป็น `sk_live_` ด่านนี้คืน false เองโดยไม่ต้องแก้โค้ด
  */
-export async function createGatewayCharge(input: CreateChargeInput): Promise<ChargeResult> {
-  const omiseSecretKey = process.env.OMISE_SECRET_KEY;
-  const currency = input.currency || "THB";
+export function isStripeTestModeOnProduction(): boolean {
+  const key = stripeSecretKey();
+  return !!key && /^(sk|rk)_test_/.test(key) && process.env.NODE_ENV === "production";
+}
 
-  // 1. Production Mode with Omise API
-  if (omiseSecretKey && !omiseSecretKey.startsWith("mock_")) {
-    try {
-      const auth = Buffer.from(`${omiseSecretKey}:`).toString("base64");
-      const res = await fetch("https://api.omise.co/charges", {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${auth}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount: input.amountSatang,
-          currency,
-          description: input.description,
-          return_uri: input.returnUri,
-          metadata: input.metadata,
-        }),
+export const PAYMENTS_NOT_OPEN_MESSAGE = "ระบบชำระเงินยังไม่เปิดให้บริการ กรุณากลับมาใหม่เร็ว ๆ นี้";
+
+/** แปลง object ซ้อนเป็น form body แบบที่ Stripe รับ (`a[b][0][c]=...`) */
+export function toStripeForm(params: Record<string, unknown>, prefix = "", out = new URLSearchParams()): URLSearchParams {
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null) continue;
+    const name = prefix ? `${prefix}[${key}]` : key;
+    if (Array.isArray(value)) {
+      value.forEach((item, i) => {
+        if (item !== null && typeof item === "object") toStripeForm(item as Record<string, unknown>, `${name}[${i}]`, out);
+        else out.append(`${name}[${i}]`, String(item));
       });
-
-      if (res.ok) {
-        const data = await res.json();
-        return {
-          chargeId: data.id,
-          amountSatang: data.amount,
-          currency: data.currency,
-          status: data.status === "successful" ? "successful" : "pending",
-          authorizeUri: data.authorize_uri,
-          qrCodeUri: data.source?.scannable_code?.image?.download_uri,
-          isTestMode: !data.livemode,
-        };
-      }
-    } catch (err) {
-      console.warn("[Payment Gateway] Omise API call failed, falling back to simulated test charge", err);
+    } else if (typeof value === "object") {
+      toStripeForm(value as Record<string, unknown>, name, out);
+    } else {
+      out.append(name, String(value));
     }
   }
+  return out;
+}
 
-  // 2. Test-Mode Deterministic Simulator (สำหรับรอบการทดสอบและระหว่างรอใส่ API Key)
+async function stripeRequest(
+  key: string,
+  method: "GET" | "POST",
+  path: string,
+  body?: URLSearchParams,
+): Promise<Record<string, unknown>> {
+  const headers: Record<string, string> = { Authorization: `Bearer ${key}` };
+  if (body) headers["Content-Type"] = "application/x-www-form-urlencoded";
+
+  const res = await fetch(`${STRIPE_API}${path}`, {
+    method,
+    headers,
+    body: body?.toString(),
+    signal: AbortSignal.timeout(STRIPE_TIMEOUT_MS),
+  });
+  const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+  if (!res.ok) {
+    // ห้ามโยนข้อความดิบของ Stripe ขึ้นหน้าเว็บ (A1-08) — ผู้เรียกจับแล้วตอบข้อความคงที่เอง
+    const err = (data.error ?? {}) as Record<string, unknown>;
+    throw new Error(`[Stripe] ${method} ${path} → ${res.status} ${String(err.type ?? "")} ${String(err.code ?? "")}`.trim());
+  }
+  return data;
+}
+
+/**
+ * สร้างรายการชำระเงิน (Stripe Checkout Session)
+ *
+ * ⚠️ มีคีย์ Stripe แล้วเรียกไม่สำเร็จ = โยน error ออกไป **ห้ามถอยไปตัวจำลองเงียบ ๆ**
+ *    ของเดิม (ยุค Omise) ถอยไปตัวจำลอง ผู้ใช้บน production จึงเห็นหน้าจ่ายปลอม
+ *    แล้วกดยืนยันไม่ผ่านโดยไม่มีใครรู้ว่าเกตเวย์ล่ม
+ */
+export async function createGatewayCharge(input: CreateChargeInput): Promise<ChargeResult> {
+  const currency = (input.currency || "THB").toUpperCase();
+  const key = stripeSecretKey();
+
+  if (key) {
+    const metadata = input.metadata ?? {};
+    const body = toStripeForm({
+      mode: "payment",
+      success_url: input.returnUri,
+      cancel_url: input.cancelUri,
+      client_reference_id: input.referenceId,
+      locale: input.locale === "en" ? "en" : "th",
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: currency.toLowerCase(),
+            unit_amount: input.amountSatang,
+            product_data: { name: input.description },
+          },
+        },
+      ],
+      metadata,
+      payment_intent_data: { description: input.description, metadata },
+    });
+    const session = await stripeRequest(key, "POST", "/checkout/sessions", body);
+    return {
+      chargeId: String(session.id),
+      amountSatang: Number(session.amount_total ?? input.amountSatang),
+      currency: String(session.currency ?? currency).toUpperCase(),
+      status: session.payment_status === "paid" ? "successful" : "pending",
+      provider: "stripe",
+      authorizeUri: typeof session.url === "string" ? session.url : undefined,
+      isTestMode: session.livemode !== true,
+    };
+  }
+
+  // ตัวจำลองแบบกำหนดผลได้ (เครื่องพัฒนา / รอบทดสอบ / ระหว่างยังไม่ได้ใส่คีย์)
   const mockChargeId = `chrg_test_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
   return {
     chargeId: mockChargeId,
     amountSatang: input.amountSatang,
     currency,
     status: "pending",
+    provider: "simulator",
     authorizeUri: `${input.returnUri}&test_charge_id=${mockChargeId}`,
     isTestMode: true,
   };
 }
 
-/** เวลาเผื่อของ `Omise-Signature-Timestamp` — เก่ากว่านี้ถือเป็น replay (ตามที่เอกสาร Omise แนะนำ) */
+export interface GatewayChargeStatus {
+  status: "pending" | "paid" | "failed";
+  amountSatang: number;
+  currency: string;
+  metadata: Record<string, string>;
+}
+
+/** ข้อมูลสถานะของ Checkout Session ไม่ว่าจะมาจาก webhook หรือจากการถาม Stripe เอง */
+export function readCheckoutSession(session: Record<string, unknown>): GatewayChargeStatus {
+  const metadata: Record<string, string> = {};
+  const raw = session.metadata;
+  if (raw && typeof raw === "object") {
+    for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+      if (typeof v === "string") metadata[k] = v;
+    }
+  }
+  const status =
+    session.payment_status === "paid" ? "paid" : session.status === "expired" ? "failed" : "pending";
+  return {
+    status,
+    amountSatang: Number(session.amount_total ?? 0),
+    currency: String(session.currency ?? "").toUpperCase(),
+    metadata,
+  };
+}
+
+/**
+ * ถามสถานะรายการจาก Stripe โดยตรง — ใช้ตอนผู้ใช้กลับมาที่ `successUri` ก่อน webhook มาถึง
+ * คืน `null` เมื่อไม่มีคีย์ (ตัวจำลอง) หรือถามไม่สำเร็จ
+ */
+export async function retrieveGatewayCharge(chargeId: string): Promise<GatewayChargeStatus | null> {
+  const key = stripeSecretKey();
+  if (!key || !/^cs_[A-Za-z0-9_]+$/.test(chargeId)) return null;
+  try {
+    const session = await stripeRequest(key, "GET", `/checkout/sessions/${chargeId}`);
+    return readCheckoutSession(session);
+  } catch (err) {
+    console.warn("[Payment Gateway] ถามสถานะจาก Stripe ไม่สำเร็จ", err);
+    return null;
+  }
+}
+
+export interface WebhookOutcome {
+  chargeId: string;
+  outcome: "paid" | "failed" | "ignore";
+  charge: GatewayChargeStatus;
+}
+
+/**
+ * แปลง event ของ Stripe เป็นผลที่เราต้องทำ — บริสุทธิ์ ไม่แตะ I/O (ด่านตรวจเรียกตรงได้)
+ *
+ * - `checkout.session.completed` + `payment_status = paid` ➔ จ่ายแล้ว (บัตร)
+ * - `checkout.session.completed` + `unpaid` ➔ ยังรอ (ช่องทางจ่ายทีหลัง เช่น PromptPay)
+ * - `checkout.session.async_payment_succeeded` ➔ จ่ายแล้ว
+ * - `checkout.session.async_payment_failed` / `checkout.session.expired` ➔ ไม่สำเร็จ
+ */
+export function parseWebhookEvent(event: Record<string, unknown>): WebhookOutcome | null {
+  const type = typeof event.type === "string" ? event.type : "";
+  if (!type.startsWith("checkout.session.")) return null;
+  const session = ((event.data as Record<string, unknown> | undefined)?.object ?? null) as Record<
+    string,
+    unknown
+  > | null;
+  if (!session || typeof session.id !== "string") return null;
+
+  const charge = readCheckoutSession(session);
+  let outcome: WebhookOutcome["outcome"] = "ignore";
+  if (type === "checkout.session.async_payment_succeeded") outcome = "paid";
+  else if (type === "checkout.session.completed" && charge.status === "paid") outcome = "paid";
+  else if (type === "checkout.session.async_payment_failed" || type === "checkout.session.expired") outcome = "failed";
+
+  return { chargeId: session.id, outcome, charge };
+}
+
+/** เพดานอายุของ webhook — ตามค่าเริ่มต้นของไลบรารี Stripe (กันยิง payload เก่าซ้ำ) */
 const WEBHOOK_TOLERANCE_SEC = 5 * 60;
 
 /**
- * ตรวจลายเซ็น webhook ตามสเปก Omise (A2-12 · ยืนยันกับ docs.omise.co/api-webhooks แล้ว)
- * - header `Omise-Signature` (มีได้หลายค่าคั่นด้วย `,` ตอนหมุนคีย์) + `Omise-Signature-Timestamp`
- * - ข้อความที่เซ็น = `${timestamp}.${rawBody}`
- * - secret ที่ Omise ให้มาเป็น **base64** ต้องถอดก่อนใช้เป็นกุญแจ HMAC-SHA256 · ผลเป็น hex
- * - timestamp ห่างจากเวลาจริงเกิน 5 นาที = ปฏิเสธ (กันยิง payload เก่าซ้ำ)
- *
- * ⚠️ ของเดิม HMAC(rawBody) ด้วย secret แบบข้อความดิบ และอ่าน header `x-omise-signature`
- *    วันที่เปิดเกตเวย์จริง webhook ทุกใบจะได้ 401 ลูกค้าจ่ายเงินแล้วไม่ได้เครดิต
+ * ตรวจลายเซ็น webhook ตามสเปก Stripe (docs.stripe.com/webhooks#verify-manually)
+ * - header `Stripe-Signature: t=<unix>,v1=<hex>[,v1=<hex>...]` (หลาย `v1` ตอนหมุนคีย์)
+ * - ข้อความที่เซ็น = `${t}.${rawBody}` · HMAC-SHA256 · กุญแจคือสตริง `whsec_...` ทั้งก้อน (ไม่ต้องถอด base64)
+ * - `t` ห่างจากเวลาจริงเกิน 5 นาที = ปฏิเสธ
  */
 export function verifyWebhookSignature(
   rawBody: string,
   signatureHeader: string | null | undefined,
-  timestampHeader: string | null | undefined,
   signingSecret?: string,
   nowMs: number = Date.now(),
 ): boolean {
-  const secret = signingSecret || process.env.OMISE_WEBHOOK_SECRET || process.env.PAYMENT_WEBHOOK_SECRET;
+  const secret = signingSecret || process.env.STRIPE_WEBHOOK_SECRET || process.env.PAYMENT_WEBHOOK_SECRET;
 
   /*
    * 🔴 บทเรียน T-18: ของเดิม "ไม่มี secret + NODE_ENV ไม่ใช่ production" = ผ่านทุกคำขอ
@@ -114,24 +275,32 @@ export function verifyWebhookSignature(
       return true;
     }
     console.error(
-      "[Payment Webhook] ไม่ได้ตั้ง OMISE_WEBHOOK_SECRET / PAYMENT_WEBHOOK_SECRET — ปฏิเสธคำขอทั้งหมด",
+      "[Payment Webhook] ไม่ได้ตั้ง STRIPE_WEBHOOK_SECRET / PAYMENT_WEBHOOK_SECRET — ปฏิเสธคำขอทั้งหมด",
     );
     return false;
   }
 
-  if (!signatureHeader || !timestampHeader) return false;
+  if (!signatureHeader) return false;
 
-  const ts = Number(timestampHeader);
+  let timestamp = "";
+  const signatures: string[] = [];
+  for (const part of signatureHeader.split(",")) {
+    const eq = part.indexOf("=");
+    if (eq <= 0) continue;
+    const k = part.slice(0, eq).trim();
+    const v = part.slice(eq + 1).trim();
+    if (k === "t") timestamp = v;
+    else if (k === "v1" && v) signatures.push(v);
+  }
+  if (!timestamp || signatures.length === 0) return false;
+
+  const ts = Number(timestamp);
   if (!Number.isFinite(ts) || Math.abs(nowMs / 1000 - ts) > WEBHOOK_TOLERANCE_SEC) return false;
 
   try {
-    const key = Buffer.from(secret, "base64");
-    if (key.length === 0) return false;
-    const expected = Buffer.from(
-      createHmac("sha256", key).update(`${timestampHeader}.${rawBody}`).digest("hex"),
-    );
-    return signatureHeader.split(",").some((candidate) => {
-      const got = Buffer.from(candidate.trim());
+    const expected = Buffer.from(createHmac("sha256", secret).update(`${timestamp}.${rawBody}`).digest("hex"));
+    return signatures.some((candidate) => {
+      const got = Buffer.from(candidate);
       return got.length === expected.length && timingSafeEqual(got, expected);
     });
   } catch {

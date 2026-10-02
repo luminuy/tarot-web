@@ -16,7 +16,7 @@
 | สร้างด้วยอะไร | **Expo (React Native) + TypeScript** — ใช้โค้ดแกนกลาง (`src/data`, `src/lib/tarot`, schema Zod) ร่วมกับเว็บได้ · ทีมเขียน React อยู่แล้ว · ได้ Android แทบฟรีในอนาคต |
 | ทำไมไม่ห่อเว็บ (WebView/Capacitor) | Apple ข้อ **4.2** (แอปที่เป็นแค่เว็บห่อ) + **4.3(b)** (หมวด "ดูดวง" อิ่มตัว ต้องเป็นประสบการณ์คุณภาพสูงเฉพาะตัว) = เสี่ยงโดนปฏิเสธสูงสุด · การ์ด 3D บนเว็บวิวบนมือถือยังไม่ลื่นเท่า native |
 | หลังบ้านต้องแก้อะไร | 5 ก้อน: **ช่องทางแอป (Bearer token + App Attest)** · **Sign in with Apple** · **ซื้อเครดิตผ่าน StoreKit (IAP)** · **Push แจ้งเตือน** · **Universal Links** (หัวข้อ 4) |
-| เงิน | เครดิตเปิดไพ่ (`pack_3/10/30`) **ต้องขายผ่าน In-App Purchase** ในแอป (ข้อ 3.1.1) · ระบบ Omise ของเว็บใช้ในแอปไม่ได้ |
+| เงิน | เครดิตเปิดไพ่ (`pack_3/10/30`) **ต้องขายผ่าน In-App Purchase** ในแอป (ข้อ 3.1.1) · ระบบ Stripe ของเว็บใช้ในแอปไม่ได้ |
 | ใช้เวลา | เฟส 0–2 ≈ **9–12 สัปดาห์** ถึงขึ้น App Store เวอร์ชัน 1.0 (หัวข้อ 7) |
 | ต้นทุนคงที่ | Apple Developer Program **99 USD/ปี** · EAS Build (สร้างไฟล์แอปบนคลาวด์ ไม่ต้องมี Mac) มีแผนฟรี · Apple หักค่าธรรมเนียม IAP **15%** (Small Business Program) |
 | เจ้าของต้องทำ | เปิดบัญชี Apple Developer + สัญญา Paid Apps/บัญชีธนาคาร/ภาษี · เคาะราคา IAP · ตอบคำถามหัวข้อ 9 |
@@ -34,7 +34,7 @@
 | ล็อกอิน Google / LINE / อีเมล | `src/app/api/auth/*` | ⚠️ ทั้งหมดส่งคุกกี้ httpOnly `tarot_auth_session` (`session.ts`) · อีเมลใช้ Turnstile |
 | ลบบัญชี | `DELETE /api/account` (`src/app/api/account/route.ts:11`) | ✅ ตรงข้อ 5.1.1(v) ของ Apple — แค่ต้องมีปุ่มในแอป |
 | ส่งออกข้อมูล | `src/app/api/account/export` | ✅ |
-| ซื้อเครดิต | `entitlement/checkout` → Omise (`src/lib/marketplace/payment-gateway.ts`) | ❌ ห้ามใช้ในแอป iOS |
+| ซื้อเครดิต | `entitlement/checkout` → Stripe Checkout (`src/lib/marketplace/payment-gateway.ts`) | ❌ ห้ามใช้ในแอป iOS |
 | Daily Digest | `src/app/api/cron/daily-digest` (ส่งอีเมล) | ➕ เพิ่มช่อง Push |
 | PWA | `src/app/manifest.ts` · `public/sw.js` | ใช้ต่อบนเว็บ ไม่เกี่ยวกับแอป |
 | ภาพไพ่ 1909 | `public/cards/` — `w256` 2.9 MB · `w512b` 7.2 MB · `w768b` 11 MB | ✅ ฝังในแอปได้ (หัวข้อ 3.4) |

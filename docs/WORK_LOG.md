@@ -38,6 +38,23 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-02 (รอบ 192): ✦ เปลี่ยนเกตเวย์รับเงินจาก Omise ➔ Stripe Checkout
+
+- เจ้าของสั่งเปลี่ยนไปใช้ Stripe (Omise ไม่เคยตั้งคีย์บน production จึงไม่มีรายการเก่าต้องย้าย) · **เจ้าของสั่งยังไม่ให้ push/เปิด PR**
+- `payment-gateway.ts`: สร้าง Checkout Session ผ่าน REST (`fetch` + form body ไม่เพิ่ม SDK) · ผู้ใช้จ่ายที่หน้า Stripe (บัตร/PromptPay ตามที่เปิดในแดชบอร์ด)
+  - มีคีย์แล้วเรียก Stripe ไม่ได้ = โยน error (เดิมถอยไปตัวจำลองเงียบ ๆ ผู้ใช้ production จะเห็นหน้าจ่ายปลอม)
+  - `verifyWebhookSignature` ตามสเปก `Stripe-Signature` (t/v1 · หลาย v1 · เพดาน 5 นาที · ไม่มี secret = ปฏิเสธ ตาม T-18)
+  - `parseWebhookEvent` บริสุทธิ์: completed+paid · async_payment_succeeded = จ่าย · async_payment_failed/expired = ไม่สำเร็จ
+- webhook: ตรวจยอด/สกุลเงินจาก Stripe ต้องตรงแถว `payments` · ห้ามลด `paid` กลับเป็น `failed` · ยังแจกผ่าน `decidePurchaseGrant` ก้อนเดิม
+- `checkout/confirm`: ผู้ใช้กลับมาก่อน webhook ถึง ➔ ถาม Stripe เองด้วยคีย์ลับ (ต้องตรง orderId + ยอด + สกุลเงิน) แล้วค่อยแจก
+- `BuyCreditsModal`: provider `stripe` ➔ พาไปหน้า Stripe · ตัดส่วน QR ของ Omise · ปุ่มไม่ค้างหมุนเมื่อกดย้อนกลับ (bfcache)
+- ตัวแปรใหม่ `STRIPE_SECRET_KEY` · `STRIPE_WEBHOOK_SECRET` (`.env.example` · `PENDING_SETUP.md` พร้อมขั้นตั้งค่าแดชบอร์ด)
+- ทดสอบ: `test-marketplace-readers` ข้อ 10 เปลี่ยนเป็นสเปก Stripe + แปล event 6 แบบ · ทดสอบปลายทาง webhook จริงบน SQLite (ปลอมลายเซ็น 401 · ยอดไม่ตรงไม่แจก · ยิงซ้ำได้ +10 ครั้งเดียว · expired หลัง paid ไม่ลดสถานะ)
+- ด่านคีย์ทดสอบบนเว็บจริง: `sk_test_`/`rk_test_` + production ➔ checkout · marketplace/payments ตอบ 503 ยกเว้นผู้ทดสอบ (`isPrivilegedTestRequest`) กันบัตร 4242 ได้เครดิตฟรีช่วงทดสอบบนเว็บจริง · ด่าน test-money-path ตรวจทั้งสองเส้น (mutation: ถอดด่าน ➔ ตก)
+- `deploy.yml` ขั้นใหม่ `💳 Sync Stripe secrets to Worker`: GitHub Secrets `STRIPE_SECRET_KEY` · `STRIPE_WEBHOOK_SECRET` ➔ `wrangler secret put` (stdin) หลัง deploy · ไม่ตั้ง = ข้าม
+- ยิง Stripe sandbox จริงแล้ว: สร้าง/อ่าน Checkout Session ได้ · ยอด ฿149 · locale th · ช่องทาง card + promptpay · webhook `seertarot-checkout` ตั้งในแดชบอร์ดแล้ว (4 event)
+- ค้าง: เจ้าของตั้งคีย์ + webhook ในแดชบอร์ด Stripe · ทดสอบจ่ายจริงด้วย `sk_test_` บัตร 4242 · ระบบจองแม่หมอ (Marketplace) ยังใช้ Checkout ธรรมดา การแบ่งเงินให้แม่หมอต้องใช้ Stripe Connect ในเฟส 2
+
 ### 🗓️ 2026-10-01 (รอบ 191): ✦ ปุ่มลอยช่องทางทางการ — ปรับหน้าตาให้ได้มาตรฐาน FAB
 
 - เจ้าของขอ: ปุ่มหลัก (วงกลมดำไอคอนแชท) ให้สวยขึ้นและได้มาตรฐาน

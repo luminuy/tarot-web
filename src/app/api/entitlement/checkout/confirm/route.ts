@@ -8,6 +8,7 @@ import {
   type PaymentRowForGrant,
 } from "@/lib/entitlement/purchase";
 import { updatePaymentStatus } from "@/lib/marketplace/payments.repo";
+import { retrieveGatewayCharge } from "@/lib/marketplace/payment-gateway";
 import { getAppDB } from "@/lib/platform/db";
 import { getSessionUser } from "@/lib/auth/session";
 import { isPrivilegedTestRequest } from "@/lib/security/privileged";
@@ -28,7 +29,8 @@ export const runtime = "nodejs";
  *   2. ต้องมีแถว `payments` ของ `orderId` นั้นอยู่จริง (สร้างตอน /checkout ซึ่งล็อกอินแล้ว)
  *   3. **แถวนั้นต้องเป็นของผู้ใช้คนนี้** (`payments.user_id` ตรงกับเซสชัน)
  *   4. ยอดเงินในแถวต้องตรงกับราคาแพ็กเกจฝั่งเซิร์ฟเวอร์ (กันแก้ราคาฝั่งไคลเอนต์)
- *   5. สถานะต้องเป็น `paid` ซึ่งมีแค่ webhook ที่ผ่านการตรวจลายเซ็นเท่านั้นที่ตั้งได้
+ *   5. สถานะต้องเป็น `paid` ซึ่งตั้งได้สองทางเท่านั้น: webhook ที่ผ่านการตรวจลายเซ็น
+ *      หรือเซิร์ฟเวอร์เราถาม Stripe เองด้วยคีย์ลับ (ผู้ใช้กลับมาก่อน webhook ถึง)
  * ตัวจำลอง (`provider = 'simulator'`) ผ่านได้เฉพาะนอก production เท่านั้น
  *
  * 🔴 ด่านที่ 3 คือของใหม่ (T-07) — ก่อนหน้านี้ไม่มีอะไรพิสูจน์ว่า "เซสชันที่ล็อกอินอยู่"
@@ -65,11 +67,36 @@ async function processPaymentGrant(
   // แถวยุคก่อน migrations/0015 เก็บเลขออร์เดอร์ไว้ที่ `booking_id` จึงต้องมองทั้งสองคอลัมน์
   const payRow = await db
     .prepare(
-      `SELECT id, order_id, booking_id, amount_satang, currency, status, provider, ticket_id, user_id
+      `SELECT id, order_id, booking_id, amount_satang, currency, status, provider, provider_ref, ticket_id, user_id
          FROM payments WHERE order_id = ? OR booking_id = ? LIMIT 1`
     )
     .bind(orderId, orderId)
-    .first<PaymentRowForGrant>();
+    .first<PaymentRowForGrant & { provider_ref?: string | null }>();
+
+  /*
+   * ผู้ใช้จ่ายบัตรเสร็จแล้ว Stripe พากลับมาที่นี่ทันที — webhook มักตามมาทีหลังไม่กี่วินาที
+   * ถ้ารอ webhook อย่างเดียว ผู้ใช้จะเจอ "ยังไม่ได้รับการยืนยัน" ทั้งที่จ่ายแล้ว
+   * จึงถาม Stripe ตรง ๆ ด้วยคีย์ลับ (ปลอมไม่ได้) แล้วยอมรับเฉพาะเมื่อ
+   * เลขออร์เดอร์ · ยอดเงิน · สกุลเงิน ตรงกับแถวของเราทุกตัว
+   */
+  if (payRow && payRow.status === "pending" && payRow.provider === "stripe" && payRow.provider_ref) {
+    const charge = await retrieveGatewayCharge(payRow.provider_ref);
+    if (
+      charge &&
+      charge.metadata.orderId === orderId &&
+      charge.amountSatang === Number(payRow.amount_satang) &&
+      charge.currency === payRow.currency
+    ) {
+      if (charge.status === "paid" || charge.status === "failed") {
+        try {
+          await updatePaymentStatus(payRow.id, charge.status);
+          payRow.status = charge.status;
+        } catch (err) {
+          console.warn("[Credit Confirmation] อัปเดตสถานะจาก Stripe ไม่สำเร็จ", err);
+        }
+      }
+    }
+  }
 
   /*
    * ด่าน 3–5 ตัดสินใน `src/lib/entitlement/purchase.ts` ซึ่งไม่แตะ I/O เลย
