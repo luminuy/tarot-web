@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { recordEvent } from "@/lib/stats/record";
 import { getSessionUser } from "@/lib/auth/session";
 import { getCreditPackageById } from "@/lib/entitlement/packages";
-import { createGatewayCharge } from "@/lib/marketplace/payment-gateway";
+import {
+  createGatewayCharge,
+  isStripeTestModeOnProduction,
+  PAYMENTS_NOT_OPEN_MESSAGE,
+} from "@/lib/marketplace/payment-gateway";
 import { createPaymentRecord } from "@/lib/marketplace/payments.repo";
 import { isPrivilegedTestRequest } from "@/lib/security/privileged";
 import { resolveAppOrigin } from "@/lib/security/app-origin";
@@ -40,6 +44,11 @@ export async function POST(request: Request) {
         { error: "กรุณาเข้าสู่ระบบก่อนทำการซื้อแพ็กเกจเปิดไพ่" },
         { status: 401 }
       );
+    }
+
+    // คีย์ทดสอบบนเว็บจริง = เปิดให้เฉพาะผู้ทดสอบ (บัตร 4242 ห้ามได้เครดิตฟรี)
+    if (isStripeTestModeOnProduction() && !isPrivileged) {
+      return NextResponse.json({ error: PAYMENTS_NOT_OPEN_MESSAGE }, { status: 503 });
     }
 
     const body = await request.json().catch(() => ({}));

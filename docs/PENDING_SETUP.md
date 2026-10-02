@@ -106,6 +106,9 @@ npx wrangler secret put STRIPE_WEBHOOK_SECRET
    เลือก 4 event: `checkout.session.completed` · `checkout.session.async_payment_succeeded` ·
    `checkout.session.async_payment_failed` · `checkout.session.expired` ➔ คัดลอก Signing secret (`whsec_...`) ไปตั้งข้างบน
 3. ทดสอบด้วยคีย์ `sk_test_...` + บัตร `4242 4242 4242 4242` ก่อนสลับเป็น `sk_live_...`
+   - ⚠️ ระหว่างเว็บจริงใช้คีย์ทดสอบ **เฉพาะผู้ทดสอบ** ซื้อได้ (คุกกี้ `/tester` หรืออีเมลใน `UNLIMITED_EMAILS` ที่ยืนยันแล้ว)
+     คนอื่นได้ 503 "ระบบชำระเงินยังไม่เปิดให้บริการ" — กันบัตร 4242 ได้เครดิตฟรี (`isStripeTestModeOnProduction`)
+   - ใส่ `sk_live_...` เมื่อไหร่ ด่านนี้ปลดเองทันที
 
 > 🚫 `ALLOW_UNSIGNED_WEBHOOKS_DEV=1` เป็นธงสำหรับ **เครื่องพัฒนาเท่านั้น**
 > ห้ามตั้งบน production / preview / staging เด็ดขาด — เท่ากับเปิดให้ใครก็ได้แจกเครดิตให้ตัวเอง

@@ -52,6 +52,20 @@ function stripeSecretKey(): string | null {
   return key && !key.startsWith("mock_") ? key : null;
 }
 
+/**
+ * 🔒 คีย์ทดสอบ (`sk_test_` / `rk_test_`) บน production — ช่วงทดสอบบนเว็บจริงก่อนเปิดบัญชี live
+ *
+ * ระหว่างนี้ใครก็จ่ายด้วยบัตรทดสอบ `4242 4242 4242 4242` ได้และเว็บจะแจกเครดิตจริง
+ * จุดสร้างรายการชำระเงินทุกจุดจึงต้องเรียกฟังก์ชันนี้ แล้วเปิดให้เฉพาะผู้ทดสอบ (`isPrivilegedTestRequest`)
+ * พอเปลี่ยนเป็น `sk_live_` ด่านนี้คืน false เองโดยไม่ต้องแก้โค้ด
+ */
+export function isStripeTestModeOnProduction(): boolean {
+  const key = stripeSecretKey();
+  return !!key && /^(sk|rk)_test_/.test(key) && process.env.NODE_ENV === "production";
+}
+
+export const PAYMENTS_NOT_OPEN_MESSAGE = "ระบบชำระเงินยังไม่เปิดให้บริการ กรุณากลับมาใหม่เร็ว ๆ นี้";
+
 /** แปลง object ซ้อนเป็น form body แบบที่ Stripe รับ (`a[b][0][c]=...`) */
 export function toStripeForm(params: Record<string, unknown>, prefix = "", out = new URLSearchParams()): URLSearchParams {
   for (const [key, value] of Object.entries(params)) {

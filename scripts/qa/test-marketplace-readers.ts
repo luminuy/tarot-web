@@ -146,7 +146,7 @@ async function runTest() {
   console.log("  ✓ 8. Reader Queue Lifecycle: รอคิว ➔ เรียกคิว ➔ ส่งต่อ LINE สำเร็จครบวงจร");
 
   // ── M7: Payments & Webhook Verification ───────────────────────────────────
-  const { createGatewayCharge, verifyWebhookSignature, parseWebhookEvent, toStripeForm } = await import(
+  const { createGatewayCharge, verifyWebhookSignature, parseWebhookEvent, toStripeForm, isStripeTestModeOnProduction } = await import(
     "../../src/lib/marketplace/payment-gateway"
   );
   const {
@@ -250,6 +250,29 @@ async function runTest() {
     other !== null
   ) {
     throw new Error("❌ parseWebhookEvent แปล event ของ Stripe ผิด");
+  }
+
+  // คีย์ทดสอบบนเว็บจริงต้องถูกจับได้ (ไม่งั้นบัตร 4242 ได้เครดิตฟรี) · คีย์ live / เครื่องพัฒนา / ตัวจำลอง ต้องไม่โดน
+  const envBackup = { key: process.env.STRIPE_SECRET_KEY, node: process.env.NODE_ENV };
+  const modeOf = (key: string | undefined, node: string) => {
+    if (key === undefined) delete process.env.STRIPE_SECRET_KEY;
+    else process.env.STRIPE_SECRET_KEY = key;
+    (process.env as Record<string, string>).NODE_ENV = node;
+    return isStripeTestModeOnProduction();
+  };
+  const gate = [
+    modeOf("sk_test_x", "production"),
+    modeOf("rk_test_x", "production"),
+    modeOf("sk_live_x", "production"),
+    modeOf("sk_test_x", "development"),
+    modeOf("mock_x", "production"),
+    modeOf(undefined, "production"),
+  ];
+  if (envBackup.key === undefined) delete process.env.STRIPE_SECRET_KEY;
+  else process.env.STRIPE_SECRET_KEY = envBackup.key;
+  (process.env as Record<string, string | undefined>).NODE_ENV = envBackup.node;
+  if (gate.join() !== "true,true,false,false,false,false") {
+    throw new Error(`❌ isStripeTestModeOnProduction ตัดสินผิด: ${gate.join()}`);
   }
 
   // form body ซ้อนชั้นแบบที่ Stripe รับ
