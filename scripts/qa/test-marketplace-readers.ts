@@ -275,6 +275,45 @@ async function runTest() {
     throw new Error(`❌ isStripeTestModeOnProduction ตัดสินผิด: ${gate.join()}`);
   }
 
+  // หน้าจ่ายเงิน Stripe: ชื่อสั้น · บรรทัดรอง · รูป · เติมอีเมล · ข้อความใต้ปุ่ม ต้องถูกส่งไปจริง
+  {
+    const realFetch = globalThis.fetch;
+    const prevKey = process.env.STRIPE_SECRET_KEY;
+    let sent = "";
+    process.env.STRIPE_SECRET_KEY = "sk_test_form_check";
+    globalThis.fetch = (async (_u: unknown, init?: RequestInit) => {
+      sent = String(init?.body ?? "");
+      return new Response(JSON.stringify({ id: "cs_test_form", url: "https://checkout.stripe.com/x", amount_total: 14900, currency: "thb" }));
+    }) as typeof fetch;
+    try {
+      await createGatewayCharge({
+        amountSatang: 14900,
+        description: "เติมรอบดูดวง 10 ครั้ง",
+        productDescription: "รอบไม่มีวันหมดอายุ",
+        imageUrl: "https://seertarot.net/cards/pentacles-01.jpg",
+        customerEmail: "a@example.com",
+        submitMessage: "รอบจะเข้าบัญชีทันที",
+        returnUri: "https://seertarot.net/x?y=1",
+        cancelUri: "https://seertarot.net/pricing",
+        referenceId: "ord_form",
+      });
+    } finally {
+      globalThis.fetch = realFetch;
+      if (prevKey === undefined) delete process.env.STRIPE_SECRET_KEY;
+      else process.env.STRIPE_SECRET_KEY = prevKey;
+    }
+    const f = new URLSearchParams(sent);
+    if (
+      f.get("line_items[0][price_data][product_data][description]") !== "รอบไม่มีวันหมดอายุ" ||
+      f.get("line_items[0][price_data][product_data][images][0]") !== "https://seertarot.net/cards/pentacles-01.jpg" ||
+      f.get("customer_email") !== "a@example.com" ||
+      f.get("custom_text[submit][message]") !== "รอบจะเข้าบัญชีทันที" ||
+      f.get("submit_type") !== "pay"
+    ) {
+      throw new Error(`❌ createGatewayCharge ส่งรายละเอียดหน้าจ่ายเงินไม่ครบ: ${sent}`);
+    }
+  }
+
   // form body ซ้อนชั้นแบบที่ Stripe รับ
   const form = toStripeForm({ line_items: [{ price_data: { unit_amount: 9900 } }], metadata: { orderId: "ord_1" } });
   if (form.get("line_items[0][price_data][unit_amount]") !== "9900" || form.get("metadata[orderId]") !== "ord_1") {
