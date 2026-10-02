@@ -173,7 +173,7 @@ export default async function ReaderDetailPage({
               <div className="rounded-lg bg-surface border border-[#E4D8C4] p-4 space-y-1.5">
                 <span className="text-gold-ink font-bold text-base">3. สนทนากับแม่หมอ</span>
                 <p className="text-muted leading-relaxed">
-                  เชื่อมต่อไปยัง LINE ส่วนตัวของแม่หมอเพื่อสนทนาเจาะลึกและไขข้อข้องใจ
+                  ถึงคิวแล้วกดเข้าห้องวิดีโอคอลในเว็บ คุยตัวต่อตัวกับแม่หมอ (หรือคุยทาง LINE ก็ได้)
                 </p>
               </div>
             </div>

@@ -1,3 +1,4 @@
+import { CONSULTATION_PRICE_THB } from "@/lib/marketplace/offer";
 import { getAppDB } from "@/lib/platform/db";
 
 /**
@@ -7,7 +8,7 @@ import { getAppDB } from "@/lib/platform/db";
  * ไม่งั้นผู้ใช้ยิง `{"amountSatang":1000}` แล้วจ่ายจริง 10 บาทแทน 299 บาทได้
  * ส่วนแบ่งแม่หมอคำนวณจากยอดนี้ (calculateReaderEarnings) จึงกระทบรายได้จริงทั้งสองฝั่ง
  */
-export const CONSULTATION_PRICE_SATANG = 29900;
+export const CONSULTATION_PRICE_SATANG = CONSULTATION_PRICE_THB * 100;
 
 export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
 export type PayoutStatus = "pending" | "completed" | "cancelled";

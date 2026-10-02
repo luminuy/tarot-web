@@ -95,6 +95,17 @@ export async function getReaderLiveAvailability(readerId: string): Promise<boole
 }
 
 /**
+ * แม่หมอทุกคนที่เปิดรับคิวสดอยู่ตอนนี้ — อ่านครั้งเดียวทั้งชุด (หน้ารวมแม่หมอ ไม่วนอ่านทีละคน)
+ */
+export async function listLiveReaderIds(): Promise<Set<string>> {
+  const db = await getAppDB();
+  const { results } = await db
+    .prepare("SELECT reader_id FROM reader_availability WHERE mode = 'live' AND is_open = 1")
+    .all<{ reader_id: string }>();
+  return new Set((results || []).map((r) => r.reader_id));
+}
+
+/**
  * เปิด/ปิด Live Queue ของแม่หมอ
  */
 export async function setReaderLiveAvailability(readerId: string, isOpen: boolean): Promise<void> {

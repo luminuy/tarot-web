@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import type { CallRole, CallView } from "@/lib/marketplace/call.repo";
 import type { IceServerConfig } from "@/lib/marketplace/turn";
 
@@ -271,9 +272,12 @@ export interface VideoCallRoomProps {
   /** โทเคนแม่หมอ (หน้าแผงแม่หมอส่งเป็น Bearer) — ฝั่งลูกค้าใช้คุกกี้ ไม่ต้องส่ง */
   authToken?: string | null;
   onClose?: () => void;
+  /** วางอยู่ในการ์ดของหน้าอยู่แล้ว — ไม่ต้องมีกรอบการ์ดซ้อนอีกชั้น และไม่ต้องมีหัวข้อซ้ำ */
+  embedded?: boolean;
 }
 
-export function VideoCallRoom({ ticketId, role, peerName, authToken, onClose }: VideoCallRoomProps) {
+export function VideoCallRoom({ ticketId, role, peerName, authToken, onClose, embedded = false }: VideoCallRoomProps) {
+  const shell = embedded ? "" : "altar-card-porcelain p-5";
   const endpoint = `/api/marketplace/calls/${encodeURIComponent(ticketId)}`;
   const headers: HeadersInit = authToken ? { Authorization: `Bearer ${authToken}` } : {};
 
@@ -419,13 +423,13 @@ export function VideoCallRoom({ ticketId, role, peerName, authToken, onClose }: 
   if (phase === "idle" || phase === "error" || phase === "ended") {
     const isCustomer = role === "customer";
     return (
-      <section aria-label="วิดีโอคอล" className="altar-card-porcelain p-5 space-y-4 text-left font-serif-th">
+      <section aria-label="วิดีโอคอล" className={`${shell} space-y-4 text-left font-serif-th`}>
         {phase === "ended" ? (
-          <p className="text-sm text-ink">
+          <p className="text-sm font-semibold text-ink">
             {endedBy === role ? "คุณวางสายแล้ว" : endedBy ? `${peerName} วางสายแล้ว` : "สายนี้จบแล้ว"}
           </p>
         ) : (
-          <h3 className="font-bold text-base text-ink">วิดีโอคอลกับ{peerName}</h3>
+          !embedded && <h3 className="font-bold text-base text-ink">วิดีโอคอลกับ{peerName}</h3>
         )}
 
         {error && (
@@ -435,20 +439,27 @@ export function VideoCallRoom({ ticketId, role, peerName, authToken, onClose }: 
         )}
 
         {isCustomer && phase === "idle" && (
-          <div className="space-y-3 text-xs text-muted leading-relaxed">
-            <ul className="list-disc list-inside space-y-1">
-              <li>ภาพและเสียงส่งผ่านเซิร์ฟเวอร์ของ Cloudflare เพื่อซ่อนหมายเลข IP ของคุณจากแม่หมอ</li>
-              <li>เว็บไม่บันทึกภาพ เสียง หรือบทสนทนาใด ๆ</li>
-              <li>ปิดไมค์หรือกล้องได้ตลอดเวลาระหว่างคุย</li>
+          <div className="space-y-3 text-[13px] leading-relaxed">
+            <ul className="space-y-1.5 text-ink">
+              {[
+                "แม่หมอไม่เห็นเบอร์โทรและหมายเลข IP ของคุณ",
+                "เว็บไม่บันทึกภาพ เสียง หรือบทสนทนาใด ๆ",
+                "ปิดไมค์หรือกล้องได้ตลอดเวลาระหว่างคุย",
+              ].map((line) => (
+                <li key={line} className="flex items-start gap-2">
+                  <span aria-hidden="true" className="text-ok font-bold">✓</span>
+                  <span><ThaiPhrases>{line}</ThaiPhrases></span>
+                </li>
+              ))}
             </ul>
-            <label className="flex items-start gap-2 text-ink cursor-pointer">
+            <label className="flex items-start gap-3 rounded-xl border border-line bg-surface p-3.5 text-sm text-ink cursor-pointer">
               <input
                 type="checkbox"
                 checked={consent}
                 onChange={(e) => setConsent(e.target.checked)}
-                className="mt-1 h-4 w-4 shrink-0 accent-gold-ink"
+                className="mt-0.5 h-5 w-5 shrink-0 accent-gold-ink"
               />
-              <span>ฉันยินยอมให้เปิดกล้องและไมโครโฟน เพื่อคุยกับแม่หมอผ่านวิดีโอคอล</span>
+              <span><ThaiPhrases>ฉันยินยอมให้เปิดกล้องและไมโครโฟน เพื่อคุยกับแม่หมอผ่านวิดีโอคอล</ThaiPhrases></span>
             </label>
           </div>
         )}
@@ -456,6 +467,7 @@ export function VideoCallRoom({ ticketId, role, peerName, authToken, onClose }: 
         <div className="flex flex-wrap gap-2">
           <Button
             variant="gold"
+            size="lg"
             className="flex-1"
             disabled={isCustomer && phase === "idle" && !consent}
             onClick={() => void start()}
@@ -490,7 +502,7 @@ export function VideoCallRoom({ ticketId, role, peerName, authToken, onClose }: 
   return (
     <section
       aria-label={`วิดีโอคอลกับ${peerName}`}
-      className="altar-card-porcelain w-full max-w-3xl mx-auto p-2 sm:p-4 space-y-3 font-serif-th"
+      className={`${embedded ? "" : "altar-card-porcelain p-2 sm:p-4"} w-full max-w-3xl mx-auto space-y-3 font-serif-th`}
     >
       {/* สูงไม่เกิน 65% ของจอ — จอกว้างแบบเดสก์ท็อปไม่ให้ภาพดันปุ่มวางสายตกขอบล่าง */}
       <div className="relative w-full aspect-[3/4] sm:aspect-video max-h-[65vh] rounded-2xl bg-ink-deep overflow-hidden">
