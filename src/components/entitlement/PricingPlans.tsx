@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { getCreditPackages, type CreditPackage } from "@/lib/entitlement/packages";
 import { DAILY_LIMIT } from "@/lib/entitlement/limits";
 import { startCheckout } from "@/lib/entitlement/start-checkout";
+import { rememberPendingCheckout, takePendingCheckout } from "@/lib/entitlement/pending-checkout";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useSessionUser } from "@/lib/auth/use-session";
 import { useLocale } from "@/lib/i18n";
@@ -48,6 +49,32 @@ export function PricingPlans() {
   const [auth, setAuth] = useState<"signin" | "signup" | null>(null);
   const [simulatorOpen, setSimulatorOpen] = useState(false);
   const [cancelled, setCancelled] = useState(false);
+  const [resuming, setResuming] = useState(false);
+
+  /*
+   * ▶️ เพิ่งล็อกอินเสร็จ และมีแพ็กที่กดซื้อค้างไว้ ➔ ไปหน้าจ่ายเงินต่อทันที (INC-0249)
+   * `AuthModal` พากลับมาหน้านี้เมื่อมีแพ็กค้าง (ล็อกอินอีเมลและ Google/LINE พามาพร้อม `auth_success=1`)
+   */
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("auth_success") !== "1") return;
+    url.searchParams.delete("auth_success");
+    url.searchParams.delete("new_user");
+    window.history.replaceState({}, "", url.pathname + url.search + url.hash);
+    const packageId = takePendingCheckout();
+    if (!packageId) return;
+    setBusyId(packageId as CreditPackage["id"]);
+    setResuming(true);
+    void startCheckout(packageId, isEn).then((result) => {
+      if (result.kind === "redirect") return;
+      setBusyId(null);
+      setResuming(false);
+      if (result.kind === "error") setError(result.message);
+      else if (result.kind === "simulator") setSimulatorOpen(true);
+    });
+    // ทำครั้งเดียวตอนเปิดหน้า
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /* กลับมาจากปุ่ม "ยกเลิก" ในหน้า Stripe — บอกให้สบายใจว่ายังไม่ตัดเงิน แล้วล้างพารามิเตอร์ทิ้ง */
   useEffect(() => {
@@ -70,6 +97,7 @@ export function PricingPlans() {
   const buy = async (pkg: CreditPackage) => {
     setError(null);
     if (!user) {
+      rememberPendingCheckout(pkg.id); // ล็อกอินเสร็จพาไปจ่ายต่อเอง (site-chrome.ts)
       setAuth("signin");
       return;
     }
@@ -77,7 +105,10 @@ export function PricingPlans() {
     const result = await startCheckout(pkg.id, isEn);
     if (result.kind === "redirect") return;
     setBusyId(null);
-    if (result.kind === "auth_required") setAuth("signin");
+    if (result.kind === "auth_required") {
+      rememberPendingCheckout(pkg.id);
+      setAuth("signin");
+    }
     else if (result.kind === "error") setError(result.message);
     else setSimulatorOpen(true);
   };
@@ -90,6 +121,11 @@ export function PricingPlans() {
 
   return (
     <div className="space-y-6">
+      {resuming && (
+        <p role="status" className="glass-tile mx-auto max-w-xl px-4 py-2.5 text-center font-serif-th text-sm font-semibold text-ink-deep">
+          {isEn ? "Signed in — taking you to checkout…" : "เข้าสู่ระบบแล้ว กำลังพาไปหน้าชำระเงิน…"}
+        </p>
+      )}
       {cancelled && (
         <p role="status" className="glass-tile mx-auto max-w-xl px-4 py-2.5 text-center font-serif-th text-sm text-ink-deep">
           {isEn ? "Payment cancelled — you have not been charged." : "ยกเลิกการชำระเงินแล้ว ยังไม่มีการตัดเงิน"}

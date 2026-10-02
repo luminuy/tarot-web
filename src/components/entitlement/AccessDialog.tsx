@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
+import { PurchasePanel } from "@/components/entitlement/PurchasePanel";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 
 import { Modal } from "@/components/ui/Modal";
 import { QuotaPips } from "@/components/entitlement/QuotaPips";
 import {
   CheckMarkIcon,
-  CoinSealIcon,
   DashMarkIcon,
   HourglassIcon,
   SealedLockIcon,
@@ -15,8 +15,6 @@ import {
 } from "@/components/entitlement/EntitlementIcons";
 import {
   CHEAPEST_PACKAGE_THB,
-  DAILY_LIMIT,
-  READINGS_EN,
   describeEntitlement,
   formatResetCountdown,
   getAccessPlans,
@@ -87,6 +85,54 @@ export function AccessDialog({
     if (copy.primaryAction === "signup" && reason !== "explore") onSignin();
   };
 
+  /*
+   * 💳 เหตุผลที่ต้อง "เติมรอบ" (โควตาหมด · ผังใหญ่ · แม่หมอพิเศษ · ถามต่อไม่จำกัด)
+   * ➔ ขายในหน้าต่างนี้เลยด้วย `PurchasePanel` ชุดเดียวกับหน้าต่างเติมรอบ
+   *
+   * 🔴 เดิมหน้าต่างนี้มีกล่องสถานะ + กล่อง "เติมรอบ เปิดต่อได้เลย" + ปุ่ม แล้วกดปุ่มกลับไปเปิด
+   *    **หน้าต่างที่สองที่ขายของซ้ำอีกรอบ** — เจ้าของเจอว่าซ้ำซ้อน ต้องกดสองชั้นกว่าจะถึงหน้าจ่ายเงิน
+   */
+  if (showCredits) {
+    return (
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        maxWidth="lg"
+        showCloseButton
+        title={copy.title}
+        description={<span className="font-serif-th leading-relaxed">{copy.body}</span>}
+      >
+        <div className="space-y-5 pt-1">
+          {reason === "daily_exhausted" && (
+            <p className="glass-chip mx-auto flex w-fit items-center gap-1.5 px-3 py-1.5 font-serif-th text-xs font-semibold text-ink-deep">
+              <HourglassIcon className="h-3.5 w-3.5 text-gold-ink" />
+              {isEn
+                ? `Free reading back ${countdown || "after midnight"}`
+                : `เปิดไพ่ฟรีได้อีกครั้ง${countdown ? ` ${countdown}` : "หลังเที่ยงคืน"}`}
+            </p>
+          )}
+          <PurchasePanel
+            onDone={onClose}
+            onRequireAuth={() => {
+              trackEntitlementEvent(`access_dialog_primary:${reason}`);
+              onClose();
+              onSignup();
+            }}
+          />
+          <p className="text-center">
+            <button
+              type="button"
+              onClick={handleSecondary}
+              className="tap-overlay-y font-serif-th text-sm text-muted underline underline-offset-4 hover:text-ink-deep cursor-pointer"
+            >
+              {copy.secondaryLabel}
+            </button>
+          </p>
+        </div>
+      </Modal>
+    );
+  }
+
   return (
     <Modal
       isOpen={isOpen}
@@ -97,41 +143,18 @@ export function AccessDialog({
       description={<span className="font-serif-th leading-relaxed">{copy.body}</span>}
     >
       <div className="space-y-6 text-ink-deep">
-        {/* ป้ายบอกว่าหน้าต่างนี้เปิดขึ้นเพราะอะไร — โควตาหมดไม่ต้องมี กล่องนาฬิกาทรายข้างล่างบอกเองแล้ว */}
-        {reason !== "daily_exhausted" && (
-          <span className="glass-chip inline-flex items-center gap-1.5 px-3 py-1 font-serif-th text-xs font-semibold text-gold-ink">
-            {showCredits ? (
-              <HourglassIcon className="h-3.5 w-3.5" />
-            ) : reason === "explore" ? (
-              <SparkSealIcon className="h-3.5 w-3.5" />
-            ) : (
-              <SealedLockIcon className="h-3.5 w-3.5" />
-            )}
-            {copy.eyebrow}
-          </span>
-        )}
+        {/* ป้ายบอกว่าหน้าต่างนี้เปิดขึ้นเพราะอะไร (เหตุผลที่ต้องเติมรอบใช้หน้าต่างแบบ PurchasePanel ข้างบน) */}
+        <span className="glass-chip inline-flex items-center gap-1.5 px-3 py-1 font-serif-th text-xs font-semibold text-gold-ink">
+          {reason === "explore" ? (
+            <SparkSealIcon className="h-3.5 w-3.5" />
+          ) : (
+            <SealedLockIcon className="h-3.5 w-3.5" />
+          )}
+          {copy.eyebrow}
+        </span>
 
         {/* ── สถานะสิทธิ์ปัจจุบัน ─────────────────────────────────── */}
-        {reason === "daily_exhausted" ? (
-          /* โควตาวันนี้หมด: บอกเรื่องเดียวที่ผู้ใช้อยากรู้ — "อีกนานไหม"
-             ไม่โชว์บรรทัด "วันนี้เหลือ X จาก Y" ซ้ำ เพราะถ้าข้อมูลสิทธิ์ยังไม่อัปเดต
-             จะขัดกับหัวเรื่องตรง ๆ (เจ้าของเจอ "วันนี้เหลือ 1 จาก 1 ครั้ง" ใต้หัว "เปิดครบแล้ว") */
-          <div className="altar-panel !rounded-2xl p-5 sm:p-6 text-center space-y-1.5">
-            <span className="glass-tile mx-auto mb-2 flex h-11 w-11 items-center justify-center !rounded-full text-gold-ink">
-              <HourglassIcon className="h-5 w-5" />
-            </span>
-            <p className="font-serif-th text-xs text-muted">
-              {isEn ? "Your free reading is back" : "เปิดไพ่ฟรีได้อีกครั้ง"}
-            </p>
-            <p className="font-serif-th text-2xl font-bold text-ink-deep">
-              {countdown || (isEn ? "after midnight" : "หลังเที่ยงคืนนี้")}
-            </p>
-            <p className="font-serif-th text-xs text-muted">
-              {isEn ? `Free readings reset at ${resetClockLabel(true)}` : "สิทธิ์ฟรีรีเซ็ตทุกคืนตอนเที่ยงคืน เวลาไทย"}
-            </p>
-          </div>
-        ) : (
-          view && (
+        {view && (
             <div className="altar-panel !rounded-2xl p-4 sm:p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="space-y-1">
@@ -154,11 +177,9 @@ export function AccessDialog({
                 </div>
               )}
             </div>
-          )
-        )}
+          )}
 
         {/* ── สิ่งที่ได้เพิ่ม ─────────────────────────────────────── */}
-        {!showCredits && (
           <section className="space-y-3">
             <h3 className="font-serif-th text-sm font-bold text-ink-deep"><ThaiPhrases>
               {view?.isMember
@@ -183,40 +204,6 @@ export function AccessDialog({
               ))}
             </ul>
           </section>
-        )}
-
-        {/* ── ทางเลือกเมื่อโควตาวันนี้หมด ─────────────────────────── */}
-        {/* สองกล่องขนาดเท่ากัน โครงเดียวกัน — ทางที่จ่ายเงินแค่มีขอบทองบอกว่าใช้ได้ทันที ไม่ตะโกนใส่ */}
-        {/* กล่อง "รอพรุ่งนี้" ใช้ได้เฉพาะตอนโควตาเปิดไพ่หมดจริง — ผังใหญ่ / แม่หมอพิเศษ / ถามต่อไม่จำกัด
-            รอพรุ่งนี้ก็ไม่ได้สิ่งนั้น เหลือกล่องเติมรอบกล่องเดียวเต็มแถว */}
-        {showCredits && (
-          <section className={`grid gap-3 ${reason === "daily_exhausted" ? "sm:grid-cols-2" : ""}`}>
-            {reason === "daily_exhausted" && (
-              <div className="glass-tile !rounded-2xl p-4 space-y-1.5">
-                <span className="flex items-center gap-2 font-serif-th text-sm font-bold text-ink-deep">
-                  <HourglassIcon className="h-4 w-4 text-gold-ink" />
-                  {isEn ? "Come back tomorrow, free" : "รอพรุ่งนี้ ไม่เสียเงิน"}
-                </span>
-                <p className="font-serif-th text-[13px] leading-relaxed text-muted">
-                  {isEn
-                    ? `Your ${DAILY_LIMIT} free ${READINGS_EN} come back at midnight. Nothing to do.`
-                    : `พ้นเที่ยงคืนได้สิทธิ์เปิดไพ่ฟรี ${DAILY_LIMIT} ครั้งกลับมาเอง ไม่ต้องทำอะไรเพิ่ม`}
-                </p>
-              </div>
-            )}
-            <div className="glass-tile !rounded-2xl p-4 space-y-1.5 ring-1 ring-gold/60">
-              <span className="flex items-center gap-2 font-serif-th text-sm font-bold text-gold-ink">
-                <CoinSealIcon className="h-4 w-4" />
-                {isEn ? "Top up, draw now" : "เติมรอบ เปิดต่อได้เลย"}
-              </span>
-              <p className="font-serif-th text-[13px] leading-relaxed text-ink-deep">
-                {isEn
-                  ? `From ${CHEAPEST_PACKAGE_THB} THB · Big 10–12 card spreads and unlimited follow-up questions`
-                  : `เริ่มต้น ${CHEAPEST_PACKAGE_THB} บาท · เปิดผังใหญ่ 10–12 ใบ และถามแม่หมอต่อได้ไม่จำกัด`}
-              </p>
-            </div>
-          </section>
-        )}
 
         {/* ── ตารางเทียบสิทธิ์ ────────────────────────────────────── */}
         {reason === "explore" && (

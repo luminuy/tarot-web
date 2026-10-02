@@ -616,10 +616,11 @@ check(
   );
   const cardImage = src("src/components/card/CardImage.tsx");
   check("A3-06: CardImage remount ต่อภาพ (key={src} ทั้ง <img> และ <picture>)", /<img\s+key=\{src\}/.test(cardImage) && /<picture key=\{src\}/.test(cardImage));
-  const buy = src("src/components/entitlement/BuyCreditsModal.tsx");
+  // ตัวเลือกแพ็ก/จ่ายเงินย้ายไปอยู่ใน PurchasePanel (ใช้ร่วมกับหน้าต่างสิทธิ์) — หน้าต่างเติมรอบเป็นแค่เปลือก
+  const buy = src("src/components/entitlement/PurchasePanel.tsx");
   check(
-    "A3-07: BuyCreditsModal เก็บไทม์เมอร์ปิดใน ref และล้างตอนปิด/unmount",
-    /closeTimerRef\.current = setTimeout/.test(buy) && /resetModalState = \(\) => \{\s*clearCloseTimer\(\)/.test(buy) && /return clearCloseTimer/.test(buy),
+    "A3-07: แผงจ่ายเงินเก็บไทม์เมอร์ปิดใน ref และล้างตอน unmount",
+    /closeTimerRef\.current = setTimeout/.test(buy) && /return clearCloseTimer/.test(buy) && /clearCloseTimer\(\);\s*closeTimerRef\.current = setTimeout/.test(buy),
   );
   const hook = src("src/lib/reading/use-ai-reading.ts");
   const retryUsers = [
