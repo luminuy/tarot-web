@@ -2424,15 +2424,17 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
    - ขนาดตามมาตรฐาน FAB: ปุ่มหลัก 56px · ปุ่มช่องทาง 48px (touch target ≥ 44px)
    - ไอคอน (::before) และป้ายชื่อ (::after จาก data-label) เป็น pseudo-element ทั้งหมด
      ไม่เพิ่ม element จริง — หน้าแรกมีงบ DOM ≤ 1,500 (INC-0247)
-   - พื้นปุ่มหลักใช้ทองแบบเดียวกับ `.btn-gold-glass` (ปุ่มหลักทั้งเว็บ) */
+   - พื้นปุ่มหลักเขียวโทน LINE (เจ้าของเลือก 2026-10-02 — คนไทยเห็นแล้วรู้ว่าทักแชทได้)
+     ⚠️ ไม่ใช้ #06C755 (เขียว LINE สด) ตรง ๆ: ไอคอนขาวบนสีนั้นได้คอนทราสต์แค่ 2.26:1
+     ต่ำกว่าเกณฑ์ WCAG 1.4.11 (≥ 3:1 สำหรับไอคอน) ➔ #00A64B ได้ 3.2:1 · โลโก้ LINE ในปุ่มย่อยยังใช้สีแบรนด์จริง (โลโก้ได้รับยกเว้น) */
 .social-fab > summary {
-  background-image: linear-gradient(180deg, #96621C 0%, #8F5C1A 54%, #7A4E14 100%);
-  color: #FFF8EC;
+  background-color: #00A64B;
+  color: #FFFFFF;
   box-shadow:
-    0 1px 0 rgba(255, 233, 199, 0.32) inset,
-    0 -1px 0 rgba(0, 0, 0, 0.22) inset,
-    0 2px 4px rgba(51, 36, 26, 0.24),
-    0 12px 28px -8px rgba(122, 78, 20, 0.6);
+    0 1px 0 rgba(255, 255, 255, 0.22) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.14) inset,
+    0 2px 4px rgba(0, 60, 25, 0.22),
+    0 12px 28px -8px rgba(0, 120, 55, 0.55);
   transition: transform var(--dur-fast, 0.18s) ease, box-shadow var(--dur-fast, 0.18s) ease, filter var(--dur-fast, 0.18s) ease;
   -webkit-tap-highlight-color: transparent;
 }
@@ -2450,13 +2452,13 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
 }
 @media (hover: hover) {
   .social-fab > summary:hover {
-    filter: brightness(1.06);
+    filter: brightness(1.05);
     transform: translateY(-1px);
     box-shadow:
-      0 1px 0 rgba(255, 233, 199, 0.36) inset,
-      0 -1px 0 rgba(0, 0, 0, 0.22) inset,
-      0 3px 6px rgba(51, 36, 26, 0.24),
-      0 18px 34px -10px rgba(122, 78, 20, 0.65);
+      0 1px 0 rgba(255, 255, 255, 0.26) inset,
+      0 -1px 0 rgba(0, 0, 0, 0.14) inset,
+      0 3px 6px rgba(0, 60, 25, 0.24),
+      0 18px 34px -10px rgba(0, 120, 55, 0.6);
   }
 }
 .social-fab > summary:active {
