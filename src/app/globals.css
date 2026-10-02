@@ -2193,17 +2193,20 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
       เขียนนอก @layer จึงชนะคลาส `grid` ของ Tailwind ได้โดยไม่ต้อง !important
       ปุ่มลูกศร (`.home-rail-btn`) ทำงานด้วย `astro/scripts/home-rails.ts`
    ═════════════════════════════════════════════════════════════════════════ */
-.home-band {
+.home-band,
+.page-band {
   position: relative;
   isolation: isolate;
   padding-block: 2.75rem;
 }
 @media (min-width: 640px) {
-  .home-band {
+  .home-band,
+  .page-band {
     padding-block: 4rem;
   }
 }
-.home-band::before {
+.home-band::before,
+.page-band::before {
   content: "";
   position: absolute;
   z-index: -1;
@@ -2214,8 +2217,29 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
   background: var(--home-band-bg, transparent);
   pointer-events: none;
 }
-.home-band-tint {
+.home-band-tint,
+.page-band-tint {
   --home-band-bg: rgba(255, 251, 244, 0.62);
+}
+/*
+ * ✦ แถบแบ่งส่วนของหน้าอื่นทั้งเว็บ (`.page-band`) — ชุดเดียวกับหน้าแรกทุกค่า (เจ้าของสั่ง 2026-10-02:
+ *   "แต่ละหน้าไม่มีการแบ่ง section ใช้สีแบ่งหัวข้อ ไม่เหมือนหน้าแรก")
+ * กติกา: ส่วนหัวของหน้า (hero) อยู่บนพื้นไล่สีเดิม ไม่ใส่แถบ · ส่วนถัดไปสลับ `page-band-tint` / `page-band`
+ * แถบแทนเส้น `border-t` ที่เคยใช้คั่นส่วน — ห้ามใส่ทั้งสองอย่างพร้อมกัน (เส้นซ้อนขอบแถบ)
+ * `margin-block: 0` — แถบต้องชิดกันเหมือนหน้าแรก แต่ส่วนใหญ่อยู่ใน `space-y-*` ที่ใส่ระยะคั่น
+ *   (กฎนี้อยู่นอก @layer จึงชนะ utility ของ Tailwind โดยไม่ต้อง !important)
+ */
+.page-band {
+  margin-block: 0;
+}
+/* หน้าเอกสาร (เกี่ยวกับเรา · ติดต่อ · นโยบาย) มีหัวข้อสั้น ๆ หลายข้อ — แถบเต็มความสูงแบบหน้าแรกจะเว้นว่างเกินเนื้อหา */
+.page-band.page-band-compact {
+  padding-block: 1.75rem;
+}
+@media (min-width: 640px) {
+  .page-band.page-band-compact {
+    padding-block: 2.25rem;
+  }
 }
 /* แถบแรกต่อจากหัวหน้า ("เปิดไพ่ด่วน") ใช้พื้นเดียวกับหัวหน้า — padding บนเต็ม 44/64px ไม่ได้แบ่งสีอะไร
    กลายเป็นช่องว่างเปล่า (เจ้าของทัก: ใต้ไพ่ประจำวันเว้นไว้เยอะ 71px มือถือ / 91px จอใหญ่) ➔ ลดเหลือ 32/40px */

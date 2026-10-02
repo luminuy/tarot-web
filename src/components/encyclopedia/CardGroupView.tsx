@@ -204,7 +204,7 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
       </div>
 
       {/* Cards Grid */}
-      <section aria-label={isEnglish ? groupInfo.nameEn : groupInfo.nameTh} className="space-y-4">
+      <section aria-label={isEnglish ? groupInfo.nameEn : groupInfo.nameTh} className="page-band page-band-tint space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-serif-th text-base font-bold text-ink"><ThaiPhrases>
             {isEnglish ? `All ${cards.length} Cards in this Group` : `รายชื่อไพ่ทั้งหมด ${cards.length} ใบ ในหมวดนี้`}

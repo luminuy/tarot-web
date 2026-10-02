@@ -241,8 +241,8 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
         );
       })()}
 
-      {/* Articles Grid */}
-      <div className="space-y-4">
+      {/* Articles Grid — แถบสีอ่อนแบ่งจากหัวหน้า/บทความเด่นแบบหน้าแรก (`page-band`) */}
+      <div className="page-band page-band-tint space-y-4">
         <div className="flex items-center justify-between text-xs text-muted px-1 font-serif-th">
           <span className="flex items-center gap-1.5">
             

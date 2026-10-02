@@ -93,13 +93,13 @@ export function ContactBodyEn() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdContact) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdBreadcrumbs) }} />
 
-      <div className="max-w-3xl mx-auto px-6 py-16 space-y-10">
-        <div className="text-center space-y-3 pb-6 border-b border-line/40">
+      <div className="max-w-3xl mx-auto px-6 pt-16 space-y-10">
+        <div className="text-center space-y-3 pb-2">
           <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif-th"><ThaiPhrases>Contact Us</ThaiPhrases></h1>
           <p className="text-xs text-muted">We personally review and attend to every message received.</p>
         </div>
 
-        <section className="space-y-3">
+        <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>Electronic Mail</ThaiPhrases></h2>
           <div className="altar-card-porcelain !rounded-xl p-4 space-y-2">
             <a
@@ -115,7 +115,7 @@ export function ContactBodyEn() {
         </section>
 
         {TIKTOK_URL && (
-          <section className="space-y-3">
+          <section className="page-band page-band-compact space-y-3">
             <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>Official Channels</ThaiPhrases></h2>
             <ul className="space-y-3">
               {BRAND_SOCIAL_LINKS.map((social) => (
@@ -144,7 +144,7 @@ export function ContactBodyEn() {
           </section>
         )}
 
-        <section className="space-y-3">
+        <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>Inquiries We Welcome</ThaiPhrases></h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
@@ -166,7 +166,7 @@ export function ContactBodyEn() {
           </ul>
         </section>
 
-        <section className="space-y-3">
+        <section className="page-band page-band-compact space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>Matters Outside Our Scope</ThaiPhrases></h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             We do not conduct manual readings via email, perform karmic or ritualistic interventions, or provide licensed medical, legal, or financial counsel. If you wish to draw cards, please visit our{" "}
@@ -180,7 +180,7 @@ export function ContactBodyEn() {
           </p>
         </section>
 
-        <section className="space-y-3">
+        <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>About the Sanctuary</ThaiPhrases></h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             To learn more about our philosophy, cryptographic Provably Fair random generation, and historical 1909 Rider-Waite heritage, visit our{" "}

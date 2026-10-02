@@ -363,7 +363,8 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
         role="tabpanel"
         id={`card-panel-${activeFilter}`}
         aria-labelledby={`card-tab-${activeFilter}`}
-        className={hasSwappedTab ? "anim-swap-rise" : undefined}
+        /* แถบสีอ่อนแบ่ง "กริดไพ่" ออกจากหัวหน้า + แผงค้นหา แบบหน้าแรก (`page-band`) */
+        className={`page-band page-band-tint${hasSwappedTab ? " anim-swap-rise" : ""}`}
       >
         <div
           className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-5${

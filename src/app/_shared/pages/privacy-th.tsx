@@ -38,9 +38,9 @@ export const privacyMetadataTh: Metadata = {
 export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen text-ink">
-      <div className="max-w-3xl mx-auto px-6 py-16 space-y-10">
+      <div className="max-w-3xl mx-auto px-6 pt-16 space-y-10">
         {/* Header */}
-        <div className="text-center space-y-3 pb-6 border-b border-line/40">
+        <div className="text-center space-y-3 pb-2">
           <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif-th"><ThaiPhrases>
             นโยบายความเป็นส่วนตัว และการคุ้มครองข้อมูลส่วนบุคคล
           </ThaiPhrases></h1>
@@ -50,7 +50,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
         </div>
 
         {/* Section 1 */}
-        <section className="space-y-3">
+        <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>1. ข้อมูลที่เราเก็บ</ThaiPhrases></h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
@@ -93,7 +93,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
         </section>
 
         {/* Section 2 */}
-        <section className="space-y-3">
+        <section className="page-band page-band-compact space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>2. สิ่งที่เราไม่ทำเด็ดขาด (คำมั่นสัญญาความปลอดภัย)</ThaiPhrases></h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
@@ -112,7 +112,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
         </section>
 
         {/* Section 3 */}
-        <section className="space-y-3">
+        <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>
             3. เราเก็บข้อมูลไว้ที่ไหน นานแค่ไหน
           </ThaiPhrases></h2>
@@ -131,7 +131,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
         </section>
 
         {/* Section 4 */}
-        <section className="space-y-3">
+        <section className="page-band page-band-compact space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>
             4. สิทธิของคุณตามกฎหมาย PDPA และมาตรฐานสากล
           </ThaiPhrases></h2>
@@ -160,7 +160,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
         </section>
 
         {/* Section 5: AI Disclosure */}
-        <section className="altar-card-porcelain !rounded-xl space-y-3 p-5">
+        <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>
             5. คำทำนายมาจาก AI
           </ThaiPhrases></h2>
@@ -181,7 +181,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
         </section>
 
         {/* Section 6: Safety */}
-        <section className="altar-card-porcelain !rounded-xl space-y-3 p-5">
+        <section className="page-band page-band-compact space-y-3">
           <h2 className="text-lg font-bold text-err font-serif-th"><ThaiPhrases>
             6. ความปลอดภัยของผู้ใช้ และข้อจำกัดความรับผิดชอบ
           </ThaiPhrases></h2>
@@ -211,7 +211,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
         </section>
 
         {/* Section 7: Export & Delete Data */}
-        <section className="pt-4 border-t border-line/40 space-y-4 font-serif-th">
+        <section className="page-band page-band-compact page-band-tint space-y-4 font-serif-th">
           <h2 className="text-lg font-bold text-gold-ink"><ThaiPhrases>7. จัดการข้อมูลส่วนบุคคลของคุณ</ThaiPhrases></h2>
           <p className="text-xs text-muted">
             คุณสามารถดาวน์โหลดสำเนาข้อมูลของคุณ หรือสั่งลบข้อมูลทั้งหมดทั้งในเครื่องและบนระบบเซิร์ฟเวอร์ได้อย่างสมบูรณ์

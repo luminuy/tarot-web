@@ -58,11 +58,11 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
   const relatedArticles = [...directArticles, ...categoryArticles].slice(0, 3);
 
   return (
-    <div className="space-y-8 pt-8 border-t border-line/40">
-      {/* Spread Links */}
+    <>
+      {/* Spread Links — แถบสีแบ่งส่วนแบบหน้าแรก (`page-band` · ต่อจากแถบ "ไพ่ที่พลังงานใกล้เคียง" ที่เป็นแถบอ่อน) */}
       <section
         aria-label={isEnglish ? "Spreads recommended for this card" : "ผังพยากรณ์ที่แนะนำสำหรับไพ่ใบนี้"}
-        className="space-y-4"
+        className="page-band space-y-4"
       >
         <div className="flex items-center justify-between">
           <h2 className="font-serif-th text-sm font-bold text-gold-ink"><ThaiPhrases>
@@ -108,7 +108,7 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
       {/* คลังบทความยังไม่มีฉบับอังกฤษ (`content` เป็นไทยล้วนทั้ง 26 บท) จึงซ่อนทั้งบล็อก
           บนหน้า `/en/**` — ปล่อยไว้จะเป็นการโยนภาษาไทยใส่ผู้อ่านอังกฤษและพาออกนอกต้นไม้ภาษา */}
       {!isEnglish && relatedArticles.length > 0 && (
-        <section aria-label="บทความคู่มือที่เกี่ยวข้อง" className="space-y-4">
+        <section aria-label="บทความคู่มือที่เกี่ยวข้อง" className="page-band page-band-tint space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-serif-th text-sm font-bold text-gold-ink"><ThaiPhrases>
               บทความและคู่มือการอ่านไพ่ ที่เกี่ยวข้อง
@@ -149,6 +149,6 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
           </div>
         </section>
       )}
-    </div>
+    </>
   );
 }

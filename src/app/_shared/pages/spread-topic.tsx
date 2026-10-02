@@ -136,6 +136,20 @@ export function SpreadTopicContent({
     })),
   };
 
+  /*
+   * แถบสีสลับแบบหน้าแรก (`page-band`) — ส่วนที่มีหรือไม่มีขึ้นกับหมวด/ภาษา จึงคำนวณลำดับจากส่วนที่แสดงจริง
+   *   ให้สลับ อ่อน / ใส ต่อกันเสมอ (ส่วนแรกเป็นแถบอ่อน ต่อจากหัวหน้าที่อยู่บนพื้นไล่สี)
+   */
+  const shownBands = [
+    "guide",
+    "spreads",
+    ...(!isEnglish && topic.alsoFitsTh && topic.alsoFitsTh.length > 0 ? ["also"] : []),
+    ...(faqs.length > 0 ? ["faq"] : []),
+    "others",
+  ];
+  const bandClass = (id: string) =>
+    shownBands.indexOf(id) % 2 === 0 ? "page-band page-band-tint" : "page-band";
+
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen text-ink p-4 sm:p-8 font-sans relative overflow-x-clip">
       <script
@@ -216,7 +230,7 @@ export function SpreadTopicContent({
         </header>
 
         {/* Editorial Guide Prose */}
-        <section className="altar-card-porcelain p-6 sm:p-8 space-y-4">
+        <section className={`${bandClass("guide")} space-y-4`}>
           <h2 className="text-base sm:text-lg font-bold font-serif-th text-ink border-b border-line-soft pb-3"><ThaiPhrases>
             {isEnglish
               ? `Guide to Reading ${topicName} Tarot Spreads`
@@ -230,7 +244,7 @@ export function SpreadTopicContent({
         </section>
 
         {/* Spreads Grid */}
-        <section className="space-y-4">
+        <section className={`${bandClass("spreads")} space-y-4`}>
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold font-serif-th text-ink"><ThaiPhrases>
               {isEnglish
@@ -246,7 +260,7 @@ export function SpreadTopicContent({
 
         {/* 🔗 ผังทั่วไปที่ใช้ถามเรื่องหมวดนี้ได้ — ข้อความลิงก์ = คำที่คนค้นจริง (ดู `alsoFitsTh`) */}
         {!isEnglish && topic.alsoFitsTh && topic.alsoFitsTh.length > 0 && (
-          <section className="altar-card-porcelain p-6 sm:p-8 space-y-4">
+          <section className={`${bandClass("also")} space-y-4`}>
             <h2 className="text-base sm:text-lg font-bold font-serif-th text-ink"><ThaiPhrases>
               {`ถามเรื่อง${topic.nameTh} ด้วยผังทั่วไป`}
             </ThaiPhrases></h2>
@@ -268,7 +282,7 @@ export function SpreadTopicContent({
 
         {/* FAQ Section */}
         {faqs.length > 0 && (
-          <section className="altar-card-porcelain p-6 sm:p-8 space-y-6">
+          <section className={`${bandClass("faq")} space-y-6`}>
             <div className="space-y-1">
               <h2 className="text-lg sm:text-xl font-bold font-serif-th text-ink"><ThaiPhrases>
                 {isEnglish
@@ -297,7 +311,7 @@ export function SpreadTopicContent({
         )}
 
         {/* Cross-Topic Internal Links Footer */}
-        <section className="pt-8 border-t border-line/80 space-y-4">
+        <section className={`${bandClass("others")} space-y-4`}>
           <h3
             className={`text-xs text-gold-ink font-semibold ${
               isEnglish ? "font-mono uppercase tracking-widest" : "font-serif-th"

@@ -154,8 +154,8 @@ export function CardsAllBody({ locale, table }: { locale: Locale; table: ReactNo
           </div>
         </header>
 
-        {/* Interactive Master Table */}
-        {table}
+        {/* Interactive Master Table — แถบสีอ่อนแบ่งจากหัวหน้าแบบหน้าแรก (`page-band`) · ห่อ div เพราะ <astro-island> เป็น display:contents */}
+        <div className="page-band page-band-tint">{table}</div>
       </div>
     </main>
   );
