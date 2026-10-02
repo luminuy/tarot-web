@@ -35,7 +35,7 @@ const readPrefix = "/read/";
   {homeJsonLdBlocks(locale).map((block) => (
     <script type="application/ld+json" is:inline set:html={JSON.stringify(block)} />
   ))}
-  <TarotFlowRoot locale={locale} client:load>
+  <TarotFlowRoot locale={locale} pathname={Astro.url.pathname} client:load>
     <Fragment slot="seoContent">
       <HomeSeoRoot locale={locale} />
     </Fragment>

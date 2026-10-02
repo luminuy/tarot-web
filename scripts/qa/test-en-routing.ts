@@ -362,6 +362,11 @@ const MAX_THAI_RATIO_PERCENT = 1.5;
 const INTENTIONAL_THAI_ON_EN: { text: string; reason: string }[] = [
   { text: "ไพ่ยิปซี", reason: "คำไทยที่บทความอังกฤษอธิบายความหมายให้ผู้อ่านต่างชาติโดยตั้งใจ" },
   { text: "สลับภาษา", reason: "ป้ายปุ่มสลับภาษา เขียนคู่กันสองภาษาเป็นดีไซน์ตั้งใจ" },
+  {
+    text: "ภาษาไทย",
+    reason:
+      "ชื่อภาษาไทยในตัวเลือกภาษาของหัวเว็บ — มาตรฐานสากลเขียนชื่อภาษาด้วยภาษาของมันเอง (endonym) ให้คนไทยที่หลงมาหน้าอังกฤษหาเจอ · ติด lang=\"th\"",
+  },
   { text: "ทาโรต์", reason: "คำทับศัพท์ไทยที่บทความอังกฤษยกมาอธิบายคู่กับคำอังกฤษ" },
 ];
 
@@ -500,8 +505,12 @@ for (const entry of phraseLeaks.slice(0, 10)) {
   const jsonLdThai = new Map<string, string>();
   for (const page of allPages) {
     const html = fs.readFileSync(page.file, "utf-8");
-    for (const m of html.matchAll(/<a\b[^>]*\shref="(\/[^"#?]*)/g)) {
+    for (const tag of html.matchAll(/<a\b[^>]*>/g)) {
+      const m = tag[0].match(/\shref="(\/[^"#?]*)/);
+      if (!m) continue;
       const href = m[1].replace(/\/$/, "") || "/";
+      // ลิงก์ที่ประกาศ hreflang = ลิงก์ไปฉบับภาษาอื่น "โดยตั้งใจ" (ตัวเลือกภาษาในหัวเว็บ) — ไม่ใช่ลิงก์หลงต้นไม้ภาษา
+      const declaredAlternate = /\shreflang="/i.test(tag[0]);
       if (href.startsWith("//")) continue;
       const ok =
         knownRoutes.has(href) ||
@@ -510,7 +519,7 @@ for (const entry of phraseLeaks.slice(0, 10)) {
         isStaticFile(href);
       if (!ok && !broken.has(href)) broken.set(href, page.route);
       const isEnPage = page.route === "/en" || page.route.startsWith("/en/");
-      if (isEnPage && !href.startsWith("/en") && hasEnglishTwin(href) && !crossLocale.has(`${page.route} ➔ ${href}`)) {
+      if (isEnPage && !declaredAlternate && !href.startsWith("/en") && hasEnglishTwin(href) && !crossLocale.has(`${page.route} ➔ ${href}`)) {
         crossLocale.set(`${page.route} ➔ ${href}`, page.route);
       }
     }

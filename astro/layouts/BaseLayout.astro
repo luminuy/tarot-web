@@ -130,9 +130,10 @@ const webSiteJsonLd = {
  * ดักเหตุการณ์ error แบบ capture ที่ document (error ของ <img> ไม่ bubble) แล้วทำแบบเดียวกับ
  * `CardImage`: ถอด <source> ใน <picture> ทิ้ง ชี้ `src` ไปไฟล์ในเครื่อง `/cards/<ไฟล์>`
  * ติดธง `data-fell-back="global"` ให้ `CardImage` รู้ว่าถอยแล้ว (ไม่เรียก onError ซ้ำ)
+ * ถอด `srcset` ของ <img> ด้วย — ภาพย่อจิ๋ว (`CardImage thumb`) ใส่ srcset ที่ตัว <img> เอง ถ้าไม่ถอด เบราว์เซอร์ยังเลือก CDN ที่ล่มอยู่
  * ⚠️ ต้องอยู่ใน <head> ก่อนภาพแรกโหลด · ห้ามใส่ defer/async
  */
-const cardImageFallbackScript = `document.addEventListener('error',function(e){var t=e.target;if(!t||t.tagName!=='IMG'||t.dataset.fellBack)return;var s=t.getAttribute('src')||'';var i=s.indexOf('/cards/');if(i<1)return;t.dataset.fellBack='global';var p=t.parentElement;if(p&&p.tagName==='PICTURE'){var q=p.querySelectorAll('source');for(var k=0;k<q.length;k++)q[k].remove();}t.src=s.slice(i).split('?')[0];},true);`;
+const cardImageFallbackScript = `document.addEventListener('error',function(e){var t=e.target;if(!t||t.tagName!=='IMG'||t.dataset.fellBack)return;var s=t.getAttribute('src')||'';var i=s.indexOf('/cards/');if(i<1)return;t.dataset.fellBack='global';var p=t.parentElement;if(p&&p.tagName==='PICTURE'){var q=p.querySelectorAll('source');for(var k=0;k<q.length;k++)q[k].remove();}t.removeAttribute('srcset');t.src=s.slice(i).split('?')[0];},true);`;
 
 const consentScript = `try{if(!localStorage.getItem(${JSON.stringify(CONSENT_STORAGE_KEY)}))document.documentElement.setAttribute('data-consent-ask','')}catch(e){document.documentElement.setAttribute('data-consent-ask','')}`;
 ---

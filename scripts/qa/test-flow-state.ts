@@ -32,9 +32,11 @@ import type { RitualStep } from "../../src/components/home/ritual-step";
 import {
   decideSpreadAccess,
   decideStartSessionAccess,
+  hasPremiumTrialOf,
   isPassHolderOf,
 } from "../../src/components/home/flow-access";
 import { resolveEntryIntent } from "../../src/components/home/flow-entry";
+import { wantsBackEntry } from "../../src/components/home/use-flow-back";
 import { PUBLIC_SPREADS } from "../../src/data/spreads";
 import { readSpreadMetadata } from "../../src/app/_shared/pages/read-spread";
 import { assertNonEmptyCorpus } from "./lib/corpus";
@@ -428,6 +430,30 @@ check(
     const d = decideStartSessionAccess(MEMBER, "celtic-cross", "master");
     return !d.allowed && d.reason === "grand_spread";
   })(),
+);
+
+// ✦ สิทธิ์ลองผังใหญ่ / แม่หมอพิเศษฟรี 1 ครั้ง — เซิร์ฟเวอร์ตัดสินซ้ำที่ /start เสมอ
+const TRIAL = ent({ premiumTrialAvailable: true });
+const TRIAL_OUT = ent({ premiumTrialAvailable: true, remaining: 0, canStartReading: false, reason: "daily_exhausted" });
+check("มีสิทธิ์ลอง ➔ ผังใหญ่ผ่าน", decideSpreadAccess(TRIAL, "celtic-cross").allowed === true);
+check("มีสิทธิ์ลอง ➔ แม่หมอปรมาจารย์ผ่าน", decideStartSessionAccess(TRIAL, "daily", "master").allowed === true);
+check("มีสิทธิ์ลอง + โควตาวันนี้หมด ➔ ผังใหญ่ยังผ่าน (สิทธิ์ลองไม่หักโควตา)", decideSpreadAccess(TRIAL_OUT, "celtic-cross").allowed === true);
+check(
+  "มีสิทธิ์ลอง + โควตาหมด ➔ ผังมาตรฐานยังติดกำแพง (สิทธิ์ลองใช้กับผังใหญ่เท่านั้น)",
+  decideSpreadAccess(TRIAL_OUT, "daily").allowed === false,
+);
+check(
+  "ผู้ไม่ล็อกอิน / ผู้ถือสิทธิ์เต็ม ➔ ไม่นับว่ามีสิทธิ์ลอง",
+  !hasPremiumTrialOf(ent({ kind: "guest", premiumTrialAvailable: true })) && !hasPremiumTrialOf(ent({ hasPaidCredits: true, premiumTrialAvailable: true })),
+);
+
+// ✦ ปุ่มย้อนกลับของเบราว์เซอร์ — กันชนมีเฉพาะขั้นที่ย้อนได้โดยไม่เสียอะไร (ยังไม่เปิดไพ่)
+check("หน้าแรก: ขั้นตั้งคำถามกดย้อนกลับไปเลือกผังได้", wantsBackEntry("INTENTION_SELECT", true));
+check("หน้า /read/<ผัง>: ขั้นตั้งคำถามคือขั้นแรก ย้อนกลับ = ออกจากหน้าตามปกติ", !wantsBackEntry("INTENTION_SELECT", false));
+check("ขั้นสับไพ่ / เลือกไพ่ ย้อนได้ทั้งสองหน้า", ["SHUFFLE", "PICK_CARDS"].every((s) => wantsBackEntry(s as RitualStep, true) && wantsBackEntry(s as RitualStep, false)));
+check(
+  "เลือกผัง / อ่านคำทำนาย / สรุป ห้ามมีกันชน (เปิดไพ่แล้วย้อนไม่ได้)",
+  (["SPREAD_SELECT", "READING", "SUMMARY"] as RitualStep[]).every((s) => !wantsBackEntry(s, true)),
 );
 
 // ทางเข้าทั้งสามใน TarotFlow ต้องเรียกตรรกะก้อนนี้ ห้ามคัดลอกเงื่อนไขไปเขียนเองอีก

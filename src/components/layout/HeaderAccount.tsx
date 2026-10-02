@@ -25,7 +25,7 @@ export function HeaderAccount() {
       data-header-account=""
       aria-label={label}
       title={label}
-      className="tap-overlay relative w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-line bg-surface flex items-center justify-center flex-shrink-0 select-none text-ink hover:text-gold hover:border-gold transition-colors shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
+      className="tap-overlay relative w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 select-none text-ink hover:bg-inset hover:text-gold-ink transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
     >
       <svg
         viewBox="0 0 24 24"
@@ -34,7 +34,7 @@ export function HeaderAccount() {
         strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="w-4 h-4 sm:w-5 sm:h-5"
+        className="w-5 h-5"
         aria-hidden="true"
       >
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -44,7 +44,7 @@ export function HeaderAccount() {
         data-header-account-dot=""
         hidden
         aria-hidden="true"
-        className="absolute bottom-1 right-1 w-2 h-2 rounded-full bg-gold ring-2 ring-surface"
+        className="absolute bottom-1.5 right-1.5 w-2 h-2 rounded-full bg-gold ring-2 ring-surface"
       />
     </Link>
   );

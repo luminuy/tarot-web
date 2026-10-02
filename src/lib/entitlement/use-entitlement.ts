@@ -22,6 +22,8 @@ export interface ClientEntitlement {
   bonusRemaining: number | null;
   /** true เฉพาะเมื่อผู้ใช้เคยซื้อ credits (purchase_*) และยังเหลือรอบอยู่ */
   hasPaidCredits?: boolean;
+  /** ✦ ลองผังใหญ่ / แม่หมอพิเศษฟรีได้อีก 1 ครั้ง (สมาชิกที่ยังไม่ได้ซื้อและยังไม่เคยใช้) */
+  premiumTrialAvailable?: boolean;
   resetAt: string | null;
   dailyFreeAvailable?: boolean;
   dailyStreak?: number;

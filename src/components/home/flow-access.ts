@@ -46,12 +46,21 @@ export function isPassHolderOf(ent: ClientEntitlement | null): boolean {
 }
 
 /**
+ * ✦ ยังลองผังใหญ่ / แม่หมอพิเศษฟรีได้อีก 1 ครั้งไหม (เซิร์ฟเวอร์ตัดสินซ้ำที่ /start เสมอ)
+ * รอบทดลองไม่หักโควตารายวัน จึงผ่านได้แม้วันนี้เปิดฟรีครบแล้ว
+ */
+export function hasPremiumTrialOf(ent: ClientEntitlement | null): boolean {
+  return Boolean(ent && ent.kind === "member" && ent.premiumTrialAvailable === true && !isPassHolderOf(ent));
+}
+
+/**
  * เข้าสู่ขั้นตั้งจิตด้วยผังนี้ได้ไหม — ใช้ร่วมกันทุกทางเข้า
  *
  * ชั้นที่ 1: โควตาหมด / ต้องสมัครก่อนเล่น ➔ เหตุผลตามที่เซิร์ฟเวอร์บอก
  * ชั้นที่ 2: ผังใหญ่ (ไม่ใช่ผังมาตรฐาน) แต่ไม่ใช่ผู้ถือสิทธิ์เต็ม ➔ `grand_spread`
  */
 export function decideSpreadAccess(ent: ClientEntitlement | null, spreadId: string): AccessDecision {
+  if (!isStandardSpread(spreadId) && hasPremiumTrialOf(ent)) return ALLOWED;
   const view = describeEntitlement(ent);
   if (view?.blocked) {
     return { allowed: false, reason: view.blockedReason ?? GUEST_BLOCK_REASON };
@@ -70,6 +79,8 @@ export function decideStartSessionAccess(
   spreadId: string,
   personaId: string,
 ): AccessDecision {
+  // ผังใหญ่ "หรือ" แม่หมอพิเศษ ใช้สิทธิ์ลองฟรีได้ — ตรงกับเงื่อนไข isPremiumRequest ใน /api/reading/start
+  if ((!isStandardSpread(spreadId) || isMasterPersona(personaId)) && hasPremiumTrialOf(ent)) return ALLOWED;
   const spreadDecision = decideSpreadAccess(ent, spreadId);
   if (!spreadDecision.allowed) return spreadDecision;
   if (!isPassHolderOf(ent) && isMasterPersona(personaId)) {

@@ -5,7 +5,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CardImage } from "@/components/card/CardImage";
 import { soundManager } from "@/lib/utils/audio";
-import { COUNTS } from "@/components/layout/nav-links";
+import { headerNav } from "@/components/layout/header-nav";
 import { useLocale } from "@/lib/i18n";
 import { stripLocalePrefix } from "@/lib/i18n/paths";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
@@ -94,72 +94,8 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
     setIsOpen(willOpen);
   };
 
-  const featuredItems: NavItem[] = [
-    {
-      label: isEnglish ? "Daily Tarot (1 Card)" : "ไพ่ยิปซีรายวัน (ไพ่ 1 ใบ)",
-      sublabel: isEnglish ? "Check your daily energy, career & love guidance" : "เช็กพลังงานรายวัน การงาน การเงิน และความรัก",
-      href: "/daily",
-      cardId: "major-19",
-    },
-    {
-      label: isEnglish ? "Love Tarot (1 Card)" : "ดูดวงความรัก (ไพ่ 1 ใบ)",
-      sublabel: isEnglish ? "Clarity for singles, talking stages, couples & breakups" : "คนโสด คนคุย มีแฟน หรือเพิ่งเลิกรา ไขคำตอบหัวใจ",
-      href: "/love/1-card",
-      cardId: "major-06",
-    },
-    {
-      label: isEnglish ? "Pick A Card (4 Piles)" : "Pick A Card เลือกกองไพ่ (4 กอง)",
-      sublabel: isEnglish ? "Choose a sacred pile for love, career & cosmic guidance" : "เลือกกองไพ่พยากรณ์ความรัก การงาน และข้อคิดเตือนใจ",
-      href: "/pick-a-card",
-      cardId: "major-17",
-    },
-    {
-      label: isEnglish ? "Tarot Birth Card" : "คำนวณไพ่ประจำตัว (Birth Card)",
-      sublabel: isEnglish ? "Find your personality and soul cards from your birthday" : "คำนวณไพ่บุคลิกภาพและจิตวิญญาณจากวันเกิด",
-      href: "/cards/birth-card",
-      cardId: "major-10",
-    },
-    {
-      label: isEnglish ? "Zodiac Tarot Cards" : "ไพ่ประจำราศี 12 ราศี",
-      sublabel: isEnglish ? "Your sign's tarot card & birth decan" : "หาไพ่ทาโรต์ประจำราศีจากวันเกิด",
-      href: "/cards/zodiac",
-      cardId: "major-17",
-    },
-  ];
-
-  const knowledgeItems: NavItem[] = [
-    {
-      label: isEnglish ? "Tarot Spreads (26 Spreads)" : "ผังการเปิดไพ่ (26 แบบ)",
-      sublabel: isEnglish ? "Love, career, finance & destiny spreads" : "ความรัก การงาน การเงิน และดวงชะตา",
-      href: "/spreads",
-      cardId: "major-05",
-    },
-    {
-      label: isEnglish ? "Card Meanings (78 Cards)" : "ความหมายไพ่ (78 ใบ)",
-      sublabel: isEnglish ? "1909 Rider-Waite symbolism & meanings" : "เปิดดูคำแปลและสัญลักษณ์ 1909 RWS",
-      href: "/cards",
-      cardId: "major-01",
-    },
-    {
-      label: isEnglish ? `Sanctuary Journal (${COUNTS.articles})` : `บทความดูดวง & ความรู้ไพ่ (${COUNTS.articles} เรื่อง)`,
-      sublabel: isEnglish ? "Tarot guides, love and career advice" : "ความรู้ไพ่ทาโรต์ ความรัก การงาน และผังยอดนิยม",
-      href: "/blog",
-      cardId: "major-09",
-    },
-    /* หน้าราคาเป็นลิงก์จริงทุกหน้า (เดิมเป็นปุ่มเปิดหน้าต่างลอย มีแค่หน้าแรก — เจ้าของขอให้เรื่องเงิน "หาง่าย") */
-    {
-      label: isEnglish ? "Pricing & Top-ups" : "ราคาและแพ็กเกจเติมรอบ",
-      sublabel: isEnglish ? "Free daily reading · pay once, no subscription" : "ดูฟรีทุกวัน · เติมรอบจ่ายครั้งเดียว ไม่มีรายเดือน",
-      href: "/pricing",
-      cardId: "pentacles-01",
-    },
-    {
-      label: isEnglish ? "Consult Live Readers" : "ปรึกษาแม่หมอตัวจริง",
-      sublabel: isEnglish ? "Book in-depth consultations with seasoned readers" : "จองคิววิเคราะห์ดวงเชิงลึกกับนักพยากรณ์",
-      href: "/readers",
-      cardId: "major-02",
-    },
-  ];
+  /* หัวข้อหลักชุดเดียวกับแถบเมนูบนคอม (header-nav.ts) — มือถือเห็นหมวดเดียวกัน หาง่ายเหมือนกัน */
+  const nav = headerNav(isEnglish);
 
   const renderNavCard = (item: NavItem, idx: number) => {
     const isAction = typeof item.onClick === "function";
@@ -167,108 +103,74 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       ? currentPath === item.href || (item.href !== "/" && currentPath.startsWith(item.href + "/"))
       : false;
 
+    /*
+     * หน้าตาเหมือนเดิมทุกพิกเซล แต่ลด element ต่อแถว 13 ➔ 9 (ลิ้นชักอยู่ใน HTML ของทุกหน้า · งบ DOM หน้าแรก INC-0247)
+     * ลูกศรขวาวาดด้วย pseudo-element (`after:`) แทน <svg> · ไม่มี <div> ห่อแถว · ชื่อ/คำอธิบายเป็น <span> สองตัว
+     */
     const innerContent = (
       <>
-        {/* Active Route Indicator Bar (GitHub Drawer Style) */}
         {isActive && (
-          <span
-            className="absolute left-0 top-2 bottom-2 w-1 bg-gold rounded-r-full"
-            aria-hidden="true"
-          />
+          <span className="absolute left-0 top-2 bottom-2 w-1 bg-gold rounded-r-full" aria-hidden="true" />
         )}
-
-        {/* 1909 Rider-Waite Authentic Mini Card Archetype */}
-        <div className="relative w-[34px] h-[54px] rounded-[5px] overflow-hidden border border-line/80 shadow-xs shrink-0 bg-canvas group-hover:border-gold/60 transition-colors duration-150">
-          <CardImage
-            cardId={item.cardId}
-            alt={item.label}
-            sizes="34px"
-            loading="lazy"
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        {/* Text Details: Title & Subtitle */}
-        <div className="flex-1 min-w-0 text-left">
-          <div className="flex items-center justify-between gap-2">
-            <span
-              className={`text-[13px] font-serif-th leading-[1.7] truncate transition-colors ${
-                isActive ? "font-bold text-gold-ink" : "font-semibold text-ink group-hover:text-gold-ink"
-              }`}
-            >
-              {item.label}
-            </span>
-          </div>
-          <p className="text-[11.5px] font-serif-th text-muted truncate mt-0.5 leading-[1.7]">
-            {item.sublabel}
-          </p>
-        </div>
-
-        {/* Subtle Luxury Affordance Chevron */}
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="w-3.5 h-3.5 text-muted/30 group-hover:text-gold transition-colors shrink-0"
-          aria-hidden="true"
-        >
-          <polyline points="9 18 15 12 9 6" />
-        </svg>
+        <span className="relative block w-[34px] h-[54px] rounded-[5px] overflow-hidden border border-line/80 shadow-xs shrink-0 bg-canvas group-hover:border-gold/60 transition-colors duration-150">
+          <CardImage cardId={item.cardId} alt="" sizes="34px" thumb loading="lazy" className="w-full h-full object-cover" />
+        </span>
+        <span className="flex-1 min-w-0 text-left">
+          <span
+            className={`block text-[13px] font-serif-th leading-[1.7] truncate transition-colors ${
+              isActive ? "font-bold text-gold-ink" : "font-semibold text-ink group-hover:text-gold-ink"
+            }`}
+          >
+            {item.label}
+          </span>
+          <span className="block text-[11.5px] font-serif-th text-muted truncate mt-0.5 leading-[1.7]">{item.sublabel}</span>
+        </span>
       </>
     );
 
-    const buttonClass = `tap-overlay-y relative w-full min-h-[44px] flex items-center gap-3 px-2.5 py-1.5 rounded-xl text-left transition-colors duration-150 group cursor-pointer border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
-      isActive
-        ? "bg-inset/90 border-line shadow-xs"
-        : "hover:bg-inset/60 border-transparent hover:border-line/60"
+    const buttonClass = `tap-overlay-y relative w-full min-h-[44px] flex items-center gap-3 px-2.5 py-1.5 rounded-xl text-left transition-colors duration-150 group cursor-pointer border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold after:content-['›'] after:shrink-0 after:text-lg after:leading-none after:text-muted hover:after:text-gold-ink ${
+      isActive ? "bg-inset/90 border-line shadow-xs" : "hover:bg-inset/60 border-transparent hover:border-line/60"
     }`;
 
-    return (
-      <div key={item.href ? item.href : `action-${idx}`}>
-        {isAction ? (
-          <button
-            type="button"
-            onClick={() => {
-              soundManager.playMenuTapSound();
-              setIsOpen(false);
-              item.onClick?.();
-            }}
-            className={buttonClass}
-          >
-            {innerContent}
-          </button>
-        ) : (
-          <Link
-            href={item.href || "#"}
-            // ⛔ ห้ามเปิด prefetch — บทเรียน INC-0106
-            prefetch={false}
-            aria-current={isActive ? "page" : undefined}
-            onClick={() => {
-              soundManager.playMenuTapSound();
-              setIsOpen(false);
-            }}
-            className={buttonClass}
-          >
-            {innerContent}
-          </Link>
-        )}
-      </div>
+    return isAction ? (
+      <button
+        key={`action-${idx}`}
+        type="button"
+        onClick={() => {
+          soundManager.playMenuTapSound();
+          setIsOpen(false);
+          item.onClick?.();
+        }}
+        className={buttonClass}
+      >
+        {innerContent}
+      </button>
+    ) : (
+      <Link
+        key={item.href}
+        href={item.href || "#"}
+        // ⛔ ห้ามเปิด prefetch — บทเรียน INC-0106
+        prefetch={false}
+        aria-current={isActive ? "page" : undefined}
+        onClick={() => {
+          soundManager.playMenuTapSound();
+          setIsOpen(false);
+        }}
+        className={buttonClass}
+      >
+        {innerContent}
+      </Link>
     );
   };
 
   return (
-    <div className="select-none" ref={dropdownRef}>
-      {/* Refined Luxury Minimalist Trigger Button — Hamburger Icon */}
+    /* เดสก์ท็อป (lg+) มีเมนูเรียงกลางแถบแล้ว — ปุ่มแฮมเบอร์เกอร์มีเฉพาะจอเล็ก (แบบ Kazumi) */
+    <div className="select-none lg:hidden" ref={dropdownRef}>
       <button
         type="button"
         onClick={toggleDropdown}
-        className={`tap-overlay w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border transition-colors duration-150 cursor-pointer select-none shadow-xs ${
-          isOpen
-            ? "bg-inset border-line text-ink"
-            : "bg-surface text-ink hover:text-gold border-line hover:border-gold"
+        className={`tap-overlay w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-150 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
+          isOpen ? "bg-inset text-ink" : "text-ink hover:bg-inset hover:text-gold-ink"
         }`}
         aria-expanded={isOpen}
         aria-controls="sacred-nav-panel"
@@ -279,15 +181,13 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="w-4 h-4 sm:w-5 sm:h-5 transition-colors"
+          className="w-[22px] h-[22px]"
           aria-hidden="true"
         >
-          <line x1="4" y1="7" x2="20" y2="7" />
-          <line x1="4" y1="12" x2="20" y2="12" />
-          <line x1="4" y1="17" x2="20" y2="17" />
+          <path d="M4 7h16M4 12h16M4 17h16" />
         </svg>
       </button>
 
@@ -309,7 +209,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       <nav
         id="sacred-nav-panel"
         ref={drawerRef}
-        aria-label={isEnglish ? "Sanctuary navigation menu" : "เมนูวิหารพยากรณ์"}
+        aria-label={isEnglish ? "Site menu" : "เมนูเว็บไซต์"}
         aria-hidden={!isOpen}
         tabIndex={isOpen ? 0 : -1}
         className={`nav-drawer-panel-base w-full max-w-[340px] sm:max-w-[380px] bg-surface border-l border-line z-[calc(var(--z-dropdown)+1)] flex flex-col overflow-hidden ${
@@ -387,28 +287,32 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
 
         {/* Scrollable Navigation Body */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-3 py-3 space-y-3 no-scrollbar">
-          {/* Section 1: พิธีกรรมยอดนิยม */}
+          {/* หัวข้อ 1: ดูดวง — แบ่ง 3 กลุ่มย่อยเหมือนแผงเมนูใหญ่บนคอม */}
           <div>
-            <div className="px-2.5 pb-1.5 text-xs font-serif-th font-semibold text-muted tracking-normal select-none">
-              {isEnglish ? "Featured Rituals & Tools" : "พิธีกรรมยอดนิยม & เครื่องมือ"}
-            </div>
-            <div className="space-y-1">
-              {featuredItems.map((item, idx) => renderNavCard(item, idx))}
-            </div>
+            <p className="px-2.5 pb-1 font-serif-th text-sm font-bold text-ink">{nav.reading.label}</p>
+            {nav.reading.groups.map((group) => (
+              <div key={group.title} className="pt-1.5">
+                <p className="px-2.5 pb-1 font-serif-th text-xs font-semibold text-muted">{group.title}</p>
+                <div className="space-y-1">{group.links.map((item, idx) => renderNavCard(item, idx))}</div>
+              </div>
+            ))}
+            <Link
+              href={nav.reading.all.href}
+              prefetch={false}
+              onClick={() => {
+                soundManager.playMenuTapSound();
+                setIsOpen(false);
+              }}
+              className="tap-overlay-y mt-1 flex min-h-[44px] items-center px-2.5 font-serif-th text-[13px] font-bold text-gold-ink hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold rounded-xl"
+            >
+              {nav.reading.all.label} →
+            </Link>
           </div>
 
-          {/* Divider */}
           <div className="h-[1px] w-full bg-line/40 my-1.5" />
 
-          {/* Section 2: คลังความรู้ & ผังพยากรณ์ */}
-          <div>
-            <div className="px-2.5 pb-1.5 text-xs font-serif-th font-semibold text-muted tracking-normal select-none">
-              {isEnglish ? "Knowledge & Spreads" : "คลังความรู้ & ผังพยากรณ์"}
-            </div>
-            <div className="space-y-1">
-              {knowledgeItems.map((item, idx) => renderNavCard(item, idx + 10))}
-            </div>
-          </div>
+          {/* หัวข้อหลักที่เหลือ — ชื่อตรงกับแถบเมนูบนคอมทุกคำ */}
+          <div className="space-y-1">{nav.links.map((item, idx) => renderNavCard(item, idx + 10))}</div>
 
           {/* Section 3: ประวัติการดูดวง (Reading Journal) */}
           {onOpenHistory && (

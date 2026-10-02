@@ -217,6 +217,8 @@ export async function POST(request: Request) {
 
   // ── สิทธิ์การเปิดไพ่ (ENTITLEMENT_PLAN ข้อ 1: ล็อกขั้น 1 · ยังไม่หัก) ──
   let guestGidToPin: string | null = null;
+  /** รอบนี้ใช้สิทธิ์ "ลองผังใหญ่ฟรี 1 ครั้ง" — ปักไว้ใน ReadingRecord ให้ /read หักเป็นแถว trial */
+  let usePremiumTrial = false;
   if (!privileged) {
     const { isEntitlementEnabled } = await import("@/lib/entitlement/flag");
     const { getViewer } = await import("@/lib/entitlement/viewer");
@@ -237,7 +239,12 @@ export async function POST(request: Request) {
     if (enforced) {
       const { getEntitlement } = await import("@/lib/entitlement/entitlement");
       const ent = await getEntitlement(viewer);
-      if (!ent.canStartReading) {
+      // ✦ ลองผังใหญ่ / แม่หมอพิเศษฟรี 1 ครั้ง: สมาชิกที่ยังไม่ได้ซื้อและยังไม่เคยใช้สิทธิ์ทดลอง
+      //    รอบทดลองไม่หักโควตารายวัน จึงผ่านได้แม้วันนี้เปิดฟรีครบแล้ว
+      const isPremiumRequest = !isStandardSpread(spreadId) || isMasterPersona(personaId);
+      usePremiumTrial =
+        ent.kind === "member" && !ent.hasPaidCredits && ent.premiumTrialAvailable === true && isPremiumRequest;
+      if (!ent.canStartReading && !usePremiumTrial) {
         recordEvent("entitlement_blocked_start");
         return NextResponse.json(
           {
@@ -261,7 +268,8 @@ export async function POST(request: Request) {
       }
 
       // ── ผังใหญ่ + ปรมาจารย์ลับ = สงวนไว้สำหรับผู้ซื้อ credits เท่านั้น (server-side enforcement) ──
-      if (!ent.hasPaidCredits) {
+      if (usePremiumTrial) recordEvent("entitlement_premium_trial_start");
+      if (!ent.hasPaidCredits && !usePremiumTrial) {
         if (!isStandardSpread(spreadId)) {
           recordEvent("entitlement_blocked_grand_spread");
           return NextResponse.json(
@@ -335,6 +343,7 @@ export async function POST(request: Request) {
     clientSeed: parsed.data.clientSeed ? normalizeClientSeed(parsed.data.clientSeed) : undefined,
     derivation,
     zodiac: parsed.data.zodiac,
+    ...(usePremiumTrial ? { premiumTrial: true } : {}),
     createdAt: Date.now(),
   };
 

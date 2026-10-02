@@ -430,6 +430,46 @@ async function main() {
     await softDeleteUser(streakUid);
   }
 
+  // ── ✦ สิทธิ์ลองผังใหญ่ / แม่หมอพิเศษฟรี 1 ครั้ง (premium trial) ──
+  // กติกา: สมาชิกที่ยังไม่เคยซื้อ ลองได้ครั้งเดียวตลอดชีพ · ไม่หักโควตารายวัน · คืนสิทธิ์ได้ถ้า AI ล่ม
+  console.log("\n✦ สิทธิ์ลองผังใหญ่ฟรี 1 ครั้ง:");
+  {
+    const trialUid = `trial_${Date.now()}`;
+    await upsertUserOnLogin({ id: trialUid, provider: "google", name: "ลองฟรี" });
+    const trialMember: Viewer = { kind: "member", userId: trialUid };
+    const t0 = await getEntitlement(trialMember);
+    check("สมาชิกใหม่: premiumTrialAvailable = true", t0.premiumTrialAvailable === true);
+
+    const first = await consumeReading(trialMember, `r_${trialUid}_t1`, "celtic-cross", { premiumTrial: true });
+    check("ใช้สิทธิ์ลองครั้งแรก = inserted", first.status === "inserted");
+    const t1 = await getEntitlement(trialMember);
+    check("ใช้สิทธิ์ลองแล้ว: premiumTrialAvailable = false", t1.premiumTrialAvailable === false);
+    check("สิทธิ์ลองไม่หักโควตารายวัน", t1.dailyRemaining === DAILY_LIMIT);
+
+    const second = await consumeReading(trialMember, `r_${trialUid}_t2`, "celtic-cross", { premiumTrial: true });
+    check("ใช้สิทธิ์ลองซ้ำ = denied (ครั้งเดียวตลอดชีพ)", second.status === "denied");
+
+    if (first.status === "inserted") await refundReading(`r_${trialUid}_t1`, first.usageId);
+    check("AI ล่มแล้วคืนสิทธิ์ ➔ ลองได้อีกครั้ง", (await getEntitlement(trialMember)).premiumTrialAvailable === true);
+
+    // ยิงพร้อมกัน 5 คำขอ ➔ ต้องผ่านได้แค่ 1 (NOT EXISTS แบบ atomic)
+    const parallel = await Promise.all(
+      [1, 2, 3, 4, 5].map((i) => consumeReading(trialMember, `r_${trialUid}_p${i}`, "celtic-cross", { premiumTrial: true })),
+    );
+    check("ยิงสิทธิ์ลองพร้อมกัน 5 คำขอ ➔ ผ่านแค่ 1", parallel.filter((r) => r.status === "inserted").length === 1);
+
+    const paidUid = `trial_paid_${Date.now()}`;
+    await upsertUserOnLogin({ id: paidUid, provider: "google", name: "ซื้อแล้ว" });
+    await grantBonus(paidUid, 3, "purchase_trial_test");
+    const tp = await getEntitlement({ kind: "member", userId: paidUid });
+    check("คนที่ซื้อรอบแล้ว: ไม่ได้สิทธิ์ลอง (เปิดผังใหญ่ได้อยู่แล้ว)", tp.premiumTrialAvailable === false);
+    const tg = await getEntitlement({ kind: "guest", gid: "g_trial", guestUsed: 0 });
+    check("ผู้ไม่ล็อกอิน: ไม่มีสิทธิ์ลอง", tg.premiumTrialAvailable !== true);
+
+    await softDeleteUser(trialUid);
+    await softDeleteUser(paidUid);
+  }
+
   console.log("\n🎟 รหัสแลกสิทธิ์:");
   const { runRedeemTests } = await import("./test-redeem-code");
   const redeem = await runRedeemTests();
