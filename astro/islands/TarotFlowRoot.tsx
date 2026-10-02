@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import TarotFlow from "@/components/home/TarotFlow";
+import { CurrentPathProvider } from "@/components/layout/current-path";
 import { LocaleProvider } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/types";
 
@@ -23,14 +24,19 @@ export function TarotFlowRoot({
   locale,
   seoContent,
   initialSpreadId,
+  pathname,
 }: {
   locale: Locale;
   seoContent?: ReactNode;
   initialSpreadId?: string;
+  /** `Astro.url.pathname` — หัวเว็บรู้ว่าอยู่หน้าไหนตั้งแต่ HTML (ไฮไลต์เมนู · ลิงก์ฝาแฝดของตัวเลือกภาษา) */
+  pathname?: string;
 }) {
   return (
     <LocaleProvider forcedLocale={locale}>
-      <TarotFlow seoContent={seoContent} initialSpreadId={initialSpreadId} />
+      <CurrentPathProvider pathname={pathname}>
+        <TarotFlow seoContent={seoContent} initialSpreadId={initialSpreadId} />
+      </CurrentPathProvider>
     </LocaleProvider>
   );
 }

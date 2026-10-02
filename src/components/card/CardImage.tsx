@@ -17,7 +17,7 @@
  */
 import type { CSSProperties } from "react";
 
-import { getCardAvifSrcSet, getCardImageSrc, getCardWebpSrcSet } from "@/lib/tarot/card-image";
+import { getCardAvifSrcSet, getCardImageSrc, getCardWebpSrcSet, getCardWebpVariantSrc } from "@/lib/tarot/card-image";
 
 interface CardImageProps {
   /** ชื่อไฟล์ดิบจากฐานข้อมูลไพ่ เช่น `"major-00.jpg"` หรือ path เต็ม `"/cards/major-00.jpg"` */
@@ -38,6 +38,12 @@ interface CardImageProps {
    * ใช้กับหน้ารายละเอียดไพ่ หน้าซูม และการ Export ภาพลง Canvas
    */
   full?: boolean;
+  /**
+   * `true` = ภาพย่อจิ๋ว (แสดงไม่เกิน ~42px) — `<img>` ตัวเดียว WebP 64w/128w ไม่มี `<picture>`/AVIF
+   * ใช้กับไอคอนไพ่ในเมนูที่อยู่ใน HTML ของทุกหน้า: ภาพ 34px ไม่ต้องการ srcset 7 ขนาดถึง 768w
+   * (ลด element 3 ชิ้น + ข้อความ srcset ~1 KB ต่อใบ · งบ DOM/HTML INC-0247)
+   */
+  thumb?: boolean;
   loading?: "lazy" | "eager";
   decoding?: "async" | "sync" | "auto";
   fetchPriority?: "high" | "low" | "auto";
@@ -62,6 +68,7 @@ export function CardImage({
   style,
   sizes = "220px",
   full = false,
+  thumb = false,
   loading = "lazy",
   decoding = "async",
   fetchPriority,
@@ -88,6 +95,7 @@ export function CardImage({
           const sources = parent.querySelectorAll("source");
           sources.forEach((s) => s.remove());
         }
+        el.removeAttribute("srcset"); // ภาพย่อจิ๋ว (`thumb`) ใส่ srcset ที่ตัว <img> เอง
         el.src = fallback;
         return;
       }
@@ -118,6 +126,28 @@ export function CardImage({
   );
 
   if (full) return img;
+
+  if (thumb) {
+    const w64 = getCardWebpVariantSrc(image, "w64", cardId);
+    const w128 = getCardWebpVariantSrc(image, "w128", cardId);
+    return (
+      <img
+        key={src}
+        src={w64 ?? src}
+        srcSet={w64 && w128 ? `${w64} 64w, ${w128} 128w` : undefined}
+        sizes={sizes}
+        alt={alt}
+        width={300}
+        height={520}
+        className={`select-none ${className || ""}`}
+        style={style}
+        loading={loading}
+        decoding={decoding}
+        draggable={draggable}
+        onError={handleImgError}
+      />
+    );
+  }
 
   const webpSrcSet = getCardWebpSrcSet(image, cardId);
   if (!webpSrcSet) return img;

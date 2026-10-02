@@ -14,7 +14,6 @@
  * ⚠️ ห้ามนำเข้าอะไรที่ลาก React ตามมา — ไฟล์นี้อยู่บนทุกหน้า
  */
 
-import { hasEnglishTwin, stripLocalePrefix } from "@/lib/i18n/paths";
 import { LOCALE_COOKIE_KEY } from "@/lib/i18n/types";
 import { hasSessionHint } from "@/lib/auth/session-hint";
 
@@ -119,53 +118,67 @@ function installNavDrawer(): void {
 }
 
 /**
- * ปุ่มสลับภาษา — ต้อง "พาไปยัง URL ฝาแฝด" ไม่ใช่แค่สลับ state ในหน่วยความจำ
- * หน้าที่ยังไม่มีฝาแฝดจะจำภาษาไว้ที่เครื่องอย่างเดียว ดีกว่าพาผู้ใช้ไปชน 404
+ * ตัวเลือกภาษา (`LanguageSwitcher`) — ลิงก์ในแผงชี้ไปหน้าฝาแฝดเองอยู่แล้ว ไฟล์นี้แค่:
+ *   · จำภาษาที่เลือกไว้ที่เครื่องก่อนเบราว์เซอร์เปลี่ยนหน้า
+ *   · หน้าที่ไม่มีฝาแฝด (เป็นปุ่ม) ➔ จำภาษาอย่างเดียว แล้วย้ายเครื่องหมายถูก — ไม่รีโหลด (ไม่มีหน้าภาษาอื่นให้ไป)
+ *   · คีย์บอร์ด: เปิดด้วยคีย์บอร์ดแล้วโฟกัสภาษาปัจจุบัน · ↑ ↓ เลื่อน · Esc ปิดแล้วคืนโฟกัสให้ปุ่ม · แตะนอกแผงปิด
  */
 function installLanguageSwitcher(): void {
-  const buttons = Array.from(
-    document.querySelectorAll<HTMLButtonElement>("[data-locale-switch]"),
-  ).filter((button) => !ownedByIsland(button));
-  if (buttons.length === 0) return;
-
-  // รายการภาษาเป็น <details> — แตะนอกรายการ / กด Esc ➔ พับ (เบราว์เซอร์ไม่ปิดให้เอง)
   const menu = document.querySelector<HTMLDetailsElement>("[data-locale-menu]");
-  if (menu && !ownedByIsland(menu)) {
-    document.addEventListener("pointerdown", (e) => {
-      if (menu.open && !menu.contains(e.target as Node)) menu.open = false;
-    });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") menu.open = false;
-    });
-  }
+  if (!menu || ownedByIsland(menu)) return;
+  const summary = menu.querySelector("summary");
+  const items = Array.from(menu.querySelectorAll<HTMLElement>("[data-locale-switch]"));
 
-  buttons.forEach((button) => {
-    button.addEventListener("click", () => {
-      if (menu) menu.open = false;
-      const next = button.dataset.localeSwitch === "en" ? "en" : "th";
-      if (button.getAttribute("aria-pressed") === "true") return;
+  const close = (refocus: boolean) => {
+    menu.open = false;
+    if (refocus) summary?.focus();
+  };
 
+  document.addEventListener("pointerdown", (e) => {
+    if (menu.open && !menu.contains(e.target as Node)) close(false);
+  });
+
+  menu.addEventListener("toggle", () => {
+    if (menu.open && summary?.matches(":focus-visible")) {
+      items.find((el) => el.getAttribute("aria-current") === "true")?.focus();
+    }
+  });
+
+  menu.addEventListener("keydown", (e) => {
+    if (!menu.open) return;
+    if (e.key === "Escape") {
+      e.preventDefault();
+      close(true);
+      return;
+    }
+    const step = e.key === "ArrowDown" ? 1 : e.key === "ArrowUp" ? -1 : 0;
+    if (!step) return;
+    e.preventDefault();
+    const i = items.indexOf(document.activeElement as HTMLElement);
+    items[(i + step + items.length) % items.length]?.focus();
+  });
+
+  items.forEach((item) => {
+    item.addEventListener("click", (e) => {
+      const next = item.dataset.localeSwitch === "en" ? "en" : "th";
+      if (item.getAttribute("aria-current") === "true") {
+        e.preventDefault();
+        close(true);
+        return;
+      }
       try {
         document.cookie = `${LOCALE_COOKIE_KEY}=${next}; path=/; max-age=31536000; SameSite=Lax`;
         document.cookie = `locale=${next}; path=/; max-age=31536000; SameSite=Lax`;
         localStorage.setItem(LOCALE_COOKIE_KEY, next);
       } catch {
-        // เขียนไม่ได้ (โหมดส่วนตัว) — ยังพาไปหน้าฝาแฝดได้ตามปกติ
+        // เขียนไม่ได้ (โหมดส่วนตัว) — ลิงก์ยังพาไปหน้าฝาแฝดได้ตามปกติ
       }
-
-      const basePath = stripLocalePrefix(window.location.pathname);
-
-      /* หน้าที่ยังไม่มีฝาแฝด: จำภาษาไว้ที่เครื่องอย่างเดียว แล้วอัปเดตสถานะปุ่มให้เห็นผลทันที
-         — ห้ามรีโหลด เพราะหน้านี้ไม่มีฉบับภาษาอื่นให้ไปอยู่ดี (จะเสียเวลาโหลดเปล่า ๆ) */
-      if (!hasEnglishTwin(basePath)) {
-        buttons.forEach((other) => {
-          other.setAttribute("aria-pressed", String(other.dataset.localeSwitch === next));
-        });
-        return;
-      }
-
-      const target = next === "en" ? (basePath === "/" ? "/en" : `/en${basePath}`) : basePath;
-      if (target !== window.location.pathname) window.location.assign(target);
+      if (item.tagName === "A") return; // ปล่อยให้ลิงก์พาไปหน้าฝาแฝด
+      items.forEach((other) => {
+        if (other === item) other.setAttribute("aria-current", "true");
+        else other.removeAttribute("aria-current");
+      });
+      close(true);
     });
   });
 }

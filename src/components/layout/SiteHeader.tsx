@@ -132,7 +132,7 @@ export function SiteHeader({
               href="/"
               prefetch={false}
               aria-label={isEnglish ? "SeerTarot — Return to Home" : "ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"}
-              className="group flex min-w-0 shrink items-center gap-3 select-none rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
+              className="group flex min-w-0 shrink items-center gap-2.5 sm:gap-3 select-none rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
             >
               <img
                 src="/logo.webp"
@@ -140,11 +140,11 @@ export function SiteHeader({
                 width={40}
                 height={40}
                 loading="eager"
-                className="h-10 w-10 shrink-0 rounded-full border border-line object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                className="h-9 w-9 shrink-0 rounded-full border border-line object-cover transition-transform duration-300 group-hover:scale-[1.03] sm:h-10 sm:w-10"
               />
               <span className="flex flex-col whitespace-nowrap leading-none">
-                <span className="font-serif-th text-[1.05rem] tracking-[0.2em] text-ink">SEERTAROT</span>
-                <span className="mt-1.5 font-serif-th text-[11px] tracking-[0.14em] text-muted">
+                <span className="font-serif-th text-[13.5px] tracking-[0.16em] text-ink sm:text-[1.05rem] sm:tracking-[0.2em]">SEERTAROT</span>
+                <span className="mt-1 font-serif-th text-[10px] tracking-[0.12em] text-muted sm:mt-1.5 sm:text-[11px] sm:tracking-[0.14em]">
                   {isEnglish ? "1909 RIDER-WAITE" : "ดูดวงไพ่ทาโรต์"}
                 </span>
               </span>

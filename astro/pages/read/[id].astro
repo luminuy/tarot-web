@@ -22,5 +22,5 @@ const spreadId = Astro.params.id!;
 ---
 
 <BaseLayout locale={locale} metadata={readSpreadMetadata(spreadId, locale)}>
-  <TarotFlowRoot locale={locale} initialSpreadId={spreadId} client:load />
+  <TarotFlowRoot locale={locale} initialSpreadId={spreadId} pathname={Astro.url.pathname} client:load />
 </BaseLayout>

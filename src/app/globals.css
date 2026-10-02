@@ -715,6 +715,18 @@ body > *:not(.fixed):not([data-floating]):not([data-site-header]) {
   border-bottom: 1px solid var(--color-line);
 }
 
+/* แผงเลือกภาษา — ผุดจากมุมขวาบน (ปุ่มลูกโลก) แบบเมนูของระบบปฏิบัติการ · ปิดเองเมื่อ prefers-reduced-motion (กฎรวม) */
+.lang-pop {
+  transform-origin: top right;
+  animation: lang-pop 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes lang-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+}
+
 /* ตัวอักษรสีทองศักดิ์สิทธิ์ตามระบบ V2 — คมชัด ผ่าน WCAG AA */
 /*
  * ⚠️ คลาสนี้กำหนด `color` จึงชนะ utility `text-*` ที่ใส่มาคู่กันเสมอ

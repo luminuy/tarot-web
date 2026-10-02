@@ -21,6 +21,7 @@ export function useCurrentPath(): string {
   const fromRouter = usePathname();
   const raw = fromProvider || fromRouter || "/";
   // build.format "file" + trailingSlash "never" — กันไว้เผื่อได้ `/x/` หรือ `/x.html`
-  const trimmed = raw.replace(/\.html$/, "").replace(/\/+$/, "");
+  // หน้าแรกถูกบิลด์เป็น `index.html` ➔ `Astro.url.pathname` ได้ `/index.html` · `/en/index.html` ต้องกลับเป็น `/` · `/en`
+  const trimmed = raw.replace(/\.html$/, "").replace(/(^|\/)index$/, "").replace(/\/+$/, "");
   return trimmed || "/";
 }
