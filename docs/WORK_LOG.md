@@ -51,6 +51,8 @@
 - ตัวแปรใหม่ `STRIPE_SECRET_KEY` · `STRIPE_WEBHOOK_SECRET` (`.env.example` · `PENDING_SETUP.md` พร้อมขั้นตั้งค่าแดชบอร์ด)
 - ทดสอบ: `test-marketplace-readers` ข้อ 10 เปลี่ยนเป็นสเปก Stripe + แปล event 6 แบบ · ทดสอบปลายทาง webhook จริงบน SQLite (ปลอมลายเซ็น 401 · ยอดไม่ตรงไม่แจก · ยิงซ้ำได้ +10 ครั้งเดียว · expired หลัง paid ไม่ลดสถานะ)
 - ด่านคีย์ทดสอบบนเว็บจริง: `sk_test_`/`rk_test_` + production ➔ checkout · marketplace/payments ตอบ 503 ยกเว้นผู้ทดสอบ (`isPrivilegedTestRequest`) กันบัตร 4242 ได้เครดิตฟรีช่วงทดสอบบนเว็บจริง · ด่าน test-money-path ตรวจทั้งสองเส้น (mutation: ถอดด่าน ➔ ตก)
+- `deploy.yml` ขั้นใหม่ `💳 Sync Stripe secrets to Worker`: GitHub Secrets `STRIPE_SECRET_KEY` · `STRIPE_WEBHOOK_SECRET` ➔ `wrangler secret put` (stdin) หลัง deploy · ไม่ตั้ง = ข้าม
+- ยิง Stripe sandbox จริงแล้ว: สร้าง/อ่าน Checkout Session ได้ · ยอด ฿149 · locale th · ช่องทาง card + promptpay · webhook `seertarot-checkout` ตั้งในแดชบอร์ดแล้ว (4 event)
 - ค้าง: เจ้าของตั้งคีย์ + webhook ในแดชบอร์ด Stripe · ทดสอบจ่ายจริงด้วย `sk_test_` บัตร 4242 · ระบบจองแม่หมอ (Marketplace) ยังใช้ Checkout ธรรมดา การแบ่งเงินให้แม่หมอต้องใช้ Stripe Connect ในเฟส 2
 
 ### 🗓️ 2026-10-01 (รอบ 191): ✦ ปุ่มลอยช่องทางทางการ — ปรับหน้าตาให้ได้มาตรฐาน FAB

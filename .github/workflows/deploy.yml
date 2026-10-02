@@ -171,6 +171,27 @@ jobs:
 
 
 
+      # ── 💳 คีย์ Stripe: GitHub Secrets ➔ Worker secret ─────────────────────────────
+      # เจ้าของเก็บคีย์ไว้ที่ GitHub (Settings ➔ Secrets and variables ➔ Actions) ไม่ได้รัน wrangler เอง
+      # ขั้นนี้ดันเข้า Worker ด้วย `wrangler secret put` (อ่านจาก stdin — คีย์ไม่โผล่ใน log)
+      # ไม่ได้ตั้งที่ GitHub = ข้าม ไม่แตะค่าที่อาจตั้งไว้ใน Cloudflare อยู่แล้ว
+      # ⚠️ CLOUDFLARE_API_TOKEN ต้องมีสิทธิ์ Workers Scripts:Edit (ขั้น deploy ใช้อยู่แล้ว)
+      - name: 💳 Sync Stripe secrets to Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+        run: |
+          for name in STRIPE_SECRET_KEY STRIPE_WEBHOOK_SECRET; do
+            if [ -z "${!name}" ]; then
+              echo "ℹ️  ไม่ได้ตั้ง $name ใน GitHub Secrets — ข้าม"
+              continue
+            fi
+            printf '%s' "${!name}" | npx wrangler secret put "$name"
+            echo "✅ ตั้ง $name ใน Worker แล้ว"
+          done
+
       # ── ล้างแคช Edge หลัง deploy (จำเป็นตั้งแต่เปิด Cache Rules เฟส 1) ──────────
       # Cache Rule `[phase1]` ตั้ง edge TTL หน้า SSG ไว้ 7 วัน ถ้าไม่ purge หลังปล่อยเวอร์ชันใหม่
       # ผู้ใช้จะยังเห็นหน้าเดิมค้างอยู่นานถึง 7 วัน (ของใหม่ขึ้นแล้วแต่ไม่มีใครเห็น)

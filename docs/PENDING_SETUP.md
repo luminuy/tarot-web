@@ -100,6 +100,10 @@ npx wrangler secret put STRIPE_SECRET_KEY
 npx wrangler secret put STRIPE_WEBHOOK_SECRET
 ```
 
+หรือ (ทางที่เจ้าของใช้) ใส่ทั้งสองชื่อไว้ที่ GitHub **Settings ➔ Secrets and variables ➔ Actions** —
+ขั้น `💳 Sync Stripe secrets to Worker` ใน `deploy.yml` ดันเข้า Worker ให้ทุกครั้งที่ deploy
+(ไม่ได้ตั้งที่ GitHub = ข้าม ไม่แตะค่าใน Cloudflare)
+
 ฝั่ง Stripe Dashboard (ทำครั้งเดียว):
 1. **Settings ➔ Payment methods** เปิด Cards + **PromptPay** (หน้า Checkout จะโชว์ตามที่เปิดไว้)
 2. **Developers ➔ Webhooks ➔ Add endpoint** `https://seertarot.net/api/marketplace/payments/webhook`
