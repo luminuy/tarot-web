@@ -75,11 +75,3 @@ export const QrCodeIcon: FC<IconProps> = ({ className = "w-4 h-4" }) => (
     <path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 20h1M20 14v1" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-
-/** โล่ — ความปลอดภัยของการชำระเงิน */
-export const ShieldCheckIcon: FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg viewBox="0 0 24 24" className={`${base} ${className}`} strokeWidth={1.6} aria-hidden="true">
-    <path d="M12 3l7 3v5.5c0 4.3-3 7.9-7 9.5-4-1.6-7-5.2-7-9.5V6l7-3z" strokeLinejoin="round" />
-    <path d="M8.8 12.2l2.2 2.2 4.2-4.6" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);

@@ -8,7 +8,7 @@ import { mutateEntitlement, useEntitlement } from "@/lib/entitlement/use-entitle
 import { startCheckout, type SimulatedCheckout } from "@/lib/entitlement/start-checkout";
 import { useLocale } from "@/lib/i18n";
 import { CheckMarkIcon } from "@/components/entitlement/EntitlementIcons";
-import { PaymentTrustRow, creditsLabel, packageBadge, perReadingLabel } from "@/components/entitlement/PackageParts";
+import { PaymentMethodsNote, creditsLabel, packageBadge, perReadingLabel } from "@/components/entitlement/PackageParts";
 import { RedeemCodeForm } from "@/components/entitlement/RedeemCodeForm";
 
 interface BuyCreditsModalProps {
@@ -167,15 +167,17 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
 
         {!simulated ? (
           <>
-            {user && bonus > 0 && (
-              <p className="glass-chip mx-auto flex w-fit items-center gap-1.5 px-3 py-1 font-serif-th text-xs font-semibold text-ink-deep">
-                {isEn ? (
-                  <>You have <strong className="text-gold-ink">{bonus}</strong> purchased readings left</>
-                ) : (
-                  <>ตอนนี้มีรอบที่เติมไว้ <strong className="text-gold-ink">{bonus}</strong> ครั้ง</>
-                )}
-              </p>
-            )}
+            <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 font-serif-th text-[13px] text-ink-deep">
+              {(isEn
+                ? ["Every big 5–12 card spread", "Unlimited follow-up questions", "Never expires"]
+                : ["เปิดผังใหญ่ได้ทุกผัง", "ถามแม่หมอต่อได้ไม่จำกัด", "ไม่มีวันหมดอายุ"]
+              ).map((t) => (
+                <li key={t} className="inline-flex items-center gap-1.5">
+                  <CheckMarkIcon className="h-3.5 w-3.5 shrink-0 text-gold-ink" />
+                  {t}
+                </li>
+              ))}
+            </ul>
 
             <fieldset className="space-y-2.5">
               <legend className="sr-only">{isEn ? "Choose a package" : "เลือกแพ็กเกจ"}</legend>
@@ -235,19 +237,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
               })}
             </fieldset>
 
-            <ul className="grid gap-1.5 rounded-2xl bg-inset-warm px-4 py-3 font-serif-th text-[13px] text-ink-deep sm:grid-cols-3 sm:gap-3">
-              {(isEn
-                ? ["Every big 5–12 card spread", "Unlimited follow-up questions", "Ready right after payment"]
-                : ["เปิดผังใหญ่ 5–12 ใบได้ทุกผัง", "ถามแม่หมอต่อได้ไม่จำกัด", "จ่ายแล้วใช้ได้ทันที"]
-              ).map((t) => (
-                <li key={t} className="flex items-center gap-1.5">
-                  <CheckMarkIcon className="h-3.5 w-3.5 shrink-0 text-gold-ink" />
-                  {t}
-                </li>
-              ))}
-            </ul>
-
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <button
                 type="button"
                 disabled={loading}
@@ -256,45 +246,49 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
               >
                 {loading
                   ? isEn
-                    ? "Opening secure checkout…"
+                    ? "Opening checkout…"
                     : "กำลังเปิดหน้าชำระเงิน…"
                   : !user
                     ? isEn
                       ? "Sign in to continue"
                       : "เข้าสู่ระบบเพื่อซื้อ"
                     : isEn
-                      ? `Pay ${priceLabel}`
+                      ? `Continue · ${priceLabel}`
                       : `ชำระเงิน ${priceLabel}`}
               </button>
-              <PaymentTrustRow isEn={isEn} />
+              <PaymentMethodsNote isEn={isEn} />
+              {user && bonus > 0 && (
+                <p className="text-center font-serif-th text-xs text-muted">
+                  {isEn ? `You currently have ${bonus} purchased readings` : `ตอนนี้มีรอบที่เติมไว้ ${bonus} ครั้ง`}
+                </p>
+              )}
             </div>
 
-            <details className="group rounded-2xl border border-line-warm bg-surface-warm px-4 py-3">
-              <summary className="tap-overlay-y flex cursor-pointer list-none items-center justify-between font-serif-th text-sm font-semibold text-ink-deep">
-                {isEn ? "Have a redeem code?" : "มีรหัสแลกสิทธิ์?"}
-                <svg
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                  className="h-4 w-4 fill-none stroke-current text-muted transition-transform duration-150 group-open:rotate-180"
-                  strokeWidth={2}
-                >
-                  <path d="M5 7.5l5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </summary>
-              <div className="pt-3">
-                <RedeemCodeForm isEn={isEn} signedIn={!!user} onRequireAuth={requireAuth} />
-              </div>
-            </details>
-
-            <p className="text-center">
+            <div className="flex flex-col items-center gap-2 border-t border-line-warm/50 pt-4">
+              <details className="group w-full">
+                <summary className="tap-overlay-y mx-auto flex w-fit cursor-pointer list-none items-center gap-1 font-serif-th text-sm font-semibold text-ink-deep hover:text-gold-ink">
+                  {isEn ? "Have a redeem code?" : "มีรหัสแลกสิทธิ์?"}
+                  <svg
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                    className="h-4 w-4 fill-none stroke-current text-muted transition-transform duration-150 group-open:rotate-180"
+                    strokeWidth={2}
+                  >
+                    <path d="M5 7.5l5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </summary>
+                <div className="pt-3">
+                  <RedeemCodeForm isEn={isEn} signedIn={!!user} onRequireAuth={requireAuth} />
+                </div>
+              </details>
               <Link
                 href="/pricing"
                 prefetch={false}
-                className="font-serif-th text-xs font-semibold text-gold-ink underline underline-offset-4 hover:text-gold-ink-deep"
+                className="tap-overlay-y font-serif-th text-xs text-muted underline underline-offset-4 hover:text-ink-deep"
               >
-                {isEn ? "Compare packages & payment FAQ" : "ดูรายละเอียดแพ็กเกจและคำถามที่พบบ่อย"}
+                {isEn ? "Compare plans and read the payment FAQ" : "เทียบแพ็กและคำถามเรื่องการชำระเงิน"}
               </Link>
-            </p>
+            </div>
           </>
         ) : (
           /* หน้าจำลอง — เครื่องพัฒนา / ยังไม่ใส่คีย์ Stripe (production ปฏิเสธรายการจำลองที่ด่านยืนยัน) */

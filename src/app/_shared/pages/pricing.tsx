@@ -6,7 +6,7 @@ import { buildPageOgImage } from "@/lib/media/og-image";
 import { buildBreadcrumbJsonLd, homeCrumb } from "@/app/_shared/seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { getCreditPackages } from "@/lib/entitlement/packages";
-import { getAccessPlans, CHEAPEST_PACKAGE_THB, DAILY_LIMIT, READINGS_EN } from "@/lib/entitlement/copy";
+import { CHEAPEST_PACKAGE_THB, DAILY_LIMIT, READINGS_EN } from "@/lib/entitlement/copy";
 import { CheckMarkIcon, DashMarkIcon } from "@/components/entitlement/EntitlementIcons";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import type { Locale } from "@/lib/i18n/types";
@@ -124,24 +124,56 @@ function faqItems(locale: Locale): Array<{ q: string; a: string }> {
   ];
 }
 
-const STEPS = {
-  th: [
-    { title: "เลือกแพ็ก", body: "เลือกจำนวนรอบที่ต้องการ แล้วกดซื้อ" },
-    { title: "จ่ายที่หน้า Stripe", body: "จ่ายด้วยบัตรหรือสแกน PromptPay" },
-    { title: "รอบเข้าบัญชีทันที", body: "กลับมาที่เว็บแล้วเปิดไพ่ต่อได้เลย" },
-  ],
-  en: [
-    { title: "Pick a package", body: "Choose how many readings you want and tap buy" },
-    { title: "Pay on Stripe", body: "Use a card or scan PromptPay" },
-    { title: "Readings land instantly", body: "Come back and keep reading right away" },
-  ],
-} as const;
+/** ตารางเทียบสิทธิ์ — แถว: สิ่งที่ได้ · คอลัมน์: สมาชิกฟรี / แพ็กเติมรอบ (true = มี · false = ไม่มี · ข้อความ = มีแบบมีเงื่อนไข) */
+type Cell = boolean | string;
+function compareRows(locale: Locale): Array<{ label: string; free: Cell; paid: Cell }> {
+  if (locale === "en") {
+    return [
+      { label: "Standard 1–4 card spreads", free: `${DAILY_LIMIT} a day`, paid: true },
+      { label: "Big 5–12 card spreads (Celtic Cross and more)", free: false, paid: true },
+      { label: "Master readers", free: false, paid: true },
+      { label: "Follow-up questions", free: "2 per reading", paid: "Unlimited" },
+      { label: "Reading history on every device", free: true, paid: true },
+      { label: "78-card meanings and articles", free: true, paid: true },
+      { label: "Expiry", free: "Resets at midnight", paid: "Never expires" },
+    ];
+  }
+  return [
+    { label: "ผังมาตรฐาน 1–4 ใบ", free: `วันละ ${DAILY_LIMIT} ครั้ง`, paid: true },
+    { label: "ผังใหญ่ 5–12 ใบ (เซลติกครอส ฯลฯ)", free: false, paid: true },
+    { label: "แม่หมอพิเศษ 2 ท่าน", free: false, paid: true },
+    { label: "ถามแม่หมอต่อหลังเปิดไพ่", free: "2 คำถามต่อรอบ", paid: "ไม่จำกัด" },
+    { label: "เก็บประวัติคำทำนายข้ามเครื่อง", free: true, paid: true },
+    { label: "ความหมายไพ่ 78 ใบและบทความ", free: true, paid: true },
+    { label: "อายุของสิทธิ์", free: "รีเซ็ตทุกเที่ยงคืน", paid: "ไม่มีวันหมดอายุ" },
+  ];
+}
+
+function CompareCell({ value, isEn }: { value: Cell; isEn: boolean }) {
+  if (value === true) {
+    return (
+      <>
+        <CheckMarkIcon className="mx-auto h-5 w-5 text-gold-ink" />
+        <span className="sr-only">{isEn ? "Included" : "มี"}</span>
+      </>
+    );
+  }
+  if (value === false) {
+    return (
+      <>
+        <DashMarkIcon className="mx-auto h-5 w-5 text-muted" />
+        <span className="sr-only">{isEn ? "Not included" : "ไม่มี"}</span>
+      </>
+    );
+  }
+  return <span className="font-serif-th text-xs text-ink-deep sm:text-sm">{value}</span>;
+}
 
 export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNode }) {
   const isEn = locale === "en";
   const c = COPY[locale];
   const faqs = faqItems(locale);
-  const accessPlans = getAccessPlans(isEn).filter((p) => p.id !== "guest");
+  const rows = compareRows(locale);
   const packages = getCreditPackages(isEn);
 
   const jsonLdBreadcrumbs = buildBreadcrumbJsonLd(locale, [homeCrumb(locale), { name: c.crumb, path: PATH }]);
@@ -173,104 +205,109 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdFaq) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdOffers) }} />
 
-      <div className="mx-auto max-w-5xl space-y-14 px-4 py-12 sm:px-6 sm:py-16">
-        {/* ── หัวหน้า ─────────────────────────────────────────────── */}
-        <header className="altar-panel mx-auto max-w-3xl space-y-3 px-5 py-7 text-center sm:px-8">
-          <p className="font-serif-th text-sm font-semibold text-gold-ink">
-            {isEn ? "Pricing" : "ราคาและแพ็กเกจ"}
-          </p>
-          <h1 className="font-serif-th text-2xl font-bold leading-snug text-ink-deep sm:text-4xl">
-            <ThaiPhrases>{isEn ? "Read free every day. Top up only when you want more." : "ดูดวงฟรีทุกวัน เติมรอบเฉพาะตอนอยากถามเพิ่ม"}</ThaiPhrases>
+      <div className="mx-auto max-w-6xl space-y-16 px-4 py-12 sm:px-6 sm:py-16">
+        {/* ── หัวหน้า — ไม่มีกล่อง ตัวอักษรสีหมึกเท่านั้น (สีทองบนพื้นไล่สีคอนทราสต์ไม่ผ่าน · HANDOFF_GLASS_HOME 2.4) ── */}
+        <header className="mx-auto max-w-3xl space-y-4 text-center">
+          <p className="font-serif-th text-sm font-semibold text-muted">{isEn ? "Pricing" : "ราคาและแพ็กเกจ"}</p>
+          <h1 className="font-serif-th text-3xl font-bold leading-snug text-ink-deep sm:text-5xl">
+            <ThaiPhrases>{isEn ? "Read free every day. Top up when you want more." : "ดูดวงฟรีทุกวัน เติมรอบเมื่ออยากถามเพิ่ม"}</ThaiPhrases>
           </h1>
-          <p className="mx-auto max-w-2xl font-serif-th text-base leading-relaxed text-muted">
-            {isEn
-              ? `Members get ${DAILY_LIMIT} free ${READINGS_EN} a day. Packages start at ${CHEAPEST_PACKAGE_THB} THB — pay once, no subscription, and your readings never expire.`
-              : `สมาชิกเปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง แพ็กเติมรอบเริ่มต้น ${CHEAPEST_PACKAGE_THB} บาท จ่ายครั้งเดียว ไม่มีรายเดือน และรอบที่เติมไม่มีวันหมดอายุ`}
+          <p className="mx-auto max-w-2xl font-serif-th text-base leading-relaxed text-muted sm:text-lg">
+            <ThaiPhrases>
+              {isEn
+                ? `Pay once — no subscription, and purchased readings never expire. Packages from ${CHEAPEST_PACKAGE_THB} THB.`
+                : `จ่ายครั้งเดียว ไม่มีรายเดือน รอบที่เติมไม่มีวันหมดอายุ · แพ็กเริ่มต้น ${CHEAPEST_PACKAGE_THB} บาท`}
+            </ThaiPhrases>
           </p>
         </header>
 
-        {/* ── การ์ดแพ็ก (island) ───────────────────────────────────── */}
-        <section aria-labelledby="pricing-packages" className="space-y-6">
+        {/* ── แพ็ก (island) ───────────────────────────────────────── */}
+        <section aria-labelledby="pricing-packages">
           <h2 id="pricing-packages" className="sr-only">
-            {isEn ? "Top-up packages" : "แพ็กเติมรอบ"}
+            {isEn ? "Plans and packages" : "แพ็กเกจทั้งหมด"}
           </h2>
           {plans}
         </section>
 
-        {/* ── ฟรีกับเติมรอบต่างกันอย่างไร ─────────────────────────── */}
-        <section aria-labelledby="pricing-compare" className="space-y-5">
-          <h2 id="pricing-compare" className="text-center font-serif-th text-xl font-bold text-ink-deep sm:text-2xl">
-            <ThaiPhrases>{isEn ? "Free membership vs. top-ups" : "สมาชิกฟรีกับรอบที่เติม ต่างกันอย่างไร"}</ThaiPhrases>
+        {/* ── ตารางเทียบสิทธิ์ ────────────────────────────────────── */}
+        <section aria-labelledby="pricing-compare" className="mx-auto max-w-4xl space-y-6">
+          <h2 id="pricing-compare" className="text-center font-serif-th text-2xl font-bold text-ink-deep sm:text-3xl">
+            <ThaiPhrases>{isEn ? "Compare plans" : "เทียบสิทธิ์ทั้งหมด"}</ThaiPhrases>
           </h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            {accessPlans.map((plan) => (
-              <div key={plan.id} className={`${plan.id === "credits" ? "altar-panel-active" : "altar-panel"} p-5 sm:p-6`}>
-                <div className="flex items-baseline justify-between gap-3">
-                  <h3 className="font-serif-th text-base font-bold text-ink-deep"><ThaiPhrases>{plan.name}</ThaiPhrases></h3>
-                  <span className="font-serif-th text-lg font-bold text-gold-ink">{plan.price}</span>
-                </div>
-                <p className="mt-0.5 font-serif-th text-[13px] text-muted">{plan.priceNote}</p>
-                <ul className="mt-4 space-y-2 border-t border-line-warm/60 pt-4">
-                  {plan.features.map((f) => (
-                    <li
-                      key={f.label}
-                      className={`flex items-start gap-2 font-serif-th text-sm ${f.included ? "text-ink-deep" : "text-muted"}`}
-                    >
-                      {f.included ? (
-                        <CheckMarkIcon className="mt-0.5 h-4 w-4 shrink-0 text-gold-ink" />
-                      ) : (
-                        <DashMarkIcon className="mt-0.5 h-4 w-4 shrink-0 text-muted" />
-                      )}
-                      {f.label}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+          <div className="altar-panel">
+            <table className="w-full table-fixed border-collapse text-left">
+              <caption className="sr-only">{isEn ? "Free membership compared with top-up packages" : "เทียบสมาชิกฟรีกับแพ็กเติมรอบ"}</caption>
+              <thead>
+                <tr className="border-b border-line-warm/70">
+                  <th scope="col" className="px-4 py-4 font-serif-th text-sm font-semibold text-muted sm:px-5">
+                    {isEn ? "Feature" : "สิ่งที่ได้"}
+                  </th>
+                  <th scope="col" className="w-[92px] px-2 py-4 text-center font-serif-th text-sm font-bold text-ink-deep sm:w-44 sm:px-3">
+                    {isEn ? "Free member" : "สมาชิกฟรี"}
+                  </th>
+                  <th scope="col" className="w-[92px] px-2 py-4 text-center font-serif-th text-sm font-bold text-gold-ink sm:w-44 sm:px-3">
+                    {isEn ? "Top-up" : "แพ็กเติมรอบ"}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.label} className="border-b border-line-warm/40 last:border-0">
+                    <th scope="row" className="px-4 py-3.5 font-serif-th text-sm font-normal text-ink-deep sm:px-5">
+                      {r.label}
+                    </th>
+                    <td className="px-2 py-3.5 text-center sm:px-3">
+                      <CompareCell value={r.free} isEn={isEn} />
+                    </td>
+                    <td className="px-2 py-3.5 text-center sm:px-3">
+                      <CompareCell value={r.paid} isEn={isEn} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </section>
-
-        {/* ── จ่ายเงินยังไง ───────────────────────────────────────── */}
-        <section aria-labelledby="pricing-how" className="space-y-5">
-          <h2 id="pricing-how" className="text-center font-serif-th text-xl font-bold text-ink-deep sm:text-2xl">
-            <ThaiPhrases>{isEn ? "How paying works" : "ซื้อแพ็กยังไง"}</ThaiPhrases>
-          </h2>
-          <ol className="grid gap-3 sm:grid-cols-3">
-            {STEPS[locale].map((s, i) => (
-              <li key={s.title} className="altar-panel flex items-start gap-3 p-4">
-                <span
-                  aria-hidden="true"
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold-ink font-serif-th text-sm font-bold text-surface"
-                >
-                  {i + 1}
-                </span>
-                <span>
-                  <span className="block font-serif-th text-sm font-bold text-ink-deep">{s.title}</span>
-                  <span className="block font-serif-th text-[13px] leading-relaxed text-muted">{s.body}</span>
-                </span>
-              </li>
-            ))}
-          </ol>
         </section>
 
         {/* ── คำถามที่พบบ่อย ──────────────────────────────────────── */}
-        <section aria-labelledby="pricing-faq" className="mx-auto max-w-3xl space-y-4">
-          <h2 id="pricing-faq" className="text-center font-serif-th text-xl font-bold text-ink-deep sm:text-2xl">
-            <ThaiPhrases>{isEn ? "Questions about paying" : "คำถามเรื่องการชำระเงิน"}</ThaiPhrases>
+        <section aria-labelledby="pricing-faq" className="mx-auto max-w-3xl space-y-6">
+          <h2 id="pricing-faq" className="text-center font-serif-th text-2xl font-bold text-ink-deep sm:text-3xl">
+            <ThaiPhrases>{isEn ? "Frequently asked questions" : "คำถามที่พบบ่อย"}</ThaiPhrases>
           </h2>
-          <div className="space-y-2.5">
+          <div className="altar-panel divide-y divide-line-warm/50 px-5 sm:px-6">
             {faqs.map((f) => (
-              <details key={f.q} className="altar-panel group px-5 py-4">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-serif-th text-base font-semibold text-ink-deep">
+              <details key={f.q} className="group py-4">
+                <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-4 font-serif-th text-base font-semibold text-ink-deep">
                   {f.q}
-                  <span aria-hidden="true" className="shrink-0 text-gold-ink transition-transform duration-150 group-open:rotate-45">
-                    +
-                  </span>
+                  <svg
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                    className="h-5 w-5 shrink-0 fill-none stroke-current text-muted transition-transform duration-150 group-open:rotate-180"
+                    strokeWidth={2}
+                  >
+                    <path d="M5 7.5l5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </summary>
-                <p className="pt-3 font-serif-th text-sm leading-relaxed text-muted">{f.a}</p>
+                <p className="pt-2 font-serif-th text-sm leading-relaxed text-muted">{f.a}</p>
               </details>
             ))}
           </div>
+        </section>
+
+        {/* ── ปิดท้าย ─────────────────────────────────────────────── */}
+        <section className="altar-panel mx-auto max-w-3xl space-y-4 px-6 py-8 text-center">
+          <h2 className="font-serif-th text-xl font-bold text-ink-deep sm:text-2xl">
+            <ThaiPhrases>{isEn ? "Not sure yet? Start free." : "ยังไม่แน่ใจ? เริ่มดูดวงฟรีก่อน"}</ThaiPhrases>
+          </h2>
+          <p className="font-serif-th text-sm text-muted">
+            {isEn ? "Draw your first reading today — no card needed." : "เปิดไพ่ใบแรกได้วันนี้ ไม่ต้องใช้บัตร"}
+          </p>
+          <a
+            href={isEn ? "/en" : "/"}
+            className="btn-glass-primary inline-flex min-h-[48px] items-center justify-center px-8 font-serif-th text-base font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2"
+          >
+            {isEn ? "Start a free reading" : "เริ่มดูดวงฟรี"}
+          </a>
         </section>
       </div>
     </main>
