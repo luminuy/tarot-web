@@ -89,7 +89,7 @@ export default function CustomerQueuePage() {
 
   if (loading && !data) {
     return (
-      <main id="main-content" tabIndex={-1} className="min-h-[70vh] bg-[#F6F1E9] text-ink flex items-center justify-center p-4">
+      <main id="main-content" tabIndex={-1} className="min-h-[70vh] text-ink flex items-center justify-center p-4">
         <div className="altar-card-porcelain p-8 text-center space-y-3 z-10">
           <div className="h-8 w-8 mx-auto border-2 border-gold-ink border-t-transparent rounded-full animate-spin" />
           <p className="text-xs text-muted font-serif-th">กำลังตรวจสอบข้อมูลคิวของคุณ…</p>
@@ -100,7 +100,7 @@ export default function CustomerQueuePage() {
 
   if (error || !data) {
     return (
-      <main id="main-content" tabIndex={-1} className="min-h-[70vh] bg-[#F6F1E9] text-ink flex items-center justify-center p-4">
+      <main id="main-content" tabIndex={-1} className="min-h-[70vh] text-ink flex items-center justify-center p-4">
         <div className="bg-surface rounded-2xl p-8 text-center space-y-4 max-w-md z-10 border border-err/40 shadow-sm">
           <p className="text-sm text-err font-serif-th">{error || "ไม่พบตั๋วคิว"}</p>
           <Button variant="gold" onClick={() => router.push("/readers")}>
@@ -119,7 +119,7 @@ export default function CustomerQueuePage() {
   const stepIndex = { screening: 0, waiting: 1, ready: 2, handed_off: 3 }[ticket.status as string] ?? -1;
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-[70vh] bg-[#F6F1E9] text-ink px-4 py-6 sm:py-10 font-serif-th">
+    <main id="main-content" tabIndex={-1} className="min-h-[70vh] text-ink px-4 py-6 sm:py-10 font-serif-th">
       <div className="max-w-xl w-full mx-auto space-y-5">
         <h1 className="sr-only">สถานะคิวปรึกษาแม่หมอ</h1>
 

@@ -96,7 +96,7 @@ export default async function ReadersPage() {
   return (
     <>
       <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-ink-deep px-4 pb-16 sm:px-8 font-serif-th relative overflow-x-clip">
+      <main id="main-content" tabIndex={-1} className="min-h-screen text-ink-deep px-4 pb-16 sm:px-8 font-serif-th relative overflow-x-clip">
         {/* Schema.org Structured Data */}
         <script
           type="application/ld+json"
@@ -172,7 +172,7 @@ export default async function ReadersPage() {
                 { title: "คุยผ่านวิดีโอคอล", body: "ถึงคิวแล้วกดเข้าห้อง คุยตัวต่อตัวกับแม่หมอในเว็บนี้" },
               ].map((step, i) => (
                 <li key={step.title} className="relative text-center space-y-3 px-4">
-                  <span className="relative mx-auto h-12 w-12 rounded-full bg-ink-deep text-surface grid place-items-center text-lg font-bold ring-8 ring-canvas">
+                  <span className="relative mx-auto h-12 w-12 rounded-full bg-ink-deep text-surface grid place-items-center text-lg font-bold">
                     {i + 1}
                   </span>
                   <h3 className="font-bold text-ink-deep text-lg">{step.title}</h3>

@@ -216,7 +216,7 @@ export default function ResetPasswordPage() {
   const isEn = isEnglish || locale === "en";
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-[70vh] bg-surface-warm text-ink-deep flex items-center justify-center p-4">
+    <main id="main-content" tabIndex={-1} className="min-h-[70vh] text-ink-deep flex items-center justify-center p-4">
       <div className="w-full max-w-md rounded-lg bg-surface border border-line-warm p-6 sm:p-8 relative overflow-hidden text-center space-y-6">
         <div className="w-14 h-14 rounded-lg bg-inset-warm border border-line-warm text-gold-ink flex items-center justify-center text-2xl mx-auto font-bold">✓</div>
 
