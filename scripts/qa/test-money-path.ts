@@ -91,7 +91,7 @@ async function insertPaymentRow(row: {
       row.orderId,
       row.userId,
       row.ticketId ?? null,
-      row.provider ?? "omise",
+      row.provider ?? "stripe",
       `chrg_${row.orderId}`,
       row.amountSatang,
       row.currency ?? "THB",

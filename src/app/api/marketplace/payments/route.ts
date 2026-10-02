@@ -122,12 +122,15 @@ export async function POST(request: Request) {
     }
 
     // 4. Create Gateway Charge
-    const defaultReturnUri = `${resolveAppOrigin(request)}/readers/queue/${encodeURIComponent(ticketId)}?paid=1`;
+    const queueUri = `${resolveAppOrigin(request)}/readers/queue/${encodeURIComponent(ticketId)}`;
+    const defaultReturnUri = `${queueUri}?paid=1`;
     const charge = await createGatewayCharge({
       amountSatang,
       currency: "THB",
       description: `ปรึกษาดวงชะตากับ ${reader.displayName} (คิว #${ticket.position || 1})`,
       returnUri: defaultReturnUri,
+      cancelUri: queueUri,
+      referenceId: bookingId,
       metadata: { ticketId, bookingId, readerId: reader.id },
     });
 
@@ -135,7 +138,7 @@ export async function POST(request: Request) {
     const payment = await createPaymentRecord({
       bookingId,
       ticketId,
-      provider: "omise",
+      provider: charge.provider,
       providerRef: charge.chargeId,
       amountSatang,
       currency: "THB",

@@ -510,7 +510,7 @@ async function taskWaf() {
     'or http.request.uri.path contains "/.aws"',
   ].join(" ");
 
-  // เครื่องมือสคริปต์ที่ยิงเข้า /api/ — ยกเว้น webhook รับเงิน (Omise ยิงแบบ server-to-server)
+  // เครื่องมือสคริปต์ที่ยิงเข้า /api/ — ยกเว้น webhook รับเงิน (Stripe ยิงแบบ server-to-server)
   const scriptUa = [
     'lower(http.user_agent) contains "curl/"',
     'or lower(http.user_agent) contains "wget"',
@@ -611,7 +611,7 @@ async function taskWaf() {
      *   • ถ้า header หายไปเลย Cloudflare ถือว่าเงื่อนไขเป็นเท็จ ➔ `not(...)` เป็นจริง ➔ โดนท้าทาย (ตามที่ตั้งใจ)
      *
      * ข้อยกเว้นที่ต้องมี (เรียกจากเซิร์ฟเวอร์ภายนอก ไม่มี Origin โดยธรรมชาติ):
-     *   • `/api/marketplace/payments/webhook` — Omise ยิงเข้ามาแบบ server-to-server
+     *   • `/api/marketplace/payments/webhook` — Stripe ยิงเข้ามาแบบ server-to-server
      *   • `/api/cron/` — ตัวตั้งเวลาเรียก
      * ส่วนเส้น callback ของ OAuth (`/api/auth/<provider>/callback`) เป็น **GET** (เบราว์เซอร์ถูก redirect
      * กลับมา) จึงไม่โดนอยู่แล้ว — ห้ามเขียนเครื่องหมายดอกจันติดทับขีดในคอมเมนต์บล็อก มันปิดคอมเมนต์กลางคัน

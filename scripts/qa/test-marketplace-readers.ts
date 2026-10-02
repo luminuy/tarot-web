@@ -146,7 +146,7 @@ async function runTest() {
   console.log("  ✓ 8. Reader Queue Lifecycle: รอคิว ➔ เรียกคิว ➔ ส่งต่อ LINE สำเร็จครบวงจร");
 
   // ── M7: Payments & Webhook Verification ───────────────────────────────────
-  const { createGatewayCharge, verifyWebhookSignature } = await import(
+  const { createGatewayCharge, verifyWebhookSignature, parseWebhookEvent, toStripeForm } = await import(
     "../../src/lib/marketplace/payment-gateway"
   );
   const {
@@ -160,9 +160,11 @@ async function runTest() {
   const charge = await createGatewayCharge({
     amountSatang: 29900,
     description: "ทดสอบการชำระเงิน 299 บาท",
-    returnUri: "http://localhost:3000/readers/queue/ticket_test",
+    returnUri: "http://localhost:3000/readers/queue/ticket_test?paid=1",
+    cancelUri: "http://localhost:3000/readers/queue/ticket_test",
+    referenceId: "book_test",
   });
-  if (!charge.chargeId || charge.amountSatang !== 29900) {
+  if (!charge.chargeId || charge.amountSatang !== 29900 || charge.provider !== "simulator") {
     throw new Error("❌ createGatewayCharge failed to generate charge");
   }
 
@@ -183,7 +185,7 @@ async function runTest() {
   const payment = await createPaymentRecord({
     bookingId: testBookingId,
     ticketId: ticket1.id,
-    provider: "omise",
+    provider: "stripe",
     providerRef: charge.chargeId,
     amountSatang: 29900,
   });
@@ -193,32 +195,67 @@ async function runTest() {
 
   // 3. Test Webhook Signature Verification
   const testPayload = JSON.stringify({
-    data: { id: charge.chargeId, status: "successful", amount: 29900 },
+    type: "checkout.session.completed",
+    data: { object: { id: charge.chargeId, payment_status: "paid", amount_total: 29900, currency: "thb" } },
   });
-  // A2-12: สเปก Omise — secret เป็น base64 · เซ็น `${ts}.${body}` · หลายลายเซ็นคั่นด้วย `,` · เก่าเกิน 5 นาทีปฏิเสธ
-  const secretKey = Buffer.from("test_webhook_secret_key_123").toString("base64");
+  // สเปก Stripe — `Stripe-Signature: t=..,v1=..` · เซ็น `${t}.${body}` · กุญแจคือสตริง whsec_ ทั้งก้อน
+  // หลาย v1 ตอนหมุนคีย์ · เก่าเกิน 5 นาทีปฏิเสธ · เซ็นแค่ body ปฏิเสธ
+  const secretKey = "whsec_test_webhook_secret_key_123";
   const { createHmac } = await import("node:crypto");
   const nowTs = String(Math.floor(Date.now() / 1000));
-  const sign = (ts: string, body: string, secretB64: string) =>
-    createHmac("sha256", Buffer.from(secretB64, "base64")).update(`${ts}.${body}`).digest("hex");
-  const validSignature = sign(nowTs, testPayload, secretKey);
-  const oldKeySig = sign(nowTs, testPayload, Buffer.from("rotated_old_key").toString("base64"));
+  const sign = (ts: string, body: string, secret: string) =>
+    createHmac("sha256", secret).update(`${ts}.${body}`).digest("hex");
+  const validSignature = `t=${nowTs},v1=${sign(nowTs, testPayload, secretKey)}`;
+  const oldKeySig = sign(nowTs, testPayload, "whsec_rotated_old_key");
 
-  const sigPass = verifyWebhookSignature(testPayload, validSignature, nowTs, secretKey);
-  const sigRotation = verifyWebhookSignature(testPayload, `${oldKeySig},${validSignature}`, nowTs, secretKey);
-  const sigFail = verifyWebhookSignature(testPayload, "tampered_signature_hex", nowTs, secretKey);
-  const staleTs = String(Math.floor(Date.now() / 1000) - 3600);
-  const sigReplay = verifyWebhookSignature(testPayload, sign(staleTs, testPayload, secretKey), staleTs, secretKey);
-  const sigBodyOnly = verifyWebhookSignature(
+  const sigPass = verifyWebhookSignature(testPayload, validSignature, secretKey);
+  const sigRotation = verifyWebhookSignature(
     testPayload,
-    createHmac("sha256", Buffer.from(secretKey, "base64")).update(testPayload).digest("hex"),
-    nowTs,
+    `t=${nowTs},v1=${oldKeySig},v1=${sign(nowTs, testPayload, secretKey)}`,
     secretKey,
   );
-  if (!sigPass || !sigRotation || sigFail || sigReplay || sigBodyOnly) {
+  const sigFail = verifyWebhookSignature(testPayload, `t=${nowTs},v1=tampered_signature_hex`, secretKey);
+  const staleTs = String(Math.floor(Date.now() / 1000) - 3600);
+  const sigReplay = verifyWebhookSignature(
+    testPayload,
+    `t=${staleTs},v1=${sign(staleTs, testPayload, secretKey)}`,
+    secretKey,
+  );
+  const sigBodyOnly = verifyWebhookSignature(
+    testPayload,
+    `t=${nowTs},v1=${createHmac("sha256", secretKey).update(testPayload).digest("hex")}`,
+    secretKey,
+  );
+  const sigNoTs = verifyWebhookSignature(testPayload, `v1=${sign(nowTs, testPayload, secretKey)}`, secretKey);
+  if (!sigPass || !sigRotation || sigFail || sigReplay || sigBodyOnly || sigNoTs) {
     throw new Error(
-      `❌ verifyWebhookSignature ไม่ตรงสเปก Omise (pass=${sigPass} rotation=${sigRotation} tampered=${sigFail} replay=${sigReplay} bodyOnly=${sigBodyOnly})`,
+      `❌ verifyWebhookSignature ไม่ตรงสเปก Stripe (pass=${sigPass} rotation=${sigRotation} tampered=${sigFail} replay=${sigReplay} bodyOnly=${sigBodyOnly} noTs=${sigNoTs})`,
     );
+  }
+
+  // event ของ Stripe ➔ ผลที่ต้องทำ (บัตรจ่ายทันที · PromptPay จ่ายทีหลัง · หมดอายุ · event อื่น)
+  const ev = (type: string, object: Record<string, unknown>) => parseWebhookEvent({ type, data: { object } });
+  const cardPaid = ev("checkout.session.completed", { id: "cs_1", payment_status: "paid", amount_total: 9900, currency: "thb" });
+  const asyncPending = ev("checkout.session.completed", { id: "cs_2", payment_status: "unpaid" });
+  const asyncPaid = ev("checkout.session.async_payment_succeeded", { id: "cs_2", payment_status: "paid" });
+  const asyncFailed = ev("checkout.session.async_payment_failed", { id: "cs_2", payment_status: "unpaid" });
+  const expired = ev("checkout.session.expired", { id: "cs_3", status: "expired", payment_status: "unpaid" });
+  const other = parseWebhookEvent({ type: "customer.created", data: { object: { id: "cus_1" } } });
+  if (
+    cardPaid?.outcome !== "paid" || cardPaid.charge.amountSatang !== 9900 || cardPaid.charge.currency !== "THB" ||
+    asyncPending?.outcome !== "ignore" ||
+    asyncPaid?.outcome !== "paid" ||
+    asyncFailed?.outcome !== "failed" ||
+    expired?.outcome !== "failed" ||
+    other !== null
+  ) {
+    throw new Error("❌ parseWebhookEvent แปล event ของ Stripe ผิด");
+  }
+
+  // form body ซ้อนชั้นแบบที่ Stripe รับ
+  const form = toStripeForm({ line_items: [{ price_data: { unit_amount: 9900 } }], metadata: { orderId: "ord_1" } });
+  if (form.get("line_items[0][price_data][unit_amount]") !== "9900" || form.get("metadata[orderId]") !== "ord_1") {
+    throw new Error(`❌ toStripeForm ประกอบ form ผิด: ${form.toString()}`);
   }
 
   // 4. Update Payment status to 'paid'

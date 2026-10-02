@@ -100,7 +100,7 @@ export async function createPaymentRecord(input: CreatePaymentInput): Promise<Pa
   const db = await getAppDB();
   const id = `pay_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
   const now = Date.now();
-  const provider = input.provider || "omise";
+  const provider = input.provider || "stripe";
   const currency = input.currency || "THB";
 
   const payment: PaymentRecord = {
