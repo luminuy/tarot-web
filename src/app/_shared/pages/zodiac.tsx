@@ -299,12 +299,13 @@ export function ZodiacIndexBody({
             ถ้าไม่ห่อ ส่วนต่าง ๆ จะชิดกันจนหัวข้อทับขอบกล่องข้างบน (เจ้าของเห็นจากภาพหน้าจอ) */}
         <div>{finder}</div>
 
-        <div>{daily}</div>
+        {/* แถบสีสลับแบบหน้าแรก (`page-band`): วันนี้ (อ่อน) · ราศีคู่ (ใส) · รายชื่อ 12 ราศี (อ่อน) · บทความ (ใส) */}
+        <div className="page-band page-band-tint">{daily}</div>
 
-        <div>{compat}</div>
+        <div className="page-band">{compat}</div>
 
         {/* รายชื่อ 12 ราศีพร้อมช่วงวันเกิด — กะทัดรัด (วงล้อด้านบนมีภาพไพ่ครบแล้ว) */}
-        <section aria-labelledby="zodiac-list-title" className="space-y-4">
+        <section aria-labelledby="zodiac-list-title" className="page-band page-band-tint space-y-4">
           <h2 id="zodiac-list-title" className="text-xl sm:text-2xl font-serif-th font-bold text-ink text-center"><ThaiPhrases>
             {isEnglish ? "All 12 signs and their dates" : "12 ราศีและช่วงวันเกิด"}
           </ThaiPhrases></h2>
@@ -343,6 +344,7 @@ export function ZodiacIndexBody({
         </section>
 
         <SeoArticleShell
+          band="plain"
           eyebrow={isEnglish ? "How it works" : "ไพ่กับดวงดาวเกี่ยวกันอย่างไร"}
           title={
             isEnglish
@@ -479,7 +481,7 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
         </dl>
 
         {/* ดวงรายวันของราศีนี้ — หัวข้อเป็น HTML ให้บอทเห็น ตัวไพ่มาจาก island (เปลี่ยนทุกวัน) */}
-        <section aria-labelledby="zodiac-today" className="altar-panel rounded-2xl p-5 sm:p-8 space-y-4">
+        <section aria-labelledby="zodiac-today" className="page-band page-band-tint space-y-4">
           <div className="space-y-1">
             <h2 id="zodiac-today" className="text-lg sm:text-xl font-serif-th font-bold text-ink"><ThaiPhrases>
               {isEnglish ? `${sign.nameEn} daily tarot: today's card` : `ดูดวง${sign.nameTh}วันนี้ — เปิดไพ่ยิปซีประจำวัน`}
@@ -494,7 +496,7 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
         </section>
 
         {/* ไพ่สองใบหลัก */}
-        <section aria-labelledby="zodiac-main-cards" className="altar-panel rounded-2xl p-5 sm:p-8 space-y-6">
+        <section aria-labelledby="zodiac-main-cards" className="page-band space-y-6">
           <h2 id="zodiac-main-cards" className="text-lg sm:text-xl font-serif-th font-bold text-ink text-center"><ThaiPhrases>
             {isEnglish ? `The cards of ${sign.nameEn}` : `ไพ่หลักของ${sign.nameTh}`}
           </ThaiPhrases></h2>
@@ -511,7 +513,7 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
         </section>
 
         {/* ในโหราศาสตร์ไทย — เจ้าเรือนต่างจากสากลเฉพาะพิจิก กุมภ์ มีน */}
-        <section aria-labelledby="zodiac-thai" className="altar-panel rounded-2xl p-5 sm:p-8 space-y-4">
+        <section aria-labelledby="zodiac-thai" className="page-band page-band-tint space-y-4">
           <h2 id="zodiac-thai" className="text-lg sm:text-xl font-serif-th font-bold text-ink"><ThaiPhrases>
             {isEnglish ? `${sign.nameEn} in Thai astrology` : `${sign.nameTh}ในโหราศาสตร์ไทย`}
           </ThaiPhrases></h2>
@@ -543,7 +545,7 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
         </section>
 
         {/* นิสัย ความรัก การงาน */}
-        <section aria-labelledby="zodiac-reading" className="altar-panel rounded-2xl p-5 sm:p-8 space-y-5">
+        <section aria-labelledby="zodiac-reading" className="page-band space-y-5">
           <h2 id="zodiac-reading" className="text-lg sm:text-xl font-serif-th font-bold text-ink"><ThaiPhrases>
             {isEnglish ? `${sign.nameEn} through the tarot` : `${sign.nameTh}ในมุมของไพ่ทาโรต์`}
           </ThaiPhrases></h2>
@@ -556,7 +558,7 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
         </section>
 
         {/* ราศีที่เข้ากัน — คิดจากมุมระหว่างราศี (ข้อมูลเดียวกับเครื่องคำนวณความเข้ากันในหน้ารวม) */}
-        <section aria-labelledby="zodiac-compat" className="altar-panel rounded-2xl p-5 sm:p-8 space-y-4">
+        <section aria-labelledby="zodiac-compat" className="page-band page-band-tint space-y-4">
           <h2 id="zodiac-compat" className="text-lg sm:text-xl font-serif-th font-bold text-ink"><ThaiPhrases>
             {isEnglish ? `Who ${sign.nameEn} gets along with` : `${sign.nameTh}เข้ากับราศีไหน`}
           </ThaiPhrases></h2>
@@ -596,7 +598,7 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
         </section>
 
         {/* ไพ่ 3 ช่วง */}
-        <section aria-labelledby="zodiac-decans" className="altar-panel rounded-2xl p-5 sm:p-8 space-y-5">
+        <section aria-labelledby="zodiac-decans" className="page-band space-y-5">
           <div className="space-y-1.5">
             <h2 id="zodiac-decans" className="text-lg sm:text-xl font-serif-th font-bold text-ink"><ThaiPhrases>
               {isEnglish ? "Your decan card" : "ไพ่ประจำช่วงวันเกิด (Decan)"}
@@ -626,7 +628,7 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
         </section>
 
         {/* ชวนเปิดไพ่ + ราศีข้างเคียง */}
-        <section className="altar-panel rounded-2xl p-5 sm:p-8 space-y-5 text-center">
+        <section className="page-band page-band-tint space-y-5 text-center">
           <p className="text-sm text-ink font-sans leading-relaxed">
             {isEnglish
               ? `Want to know what ${major.nameEn} has to say about your question today?`

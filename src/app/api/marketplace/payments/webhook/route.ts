@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { parseWebhookEvent, verifyWebhookSignature } from "@/lib/marketplace/payment-gateway";
 import { updatePaymentStatus } from "@/lib/marketplace/payments.repo";
+import { handleFailedConsultationPayment, settleConsultationPayment } from "@/lib/marketplace/booking.repo";
 import { getAppDB } from "@/lib/platform/db";
 import { getCreditPackageById } from "@/lib/entitlement/packages";
 import { grantBonus } from "@/lib/entitlement/entitlement";
@@ -74,6 +75,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ received: true, note: "Amount mismatch" });
     }
 
+    /*
+     * 📅 ค่าปรึกษาแม่หมอ (แถวมี ticket_id) ➔ จุดเดียวที่เปลี่ยน "เงินเข้า" เป็น "ได้นัด"
+     * ที่นั่งหลุด/จ่ายซ้ำ/ยกเลิกไปก่อน ➔ settle คืนเงินให้เองอัตโนมัติ (เงินเข้าแล้วต้องจบที่นัดหรือเงินคืนเสมอ)
+     * คืนเงินไม่สำเร็จ = ตอบ 500 ให้ Stripe ยิงซ้ำ (refund ใช้กุญแจกันซ้ำ เรียกกี่รอบก็คืนครั้งเดียว)
+     */
+    if (paymentRow.ticket_id) {
+      if (event.outcome === "paid") {
+        const state = await settleConsultationPayment(paymentRow.id, { webhookLog: rawBody, email: event.charge.email });
+        if (state === "refund_failed") {
+          return NextResponse.json({ error: "คืนเงินไม่สำเร็จ", state }, { status: 500 });
+        }
+        return NextResponse.json({ received: true, status: state });
+      }
+      if (event.outcome === "failed") {
+        await handleFailedConsultationPayment(paymentRow.id, rawBody);
+      }
+      return NextResponse.json({ received: true, status: "processed" });
+    }
+
     if (event.outcome === "paid") {
       await updatePaymentStatus(paymentRow.id, "paid", {
         providerRef: chargeId,
@@ -121,17 +141,6 @@ export async function POST(request: Request) {
         }
       }
 
-      // Advance ticket or booking status if associated
-      if (paymentRow.ticket_id) {
-        try {
-          await db
-            .prepare("UPDATE queue_tickets SET status = 'waiting' WHERE id = ? AND status = 'screening'")
-            .bind(paymentRow.ticket_id)
-            .run();
-        } catch {
-          // ignore
-        }
-      }
     } else if (event.outcome === "failed" && paymentRow.status !== "paid") {
       // ห้ามลดรายการที่จ่ายแล้วกลับเป็น failed (event มาไม่เรียงลำดับได้)
       await updatePaymentStatus(paymentRow.id, "failed", {

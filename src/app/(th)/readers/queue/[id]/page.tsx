@@ -8,7 +8,15 @@ import { VideoCallRoom } from "@/components/marketplace/VideoCallRoom";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { useVisibleInterval } from "@/lib/utils/use-visible-interval";
 import type { QueueTicket } from "@/lib/marketplace/queue.repo";
-import { CONSULTATION_PRICE_LABEL, questionCategoryLabel } from "@/lib/marketplace/offer";
+import { CONSULTATION_MINUTES, CONSULTATION_PRICE_THB, questionCategoryLabel } from "@/lib/marketplace/offer";
+import {
+  BookingConfirmedPanel,
+  ManageBooking,
+  PaymentPendingPanel,
+  ReviewPanel,
+  type BookingView,
+} from "@/components/marketplace/QueueBookingParts";
+import { formatSlotRange } from "@/lib/marketplace/booking-policy";
 
 interface PollResponse {
   ticket: QueueTicket;
@@ -18,11 +26,32 @@ interface PollResponse {
     avatarUrl: string | null;
     specialties: string[];
     lineUrl: string | null;
+    /** ค่าปรึกษาของแม่หมอคนนี้ (บาท) */
+    priceThb?: number;
   };
   canAccessLine: boolean;
   /** แม่หมอเรียกคิวแล้ว + ระบบวิดีโอคอลพร้อม (ตั้งค่า TURN แล้ว) */
   videoCallAvailable?: boolean;
+  /** การจอง/การจ่ายเงินของตั๋ว (เฉพาะเจ้าของตั๋ว) — null สำหรับตั๋วยุคก่อนระบบจ่ายก่อนคุย */
+  booking?: BookingView | null;
 }
+
+/** ตั๋วยุคก่อนระบบจ่ายก่อนคุย (ไม่มีใบจอง) — ยังยกเลิกได้ตามเดิม ไม่มีเงินให้คืน */
+const LEGACY_FREE_TICKET: BookingView = {
+  id: "legacy",
+  kind: "walkup",
+  status: "confirmed",
+  slotStart: null,
+  slotEnd: null,
+  holdExpiresAt: null,
+  rescheduleCount: 0,
+  cancelledBy: null,
+  refundStatus: null,
+  paid: false,
+  amountSatang: null,
+  cancel: { allowed: true, refund: false, reason: "unpaid" },
+  canReschedule: false,
+};
 
 export default function CustomerQueuePage() {
   const params = useParams<{ id: string }>();
@@ -32,19 +61,20 @@ export default function CustomerQueuePage() {
   const [data, setData] = useState<PollResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [cancelling, setCancelling] = useState(false);
-
-  const [confirmCancel, setConfirmCancel] = useState(false);
-  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  const [notice, setNotice] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
 
   const fetchTicketStatus = useCallback(async () => {
     if (!ticketId) return;
     try {
-      const res = await fetch(`/api/marketplace/tickets/${ticketId}`);
+      const res = await fetch(`/api/marketplace/tickets/${ticketId}`, { cache: "no-store" });
       if (res.ok) {
         const json = (await res.json()) as PollResponse;
         setData(json);
+        setNow(Date.now());
         setError(null);
+        if (json.ticket.status !== "pending_payment") setConfirming(false);
       } else {
         const json = await res.json();
         setError(json.error || "ไม่พบข้อมูลคิว");
@@ -58,23 +88,34 @@ export default function CustomerQueuePage() {
 
   useVisibleInterval(fetchTicketStatus, 4000);
 
-  const handleCancel = async () => {
-    setCancelling(true);
-    setCancelError(null);
-    try {
-      const res = await fetch(`/api/marketplace/tickets/${ticketId}`, { method: "DELETE" });
-      if (res.ok) {
-        setConfirmCancel(false);
-        fetchTicketStatus();
-      } else {
-        setCancelError("ไม่สามารถยกเลิกคิวได้ กรุณาลองใหม่อีกครั้ง");
+  /*
+   * กลับจากหน้าจ่ายเงิน Stripe (`?paid=1`) ➔ ให้เซิร์ฟเวอร์ถาม Stripe เองว่าจ่ายจริงไหม
+   * (ไม่เชื่อ query string) แล้วล้าง query ออกจาก URL — รีเฟรชหน้าจะได้ไม่ยิงซ้ำ
+   */
+  useEffect(() => {
+    if (!ticketId || typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("paid") !== "1") return;
+    setConfirming(true);
+    window.history.replaceState(null, "", window.location.pathname);
+    void (async () => {
+      try {
+        const res = await fetch("/api/marketplace/payments/confirm", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ticketId, testChargeId: params.get("test_charge_id") || undefined }),
+        });
+        const json = (await res.json().catch(() => ({}))) as { status?: string };
+        if (json.status === "refunded") {
+          setNotice("เวลานี้ถูกจองไปก่อนที่การชำระเงินจะเสร็จ ระบบคืนเงินเต็มจำนวนให้แล้ว");
+        }
+        if (json.status !== "pending") setConfirming(false);
+      } catch {
+        setConfirming(false);
       }
-    } catch {
-      setCancelError("เกิดข้อผิดพลาดในการยกเลิกคิว กรุณาตรวจสอบการเชื่อมต่อ");
-    } finally {
-      setCancelling(false);
-    }
-  };
+      void fetchTicketStatus();
+    })();
+  }, [ticketId, fetchTicketStatus]);
 
   // ถึงคิวแล้วให้ชื่อแท็บเปลี่ยน — คนที่สลับไปแท็บอื่นระหว่างรอจะเห็นทันที
   const isReady = data?.ticket.status === "ready";
@@ -111,28 +152,67 @@ export default function CustomerQueuePage() {
     );
   }
 
-  const { ticket, reader, canAccessLine, videoCallAvailable } = data;
+  const { ticket, reader, canAccessLine, videoCallAvailable, booking } = data;
+  const priceThb = reader.priceThb ?? CONSULTATION_PRICE_THB;
+  const paidThb = booking?.amountSatang ? booking.amountSatang / 100 : priceThb;
   const isBlocked = ticket.screening?.verdict === "block" || ticket.status === "cancelled" || ticket.status === "expired";
   const isCrisis = ticket.screening?.flags.includes("self_harm") || ticket.screening?.flags.includes("crisis");
   const isDone = ticket.status === "handed_off";
+  const isScheduled = booking?.kind === "scheduled" && booking.slotStart !== null;
   const categoryLabel = questionCategoryLabel(ticket.screening?.category);
-  const stepIndex = { screening: 0, waiting: 1, ready: 2, handed_off: 3 }[ticket.status as string] ?? -1;
+  const stepIndex =
+    { pending_payment: 0, screening: 0, waiting: 1, ready: 2, handed_off: 3 }[ticket.status as string] ?? -1;
+  const steps = ["ชำระเงิน", isScheduled ? "รอถึงเวลานัด" : "รอคิว", "คุยกับแม่หมอ", "เสร็จสิ้น"];
+  const blockedTitle =
+    ticket.screening?.verdict === "block"
+      ? "คิวนี้ถูกยกเลิกแล้ว"
+      : booking?.status === "no_show"
+        ? "คุณไม่ได้เข้าร่วมตามนัด"
+        : booking?.status === "expired" && !booking.paid
+          ? "หมดเวลาชำระเงิน"
+          : booking?.cancelledBy === "reader"
+            ? "แม่หมอยกเลิกนัดนี้"
+            : isScheduled
+              ? "ยกเลิกนัดแล้ว"
+              : "คิวนี้ถูกยกเลิกแล้ว";
+  const blockedBody =
+    ticket.screening?.verdict === "block" && ticket.screening.brief
+      ? ticket.screening.brief
+      : booking?.refundStatus === "refunded"
+        ? "คืนเงินเต็มจำนวนแล้ว เงินจะกลับเข้าช่องทางที่ชำระภายใน 5–10 วันทำการ (ขึ้นกับธนาคาร)"
+        : booking?.refundStatus === "failed"
+          ? "ระบบคืนเงินขัดข้องชั่วคราว ทีมงานจะคืนเงินให้ภายใน 3 วันทำการ"
+          : booking?.status === "no_show"
+            ? "แม่หมอรอแล้วแต่ไม่พบคุณในเวลานัด ตามนโยบายจะไม่มีการคืนเงิน"
+            : booking?.refundStatus === "none"
+              ? `ยกเลิกน้อยกว่า 24 ชั่วโมงก่อนนัด จึงไม่มีการคืนเงิน`
+              : booking?.status === "expired" && !booking.paid
+                ? "ไม่มีการตัดเงิน ระบบปล่อยเวลานี้ให้คนอื่นแล้ว ถ้ายังอยากปรึกษา จองใหม่ได้เลย"
+                : "ถ้ายังอยากปรึกษา เลือกแม่หมอแล้วจองใหม่ได้เลย";
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-[70vh] text-ink px-4 py-6 sm:py-10 font-serif-th">
       <div className="max-w-xl w-full mx-auto space-y-5">
         <h1 className="sr-only">สถานะคิวปรึกษาแม่หมอ</h1>
 
-        <Link
-          href="/readers"
-          className="tap-overlay-y inline-flex items-center gap-1.5 text-sm text-gold-ink hover:text-gold-ink-deep transition-colors"
-        >
-          <span aria-hidden="true">←</span> แม่หมอทั้งหมด
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link
+            href="/readers"
+            className="tap-overlay-y inline-flex items-center gap-1.5 text-sm text-gold-ink hover:text-gold-ink-deep transition-colors"
+          >
+            <span aria-hidden="true">←</span> แม่หมอทั้งหมด
+          </Link>
+          <Link
+            href="/readers/bookings"
+            className="tap-overlay-y inline-flex items-center gap-1.5 text-sm font-semibold text-gold-ink hover:text-gold-ink-deep transition-colors"
+          >
+            นัดของฉัน
+          </Link>
+        </div>
 
         <section className="rounded-[28px] border border-line bg-surface overflow-hidden shadow-[0_20px_40px_-28px_rgba(46,33,26,0.45)]">
           {/* แถบกำมะหยี่ — ภาษาภาพเดียวกับการ์ดแม่หมอในหน้ารวม */}
-          <div className="consult-stage h-20 !rounded-none !border-0" aria-hidden="true" />
+          <div className="consult-stage h-20 !rounded-none !border-0 !shadow-none" aria-hidden="true" />
           {/* แม่หมอที่คุณจองไว้ */}
           <div className="flex items-end gap-4 px-5 sm:px-6 pb-5 border-b border-line">
             <div className="-mt-9 h-[72px] w-[72px] shrink-0 rounded-full bg-canvas ring-4 ring-surface overflow-hidden grid place-items-center text-2xl font-bold text-gold-ink shadow-md">
@@ -155,7 +235,7 @@ export default function CustomerQueuePage() {
           {/* ความคืบหน้า 4 ขั้น — ผู้ใช้รู้ทันทีว่าอยู่ตรงไหน และต่อไปจะเกิดอะไร */}
           {!isBlocked && stepIndex >= 0 && (
             <ol className="flex items-start px-4 sm:px-6 pt-5" aria-label="ความคืบหน้าคิว">
-              {["ส่งคำถาม", "รอคิว", "คุยกับแม่หมอ", "เสร็จสิ้น"].map((label, i) => {
+              {steps.map((label, i) => {
                 const done = i < stepIndex || (isDone && i === stepIndex);
                 const current = i === stepIndex && !isDone;
                 return (
@@ -201,7 +281,21 @@ export default function CustomerQueuePage() {
               </div>
             )}
 
-            {ticket.status === "waiting" && (
+            {notice && !isBlocked && (
+              <p role="status" className="rounded-xl border border-gold-ink/30 bg-inset-warm p-3 text-[13px] text-ink">
+                {notice}
+              </p>
+            )}
+
+            {ticket.status === "pending_payment" && booking && (
+              <PaymentPendingPanel ticketId={ticket.id} booking={booking} nowMs={now} confirming={confirming} priceThb={priceThb} />
+            )}
+
+            {ticket.status === "waiting" && isScheduled && booking && (
+              <BookingConfirmedPanel booking={booking} readerName={reader.displayName} ticketId={ticket.id} nowMs={now} />
+            )}
+
+            {ticket.status === "waiting" && !isScheduled && (
               <div className="text-center py-4 space-y-4">
                 <div className="relative mx-auto h-36 w-36">
                   <span aria-hidden="true" className="absolute -inset-3 rounded-full bg-gold-ink/10 animate-pulse" />
@@ -288,6 +382,9 @@ export default function CustomerQueuePage() {
                   <h3 className="font-bold text-lg text-ink">ปรึกษาเสร็จเรียบร้อย</h3>
                   <p className="text-sm text-muted"><ThaiPhrases>ขอบคุณที่ใช้บริการ ขอให้เรื่องที่ถามคลี่คลายไปในทางที่ดี</ThaiPhrases></p>
                 </div>
+                {booking && (booking.canReview || booking.reviewRating) && (
+                  <ReviewPanel ticketId={ticket.id} readerName={reader.displayName} existingRating={booking.reviewRating ?? null} />
+                )}
                 <div className="flex flex-col sm:flex-row gap-2 justify-center">
                   <Link href="/" className="btn-gold-glass inline-flex items-center justify-center px-5 py-3 text-sm font-bold">
                     ดูดวงกับแม่หมอ AI
@@ -312,12 +409,8 @@ export default function CustomerQueuePage() {
 
             {isBlocked && (
               <div className="text-center py-4 space-y-3 rounded-2xl bg-err-wash border border-err/30 p-5">
-                <h3 className="font-bold text-lg text-err">คิวนี้ถูกยกเลิกแล้ว</h3>
-                <p className="text-sm text-ink leading-relaxed">
-                  {ticket.screening?.verdict === "block" && ticket.screening.brief
-                    ? ticket.screening.brief
-                    : "ถ้ายังอยากปรึกษา เลือกแม่หมอแล้วเข้าคิวใหม่ได้เลย"}
-                </p>
+                <h3 className="font-bold text-lg text-err">{blockedTitle}</h3>
+                <p className="text-sm text-ink leading-relaxed">{blockedBody}</p>
 
                 {isCrisis && (
                   <div className="rounded-xl bg-surface border border-err/30 p-4 text-sm space-y-1 text-left">
@@ -331,8 +424,11 @@ export default function CustomerQueuePage() {
                   </div>
                 )}
 
-                <Link href="/readers" className="btn-gold-glass inline-flex items-center justify-center px-5 py-3 text-sm font-bold">
-                  เลือกแม่หมอ
+                <Link
+                  href={ticket.screening?.verdict === "block" ? "/readers" : `/readers/${reader.id}`}
+                  className="btn-gold-glass inline-flex items-center justify-center px-5 py-3 text-sm font-bold"
+                >
+                  {ticket.screening?.verdict === "block" ? "เลือกแม่หมอ" : "จองใหม่"}
                 </Link>
               </div>
             )}
@@ -359,46 +455,45 @@ export default function CustomerQueuePage() {
                 <dd className="text-ink text-right">{categoryLabel}</dd>
               </div>
             )}
+            {isScheduled && booking?.slotStart && (
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted shrink-0">เวลานัด</dt>
+                <dd className="text-ink font-semibold text-right">{formatSlotRange(booking.slotStart, true)}</dd>
+              </div>
+            )}
             <div className="flex justify-between gap-4 pt-2.5 border-t border-line">
               <dt className="text-muted shrink-0">ค่าบริการ</dt>
-              <dd className="text-ink font-bold text-right">{CONSULTATION_PRICE_LABEL}</dd>
+              <dd className="text-ink font-bold text-right">{paidThb} บาท · {CONSULTATION_MINUTES} นาที</dd>
             </div>
+            {booking && (
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted shrink-0">การชำระเงิน</dt>
+                <dd className="text-right font-semibold">
+                  {booking.refundStatus === "refunded" ? (
+                    <span className="text-ink">คืนเงินแล้ว {paidThb} บาท</span>
+                  ) : booking.paid ? (
+                    <span className="text-ok">ชำระแล้ว {paidThb} บาท</span>
+                  ) : (
+                    <span className="text-muted">ยังไม่ชำระ</span>
+                  )}
+                </dd>
+              </div>
+            )}
           </dl>
         </section>
 
-        {/* ยกเลิกคิว — เฉพาะตอนยังรอคิว */}
-        {ticket.status === "waiting" && (
-          <div className="text-center space-y-2">
-            {cancelError && <p className="text-sm text-err">{cancelError}</p>}
-            {confirmCancel ? (
-              <div className="space-y-2">
-                <p className="text-sm text-err">ยืนยันยกเลิกคิวนี้ใช่ไหม?</p>
-                <div className="flex justify-center gap-2">
-                  <Button variant="gold" className="!bg-err !text-white" onClick={handleCancel} disabled={cancelling}>
-                    {cancelling ? "กำลังยกเลิก…" : "ยกเลิกคิว"}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      setConfirmCancel(false);
-                      setCancelError(null);
-                    }}
-                    disabled={cancelling}
-                  >
-                    ไม่ยกเลิก
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setConfirmCancel(true)}
-                className="tap-overlay-y text-sm text-muted hover:text-err transition-colors underline underline-offset-2"
-              >
-                ยกเลิกคิวนี้
-              </button>
-            )}
-          </div>
+        {/* จัดการนัด/คิว — เลื่อน · ยกเลิก (นโยบายคืนเงินคำนวณฝั่งเซิร์ฟเวอร์) */}
+        {!confirming && (ticket.status === "waiting" || ticket.status === "pending_payment") && (
+          <ManageBooking
+            key={`${booking?.slotStart}-${ticket.status}`}
+            ticketId={ticket.id}
+            readerId={reader.id}
+            booking={booking ?? LEGACY_FREE_TICKET}
+            onChanged={(message) => {
+              setNotice(message);
+              void fetchTicketStatus();
+            }}
+          />
         )}
       </div>
     </main>

@@ -7,7 +7,7 @@ import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
-export function ChangePasswordCard() {
+export function ChangePasswordCard({ icon }: { icon?: React.ReactNode } = {}) {
   const { locale, isEnglish } = useLocale();
   const isEn = isEnglish || locale === "en";
   const { user, refresh } = useSessionUser();
@@ -96,33 +96,41 @@ export function ChangePasswordCard() {
    * ใช้ <details> ของเบราว์เซอร์เอง — เปิดปิดได้ด้วยคีย์บอร์ดและโปรแกรมอ่านหน้าจอครบโดยไม่ต้องเขียน JS
    */
   return (
-    <details className="group rounded-lg border border-line-warm bg-surface p-5 sm:p-6 text-left">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
-        <span className="space-y-1">
-          <h2 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold"><ThaiPhrases>
+    /* แถวหนึ่งในกลุ่ม "การเข้าสู่ระบบและความปลอดภัย" ของหน้าบัญชี (โครงเดียวกับ `SettingsRow`) */
+    <details className="group text-left">
+      <summary className="flex min-h-[64px] cursor-pointer list-none items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-inset/50 focus-visible:bg-inset/60 focus-visible:outline-none sm:px-5 [&::-webkit-details-marker]:hidden">
+        {icon}
+        <span className="min-w-0 flex-1">
+          <h3 className="font-serif-th text-sm font-bold text-ink-deep"><ThaiPhrases>
             {hasPassword
-              ? (isEn ? "Change Password" : "เปลี่ยนรหัสผ่าน")
-              : (isEn ? "Set Email Password" : "ตั้งรหัสผ่านสำหรับเข้าสู่ระบบด้วยอีเมล")}
-          </ThaiPhrases></h2>
-          <span className="block text-xs text-muted leading-relaxed">
+              ? (isEn ? "Change password" : "เปลี่ยนรหัสผ่าน")
+              : (isEn ? "Set an email password" : "ตั้งรหัสผ่านสำหรับเข้าสู่ระบบด้วยอีเมล")}
+          </ThaiPhrases></h3>
+          <span className="mt-0.5 block font-serif-th text-xs leading-relaxed text-muted">
             {hasPassword
               ? (isEn
-                ? "Set a new password for security. You will be automatically signed out from other devices."
-                : "กำหนดรหัสผ่านใหม่เพื่อความปลอดภัย ระบบจะลงชื่อออกจากอุปกรณ์อื่นโดยอัตโนมัติ")
+                ? "You'll be signed out on other devices"
+                : "ระบบจะลงชื่อออกจากอุปกรณ์อื่นให้อัตโนมัติ")
               : (isEn
-                ? "Optional — sign in by email as well as Google or LINE."
-                : "ตัวเลือกเสริม — ตั้งไว้เพื่อเข้าสู่ระบบด้วยอีเมลได้ นอกเหนือจาก Google หรือ LINE")}
+                ? "Optional — also sign in by email"
+                : "ตัวเลือกเสริม — เข้าสู่ระบบด้วยอีเมลได้อีกทาง")}
           </span>
         </span>
-        <span
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-4 w-4 shrink-0 text-muted transition-transform group-open:rotate-90"
           aria-hidden="true"
-          className="shrink-0 font-mono text-xs text-gold-ink transition-transform group-open:rotate-90"
         >
-          ▸
-        </span>
+          <path d="m9 6 6 6-6 6" />
+        </svg>
       </summary>
 
-      <div className="space-y-4 pt-5">
+      <div className="space-y-4 px-4 pb-5 sm:px-5">
       {/* ♿ R-21: `role="alert"` ทำให้โปรแกรมอ่านหน้าจออ่านข้อความทันทีที่โหนดปรากฏ
           ของเดิมข้อความโผล่บนจออย่างเดียว ผู้ใช้ที่มองไม่เห็นจึงไม่รู้ว่ากรอกผิด */}
       {errorMsg && (

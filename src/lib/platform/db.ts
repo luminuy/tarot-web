@@ -398,6 +398,40 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec("ALTER TABLE payments ADD COLUMN user_id TEXT");
     safeExec("CREATE INDEX IF NOT EXISTS idx_payments_order ON payments(order_id)");
     safeExec("CREATE INDEX IF NOT EXISTS idx_payments_user ON payments(user_id)");
+    // 📅 นัดเวลาล่วงหน้า + จ่ายก่อนคุย (migrations/0020) — unique index แบบมีเงื่อนไขคือด่านกันจองซ้อน
+    safeExec("ALTER TABLE bookings ADD COLUMN kind TEXT NOT NULL DEFAULT 'scheduled'");
+    safeExec("ALTER TABLE bookings ADD COLUMN hold_expires_at INTEGER");
+    safeExec("ALTER TABLE bookings ADD COLUMN cancelled_at INTEGER");
+    safeExec("ALTER TABLE bookings ADD COLUMN cancelled_by TEXT");
+    safeExec("ALTER TABLE bookings ADD COLUMN refund_status TEXT");
+    safeExec("ALTER TABLE bookings ADD COLUMN reschedule_count INTEGER NOT NULL DEFAULT 0");
+    safeExec("ALTER TABLE payments ADD COLUMN refund_due INTEGER NOT NULL DEFAULT 0");
+    safeExec(
+      "CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_slot_active ON bookings(reader_id, slot_start) WHERE kind = 'scheduled' AND status IN ('reserved', 'confirmed')"
+    );
+    safeExec("CREATE INDEX IF NOT EXISTS idx_bookings_ticket ON bookings(ticket_id)");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_payments_provider_ref ON payments(provider_ref)");
+    // 💌 ระบบจองรอบสอง: อีเมลยืนยัน/เตือน · นัดของฉัน · ตั้งค่าแม่หมอ · วันหยุด · รีวิว · รอคิวว่าง (migrations/0021)
+    safeExec("ALTER TABLE bookings ADD COLUMN contact_email TEXT");
+    safeExec("ALTER TABLE bookings ADD COLUMN confirm_email_at INTEGER");
+    safeExec("ALTER TABLE bookings ADD COLUMN reminder_24h_at INTEGER");
+    safeExec("ALTER TABLE bookings ADD COLUMN reminder_1h_at INTEGER");
+    safeExec("ALTER TABLE queue_tickets ADD COLUMN user_id TEXT");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_tickets_user ON queue_tickets(user_id)");
+    safeExec("ALTER TABLE readers ADD COLUMN notify_email TEXT");
+    safeExec("ALTER TABLE readers ADD COLUMN price_thb INTEGER");
+    safeExec("ALTER TABLE readers ADD COLUMN buffer_min INTEGER NOT NULL DEFAULT 0");
+    safeExec("ALTER TABLE readers ADD COLUMN daily_cap INTEGER");
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS reader_blocked_dates (reader_id TEXT NOT NULL REFERENCES readers(id), date_key TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (reader_id, date_key))"
+    );
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS reader_reviews (id TEXT PRIMARY KEY, ticket_id TEXT NOT NULL UNIQUE, reader_id TEXT NOT NULL REFERENCES readers(id), rating INTEGER NOT NULL, comment TEXT, nickname TEXT, hidden INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL)"
+    );
+    safeExec("CREATE INDEX IF NOT EXISTS idx_reviews_reader ON reader_reviews(reader_id, hidden, created_at DESC)");
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS booking_waitlist (id TEXT PRIMARY KEY, reader_id TEXT NOT NULL REFERENCES readers(id), email TEXT NOT NULL, created_at INTEGER NOT NULL, UNIQUE (reader_id, email))"
+    );
     // 🎟 รหัสแลกสิทธิ์ตั้งต้นของเครื่อง dev — ต้องมีเพดานและวันหมดอายุเท่ากับ migrations/0013
     // (ห้ามปล่อย max_uses = -1 อีก: รหัสที่เขียนไว้ในรีโปแปลว่าใครอ่านซอร์สเจอก็แลกได้)
     // รหัสสำหรับแจกจริงให้สร้างจากแผงแอดมินซึ่งสุ่มรหัสใหม่ทุกครั้ง — อย่า seed ลงไฟล์

@@ -7,6 +7,14 @@ import { Button } from "@/components/ui/Button";
 import { VideoCallRoom } from "@/components/marketplace/VideoCallRoom";
 import { useVisibleInterval } from "@/lib/utils/use-visible-interval";
 import type { QueueTicket } from "@/lib/marketplace/queue.repo";
+import type { ScheduleRule } from "@/lib/marketplace/booking-policy";
+import {
+  ReaderBookingSettings,
+  ReaderScheduleEditor,
+  UpcomingBookings,
+  type ReaderSettingsState,
+} from "@/components/marketplace/ConsoleBookingParts";
+import { bkkDateKey } from "@/lib/marketplace/booking-policy";
 
 export const dynamic = "force-dynamic";
 
@@ -20,10 +28,15 @@ interface ConsoleState {
     commissionPct: number;
   };
   isLiveOpen: boolean;
-  tickets: QueueTicket[];
+  /** `paid` = ลูกค้าจ่ายแล้ว — ยังไม่จ่าย (ตั๋วยุคก่อนระบบจ่ายเงิน) เรียกคิวไม่ได้ */
+  tickets: (QueueTicket & { paid?: boolean })[];
   totalWaiting: number;
   /** ตั้งค่า TURN แล้ว = แม่หมอเปิดวิดีโอคอลกับคิวที่เรียกแล้วได้ */
   videoCallEnabled?: boolean;
+  /** ตารางรับนัดประจำสัปดาห์ (migrations/0020) */
+  schedule?: ScheduleRule[];
+  /** ตั้งค่าการรับนัด (migrations/0021) */
+  settings?: ReaderSettingsState;
 }
 
 function ReaderConsoleInner() {
@@ -37,6 +50,7 @@ function ReaderConsoleInner() {
   const [notice, setNotice] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [activeCallId, setActiveCallId] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
 
   const getAuthHeaders = useCallback((): HeadersInit => {
     const headers: Record<string, string> = {
@@ -62,6 +76,7 @@ function ReaderConsoleInner() {
       if (res.ok) {
         const json = (await res.json()) as ConsoleState;
         setData(json);
+        setNow(Date.now());
         setError(null);
       } else {
         const json = await res.json();
@@ -99,7 +114,7 @@ function ReaderConsoleInner() {
     }
   };
 
-  const handleTicketAction = async (ticketId: string, action: "accept" | "handoff" | "cancel") => {
+  const handleTicketAction = async (ticketId: string, action: "accept" | "handoff" | "cancel" | "no_show") => {
     setActionLoading(ticketId);
     setNotice(null);
     try {
@@ -112,7 +127,8 @@ function ReaderConsoleInner() {
         fetchConsoleData();
         if (action === "accept") setNotice("เรียกคิวเรียบร้อยแล้ว");
         else if (action === "handoff") setNotice("ปิดคิวเรียบร้อยแล้ว");
-        else setNotice("ยกเลิกคิวเรียบร้อยแล้ว");
+        else if (action === "no_show") setNotice("บันทึกว่าลูกค้าไม่มาตามนัดแล้ว");
+        else setNotice("ยกเลิกแล้ว ระบบคืนเงินลูกค้าเต็มจำนวนให้อัตโนมัติ");
       } else {
         const d = await res.json().catch(() => ({}));
         setNotice(d.error || "ดำเนินการไม่สำเร็จ");
@@ -155,7 +171,17 @@ function ReaderConsoleInner() {
     );
   }
 
-  const { reader, isLiveOpen, tickets, totalWaiting, videoCallEnabled } = data;
+  const { reader, isLiveOpen, tickets: allTickets, totalWaiting, videoCallEnabled, schedule = [] } = data;
+  // นัดล่วงหน้าที่ยังไม่ถึงเวลาแยกไปอยู่ "นัดที่จะถึง" — กริดคิวด้านล่างคือคิวสด + นัดที่เริ่มแล้ว
+  const upcomingBookings = allTickets.filter((t) => t.kind === "booking" && t.status === "waiting");
+  const tickets = allTickets.filter((t) => !(t.kind === "booking" && t.status === "waiting"));
+  const bookedDates: Record<string, number> = {};
+  for (const t of upcomingBookings) {
+    if (t.slotStart && t.paid !== false) {
+      const key = bkkDateKey(t.slotStart);
+      bookedDates[key] = (bookedDates[key] ?? 0) + 1;
+    }
+  }
   // ห้องวิดีโอแสดงเฉพาะตอนคิวนั้นยังอยู่สถานะ "เรียกแล้ว" — ปิดคิว = ห้องหายและกล้องดับเอง
   const activeCallTicket = activeCallId
     ? tickets.find((t) => t.id === activeCallId && t.status === "ready") ?? null
@@ -231,11 +257,18 @@ function ReaderConsoleInner() {
           </div>
         </div>
 
+        <UpcomingBookings
+          tickets={upcomingBookings}
+          nowMs={now}
+          busyId={actionLoading}
+          onAction={(id, action) => void handleTicketAction(id, action)}
+        />
+
         {/* Queue Board Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="font-serif-th font-bold text-lg text-ink">
-              รายการคิวรอรับคำปรึกษา
+              คิวสดและนัดที่กำลังคุย
             </h2>
             <span className="rounded-full bg-gold-ink/10 px-2.5 py-0.5 text-xs font-bold text-gold-ink border border-gold-ink/20">
               {totalWaiting} คิว
@@ -280,6 +313,7 @@ function ReaderConsoleInner() {
           <div className="grid gap-4 sm:grid-cols-2">
             {tickets.map((ticket) => {
               const isReady = ticket.status === "ready";
+              const unpaid = ticket.paid === false;
               return (
                 <div
                   key={ticket.id}
@@ -293,7 +327,7 @@ function ReaderConsoleInner() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gold-ink/10 text-xs font-bold text-gold-ink">
-                        #{ticket.position || 1}
+                        {ticket.kind === "booking" ? "นัด" : `#${ticket.position || 1}`}
                       </span>
                       <span className="font-serif-th font-bold text-sm text-ink">
                         คุณ{ticket.nickname || "ลูกดวง"}
@@ -307,7 +341,7 @@ function ReaderConsoleInner() {
                           : "bg-amber-50 text-amber-700 border border-amber-200"
                       }`}
                     >
-                      {isReady ? "เรียกคิวแล้ว" : "กำลังรอคิว"}
+                      {isReady ? "เรียกคิวแล้ว" : unpaid ? "ยังไม่ชำระเงิน" : "ชำระแล้ว · รอคิว"}
                     </span>
                   </div>
 
@@ -351,7 +385,11 @@ function ReaderConsoleInner() {
 
                   {/* Actions */}
                   <div className="flex gap-2 pt-2 border-t border-line">
-                    {!isReady ? (
+                    {!isReady && unpaid ? (
+                      <p className="flex-1 self-center text-xs text-muted">
+                        ลูกค้ายังไม่ชำระเงิน — เรียกคิวได้หลังชำระแล้วเท่านั้น
+                      </p>
+                    ) : !isReady ? (
                       <Button
                         variant="gold"
                         size="sm"
@@ -400,6 +438,30 @@ function ReaderConsoleInner() {
             })}
           </div>
         )}
+
+        {data.settings && (
+          <ReaderBookingSettings
+            key={JSON.stringify(data.settings)}
+            settings={data.settings}
+            bookedDates={bookedDates}
+            nowMs={now}
+            authHeaders={getAuthHeaders}
+            onSaved={(message) => {
+              setNotice(message);
+              void fetchConsoleData();
+            }}
+          />
+        )}
+
+        <ReaderScheduleEditor
+          key={JSON.stringify(schedule)}
+          schedule={schedule}
+          authHeaders={getAuthHeaders}
+          onSaved={(message) => {
+            setNotice(message);
+            void fetchConsoleData();
+          }}
+        />
       </div>
     </main>
   );

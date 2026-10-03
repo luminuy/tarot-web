@@ -21,7 +21,7 @@ export function RelatedCards({ cardId }: { cardId: string }) {
   if (cards.length === 0) return null;
 
   return (
-    <section className="pt-8 border-t border-line/40">
+    <section className="page-band page-band-tint">
       <h2 className="font-serif-th text-sm font-bold text-gold-ink mb-4"><ThaiPhrases>
         {isEnglish ? "Resonant & Harmonious Cards" : "ไพ่ที่พลังงานใกล้เคียง"}
       </ThaiPhrases></h2>

@@ -245,7 +245,7 @@ check(`มีโมดูลซองจดหมาย (${ENVELOPE_MODULE})`, f
  * ลดได้เมื่อไหร่ให้ลดตัวเลขตาม — การเปลี่ยนรูปคำตอบของเส้นที่มีผู้ใช้อยู่ต้องแก้
  * ทั้งฝั่งส่งและฝั่งรับพร้อมกัน จึงย้ายทีละกลุ่ม ไม่ใช่ทีเดียวทั้งหมด
  */
-const LEGACY_SUCCESS_BUDGET = 23;
+const LEGACY_SUCCESS_BUDGET = 21;
 
 const apiRoutes = walk(path.join(ROOT, "src/app/api"));
 assertNonEmptyCorpus("ไฟล์ route ใน src/app/api", apiRoutes, "ตรวจว่า src/app/api ยังอยู่ที่เดิม");

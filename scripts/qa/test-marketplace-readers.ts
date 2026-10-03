@@ -175,8 +175,8 @@ async function runTest() {
   const now = Date.now();
   await db
     .prepare(
-      `INSERT INTO bookings (id, ticket_id, reader_id, slot_start, slot_end, status, created_at)
-       VALUES (?, ?, ?, ?, ?, 'reserved', ?)`
+      `INSERT INTO bookings (id, ticket_id, reader_id, kind, slot_start, slot_end, status, created_at)
+       VALUES (?, ?, ?, 'walkup', ?, ?, 'reserved', ?)`
     )
     .bind(testBookingId, ticket1.id, created.id, now, now + 1800000, now)
     .run();
@@ -406,7 +406,7 @@ async function runTest() {
       headers: { "content-type": "application/json", origin: "https://seertarot.net" },
       body: JSON.stringify({
         readerId: created.id,
-        kind: "booking",
+        kind: "walkup",
         customerRef: "cust_client_device_1",
         nickname: "ผู้บุกรุก",
         question: "ขอดูคิวของคนอื่นหน่อย",
@@ -415,7 +415,7 @@ async function runTest() {
     }),
   );
   if (stealRes.status !== 200) {
-    throw new Error(`❌ A2-13: POST /tickets (booking) expected 200, got ${stealRes.status}`);
+    throw new Error(`❌ A2-13: POST /tickets (walkup) expected 200, got ${stealRes.status}`);
   }
   const stealJson = JSON.stringify(await stealRes.json());
   if (stealJson.includes("customerRef") || stealJson.includes("cust_client_device_1")) {
@@ -471,6 +471,12 @@ async function runTest() {
   }
   console.log("  ✓ 14. Malformed & Empty JSON Resilience: ตอบ HTTP 400 ป้องกัน 500 error ในคิวและการชำระเงิน");
 
+  // ── 📅 นัดเวลาล่วงหน้า + จ่ายก่อนคุย (migrations/0020) ─────────────────────────
+  await testScheduledBooking(created.id);
+
+  // ── 💌 ระบบจองรอบสอง: อีเมล · ลิงก์เข้าคิว · วันหยุด/พัก/เพดาน · รีวิว · รอคิวว่าง · cron ──
+  await testBookingCare(created.id);
+
   // ── 📹 วิดีโอคอลตัวต่อตัว (บังคับผ่าน TURN · ซ่อน IP) ─────────────────────────
   await testVideoCall(created.id, created.sessionSecret);
 
@@ -488,6 +494,329 @@ async function runTest() {
  *   3. offer เห็นได้เฉพาะแม่หมอ · answer เห็นได้เฉพาะลูกค้า · คนนอก = 404
  *   4. กล้อง/ไมค์เปิดได้เฉพาะสองหน้าของวิดีโอคอล ทั้งเว็บที่เหลือยังปิด
  */
+async function testScheduledBooking(readerId: string) {
+  const policy = await import("../../src/lib/marketplace/booking-policy");
+  const repo = await import("../../src/lib/marketplace/booking.repo");
+  const { createPaymentRecord, getPaymentById } = await import("../../src/lib/marketplace/payments.repo");
+  const { getQueueTicketById } = await import("../../src/lib/marketplace/queue.repo");
+  const HOUR = 3_600_000;
+
+  // ── 17.1 ตารางรับนัด: รูปแบบผิดต้องถูกปฏิเสธ ─────────────────────────────────
+  const bad = [
+    policy.validateScheduleRules([{ weekday: 1, startMin: 600, endMin: 615 }]),
+    policy.validateScheduleRules([{ weekday: 1, startMin: 610, endMin: 700 }]),
+    policy.validateScheduleRules([
+      { weekday: 2, startMin: 600, endMin: 720 },
+      { weekday: 2, startMin: 690, endMin: 780 },
+    ]),
+    policy.validateScheduleRules([{ weekday: 7, startMin: 600, endMin: 660 }]),
+  ];
+  if (bad.some((v) => v === null) || policy.validateScheduleRules([{ weekday: 0, startMin: 0, endMin: 1440 }]) !== null) {
+    throw new Error(`❌ validateScheduleRules ตัดสินผิด: ${JSON.stringify(bad)}`);
+  }
+
+  // ── 17.2 สร้างเวลาว่าง: ล่วงหน้า ≥ 2 ชม. · ไม่เกิน 14 วัน · ตัดช่องที่ถูกจอง · เวลาไทย ──
+  const now = Date.UTC(2026, 9, 5, 3, 0); // จันทร์ 5 ต.ค. 2569 10:00 เวลาไทย
+  const rules = [{ weekday: 1, startMin: 10 * 60, endMin: 14 * 60 }]; // วันจันทร์ 10:00–14:00
+  const days = policy.generateSlots(rules, now, new Set([now + 3 * HOUR]));
+  const first = days[0];
+  if (
+    !first || first.date !== "2026-10-05" ||
+    policy.formatTime(first.slots[0]) !== "12:00" || // 10:00–11:30 ใกล้เกินไป (ต้องล่วงหน้า 2 ชม.)
+    first.slots.some((x) => x === now + 3 * HOUR) || // 13:00 ถูกจองแล้ว
+    first.slots.length !== 3 || // 12:00 12:30 13:30
+    days.length !== 2 || days[1].date !== "2026-10-12"
+  ) {
+    throw new Error(`❌ generateSlots ผิด: ${JSON.stringify(days.map((d) => [d.date, d.slots.map(policy.formatTime)]))}`);
+  }
+  if (policy.slotRejection(rules, now, now + 2 * HOUR + 60_000, new Set()) === null) {
+    throw new Error("❌ slotRejection ต้องปฏิเสธเวลาที่ไม่ลงช่อง");
+  }
+  if (policy.formatSlotRange(first.slots[0]) !== "จันทร์ 5 ต.ค. · 12:00–12:30 น.") {
+    throw new Error(`❌ formatSlotRange ผิด: ${policy.formatSlotRange(first.slots[0])}`);
+  }
+
+  // ── 17.3 นโยบายยกเลิก/คืนเงิน ─────────────────────────────────────────────
+  const slot = now + 48 * HOUR;
+  const dc = (actor: "customer" | "reader", status: string, paid: boolean, at: number, kind: "walkup" | "booking" = "booking") =>
+    policy.decideCancellation({ actor, kind, ticketStatus: status, paid, slotStart: kind === "booking" ? slot : null, nowMs: at });
+  const table = [
+    dc("customer", "waiting", true, slot - 25 * HOUR), // ก่อน 24 ชม. ➔ คืน
+    dc("customer", "waiting", true, slot - 2 * HOUR), // ไม่ถึง 24 ชม. ➔ ไม่คืน
+    dc("customer", "waiting", true, slot + 20 * 60_000), // แม่หมอไม่มา ➔ คืน
+    dc("reader", "waiting", true, slot - HOUR), // แม่หมอยกเลิก ➔ คืน
+    dc("customer", "ready", true, slot), // กำลังคุย ➔ ยกเลิกไม่ได้
+    dc("customer", "waiting", true, slot, "walkup"), // คิวสดระหว่างรอ ➔ คืน
+    dc("customer", "pending_payment", false, slot - HOUR), // ยังไม่จ่าย ➔ ยกเลิกได้ ไม่มีเงินคืน
+  ].map((d) => `${d.allowed ? "Y" : "N"}${d.refund ? "R" : "-"}`);
+  if (table.join(",") !== "YR,Y-,YR,YR,N-,YR,Y-") {
+    throw new Error(`❌ decideCancellation ผิดนโยบาย: ${table.join(",")}`);
+  }
+
+  // ── 17.4 กันจองซ้อน: ฐานข้อมูลตัดสิน (unique index) ─────────────────────────
+  const slotStart = policy.bkkDayStart(Date.now()) + 5 * 86_400_000 + 10 * HOUR; // อีก 5 วัน (เวลาไทย 17:00)
+  const t1 = await createQueueTicket({
+    readerId, kind: "booking", customerRef: "cust_booking_a", nickname: "เอ", question: "เรื่องงานปีหน้าเป็นอย่างไร",
+    slotStart, initialStatus: "pending_payment",
+  });
+  const t2 = await createQueueTicket({
+    readerId, kind: "booking", customerRef: "cust_booking_b", nickname: "บี", question: "เรื่องความรักช่วงนี้เป็นอย่างไร",
+    slotStart, initialStatus: "pending_payment",
+  });
+  if (t1.status !== "pending_payment" || t1.position !== null) {
+    throw new Error(`❌ ตั๋วรอจ่ายต้องไม่มีลำดับคิว (${t1.status} #${t1.position})`);
+  }
+  const h1 = await repo.holdBooking({ ticketId: t1.id, readerId, kind: "scheduled", slotStart });
+  const h2 = await repo.holdBooking({ ticketId: t2.id, readerId, kind: "scheduled", slotStart });
+  if (!h1.ok || h2.ok) throw new Error("❌ สองคนกันเวลาเดียวกันได้ทั้งคู่ (unique index ไม่ทำงาน)");
+  console.log("  ✓ 17.1–17.4 ตาราง · เวลาว่าง · นโยบายยกเลิก · กันจองซ้อนด้วย unique index");
+
+  // ── 17.5 เงินเข้า ➔ ได้นัด · จ่ายซ้ำ ➔ คืนอัตโนมัติ · เรียกซ้ำ ➔ ไม่ทำซ้ำ ───────────
+  const pay = (ticketId: string, bookingId: string) =>
+    createPaymentRecord({ bookingId, ticketId, provider: "simulator", providerRef: `chrg_test_${crypto.randomUUID().slice(0, 8)}`, amountSatang: 29900 });
+  const p1 = await pay(t1.id, h1.booking.id);
+  const p1dup = await pay(t1.id, h1.booking.id);
+  const s1 = await repo.settleConsultationPayment(p1.id);
+  const s1again = await repo.settleConsultationPayment(p1.id);
+  const sDup = await repo.settleConsultationPayment(p1dup.id);
+  const t1After = await getQueueTicketById(t1.id);
+  const b1 = await repo.getBookingByTicketId(t1.id);
+  if (s1 !== "confirmed" || s1again !== "already" || sDup !== "refunded" || t1After?.status !== "waiting" || b1?.status !== "confirmed") {
+    throw new Error(`❌ settle ผิด: ${s1}/${s1again}/${sDup} ticket=${t1After?.status} booking=${b1?.status}`);
+  }
+  if ((await getPaymentById(p1dup.id))?.status !== "refunded") throw new Error("❌ รายการจ่ายซ้ำต้องถูกคืนเงิน");
+
+  // ── 17.6 ที่หลุดระหว่างรอเงิน ➔ คืนเงิน ไม่ยืนยันนัดซ้อน ────────────────────────
+  const lapsedSlot = slotStart + 30 * 60_000;
+  const t3 = await createQueueTicket({
+    readerId, kind: "booking", customerRef: "cust_booking_c", nickname: "ซี", question: "การเงินเดือนหน้าเป็นอย่างไร",
+    slotStart: lapsedSlot, initialStatus: "pending_payment",
+  });
+  const h3 = await repo.holdBooking({ ticketId: t3.id, readerId, kind: "scheduled", slotStart: lapsedSlot, nowMs: Date.now() - 2 * HOUR });
+  if (!h3.ok) throw new Error("❌ holdBooking (ที่หมดเวลาแล้ว) ล้ม");
+  const t4 = await createQueueTicket({
+    readerId, kind: "booking", customerRef: "cust_booking_d", nickname: "ดี", question: "การเงินเดือนหน้าเป็นอย่างไร",
+    slotStart: lapsedSlot, initialStatus: "pending_payment",
+  });
+  const h4 = await repo.holdBooking({ ticketId: t4.id, readerId, kind: "scheduled", slotStart: lapsedSlot });
+  if (!h4.ok) throw new Error("❌ ที่ที่หมดเวลากันแล้วต้องจองต่อได้");
+  const p4 = await pay(t4.id, h4.booking.id);
+  if ((await repo.settleConsultationPayment(p4.id)) !== "confirmed") throw new Error("❌ คนที่สองต้องได้นัด");
+  const p3 = await pay(t3.id, h3.booking.id);
+  const s3 = await repo.settleConsultationPayment(p3.id);
+  if (s3 !== "refunded" || (await getQueueTicketById(t3.id))?.status !== "cancelled") {
+    throw new Error(`❌ เงินมาช้าหลังที่หลุด ต้องคืนเงิน + ยกเลิกตั๋ว (ได้ ${s3})`);
+  }
+  // ── 17.9 ต้องจ่ายก่อนถึงจะได้คุย: ด่านเดียว (isPaidBooking) + แผงแม่หมอใช้ด่านนี้ก่อนเรียกคิว ──
+  if (
+    !repo.isPaidBooking(await repo.getBookingByTicketId(t1.id)) ||
+    repo.isPaidBooking(await repo.getBookingByTicketId(t2.id)) ||
+    repo.isPaidBooking(null)
+  ) {
+    throw new Error("❌ isPaidBooking ตัดสินผิด (ต้องจริงเฉพาะใบจองที่ยืนยันด้วยเงินแล้ว)");
+  }
+  {
+    const fsMod = await import("node:fs");
+    const consoleSrc = fsMod.readFileSync("src/app/api/marketplace/console/queue/route.ts", "utf-8");
+    const acceptAt = consoleSrc.indexOf('action === "accept"');
+    const guardAt = consoleSrc.indexOf("isPaidBooking(await getBookingByTicketId", acceptAt);
+    const readyAt = consoleSrc.indexOf('updateTicketStatus(ticket.id, "ready"', acceptAt);
+    if (acceptAt < 0 || guardAt < 0 || readyAt < 0 || guardAt > readyAt) {
+      throw new Error("❌ แผงแม่หมอต้องตรวจ isPaidBooking ก่อนเรียกคิว (ต้องจ่ายก่อนถึงจะได้คุย)");
+    }
+  }
+  console.log("  ✓ 17.9 ต้องจ่ายก่อนถึงจะได้คุย — แม่หมอเรียกคิวที่ยังไม่จ่ายไม่ได้ (ตัดสินที่เซิร์ฟเวอร์)");
+  console.log("  ✓ 17.5–17.6 เงินเข้า ➔ ได้นัด · จ่ายซ้ำ/ที่หลุด ➔ คืนเงินอัตโนมัติ · settle ซ้ำไม่ทำซ้ำ");
+
+  // ── 17.7 เลื่อนนัดได้ 1 ครั้ง · ยกเลิกก่อน 24 ชม. คืนเงินเต็ม ─────────────────────
+  const allDay = [0, 1, 2, 3, 4, 5, 6].map((weekday) => ({ weekday, startMin: 0, endMin: 1440 }));
+  await repo.replaceScheduleRules(readerId, allDay);
+  if ((await repo.getScheduleRules(readerId)).length !== 7) throw new Error("❌ replaceScheduleRules ไม่ได้ 7 วัน");
+  const t1Live = (await getQueueTicketById(t1.id))!;
+  const moveTo = slotStart + 2 * HOUR;
+  const r1 = await repo.rescheduleBooking(t1Live, moveTo);
+  const r2 = await repo.rescheduleBooking((await getQueueTicketById(t1.id))!, moveTo + HOUR);
+  if (!r1.ok || r2.ok || (await getQueueTicketById(t1.id))?.slotStart !== moveTo) {
+    throw new Error(`❌ เลื่อนนัด: ครั้งแรกต้องได้ ครั้งที่สองต้องไม่ได้ (${JSON.stringify([r1, r2])})`);
+  }
+  const taken = await repo.listTakenSlots(readerId, Date.now());
+  if (!taken.has(moveTo) || taken.has(slotStart)) throw new Error("❌ เลื่อนแล้วเวลาเดิมต้องว่าง เวลาใหม่ต้องไม่ว่าง");
+  const c1 = await repo.cancelConsultation((await getQueueTicketById(t1.id))!, "customer");
+  if (!c1.ok || c1.refundStatus !== "refunded" || (await repo.getBookingByTicketId(t1.id))?.status !== "cancelled") {
+    throw new Error(`❌ ยกเลิกก่อน 24 ชม. ต้องคืนเงินเต็ม (${JSON.stringify(c1)})`);
+  }
+  if ((await repo.listTakenSlots(readerId, Date.now())).has(moveTo)) throw new Error("❌ ยกเลิกแล้วเวลาต้องว่างกลับมา");
+  await repo.replaceScheduleRules(readerId, []);
+  console.log("  ✓ 17.7 เลื่อนนัดได้ 1 ครั้ง · ยกเลิกก่อน 24 ชม. คืนเงินเต็ม · เวลาที่ปล่อยกลับมาว่าง");
+
+  // ── 17.8 API: เวลาที่ไม่อยู่ในตาราง ➔ 409 (ไม่เชื่อเวลาจากไคลเอนต์) ────────────────
+  const { POST: postTicket } = await import("../../src/app/api/marketplace/tickets/route");
+  const offRes = await postTicket(
+    new Request("https://seertarot.net/api/marketplace/tickets", {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: "https://seertarot.net" },
+      body: JSON.stringify({
+        readerId, kind: "booking", slotStart: slotStart + 7 * 60_000,
+        nickname: "ทดสอบ", question: "เวลานี้ไม่อยู่ในตาราง", consent: true,
+      }),
+    }),
+  );
+  if (offRes.status !== 409) throw new Error(`❌ จองเวลานอกตารางต้องได้ 409 (ได้ ${offRes.status})`);
+  console.log("  ✓ 17.8 API จองเวลานอกตาราง ➔ 409");
+}
+
+async function testBookingCare(readerId: string) {
+  const policy = await import("../../src/lib/marketplace/booking-policy");
+  const repo = await import("../../src/lib/marketplace/booking.repo");
+  const mail = await import("../../src/lib/marketplace/booking-mail");
+  const reviews = await import("../../src/lib/marketplace/reviews.repo");
+  const { createPaymentRecord } = await import("../../src/lib/marketplace/payments.repo");
+  const { getQueueTicketById, listTicketsForOwner } = await import("../../src/lib/marketplace/queue.repo");
+  const { getAppDB } = await import("../../src/lib/platform/db");
+  const db = await getAppDB();
+  const HOUR = 3_600_000;
+
+  // ── 18.1 วันหยุด · เวลาพัก · เพดานต่อวัน ────────────────────────────────────
+  const now = Date.UTC(2026, 9, 5, 3, 0); // จันทร์ 10:00 เวลาไทย
+  const rules = [1, 2].map((weekday) => ({ weekday, startMin: 12 * 60, endMin: 15 * 60 })); // จ.–อ. 12:00–15:00
+  const tueKey = policy.generateSlots(rules, now, new Set())[1].date;
+  const noon = policy.generateSlots(rules, now, new Set())[0].slots[0]; // จ. 12:00
+  const blocked = policy.generateSlots(rules, now, new Set(), { blockedDates: new Set([tueKey]) });
+  const buffered = policy.generateSlots(rules, now, new Set([noon + HOUR]), { bufferMin: 30 }); // จองไว้ 13:00
+  const capped = policy.generateSlots(rules, now, new Set([noon]), { dailyCap: 1 });
+  const times = (d: { slots: number[] }) => d.slots.map(policy.formatTime).join(",");
+  if (blocked.some((d) => d.date === tueKey)) throw new Error("❌ วันหยุดยังเปิดให้จอง");
+  if (times(buffered[0]) !== "12:00,14:00,14:30") throw new Error(`❌ เวลาพัก 30 นาทีคิดผิด: ${times(buffered[0])}`);
+  if (capped[0].date === policy.bkkDateKey(noon)) throw new Error("❌ เพดานต่อวันครบแล้วยังเปิดวันนั้น");
+  if (policy.slotRejection(rules, now, noon + 30 * 60_000, new Set([noon + HOUR]), { bufferMin: 30 }) === null) {
+    throw new Error("❌ slotRejection ต้องปฏิเสธช่องที่ชิดนัดเดิมเกินเวลาพัก");
+  }
+  console.log("  ✓ 18.1 วันหยุด · เวลาพัก · เพดานนัดต่อวัน ตัดเวลาว่างถูกต้อง (และด่านเซิร์ฟเวอร์ใช้กติกาเดียวกัน)");
+
+  // ── 18.2 หน้าต่างเตือนนัด ───────────────────────────────────────────────────
+  const slot = now + 24 * HOUR;
+  const r = [
+    policy.reminderDue(slot, now - 3 * 86_400_000, now), // เหลือ 24 ชม. จองนานแล้ว ➔ 24h
+    policy.reminderDue(slot, now - HOUR, now), // เพิ่งจอง ➔ ไม่ส่ง 24h
+    policy.reminderDue(now + 60 * 60_000, now - 86_400_000, now), // เหลือ 1 ชม. ➔ 1h
+    policy.reminderDue(now + 5 * HOUR, now - 86_400_000, now), // เหลือ 5 ชม. ➔ ไม่มี
+    policy.reminderDue(now - 60_000, now - 86_400_000, now), // เลยแล้ว ➔ ไม่มี
+  ];
+  if (r.join(",") !== "24h,,1h,,") throw new Error(`❌ reminderDue ผิด: ${r.join(",")}`);
+  console.log("  ✓ 18.2 เตือนนัดก่อน 24 ชม. / 1 ชม. ถูกจังหวะ (เพิ่งจองไม่เตือนซ้ำ)");
+
+  // ── 18.3 ลิงก์เข้าคิวจากอีเมล: ผูกตั๋ว · หมดอายุ · ใช้แทนคุกกี้ตรง ๆ ไม่ได้ ──────────
+  const tokenOk = await mail.signBookingAccess("ticket_x", "cust_link_owner", Date.now() + HOUR);
+  const tokenOld = await mail.signBookingAccess("ticket_x", "cust_link_owner", Date.now() - 1000);
+  const { CUSTOMER_REF_COOKIE, readCustomerRefFromCookie } = await import("../../src/lib/marketplace/customer-ref");
+  const asCookie = await readCustomerRefFromCookie(
+    new Request("https://seertarot.net/", { headers: { cookie: `${CUSTOMER_REF_COOKIE}=${tokenOk}` } }),
+  );
+  if (
+    (await mail.verifyBookingAccess(tokenOk, "ticket_x")) !== "cust_link_owner" ||
+    (await mail.verifyBookingAccess(tokenOk, "ticket_other")) !== null ||
+    (await mail.verifyBookingAccess(tokenOld, "ticket_x")) !== null ||
+    (await mail.verifyBookingAccess(tokenOk.slice(0, -2) + "xx", "ticket_x")) !== null ||
+    asCookie !== null
+  ) {
+    throw new Error("❌ ลิงก์เข้าคิวจากอีเมลตรวจไม่ครบ (ตั๋วอื่น/หมดอายุ/ปลอมลายเซ็น/ใช้แทนคุกกี้)");
+  }
+  console.log("  ✓ 18.3 ลิงก์ในอีเมลเปิดได้เฉพาะตั๋วนั้น · หมดอายุได้ · ปลอมไม่ได้ · ใช้แทนคุกกี้ตรง ๆ ไม่ได้");
+
+  // ── 18.4 เงินเข้า ➔ อีเมลยืนยันครั้งเดียว · นัดของฉันข้ามเครื่องด้วยบัญชี ─────────────
+  const slotStart = policy.bkkDayStart(Date.now()) + 6 * 86_400_000 + 9 * HOUR;
+  const t = await createQueueTicket({
+    readerId, kind: "booking", customerRef: "cust_care_a", nickname: "แคร์", question: "เรื่องงานช่วงนี้",
+    slotStart, initialStatus: "pending_payment", userId: "usr_care_a",
+  });
+  const hold = await repo.holdBooking({ ticketId: t.id, readerId, kind: "scheduled", slotStart, contactEmail: "care@example.com" });
+  if (!hold.ok) throw new Error("❌ holdBooking ล้ม");
+  const pay = await createPaymentRecord({ bookingId: hold.booking.id, ticketId: t.id, provider: "simulator", providerRef: "chrg_test_care", amountSatang: 29900 });
+  if ((await repo.settleConsultationPayment(pay.id, { email: "paid@example.com" })) !== "confirmed") throw new Error("❌ settle ล้ม");
+  const b = await db.prepare("SELECT contact_email, confirm_email_at FROM bookings WHERE id = ?").bind(hold.booking.id).first<{ contact_email: string; confirm_email_at: number | null }>();
+  if (b?.contact_email !== "paid@example.com" || !b.confirm_email_at) {
+    throw new Error(`❌ ต้องเก็บอีเมลจากหน้าจ่ายเงินและส่งอีเมลยืนยัน (${JSON.stringify(b)})`);
+  }
+  await mail.sendBookingConfirmed(t.id);
+  const b2 = await db.prepare("SELECT confirm_email_at FROM bookings WHERE id = ?").bind(hold.booking.id).first<{ confirm_email_at: number }>();
+  if (b2?.confirm_email_at !== b.confirm_email_at) throw new Error("❌ อีเมลยืนยันถูกส่งซ้ำ");
+  const byUser = await listTicketsForOwner({ userId: "usr_care_a" });
+  const byStranger = await listTicketsForOwner({ userId: "usr_someone_else" });
+  if (!byUser.some((x) => x.id === t.id) || byStranger.some((x) => x.id === t.id) || (await listTicketsForOwner({})).length !== 0) {
+    throw new Error("❌ นัดของฉัน: ต้องเห็นเฉพาะตั๋วของบัญชีตัวเอง");
+  }
+  console.log("  ✓ 18.4 เงินเข้า ➔ เก็บอีเมลจากหน้าจ่าย + ยืนยันครั้งเดียว · นัดของฉันเห็นเฉพาะของบัญชีตัวเอง");
+
+  // ── 18.5 รีวิว: เฉพาะคุยจบ+จ่ายแล้ว · ครั้งเดียว · ซ่อนชื่อเล่น ───────────────────
+  const { POST: postReview } = await import("../../src/app/api/marketplace/tickets/[id]/review/route");
+  const { signPayload } = await import("../../src/lib/auth/edge-auth");
+  const ownerCookie = `${CUSTOMER_REF_COOKIE}=${await signPayload({ ref: "cust_care_a" })}`;
+  const reviewReq = (body: unknown) =>
+    postReview(
+      new Request(`https://seertarot.net/api/marketplace/tickets/${t.id}/review`, {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: "https://seertarot.net", cookie: ownerCookie },
+        body: JSON.stringify(body),
+      }),
+      { params: Promise.resolve({ id: t.id }) },
+    );
+  if ((await reviewReq({ rating: 5 })).status !== 409) throw new Error("❌ ยังไม่คุยจบต้องรีวิวไม่ได้");
+  await updateTicketStatus(t.id, "ready", readerId);
+  await updateTicketStatus(t.id, "handed_off", readerId);
+  await repo.completeBooking(t.id);
+  const bad = await reviewReq({ rating: 7 });
+  const good = await reviewReq({ rating: 4, comment: "แม่หมออธิบายชัดเจน" });
+  const again = await reviewReq({ rating: 5 });
+  const summary = await reviews.getReaderReviewSummary(readerId);
+  if (bad.status !== 400 || good.status !== 200 || again.status !== 409 || summary.count !== 1 || summary.average !== 4) {
+    throw new Error(`❌ รีวิว: ${bad.status}/${good.status}/${again.status} count=${summary.count} avg=${summary.average}`);
+  }
+  if (summary.latest[0]?.name !== "คุณแ***" || reviews.maskNickname("") !== "ลูกค้า") {
+    throw new Error(`❌ ต้องซ่อนชื่อเล่นบนรีวิวสาธารณะ (${summary.latest[0]?.name})`);
+  }
+  const stranger = await postReview(
+    new Request(`https://seertarot.net/api/marketplace/tickets/${t.id}/review`, {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: "https://seertarot.net" },
+      body: JSON.stringify({ rating: 1 }),
+    }),
+    { params: Promise.resolve({ id: t.id }) },
+  );
+  if (stranger.status !== 404) throw new Error("❌ คนนอกรีวิวตั๋วคนอื่นได้");
+  console.log("  ✓ 18.5 รีวิวได้เฉพาะเจ้าของที่คุยจบและจ่ายแล้ว · ครั้งเดียว · ชื่อบนรีวิวถูกซ่อน · คนนอก 404");
+
+  // ── 18.6 cron: ล็อกด้วยความลับ · ปล่อยที่ที่หมดเวลาจ่าย · แจ้งรายชื่อรอแล้วลบทิ้ง ─────
+  const { POST: cron } = await import("../../src/app/api/cron/booking-reminders/route");
+  const savedSecret = process.env.CRON_SECRET;
+  process.env.CRON_SECRET = "cron_test_secret_value";
+  try {
+    const denied = await cron(new Request("https://x/api/cron/booking-reminders", { method: "POST" }));
+    if (denied.status !== 401) throw new Error(`❌ cron ไม่มีความลับต้อง 401 (ได้ ${denied.status})`);
+    const lapsedSlot = slotStart + 2 * HOUR;
+    const tl = await createQueueTicket({
+      readerId, kind: "booking", customerRef: "cust_care_b", nickname: "บี", question: "การเงิน",
+      slotStart: lapsedSlot, initialStatus: "pending_payment",
+    });
+    await repo.holdBooking({ ticketId: tl.id, readerId, kind: "scheduled", slotStart: lapsedSlot, nowMs: Date.now() - 2 * HOUR });
+    await repo.replaceScheduleRules(readerId, [0, 1, 2, 3, 4, 5, 6].map((weekday) => ({ weekday, startMin: 0, endMin: 1440 })));
+    await db.prepare("INSERT OR IGNORE INTO booking_waitlist (id, reader_id, email, created_at) VALUES (?, ?, ?, ?)").bind("wait_test_1", readerId, "wait@example.com", Date.now()).run();
+    const res = await cron(
+      new Request("https://x/api/cron/booking-reminders", { method: "POST", headers: { authorization: "Bearer cron_test_secret_value" } }),
+    );
+    const json = (await res.json()) as { waitlist: number; holdsReleased: number };
+    const left = await db.prepare("SELECT COUNT(*) AS c FROM booking_waitlist WHERE reader_id = ?").bind(readerId).first<{ c: number }>();
+    if (res.status !== 200 || json.holdsReleased < 1 || json.waitlist < 1 || Number(left?.c) !== 0) {
+      throw new Error(`❌ cron: ${res.status} ${JSON.stringify(json)} waitlist_left=${left?.c}`);
+    }
+    if ((await getQueueTicketById(tl.id))?.status !== "expired") throw new Error("❌ cron ต้องปิดตั๋วที่หมดเวลาจ่าย");
+  } finally {
+    if (savedSecret === undefined) delete process.env.CRON_SECRET;
+    else process.env.CRON_SECRET = savedSecret;
+    await repo.replaceScheduleRules(readerId, []);
+  }
+  console.log("  ✓ 18.6 cron ล็อกด้วยความลับ · ปล่อยที่ที่หมดเวลาจ่าย · แจ้งรายชื่อรอเวลาว่างแล้วลบอีเมลทิ้ง");
+}
+
 async function testVideoCall(readerId: string, sessionSecret: string) {
   const fs = await import("node:fs");
   const path = await import("node:path");

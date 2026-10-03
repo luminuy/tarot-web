@@ -38,9 +38,9 @@ export const privacyMetadataEn: Metadata = {
 export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen text-ink">
-      <div className="max-w-3xl mx-auto px-6 py-16 space-y-10">
+      <div className="max-w-3xl mx-auto px-6 pt-16 space-y-10">
         {/* Header */}
-        <div className="text-center space-y-3 pb-6 border-b border-line/40">
+        <div className="text-center space-y-3 pb-2">
           <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif"><ThaiPhrases>
             Privacy Policy &amp; Data Protection
           </ThaiPhrases></h1>
@@ -50,7 +50,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
         </div>
 
         {/* Section 1 */}
-        <section className="space-y-3">
+        <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif"><ThaiPhrases>1. Information We Collect</ThaiPhrases></h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed">
             <li>
@@ -94,7 +94,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
         </section>
 
         {/* Section 2 */}
-        <section className="space-y-3">
+        <section className="page-band page-band-compact space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif"><ThaiPhrases>2. Prohibited Practices &amp; Core Commitments</ThaiPhrases></h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed">
             <li>
@@ -119,7 +119,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
         </section>
 
         {/* Section 3 */}
-        <section className="space-y-3">
+        <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif"><ThaiPhrases>
             3. Data Storage, Retention &amp; Cloud Architecture
           </ThaiPhrases></h2>
@@ -138,7 +138,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
         </section>
 
         {/* Section 4 */}
-        <section className="space-y-3">
+        <section className="page-band page-band-compact space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif"><ThaiPhrases>
             4. Your Legal Rights (PDPA, GDPR &amp; CCPA/CPRA)
           </ThaiPhrases></h2>
@@ -167,7 +167,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
         </section>
 
         {/* Section 5: AI Disclosure */}
-        <section className="altar-card-porcelain !rounded-xl space-y-3 p-5">
+        <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif"><ThaiPhrases>
             5. Algorithmic Transparency &amp; AI Persona Disclosures
           </ThaiPhrases></h2>
@@ -189,7 +189,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
         </section>
 
         {/* Section 6: Safety Guardrails */}
-        <section className="altar-card-porcelain !rounded-xl space-y-3 p-5">
+        <section className="page-band page-band-compact space-y-3">
           <h2 className="text-lg font-bold text-err font-serif"><ThaiPhrases>
             6. User Safety Guardrails &amp; Health Disclaimers
           </ThaiPhrases></h2>
@@ -223,7 +223,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
         </section>
 
         {/* Section 7: Export & Delete Data */}
-        <section className="pt-4 border-t border-line/40 space-y-4">
+        <section className="page-band page-band-compact page-band-tint space-y-4">
           <h2 className="text-lg font-bold text-gold-ink font-serif"><ThaiPhrases>7. Manage Your Personal Data</ThaiPhrases></h2>
           <p className="text-xs text-muted">
             You can download a complete JSON archive of your personal journal or permanently delete all local and cloud

@@ -6,6 +6,12 @@ import { Input, Textarea } from "@/components/ui/Input";
 import { Field } from "@/components/ui/Field";
 import { Modal } from "@/components/ui/Modal";
 import type { Reader, ReaderStatus } from "@/lib/marketplace/readers.repo";
+import {
+  CONSULTATION_PRICE_THB,
+  READER_PRICE_MAX_THB,
+  READER_PRICE_MIN_THB,
+  readerPriceThb,
+} from "@/lib/marketplace/offer";
 import { copyToClipboard } from "@/lib/utils/clipboard";
 
 export default function ReadersManager() {
@@ -29,6 +35,8 @@ export default function ReadersManager() {
   const [lineUrl, setLineUrl] = useState("");
   const [status, setStatus] = useState<ReaderStatus>("approved");
   const [commissionPct, setCommissionPct] = useState<number>(20);
+  /** ค่าปรึกษาต่อครั้ง — ช่องว่าง = ราคากลาง */
+  const [priceText, setPriceText] = useState("");
 
   // Toast / Copy notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -69,6 +77,7 @@ export default function ReadersManager() {
     setLineUrl("");
     setStatus("approved");
     setCommissionPct(20);
+    setPriceText("");
     setFormError(null);
     setIsModalOpen(true);
   };
@@ -82,6 +91,7 @@ export default function ReadersManager() {
     setLineUrl(r.lineUrl);
     setStatus(r.status);
     setCommissionPct(r.commissionPct);
+    setPriceText(r.priceThb ? String(r.priceThb) : "");
     setFormError(null);
     setIsModalOpen(true);
   };
@@ -104,7 +114,14 @@ export default function ReadersManager() {
       lineUrl: lineUrl.trim(),
       status,
       commissionPct: Number(commissionPct) || 20,
+      priceThb: priceText.trim() ? Number(priceText) : null,
     };
+
+    if (payload.priceThb !== null && !(payload.priceThb >= READER_PRICE_MIN_THB && payload.priceThb <= READER_PRICE_MAX_THB)) {
+      setFormError(`ค่าปรึกษาต้องอยู่ระหว่าง ${READER_PRICE_MIN_THB}–${READER_PRICE_MAX_THB} บาท (เว้นว่าง = ราคากลาง ${CONSULTATION_PRICE_THB} บาท)`);
+      setSaving(false);
+      return;
+    }
 
     if (!payload.displayName) {
       setFormError("กรุณาระบุชื่อแม่หมอ");
@@ -375,6 +392,10 @@ export default function ReadersManager() {
                     <span>ส่วนแบ่งระบบ:</span>
                     <span className="font-semibold text-ink">{r.commissionPct}%</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span>ค่าปรึกษา:</span>
+                    <span className="font-semibold text-ink">{readerPriceThb(r)} บาท{r.priceThb ? "" : " (ราคากลาง)"}</span>
+                  </div>
                 </div>
               </div>
 
@@ -510,6 +531,21 @@ export default function ReadersManager() {
                   <option value="pending">รอตรวจสอบ (Pending)</option>
                   <option value="suspended">พักงาน (Suspended)</option>
                 </select>
+              )}
+            </Field>
+
+            <Field label="ค่าปรึกษาต่อครั้ง (บาท)" hint={`เว้นว่าง = ราคากลาง ${CONSULTATION_PRICE_THB} บาท · มีผลกับการจองครั้งถัดไป`}>
+              {(field) => (
+                <Input
+                  {...field}
+                  type="number"
+                  inputMode="numeric"
+                  min={READER_PRICE_MIN_THB}
+                  max={READER_PRICE_MAX_THB}
+                  placeholder={String(CONSULTATION_PRICE_THB)}
+                  value={priceText}
+                  onChange={(e) => setPriceText(e.target.value)}
+                />
               )}
             </Field>
 

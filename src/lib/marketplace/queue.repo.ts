@@ -8,6 +8,8 @@ import {
 
 export type TicketKind = "walkup" | "booking";
 export type TicketStatus =
+  /** กันที่ไว้แล้ว รอจ่ายเงิน (migrations/0020) — แม่หมอยังไม่เห็นตั๋วนี้ */
+  | "pending_payment"
   | "screening"
   | "waiting"
   | "ready"
@@ -29,6 +31,8 @@ export interface QueueTicket {
   aiScreenId: string | null;
   createdAt: number;
   expiresAt: number;
+  /** สมาชิกที่ล็อกอินตอนจอง (migrations/0021) — ใช้เปิด "นัดของฉัน" ข้ามเครื่อง */
+  userId: string | null;
   // Attached AI brief if available
   screening?: AIScreeningRecord | null;
 }
@@ -47,10 +51,11 @@ interface RawTicketRow {
   ai_screen_id: string | null;
   created_at: number;
   expires_at: number;
+  user_id?: string | null;
 }
 
-/** ตั๋วฉบับส่งออกนอกเซิร์ฟเวอร์ — ไม่มี `customerRef` */
-export type PublicQueueTicket = Omit<QueueTicket, "customerRef">;
+/** ตั๋วฉบับส่งออกนอกเซิร์ฟเวอร์ — ไม่มี `customerRef` และ `userId` (ตัวตนของลูกค้า) */
+export type PublicQueueTicket = Omit<QueueTicket, "customerRef" | "userId">;
 
 /**
  * ⚠️ `customerRef` คือความลับแบบ bearer ของลูกค้า (ใครถือ = เป็นเจ้าของตั๋วทุกใบของคนนั้น)
@@ -58,8 +63,9 @@ export type PublicQueueTicket = Omit<QueueTicket, "customerRef">;
  * แม่หมอจึงเห็น ref ของลูกค้าทุกคนในคิว แล้วเอาไปแลกเป็นคุกกี้อ่านคิวข้ามแม่หมอได้ (A2-13)
  */
 export function toPublicTicket(ticket: QueueTicket): PublicQueueTicket {
-  const { customerRef: _secret, ...rest } = ticket;
+  const { customerRef: _secret, userId: _user, ...rest } = ticket;
   void _secret;
+  void _user;
   return rest;
 }
 
@@ -78,6 +84,7 @@ function mapRowToTicket(row: RawTicketRow): QueueTicket {
     aiScreenId: row.ai_screen_id,
     createdAt: row.created_at,
     expiresAt: row.expires_at,
+    userId: row.user_id ?? null,
   };
 }
 
@@ -144,6 +151,23 @@ export interface CreateQueueTicketInput {
   question: string;
   readingSnapshot?: string;
   slotStart?: number;
+  /**
+   * สถานะเริ่มต้นเมื่อผ่าน AI คัดกรอง — ค่าเริ่มต้น `waiting` (เข้าคิวทันที)
+   * เส้นจองจริงส่ง `pending_payment`: ตั๋วจะเข้าคิวก็ต่อเมื่อจ่ายเงินแล้ว (`settleConsultationPayment`)
+   */
+  initialStatus?: Extract<TicketStatus, "waiting" | "pending_payment">;
+  /** สมาชิกที่ล็อกอินอยู่ตอนจอง (ไม่บังคับ — จองแบบไม่สมัครได้เสมอ) */
+  userId?: string | null;
+}
+
+const RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * วันลบตั๋ว (PDPA) — 7 วันหลังสร้าง หรือ 7 วันหลังเวลานัด แล้วแต่อันไหนช้ากว่า
+ * ⚠️ นัดล่วงหน้าได้ไกล 14 วัน — ถ้านับจากวันสร้างอย่างเดียว ตั๋วจะถูกลบก่อนถึงวันนัด
+ */
+export function ticketExpiresAt(nowMs: number, slotStart?: number | null): number {
+  return Math.max(nowMs + RETENTION_MS, (slotStart ?? 0) + RETENTION_MS);
 }
 
 /**
@@ -153,7 +177,7 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
   const db = await getAppDB();
   const ticketId = `ticket_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
   const now = Date.now();
-  const expiresAt = now + 7 * 24 * 60 * 60 * 1000; // 7 days PDPA retention
+  const expiresAt = ticketExpiresAt(now, input.slotStart);
 
   // 1. Run AI Screening First
   const screening = await performAIScreening({
@@ -178,14 +202,15 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
       aiScreenId: screening.id,
       createdAt: now,
       expiresAt,
+      userId: input.userId ?? null,
       screening,
     };
 
     await db
       .prepare(
         `INSERT INTO queue_tickets (
-          id, reader_id, kind, status, position, slot_start, customer_ref, nickname, question, reading_snapshot, ai_screen_id, created_at, expires_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          id, reader_id, kind, status, position, slot_start, customer_ref, nickname, question, reading_snapshot, ai_screen_id, created_at, expires_at, user_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         ticket.id,
@@ -200,16 +225,19 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
         ticket.readingSnapshot,
         ticket.aiScreenId,
         ticket.createdAt,
-        ticket.expiresAt
+        ticket.expiresAt,
+        ticket.userId
       )
       .run();
 
     return ticket;
   }
 
-  // 2. Calculate Queue Position for walk-up
-  let position = 1;
-  if (input.kind === "walkup") {
+  const initialStatus: TicketStatus = input.initialStatus ?? "waiting";
+
+  // 2. Calculate Queue Position for walk-up (ตั๋วที่ยังไม่จ่ายยังไม่มีลำดับ — ได้ลำดับตอนจ่ายสำเร็จ)
+  let position: number | null = initialStatus === "waiting" ? 1 : null;
+  if (input.kind === "walkup" && initialStatus === "waiting") {
     const countRow = await db
       .prepare(
         "SELECT COUNT(*) as count FROM queue_tickets WHERE reader_id = ? AND status IN ('waiting', 'ready')"
@@ -219,13 +247,11 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
     position = (countRow?.count || 0) + 1;
   }
 
-  const initialStatus: TicketStatus = "waiting";
-
   await db
     .prepare(
       `INSERT INTO queue_tickets (
-        id, reader_id, kind, status, position, slot_start, customer_ref, nickname, question, reading_snapshot, ai_screen_id, created_at, expires_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        id, reader_id, kind, status, position, slot_start, customer_ref, nickname, question, reading_snapshot, ai_screen_id, created_at, expires_at, user_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       ticketId,
@@ -240,7 +266,8 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
       input.readingSnapshot || null,
       screening.id,
       now,
-      expiresAt
+      expiresAt,
+      input.userId ?? null
     )
     .run();
 
@@ -278,11 +305,30 @@ export async function listActiveTicketsForCustomer(customerRef: string): Promise
   const db = await getAppDB();
   const { results } = await db
     .prepare(
-      "SELECT * FROM queue_tickets WHERE customer_ref = ? AND status IN ('screening', 'waiting', 'ready') ORDER BY created_at DESC"
+      "SELECT * FROM queue_tickets WHERE customer_ref = ? AND status IN ('pending_payment', 'screening', 'waiting', 'ready') ORDER BY created_at DESC"
     )
     .bind(customerRef)
     .all<RawTicketRow>();
 
+  return (results || []).map(mapRowToTicket);
+}
+
+/**
+ * "นัดของฉัน" — ตั๋วของลูกค้าคนนี้ทั้งที่ยังไม่จบและที่จบแล้ว (ตั๋วถูกลบตาม PDPA เองหลังครบอายุ)
+ * จับคู่ได้สองทาง: คุกกี้ของเบราว์เซอร์นี้ (`customerRef`) หรือบัญชีที่ล็อกอิน (`userId` — ทุกเครื่อง)
+ */
+export async function listTicketsForOwner(owner: { customerRef?: string | null; userId?: string | null }): Promise<QueueTicket[]> {
+  if (!owner.customerRef && !owner.userId) return [];
+  const db = await getAppDB();
+  const { results } = await db
+    .prepare(
+      `SELECT * FROM queue_tickets
+        WHERE (customer_ref = ? OR (user_id IS NOT NULL AND user_id = ?))
+        ORDER BY COALESCE(slot_start, created_at) DESC
+        LIMIT 50`
+    )
+    .bind(owner.customerRef ?? "", owner.userId ?? "")
+    .all<RawTicketRow>();
   return (results || []).map(mapRowToTicket);
 }
 

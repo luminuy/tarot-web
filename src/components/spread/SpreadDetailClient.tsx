@@ -128,7 +128,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
   ];
 
   return (
-    <div className="mx-auto max-w-4xl space-y-10 pb-20">
+    <div className="mx-auto max-w-4xl space-y-10">
       {/* Top Breadcrumb */}
       <nav
         aria-label="Breadcrumb"
@@ -179,7 +179,8 @@ export const SpreadDetailClient: React.FC<Props> = ({
       </header>
 
       {/* Diagram + Positions */}
-      <section className="space-y-6">
+      {/* แถบสีสลับแบบหน้าแรก (`page-band`): ตำแหน่งไพ่ (อ่อน) · วิธีอ่าน (ใส) · คำถาม (อ่อน) · บทความ (ใส) · ผังอื่น (สลับต่อ) */}
+      <section className="page-band page-band-tint space-y-6">
         <div className="grid gap-8 sm:grid-cols-[minmax(0,260px)_1fr] sm:items-start">
           <div>
             <SpreadPositionMap positions={spread.positions} isEnglish={isEnglish} />
@@ -221,7 +222,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
       </section>
 
       {/* How-to Steps */}
-      <section>
+      <section className="page-band">
         <h2 className="font-serif-th text-xl font-bold"><ThaiPhrases>
           {isEnglish ? "How to Read this Spread" : "วิธีอ่านผังนี้"}
         </ThaiPhrases></h2>
@@ -241,7 +242,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
       </section>
 
       {/* FAQs */}
-      <section>
+      <section className="page-band page-band-tint">
         <h2 className="font-serif-th text-xl font-bold"><ThaiPhrases>
           {isEnglish ? "Frequently Asked Questions" : "คำถามที่พบบ่อย"}
         </ThaiPhrases></h2>
@@ -260,7 +261,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
 
       {/* Related Articles */}
       {relatedArticles.length > 0 && (
-        <section>
+        <section className="page-band">
           <h2 className="font-serif-th text-xl font-bold"><ThaiPhrases>
             {isEnglish ? "Related Wisdom Articles" : "บทความที่เกี่ยวข้อง"}
           </ThaiPhrases></h2>
@@ -280,7 +281,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
       )}
 
       {/* Other Spreads */}
-      <section>
+      <section className={relatedArticles.length > 0 ? "page-band page-band-tint" : "page-band"}>
         <h2 className="font-serif-th text-xl font-bold"><ThaiPhrases>
           {isEnglish ? "Explore Other Spreads" : "ผังอื่นที่น่าสนใจ"}
         </ThaiPhrases></h2>

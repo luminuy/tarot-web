@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { listPublicApprovedReaders, type PublicReaderProfile } from "@/lib/marketplace/readers.repo";
 import { listLiveReaderIds } from "@/lib/marketplace/queue.repo";
-import { CONSULTATION_MINUTES, CONSULTATION_PRICE_THB } from "@/lib/marketplace/offer";
+import { CONSULTATION_MINUTES } from "@/lib/marketplace/offer";
+import { getAllReaderRatings } from "@/lib/marketplace/reviews.repo";
 import { ReadersDirectory } from "@/components/readers/ReadersDirectory";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -47,10 +48,16 @@ export const metadata: Metadata = {
 export default async function ReadersPage() {
   let readers: PublicReaderProfile[] = [];
   let liveReaderIds: string[] = [];
+  let ratings: Record<string, { count: number; average: number }> = {};
   try {
-    const [list, live] = await Promise.all([listPublicApprovedReaders(), listLiveReaderIds()]);
+    const [list, live, ratingMap] = await Promise.all([
+      listPublicApprovedReaders(),
+      listLiveReaderIds(),
+      getAllReaderRatings().catch(() => new Map<string, { count: number; average: number }>()),
+    ]);
     readers = list;
     liveReaderIds = [...live];
+    ratings = Object.fromEntries(ratingMap);
   } catch (err) {
     console.error("[ReadersPage] Failed to fetch readers:", err);
   }
@@ -140,7 +147,7 @@ export default async function ReadersPage() {
                 </a>
               </div>
               <p className="text-[13px] text-muted">
-                {CONSULTATION_PRICE_THB} บาท · {CONSULTATION_MINUTES} นาที · ไม่บันทึกภาพและเสียง
+                ตัวต่อตัว {CONSULTATION_MINUTES} นาที · รู้ราคาก่อนจอง · ไม่บันทึกภาพและเสียง
               </p>
             </div>
             <div className="max-w-md w-full mx-auto lg:max-w-none">
@@ -150,7 +157,7 @@ export default async function ReadersPage() {
 
           {/* ── รายชื่อแม่หมอ ─────────────────────────────────────────────────── */}
           <div id="readers" className="scroll-mt-24">
-            <ReadersDirectory initialReaders={readers} liveReaderIds={liveReaderIds} />
+            <ReadersDirectory initialReaders={readers} liveReaderIds={liveReaderIds} ratings={ratings} />
           </div>
 
           {/* ── เหตุผลที่ไว้ใจได้ — แถวปัดแบบหน้าแรก ───────────────────────────── */}

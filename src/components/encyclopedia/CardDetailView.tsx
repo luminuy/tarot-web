@@ -329,7 +329,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
       {related}
 
       {/* Bottom Previous / Next Card Navigation Bar */}
-      <div className="pt-8 border-t border-line/40 flex items-center justify-between gap-4">
+      <div className="pt-8 flex items-center justify-between gap-4">
         {prevCard ? (
           <Link
             href={`/cards/${prevCard.id}`}

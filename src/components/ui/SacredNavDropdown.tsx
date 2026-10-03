@@ -117,13 +117,17 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         </span>
         <span className="flex-1 min-w-0 text-left">
           <span
-            className={`block text-[13px] font-serif-th leading-[1.7] truncate transition-colors ${
+            className={`block text-[13px] font-serif-th leading-[1.7] break-words transition-colors ${
               isActive ? "font-bold text-gold-ink" : "font-semibold text-ink group-hover:text-gold-ink"
             }`}
           >
             {item.label}
           </span>
-          <span className="block text-[11.5px] font-serif-th text-muted truncate mt-0.5 leading-[1.7]">{item.sublabel}</span>
+          {/*
+            ⛔ ห้าม `truncate` ในลิ้นชักทั้งไฟล์ (INC-0209 ➜ INC-0252) — iOS Safari คิดความกว้างกล่องตัดได้ 0
+            แล้วเฉือนบรรทัดทิ้งทั้งบรรทัด (เจ้าของเจอบรรทัดคำอธิบายหายบน iPhone) · ข้อความสั้นอยู่แล้ว ปล่อยขึ้นบรรทัดใหม่แทน
+          */}
+          <span className="block text-[11.5px] font-serif-th text-muted break-words mt-0.5 leading-[1.7]">{item.sublabel}</span>
         </span>
       </>
     );
@@ -219,43 +223,28 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         {/* Ambient Top Gold Accent Line */}
         <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-gold/40 to-transparent shrink-0" />
 
-        {/* Drawer Header: Brand, 1909 RWS Badge & Close Button */}
+        {/* Drawer Header: โลโก้ + ชื่อแบรนด์ชุดเดียวกับหัวเว็บ (SEERTAROT) & Close Button */}
         <div className="px-4 py-3 sm:py-3.5 border-b border-line flex items-center justify-between gap-2 bg-surface shrink-0">
           <div className="flex min-w-0 flex-1 items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full border border-line overflow-hidden relative flex-shrink-0 bg-canvas">
-              <img
-                src="/logo.webp"
-                alt="SeerTarot"
-                width={32}
-                height={32}
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-            </div>
+            <img
+              src="/logo.webp"
+              alt="SeerTarot"
+              width={36}
+              height={36}
+              className="h-9 w-9 shrink-0 rounded-full border border-line object-cover"
+              loading="lazy"
+            />
             {/*
-              ⛔ ห้ามใส่ `truncate` ให้สองบรรทัดนี้อีก (INC-0200 ➜ INC-0209 · หัวลิ้นชักหายบน iOS Safari)
-              รอบแรกแก้ด้วยการเติม `flex-1` ให้คอลัมน์ — วัดจากภาพที่เจ้าของส่งมารอบสองแล้ว
-              คอลัมน์กว้างถูกแล้วจริง (ป้าย 1909 RWS ถูกดันไปอยู่ตำแหน่งที่ควรเป็นเป๊ะ) แต่ตัวหนังสือยังหาย
-              ตัวการ์จริงคือ `truncate` เอง — มันสร้าง `overflow: hidden` เป็นกล่องตัดของตัวเอง
-              ที่ Safari คิดความกว้างแบบ shrink-to-fit ได้ 0 ตัวอักษรจึงถูกตัดทิ้งทั้งบรรทัด
-              ทั้งที่มีที่ว่างให้วาง · ป้าย "1909 RWS" ไม่มี `truncate` จึงรอดมาใบเดียว — นั่นคือเบาะแสที่ชี้ตัวจริง
-
-              ข้อความสองบรรทัดนี้เป็นค่าคงที่ ยาวสุด ~175px ในลิ้นชักที่กว้างอย่างน้อย 340px
-              จึงไม่มีทางล้น ใช้ `whitespace-nowrap` พอ ไม่ต้องมีกล่องตัดให้ Safari ยุบ
+              ชื่อแบรนด์ชุดเดียวกับหัวเว็บ (`SiteHeader`) — เดิมเขียน "วิหารพยากรณ์ · 1909 RWS" ซึ่งเป็นชื่อเก่า
+              ⛔ ห้ามใส่ `truncate` (INC-0200 ➜ INC-0209 ➜ INC-0252 · iOS Safari เฉือนบรรทัดทิ้งทั้งบรรทัด)
+              ข้อความเป็นค่าคงที่สั้นกว่าลิ้นชักมาก ใช้ `whitespace-nowrap` พอ ไม่ต้องมีกล่องตัด
             */}
-            <div className="flex flex-col min-w-0 flex-1">
-              <div className="flex items-center gap-1.5">
-                <span className="font-serif-th text-sm font-bold text-ink whitespace-nowrap leading-[1.7]">
-                  {isEnglish ? "Tarot Sanctuary" : "วิหารพยากรณ์"}
-                </span>
-                <span className="glass-chip text-ink text-[10px] font-mono tracking-wider px-1.5 py-0.2 font-bold shrink-0">
-                  1909 RWS
-                </span>
-              </div>
-              <span className="text-[10px] tracking-[0.16em] text-muted font-mono uppercase font-semibold whitespace-nowrap mt-0.5">
-                RIDER-WAITE TAROT
+            <span className="flex flex-col whitespace-nowrap leading-none">
+              <span className="font-serif-th text-[15px] tracking-[0.18em] text-ink">SEERTAROT</span>
+              <span className="mt-1.5 font-serif-th text-[11px] tracking-[0.12em] text-muted">
+                {isEnglish ? "1909 RIDER-WAITE" : "ดูดวงไพ่ทาโรต์"}
               </span>
-            </div>
+            </span>
           </div>
 
           <button

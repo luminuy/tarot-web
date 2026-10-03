@@ -133,7 +133,8 @@ export function SpreadsIndexBody({ locale, library }: { locale: Locale; library:
         */}
         <nav
           aria-label={copy.directoryTitle}
-          className="rounded-2xl border border-[#E4DED2] bg-surface-warm px-5 py-6 sm:px-7 sm:py-7"
+          /* แถบพื้นใสต่อจากแถบอ่อนของกริดผัง (`page-band` แบบหน้าแรก) — เดิมเป็นกล่องขอบครีม */
+          className="page-band"
         >
           <h2 className="text-base sm:text-lg font-serif-th font-bold text-ink"><ThaiPhrases>{copy.directoryTitle}</ThaiPhrases></h2>
           <p className="mt-1.5 text-xs sm:text-sm text-muted leading-relaxed">{copy.directoryLead}</p>

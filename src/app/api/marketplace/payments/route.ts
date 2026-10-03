@@ -1,22 +1,19 @@
 import { NextResponse } from "next/server";
+import { apiOk } from "@/lib/api/envelope";
 import { z } from "zod";
 
 import {
-  createGatewayCharge,
   isStripeTestModeOnProduction,
+  openGatewayCheckoutUrl,
   PAYMENTS_NOT_OPEN_MESSAGE,
 } from "@/lib/marketplace/payment-gateway";
 import { isPrivilegedTestRequest } from "@/lib/security/privileged";
-import {
-  CONSULTATION_PRICE_SATANG,
-  createPaymentRecord,
-  getPaymentByTicketId,
-} from "@/lib/marketplace/payments.repo";
-import { readCustomerRefFromCookie } from "@/lib/marketplace/customer-ref";
+import { isTicketOwner } from "@/lib/marketplace/ticket-owner";
+import { readerPriceThb } from "@/lib/marketplace/offer";
 import { getQueueTicketById } from "@/lib/marketplace/queue.repo";
 import { getReaderById } from "@/lib/marketplace/readers.repo";
-import { getAppDB } from "@/lib/platform/db";
-import { resolveAppOrigin } from "@/lib/security/app-origin";
+import { expireLapsedHold, getBookingByTicketId, listPaymentsForTicket } from "@/lib/marketplace/booking.repo";
+import { MAX_CHECKOUTS_PER_BOOKING, openConsultationCheckout } from "@/lib/marketplace/consultation-checkout";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
@@ -32,7 +29,12 @@ const CreatePaymentSchema = z.object({
 });
 
 /**
- * POST /api/marketplace/payments - สร้างรายการชำระเงินสำหรับคิวรับคำปรึกษา
+ * POST /api/marketplace/payments — "จ่ายต่อ" สำหรับการจองที่ยังรอจ่ายเงิน (ลูกค้ากดย้อนกลับจากหน้า Stripe)
+ * ---------------------------------------------------------------------------
+ * - หน้าจ่ายเดิมยังเปิดอยู่ ➔ ส่งลิงก์เดิมกลับไป (ไม่สร้างใบใหม่ = ไม่มีทางจ่ายซ้อนสองใบ)
+ * - หน้าจ่ายเดิมหมดอายุแต่ยังกันที่อยู่ ➔ เปิดใบใหม่ (ไม่เกิน 3 ครั้งต่อการจอง)
+ * - ที่นั่งหลุดแล้ว ➔ 409 ให้เลือกเวลาใหม่
+ * การจองใหม่ทั้งหมดเริ่มที่ `POST /api/marketplace/tickets` (กันที่ + เปิดหน้าจ่ายในคำขอเดียว)
  */
 export async function POST(request: Request) {
   if (!isRequestAuthorizedOrigin(request)) {
@@ -57,112 +59,58 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
-    if (!body || typeof body !== "object") {
-      return NextResponse.json(
-        { error: "รูปแบบข้อมูลคำขอไม่ถูกต้อง" },
-        { status: 400 }
-      );
-    }
-    const parsed = CreatePaymentSchema.safeParse(body);
-
+    const parsed = CreatePaymentSchema.safeParse(await request.json().catch(() => null));
     if (!parsed.success) {
+      return NextResponse.json({ error: "ข้อมูลไม่ถูกต้อง" }, { status: 400 });
+    }
+    const { ticketId } = parsed.data;
+
+    // ต้องเป็นตั๋วของผู้ขอเองเท่านั้น (คุกกี้ที่เราเซ็นเอง)
+    const ticket = await getQueueTicketById(ticketId);
+    if (!ticket || !(await isTicketOwner(request, ticket))) {
+      return NextResponse.json({ error: "ไม่พบตั๋วคิวที่ระบุ" }, { status: 404 });
+    }
+    if (ticket.status !== "pending_payment") {
+      return NextResponse.json({ error: "การจองนี้ไม่ได้รอชำระเงินแล้ว" }, { status: 409 });
+    }
+    if (await expireLapsedHold(ticket)) {
       return NextResponse.json(
-        { error: "ข้อมูลไม่ถูกต้อง", details: parsed.error.format() },
-        { status: 400 }
+        { error: "หมดเวลาชำระเงิน ระบบปล่อยเวลานี้แล้ว กรุณาจองใหม่", code: "hold_expired" },
+        { status: 409 }
+      );
+    }
+    const booking = await getBookingByTicketId(ticketId);
+    const reader = await getReaderById(ticket.readerId);
+    if (!booking || booking.status !== "reserved" || !reader) {
+      return NextResponse.json({ error: "ไม่พบการจองที่รอชำระเงิน" }, { status: 404 });
+    }
+
+    const payments = await listPaymentsForTicket(ticketId);
+    const pending = payments.filter((p) => p.status === "pending");
+    for (const p of [...pending].reverse()) {
+      const url = p.providerRef ? await openGatewayCheckoutUrl(p.providerRef) : null;
+      if (url) return apiOk({ checkoutUrl: url });
+    }
+    if (payments.length >= MAX_CHECKOUTS_PER_BOOKING) {
+      return NextResponse.json(
+        { error: "เปิดหน้าชำระเงินครบจำนวนครั้งแล้ว กรุณายกเลิกแล้วจองใหม่" },
+        { status: 429 }
       );
     }
 
-    const { ticketId } = parsed.data;
-    const customerRef = await readCustomerRefFromCookie(request);
-    const amountSatang = CONSULTATION_PRICE_SATANG;
-
-    // 1. Verify Ticket + ต้องเป็นตั๋วของผู้ขอเองเท่านั้น
-    const ticket = await getQueueTicketById(ticketId);
-    if (!ticket) {
-      return NextResponse.json({ error: "ไม่พบตั๋วคิวที่ระบุ" }, { status: 404 });
-    }
-    if (!customerRef || ticket.customerRef !== customerRef) {
-      return NextResponse.json({ error: "ไม่พบตั๋วคิวที่ระบุ" }, { status: 404 });
-    }
-
-    const reader = await getReaderById(ticket.readerId);
-    if (!reader) {
-      return NextResponse.json({ error: "ไม่พบข้อมูลแม่หมอสำหรับคิวนี้" }, { status: 404 });
-    }
-
-    // 2. Check if already has a payment
-    const existing = await getPaymentByTicketId(ticketId);
-    if (existing && existing.status === "paid") {
-      return NextResponse.json({
-        success: true,
-        message: "คิวนี้ได้รับการชำระเงินเรียบร้อยแล้ว",
-        payment: existing,
-      });
-    }
-
-    // 3. Ensure Booking record exists
-    const db = await getAppDB();
-    let bookingId = `book_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
-    const now = Date.now();
-
-    const existingBooking = await db
-      .prepare("SELECT id FROM bookings WHERE ticket_id = ? LIMIT 1")
-      .bind(ticketId)
-      .first<{ id: string }>();
-
-    if (existingBooking) {
-      bookingId = existingBooking.id;
-    } else {
-      await db
-        .prepare(
-          `INSERT INTO bookings (
-            id, ticket_id, reader_id, slot_start, slot_end, status, created_at
-          ) VALUES (?, ?, ?, ?, ?, 'reserved', ?)`
-        )
-        .bind(
-          bookingId,
-          ticketId,
-          ticket.readerId,
-          ticket.slotStart || now,
-          (ticket.slotStart || now) + 30 * 60 * 1000,
-          now
-        )
-        .run();
-    }
-
-    // 4. Create Gateway Charge
-    const queueUri = `${resolveAppOrigin(request)}/readers/queue/${encodeURIComponent(ticketId)}`;
-    const defaultReturnUri = `${queueUri}?paid=1`;
-    const charge = await createGatewayCharge({
-      amountSatang,
-      currency: "THB",
-      description: `ปรึกษาดวงชะตากับ ${reader.displayName} (คิว #${ticket.position || 1})`,
-      returnUri: defaultReturnUri,
-      cancelUri: queueUri,
-      referenceId: bookingId,
-      metadata: { ticketId, bookingId, readerId: reader.id },
-    });
-
-    // 5. Save Payment Record
-    const payment = await createPaymentRecord({
-      bookingId,
+    const { checkoutUrl } = await openConsultationCheckout({
+      request,
       ticketId,
-      provider: charge.provider,
-      providerRef: charge.chargeId,
-      amountSatang,
-      currency: "THB",
+      readerId: reader.id,
+      readerName: reader.displayName,
+      booking,
+      attempt: payments.length + 1,
+      priceThb: readerPriceThb(reader),
+      customerEmail: booking.contactEmail,
     });
-
-    return NextResponse.json({
-      success: true,
-      payment,
-      charge,
-      checkoutUrl: charge.authorizeUri || defaultReturnUri,
-      isTestMode: charge.isTestMode,
-    });
+    return apiOk({ checkoutUrl });
   } catch (err) {
     console.error("[API Payments POST Error]", err);
-    return NextResponse.json({ error: "ไม่สามารถสร้างรายการชำระเงินได้" }, { status: 500 });
+    return NextResponse.json({ error: "เปิดหน้าชำระเงินไม่สำเร็จ ยังไม่มีการตัดเงิน กรุณาลองใหม่" }, { status: 500 });
   }
 }

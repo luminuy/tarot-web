@@ -210,18 +210,9 @@ export async function updatePaymentStatus(
     .bind(status, newProviderRef, newLog, now, id)
     .run();
 
-  // If status marked as 'paid', also confirm booking
-  // (รายการเติมเครดิตไม่มี booking — ข้ามไปเลย ไม่ใช่ยิง UPDATE ที่ไม่มีวันตรงแถวไหน)
-  if (status === "paid" && payment.bookingId) {
-    try {
-      await db
-        .prepare("UPDATE bookings SET status = 'paid' WHERE id = ?")
-        .bind(payment.bookingId)
-        .run();
-    } catch {
-      // ignore
-    }
-  }
+  // ⚠️ ไม่แตะตาราง bookings ที่นี่แล้ว (migrations/0020) — การยืนยันนัด/กันจองซ้อน/คืนเงินเมื่อชนกัน
+  //    ต้องผ่าน `settleConsultationPayment` (booking.repo.ts) ที่เดียว ของเดิมตั้ง bookings = 'paid'
+  //    ตรงนี้แบบไม่ดูว่าที่นั่งยังว่างไหม จึงยืนยันนัดซ้อนกันได้
 
   return getPaymentById(id);
 }

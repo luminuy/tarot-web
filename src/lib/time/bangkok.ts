@@ -89,3 +89,50 @@ export function bangkokNextMidnightISO(now: Date = new Date()): string {
   const tomorrow = new Date(new Date(`${today}T00:00:00+07:00`).getTime() + 24 * 60 * 60 * 1000);
   return tomorrow.toISOString();
 }
+
+/** ส่วนประกอบของเวลา ณ ขณะหนึ่ง ตามนาฬิกากรุงเทพฯ (เดือนนับจาก 0 · วันในสัปดาห์ 0 = อาทิตย์) */
+export interface BangkokParts {
+  year: number;
+  month: number;
+  day: number;
+  weekday: number;
+  hour: number;
+  minute: number;
+}
+
+const CLOCK_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  timeZone: APP_TIME_ZONE,
+  year: "numeric",
+  month: "numeric",
+  day: "numeric",
+  hour: "numeric",
+  minute: "numeric",
+  hourCycle: "h23",
+});
+
+/**
+ * แตกเวลา (ms) เป็นวัน/เวลาตามนาฬิกากรุงเทพฯ — ระบบนัดเวลาของแม่หมอใช้ตัวนี้ตัวเดียว
+ * ประกอบจาก `formatToParts()` แบบระบุชื่อ จึงได้ผลเดียวกันทั้งเซิร์ฟเวอร์และเบราว์เซอร์ทุก locale
+ */
+export function bangkokParts(ms: number): BangkokParts {
+  const parts = CLOCK_FORMATTER.formatToParts(new Date(ms));
+  const get = (type: Intl.DateTimeFormatPartTypes): number => Number(parts.find((p) => p.type === type)?.value ?? NaN);
+  const year = get("year");
+  const month = get("month") - 1;
+  const day = get("day");
+  const hour = get("hour") % 24;
+  const minute = get("minute");
+  if ([year, month, day, hour, minute].some((n) => !Number.isFinite(n))) {
+    throw new Error("[bangkokParts] ประกอบเวลาจาก Intl ไม่สำเร็จ");
+  }
+  return { year, month, day, weekday: new Date(Date.UTC(year, month, day)).getUTCDay(), hour, minute };
+}
+
+/** เที่ยงคืน (00:00 เวลากรุงเทพฯ) ของวันที่ `ms` ตกอยู่ — คืนเป็น ms */
+export function bangkokDayStartMs(ms: number): number {
+  const p = bangkokParts(ms);
+  // ระยะห่างระหว่าง "นาฬิกากรุงเทพฯ อ่านเป็น UTC" กับเวลาจริง = ออฟเซ็ตของเขตเวลา (ไม่เขียนตัวเลขเอง)
+  const wallAsUtc = Date.UTC(p.year, p.month, p.day, p.hour, p.minute);
+  const offset = wallAsUtc - Math.floor(ms / 60_000) * 60_000;
+  return Date.UTC(p.year, p.month, p.day) - offset;
+}

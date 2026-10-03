@@ -96,13 +96,13 @@ export function ContactBodyTh() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdContact) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdBreadcrumbs) }} />
 
-      <div className="max-w-3xl mx-auto px-6 py-16 space-y-10">
-        <div className="text-center space-y-3 pb-6 border-b border-line/40">
+      <div className="max-w-3xl mx-auto px-6 pt-16 space-y-10">
+        <div className="text-center space-y-3 pb-2">
           <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif-th"><ThaiPhrases>ติดต่อเรา</ThaiPhrases></h1>
           <p className="text-xs text-muted">เราอ่านทุกข้อความที่ส่งเข้ามา</p>
         </div>
 
-        <section className="space-y-3">
+        <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>อีเมล</ThaiPhrases></h2>
           <div className="altar-card-porcelain !rounded-xl p-4 space-y-2">
             <a
@@ -118,7 +118,7 @@ export function ContactBodyTh() {
         </section>
 
         {TIKTOK_URL && (
-          <section className="space-y-3">
+          <section className="page-band page-band-compact space-y-3">
             <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>ติดตามเรา</ThaiPhrases></h2>
             <ul className="space-y-3">
               {BRAND_SOCIAL_LINKS.map((social) => (
@@ -147,7 +147,7 @@ export function ContactBodyTh() {
           </section>
         )}
 
-        <section className="space-y-3">
+        <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>เรื่องที่เขียนมาได้</ThaiPhrases></h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
@@ -171,7 +171,7 @@ export function ContactBodyTh() {
           </ul>
         </section>
 
-        <section className="space-y-3">
+        <section className="page-band page-band-compact space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>เรื่องที่ตอบให้ไม่ได้</ThaiPhrases></h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             เราไม่รับทำนายดวงทางอีเมล ไม่รับแก้กรรม และไม่ให้คำแนะนำทางการแพทย์ กฎหมาย หรือการเงิน
@@ -187,7 +187,7 @@ export function ContactBodyTh() {
           </p>
         </section>
 
-        <section className="space-y-3">
+        <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>อยากรู้จักเราก่อน</ThaiPhrases></h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             อ่านได้ที่หน้า{" "}

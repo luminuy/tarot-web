@@ -189,7 +189,8 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
         id="library-panel"
         data-spreads-panel
         aria-labelledby={`library-tab-${DEFAULT_TAB}`}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6"
+        /* แถบสีอ่อนแบ่ง "การ์ดผัง" ออกจากหัวหน้าแบบหน้าแรก (`page-band`) */
+        className="page-band page-band-tint grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6"
       >
         {spreads.map((spread) => {
           const cats = catsOf(spread.id);

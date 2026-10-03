@@ -298,6 +298,44 @@ export interface Reader { id: string; displayName: string; bio: string; avatarUr
 - เมื่อยังไม่ได้ใส่ Secret Key ระบบจะรันในโหมด **Deterministic Test Mode Simulator** โดยอัตโนมัติ
 - ระบบตรวจสอบความถูกต้องของ Webhook Signature ป้องกันการปลอมแปลง Event
 
+---
+
+### 📅 นัดเวลาล่วงหน้า + จ่ายก่อนคุย (เคาะ 2026-10-03)
+
+| หัวข้อ | ค่าที่เคาะ |
+| :-- | :-- |
+| ตารางรับนัด | แม่หมอตั้งรายสัปดาห์ในแผงแม่หมอ (`reader_availability.mode = 'scheduled'`) · ช่องละ 30 นาที · จองล่วงหน้า ≥ 2 ชม. · ไกลสุด 14 วัน · เวลาไทย |
+| จ่ายเงิน | ทุกการปรึกษาจ่ายก่อน (คิวสดด้วย) ผ่าน Stripe Checkout · ราคาจากเซิร์ฟเวอร์เท่านั้น |
+| กันที่ | 36 นาที · หน้าจ่ายหมดอายุ 31 นาที (หน้าจ่ายต้องหมดก่อนที่นั่งเสมอ) |
+| กันจองซ้อน | unique index `idx_bookings_slot_active` (reader_id, slot_start) เฉพาะ `kind='scheduled'` และสถานะ `reserved/confirmed` |
+| ยกเลิก/คืนเงิน | ก่อนนัด ≥ 24 ชม. คืนเต็ม · < 24 ชม. ไม่คืน · แม่หมอยกเลิก/ไม่มาภายใน 15 นาที คืนเต็ม · คิวสดระหว่างรอ คืนเต็ม · เลื่อนได้ 1 ครั้ง (≥ 24 ชม.) |
+
+**ไฟล์**: `src/lib/marketplace/booking-policy.ts` (กติกา — ไม่มี I/O ใช้ร่วมหน้าเว็บ/API) · `booking.repo.ts` (วงจรใบจอง + `settleConsultationPayment` จุดเดียวที่เปลี่ยนเงินเข้าเป็นนัด) ·
+`consultation-checkout.ts` · `SlotPicker.tsx` · `BookQueueModal.tsx` · `QueueBookingParts.tsx` · `ConsoleBookingParts.tsx` · migrations/0020
+
+**กับดักที่ห้ามพลาด**
+- ห้ามยืนยันนัดที่อื่นนอก `settleConsultationPayment` (เดิม `updatePaymentStatus` ตั้ง bookings = 'paid' เองโดยไม่ดูว่าที่ว่างไหม — ถอดแล้ว)
+- อายุตั๋ว (PDPA) = 7 วันหลังเวลานัด ไม่ใช่หลังวันสร้าง (`ticketExpiresAt`) — นัดไกล 14 วัน ถ้านับจากวันสร้างตั๋วจะถูกลบก่อนถึงวันนัด
+- เวลาที่ไคลเอนต์ส่งมาไม่เชื่อ: `slotRejection` ตรวจกับตารางจริงทุกครั้ง แล้ว unique index เป็นด่านสุดท้าย
+- ด่านตรวจ: `test-marketplace-readers` ข้อ 17.1–17.8
+
+### 💌 ระบบจองรอบสอง — ดูแลลูกค้าครบวงจร (2026-10-03)
+
+| เรื่อง | ไฟล์ / กติกา |
+| :-- | :-- |
+| อีเมลทุกชนิด | `src/lib/marketplace/booking-mail.ts` — never throw · ส่งครั้งเดียว (`bookings.confirm_email_at` · `reminder_24h_at` · `reminder_1h_at`) |
+| ลิงก์เปิดนัดทุกเครื่อง | `/api/marketplace/tickets/[id]/access?k=` · `signBookingAccess` / `verifyBookingAccess` |
+| ความเป็นเจ้าของตั๋ว | `src/lib/marketplace/ticket-owner.ts` (`isTicketOwner`: คุกกี้ หรือ `user_id` ของบัญชี) — ห้ามเขียนเทียบ `customerRef` เองที่อื่น |
+| วันหยุด · พัก · เพดานต่อวัน | `reader_blocked_dates` · `readers.buffer_min` · `readers.daily_cap` ➔ `generateSlots(..., SlotOptions)` · ด่านเซิร์ฟเวอร์ `checkSlotBookable` |
+| ราคาต่อแม่หมอ | `readers.price_thb` · `readerPriceThb()` ใน `offer.ts` (ทั้งหน้าเว็บและตอนเรียกเก็บ) |
+| รีวิว | `reviews.repo.ts` · `POST /api/marketplace/tickets/[id]/review` — handed_off + จ่ายแล้ว + UNIQUE(ticket_id) |
+| รอคิวว่าง | `booking_waitlist` · `POST /api/marketplace/readers/[id]/waitlist` · cron แจ้งครั้งเดียวแล้วลบ |
+| งานรอบ | `/api/cron/booking-reminders` (ทุก 15 นาที ผ่าน GitHub Actions) |
+| แอดมิน | `/api/admin/bookings` + `BookingsAdmin.tsx` (แท็บ "การจอง & การเงิน") |
+
+**กับดัก**: เวลาพัก/เพดานต่อวันเป็น "ความสะดวก" — สองคนจองช่องติดกันพร้อมกันเป๊ะอาจหลุดได้ ส่วนการจองเวลาเดียวกันซ้อน unique index กันไว้แล้ว ·
+อย่าใส่คำถามลูกค้าลงอีเมลแม่หมอ (อีเมลไม่ใช่ช่องทางที่ล็อกอิน) · ด่าน `test-marketplace-readers` 18.1–18.6
+
 ### 7.3 Repository & APIs
 - `src/lib/marketplace/payments.repo.ts`: จัดการ CRUD, Transition สถานะ, คำนวณส่วนแบ่งแม่หมอ
 - `/api/marketplace/payments`: สร้างรายการชำระเงิน

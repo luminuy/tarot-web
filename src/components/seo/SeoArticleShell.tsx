@@ -22,6 +22,11 @@ export interface SeoArticleShellProps {
   faqs?: SeoFaqItem[];
   links?: SeoArticleLink[];
   className?: string;
+  /**
+   * สีแถบแบ่งส่วน (`page-band` แบบหน้าแรก) — ค่าเริ่มต้นแถบอ่อน (`tint`) เพราะบทความนี้มักเป็นส่วนสุดท้ายต่อจากส่วนพื้นใส
+   * หน้าไหนส่วนก่อนหน้าเป็นแถบอ่อนอยู่แล้ว ส่ง `"plain"` เพื่อให้สลับสีต่อกันถูก
+   */
+  band?: "tint" | "plain";
 }
 
 export function SeoArticleShell({
@@ -31,6 +36,7 @@ export function SeoArticleShell({
   faqs,
   links,
   className = "",
+  band = "tint",
 }: SeoArticleShellProps) {
   const { isEnglish } = useLocale();
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
@@ -41,7 +47,7 @@ export function SeoArticleShell({
 
   return (
     <section
-      className={`altar-panel rounded-2xl p-5 sm:p-8 space-y-6 ${className}`}
+      className={`page-band${band === "tint" ? " page-band-tint" : ""} space-y-6 ${className}`}
     >
       {/* Header */}
       <div className="space-y-2 border-b border-line pb-4">

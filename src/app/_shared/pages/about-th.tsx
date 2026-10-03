@@ -95,13 +95,13 @@ export function AboutBodyTh() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdAbout) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdBreadcrumbs) }} />
 
-      <div className="max-w-3xl mx-auto px-6 py-16 space-y-10">
-        <div className="text-center space-y-3 pb-6 border-b border-line/40">
+      <div className="max-w-3xl mx-auto px-6 pt-16 space-y-10">
+        <div className="text-center space-y-3 pb-2">
           <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif-th"><ThaiPhrases>เกี่ยวกับ SeerTarot</ThaiPhrases></h1>
           <p className="text-xs text-muted">ใครอยู่เบื้องหลัง และคำทำนายมาจากไหน</p>
         </div>
 
-        <section className="space-y-3">
+        <section className="page-band page-band-compact page-band-tint space-y-3">
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             SeerTarot คือเว็บดูดวงไพ่ยิปซีและไพ่ทาโรต์ออนไลน์ ที่สร้างขึ้นด้วยความตั้งใจเดียว —
             ทำให้การเปิดไพ่บนอินเทอร์เน็ต <strong>ตรวจสอบได้จริง</strong> ไม่ใช่แค่สุ่มภาพขึ้นมาแล้วบอกว่านี่คือดวงของคุณ
@@ -112,7 +112,7 @@ export function AboutBodyTh() {
           </p>
         </section>
 
-        <section className="space-y-3">
+        <section className="page-band page-band-compact space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>คำทำนายมาจากไหน</ThaiPhrases></h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             <strong>คำทำนายบนเว็บนี้เขียนโดยปัญญาประดิษฐ์ (AI) ที่เราออกแบบและปรับแต่งเอง</strong> ไม่ใช่หมอดูมนุษย์
@@ -131,7 +131,7 @@ export function AboutBodyTh() {
           </p>
         </section>
 
-        <section className="space-y-3">
+        <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>ไพ่ถูกสุ่มจริงไหม — พิสูจน์ได้</ThaiPhrases></h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             นี่คือเรื่องที่เราให้ความสำคัญที่สุด เว็บดูดวงทั่วไปไม่มีทางให้คุณรู้เลยว่าไพ่ถูกสุ่มจริง
@@ -148,7 +148,7 @@ export function AboutBodyTh() {
           </p>
         </section>
 
-        <section className="space-y-3">
+        <section className="page-band page-band-compact space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>สำรับไพ่ที่เราใช้</ThaiPhrases></h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             เราใช้ภาพไพ่จากสำรับ <strong>1909 Rider-Waite-Smith</strong> ต้นฉบับ ครบทั้ง 78 ใบ
@@ -160,7 +160,7 @@ export function AboutBodyTh() {
           </p>
         </section>
 
-        <section className="space-y-3">
+        <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>สิ่งที่เราไม่ใช่ และไม่รับทำ</ThaiPhrases></h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
@@ -182,7 +182,7 @@ export function AboutBodyTh() {
           </ul>
         </section>
 
-        <section className="space-y-3">
+        <section className="page-band page-band-compact space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>ถ้าคุณกำลังรู้สึกแย่มาก</ThaiPhrases></h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             ถ้าระบบตรวจพบว่าคำถามของคุณมีสัญญาณของการทำร้ายตัวเอง เราจะหยุดการทำนายทันที
@@ -198,7 +198,7 @@ export function AboutBodyTh() {
           </div>
         </section>
 
-        <section className="space-y-3">
+        <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>ติดต่อเรา</ThaiPhrases></h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">
             มีอะไรอยากบอก อยากติ อยากแจ้งปัญหา หรือเจอคำทำนายที่ไม่เหมาะสม เขียนมาได้เลยที่{" "}

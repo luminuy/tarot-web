@@ -174,7 +174,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
 
       {/* FAQ Section with Accordion */}
       {effectiveFaqs && effectiveFaqs.length > 0 && (
-        <section className="space-y-4 pt-6 border-t border-line/40">
+        <section className="page-band page-band-tint space-y-4">
           <h2 className="flex items-center gap-2 text-sm sm:text-base font-serif-th font-bold text-ink">
             
             {isEnglish ? "Frequently Asked Questions (FAQ)" : "คำถามที่พบบ่อย (FAQ)"}
@@ -266,7 +266,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
 
       {/* Related Articles Carousel/Grid */}
       {relatedArticles.length > 0 && (
-        <section className="space-y-4 pt-4">
+        <section className="page-band page-band-tint space-y-4">
           <h2 className="font-serif-th text-lg sm:text-xl font-bold text-ink"><ThaiPhrases>
             {isEnglish ? "Resonant & Related Articles" : "คัมภีร์บทความที่เกี่ยวข้อง"}
           </ThaiPhrases></h2>

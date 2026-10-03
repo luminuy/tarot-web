@@ -205,7 +205,7 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdFaq) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdOffers) }} />
 
-      <div className="mx-auto max-w-6xl space-y-16 px-4 py-12 sm:px-6 sm:py-16">
+      <div className="mx-auto max-w-6xl space-y-16 px-4 pt-12 sm:px-6 sm:pt-16">
         {/* ── หัวหน้า — ไม่มีกล่อง ตัวอักษรสีหมึกเท่านั้น (สีทองบนพื้นไล่สีคอนทราสต์ไม่ผ่าน · HANDOFF_GLASS_HOME 2.4) ── */}
         <header className="mx-auto max-w-3xl space-y-4 text-center">
           <p className="font-serif-th text-sm font-semibold text-muted">{isEn ? "Pricing" : "ราคาและแพ็กเกจ"}</p>
@@ -222,7 +222,8 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
         </header>
 
         {/* ── แพ็ก (island) ───────────────────────────────────────── */}
-        <section aria-labelledby="pricing-packages">
+        {/* แถบสีสลับแบบหน้าแรก (`page-band`): แพ็ก (อ่อน) · ตารางเทียบ (ใส) · คำถาม (อ่อน) · ปิดท้าย (ใส) */}
+        <section aria-labelledby="pricing-packages" className="page-band page-band-tint">
           <h2 id="pricing-packages" className="sr-only">
             {isEn ? "Plans and packages" : "แพ็กเกจทั้งหมด"}
           </h2>
@@ -230,7 +231,7 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
         </section>
 
         {/* ── ตารางเทียบสิทธิ์ ────────────────────────────────────── */}
-        <section aria-labelledby="pricing-compare" className="mx-auto max-w-4xl space-y-6">
+        <section aria-labelledby="pricing-compare" className="page-band mx-auto max-w-4xl space-y-6">
           <h2 id="pricing-compare" className="text-center font-serif-th text-2xl font-bold text-ink-deep sm:text-3xl">
             <ThaiPhrases>{isEn ? "Compare plans" : "เทียบสิทธิ์ทั้งหมด"}</ThaiPhrases>
           </h2>
@@ -270,7 +271,7 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
         </section>
 
         {/* ── คำถามที่พบบ่อย ──────────────────────────────────────── */}
-        <section aria-labelledby="pricing-faq" className="mx-auto max-w-3xl space-y-6">
+        <section aria-labelledby="pricing-faq" className="page-band page-band-tint mx-auto max-w-3xl space-y-6">
           <h2 id="pricing-faq" className="text-center font-serif-th text-2xl font-bold text-ink-deep sm:text-3xl">
             <ThaiPhrases>{isEn ? "Frequently asked questions" : "คำถามที่พบบ่อย"}</ThaiPhrases>
           </h2>
@@ -295,7 +296,7 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
         </section>
 
         {/* ── ปิดท้าย ─────────────────────────────────────────────── */}
-        <section className="altar-panel mx-auto max-w-3xl space-y-4 px-6 py-8 text-center">
+        <section className="page-band mx-auto max-w-3xl space-y-4 text-center">
           <h2 className="font-serif-th text-xl font-bold text-ink-deep sm:text-2xl">
             <ThaiPhrases>{isEn ? "Not sure yet? Start free." : "ยังไม่แน่ใจ? เริ่มดูดวงฟรีก่อน"}</ThaiPhrases>
           </h2>

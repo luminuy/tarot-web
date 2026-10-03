@@ -40,6 +40,13 @@ export interface CreateChargeInput {
   customerEmail?: string;
   /** ข้อความเล็กใต้ปุ่มจ่ายเงิน */
   submitMessage?: string;
+  /**
+   * เวลาที่หน้าจ่ายเงินหมดอายุ (unix วินาที · Stripe รับ 30 นาทีถึง 24 ชม. นับจากตอนสร้าง)
+   * ใช้กับการจองที่ "กันที่นั่ง" ไว้ — หน้าจ่ายต้องหมดอายุก่อนที่นั่งถูกปล่อยเสมอ
+   */
+  expiresAt?: number;
+  /** กุญแจกันสร้างซ้ำ (`Idempotency-Key`) — กดซ้ำ/เน็ตหลุดแล้วยิงใหม่ได้ session เดิม ไม่ใช่ใบใหม่ */
+  idempotencyKey?: string;
 }
 
 export interface ChargeResult {
@@ -98,9 +105,11 @@ async function stripeRequest(
   method: "GET" | "POST",
   path: string,
   body?: URLSearchParams,
+  idempotencyKey?: string,
 ): Promise<Record<string, unknown>> {
   const headers: Record<string, string> = { Authorization: `Bearer ${key}` };
   if (body) headers["Content-Type"] = "application/x-www-form-urlencoded";
+  if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
 
   const res = await fetch(`${STRIPE_API}${path}`, {
     method,
@@ -154,9 +163,11 @@ export async function createGatewayCharge(input: CreateChargeInput): Promise<Cha
       submit_type: "pay",
       custom_text: input.submitMessage ? { submit: { message: input.submitMessage } } : undefined,
       metadata,
-      payment_intent_data: { description: input.description, metadata },
+      // receipt_email = Stripe ส่งใบเสร็จให้เอง (โหมดจริง) · ไม่รู้อีเมล = Stripe ใช้อีเมลที่ลูกค้ากรอกในหน้าจ่ายตามค่าในแดชบอร์ด
+      payment_intent_data: { description: input.description, metadata, receipt_email: input.customerEmail },
+      expires_at: input.expiresAt,
     });
-    const session = await stripeRequest(key, "POST", "/checkout/sessions", body);
+    const session = await stripeRequest(key, "POST", "/checkout/sessions", body, input.idempotencyKey);
     return {
       chargeId: String(session.id),
       amountSatang: Number(session.amount_total ?? input.amountSatang),
@@ -186,6 +197,8 @@ export interface GatewayChargeStatus {
   amountSatang: number;
   currency: string;
   metadata: Record<string, string>;
+  /** อีเมลที่ลูกค้ากรอกในหน้าจ่ายเงิน Stripe — ใช้ส่งยืนยัน/เตือนนัด (null = ไม่มี) */
+  email: string | null;
 }
 
 /** ข้อมูลสถานะของ Checkout Session ไม่ว่าจะมาจาก webhook หรือจากการถาม Stripe เอง */
@@ -199,11 +212,15 @@ export function readCheckoutSession(session: Record<string, unknown>): GatewayCh
   }
   const status =
     session.payment_status === "paid" ? "paid" : session.status === "expired" ? "failed" : "pending";
+  const details = (session.customer_details ?? null) as Record<string, unknown> | null;
+  const rawEmail = details?.email ?? session.customer_email;
+  const email = typeof rawEmail === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail) ? rawEmail.trim().slice(0, 254) : null;
   return {
     status,
     amountSatang: Number(session.amount_total ?? 0),
     currency: String(session.currency ?? "").toUpperCase(),
     metadata,
+    email,
   };
 }
 
@@ -220,6 +237,66 @@ export async function retrieveGatewayCharge(chargeId: string): Promise<GatewayCh
   } catch (err) {
     console.warn("[Payment Gateway] ถามสถานะจาก Stripe ไม่สำเร็จ", err);
     return null;
+  }
+}
+
+/**
+ * ปิดหน้าจ่ายเงินที่ยังเปิดอยู่ (ลูกค้ายกเลิกการจองก่อนจ่าย) — กันจ่ายเข้ามาหลังยกเลิกแล้ว
+ * พลาดได้ไม่เป็นไร: ถ้าเงินเข้ามาจริง `settleConsultationPayment` จะคืนเงินให้อัตโนมัติ
+ */
+export async function expireGatewayCharge(chargeId: string): Promise<void> {
+  const key = stripeSecretKey();
+  if (!key || !/^cs_[A-Za-z0-9_]+$/.test(chargeId)) return;
+  try {
+    await stripeRequest(key, "POST", `/checkout/sessions/${chargeId}/expire`);
+  } catch (err) {
+    // session ที่จ่ายแล้ว/หมดอายุแล้วปิดซ้ำไม่ได้ — เป็นเรื่องปกติ
+    console.warn("[Payment Gateway] ปิดหน้าจ่ายเงินไม่สำเร็จ", err);
+  }
+}
+
+/** ลิงก์หน้าจ่ายเงินเดิมถ้ายังเปิดอยู่ (กลับมาจ่ายต่อ) — null = หมดอายุ/จ่ายแล้ว/ไม่ใช่ Stripe */
+export async function openGatewayCheckoutUrl(chargeId: string): Promise<string | null> {
+  const key = stripeSecretKey();
+  if (!key || !/^cs_[A-Za-z0-9_]+$/.test(chargeId)) return null;
+  try {
+    const session = await stripeRequest(key, "GET", `/checkout/sessions/${chargeId}`);
+    return session.status === "open" && typeof session.url === "string" ? session.url : null;
+  } catch {
+    return null;
+  }
+}
+
+export interface RefundResult {
+  ok: boolean;
+  refundId?: string;
+}
+
+/**
+ * คืนเงินเต็มจำนวนของรายการ (Checkout Session ➔ PaymentIntent ➔ Refund)
+ * - `idempotencyKey` ต้องผูกกับรายการของเรา (`refund_<paymentId>`) — เรียกซ้ำกี่ครั้งก็คืนครั้งเดียว
+ * - ตัวจำลอง (ไม่มีคีย์) ถือว่าคืนสำเร็จ — ใช้เฉพาะเครื่องพัฒนา/รอบทดสอบ
+ * ⚠️ ห้ามโยน error ออกไป — ผู้เรียกต้องบันทึก `refund_status = failed` ให้แอดมินตามต่อ ไม่ใช่ทำให้การยกเลิกพัง
+ */
+export async function refundGatewayCharge(chargeId: string, idempotencyKey: string): Promise<RefundResult> {
+  const key = stripeSecretKey();
+  if (!key) return { ok: true, refundId: `re_sim_${chargeId.slice(-8)}` };
+  if (!/^cs_[A-Za-z0-9_]+$/.test(chargeId)) return { ok: false };
+  try {
+    const session = await stripeRequest(key, "GET", `/checkout/sessions/${chargeId}`);
+    const intent = typeof session.payment_intent === "string" ? session.payment_intent : null;
+    if (!intent) return { ok: false };
+    const refund = await stripeRequest(
+      key,
+      "POST",
+      "/refunds",
+      toStripeForm({ payment_intent: intent, reason: "requested_by_customer" }),
+      idempotencyKey,
+    );
+    return { ok: true, refundId: String(refund.id ?? "") };
+  } catch (err) {
+    console.error("[Payment Gateway] คืนเงินไม่สำเร็จ", err);
+    return { ok: false };
   }
 }
 

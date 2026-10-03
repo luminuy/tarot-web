@@ -149,11 +149,12 @@ export function HomeProofSection({ isEnglish }: { isEnglish: boolean }) {
       </figure>
 
       <div className="text-center">
+        {/* ไปผังเดียวกับตัวอย่างข้างบน (3 ใบ อดีต ปัจจุบัน อนาคต) — เดิมชี้ #home-quick ที่เป็นไพ่ใบเดียว คนกดแล้วไม่เจอสิ่งที่เพิ่งดู */}
         <a
-          href="#home-quick"
+          href={isEnglish ? "/en/read/three-card" : "/read/three-card"}
           className="btn-gold-glass inline-flex items-center gap-1.5 px-5 py-2.5 font-serif-th text-sm font-bold"
         >
-          {isEnglish ? "Draw your own cards" : "ลองเปิดไพ่ของคุณเอง"}
+          {isEnglish ? "Draw your own 3 cards" : "ลองเปิดไพ่ 3 ใบของคุณเอง"}
         </a>
       </div>
     </section>
