@@ -17,6 +17,7 @@ export interface ElementalPairInteraction {
   elementB: TarotElement;
   relationship: "harmonious" | "tension" | "neutral" | "reinforcing";
   meaningTh: string;
+  meaningEn: string;
 }
 
 export interface ElementalAlchemyResult {
@@ -27,7 +28,34 @@ export interface ElementalAlchemyResult {
   majorPercentage: number;
   pairInteractions: ElementalPairInteraction[];
   alchemyNarrative: string;
+  /** ฉบับอังกฤษล้วนสำหรับ prompt หน้า `/en` (ISSUE-055) */
+  alchemyNarrativeEn: string;
 }
+
+export interface AlchemyOptions {
+  /**
+   * ป้ายของไพ่แต่ละใบตามลำดับ เช่น `ตำแหน่ง "อดีต" (หอคอย)` — ให้ AI รู้ว่าคู่ธาตุนี้คือ "ช่องไหนคุยกับช่องไหน"
+   * ไม่ส่ง = ใช้ชื่อไพ่อย่างเดียว (พฤติกรรมเดิม)
+   */
+  labelsTh?: string[];
+  labelsEn?: string[];
+}
+
+const ELEMENT_EN: Record<TarotElement, string> = { ไฟ: "Fire", น้ำ: "Water", ลม: "Air", ดิน: "Earth" };
+
+const ELEMENT_PSYCHOLOGY_EN: Record<TarotElement, { nature: string; positive: string }> = {
+  ไฟ: { nature: "drive, enthusiasm, courage and will", positive: "determination, passion and readiness to initiate" },
+  น้ำ: { nature: "emotion, love, the subconscious and intuition", positive: "deep empathy for oneself and others" },
+  ลม: { nature: "intellect, logic, communication and discernment", positive: "sharp analysis, honest communication and foresight" },
+  ดิน: { nature: "material security, money, work, the body and present reality", positive: "steadiness, follow-through and grounded management of life" },
+};
+
+const LACKING_ELEMENT_MEANINGS_EN: Record<TarotElement, string> = {
+  ไฟ: "missing drive and confidence — sluggishness, fatigue or reluctance to leave the comfort zone",
+  น้ำ: "logic overriding the heart — true feelings swept under the rug",
+  ลม: "missing clear thinking or communication — acting on impulse without a plan",
+  ดิน: "missing concrete action — ideas and wishes not yet rooted in reality",
+};
 
 const ELEMENT_PSYCHOLOGY: Record<TarotElement, { nature: string; positive: string; shadow: string }> = {
   ไฟ: {
@@ -61,86 +89,81 @@ const LACKING_ELEMENT_MEANINGS: Record<TarotElement, string> = {
 
 /**
  * ประเมินความสัมพันธ์ระหว่างคู่ธาตุตามกฎ Elemental Dignities
+ * `labelA/B` = ป้ายที่ใช้เรียกไพ่ในข้อความ (ชื่อไพ่ หรือ ชื่อตำแหน่ง+ชื่อไพ่)
  */
 function evaluatePairDignity(
   cardA: TarotCard,
-  cardB: TarotCard
+  cardB: TarotCard,
+  labels: { thA: string; thB: string; enA: string; enB: string },
 ): ElementalPairInteraction | null {
   const elemA = cardA.element as TarotElement;
   const elemB = cardB.element as TarotElement;
 
   if (!elemA || !elemB) return null;
 
+  const { thA, thB, enA, enB } = labels;
+  const base = { cardA: cardA.nameTh, cardB: cardB.nameTh, elementA: elemA, elementB: elemB };
+  const pair = (a: TarotElement, b: TarotElement) =>
+    (elemA === a && elemB === b) || (elemA === b && elemB === a);
+
   if (elemA === elemB) {
     return {
-      cardA: cardA.nameTh,
-      cardB: cardB.nameTh,
-      elementA: elemA,
-      elementB: elemB,
+      ...base,
       relationship: "reinforcing",
-      meaningTh: `พลังธาตุ${elemA}เสริมกำลังกันเข้มข้น (${cardA.nameTh} + ${cardB.nameTh}) ทวีคูณ${ELEMENT_PSYCHOLOGY[elemA].nature}`,
+      meaningTh: `พลังธาตุ${elemA}เสริมกำลังกันเข้มข้น (${thA} + ${thB}) ทวีคูณ${ELEMENT_PSYCHOLOGY[elemA].nature}`,
+      meaningEn: `Doubled ${ELEMENT_EN[elemA]} (${enA} + ${enB}) amplifies ${ELEMENT_PSYCHOLOGY_EN[elemA].nature}`,
     };
   }
 
   // คู่เกื้อหนุน (Fire + Air / Water + Earth)
-  if ((elemA === "ไฟ" && elemB === "ลม") || (elemA === "ลม" && elemB === "ไฟ")) {
+  if (pair("ไฟ", "ลม")) {
     return {
-      cardA: cardA.nameTh,
-      cardB: cardB.nameTh,
-      elementA: elemA,
-      elementB: elemB,
+      ...base,
       relationship: "harmonious",
-      meaningTh: `ธาตุไฟและธาตุลมเกื้อหนุนกัน (${cardA.nameTh} + ${cardB.nameTh}): ความคิดและแรงบันดาลใจโหมส่งให้เกิดการลงมือทำที่ก้าวกระโดด`,
+      meaningTh: `ธาตุไฟและธาตุลมเกื้อหนุนกัน (${thA} + ${thB}): ความคิดและแรงบันดาลใจโหมส่งให้เกิดการลงมือทำที่ก้าวกระโดด`,
+      meaningEn: `Fire and Air support each other (${enA} + ${enB}): ideas fan inspiration into bold action`,
     };
   }
-  if ((elemA === "น้ำ" && elemB === "ดิน") || (elemA === "ดิน" && elemB === "น้ำ")) {
+  if (pair("น้ำ", "ดิน")) {
     return {
-      cardA: cardA.nameTh,
-      cardB: cardB.nameTh,
-      elementA: elemA,
-      elementB: elemB,
+      ...base,
       relationship: "harmonious",
-      meaningTh: `ธาตุน้ำและธาตุดินผสานกันอย่างอุดมสมบูรณ์ (${cardA.nameTh} + ${cardB.nameTh}): ความรู้สึกและจินตนาการสามารถแปรเปลี่ยนเป็นความสำเร็จที่มั่นคงจับต้องได้`,
+      meaningTh: `ธาตุน้ำและธาตุดินผสานกันอย่างอุดมสมบูรณ์ (${thA} + ${thB}): ความรู้สึกและจินตนาการสามารถแปรเปลี่ยนเป็นความสำเร็จที่มั่นคงจับต้องได้`,
+      meaningEn: `Water and Earth nourish each other (${enA} + ${enB}): feelings and imagination can become tangible, lasting results`,
     };
   }
 
   // คู่ขัดแย้ง/ตึงเครียด (Fire + Water / Air + Earth)
-  if ((elemA === "ไฟ" && elemB === "น้ำ") || (elemA === "น้ำ" && elemB === "ไฟ")) {
+  if (pair("ไฟ", "น้ำ")) {
     return {
-      cardA: cardA.nameTh,
-      cardB: cardB.nameTh,
-      elementA: elemA,
-      elementB: elemB,
+      ...base,
       relationship: "tension",
-      meaningTh: `ธาตุไฟปะทะธาตุน้ำ (${cardA.nameTh} + ${cardB.nameTh}): ความขัดแย้งภายในระหว่างความอยากพุ่งไปข้างหน้ากับความกลัว/ความผูกพันในใจ ทำให้เกิดสภาวะอารมณ์ที่พลุ่งพล่าน`,
+      meaningTh: `ธาตุไฟปะทะธาตุน้ำ (${thA} + ${thB}): ความขัดแย้งภายในระหว่างความอยากพุ่งไปข้างหน้ากับความกลัว/ความผูกพันในใจ ทำให้เกิดสภาวะอารมณ์ที่พลุ่งพล่าน`,
+      meaningEn: `Fire clashes with Water (${enA} + ${enB}): the urge to charge ahead fights fear or emotional attachment, stirring turbulent feelings`,
     };
   }
-  if ((elemA === "ลม" && elemB === "ดิน") || (elemA === "ดิน" && elemB === "ลม")) {
+  if (pair("ลม", "ดิน")) {
     return {
-      cardA: cardA.nameTh,
-      cardB: cardB.nameTh,
-      elementA: elemA,
-      elementB: elemB,
+      ...base,
       relationship: "tension",
-      meaningTh: `ธาตุลมขัดแย้งกับธาตุดิน (${cardA.nameTh} + ${cardB.nameTh}): ความคิดและทฤษฎีในหัวขัดแย้งกับข้อจำกัดในโลกความเป็นจริง เกิดความรู้สึกลังเลหรือติดหล่ม`,
+      meaningTh: `ธาตุลมขัดแย้งกับธาตุดิน (${thA} + ${thB}): ความคิดและทฤษฎีในหัวขัดแย้งกับข้อจำกัดในโลกความเป็นจริง เกิดความรู้สึกลังเลหรือติดหล่ม`,
+      meaningEn: `Air clashes with Earth (${enA} + ${enB}): theories in the head collide with real-world limits, producing hesitation or feeling stuck`,
     };
   }
 
   // คู่เป็นกลาง (Fire + Earth / Air + Water)
   return {
-    cardA: cardA.nameTh,
-    cardB: cardB.nameTh,
-    elementA: elemA,
-    elementB: elemB,
+    ...base,
     relationship: "neutral",
-    meaningTh: `ธาตุ${elemA}และธาตุ${elemB} (${cardA.nameTh} + ${cardB.nameTh}): ต้องอาศัยการประนีประนอมและการจัดสรรจังหวะเวลาอย่างมีสติ`,
+    meaningTh: `ธาตุ${elemA}และธาตุ${elemB} (${thA} + ${thB}): ต้องอาศัยการประนีประนอมและการจัดสรรจังหวะเวลาอย่างมีสติ`,
+    meaningEn: `${ELEMENT_EN[elemA]} and ${ELEMENT_EN[elemB]} (${enA} + ${enB}): calls for compromise and mindful timing`,
   };
 }
 
 /**
  * วิเคราะห์เคมีธาตุภาพรวมของผังพยากรณ์
  */
-export function analyzeElementalAlchemy(cards: TarotCard[]): ElementalAlchemyResult {
+export function analyzeElementalAlchemy(cards: TarotCard[], opts?: AlchemyOptions): ElementalAlchemyResult {
   const counts: Record<TarotElement, number> = {
     ไฟ: 0,
     น้ำ: 0,
@@ -162,7 +185,7 @@ export function analyzeElementalAlchemy(cards: TarotCard[]): ElementalAlchemyRes
   const total = cards.length || 1;
   const majorPercentage = Math.round((majorCount / total) * 100);
 
-  // หาธาตุเด่น (ถ้ามีสัดส่วน >= 40%)
+  // หาธาตุเด่น (ต้องมีสัดส่วน >= 35%)
   let dominantElement: TarotElement | null = null;
   let maxCount = 0;
   for (const [elem, count] of Object.entries(counts) as [TarotElement, number][]) {
@@ -181,9 +204,16 @@ export function analyzeElementalAlchemy(cards: TarotCard[]): ElementalAlchemyRes
   );
 
   // ตรวจจับคู่ธาตุติดกัน (Pair interactions) สูงสุด 3 คู่แรกที่สำคัญ
+  const thLabel = (i: number) => opts?.labelsTh?.[i] || cards[i].nameTh;
+  const enLabel = (i: number) => opts?.labelsEn?.[i] || cards[i].nameEn;
   const pairInteractions: ElementalPairInteraction[] = [];
   for (let i = 0; i < cards.length - 1 && pairInteractions.length < 3; i++) {
-    const interaction = evaluatePairDignity(cards[i], cards[i + 1]);
+    const interaction = evaluatePairDignity(cards[i], cards[i + 1], {
+      thA: thLabel(i),
+      thB: thLabel(i + 1),
+      enA: enLabel(i),
+      enB: enLabel(i + 1),
+    });
     if (interaction && (interaction.relationship === "harmonious" || interaction.relationship === "tension")) {
       pairInteractions.push(interaction);
     }
@@ -222,6 +252,27 @@ export function analyzeElementalAlchemy(cards: TarotCard[]): ElementalAlchemyRes
     );
   }
 
+  // ฉบับอังกฤษล้วน (ISSUE-055) — โครงเดียวกับฉบับไทยทุกบรรทัด
+  const en: string[] = [
+    `Elemental balance: Fire ${counts.ไฟ} | Water ${counts.น้ำ} | Air ${counts.ลม} | Earth ${counts.ดิน} (Major Arcana: ${majorCount}/${total} cards = ${majorPercentage}%)`,
+  ];
+  en.push(
+    dominantElement
+      ? `• Dominant element: ${ELEMENT_EN[dominantElement]} — driven by ${ELEMENT_PSYCHOLOGY_EN[dominantElement].positive}`
+      : "• Elemental balance: energy is spread fairly evenly; no single element dominates",
+  );
+  if (lackingElements.length > 0) {
+    en.push(
+      `• Missing element(s): ${lackingElements.map((e) => `${ELEMENT_EN[e]} (${LACKING_ELEMENT_MEANINGS_EN[e]})`).join(" and ")}`,
+    );
+  }
+  if (pairInteractions.length > 0) {
+    en.push(`• Key card-pair chemistry: ${pairInteractions.map((p) => p.meaningEn).join(" | ")}`);
+  }
+  if (majorPercentage >= 50) {
+    en.push("• Fate dimension: Major Arcana make up half or more — a major life turning point driven by soul-level forces");
+  }
+
   return {
     counts,
     dominantElement,
@@ -230,5 +281,6 @@ export function analyzeElementalAlchemy(cards: TarotCard[]): ElementalAlchemyRes
     majorPercentage,
     pairInteractions,
     alchemyNarrative: narrativeParts.join("\n"),
+    alchemyNarrativeEn: en.join("\n"),
   };
 }

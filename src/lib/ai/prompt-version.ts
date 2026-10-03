@@ -4,7 +4,7 @@
  * ตัวอย่างมาตรฐาน หรือโมดูลวิเคราะห์ 7 ตัว — ไม่งั้นสถิติก่อน/หลังจะปนกันจนอ่านไม่ออก
  * รูปแบบ: <YYYYMMDD>-<ลำดับในวัน>
  */
-export const PROMPT_VERSION = "20260911-2";
+export const PROMPT_VERSION = "20261003-1";
 
 /**
  * 🔒 ลายนิ้วมือของ `SYSTEM_CORE_KNOWLEDGE` ที่ปักหมุดคู่กับ `PROMPT_VERSION` ข้างบน

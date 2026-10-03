@@ -25,6 +25,7 @@ export interface ConsistencyIssue {
     | "DUPLICATE_POSITION"
     | "FOREIGN_CARD"
     | "YESNO_CONTRADICTION"
+    | "YESNO_AGAINST_CARDS"
     | "ADVICE_MISSING_MINDFUL"
     | "CARD_READING_TOO_SHORT"
     | "CARD_READING_TOO_LONG"
@@ -44,6 +45,8 @@ export interface ConsistencyOptions {
   yesNoMode?: boolean;
   pastReading?: PastReadingSnapshot;
   allowedExtraCardNames?: string[];
+  /** น้ำหนักรวมใช่/ไม่ใช่จากสารานุกรม (`tallyYesNo`) — ใช้นับสถิติว่า AI ฟันธงสวนไพ่บ่อยแค่ไหน */
+  expectedYesNo?: "ใช่" | "ไม่ใช่" | "ยังไม่แน่";
 }
 
 // แผนที่คำอ่านทับศัพท์ภาษาไทยสำหรับไพ่ชุดหลัก (Major Arcana Transliterations)
@@ -259,6 +262,23 @@ export function checkReadingConsistency(
         });
       }
     }
+  }
+
+  // ── 3b. ฟันธงสวนน้ำหนักไพ่ทั้งผัง (ใช่ ↔ ไม่ใช่) — เตือนเพื่อเก็บสถิติ ไม่ตีตก
+  //       (prompt อนุญาตให้ตอบต่างได้ถ้าอธิบายเหตุผลจากหน้าไพ่ · ISSUE-054)
+  if (
+    opts?.yesNoMode &&
+    opts.expectedYesNo &&
+    opts.expectedYesNo !== "ยังไม่แน่" &&
+    reading.yesNoAnswer &&
+    reading.yesNoAnswer !== "ยังไม่แน่" &&
+    reading.yesNoAnswer !== opts.expectedYesNo
+  ) {
+    issues.push({
+      code: "YESNO_AGAINST_CARDS",
+      message: `yesNoAnswer "${reading.yesNoAnswer}" สวนน้ำหนักไพ่ทั้งผังที่เอนไปทาง "${opts.expectedYesNo}"`,
+      fatal: false,
+    });
   }
 
   // ── 4. ตรวจสอบ Mindful Ritual ใน advice (ADVICE_MISSING_MINDFUL) ──

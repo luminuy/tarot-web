@@ -21,6 +21,8 @@ export interface QuestionEnergyDiagnostic {
   coreEmotionalNeed: string;
   counselingGuidance: string;
   promptDirective: string;
+  /** ฉบับอังกฤษล้วนสำหรับ prompt หน้า `/en` (ISSUE-055) */
+  promptDirectiveEn: string;
 }
 
 const VICTIM_KEYWORDS = [
@@ -41,6 +43,8 @@ const VICTIM_KEYWORDS = [
   "เวรกรรม",
   "ซวย",
   "ไม่ไหว",
+  // อังกฤษ (หน้า /en) — เดิมมีแต่คำไทย คำถามภาษาอังกฤษจึงตกค่าปริยายทุกครั้ง
+  "exhausted", "hopeless", "why me", "hurt", "betrayed", "can't cope", "falling apart", "cheated on", "crying", "give up",
 ];
 
 const PARALYSIS_KEYWORDS = [
@@ -57,6 +61,8 @@ const PARALYSIS_KEYWORDS = [
   "ตัดสินใจ",
   "คิดไม่ตก",
   "สับสน",
+  // อังกฤษ (หน้า /en) — เดิมมีแต่คำไทย คำถามภาษาอังกฤษจึงตกค่าปริยายทุกครั้ง
+  "should i", " or ", "can't decide", "torn between", "which one", "stay or go", "quit or", "confused", "worth it",
 ];
 
 const INSECURITY_KEYWORDS = [
@@ -73,6 +79,8 @@ const INSECURITY_KEYWORDS = [
   "แอบมอง",
   "ความรู้สึกเขา",
   "ทิ้งเราไหม",
+  // อังกฤษ (หน้า /en) — เดิมมีแต่คำไทย คำถามภาษาอังกฤษจึงตกค่าปริยายทุกครั้ง
+  "does he love", "does she love", "do they love", "miss me", "come back", "someone else", "how does he feel", "how does she feel", "how do they feel", "cheating", "secretly",
 ];
 
 const GROWTH_KEYWORDS = [
@@ -90,6 +98,8 @@ const GROWTH_KEYWORDS = [
   "กำไร",
   "ขยับขยาย",
   "เติบโต",
+  // อังกฤษ (หน้า /en) — เดิมมีแต่คำไทย คำถามภาษาอังกฤษจึงตกค่าปริยายทุกครั้ง
+  "grow", "future", "start", "business", "opportunity", "promotion", "invest", "goal", "success", "plan", "money", "profit", "expand",
 ];
 
 /**
@@ -139,6 +149,8 @@ export function diagnoseQuestionEnergy(
           "ห้ามซ้ำเติมหรือใช้คำสั่งสอนแข็งทื่อ ให้เริ่มด้วยการโอบอุ้มความรู้สึก แล้วค่อย ๆ ชี้ให้เห็นว่าเขายังมีสิทธิ์เลือกและก้าวต่อไปได้",
         promptDirective:
           "• กรอบจิตวิทยา: ผู้ถามกำลังรู้สึกเปราะบาง จงใช้น้ำเสียงที่โอบอุ้มหัวใจ ชี้ให้เห็นว่าเขาไม่ได้อยู่คนเดียว และเปลี่ยนความกลัวเป็นพลังก้าวแรก",
+        promptDirectiveEn:
+          "• Psychological frame: the seeker feels vulnerable. Use a voice that holds their heart, show them they are not alone, and turn fear into a first brave step.",
       };
     }
 
@@ -151,6 +163,8 @@ export function diagnoseQuestionEnergy(
           "ช่วยชั่งน้ำหนักพลังงานของทางเลือกอย่างตรงไปตรงมา ชี้ให้เห็นว่าการไม่ตัดสินใจก็คือการตัดสินใจอย่างหนึ่งที่ทำให้เสียเวลาชีวิต",
         promptDirective:
           "• กรอบจิตวิทยา: ผู้ถามกำลังลังเลคิดวน จงช่วยตัดความฟุ้งซ่าน ชี้จุดสำคัญที่สุด 1 จุด และมอบเกณฑ์ตัดสินใจที่เฉียบคม",
+        promptDirectiveEn:
+          "• Psychological frame: the seeker is stuck in indecision. Cut through the noise, name the single most important point, and give a sharp decision criterion.",
       };
     }
 
@@ -163,6 +177,8 @@ export function diagnoseQuestionEnergy(
           "เปิดเผยความจริงบนหน้าไพ่อย่างนุ่มนวล เตือนสติไม่ให้เอาใจไปผูกไว้กับความไม่แน่นอน และชวนให้เขากลับมารักและดูแลตัวเอง",
         promptDirective:
           "• กรอบจิตวิทยา: ผู้ถามกำลังกังวลเรื่องความสัมพันธ์ จงเตือนสติอย่างอ่อนโยนว่าความรักที่ดีต้องไม่บั่นทอนคุณค่าในตัวเอง คืนจุดยืนที่สง่างามให้เขา",
+        promptDirectiveEn:
+          "• Psychological frame: the seeker is anxious about a relationship. Gently remind them that good love never erodes self-worth, and restore their dignified footing.",
       };
     }
 
@@ -174,6 +190,8 @@ export function diagnoseQuestionEnergy(
         "ใช้น้ำเสียงที่เป็นมืออาชีพ มั่นใจ ท้าทายให้ก้าวข้ามขีดจำกัด และมอบคำแนะนำแบบ Step-by-Step ที่มีพลัง",
       promptDirective:
         "• กรอบจิตวิทยา: ผู้ถามพร้อมลุยและพัฒนา จงมอบคำแนะนำระดับกลยุทธ์ที่คมชัด หนักแน่น และผลักดันให้เขาสร้างผลลัพธ์จริง",
+      promptDirectiveEn:
+        "• Psychological frame: the seeker is ready to act and grow. Offer crisp, strategic, confident guidance that pushes toward real results.",
     };
   }
 
@@ -184,5 +202,7 @@ export function diagnoseQuestionEnergy(
     coreEmotionalNeed: "ต้องการความกระจ่างและการชี้แนะทิศทางชีวิตอย่างรอบด้าน",
     counselingGuidance: "อ่านไพ่ตามธรรมชาติด้วยความเข้าอกเข้าใจและให้กำลังใจ",
     promptDirective: "• กรอบจิตวิทยา: นำเสนอความจริงอย่างลึกซึ้ง อบอุ่น และมอบพลังบวกในการดำเนินชีวิต",
+    promptDirectiveEn:
+      "• Psychological frame: present the truth with depth and warmth, and leave the seeker empowered.",
   };
 }

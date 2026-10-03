@@ -32,6 +32,7 @@ import { mockCardTone, streamMockGeminiReading } from "../../src/lib/ai/mock-rea
 import { READING_INITIAL, readingReducer } from "../../src/components/home/flow-reading";
 import { buildOfflineMonthlySummary } from "../../src/lib/journal/monthly-offline";
 import { buildOfflineChatReply, detectChatIntent } from "../../src/lib/ai/chat-fallback";
+import { formatPriorReadingForChat, PRIOR_READING_CHAR_BUDGET } from "../../src/lib/ai/chat-context";
 import type { SavedReadingItem } from "../../src/lib/utils/history";
 import { checkReadingConsistency } from "../../src/lib/ai/consistency";
 import type { ReadingEvent } from "../../src/lib/ai/types";
@@ -553,6 +554,54 @@ async function run() {
   check("ไม่มีไพ่ให้อ้าง ➔ บอกให้โหลดใหม่ ไม่เดาคำตอบ (กฎเหล็กข้อ 14)", /โหลดคำอ่านใหม่/.test(ask("อะไรก็ได้", {})));
   const chatRouteSrc = fs.readFileSync(path.resolve("src/app/api/reading/[id]/chat/route.ts"), "utf8");
   check("route แชทใช้ buildOfflineChatReply และยังตรวจสัญญาณวิกฤตก่อน", /buildOfflineChatReply\(/.test(chatRouteSrc) && /checkQuestion\(userQuestion, lang\)/.test(chatRouteSrc));
+
+  // ── 11. บริบทคำอ่านเดิมที่ส่งให้ AI ตอนถามต่อ (chat-context) ──────────────
+  console.log("\n🧠 11. แชทถามต่อเห็นคำอ่านเดิมครบทุกใบ (chat-context)");
+  const posNames = ["อดีต", "ปัจจุบัน", "อนาคต"];
+  const priorResult = {
+    cards: [
+      { position: 2, headline: "แสงที่รออยู่", reading: "ดวงอาทิตย์ส่องลงบนเด็กบนหลังม้าขาว ".repeat(3) },
+      { position: 0, headline: "จุดต่ำสุดผ่านไปแล้ว", reading: "ดาบสิบเล่มปักหลัง แต่ฟ้าด้านหลังเริ่มสว่าง" },
+      { position: 1, headline: "ใจสองดวงเริ่มคุยกัน", reading: "ถ้วยสองใบยื่นเข้าหากันอย่างเท่าเทียม" },
+    ],
+    summary: "สรุปคำอ่านจริงของรอบนี้",
+    advice: ["ทักเขาก่อนสั้น ๆ", "🧘 หายใจลึก ๆ"],
+    timing: "ภายใน 1-2 สัปดาห์นี้",
+    yesNoAnswer: "ใช่" as const,
+  };
+  const priorTh = formatPriorReadingForChat({ result: priorResult, positionNames: posNames, lang: "th" });
+  check("พูดถึงคำอ่านครบทุกใบ (พาดหัวทั้ง 3 ใบ)", priorResult.cards.every((c) => priorTh.includes(c.headline)));
+  check(
+    "เรียงตามตำแหน่ง 0..N แม้โมเดลส่งมาสลับลำดับ",
+    priorTh.indexOf("จุดต่ำสุด") < priorTh.indexOf("ใจสองดวง") && priorTh.indexOf("ใจสองดวง") < priorTh.indexOf("แสงที่รออยู่"),
+  );
+  check("ผูกชื่อตำแหน่งถูกช่อง", priorTh.includes('"อดีต": จุดต่ำสุดผ่านไปแล้ว') && priorTh.includes('"อนาคต": แสงที่รออยู่'));
+  check(
+    "มีฟันธง · สรุป · คำแนะนำ · กรอบเวลาที่ให้ไปแล้ว",
+    ["คำตอบฟันธงที่ให้ไว้: ใช่", "สรุปคำอ่านจริงของรอบนี้", "ทักเขาก่อนสั้น ๆ", "ภายใน 1-2 สัปดาห์นี้"].every((t) => priorTh.includes(t)),
+  );
+  const noResult = formatPriorReadingForChat({ result: undefined, positionNames: posNames, lang: "th" });
+  check(
+    "ไม่มีคำอ่าน ➔ บอกตรง ๆ ว่ายังไม่มี ไม่กุสรุปขึ้นเอง",
+    /ยังไม่มี/.test(noResult) && !/เปลี่ยนแปลงที่ดี|positive resolution/.test(noResult),
+  );
+  const bigCards = Array.from({ length: 12 }, (_, i) => ({ position: i, headline: `ช่อง${i}`, reading: "ก".repeat(900) }));
+  const big = formatPriorReadingForChat({ result: { cards: bigCards }, positionNames: [], lang: "th" });
+  check(
+    "ผัง 12 ใบ ➔ ทุกใบยังอยู่ครบ และคำอ่านรายใบไม่เกินงบรวม (กันชนเพดาน TPM ของ Groq)",
+    bigCards.every((c) => big.includes(`${c.headline} —`)) && big.length <= PRIOR_READING_CHAR_BUDGET + 12 * 60,
+    `ยาว ${big.length} ตัวอักษร`,
+  );
+  const priorEn = formatPriorReadingForChat({
+    result: { ...priorResult, cards: [{ position: 0, headline: "The Low Point Has Passed", reading: "Ten swords, yet dawn rises." }], summary: "Real summary", advice: ["Reach out first"], timing: "Within two weeks" },
+    positionNames: ["Past"],
+    lang: "en",
+  });
+  check("[en] บล็อกคำอ่านเดิมไม่มีอักษรไทยหลุด (ฟันธงแปลงเป็น Yes)", !THAI.test(priorEn) && priorEn.includes("Yes/No verdict given: Yes"), priorEn);
+  check(
+    "route แชทส่งคำอ่านเดิมรายใบให้ AI และเลิกกุสรุปเมื่อไม่มีคำอ่าน",
+    /formatPriorReadingForChat\(/.test(chatRouteSrc) && !/กำลังอยู่ในช่วงการเปลี่ยนแปลงที่ดี|Energy is moving towards a positive resolution/.test(chatRouteSrc),
+  );
 
   // ── สรุป ────────────────────────────────────────────────────────────
   console.log("\n══════════════════════════════════════════════════════════════════");

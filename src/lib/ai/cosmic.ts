@@ -35,7 +35,32 @@ export interface CosmicContext {
   moon: MoonPhaseInfo;
   day: DayRulerInfo;
   promptAnchor: string;
+  /** ฉบับอังกฤษล้วนสำหรับ prompt หน้า `/en` (ISSUE-055) */
+  promptAnchorEn: string;
 }
+
+const MOON_THEME_EN: Record<MoonPhaseInfo["phaseCode"], string> = {
+  new_moon: "setting intentions, starting from zero and clearing old energy",
+  waxing_crescent: "nurturing hope, first steps of action and planting new seeds",
+  first_quarter: "decisive choices, passing tests and standing firm on goals",
+  waxing_gibbous: "fine-tuning details, patient refinement and preparing for results",
+  full_moon: "peak awareness, illuminating blind spots and celebrating truth",
+  waning_gibbous: "sharing lessons, gratitude and passing on wisdom",
+  last_quarter: "release, forgiveness and clearing what is no longer needed",
+  waning_crescent: "stillness, inner renewal and rest before a new cycle",
+};
+
+const ELEMENT_EN: Record<DayRulerInfo["element"], string> = { ไฟ: "Fire", น้ำ: "Water", ลม: "Air", ดิน: "Earth" };
+
+const DAY_EN: Record<string, { day: string; theme: string }> = {
+  Sun: { day: "Sunday", theme: "identity, focused will, clarity and honor" },
+  Moon: { day: "Monday", theme: "the subconscious, intuition, emotion and healing" },
+  Mars: { day: "Tuesday", theme: "courage, drive, protection and cutting away what is useless" },
+  Mercury: { day: "Wednesday", theme: "intellect, communication, agility and connecting information" },
+  Jupiter: { day: "Thursday", theme: "expansion, opportunity, life philosophy, fortune and wide vision" },
+  Venus: { day: "Friday", theme: "love, charm, harmony, abundance and beauty" },
+  Saturn: { day: "Saturday", theme: "discipline, stable foundations, patience and hard truths" },
+};
 
 // อ้างอิงจุดจันทร์ดับแม่นยำ (Reference New Moon: 2000-01-06 18:14 UTC)
 const SYNODIC_MONTH_DAYS = 29.53058867;
@@ -208,9 +233,14 @@ export function getCosmicContext(date: Date = new Date()): CosmicContext {
   const promptAnchor = `ห้วงเวลาจักรวาลขณะเปิดไพ่: ${day.dayNameTh} ครองโดย${day.planetTh} (ธาตุ${day.element}) | ดิถีพระจันทร์: ${moon.nameTh} สว่าง ${moon.illuminationPercent}%
   คลื่นพลังงานธรรมชาติ: ${day.energyTheme} ผสานกับ ${moon.energyTheme}`;
 
+  const dEn = DAY_EN[day.planetEn];
+  const promptAnchorEn = `Cosmic timing of this reading: ${dEn?.day ?? day.planetEn}, ruled by ${day.planetEn} (${ELEMENT_EN[day.element]}) | Moon phase: ${moon.nameEn}, ${moon.illuminationPercent}% illuminated
+  Natural energy current: ${dEn?.theme ?? day.planetEn} blended with ${MOON_THEME_EN[moon.phaseCode]}`;
+
   return {
     moon,
     day,
     promptAnchor,
+    promptAnchorEn,
   };
 }

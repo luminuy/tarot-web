@@ -15,6 +15,7 @@ import {
 } from "@/lib/ai/language";
 import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
 import { checkReadingConsistency } from "@/lib/ai/consistency";
+import { tallyYesNo } from "@/data/cards/yes-no";
 import { enforceThaiQuality } from "@/lib/ai/thai-quality";
 import { recordEvent } from "@/lib/stats/record";
 import { resolveThinkingOutputBudget } from "@/lib/ai/reading-stream";
@@ -463,6 +464,9 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
       drawnCount: ctx.drawn.length,
       yesNoMode: ctx.spread.yesNoMode,
       pastReading: ctx.pastReading,
+      expectedYesNo: ctx.spread.yesNoMode
+        ? tallyYesNo(ctx.drawn.map((d, i) => ({ card: ctx.cards[i], isReversed: d.isReversed }))).verdict
+        : undefined,
     });
 
     if (!consistency.ok) {

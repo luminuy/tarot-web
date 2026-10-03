@@ -36,6 +36,7 @@ import type { ReadingContext } from "@/lib/ai/prompt";
 import { ReadingSchema } from "@/lib/schema/reading";
 import type { ReadingEvent, UsageInfo } from "@/lib/ai/types";
 import { checkReadingConsistency } from "@/lib/ai/consistency";
+import { tallyYesNo } from "@/data/cards/yes-no";
 import { enforceThaiQuality } from "@/lib/ai/thai-quality";
 
 /** สถานะสะสมของสตรีมหนึ่งเส้น (หนึ่งโมเดล หนึ่งรอบ) */
@@ -212,6 +213,9 @@ export function finalizeReading(
     drawnCount: ctx.drawn.length,
     yesNoMode: ctx.spread.yesNoMode,
     pastReading: ctx.pastReading,
+    expectedYesNo: ctx.spread.yesNoMode
+      ? tallyYesNo(ctx.drawn.map((d, i) => ({ card: ctx.cards[i], isReversed: d.isReversed }))).verdict
+      : undefined,
   });
 
   if (consistency.fatal) {

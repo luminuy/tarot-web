@@ -124,29 +124,76 @@ export interface PairGazeInteraction {
   cardB: string;
   relation: "face-to-face" | "back-to-back" | "shared-vision" | "introspective" | "blindfolded";
   narrativeTh: string;
+  narrativeEn: string;
 }
 
 export interface GazeDialogueAnalysis {
   cardGazes: Array<{ cardName: string; gaze: GazeDirection; description: string }>;
   interactions: PairGazeInteraction[];
   dialogueNarrative: string;
+  /** ฉบับอังกฤษล้วนสำหรับ prompt หน้า `/en` (ISSUE-055) */
+  dialogueNarrativeEn: string;
 }
+
+export interface GazeOptions {
+  /** ทิศของไพ่แต่ละใบตามลำดับ — ไพ่กลับหัว ตัวละครหันกลับทิศ (ซ้าย↔ขวา · บน↔ล่าง) */
+  reversed?: boolean[];
+  /**
+   * พิกัดแนวนอนของแต่ละใบบนผังจริง (0..1 จาก `spread.positions[].x`)
+   * "สบตากัน" ต้องรู้ว่าใบไหนอยู่ซ้าย — ผังหลายแบบวางใบถัดไปไว้ทางซ้ายหรือซ้อนแนวตั้ง
+   * ไม่ส่ง = ถือว่าเรียงซ้ายไปขวาตามลำดับ (พฤติกรรมเดิม)
+   */
+  xs?: number[];
+  /** ป้ายเรียกไพ่ในข้อความ เช่น `ตำแหน่ง "อดีต" (หอคอย)` */
+  labelsTh?: string[];
+  labelsEn?: string[];
+}
+
+const FLIP: Partial<Record<GazeDirection, GazeDirection>> = { left: "right", right: "left", up: "down", down: "up" };
+
+/** ใบสองใบอยู่คอลัมน์เดียวกัน (ซ้อนบน-ล่าง) ถ้าห่างกันแนวนอนไม่เกินค่านี้ — มองซ้าย/ขวาจึงไม่ได้หันเข้าหากัน */
+const SAME_COLUMN_DX = 0.05;
+
+const GAZE_EN: Record<GazeDirection, string> = {
+  left: "looks to the left (the past, reflection)",
+  right: "looks to the right (the future, forward motion)",
+  center: "gazes straight ahead (facing the present truth)",
+  down: "looks downward (inner feeling, introspection)",
+  up: "looks upward (faith, aspiration)",
+  hidden: "is blindfolded or faceless (avoiding sight, pure instinct)",
+};
+const POSTURE_EN: Record<PostureType, string> = {
+  seated: "seated",
+  standing: "standing",
+  moving: "in motion",
+  fallen: "fallen or lying down",
+  symbolic: "a symbolic scene without a central figure",
+};
 
 /**
  * วิเคราะห์ความสัมพันธ์ทางสายตาระหว่างไพ่ที่เปิดได้
  */
-export function analyzeSpatialGazeDialogue(cards: TarotCard[]): GazeDialogueAnalysis {
+export function analyzeSpatialGazeDialogue(cards: TarotCard[], opts?: GazeOptions): GazeDialogueAnalysis {
   const cardGazes: Array<{ cardName: string; gaze: GazeDirection; description: string }> = [];
 
-  for (const card of cards) {
-    const meta = GAZE_REGISTRY[card.id] || {
+  /** ทิศสายตาจริงบนผัง — ไพ่กลับหัวพลิกทิศ */
+  const effectiveGaze = (i: number): GazeDirection | null => {
+    const meta = GAZE_REGISTRY[cards[i].id];
+    if (!meta) return null;
+    return opts?.reversed?.[i] ? (FLIP[meta.gaze] ?? meta.gaze) : meta.gaze;
+  };
+  const thLabel = (i: number) => opts?.labelsTh?.[i] || cards[i].nameTh;
+  const enLabel = (i: number) => opts?.labelsEn?.[i] || cards[i].nameEn;
+
+  for (let i = 0; i < cards.length; i++) {
+    const meta = GAZE_REGISTRY[cards[i].id] || {
       gaze: "center",
       posture: "standing",
       descriptionTh: "สายตามองตรง",
     };
     cardGazes.push({
-      cardName: card.nameTh,
-      gaze: meta.gaze,
+      cardName: cards[i].nameTh,
+      gaze: effectiveGaze(i) ?? meta.gaze,
       description: meta.descriptionTh,
     });
   }
@@ -155,77 +202,101 @@ export function analyzeSpatialGazeDialogue(cards: TarotCard[]): GazeDialogueAnal
 
   // วิเคราะห์คู่ไพ่ติดกัน (Adjacent Pairs)
   for (let i = 0; i < cards.length - 1 && interactions.length < 3; i++) {
-    const cardA = cards[i];
-    const cardB = cards[i + 1];
-    const metaA = GAZE_REGISTRY[cardA.id];
-    const metaB = GAZE_REGISTRY[cardB.id];
+    let a = i;
+    let b = i + 1;
+    let gA = effectiveGaze(a);
+    let gB = effectiveGaze(b);
 
-    if (!metaA || !metaB) continue;
+    if (!gA || !gB) continue;
 
     // 1. Blindfolded
-    if (metaA.gaze === "hidden" || metaB.gaze === "hidden") {
-      const blindCard = metaA.gaze === "hidden" ? cardA.nameTh : cardB.nameTh;
+    if (gA === "hidden" || gB === "hidden") {
+      const blind = gA === "hidden" ? a : b;
       interactions.push({
-        cardA: cardA.nameTh,
-        cardB: cardB.nameTh,
+        cardA: cards[a].nameTh,
+        cardB: cards[b].nameTh,
         relation: "blindfolded",
-        narrativeTh: `การปิดกั้นสายตา: ไพ่ ${blindCard} อยู่ในสภาวะปิดตา/ไม่ยอมมอง บ่งบอกถึงการกลัวที่จะรับรู้ความจริงตรงหน้า`,
+        narrativeTh: `การปิดกั้นสายตา: ไพ่ ${thLabel(blind)} อยู่ในสภาวะปิดตา/ไม่ยอมมอง บ่งบอกถึงการกลัวที่จะรับรู้ความจริงตรงหน้า`,
+        narrativeEn: `Blocked sight: ${enLabel(blind)} is blindfolded or refuses to look — a fear of acknowledging the truth in front of you`,
       });
       continue;
     }
 
-    // 2. Face-to-Face (A มองขวาไปหา B, B มองซ้ายกลับมาหา A)
-    if (metaA.gaze === "right" && metaB.gaze === "left") {
+    // 5. Introspective (ก้มหน้ามองต่ำทั้งคู่) — ไม่ขึ้นกับซ้าย/ขวา
+    if (gA === "down" && gB === "down") {
       interactions.push({
-        cardA: cardA.nameTh,
-        cardB: cardB.nameTh,
+        cardA: cards[a].nameTh,
+        cardB: cards[b].nameTh,
+        relation: "introspective",
+        narrativeTh: `การดำดิ่งสู่ภายใน: ทั้ง ${thLabel(a)} และ ${thLabel(b)} ก้มหน้าลงต่ำ สื่อถึงการจมกับอารมณ์ความรู้สึกหรือการใคร่ครวญเงียบ ๆ ในใจ`,
+        narrativeEn: `Turning inward: both ${enLabel(a)} and ${enLabel(b)} look downward — sinking into feelings or quiet private reflection`,
+      });
+      continue;
+    }
+
+    // ซ้าย/ขวาต้องดูจากผังจริง — ใบที่อยู่คอลัมน์เดียวกันไม่ได้หันเข้าหากันด้วยการมองซ้าย/ขวา
+    const xs = opts?.xs;
+    if (xs && Number.isFinite(xs[a]) && Number.isFinite(xs[b])) {
+      if (Math.abs(xs[a] - xs[b]) <= SAME_COLUMN_DX) continue;
+      if (xs[a] > xs[b]) {
+        [a, b] = [b, a];
+        [gA, gB] = [gB, gA];
+      }
+    }
+
+    // 2. Face-to-Face (ใบซ้ายมองขวาไปหาใบขวา ใบขวามองซ้ายกลับมา)
+    if (gA === "right" && gB === "left") {
+      interactions.push({
+        cardA: cards[a].nameTh,
+        cardB: cards[b].nameTh,
         relation: "face-to-face",
-        narrativeTh: `การสบสายตากันตรง ๆ: ${cardA.nameTh} กำลังหันหน้าประสานสายตากับ ${cardB.nameTh} โดยตรง สื่อถึงการเผชิญหน้า การพร้อมเปิดอกคุย หรือประเด็นที่หนีไม่พ้น`,
+        narrativeTh: `การสบสายตากันตรง ๆ: ${thLabel(a)} กำลังหันหน้าประสานสายตากับ ${thLabel(b)} โดยตรง สื่อถึงการเผชิญหน้า การพร้อมเปิดอกคุย หรือประเด็นที่หนีไม่พ้น`,
+        narrativeEn: `Face to face: ${enLabel(a)} and ${enLabel(b)} turn toward each other — a direct confrontation, readiness to talk openly, or an issue that cannot be avoided`,
       });
       continue;
     }
 
-    // 3. Back-to-Back (A มองซ้ายหันหลังให้ B, B มองขวาหันหลังให้ A)
-    if (metaA.gaze === "left" && metaB.gaze === "right") {
+    // 3. Back-to-Back (ใบซ้ายมองซ้าย ใบขวามองขวา)
+    if (gA === "left" && gB === "right") {
       interactions.push({
-        cardA: cardA.nameTh,
-        cardB: cardB.nameTh,
+        cardA: cards[a].nameTh,
+        cardB: cards[b].nameTh,
         relation: "back-to-back",
-        narrativeTh: `การหันหลังให้กัน: ${cardA.nameTh} และ ${cardB.nameTh} กำลังมองไปคนละทิศทาง สื่อถึงความเหินห่าง การหลบเลี่ยง หรือการไม่ยอมรับฟังมุมมองของอีกฝ่าย`,
+        narrativeTh: `การหันหลังให้กัน: ${thLabel(a)} และ ${thLabel(b)} กำลังมองไปคนละทิศทาง สื่อถึงความเหินห่าง การหลบเลี่ยง หรือการไม่ยอมรับฟังมุมมองของอีกฝ่าย`,
+        narrativeEn: `Back to back: ${enLabel(a)} and ${enLabel(b)} look in opposite directions — distance, avoidance, or refusing to hear the other side`,
       });
       continue;
     }
 
     // 4. Shared Vision (มองไปทางขวาด้วยกันทั้งคู่)
-    if (metaA.gaze === "right" && metaB.gaze === "right") {
+    if (gA === "right" && gB === "right") {
       interactions.push({
-        cardA: cardA.nameTh,
-        cardB: cardB.nameTh,
+        cardA: cards[a].nameTh,
+        cardB: cards[b].nameTh,
         relation: "shared-vision",
-        narrativeTh: `การมองไปข้างหน้าร่วมกัน: ทั้ง ${cardA.nameTh} และ ${cardB.nameTh} ทอดสายตามุ่งไปสู่อนาคตทางขวา พลังงานขับเคลื่อนไปในทิศทางเดียวกัน`,
-      });
-      continue;
-    }
-
-    // 5. Introspective (ก้มหน้ามองต่ำทั้งคู่)
-    if (metaA.gaze === "down" && metaB.gaze === "down") {
-      interactions.push({
-        cardA: cardA.nameTh,
-        cardB: cardB.nameTh,
-        relation: "introspective",
-        narrativeTh: `การดำดิ่งสู่ภายใน: ทั้งสองใบก้มหน้าลงต่ำ สื่อถึงการจมกับอารมณ์ความรู้สึกหรือการใคร่ครวญเงียบ ๆ ในใจ`,
+        narrativeTh: `การมองไปข้างหน้าร่วมกัน: ทั้ง ${thLabel(a)} และ ${thLabel(b)} ทอดสายตามุ่งไปสู่อนาคตทางขวา พลังงานขับเคลื่อนไปในทิศทางเดียวกัน`,
+        narrativeEn: `Shared vision: ${enLabel(a)} and ${enLabel(b)} both look ahead to the right — energy moving in the same direction`,
       });
     }
   }
 
   // สร้าง Narrative
   const parts: string[] = [];
+  const partsEn: string[] = [];
   if (interactions.length > 0) {
     parts.push(interactions.map((it) => `• ${it.narrativeTh}`).join("\n"));
+    partsEn.push(interactions.map((it) => `• ${it.narrativeEn}`).join("\n"));
   } else if (cards.length > 0) {
     const firstMeta = GAZE_REGISTRY[cards[0].id];
     if (firstMeta) {
-      parts.push(`• สายตาของไพ่ใบหลัก (${cards[0].nameTh}): ${firstMeta.descriptionTh}`);
+      const rev = Boolean(opts?.reversed?.[0]);
+      const g = effectiveGaze(0) ?? firstMeta.gaze;
+      parts.push(
+        `• สายตาของไพ่ใบหลัก (${thLabel(0)}): ${firstMeta.descriptionTh}${rev && g !== firstMeta.gaze ? " (ไพ่กลับหัว ทิศสายตาจึงกลับด้าน)" : ""}`,
+      );
+      partsEn.push(
+        `• Gaze of the lead card (${enLabel(0)}): the figure ${GAZE_EN[g]}, ${POSTURE_EN[firstMeta.posture]}${rev && g !== firstMeta.gaze ? " (reversed, so the gaze is turned the other way)" : ""}`,
+      );
     }
   }
 
@@ -233,5 +304,6 @@ export function analyzeSpatialGazeDialogue(cards: TarotCard[]): GazeDialogueAnal
     cardGazes,
     interactions,
     dialogueNarrative: parts.join("\n"),
+    dialogueNarrativeEn: partsEn.join("\n"),
   };
 }

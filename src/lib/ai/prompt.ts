@@ -14,6 +14,7 @@ import { getPersona, type Persona } from "@/data/personas";
 import type { DrawnCard } from "@/lib/tarot/shuffle";
 import type { SafetyVerdict } from "@/lib/safety/guardrails";
 import { pickExemplar, formatExemplarForPrompt } from "@/data/ai/exemplars";
+import { YES_NO_TONE, tallyYesNo, yesNoWeight } from "@/data/cards/yes-no";
 import {
   PROMPT_TRUST_BOUNDARY_EN,
   PROMPT_TRUST_BOUNDARY_TH,
@@ -252,9 +253,72 @@ export interface ReadingMessageOptions {
   omitExemplar?: boolean;
 }
 
+/** ชื่อหมวดภาษาไทยใน prompt — เดิมแทรกคีย์อังกฤษดิบ ("นัยสำคัญในหมวดlove") */
+const CATEGORY_TH: Record<Category, string> = {
+  general: "ภาพรวมชีวิต",
+  love: "ความรัก",
+  work: "การงาน",
+  money: "การเงิน",
+  self: "การพัฒนาตัวเอง",
+};
+
+/**
+ * ✦ หลักฐาน "ใช่/ไม่ใช่" จากสารานุกรม 78 ใบ (ISSUE-054)
+ * เดิม prompt สั่งแค่ "กรอก yesNoAnswer" โดยไม่ส่งแนวโน้มประจำไพ่ไปเลย ➔ AI ฟันธงสวนกับหน้า
+ * `/cards/<id>` ของไพ่ใบเดียวกันได้ · ตอนนี้ส่งแนวโน้มรายใบ + น้ำหนักรวมด้วย `tallyYesNo()`
+ * ตัวเดียวกับคำอ่านสำรอง (กลับหัวไม่กลับขั้ว แต่แรงลดครึ่ง · ใบคำตอบสรุปนับสองเท่า)
+ */
+function buildYesNoBlock(ctx: ReadingContext, isEn: boolean): string {
+  const { spread, drawn, cards } = ctx;
+  const lines = drawn.map((d, i) => {
+    const card = cards[i];
+    const pos = spread.positions[d.order];
+    const tone = YES_NO_TONE[card.yesNo];
+    const weakened = d.isReversed && yesNoWeight(card, false) !== 0;
+    return isEn
+      ? `  • ${pos?.nameEn || pos?.nameTh || `Position ${i + 1}`}: ${card.nameEn} ${d.isReversed ? "(Reversed)" : "(Upright)"} → ${tone.labelEn}${weakened ? " — weakened by the reversal (delays or conditions first)" : ""}`
+      : `  • ${pos?.nameTh || `ตำแหน่งที่ ${i + 1}`}: ${card.nameTh} ${d.isReversed ? "(กลับหัว)" : "(หัวตั้ง)"} → ${tone.labelTh}${weakened ? " — แรงลดลงเพราะกลับหัว (มีเงื่อนไขหรือล่าช้าก่อน)" : ""}`;
+  });
+  const { verdict } = tallyYesNo(drawn.map((d, i) => ({ card: cards[i], isReversed: d.isReversed })));
+  const verdictEn = { ใช่: "Yes", ไม่ใช่: "No", ยังไม่แน่: "Not yet certain" }[verdict];
+
+  if (isEn) {
+    return `
+## YES/NO MODE
+Yes/No lean of each drawn card from our 78-card encyclopedia (the same data shown on each card's page):
+${lines.join("\n")}
+Weighted total (the first "core tendency" card counts double; reversals keep their direction but at half strength): leaning "${verdictEn}"
+Fill "yesNoAnswer" with exactly one of "ใช่" (Yes), "ไม่ใช่" (No) or "ยังไม่แน่" (Not yet certain) — these Thai values are the stored codes. Follow the weighted lean unless the card imagery in its position clearly argues otherwise; if you diverge, explain why in "summary". State the answer plainly in the first sentence of "summary" and name the card that decides it.
+`;
+  }
+  return `
+## โหมดฟันธง ใช่/ไม่ใช่
+แนวโน้มใช่/ไม่ใช่ของไพ่แต่ละใบจากสารานุกรม 78 ใบของเว็บ (ข้อมูลชุดเดียวกับที่ผู้ถามเห็นในหน้าไพ่แต่ละใบ):
+${lines.join("\n")}
+น้ำหนักรวมทั้งผัง (ใบ "คำตอบสรุป" ใบแรกนับสองเท่า · ไพ่กลับหัวไม่กลับขั้วแต่แรงลดครึ่ง): เอนไปทาง "${verdict}"
+กรอก yesNoAnswer เป็น "ใช่", "ไม่ใช่", หรือ "ยังไม่แน่" — ให้ยึดน้ำหนักรวมนี้ เว้นแต่ภาพบนหน้าไพ่ในตำแหน่งนั้นชี้ชัดว่าต่างออกไป ถ้าตอบต่างต้องอธิบายเหตุผลใน summary · ประโยคแรกของ summary ต้องบอกคำตอบตรง ๆ และระบุไพ่ใบที่เป็นตัวตัดสิน
+`;
+}
+
 export function buildReadingMessage(ctx: ReadingContext, options?: ReadingMessageOptions): string {
   const { spread, category, question, intake, drawn, cards, safety, nickname, lang = "th" } = ctx;
   const isEn = lang === "en";
+
+  /*
+   * ✦ ป้ายเรียกไพ่ "ช่องไหน · ใบอะไร · ทิศไหน" ให้โมดูลวิเคราะห์ใช้ (คลื่นปรับจูน 2026-10-03)
+   * เดิมเคมีธาตุ/สายตาพูดแค่ชื่อไพ่ AI จึงต้องเดาเองว่าคู่นี้คือตำแหน่งไหนคุยกับตำแหน่งไหน
+   */
+  const posOf = (i: number) => spread.positions[drawn[i].order];
+  const labelsTh = drawn.map((d, i) => {
+    const p = posOf(i);
+    const name = `${cards[i].nameTh}${d.isReversed ? " กลับหัว" : ""}`;
+    return p ? `ตำแหน่ง "${p.nameTh}" (${name})` : name;
+  });
+  const labelsEn = drawn.map((d, i) => {
+    const p = posOf(i);
+    const name = `${cards[i].nameEn}${d.isReversed ? ", reversed" : ""}`;
+    return p ? `"${p.nameEn || p.nameTh}" (${name})` : name;
+  });
 
   const cardBlocks = drawn.map((d, i) => {
     const card = cards[i];
@@ -289,7 +353,7 @@ export function buildReadingMessage(ctx: ReadingContext, options?: ReadingMessag
   Element: ${cardElement} | Astrology: ${astro} | Numerology: ${numero}
   Core Archetypal Energies: ${keywords.join(" · ")}
   Thematic Meaning in ${category}: ${meaning}
-${loreStr}`;
+${loreStr ? `  (1909 imagery notes below are written in Thai — use the ideas, but never copy Thai words into your answer)\n${loreStr}` : ""}`;
     }
 
     const orientation = d.isReversed ? "หัวกลับ (Reversed)" : "หัวตั้ง (Upright)";
@@ -303,32 +367,46 @@ ${loreStr}`;
   ไพ่ที่เปิดได้: ${card.nameTh} (${card.nameEn}) — ${orientation}
   ธาตุ: ${card.element} | โหราศาสตร์: ${card.astrology} | รหัสตัวเลข: ${card.numerology}
   พลังงานหลัก: ${keywords.join(" · ")}
-  นัยสำคัญในหมวด${category}: ${meaning}
+  นัยสำคัญในหมวด${CATEGORY_TH[category] ?? category}: ${meaning}
 ${loreStr}`;
   });
 
   // Pre-compute Real-Time Cosmic & Grandmaster Cognitive Matrices
   const cosmic = getCosmicContext();
-  const alchemy = analyzeElementalAlchemy(cards);
-  const gaze = analyzeSpatialGazeDialogue(cards);
+  const alchemy = analyzeElementalAlchemy(cards, { labelsTh, labelsEn });
+  // ไพ่กลับหัวตัวละครหันกลับทิศ · ซ้าย/ขวาดูจากพิกัดผังจริง ไม่ใช่ลำดับการจั่ว
+  const gaze = analyzeSpatialGazeDialogue(cards, {
+    reversed: drawn.map((d) => d.isReversed),
+    xs: drawn.map((_, i) => posOf(i)?.x ?? Number.NaN),
+    labelsTh,
+    labelsEn,
+  });
   const numerology = analyzeNumerologicalRhythm(cards);
   const diagnosis = diagnoseQuestionEnergy(question || "", intake);
   const ritual = generateMindfulMicroRitual(alchemy.lackingElements, alchemy.dominantElement);
   const karmic = analyzeKarmicBridge(cards, ctx.pastReading);
 
-  const intakeLines = [
-    intake.situation && `สถานการณ์ปัจจุบัน: ${intake.situation}`,
-    intake.feeling && `ความรู้สึกในใจตอนนี้: ${intake.feeling}`,
-    intake.hoped && `สิ่งที่ใจหวังไว้: ${intake.hoped}`,
-  ].filter(Boolean);
+  const intakeLines = (
+    isEn
+      ? [
+          intake.situation && `Current situation: ${intake.situation}`,
+          intake.feeling && `How they feel right now: ${intake.feeling}`,
+          intake.hoped && `What they are hoping for: ${intake.hoped}`,
+        ]
+      : [
+          intake.situation && `สถานการณ์ปัจจุบัน: ${intake.situation}`,
+          intake.feeling && `ความรู้สึกในใจตอนนี้: ${intake.feeling}`,
+          intake.hoped && `สิ่งที่ใจหวังไว้: ${intake.hoped}`,
+        ]
+  ).filter(Boolean);
 
   const guard = safety.promptGuard
-    ? `\n## ข้อพึงระวังพิเศษในการตอบ\n${safety.promptGuard}\n`
+    ? isEn
+      ? `\n## Special Care Required In This Answer\n${safety.promptGuard}\n`
+      : `\n## ข้อพึงระวังพิเศษในการตอบ\n${safety.promptGuard}\n`
     : "";
 
-  const yesNo = spread.yesNoMode
-    ? `\n## โหมดฟันธง ใช่/ไม่ใช่\nกรอก yesNoAnswer เป็น "ใช่", "ไม่ใช่", หรือ "ยังไม่แน่" พร้อมเหตุผลสรุปใน summary\n`
-    : "";
+  const yesNo = spread.yesNoMode ? buildYesNoBlock(ctx, isEn) : "";
 
   const cognitiveBlock = `## 🔮 ข้อมูลการสังเคราะห์เชิงสัญลักษณ์และเคมีธาตุ (Grandmaster Cognitive Matrix)
 ${alchemy.alchemyNarrative}
@@ -337,6 +415,15 @@ ${numerology.narrativeTh ? `\n• จังหวะตัวเลขและ�
 ${diagnosis.promptDirective}
 ${karmic.karmicNarrative ? `\n${karmic.karmicNarrative}` : ""}
 • กิจกรรมฝึกสติประจำผัง (Mindful Ritual Guidance): ขอให้นำแนวทางนี้ไปใส่เป็นข้อสุดท้ายใน advice -> "${ritual.adviceString}"`;
+
+  // ฉบับอังกฤษล้วน (ISSUE-055) — เดิมหน้า /en ได้บล็อกนี้เป็นภาษาไทยทั้งก้อน
+  const cognitiveBlockEn = `## 🔮 Symbolic Synthesis & Elemental Chemistry (Grandmaster Cognitive Matrix)
+${alchemy.alchemyNarrativeEn}
+${gaze.dialogueNarrativeEn ? `\n• Spatial gaze dialogue on the card faces:\n${gaze.dialogueNarrativeEn}` : ""}
+${numerology.narrativeEn ? `\n• Numerological rhythm:\n${numerology.narrativeEn}` : ""}
+${diagnosis.promptDirectiveEn}
+${karmic.karmicNarrativeEn ? `\n${karmic.karmicNarrativeEn}` : ""}
+• Mindful ritual for this spread: use this as the final "advice" item -> "${ritual.adviceStringEn}"`;
 
   // ปรับความยาวคำอ่านตามจำนวนไพ่ — ผังน้อยใบอ่านลึก · ผังเยอะใบกระชับ (กันกำแพงข้อความ + คำอ่านโดนตัดกลาง)
   const cardCount = drawn.length;
@@ -371,6 +458,34 @@ ${karmic.karmicNarrative ? `\n${karmic.karmicNarrative}` : ""}
    */
   const zodiacBlock = formatZodiacForPrompt(ctx.zodiac, cards, lang);
 
+  /*
+   * ✦ เช็กลิสต์ความแม่น (คลื่นปรับจูน 2026-10-03) — สั้นโดยตั้งใจ (Groq นับ prompt + ผลลัพธ์รวมกันต่อคำขอ)
+   * ปิดจุดที่คำอ่านมักหลวม: อ่านไพ่แบบไม่ผ่านตำแหน่ง · กลับหัว = ตรงข้ามเฉย ๆ · connections ลอย ๆ
+   * · summary ไม่ตอบคำถาม · ไม่ใช้บริบทที่ผู้ถามพิมพ์มา
+   */
+  const hasIntake = cleanIntakeLines.length > 0;
+  const linkPairs = !isQuick && cardCount >= 3;
+  const precisionTh = [
+    "✦ เช็กความแม่นก่อนส่ง:",
+    "- reading ทุกใบต้องตีความผ่านมิติของตำแหน่งนั้น (ไพ่ใบเดียวกันในช่องอุปสรรคกับช่องผลลัพธ์ต้องอ่านต่างกัน)",
+    "- ไพ่กลับหัว ให้บอกชัดว่าเป็นแบบไหน: พลังถูกกักไว้ข้างใน · ล่าช้า/ติดขัด · หรือมากหรือน้อยเกินไป ห้ามอ่านเป็นความหมายตรงข้ามเฉย ๆ",
+    linkPairs && "- connections ต้องยกคู่ไพ่อย่างน้อย 2 คู่โดยเรียกชื่อตำแหน่ง (ใช้ข้อมูลเคมีธาตุ/สายตาด้านบนถ้ามี)",
+    "- ประโยคแรกของ summary ต้องตอบคำถามใน <question> ตรง ๆ และอ้างไพ่ใบที่เป็นตัวชี้ขาดพร้อมตำแหน่ง",
+    hasIntake && "- ต้องหยิบรายละเอียดใน <context_details> ของผู้ถามมาใช้อย่างน้อย 1 จุดใน reading หรือ summary",
+  ]
+    .filter(Boolean)
+    .join("\n");
+  const precisionEn = [
+    "✦ Precision checklist before you answer:",
+    "- Read every card THROUGH its position (the same card in an Obstacle slot and an Outcome slot must read differently)",
+    "- For reversed cards, say which kind: energy held inside · delayed/blocked · or excess/deficiency — never just the plain opposite meaning",
+    linkPairs && '- "connections" must name at least 2 specific card pairs by position (use the elemental/gaze data above when present)',
+    '- The first sentence of "summary" must answer the <question> directly and cite the deciding card with its position',
+    hasIntake && "- Use at least one concrete detail from the seeker's <context_details> in a reading or the summary",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
   const exemplar = pickExemplar(category, drawn.length, spread.yesNoMode);
   const exemplarBlock = !isEn && !options?.omitExemplar ? formatExemplarForPrompt(exemplar) : "";
 
@@ -389,7 +504,7 @@ ${karmic.karmicNarrative ? `\n${karmic.karmicNarrative}` : ""}
 
     return `## Cosmic & Seeker Context
 <user_profile>
-  ${cosmic.promptAnchor}
+  ${cosmic.promptAnchorEn}
   <nickname>${cleanNickname}</nickname>
   <question>${cleanQuestion}</question>
   ${cleanIntakeLines.length ? `<context_details>\n  ${cleanIntakeLines.join("\n  ")}\n  </context_details>` : ""}${zodiacBlock ? `\n  ${zodiacBlock}` : ""}
@@ -398,7 +513,7 @@ ${karmic.karmicNarrative ? `\n${karmic.karmicNarrative}` : ""}
 ## Spread: ${spread.nameEn || spread.nameTh} (${spread.descriptionEn || spread.description})
 Category: ${category}
 
-${cognitiveBlock}
+${cognitiveBlockEn}
 
 ## Genuinely Drawn Cards (${drawn.length} cards):
 ${cardBlocks.join("\n\n")}
@@ -431,6 +546,7 @@ ${isQuick ? "" : '    "Concrete, practical micro-action achievable within 24-48 
   "mood": "One of: Radiant | Warm | Serene | Reflective | Challenging"
 }
 Must include "cards" for all positions given, ordered sequentially by position.
+${precisionEn}
 ⛔ CRITICAL MANDATE: All string values MUST be written in natural, fluent American English 100%.
 ${PROMPT_TRUST_BOUNDARY_EN}`;
   }
@@ -479,6 +595,7 @@ ${isQuick ? "" : '    "ข้อแนะนำที่เป็น Micro-Actio
   "mood": "หนึ่งใน: สดใส | อบอุ่น | สงบ | ครุ่นคิด | ท้าทาย"
 }
 ต้องมี "cards" ครบทุกตำแหน่งที่ให้มา เรียงตาม position จากน้อยไปมาก
+${precisionTh}
 
 ⛔ ย้ำเด็ดขาด: ค่าของทุกคีย์ต้องเป็นภาษาไทยล้วน 100% ห้ามมีอักษรจีน (เช่น 向, 你, 的, 汉字) หรือภาษาต่างด้าวปนแม้แต่ตัวเดียว!
 ${PROMPT_TRUST_BOUNDARY_TH}`;
