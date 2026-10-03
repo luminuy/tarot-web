@@ -8,6 +8,9 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { buildAlternates, SITE_ORIGIN, noindexAlternates } from "@/lib/config/site";
 import type { Metadata } from "next";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { BriefIcon, ClockIcon, ShieldIcon, VideoIcon } from "@/components/marketplace/ConsultIcons";
+import { CONSULTATION_MINUTES } from "@/lib/marketplace/offer";
 
 export const dynamic = "force-dynamic";
 
@@ -72,10 +75,12 @@ export default async function ReaderDetailPage({
     },
   };
 
+  const bio = reader.bio?.trim();
+
   return (
     <>
       <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="min-h-screen text-ink-deep p-4 sm:p-8 font-sans relative overflow-x-clip">
+      <main id="main-content" tabIndex={-1} className="min-h-screen text-ink-deep px-4 pb-16 pt-5 sm:px-8 sm:pt-8 font-serif-th relative overflow-x-clip">
         {/* Schema.org Structured Data */}
         <script
           type="application/ld+json"
@@ -86,111 +91,128 @@ export default async function ReaderDetailPage({
           dangerouslySetInnerHTML={{ __html: jsonLdScript(personJsonLd) }}
         />
 
-        <div className="max-w-4xl mx-auto space-y-6 relative z-10">
-          {/* Top Breadcrumbs */}
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-serif-th text-muted border-b border-[#E4D8C4]/40 pb-4 overflow-x-auto whitespace-nowrap">
+        <div className="mx-auto max-w-5xl space-y-6 relative z-10">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 overflow-x-auto whitespace-nowrap text-[13px] text-muted">
             <Link href="/" className="hover:text-gold-ink transition-colors">
               หน้าแรก
             </Link>
-            <span>/</span>
+            <span aria-hidden="true">/</span>
             <Link href="/readers" className="hover:text-gold-ink transition-colors">
-              ปรึกษาแม่หมอตัวจริง
+              ปรึกษาหมอดู
             </Link>
-            <span>/</span>
-            <span className="text-ink-deep font-bold truncate">{reader.displayName}</span>
+            <span aria-hidden="true">/</span>
+            <span className="font-semibold text-ink-deep">{reader.displayName}</span>
           </nav>
 
-        {/* Reader Profile Container */}
-        <div className="bg-surface rounded-lg p-6 sm:p-10 space-y-8 border border-[#E4D8C4]">
-          {/* Header info */}
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
-            <div className="h-24 w-24 sm:h-28 sm:w-28 shrink-0 rounded-full border-2 border-[#E4D8C4] bg-[#F0E8DB] overflow-hidden flex items-center justify-center text-3xl font-bold text-gold-ink">
-              {reader.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={reader.avatarUrl}
-                  /* ภาพประกอบล้วน — <h1> ข้าง ๆ พิมพ์ชื่อแม่หมออยู่แล้ว (INC-0125) */
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                reader.displayName.charAt(0)
-              )}
-            </div>
-
-            <div className="space-y-3 flex-1">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                <h1 className="font-serif-th text-2xl sm:text-3xl font-bold font-mystic-gold">
-                  {reader.displayName}
-                </h1>
-                <span className="inline-flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-semibold w-fit mx-auto sm:mx-0">
-                  แม่หมอตัวจริง (ยืนยันตัวตนแล้ว)
-                </span>
+          {/*
+            ✦ หน้าโปรไฟล์แม่หมอแบบหน้าโปรไฟล์ผู้ให้บริการของเว็บระดับโลก (เจ้าของสั่ง 2026-10-03)
+            หัวโปรไฟล์ (แถบกำมะหยี่ชุดเดียวกับหน้ารวม/หน้าคิว) · ซ้าย = เกี่ยวกับ + วิธีคุย + ขั้นตอน · ขวา = การ์ดจองติดจอ
+            มือถือ: การ์ดจองขึ้นต่อจากหัวโปรไฟล์ทันที (ไม่ต้องเลื่อนหา) · ข้อความ PDPA อยู่ในหน้าต่างจองที่เดียว (เดิมซ้ำ 3 ที่)
+          */}
+          <section className="overflow-hidden rounded-[28px] border border-line bg-surface shadow-[0_20px_40px_-28px_rgba(46,33,26,0.45)]">
+            <div className="consult-stage h-24 !rounded-none !border-0 !shadow-none sm:h-32" aria-hidden="true" />
+            <div className="flex flex-col items-center gap-4 px-5 pb-6 text-center sm:flex-row sm:items-end sm:px-8 sm:text-left">
+              <div className="-mt-12 grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-full bg-canvas text-3xl font-bold text-gold-ink shadow-md ring-4 ring-surface sm:-mt-14 sm:h-28 sm:w-28">
+                {reader.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={reader.avatarUrl}
+                    /* ภาพประกอบล้วน — <h1> ข้าง ๆ พิมพ์ชื่อแม่หมออยู่แล้ว (INC-0125) */
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  reader.displayName.charAt(0).toUpperCase()
+                )}
               </div>
-
-              {/* Specialties */}
-              <div className="flex flex-wrap justify-center sm:justify-start gap-2">
-                {reader.specialties.map((s, idx) => (
-                  <span
-                    key={idx}
-                    className="px-3 py-1 rounded-full bg-[#F0E8DB] border border-[#E4D8C4] text-xs text-ink-deep font-medium"
-                  >
-                    • {s}
+              <div className="min-w-0 flex-1 space-y-2.5 sm:pb-1 sm:pt-4">
+                <div className="flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap">
+                  <h1 className="break-words text-2xl font-bold leading-snug text-ink-deep sm:text-3xl">{reader.displayName}</h1>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-ok/30 bg-ok/10 px-2.5 py-0.5 text-[13px] font-semibold text-ok">
+                    <ShieldIcon width={14} height={14} />
+                    ยืนยันตัวตนแล้ว
                   </span>
-                ))}
+                </div>
+                {reader.specialties.length > 0 && (
+                  <ul className="flex flex-wrap justify-center gap-1.5 sm:justify-start" aria-label="ความถนัด">
+                    {reader.specialties.map((s) => (
+                      <li key={s} className="rounded-full border border-line-warm bg-inset-warm px-3 py-1 text-[13px] text-ink-deep">
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
-          </div>
+          </section>
 
-          {/* Bio Section */}
-          <div className="space-y-3 border-t border-[#E4D8C4]/30 pt-6">
-            <h2 className="text-sm font-bold text-ink-deep font-serif-th flex items-center gap-2">
-              ประวัติและสไตล์การทำนาย
-            </h2>
-            <div className="bg-surface rounded-lg p-5 border border-[#E4D8C4] text-xs sm:text-sm text-ink-deep leading-relaxed font-serif-th whitespace-pre-line">
-              {reader.bio || "พร้อมให้คำปรึกษาและชี้แนะแนวทางชีวิตอย่างลึกซึ้งผ่านศาสตร์ไพ่ทาโรต์"}
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+            {/* การ์ดจอง — มือถือขึ้นก่อนเนื้อหา · จอใหญ่ติดขวาและติดจอตอนเลื่อน */}
+            <div className="lg:order-2 lg:sticky lg:top-[calc(var(--site-header-h)+20px)]">
+              <ReaderDetailClient reader={reader} isLiveOpen={isLiveOpen} />
             </div>
-          </div>
 
-          {/* Consultation Process Steps */}
-          <div className="space-y-4 border-t border-[#E4D8C4]/30 pt-6">
-            <h2 className="text-sm font-bold text-ink-deep font-serif-th flex items-center gap-2">
-              ขั้นตอนการรับคำปรึกษา
-            </h2>
-            <div className="grid gap-3 sm:grid-cols-3 text-xs">
-              <div className="rounded-lg bg-surface border border-[#E4D8C4] p-4 space-y-1.5">
-                <span className="text-gold-ink font-bold text-base">1. สับไพ่และตั้งจิต</span>
-                <p className="text-muted leading-relaxed">
-                  เลือกผังและเปิดไพ่ด้วยตนเองผ่านระบบ หรือระบุหัวข้อคำถามที่ต้องการคำตอบ
+            <div className="space-y-6 lg:order-1">
+              <section aria-labelledby="reader-about" className="altar-card-porcelain !rounded-2xl space-y-3 p-5 sm:p-7">
+                <h2 id="reader-about" className="text-lg font-bold text-ink-deep">
+                  <ThaiPhrases>{`เกี่ยวกับ ${reader.displayName}`}</ThaiPhrases>
+                </h2>
+                <p className="whitespace-pre-line text-sm leading-relaxed text-ink sm:text-[15px]">
+                  {bio || "พร้อมให้คำปรึกษาและชี้แนะแนวทางชีวิตอย่างลึกซึ้งผ่านศาสตร์ไพ่ทาโรต์"}
                 </p>
-              </div>
-              <div className="rounded-lg bg-surface border border-[#E4D8C4] p-4 space-y-1.5">
-                <span className="text-gold-ink font-bold text-base">2. AI สรุปสาระสำคัญ</span>
-                <p className="text-muted leading-relaxed">
-                  ระบบช่วยประมวลผลตำแหน่งไพ่และบริบทคำถาม เพื่อเตรียมข้อมูลส่งต่อให้แม่หมอ
-                </p>
-              </div>
-              <div className="rounded-lg bg-surface border border-[#E4D8C4] p-4 space-y-1.5">
-                <span className="text-gold-ink font-bold text-base">3. สนทนากับแม่หมอ</span>
-                <p className="text-muted leading-relaxed">
-                  ถึงคิวแล้วกดเข้าห้องวิดีโอคอลในเว็บ คุยตัวต่อตัวกับแม่หมอ (หรือคุยทาง LINE ก็ได้)
-                </p>
-              </div>
+              </section>
+
+              <section aria-labelledby="reader-format" className="altar-card-porcelain !rounded-2xl space-y-4 p-5 sm:p-7">
+                <h2 id="reader-format" className="text-lg font-bold text-ink-deep">
+                  <ThaiPhrases>คุยกันแบบไหน</ThaiPhrases>
+                </h2>
+                <ul className="grid gap-3 sm:grid-cols-3">
+                  {[
+                    { Icon: VideoIcon, title: "วิดีโอคอลในเว็บ", body: "กดเข้าห้องได้เลย ไม่ต้องลงแอป หรือคุยทาง LINE ก็ได้" },
+                    { Icon: ClockIcon, title: `ตัวต่อตัว ${CONSULTATION_MINUTES} นาที`, body: "เวลาของคุณกับแม่หมอสองคนเท่านั้น" },
+                    { Icon: BriefIcon, title: "แม่หมออ่านเรื่องก่อนคุย", body: "AI สรุปคำถามของคุณให้แม่หมอเตรียมตัวล่วงหน้า" },
+                  ].map(({ Icon, title, body }) => (
+                    <li key={title} className="space-y-1.5 rounded-2xl border border-line-warm bg-inset-warm/60 p-4">
+                      <span className="grid h-9 w-9 place-items-center rounded-xl bg-surface text-gold-ink">
+                        <Icon />
+                      </span>
+                      <p className="text-sm font-bold text-ink-deep">{title}</p>
+                      <p className="text-[13px] leading-relaxed text-muted">{body}</p>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+
+              <section aria-labelledby="reader-steps" className="altar-card-porcelain !rounded-2xl space-y-4 p-5 sm:p-7">
+                <h2 id="reader-steps" className="text-lg font-bold text-ink-deep">
+                  <ThaiPhrases>ขั้นตอนการปรึกษา</ThaiPhrases>
+                </h2>
+                <ol className="space-y-4">
+                  {[
+                    { title: "ส่งคำถาม", body: "บอกชื่อเล่นและเรื่องที่อยากถาม ใช้เวลาไม่ถึงนาที" },
+                    { title: "รอคิว", body: "เปิดหน้าคิวทิ้งไว้ได้เลย ถึงคิวแล้วจะขึ้นปุ่มเข้าห้องให้ทันที" },
+                    { title: "คุยกับแม่หมอ", body: "เข้าห้องวิดีโอคอลในเว็บ หรือคุยทาง LINE" },
+                  ].map((step, i, all) => (
+                    <li key={step.title} className="relative flex gap-4">
+                      {i < all.length - 1 && (
+                        <span aria-hidden="true" className="absolute left-[15px] top-9 bottom-[-12px] w-px bg-line" />
+                      )}
+                      <span className="relative z-10 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gold-ink text-[13px] font-bold text-surface">
+                        {i + 1}
+                      </span>
+                      <div className="space-y-0.5 pt-1">
+                        <p className="text-sm font-bold text-ink-deep">{step.title}</p>
+                        <p className="text-[13px] leading-relaxed text-muted">{step.body}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </section>
             </div>
-          </div>
-
-          {/* Booking / Consultation Action */}
-          <div className="border-t border-[#E4D8C4]/30 pt-6 space-y-3 text-center sm:text-left">
-            <ReaderDetailClient reader={reader} isLiveOpen={isLiveOpen} />
-
-            <p className="text-[13px] text-muted text-center pt-2 font-serif-th">
-              ข้อมูลคำถามจะถูกส่งต่อไปยังแม่หมอโดยตรง และจะถูกลบออกจากระบบภายใน 30 วันตามมาตรฐาน PDPA
-            </p>
           </div>
         </div>
-      </div>
-    </main>
-    <SiteFooter />
-  </>
+      </main>
+      <SiteFooter />
+    </>
   );
 }

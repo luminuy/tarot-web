@@ -132,7 +132,7 @@ export default function CustomerQueuePage() {
 
         <section className="rounded-[28px] border border-line bg-surface overflow-hidden shadow-[0_20px_40px_-28px_rgba(46,33,26,0.45)]">
           {/* แถบกำมะหยี่ — ภาษาภาพเดียวกับการ์ดแม่หมอในหน้ารวม */}
-          <div className="consult-stage h-20 !rounded-none !border-0" aria-hidden="true" />
+          <div className="consult-stage h-20 !rounded-none !border-0 !shadow-none" aria-hidden="true" />
           {/* แม่หมอที่คุณจองไว้ */}
           <div className="flex items-end gap-4 px-5 sm:px-6 pb-5 border-b border-line">
             <div className="-mt-9 h-[72px] w-[72px] shrink-0 rounded-full bg-canvas ring-4 ring-surface overflow-hidden grid place-items-center text-2xl font-bold text-gold-ink shadow-md">
