@@ -11,6 +11,7 @@ import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-rat
 import { looksLikePromptInjection, sanitizePromptValue } from "@/lib/ai/prompt-guard";
 
 import { formatCardLoreForPrompt } from "@/data/cards/visual-lore";
+import { formatPriorReadingForChat } from "@/lib/ai/chat-context";
 import { diagnoseQuestionEnergy } from "@/lib/ai/intent";
 import { analyzeSpatialGazeDialogue } from "@/lib/ai/gaze";
 import { checkQuestion, getCrisisMessage } from "@/lib/safety/guardrails";
@@ -284,6 +285,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       })
       .filter((line): line is string => !!line);
 
+    /*
+     * ✦ คำอ่านเดิมที่ผู้ใช้เพิ่งเห็นบนจอ — รายใบ · ฟันธง · สรุป · คำแนะนำ · กรอบเวลา
+     * เดิมส่งแค่ summary (และกุสรุปขึ้นเองเมื่อไม่มีคำอ่าน) ➔ ถามต่อแล้วตอบขัดกับคำอ่านรายใบ
+     */
+    const priorReading = formatPriorReadingForChat({
+      result: record.result,
+      positionNames: (spread?.positions ?? []).map((p) => (isEnglish ? p.nameEn || p.nameTh : p.nameTh)),
+      lang: activeLang,
+    });
+
     const rawCards = (record.drawn || [])
       .map((d) => cardByIndex(d.cardIndex))
       .filter((c): c is import("@/data/cards").TarotCard => !!c);
@@ -316,7 +327,7 @@ The seeker just drew these cards with you:
 • Drawn Cards:
 ${cards.join("\n")}
 
-• Previous Reading Summary: "${record.result?.summary || "Energy is moving towards a positive resolution."}"
+${priorReading}
 ${gazeDialogue.dialogueNarrative ? `\n• Visual Card Dialogue:\n${gazeDialogue.dialogueNarrative}` : ""}
 ${guardSection}
 
@@ -346,7 +357,7 @@ ${guardSection}
 • ไพ่ที่หยิบได้จริงในรอบนี้:
 ${cards.join("\n")}
 
-• สรุปคำทำนายเดิมที่คุณเคยบอกไว้: "${record.result?.summary || "กำลังอยู่ในช่วงการเปลี่ยนแปลงที่ดี"}"
+${priorReading}
 ${gazeDialogue.dialogueNarrative ? `\n• บทสนทนาทางสายตาบนหน้าไพ่:\n${gazeDialogue.dialogueNarrative}` : ""}
 ${questionDiagnosis.promptDirective}
 ${guardSection}
