@@ -1,7 +1,7 @@
 import { CONSULTATION_MINUTES } from "@/lib/marketplace/offer";
 import { CHECKOUT_EXPIRES_MINUTES, formatSlotRange, HOLD_MINUTES } from "@/lib/marketplace/booking-policy";
 import type { BookingRecord } from "@/lib/marketplace/booking.repo";
-import { createGatewayCharge } from "@/lib/marketplace/payment-gateway";
+import { checkoutArtUrl, createGatewayCharge } from "@/lib/marketplace/payment-gateway";
 import { createPaymentRecord } from "@/lib/marketplace/payments.repo";
 import { getAppDB } from "@/lib/platform/db";
 import { resolveAppOrigin } from "@/lib/security/app-origin";
@@ -52,6 +52,7 @@ export async function openConsultationCheckout(input: {
       ? `ปรึกษา ${readerName} · ${formatSlotRange(booking.slotStart)}`
       : `ปรึกษา ${readerName} · คิวสดตอนนี้`,
     productDescription: `ตัวต่อตัว ${CONSULTATION_MINUTES} นาที · วิดีโอคอลในเว็บ หรือ LINE`,
+    imageUrl: checkoutArtUrl(origin, "consultation"),
     submitMessage: scheduled
       ? "ยกเลิกหรือเลื่อนนัดก่อนเวลานัด 24 ชั่วโมง คืนเงินเต็มจำนวน"
       : "ยกเลิกได้ระหว่างรอคิว คืนเงินเต็มจำนวน",

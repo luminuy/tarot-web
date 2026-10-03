@@ -3,6 +3,7 @@ import { recordEvent } from "@/lib/stats/record";
 import { getSessionUser } from "@/lib/auth/session";
 import { getCreditPackageById } from "@/lib/entitlement/packages";
 import {
+  checkoutArtUrl,
   createGatewayCharge,
   isStripeTestModeOnProduction,
   PAYMENTS_NOT_OPEN_MESSAGE,
@@ -84,7 +85,7 @@ export async function POST(request: Request) {
       productDescription: isEnglish
         ? "Readings with SeerTarot's AI readers · never expire · one-time payment, no subscription"
         : "เปิดไพ่กับแม่หมอ SeerTarot · รอบไม่มีวันหมดอายุ · จ่ายครั้งเดียว ไม่มีรายเดือน",
-      imageUrl: `${origin}/cards/pentacles-01.jpg`,
+      imageUrl: checkoutArtUrl(origin, "credits"),
       // อีเมลรูปแบบผิด = Stripe ตอบ 400 ทั้งรายการ — ส่งเฉพาะที่หน้าตาเป็นอีเมลจริง (บัญชี LINE อาจไม่มีอีเมล)
       customerEmail: user?.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email) ? user.email : undefined,
       submitMessage: isEnglish
