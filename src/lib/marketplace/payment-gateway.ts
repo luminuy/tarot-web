@@ -79,6 +79,32 @@ export function isStripeTestModeOnProduction(): boolean {
   return !!key && /^(sk|rk)_test_/.test(key) && process.env.NODE_ENV === "production";
 }
 
+/**
+ * 🎨 หน้าตาหน้าจ่ายเงินของ Stripe ให้เป็นแบรนด์เดียวกับเว็บ (ส่งไปกับทุกรายการ)
+ * ---------------------------------------------------------------------------
+ * - พื้นครีมอุ่น · ปุ่มสีหมึกเข้ม (สีเดียวกับปุ่มหลักในเว็บ) · มุมโค้ง
+ * - ฟอนต์ **Pridi** = ฟอนต์ไทยแบบมีหัวที่ Stripe มีให้เลือก (ตัวเลือกอื่นส่วนใหญ่ไม่มีอักษรไทย)
+ * - ไอคอนแบรนด์ส่งเฉพาะเว็บจริง (https) — Stripe ต้องดึงภาพจากอินเทอร์เน็ตได้
+ * ⚠️ ถ้าบัญชี Stripe ใช้ API รุ่นเก่าที่ไม่รู้จัก `branding_settings` ระบบจะยิงซ้ำโดยไม่ส่งส่วนนี้
+ *    (ดู `createGatewayCharge`) — หน้าจ่ายเงินต้องไม่ล่มเพราะเรื่องหน้าตา
+ */
+export function checkoutBranding(origin: string | null): Record<string, unknown> {
+  const isPublic = !!origin && origin.startsWith("https://");
+  return {
+    display_name: "SeerTarot",
+    background_color: "#F7F2EA",
+    button_color: "#2E211A",
+    border_style: "rounded",
+    font_family: "pridi",
+    icon: isPublic ? { type: "url", url: `${origin}/icons/icon-512x512.png` } : undefined,
+  };
+}
+
+/** ภาพสินค้าในหน้าจ่ายเงิน (สี่เหลี่ยมจัตุรัส · สร้างด้วย scripts/generate-checkout-art.mjs) */
+export function checkoutArtUrl(origin: string, kind: "credits" | "consultation"): string {
+  return `${origin}/checkout/${kind}.jpg`;
+}
+
 export const PAYMENTS_NOT_OPEN_MESSAGE = "ระบบชำระเงินยังไม่เปิดให้บริการ กรุณากลับมาใหม่เร็ว ๆ นี้";
 
 /** แปลง object ซ้อนเป็น form body แบบที่ Stripe รับ (`a[b][0][c]=...`) */
@@ -139,7 +165,13 @@ export async function createGatewayCharge(input: CreateChargeInput): Promise<Cha
 
   if (key) {
     const metadata = input.metadata ?? {};
-    const body = toStripeForm({
+    let origin: string | null = null;
+    try {
+      origin = new URL(input.returnUri).origin;
+    } catch {
+      origin = null;
+    }
+    const params: Record<string, unknown> = {
       mode: "payment",
       success_url: input.returnUri,
       cancel_url: input.cancelUri,
@@ -166,8 +198,25 @@ export async function createGatewayCharge(input: CreateChargeInput): Promise<Cha
       // receipt_email = Stripe ส่งใบเสร็จให้เอง (โหมดจริง) · ไม่รู้อีเมล = Stripe ใช้อีเมลที่ลูกค้ากรอกในหน้าจ่ายตามค่าในแดชบอร์ด
       payment_intent_data: { description: input.description, metadata, receipt_email: input.customerEmail },
       expires_at: input.expiresAt,
-    });
-    const session = await stripeRequest(key, "POST", "/checkout/sessions", body, input.idempotencyKey);
+      branding_settings: checkoutBranding(origin),
+    };
+    let session: Record<string, unknown>;
+    try {
+      session = await stripeRequest(key, "POST", "/checkout/sessions", toStripeForm(params), input.idempotencyKey);
+    } catch (err) {
+      // 400 = Stripe ไม่รับพารามิเตอร์ (เช่นบัญชีใช้ API รุ่นเก่าที่ยังไม่มี branding_settings)
+      // ยิงซ้ำหนึ่งครั้งโดยไม่ส่งส่วนหน้าตา · ใช้คีย์กันซ้ำคนละตัว เพราะเนื้อคำขอไม่เหมือนเดิม
+      if (!(err instanceof Error) || !/ → 400 /.test(err.message)) throw err;
+      console.warn("[Stripe] branding_settings ถูกปฏิเสธ — สร้างหน้าจ่ายเงินแบบไม่ปรับหน้าตา", err.message);
+      delete params.branding_settings;
+      session = await stripeRequest(
+        key,
+        "POST",
+        "/checkout/sessions",
+        toStripeForm(params),
+        input.idempotencyKey ? `${input.idempotencyKey}:plain` : undefined,
+      );
+    }
     return {
       chargeId: String(session.id),
       amountSatang: Number(session.amount_total ?? input.amountSatang),

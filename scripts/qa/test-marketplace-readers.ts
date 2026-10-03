@@ -312,6 +312,57 @@ async function runTest() {
     ) {
       throw new Error(`❌ createGatewayCharge ส่งรายละเอียดหน้าจ่ายเงินไม่ครบ: ${sent}`);
     }
+    // หน้าตาแบรนด์ต้องไปถึง Stripe: ฟอนต์ไทย · สีปุ่ม · ไอคอนจากเว็บจริง
+    if (
+      f.get("branding_settings[font_family]") !== "pridi" ||
+      f.get("branding_settings[button_color]") !== "#2E211A" ||
+      f.get("branding_settings[display_name]") !== "SeerTarot" ||
+      f.get("branding_settings[icon][url]") !== "https://seertarot.net/icons/icon-512x512.png"
+    ) {
+      throw new Error(`❌ createGatewayCharge ไม่ได้ส่ง branding_settings ไปให้ Stripe: ${sent}`);
+    }
+  }
+
+  // Stripe ปฏิเสธ branding_settings (API รุ่นเก่า) ➔ ต้องยิงซ้ำแบบไม่มีส่วนหน้าตา ไม่ใช่ทำให้จ่ายเงินไม่ได้
+  {
+    const realFetch = globalThis.fetch;
+    const prevKey = process.env.STRIPE_SECRET_KEY;
+    const calls: { body: string; idem: string | null }[] = [];
+    process.env.STRIPE_SECRET_KEY = "sk_test_branding_fallback";
+    globalThis.fetch = (async (_u: unknown, init?: RequestInit) => {
+      const body = String(init?.body ?? "");
+      calls.push({ body, idem: new Headers(init?.headers).get("Idempotency-Key") });
+      if (body.includes("branding_settings")) {
+        return new Response(
+          JSON.stringify({ error: { type: "invalid_request_error", code: "parameter_unknown", param: "branding_settings" } }),
+          { status: 400 },
+        );
+      }
+      return new Response(JSON.stringify({ id: "cs_test_plain", url: "https://checkout.stripe.com/p", amount_total: 14900, currency: "thb" }));
+    }) as typeof fetch;
+    let result: { chargeId: string } | null = null;
+    try {
+      result = await createGatewayCharge({
+        amountSatang: 14900,
+        description: "เติมรอบดูดวง 10 ครั้ง",
+        returnUri: "https://seertarot.net/x",
+        cancelUri: "https://seertarot.net/pricing",
+        referenceId: "ord_brand",
+        idempotencyKey: "checkout_ord_brand",
+      });
+    } finally {
+      globalThis.fetch = realFetch;
+      if (prevKey === undefined) delete process.env.STRIPE_SECRET_KEY;
+      else process.env.STRIPE_SECRET_KEY = prevKey;
+    }
+    if (
+      result?.chargeId !== "cs_test_plain" ||
+      calls.length !== 2 ||
+      calls[1].body.includes("branding_settings") ||
+      calls[1].idem === calls[0].idem
+    ) {
+      throw new Error(`❌ branding_settings ถูกปฏิเสธแล้วไม่ถอยไปหน้าจ่ายเงินแบบธรรมดา: ${JSON.stringify(calls.map((c) => c.idem))}`);
+    }
   }
 
   // form body ซ้อนชั้นแบบที่ Stripe รับ
