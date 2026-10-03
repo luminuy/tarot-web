@@ -23,7 +23,7 @@ import type { RitualStep } from "@/components/home/ritual-step";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";
-import { saveFlowState, loadFlowState, clearFlowState } from "@/lib/utils/flow-persistence";
+import { saveFlowState, loadFlowState, clearFlowState, FRESH_START_EVENT } from "@/lib/utils/flow-persistence";
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
 import { prefetchTurnstile } from "@/lib/auth/turnstile";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -787,6 +787,16 @@ export default function TarotFlow({
    * (`beforeunload` ไม่ยิงและยังตัด bfcache ทิ้งด้วย) เสริมด้วย `visibilitychange`
    * สำหรับกรณีสลับแอปแล้วระบบปฏิบัติการเก็บแท็บทิ้งไปเลย
    */
+  // ผู้ใช้กดโลโก้/ลิงก์หน้าแรก ➔ ทิ้งรอบที่ค้าง และห้ามตัว flush เขียนคืน (requestFreshStart)
+  useEffect(() => {
+    const onFreshStart = () => {
+      leavingRef.current = true;
+      clearFlowState();
+    };
+    window.addEventListener(FRESH_START_EVENT, onFreshStart);
+    return () => window.removeEventListener(FRESH_START_EVENT, onFreshStart);
+  }, []);
+
   useEffect(() => {
     const flush = () => {
       if (latestFlowRef.current && !leavingRef.current) saveFlowState(latestFlowRef.current);

@@ -3,6 +3,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
+import { requestFreshStart } from "@/lib/utils/flow-persistence";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { HeaderAccount } from "@/components/layout/HeaderAccount";
@@ -131,6 +132,9 @@ export function SiteHeader({
             <Link
               href="/"
               prefetch={false}
+              data-home-link=""
+              // กดโลโก้ = เริ่มใหม่จากหน้าแรกจริง ไม่ใช่กู้คืนรอบที่ค้างกลับมา (requestFreshStart)
+              onClick={() => requestFreshStart()}
               aria-label={isEnglish ? "SeerTarot — Return to Home" : "ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"}
               className="group flex min-w-0 shrink items-center gap-2.5 sm:gap-3 select-none rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
             >

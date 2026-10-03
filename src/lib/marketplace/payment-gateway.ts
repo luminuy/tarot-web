@@ -300,6 +300,64 @@ export async function refundGatewayCharge(chargeId: string, idempotencyKey: stri
   }
 }
 
+/**
+ * 💸 event คืนเงินจาก Stripe (`charge.refunded`) — คืนจากแดชบอร์ด Stripe เอง หรือจากระบบเรา
+ * charge ไม่รู้จัก Checkout Session ของเรา จึงคืน `paymentIntent` ไว้ให้ผู้เรียกหา session ต่อ
+ * คืน null ถ้าไม่ใช่ event นี้
+ */
+export function parseRefundEvent(
+  event: Record<string, unknown>,
+): { paymentIntent: string; fullyRefunded: boolean } | null {
+  if (event.type !== "charge.refunded") return null;
+  const charge = ((event.data as Record<string, unknown> | undefined)?.object ?? null) as Record<string, unknown> | null;
+  const pi = charge?.payment_intent;
+  if (!charge || typeof pi !== "string") return null;
+  const amount = Number(charge.amount ?? 0);
+  const refunded = Number(charge.amount_refunded ?? 0);
+  return { paymentIntent: pi, fullyRefunded: charge.refunded === true || (amount > 0 && refunded >= amount) };
+}
+
+/** หา Checkout Session (`cs_...` ที่เราเก็บเป็น provider_ref) จาก PaymentIntent */
+export async function findCheckoutSessionByPaymentIntent(paymentIntent: string): Promise<string | null> {
+  const key = stripeSecretKey();
+  if (!key || !/^pi_[A-Za-z0-9_]+$/.test(paymentIntent)) return null;
+  try {
+    const list = await stripeRequest(key, "GET", `/checkout/sessions?payment_intent=${encodeURIComponent(paymentIntent)}&limit=1`);
+    const first = Array.isArray(list.data) ? (list.data[0] as Record<string, unknown> | undefined) : undefined;
+    return typeof first?.id === "string" ? first.id : null;
+  } catch (err) {
+    console.warn("[Payment Gateway] หา session จาก payment_intent ไม่สำเร็จ", err);
+    return null;
+  }
+}
+
+/**
+ * รายการนี้ถูกคืนเงินเต็มจำนวนแล้วหรือยัง — ถาม Stripe เองด้วยคีย์ลับ (ปลอมไม่ได้)
+ * ใช้ทั้งตอนรับ webhook (ยืนยันซ้ำ) และปุ่มแอดมิน "ตรวจรายการคืนเงินจาก Stripe" (ซิงก์ย้อนหลัง)
+ * คืน null = ถามไม่ได้ (ไม่มีคีย์/เน็ตล่ม) ห้ามตีความว่า "ไม่ได้คืน"
+ */
+export async function retrieveRefundState(chargeId: string): Promise<{ fullyRefunded: boolean; partiallyRefunded: boolean } | null> {
+  const key = stripeSecretKey();
+  if (!key || !/^cs_[A-Za-z0-9_]+$/.test(chargeId)) return null;
+  try {
+    const session = await stripeRequest(
+      key,
+      "GET",
+      `/checkout/sessions/${chargeId}?expand[]=payment_intent.latest_charge`,
+    );
+    const intent = (session.payment_intent ?? null) as Record<string, unknown> | null;
+    const charge = (intent?.latest_charge ?? null) as Record<string, unknown> | null;
+    if (!charge || typeof charge !== "object") return { fullyRefunded: false, partiallyRefunded: false };
+    const amount = Number(charge.amount ?? 0);
+    const refunded = Number(charge.amount_refunded ?? 0);
+    const full = charge.refunded === true || (amount > 0 && refunded >= amount);
+    return { fullyRefunded: full, partiallyRefunded: !full && refunded > 0 };
+  } catch (err) {
+    console.warn("[Payment Gateway] ถามสถานะคืนเงินจาก Stripe ไม่สำเร็จ", err);
+    return null;
+  }
+}
+
 export interface WebhookOutcome {
   chargeId: string;
   outcome: "paid" | "failed" | "ignore";

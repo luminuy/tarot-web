@@ -815,6 +815,48 @@ async function testBookingCare(readerId: string) {
     await repo.replaceScheduleRules(readerId, []);
   }
   console.log("  ✓ 18.6 cron ล็อกด้วยความลับ · ปล่อยที่ที่หมดเวลาจ่าย · แจ้งรายชื่อรอเวลาว่างแล้วลบอีเมลทิ้ง");
+
+  // ── 18.7 คืนเงินจากแดชบอร์ด Stripe ➔ ถอนรอบดูดวงที่ซื้อ / ยกเลิกนัด (เจ้าของแจ้ง: คืนเงินแล้วรอบไม่ลด) ──
+  const { parseRefundEvent } = await import("../../src/lib/marketplace/payment-gateway");
+  const { applyGatewayRefund } = await import("../../src/lib/marketplace/refund-sync");
+  const { grantBonus } = await import("../../src/lib/entitlement/entitlement");
+  const { purchaseGrantReason } = await import("../../src/lib/entitlement/purchase");
+  const ev = (obj: Record<string, unknown>) => parseRefundEvent({ type: "charge.refunded", data: { object: obj } });
+  const full = ev({ payment_intent: "pi_1", amount: 14900, amount_refunded: 14900, refunded: true });
+  const part = ev({ payment_intent: "pi_1", amount: 14900, amount_refunded: 5000, refunded: false });
+  if (!full?.fullyRefunded || part?.fullyRefunded !== false || parseRefundEvent({ type: "charge.succeeded", data: { object: {} } }) !== null) {
+    throw new Error("❌ parseRefundEvent แยกคืนเต็ม/คืนบางส่วนผิด");
+  }
+  const uid = `usr_refund_${crypto.randomUUID().slice(0, 8)}`;
+  const orderId = `ord_refund_${crypto.randomUUID().slice(0, 8)}`;
+  await grantBonus(uid, 3, purchaseGrantReason(orderId));
+  const creditPay = await createPaymentRecord({ orderId, userId: uid, provider: "stripe", providerRef: `cs_test_${orderId}`, amountSatang: 14900 });
+  await db.prepare("UPDATE payments SET status = 'paid' WHERE id = ?").bind(creditPay.id).run();
+  const r1 = await applyGatewayRefund(creditPay.id);
+  const r2 = await applyGatewayRefund(creditPay.id);
+  const left = await db.prepare("SELECT COALESCE(SUM(granted), 0) AS n FROM user_bonus WHERE user_id = ?").bind(uid).first<{ n: number }>();
+  if (r1 !== "credits_revoked" || r2 !== "already" || Number(left?.n) !== 0) {
+    throw new Error(`❌ คืนเงินแล้วต้องถอนรอบที่ซื้อ (${r1}/${r2} เหลือ ${left?.n})`);
+  }
+  // จ่ายซ้ำ webhook เดิมหลังคืนเงินต้องแจกคืนไม่ได้ (กุญแจการซื้อยังอยู่)
+  await grantBonus(uid, 3, purchaseGrantReason(orderId));
+  const regranted = await db.prepare("SELECT COALESCE(SUM(granted), 0) AS n FROM user_bonus WHERE user_id = ?").bind(uid).first<{ n: number }>();
+  if (Number(regranted?.n) !== 0) throw new Error("❌ webhook จ่ายเงินยิงซ้ำหลังคืนเงินแจกรอบคืนได้");
+  await db.prepare("DELETE FROM user_bonus WHERE user_id = ?").bind(uid).run();
+  await db.prepare("DELETE FROM payments WHERE id = ?").bind(creditPay.id).run();
+
+  const tr = await createQueueTicket({
+    readerId, kind: "walkup", customerRef: "cust_refund_c", nickname: "ซี", question: "คืนเงินจากแดชบอร์ด", initialStatus: "pending_payment",
+  });
+  const hr = await repo.holdBooking({ ticketId: tr.id, readerId, kind: "walkup", slotStart: Date.now() });
+  if (!hr.ok) throw new Error("❌ hold walkup ล้ม");
+  const pr = await createPaymentRecord({ bookingId: hr.booking.id, ticketId: tr.id, provider: "simulator", providerRef: "chrg_test_refund_c", amountSatang: 29900 });
+  await repo.settleConsultationPayment(pr.id);
+  const rc = await applyGatewayRefund(pr.id);
+  if (rc !== "booking_cancelled" || (await getQueueTicketById(tr.id))?.status !== "cancelled") {
+    throw new Error(`❌ คืนค่าปรึกษาจากแดชบอร์ดต้องยกเลิกคิวด้วย (${rc})`);
+  }
+  console.log("  ✓ 18.7 คืนเงินจากแดชบอร์ด Stripe ➔ ถอนรอบที่ซื้อ (ครั้งเดียว · แจกคืนไม่ได้) · ค่าปรึกษา ➔ ยกเลิกคิว");
 }
 
 async function testVideoCall(readerId: string, sessionSecret: string) {

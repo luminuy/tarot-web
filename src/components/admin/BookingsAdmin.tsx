@@ -72,7 +72,7 @@ export default function BookingsAdmin() {
   const [notice, setNotice] = useState<string | null>(null);
   const load = reload;
 
-  const act = async (key: string, body: Record<string, unknown>, okMsg: string) => {
+  const act = async (key: string, body: Record<string, unknown>, okMsg: string | ((json: Record<string, unknown>) => string)) => {
     setBusy(key);
     setNotice(null);
     try {
@@ -82,7 +82,7 @@ export default function BookingsAdmin() {
         body: JSON.stringify(body),
       });
       const json = await res.json().catch(() => ({}));
-      setNotice(res.ok ? okMsg : json.error || "ดำเนินการไม่สำเร็จ");
+      setNotice(res.ok ? (typeof okMsg === "function" ? okMsg(json) : okMsg) : json.error || "ดำเนินการไม่สำเร็จ");
       if (res.ok) await load();
     } finally {
       setBusy(null);
@@ -97,6 +97,27 @@ export default function BookingsAdmin() {
   return (
     <div className="space-y-8 font-sans">
       {notice && <p className="rounded-xl border border-gold-ink/30 bg-gold-ink/10 px-4 py-2.5 text-xs text-ink">{notice}</p>}
+
+      <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-inset/40 p-3.5">
+        <p className="min-w-0 flex-1 text-xs leading-relaxed text-ink">
+          <strong>คืนเงินในแดชบอร์ด Stripe เอง?</strong> กดตรวจเพื่อให้เว็บหักรอบดูดวงที่ซื้อ / ยกเลิกนัดของรายการที่คืนเงินแล้วให้ตรงกัน
+          (ปกติ webhook <code>charge.refunded</code> ทำให้เองอัตโนมัติ)
+        </p>
+        <Button
+          size="sm"
+          variant="gold"
+          disabled={busy === "sync"}
+          onClick={() =>
+            void act("sync", { action: "sync_refunds" }, (j) =>
+              `ตรวจ ${j.checked ?? 0} รายการ · ปรับตามการคืนเงินแล้ว ${j.applied ?? 0} รายการ` +
+              (Number(j.partial ?? 0) > 0 ? ` · คืนบางส่วน ${j.partial} รายการ (ต้องปรับเอง)` : "") +
+              (Number(j.unreachable ?? 0) > 0 ? ` · ถาม Stripe ไม่ได้ ${j.unreachable} รายการ` : "")
+            )
+          }
+        >
+          {busy === "sync" ? "กำลังตรวจกับ Stripe…" : "ตรวจรายการคืนเงินจาก Stripe"}
+        </Button>
+      </section>
 
       <section className="space-y-3">
         <h3 className="text-sm font-bold text-ink">เงินที่ต้องคืนแต่ยังคืนไม่สำเร็จ ({due.length})</h3>
