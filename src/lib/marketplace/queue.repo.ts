@@ -8,6 +8,8 @@ import {
 
 export type TicketKind = "walkup" | "booking";
 export type TicketStatus =
+  /** กันที่ไว้แล้ว รอจ่ายเงิน (migrations/0020) — แม่หมอยังไม่เห็นตั๋วนี้ */
+  | "pending_payment"
   | "screening"
   | "waiting"
   | "ready"
@@ -144,6 +146,21 @@ export interface CreateQueueTicketInput {
   question: string;
   readingSnapshot?: string;
   slotStart?: number;
+  /**
+   * สถานะเริ่มต้นเมื่อผ่าน AI คัดกรอง — ค่าเริ่มต้น `waiting` (เข้าคิวทันที)
+   * เส้นจองจริงส่ง `pending_payment`: ตั๋วจะเข้าคิวก็ต่อเมื่อจ่ายเงินแล้ว (`settleConsultationPayment`)
+   */
+  initialStatus?: Extract<TicketStatus, "waiting" | "pending_payment">;
+}
+
+const RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * วันลบตั๋ว (PDPA) — 7 วันหลังสร้าง หรือ 7 วันหลังเวลานัด แล้วแต่อันไหนช้ากว่า
+ * ⚠️ นัดล่วงหน้าได้ไกล 14 วัน — ถ้านับจากวันสร้างอย่างเดียว ตั๋วจะถูกลบก่อนถึงวันนัด
+ */
+export function ticketExpiresAt(nowMs: number, slotStart?: number | null): number {
+  return Math.max(nowMs + RETENTION_MS, (slotStart ?? 0) + RETENTION_MS);
 }
 
 /**
@@ -153,7 +170,7 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
   const db = await getAppDB();
   const ticketId = `ticket_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
   const now = Date.now();
-  const expiresAt = now + 7 * 24 * 60 * 60 * 1000; // 7 days PDPA retention
+  const expiresAt = ticketExpiresAt(now, input.slotStart);
 
   // 1. Run AI Screening First
   const screening = await performAIScreening({
@@ -207,9 +224,11 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
     return ticket;
   }
 
-  // 2. Calculate Queue Position for walk-up
-  let position = 1;
-  if (input.kind === "walkup") {
+  const initialStatus: TicketStatus = input.initialStatus ?? "waiting";
+
+  // 2. Calculate Queue Position for walk-up (ตั๋วที่ยังไม่จ่ายยังไม่มีลำดับ — ได้ลำดับตอนจ่ายสำเร็จ)
+  let position: number | null = initialStatus === "waiting" ? 1 : null;
+  if (input.kind === "walkup" && initialStatus === "waiting") {
     const countRow = await db
       .prepare(
         "SELECT COUNT(*) as count FROM queue_tickets WHERE reader_id = ? AND status IN ('waiting', 'ready')"
@@ -218,8 +237,6 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
       .first<{ count: number }>();
     position = (countRow?.count || 0) + 1;
   }
-
-  const initialStatus: TicketStatus = "waiting";
 
   await db
     .prepare(
@@ -278,7 +295,7 @@ export async function listActiveTicketsForCustomer(customerRef: string): Promise
   const db = await getAppDB();
   const { results } = await db
     .prepare(
-      "SELECT * FROM queue_tickets WHERE customer_ref = ? AND status IN ('screening', 'waiting', 'ready') ORDER BY created_at DESC"
+      "SELECT * FROM queue_tickets WHERE customer_ref = ? AND status IN ('pending_payment', 'screening', 'waiting', 'ready') ORDER BY created_at DESC"
     )
     .bind(customerRef)
     .all<RawTicketRow>();

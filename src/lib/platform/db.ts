@@ -398,6 +398,19 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec("ALTER TABLE payments ADD COLUMN user_id TEXT");
     safeExec("CREATE INDEX IF NOT EXISTS idx_payments_order ON payments(order_id)");
     safeExec("CREATE INDEX IF NOT EXISTS idx_payments_user ON payments(user_id)");
+    // 📅 นัดเวลาล่วงหน้า + จ่ายก่อนคุย (migrations/0020) — unique index แบบมีเงื่อนไขคือด่านกันจองซ้อน
+    safeExec("ALTER TABLE bookings ADD COLUMN kind TEXT NOT NULL DEFAULT 'scheduled'");
+    safeExec("ALTER TABLE bookings ADD COLUMN hold_expires_at INTEGER");
+    safeExec("ALTER TABLE bookings ADD COLUMN cancelled_at INTEGER");
+    safeExec("ALTER TABLE bookings ADD COLUMN cancelled_by TEXT");
+    safeExec("ALTER TABLE bookings ADD COLUMN refund_status TEXT");
+    safeExec("ALTER TABLE bookings ADD COLUMN reschedule_count INTEGER NOT NULL DEFAULT 0");
+    safeExec("ALTER TABLE payments ADD COLUMN refund_due INTEGER NOT NULL DEFAULT 0");
+    safeExec(
+      "CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_slot_active ON bookings(reader_id, slot_start) WHERE kind = 'scheduled' AND status IN ('reserved', 'confirmed')"
+    );
+    safeExec("CREATE INDEX IF NOT EXISTS idx_bookings_ticket ON bookings(ticket_id)");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_payments_provider_ref ON payments(provider_ref)");
     // 🎟 รหัสแลกสิทธิ์ตั้งต้นของเครื่อง dev — ต้องมีเพดานและวันหมดอายุเท่ากับ migrations/0013
     // (ห้ามปล่อย max_uses = -1 อีก: รหัสที่เขียนไว้ในรีโปแปลว่าใครอ่านซอร์สเจอก็แลกได้)
     // รหัสสำหรับแจกจริงให้สร้างจากแผงแอดมินซึ่งสุ่มรหัสใหม่ทุกครั้ง — อย่า seed ลงไฟล์

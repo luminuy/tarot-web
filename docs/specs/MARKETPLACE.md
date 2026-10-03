@@ -298,6 +298,27 @@ export interface Reader { id: string; displayName: string; bio: string; avatarUr
 - เมื่อยังไม่ได้ใส่ Secret Key ระบบจะรันในโหมด **Deterministic Test Mode Simulator** โดยอัตโนมัติ
 - ระบบตรวจสอบความถูกต้องของ Webhook Signature ป้องกันการปลอมแปลง Event
 
+---
+
+### 📅 นัดเวลาล่วงหน้า + จ่ายก่อนคุย (เคาะ 2026-10-03)
+
+| หัวข้อ | ค่าที่เคาะ |
+| :-- | :-- |
+| ตารางรับนัด | แม่หมอตั้งรายสัปดาห์ในแผงแม่หมอ (`reader_availability.mode = 'scheduled'`) · ช่องละ 30 นาที · จองล่วงหน้า ≥ 2 ชม. · ไกลสุด 14 วัน · เวลาไทย |
+| จ่ายเงิน | ทุกการปรึกษาจ่ายก่อน (คิวสดด้วย) ผ่าน Stripe Checkout · ราคาจากเซิร์ฟเวอร์เท่านั้น |
+| กันที่ | 36 นาที · หน้าจ่ายหมดอายุ 31 นาที (หน้าจ่ายต้องหมดก่อนที่นั่งเสมอ) |
+| กันจองซ้อน | unique index `idx_bookings_slot_active` (reader_id, slot_start) เฉพาะ `kind='scheduled'` และสถานะ `reserved/confirmed` |
+| ยกเลิก/คืนเงิน | ก่อนนัด ≥ 24 ชม. คืนเต็ม · < 24 ชม. ไม่คืน · แม่หมอยกเลิก/ไม่มาภายใน 15 นาที คืนเต็ม · คิวสดระหว่างรอ คืนเต็ม · เลื่อนได้ 1 ครั้ง (≥ 24 ชม.) |
+
+**ไฟล์**: `src/lib/marketplace/booking-policy.ts` (กติกา — ไม่มี I/O ใช้ร่วมหน้าเว็บ/API) · `booking.repo.ts` (วงจรใบจอง + `settleConsultationPayment` จุดเดียวที่เปลี่ยนเงินเข้าเป็นนัด) ·
+`consultation-checkout.ts` · `SlotPicker.tsx` · `BookQueueModal.tsx` · `QueueBookingParts.tsx` · `ConsoleBookingParts.tsx` · migrations/0020
+
+**กับดักที่ห้ามพลาด**
+- ห้ามยืนยันนัดที่อื่นนอก `settleConsultationPayment` (เดิม `updatePaymentStatus` ตั้ง bookings = 'paid' เองโดยไม่ดูว่าที่ว่างไหม — ถอดแล้ว)
+- อายุตั๋ว (PDPA) = 7 วันหลังเวลานัด ไม่ใช่หลังวันสร้าง (`ticketExpiresAt`) — นัดไกล 14 วัน ถ้านับจากวันสร้างตั๋วจะถูกลบก่อนถึงวันนัด
+- เวลาที่ไคลเอนต์ส่งมาไม่เชื่อ: `slotRejection` ตรวจกับตารางจริงทุกครั้ง แล้ว unique index เป็นด่านสุดท้าย
+- ด่านตรวจ: `test-marketplace-readers` ข้อ 17.1–17.8
+
 ### 7.3 Repository & APIs
 - `src/lib/marketplace/payments.repo.ts`: จัดการ CRUD, Transition สถานะ, คำนวณส่วนแบ่งแม่หมอ
 - `/api/marketplace/payments`: สร้างรายการชำระเงิน

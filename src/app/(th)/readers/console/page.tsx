@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/Button";
 import { VideoCallRoom } from "@/components/marketplace/VideoCallRoom";
 import { useVisibleInterval } from "@/lib/utils/use-visible-interval";
 import type { QueueTicket } from "@/lib/marketplace/queue.repo";
+import type { ScheduleRule } from "@/lib/marketplace/booking-policy";
+import { ReaderScheduleEditor, UpcomingBookings } from "@/components/marketplace/ConsoleBookingParts";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +26,8 @@ interface ConsoleState {
   totalWaiting: number;
   /** ตั้งค่า TURN แล้ว = แม่หมอเปิดวิดีโอคอลกับคิวที่เรียกแล้วได้ */
   videoCallEnabled?: boolean;
+  /** ตารางรับนัดประจำสัปดาห์ (migrations/0020) */
+  schedule?: ScheduleRule[];
 }
 
 function ReaderConsoleInner() {
@@ -37,6 +41,7 @@ function ReaderConsoleInner() {
   const [notice, setNotice] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [activeCallId, setActiveCallId] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
 
   const getAuthHeaders = useCallback((): HeadersInit => {
     const headers: Record<string, string> = {
@@ -62,6 +67,7 @@ function ReaderConsoleInner() {
       if (res.ok) {
         const json = (await res.json()) as ConsoleState;
         setData(json);
+        setNow(Date.now());
         setError(null);
       } else {
         const json = await res.json();
@@ -99,7 +105,7 @@ function ReaderConsoleInner() {
     }
   };
 
-  const handleTicketAction = async (ticketId: string, action: "accept" | "handoff" | "cancel") => {
+  const handleTicketAction = async (ticketId: string, action: "accept" | "handoff" | "cancel" | "no_show") => {
     setActionLoading(ticketId);
     setNotice(null);
     try {
@@ -112,7 +118,8 @@ function ReaderConsoleInner() {
         fetchConsoleData();
         if (action === "accept") setNotice("เรียกคิวเรียบร้อยแล้ว");
         else if (action === "handoff") setNotice("ปิดคิวเรียบร้อยแล้ว");
-        else setNotice("ยกเลิกคิวเรียบร้อยแล้ว");
+        else if (action === "no_show") setNotice("บันทึกว่าลูกค้าไม่มาตามนัดแล้ว");
+        else setNotice("ยกเลิกแล้ว ระบบคืนเงินลูกค้าเต็มจำนวนให้อัตโนมัติ");
       } else {
         const d = await res.json().catch(() => ({}));
         setNotice(d.error || "ดำเนินการไม่สำเร็จ");
@@ -155,7 +162,10 @@ function ReaderConsoleInner() {
     );
   }
 
-  const { reader, isLiveOpen, tickets, totalWaiting, videoCallEnabled } = data;
+  const { reader, isLiveOpen, tickets: allTickets, totalWaiting, videoCallEnabled, schedule = [] } = data;
+  // นัดล่วงหน้าที่ยังไม่ถึงเวลาแยกไปอยู่ "นัดที่จะถึง" — กริดคิวด้านล่างคือคิวสด + นัดที่เริ่มแล้ว
+  const upcomingBookings = allTickets.filter((t) => t.kind === "booking" && t.status === "waiting");
+  const tickets = allTickets.filter((t) => !(t.kind === "booking" && t.status === "waiting"));
   // ห้องวิดีโอแสดงเฉพาะตอนคิวนั้นยังอยู่สถานะ "เรียกแล้ว" — ปิดคิว = ห้องหายและกล้องดับเอง
   const activeCallTicket = activeCallId
     ? tickets.find((t) => t.id === activeCallId && t.status === "ready") ?? null
@@ -231,11 +241,18 @@ function ReaderConsoleInner() {
           </div>
         </div>
 
+        <UpcomingBookings
+          tickets={upcomingBookings}
+          nowMs={now}
+          busyId={actionLoading}
+          onAction={(id, action) => void handleTicketAction(id, action)}
+        />
+
         {/* Queue Board Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="font-serif-th font-bold text-lg text-ink">
-              รายการคิวรอรับคำปรึกษา
+              คิวสดและนัดที่กำลังคุย
             </h2>
             <span className="rounded-full bg-gold-ink/10 px-2.5 py-0.5 text-xs font-bold text-gold-ink border border-gold-ink/20">
               {totalWaiting} คิว
@@ -293,7 +310,7 @@ function ReaderConsoleInner() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gold-ink/10 text-xs font-bold text-gold-ink">
-                        #{ticket.position || 1}
+                        {ticket.kind === "booking" ? "นัด" : `#${ticket.position || 1}`}
                       </span>
                       <span className="font-serif-th font-bold text-sm text-ink">
                         คุณ{ticket.nickname || "ลูกดวง"}
@@ -400,6 +417,16 @@ function ReaderConsoleInner() {
             })}
           </div>
         )}
+
+        <ReaderScheduleEditor
+          key={JSON.stringify(schedule)}
+          schedule={schedule}
+          authHeaders={getAuthHeaders}
+          onSaved={(message) => {
+            setNotice(message);
+            void fetchConsoleData();
+          }}
+        />
       </div>
     </main>
   );

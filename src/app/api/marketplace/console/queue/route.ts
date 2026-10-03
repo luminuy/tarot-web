@@ -6,20 +6,22 @@ import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { endCall } from "@/lib/marketplace/call.repo";
 import { isTurnConfigured, revokeTurnCredential } from "@/lib/marketplace/turn";
 import {
+  getQueueTicketById,
   getReaderLiveAvailability,
   listReaderQueueTickets,
   setReaderLiveAvailability,
   toPublicTicket,
   updateTicketStatus,
-  type TicketStatus,
 } from "@/lib/marketplace/queue.repo";
+import { cancelConsultation, completeBooking, getScheduleRules, markNoShow } from "@/lib/marketplace/booking.repo";
+import { canMarkNoShow, canStartBooking, EARLY_START_MINUTES, NO_SHOW_GRACE_MINUTES } from "@/lib/marketplace/booking-policy";
 
 export const runtime = "nodejs";
 
 const PatchConsoleSchema = z.object({
   isLiveOpen: z.boolean().optional(),
   ticketId: z.string().optional(),
-  action: z.enum(["accept", "handoff", "cancel"]).optional(),
+  action: z.enum(["accept", "handoff", "cancel", "no_show"]).optional(),
 });
 
 /**
@@ -32,9 +34,11 @@ export async function GET(request: Request) {
   const { reader, readerId } = auth;
   try {
     const isLiveOpen = await getReaderLiveAvailability(readerId);
+    // ตั๋วที่ยังไม่จ่าย (`pending_payment`) ไม่อยู่ในรายการนี้โดยตั้งใจ — แม่หมอเห็นเฉพาะคิว/นัดที่จ่ายแล้ว
     const tickets = await listReaderQueueTickets(readerId, {
       status: ["waiting", "ready", "screening"],
     });
+    const schedule = await getScheduleRules(readerId);
 
     return NextResponse.json({
       reader: {
@@ -47,7 +51,8 @@ export async function GET(request: Request) {
       },
       isLiveOpen,
       tickets: tickets.map(toPublicTicket),
-      totalWaiting: tickets.filter((t) => t.status === "waiting").length,
+      totalWaiting: tickets.filter((t) => t.status === "waiting" && t.kind === "walkup").length,
+      schedule,
       videoCallEnabled: isTurnConfigured(),
     });
   } catch (err) {
@@ -92,18 +97,48 @@ export async function PATCH(request: Request) {
 
     // 2. Handle Ticket Status Action
     if (parsed.data.ticketId && parsed.data.action) {
-      let targetStatus: TicketStatus = "waiting";
-      if (parsed.data.action === "accept") targetStatus = "ready";
-      if (parsed.data.action === "handoff") targetStatus = "handed_off";
-      if (parsed.data.action === "cancel") targetStatus = "cancelled";
-
-      const updated = await updateTicketStatus(parsed.data.ticketId, targetStatus, readerId);
-      if (!updated) {
+      const ticket = await getQueueTicketById(parsed.data.ticketId);
+      if (!ticket || ticket.readerId !== readerId) {
         return NextResponse.json({ error: "ไม่พบคิวที่ระบุ หรือไม่มีสิทธิ์แก้ไข" }, { status: 404 });
       }
+      const now = Date.now();
+      const action = parsed.data.action;
+
+      if (action === "accept") {
+        if (ticket.status !== "waiting") {
+          return NextResponse.json({ error: "คิวนี้เรียกไม่ได้แล้ว" }, { status: 409 });
+        }
+        if (ticket.kind === "booking" && !canStartBooking(ticket.slotStart, now)) {
+          return NextResponse.json(
+            { error: `เริ่มนัดได้ก่อนเวลานัดไม่เกิน ${EARLY_START_MINUTES} นาที` },
+            { status: 409 }
+          );
+        }
+        if (!(await updateTicketStatus(ticket.id, "ready", readerId))) {
+          return NextResponse.json({ error: "ไม่พบคิวที่ระบุ หรือไม่มีสิทธิ์แก้ไข" }, { status: 404 });
+        }
+      } else if (action === "handoff") {
+        if (ticket.status !== "ready" || !(await updateTicketStatus(ticket.id, "handed_off", readerId))) {
+          return NextResponse.json({ error: "ปิดคิวได้เฉพาะคิวที่เรียกแล้ว" }, { status: 409 });
+        }
+        await completeBooking(ticket.id);
+      } else if (action === "no_show") {
+        if (ticket.kind !== "booking" || !canMarkNoShow(ticket.slotStart, now) || !(await markNoShow(ticket, now))) {
+          return NextResponse.json(
+            { error: `แจ้งลูกค้าไม่มาได้หลังเวลานัด ${NO_SHOW_GRACE_MINUTES} นาที` },
+            { status: 409 }
+          );
+        }
+      } else {
+        // แม่หมอยกเลิก = คืนเงินลูกค้าเต็มจำนวนเสมอ (decideCancellation)
+        const result = await cancelConsultation(ticket, "reader", now);
+        if (!result.ok) {
+          return NextResponse.json({ error: "คิวนี้ยกเลิกไม่ได้แล้ว" }, { status: 409 });
+        }
+      }
       // ปิดคิว = วางสายวิดีโอที่อาจค้างอยู่ + เพิกถอนรหัสผ่าน TURN ทันที
-      if (targetStatus === "handed_off" || targetStatus === "cancelled") {
-        const users = await endCall(parsed.data.ticketId, "reader");
+      if (action !== "accept") {
+        const users = await endCall(ticket.id, "reader");
         await Promise.all(users.map(revokeTurnCredential));
       }
     }

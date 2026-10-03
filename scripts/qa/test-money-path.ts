@@ -401,12 +401,19 @@ async function main(): Promise<void> {
     /createPaymentRecord\(\{[\s\S]{0,400}userId,/.test(checkoutSrc),
   );
   // คีย์ Stripe ทดสอบบนเว็บจริง: บัตร 4242 ต้องไม่ได้ของฟรี — ทุกจุดที่สร้างรายการชำระเงินต้องมีด่านนี้
+  // ค่าปรึกษาแม่หมอเปิดหน้าจ่ายผ่าน openConsultationCheckout() ที่เดียว (จองใหม่ = /tickets · จ่ายต่อ = /payments)
   const marketPaySrc = readSource("src/app/api/marketplace/payments/route.ts");
-  for (const [name, src] of [["checkout", checkoutSrc], ["marketplace/payments", marketPaySrc]] as const) {
+  const marketTicketSrc = readSource("src/app/api/marketplace/tickets/route.ts");
+  for (const [name, src, opener] of [
+    ["checkout", checkoutSrc, "createGatewayCharge({"],
+    ["marketplace/payments", marketPaySrc, "openConsultationCheckout({"],
+    ["marketplace/tickets", marketTicketSrc, "openConsultationCheckout({"],
+  ] as const) {
     check(
       `${name} ปิดรับเงินเมื่อเว็บจริงใช้คีย์ทดสอบ (ยกเว้นผู้ทดสอบ) ก่อนสร้างรายการ`,
       /isStripeTestModeOnProduction\(\)/.test(src) &&
-        src.indexOf("isStripeTestModeOnProduction()") < src.indexOf("createGatewayCharge({"),
+        src.includes(opener) &&
+        src.indexOf("isStripeTestModeOnProduction()") < src.indexOf(opener),
     );
   }
 

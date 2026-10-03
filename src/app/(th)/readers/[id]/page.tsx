@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPublicReaderById } from "@/lib/marketplace/readers.repo";
 import { getReaderLiveAvailability } from "@/lib/marketplace/queue.repo";
+import { getNextAvailableSlot } from "@/lib/marketplace/booking.repo";
+import { FREE_CANCEL_HOURS, MAX_RESCHEDULES } from "@/lib/marketplace/booking-policy";
 import { ReaderDetailClient } from "@/components/marketplace/ReaderDetailClient";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -39,7 +41,8 @@ export default async function ReaderDetailPage({
     notFound();
   }
 
-  const isLiveOpen = await getReaderLiveAvailability(id);
+  const nowMs = Date.now();
+  const [isLiveOpen, nextSlot] = await Promise.all([getReaderLiveAvailability(id), getNextAvailableSlot(id, nowMs)]);
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -149,7 +152,7 @@ export default async function ReaderDetailPage({
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
             {/* การ์ดจอง — มือถือขึ้นก่อนเนื้อหา · จอใหญ่ติดขวาและติดจอตอนเลื่อน */}
             <div className="lg:order-2 lg:sticky lg:top-[calc(var(--site-header-h)+20px)]">
-              <ReaderDetailClient reader={reader} isLiveOpen={isLiveOpen} />
+              <ReaderDetailClient reader={reader} isLiveOpen={isLiveOpen} nextSlot={nextSlot} nowMs={nowMs} />
             </div>
 
             <div className="space-y-6 lg:order-1">
@@ -189,8 +192,8 @@ export default async function ReaderDetailPage({
                 </h2>
                 <ol className="space-y-4">
                   {[
-                    { title: "ส่งคำถาม", body: "บอกชื่อเล่นและเรื่องที่อยากถาม ใช้เวลาไม่ถึงนาที" },
-                    { title: "รอคิว", body: "เปิดหน้าคิวทิ้งไว้ได้เลย ถึงคิวแล้วจะขึ้นปุ่มเข้าห้องให้ทันที" },
+                    { title: "เลือกเวลาและชำระเงิน", body: "คุยตอนนี้ หรือนัดวันเวลาที่สะดวก บอกชื่อเล่นกับเรื่องที่อยากถาม แล้วชำระผ่าน Stripe" },
+                    { title: "รอถึงเวลา", body: "ได้หน้ายืนยันพร้อมปุ่มเพิ่มลงปฏิทิน ถึงคิวหรือถึงเวลานัดแล้ว ปุ่มเข้าห้องจะขึ้นให้ทันที" },
                     { title: "คุยกับแม่หมอ", body: "เข้าห้องวิดีโอคอลในเว็บ หรือคุยทาง LINE" },
                   ].map((step, i, all) => (
                     <li key={step.title} className="relative flex gap-4">
@@ -207,6 +210,28 @@ export default async function ReaderDetailPage({
                     </li>
                   ))}
                 </ol>
+              </section>
+
+              <section aria-labelledby="reader-policy" className="altar-card-porcelain !rounded-2xl space-y-3 p-5 sm:p-7">
+                <h2 id="reader-policy" className="text-lg font-bold text-ink-deep">
+                  <ThaiPhrases>การยกเลิกและคืนเงิน</ThaiPhrases>
+                </h2>
+                <dl className="divide-y divide-line-warm/70 text-sm">
+                  {[
+                    { when: `ก่อนเวลานัด ${FREE_CANCEL_HOURS} ชม. ขึ้นไป`, what: `ยกเลิกคืนเงินเต็ม หรือเลื่อนนัดได้ ${MAX_RESCHEDULES} ครั้ง` },
+                    { when: `น้อยกว่า ${FREE_CANCEL_HOURS} ชม. ก่อนนัด`, what: "ยกเลิกได้ แต่ไม่คืนเงิน" },
+                    { when: "คิวสดระหว่างรอเรียก", what: "ยกเลิกได้ตลอด คืนเงินเต็ม" },
+                    { when: "แม่หมอยกเลิกหรือไม่มาตามนัด", what: "คืนเงินเต็มอัตโนมัติ" },
+                  ].map((row) => (
+                    <div key={row.when} className="flex flex-col gap-0.5 py-2.5 first:pt-0 last:pb-0 sm:flex-row sm:gap-4">
+                      <dt className="text-muted sm:w-56 sm:shrink-0">{row.when}</dt>
+                      <dd className="font-semibold text-ink-deep">{row.what}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <p className="text-[13px] leading-relaxed text-muted">
+                  เงินคืนเข้าช่องทางเดิมที่ชำระ ภายใน 5–10 วันทำการ (ขึ้นกับธนาคาร)
+                </p>
               </section>
             </div>
           </div>
