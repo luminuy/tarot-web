@@ -107,7 +107,7 @@ export const ReaderDetailClient: React.FC<ReaderDetailClientProps> = ({ reader, 
         <ul className="space-y-2 text-[13px] text-muted">
           {[
             `ยกเลิกก่อนนัด ${FREE_CANCEL_HOURS} ชม. คืนเงินเต็มจำนวน`,
-            "ชำระผ่าน Stripe · บัตรหรือพร้อมเพย์",
+            "ชำระก่อนคุย ผ่าน Stripe · บัตรหรือพร้อมเพย์",
             "คุยผ่านวิดีโอคอลในเว็บ หรือ LINE",
           ].map((line) => (
             <li key={line} className="flex items-center gap-2">

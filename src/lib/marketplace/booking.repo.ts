@@ -561,6 +561,15 @@ export async function rescheduleBooking(
   return { ok: true, slotStart: newSlotStart };
 }
 
+/**
+ * 🔒 จ่ายแล้วหรือยัง — ด่านเดียวที่ตัดสินว่าแม่หมอ "เริ่มคุย" กับตั๋วนี้ได้ไหม (เจ้าของสั่ง: ต้องจ่ายก่อนถึงจะได้คุย)
+ * นับเฉพาะใบจองที่ยืนยันด้วยเงินจริงแล้ว (`confirmed` · หรือ `done` ของการคุยที่จบแล้ว)
+ * ตั๋วยุคก่อนระบบจ่ายเงินไม่มีใบจอง ➔ ถือว่ายังไม่จ่าย
+ */
+export function isPaidBooking(booking: BookingRecord | null | undefined): boolean {
+  return booking?.status === "confirmed" || booking?.status === "done";
+}
+
 /** แม่หมอปิดคิว (คุยเสร็จ) ➔ ใบจองเป็น done */
 export async function completeBooking(ticketId: string): Promise<void> {
   const db = await getAppDB();

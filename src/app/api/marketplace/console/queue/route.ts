@@ -13,7 +13,15 @@ import {
   toPublicTicket,
   updateTicketStatus,
 } from "@/lib/marketplace/queue.repo";
-import { cancelConsultation, completeBooking, getScheduleRules, markNoShow } from "@/lib/marketplace/booking.repo";
+import {
+  cancelConsultation,
+  completeBooking,
+  getBookingByTicketId,
+  getBookingsByTicketIds,
+  getScheduleRules,
+  isPaidBooking,
+  markNoShow,
+} from "@/lib/marketplace/booking.repo";
 import { canMarkNoShow, canStartBooking, EARLY_START_MINUTES, NO_SHOW_GRACE_MINUTES } from "@/lib/marketplace/booking-policy";
 
 export const runtime = "nodejs";
@@ -39,6 +47,7 @@ export async function GET(request: Request) {
       status: ["waiting", "ready", "screening"],
     });
     const schedule = await getScheduleRules(readerId);
+    const bookings = await getBookingsByTicketIds(tickets.map((t) => t.id));
 
     return NextResponse.json({
       reader: {
@@ -50,7 +59,8 @@ export async function GET(request: Request) {
         commissionPct: reader.commissionPct,
       },
       isLiveOpen,
-      tickets: tickets.map(toPublicTicket),
+      // `paid` = ลูกค้าจ่ายแล้ว (ตั๋วยุคก่อนระบบจ่ายเงินเป็น false — แม่หมอเรียกคิวนั้นไม่ได้)
+      tickets: tickets.map((t) => ({ ...toPublicTicket(t), paid: isPaidBooking(bookings.get(t.id)) })),
       totalWaiting: tickets.filter((t) => t.status === "waiting" && t.kind === "walkup").length,
       schedule,
       videoCallEnabled: isTurnConfigured(),
@@ -107,6 +117,10 @@ export async function PATCH(request: Request) {
       if (action === "accept") {
         if (ticket.status !== "waiting") {
           return NextResponse.json({ error: "คิวนี้เรียกไม่ได้แล้ว" }, { status: 409 });
+        }
+        // 🔒 ต้องจ่ายก่อนถึงจะได้คุย — ตัดสินที่เซิร์ฟเวอร์ ไม่ใช่แค่ซ่อนปุ่ม
+        if (!isPaidBooking(await getBookingByTicketId(ticket.id))) {
+          return NextResponse.json({ error: "ลูกค้ายังไม่ได้ชำระเงิน เรียกคิวนี้ไม่ได้" }, { status: 402 });
         }
         if (ticket.kind === "booking" && !canStartBooking(ticket.slotStart, now)) {
           return NextResponse.json(

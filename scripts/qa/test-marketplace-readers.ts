@@ -604,6 +604,25 @@ async function testScheduledBooking(readerId: string) {
   if (s3 !== "refunded" || (await getQueueTicketById(t3.id))?.status !== "cancelled") {
     throw new Error(`❌ เงินมาช้าหลังที่หลุด ต้องคืนเงิน + ยกเลิกตั๋ว (ได้ ${s3})`);
   }
+  // ── 17.9 ต้องจ่ายก่อนถึงจะได้คุย: ด่านเดียว (isPaidBooking) + แผงแม่หมอใช้ด่านนี้ก่อนเรียกคิว ──
+  if (
+    !repo.isPaidBooking(await repo.getBookingByTicketId(t1.id)) ||
+    repo.isPaidBooking(await repo.getBookingByTicketId(t2.id)) ||
+    repo.isPaidBooking(null)
+  ) {
+    throw new Error("❌ isPaidBooking ตัดสินผิด (ต้องจริงเฉพาะใบจองที่ยืนยันด้วยเงินแล้ว)");
+  }
+  {
+    const fsMod = await import("node:fs");
+    const consoleSrc = fsMod.readFileSync("src/app/api/marketplace/console/queue/route.ts", "utf-8");
+    const acceptAt = consoleSrc.indexOf('action === "accept"');
+    const guardAt = consoleSrc.indexOf("isPaidBooking(await getBookingByTicketId", acceptAt);
+    const readyAt = consoleSrc.indexOf('updateTicketStatus(ticket.id, "ready"', acceptAt);
+    if (acceptAt < 0 || guardAt < 0 || readyAt < 0 || guardAt > readyAt) {
+      throw new Error("❌ แผงแม่หมอต้องตรวจ isPaidBooking ก่อนเรียกคิว (ต้องจ่ายก่อนถึงจะได้คุย)");
+    }
+  }
+  console.log("  ✓ 17.9 ต้องจ่ายก่อนถึงจะได้คุย — แม่หมอเรียกคิวที่ยังไม่จ่ายไม่ได้ (ตัดสินที่เซิร์ฟเวอร์)");
   console.log("  ✓ 17.5–17.6 เงินเข้า ➔ ได้นัด · จ่ายซ้ำ/ที่หลุด ➔ คืนเงินอัตโนมัติ · settle ซ้ำไม่ทำซ้ำ");
 
   // ── 17.7 เลื่อนนัดได้ 1 ครั้ง · ยกเลิกก่อน 24 ชม. คืนเงินเต็ม ─────────────────────

@@ -91,7 +91,14 @@ export function PaymentPendingPanel({
         <h3 className="mt-0.5 text-lg font-bold text-ink-deep">
           {booking.kind === "scheduled" && booking.slotStart ? formatSlotRange(booking.slotStart, true) : "คิวสด · คุยทันทีที่ถึงคิว"}
         </h3>
-        <p className="mt-1 text-sm leading-relaxed text-ink">
+        <p className="mt-2 flex items-start gap-2 rounded-xl bg-surface/70 p-2.5 text-[13px] leading-relaxed text-ink">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 h-4 w-4 shrink-0 text-gold-ink" aria-hidden="true">
+            <rect x="4" y="11" width="16" height="10" rx="2" />
+            <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+          </svg>
+          ห้องคุยกับแม่หมอจะเปิดหลังชำระเงินเท่านั้น
+        </p>
+        <p className="mt-2 text-sm leading-relaxed text-ink">
           {minutesLeft !== null && minutesLeft > 0
             ? `ระบบกันเวลานี้ไว้ให้อีก ${minutesLeft} นาที ชำระเงินให้เสร็จเพื่อยืนยัน`
             : "เวลาที่กันไว้ใกล้หมดแล้ว ชำระเงินตอนนี้ หรือจองเวลาใหม่"}

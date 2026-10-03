@@ -15,6 +15,11 @@ export interface ModalProps {
   maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl";
   className?: string;
   showCloseButton?: boolean;
+  /**
+   * แถบล่างติดหน้าต่าง (ไม่เลื่อนตามเนื้อหา) — ปุ่มหลัก/ยอดชำระที่ต้องเห็นตลอดแบบหน้าชำระเงินทั่วโลก
+   * เว้นไว้ = ไม่มีแถบล่าง (หน้าต่างเดิมทุกตัวหน้าตาเหมือนเดิม)
+   */
+  footer?: React.ReactNode;
 }
 
 /**
@@ -50,6 +55,7 @@ export const Modal: React.FC<ModalProps> = ({
   maxWidth = "2xl",
   className = "",
   showCloseButton = true,
+  footer,
 }) => {
   const { isEnglish } = useLocale();
   const modalContainerRef = useRef<HTMLDivElement>(null);
@@ -146,8 +152,8 @@ export const Modal: React.FC<ModalProps> = ({
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="glass-divider-b flex items-start justify-between p-6 pb-4">
-            <div>
+          <div className="glass-divider-b flex items-start justify-between gap-3 p-6 pb-4">
+            <div className="min-w-0 flex-1">
               {title && <h2 className="text-xl sm:text-2xl font-bold font-mystic-gold"><ThaiPhrases>{title}</ThaiPhrases></h2>}
               {description && <div className="mt-1 text-xs sm:text-sm text-muted">{description}</div>}
             </div>
@@ -166,6 +172,7 @@ export const Modal: React.FC<ModalProps> = ({
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto p-6">{children}</div>
+        {footer && <div className="glass-divider-t shrink-0 px-6 pb-5 pt-4">{footer}</div>}
       </div>
     </div>
   );

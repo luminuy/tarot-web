@@ -22,7 +22,8 @@ interface ConsoleState {
     commissionPct: number;
   };
   isLiveOpen: boolean;
-  tickets: QueueTicket[];
+  /** `paid` = ลูกค้าจ่ายแล้ว — ยังไม่จ่าย (ตั๋วยุคก่อนระบบจ่ายเงิน) เรียกคิวไม่ได้ */
+  tickets: (QueueTicket & { paid?: boolean })[];
   totalWaiting: number;
   /** ตั้งค่า TURN แล้ว = แม่หมอเปิดวิดีโอคอลกับคิวที่เรียกแล้วได้ */
   videoCallEnabled?: boolean;
@@ -297,6 +298,7 @@ function ReaderConsoleInner() {
           <div className="grid gap-4 sm:grid-cols-2">
             {tickets.map((ticket) => {
               const isReady = ticket.status === "ready";
+              const unpaid = ticket.paid === false;
               return (
                 <div
                   key={ticket.id}
@@ -324,7 +326,7 @@ function ReaderConsoleInner() {
                           : "bg-amber-50 text-amber-700 border border-amber-200"
                       }`}
                     >
-                      {isReady ? "เรียกคิวแล้ว" : "กำลังรอคิว"}
+                      {isReady ? "เรียกคิวแล้ว" : unpaid ? "ยังไม่ชำระเงิน" : "ชำระแล้ว · รอคิว"}
                     </span>
                   </div>
 
@@ -368,7 +370,11 @@ function ReaderConsoleInner() {
 
                   {/* Actions */}
                   <div className="flex gap-2 pt-2 border-t border-line">
-                    {!isReady ? (
+                    {!isReady && unpaid ? (
+                      <p className="flex-1 self-center text-xs text-muted">
+                        ลูกค้ายังไม่ชำระเงิน — เรียกคิวได้หลังชำระแล้วเท่านั้น
+                      </p>
+                    ) : !isReady ? (
                       <Button
                         variant="gold"
                         size="sm"
