@@ -140,7 +140,8 @@ npx wrangler secret put STRIPE_WEBHOOK_SECRET
   ใช้ `CRON_SECRET` ตัวเดียวกับ Daily Digest (หัวข้อถัดไป) — ตั้งครั้งเดียวได้ทั้งสองงาน
 - **อีเมลยืนยัน/เตือนนัด/คืนเงิน**: ใช้ `RESEND_API_KEY` เดิม · ⚠️ แผนฟรี 100 ฉบับ/วันใช้ร่วมกับอีเมลยืนยันตัวตน — เพดานต่อรอบของ cron จองตั้งไว้ 40
 - **ใบเสร็จ Stripe**: เปิดที่ Stripe Dashboard → Settings → Customer emails → "Successful payments" (ระบบส่ง `receipt_email` ให้เมื่อรู้อีเมลอยู่แล้ว)
-- **Webhook**: ใช้ 4 event เดิม (`checkout.session.*`) — ไม่ต้องเพิ่ม
+- **Webhook**: ⚠️ **ต้องเพิ่ม event `charge.refunded`** ใน Stripe Dashboard → Developers → Webhooks → endpoint `/api/marketplace/payments/webhook`
+  (คืนเงินในแดชบอร์ดแล้วเว็บจะหักรอบดูดวงที่ซื้อ / ยกเลิกนัดให้เอง) · คืนเงินที่ทำไปก่อนเพิ่ม event นี้ ➔ แผงแอดมิน → "การจอง & การเงิน" → "ตรวจรายการคืนเงินจาก Stripe"
 - **ทดสอบจ่ายจริง 1 รอบก่อนเปิด**: จองนัดจริง → จ่าย → ได้อีเมลยืนยัน → กดยกเลิก (ก่อน 24 ชม.) → เช็กว่า Stripe คืนเงินจริง → อีเมลแจ้งคืนเงินมาถึง
 
 ### 📬 รอตั้งเพิ่ม — `CRON_SECRET` (ดวงประจำวันทางอีเมล)

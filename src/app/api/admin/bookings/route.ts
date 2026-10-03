@@ -6,6 +6,7 @@ import { listAdminBookings, retryDueRefund } from "@/lib/marketplace/booking.rep
 import { calculateReaderEarnings } from "@/lib/marketplace/payments.repo";
 import { listReaders } from "@/lib/marketplace/readers.repo";
 import { listRecentReviews, setReviewHidden } from "@/lib/marketplace/reviews.repo";
+import { syncGatewayRefunds } from "@/lib/marketplace/refund-sync";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { recordAudit } from "@/lib/admin/audit";
 
@@ -42,6 +43,7 @@ export async function GET() {
 const ActionSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("retry_refund"), paymentId: z.string().min(1) }),
   z.object({ action: z.literal("hide_review"), reviewId: z.string().min(1), hidden: z.boolean() }),
+  z.object({ action: z.literal("sync_refunds") }),
 ]);
 
 /** POST /api/admin/bookings — ลองคืนเงินอีกครั้ง · ซ่อน/แสดงรีวิว (บันทึกลงประวัติแอดมินทุกครั้ง) */
@@ -52,6 +54,12 @@ export async function POST(request: Request) {
   try {
     const parsed = ActionSchema.safeParse(await request.json().catch(() => null));
     if (!parsed.success) return apiFail("ข้อมูลไม่ถูกต้อง", 400);
+    if (parsed.data.action === "sync_refunds") {
+      // ไล่ถาม Stripe ว่ารายการที่เรายังถือว่า "จ่ายแล้ว" ถูกคืนเงินจากแดชบอร์ดไปหรือยัง ➔ ถอนรอบ/ยกเลิกนัดให้ตรง
+      const result = await syncGatewayRefunds();
+      await recordAudit("sync_refunds", `ตรวจ ${result.checked} · ถอนแล้ว ${result.applied} · คืนบางส่วน ${result.partial} · ถามไม่ได้ ${result.unreachable}`);
+      return apiOk(result);
+    }
     if (parsed.data.action === "retry_refund") {
       const result = await retryDueRefund(parsed.data.paymentId);
       await recordAudit("retry_refund", `ลองคืนเงินอีกครั้ง ${parsed.data.paymentId}: ${result}`);

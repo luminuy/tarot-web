@@ -249,6 +249,7 @@ export function AccountClient() {
   const ent = useEntitlement();
   const view = describeEntitlement(ent, isEn);
   const bonus = ent?.bonusRemaining ?? 0;
+  const dailyFree = Math.max(0, ent?.dailyRemaining ?? (view ? view.remaining - bonus : 0));
   const streak = ent?.dailyStreak ?? 0;
   const [countdown, setCountdown] = useState("");
   useEffect(() => {
@@ -385,7 +386,8 @@ export function AccountClient() {
                     isEn ? "Unlimited" : "ไม่จำกัด"
                   ) : (
                     <>
-                      {view.remaining}
+                      {/* สิทธิ์ฟรีของวันนี้เท่านั้น — รอบที่เติมไว้แยกไปช่องถัดไป (เดิมรวมกันจนขึ้น "4/1" ชวนงง) */}
+                      {dailyFree}
                       <span className="text-sm font-semibold text-muted sm:text-base">/{view.limit}</span>
                     </>
                   )

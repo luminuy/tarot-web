@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
-import { parseWebhookEvent, verifyWebhookSignature } from "@/lib/marketplace/payment-gateway";
+import {
+  findCheckoutSessionByPaymentIntent,
+  parseRefundEvent,
+  parseWebhookEvent,
+  retrieveRefundState,
+  verifyWebhookSignature,
+} from "@/lib/marketplace/payment-gateway";
+import { applyGatewayRefund } from "@/lib/marketplace/refund-sync";
 import { updatePaymentStatus } from "@/lib/marketplace/payments.repo";
 import { handleFailedConsultationPayment, settleConsultationPayment } from "@/lib/marketplace/booking.repo";
 import { getAppDB } from "@/lib/platform/db";
@@ -18,7 +25,7 @@ export const runtime = "nodejs";
  *
  * ตั้งใน Stripe Dashboard ➔ Developers ➔ Webhooks ให้ส่ง 4 event นี้มาที่เส้นนี้:
  * `checkout.session.completed` · `checkout.session.async_payment_succeeded`
- * `checkout.session.async_payment_failed` · `checkout.session.expired`
+ * `checkout.session.async_payment_failed` · `checkout.session.expired` · `charge.refunded` (คืนเงิน)
  */
 export async function POST(request: Request) {
   try {
@@ -37,6 +44,32 @@ export async function POST(request: Request) {
       payload = JSON.parse(rawBody);
     } catch {
       return NextResponse.json({ error: "รูปแบบ JSON ของ Webhook ไม่ถูกต้อง" }, { status: 400 });
+    }
+
+    /*
+     * 💸 คืนเงิน (`charge.refunded`) — คืนจากแดชบอร์ด Stripe หรือจากระบบเราเอง
+     * หา Checkout Session ของรายการ ➔ ถาม Stripe ซ้ำว่าคืนเต็มจำนวนจริง ➔ ถอนรอบดูดวง/ยกเลิกนัด
+     * (ตั้งใน Stripe Dashboard ➔ Webhooks ให้ส่ง `charge.refunded` มาที่เส้นนี้ด้วย)
+     */
+    const refund = parseRefundEvent(payload);
+    if (refund) {
+      if (!refund.fullyRefunded) {
+        return NextResponse.json({ received: true, note: "Partial refund — handle manually" });
+      }
+      const sessionId = await findCheckoutSessionByPaymentIntent(refund.paymentIntent);
+      if (!sessionId) return NextResponse.json({ received: true, note: "Session not found" });
+      const state = await retrieveRefundState(sessionId);
+      // ถาม Stripe ไม่ได้ = ตอบ 500 ให้ Stripe ยิงซ้ำ (ห้ามเดาว่าคืนแล้ว/ไม่คืน)
+      if (!state) return NextResponse.json({ error: "ยืนยันสถานะคืนเงินไม่ได้" }, { status: 500 });
+      if (!state.fullyRefunded) return NextResponse.json({ received: true, note: "Not fully refunded" });
+      const db = await getAppDB();
+      const row = await db
+        .prepare("SELECT id FROM payments WHERE provider_ref = ? AND provider = 'stripe' LIMIT 1")
+        .bind(sessionId)
+        .first<{ id: string }>();
+      if (!row) return NextResponse.json({ received: true, note: "Charge not found in active records" });
+      const result = await applyGatewayRefund(row.id);
+      return NextResponse.json({ received: true, status: result });
     }
 
     const event = parseWebhookEvent(payload);

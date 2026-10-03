@@ -78,3 +78,19 @@ export function clearFlowState(): void {
     /* noop */
   }
 }
+
+/**
+ * ✦ "เริ่มใหม่จากหน้าแรก" — ผู้ใช้กดโลโก้/ลิงก์หน้าแรกเอง (เจ้าของแจ้ง 2026-10-03: กดโลโก้แล้ววนกลับขั้นตั้งคำถาม)
+ * ---------------------------------------------------------------------------
+ * กดโลโก้ = โหลดหน้าแรกใหม่ ซึ่งเดิมเจอรอบที่ค้างใน sessionStorage แล้ว "กู้คืน" กลับไปขั้นเดิม
+ * จึงต้องล้างรอบค้างก่อนออกจากหน้า และบอก `TarotFlow` (ถ้าอยู่บนหน้า) ว่าห้ามเขียนรอบนี้คืน
+ * ตอน `pagehide` — ไม่งั้นตัว flush (T-45) จะเขียนรอบเดิมกลับลงไปทันที
+ * ⚠️ รีเฟรชหน้าเฉย ๆ ยังกู้คืนเหมือนเดิม — เฉพาะการกดไปหน้าแรกเองเท่านั้นที่เริ่มใหม่
+ */
+export const FRESH_START_EVENT = "tarot:fresh-start";
+
+export function requestFreshStart(): void {
+  if (typeof window === "undefined") return;
+  clearFlowState();
+  window.dispatchEvent(new Event(FRESH_START_EVENT));
+}

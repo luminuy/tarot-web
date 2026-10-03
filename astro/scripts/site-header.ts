@@ -16,6 +16,7 @@
 
 import { LOCALE_COOKIE_KEY } from "@/lib/i18n/types";
 import { hasSessionHint } from "@/lib/auth/session-hint";
+import { requestFreshStart } from "@/lib/utils/flow-persistence";
 
 const FOCUSABLE_SELECTOR =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -255,6 +256,18 @@ function installAccountAuth(): void {
   });
 }
 
+/**
+ * โลโก้ในหัวเว็บ static — กดแล้วเริ่มใหม่จากหน้าแรก ไม่กู้คืนรอบดูดวงที่ค้างในแท็บนี้กลับมา
+ * (หัวเว็บใน island ของหน้าแรกผูก onClick ของ React เองแล้ว — ownedByIsland)
+ */
+function installHomeLink(): void {
+  document.querySelectorAll<HTMLAnchorElement>("[data-home-link]").forEach((link) => {
+    if (ownedByIsland(link)) return;
+    link.addEventListener("click", () => requestFreshStart());
+  });
+}
+
+installHomeLink();
 installNavDrawer();
 installLanguageSwitcher();
 installHeaderHeightObserver();
