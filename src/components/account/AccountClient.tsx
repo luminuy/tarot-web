@@ -2,15 +2,39 @@
 
 import { useEffect, useId, useState } from "react";
 import dynamic from "next/dynamic";
-import { RouteLink as Link } from "@/components/ui/RouteLink";
 import { withMotionScope } from "@/components/providers/with-motion-scope";
 import { ChangePasswordCard } from "@/components/account/ChangePasswordCard";
-import { EntitlementStatusCard } from "@/components/entitlement/EntitlementStatusCard";
+import {
+  IconBook,
+  IconCards,
+  IconKey,
+  IconLogin,
+  IconLogout,
+  IconMail,
+  IconShield,
+  IconSpark,
+  IconSun,
+  IconTag,
+  IconTicket,
+  IconTrash,
+  RowIcon,
+  SettingsRow,
+  SettingsSection,
+  StatTile,
+} from "@/components/account/AccountParts";
+import { QuotaPips } from "@/components/entitlement/QuotaPips";
 import { DeleteAllDataButton } from "@/components/ui/DeleteAllDataButton";
 import { useSessionUser, patchSessionUser, invalidateSessionCache } from "@/lib/auth/use-session";
 import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
-import type { UpgradeReason } from "@/lib/entitlement/copy";
+import {
+  CHEAPEST_PACKAGE_THB,
+  describeEntitlement,
+  formatResetCountdown,
+  getMemberBenefits,
+} from "@/lib/entitlement/copy";
+import { useEntitlement } from "@/lib/entitlement/use-entitlement";
+import { CheckMarkIcon } from "@/components/entitlement/EntitlementIcons";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 // INC-0130 / Rule 3.5: Dynamic modal imports placed outside <main> to avoid stacking context traps
@@ -21,62 +45,25 @@ const AuthModal = dynamic(() => import("@/components/auth/AuthModal").then((m) =
 const ReadingHistoryModal = withMotionScope(() =>
   import("@/components/history/ReadingHistoryModal").then((m) => m.ReadingHistoryModal),
 );
-const AccessDialog = dynamic(
-  () => import("@/components/entitlement/AccessDialog").then((m) => m.AccessDialog),
-  { ssr: false },
-);
 const BuyCreditsModal = dynamic(
   () => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal),
   { ssr: false },
 );
 
-/* ───────────────────────────────────────────────────────────────────────────
- * ชิ้นส่วนหน้าตาที่ใช้ซ้ำทั้งหน้า
- *
- * ⚠️ ทั้งหน้าต้องใช้ "เปลือกการ์ดใบเดียวกัน" เสมอ
- * รอบก่อนหน้านี้หน้านี้มีการ์ดสองระบบปนกัน (`rounded-xl border-line` + เงาหนัก
- * ของหน้านี้เอง กับ `rounded-lg border-line-warm` ของการ์ดที่นำเข้ามา)
- * ตาเห็นทันทีว่าเป็นคนละเว็บมาต่อกัน — เปลือกกลางตัวนี้คือสิ่งที่กันไม่ให้เกิดซ้ำ
- * ─────────────────────────────────────────────────────────────────────────── */
-
-const CARD_SHELL = "altar-card-porcelain !rounded-lg p-5 sm:p-6";
-
-function SectionCard({
-  title,
-  description,
-  children,
-  tone = "plain",
-}: {
-  title: string;
-  description?: string;
-  children?: React.ReactNode;
-  tone?: "plain" | "danger";
-}) {
-  return (
-    <section className={`${CARD_SHELL} space-y-4 ${tone === "danger" ? "border-err/30" : ""}`}>
-      <div className="space-y-1">
-        <h2 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold"><ThaiPhrases>{title}</ThaiPhrases></h2>
-        {description && (
-          <p className="text-xs text-muted font-serif-th leading-relaxed">{description}</p>
-        )}
-      </div>
-      {children}
-    </section>
-  );
-}
-
 /**
- * สวิตช์ความยินยอม — ใช้ `role="switch"` จริง ไม่ใช่ `<input>` ซ่อนที่วาดด้วย `peer-*`
+ * สวิตช์ความยินยอมในรูป "แถว" ของกลุ่มตั้งค่า — ใช้ `role="switch"` จริง ไม่ใช่ `<input>` ซ่อนที่วาดด้วย `peer-*`
  * เพราะโปรแกรมอ่านหน้าจอต้องได้ยินทั้ง "ชื่อสวิตช์" และ "สถานะเปิด/ปิด" ในจังหวะเดียว
  * ขนาดแตะ 44x24 ผ่านเกณฑ์ WCAG 2.2 (24px) และมีสถานะกำลังบันทึกเพื่อกันกดรัว
  */
 function ConsentToggle({
+  icon,
   label,
   hint,
   checked,
   saving,
   onChange,
 }: {
+  icon: React.ReactNode;
   label: string;
   hint: string;
   checked: boolean;
@@ -85,12 +72,13 @@ function ConsentToggle({
 }) {
   const labelId = useId();
   return (
-    <div className="flex items-start justify-between gap-4 py-3.5">
-      <div className="space-y-0.5">
-        <p id={labelId} className="text-xs font-bold font-serif-th text-ink-deep">
+    <div className="flex min-h-[64px] items-center gap-3.5 px-4 py-3.5 sm:px-5">
+      <RowIcon>{icon}</RowIcon>
+      <div className="min-w-0 flex-1">
+        <p id={labelId} className="font-serif-th text-sm font-bold text-ink-deep">
           {label}
         </p>
-        <p className="text-xs text-muted leading-relaxed">{hint}</p>
+        <p className="mt-0.5 font-serif-th text-xs leading-relaxed text-muted">{hint}</p>
       </div>
       <button
         type="button"
@@ -114,47 +102,13 @@ function ConsentToggle({
   );
 }
 
-/** ทางลัดหนึ่งช่อง — ทั้งช่องกดได้ ไม่ใช่ลิงก์เส้นเล็ก ๆ ในมุมการ์ด */
-function HubTile({
-  eyebrow,
-  title,
-  hint,
-  badge,
-  onClick,
-}: {
-  eyebrow: string;
-  title: string;
-  hint: string;
-  badge?: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="glass-tile !rounded-lg group flex w-full flex-col items-start gap-1 p-4 text-left transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
-    >
-      <span className="flex w-full items-center justify-between gap-2">
-        {/* ภาษาไทยห้ามถ่างตัวอักษร — อ่านเป็น "บ ั น ท ึ ก" (ตรวจทั้งเว็บ 2026-09-25) */}
-        <span
-          className={`text-xs text-muted ${
-            /[\u0E00-\u0E7F]/.test(eyebrow) ? "font-serif-th font-semibold" : "font-mono uppercase tracking-[0.16em]"
-          }`}
-        >
-          {eyebrow}
-        </span>
-        {badge && (
-          <span className="rounded-full bg-gold-ink px-2 py-0.5 font-serif-th text-xs font-bold text-surface">
-            {badge}
-          </span>
-        )}
-      </span>
-      <span className="font-serif-th text-sm font-bold text-ink-deep group-hover:text-gold-ink transition-colors">
-        {title}
-      </span>
-      <span className="font-serif-th text-xs text-muted leading-relaxed">{hint}</span>
-    </button>
-  );
+/** "สมาชิกตั้งแต่ ตุลาคม 2569" — ปฏิทินตามภาษาของหน้า (ไทย = พ.ศ.) · วันที่อ่านไม่ได้ = ไม่แสดง */
+function memberSinceLabel(createdAt: string | undefined, isEn: boolean): string | null {
+  if (!createdAt) return null;
+  const d = new Date(createdAt);
+  if (Number.isNaN(d.getTime())) return null;
+  const month = d.toLocaleDateString(isEn ? "en-US" : "th-TH", { month: "long", year: "numeric" });
+  return isEn ? `Member since ${month}` : `สมาชิกตั้งแต่ ${month}`;
 }
 
 export function AccountClient() {
@@ -172,7 +126,6 @@ export function AccountClient() {
   // Modal control states
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
-  const [exploreReason, setExploreReason] = useState<UpgradeReason | null>(null);
   const [creditsModalOpen, setCreditsModalOpen] = useState(false);
 
   useEffect(() => {
@@ -285,279 +238,383 @@ export function AccountClient() {
 
   const providerLabel =
     user?.provider === "google"
-      ? "Google Account"
+      ? isEn ? "Signed in with Google" : "เข้าสู่ระบบด้วย Google"
       : user?.provider === "line"
-        ? "LINE Account"
+        ? isEn ? "Signed in with LINE" : "เข้าสู่ระบบด้วย LINE"
         : isEn
-          ? "Email Account"
-          : "บัญชีอีเมล";
+          ? "Signed in with email"
+          : "เข้าสู่ระบบด้วยอีเมล";
+
+  /* ── สิทธิ์เปิดไพ่ (เดิมอยู่ใน EntitlementStatusCard แยก — รวมเข้าโครงเดียวกับทั้งหน้า) ── */
+  const ent = useEntitlement();
+  const view = describeEntitlement(ent, isEn);
+  const bonus = ent?.bonusRemaining ?? 0;
+  const streak = ent?.dailyStreak ?? 0;
+  const [countdown, setCountdown] = useState("");
+  useEffect(() => {
+    if (!ent?.resetAt) return;
+    const tick = () => setCountdown(formatResetCountdown(ent.resetAt, Date.now(), isEn));
+    tick();
+    const timer = setInterval(tick, 60_000);
+    return () => clearInterval(timer);
+  }, [ent?.resetAt, isEn]);
+  const hasTrial = Boolean(user && ent?.premiumTrialAvailable && !ent?.hasPaidCredits);
+  const memberSince = memberSinceLabel(user?.createdAt, isEn);
 
   return (
     <>
       <main
         id="main-content"
         tabIndex={-1}
-        className="min-h-screen text-ink px-4 py-6 sm:px-8 sm:py-10 font-sans selection:bg-gold/20 selection:text-ink"
+        className="min-h-screen text-ink px-4 pb-12 pt-8 sm:px-8 sm:pb-16 sm:pt-12 font-sans selection:bg-gold/20 selection:text-ink"
       >
-        <div className="mx-auto max-w-3xl space-y-5">
-          {/* Top back navigation */}
-          <Link
-            href="/"
-            onClick={() => soundManager.playMenuTapSound()}
-            className="inline-flex items-center gap-1.5 text-xs font-serif-th text-muted hover:text-gold-ink transition-colors"
-          >
-            <span aria-hidden="true">←</span>
-            <span>{isEn ? "Return to Sanctuary" : "กลับสู่วิหารพยากรณ์"}</span>
-          </Link>
-
-          {/* Header Title & Intro */}
-          <div className="space-y-3 py-1 text-center sm:py-3">
-            <span className="glass-chip inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold text-gold-ink">
-              Sacred Sanctuary Profile
-            </span>
-            <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-ink leading-snug sm:leading-normal [text-wrap:balance]"><ThaiPhrases>
-              {isEn ? "Your Account & Sacred Archive" : "บัญชีและประวัติของคุณ"}
-            </ThaiPhrases></h1>
-            <p className="mx-auto max-w-lg font-serif-th text-xs sm:text-sm text-muted leading-relaxed [text-wrap:balance]">
-              {isEn
-                ? "Manage personal privacy, sacred reading archives, and data rights under PDPA & GDPR standards."
-                : "ควบคุมข้อมูลความเป็นส่วนตัว ประวัติคำทำนาย และการตั้งค่าตามสิทธิ์ PDPA"}
-            </p>
-          </div>
-
-          {/* ── ตัวตนของผู้ใช้ ─────────────────────────────────────────────
+        <div className="mx-auto max-w-2xl space-y-8 sm:space-y-10">
+          {/* ── หัวหน้า: ตัวตนของผู้ใช้ (แบบ Apple ID — รูปใหญ่ · ชื่อ · อีเมล · วิธีเข้าสู่ระบบ) ──────
               สามสถานะต้องสูงใกล้เคียงกัน ไม่งั้นหน้ากระโดดตอนเซสชันโหลดเสร็จ */}
+          {/* ⚠️ ทุกสถานะต้องมี <h1> หนึ่งเดียว — HTML ตอนบิลด์คือสถานะ "กำลังโหลด" (ด่าน a11y ตรวจ h1 เดี่ยว + ลำดับหัวข้อ) */}
+          {(loading || !user) && <h1 className="sr-only">{isEn ? "My account" : "บัญชีของฉัน"}</h1>}
+
           {loading && (
-            <div className={`${CARD_SHELL} flex items-center gap-4`} aria-hidden="true">
-              <div className="glass-chip h-14 w-14 shrink-0" />
-              <div className="flex-1 space-y-2">
-                <div className="h-4 w-40 rounded-full bg-inset-warm" />
-                <div className="h-3 w-56 rounded-full bg-inset-warm" />
-              </div>
+            <div className="flex flex-col items-center gap-4 text-center" aria-hidden="true">
+              <div className="h-20 w-20 rounded-full bg-inset-warm sm:h-24 sm:w-24" />
+              <div className="h-6 w-44 rounded-full bg-inset-warm" />
+              <div className="h-4 w-60 rounded-full bg-inset-warm" />
             </div>
           )}
 
-          {!loading && !user && (
-            <section className={`${CARD_SHELL} space-y-4 text-center`}>
-              <div className="glass-chip mx-auto flex h-12 w-12 items-center justify-center text-muted">
-                <svg
-                  className="h-6 w-6"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
+          {!loading && user && (
+            <header className="flex flex-col items-center gap-4 text-center">
+              <div className="relative">
+                <div className="h-20 w-20 overflow-hidden rounded-full border-4 border-surface bg-inset-warm shadow-[0_10px_30px_-12px_rgba(78,54,32,0.45)] sm:h-24 sm:w-24">
+                  {user.avatar ? (
+                    <img
+                      src={user.avatar}
+                      /* ภาพประกอบล้วน — ชื่อผู้ใช้พิมพ์อยู่ข้างล่างแล้ว (INC-0125) */
+                      alt=""
+                      className="h-full w-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center font-serif-th text-2xl font-bold text-ink-deep">
+                      {user.name ? user.name.slice(0, 2).toUpperCase() : "M"}
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="space-y-1">
-                <h2 className="font-serif-th text-lg font-bold font-mystic-gold"><ThaiPhrases>
-                  {isEn ? "Sign In to Access Your Sanctuary Profile" : "เข้าสู่ระบบ เพื่อเข้าถึงบัญชีสมาชิกของคุณ"}
-                </ThaiPhrases></h2>
-                <p className="mx-auto max-w-md font-serif-th text-xs text-muted leading-relaxed">
+              <div className="space-y-1.5">
+                <h1 className="font-serif-th text-xs font-semibold text-muted">{isEn ? "My account" : "บัญชีของฉัน"}</h1>
+                <p className="font-serif-th text-2xl font-bold leading-snug text-ink-deep sm:text-3xl">
+                  <ThaiPhrases>{user.name || (isEn ? "Member" : "สมาชิก")}</ThaiPhrases>
+                </p>
+                {user.email && <p className="break-all font-serif-th text-sm text-muted">{user.email}</p>}
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <span className="glass-chip px-3 py-1 font-serif-th text-xs text-ink">{providerLabel}</span>
+                {memberSince && <span className="glass-chip px-3 py-1 font-serif-th text-xs text-ink">{memberSince}</span>}
+              </div>
+
+              {/* อีเมลยังไม่ยืนยัน — แจ้งตรงใต้ชื่อ ที่เดียวที่ผู้ใช้จะเห็นแน่ ๆ */}
+              {user.emailVerified === false && (
+                <div className="flex w-full flex-col gap-3 rounded-2xl border border-err/30 bg-err-wash p-4 text-left sm:flex-row sm:items-center sm:justify-between">
+                  <div className="space-y-0.5">
+                    <p className="font-serif-th text-sm font-bold text-err">
+                      {isEn ? "Please verify your email" : "ยืนยันอีเมลของคุณ"}
+                    </p>
+                    <p className="font-serif-th text-xs leading-relaxed text-muted">
+                      {isEn
+                        ? "Verify to receive follow-ups and the daily card by email."
+                        : "ยืนยันก่อน จึงจะรับคำทำนายติดตามผลและดวงประจำวันทางอีเมลได้"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleResendVerify}
+                    className="tap-overlay-y min-h-[44px] shrink-0 self-start whitespace-nowrap rounded-full border border-err/40 px-4 font-serif-th text-xs font-bold text-err transition-colors hover:bg-err hover:text-surface cursor-pointer sm:self-auto"
+                  >
+                    {resendStatus || (isEn ? "Resend link" : "ส่งลิงก์ยืนยันอีกครั้ง")}
+                  </button>
+                </div>
+              )}
+            </header>
+          )}
+
+          {/* ── ยังไม่ได้เข้าสู่ระบบ: บอกว่าสมัครแล้วได้อะไร แล้วให้กดปุ่มเดียว ─────────────────── */}
+          {!loading && !user && (
+            <section className="altar-card-porcelain !rounded-2xl space-y-5 p-6 text-center sm:p-8">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-inset-warm text-gold-ink">
+                <IconLogin />
+              </div>
+              <div className="space-y-1.5">
+                <h2 className="font-serif-th text-xl font-bold text-ink-deep sm:text-2xl">
+                  <ThaiPhrases>{isEn ? "Sign in to your account" : "เข้าสู่ระบบบัญชีของคุณ"}</ThaiPhrases>
+                </h2>
+                <p className="mx-auto max-w-md font-serif-th text-sm leading-relaxed text-muted">
                   {isEn
-                    ? "Connect your Google or LINE account to synchronize sacred readings, unlock daily quota benefits, and preserve your reflection history."
-                    : "เชื่อมต่อบัญชีเพื่อบันทึกประวัติการเปิดไพ่ รับโควตาคำทำนายประจำวัน และติดตามผลลัพธ์คำทำนายอย่างต่อเนื่อง"}
+                    ? "Free membership — keep your readings, get a free reading every day, and track how they turn out."
+                    : "สมัครฟรี — เก็บประวัติการเปิดไพ่ ดูดวงฟรีทุกวัน และติดตามผลคำทำนายได้ต่อเนื่อง"}
                 </p>
               </div>
+              <ul className="mx-auto grid max-w-md gap-2 text-left">
+                {getMemberBenefits(isEn).map((b) => (
+                  <li key={b.title} className="flex items-start gap-2.5 font-serif-th text-sm text-ink-deep">
+                    <CheckMarkIcon className="mt-1 h-3.5 w-3.5 shrink-0 text-gold-ink" />
+                    {b.title}
+                  </li>
+                ))}
+              </ul>
               <button
                 type="button"
                 onClick={() => {
                   soundManager.playMenuTapSound();
                   setAuthModalOpen(true);
                 }}
-                className="tap-overlay-y rounded-full bg-gold-ink px-6 py-2.5 font-serif-th text-xs font-bold text-surface transition-colors hover:bg-gold-ink-deep cursor-pointer"
+                className="btn-gold-glass min-h-[48px] w-full max-w-xs px-6 font-serif-th text-sm font-bold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2"
               >
-                {isEn ? "Sign In / Register" : "เข้าสู่ระบบ / สมัครสมาชิก"}
+                {isEn ? "Sign in / Sign up free" : "เข้าสู่ระบบ / สมัครฟรี"}
               </button>
             </section>
           )}
 
-          {user && (
-            <section className={`${CARD_SHELL} space-y-4`}>
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex min-w-0 items-center gap-3.5">
-                  <div className="glass-chip relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden">
-                    {user.avatar ? (
-                      <img
-                        src={user.avatar}
-                        /* ภาพประกอบล้วน — ชื่อผู้ใช้พิมพ์อยู่ข้าง ๆ แล้ว (INC-0125) */
-                        alt=""
-                        className="h-full w-full object-cover"
-                        referrerPolicy="no-referrer"
-                      />
-                    ) : (
-                      <span className="font-serif-th text-lg font-bold text-ink-deep">
-                        {user.name ? user.name.slice(0, 2).toUpperCase() : "M"}
-                      </span>
-                    )}
-                  </div>
-                  <div className="min-w-0 space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-serif-th text-base sm:text-lg font-bold text-ink-deep"><ThaiPhrases>
-                        {user.name || (isEn ? "Sacred Member" : "สมาชิกวิหาร")}
-                      </ThaiPhrases></h2>
-                      <span className="glass-chip px-2 py-0.5 font-mono text-xs text-muted">
-                        {providerLabel}
-                      </span>
-                    </div>
-                    <p className="font-mono text-xs text-muted break-all">{user.email}</p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="tap-overlay-y shrink-0 self-start rounded-full border border-line-interactive-warm px-4 py-2 font-serif-th text-xs font-semibold text-ink-deep transition-colors hover:border-err hover:text-err cursor-pointer sm:self-center"
-                >
-                  {isEn ? "Sign Out" : "ออกจากระบบ"}
-                </button>
-              </div>
-
-              {/* Email Verification Status Notice */}
-              {user.emailVerified === false && (
-                <div className="flex flex-col gap-3 rounded-lg border border-err/30 bg-err-wash p-3 text-xs sm:flex-row sm:items-center sm:justify-between">
-                  <div className="space-y-0.5">
-                    <p className="font-serif-th font-bold text-err">
-                      {isEn ? "Email verification required" : "ยังไม่ได้ยืนยันอีเมล"}
-                    </p>
-                    <p className="text-muted leading-relaxed">
-                      {isEn
-                        ? "Verify your email address to receive follow-ups and the daily card by email."
-                        : "ยืนยันอีเมลก่อน จึงจะรับคำทำนายติดตามผลและดวงประจำวันทางอีเมลได้"}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleResendVerify}
-                    className="tap-overlay-y shrink-0 self-start whitespace-nowrap rounded-full border border-err/40 px-4 py-2 font-serif-th text-xs font-bold text-err transition-colors hover:bg-err hover:text-surface cursor-pointer sm:self-auto"
-                  >
-                    {resendStatus || (isEn ? "Resend Link" : "ส่งลิงก์ยืนยันอีกครั้ง")}
-                  </button>
-                </div>
-              )}
-            </section>
+          {/* ── ตัวเลขสรุป 3 ช่อง: สิทธิ์วันนี้ · รอบที่เติม · วันต่อเนื่อง ─────────────────────── */}
+          {user && view && (
+            <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
+              <StatTile
+                label={isEn ? "Readings today" : "ดูดวงได้วันนี้"}
+                value={
+                  view.isUnlimited ? (
+                    isEn ? "Unlimited" : "ไม่จำกัด"
+                  ) : (
+                    <>
+                      {view.remaining}
+                      <span className="text-sm font-semibold text-muted sm:text-base">/{view.limit}</span>
+                    </>
+                  )
+                }
+                sub={
+                  view.isUnlimited
+                    ? undefined
+                    : countdown
+                      ? isEn
+                        ? `Resets ${countdown}`
+                        : `รีเซ็ต${countdown}`
+                      : undefined
+                }
+              />
+              <StatTile
+                label={isEn ? "Top-up readings" : "รอบที่เติมไว้"}
+                value={bonus}
+                sub={isEn ? "Never expire" : "ไม่มีวันหมดอายุ"}
+              />
+              <StatTile
+                label={isEn ? "Daily streak" : "เปิดไพ่รายวันติดกัน"}
+                value={
+                  <>
+                    {streak}
+                    <span className="text-sm font-semibold text-muted sm:text-base">{isEn ? " days" : " วัน"}</span>
+                  </>
+                }
+                sub={isEn ? "Daily card" : "ไพ่ประจำวัน"}
+              />
+            </div>
           )}
 
-          {/* สิทธิ์การเปิดไพ่คงเหลือ · โควตารายวัน · โบนัสสะสม · ปุ่มเติมรอบ · รหัสแลกสิทธิ์ */}
-          <EntitlementStatusCard onBuyCredits={openBuyCredits} />
+          {/* ── ดูดวงและเติมรอบ ─────────────────────────────────────────────────── */}
+          {user && view && (
+            <SettingsSection id="account-readings" title={isEn ? "Readings & top-ups" : "ดูดวงและเติมรอบ"}>
+              {view.isUnlimited ? (
+                <SettingsRow
+                  icon={<RowIcon><IconSpark /></RowIcon>}
+                  label={isEn ? "Unlimited account" : "บัญชีไม่จำกัดสิทธิ์"}
+                  hint={view.statusLine}
+                />
+              ) : (
+                <SettingsRow
+                  icon={<RowIcon><IconCards /></RowIcon>}
+                  label={isEn ? "Top up readings" : "เติมรอบดูดวง"}
+                  hint={
+                    isEn
+                      ? `Pay once, no subscription · from ${CHEAPEST_PACKAGE_THB} THB`
+                      : `จ่ายครั้งเดียว ไม่มีรายเดือน · เริ่ม ${CHEAPEST_PACKAGE_THB} บาท`
+                  }
+                  trailing={
+                    <button
+                      type="button"
+                      onClick={openBuyCredits}
+                      className="btn-gold-glass min-h-[40px] shrink-0 px-4 font-serif-th text-xs font-bold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2 sm:px-5 sm:text-sm"
+                    >
+                      {isEn ? "Top up" : "เติมรอบ"}
+                    </button>
+                  }
+                />
+              )}
+              {!view.isUnlimited && (
+                <SettingsRow
+                  icon={<RowIcon><IconSun /></RowIcon>}
+                  label={isEn ? "Free reading today" : "สิทธิ์ดูดวงฟรีวันนี้"}
+                  hint={view.statusLine}
+                  trailing={<QuotaPips remaining={view.remaining} limit={view.limit} tone={view.tone} />}
+                />
+              )}
+              {hasTrial && (
+                <SettingsRow
+                  icon={<RowIcon><IconSpark /></RowIcon>}
+                  label={isEn ? "Free big-spread trial" : "สิทธิ์ลองผังใหญ่ฟรี"}
+                  hint={
+                    isEn
+                      ? "Open a 5–12 card spread or a master reader once, free"
+                      : "เปิดผัง 5–12 ใบ หรือแม่หมอพิเศษได้ฟรี 1 ครั้ง"
+                  }
+                  href="/read/celtic-cross"
+                />
+              )}
+              <SettingsRow
+                icon={<RowIcon><IconTag /></RowIcon>}
+                label={isEn ? "Pricing & packages" : "ราคาและแพ็กเกจ"}
+                hint={isEn ? "Compare every package" : "เทียบแพ็กเกจทั้งหมด"}
+                href="/pricing"
+              />
+              <SettingsRow
+                icon={<RowIcon><IconTicket /></RowIcon>}
+                label={isEn ? "Redeem a code" : "ใส่รหัสแลกสิทธิ์"}
+                hint={isEn ? "Have a gift or promo code?" : "มีรหัสของขวัญหรือรหัสโปรโมชั่น"}
+                onClick={openBuyCredits}
+              />
+            </SettingsSection>
+          )}
 
-          {/* ทางลัดที่คนมาหน้านี้ต้องการจริง — รวมไว้ที่เดียว ไม่กระจายเป็นปุ่มซ้ำทั้งหน้า */}
-          <SectionCard
-            title={isEn ? "Member Shortcuts" : "ทางลัดของสมาชิก"}
-            description={
-              isEn
-                ? "Your reading archive and the benefits of each membership tier."
-                : "คลังคำทำนายของคุณ และสิทธิประโยชน์ของสมาชิกแต่ละระดับ"
-            }
-          >
-            <div className="grid gap-3 sm:grid-cols-2">
-              <HubTile
-                eyebrow={isEn ? "Sacred Archive" : "บันทึกคำทำนาย"}
-                title={isEn ? "Reading History & Journal" : "ประวัติการเปิดไพ่"}
+          {/* ── ประวัติการดูดวง ─────────────────────────────────────────────────── */}
+          {user && (
+            <SettingsSection id="account-history" title={isEn ? "Your readings" : "ประวัติการดูดวง"}>
+              <SettingsRow
+                icon={<RowIcon><IconBook /></RowIcon>}
+                label={isEn ? "Reading history" : "ประวัติการเปิดไพ่"}
                 hint={
                   pendingCount > 0
                     ? isEn
-                      ? "Readings have reached their reflection date — record what actually happened."
-                      : "มีคำทำนายถึงกำหนดติดตามผลแล้ว บันทึกสิ่งที่เกิดขึ้นจริงได้เลย"
+                      ? "Some readings are ready for follow-up — note what actually happened"
+                      : "มีคำทำนายถึงเวลาติดตามผลแล้ว บันทึกสิ่งที่เกิดขึ้นจริงได้เลย"
                     : isEn
-                      ? "Review past readings and insights"
-                      : "ดูผลคำทำนายย้อนหลังและบันทึกข้อคิด"
+                      ? "Revisit your cards and readings"
+                      : "ย้อนดูไพ่และคำทำนายที่เคยเปิด"
                 }
-                badge={
-                  pendingCount > 0
-                    ? isEn
-                      ? `${pendingCount} to review`
-                      : `รอติดตามผล ${pendingCount}`
-                    : undefined
+                trailing={
+                  pendingCount > 0 ? (
+                    <span className="shrink-0 rounded-full bg-gold-ink px-2.5 py-0.5 font-serif-th text-xs font-bold text-surface">
+                      {isEn ? `${pendingCount} to review` : `รอติดตาม ${pendingCount}`}
+                    </span>
+                  ) : undefined
                 }
                 onClick={openJournal}
               />
-              <HubTile
-                eyebrow={isEn ? "Privilege Tiers" : "สิทธิประโยชน์"}
-                title={isEn ? "Compare Membership Plans" : "เปรียบเทียบทุกแพลน"}
-                hint={
-                  isEn
-                    ? "Explore tiers, tokens, and daily limits"
-                    : "ดูโควตารายวันและแพ็กเกจเปิดไพ่พรีเมียม"
-                }
-                onClick={() => {
-                  soundManager.playMenuTapSound();
-                  setExploreReason("explore");
-                }}
-              />
-            </div>
-          </SectionCard>
+            </SettingsSection>
+          )}
 
-          {/* Notification & Communication Preferences (PDPA Opt-In) */}
+          {/* ── การแจ้งเตือนทางอีเมล (PDPA: สมัครใจทุกรายการ) ───────────────────────── */}
           {user && (
-            <SectionCard
-              title={isEn ? "Notification Preferences (PDPA)" : "การแจ้งเตือนและความยินยอม (PDPA)"}
+            <SettingsSection
+              id="account-notifications"
+              title={isEn ? "Email notifications" : "การแจ้งเตือนทางอีเมล"}
               description={
                 isEn
-                  ? "Control email notifications. All subscriptions are opt-in only and can be modified anytime."
-                  : "ควบคุมการรับข้อมูลทางอีเมล ทุกรายการเป็นการสมัครใจ เปิดหรือปิดเมื่อไรก็ได้"
+                  ? "Opt-in only — turn on or off anytime."
+                  : "สมัครใจทุกรายการ เปิดหรือปิดได้ทุกเมื่อ (PDPA)"
               }
             >
-              <div className="divide-y divide-line-warm/50">
-                <ConsentToggle
-                  label={isEn ? "Reading Outcome Follow-ups" : "รับคำทำนายติดตามผล"}
-                  hint={
-                    isEn
-                      ? "Receive email notifications when your readings reach their reflection date."
-                      : "รับการแจ้งเตือนทางอีเมลเมื่อคำทำนายถึงกำหนดติดตามผลลัพธ์"
-                  }
-                  checked={!!user.marketingConsent}
-                  saving={isUpdatingConsent}
-                  onChange={handleUpdateConsent}
-                />
-                <ConsentToggle
-                  label={isEn ? "Daily Tarot Guidance via Email" : "รับดวงประจำวันทางอีเมล"}
-                  hint={
-                    isEn
-                      ? "One card drawn at sunrise each morning · unsubscribe from any email."
-                      : "ไพ่นำทางวันละ 1 ใบทุกเช้า · ยกเลิกได้ทุกเมื่อจากในอีเมล"
-                  }
-                  checked={!!user.digestEmail}
-                  saving={isUpdatingDigest}
-                  onChange={handleUpdateDigest}
-                />
-              </div>
+              <ConsentToggle
+                icon={<IconMail />}
+                label={isEn ? "Reading follow-ups" : "แจ้งเตือนติดตามผลคำทำนาย"}
+                hint={
+                  isEn
+                    ? "An email when a reading reaches its follow-up date"
+                    : "ส่งอีเมลเมื่อคำทำนายถึงเวลาติดตามผล"
+                }
+                checked={!!user.marketingConsent}
+                saving={isUpdatingConsent}
+                onChange={handleUpdateConsent}
+              />
+              <ConsentToggle
+                icon={<IconSun />}
+                label={isEn ? "Daily card by email" : "ดวงประจำวันทางอีเมล"}
+                hint={
+                  isEn
+                    ? "One guiding card every morning · unsubscribe from any email"
+                    : "ไพ่นำทางวันละ 1 ใบทุกเช้า · ยกเลิกได้จากในอีเมล"
+                }
+                checked={!!user.digestEmail}
+                saving={isUpdatingDigest}
+                onChange={handleUpdateDigest}
+              />
               {consentError && (
-                <p role="alert" className="mt-3 text-xs font-serif-th text-err">
+                <p role="alert" className="px-5 py-3 font-serif-th text-xs text-err">
                   {consentError}
                 </p>
               )}
-            </SectionCard>
+            </SettingsSection>
           )}
 
-          {/* Change Password & Security Card — พับเก็บไว้ ไม่ใช่ฟอร์มยาวคาหน้า */}
-          <ChangePasswordCard />
+          {/* ── เข้าสู่ระบบและความปลอดภัย ─────────────────────────────────────────── */}
+          {user && (
+            <SettingsSection id="account-security" title={isEn ? "Sign-in & security" : "การเข้าสู่ระบบและความปลอดภัย"}>
+              <SettingsRow
+                icon={<RowIcon><IconLogin /></RowIcon>}
+                label={isEn ? "Sign-in method" : "วิธีเข้าสู่ระบบ"}
+                hint={providerLabel}
+              />
+              {/* เปลี่ยน/ตั้งรหัสผ่าน — พับเก็บไว้ (<details>) ไม่ใช่ฟอร์มยาวคาหน้า */}
+              <ChangePasswordCard icon={<RowIcon><IconKey /></RowIcon>} />
+            </SettingsSection>
+          )}
 
-          {/* Privacy & PDPA Control Card */}
-          <SectionCard
-            title={isEn ? "Privacy & Data Sovereign Rights" : "ความเป็นส่วนตัวและข้อมูลของคุณ"}
+          {/* ── ความเป็นส่วนตัวและข้อมูล ───────────────────────────────────────────── */}
+          <SettingsSection
+            id="account-privacy"
+            title={isEn ? "Privacy & your data" : "ความเป็นส่วนตัวและข้อมูลของคุณ"}
             description={
               isEn
-                ? "Your inquiries and reading reflections are preserved in your own device storage — we keep no unnecessary permanent copy on our servers."
-                : "คำถามและประวัติการดูดวงของคุณถูกเก็บไว้ในเครื่องของคุณเอง เราไม่เก็บสำเนาถาวรไว้บนเซิร์ฟเวอร์โดยไม่จำเป็น"
+                ? "Your questions and reading notes live on your own device — we keep no unnecessary copies."
+                : "คำถามและประวัติการดูดวงเก็บไว้ในเครื่องของคุณ เราไม่เก็บสำเนาถาวรบนเซิร์ฟเวอร์โดยไม่จำเป็น"
             }
-            tone="danger"
           >
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line-warm/50 pt-4">
-              <Link
-                href="/privacy"
-                className="font-serif-th text-xs font-bold text-gold-ink underline transition-colors hover:text-ink-deep"
-              >
-                {isEn ? "Read Privacy Policy (PDPA / GDPR)" : "อ่านนโยบายความเป็นส่วนตัว (PDPA)"}
-              </Link>
+            <SettingsRow
+              icon={<RowIcon><IconShield /></RowIcon>}
+              label={isEn ? "Privacy policy" : "นโยบายความเป็นส่วนตัว"}
+              hint="PDPA · GDPR"
+              href="/privacy"
+            />
+            <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:px-5">
+              <div className="flex min-w-0 flex-1 items-center gap-3.5">
+                <RowIcon tone="danger"><IconTrash /></RowIcon>
+                <div className="min-w-0">
+                  <p className="font-serif-th text-sm font-bold text-ink-deep">
+                    {isEn ? "Delete all my data" : "ลบข้อมูลทั้งหมดของฉัน"}
+                  </p>
+                  <p className="mt-0.5 font-serif-th text-xs leading-relaxed text-muted">
+                    {isEn ? "Permanently removes your account and history" : "ลบบัญชีและประวัติทั้งหมดถาวร กู้คืนไม่ได้"}
+                  </p>
+                </div>
+              </div>
               <DeleteAllDataButton />
             </div>
-          </SectionCard>
+          </SettingsSection>
+
+          {/* ── ออกจากระบบ — ท้ายหน้า แยกจากทุกอย่าง (แบบหน้าบัญชีของเว็บใหญ่) ──────────────────── */}
+          {user && (
+            <div className="space-y-3 text-center">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="altar-card-porcelain !rounded-2xl tap-overlay-y flex min-h-[52px] w-full items-center justify-center gap-2 font-serif-th text-sm font-bold text-ink-deep transition-colors hover:text-err cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+              >
+                <IconLogout />
+                {isEn ? "Sign out" : "ออกจากระบบ"}
+              </button>
+              <p className="font-serif-th text-xs text-muted">
+                {isEn ? "Signed in as " : "เข้าสู่ระบบอยู่ในชื่อ "}
+                {user.email || user.name}
+              </p>
+            </div>
+          )}
+
         </div>
       </main>
 
@@ -573,25 +630,6 @@ export function AccountClient() {
         <ReadingHistoryModal
           isOpen={historyModalOpen}
           onClose={() => setHistoryModalOpen(false)}
-        />
-      )}
-
-      {exploreReason !== null && (
-        <AccessDialog
-          reason={exploreReason}
-          onClose={() => setExploreReason(null)}
-          onSignup={() => {
-            setExploreReason(null);
-            setAuthModalOpen(true);
-          }}
-          onSignin={() => {
-            setExploreReason(null);
-            setAuthModalOpen(true);
-          }}
-          onBuyCredits={() => {
-            setExploreReason(null);
-            setCreditsModalOpen(true);
-          }}
         />
       )}
 
