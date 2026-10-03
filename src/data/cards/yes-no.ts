@@ -142,3 +142,37 @@ export function buildYesNoAnswer(card: TarotCard, isUpright: boolean, isEnglish:
     condition,
   };
 }
+
+/** ค่าฟันธงที่ schema คำอ่านเก็บ (ไทยเสมอ — ฝั่งแสดงผลแปลงเป็นอังกฤษเอง) */
+export type YesNoVerdictTh = "ใช่" | "ไม่ใช่" | "ยังไม่แน่";
+
+/**
+ * น้ำหนัก ใช่/ไม่ใช่ ของไพ่หนึ่งใบ — **กติกาเดียวกับหน้าสารานุกรม** (`buildYesNoAnswer`)
+ * หัวตั้ง: yes = +1 · no = −1 · maybe = 0
+ * กลับหัว: **ไม่กลับขั้ว** แต่แรงลดลงครึ่งหนึ่ง (หน้าสารานุกรมเขียนว่า "มีเงื่อนไข" — ล่าช้า/ติดขัดก่อนเป็นจริง)
+ *
+ * เดิมคำอ่านสำรองกลับขั้วไพ่กลับหัว (yes ➔ no) ขณะที่หน้า `/cards/<id>` ไม่กลับ
+ * ผู้ใช้จึงเห็นคำตอบสองแบบสำหรับไพ่ใบเดียวกัน (ISSUE-054)
+ */
+export function yesNoWeight(card: Pick<TarotCard, "yesNo">, isReversed: boolean): number {
+  const polarity = card.yesNo === "yes" ? 1 : card.yesNo === "no" ? -1 : 0;
+  return isReversed ? polarity * 0.5 : polarity;
+}
+
+/** ใบในตำแหน่งแรกของผังใช่/ไม่ใช่คือ "คำตอบสรุป" — นับน้ำหนักสองเท่า */
+const YES_NO_ANCHOR_WEIGHT = 2;
+
+/**
+ * รวมน้ำหนักทั้งผังเป็นคำตอบเดียว — ใช้ร่วมกันทั้งคำอ่านสำรองและบล็อกหลักฐานใน prompt ของ AI
+ * ±1 ขึ้นไป = ใช่/ไม่ใช่ · ระหว่างนั้น = ยังไม่แน่
+ */
+export function tallyYesNo(
+  items: Array<{ card: Pick<TarotCard, "yesNo">; isReversed: boolean }>,
+): { verdict: YesNoVerdictTh; score: number } {
+  let score = 0;
+  items.forEach(({ card, isReversed }, i) => {
+    score += yesNoWeight(card, isReversed) * (i === 0 ? YES_NO_ANCHOR_WEIGHT : 1);
+  });
+  const verdict: YesNoVerdictTh = score >= 1 ? "ใช่" : score <= -1 ? "ไม่ใช่" : "ยังไม่แน่";
+  return { verdict, score };
+}

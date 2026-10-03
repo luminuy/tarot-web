@@ -15,6 +15,8 @@ export interface MindfulRitual {
   durationText: string;
   actionText: string;
   adviceString: string;
+  /** ฉบับอังกฤษล้วนสำหรับ prompt หน้า `/en` (ISSUE-055) — ขึ้นต้นตามสเปกผลลัพธ์อังกฤษ */
+  adviceStringEn: string;
 }
 
 /**
@@ -34,6 +36,8 @@ export function generateMindfulMicroRitual(
         "รินน้ำเปล่า 1 แก้ว หลับตาลงช้า ๆ วางมือขวาบนหน้าอก ดื่มน้ำทีละจิบอย่างมีสติ แล้วบอกตัวเองในใจว่า 'ฉันอนุญาตให้ตัวเองได้รู้สึก พักผ่อน และใจดีกับตัวเองในวันนี้'",
       adviceString:
         "🧘 กิจกรรมฝึกสติ 1 นาที (เติมธาตุน้ำ): วางมือขวาบนหน้าอก ดื่มน้ำ 1 แก้วอย่างมีสติ แล้วบอกตัวเองว่า 'ฉันอนุญาตให้ตัวเองได้รู้สึก พักผ่อน และใจดีกับตัวเองในวันนี้'",
+      adviceStringEn:
+        "🧘 1-Minute Mindful Ritual (restore Water): place your right hand on your chest, drink one glass of water mindfully, and tell yourself: 'I allow myself to feel, to rest, and to be kind to myself today.'",
     };
   }
 
@@ -47,6 +51,8 @@ export function generateMindfulMicroRitual(
         "ยืนขึ้น ยืดตัวตรง สูดหายใจเข้าลึก ๆ ให้เต็มปอด ก้าวเท้าขวาไปข้างหน้า 1 ก้าวอย่างมั่นคง แล้วกล่าวเป้าหมาย 1 อย่างที่คุณจะทำให้สำเร็จในวันนี้ด้วยความมั่นใจ",
       adviceString:
         "🧘 กิจกรรมฝึกสติ 1 นาที (เติมธาตุไฟ): ยืนยืดตัวตรง สูดหายใจลึก ก้าวไปข้างหน้า 1 ก้าว แล้วเอ่ยเป้าหมาย 1 อย่างที่คุณจะลงมือทำในวันนี้อย่างมั่นคง",
+      adviceStringEn:
+        "🧘 1-Minute Mindful Ritual (restore Fire): stand tall, breathe in deeply, take one firm step forward, and say aloud one goal you will act on today.",
     };
   }
 
@@ -60,6 +66,8 @@ export function generateMindfulMicroRitual(
         "วางฝ่าเท้าทั้งสองข้างแนบสนิทกับพื้น สัมผัสความหนักแน่นของผืนดิน เขียนงานหรือเป้าหมายที่เล็กที่สุด 1 อย่างลงกระดาษ แล้วลงมือทำให้เสร็จใน 10 นาที",
       adviceString:
         "🧘 กิจกรรมฝึกสติ 1 นาที (เติมธาตุดิน): วางเท้าเปล่าแนบพื้น สัมผัสความหนักแน่นของผืนดิน แล้วเลือกทำสิ่งเล็ก ๆ 1 อย่างให้เสร็จจริงใน 10 นาทีนี้",
+      adviceStringEn:
+        "🧘 1-Minute Mindful Ritual (restore Earth): press your bare feet to the floor, feel the solid ground, then finish one small task within the next 10 minutes.",
     };
   }
 
@@ -73,6 +81,8 @@ export function generateMindfulMicroRitual(
         "หลับตาลง หายใจเข้า 4 วินาที กลั้นหายใจ 4 วินาที แล้วหายใจออกช้า ๆ 6 วินาที ทำซ้ำ 3 รอบ เพื่อระบายความอึดอัดและเปิดพื้นที่ว่างให้สติปัญญา",
       adviceString:
         "🧘 กิจกรรมฝึกสติ 1 นาที (เติมธาตุลม): หลับตาลง ฝึกหายใจเข้า 4 วิ กลั้น 4 วิ ผ่อนลมหายใจออก 6 วิ ทำซ้ำ 3 รอบ เพื่อเคลียร์สมองให้ปลอดโปร่ง",
+      adviceStringEn:
+        "🧘 1-Minute Mindful Ritual (restore Air): close your eyes, breathe in for 4 seconds, hold for 4, exhale for 6 — repeat three times to clear your mind.",
     };
   }
 
@@ -85,5 +95,7 @@ export function generateMindfulMicroRitual(
       "หลับตาลง 1 นาที นึกถึงเรื่องดี ๆ หรือความพยายามของตนเอง 1 เรื่องในวันนี้ แล้วส่งรอยยิ้มขอบคุณให้กับตัวเองที่เข้มแข็งและเติบโตมาจนถึงตอนนี้",
     adviceString:
       "🧘 กิจกรรมฝึกสติ 1 นาที (น้อมรับความสมดุล): หลับตา 1 นาที นึกถึงความพยายามของตัวเอง 1 เรื่อง แล้วขอบคุณหัวใจตัวเองที่เข้มแข็งเสมอมา",
+    adviceStringEn:
+      "🧘 1-Minute Mindful Ritual (honor your balance): close your eyes for one minute, recall one effort you made today, and thank your heart for staying strong.",
   };
 }

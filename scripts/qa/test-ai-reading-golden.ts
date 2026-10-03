@@ -18,6 +18,10 @@ import {
   resolveThinkingOutputBudget,
 } from "../../src/lib/ai/reading-stream";
 import { PROMPT_VERSION } from "../../src/lib/ai/prompt-version";
+import { tallyYesNo, yesNoWeight } from "../../src/data/cards/yes-no";
+import { analyzeSpatialGazeDialogue } from "../../src/lib/ai/gaze";
+import { analyzeNumerologicalRhythm } from "../../src/lib/ai/numerology";
+import { checkReadingConsistency } from "../../src/lib/ai/consistency";
 
 let pass = 0;
 let fail = 0;
@@ -285,6 +289,69 @@ async function main() {
   const schemaSrc = fs.readFileSync(path.resolve(process.cwd(), "src/lib/schema/reading.ts"), "utf-8");
   check("reading.ts: summary describe ระบุ 5-8 ประโยค + Power Reflection Question", schemaSrc.includes("5-8 ประโยค") && schemaSrc.includes("Power Reflection Question"));
   check("reading.ts: advice describe ระบุกิจกรรมฝึกสติ 🧘", schemaSrc.includes("🧘"));
+
+  // 10. ✦ คลื่นปรับจูน 2026-10-03 — ใช่/ไม่ใช่ · อังกฤษล้วน · ความแม่น
+  const THAI = /[\u0E00-\u0E7F]/;
+  const byId = (id: string) => ALL_CARDS.find((c) => c.id === id)!;
+
+  // 10a. ผังใช่/ไม่ใช่ส่งหลักฐานจากสารานุกรมให้ AI (ISSUE-054)
+  const ynBase = ctxFor("yes-no");
+  const ynCards = ["major-19", "swords-10", "cups-02"].map(byId); // The Sun (yes) · 10 ดาบ (no) · 2 ถ้วย (yes)
+  const ynCtx: ReadingContext = {
+    ...ynBase,
+    cards: ynCards as ReadingContext["cards"],
+    drawn: ynCards.map((c, i) => ({ order: i, cardIndex: ALL_CARDS.indexOf(c), isReversed: i === 1 })),
+  };
+  const ynMsg = buildReadingMessage(ynCtx);
+  const ynExpected = tallyYesNo(ynCtx.drawn.map((d, i) => ({ card: ynCards[i], isReversed: d.isReversed }))).verdict;
+  check("ใช่/ไม่ใช่: prompt มีแนวโน้มรายใบครบ 3 ใบ", ynCards.every((c) => ynMsg.includes(`${c.nameTh} (`)) && ynMsg.includes("เอนไปทางใช่"));
+  check(`ใช่/ไม่ใช่: prompt ระบุน้ำหนักรวมตรงกับ tallyYesNo ("${ynExpected}")`, ynMsg.includes(`เอนไปทาง "${ynExpected}"`));
+  check("ใช่/ไม่ใช่: ผังปกติไม่มีบล็อกนี้", !msg3.includes("โหมดฟันธง"));
+  check("กติกาเดียวกับหน้าสารานุกรม: กลับหัวไม่กลับขั้ว (แรงลดครึ่ง)", yesNoWeight(byId("major-19"), true) === 0.5 && yesNoWeight(byId("swords-10"), true) === -0.5);
+  check(
+    "ใบคำตอบสรุปนับสองเท่า: The Sun หัวตั้ง + 10 ดาบ + 3 ดาบ ➔ ยังไม่แน่ (2 − 1 − 1)",
+    tallyYesNo([byId("major-19"), byId("swords-10"), byId("swords-03")].map((card) => ({ card, isReversed: false }))).verdict === "ยังไม่แน่",
+  );
+  const ynEn = buildReadingMessage({ ...ynCtx, lang: "en" });
+  check("[en] ใช่/ไม่ใช่: คำสั่งเป็นอังกฤษ (ค่าที่ต้องกรอกยังเป็นรหัสไทยตาม schema)", ynEn.includes("YES/NO MODE") && ynEn.includes("Leaning Yes"));
+  const fakeReading = { summary: "คำตอบคือไม่ใช่", yesNoAnswer: "ไม่ใช่", cards: [], advice: [] } as never;
+  check(
+    "consistency: ฟันธงสวนน้ำหนักไพ่ ➔ เตือน YESNO_AGAINST_CARDS (ไม่ตีตก)",
+    checkReadingConsistency(fakeReading, [], { yesNoMode: true, expectedYesNo: "ใช่" }).issues.some((i) => i.code === "YESNO_AGAINST_CARDS" && !i.fatal),
+  );
+
+  // 10b. prompt หน้า /en ไม่มีภาษาไทยปน นอกจากบันทึกภาพ 1909 ที่ติดป้ายไว้ และข้อมูลที่ผู้ใช้พิมพ์เอง (ISSUE-055)
+  const enCtx: ReadingContext = { ...ctxFor("celtic-cross"), lang: "en", question: "Should I change jobs?", nickname: "Ann", intake: { situation: "Offered a new role" } };
+  const enMsg = buildReadingMessage(enCtx);
+  const enNoLore = enMsg
+    .split("\n")
+    .filter((l) => !/^  • (สัญลักษณ์ภาพ 1909|จุดสังเกตสำคัญ|จิตวิทยาเชิงลึก|คำถามชวนคิดทรงพลัง)/.test(l))
+    .join("\n");
+  const thaiLine = enNoLore.split("\n").find((l) => THAI.test(l));
+  if (thaiLine) console.log(`     ไทยหลุด: ${thaiLine}`);
+  check("[en] prompt อังกฤษล้วน (ยกเว้นบันทึกภาพ 1909 ที่ติดป้ายว่าเป็นภาษาไทย)", !thaiLine);
+  check("[en] บันทึกภาพ 1909 ติดป้ายห้ามคัดลอกภาษาไทย", enMsg.includes("never copy Thai words"));
+
+  // 10c. ความแม่น — ไพ่กลับหัวหันกลับทิศ · ซ้าย/ขวาดูจากผังจริง
+  const kingPent = byId("pentacles-14"); // มองซ้าย
+  const lookRight = ALL_CARDS.find((c) => c.arcana === "minor" && analyzeSpatialGazeDialogue([c]).cardGazes[0].gaze === "right")!;
+  const facing = analyzeSpatialGazeDialogue([lookRight, kingPent]);
+  check("สายตา: ใบซ้ายมองขวา + ใบขวามองซ้าย ➔ สบตากัน", facing.interactions[0]?.relation === "face-to-face");
+  const flipped = analyzeSpatialGazeDialogue([lookRight, kingPent], { reversed: [true, false] });
+  check("สายตา: ใบซ้ายกลับหัว ➔ หันกลับทิศ ไม่สบตาแล้ว", flipped.interactions[0]?.relation !== "face-to-face");
+  const swapped = analyzeSpatialGazeDialogue([lookRight, kingPent], { xs: [0.7, 0.3] });
+  check("สายตา: ผังวางใบแรกไว้ทางขวา ➔ หันหลังให้กัน (ไม่ใช่สบตา)", swapped.interactions[0]?.relation === "back-to-back");
+  const stacked = analyzeSpatialGazeDialogue([lookRight, kingPent], { xs: [0.5, 0.5] });
+  check("สายตา: ซ้อนคอลัมน์เดียวกัน ➔ ไม่ตีความซ้าย/ขวา", stacked.interactions.length === 0);
+  check("สายตา: มีฉบับอังกฤษล้วน", Boolean(facing.dialogueNarrativeEn) && !THAI.test(facing.dialogueNarrativeEn));
+
+  const courts = analyzeNumerologicalRhythm(["wands-11", "cups-12", "swords-13"].map(byId));
+  check("เลขศาสตร์: Page ➔ Knight ➔ Queen ไม่ถูกอ่านเป็นตัวเลขก้าวหน้า", courts.progressionTrend !== "advancing" && courts.courtCardCount === 3);
+
+  check("ไทย: หมวดคำถามเป็นคำไทย ไม่ใช่คีย์อังกฤษดิบ", msg3.includes("นัยสำคัญในหมวดภาพรวมชีวิต") && !/นัยสำคัญในหมวด[a-z]/.test(msg3));
+  check("ไทย: เช็กลิสต์ความแม่นอยู่ในรูปแบบผลลัพธ์", msg3.includes("เช็กความแม่นก่อนส่ง") && msg3.includes("connections ต้องยกคู่ไพ่อย่างน้อย 2 คู่"));
+  check("ไทย: ผัง 1 ใบไม่สั่งให้ยกคู่ไพ่", !msg1.includes("connections ต้องยกคู่ไพ่"));
+  check("ไทย: มีบริบทผู้ถาม ➔ สั่งให้ใช้ <context_details>", msg3.includes("<context_details> ของผู้ถามมาใช้"));
 
   // 9. PROMPT_VERSION sync guard (AI_INTELLIGENCE_PLAN W1.1)
   check("PROMPT_VERSION มีการระบุและขึ้นรูปแบบ YYYYMMDD-X", /^\d{8}-\d+$/.test(PROMPT_VERSION));

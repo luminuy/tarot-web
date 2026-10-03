@@ -23,7 +23,25 @@ export interface KarmicBridgeAnalysis {
   hasPastContext: boolean;
   pastReading?: PastReadingSnapshot;
   karmicNarrative?: string;
+  /** ฉบับอังกฤษล้วนสำหรับ prompt หน้า `/en` (ISSUE-055) */
+  karmicNarrativeEn?: string;
 }
+
+const NOTABLE_TRANSITIONS_EN: Record<string, Record<string, string>> = {
+  tower: {
+    star: "Healing after the storm: from the upheaval of The Tower to the hope and renewal of The Star",
+    sun: "From shadow into light: the clouds of loss have passed and joy and clarity are rising",
+    world: "Liberation: the collapse of the old freed you to complete a cycle and begin again with grace",
+  },
+  death: {
+    fool: "Spiritual rebirth: after an ending (Death), today is the first step of a new adventure (The Fool)",
+    empress: "Abundance after shedding: barren ground has turned into a field of joy and fresh growth",
+  },
+  devil: {
+    star: "Breaking the chains: the shackles of fear or a toxic bond have fallen away; your inner light is guiding you",
+    judgement: "Awakening and freedom: you hear the call of truth and are ready to forgive yourself and begin anew",
+  },
+};
 
 const NOTABLE_TRANSITIONS: Record<string, Record<string, string>> = {
   tower: {
@@ -58,6 +76,7 @@ export function analyzeKarmicBridge(
   }
 
   let transitionInsight = "";
+  let transitionInsightEn = "";
 
   // ตรวจจับคู่การเปลี่ยนผ่านที่มีนัยสำคัญ
   const pastCardLower = pastReading.primaryCardName.toLowerCase();
@@ -81,6 +100,7 @@ export function analyzeKarmicBridge(
           (currentId === "judgement" && primaryCurrent.nameTh.includes("จัดจ์เมนต์"))
         ) {
           transitionInsight = desc;
+          transitionInsightEn = NOTABLE_TRANSITIONS_EN[pastId]?.[currentId] ?? "";
           break;
         }
       }
@@ -117,9 +137,35 @@ export function analyzeKarmicBridge(
     );
   }
 
+  // ฉบับอังกฤษ — คำถาม/ชื่อไพ่ในอดีตเป็นข้อมูลของผู้ใช้เอง จึงยกมาตรง ๆ
+  const en: string[] = [];
+  const ago =
+    pastReading.daysAgo === undefined
+      ? ""
+      : pastReading.daysAgo === 0
+        ? " (earlier today)"
+        : pastReading.daysAgo === 1
+          ? " (yesterday)"
+          : ` (${pastReading.daysAgo} days ago)`;
+  en.push(
+    `Past karmic memory: the seeker last consulted the cards${ago}${pastReading.question ? ` about "${pastReading.question}"` : ""}, and the lead card was ${pastReading.primaryCardName}`,
+  );
+  if (pastReading.outcome && pastReading.outcome !== "PENDING") {
+    en.push(`• Outcome the seeker recorded for that reading: ${pastReading.outcome}`);
+  }
+  if (pastReading.recentPrimaryCards && pastReading.recentPrimaryCards.length > 0) {
+    en.push(`• Lead cards from other past readings: ${pastReading.recentPrimaryCards.join(", ")}`);
+  }
+  en.push(
+    transitionInsightEn
+      ? `• Life transition: ${transitionInsightEn}`
+      : '• Guidance for the reader: warmly acknowledge the continuity of their journey (e.g. "Welcome back..." or "Since we last spoke about...") without repeating every detail, so they feel genuinely remembered.',
+  );
+
   return {
     hasPastContext: true,
     pastReading,
     karmicNarrative: narrativeParts.join("\n"),
+    karmicNarrativeEn: en.join("\n"),
   };
 }

@@ -295,10 +295,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       lang: activeLang,
     });
 
-    const rawCards = (record.drawn || [])
-      .map((d) => cardByIndex(d.cardIndex))
-      .filter((c): c is import("@/data/cards").TarotCard => !!c);
-    const gazeDialogue = analyzeSpatialGazeDialogue(rawCards);
+    const drawnWithCards = (record.drawn || [])
+      .map((d) => ({ d, card: cardByIndex(d.cardIndex) }))
+      .filter((x): x is { d: (typeof x)["d"]; card: import("@/data/cards").TarotCard } => !!x.card);
+    // ไพ่กลับหัวหันกลับทิศ · ซ้าย/ขวาดูจากผังจริง (เหมือนคำอ่านหลัก)
+    const gazeDialogue = analyzeSpatialGazeDialogue(
+      drawnWithCards.map((x) => x.card),
+      {
+        reversed: drawnWithCards.map((x) => x.d.isReversed),
+        xs: drawnWithCards.map((x) => spread?.positions[x.d.order]?.x ?? Number.NaN),
+      },
+    );
     const questionDiagnosis = diagnoseQuestionEnergy(userQuestion);
 
     /*
@@ -328,7 +335,8 @@ The seeker just drew these cards with you:
 ${cards.join("\n")}
 
 ${priorReading}
-${gazeDialogue.dialogueNarrative ? `\n• Visual Card Dialogue:\n${gazeDialogue.dialogueNarrative}` : ""}
+${gazeDialogue.dialogueNarrativeEn ? `\n• Visual Card Dialogue:\n${gazeDialogue.dialogueNarrativeEn}` : ""}
+${questionDiagnosis.promptDirectiveEn}
 ${guardSection}
 
 ## Consultation Guidelines (Authentic American English Reader)

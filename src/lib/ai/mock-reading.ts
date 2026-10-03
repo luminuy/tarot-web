@@ -11,6 +11,7 @@
  *  ของเดิมจึงไม่เคยมีด่านไหนตรวจคำอ่านสำรองแม้แต่ด่านเดียว)
  */
 import type { ReadingContext } from "@/lib/ai/prompt";
+import { tallyYesNo, type YesNoVerdictTh } from "@/data/cards/yes-no";
 import type { Reading } from "@/lib/schema/reading";
 import type { ReadingEvent, UsageInfo } from "@/lib/ai/types";
 import { getPositionMeaning, getPositionName } from "@/data/spreads-helpers";
@@ -229,23 +230,19 @@ const YES_NO_EN: Record<string, string> = { ใช่: "Yes", ไม่ใช่
 /**
  * ฟันธง ใช่/ไม่ใช่ ของคำอ่านสำรอง
  * ---------------------------------------------------------------------------
- * ใช้ค่า `yesNo` ที่ผูกไว้กับไพ่ทั้ง 78 ใบในสารานุกรม (ข้อมูลชุดเดียวกับที่ส่งให้
- * โมเดลจริงอ่าน) ไพ่กลับหัวสลับขั้ว yes↔no ส่วน maybe คงเดิม แล้วรวมคะแนนทั้งผัง
+ * ใช้ `tallyYesNo()` ตัวเดียวกับบล็อกหลักฐานที่ส่งให้โมเดลจริงใน `buildReadingMessage()`
+ * (ค่า `yesNo` ของไพ่ทั้ง 78 ใบในสารานุกรม · กลับหัวไม่กลับขั้วแต่แรงลดครึ่ง · ใบคำตอบสรุปนับสองเท่า)
  * — ไม่ใช่การเดาและไม่ได้สร้างข้อมูลใหม่ขึ้นเอง
  *
  * เดิมคืน `null` เสมอ ➔ ผัง `yes-no` ที่ตกมาถึงคำอ่านสำรองจะไม่มีคำตอบให้ผู้ใช้เลย
  * เพราะ UI ซ่อนชิปคำตอบเมื่อค่าเป็น null (StreamReader.tsx)
  */
-function resolveMockYesNo(ctx: ReadingContext): "ใช่" | "ไม่ใช่" | "ยังไม่แน่" | null {
+function resolveMockYesNo(ctx: ReadingContext): YesNoVerdictTh | null {
   if (!ctx.spread.yesNoMode) return null;
-  let score = 0;
-  for (let i = 0; i < ctx.drawn.length; i++) {
-    const card = ctx.cards[i];
-    if (!card) continue;
-    const polarity = card.yesNo === "yes" ? 1 : card.yesNo === "no" ? -1 : 0;
-    score += ctx.drawn[i].isReversed ? -polarity : polarity;
-  }
-  return score > 0 ? "ใช่" : score < 0 ? "ไม่ใช่" : "ยังไม่แน่";
+  const items = ctx.drawn
+    .map((d, i) => ({ card: ctx.cards[i], isReversed: d.isReversed }))
+    .filter((it) => Boolean(it.card));
+  return tallyYesNo(items).verdict;
 }
 
 /**
