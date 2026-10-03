@@ -56,6 +56,10 @@ const FeedbackPanel = dynamic(() => import("@/components/admin/FeedbackPanel"), 
   ssr: false,
   loading: () => <AdminLoading label="กำลังโหลดความเห็นจากผู้ใช้…" />,
 });
+const BookingsAdmin = dynamic(() => import("@/components/admin/BookingsAdmin"), {
+  ssr: false,
+  loading: () => <AdminLoading label="กำลังโหลดการจองและการเงิน…" />,
+});
 const RedeemCodesManager = dynamic(() => import("@/components/admin/RedeemCodesManager"), {
   ssr: false,
   loading: () => <AdminLoading label="กำลังโหลดรหัสแลกสิทธิ์…" />,
@@ -79,6 +83,7 @@ type TabId =
   | "entitlement"
   | "content"
   | "readers"
+  | "bookings"
   | "health";
 
 interface NavItem {
@@ -126,6 +131,11 @@ const NAV_SECTIONS: NavSection[] = [
       { id: "entitlement", label: "สิทธิ์ & โควตา", description: "สวิตช์ระบบสิทธิ์ ประกาศล่วงหน้า และตัวเลขการถูกกั้นสิทธิ์" },
       { id: "content", label: "แม่หมอ & ไพ่ 78 ใบ", description: "แก้คำสั่งระบบ บุคลิกแม่หมอ และความหมายไพ่แบบสด" },
       { id: "readers", label: "หมอดูพาร์ทเนอร์", description: "รับสมัคร ตรวจสอบ และจัดการโปรไฟล์หมอดูตัวจริง" },
+      {
+        id: "bookings",
+        label: "การจอง & การเงิน",
+        description: "เงินที่ต้องคืน · รายการจอง · ยอดที่ต้องโอนให้แม่หมอ · รีวิว",
+      },
     ],
   },
   {
@@ -163,6 +173,7 @@ function TabIcon({ id, className = "w-4 h-4" }: { id: TabId; className?: string 
     content:
       "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10",
     readers: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
+    bookings: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
     health: "M13 10V3L4 14h7v7l9-11h-7z",
   };
   return (
@@ -379,6 +390,7 @@ function AdminContent() {
             {activeTab === "entitlement" && <EntitlementAdmin />}
             {activeTab === "content" && <ContentEditor />}
             {activeTab === "readers" && <ReadersManager />}
+            {activeTab === "bookings" && <BookingsAdmin />}
             {activeTab === "health" &&
               (healthSubTab === "system" ? (
                 <SystemHealthPanel

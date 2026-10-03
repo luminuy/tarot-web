@@ -319,6 +319,23 @@ export interface Reader { id: string; displayName: string; bio: string; avatarUr
 - เวลาที่ไคลเอนต์ส่งมาไม่เชื่อ: `slotRejection` ตรวจกับตารางจริงทุกครั้ง แล้ว unique index เป็นด่านสุดท้าย
 - ด่านตรวจ: `test-marketplace-readers` ข้อ 17.1–17.8
 
+### 💌 ระบบจองรอบสอง — ดูแลลูกค้าครบวงจร (2026-10-03)
+
+| เรื่อง | ไฟล์ / กติกา |
+| :-- | :-- |
+| อีเมลทุกชนิด | `src/lib/marketplace/booking-mail.ts` — never throw · ส่งครั้งเดียว (`bookings.confirm_email_at` · `reminder_24h_at` · `reminder_1h_at`) |
+| ลิงก์เปิดนัดทุกเครื่อง | `/api/marketplace/tickets/[id]/access?k=` · `signBookingAccess` / `verifyBookingAccess` |
+| ความเป็นเจ้าของตั๋ว | `src/lib/marketplace/ticket-owner.ts` (`isTicketOwner`: คุกกี้ หรือ `user_id` ของบัญชี) — ห้ามเขียนเทียบ `customerRef` เองที่อื่น |
+| วันหยุด · พัก · เพดานต่อวัน | `reader_blocked_dates` · `readers.buffer_min` · `readers.daily_cap` ➔ `generateSlots(..., SlotOptions)` · ด่านเซิร์ฟเวอร์ `checkSlotBookable` |
+| ราคาต่อแม่หมอ | `readers.price_thb` · `readerPriceThb()` ใน `offer.ts` (ทั้งหน้าเว็บและตอนเรียกเก็บ) |
+| รีวิว | `reviews.repo.ts` · `POST /api/marketplace/tickets/[id]/review` — handed_off + จ่ายแล้ว + UNIQUE(ticket_id) |
+| รอคิวว่าง | `booking_waitlist` · `POST /api/marketplace/readers/[id]/waitlist` · cron แจ้งครั้งเดียวแล้วลบ |
+| งานรอบ | `/api/cron/booking-reminders` (ทุก 15 นาที ผ่าน GitHub Actions) |
+| แอดมิน | `/api/admin/bookings` + `BookingsAdmin.tsx` (แท็บ "การจอง & การเงิน") |
+
+**กับดัก**: เวลาพัก/เพดานต่อวันเป็น "ความสะดวก" — สองคนจองช่องติดกันพร้อมกันเป๊ะอาจหลุดได้ ส่วนการจองเวลาเดียวกันซ้อน unique index กันไว้แล้ว ·
+อย่าใส่คำถามลูกค้าลงอีเมลแม่หมอ (อีเมลไม่ใช่ช่องทางที่ล็อกอิน) · ด่าน `test-marketplace-readers` 18.1–18.6
+
 ### 7.3 Repository & APIs
 - `src/lib/marketplace/payments.repo.ts`: จัดการ CRUD, Transition สถานะ, คำนวณส่วนแบ่งแม่หมอ
 - `/api/marketplace/payments`: สร้างรายการชำระเงิน

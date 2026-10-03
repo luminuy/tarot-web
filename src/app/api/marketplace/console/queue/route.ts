@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { requireReader } from "@/lib/auth/reader-auth";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
+import { readerPriceThb } from "@/lib/marketplace/offer";
 import { endCall } from "@/lib/marketplace/call.repo";
 import { isTurnConfigured, revokeTurnCredential } from "@/lib/marketplace/turn";
 import {
@@ -17,6 +18,7 @@ import {
   cancelConsultation,
   completeBooking,
   getBookingByTicketId,
+  getBlockedDates,
   getBookingsByTicketIds,
   getScheduleRules,
   isPaidBooking,
@@ -63,6 +65,14 @@ export async function GET(request: Request) {
       tickets: tickets.map((t) => ({ ...toPublicTicket(t), paid: isPaidBooking(bookings.get(t.id)) })),
       totalWaiting: tickets.filter((t) => t.status === "waiting" && t.kind === "walkup").length,
       schedule,
+      // ตั้งค่าการรับนัด (migrations/0021) — แม่หมอแก้เองได้ที่ PUT /api/marketplace/console/settings
+      settings: {
+        notifyEmail: reader.notifyEmail,
+        bufferMin: reader.bufferMin,
+        dailyCap: reader.dailyCap,
+        blockedDates: await getBlockedDates(readerId),
+        priceThb: readerPriceThb(reader),
+      },
       videoCallEnabled: isTurnConfigured(),
     });
   } catch (err) {

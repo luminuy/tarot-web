@@ -14,9 +14,20 @@ export interface Reader {
   sessionSecret: string;
   createdAt: number;
   updatedAt: number;
+  /** อีเมลรับแจ้งเตือนนัดใหม่/ยกเลิก (migrations/0021) — ข้อมูลส่วนตัว ห้ามออกหน้าสาธารณะ */
+  notifyEmail: string | null;
+  /** ค่าปรึกษาต่อครั้ง (บาท) — null = ราคากลาง `CONSULTATION_PRICE_THB` · ตั้งโดยแอดมินเท่านั้น */
+  priceThb: number | null;
+  /** เวลาพักระหว่างนัด (นาที) */
+  bufferMin: number;
+  /** เพดานนัดต่อวัน — null = ไม่จำกัด */
+  dailyCap: number | null;
 }
 
-export type PublicReaderProfile = Omit<Reader, "lineUrl" | "sessionSecret" | "updatedAt">;
+export type PublicReaderProfile = Omit<
+  Reader,
+  "lineUrl" | "sessionSecret" | "updatedAt" | "notifyEmail" | "bufferMin" | "dailyCap"
+>;
 
 interface RawReaderRow {
   id: string;
@@ -30,6 +41,10 @@ interface RawReaderRow {
   session_secret: string;
   created_at: number;
   updated_at: number;
+  notify_email?: string | null;
+  price_thb?: number | null;
+  buffer_min?: number | null;
+  daily_cap?: number | null;
 }
 
 function parseSpecialties(raw: string): string[] {
@@ -57,6 +72,10 @@ function mapRowToReader(row: RawReaderRow): Reader {
     sessionSecret: row.session_secret,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    notifyEmail: row.notify_email || null,
+    priceThb: typeof row.price_thb === "number" && row.price_thb > 0 ? row.price_thb : null,
+    bufferMin: Number(row.buffer_min ?? 0) || 0,
+    dailyCap: typeof row.daily_cap === "number" && row.daily_cap > 0 ? row.daily_cap : null,
   };
 }
 
@@ -70,6 +89,7 @@ export function toPublicReaderProfile(reader: Reader): PublicReaderProfile {
     status: reader.status,
     commissionPct: reader.commissionPct,
     createdAt: reader.createdAt,
+    priceThb: reader.priceThb,
   };
 }
 
@@ -91,6 +111,23 @@ export interface UpdateReaderInput {
   lineUrl?: string;
   status?: ReaderStatus;
   commissionPct?: number;
+  /** ราคาต่อครั้ง (บาท) — null = กลับไปใช้ราคากลาง */
+  priceThb?: number | null;
+}
+
+/** ตั้งค่าการรับนัดที่แม่หมอแก้เองได้จากแผงแม่หมอ */
+export interface ReaderBookingSettings {
+  notifyEmail: string | null;
+  bufferMin: number;
+  dailyCap: number | null;
+}
+
+export async function updateReaderBookingSettings(id: string, input: ReaderBookingSettings): Promise<void> {
+  const db = await getAppDB();
+  await db
+    .prepare("UPDATE readers SET notify_email = ?, buffer_min = ?, daily_cap = ?, updated_at = ? WHERE id = ?")
+    .bind(input.notifyEmail, input.bufferMin, input.dailyCap, Date.now(), id)
+    .run();
 }
 
 /**
@@ -204,6 +241,7 @@ export async function updateReader(id: string, input: UpdateReaderInput): Promis
   const status = input.status !== undefined ? input.status : existing.status;
   const commissionPct =
     typeof input.commissionPct === "number" ? input.commissionPct : existing.commissionPct;
+  const priceThb = input.priceThb !== undefined ? input.priceThb : existing.priceThb;
 
   await db
     .prepare(
@@ -215,10 +253,11 @@ export async function updateReader(id: string, input: UpdateReaderInput): Promis
         line_url = ?,
         status = ?,
         commission_pct = ?,
+        price_thb = ?,
         updated_at = ?
       WHERE id = ?`
     )
-    .bind(displayName, bio, avatarUrl, specialtiesJson, lineUrl, status, commissionPct, now, id)
+    .bind(displayName, bio, avatarUrl, specialtiesJson, lineUrl, status, commissionPct, priceThb, now, id)
     .run();
 
   return getReaderById(id);
@@ -245,6 +284,14 @@ export async function deleteReader(id: string): Promise<boolean> {
     await db.prepare("DELETE FROM bookings WHERE reader_id = ?").bind(id).run();
     await db.prepare("DELETE FROM queue_tickets WHERE reader_id = ?").bind(id).run();
     await db.prepare("DELETE FROM reader_availability WHERE reader_id = ?").bind(id).run();
+  } catch {
+    // ignore if tables not yet created in older migrations
+  }
+  // ตาราง migrations/0021 — แยก try เหมือนห้องวิดีโอ: ฐานข้อมูลเก่าที่ยังไม่มีตารางต้องไม่ทำให้การลบแม่หมอล้ม
+  try {
+    await db.prepare("DELETE FROM reader_blocked_dates WHERE reader_id = ?").bind(id).run();
+    await db.prepare("DELETE FROM reader_reviews WHERE reader_id = ?").bind(id).run();
+    await db.prepare("DELETE FROM booking_waitlist WHERE reader_id = ?").bind(id).run();
   } catch {
     // ignore if tables not yet created in older migrations
   }

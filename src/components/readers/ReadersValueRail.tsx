@@ -6,7 +6,7 @@ import { BriefIcon, ClockIcon, ShieldIcon, VideoIcon } from "@/components/market
 import { RailArrows } from "@/components/ui/RailArrows";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { useRail } from "@/components/ui/use-rail";
-import { CONSULTATION_MINUTES, CONSULTATION_PRICE_THB } from "@/lib/marketplace/offer";
+import { CONSULTATION_MINUTES } from "@/lib/marketplace/offer";
 
 /**
  * ✦ "สบายใจตั้งแต่ก่อนเริ่มคุย" — แถวปัดแบบเดียวกับหน้าแรก (เจ้าของสั่ง 2026-10-02)
@@ -20,7 +20,7 @@ const ITEMS = [
   {
     Icon: ClockIcon,
     title: `${CONSULTATION_MINUTES} นาทีเต็ม`,
-    body: `ราคาเดียว ${CONSULTATION_PRICE_THB} บาท รู้ราคาก่อนเข้าคิว`,
+    body: "รู้ราคาก่อนจอง จ่ายครั้งเดียว ยกเลิกก่อนนัด 24 ชม. คืนเงินเต็ม",
   },
 ];
 

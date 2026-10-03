@@ -6,7 +6,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Field } from "@/components/ui/Field";
 import { Input, Textarea } from "@/components/ui/Input";
 import { SlotPicker } from "@/components/marketplace/SlotPicker";
-import { CONSULTATION_MINUTES, CONSULTATION_PRICE_THB } from "@/lib/marketplace/offer";
+import { CONSULTATION_MINUTES } from "@/lib/marketplace/offer";
 import { FREE_CANCEL_HOURS, MAX_RESCHEDULES, formatSlotRange } from "@/lib/marketplace/booking-policy";
 
 export type BookingMode = "walkup" | "booking";
@@ -24,6 +24,8 @@ interface BookQueueModalProps {
   initialMode?: BookingMode;
   initialQuestion?: string;
   readingSnapshot?: string;
+  /** ค่าปรึกษาของแม่หมอคนนี้ (แสดงผลเท่านั้น — ยอดที่เรียกเก็บจริงเซิร์ฟเวอร์คิดเอง) */
+  priceThb: number;
 }
 
 const QUESTION_MAX = 1000;
@@ -51,6 +53,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
   initialMode,
   initialQuestion = "",
   readingSnapshot,
+  priceThb,
 }) => {
   const bothModes = isLiveOpen && hasSchedule;
   const [mode, setMode] = useState<BookingMode>(initialMode ?? (isLiveOpen ? "walkup" : "booking"));
@@ -155,7 +158,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
           <strong className="font-bold text-ink-deep">{whenLabel}</strong>
         </p>
         <p className="shrink-0 text-right leading-none">
-          <span className="text-xl font-bold text-ink-deep">{CONSULTATION_PRICE_THB}</span>
+          <span className="text-xl font-bold text-ink-deep">{priceThb}</span>
           <span className="ml-1 text-sm font-semibold text-ink-deep">บาท</span>
         </p>
       </div>
@@ -179,7 +182,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
           className="btn-gold-glass flex min-h-[52px] w-full items-center justify-center gap-2 px-6 text-base font-bold cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2"
         >
           <LockIcon />
-          {submitting ? "กำลังไปหน้าชำระเงิน…" : `ชำระเงิน ${CONSULTATION_PRICE_THB} บาท`}
+          {submitting ? "กำลังไปหน้าชำระเงิน…" : `ชำระเงิน ${priceThb} บาท`}
         </button>
       )}
       <p className="text-center text-[12px] leading-relaxed text-muted">
@@ -249,7 +252,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
           )}
 
           {mode === "booking" ? (
-            <SlotPicker readerId={readerId} value={slot} onChange={setSlot} refreshKey={refreshKey} />
+            <SlotPicker readerId={readerId} value={slot} onChange={setSlot} refreshKey={refreshKey} showWaitlist />
           ) : (
             <p className="rounded-2xl bg-inset-warm/70 p-4 text-[13px] leading-relaxed text-ink">
               ชำระเงินแล้วเข้าคิวทันที เปิดหน้าคิวทิ้งไว้ได้เลย ถึงตาคุณแล้วปุ่มเข้าห้องวิดีโอคอลจะขึ้นเอง

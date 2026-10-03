@@ -14,7 +14,6 @@ import {
   googleCalendarUrl,
   MAX_RESCHEDULES,
 } from "@/lib/marketplace/booking-policy";
-import { CONSULTATION_PRICE_THB } from "@/lib/marketplace/offer";
 
 /** ภาพรวมการจองที่ `GET /api/marketplace/tickets/[id]` ส่งมา (เฉพาะเจ้าของตั๋ว) */
 export interface BookingView {
@@ -31,6 +30,10 @@ export interface BookingView {
   amountSatang: number | null;
   cancel: { allowed: boolean; refund: boolean; reason: string };
   canReschedule: boolean;
+  /** คะแนนที่ให้ไว้แล้ว (null = ยังไม่รีวิว) */
+  reviewRating?: number | null;
+  /** รีวิวได้ (คุยจบแล้ว · จ่ายแล้ว · ยังไม่เคยรีวิว) */
+  canReview?: boolean;
 }
 
 /**
@@ -41,11 +44,13 @@ export function PaymentPendingPanel({
   booking,
   nowMs,
   confirming,
+  priceThb,
 }: {
   ticketId: string;
   booking: BookingView;
   nowMs: number;
   confirming: boolean;
+  priceThb: number;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -115,7 +120,7 @@ export function PaymentPendingPanel({
         disabled={busy}
         className="btn-gold-glass flex min-h-[52px] w-full items-center justify-center gap-2 px-6 text-base font-bold cursor-pointer disabled:opacity-50"
       >
-        {busy ? "กำลังไปหน้าชำระเงิน…" : `ชำระเงิน ${CONSULTATION_PRICE_THB} บาท`}
+        {busy ? "กำลังไปหน้าชำระเงิน…" : `ชำระเงิน ${priceThb} บาท`}
       </button>
       <p className="text-center text-[12px] text-muted">
         จ่ายผ่าน PromptPay แล้ว? ธนาคารอาจใช้เวลายืนยันสักครู่ หน้านี้จะอัปเดตเองอัตโนมัติ
@@ -393,5 +398,108 @@ function CalendarIcon() {
       <rect x="3" y="5" width="18" height="16" rx="2" />
       <path d="M16 3v4M8 3v4M3 10h18" />
     </svg>
+  );
+}
+
+/**
+ * ✦ รีวิวหลังคุยจบ — แตะดาว + เขียนสั้น ๆ (ไม่บังคับ) · ส่งครั้งเดียว
+ * รีวิวได้เฉพาะผู้ที่จ่ายเงินและคุยจบจริง (ตรวจที่เซิร์ฟเวอร์) — รีวิวบนหน้าแม่หมอจึงเชื่อถือได้
+ */
+export function ReviewPanel({
+  ticketId,
+  readerName,
+  existingRating,
+}: {
+  ticketId: string;
+  readerName: string;
+  existingRating: number | null;
+}) {
+  const [rating, setRating] = useState(0);
+  const [hover, setHover] = useState(0);
+  const [comment, setComment] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState<number | null>(existingRating);
+
+  if (done) {
+    return (
+      <p role="status" className="rounded-2xl border border-ok/30 bg-ok/10 p-4 text-center text-sm text-ink">
+        <span className="text-gold-ink" aria-hidden="true">{"★".repeat(done)}</span>{" "}
+        ขอบคุณสำหรับรีวิว ช่วยให้คนอื่นเลือกแม่หมอได้ง่ายขึ้นมาก
+      </p>
+    );
+  }
+
+  const submit = async () => {
+    if (!rating) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/marketplace/tickets/${ticketId}/review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating, comment: comment.trim() || undefined }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) setError(data.error || "ส่งรีวิวไม่สำเร็จ");
+      else setDone(rating);
+    } catch {
+      setError("เชื่อมต่อไม่ได้ กรุณาลองใหม่");
+    }
+    setBusy(false);
+  };
+
+  const shown = hover || rating;
+  const labels = ["", "ไม่พอใจ", "พอใช้", "ดี", "ดีมาก", "ประทับใจมาก"];
+
+  return (
+    <div className="space-y-3 rounded-2xl border border-line-warm bg-surface p-4 text-left">
+      <p className="text-sm font-bold text-ink-deep">ให้คะแนน {readerName}</p>
+      <div className="flex items-center gap-1" role="radiogroup" aria-label="คะแนน 1 ถึง 5 ดาว" onMouseLeave={() => setHover(0)}>
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button
+            key={n}
+            type="button"
+            role="radio"
+            aria-checked={rating === n}
+            aria-label={`${n} ดาว`}
+            onClick={() => setRating(n)}
+            onMouseEnter={() => setHover(n)}
+            className={`grid h-11 w-11 place-items-center rounded-full text-3xl leading-none transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
+              n <= shown ? "text-gold-ink" : "text-line-warm"
+            }`}
+          >
+            ★
+          </button>
+        ))}
+        <span className="ml-2 text-[13px] text-muted" aria-live="polite">
+          {labels[shown]}
+        </span>
+      </div>
+      <label className="block space-y-1">
+        <span className="text-[13px] text-muted">เล่าสั้น ๆ (ไม่บังคับ) · แสดงต่อสาธารณะโดยซ่อนชื่อเล่น</span>
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          rows={3}
+          maxLength={500}
+          placeholder="เช่น แม่หมออธิบายชัด ใจเย็น ได้แนวทางไปต่อ"
+          className="glass-field w-full rounded-xl border border-line-interactive-warm p-3 text-sm text-ink outline-none focus:border-gold-ink"
+        />
+      </label>
+      {error && (
+        <p role="alert" className="text-[13px] text-err">
+          {error}
+        </p>
+      )}
+      <button
+        type="button"
+        disabled={!rating || busy}
+        onClick={submit}
+        className="btn-gold-glass flex min-h-[46px] w-full items-center justify-center px-5 text-sm font-bold cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {busy ? "กำลังส่ง…" : "ส่งรีวิว"}
+      </button>
+    </div>
   );
 }

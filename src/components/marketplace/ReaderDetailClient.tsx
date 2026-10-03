@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { BookQueueModal, type BookingMode } from "@/components/marketplace/BookQueueModal";
 import type { PublicReaderProfile } from "@/lib/marketplace/readers.repo";
-import { CONSULTATION_MINUTES, CONSULTATION_PRICE_THB } from "@/lib/marketplace/offer";
+import { CONSULTATION_MINUTES, readerPriceThb } from "@/lib/marketplace/offer";
+import { WaitlistForm } from "@/components/marketplace/WaitlistForm";
 import { FREE_CANCEL_HOURS, formatTime, relativeDayLabel } from "@/lib/marketplace/booking-policy";
 
 interface ReaderDetailClientProps {
@@ -28,6 +29,7 @@ interface ReaderDetailClientProps {
 export const ReaderDetailClient: React.FC<ReaderDetailClientProps> = ({ reader, isLiveOpen, nextSlot, nowMs }) => {
   const [openMode, setOpenMode] = useState<BookingMode | null>(null);
   const hasSchedule = nextSlot !== null;
+  const price = readerPriceThb(reader);
   const nextLabel = nextSlot ? `${relativeDayLabel(nextSlot, nowMs)} ${formatTime(nextSlot)} น.` : null;
 
   const primaryClass =
@@ -39,7 +41,7 @@ export const ReaderDetailClient: React.FC<ReaderDetailClientProps> = ({ reader, 
     <>
       <section aria-label="จองคิวปรึกษา" className="altar-card-porcelain !rounded-2xl space-y-5 p-5 sm:p-6">
         <div className="flex items-baseline gap-1.5">
-          <span className="text-3xl font-bold text-ink-deep">{CONSULTATION_PRICE_THB}</span>
+          <span className="text-3xl font-bold text-ink-deep">{price}</span>
           <span className="text-sm font-semibold text-ink-deep">บาท</span>
           <span className="text-sm text-muted">/ {CONSULTATION_MINUTES} นาที</span>
         </div>
@@ -99,9 +101,12 @@ export const ReaderDetailClient: React.FC<ReaderDetailClientProps> = ({ reader, 
             )}
           </div>
         ) : (
-          <p className="rounded-xl bg-inset-warm p-3.5 text-center text-[13px] leading-relaxed text-muted">
-            แม่หมอยังไม่เปิดรับคิวและนัดในตอนนี้ ลองกลับมาใหม่ หรือดูแม่หมอท่านอื่น
-          </p>
+          <div className="space-y-3">
+            <p className="rounded-xl bg-inset-warm p-3.5 text-center text-[13px] leading-relaxed text-muted">
+              แม่หมอยังไม่มีเวลาว่างในตอนนี้
+            </p>
+            <WaitlistForm readerId={reader.id} compact />
+          </div>
         )}
 
         <ul className="space-y-2 text-[13px] text-muted">
@@ -140,6 +145,7 @@ export const ReaderDetailClient: React.FC<ReaderDetailClientProps> = ({ reader, 
           isLiveOpen={isLiveOpen}
           hasSchedule={hasSchedule}
           initialMode={openMode}
+          priceThb={price}
         />
       )}
     </>

@@ -100,27 +100,56 @@ export function validateScheduleRules(rules: ScheduleRule[]): string | null {
   return null;
 }
 
+/** ตั้งค่าการรับนัดของแม่หมอที่มีผลกับเวลาว่าง (migrations/0021) */
+export interface SlotOptions {
+  /** วันหยุดรายวัน (YYYY-MM-DD เวลาไทย) — ปิดทั้งวันทับตารางประจำสัปดาห์ */
+  blockedDates?: ReadonlySet<string>;
+  /** เวลาพักระหว่างนัด (นาที) — ช่องที่ชิดนัดเดิมน้อยกว่านี้จะไม่เปิดให้จอง */
+  bufferMin?: number;
+  /** เพดานนัดต่อวัน — ครบแล้วทั้งวันไม่เปิดเพิ่ม */
+  dailyCap?: number | null;
+}
+
+/** ตัวเลือกเวลาพักที่แม่หมอเลือกได้ — ตารางเป็นช่องละ 30 นาที พักเศษกว่านั้นก็ต้องเว้นทั้งช่องอยู่ดี */
+export const BUFFER_OPTIONS = [0, SLOT_MINUTES] as const;
+export const DAILY_CAP_MAX = 24;
+
 /**
  * เวลาว่างทั้งหมดในช่วงที่เปิดให้จอง
  * - ต้องอยู่ในตารางประจำสัปดาห์ · เริ่มหลัง "ตอนนี้ + เวลาจองล่วงหน้าขั้นต่ำ" · ไม่เกินขอบเขตวันที่เปิดจอง
- * - ไม่ซ้ำกับเวลาที่ถูกจอง/กันที่ไว้แล้ว (`taken`)
+ * - ไม่ซ้ำกับเวลาที่ถูกจอง/กันที่ไว้แล้ว (`taken`) · ไม่ใช่วันหยุด · เว้นเวลาพัก · ไม่เกินเพดานต่อวัน
+ *
+ * ⚠️ เวลาพัก/เพดานต่อวันเป็น "ความสะดวกของแม่หมอ" — สองคนจองช่องติดกันพร้อมกันเป๊ะอาจหลุดได้
+ *    สิ่งที่ห้ามหลุดเด็ดขาด (สองคนเวลาเดียวกัน) ฐานข้อมูลกันไว้ด้วย unique index อยู่แล้ว
  */
-export function generateSlots(rules: ScheduleRule[], nowMs: number, taken: ReadonlySet<number>): SlotDay[] {
+export function generateSlots(
+  rules: ScheduleRule[],
+  nowMs: number,
+  taken: ReadonlySet<number>,
+  opts: SlotOptions = {}
+): SlotDay[] {
   const earliest = nowMs + BOOKING_LEAD_HOURS * HOUR;
   const firstDay = bkkDayStart(nowMs);
+  const gap = slotMs + Math.max(0, opts.bufferMin ?? 0) * MINUTE;
+  const takenList = [...taken];
   const days: SlotDay[] = [];
   for (let d = 0; d < BOOKING_HORIZON_DAYS; d++) {
     const dayStart = firstDay + d * DAY;
+    const dateKey = bkkDateKey(dayStart);
+    if (opts.blockedDates?.has(dateKey)) continue;
+    if (opts.dailyCap && takenList.filter((t) => t >= dayStart && t < dayStart + DAY).length >= opts.dailyCap) continue;
     const weekday = bkkParts(dayStart).weekday;
     const starts = new Set<number>();
     for (const r of rules) {
       if (r.weekday !== weekday) continue;
       for (let m = r.startMin; m + SLOT_MINUTES <= r.endMin; m += SLOT_MINUTES) {
         const s = dayStart + m * MINUTE;
-        if (s >= earliest && !taken.has(s)) starts.add(s);
+        if (s < earliest || taken.has(s)) continue;
+        if (takenList.some((t) => Math.abs(t - s) < gap)) continue;
+        starts.add(s);
       }
     }
-    if (starts.size > 0) days.push({ date: bkkDateKey(dayStart), slots: [...starts].sort((a, b) => a - b) });
+    if (starts.size > 0) days.push({ date: dateKey, slots: [...starts].sort((a, b) => a - b) });
   }
   return days;
 }
@@ -130,12 +159,31 @@ export function slotRejection(
   rules: ScheduleRule[],
   nowMs: number,
   slotStart: number,
-  taken: ReadonlySet<number>
+  taken: ReadonlySet<number>,
+  opts: SlotOptions = {}
 ): string | null {
   if (!Number.isSafeInteger(slotStart)) return "เวลานัดไม่ถูกต้อง";
-  const day = generateSlots(rules, nowMs, new Set()).find((d) => d.date === bkkDateKey(slotStart));
+  const open = generateSlots(rules, nowMs, new Set(), { blockedDates: opts.blockedDates });
+  const day = open.find((d) => d.date === bkkDateKey(slotStart));
   if (!day || !day.slots.includes(slotStart)) return "เวลานี้ไม่อยู่ในตารางรับนัดของแม่หมอแล้ว กรุณาเลือกเวลาใหม่";
   if (taken.has(slotStart)) return "เวลานี้เพิ่งมีคนจองไป กรุณาเลือกเวลาอื่น";
+  const free = generateSlots(rules, nowMs, taken, opts).find((d) => d.date === bkkDateKey(slotStart));
+  if (!free || !free.slots.includes(slotStart)) return "เวลานี้ไม่ว่างแล้ว (แม่หมอเว้นเวลาพักหรือรับนัดเต็มวัน) กรุณาเลือกเวลาอื่น";
+  return null;
+}
+
+export type ReminderKind = "24h" | "1h";
+
+/**
+ * ถึงเวลาส่งอีเมลเตือนนัดแบบไหน (ตัวจับเวลาอยู่ GitHub Actions ทุก 15 นาที — ดีเลย์ได้ 5–15 นาที หน้าต่างจึงกว้าง)
+ * - "24h": เหลือ 12–25 ชม. และจองไว้นานกว่า 6 ชม. แล้ว (เพิ่งจองไม่ต้องเตือนซ้ำกับอีเมลยืนยัน)
+ * - "1h" : เหลือไม่เกิน 75 นาทีและยังไม่ถึงเวลานัด
+ */
+export function reminderDue(slotStart: number, createdAt: number, nowMs: number): ReminderKind | null {
+  const left = slotStart - nowMs;
+  if (left <= 0) return null;
+  if (left <= 75 * MINUTE) return "1h";
+  if (left > 12 * HOUR && left <= 25 * HOUR && nowMs - createdAt >= 6 * HOUR) return "24h";
   return null;
 }
 

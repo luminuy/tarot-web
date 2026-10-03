@@ -16,7 +16,8 @@ export function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
-function baseLayout(contentHtml: string, title: string, lang: "th" | "en" = "th"): string {
+/** โครงอีเมลกลางของแบรนด์ — อีเมลทุกฉบับ (รวมอีเมลการจองใน `booking-mail.ts`) ใช้ตัวนี้ตัวเดียว */
+export function baseLayout(contentHtml: string, title: string, lang: "th" | "en" = "th"): string {
   const isEn = lang === "en";
   return `<!DOCTYPE html>
 <html lang="${lang}">
@@ -110,7 +111,7 @@ function baseLayout(contentHtml: string, title: string, lang: "th" | "en" = "th"
     <div class="card">
       <div class="brand">
         <div class="brand-title">SEERTAROT</div>
-        <div class="brand-sub">${isEn ? "Online Interactive Tarot Sanctuary" : "วิหารพยากรณ์ไพ่ทาโรต์ออนไลน์"}</div>
+        <div class="brand-sub">${isEn ? "Online Tarot Readings" : "ดูดวงไพ่ทาโรต์"}</div>
       </div>
       ${contentHtml}
     </div>

@@ -31,6 +31,8 @@ export interface QueueTicket {
   aiScreenId: string | null;
   createdAt: number;
   expiresAt: number;
+  /** สมาชิกที่ล็อกอินตอนจอง (migrations/0021) — ใช้เปิด "นัดของฉัน" ข้ามเครื่อง */
+  userId: string | null;
   // Attached AI brief if available
   screening?: AIScreeningRecord | null;
 }
@@ -49,10 +51,11 @@ interface RawTicketRow {
   ai_screen_id: string | null;
   created_at: number;
   expires_at: number;
+  user_id?: string | null;
 }
 
-/** ตั๋วฉบับส่งออกนอกเซิร์ฟเวอร์ — ไม่มี `customerRef` */
-export type PublicQueueTicket = Omit<QueueTicket, "customerRef">;
+/** ตั๋วฉบับส่งออกนอกเซิร์ฟเวอร์ — ไม่มี `customerRef` และ `userId` (ตัวตนของลูกค้า) */
+export type PublicQueueTicket = Omit<QueueTicket, "customerRef" | "userId">;
 
 /**
  * ⚠️ `customerRef` คือความลับแบบ bearer ของลูกค้า (ใครถือ = เป็นเจ้าของตั๋วทุกใบของคนนั้น)
@@ -60,8 +63,9 @@ export type PublicQueueTicket = Omit<QueueTicket, "customerRef">;
  * แม่หมอจึงเห็น ref ของลูกค้าทุกคนในคิว แล้วเอาไปแลกเป็นคุกกี้อ่านคิวข้ามแม่หมอได้ (A2-13)
  */
 export function toPublicTicket(ticket: QueueTicket): PublicQueueTicket {
-  const { customerRef: _secret, ...rest } = ticket;
+  const { customerRef: _secret, userId: _user, ...rest } = ticket;
   void _secret;
+  void _user;
   return rest;
 }
 
@@ -80,6 +84,7 @@ function mapRowToTicket(row: RawTicketRow): QueueTicket {
     aiScreenId: row.ai_screen_id,
     createdAt: row.created_at,
     expiresAt: row.expires_at,
+    userId: row.user_id ?? null,
   };
 }
 
@@ -151,6 +156,8 @@ export interface CreateQueueTicketInput {
    * เส้นจองจริงส่ง `pending_payment`: ตั๋วจะเข้าคิวก็ต่อเมื่อจ่ายเงินแล้ว (`settleConsultationPayment`)
    */
   initialStatus?: Extract<TicketStatus, "waiting" | "pending_payment">;
+  /** สมาชิกที่ล็อกอินอยู่ตอนจอง (ไม่บังคับ — จองแบบไม่สมัครได้เสมอ) */
+  userId?: string | null;
 }
 
 const RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
@@ -195,14 +202,15 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
       aiScreenId: screening.id,
       createdAt: now,
       expiresAt,
+      userId: input.userId ?? null,
       screening,
     };
 
     await db
       .prepare(
         `INSERT INTO queue_tickets (
-          id, reader_id, kind, status, position, slot_start, customer_ref, nickname, question, reading_snapshot, ai_screen_id, created_at, expires_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          id, reader_id, kind, status, position, slot_start, customer_ref, nickname, question, reading_snapshot, ai_screen_id, created_at, expires_at, user_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         ticket.id,
@@ -217,7 +225,8 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
         ticket.readingSnapshot,
         ticket.aiScreenId,
         ticket.createdAt,
-        ticket.expiresAt
+        ticket.expiresAt,
+        ticket.userId
       )
       .run();
 
@@ -241,8 +250,8 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
   await db
     .prepare(
       `INSERT INTO queue_tickets (
-        id, reader_id, kind, status, position, slot_start, customer_ref, nickname, question, reading_snapshot, ai_screen_id, created_at, expires_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        id, reader_id, kind, status, position, slot_start, customer_ref, nickname, question, reading_snapshot, ai_screen_id, created_at, expires_at, user_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       ticketId,
@@ -257,7 +266,8 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
       input.readingSnapshot || null,
       screening.id,
       now,
-      expiresAt
+      expiresAt,
+      input.userId ?? null
     )
     .run();
 
@@ -300,6 +310,25 @@ export async function listActiveTicketsForCustomer(customerRef: string): Promise
     .bind(customerRef)
     .all<RawTicketRow>();
 
+  return (results || []).map(mapRowToTicket);
+}
+
+/**
+ * "นัดของฉัน" — ตั๋วของลูกค้าคนนี้ทั้งที่ยังไม่จบและที่จบแล้ว (ตั๋วถูกลบตาม PDPA เองหลังครบอายุ)
+ * จับคู่ได้สองทาง: คุกกี้ของเบราว์เซอร์นี้ (`customerRef`) หรือบัญชีที่ล็อกอิน (`userId` — ทุกเครื่อง)
+ */
+export async function listTicketsForOwner(owner: { customerRef?: string | null; userId?: string | null }): Promise<QueueTicket[]> {
+  if (!owner.customerRef && !owner.userId) return [];
+  const db = await getAppDB();
+  const { results } = await db
+    .prepare(
+      `SELECT * FROM queue_tickets
+        WHERE (customer_ref = ? OR (user_id IS NOT NULL AND user_id = ?))
+        ORDER BY COALESCE(slot_start, created_at) DESC
+        LIMIT 50`
+    )
+    .bind(owner.customerRef ?? "", owner.userId ?? "")
+    .all<RawTicketRow>();
   return (results || []).map(mapRowToTicket);
 }
 

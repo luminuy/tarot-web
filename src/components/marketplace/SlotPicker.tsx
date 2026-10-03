@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { WaitlistForm } from "@/components/marketplace/WaitlistForm";
 import {
   dayChipParts,
   formatTime,
@@ -18,6 +19,8 @@ interface SlotPickerProps {
   refreshKey?: number;
   /** แจ้งผู้ใช้ว่ามีเวลาว่างไหม (ใช้ซ่อน/แสดงทางเลือกนัดล่วงหน้า) */
   onLoaded?: (hasSlots: boolean) => void;
+  /** เวลาเต็ม ➔ แสดงฟอร์ม "แจ้งเตือนฉันเมื่อมีเวลาว่าง" แทนทางตัน */
+  showWaitlist?: boolean;
 }
 
 const PERIODS: { label: string; from: number; to: number }[] = [
@@ -34,7 +37,15 @@ const PERIODS: { label: string; from: number; to: number }[] = [
  * - ⚠️ Zero-Clipping: แถววันที่ "ห่อบรรทัด" ไม่ใช้แถบเลื่อนแนวนอน (กฎเหล็กข้อ 3)
  * - เวลาที่แสดงเป็นแค่ "ที่ว่างตอนโหลด" — ด่านจริงอยู่ฝั่งเซิร์ฟเวอร์ (slotRejection + unique index)
  */
-export const SlotPicker: React.FC<SlotPickerProps> = ({ readerId, value, onChange, excludeSlot, refreshKey = 0, onLoaded }) => {
+export const SlotPicker: React.FC<SlotPickerProps> = ({
+  readerId,
+  value,
+  onChange,
+  excludeSlot,
+  refreshKey = 0,
+  onLoaded,
+  showWaitlist = false,
+}) => {
   const [days, setDays] = useState<SlotDay[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeDate, setActiveDate] = useState<string | null>(null);
@@ -111,6 +122,11 @@ export const SlotPicker: React.FC<SlotPickerProps> = ({ readerId, value, onChang
           >
             ลองอีกครั้ง
           </button>
+        )}
+        {!error && showWaitlist && (
+          <div className="mt-4">
+            <WaitlistForm readerId={readerId} compact />
+          </div>
         )}
       </div>
     );

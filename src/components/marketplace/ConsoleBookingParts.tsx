@@ -3,6 +3,11 @@
 import { useMemo, useState } from "react";
 import type { QueueTicket } from "@/lib/marketplace/queue.repo";
 import {
+  bkkDateKey,
+  bkkDayStart,
+  BOOKING_HORIZON_DAYS,
+  BUFFER_OPTIONS,
+  dayChipParts,
   canMarkNoShow,
   canStartBooking,
   EARLY_START_MINUTES,
@@ -251,6 +256,182 @@ export function UpcomingBookings({
           })}
         </ul>
       )}
+    </section>
+  );
+}
+
+export interface ReaderSettingsState {
+  notifyEmail: string | null;
+  bufferMin: number;
+  dailyCap: number | null;
+  blockedDates: string[];
+  priceThb?: number;
+}
+
+/**
+ * ✦ ตั้งค่าการรับนัด — แจ้งเตือนทางอีเมล · เวลาพัก · เพดานนัดต่อวัน · วันหยุดรายวัน
+ * วันหยุด: แตะวันในอีก 14 วันข้างหน้าเพื่อปิดทั้งวัน (ทับตารางประจำสัปดาห์) ·
+ * วันที่มีนัดจ่ายแล้วจะเตือนให้เห็น — ปิดวันไม่ยกเลิกนัดเดิมให้เอง (ต้องกดยกเลิกในรายการนัดซึ่งคืนเงินลูกค้า)
+ */
+export function ReaderBookingSettings({
+  settings,
+  bookedDates,
+  nowMs,
+  authHeaders,
+  onSaved,
+}: {
+  settings: ReaderSettingsState;
+  /** วันที่ (YYYY-MM-DD) ที่มีนัดจ่ายแล้ว → จำนวนนัด */
+  bookedDates: Record<string, number>;
+  nowMs: number;
+  authHeaders: () => HeadersInit;
+  onSaved: (message: string) => void;
+}) {
+  const [email, setEmail] = useState(settings.notifyEmail ?? "");
+  const [bufferMin, setBufferMin] = useState(settings.bufferMin);
+  const [dailyCap, setDailyCap] = useState<number | null>(settings.dailyCap);
+  const [blocked, setBlocked] = useState<Set<string>>(new Set(settings.blockedDates));
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const days = useMemo(() => {
+    const first = bkkDayStart(nowMs);
+    return Array.from({ length: BOOKING_HORIZON_DAYS }, (_, i) => {
+      const ms = first + i * 86_400_000 + 12 * 3_600_000; // เที่ยงวัน กันปัดข้ามวัน
+      return { key: bkkDateKey(ms), chip: dayChipParts(ms) };
+    });
+  }, [nowMs]);
+
+  const toggle = (key: string) =>
+    setBlocked((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+
+  const save = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/marketplace/console/settings", {
+        method: "PUT",
+        headers: authHeaders(),
+        body: JSON.stringify({ notifyEmail: email.trim() || null, bufferMin, dailyCap, blockedDates: [...blocked] }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) setError(data.error || "บันทึกไม่สำเร็จ");
+      else onSaved("บันทึกการตั้งค่าการรับนัดแล้ว ลูกค้าเห็นเวลาว่างใหม่ทันที");
+    } catch {
+      setError("เชื่อมต่อไม่ได้ กรุณาลองใหม่");
+    }
+    setSaving(false);
+  };
+
+  const selectClass =
+    "min-h-[40px] rounded-lg border border-line-warm bg-surface px-2 font-serif-th text-sm text-ink-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink";
+
+  return (
+    <section aria-labelledby="settings-heading" className="altar-card-porcelain !rounded-3xl space-y-5 p-5 sm:p-6">
+      <div>
+        <h2 id="settings-heading" className="font-serif-th text-lg font-bold text-ink">ตั้งค่าการรับนัด</h2>
+        {settings.priceThb && (
+          <p className="mt-0.5 font-serif-th text-xs text-muted">
+            ค่าปรึกษาของคุณ {settings.priceThb} บาทต่อครั้ง (ทีมงานเป็นผู้ตั้ง ติดต่อทีมงานเพื่อปรับราคา)
+          </p>
+        )}
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <label className="space-y-1.5 sm:col-span-3">
+          <span className="block font-serif-th text-[13px] font-bold text-ink-deep">อีเมลรับแจ้งเตือนนัดใหม่ / ยกเลิก</span>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="เช่น mor.ploy@gmail.com (เว้นว่าง = ไม่รับอีเมล)"
+            autoComplete="email"
+            className="glass-field min-h-[44px] w-full rounded-xl border border-line-interactive-warm px-3.5 font-serif-th text-sm text-ink outline-none focus:border-gold-ink"
+          />
+        </label>
+        <label className="space-y-1.5">
+          <span className="block font-serif-th text-[13px] font-bold text-ink-deep">พักระหว่างนัด</span>
+          <select value={bufferMin} onChange={(e) => setBufferMin(Number(e.target.value))} className={`${selectClass} w-full`}>
+            {BUFFER_OPTIONS.map((m) => (
+              <option key={m} value={m}>
+                {m === 0 ? "ไม่ต้องพัก (นัดติดกันได้)" : `พัก ${m} นาทีหลังแต่ละนัด`}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="space-y-1.5">
+          <span className="block font-serif-th text-[13px] font-bold text-ink-deep">รับนัดไม่เกินวันละ</span>
+          <select
+            value={dailyCap ?? 0}
+            onChange={(e) => setDailyCap(Number(e.target.value) || null)}
+            className={`${selectClass} w-full`}
+          >
+            <option value={0}>ไม่จำกัด</option>
+            {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
+              <option key={n} value={n}>
+                {n} นัด
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <fieldset className="space-y-2">
+        <legend className="font-serif-th text-[13px] font-bold text-ink-deep">วันหยุด (แตะเพื่อปิดรับนัดทั้งวัน)</legend>
+        <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
+          {days.map(({ key, chip }) => {
+            const off = blocked.has(key);
+            const booked = bookedDates[key] ?? 0;
+            return (
+              <button
+                key={key}
+                type="button"
+                aria-pressed={off}
+                onClick={() => toggle(key)}
+                className={`relative flex min-h-[64px] flex-col items-center justify-center rounded-2xl border px-1 py-2 font-serif-th transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
+                  off ? "border-err/40 bg-err-wash text-err" : "border-line-warm bg-surface text-ink-deep hover:border-gold-ink/60"
+                }`}
+              >
+                <span className="text-[11px]">{chip.weekday}</span>
+                <span className={`text-lg font-bold leading-tight ${off ? "line-through" : ""}`}>{chip.day}</span>
+                <span className="text-[11px]">{off ? "หยุด" : chip.month}</span>
+                {booked > 0 && (
+                  <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-gold-ink px-1 text-[11px] font-bold text-surface">
+                    {booked}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        {[...blocked].some((d) => (bookedDates[d] ?? 0) > 0) && (
+          <p className="rounded-xl border border-gold-ink/30 bg-inset-warm p-3 font-serif-th text-[13px] text-ink">
+            วันที่ปิดบางวันมีนัดที่ลูกค้าจ่ายแล้ว (ตัวเลขบนวัน) — การปิดวันไม่ยกเลิกนัดเดิมให้ ถ้าไม่สะดวกจริง กด
+            &quot;ยกเลิก (คืนเงินเต็ม)&quot; ที่นัดนั้นในรายการด้านบน
+          </p>
+        )}
+      </fieldset>
+
+      {error && (
+        <p role="alert" className="rounded-xl border border-err/30 bg-err-wash p-3 font-serif-th text-[13px] text-err">
+          {error}
+        </p>
+      )}
+      <div className="flex justify-end">
+        <button
+          type="button"
+          disabled={saving}
+          onClick={save}
+          className="btn-gold-glass min-h-[44px] px-6 font-serif-th text-sm font-bold cursor-pointer disabled:opacity-50"
+        >
+          {saving ? "กำลังบันทึก…" : "บันทึกการตั้งค่า"}
+        </button>
+      </div>
     </section>
   );
 }

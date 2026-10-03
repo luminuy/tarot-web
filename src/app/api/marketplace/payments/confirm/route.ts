@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { listPaymentsForTicket, settleConsultationPayment } from "@/lib/marketplace/booking.repo";
-import { readCustomerRefFromCookie } from "@/lib/marketplace/customer-ref";
+import { isTicketOwner } from "@/lib/marketplace/ticket-owner";
 import { retrieveGatewayCharge } from "@/lib/marketplace/payment-gateway";
 import { getQueueTicketById } from "@/lib/marketplace/queue.repo";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
@@ -42,9 +42,8 @@ export async function POST(request: Request) {
     }
     const { ticketId, testChargeId } = parsed.data;
 
-    const customerRef = await readCustomerRefFromCookie(request);
     const ticket = await getQueueTicketById(ticketId);
-    if (!ticket || !customerRef || ticket.customerRef !== customerRef) {
+    if (!ticket || !(await isTicketOwner(request, ticket))) {
       return NextResponse.json({ error: "ไม่พบตั๋วคิวที่ระบุ" }, { status: 404 });
     }
 
@@ -55,6 +54,7 @@ export async function POST(request: Request) {
 
     for (const payment of payments.filter((p) => p.status === "pending" || p.status === "failed")) {
       let verified = false;
+      let email: string | null = null;
       if (payment.provider === "simulator") {
         verified =
           process.env.NODE_ENV !== "production" && Boolean(testChargeId) && testChargeId === payment.providerRef;
@@ -65,9 +65,10 @@ export async function POST(request: Request) {
           charge.amountSatang === payment.amountSatang &&
           charge.currency === payment.currency &&
           charge.metadata.ticketId === ticketId;
+        email = charge?.email ?? null;
       }
       if (!verified) continue;
-      const state = await settleConsultationPayment(payment.id);
+      const state = await settleConsultationPayment(payment.id, { email });
       return NextResponse.json({ status: state === "already" ? "confirmed" : state });
     }
 

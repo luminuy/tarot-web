@@ -1,0 +1,48 @@
+name: 📅 Booking Reminders — เตือนนัดแม่หมอ · แจ้งเวลาว่าง
+run-name: "📅 Booking Reminders ${{ github.event_name == 'workflow_dispatch' && format('(กดเองโดย {0})', github.actor) || '(ตามเวลา)' }}"
+
+# ตัวจับเวลาของระบบจอง (ดูเหตุผลที่ไม่ใช้ Cloudflare Cron Trigger ใน daily-digest.yml)
+# ------------------------------------------------------------------------------
+# ทุก 15 นาที: เตือนนัดก่อน 24 ชม./1 ชม. · แจ้งคนที่ลงชื่อรอเวลาว่าง · ปล่อยที่ที่หมดเวลาจ่ายเงิน
+# ⚠️ cron ของ GitHub ดีเลย์ได้ 5–15 นาที — หน้าต่างเตือนฝั่งเซิร์ฟเวอร์ (`reminderDue`) กว้างพอรองรับแล้ว
+# ปลายทางกันส่งซ้ำเอง (จองสิทธิ์ส่งในฐานข้อมูล) กดรันเองซ้ำกี่ครั้งก็ไม่มีใครได้อีเมลซ้ำ
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: booking-reminders
+  cancel-in-progress: false
+
+# 🔒 R-17: ยิง HTTP เส้นเดียว ไม่ต้องการสิทธิ์ใด ๆ
+permissions: {}
+
+jobs:
+  run:
+    name: เตือนนัดและแจ้งเวลาว่าง
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: ยิงเส้น cron ของระบบจอง
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::error::ยังไม่ได้ตั้ง repository secret ชื่อ CRON_SECRET"
+            exit 1
+          fi
+          # ยิงเข้า *.workers.dev ไม่ใช่โดเมนหลัก — Bot Fight Mode ของโซนตอบ challenge ให้ IP ของ GitHub (ดู daily-digest.yml)
+          HTTP_CODE=$(curl -sS -o response.json -w "%{http_code}" \
+            -X POST "https://tarot-web.bankjack10452.workers.dev/api/cron/booking-reminders" \
+            -A "SeerTarot-Cron/1.0" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            --max-time 120)
+          echo "HTTP $HTTP_CODE"
+          cat response.json || true
+          echo ""
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::รอบนี้ล้มเหลว (HTTP $HTTP_CODE)"
+            exit 1
+          fi

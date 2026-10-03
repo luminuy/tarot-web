@@ -8,11 +8,12 @@ import { VideoCallRoom } from "@/components/marketplace/VideoCallRoom";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { useVisibleInterval } from "@/lib/utils/use-visible-interval";
 import type { QueueTicket } from "@/lib/marketplace/queue.repo";
-import { CONSULTATION_PRICE_LABEL, CONSULTATION_PRICE_THB, questionCategoryLabel } from "@/lib/marketplace/offer";
+import { CONSULTATION_MINUTES, CONSULTATION_PRICE_THB, questionCategoryLabel } from "@/lib/marketplace/offer";
 import {
   BookingConfirmedPanel,
   ManageBooking,
   PaymentPendingPanel,
+  ReviewPanel,
   type BookingView,
 } from "@/components/marketplace/QueueBookingParts";
 import { formatSlotRange } from "@/lib/marketplace/booking-policy";
@@ -25,6 +26,8 @@ interface PollResponse {
     avatarUrl: string | null;
     specialties: string[];
     lineUrl: string | null;
+    /** ค่าปรึกษาของแม่หมอคนนี้ (บาท) */
+    priceThb?: number;
   };
   canAccessLine: boolean;
   /** แม่หมอเรียกคิวแล้ว + ระบบวิดีโอคอลพร้อม (ตั้งค่า TURN แล้ว) */
@@ -150,6 +153,8 @@ export default function CustomerQueuePage() {
   }
 
   const { ticket, reader, canAccessLine, videoCallAvailable, booking } = data;
+  const priceThb = reader.priceThb ?? CONSULTATION_PRICE_THB;
+  const paidThb = booking?.amountSatang ? booking.amountSatang / 100 : priceThb;
   const isBlocked = ticket.screening?.verdict === "block" || ticket.status === "cancelled" || ticket.status === "expired";
   const isCrisis = ticket.screening?.flags.includes("self_harm") || ticket.screening?.flags.includes("crisis");
   const isDone = ticket.status === "handed_off";
@@ -190,12 +195,20 @@ export default function CustomerQueuePage() {
       <div className="max-w-xl w-full mx-auto space-y-5">
         <h1 className="sr-only">สถานะคิวปรึกษาแม่หมอ</h1>
 
-        <Link
-          href="/readers"
-          className="tap-overlay-y inline-flex items-center gap-1.5 text-sm text-gold-ink hover:text-gold-ink-deep transition-colors"
-        >
-          <span aria-hidden="true">←</span> แม่หมอทั้งหมด
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link
+            href="/readers"
+            className="tap-overlay-y inline-flex items-center gap-1.5 text-sm text-gold-ink hover:text-gold-ink-deep transition-colors"
+          >
+            <span aria-hidden="true">←</span> แม่หมอทั้งหมด
+          </Link>
+          <Link
+            href="/readers/bookings"
+            className="tap-overlay-y inline-flex items-center gap-1.5 text-sm font-semibold text-gold-ink hover:text-gold-ink-deep transition-colors"
+          >
+            นัดของฉัน
+          </Link>
+        </div>
 
         <section className="rounded-[28px] border border-line bg-surface overflow-hidden shadow-[0_20px_40px_-28px_rgba(46,33,26,0.45)]">
           {/* แถบกำมะหยี่ — ภาษาภาพเดียวกับการ์ดแม่หมอในหน้ารวม */}
@@ -275,7 +288,7 @@ export default function CustomerQueuePage() {
             )}
 
             {ticket.status === "pending_payment" && booking && (
-              <PaymentPendingPanel ticketId={ticket.id} booking={booking} nowMs={now} confirming={confirming} />
+              <PaymentPendingPanel ticketId={ticket.id} booking={booking} nowMs={now} confirming={confirming} priceThb={priceThb} />
             )}
 
             {ticket.status === "waiting" && isScheduled && booking && (
@@ -369,6 +382,9 @@ export default function CustomerQueuePage() {
                   <h3 className="font-bold text-lg text-ink">ปรึกษาเสร็จเรียบร้อย</h3>
                   <p className="text-sm text-muted"><ThaiPhrases>ขอบคุณที่ใช้บริการ ขอให้เรื่องที่ถามคลี่คลายไปในทางที่ดี</ThaiPhrases></p>
                 </div>
+                {booking && (booking.canReview || booking.reviewRating) && (
+                  <ReviewPanel ticketId={ticket.id} readerName={reader.displayName} existingRating={booking.reviewRating ?? null} />
+                )}
                 <div className="flex flex-col sm:flex-row gap-2 justify-center">
                   <Link href="/" className="btn-gold-glass inline-flex items-center justify-center px-5 py-3 text-sm font-bold">
                     ดูดวงกับแม่หมอ AI
@@ -447,16 +463,16 @@ export default function CustomerQueuePage() {
             )}
             <div className="flex justify-between gap-4 pt-2.5 border-t border-line">
               <dt className="text-muted shrink-0">ค่าบริการ</dt>
-              <dd className="text-ink font-bold text-right">{CONSULTATION_PRICE_LABEL}</dd>
+              <dd className="text-ink font-bold text-right">{paidThb} บาท · {CONSULTATION_MINUTES} นาที</dd>
             </div>
             {booking && (
               <div className="flex justify-between gap-4">
                 <dt className="text-muted shrink-0">การชำระเงิน</dt>
                 <dd className="text-right font-semibold">
                   {booking.refundStatus === "refunded" ? (
-                    <span className="text-ink">คืนเงินแล้ว {CONSULTATION_PRICE_THB} บาท</span>
+                    <span className="text-ink">คืนเงินแล้ว {paidThb} บาท</span>
                   ) : booking.paid ? (
-                    <span className="text-ok">ชำระแล้ว {CONSULTATION_PRICE_THB} บาท</span>
+                    <span className="text-ok">ชำระแล้ว {paidThb} บาท</span>
                   ) : (
                     <span className="text-muted">ยังไม่ชำระ</span>
                   )}

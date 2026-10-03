@@ -2,7 +2,7 @@ import { CONSULTATION_MINUTES } from "@/lib/marketplace/offer";
 import { CHECKOUT_EXPIRES_MINUTES, formatSlotRange, HOLD_MINUTES } from "@/lib/marketplace/booking-policy";
 import type { BookingRecord } from "@/lib/marketplace/booking.repo";
 import { createGatewayCharge } from "@/lib/marketplace/payment-gateway";
-import { CONSULTATION_PRICE_SATANG, createPaymentRecord } from "@/lib/marketplace/payments.repo";
+import { createPaymentRecord } from "@/lib/marketplace/payments.repo";
 import { getAppDB } from "@/lib/platform/db";
 import { resolveAppOrigin } from "@/lib/security/app-origin";
 
@@ -12,7 +12,7 @@ export const MAX_CHECKOUTS_PER_BOOKING = 3;
 /**
  * 💳 เปิดหน้าจ่ายเงิน Stripe สำหรับการจองหนึ่งใบ + บันทึกแถว payments (pending)
  * ---------------------------------------------------------------------------
- * - ราคามาจากค่าคงที่ฝั่งเซิร์ฟเวอร์เท่านั้น (`CONSULTATION_PRICE_SATANG`)
+ * - ราคามาจากฝั่งเซิร์ฟเวอร์เท่านั้น (`readerPriceThb(reader)` — ราคาที่แอดมินตั้งให้แม่หมอ หรือราคากลาง)
  * - ปลายทางกลับเป็น origin ของเราเอง (ไม่รับ return_uri จากไคลเอนต์)
  * - หน้าจ่ายหมดอายุ 31 นาที และต่อเวลากันที่ให้ยาวกว่านั้นเสมอ (`HOLD_MINUTES`)
  *   ➔ Stripe รับเงินหลังหน้าจ่ายหมดอายุไม่ได้ ที่นั่งจึงยังเป็นของลูกค้าตอนเงินเข้า
@@ -25,8 +25,13 @@ export async function openConsultationCheckout(input: {
   readerName: string;
   booking: BookingRecord;
   attempt: number;
+  /** ค่าปรึกษาของแม่หมอคนนี้ (บาท) — คำนวณฝั่งเซิร์ฟเวอร์ด้วย `readerPriceThb()` เท่านั้น ห้ามรับจากไคลเอนต์ */
+  priceThb: number;
+  /** อีเมลสมาชิกที่ล็อกอินอยู่ — เติมให้ในหน้า Stripe + ใช้ส่งใบเสร็จ */
+  customerEmail?: string | null;
 }): Promise<{ checkoutUrl: string; paymentId: string }> {
-  const { request, ticketId, readerId, readerName, booking, attempt } = input;
+  const { request, ticketId, readerId, readerName, booking, attempt, priceThb, customerEmail } = input;
+  const amountSatang = Math.round(priceThb * 100);
   const now = Date.now();
   const db = await getAppDB();
 
@@ -40,8 +45,9 @@ export async function openConsultationCheckout(input: {
   const queueUri = `${origin}/readers/queue/${encodeURIComponent(ticketId)}`;
   const scheduled = booking.kind === "scheduled";
   const charge = await createGatewayCharge({
-    amountSatang: CONSULTATION_PRICE_SATANG,
+    amountSatang,
     currency: "THB",
+    customerEmail: customerEmail || undefined,
     description: scheduled
       ? `ปรึกษา ${readerName} · ${formatSlotRange(booking.slotStart)}`
       : `ปรึกษา ${readerName} · คิวสดตอนนี้`,
@@ -63,7 +69,7 @@ export async function openConsultationCheckout(input: {
     ticketId,
     provider: charge.provider,
     providerRef: charge.chargeId,
-    amountSatang: CONSULTATION_PRICE_SATANG,
+    amountSatang,
     currency: "THB",
   });
 

@@ -9,6 +9,16 @@
 export const CONSULTATION_PRICE_THB = 299;
 export const CONSULTATION_MINUTES = 30;
 
+/** เพดานราคาที่แอดมินตั้งให้แม่หมอได้ (บาท) — กันพิมพ์ผิดหลักจนลูกค้าโดนตัดเงินผิด */
+export const READER_PRICE_MIN_THB = 99;
+export const READER_PRICE_MAX_THB = 5000;
+
+/** ราคาจริงของแม่หมอคนนี้ (บาท) — ไม่ได้ตั้ง = ราคากลาง · ใช้ทั้งหน้าเว็บและตอนเรียกเก็บเงิน */
+export function readerPriceThb(reader: { priceThb?: number | null } | null | undefined): number {
+  const p = reader?.priceThb;
+  return typeof p === "number" && p >= READER_PRICE_MIN_THB && p <= READER_PRICE_MAX_THB ? p : CONSULTATION_PRICE_THB;
+}
+
 /** ป้ายราคาแบบสั้นสำหรับหน้าเว็บ เช่น "299 บาท · 30 นาที" */
 export const CONSULTATION_PRICE_LABEL = `${CONSULTATION_PRICE_THB} บาท · ${CONSULTATION_MINUTES} นาที`;
 

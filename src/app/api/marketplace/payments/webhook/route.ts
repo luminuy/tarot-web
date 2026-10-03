@@ -82,7 +82,7 @@ export async function POST(request: Request) {
      */
     if (paymentRow.ticket_id) {
       if (event.outcome === "paid") {
-        const state = await settleConsultationPayment(paymentRow.id, { webhookLog: rawBody });
+        const state = await settleConsultationPayment(paymentRow.id, { webhookLog: rawBody, email: event.charge.email });
         if (state === "refund_failed") {
           return NextResponse.json({ error: "คืนเงินไม่สำเร็จ", state }, { status: 500 });
         }

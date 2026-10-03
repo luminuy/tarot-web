@@ -8,12 +8,15 @@ import {
   MAX_RESCHEDULES,
   slotMs,
   slotRejection,
+  bkkDateKey,
   BOOKING_HORIZON_DAYS,
+  type SlotOptions,
   type CancelActor,
   type ScheduleRule,
   type SlotDay,
 } from "@/lib/marketplace/booking-policy";
 import { expireGatewayCharge, refundGatewayCharge } from "@/lib/marketplace/payment-gateway";
+import { sendBookingCancelled, sendBookingConfirmed, sendBookingRescheduled } from "@/lib/marketplace/booking-mail";
 import { getPaymentById, type PaymentRecord } from "@/lib/marketplace/payments.repo";
 import { getQueueTicketById, ticketExpiresAt, type QueueTicket } from "@/lib/marketplace/queue.repo";
 
@@ -51,6 +54,8 @@ export interface BookingRecord {
   refundStatus: RefundStatus | null;
   rescheduleCount: number;
   createdAt: number;
+  /** อีเมลติดต่อลูกค้า (PDPA — ใช้ส่งเรื่องนัดนี้เท่านั้น) */
+  contactEmail: string | null;
 }
 
 interface RawBookingRow {
@@ -67,6 +72,7 @@ interface RawBookingRow {
   refund_status: string | null;
   reschedule_count: number | null;
   created_at: number;
+  contact_email?: string | null;
 }
 
 function mapBooking(row: RawBookingRow): BookingRecord {
@@ -84,6 +90,7 @@ function mapBooking(row: RawBookingRow): BookingRecord {
     refundStatus: (row.refund_status as RefundStatus | null) ?? null,
     rescheduleCount: Number(row.reschedule_count ?? 0),
     createdAt: Number(row.created_at),
+    contactEmail: row.contact_email ?? null,
   };
 }
 
@@ -159,10 +166,65 @@ export async function listTakenSlots(readerId: string, nowMs: number): Promise<S
   return new Set((results || []).map((r) => Number(r.slot_start)));
 }
 
+/** วันหยุดรายวันของแม่หมอ (เฉพาะวันนี้เป็นต้นไป) */
+export async function getBlockedDates(readerId: string, nowMs = Date.now()): Promise<string[]> {
+  const db = await getAppDB();
+  const { results } = await db
+    .prepare("SELECT date_key FROM reader_blocked_dates WHERE reader_id = ? AND date_key >= ? ORDER BY date_key")
+    .bind(readerId, bkkDateKey(nowMs))
+    .all<{ date_key: string }>();
+  return (results || []).map((r) => r.date_key);
+}
+
+/** แทนที่วันหยุดทั้งชุด (เฉพาะวันนี้เป็นต้นไป — วันที่ผ่านไปแล้วลบทิ้งด้วย ไม่ต้องเก็บ) */
+export async function replaceBlockedDates(readerId: string, dates: string[]): Promise<void> {
+  const db = await getAppDB();
+  const now = Date.now();
+  const statements = [
+    db.prepare("DELETE FROM reader_blocked_dates WHERE reader_id = ?").bind(readerId),
+    ...[...new Set(dates)].map((d) =>
+      db
+        .prepare("INSERT INTO reader_blocked_dates (reader_id, date_key, created_at) VALUES (?, ?, ?)")
+        .bind(readerId, d, now)
+    ),
+  ];
+  if (db.batch) await db.batch(statements);
+  else for (const st of statements) await st.run();
+}
+
+/** ตั้งค่าที่มีผลกับเวลาว่าง: วันหยุด · เวลาพัก · เพดานต่อวัน */
+export async function getSlotOptions(readerId: string, nowMs = Date.now()): Promise<SlotOptions> {
+  const db = await getAppDB();
+  const row = await db
+    .prepare("SELECT buffer_min, daily_cap FROM readers WHERE id = ? LIMIT 1")
+    .bind(readerId)
+    .first<{ buffer_min: number | null; daily_cap: number | null }>();
+  return {
+    blockedDates: new Set(await getBlockedDates(readerId, nowMs)),
+    bufferMin: Number(row?.buffer_min ?? 0) || 0,
+    dailyCap: row?.daily_cap && row.daily_cap > 0 ? Number(row.daily_cap) : null,
+  };
+}
+
 export async function getAvailableSlots(readerId: string, nowMs = Date.now()): Promise<SlotDay[]> {
   const rules = await getScheduleRules(readerId);
   if (rules.length === 0) return [];
-  return generateSlots(rules, nowMs, await listTakenSlots(readerId, nowMs));
+  return generateSlots(rules, nowMs, await listTakenSlots(readerId, nowMs), await getSlotOptions(readerId, nowMs));
+}
+
+/**
+ * ด่านฝั่งเซิร์ฟเวอร์ก่อนกันที่/เลื่อนนัด — ตาราง · วันหยุด · ช่องว่าง · เวลาพัก · เพดานต่อวัน
+ * `ownSlot` = เวลานัดเดิมของคนที่กำลังเลื่อน (ไม่นับเป็นเวลาที่ชนตัวเอง)
+ */
+export async function checkSlotBookable(
+  readerId: string,
+  slotStart: number,
+  nowMs = Date.now(),
+  ownSlot?: number | null
+): Promise<string | null> {
+  const taken = await listTakenSlots(readerId, nowMs);
+  if (ownSlot) taken.delete(ownSlot);
+  return slotRejection(await getScheduleRules(readerId), nowMs, slotStart, taken, await getSlotOptions(readerId, nowMs));
 }
 
 /** เวลาว่างใกล้สุดของแม่หมอ (หน้าโปรไฟล์) — null = ยังไม่เปิดตาราง หรือเต็มทุกช่องใน 14 วัน */
@@ -221,6 +283,8 @@ export async function holdBooking(input: {
   kind: BookingKind;
   slotStart: number;
   nowMs?: number;
+  /** อีเมลสมาชิกที่ล็อกอินอยู่ (ถ้ามี) — อีเมลที่กรอกในหน้า Stripe จะมาแทนตอนเงินเข้า */
+  contactEmail?: string | null;
 }): Promise<HoldResult> {
   const db = await getAppDB();
   const now = input.nowMs ?? Date.now();
@@ -247,12 +311,13 @@ export async function holdBooking(input: {
     refundStatus: null,
     rescheduleCount: 0,
     createdAt: now,
+    contactEmail: input.contactEmail ?? null,
   };
   try {
     await db
       .prepare(
-        `INSERT INTO bookings (id, ticket_id, reader_id, kind, slot_start, slot_end, status, hold_expires_at, reschedule_count, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, 'reserved', ?, 0, ?)`
+        `INSERT INTO bookings (id, ticket_id, reader_id, kind, slot_start, slot_end, status, hold_expires_at, reschedule_count, created_at, contact_email)
+         VALUES (?, ?, ?, ?, ?, ?, 'reserved', ?, 0, ?, ?)`
       )
       .bind(
         booking.id,
@@ -262,7 +327,8 @@ export async function holdBooking(input: {
         booking.slotStart,
         booking.slotEnd,
         booking.holdExpiresAt,
-        booking.createdAt
+        booking.createdAt,
+        input.contactEmail ?? null
       )
       .run();
   } catch (err) {
@@ -338,7 +404,7 @@ export type SettleState = "confirmed" | "already" | "refunded" | "refund_failed"
  */
 export async function settleConsultationPayment(
   paymentId: string,
-  opts: { webhookLog?: string; nowMs?: number } = {}
+  opts: { webhookLog?: string; nowMs?: number; email?: string | null } = {}
 ): Promise<SettleState> {
   const db = await getAppDB();
   const now = opts.nowMs ?? Date.now();
@@ -366,6 +432,10 @@ export async function settleConsultationPayment(
     .run();
   if ((claim.meta?.changes ?? 0) === 0) return "already";
   const paid: PaymentRecord = { ...payment, status: "paid" };
+  // อีเมลที่ลูกค้ากรอกในหน้าจ่ายเงิน — ใช้ส่งยืนยัน/เตือนนัด/แจ้งคืนเงิน (ทับอีเมลบัญชีได้ เพราะเป็นอีเมลที่เขาเพิ่งพิมพ์เอง)
+  if (opts.email && payment.bookingId) {
+    await db.prepare("UPDATE bookings SET contact_email = ? WHERE id = ?").bind(opts.email, payment.bookingId).run();
+  }
 
   const refund = async (reason: string): Promise<SettleState> => {
     console.warn("[Booking] เงินเข้าแต่ให้นัดไม่ได้ ➔ คืนเงินอัตโนมัติ", { paymentId, reason });
@@ -376,6 +446,10 @@ export async function settleConsultationPayment(
       )
       .bind(ok ? "refunded" : "failed", payment.bookingId ?? "")
       .run();
+    // จ่ายซ้ำ = นัดยังอยู่ ไม่ต้องบอกว่ายกเลิก · กรณีอื่นบอกลูกค้าว่าไม่ได้นัดแต่ได้เงินคืน
+    if (reason !== "duplicate_payment" && payment.ticketId) {
+      await sendBookingCancelled(payment.ticketId, "system", ok ? "refunded" : "failed");
+    }
     return ok ? "refunded" : "refund_failed";
   };
 
@@ -426,6 +500,7 @@ export async function settleConsultationPayment(
     )
     .bind(position, ticketExpiresAt(now, booking.kind === "scheduled" ? booking.slotStart : null), ticket.id)
     .run();
+  await sendBookingConfirmed(ticket.id);
   return "confirmed";
 }
 
@@ -498,6 +573,8 @@ export async function cancelConsultation(
   await Promise.all(
     payments.filter((p) => p.status === "pending" && p.providerRef).map((p) => expireGatewayCharge(p.providerRef as string))
   );
+  // แจ้งเฉพาะรายการที่จ่ายแล้ว (ยกเลิกก่อนจ่าย ไม่มีอะไรต้องบอก)
+  if (paidPayment) await sendBookingCancelled(ticket.id, actor, refundStatus);
   return { ok: true, reason: decision.reason, refundStatus };
 }
 
@@ -526,12 +603,7 @@ export async function rescheduleBooking(
   }
   if (newSlotStart === booking.slotStart) return { ok: false, error: "เลือกเวลาใหม่ที่ไม่ใช่เวลาเดิม", status: 400 };
 
-  const rejection = slotRejection(
-    await getScheduleRules(ticket.readerId),
-    nowMs,
-    newSlotStart,
-    await listTakenSlots(ticket.readerId, nowMs)
-  );
+  const rejection = await checkSlotBookable(ticket.readerId, newSlotStart, nowMs, booking.slotStart);
   if (rejection) return { ok: false, error: rejection, status: 409 };
 
   await db
@@ -558,6 +630,11 @@ export async function rescheduleBooking(
     .prepare("UPDATE queue_tickets SET slot_start = ?, expires_at = ? WHERE id = ?")
     .bind(newSlotStart, ticketExpiresAt(nowMs, newSlotStart), ticket.id)
     .run();
+  await db
+    .prepare("UPDATE bookings SET reminder_24h_at = NULL, reminder_1h_at = NULL WHERE id = ?")
+    .bind(booking.id)
+    .run();
+  await sendBookingRescheduled(ticket.id, booking.slotStart);
   return { ok: true, slotStart: newSlotStart };
 }
 
@@ -591,4 +668,96 @@ export async function markNoShow(ticket: QueueTicket, nowMs = Date.now()): Promi
     .bind(nowMs, ticket.id)
     .run();
   return true;
+}
+
+/* ── แผงแอดมิน: การจองและการเงิน ─────────────────────────────────────────── */
+
+export interface AdminBookingRow {
+  bookingId: string;
+  ticketId: string;
+  readerName: string;
+  nickname: string | null;
+  kind: BookingKind;
+  slotStart: number | null;
+  status: BookingStatus;
+  ticketStatus: string;
+  amountThb: number | null;
+  paymentStatus: string | null;
+  refundStatus: RefundStatus | null;
+  refundDue: boolean;
+  paymentId: string | null;
+  createdAt: number;
+}
+
+/**
+ * รายการจองล่าสุด + รายการที่ "ต้องคืนเงินแต่ยังคืนไม่สำเร็จ" (ขึ้นบนสุดเสมอ)
+ * ไม่มีคำถาม/สรุป AI ของลูกค้าในรายการนี้ — แอดมินไม่จำเป็นต้องเห็น (PDPA: เท่าที่จำเป็น)
+ */
+export async function listAdminBookings(limit = 60): Promise<AdminBookingRow[]> {
+  const db = await getAppDB();
+  const { results } = await db
+    .prepare(
+      `SELECT b.id AS booking_id, b.ticket_id, b.kind, b.slot_start, b.status, b.refund_status, b.created_at,
+              r.display_name, t.nickname, t.status AS ticket_status,
+              p.id AS payment_id, p.amount_satang, p.status AS payment_status, p.refund_due
+         FROM bookings b
+         JOIN readers r ON r.id = b.reader_id
+         LEFT JOIN queue_tickets t ON t.id = b.ticket_id
+         LEFT JOIN payments p ON p.id = (
+           SELECT id FROM payments WHERE booking_id = b.id ORDER BY (status = 'paid') DESC, created_at DESC LIMIT 1
+         )
+        WHERE b.status != 'expired' OR p.status IN ('paid', 'refunded')
+        ORDER BY COALESCE(p.refund_due, 0) DESC, b.created_at DESC
+        LIMIT ?`
+    )
+    .bind(limit)
+    .all<{
+      booking_id: string;
+      ticket_id: string;
+      kind: string | null;
+      slot_start: number;
+      status: string;
+      refund_status: string | null;
+      created_at: number;
+      display_name: string;
+      nickname: string | null;
+      ticket_status: string | null;
+      payment_id: string | null;
+      amount_satang: number | null;
+      payment_status: string | null;
+      refund_due: number | null;
+    }>();
+  return (results || []).map((r) => ({
+    bookingId: r.booking_id,
+    ticketId: r.ticket_id,
+    readerName: r.display_name,
+    nickname: r.nickname,
+    kind: r.kind === "walkup" ? "walkup" : "scheduled",
+    slotStart: r.kind === "walkup" ? null : Number(r.slot_start),
+    status: r.status as BookingStatus,
+    ticketStatus: r.ticket_status ?? "-",
+    amountThb: r.amount_satang ? Number(r.amount_satang) / 100 : null,
+    paymentStatus: r.payment_status,
+    refundStatus: (r.refund_status as RefundStatus | null) ?? null,
+    refundDue: Number(r.refund_due ?? 0) === 1,
+    paymentId: r.payment_id,
+    createdAt: Number(r.created_at),
+  }));
+}
+
+/** แอดมินกด "ลองคืนเงินอีกครั้ง" — คืนได้เฉพาะรายการที่ติดธง `refund_due` เท่านั้น */
+export async function retryDueRefund(paymentId: string): Promise<"refunded" | "failed" | "not_due"> {
+  const db = await getAppDB();
+  const row = await db
+    .prepare("SELECT refund_due FROM payments WHERE id = ? AND status = 'paid' LIMIT 1")
+    .bind(paymentId)
+    .first<{ refund_due: number }>();
+  if (Number(row?.refund_due ?? 0) !== 1) return "not_due";
+  const payment = await getPaymentById(paymentId);
+  if (!payment) return "not_due";
+  const ok = await refundPaymentRecord(payment);
+  if (ok && payment.bookingId) {
+    await db.prepare("UPDATE bookings SET refund_status = 'refunded' WHERE id = ?").bind(payment.bookingId).run();
+  }
+  return ok ? "refunded" : "failed";
 }

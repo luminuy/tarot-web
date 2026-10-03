@@ -8,11 +8,13 @@ import {
   listActiveTicketsForCustomer,
   toPublicTicket,
 } from "@/lib/marketplace/queue.repo";
-import { expireLapsedHold, getScheduleRules, holdBooking, listTakenSlots, releaseHold } from "@/lib/marketplace/booking.repo";
-import { MAX_ACTIVE_PER_CUSTOMER, slotRejection } from "@/lib/marketplace/booking-policy";
+import { checkSlotBookable, expireLapsedHold, holdBooking, releaseHold } from "@/lib/marketplace/booking.repo";
+import { MAX_ACTIVE_PER_CUSTOMER } from "@/lib/marketplace/booking-policy";
 import { openConsultationCheckout } from "@/lib/marketplace/consultation-checkout";
 import { isStripeTestModeOnProduction, PAYMENTS_NOT_OPEN_MESSAGE } from "@/lib/marketplace/payment-gateway";
 import { isPrivilegedTestRequest } from "@/lib/security/privileged";
+import { getSessionUser } from "@/lib/auth/session";
+import { readerPriceThb } from "@/lib/marketplace/offer";
 import { getReaderById } from "@/lib/marketplace/readers.repo";
 import {
   readCustomerRefFromCookie,
@@ -125,7 +127,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "กรุณาเลือกวันและเวลานัด" }, { status: 400 });
       }
       // ไม่เชื่อเวลาที่ไคลเอนต์ส่งมา — ตรวจกับตารางของแม่หมอ + ช่องที่ถูกจองแล้วฝั่งเซิร์ฟเวอร์
-      const rejection = slotRejection(await getScheduleRules(readerId), now, slotStart, await listTakenSlots(readerId, now));
+      const rejection = await checkSlotBookable(readerId, slotStart, now);
       if (rejection) {
         return NextResponse.json({ error: rejection, code: "slot_unavailable" }, { status: 409 });
       }
@@ -149,8 +151,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: PAYMENTS_NOT_OPEN_MESSAGE }, { status: 503 });
     }
 
+    // ล็อกอินอยู่ = ผูกตั๋วกับบัญชี (เห็น "นัดของฉัน" ทุกเครื่อง) · ไม่ล็อกอินก็จองได้ตามปกติ
+    const user = await getSessionUser().catch(() => null);
+
     // Create ticket with AI Screening — ยังไม่เข้าคิวจนกว่าจะจ่ายเงิน
     const ticket = await createQueueTicket({
+      userId: user?.id ?? null,
       readerId,
       kind,
       customerRef,
@@ -174,6 +180,7 @@ export async function POST(request: Request) {
       kind: kind === "booking" ? "scheduled" : "walkup",
       slotStart: kind === "booking" && slotStart ? slotStart : now,
       nowMs: now,
+      contactEmail: user?.email ?? null,
     });
     if (!hold.ok) {
       await releaseHold(ticket.id, "cancelled", "system");
@@ -192,6 +199,8 @@ export async function POST(request: Request) {
         readerName: reader.displayName,
         booking: hold.booking,
         attempt: 1,
+        priceThb: readerPriceThb(reader),
+        customerEmail: user?.email ?? null,
       }));
     } catch (err) {
       // เกตเวย์ล่ม = ปล่อยที่ทันที ไม่ให้เวลาว่างหายไปจากตาราง 36 นาทีทั้งที่ไม่มีใครจ่ายได้

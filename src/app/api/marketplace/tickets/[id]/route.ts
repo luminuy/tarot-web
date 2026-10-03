@@ -11,7 +11,9 @@ import {
 } from "@/lib/marketplace/booking.repo";
 import { canReschedule, decideCancellation } from "@/lib/marketplace/booking-policy";
 import { getReaderById } from "@/lib/marketplace/readers.repo";
-import { readCustomerRefFromCookie } from "@/lib/marketplace/customer-ref";
+import { isTicketOwner } from "@/lib/marketplace/ticket-owner";
+import { getReviewByTicketId } from "@/lib/marketplace/reviews.repo";
+import { readerPriceThb } from "@/lib/marketplace/offer";
 import { requireReader } from "@/lib/auth/reader-auth";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { isTurnConfigured } from "@/lib/marketplace/turn";
@@ -29,9 +31,13 @@ async function buildBookingView(ticket: QueueTicket, nowMs: number) {
   const paid = payments.some((p) => p.status === "paid");
   const refunded = payments.some((p) => p.status === "refunded");
   const slotStart = booking.kind === "scheduled" ? booking.slotStart : null;
+  const review = ticket.status === "handed_off" ? await getReviewByTicketId(ticket.id) : null;
   return {
     id: booking.id,
     kind: booking.kind,
+    /** คะแนนที่ลูกค้าให้ไว้แล้ว (null = ยังไม่รีวิว) */
+    reviewRating: review?.rating ?? null,
+    canReview: ticket.status === "handed_off" && (booking.status === "done" || booking.status === "confirmed") && !review,
     status: booking.status,
     slotStart,
     slotEnd: booking.kind === "scheduled" ? booking.slotEnd : null,
@@ -52,10 +58,8 @@ async function buildBookingView(ticket: QueueTicket, nowMs: number) {
 }
 
 async function loadOwnedTicket(request: Request, id: string): Promise<QueueTicket | null> {
-  const customerRef = await readCustomerRefFromCookie(request);
-  if (!customerRef) return null;
   const ticket = await getQueueTicketById(id);
-  return ticket && ticket.customerRef === customerRef ? ticket : null;
+  return ticket && (await isTicketOwner(request, ticket)) ? ticket : null;
 }
 
 /**
@@ -73,8 +77,7 @@ export async function GET(
       return NextResponse.json({ error: "ไม่พบตั๋วคิวที่ระบุ" }, { status: 404 });
     }
 
-    const customerRef = await readCustomerRefFromCookie(request);
-    const isOwner = Boolean(customerRef) && ticket.customerRef === customerRef;
+    const isOwner = await isTicketOwner(request, ticket);
     const readerAuth = await requireReader(request);
     const isReader = readerAuth.success && readerAuth.readerId === ticket.readerId;
 
@@ -104,6 +107,7 @@ export async function GET(
         displayName: reader.displayName,
         avatarUrl: reader.avatarUrl,
         specialties: reader.specialties,
+        priceThb: readerPriceThb(reader),
         // Protected lineUrl
         lineUrl: canAccessLine ? reader.lineUrl : null,
       },

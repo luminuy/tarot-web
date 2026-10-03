@@ -163,7 +163,8 @@ export async function createGatewayCharge(input: CreateChargeInput): Promise<Cha
       submit_type: "pay",
       custom_text: input.submitMessage ? { submit: { message: input.submitMessage } } : undefined,
       metadata,
-      payment_intent_data: { description: input.description, metadata },
+      // receipt_email = Stripe ส่งใบเสร็จให้เอง (โหมดจริง) · ไม่รู้อีเมล = Stripe ใช้อีเมลที่ลูกค้ากรอกในหน้าจ่ายตามค่าในแดชบอร์ด
+      payment_intent_data: { description: input.description, metadata, receipt_email: input.customerEmail },
       expires_at: input.expiresAt,
     });
     const session = await stripeRequest(key, "POST", "/checkout/sessions", body, input.idempotencyKey);
@@ -196,6 +197,8 @@ export interface GatewayChargeStatus {
   amountSatang: number;
   currency: string;
   metadata: Record<string, string>;
+  /** อีเมลที่ลูกค้ากรอกในหน้าจ่ายเงิน Stripe — ใช้ส่งยืนยัน/เตือนนัด (null = ไม่มี) */
+  email: string | null;
 }
 
 /** ข้อมูลสถานะของ Checkout Session ไม่ว่าจะมาจาก webhook หรือจากการถาม Stripe เอง */
@@ -209,11 +212,15 @@ export function readCheckoutSession(session: Record<string, unknown>): GatewayCh
   }
   const status =
     session.payment_status === "paid" ? "paid" : session.status === "expired" ? "failed" : "pending";
+  const details = (session.customer_details ?? null) as Record<string, unknown> | null;
+  const rawEmail = details?.email ?? session.customer_email;
+  const email = typeof rawEmail === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail) ? rawEmail.trim().slice(0, 254) : null;
   return {
     status,
     amountSatang: Number(session.amount_total ?? 0),
     currency: String(session.currency ?? "").toUpperCase(),
     metadata,
+    email,
   };
 }
 

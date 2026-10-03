@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getPublicReaderById } from "@/lib/marketplace/readers.repo";
 import { getReaderLiveAvailability } from "@/lib/marketplace/queue.repo";
 import { getNextAvailableSlot } from "@/lib/marketplace/booking.repo";
+import { getReaderReviewSummary, type ReviewSummary } from "@/lib/marketplace/reviews.repo";
 import { FREE_CANCEL_HOURS, MAX_RESCHEDULES } from "@/lib/marketplace/booking-policy";
 import { ReaderDetailClient } from "@/components/marketplace/ReaderDetailClient";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -42,7 +43,12 @@ export default async function ReaderDetailPage({
   }
 
   const nowMs = Date.now();
-  const [isLiveOpen, nextSlot] = await Promise.all([getReaderLiveAvailability(id), getNextAvailableSlot(id, nowMs)]);
+  const emptyReviews: ReviewSummary = { count: 0, average: null, latest: [] };
+  const [isLiveOpen, nextSlot, reviews] = await Promise.all([
+    getReaderLiveAvailability(id),
+    getNextAvailableSlot(id, nowMs),
+    getReaderReviewSummary(id).catch(() => emptyReviews),
+  ]);
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -136,6 +142,13 @@ export default async function ReaderDetailPage({
                     ยืนยันตัวตนแล้ว
                   </span>
                 </div>
+                {reviews.average !== null && (
+                  <a href="#reader-reviews" className="inline-flex items-center gap-1.5 text-sm text-ink hover:text-gold-ink">
+                    <span aria-hidden="true" className="text-gold-ink">★</span>
+                    <strong className="font-bold">{reviews.average.toFixed(1)}</strong>
+                    <span className="text-muted">· {reviews.count} รีวิวจากผู้ที่ปรึกษาจริง</span>
+                  </a>
+                )}
                 {reader.specialties.length > 0 && (
                   <ul className="flex flex-wrap justify-center gap-1.5 sm:justify-start" aria-label="ความถนัด">
                     {reader.specialties.map((s) => (
@@ -211,6 +224,41 @@ export default async function ReaderDetailPage({
                   ))}
                 </ol>
               </section>
+
+              {reviews.count > 0 && (
+                <section id="reader-reviews" aria-labelledby="reader-reviews-heading" className="altar-card-porcelain !rounded-2xl space-y-4 p-5 sm:p-7">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <h2 id="reader-reviews-heading" className="text-lg font-bold text-ink-deep">
+                      <ThaiPhrases>รีวิวจากผู้ที่ปรึกษาจริง</ThaiPhrases>
+                    </h2>
+                    <p className="text-sm text-ink">
+                      <span aria-hidden="true" className="text-gold-ink">★</span>{" "}
+                      <strong className="font-bold">{reviews.average?.toFixed(1)}</strong>
+                      <span className="text-muted"> จาก 5 · {reviews.count} รีวิว</span>
+                    </p>
+                  </div>
+                  {reviews.latest.length > 0 ? (
+                    <ul className="divide-y divide-line-warm/70">
+                      {reviews.latest.map((rv) => (
+                        <li key={rv.id} className="space-y-1 py-3 first:pt-0 last:pb-0">
+                          <p className="text-[13px]">
+                            <span className="text-gold-ink" aria-hidden="true">
+                              {"★".repeat(rv.rating)}
+                              <span className="text-line-warm">{"★".repeat(5 - rv.rating)}</span>
+                            </span>
+                            <span className="sr-only">{rv.rating} ดาว</span>{" "}
+                            <span className="font-semibold text-ink-deep">{rv.name}</span>
+                          </p>
+                          <p className="whitespace-pre-line text-sm leading-relaxed text-ink">{rv.comment}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted">ผู้ที่ปรึกษาให้คะแนนไว้ แต่ยังไม่มีรีวิวแบบข้อความ</p>
+                  )}
+                  <p className="text-[12px] text-muted">รีวิวได้เฉพาะผู้ที่ชำระเงินและคุยกับแม่หมอจบแล้วเท่านั้น</p>
+                </section>
+              )}
 
               <section aria-labelledby="reader-policy" className="altar-card-porcelain !rounded-2xl space-y-3 p-5 sm:p-7">
                 <h2 id="reader-policy" className="text-lg font-bold text-ink-deep">

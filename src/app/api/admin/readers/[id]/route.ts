@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { READER_PRICE_MAX_THB, READER_PRICE_MIN_THB } from "@/lib/marketplace/offer";
 import { z } from "zod";
 
 import { recordAudit } from "@/lib/admin/audit";
@@ -20,6 +21,8 @@ const UpdateReaderSchema = z.object({
   lineUrl: z.string().trim().min(3, "กรุณาระบุ LINE ID หรือ LINE OA URL").max(300).optional(),
   status: z.enum(["pending", "approved", "suspended"]).optional(),
   commissionPct: z.number().int().min(0).max(100).optional(),
+  // ค่าปรึกษาต่อครั้ง (บาท) — null = ใช้ราคากลาง · เพดานกันพิมพ์ผิดหลักจนลูกค้าโดนตัดเงินผิด
+  priceThb: z.number().int().min(READER_PRICE_MIN_THB).max(READER_PRICE_MAX_THB).nullable().optional(),
 });
 
 /**

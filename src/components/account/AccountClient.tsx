@@ -506,6 +506,13 @@ export function AccountClient() {
                 }
                 onClick={openJournal}
               />
+              {/* นัดปรึกษาแม่หมอตัวจริง — จองตอนล็อกอินอยู่ = เห็นได้ทุกเครื่อง */}
+              <SettingsRow
+                icon={<RowIcon><IconTicket /></RowIcon>}
+                label={isEn ? "My consultations" : "นัดปรึกษาแม่หมอ"}
+                hint={isEn ? "Queues and bookings with real readers" : "คิวและนัดคุยกับแม่หมอตัวจริงของคุณ"}
+                href="/readers/bookings"
+              />
             </SettingsSection>
           )}
 

@@ -3,19 +3,21 @@
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import type { PublicReaderProfile } from "@/lib/marketplace/readers.repo";
-import { CONSULTATION_MINUTES, CONSULTATION_PRICE_THB } from "@/lib/marketplace/offer";
+import { CONSULTATION_MINUTES, readerPriceThb } from "@/lib/marketplace/offer";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 interface ReadersDirectoryProps {
   initialReaders: PublicReaderProfile[];
   /** แม่หมอที่เปิดรับคิวสดอยู่ตอนนี้ (อ่านจากเซิร์ฟเวอร์ตอนเปิดหน้า) */
   liveReaderIds: string[];
+  /** คะแนนรีวิวจริงของแต่ละแม่หมอ (เฉพาะคนที่มีรีวิวแล้ว) */
+  ratings?: Record<string, { count: number; average: number }>;
 }
 
 /** ช่องค้นหา + ตัวกรองโผล่เมื่อมีแม่หมอตั้งแต่ 4 คน — น้อยกว่านั้นเห็นครบในจอเดียวอยู่แล้ว */
 const SHOW_FILTERS_FROM = 4;
 
-export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReaders, liveReaderIds }) => {
+export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReaders, liveReaderIds, ratings = {} }) => {
   const [search, setSearch] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>("all");
   const live = useMemo(() => new Set(liveReaderIds), [liveReaderIds]);
@@ -140,6 +142,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
         >
           {filtered.map((reader) => {
             const isLive = live.has(reader.id);
+            const rating = ratings[reader.id];
             return (
               <li key={reader.id}>
                 <article className="group h-full flex flex-col rounded-[28px] border border-line bg-surface overflow-hidden shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_20px_40px_-28px_rgba(46,33,26,0.45)] transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_28px_50px_-26px_rgba(46,33,26,0.5)]">
@@ -173,6 +176,13 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
                         <span aria-hidden="true" className="h-4 w-4 rounded-full bg-ok text-white grid place-items-center text-[10px]">✓</span>
                         ยืนยันตัวตนแล้ว
                       </p>
+                      {rating && (
+                        <p className="text-[13px] text-ink">
+                          <span aria-hidden="true" className="text-gold-ink">★</span>{" "}
+                          <strong className="font-bold">{rating.average.toFixed(1)}</strong>
+                          <span className="text-muted"> · {rating.count} รีวิว</span>
+                        </p>
+                      )}
                     </div>
 
                     <p className="text-sm text-ink leading-relaxed line-clamp-3">
@@ -191,7 +201,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
 
                     <div className="mt-auto pt-5 border-t border-line flex items-center justify-between gap-3">
                       <p className="text-[13px] text-muted leading-tight">
-                        <span className="block text-xl font-bold text-ink-deep">฿{CONSULTATION_PRICE_THB}</span>
+                        <span className="block text-xl font-bold text-ink-deep">฿{readerPriceThb(reader)}</span>
                         ต่อ {CONSULTATION_MINUTES} นาที
                       </p>
                       <Link

@@ -8,7 +8,8 @@ import {
   PAYMENTS_NOT_OPEN_MESSAGE,
 } from "@/lib/marketplace/payment-gateway";
 import { isPrivilegedTestRequest } from "@/lib/security/privileged";
-import { readCustomerRefFromCookie } from "@/lib/marketplace/customer-ref";
+import { isTicketOwner } from "@/lib/marketplace/ticket-owner";
+import { readerPriceThb } from "@/lib/marketplace/offer";
 import { getQueueTicketById } from "@/lib/marketplace/queue.repo";
 import { getReaderById } from "@/lib/marketplace/readers.repo";
 import { expireLapsedHold, getBookingByTicketId, listPaymentsForTicket } from "@/lib/marketplace/booking.repo";
@@ -65,9 +66,8 @@ export async function POST(request: Request) {
     const { ticketId } = parsed.data;
 
     // ต้องเป็นตั๋วของผู้ขอเองเท่านั้น (คุกกี้ที่เราเซ็นเอง)
-    const customerRef = await readCustomerRefFromCookie(request);
     const ticket = await getQueueTicketById(ticketId);
-    if (!ticket || !customerRef || ticket.customerRef !== customerRef) {
+    if (!ticket || !(await isTicketOwner(request, ticket))) {
       return NextResponse.json({ error: "ไม่พบตั๋วคิวที่ระบุ" }, { status: 404 });
     }
     if (ticket.status !== "pending_payment") {
@@ -105,6 +105,8 @@ export async function POST(request: Request) {
       readerName: reader.displayName,
       booking,
       attempt: payments.length + 1,
+      priceThb: readerPriceThb(reader),
+      customerEmail: booking.contactEmail,
     });
     return apiOk({ checkoutUrl });
   } catch (err) {

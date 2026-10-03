@@ -8,7 +8,13 @@ import { VideoCallRoom } from "@/components/marketplace/VideoCallRoom";
 import { useVisibleInterval } from "@/lib/utils/use-visible-interval";
 import type { QueueTicket } from "@/lib/marketplace/queue.repo";
 import type { ScheduleRule } from "@/lib/marketplace/booking-policy";
-import { ReaderScheduleEditor, UpcomingBookings } from "@/components/marketplace/ConsoleBookingParts";
+import {
+  ReaderBookingSettings,
+  ReaderScheduleEditor,
+  UpcomingBookings,
+  type ReaderSettingsState,
+} from "@/components/marketplace/ConsoleBookingParts";
+import { bkkDateKey } from "@/lib/marketplace/booking-policy";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +35,8 @@ interface ConsoleState {
   videoCallEnabled?: boolean;
   /** ตารางรับนัดประจำสัปดาห์ (migrations/0020) */
   schedule?: ScheduleRule[];
+  /** ตั้งค่าการรับนัด (migrations/0021) */
+  settings?: ReaderSettingsState;
 }
 
 function ReaderConsoleInner() {
@@ -167,6 +175,13 @@ function ReaderConsoleInner() {
   // นัดล่วงหน้าที่ยังไม่ถึงเวลาแยกไปอยู่ "นัดที่จะถึง" — กริดคิวด้านล่างคือคิวสด + นัดที่เริ่มแล้ว
   const upcomingBookings = allTickets.filter((t) => t.kind === "booking" && t.status === "waiting");
   const tickets = allTickets.filter((t) => !(t.kind === "booking" && t.status === "waiting"));
+  const bookedDates: Record<string, number> = {};
+  for (const t of upcomingBookings) {
+    if (t.slotStart && t.paid !== false) {
+      const key = bkkDateKey(t.slotStart);
+      bookedDates[key] = (bookedDates[key] ?? 0) + 1;
+    }
+  }
   // ห้องวิดีโอแสดงเฉพาะตอนคิวนั้นยังอยู่สถานะ "เรียกแล้ว" — ปิดคิว = ห้องหายและกล้องดับเอง
   const activeCallTicket = activeCallId
     ? tickets.find((t) => t.id === activeCallId && t.status === "ready") ?? null
@@ -422,6 +437,20 @@ function ReaderConsoleInner() {
               );
             })}
           </div>
+        )}
+
+        {data.settings && (
+          <ReaderBookingSettings
+            key={JSON.stringify(data.settings)}
+            settings={data.settings}
+            bookedDates={bookedDates}
+            nowMs={now}
+            authHeaders={getAuthHeaders}
+            onSaved={(message) => {
+              setNotice(message);
+              void fetchConsoleData();
+            }}
+          />
         )}
 
         <ReaderScheduleEditor
