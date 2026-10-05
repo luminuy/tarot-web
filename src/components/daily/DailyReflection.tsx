@@ -10,6 +10,7 @@ import { MAX_RITUAL_NOTE_LENGTH } from "@/lib/journal/journal-types";
 import { moodOption, type MoodLevel } from "@/lib/journal/mood";
 import { bangkokHour, reflectionStreak } from "@/lib/journal/ritual";
 import { getReadings, updateReadingMeta, type ReadingOutcome, type SavedReadingItem } from "@/lib/utils/history";
+import { markPwaValueMoment } from "@/lib/pwa/pwa-client";
 
 /**
  * ✦ พิธีเช้า-เย็น (REFLECTION_JOURNAL_PLAN 1.9) — ส่วนที่ต่อจากการเปิดไพ่ประจำวันเดิมของ `/daily`
@@ -57,6 +58,10 @@ export const MorningReflection: React.FC<{
   const L = (o: { th: string; en: string }) => (isEnglish ? o.en : o.th);
   const prompt = useReflectionPrompt(cardId, isReversed, isEnglish);
   const [mood, setMood] = useState<MoodLevel | null>(null);
+  // ✦ ทำพิธีเช้าแล้ว = จังหวะที่เห็นคุณค่า (ครบ 2 วัน ➔ ชวนติดตั้งแอปได้)
+  useEffect(() => {
+    markPwaValueMoment("ritual", dayKeyOf(new Date()));
+  }, []);
   const [note, setNote] = useState("");
   const [saved, setSaved] = useState(false);
 

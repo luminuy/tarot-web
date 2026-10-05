@@ -14,6 +14,7 @@ import { OneCardRitual } from "@/components/reading/one-card/OneCardRitual";
 import { DailyStreakRibbon } from "@/components/daily/DailyStreakRibbon";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { EveningCheckin, MorningReflection, WeekStrip } from "@/components/daily/DailyReflection";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import type { RitualFocus } from "@/lib/journal/journal-types";
 
 type DailyFocus = "general" | "work" | "money" | "love" | "mind";
@@ -227,6 +228,7 @@ export function DailyClient() {
         onRevealed={handleRevealed}
         headerSlot={
           <div className="space-y-6">
+            <InstallPrompt isEnglish={isEnglish} />
             {/* ✦ กลับมาวันเดียวกัน = เช็กอินเย็น · มีพิธีหลายวันแล้ว = แถบ 7 วัน */}
             <EveningCheckin isEnglish={isEnglish} />
             <WeekStrip isEnglish={isEnglish} />

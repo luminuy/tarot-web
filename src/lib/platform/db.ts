@@ -462,6 +462,12 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
       "CREATE TABLE IF NOT EXISTS reflection_cache (cache_key TEXT PRIMARY KEY, user_id TEXT NOT NULL, lang TEXT NOT NULL, result_json TEXT NOT NULL, created_at INTEGER NOT NULL)"
     );
     safeExec("CREATE INDEX IF NOT EXISTS idx_reflection_cache_user ON reflection_cache(user_id, created_at)");
+    // 🔔 Web Push (migrations/0025)
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS push_subscriptions (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, endpoint TEXT NOT NULL UNIQUE, p256dh TEXT NOT NULL, auth TEXT NOT NULL, lang TEXT NOT NULL DEFAULT 'th', morning_hour INTEGER, checkins INTEGER NOT NULL DEFAULT 1, last_morning_day TEXT, fail_count INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)"
+    );
+    safeExec("CREATE INDEX IF NOT EXISTS idx_push_user ON push_subscriptions(user_id)");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_push_morning ON push_subscriptions(morning_hour) WHERE morning_hour IS NOT NULL");
     // 🎟 รหัสแลกสิทธิ์ตั้งต้นของเครื่อง dev — ต้องมีเพดานและวันหมดอายุเท่ากับ migrations/0013
     // (ห้ามปล่อย max_uses = -1 อีก: รหัสที่เขียนไว้ในรีโปแปลว่าใครอ่านซอร์สเจอก็แลกได้)
     // รหัสสำหรับแจกจริงให้สร้างจากแผงแอดมินซึ่งสุ่มรหัสใหม่ทุกครั้ง — อย่า seed ลงไฟล์

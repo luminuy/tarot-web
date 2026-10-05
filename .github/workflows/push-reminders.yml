@@ -1,0 +1,46 @@
+name: 🔔 Push Reminders — เตือนพิธีเช้าตามเวลาที่ผู้ใช้เลือก
+run-name: "🔔 Push Reminders ${{ github.event_name == 'workflow_dispatch' && format('(กดเองโดย {0})', github.actor) || '(รายชั่วโมง)' }}"
+
+# ตัวจับเวลาของการเตือนพิธีเช้าแบบ Web Push (REFLECTION_JOURNAL_PLAN 1.9 · 1.10)
+# ทุกชั่วโมง — ปลายทางเลือกเฉพาะผู้ที่ตั้งชั่วโมงตรงกับตอนนี้ (เวลาไทย) และกันส่งซ้ำรายวันเอง
+# เหตุผลที่ไม่ใช้ Cloudflare Cron Trigger และที่ยิงเข้า *.workers.dev เหมือน daily-digest.yml ทุกข้อ
+# ⚠️ cron ของ GitHub ดีเลย์ได้ 5–15 นาที — ยอมรับได้กับการเตือนพิธีเช้า
+# ยังไม่ตั้ง VAPID_* บน Cloudflare = ปลายทางตอบ 200 "vapid_not_configured" ไม่ส่งอะไร
+
+on:
+  schedule:
+    - cron: "5 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: push-reminders
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  send:
+    name: ส่งเตือนพิธีเช้า
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: ยิงเส้น cron ของการเตือน
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::error::ยังไม่ได้ตั้ง repository secret ชื่อ CRON_SECRET"
+            exit 1
+          fi
+          HTTP_CODE=$(curl -sS -o response.json -w "%{http_code}" \
+            -X POST "https://tarot-web.bankjack10452.workers.dev/api/cron/push-reminders" \
+            -A "SeerTarot-Cron/1.0" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            --max-time 300)
+          echo "HTTP $HTTP_CODE"
+          cat response.json || true
+          echo ""
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::ส่งเตือนไม่สำเร็จ (HTTP $HTTP_CODE)"
+            exit 1
+          fi

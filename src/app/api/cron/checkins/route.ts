@@ -8,6 +8,8 @@ import { claimCheckin, listDueCheckins } from "@/lib/journal/journal.repo";
 import { getThread } from "@/lib/journal/threads.repo";
 import { getUserById } from "@/lib/users/users.repo";
 import { recordEvent } from "@/lib/stats/record";
+import { listUserSubscriptions, recordPushResult } from "@/lib/push/push.repo";
+import { sendWebPush, vapidConfigured } from "@/lib/push/webpush";
 
 export const runtime = "nodejs";
 
@@ -21,7 +23,7 @@ export const runtime = "nodejs";
  *  • จองก่อนส่ง (`claimCheckin`) กันรอบที่ทำงานซ้อนส่งซ้ำ · ส่งไม่สำเร็จไม่ลองซ้ำอัตโนมัติ (ไม่ถล่มกล่องจดหมาย)
  *  • อีเมลมีแค่ชื่อเรื่องที่ผู้ใช้ตั้งเอง + ชื่อไพ่ใบหลัก — ไม่มีคำถามเต็ม/บันทึก (กติกาความเป็นส่วนตัวข้อ 5)
  *  • เพดานต่อรอบ 15 ฉบับ — แบ่งโควตา Resend ฟรี 100/วัน กับ digest (80) และอีเมลระบบ
- *  • ผู้ใช้ที่ไม่มีอีเมลที่ยืนยันแล้ว = ข้าม (Push จะมาแทนเมื่อเปิดใช้ Web Push)
+ *  • ผู้ใช้ที่เปิด Web Push ไว้ (เลือกรับนัดเช็ก) ได้แจ้งเตือนบนเครื่องด้วย · ไม่มีทั้งอีเมลยืนยันและ Push = ข้าม
  */
 
 const MAX_PER_RUN = 15;
@@ -54,8 +56,9 @@ export async function POST(request: Request) {
     }
     try {
       const user = await getUserById(item.userId);
-      const verified = user?.email && (user.provider !== "email" || user.emailVerified);
-      if (!user || !verified) {
+      const verified = Boolean(user?.email && (user.provider !== "email" || user.emailVerified));
+      const pushSubs = user && vapidConfigured() ? (await listUserSubscriptions(user.id).catch(() => [])).filter((p) => p.checkins) : [];
+      if (!user || (!verified && pushSubs.length === 0)) {
         skipped++;
         continue;
       }
@@ -79,6 +82,30 @@ export async function POST(request: Request) {
         link: `${SITE_ORIGIN}${lang === "en" ? "/en" : ""}/journal?entry=${encodeURIComponent(item.id)}&utm_source=checkin&utm_medium=email`,
         lang,
       };
+      // 🔔 แจ้งเตือนบนเครื่อง — ชื่อเรื่องที่ผู้ใช้ตั้งเองเท่านั้น ไม่มีคำถาม
+      for (const p of pushSubs) {
+        const r = await sendWebPush(
+          p,
+          {
+            title: lang === "en" ? "How did it turn out?" : "เรื่องนั้นเป็นอย่างไรบ้าง",
+            body: thread?.title
+              ? lang === "en"
+                ? `Time to check in on “${thread.title}”.`
+                : `ถึงเวลากลับมาเช็กเรื่อง “${thread.title}” แล้ว`
+              : lang === "en"
+                ? "Time to write down what actually happened."
+                : "ถึงเวลากลับมาเขียนว่าเกิดอะไรขึ้นจริงแล้ว",
+            url: `${lang === "en" ? "/en" : ""}/journal?entry=${encodeURIComponent(item.id)}`,
+            tag: "checkin",
+          },
+          { ttl: 24 * 3600 },
+        ).catch(() => ({ ok: false, gone: false, status: 0 }));
+        await recordPushResult(p.id, r).catch(() => {});
+      }
+      if (!verified) {
+        sent++;
+        continue;
+      }
       const res = await sendEmail(
         user.email!,
         lang === "en" ? "How did it turn out?" : "เรื่องนั้นเป็นอย่างไรบ้าง",

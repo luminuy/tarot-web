@@ -27,6 +27,12 @@ const SOURCES: UserDataSource[] = [
     export: async (userId) => (await import("@/lib/journal/reflection.repo")).listReflections(userId),
     erase: async (userId) => (await import("@/lib/journal/reflection.repo")).deleteReflections(userId),
   },
+  {
+    // ไม่ส่งออก endpoint/กุญแจเต็ม — บอกแค่ว่าเปิดแจ้งเตือนไว้กี่เครื่องและตั้งค่าอะไร (ข้อมูลที่ผู้ใช้เข้าใจได้)
+    key: "pushReminders",
+    export: async (userId) => (await import("@/lib/push/push.repo")).exportPushSettings(userId),
+    erase: async (userId) => (await import("@/lib/push/push.repo")).deleteAllPushSubscriptions(userId),
+  },
 ];
 
 export async function exportExtraUserData(userId: string): Promise<{ data: Record<string, unknown>; failed: string[] }> {

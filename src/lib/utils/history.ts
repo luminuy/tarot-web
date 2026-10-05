@@ -233,6 +233,8 @@ export function saveReading(item: Omit<SavedReadingItem, "id" | "date">): SavedR
   });
 
   if (!isDuplicate) {
+    // ✦ บันทึกคำอ่านครบ 2 ครั้ง = จังหวะที่เห็นคุณค่า (ชวนติดตั้งแอปได้ — REFLECTION_JOURNAL_PLAN 1.10)
+    if (typeof window !== "undefined") void import("@/lib/pwa/pwa-client").then((m) => m.markPwaValueMoment("reading")).catch(() => {});
     const merged = [newItem, ...current];
     const updated = merged.slice(0, LOCAL_HISTORY_LIMIT);
     // T-46: ของเดิม `.slice(0, 50)` ตัดตัวเก่าสุดทิ้งเงียบ ๆ โดยไม่มีการแจ้งเลยสักครั้ง
@@ -266,7 +268,7 @@ export function saveReading(item: Omit<SavedReadingItem, "id" | "date">): SavedR
           const queued = pendingServerPatches.get(newItem.id);
           if (queued) {
             pendingServerPatches.delete(newItem.id);
-            sendMetaPatch(serverId, queued);
+            void sendMetaPatch(serverId, queued);
           }
         })
         .catch(() => {
@@ -311,14 +313,68 @@ export function updateReadingOutcome(
   }
 }
 
-function sendMetaPatch(id: string, patch: ReadingMetaPatch): void {
-  fetch(`/api/journal/${encodeURIComponent(id)}`, {
+/**
+ * ✦ คิวแก้สมุดที่ส่งไม่ถึงเซิร์ฟเวอร์ (ออฟไลน์/เซิร์ฟเวอร์ล่ม) — REFLECTION_JOURNAL_PLAN 1.10 สมุดออฟไลน์
+ * แพตช์ของรายการเดียวกันถูกรวมกัน (อันใหม่ทับอันเก่า · ritual ผสาน) · 401/4xx ไม่เข้าคิว (ผู้เยี่ยมชม/ข้อมูลผิด)
+ * ส่งซ้ำด้วย `flushPendingJournalPatches()` (หน้าสมุดเรียกตอนเปิดและตอน `online`)
+ */
+const PENDING_KEY = STORAGE_KEYS.journalPendingPatches;
+
+function readPending(): Record<string, ReadingMetaPatch> {
+  try {
+    const raw = localStorage.getItem(PENDING_KEY);
+    const v = raw ? JSON.parse(raw) : {};
+    return v && typeof v === "object" && !Array.isArray(v) ? v : {};
+  } catch {
+    return {};
+  }
+}
+
+function writePending(map: Record<string, ReadingMetaPatch>): void {
+  try {
+    if (Object.keys(map).length === 0) localStorage.removeItem(PENDING_KEY);
+    else localStorage.setItem(PENDING_KEY, JSON.stringify(map));
+  } catch {
+    /* โหมดส่วนตัว — ข้าม */
+  }
+}
+
+function enqueuePatch(id: string, patch: ReadingMetaPatch): void {
+  const map = readPending();
+  const prev = map[id] ?? {};
+  map[id] = { ...prev, ...patch, ...(prev.ritual || patch.ritual ? { ritual: { ...(prev.ritual ?? {}), ...(patch.ritual ?? {}) } } : {}) };
+  writePending(map);
+}
+
+function sendMetaPatch(id: string, patch: ReadingMetaPatch): Promise<boolean> {
+  return fetch(`/api/journal/${encodeURIComponent(id)}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(patch),
-  }).catch(() => {
-    // ผู้เยี่ยมชม (401) / ออฟไลน์ — ค่าอยู่ในเครื่องแล้ว จะขึ้นเซิร์ฟเวอร์ตอนซิงก์หลังล็อกอิน
-  });
+  })
+    .then((res) => {
+      if (res.status >= 500) enqueuePatch(id, patch);
+      return res.ok;
+    })
+    .catch(() => {
+      // ออฟไลน์ — ค่าอยู่ในเครื่องแล้ว เก็บไว้ส่งซ้ำเมื่อกลับมาออนไลน์
+      enqueuePatch(id, patch);
+      return false;
+    });
+}
+
+/** ส่งแพตช์ที่ค้างอยู่ทั้งหมด — คืนจำนวนที่ส่งสำเร็จ */
+export async function flushPendingJournalPatches(): Promise<number> {
+  if (typeof window === "undefined" || !navigator.onLine) return 0;
+  const map = readPending();
+  const ids = Object.keys(map);
+  if (ids.length === 0) return 0;
+  writePending({});
+  let ok = 0;
+  for (const id of ids) {
+    if (await sendMetaPatch(id, map[id])) ok++;
+  }
+  return ok;
 }
 
 /**
@@ -359,7 +415,7 @@ export function updateReadingMeta(id: string, patch: ReadingMetaPatch): SavedRea
       ...(prev.ritual || patch.ritual ? { ritual: { ...(prev.ritual ?? {}), ...(patch.ritual ?? {}) } } : {}),
     });
   } else {
-    sendMetaPatch(id, patch);
+    void sendMetaPatch(id, patch);
   }
   return changed;
 }

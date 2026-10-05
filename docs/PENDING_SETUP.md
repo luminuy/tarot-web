@@ -199,6 +199,23 @@ npx wrangler secret put CRON_SECRET
 > **เอนจินคำอ่าน**: GROQ + GEMINI ตั้งครบ → Tier 1 Groq Qwen3-27B ทำงาน (`src/lib/ai/groq.ts` · fallback → Gemini `src/lib/ai/gemini.ts`) · เฝ้าเมตริก `ai_foreign_trip` / `ai_groq_failover` ใน `/admin`
 > **AI Gateway / Turnstile**: ตั้งครบแล้ว ไม่ใช่รายการค้างอีกต่อไป
 
+### 🔔 รอตั้งเพิ่ม — Web Push (`VAPID_*`) สำหรับเตือนพิธีเช้า + นัดกลับมาเช็ก (2026-10-05 · REFLECTION_JOURNAL_PLAN 1.10)
+
+ยังไม่ตั้ง = ปุ่ม "เปิดการเตือน" ถูกซ่อนเอง (`/api/push/public-key` ตอบ `enabled: false`) · cron ตอบ `vapid_not_configured` ไม่ส่งอะไร · อีเมลนัดเช็กยังทำงานตามปกติ
+
+1. สร้างคู่กุญแจในเครื่อง: `npx tsx scripts/gen-vapid.ts` (⚠️ ห้าม commit ค่าที่ได้)
+2. ตั้ง secret บน Worker:
+   ```bash
+   npx wrangler secret put VAPID_PUBLIC_KEY    # ค่าบรรทัด VAPID_PUBLIC_KEY
+   npx wrangler secret put VAPID_PRIVATE_KEY   # ค่าบรรทัด VAPID_PRIVATE_KEY
+   npx wrangler secret put VAPID_SUBJECT       # mailto:อีเมลผู้ดูแล
+   ```
+3. workflow `.github/workflows/push-reminders.yml` (ทุกชั่วโมง) ใช้ `CRON_SECRET` ชุดเดียวกับ digest — ไม่ต้องตั้งเพิ่ม
+4. รัน migration `0025_push_subscriptions.sql` (พร้อม 0022 · 0023 · 0028 ของสมุดดวง) ก่อนเปิดใช้
+
+⚠️ เปลี่ยนกุญแจภายหลัง = ผู้ใช้ทุกคนต้องกดเปิดการเตือนใหม่ (subscription เดิมใช้ไม่ได้)
+⚠️ iPhone รับแจ้งเตือนได้เฉพาะเมื่อเพิ่มเว็บไปยังหน้าจอโฮมแล้ว (iOS 16.4+) — หน้าเว็บบอกผู้ใช้เองแล้ว
+
 ### ⏳ รอตั้งเพิ่ม — Vectorize / R2 (Wave 3)
 
 **Vectorize** (binding อยู่ใน `wrangler.jsonc` แล้ว — deploy รอบถัดไปทำงานเลย):

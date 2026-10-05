@@ -7,6 +7,7 @@ import { STORAGE_KEYS } from "@/lib/storage/keys";
 import {
   deleteReading,
   fetchServerReadings,
+  flushPendingJournalPatches,
   getReadings,
   searchServerReadings,
   updateReadingMeta,
@@ -19,6 +20,8 @@ import { JournalCalendar } from "./JournalCalendar";
 import { JournalOverview } from "./JournalOverview";
 import { JournalThreads } from "./JournalThreads";
 import { ReflectionPanel } from "./ReflectionPanel";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import { AppSettingsCard } from "@/components/pwa/AppSettingsCard";
 import { CATEGORY_LABEL, OUTCOME_LABEL, dayKeyOf, formatDate } from "./journal-format";
 
 /**
@@ -78,6 +81,15 @@ export function JournalApp() {
       setView(readView());
     }
   }, []);
+
+  // ✦ สมุดออฟไลน์: แก้ขณะไม่มีเน็ตเก็บในเครื่องก่อน แล้วส่งขึ้นเมื่อกลับมาออนไลน์
+  useEffect(() => {
+    if (!isMember) return;
+    void flushPendingJournalPatches();
+    const onOnline = () => void flushPendingJournalPatches();
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+  }, [isMember]);
 
   useEffect(() => {
     if (sessionLoading) return;
@@ -195,6 +207,8 @@ export function JournalApp() {
           })}
         </p>
       </header>
+
+      <InstallPrompt isEnglish={isEnglish} />
 
       {!sessionLoading && !isMember && (
         <div className="glass-tile !rounded-xl p-4 text-xs sm:text-sm font-serif-th text-ink-deep text-center">
@@ -390,6 +404,7 @@ export function JournalApp() {
                   />
                 )}
                 <JournalOverview items={items} isEnglish={isEnglish} isMember={isMember} />
+                <AppSettingsCard isEnglish={isEnglish} isMember={isMember} />
               </div>
             )}
           </div>
