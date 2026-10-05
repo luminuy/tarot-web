@@ -21,6 +21,12 @@ const SOURCES: UserDataSource[] = [
     export: async (userId) => (await import("@/lib/journal/threads.repo")).listThreads(userId),
     erase: async (userId) => (await import("@/lib/journal/threads.repo")).deleteAllThreads(userId),
   },
+  {
+    // ข้อสังเกตที่เคยสร้างไว้ — เป็นข้อความที่อนุมานจากสมุดของผู้ใช้ จึงเป็นข้อมูลส่วนบุคคลด้วย
+    key: "reflections",
+    export: async (userId) => (await import("@/lib/journal/reflection.repo")).listReflections(userId),
+    erase: async (userId) => (await import("@/lib/journal/reflection.repo")).deleteReflections(userId),
+  },
 ];
 
 export async function exportExtraUserData(userId: string): Promise<{ data: Record<string, unknown>; failed: string[] }> {

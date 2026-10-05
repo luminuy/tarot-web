@@ -18,6 +18,7 @@ import { JournalEntryCard } from "./JournalEntryCard";
 import { JournalCalendar } from "./JournalCalendar";
 import { JournalOverview } from "./JournalOverview";
 import { JournalThreads } from "./JournalThreads";
+import { ReflectionPanel } from "./ReflectionPanel";
 import { CATEGORY_LABEL, OUTCOME_LABEL, dayKeyOf, formatDate } from "./journal-format";
 
 /**
@@ -363,12 +364,34 @@ export function JournalApp() {
                 knownTags={knownTags}
                 onPatch={onPatch}
                 onDelete={onDelete}
+                renderReflection={(threadId) => (
+                  <ReflectionPanel
+                    scope={{ threadId }}
+                    isEnglish={isEnglish}
+                    onOpenEntry={(id) => document.getElementById(`entry-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                  />
+                )}
               />
             )}
           </div>
 
           <div id="journal-panel-overview" role="tabpanel" aria-labelledby="journal-tab-overview" hidden={view !== "overview"}>
-            {view === "overview" && <JournalOverview items={items} isEnglish={isEnglish} isMember={isMember} />}
+            {view === "overview" && (
+              <div className="space-y-5">
+                {isMember && (
+                  <ReflectionPanel
+                    scope={{ days: 90 }}
+                    isEnglish={isEnglish}
+                    onOpenEntry={(id) => {
+                      clearFilters();
+                      setFocusEntry(id);
+                      chooseView("list");
+                    }}
+                  />
+                )}
+                <JournalOverview items={items} isEnglish={isEnglish} isMember={isMember} />
+              </div>
+            )}
           </div>
         </>
       )}

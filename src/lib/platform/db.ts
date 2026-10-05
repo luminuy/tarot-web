@@ -457,6 +457,11 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec(
       "CREATE INDEX IF NOT EXISTS idx_rj_checkin_due ON reading_journal(checkin_at, checkin_sent_at) WHERE checkin_at IS NOT NULL"
     );
+    // ✦ แคชข้อสังเกตจากสมุด (migrations/0028)
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS reflection_cache (cache_key TEXT PRIMARY KEY, user_id TEXT NOT NULL, lang TEXT NOT NULL, result_json TEXT NOT NULL, created_at INTEGER NOT NULL)"
+    );
+    safeExec("CREATE INDEX IF NOT EXISTS idx_reflection_cache_user ON reflection_cache(user_id, created_at)");
     // 🎟 รหัสแลกสิทธิ์ตั้งต้นของเครื่อง dev — ต้องมีเพดานและวันหมดอายุเท่ากับ migrations/0013
     // (ห้ามปล่อย max_uses = -1 อีก: รหัสที่เขียนไว้ในรีโปแปลว่าใครอ่านซอร์สเจอก็แลกได้)
     // รหัสสำหรับแจกจริงให้สร้างจากแผงแอดมินซึ่งสุ่มรหัสใหม่ทุกครั้ง — อย่า seed ลงไฟล์

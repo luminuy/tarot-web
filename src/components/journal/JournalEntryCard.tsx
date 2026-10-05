@@ -58,7 +58,7 @@ export const JournalEntryCard: React.FC<{
   }
 
   return (
-    <article className={`altar-card-porcelain !rounded-xl p-4 sm:p-5 space-y-3 ${item.pinned ? "ring-1 ring-gold-ink/60" : ""}`}>
+    <article id={`entry-${item.id}`} className={`altar-card-porcelain !rounded-xl p-4 sm:p-5 space-y-3 scroll-mt-24 ${item.pinned ? "ring-1 ring-gold-ink/60" : ""}`}>
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-0.5">
           <p className="text-[11px] sm:text-xs text-muted font-serif-th tracking-wide">
