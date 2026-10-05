@@ -26,6 +26,7 @@ import type { ReadingBasis } from "@/lib/tarot/explain-types";
 import { CardWhyPanel } from "./insight/CardWhyPanel";
 import { ReadingBasisPanel } from "./insight/ReadingBasisPanel";
 import { explainUrl } from "./insight/use-reading-explain";
+import { SecondPerspectivePanel } from "./insight/SecondPerspectivePanel";
 
 interface StreamReaderProps {
   reading?: Partial<Reading> | null;
@@ -681,6 +682,19 @@ isEnglish
                 ))}
               </ul>
             </div>
+          )}
+
+          {/* ✦ มุมที่สอง — ไพ่ชุดเดิมเป๊ะ อ่านโดยแม่หมออีกบุคลิก (ไม่ใช้กับคำอ่านสำรอง) */}
+          {readingId && !isStreaming && !isFallback && reading?.summary && (
+            <SecondPerspectivePanel
+              readingId={readingId}
+              original={reading}
+              originalPersona={persona}
+              positionNames={[...drawnCards]
+                .sort((a, b) => a.order - b.order)
+                .map((d) => (isEnglish ? d.position.nameEn || d.position.nameTh : d.position.nameTh))}
+              isEnglish={isEnglish}
+            />
           )}
 
           {/* ✦ คำอ่านนี้ประกอบจากอะไร + แผนที่ความเชื่อมโยง (ไม่มีตัวเลขความแม่น) */}

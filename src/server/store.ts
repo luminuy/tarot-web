@@ -46,6 +46,11 @@ export interface ReadingRecord {
   zodiac?: import("@/lib/ai/zodiac-context").SeekerZodiac;
 
   result?: Reading;
+  /**
+   * ✦ "มุมที่สอง" (REFLECTION_JOURNAL_PLAN 1.7) — คำอ่านไพ่ชุดเดิมเป๊ะจากบุคลิกแม่หมออื่น แยกตาม personaId
+   * เก็บไว้ในเซสชันเดิม เปิดซ้ำจึงไม่เรียก AI (ไม่เสียค่าซ้ำ) · ไพ่ไม่ถูกสับใหม่ทุกกรณี
+   */
+  perspectives?: Record<string, Reading>;
   createdAt: number;
 }
 
