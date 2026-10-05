@@ -43,6 +43,7 @@ docs/
     └── plans/
 <!-- PLANS_TREE_START · สร้างด้วย npm run docs:index — ห้ามแก้มือ -->
         ├── MASTER_PLAN_2026-09-06.md               # 🚧 🗺️ แผนแม่บทรวม — ทุกงานที่ค้างอยู่
+        ├── REFLECTION_JOURNAL_PLAN_2026-10-05.md   # 🚧 🪞 แผนออกแบบ 14 ระบบ — จากเว็บดูดวงสู่เครื่องมือสะท้อนตัวเอง (สมุดดวง · ความเชื่อมโยงไพ่ · หลักฐานคำอ่าน · พิธีเช้าเย็น · PWA · หน้าคำถาม · Reader Studio · ความปลอดภัย AI · วัดคุณภาพ AI)
         ├── IOS_APP_PLAN_2026-09-29.md              # 🚧 📱 แผนออกแบบระบบ — แอป SeerTarot บน iPhone (iOS App Store)
         ├── HANDOFF_OMNI_YESNO_2026-09-06.md        # 🚧 🎯 แผนส่งต่องาน 3 ชิ้น — Yes/No 78 หน้า · Omnichannel · Daily Digest
         ├── HANDOFF_AI_ACCURACY_THAI_2026-09-07.md  # 🚧 🧠 แผนยกระดับ "ความแม่น" ของคำอ่าน + "ภาษาไทยที่ถูกต้อง" ของแม่หมอ AI

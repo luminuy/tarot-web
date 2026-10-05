@@ -342,6 +342,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           return;
         }
 
+        /*
+         * ✦ หลักฐานคำอ่าน (REFLECTION_JOURNAL_PLAN 1.6) — บอกผู้ใช้ตามจริงว่ารอบนี้แม่หมอได้อะไรไปบ้าง
+         * ส่งเฉพาะ "ใช้/ไม่ใช้" ไม่ส่งเนื้อหาประวัติ · ส่วนที่นับได้จากไพ่/ผังคำนวณฝั่งหน้าเว็บผ่าน /api/reading/explain
+         */
+        send(controller, "basis", {
+          history: Boolean(pastReading),
+          member: Boolean(memberUserId),
+          intake: Boolean(record.intake?.situation || record.intake?.feeling || record.intake?.hoped),
+          question: Boolean(record.question?.trim()),
+        });
+
         const readingCtx = {
           personaId: record.personaId,
           spread,

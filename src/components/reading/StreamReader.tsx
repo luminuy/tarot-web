@@ -22,6 +22,10 @@ import { TTSReaderButton } from "./TTSReaderButton";
 import { useLocale } from "@/lib/i18n";
 import { useMotionSafe } from "@/lib/use-motion-safe";
 import { resolveDisplayKeywords } from "@/lib/tarot/keywords";
+import type { ReadingBasis } from "@/lib/tarot/explain-types";
+import { CardWhyPanel } from "./insight/CardWhyPanel";
+import { ReadingBasisPanel } from "./insight/ReadingBasisPanel";
+import { explainUrl } from "./insight/use-reading-explain";
 
 interface StreamReaderProps {
   reading?: Partial<Reading> | null;
@@ -44,6 +48,13 @@ interface StreamReaderProps {
   onRetry?: () => void;
   /** คำอ่านมาจากคลังความหมายไพ่ ไม่ใช่แม่หมอ AI — ขึ้น `FallbackNotice` ให้ผู้ใช้รู้และกดอ่านใหม่ได้ */
   isFallback?: boolean;
+  /**
+   * ✦ ผัง/หมวดของคำอ่านรอบนี้ + เฟรม `basis` — เปิดแผง "ทำไมแม่หมออ่านแบบนี้" และ "คำอ่านนี้ประกอบจาก"
+   * (REFLECTION_JOURNAL_PLAN 1.2 · 1.6) · ไม่ส่ง `spreadId` = ไม่แสดงสองแผงนี้
+   */
+  spreadId?: string;
+  category?: string;
+  basis?: ReadingBasis | null;
 }
 
 /**
@@ -108,6 +119,9 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
   nickname,
   onRetry,
   isFallback,
+  spreadId,
+  category,
+  basis,
 }) => {
   const { isEnglish } = useLocale();
   // สำรับตามภาษาของหน้า — ไม่ลากคำทำนายอังกฤษมาให้ผู้ใช้ไทย (A8-02)
@@ -124,6 +138,16 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       ? cardByIndex(activeDrawnCard.cardIndex)
       : undefined) || activeDrawnCard?.card;
   const activeCardReading = reading?.cards?.find((c) => c.position === activeCardIndex);
+
+  /*
+   * ✦ ลิงก์หลักฐานของคำอ่าน — สร้างเฉพาะเมื่อไพ่ครบทุกใบและอ่านจบแล้ว (คำอ่านสำรองก็แสดงได้ เพราะหลักฐานมาจากสารานุกรม)
+   * ไพ่ใบไหนไม่มีเลขในสำรับ = ไม่สร้างลิงก์เลย (กฎเหล็กข้อ 14 — ไม่ส่งไพ่ไม่ครบไปอธิบาย)
+   */
+  const insightUrl = useMemo(() => {
+    if (!spreadId || isStreaming || drawnCards.length === 0) return null;
+    if (drawnCards.some((d) => typeof d.cardIndex !== "number" || d.cardIndex < 0 || d.cardIndex > 77)) return null;
+    return explainUrl(spreadId, drawnCards, category || "general", isEnglish);
+  }, [spreadId, isStreaming, drawnCards, category, isEnglish]);
 
   /** ♿ ผู้ใช้ขอลดการเคลื่อนไหวหรือไม่ — ฮุกนี้ไม่ลาก `motion` เข้าบันเดิลสักไบต์ */
   const motionSafe = useMotionSafe();
@@ -538,6 +562,10 @@ isEnglish
               </p>
             </div>
 
+            {activeCardReading?.reading && cardData && (
+              <CardWhyPanel url={insightUrl} order={activeCardIndex} isEnglish={isEnglish} />
+            )}
+
             {/* Next / Prev Card Navigation Arrows */}
             <div className="flex items-center justify-between pt-3 border-t border-line-warm/30 text-xs">
               <button
@@ -653,6 +681,21 @@ isEnglish
                 ))}
               </ul>
             </div>
+          )}
+
+          {/* ✦ คำอ่านนี้ประกอบจากอะไร + แผนที่ความเชื่อมโยง (ไม่มีตัวเลขความแม่น) */}
+          {insightUrl && reading?.summary && (
+            <ReadingBasisPanel
+              url={insightUrl}
+              cardCount={drawnCards.length}
+              positionNames={[...drawnCards]
+                .sort((a, b) => a.order - b.order)
+                .map((d) => (isEnglish ? d.position.nameEn || d.position.nameTh : d.position.nameTh))}
+              category={category || "general"}
+              basis={basis ?? null}
+              hasQuestion={Boolean(question?.trim())}
+              isEnglish={isEnglish}
+            />
           )}
 
           {/* ── ส่วนรอง: ยุบไว้เพื่อไม่ให้หน้ายาวเกินไป ผู้ใช้แตะเปิดเอง ── */}

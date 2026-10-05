@@ -13,6 +13,7 @@ import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { loadCardResolver } from "@/data/cards/client-deck";
 import { PUBLIC_SPREADS, getSpread, type Spread } from "@/data/spreads";
 import { PERSONAS, getPersona, type Persona } from "@/data/personas";
+import type { ReadingBasis } from "@/lib/tarot/explain-types";
 import type { Category } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
@@ -346,6 +347,15 @@ export default function TarotFlow({
   const [selectedSpread, setSelectedSpread] = useState<Spread>(routeSpread ?? PUBLIC_SPREADS[3]); // Default: 3-card
   const [selectedPersona, setSelectedPersona] = useState<Persona>(PERSONAS[0]); // Default: warm
   const [selectedCategory, setSelectedCategory] = useState<Category>("general");
+  /**
+   * ✦ บริบทของคำอ่านที่กำลังแสดง สำหรับแผง "ทำไมแม่หมออ่านแบบนี้" + หลักฐานคำอ่าน (REFLECTION_JOURNAL_PLAN 1.2 · 1.6)
+   * เก็บผัง/หมวดของ "รอบที่อ่านจริง" (ทำนายด่วนใช้ผังคนละตัวกับ `selectedSpread`) · `basis` มาจากเฟรม SSE `basis`
+   */
+  const [readingInsight, setReadingInsight] = useState<{
+    spreadId: string;
+    category: string;
+    basis: ReadingBasis | null;
+  } | null>(null);
   const [question, setQuestion] = useState("");
   const [nickname, setNickname] = useState("");
   const [situation, setSituation] = useState("");
@@ -1287,6 +1297,11 @@ export default function TarotFlow({
     readStreamAbortRef.current = abortController;
 
     dispatchRead({ type: "start" });
+    setReadingInsight({
+      spreadId: (overrides?.spread ?? selectedSpread).id,
+      category: overrides?.category || selectedCategory,
+      basis: null,
+    });
     let streamCompleted = false;
 
     try {
@@ -1333,7 +1348,9 @@ export default function TarotFlow({
             try {
               const data = JSON.parse(dataMatch[1]);
 
-              if (eventType === "opening") {
+              if (eventType === "basis") {
+                setReadingInsight((prev) => (prev ? { ...prev, basis: data as ReadingBasis } : prev));
+              } else if (eventType === "opening") {
                 dispatchRead({ type: "opening", text: data.text });
               } else if (eventType === "card") {
                 // การรวมคำอ่านรายใบแบบไม่ซ้ำตำแหน่งย้ายไปอยู่ในตัวลดแล้ว
@@ -2012,6 +2029,9 @@ export default function TarotFlow({
                       question={question}
                       nickname={nickname}
                       isFallback={read.fallback}
+                      spreadId={readingInsight?.spreadId ?? selectedSpread.id}
+                      category={readingInsight?.category ?? selectedCategory}
+                      basis={readingInsight?.basis ?? null}
                       onRetry={() => {
                         if (readingId && drawnCards.length > 0) {
                           startAIStreaming(readingId, drawnCards);
