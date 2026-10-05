@@ -118,6 +118,31 @@ export const JournalPatchSchema = z
     moodAfter: JournalMoodSchema.nullable().optional(),
     shareWithAi: z.boolean().optional(),
     ritual: JournalRitualSchema.optional(),
+    /** คลื่น 3 — ผูก/ถอดเส้นเรื่อง (route ตรวจว่าเป็นเรื่องของผู้ใช้คนนี้จริง) */
+    threadId: z.string().regex(/^th_[0-9a-f-]{36}$/, "รหัสเรื่องไม่ถูกต้อง").nullable().optional(),
+    /** คลื่น 3 — นัดกลับมาเช็ก: ต้องอยู่ในอนาคตไม่เกิน 180 วัน · null = ยกเลิกนัด */
+    checkinAt: z
+      .string()
+      .datetime()
+      .refine((v) => {
+        const t = Date.parse(v);
+        return t > Date.now() - 60_000 && t < Date.now() + 181 * 86_400_000;
+      }, "วันนัดต้องอยู่ภายใน 180 วันข้างหน้า")
+      .nullable()
+      .optional(),
+  })
+  .refine((v) => Object.values(v).some((x) => x !== undefined), { message: "ไม่มีข้อมูลให้แก้ไข" });
+
+/** ชื่อเรื่องที่ติดตาม — ผู้ใช้ตั้งเอง ใช้แทนคำถามเต็มในอีเมล/แจ้งเตือน (กติกาความเป็นส่วนตัวข้อ 5) */
+export const ThreadTitleSchema = noInjection("ชื่อเรื่อง", 60)
+  .transform((v) => v.replace(/\s+/g, " ").trim())
+  .pipe(z.string().min(1, "กรุณาตั้งชื่อเรื่อง"));
+
+export const ThreadPatchSchema = z
+  .object({
+    title: ThreadTitleSchema.optional(),
+    status: z.enum(["open", "closed"]).optional(),
+    closingNote: noInjection("บทสรุปปิดเรื่อง", 1000).nullable().optional(),
   })
   .refine((v) => Object.values(v).some((x) => x !== undefined), { message: "ไม่มีข้อมูลให้แก้ไข" });
 

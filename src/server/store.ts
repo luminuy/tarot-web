@@ -44,6 +44,8 @@ export interface ReadingRecord {
   premiumTrial?: boolean;
   /** ✦ ราศีที่ผู้ถามบอกไว้ (ไม่บังคับ) — บริบทของ prompt เท่านั้น ไม่เกี่ยวกับการจั่ว */
   zodiac?: import("@/lib/ai/zodiac-context").SeekerZodiac;
+  /** ✦ ถามต่อจากเส้นเรื่องเดิม — ความทรงจำแม่หมอดึงคำอ่านในเรื่องนี้แทน "3 ครั้งล่าสุด" */
+  threadId?: string;
 
   result?: Reading;
   /**

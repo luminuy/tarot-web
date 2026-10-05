@@ -141,7 +141,12 @@ check("ป้ายใจไม่มีอิโมจิ", MOOD_OPTIONS.every(
 
 // ── 7. ความเป็นส่วนตัว: ความทรงจำแม่หมอไม่แตะบันทึก/ใจ/แท็ก ──
 const memorySrc = readFileSync("src/lib/ai/memory.ts", "utf8");
-check("memory.ts ไม่ส่ง userNote/mood/tags เข้า prompt", !/userNote|moodBefore|moodAfter|\.tags\b|ritual/.test(memorySrc));
+const memoryCode = memorySrc.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+check("memory.ts ไม่ส่ง mood/tags/บันทึกพิธีเข้า prompt", !/moodBefore|moodAfter|\.tags\b|ritual/.test(memoryCode));
+check(
+  "memory.ts ใช้ userNote เฉพาะเมื่อผู้ใช้ยินยอม (shareWithAi) และผ่าน sanitizePromptValue",
+  memoryCode.split("\n").filter((l) => /userNote/.test(l)).every((l) => /shareWithAi/.test(l) && /sanitizePromptValue/.test(l)),
+);
 
 // ── 8. หน้า /journal เป็น noindex ──
 const metaSrc = readFileSync("src/app/_shared/pages/journal-meta.ts", "utf8");

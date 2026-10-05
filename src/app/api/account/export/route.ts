@@ -24,6 +24,9 @@ export async function GET() {
 
     const dbUser = await getUserById(user.id);
     const journal = await listAllJournalForExport(user.id);
+    // ✦ ฟีเจอร์ใหม่ลงทะเบียนที่ `lib/privacy/user-data.ts` ที่เดียว — ส่วนไหนอ่านไม่ได้ต้องบอกในไฟล์ ไม่ใช่เงียบ
+    const { exportExtraUserData } = await import("@/lib/privacy/user-data");
+    const extra = await exportExtraUserData(user.id);
 
     const exportData = {
       exportedAt: new Date().toISOString(),
@@ -41,6 +44,8 @@ export async function GET() {
       },
       readingJournalCount: journal.length,
       readingJournal: journal,
+      ...extra.data,
+      ...(extra.failed.length > 0 ? { incompleteSections: extra.failed } : {}),
     };
 
     const fileName = `tarot-data-export-${user.id}-${Date.now()}.json`;

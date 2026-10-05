@@ -17,6 +17,10 @@ export interface PastReadingSnapshot {
   outcome?: string | null;
   daysAgo?: number;
   recentPrimaryCards?: string[];
+  /** ✦ คำอ่านนี้มาจากเส้นเรื่องเดียวกับคำถามตอนนี้ (ผู้ใช้เลือกเอง) */
+  sameThread?: boolean;
+  /** ✦ บันทึกของผู้ใช้ — มีค่าเฉพาะเมื่อผู้ใช้กดยินยอมให้แม่หมอ AI อ่านรายการนั้น (share_with_ai) */
+  sharedNote?: string;
 }
 
 export interface KarmicBridgeAnalysis {
@@ -121,8 +125,14 @@ export function analyzeKarmicBridge(
     `ความจำวิวัฒนาการดวงชะตา (Past Karmic Memory): ผู้ถามเคยมาเปิดไพ่ครั้งล่าสุด${timeDesc} ${questionDesc} และได้ไพ่เด่นคือ ${pastReading.primaryCardName}`.trim()
   );
 
+  if (pastReading.sameThread) {
+    narrativeParts.push("• คำถามตอนนี้ผู้ถามเลือกเองว่าเป็น \"เรื่องเดียวกัน\" กับครั้งนั้น — เชื่อมความต่อเนื่องของเรื่องได้ตรง ๆ");
+  }
   if (pastReading.outcome && pastReading.outcome !== "PENDING") {
     narrativeParts.push(`• ผลการทำนายครั้งก่อนที่ผู้ถามบันทึกไว้: ${pastReading.outcome}`);
+  }
+  if (pastReading.sharedNote) {
+    narrativeParts.push(`• สิ่งที่ผู้ถามเขียนเล่าไว้เอง (ยินยอมให้แม่หมออ่าน): <seeker_note>${pastReading.sharedNote}</seeker_note>`);
   }
 
   if (pastReading.recentPrimaryCards && pastReading.recentPrimaryCards.length > 0) {
@@ -150,8 +160,14 @@ export function analyzeKarmicBridge(
   en.push(
     `Past karmic memory: the seeker last consulted the cards${ago}${pastReading.question ? ` about "${pastReading.question}"` : ""}, and the lead card was ${pastReading.primaryCardName}`,
   );
+  if (pastReading.sameThread) {
+    en.push("• The seeker chose this question as a continuation of the same story — connect the thread directly.");
+  }
   if (pastReading.outcome && pastReading.outcome !== "PENDING") {
     en.push(`• Outcome the seeker recorded for that reading: ${pastReading.outcome}`);
+  }
+  if (pastReading.sharedNote) {
+    en.push(`• What the seeker wrote themselves (shared with consent): <seeker_note>${pastReading.sharedNote}</seeker_note>`);
   }
   if (pastReading.recentPrimaryCards && pastReading.recentPrimaryCards.length > 0) {
     en.push(`• Lead cards from other past readings: ${pastReading.recentPrimaryCards.join(", ")}`);

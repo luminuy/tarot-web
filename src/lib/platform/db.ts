@@ -448,6 +448,15 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec(
       "CREATE INDEX IF NOT EXISTS idx_rj_user_ritual ON reading_journal(user_id, ritual_kind, created_at) WHERE ritual_kind IS NOT NULL"
     );
+    // 🧵 เส้นเรื่อง + นัดกลับมาเช็ก (migrations/0023) — ต้องตรงกับไฟล์ migration ทุกคอลัมน์
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS journal_threads (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, title TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'open', closing_note TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, closed_at INTEGER)"
+    );
+    safeExec("CREATE INDEX IF NOT EXISTS idx_jt_user_status ON journal_threads(user_id, status, updated_at DESC)");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN checkin_sent_at INTEGER");
+    safeExec(
+      "CREATE INDEX IF NOT EXISTS idx_rj_checkin_due ON reading_journal(checkin_at, checkin_sent_at) WHERE checkin_at IS NOT NULL"
+    );
     // 🎟 รหัสแลกสิทธิ์ตั้งต้นของเครื่อง dev — ต้องมีเพดานและวันหมดอายุเท่ากับ migrations/0013
     // (ห้ามปล่อย max_uses = -1 อีก: รหัสที่เขียนไว้ในรีโปแปลว่าใครอ่านซอร์สเจอก็แลกได้)
     // รหัสสำหรับแจกจริงให้สร้างจากแผงแอดมินซึ่งสุ่มรหัสใหม่ทุกครั้ง — อย่า seed ลงไฟล์

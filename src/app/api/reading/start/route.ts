@@ -46,6 +46,11 @@ const BodySchema = z.object({
   // ผูกไว้กับ record ตั้งแต่ /start เพื่อให้ตรึงก่อนการจั่วทุกกรณี และกันกรณีที่คำขอ
   // /shuffle สองอันมาพร้อมกันแล้วได้เมล็ดคนละตัวจนจั่วได้ไพ่คนละชุด
   clientSeed: z.string().min(1).max(4096).optional(),
+  /**
+   * ✦ ถามต่อจากเส้นเรื่องเดิม (REFLECTION_JOURNAL_PLAN 1.4) — ความทรงจำแม่หมอจะดึงคำอ่านในเรื่องเดียวกัน
+   * ไม่มีผลกับการจั่ว · `/read` ค้นด้วย user_id ของเซสชันเสมอ จึงอ่านเรื่องของคนอื่นไม่ได้แม้จะเดารหัสถูก
+   */
+  threadId: z.string().regex(/^th_[0-9a-f-]{36}$/).optional(),
   /*
    * ✦ ราศีที่ผู้ใช้บอกไว้ในหน้าไพ่ประจำราศี (ไม่บังคับ) — รับเฉพาะ slug ราศีที่มีจริง
    * เป็นแค่บริบทให้แม่หมอ ไม่มีผลกับการจั่วไพ่เลย (ไม่แตะ seed · ไม่แตะ derivation)
@@ -343,6 +348,7 @@ export async function POST(request: Request) {
     clientSeed: parsed.data.clientSeed ? normalizeClientSeed(parsed.data.clientSeed) : undefined,
     derivation,
     zodiac: parsed.data.zodiac,
+    ...(parsed.data.threadId ? { threadId: parsed.data.threadId } : {}),
     ...(usePremiumTrial ? { premiumTrial: true } : {}),
     createdAt: Date.now(),
   };

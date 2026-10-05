@@ -17,6 +17,7 @@ import {
 import { JournalEntryCard } from "./JournalEntryCard";
 import { JournalCalendar } from "./JournalCalendar";
 import { JournalOverview } from "./JournalOverview";
+import { JournalThreads } from "./JournalThreads";
 import { CATEGORY_LABEL, OUTCOME_LABEL, dayKeyOf, formatDate } from "./journal-format";
 
 /**
@@ -28,13 +29,13 @@ import { CATEGORY_LABEL, OUTCOME_LABEL, dayKeyOf, formatDate } from "./journal-f
  * ⚠️ island นี้ห้าม import สารานุกรมไพ่ — ใช้ `deck-index-meta.ts` (เบา) เท่านั้น
  */
 
-type View = "list" | "calendar" | "overview";
+type View = "list" | "calendar" | "overview" | "stories";
 type Range = "all" | "7" | "30" | "90";
 
 function readView(): View {
   try {
     const v = window.localStorage.getItem(STORAGE_KEYS.journalView);
-    return v === "calendar" || v === "overview" ? v : "list";
+    return v === "calendar" || v === "overview" || v === "stories" ? v : "list";
   } catch {
     return "list";
   }
@@ -57,10 +58,24 @@ export function JournalApp() {
   const [pinnedOnly, setPinnedOnly] = useState(false);
   const [range, setRange] = useState<Range>("all");
   const [day, setDay] = useState<string | null>(null);
+  /** ลิงก์จากอีเมลนัดเช็ก `?entry=` / ท้ายคำอ่าน `?thread=` — เปิดตรงไปยังรายการ/เรื่องนั้น */
+  const [focusEntry, setFocusEntry] = useState<string | null>(null);
+  const [initialThread, setInitialThread] = useState<string | null>(null);
   const editVersion = useRef(0);
 
   useEffect(() => {
-    setView(readView());
+    const params = new URLSearchParams(window.location.search);
+    const entry = params.get("entry");
+    const thread = params.get("thread");
+    if (thread && /^th_[0-9a-f-]{36}$/.test(thread)) {
+      setInitialThread(thread);
+      setView("stories");
+    } else if (entry && /^[\w-]{1,80}$/.test(entry)) {
+      setFocusEntry(entry);
+      setView("list");
+    } else {
+      setView(readView());
+    }
   }, []);
 
   useEffect(() => {
@@ -132,6 +147,7 @@ export function JournalApp() {
         if (outcome !== "ALL" && (r.outcome ?? "PENDING") !== outcome) return false;
         if (since && new Date(r.date).getTime() < since) return false;
         if (day && dayKeyOf(r.date) !== day) return false;
+        if (focusEntry && r.id !== focusEntry) return false;
         if (!q) return true;
         if (serverHits?.some((h) => h.id === r.id)) return true;
         return (
@@ -143,9 +159,9 @@ export function JournalApp() {
         );
       })
       .sort((a, b) => Number(!!b.pinned) - Number(!!a.pinned) || new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [items, serverHits, query, range, pinnedOnly, tagFilter, category, outcome, day]);
+  }, [items, serverHits, query, range, pinnedOnly, tagFilter, category, outcome, day, focusEntry]);
 
-  const activeFilters = Boolean(tagFilter || category !== "all" || outcome !== "ALL" || pinnedOnly || range !== "all" || day || query);
+  const activeFilters = Boolean(tagFilter || category !== "all" || outcome !== "ALL" || pinnedOnly || range !== "all" || day || query || focusEntry);
   const clearFilters = () => {
     setTagFilter(null);
     setCategory("all");
@@ -154,12 +170,14 @@ export function JournalApp() {
     setRange("all");
     setDay(null);
     setQuery("");
+    setFocusEntry(null);
   };
 
   const tabs: Array<{ id: View; label: string }> = [
     { id: "list", label: L({ th: "รายการ", en: "Entries" }) },
     { id: "calendar", label: L({ th: "ปฏิทิน", en: "Calendar" }) },
     { id: "overview", label: L({ th: "ภาพรวม", en: "Overview" }) },
+    { id: "stories", label: L({ th: "เรื่องที่ติดตาม", en: "Stories" }) },
   ];
 
   return (
@@ -189,7 +207,7 @@ export function JournalApp() {
         </div>
       )}
 
-      <div role="tablist" aria-label={L({ th: "มุมมองสมุดดวง", en: "Journal views" })} className="flex justify-center gap-1.5 sm:gap-2">
+      <div role="tablist" aria-label={L({ th: "มุมมองสมุดดวง", en: "Journal views" })} className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
         {tabs.map((t) => (
           <button
             key={t.id}
@@ -313,6 +331,7 @@ export function JournalApp() {
                   onPatch={onPatch}
                   onDelete={onDelete}
                   onTagClick={(t) => setTagFilter(t)}
+                  defaultOpen={focusEntry === r.id}
                 />
               ))}
               {filtered.length === 0 && (
@@ -331,6 +350,19 @@ export function JournalApp() {
                   setDay(k);
                   chooseView("list");
                 }}
+              />
+            )}
+          </div>
+
+          <div id="journal-panel-stories" role="tabpanel" aria-labelledby="journal-tab-stories" hidden={view !== "stories"}>
+            {view === "stories" && (
+              <JournalThreads
+                isEnglish={isEnglish}
+                isMember={isMember}
+                initialThreadId={initialThread}
+                knownTags={knownTags}
+                onPatch={onPatch}
+                onDelete={onDelete}
               />
             )}
           </div>

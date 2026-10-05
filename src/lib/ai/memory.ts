@@ -1,4 +1,4 @@
-import { listJournal } from "@/lib/journal/journal.repo";
+import { listJournal, listThreadEntries } from "@/lib/journal/journal.repo";
 import type { PastReadingSnapshot } from "@/lib/ai/karmic";
 import { cardByIndex } from "@/data/cards";
 import { sanitizePromptValue } from "@/lib/ai/prompt-guard";
@@ -14,13 +14,17 @@ import { sanitizePromptValue } from "@/lib/ai/prompt-guard";
 export async function loadKarmicMemory(
   userId: string | null | undefined,
   limit = 3,
+  /** ✦ ถามต่อจากเส้นเรื่องเดิม — ดึงคำอ่านในเรื่องนั้น (ค้นด้วย userId เสมอ อ่านของคนอื่นไม่ได้) */
+  threadId?: string,
 ): Promise<PastReadingSnapshot | undefined> {
   if (!userId) return undefined;
 
   try {
     // จำกัดเวลาค้นหาประวัติไม่เกิน 250ms เพื่อรักษา TTFB Budget ไม่ให้สตรีมช้า
     const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 250));
-    const pastPromise = listJournal(userId, { limit });
+    const pastPromise = threadId
+      ? listThreadEntries(userId, threadId, limit).then((list) => list.reverse()) // ใหม่ ➔ เก่า เหมือน listJournal
+      : listJournal(userId, { limit });
 
     const past = await Promise.race([pastPromise, timeoutPromise]);
     if (!past || past.length === 0) return undefined;
@@ -52,6 +56,12 @@ export async function loadKarmicMemory(
         .filter((name): name is string => Boolean(name)),
       date: latest.date,
       summary: sanitizePromptValue(latest.summary, 600) || undefined,
+      ...(threadId ? { sameThread: true } : {}),
+      /*
+       * 🔐 กติกาความเป็นส่วนตัวข้อ 1 — บันทึกส่วนตัวเข้า prompt ได้เฉพาะรายการที่ผู้ใช้กดยินยอมเอง (share_with_ai)
+       *    ใจตอนนี้/แท็ก/บันทึกพิธี ไม่เข้า prompt ในทุกกรณี
+       */
+      ...(latest.shareWithAi && latest.userNote ? { sharedNote: sanitizePromptValue(latest.userNote, 300) || undefined } : {}),
     };
   } catch (err) {
     console.warn("[karmic memory] อ่านประวัติไม่สำเร็จ:", err);

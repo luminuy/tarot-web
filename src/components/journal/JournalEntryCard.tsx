@@ -23,8 +23,10 @@ export const JournalEntryCard: React.FC<{
   onPatch: (id: string, patch: ReadingMetaPatch) => void;
   onDelete: (id: string) => void;
   onTagClick: (tag: string) => void;
-}> = ({ item, isEnglish, isMember, knownTags, onPatch, onDelete, onTagClick }) => {
-  const [open, setOpen] = useState(false);
+  /** เปิดรายละเอียดไว้ตั้งแต่แรก (ลิงก์จากอีเมลนัดเช็ก) */
+  defaultOpen?: boolean;
+}> = ({ item, isEnglish, isMember, knownTags, onPatch, onDelete, onTagClick, defaultOpen }) => {
+  const [open, setOpen] = useState(Boolean(defaultOpen));
   const [noteDraft, setNoteDraft] = useState(item.userNote ?? "");
   const [tagDraft, setTagDraft] = useState("");
   const detailId = useId();
@@ -209,6 +211,22 @@ export const JournalEntryCard: React.FC<{
               />
             </label>
           </section>
+
+          {item.checkinAt && (
+            <section className="flex items-center justify-between gap-2 rounded-lg bg-surface/60 border border-line-warm p-3 text-xs font-serif-th">
+              <span className="text-ink-deep">
+                {L({ th: "นัดกลับมาเช็ก: ", en: "Check-in reminder: " })}
+                <span className="font-semibold">{formatDate(item.checkinAt, isEnglish)}</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => onPatch(item.id, { checkinAt: null })}
+                className="tap-overlay-y min-h-[44px] px-3 text-muted hover:text-err cursor-pointer"
+              >
+                {L({ th: "ยกเลิกนัด", en: "Cancel" })}
+              </button>
+            </section>
+          )}
 
           <MoodPicker
             value={item.moodAfter}

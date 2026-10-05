@@ -376,7 +376,10 @@ export async function updateJournalMeta(userId: string, id: string, patch: Readi
   if (patch.moodAfter !== undefined) set("mood_after", isMoodLevel(patch.moodAfter) ? patch.moodAfter : null);
   if (patch.shareWithAi !== undefined) set("share_with_ai", patch.shareWithAi ? 1 : 0);
   if (patch.threadId !== undefined) set("thread_id", patch.threadId || null);
-  if (patch.checkinAt !== undefined) set("checkin_at", patch.checkinAt ? new Date(patch.checkinAt).getTime() || null : null);
+  if (patch.checkinAt !== undefined) {
+    set("checkin_at", patch.checkinAt ? new Date(patch.checkinAt).getTime() || null : null);
+    set("checkin_sent_at", null); // นัดใหม่ = ส่งเตือนใหม่ได้อีกครั้ง
+  }
   if (patch.ritual !== undefined) {
     const row = await db
       .prepare(`SELECT ritual_json FROM reading_journal WHERE id = ? AND user_id = ?`)
@@ -460,4 +463,57 @@ export async function countPendingOlderThan(userId: string, days: number): Promi
     .first<{ count: number }>();
 
   return Number(row?.count ?? 0);
+}
+
+/** คำอ่านในเส้นเรื่องเดียวกัน (เก่า ➔ ใหม่) — ใช้กับหน้าเส้นเวลาและความทรงจำแม่หมอตามเรื่อง */
+export async function listThreadEntries(userId: string, threadId: string, limit = 50): Promise<SavedReadingItem[]> {
+  const db = await getAppDB();
+  const { results } = await db
+    .prepare(
+      `SELECT * FROM reading_journal WHERE user_id = ? AND thread_id = ?
+       ORDER BY created_at DESC LIMIT ?`
+    )
+    .bind(userId, threadId, Math.min(100, Math.max(1, limit)))
+    .all<RawJournalRow>();
+  return (results || []).map(mapRowToItem).reverse();
+}
+
+export interface DueCheckin {
+  id: string;
+  userId: string;
+  createdAt: number;
+  checkinAt: number;
+  threadId: string | null;
+  cardsJson: string;
+}
+
+/** นัดกลับมาเช็กที่ถึงเวลาแล้วและยังไม่ได้ส่งเตือน · ผลจริงยังเป็น PENDING เท่านั้น (บันทึกแล้วไม่ต้องเตือน) */
+export async function listDueCheckins(now: number, limit: number): Promise<DueCheckin[]> {
+  const db = await getAppDB();
+  const { results } = await db
+    .prepare(
+      `SELECT id, user_id, created_at, checkin_at, thread_id, cards_json FROM reading_journal
+       WHERE checkin_at IS NOT NULL AND checkin_at <= ? AND checkin_sent_at IS NULL AND outcome = 'PENDING'
+       ORDER BY checkin_at ASC LIMIT ?`
+    )
+    .bind(now, limit)
+    .all<{ id: string; user_id: string; created_at: number; checkin_at: number; thread_id: string | null; cards_json: string }>();
+  return (results || []).map((r) => ({
+    id: r.id,
+    userId: r.user_id,
+    createdAt: r.created_at,
+    checkinAt: r.checkin_at,
+    threadId: r.thread_id,
+    cardsJson: r.cards_json,
+  }));
+}
+
+/** จองการส่งเตือน (กันส่งซ้ำเมื่อ cron ทำงานซ้อน) — true = รอบนี้เป็นคนส่ง */
+export async function claimCheckin(id: string, now: number): Promise<boolean> {
+  const db = await getAppDB();
+  const res = await db
+    .prepare(`UPDATE reading_journal SET checkin_sent_at = ? WHERE id = ? AND checkin_sent_at IS NULL`)
+    .bind(now, id)
+    .run();
+  return (res.meta?.changes ?? 0) > 0;
 }

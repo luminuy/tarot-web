@@ -35,7 +35,18 @@ export async function PATCH(
       return NextResponse.json({ error: "ข้อมูลสถานะไม่ถูกต้อง" }, { status: 400 });
     }
 
+    // 🧵 ผูกเส้นเรื่องได้เฉพาะเรื่องของตัวเอง — ห้ามเชื่อรหัสที่ไคลเอนต์ส่งมาเฉย ๆ
+    if (parsed.data.threadId) {
+      const { getThread } = await import("@/lib/journal/threads.repo");
+      const thread = await getThread(userId, parsed.data.threadId);
+      if (!thread) return NextResponse.json({ error: "ไม่พบเรื่องที่ติดตามนี้" }, { status: 404 });
+    }
+
     const changed = await updateJournalMeta(userId, id, parsed.data);
+    if (changed && parsed.data.threadId) {
+      const { touchThread } = await import("@/lib/journal/threads.repo");
+      await touchThread(userId, parsed.data.threadId).catch(() => {});
+    }
     if (!changed) {
       return NextResponse.json({ error: "ไม่พบบันทึกดวงรายการนี้" }, { status: 404 });
     }

@@ -25,6 +25,8 @@ import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { soundManager } from "@/lib/utils/audio";
 import { saveReading, updateReadingMeta } from "@/lib/utils/history";
 import { MoodPicker } from "@/components/journal/MoodPicker";
+import { FollowStoryCard } from "@/components/journal/FollowStoryCard";
+import { fetchThreads, type JournalThread } from "@/lib/journal/threads-client";
 import type { MoodLevel } from "@/lib/journal/mood";
 import { saveFlowState, loadFlowState, clearFlowState, FRESH_START_EVENT } from "@/lib/utils/flow-persistence";
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
@@ -360,6 +362,19 @@ export default function TarotFlow({
   const [moodBefore, setMoodBefore] = useState<MoodLevel | null>(null);
   const [moodAfter, setMoodAfter] = useState<MoodLevel | null>(null);
   const [savedJournalId, setSavedJournalId] = useState<string | null>(null);
+  /** 🧵 เส้นเรื่องที่ติดตามอยู่ (สมาชิก) + เรื่องที่เลือก "ถามต่อ" สำหรับรอบนี้ (REFLECTION_JOURNAL_PLAN 1.4) */
+  const [openThreads, setOpenThreads] = useState<JournalThread[]>([]);
+  const [chosenThread, setChosenThread] = useState<{ id: string; title: string } | null>(null);
+  const isJournalMember = entitlement?.kind === "member";
+  useEffect(() => {
+    if (!isJournalMember || currentStep !== "INTENTION_SELECT") return;
+    let alive = true;
+    void fetchThreads("open").then((list) => alive && setOpenThreads(list));
+    return () => {
+      alive = false;
+    };
+  }, [isJournalMember, currentStep]);
+
   const [readingInsight, setReadingInsight] = useState<{
     spreadId: string;
     category: string;
@@ -891,6 +906,8 @@ export default function TarotFlow({
           lang: locale,
           clientSeed: freshSeed,
           zodiac: readMySign(),
+          // ✦ ถามต่อจากเรื่องเดิม — แม่หมอดึงความทรงจำของเรื่องนี้แทน "3 ครั้งล่าสุด"
+          ...(chosenThread ? { threadId: chosenThread.id } : {}),
         }),
       });
 
@@ -1426,6 +1443,7 @@ export default function TarotFlow({
                     ...(moodBefore ? { moodBefore } : {}),
                   });
                   setSavedJournalId(saved.id);
+                  if (chosenThread) updateReadingMeta(saved.id, { threadId: chosenThread.id });
                 }
                 trackEvent("reading_complete", {
                   spread_id: selectedSpread.id,
@@ -1506,6 +1524,7 @@ export default function TarotFlow({
     setMoodBefore(null);
     setMoodAfter(null);
     setSavedJournalId(null);
+    setChosenThread(null);
     if (typeof window !== "undefined") {
       try {
         localStorage.removeItem(STORAGE_KEYS.nickname);
@@ -1890,6 +1909,35 @@ export default function TarotFlow({
                 persona={selectedPersona}
               />
 
+              {/* 🧵 ถามต่อจากเรื่องเดิม — สมาชิกที่มีเรื่องที่ติดตามอยู่ (แตะเลือก/แตะซ้ำยกเลิก) */}
+              {!clarificationPrompt && openThreads.length > 0 && (
+                <div className="w-full max-w-2xl mx-auto space-y-2">
+                  <p className="text-xs sm:text-[13px] font-serif-th font-semibold text-ink-deep">
+                    {isEnglish ? "Continuing a story you follow?" : "ถามต่อจากเรื่องที่ติดตามอยู่ไหม"}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2" role="radiogroup" aria-label={isEnglish ? "Stories you follow" : "เรื่องที่ติดตามอยู่"}>
+                    {openThreads.slice(0, 6).map((t) => {
+                      const on = chosenThread?.id === t.id;
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={on}
+                          onClick={() => setChosenThread(on ? null : { id: t.id, title: t.title })}
+                          className={`tap-overlay-y min-h-[44px] px-3.5 rounded-full border text-xs sm:text-[13px] font-serif-th cursor-pointer transition-colors ${
+                            on ? "bg-surface border-gold-ink text-ink-deep font-semibold" : "glass-chip border-line-warm text-ink-deep hover:border-gold-ink"
+                          }`}
+                        >
+                          {on ? "✦ " : ""}
+                          {t.title}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* ✦ ใจตอนนี้ — แตะเดียว ข้ามได้ (สมุดดวง v2) */}
               {!clarificationPrompt && (
                 <MoodPicker
@@ -2173,6 +2221,19 @@ export default function TarotFlow({
                     ✦ {isEnglish ? "Open my reading journal" : "เปิดสมุดดวงของฉัน"}
                   </a>
                 </div>
+              )}
+
+              {/* 🧵 ติดตามเรื่องนี้ + นัดกลับมาเช็ก */}
+              {currentStep === "SUMMARY" && !isStreaming && savedJournalId && (
+                <FollowStoryCard
+                  journalId={savedJournalId}
+                  question={question}
+                  timing={readingResult?.timing}
+                  isMember={isJournalMember}
+                  existingThread={chosenThread}
+                  isEnglish={isEnglish}
+                  onSignIn={() => openAuth("signin", false)}
+                />
               )}
 
               {currentStep === "SUMMARY" && !isStreaming && (

@@ -1,0 +1,61 @@
+/**
+ * 🔐 ทะเบียนข้อมูลส่วนบุคคลของฟีเจอร์ใหม่ (PDPA — สิทธิ์ขอสำเนา + สิทธิ์ขอลบ)
+ * ---------------------------------------------------------------------------
+ * ทุกตารางใหม่ที่มี user_id ต้องลงทะเบียนที่นี่ "ที่เดียว" แล้ว `/api/account/export` กับ `DELETE /api/account`
+ * จะครอบคลุมเอง — เดิมแต่ละฟีเจอร์ต้องไปแก้สองเส้นนั้นเอง และลืมได้ (กติกาความเป็นส่วนตัวข้อ 6 ของ REFLECTION_JOURNAL_PLAN)
+ *
+ * แต่ละรายการ: export = ข้อมูลที่จะใส่ในไฟล์ส่งออก · erase = ลบทิ้งทั้งหมดของผู้ใช้คนนั้น
+ * ⚠️ ห้ามโยน error ออกไปทั้งก้อน — ตารางหนึ่งพัง (เช่นยังไม่ migrate) ต้องไม่ทำให้ส่วนอื่นหยุด
+ *    แต่ต้องรายงานว่าส่วนไหนพัง (ส่งออกไม่ครบต้องบอก ไม่ใช่เงียบ)
+ */
+
+interface UserDataSource {
+  key: string;
+  export: (userId: string) => Promise<unknown>;
+  erase: (userId: string) => Promise<unknown>;
+}
+
+const SOURCES: UserDataSource[] = [
+  {
+    key: "journalThreads",
+    export: async (userId) => (await import("@/lib/journal/threads.repo")).listThreads(userId),
+    erase: async (userId) => (await import("@/lib/journal/threads.repo")).deleteAllThreads(userId),
+  },
+];
+
+export async function exportExtraUserData(userId: string): Promise<{ data: Record<string, unknown>; failed: string[] }> {
+  const data: Record<string, unknown> = {};
+  const failed: string[] = [];
+  for (const src of SOURCES) {
+    try {
+      data[src.key] = await src.export(userId);
+    } catch (err) {
+      console.error(`[PDPA export] ${src.key} ล้มเหลว:`, err);
+      failed.push(src.key);
+    }
+  }
+  return { data, failed };
+}
+
+export async function eraseExtraUserData(userId: string): Promise<{ failed: string[] }> {
+  const failed: string[] = [];
+  for (const src of SOURCES) {
+    try {
+      await src.erase(userId);
+    } catch (err) {
+      console.error(`[PDPA erase] ${src.key} ล้มเหลว:`, err);
+      failed.push(src.key);
+    }
+  }
+  return { failed };
+}
+
+/** สำหรับด่านทดสอบ — รายชื่อแหล่งข้อมูลที่ลงทะเบียนไว้ */
+export function registeredUserDataKeys(): string[] {
+  return SOURCES.map((s) => s.key);
+}
+
+/** ฟีเจอร์ที่โหลดทีหลังลงทะเบียนเพิ่มได้ (ต้องเรียกตอน import โมดูล ไม่ใช่ระหว่างคำขอ) */
+export function registerUserDataSource(src: UserDataSource): void {
+  if (!SOURCES.some((s) => s.key === src.key)) SOURCES.push(src);
+}

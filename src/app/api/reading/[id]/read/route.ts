@@ -327,7 +327,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         const { loadKarmicMemory } = await import("@/lib/ai/memory");
         const [overrideDoc, pastReading] = await Promise.all([
           getContentOverrides(),
-          loadKarmicMemory(memberUserId),
+          loadKarmicMemory(memberUserId, 3, record.threadId),
         ]);
         const resolvedCards = record.drawn!.map((d) => resolveCardByIndex(overrideDoc, d.cardIndex));
         if (resolvedCards.some((c) => !c)) {
