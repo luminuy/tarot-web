@@ -44,6 +44,7 @@ export const CATEGORY_LABEL: Record<string, { th: string; en: string }> = {
   work: { th: "การงาน", en: "Career" },
   money: { th: "การเงิน", en: "Money" },
   self: { th: "ตัวเอง", en: "Self" },
+  daily: { th: "ประจำวัน", en: "Daily" },
 };
 
 /** ดิถีคร่าว ๆ สำหรับปฏิทิน — จันทร์ดับ/เพ็ญ (สูตรเดียวกับ `src/lib/ai/cosmic.ts` · ไม่ import ไฟล์นั้นเพื่อให้ island เบา) */

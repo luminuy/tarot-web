@@ -6,6 +6,8 @@ import { normalizeTags, MAX_TAGS_PER_ENTRY } from "../../src/lib/journal/journal
 import { MOOD_OPTIONS } from "../../src/lib/journal/mood";
 import { binomialUpperTail, computeJournalStats, EXPECTED_REVERSAL_RATE } from "../../src/lib/journal/stats";
 import type { SavedReadingItem } from "../../src/lib/utils/history";
+import { REFLECTION_PROMPTS, reflectionPromptFor } from "../../src/data/cards/reflection-prompts";
+import { reflectionStreak } from "../../src/lib/journal/ritual";
 
 /**
  * QA — สมุดดวง v2 (REFLECTION_JOURNAL_PLAN 1.3 · 1.9 · คลื่น 2)
@@ -144,6 +146,30 @@ check("memory.ts ไม่ส่ง userNote/mood/tags เข้า prompt", !/u
 // ── 8. หน้า /journal เป็น noindex ──
 const metaSrc = readFileSync("src/app/_shared/pages/journal-meta.ts", "utf8");
 check("journal metadata noindex ทั้งสองภาษา", (metaSrc.match(/index: false/g) ?? []).length === 2);
+
+// ── 9. คลังคำถามสะท้อนตัวเอง: ครบ 78 × 2 ทิศ × 2 ภาษา · เป็นคำถาม · ไม่ฟันธง · อังกฤษไม่มีไทย ──
+check("คลังคำถามครบ 78 ใบ", DECK.every((c) => Boolean(REFLECTION_PROMPTS[c.id])) && Object.keys(REFLECTION_PROMPTS).length === 78);
+const banned = /จะเกิด|แน่นอน|ฟันธง|ดวงกำหนด|will happen|destined|guarantee/i;
+for (const card of DECK) {
+  for (const rev of [false, true]) {
+    const th = reflectionPromptFor(card.id, rev, false) ?? "";
+    const en = reflectionPromptFor(card.id, rev, true) ?? "";
+    check(`${card.id}${rev ? " กลับหัว" : ""}: มีทั้งสองภาษา`, th.length > 10 && en.length > 10);
+    check(`${card.id}${rev ? " กลับหัว" : ""}: อังกฤษไม่มีอักษรไทย`, !/[\u0E00-\u0E7F]/.test(en));
+    check(`${card.id}${rev ? " กลับหัว" : ""}: อังกฤษเป็นคำถาม`, en.trim().endsWith("?"));
+    check(`${card.id}${rev ? " กลับหัว" : ""}: ไม่ฟันธงอนาคต`, !banned.test(th + en));
+  }
+}
+check("ไพ่ที่ไม่มีในคลัง = undefined", reflectionPromptFor("major-99", false, false) === undefined);
+
+// ── 10. streak ใจดี ──
+const dk = (n: number) => new Date(Date.parse("2026-10-05T00:00:00Z") - n * 86_400_000).toISOString().slice(0, 10);
+check("ยังไม่ทำวันนี้ไม่ถือว่าขาด", reflectionStreak([dk(1), dk(2)], dk(0)).days === 2);
+check("ขาด 1 วันในสัปดาห์ไม่รีเซ็ต", reflectionStreak([dk(0), dk(1), dk(3), dk(4)], dk(0)).days === 4);
+check("ขาด 2 วันติดจบสาย", reflectionStreak([dk(0), dk(3), dk(4)], dk(0)).days === 1);
+check("ขาด 2 ครั้งในสัปดาห์เดียวจบสาย", reflectionStreak([dk(0), dk(2), dk(4), dk(5)], dk(0)).days === 2);
+check("ช่องว่างปลายสายไม่นับเป็นวันพัก", reflectionStreak([dk(0), dk(1)], dk(0)).restUsedThisWeek === 0);
+check("ไม่มีบันทึก = 0", reflectionStreak([], dk(0)).days === 0);
 
 console.log(`\n✦ journal-v2: ผ่าน ${pass} · ไม่ผ่าน ${fail}`);
 if (fail > 0) process.exit(1);
