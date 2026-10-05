@@ -533,6 +533,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
           {/* คำอ่านของแม่หมอ — สตรีมสดทุกครั้ง ไม่ใช่ข้อความสำเร็จรูป */}
           <div className="pt-2">
             <AiReadingPanel
+              insight={oracle}
               state={oracle.state}
               isEn={isEnglish}
               onRetry={() => {

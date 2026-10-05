@@ -2040,6 +2040,9 @@ export default function TarotFlow({
                       question={question}
                       nickname={nickname}
                       isFallback={read.fallback}
+                      spreadId={readingInsight?.spreadId ?? selectedSpread.id}
+                      category={readingInsight?.category ?? selectedCategory}
+                      basis={readingInsight?.basis ?? null}
                       onRetry={() => {
                         if (readingId && drawnCards.length > 0) {
                           startAIStreaming(readingId, drawnCards);

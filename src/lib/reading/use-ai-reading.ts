@@ -31,6 +31,7 @@ import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { readingReducer, READING_INITIAL } from "@/components/home/flow-reading";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import type { Category } from "@/data/cards/types";
+import type { ReadingBasis } from "@/lib/tarot/explain-types";
 import type { UpgradeReason } from "@/lib/entitlement/copy";
 import { useLocale } from "@/lib/i18n";
 import { createClientSeed } from "@/lib/tarot/client-seed";
@@ -128,6 +129,10 @@ export interface AiReadingController {
   retryRead: () => Promise<boolean>;
   reset: () => void;
   clearGate: () => void;
+  /** ✦ เฟรม `basis` ของรอบนี้ (ใช้/ไม่ใช้ประวัติ · คำถาม) — แผง "คำอ่านนี้ประกอบจาก" */
+  basis: ReadingBasis | null;
+  /** ผัง/หมวดของคำขอล่าสุด — ใช้สร้างลิงก์ `/api/reading/explain` */
+  lastRequest: { spreadId: string; category: string } | null;
 }
 
 /** แปลง `reason` จาก API เป็นเหตุผลของกำแพงสิทธิ์ฝั่ง UI (ชุดเดียวกับหน้าแรก) */
@@ -142,6 +147,8 @@ function mapBlockedReason(reason?: string): UpgradeReason | null {
 export function useAiReading(): AiReadingController {
   const { locale, isEnglish } = useLocale();
   const [state, dispatch] = useReducer(readingReducer, READING_INITIAL);
+  const [basis, setBasis] = useState<ReadingBasis | null>(null);
+  const [lastRequest, setLastRequest] = useState<{ spreadId: string; category: string } | null>(null);
   const [cards, setCards] = useState<DrawnSlotCard[]>([]);
   const [rawDrawn, setRawDrawn] = useState<RawDrawnCard[]>([]);
   const [serverCards, setServerCards] = useState<ServerDrawnCard[]>([]);
@@ -163,6 +170,7 @@ export function useAiReading(): AiReadingController {
     dispatch({ type: "reset" });
     setCards([]);
     setRawDrawn([]);
+    setBasis(null);
     setServerCards([]);
     setDerived(null);
     setReadingId(null);
@@ -238,6 +246,9 @@ export function useAiReading(): AiReadingController {
           }
 
           switch (eventMatch[1]) {
+            case "basis":
+              setBasis(payload as unknown as ReadingBasis);
+              break;
             case "opening":
               dispatch({ type: "opening", text: payload.text ?? "" });
               break;
@@ -318,6 +329,7 @@ export function useAiReading(): AiReadingController {
       readTargetRef.current = null;
       setGate(null);
       setCrisisMessage(null);
+      setLastRequest({ spreadId: request.spreadId, category: request.category });
       /*
        * ⚠️ ล้างไพ่ของรอบก่อนทิ้งก่อนเสมอ — ไม่ใช่รอให้ไพ่ชุดใหม่มาทับ
        * ไม่งั้นระหว่างรอเซิร์ฟเวอร์ หน้าเว็บจะยังถือไพ่ของรอบที่แล้วอยู่ แล้วเอาไปเทียบ/แสดงผิดรอบ
@@ -513,5 +525,7 @@ export function useAiReading(): AiReadingController {
     retryRead,
     reset,
     clearGate,
+    basis,
+    lastRequest,
   };
 }

@@ -3,6 +3,7 @@
 import React, { useId, useState } from "react";
 import type { ReadingBasis } from "@/lib/tarot/explain-types";
 import { useReadingExplain } from "./use-reading-explain";
+import { RelationsConstellation } from "./RelationsConstellation";
 
 /**
  * ✦ "คำอ่านนี้ประกอบจากอะไร" + แผนที่ความเชื่อมโยงของไพ่ (REFLECTION_JOURNAL_PLAN 1.1 · 1.6)
@@ -30,6 +31,8 @@ interface Props {
   /** มีคำถามที่ผู้ใช้พิมพ์เอง — ใช้แทนเมื่อไม่มีเฟรม basis (เช่นกู้คืนคำอ่านเดิม) */
   hasQuestion: boolean;
   isEnglish: boolean;
+  /** พิกัดจริงของผัง (0–1) ต่อลำดับไพ่ — ใช้วาดแผนภาพความเชื่อมโยง */
+  layout?: Array<{ order: number; x: number; y: number }>;
 }
 
 export const ReadingBasisPanel: React.FC<Props> = ({
@@ -40,6 +43,7 @@ export const ReadingBasisPanel: React.FC<Props> = ({
   basis,
   hasQuestion,
   isEnglish,
+  layout,
 }) => {
   const [mapOpen, setMapOpen] = useState(false);
   const mapId = useId();
@@ -65,9 +69,15 @@ export const ReadingBasisPanel: React.FC<Props> = ({
       detail: isEnglish ? "Scenes and symbols of the original Rider-Waite art" : "ฉากและสัญลักษณ์จากภาพต้นฉบับ Rider-Waite",
     },
     {
-      used: positionNames.length > 0,
+      // ผังใบเดียวที่ไม่มีชื่อตำแหน่ง = ไพ่ตอบคำถามทั้งข้อ (ตำแหน่งเดียวของผังยังถูกส่งให้แม่หมอเสมอ)
+      used: true,
       label: isEnglish ? "Spread positions" : "ตำแหน่งในผัง",
-      detail: shownPositions,
+      detail:
+        positionNames.length > 0
+          ? shownPositions
+          : isEnglish
+            ? "A single card answering your whole question"
+            : "ไพ่ใบเดียวตอบคำถามทั้งข้อ",
     },
     cardCount >= 2
       ? {
@@ -182,6 +192,7 @@ export const ReadingBasisPanel: React.FC<Props> = ({
               )}
               {data && (
                 <>
+                  {layout && layout.length >= 2 && <RelationsConstellation data={data} layout={layout} isEnglish={isEnglish} />}
                   <p className="text-muted">
                     {isEnglish
                       ? "Calculated from the encyclopedia (elements and shared themes) — the same every time for these cards."

@@ -695,6 +695,7 @@ isEnglish
               basis={basis ?? null}
               hasQuestion={Boolean(question?.trim())}
               isEnglish={isEnglish}
+              layout={drawnCards.map((d) => ({ order: d.order, x: d.position.x, y: d.position.y }))}
             />
           )}
 
