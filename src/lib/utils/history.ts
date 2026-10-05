@@ -2,6 +2,9 @@
 
 
 import { STORAGE_KEYS } from "@/lib/storage/keys";
+import type { ReadingBasis } from "@/lib/tarot/explain-types";
+import type { MoodLevel } from "@/lib/journal/mood";
+import type { JournalRitual, RitualKind } from "@/lib/journal/journal-types";
 export interface SavedCardDetail {
   order: number;
   positionName: string;
@@ -39,6 +42,40 @@ export interface SavedReadingItem {
    * กรุณาโหลดใหม่" ห้ามแสดงเป็นการอ่านที่ดูเหมือนไม่มีไพ่เลย (กฎเหล็กข้อ 14 · T-47)
    */
   corrupted?: boolean;
+
+  // ── สมุดดวง v2 (migrations/0022 · REFLECTION_JOURNAL_PLAN 1.3 · 1.9) ──
+  /** ปักหมุด ✦ */
+  pinned?: boolean;
+  /** แท็กส่วนตัว ≤ 5 (หมวด `category` เป็นแท็กอัตโนมัติอยู่แล้ว ไม่ต้องซ้ำ) */
+  tags?: string[];
+  /** ใจตอนนี้ก่อนสับไพ่ / ก่อนพิธีเช้า (1..5 · ไม่มี = ข้าม) */
+  moodBefore?: MoodLevel;
+  /** ใจตอนนี้หลังอ่านจบ / รอบเย็น */
+  moodAfter?: MoodLevel;
+  /** ผู้ใช้ยินยอมให้แม่หมอ AI อ่านบันทึก · ใจ · แท็กของรายการนี้ (ค่าเริ่มต้น = ไม่ยินยอม) */
+  shareWithAi?: boolean;
+  /** หลักฐานคำอ่านรอบนั้น — ใช้/ไม่ใช้ประวัติ · คำถาม · รายละเอียด */
+  basis?: ReadingBasis;
+  /** "morning" = บันทึกจากพิธีเช้าหน้า /daily */
+  ritualKind?: RitualKind;
+  ritual?: JournalRitual;
+  /** คลื่น 3 — เส้นเรื่อง/นัดกลับมาเช็ก (อ่านอย่างเดียวในคลื่นนี้) */
+  threadId?: string;
+  checkinAt?: string;
+}
+
+/** ช่องที่แก้ทีหลังได้ (PATCH `/api/journal/[id]`) — ห้ามมีคำถาม/ไพ่ (Provably Fair) */
+export interface ReadingMetaPatch {
+  outcome?: ReadingOutcome;
+  userNote?: string;
+  pinned?: boolean;
+  tags?: string[];
+  /** null = ล้างค่า */
+  moodBefore?: MoodLevel | null;
+  moodAfter?: MoodLevel | null;
+  shareWithAi?: boolean;
+  /** ผสานกับของเดิม */
+  ritual?: JournalRitual;
 }
 
 const STORAGE_KEY = STORAGE_KEYS.journal;

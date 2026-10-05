@@ -7,6 +7,7 @@
  * 3 ชั้น:
  *  1. คู่ไพ่ (pairs) — ธาตุคู่กันตามหลัก Golden Dawn (กติกาเดียวกับ `src/lib/ai/alchemy.ts`)
  *     + แก่นเรื่องที่ตรงกัน (`src/data/cards/themes.ts`)
+ *     + คู่ไพ่ที่แม่หมอตัวจริงตรวจแล้ว (`src/data/cards/combos.ts` · เฉพาะแถว `reviewedBy` ≠ "pending")
  *  2. กลุ่มแก่นเรื่อง (clusters) — ไพ่ ≥ 2 ใบที่ชี้เรื่องเดียวกัน
  *  3. สัญญาณโครงสร้าง (signals) — เมเจอร์เยอะ · ชุดเด่น · เลขซ้ำ · ราชสำนักหลายใบ · กลับหัวเยอะ · ขาดธาตุ
  *
@@ -16,11 +17,12 @@
 
 import type { TarotCard } from "@/data/cards/types";
 import { THEME_LABEL, themesOf, type ThemeId } from "@/data/cards/themes";
+import { CURATED_COMBOS, comboKey, reviewedCombos, type CuratedCombo } from "@/data/cards/combos";
 
 type Element = TarotCard["element"];
 
 export type RelationKind = "support" | "tension" | "echo";
-export type RelationSource = "element" | "theme";
+export type RelationSource = "curated" | "element" | "theme";
 
 export interface RelationPair {
   /** ลำดับตำแหน่งในผัง (0-based) — a < b เสมอ */
@@ -30,7 +32,7 @@ export interface RelationPair {
   sources: RelationSource[];
   noteTh: string;
   noteEn: string;
-  /** จำนวนหลักฐานที่ชี้ทางเดียวกัน (1–2) */
+  /** จำนวนหลักฐานที่ชี้ทางเดียวกัน (1–3) */
   strength: number;
 }
 
@@ -115,9 +117,19 @@ function elementRelation(x: Element, y: Element): { kind: RelationKind; th: stri
   return null; // ไฟ+ดิน · ลม+น้ำ = กลาง ไม่นับเป็นความเชื่อมโยงที่ควรชี้ให้ดู
 }
 
-export function analyzeRelations(inputs: readonly RelationInput[]): RelationsResult {
+export interface AnalyzeOptions {
+  /**
+   * ตารางคู่ไพ่ที่จะพิจารณา — ค่าตั้งต้น = `CURATED_COMBOS` ทั้งตาราง (ใช้จริงเฉพาะแถวที่ตรวจแล้ว)
+   * มีไว้ให้ด่านทดสอบส่งแถวสมมุติเข้ามาได้ ไม่ใช่ให้โค้ดจริงข้ามการตรวจ
+   */
+  combos?: readonly CuratedCombo[];
+}
+
+export function analyzeRelations(inputs: readonly RelationInput[], options: AnalyzeOptions = {}): RelationsResult {
   const n = inputs.length;
   const themes = inputs.map((i) => themesOf(i.card.id, i.isReversed));
+  // ⚠️ กรองผ่าน reviewedCombos() เสมอ — แถว pending ห้ามโผล่แม้ผู้เรียกจะส่งตารางเองมา
+  const curated = new Map(reviewedCombos(options.combos ?? CURATED_COMBOS).map((c) => [comboKey(c.cards[0], c.cards[1]), c]));
 
   // ── 1. คู่ไพ่ ──
   const pairs: RelationPair[] = [];
@@ -125,11 +137,19 @@ export function analyzeRelations(inputs: readonly RelationInput[]): RelationsRes
     for (let b = a + 1; b < n; b++) {
       const el = elementRelation(inputs[a].card.element, inputs[b].card.element);
       const shared = themes[a].filter((t) => themes[b].includes(t));
-      if (!el && shared.length === 0) continue;
+      const combo = curated.get(comboKey(inputs[a].card.id, inputs[b].card.id));
+      const comboFits = combo && (combo.orientation === "any" || (!inputs[a].isReversed && !inputs[b].isReversed));
+      if (!el && shared.length === 0 && !comboFits) continue;
 
       const sources: RelationSource[] = [];
       const th: string[] = [];
       const en: string[] = [];
+      // คู่ที่คนตรวจแล้วขึ้นก่อน — เป็นคำอธิบายที่แม่หมอใช้จริง ไม่ใช่กติกาหยาบ
+      if (combo && comboFits) {
+        sources.push("curated");
+        th.push(combo.noteTh);
+        en.push(combo.noteEn);
+      }
       if (shared.length > 0) {
         sources.push("theme");
         th.push(`ชี้เรื่องเดียวกัน: ${shared.map((t) => THEME_LABEL[t].th).join(" · ")}`);
@@ -140,8 +160,16 @@ export function analyzeRelations(inputs: readonly RelationInput[]): RelationsRes
         th.push(el.th);
         en.push(el.en);
       }
-      // ธาตุขัดกันมีน้ำหนักกว่า "เรื่องเดียวกัน" — เรื่องเดียวกันแต่พลังสวนกันคือจุดที่ผู้ใช้ควรเห็น
-      const kind: RelationKind = el?.kind === "tension" ? "tension" : el?.kind === "support" ? "support" : "echo";
+      // คู่ที่คนตรวจแล้วตัดสินชนิดเอง · ไม่มี ➔ ธาตุขัดกันมีน้ำหนักกว่า "เรื่องเดียวกัน"
+      // (เรื่องเดียวกันแต่พลังสวนกันคือจุดที่ผู้ใช้ควรเห็น)
+      const kind: RelationKind =
+        combo && comboFits
+          ? combo.kind
+          : el?.kind === "tension"
+            ? "tension"
+            : el?.kind === "support"
+              ? "support"
+              : "echo";
       pairs.push({ a, b, kind, sources, noteTh: th.join(" — "), noteEn: en.join(" — "), strength: sources.length });
     }
   }

@@ -432,6 +432,22 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec(
       "CREATE TABLE IF NOT EXISTS booking_waitlist (id TEXT PRIMARY KEY, reader_id TEXT NOT NULL REFERENCES readers(id), email TEXT NOT NULL, created_at INTEGER NOT NULL, UNIQUE (reader_id, email))"
     );
+    // 📓 สมุดดวง v2 + พิธีเช้า-เย็น (migrations/0022) — ต้องตรงกับไฟล์ migration ทุกคอลัมน์
+    safeExec("ALTER TABLE reading_journal ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN tags_json TEXT NOT NULL DEFAULT '[]'");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN mood_before INTEGER");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN mood_after INTEGER");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN thread_id TEXT");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN checkin_at INTEGER");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN share_with_ai INTEGER NOT NULL DEFAULT 0");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN basis_json TEXT");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN ritual_kind TEXT");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN ritual_json TEXT");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_rj_user_thread ON reading_journal(user_id, thread_id, created_at)");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_rj_checkin ON reading_journal(checkin_at) WHERE checkin_at IS NOT NULL");
+    safeExec(
+      "CREATE INDEX IF NOT EXISTS idx_rj_user_ritual ON reading_journal(user_id, ritual_kind, created_at) WHERE ritual_kind IS NOT NULL"
+    );
     // 🎟 รหัสแลกสิทธิ์ตั้งต้นของเครื่อง dev — ต้องมีเพดานและวันหมดอายุเท่ากับ migrations/0013
     // (ห้ามปล่อย max_uses = -1 อีก: รหัสที่เขียนไว้ในรีโปแปลว่าใครอ่านซอร์สเจอก็แลกได้)
     // รหัสสำหรับแจกจริงให้สร้างจากแผงแอดมินซึ่งสุ่มรหัสใหม่ทุกครั้ง — อย่า seed ลงไฟล์
