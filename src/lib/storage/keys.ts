@@ -62,6 +62,8 @@ export const STORAGE_KEYS = {
   personaRatings: "persona_ratings",
   /** แคชไพ่ประจำวันในเครื่อง (localStorage — 0ms LCP) */
   dailyCard: "tarot_daily_card",
+  /** มุมมองที่เปิดค้างไว้ในหน้าสมุดดวง (รายการ · ปฏิทิน · ภาพรวม) */
+  journalView: "tarot_journal_view_v1",
 
   /* ── คีย์ที่มีผู้ใช้จริงอยู่ก่อนมีทะเบียนนี้ — ห้ามเปลี่ยนชื่อ ── */
   /** ชื่อเล่นที่ผู้ใช้เคยกรอกไว้ */

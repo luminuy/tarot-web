@@ -2,7 +2,6 @@
 
 import { useEffect, useId, useState } from "react";
 import dynamic from "next/dynamic";
-import { withMotionScope } from "@/components/providers/with-motion-scope";
 import { ChangePasswordCard } from "@/components/account/ChangePasswordCard";
 import {
   IconBook,
@@ -41,10 +40,6 @@ import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 const AuthModal = dynamic(() => import("@/components/auth/AuthModal").then((m) => m.AuthModal), {
   ssr: false,
 });
-// A5-08: สมุดบันทึกใช้ motion ข้างใน — ต้องห่อ withMotionScope ให้เคารพ reduced-motion เหมือนหน้าแรก
-const ReadingHistoryModal = withMotionScope(() =>
-  import("@/components/history/ReadingHistoryModal").then((m) => m.ReadingHistoryModal),
-);
 const BuyCreditsModal = dynamic(
   () => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal),
   { ssr: false },
@@ -125,7 +120,6 @@ export function AccountClient() {
 
   // Modal control states
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [creditsModalOpen, setCreditsModalOpen] = useState(false);
 
   useEffect(() => {
@@ -226,9 +220,10 @@ export function AccountClient() {
     window.location.href = isEn ? "/en" : "/";
   };
 
+  // ✦ สมุดดวงย้ายเป็นหน้าเต็ม `/journal` (REFLECTION_JOURNAL_PLAN 1.3) — รายการ · ปฏิทิน · ภาพรวม
   const openJournal = () => {
     soundManager.playMenuTapSound();
-    setHistoryModalOpen(true);
+    window.location.href = isEn ? "/en/journal" : "/journal";
   };
 
   const openBuyCredits = () => {
@@ -632,13 +627,6 @@ export function AccountClient() {
         <AuthModal
           isOpen={authModalOpen}
           onClose={() => setAuthModalOpen(false)}
-        />
-      )}
-
-      {historyModalOpen && (
-        <ReadingHistoryModal
-          isOpen={historyModalOpen}
-          onClose={() => setHistoryModalOpen(false)}
         />
       )}
 
