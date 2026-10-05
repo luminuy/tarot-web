@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { JournalItemSchema } from "@/lib/journal/journal.schema";
+import { JournalItemSchema, JournalSearchQuerySchema } from "@/lib/journal/journal.schema";
 import { getSessionUser } from "@/lib/auth/session";
-import { listJournal, insertJournal, deleteAllJournal } from "@/lib/journal/journal.repo";
+import { listJournal, insertJournal, deleteAllJournal, searchJournal } from "@/lib/journal/journal.repo";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 
@@ -25,6 +25,22 @@ export async function GET(request: Request) {
     }
 
     const url = new URL(request.url);
+
+    // ✦ ค้นฝั่งเซิร์ฟเวอร์ (?q=) — สำหรับสมุดที่ยาวเกินที่หน้าจอโหลดไว้ · เพดานถี่กัน LIKE สแกนรัว ๆ
+    const q = url.searchParams.get("q");
+    if (q !== null) {
+      const query = JournalSearchQuerySchema.safeParse(q);
+      if (!query.success) {
+        return NextResponse.json({ error: "คำค้นไม่ถูกต้อง" }, { status: 400 });
+      }
+      const gate = checkRateLimit(`journal_search:${userId}`, { maxRequests: 20, windowSeconds: 60 });
+      if (!gate.allowed) {
+        return createRateLimitResponse(gate.retryAfterSeconds, "ค้นหาถี่เกินไป กรุณารอสักครู่");
+      }
+      const readings = await searchJournal(userId, query.data);
+      return NextResponse.json({ readings });
+    }
+
     const limit = Number(url.searchParams.get("limit")) || 50;
     const before = Number(url.searchParams.get("before")) || undefined;
 

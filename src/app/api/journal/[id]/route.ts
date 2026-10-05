@@ -1,16 +1,10 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
-import { JournalItemSchema, JournalOutcomeSchema } from "@/lib/journal/journal.schema";
+import { JournalPatchSchema } from "@/lib/journal/journal.schema";
 import { getSessionUser } from "@/lib/auth/session";
-import { updateJournalOutcome, deleteJournalItem } from "@/lib/journal/journal.repo";
+import { updateJournalMeta, deleteJournalItem } from "@/lib/journal/journal.repo";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 
 export const runtime = "nodejs";
-
-const UpdateOutcomeSchema = z.object({
-  outcome: JournalOutcomeSchema,
-  userNote: JournalItemSchema.shape.userNote,
-});
 
 async function getAuthenticatedUserId(): Promise<string | null> {
   const user = await getSessionUser();
@@ -33,20 +27,24 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await request.json().catch(() => ({}));
-    const parsed = UpdateOutcomeSchema.safeParse(body);
+    // ✦ สมุดดวง v2: แก้ได้ทีละบางช่อง (ผลจริง · บันทึก · ปักหมุด · แท็ก · ใจ · ยินยอมให้ AI อ่าน · พิธี)
+    //   รูปแบบเดิม `{ outcome, userNote }` ยังผ่านสคีมาเดียวกันได้
+    const parsed = JournalPatchSchema.safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json({ error: "ข้อมูลสถานะไม่ถูกต้อง" }, { status: 400 });
     }
 
-    const changed = await updateJournalOutcome(userId, id, parsed.data.outcome, parsed.data.userNote);
+    const changed = await updateJournalMeta(userId, id, parsed.data);
     if (!changed) {
       return NextResponse.json({ error: "ไม่พบบันทึกดวงรายการนี้" }, { status: 404 });
     }
 
     // 📊 Sync outcome to reading_quality for model telemetry (AI_INTELLIGENCE_PLAN W1.1)
-    const { updateQualityOutcome } = await import("@/lib/ai/quality.repo");
-    await updateQualityOutcome(id, parsed.data.outcome).catch(() => {});
+    if (parsed.data.outcome) {
+      const { updateQualityOutcome } = await import("@/lib/ai/quality.repo");
+      await updateQualityOutcome(id, parsed.data.outcome).catch(() => {});
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

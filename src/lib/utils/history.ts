@@ -76,7 +76,18 @@ export interface ReadingMetaPatch {
   shareWithAi?: boolean;
   /** ผสานกับของเดิม */
   ritual?: JournalRitual;
+  /** คลื่น 3 — ผูก/ถอดเส้นเรื่อง (ว่าง = ถอด) */
+  threadId?: string | null;
+  /** คลื่น 3 — นัดกลับมาเช็ก ISO (ว่าง = ยกเลิกนัด) */
+  checkinAt?: string | null;
 }
+
+/**
+ * แพตช์ที่ผู้ใช้ทำกับรายการที่ยังไม่ได้ id จากเซิร์ฟเวอร์ (`reading_…`) — ส่งต่อทันทีที่ได้ `rj_…`
+ * กรณีจริง: อ่านจบ ➔ บันทึกอัตโนมัติ ➔ ผู้ใช้แตะ "ใจตอนนี้" ภายในเสี้ยววินาทีก่อน POST กลับมา
+ * ถ้ายิง PATCH ไปที่ id ชั่วคราว เซิร์ฟเวอร์ตอบ 404 และค่าที่เลือกหายตอนซิงก์รอบหน้า
+ */
+const pendingServerPatches = new Map<string, ReadingMetaPatch>();
 
 const STORAGE_KEY = STORAGE_KEYS.journal;
 
@@ -252,6 +263,11 @@ export function saveReading(item: Omit<SavedReadingItem, "id" | "date">): SavedR
           if (idx === -1) return;
           list[idx] = { ...list[idx], id: serverId };
           writeStorage(JSON.stringify(list));
+          const queued = pendingServerPatches.get(newItem.id);
+          if (queued) {
+            pendingServerPatches.delete(newItem.id);
+            sendMetaPatch(serverId, queued);
+          }
         })
         .catch(() => {
           // Silently ignore 401 for anonymous users
@@ -292,6 +308,74 @@ export function updateReadingOutcome(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ outcome, userNote }),
     }).catch(() => {});
+  }
+}
+
+function sendMetaPatch(id: string, patch: ReadingMetaPatch): void {
+  fetch(`/api/journal/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  }).catch(() => {
+    // ผู้เยี่ยมชม (401) / ออฟไลน์ — ค่าอยู่ในเครื่องแล้ว จะขึ้นเซิร์ฟเวอร์ตอนซิงก์หลังล็อกอิน
+  });
+}
+
+/**
+ * ✦ แก้ช่องเสริมของบันทึก (สมุดดวง v2) ในเครื่องทันที แล้วส่งขึ้นเซิร์ฟเวอร์แบบไม่รอ
+ * คืนรายการหลังแก้ (ไม่พบ = undefined) · `ritual` ผสานกับของเดิม · ใจ = null คือล้างค่า
+ */
+export function updateReadingMeta(id: string, patch: ReadingMetaPatch): SavedReadingItem | undefined {
+  const current = getReadings();
+  let changed: SavedReadingItem | undefined;
+  const updated = current.map((r) => {
+    if (r.id !== id) return r;
+    const next: SavedReadingItem = { ...r };
+    if (patch.outcome !== undefined) {
+      next.outcome = patch.outcome;
+      next.outcomeUpdatedAt = new Date().toISOString();
+    }
+    if (patch.userNote !== undefined) next.userNote = patch.userNote || undefined;
+    if (patch.pinned !== undefined) next.pinned = patch.pinned || undefined;
+    if (patch.tags !== undefined) next.tags = patch.tags.length > 0 ? patch.tags : undefined;
+    if (patch.moodBefore !== undefined) next.moodBefore = patch.moodBefore ?? undefined;
+    if (patch.moodAfter !== undefined) next.moodAfter = patch.moodAfter ?? undefined;
+    if (patch.shareWithAi !== undefined) next.shareWithAi = patch.shareWithAi || undefined;
+    if (patch.ritual !== undefined) next.ritual = { ...(r.ritual ?? {}), ...patch.ritual };
+    if (patch.threadId !== undefined) next.threadId = patch.threadId || undefined;
+    if (patch.checkinAt !== undefined) next.checkinAt = patch.checkinAt || undefined;
+    changed = next;
+    return next;
+  });
+  if (typeof window === "undefined") return changed;
+  if (changed) writeStorage(JSON.stringify(updated));
+
+  if (id.startsWith("reading_")) {
+    // ยังไม่ได้ id จากเซิร์ฟเวอร์ — รวมแพตช์ไว้ก่อน (ritual ผสานกัน) แล้วส่งตอนได้ `rj_…`
+    const prev = pendingServerPatches.get(id) ?? {};
+    pendingServerPatches.set(id, {
+      ...prev,
+      ...patch,
+      ...(prev.ritual || patch.ritual ? { ritual: { ...(prev.ritual ?? {}), ...(patch.ritual ?? {}) } } : {}),
+    });
+  } else {
+    sendMetaPatch(id, patch);
+  }
+  return changed;
+}
+
+/**
+ * ✦ ค้นสมุดฝั่งเซิร์ฟเวอร์ (สมาชิก · เกินที่โหลดไว้ในเครื่อง) — ล้มเหลว = คืนค่าว่าง ให้หน้าจอใช้ผลในเครื่องต่อ
+ */
+export async function searchServerReadings(query: string): Promise<SavedReadingItem[] | null> {
+  if (typeof window === "undefined") return null;
+  try {
+    const res = await fetch(`/api/journal?q=${encodeURIComponent(query)}`, { cache: "no-store" });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { readings?: SavedReadingItem[] };
+    return Array.isArray(data.readings) ? data.readings : null;
+  } catch {
+    return null;
   }
 }
 

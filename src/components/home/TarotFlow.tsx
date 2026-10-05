@@ -23,7 +23,9 @@ import { QuickFortunePicker, type QuickTopic } from "@/components/reading/QuickF
 import type { RitualStep } from "@/components/home/ritual-step";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { soundManager } from "@/lib/utils/audio";
-import { saveReading } from "@/lib/utils/history";
+import { saveReading, updateReadingMeta } from "@/lib/utils/history";
+import { MoodPicker } from "@/components/journal/MoodPicker";
+import type { MoodLevel } from "@/lib/journal/mood";
 import { saveFlowState, loadFlowState, clearFlowState, FRESH_START_EVENT } from "@/lib/utils/flow-persistence";
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
 import { prefetchTurnstile } from "@/lib/auth/turnstile";
@@ -351,6 +353,13 @@ export default function TarotFlow({
    * ✦ บริบทของคำอ่านที่กำลังแสดง สำหรับแผง "ทำไมแม่หมออ่านแบบนี้" + หลักฐานคำอ่าน (REFLECTION_JOURNAL_PLAN 1.2 · 1.6)
    * เก็บผัง/หมวดของ "รอบที่อ่านจริง" (ทำนายด่วนใช้ผังคนละตัวกับ `selectedSpread`) · `basis` มาจากเฟรม SSE `basis`
    */
+  /**
+   * ✦ ใจตอนนี้ก่อนสับไพ่/หลังอ่านจบ (REFLECTION_JOURNAL_PLAN 1.3) + id ของบันทึกที่เพิ่งเซฟอัตโนมัติ
+   * ไม่เลือก = null (ข้ามได้เสมอ) · หลังอ่านจบแก้ผ่าน `updateReadingMeta` ซึ่งรับมือ id ชั่วคราวให้แล้ว
+   */
+  const [moodBefore, setMoodBefore] = useState<MoodLevel | null>(null);
+  const [moodAfter, setMoodAfter] = useState<MoodLevel | null>(null);
+  const [savedJournalId, setSavedJournalId] = useState<string | null>(null);
   const [readingInsight, setReadingInsight] = useState<{
     spreadId: string;
     category: string;
@@ -1297,6 +1306,10 @@ export default function TarotFlow({
     readStreamAbortRef.current = abortController;
 
     dispatchRead({ type: "start" });
+    // เฟรม basis มาก่อน done เสมอ — เก็บในตัวแปรของรอบนี้ (state ใน closure ของสตรีมจะเป็นค่าเก่า)
+    let streamBasis: ReadingBasis | null = null;
+    setSavedJournalId(null);
+    setMoodAfter(null);
     setReadingInsight({
       spreadId: (overrides?.spread ?? selectedSpread).id,
       category: overrides?.category || selectedCategory,
@@ -1349,6 +1362,7 @@ export default function TarotFlow({
               const data = JSON.parse(dataMatch[1]);
 
               if (eventType === "basis") {
+                streamBasis = data as ReadingBasis;
                 setReadingInsight((prev) => (prev ? { ...prev, basis: data as ReadingBasis } : prev));
               } else if (eventType === "opening") {
                 dispatchRead({ type: "opening", text: data.text });
@@ -1388,7 +1402,7 @@ export default function TarotFlow({
                   const effectiveSpread = overrides?.spread || selectedSpread;
                   const effectiveNickname = (overrides?.nickname ?? nickname).trim() || undefined;
 
-                  saveReading({
+                  const saved = saveReading({
                     nickname: effectiveNickname,
                     question: effectiveQuestion,
                     spreadId: effectiveSpread.id,
@@ -1408,7 +1422,10 @@ export default function TarotFlow({
                     summary: data.reading.summary || "",
                     advice: data.reading.advice || [],
                     timing: data.reading.timing || "",
+                    ...(streamBasis ? { basis: streamBasis } : {}),
+                    ...(moodBefore ? { moodBefore } : {}),
                   });
+                  setSavedJournalId(saved.id);
                 }
                 trackEvent("reading_complete", {
                   spread_id: selectedSpread.id,
@@ -1486,6 +1503,9 @@ export default function TarotFlow({
     setNickname("");
     setQuestion("");
     setSituation("");
+    setMoodBefore(null);
+    setMoodAfter(null);
+    setSavedJournalId(null);
     if (typeof window !== "undefined") {
       try {
         localStorage.removeItem(STORAGE_KEYS.nickname);
@@ -1870,6 +1890,17 @@ export default function TarotFlow({
                 persona={selectedPersona}
               />
 
+              {/* ✦ ใจตอนนี้ — แตะเดียว ข้ามได้ (สมุดดวง v2) */}
+              {!clarificationPrompt && (
+                <MoodPicker
+                  value={moodBefore}
+                  onChange={setMoodBefore}
+                  isEnglish={isEnglish}
+                  label={isEnglish ? "How do you feel right now?" : "ใจตอนนี้เป็นอย่างไร"}
+                  hint={isEnglish ? "Optional · saved to your journal only" : "ไม่บังคับ · เก็บไว้ในสมุดของคุณเท่านั้น"}
+                />
+              )}
+
               {/* Clarification Card (B-04) */}
               {clarificationPrompt && (
                 <ClarificationCard
@@ -2109,6 +2140,37 @@ export default function TarotFlow({
                   </button>
                 </div>
               </div>
+
+              {/* ✦ ใจตอนนี้หลังอ่านจบ — เทียบกับก่อนเปิดไพ่ได้ในสมุดดวง */}
+              {currentStep === "SUMMARY" && !isStreaming && savedJournalId && (
+                <div className="glass-tile !rounded-xl p-4 sm:p-5 w-full max-w-2xl mx-auto space-y-3">
+                  <MoodPicker
+                    value={moodAfter}
+                    onChange={(level) => {
+                      setMoodAfter(level);
+                      updateReadingMeta(savedJournalId, { moodAfter: level });
+                    }}
+                    isEnglish={isEnglish}
+                    compact
+                    label={isEnglish ? "After this reading, how do you feel?" : "อ่านจบแล้ว ตอนนี้ใจเป็นอย่างไร"}
+                    hint={
+                      moodAfter
+                        ? isEnglish
+                          ? "Saved to your journal"
+                          : "บันทึกลงสมุดดวงแล้ว"
+                        : isEnglish
+                          ? "Optional"
+                          : "ไม่บังคับ"
+                    }
+                  />
+                  <a
+                    href={isEnglish ? "/en/journal" : "/journal"}
+                    className="inline-flex text-xs sm:text-[13px] font-serif-th font-semibold text-gold-ink underline underline-offset-2"
+                  >
+                    ✦ {isEnglish ? "Open my reading journal" : "เปิดสมุดดวงของฉัน"}
+                  </a>
+                </div>
+              )}
 
               {currentStep === "SUMMARY" && !isStreaming && (
                 <PostReadingSignup onOpenAuth={() => openAuth("signup", true)} />
