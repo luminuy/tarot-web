@@ -83,11 +83,18 @@ async function loadRecord(id: string, request: Request): Promise<Partial<Reading
 }
 
 /** เก็บคำอ่านจากสตรีมของผู้ให้บริการจนได้เฟรม done — คืน null ถ้าไม่จบ/เป็นคำอ่านสำรอง */
-async function collect(gen: AsyncGenerator<ReadingEvent>): Promise<Reading | null> {
+interface Collected {
+  reading: Reading;
+  /** โทเคนจริงของรอบนี้ — ส่งต่อให้บัญชีต้นทุน (แทร็ก S) */
+  usage: { inputTokens: number; outputTokens: number };
+}
+
+async function collect(gen: AsyncGenerator<ReadingEvent>): Promise<Collected | null> {
   for await (const ev of gen) {
     if (ev.type === "done") {
-      const real = (ev.usage?.inputTokens ?? 0) > 0 || (ev.usage?.outputTokens ?? 0) > 0;
-      return real ? ev.reading : null;
+      const usage = { inputTokens: ev.usage?.inputTokens ?? 0, outputTokens: ev.usage?.outputTokens ?? 0 };
+      const real = usage.inputTokens > 0 || usage.outputTokens > 0;
+      return real ? { reading: ev.reading, usage } : null;
     }
     if (ev.type === "error") return null;
   }
@@ -143,6 +150,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (cached) return NextResponse.json({ reading: cached, personaId: persona.id, cached: true });
 
   let limit = { allowed: true, releaseConcurrency: () => {} } as ReturnType<typeof checkRateLimit>;
+  let costSubj: string | null = null;
   if (!privileged) {
     const clientIp = getClientIdentifier(request);
     const edge = await consumeEdgeRateLimits([
@@ -157,6 +165,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       limit.releaseConcurrency();
       recordEvent("ai_cap_hit");
       return NextResponse.json({ error: say(MSG.cap) }, { status: 503 });
+    }
+    // 🛡️ แทร็ก S: เพดานโทเคนต่อผู้ใช้ต่อวัน
+    const { costSubject, isUserTokenCapReached, tokenCapMessage } = await import("@/lib/security/cost-ledger");
+    costSubj = costSubject(userId, clientIp);
+    if (await isUserTokenCapReached(costSubj, "member")) {
+      limit.releaseConcurrency();
+      return NextResponse.json({ error: tokenCapMessage(lang) }, { status: 429 });
     }
   }
 
@@ -184,15 +199,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       abortSignal: (request as Request & { signal?: AbortSignal }).signal,
     } as import("@/lib/ai/prompt").ReadingContext;
 
-    let reading: Reading | null = null;
+    let got: Collected | null = null;
     if (process.env.GROQ_API_KEY) {
       const { streamGroqReading } = await import("@/lib/ai/groq");
-      reading = await collect(streamGroqReading(ctx)).catch(() => null);
+      got = await collect(streamGroqReading(ctx)).catch(() => null);
     }
-    if (!reading) {
+    if (!got) {
       const { streamGeminiReading } = await import("@/lib/ai/gemini");
-      reading = await collect(streamGeminiReading(ctx)).catch(() => null);
+      got = await collect(streamGeminiReading(ctx)).catch(() => null);
     }
+    const reading: Reading | null = got?.reading ?? null;
     if (!reading) {
       recordEvent("perspective_failed");
       return NextResponse.json({ error: say(MSG.busy) }, { status: 503 });
@@ -200,6 +216,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     const { recordAiCall } = await import("@/lib/security/ai-budget");
     void recordAiCall(1);
+    if (costSubj) {
+      const { recordAiUsage } = await import("@/lib/security/cost-ledger");
+      void recordAiUsage(costSubj, got?.usage.inputTokens ?? 0, got?.usage.outputTokens ?? 0);
+    }
     recordEvents(["perspective_completed", `perspective_persona:${persona.id}`]);
 
     const next = updateReading(id, { perspectives: { ...(record.perspectives ?? {}), [persona.id]: reading } });

@@ -5,6 +5,9 @@ import { z } from "zod";
 import { getSpread } from "@/data/spreads";
 import { CUSTOM_SPREAD_ID, isCustomStandard, type CustomSpreadInput } from "@/lib/tarot/custom-spread";
 import { parseCustomSpread } from "@/lib/tarot/custom-spread.server";
+import { detectPiiKinds, piiNotice } from "@/lib/security/pii";
+import { bodyHasInjection, cooldownMessage, isInInjectionCooldown, noteInjectionAttempt } from "@/lib/security/abuse-guard";
+import { getSessionUser } from "@/lib/auth/session";
 import { checkQuestion, getCrisisMessage } from "@/lib/safety/guardrails";
 import { assessCrisisRisk } from "@/lib/safety/ai-classifier";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
@@ -148,6 +151,21 @@ export async function POST(request: Request) {
   const rawBody = await request.json().catch(() => null);
   const parsed = BodySchema.safeParse(rawBody);
   const isEnInitial = (rawBody && typeof rawBody === "object" && (rawBody as { lang?: string }).lang === "en") || false;
+
+  /*
+   * 🛡️ แทร็ก S: พยายามฉีดคำสั่งซ้ำ ➔ พักการเปิดไพ่ของตัวตนนั้น 1 ชม. (abuse-guard.ts)
+   * นับเฉพาะคำขอที่โดนด่านคำสั่งแฝง · ตรวจช่วงพักก่อนทำงานหนักทุกอย่าง
+   */
+  const abuseIp = getClientIdentifier(request);
+  const abuseUserId = privileged ? null : (await getSessionUser().catch(() => null))?.id ?? null;
+  if (!privileged && bodyHasInjection(rawBody)) {
+    const tripped = await noteInjectionAttempt(abuseIp, abuseUserId, "start");
+    if (tripped) return NextResponse.json({ error: cooldownMessage(isEnInitial ? "en" : "th") }, { status: 429 });
+  }
+  if (!privileged && (await isInInjectionCooldown(abuseIp, abuseUserId))) {
+    return NextResponse.json({ error: cooldownMessage(isEnInitial ? "en" : "th") }, { status: 429 });
+  }
+
   if (!parsed.success) {
     return NextResponse.json(
       { error: isEnInitial ? "Invalid request data" : "ข้อมูลที่ส่งมาไม่ถูกต้อง" },
@@ -395,9 +413,16 @@ export async function POST(request: Request) {
   const { signReadingSessionToken } = await import("@/lib/security/session-token");
   const sessionToken = signReadingSessionToken(record);
 
+  // 🛡️ แทร็ก S: บอกผู้ใช้ว่าซ่อนข้อมูลส่วนตัวอะไรไว้ (ตัวซ่อนจริงอยู่ที่ sanitizePromptValue ตอนสร้าง prompt)
+  const privacyNotice = piiNotice(
+    detectPiiKinds(question, intake.situation, intake.feeling, intake.hoped, nickname),
+    parsed.data.lang,
+  );
+
   const res = NextResponse.json({
     id,
     readingId: id,
+    ...(privacyNotice ? { privacyNotice } : {}),
     commitment,
     clientSeed: record.clientSeed,
     sessionToken,

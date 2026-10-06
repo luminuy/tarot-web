@@ -39,6 +39,12 @@ const SOURCES: UserDataSource[] = [
     export: async (userId) => (await import("@/lib/tarot/custom-spread.repo")).listCustomSpreads(userId),
     erase: async (userId) => (await import("@/lib/tarot/custom-spread.repo")).deleteAllCustomSpreads(userId),
   },
+  {
+    // บัญชีต้นทุน AI รายวัน (แทร็ก S) — แค่จำนวนครั้ง/โทเคน ไม่มีเนื้อหาคำถาม
+    key: "aiUsage",
+    export: async (userId) => (await import("@/lib/security/cost-ledger")).exportAiUsage(userId),
+    erase: async (userId) => (await import("@/lib/security/cost-ledger")).deleteAiUsage(userId),
+  },
 ];
 
 export async function exportExtraUserData(userId: string): Promise<{ data: Record<string, unknown>; failed: string[] }> {

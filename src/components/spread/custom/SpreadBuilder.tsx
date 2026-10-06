@@ -37,6 +37,7 @@ import {
 } from "@/lib/tarot/custom-spread-client";
 import { mapLayout, MAP_CARD_ASPECT, MAP_CARD_MIN_PX } from "@/lib/tarot/spread-map-geometry";
 import { SpreadLayoutGlyph } from "./SpreadLayoutGlyph";
+import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 
 /**
  * ✦ ห้องออกแบบผัง `/spreads/create` (REFLECTION_JOURNAL_PLAN 1.8 · คลื่น 5)
@@ -166,7 +167,7 @@ export const SpreadBuilder: React.FC = () => {
     setSharedFrom(false);
     update({ name: s.name, layout: s.layout, positions: s.positions });
     setActive(null);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: smoothScrollBehavior() });
   };
 
   const startOver = () => {

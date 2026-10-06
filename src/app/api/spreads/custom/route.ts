@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth/session";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
-import { checkRateLimit, createRateLimitResponse } from "@/lib/utils/rate-limit";
+import { checkRateLimit, createRateLimitResponse, getClientIdentifier } from "@/lib/utils/rate-limit";
+import { bodyHasInjection, noteInjectionAttempt } from "@/lib/security/abuse-guard";
 import { parseCustomSpread } from "@/lib/tarot/custom-spread.server";
 import { createCustomSpread, CUSTOM_SPREADS_PER_USER, listCustomSpreads } from "@/lib/tarot/custom-spread.repo";
 
@@ -36,7 +37,10 @@ export async function POST(request: Request) {
   if (!gate.allowed) return createRateLimitResponse(gate.retryAfterSeconds, lang === "en" ? "Too many saves — please wait a moment." : "บันทึกถี่เกินไป กรุณารอสักครู่");
 
   const parsed = parseCustomSpread(body.spread, lang);
-  if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });
+  if (!parsed.ok) {
+    if (bodyHasInjection(body.spread)) await noteInjectionAttempt(getClientIdentifier(request), user.id, "custom_spread");
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
+  }
 
   const saved = await createCustomSpread(user.id, parsed.input);
   if (!saved) {

@@ -167,6 +167,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   let guestNeedsConsume = false; // ผู้เยี่ยมชมผ่าน gate → ต้องออก ticket หลังอ่านสำเร็จจริง
   let guestGid: string | null = null; // gid ของผู้เยี่ยมชม — ใช้ mark ฝั่ง server ตอนอ่านจบ
   let memberUserId: string | null = null;
+  /** 🛡️ แทร็ก S: ตัวตนในบัญชีต้นทุน AI ต่อวัน (null = คำขอทดสอบที่ได้รับสิทธิ์ ไม่นับ) */
+  let costSubj: string | null = null;
   const { isAiCapReached } = await import("@/lib/security/ai-budget");
   const aiCapResponse = () => {
     recordEvent("ai_cap_hit");
@@ -191,6 +193,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       limit.releaseConcurrency();
       recordEvent("entitlement_blocked_signin");
       return Response.json({ error: getSignInGateMessage(record.lang), reason: SIGN_IN_GATE_REASON }, { status: 403 });
+    }
+
+    // 🛡️ แทร็ก S: เพดานโทเคนต่อผู้ใช้ต่อวัน — ตรวจก่อนหักสิทธิ์ (ไม่ต้องคืนสิทธิ์ทีหลัง)
+    const { costSubject, isUserTokenCapReached, tokenCapMessage } = await import("@/lib/security/cost-ledger");
+    costSubj = costSubject(viewer.kind === "member" ? viewer.userId : null, clientIp);
+    if (await isUserTokenCapReached(costSubj, viewer.kind === "member" ? "member" : "guest")) {
+      limit.releaseConcurrency();
+      return Response.json({ error: tokenCapMessage(isEn ? "en" : "th") }, { status: 429 });
     }
 
     if (enforced) {
@@ -353,7 +363,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           question: Boolean(record.question?.trim()),
         });
 
+        const { createRetryBudget, DEFAULT_READING_RETRY } = await import("@/lib/ai/retry-budget");
         const readingCtx = {
+          // 🛡️ แทร็ก S: ทั้งสายสำรอง (Groq ➔ Gemini) ลองได้ไม่เกิน 4 ครั้ง / 90 วินาทีรวม
+          retryBudget: createRetryBudget(DEFAULT_READING_RETRY),
           personaId: record.personaId,
           spread,
           category: record.category,
@@ -472,6 +485,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             ]);
             void recordAiCall(1);
             void recordPerIpReadQuota(clientIp);
+            if (costSubj) {
+              const { recordAiUsage } = await import("@/lib/security/cost-ledger");
+              void recordAiUsage(costSubj, event.usage?.inputTokens ?? 0, event.usage?.outputTokens ?? 0);
+            }
             // ✦ ผังที่บันทึกไว้ในบัญชี — นับครั้งที่ใช้ (เรียงผังโปรดขึ้นก่อน) · กรองด้วย user_id เสมอ
             if (memberUserId && record.customSpread?.savedId) {
               const { markCustomSpreadUsed } = await import("@/lib/tarot/custom-spread.repo");

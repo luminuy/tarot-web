@@ -17,6 +17,7 @@ import { groqChatCompletionsEndpoint, aiGatewayHeaders } from "@/lib/ai/gateway"
 import { isAiCapReached, recordAiCall } from "@/lib/security/ai-budget";
 import { checkThaiQuality, polishThai } from "@/lib/ai/thai-quality";
 import { recordEvent } from "@/lib/stats/record";
+import { sanitizePromptValue } from "@/lib/ai/prompt-guard";
 
 export interface ClarifyInput {
   question: string;
@@ -122,9 +123,13 @@ export async function evaluateClarification(input: ClarifyInput): Promise<Clarif
 
   const isEn = lang === "en";
   const systemInstruction = isEn ? CLARIFY_SYSTEM_PROMPT_EN : CLARIFY_SYSTEM_PROMPT_TH;
+  // ข้อความผู้ใช้ทุกช่องผ่าน sanitizePromptValue (ปิดแท็กไม่ได้ + ซ่อน PII) — เดิมส่งดิบ
+  const safeNick = sanitizePromptValue(nickname, 80);
+  const safeQuestion = sanitizePromptValue(cleanQuestion, 1000);
+  const safeSituation = sanitizePromptValue(situation, 1000);
   const userMessage = isEn
-    ? `Seeker: ${nickname || "Querent"}\nCategory: ${category}\nQuestion: "${cleanQuestion}"${situation ? `\nAdditional Context: "${situation}"` : ""}`
-    : `ผู้ถาม: ${nickname || "ผู้มาขอคำทำนาย"}\nหมวดคำทำนาย: ${category}\nคำถาม: "${cleanQuestion}"${situation ? `\nบริบทเดิมที่มี: "${situation}"` : ""}`;
+    ? `Seeker: ${safeNick || "Querent"}\nCategory: ${category}\nQuestion: "${safeQuestion}"${safeSituation ? `\nAdditional Context: "${safeSituation}"` : ""}`
+    : `ผู้ถาม: ${safeNick || "ผู้มาขอคำทำนาย"}\nหมวดคำทำนาย: ${category}\nคำถาม: "${safeQuestion}"${safeSituation ? `\nบริบทเดิมที่มี: "${safeSituation}"` : ""}`;
 
   // 4. เรียกโมเดล Groq พร้อมคุม Timeout ไม่เกิน 2.5 วินาที
   const controller = new AbortController();

@@ -20,6 +20,7 @@ import { enforceThaiQuality } from "@/lib/ai/thai-quality";
 import { recordEvent } from "@/lib/stats/record";
 import { resolveThinkingOutputBudget } from "@/lib/ai/reading-stream";
 import { streamMockGeminiReading, type MockReason } from "@/lib/ai/mock-reading";
+import { clampToBudget } from "@/lib/ai/retry-budget";
 
 export { streamMockGeminiReading, type MockReason };
 /**
@@ -295,13 +296,14 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
   let lastFailure: "truncated" | "schema" | "stream_error" | null = null;
 
   for (const [modelIdx, model] of WORKING_GEMINI_MODELS.entries()) {
+    if (ctx.retryBudget && !ctx.retryBudget.take()) break;
     const { response, droppedBudget } = await fetchGeminiStream({
       endpoint: geminiEndpoint(model, "streamGenerateContent", { sse: true }),
       apiKey,
       systemInstruction,
       userPrompt,
       maxOutputTokens,
-      timeoutMs: modelIdx === 0 ? GEMINI_FIRST_MODEL_TIMEOUT_MS : GEMINI_FALLBACK_MODEL_TIMEOUT_MS,
+      timeoutMs: clampToBudget(modelIdx === 0 ? GEMINI_FIRST_MODEL_TIMEOUT_MS : GEMINI_FALLBACK_MODEL_TIMEOUT_MS, ctx.retryBudget),
       model,
       abortSignal: ctx.abortSignal,
     });

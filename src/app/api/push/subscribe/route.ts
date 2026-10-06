@@ -5,6 +5,7 @@ import { deletePushSubscription, getPushSubscription, upsertPushSubscription } f
 import { isAllowedPushEndpoint, vapidConfigured } from "@/lib/push/webpush";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, createRateLimitResponse } from "@/lib/utils/rate-limit";
+import { apiOk } from "@/lib/api/envelope";
 
 export const runtime = "nodejs";
 
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
     { endpoint: subscription.endpoint, p256dh: subscription.keys.p256dh, auth: subscription.keys.auth },
     { lang, morningHour, checkins },
   );
-  return NextResponse.json({ success: true });
+  return apiOk();
 }
 
 export async function DELETE(request: Request) {
@@ -63,5 +64,5 @@ export async function DELETE(request: Request) {
   const body = (await request.json().catch(() => ({}))) as { endpoint?: string };
   if (!body.endpoint) return NextResponse.json({ error: "ข้อมูลไม่ครบ" }, { status: 400 });
   await deletePushSubscription(user.id, body.endpoint);
-  return NextResponse.json({ success: true });
+  return apiOk();
 }

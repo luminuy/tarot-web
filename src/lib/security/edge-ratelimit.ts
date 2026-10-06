@@ -200,3 +200,16 @@ export async function consumeEdgeRateLimits(
   }
   return worst;
 }
+
+/**
+ * ✦ ตัวนับเหตุการณ์ (ไม่ใช่เพดานคำขอ) — ใช้ที่เก็บเดียวกันแบบ atomic
+ * `bump` = +1 แล้วคืนค่าหลังนับ · `peek` = อ่านค่าปัจจุบันโดยไม่นับเพิ่ม (หน้าต่างหมดอายุ = 0)
+ * ใช้กับ "จับการพยายามฉีดคำสั่งซ้ำ" (`abuse-guard.ts`) ซึ่งต้องนับครั้งที่โดนด่าน ไม่ใช่ครั้งที่ผ่าน
+ */
+export async function bumpEdgeCounter(key: string, windowSec: number): Promise<number> {
+  return (await tally(key, windowSec, 1)).count;
+}
+
+export async function peekEdgeCounter(key: string, windowSec: number): Promise<number> {
+  return (await tally(key, windowSec, 0)).count;
+}

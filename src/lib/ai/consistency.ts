@@ -18,6 +18,7 @@ import { DECK, type TarotCard } from "@/data/cards";
 import { CARD_VISUAL_LORE } from "@/data/cards/visual-lore";
 import type { Reading } from "@/lib/schema/reading";
 import type { PastReadingSnapshot } from "@/lib/ai/karmic";
+import { collectStrings, detectPromptLeak } from "@/lib/ai/leak-guard";
 
 export interface ConsistencyIssue {
   code:
@@ -29,7 +30,8 @@ export interface ConsistencyIssue {
     | "ADVICE_MISSING_MINDFUL"
     | "CARD_READING_TOO_SHORT"
     | "CARD_READING_TOO_LONG"
-    | "VISUAL_ANCHOR_UNGROUNDED";
+    | "VISUAL_ANCHOR_UNGROUNDED"
+    | "PROMPT_LEAK";
   message: string;
   fatal: boolean;
 }
@@ -168,6 +170,12 @@ export function checkReadingConsistency(
 ): ConsistencyResult {
   const issues: ConsistencyIssue[] = [];
   const expectedCount = opts?.drawnCount ?? drawnCards.length;
+
+  // ── 0. ด่านขาออก: คำอ่านต้องไม่เผยท่อนกติกาของระบบ (แทร็ก S · leak-guard.ts) ──
+  const leak = detectPromptLeak(collectStrings(reading).join("\n"));
+  if (leak) {
+    issues.push({ code: "PROMPT_LEAK", message: `คำอ่านมีท่อนกติกาของระบบ ("${leak}")`, fatal: true });
+  }
 
   // ── 1. ตรวจสอบตำแหน่งไพ่ (MISSING_POSITION & DUPLICATE_POSITION) ──
   const positionsPresent = new Set<number>();

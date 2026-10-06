@@ -237,6 +237,8 @@ export interface ReadingContext {
    * ไม่ส่งมาก็ทำงานได้ แต่จะจ่ายค่าโทเคนให้คำอ่านที่ไม่มีใครได้เห็น (T-06)
    */
   abortSignal?: AbortSignal;
+  /** 🛡️ งบลองใหม่ของทั้งสายสำรอง (แทร็ก S · retry-budget.ts) — ไม่ส่ง = ลองครบทุกโมเดลแบบเดิม */
+  retryBudget?: import("@/lib/ai/retry-budget").RetryBudget;
 }
 
 /**

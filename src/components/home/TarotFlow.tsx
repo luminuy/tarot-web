@@ -983,6 +983,10 @@ export default function TarotFlow({
       }
 
       const sessionReadingId = data.readingId || data.id;
+      // 🛡️ เซิร์ฟเวอร์ซ่อนเบอร์/อีเมล/เลขบัตรไว้ก่อนส่งให้ AI — บอกเบา ๆ ครั้งเดียว ไม่ต้องให้ผู้ใช้ทำอะไร
+      if (typeof data.privacyNotice === "string" && data.privacyNotice) {
+        setToast({ type: "info", title: isEnglish ? "Your privacy is protected" : "ข้อมูลส่วนตัวของคุณปลอดภัย", subtitle: data.privacyNotice, duration: 6000 });
+      }
       dispatchSession({
         type: "started",
         readingId: sessionReadingId,

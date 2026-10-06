@@ -3,8 +3,9 @@
  * เบาโดยตั้งใจ (ใช้ใน island ของ /journal และ /daily)
  */
 import type { ReadingOutcome, SavedReadingItem } from "@/lib/utils/history";
+import { APP_TIME_ZONE } from "@/lib/time/bangkok";
 
-const TZ = "Asia/Bangkok";
+const TZ = APP_TIME_ZONE;
 
 /** คีย์วันแบบ YYYY-MM-DD ตามเวลาไทย — ใช้จัดกลุ่มในปฏิทิน (ผู้ใช้ส่วนใหญ่อยู่ไทย และพิธีประจำวันใช้เวลาไทย) */
 export function dayKeyOf(iso: string | number | Date): string {

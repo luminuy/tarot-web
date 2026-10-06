@@ -32,10 +32,15 @@ function check(label: string, ok: boolean, detail = ""): void {
 }
 
 /** ตัดคอมเมนต์ออกก่อนวิเคราะห์ — คอมเมนต์ที่อธิบายแพตเทิร์นไม่ใช่การใช้แพตเทิร์น */
+/**
+ * ⚠️ ต้อง "รักษาความยาว" (แทนคอมเมนต์ด้วยช่องว่าง) — ด่าน catch ว่างใช้ตำแหน่งจากข้อความนี้ไปตัดข้อความดิบ
+ * เดิมคอมเมนต์ `//` ถูกลบทิ้งทั้งท่อน ตำแหน่งจึงเลื่อนสะสมตามจำนวนคอมเมนต์ก่อนหน้า
+ * แล้วไปชี้ catch ผิดตัว (รายงาน db.ts:537 ซึ่งไม่ว่าง ขณะที่ catch ว่างจริงอาจหลุด)
+ */
 function stripComments(src: string): string {
   return src
     .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " "))
-    .replace(/(^|[^:])\/\/.*$/gm, "$1");
+    .replace(/(^|[^:])(\/\/.*)$/gm, (_m, lead: string, comment: string) => lead + comment.replace(/./g, " "));
 }
 
 function walk(dir: string, out: string[] = []): string[] {

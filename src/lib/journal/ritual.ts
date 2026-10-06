@@ -7,6 +7,7 @@
  *  • ขาดเกินโควตาพักของช่วงนั้น ➔ หยุดนับ
  * ⚠️ แยกจาก streak การเปิดไพ่ประจำวันของเซิร์ฟเวอร์ (`/api/daily/checkin`) ซึ่งผูกกับระบบสิทธิ์ — ห้ามรวมกัน
  */
+import { APP_TIME_ZONE } from "@/lib/time/bangkok";
 
 const DAY_MS = 86_400_000;
 
@@ -55,5 +56,5 @@ export function reflectionStreak(ritualDays: Iterable<string>, todayKey: string,
 
 /** ช่วงเวลาของวันตามเวลาไทย — ใช้เลือกว่าจะชวน "เช็กอินเย็นนี้" หรือยัง */
 export function bangkokHour(now: Date = new Date()): number {
-  return Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Bangkok", hour: "2-digit", hour12: false }).format(now)) % 24;
+  return Number(new Intl.DateTimeFormat("en-GB", { timeZone: APP_TIME_ZONE, hour: "2-digit", hour12: false }).format(now)) % 24;
 }

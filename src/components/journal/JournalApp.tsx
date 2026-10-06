@@ -23,6 +23,7 @@ import { ReflectionPanel } from "./ReflectionPanel";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { AppSettingsCard } from "@/components/pwa/AppSettingsCard";
 import { CATEGORY_LABEL, OUTCOME_LABEL, dayKeyOf, formatDate } from "./journal-format";
+import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 
 /**
  * ✦ สมุดดวงของฉัน — หน้าเต็ม `/journal` (REFLECTION_JOURNAL_PLAN 1.3 · คลื่น 2)
@@ -382,7 +383,7 @@ export function JournalApp() {
                   <ReflectionPanel
                     scope={{ threadId }}
                     isEnglish={isEnglish}
-                    onOpenEntry={(id) => document.getElementById(`entry-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                    onOpenEntry={(id) => document.getElementById(`entry-${id}`)?.scrollIntoView({ behavior: smoothScrollBehavior(), block: "start" })}
                   />
                 )}
               />

@@ -4,6 +4,7 @@ import { ThreadPatchSchema } from "@/lib/journal/journal.schema";
 import { listThreadEntries } from "@/lib/journal/journal.repo";
 import { deleteThread, getThread, updateThread } from "@/lib/journal/threads.repo";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
+import { apiOk } from "@/lib/api/envelope";
 
 export const runtime = "nodejs";
 
@@ -31,7 +32,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
   const ok = await updateThread(user.id, id, parsed.data);
   if (!ok) return NextResponse.json({ error: "ไม่พบเรื่องนี้" }, { status: 404 });
-  return NextResponse.json({ success: true });
+  return apiOk();
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -43,5 +44,5 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   const { id } = await params;
   const ok = await deleteThread(user.id, id);
   if (!ok) return NextResponse.json({ error: "ไม่พบเรื่องนี้" }, { status: 404 });
-  return NextResponse.json({ success: true });
+  return apiOk();
 }
