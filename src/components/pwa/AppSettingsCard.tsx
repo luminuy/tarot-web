@@ -78,7 +78,7 @@ export const AppSettingsCard: React.FC<{ isEnglish: boolean; isMember: boolean }
                 <select
                   value={hour ?? "off"}
                   onChange={(e) => setHour(e.target.value === "off" ? null : Number(e.target.value))}
-                  className="min-h-[44px] rounded-full border border-line-warm bg-surface/80 px-3 text-ink-deep"
+                  className="min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-3 text-ink-deep"
                 >
                   <option value="off">{L({ th: "ไม่ต้องเตือน", en: "Off" })}</option>
                   {[5, 6, 7, 8, 9, 10, 11, 12, 18, 19, 20, 21].map((h) => (

@@ -102,7 +102,7 @@ export const FollowStoryCard: React.FC<{
               maxLength={60}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={L({ th: "เช่น งานใหม่ · ความสัมพันธ์กับ ก.", en: "e.g. the new job · things with A." })}
-              className="flex-1 min-w-0 min-h-[44px] rounded-full border border-line-warm bg-surface/80 px-4 text-sm text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+              className="flex-1 min-w-0 min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-4 text-sm text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
             />
             <button type="submit" disabled={busy || !title.trim()} className="tap-overlay-y min-h-[44px] px-5 rounded-full btn-gold-glass text-xs sm:text-sm font-bold cursor-pointer disabled:opacity-50">
               {busy ? "…" : L({ th: "ติดตาม", en: "Follow" })}

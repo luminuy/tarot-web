@@ -1,0 +1,16 @@
+---
+import { questionsHubMetadata } from "@/app/_shared/pages/question-page";
+
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { QuestionsHubContentRoot } from "../../../components/PageBodies";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
+
+/** ❓ หน้ารวมคำถามดูดวง 20 ข้อ (REFLECTION_JOURNAL_PLAN 1.11 · แทร็ก Q) — ไม่มี JS */
+const locale = "en" as const;
+---
+
+<BaseLayout locale={locale} metadata={questionsHubMetadata(locale)}>
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <QuestionsHubContentRoot locale={locale} />
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>

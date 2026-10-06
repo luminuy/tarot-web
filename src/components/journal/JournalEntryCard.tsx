@@ -207,7 +207,7 @@ export const JournalEntryCard: React.FC<{
                   if (noteDraft !== (item.userNote ?? "")) onPatch(item.id, { userNote: noteDraft.trim() });
                 }}
                 placeholder={L({ th: "เกิดอะไรขึ้นบ้าง ตรงหรือต่างจากที่ไพ่บอกตรงไหน…", en: "What happened? Where did it match or differ from the cards…" })}
-                className="w-full rounded-lg border border-line-warm bg-surface/80 p-3 text-xs sm:text-[13px] font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+                className="w-full rounded-lg border border-line-interactive-warm bg-surface/80 p-3 text-xs sm:text-[13px] font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
               />
             </label>
           </section>
@@ -272,7 +272,7 @@ export const JournalEntryCard: React.FC<{
                   onChange={(e) => setTagDraft(e.target.value)}
                   list={`${detailId}-tags`}
                   placeholder={L({ th: "เช่น งานใหม่ · แฟน · สอบ", en: "e.g. new job · partner · exam" })}
-                  className="flex-1 min-w-0 min-h-[44px] rounded-full border border-line-warm bg-surface/80 px-4 text-xs font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+                  className="flex-1 min-w-0 min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-4 text-xs font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
                 />
                 <datalist id={`${detailId}-tags`}>
                   {knownTags
@@ -311,7 +311,7 @@ export const JournalEntryCard: React.FC<{
                 <span className="sr-only">{L({ th: "ให้แม่หมอ AI อ่าน", en: "Share with AI reader" })}</span>
                 <span
                   aria-hidden="true"
-                  className={`absolute top-0.5 w-[22px] h-[22px] rounded-full bg-surface shadow transition-all ${item.shareWithAi ? "left-[22px]" : "left-0.5"}`}
+                  className={`absolute top-0.5 w-[22px] h-[22px] rounded-full bg-surface shadow transition-[left] ${item.shareWithAi ? "left-[22px]" : "left-0.5"}`}
                 />
               </button>
             </section>

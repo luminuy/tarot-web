@@ -119,7 +119,7 @@ export const MorningReflection: React.FC<{
               setSaved(false);
             }}
             placeholder={L({ th: "วันนี้ฉันจะ…", en: "Today I will…" })}
-            className="flex-1 min-w-0 min-h-[44px] rounded-full border border-line-warm bg-surface/80 px-4 text-sm font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+            className="flex-1 min-w-0 min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-4 text-sm font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
           />
           <button
             type="submit"
@@ -245,7 +245,7 @@ export const EveningCheckin: React.FC<{ isEnglish: boolean }> = ({ isEnglish }) 
               onChange={(e) => setNote(e.target.value)}
               aria-label={L({ th: "บรรทัดเดียวของวันนี้", en: "One line about today" })}
               placeholder={L({ th: "สิ่งที่ตรง / ไม่ตรงกับไพ่ (ไม่บังคับ)", en: "What matched or didn't (optional)" })}
-              className="flex-1 min-w-0 min-h-[44px] rounded-full border border-line-warm bg-surface/80 px-4 text-sm font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+              className="flex-1 min-w-0 min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-4 text-sm font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
             />
             <button type="submit" className="tap-overlay-y min-h-[44px] px-5 rounded-full btn-gold-glass text-xs sm:text-sm font-serif-th font-bold cursor-pointer">
               {L({ th: "ปิดวัน", en: "Close the day" })}

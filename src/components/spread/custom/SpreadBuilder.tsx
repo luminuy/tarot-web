@@ -38,6 +38,7 @@ import {
 import { mapLayout, MAP_CARD_ASPECT, MAP_CARD_MIN_PX } from "@/lib/tarot/spread-map-geometry";
 import { SpreadLayoutGlyph } from "./SpreadLayoutGlyph";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * ✦ ห้องออกแบบผัง `/spreads/create` (REFLECTION_JOURNAL_PLAN 1.8 · คลื่น 5)
@@ -261,7 +262,7 @@ export const SpreadBuilder: React.FC = () => {
       <header className="text-center space-y-2">
         <p className="text-[11px] sm:text-xs tracking-[0.2em] uppercase text-gold-ink font-serif-th">✦ {L("ห้องออกแบบผัง", "Spread workshop")}</p>
         <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-ink-deep [text-wrap:balance]">
-          {L("ผังที่ถามตรงกับใจคุณ", "A spread that asks what you mean")}
+          <ThaiPhrases>{L("ผังที่ถามตรงกับใจคุณ", "A spread that asks what you mean")}</ThaiPhrases>
         </h1>
         <p className="text-xs sm:text-sm text-muted font-serif-th max-w-xl mx-auto leading-relaxed [text-wrap:balance]">
           {L(
@@ -279,7 +280,7 @@ export const SpreadBuilder: React.FC = () => {
 
       {n === 0 && (
         <section aria-label={L("แม่แบบตั้งต้น", "Starting points")} className="space-y-3">
-          <h2 className="font-serif-th text-base sm:text-lg text-ink-deep text-center">{L("เริ่มจากแม่แบบ หรือหยิบตำแหน่งด้านล่าง", "Start from a template, or pick positions below")}</h2>
+          <h2 className="font-serif-th text-base sm:text-lg text-ink-deep text-center"><ThaiPhrases>{L("เริ่มจากแม่แบบ หรือหยิบตำแหน่งด้านล่าง", "Start from a template, or pick positions below")}</ThaiPhrases></h2>
           <div className="grid gap-3 sm:grid-cols-3">
             {STARTERS.map((s) => (
               <button
@@ -382,7 +383,7 @@ export const SpreadBuilder: React.FC = () => {
               maxLength={CUSTOM_NAME_MAX}
               onChange={(e) => update({ name: e.target.value })}
               placeholder={L("เช่น ย้ายงานดีไหม", "e.g. Should I change jobs?")}
-              className="w-full min-h-[44px] rounded-full border border-line-warm bg-surface/80 px-4 text-sm font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+              className="w-full min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-4 text-sm font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
             />
           </label>
 
@@ -401,7 +402,7 @@ export const SpreadBuilder: React.FC = () => {
                     onChange={(e) => editPosition(i, "name", e.target.value)}
                     aria-label={`${L("ชื่อตำแหน่งที่", "Name of position")} ${i + 1}`}
                     placeholder={L("ชื่อตำแหน่ง", "Position name")}
-                    className="flex-1 min-w-0 min-h-[44px] rounded-full border border-line-warm bg-surface/80 px-3 text-sm font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+                    className="flex-1 min-w-0 min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-3 text-sm font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
                   />
                   <div className="flex shrink-0">
                     <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label={L("เลื่อนขึ้น", "Move up")} className="tap-overlay-y min-h-[44px] min-w-[36px] text-gold-ink disabled:opacity-30">↑</button>
@@ -416,7 +417,7 @@ export const SpreadBuilder: React.FC = () => {
                   rows={2}
                   aria-label={`${L("ตำแหน่งที่", "Position")} ${i + 1} ${L("ถามอะไร", "asks")}`}
                   placeholder={L("ตำแหน่งนี้ถามอะไร เช่น สิ่งที่ฉันยังมองไม่เห็นในเรื่องนี้", "What this position asks, e.g. what I'm not seeing yet")}
-                  className="w-full rounded-xl border border-line-warm bg-surface/80 px-3 py-2 text-sm font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+                  className="w-full rounded-xl border border-line-interactive-warm bg-surface/80 px-3 py-2 text-sm font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
                 />
               </li>
             ))}

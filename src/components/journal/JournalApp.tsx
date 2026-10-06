@@ -24,6 +24,7 @@ import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { AppSettingsCard } from "@/components/pwa/AppSettingsCard";
 import { CATEGORY_LABEL, OUTCOME_LABEL, dayKeyOf, formatDate } from "./journal-format";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * ✦ สมุดดวงของฉัน — หน้าเต็ม `/journal` (REFLECTION_JOURNAL_PLAN 1.3 · คลื่น 2)
@@ -199,7 +200,7 @@ export function JournalApp() {
       <header className="text-center space-y-2">
         <p className="text-[11px] sm:text-xs tracking-[0.2em] uppercase text-gold-ink font-serif-th">✦ {L({ th: "สมุดดวงของฉัน", en: "My reading journal" })} ✦</p>
         <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-ink-deep [text-wrap:balance]">
-          {L({ th: "ทุกคำอ่าน คือบทหนึ่งของเรื่องคุณ", en: "Every reading is a chapter of your story" })}
+          <ThaiPhrases>{L({ th: "ทุกคำอ่าน คือบทหนึ่งของเรื่องคุณ", en: "Every reading is a chapter of your story" })}</ThaiPhrases>
         </h1>
         <p className="text-xs sm:text-sm text-muted font-serif-th max-w-xl mx-auto leading-relaxed [text-wrap:balance]">
           {L({
@@ -270,7 +271,7 @@ export function JournalApp() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={L({ th: "ค้นคำถาม ชื่อไพ่ บันทึก หรือแท็ก…", en: "Search questions, cards, notes or tags…" })}
                 aria-label={L({ th: "ค้นหาในสมุด", en: "Search the journal" })}
-                className="w-full min-h-[44px] rounded-full border border-line-warm bg-surface/80 px-4 text-sm font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+                className="w-full min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-4 text-sm font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
               />
               <div className="flex flex-wrap gap-1.5 text-xs font-serif-th">
                 <Chip on={pinnedOnly} onClick={() => setPinnedOnly((v) => !v)}>
@@ -280,7 +281,7 @@ export function JournalApp() {
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   aria-label={L({ th: "หมวด", en: "Category" })}
-                  className="min-h-[44px] rounded-full border border-line-warm bg-surface/80 px-3 text-ink-deep"
+                  className="min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-3 text-ink-deep"
                 >
                   <option value="all">{L({ th: "ทุกหมวด", en: "All topics" })}</option>
                   {Object.entries(CATEGORY_LABEL).map(([k, v]) => (
@@ -293,7 +294,7 @@ export function JournalApp() {
                   value={outcome}
                   onChange={(e) => setOutcome(e.target.value as "ALL" | ReadingOutcome)}
                   aria-label={L({ th: "ผลจริง", en: "Outcome" })}
-                  className="min-h-[44px] rounded-full border border-line-warm bg-surface/80 px-3 text-ink-deep"
+                  className="min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-3 text-ink-deep"
                 >
                   <option value="ALL">{L({ th: "ทุกผล", en: "Any outcome" })}</option>
                   {(Object.keys(OUTCOME_LABEL) as ReadingOutcome[]).map((o) => (
@@ -306,7 +307,7 @@ export function JournalApp() {
                   value={range}
                   onChange={(e) => setRange(e.target.value as Range)}
                   aria-label={L({ th: "ช่วงเวลา", en: "Time range" })}
-                  className="min-h-[44px] rounded-full border border-line-warm bg-surface/80 px-3 text-ink-deep"
+                  className="min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-3 text-ink-deep"
                 >
                   <option value="all">{L({ th: "ทั้งหมด", en: "All time" })}</option>
                   <option value="7">{L({ th: "7 วัน", en: "7 days" })}</option>

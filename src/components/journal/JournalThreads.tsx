@@ -127,7 +127,7 @@ export const JournalThreads: React.FC<{
                       maxLength={60}
                       onChange={(e) => setRenaming(e.target.value)}
                       aria-label={L({ th: "ชื่อเรื่อง", en: "Story title" })}
-                      className="flex-1 min-w-0 min-h-[44px] rounded-full border border-line-warm bg-surface/80 px-4 text-sm font-serif-th text-ink-deep"
+                      className="flex-1 min-w-0 min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-4 text-sm font-serif-th text-ink-deep"
                     />
                     <button type="submit" className="tap-overlay-y min-h-[44px] px-4 rounded-full btn-gold-glass text-xs font-serif-th font-bold cursor-pointer">
                       {L({ th: "บันทึก", en: "Save" })}
@@ -200,7 +200,7 @@ export const JournalThreads: React.FC<{
                     maxLength={1000}
                     value={closingNote}
                     onChange={(e) => setClosingNote(e.target.value)}
-                    className="w-full rounded-lg border border-line-warm bg-surface/80 p-3 text-sm font-serif-th text-ink-deep"
+                    className="w-full rounded-lg border border-line-interactive-warm bg-surface/80 p-3 text-sm font-serif-th text-ink-deep"
                   />
                   <button type="submit" className="tap-overlay-y min-h-[44px] px-5 rounded-full btn-gold-glass text-xs font-serif-th font-bold cursor-pointer">
                     {L({ th: "ปิดเรื่อง", en: "Close the story" })}

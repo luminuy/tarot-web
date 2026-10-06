@@ -56,6 +56,7 @@ import { STORAGE_KEYS, STORAGE_KEY_BUILDERS } from "@/lib/storage/keys";
 import { readMySign } from "@/lib/zodiac/my-sign";
 import { buildCustomSpread, CUSTOM_SPREAD_ID, layoutPoints } from "@/lib/tarot/custom-spread";
 import { takeCustomLaunch, type CustomSpreadDef } from "@/lib/tarot/custom-spread-client";
+import { takeQuestionPrefill } from "@/lib/reading/question-prefill";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
@@ -565,6 +566,12 @@ export default function TarotFlow({
       // รอบเก่าถูกบันทึกลงประวัติตั้งแต่ตอนอ่านจบแล้ว — ของที่ทิ้งคือ "ค้างกลางทาง" ไม่ใช่ผลคำอ่าน
       clearFlowState();
       rememberNickname();
+      // ✦ มาจากปุ่ม "ถามเลย" ของหน้าคำถาม — เติมคำถาม/หมวดที่ตั้งไว้ให้ (ผู้ใช้แก้ได้ก่อนกดเริ่ม)
+      const prefill = takeQuestionPrefill(routeSpread.id);
+      if (prefill) {
+        setQuestion(prefill.question);
+        setSelectedCategory(prefill.category);
+      }
       void checkRouteAccess(routeSpread, () => deepLinkCancelledRef.current);
     } else if (intent.kind === "resume" && saved) {
       // กู้คืนเฉพาะเมื่อผู้ใช้ "เริ่มดูดวงไปแล้วจริง ๆ" (พ้นขั้นเลือกผัง)

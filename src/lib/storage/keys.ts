@@ -70,6 +70,8 @@ export const STORAGE_KEYS = {
   customSpreadsLocal: "tarot_custom_spreads_v1",
   /** ✦ ผังที่กด "ใช้ผังนี้" จากหน้าสร้างผัง — ส่งต่อให้พิธีเปิดไพ่ครั้งเดียวแล้วลบทิ้ง (sessionStorage) */
   customSpreadLaunch: "tarot_custom_spread_launch_v1",
+  /** ✦ คำถามที่ตั้งไว้ให้จากหน้าคำถาม `/questions/*` — ส่งต่อให้พิธีเปิดไพ่ครั้งเดียวแล้วลบทิ้ง (sessionStorage) */
+  questionPrefill: "tarot_question_prefill_v1",
 
   /* ── คีย์ที่มีผู้ใช้จริงอยู่ก่อนมีทะเบียนนี้ — ห้ามเปลี่ยนชื่อ ── */
   /** ชื่อเล่นที่ผู้ใช้เคยกรอกไว้ */

@@ -32,10 +32,11 @@ export const EN_TWIN_ROUTES = [
   "/privacy",
   "/contact",
   "/pricing",
+  "/questions",
 ] as const;
 
 /** เส้นทางที่มีพารามิเตอร์ — ลูกทุกใบใต้ prefix นี้มีฝาแฝดครบ */
-const EN_TWIN_DYNAMIC_PREFIXES = ["/cards/", "/spreads/", "/blog/", "/pick-a-card/", "/read/"] as const;
+const EN_TWIN_DYNAMIC_PREFIXES = ["/cards/", "/spreads/", "/blog/", "/pick-a-card/", "/read/", "/questions/"] as const;
 
 /**
  * เส้นทางที่อยู่ใต้ prefix ข้างบนก็จริง แต่ **ไม่มี** ฝาแฝด — ต้องยกเว้นเป็นรายตัว

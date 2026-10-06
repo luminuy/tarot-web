@@ -40,6 +40,8 @@ export const ASTRO_ROUTE_PREFIXES = [
   "/daily",
   "/love",
   "/pick-a-card",
+  /* ❓ หน้าคำถาม 20 หน้า + หน้ารวม (REFLECTION_JOURNAL_PLAN 1.11) */
+  "/questions",
   /* หน้าดูดวงรายผัง `/read/<ผัง>` — ⚠️ ไม่ชน `/reading` (เทียบด้วย `/read/` มีทับท้าย) และไม่ชน `/readers` ของ Next */
   "/read",
 ] as const;
