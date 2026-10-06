@@ -147,7 +147,17 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
   const insightUrl = useMemo(() => {
     if (!spreadId || isStreaming || drawnCards.length === 0) return null;
     if (drawnCards.some((d) => typeof d.cardIndex !== "number" || d.cardIndex < 0 || d.cardIndex > 77)) return null;
-    return explainUrl(spreadId, drawnCards, category || "general", isEnglish);
+    // ผังที่สร้างเอง: เซิร์ฟเวอร์ไม่รู้ชื่อตำแหน่ง ➔ ส่งข้อความตำแหน่งที่หน้าเว็บถืออยู่ไปทาง fragment
+    const customPositions =
+      spreadId === "custom"
+        ? [...drawnCards]
+            .sort((a, b) => a.order - b.order)
+            .map((d) => ({
+              name: (isEnglish ? d.position.nameEn : d.position.nameTh) || d.position.nameTh,
+              meaning: (isEnglish ? d.position.meaningEn : d.position.meaning) || d.position.meaning,
+            }))
+        : undefined;
+    return explainUrl(spreadId, drawnCards, category || "general", isEnglish, customPositions);
   }, [spreadId, isStreaming, drawnCards, category, isEnglish]);
 
   /** ♿ ผู้ใช้ขอลดการเคลื่อนไหวหรือไม่ — ฮุกนี้ไม่ลาก `motion` เข้าบันเดิลสักไบต์ */

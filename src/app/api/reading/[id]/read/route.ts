@@ -1,4 +1,3 @@
-import { getSpread } from "@/data/spreads";
 import { getContentOverrides, resolveCardByIndex } from "@/lib/content/overrides";
 import { streamGeminiReading } from "@/lib/ai/gemini";
 import { AI_DISCLOSURE, AI_DISCLOSURE_EN } from "@/lib/safety/guardrails";
@@ -10,6 +9,7 @@ import { recordEvents, recordEvent } from "@/lib/stats/record";
 import { GUEST_BLOCK_REASON, REQUIRE_SIGNUP_TO_READ } from "@/lib/entitlement/limits";
 import { SIGN_IN_GATE_REASON, getSignInGateMessage, isSignInRequired } from "@/lib/entitlement/signin-gate";
 import { recordCaughtError } from "@/lib/observability/caught";
+import { resolveRecordSpread } from "@/lib/tarot/record-spread";
 
 export const runtime = "nodejs";
 /** การอ่านไพ่ใช้เวลาหลายสิบวินาที ต้องกันไม่ให้ platform ตัดกลางคัน */
@@ -77,7 +77,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
   }
 
-  const spread = getSpread(record.spreadId);
+  const spread = resolveRecordSpread(record);
   if (!spread) {
     return Response.json({ error: isEn ? "Spread layout not found." : "ไม่พบรูปแบบการวางไพ่นี้" }, { status: 404 });
   }
@@ -472,6 +472,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             ]);
             void recordAiCall(1);
             void recordPerIpReadQuota(clientIp);
+            // ✦ ผังที่บันทึกไว้ในบัญชี — นับครั้งที่ใช้ (เรียงผังโปรดขึ้นก่อน) · กรองด้วย user_id เสมอ
+            if (memberUserId && record.customSpread?.savedId) {
+              const { markCustomSpreadUsed } = await import("@/lib/tarot/custom-spread.repo");
+              void markCustomSpreadUsed(memberUserId, record.customSpread.savedId).catch(() => {});
+            }
 
             // 📊 บันทึกบริบทตอนสร้างคำอ่าน สำหรับวัดคุณภาพ AI (AI_INTELLIGENCE_PLAN W1.1)
             const { recordReadingQuality } = await import("@/lib/ai/quality.repo");

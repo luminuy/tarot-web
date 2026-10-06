@@ -55,7 +55,7 @@ async function main() {
   const d = (await crypto.subtle.exportKey("jwk", pair.privateKey)).d!;
   const jwt = await vapidJwt("https://fcm.googleapis.com", "mailto:test@example.com", d, b64urlEncode(pubRaw));
   const [h, p, s] = jwt.split(".");
-  const verified = await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, pair.publicKey, b64urlDecode(s), new TextEncoder().encode(`${h}.${p}`));
+  const verified = await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, pair.publicKey, b64urlDecode(s) as BufferSource, new TextEncoder().encode(`${h}.${p}`));
   const claims = JSON.parse(new TextDecoder().decode(b64urlDecode(p)));
   check("VAPID JWT ตรวจลายเซ็นผ่าน", verified);
   check("VAPID aud/sub/exp ถูกต้อง (≤ 24 ชม.)", claims.aud === "https://fcm.googleapis.com" && claims.sub === "mailto:test@example.com" && claims.exp - Date.now() / 1000 <= 24 * 3600);

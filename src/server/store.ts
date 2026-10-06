@@ -46,6 +46,12 @@ export interface ReadingRecord {
   zodiac?: import("@/lib/ai/zodiac-context").SeekerZodiac;
   /** ✦ ถามต่อจากเส้นเรื่องเดิม — ความทรงจำแม่หมอดึงคำอ่านในเรื่องนี้แทน "3 ครั้งล่าสุด" */
   threadId?: string;
+  /**
+   * ✦ ผังที่ผู้ใช้ออกแบบเอง (`spreadId = "custom"`) — ตรวจแล้วตรึงตั้งแต่ `/start` เปลี่ยนไม่ได้อีก
+   * ทุกเส้นทางต้องอ่านผังผ่าน `resolveRecordSpread(record)` ไม่ใช่ `getSpread(record.spreadId)`
+   * `savedId` = ผังที่บันทึกไว้ในบัญชี (ถ้ามี) ใช้นับครั้งที่ใช้ ไม่มีผลกับการอ่าน
+   */
+  customSpread?: import("@/lib/tarot/custom-spread").CustomSpreadInput & { savedId?: string };
 
   result?: Reading;
   /**

@@ -40,6 +40,8 @@ export interface PersistedFlow {
   readingResult: Partial<Reading> | null;
   proof: { serverSeed?: string; clientSeed?: string; commitment?: string };
   lang?: "th" | "en";
+  /** ✦ ผังที่สร้างเอง — ต้องเก็บตัวผังด้วย ไม่งั้นรีเฟรชกลางพิธีจะหาผังไม่เจอแล้วตำแหน่งเพี้ยน */
+  customSpread?: import("@/lib/tarot/custom-spread").CustomSpreadInput & { savedId?: string };
   savedAt: number;
 }
 

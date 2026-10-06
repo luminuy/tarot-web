@@ -54,6 +54,8 @@ import { ensureEntitlement, refreshEntitlement, useEntitlement } from "@/lib/ent
 import { useLocale } from "@/lib/i18n";
 import { STORAGE_KEYS, STORAGE_KEY_BUILDERS } from "@/lib/storage/keys";
 import { readMySign } from "@/lib/zodiac/my-sign";
+import { buildCustomSpread, CUSTOM_SPREAD_ID, layoutPoints } from "@/lib/tarot/custom-spread";
+import { takeCustomLaunch, type CustomSpreadDef } from "@/lib/tarot/custom-spread-client";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
@@ -113,6 +115,8 @@ const CrisisNotice = dynamic(() => import("@/components/safety/CrisisNotice").th
 const PostReadingSignup = dynamic(() => import("@/components/entitlement/PostReadingSignup").then((m) => m.PostReadingSignup), { ssr: false });
 const PostReadingUpsell = dynamic(() => import("@/components/entitlement/PostReadingUpsell").then((m) => m.PostReadingUpsell), { ssr: false });
 const AnnouncementBanner = dynamic(() => import("@/components/entitlement/AnnouncementBanner").then((m) => m.AnnouncementBanner), { ssr: false });
+/* ✦ ผังของฉัน (คลื่น 5) — โหลดเมื่อถึงขั้นเลือกผังเท่านั้น ไม่เพิ่มบันเดิลหน้าแรก */
+const MyCustomSpreadsRow = dynamic(() => import("@/components/spread/custom/MyCustomSpreadsRow"), { ssr: false });
 const ToastNotification = dynamic(() => import("@/components/ui/ToastNotification").then((m) => m.ToastNotification), { ssr: false });
 
 // P1-U1: ปุ่มย้อนกลับทีละขั้น — ใช้ร่วมในขั้นสับไพ่และเลือกไพ่
@@ -349,6 +353,18 @@ export default function TarotFlow({
 
   // Selection state
   const [selectedSpread, setSelectedSpread] = useState<Spread>(routeSpread ?? PUBLIC_SPREADS[3]); // Default: 3-card
+  /**
+   * ✦ ผังที่สร้างเอง (REFLECTION_JOURNAL_PLAN 1.8) — ตัวผังดิบที่ส่งให้ `/start` ตรวจซ้ำแล้วตรึงลงเซสชัน
+   * มีผลเฉพาะเมื่อ `selectedSpread.id === "custom"` · เลือกผังในบ้านทีหลัง = ค่านี้ถูกเมินเอง
+   */
+  const [customDef, setCustomDef] = useState<CustomSpreadDef | null>(null);
+  const pickCustomSpread = useCallback((def: CustomSpreadDef): Spread | null => {
+    if (!layoutPoints(def.layout, def.positions.length)) return null;
+    const built = buildCustomSpread(def);
+    setCustomDef(def);
+    setSelectedSpread(built);
+    return built;
+  }, []);
   const [selectedPersona, setSelectedPersona] = useState<Persona>(PERSONAS[0]); // Default: warm
   const [selectedCategory, setSelectedCategory] = useState<Category>("general");
   /**
@@ -454,8 +470,10 @@ export default function TarotFlow({
    * เริ่มพิธีด้วยผังที่เลือกอยู่ — ใช้ร่วมกันระหว่างปุ่มหลักของ hero กับปุ่มใน SpreadCardSelector
    * ⚠️ ด่านสิทธิ์สามชั้นด้านล่างคือของเดิมทั้งหมด ห้ามตัดออกแม้แต่ชั้นเดียว
    */
-  const handleBeginReading = useCallback(() => {
-    const decision = decideSpreadAccess(entitlement, selectedSpread.id);
+  const handleBeginReading = useCallback((spreadOverride?: Spread) => {
+    // ผังของฉัน: เลือกแล้วเริ่มทันที — state ยังไม่อัปเดตในรอบนี้ จึงตัดสินจากผังที่ส่งมา
+    const target = spreadOverride ?? selectedSpread;
+    const decision = decideSpreadAccess(entitlement, target.id, target.positions.length);
     if (!decision.allowed) {
       openAccessDialog(decision.reason);
       return;
@@ -485,7 +503,7 @@ export default function TarotFlow({
     const currentEntitlement = entitlement ?? (await ensureEntitlement());
     if (isCancelled()) return;
 
-    const decision = decideSpreadAccess(currentEntitlement, spread.id);
+    const decision = decideSpreadAccess(currentEntitlement, spread.id, spread.positions.length);
     if (!decision.allowed) openAccessDialog(decision.reason);
   };
 
@@ -517,6 +535,22 @@ export default function TarotFlow({
       }
     };
 
+    /*
+     * ✦ มาจากปุ่ม "ใช้ผังนี้" ของหน้าสร้างผัง — สั่งเริ่มรอบใหม่ชัดเจน จึงชนะรอบที่ค้างไว้ (เหตุผลเดียวกับ `/read/<ผัง>`)
+     * ส่งต่อครั้งเดียวทาง sessionStorage แล้วลบทิ้ง · ผังพัง/แม่แบบไม่ตรงจำนวนใบ = เมินแล้วเปิดหน้าแรกปกติ
+     */
+    const launch = takeCustomLaunch();
+    if (launch && layoutPoints(launch.layout, launch.positions.length)) {
+      clearFlowState();
+      rememberNickname();
+      const spread = buildCustomSpread(launch);
+      setCustomDef(launch);
+      setSelectedSpread(spread);
+      setCurrentStep("INTENTION_SELECT");
+      void checkRouteAccess(spread, () => deepLinkCancelledRef.current);
+      return;
+    }
+
     const saved = loadFlowState();
     const intent = resolveEntryIntent({
       routeSpread: routeSpread?.id ?? null,
@@ -534,7 +568,13 @@ export default function TarotFlow({
       void checkRouteAccess(routeSpread, () => deepLinkCancelledRef.current);
     } else if (intent.kind === "resume" && saved) {
       // กู้คืนเฉพาะเมื่อผู้ใช้ "เริ่มดูดวงไปแล้วจริง ๆ" (พ้นขั้นเลือกผัง)
-      const spread = getSpread(saved.spreadId);
+      // ผังที่สร้างเองกู้จากตัวผังที่เก็บไว้ในรอบนั้น (หาใน `getSpread` ไม่เจอโดยตั้งใจ)
+      const customSaved =
+        saved.spreadId === CUSTOM_SPREAD_ID && saved.customSpread && layoutPoints(saved.customSpread.layout, saved.customSpread.positions.length)
+          ? saved.customSpread
+          : null;
+      const spread = customSaved ? buildCustomSpread(customSaved) : getSpread(saved.spreadId);
+      if (customSaved) setCustomDef(customSaved);
       if (spread) setSelectedSpread(spread);
       setSelectedPersona(getPersona(saved.personaId));
       setSelectedCategory(saved.category);
@@ -783,6 +823,7 @@ export default function TarotFlow({
       readingResult,
       proof,
       lang: isEnglish ? "en" : "th",
+      ...(selectedSpread.id === CUSTOM_SPREAD_ID && customDef ? { customSpread: customDef } : {}),
     };
     const snapshot = latestFlowRef.current;
     const t = setTimeout(() => {
@@ -813,6 +854,7 @@ export default function TarotFlow({
     readingResult,
     proof,
     isEnglish,
+    customDef,
   ]);
 
   /**
@@ -863,7 +905,7 @@ export default function TarotFlow({
      *    ในคลอเชอร์ ของเดิมถามสิทธิ์ใหม่แล้วแต่ยังเอาค่าเก่ามาตัดสินชั้นที่ 2 กับ 3
      *    คนที่เพิ่งเปิดหน้าแล้วกดเปิดผังใหญ่ทันทีจึงโดนกำแพงทั้งที่จ่ายเงินมาแล้ว
      */
-    const decision = decideStartSessionAccess(currentEntitlement, selectedSpread.id, selectedPersona.id);
+    const decision = decideStartSessionAccess(currentEntitlement, selectedSpread.id, selectedPersona.id, selectedSpread.positions.length);
     if (!decision.allowed) {
       openAccessDialog(decision.reason);
       return;
@@ -908,6 +950,13 @@ export default function TarotFlow({
           zodiac: readMySign(),
           // ✦ ถามต่อจากเรื่องเดิม — แม่หมอดึงความทรงจำของเรื่องนี้แทน "3 ครั้งล่าสุด"
           ...(chosenThread ? { threadId: chosenThread.id } : {}),
+          // ✦ ผังที่สร้างเอง — เซิร์ฟเวอร์ตรวจซ้ำทั้งหมดแล้วตรึงลงเซสชัน (ไม่เชื่อหน้าเว็บ)
+          ...(selectedSpread.id === CUSTOM_SPREAD_ID && customDef
+            ? {
+                custom: { name: customDef.name, layout: customDef.layout, positions: customDef.positions },
+                ...(customDef.savedId ? { customSavedId: customDef.savedId } : {}),
+              }
+            : {}),
         }),
       });
 
@@ -1843,21 +1892,39 @@ export default function TarotFlow({
                   isPassHolder={isPassHolder}
                   premiumTrial={hasPremiumTrial}
                   proceedLabel={
-                    hasPremiumTrial && !isStandardSpread(selectedSpread.id)
+                    hasPremiumTrial && !isStandardSpread(selectedSpread.id, selectedSpread.positions.length)
                       ? (isEnglish ? "Try This Spread Free (1-time trial)" : "ลองผังนี้ฟรี (สิทธิ์ทดลอง 1 ครั้ง)")
                       : entitlementView?.blocked
                       ? entitlementView.blockedReason === "daily_exhausted"
                         ? (isEnglish ? "Refill Quota to Continue" : "เติมรอบเพื่อเปิดไพ่ต่อ")
                         : (isEnglish ? "Sign Up Free to Draw Cards" : "สมัครสมาชิกฟรีเพื่อเปิดไพ่")
-                      : !isPassHolder && !isStandardSpread(selectedSpread.id)
+                      : !isPassHolder && !isStandardSpread(selectedSpread.id, selectedSpread.positions.length)
                         ? (isEnglish ? "Unlock Spread to Draw Cards" : "ปลดล็อกผังนี้เพื่อเปิดไพ่")
                         : undefined
                   }
                   onRequireUpgrade={() => {
                     openAccessDialog("grand_spread");
                   }}
-                  onProceed={handleBeginReading}
+                  onProceed={() => handleBeginReading()}
                 />
+                <div className="mt-6 sm:mt-8">
+                  <MyCustomSpreadsRow
+                    isEnglish={isEnglish}
+                    selectedName={selectedSpread.id === CUSTOM_SPREAD_ID ? selectedSpread.nameTh : null}
+                    onPick={(def) => {
+                      soundManager.playCardSelectSound();
+                      void ensureEntitlement();
+                      const built = pickCustomSpread(def);
+                      if (built) handleBeginReading(built);
+                      trackEvent("spread_select", {
+                        spread_id: CUSTOM_SPREAD_ID,
+                        spread_name: "custom",
+                        card_count: def.positions.length,
+                        category: "general",
+                      });
+                    }}
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -2245,7 +2312,7 @@ export default function TarotFlow({
                 !isStreaming &&
                 entitlement?.kind === "member" &&
                 !isPassHolder &&
-                isStandardSpread(selectedSpread.id) &&
+                isStandardSpread(selectedSpread.id, selectedSpread.positions.length) &&
                 !isMasterPersona(selectedPersona.id) &&
                 upsellPositions.length > 0 && (
                   <PostReadingUpsell

@@ -33,6 +33,12 @@ const SOURCES: UserDataSource[] = [
     export: async (userId) => (await import("@/lib/push/push.repo")).exportPushSettings(userId),
     erase: async (userId) => (await import("@/lib/push/push.repo")).deleteAllPushSubscriptions(userId),
   },
+  {
+    // ผังที่ออกแบบเอง — ชื่อ/ตำแหน่งที่ผู้ใช้เขียนเอง (ลิงก์แบ่งปันหายไปพร้อมกันเมื่อลบ)
+    key: "customSpreads",
+    export: async (userId) => (await import("@/lib/tarot/custom-spread.repo")).listCustomSpreads(userId),
+    erase: async (userId) => (await import("@/lib/tarot/custom-spread.repo")).deleteAllCustomSpreads(userId),
+  },
 ];
 
 export async function exportExtraUserData(userId: string): Promise<{ data: Record<string, unknown>; failed: string[] }> {

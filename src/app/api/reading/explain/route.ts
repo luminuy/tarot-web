@@ -7,6 +7,7 @@ import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { THEME_LABEL, themesOf } from "@/data/cards/themes";
 import type { Category, TarotCard } from "@/data/cards/types";
 import { analyzeRelations } from "@/lib/tarot/relations";
+import { CUSTOM_MAX_CARDS, CUSTOM_SPREAD_ID } from "@/lib/tarot/custom-spread";
 import type { ExplainCard, ExplainResponse } from "@/lib/tarot/explain-types";
 
 export const runtime = "nodejs";
@@ -49,7 +50,15 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const lang: "th" | "en" = url.searchParams.get("lang") === "en" ? "en" : "th";
   const isEn = lang === "en";
-  const spread = getSpread(url.searchParams.get("spread") ?? "");
+  const spreadParam = url.searchParams.get("spread") ?? "";
+  /*
+   * ✦ ผังที่สร้างเอง — เซิร์ฟเวอร์ไม่รู้ชื่อตำแหน่ง (ไม่รับข้อความของผู้ใช้ทาง URL ที่แคชที่ขอบ)
+   * คืนช่องตำแหน่งว่าง แล้วหน้าเว็บเติมจากผังที่ตัวเองถืออยู่ (ส่วน `#pos=` ของลิงก์ ซึ่งไม่ถูกส่งมาที่เซิร์ฟเวอร์)
+   */
+  const isCustom = spreadParam === CUSTOM_SPREAD_ID;
+  const spread = isCustom
+    ? { positions: Array.from({ length: CUSTOM_MAX_CARDS }, () => ({ nameTh: "", nameEn: "", meaning: "", meaningEn: "" })) }
+    : getSpread(spreadParam);
   const catParam = url.searchParams.get("cat") as Category | null;
   const category: Category = catParam && CATEGORIES.includes(catParam) ? catParam : "general";
 

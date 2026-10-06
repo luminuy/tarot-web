@@ -21,6 +21,8 @@ import { recordEvent, recordEvents } from "@/lib/stats/record";
 import { sanitizeTarotText, stripThinkingTags } from "@/lib/ai/language";
 import { buildOfflineChatReply } from "@/lib/ai/chat-fallback";
 import { getMembersOnlyChatMessage, isSignInRequired } from "@/lib/entitlement/signin-gate";
+import { resolveRecordSpread } from "@/lib/tarot/record-spread";
+import { CUSTOM_SPREAD_ID } from "@/lib/tarot/custom-spread";
 
 export const runtime = "nodejs";
 
@@ -270,7 +272,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const isEnglish = activeLang === "en";
 
     const personaId = record.personaId || "warm";
-    const spread = getSpread(record.spreadId || "single");
+    const spread = (record.spreadId === CUSTOM_SPREAD_ID ? resolveRecordSpread(record) : getSpread(record.spreadId || "single"));
     const overrideDoc = await getContentOverrides();
     const cards = (record.drawn || [])
       .map((d) => {

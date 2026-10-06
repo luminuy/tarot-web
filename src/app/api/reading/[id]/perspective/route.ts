@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getSpread } from "@/data/spreads";
 import { PERSONA_BY_ID } from "@/data/personas";
 import type { TarotCard } from "@/data/cards";
 import { getContentOverrides, resolveCardByIndex } from "@/lib/content/overrides";
@@ -13,6 +12,7 @@ import { recordEvent, recordEvents } from "@/lib/stats/record";
 import { getReading, updateReading, type ReadingRecord } from "@/server/store";
 import type { Reading } from "@/lib/schema/reading";
 import type { ReadingEvent } from "@/lib/ai/types";
+import { resolveRecordSpread } from "@/lib/tarot/record-spread";
 
 export const runtime = "nodejs";
 
@@ -161,7 +161,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   try {
-    const spread = getSpread(record.spreadId || "");
+    const spread = resolveRecordSpread(record);
     const overrides = await getContentOverrides();
     const cards = record.drawn.map((d) => resolveCardByIndex(overrides, d.cardIndex));
     // 🃏 กฎเหล็กข้อ 14 — ไพ่ใบไหนหาไม่เจอ ห้ามเดาแทน

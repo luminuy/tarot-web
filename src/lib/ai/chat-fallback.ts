@@ -15,10 +15,10 @@
  */
 import { cardByIndex } from "@/data/cards";
 import type { TarotCard } from "@/data/cards/types";
-import { getSpread } from "@/data/spreads";
 import { getPositionName } from "@/data/spreads-helpers";
 import { MOCK_ADVICE, MOCK_TIMING, mockCardTone, shortPositionName, type MockTone } from "@/lib/ai/mock-reading";
 import type { Reading } from "@/lib/schema/reading";
+import { resolveRecordSpread } from "@/lib/tarot/record-spread";
 
 type Lang = "th" | "en";
 
@@ -140,7 +140,7 @@ export function buildOfflineChatReply(input: ChatFallbackInput): string {
   const isEn = lang === "en";
   const voice = (VOICE[personaId] ?? VOICE.warm)[lang];
   const category = questionCategory(userQuestion, record.category || "general");
-  const spread = record.spreadId ? getSpread(record.spreadId) : undefined;
+  const spread = resolveRecordSpread(record);
 
   const views: View[] = [...(record.drawn ?? [])]
     .sort((a, b) => a.order - b.order)

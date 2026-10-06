@@ -66,7 +66,14 @@ import { STANDARD_SPREAD_IDS } from "@/data/spreads/standard-ids.generated";
 
 export { STANDARD_SPREAD_IDS };
 
-export function isStandardSpread(spreadId: string): boolean {
+/**
+ * ผังมาตรฐาน (เปิดด้วยโควตารายวันได้) หรือไม่
+ * ✦ ผังที่ผู้ใช้สร้างเอง (`custom`) ตัดสินจากจำนวนใบ: 1–3 ใบ = มาตรฐาน · 4–7 ใบ = ผังใหญ่
+ *   (เกณฑ์เดียวกับ `isCustomStandard` ใน lib/tarot/custom-spread.ts — สร้างผังเองไม่ใช่ช่องหลบโควตา)
+ *   ไม่ส่ง `cardCount` มากับ `custom` = นับเป็นผังใหญ่ (ปลอดภัยไว้ก่อน)
+ */
+export function isStandardSpread(spreadId: string, cardCount?: number): boolean {
+  if (spreadId === "custom") return typeof cardCount === "number" && cardCount >= 1 && cardCount <= 3;
   return STANDARD_SPREAD_IDS.has(spreadId);
 }
 

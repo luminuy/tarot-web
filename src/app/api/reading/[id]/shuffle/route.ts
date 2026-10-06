@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { cardByIndex, DECK_SIZE } from "@/data/cards";
-import { getSpread } from "@/data/spreads";
 import { drawCards, normalizeClientSeed, verifyCommitment } from "@/lib/tarot/shuffle";
 import { deriveDrawn, type DerivedDrawDetail } from "@/lib/reading/derived-draw";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { getReading, updateReading, persistReading } from "@/server/store";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
+import { resolveRecordSpread } from "@/lib/tarot/record-spread";
 
 export const runtime = "nodejs";
 
@@ -110,7 +110,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     );
   }
 
-  const spread = getSpread(record.spreadId);
+  const spread = resolveRecordSpread(record);
   if (!spread) {
     return NextResponse.json(
       { error: record.lang === "en" ? "Spread layout not found" : "ไม่พบรูปแบบการวางไพ่นี้" },

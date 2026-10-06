@@ -468,6 +468,11 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     );
     safeExec("CREATE INDEX IF NOT EXISTS idx_push_user ON push_subscriptions(user_id)");
     safeExec("CREATE INDEX IF NOT EXISTS idx_push_morning ON push_subscriptions(morning_hour) WHERE morning_hour IS NOT NULL");
+    // ✦ ผังที่สมาชิกออกแบบเอง (migrations/0024)
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS custom_spreads (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, name TEXT NOT NULL, layout TEXT NOT NULL, positions_json TEXT NOT NULL, share_slug TEXT UNIQUE, use_count INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)"
+    );
+    safeExec("CREATE INDEX IF NOT EXISTS idx_custom_spreads_user ON custom_spreads(user_id, updated_at DESC)");
     // 🎟 รหัสแลกสิทธิ์ตั้งต้นของเครื่อง dev — ต้องมีเพดานและวันหมดอายุเท่ากับ migrations/0013
     // (ห้ามปล่อย max_uses = -1 อีก: รหัสที่เขียนไว้ในรีโปแปลว่าใครอ่านซอร์สเจอก็แลกได้)
     // รหัสสำหรับแจกจริงให้สร้างจากแผงแอดมินซึ่งสุ่มรหัสใหม่ทุกครั้ง — อย่า seed ลงไฟล์

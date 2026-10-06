@@ -1,0 +1,20 @@
+---
+import { spreadBuilderMetadataEn } from "@/app/_shared/pages/spread-builder-meta";
+
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { SpreadBuilderRoot } from "../../../islands/SpreadBuilderRoot";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
+
+/**
+ * ✦ ห้องออกแบบผัง (REFLECTION_JOURNAL_PLAN 1.8 · คลื่น 5) — เชลล์ static + island เดียว · noindex
+ * อยู่ใต้ prefix `/spreads` ของ Astro แล้ว (src/lib/routing/astro-routes.ts) — หน้า static ชนะ `[id].astro` เสมอ
+ * ลิงก์แบ่งปัน = `?s=<slug>` (หน้า static ทำเส้นทางไดนามิกไม่ได้ · island อ่านเองหลัง hydrate)
+ */
+const locale = "en" as const;
+---
+
+<BaseLayout locale={locale} metadata={spreadBuilderMetadataEn}>
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <SpreadBuilderRoot locale={locale} client:load />
+  <SiteFooterRoot locale={locale} spacing="tight" />
+</BaseLayout>
