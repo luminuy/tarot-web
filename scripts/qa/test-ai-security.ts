@@ -160,15 +160,17 @@ async function main() {
   check("คำอ่านที่เผย prompt = PROMPT_LEAK (fatal)", cons.fatal && cons.issues.some((i) => i.code === "PROMPT_LEAK"));
 
   // ── 4. พักผู้ฉีดซ้ำ ──
-  const ip = `203.0.113.${Math.floor(Math.random() * 200)}`;
+  // ตัวตนไม่ซ้ำทุกรอบ — ช่วงพักถูกเก็บใน SQLite ในเครื่อง (อยู่ข้ามรอบได้ 1 ชม.)
+  const runTag = `${Date.now().toString(16)}${Math.floor(Math.random() * 0xffff).toString(16)}`;
+  const ip = `2001:db8:${runTag.slice(-4)}::1`;
   const uid = `test_abuse_${Date.now()}`;
   check("เริ่มต้นไม่ถูกพัก", !(await isInInjectionCooldown(ip, uid)));
   let tripped = false;
   for (let i = 0; i < INJECTION_STRIKES; i++) tripped = await noteInjectionAttempt(ip, uid, "test");
   check(`ครบ ${INJECTION_STRIKES} ครั้ง ➔ ถูกพัก`, tripped && (await isInInjectionCooldown(ip, uid)));
-  check("พักตามบัญชีด้วย (เปลี่ยน IP ก็ยังโดน)", await isInInjectionCooldown("198.51.100.7", uid));
-  check("คนอื่นไม่โดนพักไปด้วย", !(await isInInjectionCooldown("198.51.100.8", `${uid}_other`)));
-  const ip2 = `203.0.113.${201 + Math.floor(Math.random() * 50)}`;
+  check("พักตามบัญชีด้วย (เปลี่ยน IP ก็ยังโดน)", await isInInjectionCooldown(`2001:db8:${runTag.slice(-4)}::7`, uid));
+  check("คนอื่นไม่โดนพักไปด้วย", !(await isInInjectionCooldown(`2001:db8:${runTag.slice(-4)}::8`, `${uid}_other`)));
+  const ip2 = `2001:db8:${runTag.slice(-4)}::2`;
   await noteInjectionAttempt(ip2, null, "test");
   check("ครั้งเดียว (พิมพ์พลาด) ยังไม่ถูกพัก", !(await isInInjectionCooldown(ip2, null)));
 
