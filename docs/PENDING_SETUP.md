@@ -216,6 +216,46 @@ npx wrangler secret put CRON_SECRET
 ⚠️ เปลี่ยนกุญแจภายหลัง = ผู้ใช้ทุกคนต้องกดเปิดการเตือนใหม่ (subscription เดิมใช้ไม่ได้)
 ⚠️ iPhone รับแจ้งเตือนได้เฉพาะเมื่อเพิ่มเว็บไปยังหน้าจอโฮมแล้ว (iOS 16.4+) — หน้าเว็บบอกผู้ใช้เองแล้ว
 
+### 🗄️ รอรัน — migration ของแผนสมุดดวง 0022–0028 (REFLECTION_JOURNAL_PLAN · ก่อน deploy กิ่งนี้)
+
+รันตามลำดับเลขบน D1 `tarot-app-db` (ไฟล์ที่มีแต่ `CREATE ... IF NOT EXISTS` รันซ้ำได้ · 0022 มี `ALTER TABLE`):
+```bash
+for f in 0022_journal_v2 0023_journal_threads 0024_custom_spreads 0025_push_subscriptions 0026_ai_usage_ledger 0027_reader_studio 0028_reflection_cache; do
+  npx wrangler d1 execute tarot-app-db --remote --file=migrations/$f.sql
+done
+```
+⚠️ 0022 มี `ALTER TABLE ... ADD COLUMN` — รันซ้ำจะ error "duplicate column" (ไม่เสียหาย แต่ต้องรู้ว่ารันไปแล้ว)
+
+### 🛡️ ตั้งได้ภายหลัง (มีค่าเริ่มต้นแล้ว) — เพดานโทเคน AI ต่อคนต่อวัน (แทร็ก S · 2026-10-06)
+
+ไม่ตั้ง = ใช้ค่าเริ่มต้น · ตั้งเป็นตัวเลขจำนวนโทเคนต่อวัน (เข้า+ออก)
+| ตัวแปร | ค่าเริ่มต้น | ใช้กับ |
+|---|---|---|
+| `AI_GUEST_DAILY_TOKENS` | 60000 | ผู้เยี่ยมชม (นับต่อซับเน็ตแบบแฮช) |
+| `AI_MEMBER_DAILY_TOKENS` | 300000 | สมาชิกฟรี |
+| `AI_PAID_DAILY_TOKENS` | 1500000 | ผู้ถือรอบที่ซื้อ/ไม่จำกัด |
+| `AI_READER_DAILY_TOKENS` | 800000 | แม่หมอใน Reader Studio (ร่างคำอ่าน) |
+| `STUDIO_DRAFTS_PER_DAY` | 40 | จำนวนครั้งที่แม่หมอกด "ให้ AI ช่วยเกลา" ต่อวัน |
+
+### ⚖️ รอผู้ตัดสินแยกโควตา — `JUDGE_GEMINI_API_KEY` / `JUDGE_GROQ_API_KEY` (แทร็ก E · 2026-10-06)
+
+ใช้เฉพาะสคริปต์ในเครื่อง/CI (`npm run ai:judge` · `ai:judge:ab` · `ai:judge:calibrate`) — **ไม่ต้องตั้งบน Worker**
+- คีย์แยกจากเว็บจริง = ผู้ตัดสินไม่แย่งโควตา 429 กับผู้ใช้ (ต้นเหตุที่ baseline ค้างใน HANDOFF_AI_JUDGE_BASELINE)
+- ไม่ตั้ง = ใช้ `GEMINI_API_KEY` / `GROQ_API_KEY` เดิม และสลับไปผู้ตัดสินอีกตระกูลอัตโนมัติเมื่อโดน 429/5xx
+- ตั้งใน `.env.local` หรือ GitHub Actions secret ถ้าจะรันใน CI
+
+### 🪶 ปิดไว้จนกว่าทนายรับรอง — Reader Studio (`READER_STUDIO_ENABLED` · `STUDIO_VIEW_SECRET` · 2026-10-06)
+
+ไม่ตั้ง = สตูดิโอแม่หมอและลิงก์ `/r/*` ตอบ 404 ทั้งหมด (ตั้งใจ — ยังไม่มีข้อตกลง PDPA ฉบับจริง)
+1. ให้ทนายตรวจร่าง `docs/legal/READER_STUDIO_DPA_DRAFT.md` ➔ แก้ `STUDIO_DPA_VERSION` + `STUDIO_DPA_POINTS_TH` ใน `src/lib/studio/dpa.ts`
+2. รัน migration `0027_reader_studio.sql` (อยู่ในชุดข้างบนแล้ว)
+3. ตั้ง secret:
+   ```bash
+   npx wrangler secret put STUDIO_VIEW_SECRET     # สุ่ม ≥ 32 ตัว: openssl rand -base64 48 (ไม่ตั้ง = ใช้ TAROT_SESSION_SECRET)
+   npx wrangler secret put READER_STUDIO_ENABLED  # 1
+   ```
+4. ⏸️ แพ็กเกจรายเดือนสำหรับแม่หมอ (Stripe) — รอเจ้าของตั้งราคา · ตอนนี้ทุกคนได้โควตาร่างเท่ากัน (`STUDIO_DRAFTS_PER_DAY`)
+
 ### ⏳ รอตั้งเพิ่ม — Vectorize / R2 (Wave 3)
 
 **Vectorize** (binding อยู่ใน `wrangler.jsonc` แล้ว — deploy รอบถัดไปทำงานเลย):
