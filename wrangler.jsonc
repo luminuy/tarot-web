@@ -63,6 +63,8 @@
       "/admin/*",
       "/readers",
       "/readers/*",
+      // ลิงก์คำอ่านส่วนตัวที่แม่หมอส่งให้ลูกค้า (Reader Studio · REFLECTION_JOURNAL_PLAN 1.13)
+      "/r/*",
       "/reset-password",
       "/s/*",
       "/tester",

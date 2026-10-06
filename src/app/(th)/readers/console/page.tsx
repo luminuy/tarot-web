@@ -33,6 +33,8 @@ interface ConsoleState {
   totalWaiting: number;
   /** ตั้งค่า TURN แล้ว = แม่หมอเปิดวิดีโอคอลกับคิวที่เรียกแล้วได้ */
   videoCallEnabled?: boolean;
+  /** สตูดิโอทำคำอ่านให้ลูกค้าของตัวเอง (REFLECTION_JOURNAL_PLAN 1.13) */
+  studioEnabled?: boolean;
   /** ตารางรับนัดประจำสัปดาห์ (migrations/0020) */
   schedule?: ScheduleRule[];
   /** ตั้งค่าการรับนัด (migrations/0021) */
@@ -222,6 +224,14 @@ function ReaderConsoleInner() {
                 </span>
               </div>
               <p className="text-xs text-muted mt-0.5">LINE: {reader.lineUrl}</p>
+              {data.studioEnabled && token && (
+                <a
+                  href={`/readers/studio?token=${encodeURIComponent(token)}`}
+                  className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold text-gold-ink hover:underline"
+                >
+                  ✦ สตูดิโอคำอ่าน — ทำคำอ่านให้ลูกค้าของคุณเอง
+                </a>
+              )}
             </div>
           </div>
 

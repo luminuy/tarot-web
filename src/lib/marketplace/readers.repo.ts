@@ -295,6 +295,16 @@ export async function deleteReader(id: string): Promise<boolean> {
   } catch {
     // ignore if tables not yet created in older migrations
   }
+  // Reader Studio (migrations/0027) — ข้อมูลลูกค้าของแม่หมอ (แม่หมอเป็นผู้ควบคุมข้อมูล) ต้องหายไปพร้อมบัญชี
+  // ลิงก์คำอ่านที่ส่งไปแล้วจึงเปิดไม่ได้ทันที · แยก try เพราะฐานข้อมูลเก่ายังไม่มีตาราง
+  try {
+    await db.prepare("DELETE FROM reader_readings WHERE reader_id = ?").bind(id).run();
+    await db.prepare("DELETE FROM reader_clients WHERE reader_id = ?").bind(id).run();
+    await db.prepare("DELETE FROM reader_templates WHERE reader_id = ?").bind(id).run();
+    await db.prepare("DELETE FROM reader_studio_settings WHERE reader_id = ?").bind(id).run();
+  } catch {
+    // ignore if tables not yet created in older migrations
+  }
 
   const res = await db.prepare("DELETE FROM readers WHERE id = ?").bind(id).run();
   return (res.meta?.changes ?? 0) > 0;

@@ -15,13 +15,15 @@ import { recordEvent, utcDay } from "@/lib/stats/record";
  *  • ข้อมูลรายบัญชีเป็นข้อมูลส่วนบุคคล ➔ ลงทะเบียนส่งออก/ลบใน `src/lib/privacy/user-data.ts`
  */
 
-export type CostTier = "guest" | "member" | "paid";
+/** `reader` = แม่หมอใน Reader Studio (โควตาร่างคำอ่านแยกจากผู้ใช้ทั่วไป — แผน 1.13) */
+export type CostTier = "guest" | "member" | "paid" | "reader";
 
-const DEFAULTS: Record<CostTier, number> = { guest: 60_000, member: 300_000, paid: 1_500_000 };
+const DEFAULTS: Record<CostTier, number> = { guest: 60_000, member: 300_000, paid: 1_500_000, reader: 800_000 };
 const ENV: Record<CostTier, string> = {
   guest: "AI_GUEST_DAILY_TOKENS",
   member: "AI_MEMBER_DAILY_TOKENS",
   paid: "AI_PAID_DAILY_TOKENS",
+  reader: "AI_READER_DAILY_TOKENS",
 };
 
 export function dailyTokenCap(tier: CostTier): number {

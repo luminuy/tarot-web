@@ -1,0 +1,42 @@
+import { DECK } from "@/data/cards";
+import { PUBLIC_SPREADS } from "@/data/spreads";
+import { apiOk } from "@/lib/api/envelope";
+import { STUDIO_DPA_POINTS_TH, STUDIO_DPA_VERSION, hasAcceptedDpa } from "@/lib/studio/dpa";
+import { studioGate } from "@/lib/studio/gate";
+import { readingSummary } from "@/lib/studio/view";
+import { listClients, listReadings, listTemplates } from "@/lib/studio/studio.repo";
+import { STUDIO_DEFAULT_COLOR } from "@/lib/studio/brand";
+import { studioDraftQuota } from "@/lib/studio/quota";
+
+export const runtime = "nodejs";
+
+/**
+ * GET /api/marketplace/studio — ข้อมูลตั้งต้นของสตูดิโอแม่หมอ (REFLECTION_JOURNAL_PLAN 1.13)
+ * ยังไม่ยอมรับข้อตกลง ➔ ส่งแค่ตัวข้อตกลง (ไม่ส่งข้อมูลลูกค้าใด ๆ)
+ */
+export async function GET(request: Request) {
+  const gate = await studioGate(request, { needDpa: false });
+  if (!gate.ok) return gate.response;
+  const accepted = hasAcceptedDpa(gate.settings.dpaVersion);
+  const dpa = { version: STUDIO_DPA_VERSION, accepted, acceptedVersion: gate.settings.dpaVersion, points: STUDIO_DPA_POINTS_TH };
+  const reader = { id: gate.readerId, displayName: gate.reader.displayName };
+  if (!accepted) return apiOk({ reader, dpa });
+
+  const [clients, readings, templates, quota] = await Promise.all([
+    listClients(gate.readerId),
+    listReadings(gate.readerId),
+    listTemplates(gate.readerId),
+    studioDraftQuota(gate.readerId),
+  ]);
+  return apiOk({
+    reader,
+    dpa,
+    settings: { ...gate.settings, brandColor: gate.settings.brandColor ?? STUDIO_DEFAULT_COLOR },
+    clients,
+    readings: readings.map(readingSummary),
+    templates,
+    quota,
+    spreads: PUBLIC_SPREADS.map((s) => ({ id: s.id, nameTh: s.nameTh, count: s.positions.length })),
+    deck: DECK.map((c, i) => ({ index: i, id: c.id, nameTh: c.nameTh, nameEn: c.nameEn })),
+  });
+}

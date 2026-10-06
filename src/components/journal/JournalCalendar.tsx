@@ -102,7 +102,7 @@ export const JournalCalendar: React.FC<{
                 disabled={list.length === 0}
                 onClick={() => onPickDay(k)}
                 aria-label={label}
-                className={`relative w-full aspect-[3/4] rounded-lg border flex flex-col items-center justify-start p-0.5 sm:p-1 transition-colors ${
+                className={`relative w-full min-h-11 aspect-[3/4] rounded-lg border flex flex-col items-center justify-start p-0.5 sm:p-1 transition-colors ${
                   list.length ? "border-line-warm bg-surface/70 hover:border-gold-ink cursor-pointer" : "border-transparent bg-inset-warm/40 cursor-default"
                 } ${isToday ? "ring-2 ring-gold-ink/70" : ""}`}
               >

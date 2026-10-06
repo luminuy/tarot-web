@@ -5,6 +5,7 @@ import { overlayReducer, OVERLAY_INITIAL, isOverlay } from "@/components/home/fl
 import { deckReducer, DECK_INITIAL } from "@/components/home/flow-deck";
 import { sessionReducer, SESSION_INITIAL } from "@/components/home/flow-session";
 import { readingReducer, READING_INITIAL } from "@/components/home/flow-reading";
+import { useFlowReflection } from "@/components/home/flow-reflection";
 import dynamic from "next/dynamic";
 import { withMotionScope } from "@/components/providers/with-motion-scope";
 import { useOnceOpen } from "@/lib/use-once-open";
@@ -26,8 +27,7 @@ import { soundManager } from "@/lib/utils/audio";
 import { saveReading, updateReadingMeta } from "@/lib/utils/history";
 import { MoodPicker } from "@/components/journal/MoodPicker";
 import { FollowStoryCard } from "@/components/journal/FollowStoryCard";
-import { fetchThreads, type JournalThread } from "@/lib/journal/threads-client";
-import type { MoodLevel } from "@/lib/journal/mood";
+import { fetchThreads } from "@/lib/journal/threads-client";
 import { saveFlowState, loadFlowState, clearFlowState, FRESH_START_EVENT } from "@/lib/utils/flow-persistence";
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
 import { prefetchTurnstile } from "@/lib/auth/turnstile";
@@ -358,14 +358,16 @@ export default function TarotFlow({
    * ✦ ผังที่สร้างเอง (REFLECTION_JOURNAL_PLAN 1.8) — ตัวผังดิบที่ส่งให้ `/start` ตรวจซ้ำแล้วตรึงลงเซสชัน
    * มีผลเฉพาะเมื่อ `selectedSpread.id === "custom"` · เลือกผังในบ้านทีหลัง = ค่านี้ถูกเมินเอง
    */
-  const [customDef, setCustomDef] = useState<CustomSpreadDef | null>(null);
+  const reflection = useFlowReflection();
+  const { customDef, moodBefore, moodAfter, savedJournalId, openThreads, chosenThread, readingInsight } = reflection.state;
+  const { setCustomDef, setMoodBefore, setMoodAfter, setSavedJournalId, setOpenThreads, setChosenThread, readingStarted, setBasis, newRound: newReflectionRound } = reflection;
   const pickCustomSpread = useCallback((def: CustomSpreadDef): Spread | null => {
     if (!layoutPoints(def.layout, def.positions.length)) return null;
     const built = buildCustomSpread(def);
     setCustomDef(def);
     setSelectedSpread(built);
     return built;
-  }, []);
+  }, [setCustomDef]);
   const [selectedPersona, setSelectedPersona] = useState<Persona>(PERSONAS[0]); // Default: warm
   const [selectedCategory, setSelectedCategory] = useState<Category>("general");
   /**
@@ -376,12 +378,9 @@ export default function TarotFlow({
    * ✦ ใจตอนนี้ก่อนสับไพ่/หลังอ่านจบ (REFLECTION_JOURNAL_PLAN 1.3) + id ของบันทึกที่เพิ่งเซฟอัตโนมัติ
    * ไม่เลือก = null (ข้ามได้เสมอ) · หลังอ่านจบแก้ผ่าน `updateReadingMeta` ซึ่งรับมือ id ชั่วคราวให้แล้ว
    */
-  const [moodBefore, setMoodBefore] = useState<MoodLevel | null>(null);
-  const [moodAfter, setMoodAfter] = useState<MoodLevel | null>(null);
-  const [savedJournalId, setSavedJournalId] = useState<string | null>(null);
+  // (moodBefore · moodAfter · savedJournalId อยู่ใน `useFlowReflection` ด้านบน)
   /** 🧵 เส้นเรื่องที่ติดตามอยู่ (สมาชิก) + เรื่องที่เลือก "ถามต่อ" สำหรับรอบนี้ (REFLECTION_JOURNAL_PLAN 1.4) */
-  const [openThreads, setOpenThreads] = useState<JournalThread[]>([]);
-  const [chosenThread, setChosenThread] = useState<{ id: string; title: string } | null>(null);
+  // (openThreads · chosenThread อยู่ใน `useFlowReflection` ด้านบน)
   const isJournalMember = entitlement?.kind === "member";
   useEffect(() => {
     if (!isJournalMember || currentStep !== "INTENTION_SELECT") return;
@@ -390,13 +389,9 @@ export default function TarotFlow({
     return () => {
       alive = false;
     };
-  }, [isJournalMember, currentStep]);
+  }, [isJournalMember, currentStep, setOpenThreads]);
 
-  const [readingInsight, setReadingInsight] = useState<{
-    spreadId: string;
-    category: string;
-    basis: ReadingBasis | null;
-  } | null>(null);
+  // (readingInsight อยู่ใน `useFlowReflection` ด้านบน)
   const [question, setQuestion] = useState("");
   const [nickname, setNickname] = useState("");
   const [situation, setSituation] = useState("");
@@ -1385,13 +1380,7 @@ export default function TarotFlow({
     dispatchRead({ type: "start" });
     // เฟรม basis มาก่อน done เสมอ — เก็บในตัวแปรของรอบนี้ (state ใน closure ของสตรีมจะเป็นค่าเก่า)
     let streamBasis: ReadingBasis | null = null;
-    setSavedJournalId(null);
-    setMoodAfter(null);
-    setReadingInsight({
-      spreadId: (overrides?.spread ?? selectedSpread).id,
-      category: overrides?.category || selectedCategory,
-      basis: null,
-    });
+    readingStarted((overrides?.spread ?? selectedSpread).id, overrides?.category || selectedCategory);
     let streamCompleted = false;
 
     try {
@@ -1440,7 +1429,7 @@ export default function TarotFlow({
 
               if (eventType === "basis") {
                 streamBasis = data as ReadingBasis;
-                setReadingInsight((prev) => (prev ? { ...prev, basis: data as ReadingBasis } : prev));
+                setBasis(data as ReadingBasis);
               } else if (eventType === "opening") {
                 dispatchRead({ type: "opening", text: data.text });
               } else if (eventType === "card") {
@@ -1581,10 +1570,7 @@ export default function TarotFlow({
     setNickname("");
     setQuestion("");
     setSituation("");
-    setMoodBefore(null);
-    setMoodAfter(null);
-    setSavedJournalId(null);
-    setChosenThread(null);
+    newReflectionRound();
     if (typeof window !== "undefined") {
       try {
         localStorage.removeItem(STORAGE_KEYS.nickname);

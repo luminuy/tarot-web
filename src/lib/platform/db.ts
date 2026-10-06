@@ -478,6 +478,31 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
       "CREATE TABLE IF NOT EXISTS ai_usage_daily (day TEXT NOT NULL, subject TEXT NOT NULL, calls INTEGER NOT NULL DEFAULT 0, tokens_in INTEGER NOT NULL DEFAULT 0, tokens_out INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, subject))"
     );
     safeExec("CREATE INDEX IF NOT EXISTS idx_ai_usage_subject ON ai_usage_daily(subject, day)");
+    // ✦ Reader Studio (migrations/0027)
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS reader_studio_settings ( reader_id TEXT PRIMARY KEY, brand_name TEXT, logo_url TEXT, brand_color TEXT, contact_line TEXT, show_ai_disclosure INTEGER NOT NULL DEFAULT 1, dpa_version TEXT, dpa_accepted_at INTEGER, updated_at INTEGER NOT NULL )"
+    );
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS reader_clients ( id TEXT PRIMARY KEY, reader_id TEXT NOT NULL, display_name TEXT NOT NULL, contact TEXT, note TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL )"
+    );
+    safeExec(
+      "CREATE INDEX IF NOT EXISTS idx_reader_clients_reader ON reader_clients(reader_id, updated_at DESC)"
+    );
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS reader_readings ( id TEXT PRIMARY KEY, reader_id TEXT NOT NULL, client_id TEXT, title TEXT NOT NULL, question TEXT, spread_id TEXT NOT NULL, custom_spread_json TEXT, card_source TEXT, cards_json TEXT, commitment TEXT, server_seed TEXT, client_seed TEXT, notes_json TEXT NOT NULL DEFAULT '{}', draft_json TEXT, body_json TEXT, show_ai_disclosure INTEGER NOT NULL DEFAULT 1, status TEXT NOT NULL DEFAULT 'draft', share_token_hash TEXT UNIQUE, share_expires_at INTEGER, share_password_hash TEXT, share_revoked_at INTEGER, view_count INTEGER NOT NULL DEFAULT 0, sent_at INTEGER, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL )"
+    );
+    safeExec(
+      "CREATE INDEX IF NOT EXISTS idx_reader_readings_reader ON reader_readings(reader_id, updated_at DESC)"
+    );
+    safeExec(
+      "CREATE INDEX IF NOT EXISTS idx_reader_readings_client ON reader_readings(client_id)"
+    );
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS reader_templates ( id TEXT PRIMARY KEY, reader_id TEXT NOT NULL, name TEXT NOT NULL, intro TEXT, closing TEXT, created_at INTEGER NOT NULL )"
+    );
+    safeExec(
+      "CREATE INDEX IF NOT EXISTS idx_reader_templates_reader ON reader_templates(reader_id)"
+    );
     // 🎟 รหัสแลกสิทธิ์ตั้งต้นของเครื่อง dev — ต้องมีเพดานและวันหมดอายุเท่ากับ migrations/0013
     // (ห้ามปล่อย max_uses = -1 อีก: รหัสที่เขียนไว้ในรีโปแปลว่าใครอ่านซอร์สเจอก็แลกได้)
     // รหัสสำหรับแจกจริงให้สร้างจากแผงแอดมินซึ่งสุ่มรหัสใหม่ทุกครั้ง — อย่า seed ลงไฟล์
