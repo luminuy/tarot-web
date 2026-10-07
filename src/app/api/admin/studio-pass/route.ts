@@ -29,7 +29,7 @@ const Price = z.number().int().min(STUDIO_PASS_PRICE_MIN_THB).max(STUDIO_PASS_PR
 const PutBody = z.object({ defaultPriceThb: Price });
 const PatchBody = z.object({ readerId: z.string().trim().min(1).max(80), priceThb: Price });
 
-const PRICE_ERROR = `ราคาต้องเป็นบาทเต็ม ${STUDIO_PASS_PRICE_MIN_THB}–${STUDIO_PASS_PRICE_MAX_THB.toLocaleString("th-TH")} บาท (เว้นว่าง = ใช้ราคากลาง)`;
+const PRICE_ERROR = `ใส่ราคาเป็นจำนวนเต็ม ${STUDIO_PASS_PRICE_MIN_THB}–${STUDIO_PASS_PRICE_MAX_THB.toLocaleString("th-TH")} บาท`;
 
 export async function GET() {
   const denied = await requireAdmin();

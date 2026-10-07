@@ -86,105 +86,186 @@ export default function StudioPassPricing() {
   if (!data) {
     return (
       <section className="altar-card-porcelain p-5" aria-labelledby="studio-pass-h">
-        <h3 id="studio-pass-h" className="text-sm font-semibold text-ink">ราคาบัตรผ่านสตูดิโอแม่หมอ</h3>
-        <p className="mt-2 text-xs text-muted">{error ?? "กำลังโหลด…"}</p>
+        <h3 id="studio-pass-h" className="text-base font-semibold text-ink">ราคาบัตรผ่านสตูดิโอ</h3>
+        <p className="mt-2 text-sm text-muted">{error ?? "กำลังโหลด…"}</p>
       </section>
     );
   }
 
-  const range = `${data.minThb}–${data.maxThb.toLocaleString("th-TH")} บาท`;
-  const saveDefault = () => {
-    const v = parsePrice(defaultText, data.minThb, data.maxThb);
-    if (v === "invalid") return setError(`ราคากลางต้องเป็นบาทเต็ม ${range}`);
-    send("default", "PUT", { defaultPriceThb: v }, v === null ? "กลับไปใช้ราคาตั้งต้นแล้ว" : `ตั้งราคากลาง ${v} บาทแล้ว`);
+  const baht = (n: number) => `${n.toLocaleString("th-TH")} บาท`;
+  const rangeError = `ใส่ราคาเป็นจำนวนเต็ม ${data.minThb}–${data.maxThb.toLocaleString("th-TH")} บาท`;
+  const normal = data.effectiveDefaultThb;
+  const saveDefault = (text: string) => {
+    const v = parsePrice(text, data.minThb, data.maxThb);
+    if (v === "invalid") return setError(rangeError);
+    send("default", "PUT", { defaultPriceThb: v }, v === null ? "กลับไปใช้ราคาเริ่มต้นแล้ว" : `บันทึกราคาปกติ ${baht(v)} แล้ว`);
   };
   const saveReader = (r: Row) => {
     const v = parsePrice(drafts[r.id] ?? "", data.minThb, data.maxThb);
-    if (v === "invalid") return setError(`ราคาของ ${r.displayName} ต้องเป็นบาทเต็ม ${range} (เว้นว่าง = ใช้ราคากลาง)`);
-    send(r.id, "PATCH", { readerId: r.id, priceThb: v }, v === null ? `${r.displayName} ใช้ราคากลางแล้ว` : `ตั้งราคาของ ${r.displayName} เป็น ${v} บาทแล้ว`);
+    if (v === "invalid") return setError(`${r.displayName}: ${rangeError}`);
+    send(r.id, "PATCH", { readerId: r.id, priceThb: v }, v === null ? `${r.displayName} กลับไปใช้ราคาปกติแล้ว` : `ตั้งราคาพิเศษให้ ${r.displayName}: ${baht(v)}`);
   };
 
   return (
     <section className="altar-card-porcelain p-5" aria-labelledby="studio-pass-h">
-      <h3 id="studio-pass-h" className="text-sm font-semibold text-ink">ราคาบัตรผ่านสตูดิโอแม่หมอ {data.days} วัน</h3>
-      <p className="mt-1 text-xs leading-relaxed text-muted">
-        เงินที่แม่หมอจ่ายให้ SeerTarot เพื่อร่างคำอ่านด้วย AI ได้มากขึ้น (ไม่ใช่ค่าปรึกษาที่ลูกค้าจ่ายแม่หมอ — อันนั้นแก้ที่ปุ่ม "แก้ไข" ของแม่หมอแต่ละคนด้านบน) ·
-        เปลี่ยนแล้วมีผลกับการกดซื้อครั้งถัดไปทันที
+      <h3 id="studio-pass-h" className="text-base font-semibold text-ink">ราคาบัตรผ่านสตูดิโอ ({data.days} วัน)</h3>
+      <p className="mt-1 text-sm leading-relaxed text-muted">
+        แม่หมอจ่ายค่านี้ให้เรา เพื่อใช้ AI ช่วยเขียนคำอ่านได้มากขึ้น — คนละอย่างกับค่าดูดวงที่ลูกค้าจ่ายแม่หมอ
       </p>
 
-      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end">
-        <label className="flex-1 text-xs text-muted">
-          ราคากลาง (บาท) · ใช้กับแม่หมอทุกคนที่ไม่ได้ตั้งราคาเฉพาะ
-          <Input
-            type="number"
-            inputMode="numeric"
+      {/* ราคาปกติ */}
+      <div className="mt-5">
+        <label htmlFor="studio-pass-default" className="text-sm font-medium text-ink">
+          ราคาปกติ
+        </label>
+        <p className="text-xs text-muted">ใช้กับแม่หมอทุกคน ยกเว้นคนที่ได้ราคาพิเศษด้านล่าง</p>
+        <div className="mt-2 flex items-center gap-2">
+          <PriceInput
+            id="studio-pass-default"
             min={data.minThb}
             max={data.maxThb}
-            placeholder={data.envDefaultThb ? `${data.envDefaultThb} (ค่าตั้งต้น)` : "ยังไม่เปิดขาย"}
+            placeholder={data.envDefaultThb ? String(data.envDefaultThb) : ""}
             value={defaultText}
-            onChange={(e) => setDefaultText(e.target.value)}
-            className="mt-1"
+            onChange={setDefaultText}
           />
-        </label>
-        <Button variant="gold" onClick={saveDefault} disabled={busy !== null} className="min-h-11">
-          {busy === "default" ? "กำลังบันทึก…" : "บันทึกราคากลาง"}
-        </Button>
+          <Button variant="gold" onClick={() => saveDefault(defaultText)} disabled={busy !== null} className="min-h-11 shrink-0 whitespace-nowrap">
+            {busy === "default" ? "กำลังบันทึก…" : "บันทึก"}
+          </Button>
+        </div>
+        <p className="mt-1.5 text-xs text-muted">
+          {normal ? (
+            <>
+              ตอนนี้ <span className="font-semibold text-ink">{baht(normal)}</span>
+              {data.adminDefaultThb ? "" : " (ราคาเริ่มต้นของระบบ)"}
+            </>
+          ) : (
+            "ยังไม่ได้ตั้งราคา — แม่หมอยังซื้อบัตรผ่านไม่ได้"
+          )}
+          {data.adminDefaultThb && data.envDefaultThb ? (
+            <>
+              {" · "}
+              <button
+                type="button"
+                onClick={() => saveDefault("")}
+                disabled={busy !== null}
+                className="tap-overlay-y underline underline-offset-2 hover:text-ink"
+              >
+                กลับไปใช้ราคาเริ่มต้น ({baht(data.envDefaultThb)})
+              </button>
+            </>
+          ) : null}
+        </p>
       </div>
-      <p className="mt-1 text-[11px] text-muted">
-        ตอนนี้ใช้ {data.effectiveDefaultThb ? `${data.effectiveDefaultThb} บาท` : "— (ยังไม่เปิดขาย)"}
-        {data.adminDefaultThb ? " · ตั้งจากหน้านี้" : " · ค่าตั้งต้นของระบบ"} · เว้นว่างแล้วบันทึก = กลับไปใช้ค่าตั้งต้น
-      </p>
 
-      <h4 className="mt-5 text-xs font-semibold text-ink">ราคาเฉพาะแม่หมอ (เว้นว่าง = ใช้ราคากลาง)</h4>
-      {data.readers.length === 0 ? (
-        <p className="mt-2 text-xs text-muted">ยังไม่มีแม่หมอในระบบ</p>
-      ) : (
-        <ul className="mt-2 divide-y divide-line rounded-lg border border-line">
-          {data.readers.map((r) => (
-            <li key={r.id} className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center">
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-ink">{r.displayName}</p>
-                <p className="text-[11px] text-muted">
-                  {STATUS_TH[r.status] ?? r.status} · จ่ายจริง{" "}
-                  <span className="font-semibold text-ink">
-                    {r.priceThb ?? data.effectiveDefaultThb ?? "—"}
-                    {r.priceThb || data.effectiveDefaultThb ? " บาท" : ""}
-                  </span>
-                  {r.priceThb ? " (ราคาเฉพาะคน)" : " (ราคากลาง)"}
-                  {r.proUntil ? ` · บัตรผ่านใช้ได้ถึง ${new Date(r.proUntil).toLocaleDateString("th-TH", { dateStyle: "medium" })}` : ""}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  inputMode="numeric"
-                  min={data.minThb}
-                  max={data.maxThb}
-                  aria-label={`ราคาบัตรผ่านของ ${r.displayName}`}
-                  placeholder={data.effectiveDefaultThb ? String(data.effectiveDefaultThb) : "ราคากลาง"}
-                  value={drafts[r.id] ?? ""}
-                  onChange={(e) => setDrafts((d) => ({ ...d, [r.id]: e.target.value }))}
-                  className="min-w-0 flex-1 sm:w-32 sm:flex-none"
-                />
-                <Button variant="outline" size="sm" onClick={() => saveReader(r)} disabled={busy !== null} className="min-h-11 shrink-0 whitespace-nowrap">
-                  {busy === r.id ? "…" : "บันทึก"}
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+      {/* ราคาพิเศษรายคน */}
+      <div className="mt-6">
+        <h4 className="text-sm font-medium text-ink">ราคาพิเศษรายคน</h4>
+        <p className="text-xs text-muted">ใส่ราคาเฉพาะแม่หมอที่ต้องการ · เว้นว่างไว้ = ใช้ราคาปกติ</p>
+        {data.readers.length === 0 ? (
+          <p className="mt-3 text-sm text-muted">ยังไม่มีแม่หมอในระบบ</p>
+        ) : (
+          <ul className="mt-3 divide-y divide-line rounded-lg border border-line">
+            {data.readers.map((r) => {
+              const pays = r.priceThb ?? normal;
+              return (
+                <li key={r.id} className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center">
+                  <div className="min-w-0 flex-1">
+                    <p className="flex flex-wrap items-center gap-1.5 text-sm font-medium text-ink">
+                      <span className="truncate">{r.displayName}</span>
+                      {r.status !== "approved" && (
+                        <span className="rounded border border-line px-1.5 py-px text-[11px] font-normal text-muted">
+                          {STATUS_TH[r.status] ?? r.status}
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-xs text-muted">
+                      {pays ? (
+                        <>
+                          จ่าย <span className="font-semibold text-ink">{baht(pays)}</span>
+                          {r.priceThb ? " · ราคาพิเศษ" : " · ราคาปกติ"}
+                        </>
+                      ) : (
+                        "ยังซื้อไม่ได้ (ยังไม่ได้ตั้งราคา)"
+                      )}
+                      {r.proUntil
+                        ? ` · ใช้งานได้ถึง ${new Date(r.proUntil).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })}`
+                        : ""}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <PriceInput
+                      ariaLabel={`ราคาพิเศษของ ${r.displayName}`}
+                      min={data.minThb}
+                      max={data.maxThb}
+                      placeholder={normal ? String(normal) : ""}
+                      value={drafts[r.id] ?? ""}
+                      onChange={(v) => setDrafts((d) => ({ ...d, [r.id]: v }))}
+                      compact
+                    />
+                    <Button variant="outline" size="sm" onClick={() => saveReader(r)} disabled={busy !== null} className="min-h-11 shrink-0 whitespace-nowrap">
+                      {busy === r.id ? "กำลังบันทึก…" : "บันทึก"}
+                    </Button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+
+      <p className="mt-4 text-xs text-muted">ราคาใหม่ใช้กับการซื้อครั้งถัดไป · คนที่กำลังจ่ายเงินอยู่จะจ่ายราคาเดิม</p>
 
       {error && (
-        <p role="alert" className="mt-3 text-xs font-semibold text-rose-700">
+        <p role="alert" className="mt-3 text-sm font-semibold text-rose-700">
           {error}
         </p>
       )}
       {notice && (
-        <p role="status" className="mt-3 text-xs text-emerald-800">
+        <p role="status" className="mt-3 text-sm text-emerald-800">
           {notice}
         </p>
       )}
     </section>
+  );
+}
+
+/** ช่องราคามีคำว่า "บาท" ต่อท้ายในช่อง — อ่านจบในตัวไม่ต้องเดาหน่วย */
+function PriceInput({
+  id,
+  ariaLabel,
+  min,
+  max,
+  placeholder,
+  value,
+  onChange,
+  compact,
+}: {
+  id?: string;
+  ariaLabel?: string;
+  min: number;
+  max: number;
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+  compact?: boolean;
+}) {
+  return (
+    <div className={`relative ${compact ? "min-w-0 flex-1 sm:w-36 sm:flex-none" : "min-w-0 flex-1 sm:max-w-xs"}`}>
+      <Input
+        id={id}
+        aria-label={ariaLabel}
+        type="number"
+        inputMode="numeric"
+        min={min}
+        max={max}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="pr-12"
+      />
+      <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-sm text-muted">
+        บาท
+      </span>
+    </div>
   );
 }
