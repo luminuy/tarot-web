@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useId, useState } from "react";
+import { trackReflectionEvent } from "@/lib/stats/reflection-events";
 import type { ReadingBasis } from "@/lib/tarot/explain-types";
 import { useReadingExplain } from "./use-reading-explain";
 import { RelationsConstellation } from "./RelationsConstellation";
@@ -162,7 +163,10 @@ export const ReadingBasisPanel: React.FC<Props> = ({
             type="button"
             aria-expanded={mapOpen}
             aria-controls={mapId}
-            onClick={() => setMapOpen((v) => !v)}
+            onClick={() => {
+              if (!mapOpen) trackReflectionEvent("relations_map_opened");
+              setMapOpen((v) => !v);
+            }}
             className="tap-overlay-y w-full flex items-center justify-between gap-2 text-left text-xs sm:text-[13px] font-semibold text-gold-ink hover:text-gold-ink-deep cursor-pointer"
           >
             <span>✦ {isEnglish ? "See how your cards connect" : "ดูแผนที่ความเชื่อมโยงของไพ่"}</span>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { trackReflectionEvent } from "@/lib/stats/reflection-events";
 import { queueQuestionPrefill, type QuestionPrefill } from "@/lib/reading/question-prefill";
 
 /**
@@ -22,6 +23,7 @@ export const AskNowBox: React.FC<{
   const go = () => {
     const question = q.trim() || defaultQuestion;
     queueQuestionPrefill({ question, category, spreadId });
+    trackReflectionEvent("question_ask_now");
     window.location.href = `${isEnglish ? "/en" : ""}/read/${spreadId}`;
   };
 

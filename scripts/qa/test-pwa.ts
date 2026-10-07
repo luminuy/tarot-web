@@ -120,6 +120,16 @@ async function main() {
   const checkin = readFileSync("src/app/api/cron/checkins/route.ts", "utf8");
   check("แจ้งเตือนนัดเช็กใช้ชื่อเรื่อง ไม่ใช้คำถาม", /thread\?\.title/.test(checkin) && !/\.question/.test(checkin));
 
+  // ── ตัวชี้วัดแผนสะท้อนตัวเอง: รับเฉพาะ event ใน allowlist (กันตัวนับบวม/กันข้อความผู้ใช้หลุดเข้าสถิติ) ──
+  const { REFLECTION_EVENTS } = await import("../../src/lib/stats/reflection-events");
+  const statsRoute = await import("../../src/app/api/stats/event/route");
+  const post = (name: string) =>
+    statsRoute.POST(new Request("https://seertarot.net/api/stats/event", { method: "POST", headers: { origin: "https://seertarot.net", "content-type": "application/json" }, body: JSON.stringify({ name }) }));
+  check("event ติดตั้งแอปผ่าน allowlist", (await post("pwa_install_shown")).status === 200);
+  check("event ชื่อมั่ว/มีข้อความผู้ใช้ถูกปฏิเสธ", (await post("journal_view:ความรักของฉัน")).status === 400 && (await post("anything")).status === 400);
+  check("ชื่อ event ไม่มีอักษรไทย/ช่องว่าง (ไม่มีข้อความผู้ใช้)", REFLECTION_EVENTS.every((e) => /^[a-z_:]+$/.test(e)));
+  check("ปุ่มติดตั้งนับทั้งชวนและติดตั้งจริง", /pwa_install_shown/.test(readFileSync("src/components/pwa/InstallPrompt.tsx", "utf8")) && /pwa_install_accepted/.test(readFileSync("src/components/pwa/InstallPrompt.tsx", "utf8")));
+
   console.log(`\n✦ pwa: ผ่าน ${pass} · ไม่ผ่าน ${fail}`);
   if (fail > 0) process.exit(1);
 }

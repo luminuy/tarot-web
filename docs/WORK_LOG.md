@@ -44,6 +44,7 @@
 - **บัตรผ่านสตูดิโอ 30 วัน** แทนแพ็กเกจรายเดือน: PromptPay ตัดเงินซ้ำไม่ได้ จึงเป็นจ่ายครั้งเดียว ไม่ต่ออายุเอง · ซื้อซ้ำต่อวันจากวันหมดเดิม · โควตาร่าง 300/วัน + เพดานโทเคน `paid` · ใช้ท่อเงินเดิม (webhook ลงลายเซ็น + ถาม Stripe เอง + ยอดต้องตรง + ให้วันครั้งเดียว + คืนเงิน = หักวัน) · ปิดอยู่จนเจ้าของตั้ง `STUDIO_PRO_PRICE_THB`
 - โทเคนแม่หมอย้ายจาก URL ไป sessionStorage ของแท็บ (ลิงก์ที่ก๊อปไม่มีโทเคน · กลับจาก Stripe ยังใช้ต่อได้)
 - ด่าน `test-reader-studio` 153 ข้อ · `test-money-path` · `test-marketplace-readers` · `test-entitlement` · `test-code-debt` ผ่าน · typecheck ผ่าน
+- **ตัวชี้วัดแผน (หัวข้อ 5) วัดได้จริง**: allowlist event ใหม่ `reflection-events.ts` (ชื่อคงที่ ไม่มีข้อความผู้ใช้) + `journal_outcome_set`/`journal_mood_after_set` ฝั่งเซิร์ฟเวอร์ + การ์ด 3 ใบในสรุปรายวันของแอดมิน · `test-admin-stats-keys` · `test-analytics-integrity` · `test-pwa` (38) · `test-bundle-budget` (บิลด์ Astro 462 หน้า) ผ่าน
 
 ### 🗓️ 2026-10-06 (รอบ 211): ✦ แผนสะท้อนตัวเอง — ลงโค้ดครบ 5 คลื่น + แทร็ก S · E · Q · R (ยังไม่ขึ้น · ยังไม่รัน repo:verify)
 

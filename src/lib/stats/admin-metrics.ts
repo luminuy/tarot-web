@@ -38,6 +38,23 @@ export const METRIC = {
   digestSent: "digest_sent",
   checkoutFailed: "checkout_failed",
   purchaseGrantFailed: "purchase_grant_failed",
+  // ── แผนสะท้อนตัวเอง (REFLECTION_JOURNAL_PLAN หัวข้อ 5 · ตัวชี้วัด) ──
+  whyOpened: "why_panel_opened",
+  relationsMapOpened: "relations_map_opened",
+  relationsLineTapped: "relations_line_tapped",
+  outcomeSet: "journal_outcome_set",
+  moodAfterSet: "journal_mood_after_set",
+  reflectAi: "reflect_ai",
+  perspectiveCompleted: "perspective_completed",
+  checkinSent: "checkin_sent",
+  pushMorningSent: "push_morning_sent",
+  pwaInstallShown: "pwa_install_shown",
+  pwaInstallAccepted: "pwa_install_accepted",
+  questionAskNow: "question_ask_now",
+  studioDraftAi: "studio_draft_ai",
+  studioPassGranted: "studio_pass_granted",
+  injectionCooldown: "ai_injection_cooldown",
+  retryBudgetExhausted: "ai_retry_budget_exhausted",
 } as const;
 
 /** เมตริกแบบมี prefix (ค่าหลัง prefix คือมิติ เช่น ชื่อผัง/ผู้ให้บริการ AI) */
@@ -50,6 +67,8 @@ export const PREFIX = {
   persona: "persona:",
   category: "category:",
   safetyFlag: "safety_flag:",
+  journalView: "journal_view:",
+  promptLeak: "ai_prompt_leak:",
 } as const;
 
 /**
@@ -151,6 +170,33 @@ export interface StatsSummary {
     checkoutFailed: number;
     purchaseGrantFailed: number;
   };
+  /** ตัวชี้วัดแผนสะท้อนตัวเอง — อัตราต่อคำอ่านที่อ่านจบ (`completed`) · ตัวหาร 0 = null */
+  reflection: {
+    whyOpened: number;
+    whyPerReadingPct: number | null;
+    relationsMapOpened: number;
+    relationsLineTapped: number;
+    outcomeSet: number;
+    outcomePerReadingPct: number | null;
+    moodAfterSet: number;
+    reflectAi: number;
+    perspective: number;
+    checkinSent: number;
+    pushMorningSent: number;
+    installShown: number;
+    installAccepted: number;
+    installPct: number | null;
+    questionAskNow: number;
+    studioDraftAi: number;
+    studioPassGranted: number;
+    journalViews: CountRow[];
+  };
+  /** ชั้นความปลอดภัย AI (แทร็ก S) */
+  aiSecurity: {
+    injectionCooldown: number;
+    promptLeaks: number;
+    retryBudgetExhausted: number;
+  };
   top: {
     categories: CountRow[];
     spreads: CountRow[];
@@ -227,6 +273,31 @@ export function summarize(doc: Counters | null | undefined): StatsSummary {
       digestSent: v(METRIC.digestSent),
       checkoutFailed: v(METRIC.checkoutFailed),
       purchaseGrantFailed: v(METRIC.purchaseGrantFailed),
+    },
+    reflection: {
+      whyOpened: v(METRIC.whyOpened),
+      whyPerReadingPct: pctOf(v(METRIC.whyOpened), completed),
+      relationsMapOpened: v(METRIC.relationsMapOpened),
+      relationsLineTapped: v(METRIC.relationsLineTapped),
+      outcomeSet: v(METRIC.outcomeSet),
+      outcomePerReadingPct: pctOf(v(METRIC.outcomeSet), completed),
+      moodAfterSet: v(METRIC.moodAfterSet),
+      reflectAi: v(METRIC.reflectAi),
+      perspective: v(METRIC.perspectiveCompleted),
+      checkinSent: v(METRIC.checkinSent),
+      pushMorningSent: v(METRIC.pushMorningSent),
+      installShown: v(METRIC.pwaInstallShown),
+      installAccepted: v(METRIC.pwaInstallAccepted),
+      installPct: pctOf(v(METRIC.pwaInstallAccepted), v(METRIC.pwaInstallShown)),
+      questionAskNow: v(METRIC.questionAskNow),
+      studioDraftAi: v(METRIC.studioDraftAi),
+      studioPassGranted: v(METRIC.studioPassGranted),
+      journalViews: rows(d, PREFIX.journalView),
+    },
+    aiSecurity: {
+      injectionCooldown: v(METRIC.injectionCooldown),
+      promptLeaks: rows(d, PREFIX.promptLeak).reduce((n, r) => n + r.count, 0),
+      retryBudgetExhausted: v(METRIC.retryBudgetExhausted),
     },
     top: {
       categories: rows(d, PREFIX.category),

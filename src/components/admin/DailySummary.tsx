@@ -347,8 +347,78 @@ export default function DailySummary({ day, onDayChange }: { day: string; onDayC
               />
             </div>
           </div>
+
+          {/* ─── แผนสะท้อนตัวเอง (REFLECTION_JOURNAL_PLAN หัวข้อ 5) ───────── */}
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <div className="altar-card-porcelain space-y-3 p-5">
+              <SectionTitle title="หลักฐานคำอ่าน" hint="ต่อคำอ่านที่อ่านจบ" />
+              <KeyValueList
+                items={[
+                  {
+                    label: "เปิดแผง \"ทำไมแม่หมออ่านแบบนี้\"",
+                    value: cur.reflection.whyOpened,
+                    hint: cur.reflection.whyPerReadingPct == null ? undefined : `${cur.reflection.whyPerReadingPct}% ของคำอ่าน`,
+                  },
+                  { label: "เปิดแผนที่ความเชื่อมโยง", value: cur.reflection.relationsMapOpened },
+                  { label: "แตะเส้นความเชื่อมโยง", value: cur.reflection.relationsLineTapped },
+                  { label: "ขอมุมที่สอง", value: cur.reflection.perspective },
+                ]}
+              />
+            </div>
+            <div className="altar-card-porcelain space-y-3 p-5">
+              <SectionTitle title="สมุดดวง & การกลับมา" />
+              <KeyValueList
+                items={[
+                  {
+                    label: "บันทึกผลจริง",
+                    value: cur.reflection.outcomeSet,
+                    hint: cur.reflection.outcomePerReadingPct == null ? undefined : `${cur.reflection.outcomePerReadingPct}% ของคำอ่าน`,
+                  },
+                  { label: "บันทึกใจหลังอ่าน", value: cur.reflection.moodAfterSet },
+                  { label: "สิ่งที่สมุดสะท้อน (AI)", value: cur.reflection.reflectAi },
+                  { label: "ส่งนัดกลับมาเช็ก", value: cur.reflection.checkinSent },
+                  { label: "ส่งเตือนพิธีเช้า (Push)", value: cur.reflection.pushMorningSent },
+                  {
+                    label: "ติดตั้งแอป (PWA)",
+                    value: cur.reflection.installAccepted,
+                    hint: cur.reflection.installPct == null ? undefined : `${cur.reflection.installPct}% ของที่ชวน (${fmt(cur.reflection.installShown)})`,
+                  },
+                ]}
+              />
+              {cur.reflection.journalViews.length > 0 && (
+                <ul className="space-y-1 border-t border-line pt-2 text-xs text-muted">
+                  {cur.reflection.journalViews.map((r) => (
+                    <li key={r.key} className="flex justify-between gap-2">
+                      <span>มุมมองสมุด: {JOURNAL_VIEW_NAME[r.key] ?? r.key}</span>
+                      <span className="font-mono font-semibold">{fmt(r.count)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="altar-card-porcelain space-y-3 p-5">
+              <SectionTitle title="หน้าคำถาม · สตูดิโอ · ความปลอดภัย AI" />
+              <KeyValueList
+                items={[
+                  { label: "กด \"ถามเลย\" จากหน้าคำถาม", value: cur.reflection.questionAskNow },
+                  { label: "แม่หมอให้ AI เกลาคำอ่าน", value: cur.reflection.studioDraftAi },
+                  { label: "ขายบัตรผ่านสตูดิโอ", value: cur.reflection.studioPassGranted },
+                ]}
+              />
+              <KeyValueList
+                alertWhenPositive
+                items={[
+                  { label: "พักผู้ฉีดคำสั่งซ้ำ", value: cur.aiSecurity.injectionCooldown },
+                  { label: "AI เผยคำสั่งระบบ (ถูกตัด)", value: cur.aiSecurity.promptLeaks },
+                  { label: "ลองซ้ำจนหมดงบ", value: cur.aiSecurity.retryBudgetExhausted },
+                ]}
+              />
+            </div>
+          </div>
         </>
       )}
     </div>
   );
 }
+
+const JOURNAL_VIEW_NAME: Record<string, string> = { list: "รายการ", calendar: "ปฏิทิน", overview: "ภาพรวม", stories: "เรื่องที่ติดตาม" };

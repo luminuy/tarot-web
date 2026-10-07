@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { trackReflectionEvent } from "@/lib/stats/reflection-events";
 import {
   dismissInstall,
   getPwaState,
@@ -54,6 +55,11 @@ export const InstallPrompt: React.FC<{ isEnglish: boolean }> = ({ isEnglish }) =
     };
   }, [isEnglish]);
 
+  // นับครั้งที่ชวนติดตั้งจริง (ตัวหารของอัตราติดตั้ง)
+  useEffect(() => {
+    if (show) trackReflectionEvent("pwa_install_shown");
+  }, [show]);
+
   if (!show) return null;
   const close = () => {
     dismissInstall();
@@ -96,7 +102,10 @@ export const InstallPrompt: React.FC<{ isEnglish: boolean }> = ({ isEnglish }) =
             if (!bip) return;
             await bip.prompt();
             const choice = await bip.userChoice.catch(() => ({ outcome: "dismissed" }));
-            if (choice.outcome === "accepted") markInstalled();
+            if (choice.outcome === "accepted") {
+              trackReflectionEvent("pwa_install_accepted");
+              markInstalled();
+            }
             else dismissInstall();
             setShow(false);
           }}

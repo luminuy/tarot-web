@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { trackReflectionEvent } from "@/lib/stats/reflection-events";
 import { useLocale } from "@/lib/i18n";
 import { useSessionUser } from "@/lib/auth/use-session";
 import { STORAGE_KEYS } from "@/lib/storage/keys";
@@ -109,6 +110,7 @@ export function JournalApp() {
   }, [sessionLoading, isMember]);
 
   const chooseView = (v: View) => {
+    if (v !== view) trackReflectionEvent(`journal_view:${v}`);
     setView(v);
     try {
       window.localStorage.setItem(STORAGE_KEYS.journalView, v);

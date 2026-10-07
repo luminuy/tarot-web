@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { trackReflectionEvent } from "@/lib/stats/reflection-events";
 import { CardImage } from "@/components/card/CardImage";
 import type { ExplainResponse } from "@/lib/tarot/explain-types";
 
@@ -29,6 +30,10 @@ export const RelationsConstellation: React.FC<{
   isEnglish: boolean;
 }> = ({ data, layout, isEnglish }) => {
   const [active, setActive] = useState<string | null>(null);
+  const toggleLine = (on: boolean, key: string) => {
+    if (!on) trackReflectionEvent("relations_line_tapped");
+    setActive(on ? null : key);
+  };
   const n = layout.length;
   const pairs = n >= 7 ? data.relations.pairs.slice(0, 3) : data.relations.pairs;
 
@@ -95,11 +100,11 @@ export const RelationsConstellation: React.FC<{
                   aria-label={label}
                   aria-pressed={on}
                   className="cursor-pointer focus:outline-none"
-                  onClick={() => setActive(on ? null : key)}
+                  onClick={() => toggleLine(on, key)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      setActive(on ? null : key);
+                      toggleLine(on, key);
                     }
                   }}
                 >

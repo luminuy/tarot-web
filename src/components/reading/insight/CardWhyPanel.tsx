@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useId, useState } from "react";
+import { trackReflectionEvent } from "@/lib/stats/reflection-events";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { useReadingExplain } from "./use-reading-explain";
 
@@ -34,7 +35,10 @@ export const CardWhyPanel: React.FC<{
         type="button"
         aria-expanded={open}
         aria-controls={panelId}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          if (!open) trackReflectionEvent("why_panel_opened");
+          setOpen((v) => !v);
+        }}
         className="tap-overlay-y w-full flex items-center justify-between gap-2 text-left text-xs sm:text-[13px] font-serif-th font-semibold text-gold-ink hover:text-gold-ink-deep cursor-pointer"
       >
         <span>✦ {isEnglish ? "Why did the reader read it this way?" : "ทำไมแม่หมออ่านแบบนี้?"}</span>

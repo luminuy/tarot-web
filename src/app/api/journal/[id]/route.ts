@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { recordEvent } from "@/lib/stats/record";
 import { JournalPatchSchema } from "@/lib/journal/journal.schema";
 import { getSessionUser } from "@/lib/auth/session";
 import { updateJournalMeta, deleteJournalItem } from "@/lib/journal/journal.repo";
@@ -55,7 +56,10 @@ export async function PATCH(
     if (parsed.data.outcome) {
       const { updateQualityOutcome } = await import("@/lib/ai/quality.repo");
       await updateQualityOutcome(id, parsed.data.outcome).catch(() => {});
+      // ตัวชี้วัดแผนสะท้อนตัวเอง (หัวข้อ 5): สัดส่วนคำอ่านที่ผู้ใช้กลับมาบันทึกผลจริง
+      if (parsed.data.outcome !== "PENDING") recordEvent("journal_outcome_set");
     }
+    if (parsed.data.moodAfter !== undefined && parsed.data.moodAfter !== null) recordEvent("journal_mood_after_set");
 
     return NextResponse.json({ success: true });
   } catch (error) {
