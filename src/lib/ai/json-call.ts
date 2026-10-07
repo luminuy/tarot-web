@@ -9,7 +9,7 @@ import { recordAiCall } from "@/lib/security/ai-budget";
 
 export async function generateGeminiJson<T = unknown>(
   prompt: string,
-  opts: { temperature?: number; cacheTtl?: number; label: string },
+  opts: { temperature?: number; cacheTtl?: number; label: string; /** false = ห้าม AI Gateway เก็บ log คำขอนี้ */ collectLog?: boolean },
 ): Promise<T | null> {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   if (!apiKey) return null;
@@ -24,7 +24,7 @@ export async function generateGeminiJson<T = unknown>(
       const res = await fetch(geminiEndpoint(model, "generateContent"), {
         method: "POST",
         signal: controller.signal,
-        headers: { "Content-Type": "application/json", "X-goog-api-key": apiKey, ...aiGatewayHeaders({ cacheTtl: opts.cacheTtl ?? 0 }) },
+        headers: { "Content-Type": "application/json", "X-goog-api-key": apiKey, ...aiGatewayHeaders({ cacheTtl: opts.cacheTtl ?? 0, collectLog: opts.collectLog }) },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: { responseMimeType: "application/json", temperature: opts.temperature ?? 0.6 },

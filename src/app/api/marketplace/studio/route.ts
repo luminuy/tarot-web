@@ -1,10 +1,11 @@
 import { DECK } from "@/data/cards";
 import { PUBLIC_SPREADS } from "@/data/spreads";
-import { apiOk } from "@/lib/api/envelope";
-import { STUDIO_DPA_POINTS_TH, STUDIO_DPA_VERSION, hasAcceptedDpa } from "@/lib/studio/dpa";
-import { studioGate } from "@/lib/studio/gate";
+import { z } from "zod";
+import { apiFail, apiOk } from "@/lib/api/envelope";
+import { PURGE_CONFIRM_TEXT, STUDIO_DPA_POINTS_TH, STUDIO_DPA_VERSION, hasAcceptedDpa } from "@/lib/studio/dpa";
+import { readJson, studioGate } from "@/lib/studio/gate";
 import { readingSummary } from "@/lib/studio/view";
-import { listClients, listReadings, listTemplates } from "@/lib/studio/studio.repo";
+import { listClients, listReadings, listTemplates, purgeStudioData } from "@/lib/studio/studio.repo";
 import { STUDIO_DEFAULT_COLOR } from "@/lib/studio/brand";
 import { studioPlanView } from "@/lib/studio/plan";
 import { studioDraftQuota, studioDraftsPerDay } from "@/lib/studio/quota";
@@ -42,3 +43,16 @@ export async function GET(request: Request) {
     deck: DECK.map((c, i) => ({ index: i, id: c.id, nameTh: c.nameTh, nameEn: c.nameEn })),
   });
 }
+
+/**
+ * DELETE /api/marketplace/studio — แม่หมอลบข้อมูลสตูดิโอทั้งหมดของตัวเอง (DPA ข้อ 15)
+ * ต้องพิมพ์ข้อความยืนยันตรงตัว · ทำได้แม้ยังไม่ยอมรับข้อตกลงรุ่นใหม่ (สิทธิ์ลบต้องไม่ถูกกั้น)
+ */
+export async function DELETE(request: Request) {
+  const gate = await studioGate(request, { needDpa: false });
+  if (!gate.ok) return gate.response;
+  const parsed = z.object({ confirm: z.literal(PURGE_CONFIRM_TEXT) }).safeParse(await readJson(request));
+  if (!parsed.success) return apiFail(`พิมพ์ "${PURGE_CONFIRM_TEXT}" เพื่อยืนยัน`, 400, "confirm_required");
+  return apiOk({ deleted: await purgeStudioData(gate.readerId) });
+}
+

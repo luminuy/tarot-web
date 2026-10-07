@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ensureReadableColor, STUDIO_PAPER } from "@/lib/studio/brand";
+import { PURGE_CONFIRM_TEXT } from "@/lib/studio/dpa";
 import { layoutsFor } from "@/lib/tarot/custom-spread";
 import { APP_TIME_ZONE } from "@/lib/time/bangkok";
 import { ReadingEditor } from "./ReadingEditor";
@@ -183,6 +184,7 @@ export function StudioApp({ token }: { token: string | null }) {
       {tab === "clients" && <ClientsTab token={token} clients={clients} readings={boot.readings ?? []} call={call} onChanged={load} onOpen={openById} />}
       {tab === "templates" && <TemplatesTab templates={boot.templates ?? []} call={call} onChanged={load} />}
       {tab === "brand" && boot.settings && <BrandTab settings={boot.settings} call={call} onSaved={load} />}
+      {tab === "brand" && <MyDataPanel token={token} call={call} onPurged={load} />}
     </div>
   );
 }
@@ -698,6 +700,56 @@ function PlanCard({ plan, quota, call }: { plan: PlanT; quota: { used: number; l
           <span className="text-[12px] text-muted">จ่ายครั้งเดียว ไม่ตัดเงินอัตโนมัติ{plan.active ? " · วันต่อจากวันหมดเดิม" : ""}</span>
         </div>
       )}
+    </section>
+  );
+}
+
+/* ── ข้อมูลของฉัน: ส่งออก/ลบทั้งหมด (DPA ข้อ 12 · 15) ─────────────────────── */
+
+function MyDataPanel({ token, call, onPurged }: { token: string | null; call: ReturnType<typeof makeStudioCall>; onPurged: () => void }) {
+  const [confirm, setConfirm] = useState("");
+  const [msg, setMsg] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  return (
+    <section aria-label="ข้อมูลของฉัน" className={`${card} space-y-4`}>
+      <div className="space-y-1">
+        <h2 className="text-lg font-bold text-ink-deep">ข้อมูลของฉัน</h2>
+        <p className="text-[13px] leading-relaxed text-muted">คุณเป็นเจ้าของข้อมูลลูกค้าในสตูดิโอ ส่งออกเก็บไว้หรือลบทั้งหมดได้ทุกเมื่อ</p>
+      </div>
+      <button
+        type="button"
+        className={btnGhost}
+        onClick={async () => setMsg((await downloadWithAuth(token, "/export", `seertarot-studio-${new Date().toISOString().slice(0, 10)}.json`)) ? "ดาวน์โหลดแล้ว" : "ส่งออกไม่สำเร็จ")}
+      >
+        ส่งออกข้อมูลสตูดิโอทั้งหมด (JSON)
+      </button>
+      <div className="space-y-2 rounded-2xl border border-err/30 bg-err-wash/40 p-4">
+        <p className="text-sm font-semibold text-ink-deep">ลบข้อมูลสตูดิโอทั้งหมด</p>
+        <p className="text-[13px] leading-relaxed text-ink">
+          ลูกค้า คำอ่าน แม่แบบ และแบรนด์ จะถูกลบทันที ลิงก์ที่ส่งให้ลูกค้าไปแล้วจะเปิดไม่ได้ ระบบสำรองข้อมูลจะลบตามภายใน 30 วัน (วันคงเหลือของบัตรผ่านยังอยู่)
+        </p>
+        <label className="block space-y-1 text-[13px] text-muted">
+          พิมพ์ &quot;{PURGE_CONFIRM_TEXT}&quot; เพื่อยืนยัน
+          <input value={confirm} onChange={(e) => setConfirm(e.target.value)} className={`${fieldCls} min-h-11`} />
+        </label>
+        <button
+          type="button"
+          disabled={confirm !== PURGE_CONFIRM_TEXT || busy}
+          className={`${btnGhost} text-err`}
+          onClick={async () => {
+            setBusy(true);
+            const res = await call<{ deleted: { clients: number; readings: number } }>("", { method: "DELETE", body: { confirm } });
+            setBusy(false);
+            if (!res.ok) return setMsg(res.error);
+            setMsg(`ลบแล้ว — ลูกค้า ${res.data.deleted.clients} คน · คำอ่าน ${res.data.deleted.readings} รายการ`);
+            setConfirm("");
+            onPurged();
+          }}
+        >
+          {busy ? "กำลังลบ…" : "ลบทั้งหมด"}
+        </button>
+      </div>
+      {msg && <p className="text-sm text-ink">{msg}</p>}
     </section>
   );
 }

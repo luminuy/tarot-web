@@ -6,6 +6,7 @@ import { estimateTokens, isUserTokenCapReached, recordAiUsage } from "@/lib/secu
 import { recordEvent } from "@/lib/stats/record";
 import { assembleOfflineDraft, buildDraftPrompt, validateDraft, type DraftContext } from "@/lib/studio/draft";
 import { studioGate } from "@/lib/studio/gate";
+import { isStudioAiAllowed } from "@/lib/studio/dpa";
 import { isProActive } from "@/lib/studio/plan";
 import { takeStudioDraft } from "@/lib/studio/quota";
 import { ID, findInjectedNote, spreadOfReading } from "@/lib/studio/schemas";
@@ -57,12 +58,14 @@ export async function POST(request: Request, { params }: Ctx) {
 
   // บัตรผ่าน 30 วัน = โควตาร่างสูงขึ้น + เพดานโทเคนระดับผู้จ่ายเงิน (`plan.ts`)
   const pro = isProActive(gate.settings.proUntil);
-  if (!(await takeStudioDraft(gate.readerId, gate.settings.proUntil))) reason = "quota";
+  // ยังไม่ยืนยันว่า AI อยู่บนบริการแบบเสียเงิน (ไม่ฝึกโมเดล) = ไม่ส่งข้อมูลลูกค้าออกไปเลย (DPA ข้อ 7)
+  if (!isStudioAiAllowed()) reason = "ai_tier_unconfirmed";
+  else if (!(await takeStudioDraft(gate.readerId, gate.settings.proUntil))) reason = "quota";
   else if (await isUserTokenCapReached(subject, pro ? "paid" : "reader")) reason = "token_cap";
   else if (await isAiCapReached("member")) reason = "ai_cap";
   else {
     const prompt = buildDraftPrompt(ctx);
-    const raw = await generateGeminiJson(prompt, { label: "StudioDraft", temperature: 0.5 });
+    const raw = await generateGeminiJson(prompt, { label: "StudioDraft", temperature: 0.5, collectLog: false });
     const checked = raw ? validateDraft(raw, ctx) : ({ ok: false, reason: "models_down" } as const);
     if (checked.ok) {
       mode = "ai";

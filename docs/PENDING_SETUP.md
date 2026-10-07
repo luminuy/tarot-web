@@ -238,7 +238,12 @@ workflow `.github/workflows/setup-vapid.yml` สร้างคู่กุญ�
 ### 🪶 ปิดไว้จนกว่าทนายรับรอง — Reader Studio (`READER_STUDIO_ENABLED` · `STUDIO_VIEW_SECRET` · 2026-10-06)
 
 ไม่ตั้ง = สตูดิโอแม่หมอและลิงก์ `/r/*` ตอบ 404 ทั้งหมด (ตั้งใจ — ยังไม่มีข้อตกลง PDPA ฉบับจริง)
-1. ให้ทนายตรวจร่าง `docs/legal/READER_STUDIO_DPA_DRAFT.md` ➔ แก้ `STUDIO_DPA_VERSION` + `STUDIO_DPA_POINTS_TH` ใน `src/lib/studio/dpa.ts`
+1. ให้ทนายตรวจร่าง `docs/legal/READER_STUDIO_DPA_DRAFT.md` (ฉบับละเอียด 22 ข้อ + ภาคผนวก 6 · ส่วน ก มีคำถาม 12 ข้อที่ทนายต้องตัดสิน) ➔ แก้ `STUDIO_DPA_VERSION` + `STUDIO_DPA_POINTS_TH` ใน `src/lib/studio/dpa.ts` (ต้องตรงกับภาคผนวก 6 — ด่านตรวจ)
+   - เติมในร่าง: ชื่อ/ที่อยู่/เลขผู้เสียภาษีของผู้ให้บริการ SeerTarot · ภูมิภาคหลักของฐานข้อมูล `tarot-app-db` (แดชบอร์ด Cloudflare ➔ D1)
+   - เปิดการยืนยันตัวตนสองขั้นตอนในบัญชี Cloudflare และ GitHub (ภาคผนวก 2 อ้างถึง)
+1.5 **เปิดการเรียบเรียงด้วย AI ในสตูดิโอ** — ต้องใช้ Gemini แบบ **เสียเงิน** เท่านั้น (แบบฟรี Google นำข้อมูลไปพัฒนาผลิตภัณฑ์และอาจให้คนอ่าน ซึ่งขัดข้อตกลงข้อ 7):
+   เปิด billing ของโปรเจกต์ Google AI Studio ที่ออก `GEMINI_API_KEY` ➔ ตั้ง `npx wrangler secret put STUDIO_AI_PAID_TIER` = `1`
+   ไม่ตั้ง = ปุ่ม "ให้ AI ช่วยเกลา" ประกอบร่างจากโน้ตของแม่หมอเองโดยไม่ส่งอะไรให้ AI
 2. รัน migration `0027_reader_studio.sql` (อยู่ในชุดข้างบนแล้ว)
 3. ตั้ง secret:
    ```bash

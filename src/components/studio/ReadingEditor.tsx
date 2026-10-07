@@ -167,7 +167,12 @@ export function ReadingEditor({
     if (res.data.mode === "ai") {
       setMsg({ tone: "ok", text: hadBody ? "ได้ร่างใหม่แล้ว — กด \"ใช้ร่างนี้\" ทีละส่วนที่ต้องการ (งานที่คุณแก้ไว้ไม่ถูกทับ)" : "ได้ร่างแล้ว ส่วนแถบม่วงคือร่างจาก AI ตรวจและแก้ก่อนส่ง" });
     } else {
-      const why = res.data.reason === "quota" ? "ใช้โควตาร่างของวันนี้ครบแล้ว" : "ตอนนี้ AI ไม่พร้อม";
+      const why =
+        res.data.reason === "quota"
+          ? "ใช้โควตาร่างของวันนี้ครบแล้ว"
+          : res.data.reason === "ai_tier_unconfirmed"
+            ? "การเกลาด้วย AI ยังปิดอยู่ (รอยืนยันว่าบริการ AI ไม่นำข้อมูลไปฝึกโมเดล)"
+            : "ตอนนี้ AI ไม่พร้อม";
       setMsg({ tone: "info", text: `${why} — ประกอบร่างจากโน้ตของคุณให้แทน` });
     }
   }

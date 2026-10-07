@@ -113,8 +113,21 @@ check("ร่างออฟไลน์: โน้ตของหมอคง�
 check("ร่างออฟไลน์: ไม่มีโน้ต ➔ คำสำคัญของไพ่จริง", (offline.find((p) => p.key === "card:1")?.text ?? "").includes(DECK[17].nameTh));
 check("ร่างออฟไลน์: ครบทุกส่วน", JSON.stringify(offline.map((p) => p.key)) === JSON.stringify(keys));
 
+/* ── 4b. AI Gateway ไม่เก็บ log ของสตูดิโอ (DPA ข้อ 7) ─────────────────── */
+{
+  process.env.CF_AI_GATEWAY_ACCOUNT_ID = "acc_test";
+  process.env.CF_AI_GATEWAY_ID = "gw_test";
+  const { aiGatewayHeaders } = await import("@/lib/ai/gateway");
+  check("gateway: collectLog false ➔ ส่ง cf-aig-collect-log: false", aiGatewayHeaders({ cacheTtl: 0, collectLog: false })["cf-aig-collect-log"] === "false");
+  check("gateway: ค่าเริ่มต้นไม่แตะการเก็บ log ของเส้นอื่น", !("cf-aig-collect-log" in aiGatewayHeaders({ cacheTtl: 0 })));
+  delete process.env.CF_AI_GATEWAY_ACCOUNT_ID;
+  delete process.env.CF_AI_GATEWAY_ID;
+  check("draft route: เรียก AI แบบไม่เก็บ log + ต้องยืนยัน AI แบบเสียเงินก่อน", /collectLog: false/.test(src("src/app/api/marketplace/studio/readings/[id]/draft/route.ts")) && /isStudioAiAllowed\(\)/.test(src("src/app/api/marketplace/studio/readings/[id]/draft/route.ts")));
+}
+
 /* ── 5. เส้นทาง API ครบวงจร ──────────────────────────────────────── */
 const ORIGIN = "https://seertarot.net";
+const RUN_IP = `2001:db8:${Math.floor(Math.random() * 0xffff).toString(16)}::${Date.now().toString(16).slice(-4)}`;
 async function api<T = Record<string, unknown>>(
   mod: Record<string, unknown>,
   method: string,
@@ -123,7 +136,8 @@ async function api<T = Record<string, unknown>>(
   body?: unknown,
   params?: Record<string, string>,
 ): Promise<{ status: number; json: T & { ok?: boolean; error?: string; code?: string }; res: Response }> {
-  const headers: Record<string, string> = { "content-type": "application/json", origin: ORIGIN };
+  // IP ต่อรอบทดสอบไม่ซ้ำกัน — ตัวนับกันเดารหัสอยู่ใน D1 ในเครื่องข้ามรอบได้ (รันติดกันหลายรอบจะชนเพดาน 8 ครั้ง/15 นาที)
+  const headers: Record<string, string> = { "content-type": "application/json", origin: ORIGIN, "cf-connecting-ip": RUN_IP };
   if (token) headers.authorization = `Bearer ${token}`;
   const req = new Request(`${ORIGIN}${path}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
   const handler = mod[method] as (r: Request, c?: unknown) => Promise<Response>;
@@ -253,6 +267,11 @@ async function main() {
     check("PATCH ที่ไม่ส่งคำถามมา ไม่ลบคำถามเดิม", (r.json as { reading: RV & { question: string | null } }).reading.question === "เขาคิดยังไงกับฉัน");
 
     // ร่าง (ไม่มีคีย์ AI ➔ ร่างออฟไลน์)
+    // ยังไม่ยืนยันว่า AI อยู่บนบริการแบบเสียเงิน ➔ ไม่ส่งข้อมูลลูกค้าให้ AI เลย (DPA ข้อ 7)
+    delete process.env.STUDIO_AI_PAID_TIER;
+    r = await api<{ mode: string; reason?: string }>(draft, "POST", `/api/marketplace/studio/readings/${reading.id}/draft`, A.token, {}, { id: reading.id });
+    check("ยังไม่ยืนยัน AI แบบเสียเงิน ➔ ร่างออฟไลน์ ไม่ส่งข้อมูลให้ AI (ai_tier_unconfirmed)", (r.json as { mode: string; reason?: string }).mode === "offline" && (r.json as { reason?: string }).reason === "ai_tier_unconfirmed", r.json);
+    process.env.STUDIO_AI_PAID_TIER = "1";
     r = await api<{ mode: string; reading: RV }>(draft, "POST", `/api/marketplace/studio/readings/${reading.id}/draft`, A.token, {}, { id: reading.id });
     reading = (r.json as { reading: RV }).reading;
     check("ไม่มี AI ➔ ร่างออฟไลน์จากโน้ต (ผู้ใช้ไม่กลับมือเปล่า)", r.status === 200 && (r.json as { mode: string }).mode === "offline", r.json);
@@ -461,6 +480,23 @@ async function main() {
     delete process.env.STRIPE_WEBHOOK_SECRET;
     delete process.env.STUDIO_PRO_PRICE_THB;
 
+    // ── ส่งออก/ลบทั้งสตูดิโอ (DPA ข้อ 12 · 15) ──
+    const exportRoute = await import("../../src/app/api/marketplace/studio/export/route");
+    r = await api(exportRoute, "GET", "/api/marketplace/studio/export", A.token);
+    const allExport = r.json as unknown as { clients?: unknown[]; readings?: unknown[]; templates?: unknown[]; settings?: unknown };
+    check("ส่งออกทั้งสตูดิโอ: ไฟล์แนบ JSON ครบ ลูกค้า/คำอ่าน/แม่แบบ/แบรนด์", r.status === 200 && /attachment/.test(r.res.headers.get("content-disposition") ?? "") && Array.isArray(allExport.clients) && Array.isArray(allExport.readings) && Boolean(allExport.settings));
+    check("ส่งออกทั้งสตูดิโอ: ไม่มีแฮชลิงก์/รหัส/sessionSecret", !/share_token_hash|pbkdf2\$|sessionSecret/.test(JSON.stringify(r.json)));
+    r = await api(root, "DELETE", "/api/marketplace/studio", A.token, { confirm: "ลบ" });
+    check("ลบทั้งสตูดิโอ: ต้องพิมพ์ข้อความยืนยันตรงตัว", r.status === 400 && r.json.code === "confirm_required");
+    const proBefore = (await tdb.prepare(`SELECT pro_until FROM reader_studio_settings WHERE reader_id = ?`).bind(A.id).first<{ pro_until: number | null }>())?.pro_until;
+    r = await api<{ deleted: { clients: number; readings: number } }>(root, "DELETE", "/api/marketplace/studio", A.token, { confirm: "ลบข้อมูลสตูดิโอทั้งหมด" });
+    const leftA = await tdb.prepare(`SELECT (SELECT COUNT(*) FROM reader_clients WHERE reader_id = ?) + (SELECT COUNT(*) FROM reader_readings WHERE reader_id = ?) + (SELECT COUNT(*) FROM reader_templates WHERE reader_id = ?) AS n`).bind(A.id, A.id, A.id).first<{ n: number }>();
+    check("ลบทั้งสตูดิโอ: ลูกค้า/คำอ่าน/แม่แบบหายหมด", r.status === 200 && Number(leftA?.n) === 0, r.json);
+    const afterPurge = await tdb.prepare(`SELECT dpa_version, brand_name, pro_until FROM reader_studio_settings WHERE reader_id = ?`).bind(A.id).first<{ dpa_version: string | null; brand_name: string | null; pro_until: number | null }>();
+    check("ลบทั้งสตูดิโอ: ล้างแบรนด์ + การยอมรับข้อตกลง แต่คงวันบัตรผ่าน", afterPurge?.dpa_version === null && afterPurge.brand_name === null && afterPurge.pro_until === proBefore);
+    check("ลบทั้งสตูดิโอ: แม่หมอ B ไม่ถูกแตะ (ยังยอมรับข้อตกลงอยู่)", (await tdb.prepare(`SELECT dpa_version FROM reader_studio_settings WHERE reader_id = ?`).bind(B.id).first<{ dpa_version: string | null }>())?.dpa_version === STUDIO_DPA_VERSION);
+    await api(dpa, "POST", "/api/marketplace/studio/dpa", A.token, { version: STUDIO_DPA_VERSION, agree: true });
+
     r = await api<{ deck: unknown[]; spreads: unknown[] }>(root, "GET", "/api/marketplace/studio", A.token);
     check("ข้อมูลตั้งต้น: สำรับ 78 ใบ + ผังสาธารณะ", (r.json as { deck: unknown[] }).deck?.length === 78 && ((r.json as { spreads: unknown[] }).spreads?.length ?? 0) === PUBLIC_SPREADS.length);
     check("ข้อมูลตั้งต้นไม่มี sessionSecret", !JSON.stringify(r.json).includes("sessionSecret"));
@@ -494,7 +530,11 @@ async function main() {
   const mirror = src("src/lib/platform/db.ts");
   check("ตาราง 0027 มีใน mirror ฐานข้อมูลในเครื่อง", ["reader_studio_settings", "reader_clients", "reader_readings", "reader_templates"].every((t) => mirror.includes(t)));
   check("ลบบัญชีแม่หมอลบตารางสตูดิโอด้วย", src("src/lib/marketplace/readers.repo.ts").includes("DELETE FROM reader_readings WHERE reader_id"));
-  check("มีร่างข้อตกลง DPA ให้ทนายตรวจ", src("docs/legal/READER_STUDIO_DPA_DRAFT.md").includes(STUDIO_DPA_VERSION));
+  const dpaDoc = src("docs/legal/READER_STUDIO_DPA_DRAFT.md");
+  check("มีร่างข้อตกลง DPA ให้ทนายตรวจ (รุ่นตรงกับโค้ด)", dpaDoc.includes(STUDIO_DPA_VERSION));
+  const { STUDIO_DPA_POINTS_TH } = await import("@/lib/studio/dpa");
+  check("ข้อความในหน้ายอมรับตรงกับภาคผนวก 6 ของร่างทุกข้อ", STUDIO_DPA_POINTS_TH.length >= 8 && STUDIO_DPA_POINTS_TH.every((p) => dpaDoc.includes(p)));
+  check("ร่างสัญญาว่าไม่เก็บ log/ไม่ฝึก AI ➔ โค้ดทำจริง (collectLog false + ต้องยืนยัน AI แบบเสียเงิน)", /ไม่เก็บบันทึก \(log\)/.test(dpaDoc) && /collectLog: false/.test(src("src/app/api/marketplace/studio/readings/[id]/draft/route.ts")));
 
   console.log(`\n${fail === 0 ? "✅" : "❌"} reader studio: ${pass} passed, ${fail} failed`);
   process.exit(fail === 0 ? 0 : 1);

@@ -462,3 +462,42 @@ export async function exportClient(readerId: string, clientId: string) {
     readings: readings.map(({ share, ...r }) => ({ ...r, share: { active: share.active, expiresAt: share.expiresAt } })),
   };
 }
+
+/* ── ส่งออก/ลบทั้งสตูดิโอ (DPA ข้อ 15 — เลิกใช้สตูดิโอ = แม่หมอลบ/ส่งออกเองได้ทันที) ───────────── */
+
+export async function exportAllStudioData(readerId: string) {
+  const [settings, clients, readings, templates] = await Promise.all([
+    getStudioSettings(readerId),
+    (async () => {
+      const db = await getAppDB();
+      const { results } = await db.prepare(`SELECT * FROM reader_clients WHERE reader_id = ? ORDER BY created_at ASC`).bind(readerId).all<ClientRow>();
+      return (results || []).map(mapClient);
+    })(),
+    (async () => {
+      const db = await getAppDB();
+      const { results } = await db.prepare(`SELECT * FROM reader_readings WHERE reader_id = ? ORDER BY created_at ASC`).bind(readerId).all<ReadingRow>();
+      return (results || []).map(mapReading).map(({ share, ...r }) => ({ ...r, share: { active: share.active, expiresAt: share.expiresAt } }));
+    })(),
+    listTemplates(readerId),
+  ]);
+  return { exportedAt: new Date().toISOString(), settings, clients, readings, templates };
+}
+
+/**
+ * ลบข้อมูลสตูดิโอทั้งหมดของแม่หมอ — ลูกค้า · คำอ่าน (ลิงก์ที่ส่งไปแล้วเปิดไม่ได้ทันที) · แม่แบบ · แบรนด์ · การยอมรับข้อตกลง
+ * คงไว้: วันคงเหลือของบัตรผ่าน (`pro_until`) และแถวคำสั่งซื้อบัตรผ่าน — เป็นหลักฐานการเงิน ไม่มีข้อมูลลูกค้า
+ */
+export async function purgeStudioData(readerId: string): Promise<{ clients: number; readings: number; templates: number }> {
+  const db = await getAppDB();
+  const r = await db.prepare(`DELETE FROM reader_readings WHERE reader_id = ?`).bind(readerId).run();
+  const c = await db.prepare(`DELETE FROM reader_clients WHERE reader_id = ?`).bind(readerId).run();
+  const t = await db.prepare(`DELETE FROM reader_templates WHERE reader_id = ?`).bind(readerId).run();
+  await db
+    .prepare(
+      `UPDATE reader_studio_settings SET brand_name = NULL, logo_url = NULL, brand_color = NULL, contact_line = NULL,
+         show_ai_disclosure = 1, dpa_version = NULL, dpa_accepted_at = NULL, updated_at = ? WHERE reader_id = ?`,
+    )
+    .bind(Date.now(), readerId)
+    .run();
+  return { clients: c.meta?.changes ?? 0, readings: r.meta?.changes ?? 0, templates: t.meta?.changes ?? 0 };
+}
