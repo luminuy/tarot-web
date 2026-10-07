@@ -1,0 +1,109 @@
+name: 🔑 Setup Web Push keys (VAPID)
+
+# ตั้งคู่กุญแจ Web Push บน Cloudflare Worker โดยไม่มีใครต้องเห็นกุญแจลับ (REFLECTION_JOURNAL_PLAN 1.10)
+# ---------------------------------------------------------------------------
+# • สร้างกุญแจใน runner ด้วย WebCrypto ของ Node (ไม่มี dependency เพิ่ม) แล้วส่งเข้า `wrangler secret put`
+#   ทาง stdin ตรง ๆ — กุญแจลับไม่ถูกพิมพ์ลง log (ปิดบังด้วย ::add-mask:: อีกชั้น) และไม่ถูกเก็บที่ไหนนอก Cloudflare
+# • ทำซ้ำได้ปลอดภัย: ถ้า Worker มี VAPID_PRIVATE_KEY อยู่แล้ว = ข้าม (เปลี่ยนกุญแจ = ผู้ใช้ทุกคนต้องกดเปิดแจ้งเตือนใหม่)
+#   หมุนกุญแจจริง ๆ ต้องกด Run workflow เองแล้วติ๊ก `rotate`
+# • ทำงานเองหนึ่งครั้งเมื่อไฟล์นี้ถูก push (ทุกกิ่ง) · ต่อจากนั้นกดเองได้ที่แท็บ Actions
+# • ใช้ CLOUDFLARE_API_TOKEN ชุดเดียวกับ deploy.yml (ต้องมีสิทธิ์ Workers Scripts: Edit)
+
+on:
+  push:
+    paths:
+      - .github/workflows/setup-vapid.yml
+  workflow_dispatch:
+    inputs:
+      rotate:
+        description: "หมุนกุญแจใหม่ (ผู้ใช้ทุกคนต้องกดเปิดการเตือนใหม่)"
+        type: boolean
+        default: false
+      subject:
+        description: "อีเมลผู้ดูแลสำหรับ VAPID_SUBJECT"
+        type: string
+        default: "support@seertarot.net"
+
+concurrency:
+  group: setup-vapid
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  vapid:
+    name: 🔑 VAPID → Cloudflare secrets
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: ⚙️ Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔎 Check existing secrets
+        id: existing
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::ยังไม่มี repository secret CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID"
+            exit 1
+          fi
+          npx wrangler secret list --format json > "$RUNNER_TEMP/secrets.json"
+          if grep -q '"VAPID_PRIVATE_KEY"' "$RUNNER_TEMP/secrets.json"; then
+            echo "has_keys=true" >> "$GITHUB_OUTPUT"
+            echo "พบ VAPID_PRIVATE_KEY บน Worker อยู่แล้ว"
+          else
+            echo "has_keys=false" >> "$GITHUB_OUTPUT"
+            echo "ยังไม่มีกุญแจ VAPID บน Worker"
+          fi
+          rm -f "$RUNNER_TEMP/secrets.json"
+
+      - name: 🔑 Generate and upload keys
+        if: steps.existing.outputs.has_keys != 'true' || inputs.rotate == true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          SUBJECT_EMAIL: ${{ inputs.subject || 'support@seertarot.net' }}
+        run: |
+          umask 077
+          KEYDIR="$(mktemp -d)"
+          node --input-type=module -e '
+            import { writeFileSync } from "node:fs";
+            const pair = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
+            const raw = new Uint8Array(await crypto.subtle.exportKey("raw", pair.publicKey));
+            const jwk = await crypto.subtle.exportKey("jwk", pair.privateKey);
+            const pub = Buffer.from(raw).toString("base64url");
+            if (raw.length !== 65 || !jwk.d) throw new Error("bad key");
+            writeFileSync(process.argv[1] + "/pub", pub);
+            writeFileSync(process.argv[1] + "/priv", jwk.d);
+          ' "$KEYDIR"
+          echo "::add-mask::$(cat "$KEYDIR/priv")"
+          case "$SUBJECT_EMAIL" in *@*.*) ;; *) echo "::error::อีเมลไม่ถูกต้อง"; exit 1 ;; esac
+          printf 'mailto:%s' "$SUBJECT_EMAIL" > "$KEYDIR/subject"
+          # ลำดับสำคัญ: กุญแจลับก่อน · กุญแจสาธารณะทีหลัง — ระหว่างทางที่ล้มกลางคัน ปุ่มจะยังซ่อนอยู่ (ไม่มีคู่ที่ไม่ตรงกันโผล่ให้ผู้ใช้กด)
+          npx wrangler secret put VAPID_SUBJECT < "$KEYDIR/subject"
+          npx wrangler secret put VAPID_PRIVATE_KEY < "$KEYDIR/priv"
+          npx wrangler secret put VAPID_PUBLIC_KEY < "$KEYDIR/pub"
+          rm -rf "$KEYDIR"
+          {
+            echo "### ✦ ตั้งกุญแจ Web Push แล้ว"
+            echo "- VAPID_SUBJECT · VAPID_PRIVATE_KEY · VAPID_PUBLIC_KEY ถูกตั้งบน Worker \`tarot-web\`"
+            echo "- กุญแจลับไม่ถูกพิมพ์ลง log และไม่ถูกเก็บที่อื่น"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: ✅ Already set
+        if: steps.existing.outputs.has_keys == 'true' && inputs.rotate != true
+        run: |
+          echo "### ✦ มีกุญแจ Web Push อยู่แล้ว — ไม่ได้เปลี่ยนอะไร" >> "$GITHUB_STEP_SUMMARY"
+          echo "(ต้องการหมุนกุญแจ: กด Run workflow แล้วติ๊ก rotate)" >> "$GITHUB_STEP_SUMMARY"

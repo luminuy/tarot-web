@@ -199,32 +199,23 @@ npx wrangler secret put CRON_SECRET
 > **เอนจินคำอ่าน**: GROQ + GEMINI ตั้งครบ → Tier 1 Groq Qwen3-27B ทำงาน (`src/lib/ai/groq.ts` · fallback → Gemini `src/lib/ai/gemini.ts`) · เฝ้าเมตริก `ai_foreign_trip` / `ai_groq_failover` ใน `/admin`
 > **AI Gateway / Turnstile**: ตั้งครบแล้ว ไม่ใช่รายการค้างอีกต่อไป
 
-### 🔔 รอตั้งเพิ่ม — Web Push (`VAPID_*`) สำหรับเตือนพิธีเช้า + นัดกลับมาเช็ก (2026-10-05 · REFLECTION_JOURNAL_PLAN 1.10)
+### 🔔 Web Push (`VAPID_*`) — ตั้งผ่าน GitHub Actions (ไม่ต้องรันในเครื่อง · 2026-10-07)
 
-ยังไม่ตั้ง = ปุ่ม "เปิดการเตือน" ถูกซ่อนเอง (`/api/push/public-key` ตอบ `enabled: false`) · cron ตอบ `vapid_not_configured` ไม่ส่งอะไร · อีเมลนัดเช็กยังทำงานตามปกติ
+workflow `.github/workflows/setup-vapid.yml` สร้างคู่กุญแจใน runner แล้วส่งเข้า `wrangler secret put` ตรง ๆ
+— กุญแจลับไม่ถูกพิมพ์ลง log และไม่มีใครต้องเห็น · ใช้ `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID` ชุดเดียวกับ deploy
+- ทำงานเองหนึ่งครั้งเมื่อไฟล์ workflow ถูก push · ทำซ้ำได้ปลอดภัย: มี `VAPID_PRIVATE_KEY` บน Worker แล้ว = ข้าม
+- หมุนกุญแจ: GitHub ➔ Actions ➔ "🔑 Setup Web Push keys (VAPID)" ➔ Run workflow ➔ ติ๊ก `rotate` (ผู้ใช้ทุกคนต้องกดเปิดการเตือนใหม่)
+- `VAPID_SUBJECT` = `mailto:support@seertarot.net` (เปลี่ยนได้ตอนกด Run workflow)
+- ทางสำรองในเครื่อง: `npx tsx scripts/gen-vapid.ts` แล้ว `npx wrangler secret put VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT`
+- workflow `push-reminders.yml` (ทุกชั่วโมง) ใช้ `CRON_SECRET` ชุดเดียวกับ digest — ไม่ต้องตั้งเพิ่ม
 
-1. สร้างคู่กุญแจในเครื่อง: `npx tsx scripts/gen-vapid.ts` (⚠️ ห้าม commit ค่าที่ได้)
-2. ตั้ง secret บน Worker:
-   ```bash
-   npx wrangler secret put VAPID_PUBLIC_KEY    # ค่าบรรทัด VAPID_PUBLIC_KEY
-   npx wrangler secret put VAPID_PRIVATE_KEY   # ค่าบรรทัด VAPID_PRIVATE_KEY
-   npx wrangler secret put VAPID_SUBJECT       # mailto:อีเมลผู้ดูแล
-   ```
-3. workflow `.github/workflows/push-reminders.yml` (ทุกชั่วโมง) ใช้ `CRON_SECRET` ชุดเดียวกับ digest — ไม่ต้องตั้งเพิ่ม
-4. รัน migration `0025_push_subscriptions.sql` (พร้อม 0022 · 0023 · 0028 ของสมุดดวง) ก่อนเปิดใช้
-
-⚠️ เปลี่ยนกุญแจภายหลัง = ผู้ใช้ทุกคนต้องกดเปิดการเตือนใหม่ (subscription เดิมใช้ไม่ได้)
+ยังไม่ตั้ง = ปุ่ม "เปิดการเตือน" ถูกซ่อนเอง (`/api/push/public-key` ตอบ `enabled: false`) · อีเมลนัดเช็กยังทำงานตามปกติ
 ⚠️ iPhone รับแจ้งเตือนได้เฉพาะเมื่อเพิ่มเว็บไปยังหน้าจอโฮมแล้ว (iOS 16.4+) — หน้าเว็บบอกผู้ใช้เองแล้ว
 
-### 🗄️ รอรัน — migration ของแผนสมุดดวง 0022–0028 (REFLECTION_JOURNAL_PLAN · ก่อน deploy กิ่งนี้)
+### 🗄️ migration ของแผนสมุดดวง 0022–0028 — **ไม่ต้องทำเอง**
 
-รันตามลำดับเลขบน D1 `tarot-app-db` (ไฟล์ที่มีแต่ `CREATE ... IF NOT EXISTS` รันซ้ำได้ · 0022 มี `ALTER TABLE`):
-```bash
-for f in 0022_journal_v2 0023_journal_threads 0024_custom_spreads 0025_push_subscriptions 0026_ai_usage_ledger 0027_reader_studio 0028_reflection_cache; do
-  npx wrangler d1 execute tarot-app-db --remote --file=migrations/$f.sql
-done
-```
-⚠️ 0022 มี `ALTER TABLE ... ADD COLUMN` — รันซ้ำจะ error "duplicate column" (ไม่เสียหาย แต่ต้องรู้ว่ารันไปแล้ว)
+`deploy.yml` รัน `npm run db:migrate` ใส่ D1 remote ให้ทุกครั้งก่อน deploy (wrangler จำว่าไฟล์ไหน apply แล้ว ข้ามให้เอง)
+จึงลงพร้อมโค้ดอัตโนมัติเมื่อ merge กิ่งนี้เข้า `main` · ต้องการแค่ `CLOUDFLARE_API_TOKEN` มีสิทธิ์ D1:Edit (มีอยู่แล้วเพราะ deploy ก่อนหน้าใช้ขั้นนี้)
 
 ### 🛡️ ตั้งได้ภายหลัง (มีค่าเริ่มต้นแล้ว) — เพดานโทเคน AI ต่อคนต่อวัน (แทร็ก S · 2026-10-06)
 
