@@ -18,7 +18,7 @@ import {
 export const runtime = "nodejs";
 
 /**
- * ราคาบัตรผ่านสตูดิโอแม่หมอ 30 วัน — แอดมินตั้งเองได้ไม่ต้อง deploy (แท็บ "หมอดูพาร์ทเนอร์")
+ * ราคาแพ็กเกจ AI ช่วยเขียน 30 วัน (studio pass) — แอดมินตั้งเองได้ไม่ต้อง deploy (แท็บ "หมอดูพาร์ทเนอร์")
  *  GET   ราคากลาง + ราคาเฉพาะคนของแม่หมอทุกคน + วันหมดบัตรผ่าน
  *  PUT   { defaultPriceThb: number | null }            ราคากลาง (null = กลับไปใช้ค่าตั้งต้นใน wrangler.jsonc)
  *  PATCH { readerId, priceThb: number | null }         ราคาเฉพาะแม่หมอคนนั้น (null = ใช้ราคากลาง)
@@ -58,7 +58,7 @@ export async function GET() {
     });
   } catch (err) {
     console.error("[API Admin Studio Pass GET]", err);
-    return apiFail("โหลดราคาบัตรผ่านไม่สำเร็จ", 500);
+    return apiFail("โหลดราคาแพ็กเกจไม่สำเร็จ", 500);
   }
 }
 
@@ -72,7 +72,7 @@ export async function PUT(request: Request) {
     await setAdminDefaultPassPriceThb(parsed.data.defaultPriceThb);
     await recordAudit(
       "studio_pass_default_price",
-      `ราคากลางบัตรผ่านสตูดิโอ ${before ?? "ค่าตั้งต้น"} ➔ ${parsed.data.defaultPriceThb ?? `ค่าตั้งต้น (${envPassPriceThb() ?? "ไม่เปิดขาย"})`} บาท`,
+      `ราคาปกติแพ็กเกจ AI ช่วยเขียน ${before ?? "ราคาเริ่มต้น"} ➔ ${parsed.data.defaultPriceThb ?? `ราคาเริ่มต้น (${envPassPriceThb() ?? "ไม่เปิดขาย"})`} บาท`,
     );
     return apiOk({ adminDefaultThb: parsed.data.defaultPriceThb });
   } catch (err) {
@@ -93,7 +93,7 @@ export async function PATCH(request: Request) {
     await setReaderPassPriceThb(readerId, priceThb);
     await recordAudit(
       "studio_pass_reader_price",
-      `ราคาบัตรผ่านสตูดิโอของ ${reader.displayName} (${readerId}) ➔ ${priceThb ?? "ราคากลาง"}${priceThb ? " บาท" : ""}`,
+      `ราคาพิเศษแพ็กเกจ AI ช่วยเขียนของ ${reader.displayName} (${readerId}) ➔ ${priceThb ?? "ใช้ราคาปกติ"}${priceThb ? " บาท" : ""}`,
     );
     return apiOk({ readerId, priceThb });
   } catch (err) {

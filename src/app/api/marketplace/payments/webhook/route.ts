@@ -139,7 +139,7 @@ export async function POST(request: Request) {
       if (isStudioPassOrder(passOrderId)) {
         const granted = await grantStudioPass(passOrderId!);
         if (granted === "failed") {
-          return NextResponse.json({ error: "บันทึกบัตรผ่านไม่สำเร็จ", orderId: passOrderId }, { status: 500 });
+          return NextResponse.json({ error: "บันทึกแพ็กเกจ AI ช่วยเขียนไม่สำเร็จ", orderId: passOrderId }, { status: 500 });
         }
         return NextResponse.json({ received: true, status: "paid", studioPass: granted });
       }

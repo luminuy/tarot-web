@@ -14,6 +14,8 @@ export interface StudioSettings {
   brandColor: string | null;
   contactLine: string | null;
   showAiDisclosure: boolean;
+  /** เปิดตัวช่วย AI เกลาคำอ่านหรือไม่ — ปิดเป็นค่าเริ่มต้น · ปิด = ไม่มีข้อมูลใดถูกส่งให้ AI */
+  aiAssist: boolean;
   dpaVersion: string | null;
   dpaAcceptedAt: number | null;
   /** บัตรผ่าน 30 วันใช้ได้ถึง (ms) — null/อดีต = แผนฟรี (`plan.ts`) */
@@ -95,6 +97,7 @@ interface SettingsRow {
   brand_color: string | null;
   contact_line: string | null;
   show_ai_disclosure: number;
+  ai_assist?: number | null;
   dpa_version: string | null;
   dpa_accepted_at: number | null;
   pro_until?: number | null;
@@ -110,6 +113,7 @@ export async function getStudioSettings(readerId: string): Promise<StudioSetting
     brandColor: r?.brand_color ?? null,
     contactLine: r?.contact_line ?? null,
     showAiDisclosure: r ? r.show_ai_disclosure === 1 : true,
+    aiAssist: r?.ai_assist === 1,
     dpaVersion: r?.dpa_version ?? null,
     dpaAcceptedAt: r?.dpa_accepted_at ?? null,
     proUntil: r?.pro_until ?? null,
@@ -118,18 +122,18 @@ export async function getStudioSettings(readerId: string): Promise<StudioSetting
 
 export async function saveStudioSettings(
   readerId: string,
-  s: Pick<StudioSettings, "brandName" | "logoUrl" | "brandColor" | "contactLine" | "showAiDisclosure">,
+  s: Pick<StudioSettings, "brandName" | "logoUrl" | "brandColor" | "contactLine" | "showAiDisclosure" | "aiAssist">,
 ): Promise<void> {
   const db = await getAppDB();
   await db
     .prepare(
-      `INSERT INTO reader_studio_settings (reader_id, brand_name, logo_url, brand_color, contact_line, show_ai_disclosure, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO reader_studio_settings (reader_id, brand_name, logo_url, brand_color, contact_line, show_ai_disclosure, ai_assist, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(reader_id) DO UPDATE SET brand_name = excluded.brand_name, logo_url = excluded.logo_url,
          brand_color = excluded.brand_color, contact_line = excluded.contact_line,
-         show_ai_disclosure = excluded.show_ai_disclosure, updated_at = excluded.updated_at`,
+         show_ai_disclosure = excluded.show_ai_disclosure, ai_assist = excluded.ai_assist, updated_at = excluded.updated_at`,
     )
-    .bind(readerId, s.brandName, s.logoUrl, s.brandColor, s.contactLine, s.showAiDisclosure ? 1 : 0, Date.now())
+    .bind(readerId, s.brandName, s.logoUrl, s.brandColor, s.contactLine, s.showAiDisclosure ? 1 : 0, s.aiAssist ? 1 : 0, Date.now())
     .run();
 }
 
@@ -495,7 +499,7 @@ export async function purgeStudioData(readerId: string): Promise<{ clients: numb
   await db
     .prepare(
       `UPDATE reader_studio_settings SET brand_name = NULL, logo_url = NULL, brand_color = NULL, contact_line = NULL,
-         show_ai_disclosure = 1, dpa_version = NULL, dpa_accepted_at = NULL, updated_at = ? WHERE reader_id = ?`,
+         show_ai_disclosure = 1, ai_assist = 0, dpa_version = NULL, dpa_accepted_at = NULL, updated_at = ? WHERE reader_id = ?`,
     )
     .bind(Date.now(), readerId)
     .run();

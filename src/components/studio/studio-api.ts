@@ -117,6 +117,7 @@ export interface StudioSettingsT {
   brandColor: string | null;
   contactLine: string | null;
   showAiDisclosure: boolean;
+  aiAssist: boolean;
 }
 export interface DeckEntryT {
   index: number;

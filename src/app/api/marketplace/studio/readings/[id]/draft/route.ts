@@ -21,6 +21,7 @@ type Ctx = { params: Promise<{ id: string }> };
  * POST /api/marketplace/studio/readings/[id]/draft — ให้ AI เกลาคำอ่านจาก "โน้ตของหมอ" (ไม่ใช่อ่านไพ่เอง)
  *  • ร่างเก็บแยกใน `draft` เสมอ · ฉบับส่งจริง (`body`) ถูกเติมให้เฉพาะตอนที่ยังว่าง — ไม่ทับงานของหมอ
  *  • AI ล่ม/งบเต็ม/โควตาหมด/ผลไม่ผ่านด่าน ➔ ร่างออฟไลน์จากโน้ตตรง ๆ (`mode: "offline"`)
+ *  • แม่หมอปิดตัวช่วย AI (ค่าเริ่มต้น) ➔ จัดโน้ตเป็นคำอ่านตรง ๆ ไม่ส่งอะไรให้ AI ไม่กินโควตา (`reason: "ai_off"`)
  *  • โน้ต/คำถามมีสัญญาณวิกฤต ➔ ไม่เรียก AI และแนะนำสายด่วน 1323 ให้หมอส่งต่อ (กฎเหล็กข้อ 6)
  */
 export async function POST(request: Request, { params }: Ctx) {
@@ -58,8 +59,13 @@ export async function POST(request: Request, { params }: Ctx) {
 
   // บัตรผ่าน 30 วัน = โควตาร่างสูงขึ้น + เพดานโทเคนระดับผู้จ่ายเงิน (`plan.ts`)
   const pro = isProActive(gate.settings.proUntil);
+  // แม่หมอไม่ได้เปิดตัวช่วย AI = ไม่ส่งข้อมูลลูกค้าออกไปเลย · คำสำคัญของไพ่ (จากสารานุกรม ไม่ใช่ AI) นับเป็นคำของแม่หมอ
+  if (!gate.settings.aiAssist) {
+    reason = "ai_off";
+    parts = parts.map((p) => ({ ...p, origin: "reader" as const }));
+  }
   // ยังไม่ยืนยันว่า AI อยู่บนบริการแบบเสียเงิน (ไม่ฝึกโมเดล) = ไม่ส่งข้อมูลลูกค้าออกไปเลย (DPA ข้อ 7)
-  if (!isStudioAiAllowed()) reason = "ai_tier_unconfirmed";
+  else if (!isStudioAiAllowed()) reason = "ai_tier_unconfirmed";
   else if (!(await takeStudioDraft(gate.readerId, gate.settings.proUntil))) reason = "quota";
   else if (await isUserTokenCapReached(subject, pro ? "paid" : "reader")) reason = "token_cap";
   else if (await isAiCapReached("member")) reason = "ai_cap";

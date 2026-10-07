@@ -46,6 +46,6 @@ export async function POST(request: Request) {
 
   if (payment.status !== "paid") await updatePaymentStatus(payment.id, "paid", { providerRef: payment.providerRef ?? undefined });
   const res = await grantStudioPass(orderId);
-  if (res === "failed") return apiFail("บันทึกบัตรผ่านไม่สำเร็จ กรุณาลองใหม่", 500);
+  if (res === "failed") return apiFail("บันทึกแพ็กเกจไม่สำเร็จ กรุณาลองใหม่", 500);
   return apiOk({ status: "granted", plan: await view() });
 }

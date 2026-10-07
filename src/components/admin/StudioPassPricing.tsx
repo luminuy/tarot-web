@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
 /**
- * ✦ ราคาบัตรผ่านสตูดิโอแม่หมอ 30 วัน — ราคากลาง + ราคาเฉพาะคน (src/app/api/admin/studio-pass)
+ * ✦ ราคาแพ็กเกจ AI ช่วยเขียน 30 วัน (ในโค้ดเรียก "studio pass") — ราคากลาง + ราคาเฉพาะคน (src/app/api/admin/studio-pass)
  * ราคาใหม่มีผลกับการกดซื้อครั้งถัดไป · คำสั่งซื้อที่เริ่มไปแล้วยังตรวจยอดตามราคาเดิมของมัน
  */
 
@@ -86,7 +86,7 @@ export default function StudioPassPricing() {
   if (!data) {
     return (
       <section className="altar-card-porcelain p-5" aria-labelledby="studio-pass-h">
-        <h3 id="studio-pass-h" className="text-base font-semibold text-ink">ราคาบัตรผ่านสตูดิโอ</h3>
+        <h3 id="studio-pass-h" className="text-base font-semibold text-ink">ราคาแพ็กเกจ AI ช่วยเขียน</h3>
         <p className="mt-2 text-sm text-muted">{error ?? "กำลังโหลด…"}</p>
       </section>
     );
@@ -108,9 +108,10 @@ export default function StudioPassPricing() {
 
   return (
     <section className="altar-card-porcelain p-5" aria-labelledby="studio-pass-h">
-      <h3 id="studio-pass-h" className="text-base font-semibold text-ink">ราคาบัตรผ่านสตูดิโอ ({data.days} วัน)</h3>
+      <h3 id="studio-pass-h" className="text-base font-semibold text-ink">ราคาแพ็กเกจ AI ช่วยเขียน ({data.days} วัน)</h3>
       <p className="mt-1 text-sm leading-relaxed text-muted">
-        แม่หมอจ่ายค่านี้ให้เรา เพื่อใช้ AI ช่วยเขียนคำอ่านได้มากขึ้น — คนละอย่างกับค่าดูดวงที่ลูกค้าจ่ายแม่หมอ
+        แม่หมอที่เปิดใช้ AI ในสตูดิโอ ซื้อเพิ่มได้ถ้าอยากให้ AI ช่วยเขียนคำอ่านได้มากขึ้นต่อวัน (ไม่ซื้อก็ใช้สตูดิโอได้ครบ) —
+        คนละอย่างกับค่าดูดวงที่ลูกค้าจ่ายแม่หมอ
       </p>
 
       {/* ราคาปกติ */}
@@ -139,7 +140,7 @@ export default function StudioPassPricing() {
               {data.adminDefaultThb ? "" : " (ราคาเริ่มต้นของระบบ)"}
             </>
           ) : (
-            "ยังไม่ได้ตั้งราคา — แม่หมอยังซื้อบัตรผ่านไม่ได้"
+            "ยังไม่ได้ตั้งราคา — แม่หมอยังซื้อแพ็กเกจไม่ได้"
           )}
           {data.adminDefaultThb && data.envDefaultThb ? (
             <>

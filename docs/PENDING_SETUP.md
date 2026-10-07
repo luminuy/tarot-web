@@ -250,7 +250,7 @@ workflow `.github/workflows/setup-vapid.yml` สร้างคู่กุญ�
    npx wrangler secret put STUDIO_VIEW_SECRET     # สุ่ม ≥ 32 ตัว: openssl rand -base64 48 (ไม่ตั้ง = ใช้ TAROT_SESSION_SECRET)
    npx wrangler secret put READER_STUDIO_ENABLED  # 1
    ```
-4. ✅ **บัตรผ่านสตูดิโอ 30 วัน** (จ่ายครั้งเดียว ไม่ตัดเงินอัตโนมัติ) — **แก้ราคาที่แผงแอดมิน แท็บ "หมอดูพาร์ทเนอร์"** ไม่ต้อง deploy
+4. ✅ **แพ็กเกจ AI ช่วยเขียน 30 วัน** (ในโค้ดเรียก studio pass) (จ่ายครั้งเดียว ไม่ตัดเงินอัตโนมัติ) — **แก้ราคาที่แผงแอดมิน แท็บ "หมอดูพาร์ทเนอร์"** ไม่ต้อง deploy
    - ลำดับ: ราคาเฉพาะแม่หมอคนนั้น ➔ ราคากลางที่แอดมินตั้ง ➔ ค่าตั้งต้น **299 บาท** ใน `wrangler.jsonc` → `vars.STUDIO_PRO_PRICE_THB`
    - เปลี่ยนราคามีผลกับการกดซื้อครั้งถัดไป · คำสั่งซื้อที่เริ่มแล้วตรวจยอดตามราคาเดิม · **ห้าม** `wrangler secret put STUDIO_PRO_PRICE_THB` (ชื่อชนกับ var ➔ deploy ล้ม)
    - ปุ่มซื้อโผล่เมื่อสตูดิโอเปิด (`READER_STUDIO_ENABLED`) เท่านั้น

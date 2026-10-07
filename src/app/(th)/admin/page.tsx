@@ -46,7 +46,7 @@ const ReadersManager = dynamic(() => import("@/components/admin/ReadersManager")
 });
 const StudioPassPricing = dynamic(() => import("@/components/admin/StudioPassPricing"), {
   ssr: false,
-  loading: () => <AdminLoading label="กำลังโหลดราคาบัตรผ่านสตูดิโอ…" />,
+  loading: () => <AdminLoading label="กำลังโหลดราคาแพ็กเกจ AI ช่วยเขียน…" />,
 });
 const EntitlementAdmin = dynamic(() => import("@/components/admin/EntitlementAdmin"), {
   ssr: false,

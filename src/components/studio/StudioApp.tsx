@@ -97,8 +97,8 @@ export function StudioApp({ token }: { token: string | null }) {
     }
     if (planParam !== "return" || !orderId) return;
     void call<{ status: string }>("/plan/confirm", { method: "POST", body: { orderId, testChargeId } }).then((res) => {
-      if (res.ok && res.data.status === "granted") setNotice("✦ ได้รับบัตรผ่านสตูดิโอแล้ว ขอบคุณที่สนับสนุน");
-      else if (res.ok) setNotice("กำลังรอยืนยันการชำระเงิน (เช่น PromptPay) — บัตรผ่านจะเข้าเองเมื่อเงินเข้า");
+      if (res.ok && res.data.status === "granted") setNotice("✦ เริ่มใช้แพ็กเกจ AI ช่วยเขียนแล้ว ขอบคุณที่สนับสนุน");
+      else if (res.ok) setNotice("กำลังรอยืนยันการชำระเงิน (เช่น PromptPay) — แพ็กเกจจะเริ่มใช้เองเมื่อเงินเข้า");
       else setNotice(res.error);
       void load();
     });
@@ -133,6 +133,7 @@ export function StudioApp({ token }: { token: string | null }) {
         deck={deck}
         clients={clients}
         quota={boot.quota ?? null}
+        aiAssist={Boolean(boot.settings?.aiAssist)}
         onChanged={(r) => setOpenReading(r)}
         onDeleted={() => {
           setOpenReading(null);
@@ -150,7 +151,7 @@ export function StudioApp({ token }: { token: string | null }) {
     ["readings", "คำอ่าน"],
     ["clients", "ลูกค้า"],
     ["templates", "แม่แบบ"],
-    ["brand", "แบรนด์ของฉัน"],
+    ["brand", "แบรนด์และการตั้งค่า"],
   ];
 
   return (
@@ -158,9 +159,11 @@ export function StudioApp({ token }: { token: string | null }) {
       <header className="space-y-1">
         <p className="text-sm font-semibold text-gold-ink">สตูดิโอแม่หมอ</p>
         <h1 className="text-2xl font-bold text-ink-deep sm:text-3xl">สวัสดี {boot.reader.displayName}</h1>
-        <p className="text-sm text-muted">ทำคำอ่านให้ลูกค้าของคุณเอง — คุณอ่าน AI ช่วยเกลา แล้วส่งเป็นลิงก์ส่วนตัวในแบรนด์ของคุณ</p>
+        <p className="text-sm text-muted">
+          ทำคำอ่านให้ลูกค้าของคุณ แล้วส่งเป็นลิงก์ส่วนตัวในแบรนด์ของคุณ{boot.settings?.aiAssist ? " · มี AI ช่วยเกลาเมื่อคุณกด" : ""}
+        </p>
       </header>
-      {boot.plan && <PlanCard plan={boot.plan} quota={boot.quota ?? null} call={call} />}
+      {boot.plan && boot.settings?.aiAssist && <PlanCard plan={boot.plan} quota={boot.quota ?? null} call={call} />}
       <nav role="tablist" aria-label="เมนูสตูดิโอ" className="flex flex-wrap gap-2">
         {tabs.map(([id, label]) => (
           <button
@@ -631,10 +634,24 @@ function BrandTab({ settings, call, onSaved }: { settings: StudioSettingsT; call
           ช่องทางติดต่อ (แสดงท้ายคำอ่าน)
           <input value={s.contactLine ?? ""} maxLength={120} placeholder="เช่น LINE @yourname" onChange={(e) => setS({ ...s, contactLine: e.target.value })} className={`${fieldCls} min-h-11`} />
         </label>
-        <label className="flex min-h-11 items-center gap-3 text-sm text-ink">
-          <input type="checkbox" checked={s.showAiDisclosure} onChange={(e) => setS({ ...s, showAiDisclosure: e.target.checked })} className="h-5 w-5" />
-          คำอ่านใหม่แสดงบรรทัด &quot;เรียบเรียงด้วยความช่วยเหลือของ AI&quot; เป็นค่าเริ่มต้น
-        </label>
+        <fieldset className="space-y-2 rounded-xl border border-line p-4">
+          <legend className="px-1 text-sm font-bold text-ink-deep">ตัวช่วย AI (ไม่บังคับ)</legend>
+          <label className="flex min-h-11 items-center gap-3 text-sm text-ink">
+            <input type="checkbox" checked={s.aiAssist} onChange={(e) => setS({ ...s, aiAssist: e.target.checked })} className="h-5 w-5" />
+            ให้ AI ช่วยเกลาคำอ่านจากโน้ตของฉัน
+          </label>
+          <p className="text-[13px] leading-relaxed text-muted">
+            {s.aiAssist
+              ? "AI ทำงานเฉพาะตอนคุณกดปุ่ม และได้รับแค่โน้ตกับคำถาม (ซ่อนเบอร์โทร อีเมล เลขบัตรแล้ว) ไม่ได้รับชื่อลูกค้า · คุณตรวจและแก้ก่อนส่งทุกครั้ง"
+              : "ปิดอยู่ — สตูดิโอไม่ส่งข้อมูลใดให้ AI คำอ่านเป็นคำของคุณทั้งหมด ไม่ใช้ AI ก็ทำคำอ่านและส่งลิงก์ให้ลูกค้าได้ครบ"}
+          </p>
+          {s.aiAssist && (
+            <label className="flex min-h-11 items-center gap-3 text-sm text-ink">
+              <input type="checkbox" checked={s.showAiDisclosure} onChange={(e) => setS({ ...s, showAiDisclosure: e.target.checked })} className="h-5 w-5" />
+              ถ้าใช้ AI ในคำอ่านไหน ให้บอกลูกค้าว่า &quot;เรียบเรียงด้วยความช่วยเหลือของ AI&quot;
+            </label>
+          )}
+        </fieldset>
         {msg && <p className="text-sm text-ink">{msg}</p>}
         <button
           type="button"
@@ -646,7 +663,7 @@ function BrandTab({ settings, call, onSaved }: { settings: StudioSettingsT; call
             onSaved();
           }}
         >
-          บันทึกแบรนด์
+          บันทึก
         </button>
       </div>
       <aside aria-label="ตัวอย่างหัวคำอ่าน" className="space-y-3 rounded-[24px] border border-line p-6 text-center" style={{ backgroundColor: STUDIO_PAPER }}>
@@ -664,7 +681,7 @@ function BrandTab({ settings, call, onSaved }: { settings: StudioSettingsT; call
   );
 }
 
-/* ── บัตรผ่าน 30 วัน ─────────────────────────────────────────────── */
+/* ── แพ็กเกจ AI ช่วยเขียน 30 วัน (studio pass) ─────────────────────────────────────────────── */
 
 function PlanCard({ plan, quota, call }: { plan: PlanT; quota: { used: number; limit: number } | null; call: ReturnType<typeof makeStudioCall> }) {
   const [busy, setBusy] = useState(false);
@@ -682,20 +699,20 @@ function PlanCard({ plan, quota, call }: { plan: PlanT; quota: { used: number; l
     setErr(res.error || "เริ่มการชำระเงินไม่สำเร็จ");
   };
   return (
-    <section aria-label="แผนสตูดิโอ" className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line-warm bg-surface px-5 py-4">
+    <section aria-label="แพ็กเกจ AI ช่วยเขียน" className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line-warm bg-surface px-5 py-4">
       <div className="min-w-0 space-y-0.5">
-        <p className="text-sm font-bold text-ink-deep">{plan.active ? `บัตรผ่านสตูดิโอ · ใช้ได้ถึง ${until}` : "แผนฟรี"}</p>
+        <p className="text-sm font-bold text-ink-deep">{plan.active ? `แพ็กเกจ AI ช่วยเขียน · ใช้ได้ถึง ${until}` : "AI ช่วยเขียน · แบบฟรี"}</p>
         <p className="text-[13px] text-muted">
-          ร่างด้วย AI ได้ {plan.active ? plan.proDraftsPerDay : plan.freeDraftsPerDay} ครั้งต่อวัน
+          ให้ AI ช่วยเขียนได้ {plan.active ? plan.proDraftsPerDay : plan.freeDraftsPerDay} ครั้งต่อวัน
           {quota ? ` · วันนี้ใช้ไป ${quota.used}` : ""}
-          {!plan.active && plan.priceThb !== null ? ` · บัตรผ่าน ${plan.days} วัน ได้ ${plan.proDraftsPerDay} ครั้งต่อวัน` : ""}
+          {!plan.active && plan.priceThb !== null ? ` · ซื้อแพ็กเกจ ${plan.days} วัน ได้ ${plan.proDraftsPerDay} ครั้งต่อวัน` : ""}
         </p>
         {err && <p className="text-[13px] text-err">{err}</p>}
       </div>
       {plan.priceThb !== null && (
         <div className="flex flex-col items-end gap-1">
           <button type="button" onClick={buy} disabled={busy} className={btnPrimary}>
-            {busy ? "กำลังไปหน้าชำระเงิน…" : `${plan.active ? "ต่ออายุ" : "ซื้อบัตรผ่าน"} ${plan.days} วัน · ${plan.priceThb.toLocaleString("th-TH")} บาท`}
+            {busy ? "กำลังไปหน้าชำระเงิน…" : `${plan.active ? "ต่ออายุ" : "ซื้อแพ็กเกจ"} ${plan.days} วัน · ${plan.priceThb.toLocaleString("th-TH")} บาท`}
           </button>
           <span className="text-[12px] text-muted">จ่ายครั้งเดียว ไม่ตัดเงินอัตโนมัติ{plan.active ? " · วันต่อจากวันหมดเดิม" : ""}</span>
         </div>
@@ -726,7 +743,7 @@ function MyDataPanel({ token, call, onPurged }: { token: string | null; call: Re
       <div className="space-y-2 rounded-2xl border border-err/30 bg-err-wash/40 p-4">
         <p className="text-sm font-semibold text-ink-deep">ลบข้อมูลสตูดิโอทั้งหมด</p>
         <p className="text-[13px] leading-relaxed text-ink">
-          ลูกค้า คำอ่าน แม่แบบ และแบรนด์ จะถูกลบทันที ลิงก์ที่ส่งให้ลูกค้าไปแล้วจะเปิดไม่ได้ ระบบสำรองข้อมูลจะลบตามภายใน 30 วัน (วันคงเหลือของบัตรผ่านยังอยู่)
+          ลูกค้า คำอ่าน แม่แบบ และแบรนด์ จะถูกลบทันที ลิงก์ที่ส่งให้ลูกค้าไปแล้วจะเปิดไม่ได้ ระบบสำรองข้อมูลจะลบตามภายใน 30 วัน (วันคงเหลือของแพ็กเกจ AI ช่วยเขียนยังอยู่)
         </p>
         <label className="block space-y-1 text-[13px] text-muted">
           พิมพ์ &quot;{PURGE_CONFIRM_TEXT}&quot; เพื่อยืนยัน

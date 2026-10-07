@@ -266,6 +266,28 @@ async function main() {
     r = await api<{ reading: RV }>(readingOne, "PATCH", `/api/marketplace/studio/readings/${reading.id}`, A.token, { title: "ความรักปลายปี (แก้)" }, { id: reading.id });
     check("PATCH ที่ไม่ส่งคำถามมา ไม่ลบคำถามเดิม", (r.json as { reading: RV & { question: string | null } }).reading.question === "เขาคิดยังไงกับฉัน");
 
+    // ตัวช่วย AI ปิดเป็นค่าเริ่มต้น ➔ ปุ่มแค่จัดโน้ตเป็นคำอ่าน ไม่ส่งอะไรให้ AI · ไม่กินโควตา · ไม่ติดป้าย AI
+    process.env.STUDIO_AI_PAID_TIER = "1";
+    type SettingsV = { aiAssist: boolean; showAiDisclosure: boolean };
+    const settingsOf = async (token: string) => ((await api<{ settings: SettingsV }>(root, "GET", "/api/marketplace/studio", token)).json as { settings: SettingsV }).settings;
+    check("ตัวช่วย AI: ปิดเป็นค่าเริ่มต้น", (await settingsOf(A.token)).aiAssist === false);
+    r = await api<{ mode: string; reason?: string; reading: RV }>(draft, "POST", `/api/marketplace/studio/readings/${reading.id}/draft`, A.token, {}, { id: reading.id });
+    const offJson = r.json as { mode: string; reason?: string; reading: RV };
+    check("ตัวช่วย AI ปิด ➔ จัดโน้ตเป็นคำอ่าน ไม่ส่งให้ AI (ai_off)", r.status === 200 && offJson.mode === "offline" && offJson.reason === "ai_off", r.json);
+    check("ตัวช่วย AI ปิด ➔ ทุกส่วนนับเป็นคำของแม่หมอ (ลิงก์ลูกค้าไม่ขึ้นป้าย AI)", (offJson.reading.body ?? []).length > 0 && (offJson.reading.body ?? []).every((p) => p.origin === "reader"));
+    check("ตัวช่วย AI ปิด ➔ ไม่กินโควตา AI", ((await api<{ quota: { used: number } }>(root, "GET", "/api/marketplace/studio", A.token)).json as { quota: { used: number } }).quota.used === 0);
+    process.env.STUDIO_PRO_PRICE_THB = "199";
+    r = await api(planCheckout, "POST", "/api/marketplace/studio/plan/checkout", A.token, {});
+    check("ตัวช่วย AI ปิด ➔ ซื้อแพ็กเกจ AI ไม่ได้ (409 ai_off)", r.status === 409 && r.json.code === "ai_off");
+    delete process.env.STUDIO_PRO_PRICE_THB;
+    await api(readingOne, "PATCH", `/api/marketplace/studio/readings/${reading.id}`, A.token, { body: [] }, { id: reading.id });
+    const brandBody = { brandName: "บ้านไพ่ทดสอบ", logoUrl: null, brandColor: null, contactLine: null, showAiDisclosure: true };
+    await api(settings, "PUT", "/api/marketplace/studio/settings", A.token, { ...brandBody, aiAssist: true });
+    check("ตัวช่วย AI: แม่หมอเปิดเองได้", (await settingsOf(A.token)).aiAssist === true);
+    await api(settings, "PUT", "/api/marketplace/studio/settings", A.token, brandBody);
+    check("ตัวช่วย AI: บันทึกแบรนด์โดยไม่ส่งสวิตช์มา ➔ คงค่าเดิม", (await settingsOf(A.token)).aiAssist === true);
+    check("ตัวช่วย AI: เปิดของ A ไม่กระทบ B", (await settingsOf(B.token)).aiAssist === false);
+
     // ร่าง (ไม่มีคีย์ AI ➔ ร่างออฟไลน์)
     // ยังไม่ยืนยันว่า AI อยู่บนบริการแบบเสียเงิน ➔ ไม่ส่งข้อมูลลูกค้าให้ AI เลย (DPA ข้อ 7)
     delete process.env.STUDIO_AI_PAID_TIER;
@@ -527,8 +549,8 @@ async function main() {
     r = await api<{ deleted: { clients: number; readings: number } }>(root, "DELETE", "/api/marketplace/studio", A.token, { confirm: "ลบข้อมูลสตูดิโอทั้งหมด" });
     const leftA = await tdb.prepare(`SELECT (SELECT COUNT(*) FROM reader_clients WHERE reader_id = ?) + (SELECT COUNT(*) FROM reader_readings WHERE reader_id = ?) + (SELECT COUNT(*) FROM reader_templates WHERE reader_id = ?) AS n`).bind(A.id, A.id, A.id).first<{ n: number }>();
     check("ลบทั้งสตูดิโอ: ลูกค้า/คำอ่าน/แม่แบบหายหมด", r.status === 200 && Number(leftA?.n) === 0, r.json);
-    const afterPurge = await tdb.prepare(`SELECT dpa_version, brand_name, pro_until FROM reader_studio_settings WHERE reader_id = ?`).bind(A.id).first<{ dpa_version: string | null; brand_name: string | null; pro_until: number | null }>();
-    check("ลบทั้งสตูดิโอ: ล้างแบรนด์ + การยอมรับข้อตกลง แต่คงวันบัตรผ่าน", afterPurge?.dpa_version === null && afterPurge.brand_name === null && afterPurge.pro_until === proBefore);
+    const afterPurge = await tdb.prepare(`SELECT dpa_version, brand_name, pro_until, ai_assist FROM reader_studio_settings WHERE reader_id = ?`).bind(A.id).first<{ dpa_version: string | null; brand_name: string | null; pro_until: number | null; ai_assist: number }>();
+    check("ลบทั้งสตูดิโอ: ล้างแบรนด์ + การยอมรับข้อตกลง + ปิดตัวช่วย AI แต่คงวันแพ็กเกจ", afterPurge?.dpa_version === null && afterPurge.brand_name === null && afterPurge.pro_until === proBefore && afterPurge.ai_assist === 0);
     check("ลบทั้งสตูดิโอ: แม่หมอ B ไม่ถูกแตะ (ยังยอมรับข้อตกลงอยู่)", (await tdb.prepare(`SELECT dpa_version FROM reader_studio_settings WHERE reader_id = ?`).bind(B.id).first<{ dpa_version: string | null }>())?.dpa_version === STUDIO_DPA_VERSION);
     await api(dpa, "POST", "/api/marketplace/studio/dpa", A.token, { version: STUDIO_DPA_VERSION, agree: true });
 
