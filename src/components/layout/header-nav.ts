@@ -103,6 +103,30 @@ export function headerNav(isEn: boolean): HeaderNav {
             },
           ],
         },
+        {
+          // ✦ หน้าใหม่จากแผน REFLECTION_JOURNAL_PLAN (ขึ้น 2026-10-07) — เดิมไม่มีในเมนู เจ้าของหาไม่เจอ
+          title: isEn ? "Your journal & tools" : "สมุดดวงและเครื่องมือ",
+          links: [
+            {
+              label: isEn ? "My tarot journal" : "สมุดดวงของฉัน",
+              href: "/journal",
+              sublabel: isEn ? "Past readings, moods and stories you follow" : "ย้อนดูคำอ่าน ใจก่อน-หลัง และเรื่องที่ติดตาม",
+              cardId: "major-20",
+            },
+            {
+              label: isEn ? "Design your own spread" : "ออกแบบผังเอง",
+              href: "/spreads/create",
+              sublabel: isEn ? "Set 1–7 card positions for your question" : "ตั้งตำแหน่งไพ่ 1–7 ใบตามเรื่องของคุณ",
+              cardId: "major-03",
+            },
+            {
+              label: isEn ? "Popular tarot questions" : "คำถามที่คนถามไพ่บ่อย",
+              href: "/questions",
+              sublabel: isEn ? "20 common questions and the right spread" : "20 คำถามยอดฮิต พร้อมผังที่เหมาะ",
+              cardId: "major-05",
+            },
+          ],
+        },
       ],
       all: { label: isEn ? `See all ${COUNTS.spreads} spreads` : `ดูผังไพ่ทั้งหมด ${COUNTS.spreads} แบบ`, href: "/spreads" },
     },

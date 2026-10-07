@@ -88,6 +88,7 @@ const POPULAR_SEARCHES = [
   { path: "/cards", th: "ความหมายไพ่ทาโร่ 78 ใบ", en: "Tarot card meanings" },
   { path: "/cards/all", th: "ความหมายไพ่ยิปซีทั้งหมด", en: "All 78 cards at a glance" },
   { path: "/cards/birth-card", th: "ไพ่ประจำตัว", en: "Tarot birth card" },
+  { path: "/questions", th: "คำถามที่คนถามไพ่บ่อย", en: "Popular tarot questions" },
 ] as const;
 
 export function HomeMoreWaysSection({ isEnglish, href }: { isEnglish: boolean; href: (path: string) => string }) {

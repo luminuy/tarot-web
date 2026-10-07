@@ -208,7 +208,7 @@ function DesktopNav({ isEnglish }: { isEnglish: boolean }) {
           </svg>
         </Link>
         <div className="invisible absolute inset-x-0 top-full z-50 border-b border-line bg-canvas opacity-0 shadow-[0_24px_48px_-32px_rgba(42,38,31,0.35)] transition-[opacity,visibility] duration-150 group-hover/mega:visible group-hover/mega:opacity-100 group-focus-within/mega:visible group-focus-within/mega:opacity-100">
-          <div className="mx-auto grid max-w-6xl grid-cols-3 gap-x-10 px-6 pb-8 pt-9">
+          <div className="mx-auto grid max-w-6xl grid-cols-4 gap-x-8 px-6 pb-8 pt-9">
             {nav.reading.groups.map((group) => (
               <div key={group.title}>
                 <p className="text-sm font-bold text-ink">{group.title}</p>
