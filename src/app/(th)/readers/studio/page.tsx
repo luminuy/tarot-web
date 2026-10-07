@@ -35,15 +35,28 @@ function StudioInner() {
     setToken(t);
     setReady(true);
   }, [queryToken]);
-  if (!ready) return <p className="py-20 text-center text-sm text-muted">กำลังเปิดสตูดิโอ…</p>;
+  if (!ready) return <StudioLoading />;
   return <StudioApp token={token} />;
+}
+
+/**
+ * ⚠️ ทุกหน้าต้องมี <h1> หนึ่งอันเสมอ (ด่าน test-a11y-critical ตรวจจาก HTML ที่ build) — HTML แรกของหน้านี้คือสถานะกำลังโหลด
+ * จึงใส่ h1 แบบ sr-only ไว้ที่นี่ (แบบเดียวกับแผงคิว) · พอโหลดเสร็จ StudioApp แทนที่ทั้งก้อนด้วย h1 ของสถานะนั้นเอง
+ */
+function StudioLoading() {
+  return (
+    <>
+      <h1 className="sr-only">สตูดิโอแม่หมอ</h1>
+      <p className="py-20 text-center text-sm text-muted">กำลังเปิดสตูดิโอ…</p>
+    </>
+  );
 }
 
 export default function ReaderStudioPage() {
   return (
     <main className="min-h-screen px-4 pb-16 pt-5 font-serif-th text-ink-deep sm:px-8 sm:pt-8">
       <div className="mx-auto max-w-4xl">
-        <Suspense fallback={<p className="py-20 text-center text-sm text-muted">กำลังเปิดสตูดิโอ…</p>}>
+        <Suspense fallback={<StudioLoading />}>
           <StudioInner />
         </Suspense>
       </div>

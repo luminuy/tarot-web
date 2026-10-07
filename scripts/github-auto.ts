@@ -464,6 +464,18 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
     cmd: TSX,
     args: ["scripts/qa/test-derived-draw.ts"],
   },
+  // ── แผน REFLECTION_JOURNAL_PLAN_2026-10-05: ลงทะเบียนตอนขึ้น production (หัวข้อ 7 "ตรวจก่อนขึ้น") ──
+  { label: "🕸 ความเชื่อมโยงไพ่ (ธาตุ · แก่นเรื่อง · สัญญาณโครงสร้าง) + หลักฐานคำอ่าน", cmd: TSX, args: ["scripts/qa/test-card-relations.ts"] },
+  { label: "📔 สมุดดวง v2 (ใจก่อน/หลัง · สถิติซื่อตรง · พิธีเช้าเย็น · streak ใจดี)", cmd: TSX, args: ["scripts/qa/test-journal-v2.ts"] },
+  { label: "🔁 มุมที่สอง (ไพ่ชุดเดิมเป๊ะ · ตรงกัน/ต่างกันคำนวณด้วยโค้ด)", cmd: TSX, args: ["scripts/qa/test-perspective.ts"] },
+  { label: "🧵 เส้นเรื่อง · นัดเช็ก · ความทรงจำตามเรื่อง · ทะเบียน PDPA กลาง", cmd: TSX, args: ["scripts/qa/test-threads.ts"] },
+  { label: "📲 PWA (ทางลัด · ออฟไลน์ · Web Push เลือกเปิดเอง)", cmd: TSX, args: ["scripts/qa/test-pwa.ts"] },
+  { label: "🪞 สิ่งที่สมุดสะท้อน (โค้ดคำนวณ AI เล่า · ทุกข้ออ้างอิงคำอ่าน)", cmd: TSX, args: ["scripts/qa/test-reflect.ts"] },
+  { label: "🧩 สร้างผังเอง (เลย์เอาต์ · ตรวจซ้ำที่ /start · สิทธิ์ตามจำนวนใบ)", cmd: TSX, args: ["scripts/qa/test-custom-spreads.ts"] },
+  { label: "🛡 ความปลอดภัย AI (ซ่อน PII · คำสั่งแฝง · รั่ว prompt · บัญชีโทเคน)", cmd: TSX, args: ["scripts/qa/test-ai-security.ts"] },
+  { label: "📏 วัดคุณภาพ AI (ชั้นตรวจด้วยโค้ด · snapshot · ผู้ตัดสินสลับ · gate)", cmd: TSX, args: ["scripts/qa/test-ai-eval.ts"] },
+  { label: "❓ หน้าคำถาม 20 หน้า × 2 ภาษา", cmd: TSX, args: ["scripts/qa/test-question-pages.ts"] },
+  { label: "🪶 Reader Studio (แยกข้อมูลรายแม่หมอ · DPA · ลิงก์ส่วนตัว · ส่งออก/ลบ)", cmd: TSX, args: ["scripts/qa/test-reader-studio.ts"] },
 ];
 
 /**
