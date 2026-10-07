@@ -35,6 +35,8 @@ const CreateTicketSchema = z.object({
   consent: z.boolean().refine((val) => val === true, {
     message: "กรุณากดยินยอมข้อกำหนดการคุ้มครองข้อมูลส่วนบุคคล (PDPA)",
   }),
+  /** ความยินยอมโดยชัดแจ้งเรื่องข้อมูลอ่อนไหว (ม.26) — ช่องแยก ไม่บังคับ · ไม่ติ๊ก = ไม่ได้ยินยอม */
+  sensitiveConsent: z.boolean().optional(),
 });
 
 /**
@@ -99,7 +101,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { readerId, kind, nickname, question, readingSnapshot, slotStart } = parsed.data;
+    const { readerId, kind, nickname, question, readingSnapshot, slotStart, sensitiveConsent } = parsed.data;
 
     // 🔒 customerRef ออกโดยเซิร์ฟเวอร์เท่านั้น — ห้ามรับจาก body (A2-13)
     //    เดิมรับค่าจาก body แล้วเซ็นคุกกี้ให้ทันที ใครรู้ ref ของคนอื่นก็แลกเป็นคุกกี้อ่านคิวเขาได้
@@ -165,6 +167,7 @@ export async function POST(request: Request) {
       readingSnapshot,
       slotStart: kind === "booking" ? slotStart : undefined,
       initialStatus: "pending_payment",
+      sensitiveConsent: sensitiveConsent === true,
     });
     const redirectUrl = `/readers/queue/${ticket.id}`;
 

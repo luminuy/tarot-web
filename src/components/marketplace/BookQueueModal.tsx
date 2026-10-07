@@ -64,6 +64,8 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
   const [nickname, setNickname] = useState("");
   const [question, setQuestion] = useState(initialQuestion);
   const [consent, setConsent] = useState(false);
+  // ม.26: ยินยอมเรื่องข้อมูลอ่อนไหวเป็นช่องแยก ไม่บังคับ และไม่ติ๊กไว้ก่อน (ม.19 ห้ามรวบกับการยอมรับเงื่อนไข)
+  const [sensitiveConsent, setSensitiveConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -93,6 +95,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
           question: question.trim(),
           readingSnapshot: readingSnapshot || undefined,
           consent: true,
+          sensitiveConsent,
         }),
       });
 
@@ -356,10 +359,23 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
               className="mt-0.5 h-5 w-5 shrink-0 rounded border-line-interactive-warm accent-gold-ink"
             />
             <span>
-              ยินยอมส่งชื่อเล่นและคำถามให้แม่หมอ และยอมรับเงื่อนไขการยกเลิก{" "}
+              รับทราบว่าชื่อเล่นและคำถามจะส่งให้แม่หมอที่เลือกเพื่อดูดวงให้ฉัน และยอมรับเงื่อนไขการยกเลิกและคืนเงิน{" "}
               <Link href="/privacy" target="_blank" className="font-semibold text-gold-ink underline underline-offset-2">
-                (PDPA)
+                (นโยบายความเป็นส่วนตัว)
               </Link>
+            </span>
+          </label>
+
+          <label className="flex cursor-pointer select-none items-start gap-3 text-[13px] leading-relaxed text-ink">
+            <input
+              type="checkbox"
+              checked={sensitiveConsent}
+              onChange={(e) => setSensitiveConsent(e.target.checked)}
+              className="mt-0.5 h-5 w-5 shrink-0 rounded border-line-interactive-warm accent-gold-ink"
+            />
+            <span>
+              ไม่บังคับ: คำถามของฉันมีเรื่องสุขภาพ เพศวิถี หรือความเชื่อทางศาสนา และฉันยินยอมโดยชัดแจ้งให้แม่หมอที่เลือกใช้ข้อมูลนี้เพื่อดูดวงให้ฉันเท่านั้น
+              ถ้าไม่ติ๊ก โปรดอย่าใส่เรื่องเหล่านี้ในคำถาม
             </span>
           </label>
         </form>

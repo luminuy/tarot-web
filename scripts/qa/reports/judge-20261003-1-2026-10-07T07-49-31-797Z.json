@@ -1,0 +1,1005 @@
+{
+  "promptVersion": "20261003-1",
+  "judgeModel": "gemini-3.6-flash",
+  "startedAt": "2026-10-07T07:49:31.797Z",
+  "cases": [
+    {
+      "id": "gold-001",
+      "category": "love",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "openai/gpt-oss-120b",
+      "elapsedMs": 8887,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำทำนายอ้างอิงภาพไพ่ 1909 และตอบคำถามได้ค่อนข้างดี แต่คำแนะนำบางข้ออาจจะปฏิบัติจริงได้ยากใน 24-48 ชั่วโมง และมีการสับสนเรื่องตำแหน่งของไพ่ Eight of Cups กลับหัวที่นำไปปะปนกับความรู้สึกของผู้ถามเอง",
+        "onQuestion": 4,
+        "cardGrounded": 4,
+        "actionable": 3,
+        "personaFit": 4,
+        "notVague": 3,
+        "thaiNatural": 4,
+        "average": 3.67
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "groq",
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "gemini-3.5-flash-lite"
+    },
+    {
+      "id": "gold-002",
+      "category": "work",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 14742,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "การอ่านตอบคำถามอย่างตรงจุดและอ้างอิงภาพไพ่ได้ชัดเจน พร้อมคำแนะนำที่ทำได้จริง",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 5,
+        "thaiNatural": 5,
+        "average": 5
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "openai/gpt-oss-120b"
+    },
+    {
+      "id": "gold-003",
+      "category": "money",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "openai/gpt-oss-120b",
+      "elapsedMs": 6551,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำทำนายตอบตรงประเด็นการเงิน อ้างอิงภาพไพ่ 1909 ได้แม่นยำ คำแนะนำทำได้จริงภายใน 24 ชั่วโมง และใช้ภาษาไทยที่สละสลวยเป็นธรรมชาติ",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 5,
+        "thaiNatural": 5,
+        "average": 5
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "groq",
+      "deterministic": {
+        "pass": false,
+        "failed": [
+          "reversed"
+        ]
+      },
+      "judgeModel": "gemini-3.5-flash-lite"
+    },
+    {
+      "id": "gold-004",
+      "category": "self",
+      "spreadId": "daily",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 31497,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "fallback": true,
+      "error": "ได้คำอ่านสำรองออฟไลน์ (mock-gemini) — โมเดลจริงไม่ตอบ (มักเป็นโควตาหมด) ไม่นับเป็นผลวัด"
+    },
+    {
+      "id": "gold-005",
+      "category": "general",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2513,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 90,
+      "thaiIssues": [
+        "LATIN_LEAK",
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำอ่านวิเคราะห์ตรงคำถาม อ้างอิงภาพไพ่ 1909 ได้แม่นยำ และให้คำแนะนำที่ปฏิบัติได้จริง ภาษาไทยสละสลวยและเป็นธรรมชาติในโทนแม่หมอบวกๆ",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 4,
+        "thaiNatural": 5,
+        "average": 4.83
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "groq",
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "gemini-3.5-flash-lite"
+    },
+    {
+      "id": "gold-006",
+      "category": "love",
+      "spreadId": "love",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 11611,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "การอ่านตอบคำถามหลักและให้คำแนะนำที่ทำได้จริงโดยอิงภาพไพ่ 1909 อย่างแม่นยำ แต่บางส่วนยังค่อนข้างทั่วไป",
+        "onQuestion": 4,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 4,
+        "thaiNatural": 5,
+        "average": 4.67
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "openai/gpt-oss-120b"
+    },
+    {
+      "id": "gold-007",
+      "category": "work",
+      "spreadId": "career",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 6187,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "การอ่านตอบโจทย์คำถามเกี่ยวกับอาชีพและโปรเจกต์ได้ดีและอิงภาพไพ่จริง พร้อมคำแนะนำที่ทำได้จริง แต่บางส่วนยังค่อนข้างทั่วไป",
+        "onQuestion": 4,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 4,
+        "thaiNatural": 5,
+        "average": 4.67
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "openai/gpt-oss-120b"
+    },
+    {
+      "id": "gold-008",
+      "category": "money",
+      "spreadId": "money",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 24245,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "fallback": true,
+      "error": "ได้คำอ่านสำรองออฟไลน์ (mock-gemini) — โมเดลจริงไม่ตอบ (มักเป็นโควตาหมด) ไม่นับเป็นผลวัด"
+    },
+    {
+      "id": "gold-009",
+      "category": "self",
+      "spreadId": "chakra",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 7905,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "การอ่านตอบโจทย์คำถามและอ้างอิงภาพไพ่ได้แม่นยำ พร้อมคำแนะนำที่ทำได้จริง แต่บางส่วนยังค่อนข้างทั่วไปและมีข้อผิดพลาดเล็กน้อยในข้อความ",
+        "onQuestion": 4,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 4,
+        "thaiNatural": 4,
+        "average": 4.5
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "openai/gpt-oss-120b"
+    },
+    {
+      "id": "gold-010",
+      "category": "love",
+      "spreadId": "soulmate",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 6691,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "การอ่านตอบคำถามและให้ขั้นตอนที่ทำได้จริง แต่บางส่วนยังค่อนข้างทั่วไปและอาจฟังคล้ายบาร์นัม",
+        "onQuestion": 4,
+        "cardGrounded": 5,
+        "actionable": 4,
+        "personaFit": 5,
+        "notVague": 3,
+        "thaiNatural": 5,
+        "average": 4.33
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "openai/gpt-oss-120b"
+    },
+    {
+      "id": "gold-011",
+      "category": "general",
+      "spreadId": "decision",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 9048,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "การอ่านตอบคำถามได้ชัดเจนและให้คำแนะนำที่ทำได้จริง; ส่วนการอ้างอิงไพ่โดยรวมแม่นยำแต่มีรายละเอียดบางอย่างไม่ตรงกับภาพจริง",
+        "onQuestion": 5,
+        "cardGrounded": 4,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 5,
+        "thaiNatural": 5,
+        "average": 4.83
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "openai/gpt-oss-120b"
+    },
+    {
+      "id": "gold-012",
+      "category": "work",
+      "spreadId": "daily",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 22938,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "การอ่านตอบคำถามได้ดีและอ้างภาพไพ่อย่างแม่นยำ พร้อมคำแนะนำที่ทำได้จริง แต่โทนอาจยังไม่เต็มที่กับบุคลิกแม่หมอ",
+        "onQuestion": 4,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 4,
+        "notVague": 5,
+        "thaiNatural": 5,
+        "average": 4.67
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "openai/gpt-oss-120b"
+    },
+    {
+      "id": "gold-013",
+      "category": "money",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 15006,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "การอ่านตอบคำถามและให้กรอบเวลาชัดเจน ใช้ภาพไพ่จริงและให้คำแนะนำปฏิบัติได้จริง",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 5,
+        "thaiNatural": 5,
+        "average": 5
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "openai/gpt-oss-120b"
+    },
+    {
+      "id": "gold-014",
+      "category": "love",
+      "spreadId": "ex-reconciliation",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 8319,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "การอ่านตอบคำถามได้ชัดเจนและอิงภาพไพ่จริง พร้อมคำแนะนำทำได้จริงและสไตล์แม่หมอตรงกัน แม้บางส่วนอาจค่อนข้างกว้างแต่โดยรวมไม่เป็น Barnum",
+        "onQuestion": 4,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 4,
+        "thaiNatural": 5,
+        "average": 4.67
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "openai/gpt-oss-120b"
+    },
+    {
+      "id": "gold-015",
+      "category": "self",
+      "spreadId": "mind-body-spirit",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2701,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 90,
+      "thaiIssues": [
+        "LATIN_LEAK",
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำทำนายตอบคำถามเรื่องบทเรียนชีวิตได้อย่างตรงจุด อ้างอิงองค์ประกอบไพ่ Rider-Waite-Smith 1909 ได้แม่นยำ และให้คำแนะนำที่ปฏิบัติได้จริง ภาษาไทยสละสลวยและมีน้ำเสียงที่อบอุ่นเหมาะสมกับบทบาทแม่หมอ",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 4,
+        "thaiNatural": 5,
+        "average": 4.83
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "groq",
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "gemini-3.5-flash-lite"
+    },
+    {
+      "id": "gold-016",
+      "category": "general",
+      "spreadId": "weekly",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 8077,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "การอ่านตอบคำถามแนวโน้มสัปดาห์ได้ครบถ้วนและให้คำแนะนำทำได้จริง; ส่วนการอ้างอิงภาพไพ่ค่อนข้างแม่นยำแต่มีบางจุดคลาดเคลื่อนเล็กน้อย",
+        "onQuestion": 5,
+        "cardGrounded": 4,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 4,
+        "thaiNatural": 5,
+        "average": 4.67
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "openai/gpt-oss-120b"
+    },
+    {
+      "id": "gold-017",
+      "category": "work",
+      "spreadId": "career-switch",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 6898,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "การอ่านตอบคำถามการย้ายสายงานได้ชัดเจนและอิงภาพไพ่จริง พร้อมคำแนะนำที่ทำได้จริง แต่มีข้อผิดพลาดเล็กน้อยในข้อความและบางส่วนค่อนข้างทั่วไป",
+        "onQuestion": 4,
+        "cardGrounded": 5,
+        "actionable": 4,
+        "personaFit": 5,
+        "notVague": 4,
+        "thaiNatural": 4,
+        "average": 4.33
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "openai/gpt-oss-120b"
+    },
+    {
+      "id": "gold-018",
+      "category": "love",
+      "spreadId": "how-they-feel",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 8428,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "การอ่านตอบคำถามได้ค่อนข้างตรงและอิงภาพไพ่จริง แต่มีข้อผิดพลาดเล็กน้อยในภาษาและบางส่วนอาจยังคลุมเครือบ้าง",
+        "onQuestion": 4,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 4,
+        "notVague": 4,
+        "thaiNatural": 4,
+        "average": 4.33
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "openai/gpt-oss-120b"
+    },
+    {
+      "id": "gold-019",
+      "category": "money",
+      "spreadId": "quick",
+      "personaId": "default",
+      "model": "openai/gpt-oss-120b",
+      "elapsedMs": 3694,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำทำนายอ้างอิงภาพไพ่ 1909 ได้ดี ตรงประเด็นการเงิน และมีคำแนะนำที่ปฏิบัติได้จริง ภาษาไทยสละสลวย",
+        "onQuestion": 4,
+        "cardGrounded": 5,
+        "actionable": 4,
+        "personaFit": 4,
+        "notVague": 4,
+        "thaiNatural": 4,
+        "average": 4.17
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "groq",
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "gemini-3.5-flash-lite"
+    },
+    {
+      "id": "gold-020",
+      "category": "self",
+      "spreadId": "inner-potential",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 6786,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "ตอบคำถามเกี่ยวกับศักยภาพและจิตใต้สำนึกได้ตรงประเด็นและอ้างอิงไพ่จริง มีข้อเสนอปฏิบัติได้จริงและสอดคล้องกับบุคลิกแม่หมอ",
+        "onQuestion": 4,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 4,
+        "thaiNatural": 5,
+        "average": 4.67
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "openai/gpt-oss-120b"
+    },
+    {
+      "id": "gold-021",
+      "category": "general",
+      "spreadId": "celtic-cross",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 11005,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "ตอบโจทย์ภาพรวมชีวิตได้ค่อนข้างตรง แต่อ้างอิงภาพไพ่ไม่ละเอียดมาก; คำแนะนำทำได้จริงและสไตล์แม่หมอเป็นธรรมชาติ",
+        "onQuestion": 4,
+        "cardGrounded": 3,
+        "actionable": 4,
+        "personaFit": 4,
+        "notVague": 3,
+        "thaiNatural": 5,
+        "average": 3.83
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "openai/gpt-oss-120b"
+    },
+    {
+      "id": "gold-022",
+      "category": "work",
+      "spreadId": "situation-solution",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2955,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำทำนายวิเคราะห์จากภาพไพ่ 1909 ได้อย่างแม่นยำ เชื่อมโยงกับคำถามเรื่องที่ทำงานได้ดี มีคำแนะนำที่ปฏิบัติได้จริงภายใน 24 ชั่วโมง และใช้ภาษาไทยที่สละสลวยเป็นธรรมชาติ",
+        "onQuestion": 4,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 4,
+        "thaiNatural": 5,
+        "average": 4.67
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "groq",
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "gemini-3.5-flash-lite"
+    },
+    {
+      "id": "gold-023",
+      "category": "love",
+      "spreadId": "yes-no",
+      "personaId": "default",
+      "model": "mock-gemini",
+      "elapsedMs": 23754,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "fallback": true,
+      "error": "ได้คำอ่านสำรองออฟไลน์ (mock-gemini) — โมเดลจริงไม่ตอบ (มักเป็นโควตาหมด) ไม่นับเป็นผลวัด"
+    },
+    {
+      "id": "gold-024",
+      "category": "money",
+      "spreadId": "yes-no",
+      "personaId": "default",
+      "model": "openai/gpt-oss-120b",
+      "elapsedMs": 9214,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "ทำนายได้ตรงคำถาม อ้างอิงภาพไพ่ 1909 ได้ดี และให้คำแนะนำที่ปฏิบัติได้จริงด้วยภาษาที่เป็นธรรมชาติ",
+        "onQuestion": 4,
+        "cardGrounded": 4,
+        "actionable": 4,
+        "personaFit": 5,
+        "notVague": 4,
+        "thaiNatural": 5,
+        "average": 4.33
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "groq",
+      "deterministic": {
+        "pass": false,
+        "failed": [
+          "yes_no"
+        ]
+      },
+      "judgeModel": "gemini-3.5-flash-lite"
+    },
+    {
+      "id": "gold-025",
+      "category": "self",
+      "spreadId": "daily",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 12950,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "อ่านตรงคำถามและอิงภาพไพ่ได้ชัดเจน พร้อมข้อปฏิบัติที่ทำได้จริง; มีข้อผิดพลาดเล็กน้อยในภาษา",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 5,
+        "thaiNatural": 4,
+        "average": 4.83
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "openai/gpt-oss-120b"
+    },
+    {
+      "id": "gold-026",
+      "category": "love",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 11892,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "การอ่านตอบคำถามได้ชัดเจนและอิงไพ่จริง พร้อมคำแนะนำที่ทำได้จริง แต่บางส่วนยังค่อนข้างทั่วไป",
+        "onQuestion": 4,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 4,
+        "thaiNatural": 5,
+        "average": 4.67
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "openai/gpt-oss-120b"
+    },
+    {
+      "id": "gold-027",
+      "category": "work",
+      "spreadId": "daily",
+      "personaId": "default",
+      "model": "openai/gpt-oss-120b",
+      "elapsedMs": 8259,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "มีการตอบตรงคำถามและให้คำแนะนำที่ปฏิบัติได้จริง แต่มีการบรรยายภาพไพ่ Rider-Waite-Smith ผิดพลาดหลายจุด (เช่น อัศวินขี่ม้าขาวถือไม้เท้า ซึ่งในไพ่ 6 ไม้เท้าเป็นขี่ม้าสีน้ำตาล และไม่มีธาตุไฟเด่นตามหลักโหราศาสตร์ในไพ่ทาโรต์สำรับนี้) รวมถึงภาษาไทยมีสำนวนแปลก ๆ และใช้คำศัพท์เชิงธาตุที่หลุดบริบททาโรต์สากล",
+        "onQuestion": 5,
+        "cardGrounded": 2,
+        "actionable": 4,
+        "personaFit": 4,
+        "notVague": 4,
+        "thaiNatural": 2,
+        "average": 3.5
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "groq",
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "gemini-3.5-flash-lite"
+    },
+    {
+      "id": "gold-028",
+      "category": "money",
+      "spreadId": "money",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 6451,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "การอ่านตอบตรงคำถามและอ้างอิงไพ่ได้ชัดเจน พร้อมคำแนะนำที่ทำได้จริงและสอดคล้องกับบุคลิกแม่หมอ",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 5,
+        "thaiNatural": 5,
+        "average": 5
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "openai/gpt-oss-120b"
+    },
+    {
+      "id": "gold-029",
+      "category": "general",
+      "spreadId": "weekly",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 7281,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "ตอบตรงคำถามและให้คำแนะนำที่ทำได้จริง แต่การอ้างภาพไพ่หลายส่วนไม่สอดคล้องกับไพ่ Rider‑Waite 1909.",
+        "onQuestion": 5,
+        "cardGrounded": 2,
+        "actionable": 5,
+        "personaFit": 4,
+        "notVague": 4,
+        "thaiNatural": 5,
+        "average": 4.17
+      },
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      },
+      "judgeModel": "openai/gpt-oss-120b"
+    },
+    {
+      "id": "gold-030",
+      "category": "self",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "gemini-3.5-flash-lite",
+      "elapsedMs": 14842,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 90,
+      "thaiIssues": [
+        "LATIN_LEAK",
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {},
+      "kind": "reading",
+      "lang": "th",
+      "provider": "gemini",
+      "providerNotes": [
+        "Groq ทุกโมเดลไม่คืนคำอ่านที่สมบูรณ์"
+      ],
+      "deterministic": {
+        "pass": true,
+        "failed": []
+      }
+    }
+  ],
+  "summary": {
+    "total": 30,
+    "succeeded": 27,
+    "judged": 26,
+    "avgThaiScore": 94,
+    "avgElapsedMs": 8957,
+    "consistencyIssueRate": 0,
+    "rubric": {
+      "onQuestion": 4.42,
+      "cardGrounded": 4.54,
+      "actionable": 4.69,
+      "personaFit": 4.73,
+      "notVague": 4.15,
+      "thaiNatural": 4.65
+    },
+    "overall": 4.53
+  }
+}

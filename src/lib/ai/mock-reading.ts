@@ -18,6 +18,7 @@ import { getPositionMeaning, getPositionName } from "@/data/spreads-helpers";
 import { recordEvents } from "@/lib/stats/record";
 import { generateMindfulMicroRitual } from "@/lib/ai/ritual";
 import type { TarotCard } from "@/data/cards/types";
+import { redactPii } from "@/lib/security/pii";
 
 // คำอ่านสำรองไม่ได้เรียกโมเดลจริง จึงไม่มีโทเค็นให้นับ — ศูนย์ทั้งชุดคือความจริง ไม่ใช่ค่าตั้งต้น
 const DEFAULT_USAGE: UsageInfo = {
@@ -510,7 +511,8 @@ export async function* streamMockGeminiReading(
   ]);
 
   const nickname = ctx.nickname?.trim() || (isEn ? "friend" : "ผู้แสวงหาคำตอบ");
-  const question = ctx.question?.trim() || (isEn ? "the road ahead" : "ภาพรวมดวงชะตา");
+  // 🛡️ แทร็ก S/E: คำอ่านสำรองถูกบันทึกลงสมุดดวงด้วย — ซ่อนเบอร์/อีเมล/เลขบัตรเหมือนคำอ่านจากโมเดล (ซึ่งไม่เคยเห็นข้อมูลดิบ)
+  const question = redactPii(ctx.question?.trim() ?? "").text || (isEn ? "the road ahead" : "ภาพรวมดวงชะตา");
   const category = (ctx.category || "general") as "general" | "work" | "money" | "love" | "self";
   const voice = resolveVoice(ctx.personaId, lang);
 

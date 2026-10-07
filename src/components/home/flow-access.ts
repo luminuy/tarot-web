@@ -59,13 +59,13 @@ export function hasPremiumTrialOf(ent: ClientEntitlement | null): boolean {
  * ชั้นที่ 1: โควตาหมด / ต้องสมัครก่อนเล่น ➔ เหตุผลตามที่เซิร์ฟเวอร์บอก
  * ชั้นที่ 2: ผังใหญ่ (ไม่ใช่ผังมาตรฐาน) แต่ไม่ใช่ผู้ถือสิทธิ์เต็ม ➔ `grand_spread`
  */
-export function decideSpreadAccess(ent: ClientEntitlement | null, spreadId: string): AccessDecision {
-  if (!isStandardSpread(spreadId) && hasPremiumTrialOf(ent)) return ALLOWED;
+export function decideSpreadAccess(ent: ClientEntitlement | null, spreadId: string, cardCount?: number): AccessDecision {
+  if (!isStandardSpread(spreadId, cardCount) && hasPremiumTrialOf(ent)) return ALLOWED;
   const view = describeEntitlement(ent);
   if (view?.blocked) {
     return { allowed: false, reason: view.blockedReason ?? GUEST_BLOCK_REASON };
   }
-  if (!isPassHolderOf(ent) && !isStandardSpread(spreadId)) {
+  if (!isPassHolderOf(ent) && !isStandardSpread(spreadId, cardCount)) {
     return { allowed: false, reason: "grand_spread" };
   }
   return ALLOWED;
@@ -78,10 +78,11 @@ export function decideStartSessionAccess(
   ent: ClientEntitlement | null,
   spreadId: string,
   personaId: string,
+  cardCount?: number,
 ): AccessDecision {
   // ผังใหญ่ "หรือ" แม่หมอพิเศษ ใช้สิทธิ์ลองฟรีได้ — ตรงกับเงื่อนไข isPremiumRequest ใน /api/reading/start
-  if ((!isStandardSpread(spreadId) || isMasterPersona(personaId)) && hasPremiumTrialOf(ent)) return ALLOWED;
-  const spreadDecision = decideSpreadAccess(ent, spreadId);
+  if ((!isStandardSpread(spreadId, cardCount) || isMasterPersona(personaId)) && hasPremiumTrialOf(ent)) return ALLOWED;
+  const spreadDecision = decideSpreadAccess(ent, spreadId, cardCount);
   if (!spreadDecision.allowed) return spreadDecision;
   if (!isPassHolderOf(ent) && isMasterPersona(personaId)) {
     return { allowed: false, reason: "master_persona" };

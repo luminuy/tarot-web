@@ -13,6 +13,9 @@ import { RitualHero } from "@/components/reading/one-card/RitualHero";
 import { OneCardRitual } from "@/components/reading/one-card/OneCardRitual";
 import { DailyStreakRibbon } from "@/components/daily/DailyStreakRibbon";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { EveningCheckin, MorningReflection, WeekStrip } from "@/components/daily/DailyReflection";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import type { RitualFocus } from "@/lib/journal/journal-types";
 
 type DailyFocus = "general" | "work" | "money" | "love" | "mind";
 
@@ -93,6 +96,15 @@ const FOCUS_CHAMBERS: FocusChamber[] = [
   },
 ];
 
+/** วิหารเดิม ➔ ชิป "วันนี้อยากใส่ใจเรื่องอะไร" ของพิธีเช้า (ภาพรวม = ไม่ระบุ) */
+const CHAMBER_TO_FOCUS: Record<DailyFocus, RitualFocus | undefined> = {
+  general: undefined,
+  work: "work",
+  money: "money",
+  love: "heart",
+  mind: "self",
+};
+
 export function DailyClient() {
   const { isEnglish } = useLocale();
 
@@ -100,6 +112,8 @@ export function DailyClient() {
   const [intentionText, setIntentionText] = useState("");
   /** จำนวนวันที่เปิดไพ่ประจำวันติดต่อกัน — มาจากเซิร์ฟเวอร์เท่านั้น ห้ามนับเองฝั่งเบราว์เซอร์ */
   const [streak, setStreak] = useState(0);
+  /** ✦ พิธีเช้า — ทิศไพ่ที่เปิดได้ + id ของบันทึกในสมุด (ใช้ต่อกับใจตอนนี้/บรรทัดเดียว) */
+  const [ritual, setRitual] = useState<{ isReversed: boolean; journalId: string | null } | null>(null);
 
   const currentChamber = FOCUS_CHAMBERS.find((c) => c.id === selectedFocus) || FOCUS_CHAMBERS[0];
 
@@ -153,7 +167,7 @@ export function DailyClient() {
         console.error("[Daily] หาไพ่ใน CARD_SUMMARIES ไม่เจอ — ข้ามการบันทึก:", card.id);
         return;
       }
-      saveReading({
+      const saved = saveReading({
         spreadId: "daily-one",
         spreadName: isEnglish ? "Daily Tarot Reading" : "ดูดวงไพ่ยิปซีรายวัน",
         category: "daily",
@@ -172,7 +186,11 @@ export function DailyClient() {
           },
         ],
         summary: isReversed ? card.meanings.general.reversed : card.meanings.general.upright,
+        // ✦ บันทึกนี้คือพิธีเช้าของวันนี้ — รอบเย็นและสรุปสัปดาห์หาด้วย ritualKind (REFLECTION_JOURNAL_PLAN 1.9)
+        ritualKind: "morning",
+        ritual: CHAMBER_TO_FOCUS[selectedFocus] ? { focus: CHAMBER_TO_FOCUS[selectedFocus] } : undefined,
       });
+      setRitual({ isReversed, journalId: saved.id });
     } catch {
       // Ignored
     }
@@ -210,6 +228,10 @@ export function DailyClient() {
         onRevealed={handleRevealed}
         headerSlot={
           <div className="space-y-6">
+            <InstallPrompt isEnglish={isEnglish} />
+            {/* ✦ กลับมาวันเดียวกัน = เช็กอินเย็น · มีพิธีหลายวันแล้ว = แถบ 7 วัน */}
+            <EveningCheckin isEnglish={isEnglish} />
+            <WeekStrip isEnglish={isEnglish} />
             {/* Chamber Selection */}
             <div className="space-y-3">
               <div className="space-y-1">
@@ -321,6 +343,18 @@ export function DailyClient() {
         renderReading={(card) => (
           <div className="space-y-6">
             <DailyStreakRibbon streak={streak} isEnglish={isEnglish} />
+
+            <MorningReflection
+              cardId={card.id}
+              isReversed={!!ritual?.isReversed}
+              keywords={
+                ritual?.isReversed
+                  ? (isEnglish ? card.keywordsEn?.reversed : undefined) ?? card.keywords.reversed
+                  : (isEnglish ? card.keywordsEn?.upright : undefined) ?? card.keywords.upright
+              }
+              journalId={ritual?.journalId ?? null}
+              isEnglish={isEnglish}
+            />
 
             <div className="border-b border-line pb-3 text-center sm:text-left">
               <span className="text-xs font-serif-th font-semibold text-gold-ink">

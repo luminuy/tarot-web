@@ -5,6 +5,7 @@ import { overlayReducer, OVERLAY_INITIAL, isOverlay } from "@/components/home/fl
 import { deckReducer, DECK_INITIAL } from "@/components/home/flow-deck";
 import { sessionReducer, SESSION_INITIAL } from "@/components/home/flow-session";
 import { readingReducer, READING_INITIAL } from "@/components/home/flow-reading";
+import { useFlowReflection } from "@/components/home/flow-reflection";
 import dynamic from "next/dynamic";
 import { withMotionScope } from "@/components/providers/with-motion-scope";
 import { useOnceOpen } from "@/lib/use-once-open";
@@ -13,6 +14,7 @@ import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { loadCardResolver } from "@/data/cards/client-deck";
 import { PUBLIC_SPREADS, getSpread, type Spread } from "@/data/spreads";
 import { PERSONAS, getPersona, type Persona } from "@/data/personas";
+import type { ReadingBasis } from "@/lib/tarot/explain-types";
 import type { Category } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
@@ -22,7 +24,10 @@ import { QuickFortunePicker, type QuickTopic } from "@/components/reading/QuickF
 import type { RitualStep } from "@/components/home/ritual-step";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { soundManager } from "@/lib/utils/audio";
-import { saveReading } from "@/lib/utils/history";
+import { saveReading, updateReadingMeta } from "@/lib/utils/history";
+import { MoodPicker } from "@/components/journal/MoodPicker";
+import { FollowStoryCard } from "@/components/journal/FollowStoryCard";
+import { fetchThreads } from "@/lib/journal/threads-client";
 import { saveFlowState, loadFlowState, clearFlowState, FRESH_START_EVENT } from "@/lib/utils/flow-persistence";
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
 import { prefetchTurnstile } from "@/lib/auth/turnstile";
@@ -49,6 +54,9 @@ import { ensureEntitlement, refreshEntitlement, useEntitlement } from "@/lib/ent
 import { useLocale } from "@/lib/i18n";
 import { STORAGE_KEYS, STORAGE_KEY_BUILDERS } from "@/lib/storage/keys";
 import { readMySign } from "@/lib/zodiac/my-sign";
+import { buildCustomSpread, CUSTOM_SPREAD_ID, layoutPoints } from "@/lib/tarot/custom-spread";
+import { takeCustomLaunch, type CustomSpreadDef } from "@/lib/tarot/custom-spread-client";
+import { takeQuestionPrefill } from "@/lib/reading/question-prefill";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
@@ -108,6 +116,8 @@ const CrisisNotice = dynamic(() => import("@/components/safety/CrisisNotice").th
 const PostReadingSignup = dynamic(() => import("@/components/entitlement/PostReadingSignup").then((m) => m.PostReadingSignup), { ssr: false });
 const PostReadingUpsell = dynamic(() => import("@/components/entitlement/PostReadingUpsell").then((m) => m.PostReadingUpsell), { ssr: false });
 const AnnouncementBanner = dynamic(() => import("@/components/entitlement/AnnouncementBanner").then((m) => m.AnnouncementBanner), { ssr: false });
+/* ✦ ผังของฉัน (คลื่น 5) — โหลดเมื่อถึงขั้นเลือกผังเท่านั้น ไม่เพิ่มบันเดิลหน้าแรก */
+const MyCustomSpreadsRow = dynamic(() => import("@/components/spread/custom/MyCustomSpreadsRow"), { ssr: false });
 const ToastNotification = dynamic(() => import("@/components/ui/ToastNotification").then((m) => m.ToastNotification), { ssr: false });
 
 // P1-U1: ปุ่มย้อนกลับทีละขั้น — ใช้ร่วมในขั้นสับไพ่และเลือกไพ่
@@ -344,8 +354,44 @@ export default function TarotFlow({
 
   // Selection state
   const [selectedSpread, setSelectedSpread] = useState<Spread>(routeSpread ?? PUBLIC_SPREADS[3]); // Default: 3-card
+  /**
+   * ✦ ผังที่สร้างเอง (REFLECTION_JOURNAL_PLAN 1.8) — ตัวผังดิบที่ส่งให้ `/start` ตรวจซ้ำแล้วตรึงลงเซสชัน
+   * มีผลเฉพาะเมื่อ `selectedSpread.id === "custom"` · เลือกผังในบ้านทีหลัง = ค่านี้ถูกเมินเอง
+   */
+  const reflection = useFlowReflection();
+  const { customDef, moodBefore, moodAfter, savedJournalId, openThreads, chosenThread, readingInsight } = reflection.state;
+  const { setCustomDef, setMoodBefore, setMoodAfter, setSavedJournalId, setOpenThreads, setChosenThread, readingStarted, setBasis, newRound: newReflectionRound } = reflection;
+  const pickCustomSpread = useCallback((def: CustomSpreadDef): Spread | null => {
+    if (!layoutPoints(def.layout, def.positions.length)) return null;
+    const built = buildCustomSpread(def);
+    setCustomDef(def);
+    setSelectedSpread(built);
+    return built;
+  }, [setCustomDef]);
   const [selectedPersona, setSelectedPersona] = useState<Persona>(PERSONAS[0]); // Default: warm
   const [selectedCategory, setSelectedCategory] = useState<Category>("general");
+  /**
+   * ✦ บริบทของคำอ่านที่กำลังแสดง สำหรับแผง "ทำไมแม่หมออ่านแบบนี้" + หลักฐานคำอ่าน (REFLECTION_JOURNAL_PLAN 1.2 · 1.6)
+   * เก็บผัง/หมวดของ "รอบที่อ่านจริง" (ทำนายด่วนใช้ผังคนละตัวกับ `selectedSpread`) · `basis` มาจากเฟรม SSE `basis`
+   */
+  /**
+   * ✦ ใจตอนนี้ก่อนสับไพ่/หลังอ่านจบ (REFLECTION_JOURNAL_PLAN 1.3) + id ของบันทึกที่เพิ่งเซฟอัตโนมัติ
+   * ไม่เลือก = null (ข้ามได้เสมอ) · หลังอ่านจบแก้ผ่าน `updateReadingMeta` ซึ่งรับมือ id ชั่วคราวให้แล้ว
+   */
+  // (moodBefore · moodAfter · savedJournalId อยู่ใน `useFlowReflection` ด้านบน)
+  /** 🧵 เส้นเรื่องที่ติดตามอยู่ (สมาชิก) + เรื่องที่เลือก "ถามต่อ" สำหรับรอบนี้ (REFLECTION_JOURNAL_PLAN 1.4) */
+  // (openThreads · chosenThread อยู่ใน `useFlowReflection` ด้านบน)
+  const isJournalMember = entitlement?.kind === "member";
+  useEffect(() => {
+    if (!isJournalMember || currentStep !== "INTENTION_SELECT") return;
+    let alive = true;
+    void fetchThreads("open").then((list) => alive && setOpenThreads(list));
+    return () => {
+      alive = false;
+    };
+  }, [isJournalMember, currentStep, setOpenThreads]);
+
+  // (readingInsight อยู่ใน `useFlowReflection` ด้านบน)
   const [question, setQuestion] = useState("");
   const [nickname, setNickname] = useState("");
   const [situation, setSituation] = useState("");
@@ -420,8 +466,10 @@ export default function TarotFlow({
    * เริ่มพิธีด้วยผังที่เลือกอยู่ — ใช้ร่วมกันระหว่างปุ่มหลักของ hero กับปุ่มใน SpreadCardSelector
    * ⚠️ ด่านสิทธิ์สามชั้นด้านล่างคือของเดิมทั้งหมด ห้ามตัดออกแม้แต่ชั้นเดียว
    */
-  const handleBeginReading = useCallback(() => {
-    const decision = decideSpreadAccess(entitlement, selectedSpread.id);
+  const handleBeginReading = useCallback((spreadOverride?: Spread) => {
+    // ผังของฉัน: เลือกแล้วเริ่มทันที — state ยังไม่อัปเดตในรอบนี้ จึงตัดสินจากผังที่ส่งมา
+    const target = spreadOverride ?? selectedSpread;
+    const decision = decideSpreadAccess(entitlement, target.id, target.positions.length);
     if (!decision.allowed) {
       openAccessDialog(decision.reason);
       return;
@@ -451,7 +499,7 @@ export default function TarotFlow({
     const currentEntitlement = entitlement ?? (await ensureEntitlement());
     if (isCancelled()) return;
 
-    const decision = decideSpreadAccess(currentEntitlement, spread.id);
+    const decision = decideSpreadAccess(currentEntitlement, spread.id, spread.positions.length);
     if (!decision.allowed) openAccessDialog(decision.reason);
   };
 
@@ -483,6 +531,22 @@ export default function TarotFlow({
       }
     };
 
+    /*
+     * ✦ มาจากปุ่ม "ใช้ผังนี้" ของหน้าสร้างผัง — สั่งเริ่มรอบใหม่ชัดเจน จึงชนะรอบที่ค้างไว้ (เหตุผลเดียวกับ `/read/<ผัง>`)
+     * ส่งต่อครั้งเดียวทาง sessionStorage แล้วลบทิ้ง · ผังพัง/แม่แบบไม่ตรงจำนวนใบ = เมินแล้วเปิดหน้าแรกปกติ
+     */
+    const launch = takeCustomLaunch();
+    if (launch && layoutPoints(launch.layout, launch.positions.length)) {
+      clearFlowState();
+      rememberNickname();
+      const spread = buildCustomSpread(launch);
+      setCustomDef(launch);
+      setSelectedSpread(spread);
+      setCurrentStep("INTENTION_SELECT");
+      void checkRouteAccess(spread, () => deepLinkCancelledRef.current);
+      return;
+    }
+
     const saved = loadFlowState();
     const intent = resolveEntryIntent({
       routeSpread: routeSpread?.id ?? null,
@@ -497,10 +561,22 @@ export default function TarotFlow({
       // รอบเก่าถูกบันทึกลงประวัติตั้งแต่ตอนอ่านจบแล้ว — ของที่ทิ้งคือ "ค้างกลางทาง" ไม่ใช่ผลคำอ่าน
       clearFlowState();
       rememberNickname();
+      // ✦ มาจากปุ่ม "ถามเลย" ของหน้าคำถาม — เติมคำถาม/หมวดที่ตั้งไว้ให้ (ผู้ใช้แก้ได้ก่อนกดเริ่ม)
+      const prefill = takeQuestionPrefill(routeSpread.id);
+      if (prefill) {
+        setQuestion(prefill.question);
+        setSelectedCategory(prefill.category);
+      }
       void checkRouteAccess(routeSpread, () => deepLinkCancelledRef.current);
     } else if (intent.kind === "resume" && saved) {
       // กู้คืนเฉพาะเมื่อผู้ใช้ "เริ่มดูดวงไปแล้วจริง ๆ" (พ้นขั้นเลือกผัง)
-      const spread = getSpread(saved.spreadId);
+      // ผังที่สร้างเองกู้จากตัวผังที่เก็บไว้ในรอบนั้น (หาใน `getSpread` ไม่เจอโดยตั้งใจ)
+      const customSaved =
+        saved.spreadId === CUSTOM_SPREAD_ID && saved.customSpread && layoutPoints(saved.customSpread.layout, saved.customSpread.positions.length)
+          ? saved.customSpread
+          : null;
+      const spread = customSaved ? buildCustomSpread(customSaved) : getSpread(saved.spreadId);
+      if (customSaved) setCustomDef(customSaved);
       if (spread) setSelectedSpread(spread);
       setSelectedPersona(getPersona(saved.personaId));
       setSelectedCategory(saved.category);
@@ -749,6 +825,7 @@ export default function TarotFlow({
       readingResult,
       proof,
       lang: isEnglish ? "en" : "th",
+      ...(selectedSpread.id === CUSTOM_SPREAD_ID && customDef ? { customSpread: customDef } : {}),
     };
     const snapshot = latestFlowRef.current;
     const t = setTimeout(() => {
@@ -779,6 +856,7 @@ export default function TarotFlow({
     readingResult,
     proof,
     isEnglish,
+    customDef,
   ]);
 
   /**
@@ -829,7 +907,7 @@ export default function TarotFlow({
      *    ในคลอเชอร์ ของเดิมถามสิทธิ์ใหม่แล้วแต่ยังเอาค่าเก่ามาตัดสินชั้นที่ 2 กับ 3
      *    คนที่เพิ่งเปิดหน้าแล้วกดเปิดผังใหญ่ทันทีจึงโดนกำแพงทั้งที่จ่ายเงินมาแล้ว
      */
-    const decision = decideStartSessionAccess(currentEntitlement, selectedSpread.id, selectedPersona.id);
+    const decision = decideStartSessionAccess(currentEntitlement, selectedSpread.id, selectedPersona.id, selectedSpread.positions.length);
     if (!decision.allowed) {
       openAccessDialog(decision.reason);
       return;
@@ -872,6 +950,15 @@ export default function TarotFlow({
           lang: locale,
           clientSeed: freshSeed,
           zodiac: readMySign(),
+          // ✦ ถามต่อจากเรื่องเดิม — แม่หมอดึงความทรงจำของเรื่องนี้แทน "3 ครั้งล่าสุด"
+          ...(chosenThread ? { threadId: chosenThread.id } : {}),
+          // ✦ ผังที่สร้างเอง — เซิร์ฟเวอร์ตรวจซ้ำทั้งหมดแล้วตรึงลงเซสชัน (ไม่เชื่อหน้าเว็บ)
+          ...(selectedSpread.id === CUSTOM_SPREAD_ID && customDef
+            ? {
+                custom: { name: customDef.name, layout: customDef.layout, positions: customDef.positions },
+                ...(customDef.savedId ? { customSavedId: customDef.savedId } : {}),
+              }
+            : {}),
         }),
       });
 
@@ -898,6 +985,10 @@ export default function TarotFlow({
       }
 
       const sessionReadingId = data.readingId || data.id;
+      // 🛡️ เซิร์ฟเวอร์ซ่อนเบอร์/อีเมล/เลขบัตรไว้ก่อนส่งให้ AI — บอกเบา ๆ ครั้งเดียว ไม่ต้องให้ผู้ใช้ทำอะไร
+      if (typeof data.privacyNotice === "string" && data.privacyNotice) {
+        setToast({ type: "info", title: isEnglish ? "Your privacy is protected" : "ข้อมูลส่วนตัวของคุณปลอดภัย", subtitle: data.privacyNotice, duration: 6000 });
+      }
       dispatchSession({
         type: "started",
         readingId: sessionReadingId,
@@ -1287,6 +1378,9 @@ export default function TarotFlow({
     readStreamAbortRef.current = abortController;
 
     dispatchRead({ type: "start" });
+    // เฟรม basis มาก่อน done เสมอ — เก็บในตัวแปรของรอบนี้ (state ใน closure ของสตรีมจะเป็นค่าเก่า)
+    let streamBasis: ReadingBasis | null = null;
+    readingStarted((overrides?.spread ?? selectedSpread).id, overrides?.category || selectedCategory);
     let streamCompleted = false;
 
     try {
@@ -1333,7 +1427,10 @@ export default function TarotFlow({
             try {
               const data = JSON.parse(dataMatch[1]);
 
-              if (eventType === "opening") {
+              if (eventType === "basis") {
+                streamBasis = data as ReadingBasis;
+                setBasis(data as ReadingBasis);
+              } else if (eventType === "opening") {
                 dispatchRead({ type: "opening", text: data.text });
               } else if (eventType === "card") {
                 // การรวมคำอ่านรายใบแบบไม่ซ้ำตำแหน่งย้ายไปอยู่ในตัวลดแล้ว
@@ -1371,7 +1468,7 @@ export default function TarotFlow({
                   const effectiveSpread = overrides?.spread || selectedSpread;
                   const effectiveNickname = (overrides?.nickname ?? nickname).trim() || undefined;
 
-                  saveReading({
+                  const saved = saveReading({
                     nickname: effectiveNickname,
                     question: effectiveQuestion,
                     spreadId: effectiveSpread.id,
@@ -1391,7 +1488,11 @@ export default function TarotFlow({
                     summary: data.reading.summary || "",
                     advice: data.reading.advice || [],
                     timing: data.reading.timing || "",
+                    ...(streamBasis ? { basis: streamBasis } : {}),
+                    ...(moodBefore ? { moodBefore } : {}),
                   });
+                  setSavedJournalId(saved.id);
+                  if (chosenThread) updateReadingMeta(saved.id, { threadId: chosenThread.id });
                 }
                 trackEvent("reading_complete", {
                   spread_id: selectedSpread.id,
@@ -1469,6 +1570,7 @@ export default function TarotFlow({
     setNickname("");
     setQuestion("");
     setSituation("");
+    newReflectionRound();
     if (typeof window !== "undefined") {
       try {
         localStorage.removeItem(STORAGE_KEYS.nickname);
@@ -1787,21 +1889,39 @@ export default function TarotFlow({
                   isPassHolder={isPassHolder}
                   premiumTrial={hasPremiumTrial}
                   proceedLabel={
-                    hasPremiumTrial && !isStandardSpread(selectedSpread.id)
+                    hasPremiumTrial && !isStandardSpread(selectedSpread.id, selectedSpread.positions.length)
                       ? (isEnglish ? "Try This Spread Free (1-time trial)" : "ลองผังนี้ฟรี (สิทธิ์ทดลอง 1 ครั้ง)")
                       : entitlementView?.blocked
                       ? entitlementView.blockedReason === "daily_exhausted"
                         ? (isEnglish ? "Refill Quota to Continue" : "เติมรอบเพื่อเปิดไพ่ต่อ")
                         : (isEnglish ? "Sign Up Free to Draw Cards" : "สมัครสมาชิกฟรีเพื่อเปิดไพ่")
-                      : !isPassHolder && !isStandardSpread(selectedSpread.id)
+                      : !isPassHolder && !isStandardSpread(selectedSpread.id, selectedSpread.positions.length)
                         ? (isEnglish ? "Unlock Spread to Draw Cards" : "ปลดล็อกผังนี้เพื่อเปิดไพ่")
                         : undefined
                   }
                   onRequireUpgrade={() => {
                     openAccessDialog("grand_spread");
                   }}
-                  onProceed={handleBeginReading}
+                  onProceed={() => handleBeginReading()}
                 />
+                <div className="mt-6 sm:mt-8">
+                  <MyCustomSpreadsRow
+                    isEnglish={isEnglish}
+                    selectedName={selectedSpread.id === CUSTOM_SPREAD_ID ? selectedSpread.nameTh : null}
+                    onPick={(def) => {
+                      soundManager.playCardSelectSound();
+                      void ensureEntitlement();
+                      const built = pickCustomSpread(def);
+                      if (built) handleBeginReading(built);
+                      trackEvent("spread_select", {
+                        spread_id: CUSTOM_SPREAD_ID,
+                        spread_name: "custom",
+                        card_count: def.positions.length,
+                        category: "general",
+                      });
+                    }}
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -1852,6 +1972,46 @@ export default function TarotFlow({
                 onCategoryChange={setSelectedCategory}
                 persona={selectedPersona}
               />
+
+              {/* 🧵 ถามต่อจากเรื่องเดิม — สมาชิกที่มีเรื่องที่ติดตามอยู่ (แตะเลือก/แตะซ้ำยกเลิก) */}
+              {!clarificationPrompt && openThreads.length > 0 && (
+                <div className="w-full max-w-2xl mx-auto space-y-2">
+                  <p className="text-xs sm:text-[13px] font-serif-th font-semibold text-ink-deep">
+                    {isEnglish ? "Continuing a story you follow?" : "ถามต่อจากเรื่องที่ติดตามอยู่ไหม"}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2" role="radiogroup" aria-label={isEnglish ? "Stories you follow" : "เรื่องที่ติดตามอยู่"}>
+                    {openThreads.slice(0, 6).map((t) => {
+                      const on = chosenThread?.id === t.id;
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={on}
+                          onClick={() => setChosenThread(on ? null : { id: t.id, title: t.title })}
+                          className={`tap-overlay-y min-h-[44px] px-3.5 rounded-full border text-xs sm:text-[13px] font-serif-th cursor-pointer transition-colors ${
+                            on ? "bg-surface border-gold-ink text-ink-deep font-semibold" : "glass-chip border-line-warm text-ink-deep hover:border-gold-ink"
+                          }`}
+                        >
+                          {on ? "✦ " : ""}
+                          {t.title}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* ✦ ใจตอนนี้ — แตะเดียว ข้ามได้ (สมุดดวง v2) */}
+              {!clarificationPrompt && (
+                <MoodPicker
+                  value={moodBefore}
+                  onChange={setMoodBefore}
+                  isEnglish={isEnglish}
+                  label={isEnglish ? "How do you feel right now?" : "ใจตอนนี้เป็นอย่างไร"}
+                  hint={isEnglish ? "Optional · saved to your journal only" : "ไม่บังคับ · เก็บไว้ในสมุดของคุณเท่านั้น"}
+                />
+              )}
 
               {/* Clarification Card (B-04) */}
               {clarificationPrompt && (
@@ -1992,6 +2152,9 @@ export default function TarotFlow({
                       question={question}
                       nickname={nickname}
                       isFallback={read.fallback}
+                      spreadId={readingInsight?.spreadId ?? selectedSpread.id}
+                      category={readingInsight?.category ?? selectedCategory}
+                      basis={readingInsight?.basis ?? null}
                       onRetry={() => {
                         if (readingId && drawnCards.length > 0) {
                           startAIStreaming(readingId, drawnCards);
@@ -2012,6 +2175,9 @@ export default function TarotFlow({
                       question={question}
                       nickname={nickname}
                       isFallback={read.fallback}
+                      spreadId={readingInsight?.spreadId ?? selectedSpread.id}
+                      category={readingInsight?.category ?? selectedCategory}
+                      basis={readingInsight?.basis ?? null}
                       onRetry={() => {
                         if (readingId && drawnCards.length > 0) {
                           startAIStreaming(readingId, drawnCards);
@@ -2090,6 +2256,50 @@ export default function TarotFlow({
                 </div>
               </div>
 
+              {/* ✦ ใจตอนนี้หลังอ่านจบ — เทียบกับก่อนเปิดไพ่ได้ในสมุดดวง */}
+              {currentStep === "SUMMARY" && !isStreaming && savedJournalId && (
+                <div className="glass-tile !rounded-xl p-4 sm:p-5 w-full max-w-2xl mx-auto space-y-3">
+                  <MoodPicker
+                    value={moodAfter}
+                    onChange={(level) => {
+                      setMoodAfter(level);
+                      updateReadingMeta(savedJournalId, { moodAfter: level });
+                    }}
+                    isEnglish={isEnglish}
+                    compact
+                    label={isEnglish ? "After this reading, how do you feel?" : "อ่านจบแล้ว ตอนนี้ใจเป็นอย่างไร"}
+                    hint={
+                      moodAfter
+                        ? isEnglish
+                          ? "Saved to your journal"
+                          : "บันทึกลงสมุดดวงแล้ว"
+                        : isEnglish
+                          ? "Optional"
+                          : "ไม่บังคับ"
+                    }
+                  />
+                  <a
+                    href={isEnglish ? "/en/journal" : "/journal"}
+                    className="inline-flex text-xs sm:text-[13px] font-serif-th font-semibold text-gold-ink underline underline-offset-2"
+                  >
+                    ✦ {isEnglish ? "Open my reading journal" : "เปิดสมุดดวงของฉัน"}
+                  </a>
+                </div>
+              )}
+
+              {/* 🧵 ติดตามเรื่องนี้ + นัดกลับมาเช็ก */}
+              {currentStep === "SUMMARY" && !isStreaming && savedJournalId && (
+                <FollowStoryCard
+                  journalId={savedJournalId}
+                  question={question}
+                  timing={readingResult?.timing}
+                  isMember={isJournalMember}
+                  existingThread={chosenThread}
+                  isEnglish={isEnglish}
+                  onSignIn={() => openAuth("signin", false)}
+                />
+              )}
+
               {currentStep === "SUMMARY" && !isStreaming && (
                 <PostReadingSignup onOpenAuth={() => openAuth("signup", true)} />
               )}
@@ -2099,7 +2309,7 @@ export default function TarotFlow({
                 !isStreaming &&
                 entitlement?.kind === "member" &&
                 !isPassHolder &&
-                isStandardSpread(selectedSpread.id) &&
+                isStandardSpread(selectedSpread.id, selectedSpread.positions.length) &&
                 !isMasterPersona(selectedPersona.id) &&
                 upsellPositions.length > 0 && (
                   <PostReadingUpsell

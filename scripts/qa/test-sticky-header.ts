@@ -477,6 +477,11 @@ const INTENTIONALLY_BARE: { route: string; reason: string }[] = [
   { route: "admin/login", reason: "หน้าเข้าสู่ระบบของแผงแอดมิน (noindex)" },
   { route: "tester", reason: "โหมดผู้ทดสอบภายใน — ธีมมืดคนละชุด (noindex)" },
   { route: "readers/console", reason: "แผงทำงานหลังบ้านของแม่หมอ มีแถบของตัวเอง (noindex)" },
+  { route: "readers/studio", reason: "สตูดิโอแม่หมอ — เครื่องมือหลังบ้านแบบเดียวกับแผงคิว มีแถบแท็บของตัวเอง (noindex)" },
+  {
+    route: "r/[token]",
+    reason: "คำอ่านส่วนตัวที่แม่หมอส่งให้ลูกค้า แสดงในแบรนด์ของแม่หมอ (noindex · ไม่ส่ง Referer) หัวเว็บ SeerTarot จะแย่งแบรนด์และพาลูกค้าออกจากคำอ่าน",
+  },
   {
     route: "reading/chat",
     reason: "ห้องแชท — มีแถบหัวบางของตัวเองพร้อมปุ่มกลับหน้าคำทำนาย (INC-0109) หัวเว็บเต็มจะกินพื้นที่จอสนทนา",

@@ -1,5 +1,9 @@
 import { getAppDB } from "@/lib/platform/db";
-import type { SavedReadingItem, SavedCardDetail, ReadingOutcome } from "@/lib/utils/history";
+import type { SavedReadingItem, SavedCardDetail, ReadingOutcome, ReadingMetaPatch } from "@/lib/utils/history";
+import type { ReadingBasis } from "@/lib/tarot/explain-types";
+import type { JournalRitual, RitualKind } from "@/lib/journal/journal-types";
+import { normalizeTags } from "@/lib/journal/journal-types";
+import { isMoodLevel } from "@/lib/journal/mood";
 import { createHash } from "node:crypto";
 
 export function computeContentHash(question: string, cards: SavedCardDetail[]): string {
@@ -29,7 +33,48 @@ interface RawJournalRow {
   user_note: string | null;
   outcome_updated_at: number | null;
   created_at: number;
+  // ── v2 (migrations/0022) — อาจไม่มีในฐานข้อมูลที่ยังไม่รัน migration ➔ อ่านแบบ optional ทุกช่อง ──
+  pinned?: number | null;
+  tags_json?: string | null;
+  mood_before?: number | null;
+  mood_after?: number | null;
+  thread_id?: string | null;
+  checkin_at?: number | null;
+  share_with_ai?: number | null;
+  basis_json?: string | null;
+  ritual_kind?: string | null;
+  ritual_json?: string | null;
 }
+
+/** JSON ของช่องเสริม (ไม่ใช่ไพ่) พังได้โดยไม่ทำให้ทั้งรายการเสีย — คืน undefined เงียบ ๆ */
+function parseOptionalJson<T>(raw: string | null | undefined): T | undefined {
+  if (!raw) return undefined;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return undefined;
+  }
+}
+
+/** ค่าที่เขียนลงคอลัมน์ v2 — ใช้ร่วมกันทั้งบันทึกเดี่ยวและนำเข้าเป็นชุด */
+function v2Values(item: Partial<SavedReadingItem>) {
+  const tags = normalizeTags(item.tags);
+  return [
+    item.pinned ? 1 : 0,
+    JSON.stringify(tags),
+    isMoodLevel(item.moodBefore) ? item.moodBefore : null,
+    isMoodLevel(item.moodAfter) ? item.moodAfter : null,
+    item.threadId || null,
+    item.checkinAt ? new Date(item.checkinAt).getTime() || null : null,
+    item.shareWithAi ? 1 : 0,
+    item.basis ? JSON.stringify(item.basis) : null,
+    item.ritualKind || null,
+    item.ritual ? JSON.stringify(item.ritual) : null,
+  ] as const;
+}
+
+const V2_COLUMNS =
+  "pinned, tags_json, mood_before, mood_after, thread_id, checkin_at, share_with_ai, basis_json, ritual_kind, ritual_json";
 
 function mapRowToItem(row: RawJournalRow): SavedReadingItem {
   /*
@@ -75,6 +120,19 @@ function mapRowToItem(row: RawJournalRow): SavedReadingItem {
     outcome: (row.outcome as ReadingOutcome) || "PENDING",
     userNote: row.user_note || undefined,
     outcomeUpdatedAt: row.outcome_updated_at ? new Date(row.outcome_updated_at).toISOString() : undefined,
+    pinned: row.pinned === 1 || undefined,
+    tags: (() => {
+      const t = normalizeTags(parseOptionalJson<string[]>(row.tags_json));
+      return t.length > 0 ? t : undefined;
+    })(),
+    moodBefore: isMoodLevel(row.mood_before) ? row.mood_before : undefined,
+    moodAfter: isMoodLevel(row.mood_after) ? row.mood_after : undefined,
+    threadId: row.thread_id || undefined,
+    checkinAt: row.checkin_at ? new Date(row.checkin_at).toISOString() : undefined,
+    shareWithAi: row.share_with_ai === 1 || undefined,
+    basis: parseOptionalJson<ReadingBasis>(row.basis_json),
+    ritualKind: row.ritual_kind === "morning" || row.ritual_kind === "evening" ? (row.ritual_kind as RitualKind) : undefined,
+    ritual: parseOptionalJson<JournalRitual>(row.ritual_json),
     ...(corrupted ? { corrupted: true } : {}),
   };
 }
@@ -139,9 +197,9 @@ export async function insertJournal(
       `INSERT INTO reading_journal (
          id, user_id, content_hash, question, nickname, spread_id, spread_name,
          category, persona_id, persona_name, cards_json, summary, advice_json,
-         timing, outcome, user_note, created_at
+         timing, outcome, user_note, created_at, ${V2_COLUMNS}
        )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(user_id, content_hash) DO NOTHING`
     )
     .bind(
@@ -161,7 +219,8 @@ export async function insertJournal(
       item.timing || null,
       item.outcome || "PENDING",
       item.userNote || null,
-      createdAt
+      createdAt,
+      ...v2Values(item)
     )
     .run();
 
@@ -206,9 +265,9 @@ export async function bulkImportJournal(
         `INSERT INTO reading_journal (
            id, user_id, content_hash, question, nickname, spread_id, spread_name,
            category, persona_id, persona_name, cards_json, summary, advice_json,
-           timing, outcome, user_note, created_at
+           timing, outcome, user_note, created_at, ${V2_COLUMNS}
          )
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(user_id, content_hash) DO NOTHING`
       )
       .bind(
@@ -228,7 +287,8 @@ export async function bulkImportJournal(
         item.timing || null,
         item.outcome || "PENDING",
         item.userNote || null,
-        createdAt
+        createdAt,
+        ...v2Values(item)
       );
   });
 
@@ -290,6 +350,79 @@ export async function updateJournalOutcome(
 }
 
 /**
+ * ✦ แก้ช่องเสริมของบันทึก (สมุดดวง v2) — ปักหมุด · แท็ก · ใจตอนนี้ · ยินยอมให้ AI อ่าน · บันทึกพิธี · ผลจริง
+ * ---------------------------------------------------------------------------
+ * แก้เฉพาะช่องที่ส่งมา (`undefined` = ไม่แตะ · `null` ของใจ = ล้างค่า) ด้วย UPDATE ครั้งเดียว
+ * ⚠️ ไม่มีทางแก้คำถาม/ไพ่/คำอ่านได้จากที่นี่ — คำอ่านในอดีตต้องตรงกับที่สุ่มได้จริง (Provably Fair)
+ * `ritual` ผสานกับของเดิม (อ่านก่อนเขียน) เพราะเช้ากับเย็นเขียนคนละรอบ
+ */
+export async function updateJournalMeta(userId: string, id: string, patch: ReadingMetaPatch): Promise<boolean> {
+  const db = await getAppDB();
+  const sets: string[] = [];
+  const binds: unknown[] = [];
+  const set = (col: string, value: unknown) => {
+    sets.push(`${col} = ?`);
+    binds.push(value);
+  };
+
+  if (patch.outcome !== undefined) {
+    set("outcome", patch.outcome);
+    set("outcome_updated_at", Date.now());
+  }
+  if (patch.userNote !== undefined) set("user_note", patch.userNote || null);
+  if (patch.pinned !== undefined) set("pinned", patch.pinned ? 1 : 0);
+  if (patch.tags !== undefined) set("tags_json", JSON.stringify(normalizeTags(patch.tags)));
+  if (patch.moodBefore !== undefined) set("mood_before", isMoodLevel(patch.moodBefore) ? patch.moodBefore : null);
+  if (patch.moodAfter !== undefined) set("mood_after", isMoodLevel(patch.moodAfter) ? patch.moodAfter : null);
+  if (patch.shareWithAi !== undefined) set("share_with_ai", patch.shareWithAi ? 1 : 0);
+  if (patch.threadId !== undefined) set("thread_id", patch.threadId || null);
+  if (patch.checkinAt !== undefined) {
+    set("checkin_at", patch.checkinAt ? new Date(patch.checkinAt).getTime() || null : null);
+    set("checkin_sent_at", null); // นัดใหม่ = ส่งเตือนใหม่ได้อีกครั้ง
+  }
+  if (patch.ritual !== undefined) {
+    const row = await db
+      .prepare(`SELECT ritual_json FROM reading_journal WHERE id = ? AND user_id = ?`)
+      .bind(id, userId)
+      .first<{ ritual_json: string | null }>();
+    if (!row) return false;
+    const merged = { ...(parseOptionalJson<JournalRitual>(row.ritual_json) ?? {}), ...patch.ritual };
+    set("ritual_json", JSON.stringify(merged));
+  }
+  if (sets.length === 0) return false;
+
+  const res = await db
+    .prepare(`UPDATE reading_journal SET ${sets.join(", ")} WHERE id = ? AND user_id = ?`)
+    .bind(...binds, id, userId)
+    .run();
+  return (res.meta?.changes ?? 0) > 0;
+}
+
+/**
+ * ✦ ค้นสมุดฝั่งเซิร์ฟเวอร์ — ใช้เมื่อเกิน 200 รายการที่หน้าจอโหลดไว้ (ในเครื่องค้นไม่ถึง)
+ * ค้นในคำถาม · ชื่อผัง · บันทึก · แท็ก · ชื่อไพ่ (อยู่ใน cards_json) ด้วย LIKE
+ * ⚠️ ผู้เรียกต้องผ่านเพดานถี่ก่อน — LIKE '%x%' สแกนทั้งแถวของผู้ใช้คนนั้น (ดัชนี user_id จำกัดขอบเขตไว้)
+ * ⚠️ escape `%` `_` `\` ของผู้ใช้ — ไม่งั้นค้น "50%" ได้ทุกแถว
+ */
+export async function searchJournal(userId: string, query: string, limit = 50): Promise<SavedReadingItem[]> {
+  const db = await getAppDB();
+  const needle = `%${query.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+  const { results } = await db
+    .prepare(
+      `SELECT * FROM reading_journal
+       WHERE user_id = ?1 AND (
+         question LIKE ?2 ESCAPE '\\' OR spread_name LIKE ?2 ESCAPE '\\' OR
+         user_note LIKE ?2 ESCAPE '\\' OR tags_json LIKE ?2 ESCAPE '\\' OR cards_json LIKE ?2 ESCAPE '\\'
+       )
+       ORDER BY created_at DESC
+       LIMIT ?3`
+    )
+    .bind(userId, needle, Math.min(100, Math.max(1, limit)))
+    .all<RawJournalRow>();
+  return (results || []).map(mapRowToItem);
+}
+
+/**
  * ลบบันทึกการดูดวง 1 รายการ
  */
 export async function deleteJournalItem(userId: string, id: string): Promise<boolean> {
@@ -330,4 +463,57 @@ export async function countPendingOlderThan(userId: string, days: number): Promi
     .first<{ count: number }>();
 
   return Number(row?.count ?? 0);
+}
+
+/** คำอ่านในเส้นเรื่องเดียวกัน (เก่า ➔ ใหม่) — ใช้กับหน้าเส้นเวลาและความทรงจำแม่หมอตามเรื่อง */
+export async function listThreadEntries(userId: string, threadId: string, limit = 50): Promise<SavedReadingItem[]> {
+  const db = await getAppDB();
+  const { results } = await db
+    .prepare(
+      `SELECT * FROM reading_journal WHERE user_id = ? AND thread_id = ?
+       ORDER BY created_at DESC LIMIT ?`
+    )
+    .bind(userId, threadId, Math.min(100, Math.max(1, limit)))
+    .all<RawJournalRow>();
+  return (results || []).map(mapRowToItem).reverse();
+}
+
+export interface DueCheckin {
+  id: string;
+  userId: string;
+  createdAt: number;
+  checkinAt: number;
+  threadId: string | null;
+  cardsJson: string;
+}
+
+/** นัดกลับมาเช็กที่ถึงเวลาแล้วและยังไม่ได้ส่งเตือน · ผลจริงยังเป็น PENDING เท่านั้น (บันทึกแล้วไม่ต้องเตือน) */
+export async function listDueCheckins(now: number, limit: number): Promise<DueCheckin[]> {
+  const db = await getAppDB();
+  const { results } = await db
+    .prepare(
+      `SELECT id, user_id, created_at, checkin_at, thread_id, cards_json FROM reading_journal
+       WHERE checkin_at IS NOT NULL AND checkin_at <= ? AND checkin_sent_at IS NULL AND outcome = 'PENDING'
+       ORDER BY checkin_at ASC LIMIT ?`
+    )
+    .bind(now, limit)
+    .all<{ id: string; user_id: string; created_at: number; checkin_at: number; thread_id: string | null; cards_json: string }>();
+  return (results || []).map((r) => ({
+    id: r.id,
+    userId: r.user_id,
+    createdAt: r.created_at,
+    checkinAt: r.checkin_at,
+    threadId: r.thread_id,
+    cardsJson: r.cards_json,
+  }));
+}
+
+/** จองการส่งเตือน (กันส่งซ้ำเมื่อ cron ทำงานซ้อน) — true = รอบนี้เป็นคนส่ง */
+export async function claimCheckin(id: string, now: number): Promise<boolean> {
+  const db = await getAppDB();
+  const res = await db
+    .prepare(`UPDATE reading_journal SET checkin_sent_at = ? WHERE id = ? AND checkin_sent_at IS NULL`)
+    .bind(now, id)
+    .run();
+  return (res.meta?.changes ?? 0) > 0;
 }

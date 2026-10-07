@@ -21,6 +21,10 @@ import { TTSReaderButton } from "./TTSReaderButton";
 import { useLocale } from "@/lib/i18n";
 import { resolveDisplayKeywords } from "@/lib/tarot/keywords";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import type { ReadingBasis } from "@/lib/tarot/explain-types";
+import { CardWhyPanel } from "./insight/CardWhyPanel";
+import { ReadingBasisPanel } from "./insight/ReadingBasisPanel";
+import { explainUrl } from "./insight/use-reading-explain";
 
 export interface QuickChatResultProps {
   reading?: Partial<Reading> | null;
@@ -41,6 +45,10 @@ export interface QuickChatResultProps {
   onRetry?: () => void;
   /** คำอ่านมาจากคลังความหมายไพ่ ไม่ใช่แม่หมอ AI — ขึ้น `FallbackNotice` ให้ผู้ใช้รู้และกดอ่านใหม่ได้ */
   isFallback?: boolean;
+  /** ✦ ผัง/หมวดของรอบนี้ + เฟรม `basis` — เปิดแผง "ทำไมแม่หมออ่านแบบนี้" + "คำอ่านนี้ประกอบจาก" */
+  spreadId?: string;
+  category?: string;
+  basis?: ReadingBasis | null;
 }
 
 export const QuickChatResult: React.FC<QuickChatResultProps> = ({
@@ -55,6 +63,9 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
   nickname,
   onRetry,
   isFallback,
+  spreadId,
+  category,
+  basis,
 }) => {
   const { isEnglish } = useLocale();
   // สำรับตามภาษาของหน้า — ไม่ลากคำทำนายอังกฤษมาให้ผู้ใช้ไทย (A8-02)
@@ -431,6 +442,22 @@ isEnglish
                 <span>➔</span>
               </span>
             </Link>
+          )}
+
+          {/* ✦ ทำไมแม่หมออ่านแบบนี้ + คำอ่านนี้ประกอบจาก (ไม่เรียก AI เพิ่ม) */}
+          {!isStreaming && reading?.summary && spreadId && drawnCard && drawnCard.cardIndex >= 0 && drawnCard.cardIndex <= 77 && (
+            <>
+              <CardWhyPanel url={explainUrl(spreadId, drawnCards, category || "general", isEnglish)} order={drawnCard.order} isEnglish={isEnglish} />
+              <ReadingBasisPanel
+                url={explainUrl(spreadId, drawnCards, category || "general", isEnglish)}
+                cardCount={drawnCards.length}
+                positionNames={drawnCards.map((d) => (isEnglish ? d.position.nameEn || d.position.nameTh : d.position.nameTh))}
+                category={category || "general"}
+                basis={basis ?? null}
+                hasQuestion={Boolean(question?.trim())}
+                isEnglish={isEnglish}
+              />
+            </>
           )}
 
           {/* Accuracy Rating Widget (Uncollapsed - feedback loop หลัก) */}

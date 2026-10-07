@@ -33,6 +33,8 @@ interface ConsoleState {
   totalWaiting: number;
   /** ตั้งค่า TURN แล้ว = แม่หมอเปิดวิดีโอคอลกับคิวที่เรียกแล้วได้ */
   videoCallEnabled?: boolean;
+  /** สตูดิโอทำคำอ่านให้ลูกค้าของตัวเอง (REFLECTION_JOURNAL_PLAN 1.13) */
+  studioEnabled?: boolean;
   /** ตารางรับนัดประจำสัปดาห์ (migrations/0020) */
   schedule?: ScheduleRule[];
   /** ตั้งค่าการรับนัด (migrations/0021) */
@@ -222,6 +224,14 @@ function ReaderConsoleInner() {
                 </span>
               </div>
               <p className="text-xs text-muted mt-0.5">LINE: {reader.lineUrl}</p>
+              {data.studioEnabled && token && (
+                <a
+                  href={`/readers/studio?token=${encodeURIComponent(token)}`}
+                  className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold text-gold-ink hover:underline"
+                >
+                  ✦ สตูดิโอคำอ่าน — ทำคำอ่านให้ลูกค้าของคุณเอง
+                </a>
+              )}
             </div>
           </div>
 
@@ -344,6 +354,13 @@ function ReaderConsoleInner() {
                       {isReady ? "เรียกคิวแล้ว" : unpaid ? "ยังไม่ชำระเงิน" : "ชำระแล้ว · รอคิว"}
                     </span>
                   </div>
+
+                  {/* ม.26: บอกแม่หมอว่าลูกค้ายินยอมเรื่องข้อมูลอ่อนไหวหรือไม่ (migrations/0029) */}
+                  <p className="text-[13px] leading-relaxed text-muted">
+                    {ticket.sensitiveConsentAt
+                      ? "ลูกค้ายินยอมให้ใช้เรื่องสุขภาพ เพศวิถี หรือความเชื่อในคำถามเพื่อดูดวงครั้งนี้"
+                      : "ลูกค้าไม่ได้ยินยอมเรื่องข้อมูลอ่อนไหว — อย่าถามหรือจดเรื่องสุขภาพ เพศวิถี หรือความเชื่อ"}
+                  </p>
 
                   {/* AI Pre-Screening Summary Card */}
                   {ticket.screening && (

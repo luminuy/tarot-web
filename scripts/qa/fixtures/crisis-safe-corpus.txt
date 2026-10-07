@@ -20,3 +20,8 @@ I want to dye my hair, is it a good week for change |en-normal
 I want to spend it all on this trip, should I |en-normal
 My grandfather died last year, what should I know |en-normal
 Will my dead-end job finally change this year |en-normal
+# ── อังกฤษ: สำนวนที่มีคำว่า hurt/harm แต่ไม่ใช่สัญญาณวิกฤต (ต้องไม่บล็อก) ──
+I keep hurting myself by trusting the wrong people, will that change?
+Did I hurt myself by turning down that job?
+Will he hurt me again if I go back?
+How do I stop harming my own chances at work?

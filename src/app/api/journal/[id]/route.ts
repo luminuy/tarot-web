@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
-import { JournalItemSchema, JournalOutcomeSchema } from "@/lib/journal/journal.schema";
+import { recordEvent } from "@/lib/stats/record";
+import { JournalPatchSchema } from "@/lib/journal/journal.schema";
 import { getSessionUser } from "@/lib/auth/session";
-import { updateJournalOutcome, deleteJournalItem } from "@/lib/journal/journal.repo";
+import { updateJournalMeta, deleteJournalItem } from "@/lib/journal/journal.repo";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 
 export const runtime = "nodejs";
-
-const UpdateOutcomeSchema = z.object({
-  outcome: JournalOutcomeSchema,
-  userNote: JournalItemSchema.shape.userNote,
-});
 
 async function getAuthenticatedUserId(): Promise<string | null> {
   const user = await getSessionUser();
@@ -33,20 +28,38 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await request.json().catch(() => ({}));
-    const parsed = UpdateOutcomeSchema.safeParse(body);
+    // ✦ สมุดดวง v2: แก้ได้ทีละบางช่อง (ผลจริง · บันทึก · ปักหมุด · แท็ก · ใจ · ยินยอมให้ AI อ่าน · พิธี)
+    //   รูปแบบเดิม `{ outcome, userNote }` ยังผ่านสคีมาเดียวกันได้
+    const parsed = JournalPatchSchema.safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json({ error: "ข้อมูลสถานะไม่ถูกต้อง" }, { status: 400 });
     }
 
-    const changed = await updateJournalOutcome(userId, id, parsed.data.outcome, parsed.data.userNote);
+    // 🧵 ผูกเส้นเรื่องได้เฉพาะเรื่องของตัวเอง — ห้ามเชื่อรหัสที่ไคลเอนต์ส่งมาเฉย ๆ
+    if (parsed.data.threadId) {
+      const { getThread } = await import("@/lib/journal/threads.repo");
+      const thread = await getThread(userId, parsed.data.threadId);
+      if (!thread) return NextResponse.json({ error: "ไม่พบเรื่องที่ติดตามนี้" }, { status: 404 });
+    }
+
+    const changed = await updateJournalMeta(userId, id, parsed.data);
+    if (changed && parsed.data.threadId) {
+      const { touchThread } = await import("@/lib/journal/threads.repo");
+      await touchThread(userId, parsed.data.threadId).catch(() => {});
+    }
     if (!changed) {
       return NextResponse.json({ error: "ไม่พบบันทึกดวงรายการนี้" }, { status: 404 });
     }
 
     // 📊 Sync outcome to reading_quality for model telemetry (AI_INTELLIGENCE_PLAN W1.1)
-    const { updateQualityOutcome } = await import("@/lib/ai/quality.repo");
-    await updateQualityOutcome(id, parsed.data.outcome).catch(() => {});
+    if (parsed.data.outcome) {
+      const { updateQualityOutcome } = await import("@/lib/ai/quality.repo");
+      await updateQualityOutcome(id, parsed.data.outcome).catch(() => {});
+      // ตัวชี้วัดแผนสะท้อนตัวเอง (หัวข้อ 5): สัดส่วนคำอ่านที่ผู้ใช้กลับมาบันทึกผลจริง
+      if (parsed.data.outcome !== "PENDING") recordEvent("journal_outcome_set");
+    }
+    if (parsed.data.moodAfter !== undefined && parsed.data.moodAfter !== null) recordEvent("journal_mood_after_set");
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -76,6 +76,9 @@ export function signReadingSessionToken(record: Partial<ReadingRecord>): string 
     // รอบลองผังใหญ่ฟรีต้องติดไปกับโทเคนด้วย — เซสชันที่กู้คืนจากโทเคนจะได้หักเป็นแถว trial
     // ไม่ใช่ไปหักโควตารายวัน (หรือถูกปฏิเสธทั้งที่ /start อนุญาตแล้ว) · HMAC กันปลอมอยู่แล้ว
     premiumTrial: record.premiumTrial,
+    // ผังที่สร้างเองต้องติดไปด้วย — เซสชันที่กู้จากโทเคนต้องอ่านตำแหน่งเดิมที่ตรวจแล้ว ไม่ใช่หาผังไม่เจอ
+    customSpread: record.customSpread,
+    threadId: record.threadId,
     result: record.result,
     createdAt: record.createdAt || Date.now(),
     iat: nowSec,

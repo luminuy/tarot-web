@@ -693,6 +693,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                 </p>
               ) : (
                 <AiReadingPanel
+                  insight={oracle}
                   state={oracle.state}
                   isEn={isEnglish}
                   onRetry={() => {

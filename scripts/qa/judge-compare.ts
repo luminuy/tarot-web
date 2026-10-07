@@ -48,6 +48,17 @@ export interface CaseResult {
   thaiScore: number;
   thaiIssues: string[];
   judge: Partial<Record<RubricKey, number>> & { average?: number; comment?: string };
+  /** ✦ แทร็ก E: ชนิดเคส (คำอ่านปกติ · ใช่/ไม่ใช่ · วิกฤต · คำสั่งแฝง · กำกวม · ข้อมูลส่วนตัว) */
+  kind?: string;
+  lang?: "th" | "en";
+  /** ✦ แทร็ก E: ผลตรวจชั้น 1 (โค้ด) — ทุกเกณฑ์ต้องผ่าน */
+  deterministic?: { pass: boolean; failed: string[] };
+  /** ✦ แทร็ก E: เคสที่ตัดสินที่ด่านขาเข้า (วิกฤต/คำสั่งแฝง/PII) — ไม่เรียกโมเดล */
+  ingress?: { expected: string; pass: boolean };
+  /** ผู้ตัดสินที่ให้คะแนนเคสนี้จริง (สลับได้เมื่อโดน 429) */
+  judgeModel?: string;
+  /** คำอ่านมาจาก snapshot ที่บันทึกไว้ (ไม่ได้ยิงผู้ผลิตรอบนี้) */
+  fromSnapshot?: boolean;
 }
 
 export interface JudgeReport {

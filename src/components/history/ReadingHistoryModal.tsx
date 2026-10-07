@@ -253,6 +253,13 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                     ? `Tarot readings and real-life manifestations (${readings.length} ${readings.length === 1 ? "entry" : "entries"})`
                     : `บันทึกคำทำนายและบันทึกผลลัพธ์ในชีวิต (${readings.length} รายการ)`}
                 </p>
+                {/* ✦ ทางไปหน้าสมุดเต็ม — ปฏิทิน · ภาพรวม · แท็ก · ใจตอนนี้ (REFLECTION_JOURNAL_PLAN 1.3) */}
+                <a
+                  href={isEn ? "/en/journal" : "/journal"}
+                  className="inline-flex mt-0.5 text-[13px] font-serif-th font-semibold text-gold-ink underline underline-offset-2"
+                >
+                  ✦ {isEn ? "Open full journal" : "เปิดสมุดเต็ม"}
+                </a>
               </div>
             </div>
 

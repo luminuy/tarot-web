@@ -37,19 +37,31 @@ import { cardById } from "../../src/data/cards";
 import { checkReadingConsistency } from "../../src/lib/ai/consistency";
 import { checkThaiQualityDeep } from "../../src/lib/ai/thai-quality";
 import { PROMPT_VERSION } from "../../src/lib/ai/prompt-version";
-import { geminiEndpoint, aiGatewayHeaders } from "../../src/lib/ai/gateway";
 import type { ReadingContext } from "../../src/lib/ai/prompt";
 import type { Reading } from "../../src/lib/schema/reading";
-import type { Category } from "../../src/data/cards/types";
 import { RUBRIC, buildComparison } from "./judge-compare";
 import type { RubricKey, CaseResult, JudgeReport } from "./judge-compare";
 import { assertNonEmptyCorpus } from "./lib/corpus";
+import { contextForCase, loadSnapshot, saveSnapshot } from "./lib/eval/snapshots";
+import { JUDGE_POOL, judgeKeyFor, judgeWithRotation, parseJudgeJson } from "./lib/eval/judges";
+import { evaluateReading } from "../../src/lib/ai/eval/deterministic";
+import { checkQuestion } from "../../src/lib/safety/guardrails";
+import { looksLikePromptInjection } from "../../src/lib/ai/prompt-guard";
+import { buildReadingMessage } from "../../src/lib/ai/prompt";
 
 const REPORT_DIR = path.join(process.cwd(), "scripts/qa/reports");
-const FIXTURE = path.join(process.cwd(), "scripts/qa/fixtures/golden-readings.json");
+/** `--set eval` = ชุด 100 เคสแบ่งชั้น (แทร็ก E) · ค่าเริ่มต้น = ชุดทอง 30 เคสเดิม (เทียบกับ baseline เก่าได้) */
+const FIXTURE = path.join(
+  process.cwd(),
+  process.argv.includes("--set") && process.argv[process.argv.indexOf("--set") + 1] === "eval"
+    ? "scripts/qa/fixtures/eval-cases.json"
+    : "scripts/qa/fixtures/golden-readings.json",
+);
 
-/** โมเดลผู้ตัดสิน — คนละตระกูลกับผู้ผลิตคำอ่านเสมอ */
-const JUDGE_MODEL = "gemini-3.6-flash";
+/** ผู้ตัดสินตัวแรกในรายการ (ตัวที่ใช้จริงต่อเคสอยู่ใน `judgeModel` — สลับได้เมื่อโดน 429 · lib/eval/judges.ts) */
+const JUDGE_MODEL = JUDGE_POOL[0].model;
+/** ผู้ตัดสินที่โดน 429/5xx ในรอบนี้ — พักทั้งรอบ ไม่ยิงซ้ำให้เปลืองโควตา */
+const BENCHED_JUDGES = new Set<string>();
 
 interface GoldenCase {
   id: string;
@@ -59,6 +71,8 @@ interface GoldenCase {
   cardIds: string[];
   reversed: boolean[];
   personaId?: string;
+  lang?: "th" | "en";
+  kind?: string;
 }
 
 function arg(name: string): string | undefined {
@@ -67,26 +81,8 @@ function arg(name: string): string | undefined {
 }
 
 function buildContext(gold: GoldenCase): ReadingContext | null {
-  const spread = getSpread(gold.spreadId);
-  if (!spread) return null;
-  const cards = gold.cardIds.map((id) => cardById(id)).filter(Boolean) as ReturnType<typeof cardById>[];
-  if (cards.length !== gold.cardIds.length) return null;
-
-  return {
-    personaId: gold.personaId ?? null,
-    spread,
-    category: gold.category as Category,
-    question: gold.question,
-    intake: {},
-    drawn: gold.cardIds.map((_, i) => ({
-      order: i,
-      cardIndex: i,
-      isReversed: Boolean(gold.reversed?.[i]),
-    })),
-    cards: cards as NonNullable<ReturnType<typeof cardById>>[],
-    safety: { flag: "none", block: false },
-    lang: "th",
-  } as ReadingContext;
+  // ✦ แทร็ก E: ใช้ตัวประกอบกลาง — เลขไพ่จริงในสำรับ + ภาษาของเคส (เดิม cardIndex = เลขตำแหน่ง · ไทยตายตัว)
+  return contextForCase(gold);
 }
 
 /**
@@ -96,8 +92,8 @@ function buildContext(gold: GoldenCase): ReadingContext | null {
 async function judgeReading(
   gold: GoldenCase,
   reading: Reading,
-  apiKey: string
-): Promise<CaseResult["judge"] | null> {
+  producerModel: string | null,
+): Promise<{ scores: CaseResult["judge"]; judgeModel: string } | null> {
   const cardLines = gold.cardIds
     .map((id, i) => {
       const card = cardById(id);
@@ -127,52 +123,51 @@ ${rubricLines}
 - "ยึดกับภาพไพ่จริง" 5 คะแนน = อ้างองค์ประกอบที่อยู่บนไพ่ 1909 ใบนั้นจริง · 1 คะแนน = อ้างภาพที่ไม่มีอยู่ หรือไม่อ้างเลย
 - "ลงมือทำได้จริง" 5 คะแนน = ทำได้จริงใน 24-48 ชั่วโมงและวัดผลได้ · 1 คะแนน = คำปลอบใจลอย ๆ
 - "ไม่กำกวม" 1 คะแนน = เต็มไปด้วยประโยคที่ตีความได้ทุกทาง
-- "ภาษาไทยถูกต้อง" 1 คะแนน = มีคำผิด สำนวนแปลตรงตัว หรือทับศัพท์อังกฤษเกลื่อน
+- "${gold.lang === "en" ? "ภาษาอังกฤษถูกต้องเป็นธรรมชาติ (ช่อง thaiNatural ใช้ให้คะแนนภาษาของคำอ่านนี้)" : "ภาษาไทยถูกต้อง"}" 1 คะแนน = มีคำผิด สำนวนแปลตรงตัว หรือปนภาษาอื่นเกลื่อน
 
 ตอบกลับเป็น JSON เท่านั้น รูปแบบ:
 {"onQuestion":3,"cardGrounded":3,"actionable":3,"personaFit":3,"notVague":3,"thaiNatural":3,"comment":"เหตุผลสั้น ๆ ไม่เกิน 2 ประโยค"}`;
 
-  try {
-    const res = await fetch(geminiEndpoint(JUDGE_MODEL, "generateContent"), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey,
-        ...aiGatewayHeaders({ cacheTtl: 0 }),
-      },
-      body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json", temperature: 0 },
-      }),
-    });
-    if (!res.ok) {
-      console.warn(`    ⚠️ judge HTTP ${res.status}`);
-      return null;
-    }
-    const payload: any = await res.json();
-    const text = payload?.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join("") ?? "";
-    const parsed = JSON.parse(text);
-
-    const scores: CaseResult["judge"] = { comment: parsed.comment };
-    let sum = 0;
-    let n = 0;
-    for (const r of RUBRIC) {
-      const v = Number(parsed[r.key]);
-      if (Number.isFinite(v)) {
-        scores[r.key] = v;
-        sum += v;
-        n++;
-      }
-    }
-    scores.average = n > 0 ? Math.round((sum / n) * 100) / 100 : undefined;
-    return scores;
-  } catch (err) {
-    console.warn("    ⚠️ judge ล้มเหลว:", err instanceof Error ? err.message : err);
+  const got = await judgeWithRotation(producerModel, prompt, BENCHED_JUDGES);
+  if (!got) {
+    console.warn("    ⚠️ ไม่เหลือผู้ตัดสินที่ใช้ได้ (คนละตระกูล + มีคีย์ + ไม่โดน 429)");
     return null;
   }
+  const parsed = parseJudgeJson(got.text);
+  if (!parsed) {
+    console.warn(`    ⚠️ ผู้ตัดสิน ${got.judge.model} ตอบไม่เป็น JSON`);
+    return null;
+  }
+  const scores: CaseResult["judge"] = { comment: typeof parsed.comment === "string" ? parsed.comment : undefined };
+  let sum = 0;
+  let n = 0;
+  for (const r of RUBRIC) {
+    const v = Number(parsed[r.key]);
+    if (Number.isFinite(v) && v >= 1 && v <= 5) {
+      scores[r.key] = v;
+      sum += v;
+      n++;
+    }
+  }
+  scores.average = n > 0 ? Math.round((sum / n) * 100) / 100 : undefined;
+  return { scores, judgeModel: got.judge.model };
 }
 
-async function runCase(gold: GoldenCase, judgeKey: string | null): Promise<CaseResult> {
+/**
+ * ✦ แทร็ก E: เคสที่ตัดสินที่ "ด่านขาเข้า" — ไม่ต้องเรียกโมเดล (และไม่ควร: ข้อความวิกฤต/คำสั่งแฝงห้ามออกนอกระบบ)
+ *   วิกฤต ➔ ต้องถูกบล็อก · คำสั่งแฝง ➔ ต้องโดนด่าน · PII ➔ prompt ต้องไม่มีข้อมูลดิบ (ตัวเลข/อีเมลถูกซ่อน)
+ */
+function ingressCheck(gold: GoldenCase, ctx: ReadingContext): CaseResult["ingress"] | null {
+  if (gold.kind === "crisis") return { expected: "blocked + hotline", pass: checkQuestion(gold.question, gold.lang ?? "th").block };
+  if (gold.kind === "injection") return { expected: "ingress rejects", pass: looksLikePromptInjection(gold.question) };
+  if (gold.kind === "pii") {
+    const prompt = buildReadingMessage(ctx);
+    return { expected: "PII hidden in prompt", pass: !/081-234-5678|example\.com/.test(prompt) };
+  }
+  return null;
+}
+
+async function runCase(gold: GoldenCase, judgeKey: string | null, fromVersion: string | null = null): Promise<CaseResult> {
   const base: CaseResult = {
     id: gold.id,
     category: gold.category,
@@ -185,6 +180,8 @@ async function runCase(gold: GoldenCase, judgeKey: string | null): Promise<CaseR
     thaiScore: 0,
     thaiIssues: [],
     judge: {},
+    kind: gold.kind ?? "reading",
+    lang: gold.lang ?? "th",
   };
 
   const ctx = buildContext(gold);
@@ -193,9 +190,33 @@ async function runCase(gold: GoldenCase, judgeKey: string | null): Promise<CaseR
     return base;
   }
 
+  const ingress = ingressCheck(gold, ctx);
+  if (ingress) {
+    base.ingress = ingress;
+    // วิกฤต/คำสั่งแฝง: production ไม่ส่งไปโมเดลเลย — วัดแค่ด่านขาเข้า ไม่ยิงโมเดล
+    if (gold.kind === "crisis" || gold.kind === "injection") {
+      base.ok = ingress.pass;
+      if (!ingress.pass) base.error = `ด่านขาเข้าไม่ทำงาน (${ingress.expected})`;
+      return base;
+    }
+  }
+
   const startedAt = Date.now();
   let reading: Reading | null = null;
   const providerNotes: string[] = [];
+
+  // ✦ แทร็ก E: ให้คะแนนใหม่จาก snapshot โดยไม่เรียกผู้ผลิต
+  if (fromVersion) {
+    const snap = loadSnapshot(fromVersion, gold.id);
+    if (!snap) {
+      base.error = `ไม่มี snapshot ของ ${fromVersion}/${gold.id}`;
+      return base;
+    }
+    reading = snap.reading;
+    base.model = snap.model;
+    base.provider = snap.provider === "mock" ? undefined : snap.provider;
+    base.fromSnapshot = true;
+  }
 
   /*
    * ⚠️ ต้องเดินเส้นทางเดียวกับ production เป๊ะ ๆ (Groq ➔ Gemini)
@@ -208,7 +229,7 @@ async function runCase(gold: GoldenCase, judgeKey: string | null): Promise<CaseR
    * ทั้งที่ผู้ใช้จริงได้คำอ่านครบทุกเคส ตัวเลขที่ได้จึงเป็นของ "Groq เดี่ยว"
    * ไม่ใช่ของเว็บที่ deploy อยู่ และคะแนน rubric ก็เอียงไปทางเคสที่ Groq บังเอิญตอบจบ
    */
-  if (process.env.GROQ_API_KEY) {
+  if (!reading && process.env.GROQ_API_KEY) {
     try {
       for await (const event of streamGroqReading(ctx)) {
         if (event.type === "done") {
@@ -221,7 +242,7 @@ async function runCase(gold: GoldenCase, judgeKey: string | null): Promise<CaseR
     } catch (err) {
       providerNotes.push(`Groq ล้มเหลว: ${err instanceof Error ? err.message : String(err)}`);
     }
-  } else {
+  } else if (!reading) {
     providerNotes.push("ไม่มี GROQ_API_KEY — ข้ามชั้นที่ 1 เหมือน production");
   }
 
@@ -260,6 +281,28 @@ async function runCase(gold: GoldenCase, judgeKey: string | null): Promise<CaseR
   }
   base.ok = true;
 
+  // ✦ แทร็ก E: เก็บคำตอบจริงไว้ให้คะแนนซ้ำได้โดยไม่ต้องเรียกโมเดล
+  if (!base.fromSnapshot && !process.argv.includes("--no-snapshot") && base.model) {
+    saveSnapshot({
+      caseId: gold.id,
+      promptVersion: PROMPT_VERSION,
+      model: base.model,
+      provider: base.provider ?? "gemini",
+      createdAt: new Date().toISOString(),
+      reading,
+    });
+  }
+
+  // ✦ แทร็ก E ชั้น 1: ตรวจด้วยโค้ด (ฟรี · แน่นอน)
+  const det = evaluateReading({
+    reading,
+    cards: ctx.cards,
+    reversed: ctx.drawn.map((d) => d.isReversed),
+    lang: ctx.lang ?? "th",
+    yesNoMode: ctx.spread.yesNoMode,
+  });
+  base.deterministic = { pass: det.pass, failed: det.checks.filter((c) => !c.pass).map((c) => c.id) };
+
   const consistency = checkReadingConsistency(reading, ctx.cards, {
     drawnCount: ctx.drawn.length,
     yesNoMode: ctx.spread.yesNoMode,
@@ -271,8 +314,11 @@ async function runCase(gold: GoldenCase, judgeKey: string | null): Promise<CaseR
   base.thaiIssues = thai.issues.map((i) => i.code);
 
   if (judgeKey) {
-    const judged = await judgeReading(gold, reading, judgeKey);
-    if (judged) base.judge = judged;
+    const judged = await judgeReading(gold, reading, base.model);
+    if (judged) {
+      base.judge = judged.scores;
+      base.judgeModel = judged.judgeModel;
+    }
   }
 
   return base;
@@ -397,7 +443,9 @@ function loadEnvIfPresent() {
 async function main() {
   loadEnvIfPresent();
   const groqKey = process.env.GROQ_API_KEY;
-  const judgeKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || null;
+  // ผู้ตัดสินใช้ได้ถ้ามีคีย์ของผู้ให้บริการใดก็ได้ในรายการ (แยกคีย์ได้ด้วย JUDGE_GEMINI_API_KEY / JUDGE_GROQ_API_KEY)
+  const judgeKey = JUDGE_POOL.some((j) => judgeKeyFor(j.provider).key) ? "rotation" : null;
+  const fromVersion = arg("from-snapshots") ?? null;
 
   const isDryRun = process.argv.includes("--dry-run");
   if (isDryRun) {
@@ -411,7 +459,7 @@ async function main() {
     return;
   }
 
-  if (!groqKey) {
+  if (!groqKey && !fromVersion) {
     console.log("\n🔑 ยังรันไม่ได้ — สคริปต์นี้ต้องยิงเข้าโมเดลจริง");
     console.log("   ตั้งค่าก่อนรัน:");
     console.log("     export GROQ_API_KEY=<คีย์ของนักพัฒนา>        # ผู้ผลิตคำอ่าน (บังคับ)");
@@ -456,14 +504,14 @@ async function main() {
       await new Promise((r) => setTimeout(r, delayArg));
     }
     process.stdout.write(`  [${i + 1}/${cases.length}] ${gold.id} (${gold.category}/${gold.spreadId}) ... `);
-    let result = await runCase(gold, judgeKey);
+    let result = await runCase(gold, judgeKey, fromVersion);
 
     let retries = 0;
-    while (!result.ok && !result.fallback && retries < 3) {
+    while (!result.ok && !result.fallback && !result.fromSnapshot && !result.ingress && retries < 3) {
       retries++;
       process.stdout.write(`⚠️ ลองใหม่รอบที่ ${retries} (รอ 35s) ... `);
       await new Promise((r) => setTimeout(r, 35000));
-      result = await runCase(gold, judgeKey);
+      result = await runCase(gold, judgeKey, fromVersion);
     }
 
     results.push(result);

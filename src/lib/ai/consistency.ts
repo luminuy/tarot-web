@@ -18,6 +18,7 @@ import { DECK, type TarotCard } from "@/data/cards";
 import { CARD_VISUAL_LORE } from "@/data/cards/visual-lore";
 import type { Reading } from "@/lib/schema/reading";
 import type { PastReadingSnapshot } from "@/lib/ai/karmic";
+import { collectStrings, detectPromptLeak } from "@/lib/ai/leak-guard";
 
 export interface ConsistencyIssue {
   code:
@@ -29,7 +30,8 @@ export interface ConsistencyIssue {
     | "ADVICE_MISSING_MINDFUL"
     | "CARD_READING_TOO_SHORT"
     | "CARD_READING_TOO_LONG"
-    | "VISUAL_ANCHOR_UNGROUNDED";
+    | "VISUAL_ANCHOR_UNGROUNDED"
+    | "PROMPT_LEAK";
   message: string;
   fatal: boolean;
 }
@@ -83,8 +85,27 @@ function escapeRegex(str: string): string {
  * สกัดรายชื่อไพ่ทาโรต์ที่มีการอ้างอิงชัดเจนในข้อความ
  * โดยป้องกันผลบวกลวง (False Positives) จากคำสามัญในภาษาไทย
  */
+/** ส่วนท้ายของชื่อไทยที่ยาวกว่า (เช่น "นี" ของจักรพรรดินี) — ใช้ทำ negative lookahead */
+const THAI_LONGER_SUFFIXES = new Map<string, string[]>(
+  DECK.map((c) => [
+    c.id,
+    DECK.filter((o) => o.id !== c.id && o.nameTh.startsWith(c.nameTh)).map((o) => o.nameTh.slice(c.nameTh.length)),
+  ]),
+);
+
+function thaiLongerNameGuard(card: TarotCard): string {
+  const suffixes = THAI_LONGER_SUFFIXES.get(card.id) ?? [];
+  return suffixes.length ? `(?!${suffixes.map(escapeRegex).join("|")})` : "";
+}
+
 export function extractReferencedCards(text: string): Array<{ card: TarotCard; rawMatch: string }> {
   if (!text || !text.trim()) return [];
+  /*
+   * ฉายาแบบ Golden Dawn ของอัศวิน ("Prince of the Chariot of the Winds") อยู่ในข้อมูลโหราศาสตร์ที่ส่งเข้า prompt
+   * คำอ่านภาษาอังกฤษที่ทวนฉายานี้เคยถูกนับเป็นไพ่ The Chariot (FOREIGN_CARD · fatal) ➔ สลับโมเดลทิ้งโดยไม่จำเป็น
+   * (พบจากชุดวัดแทร็ก E: eval-010 อัศวินดาบกลับหัว) — ตัดฉายาออกก่อนจับชื่อไพ่
+   */
+  text = text.replace(/\bChariots? of (?:the )?(?:Winds?|Waters?|Fire|Earth)\b/gi, " ");
 
   const matches: Array<{ card: TarotCard; rawMatch: string }> = [];
   const seenCardIds = new Set<string>();
@@ -96,8 +117,11 @@ export function extractReferencedCards(text: string): Array<{ card: TarotCard; r
     let matchStr = "";
 
     // 1. นำหน้าด้วยคำว่า "ไพ่" (เช่น "ไพ่หอคอย", "ไพ่ The Tower", "ไพ่ดวงอาทิตย์", "ไพ่ 3 ดาบ")
+    // ⚠️ ชื่อที่เป็นคำนำหน้าของชื่ออื่น ("จักรพรรดิ" ⊂ "จักรพรรดินี" · "นักบวช" ⊂ "นักบวชหญิง") ต้องไม่จับชื่อยาว
+    //    เดิมคำอ่านที่พูดถึงจักรพรรดินีถูกนับว่าอ้าง "จักรพรรดิ" ที่ไม่ได้เปิด (fatal) ➔ สลับโมเดลทิ้ง (พบจากชุดวัดแทร็ก E)
+    const thaiName = escapeRegex(card.nameTh) + thaiLongerNameGuard(card);
     const thaiCardRegex = new RegExp(
-      "(?:ไพ่|ไพ่ใบนี้คือ|ไพ่ใบที่\\s*\\d+|ไพ่\\s*(?:ของ|แห่ง)?)\\s*" + escapeRegex(card.nameTh),
+      "(?:ไพ่|ไพ่ใบนี้คือ|ไพ่ใบที่\\s*\\d+|ไพ่\\s*(?:ของ|แห่ง)?)\\s*" + thaiName,
       "gi"
     );
     if (thaiCardRegex.test(text)) {
@@ -118,7 +142,15 @@ export function extractReferencedCards(text: string): Array<{ card: TarotCard; r
     // 3. ภาษาอังกฤษหลายคำ (Multi-word English Card Name) พร้อม Word Boundary (เช่น "The Tower", "The Sun", "Three of Swords")
     if (!matched) {
       if (card.nameEn.includes(" ")) {
-        const enRegex = new RegExp("\\b" + escapeRegex(card.nameEn) + "\\b", "i");
+        /*
+         * ไพ่ Major แบบ "The X" ต้องเป็นตัวพิมพ์ใหญ่ตามชื่อไพ่ ("The World" / "the World") — สำนวนอังกฤษทั่วไป
+         * อย่าง "hold the world in your hands" · "the sun came out" เคยถูกนับเป็นไพ่นอกชุด (fatal) ทั้งที่ไม่ใช่
+         * (พบจากชุดวัดแทร็ก E) · ไพ่ Minor ("Three of Swords") ยังเทียบแบบไม่สนตัวพิมพ์เหมือนเดิม
+         */
+        const theName = /^The\s+(.+)$/.exec(card.nameEn);
+        const enRegex = theName
+          ? new RegExp("\\b[Tt]he\\s+" + escapeRegex(theName[1]) + "\\b")
+          : new RegExp("\\b" + escapeRegex(card.nameEn) + "\\b", "i");
         if (enRegex.test(text)) {
           matched = true;
           matchStr = card.nameEn;
@@ -168,6 +200,12 @@ export function checkReadingConsistency(
 ): ConsistencyResult {
   const issues: ConsistencyIssue[] = [];
   const expectedCount = opts?.drawnCount ?? drawnCards.length;
+
+  // ── 0. ด่านขาออก: คำอ่านต้องไม่เผยท่อนกติกาของระบบ (แทร็ก S · leak-guard.ts) ──
+  const leak = detectPromptLeak(collectStrings(reading).join("\n"));
+  if (leak) {
+    issues.push({ code: "PROMPT_LEAK", message: `คำอ่านมีท่อนกติกาของระบบ ("${leak}")`, fatal: true });
+  }
 
   // ── 1. ตรวจสอบตำแหน่งไพ่ (MISSING_POSITION & DUPLICATE_POSITION) ──
   const positionsPresent = new Set<number>();

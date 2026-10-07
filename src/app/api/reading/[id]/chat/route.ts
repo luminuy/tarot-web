@@ -9,6 +9,8 @@ import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
 import { looksLikePromptInjection, sanitizePromptValue } from "@/lib/ai/prompt-guard";
+import { redactPii } from "@/lib/security/pii";
+import { detectPromptLeak } from "@/lib/ai/leak-guard";
 
 import { formatCardLoreForPrompt } from "@/data/cards/visual-lore";
 import { formatPriorReadingForChat } from "@/lib/ai/chat-context";
@@ -21,6 +23,8 @@ import { recordEvent, recordEvents } from "@/lib/stats/record";
 import { sanitizeTarotText, stripThinkingTags } from "@/lib/ai/language";
 import { buildOfflineChatReply } from "@/lib/ai/chat-fallback";
 import { getMembersOnlyChatMessage, isSignInRequired } from "@/lib/entitlement/signin-gate";
+import { resolveRecordSpread } from "@/lib/tarot/record-spread";
+import { CUSTOM_SPREAD_ID } from "@/lib/tarot/custom-spread";
 
 export const runtime = "nodejs";
 
@@ -144,6 +148,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   let limit = { allowed: true, releaseConcurrency: () => {} } as ReturnType<typeof checkRateLimit>;
+  /** 🛡️ แทร็ก S: ตัวตนในบัญชีต้นทุน AI ต่อวัน (null = คำขอทดสอบที่ได้รับสิทธิ์) */
+  let chatCostSubj: string | null = null;
   if (!privileged) {
     const clientIp = getClientIdentifier(request);
 
@@ -161,6 +167,22 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         return null;
       }
     })();
+
+    // 🛡️ แทร็ก S: พยายามฉีดคำสั่งซ้ำ ➔ พัก AI ของตัวตนนั้น 1 ชม. (ตรวจก่อนกินเพดานถี่)
+    const { bodyHasInjection, cooldownMessage, isInInjectionCooldown, noteInjectionAttempt } = await import(
+      "@/lib/security/abuse-guard"
+    );
+    if (bodyHasInjection((rawBody as { message?: unknown } | null)?.message)) {
+      await noteInjectionAttempt(clientIp, chatUserId, "chat");
+    }
+    if (await isInInjectionCooldown(clientIp, chatUserId)) {
+      return NextResponse.json({ error: cooldownMessage(initialLang === "en" ? "en" : "th") }, { status: 429 });
+    }
+    const { costSubject, isUserTokenCapReached, tokenCapMessage } = await import("@/lib/security/cost-ledger");
+    chatCostSubj = costSubject(chatUserId, clientIp);
+    if (await isUserTokenCapReached(chatCostSubj, chatUserId ? "member" : "guest")) {
+      return NextResponse.json({ error: tokenCapMessage(initialLang === "en" ? "en" : "th") }, { status: 429 });
+    }
 
     const edge = await consumeEdgeRateLimits([
       { key: edgeRateLimitKey("chat:ip", clientIp), config: { max: 30, windowSec: 60 } },
@@ -205,7 +227,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
 
-    const userQuestion = parsed.data.message;
+    // 🛡️ แทร็ก S: ซ่อนเบอร์/อีเมล/เลขบัตรก่อนส่งให้ผู้ให้บริการโมเดล (คำถามแชทไม่ผ่าน sanitizePromptValue)
+    const userQuestion = redactPii(parsed.data.message).text;
     /*
      * 📏 T-38: ประวัติที่จะ replay ถูกกรองและจำกัดงบตั้งแต่ตรงนี้จุดเดียว
      * ทั้งสองเส้นทางผู้ให้บริการใช้ชุดเดียวกัน — ของเดิมต่างคนต่าง `.slice(-20)` และ
@@ -270,7 +293,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const isEnglish = activeLang === "en";
 
     const personaId = record.personaId || "warm";
-    const spread = getSpread(record.spreadId || "single");
+    const spread = (record.spreadId === CUSTOM_SPREAD_ID ? resolveRecordSpread(record) : getSpread(record.spreadId || "single"));
     const overrideDoc = await getContentOverrides();
     const cards = (record.drawn || [])
       .map((d) => {
@@ -329,7 +352,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
 ## Master Tarot Consultation Dialogue (1-on-1 Private Session)
 The seeker just drew these cards with you:
-• Initial Question: "${record.question || "Life Path & Guidance"}"
+• Initial Question: "${sanitizePromptValue(record.question, 500) || "Life Path & Guidance"}"
 • Spread: "${spread?.nameEn || spread?.nameTh || "General"}"
 • Drawn Cards:
 ${cards.join("\n")}
@@ -360,7 +383,7 @@ ${guardSection}
 
 ## บริบทการสนทนาส่วนตัวแบบ 1-on-1 (Master Tarot Consultation Dialogue)
 ผู้ถามเพิ่งเปิดไพ่ชุดนี้กับคุณ:
-• คำถามตั้งต้น: "${record.question || "ภาพรวมชีวิต"}"
+• คำถามตั้งต้น: "${sanitizePromptValue(record.question, 500) || "ภาพรวมชีวิต"}"
 • ผังที่ใช้: "${spread?.nameTh || "ทั่วไป"}"
 • ไพ่ที่หยิบได้จริงในรอบนี้:
 ${cards.join("\n")}
@@ -431,8 +454,12 @@ ${guardSection}
 
         if (groqResult && groqResult.reply) {
           const cleanReply = sanitizeTarotText(stripThinkingTags(groqResult.reply));
-          if (cleanReply) {
+          // 🛡️ ด่านขาออก: คำตอบที่เผยกติกาของระบบ = ทิ้ง ไปลองผู้ให้บริการถัดไป/คำตอบสำรอง
+          const leakedGroq = cleanReply ? detectPromptLeak(cleanReply) : null;
+          if (leakedGroq) recordEvent("ai_prompt_leak:chat");
+          if (cleanReply && !leakedGroq) {
             await recordAiCall(1);
+            await noteChatCost(chatCostSubj, systemInstruction, history, userQuestion, cleanReply);
             return NextResponse.json({
               reply: cleanReply,
               provider: "groq",
@@ -514,7 +541,12 @@ ${guardSection}
             const replyText = extractGeminiAnswer(data);
             if (replyText) {
               const cleanReply = sanitizeTarotText(replyText);
+              if (detectPromptLeak(cleanReply)) {
+                recordEvent("ai_prompt_leak:chat");
+                continue;
+              }
               await recordAiCall(1);
+              await noteChatCost(chatCostSubj, systemInstruction, history, userQuestion, cleanReply);
               return NextResponse.json({
                 reply: cleanReply,
                 provider: "gemini",
@@ -571,4 +603,18 @@ ${guardSection}
   } finally {
     limit.releaseConcurrency();
   }
+}
+
+/** 🛡️ แทร็ก S: บันทึกต้นทุนแชท — ผู้ให้บริการไม่ส่ง usage กลับในเส้นนี้ จึงประมาณจากจำนวนอักขระ */
+async function noteChatCost(
+  subject: string | null,
+  systemInstruction: string,
+  history: Array<{ text: string }>,
+  question: string,
+  reply: string,
+): Promise<void> {
+  if (!subject) return;
+  const { estimateTokens, recordAiUsage } = await import("@/lib/security/cost-ledger");
+  const inChars = systemInstruction.length + question.length + history.reduce((n, h) => n + h.text.length, 0);
+  await recordAiUsage(subject, estimateTokens(inChars), estimateTokens(reply.length)).catch(() => undefined);
 }

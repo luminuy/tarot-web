@@ -44,10 +44,13 @@ export function isAiGatewayEnabled(): boolean {
  *     0        = ห้ามแคชเด็ดขาด (ใช้กับคำอ่านไพ่ / แชท — ต้องสด + กันหักโควตาพลาด)
  *     > 0      = แคชได้ N วินาที (ใช้กับ safety classifier / สรุปรายเดือน)
  *     undefined = ตามค่า default ของ gateway
+ * - `cf-aig-collect-log: false` (`collectLog: false`) = ห้าม gateway เก็บ log คำขอนี้ (ทั้ง prompt/คำตอบ/เมทาดาทา)
+ *     ใช้กับข้อมูลลูกค้าของแม่หมอใน Reader Studio — ข้อตกลง DPA สัญญาว่า SeerTarot ไม่เก็บ prompt
+ *     (docs/legal/READER_STUDIO_DPA_DRAFT.md ข้อ 7 · ค่าเริ่มต้นของ gateway คือเก็บ log)
  *
  * คืน object ว่างถ้าไม่ได้เปิด gateway — spread เข้าไปได้เลยไม่ต้องเช็ค
  */
-export function aiGatewayHeaders(opts: { cacheTtl?: number } = {}): Record<string, string> {
+export function aiGatewayHeaders(opts: { cacheTtl?: number; collectLog?: boolean } = {}): Record<string, string> {
   if (!isAiGatewayEnabled()) return {};
   const headers: Record<string, string> = {};
   const token = process.env.CF_AI_GATEWAY_TOKEN?.trim();
@@ -55,6 +58,7 @@ export function aiGatewayHeaders(opts: { cacheTtl?: number } = {}): Record<strin
   if (typeof opts.cacheTtl === "number" && opts.cacheTtl >= 0) {
     headers["cf-aig-cache-ttl"] = String(Math.floor(opts.cacheTtl));
   }
+  if (opts.collectLog === false) headers["cf-aig-collect-log"] = "false";
   return headers;
 }
 

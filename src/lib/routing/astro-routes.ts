@@ -25,7 +25,7 @@
  * ℹ️ ไม่มีใครลิงก์ไป `/404` ตรง ๆ อยู่แล้ว — ที่ต้องประกาศไว้เพราะด่าน
  * `test-astro-routes.ts` เทียบรายการนี้กับหน้าที่บิลด์ออกมาจริงทุกครั้ง
  */
-const ASTRO_EXACT_ROUTES = ["/", "/404", "/account"] as const;
+const ASTRO_EXACT_ROUTES = ["/", "/404", "/account", "/journal"] as const;
 
 /** เส้นทาง (ฝั่งไทย) ที่ตัวมันเองและลูกทุกใบถูกเรนเดอร์ด้วย Astro */
 export const ASTRO_ROUTE_PREFIXES = [
@@ -40,6 +40,8 @@ export const ASTRO_ROUTE_PREFIXES = [
   "/daily",
   "/love",
   "/pick-a-card",
+  /* ❓ หน้าคำถาม 20 หน้า + หน้ารวม (REFLECTION_JOURNAL_PLAN 1.11) */
+  "/questions",
   /* หน้าดูดวงรายผัง `/read/<ผัง>` — ⚠️ ไม่ชน `/reading` (เทียบด้วย `/read/` มีทับท้าย) และไม่ชน `/readers` ของ Next */
   "/read",
 ] as const;

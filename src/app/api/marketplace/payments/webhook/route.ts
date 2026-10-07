@@ -11,6 +11,7 @@ import { updatePaymentStatus } from "@/lib/marketplace/payments.repo";
 import { handleFailedConsultationPayment, settleConsultationPayment } from "@/lib/marketplace/booking.repo";
 import { getAppDB } from "@/lib/platform/db";
 import { getCreditPackageById } from "@/lib/entitlement/packages";
+import { grantStudioPass, isStudioPassOrder } from "@/lib/studio/plan";
 import { grantBonus } from "@/lib/entitlement/entitlement";
 import {
   decidePurchaseGrant,
@@ -132,6 +133,16 @@ export async function POST(request: Request) {
         providerRef: chargeId,
         webhookLog: rawBody,
       });
+
+      // 🎫 บัตรผ่านสตูดิโอแม่หมอ (`stp_...`) — ให้วันครั้งเดียวต่อคำสั่งซื้อ · เขียนไม่ลง = 500 ให้ Stripe ยิงซ้ำ
+      const passOrderId = orderIdOfPaymentRow(paymentRow);
+      if (isStudioPassOrder(passOrderId)) {
+        const granted = await grantStudioPass(passOrderId!);
+        if (granted === "failed") {
+          return NextResponse.json({ error: "บันทึกแพ็กเกจ AI ช่วยเขียนไม่สำเร็จ", orderId: passOrderId }, { status: 500 });
+        }
+        return NextResponse.json({ received: true, status: "paid", studioPass: granted });
+      }
 
       // 💎 เติมโควตาเปิดไพ่ให้ทันทีที่การชำระเงินได้รับการยืนยันจากเกตเวย์
       // ---------------------------------------------------------------------

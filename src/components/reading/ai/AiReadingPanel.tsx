@@ -3,6 +3,10 @@
 import type { ReadingState } from "@/components/home/flow-reading";
 import { FallbackNotice } from "@/components/reading/FallbackNotice";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import type { ReadingBasis } from "@/lib/tarot/explain-types";
+import { CardWhyPanel } from "@/components/reading/insight/CardWhyPanel";
+import { ReadingBasisPanel } from "@/components/reading/insight/ReadingBasisPanel";
+import { explainUrl } from "@/components/reading/insight/use-reading-explain";
 
 /**
  * ✦ คำอ่านของแม่หมอบนหน้าเฉพาะทาง (1–3 ใบ)
@@ -25,6 +29,7 @@ export function AiReadingPanel({
   onRetry,
   cardLabels,
   title,
+  insight,
 }: {
   state: ReadingState;
   isEn: boolean;
@@ -32,9 +37,25 @@ export function AiReadingPanel({
   /** ชื่อตำแหน่งของไพ่แต่ละใบตามลำดับ — ไม่ส่งมาก็ได้ (ผังใบเดียวไม่ต้องมีป้ายตำแหน่ง) */
   cardLabels?: readonly string[];
   title?: string;
+  /**
+   * ✦ ส่ง controller ของ `useAiReading` มา = เปิดแผง "ทำไมแม่หมออ่านแบบนี้" ใต้แต่ละใบ + "คำอ่านนี้ประกอบจาก"
+   * (REFLECTION_JOURNAL_PLAN 1.2 · 1.6) — ไม่เรียก AI เพิ่ม · ไพ่ไม่ครบ/นอกสำรับ = ไม่แสดง (กฎเหล็กข้อ 14)
+   */
+  insight?: {
+    rawDrawn: ReadonlyArray<{ order: number; cardIndex: number; isReversed: boolean }>;
+    basis: ReadingBasis | null;
+    lastRequest: { spreadId: string; category: string } | null;
+  };
 }) {
   const reading = state.reading;
   const cardReadings = reading?.cards ?? [];
+  const insightUrl =
+    insight?.lastRequest &&
+    state.status === "done" &&
+    insight.rawDrawn.length > 0 &&
+    insight.rawDrawn.every((d) => Number.isInteger(d.cardIndex) && d.cardIndex >= 0 && d.cardIndex <= 77)
+      ? explainUrl(insight.lastRequest.spreadId, insight.rawDrawn, insight.lastRequest.category, isEn)
+      : null;
 
   /* สตรีมสะดุด — ของที่มาถึงแล้วยังอยู่ ผู้ใช้กดอ่านใหม่ได้ */
   if (state.error) {
@@ -100,6 +121,7 @@ export function AiReadingPanel({
                 {card.reading}
               </p>
             )}
+            {insightUrl && card.reading && <CardWhyPanel url={insightUrl} order={card.position} isEnglish={isEn} />}
           </div>
         );
       })}
@@ -119,6 +141,18 @@ export function AiReadingPanel({
             {reading.summary}
           </p>
         </div>
+      )}
+
+      {insightUrl && insight && (
+        <ReadingBasisPanel
+          url={insightUrl}
+          cardCount={insight.rawDrawn.length}
+          positionNames={cardLabels ? insight.rawDrawn.map((d) => cardLabels[d.order]).filter((x): x is string => Boolean(x)) : []}
+          category={insight.lastRequest?.category ?? "general"}
+          basis={insight.basis}
+          hasQuestion
+          isEnglish={isEn}
+        />
       )}
 
       {reading?.advice && reading.advice.length > 0 && (

@@ -43,6 +43,7 @@ docs/
     └── plans/
 <!-- PLANS_TREE_START · สร้างด้วย npm run docs:index — ห้ามแก้มือ -->
         ├── MASTER_PLAN_2026-09-06.md               # 🚧 🗺️ แผนแม่บทรวม — ทุกงานที่ค้างอยู่
+        ├── REFLECTION_JOURNAL_PLAN_2026-10-05.md   # 🚧 🪞 แผนออกแบบ 14 ระบบ — จากเว็บดูดวงสู่เครื่องมือสะท้อนตัวเอง (สมุดดวง · ความเชื่อมโยงไพ่ · หลักฐานคำอ่าน · พิธีเช้าเย็น · PWA · หน้าคำถาม · Reader Studio · ความปลอดภัย AI · วัดคุณภาพ AI)
         ├── IOS_APP_PLAN_2026-09-29.md              # 🚧 📱 แผนออกแบบระบบ — แอป SeerTarot บน iPhone (iOS App Store)
         ├── HANDOFF_OMNI_YESNO_2026-09-06.md        # 🚧 🎯 แผนส่งต่องาน 3 ชิ้น — Yes/No 78 หน้า · Omnichannel · Daily Digest
         ├── HANDOFF_AI_ACCURACY_THAI_2026-09-07.md  # 🚧 🧠 แผนยกระดับ "ความแม่น" ของคำอ่าน + "ภาษาไทยที่ถูกต้อง" ของแม่หมอ AI
@@ -118,11 +119,11 @@ docs/
 
 | คำสั่ง | หน้าที่และวัตถุประสงค์ |
 | :--- | :--- |
-| `npm run repo:verify` | **ตรวจครบทั้ง 82 ด่านในคำสั่งเดียว** (Typecheck, ไพ่ 78 ใบ, ผัง 26 แบบ, Provably-Fair, D1, Failover, PDPA ฯลฯ) |
+| `npm run repo:verify` | **ตรวจครบทั้ง 93 ด่านในคำสั่งเดียว** (Typecheck, ไพ่ 78 ใบ, ผัง 26 แบบ, Provably-Fair, D1, Failover, PDPA ฯลฯ) |
 | `npm run typecheck` | ตรวจสอบความถูกต้องของ TypeScript Types (ต้องผ่าน 0 Errors) |
 | `npm run agent:status` | ตรวจสอบว่ามี Agent ตัวไหนกำลังทำงานหรือล็อคไฟล์อยู่หรือไม่ |
 | `npm run agent:lock` | ล็อคไฟล์ก่อนเริ่มทำงานป้องกันการชนกันของ AI หลายตัว |
 | `npm run agent:unlock` | ปลดล็อคไฟล์เมื่อทำงานเสร็จสมบูรณ์ |
-| `npm run pr:auto` | ตรวจครบ 82 ด่าน ➔ Push ➔ เปิด PR ➔ Auto-Merge ➔ Deploy Cloudflare Workers ในคำสั่งเดียว |
+| `npm run pr:auto` | ตรวจครบ 93 ด่าน ➔ Push ➔ เปิด PR ➔ Auto-Merge ➔ Deploy Cloudflare Workers ในคำสั่งเดียว |
 | `npm run git:tidy` | เก็บกวาดกิ่งงานที่ Merge ไปแล้วทั้งในเครื่องและบน Remote ตามกฎ Zero Leftovers |
 | `npm run dev` | รันเซิร์ฟเวอร์จำลองสำหรับพัฒนา (Next.js Local Server) |

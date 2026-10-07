@@ -333,3 +333,66 @@ export function dailyDigestText(params: {
     `ยกเลิกรับดวงประจำวัน: ${params.unsubUrl}`,
   ].join("\n");
 }
+
+/**
+ * ✦ อีเมล "นัดกลับมาเช็ก" (REFLECTION_JOURNAL_PLAN 1.4) — ผู้ใช้ตั้งนัดเองรายคำอ่าน
+ * ⚠️ ห้ามมีคำถามเต็มหรือบันทึกส่วนตัวของผู้ใช้ (กติกาความเป็นส่วนตัวข้อ 5 — อีเมลอาจถูกคนอื่นเห็น)
+ *    ใช้ "ชื่อเรื่อง" ที่ผู้ใช้ตั้งเองเท่านั้น ไม่มีชื่อเรื่อง = ระบุแค่ว่าถามไว้เมื่อกี่วันก่อน
+ */
+export function checkinHtml(params: {
+  name?: string;
+  threadTitle?: string;
+  daysAgo: number;
+  cardName?: string;
+  link: string;
+  lang: "th" | "en";
+}): string {
+  const isEn = params.lang === "en";
+  const greeting = params.name
+    ? isEn
+      ? `Hello ${escapeHtml(params.name)}`
+      : `สวัสดีคุณ ${escapeHtml(params.name)}`
+    : isEn
+      ? "Hello"
+      : "สวัสดีค่ะ";
+  const about = params.threadTitle
+    ? isEn
+      ? `about “${escapeHtml(params.threadTitle)}”`
+      : `เรื่อง “${escapeHtml(params.threadTitle)}”`
+    : isEn
+      ? "about something on your mind"
+      : "เรื่องหนึ่งที่อยู่ในใจคุณ";
+  const card = params.cardName
+    ? isEn
+      ? ` and drew <strong>${escapeHtml(params.cardName)}</strong>`
+      : ` และได้ไพ่ <strong>${escapeHtml(params.cardName)}</strong>`
+    : "";
+  const content = `
+    <h1>${isEn ? "How did it turn out?" : "เรื่องนั้นเป็นอย่างไรบ้าง"}</h1>
+    <p>${greeting},</p>
+    <p>${isEn ? `${params.daysAgo} days ago you asked the cards ${about}${card}.` : `${params.daysAgo} วันก่อน คุณถามไพ่${about}${card}`}</p>
+    <p>${isEn ? "Take a minute to write down what actually happened — it helps you see your own patterns, and helps your reader remember." : "ลองใช้เวลาสักนาทีเขียนว่าเกิดอะไรขึ้นจริง — ช่วยให้คุณเห็นเส้นทางของตัวเอง และแม่หมอจะจำเรื่องของคุณได้ตรงขึ้น"}</p>
+    <div class="btn-container">
+      <a href="${escapeHtml(params.link)}" class="btn">${isEn ? "Write what happened" : "เขียนสิ่งที่เกิดขึ้น"}</a>
+    </div>
+    <p style="font-size:12px;color:#6F5B4A;margin-top:24px;text-align:center;">
+      ${isEn ? "You're receiving this because you set this check-in yourself. You can cancel it anytime from your journal." : "คุณได้รับอีเมลนี้เพราะตั้งนัดกลับมาเช็กไว้เอง — ยกเลิกนัดได้ทุกเมื่อในสมุดดวงของคุณ"}
+    </p>
+  `;
+  return baseLayout(content, isEn ? "How did it turn out? — SeerTarot" : "เรื่องนั้นเป็นอย่างไรบ้าง — SeerTarot", params.lang);
+}
+
+export function checkinText(params: { name?: string; threadTitle?: string; daysAgo: number; cardName?: string; link: string; lang: "th" | "en" }): string {
+  const isEn = params.lang === "en";
+  const about = params.threadTitle ? (isEn ? ` about "${params.threadTitle}"` : `เรื่อง "${params.threadTitle}"`) : "";
+  const card = params.cardName ? (isEn ? ` and drew ${params.cardName}` : ` และได้ไพ่ ${params.cardName}`) : "";
+  return [
+    isEn ? "How did it turn out? — SeerTarot" : "เรื่องนั้นเป็นอย่างไรบ้าง — SeerTarot",
+    "",
+    isEn ? `${params.daysAgo} days ago you asked the cards${about}${card}.` : `${params.daysAgo} วันก่อน คุณถามไพ่${about}${card}`,
+    isEn ? "Write what actually happened:" : "เขียนสิ่งที่เกิดขึ้นจริง:",
+    params.link,
+    "",
+    isEn ? "You set this check-in yourself — cancel it anytime in your journal." : "คุณตั้งนัดนี้ไว้เอง — ยกเลิกได้ทุกเมื่อในสมุดดวง",
+  ].join("\n");
+}

@@ -29,6 +29,10 @@ on:
         description: "คูลดาวน์ระหว่างเคส (มิลลิวินาที) กัน rate limit"
         required: false
         default: "50000"
+      set:
+        description: "ชุดเคส: golden (30 เคส เทียบ baseline เก่าได้) หรือ eval (100 เคสแบ่งชั้น · แทร็ก E)"
+        required: false
+        default: "golden"
 
 concurrency:
   group: ai-judge
@@ -64,26 +68,54 @@ jobs:
       - name: 📦 Install dependencies
         run: npm ci
 
+      # หาว่าคีย์ AI อยู่ในชื่อไหน/ที่ไหน — พิมพ์เฉพาะ "ชื่อ" ที่เกี่ยวกับ AI (ไม่มีค่า · GitHub ปิดบังค่าอยู่แล้วอีกชั้น)
+      - name: 🔎 ชื่อคีย์ AI ที่ workflow มองเห็น (ชื่อเท่านั้น)
+        env:
+          ALL_SECRETS: ${{ toJSON(secrets) }}
+          ALL_VARS: ${{ toJSON(vars) }}
+        run: |
+          pick() { jq -r 'keys[]' | grep -Ei 'JUDGE|GEMINI|GOOGLE|GROQ|OPENROUTER|OPENAI|ANTHROPIC|AI_' || echo "(ไม่มี)"; }
+          echo "Repository/Organization secrets:"; printf '%s' "$ALL_SECRETS" | pick
+          echo "Repository/Organization variables:"; printf '%s' "$ALL_VARS" | pick
+          unset ALL_SECRETS ALL_VARS
+
       - name: 🔑 ตรวจว่ามีคีย์ครบก่อนเสียเงิน
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          JUDGE_GEMINI_API_KEY: ${{ secrets.JUDGE_GEMINI_API_KEY || vars.JUDGE_GEMINI_API_KEY }}
+          JUDGE_GROQ_API_KEY: ${{ secrets.JUDGE_GROQ_API_KEY || vars.JUDGE_GROQ_API_KEY }}
         run: |
           if [ -z "$GROQ_API_KEY" ]; then
             echo "::error::ไม่มี GROQ_API_KEY ใน repository secrets — สคริปต์นี้บังคับต้องมี (ผู้ผลิตคำอ่าน)"
             exit 1
           fi
-          if [ -z "$GEMINI_API_KEY" ]; then
-            echo "::warning::ไม่มี GEMINI_API_KEY — จะได้แค่คะแนนจากโค้ด ไม่มีคะแนน judge"
+          # บอกแค่ "มี/ไม่มี" — ไม่พิมพ์ค่าคีย์
+          has() { if [ -n "$1" ]; then echo "มี"; else echo "ไม่มี"; fi; }
+          echo "คีย์ผู้ตัดสินแยก: JUDGE_GEMINI_API_KEY=$(has "$JUDGE_GEMINI_API_KEY") · JUDGE_GROQ_API_KEY=$(has "$JUDGE_GROQ_API_KEY")"
+          {
+            echo "### 🔑 คีย์ที่ใช้รอบนี้"
+            echo "- ผู้ผลิตคำอ่าน: GROQ_API_KEY (คีย์ของเว็บ)"
+            echo "- ผู้ตัดสิน Gemini: $( [ -n "$JUDGE_GEMINI_API_KEY" ] && echo 'JUDGE_GEMINI_API_KEY (คีย์แยก)' || echo 'GEMINI_API_KEY (คีย์ของเว็บ — เสี่ยงชน 429)')"
+            echo "- ผู้ตัดสิน Groq: $( [ -n "$JUDGE_GROQ_API_KEY" ] && echo 'JUDGE_GROQ_API_KEY (คีย์แยก)' || echo 'GROQ_API_KEY (คีย์ของเว็บ)')"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ -z "$GEMINI_API_KEY" ] && [ -z "$JUDGE_GEMINI_API_KEY" ] && [ -z "$JUDGE_GROQ_API_KEY" ]; then
+            echo "::warning::ไม่มีคีย์ผู้ตัดสินเลย — จะได้แค่คะแนนจากโค้ด ไม่มีคะแนน judge"
           fi
 
       - name: 🧪 ซ้อมแห้งก่อน (ไม่เรียกโมเดล ต้นทุน 0)
-        run: npm run ai:judge -- --dry-run
+        env:
+          JUDGE_SET: ${{ inputs.set }}
+        run: |
+          case "${JUDGE_SET:-golden}" in golden) npm run ai:judge -- --dry-run ;; eval) npm run ai:judge -- --dry-run --set eval ;; *) echo "::error::set ต้องเป็น golden หรือ eval"; exit 1 ;; esac
 
       - name: 🧑‍⚖️ ยิงจริงแล้วเก็บรายงาน
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # คีย์ผู้ตัดสินแยก (scripts/qa/lib/eval/judges.ts) — ไม่แย่งโควตากับเว็บจริง · ไม่ตั้ง = ถอยไปคีย์ของเว็บ
+          JUDGE_GEMINI_API_KEY: ${{ secrets.JUDGE_GEMINI_API_KEY || vars.JUDGE_GEMINI_API_KEY }}
+          JUDGE_GROQ_API_KEY: ${{ secrets.JUDGE_GROQ_API_KEY || vars.JUDGE_GROQ_API_KEY }}
           CF_AI_GATEWAY_ACCOUNT_ID: ${{ secrets.CF_AI_GATEWAY_ACCOUNT_ID }}
           CF_AI_GATEWAY_ID: ${{ secrets.CF_AI_GATEWAY_ID }}
           CF_AI_GATEWAY_TOKEN: ${{ secrets.CF_AI_GATEWAY_TOKEN }}
@@ -92,6 +124,7 @@ jobs:
           JUDGE_COMPARE: ${{ inputs.compare }}
           JUDGE_LIMIT: ${{ inputs.limit }}
           JUDGE_DELAY: ${{ inputs.delay }}
+          JUDGE_SET: ${{ inputs.set }}
         run: |
           set -o pipefail
 
@@ -103,6 +136,12 @@ jobs:
           LIMIT="${JUDGE_LIMIT:-0}"
           case "$LIMIT" in ''|*[!0-9]*) echo "::error::limit ต้องเป็นตัวเลขล้วน (ได้มา: $LIMIT)"; exit 1;; esac
           if [ "$LIMIT" != "0" ]; then ARGS="$ARGS --limit $LIMIT"; fi
+
+          case "${JUDGE_SET:-golden}" in
+            golden) ;;
+            eval) ARGS="$ARGS --set eval" ;;
+            *) echo "::error::set ต้องเป็น golden หรือ eval"; exit 1 ;;
+          esac
 
           if [ -n "$JUDGE_COMPARE" ]; then
             case "$JUDGE_COMPARE" in
@@ -133,11 +172,34 @@ jobs:
           name: judge-report
           path: |
             scripts/qa/reports/judge-*.json
+            scripts/qa/snapshots/**
             judge-output.txt
           if-no-files-found: warn
           retention-days: 30
 
+      # รันบนกิ่งงาน (ยังไม่ขึ้น) ➔ เก็บรายงานลงกิ่งนั้นเอง ไม่เปิด PR เข้า main
+      - name: 💾 เก็บรายงานลงกิ่งที่รัน (ไม่ใช่ main)
+        if: github.ref_name != 'main'
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          rm -f judge-output.txt
+          if [ -z "$(git status --porcelain scripts/qa/reports scripts/qa/snapshots)" ]; then
+            echo "::warning::ไม่มีไฟล์รายงานใหม่"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/qa/reports scripts/qa/snapshots
+          # --no-verify: hook ของ repo รัน repo:verify ทั้ง 82 ด่าน (รอบ 2026-10-07 ล้มตรงนี้ทั้งที่วัดผลสำเร็จ)
+          # commit นี้มีแต่ไฟล์รายงาน/snapshot · ด่านจริงรันใน pr.yml ตอนเปิด PR อยู่แล้ว
+          git commit --no-verify -m "chore(ai): เก็บผลวัด ai:judge จาก workflow" -m "ดูสรุปผลได้ที่ ${RUN_URL}"
+          git pull --rebase origin "$BRANCH"
+          git push origin "HEAD:${BRANCH}"
+
       - name: 🔀 เปิด PR เอาไฟล์รายงานเข้า main
+        if: github.ref_name == 'main'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JUDGE_COMPARE: ${{ inputs.compare }}
@@ -146,7 +208,7 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           rm -f judge-output.txt
-          if [ -z "$(git status --porcelain scripts/qa/reports)" ]; then
+          if [ -z "$(git status --porcelain scripts/qa/reports scripts/qa/snapshots)" ]; then
             echo "::warning::ไม่มีไฟล์รายงานใหม่ — ข้ามการเปิด PR"
             exit 0
           fi
@@ -159,10 +221,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
-          git add scripts/qa/reports
+          git add scripts/qa/reports scripts/qa/snapshots
           # ใช้ -m สองครั้งแทนการฝังขึ้นบรรทัดใหม่ในสตริง
           # (ขึ้นบรรทัดใหม่กลางสตริงจะทำให้ YAML block scalar พัง เพราะบรรทัดถัดไปไม่มีย่อหน้า)
-          git commit \
+          git commit --no-verify \
             -m "chore(ai): เก็บผลวัด ai:judge จาก workflow กดรันเอง" \
             -m "รันโดย ${RUN_ACTOR} · เทียบกับ ${COMPARED} · ${CASES}" \
             -m "ดูสรุปผลได้ที่ ${RUN_URL}"

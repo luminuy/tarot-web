@@ -29,6 +29,10 @@ export async function DELETE(request: Request) {
 
     // 1. Delete all reading journal entries for this user
     await deleteAllJournal(user.id);
+    // 1b. ข้อมูลของฟีเจอร์ใหม่ทั้งหมด (เส้นเรื่อง · Push · ผังของฉัน · ฯลฯ) — ทะเบียนเดียว `lib/privacy/user-data.ts`
+    const { eraseExtraUserData } = await import("@/lib/privacy/user-data");
+    const erased = await eraseExtraUserData(user.id);
+    if (erased.failed.length > 0) console.error("[Account Delete] ลบข้อมูลบางส่วนไม่สำเร็จ:", erased.failed);
 
     // 2. Invalidate all active tokens for this user
     await invalidateUserTokens(user.id, "verify");

@@ -8,6 +8,7 @@ import {
   getSpreadsForTopic,
 } from "@/data/spread-topics";
 import type { ReactNode } from "react";
+import { QUESTIONS } from "@/data/questions";
 import { buildAlternates, localizedUrl, noindexAlternates } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { getCategoryCardImage } from "@/lib/media/og-card-art";
@@ -87,6 +88,8 @@ export function SpreadTopicContent({
   const isEnglish = locale === "en";
   const spreads = getSpreadsForTopic(topic);
   const allTopics = Object.values(SPREAD_TOPICS);
+  // ❓ หน้าคำถามในหมวดนี้ (แทร็ก Q) — ลิงก์ลงไปยังชั้นลูก ให้บอตเห็นโครงหมวด ➔ คำถาม
+  const topicQuestions = QUESTIONS.filter((q) => q.topic === topic.slug);
   const currentPath = `/spreads/topic/${topic.slug}`;
   const currentUrl = localizedUrl(currentPath, locale);
 
@@ -143,6 +146,7 @@ export function SpreadTopicContent({
   const shownBands = [
     "guide",
     "spreads",
+    ...(topicQuestions.length > 0 ? ["questions"] : []),
     ...(!isEnglish && topic.alsoFitsTh && topic.alsoFitsTh.length > 0 ? ["also"] : []),
     ...(faqs.length > 0 ? ["faq"] : []),
     "others",
@@ -257,6 +261,23 @@ export function SpreadTopicContent({
           </div>
           {list}
         </section>
+
+        {topicQuestions.length > 0 && (
+          <section className={`${bandClass("questions")} space-y-3`}>
+            <h2 className="text-base sm:text-lg font-bold font-serif-th text-ink"><ThaiPhrases>
+              {isEnglish ? `Common ${topicName.toLowerCase()} questions` : `คำถามที่คนถามบ่อย หมวด${topic.nameTh}`}
+            </ThaiPhrases></h2>
+            <ul className="grid gap-2 sm:grid-cols-2">
+              {topicQuestions.map((q) => (
+                <li key={q.slug}>
+                  <Link href={`/questions/${q.slug}`} className="block glass-tile !rounded-xl p-3 text-sm font-serif-th text-ink hover:text-gold-ink">
+                    {q[isEnglish ? "en" : "th"].question}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* 🔗 ผังทั่วไปที่ใช้ถามเรื่องหมวดนี้ได้ — ข้อความลิงก์ = คำที่คนค้นจริง (ดู `alsoFitsTh`) */}
         {!isEnglish && topic.alsoFitsTh && topic.alsoFitsTh.length > 0 && (

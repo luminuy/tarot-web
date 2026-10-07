@@ -94,3 +94,25 @@ jobs:
             echo "::error::รอบนี้ล้มเหลว (HTTP $HTTP_CODE) — ดูรายละเอียดในผลลัพธ์ด้านบน"
             exit 1
           fi
+
+      # ✦ ขั้นที่สอง — ส่งเตือน "นัดกลับมาเช็ก" ที่ถึงเวลาแล้ว (REFLECTION_JOURNAL_PLAN 1.4)
+      # เส้นทาง/ความลับ/เหตุผลเรื่อง workers.dev เหมือนขั้นแรกทุกอย่าง · ล้ม = ไม่กระทบ digest ที่ส่งไปแล้ว
+      - name: ยิงเส้น cron ของนัดกลับมาเช็ก
+        # digest ล้มต้องไม่ทำให้นัดที่ผู้ใช้ตั้งไว้เองไม่ถูกส่ง
+        if: always()
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          HTTP_CODE=$(curl -sS -o checkins.json -w "%{http_code}" \
+            -X POST "https://tarot-web.bankjack10452.workers.dev/api/cron/checkins" \
+            -A "SeerTarot-Cron/1.0" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            --max-time 300)
+          echo "HTTP $HTTP_CODE"
+          cat checkins.json || true
+          echo ""
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::ส่งเตือนนัดกลับมาเช็กไม่สำเร็จ (HTTP $HTTP_CODE)"
+            exit 1
+          fi
+

@@ -199,6 +199,70 @@ npx wrangler secret put CRON_SECRET
 > **เอนจินคำอ่าน**: GROQ + GEMINI ตั้งครบ → Tier 1 Groq Qwen3-27B ทำงาน (`src/lib/ai/groq.ts` · fallback → Gemini `src/lib/ai/gemini.ts`) · เฝ้าเมตริก `ai_foreign_trip` / `ai_groq_failover` ใน `/admin`
 > **AI Gateway / Turnstile**: ตั้งครบแล้ว ไม่ใช่รายการค้างอีกต่อไป
 
+### 🔔 Web Push (`VAPID_*`) — ✅ ตั้งแล้ว 2026-10-07 ผ่าน GitHub Actions (run 37568597441)
+
+workflow `.github/workflows/setup-vapid.yml` สร้างคู่กุญแจใน runner แล้วส่งเข้า `wrangler secret put` ตรง ๆ
+— กุญแจลับไม่ถูกพิมพ์ลง log และไม่มีใครต้องเห็น · ใช้ `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID` ชุดเดียวกับ deploy
+- ทำงานเองหนึ่งครั้งเมื่อไฟล์ workflow ถูก push · ทำซ้ำได้ปลอดภัย: มี `VAPID_PRIVATE_KEY` บน Worker แล้ว = ข้าม
+- หมุนกุญแจ: GitHub ➔ Actions ➔ "🔑 Setup Web Push keys (VAPID)" ➔ Run workflow ➔ ติ๊ก `rotate` (ผู้ใช้ทุกคนต้องกดเปิดการเตือนใหม่)
+- `VAPID_SUBJECT` = `mailto:support@seertarot.net` (เปลี่ยนได้ตอนกด Run workflow)
+- ทางสำรองในเครื่อง: `npx tsx scripts/gen-vapid.ts` แล้ว `npx wrangler secret put VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT`
+- workflow `push-reminders.yml` (ทุกชั่วโมง) ใช้ `CRON_SECRET` ชุดเดียวกับ digest — ไม่ต้องตั้งเพิ่ม
+
+ยังไม่ตั้ง = ปุ่ม "เปิดการเตือน" ถูกซ่อนเอง (`/api/push/public-key` ตอบ `enabled: false`) · อีเมลนัดเช็กยังทำงานตามปกติ
+⚠️ iPhone รับแจ้งเตือนได้เฉพาะเมื่อเพิ่มเว็บไปยังหน้าจอโฮมแล้ว (iOS 16.4+) — หน้าเว็บบอกผู้ใช้เองแล้ว
+
+### 🗄️ migration ของแผนสมุดดวง 0022–0029 — **ไม่ต้องทำเอง**
+
+`deploy.yml` รัน `npm run db:migrate` ใส่ D1 remote ให้ทุกครั้งก่อน deploy (wrangler จำว่าไฟล์ไหน apply แล้ว ข้ามให้เอง)
+จึงลงพร้อมโค้ดอัตโนมัติเมื่อ merge กิ่งนี้เข้า `main` · ต้องการแค่ `CLOUDFLARE_API_TOKEN` มีสิทธิ์ D1:Edit (มีอยู่แล้วเพราะ deploy ก่อนหน้าใช้ขั้นนี้)
+
+### 🛡️ ตั้งได้ภายหลัง (มีค่าเริ่มต้นแล้ว) — เพดานโทเคน AI ต่อคนต่อวัน (แทร็ก S · 2026-10-06)
+
+ไม่ตั้ง = ใช้ค่าเริ่มต้น · ตั้งเป็นตัวเลขจำนวนโทเคนต่อวัน (เข้า+ออก)
+| ตัวแปร | ค่าเริ่มต้น | ใช้กับ |
+|---|---|---|
+| `AI_GUEST_DAILY_TOKENS` | 60000 | ผู้เยี่ยมชม (นับต่อซับเน็ตแบบแฮช) |
+| `AI_MEMBER_DAILY_TOKENS` | 300000 | สมาชิกฟรี |
+| `AI_PAID_DAILY_TOKENS` | 1500000 | ผู้ถือรอบที่ซื้อ/ไม่จำกัด |
+| `AI_READER_DAILY_TOKENS` | 800000 | แม่หมอใน Reader Studio (ร่างคำอ่าน) |
+| `STUDIO_DRAFTS_PER_DAY` | 40 | จำนวนครั้งที่แม่หมอกด "ให้ AI ช่วยเกลา" ต่อวัน |
+
+### ⚖️ รอผู้ตัดสินแยกโควตา — `JUDGE_GEMINI_API_KEY` / `JUDGE_GROQ_API_KEY` (แทร็ก E · 2026-10-06)
+
+ใช้เฉพาะสคริปต์ในเครื่อง/CI (`npm run ai:judge` · `ai:judge:ab` · `ai:judge:calibrate`) — **ไม่ต้องตั้งบน Worker**
+- คีย์แยกจากเว็บจริง = ผู้ตัดสินไม่แย่งโควตา 429 กับผู้ใช้ (ต้นเหตุที่ baseline ค้างใน HANDOFF_AI_JUDGE_BASELINE)
+- ไม่ตั้ง = ใช้ `GEMINI_API_KEY` / `GROQ_API_KEY` เดิม และสลับไปผู้ตัดสินอีกตระกูลอัตโนมัติเมื่อโดน 429/5xx
+- ตั้งใน `.env.local` หรือ GitHub Actions secret ถ้าจะรันใน CI
+
+### 🪶 ปิดไว้จนกว่าทนายรับรอง — Reader Studio (`READER_STUDIO_ENABLED` · `STUDIO_VIEW_SECRET` · 2026-10-06)
+
+ไม่ตั้ง = สตูดิโอแม่หมอและลิงก์ `/r/*` ตอบ 404 ทั้งหมด (ตั้งใจ — ยังไม่มีข้อตกลง PDPA ฉบับจริง)
+1. ให้ทนายความไทยรับรองร่าง `docs/legal/READER_STUDIO_DPA_DRAFT.md` (`draft-2026-10-07-r2`) และ `docs/legal/READER_TERMS_DRAFT.md` (เงื่อนไขการใช้บริการสำหรับแม่หมอ `draft-2026-10-07-r1`) ➔ ตัดคำว่า `draft-` ออกจาก `STUDIO_DPA_VERSION` และให้ `STUDIO_DPA_POINTS_TH` ใน `src/lib/studio/dpa.ts` ตรงกับภาคผนวก 6 (ด่านตรวจ)
+   - ✅ เติมแล้ว (2026-10-07): อีเมล support@seertarot.net · เพดานความรับผิด = เงินที่ได้รับจากแม่หมอใน 12 เดือน · ศาลไทยที่มีเขตอำนาจ · โอนส่วนแบ่งรายเดือนภายในวันที่ 15
+   - ⏸️ **ยังต้องเติมก่อนรับแม่หมอภายนอกคนแรก**: ชื่อ ที่อยู่ เลขผู้เสียภาษีของผู้ให้บริการ (หัวสัญญาทั้งสองฉบับ + ประกาศความเป็นส่วนตัว) — ตอนนี้แม่หมอมีแค่เจ้าของคนเดียว
+   - ⏸️ ยังไม่มีหน้าให้อ่านข้อตกลงฉบับเต็มจากหน้ายอมรับ (B-7) และยังไม่มีหน้าให้แม่หมอกดยอมรับเงื่อนไขการใช้บริการในแผงแม่หมอ
+   - เปิดการยืนยันตัวตนสองขั้นตอนในบัญชี Cloudflare, GitHub, Google AI Studio และ Stripe (ภาคผนวก 2 อ้างถึง)
+1.2 **ทำข้อตกลงประมวลผลข้อมูล (DPA) กับ Cloudflare** — ตรวจแล้ว (2026-10-07): ข้อกำหนด Self-Serve ของ Cloudflare นำ DPA มาใช้เฉพาะข้อมูลของคนใน EU/UK และตาม CCPA **ข้อมูลลูกค้าคนไทยจึงไม่อยู่ใต้ DPA โดยอัตโนมัติ**
+   ขอทำ/ยอมรับ DPA กับ Cloudflare สำหรับบัญชีนี้ (ติดต่อฝ่ายขาย/ฝ่ายกฎหมายของ Cloudflare ตามหน้า https://www.cloudflare.com/cloudflare-customer-dpa/) แล้วจดวันที่ลงในภาคผนวก 3 ของร่าง DPA
+   ทำไม่ได้ = ข้อตกลงยังใช้ได้ด้วยฐาน ม.28(3) (จำเป็นต่อการให้บริการ) แต่ไม่มีชั้นคุ้มครองตามสัญญาของ Cloudflare — ภาคผนวก 3 เขียนสถานะนี้ตามจริงไว้แล้ว
+1.5 **เปิดการเรียบเรียงด้วย AI ในสตูดิโอ** — ต้องใช้ Gemini แบบ **เสียเงิน** เท่านั้น (แบบฟรี Google นำข้อมูลไปพัฒนาผลิตภัณฑ์และอาจให้คนอ่าน ซึ่งขัดข้อตกลงข้อ 7):
+   ตามข้อกำหนด Gemini API (มีผล 23 มี.ค. 2569) คีย์จะเป็น Paid Service **เฉพาะเมื่อโปรเจกต์ Google Cloud ที่ออกคีย์มีบัญชีเรียกเก็บเงินที่ใช้งานอยู่** และเมื่อนั้น DPA ของ Google มีผลเอง ไม่ต้องลงนามแยก
+   Google AI Studio ➔ API keys ➔ ดูว่าคีย์ใน `GEMINI_API_KEY` อยู่โปรเจกต์ไหน ➔ Google Cloud Console ➔ Billing ➔ ผูกบัญชีเรียกเก็บเงินกับโปรเจกต์นั้น (สถานะต้องเป็น Active) ➔ ตั้ง `npx wrangler secret put STUDIO_AI_PAID_TIER` = `1`
+   ไม่ตั้ง = ปุ่ม "ให้ AI ช่วยเกลา" ประกอบร่างจากโน้ตของแม่หมอเองโดยไม่ส่งอะไรให้ AI
+2. รัน migration `0027_reader_studio.sql` (อยู่ในชุดข้างบนแล้ว)
+3. ตั้ง secret:
+   ```bash
+   npx wrangler secret put STUDIO_VIEW_SECRET     # สุ่ม ≥ 32 ตัว: openssl rand -base64 48 (ไม่ตั้ง = ใช้ TAROT_SESSION_SECRET)
+   npx wrangler secret put READER_STUDIO_ENABLED  # 1
+   ```
+4. ✅ **แพ็กเกจ AI ช่วยเขียน 30 วัน** (ในโค้ดเรียก studio pass) (จ่ายครั้งเดียว ไม่ตัดเงินอัตโนมัติ) — **แก้ราคาที่แผงแอดมิน แท็บ "หมอดูพาร์ทเนอร์"** ไม่ต้อง deploy
+   - ลำดับ: ราคาเฉพาะแม่หมอคนนั้น ➔ ราคากลางที่แอดมินตั้ง ➔ ค่าตั้งต้น **299 บาท** ใน `wrangler.jsonc` → `vars.STUDIO_PRO_PRICE_THB`
+   - เปลี่ยนราคามีผลกับการกดซื้อครั้งถัดไป · คำสั่งซื้อที่เริ่มแล้วตรวจยอดตามราคาเดิม · **ห้าม** `wrangler secret put STUDIO_PRO_PRICE_THB` (ชื่อชนกับ var ➔ deploy ล้ม)
+   - ปุ่มซื้อโผล่เมื่อสตูดิโอเปิด (`READER_STUDIO_ENABLED`) เท่านั้น
+   - โควตาร่างต่อวันของผู้ถือบัตร (ไม่บังคับ · ค่าเริ่ม 300): `npx wrangler secret put STUDIO_PRO_DRAFTS_PER_DAY`
+   ใช้ webhook Stripe เส้นเดิม (`/api/marketplace/payments/webhook`) — ไม่ต้องเพิ่ม event · คืนเงินเต็มในแดชบอร์ด = หักวันคืนอัตโนมัติ
+
 ### ⏳ รอตั้งเพิ่ม — Vectorize / R2 (Wave 3)
 
 **Vectorize** (binding อยู่ใน `wrangler.jsonc` แล้ว — deploy รอบถัดไปทำงานเลย):

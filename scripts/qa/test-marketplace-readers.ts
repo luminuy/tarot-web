@@ -126,6 +126,26 @@ async function runTest() {
   }
   console.log("  ✓ 7. Queue Tickets: คำนวณลำดับคิวและบันทึกตั๋วสำเร็จ (#1 และ #2)");
 
+  // ม.26: ความยินยอมเรื่องข้อมูลอ่อนไหวเป็นช่องแยก — ไม่ติ๊ก = null · ติ๊ก = เก็บเวลา และอ่านกลับจากฐานข้อมูลได้ (migrations/0029)
+  const { getQueueTicketById: readTicket } = await import("../../src/lib/marketplace/queue.repo");
+  if (ticket1.sensitiveConsentAt !== null || (await readTicket(ticket2.id))?.sensitiveConsentAt !== null) {
+    throw new Error("❌ ตั๋วที่ไม่ได้ติ๊กยินยอมเรื่องข้อมูลอ่อนไหว ต้องเก็บเป็น null");
+  }
+  const sensitiveTicket = await createQueueTicket({
+    readerId: created.id,
+    kind: "walkup",
+    customerRef: "cust_client_device_sensitive",
+    nickname: "มายด์",
+    question: "ช่วงนี้สุขภาพไม่ค่อยดี งานจะไปต่อได้ไหม",
+    sensitiveConsent: true,
+  });
+  const sensitiveRow = await readTicket(sensitiveTicket.id);
+  if (typeof sensitiveRow?.sensitiveConsentAt !== "number" || sensitiveRow.sensitiveConsentAt <= 0) {
+    throw new Error(`❌ ตั๋วที่ติ๊กยินยอมเรื่องข้อมูลอ่อนไหวต้องเก็บเวลา: ${JSON.stringify(sensitiveRow?.sensitiveConsentAt)}`);
+  }
+  await updateTicketStatus(sensitiveTicket.id, "cancelled", created.id);
+  console.log("  ✓ 7.1 ยินยอมเรื่องข้อมูลอ่อนไหว (ม.26): ไม่ติ๊ก = ไม่มีหลักฐาน · ติ๊ก = เก็บเวลาที่ยินยอม");
+
   // ── M5: Reader Queue Lifecycle ───────────────────────────────────────────
   const readerTickets = await listReaderQueueTickets(created.id);
   if (readerTickets.length < 2) {

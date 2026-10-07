@@ -381,6 +381,7 @@ export function OneCardRitual({
 
             {/* คำอ่านของแม่หมอ — สตรีมสดจาก AI ทุกครั้ง */}
             <AiReadingPanel
+              insight={oracle}
               state={oracle.state}
               isEn={isEn}
               onRetry={() => {

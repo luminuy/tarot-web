@@ -11,6 +11,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { REFLECTION_INITIAL, reflectionReducer } from "../../src/components/home/flow-reflection";
 import {
   overlayReducer,
   OVERLAY_INITIAL,
@@ -117,6 +118,26 @@ if (!fs.existsSync(FLOW)) {
     "หน้าต่างลอยใช้ตัวลดกลาง ไม่ได้กลับไปใช้ useState",
     flowSrc.includes("overlayReducer") && !/useState\(false\);\s*\n\s*const \[isHistoryOpen/.test(flowSrc),
   );
+}
+
+// ── 6. สถานะประกอบจากแผนสมุดดวง (flow-reflection.ts) ──
+{
+  const basis = { cards: [] } as never;
+  let st = reflectionReducer(REFLECTION_INITIAL, { type: "set", key: "moodBefore", value: 2 });
+  st = reflectionReducer(st, { type: "set", key: "moodAfter", value: 4 });
+  st = reflectionReducer(st, { type: "set", key: "savedJournalId", value: "j1" });
+  st = reflectionReducer(st, { type: "set", key: "chosenThread", value: { id: "th_x", title: "งาน" } });
+  st = reflectionReducer(st, { type: "set", key: "openThreads", value: [{ id: "th_x" } as never] });
+  const started = reflectionReducer(st, { type: "readingStarted", spreadId: "three-card", category: "love" });
+  check("เริ่มอ่าน ➔ ล้างใจหลังอ่าน + id บันทึกของรอบก่อน", started.moodAfter === null && started.savedJournalId === null && started.moodBefore === 2);
+  check("เริ่มอ่าน ➔ ตั้งบริบทคำอ่านใหม่ (basis ว่าง)", started.readingInsight?.spreadId === "three-card" && started.readingInsight.basis === null);
+  check("เฟรม basis เขียนลงบริบทที่มีอยู่", reflectionReducer(started, { type: "basis", basis }).readingInsight?.basis === basis);
+  check("เฟรม basis ที่ไม่มีบริบท ➔ ไม่สร้างขึ้นเอง", reflectionReducer(REFLECTION_INITIAL, { type: "basis", basis }).readingInsight === null);
+  const round = reflectionReducer(st, { type: "newRound" });
+  check("เริ่มรอบใหม่ ➔ ล้างใจก่อน/หลัง · id บันทึก · เรื่องที่เลือก พร้อมกัน", round.moodBefore === null && round.moodAfter === null && round.savedJournalId === null && round.chosenThread === null);
+  check("เริ่มรอบใหม่ ➔ รายการเส้นเรื่องคงไว้", round.openThreads.length === 1);
+  check("ตั้งค่าแบบฟังก์ชันได้เหมือน useState", reflectionReducer(st, { type: "set", key: "openThreads", value: (prev) => [...prev, { id: "th_y" } as never] }).openThreads.length === 2);
+  check("ตั้งค่าเดิม ➔ state เดิม (ไม่เรนเดอร์ซ้ำ)", reflectionReducer(st, { type: "set", key: "moodBefore", value: 2 }) === st);
 }
 
 console.log(`\n📊 สรุป: ผ่าน ${pass} ข้อ | ล้มเหลว ${fail} ข้อ\n`);

@@ -62,6 +62,16 @@ export const STORAGE_KEYS = {
   personaRatings: "persona_ratings",
   /** แคชไพ่ประจำวันในเครื่อง (localStorage — 0ms LCP) */
   dailyCard: "tarot_daily_card",
+  /** มุมมองที่เปิดค้างไว้ในหน้าสมุดดวง (รายการ · ปฏิทิน · ภาพรวม) */
+  journalView: "tarot_journal_view_v1",
+  /** การแก้สมุดดวงที่ส่งขึ้นเซิร์ฟเวอร์ไม่สำเร็จ (ออฟไลน์) — ส่งซ้ำเมื่อกลับมาออนไลน์ */
+  journalPendingPatches: "tarot_journal_pending_v1",
+  /** ✦ ผังที่สร้างเองของผู้เยี่ยมชม (ยังไม่ล็อกอิน) — อยู่ในเครื่องนี้เท่านั้น สูงสุด 10 ผัง */
+  customSpreadsLocal: "tarot_custom_spreads_v1",
+  /** ✦ ผังที่กด "ใช้ผังนี้" จากหน้าสร้างผัง — ส่งต่อให้พิธีเปิดไพ่ครั้งเดียวแล้วลบทิ้ง (sessionStorage) */
+  customSpreadLaunch: "tarot_custom_spread_launch_v1",
+  /** ✦ คำถามที่ตั้งไว้ให้จากหน้าคำถาม `/questions/*` — ส่งต่อให้พิธีเปิดไพ่ครั้งเดียวแล้วลบทิ้ง (sessionStorage) */
+  questionPrefill: "tarot_question_prefill_v1",
 
   /* ── คีย์ที่มีผู้ใช้จริงอยู่ก่อนมีทะเบียนนี้ — ห้ามเปลี่ยนชื่อ ── */
   /** ชื่อเล่นที่ผู้ใช้เคยกรอกไว้ */

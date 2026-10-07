@@ -33,6 +33,7 @@ import { CardGroupBody } from "@/app/_shared/pages/card-group";
 import type { CardGroupInfo } from "@/data/cards/group-seo";
 import { LocaleProvider } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/types";
+import { QuestionPageContent, QuestionsHubContent } from "@/app/_shared/pages/question-page";
 
 /**
  * 📄 เปลือกบาง ๆ ของ "เนื้อหาหน้า" ที่ Astro เรนเดอร์เป็น HTML **โดยไม่ hydrate**
@@ -321,6 +322,32 @@ export function PricingBodyRoot({ locale, plans }: { locale: Locale; plans: Reac
   return (
     <LocaleProvider forcedLocale={locale}>
       <PricingBody locale={locale} plans={plans} />
+    </LocaleProvider>
+  );
+}
+
+/* ── ❓ หน้าคำถาม (REFLECTION_JOURNAL_PLAN 1.11 · แทร็ก Q) — SSR ล้วน ไม่มี JS ยกเว้นกล่อง "ถามเลย" ── */
+
+export function QuestionPageContentRoot({
+  question,
+  locale,
+  askBox,
+}: {
+  question: import("@/data/questions").QuestionPage;
+  locale: Locale;
+  askBox: ReactNode;
+}) {
+  return (
+    <LocaleProvider forcedLocale={locale}>
+      <QuestionPageContent question={question} locale={locale} askBox={askBox} />
+    </LocaleProvider>
+  );
+}
+
+export function QuestionsHubContentRoot({ locale }: { locale: Locale }) {
+  return (
+    <LocaleProvider forcedLocale={locale}>
+      <QuestionsHubContent locale={locale} />
     </LocaleProvider>
   );
 }

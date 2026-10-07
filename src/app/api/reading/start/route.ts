@@ -3,6 +3,11 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getSpread } from "@/data/spreads";
+import { CUSTOM_SPREAD_ID, isCustomStandard, type CustomSpreadInput } from "@/lib/tarot/custom-spread";
+import { parseCustomSpread } from "@/lib/tarot/custom-spread.server";
+import { detectPiiKinds, piiNotice } from "@/lib/security/pii";
+import { bodyHasInjection, cooldownMessage, isInInjectionCooldown, noteInjectionAttempt } from "@/lib/security/abuse-guard";
+import { getSessionUser } from "@/lib/auth/session";
 import { checkQuestion, getCrisisMessage } from "@/lib/safety/guardrails";
 import { assessCrisisRisk } from "@/lib/safety/ai-classifier";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
@@ -46,6 +51,18 @@ const BodySchema = z.object({
   // ผูกไว้กับ record ตั้งแต่ /start เพื่อให้ตรึงก่อนการจั่วทุกกรณี และกันกรณีที่คำขอ
   // /shuffle สองอันมาพร้อมกันแล้วได้เมล็ดคนละตัวจนจั่วได้ไพ่คนละชุด
   clientSeed: z.string().min(1).max(4096).optional(),
+  /**
+   * ✦ ถามต่อจากเส้นเรื่องเดิม (REFLECTION_JOURNAL_PLAN 1.4) — ความทรงจำแม่หมอจะดึงคำอ่านในเรื่องเดียวกัน
+   * ไม่มีผลกับการจั่ว · `/read` ค้นด้วย user_id ของเซสชันเสมอ จึงอ่านเรื่องของคนอื่นไม่ได้แม้จะเดารหัสถูก
+   */
+  threadId: z.string().regex(/^th_[0-9a-f-]{36}$/).optional(),
+  /**
+   * ✦ ผังที่ออกแบบเอง (REFLECTION_JOURNAL_PLAN 1.8) — ใช้คู่กับ `spreadId = "custom"` เท่านั้น
+   * ตรวจละเอียดด้วย `parseCustomSpread` ด้านล่าง (รูปทรง · ความยาว · คำสั่งแฝง · แม่แบบเรขาคณิต)
+   * `savedId` = ผังที่บันทึกไว้ในบัญชี — ใช้นับครั้งที่ใช้เท่านั้น ตำแหน่งที่อ่านคือที่ส่งมาและผ่านด่านรอบนี้
+   */
+  custom: z.unknown().optional(),
+  customSavedId: z.string().regex(/^cs_[0-9a-f-]{36}$/).optional(),
   /*
    * ✦ ราศีที่ผู้ใช้บอกไว้ในหน้าไพ่ประจำราศี (ไม่บังคับ) — รับเฉพาะ slug ราศีที่มีจริง
    * เป็นแค่บริบทให้แม่หมอ ไม่มีผลกับการจั่วไพ่เลย (ไม่แตะ seed · ไม่แตะ derivation)
@@ -134,6 +151,21 @@ export async function POST(request: Request) {
   const rawBody = await request.json().catch(() => null);
   const parsed = BodySchema.safeParse(rawBody);
   const isEnInitial = (rawBody && typeof rawBody === "object" && (rawBody as { lang?: string }).lang === "en") || false;
+
+  /*
+   * 🛡️ แทร็ก S: พยายามฉีดคำสั่งซ้ำ ➔ พักการเปิดไพ่ของตัวตนนั้น 1 ชม. (abuse-guard.ts)
+   * นับเฉพาะคำขอที่โดนด่านคำสั่งแฝง · ตรวจช่วงพักก่อนทำงานหนักทุกอย่าง
+   */
+  const abuseIp = getClientIdentifier(request);
+  const abuseUserId = privileged ? null : (await getSessionUser().catch(() => null))?.id ?? null;
+  if (!privileged && bodyHasInjection(rawBody)) {
+    const tripped = await noteInjectionAttempt(abuseIp, abuseUserId, "start");
+    if (tripped) return NextResponse.json({ error: cooldownMessage(isEnInitial ? "en" : "th") }, { status: 429 });
+  }
+  if (!privileged && (await isInInjectionCooldown(abuseIp, abuseUserId))) {
+    return NextResponse.json({ error: cooldownMessage(isEnInitial ? "en" : "th") }, { status: 429 });
+  }
+
   if (!parsed.success) {
     return NextResponse.json(
       { error: isEnInitial ? "Invalid request data" : "ข้อมูลที่ส่งมาไม่ถูกต้อง" },
@@ -142,7 +174,19 @@ export async function POST(request: Request) {
   }
 
   const { spreadId, question, personaId, nickname, category, intake } = parsed.data;
-  const spread = getSpread(spreadId);
+  let customSpread: CustomSpreadInput | undefined;
+  let spread = getSpread(spreadId);
+  if (spreadId === CUSTOM_SPREAD_ID) {
+    const custom = parseCustomSpread(parsed.data.custom, parsed.data.lang);
+    if (!custom.ok) return NextResponse.json({ error: custom.error }, { status: 400 });
+    customSpread = custom.input;
+    spread = custom.spread;
+  } else if (parsed.data.custom !== undefined) {
+    return NextResponse.json(
+      { error: parsed.data.lang === "en" ? "Invalid request data" : "ข้อมูลที่ส่งมาไม่ถูกต้อง" },
+      { status: 400 },
+    );
+  }
   if (!spread) {
     return NextResponse.json(
       { error: parsed.data.lang === "en" ? "Spread layout not found" : "ไม่พบรูปแบบการวางไพ่นี้" },
@@ -198,6 +242,8 @@ export async function POST(request: Request) {
     intake.feeling,
     intake.hoped,
     nickname,
+    // ตำแหน่งที่ผู้ใช้เขียนเองก็เป็นข้อความของผู้ใช้ — ต้องผ่านด่านความปลอดภัยเดียวกับคำถาม
+    ...(customSpread ? [customSpread.name, ...customSpread.positions.flatMap((p) => [p.nameTh, p.meaning])] : []),
   ]
     .filter(Boolean)
     .join(" ");
@@ -219,6 +265,8 @@ export async function POST(request: Request) {
   let guestGidToPin: string | null = null;
   /** รอบนี้ใช้สิทธิ์ "ลองผังใหญ่ฟรี 1 ครั้ง" — ปักไว้ใน ReadingRecord ให้ /read หักเป็นแถว trial */
   let usePremiumTrial = false;
+  // ผังที่สร้างเอง: 1–3 ใบนับเหมือนผังมาตรฐาน · 4–7 ใบนับเหมือนผังใหญ่ (สร้างผังเองไม่ใช่ช่องหลบโควตา)
+  const isStandardRequest = customSpread ? isCustomStandard(spread) : isStandardSpread(spreadId, spread.positions.length);
   if (!privileged) {
     const { isEntitlementEnabled } = await import("@/lib/entitlement/flag");
     const { getViewer } = await import("@/lib/entitlement/viewer");
@@ -241,7 +289,7 @@ export async function POST(request: Request) {
       const ent = await getEntitlement(viewer);
       // ✦ ลองผังใหญ่ / แม่หมอพิเศษฟรี 1 ครั้ง: สมาชิกที่ยังไม่ได้ซื้อและยังไม่เคยใช้สิทธิ์ทดลอง
       //    รอบทดลองไม่หักโควตารายวัน จึงผ่านได้แม้วันนี้เปิดฟรีครบแล้ว
-      const isPremiumRequest = !isStandardSpread(spreadId) || isMasterPersona(personaId);
+      const isPremiumRequest = !isStandardRequest || isMasterPersona(personaId);
       usePremiumTrial =
         ent.kind === "member" && !ent.hasPaidCredits && ent.premiumTrialAvailable === true && isPremiumRequest;
       if (!ent.canStartReading && !usePremiumTrial) {
@@ -270,7 +318,7 @@ export async function POST(request: Request) {
       // ── ผังใหญ่ + ปรมาจารย์ลับ = สงวนไว้สำหรับผู้ซื้อ credits เท่านั้น (server-side enforcement) ──
       if (usePremiumTrial) recordEvent("entitlement_premium_trial_start");
       if (!ent.hasPaidCredits && !usePremiumTrial) {
-        if (!isStandardSpread(spreadId)) {
+        if (!isStandardRequest) {
           recordEvent("entitlement_blocked_grand_spread");
           return NextResponse.json(
             {
@@ -343,6 +391,10 @@ export async function POST(request: Request) {
     clientSeed: parsed.data.clientSeed ? normalizeClientSeed(parsed.data.clientSeed) : undefined,
     derivation,
     zodiac: parsed.data.zodiac,
+    ...(parsed.data.threadId ? { threadId: parsed.data.threadId } : {}),
+    ...(customSpread
+      ? { customSpread: { ...customSpread, ...(parsed.data.customSavedId ? { savedId: parsed.data.customSavedId } : {}) } }
+      : {}),
     ...(usePremiumTrial ? { premiumTrial: true } : {}),
     createdAt: Date.now(),
   };
@@ -361,9 +413,16 @@ export async function POST(request: Request) {
   const { signReadingSessionToken } = await import("@/lib/security/session-token");
   const sessionToken = signReadingSessionToken(record);
 
+  // 🛡️ แทร็ก S: บอกผู้ใช้ว่าซ่อนข้อมูลส่วนตัวอะไรไว้ (ตัวซ่อนจริงอยู่ที่ sanitizePromptValue ตอนสร้าง prompt)
+  const privacyNotice = piiNotice(
+    detectPiiKinds(question, intake.situation, intake.feeling, intake.hoped, nickname),
+    parsed.data.lang,
+  );
+
   const res = NextResponse.json({
     id,
     readingId: id,
+    ...(privacyNotice ? { privacyNotice } : {}),
     commitment,
     clientSeed: record.clientSeed,
     sessionToken,

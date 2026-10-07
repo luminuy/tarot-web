@@ -1,0 +1,42 @@
+---
+import { questionMetadata, questionStaticSlugs } from "@/app/_shared/pages/question-page";
+import { getQuestion } from "@/data/questions";
+import { getSpread } from "@/data/spreads";
+
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { QuestionPageContentRoot } from "../../../components/PageBodies";
+import { AskNowRoot } from "../../../islands/AskNowRoot";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
+
+/**
+ * ❓ หน้าคำถาม 20 หน้า (REFLECTION_JOURNAL_PLAN 1.11 · แทร็ก Q) — เนื้อหา SSR ทั้งหมด
+ * island เดียวคือกล่อง "ถามเลย" (`client:visible`) · ⚠️ `/questions` อยู่ใน ASTRO_ROUTE_PREFIXES
+ */
+const locale = "en" as const;
+
+export function getStaticPaths() {
+  return questionStaticSlugs().map(({ slug }) => ({ params: { slug } }));
+}
+
+const question = getQuestion(Astro.params.slug!)!;
+const spread = getSpread(question.spreadId)!;
+const copy = question[locale];
+---
+
+<BaseLayout locale={locale} metadata={questionMetadata(question.slug, locale)}>
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <QuestionPageContentRoot question={question} locale={locale}>
+    <Fragment slot="askBox">
+      <AskNowRoot
+        client:visible
+        isEnglish={locale === "en"}
+        defaultQuestion={copy.betterQuestions[0]}
+        spreadId={spread.id}
+        spreadName={locale === "en" ? spread.nameEn || spread.nameTh : spread.nameTh}
+        cardCount={spread.positions.length}
+        category={question.category}
+      />
+    </Fragment>
+  </QuestionPageContentRoot>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>

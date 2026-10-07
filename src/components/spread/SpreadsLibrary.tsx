@@ -133,6 +133,19 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
             ? "Select a sacred spread attuned to your inquiry. Explore positional dynamics, archetypal geometry, and card interpretations."
             : "เลือกผังที่ตรงกับเรื่องที่คุณอยากรู้ พร้อมดูตัวอย่างการจัดวางและความหมายของแต่ละตำแหน่ง"}
         </p>
+        {/* ✦ ห้องออกแบบผัง (REFLECTION_JOURNAL_PLAN 1.8) — ทางเข้าเดียวจากคลังผัง */}
+        <Link
+          href="/spreads/create"
+          className="tap-overlay-y min-h-11 inline-flex items-center px-5 rounded-full glass-chip text-sm font-serif-th text-ink-deep font-semibold hover:text-gold-ink"
+        >
+          {isEnglish ? "✦ Or design your own spread" : "✦ หรือออกแบบผังของคุณเอง"}
+        </Link>
+        <Link
+          href="/questions"
+          className="tap-overlay-y min-h-11 inline-flex items-center px-5 rounded-full glass-chip text-sm font-serif-th text-ink-deep font-semibold hover:text-gold-ink sm:ml-2"
+        >
+          {isEnglish ? "✦ Questions people ask most" : "✦ คำถามที่คนถามไพ่บ่อย"}
+        </Link>
       </div>
 
       {/* Category Tabs with Editorial Styling */}

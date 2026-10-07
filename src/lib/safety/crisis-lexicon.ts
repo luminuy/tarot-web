@@ -117,6 +117,9 @@ export const CRISIS_RULES_LATIN: RegExp[] = [
   /\boff\s*my\s*self\b/i,
   /\bun\s*-?\s*alive(\s*my\s*self)?\b/i,
   /\bself\s*-?\s*harm(ing|ed)?\b/i,
+  // "thinking about hurting myself" — เจตนาทำร้ายตัวเองโดยไม่ใช้คำว่า self-harm (พบจากชุดวัด แทร็ก E · eval-058)
+  // ต้องมีคำบอกเจตนานำหน้า ไม่งั้นสำนวนอย่าง "I keep hurting myself by trusting him" จะโดนจับเกิน
+  /\b(want|wanna|going|gonna|plan(ning)?|think(ing)?\s+(about|of)|urges?\s+to|feel(ing)?\s+like|tempted\s+to|might|scared\s+i('ll|\s+will))\s+(to\s+)?(hurt(ing)?|harm(ing)?|injur(e|ing))\s*my\s*self\b/i,
   /\bcut(ting)?\s*my\s*self\b/i,
   /\bslit(ting)?\s+my\s+wrists?\b/i,
   /\bhang(ing)?\s*my\s*self\b/i,

@@ -44,8 +44,21 @@ export interface ReadingRecord {
   premiumTrial?: boolean;
   /** ✦ ราศีที่ผู้ถามบอกไว้ (ไม่บังคับ) — บริบทของ prompt เท่านั้น ไม่เกี่ยวกับการจั่ว */
   zodiac?: import("@/lib/ai/zodiac-context").SeekerZodiac;
+  /** ✦ ถามต่อจากเส้นเรื่องเดิม — ความทรงจำแม่หมอดึงคำอ่านในเรื่องนี้แทน "3 ครั้งล่าสุด" */
+  threadId?: string;
+  /**
+   * ✦ ผังที่ผู้ใช้ออกแบบเอง (`spreadId = "custom"`) — ตรวจแล้วตรึงตั้งแต่ `/start` เปลี่ยนไม่ได้อีก
+   * ทุกเส้นทางต้องอ่านผังผ่าน `resolveRecordSpread(record)` ไม่ใช่ `getSpread(record.spreadId)`
+   * `savedId` = ผังที่บันทึกไว้ในบัญชี (ถ้ามี) ใช้นับครั้งที่ใช้ ไม่มีผลกับการอ่าน
+   */
+  customSpread?: import("@/lib/tarot/custom-spread").CustomSpreadInput & { savedId?: string };
 
   result?: Reading;
+  /**
+   * ✦ "มุมที่สอง" (REFLECTION_JOURNAL_PLAN 1.7) — คำอ่านไพ่ชุดเดิมเป๊ะจากบุคลิกแม่หมออื่น แยกตาม personaId
+   * เก็บไว้ในเซสชันเดิม เปิดซ้ำจึงไม่เรียก AI (ไม่เสียค่าซ้ำ) · ไพ่ไม่ถูกสับใหม่ทุกกรณี
+   */
+  perspectives?: Record<string, Reading>;
   createdAt: number;
 }
 

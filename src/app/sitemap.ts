@@ -4,6 +4,7 @@ import { ARTICLES } from "@/data/articles";
 import { PUBLIC_SPREADS } from "@/data/spreads";
 import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
 import { ZODIAC_SIGNS } from "@/data/zodiac";
+import { QUESTIONS } from "@/data/questions";
 import { localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
 import { hasEnglishTwin } from "@/lib/i18n/paths";
 import { zodiacSignPath } from "@/lib/tarot/zodiac";
@@ -220,8 +221,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ];
 
+  /** ❓ หน้าคำถาม 20 หน้า + หน้ารวม (แทร็ก Q) — lastModified ตามวันที่แก้เนื้อหาจริงของแต่ละหน้า */
+  const questionRoutes: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/questions`, lastModified: new Date("2026-10-06T12:00:00+07:00"), changeFrequency: "monthly", priority: 0.8 },
+    ...QUESTIONS.map((q) => ({
+      url: `${baseUrl}/questions/${q.slug}`,
+      lastModified: new Date(`${q.updatedAt}T12:00:00+07:00`),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    })),
+  ];
+
   const thaiRoutes = [
     ...staticRoutes,
+    ...questionRoutes,
     ...zodiacRoutes,
     ...cardRoutes,
     ...blogRoutes,

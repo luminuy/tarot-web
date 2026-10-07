@@ -33,6 +33,8 @@ export interface QueueTicket {
   expiresAt: number;
   /** สมาชิกที่ล็อกอินตอนจอง (migrations/0021) — ใช้เปิด "นัดของฉัน" ข้ามเครื่อง */
   userId: string | null;
+  /** เวลาที่ลูกค้ายินยอมโดยชัดแจ้งให้แม่หมอใช้ข้อมูลอ่อนไหวในคำถาม (ม.26 · migrations/0029) · null = ไม่ได้ยินยอม */
+  sensitiveConsentAt: number | null;
   // Attached AI brief if available
   screening?: AIScreeningRecord | null;
 }
@@ -52,6 +54,7 @@ interface RawTicketRow {
   created_at: number;
   expires_at: number;
   user_id?: string | null;
+  sensitive_consent_at?: number | null;
 }
 
 /** ตั๋วฉบับส่งออกนอกเซิร์ฟเวอร์ — ไม่มี `customerRef` และ `userId` (ตัวตนของลูกค้า) */
@@ -85,6 +88,7 @@ function mapRowToTicket(row: RawTicketRow): QueueTicket {
     createdAt: row.created_at,
     expiresAt: row.expires_at,
     userId: row.user_id ?? null,
+    sensitiveConsentAt: row.sensitive_consent_at ?? null,
   };
 }
 
@@ -158,6 +162,8 @@ export interface CreateQueueTicketInput {
   initialStatus?: Extract<TicketStatus, "waiting" | "pending_payment">;
   /** สมาชิกที่ล็อกอินอยู่ตอนจอง (ไม่บังคับ — จองแบบไม่สมัครได้เสมอ) */
   userId?: string | null;
+  /** ลูกค้าติ๊กยินยอมโดยชัดแจ้งเรื่องข้อมูลอ่อนไหว (ม.26) — ช่องแยก ไม่บังคับ */
+  sensitiveConsent?: boolean;
 }
 
 const RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
@@ -178,6 +184,7 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
   const ticketId = `ticket_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
   const now = Date.now();
   const expiresAt = ticketExpiresAt(now, input.slotStart);
+  const sensitiveConsentAt = input.sensitiveConsent === true ? now : null;
 
   // 1. Run AI Screening First
   const screening = await performAIScreening({
@@ -203,14 +210,15 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
       createdAt: now,
       expiresAt,
       userId: input.userId ?? null,
+      sensitiveConsentAt,
       screening,
     };
 
     await db
       .prepare(
         `INSERT INTO queue_tickets (
-          id, reader_id, kind, status, position, slot_start, customer_ref, nickname, question, reading_snapshot, ai_screen_id, created_at, expires_at, user_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          id, reader_id, kind, status, position, slot_start, customer_ref, nickname, question, reading_snapshot, ai_screen_id, created_at, expires_at, user_id, sensitive_consent_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         ticket.id,
@@ -226,7 +234,8 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
         ticket.aiScreenId,
         ticket.createdAt,
         ticket.expiresAt,
-        ticket.userId
+        ticket.userId,
+        ticket.sensitiveConsentAt
       )
       .run();
 
@@ -250,8 +259,8 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
   await db
     .prepare(
       `INSERT INTO queue_tickets (
-        id, reader_id, kind, status, position, slot_start, customer_ref, nickname, question, reading_snapshot, ai_screen_id, created_at, expires_at, user_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        id, reader_id, kind, status, position, slot_start, customer_ref, nickname, question, reading_snapshot, ai_screen_id, created_at, expires_at, user_id, sensitive_consent_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       ticketId,
@@ -267,7 +276,8 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
       screening.id,
       now,
       expiresAt,
-      input.userId ?? null
+      input.userId ?? null,
+      sensitiveConsentAt
     )
     .run();
 

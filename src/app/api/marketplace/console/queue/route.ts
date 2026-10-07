@@ -6,6 +6,7 @@ import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { readerPriceThb } from "@/lib/marketplace/offer";
 import { endCall } from "@/lib/marketplace/call.repo";
 import { isTurnConfigured, revokeTurnCredential } from "@/lib/marketplace/turn";
+import { isStudioEnabled } from "@/lib/studio/dpa";
 import {
   getQueueTicketById,
   getReaderLiveAvailability,
@@ -74,6 +75,8 @@ export async function GET(request: Request) {
         priceThb: readerPriceThb(reader),
       },
       videoCallEnabled: isTurnConfigured(),
+      // Reader Studio (REFLECTION_JOURNAL_PLAN 1.13) — เปิดเมื่อ READER_STUDIO_ENABLED=1 เท่านั้น
+      studioEnabled: isStudioEnabled(),
     });
   } catch (err) {
     console.error("[API Console Queue GET Error]", err);

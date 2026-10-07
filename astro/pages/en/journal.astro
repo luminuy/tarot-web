@@ -1,0 +1,19 @@
+---
+import { journalMetadataEn } from "@/app/_shared/pages/journal-meta";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { JournalRoot } from "../../islands/JournalRoot";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+
+/**
+ * ✦ สมุดดวงของฉัน (REFLECTION_JOURNAL_PLAN 1.3 · คลื่น 2) — เชลล์ static + island เดียว · noindex
+ * ⚠️ `/journal` อยู่ใน `ASTRO_EXACT_ROUTES` (`src/lib/routing/astro-routes.ts`) — ย้าย/ลบหน้านี้ต้องแก้ที่นั่นด้วย
+ */
+const locale = "en" as const;
+---
+
+<BaseLayout locale={locale} metadata={journalMetadataEn}>
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <JournalRoot locale={locale} client:load />
+  <SiteFooterRoot locale={locale} spacing="tight" />
+</BaseLayout>

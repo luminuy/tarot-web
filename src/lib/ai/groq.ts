@@ -30,6 +30,7 @@ import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/l
 import { linkAbortSignal, readWithIdleTimeout } from "@/lib/ai/abort";
 import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
 import type { ReadingEvent } from "@/lib/ai/types";
+import { clampToBudget } from "@/lib/ai/retry-budget";
 
 /**
  * ลำดับนี้ตั้งใจให้ Qwen มาก่อน — คุณภาพภาษาไทยดีที่สุดในสี่ตัว (มี QA test ล็อกไว้)
@@ -425,6 +426,7 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
   }
 
   for (const [readingAttempt, model] of readingModels.entries()) {
+    if (ctx.retryBudget && !ctx.retryBudget.take()) return;
     const state = createReadingStreamState();
     const usage = createEmptyUsage();
     let unlinkAbort: (() => void) | undefined;
@@ -437,7 +439,7 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
        * ตัวเลขตายตัวจึงตัดคำอ่านผังใหญ่ทิ้งกลางคันเสมอ ทั้งที่โมเดลยังเขียนอยู่
        * คิดจากอัตราจริงแล้วเผื่อเวลาเริ่มต้น 6 วินาที และกันไว้ไม่ให้เกิน 55 วินาที
        */
-      const timeoutMs = Math.min(55000, 6000 + Math.ceil((maxReadingTokens / 300) * 1000));
+      const timeoutMs = clampToBudget(Math.min(55000, 6000 + Math.ceil((maxReadingTokens / 300) * 1000)), ctx.retryBudget);
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
       // ผู้ใช้ปิดแท็บ → ยกเลิกคำขอที่ต้นทางทันที ไม่ใช่ปล่อยให้โมเดลผลิตจนจบแล้วทิ้ง (T-06)
       unlinkAbort = linkAbortSignal(controller, ctx.abortSignal);

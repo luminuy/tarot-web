@@ -1,4 +1,3 @@
-import { getSpread } from "@/data/spreads";
 import { getContentOverrides, resolveCardByIndex } from "@/lib/content/overrides";
 import { streamGeminiReading } from "@/lib/ai/gemini";
 import { AI_DISCLOSURE, AI_DISCLOSURE_EN } from "@/lib/safety/guardrails";
@@ -10,6 +9,7 @@ import { recordEvents, recordEvent } from "@/lib/stats/record";
 import { GUEST_BLOCK_REASON, REQUIRE_SIGNUP_TO_READ } from "@/lib/entitlement/limits";
 import { SIGN_IN_GATE_REASON, getSignInGateMessage, isSignInRequired } from "@/lib/entitlement/signin-gate";
 import { recordCaughtError } from "@/lib/observability/caught";
+import { resolveRecordSpread } from "@/lib/tarot/record-spread";
 
 export const runtime = "nodejs";
 /** การอ่านไพ่ใช้เวลาหลายสิบวินาที ต้องกันไม่ให้ platform ตัดกลางคัน */
@@ -77,7 +77,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
   }
 
-  const spread = getSpread(record.spreadId);
+  const spread = resolveRecordSpread(record);
   if (!spread) {
     return Response.json({ error: isEn ? "Spread layout not found." : "ไม่พบรูปแบบการวางไพ่นี้" }, { status: 404 });
   }
@@ -167,6 +167,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   let guestNeedsConsume = false; // ผู้เยี่ยมชมผ่าน gate → ต้องออก ticket หลังอ่านสำเร็จจริง
   let guestGid: string | null = null; // gid ของผู้เยี่ยมชม — ใช้ mark ฝั่ง server ตอนอ่านจบ
   let memberUserId: string | null = null;
+  /** 🛡️ แทร็ก S: ตัวตนในบัญชีต้นทุน AI ต่อวัน (null = คำขอทดสอบที่ได้รับสิทธิ์ ไม่นับ) */
+  let costSubj: string | null = null;
   const { isAiCapReached } = await import("@/lib/security/ai-budget");
   const aiCapResponse = () => {
     recordEvent("ai_cap_hit");
@@ -191,6 +193,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       limit.releaseConcurrency();
       recordEvent("entitlement_blocked_signin");
       return Response.json({ error: getSignInGateMessage(record.lang), reason: SIGN_IN_GATE_REASON }, { status: 403 });
+    }
+
+    // 🛡️ แทร็ก S: เพดานโทเคนต่อผู้ใช้ต่อวัน — ตรวจก่อนหักสิทธิ์ (ไม่ต้องคืนสิทธิ์ทีหลัง)
+    const { costSubject, isUserTokenCapReached, tokenCapMessage } = await import("@/lib/security/cost-ledger");
+    costSubj = costSubject(viewer.kind === "member" ? viewer.userId : null, clientIp);
+    if (await isUserTokenCapReached(costSubj, viewer.kind === "member" ? "member" : "guest")) {
+      limit.releaseConcurrency();
+      return Response.json({ error: tokenCapMessage(isEn ? "en" : "th") }, { status: 429 });
     }
 
     if (enforced) {
@@ -327,7 +337,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         const { loadKarmicMemory } = await import("@/lib/ai/memory");
         const [overrideDoc, pastReading] = await Promise.all([
           getContentOverrides(),
-          loadKarmicMemory(memberUserId),
+          loadKarmicMemory(memberUserId, 3, record.threadId),
         ]);
         const resolvedCards = record.drawn!.map((d) => resolveCardByIndex(overrideDoc, d.cardIndex));
         if (resolvedCards.some((c) => !c)) {
@@ -342,7 +352,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           return;
         }
 
+        /*
+         * ✦ หลักฐานคำอ่าน (REFLECTION_JOURNAL_PLAN 1.6) — บอกผู้ใช้ตามจริงว่ารอบนี้แม่หมอได้อะไรไปบ้าง
+         * ส่งเฉพาะ "ใช้/ไม่ใช้" ไม่ส่งเนื้อหาประวัติ · ส่วนที่นับได้จากไพ่/ผังคำนวณฝั่งหน้าเว็บผ่าน /api/reading/explain
+         */
+        send(controller, "basis", {
+          history: Boolean(pastReading),
+          member: Boolean(memberUserId),
+          intake: Boolean(record.intake?.situation || record.intake?.feeling || record.intake?.hoped),
+          question: Boolean(record.question?.trim()),
+        });
+
+        const { createRetryBudget, DEFAULT_READING_RETRY } = await import("@/lib/ai/retry-budget");
         const readingCtx = {
+          // 🛡️ แทร็ก S: ทั้งสายสำรอง (Groq ➔ Gemini) ลองได้ไม่เกิน 4 ครั้ง / 90 วินาทีรวม
+          retryBudget: createRetryBudget(DEFAULT_READING_RETRY),
           personaId: record.personaId,
           spread,
           category: record.category,
@@ -461,6 +485,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             ]);
             void recordAiCall(1);
             void recordPerIpReadQuota(clientIp);
+            if (costSubj) {
+              const { recordAiUsage } = await import("@/lib/security/cost-ledger");
+              void recordAiUsage(costSubj, event.usage?.inputTokens ?? 0, event.usage?.outputTokens ?? 0);
+            }
+            // ✦ ผังที่บันทึกไว้ในบัญชี — นับครั้งที่ใช้ (เรียงผังโปรดขึ้นก่อน) · กรองด้วย user_id เสมอ
+            if (memberUserId && record.customSpread?.savedId) {
+              const { markCustomSpreadUsed } = await import("@/lib/tarot/custom-spread.repo");
+              void markCustomSpreadUsed(memberUserId, record.customSpread.savedId).catch(() => {});
+            }
 
             // 📊 บันทึกบริบทตอนสร้างคำอ่าน สำหรับวัดคุณภาพ AI (AI_INTELLIGENCE_PLAN W1.1)
             const { recordReadingQuality } = await import("@/lib/ai/quality.repo");

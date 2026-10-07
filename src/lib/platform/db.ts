@@ -418,6 +418,8 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec("ALTER TABLE bookings ADD COLUMN reminder_1h_at INTEGER");
     safeExec("ALTER TABLE queue_tickets ADD COLUMN user_id TEXT");
     safeExec("CREATE INDEX IF NOT EXISTS idx_tickets_user ON queue_tickets(user_id)");
+    // ความยินยอมโดยชัดแจ้ง ม.26 สำหรับคำถามที่มีข้อมูลอ่อนไหว (migrations/0029)
+    safeExec("ALTER TABLE queue_tickets ADD COLUMN sensitive_consent_at INTEGER");
     safeExec("ALTER TABLE readers ADD COLUMN notify_email TEXT");
     safeExec("ALTER TABLE readers ADD COLUMN price_thb INTEGER");
     safeExec("ALTER TABLE readers ADD COLUMN buffer_min INTEGER NOT NULL DEFAULT 0");
@@ -431,6 +433,91 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec("CREATE INDEX IF NOT EXISTS idx_reviews_reader ON reader_reviews(reader_id, hidden, created_at DESC)");
     safeExec(
       "CREATE TABLE IF NOT EXISTS booking_waitlist (id TEXT PRIMARY KEY, reader_id TEXT NOT NULL REFERENCES readers(id), email TEXT NOT NULL, created_at INTEGER NOT NULL, UNIQUE (reader_id, email))"
+    );
+    // 📓 สมุดดวง v2 + พิธีเช้า-เย็น (migrations/0022) — ต้องตรงกับไฟล์ migration ทุกคอลัมน์
+    safeExec("ALTER TABLE reading_journal ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN tags_json TEXT NOT NULL DEFAULT '[]'");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN mood_before INTEGER");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN mood_after INTEGER");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN thread_id TEXT");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN checkin_at INTEGER");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN share_with_ai INTEGER NOT NULL DEFAULT 0");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN basis_json TEXT");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN ritual_kind TEXT");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN ritual_json TEXT");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_rj_user_thread ON reading_journal(user_id, thread_id, created_at)");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_rj_checkin ON reading_journal(checkin_at) WHERE checkin_at IS NOT NULL");
+    safeExec(
+      "CREATE INDEX IF NOT EXISTS idx_rj_user_ritual ON reading_journal(user_id, ritual_kind, created_at) WHERE ritual_kind IS NOT NULL"
+    );
+    // 🧵 เส้นเรื่อง + นัดกลับมาเช็ก (migrations/0023) — ต้องตรงกับไฟล์ migration ทุกคอลัมน์
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS journal_threads (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, title TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'open', closing_note TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, closed_at INTEGER)"
+    );
+    safeExec("CREATE INDEX IF NOT EXISTS idx_jt_user_status ON journal_threads(user_id, status, updated_at DESC)");
+    safeExec("ALTER TABLE reading_journal ADD COLUMN checkin_sent_at INTEGER");
+    safeExec(
+      "CREATE INDEX IF NOT EXISTS idx_rj_checkin_due ON reading_journal(checkin_at, checkin_sent_at) WHERE checkin_at IS NOT NULL"
+    );
+    // ✦ แคชข้อสังเกตจากสมุด (migrations/0028)
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS reflection_cache (cache_key TEXT PRIMARY KEY, user_id TEXT NOT NULL, lang TEXT NOT NULL, result_json TEXT NOT NULL, created_at INTEGER NOT NULL)"
+    );
+    safeExec("CREATE INDEX IF NOT EXISTS idx_reflection_cache_user ON reflection_cache(user_id, created_at)");
+    // 🔔 Web Push (migrations/0025)
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS push_subscriptions (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, endpoint TEXT NOT NULL UNIQUE, p256dh TEXT NOT NULL, auth TEXT NOT NULL, lang TEXT NOT NULL DEFAULT 'th', morning_hour INTEGER, checkins INTEGER NOT NULL DEFAULT 1, last_morning_day TEXT, fail_count INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)"
+    );
+    safeExec("CREATE INDEX IF NOT EXISTS idx_push_user ON push_subscriptions(user_id)");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_push_morning ON push_subscriptions(morning_hour) WHERE morning_hour IS NOT NULL");
+    // ✦ ผังที่สมาชิกออกแบบเอง (migrations/0024)
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS custom_spreads (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, name TEXT NOT NULL, layout TEXT NOT NULL, positions_json TEXT NOT NULL, share_slug TEXT UNIQUE, use_count INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)"
+    );
+    safeExec("CREATE INDEX IF NOT EXISTS idx_custom_spreads_user ON custom_spreads(user_id, updated_at DESC)");
+    // 🛡️ บัญชีต้นทุน AI ต่อผู้ใช้ต่อวัน (migrations/0026)
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS ai_usage_daily (day TEXT NOT NULL, subject TEXT NOT NULL, calls INTEGER NOT NULL DEFAULT 0, tokens_in INTEGER NOT NULL DEFAULT 0, tokens_out INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, subject))"
+    );
+    safeExec("CREATE INDEX IF NOT EXISTS idx_ai_usage_subject ON ai_usage_daily(subject, day)");
+    // ✦ Reader Studio (migrations/0027)
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS reader_studio_settings ( reader_id TEXT PRIMARY KEY, brand_name TEXT, logo_url TEXT, brand_color TEXT, contact_line TEXT, show_ai_disclosure INTEGER NOT NULL DEFAULT 1, ai_assist INTEGER NOT NULL DEFAULT 0, dpa_version TEXT, dpa_accepted_at INTEGER, pro_until INTEGER, pass_price_thb INTEGER, updated_at INTEGER NOT NULL )"
+    );
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS reader_clients ( id TEXT PRIMARY KEY, reader_id TEXT NOT NULL, display_name TEXT NOT NULL, contact TEXT, note TEXT, source_customer_hash TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL )"
+    );
+    safeExec(
+      "CREATE INDEX IF NOT EXISTS idx_reader_clients_reader ON reader_clients(reader_id, updated_at DESC)"
+    );
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS reader_readings ( id TEXT PRIMARY KEY, reader_id TEXT NOT NULL, client_id TEXT, title TEXT NOT NULL, question TEXT, spread_id TEXT NOT NULL, custom_spread_json TEXT, card_source TEXT, cards_json TEXT, commitment TEXT, server_seed TEXT, client_seed TEXT, notes_json TEXT NOT NULL DEFAULT '{}', draft_json TEXT, body_json TEXT, show_ai_disclosure INTEGER NOT NULL DEFAULT 1, status TEXT NOT NULL DEFAULT 'draft', share_token_hash TEXT UNIQUE, share_expires_at INTEGER, share_password_hash TEXT, share_revoked_at INTEGER, view_count INTEGER NOT NULL DEFAULT 0, sent_at INTEGER, source_ticket_id TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL )"
+    );
+    safeExec(
+      "CREATE INDEX IF NOT EXISTS idx_reader_readings_reader ON reader_readings(reader_id, updated_at DESC)"
+    );
+    safeExec(
+      "CREATE INDEX IF NOT EXISTS idx_reader_readings_client ON reader_readings(client_id)"
+    );
+    // ฐานข้อมูลในเครื่องที่สร้างตาราง 0027 รุ่นแรกไว้แล้ว — เติมคอลัมน์ที่มาทีหลัง (มีแล้ว = error เงียบ)
+    safeExec("ALTER TABLE reader_clients ADD COLUMN source_customer_hash TEXT");
+    safeExec("ALTER TABLE reader_readings ADD COLUMN source_ticket_id TEXT");
+    safeExec("ALTER TABLE reader_studio_settings ADD COLUMN pro_until INTEGER");
+    safeExec("ALTER TABLE reader_studio_settings ADD COLUMN pass_price_thb INTEGER");
+    safeExec("ALTER TABLE reader_studio_settings ADD COLUMN ai_assist INTEGER NOT NULL DEFAULT 0");
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS reader_studio_passes ( order_id TEXT PRIMARY KEY, reader_id TEXT NOT NULL, days INTEGER NOT NULL, created_at INTEGER NOT NULL, granted_at INTEGER, revoked_at INTEGER )"
+    );
+    safeExec("CREATE INDEX IF NOT EXISTS idx_reader_studio_passes_reader ON reader_studio_passes(reader_id, created_at DESC)");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_reader_clients_source ON reader_clients(reader_id, source_customer_hash)");
+    safeExec(
+      "CREATE UNIQUE INDEX IF NOT EXISTS idx_reader_readings_ticket ON reader_readings(reader_id, source_ticket_id) WHERE source_ticket_id IS NOT NULL"
+    );
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS reader_templates ( id TEXT PRIMARY KEY, reader_id TEXT NOT NULL, name TEXT NOT NULL, intro TEXT, closing TEXT, created_at INTEGER NOT NULL )"
+    );
+    safeExec(
+      "CREATE INDEX IF NOT EXISTS idx_reader_templates_reader ON reader_templates(reader_id)"
     );
     // 🎟 รหัสแลกสิทธิ์ตั้งต้นของเครื่อง dev — ต้องมีเพดานและวันหมดอายุเท่ากับ migrations/0013
     // (ห้ามปล่อย max_uses = -1 อีก: รหัสที่เขียนไว้ในรีโปแปลว่าใครอ่านซอร์สเจอก็แลกได้)

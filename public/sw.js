@@ -11,6 +11,13 @@
 const CACHE_VERSION = "v-da0500b";
 const STATIC_CACHE_NAME = `seertarot-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE_NAME = `seertarot-runtime-${CACHE_VERSION}`;
+/**
+ * ✦ สารานุกรมออฟไลน์ (REFLECTION_JOURNAL_PLAN 1.10) — หน้าไพ่ 78 ใบ + หน้าที่ใช้ทุกวัน
+ * เก็บแยกถังและ "ไม่ผูกกับเวอร์ชัน" เพื่อไม่ต้องโหลดใหม่ทั้งชุดทุกครั้งที่ deploy
+ * ใช้เฉพาะตอนออฟไลน์ (หน้าเว็บยัง network-first เสมอ) · เติมเมื่อหน้าเว็บสั่งตอนเครื่องว่าง + Wi-Fi เท่านั้น
+ */
+const ENCYCLOPEDIA_CACHE_NAME = "seertarot-encyclopedia-v1";
+const ENCYCLOPEDIA_LIMIT = 200;
 
 const PRECACHE_URLS = [
   "/offline.html",
@@ -54,7 +61,7 @@ self.addEventListener("install", (event) => {
 
 // กำจัดแคชเวอร์ชันเก่าเมื่อ Service Worker ใหม่ถูกเปิดใช้งาน
 self.addEventListener("activate", (event) => {
-  const currentCaches = [STATIC_CACHE_NAME, RUNTIME_CACHE_NAME];
+  const currentCaches = [STATIC_CACHE_NAME, RUNTIME_CACHE_NAME, ENCYCLOPEDIA_CACHE_NAME];
   event.waitUntil(
     caches
       .keys()
@@ -193,9 +200,79 @@ self.addEventListener("fetch", (event) => {
 
 });
 
-// รองรับข้อความจากไคลเอนต์เพื่อ skip waiting
+/** เส้นทางที่อนุญาตให้เก็บลงสารานุกรมออฟไลน์ — หน้าเนื้อหาสาธารณะเท่านั้น ห้ามหน้าส่วนตัว/API */
+function isEncyclopediaPath(path) {
+  return (
+    typeof path === "string" &&
+    /^\/(?:en\/)?(?:cards(?:\/[a-z0-9-]+)?|daily|journal|spreads)?\/?$/.test(path) &&
+    !path.startsWith("/api/")
+  );
+}
+
+async function precacheEncyclopedia(paths) {
+  const cache = await caches.open(ENCYCLOPEDIA_CACHE_NAME);
+  const list = (Array.isArray(paths) ? paths : []).filter(isEncyclopediaPath).slice(0, ENCYCLOPEDIA_LIMIT);
+  let i = 0;
+  // ทีละ 4 คำขอ — ไม่แย่งแบนด์วิดท์ผู้ใช้ และหยุดเงียบ ๆ เมื่อหลุดเน็ต
+  const worker = async () => {
+    while (i < list.length) {
+      const path = list[i++];
+      try {
+        const res = await fetch(path, { credentials: "same-origin" });
+        if (res && res.ok && res.type === "basic") await cache.put(path, res);
+      } catch {
+        return;
+      }
+    }
+  };
+  await Promise.all([worker(), worker(), worker(), worker()]);
+}
+
+// รองรับข้อความจากไคลเอนต์
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
+  if (event.data && event.data.type === "PRECACHE_ENCYCLOPEDIA") {
+    event.waitUntil(precacheEncyclopedia(event.data.paths));
+  }
+});
+
+/*
+ * 🔔 Web Push (REFLECTION_JOURNAL_PLAN 1.10) — เนื้อหาเข้ารหัสมาจากเซิร์ฟเวอร์ (RFC 8291)
+ * แสดงเฉพาะหัวเรื่อง/ข้อความ/ลิงก์ภายในเว็บ · ลิงก์ที่ไม่ขึ้นต้นด้วย "/" ถูกเปลี่ยนเป็นหน้าแรก (กันพาออกนอกเว็บ)
+ */
+self.addEventListener("push", (event) => {
+  let msg = {};
+  try {
+    msg = event.data ? event.data.json() : {};
+  } catch {
+    msg = {};
+  }
+  const title = typeof msg.title === "string" && msg.title ? msg.title.slice(0, 80) : "SeerTarot";
+  const url = typeof msg.url === "string" && msg.url.startsWith("/") && !msg.url.startsWith("//") ? msg.url : "/";
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: typeof msg.body === "string" ? msg.body.slice(0, 200) : "",
+      icon: "/icons/icon-192x192.png",
+      badge: "/icons/icon-192x192.png",
+      tag: typeof msg.tag === "string" ? msg.tag : undefined,
+      data: { url },
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || "/";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
+      for (const w of wins) {
+        if (new URL(w.url).origin === self.location.origin && "focus" in w) {
+          return w.navigate(url).then((nw) => (nw || w).focus());
+        }
+      }
+      return self.clients.openWindow(url);
+    })
+  );
 });
