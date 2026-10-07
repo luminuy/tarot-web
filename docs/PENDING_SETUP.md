@@ -199,7 +199,7 @@ npx wrangler secret put CRON_SECRET
 > **เอนจินคำอ่าน**: GROQ + GEMINI ตั้งครบ → Tier 1 Groq Qwen3-27B ทำงาน (`src/lib/ai/groq.ts` · fallback → Gemini `src/lib/ai/gemini.ts`) · เฝ้าเมตริก `ai_foreign_trip` / `ai_groq_failover` ใน `/admin`
 > **AI Gateway / Turnstile**: ตั้งครบแล้ว ไม่ใช่รายการค้างอีกต่อไป
 
-### 🔔 Web Push (`VAPID_*`) — ตั้งผ่าน GitHub Actions (ไม่ต้องรันในเครื่อง · 2026-10-07)
+### 🔔 Web Push (`VAPID_*`) — ✅ ตั้งแล้ว 2026-10-07 ผ่าน GitHub Actions (run 37568597441)
 
 workflow `.github/workflows/setup-vapid.yml` สร้างคู่กุญแจใน runner แล้วส่งเข้า `wrangler secret put` ตรง ๆ
 — กุญแจลับไม่ถูกพิมพ์ลง log และไม่มีใครต้องเห็น · ใช้ `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID` ชุดเดียวกับ deploy

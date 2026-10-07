@@ -38,6 +38,13 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-07 (รอบ 213): ✦ ตั้งกุญแจ Web Push (VAPID) บน Worker ผ่าน GitHub Actions แล้ว
+
+- เจ้าของขอให้ทำผ่าน GitHub แทนรันในเครื่อง ➔ `.github/workflows/setup-vapid.yml` สร้างกุญแจใน runner แล้วส่งเข้า `wrangler secret put` ทาง stdin (กุญแจลับถูก mask ไม่ลง log) · มีกุญแจแล้ว = ข้าม · หมุนได้ด้วยปุ่ม Run workflow + `rotate`
+- รันจริงแล้ว ✅ run 37568597441 — `VAPID_SUBJECT` (mailto:support@seertarot.net) · `VAPID_PRIVATE_KEY` · `VAPID_PUBLIC_KEY` อยู่บน Worker `tarot-web` แล้ว (ตรวจ log: ไม่มีกุญแจลับหลุด)
+- ปุ่มเปิดการเตือนจะโผล่หลังโค้ดรอบนี้ขึ้น production · migration 0022–0028 ไม่ต้องรันเอง (`deploy.yml` รัน `db:migrate` ให้)
+- แถม: `sharp` ประกาศใน devDependencies (ด่าน `test-ci-supply-chain` จับได้)
+
 ### 🗓️ 2026-10-07 (รอบ 212): ✦ Reader Studio — เริ่มจากคิวที่จองผ่านเว็บ + บัตรผ่าน 30 วัน (ยังไม่ขึ้น)
 
 - **เริ่มคำอ่านจากคิว/นัดของเว็บ**: เลือกตั๋วที่จ่าย/เข้าคิวแล้ว (60 วัน) ➔ สร้างลูกค้าจากชื่อเล่น หรือผูกกับลูกค้าคนเดิมเมื่อจองซ้ำ (แฮช reader_id + customer_ref · ไม่เก็บตัวอ้างอิงดิบ) · ตั๋วละครั้ง (UNIQUE) · คำถามที่มีคำสั่งแฝงไม่ถูกเติม
