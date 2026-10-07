@@ -46,6 +46,8 @@ export const CreateReadingSchema = z.object({
   spreadId: z.string().min(1).max(64),
   customSpread: z.unknown().optional(),
   templateId: z.string().regex(ID.template).optional(),
+  /** เริ่มจากคิว/นัดที่จองผ่านเว็บ (`queue-import.ts`) */
+  ticketId: z.string().regex(/^ticket_[0-9a-f]{16}$/).optional(),
 });
 
 const BodyPartSchema = z.object({

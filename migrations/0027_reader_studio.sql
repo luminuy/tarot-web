@@ -23,10 +23,14 @@ CREATE TABLE IF NOT EXISTS reader_clients (
   display_name  TEXT NOT NULL,
   contact       TEXT,
   note          TEXT,
+  -- ลูกค้าที่มาจากคิว/นัดที่จองผ่านเว็บ: SHA-256 ของ (reader_id + customer_ref) — ไม่เก็บตัวอ้างอิงดิบ
+  -- จองซ้ำกับแม่หมอคนเดิม = ผูกกับลูกค้าคนเดิมอัตโนมัติ · แม่หมอต่างคนได้แฮชต่างกัน (ข้ามแม่หมอจับคู่ไม่ได้)
+  source_customer_hash TEXT,
   created_at    INTEGER NOT NULL,
   updated_at    INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_reader_clients_reader ON reader_clients(reader_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_reader_clients_source ON reader_clients(reader_id, source_customer_hash);
 
 --   card_source    — 'fair' (สุ่มแบบ Provably Fair ของเว็บ: commitment/server_seed/client_seed) · 'manual' (กรอกจากสำรับจริงของหมอ — ไม่ผ่านการยืนยัน)
 --   cards_json     — [{ order, cardIndex, isReversed }]
@@ -58,11 +62,14 @@ CREATE TABLE IF NOT EXISTS reader_readings (
   share_revoked_at     INTEGER,
   view_count           INTEGER NOT NULL DEFAULT 0,
   sent_at              INTEGER,
+  -- คำอ่านที่เริ่มจากตั๋วคิว/นัดของเว็บ (นำเข้าได้ครั้งเดียวต่อตั๋ว)
+  source_ticket_id     TEXT,
   created_at           INTEGER NOT NULL,
   updated_at           INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_reader_readings_reader ON reader_readings(reader_id, updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_reader_readings_client ON reader_readings(client_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_reader_readings_ticket ON reader_readings(reader_id, source_ticket_id) WHERE source_ticket_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS reader_templates (
   id          TEXT PRIMARY KEY,

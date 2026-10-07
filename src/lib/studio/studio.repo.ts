@@ -61,6 +61,8 @@ export interface StudioReading {
   status: "draft" | "sent";
   share: { active: boolean; expiresAt: number | null; hasPassword: boolean; revokedAt: number | null; viewCount: number };
   sentAt: number | null;
+  /** เริ่มจากตั๋วคิว/นัดที่จองผ่านเว็บ */
+  sourceTicketId: string | null;
   createdAt: number;
   updatedAt: number;
 }
@@ -178,17 +180,30 @@ export async function getClient(readerId: string, id: string): Promise<StudioCli
   return r ? mapClient(r) : null;
 }
 
-export async function createClient(readerId: string, c: { displayName: string; contact?: string | null; note?: string | null }): Promise<StudioClient | null> {
+export async function createClient(
+  readerId: string,
+  c: { displayName: string; contact?: string | null; note?: string | null; sourceCustomerHash?: string | null },
+): Promise<StudioClient | null> {
   const db = await getAppDB();
   const count = await db.prepare(`SELECT COUNT(*) AS n FROM reader_clients WHERE reader_id = ?`).bind(readerId).first<{ n: number }>();
   if ((count?.n ?? 0) >= MAX_CLIENTS_PER_READER) return null;
   const now = Date.now();
   const id = `rc_${crypto.randomUUID()}`;
   await db
-    .prepare(`INSERT INTO reader_clients (id, reader_id, display_name, contact, note, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`)
-    .bind(id, readerId, c.displayName, c.contact ?? null, c.note ?? null, now, now)
+    .prepare(`INSERT INTO reader_clients (id, reader_id, display_name, contact, note, source_customer_hash, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
+    .bind(id, readerId, c.displayName, c.contact ?? null, c.note ?? null, c.sourceCustomerHash ?? null, now, now)
     .run();
   return { id, displayName: c.displayName, contact: c.contact ?? null, note: c.note ?? null, createdAt: now, updatedAt: now };
+}
+
+/** ลูกค้าที่เคยนำเข้าจากคิวของเว็บ (จับคู่ด้วยแฮชของตัวอ้างอิงลูกค้า ต่อแม่หมอ) */
+export async function findClientBySource(readerId: string, sourceCustomerHash: string): Promise<StudioClient | null> {
+  const db = await getAppDB();
+  const r = await db
+    .prepare(`SELECT * FROM reader_clients WHERE reader_id = ? AND source_customer_hash = ? ORDER BY created_at ASC LIMIT 1`)
+    .bind(readerId, sourceCustomerHash)
+    .first<ClientRow>();
+  return r ? mapClient(r) : null;
 }
 
 export async function updateClient(readerId: string, id: string, c: { displayName: string; contact?: string | null; note?: string | null }): Promise<boolean> {
@@ -234,6 +249,7 @@ interface ReadingRow {
   share_revoked_at: number | null;
   view_count: number;
   sent_at: number | null;
+  source_ticket_id?: string | null;
   created_at: number;
   updated_at: number;
 }
@@ -264,6 +280,7 @@ const mapReading = (r: ReadingRow): StudioReading => ({
     viewCount: r.view_count,
   },
   sentAt: r.sent_at,
+  sourceTicketId: r.source_ticket_id ?? null,
   createdAt: r.created_at,
   updatedAt: r.updated_at,
 });
@@ -294,17 +311,17 @@ export async function getReadingSecrets(readerId: string, id: string): Promise<{
 
 export async function createReading(
   readerId: string,
-  r: { clientId: string | null; title: string; question: string | null; spreadId: string; customSpread: unknown | null; showAiDisclosure: boolean },
+  r: { clientId: string | null; title: string; question: string | null; spreadId: string; customSpread: unknown | null; showAiDisclosure: boolean; sourceTicketId?: string | null },
 ): Promise<string> {
   const db = await getAppDB();
   const now = Date.now();
   const id = `rr_${crypto.randomUUID()}`;
   await db
     .prepare(
-      `INSERT INTO reader_readings (id, reader_id, client_id, title, question, spread_id, custom_spread_json, show_ai_disclosure, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO reader_readings (id, reader_id, client_id, title, question, spread_id, custom_spread_json, show_ai_disclosure, source_ticket_id, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
-    .bind(id, readerId, r.clientId, r.title, r.question, r.spreadId, r.customSpread ? JSON.stringify(r.customSpread) : null, r.showAiDisclosure ? 1 : 0, now, now)
+    .bind(id, readerId, r.clientId, r.title, r.question, r.spreadId, r.customSpread ? JSON.stringify(r.customSpread) : null, r.showAiDisclosure ? 1 : 0, r.sourceTicketId ?? null, now, now)
     .run();
   return id;
 }

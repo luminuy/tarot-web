@@ -35,6 +35,7 @@ export function readingSummary(r: StudioReading) {
     shareActive: r.share.active,
     viewCount: r.share.viewCount,
     sentAt: r.sentAt,
+    fromQueue: Boolean(r.sourceTicketId),
     updatedAt: r.updatedAt,
   };
 }

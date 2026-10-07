@@ -74,7 +74,17 @@ export interface ReadingSummaryT {
   shareActive: boolean;
   viewCount: number;
   sentAt: number | null;
+  fromQueue?: boolean;
   updatedAt: number;
+}
+export interface ImportableTicketT {
+  ticketId: string;
+  kind: "walkup" | "booking";
+  nickname: string | null;
+  question: string | null;
+  at: number;
+  clientId: string | null;
+  readingId: string | null;
 }
 export interface BodyPartT {
   key: string;

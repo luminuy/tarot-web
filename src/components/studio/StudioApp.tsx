@@ -9,6 +9,7 @@ import {
   downloadWithAuth,
   makeStudioCall,
   type DeckEntryT,
+  type ImportableTicketT,
   type ReadingSummaryT,
   type ReadingT,
   type SpreadOptionT,
@@ -226,6 +227,7 @@ function ReadingsTab({ boot, call, onOpen, onCreated }: { boot: Boot; call: Retu
                     {r.shareActive ? `ส่งแล้ว · เปิด ${r.viewCount}` : r.status === "sent" ? "ลิงก์ปิดแล้ว" : "ร่าง"}
                   </span>
                 </span>
+                {r.fromQueue && <span className="mt-1 inline-block text-[12px] font-semibold text-gold-ink">จากคิวที่จองผ่านเว็บ</span>}
                 <span className="mt-1 block text-[13px] text-muted">
                   {[r.clientId ? clientName.get(r.clientId) : null, r.spreadName, r.cardCount ? `${r.cardCount} ใบ` : "ยังไม่เปิดไพ่", fmtDate(r.updatedAt)].filter(Boolean).join(" · ")}
                 </span>
@@ -252,6 +254,25 @@ function NewReadingForm({ boot, call, onCancel, onCreated }: { boot: Boot; call:
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const isCustom = spreadId === "custom";
+  // คิว/นัดที่ลูกค้าจองผ่านเว็บ — เลือกแล้วเติมชื่อ/คำถาม/ลูกค้าให้ (ลูกค้าจองซ้ำ = ลูกค้าคนเดิม)
+  const [tickets, setTickets] = useState<ImportableTicketT[] | null>(null);
+  const [ticketId, setTicketId] = useState("");
+  useEffect(() => {
+    let alive = true;
+    void call<{ tickets: ImportableTicketT[] }>("/tickets").then((res) => alive && setTickets(res.ok ? res.data.tickets.filter((t) => !t.readingId) : []));
+    return () => {
+      alive = false;
+    };
+  }, [call]);
+  const pickTicket = (id: string) => {
+    setTicketId(id);
+    const t = tickets?.find((x) => x.ticketId === id);
+    if (!t) return;
+    if (!title.trim()) setTitle(`คำอ่านให้${t.nickname ? ` ${t.nickname}` : "ลูกค้าจากคิว"}`);
+    if (!question.trim() && t.question) setQuestion(t.question);
+    setClientId(t.clientId ?? "");
+  };
+  const pickedTicket = tickets?.find((x) => x.ticketId === ticketId) ?? null;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -267,7 +288,7 @@ function NewReadingForm({ boot, call, onCancel, onCreated }: { boot: Boot; call:
     setBusy(true);
     const res = await call<{ reading: ReadingT }>("/readings", {
       method: "POST",
-      body: { title: title.trim(), clientId: clientId || null, question: question.trim() || null, spreadId, customSpread, ...(templateId ? { templateId } : {}) },
+      body: { title: title.trim(), clientId: clientId || null, question: question.trim() || null, spreadId, customSpread, ...(templateId ? { templateId } : {}), ...(ticketId ? { ticketId } : {}) },
     });
     setBusy(false);
     if (!res.ok || !res.data.reading) return setErr(res.error || "สร้างไม่สำเร็จ");
@@ -277,6 +298,24 @@ function NewReadingForm({ boot, call, onCancel, onCreated }: { boot: Boot; call:
   return (
     <form onSubmit={submit} className={`${card} space-y-4`}>
       <h2 className="text-lg font-bold text-ink-deep">คำอ่านใหม่</h2>
+      {tickets && tickets.length > 0 && (
+        <label className="block space-y-1 rounded-2xl bg-inset-warm/60 p-4 text-sm text-muted">
+          เริ่มจากคิว/นัดที่ลูกค้าจองผ่านเว็บ (ไม่บังคับ)
+          <select value={ticketId} onChange={(e) => pickTicket(e.target.value)} className={`${fieldCls} min-h-11`}>
+            <option value="">— ไม่ใช้ —</option>
+            {tickets.map((t) => (
+              <option key={t.ticketId} value={t.ticketId}>
+                {t.nickname || "ลูกค้าไม่ระบุชื่อ"} · {t.kind === "booking" ? "นัดล่วงหน้า" : "คิวสด"} · {fmtDate(t.at)}
+              </option>
+            ))}
+          </select>
+          {pickedTicket && (
+            <span className="block text-[13px] leading-relaxed">
+              {pickedTicket.clientId ? "ลูกค้าคนนี้เคยมาแล้ว — ผูกกับรายชื่อเดิมให้" : "จะเพิ่มเป็นลูกค้าใหม่ในสตูดิโอ"} · ขอความยินยอมจากลูกค้าก่อนบันทึกข้อมูลของเขา
+            </span>
+          )}
+        </label>
+      )}
       <label className="block space-y-1 text-sm text-muted">
         ชื่อคำอ่าน
         <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="เช่น ความรักช่วงปลายปี" className={`${fieldCls} min-h-11`} />
@@ -285,7 +324,7 @@ function NewReadingForm({ boot, call, onCancel, onCreated }: { boot: Boot; call:
         <label className="space-y-1 text-sm text-muted">
           ลูกค้า
           <select value={clientId} onChange={(e) => setClientId(e.target.value)} className={`${fieldCls} min-h-11`}>
-            <option value="">— ไม่ระบุ —</option>
+            <option value="">{pickedTicket ? "— เพิ่มเป็นลูกค้าใหม่จากคิว —" : "— ไม่ระบุ —"}</option>
             {(boot.clients ?? []).map((c) => (
               <option key={c.id} value={c.id}>
                 {c.displayName}
