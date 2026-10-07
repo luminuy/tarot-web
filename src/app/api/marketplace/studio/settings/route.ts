@@ -2,6 +2,7 @@ import { apiFail, apiOk } from "@/lib/api/envelope";
 import { ensureReadableColor, sanitizeLogoUrl } from "@/lib/studio/brand";
 import { readJson, studioGate } from "@/lib/studio/gate";
 import { SettingsSchema } from "@/lib/studio/schemas";
+import { deleteOwnLogo } from "@/lib/studio/logo";
 import { saveStudioSettings } from "@/lib/studio/studio.repo";
 
 export const runtime = "nodejs";
@@ -27,5 +28,6 @@ export async function PUT(request: Request) {
     showAiDisclosure,
     aiAssist: aiAssist ?? gate.settings.aiAssist,
   });
+  if (gate.settings.logoUrl && gate.settings.logoUrl !== logo) await deleteOwnLogo(gate.settings.logoUrl);
   return apiOk({ brandColor: color.color, colorAdjusted: color.adjusted, contrast: color.ratio, logoUrl: logo });
 }

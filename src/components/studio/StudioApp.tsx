@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ensureReadableColor, STUDIO_PAPER } from "@/lib/studio/brand";
 import { PURGE_CONFIRM_TEXT } from "@/lib/studio/dpa";
 import { layoutsFor } from "@/lib/tarot/custom-spread";
 import { APP_TIME_ZONE } from "@/lib/time/bangkok";
+import { BrandSettings } from "./BrandSettings";
 import { ReadingEditor } from "./ReadingEditor";
 import {
   downloadWithAuth,
@@ -186,7 +186,7 @@ export function StudioApp({ token }: { token: string | null }) {
       {tab === "readings" && <ReadingsTab boot={boot} call={call} onOpen={openById} onCreated={(r) => setOpenReading(r)} />}
       {tab === "clients" && <ClientsTab token={token} clients={clients} readings={boot.readings ?? []} call={call} onChanged={load} onOpen={openById} />}
       {tab === "templates" && <TemplatesTab templates={boot.templates ?? []} call={call} onChanged={load} />}
-      {tab === "brand" && boot.settings && <BrandTab settings={boot.settings} readerName={boot.reader.displayName} call={call} onSaved={load} />}
+      {tab === "brand" && boot.settings && <BrandSettings settings={boot.settings} readerName={boot.reader.displayName} token={token} call={call} onSaved={load} />}
       {tab === "brand" && <MyDataPanel token={token} call={call} onPurged={load} />}
     </div>
   );
@@ -600,117 +600,6 @@ function TemplatesTab({ templates, call, onChanged }: { templates: StudioTemplat
           </li>
         ))}
       </ul>
-    </div>
-  );
-}
-
-/* ── แท็บแบรนด์ ──────────────────────────────────────────────────── */
-
-function BrandTab({
-  settings,
-  readerName,
-  call,
-  onSaved,
-}: {
-  settings: StudioSettingsT;
-  readerName: string;
-  call: ReturnType<typeof makeStudioCall>;
-  onSaved: () => void;
-}) {
-  const [s, setS] = useState(settings);
-  const [msg, setMsg] = useState<string | null>(null);
-  const preview = ensureReadableColor(s.brandColor);
-  return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-      <div className={`${card} space-y-4`}>
-        <p className="text-[13px] leading-relaxed text-muted">หน้าคำอ่านที่ส่งให้ลูกค้าจะขึ้นชื่อ โลโก้ และสีของคุณ — ดูหน้าตาได้ที่กล่อง &quot;ตัวอย่างที่ลูกค้าเห็น&quot;</p>
-        <label className="block space-y-1 text-sm font-semibold text-ink-deep">
-          ชื่อร้านหรือชื่อที่ลูกค้ารู้จัก
-          <span className="block text-[13px] font-normal text-muted">ขึ้นบนหัวคำอ่าน · เว้นว่างไว้ = ใช้ชื่อ &quot;{readerName}&quot;</span>
-          <input
-            value={s.brandName ?? ""}
-            maxLength={60}
-            placeholder="เช่น บ้านไพ่แม่จันทร์"
-            onChange={(e) => setS({ ...s, brandName: e.target.value })}
-            className={`${fieldCls} min-h-11 font-normal`}
-          />
-        </label>
-        <label className="block space-y-1 text-sm font-semibold text-ink-deep">
-          โลโก้ (ไม่บังคับ)
-          <span className="block text-[13px] font-normal text-muted">วางลิงก์รูปที่ขึ้นต้นด้วย https:// · รูปสี่เหลี่ยมจัตุรัสดูดีที่สุด</span>
-          <input
-            value={s.logoUrl ?? ""}
-            maxLength={500}
-            placeholder="https://..."
-            onChange={(e) => setS({ ...s, logoUrl: e.target.value })}
-            className={`${fieldCls} min-h-11 font-normal`}
-          />
-        </label>
-        <div className="space-y-1 text-sm text-muted">
-          <label htmlFor="studio-color" className="font-semibold text-ink-deep">
-            สีประจำร้าน
-          </label>
-          <div className="flex items-center gap-3">
-            <input id="studio-color" type="color" value={preview.color} onChange={(e) => setS({ ...s, brandColor: e.target.value })} className="h-11 w-14 cursor-pointer rounded-lg border border-line-interactive-warm bg-surface" />
-            <input aria-label="รหัสสี" value={s.brandColor ?? ""} maxLength={9} onChange={(e) => setS({ ...s, brandColor: e.target.value })} className={`${fieldCls} min-h-11 max-w-[140px] font-mono`} />
-            <span className="text-[13px]">{preview.adjusted ? "อ่านยาก" : "อ่านง่าย"}</span>
-          </div>
-          {preview.adjusted && <p className="text-[13px] text-ink">สีนี้อ่านยากบนพื้นสว่าง ระบบจะปรับให้เข้มขึ้นเป็น {preview.color} โดยอัตโนมัติ</p>}
-        </div>
-        <label className="block space-y-1 text-sm font-semibold text-ink-deep">
-          ช่องทางให้ลูกค้าติดต่อกลับ
-          <span className="block text-[13px] font-normal text-muted">ขึ้นท้ายคำอ่าน · ไม่ใส่ก็ได้</span>
-          <input
-            value={s.contactLine ?? ""}
-            maxLength={120}
-            placeholder="เช่น LINE @yourname"
-            onChange={(e) => setS({ ...s, contactLine: e.target.value })}
-            className={`${fieldCls} min-h-11 font-normal`}
-          />
-        </label>
-        <fieldset className="space-y-2 rounded-xl border border-line p-4">
-          <legend className="px-1 text-sm font-bold text-ink-deep">ตัวช่วย AI (ไม่บังคับ)</legend>
-          <label className="flex min-h-11 items-center gap-3 text-sm text-ink">
-            <input type="checkbox" checked={s.aiAssist} onChange={(e) => setS({ ...s, aiAssist: e.target.checked })} className="h-5 w-5" />
-            ให้ AI ช่วยเกลาคำอ่านจากโน้ตของฉัน
-          </label>
-          <p className="text-[13px] leading-relaxed text-muted">
-            {s.aiAssist
-              ? "AI ทำงานเฉพาะตอนคุณกดปุ่ม และได้รับแค่โน้ตกับคำถาม (ซ่อนเบอร์โทร อีเมล เลขบัตรแล้ว) ไม่ได้รับชื่อลูกค้า · คุณตรวจและแก้ก่อนส่งทุกครั้ง"
-              : "ปิดอยู่ — สตูดิโอไม่ส่งข้อมูลใดให้ AI คำอ่านเป็นคำของคุณทั้งหมด ไม่ใช้ AI ก็ทำคำอ่านและส่งลิงก์ให้ลูกค้าได้ครบ"}
-          </p>
-          {s.aiAssist && (
-            <label className="flex min-h-11 items-center gap-3 text-sm text-ink">
-              <input type="checkbox" checked={s.showAiDisclosure} onChange={(e) => setS({ ...s, showAiDisclosure: e.target.checked })} className="h-5 w-5" />
-              ถ้าใช้ AI ในคำอ่านไหน ให้บอกลูกค้าว่า &quot;เรียบเรียงด้วยความช่วยเหลือของ AI&quot;
-            </label>
-          )}
-        </fieldset>
-        {msg && <p className="text-sm text-ink">{msg}</p>}
-        <button
-          type="button"
-          className={btnPrimary}
-          onClick={async () => {
-            const res = await call<{ colorAdjusted: boolean; brandColor: string }>("/settings", { method: "PUT", body: s });
-            if (!res.ok) return setMsg(res.error);
-            setMsg(res.data.colorAdjusted ? `บันทึกแล้ว — ปรับสีเป็น ${res.data.brandColor} ให้อ่านง่ายขึ้น` : "บันทึกแล้ว");
-            onSaved();
-          }}
-        >
-          บันทึก
-        </button>
-      </div>
-      <aside aria-label="ตัวอย่างหัวคำอ่าน" className="space-y-3 rounded-[24px] border border-line p-6 text-center" style={{ backgroundColor: STUDIO_PAPER }}>
-        <p className="text-[12px] text-muted">ตัวอย่างที่ลูกค้าเห็น</p>
-        <p className="text-sm font-bold" style={{ color: preview.color }}>
-          {s.brandName?.trim() || readerName}
-        </p>
-        <p className="text-lg font-bold text-ink-deep">ความรักช่วงปลายปี</p>
-        <p className="rounded-xl border px-3 py-2 text-[13px]" style={{ borderColor: preview.color, color: preview.color }}>
-          ภาพรวม
-        </p>
-        <p className="text-[12px] text-muted">สร้างด้วย SeerTarot</p>
-      </aside>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { getAppDB } from "@/lib/platform/db";
+import { deleteOwnLogo } from "@/lib/studio/logo";
 
 /**
  * 🗂️ Reader Studio (migrations/0027) — ทุกคำสั่งที่แม่หมอเรียกกรองด้วย reader_id เสมอ
@@ -491,8 +492,24 @@ export async function exportAllStudioData(readerId: string) {
  * ลบข้อมูลสตูดิโอทั้งหมดของแม่หมอ — ลูกค้า · คำอ่าน (ลิงก์ที่ส่งไปแล้วเปิดไม่ได้ทันที) · แม่แบบ · แบรนด์ · การยอมรับข้อตกลง
  * คงไว้: วันคงเหลือของบัตรผ่าน (`pro_until`) และแถวคำสั่งซื้อบัตรผ่าน — เป็นหลักฐานการเงิน ไม่มีข้อมูลลูกค้า
  */
+/** ตั้ง/เอาโลโก้ออกทันที (หลังอัปโหลด) — คืน path เดิมให้ผู้เรียกลบไฟล์เก่า */
+export async function setStudioLogo(readerId: string, logoUrl: string | null): Promise<string | null> {
+  const db = await getAppDB();
+  const before = await db.prepare(`SELECT logo_url FROM reader_studio_settings WHERE reader_id = ?`).bind(readerId).first<{ logo_url: string | null }>();
+  await db
+    .prepare(
+      `INSERT INTO reader_studio_settings (reader_id, logo_url, updated_at) VALUES (?, ?, ?)
+       ON CONFLICT(reader_id) DO UPDATE SET logo_url = excluded.logo_url, updated_at = excluded.updated_at`,
+    )
+    .bind(readerId, logoUrl, Date.now())
+    .run();
+  return before?.logo_url ?? null;
+}
+
 export async function purgeStudioData(readerId: string): Promise<{ clients: number; readings: number; templates: number }> {
   const db = await getAppDB();
+  const logo = await db.prepare(`SELECT logo_url FROM reader_studio_settings WHERE reader_id = ?`).bind(readerId).first<{ logo_url: string | null }>();
+  await deleteOwnLogo(logo?.logo_url);
   const r = await db.prepare(`DELETE FROM reader_readings WHERE reader_id = ?`).bind(readerId).run();
   const c = await db.prepare(`DELETE FROM reader_clients WHERE reader_id = ?`).bind(readerId).run();
   const t = await db.prepare(`DELETE FROM reader_templates WHERE reader_id = ?`).bind(readerId).run();

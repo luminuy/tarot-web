@@ -4,7 +4,9 @@ import { PUBLIC_SPREADS } from "@/data/spreads";
 import { signReaderToken } from "@/lib/auth/reader-auth";
 import { createReader, deleteReader } from "@/lib/marketplace/readers.repo";
 import { getAppDB } from "@/lib/platform/db";
-import { contrastRatio, ensureReadableColor, normalizeHex, sanitizeLogoUrl, STUDIO_PAPER } from "@/lib/studio/brand";
+import { contrastRatio, ensureReadableColor, normalizeHex, sanitizeLogoUrl, STUDIO_COLOR_PRESETS, STUDIO_PAPER } from "@/lib/studio/brand";
+import { setShareBucketForTests, type AppR2Bucket } from "@/lib/platform/cf";
+import { logoKeyFromPath, sniffLogoKind } from "@/lib/studio/logo";
 import { assembleOfflineDraft, buildDraftPrompt, cardLabelTh, expectedKeys, validateDraft, type DraftContext } from "@/lib/studio/draft";
 import { STUDIO_DPA_VERSION, hasAcceptedDpa, isStudioEnabled } from "@/lib/studio/dpa";
 import { hashShareToken, isWellFormedToken, newShareToken, signViewCookie, verifyViewCookie, viewCookieName } from "@/lib/studio/share";
@@ -537,6 +539,82 @@ async function main() {
       (adminPassSrc.match(/const denied = await requireAdmin\(\);\s*if \(denied\) return denied;/g) ?? []).length === 3 && (adminPassSrc.match(/recordAudit\(/g) ?? []).length === 2,
     );
 
+    // ── โลโก้: อัปโหลดจากเครื่อง (R2) แทนการวางลิงก์ ──
+    check("สีสำเร็จรูปทุกสีอ่านง่ายบนพื้นกระดาษ (ไม่ต้องปรับ)", STUDIO_COLOR_PRESETS.every((p) => !ensureReadableColor(p.hex).adjusted) && new Set(STUDIO_COLOR_PRESETS.map((p) => p.hex)).size === STUDIO_COLOR_PRESETS.length);
+    const ownLogo = `/api/studio/logo/${A.id}/${"a".repeat(32)}.png`;
+    check(
+      "โลโก้: รับ path ของระบบเรา · ไม่รับ path แปลก/http/javascript:",
+      sanitizeLogoUrl(ownLogo) === ownLogo &&
+        sanitizeLogoUrl(`/api/studio/logo/${A.id}/../x.png`) === null &&
+        sanitizeLogoUrl("/etc/passwd") === null &&
+        sanitizeLogoUrl("http://x.com/a.png") === null &&
+        sanitizeLogoUrl("javascript:alert(1)") === null,
+    );
+    check("โลโก้: path ➔ key ใน R2 เฉพาะรูปแบบที่ถูก", logoKeyFromPath(ownLogo) === `studio-logo/${A.id}/${"a".repeat(32)}.png` && logoKeyFromPath("/api/share/image/abc") === null);
+    const PNG1 = Uint8Array.from(Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==", "base64"));
+    const webpHead = Uint8Array.from([0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50]);
+    check(
+      "โลโก้: ดูชนิดไฟล์จากไบต์จริง (PNG/JPG/WebP · GIF/ข้อความไม่รับ)",
+      sniffLogoKind(PNG1) === "png" && sniffLogoKind(Uint8Array.from([0xff, 0xd8, 0xff, 0xe0])) === "jpg" && sniffLogoKind(webpHead) === "webp" &&
+        sniffLogoKind(new TextEncoder().encode("GIF89a......")) === null && sniffLogoKind(new TextEncoder().encode("<svg onload=x>")) === null,
+    );
+    const logoRoute = await import("../../src/app/api/marketplace/studio/logo/route");
+    const logoServe = await import("../../src/app/api/studio/logo/[readerId]/[file]/route");
+    const sendLogo = (token: string | null, bytes: Uint8Array, origin = ORIGIN) =>
+      logoRoute.POST(
+        new Request(`${ORIGIN}/api/marketplace/studio/logo`, {
+          method: "POST",
+          headers: { ...(token ? { authorization: `Bearer ${token}` } : {}), origin, "content-type": "image/png" },
+          body: new Blob([bytes as BlobPart]),
+        }),
+      );
+    setShareBucketForTests(null);
+    let lr = await sendLogo(A.token, new Uint8Array(200).fill(1));
+    check("โลโก้: ไม่มีที่เก็บไฟล์ ➔ 503 ให้หน้าเว็บเสนอวางลิงก์แทน", lr.status === 503 && ((await lr.json()) as { code?: string }).code === "storage_unavailable");
+    const store = new Map<string, { data: ArrayBuffer; ct?: string }>();
+    const fakeBucket: AppR2Bucket = {
+      async put(key, value, opts) {
+        store.set(key, { data: value as ArrayBuffer, ct: opts?.httpMetadata?.contentType });
+      },
+      async get(key) {
+        const o = store.get(key);
+        return o ? { body: new Blob([o.data]).stream(), httpMetadata: { contentType: o.ct }, size: o.data.byteLength, arrayBuffer: async () => o.data } : null;
+      },
+      async head(key) {
+        const o = store.get(key);
+        return o ? { size: o.data.byteLength } : null;
+      },
+      async delete(key) {
+        store.delete(key);
+      },
+    };
+    setShareBucketForTests(fakeBucket);
+    const pngPadded = new Uint8Array(400);
+    pngPadded.set(PNG1);
+    lr = await sendLogo(null, pngPadded, "https://evil.example");
+    check("โลโก้: อัปโหลดจากเว็บอื่น (ไม่มี Bearer) ไม่ได้ (CSRF)", lr.status === 403);
+    lr = await sendLogo(A.token, new TextEncoder().encode("<svg xmlns='http://www.w3.org/2000/svg' onload='alert(1)'>".padEnd(200, " ")));
+    check("โลโก้: ไฟล์ที่ไม่ใช่รูป (SVG/ข้อความ) ไม่รับ", lr.status === 415);
+    const tooBig = new Uint8Array(400_001);
+    tooBig.set(PNG1);
+    lr = await sendLogo(A.token, tooBig);
+    check("โลโก้: ใหญ่เกิน 400 KB ไม่รับ", lr.status === 413);
+    lr = await sendLogo(A.token, pngPadded);
+    const up1 = (await lr.json()) as { logoUrl?: string };
+    check("โลโก้: อัปโหลดแล้วตั้งเป็นโลโก้ทันที", lr.status === 200 && Boolean(up1.logoUrl && sanitizeLogoUrl(up1.logoUrl)) && (await settingsOf(A.token) as unknown as { logoUrl: string }).logoUrl === up1.logoUrl, up1);
+    const [, , , , rid1, file1] = (up1.logoUrl ?? "").split("/");
+    const served = await logoServe.GET(new Request(`${ORIGIN}${up1.logoUrl}`), { params: Promise.resolve({ readerId: rid1, file: file1 }) });
+    check("โลโก้: เสิร์ฟรูปได้ (ชนิดถูก · nosniff · cache ยาว)", served.status === 200 && served.headers.get("content-type") === "image/png" && served.headers.get("x-content-type-options") === "nosniff" && /immutable/.test(served.headers.get("cache-control") ?? ""));
+    const bad = await logoServe.GET(new Request(`${ORIGIN}/api/studio/logo/x/y`), { params: Promise.resolve({ readerId: "..", file: "secret.json" }) });
+    check("โลโก้: path แปลกอ่านไฟล์อื่นใน bucket ไม่ได้ (404)", bad.status === 404);
+    lr = await sendLogo(A.token, pngPadded);
+    const up2 = (await lr.json()) as { logoUrl?: string };
+    check("โลโก้: เปลี่ยนรูป ➔ ลบไฟล์เก่าทิ้ง ไม่ค้างใน R2", up2.logoUrl !== up1.logoUrl && !store.has(logoKeyFromPath(up1.logoUrl)!) && store.has(logoKeyFromPath(up2.logoUrl)!));
+    const delRes = await logoRoute.DELETE(new Request(`${ORIGIN}/api/marketplace/studio/logo`, { method: "DELETE", headers: { authorization: `Bearer ${A.token}`, origin: ORIGIN } }));
+    check("โลโก้: เอาออก ➔ ไม่มีโลโก้ + ลบไฟล์", delRes.status === 200 && store.size === 0 && (await settingsOf(A.token) as unknown as { logoUrl: string | null }).logoUrl === null);
+    lr = await sendLogo(A.token, pngPadded);
+    const up3 = (await lr.json()) as { logoUrl?: string };
+
     // ── ส่งออก/ลบทั้งสตูดิโอ (DPA ข้อ 12 · 15) ──
     const exportRoute = await import("../../src/app/api/marketplace/studio/export/route");
     r = await api(exportRoute, "GET", "/api/marketplace/studio/export", A.token);
@@ -551,6 +629,8 @@ async function main() {
     check("ลบทั้งสตูดิโอ: ลูกค้า/คำอ่าน/แม่แบบหายหมด", r.status === 200 && Number(leftA?.n) === 0, r.json);
     const afterPurge = await tdb.prepare(`SELECT dpa_version, brand_name, pro_until, ai_assist FROM reader_studio_settings WHERE reader_id = ?`).bind(A.id).first<{ dpa_version: string | null; brand_name: string | null; pro_until: number | null; ai_assist: number }>();
     check("ลบทั้งสตูดิโอ: ล้างแบรนด์ + การยอมรับข้อตกลง + ปิดตัวช่วย AI แต่คงวันแพ็กเกจ", afterPurge?.dpa_version === null && afterPurge.brand_name === null && afterPurge.pro_until === proBefore && afterPurge.ai_assist === 0);
+    check("ลบทั้งสตูดิโอ: ลบไฟล์โลโก้ใน R2 ด้วย", !store.has(logoKeyFromPath(up3.logoUrl)!));
+    setShareBucketForTests(undefined);
     check("ลบทั้งสตูดิโอ: แม่หมอ B ไม่ถูกแตะ (ยังยอมรับข้อตกลงอยู่)", (await tdb.prepare(`SELECT dpa_version FROM reader_studio_settings WHERE reader_id = ?`).bind(B.id).first<{ dpa_version: string | null }>())?.dpa_version === STUDIO_DPA_VERSION);
     await api(dpa, "POST", "/api/marketplace/studio/dpa", A.token, { version: STUDIO_DPA_VERSION, agree: true });
 

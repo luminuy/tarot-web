@@ -29,6 +29,26 @@ export function makeStudioCall(token: string | null): StudioCall {
   };
 }
 
+/** อัปโหลดโลโก้ (ไฟล์รูปดิบ ไม่ใช่ JSON) */
+export async function uploadStudioLogo(
+  token: string | null,
+  blob: Blob,
+): Promise<{ ok: true; logoUrl: string } | { ok: false; error: string; code?: string }> {
+  try {
+    const res = await fetch("/api/marketplace/studio/logo", {
+      method: "POST",
+      headers: { "Content-Type": blob.type || "application/octet-stream", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: blob,
+      cache: "no-store",
+    });
+    const json = (await res.json().catch(() => null)) as { ok?: boolean; logoUrl?: string; error?: string; code?: string } | null;
+    if (res.ok && json?.logoUrl) return { ok: true, logoUrl: json.logoUrl };
+    return { ok: false, error: json?.error || "อัปโหลดรูปไม่สำเร็จ", code: json?.code };
+  } catch {
+    return { ok: false, error: "เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง" };
+  }
+}
+
 /** ดาวน์โหลดไฟล์ส่งออก (ต้องแนบ Bearer จึงใช้ <a href> ตรง ๆ ไม่ได้) */
 export async function downloadWithAuth(token: string | null, path: string, filename: string): Promise<boolean> {
   try {
