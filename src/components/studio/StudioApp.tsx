@@ -214,7 +214,7 @@ function DpaGate({ boot, call, onAccepted }: { boot: Boot; call: ReturnType<type
       <p className="text-[13px] text-muted">ฉบับ {boot.dpa.version}</p>
       <label className="flex min-h-11 items-start gap-3 text-sm text-ink-deep">
         <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0" />
-        ฉันอ่านแล้ว และจะขอความยินยอมจากลูกค้าก่อนบันทึกข้อมูลของเขาในสตูดิโอ
+        ฉันได้อ่านและยอมรับข้อตกลงการประมวลผลข้อมูลส่วนบุคคลฉบับ {boot.dpa.version} และจะแจ้งลูกค้าและขอความยินยอมตามข้อตกลงก่อนบันทึกข้อมูลของเขาในสตูดิโอ
       </label>
       {err && <p className="text-sm text-err">{err}</p>}
       <button
@@ -633,7 +633,7 @@ function BrandTab({ settings, call, onSaved }: { settings: StudioSettingsT; call
         </label>
         <label className="flex min-h-11 items-center gap-3 text-sm text-ink">
           <input type="checkbox" checked={s.showAiDisclosure} onChange={(e) => setS({ ...s, showAiDisclosure: e.target.checked })} className="h-5 w-5" />
-          คำอ่านใหม่แสดงบรรทัด &quot;เรียบเรียงด้วยความช่วยเหลือของ AI&quot; เป็นค่าเริ่มต้น
+          คำอ่านใหม่แสดงบรรทัด &quot;เรียบเรียงด้วยความช่วยเหลือของ AI&quot; เป็นค่าเริ่มต้น (แนะนำ — ถ้าปิด คุณต้องตรวจทานทุกคำอ่านก่อนส่ง ตามข้อตกลงข้อ 7.7)
         </label>
         {msg && <p className="text-sm text-ink">{msg}</p>}
         <button

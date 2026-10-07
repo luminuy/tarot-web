@@ -459,7 +459,7 @@ export function ReadingEditor({
           })}
           <label className="flex min-h-11 items-center gap-3 text-sm text-ink">
             <input type="checkbox" checked={r.showAiDisclosure} onChange={(e) => save({ showAiDisclosure: e.target.checked }, "disclosure")} className="h-5 w-5" />
-            แสดงบรรทัด &quot;เรียบเรียงด้วยความช่วยเหลือของ AI&quot; ให้ลูกค้าเห็น (แนะนำ — ความโปร่งใสสร้างความเชื่อใจ)
+            แสดงบรรทัด &quot;เรียบเรียงด้วยความช่วยเหลือของ AI&quot; ให้ลูกค้าเห็น (แนะนำ — ปิดได้เมื่อคุณตรวจทานคำอ่านแล้วเท่านั้น การปิดถือว่าคุณรับถ้อยคำเป็นของคุณเอง ตามข้อตกลงข้อ 7.7)
           </label>
           <button type="button" onClick={saveBody} disabled={!bodyDirty || busy === "body"} className={btnPrimary}>
             {busy === "body" ? "กำลังบันทึก…" : "บันทึกคำอ่าน"}

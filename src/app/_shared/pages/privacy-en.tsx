@@ -85,6 +85,15 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
               record any video, audio or conversation, and connection data is deleted as soon as the call ends.
             </li>
             <li>
+              <strong>Queue &amp; Appointment Bookings with a Human Reader (Marketplace)</strong> — When you book a
+              reader, we share your nickname, your question and any reading you attach{" "}
+              <strong>only with the reader you chose</strong>, because this is needed to provide the reading you asked
+              for. Readers are independent providers and may keep this information in their own records (including
+              SeerTarot&apos;s Reader Studio) to continue serving you, as a separate data controller who must tell you
+              before doing so. If you do not want a reader to see health, sexuality or religious matters, please leave
+              them out of your question.
+            </li>
+            <li>
               <strong>Trial Quota Cookie (tarot_guest)</strong> — A strictly functional, first-party cookie containing
               only a cryptographically random identifier and your remaining complimentary trial counter. It collects
               zero personal data, performs zero cross-site tracking, and can be cleared via your browser settings at
@@ -180,6 +189,8 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
               The &quot;Oracle&quot; and &quot;Tarot Readers&quot; across this platform are{" "}
               <strong>curated AI personas</strong> designed to facilitate mindful introspection, philosophical
               perspective, and contemplative guidance. They do not constitute human clairvoyants or accredited counselors.
+              The only exception is a Marketplace booking, where you are clearly told you are booking a real human
+              reader.
             </p>
             <p>
               <strong>Zero Fabricated Cards Policy:</strong> Every reading operates strictly upon the authentic 78-card
