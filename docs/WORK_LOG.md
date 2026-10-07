@@ -38,6 +38,14 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-07 (รอบ 210): ✦ Search Console แจ้ง Structured Data "ข้อมูลผู้ขาย / ตัวอย่างข้อมูลสินค้า" ไม่ครบ (หน้า `/pricing` · `/en/pricing`)
+
+- อีเมล Google 2026-10-06: ขาด `image` (ร้ายแรง ➔ หน้าราคาไม่ได้แสดงแบบสินค้า) · `description` · `shippingDetails` · `hasMerchantReturnPolicy` · `review` · `aggregateRating`
+- `Product` JSON-LD ใน `src/app/_shared/pages/pricing.tsx` เติม `image` (ภาพสินค้าจัตุรัส `public/checkout/credits.jpg` ชุดเดียวกับหน้าจ่าย Stripe · production ตอบ 200) · `description` (ข้อความเดียวกับ meta) · `shippingDetails` ทุก Offer (ของดิจิทัล ค่าส่ง 0 บาท ได้ทันที ปลายทาง TH)
+- **ตั้งใจไม่ใส่**: `hasMerchantReturnPolicy` (เจ้าของยังไม่ประกาศนโยบายคืนเงิน — กฎหัวไฟล์) · `review`/`aggregateRating` (ห้ามแต่งรีวิวเอง ผิดนโยบาย Google) ➔ สองอันนี้เป็นแค่คำเตือน ไม่ทำให้หลุดผลค้นหา
+- ตรวจ: typecheck · build ทั้งชุด · อ่าน JSON-LD จาก `dist/pricing.html` + `dist/en/pricing.html` จริง · ด่าน test-json-ld-escape · test-code-debt (72/72) · test-en-routing (A6-07) ผ่าน
+- ค้าง: deploy แล้วกด "ตรวจสอบการแก้ไข" ใน Search Console · ถ้าเจ้าของประกาศนโยบายคืนเงินเมื่อไร ค่อยเติม `hasMerchantReturnPolicy`
+
 ### 🗓️ 2026-10-03 (รอบ 208): ✦ แก้ 2 บั๊กจากเจ้าของ — คืนเงินแล้วรอบไม่ลด · กดโลโก้ไม่กลับหน้าแรก
 
 - **คืนเงินในแดชบอร์ด Stripe แล้วรอบดูดวงที่ซื้อไม่ลด** (INC บันทึกแล้ว): webhook รับ `charge.refunded` ➔ ถาม Stripe ซ้ำว่าคืนเต็ม ➔ `applyGatewayRefund` (`refund-sync.ts`) ตั้ง `user_bonus.granted = 0` ของการซื้อนั้น (กุญแจเดิมกันแจกคืน) · ค่าปรึกษา ➔ ยกเลิกคิว/นัด + อีเมลแจ้ง · คืนบางส่วนไม่ถอนอัตโนมัติ

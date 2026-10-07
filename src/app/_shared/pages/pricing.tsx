@@ -183,10 +183,30 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
     inLanguage: locale,
     mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
   };
+  /*
+   * Search Console (2026-10-06) แจ้งว่าข้อมูลผู้ขายขาด image (ร้ายแรง) · description · shippingDetails
+   * - image ใช้ภาพสินค้าจัตุรัสชุดเดียวกับหน้าจ่ายเงิน Stripe (`public/checkout/credits.jpg` · ดู `checkoutArtUrl`
+   *   — ไม่ import ตรงเพราะไฟล์นั้นดึง node:crypto เข้ามา)
+   * - shippingDetails = ของดิจิทัล ได้รอบทันทีหลังจ่าย ไม่มีค่าส่ง (ข้อเท็จจริง ไม่ใช่นโยบายใหม่)
+   * ⚠️ ไม่ใส่ hasMerchantReturnPolicy จนกว่าเจ้าของจะประกาศนโยบายคืนเงิน (ดูหัวไฟล์)
+   * ⚠️ ห้ามใส่ review / aggregateRating ที่ไม่ได้มาจากรีวิวจริง — Google ลงโทษรีวิวที่เว็บเขียนให้ตัวเอง
+   */
+  const shippingDetails = {
+    "@type": "OfferShippingDetails",
+    shippingRate: { "@type": "MonetaryAmount", value: 0, currency: "THB" },
+    shippingDestination: { "@type": "DefinedRegion", addressCountry: "TH" },
+    deliveryTime: {
+      "@type": "ShippingDeliveryTime",
+      handlingTime: { "@type": "QuantitativeValue", minValue: 0, maxValue: 0, unitCode: "DAY" },
+      transitTime: { "@type": "QuantitativeValue", minValue: 0, maxValue: 0, unitCode: "DAY" },
+    },
+  };
   const jsonLdOffers = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: isEn ? "SeerTarot reading top-ups" : "แพ็กเติมรอบดูดวง SeerTarot",
+    description: c.description,
+    image: `${SITE_ORIGIN}/checkout/credits.jpg`,
     url: localizedUrl(PATH, locale),
     brand: { "@type": "Brand", name: "SeerTarot" },
     offers: packages.map((p) => ({
@@ -196,6 +216,7 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
       priceCurrency: "THB",
       availability: "https://schema.org/InStock",
       url: `${SITE_ORIGIN}${isEn ? "/en" : ""}${PATH}`,
+      shippingDetails,
     })),
   };
 
