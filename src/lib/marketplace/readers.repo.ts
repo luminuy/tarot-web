@@ -302,6 +302,8 @@ export async function deleteReader(id: string): Promise<boolean> {
     await db.prepare("DELETE FROM reader_clients WHERE reader_id = ?").bind(id).run();
     await db.prepare("DELETE FROM reader_templates WHERE reader_id = ?").bind(id).run();
     await db.prepare("DELETE FROM reader_studio_settings WHERE reader_id = ?").bind(id).run();
+    // บัตรผ่าน: ลบแถวที่ผูกกับตัวแม่หมอ · แถว payments (หลักฐานการเงิน) คงไว้ตามเดิม ไม่มี reader_id อยู่แล้ว
+    await db.prepare("DELETE FROM reader_studio_passes WHERE reader_id = ?").bind(id).run();
   } catch {
     // ignore if tables not yet created in older migrations
   }

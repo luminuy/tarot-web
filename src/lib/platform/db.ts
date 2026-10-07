@@ -480,7 +480,7 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec("CREATE INDEX IF NOT EXISTS idx_ai_usage_subject ON ai_usage_daily(subject, day)");
     // ✦ Reader Studio (migrations/0027)
     safeExec(
-      "CREATE TABLE IF NOT EXISTS reader_studio_settings ( reader_id TEXT PRIMARY KEY, brand_name TEXT, logo_url TEXT, brand_color TEXT, contact_line TEXT, show_ai_disclosure INTEGER NOT NULL DEFAULT 1, dpa_version TEXT, dpa_accepted_at INTEGER, updated_at INTEGER NOT NULL )"
+      "CREATE TABLE IF NOT EXISTS reader_studio_settings ( reader_id TEXT PRIMARY KEY, brand_name TEXT, logo_url TEXT, brand_color TEXT, contact_line TEXT, show_ai_disclosure INTEGER NOT NULL DEFAULT 1, dpa_version TEXT, dpa_accepted_at INTEGER, pro_until INTEGER, updated_at INTEGER NOT NULL )"
     );
     safeExec(
       "CREATE TABLE IF NOT EXISTS reader_clients ( id TEXT PRIMARY KEY, reader_id TEXT NOT NULL, display_name TEXT NOT NULL, contact TEXT, note TEXT, source_customer_hash TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL )"
@@ -500,6 +500,11 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     // ฐานข้อมูลในเครื่องที่สร้างตาราง 0027 รุ่นแรกไว้แล้ว — เติมคอลัมน์ที่มาทีหลัง (มีแล้ว = error เงียบ)
     safeExec("ALTER TABLE reader_clients ADD COLUMN source_customer_hash TEXT");
     safeExec("ALTER TABLE reader_readings ADD COLUMN source_ticket_id TEXT");
+    safeExec("ALTER TABLE reader_studio_settings ADD COLUMN pro_until INTEGER");
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS reader_studio_passes ( order_id TEXT PRIMARY KEY, reader_id TEXT NOT NULL, days INTEGER NOT NULL, created_at INTEGER NOT NULL, granted_at INTEGER, revoked_at INTEGER )"
+    );
+    safeExec("CREATE INDEX IF NOT EXISTS idx_reader_studio_passes_reader ON reader_studio_passes(reader_id, created_at DESC)");
     safeExec("CREATE INDEX IF NOT EXISTS idx_reader_clients_source ON reader_clients(reader_id, source_customer_hash)");
     safeExec(
       "CREATE UNIQUE INDEX IF NOT EXISTS idx_reader_readings_ticket ON reader_readings(reader_id, source_ticket_id) WHERE source_ticket_id IS NOT NULL"

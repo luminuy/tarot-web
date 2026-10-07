@@ -153,6 +153,12 @@ async function main() {
   const templateOne = await import("../../src/app/api/marketplace/studio/templates/[id]/route");
   const unlock = await import("../../src/app/api/studio/unlock/route");
   const ticketsRoute = await import("../../src/app/api/marketplace/studio/tickets/route");
+  const planCheckout = await import("../../src/app/api/marketplace/studio/plan/checkout/route");
+  const planConfirm = await import("../../src/app/api/marketplace/studio/plan/confirm/route");
+  const webhook = await import("../../src/app/api/marketplace/payments/webhook/route");
+  const { applyGatewayRefund } = await import("../../src/lib/marketplace/refund-sync");
+  const { grantStudioPass } = await import("../../src/lib/studio/plan");
+  const { createHmac } = await import("node:crypto");
 
   const mk = async (name: string) => {
     const r = await createReader({ displayName: name, bio: "ทดสอบสตูดิโอ", avatarUrl: null, specialties: ["ความรัก"], lineUrl: "https://line.me/ti/p/~x", status: "approved", commissionPct: 20 });
@@ -391,6 +397,70 @@ async function main() {
     check("รายการคำอ่านติดป้ายจากคิว", (r.json as { readings: Array<{ id: string; fromQueue?: boolean }> }).readings.find((x) => x.id === fromQueue.id)?.fromQueue === true);
     await tdb.prepare(`DELETE FROM queue_tickets WHERE id IN (?, ?, ?, ?, ?)`).bind(t1, t2, tPending, tOld, tB).run();
 
+    // ── บัตรผ่านสตูดิโอ 30 วัน (จ่ายครั้งเดียว) ──
+    delete process.env.STUDIO_PRO_PRICE_THB;
+    delete process.env.STRIPE_SECRET_KEY;
+    type PlanV = { active: boolean; proUntil: number | null; priceThb: number | null; proDraftsPerDay: number };
+    r = await api<{ plan: PlanV }>(root, "GET", "/api/marketplace/studio", A.token);
+    check("บัตรผ่าน: ยังไม่ตั้งราคา ➔ ไม่เปิดขาย (ไม่มีปุ่มซื้อ)", (r.json as { plan: PlanV }).plan?.priceThb === null && (r.json as { plan: PlanV }).plan.active === false, r.json);
+    r = await api(planCheckout, "POST", "/api/marketplace/studio/plan/checkout", A.token, {});
+    check("บัตรผ่าน: ยังไม่ตั้งราคา ➔ ซื้อไม่ได้ (503 plan_closed)", r.status === 503 && r.json.code === "plan_closed");
+    process.env.STUDIO_PRO_PRICE_THB = "199";
+    r = await api<{ orderId: string; authorizeUri: string; provider: string }>(planCheckout, "POST", "/api/marketplace/studio/plan/checkout", A.token, {});
+    const co = r.json as { orderId: string; authorizeUri: string; provider: string };
+    check("บัตรผ่าน: เริ่มจ่ายได้ (ตัวจำลอง) · กลับมาที่สตูดิโอโดยไม่มีโทเคนใน URL", r.status === 200 && /^stp_[0-9a-f]{16}$/.test(co.orderId) && co.authorizeUri.includes("/readers/studio?plan=return") && !co.authorizeUri.includes(A.token), r.json);
+    const testCharge = new URL(co.authorizeUri).searchParams.get("test_charge_id") ?? "";
+    const payRow = await tdb.prepare(`SELECT id, amount_satang, user_id, status FROM payments WHERE order_id = ?`).bind(co.orderId).first<{ id: string; amount_satang: number; user_id: string | null; status: string }>();
+    check("บัตรผ่าน: ราคามาจากเซิร์ฟเวอร์ (19900 สตางค์) · แถวยังรอจ่าย", payRow?.amount_satang === 19900 && payRow.status === "pending");
+    r = await api(planConfirm, "POST", "/api/marketplace/studio/plan/confirm", B.token, { orderId: co.orderId, testChargeId: testCharge });
+    check("บัตรผ่าน: แม่หมอคนอื่นยืนยันคำสั่งซื้อนี้ไม่ได้", r.status === 404);
+    r = await api(planConfirm, "POST", "/api/marketplace/studio/plan/confirm", A.token, { orderId: co.orderId, testChargeId: "chrg_test_wrong" });
+    check("บัตรผ่าน: ยังไม่จ่าย ➔ ไม่ให้วัน (402)", r.status === 402 && r.json.code === "not_paid");
+    const before = Date.now();
+    r = await api<{ status: string; plan: PlanV }>(planConfirm, "POST", "/api/marketplace/studio/plan/confirm", A.token, { orderId: co.orderId, testChargeId: testCharge });
+    const p1 = (r.json as { plan: PlanV }).plan;
+    check("บัตรผ่าน: จ่ายแล้ว ➔ ใช้ได้ 30 วัน", r.status === 200 && p1?.active === true && Math.abs((p1.proUntil ?? 0) - (before + 30 * 86_400_000)) < 60_000, r.json);
+    r = await api<{ plan: PlanV }>(planConfirm, "POST", "/api/marketplace/studio/plan/confirm", A.token, { orderId: co.orderId, testChargeId: testCharge });
+    check("บัตรผ่าน: ยืนยันซ้ำไม่ได้วันเพิ่ม", (r.json as { plan: PlanV }).plan.proUntil === p1.proUntil);
+    check("บัตรผ่าน: เรียกให้วันซ้ำ (webhook ยิงซ้ำ) = already", (await grantStudioPass(co.orderId)) === "already");
+    r = await api<{ quota: { limit: number } }>(root, "GET", "/api/marketplace/studio", A.token);
+    check("บัตรผ่าน: โควตาร่างต่อวันเพิ่มเป็น 300", (r.json as { quota: { limit: number } }).quota.limit === 300);
+    // ซื้อซ้ำก่อนหมด ➔ ต่อจากวันหมดเดิม
+    r = await api<{ orderId: string; authorizeUri: string }>(planCheckout, "POST", "/api/marketplace/studio/plan/checkout", A.token, {});
+    const co2 = r.json as { orderId: string; authorizeUri: string };
+    r = await api<{ plan: PlanV }>(planConfirm, "POST", "/api/marketplace/studio/plan/confirm", A.token, { orderId: co2.orderId, testChargeId: new URL(co2.authorizeUri).searchParams.get("test_charge_id") });
+    const p2 = (r.json as { plan: PlanV }).plan;
+    check("บัตรผ่าน: ซื้อซ้ำก่อนหมด ➔ ต่อจากวันหมดเดิม (+30 วัน)", (p2.proUntil ?? 0) - (p1.proUntil ?? 0) === 30 * 86_400_000, { p1: p1.proUntil, p2: p2.proUntil });
+    // คืนเงินเต็ม ➔ หักวันของคำสั่งซื้อนั้น
+    const pay2 = await tdb.prepare(`SELECT id FROM payments WHERE order_id = ?`).bind(co2.orderId).first<{ id: string }>();
+    check("บัตรผ่าน: คืนเงิน ➔ หักวันคืน", (await applyGatewayRefund(pay2!.id)) === "studio_pass_revoked");
+    r = await api<{ plan: PlanV }>(root, "GET", "/api/marketplace/studio", A.token);
+    check("บัตรผ่าน: หลังคืนเงินเหลือวันของคำสั่งซื้อแรก", (r.json as { plan: PlanV }).plan.proUntil === p1.proUntil);
+    check("บัตรผ่าน: คืนเงินซ้ำไม่หักซ้ำ", (await applyGatewayRefund(pay2!.id)) === "already");
+
+    // webhook ที่ลงลายเซ็นจริง ➔ ให้วันได้แม้แม่หมอไม่กลับมาที่หน้าเว็บ
+    process.env.STRIPE_WEBHOOK_SECRET = "whsec_studio_test_secret";
+    const B_order = `stp_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
+    const { createStudioPassOrder } = await import("../../src/lib/studio/plan");
+    await createStudioPassOrder(B.id, B_order);
+    const csId = `cs_test_${crypto.randomUUID().replace(/-/g, "")}`;
+    await tdb.prepare(`INSERT INTO payments (id, order_id, user_id, provider, provider_ref, amount_satang, currency, status, created_at, updated_at) VALUES (?, ?, NULL, 'stripe', ?, 19900, 'THB', 'pending', ?, ?)`).bind(`pay_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`, B_order, csId, Date.now(), Date.now()).run();
+    const sendHook = async (amount: number) => {
+      const body = JSON.stringify({ type: "checkout.session.completed", data: { object: { id: csId, payment_status: "paid", amount_total: amount, currency: "thb", metadata: { kind: "studio_pass", orderId: B_order } } } });
+      const t = Math.floor(Date.now() / 1000);
+      const sig = createHmac("sha256", process.env.STRIPE_WEBHOOK_SECRET!).update(`${t}.${body}`).digest("hex");
+      return webhook.POST(new Request(`${ORIGIN}/api/marketplace/payments/webhook`, { method: "POST", headers: { "stripe-signature": `t=${t},v1=${sig}` }, body }));
+    };
+    await sendHook(100);
+    check("webhook: ยอดไม่ตรง ➔ ไม่ให้วัน", (await import("../../src/lib/studio/plan")).isProActive((await tdb.prepare(`SELECT pro_until FROM reader_studio_settings WHERE reader_id = ?`).bind(B.id).first<{ pro_until: number | null }>())?.pro_until) === false);
+    const hook = await sendHook(19900);
+    const hookJson = (await hook.json()) as { studioPass?: string };
+    check("webhook ลงลายเซ็น ➔ ให้บัตรผ่าน", hook.status === 200 && hookJson.studioPass === "granted", hookJson);
+    const hook2 = await sendHook(19900);
+    check("webhook ยิงซ้ำ ➔ ไม่ให้ซ้ำ", ((await hook2.json()) as { studioPass?: string }).studioPass === "already");
+    delete process.env.STRIPE_WEBHOOK_SECRET;
+    delete process.env.STUDIO_PRO_PRICE_THB;
+
     r = await api<{ deck: unknown[]; spreads: unknown[] }>(root, "GET", "/api/marketplace/studio", A.token);
     check("ข้อมูลตั้งต้น: สำรับ 78 ใบ + ผังสาธารณะ", (r.json as { deck: unknown[] }).deck?.length === 78 && ((r.json as { spreads: unknown[] }).spreads?.length ?? 0) === PUBLIC_SPREADS.length);
     check("ข้อมูลตั้งต้นไม่มี sessionSecret", !JSON.stringify(r.json).includes("sessionSecret"));
@@ -401,7 +471,8 @@ async function main() {
   const db = await getAppDB();
   const left = await db.prepare(`SELECT COUNT(*) AS n FROM reader_readings WHERE reader_id IN (?, ?)`).bind(A.id, B.id).first<{ n: number }>();
   const leftSettings = await db.prepare(`SELECT COUNT(*) AS n FROM reader_studio_settings WHERE reader_id IN (?, ?)`).bind(A.id, B.id).first<{ n: number }>();
-  check("ลบบัญชีแม่หมอ ➔ ข้อมูลสตูดิโอหายหมด", Number(left?.n ?? 0) === 0 && Number(leftSettings?.n ?? 0) === 0);
+  const leftPasses = await db.prepare(`SELECT COUNT(*) AS n FROM reader_studio_passes WHERE reader_id IN (?, ?)`).bind(A.id, B.id).first<{ n: number }>();
+  check("ลบบัญชีแม่หมอ ➔ ข้อมูลสตูดิโอหายหมด", Number(left?.n ?? 0) === 0 && Number(leftSettings?.n ?? 0) === 0 && Number(leftPasses?.n ?? 0) === 0);
 
   /* ── 6. หน้าเว็บ/คอนฟิก ───────────────────────────────────────── */
   const page = src("src/app/(th)/r/[token]/page.tsx");

@@ -3,6 +3,7 @@ import { orderIdOfPaymentRow, purchaseGrantReason, type PaymentRowForGrant } fro
 import { sendBookingCancelled } from "@/lib/marketplace/booking-mail";
 import { retrieveRefundState } from "@/lib/marketplace/payment-gateway";
 import { recordEvent } from "@/lib/stats/record";
+import { isStudioPassOrder, revokeStudioPass } from "@/lib/studio/plan";
 
 /**
  * 💸 คืนเงินที่เกิดนอกระบบเรา (กดคืนในแดชบอร์ด Stripe) ➔ ถอนสิ่งที่ลูกค้าได้จากเงินก้อนนั้น
@@ -13,13 +14,14 @@ import { recordEvent } from "@/lib/stats/record";
  *   เติมรอบดูดวง ➔ ตั้ง `user_bonus.granted = 0` ของแถวการซื้อนั้น (กุญแจ `purchase_<orderId>` เดิม)
  *                  รอบที่ใช้ไปแล้วก่อนคืนเงินไม่ถูกเรียกคืน (ยอดคงเหลือไม่ติดลบ — ตัวคำนวณตัดที่ 0)
  *                  กุญแจเดิมยังอยู่ ➔ webhook จ่ายเงินที่ยิงซ้ำมาภายหลังแจกคืนไม่ได้ (ON CONFLICT DO NOTHING)
+ *   บัตรผ่านสตูดิโอแม่หมอ ➔ หักวันของคำสั่งซื้อนั้นออกจาก `pro_until` (`plan.ts`)
  *   ค่าปรึกษาแม่หมอ ➔ นัด/คิวที่ยังไม่จบถูกยกเลิก (cancelled_by = system) + อีเมลแจ้งลูกค้า
  *
  * idempotent: จองแถวด้วย `UPDATE ... WHERE status = 'paid'` — คืนเงินที่ระบบเราเป็นคนคืนเอง
  * (สถานะเป็น refunded อยู่แล้ว) หรือ event ซ้ำ จะได้ changes = 0 แล้วไม่ทำอะไร
  * ⚠️ คืนบางส่วน (partial) ไม่ถอนอัตโนมัติ — ต้องตัดสินใจเป็นราย ๆ ไป (แจ้งผ่านสถิติ)
  */
-export type GatewayRefundResult = "credits_revoked" | "booking_cancelled" | "marked_refunded" | "already";
+export type GatewayRefundResult = "credits_revoked" | "booking_cancelled" | "studio_pass_revoked" | "marked_refunded" | "already";
 
 export async function applyGatewayRefund(paymentId: string): Promise<GatewayRefundResult> {
   const db = await getAppDB();
@@ -61,6 +63,10 @@ export async function applyGatewayRefund(paymentId: string): Promise<GatewayRefu
   }
 
   const orderId = orderIdOfPaymentRow(row);
+  // บัตรผ่านสตูดิโอแม่หมอ ➔ หักวันของคำสั่งซื้อนั้นออก (ครั้งเดียว)
+  if (isStudioPassOrder(orderId)) {
+    return (await revokeStudioPass(orderId!)) ? "studio_pass_revoked" : "marked_refunded";
+  }
   if (row.user_id && orderId) {
     await db
       .prepare("UPDATE user_bonus SET granted = 0 WHERE user_id = ? AND reason = ?")

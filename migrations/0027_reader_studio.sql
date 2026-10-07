@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS reader_studio_settings (
   show_ai_disclosure INTEGER NOT NULL DEFAULT 1,
   dpa_version        TEXT,
   dpa_accepted_at    INTEGER,
+  -- บัตรผ่าน 30 วัน (จ่ายครั้งเดียว ไม่ตัดเงินอัตโนมัติ) ใช้ได้ถึงเมื่อไร — NULL/อดีต = แผนฟรี
+  pro_until          INTEGER,
   updated_at         INTEGER NOT NULL
 );
 
@@ -80,3 +82,15 @@ CREATE TABLE IF NOT EXISTS reader_templates (
   created_at  INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_reader_templates_reader ON reader_templates(reader_id);
+
+-- บัตรผ่านของแม่หมอ: สร้างแถวตอนเริ่มจ่าย (granted_at NULL) ➔ ยืนยันเงินเข้าแล้วตั้ง granted_at ครั้งเดียว
+-- order_id ผูกคำสั่งซื้อกับแม่หมอ (แถว payments ไม่มี reader_id) · คืนเงินเต็ม ➔ revoked_at + หักวันคืน
+CREATE TABLE IF NOT EXISTS reader_studio_passes (
+  order_id    TEXT PRIMARY KEY,
+  reader_id   TEXT NOT NULL,
+  days        INTEGER NOT NULL,
+  created_at  INTEGER NOT NULL,
+  granted_at  INTEGER,
+  revoked_at  INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_reader_studio_passes_reader ON reader_studio_passes(reader_id, created_at DESC);

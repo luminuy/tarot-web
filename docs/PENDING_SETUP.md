@@ -254,7 +254,12 @@ done
    npx wrangler secret put STUDIO_VIEW_SECRET     # สุ่ม ≥ 32 ตัว: openssl rand -base64 48 (ไม่ตั้ง = ใช้ TAROT_SESSION_SECRET)
    npx wrangler secret put READER_STUDIO_ENABLED  # 1
    ```
-4. ⏸️ แพ็กเกจรายเดือนสำหรับแม่หมอ (Stripe) — รอเจ้าของตั้งราคา · ตอนนี้ทุกคนได้โควตาร่างเท่ากัน (`STUDIO_DRAFTS_PER_DAY`)
+4. ⏸️ **บัตรผ่านสตูดิโอ 30 วัน** (จ่ายครั้งเดียว ไม่ตัดเงินอัตโนมัติ) — ตั้งราคาเป็นบาทเต็ม 20–100000 แล้วปุ่มซื้อจะโผล่เอง:
+   ```bash
+   npx wrangler secret put STUDIO_PRO_PRICE_THB       # เช่น 299 · ไม่ตั้ง = ยังไม่เปิดขาย
+   npx wrangler secret put STUDIO_PRO_DRAFTS_PER_DAY  # ไม่บังคับ · ค่าเริ่ม 300
+   ```
+   ใช้ webhook Stripe เส้นเดิม (`/api/marketplace/payments/webhook`) — ไม่ต้องเพิ่ม event · คืนเงินเต็มในแดชบอร์ด = หักวันคืนอัตโนมัติ
 
 ### ⏳ รอตั้งเพิ่ม — Vectorize / R2 (Wave 3)
 

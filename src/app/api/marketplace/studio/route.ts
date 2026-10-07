@@ -6,7 +6,8 @@ import { studioGate } from "@/lib/studio/gate";
 import { readingSummary } from "@/lib/studio/view";
 import { listClients, listReadings, listTemplates } from "@/lib/studio/studio.repo";
 import { STUDIO_DEFAULT_COLOR } from "@/lib/studio/brand";
-import { studioDraftQuota } from "@/lib/studio/quota";
+import { studioPlanView } from "@/lib/studio/plan";
+import { studioDraftQuota, studioDraftsPerDay } from "@/lib/studio/quota";
 
 export const runtime = "nodejs";
 
@@ -26,7 +27,7 @@ export async function GET(request: Request) {
     listClients(gate.readerId),
     listReadings(gate.readerId),
     listTemplates(gate.readerId),
-    studioDraftQuota(gate.readerId),
+    studioDraftQuota(gate.readerId, gate.settings.proUntil),
   ]);
   return apiOk({
     reader,
@@ -36,6 +37,7 @@ export async function GET(request: Request) {
     readings: readings.map(readingSummary),
     templates,
     quota,
+    plan: studioPlanView(gate.settings.proUntil, studioDraftsPerDay()),
     spreads: PUBLIC_SPREADS.map((s) => ({ id: s.id, nameTh: s.nameTh, count: s.positions.length })),
     deck: DECK.map((c, i) => ({ index: i, id: c.id, nameTh: c.nameTh, nameEn: c.nameEn })),
   });

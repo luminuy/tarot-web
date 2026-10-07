@@ -32,11 +32,21 @@ interface Boot {
   readings?: ReadingSummaryT[];
   templates?: StudioTemplateT[];
   quota?: { used: number; limit: number };
+  plan?: PlanT;
   spreads?: SpreadOptionT[];
   deck?: DeckEntryT[];
 }
 
 type Tab = "readings" | "clients" | "templates" | "brand";
+
+interface PlanT {
+  active: boolean;
+  proUntil: number | null;
+  priceThb: number | null;
+  days: number;
+  freeDraftsPerDay: number;
+  proDraftsPerDay: number;
+}
 
 const fieldCls =
   "w-full rounded-xl border border-line-interactive-warm bg-surface px-3.5 py-2.5 text-[15px] leading-relaxed text-ink-deep outline-none focus-visible:ring-2 focus-visible:ring-gold-ink/40";
@@ -69,6 +79,29 @@ export function StudioApp({ token }: { token: string | null }) {
     }
     void load();
   }, [token, load]);
+
+  // กลับจากหน้าจ่ายเงินบัตรผ่าน (`?plan=return&order=...`) ➔ ยืนยันกับเซิร์ฟเวอร์ (เผื่อ webhook มาช้า) แล้วล้าง URL
+  useEffect(() => {
+    if (!token || typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    const planParam = url.searchParams.get("plan");
+    if (!planParam) return;
+    const orderId = url.searchParams.get("order");
+    const testChargeId = url.searchParams.get("test_charge_id") ?? undefined;
+    for (const k of ["plan", "order", "test_charge_id"]) url.searchParams.delete(k);
+    window.history.replaceState(null, "", url.pathname + (url.search ? url.search : ""));
+    if (planParam === "cancelled") {
+      setNotice("ยกเลิกการชำระเงินแล้ว ยังไม่มีการตัดเงิน");
+      return;
+    }
+    if (planParam !== "return" || !orderId) return;
+    void call<{ status: string }>("/plan/confirm", { method: "POST", body: { orderId, testChargeId } }).then((res) => {
+      if (res.ok && res.data.status === "granted") setNotice("✦ ได้รับบัตรผ่านสตูดิโอแล้ว ขอบคุณที่สนับสนุน");
+      else if (res.ok) setNotice("กำลังรอยืนยันการชำระเงิน (เช่น PromptPay) — บัตรผ่านจะเข้าเองเมื่อเงินเข้า");
+      else setNotice(res.error);
+      void load();
+    });
+  }, [token, call, load]);
 
   const openById = async (id: string) => {
     const res = await call<{ reading: ReadingT }>(`/readings/${id}`);
@@ -126,6 +159,7 @@ export function StudioApp({ token }: { token: string | null }) {
         <h1 className="text-2xl font-bold text-ink-deep sm:text-3xl">สวัสดี {boot.reader.displayName}</h1>
         <p className="text-sm text-muted">ทำคำอ่านให้ลูกค้าของคุณเอง — คุณอ่าน AI ช่วยเกลา แล้วส่งเป็นลิงก์ส่วนตัวในแบรนด์ของคุณ</p>
       </header>
+      {boot.plan && <PlanCard plan={boot.plan} quota={boot.quota ?? null} call={call} />}
       <nav role="tablist" aria-label="เมนูสตูดิโอ" className="flex flex-wrap gap-2">
         {tabs.map(([id, label]) => (
           <button
@@ -627,3 +661,44 @@ function BrandTab({ settings, call, onSaved }: { settings: StudioSettingsT; call
     </div>
   );
 }
+
+/* ── บัตรผ่าน 30 วัน ─────────────────────────────────────────────── */
+
+function PlanCard({ plan, quota, call }: { plan: PlanT; quota: { used: number; limit: number } | null; call: ReturnType<typeof makeStudioCall> }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const until = plan.proUntil ? new Date(plan.proUntil).toLocaleDateString("th-TH", { day: "numeric", month: "long", year: "numeric", timeZone: APP_TIME_ZONE }) : null;
+  const buy = async () => {
+    setBusy(true);
+    setErr(null);
+    const res = await call<{ authorizeUri?: string }>("/plan/checkout", { method: "POST", body: {} });
+    if (res.ok && res.data.authorizeUri) {
+      window.location.assign(res.data.authorizeUri);
+      return;
+    }
+    setBusy(false);
+    setErr(res.error || "เริ่มการชำระเงินไม่สำเร็จ");
+  };
+  return (
+    <section aria-label="แผนสตูดิโอ" className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line-warm bg-surface px-5 py-4">
+      <div className="min-w-0 space-y-0.5">
+        <p className="text-sm font-bold text-ink-deep">{plan.active ? `บัตรผ่านสตูดิโอ · ใช้ได้ถึง ${until}` : "แผนฟรี"}</p>
+        <p className="text-[13px] text-muted">
+          ร่างด้วย AI ได้ {plan.active ? plan.proDraftsPerDay : plan.freeDraftsPerDay} ครั้งต่อวัน
+          {quota ? ` · วันนี้ใช้ไป ${quota.used}` : ""}
+          {!plan.active && plan.priceThb !== null ? ` · บัตรผ่าน ${plan.days} วัน ได้ ${plan.proDraftsPerDay} ครั้งต่อวัน` : ""}
+        </p>
+        {err && <p className="text-[13px] text-err">{err}</p>}
+      </div>
+      {plan.priceThb !== null && (
+        <div className="flex flex-col items-end gap-1">
+          <button type="button" onClick={buy} disabled={busy} className={btnPrimary}>
+            {busy ? "กำลังไปหน้าชำระเงิน…" : `${plan.active ? "ต่ออายุ" : "ซื้อบัตรผ่าน"} ${plan.days} วัน · ${plan.priceThb.toLocaleString("th-TH")} บาท`}
+          </button>
+          <span className="text-[12px] text-muted">จ่ายครั้งเดียว ไม่ตัดเงินอัตโนมัติ{plan.active ? " · วันต่อจากวันหมดเดิม" : ""}</span>
+        </div>
+      )}
+    </section>
+  );
+}
+

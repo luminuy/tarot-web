@@ -16,6 +16,8 @@ export interface StudioSettings {
   showAiDisclosure: boolean;
   dpaVersion: string | null;
   dpaAcceptedAt: number | null;
+  /** บัตรผ่าน 30 วันใช้ได้ถึง (ms) — null/อดีต = แผนฟรี (`plan.ts`) */
+  proUntil: number | null;
 }
 
 export interface StudioClient {
@@ -95,6 +97,7 @@ interface SettingsRow {
   show_ai_disclosure: number;
   dpa_version: string | null;
   dpa_accepted_at: number | null;
+  pro_until?: number | null;
 }
 
 export async function getStudioSettings(readerId: string): Promise<StudioSettings> {
@@ -109,6 +112,7 @@ export async function getStudioSettings(readerId: string): Promise<StudioSetting
     showAiDisclosure: r ? r.show_ai_disclosure === 1 : true,
     dpaVersion: r?.dpa_version ?? null,
     dpaAcceptedAt: r?.dpa_accepted_at ?? null,
+    proUntil: r?.pro_until ?? null,
   };
 }
 

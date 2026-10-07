@@ -6,6 +6,7 @@ import { estimateTokens, isUserTokenCapReached, recordAiUsage } from "@/lib/secu
 import { recordEvent } from "@/lib/stats/record";
 import { assembleOfflineDraft, buildDraftPrompt, validateDraft, type DraftContext } from "@/lib/studio/draft";
 import { studioGate } from "@/lib/studio/gate";
+import { isProActive } from "@/lib/studio/plan";
 import { takeStudioDraft } from "@/lib/studio/quota";
 import { ID, findInjectedNote, spreadOfReading } from "@/lib/studio/schemas";
 import { getReading, patchReading } from "@/lib/studio/studio.repo";
@@ -54,8 +55,10 @@ export async function POST(request: Request, { params }: Ctx) {
   let parts = assembleOfflineDraft(ctx);
   const subject = `r:${gate.readerId}`;
 
-  if (!(await takeStudioDraft(gate.readerId))) reason = "quota";
-  else if (await isUserTokenCapReached(subject, "reader")) reason = "token_cap";
+  // บัตรผ่าน 30 วัน = โควตาร่างสูงขึ้น + เพดานโทเคนระดับผู้จ่ายเงิน (`plan.ts`)
+  const pro = isProActive(gate.settings.proUntil);
+  if (!(await takeStudioDraft(gate.readerId, gate.settings.proUntil))) reason = "quota";
+  else if (await isUserTokenCapReached(subject, pro ? "paid" : "reader")) reason = "token_cap";
   else if (await isAiCapReached("member")) reason = "ai_cap";
   else {
     const prompt = buildDraftPrompt(ctx);
