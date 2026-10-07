@@ -21,7 +21,8 @@ import type { Locale } from "@/lib/i18n/types";
  *
  * ⚠️ ตัวเลขทุกตัว (ราคา · จำนวนรอบ · โควตาฟรี) ดึงจาก `packages.ts` / `limits.ts` เท่านั้น
  *    ห้ามพิมพ์ตัวเลขลงข้อความเอง — เปลี่ยนราคาแล้วหน้านี้จะโกหกลูกค้า
- * ⚠️ ห้ามเขียนนโยบายคืนเงินที่เจ้าของยังไม่ได้ประกาศ — FAQ บอกได้แค่ช่องทางติดต่อ
+ * ⚠️ นโยบายคืนเงินของแพ็กเติมรอบ = **ไม่รับคืนหลังชำระ เว้นแต่กฎหมายกำหนด** (เจ้าของเคาะ 2026-10-07)
+ *    FAQ ข้อ "ขอคืนเงินได้ไหม" กับ `hasMerchantReturnPolicy` ใน JSON-LD ต้องพูดตรงกันเสมอ — เปลี่ยนนโยบายต้องแก้ทั้งสองที่
  */
 
 const PATH = "/pricing";
@@ -91,6 +92,10 @@ function faqItems(locale: Locale): Array<{ q: string; a: string }> {
         a: "Payment happens on Stripe's own page. SeerTarot never sees or stores your card number.",
       },
       {
+        q: "Can I get a refund?",
+        a: `Top-up packages are digital and delivered the moment you pay, so they are non-refundable once paid, except where the law requires otherwise. If you were charged by mistake or your readings never arrived, email ${DEFAULT_SUPPORT_EMAIL} and we will look into it.`,
+      },
+      {
         q: "I paid but my readings did not show up. What now?",
         a: `Readings normally arrive right after payment. If they have not appeared within a few minutes, email ${DEFAULT_SUPPORT_EMAIL} with your account email and the time you paid.`,
       },
@@ -116,6 +121,10 @@ function faqItems(locale: Locale): Array<{ q: string; a: string }> {
     {
       q: "จ่ายเงินปลอดภัยไหม",
       a: "การชำระเงินทำบนหน้าของ Stripe โดยตรง SeerTarot ไม่เห็นและไม่เก็บเลขบัตรของคุณ",
+    },
+    {
+      q: "ขอคืนเงินได้ไหม",
+      a: `แพ็กเติมรอบเป็นสินค้าดิจิทัลที่ได้ทันทีหลังจ่าย จึงไม่รับคืนเงินหลังชำระแล้ว เว้นแต่กฎหมายกำหนด ถ้าถูกตัดเงินผิดพลาดหรือจ่ายแล้วรอบไม่เข้า ส่งอีเมลมาที่ ${DEFAULT_SUPPORT_EMAIL} ทีมงานจะตรวจสอบให้`,
     },
     {
       q: "จ่ายแล้วแต่รอบไม่เข้า ต้องทำอย่างไร",
@@ -188,7 +197,7 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
    * - image ใช้ภาพสินค้าจัตุรัสชุดเดียวกับหน้าจ่ายเงิน Stripe (`public/checkout/credits.jpg` · ดู `checkoutArtUrl`
    *   — ไม่ import ตรงเพราะไฟล์นั้นดึง node:crypto เข้ามา)
    * - shippingDetails = ของดิจิทัล ได้รอบทันทีหลังจ่าย ไม่มีค่าส่ง (ข้อเท็จจริง ไม่ใช่นโยบายใหม่)
-   * ⚠️ ไม่ใส่ hasMerchantReturnPolicy จนกว่าเจ้าของจะประกาศนโยบายคืนเงิน (ดูหัวไฟล์)
+   * - hasMerchantReturnPolicy = ไม่รับคืน (ตรงกับ FAQ "ขอคืนเงินได้ไหม" · ดูหัวไฟล์)
    * ⚠️ ห้ามใส่ review / aggregateRating ที่ไม่ได้มาจากรีวิวจริง — Google ลงโทษรีวิวที่เว็บเขียนให้ตัวเอง
    */
   const shippingDetails = {
@@ -200,6 +209,11 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
       handlingTime: { "@type": "QuantitativeValue", minValue: 0, maxValue: 0, unitCode: "DAY" },
       transitTime: { "@type": "QuantitativeValue", minValue: 0, maxValue: 0, unitCode: "DAY" },
     },
+  };
+  const returnPolicy = {
+    "@type": "MerchantReturnPolicy",
+    applicableCountry: "TH",
+    returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
   };
   const jsonLdOffers = {
     "@context": "https://schema.org",
@@ -217,6 +231,7 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
       availability: "https://schema.org/InStock",
       url: `${SITE_ORIGIN}${isEn ? "/en" : ""}${PATH}`,
       shippingDetails,
+      hasMerchantReturnPolicy: returnPolicy,
     })),
   };
 

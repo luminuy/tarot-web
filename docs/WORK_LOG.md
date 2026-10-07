@@ -154,6 +154,13 @@
 - **ยังไม่แตะ prompt** — ส่ง relations เข้า prompt ต้องรอ ai:judge (HANDOFF_AI_JUDGE_BASELINE)
 - ด่าน `scripts/qa/test-card-relations.ts` 565 ข้อผ่าน (ยังไม่ลงทะเบียน repo:verify) · typecheck ผ่าน
 - ⚠️ เจ้าของสั่ง: ยังไม่ push/PR และไม่รัน `repo:verify` ระหว่างทาง — ตรวจทีเดียวตอนขึ้น
+### 🗓️ 2026-10-07 (รอบ 211): ✦ นโยบายคืนเงินแพ็กเติมรอบ — "ไม่รับคืนหลังชำระ เว้นแต่กฎหมายกำหนด" (เจ้าของเคาะ)
+
+- ต่อจากรอบ 210: งานกฎหมาย #653 เป็นเงื่อนไขฝั่งแม่หมอ (ร่างรอทนาย) ไม่ครอบคลุมแพ็กเติมรอบ ➔ ถามเจ้าของ ได้คำตอบ "ไม่รับคืน"
+- `pricing.tsx`: FAQ ข้อใหม่ "ขอคืนเงินได้ไหม" / "Can I get a refund?" (ช่องทางติดต่อกรณีตัดเงินผิด/รอบไม่เข้ายังอยู่) + `hasMerchantReturnPolicy` = `MerchantReturnNotPermitted` (TH) ทุก Offer · หัวไฟล์จดว่าสองที่ต้องตรงกัน
+- ตรวจ: typecheck · อ่าน JSON-LD + FAQ จาก `dist/pricing.html` · `dist/en/pricing.html` จริง
+- เหลือคำเตือน Search Console แค่ `review`/`aggregateRating` (ตั้งใจไม่ใส่)
+
 ### 🗓️ 2026-10-07 (รอบ 210): ✦ Search Console แจ้ง Structured Data "ข้อมูลผู้ขาย / ตัวอย่างข้อมูลสินค้า" ไม่ครบ (หน้า `/pricing` · `/en/pricing`)
 
 - อีเมล Google 2026-10-06: ขาด `image` (ร้ายแรง ➔ หน้าราคาไม่ได้แสดงแบบสินค้า) · `description` · `shippingDetails` · `hasMerchantReturnPolicy` · `review` · `aggregateRating`
