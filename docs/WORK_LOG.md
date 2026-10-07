@@ -139,6 +139,13 @@
 - **ยังไม่แตะ prompt** — ส่ง relations เข้า prompt ต้องรอ ai:judge (HANDOFF_AI_JUDGE_BASELINE)
 - ด่าน `scripts/qa/test-card-relations.ts` 565 ข้อผ่าน (ยังไม่ลงทะเบียน repo:verify) · typecheck ผ่าน
 - ⚠️ เจ้าของสั่ง: ยังไม่ push/PR และไม่รัน `repo:verify` ระหว่างทาง — ตรวจทีเดียวตอนขึ้น
+### 🗓️ 2026-10-07 (รอบ 210): ✦ Search Console แจ้ง Structured Data "ข้อมูลผู้ขาย / ตัวอย่างข้อมูลสินค้า" ไม่ครบ (หน้า `/pricing` · `/en/pricing`)
+
+- อีเมล Google 2026-10-06: ขาด `image` (ร้ายแรง ➔ หน้าราคาไม่ได้แสดงแบบสินค้า) · `description` · `shippingDetails` · `hasMerchantReturnPolicy` · `review` · `aggregateRating`
+- `Product` JSON-LD ใน `src/app/_shared/pages/pricing.tsx` เติม `image` (ภาพสินค้าจัตุรัส `public/checkout/credits.jpg` ชุดเดียวกับหน้าจ่าย Stripe · production ตอบ 200) · `description` (ข้อความเดียวกับ meta) · `shippingDetails` ทุก Offer (ของดิจิทัล ค่าส่ง 0 บาท ได้ทันที ปลายทาง TH)
+- **ตั้งใจไม่ใส่**: `hasMerchantReturnPolicy` (เจ้าของยังไม่ประกาศนโยบายคืนเงิน — กฎหัวไฟล์) · `review`/`aggregateRating` (ห้ามแต่งรีวิวเอง ผิดนโยบาย Google) ➔ สองอันนี้เป็นแค่คำเตือน ไม่ทำให้หลุดผลค้นหา
+- ตรวจ: typecheck · build ทั้งชุด · อ่าน JSON-LD จาก `dist/pricing.html` + `dist/en/pricing.html` จริง · ด่าน test-json-ld-escape · test-code-debt (72/72) · test-en-routing (A6-07) ผ่าน
+- ค้าง: deploy แล้วกด "ตรวจสอบการแก้ไข" ใน Search Console · ถ้าเจ้าของประกาศนโยบายคืนเงินเมื่อไร ค่อยเติม `hasMerchantReturnPolicy`
 
 ### 🗓️ 2026-10-03 (รอบ 208): ✦ แก้ 2 บั๊กจากเจ้าของ — คืนเงินแล้วรอบไม่ลด · กดโลโก้ไม่กลับหน้าแรก
 
