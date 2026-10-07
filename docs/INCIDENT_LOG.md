@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0255 · 2026-10-07 14:40 · 🟡 Medium · เติม image · description · shippingDetails ใน Product JSON-LD หน้าราคา ตามที่ Search Console แจ้ง
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | Google Search Console ส่งอีเมล 2026-10-06 ว่าข้อมูลผู้ขายของ seertarot.net ขาดช่อง image (ร้ายแรง) และ description · shippingDetails · hasMerchantReturnPolicy รวมถึง Product snippets ขาด review · aggregateRating — หน้าราคาจึงไม่ได้แสดงแบบสินค้าในผลค้นหา |
+| **สาเหตุราก** | ตอนสร้างหน้า /pricing ใส่ Product JSON-LD แค่ name · brand · offers(ราคา) เพราะหน้านี้ไม่มีภาพสินค้าของตัวเองในตอนนั้น และไม่มีด่านใดเทียบฟิลด์กับข้อกำหนดของ Google Merchant listings ภาพสินค้าจัตุรัสเพิ่งมีใน #651 สำหรับหน้าจ่าย Stripe |
+| **การแก้ไข** | เติม image ชี้ /checkout/credits.jpg (1200x1200 ชุดเดียวกับหน้า Stripe) · description ใช้ข้อความ meta ของหน้า · shippingDetails ทุก Offer เป็นของดิจิทัลค่าส่ง 0 ได้ทันที ปลายทาง TH · ตั้งใจไม่ใส่ hasMerchantReturnPolicy (เจ้าของยังไม่ประกาศนโยบายคืนเงิน) และ review/aggregateRating (ห้ามแต่งรีวิวเอง) |
+| **🛡️ กฎป้องกันถาวร** | **Product JSON-LD ต้องมี image และ description เสมอ (ช่องที่ Google ถือว่าร้ายแรง) · ห้ามเติม review/aggregateRating ที่ไม่ได้มาจากรีวิวจริง · ห้ามเติม hasMerchantReturnPolicy ก่อนเจ้าของประกาศนโยบายคืนเงิน — จดเป็นคอมเมนต์ไว้ตรงจุดสร้าง JSON-LD ในหน้าราคา** |
+| **การพิสูจน์ว่าแก้ได้จริง** | บิลด์จริงแล้วอ่าน JSON-LD จาก dist/pricing.html และ dist/en/pricing.html ได้ image · description · shippingDetails ครบ · curl ภาพบน production ได้ 200 image/jpeg · typecheck · test-json-ld-escape 6/6 · test-code-debt 72/72 · test-en-routing A6-07 ผ่าน |
+| **บันทึกโดย** | Claude · branch `claude/hopeful-goodall-k4kb9m` · commit `559d3e7` |
+
+
 ### INC-0254 · 2026-10-03 14:27 · 🟡 Medium · กดโลโก้แล้วไม่กลับหน้าแรก วนอยู่ขั้นตั้งคำถาม
 
 | หัวข้อ | รายละเอียด |
