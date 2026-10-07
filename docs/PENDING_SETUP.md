@@ -250,11 +250,10 @@ workflow `.github/workflows/setup-vapid.yml` สร้างคู่กุญ�
    npx wrangler secret put STUDIO_VIEW_SECRET     # สุ่ม ≥ 32 ตัว: openssl rand -base64 48 (ไม่ตั้ง = ใช้ TAROT_SESSION_SECRET)
    npx wrangler secret put READER_STUDIO_ENABLED  # 1
    ```
-4. ⏸️ **บัตรผ่านสตูดิโอ 30 วัน** (จ่ายครั้งเดียว ไม่ตัดเงินอัตโนมัติ) — ตั้งราคาเป็นบาทเต็ม 20–100000 แล้วปุ่มซื้อจะโผล่เอง:
-   ```bash
-   npx wrangler secret put STUDIO_PRO_PRICE_THB       # เช่น 299 · ไม่ตั้ง = ยังไม่เปิดขาย
-   npx wrangler secret put STUDIO_PRO_DRAFTS_PER_DAY  # ไม่บังคับ · ค่าเริ่ม 300
-   ```
+4. ✅ **บัตรผ่านสตูดิโอ 30 วัน** (จ่ายครั้งเดียว ไม่ตัดเงินอัตโนมัติ) — ราคา **299 บาท** ตั้งไว้ใน `wrangler.jsonc` → `vars.STUDIO_PRO_PRICE_THB` (2026-10-07 · ไม่ใช่ความลับ)
+   - เปลี่ยนราคา = แก้เลขใน `wrangler.jsonc` แล้ว deploy (บาทเต็ม 20–100000) · **ห้าม** `wrangler secret put STUDIO_PRO_PRICE_THB` ซ้ำ (ชื่อชนกับ var ➔ deploy ล้ม)
+   - ปุ่มซื้อโผล่เมื่อสตูดิโอเปิด (`READER_STUDIO_ENABLED`) เท่านั้น
+   - โควตาร่างต่อวันของผู้ถือบัตร (ไม่บังคับ · ค่าเริ่ม 300): `npx wrangler secret put STUDIO_PRO_DRAFTS_PER_DAY`
    ใช้ webhook Stripe เส้นเดิม (`/api/marketplace/payments/webhook`) — ไม่ต้องเพิ่ม event · คืนเงินเต็มในแดชบอร์ด = หักวันคืนอัตโนมัติ
 
 ### ⏳ รอตั้งเพิ่ม — Vectorize / R2 (Wave 3)
