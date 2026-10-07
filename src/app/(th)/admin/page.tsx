@@ -44,6 +44,10 @@ const ReadersManager = dynamic(() => import("@/components/admin/ReadersManager")
   ssr: false,
   loading: () => <AdminLoading label="กำลังโหลดรายชื่อหมอดู…" />,
 });
+const StudioPassPricing = dynamic(() => import("@/components/admin/StudioPassPricing"), {
+  ssr: false,
+  loading: () => <AdminLoading label="กำลังโหลดราคาบัตรผ่านสตูดิโอ…" />,
+});
 const EntitlementAdmin = dynamic(() => import("@/components/admin/EntitlementAdmin"), {
   ssr: false,
   loading: () => <AdminLoading label="กำลังโหลดสิทธิ์และโควตา…" />,
@@ -389,7 +393,12 @@ function AdminContent() {
             {activeTab === "redeem" && <RedeemCodesManager />}
             {activeTab === "entitlement" && <EntitlementAdmin />}
             {activeTab === "content" && <ContentEditor />}
-            {activeTab === "readers" && <ReadersManager />}
+            {activeTab === "readers" && (
+              <div className="space-y-6">
+                <ReadersManager />
+                <StudioPassPricing />
+              </div>
+            )}
             {activeTab === "bookings" && <BookingsAdmin />}
             {activeTab === "health" &&
               (healthSubTab === "system" ? (

@@ -478,7 +478,42 @@ async function main() {
     const hook2 = await sendHook(19900);
     check("webhook ยิงซ้ำ ➔ ไม่ให้ซ้ำ", ((await hook2.json()) as { studioPass?: string }).studioPass === "already");
     delete process.env.STRIPE_WEBHOOK_SECRET;
+
+    // ── ราคาบัตรผ่านตั้งจากแผงแอดมิน: ราคาเฉพาะคน ➔ ราคากลางของแอดมิน ➔ ค่าตั้งต้น (wrangler vars) ──
+    const planLib = await import("../../src/lib/studio/plan");
+    check(
+      "ราคา: รับเฉพาะบาทเต็ม 20–100000 (ว่าง/ทศนิยม/ตัวอักษร/เกินช่วง = ไม่รับ)",
+      [planLib.validPassPriceThb("abc"), planLib.validPassPriceThb(19), planLib.validPassPriceThb(100_001), planLib.validPassPriceThb(25.5), planLib.validPassPriceThb(""), planLib.validPassPriceThb(null)].every((v) => v === null) &&
+        planLib.validPassPriceThb("299") === 299 && planLib.validPassPriceThb(20) === 20,
+    );
+    const planPrice = async (token: string) => ((await api<{ plan: PlanV }>(root, "GET", "/api/marketplace/studio", token)).json as { plan: PlanV }).plan.priceThb;
+    check("ราคา: ยังไม่ตั้งอะไรในแอดมิน ➔ ใช้ค่าตั้งต้น 199", (await planPrice(A.token)) === 199 && (await planPrice(B.token)) === 199);
+    await planLib.setAdminDefaultPassPriceThb(249);
+    check("ราคา: แอดมินตั้งราคากลาง 249 ➔ ทุกคนเห็น 249 ทันที (ไม่ต้อง deploy)", (await planPrice(A.token)) === 249 && (await planPrice(B.token)) === 249);
+    await planLib.setReaderPassPriceThb(A.id, 399);
+    check("ราคา: ตั้งราคาเฉพาะแม่หมอ A = 399 ➔ A เห็น 399 · B ยังเห็นราคากลาง", (await planPrice(A.token)) === 399 && (await planPrice(B.token)) === 249);
+    r = await api<{ orderId: string }>(planCheckout, "POST", "/api/marketplace/studio/plan/checkout", A.token, {});
+    const coA = r.json as { orderId: string };
+    const payA = await tdb.prepare(`SELECT amount_satang FROM payments WHERE order_id = ?`).bind(coA.orderId).first<{ amount_satang: number }>();
+    check("ราคา: A กดซื้อ ➔ เรียกเก็บ 39900 สตางค์ตามราคาเฉพาะคน", r.status === 200 && payA?.amount_satang === 39900, r.json);
+    await planLib.setReaderPassPriceThb(A.id, 499);
+    const payA2 = await tdb.prepare(`SELECT amount_satang FROM payments WHERE order_id = ?`).bind(coA.orderId).first<{ amount_satang: number }>();
+    check("ราคา: เปลี่ยนราคาทีหลังไม่แก้ยอดของคำสั่งซื้อที่เริ่มไปแล้ว", payA2?.amount_satang === 39900);
+    await api(settings, "PUT", "/api/marketplace/studio/settings", A.token, { brandName: "บ้านไพ่ทดสอบ", logoUrl: null, brandColor: null, contactLine: null, showAiDisclosure: true });
+    check("ราคา: แม่หมอบันทึกแบรนด์ไม่ลบราคาที่แอดมินตั้ง", (await planPrice(A.token)) === 499);
+    await planLib.setReaderPassPriceThb(A.id, null);
+    check("ราคา: ล้างราคาเฉพาะคน ➔ กลับไปใช้ราคากลาง", (await planPrice(A.token)) === 249);
+    await planLib.setAdminDefaultPassPriceThb(null);
+    check("ราคา: ล้างราคากลาง ➔ กลับไปใช้ค่าตั้งต้น", (await planPrice(A.token)) === 199);
     delete process.env.STUDIO_PRO_PRICE_THB;
+    await planLib.setReaderPassPriceThb(B.id, 159);
+    check("ราคา: ไม่มีค่าตั้งต้นแต่มีราคาเฉพาะคน ➔ เปิดขายเฉพาะคนนั้น", (await planPrice(B.token)) === 159 && (await planPrice(A.token)) === null);
+    await planLib.setReaderPassPriceThb(B.id, null);
+    const adminPassSrc = readFileSync("src/app/api/admin/studio-pass/route.ts", "utf8");
+    check(
+      "ราคา: ทุกเส้นของ /api/admin/studio-pass ผ่านด่านแอดมิน + จดบันทึกแอดมิน",
+      (adminPassSrc.match(/const denied = await requireAdmin\(\);\s*if \(denied\) return denied;/g) ?? []).length === 3 && (adminPassSrc.match(/recordAudit\(/g) ?? []).length === 2,
+    );
 
     // ── ส่งออก/ลบทั้งสตูดิโอ (DPA ข้อ 12 · 15) ──
     const exportRoute = await import("../../src/app/api/marketplace/studio/export/route");

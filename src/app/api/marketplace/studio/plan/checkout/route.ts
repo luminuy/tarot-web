@@ -6,21 +6,22 @@ import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-rat
 import { isPrivilegedTestRequest } from "@/lib/security/privileged";
 import { recordEvent } from "@/lib/stats/record";
 import { studioGate } from "@/lib/studio/gate";
-import { STUDIO_PASS_DAYS, createStudioPassOrder, newStudioPassOrderId, studioPassPriceSatang } from "@/lib/studio/plan";
+import { STUDIO_PASS_DAYS, createStudioPassOrder, newStudioPassOrderId, resolvePassPriceThb } from "@/lib/studio/plan";
 import { getNotifyEmail } from "@/lib/studio/plan-email";
 
 export const runtime = "nodejs";
 
 /**
  * POST /api/marketplace/studio/plan/checkout — ซื้อบัตรผ่านสตูดิโอ 30 วัน (จ่ายครั้งเดียว · ไม่ตัดเงินอัตโนมัติ)
- * ราคามาจากเซิร์ฟเวอร์ (`STUDIO_PRO_PRICE_THB`) เท่านั้น · ไม่ตั้งราคา = ยังไม่เปิดขาย (503)
+ * ราคามาจากเซิร์ฟเวอร์เท่านั้น (ราคาเฉพาะคน ➔ ราคากลางของแอดมิน ➔ `STUDIO_PRO_PRICE_THB`) · ไม่มีราคา = ยังไม่เปิดขาย (503)
+ * ยอดถูกจดลงแถว payments ตรงนี้ — webhook/confirm เทียบกับแถวนี้ แอดมินเปลี่ยนราคาทีหลังจึงไม่กระทบคำสั่งซื้อนี้
  * กลับจากหน้าจ่าย ➔ `/readers/studio?plan=return&order=...` (ไม่มีโทเคนแม่หมอใน URL ของ Stripe)
  */
 export async function POST(request: Request) {
   const gate = await studioGate(request);
   if (!gate.ok) return gate.response;
-  const price = studioPassPriceSatang();
-  if (price === null) return apiFail("บัตรผ่านสตูดิโอยังไม่เปิดขาย", 503, "plan_closed");
+  const priceThb = await resolvePassPriceThb(gate.readerId);
+  if (priceThb === null) return apiFail("บัตรผ่านสตูดิโอยังไม่เปิดขาย", 503, "plan_closed");
   if (isStripeTestModeOnProduction() && !(await isPrivilegedTestRequest(request))) {
     return apiFail(PAYMENTS_NOT_OPEN_MESSAGE, 503, "payments_closed");
   }
@@ -29,6 +30,7 @@ export async function POST(request: Request) {
   ]);
   if (!limit.allowed) return apiFail("ทำรายการถี่เกินไป รอสักครู่แล้วลองใหม่", 429, "rate_limited");
 
+  const price = priceThb * 100;
   try {
     const origin = resolveAppOrigin(request);
     const orderId = newStudioPassOrderId();

@@ -3,7 +3,7 @@ import { apiFail, apiOk } from "@/lib/api/envelope";
 import { retrieveGatewayCharge } from "@/lib/marketplace/payment-gateway";
 import { getPaymentByOrderId, updatePaymentStatus } from "@/lib/marketplace/payments.repo";
 import { readJson, studioGate } from "@/lib/studio/gate";
-import { getStudioPassOrder, grantStudioPass, isStudioPassOrder, studioPlanView } from "@/lib/studio/plan";
+import { getStudioPassOrder, grantStudioPass, isStudioPassOrder, resolvePassPriceThb, studioPlanView } from "@/lib/studio/plan";
 import { studioDraftsPerDay } from "@/lib/studio/quota";
 import { getStudioSettings } from "@/lib/studio/studio.repo";
 
@@ -28,7 +28,8 @@ export async function POST(request: Request) {
   const payment = await getPaymentByOrderId(orderId);
   if (!payment) return apiFail("ไม่พบคำสั่งซื้อ", 404);
 
-  const view = async () => studioPlanView((await getStudioSettings(gate.readerId)).proUntil, studioDraftsPerDay());
+  const view = async () =>
+    studioPlanView((await getStudioSettings(gate.readerId)).proUntil, studioDraftsPerDay(), await resolvePassPriceThb(gate.readerId));
   if (order.grantedAt) return apiOk({ status: "granted", plan: await view() });
   if (order.revokedAt) return apiFail("คำสั่งซื้อนี้ถูกคืนเงินแล้ว", 409, "refunded");
 

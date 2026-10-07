@@ -128,8 +128,8 @@
     "NODE_ENV": "production",
     "NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT": "https://ik.imagekit.io/seertarotweb",
     "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME": "xtgpasdc",
-    // ราคาบัตรผ่านสตูดิโอแม่หมอ 30 วัน (บาท · src/lib/studio/plan.ts) — ไม่ใช่ความลับจึงอยู่ที่นี่ ห้ามตั้งซ้ำเป็น secret (ชื่อชนกัน deploy ล้ม)
-    // ปุ่มซื้อโผล่เมื่อสตูดิโอเปิด (READER_STUDIO_ENABLED) เท่านั้น · เปลี่ยนราคา = แก้เลขนี้แล้ว deploy (ช่วงที่รับได้ 20–100000)
+    // ราคาตั้งต้นของบัตรผ่านสตูดิโอแม่หมอ 30 วัน (บาท · src/lib/studio/plan.ts) — ไม่ใช่ความลับ ห้ามตั้งซ้ำเป็น secret (ชื่อชนกัน deploy ล้ม)
+    // ปกติแก้ราคาที่แผงแอดมิน แท็บ "หมอดูพาร์ทเนอร์" (ราคากลาง + ราคาเฉพาะแม่หมอ) — เลขนี้ใช้เมื่อแอดมินยังไม่ได้ตั้ง
     "STUDIO_PRO_PRICE_THB": "299"
   }
 

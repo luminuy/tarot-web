@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS reader_studio_settings (
   dpa_accepted_at    INTEGER,
   -- บัตรผ่าน 30 วัน (จ่ายครั้งเดียว ไม่ตัดเงินอัตโนมัติ) ใช้ได้ถึงเมื่อไร — NULL/อดีต = แผนฟรี
   pro_until          INTEGER,
+  -- ราคาบัตรผ่านเฉพาะแม่หมอคนนี้ (บาท) ที่แอดมินตั้ง — NULL = ใช้ราคากลาง (src/lib/studio/plan.ts)
+  pass_price_thb     INTEGER,
   updated_at         INTEGER NOT NULL
 );
 
