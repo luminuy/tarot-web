@@ -186,7 +186,7 @@ export function StudioApp({ token }: { token: string | null }) {
       {tab === "readings" && <ReadingsTab boot={boot} call={call} onOpen={openById} onCreated={(r) => setOpenReading(r)} />}
       {tab === "clients" && <ClientsTab token={token} clients={clients} readings={boot.readings ?? []} call={call} onChanged={load} onOpen={openById} />}
       {tab === "templates" && <TemplatesTab templates={boot.templates ?? []} call={call} onChanged={load} />}
-      {tab === "brand" && boot.settings && <BrandTab settings={boot.settings} call={call} onSaved={load} />}
+      {tab === "brand" && boot.settings && <BrandTab settings={boot.settings} readerName={boot.reader.displayName} call={call} onSaved={load} />}
       {tab === "brand" && <MyDataPanel token={token} call={call} onPurged={load} />}
     </div>
   );
@@ -606,33 +606,67 @@ function TemplatesTab({ templates, call, onChanged }: { templates: StudioTemplat
 
 /* ── แท็บแบรนด์ ──────────────────────────────────────────────────── */
 
-function BrandTab({ settings, call, onSaved }: { settings: StudioSettingsT; call: ReturnType<typeof makeStudioCall>; onSaved: () => void }) {
+function BrandTab({
+  settings,
+  readerName,
+  call,
+  onSaved,
+}: {
+  settings: StudioSettingsT;
+  readerName: string;
+  call: ReturnType<typeof makeStudioCall>;
+  onSaved: () => void;
+}) {
   const [s, setS] = useState(settings);
   const [msg, setMsg] = useState<string | null>(null);
   const preview = ensureReadableColor(s.brandColor);
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className={`${card} space-y-4`}>
-        <label className="block space-y-1 text-sm text-muted">
-          ชื่อแบรนด์ (แสดงบนหัวคำอ่าน)
-          <input value={s.brandName ?? ""} maxLength={60} onChange={(e) => setS({ ...s, brandName: e.target.value })} className={`${fieldCls} min-h-11`} />
+        <p className="text-[13px] leading-relaxed text-muted">หน้าคำอ่านที่ส่งให้ลูกค้าจะขึ้นชื่อ โลโก้ และสีของคุณ — ดูหน้าตาได้ที่กล่อง &quot;ตัวอย่างที่ลูกค้าเห็น&quot;</p>
+        <label className="block space-y-1 text-sm font-semibold text-ink-deep">
+          ชื่อร้านหรือชื่อที่ลูกค้ารู้จัก
+          <span className="block text-[13px] font-normal text-muted">ขึ้นบนหัวคำอ่าน · เว้นว่างไว้ = ใช้ชื่อ &quot;{readerName}&quot;</span>
+          <input
+            value={s.brandName ?? ""}
+            maxLength={60}
+            placeholder="เช่น บ้านไพ่แม่จันทร์"
+            onChange={(e) => setS({ ...s, brandName: e.target.value })}
+            className={`${fieldCls} min-h-11 font-normal`}
+          />
         </label>
-        <label className="block space-y-1 text-sm text-muted">
-          ลิงก์โลโก้ (https:// · ภาพสี่เหลี่ยมจัตุรัส)
-          <input value={s.logoUrl ?? ""} maxLength={500} onChange={(e) => setS({ ...s, logoUrl: e.target.value })} className={`${fieldCls} min-h-11`} />
+        <label className="block space-y-1 text-sm font-semibold text-ink-deep">
+          โลโก้ (ไม่บังคับ)
+          <span className="block text-[13px] font-normal text-muted">วางลิงก์รูปที่ขึ้นต้นด้วย https:// · รูปสี่เหลี่ยมจัตุรัสดูดีที่สุด</span>
+          <input
+            value={s.logoUrl ?? ""}
+            maxLength={500}
+            placeholder="https://..."
+            onChange={(e) => setS({ ...s, logoUrl: e.target.value })}
+            className={`${fieldCls} min-h-11 font-normal`}
+          />
         </label>
         <div className="space-y-1 text-sm text-muted">
-          <label htmlFor="studio-color">สีหลัก</label>
+          <label htmlFor="studio-color" className="font-semibold text-ink-deep">
+            สีประจำร้าน
+          </label>
           <div className="flex items-center gap-3">
             <input id="studio-color" type="color" value={preview.color} onChange={(e) => setS({ ...s, brandColor: e.target.value })} className="h-11 w-14 cursor-pointer rounded-lg border border-line-interactive-warm bg-surface" />
             <input aria-label="รหัสสี" value={s.brandColor ?? ""} maxLength={9} onChange={(e) => setS({ ...s, brandColor: e.target.value })} className={`${fieldCls} min-h-11 max-w-[140px] font-mono`} />
-            <span className="text-[13px]">คอนทราสต์ {preview.ratio}:1</span>
+            <span className="text-[13px]">{preview.adjusted ? "อ่านยาก" : "อ่านง่าย"}</span>
           </div>
           {preview.adjusted && <p className="text-[13px] text-ink">สีนี้อ่านยากบนพื้นสว่าง ระบบจะปรับให้เข้มขึ้นเป็น {preview.color} โดยอัตโนมัติ</p>}
         </div>
-        <label className="block space-y-1 text-sm text-muted">
-          ช่องทางติดต่อ (แสดงท้ายคำอ่าน)
-          <input value={s.contactLine ?? ""} maxLength={120} placeholder="เช่น LINE @yourname" onChange={(e) => setS({ ...s, contactLine: e.target.value })} className={`${fieldCls} min-h-11`} />
+        <label className="block space-y-1 text-sm font-semibold text-ink-deep">
+          ช่องทางให้ลูกค้าติดต่อกลับ
+          <span className="block text-[13px] font-normal text-muted">ขึ้นท้ายคำอ่าน · ไม่ใส่ก็ได้</span>
+          <input
+            value={s.contactLine ?? ""}
+            maxLength={120}
+            placeholder="เช่น LINE @yourname"
+            onChange={(e) => setS({ ...s, contactLine: e.target.value })}
+            className={`${fieldCls} min-h-11 font-normal`}
+          />
         </label>
         <fieldset className="space-y-2 rounded-xl border border-line p-4">
           <legend className="px-1 text-sm font-bold text-ink-deep">ตัวช่วย AI (ไม่บังคับ)</legend>
@@ -669,7 +703,7 @@ function BrandTab({ settings, call, onSaved }: { settings: StudioSettingsT; call
       <aside aria-label="ตัวอย่างหัวคำอ่าน" className="space-y-3 rounded-[24px] border border-line p-6 text-center" style={{ backgroundColor: STUDIO_PAPER }}>
         <p className="text-[12px] text-muted">ตัวอย่างที่ลูกค้าเห็น</p>
         <p className="text-sm font-bold" style={{ color: preview.color }}>
-          {s.brandName?.trim() || "ชื่อแบรนด์ของคุณ"}
+          {s.brandName?.trim() || readerName}
         </p>
         <p className="text-lg font-bold text-ink-deep">ความรักช่วงปลายปี</p>
         <p className="rounded-xl border px-3 py-2 text-[13px]" style={{ borderColor: preview.color, color: preview.color }}>
