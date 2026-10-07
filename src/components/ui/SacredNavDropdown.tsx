@@ -15,6 +15,8 @@ interface SacredNavDropdownProps {
   onOpenHistory?: () => void;
   onReset?: () => void;
   canReset?: boolean;
+  /** เรนเดอร์รายการในลิ้นชักตั้งแต่แรก — ใช้ในด่านทดสอบเท่านั้น (ปกติรอจนเปิดครั้งแรก) */
+  eagerBody?: boolean;
 }
 
 interface NavItem {
@@ -29,8 +31,15 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
   onOpenHistory,
   onReset,
   canReset = false,
+  eagerBody = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  /*
+   * รายการในลิ้นชักเรนเดอร์หลังเปิดครั้งแรกเท่านั้น (งบ DOM หน้าแรก ≤ 1,500 · INC-0247)
+   * ลิ้นชักปิดอยู่ = มองไม่เห็นและ aria-hidden อยู่แล้ว แต่เดิมแถวไพ่ ~13 แถวอยู่ใน HTML ของทุกหน้า
+   * ลิงก์ชุดเดียวกันยังอยู่ใน HTML ผ่านแผงเมนูใหญ่บนคอม (SiteHeader) และฟุตเตอร์ — บอทค้นหายังเห็นครบ
+   */
+  const [hasOpened, setHasOpened] = useState(eagerBody);
   const isOpenRef = useRef(isOpen);
   useEffect(() => {
     isOpenRef.current = isOpen;
@@ -91,6 +100,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
     if (willOpen) {
       window.dispatchEvent(new CustomEvent("tarot:close-menus", { detail: { except: "sacred-nav" } }));
     }
+    if (willOpen) setHasOpened(true);
     setIsOpen(willOpen);
   };
 
@@ -274,8 +284,10 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
           </button>
         </div>
 
-        {/* Scrollable Navigation Body */}
+        {/* Scrollable Navigation Body — เรนเดอร์เมื่อเปิดครั้งแรก (ดู hasOpened) */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-3 py-3 space-y-3 no-scrollbar">
+          {hasOpened && (
+          <>
           {/* หัวข้อ 1: ดูดวง — แบ่ง 3 กลุ่มย่อยเหมือนแผงเมนูใหญ่บนคอม */}
           <div>
             <p className="px-2.5 pb-1 font-serif-th text-sm font-bold text-ink">{nav.reading.label}</p>
@@ -322,6 +334,8 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
                 )}
               </div>
             </>
+          )}
+          </>
           )}
         </div>
 

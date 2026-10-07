@@ -317,7 +317,7 @@ export function runQa() {
     ["CardZoomModal", <CardZoomModal card={six} isOpen onClose={noop} positionName="Position 1" />],
     ["TarotCard", <TarotCard card={six} isRevealed positionLabel="Position 1" />],
     ["SiteFooter", <SiteFooter />],
-    ["SacredNavDropdown", <SacredNavDropdown />],
+    ["SacredNavDropdown", <SacredNavDropdown eagerBody />],
     [
       "ToastNotification",
       <ToastNotification toast={{ id: "t", title: "Saved", subtitle: "All good", type: "success" }} onClose={noop} />,
