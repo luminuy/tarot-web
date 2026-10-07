@@ -30,7 +30,7 @@ export const AskNowBox: React.FC<{
   return (
     <div className="altar-card-porcelain !rounded-2xl p-5 sm:p-7 space-y-4">
       <div className="space-y-1">
-        <p className="text-[11px] sm:text-xs tracking-[0.2em] uppercase text-gold-ink font-serif-th">✦ {L("ถามเลยตอนนี้", "Ask it now")}</p>
+        <p className="text-[11px] sm:text-xs tracking-[0.2em] uppercase text-gold-ink font-serif-th">{L("ถามเลยตอนนี้", "Ask it now")}</p>
         <p className="text-sm sm:text-base font-serif-th text-ink-deep">
           {L(`ผัง${spreadName} · ${cardCount} ใบ · สับและเลือกไพ่ด้วยมือคุณเอง`, `${spreadName} · ${cardCount} ${cardCount === 1 ? "card" : "cards"} · you shuffle and pick the cards yourself`)}
         </p>

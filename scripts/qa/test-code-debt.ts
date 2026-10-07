@@ -674,23 +674,72 @@ check(
     referenced.size > 0 && undefinedInAstro.length === 0,
     `ขาด: ${undefinedInAstro.join(", ")}`,
   );
-  // A5-03: อิโมจิการ์ตูนในข้อความที่ผู้ใช้เห็น (นอกหลังบ้าน) — กฎเหล็กข้อ 2 อนุญาตแค่ ✦ ✨
-  const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2300}-\u{23FF}]/u;
+  /*
+   * A5-03: ห้ามอิโมจิ/สัญลักษณ์ตกแต่งในข้อความที่ผู้ใช้เห็น (นอกหลังบ้าน)
+   * ----------------------------------------------------------------------
+   * เจ้าของสั่ง (2026-10-07): เลิกใช้ ✦ ✨ ด้วย — ของตกแต่งใช้ `<GoldMark />` (รูปทรง CSS) แทน
+   * รอบเดิมด่านนี้หลุด 2 ทาง หน้าใหม่ ๆ จึงยังมีสัญลักษณ์โผล่:
+   *   1. จับแค่ U+1F300–1FAFF กับ U+2300–23FF ➔ ⚠ ⛔ ❌ ★ ✦ ✨ (U+2600–27BF) ลอดหมด
+   *   2. ตรวจแค่ .tsx/.astro ➔ ข้อความในไฟล์ .ts (บทความ · คำแนะนำฝึกสติ 🧘) ไม่มีใครดู
+   * ตอนนี้ใช้ `Extended_Pictographic` ทั้งชุด + ✦ ✧ + ตัวเลือกรูปแบบอิโมจิ และตรวจไฟล์ .ts ด้วย
+   */
+  const EMOJI = /[\p{Extended_Pictographic}\p{Regional_Indicator}\u{2726}\u{2727}\u{FE0F}]/u;
+  // ★ ดาวคะแนนรีวิวแม่หมอ (ตัวอักษรขาวดำ ไม่ใช่อิโมจิ) · © ลิขสิทธิ์ท้ายเว็บ
+  const EMOJI_ALLOWED = new Set(["\u2605", "\u00A9"]);
+  /*
+   * prompt ที่ส่งให้โมเดลอ่าน ไม่ได้แสดงบนจอ — ส่วนคำตอบของโมเดลถูกกวาดด้วย stripEmoji() ก่อนถึงจอ (A5-03b)
+   * ไม่แก้อิโมจิใน prompt เพราะแก้แล้วต้องขึ้น PROMPT_VERSION + วัด ai:judge ใหม่ทั้งชุด
+   */
+  const EMOJI_EXEMPT = new Set([
+    "src/lib/ai/prompt.ts",
+    "src/lib/ai/prompt-guard.ts",
+    "src/lib/ai/ritual.ts",
+    "src/data/ai/exemplars.ts",
+    "src/lib/schema/reading.ts",
+  ]);
   const emojiHits: string[] = [];
-  for (const f of [...sources, ...walkAny(path.join(ROOT, "astro"), /\.(tsx|astro)$/)]) {
-    if (!/\.(tsx|astro)$/.test(f) || /[\\/]admin[\\/]/.test(f)) continue;
+  for (const f of [...sources, ...walkAny(path.join(ROOT, "astro"), /\.(tsx?|astro)$/)]) {
+    if (!/\.(tsx?|astro)$/.test(f) || /[\\/]admin[\\/]/.test(f) || EMOJI_EXEMPT.has(rel(f))) continue;
     // ตัดคอมเมนต์ HTML (<!-- -->) ของไฟล์ .astro ด้วย โดยคงจำนวนบรรทัดเดิมไว้
     const lines = stripComments(fs.readFileSync(f, "utf-8"))
       .replace(/<!--[\s\S]*?-->/g, (c) => c.replace(/[^\n]/g, " "))
       .split("\n");
     lines.forEach((line, i) => {
-        if (/^\s*(\*|\/\/|\{\/\*)/.test(line)) return;
+        // คอมเมนต์ JS/JSX และคอมเมนต์ SQL (`--`) ในสคีมา ผู้ใช้ไม่เห็น
+        if (/^\s*(\*|\/\/|\{\/\*|--)/.test(line)) return;
         // ข้อความใน console ผู้ใช้ไม่เห็น
         if (/console\./.test(line) || /console\.\w+\(\s*$/.test(lines[i - 1] ?? "")) return;
-        if (EMOJI.test(line)) emojiHits.push(`${path.relative(ROOT, f)}:${i + 1}`);
+        const bad = [...line].filter((c) => EMOJI.test(c) && !EMOJI_ALLOWED.has(c));
+        if (bad.length > 0) emojiHits.push(`${rel(f)}:${i + 1} ${bad.join("")}`);
       });
   }
-  check(`A5-03: ไม่มีอิโมจิการ์ตูนในข้อความที่ผู้ใช้เห็น`, emojiHits.length === 0, emojiHits.slice(0, 5).join(" · "));
+  check(`A5-03: ไม่มีอิโมจิ/สัญลักษณ์ตกแต่ง (รวม ✦ ✨) ในข้อความที่ผู้ใช้เห็น`, emojiHits.length === 0, emojiHits.slice(0, 8).join(" · "));
+  /*
+   * A5-03b: ข้อความที่ AI เขียน ด่านตรวจโค้ดมองไม่เห็น ➔ ต้องกวาดตรงทางออก
+   * ยิงเคสจริงผ่าน stripEmoji() + ยืนยันว่าทางออกหลักทุกเส้นเรียกใช้อยู่
+   */
+  {
+    const { stripEmoji } = await import("../../src/lib/text/no-emoji");
+    const cases: Array<[string, string]> = [
+      ["\u{1F9D8} กิจกรรมฝึกสติ 1 นาที: หายใจลึก ๆ", "กิจกรรมฝึกสติ 1 นาที: หายใจลึก ๆ"],
+      ["SeerTarot \u2728 เปิดไพ่ฟรี", "SeerTarot เปิดไพ่ฟรี"],
+      ["\u2726 หัวข้อ\nบรรทัดสอง \u{1F52E}", "หัวข้อ\nบรรทัดสอง"],
+      ["\u26A0\uFE0F ระวังนะ", "ระวังนะ"],
+      ["ไม่มีอิโมจิ 1-2 สัปดาห์ (#3)", "ไม่มีอิโมจิ 1-2 สัปดาห์ (#3)"],
+    ];
+    const bad = cases.filter(([input, want]) => stripEmoji(input) !== want);
+    check("A5-03b: stripEmoji() ตัดอิโมจิโดยไม่ทิ้งช่องว่างเกิน และไม่แตะข้อความปกติ", bad.length === 0, bad.map(([i]) => i).join(" · "));
+    const exits: Array<[string, RegExp]> = [
+      ["src/app/api/reading/[id]/read/route.ts", /const event = stripEmojiDeep\(rawEvent\)/],
+      ["src/components/home/flow-reading.ts", /stripEmojiDeep\(action\.reading\)/],
+      ["src/lib/chat/format-chat-text.ts", /stripEmoji\(p\)/],
+      ["src/lib/utils/history.ts", /cleanAiText\(/],
+      ["src/components/reading/insight/SecondPerspectivePanel.tsx", /stripEmojiDeep\(data\.reading/],
+      ["src/lib/ai/mock-reading.ts", /stripEmoji\(generateMindfulMicroRitual/],
+    ];
+    const missing = exits.filter(([f, re]) => !re.test(src(f))).map(([f]) => f);
+    check("A5-03b: ทางออกข้อความ AI (คำอ่าน · แชท · ประวัติ · มุมที่สอง) กวาดอิโมจิก่อนถึงจอ", missing.length === 0, missing.join(" · "));
+  }
   const redeem = src("src/components/admin/RedeemCodesManager.tsx");
   check("A5-06: ช่องวันหมดอายุทั้งสองช่องมี <label htmlFor>", /htmlFor=\{createExpiryId\}/.test(redeem) && /htmlFor=\{editExpiryId\}/.test(redeem));
   check(

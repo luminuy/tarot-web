@@ -17,7 +17,7 @@
  * 6. ต้องจดสถิติ ai_mock_served ทุกครั้งที่เสิร์ฟ
  * 7. (ยกเครื่อง 2026-09-24) น้ำเสียงต้องตรงกับไพ่: ไพ่ที่ไม่ใช่ขั้วหนุนห้ามถูกเขียนว่าเป็นแรงหนุน
  *    · บทเปิด/สรุปอิงไพ่จริง · หาไพ่ปลายทางจากชื่อช่อง · ผังใบเดียวไม่ขึ้น "ทั้ง 1 ใบ"
- *    · ไม่มีวงเล็บติดอักษรไทย · ข้อสุดท้ายของคำแนะนำเป็นฝึกสติ 🧘 · ไพ่ชุดเดิมได้คำอ่านเดิม
+ *    · ไม่มีวงเล็บติดอักษรไทย · ข้อสุดท้ายของคำแนะนำเป็นฝึกสติ (ไม่มีอิโมจิ) · ไพ่ชุดเดิมได้คำอ่านเดิม
  *
  * รันด้วย: npx tsx scripts/qa/test-mock-reading.ts
  */
@@ -35,6 +35,8 @@ import { buildOfflineChatReply, detectChatIntent } from "../../src/lib/ai/chat-f
 import { formatPriorReadingForChat, PRIOR_READING_CHAR_BUDGET } from "../../src/lib/ai/chat-context";
 import type { SavedReadingItem } from "../../src/lib/utils/history";
 import { checkReadingConsistency } from "../../src/lib/ai/consistency";
+import { isMindfulAdvice } from "../../src/lib/ai/ritual";
+import { hasEmoji } from "../../src/lib/text/no-emoji";
 import type { ReadingEvent } from "../../src/lib/ai/types";
 import { YES_NO_DISPLAY_EN, type Reading } from "../../src/lib/schema/reading";
 
@@ -371,7 +373,7 @@ async function run() {
       const b = await collect(ctx);
       check(`[${lang} · ${spreadId}] ไพ่ชุดเดิมได้คำอ่านเดิม (ไม่สุ่ม)`, JSON.stringify(a.reading) === JSON.stringify(b.reading));
       const last = a.reading?.advice.at(-1) ?? "";
-      check(`[${lang} · ${spreadId}] ข้อสุดท้ายของคำแนะนำเป็นฝึกสติ 🧘`, last.includes("🧘"));
+      check(`[${lang} · ${spreadId}] ข้อสุดท้ายของคำแนะนำเป็นฝึกสติ และไม่มีอิโมจิ`, isMindfulAdvice(last) && !hasEmoji(last));
       const issues = checkReadingConsistency(a.reading!, ctx.cards, {
         drawnCount: ctx.drawn.length,
         yesNoMode: Boolean(ctx.spread.yesNoMode),
@@ -526,14 +528,14 @@ async function run() {
   const chatRec = { drawn: chatDrawn, spreadId: "three-card", category: "love" };
   const withResult = {
     ...chatRec,
-    result: { timing: "ภายใน 1-2 สัปดาห์นี้", advice: ["ส่งข้อความสั้น ๆ ทักเขาก่อน", "อย่ารีบถามเรื่องอนาคต", "🧘 หายใจลึก ๆ"], summary: "ภาพรวมของคำอ่านจริง" },
+    result: { timing: "ภายใน 1-2 สัปดาห์นี้", advice: ["ส่งข้อความสั้น ๆ ทักเขาก่อน", "อย่ารีบถามเรื่องอนาคต", "กิจกรรมฝึกสติ 1 นาที: หายใจลึก ๆ"], summary: "ภาพรวมของคำอ่านจริง" },
   };
   const ask = (q: string, record: object = chatRec, lang: "th" | "en" = "th", personaId = "warm") =>
     buildOfflineChatReply({ userQuestion: q, personaId, lang, record: record as never });
   check("ไม่จับ \"ตัดสินใจ\" เป็นคำถามความรัก (บั๊กเดิม)", detectChatIntent("ตัดสินใจยังไงดี") !== "love");
   check("\"สรุปอีกทีได้ไหม\" เป็นคำขอสรุป ไม่ใช่คำถามใช่/ไม่ใช่", detectChatIntent("สรุปอีกทีได้ไหม") === "summary");
   check("ถามเวลา ➔ ใช้กรอบเวลาจากคำอ่านจริงของผู้ใช้", ask("เมื่อไหร่จะได้คุยกัน", withResult).includes("ภายใน 1-2 สัปดาห์นี้"));
-  check("ถามวิธี ➔ ใช้คำแนะนำจากคำอ่านจริง (ไม่เอาข้อฝึกสติ)", ask("ควรทำยังไงดี", withResult).includes("ส่งข้อความสั้น ๆ ทักเขาก่อน") && !ask("ควรทำยังไงดี", withResult).includes("🧘"));
+  check("ถามวิธี ➔ ใช้คำแนะนำจากคำอ่านจริง (ไม่เอาข้อฝึกสติ)", ask("ควรทำยังไงดี", withResult).includes("ส่งข้อความสั้น ๆ ทักเขาก่อน") && !ask("ควรทำยังไงดี", withResult).includes("หายใจลึก"));
   check("ขอสรุป ➔ ใช้บทสรุปจากคำอ่านจริง", ask("สรุปอีกทีได้ไหม", withResult).includes("ภาพรวมของคำอ่านจริง"));
   check("ถามถึงไพ่ตามชื่อ ➔ ตอบเรื่องไพ่ใบนั้นในช่องของมัน", ask("ดวงอาทิตย์หมายถึงอะไร").includes("ดวงอาทิตย์ในช่องอนาคต"));
   check("ถามข้อควรระวัง ➔ ชี้ไพ่ที่เตือนจริง (สิบแห่งดาบ)", ask("มีอะไรต้องระวังไหม").includes("สิบแห่งดาบ"));

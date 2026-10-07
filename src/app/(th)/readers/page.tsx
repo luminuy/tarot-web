@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listPublicApprovedReaders, type PublicReaderProfile } from "@/lib/marketplace/readers.repo";
+import { GoldMark } from "@/components/ui/GoldMark";
 import { listLiveReaderIds } from "@/lib/marketplace/queue.repo";
 import { CONSULTATION_MINUTES } from "@/lib/marketplace/offer";
 import { getAllReaderRatings } from "@/lib/marketplace/reviews.repo";
@@ -124,7 +125,7 @@ export default async function ReadersPage() {
           <section className="grid items-center gap-10 lg:gap-14 lg:grid-cols-[1.05fr_0.95fr] pt-8 sm:pt-12 pb-14 sm:pb-20">
             <div className="space-y-6 text-center lg:text-left">
               <p className="inline-flex items-center gap-2 text-[13px] font-bold tracking-wide text-gold-ink">
-                <span aria-hidden="true">✦</span> แม่หมอตัวจริง · คุยตัวต่อตัว
+                <GoldMark /> แม่หมอตัวจริง · คุยตัวต่อตัว
               </p>
               <h1 className="text-[2.5rem] leading-[1.15] sm:text-6xl sm:leading-[1.1] font-bold text-ink-deep [text-wrap:balance]">
                 <ThaiPhrases>ปรึกษาแม่หมอ ตัวต่อตัว</ThaiPhrases>

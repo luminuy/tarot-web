@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { GoldMark } from "@/components/ui/GoldMark";
 
 import { RitualHero } from "@/components/reading/one-card/RitualHero";
 import { SeoArticleShell, type SeoFaqItem } from "@/components/seo/SeoArticleShell";
@@ -570,8 +571,10 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
                 <li key={distance} className="space-y-1">
                   <p className="text-sm font-serif-th font-bold text-ink">
                     {aspect.name}
-                    <span aria-hidden="true" className="ml-2 text-gold-ink text-xs tracking-[0.2em]">
-                      {"✦".repeat(aspect.harmony)}
+                    <span aria-hidden="true" className="ml-2 inline-flex items-center gap-1.5 text-gold-ink">
+                      {Array.from({ length: aspect.harmony }, (_, i) => (
+                        <GoldMark key={i} />
+                      ))}
                     </span>
                   </p>
                   <p className="flex flex-wrap gap-2">

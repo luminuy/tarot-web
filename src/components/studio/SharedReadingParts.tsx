@@ -71,7 +71,7 @@ export function PrintButton({ accent }: { accent: string }) {
       className="studio-no-print inline-flex min-h-11 items-center gap-2 rounded-full border px-5 text-sm font-semibold transition-colors hover:bg-inset-warm"
       style={{ borderColor: accent, color: accent }}
     >
-      ✦ บันทึกเป็น PDF / พิมพ์
+      บันทึกเป็น PDF / พิมพ์
     </button>
   );
 }

@@ -200,7 +200,7 @@ export function JournalApp() {
   return (
     <main id="main-content" className="w-full max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-16 space-y-6">
       <header className="text-center space-y-2">
-        <p className="text-[11px] sm:text-xs tracking-[0.2em] uppercase text-gold-ink font-serif-th">✦ {L({ th: "สมุดดวงของฉัน", en: "My reading journal" })} ✦</p>
+        <p className="text-[11px] sm:text-xs tracking-[0.2em] uppercase text-gold-ink font-serif-th">{L({ th: "สมุดดวงของฉัน", en: "My reading journal" })}</p>
         <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-ink-deep [text-wrap:balance]">
           <ThaiPhrases>{L({ th: "ทุกคำอ่าน คือบทหนึ่งของเรื่องคุณ", en: "Every reading is a chapter of your story" })}</ThaiPhrases>
         </h1>
@@ -277,7 +277,7 @@ export function JournalApp() {
               />
               <div className="flex flex-wrap gap-1.5 text-xs font-serif-th">
                 <Chip on={pinnedOnly} onClick={() => setPinnedOnly((v) => !v)}>
-                  ✦ {L({ th: "ปักหมุด", en: "Pinned" })}
+                  {L({ th: "ปักหมุด", en: "Pinned" })}
                 </Chip>
                 <select
                   value={category}

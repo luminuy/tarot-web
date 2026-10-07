@@ -3,6 +3,7 @@ import { streamGeminiReading } from "@/lib/ai/gemini";
 import { AI_DISCLOSURE, AI_DISCLOSURE_EN } from "@/lib/safety/guardrails";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { getReading, updateReading } from "@/server/store";
+import { stripEmojiDeep } from "@/lib/text/no-emoji";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
 import { recordEvents, recordEvent } from "@/lib/stats/record";
@@ -425,8 +426,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           }
         }
 
-        for await (const event of streamMultiProviderReading()) {
+        for await (const rawEvent of streamMultiProviderReading()) {
           if (isClosed) break;
+          // กวาดอิโมจิที่โมเดลใส่มาเองก่อนส่งถึงจอและก่อนบันทึก (คำสั่งเจ้าของ 2026-10-07)
+          const event = stripEmojiDeep(rawEvent);
 
           if (event.type === "done") {
             const providerUsed = event.provider || activeProvider;

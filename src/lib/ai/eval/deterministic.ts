@@ -25,6 +25,7 @@ import { hasForeignScript } from "@/lib/ai/language";
 import { collectStrings, detectPromptLeak } from "@/lib/ai/leak-guard";
 import { ReadingSchema, type Reading } from "@/lib/schema/reading";
 import { redactPii } from "@/lib/security/pii";
+import { stripEmoji } from "@/lib/text/no-emoji";
 
 export type EvalCheckId =
   | "schema"
@@ -122,7 +123,7 @@ export function evaluateReading(input: EvalInput): EvalResult {
   add("reversed", missingRev.length === 0, missingRev.length ? `ตำแหน่ง ${missingRev.join(",")} ไม่ได้บอกว่ากลับหัว` : undefined);
 
   const all = textOf(r);
-  const langOk = input.lang === "en" ? !THAI.test(all) : !hasForeignScript(all.replace(/🧘/g, ""));
+  const langOk = input.lang === "en" ? !THAI.test(all) : !hasForeignScript(stripEmoji(all));
   add("language", langOk, input.lang === "en" ? "พบอักษรไทยในคำอ่านภาษาอังกฤษ" : "พบอักษรต่างภาษาในคำอ่านภาษาไทย");
 
   const pats = input.lang === "en" ? ABSOLUTES_EN : ABSOLUTES_TH;

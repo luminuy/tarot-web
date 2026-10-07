@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { GoldMark } from "@/components/ui/GoldMark";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CardImage } from "@/components/card/CardImage";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
@@ -154,7 +155,7 @@ export function QuestionPageContent({ question: q, locale, askBox }: { question:
 
         <header className="space-y-4">
           <p className="glass-chip inline-flex items-center gap-2 px-3 py-1 text-xs text-gold-ink font-serif-th font-semibold">
-            ✦ {isEn ? `${parent.en} question` : `คำถามหมวด${parent.th}`}
+            {isEn ? `${parent.en} question` : `คำถามหมวด${parent.th}`}
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold font-serif-th text-ink-deep leading-tight [text-wrap:balance]"><ThaiPhrases>{c.question}</ThaiPhrases></h1>
           <div className="space-y-3 text-sm sm:text-base text-[#4A4338] font-serif-th leading-relaxed">
@@ -170,7 +171,7 @@ export function QuestionPageContent({ question: q, locale, askBox }: { question:
         <section className="space-y-3">
           <H2>{isEn ? "Ask it this way for a usable answer" : "ถามแบบนี้ได้คำตอบที่ใช้ได้จริงกว่า"}</H2>
           <ul className="space-y-2 text-sm text-[#4A4338] font-serif-th leading-relaxed list-none">
-            {c.betterQuestions.map((b, i) => <li key={i} className="pl-5 relative"><span aria-hidden="true" className="absolute left-0 text-gold-ink">✦</span>{b}</li>)}
+            {c.betterQuestions.map((b, i) => <li key={i} className="pl-5 relative"><GoldMark className="absolute left-0.5 top-[0.6em] text-gold-ink" />{b}</li>)}
           </ul>
         </section>
 
@@ -253,7 +254,7 @@ export function QuestionPageContent({ question: q, locale, askBox }: { question:
         <section className="space-y-3">
           <H2>{isEn ? "After the cards answer" : "เมื่อไพ่ตอบแล้ว ทำอะไรต่อ"}</H2>
           <ul className="space-y-2 text-sm text-[#4A4338] font-serif-th leading-relaxed list-none">
-            {c.afterReading.map((b, i) => <li key={i} className="pl-5 relative"><span aria-hidden="true" className="absolute left-0 text-gold-ink">✦</span>{b}</li>)}
+            {c.afterReading.map((b, i) => <li key={i} className="pl-5 relative"><GoldMark className="absolute left-0.5 top-[0.6em] text-gold-ink" />{b}</li>)}
           </ul>
         </section>
 
@@ -310,7 +311,7 @@ export function QuestionsHubContent({ locale }: { locale: Locale }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(itemList) }} />
       <div className="max-w-4xl mx-auto space-y-10 py-6">
         <header className="space-y-3 text-center">
-          <p className="text-[11px] sm:text-xs tracking-[0.2em] uppercase text-gold-ink font-serif-th">✦ {isEn ? "Tarot questions" : "คำถามดูดวง"}</p>
+          <p className="text-[11px] sm:text-xs tracking-[0.2em] uppercase text-gold-ink font-serif-th">{isEn ? "Tarot questions" : "คำถามดูดวง"}</p>
           <h1 className="text-3xl sm:text-4xl font-bold font-serif-th text-ink-deep [text-wrap:balance]"><ThaiPhrases>{c.heading}</ThaiPhrases></h1>
           <p className="text-sm text-muted font-serif-th max-w-2xl mx-auto leading-relaxed [text-wrap:balance]">{c.lead}</p>
         </header>

@@ -10,7 +10,7 @@
  *    (มีเกราะป้องกันผลบวกลวง: คำสามัญอย่าง "ดวงอาทิตย์", "ดวงจันทร์", "โลก", "ความตาย"
  *     ต้องมี "ไพ่" นำหน้า หรืออยู่ในวงเล็บ ถึงจะนับเป็นการอ้างอิงไพ่)
  * 3. YESNO_CONTRADICTION: yesNoAnswer ต้องไม่ขัดแย้งกับคำสรุปใน summary
- * 4. ADVICE_MISSING_MINDFUL: ข้อสุดท้ายใน advice ควรเป็น Mindful Ritual (ขึ้นต้นด้วย 🧘)
+ * 4. ADVICE_MISSING_MINDFUL: ข้อสุดท้ายใน advice ควรเป็น Mindful Ritual (ขึ้นต้นด้วย "กิจกรรมฝึกสติ 1 นาที:")
  * 5. CARD_READING_LENGTH: ความยาวคำอ่านแต่ละใบต้องสมเหตุสมผล
  */
 
@@ -19,6 +19,7 @@ import { CARD_VISUAL_LORE } from "@/data/cards/visual-lore";
 import type { Reading } from "@/lib/schema/reading";
 import type { PastReadingSnapshot } from "@/lib/ai/karmic";
 import { collectStrings, detectPromptLeak } from "@/lib/ai/leak-guard";
+import { isMindfulAdvice } from "@/lib/ai/ritual";
 
 export interface ConsistencyIssue {
   code:
@@ -323,10 +324,10 @@ export function checkReadingConsistency(
   const adviceList = reading.advice || [];
   if (adviceList.length > 0) {
     const lastAdvice = adviceList[adviceList.length - 1];
-    if (!lastAdvice.includes("🧘")) {
+    if (!isMindfulAdvice(lastAdvice)) {
       issues.push({
         code: "ADVICE_MISSING_MINDFUL",
-        message: "ข้อสุดท้ายใน advice ไม่พบสัญลักษณ์ฝึกสติ 🧘",
+        message: "ข้อสุดท้ายใน advice ไม่ใช่กิจกรรมฝึกสติ 1 นาที",
         fatal: false,
       });
     }

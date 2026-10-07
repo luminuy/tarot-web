@@ -75,7 +75,7 @@ export const InstallPrompt: React.FC<{ isEnglish: boolean }> = ({ isEnglish }) =
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
           <h2 id="install-h" className="text-sm sm:text-base font-bold">
-            ✦ {L({ th: "เก็บ SeerTarot ไว้บนหน้าจอโฮม", en: "Keep SeerTarot on your home screen" })}
+            {L({ th: "เก็บ SeerTarot ไว้บนหน้าจอโฮม", en: "Keep SeerTarot on your home screen" })}
           </h2>
           <p className="text-xs sm:text-[13px] text-muted leading-relaxed">
             {L({

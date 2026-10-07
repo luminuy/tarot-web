@@ -179,9 +179,15 @@ function drawDivider(ctx: Ctx, y: number, half = 150) {
   ctx.moveTo(W / 2 - half, y);
   ctx.lineTo(W / 2 + half, y);
   ctx.stroke();
+  // ข้าวหลามตัดทองวาดเป็นรูปทรง ไม่พิมพ์ ✦ เป็นตัวอักษร (ฟอนต์บางเครื่องขึ้นเป็นอิโมจิ · คำสั่งเจ้าของ 2026-10-07)
   ctx.fillStyle = C.gold;
-  font(ctx, 400, 22, SERIF);
-  drawCentered(ctx, "✦", W / 2, y + 8);
+  ctx.beginPath();
+  ctx.moveTo(W / 2, y - 7);
+  ctx.lineTo(W / 2 + 7, y);
+  ctx.lineTo(W / 2, y + 7);
+  ctx.lineTo(W / 2 - 7, y);
+  ctx.closePath();
+  ctx.fill();
 }
 
 function drawPill(ctx: Ctx, text: string, cx: number, y: number, color: string, size: number) {

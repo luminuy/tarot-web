@@ -3,6 +3,7 @@
 import React, { useId, useMemo, useState } from "react";
 import { PERSONAS, type Persona } from "@/data/personas";
 import type { Reading } from "@/lib/schema/reading";
+import { stripEmojiDeep } from "@/lib/text/no-emoji";
 import { ASPECT_LABEL, comparePerspectives } from "@/lib/reading/perspective";
 
 /**
@@ -52,7 +53,7 @@ export const SecondPerspectivePanel: React.FC<{
       });
       const data = (await res.json().catch(() => ({}))) as { reading?: Reading; error?: string };
       if (!res.ok || !data.reading) throw new Error(data.error || L({ th: "ขอมุมมองไม่สำเร็จ ลองใหม่อีกครั้ง", en: "Couldn't get that perspective. Please try again." }));
-      setLoaded((m) => ({ ...m, [p.id]: data.reading! }));
+      setLoaded((m) => ({ ...m, [p.id]: stripEmojiDeep(data.reading!) }));
       setTab(p.id);
     } catch (err) {
       setError((err as Error).message);
@@ -65,7 +66,7 @@ export const SecondPerspectivePanel: React.FC<{
     <section className="glass-tile !rounded-xl p-4 sm:p-5 space-y-4 font-serif-th text-ink-deep" aria-labelledby={`${id}-h`}>
       <header className="space-y-1">
         <h5 id={`${id}-h`} className="text-sm sm:text-base font-bold">
-          ✦ {L({ th: "อยากฟังอีกมุมไหม", en: "Hear it from another angle?" })}
+          {L({ th: "อยากฟังอีกมุมไหม", en: "Hear it from another angle?" })}
         </h5>
         <p className="text-xs sm:text-[13px] text-muted leading-relaxed">
           {L({
@@ -89,7 +90,7 @@ export const SecondPerspectivePanel: React.FC<{
           >
             <span className="block font-semibold">
               {name(p)}
-              {pending === p.id ? ` · ${L({ th: "กำลังอ่าน…", en: "reading…" })}` : loaded[p.id] ? " ✦" : ""}
+              {pending === p.id ? ` · ${L({ th: "กำลังอ่าน…", en: "reading…" })}` : loaded[p.id] ? ` · ${L({ th: "อ่านแล้ว", en: "ready" })}` : ""}
             </span>
             <span className="block text-[11px] text-muted max-w-[16rem]">{isEnglish ? p.taglineEn : p.tagline}</span>
           </button>

@@ -229,7 +229,7 @@ function ReaderConsoleInner() {
                   href={`/readers/studio?token=${encodeURIComponent(token)}`}
                   className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold text-gold-ink hover:underline"
                 >
-                  ✦ สตูดิโอคำอ่าน — ทำคำอ่านให้ลูกค้าของคุณเอง
+                  สตูดิโอคำอ่าน — ทำคำอ่านให้ลูกค้าของคุณเอง
                 </a>
               )}
             </div>

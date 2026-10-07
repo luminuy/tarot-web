@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { GoldMark } from "@/components/ui/GoldMark";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CardImage } from "@/components/card/CardImage";
 import { useLocale } from "@/lib/i18n";
@@ -102,9 +103,10 @@ export function ZodiacCompatibility({ signs }: { signs: ZodiacFinderItem[] }) {
                   {isEnglish ? ` — harmony ${aspect.harmony} of 5` : ` — ความกลมกลืน ${aspect.harmony} จาก 5`}
                 </span>
               </p>
-              <p aria-hidden="true" className="text-gold-ink tracking-[0.3em] text-sm">
-                {"✦".repeat(aspect.harmony)}
-                <span className="text-line">{"✦".repeat(5 - aspect.harmony)}</span>
+              <p aria-hidden="true" className="flex items-center gap-2 py-1">
+                {Array.from({ length: 5 }, (_, i) => (
+                  <GoldMark key={i} size="md" className={i < aspect.harmony ? "text-gold-ink" : "text-line"} />
+                ))}
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4">

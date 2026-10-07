@@ -30,7 +30,8 @@ const words = (t: string, lang: "th" | "en") =>
   [...new Intl.Segmenter(lang, { granularity: "word" }).segment(t)].filter((s) => s.isWordLike).length;
 const prose = (c: QuestionCopy) =>
   [c.question, ...c.intro, c.limits, ...c.betterQuestions, ...c.positionWhy, ...Object.values(c.cardNotes), ...c.afterReading, c.example.text, ...c.followUps.flatMap((f) => [f.q, f.a])].join(" ");
-const EMOJI = /\p{Extended_Pictographic}/u;
+// เจ้าของสั่งเลิก ✦ ✨ ด้วย (2026-10-07) — ไม่มีอิโมจิที่อนุญาตแล้ว
+const EMOJI = /[\p{Extended_Pictographic}\u{2726}\u{2727}]/u;
 /** สัญญาผล = "รับประกัน/guarantee" ที่ไม่ได้อยู่ในประโยคปฏิเสธ ("ไม่ได้รับประกัน" · "doesn't guarantee" · "not a guarantee") */
 function promisesOutcome(text: string): boolean {
   if (/แน่นอน\s*100|100\s*%\s*(sure|certain)/i.test(text)) return true;
@@ -40,7 +41,6 @@ function promisesOutcome(text: string): boolean {
   }
   return false;
 }
-const ALLOWED_EMOJI = /[✦✨]/gu;
 
 check("มี 20 หน้า", QUESTIONS.length === 20);
 check("slug ไม่ซ้ำ", new Set(QUESTIONS.map((q) => q.slug)).size === QUESTIONS.length);
@@ -74,7 +74,7 @@ for (const q of QUESTIONS) {
     check(`${label}: ตัวอย่างไม่ใช้ไพ่ซ้ำ`, new Set(c.example.cards.map((x) => x.id)).size === c.example.cards.length);
     check(`${label}: คำถามต่อ ≥ 3 · หลังอ่าน ≥ 3 · ถามแบบดีกว่า ≥ 3`, c.followUps.length >= 3 && c.afterReading.length >= 3 && c.betterQuestions.length >= 3);
     const all = JSON.stringify(c);
-    check(`${label}: ไม่มีอิโมจิอื่นนอกจาก ✦ ✨ (กฎเหล็กข้อ 2)`, !EMOJI.test(all.replace(ALLOWED_EMOJI, "")));
+    check(`${label}: ไม่มีอิโมจิ/สัญลักษณ์ตกแต่ง (กฎเหล็กข้อ 2)`, !EMOJI.test(all));
     if (lang === "en") check(`${label}: หน้าอังกฤษไม่มีอักษรไทย`, !/[฀-๿]/.test(all));
     check(`${label}: ไม่สัญญาผล (รับประกัน/แน่นอน 100%)`, !promisesOutcome(all));
     check(`${label}: ไม่ให้ตัวเลขเสี่ยงโชค`, !/เลขเด็ด(คือ|งวดนี้)|เลขนำโชค(คือ|ของคุณ)|ตัวเลขนำโชค\s*\d|lucky numbers? (is|are|for you)\b/i.test(all));

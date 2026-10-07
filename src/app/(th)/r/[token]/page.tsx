@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import { GoldMark } from "@/components/ui/GoldMark";
 import { notFound } from "next/navigation";
 
 import { CardImage } from "@/components/card/CardImage";
@@ -73,7 +74,7 @@ function Gone() {
   return (
     <Shell accent="#8F5C1A">
       <div className="space-y-3 text-center">
-        <p className="text-2xl text-gold-ink">✦</p>
+        <p className="text-gold-ink"><GoldMark size="lg" /></p>
         <h1 className="text-xl font-bold">ลิงก์นี้เปิดไม่ได้แล้ว</h1>
         <p className="text-sm leading-relaxed text-muted">ลิงก์อาจหมดอายุหรือถูกยกเลิกโดยแม่หมอ ติดต่อแม่หมอเพื่อขอลิงก์ใหม่ได้เลย</p>
       </div>
