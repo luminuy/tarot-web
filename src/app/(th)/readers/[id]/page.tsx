@@ -107,7 +107,7 @@ export default async function ReaderDetailPage({
             </Link>
             <span aria-hidden="true">/</span>
             <Link href="/readers" className="hover:text-gold-ink transition-colors">
-              ปรึกษาหมอดู
+              ปรึกษาแม่หมอ
             </Link>
             <span aria-hidden="true">/</span>
             <span className="font-semibold text-ink-deep">{reader.displayName}</span>
