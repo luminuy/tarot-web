@@ -355,6 +355,13 @@ function ReaderConsoleInner() {
                     </span>
                   </div>
 
+                  {/* ม.26: บอกแม่หมอว่าลูกค้ายินยอมเรื่องข้อมูลอ่อนไหวหรือไม่ (migrations/0029) */}
+                  <p className="text-[13px] leading-relaxed text-muted">
+                    {ticket.sensitiveConsentAt
+                      ? "ลูกค้ายินยอมให้ใช้เรื่องสุขภาพ เพศวิถี หรือความเชื่อในคำถามเพื่อดูดวงครั้งนี้"
+                      : "ลูกค้าไม่ได้ยินยอมเรื่องข้อมูลอ่อนไหว — อย่าถามหรือจดเรื่องสุขภาพ เพศวิถี หรือความเชื่อ"}
+                  </p>
+
                   {/* AI Pre-Screening Summary Card */}
                   {ticket.screening && (
                     <div className="altar-card-porcelain p-3.5 space-y-2 text-xs">

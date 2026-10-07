@@ -28,6 +28,7 @@ interface TicketRow {
   customer_ref: string;
   slot_start: number | null;
   created_at: number;
+  sensitive_consent_at?: number | null;
 }
 
 export interface ImportableTicket {
@@ -40,6 +41,8 @@ export interface ImportableTicket {
   clientId: string | null;
   /** เริ่มคำอ่านจากตั๋วนี้ไปแล้ว */
   readingId: string | null;
+  /** ตอนจอง ลูกค้าติ๊กยินยอมโดยชัดแจ้งเรื่องข้อมูลอ่อนไหว (ม.26) — ยินยอมให้แม่หมอดูดวง ไม่ใช่ให้บันทึกในสตูดิโอ */
+  sensitiveConsent: boolean;
 }
 
 const safeQuestion = (q: string | null) => {
@@ -52,7 +55,7 @@ export async function listImportableTickets(readerId: string, now = Date.now()):
   const since = now - IMPORT_WINDOW_DAYS * 86_400_000;
   const { results } = await db
     .prepare(
-      `SELECT id, kind, status, nickname, question, customer_ref, slot_start, created_at FROM queue_tickets
+      `SELECT id, kind, status, nickname, question, customer_ref, slot_start, created_at, sensitive_consent_at FROM queue_tickets
        WHERE reader_id = ? AND status IN (${IMPORTABLE_STATUSES.map(() => "?").join(",")}) AND created_at >= ?
        ORDER BY COALESCE(slot_start, created_at) DESC LIMIT 50`,
     )
@@ -79,6 +82,7 @@ export async function listImportableTickets(readerId: string, now = Date.now()):
     at: r.slot_start ?? r.created_at,
     clientId: clientByHash.get(customerSourceHash(readerId, r.customer_ref)) ?? null,
     readingId: readingByTicket.get(r.id) ?? null,
+    sensitiveConsent: r.sensitive_consent_at != null,
   }));
 }
 
@@ -92,7 +96,7 @@ export async function getImportableTicket(
   const db = await getAppDB();
   const r = await db
     .prepare(
-      `SELECT id, kind, status, nickname, question, customer_ref, slot_start, created_at FROM queue_tickets
+      `SELECT id, kind, status, nickname, question, customer_ref, slot_start, created_at, sensitive_consent_at FROM queue_tickets
        WHERE id = ? AND reader_id = ? AND status IN (${IMPORTABLE_STATUSES.map(() => "?").join(",")}) AND created_at >= ?`,
     )
     .bind(ticketId, readerId, ...IMPORTABLE_STATUSES, now - IMPORT_WINDOW_DAYS * 86_400_000)

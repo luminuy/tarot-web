@@ -418,6 +418,8 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec("ALTER TABLE bookings ADD COLUMN reminder_1h_at INTEGER");
     safeExec("ALTER TABLE queue_tickets ADD COLUMN user_id TEXT");
     safeExec("CREATE INDEX IF NOT EXISTS idx_tickets_user ON queue_tickets(user_id)");
+    // ความยินยอมโดยชัดแจ้ง ม.26 สำหรับคำถามที่มีข้อมูลอ่อนไหว (migrations/0029)
+    safeExec("ALTER TABLE queue_tickets ADD COLUMN sensitive_consent_at INTEGER");
     safeExec("ALTER TABLE readers ADD COLUMN notify_email TEXT");
     safeExec("ALTER TABLE readers ADD COLUMN price_thb INTEGER");
     safeExec("ALTER TABLE readers ADD COLUMN buffer_min INTEGER NOT NULL DEFAULT 0");

@@ -90,8 +90,9 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
               <strong>only with the reader you chose</strong>, because this is needed to provide the reading you asked
               for. Readers are independent providers and may keep this information in their own records (including
               SeerTarot&apos;s Reader Studio) to continue serving you, as a separate data controller who must tell you
-              before doing so. If you do not want a reader to see health, sexuality or religious matters, please leave
-              them out of your question.
+              before doing so. The booking form has a separate, optional box to give explicit consent if your question
+              involves health, sexuality or religious beliefs; we keep the time you consented as a record. If you leave
+              it unticked, please leave those matters out of your question.
             </li>
             <li>
               <strong>Trial Quota Cookie (tarot_guest)</strong> — A strictly functional, first-party cookie containing
@@ -140,7 +141,9 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
             </p>
             <p>
               <strong>Registered Account Holders:</strong> Divination journals and account metadata are securely persisted
-              on Cloudflare D1 distributed edge database instances with encryption at rest and in transit (TLS 1.3). You
+              on Cloudflare D1 distributed edge database instances with encryption at rest and in transit (TLS 1.3).
+              Cloudflare is a US company, so this data is stored outside Thailand, which is necessary to provide the
+              service you request. You
               retain continuous, unilateral authority to export or irrevocably erase your stored records at any time.
             </p>
           </div>

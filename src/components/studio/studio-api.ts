@@ -85,6 +85,7 @@ export interface ImportableTicketT {
   at: number;
   clientId: string | null;
   readingId: string | null;
+  sensitiveConsent: boolean;
 }
 export interface BodyPartT {
   key: string;
