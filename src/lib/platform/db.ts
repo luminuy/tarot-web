@@ -482,7 +482,7 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec("CREATE INDEX IF NOT EXISTS idx_ai_usage_subject ON ai_usage_daily(subject, day)");
     // ✦ Reader Studio (migrations/0027)
     safeExec(
-      "CREATE TABLE IF NOT EXISTS reader_studio_settings ( reader_id TEXT PRIMARY KEY, brand_name TEXT, logo_url TEXT, brand_color TEXT, contact_line TEXT, show_ai_disclosure INTEGER NOT NULL DEFAULT 1, dpa_version TEXT, dpa_accepted_at INTEGER, pro_until INTEGER, updated_at INTEGER NOT NULL )"
+      "CREATE TABLE IF NOT EXISTS reader_studio_settings ( reader_id TEXT PRIMARY KEY, brand_name TEXT, logo_url TEXT, brand_color TEXT, contact_line TEXT, show_ai_disclosure INTEGER NOT NULL DEFAULT 1, ai_assist INTEGER NOT NULL DEFAULT 0, dpa_version TEXT, dpa_accepted_at INTEGER, pro_until INTEGER, pass_price_thb INTEGER, updated_at INTEGER NOT NULL )"
     );
     safeExec(
       "CREATE TABLE IF NOT EXISTS reader_clients ( id TEXT PRIMARY KEY, reader_id TEXT NOT NULL, display_name TEXT NOT NULL, contact TEXT, note TEXT, source_customer_hash TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL )"
@@ -503,6 +503,8 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec("ALTER TABLE reader_clients ADD COLUMN source_customer_hash TEXT");
     safeExec("ALTER TABLE reader_readings ADD COLUMN source_ticket_id TEXT");
     safeExec("ALTER TABLE reader_studio_settings ADD COLUMN pro_until INTEGER");
+    safeExec("ALTER TABLE reader_studio_settings ADD COLUMN pass_price_thb INTEGER");
+    safeExec("ALTER TABLE reader_studio_settings ADD COLUMN ai_assist INTEGER NOT NULL DEFAULT 0");
     safeExec(
       "CREATE TABLE IF NOT EXISTS reader_studio_passes ( order_id TEXT PRIMARY KEY, reader_id TEXT NOT NULL, days INTEGER NOT NULL, created_at INTEGER NOT NULL, granted_at INTEGER, revoked_at INTEGER )"
     );

@@ -31,6 +31,8 @@ export const SettingsSchema = z.object({
   brandColor: nullableText(9),
   contactLine: nullableText(120),
   showAiDisclosure: z.boolean(),
+  /** ไม่ส่งมา = คงค่าเดิม */
+  aiAssist: z.boolean().optional(),
 });
 
 export const ClientSchema = z.object({

@@ -12,10 +12,14 @@ CREATE TABLE IF NOT EXISTS reader_studio_settings (
   brand_color        TEXT,
   contact_line       TEXT,
   show_ai_disclosure INTEGER NOT NULL DEFAULT 1,
+  -- ตัวช่วย AI — ปิดเป็นค่าเริ่มต้น (ลูกค้าแม่หมอส่วนใหญ่อยากได้คำของแม่หมอเอง) · ปิด = ไม่ส่งอะไรให้ AI เลย
+  ai_assist          INTEGER NOT NULL DEFAULT 0,
   dpa_version        TEXT,
   dpa_accepted_at    INTEGER,
   -- บัตรผ่าน 30 วัน (จ่ายครั้งเดียว ไม่ตัดเงินอัตโนมัติ) ใช้ได้ถึงเมื่อไร — NULL/อดีต = แผนฟรี
   pro_until          INTEGER,
+  -- ราคาบัตรผ่านเฉพาะแม่หมอคนนี้ (บาท) ที่แอดมินตั้ง — NULL = ใช้ราคากลาง (src/lib/studio/plan.ts)
+  pass_price_thb     INTEGER,
   updated_at         INTEGER NOT NULL
 );
 

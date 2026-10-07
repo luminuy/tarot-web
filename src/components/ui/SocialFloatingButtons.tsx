@@ -45,7 +45,8 @@ export function SocialFloatingButtons({ pathname: pathnameProp }: { pathname?: s
    */
   const pathname = stripLocalePrefix(pathnameProp ?? hookPathname ?? "");
   // ซ่อนบนหน้าแอดมิน และหน้าห้องแชท/ผลพยากรณ์ (/reading/chat ฯลฯ) เพื่อไม่ให้ลอยบังปุ่มส่งข้อความหรือแผงสนทนาบนมือถือ
-  if (pathname.startsWith("/admin") || pathname.startsWith("/reading")) return null;
+  // สตูดิโอแม่หมอ + หน้าคำอ่านที่แม่หมอส่งให้ลูกค้า (แบรนด์ของแม่หมอ ไม่ใช่ช่องแชตของเรา · ปุ่มลอยบังปุ่มในฟอร์มมือถือ)
+  if (pathname.startsWith("/admin") || pathname.startsWith("/reading") || pathname.startsWith("/readers/studio") || pathname.startsWith("/r/")) return null;
 
   return (
     <details

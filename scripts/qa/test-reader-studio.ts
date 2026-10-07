@@ -4,7 +4,9 @@ import { PUBLIC_SPREADS } from "@/data/spreads";
 import { signReaderToken } from "@/lib/auth/reader-auth";
 import { createReader, deleteReader } from "@/lib/marketplace/readers.repo";
 import { getAppDB } from "@/lib/platform/db";
-import { contrastRatio, ensureReadableColor, normalizeHex, sanitizeLogoUrl, STUDIO_PAPER } from "@/lib/studio/brand";
+import { contrastRatio, ensureReadableColor, normalizeHex, sanitizeLogoUrl, STUDIO_COLOR_PRESETS, STUDIO_PAPER } from "@/lib/studio/brand";
+import { setShareBucketForTests, type AppR2Bucket } from "@/lib/platform/cf";
+import { logoKeyFromPath, sniffLogoKind } from "@/lib/studio/logo";
 import { assembleOfflineDraft, buildDraftPrompt, cardLabelTh, expectedKeys, validateDraft, type DraftContext } from "@/lib/studio/draft";
 import { STUDIO_DPA_VERSION, hasAcceptedDpa, isStudioEnabled } from "@/lib/studio/dpa";
 import { hashShareToken, isWellFormedToken, newShareToken, signViewCookie, verifyViewCookie, viewCookieName } from "@/lib/studio/share";
@@ -266,6 +268,28 @@ async function main() {
     r = await api<{ reading: RV }>(readingOne, "PATCH", `/api/marketplace/studio/readings/${reading.id}`, A.token, { title: "ความรักปลายปี (แก้)" }, { id: reading.id });
     check("PATCH ที่ไม่ส่งคำถามมา ไม่ลบคำถามเดิม", (r.json as { reading: RV & { question: string | null } }).reading.question === "เขาคิดยังไงกับฉัน");
 
+    // ตัวช่วย AI ปิดเป็นค่าเริ่มต้น ➔ ปุ่มแค่จัดโน้ตเป็นคำอ่าน ไม่ส่งอะไรให้ AI · ไม่กินโควตา · ไม่ติดป้าย AI
+    process.env.STUDIO_AI_PAID_TIER = "1";
+    type SettingsV = { aiAssist: boolean; showAiDisclosure: boolean };
+    const settingsOf = async (token: string) => ((await api<{ settings: SettingsV }>(root, "GET", "/api/marketplace/studio", token)).json as { settings: SettingsV }).settings;
+    check("ตัวช่วย AI: ปิดเป็นค่าเริ่มต้น", (await settingsOf(A.token)).aiAssist === false);
+    r = await api<{ mode: string; reason?: string; reading: RV }>(draft, "POST", `/api/marketplace/studio/readings/${reading.id}/draft`, A.token, {}, { id: reading.id });
+    const offJson = r.json as { mode: string; reason?: string; reading: RV };
+    check("ตัวช่วย AI ปิด ➔ จัดโน้ตเป็นคำอ่าน ไม่ส่งให้ AI (ai_off)", r.status === 200 && offJson.mode === "offline" && offJson.reason === "ai_off", r.json);
+    check("ตัวช่วย AI ปิด ➔ ทุกส่วนนับเป็นคำของแม่หมอ (ลิงก์ลูกค้าไม่ขึ้นป้าย AI)", (offJson.reading.body ?? []).length > 0 && (offJson.reading.body ?? []).every((p) => p.origin === "reader"));
+    check("ตัวช่วย AI ปิด ➔ ไม่กินโควตา AI", ((await api<{ quota: { used: number } }>(root, "GET", "/api/marketplace/studio", A.token)).json as { quota: { used: number } }).quota.used === 0);
+    process.env.STUDIO_PRO_PRICE_THB = "199";
+    r = await api(planCheckout, "POST", "/api/marketplace/studio/plan/checkout", A.token, {});
+    check("ตัวช่วย AI ปิด ➔ ซื้อแพ็กเกจ AI ไม่ได้ (409 ai_off)", r.status === 409 && r.json.code === "ai_off");
+    delete process.env.STUDIO_PRO_PRICE_THB;
+    await api(readingOne, "PATCH", `/api/marketplace/studio/readings/${reading.id}`, A.token, { body: [] }, { id: reading.id });
+    const brandBody = { brandName: "บ้านไพ่ทดสอบ", logoUrl: null, brandColor: null, contactLine: null, showAiDisclosure: true };
+    await api(settings, "PUT", "/api/marketplace/studio/settings", A.token, { ...brandBody, aiAssist: true });
+    check("ตัวช่วย AI: แม่หมอเปิดเองได้", (await settingsOf(A.token)).aiAssist === true);
+    await api(settings, "PUT", "/api/marketplace/studio/settings", A.token, brandBody);
+    check("ตัวช่วย AI: บันทึกแบรนด์โดยไม่ส่งสวิตช์มา ➔ คงค่าเดิม", (await settingsOf(A.token)).aiAssist === true);
+    check("ตัวช่วย AI: เปิดของ A ไม่กระทบ B", (await settingsOf(B.token)).aiAssist === false);
+
     // ร่าง (ไม่มีคีย์ AI ➔ ร่างออฟไลน์)
     // ยังไม่ยืนยันว่า AI อยู่บนบริการแบบเสียเงิน ➔ ไม่ส่งข้อมูลลูกค้าให้ AI เลย (DPA ข้อ 7)
     delete process.env.STUDIO_AI_PAID_TIER;
@@ -478,7 +502,118 @@ async function main() {
     const hook2 = await sendHook(19900);
     check("webhook ยิงซ้ำ ➔ ไม่ให้ซ้ำ", ((await hook2.json()) as { studioPass?: string }).studioPass === "already");
     delete process.env.STRIPE_WEBHOOK_SECRET;
+
+    // ── ราคาบัตรผ่านตั้งจากแผงแอดมิน: ราคาเฉพาะคน ➔ ราคากลางของแอดมิน ➔ ค่าตั้งต้น (wrangler vars) ──
+    const planLib = await import("../../src/lib/studio/plan");
+    check(
+      "ราคา: รับเฉพาะบาทเต็ม 20–100000 (ว่าง/ทศนิยม/ตัวอักษร/เกินช่วง = ไม่รับ)",
+      [planLib.validPassPriceThb("abc"), planLib.validPassPriceThb(19), planLib.validPassPriceThb(100_001), planLib.validPassPriceThb(25.5), planLib.validPassPriceThb(""), planLib.validPassPriceThb(null)].every((v) => v === null) &&
+        planLib.validPassPriceThb("299") === 299 && planLib.validPassPriceThb(20) === 20,
+    );
+    const planPrice = async (token: string) => ((await api<{ plan: PlanV }>(root, "GET", "/api/marketplace/studio", token)).json as { plan: PlanV }).plan.priceThb;
+    check("ราคา: ยังไม่ตั้งอะไรในแอดมิน ➔ ใช้ค่าตั้งต้น 199", (await planPrice(A.token)) === 199 && (await planPrice(B.token)) === 199);
+    await planLib.setAdminDefaultPassPriceThb(249);
+    check("ราคา: แอดมินตั้งราคากลาง 249 ➔ ทุกคนเห็น 249 ทันที (ไม่ต้อง deploy)", (await planPrice(A.token)) === 249 && (await planPrice(B.token)) === 249);
+    await planLib.setReaderPassPriceThb(A.id, 399);
+    check("ราคา: ตั้งราคาเฉพาะแม่หมอ A = 399 ➔ A เห็น 399 · B ยังเห็นราคากลาง", (await planPrice(A.token)) === 399 && (await planPrice(B.token)) === 249);
+    r = await api<{ orderId: string }>(planCheckout, "POST", "/api/marketplace/studio/plan/checkout", A.token, {});
+    const coA = r.json as { orderId: string };
+    const payA = await tdb.prepare(`SELECT amount_satang FROM payments WHERE order_id = ?`).bind(coA.orderId).first<{ amount_satang: number }>();
+    check("ราคา: A กดซื้อ ➔ เรียกเก็บ 39900 สตางค์ตามราคาเฉพาะคน", r.status === 200 && payA?.amount_satang === 39900, r.json);
+    await planLib.setReaderPassPriceThb(A.id, 499);
+    const payA2 = await tdb.prepare(`SELECT amount_satang FROM payments WHERE order_id = ?`).bind(coA.orderId).first<{ amount_satang: number }>();
+    check("ราคา: เปลี่ยนราคาทีหลังไม่แก้ยอดของคำสั่งซื้อที่เริ่มไปแล้ว", payA2?.amount_satang === 39900);
+    await api(settings, "PUT", "/api/marketplace/studio/settings", A.token, { brandName: "บ้านไพ่ทดสอบ", logoUrl: null, brandColor: null, contactLine: null, showAiDisclosure: true });
+    check("ราคา: แม่หมอบันทึกแบรนด์ไม่ลบราคาที่แอดมินตั้ง", (await planPrice(A.token)) === 499);
+    await planLib.setReaderPassPriceThb(A.id, null);
+    check("ราคา: ล้างราคาเฉพาะคน ➔ กลับไปใช้ราคากลาง", (await planPrice(A.token)) === 249);
+    await planLib.setAdminDefaultPassPriceThb(null);
+    check("ราคา: ล้างราคากลาง ➔ กลับไปใช้ค่าตั้งต้น", (await planPrice(A.token)) === 199);
     delete process.env.STUDIO_PRO_PRICE_THB;
+    await planLib.setReaderPassPriceThb(B.id, 159);
+    check("ราคา: ไม่มีค่าตั้งต้นแต่มีราคาเฉพาะคน ➔ เปิดขายเฉพาะคนนั้น", (await planPrice(B.token)) === 159 && (await planPrice(A.token)) === null);
+    await planLib.setReaderPassPriceThb(B.id, null);
+    const adminPassSrc = readFileSync("src/app/api/admin/studio-pass/route.ts", "utf8");
+    check(
+      "ราคา: ทุกเส้นของ /api/admin/studio-pass ผ่านด่านแอดมิน + จดบันทึกแอดมิน",
+      (adminPassSrc.match(/const denied = await requireAdmin\(\);\s*if \(denied\) return denied;/g) ?? []).length === 3 && (adminPassSrc.match(/recordAudit\(/g) ?? []).length === 2,
+    );
+
+    // ── โลโก้: อัปโหลดจากเครื่อง (R2) แทนการวางลิงก์ ──
+    check("สีสำเร็จรูปทุกสีอ่านง่ายบนพื้นกระดาษ (ไม่ต้องปรับ)", STUDIO_COLOR_PRESETS.every((p) => !ensureReadableColor(p.hex).adjusted) && new Set(STUDIO_COLOR_PRESETS.map((p) => p.hex)).size === STUDIO_COLOR_PRESETS.length);
+    const ownLogo = `/api/studio/logo/${A.id}/${"a".repeat(32)}.png`;
+    check(
+      "โลโก้: รับ path ของระบบเรา · ไม่รับ path แปลก/http/javascript:",
+      sanitizeLogoUrl(ownLogo) === ownLogo &&
+        sanitizeLogoUrl(`/api/studio/logo/${A.id}/../x.png`) === null &&
+        sanitizeLogoUrl("/etc/passwd") === null &&
+        sanitizeLogoUrl("http://x.com/a.png") === null &&
+        sanitizeLogoUrl("javascript:alert(1)") === null,
+    );
+    check("โลโก้: path ➔ key ใน R2 เฉพาะรูปแบบที่ถูก", logoKeyFromPath(ownLogo) === `studio-logo/${A.id}/${"a".repeat(32)}.png` && logoKeyFromPath("/api/share/image/abc") === null);
+    const PNG1 = Uint8Array.from(Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==", "base64"));
+    const webpHead = Uint8Array.from([0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50]);
+    check(
+      "โลโก้: ดูชนิดไฟล์จากไบต์จริง (PNG/JPG/WebP · GIF/ข้อความไม่รับ)",
+      sniffLogoKind(PNG1) === "png" && sniffLogoKind(Uint8Array.from([0xff, 0xd8, 0xff, 0xe0])) === "jpg" && sniffLogoKind(webpHead) === "webp" &&
+        sniffLogoKind(new TextEncoder().encode("GIF89a......")) === null && sniffLogoKind(new TextEncoder().encode("<svg onload=x>")) === null,
+    );
+    const logoRoute = await import("../../src/app/api/marketplace/studio/logo/route");
+    const logoServe = await import("../../src/app/api/studio/logo/[readerId]/[file]/route");
+    const sendLogo = (token: string | null, bytes: Uint8Array, origin = ORIGIN) =>
+      logoRoute.POST(
+        new Request(`${ORIGIN}/api/marketplace/studio/logo`, {
+          method: "POST",
+          headers: { ...(token ? { authorization: `Bearer ${token}` } : {}), origin, "content-type": "image/png" },
+          body: new Blob([bytes as BlobPart]),
+        }),
+      );
+    setShareBucketForTests(null);
+    let lr = await sendLogo(A.token, new Uint8Array(200).fill(1));
+    check("โลโก้: ไม่มีที่เก็บไฟล์ ➔ 503 ให้หน้าเว็บเสนอวางลิงก์แทน", lr.status === 503 && ((await lr.json()) as { code?: string }).code === "storage_unavailable");
+    const store = new Map<string, { data: ArrayBuffer; ct?: string }>();
+    const fakeBucket: AppR2Bucket = {
+      async put(key, value, opts) {
+        store.set(key, { data: value as ArrayBuffer, ct: opts?.httpMetadata?.contentType });
+      },
+      async get(key) {
+        const o = store.get(key);
+        return o ? { body: new Blob([o.data]).stream(), httpMetadata: { contentType: o.ct }, size: o.data.byteLength, arrayBuffer: async () => o.data } : null;
+      },
+      async head(key) {
+        const o = store.get(key);
+        return o ? { size: o.data.byteLength } : null;
+      },
+      async delete(key) {
+        store.delete(key);
+      },
+    };
+    setShareBucketForTests(fakeBucket);
+    const pngPadded = new Uint8Array(400);
+    pngPadded.set(PNG1);
+    lr = await sendLogo(null, pngPadded, "https://evil.example");
+    check("โลโก้: อัปโหลดจากเว็บอื่น (ไม่มี Bearer) ไม่ได้ (CSRF)", lr.status === 403);
+    lr = await sendLogo(A.token, new TextEncoder().encode("<svg xmlns='http://www.w3.org/2000/svg' onload='alert(1)'>".padEnd(200, " ")));
+    check("โลโก้: ไฟล์ที่ไม่ใช่รูป (SVG/ข้อความ) ไม่รับ", lr.status === 415);
+    const tooBig = new Uint8Array(400_001);
+    tooBig.set(PNG1);
+    lr = await sendLogo(A.token, tooBig);
+    check("โลโก้: ใหญ่เกิน 400 KB ไม่รับ", lr.status === 413);
+    lr = await sendLogo(A.token, pngPadded);
+    const up1 = (await lr.json()) as { logoUrl?: string };
+    check("โลโก้: อัปโหลดแล้วตั้งเป็นโลโก้ทันที", lr.status === 200 && Boolean(up1.logoUrl && sanitizeLogoUrl(up1.logoUrl)) && (await settingsOf(A.token) as unknown as { logoUrl: string }).logoUrl === up1.logoUrl, up1);
+    const [, , , , rid1, file1] = (up1.logoUrl ?? "").split("/");
+    const served = await logoServe.GET(new Request(`${ORIGIN}${up1.logoUrl}`), { params: Promise.resolve({ readerId: rid1, file: file1 }) });
+    check("โลโก้: เสิร์ฟรูปได้ (ชนิดถูก · nosniff · cache ยาว)", served.status === 200 && served.headers.get("content-type") === "image/png" && served.headers.get("x-content-type-options") === "nosniff" && /immutable/.test(served.headers.get("cache-control") ?? ""));
+    const bad = await logoServe.GET(new Request(`${ORIGIN}/api/studio/logo/x/y`), { params: Promise.resolve({ readerId: "..", file: "secret.json" }) });
+    check("โลโก้: path แปลกอ่านไฟล์อื่นใน bucket ไม่ได้ (404)", bad.status === 404);
+    lr = await sendLogo(A.token, pngPadded);
+    const up2 = (await lr.json()) as { logoUrl?: string };
+    check("โลโก้: เปลี่ยนรูป ➔ ลบไฟล์เก่าทิ้ง ไม่ค้างใน R2", up2.logoUrl !== up1.logoUrl && !store.has(logoKeyFromPath(up1.logoUrl)!) && store.has(logoKeyFromPath(up2.logoUrl)!));
+    const delRes = await logoRoute.DELETE(new Request(`${ORIGIN}/api/marketplace/studio/logo`, { method: "DELETE", headers: { authorization: `Bearer ${A.token}`, origin: ORIGIN } }));
+    check("โลโก้: เอาออก ➔ ไม่มีโลโก้ + ลบไฟล์", delRes.status === 200 && store.size === 0 && (await settingsOf(A.token) as unknown as { logoUrl: string | null }).logoUrl === null);
+    lr = await sendLogo(A.token, pngPadded);
+    const up3 = (await lr.json()) as { logoUrl?: string };
 
     // ── ส่งออก/ลบทั้งสตูดิโอ (DPA ข้อ 12 · 15) ──
     const exportRoute = await import("../../src/app/api/marketplace/studio/export/route");
@@ -492,8 +627,10 @@ async function main() {
     r = await api<{ deleted: { clients: number; readings: number } }>(root, "DELETE", "/api/marketplace/studio", A.token, { confirm: "ลบข้อมูลสตูดิโอทั้งหมด" });
     const leftA = await tdb.prepare(`SELECT (SELECT COUNT(*) FROM reader_clients WHERE reader_id = ?) + (SELECT COUNT(*) FROM reader_readings WHERE reader_id = ?) + (SELECT COUNT(*) FROM reader_templates WHERE reader_id = ?) AS n`).bind(A.id, A.id, A.id).first<{ n: number }>();
     check("ลบทั้งสตูดิโอ: ลูกค้า/คำอ่าน/แม่แบบหายหมด", r.status === 200 && Number(leftA?.n) === 0, r.json);
-    const afterPurge = await tdb.prepare(`SELECT dpa_version, brand_name, pro_until FROM reader_studio_settings WHERE reader_id = ?`).bind(A.id).first<{ dpa_version: string | null; brand_name: string | null; pro_until: number | null }>();
-    check("ลบทั้งสตูดิโอ: ล้างแบรนด์ + การยอมรับข้อตกลง แต่คงวันบัตรผ่าน", afterPurge?.dpa_version === null && afterPurge.brand_name === null && afterPurge.pro_until === proBefore);
+    const afterPurge = await tdb.prepare(`SELECT dpa_version, brand_name, pro_until, ai_assist FROM reader_studio_settings WHERE reader_id = ?`).bind(A.id).first<{ dpa_version: string | null; brand_name: string | null; pro_until: number | null; ai_assist: number }>();
+    check("ลบทั้งสตูดิโอ: ล้างแบรนด์ + การยอมรับข้อตกลง + ปิดตัวช่วย AI แต่คงวันแพ็กเกจ", afterPurge?.dpa_version === null && afterPurge.brand_name === null && afterPurge.pro_until === proBefore && afterPurge.ai_assist === 0);
+    check("ลบทั้งสตูดิโอ: ลบไฟล์โลโก้ใน R2 ด้วย", !store.has(logoKeyFromPath(up3.logoUrl)!));
+    setShareBucketForTests(undefined);
     check("ลบทั้งสตูดิโอ: แม่หมอ B ไม่ถูกแตะ (ยังยอมรับข้อตกลงอยู่)", (await tdb.prepare(`SELECT dpa_version FROM reader_studio_settings WHERE reader_id = ?`).bind(B.id).first<{ dpa_version: string | null }>())?.dpa_version === STUDIO_DPA_VERSION);
     await api(dpa, "POST", "/api/marketplace/studio/dpa", A.token, { version: STUDIO_DPA_VERSION, agree: true });
 

@@ -55,10 +55,26 @@ export function ensureReadableColor(input: string | null | undefined, bg = STUDI
   return { color, adjusted: color !== hex, ratio: Math.round(contrastRatio(color, bg) * 100) / 100 };
 }
 
-/** โลโก้: https เท่านั้น ไม่เกิน 500 ตัวอักษร (กัน javascript:/data: และ URL ยาวผิดปกติ) */
+/** ชุดสีสำเร็จรูป — ทุกสีอ่านออกบนพื้นกระดาษ (≥ 4.5:1) ไม่ต้องให้แม่หมอรู้เรื่องคอนทราสต์ (ด่านทดสอบตรวจ) */
+export const STUDIO_COLOR_PRESETS: ReadonlyArray<{ hex: string; nameTh: string }> = [
+  { hex: STUDIO_DEFAULT_COLOR, nameTh: "ทองโบราณ" },
+  { hex: "#6B4A2E", nameTh: "น้ำตาลกาแฟ" },
+  { hex: "#A3302B", nameTh: "แดงชาด" },
+  { hex: "#9C2F62", nameTh: "ชมพูกุหลาบ" },
+  { hex: "#5B3A8C", nameTh: "ม่วงอเมทิสต์" },
+  { hex: "#234E8C", nameTh: "น้ำเงินคราม" },
+  { hex: "#1F6B4F", nameTh: "เขียวมรกต" },
+  { hex: "#2B2B2B", nameTh: "ดำถ่าน" },
+];
+
+/** โลโก้ที่อัปโหลดเข้าระบบเราเอง: `/api/studio/logo/<readerId>/<32 hex>.<png|webp|jpg>` */
+export const STUDIO_LOGO_PATH_RE = /^\/api\/studio\/logo\/([a-z0-9_]{3,64})\/([a-f0-9]{32})\.(png|webp|jpg)$/;
+
+/** โลโก้: ไฟล์ที่อัปโหลดเข้าระบบเรา หรือลิงก์ https ไม่เกิน 500 ตัวอักษร (กัน javascript:/data: และ URL ยาวผิดปกติ) */
 export function sanitizeLogoUrl(input: string | null | undefined): string | null {
   const raw = (input ?? "").trim();
   if (!raw || raw.length > 500) return null;
+  if (STUDIO_LOGO_PATH_RE.test(raw)) return raw;
   try {
     const u = new URL(raw);
     return u.protocol === "https:" ? u.toString() : null;

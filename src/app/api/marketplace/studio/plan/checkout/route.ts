@@ -6,21 +6,23 @@ import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-rat
 import { isPrivilegedTestRequest } from "@/lib/security/privileged";
 import { recordEvent } from "@/lib/stats/record";
 import { studioGate } from "@/lib/studio/gate";
-import { STUDIO_PASS_DAYS, createStudioPassOrder, newStudioPassOrderId, studioPassPriceSatang } from "@/lib/studio/plan";
+import { STUDIO_PASS_DAYS, createStudioPassOrder, newStudioPassOrderId, resolvePassPriceThb } from "@/lib/studio/plan";
 import { getNotifyEmail } from "@/lib/studio/plan-email";
 
 export const runtime = "nodejs";
 
 /**
- * POST /api/marketplace/studio/plan/checkout — ซื้อบัตรผ่านสตูดิโอ 30 วัน (จ่ายครั้งเดียว · ไม่ตัดเงินอัตโนมัติ)
- * ราคามาจากเซิร์ฟเวอร์ (`STUDIO_PRO_PRICE_THB`) เท่านั้น · ไม่ตั้งราคา = ยังไม่เปิดขาย (503)
+ * POST /api/marketplace/studio/plan/checkout — ซื้อแพ็กเกจ AI ช่วยเขียน 30 วัน (studio pass) (จ่ายครั้งเดียว · ไม่ตัดเงินอัตโนมัติ)
+ * ราคามาจากเซิร์ฟเวอร์เท่านั้น (ราคาเฉพาะคน ➔ ราคากลางของแอดมิน ➔ `STUDIO_PRO_PRICE_THB`) · ไม่มีราคา = ยังไม่เปิดขาย (503)
+ * ยอดถูกจดลงแถว payments ตรงนี้ — webhook/confirm เทียบกับแถวนี้ แอดมินเปลี่ยนราคาทีหลังจึงไม่กระทบคำสั่งซื้อนี้
  * กลับจากหน้าจ่าย ➔ `/readers/studio?plan=return&order=...` (ไม่มีโทเคนแม่หมอใน URL ของ Stripe)
  */
 export async function POST(request: Request) {
   const gate = await studioGate(request);
   if (!gate.ok) return gate.response;
-  const price = studioPassPriceSatang();
-  if (price === null) return apiFail("บัตรผ่านสตูดิโอยังไม่เปิดขาย", 503, "plan_closed");
+  const priceThb = await resolvePassPriceThb(gate.readerId);
+  if (priceThb === null) return apiFail("แพ็กเกจ AI ช่วยเขียนยังไม่เปิดขาย", 503, "plan_closed");
+  if (!gate.settings.aiAssist) return apiFail("เปิดตัวช่วย AI ในหน้าตั้งค่าก่อน แล้วค่อยซื้อแพ็กเกจ", 409, "ai_off");
   if (isStripeTestModeOnProduction() && !(await isPrivilegedTestRequest(request))) {
     return apiFail(PAYMENTS_NOT_OPEN_MESSAGE, 503, "payments_closed");
   }
@@ -29,6 +31,7 @@ export async function POST(request: Request) {
   ]);
   if (!limit.allowed) return apiFail("ทำรายการถี่เกินไป รอสักครู่แล้วลองใหม่", 429, "rate_limited");
 
+  const price = priceThb * 100;
   try {
     const origin = resolveAppOrigin(request);
     const orderId = newStudioPassOrderId();
@@ -37,11 +40,11 @@ export async function POST(request: Request) {
     const charge = await createGatewayCharge({
       amountSatang: price,
       currency: "THB",
-      description: `บัตรผ่านสตูดิโอแม่หมอ ${STUDIO_PASS_DAYS} วัน`,
-      productDescription: "ร่างคำอ่านด้วย AI ได้มากขึ้นต่อวัน · จ่ายครั้งเดียว ไม่ตัดเงินอัตโนมัติ · ซื้อซ้ำก่อนหมดได้ วันต่อจากเดิม",
+      description: `แพ็กเกจ AI ช่วยเขียน ${STUDIO_PASS_DAYS} วัน · สตูดิโอแม่หมอ`,
+      productDescription: "ให้ AI ช่วยเขียนคำอ่านได้มากขึ้นต่อวัน · จ่ายครั้งเดียว ไม่ตัดเงินอัตโนมัติ · ซื้อซ้ำก่อนหมดได้ วันต่อจากเดิม",
       imageUrl: checkoutArtUrl(origin, "consultation"),
       customerEmail: email ?? undefined,
-      submitMessage: "บัตรผ่านเริ่มใช้ได้ทันทีหลังชำระเงิน",
+      submitMessage: "แพ็กเกจเริ่มใช้ได้ทันทีหลังชำระเงิน",
       returnUri: `${origin}/readers/studio?plan=return&order=${orderId}`,
       cancelUri: `${origin}/readers/studio?plan=cancelled`,
       referenceId: orderId,

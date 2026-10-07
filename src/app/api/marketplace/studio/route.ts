@@ -7,7 +7,7 @@ import { readJson, studioGate } from "@/lib/studio/gate";
 import { readingSummary } from "@/lib/studio/view";
 import { listClients, listReadings, listTemplates, purgeStudioData } from "@/lib/studio/studio.repo";
 import { STUDIO_DEFAULT_COLOR } from "@/lib/studio/brand";
-import { studioPlanView } from "@/lib/studio/plan";
+import { resolvePassPriceThb, studioPlanView } from "@/lib/studio/plan";
 import { studioDraftQuota, studioDraftsPerDay } from "@/lib/studio/quota";
 
 export const runtime = "nodejs";
@@ -24,11 +24,12 @@ export async function GET(request: Request) {
   const reader = { id: gate.readerId, displayName: gate.reader.displayName };
   if (!accepted) return apiOk({ reader, dpa });
 
-  const [clients, readings, templates, quota] = await Promise.all([
+  const [clients, readings, templates, quota, passPriceThb] = await Promise.all([
     listClients(gate.readerId),
     listReadings(gate.readerId),
     listTemplates(gate.readerId),
     studioDraftQuota(gate.readerId, gate.settings.proUntil),
+    resolvePassPriceThb(gate.readerId),
   ]);
   return apiOk({
     reader,
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
     readings: readings.map(readingSummary),
     templates,
     quota,
-    plan: studioPlanView(gate.settings.proUntil, studioDraftsPerDay()),
+    plan: studioPlanView(gate.settings.proUntil, studioDraftsPerDay(), passPriceThb),
     spreads: PUBLIC_SPREADS.map((s) => ({ id: s.id, nameTh: s.nameTh, count: s.positions.length })),
     deck: DECK.map((c, i) => ({ index: i, id: c.id, nameTh: c.nameTh, nameEn: c.nameEn })),
   });

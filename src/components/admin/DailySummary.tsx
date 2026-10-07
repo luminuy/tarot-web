@@ -402,7 +402,7 @@ export default function DailySummary({ day, onDayChange }: { day: string; onDayC
                 items={[
                   { label: "กด \"ถามเลย\" จากหน้าคำถาม", value: cur.reflection.questionAskNow },
                   { label: "แม่หมอให้ AI เกลาคำอ่าน", value: cur.reflection.studioDraftAi },
-                  { label: "ขายบัตรผ่านสตูดิโอ", value: cur.reflection.studioPassGranted },
+                  { label: "ขายแพ็กเกจ AI ช่วยเขียน", value: cur.reflection.studioPassGranted },
                 ]}
               />
               <KeyValueList

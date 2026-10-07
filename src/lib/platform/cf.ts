@@ -229,6 +229,11 @@ export async function getShareBucket(): Promise<AppR2Bucket | null> {
   return null;
 }
 
+/** ชุดทดสอบเท่านั้น — ใส่ bucket ในหน่วยความจำแทน R2 (`undefined` = กลับไปหา binding จริงรอบถัดไป) */
+export function setShareBucketForTests(bucket: AppR2Bucket | null | undefined): void {
+  cachedShareBucket = bucket;
+}
+
 /**
  * คืน execution context เพื่อใช้ `waitUntil` (งาน background เช่น บันทึกสถิติ)
  * ถ้าไม่มี (dev) จะคืน shim ที่รัน callback ทันทีแบบ fire-and-forget

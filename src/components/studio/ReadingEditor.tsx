@@ -58,6 +58,7 @@ export function ReadingEditor({
   deck,
   clients,
   quota,
+  aiAssist,
   onChanged,
   onDeleted,
   onBack,
@@ -67,6 +68,8 @@ export function ReadingEditor({
   deck: DeckEntryT[];
   clients: StudioClientT[];
   quota: { used: number; limit: number } | null;
+  /** แม่หมอเปิดตัวช่วย AI ไว้ไหม — ปิด = ปุ่มจัดโน้ตเป็นคำอ่านเฉย ๆ ไม่มีอะไรเกี่ยวกับ AI บนจอ */
+  aiAssist: boolean;
   onChanged: (r: ReadingT) => void;
   onDeleted: () => void;
   onBack: () => void;
@@ -107,6 +110,9 @@ export function ReadingEditor({
   };
 
   const keys = useMemo(() => partKeys(r, notes, body), [r, notes, body]);
+  // มีส่วนไหนมาจาก AI จริงไหม (เผื่อแม่หมอเคยเปิดแล้วปิดทีหลัง) — ไม่มี = ไม่โชว์อะไรเกี่ยวกับ AI
+  const bodyHasAi = body.some((p) => p.origin === "ai" || p.origin === "edited");
+  const showAiBits = aiAssist || bodyHasAi;
   const draftByKey = useMemo(() => new Map((r.draft?.parts ?? []).map((p) => [p.key, p])), [r.draft]);
   const hasCards = r.cards.length > 0;
   const hasBody = body.some((p) => p.text.trim());
@@ -164,7 +170,9 @@ export function ReadingEditor({
     const hadBody = hasBody;
     apply(res.data.reading);
     setBodyDirty(false);
-    if (res.data.mode === "ai") {
+    if (res.data.reason === "ai_off") {
+      setMsg({ tone: "ok", text: hadBody ? "จัดโน้ตใหม่แล้ว — กด \"ใช้ข้อความนี้แทน\" ทีละส่วนที่ต้องการ (งานที่คุณแก้ไว้ไม่ถูกทับ)" : "จัดโน้ตเป็นคำอ่านแล้ว — แก้ต่อด้านล่างได้เลย" });
+    } else if (res.data.mode === "ai") {
       setMsg({ tone: "ok", text: hadBody ? "ได้ร่างใหม่แล้ว — กด \"ใช้ร่างนี้\" ทีละส่วนที่ต้องการ (งานที่คุณแก้ไว้ไม่ถูกทับ)" : "ได้ร่างแล้ว ส่วนแถบม่วงคือร่างจาก AI ตรวจและแก้ก่อนส่ง" });
     } else {
       const why =
@@ -394,7 +402,11 @@ export function ReadingEditor({
       {hasCards && (
         <section className="space-y-4 rounded-[24px] border border-line bg-surface p-5 sm:p-7">
           {step(2, "โน้ตของคุณ", Object.values(notes).some((v) => v.trim()))}
-          <p className="text-[13px] leading-relaxed text-muted">เขียนสั้น ๆ แบบที่คุณอ่านจริง AI จะเกลาจากโน้ตนี้เป็นหลัก ไม่อ่านไพ่แทนคุณ · ตำแหน่งที่เว้นว่างจะได้แค่คำสำคัญของไพ่</p>
+          <p className="text-[13px] leading-relaxed text-muted">
+            {aiAssist
+              ? "เขียนสั้น ๆ แบบที่คุณอ่านจริง AI จะเกลาจากโน้ตนี้เป็นหลัก ไม่อ่านไพ่แทนคุณ · ตำแหน่งที่เว้นว่างจะได้แค่คำสำคัญของไพ่"
+              : "เขียนแบบที่คุณอ่านจริง แล้วกด \"จัดโน้ตเป็นคำอ่าน\" ระบบจะเรียงให้เป็นฉบับส่งลูกค้า · ตำแหน่งที่เว้นว่างจะได้คำสำคัญของไพ่ไว้เริ่มต้น"}
+          </p>
           {[{ k: "intro", label: "บทนำ (ไม่บังคับ)" }, ...r.cards.map((c) => ({ k: String(c.order), label: keyLabel(r, `card:${c.order}`) })), { k: "summary", label: "ภาพรวม" }, { k: "closing", label: "คำลงท้าย (ไม่บังคับ)" }].map(({ k, label }) => (
             <label key={k} className="block space-y-1 text-sm font-semibold text-ink-deep">
               {label}
@@ -415,9 +427,9 @@ export function ReadingEditor({
               {busy === "notes" ? "กำลังบันทึก…" : "บันทึกโน้ต"}
             </button>
             <button type="button" onClick={makeDraft} disabled={busy === "draft"} className={btnPrimary}>
-              {busy === "draft" ? "กำลังเกลา…" : "✨ ให้ AI ช่วยเกลาจากโน้ต"}
+              {busy === "draft" ? (aiAssist ? "กำลังเกลา…" : "กำลังจัด…") : aiAssist ? "✨ ให้ AI ช่วยเกลาจากโน้ต" : "จัดโน้ตเป็นคำอ่าน"}
             </button>
-            {quota && (
+            {aiAssist && quota && (
               <span className="self-center text-[13px] text-muted">
                 วันนี้ใช้ไป {quota.used}/{quota.limit} ครั้ง
               </span>
@@ -430,12 +442,14 @@ export function ReadingEditor({
       {hasCards && (
         <section className="space-y-4 rounded-[24px] border border-line bg-surface p-5 sm:p-7">
           {step(3, "คำอ่านฉบับส่งจริง", hasBody)}
+          {showAiBits && (
           <ul className="flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-muted" aria-label="ความหมายของแถบสี">
             <li className="flex items-center gap-1.5"><span className="h-3 w-1 rounded bg-line" /> คำของคุณ</li>
             <li className="flex items-center gap-1.5"><span className="h-3 w-1 rounded bg-amethyst" /> ร่างจาก AI</li>
             <li className="flex items-center gap-1.5"><span className="h-3 w-1 rounded bg-gold" /> แก้จากร่าง AI</li>
             <li>แถบสีเห็นเฉพาะคุณ ลูกค้าไม่เห็น</li>
           </ul>
+          )}
           {keys.map((k) => {
             const part = body.find((p) => p.key === k);
             const origin = part?.origin ?? "reader";
@@ -451,16 +465,18 @@ export function ReadingEditor({
                 <textarea value={part?.text ?? ""} onChange={(e) => editPart(k, e.target.value)} rows={k.startsWith("card:") ? 5 : 3} maxLength={2400} className={fieldCls} />
                 {canUseDraft && (
                   <button type="button" onClick={() => takeDraftPart(k)} className="min-h-11 text-[13px] font-semibold text-amethyst hover:underline">
-                    ใช้ร่างนี้แทน: “{d.text.slice(0, 60)}{d.text.length > 60 ? "…" : ""}”
+                    {aiAssist ? "ใช้ร่างนี้แทน" : "ใช้ข้อความนี้แทน"}: “{d.text.slice(0, 60)}{d.text.length > 60 ? "…" : ""}”
                   </button>
                 )}
               </div>
             );
           })}
-          <label className="flex min-h-11 items-center gap-3 text-sm text-ink">
-            <input type="checkbox" checked={r.showAiDisclosure} onChange={(e) => save({ showAiDisclosure: e.target.checked }, "disclosure")} className="h-5 w-5" />
-            แสดงบรรทัด &quot;เรียบเรียงด้วยความช่วยเหลือของ AI&quot; ให้ลูกค้าเห็น (แนะนำ — ปิดได้เมื่อคุณตรวจทานคำอ่านแล้วเท่านั้น การปิดถือว่าคุณรับถ้อยคำเป็นของคุณเอง ตามข้อตกลงข้อ 7.7)
-          </label>
+          {bodyHasAi && (
+            <label className="flex min-h-11 items-center gap-3 text-sm text-ink">
+              <input type="checkbox" checked={r.showAiDisclosure} onChange={(e) => save({ showAiDisclosure: e.target.checked }, "disclosure")} className="h-5 w-5" />
+              แสดงบรรทัด &quot;เรียบเรียงด้วยความช่วยเหลือของ AI&quot; ให้ลูกค้าเห็น (แนะนำ — ปิดได้เมื่อคุณตรวจทานคำอ่านแล้วเท่านั้น การปิดถือว่าคุณรับถ้อยคำเป็นของคุณเอง ตามข้อตกลงข้อ 7.7)
+            </label>
+          )}
           <button type="button" onClick={saveBody} disabled={!bodyDirty || busy === "body"} className={btnPrimary}>
             {busy === "body" ? "กำลังบันทึก…" : "บันทึกคำอ่าน"}
           </button>
