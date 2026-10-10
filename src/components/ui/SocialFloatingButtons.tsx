@@ -33,6 +33,8 @@ const TIKTOK_URL = BRAND_SOCIAL_PROFILES.find((u) => u.includes("tiktok.com"));
  * หน้าตา เงา ป้ายชื่อ และแอนิเมชันอยู่ที่ `.social-fab` ใน globals.css
  */
 const BUTTON = "social-fab__item absolute right-1 flex items-center justify-center w-12 h-12 rounded-full";
+/** หน้าความหมายไพ่รายใบ (`/cards/major-00` · `/cards/cups-01` …) — ไม่รวมหน้ารวม เช่น `/cards/all` · `/cards/zodiac` */
+const CARD_DETAIL_PATH = /^\/cards\/(major|cups|wands|swords|pentacles)-\d{2}(?:\/|\.html)?$/; // ตอนบิลด์ Astro ให้ path แบบ `.html`
 const SUMMARY = "social-fab__main relative flex items-center justify-center w-14 h-14 rounded-full cursor-pointer list-none";
 
 export function SocialFloatingButtons({ pathname: pathnameProp }: { pathname?: string } = {}) {
@@ -47,6 +49,8 @@ export function SocialFloatingButtons({ pathname: pathnameProp }: { pathname?: s
   // ซ่อนบนหน้าแอดมิน และหน้าห้องแชท/ผลพยากรณ์ (/reading/chat ฯลฯ) เพื่อไม่ให้ลอยบังปุ่มส่งข้อความหรือแผงสนทนาบนมือถือ
   // สตูดิโอแม่หมอ + หน้าคำอ่านที่แม่หมอส่งให้ลูกค้า (แบรนด์ของแม่หมอ ไม่ใช่ช่องแชตของเรา · ปุ่มลอยบังปุ่มในฟอร์มมือถือ)
   if (pathname.startsWith("/admin") || pathname.startsWith("/reading") || pathname.startsWith("/readers/studio") || pathname.startsWith("/r/")) return null;
+  // หน้าความหมายไพ่รายใบ 78 ใบ × 2 ภาษา — มีแถบ "เปิดไพ่เลย" ติดล่างจอแทน (เจ้าของสั่ง 2026-10-10: ไม่ต้องโชว์ปุ่มลอยในหน้านี้)
+  if (CARD_DETAIL_PATH.test(pathname)) return null;
 
   return (
     <details

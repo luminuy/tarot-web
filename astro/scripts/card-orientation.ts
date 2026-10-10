@@ -45,7 +45,7 @@ if (root) {
   /*
    * ✦ แถบ "เปิดไพ่เลย" ติดล่างจอ (`CardDetailView` · มือถือ)
    * โผล่เมื่อปุ่มเปิดไพ่หลักเลื่อนพ้นขอบบนจอไปแล้ว · ซ่อนเมื่อปุ่มหลักกลับเข้าจอ หรือฟุตเตอร์เข้าจอ
-   * (ไม่บังลิงก์ท้ายเว็บ) · ระหว่างโผล่ ปุ่มโซเชียลลอยยกตัวขึ้นเหนือแถบ (`html[data-read-sticky-on]` ใน globals.css)
+   * (ไม่บังลิงก์ท้ายเว็บ) · หน้านี้ไม่มีปุ่มโซเชียลลอย (`SocialFloatingButtons` ซ่อนเอง) แถบจึงไม่ชนกับอะไร
    */
   const bar = root.querySelector<HTMLElement>("[data-read-sticky]");
   const cta = root.querySelector<HTMLElement>("[data-read-cta]");
@@ -65,8 +65,6 @@ if (root) {
       if ((bar.dataset.visible === "true") === show) return;
       bar.dataset.visible = String(show);
       bar.inert = !show;
-      if (show) document.documentElement.dataset.readStickyOn = "";
-      else delete document.documentElement.dataset.readStickyOn;
     };
     new IntersectionObserver(([entry]) => {
       inView = entry.isIntersecting;

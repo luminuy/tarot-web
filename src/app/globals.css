@@ -2475,22 +2475,6 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
   }
 }
 
-/* ✦ แถบ "เปิดไพ่เลย" ติดล่างจอของหน้าความหมายไพ่โผล่อยู่ (`html[data-read-sticky-on]` · มือถือเท่านั้นเหมือนแถบ)
-   ➔ ยกปุ่มลอยขึ้นเหนือแถบ ไม่ให้ทับกัน · `!important` เพราะตำแหน่งปุ่มตั้งเป็น inline style (กันกฎ `body > *`) */
-@media (max-width: 1023.98px) {
-  html[data-read-sticky-on] .social-fab {
-    bottom: calc(6rem + env(safe-area-inset-bottom, 0px)) !important;
-  }
-}
-.social-fab {
-  transition: bottom 300ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-@media (prefers-reduced-motion: reduce) {
-  .social-fab {
-    transition: none;
-  }
-}
-
 /* ✦ ปุ่มลอยช่องทางทางการ (`SocialFloatingButtons`) — ปุ่มหลักอันเดียว กดแล้วกาง LINE · Facebook · TikTok
    - ใช้ <details>/<summary> ของเบราว์เซอร์ (ไม่ต้อง JS · หน้า Astro ไม่ hydrate)
    - ขนาดตามมาตรฐาน FAB: ปุ่มหลัก 56px · ปุ่มช่องทาง 48px (touch target ≥ 44px)
