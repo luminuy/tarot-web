@@ -2506,6 +2506,33 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
     top: -28px;
   }
 }
+/* ✦ ให้ตัวหนังสือบนพัดอ่านง่าย (เจ้าของขอ 2026-10-10) — สองชั้น ไม่ใช้ blur/filter (INC-0056):
+   1) `.hero-wash::after` แสงครีมวงรีเฉพาะหลังกลุ่มหัวเรื่อง·คำโปรย·ชิป วาดทับพัด (z-index -1 เท่ากัน แต่มาทีหลังในลำดับ DOM)
+      แต่อยู่ใต้ตัวหนังสือ · ลายไพ่ตรงกลางจางลง ขอบพัดซ้ายขวายังเห็นชัด
+   2) `.hero-text-halo` เงาเรืองสีครีมรอบตัวอักษร กันเส้นลายไพ่ตัดผ่านขอบตัวหนังสือ */
+.hero-wash::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: -24px;
+  width: min(100%, 980px);
+  height: 340px;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(251, 241, 224, 0.92), rgba(251, 241, 224, 0.7) 55%, rgba(251, 241, 224, 0) 100%);
+  pointer-events: none;
+}
+@media (min-width: 640px) {
+  .hero-wash::after {
+    height: 330px;
+  }
+}
+.hero-text-halo {
+  text-shadow:
+    0 0 2px rgba(251, 241, 224, 0.95),
+    0 0 14px rgba(251, 241, 224, 0.9),
+    0 0 28px rgba(251, 241, 224, 0.75);
+}
 /* ใบริมสุดสองใบมีเฉพาะจอใหญ่ — จอเล็กพัดกว้างเกินจอ */
 .hero-fan-card--edge {
   display: none;

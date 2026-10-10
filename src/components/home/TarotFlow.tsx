@@ -1760,7 +1760,7 @@ export default function TarotFlow({
                   ⚠️ ห้ามย้าย <h1> ลงไปใต้บล็อกอื่น จะทำให้ <h2> ของ QuickFortunePicker
                      ขึ้นก่อน <h1> (ผิดลำดับหัวข้อ และเคยเป็นข้อจำกัดเดิมของไฟล์นั้น)
                   ────────────────────────────────────────────────────────── */}
-              <div className="relative isolate space-y-6" data-home-section="hero">
+              <div className="hero-wash relative isolate space-y-6" data-home-section="hero">
                 {/*
                   ✦ พัดไพ่ 1909 เป็นพื้นหลังจาง ๆ หลังหัวเรื่อง (เจ้าของสั่ง 2026-10-10: เป็นแบ็กกราวด์ ไม่ต้องกดได้)
                   ภาพประกอบล้วน (`aria-hidden` · ไม่รับการแตะ) ไม่ดันความสูงส่วนหัว — ไพ่ประจำวันยังอยู่ในจอแรก
@@ -1786,7 +1786,7 @@ export default function TarotFlow({
                   ))}
                 </div>
                 <div className="text-center space-y-3 sm:space-y-3.5 pt-2">
-                  <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]"><ThaiPhrases>
+                  <h1 className="hero-text-halo text-2xl sm:text-4xl font-serif-th font-bold text-ink tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]"><ThaiPhrases>
                     {isEnglish ? "Interactive 1909 Rider-Waite Tarot with AI Oracle" : "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ออนไลน์ ฟรี กับแม่หมอ AI"}
                   </ThaiPhrases></h1>
 
@@ -1803,7 +1803,7 @@ export default function TarotFlow({
                        ได้คำโดดท้ายบรรทัดทั้งคู่: "78 / ใบ" · "ให้ / แม่หมอ") กล่อง inline-block
                        ไม่ถูกตัดข้างในถ้ายังกว้างพอ จึงได้บรรทัดที่จบเป็นวรรคเสมอทุกความกว้างจอ
                   */}
-                  <p className="text-sm sm:text-base text-muted max-w-md sm:max-w-xl mx-auto font-serif-th leading-relaxed">
+                  <p className="hero-text-halo text-sm sm:text-base text-ink-deep/80 max-w-md sm:max-w-xl mx-auto font-serif-th leading-relaxed">
                     <span className="inline-block">
                       {isEnglish ? "Shuffle the deck and pick every card yourself," : "สับไพ่แล้วหยิบไพ่ด้วยมือคุณเอง"}
                     </span>{" "}
