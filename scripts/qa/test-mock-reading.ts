@@ -428,6 +428,27 @@ async function run() {
     /ไม่ใช่การวินิจฉัย/.test(healthQ.reading?.summary ?? "") && /แพทย์/.test((healthQ.reading?.advice ?? []).join(" ")),
     healthQ.reading?.summary.slice(0, 120),
   );
+  // คำแนะนำรายใบ (ร่างรอแม่หมอตรวจ) — ครบ 78 ใบ · ถ้อยคำไม่ว่าง/ไม่ยาวเกิน · อังกฤษไม่มีไทย · แถว pending ห้ามโผล่
+  {
+    const { CARD_ADVICE, reviewedCardAdvice } = await import("../../src/data/cards/card-advice");
+    const missing = DECK.filter((c) => !CARD_ADVICE[c.id]).map((c) => c.id);
+    check("คำแนะนำรายใบครบทุกใบในสำรับ 78 ใบ", missing.length === 0, missing.join(", "));
+    const rows = Object.entries(CARD_ADVICE).flatMap(([id, r]) => [
+      [id, r.upright.th, r.upright.en],
+      [id, r.reversed.th, r.reversed.en],
+    ]);
+    const badLen = rows.filter(([, th, en]) => !th || !en || th.length > 90 || en.length > 140).map(([id]) => id);
+    check("คำแนะนำรายใบไม่ว่างและไม่ยาวเกิน (ไทย ≤ 90 · อังกฤษ ≤ 140)", badLen.length === 0, badLen.join(", "));
+    const thaiInEn = rows.filter(([, , en]) => THAI.test(en)).map(([id]) => id);
+    check("คำแนะนำรายใบฝั่งอังกฤษไม่มีอักษรไทย", thaiInEn.length === 0, thaiInEn.join(", "));
+    const pendingLeak = Object.entries(CARD_ADVICE).filter(([id, r]) => r.reviewedBy === "pending" && reviewedCardAdvice(id, false, "th") !== null);
+    check("แถวที่ยังไม่ตรวจ (pending) ไม่ถูกใช้ในคำอ่าน", pendingLeak.length === 0, pendingLeak.map(([id]) => id).join(", "));
+    const pendingIds = Object.entries(CARD_ADVICE).filter(([, r]) => r.reviewedBy === "pending").map(([id]) => id);
+    const leakedIntoReading = pendingIds.length === 78 && [exQ, workQ, loveShadow].some((r) =>
+      (r.reading?.advice ?? []).some((line) => Object.values(CARD_ADVICE).some((row) => line === row.upright.th || line === row.reversed.th)),
+    );
+    check("คำอ่านสำรองไม่มีคำแนะนำรายใบที่ยังไม่ตรวจหลุดเข้าไป", !leakedIntoReading);
+  }
   const closers = new Set<string>();
   for (const ids of [["major-19", "cups-10", "major-21"], ["swords-10", "swords-03", "swords-09"], ["wands-01", "cups-02", "pentacles-03"], ["major-00", "major-01", "major-02"]]) {
     const r = await asked("ช่วงนี้ชีวิตจะเป็นอย่างไร", ids, [false, false, false], "general");

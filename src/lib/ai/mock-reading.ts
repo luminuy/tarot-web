@@ -19,6 +19,7 @@ import { recordEvents } from "@/lib/stats/record";
 import { generateMindfulMicroRitual } from "@/lib/ai/ritual";
 import type { TarotCard } from "@/data/cards/types";
 import { redactPii } from "@/lib/security/pii";
+import { reviewedCardAdvice } from "@/data/cards/card-advice";
 
 // คำอ่านสำรองไม่ได้เรียกโมเดลจริง จึงไม่มีโทเค็นให้นับ — ศูนย์ทั้งชุดคือความจริง ไม่ใช่ค่าตั้งต้น
 const DEFAULT_USAGE: UsageInfo = {
@@ -962,7 +963,14 @@ export async function* streamMockGeminiReading(
   const topical =
     (intent && INTENT_ADVICE[intent]?.[lang]) ??
     (CATEGORY_ADVICE[category] ?? CATEGORY_ADVICE.general)[tone][lang];
-  const adviceList = [...topical, mindful];
+  /*
+   * คำแนะนำรายใบ (`card-advice.ts`) ของไพ่ที่กำหนดทิศทาง (ปลายทาง · ใบเดียว) — ใช้เฉพาะแถวที่แม่หมอตรวจแล้ว
+   * แถว pending ได้ null ➔ เหมือนเดิมทุกอย่าง · คำถามแฟนเก่าไม่ใช้ (ชุดเฉพาะ "เว้นระยะก่อนทัก" ต้องมาก่อนเสมอ)
+   */
+  const keyView = views.length === 1 ? views[0] : findOutcome(views, lang);
+  const cardAdvice =
+    keyView && intent !== "ex" ? reviewedCardAdvice(keyView.card.id, keyView.isReversed, lang) : null;
+  const adviceList = cardAdvice ? [cardAdvice, topical[0], mindful] : [...topical, mindful];
 
   const light = views.filter((v) => v.tone === "light").length;
   const shadow = views.filter((v) => v.tone === "shadow").length;
