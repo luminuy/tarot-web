@@ -195,8 +195,11 @@ function isReturnVisit(): boolean {
   }
 }
 
-/** ✦ ไพ่ในพัดหัวหน้าแรก (ภาพประกอบ) — กลางคือดวงอาทิตย์ · ซ้ายขวาคืนกับวัน รักกับความหวัง */
-const HERO_FAN_CARDS = ["major-18", "major-06", "major-19", "major-17", "major-21"] as const;
+/**
+ * ✦ ไพ่ในพัดพื้นหลังหัวหน้าแรก (ภาพประกอบ) — กลางคือดวงอาทิตย์ · ซ้ายขวาคืนกับวัน รักกับความหวัง
+ * จอใหญ่ 7 ใบ · มือถือซ่อนใบริมสุดสองใบ เหลือ 5 (`.hero-fan-card--edge` ใน globals.css)
+ */
+const HERO_FAN_CARDS = ["major-02", "major-18", "major-06", "major-19", "major-17", "major-21", "major-01"] as const;
 
 export default function TarotFlow({
   seoContent,
@@ -1766,11 +1769,15 @@ export default function TarotFlow({
                 */}
                 <div className="hero-fan" aria-hidden="true">
                   {HERO_FAN_CARDS.map((cardId, i) => (
-                    <span key={cardId} className="hero-fan-card" style={{ "--i": i - 2 } as React.CSSProperties}>
+                    <span
+                      key={cardId}
+                      className={i === 0 || i === HERO_FAN_CARDS.length - 1 ? "hero-fan-card hero-fan-card--edge" : "hero-fan-card"}
+                      style={{ "--i": i - 3 } as React.CSSProperties}
+                    >
                       <CardImage
                         cardId={cardId}
                         alt=""
-                        sizes="(min-width: 640px) 150px, 96px"
+                        sizes="(min-width: 1024px) 200px, (min-width: 640px) 150px, 96px"
                         loading="eager"
                         fetchPriority="low"
                         className="w-full h-full object-cover"

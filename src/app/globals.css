@@ -2471,7 +2471,7 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
   }
 }
 
-/* ✦ พัดไพ่ 1909 เป็นพื้นหลังจาง ๆ หลังหัวหน้าแรก (`TarotFlow` · aria-hidden · ไม่รับการแตะ) — ไพ่แต่ละใบรู้ลำดับจาก `--i` (-2 … 2)
+/* ✦ พัดไพ่ 1909 เป็นพื้นหลังจาง ๆ หลังหัวหน้าแรก (`TarotFlow` · aria-hidden · ไม่รับการแตะ) — ไพ่แต่ละใบรู้ลำดับจาก `--i` (-3 … 3)
    ลอยอยู่ชั้นล่างสุดของส่วนหัว (`isolate` + z-index -1) ไม่กินพื้นที่ · จางด้วย opacity + ไล่จางขอบล่างด้วย mask
    (mask ไม่ใช่ blur — ไม่มี backdrop-filter/filter · INC-0056) · ผู้ใช้ปิดแอนิเมชัน = นิ่งสนิท */
 .hero-fan {
@@ -2498,12 +2498,30 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
     opacity: 0.22;
   }
 }
+/* จอใหญ่: ไพ่ใหญ่ขึ้น + 7 ใบ กางเกือบเต็มกว้างส่วนหัว (เจ้าของขอ 2026-10-10) */
+@media (min-width: 1024px) {
+  .hero-fan {
+    --w: 200px;
+    --gap: 150px;
+    width: 1200px;
+    top: -28px;
+  }
+}
+/* ใบริมสุดสองใบมีเฉพาะจอใหญ่ — จอเล็กพัดกว้างเกินจอ */
+.hero-fan-card--edge {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .hero-fan-card--edge {
+    display: block;
+  }
+}
 .hero-fan-card {
-  --d: max(var(--i), calc(var(--i) * -1)); /* ระยะห่างจากใบกลาง 0 · 1 · 2 */
+  --d: max(var(--i), calc(var(--i) * -1)); /* ระยะห่างจากใบกลาง 0 · 1 · 2 · 3 */
   position: absolute;
   left: 50%;
   top: 10px;
-  z-index: calc(3 - var(--d));
+  z-index: calc(4 - var(--d));
   width: var(--w);
   aspect-ratio: 1 / 1.7;
   border-radius: 10px;
