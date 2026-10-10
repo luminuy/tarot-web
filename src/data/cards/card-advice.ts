@@ -3,6 +3,9 @@
  * ---------------------------------------------------------------------------
  * ⚠️ สถานะ: ร่างโดยทีมพัฒนา (Claude) 2026-10-10 ตามคำอนุมัติของเจ้าของ ("แก้ได้ เดี๋ยวให้แม่หมอตรวจ")
  *    ยึดความหมายดั้งเดิมของ Rider-Waite และสารานุกรม 78 ใบของเว็บ ไม่แต่งความหมายใหม่
+ *    เทียบรายใบกับ A. E. Waite, *The Pictorial Key to the Tarot* (1911, สาธารณสมบัติ) Part III
+ *    https://en.wikisource.org/wiki/The_Pictorial_Key_to_the_Tarot/Part_3 — ชีทตรวจมีคอลัมน์ความหมายดั้งเดิมให้เทียบ
+ *    (บางใบ Waite ให้ความหมายกลับหัวต่างจากสายปัจจุบัน เช่น กงล้อกลับหัว = "เพิ่มพูน" — ร่างนี้ยึดสารานุกรมของเว็บเป็นหลัก)
  *    **ทุกแถวยังเป็น `reviewedBy: "pending"` ➔ คำอ่านสำรองข้ามทั้งหมด ผู้ใช้ยังไม่เห็นสักแถว**
  *    แถวไหนแม่หมอตรวจแล้ว เปลี่ยนเป็น `reader:<ชื่อ>` ➔ เริ่มขึ้นเป็นคำแนะนำข้อแรกของคำอ่านสำรองทันที
  *    (กติกาเดียวกับคู่ไพ่ `combos.ts` — เนื้อหาด้านไพ่ที่ยังไม่มีคนตรวจ ห้ามถึงมือผู้ใช้)
@@ -59,7 +62,7 @@ export const CARD_ADVICE: Record<string, CardAdvice> = {
   "wands-02": a("วางแผนระยะยาวให้ชัด แล้วเลือกเส้นทางที่อยากไปจริง ๆ", "Make a clear long-range plan and choose the path you truly want.", "เลิกลังเลที่จุดเดิม ลองตัดสินใจก้าวเล็ก ๆ 1 ก้าวไปทางที่อยากไป", "Stop hovering at the same point; take one small step toward where you want to go."),
   "wands-03": a("ขยายมุมมองออกไป มองหาโอกาสที่ไกลกว่าที่เคยคิด", "Widen your view and look for opportunities further out than you thought.", "ถ้าผลยังมาไม่ถึง ทบทวนแผนเดิมแล้วปรับเวลาให้สมจริงขึ้น", "If results are slow, revisit the plan and set a more realistic timeline."),
   "wands-04": a("ฉลองความสำเร็จเล็ก ๆ กับคนใกล้ตัว ให้ความรู้สึกมั่นคงได้เติบโต", "Celebrate a small win with people close to you and let that sense of home grow.", "ถ้าบรรยากาศรอบตัวไม่มั่นคง ลองเริ่มจากทำให้มุมเล็ก ๆ ของตัวเองสงบก่อน", "If things feel unsettled, start by making one small corner of your life calm."),
-  "wands-05": a("เปลี่ยนการแข่งขันเป็นการร่วมมือ ฟังความเห็นต่างก่อนตอบโต้", "Turn competition into cooperation; hear the other view before you push back.", "เลี่ยงการทะเลาะที่ไม่จำเป็น เลือกเฉพาะเรื่องที่สำคัญจริงมาคุย", "Avoid needless fights; only take up the issues that truly matter."),
+  "wands-05": a("เปลี่ยนการแข่งขันเป็นการร่วมมือ ฟังความเห็นต่างก่อนตอบโต้", "Turn competition into cooperation; hear the other view before you push back.", "ถ้าเลี่ยงการคุยมานาน หยิบเรื่องที่ค้างใจขึ้นมาคุยตรง ๆ อย่างใจเย็น 1 เรื่อง", "If you have been avoiding the clash, calmly raise one lingering issue in the open."),
   "wands-06": a("ยอมรับคำชมและความสำเร็จอย่างภูมิใจ แล้วใช้ต่อยอดก้าวถัดไป", "Accept praise and success with pride, and use them to build your next step.", "อย่ารอคำยอมรับจากคนอื่นจนหยุดเดิน ให้คุณค่ากับความพยายามของตัวเองก่อน", "Do not stall waiting for others' approval; value your own effort first."),
   "wands-07": a("ยืนหยัดในจุดยืนของคุณอย่างสุภาพ เตรียมเหตุผลให้พร้อม", "Hold your ground politely and have your reasons ready.", "ถ้าเหนื่อยกับการต้องปกป้องตลอด เลือกปกป้องเฉพาะสิ่งที่สำคัญที่สุด", "If you are tired of defending everything, defend only what matters most."),
   "wands-08": a("ตอบรับข่าวหรือโอกาสที่เข้ามาเร็ว จัดลำดับให้ทันการณ์", "Respond quickly to news or chances that arrive, and prioritise to keep up.", "ถ้าเรื่องล่าช้า ใช้เวลานี้เตรียมตัวให้พร้อมแทนการเร่ง", "If things are delayed, use the time to prepare rather than force the pace."),
