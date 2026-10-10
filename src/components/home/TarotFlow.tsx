@@ -1757,7 +1757,27 @@ export default function TarotFlow({
                   ⚠️ ห้ามย้าย <h1> ลงไปใต้บล็อกอื่น จะทำให้ <h2> ของ QuickFortunePicker
                      ขึ้นก่อน <h1> (ผิดลำดับหัวข้อ และเคยเป็นข้อจำกัดเดิมของไฟล์นั้น)
                   ────────────────────────────────────────────────────────── */}
-              <div className="space-y-6" data-home-section="hero">
+              <div className="relative isolate space-y-6" data-home-section="hero">
+                {/*
+                  ✦ พัดไพ่ 1909 เป็นพื้นหลังจาง ๆ หลังหัวเรื่อง (เจ้าของสั่ง 2026-10-10: เป็นแบ็กกราวด์ ไม่ต้องกดได้)
+                  ภาพประกอบล้วน (`aria-hidden` · ไม่รับการแตะ) ไม่ดันความสูงส่วนหัว — ไพ่ประจำวันยังอยู่ในจอแรก
+                  ภาพจาก `<CardImage />` เท่านั้น (กฎเหล็กข้อ 5 · 8) · ลำดับโหลดต่ำ ให้หัวเรื่องเป็น LCP เหมือนเดิม
+                  ⚠️ งบ DOM หน้าแรก (INC-0247) · หน้าตาอยู่ที่ `.hero-fan` ใน globals.css
+                */}
+                <div className="hero-fan" aria-hidden="true">
+                  {HERO_FAN_CARDS.map((cardId, i) => (
+                    <span key={cardId} className="hero-fan-card" style={{ "--i": i - 2 } as React.CSSProperties}>
+                      <CardImage
+                        cardId={cardId}
+                        alt=""
+                        sizes="(min-width: 640px) 150px, 96px"
+                        loading="eager"
+                        fetchPriority="low"
+                        className="w-full h-full object-cover"
+                      />
+                    </span>
+                  ))}
+                </div>
                 <div className="text-center space-y-3 sm:space-y-3.5 pt-2">
                   <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]"><ThaiPhrases>
                     {isEnglish ? "Interactive 1909 Rider-Waite Tarot with AI Oracle" : "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ออนไลน์ ฟรี กับแม่หมอ AI"}
@@ -1821,35 +1841,6 @@ export default function TarotFlow({
                       </li>
                     ))}
                   </ul>
-                </div>
-
-                {/*
-                  ✦ พัดไพ่ 1909 หน้าเปิด 5 ใบ (เจ้าของเลือกจากแบบของเพื่อน · สั่งให้โชว์หน้าไพ่ 2026-10-10)
-                  เป็นภาพประกอบล้วน (`aria-hidden`) ไม่ใช่ไพ่ของผู้ใช้ — ไม่มีป้าย "ไพ่ของคุณ" ใด ๆ ไม่ให้เข้าใจว่าเป็นคำทำนาย
-                  ภาพจาก `<CardImage />` เท่านั้น (กฎเหล็กข้อ 5 · 8) · ใบกลางโหลดก่อน ใบข้างลดลำดับ (`fetchPriority`)
-                  ⚠️ งบ DOM หน้าแรก (INC-0247): พัด 1 + ไพ่ 5 + ภาพ · กล่องสูงตายตัว (CLS 0) · หน้าตาอยู่ที่ `.hero-fan` ใน globals.css
-                */}
-                <div className="hero-fan" aria-hidden="true">
-                  {HERO_FAN_CARDS.map((cardId, i) => (
-                    <span key={cardId} className={i === 2 ? "hero-fan-card hero-fan-card--center" : "hero-fan-card"} style={{ "--i": i - 2 } as React.CSSProperties}>
-                      <CardImage
-                        cardId={cardId}
-                        alt=""
-                        sizes="(min-width: 640px) 112px, 76px"
-                        loading="eager"
-                        fetchPriority={i === 2 ? "high" : "low"}
-                        className="w-full h-full object-cover"
-                      />
-                    </span>
-                  ))}
-                </div>
-                <div className="flex flex-col items-center gap-2 -mt-1">
-                  <a href="#home-quick" className="btn-gold-glass inline-flex items-center gap-2 px-7 py-3 font-serif-th text-sm sm:text-base font-bold">
-                    {isEnglish ? "Start your reading" : "เริ่มดูดวงเลย"}
-                  </a>
-                  <p className="font-serif-th text-xs text-muted">
-                    {isEnglish ? "Pick a topic, then shuffle and choose your own cards" : "เลือกเรื่องที่อยากรู้ แล้วสับและเลือกไพ่ด้วยมือคุณเอง"}
-                  </p>
                 </div>
 
                 {/* ไพ่ประจำวัน — แตะดูเฉย ๆ ไม่กินโควตา จึงเป็นจุดเริ่มที่เบาที่สุดของหน้า
