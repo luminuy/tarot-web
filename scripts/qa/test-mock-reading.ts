@@ -385,6 +385,41 @@ async function run() {
     }
   }
 
+  // ── 7.1 (ยกเครื่อง 2026-10-10) ตอบตรงคำถาม · คำแนะนำปลอดภัยตามหมวด · ประโยคปิดไม่ซ้ำ · ไม่แปะวงเล็บคำอธิบายช่อง ──
+  console.log("\n✦ 7.1 ตอบตรงคำถาม · คำแนะนำตามหมวด · ประโยคปิดหมุนเวียน");
+  const asked = (question: string, ids: string[], reversed: boolean[], category: string, spreadId = "three-card") => {
+    const base = buildCtx({ spreadId, lang: "th", personaId: "warm" });
+    const drawn = ids.map((id, order) => ({ order, cardIndex: idxOf(id), isReversed: reversed[order] ?? false }));
+    return collect({ ...base, question, category: category as typeof base.category, drawn, cards: drawn.map((d) => cardByIndex(d.cardIndex)!) });
+  };
+  const exQ = await asked("แฟนเก่าจะกลับมาไหม", ["swords-03", "cups-06", "major-17"], [false, true, false], "love");
+  check("คำถามแฟนเก่า ➔ บทสรุปตอบตรงเรื่องเขาจะกลับมาไหม", /เขาจะกลับมาไหม/.test(exQ.reading?.summary ?? ""), exQ.reading?.summary);
+  check(
+    "คำถามแฟนเก่า ➔ คำแนะนำไม่ชวนส่งข้อความ/ทักทันที (เดิมได้ \"ส่งข้อความสั้น ๆ ถึงคนที่เกี่ยวข้อง\")",
+    !/ส่งข้อความ/.test((exQ.reading?.advice ?? []).join(" ")) && /เว้นระยะ/.test((exQ.reading?.advice ?? []).join(" ")),
+    exQ.reading?.advice.join(" | "),
+  );
+  const loveShadow = await asked("ความรักช่วงนี้เป็นยังไง", ["swords-10", "swords-03", "swords-09"], [false, false, false], "love");
+  check(
+    "หมวดความรัก ปลายทางต้องระวัง ➔ คำแนะนำไม่ชวนติดต่ออีกฝ่าย",
+    !/ส่งข้อความ|ทักเขา|โทรหา/.test((loveShadow.reading?.advice ?? []).join(" ")),
+    loveShadow.reading?.advice.join(" | "),
+  );
+  const workQ = await asked("ควรเปลี่ยนงานไหม", ["wands-10"], [false], "work", "daily");
+  check("คำถามเปลี่ยนงาน ➔ ตอบตรงเรื่องงาน", /เปลี่ยนงาน/.test(workQ.reading?.summary ?? ""), workQ.reading?.summary);
+  check("หมวดงาน ➔ คำแนะนำเป็นเรื่องงาน ไม่ใช่ของเหมารวมตามธาตุ", /งาน/.test((workQ.reading?.advice ?? []).slice(0, 2).join(" ")), workQ.reading?.advice.join(" | "));
+  const closers = new Set<string>();
+  for (const ids of [["major-19", "cups-10", "major-21"], ["swords-10", "swords-03", "swords-09"], ["wands-01", "cups-02", "pentacles-03"], ["major-00", "major-01", "major-02"]]) {
+    const r = await asked("ช่วงนี้ชีวิตจะเป็นอย่างไร", ids, [false, false, false], "general");
+    closers.add((r.reading?.summary ?? "").slice(-40)); // ท้ายประโยค 40 ตัวอักษร = ประโยคปิด (บทสรุปส่วนหน้าเปลี่ยนตามไพ่อยู่แล้ว)
+  }
+  check("ประโยคปิดหมุนเวียน ไม่ใช่ประโยคเดียวกันทุกคำอ่าน", closers.size >= 2, [...closers].join(" / "));
+  check(
+    "ไม่แปะคำอธิบายช่องในวงเล็บต่อท้ายชื่อช่องอีก (กฎเหล็กข้อ 10)",
+    !/ในช่องอดีต \(|ช่องนี้หมายถึง/.test(JSON.stringify(exQ.reading)),
+    exQ.reading?.cards.map((c) => c.reading.slice(0, 60)).join(" / "),
+  );
+
   // ── 8. ผู้ใช้ต้องรู้ว่าเป็นคำอ่านสำรอง + กดให้ AI อ่านใหม่ได้ ───────────────
   console.log("\n🪧 8. ป้ายบอกคำอ่านสำรอง (FallbackNotice)");
   const routeSrc = fs.readFileSync(path.resolve("src/app/api/reading/[id]/read/route.ts"), "utf8");
