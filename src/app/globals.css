@@ -2469,6 +2469,10 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
     width: auto;
     max-width: none;
   }
+  /* หมวด "ทั้งหมด" โชว์ 6 ใบแรก ที่เหลือไปหน้ารวมผังผ่านลิงก์ใต้ตาราง */
+  .rail-flat.rail-always.rail-grid-lg-cap > :nth-child(n + 7) {
+    display: none;
+  }
 }
 
 /* ✦ พัดไพ่ 1909 เป็นพื้นหลังจาง ๆ หลังหัวหน้าแรก (`TarotFlow` · aria-hidden · ไม่รับการแตะ) — ไพ่แต่ละใบรู้ลำดับจาก `--i` (-3 … 3)

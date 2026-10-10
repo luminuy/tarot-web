@@ -2,6 +2,8 @@
 
 import React, { useState, useMemo } from "react";
 import { SPREADS, type Spread } from "@/data/spreads";
+// ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { RailArrows } from "@/components/ui/RailArrows";
 import { useRail } from "@/components/ui/use-rail";
 import {
@@ -463,7 +465,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
            เห็นใบถัดไปโผล่ขอบขวาเป็นสัญญาณว่าปัดได้ · ความกว้างการ์ดดูที่ `SPREAD_RAIL_ITEM` */
         className={`${hasSwappedTab ? "anim-swap-rise-sm" : ""} rail-flat flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth ${
           variant === "featured"
-            ? "rail-always rail-grid-lg"
+            ? `rail-always rail-grid-lg${featuredCategory === "all" ? " rail-grid-lg-cap" : ""}`
             : "sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-5 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible"
         }`}
       >
@@ -625,6 +627,19 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
             );
           })}
       </div>
+        {/* จอใหญ่ หมวด "ทั้งหมด": ตารางโชว์ 6 ใบแรก (`.rail-grid-lg-cap`) แล้วพาไปหน้ารวมผัง — ไม่ให้ตารางยาว 9 แถว
+            (มือถือยังเป็นแถวปัดครบทุกใบ ลิงก์นี้จึงมีเฉพาะจอใหญ่) */}
+        {variant === "featured" && featuredCategory === "all" && (
+          <div className="hidden lg:flex justify-center pt-5">
+            <Link
+              href="/spreads"
+              prefetch={false}
+              className="glass-chip inline-flex items-center gap-1.5 px-5 py-2.5 font-serif-th text-sm font-bold text-gold-ink hover:underline"
+            >
+              {isEnglish ? `See all ${filteredSpreads.length} spreads →` : `ดูผังทั้งหมด ${filteredSpreads.length} แบบ →`}
+            </Link>
+          </div>
+        )}
         {variant === "featured" && (
           /* จอใหญ่เป็นตาราง (`.rail-grid-lg`) ไม่มีอะไรให้ปัด — ซ่อนลูกศร */
           <div className="lg:hidden">
