@@ -2439,6 +2439,146 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
   }
 }
 
+/* ✦ จอใหญ่ (lg+) เลิกเป็นแถวปัดในสองที่ของหน้าแรก (เจ้าของเลือกจากแบบของเพื่อน 2026-10-10 · จอเล็กยังเป็นแถวปัดเหมือนเดิม)
+   ⚠️ ต้องอยู่ "หลัง" บล็อกแถวปัดเต็มจอข้างบน — `.home-rail:not(.home-rail-sm)` / `.rail-flat.rail-always` มีน้ำหนักเท่ากัน
+      ใครอยู่ทีหลังชนะ ถ้าย้ายขึ้นไป margin/padding ทะลุขอบจอจะกลับมา
+   • `.home-rail-stack-lg` — ลิงก์ 4 อันของส่วนราศี เรียงซ้อนเป็นคอลัมน์ขวาของวงล้อ
+     ไม่ล้นแล้ว `home-rails.ts` ปิดลูกศรทั้งคู่ แถวปุ่มจึงซ่อนตัวเองตามกติกาเดิม
+   • `.rail-grid-lg` — การ์ดเลือกผัง เป็นตาราง 3 คอลัมน์ เห็นครบทั้งหมวดไม่ต้องปัด (ลูกศรซ่อนด้วย `lg:hidden` ใน React) */
+@media (min-width: 1024px) {
+  .home-rail.home-rail-stack-lg {
+    flex-direction: column;
+    overflow: visible;
+    scroll-snap-type: none;
+    margin-inline: 0;
+    padding: 0;
+  }
+  .home-rail.home-rail-stack-lg > * {
+    width: auto;
+    flex: 0 0 auto;
+  }
+  .rail-flat.rail-always.rail-grid-lg {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    overflow: visible;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+  .rail-flat.rail-always.rail-grid-lg > * {
+    width: auto;
+    max-width: none;
+  }
+  /* หมวด "ทั้งหมด" โชว์ 6 ใบแรก ที่เหลือไปหน้ารวมผังผ่านลิงก์ใต้ตาราง */
+  .rail-flat.rail-always.rail-grid-lg-cap > :nth-child(n + 7) {
+    display: none;
+  }
+}
+
+/* ✦ พัดไพ่ 1909 เป็นพื้นหลังจาง ๆ หลังหัวหน้าแรก (`TarotFlow` · aria-hidden · ไม่รับการแตะ) — ไพ่แต่ละใบรู้ลำดับจาก `--i` (-3 … 3)
+   ลอยอยู่ชั้นล่างสุดของส่วนหัว (`isolate` + z-index -1) ไม่กินพื้นที่ · จางด้วย opacity + ไล่จางขอบล่างด้วย mask
+   (mask ไม่ใช่ blur — ไม่มี backdrop-filter/filter · INC-0056) · ผู้ใช้ปิดแอนิเมชัน = นิ่งสนิท */
+.hero-fan {
+  /* ขนาดไพ่ผูกกับความกว้างจอ — ใบริมสุดต้องอยู่ในกรอบส่วนหัวเสมอ (เคยกว้างตายตัวแล้วใบริมโดนตัดขอบ เจ้าของทัก 2026-10-10)
+     ระยะจากกลางถึงขอบนอกใบริม ≈ (ใบ × ระยะห่าง) + ครึ่งใบ + ส่วนที่หมุนยื่น ≈ 2.2w (5 ใบ) / 3.1w (7 ใบ) ต้อง ≤ ครึ่งกรอบ */
+  --w: min(96px, calc((100vw / 2 - 16px) / 2.2));
+  --gap: calc(var(--w) * 0.6);
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: calc(var(--w) * 1.7 + 50px);
+  opacity: 0.2;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 45%, transparent 96%);
+  mask-image: linear-gradient(to bottom, #000 45%, transparent 96%);
+}
+@media (min-width: 640px) {
+  .hero-fan {
+    --w: min(150px, calc((100vw / 2 - 40px) / 2.3));
+    --gap: calc(var(--w) * 0.69);
+    top: -12px;
+    opacity: 0.22;
+  }
+}
+/* จอใหญ่: ไพ่ใหญ่ขึ้น + 7 ใบ กางเกือบเต็มกว้างส่วนหัว (เจ้าของขอ 2026-10-10) · กรอบส่วนหัวกว้างสุด 1,152px (max-w-6xl) */
+@media (min-width: 1024px) {
+  .hero-fan {
+    --w: min(190px, calc((min(100vw, 1152px) / 2 - 48px) / 3.1));
+    --gap: calc(var(--w) * 0.72);
+    top: -28px;
+  }
+}
+/* ✦ ให้ตัวหนังสือบนพัดอ่านง่าย (เจ้าของขอ 2026-10-10) — สองชั้น ไม่ใช้ blur/filter (INC-0056):
+   1) `.hero-wash::after` แสงครีมวงรีเฉพาะหลังกลุ่มหัวเรื่อง·คำโปรย·ชิป วาดทับพัด (z-index -1 เท่ากัน แต่มาทีหลังในลำดับ DOM)
+      แต่อยู่ใต้ตัวหนังสือ · ลายไพ่ตรงกลางจางลง ขอบพัดซ้ายขวายังเห็นชัด
+   2) `.hero-text-halo` เงาเรืองสีครีมรอบตัวอักษร กันเส้นลายไพ่ตัดผ่านขอบตัวหนังสือ */
+.hero-wash::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: -24px;
+  width: min(100%, 980px);
+  height: 340px;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(251, 241, 224, 0.92), rgba(251, 241, 224, 0.7) 55%, rgba(251, 241, 224, 0) 100%);
+  pointer-events: none;
+}
+@media (min-width: 640px) {
+  .hero-wash::after {
+    height: 330px;
+  }
+}
+.hero-text-halo {
+  text-shadow:
+    0 0 2px rgba(251, 241, 224, 0.95),
+    0 0 14px rgba(251, 241, 224, 0.9),
+    0 0 28px rgba(251, 241, 224, 0.75);
+}
+/* ใบริมสุดสองใบมีเฉพาะจอใหญ่ — จอเล็กพัดกว้างเกินจอ */
+.hero-fan-card--edge {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .hero-fan-card--edge {
+    display: block;
+  }
+}
+.hero-fan-card {
+  --d: max(var(--i), calc(var(--i) * -1)); /* ระยะห่างจากใบกลาง 0 · 1 · 2 · 3 */
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  z-index: calc(4 - var(--d));
+  width: var(--w);
+  aspect-ratio: 1 / 1.7;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f4ead6;
+  box-shadow:
+    0 0 0 1px rgba(143, 92, 26, 0.35),
+    0 0 0 3px rgba(255, 250, 240, 0.9),
+    0 18px 34px -14px rgba(56, 37, 24, 0.5);
+  transform: translateX(calc(-50% + var(--i) * var(--gap))) translateY(calc(var(--d) * var(--d) * 5px + var(--d) * 6px))
+    rotate(calc(var(--i) * 7deg)) scale(calc(1 - var(--d) * 0.07));
+  transform-origin: 50% 100%;
+}
+/* เปิดหน้ามา ไพ่ค่อย ๆ กางจากกองกลาง (ครั้งเดียว · สั้น) — ปิดแอนิเมชันในเครื่อง = ไม่เล่น */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-fan-card {
+    animation: hero-fan-in 900ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation-delay: calc(var(--d) * 80ms);
+  }
+}
+@keyframes hero-fan-in {
+  from {
+    transform: translateX(-50%) translateY(14px) rotate(0deg) scale(0.94);
+    opacity: 0;
+  }
+}
+
 /* ═════════════════════════════════════════════════════════════════════════
    🪗 ท้ายเว็บบนมือถือ: คอลัมน์ลิงก์พับได้ (`SiteFooter` + `footer-accordion.ts`)
    ผูกกับคลาส `footer-collapsible` บน <html> ที่สคริปต์ตั้ง — ไม่มีสคริปต์ = กางครบเหมือนเดิม

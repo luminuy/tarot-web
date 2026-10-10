@@ -30,10 +30,11 @@ const SAMPLE = {
   th: {
     question: ["เดือนหน้ามีสัมภาษณ์งานใหม่", "จะไปได้ดีไหม"],
     spread: "ผัง 3 ใบ · อดีต ปัจจุบัน อนาคต",
+    /* [ข้อความก่อนชื่อไพ่, ชื่อไพ่ (ตัวหนาสีทอง), ข้อความหลังชื่อไพ่] — ชื่อไพ่เด่นให้โยงกับภาพด้านบนได้ทันที */
     reading: [
-      "แปดแห่งเหรียญในตำแหน่งอดีตบอกว่าคุณสะสมฝีมือมานานแล้ว ภาพช่างที่ก้มหน้าตอกเหรียญทีละเหรียญคือช่วงที่คุณฝึกฝนเงียบ ๆ โดยไม่มีใครเห็น",
-      "ตอนนี้อัศวินไม้เท้ามาอยู่ตำแหน่งปัจจุบัน ใจคุณพร้อมพุ่งไปข้างหน้าแล้ว แต่ม้าที่ยกขาหน้าก็เตือนว่าอย่ารีบจนข้ามการเตรียมตัว",
-      "ดวงดาวในตำแหน่งอนาคตคือไพ่แห่งความหวัง ผลสัมภาษณ์มีแนวโน้มออกมาดี และถึงรอบนี้ไม่ได้ ก็จะพาไปเจอโอกาสที่เหมาะกับคุณกว่า",
+      ["", "แปดแห่งเหรียญ", "ในตำแหน่งอดีตบอกว่าคุณสะสมฝีมือมานานแล้ว ภาพช่างที่ก้มหน้าตอกเหรียญทีละเหรียญคือช่วงที่คุณฝึกฝนเงียบ ๆ โดยไม่มีใครเห็น"],
+      ["ตอนนี้", "อัศวินไม้เท้า", "มาอยู่ตำแหน่งปัจจุบัน ใจคุณพร้อมพุ่งไปข้างหน้าแล้ว แต่ม้าที่ยกขาหน้าก็เตือนว่าอย่ารีบจนข้ามการเตรียมตัว"],
+      ["", "ดวงดาว", "ในตำแหน่งอนาคตคือไพ่แห่งความหวัง ผลสัมภาษณ์มีแนวโน้มออกมาดี และถึงรอบนี้ไม่ได้ ก็จะพาไปเจอโอกาสที่เหมาะกับคุณกว่า"],
     ],
     advice: "ทำได้เลยวันนี้: เตรียมเล่าผลงาน 2–3 ชิ้นที่คุณภูมิใจที่สุดให้กระชับ",
   },
@@ -41,9 +42,9 @@ const SAMPLE = {
     question: ["I have a job interview next month.", "Will it go well?"],
     spread: "3-card spread · Past, Present, Future",
     reading: [
-      "The Eight of Pentacles in the past shows skill you have built for a long time. The craftsman tapping out coin after coin is the quiet practice nobody saw.",
-      "The Knight of Wands sits in the present. You are ready to charge ahead, but the rearing horse warns you not to rush past your preparation.",
-      "The Star in the future is a card of hope. The interview leans toward a good result, and even if this one passes you by, it points you to a better fit.",
+      ["The ", "Eight of Pentacles", " in the past shows skill you have built for a long time. The craftsman tapping out coin after coin is the quiet practice nobody saw."],
+      ["The ", "Knight of Wands", " sits in the present. You are ready to charge ahead, but the rearing horse warns you not to rush past your preparation."],
+      ["", "The Star", " in the future is a card of hope. The interview leans toward a good result, and even if this one passes you by, it points you to a better fit."],
     ],
     advice: "Do this today: prepare a short story about the two or three pieces of work you are proudest of.",
   },
@@ -112,16 +113,22 @@ export function HomeProofSection({ isEnglish }: { isEnglish: boolean }) {
           </p>
         </div>
 
-        <ul className="grid grid-cols-3 gap-3 sm:gap-6 max-w-md mx-auto">
-          {SAMPLE_CARDS.map((slot) => {
+        {/* ไพ่แต่ละใบอยู่ในกรอบของตัวเอง · ใบกลาง (ปัจจุบัน) เน้นด้วยขอบทอง — เจ้าของเลือกจากแบบของเพื่อน 2026-10-10 */}
+        <ul className="grid grid-cols-3 gap-2.5 sm:gap-4 max-w-xl mx-auto">
+          {SAMPLE_CARDS.map((slot, i) => {
             const card = SUMMARY_BY_ID.get(slot.id);
             if (!card) return null;
             return (
-              <li key={slot.id} className="flex flex-col items-center gap-1.5 text-center">
+              <li
+                key={slot.id}
+                className={`flex flex-col items-center gap-1.5 text-center rounded-xl border px-2 py-3 sm:py-4 ${
+                  i === 1 ? "border-gold bg-surface/70 shadow-[0_0_0_3px_rgba(165,138,92,0.15)]" : "border-line-warm/70 bg-surface/40"
+                }`}
+              >
                 <span className="text-[11px] font-serif-th font-semibold text-gold-ink">{isEnglish ? slot.en : slot.th}</span>
-                <div className="glass-tile !rounded-md w-16 sm:w-20 aspect-[2/3] overflow-hidden">
+                <div className="glass-tile !rounded-md w-[4.5rem] sm:w-24 aspect-[2/3] overflow-hidden">
                   {/* ภาพประกอบล้วน — ชื่อไพ่พิมพ์อยู่ใต้ภาพแล้ว (INC-0125) */}
-                  <CardImage image={card.image} alt="" className="w-full h-full object-cover" sizes="(min-width: 640px) 80px, 64px" />
+                  <CardImage image={card.image} alt="" className="w-full h-full object-cover" sizes="(min-width: 640px) 96px, 72px" />
                 </div>
                 <span className="text-xs font-serif-th font-bold text-ink leading-tight">
                   {isEnglish ? card.nameEn : card.nameTh}
@@ -131,13 +138,18 @@ export function HomeProofSection({ isEnglish }: { isEnglish: boolean }) {
           })}
         </ul>
 
-        <blockquote className="space-y-3 font-serif-th text-sm sm:text-base text-ink leading-relaxed">
-          {copy.reading.map((line) => (
-            <p key={line}>{line}</p>
+        <blockquote className="space-y-3 border-l-2 border-gold pl-4 sm:pl-5 font-serif-th text-sm sm:text-base text-ink leading-relaxed">
+          {copy.reading.map(([before, name, after]) => (
+            <p key={name}>
+              {before}
+              <strong className="font-bold text-gold-ink">{name}</strong>
+              {after}
+            </p>
           ))}
         </blockquote>
 
         <p className="rounded-xl border border-line-warm bg-inset-warm px-4 py-3 font-serif-th text-sm font-semibold text-ink">
+          <span aria-hidden="true" className="text-gold-ink">✦ </span>
           {copy.advice}
         </p>
 
