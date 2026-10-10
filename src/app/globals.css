@@ -2475,15 +2475,16 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
    ลอยอยู่ชั้นล่างสุดของส่วนหัว (`isolate` + z-index -1) ไม่กินพื้นที่ · จางด้วย opacity + ไล่จางขอบล่างด้วย mask
    (mask ไม่ใช่ blur — ไม่มี backdrop-filter/filter · INC-0056) · ผู้ใช้ปิดแอนิเมชัน = นิ่งสนิท */
 .hero-fan {
-  --w: 96px;
-  --gap: 58px;
+  /* ขนาดไพ่ผูกกับความกว้างจอ — ใบริมสุดต้องอยู่ในกรอบส่วนหัวเสมอ (เคยกว้างตายตัวแล้วใบริมโดนตัดขอบ เจ้าของทัก 2026-10-10)
+     ระยะจากกลางถึงขอบนอกใบริม ≈ (ใบ × ระยะห่าง) + ครึ่งใบ + ส่วนที่หมุนยื่น ≈ 2.2w (5 ใบ) / 3.1w (7 ใบ) ต้อง ≤ ครึ่งกรอบ */
+  --w: min(96px, calc((100vw / 2 - 16px) / 2.2));
+  --gap: calc(var(--w) * 0.6);
   position: absolute;
   z-index: -1;
-  left: 50%;
+  left: 0;
+  right: 0;
   top: 0;
-  width: 420px;
   height: calc(var(--w) * 1.7 + 50px);
-  transform: translateX(-50%);
   opacity: 0.2;
   pointer-events: none;
   -webkit-mask-image: linear-gradient(to bottom, #000 45%, transparent 96%);
@@ -2491,19 +2492,17 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
 }
 @media (min-width: 640px) {
   .hero-fan {
-    --w: 150px;
-    --gap: 104px;
-    width: 820px;
+    --w: min(150px, calc((100vw / 2 - 40px) / 2.3));
+    --gap: calc(var(--w) * 0.69);
     top: -12px;
     opacity: 0.22;
   }
 }
-/* จอใหญ่: ไพ่ใหญ่ขึ้น + 7 ใบ กางเกือบเต็มกว้างส่วนหัว (เจ้าของขอ 2026-10-10) */
+/* จอใหญ่: ไพ่ใหญ่ขึ้น + 7 ใบ กางเกือบเต็มกว้างส่วนหัว (เจ้าของขอ 2026-10-10) · กรอบส่วนหัวกว้างสุด 1,152px (max-w-6xl) */
 @media (min-width: 1024px) {
   .hero-fan {
-    --w: 200px;
-    --gap: 150px;
-    width: 1200px;
+    --w: min(190px, calc((min(100vw, 1152px) / 2 - 48px) / 3.1));
+    --gap: calc(var(--w) * 0.72);
     top: -28px;
   }
 }
