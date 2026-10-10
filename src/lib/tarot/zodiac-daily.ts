@@ -59,9 +59,10 @@ async function sha256Hex(input: string): Promise<string> {
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-function trim(text: string | undefined, max = 170): string {
-  const clean = (text ?? "").trim();
-  return clean.length <= max ? clean : `${clean.slice(0, max - 1).trimEnd()}…`;
+/** ส่งคำอธิบายเต็มประโยค — เดิมตัดที่ 170 ตัวอักษร คำอ่านขาดกลางประโยค ("…ความจริงที่รู้แล้วนั้น…")
+ *  ดูเหมือนอ่านไพ่ไม่จบ · ความหมายทั่วไปยาวสุดราว 235 ตัวอักษรอยู่แล้ว ไม่ต้องตัด */
+function trim(text: string | undefined): string {
+  return (text ?? "").trim();
 }
 
 async function cardFromSeed(sign: string, seed: string): Promise<ZodiacDayCard> {

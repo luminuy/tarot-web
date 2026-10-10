@@ -160,7 +160,13 @@ export function SiteHeader({
               <LanguageSwitcher />
               {/* ไม่มีใครส่ง toolbar มา (หน้าเนื้อหาทั่วไป) ➔ ใส่ปุ่มบัญชีให้เอง หัวเว็บทุกหน้าจะได้เหมือนหน้าแรก */}
               {toolbar ?? <HeaderAccount />}
-              {nav ?? <SacredNavDropdown />}
+              {/*
+                ⚠️ หัวเว็บนี้ (ไม่มี `nav` ส่งมา) คือหัวเว็บ static ของหน้า Astro — ไม่ hydrate React
+                ลิ้นชักเปิดด้วย `astro/scripts/site-header.ts` ซึ่งแค่สลับคลาส `hasOpened` จึงไม่มีวันเป็นจริง
+                ➔ รายการในลิ้นชักต้องอยู่ใน HTML ตั้งแต่แรก (`eagerBody`) ไม่งั้นเมนูว่างทุกหน้ายกเว้นหน้าแรก
+                หน้าแรกส่ง `nav` ของตัวเอง (React คุม) จึงยังเรนเดอร์หลังเปิดครั้งแรกได้ตามงบ DOM (INC-0247)
+              */}
+              {nav ?? <SacredNavDropdown eagerBody />}
             </div>
           </div>
 

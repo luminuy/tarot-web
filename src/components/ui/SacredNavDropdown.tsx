@@ -15,7 +15,11 @@ interface SacredNavDropdownProps {
   onOpenHistory?: () => void;
   onReset?: () => void;
   canReset?: boolean;
-  /** เรนเดอร์รายการในลิ้นชักตั้งแต่แรก — ใช้ในด่านทดสอบเท่านั้น (ปกติรอจนเปิดครั้งแรก) */
+  /**
+   * เรนเดอร์รายการในลิ้นชักตั้งแต่แรก (ปกติรอจนเปิดครั้งแรก)
+   * ⚠️ หัวเว็บ static ของหน้า Astro ต้องส่งเสมอ — หน้านั้นไม่ hydrate `hasOpened` จึงไม่มีวันเป็นจริง
+   *    (ลืมส่ง = ลิ้นชักว่างเปล่าทุกหน้ายกเว้นหน้าแรก) · ด่าน test-en-thai-leak ก็ใช้
+   */
   eagerBody?: boolean;
 }
 
@@ -122,12 +126,13 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         {isActive && (
           <span className="absolute left-0 top-2 bottom-2 w-1 bg-gold rounded-r-full" aria-hidden="true" />
         )}
-        <span className="relative block w-[34px] h-[54px] rounded-[5px] overflow-hidden border border-line/80 shadow-xs shrink-0 bg-canvas group-hover:border-gold/60 transition-colors duration-150">
+        {/* คลาส `nav-row*` อยู่ใน globals.css — รวบ utility ยาวที่ซ้ำทุกแถว (ลิ้นชักอยู่ใน HTML ของทุกหน้า Astro · งบ HTML) */}
+        <span className="nav-row-thumb">
           <CardImage cardId={item.cardId} alt="" sizes="34px" thumb loading="lazy" className="w-full h-full object-cover" />
         </span>
         <span className="flex-1 min-w-0 text-left">
           <span
-            className={`block text-[13px] font-serif-th leading-[1.7] break-words transition-colors ${
+            className={`nav-row-label ${
               isActive ? "font-bold text-gold-ink" : "font-semibold text-ink group-hover:text-gold-ink"
             }`}
           >
@@ -137,12 +142,12 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
             ⛔ ห้าม `truncate` ในลิ้นชักทั้งไฟล์ (INC-0209 ➜ INC-0252) — iOS Safari คิดความกว้างกล่องตัดได้ 0
             แล้วเฉือนบรรทัดทิ้งทั้งบรรทัด (เจ้าของเจอบรรทัดคำอธิบายหายบน iPhone) · ข้อความสั้นอยู่แล้ว ปล่อยขึ้นบรรทัดใหม่แทน
           */}
-          <span className="block text-[11.5px] font-serif-th text-muted break-words mt-0.5 leading-[1.7]">{item.sublabel}</span>
+          <span className="nav-row-sub">{item.sublabel}</span>
         </span>
       </>
     );
 
-    const buttonClass = `tap-overlay-y relative w-full min-h-[44px] flex items-center gap-3 px-2.5 py-1.5 rounded-xl text-left transition-colors duration-150 group cursor-pointer border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold after:content-['›'] after:shrink-0 after:text-lg after:leading-none after:text-muted hover:after:text-gold-ink ${
+    const buttonClass = `tap-overlay-y nav-row group ${
       isActive ? "bg-inset/90 border-line shadow-xs" : "hover:bg-inset/60 border-transparent hover:border-line/60"
     }`;
 
