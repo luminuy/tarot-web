@@ -9,6 +9,7 @@ import { formatMonthDay, zodiacSignPath } from "@/lib/tarot/zodiac";
 import { currentSign, onSignAnnounced } from "@/lib/zodiac/my-sign";
 import type { ZodiacDaily as ZodiacDailyData, ZodiacDayCard } from "@/lib/tarot/zodiac-daily";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { queueQuestionPrefill } from "@/lib/reading/question-prefill";
 
 /**
  * ✦ ดวงรายวัน 12 ราศี + ไพ่ประจำฤดูราศี — ข้อมูลจาก `/api/daily-card/zodiac`
@@ -147,9 +148,23 @@ export function ZodiacDaily({ signs, sign }: { signs: ZodiacDailySignName[]; sig
                 {(isEnglish ? card.keywordsEn : card.keywords).join(" · ")}
               </p>
               <p className="text-sm text-muted font-sans leading-relaxed">{message(card)}</p>
-              <Link href="/" className="inline-block text-sm font-serif-th font-bold text-gold-ink hover:underline">
+              {/* เดิมพาไปหน้าแรกเปล่า ๆ ผู้ใช้ต้องเลือกผังและพิมพ์คำถามใหม่เอง ➔ พาไปผังดวงรายวันพร้อมเติมคำถามของวันนี้ให้
+                  (คำถามส่งผ่าน sessionStorage ไม่ติดไปกับ URL — แบบเดียวกับปุ่ม "ถามเลย" ของหน้าคำถาม) */}
+              <a
+                href={`${isEnglish ? "/en" : ""}/read/daily`}
+                onClick={() =>
+                  queueQuestionPrefill({
+                    question: isEnglish
+                      ? `Today's card for ${nameOf(sign)} is ${card.nameEn}. What should I pay attention to today?`
+                      : `ไพ่วันนี้ของ${nameOf(sign)}คือ${card.nameTh} วันนี้ฉันควรใส่ใจเรื่องอะไรเป็นพิเศษ`,
+                    category: "general",
+                    spreadId: "daily",
+                  })
+                }
+                className="inline-block text-sm font-serif-th font-bold text-gold-ink hover:underline"
+              >
                 {isEnglish ? "Ask the oracle about your day" : "ถามแม่หมอต่อเรื่องของวันนี้"}
-              </Link>
+              </a>
             </>
           ) : (
             <p className="text-sm text-muted font-sans">

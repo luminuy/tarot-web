@@ -35,6 +35,8 @@
  *     (`overflow-hidden` / `overflow-auto` / `overflow-y-*`) — `overflow-x-clip` เท่านั้นที่อนุญาต
  *  7. **ทุกหน้าของทั้งเว็บต้องมีหัวเว็บและฟุตเตอร์จริง** ทั้งใน HTML ที่ build ออกมาและในโครง source
  *     ยกเว้นเฉพาะรายการใน `INTENTIONALLY_BARE` ที่ต้องเขียนเหตุผลกำกับ (INC-0110 · INC-0112)
+ *  7.5 ลิ้นชักเมนูมือถือของหัวเว็บ static (ไม่อยู่ใน astro-island) ต้องมีลิงก์เมนูครบทุกข้อใน HTML ที่ build แล้ว
+ *  7.6 SiteHeader ต้องส่ง `eagerBody` ให้ลิ้นชักของหัวเว็บ static (หน้า Astro ไม่ hydrate · ลิ้นชักว่าง 2026-10-10)
  *
  * รันด้วย: npx tsx scripts/qa/test-sticky-header.ts
  */
@@ -44,6 +46,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { collectRenderedPages, renderedOutputDirs } from "./lib/rendered-pages";
 import { assertNonEmptyCorpus } from "./lib/corpus";
+import { headerNav } from "../../src/components/layout/header-nav";
+
+/** 7.5 ลิงก์ที่ลิ้นชักเมนูมือถือต้องมีครบ — อ่านจากข้อมูลเมนูชุดเดียวกับที่หัวเว็บใช้ (เพิ่มเมนูแล้วด่านตามเอง) */
+const DRAWER_HREFS = (() => {
+  const nav = headerNav(false);
+  return [...new Set([...nav.reading.groups.flatMap((g) => g.links.map((l) => l.href)), nav.reading.all.href, ...nav.links.map((l) => l.href), "/account"])];
+})();
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(__filename), "../..");
@@ -635,6 +644,9 @@ if (outputDirs.every((dir) => fs.existsSync(dir))) {
 
   const headerless: string[] = [];
   const footerless: string[] = [];
+  /** 7.5 หน้าที่ลิ้นชักเมนูมือถือเป็น HTML นิ่ง แต่ไม่มีรายการเมนูครบ (INC ลิ้นชักว่าง 2026-10-10) */
+  const emptyDrawer: string[] = [];
+  let staticDrawers = 0;
   /** หน้าที่มีเนื้อหาโผล่ต่อท้ายฟุตเตอร์ (ฟุตเตอร์ลอยขึ้นมากลางหน้า) */
   const tailAfterFooter: string[] = [];
   let scanned = 0;
@@ -654,6 +666,28 @@ if (outputDirs.every((dir) => fs.existsSync(dir))) {
     if (!html.includes('data-site-header="')) headerless.push(`/${route}`);
     // ฟุตเตอร์กลางเป็น <footer> เพียงตัวเดียวของหน้า จึงจับด้วยแท็กตรง ๆ ได้
     if (!html.includes("<footer")) footerless.push(`/${route}`);
+
+    // 7.5 ลิ้นชักเมนูมือถือของหัวเว็บ static ต้องมีรายการเมนูครบใน HTML
+    //
+    // ⚠️ เกิดจริง 2026-10-10: #656 ให้ `SacredNavDropdown` เรนเดอร์รายการ "หลังเปิดครั้งแรก" (state ของ React)
+    // แต่หน้า Astro ไม่ hydrate หัวเว็บ — `site-header.ts` แค่สลับคลาส state จึงไม่มีวันเปลี่ยน
+    // ➔ ลิ้นชักว่างเปล่าทุกหน้ายกเว้นหน้าแรกบน production · ด่านเดิมไม่จับเพราะตรวจแค่ว่า "มีหัวเว็บ"
+    // หัวเว็บที่อยู่ใน `<astro-island>` (หน้าแรก · /read/*) React คุมเองและเรนเดอร์ตอนเปิดได้ จึงข้าม
+    const panelAt = html.indexOf('id="sacred-nav-panel"');
+    if (panelAt !== -1) {
+      const inIsland = html.lastIndexOf("<astro-island", panelAt) > html.lastIndexOf("</astro-island>", panelAt);
+      if (!inIsland) {
+        staticDrawers += 1;
+        const panelEnd = html.indexOf("</nav>", panelAt);
+        const panelHtml = html.slice(panelAt, panelEnd === -1 ? undefined : panelEnd);
+        const isEn = route === "en" || route.startsWith("en/");
+        const missing = DRAWER_HREFS.filter((href) => {
+          const localized = isEn ? (href === "/" ? "/en" : `/en${href}`) : href;
+          return !panelHtml.includes(`href="${localized}"`) && !panelHtml.includes(`href="${href}"`);
+        });
+        if (missing.length > 0) emptyDrawer.push(`/${route} (ขาด ${missing.length}/${DRAWER_HREFS.length} เช่น ${missing[0]})`);
+      }
+    }
 
     // 7.2 ฟุตเตอร์ต้องเป็น "ท้ายหน้า" จริง ๆ — ห้ามมีเนื้อหาหลักต่อท้ายอีก
     //
@@ -694,6 +728,21 @@ if (outputDirs.every((dir) => fs.existsSync(dir))) {
       `HTML ที่ build แล้ว: ${tailAfterFooter.length} หน้ามี <section> อยู่ **ใต้** ฟุตเตอร์ — ` +
         `${tailAfterFooter.slice(0, 5).join(", ")}${tailAfterFooter.length > 5 ? " …" : ""} ` +
         `(ผู้ใช้เห็นฟุตเตอร์โผล่กลางหน้าแล้วมีเนื้อหาต่อท้ายอีก — INC-0136b)`,
+    );
+  }
+
+  if (emptyDrawer.length > 0) {
+    failures.push(
+      `HTML ที่ build แล้ว: ${emptyDrawer.length} หน้าลิ้นชักเมนูมือถือไม่มีรายการเมนูครบ — ` +
+        `${emptyDrawer.slice(0, 5).join(", ")}${emptyDrawer.length > 5 ? " …" : ""}\n` +
+        "   ➔ หัวเว็บ static ไม่ hydrate · รายการต้องอยู่ใน HTML ตั้งแต่แรก (`<SacredNavDropdown eagerBody />` ใน SiteHeader)",
+    );
+  }
+  // กันด่านผ่านลอย ๆ: หน้า Astro หลายร้อยหน้าใช้หัวเว็บ static — ตรวจได้น้อยแปลว่าหาลิ้นชักไม่เจอแล้ว
+  if (staticDrawers < 100) {
+    failures.push(
+      `HTML ที่ build แล้ว: เจอลิ้นชักเมนูแบบ static แค่ ${staticDrawers} หน้า (คาดว่าเกิน 100) — ` +
+        "`id=\"sacred-nav-panel\"` เปลี่ยนชื่อหรือโครงหัวเว็บเปลี่ยน ด่าน 7.5 จึงพิสูจน์อะไรไม่ได้",
     );
   }
 
@@ -744,6 +793,17 @@ for (const item of INTENTIONALLY_BARE) {
     failures.push(
       `INTENTIONALLY_BARE มีรายการค้าง: "${item.route}" ไม่มีหน้านั้นในโปรเจกต์แล้ว — ลบออกจากลิสต์ ` +
         `(ไม่งั้นวันหนึ่งมีหน้าชื่อเดิมกลับมา แล้วมันจะได้ใบผ่านฟรีโดยไม่มีใครรู้)`,
+    );
+  }
+}
+
+// 7.6 ชั้น source ของข้อ 7.5 — ฟ้องตั้งแต่ก่อน build ว่าหัวเว็บ static เรนเดอร์ลิ้นชักแบบรอเปิด
+{
+  const headerSrc = fs.readFileSync(SITE_HEADER, "utf8");
+  if (!/nav\s*\?\?\s*<SacredNavDropdown\s+eagerBody\b/.test(headerSrc)) {
+    failures.push(
+      "SiteHeader.tsx: หัวเว็บ static (ไม่มี `nav` ส่งมา) ต้องเป็น `nav ?? <SacredNavDropdown eagerBody />` — " +
+        "หน้า Astro ไม่ hydrate ลิ้นชักที่รอ state `hasOpened` จะว่างเปล่าทุกหน้ายกเว้นหน้าแรก (2026-10-10)",
     );
   }
 }

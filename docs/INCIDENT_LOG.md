@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0256 · 2026-10-10 21:13 · 🟠 High · เมนูมือถือว่างเปล่าทุกหน้ายกเว้นหน้าแรก (ลิ้นชักรอ state React บนหน้าที่ไม่ hydrate)
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | เจ้าของเปิดเมนูแฮมเบอร์เกอร์บนมือถือที่หน้า /cards/zodiac เห็นลิ้นชักขาวโล่ง มีแค่หัวโลโก้กับปุ่มบัญชีด้านล่าง ไม่มีรายการเมนูสักข้อ เป็นทุกหน้าที่ไม่ใช่หน้าแรก |
+| **สาเหตุราก** | PR #656 แก้งบ DOM ด้วยการให้ SacredNavDropdown เรนเดอร์รายการหลังเปิดครั้งแรก (state hasOpened) โดยไม่ได้นึกว่าหัวเว็บของหน้า Astro เป็น HTML นิ่งไม่ hydrate React — site-header.ts แค่สลับคลาส state จึงไม่มีวันเปลี่ยน · ด่านเดิมตรวจแค่ว่ามีหัวเว็บ ไม่ได้ตรวจว่าลิ้นชักมีลิงก์ |
+| **การแก้ไข** | SiteHeader ส่ง eagerBody เมื่อเป็นหัวเว็บ static · รวบ utility ยาวของแถวเป็นคลาส nav-row* ให้หน้า /spreads/topic/love อยู่ในงบ HTML 21 KB · หน้าแรกยังรอเปิดตามงบ DOM |
+| **🛡️ กฎป้องกันถาวร** | **ด่าน test-sticky-header ข้อ 7.5 ตรวจ HTML ที่ build แล้วว่าลิ้นชักที่ไม่อยู่ใน astro-island มีลิงก์ครบทุกข้อจาก headerNav + ข้อ 7.6 ตรวจ source ว่า SiteHeader ส่ง eagerBody · กฎ: state ที่ต้องรอ React ห้ามใช้ซ่อนเนื้อหาในคอมโพเนนต์ที่หน้า Astro เรนเดอร์แบบ static** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/fervent-darwin-jsrcsp` · commit `1c187e7` |
+
+
 ### INC-0255 · 2026-10-07 14:40 · 🟡 Medium · เติม image · description · shippingDetails ใน Product JSON-LD หน้าราคา ตามที่ Search Console แจ้ง
 
 | หัวข้อ | รายละเอียด |

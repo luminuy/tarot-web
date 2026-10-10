@@ -1870,6 +1870,27 @@ html {
               visibility 0s linear 260ms;
 }
 
+/*
+ * แถวในลิ้นชักเมนูมือถือ (`SacredNavDropdown`) — คลาสชุดเดียวกับที่เคยเขียนเป็น utility ยาวในแต่ละแถว
+ * ลิ้นชักต้องอยู่ใน HTML ของทุกหน้า Astro (หน้านั้นไม่ hydrate ถ้าไม่มีรายการใน HTML เมนูจะว่าง)
+ * utility ยาวซ้ำ 17 แถวกินงบ HTML (`/spreads/topic/love` ≤ 21 KB gzip) — รวบเป็นคลาสเดียวหน้าตาเหมือนเดิมทุกพิกเซล
+ * ⚠️ ส่วนที่เปลี่ยนตามหน้าปัจจุบัน (active) ยังอยู่ใน markup · `group` กับ `tap-overlay-y` ต้องอยู่ใน markup เหมือนเดิม
+ */
+@layer components {
+  .nav-row {
+    @apply relative w-full min-h-[44px] flex items-center gap-3 px-2.5 py-1.5 rounded-xl text-left transition-colors duration-150 cursor-pointer border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold after:content-['›'] after:shrink-0 after:text-lg after:leading-none after:text-muted hover:after:text-gold-ink;
+  }
+  .nav-row-thumb {
+    @apply relative block w-[34px] h-[54px] rounded-[5px] overflow-hidden border border-line/80 shadow-xs shrink-0 bg-canvas group-hover:border-gold/60 transition-colors duration-150;
+  }
+  .nav-row-label {
+    @apply block text-[13px] font-serif-th leading-[1.7] break-words transition-colors;
+  }
+  .nav-row-sub {
+    @apply block text-[11.5px] font-serif-th text-muted break-words mt-0.5 leading-[1.7];
+  }
+}
+
 
 /* FDN-5: Shared Button & Touch Manipulation Utilities */
 button,
