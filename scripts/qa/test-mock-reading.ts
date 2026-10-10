@@ -408,6 +408,26 @@ async function run() {
   const workQ = await asked("ควรเปลี่ยนงานไหม", ["wands-10"], [false], "work", "daily");
   check("คำถามเปลี่ยนงาน ➔ ตอบตรงเรื่องงาน", /เปลี่ยนงาน/.test(workQ.reading?.summary ?? ""), workQ.reading?.summary);
   check("หมวดงาน ➔ คำแนะนำเป็นเรื่องงาน ไม่ใช่ของเหมารวมตามธาตุ", /งาน/.test((workQ.reading?.advice ?? []).slice(0, 2).join(" ")), workQ.reading?.advice.join(" | "));
+  // ประเภทคำถาม 10 แบบ — รวมกับดักคำซ้อนที่เคยจับผิด ("ลงทุน" ไม่ใช่การเรียน · "แม่หมอ/ลูกค้า" ไม่ใช่ครอบครัว)
+  const intentCases: [string, RegExp][] = [
+    ["ควรลงทุนเพิ่มดีไหม", /เรื่องเงิน/],
+    ["แม่หมอช่วยดูหน่อย ลูกค้าจะเยอะขึ้นไหม", /เรื่องธุรกิจ/],
+    ["สอบเข้ามหาลัยจะติดไหม", /เรื่องการเรียนการสอบ/],
+    ["คนคุยคนนี้จะเป็นแฟนไหม", /ความรักครั้งใหม่/],
+    ["ครอบครัวจะเข้าใจกันไหม", /เรื่องครอบครัว/],
+    ["ควรบอกความจริงไหม", /การตัดสินใจครั้งนี้/],
+    ["เมื่อไหร่จะได้งานใหม่", /ไม่ได้บอกวันเวลาตายตัว/],
+  ];
+  for (const [q, want] of intentCases) {
+    const r = await asked(q, ["major-17", "cups-06", "major-19"], [false, false, false], "general");
+    check(`ประเภทคำถาม: "${q}"`, want.test(r.reading?.summary ?? ""), r.reading?.summary.slice(0, 90));
+  }
+  const healthQ = await asked("สุขภาพคุณแม่จะดีขึ้นไหม", ["major-13", "swords-09", "major-16"], [false, false, false], "general");
+  check(
+    "คำถามสุขภาพ ➔ บอกว่าไพ่ไม่ใช่การวินิจฉัย + ชี้ไปหาแพทย์ (ไม่ทำนายผลการรักษา)",
+    /ไม่ใช่การวินิจฉัย/.test(healthQ.reading?.summary ?? "") && /แพทย์/.test((healthQ.reading?.advice ?? []).join(" ")),
+    healthQ.reading?.summary.slice(0, 120),
+  );
   const closers = new Set<string>();
   for (const ids of [["major-19", "cups-10", "major-21"], ["swords-10", "swords-03", "swords-09"], ["wands-01", "cups-02", "pentacles-03"], ["major-00", "major-01", "major-02"]]) {
     const r = await asked("ช่วงนี้ชีวิตจะเป็นอย่างไร", ids, [false, false, false], "general");

@@ -581,15 +581,49 @@ const CATEGORY_ADVICE: Record<string, Record<AdviceTone, Record<Lang, string[]>>
  * ✦ ประเภทคำถามที่พบบ่อย — จับจากคำในคำถาม (ไม่ใช้ AI) เพื่อตอบให้ตรงเรื่องและเลือกคำแนะนำที่ปลอดภัย
  * ไม่เข้าข่ายข้อไหน = null (ใช้คำแนะนำตามหมวดตามปกติ ไม่มีประโยคตอบตรง)
  */
-type QuestionIntent = "ex" | "feelings" | "job_change" | "money";
+type QuestionIntent =
+  | "ex"
+  | "feelings"
+  | "new_love"
+  | "health"
+  | "study"
+  | "family"
+  | "job_change"
+  | "business"
+  | "money"
+  | "decision";
+/**
+ * ลำดับสำคัญ — เรื่องเฉพาะมาก่อนเรื่องกว้าง ("แฟนเก่ายังรักเราไหม" = แฟนเก่า ไม่ใช่ความรู้สึก)
+ * `decision` ("ควร…ไหม") อยู่ท้ายสุด ใช้เมื่อไม่เข้าเรื่องไหนเลย · คำถาม "เมื่อไหร่" แยกเป็นธง `asksTiming` ต่อท้ายคำตอบ
+ * ⚠️ สุขภาพ: ตอบได้แค่เรื่องกำลังใจ/การดูแลตัวเอง ห้ามทำนายผลการรักษาหรืออาการ และชี้ไปหาแพทย์เสมอ
+ */
+const INTENT_ORDER: readonly QuestionIntent[] = [
+  "ex",
+  "feelings",
+  "new_love",
+  "health",
+  "study",
+  "family",
+  "job_change",
+  "business",
+  "money",
+  "decision",
+];
 const INTENT_PATTERN: Record<QuestionIntent, RegExp> = {
   ex: /แฟนเก่า|คนเก่า|คืนดี|กลับมาหา|กลับมาคบ|\bex\b|get back together|come back to me/i,
   feelings: /เขารู้สึก|เขาคิดยังไง|เขาคิดอย่างไร|เขาชอบ|เขารัก|ใจเขา|how (?:does|do) (?:he|she|they) feel|feel about me|love me/i,
+  new_love: /คนคุย|คนใหม่|เนื้อคู่|เจอคน|คู่แท้|มีแฟน|โสด|soulmate|meet someone|new (?:love|partner)|single/i,
+  health: /สุขภาพ|ป่วย|โรค|ผ่าตัด|หาย(?:ป่วย|ดี)|อาการ|health|illness|sick|surgery|recover/i,
+  study: /(?<!ตรวจ)สอบ|เรียน(?!รู้)|(?<!ลง)ทุนการศึกษา|ทุนเรียน|มหาลัย|มหาวิทยาลัย|exam|study|school|university|scholarship/i,
+  family: /ครอบครัว|พ่อ(?!ค้า)|แม่(?!หมอ|ค้า)|ลูก(?!ค้า)|พี่น้อง|ญาติ|family|parents?|mother|father|children|siblings?/i,
   job_change: /ย้ายงาน|เปลี่ยนงาน|ลาออก|งานใหม่|สมัครงาน|สัมภาษณ์|change (?:my )?jobs?|quit (?:my )?job|new job|interview/i,
+  business: /ธุรกิจ|ค้าขาย|ขายของ|ร้าน|ลูกค้า|business|shop|customers?|start-?up/i,
   money: /การเงิน|เงิน|หนี้|รายได้|ลงทุน|money|finances?|debt|income|invest/i,
+  decision: /ควร.*(?:ไหม|มั้ย|หรือเปล่า|ดีไหม)|ดีไหม|เลือก(?:ทาง|อะไร)|should i|which (?:one|option)/i,
 };
+const TIMING_PATTERN = /เมื่อไหร่|เมื่อไร|อีกนานไหม|ช่วงไหน|\bwhen\b|how long/i;
 function detectIntent(question: string): QuestionIntent | null {
-  for (const intent of ["ex", "feelings", "job_change", "money"] as const) if (INTENT_PATTERN[intent].test(question)) return intent;
+  for (const intent of INTENT_ORDER) if (INTENT_PATTERN[intent].test(question)) return intent;
   return null;
 }
 
@@ -608,6 +642,30 @@ const INTENT_ADVICE: Partial<Record<QuestionIntent, Record<Lang, string[]>>> = {
   feelings: {
     th: ["สังเกตสิ่งที่เขาทำให้คุณจริง ๆ ในสัปดาห์นี้ มากกว่าการเดาความคิดเขา", "ถามตัวเองว่าคุณต้องการอะไรจากเขา แล้วค่อยพูดตรง ๆ เมื่อใจพร้อม"],
     en: ["Notice what they actually do for you this week rather than guessing their thoughts.", "Ask yourself what you want from them, and say it plainly when you feel ready."],
+  },
+  new_love: {
+    th: ["ลองไปที่ใหม่หรือทำกิจกรรมใหม่ 1 อย่างในสัปดาห์นี้ เพื่อเปิดโอกาสได้เจอคน", "จดลักษณะของคนที่ทำให้คุณสบายใจ 3 ข้อ เพื่อใช้ดูคนที่เข้ามา"],
+    en: ["Go somewhere new or try one new activity this week to open the door to meeting people.", "Write down three qualities of someone who makes you feel at ease, and use them to see who comes along."],
+  },
+  health: {
+    th: ["ถ้ามีอาการที่กังวล ให้ปรึกษาแพทย์โดยตรง กรณีฉุกเฉินโทร 1669", "พักผ่อนให้พอและดื่มน้ำให้เพียงพอตลอดสัปดาห์นี้"],
+    en: ["If a symptom worries you, talk to a doctor directly; in an emergency call your local emergency number.", "Get enough rest and water throughout this week."],
+  },
+  study: {
+    th: ["แบ่งเนื้อหาที่ต้องอ่านเป็นชิ้นเล็ก ๆ แล้วทำวันละ 1 ชิ้นจนถึงวันสอบ", "ลองทำข้อสอบเก่าจับเวลาจริงสัก 1 ชุดในสัปดาห์นี้"],
+    en: ["Split what you need to study into small pieces and do one a day until the exam.", "Try one past paper under real timing this week."],
+  },
+  family: {
+    th: ["หาเวลาคุยกับคนในบ้านแบบตั้งใจฟังสัก 15 นาที โดยยังไม่ต้องหาข้อสรุป", "บอกสิ่งที่คุณต้องการจากครอบครัวด้วยประโยคง่าย ๆ 1 ประโยค"],
+    en: ["Spend fifteen minutes truly listening to someone at home, without trying to settle anything yet.", "Tell your family what you need in one simple sentence."],
+  },
+  business: {
+    th: ["ดูตัวเลขรายรับรายจ่ายของธุรกิจย้อนหลัง 1 เดือนให้ชัดก่อนตัดสินใจเรื่องใหญ่", "ถามลูกค้าจริงสัก 3 คนว่าชอบหรืออยากให้ปรับอะไร"],
+    en: ["Review the last month's business income and costs before any big decision.", "Ask three real customers what they like and what they would change."],
+  },
+  decision: {
+    th: ["จดข้อดีข้อเสียของแต่ละทาง ข้างละ 3 ข้อ แล้ววางไว้ 1 คืนก่อนตัดสิน", "ถามตัวเองว่าอีก 1 ปีข้างหน้า คุณจะเสียดายทางไหนมากกว่ากัน"],
+    en: ["Write three pros and cons for each path, then sleep on it before you decide.", "Ask yourself which path you would regret more a year from now."],
   },
 };
 
@@ -664,6 +722,84 @@ const INTENT_ANSWER: Record<QuestionIntent, Record<Lang, Record<AdviceTone, stri
       open: "On money, the cards have not decided; it depends on how you plan from here.",
     },
   },
+  new_love: {
+    th: {
+      light: "เรื่องความรักครั้งใหม่ ไพ่เอนไปทางที่หัวใจกำลังเปิดรับ โอกาสได้เจอหรือคุยกับคนที่ใช่มีอยู่จริง",
+      shadow: "เรื่องความรักครั้งใหม่ ไพ่ชวนให้ดูแลใจตัวเองให้พร้อมก่อน แล้วความสัมพันธ์ที่ดีจะง่ายขึ้น",
+      open: "เรื่องความรักครั้งใหม่ ไพ่ยังไม่ชี้ขาด ขึ้นกับว่าคุณเปิดโอกาสให้ตัวเองมากแค่ไหน",
+    },
+    en: {
+      light: "On new love, the cards lean towards a heart that is opening — a real chance to meet or connect with someone right.",
+      shadow: "On new love, the cards ask you to take care of your own heart first; a good connection comes easier after that.",
+      open: "On new love, the cards have not decided; it depends on how much room you give yourself to meet people.",
+    },
+  },
+  health: {
+    th: {
+      light: "เรื่องสุขภาพ ไพ่ใช้ดูได้แค่กำลังใจและการดูแลตัวเอง ไม่ใช่การวินิจฉัย ซึ่งไพ่ชุดนี้ให้กำลังใจที่ดี อาการที่กังวลควรปรึกษาแพทย์",
+      shadow: "เรื่องสุขภาพ ไพ่ใช้ดูได้แค่กำลังใจและการดูแลตัวเอง ไม่ใช่การวินิจฉัย ไพ่ชุดนี้ชวนให้ใส่ใจร่างกายมากขึ้น อาการที่กังวลควรปรึกษาแพทย์",
+      open: "เรื่องสุขภาพ ไพ่ใช้ดูได้แค่กำลังใจและการดูแลตัวเอง ไม่ใช่การวินิจฉัย อาการที่กังวลควรปรึกษาแพทย์",
+    },
+    en: {
+      light: "On health, tarot can only speak to morale and self-care, not diagnosis — and these cards are encouraging. Please see a doctor about any symptom that worries you.",
+      shadow: "On health, tarot can only speak to morale and self-care, not diagnosis — these cards ask you to pay closer attention to your body. Please see a doctor about any symptom that worries you.",
+      open: "On health, tarot can only speak to morale and self-care, not diagnosis. Please see a doctor about any symptom that worries you.",
+    },
+  },
+  study: {
+    th: {
+      light: "เรื่องการเรียนการสอบ ไพ่เอนไปทางดี ถ้าคุณเตรียมตัวต่อเนื่องอย่างที่ทำอยู่",
+      shadow: "เรื่องการเรียนการสอบ ไพ่ชวนให้เพิ่มการเตรียมตัวและอย่าประมาท ยังมีเวลาปรับ",
+      open: "เรื่องการเรียนการสอบ ไพ่ยังไม่ชี้ขาด ผลขึ้นกับการเตรียมตัวจากนี้มาก",
+    },
+    en: {
+      light: "On study and exams, the cards lean positive, as long as you keep preparing steadily.",
+      shadow: "On study and exams, the cards ask you to prepare more and not get complacent — there is still time.",
+      open: "On study and exams, the cards have not decided; the result depends a lot on your preparation from here.",
+    },
+  },
+  family: {
+    th: {
+      light: "เรื่องครอบครัว ไพ่เอนไปทางที่ความสัมพันธ์ในบ้านคลี่คลายและอบอุ่นขึ้น",
+      shadow: "เรื่องครอบครัว ไพ่ชวนให้ใจเย็นและฟังกันมากขึ้น ยังมีเรื่องที่ต้องค่อย ๆ คุย",
+      open: "เรื่องครอบครัว ไพ่ยังไม่ชี้ขาด ขึ้นกับว่าแต่ละคนเปิดใจคุยกันแค่ไหน",
+    },
+    en: {
+      light: "On family, the cards lean towards things at home easing and growing warmer.",
+      shadow: "On family, the cards ask for patience and more listening — there is still something to talk through slowly.",
+      open: "On family, the cards have not decided; it depends on how openly everyone talks.",
+    },
+  },
+  business: {
+    th: {
+      light: "เรื่องธุรกิจ ไพ่เอนไปทางเติบโต ถ้าคุณคุมตัวเลขและฟังลูกค้าต่อเนื่อง",
+      shadow: "เรื่องธุรกิจ ไพ่ชวนให้ระวังการขยายหรือลงทุนเพิ่มช่วงนี้ ดูตัวเลขให้ชัดก่อน",
+      open: "เรื่องธุรกิจ ไพ่ยังไม่ชี้ขาด ขึ้นกับการตัดสินใจและการวางแผนของคุณจากนี้",
+    },
+    en: {
+      light: "On business, the cards lean towards growth if you keep an eye on the numbers and listen to customers.",
+      shadow: "On business, the cards caution against expanding or investing more right now — get the numbers clear first.",
+      open: "On business, the cards have not decided; it depends on your planning and choices from here.",
+    },
+  },
+  decision: {
+    th: {
+      light: "สำหรับการตัดสินใจครั้งนี้ ไพ่เอนไปทางสนับสนุนให้ก้าวต่อ ถ้าคุณชั่งข้อดีข้อเสียแล้วรู้สึกพร้อม",
+      shadow: "สำหรับการตัดสินใจครั้งนี้ ไพ่ชวนให้ชะลอและหาข้อมูลเพิ่มก่อน ยังไม่ต้องรีบ",
+      open: "สำหรับการตัดสินใจครั้งนี้ ไพ่ยังไม่ชี้ขาด คำตอบอยู่ที่ว่าคุณให้น้ำหนักกับอะไรมากที่สุด",
+    },
+    en: {
+      light: "For this decision, the cards lean towards moving ahead, once you have weighed it and feel ready.",
+      shadow: "For this decision, the cards suggest slowing down and gathering more information first — no need to rush.",
+      open: "For this decision, the cards have not decided; the answer lies in what matters most to you.",
+    },
+  },
+};
+
+/** ต่อท้ายคำตอบเมื่อคำถามถามเวลา — ไพ่ไม่บอกวันเวลาตายตัว ให้แค่จังหวะคร่าว ๆ ตามธาตุเด่น */
+const TIMING_ANSWER: Record<Lang, (timing: string) => string> = {
+  th: (t) => `ส่วนเรื่องเมื่อไหร่ ไพ่ไม่ได้บอกวันเวลาตายตัว จังหวะคร่าว ๆ ที่ไพ่ชี้คือ${t}`,
+  en: (t) => `As for when, the cards do not give a fixed date; the rough timing they point to is ${t}.`,
 };
 
 /**
@@ -795,7 +931,14 @@ export async function* streamMockGeminiReading(
   const intent = detectIntent(ctx.question ?? "");
   const tone = views.length > 0 ? headingTone(views, lang) : "open";
   // ตอบตรงคำถามก่อน (ถ้ารู้ประเภท) — โหมดใช่/ไม่ใช่มีคำตอบฟันธงขึ้นต้นอยู่แล้ว จึงไม่ซ้อน
-  const direct = intent && !yesNoAnswer && views.length > 0 ? INTENT_ANSWER[intent][lang][tone] : "";
+  const asksTiming = TIMING_PATTERN.test(ctx.question ?? "");
+  const timingText = (MOCK_TIMING[dominantElement] ?? MOCK_TIMING.ดิน)[lang];
+  const direct =
+    views.length > 0 && !yesNoAnswer
+      ? [intent ? INTENT_ANSWER[intent][lang][tone] : "", asksTiming ? TIMING_ANSWER[lang](timingText) : ""]
+          .filter(Boolean)
+          .join(" ")
+      : "";
   const body = views.length > 0 ? buildSummary(views, lang) : "";
   // ประโยคปิด: หมุนจากไพ่ที่จั่ว (ไม่สุ่ม) · 0 = ของบุคลิก
   const seed = ctx.drawn.reduce((sum, d, i) => sum + (d.cardIndex + 1) * (i + 1) + (d.isReversed ? 7 : 0), 0);
