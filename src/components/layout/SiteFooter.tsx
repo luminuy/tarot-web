@@ -2,10 +2,9 @@
 
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
-import { CardImage } from "@/components/card/CardImage";
 import { getFooterColumns } from "@/components/layout/nav-links";
 import { useLocale } from "@/lib/i18n";
-import { Fragment, useEffect } from "react";
+import { useEffect } from "react";
 import { BRAND_SOCIAL_LINKS } from "@/lib/config/site";
 import { installFooterAccordion } from "@/components/layout/footer-accordion";
 
@@ -16,7 +15,7 @@ export interface SiteFooterProps {
 
 /**
  * 🏛️ Fat Footer สไตล์ Quiet Luxury สีเข้ม (#171512) กลางของทั้งวิหารพยากรณ์
- * บรรจุลิงก์ภายใน, คำเตือน AI Disclosure, สายด่วน 1323/1669 หรือ 988/911, และ PDPA
+ * บรรจุลิงก์ภายใน, ช่องทางทางการ, คำเตือน AI Disclosure, สายด่วน 1323/1669 หรือ 988/911, และ PDPA
  */
 export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
   const { isEnglish, t } = useLocale();
@@ -33,69 +32,55 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
     <footer
       className={`w-full bg-dark text-line ${paddingClass} border-t border-line/30 relative overflow-hidden`}
     >
-      {/* Ambient Gold Accent Line */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-gold/40 to-transparent pointer-events-none" />
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12 relative z-10">
-        {/* Brand & Mission Statement — Generous Breathing Room */}
-        <div className="flex flex-col items-center justify-center gap-3.5 border-b border-line/20 pb-8 sm:pb-10 pt-2 sm:pt-4 text-center">
-          <Link
-            href="/"
-            prefetch={false}
-            aria-label={isEnglish ? "SeerTarot — Home" : "SeerTarot — หน้าแรก"}
-            className="inline-flex items-center gap-3 group rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
-          >
-            <span className="w-11 h-11 rounded-full border border-gold/40 overflow-hidden bg-canvas flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
+      {/*
+        ✦ ท้ายเว็บแบบมาตรฐาน (เจ้าของสั่ง 2026-10-10 "สวยและได้มาตรฐาน") — 4 ชั้นจากบนลงล่าง:
+          1) แบรนด์ (ชิดซ้าย) + ช่องทางทางการเป็นไอคอน (ขวา)
+          2) ลิงก์ 4 คอลัมน์ ตัวอักษรใหญ่ขึ้น (14px) ระยะบรรทัดโปร่ง
+          3) ข้อควรทราบเป็นตัวพิมพ์เล็กบรรทัดเดียว (เดิมเป็นกล่องใหญ่มีภาพไพ่ แย่งสายตาจากลิงก์)
+          4) แถบล่าง: ลิขสิทธิ์ซ้าย · ลิงก์นโยบายขวา (เรียงด้วย gap ไม่ใช้จุดคั่นที่ตัดบรรทัดแล้วค้างหัวบรรทัด)
+        ⚠️ ท้ายเว็บอยู่ใน HTML ของทุกหน้า — งบ HTML (`/spreads/topic/love` ≤ 21 KB · `/cards/major-00` ≤ 18 KB) และงบ DOM หน้าแรก ≤ 1,500 ตึงมาก
+           ไอคอนโซเชียลจึงเป็นไฟล์ SVG แยก (`public/icons/social/*` · แคชครั้งเดียว) วาดด้วยพื้นหลัง CSS ไม่ฝัง path ลงทุกหน้า · ถอดภาพไพ่ประดับ 2 ภาพออก
+      */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10 sm:space-y-12 relative z-10">
+        {/* 1) แบรนด์ + ช่องทางทางการ */}
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between border-b border-line/15 pb-8 sm:pb-10">
+          <div className="space-y-3 max-w-md">
+            <Link
+              href="/"
+              prefetch={false}
+              aria-label={isEnglish ? "SeerTarot — Home" : "SeerTarot — หน้าแรก"}
+              className="inline-flex items-center gap-3 group rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
+            >
               <img
                 src="/logo.webp"
                 alt="SeerTarot"
                 width={44}
                 height={44}
-                className="w-full h-full object-cover"
+                className="w-11 h-11 rounded-full border border-gold/40 bg-canvas object-cover flex-shrink-0 transition-transform duration-300 group-hover:scale-105"
                 loading="lazy"
               />
-            </span>
-            <span className="font-serif-th text-xl sm:text-2xl font-bold tracking-wider text-surface-warm">
-              SeerTarot
-            </span>
-          </Link>
-          <p className="font-serif-th text-xs sm:text-sm text-line/85 max-w-md leading-relaxed">
-            {t.footer.brandMission}
-          </p>
-        </div>
-
-        {/* AI Disclosure Card */}
-        <div className="flex items-start gap-4 p-5 rounded-xl bg-[#1F1C18] border border-line/20 shadow-sm">
-          <div className="w-9 h-13 sm:w-10 sm:h-15 rounded-lg overflow-hidden border border-line/30 flex-shrink-0 bg-dark">
-            <CardImage
-              image="major-02.jpg"
-              /* ภาพประกอบล้วน — <h3> ข้างภาพพิมพ์หัวข้อเดียวกันอยู่แล้ว (INC-0125) */
-              alt=""
-              className="w-full h-full object-cover"
-              sizes="40px"
-            />
+              <span className="font-serif-th text-xl sm:text-2xl font-bold tracking-wider text-surface-warm">SeerTarot</span>
+            </Link>
+            <p className="font-serif-th text-sm text-line/80 leading-relaxed">{t.footer.brandMission}</p>
           </div>
-          <div className="space-y-1 min-w-0">
-            {/*
-              ⚠️ ต้องไม่เป็น <h3> (หรือหัวข้อระดับใด ๆ)
-              -----------------------------------------------------------------
-              ป้ายในฟุตเตอร์ไม่ใช่ "หัวข้อของเอกสาร" แต่เป็นชื่อของกลุ่มเนื้อหา
-              ตอนที่มันเป็น <h3> มันไปโผล่ในสารบัญหัวข้อของ **ทุกหน้าทั้งเว็บ**
-              แล้วทำให้ลำดับข้ามจาก h1 ไป h3 ทันที (ไม่มี h2 คั่น) บนหน้าที่มี
-              หัวข้อน้อย เช่น 404 · ตั้งรหัสผ่านใหม่
-
-              ฟุตเตอร์มี role `contentinfo` อยู่แล้ว และกลุ่มลิงก์แต่ละคอลัมน์
-              มีชื่อผ่าน `aria-label` ของ <nav> อยู่แล้ว การเป็นหัวข้ออีกชั้น
-              จึงซ้ำซ้อนและทำลายโครงเอกสารเปล่า ๆ
-
-              ⚠️ ห้ามเปลี่ยนกลับเป็น <h*> — ด่าน `test-a11y-critical` ตรวจทั้งเว็บแล้ว
-            */}
-            <div className={`text-[13px] font-bold text-gold-on-dark font-serif-th ${isEnglish ? "uppercase tracking-wider" : ""}`}>
-              {isEnglish ? "Ethical Reading Notice & AI Disclosure" : "ข้อควรทราบเกี่ยวกับการทำนาย"}
-            </div>
-            <p className="text-[13px] text-line leading-[1.7] font-serif-th">
-              {t.footer.ethicalDisclaimer}
-            </p>
+          {/* ช่องทางทางการ — ไอคอนวาดด้วย CSS (`.footer-social--*` ใน globals.css) · ชื่อช่องทางอยู่ใน aria-label/title */}
+          <div className="flex items-center gap-3">
+            <span className="font-serif-th text-xs text-line/60">{isEnglish ? "Follow us" : "ติดตามเรา"}</span>
+            {BRAND_SOCIAL_LINKS.map((social) => {
+              // หน้าอังกฤษใช้ชื่อช่องทางล้วน — ชื่อเพจ Facebook เป็นภาษาไทย (ด่าน test-en-thai-leak ตรวจแอตทริบิวต์ด้วย)
+              const label = isEnglish ? social.name : `${social.name} ${social.handle}`;
+              return (
+              <a
+                key={social.name}
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                title={label}
+                className={`footer-social footer-social--${social.name.toLowerCase()} tap-overlay`}
+              />
+              );
+            })}
           </div>
         </div>
 
@@ -117,7 +102,8 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
           ⚠️ คอลัมน์ "ปลอดภัย & โปร่งใส" ไม่พับเด็ดขาด — มีสายด่วน 1323/1669 ต้องเห็นทันที (กฎเหล็กข้อ 6)
           ⚠️ ไม่มีสคริปต์ = ปุ่มพับไม่แสดง ลิงก์กางครบเหมือนเดิม (CSS ผูกกับคลาส `footer-collapsible` บน <html>)
         */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-5 sm:gap-8">
+        {/* 2) ลิงก์ 4 คอลัมน์ */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-10 gap-y-6 sm:gap-y-10">
           {footerColumns.map((col, idx) => {
             const collapsible = "links" in col && Boolean(col.links);
             const listId = `footer-col-${idx}`;
@@ -125,7 +111,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
               <nav
                 key={idx}
                 aria-label={col.title}
-                className="space-y-3"
+                className="space-y-4"
                 {...(collapsible ? { "data-footer-col": "" } : {})}
               >
                 {collapsible && (
@@ -134,7 +120,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                     data-footer-toggle
                     aria-expanded="false"
                     aria-controls={listId}
-                    className={`footer-col-toggle w-full items-center justify-between gap-3 border-b border-line/20 pb-2 font-serif-th text-sm font-bold text-surface-warm text-left ${isEnglish ? "uppercase tracking-wider" : ""}`}
+                    className={`footer-col-toggle w-full items-center justify-between gap-3 border-b border-line/15 pb-2.5 font-serif-th text-sm font-bold text-surface-warm text-left ${isEnglish ? "uppercase tracking-wider" : ""}`}
                   >
                     <span>{col.title}</span>
                     <svg
@@ -151,12 +137,12 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                     </svg>
                   </button>
                 )}
-                {/* ⚠️ ห้ามเป็น <h*> — เหตุผลเดียวกับป้าย "ข้อควรทราบ" ด้านบน */}
-                <div className={`footer-col-title font-serif-th font-bold text-sm text-surface-warm border-b border-line/20 pb-2 ${isEnglish ? "uppercase tracking-wider" : ""}`}>
+                {/* ⚠️ ห้ามเป็น <h*> — ป้ายกลุ่มลิงก์ไม่ใช่หัวข้อเอกสาร (โผล่ในสารบัญทุกหน้า · ลำดับ h1 ➔ h3 ข้ามขั้น) ด่าน `test-a11y-critical` ตรวจอยู่ */}
+                <div className={`footer-col-title font-serif-th font-bold text-sm text-gold-on-dark ${isEnglish ? "uppercase tracking-wider" : "tracking-wide"}`}>
                   {col.title}
                 </div>
                 {"links" in col && col.links ? (
-                  <ul id={listId} className="footer-col-list space-y-2 text-xs font-serif-th text-line/80">
+                  <ul id={listId} className="footer-col-list space-y-2.5 text-sm font-serif-th text-line/75 leading-snug">
                     {col.links.map((link, lIdx) => {
                       return (
                         <li key={lIdx}>
@@ -168,12 +154,12 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                   })}
                 </ul>
               ) : "items" in col && col.items ? (
-                <ul className="space-y-2 text-xs font-serif-th text-line/80">
+                <ul className="space-y-3 text-sm font-serif-th text-line/75 leading-snug">
                   {col.items.map((item, iIdx) => {
                     const hasHref = "href" in item && Boolean(item.href);
                     const href = hasHref ? (item as any).href : "";
                     return (
-                      <li key={iIdx} className={iIdx > 1 ? "pt-1" : undefined}>
+                      <li key={iIdx}>
                         {hasHref ? (
                           <Link href={href} prefetch={false} className="hover:text-surface-warm transition-colors">
                             {item.title}
@@ -182,7 +168,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                           <>
                             <span className={`${"color" in item ? item.color : "text-gold-on-dark"} font-semibold`}>{item.title}</span>
                             {"description" in item && item.description && (
-                              <p className="text-[11px] text-line/60">{item.description}</p>
+                              <p className="text-xs text-line/60 mt-0.5">{item.description}</p>
                             )}
                           </>
                         )}
@@ -196,49 +182,41 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
           })}
         </div>
 
-        {/* Bottom Copyright & Disclaimer Strip */}
-        <div className="pt-8 border-t border-line/15 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-serif-th text-line/70">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-7 rounded overflow-hidden border border-line/30 flex-shrink-0 bg-dark">
-              <CardImage image="major-01.jpg" alt="The Magician" className="w-full h-full object-cover" sizes="20px" />
-            </div>
-            <span>{isEnglish ? "SeerTarot · 1909 Rider-Waite Online Tarot Sanctuary" : "SeerTarot · วิหารพยากรณ์ไพ่ทาโรต์ 1909 Rider-Waite ออนไลน์"}</span>
-          </div>
-          <p className="text-center sm:text-right">
-            {isEnglish ? "© 2026 SeerTarot · All rights reserved · " : "© 2026 SeerTarot · สงวนลิขสิทธิ์ · "}
-            {/* ลิงก์ "เกี่ยวกับเรา/ติดต่อ" ต้องอยู่ทุกหน้า — เป็นสัญญาณความน่าเชื่อถือที่ Google
-                มองหาโดยตรง และเป็นเส้นทางให้บอทเดินไปเจอหน้าทั้งสอง (ยังเป็นหน้าไทยล้วน) */}
+        {/* 3) ข้อควรทราบ — ⚠️ ป้ายห้ามเป็น <h*> (เหตุผลเดียวกับชื่อคอลัมน์) */}
+        <p className="border-t border-line/15 pt-6 font-serif-th text-xs text-line/60 leading-relaxed">
+          <span className="font-bold text-gold-on-dark">
+            {isEnglish ? "Ethical Reading Notice & AI Disclosure: " : "ข้อควรทราบเกี่ยวกับการทำนาย: "}
+          </span>
+          {t.footer.ethicalDisclaimer}
+        </p>
+
+        {/* 4) แถบล่าง — ลิขสิทธิ์ · ลิงก์นโยบาย */}
+        <div className="-mt-4 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between font-serif-th text-xs text-line/60">
+          <p>
+            {isEnglish
+              ? "© 2026 SeerTarot · 1909 Rider-Waite online tarot · All rights reserved"
+              : "© 2026 SeerTarot · ดูดวงไพ่ทาโรต์ 1909 Rider-Waite ออนไลน์ · สงวนลิขสิทธิ์"}
+          </p>
+          {/* ลิงก์ "เกี่ยวกับเรา/ติดต่อ" ต้องอยู่ทุกหน้า — สัญญาณความน่าเชื่อถือที่ Google มองหาโดยตรง (หน้าไทยล้วน)
+              หน้าราคาต้องหาเจอจากทุกหน้า (เจ้าของขอ "หาง่าย") */}
+          <div className="flex flex-wrap gap-x-5 gap-y-1.5">
             {!isEnglish && (
               <>
-                <Link href="/about" prefetch={false} className="hover:text-surface-warm transition-colors underline">
+                <Link href="/about" prefetch={false} className="hover:text-surface-warm transition-colors">
                   เกี่ยวกับเรา
                 </Link>
-                {" · "}
-                <Link href="/contact" prefetch={false} className="hover:text-surface-warm transition-colors underline">
+                <Link href="/contact" prefetch={false} className="hover:text-surface-warm transition-colors">
                   ติดต่อเรา
                 </Link>
-                {" · "}
               </>
             )}
-            {/* หน้าราคาต้องหาเจอจากทุกหน้า (เจ้าของขอ "หาง่าย") — ลิงก์เดียวในบรรทัดเดิม ไม่เพิ่มกล่อง (งบ DOM หน้าแรก) */}
-            <Link href="/pricing" prefetch={false} className="hover:text-surface-warm transition-colors underline">
+            <Link href="/pricing" prefetch={false} className="hover:text-surface-warm transition-colors">
               {isEnglish ? "Pricing" : "ราคาและแพ็กเกจ"}
             </Link>
-            {" · "}
-            <Link href="/privacy" prefetch={false} className="hover:text-surface-warm transition-colors underline">
+            <Link href="/privacy" prefetch={false} className="hover:text-surface-warm transition-colors">
               {isEnglish ? "Privacy Policy" : "นโยบายความเป็นส่วนตัว"}
             </Link>
-            {/* ช่องทางทางการ (LINE · Facebook · TikTok) — ลิงก์ตรงในบรรทัดเดิม ไม่เพิ่มกล่อง
-                เพราะท้ายเว็บอยู่ในหน้าแรกด้วย และหน้าแรกมีงบ DOM ≤ 1,500 (INC-0247) */}
-            {BRAND_SOCIAL_LINKS.map((social) => (
-              <Fragment key={social.name}>
-                {" · "}
-                <a href={social.url} target="_blank" rel="noopener noreferrer" className="hover:text-surface-warm transition-colors underline">
-                  {social.name}
-                </a>
-              </Fragment>
-            ))}
-          </p>
+          </div>
         </div>
       </div>
     </footer>

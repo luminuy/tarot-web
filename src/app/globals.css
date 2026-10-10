@@ -2579,6 +2579,44 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
   }
 }
 
+/* ✦ ไอคอนช่องทางทางการในท้ายเว็บ (`SiteFooter`) — ไฟล์ SVG แยกใน `public/icons/social/` วาดเป็นพื้นหลัง
+   ไม่ฝัง path ลง HTML ของทุกหน้า (งบ HTML ตึง) · `a` เปล่า 1 element ต่อช่องทาง (งบ DOM หน้าแรก)
+   วงกลม 36px · พื้นที่กดจริง 44px จาก `.tap-overlay` */
+.footer-social {
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: center / 100% 100% no-repeat;
+  box-shadow: 0 0 0 1px rgba(255, 248, 236, 0.14);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.footer-social:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 1px rgba(210, 163, 84, 0.6);
+}
+.footer-social:focus-visible {
+  outline: 2px solid var(--color-gold-on-dark);
+  outline-offset: 3px;
+}
+.footer-social--line {
+  background-image: url("/icons/social/line.svg");
+}
+.footer-social--facebook {
+  background-image: url("/icons/social/facebook.svg");
+}
+.footer-social--tiktok {
+  background-image: url("/icons/social/tiktok.svg");
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer-social {
+    transition: none;
+  }
+  .footer-social:hover {
+    transform: none;
+  }
+}
+
 /* ═════════════════════════════════════════════════════════════════════════
    🪗 ท้ายเว็บบนมือถือ: คอลัมน์ลิงก์พับได้ (`SiteFooter` + `footer-accordion.ts`)
    ผูกกับคลาส `footer-collapsible` บน <html> ที่สคริปต์ตั้ง — ไม่มีสคริปต์ = กางครบเหมือนเดิม
