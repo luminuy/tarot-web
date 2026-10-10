@@ -98,6 +98,11 @@ export function HomeZodiacSection({ isEnglish, href }: { isEnglish: boolean; hre
         </div>
       </div>
 
+      {/*
+        จอใหญ่ (lg+) = สองคอลัมน์: วงล้อซ้าย · ลิงก์ 4 อันเรียงซ้อนขวา (เจ้าของเลือกจากแบบของเพื่อน 2026-10-10)
+        เดิมวงล้อกินเต็มกว้าง ซ้ายขวาว่าง แล้วลิงก์เป็นแถวปัดด้านล่าง · จอเล็กยังเป็นแบบเดิมทุกอย่าง (แถวปัด)
+      */}
+      <div className="space-y-6 sm:space-y-8 lg:space-y-0 lg:grid lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-8 lg:items-center">
       {/* กล่องขาวแบบเดียวกับ "ไพ่ชุดใหญ่เมเจอร์ อาร์คานา" ในส่วนถัดไป — เจ้าของขอให้หน้าตาเข้าชุดกัน */}
       <div className="altar-panel p-4 sm:p-8 space-y-5">
         <div className="flex items-center justify-between gap-3 pb-3 border-b border-line-warm/40">
@@ -165,7 +170,7 @@ export function HomeZodiacSection({ isEnglish, href }: { isEnglish: boolean; hre
       </div>
 
       <div data-rail>
-        <div className="home-rail grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" data-rail-track>
+        <div className="home-rail home-rail-stack-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" data-rail-track>
           {FEATURES.map((feature) => {
             const copy = isEnglish ? feature.en : feature.th;
             return (
@@ -190,6 +195,7 @@ export function HomeZodiacSection({ isEnglish, href }: { isEnglish: boolean; hre
           })}
         </div>
         <HomeRailNav isEnglish={isEnglish} />
+      </div>
       </div>
     </section>
   );

@@ -122,7 +122,12 @@ import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
  */
 const SPREAD_RAIL_ITEM =
   "sm:w-[calc((100%_-_32px)/2.25)] sm:max-w-none lg:w-[calc((100%_-_48px)/3.25)] sm:snap-start";
-/** การ์ดที่มากับ HTML ของหน้าแรก — จอใหญ่เห็น 3 ใบกับอีกเสี้ยว (`SPREAD_RAIL_ITEM`) จึงต้องมีใบที่ 4 ให้โผล่ขอบ */
+/**
+ * การ์ดที่มากับ HTML ของหน้าแรก — จอใหญ่เห็น 3 ใบกับอีกเสี้ยว (`SPREAD_RAIL_ITEM`) จึงต้องมีใบที่ 4 ให้โผล่ขอบ
+ * ⚠️ จอใหญ่เป็นตาราง 3 คอลัมน์แล้ว (`.rail-grid-lg` · 2026-10-10) แต่ห้ามขยับเป็น 6 — ลองแล้วหน้าแรก +89 element
+ *    เกินงบ DOM 1,500 ใน CI (INC-0247) · ใบที่ 5–6 ของตารางเติมหลัง hydrate แทน (ดู effect `min-width: 1024px`)
+ *    แถวสองของตารางอยู่นอกจอตอนโหลด (ส่วนนี้อยู่ใต้หัวหน้าและเปิดไพ่ด่วน) จึงไม่ดันอะไรที่ผู้ใช้เห็นอยู่
+ */
 const FEATURED_INITIAL_CARDS = 4;
 
 export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
@@ -279,6 +284,13 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
   React.useEffect(() => {
     setRenderedUpTo((n) => Math.max(n, activeScrollIndex + 4));
   }, [activeScrollIndex]);
+  /* จอใหญ่ของหน้าแรกเป็นตาราง (`.rail-grid-lg`) — ไม่มีการปัด `activeScrollIndex` จึงไม่ขยับ
+     ต้องวาดภาพทุกใบและต่อการ์ดที่เหลือของหมวด (เช่น "ทั้งหมด 26") เอง ไม่งั้นได้กล่องว่าง/การ์ดไม่ครบ */
+  React.useEffect(() => {
+    if (variant !== "featured" || !window.matchMedia("(min-width: 1024px)").matches) return;
+    setRenderedUpTo(Number.MAX_SAFE_INTEGER);
+    setMountAllCards(true);
+  }, [variant]);
 
   // Defer off-screen carousel spread illustrations on mobile to keep initial LCP and image payload minimal
   const [shouldRenderAllSpreads, setShouldRenderAllSpreads] = useState(false);
@@ -451,7 +463,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
            เห็นใบถัดไปโผล่ขอบขวาเป็นสัญญาณว่าปัดได้ · ความกว้างการ์ดดูที่ `SPREAD_RAIL_ITEM` */
         className={`${hasSwappedTab ? "anim-swap-rise-sm" : ""} rail-flat flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth ${
           variant === "featured"
-            ? "rail-always"
+            ? "rail-always rail-grid-lg"
             : "sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-5 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible"
         }`}
       >
@@ -587,6 +599,12 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                   <p className="text-[13px] text-muted line-clamp-2 mt-1 leading-relaxed font-serif-th [text-wrap:pretty]">
                     {isEnglish ? (spread.taglineEn || spread.tagline) : spread.tagline}
                   </p>
+                  {/* บอกให้รู้ว่าแตะได้ (แบบของเพื่อน "เข้าสู่ผังพยากรณ์นี้ →") — พฤติกรรมเดิม: แตะทั้งการ์ด = เลือก + ป๊อปอัพเริ่ม */}
+                  {variant === "featured" && !isLocked && (
+                    <span className="mt-2 inline-block text-[13px] font-serif-th font-bold text-gold-ink group-hover/card:underline">
+                      {isEnglish ? "Start this spread →" : "เริ่มผังนี้ →"}
+                    </span>
+                  )}
                 </div>
 
                 {/* Selected Golden Corner Seals */}
@@ -608,6 +626,8 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
           })}
       </div>
         {variant === "featured" && (
+          /* จอใหญ่เป็นตาราง (`.rail-grid-lg`) ไม่มีอะไรให้ปัด — ซ่อนลูกศร */
+          <div className="lg:hidden">
           <RailArrows
             overlay
             isEnglish={isEnglish}
@@ -619,6 +639,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
               rail.next();
             }}
           />
+          </div>
         )}
       </div>
 

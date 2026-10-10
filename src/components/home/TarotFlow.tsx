@@ -195,6 +195,9 @@ function isReturnVisit(): boolean {
   }
 }
 
+/** ✦ ไพ่ในพัดหัวหน้าแรก (ภาพประกอบ) — กลางคือดวงอาทิตย์ · ซ้ายขวาคืนกับวัน รักกับความหวัง */
+const HERO_FAN_CARDS = ["major-18", "major-06", "major-19", "major-17", "major-21"] as const;
+
 export default function TarotFlow({
   seoContent,
   initialSpreadId,
@@ -1818,6 +1821,35 @@ export default function TarotFlow({
                       </li>
                     ))}
                   </ul>
+                </div>
+
+                {/*
+                  ✦ พัดไพ่ 1909 หน้าเปิด 5 ใบ (เจ้าของเลือกจากแบบของเพื่อน · สั่งให้โชว์หน้าไพ่ 2026-10-10)
+                  เป็นภาพประกอบล้วน (`aria-hidden`) ไม่ใช่ไพ่ของผู้ใช้ — ไม่มีป้าย "ไพ่ของคุณ" ใด ๆ ไม่ให้เข้าใจว่าเป็นคำทำนาย
+                  ภาพจาก `<CardImage />` เท่านั้น (กฎเหล็กข้อ 5 · 8) · ใบกลางโหลดก่อน ใบข้างลดลำดับ (`fetchPriority`)
+                  ⚠️ งบ DOM หน้าแรก (INC-0247): พัด 1 + ไพ่ 5 + ภาพ · กล่องสูงตายตัว (CLS 0) · หน้าตาอยู่ที่ `.hero-fan` ใน globals.css
+                */}
+                <div className="hero-fan" aria-hidden="true">
+                  {HERO_FAN_CARDS.map((cardId, i) => (
+                    <span key={cardId} className={i === 2 ? "hero-fan-card hero-fan-card--center" : "hero-fan-card"} style={{ "--i": i - 2 } as React.CSSProperties}>
+                      <CardImage
+                        cardId={cardId}
+                        alt=""
+                        sizes="(min-width: 640px) 112px, 76px"
+                        loading="eager"
+                        fetchPriority={i === 2 ? "high" : "low"}
+                        className="w-full h-full object-cover"
+                      />
+                    </span>
+                  ))}
+                </div>
+                <div className="flex flex-col items-center gap-2 -mt-1">
+                  <a href="#home-quick" className="btn-gold-glass inline-flex items-center gap-2 px-7 py-3 font-serif-th text-sm sm:text-base font-bold">
+                    {isEnglish ? "Start your reading" : "เริ่มดูดวงเลย"}
+                  </a>
+                  <p className="font-serif-th text-xs text-muted">
+                    {isEnglish ? "Pick a topic, then shuffle and choose your own cards" : "เลือกเรื่องที่อยากรู้ แล้วสับและเลือกไพ่ด้วยมือคุณเอง"}
+                  </p>
                 </div>
 
                 {/* ไพ่ประจำวัน — แตะดูเฉย ๆ ไม่กินโควตา จึงเป็นจุดเริ่มที่เบาที่สุดของหน้า
