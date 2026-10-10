@@ -115,6 +115,14 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
     { id: "self" as const, nameTh: "จิตวิทยาและการเติบโตภายใน", nameEn: "Psychology & Inner Growth", icon: "•", color: "#6F5B4A" },
   ];
 
+  /* ผังที่ปุ่มเปิดไพ่พาไป — ปุ่มหลักกับแถบติดล่างจอต้องไปที่เดียวกัน */
+  const readHref =
+    card.suit === "cups" || card.id === "major-06"
+      ? "/read/how-they-feel"
+      : card.suit === "wands" || card.suit === "pentacles"
+        ? "/read/career"
+        : "/read/three-card";
+
   return (
       <div
         data-card-detail=""
@@ -304,13 +312,8 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           {/* Action Button: Start Tarot Ritual with this Card */}
           <div className="pt-4 flex items-center gap-4 flex-wrap">
             <Link
-              href={
-                card.suit === "cups" || card.id === "major-06"
-                  ? "/read/how-they-feel"
-                  : card.suit === "wands" || card.suit === "pentacles"
-                    ? "/read/career"
-                    : "/read/three-card"
-              }
+              href={readHref}
+              data-read-cta=""
               className="btn-gold-glass px-7 py-3 text-xs sm:text-sm font-serif-th font-bold flex items-center gap-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
             >
               {isEnglish ? "Open Interactive Tarot Reading" : "เปิดไพ่พยากรณ์จริงกับแม่หมอ AI"}
@@ -383,6 +386,37 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
         ) : (
           <div />
         )}
+      </div>
+
+      {/*
+        ✦ แถบ "เปิดไพ่เลย" ติดล่างจอ (มือถือ) — โผล่เมื่อเลื่อนเลยปุ่มเปิดไพ่หลัก (`data-read-cta`) ไปแล้ว
+        และซ่อนเมื่อฟุตเตอร์เข้าจอ · คนที่มาจาก Google อ่านความหมายจนจบจะมีปุ่มอยู่ใกล้มือเสมอ
+        HTML นิ่ง + สคริปต์ `astro/scripts/card-orientation.ts` สลับ `data-visible` (หน้านี้ไม่ hydrate React)
+        เริ่มต้น `inert` = กดไม่ได้และโปรแกรมอ่านจอข้าม จนกว่าจะโผล่
+      */}
+      <div
+        data-read-sticky=""
+        data-visible="false"
+        inert
+        className="lg:hidden fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 flex items-center gap-3 rounded-2xl border border-line bg-surface py-2.5 pl-3 pr-2.5 shadow-[0_12px_32px_-12px_rgba(42,38,31,0.35)] translate-y-[160%] opacity-0 transition-[transform,opacity] duration-300 data-[visible=true]:translate-y-0 data-[visible=true]:opacity-100 motion-reduce:transition-none print:hidden"
+      >
+        <span className="relative block w-[30px] h-12 shrink-0 overflow-hidden rounded-[4px] border border-line">
+          <CardImage image={card.image} cardId={card.id} alt="" sizes="30px" thumb loading="lazy" className="w-full h-full object-cover" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-serif-th text-[13.5px] font-bold leading-snug text-ink">
+            {isEnglish ? `Ask ${card.nameEn} your question` : `ไพ่${card.nameTh}ตอบเรื่องของคุณได้`}
+          </span>
+          <span className="block text-[11.5px] leading-snug text-muted">
+            {isEnglish ? "Shuffle and pick them yourself" : "สับและเลือกไพ่ด้วยมือคุณเอง"}
+          </span>
+        </span>
+        <Link
+          href={readHref}
+          className="btn-gold-glass shrink-0 whitespace-nowrap px-4 py-2.5 text-[13px] font-serif-th font-bold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
+        >
+          {isEnglish ? "Draw now" : "เปิดไพ่เลย"}
+        </Link>
       </div>
     </div>
   );
