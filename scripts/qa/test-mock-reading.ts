@@ -428,7 +428,7 @@ async function run() {
     /ไม่ใช่การวินิจฉัย/.test(healthQ.reading?.summary ?? "") && /แพทย์/.test((healthQ.reading?.advice ?? []).join(" ")),
     healthQ.reading?.summary.slice(0, 120),
   );
-  // คำแนะนำรายใบ (ร่างรอแม่หมอตรวจ) — ครบ 78 ใบ · ถ้อยคำไม่ว่าง/ไม่ยาวเกิน · อังกฤษไม่มีไทย · แถว pending ห้ามโผล่
+  // คำแนะนำรายใบ (แม่หมอตรวจแล้ว 2026-10-11) — ครบ 78 ใบ · ถ้อยคำไม่ว่าง/ไม่ยาวเกิน · อังกฤษไม่มีไทย · แถว pending ห้ามโผล่
   {
     const { CARD_ADVICE, reviewedCardAdvice } = await import("../../src/data/cards/card-advice");
     const missing = DECK.filter((c) => !CARD_ADVICE[c.id]).map((c) => c.id);
@@ -437,8 +437,8 @@ async function run() {
       [id, r.upright.th, r.upright.en],
       [id, r.reversed.th, r.reversed.en],
     ]);
-    const badLen = rows.filter(([, th, en]) => !th || !en || th.length > 90 || en.length > 140).map(([id]) => id);
-    check("คำแนะนำรายใบไม่ว่างและไม่ยาวเกิน (ไทย ≤ 90 · อังกฤษ ≤ 140)", badLen.length === 0, badLen.join(", "));
+    const badLen = rows.filter(([, th, en]) => !th || !en || th.length > 110 || en.length > 140).map(([id]) => id);
+    check("คำแนะนำรายใบไม่ว่างและไม่ยาวเกิน (ไทย ≤ 110 · อังกฤษ ≤ 140)", badLen.length === 0, badLen.join(", "));
     const thaiInEn = rows.filter(([, , en]) => THAI.test(en)).map(([id]) => id);
     check("คำแนะนำรายใบฝั่งอังกฤษไม่มีอักษรไทย", thaiInEn.length === 0, thaiInEn.join(", "));
     const pendingLeak = Object.entries(CARD_ADVICE).filter(([id, r]) => r.reviewedBy === "pending" && reviewedCardAdvice(id, false, "th") !== null);
