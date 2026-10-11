@@ -29,6 +29,10 @@ export interface TarotCard {
   suit: Suit | null;
   /** Major: 0-21 | Minor: 1-14 */
   number: number;
+  /**
+   * ชื่อไทย · ไพ่ชุดเล็กใช้รูปแบบเดียว `<ลำดับ>แห่ง<ชุด>` เช่น สองแห่งถ้วย · เพจแห่งดาบ (ด่าน verify-cards)
+   * แก้แล้วต้องสร้าง `summary.ts` ใหม่ (`npx tsx scripts/generate-card-summary.ts`) และแก้ `deck-index-meta.ts` ตาม
+   */
   nameTh: string;
   nameEn: string;
   /** คำสำคัญสั้น ๆ 4-6 คำ ใช้โชว์ใต้ไพ่บน UI */

@@ -45,7 +45,7 @@ const STATUS_OPTIONS: StatusOption[] = [
     descTh: "มีความรู้สึกดี ๆ ให้กัน แต่สถานะยังคลุมเครือ",
     descEn: "Ambiguous feelings or unlabelled bond",
     cardImage: "cups-07.jpg",
-    cardNameTh: "เจ็ดถ้วย",
+    cardNameTh: "เจ็ดแห่งถ้วย",
     cardNameEn: "Seven of Cups",
   },
   {
@@ -55,7 +55,7 @@ const STATUS_OPTIONS: StatusOption[] = [
     descTh: "กำลังคบหาดูใจ มั่นคง หรือแต่งงาน",
     descEn: "In relationship or married life",
     cardImage: "cups-02.jpg",
-    cardNameTh: "สองถ้วย",
+    cardNameTh: "สองแห่งถ้วย",
     cardNameEn: "Two of Cups",
   },
   {

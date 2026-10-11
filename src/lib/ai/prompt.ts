@@ -1,6 +1,7 @@
 import type { Category, TarotCard } from "@/data/cards/types";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { formatCardLoreForPrompt } from "@/data/cards/visual-lore";
+import { formatCardLoreForPromptEn } from "@/data/cards/visual-lore-en";
 import { getCosmicContext } from "@/lib/ai/cosmic";
 import { analyzeElementalAlchemy } from "@/lib/ai/alchemy";
 import { analyzeSpatialGazeDialogue } from "@/lib/ai/gaze";
@@ -16,6 +17,7 @@ import type { DrawnCard } from "@/lib/tarot/shuffle";
 import type { SafetyVerdict } from "@/lib/safety/guardrails";
 import { pickExemplar, formatExemplarForPrompt } from "@/data/ai/exemplars";
 import { YES_NO_TONE, tallyYesNo, yesNoWeight } from "@/data/cards/yes-no";
+import { formatReversalAngleForPrompt } from "@/data/cards/reversal-angles";
 import {
   PROMPT_TRUST_BOUNDARY_EN,
   PROMPT_TRUST_BOUNDARY_TH,
@@ -349,14 +351,14 @@ export function buildReadingMessage(ctx: ReadingContext, options?: ReadingMessag
       const cardElement = elemMap[card.element] || card.element;
       const astro = card.astrologyEn || card.astrology;
       const numero = card.numerologyEn || card.numerology;
-      const loreStr = formatCardLoreForPrompt(card.id);
+      const loreStr = formatCardLoreForPromptEn(card.id);
 
       return `• Position ${position.index}: "${posName}" (Signifies: ${posMeaning})
-  Drawn Card: ${card.nameEn} — ${orientation}
+  Drawn Card: ${card.nameEn} — ${orientation}${d.isReversed ? formatReversalAngleForPrompt(card.id, "en") : ""}
   Element: ${cardElement} | Astrology: ${astro} | Numerology: ${numero}
   Core Archetypal Energies: ${keywords.join(" · ")}
   Thematic Meaning in ${category}: ${meaning}
-${loreStr ? `  (1909 imagery notes below are written in Thai — use the ideas, but never copy Thai words into your answer)\n${loreStr}` : ""}`;
+${loreStr}`;
     }
 
     const orientation = d.isReversed ? "หัวกลับ (Reversed)" : "หัวตั้ง (Upright)";
@@ -367,7 +369,7 @@ ${loreStr ? `  (1909 imagery notes below are written in Thai — use the ideas, 
     const loreStr = formatCardLoreForPrompt(card.id);
 
     return `• ตำแหน่งที่ ${position.index}: "${position.nameTh}" (มิตินี้บอกถึง: ${position.meaning})
-  ไพ่ที่เปิดได้: ${card.nameTh} (${card.nameEn}) — ${orientation}
+  ไพ่ที่เปิดได้: ${card.nameTh} (${card.nameEn}) — ${orientation}${d.isReversed ? formatReversalAngleForPrompt(card.id, "th") : ""}
   ธาตุ: ${card.element} | โหราศาสตร์: ${card.astrology} | รหัสตัวเลข: ${card.numerology}
   พลังงานหลัก: ${keywords.join(" · ")}
   นัยสำคัญในหมวด${CATEGORY_TH[category] ?? category}: ${meaning}

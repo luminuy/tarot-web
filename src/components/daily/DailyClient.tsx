@@ -55,7 +55,7 @@ const FOCUS_CHAMBERS: FocusChamber[] = [
     descTh: "การตัดสินใจ ภาวะผู้นำ และความก้าวหน้า",
     descEn: "Professional decisions and purposeful action",
     cardImage: "wands-01.jpg",
-    cardNameTh: "เอซไม้เท้า",
+    cardNameTh: "เอซแห่งไม้เท้า",
     cardNameEn: "Ace of Wands",
   },
   {

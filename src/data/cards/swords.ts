@@ -510,7 +510,7 @@ export const SWORDS: TarotCard[] = [
     arcana: "minor",
     suit: "swords",
     number: 11,
-    nameTh: "บริวารแห่งดาบ",
+    nameTh: "เพจแห่งดาบ",
     nameEn: "Page of Swords",
     keywords: {
       upright: ["อยากรู้อยากเห็น", "ข่าวสาร", "เริ่มเรียนรู้", "ช่างสังเกต", "พูดตรง"],

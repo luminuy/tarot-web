@@ -22,6 +22,8 @@ import { tallyYesNo, yesNoWeight } from "../../src/data/cards/yes-no";
 import { analyzeSpatialGazeDialogue } from "../../src/lib/ai/gaze";
 import { analyzeNumerologicalRhythm } from "../../src/lib/ai/numerology";
 import { checkReadingConsistency } from "../../src/lib/ai/consistency";
+import { CARD_VISUAL_LORE } from "../../src/data/cards/visual-lore";
+import { CARD_VISUAL_LORE_EN } from "../../src/data/cards/visual-lore-en";
 
 let pass = 0;
 let fail = 0;
@@ -320,17 +322,36 @@ async function main() {
     checkReadingConsistency(fakeReading, [], { yesNoMode: true, expectedYesNo: "ใช่" }).issues.some((i) => i.code === "YESNO_AGAINST_CARDS" && !i.fatal),
   );
 
-  // 10b. prompt หน้า /en ไม่มีภาษาไทยปน นอกจากบันทึกภาพ 1909 ที่ติดป้ายไว้ และข้อมูลที่ผู้ใช้พิมพ์เอง (ISSUE-055)
+  // 10b. prompt หน้า /en อังกฤษล้วน รวมบันทึกภาพ 1909 (ISSUE-055 — เดิมส่งบันทึกไทยพร้อมป้าย "never copy Thai words")
   const enCtx: ReadingContext = { ...ctxFor("celtic-cross"), lang: "en", question: "Should I change jobs?", nickname: "Ann", intake: { situation: "Offered a new role" } };
   const enMsg = buildReadingMessage(enCtx);
-  const enNoLore = enMsg
-    .split("\n")
-    .filter((l) => !/^  • (สัญลักษณ์ภาพ 1909|จุดสังเกตสำคัญ|จิตวิทยาเชิงลึก|คำถามชวนคิดทรงพลัง)/.test(l))
-    .join("\n");
-  const thaiLine = enNoLore.split("\n").find((l) => THAI.test(l));
+  const thaiLine = enMsg.split("\n").find((l) => THAI.test(l));
   if (thaiLine) console.log(`     ไทยหลุด: ${thaiLine}`);
-  check("[en] prompt อังกฤษล้วน (ยกเว้นบันทึกภาพ 1909 ที่ติดป้ายว่าเป็นภาษาไทย)", !thaiLine);
-  check("[en] บันทึกภาพ 1909 ติดป้ายห้ามคัดลอกภาษาไทย", enMsg.includes("never copy Thai words"));
+  check("[en] prompt อังกฤษล้วน รวมบันทึกภาพ 1909", !thaiLine);
+  check("[en] บันทึกภาพ 1909 ภาษาอังกฤษอยู่ใน prompt ครบทุกใบในผัง", enCtx.cards.every((c) => enMsg.includes(CARD_VISUAL_LORE_EN[c.id].scene1909)));
+  check("[en] ไม่มีป้ายเก่า \"never copy Thai words\" หลงเหลือ", !enMsg.includes("never copy Thai words"));
+
+  // 10b-2. บันทึกภาพอังกฤษครบ 78 ใบ ทุกช่องไม่ว่าง ไม่มีอักษรไทย จำนวนสัญลักษณ์ตรงกับฉบับไทย
+  const loreIds = Object.keys(CARD_VISUAL_LORE);
+  const enIds = Object.keys(CARD_VISUAL_LORE_EN);
+  check(`บันทึกภาพอังกฤษครบ ${ALL_CARDS.length} ใบ ชุดเดียวกับฉบับไทย`, enIds.length === ALL_CARDS.length && ALL_CARDS.every((c) => CARD_VISUAL_LORE_EN[c.id]) && loreIds.every((id) => CARD_VISUAL_LORE_EN[id]));
+  const badEn = enIds.filter((id) => {
+    const l = CARD_VISUAL_LORE_EN[id];
+    const fields = [l.scene1909, l.archetype, l.shadow, l.powerQuestion, ...l.symbols];
+    return fields.some((f) => !f.trim() || THAI.test(f)) || l.symbols.length !== CARD_VISUAL_LORE[id]?.symbols.length;
+  });
+  if (badEn.length) console.log(`     บันทึกภาพอังกฤษผิดรูป: ${badEn.join(", ")}`);
+  check("บันทึกภาพอังกฤษทุกช่องไม่ว่าง ไม่มีอักษรไทย และจำนวนสัญลักษณ์ตรงกับฉบับไทย", badEn.length === 0);
+
+  // 10b-3. คำอ่านอังกฤษที่อ้างภาพจริงต้องไม่โดนเตือน VISUAL_ANCHOR_UNGROUNDED · ภาพที่ไม่มีบนไพ่ยังโดนเตือน
+  const sunCard = byId("major-19");
+  const enAnchor = (visualAnchor: string) =>
+    checkReadingConsistency({ summary: "x", cards: [{ position: 0, reading: "A bright, joyful card for this position.", visualAnchor }], advice: [] } as never, [sunCard], { drawnCount: 1 })
+      .issues.some((i) => i.code === "VISUAL_ANCHOR_UNGROUNDED");
+  check("[en] visualAnchor อังกฤษที่ตรงภาพ (child on a white horse) ➔ ไม่เตือน", !enAnchor("A naked child rides a white horse under the sun"));
+  check("[en] visualAnchor อังกฤษพหูพจน์ (sunflowers) ➔ ไม่เตือน", !enAnchor("Tall sunflowers behind the wall"));
+  check("[en] visualAnchor อังกฤษที่ไม่มีบนไพ่ ➔ ยังเตือน", enAnchor("A lonely lighthouse keeper polishing lamps"));
+  check("[en] คำเชื่อมอย่าง the/with ไม่ทำให้ผ่านฟรี", enAnchor("The keeper with lamps"));
 
   // 10c. ความแม่น — ไพ่กลับหัวหันกลับทิศ · ซ้าย/ขวาดูจากผังจริง
   const kingPent = byId("pentacles-14"); // มองซ้าย

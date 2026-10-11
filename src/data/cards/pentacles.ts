@@ -510,7 +510,7 @@ export const PENTACLES: TarotCard[] = [
     arcana: "minor",
     suit: "pentacles",
     number: 11,
-    nameTh: "เด็กหนุ่มแห่งเหรียญ",
+    nameTh: "เพจแห่งเหรียญ",
     nameEn: "Page of Pentacles",
     keywords: {
       upright: ["เริ่มเรียนรู้", "ความอยากรู้", "ตั้งใจจริง", "ข่าวเรื่องงาน", "ลงมือทดลอง"],

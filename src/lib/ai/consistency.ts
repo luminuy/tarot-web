@@ -16,6 +16,7 @@
 
 import { DECK, type TarotCard } from "@/data/cards";
 import { CARD_VISUAL_LORE } from "@/data/cards/visual-lore";
+import { CARD_VISUAL_LORE_EN } from "@/data/cards/visual-lore-en";
 import type { Reading } from "@/lib/schema/reading";
 import type { PastReadingSnapshot } from "@/lib/ai/karmic";
 import { collectStrings, detectPromptLeak } from "@/lib/ai/leak-guard";
@@ -351,12 +352,22 @@ export function checkReadingConsistency(
 
   // ── 6. ตรวจสอบหลักฐานภาพหน้าไพ่ (VISUAL_ANCHOR_UNGROUNDED - Task B-03) ──
   // เทียบแบบหลวมด้วย Intl.Segmenter("th") และนับคำร่วม >= 1 คำที่ยาว >= 3 ตัวอักษร
+  // เทียบกับบันทึกภาพทั้งไทยและอังกฤษ (ISSUE-055) — เดิมมีแต่ไทย คำอ่าน /en จึงโดนเตือนทุกใบ
   const segmenter = new Intl.Segmenter("th", { granularity: "word" });
   const VISUAL_STOP_WORDS = new Set([
     "ภาพ", "ในภาพ", "หน้าไพ่", "ของ", "และ", "หรือ", "โดย", "ที่",
     "นี้", "นั้น", "เป็น", "อยู่", "เห็น", "ด้าน", "ข้าง", "หลัง",
     "เบื้อง", "ตรง", "ช่วง", "ตอน", "อย่าง", "แห่ง", "ตาม", "มี",
     "รูป", "ปรากฏ", "สะท้อน", "สื่อ", "แสดง", "ไพ่",
+    // อังกฤษ: คำเชื่อม/คำกลาง ๆ ที่ติดอยู่ในบันทึกภาพแทบทุกใบ — ถ้าไม่ตัดทิ้ง ทุกประโยคจะ "ผ่าน" ฟรี
+    "the", "and", "with", "from", "that", "this", "these", "those", "his", "her", "him", "she",
+    "they", "their", "them", "its", "into", "onto", "over", "under", "upon", "while", "where",
+    "which", "who", "whose", "are", "was", "were", "has", "have", "had", "for", "not", "but",
+    "out", "off", "all", "each", "both", "one", "two", "three", "four", "five", "six", "seven",
+    "eight", "nine", "ten", "behind", "beside", "before", "above", "below", "around", "toward",
+    "towards", "through", "across", "card", "image", "imagery", "picture", "scene", "figure",
+    "shows", "showing", "depicts", "depicted", "seen", "stands", "standing", "sits", "sitting",
+    "holds", "holding", "1909",
   ]);
 
   for (const c of reading.cards || []) {
@@ -364,16 +375,20 @@ export function checkReadingConsistency(
       const card = drawnCards[c.position];
       if (card && CARD_VISUAL_LORE[card.id]) {
         const lore = CARD_VISUAL_LORE[card.id];
-        const targetText = `${lore.scene1909} ${lore.symbols.join(" ")}`.toLowerCase();
+        const loreEn = CARD_VISUAL_LORE_EN[card.id];
+        const targetText = [lore.scene1909, ...lore.symbols, loreEn?.scene1909 ?? "", ...(loreEn?.symbols ?? [])]
+          .join(" ")
+          .toLowerCase();
 
         let hasSharedWord = false;
         let wordCount = 0;
         for (const seg of segmenter.segment(c.visualAnchor)) {
           if (seg.isWordLike) {
-            const w = seg.segment.trim().toLowerCase();
+            // lion's ➔ lion · swords ➔ sword (คำอ่านพูดพหูพจน์ บันทึกภาพอาจเขียนเอกพจน์)
+            const w = seg.segment.trim().toLowerCase().replace(/['’]s$/, "");
             if (w.length >= 3 && !VISUAL_STOP_WORDS.has(w)) {
               wordCount++;
-              if (targetText.includes(w)) {
+              if (targetText.includes(w) || (/^[a-z]{4,}s$/.test(w) && targetText.includes(w.slice(0, -1)))) {
                 hasSharedWord = true;
                 break;
               }
