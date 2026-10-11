@@ -17,6 +17,7 @@ import { readerPriceThb } from "@/lib/marketplace/offer";
 import { requireReader } from "@/lib/auth/reader-auth";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { isTurnConfigured } from "@/lib/marketplace/turn";
+import { bookingAccessUrl } from "@/lib/marketplace/booking-mail";
 
 export const runtime = "nodejs";
 
@@ -100,6 +101,7 @@ export async function GET(
     // Only reveal reader LINE link when status is 'ready' or 'handed_off' (Strict Zero-Leak Security)
     const canAccessLine = ticket.status === "ready" || ticket.status === "handed_off";
 
+    const booking = isOwner ? await buildBookingView(ticket, now) : null;
     return NextResponse.json({
       ticket: toPublicTicket(ticket),
       reader: {
@@ -112,9 +114,19 @@ export async function GET(
         lineUrl: canAccessLine ? reader.lineUrl : null,
       },
       canAccessLine,
-      booking: isOwner ? await buildBookingView(ticket, now) : null,
+      booking,
+      /**
+       * ลิงก์นัดส่วนตัว (ลิงก์เซ็นชุดเดียวกับในอีเมลยืนยัน) — เปิดจากเบราว์เซอร์ไหน/เครื่องไหนก็เข้านัดนี้ได้
+       * เบราว์เซอร์ในแอป LINE มีคุกกี้แยกจาก Safari/Chrome ลิงก์เปล่าจึงเปิดนอกแอปไม่เจอนัด (CONSULT_FLOW P6)
+       * 🔒 **เจ้าของตั๋วเท่านั้น** — ห้ามส่งให้แม่หมอ: ลิงก์นี้แลกเป็นคุกกี้ `customerRef` ได้
+       *    = เห็นทุกนัดของลูกค้าคนนั้น (บทเรียน A2-13)
+       */
+      accessUrl: isOwner ? await bookingAccessUrl(ticket.id, ticket.customerRef, booking?.slotStart ?? null) : null,
       // 📹 วิดีโอคอลตัวต่อตัว — เปิดเฉพาะตอนแม่หมอเรียกคิวแล้ว และตั้งค่า TURN ไว้แล้ว
       videoCallAvailable: ticket.status === "ready" && isTurnConfigured(),
+      // ระบบวิดีโอคอลเปิดใช้อยู่ไหม (ยังไม่ถึงคิวก็รู้ได้) — ไม่เปิด = คุยทาง LINE อย่างเดียว
+      // หน้าคิวใช้ตัดสินว่าต้องชวนลูกค้าที่เปิดในแอป LINE ออกไป Safari/Chrome ไหม (ในแอป LINE เปิดแชท LINE ได้ดีอยู่แล้ว)
+      videoCallEnabled: isTurnConfigured(),
     });
   } catch (err) {
     console.error("[API Ticket GET ID Error]", err);

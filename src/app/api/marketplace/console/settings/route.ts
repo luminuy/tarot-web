@@ -4,7 +4,13 @@ import { z } from "zod";
 import { apiFail, apiOk } from "@/lib/api/envelope";
 import { requireReader } from "@/lib/auth/reader-auth";
 import { getBlockedDates, replaceBlockedDates } from "@/lib/marketplace/booking.repo";
-import { BOOKING_HORIZON_DAYS, BUFFER_OPTIONS, DAILY_CAP_MAX, bkkDateKey } from "@/lib/marketplace/booking-policy";
+import {
+  BOOKING_HORIZON_DAYS,
+  BUFFER_OPTIONS,
+  DAILY_CAP_MAX,
+  LEAD_OPTIONS_MIN,
+  bkkDateKey,
+} from "@/lib/marketplace/booking-policy";
 import { updateReaderBookingSettings } from "@/lib/marketplace/readers.repo";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 
@@ -17,11 +23,17 @@ const SettingsSchema = z.object({
   bufferMin: z.number().int().refine((v) => (BUFFER_OPTIONS as readonly number[]).includes(v)),
   dailyCap: z.number().int().min(1).max(DAILY_CAP_MAX).nullable(),
   blockedDates: z.array(z.string().regex(DATE_KEY)).max(BOOKING_HORIZON_DAYS + 30),
+  // รับนัดล่วงหน้าอย่างน้อย (migrations/0030) — ไม่ส่งมา = คงค่าเดิม (แผงแม่หมอรุ่นก่อนที่เปิดค้างไว้)
+  leadMin: z
+    .number()
+    .int()
+    .refine((v) => (LEAD_OPTIONS_MIN as readonly number[]).includes(v))
+    .optional(),
 });
 
 /**
  * PUT /api/marketplace/console/settings — ตั้งค่าการรับนัดของแม่หมอ (บันทึกครั้งเดียวทั้งชุด)
- * อีเมลแจ้งเตือน · เวลาพักระหว่างนัด · เพดานนัดต่อวัน · วันหยุดรายวัน
+ * อีเมลแจ้งเตือน · เวลาพักระหว่างนัด · เพดานนัดต่อวัน · รับนัดล่วงหน้าอย่างน้อย · วันหยุดรายวัน
  * นัดที่ลูกค้าจ่ายแล้วไม่ถูกแตะ — มีผลกับเวลาว่างที่จะเปิดต่อจากนี้เท่านั้น
  */
 export async function PUT(request: Request) {
@@ -34,8 +46,8 @@ export async function PUT(request: Request) {
     const parsed = SettingsSchema.safeParse(await request.json().catch(() => null));
     if (!parsed.success) return apiFail("ข้อมูลไม่ถูกต้อง ตรวจรูปแบบอีเมลและตัวเลขอีกครั้ง", 400);
     const today = bkkDateKey(Date.now());
-    const { notifyEmail, bufferMin, dailyCap, blockedDates } = parsed.data;
-    await updateReaderBookingSettings(auth.readerId, { notifyEmail: notifyEmail || null, bufferMin, dailyCap });
+    const { notifyEmail, bufferMin, dailyCap, blockedDates, leadMin } = parsed.data;
+    await updateReaderBookingSettings(auth.readerId, { notifyEmail: notifyEmail || null, bufferMin, dailyCap, leadMin });
     await replaceBlockedDates(auth.readerId, blockedDates.filter((d) => d >= today));
     return apiOk({ blockedDates: await getBlockedDates(auth.readerId) });
   } catch (err) {

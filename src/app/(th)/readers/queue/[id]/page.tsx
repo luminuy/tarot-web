@@ -11,12 +11,15 @@ import type { QueueTicket } from "@/lib/marketplace/queue.repo";
 import { CONSULTATION_MINUTES, CONSULTATION_PRICE_THB, questionCategoryLabel } from "@/lib/marketplace/offer";
 import {
   BookingConfirmedPanel,
+  ConsultLinkPanel,
+  InAppBrowserNotice,
   ManageBooking,
   PaymentPendingPanel,
   ReviewPanel,
   type BookingView,
 } from "@/components/marketplace/QueueBookingParts";
 import { formatSlotRange } from "@/lib/marketplace/booking-policy";
+import { detectInAppBrowser, type InAppBrowser } from "@/lib/marketplace/in-app-browser";
 
 interface PollResponse {
   ticket: QueueTicket;
@@ -32,8 +35,12 @@ interface PollResponse {
   canAccessLine: boolean;
   /** แม่หมอเรียกคิวแล้ว + ระบบวิดีโอคอลพร้อม (ตั้งค่า TURN แล้ว) */
   videoCallAvailable?: boolean;
+  /** ระบบวิดีโอคอลเปิดใช้อยู่ (ไม่ขึ้นกับสถานะคิว) — ไม่เปิด = คุยทาง LINE อย่างเดียว */
+  videoCallEnabled?: boolean;
   /** การจอง/การจ่ายเงินของตั๋ว (เฉพาะเจ้าของตั๋ว) — null สำหรับตั๋วยุคก่อนระบบจ่ายก่อนคุย */
   booking?: BookingView | null;
+  /** ลิงก์นัดส่วนตัว เปิดได้ทุกเบราว์เซอร์ (เฉพาะเจ้าของตั๋ว) — CONSULT_FLOW P6 */
+  accessUrl?: string | null;
 }
 
 /** ตั๋วยุคก่อนระบบจ่ายก่อนคุย (ไม่มีใบจอง) — ยังยกเลิกได้ตามเดิม ไม่มีเงินให้คืน */
@@ -64,6 +71,11 @@ export default function CustomerQueuePage() {
   const [now, setNow] = useState(() => Date.now());
   const [notice, setNotice] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
+  /** เปิดอยู่ในเบราว์เซอร์ของแอป (LINE · Facebook · IG · TikTok) — อ่านหลัง mount เท่านั้น (HTML ฝั่งเซิร์ฟเวอร์ต้องตรงกัน) */
+  const [inApp, setInApp] = useState<InAppBrowser | null>(null);
+  useEffect(() => {
+    setInApp(detectInAppBrowser(navigator.userAgent));
+  }, []);
 
   const fetchTicketStatus = useCallback(async () => {
     if (!ticketId) return;
@@ -140,19 +152,48 @@ export default function CustomerQueuePage() {
   }
 
   if (error || !data) {
+    /*
+     * เซิร์ฟเวอร์ตอบ "ไม่พบ" ทั้งตอนไม่มีตั๋วจริงและตอนเบราว์เซอร์นี้ไม่ใช่เจ้าของ (ไม่ยืนยันว่ามีตั๋ว — PDPA)
+     * กรณีหลังคือคนจองในแอป LINE แล้วมาเปิดใน Safari/ปฏิทิน (CONSULT_FLOW P6) — เดิมเจอแค่ "ไม่พบตั๋วคิว"
+     * แล้วติดทางตัน ➔ บอกทางกลับเข้านัดให้ครบโดยไม่บอกว่าตั๋วนี้มีอยู่จริงหรือไม่
+     */
     return (
-      <main id="main-content" tabIndex={-1} className="min-h-[70vh] text-ink flex items-center justify-center p-4">
-        <div className="bg-surface rounded-2xl p-8 text-center space-y-4 max-w-md z-10 border border-err/40 shadow-sm">
-          <p className="text-sm text-err font-serif-th">{error || "ไม่พบตั๋วคิว"}</p>
-          <Button variant="gold" onClick={() => router.push("/readers")}>
-            กลับไปหน้ารวมแม่หมอ
-          </Button>
+      <main id="main-content" tabIndex={-1} className="min-h-[70vh] text-ink flex items-center justify-center p-4 font-serif-th">
+        <div className="altar-card-porcelain !rounded-3xl max-w-md w-full z-10 space-y-4 p-6 text-left sm:p-8">
+          <h1 className="text-lg font-bold text-ink-deep">
+            <ThaiPhrases>เปิดนัดนี้จากที่นี่ไม่ได้</ThaiPhrases>
+          </h1>
+          <p className="text-sm leading-relaxed text-ink">
+            ลิงก์หน้าคิวเปิดได้เฉพาะคนที่จองไว้ ถ้าเป็นนัดของคุณ ลองทางใดทางหนึ่งนี้:
+          </p>
+          <ul className="space-y-2 text-[13px] leading-relaxed text-ink">
+            {[
+              'เปิด "ลิงก์นัดของคุณ" หรือปุ่ม "ดูนัดของฉัน" ในอีเมลยืนยันการจอง (เปิดได้ทุกเครื่อง)',
+              "กลับไปเปิดในแอปหรือเบราว์เซอร์ที่ใช้ตอนจอง (เช่น ในแอป LINE)",
+              'เข้าสู่ระบบด้วยบัญชีที่ใช้ตอนจอง แล้วดูที่ "นัดของฉัน"',
+            ].map((line) => (
+              <li key={line} className="flex gap-2">
+                <span aria-hidden="true" className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold-ink" />
+                {line}
+              </li>
+            ))}
+          </ul>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button variant="gold" className="flex-1" onClick={() => router.push("/readers/bookings")}>
+              นัดของฉัน
+            </Button>
+            <Button variant="ghost" className="flex-1" onClick={() => router.push("/readers")}>
+              แม่หมอทั้งหมด
+            </Button>
+          </div>
         </div>
       </main>
     );
   }
 
-  const { ticket, reader, canAccessLine, videoCallAvailable, booking } = data;
+  const { ticket, reader, canAccessLine, videoCallAvailable, videoCallEnabled, booking, accessUrl } = data;
+  // ชวนออกจากเบราว์เซอร์ในแอปเฉพาะตอนที่จะคุยผ่านวิดีโอคอล — ถ้าคุยทาง LINE อยู่ในแอป LINE ดีกว่าอยู่แล้ว
+  const suggestExternal = Boolean(inApp && accessUrl && videoCallEnabled);
   const priceThb = reader.priceThb ?? CONSULTATION_PRICE_THB;
   const paidThb = booking?.amountSatang ? booking.amountSatang / 100 : priceThb;
   const isBlocked = ticket.screening?.verdict === "block" || ticket.status === "cancelled" || ticket.status === "expired";
@@ -292,7 +333,13 @@ export default function CustomerQueuePage() {
             )}
 
             {ticket.status === "waiting" && isScheduled && booking && (
-              <BookingConfirmedPanel booking={booking} readerName={reader.displayName} ticketId={ticket.id} nowMs={now} />
+              <BookingConfirmedPanel
+                booking={booking}
+                readerName={reader.displayName}
+                ticketId={ticket.id}
+                nowMs={now}
+                accessUrl={accessUrl}
+              />
             )}
 
             {ticket.status === "waiting" && !isScheduled && (
@@ -317,6 +364,12 @@ export default function CustomerQueuePage() {
               </div>
             )}
 
+            {/* เปิดอยู่ในแอป LINE/Facebook/IG/TikTok ➔ พาไป Safari/Chrome พร้อมนัด ก่อนถึงเวลาคุย (P6 · P7)
+                วางใต้ข้อความยืนยัน — สิ่งแรกที่ลูกค้าเห็นหลังจ่ายต้องเป็น "ยืนยันแล้ว" ไม่ใช่คำเตือน */}
+            {suggestExternal && inApp && accessUrl && ticket.status === "waiting" && (
+              <InAppBrowserNotice app={inApp} accessUrl={accessUrl} />
+            )}
+
             {ticket.status === "ready" && (
               <div className="space-y-4">
                 <div className="flex items-start gap-3 rounded-2xl bg-ok/10 border border-ok/30 p-4" role="status">
@@ -335,6 +388,10 @@ export default function CustomerQueuePage() {
                   </div>
                 </div>
 
+                {suggestExternal && videoCallAvailable && inApp && accessUrl && (
+                  <InAppBrowserNotice app={inApp} accessUrl={accessUrl} />
+                )}
+
                 {/* 📹 วิดีโอคอลตัวต่อตัว — ผ่าน TURN เสมอ (ซ่อน IP ทั้งสองฝั่ง) · ทางหลักเมื่อพร้อม */}
                 {videoCallAvailable && (
                   <VideoCallRoom
@@ -343,6 +400,17 @@ export default function CustomerQueuePage() {
                     peerName={reader.displayName}
                     peerAvatarUrl={reader.avatarUrl}
                     embedded
+                    mediaHelp={
+                      inApp && accessUrl ? (
+                        <p className="text-[13px] leading-relaxed text-ink">
+                          กำลังเปิดในแอป — กดปุ่ม &quot;เปิดใน Safari / Chrome&quot; ด้านบน แล้วเข้าห้องจากที่นั่น
+                        </p>
+                      ) : accessUrl ? (
+                        <p className="text-[13px] leading-relaxed text-ink">
+                          ลองเปิด &quot;ลิงก์นัดของคุณ&quot; ด้านล่างใน Safari หรือ Chrome แล้วกดเข้าห้องอีกครั้ง
+                        </p>
+                      ) : null
+                    }
                   />
                 )}
 
@@ -364,7 +432,8 @@ export default function CustomerQueuePage() {
                       href={reader.lineUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-[#06c755] hover:bg-[#05b34c] text-white font-bold text-sm transition"
+                      /* เขียวโทเคน ok (ตัวขาว 5.9:1) — เดิมเขียว LINE สด #06c755 กับตัวขาวได้แค่ 2.26:1 อ่านยากบนปุ่มหลัก */
+                      className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-ok hover:opacity-90 text-white font-bold text-sm transition"
                     >
                       เริ่มคุยกับแม่หมอทาง LINE <span aria-hidden="true">→</span>
                     </a>
@@ -481,6 +550,11 @@ export default function CustomerQueuePage() {
             )}
           </dl>
         </section>
+
+        {/* ลิงก์นัดส่วนตัว — เปิดได้ทุกเบราว์เซอร์ทุกเครื่อง (เดิมเปิดได้แค่เบราว์เซอร์ที่ใช้จอง · P6) */}
+        {accessUrl && booking?.paid && (ticket.status === "waiting" || ticket.status === "ready") && (
+          <ConsultLinkPanel accessUrl={accessUrl} />
+        )}
 
         {/* จัดการนัด/คิว — เลื่อน · ยกเลิก (นโยบายคืนเงินคำนวณฝั่งเซิร์ฟเวอร์) */}
         {!confirming && (ticket.status === "waiting" || ticket.status === "pending_payment") && (

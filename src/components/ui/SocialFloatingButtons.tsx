@@ -37,6 +37,22 @@ const BUTTON = "social-fab__item absolute right-1 flex items-center justify-cent
 const CARD_DETAIL_PATH = /^\/cards\/(major|cups|wands|swords|pentacles)-\d{2}(?:\/|\.html)?$/; // ตอนบิลด์ Astro ให้ path แบบ `.html`
 const SUMMARY = "social-fab__main relative flex items-center justify-center w-14 h-14 rounded-full cursor-pointer list-none";
 
+/**
+ * หน้าที่ไม่แสดงปุ่มลอย — แยกเป็นฟังก์ชันบริสุทธิ์ให้ด่าน test-marketplace-readers 19.6 ตรวจได้
+ * @param pathname path ที่ตัด `/en` ออกแล้ว
+ */
+export function shouldHideSocialFab(pathname: string): boolean {
+  // กลุ่มหน้าแม่หมอทั้งหมด (`/readers` · โปรไฟล์ · หน้าจอง · หน้าคิว · แผงแม่หมอ · สตูดิโอ) = หน้าทำรายการ
+  //   ปุ่มลอยเคยทับปุ่ม "เลือกเวลานัด" จนลูกค้ากดยาก (CONSULT_FLOW_UX_PLAN P5 · วัดแล้วทับกันจริง)
+  //   (`startsWith("/reading")` ด้านล่าง **ไม่** ครอบ `/readers` — "readi…" ≠ "reade…")
+  if (pathname === "/readers" || pathname.startsWith("/readers/")) return true;
+  // ซ่อนบนหน้าแอดมิน และหน้าห้องแชท/ผลพยากรณ์ (/reading/chat ฯลฯ) เพื่อไม่ให้ลอยบังปุ่มส่งข้อความหรือแผงสนทนาบนมือถือ
+  // หน้าคำอ่านที่แม่หมอส่งให้ลูกค้า (`/r/` แบรนด์ของแม่หมอ ไม่ใช่ช่องแชตของเรา)
+  if (pathname.startsWith("/admin") || pathname.startsWith("/reading") || pathname.startsWith("/r/")) return true;
+  // หน้าความหมายไพ่รายใบ 78 ใบ × 2 ภาษา — มีแถบ "เปิดไพ่เลย" ติดล่างจอแทน (เจ้าของสั่ง 2026-10-10: ไม่ต้องโชว์ปุ่มลอยในหน้านี้)
+  return CARD_DETAIL_PATH.test(pathname);
+}
+
 export function SocialFloatingButtons({ pathname: pathnameProp }: { pathname?: string } = {}) {
   const { isEnglish } = useLocale();
   const hookPathname = usePathname();
@@ -46,11 +62,7 @@ export function SocialFloatingButtons({ pathname: pathnameProp }: { pathname?: s
    *    ➔ หน้า Astro ส่ง `Astro.url.pathname` เข้ามาเอง · ตัด `/en` ก่อนเทียบ ให้ซ่อนทั้งสองภาษา
    */
   const pathname = stripLocalePrefix(pathnameProp ?? hookPathname ?? "");
-  // ซ่อนบนหน้าแอดมิน และหน้าห้องแชท/ผลพยากรณ์ (/reading/chat ฯลฯ) เพื่อไม่ให้ลอยบังปุ่มส่งข้อความหรือแผงสนทนาบนมือถือ
-  // สตูดิโอแม่หมอ + หน้าคำอ่านที่แม่หมอส่งให้ลูกค้า (แบรนด์ของแม่หมอ ไม่ใช่ช่องแชตของเรา · ปุ่มลอยบังปุ่มในฟอร์มมือถือ)
-  if (pathname.startsWith("/admin") || pathname.startsWith("/reading") || pathname.startsWith("/readers/studio") || pathname.startsWith("/r/")) return null;
-  // หน้าความหมายไพ่รายใบ 78 ใบ × 2 ภาษา — มีแถบ "เปิดไพ่เลย" ติดล่างจอแทน (เจ้าของสั่ง 2026-10-10: ไม่ต้องโชว์ปุ่มลอยในหน้านี้)
-  if (CARD_DETAIL_PATH.test(pathname)) return null;
+  if (shouldHideSocialFab(pathname)) return null;
 
   return (
     <details

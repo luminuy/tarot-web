@@ -285,7 +285,7 @@ const MODAL_COMPONENTS = [
   "ReadingHistoryModal",
   "BuyCreditsModal",
   "AccessDialog",
-  "BookQueueModal",
+  // BookQueueModal ถูกถอดแล้ว (2026-10-11) — การจองแม่หมอย้ายไปหน้าเต็มจอ /readers/[id]/book
 ];
 
 for (const file of tsxFiles) {

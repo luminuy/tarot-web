@@ -21,11 +21,19 @@ import {
   getBookingByTicketId,
   getBlockedDates,
   getBookingsByTicketIds,
+  getNextAvailableSlot,
   getScheduleRules,
   isPaidBooking,
   markNoShow,
 } from "@/lib/marketplace/booking.repo";
-import { canMarkNoShow, canStartBooking, EARLY_START_MINUTES, NO_SHOW_GRACE_MINUTES } from "@/lib/marketplace/booking-policy";
+import {
+  canMarkNoShow,
+  canStartBooking,
+  DEFAULT_LEAD_MIN,
+  EARLY_START_MINUTES,
+  NO_SHOW_GRACE_MINUTES,
+} from "@/lib/marketplace/booking-policy";
+import { SITE_ORIGIN } from "@/lib/config/site";
 
 export const runtime = "nodejs";
 
@@ -51,6 +59,8 @@ export async function GET(request: Request) {
     });
     const schedule = await getScheduleRules(readerId);
     const bookings = await getBookingsByTicketIds(tickets.map((t) => t.id));
+    // การ์ด "ส่งลิงก์ให้ลูกค้า" ต้องบอกแม่หมอว่าลูกค้าที่เปิดลิงก์ตอนนี้จะจองได้เร็วสุดเมื่อไร (CONSULT_FLOW P3)
+    const nextSlot = schedule.length > 0 ? await getNextAvailableSlot(readerId, Date.now()) : null;
 
     return NextResponse.json({
       reader: {
@@ -62,6 +72,9 @@ export async function GET(request: Request) {
         commissionPct: reader.commissionPct,
       },
       isLiveOpen,
+      // ลิงก์หน้าจองที่แม่หมอส่งให้ลูกค้า — โดเมนหลักเสมอ (แผงแม่หมออาจเปิดผ่านโดเมนพรีวิว)
+      bookingUrl: `${SITE_ORIGIN}/readers/${encodeURIComponent(reader.id)}/book`,
+      nextSlot,
       // `paid` = ลูกค้าจ่ายแล้ว (ตั๋วยุคก่อนระบบจ่ายเงินเป็น false — แม่หมอเรียกคิวนั้นไม่ได้)
       tickets: tickets.map((t) => ({ ...toPublicTicket(t), paid: isPaidBooking(bookings.get(t.id)) })),
       totalWaiting: tickets.filter((t) => t.status === "waiting" && t.kind === "walkup").length,
@@ -71,6 +84,7 @@ export async function GET(request: Request) {
         notifyEmail: reader.notifyEmail,
         bufferMin: reader.bufferMin,
         dailyCap: reader.dailyCap,
+        leadMin: reader.leadMin ?? DEFAULT_LEAD_MIN,
         blockedDates: await getBlockedDates(readerId),
         priceThb: readerPriceThb(reader),
       },

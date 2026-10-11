@@ -551,6 +551,9 @@ async function runTest() {
   // ── 📹 วิดีโอคอลตัวต่อตัว (บังคับผ่าน TURN · ซ่อน IP) ─────────────────────────
   await testVideoCall(created.id, created.sessionSecret);
 
+  // ── 🛎️ ขั้นตอนปรึกษาแม่หมอแบบใหม่ (CONSULT_FLOW_UX_PLAN_2026-10-11) ───────────────
+  await testConsultFlowUx(created.id, created.sessionSecret);
+
   // Cleanup test reader
   await deleteReader(created.id);
   console.log("  ✓ 15. ทำความสะอาดข้อมูลทดสอบเรียบร้อย");
@@ -1168,6 +1171,274 @@ async function testVideoCall(readerId: string, sessionSecret: string) {
     throw new Error("❌ VideoCallRoom ต้องล็อกภาพ 720p และเพดาน 1.5 Mbps (คุมโควตาฟรี TURN)");
   }
   console.log("  ✓ 16.5 กล้อง/ไมค์เปิดเฉพาะหน้าวิดีโอคอล · เบราว์เซอร์บังคับ relay · ล็อก 720p/1.5 Mbps");
+}
+
+/**
+ * 🛎️ ขั้นตอนปรึกษาแม่หมอแบบใหม่ — กันปัญหาที่ลูกค้าจริงเจอ (docs/plans/CONSULT_FLOW_UX_PLAN_2026-10-11.md)
+ *   P1 เลือกเวลาแล้วเปลี่ยนวันไม่ได้ · P3 คุย/นัดเร็วไม่ได้ · P4 ปุ่มจ่ายจางเงียบ · P5 ปุ่มลอยทับปุ่มจอง
+ *   P6 ลิงก์คิวเปิดได้แค่เบราว์เซอร์เดียว (แอป LINE ➔ Safari = ไม่พบนัด)
+ */
+async function testConsultFlowUx(readerId: string, sessionSecret: string) {
+  const fs = await import("node:fs");
+  const path = await import("node:path");
+  const policy = await import("../../src/lib/marketplace/booking-policy");
+  const repo = await import("../../src/lib/marketplace/booking.repo");
+  const { updateReaderBookingSettings } = await import("../../src/lib/marketplace/readers.repo");
+  const MIN = 60_000;
+  const src = (f: string) => fs.readFileSync(path.join(process.cwd(), f), "utf-8");
+
+  // ── 19.1 วันที่แตะล่าสุดชนะเสมอ (P1) ───────────────────────────────────────────
+  const dayA = { date: "2031-01-06", slots: [Date.UTC(2031, 0, 6, 3), Date.UTC(2031, 0, 6, 4)] };
+  const dayB = { date: "2031-01-07", slots: [Date.UTC(2031, 0, 7, 3)] };
+  const dayC = { date: "2031-01-08", slots: [Date.UTC(2031, 0, 8, 3)] };
+  const days = [dayA, dayB, dayC];
+  const chosenOnA = dayA.slots[1];
+  if (
+    policy.resolveVisibleDay(days, chosenOnA, "2031-01-07")?.date !== "2031-01-07" || // บั๊กเดิมคืน A
+    policy.resolveVisibleDay(days, chosenOnA, null)?.date !== "2031-01-06" ||
+    policy.resolveVisibleDay(days, chosenOnA, "2031-02-01")?.date !== "2031-01-06" || // วันที่แตะหายไปหลังโหลดใหม่
+    policy.resolveVisibleDay(days, null, null)?.date !== "2031-01-06" ||
+    policy.resolveVisibleDay([], null, "2031-01-07") !== null
+  ) {
+    throw new Error("❌ 19.1 resolveVisibleDay: เลือกเวลาไว้แล้วต้องยังเปลี่ยนวันที่แสดงได้ (CONSULT_FLOW P1)");
+  }
+  if (
+    policy.soonestSlots(days, 3).join() !== [...dayA.slots, dayB.slots[0]].join() ||
+    policy.soonestSlots(days, 0).length !== 0 ||
+    policy.pageOfDate(days, "2031-01-08", 2) !== 1 ||
+    policy.pageOfDate(days, "2031-09-09", 2) !== 0
+  ) {
+    throw new Error("❌ 19.1 soonestSlots/pageOfDate คืนค่าผิด");
+  }
+  const picker = src("src/components/marketplace/SlotPicker.tsx");
+  if (!picker.includes("resolveVisibleDay(") || /byValue\s*\?\?/.test(picker) || /overflow-x-(auto|scroll)/.test(picker)) {
+    throw new Error("❌ 19.1 SlotPicker ต้องใช้ resolveVisibleDay (ห้ามเขียนลำดับวันเองซ้ำ) และห้ามเลื่อนแนวนอน (กฎเหล็กข้อ 3)");
+  }
+  console.log("  ✓ 19.1 เลือกเวลาไว้แล้วเปลี่ยนวันได้ (P1) · เวลาว่างเร็วที่สุด · แถววันแบ่งหน้าไม่เลื่อนแนวนอน");
+
+  // ── 19.2 รับนัดล่วงหน้าอย่างน้อย ต่อแม่หมอ (P3) — หน้าเว็บกับด่านเซิร์ฟเวอร์ใช้ค่าเดียวกัน ──
+  const monday10 = Date.UTC(2031, 0, 6, 3); // จันทร์ 6 ม.ค. 2574 10:00 เวลาไทย
+  const rules = [{ weekday: 1, startMin: 10 * 60, endMin: 14 * 60 }];
+  const firstDefault = policy.generateSlots(rules, monday10, new Set())[0]?.slots[0];
+  const firstFast = policy.generateSlots(rules, monday10, new Set(), { leadMin: 30 })[0]?.slots[0];
+  const firstJunk = policy.generateSlots(rules, monday10, new Set(), { leadMin: 7 })[0]?.slots[0];
+  if (
+    policy.formatTime(firstDefault) !== "12:00" ||
+    policy.formatTime(firstFast) !== "10:30" ||
+    firstJunk !== firstDefault || // ค่าที่ไม่อยู่ในตัวเลือก = ค่าเริ่มต้น 2 ชม.
+    policy.normalizeLeadMin(null) !== 120 ||
+    policy.normalizeLeadMin(45) !== 120 ||
+    policy.normalizeLeadMin(30) !== 30
+  ) {
+    throw new Error(`❌ 19.2 เวลาแจ้งล่วงหน้าคำนวณผิด (ค่าเริ่มต้น ${firstDefault} · 30 นาที ${firstFast})`);
+  }
+  const at1045 = monday10 + 45 * MIN;
+  if (
+    policy.slotRejection(rules, monday10, at1045, new Set()) === null || // ค่าเริ่มต้นต้องปฏิเสธ 10:45? (ไม่ลงช่อง/ใกล้เกิน)
+    policy.slotRejection(rules, monday10, monday10 + 30 * MIN, new Set(), { leadMin: 30 }) !== null ||
+    policy.slotRejection(rules, monday10, monday10 + 30 * MIN, new Set()) === null
+  ) {
+    throw new Error("❌ 19.2 slotRejection ต้องใช้เวลาแจ้งล่วงหน้าของแม่หมอชุดเดียวกับ generateSlots");
+  }
+  await repo.replaceScheduleRules(readerId, rules);
+  await updateReaderBookingSettings(readerId, { notifyEmail: null, bufferMin: 0, dailyCap: null, leadMin: 30 });
+  const optsFast = await repo.getSlotOptions(readerId, monday10);
+  const okFast = await repo.checkSlotBookable(readerId, monday10 + 30 * MIN, monday10);
+  // แผงแม่หมอรุ่นเก่าที่ไม่ส่ง leadMin มา ต้องไม่ล้างค่าที่ตั้งไว้
+  await updateReaderBookingSettings(readerId, { notifyEmail: null, bufferMin: 0, dailyCap: null });
+  const optsKept = await repo.getSlotOptions(readerId, monday10);
+  await updateReaderBookingSettings(readerId, { notifyEmail: null, bufferMin: 0, dailyCap: null, leadMin: 120 });
+  const slowRejects = await repo.checkSlotBookable(readerId, monday10 + 30 * MIN, monday10);
+  if (optsFast.leadMin !== 30 || okFast !== null || optsKept.leadMin !== 30 || slowRejects === null) {
+    throw new Error(
+      `❌ 19.2 ค่า lead_min ในฐานข้อมูลไม่ถูกใช้ตอนจองจริง (${JSON.stringify({ fast: optsFast.leadMin, okFast, kept: optsKept.leadMin, slowRejects })})`,
+    );
+  }
+  const { PUT: putSettings } = await import("../../src/app/api/marketplace/console/settings/route");
+  const readerBearer = `Bearer ${signReaderToken(readerId, sessionSecret, 1)}`;
+  const put = (body: Record<string, unknown>) =>
+    putSettings(
+      new Request("https://seertarot.net/api/marketplace/console/settings", {
+        method: "PUT",
+        headers: { "content-type": "application/json", origin: "https://seertarot.net", authorization: readerBearer },
+        body: JSON.stringify({ notifyEmail: null, bufferMin: 0, dailyCap: null, blockedDates: [], ...body }),
+      }),
+    );
+  if ((await put({ leadMin: 45 })).status !== 400 || (await put({ leadMin: 60 })).status !== 200) {
+    throw new Error("❌ 19.2 API ตั้งค่าต้องรับเฉพาะค่าใน LEAD_OPTIONS_MIN");
+  }
+  if (!src("migrations/0030_reader_lead_time.sql").includes("ADD COLUMN lead_min")) {
+    throw new Error("❌ 19.2 ต้องมี migrations/0030 เพิ่ม readers.lead_min");
+  }
+  await updateReaderBookingSettings(readerId, { notifyEmail: null, bufferMin: 0, dailyCap: null, leadMin: 120 });
+  await repo.replaceScheduleRules(readerId, []);
+  console.log("  ✓ 19.2 รับนัดล่วงหน้าอย่างน้อยต่อแม่หมอ: เวลาว่าง · ด่านเซิร์ฟเวอร์ · API · migration ใช้ค่าเดียวกัน (P3)");
+
+  // ── 19.3 ลิงก์นัดส่วนตัว เปิดได้ทุกเบราว์เซอร์ — เจ้าของตั๋วเท่านั้น (P6) ─────────────
+  const { GET: getTicket } = await import("../../src/app/api/marketplace/tickets/[id]/route");
+  const { CUSTOMER_REF_COOKIE } = await import("../../src/lib/marketplace/customer-ref");
+  const { signPayload } = await import("../../src/lib/auth/edge-auth");
+  const mail = await import("../../src/lib/marketplace/booking-mail");
+  const t = await createQueueTicket({
+    readerId, kind: "walkup", customerRef: "cust_flow_owner", nickname: "ฟลุ๊ค", question: "อยากรู้เรื่องงานช่วงนี้",
+  });
+  const ctx = { params: Promise.resolve({ id: t.id }) };
+  const url = `https://seertarot.net/api/marketplace/tickets/${t.id}`;
+  const ownerRes = await getTicket(
+    new Request(url, { headers: { cookie: `${CUSTOMER_REF_COOKIE}=${await signPayload({ ref: "cust_flow_owner" })}` } }),
+    ctx,
+  );
+  const ownerJson = (await ownerRes.json()) as { accessUrl?: string | null; videoCallEnabled?: boolean };
+  const k = ownerJson.accessUrl ? new URL(ownerJson.accessUrl).searchParams.get("k") : null;
+  const readerJson = (await (
+    await getTicket(new Request(url, { headers: { authorization: readerBearer } }), ctx)
+  ).json()) as { accessUrl?: string | null };
+  const strangerRes = await getTicket(
+    new Request(url, { headers: { cookie: `${CUSTOMER_REF_COOKIE}=${await signPayload({ ref: "cust_flow_stranger" })}` } }),
+    ctx,
+  );
+  if (
+    ownerRes.status !== 200 ||
+    !k ||
+    (await mail.verifyBookingAccess(k, t.id)) !== "cust_flow_owner" ||
+    !ownerJson.accessUrl?.includes(`/api/marketplace/tickets/${t.id}/access?k=`) ||
+    JSON.stringify(ownerJson).includes("cust_flow_owner") || // A2-13: ห้ามมี customerRef ดิบในคำตอบ
+    typeof ownerJson.videoCallEnabled !== "boolean"
+  ) {
+    throw new Error(`❌ 19.3 เจ้าของตั๋วต้องได้ลิงก์นัดส่วนตัวที่ใช้ได้จริง (${JSON.stringify(ownerJson.accessUrl)})`);
+  }
+  if (readerJson.accessUrl !== null || strangerRes.status !== 404) {
+    throw new Error("❌ 19.3 ลิงก์นัดส่วนตัวต้องไม่หลุดถึงแม่หมอ (แลกเป็นคุกกี้ลูกค้าได้ — A2-13) และคนนอกต้องได้ 404");
+  }
+  await updateTicketStatus(t.id, "cancelled", readerId);
+  const queuePage = src("src/app/(th)/readers/queue/[id]/page.tsx");
+  const queueParts = src("src/components/marketplace/QueueBookingParts.tsx");
+  if (
+    queueParts.includes("เปิดได้เฉพาะเบราว์เซอร์ที่ใช้จอง") ||
+    !/accessUrl \|\|/.test(queueParts) || // ปฏิทินใช้ลิงก์นัดส่วนตัว (ปฏิทินเปิดใน Safari/Chrome เสมอ)
+    !queuePage.includes("<ConsultLinkPanel") ||
+    !queuePage.includes("อีเมลยืนยัน") // ไม่มีสิทธิ์ ➔ บอกทางกลับเข้า ไม่ใช่ทางตัน
+  ) {
+    throw new Error("❌ 19.3 หน้าคิวต้องให้ลิงก์นัดส่วนตัว · ปฏิทินใช้ลิงก์นั้น · และบอกทางกลับเข้าเมื่อเปิดผิดเบราว์เซอร์");
+  }
+  console.log("  ✓ 19.3 ลิงก์นัดส่วนตัวใช้ได้จริง · เฉพาะเจ้าของ (แม่หมอ = null · คนนอก = 404) · ปฏิทินใช้ลิงก์นี้ (P6)");
+
+  // ── 19.4 เบราว์เซอร์ในแอป (LINE · FB · IG · TikTok) ─────────────────────────────
+  const { detectInAppBrowser, withLineExternalBrowser } = await import("../../src/lib/marketplace/in-app-browser");
+  const UA = {
+    lineIos: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari Line/14.9.0",
+    lineAndroid: "Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Mobile Safari/537.36 Line/14.9.0/IAB",
+    fb: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 [FBAN/FBIOS;FBAV/480.0.0]",
+    ig: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 350.0.0",
+    tiktok: "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Mobile Safari/537.36 trill_360105 BytedanceWebview/d8a21c6",
+    safari: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1",
+    chrome: "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Mobile Safari/537.36",
+  };
+  const seen = Object.fromEntries(Object.entries(UA).map(([key, ua]) => [key, detectInAppBrowser(ua)]));
+  const escaped = new URL(withLineExternalBrowser("https://seertarot.net/api/marketplace/tickets/t1/access?k=abc.def"));
+  if (
+    seen.lineIos !== "line" || seen.lineAndroid !== "line" || seen.fb !== "facebook" || seen.ig !== "instagram" ||
+    seen.tiktok !== "tiktok" || seen.safari !== null || seen.chrome !== null || detectInAppBrowser("") !== null ||
+    escaped.searchParams.get("openExternalBrowser") !== "1" || escaped.searchParams.get("k") !== "abc.def"
+  ) {
+    throw new Error(`❌ 19.4 ตรวจเบราว์เซอร์ในแอปผิด: ${JSON.stringify(seen)}`);
+  }
+  console.log("  ✓ 19.4 รู้จักเบราว์เซอร์ในแอป LINE/FB/IG/TikTok · ปุ่มออกจาก LINE ใช้ openExternalBrowser=1 และคงลิงก์นัดไว้");
+
+  // ── 19.5 หน้าจองเต็มจอ + ปุ่มจ่ายไม่จางเงียบ (P2 · P4) ─────────────────────────────
+  const bookPage = src("src/app/(th)/readers/[id]/book/page.tsx");
+  const flow = src("src/components/marketplace/BookingFlow.tsx");
+  const card = src("src/components/marketplace/ReaderDetailClient.tsx");
+  const submitTag = flow.match(/<button\s+type="submit"[\s\S]*?>/)?.[0] ?? "";
+  if (
+    !/index:\s*false/.test(bookPage) ||
+    !bookPage.includes("<BookingFlow") ||
+    !submitTag ||
+    /\sdisabled[=\s>]/.test(submitTag) || // ปุ่มจ่ายต้องกดได้เสมอ — ขาดอะไรให้บอกตรงช่องนั้น
+    !flow.includes("focusField(") ||
+    !card.includes("/book") ||
+    card.includes("BookQueueModal") ||
+    fs.existsSync(path.join(process.cwd(), "src/components/marketplace/BookQueueModal.tsx"))
+  ) {
+    throw new Error("❌ 19.5 การจองต้องอยู่หน้าเต็มจอ /readers/[id]/book (noindex) และปุ่มชำระเงินห้าม disabled แบบเงียบ");
+  }
+  console.log("  ✓ 19.5 จองในหน้าเต็มจอ (noindex) · ปุ่มชำระเงินกดได้เสมอแล้วพาไปช่องที่ขาด (P2 · P4)");
+
+  // ── 19.6 ปุ่มลอยโซเชียลไม่ทับปุ่มจองในหน้ากลุ่มแม่หมอ (P5) ─────────────────────────────
+  const { shouldHideSocialFab } = await import("../../src/components/ui/SocialFloatingButtons");
+  const hidden = ["/readers", "/readers/reader_abc", "/readers/reader_abc/book", "/readers/queue/t1", "/readers/console", "/readers/studio"];
+  const shown = ["/", "/cards", "/spreads", "/readerss"];
+  if (!hidden.every(shouldHideSocialFab) || shown.some(shouldHideSocialFab)) {
+    throw new Error("❌ 19.6 ปุ่มลอยต้องซ่อนในทุกหน้ากลุ่ม /readers แต่ยังแสดงหน้าอื่น");
+  }
+  console.log("  ✓ 19.6 ปุ่มลอยโซเชียลซ่อนทั้งกลุ่ม /readers (เคยทับปุ่มจอง) แต่หน้าอื่นยังอยู่ (P5)");
+
+  // ── 19.7 ห้องวิดีโอ: แม่หมอเห็นไพ่ตัวเองในกล้อง (เจ้าของสั่ง 2026-10-11 — เดิมภาพตัวเองเป็นกรอบเล็ก 96px) ──
+  const room = src("src/components/marketplace/VideoCallRoom.tsx");
+  const videoTags = room.match(/<video[\s\S]*?\/>/g) ?? [];
+  if (
+    videoTags.length !== 2 ||
+    !videoTags.every((v) => v.includes("object-contain") && !v.includes("object-cover")) || // ห้ามตัดขอบเฟรม — ไพ่ริมโต๊ะหลุดกรอบ
+    !/useState<CallLayout>\(role === "reader" \? "split"/.test(room) || // แม่หมอเริ่มที่ภาพสองฝั่งเท่ากัน
+    !/useState\(role !== "reader"\)/.test(room) || // แม่หมอเริ่มแบบไม่กลับด้าน — ตัวหนังสือบนไพ่อ่านได้เหมือนลูกค้าเห็น
+    !room.includes('role="radiogroup" aria-label="จัดจอวิดีโอ"') ||
+    !room.includes("sender.replaceTrack(track)") || // สลับกล้องกลางสายโดยไม่ต้องต่อสายใหม่
+    !room.includes('!(status && layout === "self")') // กรอบเล็กมุมจอ: ป้ายชื่อเคยทับข้อความ "รอ…เข้าห้อง"
+  ) {
+    throw new Error("❌ 19.7 ห้องวิดีโอต้องให้แม่หมอเห็นภาพตัวเองใหญ่พอเห็นไพ่ (สองฝั่งเท่ากัน · contain · ไม่กลับด้าน · สลับกล้องได้)");
+  }
+  console.log("  ✓ 19.7 ห้องวิดีโอ: แม่หมอเริ่มที่สองฝั่งเท่ากัน · เห็นทั้งเฟรม · ไม่กลับด้าน · จัดจอ 3 แบบ · สลับกล้องกลางสาย");
+
+  // ── 19.8 แท็บหมอดูพาร์ทเนอร์ในแอดมิน ──────────────────────────────────────────────
+  const { toAdminReader, getReaderById } = await import("../../src/lib/marketplace/readers.repo");
+  const full = await getReaderById(readerId);
+  const adminView = full ? toAdminReader(full) : null;
+  const openCounts = await repo.countOpenBookingsByReader(Date.now());
+  const adminList = src("src/app/api/admin/readers/route.ts");
+  const adminOne = src("src/app/api/admin/readers/[id]/route.ts");
+  const manager = src("src/components/admin/ReadersManager.tsx");
+  if (
+    !adminView ||
+    "sessionSecret" in adminView ||
+    adminView.id !== readerId ||
+    !(openCounts instanceof Map) ||
+    // ทุกคำตอบของ API แอดมินผ่าน toAdminReader — กุญแจเซ็นลิงก์แผงไม่ออกนอกเซิร์ฟเวอร์
+    /json\(\{\s*readers\s*\}/.test(adminList) ||
+    /json\(\{\s*reader[,\s]/.test(adminList + adminOne) ||
+    !/json\(\{ reader: toAdminReader\(reader\), token, expiresAt \}\)/.test(adminOne) ||
+    !/priceThb: z\.number\(\)/.test(adminList) // ราคาที่ตั้งตอนเพิ่มแม่หมอเคยโดน zod ตัดทิ้งเงียบ ๆ
+  ) {
+    throw new Error("❌ 19.8 API แอดมินต้องไม่ส่ง sessionSecret · บอกเวลาหมดอายุลิงก์ · รับราคาตอนเพิ่มแม่หมอ");
+  }
+  // ตรวจเฉพาะโค้ด (ตัดคอมเมนต์ออก) — คอมเมนต์อธิบายของเดิมเอ่ยถึง confirm() และอิโมจิเดิมได้
+  const managerCode = manager.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/(^|[^:])\/\/[^\n]*/g, "$1 ");
+  if (
+    /\bconfirm\(/.test(managerCode) || // ลบ/พักงานต้องยืนยันในหน้า ไม่ใช่กล่อง confirm() ของเบราว์เซอร์
+    /[⏳⛔]/u.test(managerCode) || // กฎเหล็กข้อ 2
+    !manager.includes("ยืนยันพักงาน") ||
+    !manager.includes("deleteConfirmText.trim() !== editing.displayName.trim()") || // ลบต้องพิมพ์ชื่อให้ตรง
+    !manager.includes("ใช้ได้ถึง") // บอกเวลาหมดอายุลิงก์แผงจริง
+  ) {
+    throw new Error("❌ 19.8 หน้าแอดมินแม่หมอต้องยืนยันก่อนพักงาน/ลบ (ลบต้องพิมพ์ชื่อ) · ไม่มีอิโมจิการ์ตูน · บอกอายุลิงก์แผง");
+  }
+  console.log("  ✓ 19.8 แอดมินแม่หมอ: ไม่ส่ง sessionSecret · บอกอายุลิงก์แผง · ราคาตอนเพิ่มไม่หาย · พักงาน/ลบต้องยืนยันในหน้า");
+
+  // ── 19.9 แผงแม่หมออ่านเข้าใจ: ไม่มีรหัสอังกฤษจาก AI · ลิงก์หมดอายุไม่ล้างหน้า ──────────────
+  const offer = await import("../../src/lib/marketplace/offer");
+  const consolePage = src("src/app/(th)/readers/console/page.tsx");
+  if (
+    offer.questionUrgencyLabel("medium") !== "ด่วนปานกลาง" ||
+    offer.questionUrgencyLabel("bogus") !== null ||
+    !/[ก-๙]/.test(offer.suggestedSpreadLabel("love-two-hearts") ?? "") ||
+    offer.suggestedSpreadLabel("unknown-spread") !== null ||
+    /\{ticket\.screening\.(category|urgency|suggestedSpread)\}/.test(consolePage) ||
+    consolePage.includes("setError(json.error") || // ข้อความ API ("Token หมดอายุ…") ห้ามโชว์แม่หมอตรง ๆ
+    !consolePage.includes("setLinkExpired(true)") ||
+    !consolePage.includes("consoleAccessError(res.status)")
+  ) {
+    throw new Error("❌ 19.9 แผงแม่หมอต้องแปลงค่าจาก AI เป็นคำไทย และลิงก์หมดอายุกลางคิวต้องไม่ล้างหน้า (ห้องวิดีโอดับ)");
+  }
+  console.log("  ✓ 19.9 แผงแม่หมอ: หมวด/ความด่วน/ผังแนะนำเป็นคำไทย · เตือนก่อนลิงก์หมด · หมดกลางคิวไม่ล้างหน้า");
 }
 
 runTest().catch((err) => {

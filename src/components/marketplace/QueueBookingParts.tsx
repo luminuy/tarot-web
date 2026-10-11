@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { SlotPicker } from "@/components/marketplace/SlotPicker";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { IN_APP_BROWSER_LABEL, withLineExternalBrowser, type InAppBrowser } from "@/lib/marketplace/in-app-browser";
 import {
   buildIcs,
   CHECKOUT_EXPIRES_MINUTES,
@@ -137,17 +139,25 @@ export function BookingConfirmedPanel({
   readerName,
   ticketId,
   nowMs,
+  accessUrl,
 }: {
   booking: BookingView;
   readerName: string;
   ticketId: string;
   nowMs: number;
+  /** ลิงก์นัดส่วนตัว (เปิดได้ทุกเบราว์เซอร์) — null = ยังไม่ได้มาจากเซิร์ฟเวอร์ */
+  accessUrl?: string | null;
 }) {
   if (!booking.slotStart) return null;
   const chip = dayChipParts(booking.slotStart);
   const title = `ปรึกษาดวงกับ ${readerName} · SeerTarot`;
-  const pageUrl = typeof window !== "undefined" ? window.location.origin + `/readers/queue/${ticketId}` : "";
-  const details = `ถึงเวลาแล้วเปิดลิงก์นี้ในเครื่องที่ใช้จอง แล้วกดเข้าห้องวิดีโอคอล: ${pageUrl}`;
+  /*
+   * ปฏิทินเปิดลิงก์ใน Safari/Chrome เสมอ — ลิงก์หน้าคิวเปล่า ๆ ต้องมีคุกกี้ของเบราว์เซอร์ที่ใช้จอง
+   * คนที่จองในแอป LINE จึงเปิดจากปฏิทินแล้ว "ไม่พบนัด" (CONSULT_FLOW P6) ➔ ใส่ลิงก์นัดส่วนตัวแทน
+   */
+  const pageUrl =
+    accessUrl || (typeof window !== "undefined" ? window.location.origin + `/readers/queue/${ticketId}` : "");
+  const details = `ถึงเวลาแล้วเปิดลิงก์นี้ แล้วกดเข้าห้องวิดีโอคอล: ${pageUrl}`;
 
   const downloadIcs = () => {
     const ics = buildIcs({ uid: booking.id, slotStart: booking.slotStart as number, title, details, url: pageUrl });
@@ -208,8 +218,112 @@ export function BookingConfirmedPanel({
         </button>
       </div>
       <p className="text-center text-[12px] leading-relaxed text-muted">
-        ลิงก์คิวนี้เปิดได้เฉพาะเบราว์เซอร์ที่ใช้จอง — ใช้เครื่องเดิมเข้าห้องตอนถึงเวลานัด
+        ถึงเวลานัด เปิด "ลิงก์นัดของคุณ" ด้านล่างจากมือถือหรือคอมเครื่องไหนก็ได้
       </p>
+    </div>
+  );
+}
+
+/** คัดลอกข้อความ — เบราว์เซอร์ในแอปบางตัวไม่ให้ใช้ clipboard API จึงมีทางสำรอง */
+async function copyText(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // ตกไปทางสำรอง
+  }
+  try {
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    const ok = document.execCommand("copy");
+    area.remove();
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
+function CopyLinkButton({ text, label = "คัดลอกลิงก์", className = "" }: { text: string; label?: string; className?: string }) {
+  const [state, setState] = useState<"idle" | "copied" | "failed">("idle");
+  return (
+    <button
+      type="button"
+      onClick={async () => {
+        const ok = await copyText(text);
+        setState(ok ? "copied" : "failed");
+        setTimeout(() => setState("idle"), 2500);
+      }}
+      className={`flex min-h-[46px] items-center justify-center gap-2 rounded-full border border-line-interactive-warm bg-surface px-4 text-sm font-semibold text-ink-deep transition-colors cursor-pointer hover:border-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${className}`}
+    >
+      <span aria-live="polite">{state === "copied" ? "คัดลอกแล้ว ✓" : state === "failed" ? "กดค้างที่ลิงก์เพื่อคัดลอก" : label}</span>
+    </button>
+  );
+}
+
+/**
+ * ✦ ลิงก์นัดของคุณ — เปิดได้ทุกเบราว์เซอร์ทุกเครื่อง (CONSULT_FLOW_UX_PLAN ข้อ 1.7 · P6)
+ * ลิงก์เซ็นชุดเดียวกับในอีเมลยืนยัน (`bookingAccessUrl`) — เปิดแล้วเบราว์เซอร์นั้นได้สิทธิ์เข้านัดนี้
+ */
+export function ConsultLinkPanel({ accessUrl }: { accessUrl: string }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  return (
+    <section aria-labelledby="consult-link-heading" className="altar-card-porcelain !rounded-3xl space-y-3 p-5 sm:p-6">
+      <h2 id="consult-link-heading" className="font-bold text-ink">
+        <ThaiPhrases>ลิงก์นัดของคุณ</ThaiPhrases>
+      </h2>
+      <p className="text-[13px] leading-relaxed text-ink">
+        เปิดลิงก์นี้จากมือถือหรือคอมเครื่องไหนก็ได้ ถึงเวลาแล้วกดเข้าห้องวิดีโอคอล — เก็บไว้กับตัว อย่าส่งต่อให้คนอื่น
+      </p>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <input
+          ref={inputRef}
+          readOnly
+          value={accessUrl}
+          aria-label="ลิงก์นัดของคุณ"
+          onFocus={(e) => e.currentTarget.select()}
+          className="min-h-[46px] min-w-0 flex-1 rounded-xl border border-line-interactive-warm bg-surface px-3 font-mono text-[12px] text-ink-deep"
+        />
+        <CopyLinkButton text={accessUrl} label="คัดลอกลิงก์นัด" className="shrink-0" />
+      </div>
+      <p className="text-[12px] leading-relaxed text-muted">ลิงก์เดียวกันนี้อยู่ในอีเมลยืนยันด้วย (ถ้าใส่อีเมลตอนชำระเงิน)</p>
+    </section>
+  );
+}
+
+/**
+ * ✦ เปิดอยู่ในเบราว์เซอร์ของแอป (LINE · Facebook · IG · TikTok) — พาไป Safari/Chrome พร้อมนัด (P6 · P7)
+ * LINE เปิดเบราว์เซอร์หลักให้เองด้วย `openExternalBrowser=1` · แอปอื่นสั่งจากหน้าเว็บไม่ได้ ➔ คัดลอกลิงก์ + บอกวิธี
+ */
+export function InAppBrowserNotice({ app, accessUrl }: { app: InAppBrowser; accessUrl: string }) {
+  const label = IN_APP_BROWSER_LABEL[app];
+  return (
+    <div role="note" className="space-y-2.5 rounded-2xl border border-gold-ink/30 bg-inset-warm p-4 text-[13px] leading-relaxed text-ink">
+      <p className="text-sm font-bold text-ink-deep">กำลังเปิดอยู่ในแอป {label}</p>
+      <p>
+        วิดีโอคอลทำงานดีที่สุดใน Safari หรือ Chrome {app === "line" ? "กดปุ่มด้านล่าง" : "คัดลอกลิงก์นัดไปเปิด"} นัดของคุณจะตามไปด้วย ไม่ต้องจองใหม่
+      </p>
+      {app === "line" ? (
+        <a
+          href={withLineExternalBrowser(accessUrl)}
+          className="btn-gold-glass flex min-h-[48px] w-full items-center justify-center gap-2 px-5 text-sm font-bold"
+        >
+          เปิดใน Safari / Chrome <span aria-hidden="true">→</span>
+        </a>
+      ) : (
+        <>
+          <CopyLinkButton text={accessUrl} label="คัดลอกลิงก์นัด" className="w-full" />
+          <p className="text-muted">
+            แล้วกดปุ่ม ⋯ ของแอป {label} เลือก &quot;เปิดในเบราว์เซอร์&quot; หรือวางลิงก์ใน Safari/Chrome
+          </p>
+        </>
+      )}
     </div>
   );
 }

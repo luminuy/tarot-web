@@ -311,7 +311,7 @@ export interface Reader { id: string; displayName: string; bio: string; avatarUr
 | ยกเลิก/คืนเงิน | ก่อนนัด ≥ 24 ชม. คืนเต็ม · < 24 ชม. ไม่คืน · แม่หมอยกเลิก/ไม่มาภายใน 15 นาที คืนเต็ม · คิวสดระหว่างรอ คืนเต็ม · เลื่อนได้ 1 ครั้ง (≥ 24 ชม.) |
 
 **ไฟล์**: `src/lib/marketplace/booking-policy.ts` (กติกา — ไม่มี I/O ใช้ร่วมหน้าเว็บ/API) · `booking.repo.ts` (วงจรใบจอง + `settleConsultationPayment` จุดเดียวที่เปลี่ยนเงินเข้าเป็นนัด) ·
-`consultation-checkout.ts` · `SlotPicker.tsx` · `BookQueueModal.tsx` · `QueueBookingParts.tsx` · `ConsoleBookingParts.tsx` · migrations/0020
+`consultation-checkout.ts` · `SlotPicker.tsx` · `BookingFlow.tsx` (หน้าจองเต็มจอ `/readers/[id]/book` — แทน `BookQueueModal` ที่ถอดแล้ว 2026-10-11) · `QueueBookingParts.tsx` · `ConsoleBookingParts.tsx` · migrations/0020
 
 **กับดักที่ห้ามพลาด**
 - ห้ามยืนยันนัดที่อื่นนอก `settleConsultationPayment` (เดิม `updatePaymentStatus` ตั้ง bookings = 'paid' เองโดยไม่ดูว่าที่ว่างไหม — ถอดแล้ว)
@@ -335,6 +335,24 @@ export interface Reader { id: string; displayName: string; bio: string; avatarUr
 
 **กับดัก**: เวลาพัก/เพดานต่อวันเป็น "ความสะดวก" — สองคนจองช่องติดกันพร้อมกันเป๊ะอาจหลุดได้ ส่วนการจองเวลาเดียวกันซ้อน unique index กันไว้แล้ว ·
 อย่าใส่คำถามลูกค้าลงอีเมลแม่หมอ (อีเมลไม่ใช่ช่องทางที่ล็อกอิน) · ด่าน `test-marketplace-readers` 18.1–18.6
+
+### 🛎️ ขั้นตอนปรึกษาแม่หมอแบบใหม่ (2026-10-11 · แผน `docs/plans/CONSULT_FLOW_UX_PLAN_2026-10-11.md`)
+
+ที่มา: ลูกค้าจริงเปิดลิงก์แม่หมอในแอป LINE แล้วจองไม่ได้ ("เข้าไม่ได้ค่ะ · ทำไมยากจัง · มันเลือกเวลาอื่นอ่ะ")
+
+| เรื่อง | ไฟล์ / กติกา |
+| :-- | :-- |
+| หน้าจองเต็มจอ | `/readers/[id]/book` (noindex) · `BookingFlow.tsx` — ขั้น "เวลา ➔ ชื่อและคำถาม" · ย้อนกลับ = ถอยขั้น · ปุ่มชำระเงินกดได้เสมอ ขาดอะไรพาไปช่องนั้น |
+| เลือกเวลา | `SlotPicker.tsx` — เวลาว่างเร็วที่สุด 3 ช่อง · แถววันแบ่งหน้า (ไม่เลื่อนแนวนอน) · วันที่แตะล่าสุดชนะเสมอ (`resolveVisibleDay`) |
+| รับนัดล่วงหน้าอย่างน้อย | `readers.lead_min` (migrations/0030) · ตัวเลือก `LEAD_OPTIONS_MIN` · ค่าเริ่มต้น 2 ชม. · `generateSlots` และ `slotRejection` ใช้ค่าเดียวกัน |
+| ลิงก์นัดส่วนตัว | `accessUrl` ใน `GET /api/marketplace/tickets/[id]` — **เจ้าของตั๋วเท่านั้น** (แม่หมอ = null · A2-13) |
+| เบราว์เซอร์ในแอป | `in-app-browser.ts` — LINE ใช้ `openExternalBrowser=1` · แอปอื่นบอกวิธีเปิดเอง + คัดลอกลิงก์ |
+| แผงแม่หมอ | การ์ด "ส่งลิงก์ให้ลูกค้า" บอกว่าลูกค้าที่เปิดตอนนี้จะคุยได้เลย/ได้แค่นัด/จองไม่ได้ · เตือนก่อนลิงก์แผงหมดอายุ 3 ชม. · หมดกลางคิวไม่ล้างหน้า · ค่าจาก AI เป็นคำไทย |
+| ห้องวิดีโอ | จัดจอ 3 แบบ (เห็นเท่ากัน · ภาพฉันใหญ่ · อีกฝั่งใหญ่) · `object-contain` · แม่หมอเริ่มไม่กลับด้าน · สลับกล้องด้วย `replaceTrack` |
+| แอดมิน "หมอดูพาร์ทเนอร์" | `ReadersManager.tsx` — สถานะงานของแม่หมอแต่ละคน · ส่งลิงก์แผงพร้อมเวลาหมดอายุ · พักงาน/ลบต้องยืนยันในหน้า · API ไม่ส่ง `sessionSecret` (`toAdminReader`) |
+
+**กับดัก**: ห้ามเชื่อเวลา `?slot=` จากไคลเอนต์ (ตรวจด้วย `checkSlotBookable` เสมอ) · ห้ามส่ง `accessUrl` / `customerRef` ให้แม่หมอ · ห้ามให้ `sessionSecret` ออกนอกเซิร์ฟเวอร์ ·
+ด่าน `test-marketplace-readers` 19.1–19.9
 
 ### 7.3 Repository & APIs
 - `src/lib/marketplace/payments.repo.ts`: จัดการ CRUD, Transition สถานะ, คำนวณส่วนแบ่งแม่หมอ
@@ -369,7 +387,7 @@ M5 Live Queue + Reader Console
   [x] src/lib/auth/reader-auth.ts
   [x] /readers/console + /api/marketplace/console/queue
   [x] /readers/queue/[id] + /api/marketplace/tickets/[id]
-  [x] BookQueueModal + ReaderDetailClient
+  [x] BookQueueModal + ReaderDetailClient (2026-10-11: หน้าต่างลอยถูกแทนด้วยหน้าจองเต็มจอ `/readers/[id]/book`)
 
 M6 AI Pre-Screening Engine
   [x] src/lib/marketplace/screening.ts

@@ -8,10 +8,14 @@ import { signReaderToken } from "@/lib/auth/reader-auth";
 import {
   deleteReader,
   getReaderById,
+  toAdminReader,
   updateReader,
 } from "@/lib/marketplace/readers.repo";
 
 export const runtime = "nodejs";
+
+/** อายุลิงก์แผงแม่หมอที่แอดมินส่งให้ — หน้าแอดมินบอกเวลาหมดอายุจริงจาก `expiresAt` (ไม่เดาเอง) */
+const CONSOLE_LINK_HOURS = 24;
 
 const UpdateReaderSchema = z.object({
   displayName: z.string().trim().min(2, "ชื่อต้องมีอย่างน้อย 2 ตัวอักษร").max(80, "ชื่อยาวเกินไป").optional(),
@@ -27,6 +31,7 @@ const UpdateReaderSchema = z.object({
 
 /**
  * GET /api/admin/readers/[id] - ดึงข้อมูลแม่หมอรายบุคคล พร้อมสร้าง Console Access Token (24 ชม.)
+ * ทุกครั้งที่เรียก = ลิงก์ใหม่อายุเต็ม 24 ชม. (ลิงก์เก่ายังใช้ได้จนหมดอายุของมันเอง)
  */
 export async function GET(
   _request: Request,
@@ -41,8 +46,9 @@ export async function GET(
     if (!reader) {
       return NextResponse.json({ error: "ไม่พบแม่หมอที่ระบุ" }, { status: 404 });
     }
-    const token = signReaderToken(reader.id, reader.sessionSecret, 24);
-    return NextResponse.json({ reader, token });
+    const expiresAt = Date.now() + CONSOLE_LINK_HOURS * 60 * 60 * 1000;
+    const token = signReaderToken(reader.id, reader.sessionSecret, CONSOLE_LINK_HOURS);
+    return NextResponse.json({ reader: toAdminReader(reader), token, expiresAt });
   } catch (err) {
     console.error("[API Admin Reader GET ID Error]", err);
     return NextResponse.json({ error: "เกิดข้อผิดพลาดในการค้นหาแม่หมอ" }, { status: 500 });
@@ -87,7 +93,7 @@ export async function PATCH(
       `อัปเดตแม่หมอ: ${updated.displayName} (${id}) [status: ${updated.status}]`
     );
 
-    return NextResponse.json({ reader: updated, success: true });
+    return NextResponse.json({ reader: toAdminReader(updated), success: true });
   } catch (err) {
     console.error("[API Admin Reader PATCH Error]", err);
     return NextResponse.json({ error: "เกิดข้อผิดพลาดในการอัปเดตข้อมูลแม่หมอ" }, { status: 500 });

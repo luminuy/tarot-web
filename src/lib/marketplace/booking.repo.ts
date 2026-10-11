@@ -8,6 +8,7 @@ import {
   MAX_RESCHEDULES,
   slotMs,
   slotRejection,
+  soonestSlots,
   bkkDateKey,
   BOOKING_HORIZON_DAYS,
   type SlotOptions,
@@ -192,17 +193,19 @@ export async function replaceBlockedDates(readerId: string, dates: string[]): Pr
   else for (const st of statements) await st.run();
 }
 
-/** ตั้งค่าที่มีผลกับเวลาว่าง: วันหยุด · เวลาพัก · เพดานต่อวัน */
+/** ตั้งค่าที่มีผลกับเวลาว่าง: วันหยุด · เวลาพัก · เพดานต่อวัน · เวลาแจ้งล่วงหน้าขั้นต่ำ */
 export async function getSlotOptions(readerId: string, nowMs = Date.now()): Promise<SlotOptions> {
   const db = await getAppDB();
   const row = await db
-    .prepare("SELECT buffer_min, daily_cap FROM readers WHERE id = ? LIMIT 1")
+    .prepare("SELECT buffer_min, daily_cap, lead_min FROM readers WHERE id = ? LIMIT 1")
     .bind(readerId)
-    .first<{ buffer_min: number | null; daily_cap: number | null }>();
+    .first<{ buffer_min: number | null; daily_cap: number | null; lead_min: number | null }>();
   return {
     blockedDates: new Set(await getBlockedDates(readerId, nowMs)),
     bufferMin: Number(row?.buffer_min ?? 0) || 0,
     dailyCap: row?.daily_cap && row.daily_cap > 0 ? Number(row.daily_cap) : null,
+    // ค่าแปลก/ไม่ได้ตั้ง ➔ generateSlots ตกไปใช้ DEFAULT_LEAD_MIN เอง (normalizeLeadMin)
+    leadMin: row?.lead_min != null ? Number(row.lead_min) : null,
   };
 }
 
@@ -231,6 +234,41 @@ export async function checkSlotBookable(
 export async function getNextAvailableSlot(readerId: string, nowMs = Date.now()): Promise<number | null> {
   const days = await getAvailableSlots(readerId, nowMs);
   return days[0]?.slots[0] ?? null;
+}
+
+/**
+ * เวลาว่างที่เร็วที่สุด `count` ช่อง (ข้ามวันได้) — ปุ่มลัด "เวลาว่างเร็วที่สุด" บนการ์ดจอง
+ * ว่าง = ยังไม่เปิดตาราง หรือเต็มทุกช่องใน 14 วัน · เป็นแค่ทางลัดหน้าจอ ตอนจองจริงตรวจด้วย checkSlotBookable เสมอ
+ */
+export async function getSoonestSlots(readerId: string, nowMs = Date.now(), count = 3): Promise<number[]> {
+  return soonestSlots(await getAvailableSlots(readerId, nowMs), count);
+}
+
+/**
+ * งานที่ค้างของแม่หมอทุกคนในคำสั่งเดียว (หน้าแอดมิน "หมอดูพาร์ทเนอร์")
+ * - `upcoming` = นัดล่วงหน้าที่จ่ายแล้วและยังไม่จบ (รวมนัดที่กำลังคุยอยู่)
+ * - `liveWaiting` = คิวสดที่จ่ายแล้วแต่แม่หมอยังไม่ได้คุยจบ — มีค้างนาน = แม่หมออาจไม่ได้เปิดแผงดู
+ * นับจากสถานะตั๋วจริง (waiting/ready) ไม่ใช่สถานะใบจองอย่างเดียว ใบจองเก่าที่ตั๋วปิดไปแล้วจึงไม่ถูกนับ
+ */
+export async function countOpenBookingsByReader(
+  nowMs = Date.now()
+): Promise<Map<string, { upcoming: number; liveWaiting: number }>> {
+  const db = await getAppDB();
+  const { results } = await db
+    .prepare(
+      `SELECT b.reader_id AS reader_id,
+              SUM(CASE WHEN b.kind = 'walkup' THEN 0 WHEN b.slot_start >= ? THEN 1 ELSE 0 END) AS upcoming,
+              SUM(CASE WHEN b.kind = 'walkup' THEN 1 ELSE 0 END) AS live_waiting
+         FROM bookings b
+         JOIN queue_tickets t ON t.id = b.ticket_id
+        WHERE b.status = 'confirmed' AND t.status IN ('waiting', 'ready')
+        GROUP BY b.reader_id`
+    )
+    .bind(nowMs - slotMs)
+    .all<{ reader_id: string; upcoming: number | null; live_waiting: number | null }>();
+  return new Map(
+    (results || []).map((r) => [r.reader_id, { upcoming: Number(r.upcoming ?? 0), liveWaiting: Number(r.live_waiting ?? 0) }])
+  );
 }
 
 /* ── ใบจอง ───────────────────────────────────────────────────────────────── */

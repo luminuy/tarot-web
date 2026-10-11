@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
@@ -19,12 +19,13 @@ import type { IceServerConfig } from "@/lib/marketplace/turn";
  * - ไม่บันทึกภาพ เสียง หรือบทสนทนาใด ๆ
  */
 
-const VIDEO_CONSTRAINTS: MediaTrackConstraints = {
+/** ขนาดภาพที่ล็อกไว้ (720p) — ใช้ซ้ำตอนสลับกล้อง ห้ามปลดเพดานโดยไม่คำนวณโควตา TURN ใหม่ */
+const VIDEO_SIZE: MediaTrackConstraints = {
   width: { ideal: 1280, max: 1280 },
   height: { ideal: 720, max: 720 },
   frameRate: { ideal: 24, max: 30 },
-  facingMode: "user",
 };
+const VIDEO_CONSTRAINTS: MediaTrackConstraints = { ...VIDEO_SIZE, facingMode: "user" };
 const AUDIO_CONSTRAINTS: MediaTrackConstraints = {
   echoCancellation: true,
   noiseSuppression: true,
@@ -38,6 +39,8 @@ const POLL_CONNECTED_MS = 4000;
 const ICE_GATHER_TIMEOUT_MS = 6000;
 
 type LinkState = "negotiating" | "connected" | "reconnecting" | "failed";
+/** จัดจอ: สองฝั่งเท่ากัน · อีกฝั่งใหญ่ · ภาพของฉันใหญ่ */
+type CallLayout = "split" | "peer" | "self";
 type Phase = "idle" | "starting" | "live" | "ended" | "error";
 
 interface EngineOptions {
@@ -100,6 +103,15 @@ class CallEngine {
 
   start(initial: CallView): void {
     void this.handle(initial).finally(() => this.schedule());
+  }
+
+  /**
+   * สลับกล้องกลางสาย — แทนแทร็กภาพบนสายเดิม ไม่ต้องเจรจาใหม่ (replaceTrack)
+   * สายรอบถัดไป (ต่อสายใหม่) หยิบแทร็กจาก `o.stream` ซึ่งผู้เรียกเปลี่ยนแทร็กในนั้นแล้ว
+   */
+  async replaceVideoTrack(track: MediaStreamTrack): Promise<void> {
+    const sender = this.pc?.getSenders().find((s) => s.track?.kind === "video");
+    if (sender) await sender.replaceTrack(track);
   }
 
   stop(): void {
@@ -276,6 +288,11 @@ export interface VideoCallRoomProps {
   embedded?: boolean;
   /** รูปของอีกฝั่ง (ถ้ามี) — แสดงบนเวทีก่อนเข้าห้อง */
   peerAvatarUrl?: string | null;
+  /**
+   * ทางแก้ที่แสดงใต้ข้อความผิดพลาดเมื่อเปิดกล้องไม่สำเร็จ — หน้าคิวส่งปุ่ม "เปิดใน Safari/Chrome"
+   * มาให้ตอนลูกค้าเปิดอยู่ในเบราว์เซอร์ของแอป (LINE · Facebook · IG · TikTok ขอกล้องไม่ได้ในบางเครื่อง)
+   */
+  mediaHelp?: ReactNode;
 }
 
 export function VideoCallRoom({
@@ -286,6 +303,7 @@ export function VideoCallRoom({
   onClose,
   embedded = false,
   peerAvatarUrl = null,
+  mediaHelp = null,
 }: VideoCallRoomProps) {
   const shell = embedded ? "" : "altar-card-porcelain p-5";
   const endpoint = `/api/marketplace/calls/${encodeURIComponent(ticketId)}`;
@@ -301,6 +319,18 @@ export function VideoCallRoom({
   const [camOn, setCamOn] = useState(true);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  /*
+   * 🎴 จัดจอ (เจ้าของสั่ง 2026-10-11: "แม่หมอเวลาเปิดไพ่ต้องเห็นไพ่ตัวเองในกล้อง แต่ภาพตัวเองอันเล็ก")
+   * แม่หมอเริ่มที่ "สองฝั่งเท่ากัน" — เห็นภาพตัวเองใหญ่พอจัดไพ่ให้อยู่ในกรอบ · ลูกค้าเริ่มที่ "แม่หมอใหญ่"
+   */
+  const [layout, setLayout] = useState<CallLayout>(role === "reader" ? "split" : "peer");
+  /*
+   * ภาพกระจก (กลับซ้าย-ขวา) เฉพาะ "ภาพของฉัน" บนจอเราเอง — อีกฝั่งได้ภาพจริงเสมอ
+   * แม่หมอเริ่มแบบไม่กลับด้าน = เห็นตัวหนังสือบนไพ่แบบเดียวกับที่ลูกค้าเห็น · ลูกค้าเริ่มแบบกระจก (คุ้นเหมือนกล้องหน้า)
+   */
+  const [mirrorPref, setMirrorPref] = useState(role !== "reader");
+  const [videoInputs, setVideoInputs] = useState<MediaDeviceInfo[]>([]);
+  const [switching, setSwitching] = useState(false);
 
   const engineRef = useRef<CallEngine | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -352,6 +382,11 @@ export function VideoCallRoom({
     setLocalStream(stream);
     setMicOn(true);
     setCamOn(true);
+    // รายชื่อกล้อง (ได้ชื่อครบหลังอนุญาตแล้วเท่านั้น) — มีมากกว่าหนึ่งตัวถึงจะโชว์ปุ่ม "สลับกล้อง"
+    void navigator.mediaDevices
+      .enumerateDevices?.()
+      .then((list) => setVideoInputs(list.filter((d) => d.kind === "videoinput")))
+      .catch(() => undefined);
 
     try {
       const res = await fetch(endpoint, {
@@ -429,6 +464,46 @@ export function VideoCallRoom({
     setCamOn(next);
   };
 
+  /**
+   * 📷 สลับกล้อง (หน้า ↔ หลัง บนมือถือ · กล้องตัวอื่นบนคอม เช่นกล้องที่ตั้งส่องโต๊ะไพ่)
+   * - แทนแทร็กบนสายเดิม ไม่ต้องวางสายหรือเจรจาใหม่
+   * - ปล่อยกล้องเดิมก่อนเปิดตัวใหม่ (มือถือหลายรุ่นเปิดสองกล้องพร้อมกันไม่ได้) — เปิดไม่ได้ ➔ คืนกล้องเดิม
+   */
+  const switchCamera = async () => {
+    const stream = streamRef.current;
+    if (!stream || switching || videoInputs.length < 2) return;
+    setSwitching(true);
+    setError(null);
+    const current = stream.getVideoTracks()[0] ?? null;
+    const currentId = current?.getSettings().deviceId;
+    const at = videoInputs.findIndex((d) => d.deviceId === currentId);
+    const next = videoInputs[(at + 1) % videoInputs.length];
+    const acquire = async (deviceId: string | undefined) => {
+      const fresh = await navigator.mediaDevices.getUserMedia({
+        video: deviceId ? { ...VIDEO_SIZE, deviceId: { exact: deviceId } } : VIDEO_CONSTRAINTS,
+        audio: false,
+      });
+      return fresh.getVideoTracks()[0];
+    };
+    current?.stop();
+    let track: MediaStreamTrack | undefined;
+    try {
+      track = await acquire(next.deviceId);
+    } catch {
+      setError("สลับกล้องไม่สำเร็จ ใช้กล้องเดิมต่อ");
+      track = await acquire(currentId).catch(() => undefined);
+    }
+    if (track) {
+      track.enabled = camOn;
+      if (current) stream.removeTrack(current);
+      stream.addTrack(track);
+      await engineRef.current?.replaceVideoTrack(track).catch(() => undefined);
+      // ภาพตัวอย่างต้องเป็นอ็อบเจกต์ใหม่ วิดีโอบนจอถึงจะรับแทร็กใหม่แน่นอน
+      setLocalStream(new MediaStream(stream.getTracks()));
+    }
+    setSwitching(false);
+  };
+
   // ── ก่อนเข้าห้อง: ขอความยินยอม (ลูกค้า) / ปุ่มเข้าห้อง (แม่หมอ) ─────────────────────
   if (phase === "idle" || phase === "error" || phase === "ended") {
     const isCustomer = role === "customer";
@@ -464,6 +539,14 @@ export function VideoCallRoom({
         {error && (
           <p role="alert" className="text-sm text-err">
             {error}
+          </p>
+        )}
+        {phase === "error" && mediaHelp}
+
+        {!isCustomer && phase === "idle" && (
+          <p className="rounded-xl bg-inset-warm/70 p-3.5 text-[13px] leading-relaxed text-ink">
+            ก่อนเข้าห้อง: ตั้งกล้องให้เห็นโต๊ะไพ่ทั้งหมด · ในห้องกด &quot;ภาพฉันใหญ่&quot; เพื่อเช็กว่าไพ่อยู่ในกรอบ
+            และกด &quot;สลับกล้อง&quot; ได้ถ้ามีกล้องหลังหรือกล้องอีกตัว
           </p>
         )}
 
@@ -516,33 +599,70 @@ export function VideoCallRoom({
               ? "กำลังเชื่อมต่อ…"
               : null;
 
+  // กล้องหลัง (ส่องโต๊ะ) ไม่ต้องกลับด้านเลย · กล้องหน้าตามที่ผู้ใช้เลือก
+  const facing = localStream?.getVideoTracks()[0]?.getSettings().facingMode;
+  const mirrorOn = facing === "environment" ? false : mirrorPref;
+  const peerShort = role === "reader" ? "ลูกค้า" : "แม่หมอ";
+
+  /*
+   * 🎴 เวทีวิดีโอ — วิดีโอสองตัว "อยู่ที่เดิมเสมอ" เปลี่ยนแค่ตำแหน่ง/ขนาดด้วยคลาส (ไม่ถอดใส่ใหม่ ภาพไม่ดับตอนจัดจอ)
+   * ⚠️ object-contain ทั้งสองภาพ: เห็นทั้งเฟรมที่กล้องส่งจริง — เดิม object-cover ตัดขอบภาพแนวนอน
+   *    ไพ่ที่วางริมโต๊ะจึงหลุดกรอบทั้งบนจอแม่หมอและจอลูกค้า (เจ้าของสั่งปรับมุมกล้อง 2026-10-11)
+   */
+  const BIG = "inset-0 h-full w-full";
+  const PIP = "bottom-3 right-3 z-10 h-auto w-32 aspect-video rounded-xl border border-white/40 shadow-lg sm:w-48";
+  const SPLIT_A = "left-0 top-0 h-1/2 w-full sm:h-full sm:w-1/2";
+  const SPLIT_B = "bottom-0 left-0 h-1/2 w-full sm:left-1/2 sm:h-full sm:w-1/2";
+  const peerPos = layout === "split" ? SPLIT_A : layout === "peer" ? BIG : PIP;
+  const selfPos = layout === "split" ? SPLIT_B : layout === "self" ? BIG : PIP;
+  const tileLabel = "pointer-events-none absolute left-2 top-2 z-20 rounded-full bg-black/55 px-2 py-0.5 text-[12px] text-white";
+
+  // ป้ายสั้นพอไม่หักกลางคำบนจอ 360px (ปุ่มละ ~100px) · บรรทัดรองบอกว่าใช้ตอนไหน
+  const layoutOptions: { value: CallLayout; label: string; hint?: string }[] = [
+    { value: "split", label: "เห็นเท่ากัน" },
+    { value: "self", label: "ภาพฉันใหญ่", hint: role === "reader" ? "ตอนเปิดไพ่" : undefined },
+    { value: "peer", label: `${peerShort}ใหญ่` },
+  ];
+
   return (
     <section
       aria-label={`วิดีโอคอลกับ${peerName}`}
-      className={`${embedded ? "" : "altar-card-porcelain p-2 sm:p-4"} w-full max-w-3xl mx-auto space-y-3 font-serif-th`}
+      className={`${embedded ? "" : "altar-card-porcelain p-2 sm:p-4"} w-full max-w-4xl mx-auto space-y-3 font-serif-th`}
     >
-      {/* สูงไม่เกิน 65% ของจอ — จอกว้างแบบเดสก์ท็อปไม่ให้ภาพดันปุ่มวางสายตกขอบล่าง */}
-      <div className="relative w-full aspect-[3/4] sm:aspect-video max-h-[65vh] rounded-2xl bg-ink-deep overflow-hidden">
-        <video
-          ref={remoteVideoRef}
-          autoPlay
-          playsInline
-          aria-label={`ภาพจาก${peerName}`}
-          className={`h-full w-full object-cover ${connected ? "" : "opacity-0"}`}
-        />
-        {status && (
-          <p role="status" className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-white">
-            {status}
-          </p>
-        )}
-        <video
-          ref={localVideoRef}
-          autoPlay
-          playsInline
-          muted
-          aria-label="ภาพจากกล้องของคุณ"
-          className={`absolute bottom-3 right-3 w-24 sm:w-32 aspect-[3/4] rounded-xl object-cover border border-white/40 -scale-x-100 ${camOn ? "" : "opacity-30"}`}
-        />
+      {/* สูงไม่เกิน 70% ของจอ — จอกว้างแบบเดสก์ท็อปไม่ให้ภาพดันปุ่มวางสายตกขอบล่าง */}
+      <div className="relative w-full aspect-[3/4] sm:aspect-video max-h-[70svh] rounded-2xl bg-ink-deep overflow-hidden">
+        <div className={`absolute bg-black ${peerPos} ${layout === "self" ? "overflow-hidden" : ""}`}>
+          <video
+            ref={remoteVideoRef}
+            autoPlay
+            playsInline
+            aria-label={`ภาพจาก${peerName}`}
+            className={`h-full w-full object-contain ${connected ? "" : "opacity-0"}`}
+          />
+          {status && (
+            <p
+              role="status"
+              className={`absolute inset-0 flex items-center justify-center text-center text-white ${
+                layout === "self" ? "p-2 text-[12px] leading-snug" : "p-4 text-sm"
+              }`}
+            >
+              {status}
+            </p>
+          )}
+          {/* กรอบเล็กมุมจอ + มีข้อความสถานะ (ซึ่งมีชื่ออีกฝั่งอยู่แล้ว) ➔ ไม่ต้องมีป้ายชื่อซ้อน — เดิมสองข้อความทับกัน */}
+          {!(status && layout === "self") && <span className={tileLabel}>{peerName}</span>}
+        </div>
+        <div className={`absolute bg-black ${selfPos} ${layout === "peer" ? "overflow-hidden" : ""}`}>
+          <video
+            ref={localVideoRef}
+            autoPlay
+            playsInline
+            muted
+            aria-label="ภาพจากกล้องของคุณ"
+            className={`h-full w-full object-contain ${mirrorOn ? "-scale-x-100" : ""} ${camOn ? "" : "opacity-30"}`}
+          />
+          <span className={tileLabel}>คุณ{camOn ? "" : " · ปิดกล้อง"}</span>
+        </div>
       </div>
 
       {error && (
@@ -550,6 +670,28 @@ export function VideoCallRoom({
           {error}
         </p>
       )}
+
+      {/* จัดจอ — แม่หมอเลือก "ภาพของฉันใหญ่" ตอนเปิดไพ่ จะเห็นไพ่ในกล้องเต็มตาเหมือนที่ลูกค้าเห็น */}
+      <div role="radiogroup" aria-label="จัดจอวิดีโอ" className="grid grid-cols-3 gap-1.5 rounded-2xl bg-inset-warm/70 p-1.5">
+        {layoutOptions.map((opt) => {
+          const active = layout === opt.value;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => setLayout(opt.value)}
+              className={`flex min-h-[44px] flex-col items-center justify-center rounded-xl px-1.5 py-1 text-[13px] font-semibold leading-tight transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
+                active ? "bg-surface text-ink-deep shadow-sm ring-1 ring-gold-ink" : "text-muted hover:text-ink-deep"
+              }`}
+            >
+              <span>{opt.label}</span>
+              {opt.hint && <span className="text-[11px] font-normal">{opt.hint}</span>}
+            </button>
+          );
+        })}
+      </div>
 
       {/* มือถือ: ไมค์/กล้องแถวบน · วางสายเต็มแถวล่าง — ห้ามให้คำว่า "วางสาย" ถูกตัดกลางคำ */}
       <div className="grid grid-cols-2 gap-2 whitespace-nowrap sm:flex">
@@ -559,6 +701,16 @@ export function VideoCallRoom({
         <Button variant="outline" aria-pressed={!camOn} onClick={toggleCam}>
           {camOn ? "ปิดกล้อง" : "เปิดกล้อง"}
         </Button>
+        {videoInputs.length >= 2 && (
+          <Button variant="outline" onClick={() => void switchCamera()} disabled={switching}>
+            {switching ? "กำลังสลับ…" : "สลับกล้อง"}
+          </Button>
+        )}
+        {facing !== "environment" && (
+          <Button variant="outline" aria-pressed={mirrorOn} onClick={() => setMirrorPref((v) => !v)}>
+            {mirrorOn ? "ภาพกระจก: เปิด" : "ภาพกระจก: ปิด"}
+          </Button>
+        )}
         {(link === "failed" || link === "reconnecting") && (
           <Button variant="outline" className="col-span-2" onClick={() => void reconnect()}>
             ต่อสายใหม่
@@ -568,6 +720,11 @@ export function VideoCallRoom({
           วางสาย
         </Button>
       </div>
+      <p className="text-[12px] leading-relaxed text-muted">
+        {role === "reader"
+          ? 'ตอนเปิดไพ่ กด "ภาพฉันใหญ่" แล้วจัดไพ่ให้อยู่ในกรอบ — ภาพบนจอคือภาพเต็มที่ลูกค้าเห็น · ภาพกระจกปิด = ตัวหนังสือบนไพ่ไม่กลับด้าน · มีกล้องหลายตัว (เช่นกล้องหลังมือถือส่องโต๊ะ) กด "สลับกล้อง"'
+          : "ภาพกระจกมีผลแค่จอของคุณ แม่หมอเห็นภาพจริงเสมอ"}
+      </p>
     </section>
   );
 }
