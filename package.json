@@ -4,7 +4,7 @@
   "license": "SEE LICENSE IN LICENSE",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@9.15.4",
+  "packageManager": "npm@10.9.4",
   "scripts": {
     "dev": "next dev --webpack",
     "dev:astro": "ASTRO_TELEMETRY_DISABLED=1 astro dev --port 4321",
@@ -67,14 +67,14 @@
     "entitlement:grandfather": "tsx scripts/entitlement-grandfather.ts"
   },
   "dependencies": {
-    "motion": "^13.1.1",
+    "motion": "^14.1.0",
     "next": "^16.3.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "zod": "^4.5.2"
   },
   "devDependencies": {
-    "@astrojs/react": "7.0.0",
+    "@astrojs/react": "7.0.1",
     "@next/eslint-plugin-next": "^16.3.5",
     "@opennextjs/cloudflare": "^1.20.4",
     "@tailwindcss/postcss": "^4.3.3",
@@ -82,12 +82,12 @@
     "@types/node": "^26.4.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
-    "astro": "7.3.4",
+    "astro": "7.3.7",
     "eslint": "^10.10.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-unused-imports": "^4.4.1",
     "postcss": "^8.5.26",
-    "sharp": "0.35.4",
+    "sharp": "0.35.5",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.12",
     "typescript": "~6.0.3",

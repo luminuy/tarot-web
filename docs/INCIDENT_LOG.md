@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0258 · 2026-10-11 19:51 · 🟡 Medium · PR ของ dependabot ตายที่ npm ci ทุกสัปดาห์ เพราะ package.json ยังประกาศ packageManager เป็น pnpm
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | PR ของ dependabot ขึ้นแดง 1/2 ทุกชุดรายสัปดาห์ (#541–#545 · #625 #626 · #652 · #660–#663) ตายที่ขั้น npm ci ภายใน 20 วินาที ด้วย lock file does not satisfy · ต้องมีคนเติม lockfile เองทุกครั้งหรือเปิด PR แทน (#645) · INC-0206 บันทึกอาการไว้แต่ไม่เจอต้นเหตุ |
+| **สาเหตุราก** | package.json มี packageManager: pnpm@9.15.4 ค้างจาก #39 (2026-08-31) ทั้งที่ย้ายมาใช้ npm + package-lock.json แล้ว (R-13) — dependabot เลือกเครื่องมือจากช่องนี้ จึงทำงานแบบ pnpm หา pnpm-lock.yaml ไม่เจอ แล้วแก้แค่ package.json ไม่แตะ package-lock.json ทุก PR |
+| **การแก้ไข** | เปลี่ยน packageManager เป็น npm@10.9.4 · ลงอัปเดต 4 ตัวที่ค้าง (astro 7.3.7 · @astrojs/react 7.0.1 · sharp 0.35.5 · motion 14.1.0) พร้อม relock ด้วย npm ใน PR เดียว แล้วปิด PR ของ dependabot ที่ซ้ำ |
+| **🛡️ กฎป้องกันถาวร** | **ด่าน test-ci-supply-chain ตรวจว่า packageManager เป็น npm (หรือเป็น pnpm ได้เฉพาะเมื่อมี pnpm-lock.yaml จริง) — ใส่ pnpm กลับเมื่อไหร่ ด่านตก** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/clever-wright-380b0u` · commit `4be4f4f6` |
+
+
 ### INC-0257 · 2026-10-11 08:32 · 🔵 Low · ชื่อไทยไพ่ชุดเล็กเป็นรูปแบบเดียวทั้ง 4 ชุด (<ลำดับ>แห่ง<ชุด> · Page = เพจ)
 
 | หัวข้อ | รายละเอียด |

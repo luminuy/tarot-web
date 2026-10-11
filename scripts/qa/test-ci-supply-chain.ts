@@ -156,6 +156,19 @@ check(
   pnpmUsers.join("\n"),
 );
 
+/*
+ * 🤖 `packageManager` ใน package.json ต้องชี้ไปที่ npm (INC-0258)
+ * dependabot เลือกเครื่องมือจากช่องนี้ — ช่องค้างเป็น "pnpm@9.15.4" ตั้งแต่ #39 (2026-08-31)
+ * ทั้งที่ย้ายมาใช้ npm + package-lock.json แล้ว ➔ dependabot แก้แต่ package.json ไม่แตะ lockfile
+ * PR ของมันจึงตายที่ `npm ci` ทุกสัปดาห์ (INC-0206 #541–#545 · #625 #626 · #652 · #660–#663)
+ */
+const declaredPm = String((JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf-8")) as { packageManager?: string }).packageManager ?? "");
+check(
+  `package.json "packageManager" ตรงกับ lockfile ที่ใช้จริง (ได้มา: "${declaredPm || "ไม่ได้ระบุ"}")`,
+  declaredPm === "" || declaredPm.startsWith("npm@") || (declaredPm.startsWith("pnpm@") && hasPnpmLock),
+  '   ➔ รีโปนี้ใช้ npm (package-lock.json) — ตั้งเป็น "npm@<เวอร์ชัน>" ไม่งั้น dependabot จะไม่อัปเดต lockfile ให้',
+);
+
 for (const wf of workflows) {
   if (!/npm ci/.test(wf.src)) continue;
   check(
