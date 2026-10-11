@@ -1,9 +1,14 @@
+import fs from "node:fs";
+import path from "node:path";
 import { DECK_TH } from "../src/data/cards/deck-th";
 import { enrichCardEn } from "../src/data/cards/en-enrich";
 import { DECK } from "../src/data/cards";
+import { CARD_SUMMARIES } from "../src/data/cards/summary";
 import type { Category, TarotCard } from "../src/data/cards/types";
 import { RELATED_CARDS } from "../src/data/cards/related.generated";
 import { runQa as verifyEnglishMeanings } from "./qa/test-card-meanings-en";
+import { NON_CANONICAL_MINOR_NAME_TH, canonicalMinorNameTh } from "./qa/lib/card-names";
+import { assertNonEmptyCorpus } from "./qa/lib/corpus";
 
 /**
  * ตรวจความสมบูรณ์ของสำรับก่อนขึ้นเว็บจริง
@@ -124,6 +129,48 @@ function verifyThaiDeckParity() {
 }
 
 verifyThaiDeckParity();
+
+// ── ชื่อไทยไพ่ชุดเล็ก: รูปแบบเดียวทั้ง 4 ชุด "<ลำดับ>แห่ง<ชุด>" (ดู scripts/qa/lib/card-names.ts) ──
+for (const card of DECK) {
+  if (card.arcana !== "minor" || !card.suit) continue;
+  const expected = canonicalMinorNameTh(card.suit, card.number);
+  if (card.nameTh !== expected) fail(`${card.id}: nameTh ต้องเป็น "${expected}" (ได้ "${card.nameTh}")`);
+}
+
+// ── summary.ts เป็นไฟล์สร้างอัตโนมัติ — กริด /cards · หน้าชุดไพ่ · หน้าราศี ใช้ไฟล์นี้ ──────────
+// แก้สารานุกรมแล้วลืมสร้างใหม่ = หน้าไพ่รายใบขึ้นชื่อใหม่แต่กริดยังขึ้นชื่อเก่า (เดิมไม่มีด่านไหนเห็น)
+if (CARD_SUMMARIES.length !== DECK.length) fail(`summary.ts มี ${CARD_SUMMARIES.length} ใบ แต่ DECK มี ${DECK.length} ใบ`);
+CARD_SUMMARIES.forEach((summary, i) => {
+  const c = DECK[i];
+  const expected = c && {
+    id: c.id, name: c.nameTh, nameTh: c.nameTh, nameEn: c.nameEn, image: c.image, arcana: c.arcana, suit: c.suit,
+    number: c.number, element: c.element, astrology: c.astrology, keywords: { upright: c.keywords.upright, reversed: c.keywords.reversed },
+  };
+  if (JSON.stringify(summary) !== JSON.stringify(expected)) {
+    fail(`summary.ts ไม่ตรงกับสำรับที่ ${summary.id} — รัน npx tsx scripts/generate-card-summary.ts`);
+  }
+});
+
+// ── ชื่อไพ่ที่เขียนซ้ำเองในโค้ด (การ์ดตัวอย่าง · ตัวอย่างคำทำนาย) ห้ามเป็นรูปแบบเก่า ──────────────
+// ตรวจเฉพาะ string ที่ทั้งก้อนเป็นชื่อไพ่ — ข้อความบรรยายภาพอย่าง "ระหว่างสองถ้วย" ไม่เกี่ยว
+function walkSource(dir: string, out: string[] = []): string[] {
+  if (!fs.existsSync(dir)) return out;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name === "node_modules" || entry.name.startsWith(".")) continue;
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) walkSource(full, out);
+    else if (/\.(ts|tsx|astro)$/.test(entry.name)) out.push(full);
+  }
+  return out;
+}
+const NAME_ONLY = new RegExp(`^(?:${NON_CANONICAL_MINOR_NAME_TH.source})$`);
+const sourceFiles = ["src", "astro", "mobile/app", "mobile/components", "mobile/lib"].flatMap((d) => walkSource(d));
+assertNonEmptyCorpus("ไฟล์โค้ดใน src/ astro/ mobile/", sourceFiles, "รันจากรากของรีโป");
+for (const file of sourceFiles) {
+  for (const m of fs.readFileSync(file, "utf8").matchAll(/"([^"\\\n]{2,30})"/g)) {
+    if (NAME_ONLY.test(m[1])) fail(`${file}: ชื่อไพ่ "${m[1]}" ไม่ตรงกับสารานุกรม — ใช้รูปแบบ <ลำดับ>แห่ง<ชุด> (เช่น สองแห่งถ้วย)`);
+  }
+}
 
 console.log(`ตรวจไพ่ ${DECK.length} ใบ · ข้อความความหมายทั้งหมด ${allTexts.size} ข้อความ · แผนที่ไพ่ใกล้เคียง 78×4 ใบ`);
 console.log(`yesNo — ใช่ ${tally.yes} / ไม่ใช่ ${tally.no} / ไม่แน่ ${tally.maybe}`);

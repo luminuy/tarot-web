@@ -10,7 +10,7 @@ export const WANDS: TarotCard[] = [
     arcana: "minor",
     suit: "wands",
     number: 1,
-    nameTh: "เอซไม้เท้า",
+    nameTh: "เอซแห่งไม้เท้า",
     nameEn: "Ace of Wands",
     keywords: {
       upright: ["ประกายไฟแรก", "แรงบันดาลใจ", "โอกาสใหม่", "ไฟลุกในใจ", "อยากลงมือ"],
@@ -60,7 +60,7 @@ export const WANDS: TarotCard[] = [
     arcana: "minor",
     suit: "wands",
     number: 2,
-    nameTh: "ไม้เท้า 2",
+    nameTh: "สองแห่งไม้เท้า",
     nameEn: "Two of Wands",
     keywords: {
       upright: ["วางแผน", "มองไกล", "ตัดสินใจ", "โลกกว้าง", "เตรียมออกเดินทาง"],
@@ -110,7 +110,7 @@ export const WANDS: TarotCard[] = [
     arcana: "minor",
     suit: "wands",
     number: 3,
-    nameTh: "ไม้เท้า 3",
+    nameTh: "สามแห่งไม้เท้า",
     nameEn: "Three of Wands",
     keywords: {
       upright: ["ผลเริ่มเดิน", "ขยายวง", "รอผลตอบรับ", "มองการณ์ไกล", "ร่วมมือ"],
@@ -160,7 +160,7 @@ export const WANDS: TarotCard[] = [
     arcana: "minor",
     suit: "wands",
     number: 4,
-    nameTh: "ไม้เท้า 4",
+    nameTh: "สี่แห่งไม้เท้า",
     nameEn: "Four of Wands",
     keywords: {
       upright: ["เฉลิมฉลอง", "บ้าน", "ความมั่นคง", "หมุดหมาย", "ครอบครัว"],
@@ -210,7 +210,7 @@ export const WANDS: TarotCard[] = [
     arcana: "minor",
     suit: "wands",
     number: 5,
-    nameTh: "ไม้เท้า 5",
+    nameTh: "ห้าแห่งไม้เท้า",
     nameEn: "Five of Wands",
     keywords: {
       upright: ["แข่งขัน", "ปะทะความเห็น", "วุ่นวาย", "ซ้อมมือ", "ต่างคนต่างพูด"],
@@ -260,7 +260,7 @@ export const WANDS: TarotCard[] = [
     arcana: "minor",
     suit: "wands",
     number: 6,
-    nameTh: "ไม้เท้า 6",
+    nameTh: "หกแห่งไม้เท้า",
     nameEn: "Six of Wands",
     keywords: {
       upright: ["ชัยชนะ", "ได้รับการยอมรับ", "ความภูมิใจ", "คนมองเห็น", "ข่าวดี"],
@@ -310,7 +310,7 @@ export const WANDS: TarotCard[] = [
     arcana: "minor",
     suit: "wands",
     number: 7,
-    nameTh: "ไม้เท้า 7",
+    nameTh: "เจ็ดแห่งไม้เท้า",
     nameEn: "Seven of Wands",
     keywords: {
       upright: ["ยืนหยัด", "ปกป้องจุดยืน", "กล้าค้าน", "รักษาที่ยืน", "ไม่ยอมถอย"],
@@ -360,7 +360,7 @@ export const WANDS: TarotCard[] = [
     arcana: "minor",
     suit: "wands",
     number: 8,
-    nameTh: "ไม้เท้า 8",
+    nameTh: "แปดแห่งไม้เท้า",
     nameEn: "Eight of Wands",
     keywords: {
       upright: ["เร็ว", "ข่าวสาร", "ทุกอย่างขยับพร้อมกัน", "ไร้อุปสรรค", "ตรงเป้า"],
@@ -410,7 +410,7 @@ export const WANDS: TarotCard[] = [
     arcana: "minor",
     suit: "wands",
     number: 9,
-    nameTh: "ไม้เท้า 9",
+    nameTh: "เก้าแห่งไม้เท้า",
     nameEn: "Nine of Wands",
     keywords: {
       upright: ["ทนมาไกล", "เหลืออีกนิด", "ตั้งการ์ด", "ความอึด", "บาดเจ็บแต่ยังยืน"],
@@ -460,7 +460,7 @@ export const WANDS: TarotCard[] = [
     arcana: "minor",
     suit: "wands",
     number: 10,
-    nameTh: "ไม้เท้า 10",
+    nameTh: "สิบแห่งไม้เท้า",
     nameEn: "Ten of Wands",
     keywords: {
       upright: ["แบกหนัก", "รับผิดชอบเกินตัว", "ใกล้ถึงแต่ล้า", "ไม่ยอมวาง", "ภาระซ้อนภาระ"],
@@ -510,7 +510,7 @@ export const WANDS: TarotCard[] = [
     arcana: "minor",
     suit: "wands",
     number: 11,
-    nameTh: "เพจไม้เท้า",
+    nameTh: "เพจแห่งไม้เท้า",
     nameEn: "Page of Wands",
     keywords: {
       upright: ["อยากลองของใหม่", "ข่าวดี", "ความสดใส", "กล้าถาม", "ใจกล้าแบบเด็ก"],
@@ -560,7 +560,7 @@ export const WANDS: TarotCard[] = [
     arcana: "minor",
     suit: "wands",
     number: 12,
-    nameTh: "อัศวินไม้เท้า",
+    nameTh: "อัศวินแห่งไม้เท้า",
     nameEn: "Knight of Wands",
     keywords: {
       upright: ["พุ่งไปข้างหน้า", "กล้าเสี่ยง", "เสน่ห์แรง", "ผจญภัย", "ลงมือทันที"],
@@ -610,7 +610,7 @@ export const WANDS: TarotCard[] = [
     arcana: "minor",
     suit: "wands",
     number: 13,
-    nameTh: "ราชินีไม้เท้า",
+    nameTh: "ราชินีแห่งไม้เท้า",
     nameEn: "Queen of Wands",
     keywords: {
       upright: ["มั่นใจ", "อบอุ่นและมีเสน่ห์", "ดึงดูดคน", "รู้คุณค่าตัวเอง", "กล้าเป็นตัวเอง"],
@@ -660,7 +660,7 @@ export const WANDS: TarotCard[] = [
     arcana: "minor",
     suit: "wands",
     number: 14,
-    nameTh: "ราชาไม้เท้า",
+    nameTh: "ราชาแห่งไม้เท้า",
     nameEn: "King of Wands",
     keywords: {
       upright: ["ผู้นำ", "วิสัยทัศน์", "กล้าตัดสินใจ", "บารมี", "มองภาพใหญ่"],

@@ -16,6 +16,7 @@ import {
   type ReadingOutcome,
   type SavedReadingItem,
 } from "@/lib/utils/history";
+import { deckMeta } from "@/data/cards/deck-index-meta";
 import { JournalEntryCard } from "./JournalEntryCard";
 import { JournalCalendar } from "./JournalCalendar";
 import { JournalOverview } from "./JournalOverview";
@@ -172,7 +173,10 @@ export function JournalApp() {
           r.spreadName.toLowerCase().includes(q) ||
           (r.userNote ?? "").toLowerCase().includes(q) ||
           (r.tags ?? []).some((t) => t.toLowerCase().includes(q)) ||
-          r.cards.some((c) => c.cardNameTh.toLowerCase().includes(q) || (c.cardNameEn ?? "").toLowerCase().includes(q))
+          // เทียบทั้งชื่อที่บันทึกไว้ตอนเปิดไพ่และชื่อปัจจุบันในสำรับ — รายการก่อน 2026-10-11 เก็บชื่อไทยแบบเก่าของไพ่ชุดเล็กไว้
+          r.cards.some((c) =>
+            [c.cardNameTh, c.cardNameEn, deckMeta(c.cardIndex)?.nameTh, deckMeta(c.cardIndex)?.nameEn].some((n) => (n ?? "").toLowerCase().includes(q)),
+          )
         );
       })
       .sort((a, b) => Number(!!b.pinned) - Number(!!a.pinned) || new Date(b.date).getTime() - new Date(a.date).getTime());

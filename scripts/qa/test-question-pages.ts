@@ -7,6 +7,7 @@ import { hasEnglishTwin } from "@/lib/i18n/paths";
 import { isAstroRoute } from "@/lib/routing/astro-routes";
 import { looksLikePromptInjection } from "@/lib/ai/prompt-guard";
 import { checkQuestion } from "@/lib/safety/guardrails";
+import { NON_CANONICAL_MINOR_NAME_TH } from "./lib/card-names";
 
 /**
  * QA — หน้าคำถาม `/questions/*` (REFLECTION_JOURNAL_PLAN 1.11 · แทร็ก Q) · ด่านกันหน้าบาง
@@ -76,6 +77,11 @@ for (const q of QUESTIONS) {
     const all = JSON.stringify(c);
     check(`${label}: ไม่มีอิโมจิอื่นนอกจาก ✦ ✨ (กฎเหล็กข้อ 2)`, !EMOJI.test(all.replace(ALLOWED_EMOJI, "")));
     if (lang === "en") check(`${label}: หน้าอังกฤษไม่มีอักษรไทย`, !/[฀-๿]/.test(all));
+    else {
+      // ชื่อไพ่ชุดเล็กต้องเป็นชื่อเดียวกับสารานุกรม (<ลำดับ>แห่ง<ชุด>) — เดิมก๊อป "ไม้เท้า 8" · "สองถ้วย" มาจากชื่อเก่า
+      const oldNames = [...new Set(all.match(NON_CANONICAL_MINOR_NAME_TH) ?? [])];
+      check(`${label}: ชื่อไพ่ชุดเล็กตรงกับสารานุกรม${oldNames.length ? ` (เจอ ${oldNames.join(" · ")})` : ""}`, oldNames.length === 0);
+    }
     check(`${label}: ไม่สัญญาผล (รับประกัน/แน่นอน 100%)`, !promisesOutcome(all));
     check(`${label}: ไม่ให้ตัวเลขเสี่ยงโชค`, !/เลขเด็ด(คือ|งวดนี้)|เลขนำโชค(คือ|ของคุณ)|ตัวเลขนำโชค\s*\d|lucky numbers? (is|are|for you)\b/i.test(all));
     check(`${label}: คำถามในกล่องถามเลยผ่านด่านคำสั่งแฝงและด่านวิกฤต`, !looksLikePromptInjection(c.betterQuestions[0]) && !checkQuestion(c.betterQuestions[0], lang).block);

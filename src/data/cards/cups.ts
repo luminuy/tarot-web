@@ -61,7 +61,7 @@ export const CUPS: TarotCard[] = [
     arcana: "minor",
     suit: "cups",
     number: 2,
-    nameTh: "สองถ้วย",
+    nameTh: "สองแห่งถ้วย",
     nameEn: "Two of Cups",
     keywords: {
       upright: ["ใจตรงกัน", "คู่แท้", "ความผูกพัน", "การให้เกียรติ", "ข้อตกลงที่ดี"],
@@ -111,7 +111,7 @@ export const CUPS: TarotCard[] = [
     arcana: "minor",
     suit: "cups",
     number: 3,
-    nameTh: "สามถ้วย",
+    nameTh: "สามแห่งถ้วย",
     nameEn: "Three of Cups",
     keywords: {
       upright: ["มิตรภาพ", "การเฉลิมฉลอง", "กลุ่มคนที่ใช่", "ข่าวดี", "การแบ่งปัน"],
@@ -161,7 +161,7 @@ export const CUPS: TarotCard[] = [
     arcana: "minor",
     suit: "cups",
     number: 4,
-    nameTh: "สี่ถ้วย",
+    nameTh: "สี่แห่งถ้วย",
     nameEn: "Four of Cups",
     keywords: {
       upright: ["เบื่อหน่าย", "มองข้ามโอกาส", "ทบทวนตัวเอง", "อิ่มตัว", "ถอยมามอง"],
@@ -211,7 +211,7 @@ export const CUPS: TarotCard[] = [
     arcana: "minor",
     suit: "cups",
     number: 5,
-    nameTh: "ห้าถ้วย",
+    nameTh: "ห้าแห่งถ้วย",
     nameEn: "Five of Cups",
     keywords: {
       upright: ["ความเสียใจ", "การสูญเสีย", "เสียดายอดีต", "บทเรียน", "ยังมีสิ่งที่เหลือ"],
@@ -261,7 +261,7 @@ export const CUPS: TarotCard[] = [
     arcana: "minor",
     suit: "cups",
     number: 6,
-    nameTh: "หกถ้วย",
+    nameTh: "หกแห่งถ้วย",
     nameEn: "Six of Cups",
     keywords: {
       upright: ["ความทรงจำ", "คนเก่ากลับมา", "ความบริสุทธิ์ใจ", "บ้าน", "ความอบอุ่น"],
@@ -311,7 +311,7 @@ export const CUPS: TarotCard[] = [
     arcana: "minor",
     suit: "cups",
     number: 7,
-    nameTh: "เจ็ดถ้วย",
+    nameTh: "เจ็ดแห่งถ้วย",
     nameEn: "Seven of Cups",
     keywords: {
       upright: ["ทางเลือกมาก", "ภาพลวง", "เพ้อฝัน", "ลังเล", "ต้องคัดกรอง"],
@@ -361,7 +361,7 @@ export const CUPS: TarotCard[] = [
     arcana: "minor",
     suit: "cups",
     number: 8,
-    nameTh: "แปดถ้วย",
+    nameTh: "แปดแห่งถ้วย",
     nameEn: "Eight of Cups",
     keywords: {
       upright: ["จากลา", "ออกเดินทาง", "หาความหมาย", "วางสิ่งที่ไม่ใช่", "กล้าเดินต่อ"],
@@ -411,7 +411,7 @@ export const CUPS: TarotCard[] = [
     arcana: "minor",
     suit: "cups",
     number: 9,
-    nameTh: "เก้าถ้วย",
+    nameTh: "เก้าแห่งถ้วย",
     nameEn: "Nine of Cups",
     keywords: {
       upright: ["สมหวัง", "ความพอใจ", "ความสุขส่วนตัว", "รางวัลของตัวเอง", "อิ่มใจ"],
@@ -461,7 +461,7 @@ export const CUPS: TarotCard[] = [
     arcana: "minor",
     suit: "cups",
     number: 10,
-    nameTh: "สิบถ้วย",
+    nameTh: "สิบแห่งถ้วย",
     nameEn: "Ten of Cups",
     keywords: {
       upright: ["ครอบครัว", "ความสุขที่ยั่งยืน", "ความกลมเกลียว", "บ้านที่อบอุ่น", "ลงตัว"],
