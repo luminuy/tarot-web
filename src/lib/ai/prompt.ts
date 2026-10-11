@@ -1,6 +1,7 @@
 import type { Category, TarotCard } from "@/data/cards/types";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { formatCardLoreForPrompt } from "@/data/cards/visual-lore";
+import { formatCardLoreForPromptEn } from "@/data/cards/visual-lore-en";
 import { getCosmicContext } from "@/lib/ai/cosmic";
 import { analyzeElementalAlchemy } from "@/lib/ai/alchemy";
 import { analyzeSpatialGazeDialogue } from "@/lib/ai/gaze";
@@ -349,14 +350,14 @@ export function buildReadingMessage(ctx: ReadingContext, options?: ReadingMessag
       const cardElement = elemMap[card.element] || card.element;
       const astro = card.astrologyEn || card.astrology;
       const numero = card.numerologyEn || card.numerology;
-      const loreStr = formatCardLoreForPrompt(card.id);
+      const loreStr = formatCardLoreForPromptEn(card.id);
 
       return `• Position ${position.index}: "${posName}" (Signifies: ${posMeaning})
   Drawn Card: ${card.nameEn} — ${orientation}
   Element: ${cardElement} | Astrology: ${astro} | Numerology: ${numero}
   Core Archetypal Energies: ${keywords.join(" · ")}
   Thematic Meaning in ${category}: ${meaning}
-${loreStr ? `  (1909 imagery notes below are written in Thai — use the ideas, but never copy Thai words into your answer)\n${loreStr}` : ""}`;
+${loreStr}`;
     }
 
     const orientation = d.isReversed ? "หัวกลับ (Reversed)" : "หัวตั้ง (Upright)";

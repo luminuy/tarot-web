@@ -13,6 +13,7 @@ import { redactPii } from "@/lib/security/pii";
 import { detectPromptLeak } from "@/lib/ai/leak-guard";
 
 import { formatCardLoreForPrompt } from "@/data/cards/visual-lore";
+import { formatCardLoreForPromptEn } from "@/data/cards/visual-lore-en";
 import { formatPriorReadingForChat } from "@/lib/ai/chat-context";
 import { diagnoseQuestionEnergy } from "@/lib/ai/intent";
 import { analyzeSpatialGazeDialogue } from "@/lib/ai/gaze";
@@ -49,6 +50,8 @@ const CHAT_HISTORY_TURN_MAX = 800;
 const CHAT_HISTORY_REPLAY_TURNS = 12;
 /** งบอักขระรวมของประวัติทั้งหมดที่ replay ได้ในหนึ่งคำขอ */
 const CHAT_HISTORY_CHAR_BUDGET = 6000;
+/** ธาตุภาษาอังกฤษสำหรับหัวไพ่ในแชท /en — เดิมส่งคำไทย (ไฟ/น้ำ) และชื่อไทยปนเข้า prompt อังกฤษ (ISSUE-055) */
+const ELEMENT_EN: Record<string, string> = { ไฟ: "Fire", น้ำ: "Water", ลม: "Air", ดิน: "Earth" };
 
 const BodySchema = z.object({
   message: noInjection("คำถาม")
@@ -300,9 +303,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         const card = resolveCardByIndex(overrideDoc, d.cardIndex);
         if (!card) return null;
         const pos = spread?.positions[d.order];
-        const lore = formatCardLoreForPrompt(card.id);
+        const lore = isEnglish ? formatCardLoreForPromptEn(card.id) : formatCardLoreForPrompt(card.id);
         const cardHeader = isEnglish
-          ? `${d.order + 1}. Position "${pos?.nameEn || pos?.nameTh || d.order}": Card ${card.nameEn} (${card.nameTh}) - ${d.isReversed ? "Reversed" : "Upright"} | Element: ${card.element}`
+          ? `${d.order + 1}. Position "${pos?.nameEn || pos?.nameTh || d.order}": Card ${card.nameEn} - ${d.isReversed ? "Reversed" : "Upright"} | Element: ${ELEMENT_EN[card.element] ?? card.element}`
           : `${d.order + 1}. ตำแหน่ง "${pos?.nameTh || d.order}": ไพ่ ${card.nameTh} (${card.nameEn}) - ${d.isReversed ? "หัวกลับ" : "หัวตั้ง"} | ธาตุ: ${card.element}`;
         return lore ? `${cardHeader}\n   ${lore}` : cardHeader;
       })
