@@ -38,6 +38,17 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-11 (รอบ 234): ✦ PR ของ dependabot แดงทุกสัปดาห์ — เจอต้นเหตุแล้ว (`packageManager` ยังเป็น pnpm) + ลงอัปเดต 4 ตัวที่ค้าง (INC-0258)
+
+- **เจ้าของถาม**: PR ของ dependabot #660–#663 แดง 1/2 ทุกใบ "ทำไมเกิดบ่อย จากอะไร แก้ด้วย"
+- **อาการ**: ตายที่ `npm ci` ภายใน 20 วินาที (`lock file … does not satisfy …`) — PR ของ dependabot แก้แค่ `package.json` ไม่แตะ `package-lock.json` · เป็นแบบนี้**ทุกชุดรายสัปดาห์** (#541–#545 · #625 #626 · #652 · #660–#663) · INC-0206 บันทึกอาการและเติม lockfile ให้ทีละใบ แต่ไม่เจอต้นเหตุ
+- **ต้นเหตุ**: `package.json` มี `"packageManager": "pnpm@9.15.4"` ค้างจาก #39 (2026-08-31) ทั้งที่ย้ายมาใช้ npm + `package-lock.json` ตั้งแต่ R-13 — dependabot เลือกเครื่องมือจากช่องนี้ ทำงานแบบ pnpm หา `pnpm-lock.yaml` ไม่เจอ จึงอัปเดตแค่ `package.json`
+- **แก้**: `packageManager` ➔ `npm@10.9.4` · ลงอัปเดต 4 ตัวในก้อนเดียวพร้อม relock ด้วย npm: astro 7.3.7 · @astrojs/react 7.0.1 · sharp 0.35.5 · motion 14.1.0 (major — changelog 14.0 ตัดแค่ API ภายใน · เว็บใช้เฉพาะ `motion` · `AnimatePresence` · `MotionConfig` · type `Transition`)
+  - lockfile เปลี่ยนเฉพาะที่ 4 ตัวนี้ลากมา (vite 8.3.4 · rolldown 1.2.13 · shiki 4.5 · zod 4.6.5 · motion-dom/utils 14.1) · miniflare ตรึง sharp 0.35.4 ไว้เองจึงมีสำเนาซ้อน
+- **ด่านกันซ้ำ** (ในด่านเดิม `test-ci-supply-chain`): `packageManager` ต้องเป็น npm (เป็น pnpm ได้เฉพาะเมื่อมี `pnpm-lock.yaml` จริง) — ลองใส่ pnpm กลับแล้ว ด่านตกจริง
+- **ตรวจ**: `npm ci` ผ่าน · `npm run build` ผ่าน · `repo:verify` **93/93**
+- **หลัง merge**: ปิด #660–#663 (ถูกแทนแล้ว) · รอบหน้า dependabot ควรแนบ `package-lock.json` มาเอง — ถ้ายังไม่แนบ ให้กลับมาดูที่ INC-0258
+
 ### 🗓️ 2026-10-11 (รอบ 233): ✦ ขึ้น production รวม 3 สาย — ชื่อไพ่รูปแบบเดียว · ภาพ 1909 อังกฤษ · งานอีกทีม (ท้ายเว็บใหม่ · คำอ่านสำรอง) · ผลตรวจแม่หมอ (PR #659)
 
 - **เจ้าของสั่ง**: "เอาที่อีกทีมแก้ ขึ้นพร้อมกันเลย มีหลายอย่าง รวมถึง footer ด้วย" ➔ merge `claude/intelligent-brahmagupta-fqvhic` (PR #664 · ต่อจากกิ่งอีกทีม `claude/fervent-darwin-jsrcsp` 5 commit) เข้ากิ่ง PR #659 — ไม่มีไฟล์ชนกัน
