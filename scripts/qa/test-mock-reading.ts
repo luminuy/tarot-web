@@ -385,6 +385,144 @@ async function run() {
     }
   }
 
+  // ── 7.1 (ยกเครื่อง 2026-10-10) ตอบตรงคำถาม · คำแนะนำปลอดภัยตามหมวด · ประโยคปิดไม่ซ้ำ · ไม่แปะวงเล็บคำอธิบายช่อง ──
+  console.log("\n✦ 7.1 ตอบตรงคำถาม · คำแนะนำตามหมวด · ประโยคปิดหมุนเวียน");
+  const asked = (question: string, ids: string[], reversed: boolean[], category: string, spreadId = "three-card") => {
+    const base = buildCtx({ spreadId, lang: "th", personaId: "warm" });
+    const drawn = ids.map((id, order) => ({ order, cardIndex: idxOf(id), isReversed: reversed[order] ?? false }));
+    return collect({ ...base, question, category: category as typeof base.category, drawn, cards: drawn.map((d) => cardByIndex(d.cardIndex)!) });
+  };
+  const exQ = await asked("แฟนเก่าจะกลับมาไหม", ["swords-03", "cups-06", "major-17"], [false, true, false], "love");
+  check("คำถามแฟนเก่า ➔ บทสรุปตอบตรงเรื่องเขาจะกลับมาไหม", /เขาจะกลับมาไหม/.test(exQ.reading?.summary ?? ""), exQ.reading?.summary);
+  check(
+    "คำถามแฟนเก่า ➔ คำแนะนำไม่ชวนส่งข้อความ/ทักทันที (เดิมได้ \"ส่งข้อความสั้น ๆ ถึงคนที่เกี่ยวข้อง\")",
+    !/ส่งข้อความ/.test((exQ.reading?.advice ?? []).join(" ")) && /เว้นระยะ/.test((exQ.reading?.advice ?? []).join(" ")),
+    exQ.reading?.advice.join(" | "),
+  );
+  const loveShadow = await asked("ความรักช่วงนี้เป็นยังไง", ["swords-10", "swords-03", "swords-09"], [false, false, false], "love");
+  check(
+    "หมวดความรัก ปลายทางต้องระวัง ➔ คำแนะนำไม่ชวนติดต่ออีกฝ่าย",
+    !/ส่งข้อความ|ทักเขา|โทรหา/.test((loveShadow.reading?.advice ?? []).join(" ")),
+    loveShadow.reading?.advice.join(" | "),
+  );
+  const workQ = await asked("ควรเปลี่ยนงานไหม", ["wands-10"], [false], "work", "daily");
+  check("คำถามเปลี่ยนงาน ➔ ตอบตรงเรื่องงาน", /เปลี่ยนงาน/.test(workQ.reading?.summary ?? ""), workQ.reading?.summary);
+  check("หมวดงาน ➔ คำแนะนำเป็นเรื่องงาน ไม่ใช่ของเหมารวมตามธาตุ", /งาน/.test((workQ.reading?.advice ?? []).slice(0, 2).join(" ")), workQ.reading?.advice.join(" | "));
+  // ประเภทคำถาม 10 แบบ — รวมกับดักคำซ้อนที่เคยจับผิด ("ลงทุน" ไม่ใช่การเรียน · "แม่หมอ/ลูกค้า" ไม่ใช่ครอบครัว)
+  const intentCases: [string, RegExp][] = [
+    ["ควรลงทุนเพิ่มดีไหม", /เรื่องเงิน/],
+    ["แม่หมอช่วยดูหน่อย ลูกค้าจะเยอะขึ้นไหม", /เรื่องธุรกิจ/],
+    ["สอบเข้ามหาลัยจะติดไหม", /เรื่องการเรียนการสอบ/],
+    ["คนคุยคนนี้จะเป็นแฟนไหม", /ความรักครั้งใหม่/],
+    ["ครอบครัวจะเข้าใจกันไหม", /เรื่องครอบครัว/],
+    ["ควรบอกความจริงไหม", /การตัดสินใจครั้งนี้/],
+    ["เมื่อไหร่จะได้งานใหม่", /ไม่ได้บอกวันเวลาตายตัว/],
+  ];
+  for (const [q, want] of intentCases) {
+    const r = await asked(q, ["major-17", "cups-06", "major-19"], [false, false, false], "general");
+    check(`ประเภทคำถาม: "${q}"`, want.test(r.reading?.summary ?? ""), r.reading?.summary.slice(0, 90));
+  }
+  const healthQ = await asked("สุขภาพคุณแม่จะดีขึ้นไหม", ["major-13", "swords-09", "major-16"], [false, false, false], "general");
+  check(
+    "คำถามสุขภาพ ➔ บอกว่าไพ่ไม่ใช่การวินิจฉัย + ชี้ไปหาแพทย์ (ไม่ทำนายผลการรักษา)",
+    /ไม่ใช่การวินิจฉัย/.test(healthQ.reading?.summary ?? "") && /แพทย์/.test((healthQ.reading?.advice ?? []).join(" ")),
+    healthQ.reading?.summary.slice(0, 120),
+  );
+  // คำแนะนำรายใบ (แม่หมอตรวจแล้ว 2026-10-11) — ครบ 78 ใบ · ถ้อยคำไม่ว่าง/ไม่ยาวเกิน · อังกฤษไม่มีไทย · แถว pending ห้ามโผล่
+  {
+    const { CARD_ADVICE, reviewedCardAdvice } = await import("../../src/data/cards/card-advice");
+    const missing = DECK.filter((c) => !CARD_ADVICE[c.id]).map((c) => c.id);
+    check("คำแนะนำรายใบครบทุกใบในสำรับ 78 ใบ", missing.length === 0, missing.join(", "));
+    const rows = Object.entries(CARD_ADVICE).flatMap(([id, r]) => [
+      [id, r.upright.th, r.upright.en],
+      [id, r.reversed.th, r.reversed.en],
+    ]);
+    const badLen = rows.filter(([, th, en]) => !th || !en || th.length > 110 || en.length > 140).map(([id]) => id);
+    check("คำแนะนำรายใบไม่ว่างและไม่ยาวเกิน (ไทย ≤ 110 · อังกฤษ ≤ 140)", badLen.length === 0, badLen.join(", "));
+    const thaiInEn = rows.filter(([, , en]) => THAI.test(en)).map(([id]) => id);
+    check("คำแนะนำรายใบฝั่งอังกฤษไม่มีอักษรไทย", thaiInEn.length === 0, thaiInEn.join(", "));
+    const pendingLeak = Object.entries(CARD_ADVICE).filter(([id, r]) => r.reviewedBy === "pending" && reviewedCardAdvice(id, false, "th") !== null);
+    check("แถวที่ยังไม่ตรวจ (pending) ไม่ถูกใช้ในคำอ่าน", pendingLeak.length === 0, pendingLeak.map(([id]) => id).join(", "));
+    const pendingIds = Object.entries(CARD_ADVICE).filter(([, r]) => r.reviewedBy === "pending").map(([id]) => id);
+    const leakedIntoReading = pendingIds.length === 78 && [exQ, workQ, loveShadow].some((r) =>
+      (r.reading?.advice ?? []).some((line) => Object.values(CARD_ADVICE).some((row) => line === row.upright.th || line === row.reversed.th)),
+    );
+    check("คำอ่านสำรองไม่มีคำแนะนำรายใบที่ยังไม่ตรวจหลุดเข้าไป", !leakedIntoReading);
+  }
+  // กฎข้อ 3 ของหลักอ่านกลับหัว (แม่หมออนุมัติ 2026-10-11): ห้ามพูดแทนสภาพคนดู เช่น "คุณเริ่ม…แล้ว" "กำลังฟื้น" "ผ่านไปแล้ว"
+  // แอปไม่รู้สภาพจริงของคนดู ➔ ใช้ "ถ้า…" / "ไม่ว่าจะ…หรือ…" แทน · ตรวจทั้งคำแนะนำรายใบและมุมอ่านกลับหัว ทั้งไทยและอังกฤษ
+  const STATE_CLAIM_TH = /คุณเริ่ม\S{0,30}แล้ว|กำลังฟื้น|ผ่านไปแล้ว|ผ่านพ้นไปแล้ว|คุณหายดีแล้ว/;
+  const STATE_CLAIM_EN = /\byou(?:'re| are) (?:already |now )?(?:starting|beginning) to\b|\byou(?:'ve| have) (?:already )?(?:started|begun|recovered|healed|moved on)\b|\byou(?:'re| are) (?:recovering|healing)\b|\b(?:it|this) is (?:already )?(?:over|behind you)\b/i;
+  check(
+    "ด่านคำพูดแทนสภาพจับของจริงได้ (ไทย · อังกฤษ)",
+    STATE_CLAIM_TH.test("คุณเริ่มเห็นทางออกแล้ว") && STATE_CLAIM_TH.test("ช่วงที่หนักที่สุดผ่านไปแล้ว") &&
+      STATE_CLAIM_EN.test("You are starting to heal") && STATE_CLAIM_EN.test("The worst is over — you have moved on") &&
+      !STATE_CLAIM_TH.test("ไม่ว่าจะเริ่มเห็นทางออกหรือยังมองไม่เห็น") && !STATE_CLAIM_EN.test("Whether your heart is starting to heal or still hurts"),
+  );
+  {
+    const { CARD_ADVICE } = await import("../../src/data/cards/card-advice");
+    const { REVERSAL_ANGLES } = await import("../../src/data/cards/reversal-angles");
+    const texts: Array<[string, string, string]> = [
+      ...Object.entries(CARD_ADVICE).flatMap(([id, r]) => [
+        [`${id}.หัวตั้ง`, r.upright.th, r.upright.en] as [string, string, string],
+        [`${id}.กลับหัว`, r.reversed.th, r.reversed.en] as [string, string, string],
+      ]),
+      ...Object.entries(REVERSAL_ANGLES).map(([id, a]) => [`${id}.มุมกลับหัว`, a.note.th, a.note.en] as [string, string, string]),
+    ];
+    const claims = texts.filter(([, th, en]) => STATE_CLAIM_TH.test(th) || STATE_CLAIM_EN.test(en)).map(([id]) => id);
+    check("คำแนะนำรายใบ + มุมอ่านกลับหัว ไม่พูดแทนสภาพคนดู (กฎข้อ 3)", claims.length === 0, claims.join(", "));
+  }
+  // มุมอ่านกลับหัวรายใบ (ร่างรอบ 4 · รอแม่หมอตรวจ) — ครบ 78 ใบ · จำนวนต่อมุมตรงตารางที่อนุมัติ · แถว pending ไม่เข้า prompt
+  {
+    const { REVERSAL_ANGLES, REVERSAL_ANGLE_INFO, reviewedReversalAngle, formatReversalAngleForPrompt } = await import("../../src/data/cards/reversal-angles");
+    const missingAngle = DECK.filter((c) => !REVERSAL_ANGLES[c.id]).map((c) => c.id);
+    check("มุมอ่านกลับหัวครบทุกใบในสำรับ 78 ใบ", missingAngle.length === 0 && Object.keys(REVERSAL_ANGLES).length === DECK.length, missingAngle.join(", "));
+    const tally = (Object.keys(REVERSAL_ANGLE_INFO) as Array<keyof typeof REVERSAL_ANGLE_INFO>).map(
+      (k) => [k, Object.values(REVERSAL_ANGLES).filter((a) => a.angle === k).length, REVERSAL_ANGLE_INFO[k].count] as const,
+    );
+    check(
+      "จำนวนใบต่อมุมตรงตารางที่แม่หมออนุมัติ (ติดขัด 21 · มาก/น้อยเกิน 33 · หันเข้าข้างใน 9 · คลายลงหรือยังค้าง 15)",
+      tally.every(([, got, want]) => got === want),
+      tally.map(([k, got, want]) => `${k} ${got}/${want}`).join(" · "),
+    );
+    const badNote = Object.entries(REVERSAL_ANGLES)
+      .filter(([, a]) => !a.note.th || !a.note.en || a.note.th.length > 90 || a.note.en.length > 140 || THAI.test(a.note.en))
+      .map(([id]) => id);
+    check("คำอธิบายมุมรายใบไม่ว่าง ไม่ยาวเกิน (ไทย ≤ 90 · อังกฤษ ≤ 140) อังกฤษไม่มีอักษรไทย", badNote.length === 0, badNote.join(", "));
+    const easingOneSided = Object.entries(REVERSAL_ANGLES)
+      .filter(([, a]) => a.angle === "easing" && !(/หรือ/.test(a.note.th) && /\bor\b/.test(a.note.en)))
+      .map(([id]) => id);
+    check("มุม \"คลายลง หรือยังค้าง\" พูดทั้งสองทางทุกใบ (กฎข้อ 5)", easingOneSided.length === 0, easingOneSided.join(", "));
+    const pendingLeakAngle = Object.entries(REVERSAL_ANGLES).filter(
+      ([id, a]) => a.reviewedBy === "pending" && (reviewedReversalAngle(id) !== null || formatReversalAngleForPrompt(id, "th") !== "" || formatReversalAngleForPrompt(id, "en") !== ""),
+    );
+    check("มุมอ่านที่ยังไม่ตรวจ (pending) ไม่เข้า prompt ทั้งไทยและอังกฤษ", pendingLeakAngle.length === 0, pendingLeakAngle.map(([id]) => id).join(", "));
+    const fakeReviewed = { "major-19": { ...REVERSAL_ANGLES["major-19"], reviewedBy: "reader:test" as const } };
+    const lineTh = formatReversalAngleForPrompt("major-19", "th", fakeReviewed);
+    const lineEn = formatReversalAngleForPrompt("major-19", "en", fakeReviewed);
+    check(
+      "แถวที่ตรวจแล้ว ➔ prompt ได้บรรทัดมุมอ่าน (ไทยเป็นไทย · อังกฤษไม่มีอักษรไทย)",
+      lineTh.includes("ติดขัด") && lineTh.includes(REVERSAL_ANGLES["major-19"].note.th) && lineEn.includes("Blocked") && !THAI.test(lineEn),
+      `${lineTh} | ${lineEn}`,
+    );
+    const promptSrc = fs.readFileSync(path.resolve("src/lib/ai/prompt.ts"), "utf8");
+    check(
+      "prompt เรียกมุมอ่านกลับหัวเฉพาะไพ่กลับหัว ทั้งทางไทยและอังกฤษ",
+      /d\.isReversed \? formatReversalAngleForPrompt\(card\.id, "en"\)/.test(promptSrc) && /d\.isReversed \? formatReversalAngleForPrompt\(card\.id, "th"\)/.test(promptSrc),
+    );
+  }
+  const closers = new Set<string>();
+  for (const ids of [["major-19", "cups-10", "major-21"], ["swords-10", "swords-03", "swords-09"], ["wands-01", "cups-02", "pentacles-03"], ["major-00", "major-01", "major-02"]]) {
+    const r = await asked("ช่วงนี้ชีวิตจะเป็นอย่างไร", ids, [false, false, false], "general");
+    closers.add((r.reading?.summary ?? "").slice(-40)); // ท้ายประโยค 40 ตัวอักษร = ประโยคปิด (บทสรุปส่วนหน้าเปลี่ยนตามไพ่อยู่แล้ว)
+  }
+  check("ประโยคปิดหมุนเวียน ไม่ใช่ประโยคเดียวกันทุกคำอ่าน", closers.size >= 2, [...closers].join(" / "));
+  check(
+    "ไม่แปะคำอธิบายช่องในวงเล็บต่อท้ายชื่อช่องอีก (กฎเหล็กข้อ 10)",
+    !/ในช่องอดีต \(|ช่องนี้หมายถึง/.test(JSON.stringify(exQ.reading)),
+    exQ.reading?.cards.map((c) => c.reading.slice(0, 60)).join(" / "),
+  );
+
   // ── 8. ผู้ใช้ต้องรู้ว่าเป็นคำอ่านสำรอง + กดให้ AI อ่านใหม่ได้ ───────────────
   console.log("\n🪧 8. ป้ายบอกคำอ่านสำรอง (FallbackNotice)");
   const routeSrc = fs.readFileSync(path.resolve("src/app/api/reading/[id]/read/route.ts"), "utf8");

@@ -19,6 +19,7 @@ import { recordEvents } from "@/lib/stats/record";
 import { generateMindfulMicroRitual } from "@/lib/ai/ritual";
 import type { TarotCard } from "@/data/cards/types";
 import { redactPii } from "@/lib/security/pii";
+import { reviewedCardAdvice } from "@/data/cards/card-advice";
 
 // คำอ่านสำรองไม่ได้เรียกโมเดลจริง จึงไม่มีโทเค็นให้นับ — ศูนย์ทั้งชุดคือความจริง ไม่ใช่ค่าตั้งต้น
 const DEFAULT_USAGE: UsageInfo = {
@@ -157,44 +158,62 @@ const MOCK_VOICE: Record<string, Record<Lang, { greet: (v: VoiceVars) => string;
 const resolveVoice = (personaId: string | null | undefined, lang: Lang) =>
   (MOCK_VOICE[personaId ?? ""] ?? MOCK_VOICE.warm)[lang];
 
-/** สำนวนต้นประโยคของแต่ละใบ — 3 แบบต่อขั้ว เลือกด้วยลำดับตำแหน่ง (ไม่สุ่ม) */
-type LeadFn = (card: string, pos: string, posMeaning: string) => string;
+/**
+ * สำนวนต้นประโยคของแต่ละใบ — 3 แบบต่อขั้ว เลือกด้วยลำดับตำแหน่ง (ไม่สุ่ม)
+ * ---------------------------------------------------------------------------
+ * ✦ ยกเครื่อง 2026-10-10 (เจ้าของสั่ง): เดิมแปะคำอธิบายตำแหน่งทั้งก้อนในวงเล็บ หรือ "ช่องนี้หมายถึง…" ทุกใบ
+ *   อ่านแล้วเป็นแม่แบบ (กฎเหล็กข้อ 10) ➔ ชื่อช่องแบบสั้นบอกความหมายได้อยู่แล้ว (อดีต · ปัจจุบัน · ข้อควรระวัง)
+ *   มีแค่ 1 ใน 3 สำนวนที่เล่าใจความของช่องเป็นประโยคธรรมดา และใช้แค่ "แก่น" ของคำอธิบาย (`positionGist`)
+ * ⚠️ สำนวนขั้ว shadow/open ห้ามมีคำว่า "แรงหนุน · เปิดทางให้ · ส่งสัญญาณดี" (ด่าน test-mock-reading ข้อ 7)
+ */
+type LeadFn = (card: string, pos: string, posGist: string) => string;
 const CARD_LEAD: Record<Lang, Record<MockTone, LeadFn[]>> = {
   th: {
     light: [
-      (c, p, m) => `${c} มาอยู่ในช่อง${p} ซึ่งพูดถึง${m} ไพ่ใบนี้เป็นแรงหนุนที่ชัดเจนสำหรับเรื่องนี้`,
-      (c, p, m) => `ช่อง${p}ได้${c} เป็นใบที่เปิดทางให้คุณ ช่องนี้หมายถึง${m}`,
-      (c, p, m) => `${c} ในช่อง${p}ส่งสัญญาณดีมาให้ โดยช่องนี้บอกเรื่อง${m}`,
+      (c, p, g) => `${c} มาอยู่ในช่อง${p}${g ? ` ซึ่งว่าด้วย${g}` : ""} ไพ่ใบนี้เป็นแรงหนุนที่ชัดเจนสำหรับเรื่องนี้`,
+      (c, p) => `ช่อง${p}ได้${c} เป็นใบที่เปิดทางให้คุณ`,
+      (c, p) => `${c} ในช่อง${p}ส่งสัญญาณดีมาให้`,
     ],
     shadow: [
-      (c, p, m) => `${c} ในช่อง${p} (${m}) เป็นใบที่ชวนให้หยุดดูให้ดีก่อน ไม่ได้แปลว่าไม่มีทาง แต่เป็นจุดที่ต้องใส่ใจเป็นพิเศษ`,
-      (c, p, m) => `ช่อง${p}ได้${c} ซึ่งเป็นบทเรียนมากกว่าคำตัดสิน ช่องนี้พูดถึง${m}`,
-      (c, p, m) => `${c} มาอยู่ตรงช่อง${p} (${m}) เตือนเบา ๆ ว่ายังมีบางอย่างในส่วนนี้ที่ต้องจัดการ`,
+      (c, p) => `${c} ในช่อง${p} เป็นใบที่ชวนให้หยุดดูให้ดีก่อน ไม่ได้แปลว่าไม่มีทาง แต่เป็นจุดที่ต้องใส่ใจเป็นพิเศษ`,
+      (c, p, g) => `ช่อง${p}${g ? `ซึ่งว่าด้วย${g} ` : ""}ได้${c} ใบนี้เป็นบทเรียนมากกว่าคำตัดสิน`,
+      (c, p) => `${c} มาอยู่ตรงช่อง${p} เตือนเบา ๆ ว่ายังมีบางอย่างในส่วนนี้ที่ต้องจัดการ`,
     ],
     open: [
-      (c, p, m) => `${c} ในช่อง${p} ยังไม่ชี้ขาดไปทางใดทางหนึ่ง ช่องนี้พูดถึง${m} ผลจึงขึ้นกับการเลือกของคุณเองมาก`,
-      (c, p, m) => `ช่อง${p}ได้${c} เป็นใบที่เปิดให้คุณเป็นคนกำหนด ช่องนี้หมายถึง${m}`,
-      (c, p, m) => `${c} ในช่อง${p} (${m}) บอกว่าเรื่องนี้ยังเปลี่ยนได้ ขึ้นอยู่กับสิ่งที่คุณทำจากนี้`,
+      (c, p) => `${c} ในช่อง${p} ยังไม่ชี้ขาดไปทางใดทางหนึ่ง ผลจึงขึ้นกับการเลือกของคุณเองมาก`,
+      (c, p) => `ช่อง${p}ได้${c} เป็นใบที่ให้คุณเป็นคนกำหนดทิศทางเอง`,
+      (c, p, g) => `${c} ในช่อง${p}${g ? `ซึ่งว่าด้วย${g}` : ""} บอกว่าเรื่องนี้ยังเปลี่ยนได้ ขึ้นอยู่กับสิ่งที่คุณทำจากนี้`,
     ],
   },
   en: {
     light: [
-      (c, p, m) => `${c} lands in ${p} — ${m} — and it is a clear source of support here.`,
-      (c, p, m) => `${p} draws ${c}, a card that opens the way for you. This position speaks to ${m}.`,
-      (c, p, m) => `${c} in ${p} sends a good signal; this position is about ${m}.`,
+      (c, p, g) => `${c} lands in ${p}${g ? `, the part of the spread about ${g},` : ""} and it is a clear source of support here.`,
+      (c, p) => `${p} draws ${c}, a card that opens the way for you.`,
+      (c, p) => `${c} in ${p} sends a good signal.`,
     ],
     shadow: [
-      (c, p, m) => `${c} in ${p} (${m}) asks you to slow down and look closely. It does not close the door, but this is where your attention matters most.`,
-      (c, p, m) => `${p} draws ${c} — more a lesson than a verdict. This position speaks to ${m}.`,
-      (c, p, m) => `${c} sits in ${p} (${m}), a gentle warning that something here still needs work.`,
+      (c, p) => `${c} in ${p} asks you to slow down and look closely. It does not close the door, but this is where your attention matters most.`,
+      (c, p, g) => `${p}${g ? `, which is about ${g},` : ""} draws ${c} — more a lesson than a verdict.`,
+      (c, p) => `${c} sits in ${p}, a gentle warning that something here still needs work.`,
     ],
     open: [
-      (c, p, m) => `${c} in ${p} does not lean either way. This position speaks to ${m}, so a lot depends on what you choose.`,
-      (c, p, m) => `${p} draws ${c}, a card that leaves the decision with you. This position is about ${m}.`,
-      (c, p, m) => `${c} in ${p} (${m}) says this part can still change, depending on what you do next.`,
+      (c, p) => `${c} in ${p} does not lean either way, so a lot depends on what you choose.`,
+      (c, p) => `${p} draws ${c}, a card that leaves the direction with you.`,
+      (c, p, g) => `${c} in ${p}${g ? `, the part about ${g},` : ""} says this can still change depending on what you do next.`,
     ],
   },
 };
+
+/**
+ * "แก่น" ของคำอธิบายตำแหน่ง — ท่อนแรกก่อนเว้นวรรค (ไทย) / ก่อนจุลภาค (อังกฤษ)
+ * "รากของเรื่องนี้ สิ่งที่ผ่านมาแล้วและยังส่งผล…" ➔ "รากของเรื่องนี้"
+ * ท่อนแรกยาวเกิน (คำอธิบายไทยที่ไม่มีเว้นวรรคเลย) ➔ คืน "" ให้สำนวนข้ามไป ไม่ยัดประโยคยาวกลางประโยค
+ */
+function positionGist(meaning: string, lang: Lang): string {
+  const first = (lang === "en" ? meaning.split(/,|;| — /)[0] : meaning.split(/\s+/)[0])?.trim() ?? "";
+  const max = lang === "en" ? 48 : 28;
+  return first.length >= 4 && first.length <= max ? first : "";
+}
 
 /** ประโยคปิดท้ายของแต่ละใบจากคำสำคัญในสารานุกรม — หลายสำนวนกันซ้ำ */
 const KEYWORD_TAIL: Record<Lang, ((k1: string, k2?: string) => string)[]> = {
@@ -477,6 +496,341 @@ export const MOCK_ADVICE: Record<string, Record<Lang, string[]>> = {
   },
 };
 
+/**
+ * ✦ คำแนะนำตามหมวด × ขั้วของปลายทาง (ยกเครื่อง 2026-10-10 · เจ้าของสั่ง)
+ * ---------------------------------------------------------------------------
+ * เดิมเลือกจาก "ธาตุเด่น" อย่างเดียว (`MOCK_ADVICE`) ➔ คำถามแฟนเก่าได้ "ส่งข้อความสั้น ๆ ถึงคนที่เกี่ยวข้อง"
+ * ทั้งที่ไพ่ในคำอ่านเดียวกันเตือน "ระวังการกลับไปหาคนเดิม" — ขัดกันเอง และอาจพาผู้ใช้ไปทักแฟนเก่า
+ * ⚠️ หมวดความรักขั้ว shadow ห้ามมีคำแนะนำให้ติดต่อ/ทักอีกฝ่าย · คำถามแฟนเก่าใช้ชุดเฉพาะเสมอ (`INTENT_ADVICE.ex`)
+ * `MOCK_ADVICE` (ตามธาตุ) ยังอยู่ให้แชทสำรองใช้ — คำอ่านสำรองไม่ใช้แล้ว
+ */
+type AdviceTone = "light" | "shadow" | "open";
+const CATEGORY_ADVICE: Record<string, Record<AdviceTone, Record<Lang, string[]>>> = {
+  general: {
+    light: {
+      th: ["เลือกเรื่องที่ค้างอยู่มา 1 เรื่อง แล้วเริ่มลงมือภายใน 24 ชั่วโมงนี้", "จดสิ่งที่กำลังไปได้ดี 3 ข้อ แล้วทำต่อให้สม่ำเสมอ"],
+      en: ["Pick one thing you have been putting off and start it within the next 24 hours.", "Write down three things that are going well and keep them going."],
+    },
+    shadow: {
+      th: ["ก่อนตัดสินใจเรื่องสำคัญ รอให้ใจนิ่งสักคืนแล้วค่อยตัดสิน", "แตกเรื่องที่หนักใจออกเป็นขั้นเล็ก ๆ แล้วทำขั้นแรกให้เสร็จในสัปดาห์นี้"],
+      en: ["Before any important decision, sleep on it once so you decide from a calm place.", "Break what weighs on you into small steps and finish the first one this week."],
+    },
+    open: {
+      th: ["จดข้อดีข้อเสียของทางเลือกที่มีอยู่ ข้างละ 3 ข้อ", "คุยกับคนที่ไว้ใจได้ 1 คน เพื่อฟังมุมที่คุณอาจมองข้าม"],
+      en: ["List three pros and three cons for each option you have.", "Talk it through with one person you trust to hear the angle you might be missing."],
+    },
+  },
+  love: {
+    light: {
+      th: ["บอกความรู้สึกด้วยประโยคง่าย ๆ 1 ประโยค ไม่ต้องรอจังหวะที่สมบูรณ์แบบ", "หาเวลาคุยกันแบบไม่มีมือถือคั่นสัก 30 นาทีในสัปดาห์นี้"],
+      en: ["Say how you feel in one simple sentence; you do not need the perfect moment.", "Find thirty minutes this week to talk with no phones in between."],
+    },
+    shadow: {
+      th: ["ก่อนตัดสินใจเรื่องความสัมพันธ์ รอให้ใจนิ่งสักคืนแล้วค่อยคิดใหม่", "เขียนสิ่งที่คุณต้องการจากความรัก 3 ข้อ แล้วดูว่าตอนนี้ได้รับข้อไหนบ้าง"],
+      en: ["Before deciding anything about this relationship, let your heart settle overnight.", "Write down three things you need from love, then notice which of them you are actually getting."],
+    },
+    open: {
+      th: ["สังเกตสิ่งที่อีกฝ่ายทำในสัปดาห์นี้ มากกว่าสิ่งที่พูด", "ถามตัวเองว่าความสัมพันธ์แบบไหนที่ทำให้คุณสบายใจ แล้วจดไว้"],
+      en: ["Watch what the other person does this week more than what they say.", "Ask yourself what kind of relationship feels safe to you, and write it down."],
+    },
+  },
+  work: {
+    light: {
+      th: ["เลือกงานที่สำคัญที่สุด 1 ชิ้น แล้วลงมือภายใน 24 ชั่วโมง", "เล่าผลงานที่ทำสำเร็จให้หัวหน้าหรือทีมรู้ ไม่ต้องรอให้ใครถาม"],
+      en: ["Pick your single most important task and start it within 24 hours.", "Let your manager or team know what you have already delivered; do not wait to be asked."],
+    },
+    shadow: {
+      th: ["ลิสต์งานที่ถืออยู่ทั้งหมด แล้วเลือก 1 ชิ้นที่ส่งต่อหรือเลื่อนได้", "ก่อนตัดสินใจเรื่องงานใหญ่ ขอความเห็นจากคนที่รู้เรื่องนั้นจริงสัก 1 คน"],
+      en: ["List everything on your plate and choose one thing you can hand off or postpone.", "Before a big work decision, ask one person who really knows the field."],
+    },
+    open: {
+      th: ["จดทางเลือกเรื่องงานที่มีอยู่ ข้างละ 3 ข้อดีข้อเสีย", "ตั้งเป้าเล็ก ๆ 1 ข้อที่วัดผลได้ภายในสัปดาห์นี้"],
+      en: ["Write three pros and cons for each work option you have.", "Set one small, measurable goal for this week."],
+    },
+  },
+  money: {
+    light: {
+      th: ["กันเงินส่วนหนึ่งไว้ออมก่อนใช้ แม้จะเป็นจำนวนเล็ก ๆ", "วางแผนว่ารายรับที่เข้ามาจะเก็บหรือต่อยอดอย่างไรก่อนใช้"],
+      en: ["Set some money aside before you spend, even a small amount.", "Decide how incoming money will be saved or grown before you spend it."],
+    },
+    shadow: {
+      th: ["ชะลอการซื้อของชิ้นใหญ่หรือการลงทุนใหม่ออกไปก่อน 1 สัปดาห์", "จดรายจ่ายทุกบาทเป็นเวลา 7 วัน เพื่อดูว่าเงินรั่วไปตรงไหน"],
+      en: ["Hold off on any big purchase or new investment for one week.", "Track every expense for seven days to see where the money leaks."],
+    },
+    open: {
+      th: ["แยกเงินที่จำเป็นกับเงินที่ใช้ได้ออกจากกันให้ชัด", "ก่อนจ่ายทุกครั้ง ถามตัวเองว่าจำเป็นหรือแค่อยากได้"],
+      en: ["Separate the money you need from the money you can spend.", "Before each purchase, ask whether you need it or only want it."],
+    },
+  },
+  self: {
+    light: {
+      th: ["ทำสิ่งที่ทำให้คุณรู้สึกเป็นตัวเองสัก 30 นาทีในวันนี้", "จดสิ่งที่คุณภูมิใจในตัวเองช่วงนี้ 3 ข้อ"],
+      en: ["Spend thirty minutes today on something that makes you feel like yourself.", "Write down three things you are proud of lately."],
+    },
+    shadow: {
+      th: ["ให้เวลาพักจริง ๆ กับตัวเองสักครึ่งวัน โดยไม่ต้องรู้สึกผิด", "เขียนสิ่งที่หนักใจลงกระดาษ 5 นาที แล้วเลือก 1 เรื่องที่วางลงได้ก่อน"],
+      en: ["Give yourself a real half-day of rest, without guilt.", "Write what weighs on you for five minutes, then choose one thing you can set down first."],
+    },
+    open: {
+      th: ["ลองเขียนว่าอีก 3 เดือนข้างหน้า คุณอยากเป็นคนแบบไหน", "เลือกนิสัยเล็ก ๆ 1 อย่างที่อยากเริ่ม แล้วทำต่อเนื่อง 7 วัน"],
+      en: ["Write down who you want to be three months from now.", "Choose one small habit to start and keep it for seven days."],
+    },
+  },
+};
+
+/**
+ * ✦ ประเภทคำถามที่พบบ่อย — จับจากคำในคำถาม (ไม่ใช้ AI) เพื่อตอบให้ตรงเรื่องและเลือกคำแนะนำที่ปลอดภัย
+ * ไม่เข้าข่ายข้อไหน = null (ใช้คำแนะนำตามหมวดตามปกติ ไม่มีประโยคตอบตรง)
+ */
+type QuestionIntent =
+  | "ex"
+  | "feelings"
+  | "new_love"
+  | "health"
+  | "study"
+  | "family"
+  | "job_change"
+  | "business"
+  | "money"
+  | "decision";
+/**
+ * ลำดับสำคัญ — เรื่องเฉพาะมาก่อนเรื่องกว้าง ("แฟนเก่ายังรักเราไหม" = แฟนเก่า ไม่ใช่ความรู้สึก)
+ * `decision` ("ควร…ไหม") อยู่ท้ายสุด ใช้เมื่อไม่เข้าเรื่องไหนเลย · คำถาม "เมื่อไหร่" แยกเป็นธง `asksTiming` ต่อท้ายคำตอบ
+ * ⚠️ สุขภาพ: ตอบได้แค่เรื่องกำลังใจ/การดูแลตัวเอง ห้ามทำนายผลการรักษาหรืออาการ และชี้ไปหาแพทย์เสมอ
+ */
+const INTENT_ORDER: readonly QuestionIntent[] = [
+  "ex",
+  "feelings",
+  "new_love",
+  "health",
+  "study",
+  "family",
+  "job_change",
+  "business",
+  "money",
+  "decision",
+];
+const INTENT_PATTERN: Record<QuestionIntent, RegExp> = {
+  ex: /แฟนเก่า|คนเก่า|คืนดี|กลับมาหา|กลับมาคบ|\bex\b|get back together|come back to me/i,
+  feelings: /เขารู้สึก|เขาคิดยังไง|เขาคิดอย่างไร|เขาชอบ|เขารัก|ใจเขา|how (?:does|do) (?:he|she|they) feel|feel about me|love me/i,
+  new_love: /คนคุย|คนใหม่|เนื้อคู่|เจอคน|คู่แท้|มีแฟน|โสด|soulmate|meet someone|new (?:love|partner)|single/i,
+  health: /สุขภาพ|ป่วย|โรค|ผ่าตัด|หาย(?:ป่วย|ดี)|อาการ|health|illness|sick|surgery|recover/i,
+  study: /(?<!ตรวจ)สอบ|เรียน(?!รู้)|(?<!ลง)ทุนการศึกษา|ทุนเรียน|มหาลัย|มหาวิทยาลัย|exam|study|school|university|scholarship/i,
+  family: /ครอบครัว|พ่อ(?!ค้า)|แม่(?!หมอ|ค้า)|ลูก(?!ค้า)|พี่น้อง|ญาติ|family|parents?|mother|father|children|siblings?/i,
+  job_change: /ย้ายงาน|เปลี่ยนงาน|ลาออก|งานใหม่|สมัครงาน|สัมภาษณ์|change (?:my )?jobs?|quit (?:my )?job|new job|interview/i,
+  business: /ธุรกิจ|ค้าขาย|ขายของ|ร้าน|ลูกค้า|business|shop|customers?|start-?up/i,
+  money: /การเงิน|เงิน|หนี้|รายได้|ลงทุน|money|finances?|debt|income|invest/i,
+  decision: /ควร.*(?:ไหม|มั้ย|หรือเปล่า|ดีไหม)|ดีไหม|เลือก(?:ทาง|อะไร)|should i|which (?:one|option)/i,
+};
+const TIMING_PATTERN = /เมื่อไหร่|เมื่อไร|อีกนานไหม|ช่วงไหน|\bwhen\b|how long/i;
+function detectIntent(question: string): QuestionIntent | null {
+  for (const intent of INTENT_ORDER) if (INTENT_PATTERN[intent].test(question)) return intent;
+  return null;
+}
+
+/** คำแนะนำเฉพาะประเภทคำถาม — ชนะคำแนะนำตามหมวด (แฟนเก่า: ห้ามชวนทัก ให้เว้นระยะและทบทวนก่อนเสมอ) */
+const INTENT_ADVICE: Partial<Record<QuestionIntent, Record<Lang, string[]>>> = {
+  ex: {
+    th: [
+      "ก่อนทักเขา เว้นระยะสัก 7 วัน แล้วถามตัวเองว่าคิดถึงตัวเขา หรือคิดถึงช่วงเวลาที่ผ่านมา",
+      "เขียนเหตุผลที่เลิกกันครั้งก่อน 3 ข้อ แล้วดูว่าตอนนี้มีข้อไหนเปลี่ยนไปจริงบ้าง",
+    ],
+    en: [
+      "Before reaching out, give it seven days and ask yourself whether you miss them or the time you shared.",
+      "Write down three reasons it ended last time, then check which of them has truly changed.",
+    ],
+  },
+  feelings: {
+    th: ["สังเกตสิ่งที่เขาทำให้คุณจริง ๆ ในสัปดาห์นี้ มากกว่าการเดาความคิดเขา", "ถามตัวเองว่าคุณต้องการอะไรจากเขา แล้วค่อยพูดตรง ๆ เมื่อใจพร้อม"],
+    en: ["Notice what they actually do for you this week rather than guessing their thoughts.", "Ask yourself what you want from them, and say it plainly when you feel ready."],
+  },
+  new_love: {
+    th: ["ลองไปที่ใหม่หรือทำกิจกรรมใหม่ 1 อย่างในสัปดาห์นี้ เพื่อเปิดโอกาสได้เจอคน", "จดลักษณะของคนที่ทำให้คุณสบายใจ 3 ข้อ เพื่อใช้ดูคนที่เข้ามา"],
+    en: ["Go somewhere new or try one new activity this week to open the door to meeting people.", "Write down three qualities of someone who makes you feel at ease, and use them to see who comes along."],
+  },
+  health: {
+    th: ["ถ้ามีอาการที่กังวล ให้ปรึกษาแพทย์โดยตรง กรณีฉุกเฉินโทร 1669", "พักผ่อนให้พอและดื่มน้ำให้เพียงพอตลอดสัปดาห์นี้"],
+    en: ["If a symptom worries you, talk to a doctor directly; in an emergency call your local emergency number.", "Get enough rest and water throughout this week."],
+  },
+  study: {
+    th: ["แบ่งเนื้อหาที่ต้องอ่านเป็นชิ้นเล็ก ๆ แล้วทำวันละ 1 ชิ้นจนถึงวันสอบ", "ลองทำข้อสอบเก่าจับเวลาจริงสัก 1 ชุดในสัปดาห์นี้"],
+    en: ["Split what you need to study into small pieces and do one a day until the exam.", "Try one past paper under real timing this week."],
+  },
+  family: {
+    th: ["หาเวลาคุยกับคนในบ้านแบบตั้งใจฟังสัก 15 นาที โดยยังไม่ต้องหาข้อสรุป", "บอกสิ่งที่คุณต้องการจากครอบครัวด้วยประโยคง่าย ๆ 1 ประโยค"],
+    en: ["Spend fifteen minutes truly listening to someone at home, without trying to settle anything yet.", "Tell your family what you need in one simple sentence."],
+  },
+  business: {
+    th: ["ดูตัวเลขรายรับรายจ่ายของธุรกิจย้อนหลัง 1 เดือนให้ชัดก่อนตัดสินใจเรื่องใหญ่", "ถามลูกค้าจริงสัก 3 คนว่าชอบหรืออยากให้ปรับอะไร"],
+    en: ["Review the last month's business income and costs before any big decision.", "Ask three real customers what they like and what they would change."],
+  },
+  decision: {
+    th: ["จดข้อดีข้อเสียของแต่ละทาง ข้างละ 3 ข้อ แล้ววางไว้ 1 คืนก่อนตัดสิน", "ถามตัวเองว่าอีก 1 ปีข้างหน้า คุณจะเสียดายทางไหนมากกว่ากัน"],
+    en: ["Write three pros and cons for each path, then sleep on it before you decide.", "Ask yourself which path you would regret more a year from now."],
+  },
+};
+
+/**
+ * ✦ ประโยคตอบตรงคำถาม — ขึ้นต้นบทสรุป (ไม่ใช้ในโหมดใช่/ไม่ใช่ ซึ่งมีคำตอบฟันธงอยู่แล้ว)
+ * คิดจากขั้วของไพ่ปลายทาง (หรือภาพรวมของผัง) เท่านั้น ไม่ฟันธงเกินไพ่ และไม่อ้างว่ารู้การกระทำของคนอื่น
+ */
+const INTENT_ANSWER: Record<QuestionIntent, Record<Lang, Record<AdviceTone, string>>> = {
+  ex: {
+    th: {
+      light: "สำหรับคำถามว่าเขาจะกลับมาไหม ไพ่เอนไปทางที่ยังมีโอกาสได้คุยกันใหม่ แต่ไพ่บอกแนวโน้ม ไม่ได้รับประกันการตัดสินใจของใคร",
+      shadow: "สำหรับคำถามว่าเขาจะกลับมาไหม ไพ่ยังไม่เห็นสัญญาณชัดว่าเรื่องจะกลับไปเหมือนเดิม และชวนให้คุณดูแลใจตัวเองก่อน",
+      open: "สำหรับคำถามว่าเขาจะกลับมาไหม ไพ่ยังไม่ชี้ขาด ขึ้นกับว่าทั้งสองฝ่ายเปลี่ยนไปจากเดิมจริงหรือเปล่า",
+    },
+    en: {
+      light: "As for whether they will come back, the cards lean towards a chance to talk again — they show a trend, not a guarantee of anyone's choice.",
+      shadow: "As for whether they will come back, the cards do not show a clear sign that things will return to how they were, and they ask you to look after your own heart first.",
+      open: "As for whether they will come back, the cards have not decided; it depends on whether both of you have truly changed.",
+    },
+  },
+  feelings: {
+    th: {
+      light: "ความรู้สึกของอีกฝ่ายที่ไพ่สะท้อนออกมาเอนไปทางบวก แต่ให้ดูจากสิ่งที่เขาทำประกอบด้วย",
+      shadow: "ความรู้สึกของอีกฝ่ายที่ไพ่สะท้อนออกมายังมีความลังเลหรือระยะห่างอยู่",
+      open: "ความรู้สึกของอีกฝ่ายตามที่ไพ่สะท้อนยังไม่ชัด อาจเพราะเขาเองก็ยังไม่แน่ใจ",
+    },
+    en: {
+      light: "The feelings the cards reflect from the other person lean positive, but read them alongside what they actually do.",
+      shadow: "The feelings the cards reflect from the other person still carry hesitation or distance.",
+      open: "The other person's feelings are not clear in these cards — they may not be sure themselves yet.",
+    },
+  },
+  job_change: {
+    th: {
+      light: "เรื่องย้ายหรือเปลี่ยนงาน ไพ่เอนไปทางสนับสนุนให้ขยับ ถ้าคุณเตรียมตัวพร้อม",
+      shadow: "เรื่องย้ายหรือเปลี่ยนงาน ไพ่ชวนให้ชะลอและเตรียมตัวให้พร้อมกว่านี้ก่อนตัดสินใจ",
+      open: "เรื่องย้ายหรือเปลี่ยนงาน ไพ่ยังไม่ชี้ขาด ลองชั่งข้อดีข้อเสียให้ชัดก่อน",
+    },
+    en: {
+      light: "On changing jobs, the cards lean towards making the move, as long as you are prepared.",
+      shadow: "On changing jobs, the cards suggest slowing down and preparing more before you decide.",
+      open: "On changing jobs, the cards have not decided — weigh the pros and cons clearly first.",
+    },
+  },
+  money: {
+    th: {
+      light: "เรื่องเงิน ไพ่เอนไปทางดีขึ้น ถ้าคุมรายจ่ายได้ต่อเนื่อง",
+      shadow: "เรื่องเงิน ไพ่ชวนให้ระวังรายจ่ายและอย่าเพิ่งเสี่ยงช่วงนี้",
+      open: "เรื่องเงิน ไพ่ยังไม่ชี้ขาด ขึ้นกับการวางแผนของคุณจากนี้",
+    },
+    en: {
+      light: "On money, the cards lean towards improvement if you keep spending in check.",
+      shadow: "On money, the cards ask you to watch your spending and avoid risks for now.",
+      open: "On money, the cards have not decided; it depends on how you plan from here.",
+    },
+  },
+  new_love: {
+    th: {
+      light: "เรื่องความรักครั้งใหม่ ไพ่เอนไปทางที่หัวใจกำลังเปิดรับ โอกาสได้เจอหรือคุยกับคนที่ใช่มีอยู่จริง",
+      shadow: "เรื่องความรักครั้งใหม่ ไพ่ชวนให้ดูแลใจตัวเองให้พร้อมก่อน แล้วความสัมพันธ์ที่ดีจะง่ายขึ้น",
+      open: "เรื่องความรักครั้งใหม่ ไพ่ยังไม่ชี้ขาด ขึ้นกับว่าคุณเปิดโอกาสให้ตัวเองมากแค่ไหน",
+    },
+    en: {
+      light: "On new love, the cards lean towards a heart that is opening — a real chance to meet or connect with someone right.",
+      shadow: "On new love, the cards ask you to take care of your own heart first; a good connection comes easier after that.",
+      open: "On new love, the cards have not decided; it depends on how much room you give yourself to meet people.",
+    },
+  },
+  health: {
+    th: {
+      light: "เรื่องสุขภาพ ไพ่ใช้ดูได้แค่กำลังใจและการดูแลตัวเอง ไม่ใช่การวินิจฉัย ซึ่งไพ่ชุดนี้ให้กำลังใจที่ดี อาการที่กังวลควรปรึกษาแพทย์",
+      shadow: "เรื่องสุขภาพ ไพ่ใช้ดูได้แค่กำลังใจและการดูแลตัวเอง ไม่ใช่การวินิจฉัย ไพ่ชุดนี้ชวนให้ใส่ใจร่างกายมากขึ้น อาการที่กังวลควรปรึกษาแพทย์",
+      open: "เรื่องสุขภาพ ไพ่ใช้ดูได้แค่กำลังใจและการดูแลตัวเอง ไม่ใช่การวินิจฉัย อาการที่กังวลควรปรึกษาแพทย์",
+    },
+    en: {
+      light: "On health, tarot can only speak to morale and self-care, not diagnosis — and these cards are encouraging. Please see a doctor about any symptom that worries you.",
+      shadow: "On health, tarot can only speak to morale and self-care, not diagnosis — these cards ask you to pay closer attention to your body. Please see a doctor about any symptom that worries you.",
+      open: "On health, tarot can only speak to morale and self-care, not diagnosis. Please see a doctor about any symptom that worries you.",
+    },
+  },
+  study: {
+    th: {
+      light: "เรื่องการเรียนการสอบ ไพ่เอนไปทางดี ถ้าคุณเตรียมตัวต่อเนื่องอย่างที่ทำอยู่",
+      shadow: "เรื่องการเรียนการสอบ ไพ่ชวนให้เพิ่มการเตรียมตัวและอย่าประมาท ยังมีเวลาปรับ",
+      open: "เรื่องการเรียนการสอบ ไพ่ยังไม่ชี้ขาด ผลขึ้นกับการเตรียมตัวจากนี้มาก",
+    },
+    en: {
+      light: "On study and exams, the cards lean positive, as long as you keep preparing steadily.",
+      shadow: "On study and exams, the cards ask you to prepare more and not get complacent — there is still time.",
+      open: "On study and exams, the cards have not decided; the result depends a lot on your preparation from here.",
+    },
+  },
+  family: {
+    th: {
+      light: "เรื่องครอบครัว ไพ่เอนไปทางที่ความสัมพันธ์ในบ้านคลี่คลายและอบอุ่นขึ้น",
+      shadow: "เรื่องครอบครัว ไพ่ชวนให้ใจเย็นและฟังกันมากขึ้น ยังมีเรื่องที่ต้องค่อย ๆ คุย",
+      open: "เรื่องครอบครัว ไพ่ยังไม่ชี้ขาด ขึ้นกับว่าแต่ละคนเปิดใจคุยกันแค่ไหน",
+    },
+    en: {
+      light: "On family, the cards lean towards things at home easing and growing warmer.",
+      shadow: "On family, the cards ask for patience and more listening — there is still something to talk through slowly.",
+      open: "On family, the cards have not decided; it depends on how openly everyone talks.",
+    },
+  },
+  business: {
+    th: {
+      light: "เรื่องธุรกิจ ไพ่เอนไปทางเติบโต ถ้าคุณคุมตัวเลขและฟังลูกค้าต่อเนื่อง",
+      shadow: "เรื่องธุรกิจ ไพ่ชวนให้ระวังการขยายหรือลงทุนเพิ่มช่วงนี้ ดูตัวเลขให้ชัดก่อน",
+      open: "เรื่องธุรกิจ ไพ่ยังไม่ชี้ขาด ขึ้นกับการตัดสินใจและการวางแผนของคุณจากนี้",
+    },
+    en: {
+      light: "On business, the cards lean towards growth if you keep an eye on the numbers and listen to customers.",
+      shadow: "On business, the cards caution against expanding or investing more right now — get the numbers clear first.",
+      open: "On business, the cards have not decided; it depends on your planning and choices from here.",
+    },
+  },
+  decision: {
+    th: {
+      light: "สำหรับการตัดสินใจครั้งนี้ ไพ่เอนไปทางสนับสนุนให้ก้าวต่อ ถ้าคุณชั่งข้อดีข้อเสียแล้วรู้สึกพร้อม",
+      shadow: "สำหรับการตัดสินใจครั้งนี้ ไพ่ชวนให้ชะลอและหาข้อมูลเพิ่มก่อน ยังไม่ต้องรีบ",
+      open: "สำหรับการตัดสินใจครั้งนี้ ไพ่ยังไม่ชี้ขาด คำตอบอยู่ที่ว่าคุณให้น้ำหนักกับอะไรมากที่สุด",
+    },
+    en: {
+      light: "For this decision, the cards lean towards moving ahead, once you have weighed it and feel ready.",
+      shadow: "For this decision, the cards suggest slowing down and gathering more information first — no need to rush.",
+      open: "For this decision, the cards have not decided; the answer lies in what matters most to you.",
+    },
+  },
+};
+
+/** ต่อท้ายคำตอบเมื่อคำถามถามเวลา — ไพ่ไม่บอกวันเวลาตายตัว ให้แค่จังหวะคร่าว ๆ ตามธาตุเด่น */
+const TIMING_ANSWER: Record<Lang, (timing: string) => string> = {
+  th: (t) => `ส่วนเรื่องเมื่อไหร่ ไพ่ไม่ได้บอกวันเวลาตายตัว จังหวะคร่าว ๆ ที่ไพ่ชี้คือ${t}`,
+  en: (t) => `As for when, the cards do not give a fixed date; the rough timing they point to is ${t}.`,
+};
+
+/**
+ * ✦ ประโยคปิด — เดิมใช้ประโยคเดียวของบุคลิกทุกครั้ง (ผู้ใช้ที่ได้คำอ่านสำรองสองครั้งเห็นประโยคเดียวกันเป๊ะ)
+ * ตอนนี้หมุนกับอีก 3 แบบที่ไม่มีคำลงท้ายเพศ (ไม่ชนบุคลิก ค่ะ/ครับ) · เลือกจากไพ่ที่จั่ว จึงไม่สุ่ม (ไพ่ชุดเดิมได้คำเดิม)
+ * ทุกแบบจบด้วยคำถามชวนคิด 1 ข้อตามที่ schema ของ summary กำหนด
+ */
+const CLOSE_VARIANTS: Record<Lang, string[]> = {
+  th: [
+    "ลองถามตัวเองดูว่า สิ่งไหนในเรื่องนี้ที่อยู่ในมือคุณจริง ๆ",
+    "ก่อนปิดไพ่ ลองถามใจตัวเองว่า อีกหนึ่งสัปดาห์ข้างหน้า คุณอยากเห็นเรื่องนี้เป็นแบบไหน",
+    "ลองถามตัวเองเบา ๆ ว่า ถ้าเพื่อนสนิทเจอเรื่องเดียวกันนี้ คุณจะแนะนำเขาว่าอะไร",
+  ],
+  en: [
+    "Ask yourself: which part of this is truly in your hands?",
+    "Before you close the cards, ask yourself: a week from now, how would you like this to look?",
+    "Ask yourself gently: if a close friend were in this exact spot, what would you tell them?",
+  ],
+};
+
+/** ขั้วที่ใช้ตอบคำถาม/เลือกคำแนะนำ — ไพ่ปลายทางก่อน · ผังใบเดียวใช้ใบนั้น · ไม่มีปลายทางใช้ฝั่งที่มากกว่า */
+function headingTone(views: DrawnView[], lang: Lang): AdviceTone {
+  if (views.length === 1) return views[0].tone;
+  const outcome = findOutcome(views, lang);
+  if (outcome) return outcome.tone;
+  const light = views.filter((v) => v.tone === "light").length;
+  const shadow = views.filter((v) => v.tone === "shadow").length;
+  return light > shadow ? "light" : shadow > light ? "shadow" : "open";
+}
+
 const MINDFUL_EN: Record<string, string> = {
   ไฟ: "🧘 One-minute practice: stand tall, take three deep breaths, step forward once, and say out loud one thing you will do today.",
   น้ำ: "🧘 One-minute practice: hand on your chest, drink a glass of water slowly, and tell yourself it is okay to feel what you feel.",
@@ -557,7 +911,7 @@ export async function* streamMockGeminiReading(
       : v.card.meanings?.[category]?.[orientation] || v.card.meanings?.general?.[orientation] || "";
     const kws = (isEn ? v.card.keywordsEn?.[orientation] || v.card.keywords?.[orientation] : v.card.keywords?.[orientation]) ?? [];
     const variant = (i + v.card.number) % 3;
-    const lead = CARD_LEAD[lang][v.tone][variant](v.name, v.pos, v.posMeaning);
+    const lead = CARD_LEAD[lang][v.tone][variant](v.name, v.pos, positionGist(v.posMeaning, lang));
     const tail = kws[0] ? KEYWORD_TAIL[lang][(variant + 1) % 3](kws[0], kws[1]) : "";
     const reading = polish([lead, catMeaning, tail].filter(Boolean).join(" "));
     const headline = `${v.pos}: ${v.name}`;
@@ -575,8 +929,23 @@ export async function* streamMockGeminiReading(
 
   // 4. บทสรุป — โหมดฟันธงต้องขึ้นคำตอบให้ตรงกับ yesNoAnswer เสมอ (กัน YESNO_CONTRADICTION)
   const yesNoAnswer = resolveMockYesNo(ctx);
+  const intent = detectIntent(ctx.question ?? "");
+  const tone = views.length > 0 ? headingTone(views, lang) : "open";
+  // ตอบตรงคำถามก่อน (ถ้ารู้ประเภท) — โหมดใช่/ไม่ใช่มีคำตอบฟันธงขึ้นต้นอยู่แล้ว จึงไม่ซ้อน
+  const asksTiming = TIMING_PATTERN.test(ctx.question ?? "");
+  const timingText = (MOCK_TIMING[dominantElement] ?? MOCK_TIMING.ดิน)[lang];
+  const direct =
+    views.length > 0 && !yesNoAnswer
+      ? [intent ? INTENT_ANSWER[intent][lang][tone] : "", asksTiming ? TIMING_ANSWER[lang](timingText) : ""]
+          .filter(Boolean)
+          .join(" ")
+      : "";
   const body = views.length > 0 ? buildSummary(views, lang) : "";
-  let summary = [body, voice.close].filter(Boolean).join(" ");
+  // ประโยคปิด: หมุนจากไพ่ที่จั่ว (ไม่สุ่ม) · 0 = ของบุคลิก
+  const seed = ctx.drawn.reduce((sum, d, i) => sum + (d.cardIndex + 1) * (i + 1) + (d.isReversed ? 7 : 0), 0);
+  const variants = [voice.close, ...CLOSE_VARIANTS[lang]];
+  const close = variants[seed % variants.length];
+  let summary = [direct, body, close].filter(Boolean).join(" ");
   if (yesNoAnswer) {
     summary = isEn
       ? `Weighing all ${ctx.drawn.length} cards together for "${question}", the answer is ${YES_NO_EN[yesNoAnswer]}. ${summary}`
@@ -590,7 +959,18 @@ export async function* streamMockGeminiReading(
   const mindful = isEn
     ? MINDFUL_EN[dominantElement] ?? MINDFUL_EN.ดิน
     : generateMindfulMicroRitual(lacking, dominantElement).adviceString;
-  const adviceList = [...(MOCK_ADVICE[dominantElement] ?? MOCK_ADVICE.ดิน)[lang], mindful];
+  // คำแนะนำ: ประเภทคำถาม (ถ้ามีชุดเฉพาะ) ➔ หมวด × ขั้วปลายทาง · ข้อฝึกสติตามธาตุปิดท้ายเหมือนเดิม
+  const topical =
+    (intent && INTENT_ADVICE[intent]?.[lang]) ??
+    (CATEGORY_ADVICE[category] ?? CATEGORY_ADVICE.general)[tone][lang];
+  /*
+   * คำแนะนำรายใบ (`card-advice.ts`) ของไพ่ที่กำหนดทิศทาง (ปลายทาง · ใบเดียว) — ใช้เฉพาะแถวที่แม่หมอตรวจแล้ว
+   * แถว pending ได้ null ➔ เหมือนเดิมทุกอย่าง · คำถามแฟนเก่าไม่ใช้ (ชุดเฉพาะ "เว้นระยะก่อนทัก" ต้องมาก่อนเสมอ)
+   */
+  const keyView = views.length === 1 ? views[0] : findOutcome(views, lang);
+  const cardAdvice =
+    keyView && intent !== "ex" ? reviewedCardAdvice(keyView.card.id, keyView.isReversed, lang) : null;
+  const adviceList = cardAdvice ? [cardAdvice, topical[0], mindful] : [...topical, mindful];
 
   const light = views.filter((v) => v.tone === "light").length;
   const shadow = views.filter((v) => v.tone === "shadow").length;
@@ -601,7 +981,10 @@ export async function* streamMockGeminiReading(
     connections,
     summary,
     advice: adviceList,
-    timing: (MOCK_TIMING[dominantElement] ?? MOCK_TIMING.ดิน)[lang],
+    // จังหวะจากธาตุเป็นการประมาณ ไม่ใช่คำทำนายวันเวลา — ขึ้นต้นด้วย "อาจ" ไม่ให้อ่านเป็นการฟันธง
+    timing: isEn
+      ? `Possibly ${(MOCK_TIMING[dominantElement] ?? MOCK_TIMING.ดิน).en}`
+      : `อาจเห็นความเคลื่อนไหว${(MOCK_TIMING[dominantElement] ?? MOCK_TIMING.ดิน).th}`,
     // mood เป็น enum ภายในสำหรับเลือกโทนสีหน้าเว็บ ไม่ได้แสดงผลเป็นข้อความ จึงคงค่าไทยไว้ทั้งสองภาษา
     mood: shadow > light ? "ท้าทาย" : light > shadow ? "อบอุ่น" : "ครุ่นคิด",
     yesNoAnswer,

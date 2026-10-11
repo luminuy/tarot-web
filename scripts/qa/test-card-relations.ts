@@ -45,10 +45,14 @@ const c = (id: string, isReversed = false) => ({ card: cardById(id)!, isReversed
 // ── ธาตุตามกติกา alchemy.ts ──
 {
   // Sun (ไฟ) + Six of Wands (ไฟ) — ธาตุเดียวกัน + แก่นเรื่อง success ตรงกัน
-  const r = analyzeRelations([c("major-19"), c("wands-06")]);
+  // ตัดตารางคู่ไพ่ออก (combos: []) เพื่อวัดเฉพาะกติกาธาตุ/แก่นเรื่อง — คู่นี้อยู่ในตารางที่แม่หมอตรวจแล้ว (2026-10-11)
+  const r = analyzeRelations([c("major-19"), c("wands-06")], { combos: [] });
   const p = r.pairs[0];
   check("Sun + Six of Wands: เสริมกัน", p?.kind === "support");
   check("Sun + Six of Wands: 2 หลักฐาน (ธาตุ + แก่นเรื่อง)", p?.strength === 2);
+  // ตารางจริง: คู่ที่แม่หมอตรวจแล้วนับเป็นหลักฐานเพิ่มอีกชิ้น
+  const reviewed = analyzeRelations([c("major-19"), c("wands-06")]).pairs[0];
+  check("Sun + Six of Wands (ตารางที่ตรวจแล้ว): เสริมกัน · 3 หลักฐาน", reviewed?.kind === "support" && reviewed?.strength === 3);
 }
 {
   // Ace of Wands (ไฟ) + Ace of Cups (น้ำ) = ขัดกัน
