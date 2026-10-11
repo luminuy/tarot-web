@@ -449,6 +449,68 @@ async function run() {
     );
     check("คำอ่านสำรองไม่มีคำแนะนำรายใบที่ยังไม่ตรวจหลุดเข้าไป", !leakedIntoReading);
   }
+  // กฎข้อ 3 ของหลักอ่านกลับหัว (แม่หมออนุมัติ 2026-10-11): ห้ามพูดแทนสภาพคนดู เช่น "คุณเริ่ม…แล้ว" "กำลังฟื้น" "ผ่านไปแล้ว"
+  // แอปไม่รู้สภาพจริงของคนดู ➔ ใช้ "ถ้า…" / "ไม่ว่าจะ…หรือ…" แทน · ตรวจทั้งคำแนะนำรายใบและมุมอ่านกลับหัว ทั้งไทยและอังกฤษ
+  const STATE_CLAIM_TH = /คุณเริ่ม\S{0,30}แล้ว|กำลังฟื้น|ผ่านไปแล้ว|ผ่านพ้นไปแล้ว|คุณหายดีแล้ว/;
+  const STATE_CLAIM_EN = /\byou(?:'re| are) (?:already |now )?(?:starting|beginning) to\b|\byou(?:'ve| have) (?:already )?(?:started|begun|recovered|healed|moved on)\b|\byou(?:'re| are) (?:recovering|healing)\b|\b(?:it|this) is (?:already )?(?:over|behind you)\b/i;
+  check(
+    "ด่านคำพูดแทนสภาพจับของจริงได้ (ไทย · อังกฤษ)",
+    STATE_CLAIM_TH.test("คุณเริ่มเห็นทางออกแล้ว") && STATE_CLAIM_TH.test("ช่วงที่หนักที่สุดผ่านไปแล้ว") &&
+      STATE_CLAIM_EN.test("You are starting to heal") && STATE_CLAIM_EN.test("The worst is over — you have moved on") &&
+      !STATE_CLAIM_TH.test("ไม่ว่าจะเริ่มเห็นทางออกหรือยังมองไม่เห็น") && !STATE_CLAIM_EN.test("Whether your heart is starting to heal or still hurts"),
+  );
+  {
+    const { CARD_ADVICE } = await import("../../src/data/cards/card-advice");
+    const { REVERSAL_ANGLES } = await import("../../src/data/cards/reversal-angles");
+    const texts: Array<[string, string, string]> = [
+      ...Object.entries(CARD_ADVICE).flatMap(([id, r]) => [
+        [`${id}.หัวตั้ง`, r.upright.th, r.upright.en] as [string, string, string],
+        [`${id}.กลับหัว`, r.reversed.th, r.reversed.en] as [string, string, string],
+      ]),
+      ...Object.entries(REVERSAL_ANGLES).map(([id, a]) => [`${id}.มุมกลับหัว`, a.note.th, a.note.en] as [string, string, string]),
+    ];
+    const claims = texts.filter(([, th, en]) => STATE_CLAIM_TH.test(th) || STATE_CLAIM_EN.test(en)).map(([id]) => id);
+    check("คำแนะนำรายใบ + มุมอ่านกลับหัว ไม่พูดแทนสภาพคนดู (กฎข้อ 3)", claims.length === 0, claims.join(", "));
+  }
+  // มุมอ่านกลับหัวรายใบ (ร่างรอบ 4 · รอแม่หมอตรวจ) — ครบ 78 ใบ · จำนวนต่อมุมตรงตารางที่อนุมัติ · แถว pending ไม่เข้า prompt
+  {
+    const { REVERSAL_ANGLES, REVERSAL_ANGLE_INFO, reviewedReversalAngle, formatReversalAngleForPrompt } = await import("../../src/data/cards/reversal-angles");
+    const missingAngle = DECK.filter((c) => !REVERSAL_ANGLES[c.id]).map((c) => c.id);
+    check("มุมอ่านกลับหัวครบทุกใบในสำรับ 78 ใบ", missingAngle.length === 0 && Object.keys(REVERSAL_ANGLES).length === DECK.length, missingAngle.join(", "));
+    const tally = (Object.keys(REVERSAL_ANGLE_INFO) as Array<keyof typeof REVERSAL_ANGLE_INFO>).map(
+      (k) => [k, Object.values(REVERSAL_ANGLES).filter((a) => a.angle === k).length, REVERSAL_ANGLE_INFO[k].count] as const,
+    );
+    check(
+      "จำนวนใบต่อมุมตรงตารางที่แม่หมออนุมัติ (ติดขัด 21 · มาก/น้อยเกิน 33 · หันเข้าข้างใน 9 · คลายลงหรือยังค้าง 15)",
+      tally.every(([, got, want]) => got === want),
+      tally.map(([k, got, want]) => `${k} ${got}/${want}`).join(" · "),
+    );
+    const badNote = Object.entries(REVERSAL_ANGLES)
+      .filter(([, a]) => !a.note.th || !a.note.en || a.note.th.length > 90 || a.note.en.length > 140 || THAI.test(a.note.en))
+      .map(([id]) => id);
+    check("คำอธิบายมุมรายใบไม่ว่าง ไม่ยาวเกิน (ไทย ≤ 90 · อังกฤษ ≤ 140) อังกฤษไม่มีอักษรไทย", badNote.length === 0, badNote.join(", "));
+    const easingOneSided = Object.entries(REVERSAL_ANGLES)
+      .filter(([, a]) => a.angle === "easing" && !(/หรือ/.test(a.note.th) && /\bor\b/.test(a.note.en)))
+      .map(([id]) => id);
+    check("มุม \"คลายลง หรือยังค้าง\" พูดทั้งสองทางทุกใบ (กฎข้อ 5)", easingOneSided.length === 0, easingOneSided.join(", "));
+    const pendingLeakAngle = Object.entries(REVERSAL_ANGLES).filter(
+      ([id, a]) => a.reviewedBy === "pending" && (reviewedReversalAngle(id) !== null || formatReversalAngleForPrompt(id, "th") !== "" || formatReversalAngleForPrompt(id, "en") !== ""),
+    );
+    check("มุมอ่านที่ยังไม่ตรวจ (pending) ไม่เข้า prompt ทั้งไทยและอังกฤษ", pendingLeakAngle.length === 0, pendingLeakAngle.map(([id]) => id).join(", "));
+    const fakeReviewed = { "major-19": { ...REVERSAL_ANGLES["major-19"], reviewedBy: "reader:test" as const } };
+    const lineTh = formatReversalAngleForPrompt("major-19", "th", fakeReviewed);
+    const lineEn = formatReversalAngleForPrompt("major-19", "en", fakeReviewed);
+    check(
+      "แถวที่ตรวจแล้ว ➔ prompt ได้บรรทัดมุมอ่าน (ไทยเป็นไทย · อังกฤษไม่มีอักษรไทย)",
+      lineTh.includes("ติดขัด") && lineTh.includes(REVERSAL_ANGLES["major-19"].note.th) && lineEn.includes("Blocked") && !THAI.test(lineEn),
+      `${lineTh} | ${lineEn}`,
+    );
+    const promptSrc = fs.readFileSync(path.resolve("src/lib/ai/prompt.ts"), "utf8");
+    check(
+      "prompt เรียกมุมอ่านกลับหัวเฉพาะไพ่กลับหัว ทั้งทางไทยและอังกฤษ",
+      /d\.isReversed \? formatReversalAngleForPrompt\(card\.id, "en"\)/.test(promptSrc) && /d\.isReversed \? formatReversalAngleForPrompt\(card\.id, "th"\)/.test(promptSrc),
+    );
+  }
   const closers = new Set<string>();
   for (const ids of [["major-19", "cups-10", "major-21"], ["swords-10", "swords-03", "swords-09"], ["wands-01", "cups-02", "pentacles-03"], ["major-00", "major-01", "major-02"]]) {
     const r = await asked("ช่วงนี้ชีวิตจะเป็นอย่างไร", ids, [false, false, false], "general");

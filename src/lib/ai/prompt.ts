@@ -16,6 +16,7 @@ import type { DrawnCard } from "@/lib/tarot/shuffle";
 import type { SafetyVerdict } from "@/lib/safety/guardrails";
 import { pickExemplar, formatExemplarForPrompt } from "@/data/ai/exemplars";
 import { YES_NO_TONE, tallyYesNo, yesNoWeight } from "@/data/cards/yes-no";
+import { formatReversalAngleForPrompt } from "@/data/cards/reversal-angles";
 import {
   PROMPT_TRUST_BOUNDARY_EN,
   PROMPT_TRUST_BOUNDARY_TH,
@@ -352,7 +353,7 @@ export function buildReadingMessage(ctx: ReadingContext, options?: ReadingMessag
       const loreStr = formatCardLoreForPrompt(card.id);
 
       return `• Position ${position.index}: "${posName}" (Signifies: ${posMeaning})
-  Drawn Card: ${card.nameEn} — ${orientation}
+  Drawn Card: ${card.nameEn} — ${orientation}${d.isReversed ? formatReversalAngleForPrompt(card.id, "en") : ""}
   Element: ${cardElement} | Astrology: ${astro} | Numerology: ${numero}
   Core Archetypal Energies: ${keywords.join(" · ")}
   Thematic Meaning in ${category}: ${meaning}
@@ -367,7 +368,7 @@ ${loreStr ? `  (1909 imagery notes below are written in Thai — use the ideas, 
     const loreStr = formatCardLoreForPrompt(card.id);
 
     return `• ตำแหน่งที่ ${position.index}: "${position.nameTh}" (มิตินี้บอกถึง: ${position.meaning})
-  ไพ่ที่เปิดได้: ${card.nameTh} (${card.nameEn}) — ${orientation}
+  ไพ่ที่เปิดได้: ${card.nameTh} (${card.nameEn}) — ${orientation}${d.isReversed ? formatReversalAngleForPrompt(card.id, "th") : ""}
   ธาตุ: ${card.element} | โหราศาสตร์: ${card.astrology} | รหัสตัวเลข: ${card.numerology}
   พลังงานหลัก: ${keywords.join(" · ")}
   นัยสำคัญในหมวด${CATEGORY_TH[category] ?? category}: ${meaning}
