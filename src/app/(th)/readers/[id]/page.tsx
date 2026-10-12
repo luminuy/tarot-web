@@ -4,7 +4,7 @@ import { getPublicReaderById } from "@/lib/marketplace/readers.repo";
 import { getReaderLiveAvailability } from "@/lib/marketplace/queue.repo";
 import { getSoonestSlots } from "@/lib/marketplace/booking.repo";
 import { getReaderReviewSummary, type ReviewSummary } from "@/lib/marketplace/reviews.repo";
-import { FREE_CANCEL_HOURS, MAX_RESCHEDULES } from "@/lib/marketplace/booking-policy";
+import { FREE_CANCEL_HOURS, MAX_RESCHEDULES, PAID_GRACE_MINUTES } from "@/lib/marketplace/booking-policy";
 import { ReaderDetailClient } from "@/components/marketplace/ReaderDetailClient";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -278,6 +278,10 @@ export default async function ReaderDetailPage({
                   {[
                     { when: `ก่อนเวลานัด ${FREE_CANCEL_HOURS} ชม. ขึ้นไป`, what: `ยกเลิกคืนเงินเต็ม หรือเลื่อนนัดได้ ${MAX_RESCHEDULES} ครั้ง` },
                     { when: `น้อยกว่า ${FREE_CANCEL_HOURS} ชม. ก่อนนัด`, what: "ยกเลิกได้ แต่ไม่คืนเงิน" },
+                    {
+                      when: `ภายใน ${PAID_GRACE_MINUTES} นาทีหลังจ่าย`,
+                      what: "ยกเลิกคืนเงินเต็ม หรือเลื่อนนัดได้ — เผื่อกดเวลาผิด (นัดที่ห่างเกิน 1 ชม.)",
+                    },
                     { when: "คิวสดระหว่างรอเรียก", what: "ยกเลิกได้ตลอด คืนเงินเต็ม" },
                     { when: "แม่หมอยกเลิกหรือไม่มาตามนัด", what: "คืนเงินเต็มอัตโนมัติ" },
                   ].map((row) => (

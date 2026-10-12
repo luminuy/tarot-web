@@ -123,7 +123,7 @@ assert(
   "บทความสำหรับผู้เริ่มต้นต้องมี 'เรียนไพ่ยิปซีฟรี' ใน keywords",
 );
 
-const readersPagePath = path.join(process.cwd(), "src/app/(th)/readers/page.tsx");
+const readersPagePath = path.join(process.cwd(), "src/app/(th)/readers/(directory)/page.tsx");
 const readersContent = fs.readFileSync(readersPagePath, "utf-8");
 assert(
   readersContent.includes("หมอดูไพ่ยิปซี"),

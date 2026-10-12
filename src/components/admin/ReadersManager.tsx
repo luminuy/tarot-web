@@ -9,6 +9,13 @@ import type { AdminReader, ReaderActivity, ReaderStatus } from "@/lib/marketplac
 import { formatTime, relativeDayLabel } from "@/lib/marketplace/booking-policy";
 import { APP_TIME_ZONE } from "@/lib/time/bangkok";
 import {
+  CONSOLE_LINK_DAYS,
+  DEFAULT_CONSOLE_LINK_DAYS,
+  consoleLinkDaysLabel,
+  normalizeConsoleLinkDays,
+  type ConsoleLinkDays,
+} from "@/lib/marketplace/console-link";
+import {
   CONSULTATION_MINUTES,
   CONSULTATION_PRICE_THB,
   READER_PRICE_MAX_THB,
@@ -23,7 +30,8 @@ import { copyToClipboard } from "@/lib/utils/clipboard";
  * ---------------------------------------------------------------------------
  * งานที่แอดมินทำจริงกับแม่หมอมีแค่ 4 อย่าง หน้านี้จึงเรียงตามนั้น:
  *   1. ดูว่าแม่หมอแต่ละคน "รับลูกค้าได้อยู่ไหม" — ลูกค้าที่เปิดลิงก์ตอนนี้จะคุยได้เลย นัดได้ หรือจองไม่ได้เลย
- *   2. ส่งลิงก์เข้าแผงให้แม่หมอ (ลิงก์เป็นกุญแจอายุ 24 ชม. — บอกเวลาหมดอายุจริงให้เห็น)
+ *   2. ส่งลิงก์เข้าแผงให้แม่หมอ (ลิงก์เป็นกุญแจ — เลือกอายุ 1 · 7 · 30 วัน บอกเวลาหมดอายุจริง
+ *      และ "ยกเลิกลิงก์เก่าทั้งหมด" ได้ทันทีเมื่อลิงก์หลุด · ISSUE-058)
  *   3. ส่งลิงก์หน้าจองให้ลูกค้า
  *   4. เพิ่ม/แก้ไข/อนุมัติ/พักงาน
  *
@@ -63,6 +71,7 @@ interface ConsoleLink {
   readerId: string;
   link: string;
   expiresAt: number;
+  days: ConsoleLinkDays;
   /** ข้อความบอกขั้นต่อไปหลังเพิ่ม/อนุมัติแม่หมอ */
   note?: string;
 }
@@ -122,6 +131,8 @@ export default function ReadersManager() {
   // แผงลิงก์เข้าแผงแม่หมอ (เปิดทีละคน) · การยืนยันพักงาน · ปุ่มที่กำลังทำงาน
   const [linkPanel, setLinkPanel] = useState<ConsoleLink | null>(null);
   const [confirmPause, setConfirmPause] = useState<string | null>(null);
+  /** การ์ดที่กำลังถามยืนยัน "ยกเลิกลิงก์เก่าทั้งหมด" */
+  const [confirmRevoke, setConfirmRevoke] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
   // หน้าต่างเพิ่ม/แก้ไข
@@ -173,31 +184,40 @@ export default function ReadersManager() {
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
-  /** ขอลิงก์แผงแม่หมอใหม่ (อายุเต็ม 24 ชม. ทุกครั้งที่ขอ) */
-  const requestConsoleLink = async (r: ReaderRow): Promise<ConsoleLink | null> => {
+  /** แปลงคำตอบ API (token + เวลาหมดอายุ) เป็นลิงก์แผงที่ส่งให้แม่หมอได้ */
+  const toConsoleLink = (r: ReaderRow, d: { token: string; expiresAt?: unknown; days?: unknown }): ConsoleLink => {
+    const days = normalizeConsoleLinkDays(d.days);
+    const params = new URLSearchParams({ id: r.id, token: d.token });
+    return {
+      readerId: r.id,
+      link: `${origin}/readers/console?${params.toString()}`,
+      expiresAt: typeof d.expiresAt === "number" ? d.expiresAt : Date.now() + days * 86_400_000,
+      days,
+    };
+  };
+
+  /** ขอลิงก์แผงแม่หมอใหม่ อายุเต็มตามที่เลือก (ลิงก์เก่ายังใช้ได้จนหมดอายุ — ยกเลิกทั้งหมดได้ในแผงลิงก์) */
+  const requestConsoleLink = async (r: ReaderRow, days: ConsoleLinkDays = DEFAULT_CONSOLE_LINK_DAYS): Promise<ConsoleLink | null> => {
     try {
-      const res = await fetch(`/api/admin/readers/${r.id}`);
+      const res = await fetch(`/api/admin/readers/${r.id}?days=${days}`);
       const d = await res.json().catch(() => ({}));
       if (!res.ok || !d.token) {
         showToast(d.error || "สร้างลิงก์ไม่สำเร็จ ลองใหม่อีกครั้ง");
         return null;
       }
-      const params = new URLSearchParams({ id: r.id, token: d.token });
-      return {
-        readerId: r.id,
-        link: `${origin}/readers/console?${params.toString()}`,
-        expiresAt: typeof d.expiresAt === "number" ? d.expiresAt : Date.now() + 24 * 3_600_000,
-      };
+      return toConsoleLink(r, d);
     } catch {
       showToast("เชื่อมต่อไม่สำเร็จ — ลองใหม่อีกครั้ง");
       return null;
     }
   };
 
-  const openLinkPanel = async (r: ReaderRow, note?: string) => {
+  const openLinkPanel = async (r: ReaderRow, note?: string, days?: ConsoleLinkDays) => {
     setBusy(`link:${r.id}`);
     setConfirmPause(null);
-    const result = await requestConsoleLink(r);
+    setConfirmRevoke(null);
+    const keepDays = days ?? (linkPanel?.readerId === r.id ? linkPanel.days : DEFAULT_CONSOLE_LINK_DAYS);
+    const result = await requestConsoleLink(r, keepDays);
     setBusy(null);
     if (!result) return;
     setLinkPanel({ ...result, note });
@@ -205,12 +225,45 @@ export default function ReadersManager() {
     requestAnimationFrame(() => document.getElementById(`reader-${r.id}`)?.scrollIntoView({ block: "center" }));
   };
 
+  /**
+   * ยกเลิกลิงก์แผงทุกลิงก์ที่เคยส่งให้แม่หมอคนนี้ (เปลี่ยนกุญแจเซ็น) แล้วได้ลิงก์ใหม่ทันที
+   * ใช้ตอนลิงก์หลุดไปถึงคนอื่น หรือแม่หมอเลิกใช้เครื่องเดิม — แผงที่เปิดค้างด้วยลิงก์เก่าจะกดอะไรไม่ได้
+   */
+  const revokeLinks = async (r: ReaderRow) => {
+    if (busy) return;
+    setBusy(`revoke:${r.id}`);
+    const days = linkPanel?.readerId === r.id ? linkPanel.days : DEFAULT_CONSOLE_LINK_DAYS;
+    try {
+      const res = await fetch(`/api/admin/readers/${r.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "revoke_links", days }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok || !d.token) {
+        showToast(d.error || "ยกเลิกลิงก์ไม่สำเร็จ ลองใหม่อีกครั้ง");
+        return;
+      }
+      setConfirmRevoke(null);
+      setLinkPanel({
+        ...toConsoleLink(r, d),
+        note: `ยกเลิกลิงก์เก่าของ ${r.displayName} ทั้งหมดแล้ว — ลิงก์ที่เคยส่งไปใช้ไม่ได้แล้ว ส่งลิงก์ใหม่นี้ให้แม่หมอแทน`,
+      });
+      showToast("ยกเลิกลิงก์เก่าทั้งหมดแล้ว");
+    } catch {
+      showToast("เชื่อมต่อไม่สำเร็จ — ลองใหม่อีกครั้ง");
+    } finally {
+      setBusy(null);
+    }
+  };
+
   /** เปิดแผงแม่หมอในแท็บใหม่ — เปิดแท็บว่างทันทีตอนกด (กันเบราว์เซอร์บล็อกป๊อปอัป) แล้วค่อยใส่ลิงก์ */
   const openConsole = async (r: ReaderRow) => {
     if (busy) return;
     const win = window.open("", "_blank");
     setBusy(`open:${r.id}`);
-    const result = await requestConsoleLink(r);
+    // แอดมินเปิดดูเอง ➔ ลิงก์อายุสั้นสุด (1 วัน) ไม่ทิ้งกุญแจอายุยาวไว้ในประวัติเบราว์เซอร์ของแอดมิน
+    const result = await requestConsoleLink(r, 1);
     setBusy(null);
     if (!result) {
       win?.close();
@@ -563,7 +616,15 @@ export default function ReadersManager() {
               linkPanel={linkPanel?.readerId === r.id ? linkPanel : null}
               confirmingPause={confirmPause === r.id}
               onSendLink={() => void openLinkPanel(r)}
-              onCloseLink={() => setLinkPanel(null)}
+              onCloseLink={() => {
+                setLinkPanel(null);
+                setConfirmRevoke(null);
+              }}
+              onChangeLinkDays={(days) => void openLinkPanel(r, undefined, days)}
+              confirmingRevoke={confirmRevoke === r.id}
+              onAskRevoke={() => setConfirmRevoke(r.id)}
+              onCancelRevoke={() => setConfirmRevoke(null)}
+              onConfirmRevoke={() => void revokeLinks(r)}
               onCopyLink={async (link) => {
                 const ok = await copyToClipboard(link);
                 showToast(ok ? "คัดลอกลิงก์แล้ว — วางส่งให้แม่หมอทาง LINE ได้เลย" : "คัดลอกไม่ได้ — กดค้างที่ลิงก์แล้วเลือกคัดลอก");
@@ -850,7 +911,7 @@ function StartSteps() {
     { title: "เพิ่มแม่หมอ แล้วตั้งสถานะ \"ใช้งานอยู่\"", body: "โปรไฟล์จะขึ้นหน้าเว็บทันที" },
     {
       title: "กด \"ส่งลิงก์เข้าแผงให้แม่หมอ\"",
-      body: "แม่หมอเปิดลิงก์แล้วตั้งเวลาว่างประจำสัปดาห์ หรือเปิดรับคิวสด · ลิงก์ใช้ได้ 24 ชม. หมดแล้วกดสร้างใหม่ได้ทุกเมื่อ",
+      body: "แม่หมอเปิดลิงก์แล้วตั้งเวลาว่างประจำสัปดาห์ หรือเปิดรับคิวสด · ลิงก์ใช้ได้ 30 วัน (เลือกสั้นกว่านี้ได้) · ลิงก์หลุดไปถึงคนอื่น กด \"ยกเลิกลิงก์เก่าทั้งหมด\" ได้ทันที",
     },
     {
       title: "ส่ง \"ลิงก์หน้าจอง\" ให้ลูกค้า",
@@ -938,6 +999,11 @@ function ReaderCard({
   confirmingPause,
   onSendLink,
   onCloseLink,
+  onChangeLinkDays,
+  confirmingRevoke,
+  onAskRevoke,
+  onCancelRevoke,
+  onConfirmRevoke,
   onCopyLink,
   onOpenConsole,
   onCopyBooking,
@@ -954,6 +1020,11 @@ function ReaderCard({
   confirmingPause: boolean;
   onSendLink: () => void;
   onCloseLink: () => void;
+  onChangeLinkDays: (days: ConsoleLinkDays) => void;
+  confirmingRevoke: boolean;
+  onAskRevoke: () => void;
+  onCancelRevoke: () => void;
+  onConfirmRevoke: () => void;
   onCopyLink: (link: string) => void;
   onOpenConsole: () => void;
   onCopyBooking: () => void;
@@ -1015,9 +1086,31 @@ function ReaderCard({
             onFocus={(e) => e.currentTarget.select()}
             className="min-h-11 w-full rounded-lg border border-line-interactive-warm bg-surface px-3 font-mono text-xs text-ink-deep"
           />
+          <div className="flex flex-wrap items-center gap-2">
+            <span id={`link-days-${r.id}`} className="text-xs font-semibold text-ink">
+              อายุลิงก์
+            </span>
+            <div role="radiogroup" aria-labelledby={`link-days-${r.id}`} className="flex gap-1 rounded-lg bg-surface p-1">
+              {CONSOLE_LINK_DAYS.map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  role="radio"
+                  aria-checked={linkPanel.days === d}
+                  onClick={() => linkPanel.days !== d && onChangeLinkDays(d)}
+                  className={`tap-overlay-y min-h-11 rounded-md px-3 text-sm font-semibold transition-colors ${
+                    linkPanel.days === d ? "bg-gold-ink text-surface" : "text-muted hover:text-ink"
+                  }`}
+                >
+                  {consoleLinkDaysLabel(d)}
+                </button>
+              ))}
+            </div>
+          </div>
           <p className="text-xs leading-relaxed text-muted">
-            ใช้ได้ถึง <strong className="font-semibold text-ink">{formatExpiry(linkPanel.expiresAt)}</strong> (24 ชม.) —
-            หมดแล้วกดส่งลิงก์ใหม่ได้ทุกเมื่อ · ลิงก์นี้เป็นกุญแจเข้าแผงของแม่หมอ ส่งให้แม่หมอคนนี้คนเดียว อย่าโพสต์ในกลุ่ม
+            ใช้ได้ถึง <strong className="font-semibold text-ink">{formatExpiry(linkPanel.expiresAt)}</strong> (
+            {consoleLinkDaysLabel(linkPanel.days)}) · ลิงก์นี้เป็นกุญแจเข้าแผงของแม่หมอ ส่งให้แม่หมอคนนี้คนเดียว
+            อย่าโพสต์ในกลุ่ม
           </p>
           <div className="flex flex-wrap gap-2">
             <Button type="button" variant="gold" size="sm" onClick={() => onCopyLink(linkPanel.link)} className="text-sm">
@@ -1038,6 +1131,40 @@ function ReaderCard({
               ปิด
             </Button>
           </div>
+          {!confirmingRevoke ? (
+            <button
+              type="button"
+              onClick={onAskRevoke}
+              className="tap-overlay-y min-h-11 text-left text-sm font-semibold text-err underline underline-offset-2"
+            >
+              ลิงก์หลุดไปถึงคนอื่น? ยกเลิกลิงก์เก่าทั้งหมด…
+            </button>
+          ) : (
+            <div role="group" aria-labelledby={`revoke-title-${r.id}`} className="space-y-2 rounded-lg border border-err/30 bg-err-wash p-3">
+              <p id={`revoke-title-${r.id}`} className="text-sm font-bold text-err">
+                ยกเลิกลิงก์เก่าของ {r.displayName} ทั้งหมด?
+              </p>
+              <p className="text-sm leading-relaxed text-ink">
+                ลิงก์ทุกอันที่เคยส่งให้แม่หมอคนนี้จะใช้ไม่ได้ทันที — รวมแผงที่เปิดค้างไว้ แล้วระบบจะสร้างลิงก์ใหม่ให้ส่งแทน
+                {waitingCustomers > 0 ? ` · มีลูกค้าที่จ่ายเงินแล้วรออยู่ ${waitingCustomers} ราย ส่งลิงก์ใหม่ให้แม่หมอทันทีหลังกด` : ""}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={onConfirmRevoke}
+                  aria-disabled={busy !== null}
+                  className="border-err/40 text-sm text-err hover:border-err"
+                >
+                  {busy === `revoke:${r.id}` ? "กำลังยกเลิก…" : "ยืนยันยกเลิกลิงก์เก่า"}
+                </Button>
+                <Button type="button" variant="ghost" size="sm" onClick={onCancelRevoke} className="text-sm">
+                  ไม่ยกเลิก
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

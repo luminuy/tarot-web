@@ -8,8 +8,9 @@
  * ทุกการอ่าน/เขียน localStorage อยู่ใน try/catch (โหมดส่วนตัว/บล็อกที่เก็บข้อมูล)
  */
 import { DECK_INDEX_META } from "@/data/cards/deck-index-meta";
+import { STORAGE_KEYS } from "@/lib/storage/keys";
 
-const KEY = "tarot_pwa_state_v1";
+const KEY = STORAGE_KEYS.pwaState;
 const DAY = 86_400_000;
 
 export interface PwaState {

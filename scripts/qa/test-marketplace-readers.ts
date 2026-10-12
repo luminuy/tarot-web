@@ -1405,7 +1405,7 @@ async function testConsultFlowUx(readerId: string, sessionSecret: string) {
     // ทุกคำตอบของ API แอดมินผ่าน toAdminReader — กุญแจเซ็นลิงก์แผงไม่ออกนอกเซิร์ฟเวอร์
     /json\(\{\s*readers\s*\}/.test(adminList) ||
     /json\(\{\s*reader[,\s]/.test(adminList + adminOne) ||
-    !/json\(\{ reader: toAdminReader\(reader\), token, expiresAt \}\)/.test(adminOne) ||
+    !/json\(\{ reader: toAdminReader\(reader\), token, expiresAt, days \}\)/.test(adminOne) ||
     !/priceThb: z\.number\(\)/.test(adminList) // ราคาที่ตั้งตอนเพิ่มแม่หมอเคยโดน zod ตัดทิ้งเงียบ ๆ
   ) {
     throw new Error("❌ 19.8 API แอดมินต้องไม่ส่ง sessionSecret · บอกเวลาหมดอายุลิงก์ · รับราคาตอนเพิ่มแม่หมอ");
@@ -1439,6 +1439,109 @@ async function testConsultFlowUx(readerId: string, sessionSecret: string) {
     throw new Error("❌ 19.9 แผงแม่หมอต้องแปลงค่าจาก AI เป็นคำไทย และลิงก์หมดอายุกลางคิวต้องไม่ล้างหน้า (ห้องวิดีโอดับ)");
   }
   console.log("  ✓ 19.9 แผงแม่หมอ: หมวด/ความด่วน/ผังแนะนำเป็นคำไทย · เตือนก่อนลิงก์หมด · หมดกลางคิวไม่ล้างหน้า");
+
+  // ── 19.10 ยกเลิก/เลื่อนฟรีภายใน 10 นาทีหลังจ่าย (แผนข้อ 3.1 · เจ้าของสั่ง 2026-10-12) ────────
+  const graceNow = Date.UTC(2031, 0, 6, 1);
+  const in2h = graceNow + 2 * 60 * MIN;
+  const g = (paidAgoMin: number, slot: number) =>
+    policy.decideCancellation({ actor: "customer", kind: "booking", ticketStatus: "waiting", paid: true, slotStart: slot, nowMs: graceNow, paidAt: graceNow - paidAgoMin * MIN });
+  if (
+    g(5, in2h).reason !== "grace_cancel" || !g(5, in2h).refund || // จ่าย 5 นาทีที่แล้ว · นัดอีก 2 ชม. ➔ คืนเต็ม
+    g(11, in2h).refund || g(11, in2h).reason !== "late_cancel" || // เลยช่วงผ่อนผัน ➔ กติกาเดิม
+    g(5, graceNow + 30 * MIN).refund || // นัดใกล้กว่า 1 ชม. ➔ ไม่มีช่วงผ่อนผัน
+    policy.decideCancellation({ actor: "customer", kind: "booking", ticketStatus: "waiting", paid: true, slotStart: in2h, nowMs: graceNow }).refund || // ไม่รู้เวลาจ่าย ➔ ไม่มีช่วงผ่อนผัน
+    !policy.canReschedule({ ticketStatus: "waiting", slotStart: in2h, rescheduleCount: 0, nowMs: graceNow, paidAt: graceNow - 3 * MIN }) ||
+    policy.canReschedule({ ticketStatus: "waiting", slotStart: in2h, rescheduleCount: 0, nowMs: graceNow, paidAt: graceNow - 12 * MIN }) ||
+    policy.paidGraceUntil(graceNow - 3 * MIN, in2h, graceNow) !== graceNow + 7 * MIN
+  ) {
+    throw new Error("❌ 19.10 ช่วงผ่อนผันหลังจ่าย: ภายใน 10 นาที (นัดห่าง ≥ 1 ชม.) ต้องยกเลิกคืนเต็ม/เลื่อนได้ — เกินนั้นกติกาเดิม");
+  }
+  const ticketRoute = src("src/app/api/marketplace/tickets/[id]/route.ts");
+  const repoSrc = src("src/lib/marketplace/booking.repo.ts");
+  if (
+    !/paidAt: paidPayment\?\.updatedAt/.test(repoSrc) || // ยกเลิกจริงใช้เวลาจ่ายจริง
+    !/canReschedule\(\{[\s\S]*?paidAt,[\s\S]*?\}\)/.test(repoSrc) ||
+    !ticketRoute.includes("graceUntil:") ||
+    !src("src/components/marketplace/QueueBookingParts.tsx").includes("ช่วงผ่อนผัน")
+  ) {
+    throw new Error("❌ 19.10 ทุกจุดที่ตัดสินยกเลิก/เลื่อนต้องส่งเวลาจ่าย (paidAt) และหน้าคิวต้องบอกเวลาที่ช่วงผ่อนผันหมด");
+  }
+  console.log("  ✓ 19.10 ยกเลิก/เลื่อนฟรีภายใน 10 นาทีหลังจ่าย (นัดห่าง ≥ 1 ชม.) — เกินนั้นกติกา 24 ชม. เดิม");
+
+  // ── 19.11 คิวสดปิดเองเมื่อแม่หมอไม่ได้เปิดแผงเกิน 15 นาที (แผนข้อ 3.2) ───────────────────
+  const queueRepo = await import("../../src/lib/marketplace/queue.repo");
+  const { getAppDB } = await import("../../src/lib/platform/db");
+  const db = await getAppDB();
+  await queueRepo.setReaderLiveAvailability(readerId, true);
+  const liveFresh = await queueRepo.getReaderLiveAvailability(readerId);
+  await db.prepare("UPDATE reader_availability SET last_seen_at = ? WHERE reader_id = ? AND mode = 'live'").bind(Date.now() - 20 * MIN, readerId).run();
+  const liveStale = await queueRepo.getReaderLiveAvailability(readerId);
+  const listedStale = (await queueRepo.listLiveReaderIds()).has(readerId);
+  await queueRepo.touchReaderPresence(readerId);
+  const liveBack = await queueRepo.getReaderLiveAvailability(readerId);
+  await queueRepo.setReaderLiveAvailability(readerId, false);
+  if (!liveFresh || liveStale || listedStale || !liveBack || !src("src/app/api/marketplace/console/queue/route.ts").includes("await touchReaderPresence(readerId)")) {
+    throw new Error(`❌ 19.11 คิวสดต้องปิดเองเมื่อไม่เห็นแผงเกิน 15 นาที และเปิดต่อเมื่อแผงกลับมา (${JSON.stringify({ liveFresh, liveStale, listedStale, liveBack })})`);
+  }
+  if (!fs.existsSync(path.join(process.cwd(), "migrations/0031_live_presence.sql"))) {
+    throw new Error("❌ 19.11 ต้องมี migrations/0031 เพิ่ม reader_availability.last_seen_at");
+  }
+  console.log("  ✓ 19.11 คิวสดเปิดจริงเฉพาะตอนแม่หมออยู่ (เห็นแผงภายใน 15 นาที) · กลับมาเปิดแผงแล้วเปิดต่อเอง");
+
+  // ── 19.12 ลิงก์แผงแม่หมอ: เลือกอายุ 1/7/30 วัน + ยกเลิกลิงก์เก่าทั้งหมดได้ (ISSUE-058) ───────
+  const consoleLink = await import("../../src/lib/marketplace/console-link");
+  const { rotateReaderSessionSecret } = await import("../../src/lib/marketplace/readers.repo");
+  const { signReaderToken: sign, verifyReaderToken: verify } = await import("../../src/lib/auth/reader-auth");
+  const before = await getReaderById(readerId);
+  const oldToken = before ? sign(readerId, before.sessionSecret, 24) : "";
+  const rotated = await rotateReaderSessionSecret(readerId);
+  if (
+    consoleLink.normalizeConsoleLinkDays("7") !== 7 ||
+    consoleLink.normalizeConsoleLinkDays(365) !== consoleLink.DEFAULT_CONSOLE_LINK_DAYS ||
+    consoleLink.DEFAULT_CONSOLE_LINK_DAYS !== 30 ||
+    !rotated ||
+    rotated.sessionSecret === before?.sessionSecret ||
+    verify(oldToken, rotated.sessionSecret) !== null || // ลิงก์เก่าใช้ไม่ได้ทันที
+    verify(sign(readerId, rotated.sessionSecret, 720), rotated.sessionSecret)?.readerId !== readerId ||
+    !/action: z\.literal\("revoke_links"\)/.test(adminOne) ||
+    !adminOne.includes("rotateReaderSessionSecret(id)") ||
+    !manager.includes("ยืนยันยกเลิกลิงก์เก่า")
+  ) {
+    throw new Error("❌ 19.12 ลิงก์แผงแม่หมอ: อายุต้องอยู่ใน 1/7/30 วัน และปุ่มยกเลิกต้องทำให้ลิงก์เก่าใช้ไม่ได้ทันที");
+  }
+  console.log("  ✓ 19.12 ลิงก์แผงแม่หมอเลือกอายุได้ (ค่าเริ่มต้น 30 วัน) · ยกเลิกลิงก์เก่าทั้งหมดได้ทันที");
+
+  // ── 19.13 ฟิลเตอร์หน้าสวยของแม่หมอ (เจ้าของสั่ง 2026-10-12) ─────────────────────────────
+  const beauty = src("src/lib/marketplace/beauty-filter.ts");
+  const keys = src("src/lib/storage/keys.ts");
+  if (
+    !/const canBeautify = role === "reader"/.test(room) || // เฉพาะแม่หมอ
+    !room.includes("stream: send,") || // สายรอบใหม่หยิบภาพจาก "สิ่งที่ส่ง" ไม่ใช่กล้องดิบ
+    !/filter\.pause\(\);\s*void setOutgoingVideo\(camera\)/.test(room) || // แท็บถูกซ่อน ➔ ส่งภาพกล้องตรง ๆ (ไม่ค้าง)
+    !room.includes("sendStreamRef.current?.getVideoTracks().forEach((t) => (t.enabled = next))") || // ปิดกล้อง = ปิดภาพที่แต่งแล้วด้วย
+    !room.includes("filter.verify()") || // ภาพที่ส่งดำ ➔ ปิดฟิลเตอร์เอง
+    !beauty.includes("skinMask(") || // เกลี่ยเฉพาะผิว
+    !beauty.includes("exp(-dot(d, d)") || // รักษาขอบ (เส้นบนไพ่ยังคม)
+    !/MAX_W = 1280;[\s\S]*MAX_H = 720;/.test(beauty) || // เพดาน 720p เท่ากล้อง (โควตา TURN)
+    !keys.includes("readerBeautyLevel")
+  ) {
+    throw new Error("❌ 19.13 ฟิลเตอร์หน้าสวย: เฉพาะแม่หมอ · เกลี่ยเฉพาะผิวแบบรักษาขอบ · ≤720p · ซ่อนแท็บ/ปิดกล้อง/ภาพดำต้องไม่ทำให้ลูกค้าเห็นภาพค้างหรือจอดำ");
+  }
+  console.log("  ✓ 19.13 ฟิลเตอร์หน้าสวย: เฉพาะแม่หมอ · เกลี่ยเฉพาะผิวรักษาขอบ · ≤720p · ซ่อนแท็บ/ปิดกล้อง/ภาพดำมีทางถอย");
+
+  // ── 19.14 หน้าแม่หมอที่ไม่มีอยู่ตอบ 404 จริง (ISSUE-056) + แถบคุกกี้ย่อในกลุ่ม /readers (ข้อ 3.3) ──
+  const readersDir = path.join(process.cwd(), "src/app/(th)/readers");
+  const banner = src("src/components/analytics/ConsentBanner.tsx");
+  if (
+    fs.existsSync(path.join(readersDir, "loading.tsx")) || // ครอบ /readers/[id] ➔ สตรีม 200 ก่อน notFound()
+    !fs.existsSync(path.join(readersDir, "(directory)/loading.tsx")) ||
+    !fs.existsSync(path.join(readersDir, "(directory)/page.tsx")) ||
+    !banner.includes("COMPACT_PATH.test(pathname)") ||
+    !/calc\(var\(--site-header-h\) \+ 8px\)/.test(banner) // แถบย่ออยู่ใต้หัวเว็บ ไม่บังปุ่มจองที่ขอบล่าง
+  ) {
+    throw new Error("❌ 19.14 loading ของ /readers ต้องอยู่ในกลุ่ม (directory) เท่านั้น (ไม่งั้นโปรไฟล์ที่ไม่มีอยู่ได้ 200) และแถบคุกกี้ในกลุ่มแม่หมอต้องเป็นแบบย่อใต้หัวเว็บ");
+  }
+  console.log("  ✓ 19.14 /readers/<ไม่มีอยู่> ตอบ 404 จริง (loading อยู่แค่หน้ารวม) · แถบคุกกี้ย่อใต้หัวเว็บในกลุ่มแม่หมอ");
 }
 
 runTest().catch((err) => {

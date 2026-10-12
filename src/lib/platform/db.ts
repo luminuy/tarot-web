@@ -426,6 +426,7 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec("ALTER TABLE readers ADD COLUMN daily_cap INTEGER");
     // รับนัดล่วงหน้าอย่างน้อยกี่นาที — แม่หมอตั้งเอง · NULL = ค่าเริ่มต้น 2 ชม. (migrations/0030)
     safeExec("ALTER TABLE readers ADD COLUMN lead_min INTEGER");
+    safeExec("ALTER TABLE reader_availability ADD COLUMN last_seen_at INTEGER");
     safeExec(
       "CREATE TABLE IF NOT EXISTS reader_blocked_dates (reader_id TEXT NOT NULL REFERENCES readers(id), date_key TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (reader_id, date_key))"
     );

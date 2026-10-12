@@ -15,6 +15,7 @@ import {
   FREE_CANCEL_HOURS,
   googleCalendarUrl,
   MAX_RESCHEDULES,
+  PAID_GRACE_MINUTES,
 } from "@/lib/marketplace/booking-policy";
 
 /** ภาพรวมการจองที่ `GET /api/marketplace/tickets/[id]` ส่งมา (เฉพาะเจ้าของตั๋ว) */
@@ -32,6 +33,8 @@ export interface BookingView {
   amountSatang: number | null;
   cancel: { allowed: boolean; refund: boolean; reason: string };
   canReschedule: boolean;
+  /** ช่วงผ่อนผันหลังจ่าย (ยกเลิก/เลื่อนฟรี) หมดเมื่อไร — null = ไม่อยู่ในช่วง */
+  graceUntil?: number | null;
   /** คะแนนที่ให้ไว้แล้ว (null = ยังไม่รีวิว) */
   reviewRating?: number | null;
   /** รีวิวได้ (คุยจบแล้ว · จ่ายแล้ว · ยังไม่เคยรีวิว) */
@@ -349,10 +352,17 @@ export function ManageBooking({
   const [refreshKey, setRefreshKey] = useState(0);
 
   const scheduled = booking.kind === "scheduled";
+  // ช่วงผ่อนผันหลังจ่าย — บอกเวลาที่หมดชัด ๆ (เผื่อกดเวลาผิด) · ใช้เวลาเซิร์ฟเวอร์ ไม่นับถอยหลังเอง
+  const graceLabel = booking.graceUntil ? `${formatTime(booking.graceUntil)} น.` : null;
+  // เลื่อนได้ "เพราะช่วงผ่อนผัน" (นัดเหลือไม่ถึง 24 ชม.) — นับจากเวลาที่ช่วงผ่อนผันหมด ไม่เรียก Date.now() ตอนเรนเดอร์
+  const graceOnlyReschedule =
+    booking.graceUntil != null && booking.slotStart !== null && booking.slotStart - booking.graceUntil < FREE_CANCEL_HOURS * 3_600_000;
   const cancelConsequence = !booking.paid
     ? "ยังไม่มีการตัดเงิน ยกเลิกได้ทันที"
     : booking.cancel.refund
-      ? "คืนเงินเต็มจำนวนเข้าช่องทางที่ชำระ ภายใน 5–10 วันทำการ"
+      ? booking.cancel.reason === "grace_cancel" && graceLabel
+        ? `ยกเลิกก่อน ${graceLabel} คืนเงินเต็มจำนวน (ช่วงผ่อนผัน ${PAID_GRACE_MINUTES} นาทีหลังจ่าย)`
+        : "คืนเงินเต็มจำนวนเข้าช่องทางที่ชำระ ภายใน 5–10 วันทำการ"
       : `ยกเลิกน้อยกว่า ${FREE_CANCEL_HOURS} ชม. ก่อนนัด จะไม่ได้รับเงินคืน`;
 
   const doReschedule = async () => {
@@ -424,11 +434,13 @@ export function ManageBooking({
               <span>
                 <span className="block text-sm font-bold text-ink-deep">เลื่อนนัด</span>
                 <span className="block text-[13px] text-muted">
-                  {booking.canReschedule
-                    ? `เลื่อนได้ ${MAX_RESCHEDULES} ครั้ง ก่อนนัด ${FREE_CANCEL_HOURS} ชม. ไม่มีค่าใช้จ่าย`
+                  <ThaiPhrases>{booking.canReschedule
+                    ? graceOnlyReschedule && graceLabel
+                      ? `กดเวลาผิด? เลื่อนได้ฟรีก่อน ${graceLabel} (${MAX_RESCHEDULES} ครั้ง)`
+                      : `เลื่อนได้ ${MAX_RESCHEDULES} ครั้ง ก่อนนัด ${FREE_CANCEL_HOURS} ชม. ไม่มีค่าใช้จ่าย`
                     : booking.rescheduleCount >= MAX_RESCHEDULES
                       ? "ใช้สิทธิ์เลื่อนนัดครบแล้ว"
-                      : `เลื่อนได้เฉพาะก่อนนัด ${FREE_CANCEL_HOURS} ชม.`}
+                      : `เลื่อนได้เฉพาะก่อนนัด ${FREE_CANCEL_HOURS} ชม.`}</ThaiPhrases>
                 </span>
               </span>
               <span aria-hidden="true" className="text-muted">›</span>
@@ -442,7 +454,9 @@ export function ManageBooking({
             >
               <span>
                 <span className="block text-sm font-bold text-err">{scheduled ? "ยกเลิกนัด" : "ยกเลิกคิว"}</span>
-                <span className="block text-[13px] text-muted">{cancelConsequence}</span>
+                <span className="block text-[13px] text-muted">
+                  <ThaiPhrases>{cancelConsequence}</ThaiPhrases>
+                </span>
               </span>
               <span aria-hidden="true" className="text-muted">›</span>
             </button>

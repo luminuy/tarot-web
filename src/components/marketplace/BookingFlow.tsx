@@ -7,9 +7,11 @@ import { WaitlistForm } from "@/components/marketplace/WaitlistForm";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { CONSULTATION_MINUTES } from "@/lib/marketplace/offer";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
+import { STORAGE_KEYS } from "@/lib/storage/keys";
 import {
   FREE_CANCEL_HOURS,
   MAX_RESCHEDULES,
+  PAID_GRACE_MINUTES,
   formatSlotRange,
   relativeDayLabel,
   type SlotDay,
@@ -35,8 +37,12 @@ interface BookingFlowProps {
 
 const QUESTION_MAX = 1000;
 const NICKNAME_MAX = 40;
-/** จำชื่อเล่นไว้ในเครื่องนี้ให้ครั้งหน้า (ไม่จำคำถาม — เป็นเรื่องส่วนตัว) */
-const NICKNAME_KEY = "tarot_consult_nickname";
+/**
+ * จำชื่อเล่นไว้ในเครื่องนี้ให้ครั้งหน้า (ไม่จำคำถาม — เป็นเรื่องส่วนตัว)
+ * ใช้คีย์ชื่อเล่นกลางของเว็บในทะเบียน — ชื่อที่เคยกรอกตอนเปิดไพ่ก็เติมให้ด้วย
+ * (เดิมประกาศคีย์ใหม่เป็นค่าคงที่ในไฟล์นี้ ซึ่งหลบด่านทะเบียนคีย์ได้ — ด่านตรวจแบบนั้นแล้ว)
+ */
+const NICKNAME_KEY = STORAGE_KEYS.nickname;
 const HISTORY_MARK = "consultStep";
 
 function initialModeOf(p: BookingFlowProps): ConsultMode {
@@ -530,6 +536,7 @@ export function BookingFlow(props: BookingFlowProps) {
                 ? [
                     `ยกเลิกหรือเลื่อนนัดก่อนเวลานัด ${FREE_CANCEL_HOURS} ชม. คืนเงินเต็ม (เลื่อนได้ ${MAX_RESCHEDULES} ครั้ง)`,
                     `ยกเลิกน้อยกว่า ${FREE_CANCEL_HOURS} ชม. ก่อนนัด ไม่คืนเงิน`,
+                    `จ่ายแล้วเพิ่งเห็นว่ากดเวลาผิด? ภายใน ${PAID_GRACE_MINUTES} นาทีหลังจ่าย ยกเลิกหรือเลื่อนได้ฟรี (นัดที่ห่างเกิน 1 ชม.)`,
                     "แม่หมอยกเลิก หรือไม่มาตามนัด คืนเงินเต็มอัตโนมัติ",
                   ]
                 : ["ยกเลิกได้ตลอดระหว่างรอคิว คืนเงินเต็ม", "แม่หมอปิดคิวก่อนถึงตาคุณ คืนเงินเต็มอัตโนมัติ"]

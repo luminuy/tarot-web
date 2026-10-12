@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { BeautyFilter, isBeautyFilterSupported, isBeautyLevel, type BeautyLevel } from "@/lib/marketplace/beauty-filter";
 import type { CallRole, CallView } from "@/lib/marketplace/call.repo";
 import type { IceServerConfig } from "@/lib/marketplace/turn";
+import { STORAGE_KEYS } from "@/lib/storage/keys";
 
 /**
  * 📹 ห้องวิดีโอคอลตัวต่อตัว ลูกค้า ↔ แม่หมอ (ใช้ร่วมกันทั้งสองฝั่ง)
@@ -39,6 +41,14 @@ const POLL_CONNECTED_MS = 4000;
 const ICE_GATHER_TIMEOUT_MS = 6000;
 
 type LinkState = "negotiating" | "connected" | "reconnecting" | "failed";
+
+/** ระดับฟิลเตอร์หน้าสวย — ป้ายสั้นพอวางสี่ปุ่มในแถวเดียวบนจอ 360px */
+const BEAUTY_OPTIONS: { value: BeautyLevel; label: string }[] = [
+  { value: "off", label: "ปิด" },
+  { value: "natural", label: "ธรรมชาติ" },
+  { value: "smooth", label: "เนียน" },
+  { value: "glow", label: "เนียนใส" },
+];
 /** จัดจอ: สองฝั่งเท่ากัน · อีกฝั่งใหญ่ · ภาพของฉันใหญ่ */
 type CallLayout = "split" | "peer" | "self";
 type Phase = "idle" | "starting" | "live" | "ended" | "error";
@@ -331,20 +341,154 @@ export function VideoCallRoom({
   const [mirrorPref, setMirrorPref] = useState(role !== "reader");
   const [videoInputs, setVideoInputs] = useState<MediaDeviceInfo[]>([]);
   const [switching, setSwitching] = useState(false);
+  /** ทิศของกล้องจริง (ไม่ใช่ภาพที่แต่งแล้ว) — กล้องหลังไม่ต้องกลับด้าน */
+  const [rawFacing, setRawFacing] = useState<string | undefined>(undefined);
+  /*
+   * ✦ ฟิลเตอร์หน้าสวย (เจ้าของสั่ง 2026-10-12: "ใส่แล้วหน้าจะได้สวย ๆ มีผิวด้วย") — เฉพาะแม่หมอ
+   * แต่งภาพในเครื่องแม่หมอเอง (`beauty-filter.ts`) แล้วส่งภาพที่แต่งแล้วให้ลูกค้า
+   * ภาพ "คุณ" บนจอแม่หมอคือภาพเดียวกับที่ลูกค้าเห็น · จำระดับที่เลือกไว้ต่อเครื่อง
+   */
+  const canBeautify = role === "reader";
+  const [beautySupported, setBeautySupported] = useState(false);
+  const [beauty, setBeauty] = useState<BeautyLevel>("off");
+  const [beautyNote, setBeautyNote] = useState<string | null>(null);
+  const beautyLabelId = useId();
 
   const engineRef = useRef<CallEngine | null>(null);
+  /** แทร็กจากกล้อง/ไมค์จริง — เจ้าของแทร็ก (หยุดตอนวางสาย · สลับกล้อง) */
   const streamRef = useRef<MediaStream | null>(null);
+  /** สิ่งที่ส่งให้อีกฝั่ง: เสียงจริง + ภาพจากกล้องตรง ๆ หรือภาพที่แต่งแล้ว — สายรอบใหม่หยิบแทร็กจากตัวนี้ */
+  const sendStreamRef = useRef<MediaStream | null>(null);
+  const filterRef = useRef<BeautyFilter | null>(null);
+  /** คิวเปลี่ยนระดับฟิลเตอร์ — กดรัว ๆ ต้องไม่สร้างฟิลเตอร์ซ้อนกัน */
+  const beautyChainRef = useRef<Promise<void>>(Promise.resolve());
+  const camOnRef = useRef(true);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
   const releaseMedia = useCallback(() => {
     engineRef.current?.stop();
     engineRef.current = null;
+    filterRef.current?.stop();
+    filterRef.current = null;
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
+    sendStreamRef.current = null;
     setLocalStream(null);
     setRemoteStream(null);
   }, []);
+
+  useEffect(() => {
+    if (!canBeautify) return;
+    setBeautySupported(isBeautyFilterSupported());
+    try {
+      const saved = window.localStorage.getItem(STORAGE_KEYS.readerBeautyLevel);
+      if (isBeautyLevel(saved)) setBeauty(saved);
+    } catch {
+      // โหมดส่วนตัว/บล็อกที่เก็บข้อมูล — เริ่มที่ปิดฟิลเตอร์
+    }
+  }, [canBeautify]);
+
+  /** เปลี่ยนภาพที่ส่งให้อีกฝั่ง (กล้องตรง ↔ ภาพที่แต่งแล้ว) บนสายเดิม + ภาพตัวอย่างบนจอเรา */
+  const setOutgoingVideo = useCallback(async (track: MediaStreamTrack) => {
+    const send = sendStreamRef.current;
+    if (!send) return;
+    const old = send.getVideoTracks()[0];
+    if (old !== track) {
+      if (old) send.removeTrack(old);
+      send.addTrack(track);
+      track.enabled = camOnRef.current;
+      await engineRef.current?.replaceVideoTrack(track).catch(() => undefined);
+    }
+    // อ็อบเจกต์ใหม่ทุกครั้ง — วิดีโอบนจอถึงจะรับแทร็กใหม่แน่นอน
+    setLocalStream(new MediaStream(send.getTracks()));
+  }, []);
+
+  /**
+   * เปิด/เปลี่ยน/ปิดฟิลเตอร์จริง (เรียกผ่านคิว `beautyChainRef` เท่านั้น)
+   * เครื่องที่ทำไม่ได้ หรือทำแล้วภาพที่ส่งออกดำ ➔ กลับไปส่งภาพกล้องตรง ๆ ทันที ลูกค้าไม่เห็นจอดำ
+   */
+  const applyBeauty = useCallback(
+    async (level: BeautyLevel) => {
+      const raw = streamRef.current?.getVideoTracks()[0];
+      if (level === "off") {
+        const filter = filterRef.current;
+        filterRef.current = null;
+        if (raw) await setOutgoingVideo(raw);
+        filter?.stop();
+        return;
+      }
+      if (filterRef.current) {
+        filterRef.current.setLevel(level);
+        return;
+      }
+      if (!raw) return; // ยังไม่เข้าห้อง — จำไว้ เปิดให้ตอนเข้าห้อง
+      const filter = await BeautyFilter.create(raw, level);
+      if (!filter) {
+        setBeauty("off");
+        setBeautyNote("เครื่องนี้ใช้ฟิลเตอร์ไม่ได้ — ลูกค้าเห็นภาพจากกล้องตามปกติ");
+        return;
+      }
+      if (!streamRef.current) {
+        filter.stop(); // วางสายไประหว่างเตรียมฟิลเตอร์
+        return;
+      }
+      filterRef.current = filter;
+      await setOutgoingVideo(filter.track);
+      void filter.verify().then(async (ok) => {
+        if (ok || filterRef.current !== filter) return;
+        filterRef.current = null;
+        const camera = streamRef.current?.getVideoTracks()[0];
+        if (camera) await setOutgoingVideo(camera);
+        filter.stop();
+        setBeauty("off");
+        setBeautyNote("ฟิลเตอร์ทำให้ภาพดำบนเครื่องนี้ — ปิดให้แล้ว ลูกค้าเห็นภาพจากกล้องตามปกติ");
+      });
+    },
+    [setOutgoingVideo],
+  );
+
+  const queueBeauty = useCallback(
+    (level: BeautyLevel) => {
+      const next = beautyChainRef.current.then(() => applyBeauty(level)).catch(() => undefined);
+      beautyChainRef.current = next;
+      return next;
+    },
+    [applyBeauty],
+  );
+
+  const chooseBeauty = (level: BeautyLevel) => {
+    setBeauty(level);
+    setBeautyNote(null);
+    try {
+      window.localStorage.setItem(STORAGE_KEYS.readerBeautyLevel, level);
+    } catch {
+      // จำไม่ได้ก็ไม่เป็นไร — ใช้ได้ในสายนี้
+    }
+    void queueBeauty(level);
+  };
+
+  /*
+   * แท็บถูกซ่อน (สลับไปแท็บอื่นบนคอม) = ฟิลเตอร์หยุดวาด ภาพที่ลูกค้าเห็นจะค้าง
+   * ➔ ระหว่างซ่อนส่งภาพกล้องตรง ๆ แทน กลับมาที่แท็บแล้วแต่งต่อ
+   */
+  useEffect(() => {
+    if (phase !== "live") return;
+    const onVisibility = () => {
+      const filter = filterRef.current;
+      const camera = streamRef.current?.getVideoTracks()[0];
+      if (!filter || !camera) return;
+      if (document.visibilityState === "hidden") {
+        filter.pause();
+        void setOutgoingVideo(camera);
+      } else {
+        filter.resume();
+        void setOutgoingVideo(filter.track);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, [phase, setOutgoingVideo]);
 
   // ออกจากหน้า = ปล่อยกล้อง/ไมค์และหยุดถามสถานะ (ไฟกล้องต้องดับทันที)
   useEffect(() => releaseMedia, [releaseMedia]);
@@ -379,9 +523,15 @@ export function VideoCallRoom({
       return;
     }
     streamRef.current = stream;
-    setLocalStream(stream);
+    const send = new MediaStream(stream.getTracks());
+    sendStreamRef.current = send;
+    setLocalStream(send);
+    setRawFacing(stream.getVideoTracks()[0]?.getSettings().facingMode);
     setMicOn(true);
     setCamOn(true);
+    camOnRef.current = true;
+    // ✦ ฟิลเตอร์ที่เลือกไว้ — เปิดก่อนเริ่มสาย ภาพแรกที่ลูกค้าเห็นจึงแต่งแล้ว
+    if (canBeautify && beauty !== "off" && isBeautyFilterSupported()) await queueBeauty(beauty);
     // รายชื่อกล้อง (ได้ชื่อครบหลังอนุญาตแล้วเท่านั้น) — มีมากกว่าหนึ่งตัวถึงจะโชว์ปุ่ม "สลับกล้อง"
     void navigator.mediaDevices
       .enumerateDevices?.()
@@ -408,7 +558,7 @@ export function VideoCallRoom({
         role,
         headers,
         iceServers: json.iceServers,
-        stream,
+        stream: send,
         onRemoteStream: setRemoteStream,
         onLink: setLink,
         onPeerPresence: setPeerPresent,
@@ -460,7 +610,10 @@ export function VideoCallRoom({
 
   const toggleCam = () => {
     const next = !camOn;
+    camOnRef.current = next;
     streamRef.current?.getVideoTracks().forEach((t) => (t.enabled = next));
+    // ภาพที่แต่งแล้วเป็นอีกแทร็กหนึ่ง — ต้องปิดด้วย ไม่งั้นลูกค้ายังเห็นเฟรมสุดท้าย
+    sendStreamRef.current?.getVideoTracks().forEach((t) => (t.enabled = next));
     setCamOn(next);
   };
 
@@ -497,9 +650,10 @@ export function VideoCallRoom({
       track.enabled = camOn;
       if (current) stream.removeTrack(current);
       stream.addTrack(track);
-      await engineRef.current?.replaceVideoTrack(track).catch(() => undefined);
-      // ภาพตัวอย่างต้องเป็นอ็อบเจกต์ใหม่ วิดีโอบนจอถึงจะรับแทร็กใหม่แน่นอน
-      setLocalStream(new MediaStream(stream.getTracks()));
+      setRawFacing(track.getSettings().facingMode);
+      // เปิดฟิลเตอร์อยู่ = ภาพที่ส่งยังเป็นแทร็กเดิมของฟิลเตอร์ แค่เปลี่ยนกล้องที่ป้อนเข้า
+      if (filterRef.current) await filterRef.current.setSource(track);
+      else await setOutgoingVideo(track);
     }
     setSwitching(false);
   };
@@ -547,6 +701,7 @@ export function VideoCallRoom({
           <p className="rounded-xl bg-inset-warm/70 p-3.5 text-[13px] leading-relaxed text-ink">
             ก่อนเข้าห้อง: ตั้งกล้องให้เห็นโต๊ะไพ่ทั้งหมด · ในห้องกด &quot;ภาพฉันใหญ่&quot; เพื่อเช็กว่าไพ่อยู่ในกรอบ
             และกด &quot;สลับกล้อง&quot; ได้ถ้ามีกล้องหลังหรือกล้องอีกตัว
+            {beautySupported && " · เลือก \"ฟิลเตอร์หน้าสวย\" ได้ในห้อง (ระบบจำไว้ให้ครั้งหน้า)"}
           </p>
         )}
 
@@ -599,8 +754,8 @@ export function VideoCallRoom({
               ? "กำลังเชื่อมต่อ…"
               : null;
 
-  // กล้องหลัง (ส่องโต๊ะ) ไม่ต้องกลับด้านเลย · กล้องหน้าตามที่ผู้ใช้เลือก
-  const facing = localStream?.getVideoTracks()[0]?.getSettings().facingMode;
+  // กล้องหลัง (ส่องโต๊ะ) ไม่ต้องกลับด้านเลย · กล้องหน้าตามที่ผู้ใช้เลือก (ดูจากกล้องจริง ไม่ใช่ภาพที่แต่งแล้ว)
+  const facing = rawFacing;
   const mirrorOn = facing === "environment" ? false : mirrorPref;
   const peerShort = role === "reader" ? "ลูกค้า" : "แม่หมอ";
 
@@ -693,6 +848,39 @@ export function VideoCallRoom({
         })}
       </div>
 
+      {/* ✦ ฟิลเตอร์หน้าสวย (แม่หมอ) — ภาพ "คุณ" บนจอคือภาพที่ลูกค้าเห็นจริง เลือกแล้วดูผลได้ทันที */}
+      {canBeautify && beautySupported && (
+        <div className="space-y-1.5">
+          <p id={beautyLabelId} className="px-1 text-[12px] font-semibold text-ink">
+            ฟิลเตอร์หน้าสวย <span className="font-normal text-muted">· ลูกค้าเห็นภาพที่แต่งแล้ว</span>
+          </p>
+          <div role="radiogroup" aria-labelledby={beautyLabelId} className="grid grid-cols-4 gap-1.5 rounded-2xl bg-inset-warm/70 p-1.5">
+            {BEAUTY_OPTIONS.map((opt) => {
+              const active = beauty === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => chooseBeauty(opt.value)}
+                  className={`flex min-h-[44px] items-center justify-center rounded-xl px-1 text-[13px] font-semibold leading-tight transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
+                    active ? "bg-surface text-ink-deep shadow-sm ring-1 ring-gold-ink" : "text-muted hover:text-ink-deep"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      {beautyNote && (
+        <p role="status" className="text-[12px] text-err">
+          {beautyNote}
+        </p>
+      )}
+
       {/* มือถือ: ไมค์/กล้องแถวบน · วางสายเต็มแถวล่าง — ห้ามให้คำว่า "วางสาย" ถูกตัดกลางคำ */}
       <div className="grid grid-cols-2 gap-2 whitespace-nowrap sm:flex">
         <Button variant="outline" aria-pressed={!micOn} onClick={toggleMic}>
@@ -722,7 +910,7 @@ export function VideoCallRoom({
       </div>
       <p className="text-[12px] leading-relaxed text-muted">
         {role === "reader"
-          ? 'ตอนเปิดไพ่ กด "ภาพฉันใหญ่" แล้วจัดไพ่ให้อยู่ในกรอบ — ภาพบนจอคือภาพเต็มที่ลูกค้าเห็น · ภาพกระจกปิด = ตัวหนังสือบนไพ่ไม่กลับด้าน · มีกล้องหลายตัว (เช่นกล้องหลังมือถือส่องโต๊ะ) กด "สลับกล้อง"'
+          ? 'ตอนเปิดไพ่ กด "ภาพฉันใหญ่" แล้วจัดไพ่ให้อยู่ในกรอบ — ภาพบนจอคือภาพเต็มที่ลูกค้าเห็น · ภาพกระจกปิด = ตัวหนังสือบนไพ่ไม่กลับด้าน · มีกล้องหลายตัว (เช่นกล้องหลังมือถือส่องโต๊ะ) กด "สลับกล้อง" · ฟิลเตอร์เกลี่ยเฉพาะผิว เส้นบนไพ่ยังคม'
           : "ภาพกระจกมีผลแค่จอของคุณ แม่หมอเห็นภาพจริงเสมอ"}
       </p>
     </section>

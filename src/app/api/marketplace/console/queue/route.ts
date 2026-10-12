@@ -10,6 +10,7 @@ import { isStudioEnabled } from "@/lib/studio/dpa";
 import {
   getQueueTicketById,
   getReaderLiveAvailability,
+  touchReaderPresence,
   listReaderQueueTickets,
   setReaderLiveAvailability,
   toPublicTicket,
@@ -52,6 +53,8 @@ export async function GET(request: Request) {
 
   const { reader, readerId } = auth;
   try {
+    // แผงเปิดอยู่ = แม่หมออยู่ ➔ คิวสดที่เปิดสวิตช์ไว้ "เปิดจริง" (เกิน 15 นาทีไม่เห็นแผง ระบบถือว่าปิดเอง)
+    await touchReaderPresence(readerId);
     const isLiveOpen = await getReaderLiveAvailability(readerId);
     // ตั๋วที่ยังไม่จ่าย (`pending_payment`) ไม่อยู่ในรายการนี้โดยตั้งใจ — แม่หมอเห็นเฉพาะคิว/นัดที่จ่ายแล้ว
     const tickets = await listReaderQueueTickets(readerId, {

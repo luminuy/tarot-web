@@ -5,17 +5,28 @@ import { z } from "zod";
 import { recordAudit } from "@/lib/admin/audit";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { signReaderToken } from "@/lib/auth/reader-auth";
+import { normalizeConsoleLinkDays } from "@/lib/marketplace/console-link";
 import {
   deleteReader,
   getReaderById,
+  rotateReaderSessionSecret,
   toAdminReader,
   updateReader,
+  type Reader,
 } from "@/lib/marketplace/readers.repo";
 
 export const runtime = "nodejs";
 
-/** อายุลิงก์แผงแม่หมอที่แอดมินส่งให้ — หน้าแอดมินบอกเวลาหมดอายุจริงจาก `expiresAt` (ไม่เดาเอง) */
-const CONSOLE_LINK_HOURS = 24;
+/**
+ * ลิงก์แผงแม่หมอใหม่ — อายุตามที่แอดมินเลือก (1 · 7 · 30 วัน · ค่าอื่น = 30 วัน)
+ * หน้าแอดมินบอกเวลาหมดอายุจริงจาก `expiresAt` (ไม่เดาเอง)
+ */
+function issueConsoleLink(reader: Reader, daysParam: unknown) {
+  const days = normalizeConsoleLinkDays(daysParam);
+  const expiresAt = Date.now() + days * 24 * 60 * 60 * 1000;
+  const token = signReaderToken(reader.id, reader.sessionSecret, days * 24);
+  return { token, expiresAt, days };
+}
 
 const UpdateReaderSchema = z.object({
   displayName: z.string().trim().min(2, "ชื่อต้องมีอย่างน้อย 2 ตัวอักษร").max(80, "ชื่อยาวเกินไป").optional(),
@@ -30,11 +41,11 @@ const UpdateReaderSchema = z.object({
 });
 
 /**
- * GET /api/admin/readers/[id] - ดึงข้อมูลแม่หมอรายบุคคล พร้อมสร้าง Console Access Token (24 ชม.)
- * ทุกครั้งที่เรียก = ลิงก์ใหม่อายุเต็ม 24 ชม. (ลิงก์เก่ายังใช้ได้จนหมดอายุของมันเอง)
+ * GET /api/admin/readers/[id]?days=1|7|30 - ดึงข้อมูลแม่หมอรายบุคคล พร้อมสร้างลิงก์แผงแม่หมอ
+ * ทุกครั้งที่เรียก = ลิงก์ใหม่อายุเต็มตามที่เลือก (ลิงก์เก่ายังใช้ได้จนหมดอายุ — ยกเลิกทั้งหมดได้ด้วย POST revoke_links)
  */
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const denied = await requireAdmin();
@@ -46,12 +57,46 @@ export async function GET(
     if (!reader) {
       return NextResponse.json({ error: "ไม่พบแม่หมอที่ระบุ" }, { status: 404 });
     }
-    const expiresAt = Date.now() + CONSOLE_LINK_HOURS * 60 * 60 * 1000;
-    const token = signReaderToken(reader.id, reader.sessionSecret, CONSOLE_LINK_HOURS);
-    return NextResponse.json({ reader: toAdminReader(reader), token, expiresAt });
+    const { token, expiresAt, days } = issueConsoleLink(reader, new URL(request.url).searchParams.get("days"));
+    return NextResponse.json({ reader: toAdminReader(reader), token, expiresAt, days });
   } catch (err) {
     console.error("[API Admin Reader GET ID Error]", err);
     return NextResponse.json({ error: "เกิดข้อผิดพลาดในการค้นหาแม่หมอ" }, { status: 500 });
+  }
+}
+
+const ActionSchema = z.object({
+  action: z.literal("revoke_links"),
+  days: z.number().int().optional(),
+});
+
+/**
+ * POST /api/admin/readers/[id] { action: "revoke_links" } - ยกเลิกลิงก์แผงแม่หมอทุกลิงก์ที่เคยออก
+ * (เปลี่ยนกุญแจเซ็น) แล้วคืนลิงก์ใหม่ให้ส่งแทนทันที — ใช้ตอนลิงก์หลุดไปถึงคนอื่น หรือแม่หมอเลิกใช้เครื่องเดิม
+ */
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
+  const { id } = await params;
+  try {
+    const parsed = ActionSchema.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) {
+      return NextResponse.json({ error: "คำสั่งไม่ถูกต้อง" }, { status: 400 });
+    }
+    const reader = await rotateReaderSessionSecret(id);
+    if (!reader) {
+      return NextResponse.json({ error: "ไม่พบแม่หมอที่ระบุ" }, { status: 404 });
+    }
+    await recordAudit("revoke_reader_links", `ยกเลิกลิงก์แผงแม่หมอทั้งหมด: ${reader.displayName} (${id})`);
+    const { token, expiresAt, days } = issueConsoleLink(reader, parsed.data.days);
+    return NextResponse.json({ reader: toAdminReader(reader), token, expiresAt, days, revoked: true });
+  } catch (err) {
+    console.error("[API Admin Reader POST Error]", err);
+    return NextResponse.json({ error: "ยกเลิกลิงก์ไม่สำเร็จ" }, { status: 500 });
   }
 }
 

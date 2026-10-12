@@ -216,6 +216,26 @@ export async function getPublicReaderById(id: string): Promise<PublicReaderProfi
   return toPublicReaderProfile(reader);
 }
 
+/** กุญแจเซ็นลิงก์แผงแม่หมอ (สุ่ม 256 บิต) */
+function newSessionSecret(): string {
+  return crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
+}
+
+/**
+ * ยกเลิกลิงก์แผงแม่หมอ "ทุกลิงก์ที่เคยออก" ในครั้งเดียว — เปลี่ยนกุญแจเซ็น ลิงก์เก่าตรวจลายเซ็นไม่ผ่านทันที
+ * (ISSUE-058 · ร่างข้อตกลงแม่หมอข้อ 4.1 สัญญาไว้ว่ายกเลิกลิงก์เดิมได้)
+ * แผงที่เปิดค้างไว้ด้วยลิงก์เก่าจะได้ 401 ในรอบถามถัดไป — แผงแม่หมอแสดงแถบ "ลิงก์ใช้ไม่ได้แล้ว" โดยไม่ล้างหน้า
+ */
+export async function rotateReaderSessionSecret(id: string): Promise<Reader | null> {
+  const db = await getAppDB();
+  const res = await db
+    .prepare("UPDATE readers SET session_secret = ?, updated_at = ? WHERE id = ?")
+    .bind(newSessionSecret(), Date.now(), id)
+    .run();
+  if ((res.meta?.changes ?? 0) === 0) return null;
+  return getReaderById(id);
+}
+
 /**
  * สร้างแม่หมอคนใหม่
  */
@@ -223,7 +243,7 @@ export async function createReader(input: CreateReaderInput): Promise<Reader> {
   const db = await getAppDB();
   const now = Date.now();
   const id = `reader_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
-  const sessionSecret = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
+  const sessionSecret = newSessionSecret();
 
   const specialtiesJson = JSON.stringify(input.specialties || []);
   const status = input.status || "pending";

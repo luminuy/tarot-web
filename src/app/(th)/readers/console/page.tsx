@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -15,7 +15,7 @@ import {
   UpcomingBookings,
   type ReaderSettingsState,
 } from "@/components/marketplace/ConsoleBookingParts";
-import { bkkDateKey, formatTime, relativeDayLabel } from "@/lib/marketplace/booking-policy";
+import { LIVE_PRESENCE_TIMEOUT_MINUTES, bkkDateKey, formatTime, relativeDayLabel } from "@/lib/marketplace/booking-policy";
 import { questionCategoryLabel, questionUrgencyLabel, suggestedSpreadLabel } from "@/lib/marketplace/offer";
 
 export const dynamic = "force-dynamic";
@@ -60,7 +60,7 @@ function tokenExpiry(token: string | null): number | null {
 
 /** ข้อความที่แม่หมออ่านเข้าใจ — เดิมโชว์ข้อความจาก API ตรง ๆ เช่น "Token หมดอายุหรือไม่ถูกต้อง" */
 function consoleAccessError(status: number): string {
-  if (status === 401) return "ลิงก์นี้หมดอายุแล้ว หรือคัดลอกมาไม่ครบ — ลิงก์เข้าแผงใช้ได้ 24 ชม. ขอลิงก์ใหม่จากแอดมิน SeerTarot ได้เลย";
+  if (status === 401) return "ลิงก์นี้หมดอายุ ถูกยกเลิก หรือคัดลอกมาไม่ครบ — ขอลิงก์ใหม่จากแอดมิน SeerTarot ได้เลย";
   if (status === 403) return "บัญชีแม่หมอนี้ยังรออนุมัติ หรือถูกพักงานไว้ — ติดต่อแอดมิน SeerTarot";
   if (status === 404) return "ไม่พบบัญชีแม่หมอนี้ — ติดต่อแอดมิน SeerTarot";
   return "เข้าแผงไม่สำเร็จ — ลองรีเฟรชหน้านี้อีกครั้ง";
@@ -128,6 +128,18 @@ function ReaderConsoleInner() {
   }, [token, readerId, getAuthHeaders]);
 
   useVisibleInterval(fetchConsoleData, 5000);
+
+  /*
+   * ✦ คิวสดเปิดจริงเฉพาะตอนแม่หมออยู่ (เห็นแผงภายใน 15 นาที — migrations/0031 · แผน CONSULT_FLOW ข้อ 3.2)
+   * แท็บถูกซ่อน (สลับไปแท็บอื่นบนคอม) แผงหยุดถามทุก 5 วินาที แต่ยังส่งสัญญาณ "ยังอยู่" นาทีละครั้ง
+   * มือถือล็อกจอ/สลับแอป JS หยุดทั้งหมด ➔ ไม่มีสัญญาณ ➔ เกิน 15 นาทีระบบถือว่าปิดคิวสดเอง
+   */
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (document.visibilityState === "hidden") void fetchConsoleData();
+    }, 60_000);
+    return () => clearInterval(timer);
+  }, [fetchConsoleData]);
 
   const handleToggleLive = async () => {
     if (!data) return;
@@ -200,7 +212,7 @@ function ReaderConsoleInner() {
         <div className="altar-panel rounded-2xl p-8 text-center space-y-4 max-w-md z-10 border border-err/40">
           <h1 className="sr-only">แผงควบคุมแม่หมอ</h1>
           <h2 className="text-base font-bold text-err">เข้าแผงแม่หมอไม่ได้</h2>
-          <p className="text-sm text-ink">{error || "เปิดแผงนี้จากลิงก์ที่แอดมินส่งให้ (ลิงก์ใช้ได้ 24 ชม.)"}</p>
+          <p className="text-sm text-ink">{error || "เปิดแผงนี้จากลิงก์ที่แอดมินส่งให้"}</p>
           <p className="text-xs text-muted">คิวและนัดของคุณยังอยู่ครบ — เปิดลิงก์ใหม่แล้วจะเห็นเหมือนเดิม</p>
           <Link href="/" className="inline-block text-xs text-gold-ink underline">
             กลับหน้าหลัก
@@ -229,7 +241,7 @@ function ReaderConsoleInner() {
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen text-ink-deep p-4 sm:p-8 font-sans relative overflow-hidden">
       <div className="max-w-5xl mx-auto space-y-6 relative z-10">
-        {/* ลิงก์แผงอายุ 24 ชม. — เตือนก่อนหมด 3 ชม. แม่หมอจะได้ขอลิงก์ใหม่ทันก่อนนัด */}
+        {/* ลิงก์แผงมีวันหมดอายุ (1–30 วันตามที่แอดมินเลือก) — เตือนก่อนหมด 3 ชม. แม่หมอจะได้ขอลิงก์ใหม่ทันก่อนนัด */}
         {(linkExpired || (linkExpiresAt !== null && linkExpiresAt - now < LINK_WARN_MS)) && (
           <div
             role="status"
@@ -239,7 +251,7 @@ function ReaderConsoleInner() {
           >
             {linkExpired || (linkExpiresAt ?? 0) <= now ? (
               <>
-                <strong className="font-bold">ลิงก์เข้าแผงนี้หมดอายุแล้ว</strong> — กดปุ่มในหน้านี้จะไม่ได้ผล
+                <strong className="font-bold">ลิงก์เข้าแผงนี้ใช้ไม่ได้แล้ว</strong> (หมดอายุหรือแอดมินยกเลิก) — กดปุ่มในหน้านี้จะไม่ได้ผล
                 ขอลิงก์ใหม่จากแอดมินแล้วเปิดลิงก์นั้นแทน (คิวและนัดยังอยู่ครบ)
               </>
             ) : (
@@ -305,7 +317,9 @@ function ReaderConsoleInner() {
                 {isLiveOpen ? "เปิดรับคิวสดอยู่" : "ปิดรับคิวสด"}
               </p>
               <p className="text-[13px] text-muted">
-                {isLiveOpen ? "ลูกค้าสามารถกดรับคิวได้ทันที" : "รับเฉพาะคิวที่นัดล่วงหน้า"}
+                {isLiveOpen
+                  ? `ลูกค้ากด "คุยตอนนี้" ได้ · ไม่ได้เปิดหน้านี้เกิน ${LIVE_PRESENCE_TIMEOUT_MINUTES} นาที ระบบปิดให้เอง`
+                  : "รับเฉพาะคิวที่นัดล่วงหน้า"}
               </p>
             </div>
 

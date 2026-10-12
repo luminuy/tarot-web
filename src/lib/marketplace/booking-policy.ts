@@ -46,6 +46,18 @@ export const BOOKING_HORIZON_DAYS = 14;
 export const FREE_CANCEL_HOURS = 24;
 /** เลื่อนนัดได้กี่ครั้งต่อการจอง */
 export const MAX_RESCHEDULES = 1;
+/**
+ * ช่วงผ่อนผันหลังจ่าย (แบบ Airbnb · เจ้าของสั่ง 2026-10-12 "ทำให้หมดเลย" — แผน CONSULT_FLOW ข้อ 3.1)
+ * จ่ายแล้วเพิ่งเห็นว่ากดเวลาผิด/เปลี่ยนใจ ➔ ภายในกี่นาทีหลังจ่ายยกเลิกได้เงินคืนเต็ม หรือเลื่อนนัดได้ แม้นัดจะเหลือไม่ถึง 24 ชม.
+ */
+export const PAID_GRACE_MINUTES = 10;
+/** ช่วงผ่อนผันใช้ได้เฉพาะนัดที่ยังห่างอย่างน้อยกี่นาที — ใกล้กว่านี้แม่หมอเตรียมรับลูกค้าแล้ว */
+export const PAID_GRACE_MIN_LEAD_MINUTES = 60;
+/**
+ * คิวสด "เปิดจริง" ต้องเห็นแผงแม่หมอภายในกี่นาที (migrations/0031 · แผน CONSULT_FLOW ข้อ 3.2)
+ * ลืมปิดสวิตช์แล้วล็อกจอ/ปิดหน้า ➔ เกินนี้ระบบถือว่าปิดคิวสดเอง ลูกค้าไม่จ่ายแล้วรอเก้อ · เปิดแผงกลับมา = เปิดต่อเอง
+ */
+export const LIVE_PRESENCE_TIMEOUT_MINUTES = 15;
 /** แม่หมอไม่เริ่มนัดภายในกี่นาทีหลังเวลานัด = ลูกค้ายกเลิกได้และได้เงินคืนเต็ม / แม่หมอแจ้งลูกค้าไม่มาได้ */
 export const NO_SHOW_GRACE_MINUTES = 15;
 /** แม่หมอกด "เริ่มนัด" ได้ก่อนเวลากี่นาที */
@@ -259,6 +271,18 @@ export interface CancelDecision {
 }
 
 /**
+ * ยังอยู่ในช่วงผ่อนผันหลังจ่ายไหม — คืนเวลาที่ช่วงผ่อนผันหมด (null = ไม่อยู่ในช่วง)
+ * `paidAt` = เวลาที่ระบบยืนยันการจ่าย (`payments.updated_at` ของรายการที่ paid)
+ */
+export function paidGraceUntil(paidAt: number | null | undefined, slotStart: number | null, nowMs: number): number | null {
+  if (typeof paidAt !== "number" || slotStart === null) return null;
+  const until = paidAt + PAID_GRACE_MINUTES * MINUTE;
+  if (nowMs < paidAt || nowMs > until) return null;
+  if (slotStart - nowMs < PAID_GRACE_MIN_LEAD_MINUTES * MINUTE) return null;
+  return until;
+}
+
+/**
  * นโยบายยกเลิก — ใครยกเลิก ตอนไหน ได้เงินคืนไหม
  *
  * | กรณี | ผล |
@@ -267,6 +291,7 @@ export interface CancelDecision {
  * | ยังไม่จ่าย | ยกเลิกได้ ไม่มีอะไรต้องคืน |
  * | คิวสด ระหว่างรอเรียก | คืนเต็ม (ยังไม่ได้รับบริการ) |
  * | นัดล่วงหน้า ก่อนเวลานัด ≥ 24 ชม. | คืนเต็ม |
+ * | นัดล่วงหน้า ภายใน 10 นาทีหลังจ่าย (นัดยังห่าง ≥ 1 ชม.) | คืนเต็ม (ช่วงผ่อนผัน — เผื่อกดเวลาผิด) |
  * | นัดล่วงหน้า เลยเวลานัด 15 นาทีแล้วแม่หมอยังไม่เริ่ม | คืนเต็ม (แม่หมอไม่มาตามนัด) |
  * | นัดล่วงหน้า น้อยกว่า 24 ชม. | ยกเลิกได้ ไม่คืนเงิน |
  * | แม่หมอเรียกคิว/เริ่มคุยแล้ว | ลูกค้ายกเลิกเองไม่ได้ |
@@ -278,6 +303,8 @@ export function decideCancellation(input: {
   paid: boolean;
   slotStart: number | null;
   nowMs: number;
+  /** เวลาที่จ่ายสำเร็จ — ใช้ตัดสินช่วงผ่อนผันหลังจ่าย (ไม่ส่ง = ไม่มีช่วงผ่อนผัน) */
+  paidAt?: number | null;
 }): CancelDecision {
   const { actor, kind, ticketStatus, paid, slotStart, nowMs } = input;
   const open = ticketStatus === "pending_payment" || ticketStatus === "waiting" || ticketStatus === "screening";
@@ -289,22 +316,28 @@ export function decideCancellation(input: {
   if (!paid) return { allowed: true, refund: false, reason: "unpaid" };
   if (kind === "walkup" || slotStart === null) return { allowed: true, refund: true, reason: "walkup_waiting" };
   if (slotStart - nowMs >= FREE_CANCEL_HOURS * HOUR) return { allowed: true, refund: true, reason: "early_cancel" };
+  if (paidGraceUntil(input.paidAt, slotStart, nowMs) !== null) return { allowed: true, refund: true, reason: "grace_cancel" };
   if (nowMs >= slotStart + NO_SHOW_GRACE_MINUTES * MINUTE) return { allowed: true, refund: true, reason: "reader_no_show" };
   return { allowed: true, refund: false, reason: "late_cancel" };
 }
 
-/** เลื่อนนัดได้ไหม (นัดที่จ่ายแล้ว · เหลือเวลาก่อนนัด ≥ 24 ชม. · ยังไม่เคยเลื่อนครบโควตา) */
+/**
+ * เลื่อนนัดได้ไหม (นัดที่จ่ายแล้ว · ยังไม่เคยเลื่อนครบโควตา ·
+ * เหลือเวลาก่อนนัด ≥ 24 ชม. หรือยังอยู่ในช่วงผ่อนผันหลังจ่าย)
+ */
 export function canReschedule(input: {
   ticketStatus: string;
   slotStart: number | null;
   rescheduleCount: number;
   nowMs: number;
+  paidAt?: number | null;
 }): boolean {
   return (
     input.ticketStatus === "waiting" &&
     input.slotStart !== null &&
     input.rescheduleCount < MAX_RESCHEDULES &&
-    input.slotStart - input.nowMs >= FREE_CANCEL_HOURS * HOUR
+    (input.slotStart - input.nowMs >= FREE_CANCEL_HOURS * HOUR ||
+      paidGraceUntil(input.paidAt, input.slotStart, input.nowMs) !== null)
   );
 }
 

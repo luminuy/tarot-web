@@ -6,6 +6,7 @@ import {
   generateSlots,
   HOLD_MINUTES,
   MAX_RESCHEDULES,
+  PAID_GRACE_MINUTES,
   slotMs,
   slotRejection,
   soonestSlots,
@@ -585,6 +586,8 @@ export async function cancelConsultation(
     paid: Boolean(paidPayment),
     slotStart: booking?.kind === "scheduled" ? booking.slotStart : null,
     nowMs,
+    // เวลาที่จ่ายสำเร็จ = updated_at ของรายการที่ paid (settle ตั้งตอนเปลี่ยนเป็น paid)
+    paidAt: paidPayment?.updatedAt ?? null,
   });
   if (!decision.allowed) return { ok: false, reason: decision.reason, refundStatus: null };
 
@@ -629,15 +632,21 @@ export async function rescheduleBooking(
   if (!booking || booking.kind !== "scheduled" || booking.status !== "confirmed") {
     return { ok: false, error: "นัดนี้เลื่อนไม่ได้", status: 400 };
   }
+  const paidAt = (await listPaymentsForTicket(ticket.id)).find((p) => p.status === "paid")?.updatedAt ?? null;
   if (
     !canReschedule({
       ticketStatus: ticket.status,
       slotStart: booking.slotStart,
       rescheduleCount: booking.rescheduleCount,
       nowMs,
+      paidAt,
     })
   ) {
-    return { ok: false, error: `เลื่อนนัดได้ ${MAX_RESCHEDULES} ครั้ง และต้องเลื่อนก่อนเวลานัดอย่างน้อย 24 ชั่วโมง`, status: 400 };
+    return {
+      ok: false,
+      error: `เลื่อนนัดได้ ${MAX_RESCHEDULES} ครั้ง และต้องเลื่อนก่อนเวลานัดอย่างน้อย 24 ชั่วโมง (หรือภายใน ${PAID_GRACE_MINUTES} นาทีหลังจ่าย)`,
+      status: 400,
+    };
   }
   if (newSlotStart === booking.slotStart) return { ok: false, error: "เลือกเวลาใหม่ที่ไม่ใช่เวลาเดิม", status: 400 };
 

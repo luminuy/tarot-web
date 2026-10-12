@@ -3,10 +3,11 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { StudioApp } from "@/components/studio/StudioApp";
+import { STORAGE_KEYS } from "@/lib/storage/keys";
 
 export const dynamic = "force-dynamic";
 
-const TOKEN_KEY = "studio_reader_token";
+const TOKEN_KEY = STORAGE_KEYS.studioReaderToken;
 
 /**
  * 🪶 /readers/studio — สตูดิโอแม่หมอ (REFLECTION_JOURNAL_PLAN 1.13)

@@ -85,6 +85,16 @@ export const STORAGE_KEYS = {
   /** แพ็กที่ผู้ใช้กดซื้อตอนยังไม่ล็อกอิน (sessionStorage · อายุ 30 นาที)
    *  ล็อกอินเสร็จพากลับมาหน้า /pricing ซึ่งอ่านค่านี้แล้วพาไปหน้าจ่ายเงินต่อ */
   pendingCheckout: "tarot_pending_checkout",
+  /** ✦ ระดับฟิลเตอร์หน้าสวยที่แม่หมอเลือกไว้ในห้องวิดีโอ (ปิด · ธรรมชาติ · เนียน · เนียนใส) — จำต่อเครื่อง */
+  readerBeautyLevel: "tarot_reader_beauty_v1",
+  /** สถานะแอปแบบติดตั้ง (PWA): เคยเสนอติดตั้ง/ปิดไปเมื่อไร · สารานุกรมออฟไลน์ (`pwa-client.ts`) */
+  pwaState: "tarot_pwa_state_v1",
+
+  /* ── ลงทะเบียนย้อนหลัง 2026-10-12 (ด่านเริ่มจับค่าคงที่ในไฟล์) — มีผู้ใช้จริงแล้ว ห้ามเปลี่ยนชื่อ ── */
+  /** โทเคนสตูดิโอแม่หมอของแท็บนี้ (sessionStorage) — ย้ายจาก `?token=` ใน URL มาเก็บแล้วลบออกจาก URL */
+  studioReaderToken: "studio_reader_token",
+  /** แคชไพ่ประจำวันรุ่นเก่า — อ่านเพื่อย้ายไปคีย์ `dailyCard` แล้วลบทิ้ง */
+  legacyDailyCard: "seer:daily-card",
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

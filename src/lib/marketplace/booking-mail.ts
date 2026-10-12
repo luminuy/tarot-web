@@ -7,6 +7,7 @@ import {
   formatSlotRange,
   googleCalendarUrl,
   MAX_RESCHEDULES,
+  PAID_GRACE_MINUTES,
   type ReminderKind,
 } from "@/lib/marketplace/booking-policy";
 import { CONSULTATION_MINUTES } from "@/lib/marketplace/offer";
@@ -186,7 +187,7 @@ export async function sendBookingConfirmed(ticketId: string): Promise<void> {
         )}" style="color:#8F5C1A;">+ เพิ่มลง Google Calendar</a></p>`
       : "";
     const policy = scheduled
-      ? `ยกเลิกหรือเลื่อนนัดได้ฟรีก่อนเวลานัด ${FREE_CANCEL_HOURS} ชม. (เลื่อนได้ ${MAX_RESCHEDULES} ครั้ง) คืนเงินเต็มจำนวน · น้อยกว่า ${FREE_CANCEL_HOURS} ชม. ไม่คืนเงิน · แม่หมอยกเลิกหรือไม่มาตามนัด คืนเงินเต็มอัตโนมัติ`
+      ? `ยกเลิกหรือเลื่อนนัดได้ฟรีก่อนเวลานัด ${FREE_CANCEL_HOURS} ชม. (เลื่อนได้ ${MAX_RESCHEDULES} ครั้ง) คืนเงินเต็มจำนวน · น้อยกว่า ${FREE_CANCEL_HOURS} ชม. ไม่คืนเงิน · เพิ่งจ่ายแล้วเห็นว่ากดเวลาผิด ภายใน ${PAID_GRACE_MINUTES} นาทีหลังจ่ายยกเลิกหรือเลื่อนได้ฟรี (นัดที่ห่างเกิน 1 ชม.) · แม่หมอยกเลิกหรือไม่มาตามนัด คืนเงินเต็มอัตโนมัติ`
       : "ยกเลิกได้ตลอดระหว่างรอคิว คืนเงินเต็มจำนวน · แม่หมอปิดคิวก่อนถึงตาคุณ คืนเงินเต็มอัตโนมัติ";
     const html = baseLayout(
       `<h1>${title}</h1>

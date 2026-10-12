@@ -308,7 +308,7 @@ export interface Reader { id: string; displayName: string; bio: string; avatarUr
 | จ่ายเงิน | ทุกการปรึกษาจ่ายก่อน (คิวสดด้วย) ผ่าน Stripe Checkout · ราคาจากเซิร์ฟเวอร์เท่านั้น |
 | กันที่ | 36 นาที · หน้าจ่ายหมดอายุ 31 นาที (หน้าจ่ายต้องหมดก่อนที่นั่งเสมอ) |
 | กันจองซ้อน | unique index `idx_bookings_slot_active` (reader_id, slot_start) เฉพาะ `kind='scheduled'` และสถานะ `reserved/confirmed` |
-| ยกเลิก/คืนเงิน | ก่อนนัด ≥ 24 ชม. คืนเต็ม · < 24 ชม. ไม่คืน · แม่หมอยกเลิก/ไม่มาภายใน 15 นาที คืนเต็ม · คิวสดระหว่างรอ คืนเต็ม · เลื่อนได้ 1 ครั้ง (≥ 24 ชม.) |
+| ยกเลิก/คืนเงิน | ก่อนนัด ≥ 24 ชม. คืนเต็ม · < 24 ชม. ไม่คืน · แม่หมอยกเลิก/ไม่มาภายใน 15 นาที คืนเต็ม · คิวสดระหว่างรอ คืนเต็ม · เลื่อนได้ 1 ครั้ง (≥ 24 ชม.) · **ภายใน 10 นาทีหลังจ่าย (นัดห่าง ≥ 1 ชม.) ยกเลิกคืนเต็ม/เลื่อนได้** (เคาะ 2026-10-12 · `PAID_GRACE_MINUTES`) |
 
 **ไฟล์**: `src/lib/marketplace/booking-policy.ts` (กติกา — ไม่มี I/O ใช้ร่วมหน้าเว็บ/API) · `booking.repo.ts` (วงจรใบจอง + `settleConsultationPayment` จุดเดียวที่เปลี่ยนเงินเข้าเป็นนัด) ·
 `consultation-checkout.ts` · `SlotPicker.tsx` · `BookingFlow.tsx` (หน้าจองเต็มจอ `/readers/[id]/book` — แทน `BookQueueModal` ที่ถอดแล้ว 2026-10-11) · `QueueBookingParts.tsx` · `ConsoleBookingParts.tsx` · migrations/0020
@@ -350,9 +350,13 @@ export interface Reader { id: string; displayName: string; bio: string; avatarUr
 | แผงแม่หมอ | การ์ด "ส่งลิงก์ให้ลูกค้า" บอกว่าลูกค้าที่เปิดตอนนี้จะคุยได้เลย/ได้แค่นัด/จองไม่ได้ · เตือนก่อนลิงก์แผงหมดอายุ 3 ชม. · หมดกลางคิวไม่ล้างหน้า · ค่าจาก AI เป็นคำไทย |
 | ห้องวิดีโอ | จัดจอ 3 แบบ (เห็นเท่ากัน · ภาพฉันใหญ่ · อีกฝั่งใหญ่) · `object-contain` · แม่หมอเริ่มไม่กลับด้าน · สลับกล้องด้วย `replaceTrack` |
 | แอดมิน "หมอดูพาร์ทเนอร์" | `ReadersManager.tsx` — สถานะงานของแม่หมอแต่ละคน · ส่งลิงก์แผงพร้อมเวลาหมดอายุ · พักงาน/ลบต้องยืนยันในหน้า · API ไม่ส่ง `sessionSecret` (`toAdminReader`) |
+| ลิงก์แผงแม่หมอ | อายุ 1 · 7 · 30 วัน (`console-link.ts` · ค่าเริ่มต้น 30) · "ยกเลิกลิงก์เก่าทั้งหมด" = หมุน `session_secret` (`POST /api/admin/readers/[id]` `revoke_links`) |
+| คิวสดตามการออนไลน์ | เปิดจริง = สวิตช์เปิด + เห็นแผงภายใน 15 นาที (`reader_availability.last_seen_at` · migrations/0031) · ใช้ทั้งหน้าเว็บ แอดมิน และด่านสร้างคิวสด |
+| ฟิลเตอร์หน้าสวย (แม่หมอ) | `beauty-filter.ts` — WebGL ในเครื่องแม่หมอ เกลี่ยเฉพาะผิวแบบรักษาขอบ · ส่งภาพที่แต่งแล้วด้วย `replaceTrack` · ไม่บันทึก/ไม่ส่งภาพไปประมวลผลที่ไหน |
+| แถบคุกกี้ในกลุ่ม /readers | แถบย่อใต้หัวเว็บ (`ConsentBanner` `COMPACT_PATH`) — ไม่บังปุ่มจอง/ชำระเงินที่ขอบล่าง |
 
 **กับดัก**: ห้ามเชื่อเวลา `?slot=` จากไคลเอนต์ (ตรวจด้วย `checkSlotBookable` เสมอ) · ห้ามส่ง `accessUrl` / `customerRef` ให้แม่หมอ · ห้ามให้ `sessionSecret` ออกนอกเซิร์ฟเวอร์ ·
-ด่าน `test-marketplace-readers` 19.1–19.9
+ด่าน `test-marketplace-readers` 19.1–19.14
 
 ### 7.3 Repository & APIs
 - `src/lib/marketplace/payments.repo.ts`: จัดการ CRUD, Transition สถานะ, คำนวณส่วนแบ่งแม่หมอ

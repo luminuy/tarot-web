@@ -9,7 +9,7 @@ import {
   listPaymentsForTicket,
   rescheduleBooking,
 } from "@/lib/marketplace/booking.repo";
-import { canReschedule, decideCancellation } from "@/lib/marketplace/booking-policy";
+import { canReschedule, decideCancellation, paidGraceUntil } from "@/lib/marketplace/booking-policy";
 import { getReaderById } from "@/lib/marketplace/readers.repo";
 import { isTicketOwner } from "@/lib/marketplace/ticket-owner";
 import { getReviewByTicketId } from "@/lib/marketplace/reviews.repo";
@@ -30,6 +30,8 @@ async function buildBookingView(ticket: QueueTicket, nowMs: number) {
   if (!booking) return null;
   const payments = await listPaymentsForTicket(ticket.id);
   const paid = payments.some((p) => p.status === "paid");
+  // เวลาที่จ่ายสำเร็จ (updated_at ของรายการที่ paid) — ใช้ตัดสินช่วงผ่อนผัน 10 นาทีหลังจ่าย
+  const paidAt = payments.find((p) => p.status === "paid")?.updatedAt ?? null;
   const refunded = payments.some((p) => p.status === "refunded");
   const slotStart = booking.kind === "scheduled" ? booking.slotStart : null;
   const review = ticket.status === "handed_off" ? await getReviewByTicketId(ticket.id) : null;
@@ -48,13 +50,16 @@ async function buildBookingView(ticket: QueueTicket, nowMs: number) {
     refundStatus: booking.refundStatus ?? (refunded ? "refunded" : null),
     paid: paid || refunded,
     amountSatang: payments.find((p) => p.status === "paid" || p.status === "refunded")?.amountSatang ?? null,
-    cancel: decideCancellation({ actor: "customer", kind: ticket.kind, ticketStatus: ticket.status, paid, slotStart, nowMs }),
+    cancel: decideCancellation({ actor: "customer", kind: ticket.kind, ticketStatus: ticket.status, paid, slotStart, nowMs, paidAt }),
     canReschedule: canReschedule({
       ticketStatus: ticket.status,
       slotStart,
       rescheduleCount: booking.rescheduleCount,
       nowMs,
+      paidAt,
     }),
+    /** ช่วงผ่อนผันหลังจ่ายหมดเมื่อไร (null = ไม่อยู่ในช่วง) — หน้าคิวบอกลูกค้าว่ายังยกเลิก/เลื่อนฟรีได้ถึงกี่โมง */
+    graceUntil: ticket.status === "waiting" ? paidGraceUntil(paidAt, slotStart, nowMs) : null,
   };
 }
 
