@@ -128,7 +128,8 @@ export function SiteHeader({
           ⚠️ ห้ามใส่ `relative` ให้ชั้นใน — แผงเมนูใหญ่ (`absolute inset-x-0`) ต้องอ้างอิง <header> จึงกางเต็มจอ
         */}
         <div className="site-header-glass">
-          <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:h-[68px] sm:px-6">
+          {/* 🎨 UI 2.0 (คลื่น 2): แคปซูลลอย สูง 56px (มือถือ) / 62px — ความสูงเดียวกับลิงก์เมนูใน DesktopNav */}
+          <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 pl-2 pr-1.5 sm:h-[62px] sm:pl-3 sm:pr-2.5">
             <Link
               href="/"
               prefetch={false}
@@ -147,7 +148,11 @@ export function SiteHeader({
                 className="h-9 w-9 shrink-0 rounded-full border border-line object-cover transition-transform duration-300 group-hover:scale-[1.03] sm:h-10 sm:w-10"
               />
               <span className="flex flex-col whitespace-nowrap leading-none">
-                <span className="font-serif-th text-[13.5px] tracking-[0.16em] text-ink sm:text-[1.05rem] sm:tracking-[0.2em]">SEERTAROT</span>
+                {/* 🎨 UI 2.0: "Seer" + "Tarot" ตัวเอียง (Instrument Serif · คำอังกฤษประดับ — ฟอนต์ละตินล้วน 17 KB ไม่พรีโหลด) */}
+                <span className="text-[17px] tracking-[0.01em] text-ink sm:text-[19px]">
+                  <span className="font-serif-th">Seer</span>
+                  <span className="ui2-accent">Tarot</span>
+                </span>
                 <span className="mt-1 font-serif-th text-[10px] tracking-[0.12em] text-muted sm:mt-1.5 sm:text-[11px] sm:tracking-[0.14em]">
                   {isEnglish ? "1909 RIDER-WAITE" : "ดูดวงไพ่ทาโรต์"}
                 </span>
@@ -157,6 +162,11 @@ export function SiteHeader({
             <DesktopNav isEnglish={isEnglish} />
 
             <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+              {/* ปุ่มดำ "เริ่มดูดวง" (แผน UI 2.0 หัวข้อ 6.2) — พาไปส่วนเปิดไพ่ของหน้าแรก · มือถือซ่อน (ที่แคบ มีปุ่มหลักในหน้าอยู่แล้ว) */}
+              {/* <a> ธรรมดา: localeHref เติม "/" ท้าย /en ก่อน # (ได้ /en/#…) · หน้าแรกเป็นหน้า Astro ไม่ต้องพึ่ง router */}
+              <a href={isEnglish ? "/en#home-quick" : "/#home-quick"} className="ui2-header-cta mr-1 hidden sm:inline-flex" data-home-target="header:start">
+                {isEnglish ? "Start a reading" : "เริ่มดูดวง"}
+              </a>
               <LanguageSwitcher />
               {/* ไม่มีใครส่ง toolbar มา (หน้าเนื้อหาทั่วไป) ➔ ใส่ปุ่มบัญชีให้เอง หัวเว็บทุกหน้าจะได้เหมือนหน้าแรก */}
               {toolbar ?? <HeaderAccount />}
@@ -171,7 +181,7 @@ export function SiteHeader({
           </div>
 
           {breadcrumb ? (
-            <div className="mx-auto max-w-6xl px-4 pb-2.5 sm:px-6">{breadcrumb}</div>
+            <div className="site-header-crumbs mx-auto max-w-6xl px-4 pb-2.5 sm:px-6">{breadcrumb}</div>
           ) : null}
         </div>
       </header>
@@ -188,7 +198,7 @@ function DesktopNav({ isEnglish }: { isEnglish: boolean }) {
   const currentPath = stripLocalePrefix(useCurrentPath());
   const nav = headerNav(isEnglish);
   const linkClass = (href: string) =>
-    `flex h-16 sm:h-[68px] items-center whitespace-nowrap transition-colors hover:text-gold-ink focus-visible:outline-none focus-visible:text-gold-ink ${
+    `flex h-14 sm:h-[62px] items-center whitespace-nowrap transition-colors hover:text-gold-ink focus-visible:outline-none focus-visible:text-gold-ink ${
       isActiveNavPath(currentPath, href) ? "text-gold-ink" : ""
     }`;
 

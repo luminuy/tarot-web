@@ -1,0 +1,95 @@
+/*
+ * 🎨 SeerTarot UI 2.0 — ส่วนที่ใช้ทั้งเว็บ (โทเคน `--ui2-*` · ตัวเอียงของโลโก้ · ปุ่มดำในหัวเว็บ)
+ * ===========================================================================
+ * แผน: docs/plans/UI_2_0_PLAN_2026-10-12.md · นำเข้าโดย src/app/globals.css (ทุกหน้า)
+ *
+ * ⚠️ ห้ามย้ายสไตล์ของหน้าแรกมาไว้ที่นี่ — ทุกหน้าต้องโหลดไฟล์นี้ (งบ CSS 32 KB gzip ต่อหน้า · ด่าน test-bundle-budget)
+ *    สไตล์ส่วน 1–8 ของหน้าแรกอยู่ที่ `ui2.css` + `ui2-fx-full.css` ซึ่งโหลดเฉพาะหน้าที่มี TarotFlow
+ *    (นำเข้าใน `astro/islands/TarotFlowRoot.tsx`)
+ * ⚠️ สีทั้งหมดเป็นโทเคน `--ui2-*` — ห้ามเขียนสีลงคอมโพเนนต์ตรง ๆ (ด่าน palette-drift)
+ * ⚠️ ตัวเลขทุกจุดใช้ `--ui2-font-number` (Anuphan ตัวตรง) — ห้ามตัวเอียง (เจ้าของสั่ง 2026-10-12)
+ */
+
+:root {
+  --ui2-day: #F7F0E3;
+  --ui2-night: #0C0A0F;
+  --ui2-night-2: #16121A;
+  --ui2-paper: #FFFCF6;
+  --ui2-ink: #1E1914;
+  --ui2-ink-soft: #4A3F33;
+  --ui2-muted: #6B5E4F;
+  --ui2-on-night: #F6EEE2;
+  --ui2-on-night-soft: #CFC3B2;
+  --ui2-on-night-dim: rgba(246, 238, 226, 0.62);
+  --ui2-gold-light: linear-gradient(100deg, #8A4F10 0%, #B8691C 30%, #C0621B 50%, #B8691C 70%, #8A4F10 100%);
+  --ui2-gold-night: linear-gradient(100deg, #E39A3E 0%, #FFD98F 25%, #FFF5DC 50%, #FFD98F 75%, #E39A3E 100%);
+  --ui2-gold-solid: #FFD98F;
+  --ui2-gold-ink: #8A4F10;
+  --ui2-teal: #4FD1C1;
+  --ui2-teal-text: #9FE3D9;
+  --ui2-button: #17110C;
+  --ui2-button-text: #FFF6E6;
+  --ui2-grey-head: #B0A595;
+  --ui2-line-day: rgba(30, 25, 20, 0.12);
+  --ui2-line-night: rgba(246, 238, 226, 0.14);
+  --ui2-radius-xl: 36px;
+  --ui2-radius-lg: 24px;
+  --ui2-font-display: "anuphan", "anuphan Fallback", var(--font-sarabun);
+  --ui2-font-number: "anuphan", "anuphan Fallback", var(--font-sarabun);
+  --ui2-font-accent: "instrumentSerif", "instrumentSerif Fallback", Georgia, serif;
+  --ui2-font-note: "itimNotes", "anuphan", "anuphan Fallback", var(--font-sarabun);
+
+  /* แผงกระจก — lite = พื้นทึบ ≥ 0.86 + ขอบสะท้อนแสง (ไม่มี blur) */
+  --ui2-glass-day-solid: rgba(255, 252, 246, 0.9);
+  --ui2-glass-night-solid: rgba(28, 23, 30, 0.9);
+  --ui2-glass-edge-day: rgba(255, 255, 255, 0.9);
+  --ui2-glass-edge-night: rgba(255, 236, 200, 0.16);
+
+  /* แสงออโรรา (หัวข้อ 6.1) */
+  --ui2-aurora-amber: rgba(255, 184, 92, 0.85);
+  --ui2-aurora-gold: rgba(255, 222, 150, 0.9);
+  --ui2-aurora-teal: rgba(132, 196, 184, 0.55);
+  --ui2-aurora-night-teal: rgba(79, 179, 169, 0.32);
+  --ui2-aurora-night-amber: rgba(233, 160, 70, 0.3);
+
+  /* กระดาษโน้ต (ไม่มีชมพู) */
+  --ui2-note-1: #CDE7C3;
+  --ui2-note-2: #CBE1F2;
+  --ui2-note-3: #F7CDA4;
+  --ui2-note-4: #F9E6A2;
+  --ui2-note-5: #C3EAE1;
+  --ui2-note-6: #EEDABC;
+  --ui2-note-7: #D9E2F3;
+}
+
+.ui2-accent {
+  font-family: var(--ui2-font-accent);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* ปุ่มดำในแคปซูลหัวเว็บ (ทั้งเว็บ · คลื่น 2) */
+.ui2-header-cta {
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--ui2-button-text);
+  background: var(--ui2-button);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.5) inset;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.ui2-header-cta:active {
+  transform: scale(0.97);
+}
+.ui2-header-cta:focus-visible {
+  outline: 2px solid var(--ui2-gold-ink);
+  outline-offset: 2px;
+}
+html[data-ui2-over-dark] .ui2-header-cta {
+  color: var(--ui2-night);
+  background: var(--ui2-gold-solid);
+}

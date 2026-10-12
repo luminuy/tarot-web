@@ -1,4 +1,7 @@
 @import "tailwindcss";
+/* 🎨 SeerTarot UI 2.0 — ส่วนที่ใช้ทั้งเว็บ (โทเคน · ตัวเอียงโลโก้ · ปุ่มดำหัวเว็บ)
+   สไตล์หน้าแรก (ui2.css + ui2-fx-full.css) โหลดเฉพาะหน้าที่มี TarotFlow — ห้ามย้ายมาที่นี่ (งบ CSS ต่อหน้า · ด่าน test-bundle-budget) */
+@import "../styles/ui2-base.css";
 
 /*
  * 🔍 ขอบเขตที่ Tailwind ใช้ "สแกนหาชื่อคลาส" (Source Detection)
@@ -86,6 +89,42 @@
   descent-override: 23.87%;
   line-gap-override: 0.00%;
   size-adjust: 97.21%;
+}
+/*
+ * 🎨 SeerTarot UI 2.0 — หัวข้อ · ปุ่ม · ตัวเลขทุกจุด (ตัวตรง · เจ้าของสั่ง 2026-10-12) · พรีโหลดทุกหน้า (FONT_PRELOADS · หัวข้อ h1–h3 ทั้งเว็บ)
+ * ค่าชดเชยเมตริกคำนวณด้วยสูตรเดียวกับ next/font (ความกว้างเฉลี่ยตัวละตินถ่วงความถี่ภาษาอังกฤษ เทียบ Arial)
+ * ตรวจสูตรแล้ว: คำนวณ Sarabun ได้ 97.21% / 109.87% / 23.87% ตรงกับค่าข้างบนทุกหลัก
+ */
+@font-face {
+  font-family: "anuphan";
+  src: url(/fonts/anuphan-500.woff2) format("woff2");
+  font-display: swap;
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: "anuphan Fallback";
+  src: local("Arial");
+  ascent-override: 100.34%;
+  descent-override: 26.92%;
+  line-gap-override: 0.00%;
+  size-adjust: 102.15%;
+}
+/* คำอังกฤษประดับ (ตัวเอียง) เท่านั้น — ละตินล้วน · ไม่พรีโหลด · ห้ามใช้กับตัวเลข */
+@font-face {
+  font-family: "instrumentSerif";
+  src: url(/fonts/instrument-serif-italic.woff2) format("woff2");
+  font-display: swap;
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: "instrumentSerif Fallback";
+  src: local("Arial");
+  ascent-override: 123.52%;
+  descent-override: 38.68%;
+  line-gap-override: 0.00%;
+  size-adjust: 80.15%;
 }
 
 /*
@@ -418,7 +457,9 @@
   --glow-pool-w: 88%;
 
   /* ความสูงจริงของ [data-site-header] — แถบเต็มกว้างแบบ Kazumi: แถว 64px (มือถือ) / 68px (sm+)
-     + เส้นขอบล่าง 1px = 65 / 69px · วัดใหม่ด้วย Chromium ทุกครั้งที่แตะความสูงของแถบ
+     + เส้นขอบล่าง 1px = 65 / 69px (แถบเต็มกว้างเดิม)
+     UI 2.0 แคปซูลลอย: ระยะบน 10 / 14px + แคปซูล 56 / 62px + ขอบ 2px = 68 / 78px (วัดด้วย Chromium 2026-10-12)
+     · วัดใหม่ด้วย Chromium ทุกครั้งที่แตะความสูงของแถบ
      ต้องบวก safe-area-inset-top ด้วย เพราะหัวเว็บกันพื้นที่ใต้ status bar ไว้เองแล้ว
      ตอนเปิดจากไอคอนหน้าจอโฮม (display: standalone) — ในเบราว์เซอร์ปกติค่านี้ = 0
 
@@ -427,7 +468,7 @@
      ด้วยค่านี้โดยตรง — เผื่อเกิน = เห็นเป็นช่องว่างใต้หัวเว็บทุกหน้า / ขาด = หัวเว็บทับเนื้อหา
      ระยะหายใจของ anchor ย้ายไปบวกที่ `scroll-padding-top` แทนแล้ว
      SiteHeader.tsx ยังวัดของจริงด้วย ResizeObserver แล้วเขียนทับค่านี้ให้อีกชั้น */
-  --site-header-h: calc(65px + env(safe-area-inset-top, 0px));
+  --site-header-h: calc(68px + env(safe-area-inset-top, 0px));
 }
 
 @media (max-width: 639px) {
@@ -441,7 +482,7 @@
 
 @media (min-width: 640px) {
   :root {
-    --site-header-h: calc(69px + env(safe-area-inset-top, 0px));
+    --site-header-h: calc(78px + env(safe-area-inset-top, 0px));
   }
 }
 
@@ -707,12 +748,46 @@ body > *:not(.fixed):not([data-floating]):not([data-site-header]) {
  */
 .site-header-glass {
   /*
-   * แถบเต็มกว้างแบบ Kazumi Clinic (เจ้าของเลือก 2026-10-02) — พื้นทึบ เส้นขอบล่างเส้นเดียว ไม่มีมุมโค้ง/เงาลอย
+   * 🎨 SeerTarot UI 2.0 (คลื่น 2 · เจ้าของสั่ง 2026-10-12): แคปซูลลอย ห่างขอบบน 10px (มือถือ) / 14px — แทนแถบเต็มกว้าง
+   *    แบบ Kazumi Clinic (2026-10-02) · `<header>` ยังกางเต็มกว้าง + `data-site-header` (ด่านเดิม · แผงเมนูใหญ่อ้างอิงมัน)
    * ความทึบต้อง >= 0.96 (INC-0211) — หัวเว็บเป็น `fixed` ลอยทับเนื้อหาที่เลื่อนอยู่ข้างหลังตลอดเวลา
    * ที่ 0.78 ตัวหนังสือข้างหลังทะลุขึ้นมาอ่านออก (เจ้าของถ่ายภาพมายืนยัน) · 0.97 แทบมองไม่เห็น
+   * ⚠️ ความสูงรวมเปลี่ยน ➔ ค่าตั้งต้น `--site-header-h` ด้านบนต้องตรงกับที่วัดจริงเสมอ (ไม่งั้น CLS ตอนโหลด · INC-0248)
    */
   background-color: rgba(255, 252, 246, 0.97);
-  border-bottom: 1px solid var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  margin: 10px 12px 0;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 16px 34px -24px rgba(46, 33, 26, 0.55);
+  transition: background-color var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
+}
+@media (min-width: 640px) {
+  .site-header-glass {
+    width: min(100% - 32px, 1200px);
+    margin: 14px auto 0;
+  }
+}
+/* breadcrumb ซ่อนแบบ sr-only อยู่แล้ว — ตัด padding ของแถวมันทิ้งตอนไม่มีโฟกัส แคปซูลจะได้สูงเท่ากันทุกหน้า */
+.site-header-crumbs:not(:focus-within) {
+  padding-bottom: 0;
+}
+/*
+ * 🌑 กระจกมืดเมื่อแคปซูลอยู่เหนือส่วนพื้นมืดของหน้าแรก UI 2.0 (คำถามเปิดข้อ 3 · เจ้าของเคาะ 2026-10-12)
+ * `astro/scripts/ui2-home.ts` ตั้ง `data-ui2-over-dark` บน <html> เมื่อส่วนมืดอยู่ใต้แคปซูล
+ * ⚠️ เปลี่ยนสีเฉพาะตัวแถบ — ห้ามแตะแผงที่กางออกมา (แผงเมนูใหญ่ · ภาษา · ลิ้นชัก เป็น `.absolute` พื้นสว่างของตัวเอง)
+ */
+html[data-ui2-over-dark] .site-header-glass {
+  background-color: rgba(22, 17, 24, 0.96);
+  border-color: rgba(255, 236, 200, 0.18);
+  box-shadow: 0 16px 34px -24px rgba(0, 0, 0, 0.8);
+}
+html[data-ui2-over-dark] .site-header-glass :is(.text-ink, .text-ink-deep, nav):not(.absolute *, .absolute) {
+  color: #F6EEE2;
+}
+html[data-ui2-over-dark] .site-header-glass .text-muted:not(.absolute *) {
+  color: #CFC3B2;
 }
 
 /* แผงเลือกภาษา — ผุดจากมุมขวาบน (ปุ่มลูกโลก) แบบเมนูของระบบปฏิบัติการ · ปิดเองเมื่อ prefers-reduced-motion (กฎรวม) */
@@ -2475,109 +2550,7 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
   }
 }
 
-/* ✦ พัดไพ่ 1909 เป็นพื้นหลังจาง ๆ หลังหัวหน้าแรก (`TarotFlow` · aria-hidden · ไม่รับการแตะ) — ไพ่แต่ละใบรู้ลำดับจาก `--i` (-3 … 3)
-   ลอยอยู่ชั้นล่างสุดของส่วนหัว (`isolate` + z-index -1) ไม่กินพื้นที่ · จางด้วย opacity + ไล่จางขอบล่างด้วย mask
-   (mask ไม่ใช่ blur — ไม่มี backdrop-filter/filter · INC-0056) · ผู้ใช้ปิดแอนิเมชัน = นิ่งสนิท */
-.hero-fan {
-  /* ขนาดไพ่ผูกกับความกว้างจอ — ใบริมสุดต้องอยู่ในกรอบส่วนหัวเสมอ (เคยกว้างตายตัวแล้วใบริมโดนตัดขอบ เจ้าของทัก 2026-10-10)
-     ระยะจากกลางถึงขอบนอกใบริม ≈ (ใบ × ระยะห่าง) + ครึ่งใบ + ส่วนที่หมุนยื่น ≈ 2.2w (5 ใบ) / 3.1w (7 ใบ) ต้อง ≤ ครึ่งกรอบ */
-  --w: min(96px, calc((100vw / 2 - 16px) / 2.2));
-  --gap: calc(var(--w) * 0.6);
-  position: absolute;
-  z-index: -1;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: calc(var(--w) * 1.7 + 50px);
-  opacity: 0.2;
-  pointer-events: none;
-  -webkit-mask-image: linear-gradient(to bottom, #000 45%, transparent 96%);
-  mask-image: linear-gradient(to bottom, #000 45%, transparent 96%);
-}
-@media (min-width: 640px) {
-  .hero-fan {
-    --w: min(150px, calc((100vw / 2 - 40px) / 2.3));
-    --gap: calc(var(--w) * 0.69);
-    top: -12px;
-    opacity: 0.22;
-  }
-}
-/* จอใหญ่: ไพ่ใหญ่ขึ้น + 7 ใบ กางเกือบเต็มกว้างส่วนหัว (เจ้าของขอ 2026-10-10) · กรอบส่วนหัวกว้างสุด 1,152px (max-w-6xl) */
-@media (min-width: 1024px) {
-  .hero-fan {
-    --w: min(190px, calc((min(100vw, 1152px) / 2 - 48px) / 3.1));
-    --gap: calc(var(--w) * 0.72);
-    top: -28px;
-  }
-}
-/* ✦ ให้ตัวหนังสือบนพัดอ่านง่าย (เจ้าของขอ 2026-10-10) — สองชั้น ไม่ใช้ blur/filter (INC-0056):
-   1) `.hero-wash::after` แสงครีมวงรีเฉพาะหลังกลุ่มหัวเรื่อง·คำโปรย·ชิป วาดทับพัด (z-index -1 เท่ากัน แต่มาทีหลังในลำดับ DOM)
-      แต่อยู่ใต้ตัวหนังสือ · ลายไพ่ตรงกลางจางลง ขอบพัดซ้ายขวายังเห็นชัด
-   2) `.hero-text-halo` เงาเรืองสีครีมรอบตัวอักษร กันเส้นลายไพ่ตัดผ่านขอบตัวหนังสือ */
-.hero-wash::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  left: 50%;
-  top: -24px;
-  width: min(100%, 980px);
-  height: 340px;
-  transform: translateX(-50%);
-  background: radial-gradient(closest-side, rgba(251, 241, 224, 0.92), rgba(251, 241, 224, 0.7) 55%, rgba(251, 241, 224, 0) 100%);
-  pointer-events: none;
-}
-@media (min-width: 640px) {
-  .hero-wash::after {
-    height: 330px;
-  }
-}
-.hero-text-halo {
-  text-shadow:
-    0 0 2px rgba(251, 241, 224, 0.95),
-    0 0 14px rgba(251, 241, 224, 0.9),
-    0 0 28px rgba(251, 241, 224, 0.75);
-}
-/* ใบริมสุดสองใบมีเฉพาะจอใหญ่ — จอเล็กพัดกว้างเกินจอ */
-.hero-fan-card--edge {
-  display: none;
-}
-@media (min-width: 1024px) {
-  .hero-fan-card--edge {
-    display: block;
-  }
-}
-.hero-fan-card {
-  --d: max(var(--i), calc(var(--i) * -1)); /* ระยะห่างจากใบกลาง 0 · 1 · 2 · 3 */
-  position: absolute;
-  left: 50%;
-  top: 10px;
-  z-index: calc(4 - var(--d));
-  width: var(--w);
-  aspect-ratio: 1 / 1.7;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #f4ead6;
-  box-shadow:
-    0 0 0 1px rgba(143, 92, 26, 0.35),
-    0 0 0 3px rgba(255, 250, 240, 0.9),
-    0 18px 34px -14px rgba(56, 37, 24, 0.5);
-  transform: translateX(calc(-50% + var(--i) * var(--gap))) translateY(calc(var(--d) * var(--d) * 5px + var(--d) * 6px))
-    rotate(calc(var(--i) * 7deg)) scale(calc(1 - var(--d) * 0.07));
-  transform-origin: 50% 100%;
-}
-/* เปิดหน้ามา ไพ่ค่อย ๆ กางจากกองกลาง (ครั้งเดียว · สั้น) — ปิดแอนิเมชันในเครื่อง = ไม่เล่น */
-@media (prefers-reduced-motion: no-preference) {
-  .hero-fan-card {
-    animation: hero-fan-in 900ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
-    animation-delay: calc(var(--d) * 80ms);
-  }
-}
-@keyframes hero-fan-in {
-  from {
-    transform: translateX(-50%) translateY(14px) rotate(0deg) scale(0.94);
-    opacity: 0;
-  }
-}
+/* (พัดไพ่พื้นหลังหัวหน้าแรกเดิม `.hero-fan` ถูกแทนด้วยการ์ดลอยของ SeerTarot UI 2.0 — ดู src/styles/ui2.css ส่วน 1) */
 
 /* ✦ ไอคอนช่องทางทางการในท้ายเว็บ (`SiteFooter`) — ไฟล์ SVG แยกใน `public/icons/social/` วาดเป็นพื้นหลัง
    ไม่ฝัง path ลง HTML ของทุกหน้า (งบ HTML ตึง) · `a` เปล่า 1 element ต่อช่องทาง (งบ DOM หน้าแรก)
@@ -2772,4 +2745,43 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
     animation: none;
     transition: none;
   }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   🎨 SeerTarot UI 2.0 — คลื่น 3 "ทุกหน้า" (เจ้าของสั่ง 2026-10-12: "ทำต่อให้ครบทุกหน้าเลย")
+   ─────────────────────────────────────────────────────────────────────────
+   ลงภาษาดีไซน์ที่ระดับคลาสกลาง ทุกหน้า (~460 หน้า ทั้ง Astro และ Next) เปลี่ยนพร้อมกันโดยไม่ต้องรื้อทีละหน้า:
+     1. หัวข้อ h1–h3 ใช้ Anuphan 500 (ตัวเดียวกับหัวหน้าแรก) — พรีโหลดทุกหน้าแล้ว (FONT_PRELOADS)
+     2. ปุ่มหลัก `.btn-gold-glass` (ใช้ ~106 จุด) เป็นปุ่มดำขอบทองแบบ `.ui2-btn` · บนพื้นมืดกลับเป็นปุ่มทองตัวหนังสือเข้ม
+     3. มุมแผงกระจกโค้งขึ้นเล็กน้อย (22 ➔ 26px) ให้เข้ากับแผ่นใหญ่ของ UI 2.0
+   ⚠️ อยู่นอก @layer โดยตั้งใจ — ชนะยูทิลิตี้ของ Tailwind (`font-serif-th` · `font-bold`) โดยไม่ต้อง !important
+   ⚠️ ห้ามย้ายขึ้นไปไว้ก่อนบล็อก `.btn-gold-glass` เดิม — กฎนอก @layer ที่น้ำหนักเท่ากัน ตัวหลังชนะ
+   ═════════════════════════════════════════════════════════════════════════ */
+:root {
+  --glass-radius: 26px;
+}
+:where(h1, h2, h3) {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.btn-gold-glass {
+  background-image: none;
+  background-color: var(--ui2-button);
+  color: var(--ui2-button-text);
+  box-shadow:
+    0 0 0 1px rgba(255, 217, 143, 0.55) inset,
+    0 14px 28px -14px rgba(23, 17, 12, 0.7);
+}
+.btn-gold-glass:hover {
+  filter: none;
+  box-shadow:
+    0 0 0 1px rgba(255, 217, 143, 0.8) inset,
+    0 18px 34px -14px rgba(23, 17, 12, 0.75);
+}
+/* บนพื้นมืด (เวทีปรึกษาแม่หมอ · พื้นหมึก) ปุ่มดำจะจมหาย — ใช้ปุ่มทองตัวหนังสือเข้ม (คอนทราสต์ #17110C บน #FFD98F ≈ 14:1) */
+:is(.consult-stage, .bg-ink-deep, .bg-dark) .btn-gold-glass {
+  background-color: var(--ui2-gold-solid);
+  color: var(--ui2-button);
+  box-shadow: 0 14px 28px -14px rgba(0, 0, 0, 0.7);
 }

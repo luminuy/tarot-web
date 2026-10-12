@@ -1,0 +1,1900 @@
+/*
+ * 🎨 SeerTarot UI 2.0 — หน้าตาตั้งต้น (ระดับ lite) ของหน้าแรกแบบ D+
+ * โหลดเฉพาะหน้าที่มี TarotFlow (`astro/islands/TarotFlowRoot.tsx`) · โทเคน `--ui2-*` อยู่ที่ `ui2-base.css` (ทั้งเว็บ)
+ * ===========================================================================
+ * แผน: docs/plans/UI_2_0_PLAN_2026-10-12.md
+ *
+ * ⚠️ ไฟล์นี้คือ "ค่าตั้งต้นปลอดภัย" — ไม่มี data-fx (ไม่มี JS) หรือเป็น lite/off ต้องได้หน้าตานี้
+ *    ห้ามมี backdrop-filter · filter: blur · mix-blend-mode · อนิเมชันวน infinite ที่ไม่ได้หยุดนอกจอ
+ *    ของหนักทุกชิ้นอยู่ใน `ui2-fx-full.css` ใต้ `[data-fx="full"]` + `@media (min-width: 768px)` เท่านั้น
+ *    (ด่าน `scripts/qa/test-ui2-fx.ts` ตรวจ CSS ที่บิลด์แล้ว)
+ * ⚠️ สีทั้งหมดเป็นโทเคน `--ui2-*` — ห้ามเขียนสีลงคอมโพเนนต์ตรง ๆ (ด่าน palette-drift)
+ * ⚠️ ตัวเลขทุกจุดใช้ `--ui2-font-number` (Anuphan ตัวตรง) — ห้ามตัวเอียง (เจ้าของสั่ง 2026-10-12)
+ * ⚠️ คีย์เฟรมแตะแค่ transform / opacity / translate / scale (+ background-position เฉพาะ full)
+ *    ค่าตั้งต้นของทุกชิ้น = ตำแหน่งสุดท้าย · ห้ามมี translate(%) ซ้ำกับยูทิลิตี้ translate ของ Tailwind (INC-0123)
+ */
+
+/* ลายมือบนกระดาษโน้ตคำถามของหน้าแรก UI 2.0 เท่านั้น — ตัดเฉพาะตัวอักษรบนโน้ต (public/fonts/itim-notes.txt)
+   ไม่พรีโหลด · ตัวอักษรที่ไม่มีในไฟล์ถอยไป Anuphan เอง (ด่าน test-ui2-fx ตรวจว่าโน้ตทุกตัวอักษรมีในไฟล์) */
+@font-face {
+  font-family: "itimNotes";
+  src: url(/fonts/itim-notes.woff2) format("woff2");
+  font-display: swap;
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* ── ตัวช่วยตัวหนังสือ ─────────────────────────────────────────────────────── */
+.ui2-num {
+  font-family: var(--ui2-font-number);
+  font-weight: 500;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+/* ทองบนพื้นสว่าง — ใช้กับตัว ≥ 24px เท่านั้น (ทุกจุดสี ≥ 3.6:1 กับ --ui2-day · หัวข้อ 6.1.1) */
+.ui2-gold-day {
+  color: var(--ui2-gold-ink);
+  background-image: var(--ui2-gold-light);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.ui2-gold-night {
+  color: var(--ui2-gold-solid);
+  background-image: var(--ui2-gold-night);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* เครื่องหมายทอง (`<GoldMark className="ui2-mark" />`) */
+.ui2-mark {
+  color: var(--ui2-gold-ink);
+}
+.ui2-night .ui2-mark {
+  color: var(--ui2-gold-solid);
+}
+/* ตำแหน่ง/สี/จังหวะของก้อนออโรรา (แสดงจริงเฉพาะระดับ full) */
+.ui2-blob-amber { left: -8%; top: -10%; background: var(--ui2-aurora-amber); --dur: 18s; }
+.ui2-blob-gold { right: -6%; top: -16%; background: var(--ui2-aurora-gold); --dur: 24s; }
+.ui2-blob-teal { right: 18%; bottom: -30%; background: var(--ui2-aurora-teal); --dur: 26s; }
+
+/* ── ส่วน (section) เต็มความกว้างจอ ─────────────────────────────────────────
+   วาดพื้นด้วย ::before กว้าง 100vw แบบเดียวกับ `.home-band` — ไม่ต้องรื้อ max-width ของที่ครอบ
+   ⚠️ ส่วนที่มีของล้นขอบ (ริบบิ้นเอียง · การ์ดลอย) ตัดด้วย `overflow-x: clip` ที่ตัวส่วนเอง
+      ห้าม `overflow-x: hidden` ที่ body (INC-0067: หัวเว็บ sticky พัง) */
+.ui2-sec {
+  position: relative;
+  isolation: isolate;
+  padding-block: 56px;
+}
+.ui2-sec::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  inset-block: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background: var(--ui2-sec-bg, transparent);
+}
+.ui2-day {
+  color: var(--ui2-ink);
+  --ui2-sec-bg:
+    radial-gradient(60% 46% at 12% 18%, rgba(255, 184, 92, 0.32) 0%, rgba(255, 184, 92, 0) 70%),
+    radial-gradient(52% 44% at 88% 12%, rgba(255, 222, 150, 0.5) 0%, rgba(255, 222, 150, 0) 70%),
+    radial-gradient(44% 34% at 76% 58%, rgba(132, 196, 184, 0.26) 0%, rgba(132, 196, 184, 0) 70%),
+    var(--ui2-day);
+}
+.ui2-night {
+  color: var(--ui2-on-night);
+  --ui2-sec-bg:
+    radial-gradient(50% 40% at 10% 8%, var(--ui2-aurora-night-teal) 0%, rgba(79, 179, 169, 0) 70%),
+    radial-gradient(46% 40% at 92% 30%, var(--ui2-aurora-night-amber) 0%, rgba(233, 160, 70, 0) 70%),
+    var(--ui2-night);
+}
+/* ดาว — วาดครั้งเดียวด้วย radial-gradient (lite: 1 ชั้น · นิ่ง) */
+.ui2-stars {
+  position: absolute;
+  z-index: -1;
+  inset-block: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0.7;
+  background-image:
+    radial-gradient(1.2px 1.2px at 7% 12%, rgba(255, 245, 220, 0.9) 50%, transparent 51%),
+    radial-gradient(1px 1px at 23% 64%, rgba(255, 245, 220, 0.7) 50%, transparent 51%),
+    radial-gradient(1.4px 1.4px at 38% 22%, rgba(255, 245, 220, 0.85) 50%, transparent 51%),
+    radial-gradient(1px 1px at 52% 82%, rgba(255, 245, 220, 0.6) 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 66% 36%, rgba(255, 245, 220, 0.8) 50%, transparent 51%),
+    radial-gradient(1px 1px at 79% 70%, rgba(255, 245, 220, 0.7) 50%, transparent 51%),
+    radial-gradient(1.4px 1.4px at 91% 16%, rgba(255, 245, 220, 0.9) 50%, transparent 51%),
+    radial-gradient(1px 1px at 15% 90%, rgba(255, 245, 220, 0.6) 50%, transparent 51%),
+    radial-gradient(1.1px 1.1px at 47% 46%, rgba(255, 245, 220, 0.5) 50%, transparent 51%),
+    radial-gradient(1px 1px at 86% 52%, rgba(255, 245, 220, 0.65) 50%, transparent 51%);
+  background-size: 420px 420px;
+}
+.ui2-stars-2 {
+  display: none; /* ชั้นที่สองมีเฉพาะระดับ full */
+}
+/* แสงออโรราลอย + เม็ดเกรน = ระดับ full เท่านั้น (lite วาดแสงเป็น radial-gradient บนพื้นของส่วนแทน) */
+.ui2-aurora,
+.ui2-grain {
+  display: none;
+}
+.ui2-aurora {
+  position: absolute;
+  z-index: -1;
+  inset-block: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ui2-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+}
+
+/* ป้ายหัวส่วน (เล็ก) + หัวข้อส่วน */
+.ui2-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--ui2-gold-ink);
+}
+.ui2-night .ui2-kicker {
+  color: var(--ui2-gold-solid);
+}
+.ui2-h2 {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.22;
+  font-size: 30px;
+  text-wrap: balance;
+}
+.ui2-lede {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ui2-ink-soft);
+}
+.ui2-night .ui2-lede {
+  color: var(--ui2-on-night-soft);
+}
+
+/* ── ปุ่ม ──────────────────────────────────────────────────────────────── */
+.ui2-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 26px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--ui2-button-text);
+  background: var(--ui2-button);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.55) inset, 0 14px 30px -14px rgba(23, 17, 12, 0.7);
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  cursor: pointer;
+}
+.ui2-btn:active {
+  transform: scale(0.97);
+}
+.ui2-btn:focus-visible,
+.ui2-btn-ghost:focus-visible,
+.ui2-topic:focus-visible,
+.ui2-pick-card:focus-visible,
+.ui2-note:focus-visible,
+.ui2-explore-link:focus-visible,
+.ui2-tile:focus-visible {
+  outline: 2px solid var(--ui2-gold-ink);
+  outline-offset: 3px;
+}
+.ui2-night .ui2-btn:focus-visible,
+.ui2-night .ui2-btn-ghost:focus-visible,
+.ui2-night .ui2-topic:focus-visible,
+.ui2-night .ui2-pick-card:focus-visible,
+.ui2-night .ui2-note:focus-visible,
+.ui2-night .ui2-tile:focus-visible {
+  outline-color: var(--ui2-gold-solid);
+}
+.ui2-btn-arrow {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: rotate(45deg);
+  margin-left: 2px;
+}
+/* ขอบทองหมุน — วงแหวน conic ใต้ปุ่ม (lite: หมุนเฉพาะตอนส่วนนั้นอยู่ในจอ · off: นิ่ง) */
+.ui2-btn-ring {
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ui2-btn-ring::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  background: conic-gradient(from 0deg, rgba(255, 217, 143, 0) 0deg, #FFD98F 60deg, rgba(255, 217, 143, 0) 130deg, rgba(255, 217, 143, 0) 360deg);
+  animation: ui2-spin 4.5s linear infinite;
+}
+.ui2-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 20px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--ui2-ink);
+  background: var(--ui2-glass-day-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-day), 0 1px 0 var(--ui2-glass-edge-day) inset;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.ui2-btn-ghost:active {
+  transform: scale(0.97);
+}
+.ui2-night .ui2-btn-ghost {
+  color: var(--ui2-on-night);
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+}
+
+/* ชิปกระจก (ป้ายเล็ก) */
+.ui2-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ui2-ink-soft);
+  background: var(--ui2-glass-day-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-day), 0 1px 0 var(--ui2-glass-edge-day) inset;
+}
+.ui2-chip .ui2-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--ui2-teal);
+  box-shadow: 0 0 0 3px rgba(79, 209, 193, 0.18);
+}
+.ui2-night .ui2-chip {
+  color: var(--ui2-on-night-soft);
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ส่วน 1 · หัวหน้า
+   ═════════════════════════════════════════════════════════════════════════ */
+/* ⚠️ ห้ามใส่ overflow-x: clip ที่ตัวส่วนนี้/ริบบิ้น — มันตัดพื้นเต็มจอ (::before 100vw) ทิ้งด้วย เห็นเป็นแถบสีอ่อนสองข้าง
+   ของที่ล้นขอบ (การ์ดลอย · ริบบิ้น 130vw) ถูกตัดโดย <main className="overflow-x-clip"> และ html อยู่แล้ว (INC-0067) */
+.ui2-hero {
+  padding-top: 24px;
+  padding-bottom: 40px;
+  text-align: center;
+}
+/* ขยายพื้นกลางวันขึ้นไปใต้หัวเว็บ — ไม่ให้เห็นรอยต่อกับพื้นเดิมของ body */
+.ui2-hero::before {
+  inset-block-start: -240px;
+}
+.ui2-hero-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 820px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  /* มือถือ: แถบว่างเหนือชิปให้การ์ดลอยสองใบบนเกาะมุม — ปุ่มหลักยังอยู่ใน 600px แรก (หัวข้อ 5.1) */
+  padding-top: 30px;
+}
+.ui2-h1 {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 34px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ui2-ink);
+  text-wrap: balance;
+}
+.ui2-hero-sub {
+  max-width: 560px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ui2-ink-soft);
+}
+.ui2-hero-ctas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.ui2-hero-ctas .ui2-btn {
+  width: min(100%, 320px);
+}
+.ui2-daily-btn {
+  max-width: min(100%, 320px);
+}
+.ui2-daily-btn .ui2-daily-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* นาฬิกาแบบชิปบรรทัดเดียว (มือถือ) */
+.ui2-clock-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ui2-ink-soft);
+}
+.ui2-clock-chip .ui2-num {
+  font-size: 14px;
+  color: var(--ui2-ink);
+  min-width: 7ch;
+  text-align: left;
+}
+/* นาฬิกาแบบกล่อง (แท็บเล็ต/คอม) — ซ่อนบนมือถือ */
+.ui2-clock {
+  display: none;
+}
+.ui2-clock-label {
+  font-size: 13px;
+  color: var(--ui2-ink-soft);
+}
+.ui2-clock-cells {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.ui2-clock-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ui2-clock-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background: var(--ui2-glass-day-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-day), 0 1px 0 var(--ui2-glass-edge-day) inset, 0 18px 34px -24px rgba(74, 52, 30, 0.6);
+}
+.ui2-clock-cell .ui2-num {
+  line-height: 1;
+}
+.ui2-clock-unit {
+  font-size: 11px;
+  color: var(--ui2-muted);
+  margin-top: 4px;
+}
+/* ถึงเที่ยงคืน (สคริปต์ตั้ง data-done) — ซ่อนตัวเลข เปลี่ยนเป็นลิงก์ "ไพ่ใบใหม่มาแล้ว" */
+.ui2-clock-done {
+  display: none;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+[data-ui2-clock][data-done] .ui2-clock-wait,
+[data-ui2-clock][data-done] .ui2-clock-cells {
+  display: none;
+}
+[data-ui2-clock][data-done] .ui2-clock-done {
+  display: inline;
+}
+.ui2-clock-sep {
+  font-family: var(--ui2-font-number);
+  color: var(--ui2-muted);
+}
+
+/* การ์ดลอยรอบหัวข้อ (ภาพประกอบล้วน · aria-hidden) */
+.ui2-floats {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  isolation: isolate;
+  pointer-events: none;
+}
+.ui2-fc {
+  position: absolute;
+  width: 54px;
+}
+/* มือถือ: 4 ใบเกาะมุม — สองใบบนอยู่ในแถบว่าง 88px เหนือชิป · สองใบล่างอยู่ข้างแถวนาฬิกา (ห้ามทับหัวข้อ/ปุ่ม) */
+.ui2-fc:nth-child(1) { left: -14px; top: -2px; rotate: -12deg; }
+.ui2-fc:nth-child(2) { right: -12px; top: 6px; rotate: 10deg; }
+.ui2-fc:nth-child(3) { left: -22px; bottom: -6px; rotate: 9deg; }
+.ui2-fc:nth-child(4) { right: -20px; bottom: 4px; rotate: -8deg; }
+.ui2-fc-card {
+  display: block;
+  aspect-ratio: 300 / 520;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--ui2-paper);
+  box-shadow: 0 0 0 1px rgba(30, 25, 20, 0.1), 0 20px 34px -18px rgba(60, 40, 20, 0.55);
+}
+.ui2-fc-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ui2-fc-tag {
+  display: none;
+}
+.ui2-fc-far {
+  opacity: 0.55;
+}
+/* ใบไกลเป็นฉากหลัง — ไม่มีป้ายชื่อ (ป้ายซ้อนใบหน้าแล้วอ่านไม่ออก) */
+.ui2-fc-far .ui2-fc-tag {
+  visibility: hidden;
+}
+/* มือถือ: 4 ใบเกาะมุม ห้ามทับหัวข้อ/ปุ่ม · ใบที่ 5 ขึ้นไปมีเฉพาะจอ ≥ 768 */
+.ui2-fc:nth-child(n + 5) {
+  display: none;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ส่วน 2 · ริบบิ้นไขว้
+   ═════════════════════════════════════════════════════════════════════════ */
+.ui2-ribbon {
+  padding-block: 28px;
+}
+.ui2-ribbon::before {
+  background: linear-gradient(180deg, var(--ui2-day) 0%, var(--ui2-day) 42%, var(--ui2-night) 58%, var(--ui2-night) 100%);
+}
+.ui2-strip {
+  position: relative;
+  left: 50%;
+  width: 130vw;
+  translate: -50% 0;
+  overflow: hidden;
+}
+.ui2-strip-cards {
+  rotate: -3deg;
+  padding-block: 10px;
+  background: var(--ui2-night-2);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.25);
+}
+.ui2-strip-text {
+  display: none; /* เส้นตัวหนังสือมีเฉพาะระดับ full (lite 1 เส้น · ui2-fx-full.css) */
+  rotate: 2.5deg;
+  margin-top: -18px;
+  padding-block: 12px;
+  background: var(--ui2-paper);
+  box-shadow: 0 0 0 1px rgba(30, 25, 20, 0.1);
+}
+.ui2-track {
+  display: flex;
+  width: max-content;
+  gap: 12px;
+  animation: ui2-marquee 60s linear infinite;
+}
+.ui2-strip-text .ui2-track {
+  gap: 0;
+  animation-duration: 48s;
+  animation-direction: reverse;
+}
+.ui2-track-card {
+  flex: none;
+  width: 64px;
+  aspect-ratio: 300 / 520;
+  border-radius: 7px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.3);
+}
+.ui2-track-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ui2-track-word {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  padding-inline: 18px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 22px;
+  color: var(--ui2-ink);
+  white-space: nowrap;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ส่วน 3 · ใจคุณเลือกเอง (เปิดไพ่ด่วน)
+   ═════════════════════════════════════════════════════════════════════════ */
+.ui2-pick {
+  padding-top: 40px;
+}
+.ui2-pick-head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.ui2-window {
+  position: relative;
+  border-radius: var(--ui2-radius-xl);
+  padding: 16px;
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset, 0 40px 80px -40px rgba(0, 0, 0, 0.8);
+}
+.ui2-topics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.ui2-topic {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 64px;
+  padding: 8px 4px;
+  border-radius: 18px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--ui2-on-night-dim);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.ui2-topic:active {
+  transform: scale(0.97);
+}
+.ui2-topic-num {
+  font-family: var(--ui2-font-number);
+  font-size: 12px;
+  color: var(--ui2-gold-solid);
+}
+.ui2-topic[aria-pressed="true"] {
+  color: var(--ui2-on-night);
+  background: rgba(255, 217, 143, 0.12);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.6);
+}
+/* ผ้าปูไพ่ */
+.ui2-cloth {
+  position: relative;
+  margin-top: 14px;
+  height: 270px;
+  border-radius: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-inline: 8px;
+  background:
+    radial-gradient(70% 70% at 50% 40%, rgba(255, 217, 143, 0.12) 0%, rgba(255, 217, 143, 0) 70%),
+    linear-gradient(180deg, #1D1622 0%, #120E16 100%);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.18) inset;
+}
+.ui2-pick-card {
+  position: relative;
+  flex: 0 1 92px;
+  min-width: 52px;
+  aspect-ratio: 300 / 520;
+  border-radius: 10px;
+  perspective: 900px;
+  cursor: pointer;
+  translate: 0 0;
+  transition: translate var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out);
+}
+.ui2-pick-card:nth-child(2n) {
+  rotate: 2deg;
+}
+.ui2-pick-card:nth-child(2n + 1) {
+  rotate: -2deg;
+}
+.ui2-pick-card[data-state="lifted"],
+.ui2-pick-card[data-state="revealed"] {
+  translate: 0 -14px;
+}
+.ui2-pick-card[data-state="dim"] {
+  opacity: 0.35;
+}
+.ui2-pick-card:disabled {
+  cursor: default;
+}
+.ui2-flip {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 1s cubic-bezier(0.2, 0.85, 0.2, 1);
+}
+.ui2-pick-card[data-state="revealed"] .ui2-flip {
+  transform: rotateY(180deg);
+}
+.ui2-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  isolation: isolate;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.ui2-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ui2-face-front {
+  transform: rotateY(180deg);
+  background: var(--ui2-paper);
+}
+.ui2-face-front.is-reversed img {
+  rotate: 180deg;
+}
+/* หลังไพ่ — วาดด้วย CSS (ไม่ใช่ภาพไพ่ปลอม) */
+.ui2-face-back {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 217, 143, 0.35) 0 9%, rgba(255, 217, 143, 0) 10%),
+    repeating-linear-gradient(45deg, rgba(255, 217, 143, 0.16) 0 2px, rgba(255, 217, 143, 0) 2px 10px),
+    repeating-linear-gradient(-45deg, rgba(255, 217, 143, 0.16) 0 2px, rgba(255, 217, 143, 0) 2px 10px),
+    linear-gradient(160deg, #2A1F2E 0%, #17111B 100%);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.55) inset, 0 0 0 4px rgba(23, 17, 27, 1) inset, 0 0 0 5px rgba(255, 217, 143, 0.3) inset, 0 16px 30px -14px rgba(0, 0, 0, 0.9);
+}
+/* วงแสงทองเต้นระหว่างรอเซิร์ฟเวอร์ */
+.ui2-pulse {
+  position: absolute;
+  inset: -10%;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle, rgba(255, 217, 143, 0.55) 0%, rgba(255, 217, 143, 0) 65%);
+}
+.ui2-pick-card[data-state="lifted"] .ui2-pulse {
+  animation: ui2-pulse 1.4s ease-out infinite;
+}
+.ui2-pick-hint {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--ui2-on-night-soft);
+  min-height: 24px;
+}
+.ui2-lock-chip {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+.ui2-lock-chip .ui2-chip {
+  font-size: 12px;
+  color: var(--ui2-teal-text);
+}
+.ui2-lock-chip code {
+  font-family: var(--ui2-font-number);
+  letter-spacing: 0.02em;
+}
+/* ผลหลังพลิก */
+.ui2-result {
+  margin-top: 14px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+  text-align: center;
+}
+.ui2-result-name {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1.3;
+}
+.ui2-result-sub {
+  font-size: 13px;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-result-advice {
+  margin-top: 8px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ui2-on-night);
+}
+.ui2-result-actions {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.ui2-error {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  color: var(--ui2-on-night);
+  background: rgba(166, 57, 44, 0.28);
+  box-shadow: 0 0 0 1px rgba(255, 140, 120, 0.4);
+  text-align: center;
+}
+.ui2-under {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.ui2-deeper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 14px;
+  font-size: 14px;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-deeper a {
+  color: var(--ui2-on-night);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 217, 143, 0.5);
+  text-underline-offset: 4px;
+  padding-block: 10px;
+}
+.ui2-deeper a:hover {
+  text-decoration-color: var(--ui2-gold-solid);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ส่วน 4 · กระดาษโน้ตคำถาม
+   ═════════════════════════════════════════════════════════════════════════ */
+.ui2-notes-head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.ui2-notes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.ui2-note {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 132px;
+  padding: 22px 14px 14px;
+  border-radius: 6px 6px 18px 6px;
+  color: var(--ui2-ink);
+  background: var(--note, var(--ui2-note-1));
+  box-shadow: 0 18px 30px -18px rgba(0, 0, 0, 0.75);
+  rotate: var(--tilt, -1.5deg);
+  transition: rotate var(--dur-base) var(--ease-out), translate var(--dur-base) var(--ease-out);
+}
+.ui2-note:active {
+  rotate: 0deg;
+  translate: 0 -3px;
+}
+.ui2-note-q {
+  font-family: var(--ui2-font-note);
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 1.35;
+}
+.ui2-note-spread {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ui2-ink-soft);
+}
+.ui2-pin {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 35%, #FFF5DC 0%, #FFD98F 40%, #B8691C 100%);
+  box-shadow: 0 0 10px rgba(255, 217, 143, 0.7), 0 2px 3px rgba(0, 0, 0, 0.35);
+}
+.ui2-note-desk-only {
+  display: none;
+}
+.ui2-notes-more {
+  margin-top: 26px;
+  text-align: center;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ส่วน 5 · แผ่นขาว "เราให้คุณตรวจได้"
+   ═════════════════════════════════════════════════════════════════════════ */
+/* ส่วนนี้เป็นพื้นมืด (มุมโค้งของแผ่นขาวจึงเห็นพื้นมืดต่อเนื่อง) แล้วแผ่นขาวดึงขึ้นทับส่วนก่อนหน้า
+   ⚠️ ดึงขึ้นได้แค่ในระยะ padding ล่างของส่วนกระดาษโน้ต — ห้ามบังโน้ตแถวล่าง (หัวข้อ 6.5) */
+.ui2-verify {
+  padding-top: 0;
+}
+.ui2-sheet {
+  z-index: 1;
+  margin-top: -36px;
+  padding: 44px 18px 48px;
+  border-radius: 40px;
+  color: var(--ui2-ink);
+  background: var(--ui2-paper);
+  box-shadow: 0 -24px 60px -30px rgba(0, 0, 0, 0.6);
+}
+.ui2-vs {
+  text-align: center;
+}
+.ui2-vs-a {
+  display: block;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 30px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ui2-grey-head);
+}
+.ui2-vs-b {
+  display: block;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 30px;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--ui2-ink);
+}
+.ui2-underline {
+  display: block;
+  width: min(260px, 70%);
+  height: 14px;
+  margin: 2px auto 0;
+  overflow: visible;
+}
+.ui2-underline path {
+  fill: none;
+  stroke: #B8691C;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 420;
+  stroke-dashoffset: 0;
+}
+.ui2-steps {
+  position: relative;
+  margin-top: 34px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  counter-reset: none;
+}
+.ui2-step {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: 22px;
+  background: var(--ui2-day);
+  box-shadow: 0 0 0 1px var(--ui2-line-day);
+}
+.ui2-step-num {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  font-size: 18px;
+  color: var(--ui2-button-text);
+  background: var(--ui2-button);
+}
+.ui2-step-title,
+.ui2-step-desc {
+  display: block;
+}
+.ui2-step-title {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 1.35;
+}
+.ui2-step-desc {
+  margin-top: 2px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ui2-ink-soft);
+}
+.ui2-sheet-note {
+  margin: 22px auto 0;
+  max-width: 640px;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ui2-ink-soft);
+}
+.ui2-heritage {
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid var(--ui2-line-day);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 22px;
+  align-items: center;
+  text-align: center;
+}
+.ui2-1909 {
+  font-family: var(--ui2-font-number);
+  font-weight: 500;
+  font-size: 96px;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+.ui2-trio {
+  display: flex;
+  justify-content: center;
+  perspective: 900px;
+}
+.ui2-trio span {
+  display: block;
+  width: 76px;
+  aspect-ratio: 300 / 520;
+  border-radius: 9px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(30, 25, 20, 0.12), 0 22px 30px -18px rgba(60, 40, 20, 0.6);
+  background: var(--ui2-paper);
+}
+.ui2-trio span:nth-child(1) {
+  transform: rotateY(18deg) rotate(-8deg) translateX(14px);
+}
+.ui2-trio span:nth-child(2) {
+  position: relative;
+  z-index: 1;
+  transform: translateY(-8px);
+}
+.ui2-trio span:nth-child(3) {
+  transform: rotateY(-18deg) rotate(8deg) translateX(-14px);
+}
+.ui2-trio img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ui2-heritage-title {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1.3;
+}
+.ui2-heritage-desc {
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ui2-ink-soft);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ส่วน 6 · กล่องหลายขนาด (bento)
+   ═════════════════════════════════════════════════════════════════════════ */
+.ui2-bento-head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 26px;
+}
+.ui2-bento {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+.ui2-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px;
+  border-radius: 30px;
+  color: var(--ui2-on-night);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.025) 100%), var(--ui2-night-2);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+  overflow: hidden;
+}
+a.ui2-tile {
+  transition: translate var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+a.ui2-tile:active {
+  translate: 0 -2px;
+}
+.ui2-tile-title {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.3;
+}
+.ui2-tile-title b {
+  font-weight: 500;
+  color: var(--ui2-gold-solid);
+}
+.ui2-tile-desc {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-tile-go {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--ui2-gold-solid);
+}
+.ui2-tile-cards {
+  display: flex;
+  gap: 8px;
+}
+.ui2-tile-cards span {
+  width: 54px;
+  aspect-ratio: 300 / 520;
+  border-radius: 7px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.3);
+}
+.ui2-tile-cards img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ui2-tile-quote {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ui2-on-night);
+}
+.ui2-why {
+  align-self: flex-start;
+  color: var(--ui2-teal-text);
+}
+.ui2-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ui2-chips span {
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ui2-on-night-soft);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+}
+/* ไพ่คว่ำลอยในกล่องพิธีเช้า — หลังไพ่วาดด้วย CSS (ไม่ใช่ภาพไพ่ใบใด) */
+.ui2-tile-back {
+  position: absolute;
+  right: 22px;
+  bottom: 64px;
+  width: 64px;
+  aspect-ratio: 300 / 520;
+  border-radius: 9px;
+  rotate: 8deg;
+  pointer-events: none;
+}
+.ui2-morning-glow {
+  position: absolute;
+  right: -40px;
+  bottom: -60px;
+  width: 220px;
+  height: 220px;
+  border-radius: 999px;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(79, 209, 193, 0.28) 0%, rgba(79, 209, 193, 0) 70%);
+}
+/* แม่หมอตัวจริงที่ว่างเร็วสุด (เติมโดย astro/scripts/ui2-home.ts) */
+.ui2-readers {
+  display: grid;
+  gap: 8px;
+}
+.ui2-readers[hidden] {
+  display: none;
+}
+.ui2-reader-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 8px 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+  transition: box-shadow var(--dur-fast) var(--ease-out);
+}
+.ui2-reader-avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  overflow: hidden;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 18px;
+  color: var(--ui2-night);
+  background: var(--ui2-gold-solid);
+}
+.ui2-reader-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ui2-reader-body {
+  display: grid;
+  min-width: 0;
+}
+.ui2-reader-name {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 16px;
+  color: var(--ui2-on-night);
+}
+.ui2-reader-meta {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ui2-on-night-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui2-reader-meta.is-live {
+  color: var(--ui2-teal-text);
+}
+.ui2-journal-art {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+}
+.ui2-journal-art i {
+  display: block;
+  height: 6px;
+  border-radius: 99px;
+  background: rgba(246, 238, 226, 0.16);
+}
+.ui2-journal-art i:nth-child(1) { width: 62%; background: rgba(255, 217, 143, 0.45); }
+.ui2-journal-art i:nth-child(2) { width: 88%; }
+.ui2-journal-art i:nth-child(3) { width: 74%; }
+.ui2-journal-art i:nth-child(4) { width: 40%; }
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ส่วน 7 · สำรวจต่อ + FAQ
+   ═════════════════════════════════════════════════════════════════════════ */
+.ui2-explore {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+.ui2-explore-list {
+  border-top: 1px solid var(--ui2-line-day);
+}
+.ui2-explore-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 2px;
+  border-bottom: 1px solid var(--ui2-line-day);
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.3;
+  color: var(--ui2-ink);
+}
+.ui2-explore-link small {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-sarabun);
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--ui2-ink-soft);
+}
+.ui2-arrow-ne {
+  flex: none;
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px var(--ui2-line-day);
+  transition: background-color var(--dur-fast) var(--ease-out), rotate var(--dur-base) var(--ease-out);
+}
+.ui2-arrow-ne::before {
+  content: "";
+  position: absolute;
+  left: 13px;
+  top: 11px;
+  width: 9px;
+  height: 9px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+}
+/* ก้านลูกศรเฉียง */
+.ui2-arrow-ne::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 16px;
+  width: 13px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  rotate: -45deg;
+}
+.ui2-explore-link:active .ui2-arrow-ne {
+  rotate: 45deg;
+}
+.ui2-more-groups {
+  margin-top: 18px;
+  display: grid;
+  gap: 8px;
+}
+.ui2-more {
+  border-radius: 18px;
+  background: var(--ui2-glass-day-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-day);
+}
+.ui2-more > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 48px;
+  padding: 10px 16px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+}
+.ui2-more > summary::-webkit-details-marker {
+  display: none;
+}
+.ui2-more-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  padding: 0 14px 14px;
+}
+.ui2-more-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui2-ink-soft);
+  box-shadow: 0 0 0 1px var(--ui2-line-day);
+}
+.ui2-more-links a:hover {
+  color: var(--ui2-ink);
+}
+.ui2-howto {
+  display: grid;
+  gap: 10px;
+  padding: 0 18px 16px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ui2-ink-soft);
+}
+.ui2-howto strong {
+  color: var(--ui2-ink);
+  font-weight: 600;
+}
+/* ผังของฉัน (ผังที่ออกแบบเอง) ใต้ส่วนเปิดไพ่ — แผงสว่างบนพื้นมืด ให้คอมโพเนนต์เดิม (ธีมสว่าง) อ่านออก */
+.ui2-myspreads:not(:empty) {
+  position: relative;
+  width: 100%;
+  max-width: 760px;
+  margin: 6px auto 0;
+  padding: 14px 16px;
+  border-radius: 22px;
+  background: var(--ui2-paper);
+  box-shadow: 0 0 0 1px var(--ui2-line-day);
+}
+/* FAQ — แผงกระจก แตะแล้วไอคอน + หมุนเป็น × */
+.ui2-faq-list {
+  display: grid;
+  gap: 10px;
+}
+.ui2-faq {
+  border-radius: 20px;
+  background: var(--ui2-glass-day-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-day), 0 1px 0 var(--ui2-glass-edge-day) inset;
+}
+.ui2-faq > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 56px;
+  padding: 14px 18px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.ui2-faq > summary::-webkit-details-marker {
+  display: none;
+}
+.ui2-plus {
+  flex: none;
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px var(--ui2-line-day);
+  transition: rotate var(--dur-base) var(--ease-out);
+}
+.ui2-plus::before,
+.ui2-plus::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 2px;
+  margin: -1px 0 0 -6px;
+  border-radius: 2px;
+  background: currentColor;
+}
+.ui2-plus::after {
+  rotate: 90deg;
+}
+details[open] > summary .ui2-plus {
+  rotate: 45deg;
+}
+.ui2-faq-a {
+  padding: 0 18px 18px;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ui2-ink-soft);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ส่วน 8 · ปิดท้าย
+   ═════════════════════════════════════════════════════════════════════════ */
+/* พื้นรอบการ์ดมืดเป็นกลางวันต่อจากส่วน "สำรวจต่อ" — ไม่ให้เห็นพื้นเดิมของ body เป็นแถบคนละสี */
+.ui2-closing {
+  padding-block: 24px 56px;
+  --ui2-sec-bg: var(--ui2-day);
+}
+.ui2-closing-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 56px 18px;
+  border-radius: 40px;
+  text-align: center;
+  color: var(--ui2-on-night);
+  background: var(--ui2-night);
+}
+/* ภาพไพ่จางสำเร็จรูป 1 ไฟล์ (ไม่ใช้ filter: blur กับภาพหลายใบ แม้ระดับ full — หัวข้อ 3.4) */
+.ui2-closing-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  background-image: url(/ui2/closing-cards.webp);
+  background-size: cover;
+  background-position: center;
+  opacity: 0.55;
+}
+.ui2-closing-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: radial-gradient(60% 60% at 50% 50%, rgba(12, 10, 15, 0.55) 0%, rgba(12, 10, 15, 0.94) 100%);
+}
+.ui2-ring {
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 50%;
+  width: 640px;
+  height: 640px;
+  margin: -320px 0 0 -320px;
+  opacity: 0.4;
+  pointer-events: none;
+  color: var(--ui2-gold-solid);
+  animation: ui2-spin 140s linear infinite;
+}
+.ui2-closing-title {
+  margin-top: 16px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 28px;
+  line-height: 1.3;
+}
+.ui2-closing .ui2-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+.ui2-closing .ui2-clock-label {
+  color: var(--ui2-on-night-soft);
+}
+.ui2-closing .ui2-clock-cell {
+  width: 84px;
+  height: 92px;
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+}
+.ui2-closing .ui2-clock-cell .ui2-num {
+  font-size: 44px;
+}
+.ui2-closing .ui2-clock-unit {
+  color: var(--ui2-on-night-soft);
+}
+.ui2-closing .ui2-clock-sep {
+  color: var(--ui2-on-night-soft);
+}
+.ui2-closing-ctas {
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   แถบปุ่มติดล่างจอ (มือถือ) — หัวข้อ 5.2
+   ═════════════════════════════════════════════════════════════════════════ */
+.ui2-sticky {
+  position: fixed;
+  z-index: var(--z-sticky);
+  left: 12px;
+  /* เว้นฝั่งขวาให้ปุ่มแชทลอยมุมขวาล่าง — ห้ามทับ */
+  right: 84px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  justify-content: flex-start;
+  pointer-events: none;
+  opacity: 0;
+  translate: 0 16px;
+  transition: opacity var(--dur-base) var(--ease-out), translate var(--dur-base) var(--ease-out);
+}
+.ui2-sticky[data-show] {
+  opacity: 1;
+  translate: 0 0;
+}
+.ui2-sticky[data-show] .ui2-btn {
+  pointer-events: auto;
+}
+.ui2-sticky .ui2-btn {
+  min-height: 50px;
+  width: 100%;
+  max-width: 320px;
+}
+@media (min-width: 768px) {
+  .ui2-sticky {
+    display: none;
+  }
+}
+/* แถบยินยอมคุกกี้กำลังขึ้น = ไม่วางแถบซ้อนกัน */
+html[data-consent-ask] .ui2-sticky {
+  display: none;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   แท็บเล็ต / iPad แนวตั้ง (768–1023) และคอม (หัวข้อ 4)
+   ═════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 640px) {
+  .ui2-h2 {
+    font-size: 38px;
+  }
+  .ui2-notes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 768px) {
+  .ui2-sec {
+    padding-block: 88px;
+  }
+  /* แท็บเล็ตแนวตั้ง: 6 ใบ (กว้าง 96–124px) ชิดขอบซ้าย-ขวา ไม่ทับหัวข้อ */
+  /* ข้อความหัวหน้าเว้นขอบซ้าย-ขวาให้การ์ดลอย (ห้ามทับหัวข้อ) */
+  .ui2-hero-inner { padding-inline: 100px; padding-top: 0; }
+  .ui2-fc { width: 96px; }
+  .ui2-fc:nth-child(1) { left: -10px; top: 24px; rotate: -10deg; }
+  .ui2-fc:nth-child(2) { right: -8px; top: 36px; rotate: 9deg; }
+  .ui2-fc:nth-child(3) { left: -4px; top: auto; bottom: 28px; rotate: 7deg; }
+  .ui2-fc:nth-child(4) { right: -2px; top: auto; bottom: 40px; rotate: -7deg; }
+  .ui2-fc:nth-child(5) { left: -28px; top: 236px; rotate: 4deg; }
+  .ui2-fc:nth-child(6) { right: -26px; top: 252px; rotate: -5deg; }
+  .ui2-hero {
+    padding-top: 56px;
+    padding-bottom: 72px;
+    /* แท็บเล็ตแนวตั้ง: สูงพอให้การ์ดลอย 3 ใบต่อข้าง (กว้าง 96px + ป้าย) ไม่ทับกัน */
+    min-height: 780px;
+  }
+  .ui2-h1 {
+    font-size: 52px;
+    line-height: 1.18;
+  }
+  .ui2-hero-sub {
+    font-size: 17px;
+  }
+  .ui2-hero-ctas {
+    flex-direction: row;
+    justify-content: center;
+  }
+  .ui2-hero-ctas .ui2-btn {
+    width: auto;
+  }
+  .ui2-clock-chip {
+    display: none;
+  }
+  .ui2-clock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .ui2-clock-cell {
+    width: 88px;
+    height: 88px;
+  }
+  .ui2-clock-cell .ui2-num {
+    font-size: 40px;
+  }
+  .ui2-fc:nth-child(n + 5) {
+    display: block;
+  }
+  .ui2-fc:nth-child(n + 7) {
+    display: none; /* แท็บเล็ตแนวตั้ง 6 ใบ */
+  }
+  .ui2-fc-tag {
+    display: block;
+    margin-top: 8px;
+    text-align: center;
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--ui2-ink-soft);
+  }
+  .ui2-fc-tag b {
+    display: block;
+    font-family: var(--ui2-font-display);
+    font-weight: 500;
+    font-size: 12px;
+    color: var(--ui2-ink);
+  }
+  .ui2-track-card {
+    width: 74px;
+  }
+  .ui2-window {
+    padding: 22px;
+  }
+  .ui2-cloth {
+    height: 320px;
+    gap: 16px;
+  }
+  .ui2-topic {
+    font-size: 16px;
+  }
+  .ui2-vs-a,
+  .ui2-vs-b {
+    font-size: 44px;
+  }
+  .ui2-steps {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .ui2-step {
+    flex-direction: column;
+  }
+  .ui2-sheet {
+    padding: 64px 40px;
+    border-radius: 44px;
+    margin-top: -56px;
+  }
+  .ui2-verify {
+    padding-top: 0;
+  }
+  .ui2-heritage {
+    grid-template-columns: auto auto 1fr;
+    text-align: left;
+    gap: 32px;
+  }
+  .ui2-1909 {
+    font-size: 140px;
+  }
+  .ui2-bento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ui2-tile-wide,
+  .ui2-tile-wide-md {
+    grid-column: span 2;
+  }
+  .ui2-closing-card {
+    padding: 80px 40px;
+  }
+  .ui2-closing-title {
+    font-size: 40px;
+  }
+  .ui2-closing .ui2-clock-cell {
+    width: 124px;
+    height: 124px;
+  }
+  .ui2-closing .ui2-clock-cell .ui2-num {
+    font-size: 68px;
+  }
+  .ui2-closing-ctas {
+    flex-direction: row;
+    justify-content: center;
+  }
+  .ui2-ring {
+    width: 900px;
+    height: 900px;
+    margin: -450px 0 0 -450px;
+  }
+}
+@media (min-width: 1024px) {
+  .ui2-h1 {
+    font-size: 68px;
+  }
+  .ui2-hero {
+    min-height: 740px;
+  }
+  .ui2-fc:nth-child(n + 7) {
+    display: block; /* คอม/iPad แนวนอน ครบ 8 ใบ */
+  }
+  .ui2-hero-inner { max-width: 760px; padding-inline: 0; }
+  .ui2-fc { width: 112px; }
+  .ui2-fc:nth-child(1) { left: 0; top: 24px; rotate: -9deg; }
+  .ui2-fc:nth-child(2) { right: 0; top: 36px; rotate: 8deg; }
+  .ui2-fc:nth-child(3) { left: 6px; top: auto; bottom: 24px; rotate: 6deg; }
+  .ui2-fc:nth-child(4) { right: 8px; top: auto; bottom: 36px; rotate: -6deg; }
+  .ui2-fc:nth-child(5) { left: 54px; top: 262px; rotate: 4deg; width: 92px; }
+  .ui2-fc:nth-child(6) { right: 50px; top: 280px; rotate: -5deg; width: 92px; }
+  .ui2-fc:nth-child(7) { left: 112px; top: 132px; rotate: -3deg; width: 70px; z-index: -1; }
+  .ui2-fc:nth-child(8) { right: 118px; top: 150px; rotate: 5deg; width: 72px; z-index: -1; }
+  .ui2-clock-cell {
+    width: 96px;
+    height: 96px;
+  }
+  .ui2-clock-cell .ui2-num {
+    font-size: 50px;
+  }
+  /* หัวข้อชิดบน (ไม่ใช่กึ่งกลาง) — ตอนแผงผลโผล่ใต้ผ้าปู รายการหัวข้อต้องไม่กระโดดลง */
+  .ui2-pick-grid {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: 32px;
+    align-items: start;
+  }
+  .ui2-pick-grid .ui2-topics {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding-top: 36px;
+  }
+  .ui2-pick-grid .ui2-topic {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: baseline;
+    gap: 14px;
+    min-height: 0;
+    padding: 6px 4px;
+    font-size: 28px;
+    text-align: left;
+    color: rgba(246, 238, 226, 0.5);
+    background: transparent;
+    box-shadow: none;
+  }
+  .ui2-pick-grid .ui2-topic[aria-pressed="true"] {
+    font-size: 46px;
+    color: var(--ui2-on-night);
+    background: transparent;
+    box-shadow: none;
+  }
+  .ui2-pick-grid .ui2-topic-num {
+    font-size: 16px;
+  }
+  .ui2-pick-grid .ui2-cloth {
+    margin-top: 0;
+  }
+  /* คอม: 7 ใบ = แถวละ 4 แล้ว 3 จัดกลาง (ไม่ปล่อยช่องว่างท้ายแถว) */
+  .ui2-notes {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 26px 22px;
+  }
+  .ui2-notes > .ui2-note {
+    flex: 0 0 calc((100% - 66px) / 4);
+  }
+  .ui2-note-desk-only {
+    display: flex;
+  }
+  .ui2-bento {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: minmax(220px, auto);
+  }
+  .ui2-tile-tall {
+    grid-row: span 2;
+  }
+  .ui2-tile-wide-md {
+    grid-column: auto;
+  }
+  .ui2-tile-wide {
+    grid-column: span 2;
+  }
+  .ui2-explore {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
+  }
+  .ui2-explore-link {
+    font-size: 26px;
+  }
+  .ui2-1909 {
+    font-size: 190px;
+  }
+}
+@media (min-width: 1280px) {
+  .ui2-h1 {
+    font-size: 68px;
+  }
+}
+
+/* จอที่มี hover จริง (เมาส์/แทร็กแพด) — มือถือ/iPad ใช้ :active แทน (หัวข้อ 4) */
+@media (hover: hover) {
+  .ui2-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.75) inset, 0 20px 36px -16px rgba(23, 17, 12, 0.75);
+  }
+  .ui2-topic:hover {
+    color: var(--ui2-on-night);
+  }
+  .ui2-pick-card:not(:disabled):hover {
+    translate: 0 -8px;
+  }
+  .ui2-note:hover {
+    rotate: 0deg;
+    translate: 0 -4px;
+  }
+  .ui2-reader-link:hover {
+    box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.5);
+  }
+  a.ui2-tile:hover {
+    translate: 0 -4px;
+    box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.4), 0 1px 0 var(--ui2-glass-edge-night) inset;
+  }
+  .ui2-explore-link:hover .ui2-arrow-ne {
+    rotate: 45deg;
+    background: var(--ui2-ink);
+    color: var(--ui2-paper);
+  }
+}
+
+/* ── คีย์เฟรม (แตะแค่ transform / opacity / translate / scale) ─────────────── */
+@keyframes ui2-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(90px, 50px) scale(1.18); }
+}
+@keyframes ui2-bob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -16px; }
+}
+@keyframes ui2-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes ui2-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes ui2-pulse {
+  0% { transform: scale(0.55); opacity: 0.95; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+@keyframes ui2-rise {
+  from { opacity: 0; translate: 0 48px; scale: 0.96; }
+}
+@keyframes ui2-draw {
+  from { stroke-dashoffset: 420; }
+}
+@keyframes ui2-fade-in {
+  from { opacity: 0; }
+}
+
+/* เลื่อนแล้วส่วนลอยขึ้น — ทำงานบน compositor (lite ระยะสั้นกว่า full) · ไม่รองรับ = เห็นของนิ่งครบ */
+@supports (animation-timeline: view()) {
+  .ui2-reveal {
+    animation: ui2-rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 18%;
+  }
+  .ui2-underline path {
+    animation: ui2-draw linear both;
+    animation-timeline: view();
+    animation-range: entry 10% cover 40%;
+  }
+}
+
+/* หยุดอนิเมชันวนเมื่อส่วนนั้นพ้นจอ — `astro/scripts/ui2-home.ts` สลับ data-inview ด้วย IntersectionObserver ตัวเดียว
+   ⚠️ หยุดเฉพาะของที่วน (`.ui2-loop`) — ห้ามกวาดทุกลูก: `.ui2-reveal` เป็นอนิเมชันผูกการเลื่อน (view timeline)
+      ถ้าโดนหยุดตอนไม่มี JS (ไม่มีใครตั้ง data-inview) มันจะค้างที่เฟรมแรก = เนื้อหาจางหายทั้งส่วน
+   ไม่มี JS = ไม่มี data-inview ➔ ของวนทั้งหมดนิ่ง (ตรงกับหน้าตา lite แบบนิ่ง) */
+[data-anim-section]:not([data-inview]) .ui2-loop,
+[data-anim-section]:not([data-inview]) .ui2-loop::before,
+[data-anim-section]:not([data-inview]) .ui2-loop::after {
+  animation-play-state: paused;
+}
+
+/* ── ระดับ off (ลดการเคลื่อนไหว) — นิ่งทั้งหน้า เห็นของครบ ───────────────── */
+[data-fx="off"] .ui2-sec *,
+[data-fx="off"] .ui2-sec *::before,
+[data-fx="off"] .ui2-sec *::after,
+[data-fx="off"] .ui2-sticky {
+  animation: none !important;
+  transition: none !important;
+}
+/* off: พลิกไพ่แบบจางแทนหมุน */
+[data-fx="off"] .ui2-flip {
+  transform: none !important;
+}
+[data-fx="off"] .ui2-face-front {
+  transform: none;
+  opacity: 0;
+}
+[data-fx="off"] .ui2-pick-card[data-state="revealed"] .ui2-face-front {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui2-sec *,
+  .ui2-sec *::before,
+  .ui2-sec *::after {
+    animation: none !important;
+  }
+}

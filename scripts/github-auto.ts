@@ -350,6 +350,12 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   },
   {
     label:
+      "🎨 SeerTarot UI 2.0 — ของหนัก (เบลอ · blend · mask) อยู่หลังระดับ full + จอ ≥ 768 เท่านั้น · ของวนหยุดนอกจอได้ · ทุกหน้าตั้ง data-fx ก่อนเฟรมแรก",
+    cmd: TSX,
+    args: ["scripts/qa/test-ui2-fx.ts"],
+  },
+  {
+    label:
       "♿ a11y ระดับวิกฤตทุกหน้าที่เรนเดอร์จริง ทั้งสองเครื่องมือ (สายด่วนอ่านออกบนพื้นมืด · เส้นขอบตัวควบคุม 3:1 · ข้อความผิดพลาดถูกประกาศ · ลิงก์ในรายการแยกจากกันได้ · h1 เดี่ยว · ลำดับหัวข้อ)",
     cmd: TSX,
     args: ["scripts/qa/test-a11y-critical.ts"],

@@ -19,9 +19,10 @@ import type { ReadingBasis } from "@/lib/tarot/explain-types";
 import type { Category } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
-import { SpreadCardSelector } from "@/components/spread/SpreadCardSelector";
-import { DailyCardStrip } from "@/components/reading/DailyCardStrip";
-import { QuickFortunePicker, type QuickTopic } from "@/components/reading/QuickFortunePicker";
+import type { QuickTopic } from "@/components/reading/quick-topics";
+import { Ui2Hero } from "@/components/home2/Ui2Hero";
+import { Ui2Ribbon } from "@/components/home2/Ui2Ribbon";
+import { Ui2PickSection, type Ui2Draw } from "@/components/home2/Ui2PickSection";
 import type { RitualStep } from "@/components/home/ritual-step";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { soundManager } from "@/lib/utils/audio";
@@ -40,8 +41,6 @@ import { trackEvent } from "@/lib/analytics";
 import {
   DAILY_LIMIT,
   GUEST_BLOCK_REASON,
-  READINGS_EN,
-  REQUIRE_SIGNUP_TO_READ,
   describeEntitlement,
   type UpgradeReason,
   isMasterPersona,
@@ -195,12 +194,6 @@ function isReturnVisit(): boolean {
     return false;
   }
 }
-
-/**
- * ✦ ไพ่ในพัดพื้นหลังหัวหน้าแรก (ภาพประกอบ) — กลางคือดวงอาทิตย์ · ซ้ายขวาคืนกับวัน รักกับความหวัง
- * จอใหญ่ 7 ใบ · มือถือซ่อนใบริมสุดสองใบ เหลือ 5 (`.hero-fan-card--edge` ใน globals.css)
- */
-const HERO_FAN_CARDS = ["major-02", "major-18", "major-06", "major-19", "major-17", "major-21", "major-01"] as const;
 
 export default function TarotFlow({
   seoContent,
@@ -1065,165 +1058,195 @@ export default function TarotFlow({
     await executeStartSession();
   };
 
-  // ทางลัดทำนายด่วน 1 ใบ (ข้ามริชวลสับไพ่และพัดเลือกไพ่ จั่วอัตโนมัติด้วย Provably-Fair)
-  const handleQuickFortuneSelect = async (
-    topic: QuickTopic,
-    userNickname: string,
-    userQuestion?: string
-  ) => {
+  /*
+   * ⚡ เปิดไพ่ด่วน 1 ใบ แบบ UI 2.0 "ใจคุณเลือกเอง" (แผน UI_2_0 หัวข้อ 6.3) — สองจังหวะ
+   *   1. `drawQuickCard` — ผู้ใช้แตะไพ่คว่ำใบหนึ่งบนผ้าปู (= ตำแหน่งในสำรับ) ➔ /start (ได้ commitment)
+   *      ➔ /shuffle พร้อม `pickedIndices: [ตำแหน่งนั้น]` ➔ ไพ่คือ `drawn[0]` จากเซิร์ฟเวอร์เท่านั้น (กฎเหล็ก 14)
+   *      ยังไม่สตรีมคำทำนาย = ยังไม่หักโควตา (หักตอน /read จบ) · ข้อมูลไม่ครบ = โยน error ให้ "โหลดใหม่อีกครั้ง"
+   *   2. `continueQuickReading` — ผู้ใช้กด "ให้แม่หมอ AI อ่านต่อ" ➔ ไพ่ใบที่ผู้ใช้พลิกเองแล้ว (กฎเหล็ก 4)
+   *      เข้าท่อคำทำนายด่วนเดิม (`QuickChatResult`) พร้อมคำถามตั้งต้นของหัวข้อ
+   */
+  const quickDrawRef = useRef<{
+    readingId: string;
+    token: string;
+    cards: DrawnSlotCard[];
+    question: string;
+    category: Category;
+    spread: Spread;
+  } | null>(null);
+
+  /** ด่านสิทธิ์ชั้นแรกของเปิดไพ่ด่วน — ถูกกั้นแล้ว = เปิดหน้าต่างสิทธิ์ (สมัคร/เติมรอบ) แทนการเปิดไพ่ */
+  const canDrawQuick = (): boolean => {
     if (entitlementView?.blocked) {
       openAccessDialog(entitlementView.blockedReason ?? GUEST_BLOCK_REASON);
-      return;
+      return false;
     }
+    void ensureEntitlement();
+    return true;
+  };
+
+  const drawQuickCard = async (topic: QuickTopic, deckPosition: number): Promise<Ui2Draw | null> => {
+    if (!canDrawQuick()) return null;
+    quickDrawRef.current = null;
 
     const defaultQ = (isEnglish && topic.defaultQuestionEn) ? topic.defaultQuestionEn : topic.defaultQuestion;
-    const chosenQuestion = userQuestion?.trim() || defaultQ;
     const quickSpread = PUBLIC_SPREADS.find((s) => s.id === "quick") || selectedSpread;
+    const missing = isEnglish ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง";
     setSelectedSpread(quickSpread);
     setSelectedCategory(topic.category);
-    setNickname(userNickname);
-    setQuestion(chosenQuestion);
-    setLoading(true);
+    setQuestion(defaultQ);
     dispatchRead({ type: "clearError" });
     soundManager.playCardSelectSound();
 
-    try {
-      const freshSeed = createClientSeed();
-      dispatchSession({ type: "seed", clientSeed: freshSeed });
-      // 1. เริ่มต้นเซสชันด้วย API
-      const res = await fetch("/api/reading/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          spreadId: quickSpread.id,
-          question: chosenQuestion,
-          personaId: selectedPersona.id,
-          nickname: userNickname,
-          category: topic.category,
-          intake: {},
-          lang: locale,
-          clientSeed: freshSeed,
-          zodiac: readMySign(),
-        }),
-      });
-
-      const data = await res.json().catch(() => ({}));
-      // ด่านความปลอดภัยคืน 200 พร้อม `blocked` — ต้องเช็กก่อนใช้ `readingId` (เหตุผลเต็มอยู่ที่ handleStartSession)
-      if (data.blocked) {
-        setCrisisMessage(typeof data.message === "string" ? data.message : "");
-        return;
-      }
-      if (!res.ok) {
-        const blockedReason = mapBlockedReason(data.reason);
-        if (blockedReason) {
-          refreshEntitlement();
-          openAccessDialog(blockedReason);
-          return;
-        }
-        throw new Error(data.error || (isEnglish ? "Unable to begin tarot reading." : "ไม่สามารถเริ่มดูดวงได้"));
-      }
-
-      const sessionReadingId = data.readingId || data.id;
-      const activeSessionToken = data.sessionToken || "";
-      dispatchSession({
-        type: "started",
-        readingId: sessionReadingId,
-        token: activeSessionToken,
-        commitment: data.commitment,
-        clientSeed: data.clientSeed || freshSeed,
-      });
-
-      trackEvent("tarot_session_start", {
-        spread_id: quickSpread.id,
-        persona_id: selectedPersona.id,
+    const freshSeed = createClientSeed();
+    dispatchSession({ type: "seed", clientSeed: freshSeed });
+    // 1. เริ่มเซสชัน — เซิร์ฟเวอร์สร้าง serverSeed และส่ง commitment (ลำดับไพ่ถูกผูกพันก่อนเฉลย)
+    const res = await fetch("/api/reading/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        spreadId: quickSpread.id,
+        question: defaultQ,
+        personaId: selectedPersona.id,
+        nickname: nickname.trim() || undefined,
         category: topic.category,
-        has_situation: false,
-      });
+        intake: {},
+        lang: locale,
+        clientSeed: freshSeed,
+        zodiac: readMySign(),
+      }),
+    });
 
-      // เริ่มโหลดสำรับขนานกับการยิง /shuffle (A8-06) — เดิมรอคำตอบก่อนค่อยโหลด = น้ำตกสามชั้น
-      // ผลไม่ขึ้นกับคำตอบเลย · สำรับไทยล้วน + อังกฤษเฉพาะหน้าอังกฤษ (A8-02)
-      const deckReady = loadCardResolver(isEnglish);
-      deckReady.catch(() => undefined); // /shuffle ล้มก่อน = ไม่มีใครรอ ห้ามเป็น unhandled rejection
-
-      // 2. จั่วไพ่ใบแรกจากเซิร์ฟเวอร์ทันทีด้วย Provably-Fair SHA-256 (ไม่ต้องเลือกจากพัดไพ่)
-      const shuffleRes = await fetch(`/api/reading/${sessionReadingId}/shuffle`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-reading-token": activeSessionToken,
-        },
-        body: JSON.stringify({
-          clientSeed: freshSeed,
-          sessionToken: activeSessionToken || undefined,
-        }),
-      });
-
-      const shuffleData = await shuffleRes.json().catch(() => ({}));
-      if (!shuffleRes.ok) {
-        if (shuffleRes.status === 410 || shuffleData.code === "SESSION_SEED_LOST") {
-          throw new Error(isEnglish ? "Session expired during shuffle. Please start again." : "เซสชันหมดอายุระหว่างการสับไพ่ กรุณาเริ่มดูดวงใหม่อีกครั้ง");
-        }
-        throw new Error(shuffleData.error || (isEnglish ? "Unable to organize the tarot deck." : "ไม่สามารถจัดสำรับไพ่ได้"));
-      }
-
-      const latestToken = shuffleData.sessionToken || activeSessionToken;
-      dispatchSession({ type: "rotateToken", token: latestToken });
-
-      const cardByIndex = await deckReady;
-      if (!shuffleData.drawn || !Array.isArray(shuffleData.drawn) || shuffleData.drawn.length === 0) {
-        throw new Error(isEnglish ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
-      }
-
-      const enrichedCards: DrawnSlotCard[] = shuffleData.drawn.map((d: any) => {
-        if (d.cardIndex === undefined || d.cardIndex === null) {
-          throw new Error(isEnglish ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
-        }
-        const fullCard = cardByIndex(d.cardIndex);
-        if (!fullCard) {
-          throw new Error(isEnglish ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
-        }
-        const kw = fullCard.keywords;
-        const extractedKeywords = Array.isArray(kw) ? kw : d.isReversed ? (kw?.reversed ?? []) : (kw?.upright ?? []);
-
-        return {
-          order: d.order ?? 0,
-          cardIndex: d.cardIndex,
-          isReversed: !!d.isReversed,
-          position: quickSpread?.positions?.[d.order] || {
-            index: d.order ?? 0,
-            nameTh: "คำตอบต่อเรื่องนี้",
-            nameEn: "Answer to your inquiry",
-            meaning: "คำตอบตรงต่อคำถามที่ผู้ถามตั้งจิตถาม",
-            meaningEn: "Direct answer to the querent's question",
-          },
-          card: {
-            id: fullCard.id,
-            nameTh: fullCard.nameTh,
-            nameEn: fullCard.nameEn,
-            image: fullCard.image,
-            element: fullCard.element,
-            keywords: extractedKeywords,
-          },
-        };
-      });
-
-      // กฎเหล็กข้อ 4 (Manual Self-Reveal) อยู่ในตัวลดแล้ว — `deal` คว่ำไพ่ทุกใบให้เสมอ
-      dispatchDeck({ type: "deal", cards: enrichedCards });
-      scrollToSanctuaryTop();
-      navigateStep("READING");
-
-      // เริ่มสตรีมคำทำนาย AI เบื้องหลังทันที พร้อมส่งคำถามเต็มจริง ๆ และหมวดหมู่ตรงหัวข้อ ป้องกัน stale closure
-      startAIStreaming(sessionReadingId, enrichedCards, latestToken, {
-        question: chosenQuestion,
-        category: topic.category,
-        spread: quickSpread,
-        nickname: userNickname,
-      });
-    } catch (err: any) {
-      dispatchRead({ type: "fail", message: err.message || (isEnglish ? "An error occurred while processing the quick reading." : "เกิดข้อผิดพลาดในการประมวลผลไพ่ด่วน") });
-    } finally {
-      setLoading(false);
+    const data = await res.json().catch(() => ({}));
+    // ด่านความปลอดภัยคืน 200 พร้อม `blocked` — ต้องเช็กก่อนใช้ `readingId` (เหตุผลเต็มอยู่ที่ handleStartSession)
+    if (data.blocked) {
+      setCrisisMessage(typeof data.message === "string" ? data.message : "");
+      return null;
     }
+    if (!res.ok) {
+      const blockedReason = mapBlockedReason(data.reason);
+      if (blockedReason) {
+        refreshEntitlement();
+        openAccessDialog(blockedReason);
+        return null;
+      }
+      throw new Error(data.error || (isEnglish ? "Unable to begin tarot reading." : "ไม่สามารถเริ่มดูดวงได้"));
+    }
+
+    const sessionReadingId = data.readingId || data.id;
+    const activeSessionToken = data.sessionToken || "";
+    dispatchSession({
+      type: "started",
+      readingId: sessionReadingId,
+      token: activeSessionToken,
+      commitment: data.commitment,
+      clientSeed: data.clientSeed || freshSeed,
+    });
+
+    trackEvent("tarot_session_start", {
+      spread_id: quickSpread.id,
+      persona_id: selectedPersona.id,
+      category: topic.category,
+      has_situation: false,
+    });
+
+    // เริ่มโหลดสำรับขนานกับการยิง /shuffle (A8-06) — เดิมรอคำตอบก่อนค่อยโหลด = น้ำตกสามชั้น
+    // ผลไม่ขึ้นกับคำตอบเลย · สำรับไทยล้วน + อังกฤษเฉพาะหน้าอังกฤษ (A8-02)
+    const deckReady = loadCardResolver(isEnglish);
+    deckReady.catch(() => undefined); // /shuffle ล้มก่อน = ไม่มีใครรอ ห้ามเป็น unhandled rejection
+
+    // 2. สับ + จั่ว "ตำแหน่งที่ผู้ใช้แตะ" บนเซิร์ฟเวอร์ด้วย Provably-Fair SHA-256
+    const shuffleRes = await fetch(`/api/reading/${sessionReadingId}/shuffle`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-reading-token": activeSessionToken,
+      },
+      body: JSON.stringify({
+        clientSeed: freshSeed,
+        sessionToken: activeSessionToken || undefined,
+        pickedIndices: [deckPosition],
+      }),
+    });
+
+    const shuffleData = await shuffleRes.json().catch(() => ({}));
+    if (!shuffleRes.ok) {
+      if (shuffleRes.status === 410 || shuffleData.code === "SESSION_SEED_LOST") {
+        throw new Error(isEnglish ? "Session expired during shuffle. Please start again." : "เซสชันหมดอายุระหว่างการสับไพ่ กรุณาเริ่มดูดวงใหม่อีกครั้ง");
+      }
+      throw new Error(shuffleData.error || (isEnglish ? "Unable to organize the tarot deck." : "ไม่สามารถจัดสำรับไพ่ได้"));
+    }
+
+    const latestToken = shuffleData.sessionToken || activeSessionToken;
+    dispatchSession({ type: "rotateToken", token: latestToken });
+
+    const cardByIndex = await deckReady;
+    const first = Array.isArray(shuffleData.drawn) ? shuffleData.drawn[0] : undefined;
+    // 🃏 กฎเหล็ก 14 — ไม่มีไพ่จากเซิร์ฟเวอร์ = ขอให้โหลดใหม่ ห้ามหยิบไพ่ใบไหนมาแทน
+    if (!first || first.cardIndex === undefined || first.cardIndex === null) throw new Error(missing);
+    const fullCard = cardByIndex(first.cardIndex);
+    if (!fullCard) throw new Error(missing);
+
+    const kw = fullCard.keywords;
+    const isReversed = !!first.isReversed;
+    const extractedKeywords = Array.isArray(kw) ? kw : isReversed ? (kw?.reversed ?? []) : (kw?.upright ?? []);
+    const order = first.order ?? 0;
+    const card: DrawnSlotCard = {
+      order,
+      cardIndex: first.cardIndex,
+      isReversed,
+      position: quickSpread?.positions?.[order] || {
+        index: order,
+        nameTh: "คำตอบต่อเรื่องนี้",
+        nameEn: "Answer to your inquiry",
+        meaning: "คำตอบตรงต่อคำถามที่ผู้ถามตั้งจิตถาม",
+        meaningEn: "Direct answer to the querent's question",
+      },
+      card: {
+        id: fullCard.id,
+        nameTh: fullCard.nameTh,
+        nameEn: fullCard.nameEn,
+        image: fullCard.image,
+        element: fullCard.element,
+        keywords: extractedKeywords,
+      },
+    };
+
+    quickDrawRef.current = {
+      readingId: sessionReadingId,
+      token: latestToken,
+      cards: [card],
+      question: defaultQ,
+      category: topic.category,
+      spread: quickSpread,
+    };
+    trackEvent("tarot_draw", { spread_id: quickSpread.id, picked_order: 1, picked_total: 1, required_total: 1 });
+
+    return {
+      cardId: fullCard.id,
+      image: fullCard.image,
+      nameTh: fullCard.nameTh,
+      nameEn: fullCard.nameEn,
+      isReversed,
+      commitment: typeof data.commitment === "string" ? data.commitment : null,
+    };
+  };
+
+  const continueQuickReading = () => {
+    const pending = quickDrawRef.current;
+    if (!pending) return;
+    quickDrawRef.current = null;
+    dispatchDeck({ type: "deal", cards: pending.cards });
+    // ผู้ใช้พลิกใบนี้เองแล้วบนผ้าปู (กฎเหล็ก 4) — ไม่ต้องให้พลิกซ้ำในขั้นอ่าน
+    dispatchDeck({ type: "revealAll" });
+    scrollToSanctuaryTop();
+    navigateStep("READING");
+    startAIStreaming(pending.readingId, pending.cards, pending.token, {
+      question: pending.question,
+      category: pending.category,
+      spread: pending.spread,
+      nickname: nickname.trim(),
+    });
   };
 
   // Step 2 -> Step 3: Shuffle Animation Finished
@@ -1696,7 +1719,8 @@ export default function TarotFlow({
       )}
 
       {/* Main Sanctuary Container */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-12 sm:pb-16 relative z-10">
+      {/* หน้าแรก (ขั้นเลือก) ไม่มี padding ล่าง — ส่วน UI 2.0 ถัดไปต่อพื้นกันเอง ช่องว่างจะเห็นเป็นแถบพื้นเดิมคั่น */}
+      <div className={`max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 relative z-10 ${currentStep === "SPREAD_SELECT" ? "pb-0" : "pb-12 sm:pb-16"}`}>
         {Boolean(entitlement?.announce && !entitlement?.enabled) && <AnnouncementBanner />}
 
         {/* ขั้น SUMMARY มีแบนเนอร์ error ในตัว StreamReader อยู่แล้ว — ไม่ต้องซ้ำด้านบน */}
@@ -1744,216 +1768,52 @@ export default function TarotFlow({
           data-dir={stepDirection < 0 ? "back" : "forward"}
         >
           {currentStep === "SPREAD_SELECT" && (
-            /* แต่ละบล็อกเป็นแถบสีสลับกันแบบ apple.com (`.home-band` ใน globals.css) — ระยะห่างมาจาก
-               padding ของแถบเอง ไม่ใช้ space-y แล้ว ไม่งั้นช่องว่างระหว่างแถบจะเป็นพื้นคนละสี
-               หัวหน้า + "เปิดไพ่ด่วน" ใช้พื้นเดียวกัน (ไม่ tint) — เจ้าของขอให้สองส่วนนี้สีเดียวกัน แถบแรกที่ tint คือ "เลือกผัง" */
+            /* ──────────────────────────────────────────────────────────────
+                🎨 SeerTarot UI 2.0 — หน้าแรกแบบ D+ (docs/plans/UI_2_0_PLAN_2026-10-12.md)
+                ลำดับส่วน (ส่วน 1–3 อยู่ใน island นี้ · ส่วน 4–8 มากับ {seoContent} เป็น HTML นิ่ง):
+                  1. <Ui2Hero />        — h1 (หัวข้อแรกของ <main> เสมอ) · นาฬิกาไพ่ประจำวัน · ปุ่มหลัก
+                  2. <Ui2Ribbon />      — ริบบิ้นไขว้ รอยต่อกลางวัน ➔ กลางคืน
+                  3. <Ui2PickSection /> — เลือกเรื่อง แล้วแตะไพ่คว่ำ (ต่อท่อ /start ➔ /shuffle จริง · ห้ามกุไพ่)
+                ⚠️ ห้ามย้าย <h1> ลงไปใต้บล็อกอื่น — h2 ของส่วนถัดไปจะขึ้นก่อน h1 (ด่าน a11y)
+                ⚠️ ผังหลายใบเข้าได้จากแถว "อยากละเอียดกว่านี้" ใต้ส่วน 3 และกระดาษโน้ตคำถามในส่วน 4
+                   (เดิมคือตัวเลือกผังในหน้านี้ — ย้ายไปหน้า /read/<ผัง> ที่มีพิธีครบอยู่แล้ว)
+               ────────────────────────────────────────────────────────── */
             <div>
-              {/* ──────────────────────────────────────────────────────────────
-                  ลำดับหน้าแรก (คำสั่งเจ้าของ 2026-09-21 รอบ 2):
-                    1. <h1> + คำโปรย        — ต้องอยู่บนสุดเสมอ (ลำดับหัวข้อ h1 ➔ h2 ของ SEO)
-                    2. <DailyCardStrip />   — แถบไพ่ประจำวัน สูงคงที่ 96px ไม่ดันหน้า (CLS 0)
-                    3. <QuickFortunePicker />— "เปิดไพ่ด่วน 1 ใบ" คนใช้เยอะที่สุด จึงอยู่ส่วนแรก
-                    4. <SpreadCardSelector /> — ทางเลือกอ่านละเอียด (ปุ่มเริ่มอยู่ในแถบ "ผังที่เลือกไว้" ของตัวมันเอง)
-                    5. {seoContent}
-
-                  ⚠️ ของเดิม (PR #556 "ประตูเดียว") เอาผังขึ้นก่อนและดันสองบล็อกนี้ลงล่าง
-                     รอบนี้สลับตามพฤติกรรมผู้ใช้จริง — ห้ามสลับกลับโดยไม่ถามเจ้าของ
-                  ⚠️ ห้ามย้าย <h1> ลงไปใต้บล็อกอื่น จะทำให้ <h2> ของ QuickFortunePicker
-                     ขึ้นก่อน <h1> (ผิดลำดับหัวข้อ และเคยเป็นข้อจำกัดเดิมของไฟล์นั้น)
-                  ────────────────────────────────────────────────────────── */}
-              <div className="hero-wash relative isolate space-y-6" data-home-section="hero">
-                {/*
-                  ✦ พัดไพ่ 1909 เป็นพื้นหลังจาง ๆ หลังหัวเรื่อง (เจ้าของสั่ง 2026-10-10: เป็นแบ็กกราวด์ ไม่ต้องกดได้)
-                  ภาพประกอบล้วน (`aria-hidden` · ไม่รับการแตะ) ไม่ดันความสูงส่วนหัว — ไพ่ประจำวันยังอยู่ในจอแรก
-                  ภาพจาก `<CardImage />` เท่านั้น (กฎเหล็กข้อ 5 · 8) · ลำดับโหลดต่ำ ให้หัวเรื่องเป็น LCP เหมือนเดิม
-                  ⚠️ งบ DOM หน้าแรก (INC-0247) · หน้าตาอยู่ที่ `.hero-fan` ใน globals.css
-                */}
-                <div className="hero-fan" aria-hidden="true">
-                  {HERO_FAN_CARDS.map((cardId, i) => (
-                    <span
-                      key={cardId}
-                      className={i === 0 || i === HERO_FAN_CARDS.length - 1 ? "hero-fan-card hero-fan-card--edge" : "hero-fan-card"}
-                      style={{ "--i": i - 3 } as React.CSSProperties}
-                    >
-                      <CardImage
-                        cardId={cardId}
-                        alt=""
-                        sizes="(min-width: 1024px) 200px, (min-width: 640px) 150px, 96px"
-                        loading="eager"
-                        fetchPriority="low"
-                        className="w-full h-full object-cover"
-                      />
-                    </span>
-                  ))}
-                </div>
-                <div className="text-center space-y-3 sm:space-y-3.5 pt-2">
-                  <h1 className="hero-text-halo text-2xl sm:text-4xl font-serif-th font-bold text-ink tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]"><ThaiPhrases>
-                    {isEnglish ? "Interactive 1909 Rider-Waite Tarot with AI Oracle" : "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ออนไลน์ ฟรี กับแม่หมอ AI"}
-                  </ThaiPhrases></h1>
-
-                  {/*
-                    ✦ คำโปรยใต้หัวเรื่อง — เขียนใหม่ให้เป็นประโยคเดียวที่อ่านรวดเดียวจบ
-                    ของเดิมยัดสามเรื่อง (วิธีเล่น · สำรับ · ระบบสุ่ม) ไว้ในประโยคเดียวยาว 2 บรรทัด
-                    พอ `text-wrap:balance` จัดสองบรรทัดให้ยาวเท่ากัน มันตัด "78 ใบ" คาไว้คนละบรรทัด
-                    (เจ้าของทักว่าไม่สวย) — ข้อเท็จจริงที่เหลือย้ายลงแถวชิปด้านล่างซึ่งอ่านง่ายกว่า
-                    และยังเป็นข้อความจริงในหน้าเหมือนเดิม ไม่ได้หายไปจาก SEO
-                  */}
-                  {/*
-                    ⚠️ แต่ละวรรคต้องเป็น `inline-block` — ภาษาไทยไม่มีช่องว่างคั่นคำ เบราว์เซอร์จึงตัด
-                       บรรทัดกลางวรรคได้ตามใจ (ลองมาแล้วทั้ง `text-wrap:balance` และปล่อยตามธรรมชาติ
-                       ได้คำโดดท้ายบรรทัดทั้งคู่: "78 / ใบ" · "ให้ / แม่หมอ") กล่อง inline-block
-                       ไม่ถูกตัดข้างในถ้ายังกว้างพอ จึงได้บรรทัดที่จบเป็นวรรคเสมอทุกความกว้างจอ
-                  */}
-                  <p className="hero-text-halo text-sm sm:text-base text-ink-deep/80 max-w-md sm:max-w-xl mx-auto font-serif-th leading-relaxed">
-                    <span className="inline-block">
-                      {isEnglish ? "Shuffle the deck and pick every card yourself," : "สับไพ่แล้วหยิบไพ่ด้วยมือคุณเอง"}
-                    </span>{" "}
-                    <span className="inline-block">
-                      {isEnglish ? "then let the AI oracle read them one by one." : "ให้แม่หมอ AI อ่านความหมายให้ทีละใบ"}
-                    </span>
-                  </p>
-
-                  {/*
-                    แถวชิปความน่าเชื่อถือ — `whitespace-nowrap` กันคำในชิปแตกคนละบรรทัดแบบคำโปรยเดิม
-
-                    ⚠️ ชิปใบที่สามต้องอ่านค่าจริงจาก `REQUIRE_SIGNUP_TO_READ` / `DAILY_LIMIT` เสมอ
-                       ห้ามพิมพ์ "ฟรี · ไม่ต้องสมัคร" ทิ้งไว้ตรง ๆ — ตอนนี้ `GUEST_LIMIT = 0`
-                       แปลว่าเว็บบังคับสมัครก่อนเปิดไพ่ ข้อความเดิมจึงโกหกผู้ใช้ (เจ้าของทัก 2026-09-21)
-                       ถ้าวันหนึ่งเปิดสิทธิ์ทดลองกลับมา ชิปนี้จะเปลี่ยนถ้อยคำตามให้เอง
-                  */}
-                  <ul className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
-                    {/* มือถือใช้ถ้อยคำสั้น — ถ้อยคำเต็มยาวจนชิปเรียงลงมา 3 บรรทัด กินที่ ~150px ก่อนถึงไพ่ประจำวัน
-                        (เจ้าของขอให้กระชับ) · ถ้อยคำเต็มยังอยู่ใน HTML สำหรับจอใหญ่และ SEO */}
-                    {(isEnglish
-                      ? [
-                          ["Authentic 1909 Rider-Waite · 78 cards", "1909 Rider-Waite · 78 cards"],
-                          ["Truly random, verifiable shuffle", "Verifiable shuffle"],
-                          REQUIRE_SIGNUP_TO_READ
-                            ? [`Free account · ${DAILY_LIMIT} ${READINGS_EN} a day`, `Free · ${DAILY_LIMIT}/day`]
-                            : ["Free · No sign-up", "Free · No sign-up"],
-                        ]
-                      : [
-                          ["สำรับ 1909 Rider-Waite แท้ 78 ใบ", "Rider-Waite แท้ 78 ใบ"],
-                          ["ไพ่สุ่มจริง ตรวจสอบได้", "สุ่มจริง ตรวจสอบได้"],
-                          REQUIRE_SIGNUP_TO_READ
-                            ? [`สมัครสมาชิกฟรี · เปิดไพ่ได้วันละ ${DAILY_LIMIT} ครั้ง`, `สมัครฟรี · วันละ ${DAILY_LIMIT} ครั้ง`]
-                            : ["ฟรี · ไม่ต้องสมัคร", "ฟรี · ไม่ต้องสมัคร"],
-                        ]
-                    ).map(([fact, short]) => (
-                      <li
-                        key={fact}
-                        className="glass-chip whitespace-nowrap px-2.5 sm:px-3 py-1 font-serif-th text-[11px] sm:text-xs font-semibold text-gold-ink"
-                      >
-                        <span className="sm:hidden">{short}</span>
-                        <span className="hidden sm:inline">{fact}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* ไพ่ประจำวัน — แตะดูเฉย ๆ ไม่กินโควตา จึงเป็นจุดเริ่มที่เบาที่สุดของหน้า
-                    สมาชิกเห็นวันเปิดไพ่ต่อเนื่องต่อท้ายป้าย "ไพ่ประจำวันนี้" (แผนหน้าแรก ข้อ 2 — เดิมเป็นแถบแยก
-                    เจ้าของสั่งถอดเพราะกินพื้นที่ซ้ำกับแถบนี้) · บัญชีไม่จำกัดสิทธิ์ได้ 99 ตายตัวจาก snapshot จึงไม่นับ */}
-                <DailyCardStrip
-                  streak={
-                    entitlement?.kind === "member" && entitlement.role !== "unlimited" ? (entitlement.dailyStreak ?? 0) : 0
-                  }
-                />
-              </div>
-
-              {/* บล็อกทำนายด่วน 1 ใบ (4 การ์ดยอดนิยม) — ทางหลักของผู้ใช้ส่วนใหญ่ */}
-              <div id="home-quick" className="home-band home-band-snug-top scroll-mt-16" data-home-section="quick">
-                <QuickFortunePicker
-                  currentNickname={nickname}
-                  onSelectTopic={handleQuickFortuneSelect}
-                  isLoading={loading}
-                />
-              </div>
-
-              {/*
-                ผังเต็ม — สำหรับคนที่อยากอ่านละเอียดกว่าไพ่ใบเดียว
-
-                🎨 หัวบล็อกใช้จังหวะเดียวกับบล็อก "เปิดไพ่ด่วน" ด้านบนเป๊ะ (ชิป ➔ h2 ➔ คำโปรย)
-                   สองบล็อกจึงอ่านเป็นชุดเดียวกัน ไม่ใช่ของสองชิ้นที่มาจากคนละหน้า
-
-                ⚠️ ปุ่มน้ำตาลก้อนใหญ่ "เริ่มดูดวงฟรี" ถูกถอดออกจากตรงนี้ (คำสั่งเจ้าของ: ไม่สวย)
-                   ของเดิมมันเป็นก้อนสีเข้มก้อนเดียวของทั้งหน้าครีม ขวางอยู่ระหว่างหัวข้อกับการ์ดผัง
-                   และซ้ำหน้าที่กับปุ่มทองในแถบ "ผังที่เลือกไว้" ที่ `SpreadCardSelector` วางไว้ใต้กริดอยู่แล้ว
-                   (ทั้งคู่เรียก `handleBeginReading` ตัวเดียวกัน) — ทางเริ่มดูดวงจึงไม่ได้หายไปไหน
-                   ยังมีทั้งแถบนั้นและป๊อปอัพ "เริ่มการดูดวงเลย" ที่เด้งทันทีที่แตะการ์ดผัง
-              */}
-              <div className="home-band home-band-tint space-y-5 sm:space-y-6" data-home-section="spread_select">
-                <div className="text-center space-y-2.5 sm:space-y-3 max-w-2xl mx-auto px-4">
-                  <div className="glass-chip inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 text-[11px] font-serif-th font-semibold tracking-wide text-gold-ink">
-                    <span>
-                      {isEnglish
-                        ? "Multi-Card Spreads · A Fuller Picture"
-                        : "ผังหลายใบ · เห็นภาพรวมทั้งเรื่อง"}
-                    </span>
-                  </div>
-
-                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-ink tracking-wide leading-snug [text-wrap:balance]"><ThaiPhrases>
-                    {isEnglish ? "Choose Your Tarot Spread" : "เลือกผังการเปิดไพ่พยากรณ์"}
-                  </ThaiPhrases></h2>
-                  <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed [text-wrap:balance]">
-                    {isEnglish
-                      ? "Want more depth than a single card? Open several cards at once and let the oracle read the full picture."
-                      : "อยากได้คำตอบที่ละเอียดกว่าไพ่ใบเดียว เปิดหลายใบพร้อมกันแล้วให้แม่หมออ่านภาพรวมให้"}
-                  </p>
-                </div>
-
-                <SpreadCardSelector
-                  variant="featured"
-                  selectedSpread={selectedSpread}
-                  onSelectSpread={(sp) => {
+              <Ui2Hero
+                isEnglish={isEnglish}
+                streak={entitlement?.kind === "member" && entitlement.role !== "unlimited" ? (entitlement.dailyStreak ?? 0) : 0}
+              />
+              <Ui2Ribbon isEnglish={isEnglish} />
+              <Ui2PickSection
+                isEnglish={isEnglish}
+                spreadCount={PUBLIC_SPREADS.length}
+                canDraw={canDrawQuick}
+                onDraw={drawQuickCard}
+                onReadWithAI={continueQuickReading}
+                onReset={() => {
+                  quickDrawRef.current = null;
+                }}
+              >
+              {/* ผังของฉัน (ผังที่ออกแบบเอง) — ทางเดียวที่เปิดผังที่บันทึกไว้ได้ จึงต้องอยู่ต่อ (REFLECTION_JOURNAL_PLAN 1.8) */}
+              <div className="ui2-myspreads">
+                <MyCustomSpreadsRow
+                  isEnglish={isEnglish}
+                  selectedName={selectedSpread.id === CUSTOM_SPREAD_ID ? selectedSpread.nameTh : null}
+                  onPick={(def) => {
                     soundManager.playCardSelectSound();
-                    // ผู้ใช้เริ่มลงมือจริงแล้ว — อุ่นสิทธิ์ไว้เลย จะได้ไม่ต้องรอตอนกด "เริ่มดูดวง"
                     void ensureEntitlement();
-                    setSelectedSpread(sp);
+                    const built = pickCustomSpread(def);
+                    if (built) handleBeginReading(built);
                     trackEvent("spread_select", {
-                      spread_id: sp.id,
-                      spread_name: sp.nameTh,
-                      card_count: sp.positions.length,
-                      category: sp.defaultCategory,
+                      spread_id: CUSTOM_SPREAD_ID,
+                      spread_name: "custom",
+                      card_count: def.positions.length,
+                      category: "general",
                     });
                   }}
-                  isPassHolder={isPassHolder}
-                  premiumTrial={hasPremiumTrial}
-                  proceedLabel={
-                    hasPremiumTrial && !isStandardSpread(selectedSpread.id, selectedSpread.positions.length)
-                      ? (isEnglish ? "Try This Spread Free (1-time trial)" : "ลองผังนี้ฟรี (สิทธิ์ทดลอง 1 ครั้ง)")
-                      : entitlementView?.blocked
-                      ? entitlementView.blockedReason === "daily_exhausted"
-                        ? (isEnglish ? "Refill Quota to Continue" : "เติมรอบเพื่อเปิดไพ่ต่อ")
-                        : (isEnglish ? "Sign Up Free to Draw Cards" : "สมัครสมาชิกฟรีเพื่อเปิดไพ่")
-                      : !isPassHolder && !isStandardSpread(selectedSpread.id, selectedSpread.positions.length)
-                        ? (isEnglish ? "Unlock Spread to Draw Cards" : "ปลดล็อกผังนี้เพื่อเปิดไพ่")
-                        : undefined
-                  }
-                  onRequireUpgrade={() => {
-                    openAccessDialog("grand_spread");
-                  }}
-                  onProceed={() => handleBeginReading()}
                 />
-                <div className="mt-6 sm:mt-8">
-                  <MyCustomSpreadsRow
-                    isEnglish={isEnglish}
-                    selectedName={selectedSpread.id === CUSTOM_SPREAD_ID ? selectedSpread.nameTh : null}
-                    onPick={(def) => {
-                      soundManager.playCardSelectSound();
-                      void ensureEntitlement();
-                      const built = pickCustomSpread(def);
-                      if (built) handleBeginReading(built);
-                      trackEvent("spread_select", {
-                        spread_id: CUSTOM_SPREAD_ID,
-                        spread_name: "custom",
-                        card_count: def.positions.length,
-                        category: "general",
-                      });
-                    }}
-                  />
-                </div>
               </div>
+              </Ui2PickSection>
             </div>
           )}
 

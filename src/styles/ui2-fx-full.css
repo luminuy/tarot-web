@@ -1,0 +1,163 @@
+/*
+ * 🎨 SeerTarot UI 2.0 — เอฟเฟกต์หนัก "ระดับ full เท่านั้น" (คอม · แท็บเล็ต/iPad)
+ * ===========================================================================
+ * แผน: docs/plans/UI_2_0_PLAN_2026-10-12.md หัวข้อ 3
+ *
+ * 🔒 ล็อกสองชั้น — ทุกกฎในไฟล์นี้ต้อง:
+ *    1. อยู่ใต้ `@media (min-width: 768px)` — iPad แบ่งจอ (Split View) หรือหมุนจอจนแคบ ของหนักหลุดเองทันที
+ *       โดยไม่ต้องรันสคริปต์ใหม่
+ *    2. ขึ้นต้นด้วย `[data-fx="full"]` — ตั้งโดยสคริปต์ใน <head> (`src/app/_shared/ui2-fx.ts`)
+ *       มือถือ · RAM ≤ 4GB · ประหยัดข้อมูล · ตกเกณฑ์ FPS · ลดการเคลื่อนไหว ➔ ไม่ใช่ full ➔ ไม่โหลดของหนักเลย
+ *    ด่าน `scripts/qa/test-ui2-fx.ts` ตรวจทั้งสองชั้นใน CSS ที่บิลด์แล้ว · `test-motion-quality` กฎ 2
+ *    ผ่อนผัน backdrop-filter ให้ไฟล์นี้ไฟล์เดียว (ที่อื่นยังห้ามตาม INC-0056)
+ *
+ * 🚨 ห้าม `filter: blur()` กับภาพไพ่หลายใบในส่วนปิดท้าย — ใช้ภาพเบลอสำเร็จรูปไฟล์เดียว (ui2.css)
+ */
+
+@media (min-width: 768px) {
+  /* ── แผงกระจกจริง (backdrop-filter) ─────────────────────────────────────── */
+  [data-fx="full"] .ui2-chip,
+  [data-fx="full"] .ui2-btn-ghost,
+  [data-fx="full"] .ui2-clock-cell,
+  [data-fx="full"] .ui2-faq,
+  [data-fx="full"] .ui2-more {
+    background: rgba(255, 252, 246, 0.56);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
+  }
+  [data-fx="full"] .ui2-night .ui2-chip,
+  [data-fx="full"] .ui2-night .ui2-btn-ghost,
+  [data-fx="full"] .ui2-closing .ui2-clock-cell {
+    background: rgba(28, 23, 30, 0.5);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
+    backdrop-filter: blur(22px) saturate(150%);
+  }
+  [data-fx="full"] .ui2-window {
+    background: rgba(26, 21, 29, 0.55);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    backdrop-filter: blur(24px) saturate(170%);
+  }
+
+  /* ── แสงออโรราลอย (ก้อนสีเบลอ) ─────────────────────────────────────────── */
+  [data-fx="full"] .ui2-aurora {
+    display: block;
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 70%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 0%, #000 70%, transparent 100%);
+  }
+  [data-fx="full"] .ui2-hero .ui2-grain,
+  [data-fx="full"] .ui2-hero .ui2-aurora {
+    inset-block-start: -240px;
+  }
+  [data-fx="full"] .ui2-blob {
+    position: absolute;
+    width: 46vw;
+    max-width: 640px;
+    aspect-ratio: 1;
+    border-radius: 999px;
+    filter: blur(72px);
+    opacity: 0.7;
+    animation: ui2-drift var(--dur, 20s) ease-in-out infinite;
+  }
+
+  /* ── เม็ดเกรนฟิล์ม ─────────────────────────────────────────────────────── */
+  [data-fx="full"] .ui2-grain {
+    display: block;
+    position: absolute;
+    z-index: -1;
+    inset-block: 0;
+    left: 50%;
+    width: 100vw;
+    transform: translateX(-50%);
+    pointer-events: none;
+    /* จางลงที่ขอบล่าง — ไม่ให้เห็นรอยต่อกับส่วนถัดไปที่ไม่มีเกรน */
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 72%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 0%, #000 72%, transparent 100%);
+    opacity: 0.32;
+    mix-blend-mode: multiply;
+    background-image: url(/ui2/grain.webp);
+    background-size: 180px 180px;
+  }
+
+  /* ── การ์ดลอยรอบหัวข้อ: ลอยขึ้นลง · ใบไกลเบลอ + จาง ─────────────────────── */
+  [data-fx="full"] .ui2-fc {
+    animation: ui2-bob var(--bob, 7s) ease-in-out infinite;
+  }
+  [data-fx="full"] .ui2-fc:nth-child(2n) {
+    --bob: 8.5s;
+    animation-delay: -2s;
+  }
+  [data-fx="full"] .ui2-fc:nth-child(3n) {
+    --bob: 9.5s;
+    animation-delay: -4s;
+  }
+  [data-fx="full"] .ui2-tile-back {
+    animation: ui2-bob 7.5s ease-in-out infinite;
+  }
+  [data-fx="full"] .ui2-fc-far .ui2-fc-card {
+    filter: blur(1.5px);
+  }
+
+  /* ── ริบบิ้นไขว้ เส้นที่สอง (ตัวหนังสือ) ──────────────────────────────────── */
+  [data-fx="full"] .ui2-strip-text {
+    display: block;
+  }
+
+  /* ── ตัวหนังสือทองมีแสงวิ่ง (lite = ทองนิ่ง เพราะอนิเมต background-position = วาดใหม่ทุกเฟรม) ── */
+  [data-fx="full"] .ui2-gold-day,
+  [data-fx="full"] .ui2-gold-night {
+    animation: ui2-shimmer 5.5s linear infinite;
+  }
+
+  /* ── ดาวกะพริบ 2 ชั้น ─────────────────────────────────────────────────── */
+  [data-fx="full"] .ui2-stars {
+    animation: ui2-twinkle 6s ease-in-out infinite;
+  }
+  [data-fx="full"] .ui2-stars-2 {
+    display: block;
+    background-size: 300px 300px;
+    background-position: 140px 90px;
+    animation: ui2-twinkle 8s ease-in-out -3s infinite;
+  }
+
+  /* ── กระดาษโน้ตลอยแกว่งเบา ๆ (lite = นิ่ง มีแค่ตอบสนองตอนแตะ) ─────────────── */
+  [data-fx="full"] .ui2-note {
+    animation: ui2-bob var(--bob, 7s) ease-in-out infinite;
+    --bob: 7s;
+  }
+  [data-fx="full"] .ui2-note:nth-child(2n) {
+    --bob: 8.5s;
+    animation-delay: -3s;
+  }
+  [data-fx="full"] .ui2-note:nth-child(3n) {
+    --bob: 9.2s;
+    animation-delay: -5s;
+  }
+}
+
+@media (min-width: 768px) and (hover: hover) {
+  [data-fx="full"] .ui2-note:hover {
+    animation-play-state: paused;
+  }
+}
+
+/* ── เลื่อนแล้วส่วนลอยขึ้น: ระยะเต็ม 90px (lite ใช้ 48px ใน ui2.css) ─────────────── */
+@media (min-width: 768px) {
+  @supports (animation-timeline: view()) {
+    [data-fx="full"] .ui2-reveal {
+      animation-name: ui2-rise-full;
+      animation-range: entry 0% cover 26%;
+    }
+  }
+}
+
+@keyframes ui2-shimmer {
+  from { background-position: 0% 50%; }
+  to { background-position: 200% 50%; }
+}
+@keyframes ui2-twinkle {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 0.35; }
+}
+@keyframes ui2-rise-full {
+  from { opacity: 0; translate: 0 90px; scale: 0.94; }
+}

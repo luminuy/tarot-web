@@ -1,0 +1,8 @@
+/*
+ * 🎨 SeerTarot UI 2.0 — สไตล์หน้าแรก (ส่วน 1–8) รวมไฟล์เดียว
+ * นำเข้าโดย `astro/islands/TarotFlowRoot.tsx` เท่านั้น ➔ โหลดเฉพาะหน้าที่มี TarotFlow (`/` · `/en` · `/read/*`)
+ * ⚠️ ห้ามนำเข้าใน globals.css — ทุกหน้าจะต้องโหลดด้วย เกินงบ CSS 32 KB gzip (ด่าน test-bundle-budget)
+ * ⚠️ ของหนักทุกชิ้นอยู่ใน ui2-fx-full.css ไฟล์เดียว (ด่าน test-ui2-fx · test-motion-quality กฎ 2)
+ */
+@import "./ui2.css";
+@import "./ui2-fx-full.css";

@@ -71,6 +71,11 @@ export interface RouteBudget {
    * ก็ไม่มีภาพหน้าไพ่ให้จัดลำดับตั้งแต่แรก
    */
   expectLcpImage?: boolean;
+  /**
+   * งบ CSS เฉพาะเส้นทาง (gzip, KB) — ไม่ใส่ = ใช้ `MAX_CSS_GZIP_KB`
+   * ⚠️ ใส่ได้เฉพาะหน้าที่มีเหตุผลวัดจริงกำกับไว้ข้าง ๆ เท่านั้น (ดูหน้าแรก `/` · `/en`)
+   */
+  maxCssGzipKb?: number;
 }
 
 /**
@@ -130,7 +135,17 @@ export const BUDGETS: RouteBudget[] = [
      * ⚠️ นี่คือ**การขยับเพดานครั้งเดียวที่มีเหตุผลกำกับ** ห้ามใช้เป็นบรรทัดฐานขยับซ้ำ
      *    ถ้ารอบหน้าชนเพดานอีก ให้ไปลดของจริงก่อนเสมอ
      */
-    maxHtmlGzipKb: 42, // Current: 41 KB (38 KB ก่อนเปิด AVIF)
+    maxHtmlGzipKb: 28, // วัดจริง 2026-10-12 (UI 2.0): 25 KB · เดิม 42 (production ก่อน UI 2.0 วัดได้ 37 KB)
+    /*
+     * 🎨 SeerTarot UI 2.0 (2026-10-12) — งบ CSS เฉพาะหน้าแรก 38 KB (ค่าตั้งต้นทั้งเว็บ 32 KB)
+     * หน้าแรกแบบ D+ ย้ายส่วน 4–8 เป็น HTML นิ่ง + CSS ล้วน (ไม่มี JS) สไตล์ของหน้าแรกจึงแยกไฟล์
+     * (`src/styles/ui2-home.css` โหลดเฉพาะหน้าที่มี TarotFlow · หน้าอื่นลดเหลือ 30 KB)
+     * วัดจริงของที่บล็อกการเรนเดอร์ (HTML + CSS gzip):
+     *   production ก่อน UI 2.0: HTML 37 KB + CSS 30 KB = **67 KB**
+     *   UI 2.0:                 HTML 25 KB + CSS 37 KB = **62 KB** (ลดลง 5 KB · DOM 1,409 ➔ ~940)
+     * จึงรัดงบ HTML ลงพร้อมกันในรอบเดียว — ห้ามขยับงบ CSS ขึ้นอีก ถ้าชนให้ไปลดของจริงใน ui2.css ก่อน
+     */
+    maxCssGzipKb: 38,
   },
   {
     /*
@@ -142,7 +157,8 @@ export const BUDGETS: RouteBudget[] = [
      */
     route: "/en",
     maxJsGzipKb: 232,
-    maxHtmlGzipKb: 40,
+    maxHtmlGzipKb: 25, // วัดจริง 2026-10-12 (UI 2.0): 22 KB · เดิม 40
+    maxCssGzipKb: 38, // เหตุผลเดียวกับ `/` ข้างบน
   },
   {
     route: "/cards",
@@ -453,6 +469,7 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
     jsOk: boolean;
     htmlOk: boolean;
     cssGzipKb: number;
+    maxCssKb: number;
     fontPreloadBytes: number;
     lcpIssues: string[];
     topChunks: { name: string; sizeKb: number }[];
@@ -607,13 +624,14 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
 
       const jsOk = jsGzipKb <= b.maxJsGzipKb;
       const htmlOk = htmlGzipKb <= b.maxHtmlGzipKb;
-      const cssOk = cssGzipKb <= MAX_CSS_GZIP_KB;
+      const maxCssKb = b.maxCssGzipKb ?? MAX_CSS_GZIP_KB;
+      const cssOk = cssGzipKb <= maxCssKb;
       const fontOk = fontPreloadBytes <= MAX_PRELOADED_FONT_BYTES;
 
       if (!jsOk || !htmlOk || !cssOk || !fontOk || lcpIssues.length > 0) {
         hasFailure = true;
       }
-      if (!cssOk) lcpIssues.push(`CSS รวม ${cssGzipKb} KB gzip เกินงบ ${MAX_CSS_GZIP_KB} KB`);
+      if (!cssOk) lcpIssues.push(`CSS รวม ${cssGzipKb} KB gzip เกินงบ ${maxCssKb} KB`);
       if (!fontOk) {
         lcpIssues.push(
           `ฟอนต์ที่พรีโหลดรวม ${fontPreloadBytes.toLocaleString()} B เกินงบ ${MAX_PRELOADED_FONT_BYTES.toLocaleString()} B`,
@@ -630,6 +648,7 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
         jsOk,
         htmlOk,
         cssGzipKb,
+        maxCssKb,
         fontPreloadBytes,
         lcpIssues,
         topChunks: chunkDetails.filter((c) => !c.isPolyfill).slice(0, 3),
@@ -673,7 +692,7 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
       console.log(`  ❌ HTML เกินงบ (${r.htmlGzipKb} KB > ${r.maxHtmlGzipKb} KB)!`);
     }
     console.log(
-      `     CSS ${r.cssGzipKb} KB (≤ ${MAX_CSS_GZIP_KB}) · ฟอนต์ที่พรีโหลด ${r.fontPreloadBytes.toLocaleString()} B (≤ ${MAX_PRELOADED_FONT_BYTES.toLocaleString()})`,
+      `     CSS ${r.cssGzipKb} KB (≤ ${r.maxCssKb}) · ฟอนต์ที่พรีโหลด ${r.fontPreloadBytes.toLocaleString()} B (≤ ${MAX_PRELOADED_FONT_BYTES.toLocaleString()})`,
     );
     for (const issue of r.lcpIssues) {
       console.log(`  ❌ ${issue}`);
