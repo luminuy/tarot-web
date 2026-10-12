@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 // ลิงก์ภายในต้องรู้ทั้งภาษาของหน้าและเครื่องมือเรนเดอร์ปลายทาง — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 
@@ -32,8 +33,17 @@ import { applyConsentChoice } from "@/lib/analytics-bootstrap";
  * จึงไม่มีทั้งการกะพริบของเครื่องที่ตอบไปแล้ว และไม่มี hydration mismatch
  * (สถานะความยินยอมไม่ได้อยู่ใน React state อีกต่อไป)
  */
+/**
+ * หน้ากลุ่มแม่หมอ (โปรไฟล์ · หน้าจอง · หน้าคิว · แผงแม่หมอ) — ใช้แถบย่อบรรทัดเดียวใต้หัวเว็บ
+ * ลูกค้าที่มาจากลิงก์ในแอป LINE เห็นแถบนี้ทุกคน (เบราว์เซอร์ในแอปมีที่เก็บแยก) แถบเต็มที่ขอบล่างสูง ~170px
+ * บังปุ่ม "เลือกเวลานัด" / "ชำระเงิน" ที่ติดขอบล่างพอดี (CONSULT_FLOW_UX_PLAN P8 · ข้อ 3.3)
+ * หน้า Astro: shim ของ `usePathname` คืน "" ➔ ได้แถบเต็มแบบเดิมเสมอ
+ */
+const COMPACT_PATH = /^\/(?:en\/)?readers(?:\/|$)/;
+
 export function ConsentBanner() {
   const { isEnglish } = useLocale();
+  const pathname = usePathname() ?? "";
   const [decided, setDecided] = useState(false);
 
   if (decided) return null;
@@ -44,6 +54,43 @@ export function ConsentBanner() {
     applyConsentChoice(choice);
     setDecided(true);
   };
+
+  if (COMPACT_PATH.test(pathname)) {
+    return (
+      <div
+        data-consent-banner=""
+        role="region"
+        aria-label={isEnglish ? "Cookie and analytics consent" : "การขอความยินยอมเก็บสถิติการใช้งาน"}
+        className="fixed inset-x-0 z-[var(--z-consent)] px-3"
+        style={{ top: "calc(var(--site-header-h) + 8px)" }}
+      >
+        <div className="consent-bar mx-auto flex max-w-3xl items-center gap-2 py-1.5 pl-3.5 pr-1.5">
+          <p className="min-w-0 flex-1 text-[12px] leading-snug text-ink">
+            {isEnglish ? "Anonymous usage stats only · " : "เว็บเก็บสถิติแบบไม่ระบุตัวตน · "}
+            <Link href="/privacy" prefetch={false} className="underline underline-offset-2 hover:text-gold-ink">
+              {isEnglish ? "Policy" : "นโยบาย"}
+            </Link>
+          </p>
+          <button
+            type="button"
+            data-consent-reject=""
+            onClick={() => decide("denied")}
+            className="btn-glass-ghost tap-target shrink-0 px-3 py-1.5 text-[12px] font-bold"
+          >
+            {isEnglish ? "Essential only" : "เฉพาะที่จำเป็น"}
+          </button>
+          <button
+            type="button"
+            data-consent-accept=""
+            onClick={() => decide("granted")}
+            className="btn-glass-primary tap-target shrink-0 px-4 py-1.5 text-[12px] font-bold"
+          >
+            {isEnglish ? "Allow" : "ยินยอม"}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

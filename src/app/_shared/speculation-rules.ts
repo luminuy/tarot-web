@@ -40,6 +40,8 @@ export const SPECULATION_EXCLUDED_PATHS = [
   "/account/*",
   "/readers/console*",
   "/readers/queue/*",
+  // ลิงก์ห้องส่วนตัว — มีรหัสห้องใน URL และอ่านสถานะสดตอนเปิด (migrations/0032)
+  "/readers/room/*",
 ] as const;
 
 /** เพดานจำนวนหน้าในรายการ prerender — กันไม่ให้ค่อย ๆ บวมจนกลายเป็นกฎครอบทั้งเว็บ */

@@ -35,3 +35,29 @@ export function questionCategoryLabel(category: string | null | undefined): stri
   if (!category) return null;
   return CATEGORY_LABEL_TH[category] ?? null;
 }
+
+/** ความด่วนที่ AI คัดกรองให้ (ค่าใน DB เป็น low/medium/high) ➔ คำไทยในแผงแม่หมอ — เดิมโชว์ "ด่วน: medium" */
+const URGENCY_LABEL_TH: Record<string, string> = { high: "ด่วนมาก", medium: "ด่วนปานกลาง", low: "ไม่ด่วน" };
+
+export function questionUrgencyLabel(urgency: string | null | undefined): string | null {
+  if (!urgency) return null;
+  return URGENCY_LABEL_TH[urgency] ?? null;
+}
+
+/**
+ * ผังที่ AI คัดกรองแนะนำ (`screening.ts`) ➔ ชื่อไทย — เดิมแผงแม่หมอโชว์รหัสตรง ๆ เช่น "love-two-hearts"
+ * รหัสที่ไม่รู้จัก = null (ไม่โชว์รหัสอังกฤษให้แม่หมองง)
+ */
+const SUGGESTED_SPREAD_LABEL_TH: Record<string, string> = {
+  "love-two-hearts": "ผังความรักสองหัวใจ",
+  "ex-lover-return": "ผังแฟนเก่า จะกลับมาไหม",
+  "work-career-crossroads": "ผังทางแยกการงาน",
+  "money-flow": "ผังการเงินไหลเข้าออก",
+  "seven-chakras": "ผังจักระ 7 จุด",
+  "three-cards": "ไพ่ 3 ใบ อดีต ปัจจุบัน อนาคต",
+};
+
+export function suggestedSpreadLabel(spread: string | null | undefined): string | null {
+  if (!spread) return null;
+  return SUGGESTED_SPREAD_LABEL_TH[spread] ?? null;
+}

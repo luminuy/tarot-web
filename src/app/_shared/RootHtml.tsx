@@ -115,7 +115,12 @@ export function RootHtml({
   };
 
   return (
-    <html lang={locale}>
+    /*
+     * suppressHydrationWarning: สคริปต์ใน <head> ด้านล่างตั้ง `data-consent-ask` บน <html> ก่อน React ไฮเดรต
+     * (เปิดแถบยินยอมก่อนเฟรมแรก) — React เห็นแอตทริบิวต์ที่ HTML จากเซิร์ฟเวอร์ไม่มีเลยเตือน hydration mismatch
+     * ทุกหน้าสำหรับคนที่ยังไม่เคยตอบแถบยินยอม (ป้าย "1 Issue" ในโหมด dev) · ปิดเฉพาะแอตทริบิวต์ของ <html> ตัวเดียว ลูกไม่โดน
+     */
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
 

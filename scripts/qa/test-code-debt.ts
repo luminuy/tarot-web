@@ -151,11 +151,49 @@ for (const file of sources) {
     const line = src.slice(0, m.index ?? 0).split("\n").length;
     literalStorageKeys.push(`   · ${r}:${line} — "${m[2]}"`);
   }
+  /*
+   * ช่องที่เคยหลุด (2026-10-12): ประกาศคีย์เป็นค่าคงที่ในไฟล์ (`const KEY = "tarot_x"`) แล้วส่งชื่อตัวแปรแทน
+   * — ไม่ใช่สตริงตรง ๆ ในวงเล็บ ด่านข้างบนจึงมองไม่เห็น (หน้าจองแม่หมอเคยเป็นแบบนี้)
+   * ตัวแปรที่ส่งเป็นคีย์ต้องไม่ใช่ค่าคงที่สตริงที่ประกาศในไฟล์เดียวกัน
+   */
+  const localStringConsts = new Map<string, string>();
+  for (const m of src.matchAll(/\bconst\s+([A-Za-z_$][\w$]*)\s*(?::\s*string\s*)?=\s*(["'`])([^"'`$]*)\2\s*;/g)) {
+    localStringConsts.set(m[1], m[3]);
+  }
+  for (const m of src.matchAll(/\b(?:local|session)Storage\s*\.\s*(?:get|set|remove)Item\s*\(\s*([A-Za-z_$][\w$]*)\s*[,)]/g)) {
+    const value = localStringConsts.get(m[1]);
+    if (value === undefined) continue;
+    const line = src.slice(0, m.index ?? 0).split("\n").length;
+    literalStorageKeys.push(`   · ${r}:${line} — ${m[1]} = "${value}" (ค่าคงที่ในไฟล์ ไม่ได้มาจากทะเบียน)`);
+  }
 }
 check(
   "ไม่มีไฟล์ไหนส่งชื่อคีย์เป็นสตริงตายตัวให้ localStorage / sessionStorage",
   literalStorageKeys.length === 0,
   literalStorageKeys.join("\n") + `\n   ➔ ประกาศไว้ใน ${KEYS_MODULE} แล้วนำเข้ามาใช้`,
+);
+
+/*
+ * ISSUE-057 (2026-10-12): สตริงคลาสที่ต่อกันด้วย `+` ต้องมีช่องว่างคั่น
+ * `Input.tsx` เคยเขียน `"… text-ink-deep" + "placeholder:text-muted …"` ➔ กลายเป็นคลาสเดียวที่ไม่มีอยู่จริง
+ * ช่องกรอกทั้งเว็บไม่ได้สีตัวอักษรและสี placeholder มาตลอดโดยไม่มีใครเห็น
+ * ตรวจคอมโพเนนต์กลาง (`src/components/ui`) ซึ่งทุกหน้าใช้ร่วมกัน
+ */
+const uiDir = path.join(ROOT, "src/components/ui");
+const gluedClassStrings: string[] = [];
+for (const file of fs.readdirSync(uiDir).filter((f) => f.endsWith(".tsx")).map((f) => path.join(uiDir, f))) {
+  const src = stripComments(fs.readFileSync(file, "utf-8"));
+  for (const m of src.matchAll(/(["'`])([^"'`\n]*[\w\])-])\1\s*\+\s*(["'`])([a-z!\[][^"'`\n]*)\3/g)) {
+    // เฉพาะสตริงที่หน้าตาเป็นคลาส Tailwind (มีคำอย่าง text-/bg-/px- …) — ข้อความทั่วไปไม่นับ
+    if (!/\b(?:text|bg|border|px|py|p|m|w|h|rounded|flex|grid|gap|font|ring|shadow|transition|duration|placeholder|focus-visible)[-:]/.test(m[2] + " " + m[4])) continue;
+    const line = src.slice(0, m.index ?? 0).split("\n").length;
+    gluedClassStrings.push(`   · ${rel(file)}:${line} — "…${m[2].slice(-24)}" + "${m[4].slice(0, 24)}…"`);
+  }
+}
+check(
+  "สตริงคลาสที่ต่อกันในคอมโพเนนต์กลางมีช่องว่างคั่นเสมอ (ISSUE-057)",
+  gluedClassStrings.length === 0,
+  gluedClassStrings.join("\n") + "\n   ➔ เติมช่องว่างท้ายท่อนหน้า ไม่งั้นสองคลาสติดกันเป็นคลาสที่ไม่มีอยู่จริง",
 );
 
 /* ปุ่ม PDPA ต้องยังลบทุกคีย์จริง — ห้ามเปลี่ยนไปวนจากทะเบียน (ทะเบียนที่ขาดหนึ่งคีย์ = ข้อมูลค้าง)

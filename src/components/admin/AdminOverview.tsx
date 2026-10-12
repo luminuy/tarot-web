@@ -62,6 +62,7 @@ const AUDIT_LABEL: Record<string, string> = {
   create_reader: "เพิ่มหมอดูพาร์ทเนอร์",
   update_reader: "แก้ข้อมูลหมอดูพาร์ทเนอร์",
   delete_reader: "ลบหมอดูพาร์ทเนอร์",
+  revoke_reader_links: "ยกเลิกลิงก์แผงแม่หมอทั้งหมด",
   entitlement_flag: "เปิด/ปิดระบบสิทธิ์",
   entitlement_announce: "เปิด/ปิดแบนเนอร์ประกาศ",
   entitlement_init_db: "เตรียมตารางสิทธิ์",

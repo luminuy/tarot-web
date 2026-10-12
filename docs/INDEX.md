@@ -79,6 +79,7 @@ docs/
         ├── HANDOFF_2026-09-04.md                   # ✅ 📦 แผนส่งต่องานที่ยังค้าง หลังการตรวจใหญ่ 2026-09-04 (Handoff Plan)
         ├── ENTITLEMENT_PLAN.md                     # ✅ 🎟 ระบบสมาชิกและโควตาเปิดไพ่ — แผนลงมือสำหรับทีม Antigravity
         ├── EMAIL_AUTH_PLAN.md                      # ✅ 📧 แผนเพิ่ม "เข้าสู่ระบบด้วยอีเมล + รหัสผ่าน" — handoff ให้ทีมอีกทีม
+        ├── CONSULT_FLOW_UX_PLAN_2026-10-11.md      # ✅ 🛎️ แผนยกเครื่องขั้นตอน "ปรึกษาแม่หมอ" ให้ใช้ง่ายแบบเว็บจองระดับโลก
         ├── CLOUDFLARE_FREE_STACK.md                # ✅ ☁️ แผนใช้บริการฟรีของ Cloudflare ต่อยอด SeerTarot
         ├── AI_COST_CONTROL_PLAN.md                 # ✅ 💸 แผนคุมต้นทุน AI + รหัสทดสอบข้าม rate limit — handoff ให้ทีม Gemini
         ├── UX_PERF_PLAN.md                         # 📚 🎯 แผนยกเครื่อง UX · ความไว · ความสมูท — 2026-09-01

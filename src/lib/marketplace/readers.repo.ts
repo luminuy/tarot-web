@@ -22,12 +22,39 @@ export interface Reader {
   bufferMin: number;
   /** เพดานนัดต่อวัน — null = ไม่จำกัด */
   dailyCap: number | null;
+  /** รับนัดล่วงหน้าอย่างน้อยกี่นาที (migrations/0030) — null = ค่าเริ่มต้น `DEFAULT_LEAD_MIN` */
+  leadMin: number | null;
 }
 
 export type PublicReaderProfile = Omit<
   Reader,
-  "lineUrl" | "sessionSecret" | "updatedAt" | "notifyEmail" | "bufferMin" | "dailyCap"
+  "lineUrl" | "sessionSecret" | "updatedAt" | "notifyEmail" | "bufferMin" | "dailyCap" | "leadMin"
 >;
+
+/**
+ * ข้อมูลแม่หมอที่ส่งให้แผงแอดมิน — ครบทุกช่องยกเว้น `sessionSecret`
+ * (กุญแจที่ใช้เซ็นลิงก์แผงแม่หมอ ไม่ต้องออกนอกเซิร์ฟเวอร์แม้แต่ไปหาแอดมิน · ใครถือ = ปลอมลิงก์แผงได้ไม่มีวันหมดอายุ)
+ */
+export type AdminReader = Omit<Reader, "sessionSecret">;
+
+export function toAdminReader(reader: Reader): AdminReader {
+  const { sessionSecret: _secret, ...rest } = reader;
+  void _secret;
+  return rest;
+}
+
+/** งานของแม่หมอตอนนี้ (หน้าแอดมิน "หมอดูพาร์ทเนอร์") — มีเฉพาะแม่หมอที่ใช้งานอยู่ */
+export interface ReaderActivity {
+  isLiveOpen: boolean;
+  /** ตั้งตารางรับนัดประจำสัปดาห์แล้วหรือยัง */
+  hasSchedule: boolean;
+  /** เวลาว่างเร็วสุดที่ลูกค้าจองได้ (null = ยังไม่ตั้งตาราง หรือเต็มทุกช่องใน 14 วัน) */
+  nextSlot: number | null;
+  /** นัดที่ลูกค้าจ่ายเงินแล้วและยังไม่ถึงเวลา/กำลังคุย */
+  upcoming: number;
+  /** ลูกค้าคิวสดที่จ่ายเงินแล้วและยังรอคุยอยู่ */
+  liveWaiting: number;
+}
 
 interface RawReaderRow {
   id: string;
@@ -45,6 +72,7 @@ interface RawReaderRow {
   price_thb?: number | null;
   buffer_min?: number | null;
   daily_cap?: number | null;
+  lead_min?: number | null;
 }
 
 function parseSpecialties(raw: string): string[] {
@@ -76,6 +104,7 @@ function mapRowToReader(row: RawReaderRow): Reader {
     priceThb: typeof row.price_thb === "number" && row.price_thb > 0 ? row.price_thb : null,
     bufferMin: Number(row.buffer_min ?? 0) || 0,
     dailyCap: typeof row.daily_cap === "number" && row.daily_cap > 0 ? row.daily_cap : null,
+    leadMin: typeof row.lead_min === "number" && row.lead_min > 0 ? row.lead_min : null,
   };
 }
 
@@ -120,13 +149,20 @@ export interface ReaderBookingSettings {
   notifyEmail: string | null;
   bufferMin: number;
   dailyCap: number | null;
+  /**
+   * รับนัดล่วงหน้าอย่างน้อยกี่นาที — ไม่ส่งมา = คงค่าเดิม
+   * (แผงแม่หมอที่เปิดค้างไว้ก่อนอัปเดตยังส่งชุดเดิมอยู่ ห้ามล้างค่าที่แม่หมอตั้งไว้ทิ้ง)
+   */
+  leadMin?: number;
 }
 
 export async function updateReaderBookingSettings(id: string, input: ReaderBookingSettings): Promise<void> {
   const db = await getAppDB();
   await db
-    .prepare("UPDATE readers SET notify_email = ?, buffer_min = ?, daily_cap = ?, updated_at = ? WHERE id = ?")
-    .bind(input.notifyEmail, input.bufferMin, input.dailyCap, Date.now(), id)
+    .prepare(
+      "UPDATE readers SET notify_email = ?, buffer_min = ?, daily_cap = ?, lead_min = COALESCE(?, lead_min), updated_at = ? WHERE id = ?"
+    )
+    .bind(input.notifyEmail, input.bufferMin, input.dailyCap, input.leadMin ?? null, Date.now(), id)
     .run();
 }
 
@@ -180,6 +216,26 @@ export async function getPublicReaderById(id: string): Promise<PublicReaderProfi
   return toPublicReaderProfile(reader);
 }
 
+/** กุญแจเซ็นลิงก์แผงแม่หมอ (สุ่ม 256 บิต) */
+function newSessionSecret(): string {
+  return crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
+}
+
+/**
+ * ยกเลิกลิงก์แผงแม่หมอ "ทุกลิงก์ที่เคยออก" ในครั้งเดียว — เปลี่ยนกุญแจเซ็น ลิงก์เก่าตรวจลายเซ็นไม่ผ่านทันที
+ * (ISSUE-058 · ร่างข้อตกลงแม่หมอข้อ 4.1 สัญญาไว้ว่ายกเลิกลิงก์เดิมได้)
+ * แผงที่เปิดค้างไว้ด้วยลิงก์เก่าจะได้ 401 ในรอบถามถัดไป — แผงแม่หมอแสดงแถบ "ลิงก์ใช้ไม่ได้แล้ว" โดยไม่ล้างหน้า
+ */
+export async function rotateReaderSessionSecret(id: string): Promise<Reader | null> {
+  const db = await getAppDB();
+  const res = await db
+    .prepare("UPDATE readers SET session_secret = ?, updated_at = ? WHERE id = ?")
+    .bind(newSessionSecret(), Date.now(), id)
+    .run();
+  if ((res.meta?.changes ?? 0) === 0) return null;
+  return getReaderById(id);
+}
+
 /**
  * สร้างแม่หมอคนใหม่
  */
@@ -187,7 +243,7 @@ export async function createReader(input: CreateReaderInput): Promise<Reader> {
   const db = await getAppDB();
   const now = Date.now();
   const id = `reader_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
-  const sessionSecret = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
+  const sessionSecret = newSessionSecret();
 
   const specialtiesJson = JSON.stringify(input.specialties || []);
   const status = input.status || "pending";
@@ -286,6 +342,12 @@ export async function deleteReader(id: string): Promise<boolean> {
     await db.prepare("DELETE FROM reader_availability WHERE reader_id = ?").bind(id).run();
   } catch {
     // ignore if tables not yet created in older migrations
+  }
+  // ลิงก์ห้องส่วนตัว (migrations/0032) อ้าง FK ถึงแม่หมอ — ต้องลบก่อนแถวแม่หมอ · แยก try แบบเดียวกัน
+  try {
+    await db.prepare("DELETE FROM reader_invites WHERE reader_id = ?").bind(id).run();
+  } catch {
+    // ignore if table not yet created
   }
   // ตาราง migrations/0021 — แยก try เหมือนห้องวิดีโอ: ฐานข้อมูลเก่าที่ยังไม่มีตารางต้องไม่ทำให้การลบแม่หมอล้ม
   try {

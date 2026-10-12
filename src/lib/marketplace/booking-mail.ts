@@ -7,6 +7,7 @@ import {
   formatSlotRange,
   googleCalendarUrl,
   MAX_RESCHEDULES,
+  PAID_GRACE_MINUTES,
   type ReminderKind,
 } from "@/lib/marketplace/booking-policy";
 import { CONSULTATION_MINUTES } from "@/lib/marketplace/offer";
@@ -71,6 +72,8 @@ interface MailContext {
   slotStart: number | null;
   contactEmail: string | null;
   amountThb: number | null;
+  /** มาจากลิงก์ห้องส่วนตัวที่แม่หมอส่งให้ (migrations/0032) — อีเมลพูดว่า "ห้องส่วนตัว" ไม่ใช่ "คิวสด" */
+  privateRoom: boolean;
 }
 
 async function loadContext(ticketId: string): Promise<MailContext | null> {
@@ -81,7 +84,8 @@ async function loadContext(ticketId: string): Promise<MailContext | null> {
               r.display_name, r.notify_email,
               b.id AS booking_id, b.kind AS booking_kind, b.slot_start, b.contact_email,
               (SELECT amount_satang FROM payments p WHERE p.ticket_id = t.id AND p.status IN ('paid', 'refunded')
-                ORDER BY p.created_at DESC LIMIT 1) AS amount_satang
+                ORDER BY p.created_at DESC LIMIT 1) AS amount_satang,
+              EXISTS (SELECT 1 FROM reader_invites i WHERE i.ticket_id = t.id) AS private_room
          FROM queue_tickets t
          JOIN readers r ON r.id = t.reader_id
          JOIN bookings b ON b.ticket_id = t.id
@@ -102,6 +106,7 @@ async function loadContext(ticketId: string): Promise<MailContext | null> {
       slot_start: number;
       contact_email: string | null;
       amount_satang: number | null;
+      private_room: number | null;
     }>();
   if (!row) return null;
   return {
@@ -116,11 +121,13 @@ async function loadContext(ticketId: string): Promise<MailContext | null> {
     slotStart: row.booking_kind === "walkup" ? null : Number(row.slot_start),
     contactEmail: row.contact_email,
     amountThb: row.amount_satang ? Number(row.amount_satang) / 100 : null,
+    privateRoom: Number(row.private_room ?? 0) === 1,
   };
 }
 
 function whenText(ctx: MailContext): string {
-  return ctx.slotStart ? formatSlotRange(ctx.slotStart, true) : "คิวสด · คุยทันทีที่ถึงคิว";
+  if (ctx.slotStart) return formatSlotRange(ctx.slotStart, true);
+  return ctx.privateRoom ? "ห้องคุยส่วนตัว · เข้าห้องเมื่อแม่หมอกดรับ" : "คิวสด · คุยทันทีที่ถึงคิว";
 }
 
 function detailBox(rows: [string, string][]): string {
@@ -168,7 +175,7 @@ export async function sendBookingConfirmed(ticketId: string): Promise<void> {
     if (!ctx || !(await claim(ctx.bookingId, "confirm_email_at"))) return;
     const link = await bookingAccessUrl(ctx.ticketId, ctx.customerRef, ctx.slotStart);
     const scheduled = Boolean(ctx.slotStart);
-    const title = scheduled ? "นัดของคุณยืนยันแล้ว" : "คุณอยู่ในคิวแล้ว";
+    const title = scheduled ? "นัดของคุณยืนยันแล้ว" : ctx.privateRoom ? "ชำระเงินแล้ว รอแม่หมอรับเข้าห้อง" : "คุณอยู่ในคิวแล้ว";
     const rows: [string, string][] = [
       ["แม่หมอ", ctx.readerName],
       [scheduled ? "เวลานัด" : "รูปแบบ", whenText(ctx)],
@@ -186,14 +193,21 @@ export async function sendBookingConfirmed(ticketId: string): Promise<void> {
         )}" style="color:#8F5C1A;">+ เพิ่มลง Google Calendar</a></p>`
       : "";
     const policy = scheduled
-      ? `ยกเลิกหรือเลื่อนนัดได้ฟรีก่อนเวลานัด ${FREE_CANCEL_HOURS} ชม. (เลื่อนได้ ${MAX_RESCHEDULES} ครั้ง) คืนเงินเต็มจำนวน · น้อยกว่า ${FREE_CANCEL_HOURS} ชม. ไม่คืนเงิน · แม่หมอยกเลิกหรือไม่มาตามนัด คืนเงินเต็มอัตโนมัติ`
-      : "ยกเลิกได้ตลอดระหว่างรอคิว คืนเงินเต็มจำนวน · แม่หมอปิดคิวก่อนถึงตาคุณ คืนเงินเต็มอัตโนมัติ";
+      ? `ยกเลิกหรือเลื่อนนัดได้ฟรีก่อนเวลานัด ${FREE_CANCEL_HOURS} ชม. (เลื่อนได้ ${MAX_RESCHEDULES} ครั้ง) คืนเงินเต็มจำนวน · น้อยกว่า ${FREE_CANCEL_HOURS} ชม. ไม่คืนเงิน · เพิ่งจ่ายแล้วเห็นว่ากดเวลาผิด ภายใน ${PAID_GRACE_MINUTES} นาทีหลังจ่ายยกเลิกหรือเลื่อนได้ฟรี (นัดที่ห่างเกิน 1 ชม.) · แม่หมอยกเลิกหรือไม่มาตามนัด คืนเงินเต็มอัตโนมัติ`
+      : ctx.privateRoom
+        ? "ยกเลิกได้ตลอดระหว่างรอแม่หมอรับเข้าห้อง คืนเงินเต็มจำนวน · แม่หมอยกเลิก คืนเงินเต็มอัตโนมัติ"
+        : "ยกเลิกได้ตลอดระหว่างรอคิว คืนเงินเต็มจำนวน · แม่หมอปิดคิวก่อนถึงตาคุณ คืนเงินเต็มอัตโนมัติ";
+    const lead = scheduled
+      ? "ถึงเวลานัด กดปุ่มด้านล่างแล้วรอแม่หมอเริ่มคุย ปุ่มเข้าห้องวิดีโอคอลจะขึ้นเอง"
+      : ctx.privateRoom
+        ? "เปิดหน้ารอเข้าห้องทิ้งไว้ได้เลย แม่หมอกดรับเมื่อไร ปุ่มเข้าห้องวิดีโอคอลจะขึ้นเอง"
+        : "เปิดหน้าคิวทิ้งไว้ได้เลย ถึงตาคุณแล้วปุ่มเข้าห้องวิดีโอคอลจะขึ้นเอง";
     const html = baseLayout(
       `<h1>${title}</h1>
        <p>สวัสดีคุณ${escapeHtml(ctx.nickname)}</p>
-       <p>${scheduled ? "ถึงเวลานัด กดปุ่มด้านล่างแล้วรอแม่หมอเริ่มคุย ปุ่มเข้าห้องวิดีโอคอลจะขึ้นเอง" : "เปิดหน้าคิวทิ้งไว้ได้เลย ถึงตาคุณแล้วปุ่มเข้าห้องวิดีโอคอลจะขึ้นเอง"}</p>
+       <p>${lead}</p>
        ${detailBox(rows)}
-       ${button(link, scheduled ? "ดูนัดของฉัน" : "เปิดหน้าคิว")}
+       ${button(link, scheduled ? "ดูนัดของฉัน" : ctx.privateRoom ? "เปิดหน้ารอเข้าห้อง" : "เปิดหน้าคิว")}
        ${calendar}
        <div class="fallback">${escapeHtml(policy)}<br><br>ลิงก์นี้เปิดนัดของคุณได้ทุกเครื่อง เก็บอีเมลนี้ไว้ และอย่าส่งต่อให้ผู้อื่น</div>`,
       `${title} — SeerTarot`
@@ -317,7 +331,9 @@ async function notifyReader(ctx: MailContext, event: "new" | "cancelled" | "resc
     event === "new"
       ? ctx.slotStart
         ? "มีนัดใหม่ (ชำระเงินแล้ว)"
-        : "มีลูกค้าเข้าคิวสด (ชำระเงินแล้ว)"
+        : ctx.privateRoom
+          ? "ลูกค้าจากลิงก์ห้องส่วนตัวชำระเงินแล้ว — กดรับเข้าห้องในแผงแม่หมอ"
+          : "มีลูกค้าเข้าคิวสด (ชำระเงินแล้ว)"
       : event === "cancelled"
         ? "ลูกค้ายกเลิกนัด"
         : "ลูกค้าเลื่อนนัด";

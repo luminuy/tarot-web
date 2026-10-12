@@ -18,14 +18,46 @@ const DAY = 24 * HOUR;
 
 /** ความยาวหนึ่งนัด = ความยาวการปรึกษา */
 export const SLOT_MINUTES = CONSULTATION_MINUTES;
-/** จองได้ล่วงหน้าอย่างน้อยกี่ชั่วโมง (แม่หมอต้องมีเวลาอ่านบรีฟ) */
+/** จองได้ล่วงหน้าอย่างน้อยกี่ชั่วโมง (แม่หมอต้องมีเวลาอ่านบรีฟ) — ค่าเริ่มต้นของแม่หมอที่ยังไม่ได้ตั้งเอง */
 export const BOOKING_LEAD_HOURS = 2;
+/** ค่าเริ่มต้นของ "รับนัดล่วงหน้าอย่างน้อย" (นาที) — เจ้าของเคาะ 2 ชม. ไว้ 2026-10-03 */
+export const DEFAULT_LEAD_MIN = BOOKING_LEAD_HOURS * 60;
+/**
+ * ตัวเลือก "รับนัดล่วงหน้าอย่างน้อย" ที่แม่หมอตั้งเองได้ (migrations/0030)
+ * ลูกค้าส่วนใหญ่ทักแม่หมอทาง LINE แล้วอยากคุยเร็ว ๆ — 2 ชม. ตายตัวทำให้ "อยากคุยตอนนี้" นัดไม่ได้ (CONSULT_FLOW P3)
+ * ต่ำสุด 30 นาที: แม่หมอยังมีเวลาเห็นอีเมล/แผงแม่หมอและอ่านบรีฟก่อนเริ่ม
+ */
+export const LEAD_OPTIONS_MIN = [30, 60, 120, 180, 360, 720, 1440] as const;
+
+/** ค่าที่ไม่อยู่ในตัวเลือก (ข้อมูลเก่า/ค่าแปลก) = ค่าเริ่มต้น — ด่านเวลาว่างฝั่งเซิร์ฟเวอร์ใช้ค่านี้เสมอ */
+export function normalizeLeadMin(value: number | null | undefined): number {
+  return typeof value === "number" && (LEAD_OPTIONS_MIN as readonly number[]).includes(value) ? value : DEFAULT_LEAD_MIN;
+}
+
+/** "30 นาที" · "2 ชม." · "1 วัน" */
+export function formatLeadLabel(minutes: number): string {
+  if (minutes >= 1440 && minutes % 1440 === 0) return `${minutes / 1440} วัน`;
+  if (minutes >= 60 && minutes % 60 === 0) return `${minutes / 60} ชม.`;
+  return `${minutes} นาที`;
+}
 /** เปิดให้จองไกลสุดกี่วัน */
 export const BOOKING_HORIZON_DAYS = 14;
 /** ยกเลิก/เลื่อนนัดได้ฟรีถ้าทำก่อนเวลานัดอย่างน้อยกี่ชั่วโมง */
 export const FREE_CANCEL_HOURS = 24;
 /** เลื่อนนัดได้กี่ครั้งต่อการจอง */
 export const MAX_RESCHEDULES = 1;
+/**
+ * ช่วงผ่อนผันหลังจ่าย (แบบ Airbnb · เจ้าของสั่ง 2026-10-12 "ทำให้หมดเลย" — แผน CONSULT_FLOW ข้อ 3.1)
+ * จ่ายแล้วเพิ่งเห็นว่ากดเวลาผิด/เปลี่ยนใจ ➔ ภายในกี่นาทีหลังจ่ายยกเลิกได้เงินคืนเต็ม หรือเลื่อนนัดได้ แม้นัดจะเหลือไม่ถึง 24 ชม.
+ */
+export const PAID_GRACE_MINUTES = 10;
+/** ช่วงผ่อนผันใช้ได้เฉพาะนัดที่ยังห่างอย่างน้อยกี่นาที — ใกล้กว่านี้แม่หมอเตรียมรับลูกค้าแล้ว */
+export const PAID_GRACE_MIN_LEAD_MINUTES = 60;
+/**
+ * คิวสด "เปิดจริง" ต้องเห็นแผงแม่หมอภายในกี่นาที (migrations/0031 · แผน CONSULT_FLOW ข้อ 3.2)
+ * ลืมปิดสวิตช์แล้วล็อกจอ/ปิดหน้า ➔ เกินนี้ระบบถือว่าปิดคิวสดเอง ลูกค้าไม่จ่ายแล้วรอเก้อ · เปิดแผงกลับมา = เปิดต่อเอง
+ */
+export const LIVE_PRESENCE_TIMEOUT_MINUTES = 15;
 /** แม่หมอไม่เริ่มนัดภายในกี่นาทีหลังเวลานัด = ลูกค้ายกเลิกได้และได้เงินคืนเต็ม / แม่หมอแจ้งลูกค้าไม่มาได้ */
 export const NO_SHOW_GRACE_MINUTES = 15;
 /** แม่หมอกด "เริ่มนัด" ได้ก่อนเวลากี่นาที */
@@ -108,6 +140,8 @@ export interface SlotOptions {
   bufferMin?: number;
   /** เพดานนัดต่อวัน — ครบแล้วทั้งวันไม่เปิดเพิ่ม */
   dailyCap?: number | null;
+  /** รับนัดล่วงหน้าอย่างน้อยกี่นาที (migrations/0030) — ไม่ระบุ/ค่าแปลก = `DEFAULT_LEAD_MIN` */
+  leadMin?: number | null;
 }
 
 /** ตัวเลือกเวลาพักที่แม่หมอเลือกได้ — ตารางเป็นช่องละ 30 นาที พักเศษกว่านั้นก็ต้องเว้นทั้งช่องอยู่ดี */
@@ -116,7 +150,7 @@ export const DAILY_CAP_MAX = 24;
 
 /**
  * เวลาว่างทั้งหมดในช่วงที่เปิดให้จอง
- * - ต้องอยู่ในตารางประจำสัปดาห์ · เริ่มหลัง "ตอนนี้ + เวลาจองล่วงหน้าขั้นต่ำ" · ไม่เกินขอบเขตวันที่เปิดจอง
+ * - ต้องอยู่ในตารางประจำสัปดาห์ · เริ่มหลัง "ตอนนี้ + เวลาจองล่วงหน้าขั้นต่ำของแม่หมอ" · ไม่เกินขอบเขตวันที่เปิดจอง
  * - ไม่ซ้ำกับเวลาที่ถูกจอง/กันที่ไว้แล้ว (`taken`) · ไม่ใช่วันหยุด · เว้นเวลาพัก · ไม่เกินเพดานต่อวัน
  *
  * ⚠️ เวลาพัก/เพดานต่อวันเป็น "ความสะดวกของแม่หมอ" — สองคนจองช่องติดกันพร้อมกันเป๊ะอาจหลุดได้
@@ -128,7 +162,7 @@ export function generateSlots(
   taken: ReadonlySet<number>,
   opts: SlotOptions = {}
 ): SlotDay[] {
-  const earliest = nowMs + BOOKING_LEAD_HOURS * HOUR;
+  const earliest = nowMs + normalizeLeadMin(opts.leadMin) * MINUTE;
   const firstDay = bkkDayStart(nowMs);
   const gap = slotMs + Math.max(0, opts.bufferMin ?? 0) * MINUTE;
   const takenList = [...taken];
@@ -163,13 +197,52 @@ export function slotRejection(
   opts: SlotOptions = {}
 ): string | null {
   if (!Number.isSafeInteger(slotStart)) return "เวลานัดไม่ถูกต้อง";
-  const open = generateSlots(rules, nowMs, new Set(), { blockedDates: opts.blockedDates });
+  // เวลาแจ้งล่วงหน้าของแม่หมอต้องตรวจตรงนี้ด้วย — ไม่งั้นไคลเอนต์ที่ส่งเวลาใกล้กว่าที่แม่หมอรับจะหลุดผ่าน
+  const open = generateSlots(rules, nowMs, new Set(), { blockedDates: opts.blockedDates, leadMin: opts.leadMin });
   const day = open.find((d) => d.date === bkkDateKey(slotStart));
   if (!day || !day.slots.includes(slotStart)) return "เวลานี้ไม่อยู่ในตารางรับนัดของแม่หมอแล้ว กรุณาเลือกเวลาใหม่";
   if (taken.has(slotStart)) return "เวลานี้เพิ่งมีคนจองไป กรุณาเลือกเวลาอื่น";
   const free = generateSlots(rules, nowMs, taken, opts).find((d) => d.date === bkkDateKey(slotStart));
   if (!free || !free.slots.includes(slotStart)) return "เวลานี้ไม่ว่างแล้ว (แม่หมอเว้นเวลาพักหรือรับนัดเต็มวัน) กรุณาเลือกเวลาอื่น";
   return null;
+}
+
+/* ── ตัวเลือกเวลาฝั่งหน้าจอ (ตรรกะบริสุทธิ์ · ด่าน test-marketplace-readers หัวข้อ 19) ─────── */
+
+/**
+ * วันที่ตัวเลือกเวลาควรแสดงอยู่ — ลำดับ: วันที่ผู้ใช้แตะล่าสุด ➔ วันของเวลาที่เลือกไว้ ➔ วันแรกที่มีเวลาว่าง
+ *
+ * ⚠️ บั๊กเดิม (CONSULT_FLOW P1): ให้ "วันของเวลาที่เลือกไว้" ชนะ "วันที่เพิ่งแตะ"
+ *    เลือกเวลาไปแล้วหนึ่งครั้ง แตะวันอื่นเท่าไหร่หน้าจอก็ค้างวันเดิม — ลูกค้าบอกว่า "มันเลือกเวลาอื่น"
+ */
+export function resolveVisibleDay(
+  days: readonly SlotDay[],
+  value: number | null,
+  activeDate: string | null
+): SlotDay | null {
+  if (days.length === 0) return null;
+  const tapped = activeDate ? days.find((d) => d.date === activeDate) : undefined;
+  if (tapped) return tapped;
+  const ofValue = value !== null ? days.find((d) => d.slots.includes(value)) : undefined;
+  return ofValue ?? days[0];
+}
+
+/** เวลาว่างที่เร็วที่สุด `count` ช่อง (ข้ามวันได้) — ทางลัด "เร็วที่สุด" ของการ์ดจองและหน้าจอง */
+export function soonestSlots(days: readonly SlotDay[], count: number): number[] {
+  const out: number[] = [];
+  for (const d of days) {
+    for (const s of d.slots) {
+      if (out.length >= count) return out;
+      out.push(s);
+    }
+  }
+  return out;
+}
+
+/** แถววันแบ่งเป็นหน้า (แทนการเลื่อนแนวนอน — กฎเหล็กข้อ 3) · คืนเลขหน้าที่มีวันนั้นอยู่ */
+export function pageOfDate(days: readonly SlotDay[], date: string | null, pageSize: number): number {
+  const i = date ? days.findIndex((d) => d.date === date) : -1;
+  return i < 0 ? 0 : Math.floor(i / Math.max(1, pageSize));
 }
 
 export type ReminderKind = "24h" | "1h";
@@ -198,6 +271,18 @@ export interface CancelDecision {
 }
 
 /**
+ * ยังอยู่ในช่วงผ่อนผันหลังจ่ายไหม — คืนเวลาที่ช่วงผ่อนผันหมด (null = ไม่อยู่ในช่วง)
+ * `paidAt` = เวลาที่ระบบยืนยันการจ่าย (`payments.updated_at` ของรายการที่ paid)
+ */
+export function paidGraceUntil(paidAt: number | null | undefined, slotStart: number | null, nowMs: number): number | null {
+  if (typeof paidAt !== "number" || slotStart === null) return null;
+  const until = paidAt + PAID_GRACE_MINUTES * MINUTE;
+  if (nowMs < paidAt || nowMs > until) return null;
+  if (slotStart - nowMs < PAID_GRACE_MIN_LEAD_MINUTES * MINUTE) return null;
+  return until;
+}
+
+/**
  * นโยบายยกเลิก — ใครยกเลิก ตอนไหน ได้เงินคืนไหม
  *
  * | กรณี | ผล |
@@ -206,6 +291,7 @@ export interface CancelDecision {
  * | ยังไม่จ่าย | ยกเลิกได้ ไม่มีอะไรต้องคืน |
  * | คิวสด ระหว่างรอเรียก | คืนเต็ม (ยังไม่ได้รับบริการ) |
  * | นัดล่วงหน้า ก่อนเวลานัด ≥ 24 ชม. | คืนเต็ม |
+ * | นัดล่วงหน้า ภายใน 10 นาทีหลังจ่าย (นัดยังห่าง ≥ 1 ชม.) | คืนเต็ม (ช่วงผ่อนผัน — เผื่อกดเวลาผิด) |
  * | นัดล่วงหน้า เลยเวลานัด 15 นาทีแล้วแม่หมอยังไม่เริ่ม | คืนเต็ม (แม่หมอไม่มาตามนัด) |
  * | นัดล่วงหน้า น้อยกว่า 24 ชม. | ยกเลิกได้ ไม่คืนเงิน |
  * | แม่หมอเรียกคิว/เริ่มคุยแล้ว | ลูกค้ายกเลิกเองไม่ได้ |
@@ -217,6 +303,8 @@ export function decideCancellation(input: {
   paid: boolean;
   slotStart: number | null;
   nowMs: number;
+  /** เวลาที่จ่ายสำเร็จ — ใช้ตัดสินช่วงผ่อนผันหลังจ่าย (ไม่ส่ง = ไม่มีช่วงผ่อนผัน) */
+  paidAt?: number | null;
 }): CancelDecision {
   const { actor, kind, ticketStatus, paid, slotStart, nowMs } = input;
   const open = ticketStatus === "pending_payment" || ticketStatus === "waiting" || ticketStatus === "screening";
@@ -228,22 +316,28 @@ export function decideCancellation(input: {
   if (!paid) return { allowed: true, refund: false, reason: "unpaid" };
   if (kind === "walkup" || slotStart === null) return { allowed: true, refund: true, reason: "walkup_waiting" };
   if (slotStart - nowMs >= FREE_CANCEL_HOURS * HOUR) return { allowed: true, refund: true, reason: "early_cancel" };
+  if (paidGraceUntil(input.paidAt, slotStart, nowMs) !== null) return { allowed: true, refund: true, reason: "grace_cancel" };
   if (nowMs >= slotStart + NO_SHOW_GRACE_MINUTES * MINUTE) return { allowed: true, refund: true, reason: "reader_no_show" };
   return { allowed: true, refund: false, reason: "late_cancel" };
 }
 
-/** เลื่อนนัดได้ไหม (นัดที่จ่ายแล้ว · เหลือเวลาก่อนนัด ≥ 24 ชม. · ยังไม่เคยเลื่อนครบโควตา) */
+/**
+ * เลื่อนนัดได้ไหม (นัดที่จ่ายแล้ว · ยังไม่เคยเลื่อนครบโควตา ·
+ * เหลือเวลาก่อนนัด ≥ 24 ชม. หรือยังอยู่ในช่วงผ่อนผันหลังจ่าย)
+ */
 export function canReschedule(input: {
   ticketStatus: string;
   slotStart: number | null;
   rescheduleCount: number;
   nowMs: number;
+  paidAt?: number | null;
 }): boolean {
   return (
     input.ticketStatus === "waiting" &&
     input.slotStart !== null &&
     input.rescheduleCount < MAX_RESCHEDULES &&
-    input.slotStart - input.nowMs >= FREE_CANCEL_HOURS * HOUR
+    (input.slotStart - input.nowMs >= FREE_CANCEL_HOURS * HOUR ||
+      paidGraceUntil(input.paidAt, input.slotStart, input.nowMs) !== null)
   );
 }
 
@@ -304,6 +398,15 @@ export function relativeDayLabel(ms: number, nowMs: number): string {
   if (diff === 0) return "วันนี้";
   if (diff === 1) return "พรุ่งนี้";
   return formatDayLabel(ms);
+}
+
+/** แบบสั้นสำหรับปุ่มเวลา: "วันนี้" / "พรุ่งนี้" / "ศ. 10 ต.ค." */
+export function relativeDayShort(ms: number, nowMs: number): string {
+  const diff = Math.round((bkkDayStart(ms) - bkkDayStart(nowMs)) / DAY);
+  if (diff === 0) return "วันนี้";
+  if (diff === 1) return "พรุ่งนี้";
+  const p = bkkParts(ms);
+  return `${TH_WEEKDAY_SHORT[p.weekday]} ${p.day} ${TH_MONTH_SHORT[p.month]}`;
 }
 
 /** "อีก 2 วัน 3 ชม." / "อีก 45 นาที" / "ถึงเวลานัดแล้ว" */

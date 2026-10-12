@@ -363,6 +363,12 @@ async function runTests() {
       rootSrc.includes("data-consent-ask") &&
       /localStorage\.getItem/.test(rootSrc),
   );
+  // สคริปต์นั้นแตะแอตทริบิวต์ของ <html> ก่อนไฮเดรต — ถ้า <html> ไม่ประกาศ suppressHydrationWarning
+  // React จะเตือน hydration mismatch ทุกหน้าสำหรับผู้ใช้ใหม่ (เจอจากภาพทดสอบ 2026-10-12 · ป้าย "1 Issue")
+  check(
+    "<html> ประกาศ suppressHydrationWarning เพราะสคริปต์ใน <head> ตั้งแอตทริบิวต์ก่อนไฮเดรต",
+    !/document\.documentElement\.setAttribute\(/.test(rootSrc) || /<html lang=\{locale\} suppressHydrationWarning>/.test(rootSrc),
+  );
 
   /*
    * 🔌 preconnect ต้องชี้ไปยังโฮสต์ที่ "เบราว์เซอร์ต่อจริง" เท่านั้น

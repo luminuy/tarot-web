@@ -10,6 +10,7 @@ import { isStudioEnabled } from "@/lib/studio/dpa";
 import {
   getQueueTicketById,
   getReaderLiveAvailability,
+  touchReaderPresence,
   listReaderQueueTickets,
   setReaderLiveAvailability,
   toPublicTicket,
@@ -21,11 +22,20 @@ import {
   getBookingByTicketId,
   getBlockedDates,
   getBookingsByTicketIds,
+  getNextAvailableSlot,
   getScheduleRules,
   isPaidBooking,
   markNoShow,
 } from "@/lib/marketplace/booking.repo";
-import { canMarkNoShow, canStartBooking, EARLY_START_MINUTES, NO_SHOW_GRACE_MINUTES } from "@/lib/marketplace/booking-policy";
+import {
+  canMarkNoShow,
+  canStartBooking,
+  DEFAULT_LEAD_MIN,
+  EARLY_START_MINUTES,
+  NO_SHOW_GRACE_MINUTES,
+} from "@/lib/marketplace/booking-policy";
+import { SITE_ORIGIN } from "@/lib/config/site";
+import { listReaderInvites } from "@/lib/marketplace/invites.repo";
 
 export const runtime = "nodejs";
 
@@ -44,6 +54,8 @@ export async function GET(request: Request) {
 
   const { reader, readerId } = auth;
   try {
+    // แผงเปิดอยู่ = แม่หมออยู่ ➔ คิวสดที่เปิดสวิตช์ไว้ "เปิดจริง" (เกิน 15 นาทีไม่เห็นแผง ระบบถือว่าปิดเอง)
+    await touchReaderPresence(readerId);
     const isLiveOpen = await getReaderLiveAvailability(readerId);
     // ตั๋วที่ยังไม่จ่าย (`pending_payment`) ไม่อยู่ในรายการนี้โดยตั้งใจ — แม่หมอเห็นเฉพาะคิว/นัดที่จ่ายแล้ว
     const tickets = await listReaderQueueTickets(readerId, {
@@ -51,6 +63,11 @@ export async function GET(request: Request) {
     });
     const schedule = await getScheduleRules(readerId);
     const bookings = await getBookingsByTicketIds(tickets.map((t) => t.id));
+    // การ์ด "ส่งลิงก์ให้ลูกค้า" ต้องบอกแม่หมอว่าลูกค้าที่เปิดลิงก์ตอนนี้จะจองได้เร็วสุดเมื่อไร (CONSULT_FLOW P3)
+    const nextSlot = schedule.length > 0 ? await getNextAvailableSlot(readerId, Date.now()) : null;
+    // ✦ ลิงก์ห้องส่วนตัว (migrations/0032) — ถามมาพร้อมคิวทุก 5 วินาที แผงจึงเห็น "ลูกค้ากำลังจ่าย/จ่ายแล้ว" ทันที
+    const invites = await listReaderInvites(readerId);
+    const inviteTicketIds = new Set(invites.map((i) => i.ticketId).filter((id): id is string => Boolean(id)));
 
     return NextResponse.json({
       reader: {
@@ -62,8 +79,17 @@ export async function GET(request: Request) {
         commissionPct: reader.commissionPct,
       },
       isLiveOpen,
+      // ลิงก์หน้าจองที่แม่หมอส่งให้ลูกค้า — โดเมนหลักเสมอ (แผงแม่หมออาจเปิดผ่านโดเมนพรีวิว)
+      bookingUrl: `${SITE_ORIGIN}/readers/${encodeURIComponent(reader.id)}/book`,
+      nextSlot,
       // `paid` = ลูกค้าจ่ายแล้ว (ตั๋วยุคก่อนระบบจ่ายเงินเป็น false — แม่หมอเรียกคิวนั้นไม่ได้)
-      tickets: tickets.map((t) => ({ ...toPublicTicket(t), paid: isPaidBooking(bookings.get(t.id)) })),
+      // `privateRoom` = ลูกค้าจากลิงก์ห้องส่วนตัวของแม่หมอเอง (ปุ่ม "รับเข้าห้อง" เปิดห้องวิดีโอให้ทันที)
+      tickets: tickets.map((t) => ({
+        ...toPublicTicket(t),
+        paid: isPaidBooking(bookings.get(t.id)),
+        privateRoom: inviteTicketIds.has(t.id),
+      })),
+      invites,
       totalWaiting: tickets.filter((t) => t.status === "waiting" && t.kind === "walkup").length,
       schedule,
       // ตั้งค่าการรับนัด (migrations/0021) — แม่หมอแก้เองได้ที่ PUT /api/marketplace/console/settings
@@ -71,6 +97,7 @@ export async function GET(request: Request) {
         notifyEmail: reader.notifyEmail,
         bufferMin: reader.bufferMin,
         dailyCap: reader.dailyCap,
+        leadMin: reader.leadMin ?? DEFAULT_LEAD_MIN,
         blockedDates: await getBlockedDates(readerId),
         priceThb: readerPriceThb(reader),
       },

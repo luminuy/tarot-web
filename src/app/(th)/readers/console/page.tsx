@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -11,10 +11,14 @@ import type { ScheduleRule } from "@/lib/marketplace/booking-policy";
 import {
   ReaderBookingSettings,
   ReaderScheduleEditor,
+  ShareBookingLinkCard,
   UpcomingBookings,
   type ReaderSettingsState,
 } from "@/components/marketplace/ConsoleBookingParts";
-import { bkkDateKey } from "@/lib/marketplace/booking-policy";
+import { LIVE_PRESENCE_TIMEOUT_MINUTES, bkkDateKey, formatTime, relativeDayLabel } from "@/lib/marketplace/booking-policy";
+import { questionCategoryLabel, questionUrgencyLabel, suggestedSpreadLabel } from "@/lib/marketplace/offer";
+import { PrivateRoomCard } from "@/components/marketplace/PrivateRoomCard";
+import type { InviteView } from "@/lib/marketplace/invites.repo";
 
 export const dynamic = "force-dynamic";
 
@@ -28,8 +32,17 @@ interface ConsoleState {
     commissionPct: number;
   };
   isLiveOpen: boolean;
-  /** `paid` = ลูกค้าจ่ายแล้ว — ยังไม่จ่าย (ตั๋วยุคก่อนระบบจ่ายเงิน) เรียกคิวไม่ได้ */
-  tickets: (QueueTicket & { paid?: boolean })[];
+  /** ลิงก์หน้าจองที่แม่หมอส่งให้ลูกค้า (โดเมนหลักเสมอ) */
+  bookingUrl?: string;
+  /** เวลาว่างใกล้สุดที่ลูกค้าจองได้ตอนนี้ — null = ไม่มีใน 14 วัน */
+  nextSlot?: number | null;
+  /**
+   * `paid` = ลูกค้าจ่ายแล้ว — ยังไม่จ่าย (ตั๋วยุคก่อนระบบจ่ายเงิน) เรียกคิวไม่ได้
+   * `privateRoom` = ลูกค้าจากลิงก์ห้องส่วนตัวของแม่หมอเอง (migrations/0032)
+   */
+  tickets: (QueueTicket & { paid?: boolean; privateRoom?: boolean })[];
+  /** ลิงก์ห้องส่วนตัวที่ยังใช้ได้ (รอเปิด · กำลังจ่าย · จ่ายแล้ว · คุยเสร็จ) */
+  invites?: InviteView[];
   totalWaiting: number;
   /** ตั้งค่า TURN แล้ว = แม่หมอเปิดวิดีโอคอลกับคิวที่เรียกแล้วได้ */
   videoCallEnabled?: boolean;
@@ -40,6 +53,27 @@ interface ConsoleState {
   /** ตั้งค่าการรับนัด (migrations/0021) */
   settings?: ReaderSettingsState;
 }
+
+/** เวลาหมดอายุของลิงก์แผง — อ่านจาก token เอง (ส่วนแรกคือ JSON ที่ไม่ได้เข้ารหัส มีแค่รหัสแม่หมอ + เวลาหมดอายุ) */
+function tokenExpiry(token: string | null): number | null {
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[0].replace(/-/g, "+").replace(/_/g, "/"))) as { exp?: unknown };
+    return typeof payload.exp === "number" ? payload.exp : null;
+  } catch {
+    return null;
+  }
+}
+
+/** ข้อความที่แม่หมออ่านเข้าใจ — เดิมโชว์ข้อความจาก API ตรง ๆ เช่น "Token หมดอายุหรือไม่ถูกต้อง" */
+function consoleAccessError(status: number): string {
+  if (status === 401) return "ลิงก์นี้หมดอายุ ถูกยกเลิก หรือคัดลอกมาไม่ครบ — ขอลิงก์ใหม่จากแอดมิน SeerTarot ได้เลย";
+  if (status === 403) return "บัญชีแม่หมอนี้ยังรออนุมัติ หรือถูกพักงานไว้ — ติดต่อแอดมิน SeerTarot";
+  if (status === 404) return "ไม่พบบัญชีแม่หมอนี้ — ติดต่อแอดมิน SeerTarot";
+  return "เข้าแผงไม่สำเร็จ — ลองรีเฟรชหน้านี้อีกครั้ง";
+}
+
+const LINK_WARN_MS = 3 * 60 * 60 * 1000;
 
 function ReaderConsoleInner() {
   const searchParams = useSearchParams();
@@ -53,6 +87,10 @@ function ReaderConsoleInner() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [activeCallId, setActiveCallId] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
+  /** ลิงก์หมดอายุระหว่างเปิดแผงค้างไว้ — แจ้งเป็นแถบด้านบน ไม่ล้างหน้าทิ้ง (ห้องวิดีโอที่คุยอยู่ต้องไม่ดับ) */
+  const [linkExpired, setLinkExpired] = useState(false);
+  const hasData = useRef(false);
+  const linkExpiresAt = useMemo(() => tokenExpiry(token), [token]);
 
   const getAuthHeaders = useCallback((): HeadersInit => {
     const headers: Record<string, string> = {
@@ -80,9 +118,14 @@ function ReaderConsoleInner() {
         setData(json);
         setNow(Date.now());
         setError(null);
+        setLinkExpired(false);
+        hasData.current = true;
+      } else if (res.status === 401 && hasData.current) {
+        // เดิม: ลิงก์หมดอายุกลางคิว ➔ ทั้งหน้ากลายเป็นหน้า error ห้องวิดีโอที่กำลังคุยดับไปด้วย
+        setLinkExpired(true);
+        setNow(Date.now());
       } else {
-        const json = await res.json();
-        setError(json.error || "ไม่สามารถเข้าสู่ระบบแผงควบคุมแม่หมอได้");
+        setError(consoleAccessError(res.status));
       }
     } catch {
       // transient failure
@@ -92,6 +135,18 @@ function ReaderConsoleInner() {
   }, [token, readerId, getAuthHeaders]);
 
   useVisibleInterval(fetchConsoleData, 5000);
+
+  /*
+   * ✦ คิวสดเปิดจริงเฉพาะตอนแม่หมออยู่ (เห็นแผงภายใน 15 นาที — migrations/0031 · แผน CONSULT_FLOW ข้อ 3.2)
+   * แท็บถูกซ่อน (สลับไปแท็บอื่นบนคอม) แผงหยุดถามทุก 5 วินาที แต่ยังส่งสัญญาณ "ยังอยู่" นาทีละครั้ง
+   * มือถือล็อกจอ/สลับแอป JS หยุดทั้งหมด ➔ ไม่มีสัญญาณ ➔ เกิน 15 นาทีระบบถือว่าปิดคิวสดเอง
+   */
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (document.visibilityState === "hidden") void fetchConsoleData();
+    }, 60_000);
+    return () => clearInterval(timer);
+  }, [fetchConsoleData]);
 
   const handleToggleLive = async () => {
     if (!data) return;
@@ -116,7 +171,11 @@ function ReaderConsoleInner() {
     }
   };
 
-  const handleTicketAction = async (ticketId: string, action: "accept" | "handoff" | "cancel" | "no_show") => {
+  const handleTicketAction = async (
+    ticketId: string,
+    action: "accept" | "handoff" | "cancel" | "no_show",
+    opts?: { openRoom?: boolean },
+  ) => {
     setActionLoading(ticketId);
     setNotice(null);
     try {
@@ -127,7 +186,11 @@ function ReaderConsoleInner() {
       });
       if (res.ok) {
         fetchConsoleData();
-        if (action === "accept") setNotice("เรียกคิวเรียบร้อยแล้ว");
+        // ลูกค้าจากลิงก์ห้องส่วนตัว: รับเข้าห้อง = เปิดห้องวิดีโอให้เลย ไม่ต้องหาปุ่ม "เข้าห้องวิดีโอ" อีกรอบ
+        if (action === "accept" && opts?.openRoom) {
+          setActiveCallId(ticketId);
+          setNotice("รับลูกค้าเข้าห้องแล้ว — กดเปิดกล้องในห้องวิดีโอได้เลย");
+        } else if (action === "accept") setNotice("เรียกคิวเรียบร้อยแล้ว");
         else if (action === "handoff") setNotice("ปิดคิวเรียบร้อยแล้ว");
         else if (action === "no_show") setNotice("บันทึกว่าลูกค้าไม่มาตามนัดแล้ว");
         else setNotice("ยกเลิกแล้ว ระบบคืนเงินลูกค้าเต็มจำนวนให้อัตโนมัติ");
@@ -163,8 +226,9 @@ function ReaderConsoleInner() {
       <main id="main-content" tabIndex={-1} className="min-h-screen text-ink-deep flex items-center justify-center p-4">
         <div className="altar-panel rounded-2xl p-8 text-center space-y-4 max-w-md z-10 border border-err/40">
           <h1 className="sr-only">แผงควบคุมแม่หมอ</h1>
-          <h2 className="text-base font-bold text-err">ไม่สามารถเข้าใช้งานได้</h2>
-          <p className="text-xs text-muted">{error || "โปรดใช้ลิงก์เข้าสู่ระบบเฉพาะบุคคลจากผู้ดูแลระบบ"}</p>
+          <h2 className="text-base font-bold text-err">เข้าแผงแม่หมอไม่ได้</h2>
+          <p className="text-sm text-ink">{error || "เปิดแผงนี้จากลิงก์ที่แอดมินส่งให้"}</p>
+          <p className="text-xs text-muted">คิวและนัดของคุณยังอยู่ครบ — เปิดลิงก์ใหม่แล้วจะเห็นเหมือนเดิม</p>
           <Link href="/" className="inline-block text-xs text-gold-ink underline">
             กลับหน้าหลัก
           </Link>
@@ -192,6 +256,30 @@ function ReaderConsoleInner() {
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen text-ink-deep p-4 sm:p-8 font-sans relative overflow-hidden">
       <div className="max-w-5xl mx-auto space-y-6 relative z-10">
+        {/* ลิงก์แผงมีวันหมดอายุ (1–30 วันตามที่แอดมินเลือก) — เตือนก่อนหมด 3 ชม. แม่หมอจะได้ขอลิงก์ใหม่ทันก่อนนัด */}
+        {(linkExpired || (linkExpiresAt !== null && linkExpiresAt - now < LINK_WARN_MS)) && (
+          <div
+            role="status"
+            className={`rounded-xl border px-4 py-3 text-sm leading-relaxed ${
+              linkExpired || (linkExpiresAt ?? 0) <= now ? "border-err/30 bg-err-wash text-err" : "border-gold-ink/30 bg-inset-warm text-ink"
+            }`}
+          >
+            {linkExpired || (linkExpiresAt ?? 0) <= now ? (
+              <>
+                <strong className="font-bold">ลิงก์เข้าแผงนี้ใช้ไม่ได้แล้ว</strong> (หมดอายุหรือแอดมินยกเลิก) — กดปุ่มในหน้านี้จะไม่ได้ผล
+                ขอลิงก์ใหม่จากแอดมินแล้วเปิดลิงก์นั้นแทน (คิวและนัดยังอยู่ครบ)
+              </>
+            ) : (
+              <>
+                <strong className="font-bold">
+                  ลิงก์เข้าแผงนี้ใช้ได้ถึง {relativeDayLabel(linkExpiresAt as number, now)} {formatTime(linkExpiresAt as number)} น.
+                </strong>{" "}
+                — ถ้ามีนัดหลังเวลานี้ ขอลิงก์ใหม่จากแอดมินไว้ก่อน
+              </>
+            )}
+          </div>
+        )}
+
         {notice && (
           <div className="rounded-xl border border-gold-ink/30 bg-gold-ink/10 px-4 py-2.5 text-xs text-ink flex items-center justify-between">
             <span>{notice}</span>
@@ -217,9 +305,10 @@ function ReaderConsoleInner() {
               )}
             </div>
             <div>
-              <div className="flex items-center gap-2 justify-center sm:justify-start">
+              {/* จอแคบ: ป้ายตกบรรทัดใหม่ทั้งก้อน — เดิมบีบจนชื่อ "seerada.taro/t" และ "แผงแม่/หมอ" หักกลางคำ */}
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 justify-center sm:justify-start">
                 <h1 className="font-serif-th text-xl font-bold text-ink">{reader.displayName}</h1>
-                <span className="text-[13px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
+                <span className="whitespace-nowrap text-[13px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
                   แผงแม่หมอ
                 </span>
               </div>
@@ -243,7 +332,9 @@ function ReaderConsoleInner() {
                 {isLiveOpen ? "เปิดรับคิวสดอยู่" : "ปิดรับคิวสด"}
               </p>
               <p className="text-[13px] text-muted">
-                {isLiveOpen ? "ลูกค้าสามารถกดรับคิวได้ทันที" : "รับเฉพาะคิวที่นัดล่วงหน้า"}
+                {isLiveOpen
+                  ? `ลูกค้ากด "คุยตอนนี้" ได้ · ไม่ได้เปิดหน้านี้เกิน ${LIVE_PRESENCE_TIMEOUT_MINUTES} นาที ระบบปิดให้เอง`
+                  : "รับเฉพาะคิวที่นัดล่วงหน้า"}
               </p>
             </div>
 
@@ -266,6 +357,32 @@ function ReaderConsoleInner() {
             </button>
           </div>
         </div>
+
+        {/* ✦ ห้องคุยส่วนตัว — ลิงก์ให้ลูกค้าคนเดียว จ่ายแล้วรอแม่หมอรับเข้าห้อง (แผน CONSULT_FLOW คลื่น 7) */}
+        <PrivateRoomCard
+          invites={data.invites ?? []}
+          readerName={reader.displayName}
+          priceThb={data.settings?.priceThb ?? null}
+          nowMs={now}
+          authHeaders={getAuthHeaders}
+          onChanged={(message) => {
+            setNotice(message);
+            void fetchConsoleData();
+          }}
+        />
+
+        {/* ส่งลิงก์ให้ลูกค้า — เห็นก่อนส่งว่าลูกค้าที่เปิดลิงก์ตอนนี้จะคุยได้เลยหรือได้แค่นัด (CONSULT_FLOW P3) */}
+        {data.bookingUrl && (
+          <ShareBookingLinkCard
+            bookingUrl={data.bookingUrl}
+            readerName={reader.displayName}
+            isLiveOpen={isLiveOpen}
+            nextSlot={data.nextSlot ?? null}
+            nowMs={now}
+            toggling={actionLoading === "toggle"}
+            onOpenLive={() => void handleToggleLive()}
+          />
+        )}
 
         <UpcomingBookings
           tickets={upcomingBookings}
@@ -316,7 +433,7 @@ function ReaderConsoleInner() {
             <p className="text-xs text-muted">
               {isLiveOpen
                 ? "ระบบเปิดรับคิวสดอยู่ เมื่อมีลูกค้าเข้ามาจะปรากฏที่นี่ทันที"
-                : "เปิดรับคิวสดด้านบนเพื่อเริ่มรับลูกดวง"}
+                : "เปิดรับคิวสดด้านบน หรือส่งลิงก์ห้องส่วนตัวให้ลูกค้า แล้วลูกค้าที่จ่ายแล้วจะปรากฏที่นี่"}
             </p>
           </div>
         ) : (
@@ -324,6 +441,10 @@ function ReaderConsoleInner() {
             {tickets.map((ticket) => {
               const isReady = ticket.status === "ready";
               const unpaid = ticket.paid === false;
+              // ค่าจาก AI คัดกรองเก็บเป็นรหัสอังกฤษ (love · medium · love-two-hearts) ➔ แปลงเป็นคำไทยก่อนโชว์แม่หมอ
+              const categoryLabel = questionCategoryLabel(ticket.screening?.category);
+              const urgencyLabel = questionUrgencyLabel(ticket.screening?.urgency);
+              const spreadLabel = suggestedSpreadLabel(ticket.screening?.suggestedSpread);
               return (
                 <div
                   key={ticket.id}
@@ -342,6 +463,11 @@ function ReaderConsoleInner() {
                       <span className="font-serif-th font-bold text-sm text-ink">
                         คุณ{ticket.nickname || "ลูกดวง"}
                       </span>
+                      {ticket.privateRoom && (
+                        <span className="whitespace-nowrap rounded-full border border-gold-ink/30 bg-inset-warm px-2 py-0.5 text-[13px] font-semibold text-gold-ink">
+                          ห้องส่วนตัว
+                        </span>
+                      )}
                     </div>
 
                     <span
@@ -351,7 +477,15 @@ function ReaderConsoleInner() {
                           : "bg-amber-50 text-amber-700 border border-amber-200"
                       }`}
                     >
-                      {isReady ? "เรียกคิวแล้ว" : unpaid ? "ยังไม่ชำระเงิน" : "ชำระแล้ว · รอคิว"}
+                      {isReady
+                        ? ticket.privateRoom
+                          ? "รับเข้าห้องแล้ว"
+                          : "เรียกคิวแล้ว"
+                        : unpaid
+                          ? "ยังไม่ชำระเงิน"
+                          : ticket.privateRoom
+                            ? "ชำระแล้ว · รอรับเข้าห้อง"
+                            : "ชำระแล้ว · รอคิว"}
                     </span>
                   </div>
 
@@ -362,6 +496,11 @@ function ReaderConsoleInner() {
                       : "ลูกค้าไม่ได้ยินยอมเรื่องข้อมูลอ่อนไหว — อย่าถามหรือจดเรื่องสุขภาพ เพศวิถี หรือความเชื่อ"}
                   </p>
 
+                  {/* ลูกค้าจากลิงก์ห้องส่วนตัวเว้นคำถามได้ (คุยกันใน LINE มาแล้ว) — บอกแม่หมอตรง ๆ แทนการ์ดว่าง */}
+                  {ticket.privateRoom && !ticket.question && (
+                    <p className="text-[13px] leading-relaxed text-muted">ลูกค้าไม่ได้เขียนคำถามไว้ — เริ่มถามในห้องได้เลย</p>
+                  )}
+
                   {/* AI Pre-Screening Summary Card */}
                   {ticket.screening && (
                     <div className="altar-card-porcelain p-3.5 space-y-2 text-xs">
@@ -370,18 +509,22 @@ function ReaderConsoleInner() {
                           สรุปประเด็นโดย AI
                         </span>
                         <div className="flex gap-1.5">
-                          <span className="altar-card-porcelain !rounded px-1.5 py-0.5 text-[13px] text-ink">
-                            {ticket.screening.category}
-                          </span>
-                          <span
-                            className={`px-1.5 py-0.5 rounded text-[13px] ${
-                              ticket.screening.urgency === "high"
-                                ? "bg-rose-50 text-rose-700 border border-rose-200"
-                                : "bg-surface border border-line text-muted"
-                            }`}
-                          >
-                            ด่วน: {ticket.screening.urgency}
-                          </span>
+                          {categoryLabel && (
+                            <span className="altar-card-porcelain !rounded px-1.5 py-0.5 text-[13px] text-ink">
+                              {categoryLabel}
+                            </span>
+                          )}
+                          {urgencyLabel && (
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-[13px] ${
+                                ticket.screening.urgency === "high"
+                                  ? "bg-err-wash text-err border border-err/30"
+                                  : "bg-surface border border-line text-muted"
+                              }`}
+                            >
+                              {urgencyLabel}
+                            </span>
+                          )}
                         </div>
                       </div>
 
@@ -389,11 +532,11 @@ function ReaderConsoleInner() {
                         {ticket.screening.brief}
                       </p>
 
-                      {ticket.screening.suggestedSpread && (
+                      {spreadLabel && (
                         <p className="text-[13px] text-muted">
                           ผังแนะนำ:{" "}
                           <span className="text-ink font-medium">
-                            {ticket.screening.suggestedSpread}
+                            {spreadLabel}
                           </span>
                         </p>
                       )}
@@ -412,9 +555,11 @@ function ReaderConsoleInner() {
                         size="sm"
                         className="flex-1 text-xs"
                         disabled={actionLoading === ticket.id}
-                        onClick={() => handleTicketAction(ticket.id, "accept")}
+                        onClick={() =>
+                          handleTicketAction(ticket.id, "accept", { openRoom: Boolean(ticket.privateRoom && videoCallEnabled) })
+                        }
                       >
-                        เรียกคิวนี้
+                        {ticket.privateRoom ? "รับเข้าห้อง" : "เรียกคิวนี้"}
                       </Button>
                     ) : (
                       <>

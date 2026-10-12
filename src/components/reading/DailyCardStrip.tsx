@@ -11,7 +11,7 @@ import { STORAGE_KEYS } from "@/lib/storage/keys";
 
 const DAILY_CARD_STORAGE_KEY = STORAGE_KEYS.dailyCard;
 /** คีย์รุ่นเก่าสำหรับย้ายข้อมูลผู้ใช้ที่เคยแคชไว้เดิมอย่างราบรื่น */
-const LEGACY_DAILY_CARD_STORAGE_KEY = "seer:daily-card";
+const LEGACY_DAILY_CARD_STORAGE_KEY = STORAGE_KEYS.legacyDailyCard;
 
 /**
  * แถบ "ไพ่ประจำวันนี้" บนขั้นเลือกผัง — ไพ่ใบเดียวเหมือนกันทุกคนทั้งเว็บ

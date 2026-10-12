@@ -2,18 +2,24 @@
 
 import { useMemo, useState } from "react";
 import type { QueueTicket } from "@/lib/marketplace/queue.repo";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import {
   bkkDateKey,
   bkkDayStart,
   BOOKING_HORIZON_DAYS,
   BUFFER_OPTIONS,
+  DEFAULT_LEAD_MIN,
   dayChipParts,
   canMarkNoShow,
   canStartBooking,
   EARLY_START_MINUTES,
   formatCountdown,
   formatMinutes,
+  formatLeadLabel,
   formatSlotRange,
+  LEAD_OPTIONS_MIN,
+  relativeDayLabel,
+  formatTime,
   SLOT_MINUTES,
   WEEKDAY_LABELS,
   type ScheduleRule,
@@ -264,6 +270,8 @@ export interface ReaderSettingsState {
   notifyEmail: string | null;
   bufferMin: number;
   dailyCap: number | null;
+  /** รับนัดล่วงหน้าอย่างน้อยกี่นาที (migrations/0030) — เซิร์ฟเวอร์ส่งค่าเริ่มต้นมาให้เสมอ */
+  leadMin?: number;
   blockedDates: string[];
   priceThb?: number;
 }
@@ -290,6 +298,7 @@ export function ReaderBookingSettings({
   const [email, setEmail] = useState(settings.notifyEmail ?? "");
   const [bufferMin, setBufferMin] = useState(settings.bufferMin);
   const [dailyCap, setDailyCap] = useState<number | null>(settings.dailyCap);
+  const [leadMin, setLeadMin] = useState<number>(settings.leadMin ?? DEFAULT_LEAD_MIN);
   const [blocked, setBlocked] = useState<Set<string>>(new Set(settings.blockedDates));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -317,7 +326,7 @@ export function ReaderBookingSettings({
       const res = await fetch("/api/marketplace/console/settings", {
         method: "PUT",
         headers: authHeaders(),
-        body: JSON.stringify({ notifyEmail: email.trim() || null, bufferMin, dailyCap, blockedDates: [...blocked] }),
+        body: JSON.stringify({ notifyEmail: email.trim() || null, bufferMin, dailyCap, leadMin, blockedDates: [...blocked] }),
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) setError(data.error || "บันทึกไม่สำเร็จ");
@@ -353,6 +362,20 @@ export function ReaderBookingSettings({
             autoComplete="email"
             className="glass-field min-h-[44px] w-full rounded-xl border border-line-interactive-warm px-3.5 font-serif-th text-sm text-ink outline-none focus:border-gold-ink"
           />
+        </label>
+        <label className="space-y-1.5">
+          <span className="block font-serif-th text-[13px] font-bold text-ink-deep">รับนัดล่วงหน้าอย่างน้อย</span>
+          <select value={leadMin} onChange={(e) => setLeadMin(Number(e.target.value))} className={`${selectClass} w-full`}>
+            {LEAD_OPTIONS_MIN.map((m) => (
+              <option key={m} value={m}>
+                {formatLeadLabel(m)}
+                {m === DEFAULT_LEAD_MIN ? " (ค่าเริ่มต้น)" : ""}
+              </option>
+            ))}
+          </select>
+          <span className="block font-serif-th text-[12px] leading-relaxed text-muted">
+            ลูกค้าจองเวลาที่ใกล้กว่านี้ไม่ได้ — ตั้งสั้นลงถ้าอยากรับลูกค้าที่ทักมาแล้วอยากคุยเร็ว ๆ
+          </span>
         </label>
         <label className="space-y-1.5">
           <span className="block font-serif-th text-[13px] font-bold text-ink-deep">พักระหว่างนัด</span>
@@ -431,6 +454,115 @@ export function ReaderBookingSettings({
         >
           {saving ? "กำลังบันทึก…" : "บันทึกการตั้งค่า"}
         </button>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * ✦ ส่งลิงก์ให้ลูกค้า — บอกแม่หมอก่อนส่งว่าลูกค้าที่เปิดลิงก์ "ตอนนี้" จะเจออะไร (CONSULT_FLOW_UX_PLAN ข้อ 2.1 · P3)
+ * ---------------------------------------------------------------------------
+ * ที่มา: แม่หมอส่งลิงก์ทาง LINE แล้วบอกลูกค้า "เลือกเวลาแล้วเข้าได้เลย" ทั้งที่ปิดคิวสดอยู่
+ * ลูกค้าเลยเจอแค่เวลานัดอีกหลายชั่วโมง ("เข้าไม่ได้ · มันเลือกเวลาอื่น") — การ์ดนี้ทำให้เห็นก่อนกดส่ง
+ */
+export function ShareBookingLinkCard({
+  bookingUrl,
+  readerName,
+  isLiveOpen,
+  nextSlot,
+  nowMs,
+  toggling,
+  onOpenLive,
+}: {
+  bookingUrl: string;
+  readerName: string;
+  isLiveOpen: boolean;
+  /** เวลาว่างใกล้สุดที่ลูกค้าจองได้ตอนนี้ (null = ไม่มีใน 14 วัน) */
+  nextSlot: number | null;
+  nowMs: number;
+  toggling: boolean;
+  onOpenLive: () => void;
+}) {
+  const [copied, setCopied] = useState<"idle" | "ok" | "fail">("idle");
+  const message = `จองคิวดูดวงกับ ${readerName} ได้ที่ลิงก์นี้เลยค่ะ ${bookingUrl}`;
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(bookingUrl);
+      setCopied("ok");
+    } catch {
+      setCopied("fail");
+    }
+    setTimeout(() => setCopied("idle"), 2500);
+  };
+  const nextLabel = nextSlot ? `${relativeDayLabel(nextSlot, nowMs)} ${formatTime(nextSlot)} น.` : null;
+
+  return (
+    <section aria-labelledby="share-link-heading" className="altar-card-porcelain !rounded-3xl space-y-4 p-5 sm:p-6">
+      <div className="space-y-1">
+        <h2 id="share-link-heading" className="font-serif-th text-lg font-bold text-ink">
+          <ThaiPhrases>ส่งลิงก์ให้ลูกค้า</ThaiPhrases>
+        </h2>
+        <p className="font-serif-th text-[13px] text-muted">ลูกค้าเปิดลิงก์นี้แล้วจอง จ่ายเงิน และเข้าห้องคุยกับคุณได้เองครบในที่เดียว</p>
+      </div>
+
+      <div
+        role="status"
+        className={`rounded-2xl border p-4 font-serif-th text-[13px] leading-relaxed ${
+          isLiveOpen ? "border-ok/30 bg-ok/10" : nextLabel ? "border-gold-ink/30 bg-inset-warm" : "border-err/30 bg-err-wash"
+        }`}
+      >
+        <p className="font-bold text-ink-deep">ลูกค้าที่เปิดลิงก์ตอนนี้จะ…</p>
+        {isLiveOpen ? (
+          <p className="text-ink">กด &quot;คุยตอนนี้&quot; จ่ายเงิน แล้วเข้าคิวได้ทันที — กด &quot;เรียกคิวนี้&quot; ในรายการด้านล่างเมื่อพร้อมคุย</p>
+        ) : nextLabel ? (
+          <>
+            <p className="text-ink">
+              จองได้แค่เวลานัด เร็วสุด <strong className="font-bold">{nextLabel}</strong> — ยังคุยทันทีไม่ได้
+            </p>
+            <p className="mt-1 text-muted">ถ้าจะคุยกับลูกค้าตอนนี้ เปิดรับคิวสดก่อนส่งลิงก์</p>
+          </>
+        ) : (
+          <>
+            <p className="text-err font-semibold">จองไม่ได้เลย — ยังไม่เปิดคิวสดและไม่มีเวลาว่างใน 14 วัน</p>
+            <p className="mt-1 text-muted">เปิดรับคิวสด หรือตั้งตารางรับนัดด้านล่างก่อนส่งลิงก์</p>
+          </>
+        )}
+        {!isLiveOpen && (
+          <button
+            type="button"
+            disabled={toggling}
+            onClick={onOpenLive}
+            className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-full bg-ok px-5 text-sm font-bold text-white transition-opacity cursor-pointer hover:opacity-90 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+          >
+            {toggling ? "กำลังเปิด…" : "เปิดรับคิวสดตอนนี้"}
+          </button>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <input
+          readOnly
+          value={bookingUrl}
+          aria-label="ลิงก์หน้าจองของคุณ"
+          onFocus={(e) => e.currentTarget.select()}
+          className="min-h-[46px] min-w-0 flex-1 rounded-xl border border-line-interactive-warm bg-surface px-3 font-mono text-[12px] text-ink-deep"
+        />
+        <button
+          type="button"
+          onClick={() => void copy()}
+          className="min-h-[46px] shrink-0 rounded-full border border-line-interactive-warm bg-surface px-5 font-serif-th text-sm font-semibold text-ink-deep transition-colors cursor-pointer hover:border-gold-ink"
+        >
+          <span aria-live="polite">{copied === "ok" ? "คัดลอกแล้ว ✓" : copied === "fail" ? "กดค้างที่ลิงก์เพื่อคัดลอก" : "คัดลอกลิงก์"}</span>
+        </button>
+        <a
+          href={`https://line.me/R/msg/text/?${encodeURIComponent(message)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          /* เขียวโทเคน ok (#3A7044 · ตัวขาว 5.9:1) — เขียว LINE สด #06C755 กับตัวขาวได้แค่ 2.26:1 (ดู globals.css .social-fab) */
+          className="inline-flex min-h-[46px] shrink-0 items-center justify-center rounded-full bg-ok px-5 font-serif-th text-sm font-bold text-white transition-opacity hover:opacity-90"
+        >
+          ส่งทาง LINE
+        </a>
       </div>
     </section>
   );

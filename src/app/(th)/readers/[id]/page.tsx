@@ -2,9 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPublicReaderById } from "@/lib/marketplace/readers.repo";
 import { getReaderLiveAvailability } from "@/lib/marketplace/queue.repo";
-import { getNextAvailableSlot } from "@/lib/marketplace/booking.repo";
+import { getSoonestSlots } from "@/lib/marketplace/booking.repo";
 import { getReaderReviewSummary, type ReviewSummary } from "@/lib/marketplace/reviews.repo";
-import { FREE_CANCEL_HOURS, MAX_RESCHEDULES } from "@/lib/marketplace/booking-policy";
+import { FREE_CANCEL_HOURS, MAX_RESCHEDULES, PAID_GRACE_MINUTES } from "@/lib/marketplace/booking-policy";
 import { ReaderDetailClient } from "@/components/marketplace/ReaderDetailClient";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -44,9 +44,9 @@ export default async function ReaderDetailPage({
 
   const nowMs = Date.now();
   const emptyReviews: ReviewSummary = { count: 0, average: null, latest: [] };
-  const [isLiveOpen, nextSlot, reviews] = await Promise.all([
+  const [isLiveOpen, quickSlots, reviews] = await Promise.all([
     getReaderLiveAvailability(id),
-    getNextAvailableSlot(id, nowMs),
+    getSoonestSlots(id, nowMs, 3),
     getReaderReviewSummary(id).catch(() => emptyReviews),
   ]);
 
@@ -89,7 +89,8 @@ export default async function ReaderDetailPage({
   return (
     <>
       <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="min-h-screen text-ink-deep px-4 pb-16 pt-5 sm:px-8 sm:pt-8 font-serif-th relative overflow-x-clip">
+      {/* pb-28 บนมือถือ: เว้นที่ให้แถบจองติดล่างจอ (ReaderDetailClient) ไม่บังเนื้อหาท้ายหน้า */}
+      <main id="main-content" tabIndex={-1} className="min-h-screen text-ink-deep px-4 pb-28 pt-5 sm:px-8 sm:pt-8 lg:pb-16 font-serif-th relative overflow-x-clip">
         {/* Schema.org Structured Data */}
         <script
           type="application/ld+json"
@@ -165,7 +166,7 @@ export default async function ReaderDetailPage({
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
             {/* การ์ดจอง — มือถือขึ้นก่อนเนื้อหา · จอใหญ่ติดขวาและติดจอตอนเลื่อน */}
             <div className="lg:order-2 lg:sticky lg:top-[calc(var(--site-header-h)+20px)]">
-              <ReaderDetailClient reader={reader} isLiveOpen={isLiveOpen} nextSlot={nextSlot} nowMs={nowMs} />
+              <ReaderDetailClient reader={reader} isLiveOpen={isLiveOpen} quickSlots={quickSlots} nowMs={nowMs} />
             </div>
 
             <div className="space-y-6 lg:order-1">
@@ -205,9 +206,18 @@ export default async function ReaderDetailPage({
                 </h2>
                 <ol className="space-y-4">
                   {[
-                    { title: "เลือกเวลาและชำระเงิน", body: "คุยตอนนี้ หรือนัดวันเวลาที่สะดวก บอกชื่อเล่นกับเรื่องที่อยากถาม แล้วชำระผ่าน Stripe" },
-                    { title: "รอถึงเวลา", body: "ได้หน้ายืนยันพร้อมปุ่มเพิ่มลงปฏิทิน ถึงคิวหรือถึงเวลานัดแล้ว ปุ่มเข้าห้องจะขึ้นให้ทันที" },
-                    { title: "คุยกับแม่หมอ", body: "เข้าห้องวิดีโอคอลในเว็บ หรือคุยทาง LINE" },
+                    {
+                      title: "เลือกเวลา",
+                      body: 'แม่หมอออนไลน์อยู่กด "คุยตอนนี้" ได้เลย หรือแตะเวลาว่างที่สะดวก',
+                    },
+                    {
+                      title: "ใส่ชื่อเล่นกับเรื่องที่อยากถาม แล้วชำระเงิน",
+                      body: `บัตรหรือพร้อมเพย์ผ่าน Stripe · ยกเลิกก่อนนัด ${FREE_CANCEL_HOURS} ชม. คืนเงินเต็ม`,
+                    },
+                    {
+                      title: "ถึงเวลาแล้วกดเข้าห้อง",
+                      body: "ได้ลิงก์นัดของคุณ เปิดจากมือถือหรือคอมเครื่องไหนก็ได้ แล้วกดเข้าห้องวิดีโอคอล หรือคุยทาง LINE",
+                    },
                   ].map((step, i, all) => (
                     <li key={step.title} className="relative flex gap-4">
                       {i < all.length - 1 && (
@@ -268,6 +278,10 @@ export default async function ReaderDetailPage({
                   {[
                     { when: `ก่อนเวลานัด ${FREE_CANCEL_HOURS} ชม. ขึ้นไป`, what: `ยกเลิกคืนเงินเต็ม หรือเลื่อนนัดได้ ${MAX_RESCHEDULES} ครั้ง` },
                     { when: `น้อยกว่า ${FREE_CANCEL_HOURS} ชม. ก่อนนัด`, what: "ยกเลิกได้ แต่ไม่คืนเงิน" },
+                    {
+                      when: `ภายใน ${PAID_GRACE_MINUTES} นาทีหลังจ่าย`,
+                      what: "ยกเลิกคืนเงินเต็ม หรือเลื่อนนัดได้ — เผื่อกดเวลาผิด (นัดที่ห่างเกิน 1 ชม.)",
+                    },
                     { when: "คิวสดระหว่างรอเรียก", what: "ยกเลิกได้ตลอด คืนเงินเต็ม" },
                     { when: "แม่หมอยกเลิกหรือไม่มาตามนัด", what: "คืนเงินเต็มอัตโนมัติ" },
                   ].map((row) => (

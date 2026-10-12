@@ -1,4 +1,5 @@
 import { getAppDB } from "@/lib/platform/db";
+import { LIVE_PRESENCE_TIMEOUT_MINUTES } from "@/lib/marketplace/booking-policy";
 import {
   getAIScreeningById,
   getAIScreeningsByIds,
@@ -92,32 +93,54 @@ function mapRowToTicket(row: RawTicketRow): QueueTicket {
   };
 }
 
+/** เห็นแผงแม่หมอล่าสุดหลังเวลานี้ = ยังอยู่ (คิวสดเปิดจริง) */
+function presenceCutoff(nowMs: number): number {
+  return nowMs - LIVE_PRESENCE_TIMEOUT_MINUTES * 60_000;
+}
+
+/** บันทึกเวลาที่เห็นแผงล่าสุดไม่ถี่กว่านาทีละครั้ง — แผงถามทุก 5 วินาที ไม่ต้องเขียนฐานข้อมูลทุกครั้ง */
+const PRESENCE_WRITE_EVERY_MS = 60_000;
+
 /**
- * ดึงสถานะ Live Queue ของแม่หมอ (เปิดรับคิวอยู่หรือไม่)
+ * สถานะคิวสดของแม่หมอ "ที่ลูกค้าเห็น" — สวิตช์เปิด **และ** เห็นแผงภายใน 15 นาที (migrations/0031)
+ * ลืมปิดสวิตช์แล้วล็อกจอ/ปิดหน้า ➔ ถือว่าปิดเอง ลูกค้าไม่จ่ายแล้วรอเก้อ (แผน CONSULT_FLOW ข้อ 3.2)
  */
-export async function getReaderLiveAvailability(readerId: string): Promise<boolean> {
+export async function getReaderLiveAvailability(readerId: string, nowMs = Date.now()): Promise<boolean> {
   const db = await getAppDB();
   const row = await db
-    .prepare("SELECT is_open FROM reader_availability WHERE reader_id = ? AND mode = 'live' LIMIT 1")
+    .prepare("SELECT is_open, last_seen_at FROM reader_availability WHERE reader_id = ? AND mode = 'live' LIMIT 1")
     .bind(readerId)
-    .first<{ is_open: number }>();
+    .first<{ is_open: number; last_seen_at: number | null }>();
 
-  return Boolean(row?.is_open);
+  return Boolean(row?.is_open) && Number(row?.last_seen_at ?? 0) >= presenceCutoff(nowMs);
 }
 
 /**
- * แม่หมอทุกคนที่เปิดรับคิวสดอยู่ตอนนี้ — อ่านครั้งเดียวทั้งชุด (หน้ารวมแม่หมอ ไม่วนอ่านทีละคน)
+ * แม่หมอทุกคนที่เปิดรับคิวสดอยู่จริงตอนนี้ — อ่านครั้งเดียวทั้งชุด (หน้ารวมแม่หมอ ไม่วนอ่านทีละคน)
  */
-export async function listLiveReaderIds(): Promise<Set<string>> {
+export async function listLiveReaderIds(nowMs = Date.now()): Promise<Set<string>> {
   const db = await getAppDB();
   const { results } = await db
-    .prepare("SELECT reader_id FROM reader_availability WHERE mode = 'live' AND is_open = 1")
+    .prepare("SELECT reader_id FROM reader_availability WHERE mode = 'live' AND is_open = 1 AND last_seen_at >= ?")
+    .bind(presenceCutoff(nowMs))
     .all<{ reader_id: string }>();
   return new Set((results || []).map((r) => r.reader_id));
 }
 
+/** แผงแม่หมอเปิดอยู่ — บันทึกว่ายังอยู่ (เขียนจริงไม่เกินนาทีละครั้ง) */
+export async function touchReaderPresence(readerId: string, nowMs = Date.now()): Promise<void> {
+  const db = await getAppDB();
+  await db
+    .prepare(
+      `UPDATE reader_availability SET last_seen_at = ?
+        WHERE reader_id = ? AND mode = 'live' AND (last_seen_at IS NULL OR last_seen_at < ?)`
+    )
+    .bind(nowMs, readerId, nowMs - PRESENCE_WRITE_EVERY_MS)
+    .run();
+}
+
 /**
- * เปิด/ปิด Live Queue ของแม่หมอ
+ * เปิด/ปิด Live Queue ของแม่หมอ — เปิด = นับว่าอยู่ทันที (กดจากแผงเอง)
  */
 export async function setReaderLiveAvailability(readerId: string, isOpen: boolean): Promise<void> {
   const db = await getAppDB();
@@ -131,18 +154,18 @@ export async function setReaderLiveAvailability(readerId: string, isOpen: boolea
 
   if (existing) {
     await db
-      .prepare("UPDATE reader_availability SET is_open = ?, updated_at = ? WHERE id = ?")
-      .bind(isOpenInt, now, existing.id)
+      .prepare("UPDATE reader_availability SET is_open = ?, updated_at = ?, last_seen_at = ? WHERE id = ?")
+      .bind(isOpenInt, now, now, existing.id)
       .run();
   } else {
     const id = `avail_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
     await db
       .prepare(
         `INSERT INTO reader_availability (
-          id, reader_id, mode, weekday, start_min, end_min, slot_minutes, timezone, is_open, created_at, updated_at
-        ) VALUES (?, ?, 'live', NULL, NULL, NULL, 30, 'Asia/Bangkok', ?, ?, ?)`
+          id, reader_id, mode, weekday, start_min, end_min, slot_minutes, timezone, is_open, created_at, updated_at, last_seen_at
+        ) VALUES (?, ?, 'live', NULL, NULL, NULL, 30, 'Asia/Bangkok', ?, ?, ?, ?)`
       )
-      .bind(id, readerId, isOpenInt, now, now)
+      .bind(id, readerId, isOpenInt, now, now, now)
       .run();
   }
 }
@@ -185,16 +208,20 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
   const now = Date.now();
   const expiresAt = ticketExpiresAt(now, input.slotStart);
   const sensitiveConsentAt = input.sensitiveConsent === true ? now : null;
+  // ลูกค้าจากลิงก์ห้องส่วนตัวเว้นคำถามได้ (คุยกับแม่หมอใน LINE มาแล้ว/เล่าในห้องแทน) — เก็บเป็น NULL
+  const question = input.question.trim() || null;
 
-  // 1. Run AI Screening First
-  const screening = await performAIScreening({
-    question: input.question,
-    ticketId,
-    drawnCardsSummary: input.readingSnapshot,
-  });
+  // 1. Run AI Screening First — ไม่มีคำถาม = ไม่มีอะไรให้คัดกรอง (ไม่เรียก AI เปล่า ๆ)
+  const screening = question
+    ? await performAIScreening({
+        question,
+        ticketId,
+        drawnCardsSummary: input.readingSnapshot,
+      })
+    : null;
 
   // If blocked by safety guardrails -> ticket cancelled immediately
-  if (screening.verdict === "block") {
+  if (screening?.verdict === "block") {
     const ticket: QueueTicket = {
       id: ticketId,
       readerId: input.readerId,
@@ -204,7 +231,7 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
       slotStart: input.slotStart || null,
       customerRef: input.customerRef,
       nickname: input.nickname.trim(),
-      question: input.question.trim(),
+      question,
       readingSnapshot: input.readingSnapshot || null,
       aiScreenId: screening.id,
       createdAt: now,
@@ -271,9 +298,9 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
       input.slotStart || null,
       input.customerRef,
       input.nickname.trim(),
-      input.question.trim(),
+      question,
       input.readingSnapshot || null,
-      screening.id,
+      screening?.id ?? null,
       now,
       expiresAt,
       input.userId ?? null,
@@ -446,5 +473,12 @@ export async function cleanupExpiredTickets(): Promise<number> {
   `).bind(now).run();
 
   const res = await db.prepare("DELETE FROM queue_tickets WHERE expires_at < ?").bind(now).run();
+  // ✦ ลิงก์ห้องส่วนตัว (migrations/0032) มีชื่อลูกค้าที่แม่หมอพิมพ์ไว้ — ลบหลังลิงก์หมดอายุ 7 วัน
+  //   แยก try: ฐานข้อมูลเก่าที่ยังไม่มีตารางต้องไม่ทำให้การลบตั๋วข้างบนนับผิด
+  try {
+    await db.prepare("DELETE FROM reader_invites WHERE expires_at < ?").bind(now - RETENTION_MS).run();
+  } catch {
+    // ignore if table not yet created
+  }
   return res.meta?.changes ?? 0;
 }
