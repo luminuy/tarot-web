@@ -18,6 +18,7 @@ import { requireReader } from "@/lib/auth/reader-auth";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { isTurnConfigured } from "@/lib/marketplace/turn";
 import { bookingAccessUrl } from "@/lib/marketplace/booking-mail";
+import { isInviteTicket } from "@/lib/marketplace/invites.repo";
 
 export const runtime = "nodejs";
 
@@ -132,6 +133,8 @@ export async function GET(
       // ระบบวิดีโอคอลเปิดใช้อยู่ไหม (ยังไม่ถึงคิวก็รู้ได้) — ไม่เปิด = คุยทาง LINE อย่างเดียว
       // หน้าคิวใช้ตัดสินว่าต้องชวนลูกค้าที่เปิดในแอป LINE ออกไป Safari/Chrome ไหม (ในแอป LINE เปิดแชท LINE ได้ดีอยู่แล้ว)
       videoCallEnabled: isTurnConfigured(),
+      // ✦ มาจากลิงก์ห้องส่วนตัวที่แม่หมอส่งให้ (migrations/0032) — หน้าคิวพูดว่า "รอแม่หมอรับเข้าห้อง" แทน "รอคิว"
+      privateRoom: await isInviteTicket(ticket.id),
     });
   } catch (err) {
     console.error("[API Ticket GET ID Error]", err);

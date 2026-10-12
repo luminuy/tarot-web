@@ -9,6 +9,7 @@ import {
 } from "@/lib/marketplace/payment-gateway";
 import { isPrivilegedTestRequest } from "@/lib/security/privileged";
 import { isTicketOwner } from "@/lib/marketplace/ticket-owner";
+import { isInviteTicket } from "@/lib/marketplace/invites.repo";
 import { readerPriceThb } from "@/lib/marketplace/offer";
 import { getQueueTicketById } from "@/lib/marketplace/queue.repo";
 import { getReaderById } from "@/lib/marketplace/readers.repo";
@@ -107,6 +108,7 @@ export async function POST(request: Request) {
       attempt: payments.length + 1,
       priceThb: readerPriceThb(reader),
       customerEmail: booking.contactEmail,
+      privateRoom: await isInviteTicket(ticketId),
     });
     return apiOk({ checkoutUrl });
   } catch (err) {

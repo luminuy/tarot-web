@@ -96,6 +96,8 @@ self.addEventListener("fetch", (event) => {
     url.pathname.startsWith("/account") ||
     url.pathname.startsWith("/readers/console") ||
     url.pathname.startsWith("/readers/queue") ||
+    // ลิงก์ห้องส่วนตัวที่แม่หมอส่งให้ — มีรหัสห้องใน URL ห้ามเก็บลง Cache Storage (แบบเดียวกับ A4-14)
+    url.pathname.startsWith("/readers/room") ||
     // หน้าที่มีความลับอยู่ใน URL (token ตั้งรหัสผ่านใหม่) — ห้ามเก็บลง Cache Storage ของเครื่อง (A4-14)
     url.pathname.startsWith("/reset-password") ||
     url.pathname.startsWith("/en/reset-password") ||

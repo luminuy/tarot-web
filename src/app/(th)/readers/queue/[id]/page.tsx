@@ -41,6 +41,8 @@ interface PollResponse {
   booking?: BookingView | null;
   /** ลิงก์นัดส่วนตัว เปิดได้ทุกเบราว์เซอร์ (เฉพาะเจ้าของตั๋ว) — CONSULT_FLOW P6 */
   accessUrl?: string | null;
+  /** มาจากลิงก์ห้องส่วนตัวที่แม่หมอส่งให้ (migrations/0032) — พูดว่า "รอแม่หมอรับเข้าห้อง" แทน "รอคิว" */
+  privateRoom?: boolean;
 }
 
 /** ตั๋วยุคก่อนระบบจ่ายก่อนคุย (ไม่มีใบจอง) — ยังยกเลิกได้ตามเดิม ไม่มีเงินให้คืน */
@@ -191,7 +193,7 @@ export default function CustomerQueuePage() {
     );
   }
 
-  const { ticket, reader, canAccessLine, videoCallAvailable, videoCallEnabled, booking, accessUrl } = data;
+  const { ticket, reader, canAccessLine, videoCallAvailable, videoCallEnabled, booking, accessUrl, privateRoom } = data;
   // ชวนออกจากเบราว์เซอร์ในแอปเฉพาะตอนที่จะคุยผ่านวิดีโอคอล — ถ้าคุยทาง LINE อยู่ในแอป LINE ดีกว่าอยู่แล้ว
   const suggestExternal = Boolean(inApp && accessUrl && videoCallEnabled);
   const priceThb = reader.priceThb ?? CONSULTATION_PRICE_THB;
@@ -203,7 +205,7 @@ export default function CustomerQueuePage() {
   const categoryLabel = questionCategoryLabel(ticket.screening?.category);
   const stepIndex =
     { pending_payment: 0, screening: 0, waiting: 1, ready: 2, handed_off: 3 }[ticket.status as string] ?? -1;
-  const steps = ["ชำระเงิน", isScheduled ? "รอถึงเวลานัด" : "รอคิว", "คุยกับแม่หมอ", "เสร็จสิ้น"];
+  const steps = ["ชำระเงิน", isScheduled ? "รอถึงเวลานัด" : privateRoom ? "รอเข้าห้อง" : "รอคิว", "คุยกับแม่หมอ", "เสร็จสิ้น"];
   const blockedTitle =
     ticket.screening?.verdict === "block"
       ? "คิวนี้ถูกยกเลิกแล้ว"
@@ -265,7 +267,7 @@ export default function CustomerQueuePage() {
               )}
             </div>
             <div className="min-w-0 pt-3">
-              <p className="text-[13px] text-muted">คิวปรึกษากับ</p>
+              <p className="text-[13px] text-muted">{privateRoom ? "ห้องคุยส่วนตัวกับ" : "คิวปรึกษากับ"}</p>
               <h2 className="font-bold text-ink text-lg leading-snug break-words">{reader.displayName}</h2>
               {reader.specialties.length > 0 && (
                 <p className="text-[13px] text-muted truncate">{reader.specialties.slice(0, 4).join(" · ")}</p>
@@ -352,9 +354,13 @@ export default function CustomerQueuePage() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <h3 className="font-bold text-lg text-ink">คุณอยู่ในคิวแล้ว</h3>
+                  <h3 className="font-bold text-lg text-ink">{privateRoom ? "จ่ายแล้ว รอแม่หมอรับเข้าห้อง" : "คุณอยู่ในคิวแล้ว"}</h3>
                   <p className="text-sm text-muted leading-relaxed max-w-sm mx-auto">
-                    <ThaiPhrases>เปิดหน้านี้ทิ้งไว้ได้เลย เมื่อแม่หมอเรียกคิว ปุ่มเข้าห้องวิดีโอคอลจะขึ้นที่นี่ทันที</ThaiPhrases>
+                    <ThaiPhrases>
+                      {privateRoom
+                        ? `${reader.displayName} เห็นคุณในรายการแล้ว เปิดหน้านี้ทิ้งไว้ได้เลย แม่หมอกดรับเมื่อไร ปุ่มเข้าห้องวิดีโอคอลจะขึ้นที่นี่ทันที`
+                        : "เปิดหน้านี้ทิ้งไว้ได้เลย เมื่อแม่หมอเรียกคิว ปุ่มเข้าห้องวิดีโอคอลจะขึ้นที่นี่ทันที"}
+                    </ThaiPhrases>
                   </p>
                 </div>
                 <p className="inline-flex items-center gap-2 text-[13px] text-ok font-semibold" role="status">
@@ -515,7 +521,7 @@ export default function CustomerQueuePage() {
             <div className="space-y-1">
               <dt className="text-muted">เรื่องที่ถาม</dt>
               <dd className="text-ink leading-relaxed whitespace-pre-line break-words rounded-xl bg-surface border border-line p-3">
-                {ticket.question}
+                {ticket.question || <span className="text-muted">ไม่ได้เขียนไว้ — เล่าให้แม่หมอฟังในห้องได้เลย</span>}
               </dd>
             </div>
             {categoryLabel && (

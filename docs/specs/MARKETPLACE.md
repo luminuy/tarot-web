@@ -354,9 +354,11 @@ export interface Reader { id: string; displayName: string; bio: string; avatarUr
 | คิวสดตามการออนไลน์ | เปิดจริง = สวิตช์เปิด + เห็นแผงภายใน 15 นาที (`reader_availability.last_seen_at` · migrations/0031) · ใช้ทั้งหน้าเว็บ แอดมิน และด่านสร้างคิวสด |
 | ฟิลเตอร์หน้าสวย (แม่หมอ) | `beauty-filter.ts` — WebGL ในเครื่องแม่หมอ เกลี่ยเฉพาะผิวแบบรักษาขอบ · ส่งภาพที่แต่งแล้วด้วย `replaceTrack` · ไม่บันทึก/ไม่ส่งภาพไปประมวลผลที่ไหน |
 | แถบคุกกี้ในกลุ่ม /readers | แถบย่อใต้หัวเว็บ (`ConsentBanner` `COMPACT_PATH`) — ไม่บังปุ่มจอง/ชำระเงินที่ขอบล่าง |
+| ห้องคุยส่วนตัว (ลิงก์แบบห้องประชุมออนไลน์) | `reader_invites` (migrations/0032) · `invites.repo.ts` — แม่หมอสร้างลิงก์ `/readers/room/<code>` ให้ลูกค้าคนเดียว (24 ชม. · ยกเลิกได้ · เพดาน 10 ลิงก์ที่ยังไม่มีใครใช้) · **จ่ายบนเว็บก่อนเข้าห้องเสมอ** (เจ้าของเคาะ 2026-10-12) ผ่าน `POST /api/marketplace/tickets` + `inviteCode` ซึ่งข้ามแค่สวิตช์คิวสดกับคำถามขั้นต่ำ · การ์ด `PrivateRoomCard` ในแผง + ปุ่ม "รับเข้าห้อง" (เรียกคิว + เปิดห้องวิดีโอ) · จัดการลิงก์ที่ `POST/PATCH /api/marketplace/console/invites` |
 
 **กับดัก**: ห้ามเชื่อเวลา `?slot=` จากไคลเอนต์ (ตรวจด้วย `checkSlotBookable` เสมอ) · ห้ามส่ง `accessUrl` / `customerRef` ให้แม่หมอ · ห้ามให้ `sessionSecret` ออกนอกเซิร์ฟเวอร์ ·
-ด่าน `test-marketplace-readers` 19.1–19.14
+ลิงก์ห้องส่วนตัวห้ามข้ามการจ่ายเงิน/โควตา/AI คัดกรอง (ข้ามได้แค่สวิตช์คิวสด) และรหัสห้องไม่ใช่ตัวตนลูกค้า ·
+ด่าน `test-marketplace-readers` 19.1–19.17
 
 ### 7.3 Repository & APIs
 - `src/lib/marketplace/payments.repo.ts`: จัดการ CRUD, Transition สถานะ, คำนวณส่วนแบ่งแม่หมอ

@@ -17,6 +17,8 @@ import {
 } from "@/components/marketplace/ConsoleBookingParts";
 import { LIVE_PRESENCE_TIMEOUT_MINUTES, bkkDateKey, formatTime, relativeDayLabel } from "@/lib/marketplace/booking-policy";
 import { questionCategoryLabel, questionUrgencyLabel, suggestedSpreadLabel } from "@/lib/marketplace/offer";
+import { PrivateRoomCard } from "@/components/marketplace/PrivateRoomCard";
+import type { InviteView } from "@/lib/marketplace/invites.repo";
 
 export const dynamic = "force-dynamic";
 
@@ -34,8 +36,13 @@ interface ConsoleState {
   bookingUrl?: string;
   /** เวลาว่างใกล้สุดที่ลูกค้าจองได้ตอนนี้ — null = ไม่มีใน 14 วัน */
   nextSlot?: number | null;
-  /** `paid` = ลูกค้าจ่ายแล้ว — ยังไม่จ่าย (ตั๋วยุคก่อนระบบจ่ายเงิน) เรียกคิวไม่ได้ */
-  tickets: (QueueTicket & { paid?: boolean })[];
+  /**
+   * `paid` = ลูกค้าจ่ายแล้ว — ยังไม่จ่าย (ตั๋วยุคก่อนระบบจ่ายเงิน) เรียกคิวไม่ได้
+   * `privateRoom` = ลูกค้าจากลิงก์ห้องส่วนตัวของแม่หมอเอง (migrations/0032)
+   */
+  tickets: (QueueTicket & { paid?: boolean; privateRoom?: boolean })[];
+  /** ลิงก์ห้องส่วนตัวที่ยังใช้ได้ (รอเปิด · กำลังจ่าย · จ่ายแล้ว · คุยเสร็จ) */
+  invites?: InviteView[];
   totalWaiting: number;
   /** ตั้งค่า TURN แล้ว = แม่หมอเปิดวิดีโอคอลกับคิวที่เรียกแล้วได้ */
   videoCallEnabled?: boolean;
@@ -164,7 +171,11 @@ function ReaderConsoleInner() {
     }
   };
 
-  const handleTicketAction = async (ticketId: string, action: "accept" | "handoff" | "cancel" | "no_show") => {
+  const handleTicketAction = async (
+    ticketId: string,
+    action: "accept" | "handoff" | "cancel" | "no_show",
+    opts?: { openRoom?: boolean },
+  ) => {
     setActionLoading(ticketId);
     setNotice(null);
     try {
@@ -175,7 +186,11 @@ function ReaderConsoleInner() {
       });
       if (res.ok) {
         fetchConsoleData();
-        if (action === "accept") setNotice("เรียกคิวเรียบร้อยแล้ว");
+        // ลูกค้าจากลิงก์ห้องส่วนตัว: รับเข้าห้อง = เปิดห้องวิดีโอให้เลย ไม่ต้องหาปุ่ม "เข้าห้องวิดีโอ" อีกรอบ
+        if (action === "accept" && opts?.openRoom) {
+          setActiveCallId(ticketId);
+          setNotice("รับลูกค้าเข้าห้องแล้ว — กดเปิดกล้องในห้องวิดีโอได้เลย");
+        } else if (action === "accept") setNotice("เรียกคิวเรียบร้อยแล้ว");
         else if (action === "handoff") setNotice("ปิดคิวเรียบร้อยแล้ว");
         else if (action === "no_show") setNotice("บันทึกว่าลูกค้าไม่มาตามนัดแล้ว");
         else setNotice("ยกเลิกแล้ว ระบบคืนเงินลูกค้าเต็มจำนวนให้อัตโนมัติ");
@@ -343,6 +358,19 @@ function ReaderConsoleInner() {
           </div>
         </div>
 
+        {/* ✦ ห้องคุยส่วนตัว — ลิงก์ให้ลูกค้าคนเดียว จ่ายแล้วรอแม่หมอรับเข้าห้อง (แผน CONSULT_FLOW คลื่น 7) */}
+        <PrivateRoomCard
+          invites={data.invites ?? []}
+          readerName={reader.displayName}
+          priceThb={data.settings?.priceThb ?? null}
+          nowMs={now}
+          authHeaders={getAuthHeaders}
+          onChanged={(message) => {
+            setNotice(message);
+            void fetchConsoleData();
+          }}
+        />
+
         {/* ส่งลิงก์ให้ลูกค้า — เห็นก่อนส่งว่าลูกค้าที่เปิดลิงก์ตอนนี้จะคุยได้เลยหรือได้แค่นัด (CONSULT_FLOW P3) */}
         {data.bookingUrl && (
           <ShareBookingLinkCard
@@ -405,7 +433,7 @@ function ReaderConsoleInner() {
             <p className="text-xs text-muted">
               {isLiveOpen
                 ? "ระบบเปิดรับคิวสดอยู่ เมื่อมีลูกค้าเข้ามาจะปรากฏที่นี่ทันที"
-                : "เปิดรับคิวสดด้านบนเพื่อเริ่มรับลูกดวง"}
+                : "เปิดรับคิวสดด้านบน หรือส่งลิงก์ห้องส่วนตัวให้ลูกค้า แล้วลูกค้าที่จ่ายแล้วจะปรากฏที่นี่"}
             </p>
           </div>
         ) : (
@@ -435,6 +463,11 @@ function ReaderConsoleInner() {
                       <span className="font-serif-th font-bold text-sm text-ink">
                         คุณ{ticket.nickname || "ลูกดวง"}
                       </span>
+                      {ticket.privateRoom && (
+                        <span className="whitespace-nowrap rounded-full border border-gold-ink/30 bg-inset-warm px-2 py-0.5 text-[13px] font-semibold text-gold-ink">
+                          ห้องส่วนตัว
+                        </span>
+                      )}
                     </div>
 
                     <span
@@ -444,7 +477,15 @@ function ReaderConsoleInner() {
                           : "bg-amber-50 text-amber-700 border border-amber-200"
                       }`}
                     >
-                      {isReady ? "เรียกคิวแล้ว" : unpaid ? "ยังไม่ชำระเงิน" : "ชำระแล้ว · รอคิว"}
+                      {isReady
+                        ? ticket.privateRoom
+                          ? "รับเข้าห้องแล้ว"
+                          : "เรียกคิวแล้ว"
+                        : unpaid
+                          ? "ยังไม่ชำระเงิน"
+                          : ticket.privateRoom
+                            ? "ชำระแล้ว · รอรับเข้าห้อง"
+                            : "ชำระแล้ว · รอคิว"}
                     </span>
                   </div>
 
@@ -454,6 +495,11 @@ function ReaderConsoleInner() {
                       ? "ลูกค้ายินยอมให้ใช้เรื่องสุขภาพ เพศวิถี หรือความเชื่อในคำถามเพื่อดูดวงครั้งนี้"
                       : "ลูกค้าไม่ได้ยินยอมเรื่องข้อมูลอ่อนไหว — อย่าถามหรือจดเรื่องสุขภาพ เพศวิถี หรือความเชื่อ"}
                   </p>
+
+                  {/* ลูกค้าจากลิงก์ห้องส่วนตัวเว้นคำถามได้ (คุยกันใน LINE มาแล้ว) — บอกแม่หมอตรง ๆ แทนการ์ดว่าง */}
+                  {ticket.privateRoom && !ticket.question && (
+                    <p className="text-[13px] leading-relaxed text-muted">ลูกค้าไม่ได้เขียนคำถามไว้ — เริ่มถามในห้องได้เลย</p>
+                  )}
 
                   {/* AI Pre-Screening Summary Card */}
                   {ticket.screening && (
@@ -509,9 +555,11 @@ function ReaderConsoleInner() {
                         size="sm"
                         className="flex-1 text-xs"
                         disabled={actionLoading === ticket.id}
-                        onClick={() => handleTicketAction(ticket.id, "accept")}
+                        onClick={() =>
+                          handleTicketAction(ticket.id, "accept", { openRoom: Boolean(ticket.privateRoom && videoCallEnabled) })
+                        }
                       >
-                        เรียกคิวนี้
+                        {ticket.privateRoom ? "รับเข้าห้อง" : "เรียกคิวนี้"}
                       </Button>
                     ) : (
                       <>

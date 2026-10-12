@@ -33,6 +33,12 @@ interface BookingFlowProps {
   initialMode: ConsultMode | null;
   /** `?slot=` จากปุ่ม "เวลาว่างเร็วที่สุด" — เป็นแค่ทางลัด เซิร์ฟเวอร์ตรวจซ้ำตอนจองเสมอ */
   initialSlot: number | null;
+  /**
+   * ✦ ลิงก์ห้องส่วนตัวที่แม่หมอส่งให้ (`/readers/room/<code>` · migrations/0032)
+   * มี = ขั้นเดียว: ชื่อ ➔ จ่าย ➔ รอแม่หมอรับเข้าห้อง · คำถามไม่บังคับ · ใช้ได้แม้แม่หมอปิดคิวสด
+   * (เซิร์ฟเวอร์ตรวจรหัสลิงก์เองทุกครั้ง — ค่านี้แค่บอกหน้าจอว่าต้องส่งรหัสไปด้วย)
+   */
+  invite?: { code: string; customerLabel: string | null };
 }
 
 const QUESTION_MAX = 1000;
@@ -73,8 +79,8 @@ function initialStepOf(p: BookingFlowProps, mode: ConsultMode): Step {
  * - ราคา/ความถูกต้องของเวลา เซิร์ฟเวอร์ตัดสินเอง (`POST /api/marketplace/tickets`) — หน้านี้แค่ส่งสิ่งที่ลูกค้าเลือก
  */
 export function BookingFlow(props: BookingFlowProps) {
-  const { reader, priceThb, isLiveOpen, hasSchedule, initialSlot } = props;
-  const bothModes = isLiveOpen && hasSchedule;
+  const { reader, priceThb, isLiveOpen, hasSchedule, initialSlot, invite } = props;
+  const bothModes = isLiveOpen && hasSchedule && !invite;
 
   const [mode, setMode] = useState<ConsultMode>(() => initialModeOf(props));
   const [step, setStep] = useState<Step>(() => initialStepOf(props, initialModeOf(props)));
@@ -99,13 +105,18 @@ export function BookingFlow(props: BookingFlowProps) {
 
   useEffect(() => {
     setNow(Date.now());
+    // ลิงก์ห้องส่วนตัว: ชื่อที่แม่หมอพิมพ์ไว้ให้มาก่อน (แม่หมอเรียกลูกค้าแบบนี้อยู่แล้วใน LINE)
+    if (invite?.customerLabel) {
+      setNickname(invite.customerLabel.slice(0, NICKNAME_MAX));
+      return;
+    }
     try {
       const saved = window.localStorage.getItem(NICKNAME_KEY);
       if (saved) setNickname(saved.slice(0, NICKNAME_MAX));
     } catch {
       // โหมดส่วนตัว/ปิดที่เก็บข้อมูล — กรอกเองตามปกติ
     }
-  }, []);
+  }, [invite?.customerLabel]);
 
   // ลิงก์ "เวลาว่างเร็วที่สุด" อาจเก่าไปแล้ว (มีคนจองตัดหน้า) ➔ บอกตั้งแต่เปิดหน้า ไม่ใช่ตอนกดจ่าย
   useEffect(() => {
@@ -172,7 +183,8 @@ export function BookingFlow(props: BookingFlowProps) {
   const validate = (): FieldKey | null => {
     const next: Partial<Record<FieldKey, string>> = {};
     if (!nickname.trim()) next.nickname = "ใส่ชื่อเล่นที่อยากให้แม่หมอเรียก";
-    if (question.trim().length < 3) next.question = "เล่าเรื่องที่อยากถามสั้น ๆ สักประโยค";
+    // ลิงก์ห้องส่วนตัว: คุยกับแม่หมอใน LINE มาแล้ว คำถามจึงไม่บังคับ (เล่าในห้องแทนได้)
+    if (!invite && question.trim().length < 3) next.question = "เล่าเรื่องที่อยากถามสั้น ๆ สักประโยค";
     if (!consent) next.consent = "ติ๊กช่องนี้ก่อนชำระเงิน";
     setErrors(next);
     return (["nickname", "question", "consent"] as const).find((k) => next[k]) ?? null;
@@ -212,12 +224,13 @@ export function BookingFlow(props: BookingFlowProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           readerId: reader.id,
-          kind: mode === "now" ? "walkup" : "booking",
-          slotStart: mode === "schedule" ? slot : undefined,
+          kind: mode === "now" || invite ? "walkup" : "booking",
+          slotStart: mode === "schedule" && !invite ? slot : undefined,
           nickname: nickname.trim(),
           question: question.trim(),
           consent: true,
           sensitiveConsent,
+          inviteCode: invite?.code,
         }),
       });
       const data = (await res.json().catch(() => ({}))) as {
@@ -275,10 +288,14 @@ export function BookingFlow(props: BookingFlowProps) {
   }
 
   const stepIndex = step === "when" ? 0 : 1;
+  // ลิงก์ห้องส่วนตัวไม่มีขั้นเลือกเวลา — ขั้นตอนที่ลูกค้าเห็นคือ ชื่อ ➔ จ่าย ➔ เข้าห้อง
+  const stepLabels = invite ? ["ชื่อเล่น", "ชำระเงิน", "เข้าห้องกับแม่หมอ"] : ["เลือกเวลา", "ชื่อและคำถาม", "ชำระเงิน"];
+  const activeStep = invite ? (submitting ? 1 : 0) : submitting ? 2 : stepIndex;
   // "พรุ่งนี้ · จันทร์ 12 ต.ค. · 10:00–10:30 น." — วันอื่นมีชื่อวันอยู่ใน formatSlotRange แล้ว ไม่พิมพ์ซ้ำ
   const relative = slot && now ? relativeDayLabel(slot, now) : null;
-  const whenLabel =
-    mode === "now"
+  const whenLabel = invite
+    ? "ห้องส่วนตัว · เข้าห้องเมื่อแม่หมอกดรับ"
+    : mode === "now"
       ? "คุยตอนนี้ · เข้าคิวทันทีหลังชำระเงิน"
       : slot
         ? `${relative === "วันนี้" || relative === "พรุ่งนี้" ? `${relative} · ` : ""}${formatSlotRange(slot)}`
@@ -289,9 +306,9 @@ export function BookingFlow(props: BookingFlowProps) {
       <ReaderSummary reader={reader} priceThb={priceThb} />
 
       <ol className="flex items-center gap-2" aria-label="ขั้นตอนการจอง">
-        {["เลือกเวลา", "ชื่อและคำถาม", "ชำระเงิน"].map((label, i) => {
-          const done = i < stepIndex || (submitting && i < 2);
-          const active = submitting ? i === 2 : i === stepIndex;
+        {stepLabels.map((label, i) => {
+          const done = i < activeStep;
+          const active = i === activeStep;
           return (
             <li key={label} aria-current={active ? "step" : undefined} className="flex min-w-0 flex-1 flex-col gap-1.5">
               <span aria-hidden="true" className={`h-1 rounded-full ${done || active ? "bg-gold-ink" : "bg-line-warm"}`} />
@@ -382,8 +399,13 @@ export function BookingFlow(props: BookingFlowProps) {
       ) : (
         <form id="booking-form" onSubmit={handleSubmit} noValidate className="space-y-5" aria-labelledby="details-heading">
           <h1 id="details-heading" className="text-xl font-bold text-ink-deep sm:text-2xl">
-            <ThaiPhrases>ชื่อและเรื่องที่อยากถาม</ThaiPhrases>
+            <ThaiPhrases>{invite ? `ห้องคุยส่วนตัวกับ ${reader.displayName}` : "ชื่อและเรื่องที่อยากถาม"}</ThaiPhrases>
           </h1>
+          {invite && (
+            <p className="rounded-2xl border border-gold-ink/30 bg-inset-warm p-4 text-[13px] leading-relaxed text-ink">
+              <ThaiPhrases>แม่หมอส่งลิงก์นี้ให้คุณคนเดียว ใส่ชื่อแล้วชำระเงิน จากนั้นรอในหน้าถัดไป แม่หมอกดรับเมื่อไร ห้องวิดีโอคอลเปิดทันที</ThaiPhrases>
+            </p>
+          )}
 
           {/* เวลาที่เลือก + เปลี่ยนได้ทันที */}
           <div className="flex items-center gap-3 rounded-2xl border border-line-warm bg-inset-warm/70 p-3.5">
@@ -441,7 +463,7 @@ export function BookingFlow(props: BookingFlowProps) {
 
           <div className="flex flex-col gap-1.5">
             <label htmlFor="consult-question" className="text-xs font-semibold tracking-wide text-gold-ink">
-              อยากปรึกษาเรื่องอะไร
+              อยากปรึกษาเรื่องอะไร{invite ? " (ไม่บังคับ)" : ""}
             </label>
             <textarea
               ref={questionRef}
@@ -467,7 +489,9 @@ export function BookingFlow(props: BookingFlowProps) {
                 </p>
               ) : (
                 <p id="consult-question-hint" className="text-[13px] text-muted">
-                  เล่าสั้น ๆ ก็พอ AI จะสรุปให้แม่หมออ่านก่อนเริ่มคุย
+                  {invite
+                    ? "เล่าไว้ก่อนแม่หมอจะได้เตรียมตัว หรือเว้นไว้แล้วเล่าในห้องก็ได้"
+                    : "เล่าสั้น ๆ ก็พอ AI จะสรุปให้แม่หมออ่านก่อนเริ่มคุย"}
                 </p>
               )}
               <p className="shrink-0 font-mono text-[11px] text-muted" aria-hidden="true">
@@ -524,7 +548,11 @@ export function BookingFlow(props: BookingFlowProps) {
             <summary className="flex min-h-[48px] cursor-pointer list-none items-center justify-between gap-3 p-3.5">
               <span className="text-ink">
                 <strong className="font-bold text-ink-deep">
-                  {mode === "schedule" ? `ยกเลิกฟรีก่อนนัด ${FREE_CANCEL_HOURS} ชม.` : "ยกเลิกได้ตลอดระหว่างรอคิว"}
+                  {invite
+                    ? "ยกเลิกได้ตลอดระหว่างรอแม่หมอรับเข้าห้อง"
+                    : mode === "schedule"
+                      ? `ยกเลิกฟรีก่อนนัด ${FREE_CANCEL_HOURS} ชม.`
+                      : "ยกเลิกได้ตลอดระหว่างรอคิว"}
                 </strong>{" "}
                 · คืนเงินเต็มจำนวน
               </span>
@@ -532,7 +560,9 @@ export function BookingFlow(props: BookingFlowProps) {
               <span className="hidden shrink-0 font-semibold text-gold-ink group-open:inline">ซ่อน</span>
             </summary>
             <ul className="space-y-1 border-t border-line-warm px-3.5 pb-3.5 pt-3 text-ink">
-              {(mode === "schedule"
+              {(invite
+                ? ["ยกเลิกได้ตลอดระหว่างรอแม่หมอรับเข้าห้อง คืนเงินเต็ม", "แม่หมอยกเลิก คืนเงินเต็มอัตโนมัติ"]
+                : mode === "schedule"
                 ? [
                     `ยกเลิกหรือเลื่อนนัดก่อนเวลานัด ${FREE_CANCEL_HOURS} ชม. คืนเงินเต็ม (เลื่อนได้ ${MAX_RESCHEDULES} ครั้ง)`,
                     `ยกเลิกน้อยกว่า ${FREE_CANCEL_HOURS} ชม. ก่อนนัด ไม่คืนเงิน`,
@@ -552,9 +582,11 @@ export function BookingFlow(props: BookingFlowProps) {
           <div className="space-y-1.5 rounded-2xl bg-inset-warm/60 p-4 text-[13px] leading-relaxed text-ink">
             <p className="font-bold text-ink-deep">จ่ายแล้วเกิดอะไรต่อ</p>
             <p>
-              {mode === "schedule"
-                ? "ได้หน้ายืนยันนัดพร้อมลิงก์นัดของคุณ ถึงเวลานัดเปิดลิงก์นั้นแล้วกดเข้าห้องวิดีโอคอล"
-                : "เข้าคิวทันที เปิดหน้าคิวทิ้งไว้ ถึงตาคุณแล้วปุ่มเข้าห้องวิดีโอคอลจะขึ้นเอง"}
+              {invite
+                ? "ไปหน้ารอเข้าห้องทันที เปิดหน้านั้นทิ้งไว้ แม่หมอกดรับเมื่อไร ปุ่มเข้าห้องวิดีโอคอลจะขึ้นเอง"
+                : mode === "schedule"
+                  ? "ได้หน้ายืนยันนัดพร้อมลิงก์นัดของคุณ ถึงเวลานัดเปิดลิงก์นั้นแล้วกดเข้าห้องวิดีโอคอล"
+                  : "เข้าคิวทันที เปิดหน้าคิวทิ้งไว้ ถึงตาคุณแล้วปุ่มเข้าห้องวิดีโอคอลจะขึ้นเอง"}
               {" "}คุยทาง LINE แทนได้ถ้าภาพหรือเสียงมีปัญหา
             </p>
           </div>

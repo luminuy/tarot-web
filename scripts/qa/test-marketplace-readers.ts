@@ -554,9 +554,20 @@ async function runTest() {
   // ── 🛎️ ขั้นตอนปรึกษาแม่หมอแบบใหม่ (CONSULT_FLOW_UX_PLAN_2026-10-11) ───────────────
   await testConsultFlowUx(created.id, created.sessionSecret);
 
+  // ── ✦ ลิงก์ห้องส่วนตัว (คลื่น 7 · migrations/0032) ───────────────────────────────
+  await testPrivateRoom(created.id);
+
   // Cleanup test reader
   await deleteReader(created.id);
-  console.log("  ✓ 15. ทำความสะอาดข้อมูลทดสอบเรียบร้อย");
+  {
+    const { getAppDB } = await import("../../src/lib/platform/db");
+    const left = await (await getAppDB())
+      .prepare("SELECT COUNT(*) AS count FROM reader_invites WHERE reader_id = ?")
+      .bind(created.id)
+      .first<{ count: number }>();
+    if (Number(left?.count ?? 0) !== 0) throw new Error("❌ ลบแม่หมอแล้วลิงก์ห้องส่วนตัวต้องหายไปด้วย (FK + ชื่อลูกค้าที่แม่หมอพิมพ์)");
+  }
+  console.log("  ✓ 15. ทำความสะอาดข้อมูลทดสอบเรียบร้อย (รวมลิงก์ห้องส่วนตัวของแม่หมอ)");
 
   console.log("\n✨ [QA] Marketplace M4-M7 Test ผ่านครบทุกด่าน 100%!");
 }
@@ -1542,6 +1553,224 @@ async function testConsultFlowUx(readerId: string, sessionSecret: string) {
     throw new Error("❌ 19.14 loading ของ /readers ต้องอยู่ในกลุ่ม (directory) เท่านั้น (ไม่งั้นโปรไฟล์ที่ไม่มีอยู่ได้ 200) และแถบคุกกี้ในกลุ่มแม่หมอต้องเป็นแบบย่อใต้หัวเว็บ");
   }
   console.log("  ✓ 19.14 /readers/<ไม่มีอยู่> ตอบ 404 จริง (loading อยู่แค่หน้ารวม) · แถบคุกกี้ย่อใต้หัวเว็บในกลุ่มแม่หมอ");
+}
+
+/**
+ * ✦ ลิงก์ห้องส่วนตัว — เจ้าของถาม 2026-10-12 "สร้างลิงก์เข้าห้องให้ลูกค้าได้โดยตรงไหม แบบ Google Meet"
+ * แล้วเคาะ "จ่ายบนเว็บก่อนเข้า" (แผน CONSULT_FLOW_UX_PLAN คลื่น 7 · migrations/0032)
+ * สัญญาที่ห้ามหลุด: ข้ามสวิตช์คิวสดได้เฉพาะลิงก์ที่ใช้ได้จริง · ลิงก์เดียวลูกค้าคนเดียว · จ่ายก่อนเสมอ
+ * · ยกเลิกระหว่างมีคนจ่ายต้องปล่อยที่ · แผงแม่หมอไม่เห็นตัวตนลูกค้า (A2-13)
+ */
+async function testPrivateRoom(readerId: string) {
+  const fs = await import("node:fs");
+  const path = await import("node:path");
+  const src = (f: string) => fs.readFileSync(path.join(process.cwd(), f), "utf-8");
+  const inv = await import("../../src/lib/marketplace/invites.repo");
+  const { getReaderById } = await import("../../src/lib/marketplace/readers.repo");
+  const { POST: postTicket } = await import("../../src/app/api/marketplace/tickets/route");
+  const { POST: postInvite, PATCH: patchInvite } = await import("../../src/app/api/marketplace/console/invites/route");
+  const { GET: consoleGet } = await import("../../src/app/api/marketplace/console/queue/route");
+  const { GET: getTicket } = await import("../../src/app/api/marketplace/tickets/[id]/route");
+  const { CUSTOMER_REF_COOKIE } = await import("../../src/lib/marketplace/customer-ref");
+  const { signPayload } = await import("../../src/lib/auth/edge-auth");
+  const bookingRepo = await import("../../src/lib/marketplace/booking.repo");
+  const queueRepo = await import("../../src/lib/marketplace/queue.repo");
+  const { getAppDB } = await import("../../src/lib/platform/db");
+  const db = await getAppDB();
+  const ORIGIN = "https://seertarot.net";
+  // ref ลูกค้าไม่ซ้ำข้ามรอบ — รอบที่ล้มกลางทางทิ้งตั๋วค้างได้ (ลูกค้าหนึ่งคนมีตั๋วค้างได้ 3 ใบ)
+  const runTag = `cust_room_${readerId.slice(-8)}`;
+
+  // กุญแจแผงถูกหมุนไปแล้วใน 19.12 — เซ็นใหม่จากกุญแจปัจจุบัน
+  const reader = await getReaderById(readerId);
+  if (!reader) throw new Error("❌ 19.15 ไม่พบแม่หมอทดสอบ");
+  const bearer = `Bearer ${signReaderToken(readerId, reader.sessionSecret, 1)}`;
+  const asReader = (method: "POST" | "PATCH", body: unknown) =>
+    new Request(`${ORIGIN}/api/marketplace/console/invites`, {
+      method,
+      headers: { "content-type": "application/json", origin: ORIGIN, authorization: bearer },
+      body: JSON.stringify(body),
+    });
+  // ลูกค้าแต่ละคนคนละ IP — เพดานจอง 10 ครั้ง/10 นาทีต่อเครื่องต้องไม่ทำให้ด่านนี้ล้มเพราะเทสต์ข้างบน
+  let ip = 0;
+  const book = async (ref: string | null, body: Record<string, unknown>) =>
+    postTicket(
+      new Request(`${ORIGIN}/api/marketplace/tickets`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          origin: ORIGIN,
+          "x-forwarded-for": `10.66.0.${++ip}`,
+          ...(ref ? { cookie: `${CUSTOMER_REF_COOKIE}=${await signPayload({ ref })}` } : {}),
+        },
+        body: JSON.stringify({ readerId, nickname: "บีม", consent: true, ...body }),
+      }),
+    );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const json = async (res: Response) => (await res.json().catch(() => ({}))) as Record<string, any>;
+  const codeOf = (url: unknown) => (typeof url === "string" ? decodeURIComponent(url.split("/readers/room/")[1] ?? "") : "");
+  const consoleData = async () =>
+    json(await consoleGet(new Request(`${ORIGIN}/api/marketplace/console/queue`, { headers: { authorization: bearer } })));
+
+  // ── 19.15 ลิงก์ห้องส่วนตัว: จ่ายได้แม้ปิดคิวสด · คำถามไม่บังคับ · ลิงก์เดียวคนเดียว · จ่ายแล้วใช้ซ้ำไม่ได้ ──
+  await queueRepo.setReaderLiveAvailability(readerId, false);
+  const createdRes = await postInvite(asReader("POST", { label: "  คุณบีม  " }));
+  const created = await json(createdRes);
+  const code = codeOf(created.invite?.url);
+  if (createdRes.status !== 200 || !inv.isInviteCode(code) || code.length < 22 || created.invite.label !== "บีม" || created.invite.state !== "open") {
+    throw new Error(`❌ 19.15 สร้างลิงก์ห้องไม่ถูกต้อง (${createdRes.status} ${JSON.stringify(created.invite)})`);
+  }
+  const noInvite = await book(`${runTag}_a`, { kind: "walkup", question: "อยากรู้เรื่องงานช่วงนี้" });
+  const shortQuestion = await book(`${runTag}_a`, { kind: "walkup", question: "" });
+  const aRes = await book(`${runTag}_a`, { kind: "booking", inviteCode: code, question: "" });
+  const a = await json(aRes);
+  const aTicket = a.ticket?.id ? await queueRepo.getQueueTicketById(a.ticket.id) : null;
+  if (
+    noInvite.status !== 409 || // ไม่มีลิงก์ = คิวสดปิดอยู่ จองตอนนี้ไม่ได้เหมือนเดิม
+    shortQuestion.status !== 400 || // ไม่มีลิงก์ = คำถามยังบังคับ
+    aRes.status !== 200 ||
+    !a.checkoutUrl || // ต้องผ่านหน้าจ่ายเงินเสมอ (เจ้าของเคาะ "จ่ายบนเว็บก่อนเข้า")
+    !aTicket ||
+    aTicket.kind !== "walkup" || // ลิงก์ห้อง = คุยตอนนี้ ไม่มีเวลานัด
+    aTicket.status !== "pending_payment" ||
+    aTicket.question !== null ||
+    aTicket.aiScreenId !== null // ไม่มีคำถาม ➔ ไม่เรียก AI คัดกรองเปล่า ๆ
+  ) {
+    throw new Error(
+      `❌ 19.15 ลูกค้าจากลิงก์ห้องต้องจ่ายได้แม้ปิดคิวสด (คำถามไม่บังคับ) แต่ไม่มีลิงก์ต้องเหมือนเดิม (${JSON.stringify({ noInvite: noInvite.status, short: shortQuestion.status, a: aRes.status, kind: aTicket?.kind, status: aTicket?.status })})`,
+    );
+  }
+  const bRes = await book(`${runTag}_b`, { inviteCode: code, question: "ขอดูเรื่องความรัก" });
+  const b = await json(bRes);
+  const againRes = await book(`${runTag}_a`, { inviteCode: code });
+  const again = await json(againRes);
+  const paying = await consoleData();
+  if (
+    bRes.status !== 409 || b.code !== "invite_busy" || // ระหว่างคนแรกกำลังจ่าย คนอื่นจ่ายซ้อนไม่ได้
+    againRes.status !== 200 || again.redirectUrl !== `/readers/queue/${aTicket.id}` || again.checkoutUrl || // คนเดิมกดซ้ำ ➔ ตั๋วเดิม
+    paying.invites?.find((i: { id: string }) => i.id === created.invite.id)?.state !== "paying" ||
+    JSON.stringify(paying).includes("cust_room_") // แผงแม่หมอต้องไม่เห็นตัวตนลูกค้า (A2-13)
+  ) {
+    throw new Error(`❌ 19.15 ลิงก์เดียวต้องใช้ได้คนเดียว (${JSON.stringify({ b: bRes.status, code: b.code, again: againRes.status })})`);
+  }
+  const payment = (await bookingRepo.listPaymentsForTicket(aTicket.id))[0];
+  const settled = payment ? await bookingRepo.settleConsultationPayment(payment.id) : "not_found";
+  const paid = await consoleData();
+  const paidTicket = paid.tickets?.find((t: { id: string }) => t.id === aTicket.id);
+  const cRes = await book(`${runTag}_c`, { inviteCode: code });
+  const c = await json(cRes);
+  // จ่ายแล้วยกเลิกที่ลิงก์ไม่ได้ — ต้องยกเลิกที่การ์ดคิว (ซึ่งคืนเงินตามนโยบาย) ไม่ใช่ปล่อยให้ตั๋วที่จ่ายแล้วลอยอยู่
+  const paidCancelRes = await patchInvite(asReader("PATCH", { inviteId: created.invite.id, action: "cancel" }));
+  const paidCancel = await json(paidCancelRes);
+  const ownerView = await json(
+    await getTicket(
+      new Request(`${ORIGIN}/api/marketplace/tickets/${aTicket.id}`, {
+        headers: { cookie: `${CUSTOMER_REF_COOKIE}=${await signPayload({ ref: `${runTag}_a` })}` },
+      }),
+      { params: Promise.resolve({ id: aTicket.id }) },
+    ),
+  );
+  if (
+    settled !== "confirmed" ||
+    paid.invites?.find((i: { id: string }) => i.id === created.invite.id)?.state !== "paid" ||
+    paidTicket?.privateRoom !== true || // การ์ดคิวติดป้าย "ห้องส่วนตัว" + ปุ่ม "รับเข้าห้อง"
+    paidTicket.paid !== true ||
+    cRes.status !== 410 || c.code !== "invite_used" ||
+    paidCancelRes.status !== 409 || paidCancel.code !== "invite_paid" ||
+    ownerView.privateRoom !== true
+  ) {
+    throw new Error(`❌ 19.15 จ่ายแล้วลิงก์ต้องเป็น "จ่ายแล้ว" และใช้ซ้ำไม่ได้ (${JSON.stringify({ settled, paidTicket, c: cRes.status })})`);
+  }
+  await queueRepo.updateTicketStatus(aTicket.id, "handed_off", readerId);
+  console.log("  ✓ 19.15 ลิงก์ห้องส่วนตัว: จ่ายได้แม้ปิดคิวสด · คำถามไม่บังคับ · ลิงก์เดียวคนเดียว · จ่ายแล้วใช้ซ้ำไม่ได้ · แผงไม่เห็นตัวตนลูกค้า");
+
+  // ── 19.16 ยกเลิก · หมดอายุ · ลูกค้าทิ้งหน้าจ่ายแล้วลิงก์กลับมาว่าง · เพดานลิงก์ ─────────────
+  const second = await json(await postInvite(asReader("POST", {})));
+  const code2 = codeOf(second.invite?.url);
+  const d = await json(await book(`${runTag}_d`, { inviteCode: code2 }));
+  const foreign = await inv.cancelInvite("reader_not_the_owner", second.invite.id);
+  const cancelRes = await patchInvite(asReader("PATCH", { inviteId: second.invite.id, action: "cancel" }));
+  const cancelled = await json(cancelRes);
+  const dTicket = d.ticket?.id ? await queueRepo.getQueueTicketById(d.ticket.id) : null;
+  const eRes = await book(`${runTag}_e`, { inviteCode: code2 });
+  const e = await json(eRes);
+  if (
+    foreign.ok || // แม่หมอคนอื่นยกเลิกลิงก์ของเราไม่ได้
+    cancelRes.status !== 200 ||
+    cancelled.releasedTicketId !== d.ticket?.id || // มีคนกำลังจ่าย ➔ ปล่อยที่ทันที
+    dTicket?.status !== "cancelled" ||
+    eRes.status !== 410 || e.code !== "invite_cancelled"
+  ) {
+    throw new Error(`❌ 19.16 ยกเลิกลิงก์ต้องปล่อยคนที่กำลังจ่ายและเปิดไม่ได้อีก (${JSON.stringify({ foreign, cancel: cancelRes.status, cancelled, dStatus: dTicket?.status, e: eRes.status })})`);
+  }
+  const third = await json(await postInvite(asReader("POST", { label: "พลอย" })));
+  const code3 = codeOf(third.invite?.url);
+  const f = await json(await book(`${runTag}_f`, { inviteCode: code3 }));
+  // ลูกค้าปิดหน้าจ่ายเงินทิ้งไปจนเลยเวลากันที่ ➔ ลิงก์ต้องกลับมาให้ใช้ได้ (ไม่ค้าง "กำลังจ่าย" ตลอดไป)
+  await db.prepare("UPDATE bookings SET hold_expires_at = ? WHERE ticket_id = ?").bind(Date.now() - 60_000, f.ticket?.id ?? "").run();
+  const gRes = await book(`${runTag}_g`, { inviteCode: code3 });
+  const g = await json(gRes);
+  const fourth = await json(await postInvite(asReader("POST", {})));
+  await db.prepare("UPDATE reader_invites SET expires_at = ? WHERE id = ?").bind(Date.now() - 1000, fourth.invite.id).run();
+  const hRes = await book(`${runTag}_h`, { inviteCode: codeOf(fourth.invite?.url) });
+  const h = await json(hRes);
+  const now = Date.now();
+  const live = { expiresAt: now + 60_000, cancelledAt: null };
+  if (
+    gRes.status !== 200 || !g.checkoutUrl ||
+    (await queueRepo.getQueueTicketById(f.ticket?.id ?? ""))?.status !== "expired" ||
+    hRes.status !== 410 || h.code !== "invite_expired" ||
+    inv.inviteState(live, { status: "pending_payment", holdExpiresAt: now - 1 }, now) !== "open" ||
+    inv.inviteState(live, { status: "pending_payment", holdExpiresAt: now + 60_000 }, now) !== "paying" ||
+    inv.inviteState(live, { status: "waiting", holdExpiresAt: null }, now) !== "paid" ||
+    inv.inviteState(live, { status: "ready", holdExpiresAt: null }, now) !== "in_room" || // รับเข้าห้องแล้ว ห้ามบอกให้กดรับอีก
+    inv.inviteState({ expiresAt: now - 1, cancelledAt: null }, { status: "ready", holdExpiresAt: null }, now) !== "in_room" || // คุยข้ามเวลาหมดอายุลิงก์ได้
+    inv.inviteState(live, { status: "handed_off", holdExpiresAt: null }, now) !== "done" ||
+    inv.inviteState({ expiresAt: now - 1, cancelledAt: null }, { status: "cancelled", holdExpiresAt: null }, now) !== "expired" ||
+    inv.cleanInviteLabel("  คุณ  บีม ") !== "บีม" ||
+    inv.cleanInviteLabel("   ") !== null ||
+    inv.isInviteCode("../../etc/passwd") ||
+    (await inv.getInviteByCode("x' OR '1'='1")) !== null
+  ) {
+    throw new Error(`❌ 19.16 หมดอายุ/ทิ้งหน้าจ่ายเงิน/สถานะลิงก์ผิด (${JSON.stringify({ g: gRes.status, h: hRes.status, hCode: h.code })})`);
+  }
+  // เพดานลิงก์ที่ยังไม่มีใครใช้ 10 อันต่อแม่หมอ
+  let lastStatus = 0;
+  for (let i = 0; i < inv.MAX_OPEN_INVITES + 1; i++) lastStatus = (await postInvite(asReader("POST", {}))).status;
+  const listed = (await consoleData()).invites ?? [];
+  if (lastStatus !== 429 || listed.some((i: { state: string }) => ["expired", "cancelled", "done"].includes(i.state))) {
+    throw new Error(`❌ 19.16 ลิงก์ที่ยังไม่มีใครใช้ต้องมีได้ไม่เกิน ${inv.MAX_OPEN_INVITES} อัน และแผงต้องไม่โชว์ลิงก์ที่หมดอายุ/ยกเลิก/คุยเสร็จแล้ว`);
+  }
+  console.log("  ✓ 19.16 ยกเลิกลิงก์ = ปล่อยคนที่กำลังจ่าย · แม่หมออื่นยกเลิกไม่ได้ · หมดอายุ 24 ชม. · ทิ้งหน้าจ่ายแล้วลิงก์กลับมาว่าง · เพดาน 10 ลิงก์");
+
+  // ── 19.17 ต่อสายครบทุกจุด: หน้าลิงก์ · แผงแม่หมอ · ฟอร์มจอง · service worker · ลบแม่หมอ/PDPA ──
+  const roomPage = src("src/app/(th)/readers/room/[code]/page.tsx");
+  const consolePage = src("src/app/(th)/readers/console/page.tsx");
+  const ticketsRoute = src("src/app/api/marketplace/tickets/route.ts");
+  const flow = src("src/components/marketplace/BookingFlow.tsx");
+  const card = src("src/components/marketplace/PrivateRoomCard.tsx");
+  if (
+    !/index:\s*false/.test(roomPage) ||
+    !roomPage.includes('referrer: "no-referrer"') || // รหัสห้องอยู่ใน URL — ไม่ส่ง Referer ออกนอกเว็บ
+    !roomPage.includes("invite={{ code, customerLabel: invite.label }}") ||
+    !roomPage.includes("redirect(`/readers/queue/") || // คนเดิมเปิดซ้ำ ➔ หน้าคิวของเขา
+    fs.existsSync(path.join(process.cwd(), "src/app/(th)/readers/room/[code]/loading.tsx")) || // ISSUE-056
+    !/kind === "walkup" && !invite\)/.test(ticketsRoute) || // ข้ามสวิตช์คิวสดเฉพาะเมื่อมีลิงก์ที่ใช้ได้จริง
+    !ticketsRoute.includes("attachInviteTicket(invite.id, invite.ticketId, ticket.id)") ||
+    !flow.includes("inviteCode: invite?.code") ||
+    !consolePage.includes("<PrivateRoomCard") ||
+    !consolePage.includes('"รับเข้าห้อง"') ||
+    !consolePage.includes("setActiveCallId(ticketId)") || // รับเข้าห้อง = เปิดห้องวิดีโอให้เลย
+    !card.includes("ยืนยันยกเลิกลิงก์") ||
+    !src("public/sw.js").includes('startsWith("/readers/room")') || // ห้ามเก็บหน้าที่มีรหัสห้องลง Cache Storage
+    !src("src/app/_shared/speculation-rules.ts").includes('"/readers/room/*"') ||
+    !src("migrations/0032_reader_invites.sql").includes("CREATE TABLE IF NOT EXISTS reader_invites") ||
+    !src("src/lib/marketplace/readers.repo.ts").includes("DELETE FROM reader_invites WHERE reader_id = ?") ||
+    !src("src/lib/marketplace/queue.repo.ts").includes("DELETE FROM reader_invites WHERE expires_at < ?")
+  ) {
+    throw new Error("❌ 19.17 ลิงก์ห้องส่วนตัวต้องต่อครบ: หน้าลิงก์ noindex/no-referrer · แผงมีการ์ด + ปุ่มรับเข้าห้อง · SW ไม่แคช · ลบแม่หมอ/หมดอายุแล้วลบลิงก์");
+  }
+  console.log("  ✓ 19.17 ลิงก์ห้องส่วนตัวต่อครบ: หน้าลิงก์ noindex · ไม่ส่ง Referer · ไม่แคช · แผงมีการ์ด + รับเข้าห้องเปิดห้องทันที · ลบตาม PDPA");
 }
 
 runTest().catch((err) => {

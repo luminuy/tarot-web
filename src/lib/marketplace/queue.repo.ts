@@ -208,16 +208,20 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
   const now = Date.now();
   const expiresAt = ticketExpiresAt(now, input.slotStart);
   const sensitiveConsentAt = input.sensitiveConsent === true ? now : null;
+  // ลูกค้าจากลิงก์ห้องส่วนตัวเว้นคำถามได้ (คุยกับแม่หมอใน LINE มาแล้ว/เล่าในห้องแทน) — เก็บเป็น NULL
+  const question = input.question.trim() || null;
 
-  // 1. Run AI Screening First
-  const screening = await performAIScreening({
-    question: input.question,
-    ticketId,
-    drawnCardsSummary: input.readingSnapshot,
-  });
+  // 1. Run AI Screening First — ไม่มีคำถาม = ไม่มีอะไรให้คัดกรอง (ไม่เรียก AI เปล่า ๆ)
+  const screening = question
+    ? await performAIScreening({
+        question,
+        ticketId,
+        drawnCardsSummary: input.readingSnapshot,
+      })
+    : null;
 
   // If blocked by safety guardrails -> ticket cancelled immediately
-  if (screening.verdict === "block") {
+  if (screening?.verdict === "block") {
     const ticket: QueueTicket = {
       id: ticketId,
       readerId: input.readerId,
@@ -227,7 +231,7 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
       slotStart: input.slotStart || null,
       customerRef: input.customerRef,
       nickname: input.nickname.trim(),
-      question: input.question.trim(),
+      question,
       readingSnapshot: input.readingSnapshot || null,
       aiScreenId: screening.id,
       createdAt: now,
@@ -294,9 +298,9 @@ export async function createQueueTicket(input: CreateQueueTicketInput): Promise<
       input.slotStart || null,
       input.customerRef,
       input.nickname.trim(),
-      input.question.trim(),
+      question,
       input.readingSnapshot || null,
-      screening.id,
+      screening?.id ?? null,
       now,
       expiresAt,
       input.userId ?? null,
@@ -469,5 +473,12 @@ export async function cleanupExpiredTickets(): Promise<number> {
   `).bind(now).run();
 
   const res = await db.prepare("DELETE FROM queue_tickets WHERE expires_at < ?").bind(now).run();
+  // ✦ ลิงก์ห้องส่วนตัว (migrations/0032) มีชื่อลูกค้าที่แม่หมอพิมพ์ไว้ — ลบหลังลิงก์หมดอายุ 7 วัน
+  //   แยก try: ฐานข้อมูลเก่าที่ยังไม่มีตารางต้องไม่ทำให้การลบตั๋วข้างบนนับผิด
+  try {
+    await db.prepare("DELETE FROM reader_invites WHERE expires_at < ?").bind(now - RETENTION_MS).run();
+  } catch {
+    // ignore if table not yet created
+  }
   return res.meta?.changes ?? 0;
 }

@@ -29,8 +29,10 @@ export async function openConsultationCheckout(input: {
   priceThb: number;
   /** อีเมลสมาชิกที่ล็อกอินอยู่ — เติมให้ในหน้า Stripe + ใช้ส่งใบเสร็จ */
   customerEmail?: string | null;
+  /** มาจากลิงก์ห้องส่วนตัวที่แม่หมอส่งให้ (migrations/0032) — หน้าจ่ายเงินเรียก "ห้องส่วนตัว" ไม่ใช่ "คิวสด" */
+  privateRoom?: boolean;
 }): Promise<{ checkoutUrl: string; paymentId: string }> {
-  const { request, ticketId, readerId, readerName, booking, attempt, priceThb, customerEmail } = input;
+  const { request, ticketId, readerId, readerName, booking, attempt, priceThb, customerEmail, privateRoom } = input;
   const amountSatang = Math.round(priceThb * 100);
   const now = Date.now();
   const db = await getAppDB();
@@ -50,12 +52,16 @@ export async function openConsultationCheckout(input: {
     customerEmail: customerEmail || undefined,
     description: scheduled
       ? `ปรึกษา ${readerName} · ${formatSlotRange(booking.slotStart)}`
-      : `ปรึกษา ${readerName} · คิวสดตอนนี้`,
+      : privateRoom
+        ? `ปรึกษา ${readerName} · ห้องส่วนตัว`
+        : `ปรึกษา ${readerName} · คิวสดตอนนี้`,
     productDescription: `ตัวต่อตัว ${CONSULTATION_MINUTES} นาที · วิดีโอคอลในเว็บ หรือ LINE`,
     imageUrl: checkoutArtUrl(origin, "consultation"),
     submitMessage: scheduled
       ? "ยกเลิกหรือเลื่อนนัดก่อนเวลานัด 24 ชั่วโมง คืนเงินเต็มจำนวน"
-      : "ยกเลิกได้ระหว่างรอคิว คืนเงินเต็มจำนวน",
+      : privateRoom
+        ? "ยกเลิกได้ระหว่างรอแม่หมอรับเข้าห้อง คืนเงินเต็มจำนวน"
+        : "ยกเลิกได้ระหว่างรอคิว คืนเงินเต็มจำนวน",
     returnUri: `${queueUri}?paid=1`,
     cancelUri: queueUri,
     referenceId: booking.id,

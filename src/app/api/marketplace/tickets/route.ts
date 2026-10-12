@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { apiOk } from "@/lib/api/envelope";
+import { apiFail, apiOk } from "@/lib/api/envelope";
 import { z } from "zod";
 
 import {
@@ -16,6 +16,7 @@ import { isPrivilegedTestRequest } from "@/lib/security/privileged";
 import { getSessionUser } from "@/lib/auth/session";
 import { readerPriceThb } from "@/lib/marketplace/offer";
 import { getReaderById } from "@/lib/marketplace/readers.repo";
+import { attachInviteTicket, resolveInviteClaim, type ReaderInvite } from "@/lib/marketplace/invites.repo";
 import {
   readCustomerRefFromCookie,
   attachCustomerRefCookie,
@@ -29,7 +30,8 @@ const CreateTicketSchema = z.object({
   readerId: z.string().min(1, "กรุณาระบุรหัสแม่หมอ"),
   kind: z.enum(["walkup", "booking"]).default("walkup"),
   nickname: z.string().trim().min(1, "กรุณาระบุชื่อเล่น").max(40, "ชื่อเล่นยาวเกินไป"),
-  question: z.string().trim().min(3, "กรุณาระบุคำถามอย่างน้อย 3 ตัวอักษร").max(1000, "คำถามยาวเกินไป"),
+  // ขั้นต่ำ 3 ตัวอักษรตรวจหลัง parse — ลูกค้าจากลิงก์ห้องส่วนตัวเว้นได้ (คุยกับแม่หมอใน LINE มาแล้ว)
+  question: z.string().trim().max(1000, "คำถามยาวเกินไป").default(""),
   readingSnapshot: z.string().max(2000).optional(),
   slotStart: z.number().int().positive().optional(),
   consent: z.boolean().refine((val) => val === true, {
@@ -37,6 +39,11 @@ const CreateTicketSchema = z.object({
   }),
   /** ความยินยอมโดยชัดแจ้งเรื่องข้อมูลอ่อนไหว (ม.26) — ช่องแยก ไม่บังคับ · ไม่ติ๊ก = ไม่ได้ยินยอม */
   sensitiveConsent: z.boolean().optional(),
+  /**
+   * รหัสลิงก์ห้องส่วนตัวที่แม่หมอส่งให้ (migrations/0032) — มี = แม่หมอเชิญลูกค้าคนนี้เอง
+   * ข้ามแค่สวิตช์คิวสดกับคำถามขั้นต่ำ ด่านอื่น (โควตา · AI คัดกรอง · กันที่ · จ่ายเงิน) เหมือนการจองปกติทุกข้อ
+   */
+  inviteCode: z.string().trim().min(16).max(64).optional(),
 });
 
 /**
@@ -101,7 +108,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const { readerId, kind, nickname, question, readingSnapshot, slotStart, sensitiveConsent } = parsed.data;
+    const { readerId, nickname, question, readingSnapshot, slotStart, sensitiveConsent, inviteCode } = parsed.data;
+    // ลิงก์ห้องส่วนตัว = คุยตอนนี้เสมอ (ไม่มีเวลานัด)
+    const kind = inviteCode ? "walkup" : parsed.data.kind;
+    if (!inviteCode && question.length < 3) {
+      return NextResponse.json({ error: "กรุณาระบุคำถามอย่างน้อย 3 ตัวอักษร" }, { status: 400 });
+    }
 
     // 🔒 customerRef ออกโดยเซิร์ฟเวอร์เท่านั้น — ห้ามรับจาก body (A2-13)
     //    เดิมรับค่าจาก body แล้วเซ็นคุกกี้ให้ทันที ใครรู้ ref ของคนอื่นก็แลกเป็นคุกกี้อ่านคิวเขาได้
@@ -115,8 +127,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "ไม่พบแม่หมอที่ระบุ หรือยังไม่เปิดรับงาน" }, { status: 404 });
     }
 
+    // ล็อกอินอยู่ = ผูกตั๋วกับบัญชี (เห็น "นัดของฉัน" ทุกเครื่อง) · ไม่ล็อกอินก็จองได้ตามปกติ
+    const user = await getSessionUser().catch(() => null);
+
     const now = Date.now();
-    if (kind === "walkup") {
+    // ✦ ลิงก์ห้องส่วนตัว — ตัดสินก่อนด่านแพง (AI คัดกรอง · หน้าจ่ายเงิน): ลิงก์ยังใช้ได้ไหม มีคนอื่นกำลังจ่ายไหม
+    let invite: ReaderInvite | null = null;
+    if (inviteCode) {
+      const claim = await resolveInviteClaim(inviteCode, readerId, existingRef, user?.id ?? null, now);
+      if (claim.kind === "refused") return apiFail(claim.error, claim.status, claim.code);
+      // ลูกค้าคนเดิมกดซ้ำ (จ่ายค้างไว้/จ่ายแล้ว) ➔ พากลับหน้าคิวของเขา ไม่สร้างตั๋วใบที่สอง
+      if (claim.kind === "own") return apiOk({ redirectUrl: `/readers/queue/${claim.ticketId}` });
+      invite = claim.invite;
+    }
+
+    // แม่หมอเชิญเองผ่านลิงก์ห้องส่วนตัว ➔ ไม่ต้องเปิดสวิตช์คิวสด (ด่านอื่นยังตรวจครบ)
+    if (kind === "walkup" && !invite) {
       const isLive = await getReaderLiveAvailability(readerId);
       if (!isLive) {
         return NextResponse.json(
@@ -124,7 +150,7 @@ export async function POST(request: Request) {
           { status: 409 }
         );
       }
-    } else {
+    } else if (kind === "booking") {
       if (!slotStart) {
         return NextResponse.json({ error: "กรุณาเลือกวันและเวลานัด" }, { status: 400 });
       }
@@ -152,9 +178,6 @@ export async function POST(request: Request) {
     if (isStripeTestModeOnProduction() && !(await isPrivilegedTestRequest(request))) {
       return NextResponse.json({ error: PAYMENTS_NOT_OPEN_MESSAGE }, { status: 503 });
     }
-
-    // ล็อกอินอยู่ = ผูกตั๋วกับบัญชี (เห็น "นัดของฉัน" ทุกเครื่อง) · ไม่ล็อกอินก็จองได้ตามปกติ
-    const user = await getSessionUser().catch(() => null);
 
     // Create ticket with AI Screening — ยังไม่เข้าคิวจนกว่าจะจ่ายเงิน
     const ticket = await createQueueTicket({
@@ -192,6 +215,11 @@ export async function POST(request: Request) {
         { status: 409 }
       );
     }
+    // ผูกตั๋วกับลิงก์ห้องก่อนเปิดหน้าจ่ายเงิน (compare-and-swap) — คนที่สองที่กดพร้อมกันแพ้แล้วปล่อยที่ของตัวเอง
+    if (invite && !(await attachInviteTicket(invite.id, invite.ticketId, ticket.id))) {
+      await releaseHold(ticket.id, "cancelled", "system");
+      return apiFail("มีคนกำลังชำระเงินผ่านลิงก์นี้อยู่ ถ้าไม่ใช่คุณ ทักแม่หมอขอลิงก์ใหม่ได้เลย", 409, "invite_busy");
+    }
 
     let checkoutUrl: string;
     try {
@@ -204,6 +232,7 @@ export async function POST(request: Request) {
         attempt: 1,
         priceThb: readerPriceThb(reader),
         customerEmail: user?.email ?? null,
+        privateRoom: invite !== null,
       }));
     } catch (err) {
       // เกตเวย์ล่ม = ปล่อยที่ทันที ไม่ให้เวลาว่างหายไปจากตาราง 36 นาทีทั้งที่ไม่มีใครจ่ายได้

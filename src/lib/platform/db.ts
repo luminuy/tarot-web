@@ -427,6 +427,12 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     // รับนัดล่วงหน้าอย่างน้อยกี่นาที — แม่หมอตั้งเอง · NULL = ค่าเริ่มต้น 2 ชม. (migrations/0030)
     safeExec("ALTER TABLE readers ADD COLUMN lead_min INTEGER");
     safeExec("ALTER TABLE reader_availability ADD COLUMN last_seen_at INTEGER");
+    // ลิงก์ห้องส่วนตัวที่แม่หมอสร้างให้ลูกค้าคนเดียว (migrations/0032) — ต้องตรงกับไฟล์ migration ทุกคอลัมน์
+    safeExec(
+      "CREATE TABLE IF NOT EXISTS reader_invites (id TEXT PRIMARY KEY, code TEXT NOT NULL UNIQUE, reader_id TEXT NOT NULL REFERENCES readers(id), label TEXT, ticket_id TEXT, created_at INTEGER NOT NULL, expires_at INTEGER NOT NULL, cancelled_at INTEGER)"
+    );
+    safeExec("CREATE INDEX IF NOT EXISTS idx_reader_invites_reader ON reader_invites(reader_id, created_at)");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_reader_invites_ticket ON reader_invites(ticket_id)");
     safeExec(
       "CREATE TABLE IF NOT EXISTS reader_blocked_dates (reader_id TEXT NOT NULL REFERENCES readers(id), date_key TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (reader_id, date_key))"
     );

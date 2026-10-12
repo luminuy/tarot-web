@@ -343,6 +343,12 @@ export async function deleteReader(id: string): Promise<boolean> {
   } catch {
     // ignore if tables not yet created in older migrations
   }
+  // ลิงก์ห้องส่วนตัว (migrations/0032) อ้าง FK ถึงแม่หมอ — ต้องลบก่อนแถวแม่หมอ · แยก try แบบเดียวกัน
+  try {
+    await db.prepare("DELETE FROM reader_invites WHERE reader_id = ?").bind(id).run();
+  } catch {
+    // ignore if table not yet created
+  }
   // ตาราง migrations/0021 — แยก try เหมือนห้องวิดีโอ: ฐานข้อมูลเก่าที่ยังไม่มีตารางต้องไม่ทำให้การลบแม่หมอล้ม
   try {
     await db.prepare("DELETE FROM reader_blocked_dates WHERE reader_id = ?").bind(id).run();
