@@ -1,4 +1,5 @@
 import { CardImage } from "@/components/card/CardImage";
+import { GoldMark } from "@/components/ui/GoldMark";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
@@ -149,7 +150,7 @@ export function HomeProofSection({ isEnglish }: { isEnglish: boolean }) {
         </blockquote>
 
         <p className="rounded-xl border border-line-warm bg-inset-warm px-4 py-3 font-serif-th text-sm font-semibold text-ink">
-          <span aria-hidden="true" className="text-gold-ink">✦ </span>
+          <GoldMark className="mr-2 -mt-0.5 text-gold-ink" />
           {copy.advice}
         </p>
 

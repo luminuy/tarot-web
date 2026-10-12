@@ -41,7 +41,7 @@ export const CardWhyPanel: React.FC<{
         }}
         className="tap-overlay-y w-full flex items-center justify-between gap-2 text-left text-xs sm:text-[13px] font-serif-th font-semibold text-gold-ink hover:text-gold-ink-deep cursor-pointer"
       >
-        <span>✦ {isEnglish ? "Why did the reader read it this way?" : "ทำไมแม่หมออ่านแบบนี้?"}</span>
+        <span>{isEnglish ? "Why did the reader read it this way?" : "ทำไมแม่หมออ่านแบบนี้?"}</span>
         <span aria-hidden="true" className={`transition-transform ${open ? "rotate-180" : ""}`}>
           ▾
         </span>

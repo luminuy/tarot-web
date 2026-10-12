@@ -18,8 +18,8 @@ export function FallbackNotice({ isEn, onRetry }: { isEn: boolean; onRetry?: () 
     >
       <p className="text-xs sm:text-sm text-ink-deep font-serif-th leading-relaxed">
         {isEn
-          ? "✦ The AI oracle is busy right now, so this reading comes from our library of card meanings. It did not use up your reading — you can ask the AI oracle again in a moment."
-          : "✦ ตอนนี้แม่หมอ AI มีคนใช้งานเยอะ คำอ่านนี้จึงมาจากคลังความหมายไพ่ของเรา ระบบไม่ได้หักสิทธิ์ของคุณ รอสักครู่แล้วกดให้แม่หมอ AI อ่านใหม่ได้เลย"}
+          ? "The AI oracle is busy right now, so this reading comes from our library of card meanings. It did not use up your reading — you can ask the AI oracle again in a moment."
+          : "ตอนนี้แม่หมอ AI มีคนใช้งานเยอะ คำอ่านนี้จึงมาจากคลังความหมายไพ่ของเรา ระบบไม่ได้หักสิทธิ์ของคุณ รอสักครู่แล้วกดให้แม่หมอ AI อ่านใหม่ได้เลย"}
       </p>
       {onRetry && (
         <button

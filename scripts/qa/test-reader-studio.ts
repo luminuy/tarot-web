@@ -660,9 +660,9 @@ async function main() {
   const editor = src("src/components/studio/ReadingEditor.tsx");
   check("ตัวแก้: ร่าง AI แยกสีจากคำของหมอ", editor.includes("border-l-amethyst") && editor.includes("ร่างจาก AI"));
   check("ตัวแก้/หน้าสตูดิโอไม่ใส่โทเคนใน URL ของ API", !/\/api\/marketplace\/studio[^"'`]*\?token=/.test(src("src/components/studio/studio-api.ts")));
-  const EMOJI = /\p{Extended_Pictographic}/u;
+  const EMOJI = /[\p{Extended_Pictographic}\u{2726}\u{2727}]/u;
   for (const f of ["src/components/studio/StudioApp.tsx", "src/components/studio/ReadingEditor.tsx", "src/components/studio/SharedReadingParts.tsx", "src/app/(th)/r/[token]/page.tsx", "src/lib/studio/dpa.ts"]) {
-    check(`${f}: ไม่มีอิโมจิอื่นนอกจาก ✦ ✨ (กฎเหล็กข้อ 2)`, !EMOJI.test(src(f).replace(/[✦✨]/gu, "").replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "")));
+    check(`${f}: ไม่มีอิโมจิ/สัญลักษณ์ตกแต่ง (กฎเหล็กข้อ 2)`, !EMOJI.test(src(f).replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "")));
   }
   const mirror = src("src/lib/platform/db.ts");
   check("ตาราง 0027 มีใน mirror ฐานข้อมูลในเครื่อง", ["reader_studio_settings", "reader_clients", "reader_readings", "reader_templates"].every((t) => mirror.includes(t)));

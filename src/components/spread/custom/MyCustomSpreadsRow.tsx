@@ -31,7 +31,7 @@ const MyCustomSpreadsRow: React.FC<{
       <div className="flex items-baseline justify-between gap-3">
         <h3 className="font-serif-th text-sm sm:text-base text-ink-deep">{isEnglish ? "My spreads" : "ผังของฉัน"}</h3>
         <Link href="/spreads/create" className="tap-overlay-y min-h-[44px] inline-flex items-center text-xs sm:text-sm font-serif-th text-gold-ink font-semibold underline underline-offset-2">
-          {isEnglish ? "✦ Design a spread" : "✦ ออกแบบผังเอง"}
+          {isEnglish ? "Design a spread" : "ออกแบบผังเอง"}
         </Link>
       </div>
       {spreads && spreads.length > 0 ? (

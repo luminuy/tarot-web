@@ -5,6 +5,7 @@ import { CardImage } from "@/components/card/CardImage";
 import { THEME_LABEL } from "@/data/cards/themes";
 import { computeJournalStats, MIN_CARDS_FOR_STATS, type RatioStat } from "@/lib/journal/stats";
 import type { SavedReadingItem } from "@/lib/utils/history";
+import { stripEmojiDeep } from "@/lib/text/no-emoji";
 
 /**
  * ✦ ภาพรวมสมุดดวง — "บัญชีไพ่แบบซื่อตรง" (REFLECTION_JOURNAL_PLAN 1.3)
@@ -43,7 +44,7 @@ export const JournalOverview: React.FC<{ items: SavedReadingItem[]; isEnglish: b
       const res = await fetch(`/api/journal/monthly-summary?lang=${isEnglish ? "en" : "th"}`, { method: "POST" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error((data as { error?: string }).error || "");
-      setSummary(data as MonthlySummary);
+      setSummary(stripEmojiDeep(data as MonthlySummary));
       setSummaryState("idle");
     } catch (err) {
       setSummaryError((err as Error).message || L({ th: "สรุปไม่สำเร็จ ลองใหม่อีกครั้ง", en: "Couldn't summarise. Please try again." }));
@@ -109,7 +110,7 @@ export const JournalOverview: React.FC<{ items: SavedReadingItem[]; isEnglish: b
                     c.standsOut ? "bg-gold-ink text-surface font-semibold" : "glass-chip text-muted"
                   }`}
                 >
-                  {c.standsOut ? `✦ ${L({ th: "เด่นจริง", en: "Stands out" })}` : L({ th: "ปกติตามโอกาส", en: "Within chance" })}
+                  {c.standsOut ? L({ th: "เด่นจริง", en: "Stands out" }) : L({ th: "ปกติตามโอกาส", en: "Within chance" })}
                 </span>
               </li>
             ))}
@@ -169,7 +170,7 @@ export const JournalOverview: React.FC<{ items: SavedReadingItem[]; isEnglish: b
               disabled={summaryState === "loading"}
               className="tap-overlay-y min-h-[44px] px-5 rounded-full btn-gold-glass text-xs sm:text-sm font-serif-th font-bold cursor-pointer disabled:opacity-60"
             >
-              {summaryState === "loading" ? L({ th: "กำลังสรุป…", en: "Summarising…" }) : L({ th: "✦ ให้แม่หมอสรุปเดือนนี้", en: "✦ Reflect on this month" })}
+              {summaryState === "loading" ? L({ th: "กำลังสรุป…", en: "Summarising…" }) : L({ th: "ให้แม่หมอสรุปเดือนนี้", en: "Reflect on this month" })}
             </button>
             {summaryState === "error" && <p className="text-xs text-err font-serif-th">{summaryError}</p>}
           </>

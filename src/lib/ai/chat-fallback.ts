@@ -19,6 +19,7 @@ import { getPositionName } from "@/data/spreads-helpers";
 import { MOCK_ADVICE, MOCK_TIMING, mockCardTone, shortPositionName, type MockTone } from "@/lib/ai/mock-reading";
 import type { Reading } from "@/lib/schema/reading";
 import { resolveRecordSpread } from "@/lib/tarot/record-spread";
+import { isMindfulAdvice } from "@/lib/ai/ritual";
 
 type Lang = "th" | "en";
 
@@ -209,7 +210,7 @@ export function buildOfflineChatReply(input: ChatFallbackInput): string {
       break;
     }
     case "action": {
-      const advice = (result?.advice ?? []).filter((a) => !a.includes("🧘")).slice(0, 2);
+      const advice = (result?.advice ?? []).filter((a) => !isMindfulAdvice(a)).slice(0, 2);
       const list = advice.length > 0 ? advice : (MOCK_ADVICE[dominant] ?? MOCK_ADVICE.ดิน)[lang];
       body = isEn
         ? `From ${advice.length > 0 ? "your reading" : `the ${dominant === "ไฟ" ? "Fire" : dominant === "น้ำ" ? "Water" : dominant === "ลม" ? "Air" : "Earth"} energy in your spread`}, two things you can do now: 1) ${list[0]} 2) ${list[1] ?? ""}`.trim()

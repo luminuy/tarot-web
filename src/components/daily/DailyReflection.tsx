@@ -68,7 +68,7 @@ export const MorningReflection: React.FC<{
   return (
     <section className="altar-card-porcelain !rounded-2xl p-5 sm:p-6 space-y-4" aria-labelledby="morning-reflection-h">
       <header className="space-y-1">
-        <p className="text-xs font-serif-th font-semibold text-gold-ink">✦ {L({ th: "พิธีเช้า 2 นาที", en: "Two-minute morning ritual" })}</p>
+        <p className="text-xs font-serif-th font-semibold text-gold-ink">{L({ th: "พิธีเช้า 2 นาที", en: "Two-minute morning ritual" })}</p>
         <h2 id="morning-reflection-h" className="text-lg sm:text-xl font-serif-th font-bold text-ink-deep">
           {L({ th: "ก่อนเริ่มวัน ลองถามตัวเองสักข้อ", en: "Before the day begins, ask yourself one thing" })}
         </h2>
@@ -178,7 +178,7 @@ export const EveningCheckin: React.FC<{ isEnglish: boolean }> = ({ isEnglish }) 
         </span>
         <div className="space-y-1 min-w-0">
           <p className="text-xs font-serif-th font-semibold text-gold-ink">
-            ✦ {isEvening ? L({ th: "เช็กอินเย็นนี้", en: "Evening check-in" }) : L({ th: "ไพ่ของคุณเช้านี้", en: "Your card this morning" })}
+            {isEvening ? L({ th: "เช็กอินเย็นนี้", en: "Evening check-in" }) : L({ th: "ไพ่ของคุณเช้านี้", en: "Your card this morning" })}
           </p>
           <h2 id="evening-h" className="text-base sm:text-lg font-serif-th font-bold text-ink-deep">
             {isEnglish ? meta.nameEn : meta.nameTh}
@@ -308,7 +308,7 @@ export const WeekStrip: React.FC<{ isEnglish: boolean; refreshKey?: unknown }> =
           {L({ th: "7 วันที่ผ่านมาของคุณ", en: "Your last seven days" })}
         </h2>
         <p className="text-xs font-serif-th text-gold-ink font-semibold">
-          ✦ {L({ th: `กลับมาทบทวนต่อเนื่อง ${data.streak.days} วัน`, en: `${data.streak.days}-day reflection streak` })}
+          {L({ th: `กลับมาทบทวนต่อเนื่อง ${data.streak.days} วัน`, en: `${data.streak.days}-day reflection streak` })}
           <span className="text-muted font-normal"> · {L({ th: "พักได้สัปดาห์ละ 1 วัน", en: "one rest day a week is fine" })}</span>
         </p>
       </header>
@@ -350,7 +350,7 @@ export const WeekStrip: React.FC<{ isEnglish: boolean; refreshKey?: unknown }> =
         </p>
       )}
       <a href={isEnglish ? "/en/journal" : "/journal"} className="inline-flex text-xs sm:text-[13px] font-serif-th font-semibold text-gold-ink underline underline-offset-2">
-        ✦ {L({ th: "ดูทั้งหมดในสมุดดวง", en: "See everything in your journal" })}
+        {L({ th: "ดูทั้งหมดในสมุดดวง", en: "See everything in your journal" })}
       </a>
     </section>
   );

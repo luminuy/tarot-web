@@ -59,7 +59,7 @@ export const AppSettingsCard: React.FC<{ isEnglish: boolean; isMember: boolean }
   return (
     <section className="glass-tile !rounded-2xl p-4 sm:p-5 space-y-4 font-serif-th text-ink-deep" aria-labelledby="app-settings-h">
       <h2 id="app-settings-h" className="text-sm sm:text-base font-bold">
-        ✦ {L({ th: "การเตือนและการใช้งานออฟไลน์", en: "Reminders & offline" })}
+        {L({ th: "การเตือนและการใช้งานออฟไลน์", en: "Reminders & offline" })}
       </h2>
 
       {showPush && status && (

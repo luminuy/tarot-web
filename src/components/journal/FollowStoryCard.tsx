@@ -37,7 +37,7 @@ export const FollowStoryCard: React.FC<{
   if (!isMember) {
     return (
       <div className="glass-tile !rounded-xl p-4 sm:p-5 w-full max-w-2xl mx-auto space-y-2 font-serif-th">
-        <p className="text-sm font-bold text-ink-deep">✦ {L({ th: "อยากติดตามเรื่องนี้ไหม", en: "Want to follow this story?" })}</p>
+        <p className="text-sm font-bold text-ink-deep">{L({ th: "อยากติดตามเรื่องนี้ไหม", en: "Want to follow this story?" })}</p>
         <p className="text-xs sm:text-[13px] text-muted leading-relaxed">
           {L({
             th: "เข้าสู่ระบบเพื่อรวมคำอ่านเรื่องเดียวกันเป็นเส้นเวลา และให้เราเตือนกลับมาเขียนว่าเกิดอะไรขึ้นจริง",
@@ -73,7 +73,7 @@ export const FollowStoryCard: React.FC<{
     <div className="glass-tile !rounded-xl p-4 sm:p-5 w-full max-w-2xl mx-auto space-y-3 font-serif-th text-ink-deep">
       {thread ? (
         <p className="text-sm">
-          <span className="font-bold">✦ {L({ th: "บันทึกไว้ในเรื่อง", en: "Saved to the story" })}</span> “{thread.title}”{" "}
+          <span className="font-bold">{L({ th: "บันทึกไว้ในเรื่อง", en: "Saved to the story" })}</span> “{thread.title}”{" "}
           <a href={`${isEnglish ? "/en" : ""}/journal?thread=${encodeURIComponent(thread.id)}`} className="text-gold-ink underline underline-offset-2 text-xs sm:text-[13px]">
             {L({ th: "ดูเส้นเวลา", en: "See the timeline" })}
           </a>
@@ -87,7 +87,7 @@ export const FollowStoryCard: React.FC<{
           }}
         >
           <label htmlFor={`story-${journalId}`} className="block text-sm font-bold">
-            ✦ {L({ th: "เริ่มติดตามเรื่องนี้", en: "Start following this story" })}
+            {L({ th: "เริ่มติดตามเรื่องนี้", en: "Start following this story" })}
           </label>
           <p className="text-xs text-muted">
             {L({

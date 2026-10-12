@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useId, useState } from "react";
+import { GoldMark } from "@/components/ui/GoldMark";
 import { trackReflectionEvent } from "@/lib/stats/reflection-events";
 import type { ReadingBasis } from "@/lib/tarot/explain-types";
 import { useReadingExplain } from "./use-reading-explain";
@@ -141,7 +142,7 @@ export const ReadingBasisPanel: React.FC<Props> = ({
         {rows.map((r) => (
           <li key={r.label} className="grid grid-cols-[1.25rem_minmax(0,9rem)_1fr] gap-x-2 items-baseline">
             <span aria-hidden="true" className={r.used ? "text-gold-ink" : "text-muted"}>
-              {r.used ? "✦" : "○"}
+              <GoldMark hollow={!r.used} />
             </span>
             <span className={`font-semibold ${r.used ? "" : "text-muted"}`}>
               {r.label}
@@ -169,7 +170,7 @@ export const ReadingBasisPanel: React.FC<Props> = ({
             }}
             className="tap-overlay-y w-full flex items-center justify-between gap-2 text-left text-xs sm:text-[13px] font-semibold text-gold-ink hover:text-gold-ink-deep cursor-pointer"
           >
-            <span>✦ {isEnglish ? "See how your cards connect" : "ดูแผนที่ความเชื่อมโยงของไพ่"}</span>
+            <span>{isEnglish ? "See how your cards connect" : "ดูแผนที่ความเชื่อมโยงของไพ่"}</span>
             <span aria-hidden="true" className={`transition-transform ${mapOpen ? "rotate-180" : ""}`}>
               ▾
             </span>

@@ -9,6 +9,16 @@
  * - ธาตุสมดุล ➔ วงกลมแห่งความซาบซึ้ง (Circle of Gratitude)
  */
 
+/**
+ * คำแนะนำข้อนี้เป็นกิจกรรมฝึกสติ 1 นาทีหรือไม่ — ดูจากถ้อยคำ ไม่พึ่งอิโมจิอย่างเดียว
+ * prompt ยังให้โมเดลขึ้นต้นด้วย 🧘 (ไม่แตะ prompt เพื่อไม่ต้องขึ้น PROMPT_VERSION + วัด ai:judge ใหม่)
+ * แต่ 🧘 ถูกกวาดทิ้งด้วย stripEmoji() ก่อนถึงจอ (คำสั่งเจ้าของ 2026-10-07 ห้ามอิโมจิบนหน้าเว็บ)
+ * ข้อความที่ถูกกวาดแล้ว · คำอ่านสำรอง · ประวัติ จึงต้องจำได้จากถ้อยคำ
+ */
+export function isMindfulAdvice(text: string): boolean {
+  return /ฝึกสติ|mindful|one-minute practice|\u{1F9D8}/iu.test(text);
+}
+
 export interface MindfulRitual {
   targetElement: string;
   titleTh: string;

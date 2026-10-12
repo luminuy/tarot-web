@@ -214,8 +214,8 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
 
   /** แคปชันสั้นที่แนบไปกับภาพ — ข้อความยาวเต็มอยู่ใน `shareText` (ใช้คัดลอก/Threads) */
   const shortCaption = isEnglish
-    ? `My tarot reading on SeerTarot ✨ Draw your free card: ${typeof window !== "undefined" ? window.location.origin : "https://seertarot.net"}`
-    : `คำทำนายไพ่ทาโรต์ของฉันจาก SeerTarot ✨ เปิดไพ่ฟรีที่ ${typeof window !== "undefined" ? window.location.origin : "https://seertarot.net"}`;
+    ? `My tarot reading on SeerTarot · Draw your free card: ${typeof window !== "undefined" ? window.location.origin : "https://seertarot.net"}`
+    : `คำทำนายไพ่ทาโรต์ของฉันจาก SeerTarot · เปิดไพ่ฟรีที่ ${typeof window !== "undefined" ? window.location.origin : "https://seertarot.net"}`;
 
   const downloadStory = () => {
     const file = storyFileRef.current;
@@ -383,7 +383,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
   /** ลิงก์หน้าโพสต์/แชร์ของแต่ละแอป — บนมือถือ iOS/Android เด้งเข้าแอปนั้นเอง (universal/app link) */
   const brandShareUrl = (brand: LinkBrand, shareUrl: string): string => {
     if (brand === "line") {
-      const caption = isEnglish ? "My tarot reading on SeerTarot ✨" : "คำทำนายไพ่ทาโรต์ของฉันจาก SeerTarot ✨";
+      const caption = isEnglish ? "My tarot reading on SeerTarot" : "คำทำนายไพ่ทาโรต์ของฉันจาก SeerTarot";
       return `https://line.me/R/share?text=${encodeURIComponent(`${caption}\n${shareUrl}`)}`;
     }
     if (brand === "twitter") {

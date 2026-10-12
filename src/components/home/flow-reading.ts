@@ -26,6 +26,7 @@
  */
 
 import type { Reading } from "@/lib/schema/reading";
+import { stripEmoji, stripEmojiDeep } from "@/lib/text/no-emoji";
 
 type CardReading = NonNullable<Reading["cards"]>[number];
 
@@ -73,6 +74,25 @@ function mergeCard(current: Partial<Reading>, card: CardReading): Partial<Readin
 export function readingReducer(state: ReadingState, action: ReadingAction): ReadingState {
   // เฟรมของคำอ่านรับได้เฉพาะตอนที่ยังสตรีมอยู่ (กติกาข้อ 2)
   const streaming = state.status === "streaming";
+
+  /*
+   * ข้อความจาก AI ทุกชิ้นผ่านตรงนี้ก่อนถึงจอ — กวาดอิโมจิทิ้ง (คำสั่งเจ้าของ 2026-10-07)
+   * ครอบคำอ่านเก่าที่บันทึกไว้ก่อนเลิกใช้ 🧘 ด้วย (`restore`)
+   */
+  switch (action.type) {
+    case "opening":
+    case "connections":
+    case "summary":
+      action = { ...action, text: stripEmoji(action.text) };
+      break;
+    case "card":
+      action = { ...action, card: stripEmojiDeep(action.card) };
+      break;
+    case "done":
+    case "restore":
+      if (action.reading) action = { ...action, reading: stripEmojiDeep(action.reading) };
+      break;
+  }
 
   switch (action.type) {
     case "start":
