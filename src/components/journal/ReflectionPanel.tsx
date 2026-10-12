@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { formatDate } from "./journal-format";
+import { stripEmojiDeep } from "@/lib/text/no-emoji";
 
 /**
  * ✦ "สิ่งที่สมุดของคุณสะท้อน" (REFLECTION_JOURNAL_PLAN 1.5 · คลื่น 4)
@@ -45,7 +46,7 @@ export const ReflectionPanel: React.FC<{
       });
       const body = (await res.json().catch(() => ({}))) as ReflectData & { error?: string };
       if (!res.ok) throw new Error(body.error || "");
-      setData(body);
+      setData(stripEmojiDeep(body));
       setState("idle");
     } catch (err) {
       setError((err as Error).message || L({ th: "ดูภาพรวมไม่สำเร็จ ลองใหม่อีกครั้ง", en: "Couldn't reflect right now. Please try again." }));
@@ -78,7 +79,7 @@ export const ReflectionPanel: React.FC<{
     <section className="altar-card-porcelain !rounded-2xl p-4 sm:p-6 space-y-3 font-serif-th text-ink-deep" aria-live="polite">
       <header className="flex items-start justify-between gap-3 flex-wrap">
         <div className="space-y-0.5">
-          <h3 className="text-base sm:text-lg font-bold">✦ {L({ th: "สิ่งที่สมุดของคุณสะท้อน", en: "What your journal reflects" })}</h3>
+          <h3 className="text-base sm:text-lg font-bold">{L({ th: "สิ่งที่สมุดของคุณสะท้อน", en: "What your journal reflects" })}</h3>
           <p className="text-xs text-muted">
             {"threadId" in scope
               ? L({ th: "มองภาพรวมของเรื่องนี้จากทุกคำอ่านที่ผ่านมา", en: "A look across every reading in this story" })

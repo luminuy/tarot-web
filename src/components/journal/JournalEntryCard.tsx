@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useId, useState } from "react";
+import { GoldMark } from "@/components/ui/GoldMark";
 import { CardImage } from "@/components/card/CardImage";
 import { deckMeta } from "@/data/cards/deck-index-meta";
 import { MAX_TAG_LENGTH, MAX_TAGS_PER_ENTRY, normalizeTags, RITUAL_FOCUS_LABEL } from "@/lib/journal/journal-types";
@@ -81,7 +82,7 @@ export const JournalEntryCard: React.FC<{
             item.pinned ? "text-gold-ink" : "text-line-warm hover:text-gold-ink"
           }`}
         >
-          ✦
+          <GoldMark size="lg" hollow={!item.pinned} />
         </button>
       </header>
 

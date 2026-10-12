@@ -5,6 +5,7 @@ import { STORAGE_KEYS } from "@/lib/storage/keys";
 import type { ReadingBasis } from "@/lib/tarot/explain-types";
 import type { MoodLevel } from "@/lib/journal/mood";
 import type { JournalRitual, RitualKind } from "@/lib/journal/journal-types";
+import { stripEmoji } from "@/lib/text/no-emoji";
 export interface SavedCardDetail {
   order: number;
   positionName: string;
@@ -162,13 +163,26 @@ function clearStorage(): void {
   }
 }
 
+/**
+ * กวาดอิโมจิออกจากช่องที่ **AI เขียน** (สรุป · คำแนะนำ · ช่วงเวลา) ก่อนถึงจอ
+ * คำอ่านเก่าก่อน 2026-10-07 มี 🧘 ติดมาในคำแนะนำข้อสุดท้าย · ข้อความที่ผู้ใช้เขียนเองไม่แตะ
+ */
+function cleanAiText(items: SavedReadingItem[]): SavedReadingItem[] {
+  return items.map((it) => ({
+    ...it,
+    summary: typeof it.summary === "string" ? stripEmoji(it.summary) : it.summary,
+    advice: Array.isArray(it.advice) ? it.advice.map((a) => (typeof a === "string" ? stripEmoji(a) : a)) : it.advice,
+    timing: typeof it.timing === "string" ? stripEmoji(it.timing) : it.timing,
+  }));
+}
+
 export function getReadings(): SavedReadingItem[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed) ? cleanAiText(parsed) : [];
   } catch {
     return [];
   }
@@ -201,7 +215,7 @@ export async function fetchServerReadings(opts?: {
     if (data.readings && Array.isArray(data.readings)) {
       if (opts?.shouldCommit && !opts.shouldCommit()) return getReadings();
       writeStorage(JSON.stringify(data.readings.slice(0, LOCAL_HISTORY_LIMIT)));
-      return data.readings;
+      return cleanAiText(data.readings);
     }
   } catch (err) {
     console.warn("[Journal Sync Notice]:", err);
@@ -429,7 +443,7 @@ export async function searchServerReadings(query: string): Promise<SavedReadingI
     const res = await fetch(`/api/journal?q=${encodeURIComponent(query)}`, { cache: "no-store" });
     if (!res.ok) return null;
     const data = (await res.json()) as { readings?: SavedReadingItem[] };
-    return Array.isArray(data.readings) ? data.readings : null;
+    return Array.isArray(data.readings) ? cleanAiText(data.readings) : null;
   } catch {
     return null;
   }

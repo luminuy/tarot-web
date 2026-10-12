@@ -356,7 +356,7 @@ export function ReadingEditor({
                   <input value={phrase} onChange={(e) => setPhrase(e.target.value)} maxLength={120} className={`${fieldCls} min-h-11`} />
                 </label>
                 <button type="button" onClick={draw} disabled={busy === "draw" || !count} className={btnPrimary}>
-                  {busy === "draw" ? "กำลังเปิดไพ่…" : `✦ เปิดไพ่ ${count} ใบ`}
+                  {busy === "draw" ? "กำลังเปิดไพ่…" : `เปิดไพ่ ${count} ใบ`}
                 </button>
               </div>
             ) : (
@@ -427,7 +427,7 @@ export function ReadingEditor({
               {busy === "notes" ? "กำลังบันทึก…" : "บันทึกโน้ต"}
             </button>
             <button type="button" onClick={makeDraft} disabled={busy === "draft"} className={btnPrimary}>
-              {busy === "draft" ? (aiAssist ? "กำลังเกลา…" : "กำลังจัด…") : aiAssist ? "✨ ให้ AI ช่วยเกลาจากโน้ต" : "จัดโน้ตเป็นคำอ่าน"}
+              {busy === "draft" ? (aiAssist ? "กำลังเกลา…" : "กำลังจัด…") : aiAssist ? "ให้ AI ช่วยเกลาจากโน้ต" : "จัดโน้ตเป็นคำอ่าน"}
             </button>
             {aiAssist && quota && (
               <span className="self-center text-[13px] text-muted">

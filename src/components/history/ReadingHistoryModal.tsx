@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { GoldMark } from "@/components/ui/GoldMark";
 import {
   getReadings,
   deleteReading,
@@ -14,6 +15,7 @@ import {
 import { soundManager } from "@/lib/utils/audio";
 import { trackEvent } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n";
+import { stripEmojiDeep } from "@/lib/text/no-emoji";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
@@ -188,7 +190,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
         throw new Error(data.error || (isEn ? "Unable to generate monthly reflection" : "ไม่สามารถสรุปบทเรียนดวงได้"));
       }
 
-      setMonthlySummary(data);
+      setMonthlySummary(stripEmojiDeep(data));
     } catch (err: any) {
       setSummaryError(err.message || (isEn ? "An error occurred while generating monthly reflection" : "เกิดข้อผิดพลาดในการสรุปบทเรียนดวง"));
     } finally {
@@ -258,7 +260,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                   href={isEn ? "/en/journal" : "/journal"}
                   className="inline-flex mt-0.5 text-[13px] font-serif-th font-semibold text-gold-ink underline underline-offset-2"
                 >
-                  ✦ {isEn ? "Open full journal" : "เปิดสมุดเต็ม"}
+                  {isEn ? "Open full journal" : "เปิดสมุดเต็ม"}
                 </a>
               </div>
             </div>
@@ -356,8 +358,8 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
               {monthlySummary.fallback && (
                 <p role="status" className="text-[13px] text-muted font-serif-th leading-relaxed">
                   {isEn
-                    ? "✦ The AI oracle is busy right now, so this summary was worked out directly from your saved readings. Try again later for the AI version."
-                    : "✦ ตอนนี้แม่หมอ AI ไม่ว่าง สรุปนี้จึงคำนวณจากประวัติการเปิดไพ่ของคุณโดยตรง ลองกดสรุปใหม่ภายหลังเพื่อรับฉบับจากแม่หมอ AI"}
+                    ? "The AI oracle is busy right now, so this summary was worked out directly from your saved readings. Try again later for the AI version."
+                    : "ตอนนี้แม่หมอ AI ไม่ว่าง สรุปนี้จึงคำนวณจากประวัติการเปิดไพ่ของคุณโดยตรง ลองกดสรุปใหม่ภายหลังเพื่อรับฉบับจากแม่หมอ AI"}
                 </p>
               )}
 
@@ -479,7 +481,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
               className="glass-tile !rounded-xl mb-3 flex items-start justify-between gap-3 px-3.5 py-2.5 text-[13px] font-serif-th text-ink-deep"
             >
               <span className="leading-relaxed">
-                <span className="text-gold-ink" aria-hidden="true">✦ </span>
+                <GoldMark className="text-gold-ink mr-2 -mt-0.5" />
                 {isEn
                   ? `Your device keeps the latest ${LOCAL_HISTORY_LIMIT} readings — older ones have been removed. Sign in to archive them all.`
                   : `ประวัติบนเครื่องเต็ม ${LOCAL_HISTORY_LIMIT} รายการ รายการเก่าสุดถูกลบไปแล้ว — เข้าสู่ระบบเพื่อเก็บถาวรไม่จำกัด`}
@@ -586,7 +588,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         role="alert"
                         className="glass-tile !rounded-lg flex items-center gap-2 px-3 py-2 text-[13px] font-serif-th text-ink-deep"
                       >
-                        <span className="text-gold-ink" aria-hidden="true">✦</span>
+                        <GoldMark className="text-gold-ink" />
                         <span>
                           {isEn
                             ? "This entry's card data could not be read. Please refresh the page and try again."

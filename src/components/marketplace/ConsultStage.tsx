@@ -1,5 +1,6 @@
 import { CardImage } from "@/components/card/CardImage";
 import { MicIcon, PhoneDownIcon, VideoIcon } from "@/components/marketplace/ConsultIcons";
+import { GoldMark } from "@/components/ui/GoldMark";
 import { CONSULTATION_MINUTES } from "@/lib/marketplace/offer";
 
 /**
@@ -46,7 +47,7 @@ export function ConsultHeroStage() {
       {/* แถบการโทร */}
       <div className="absolute bottom-5 left-5 right-5 consult-stage-bar rounded-2xl p-3 flex items-center gap-3 font-serif-th">
         <span className="h-10 w-10 shrink-0 rounded-full bg-gold-on-dark/20 ring-1 ring-gold-on-dark/50 grid place-items-center text-gold-on-dark font-bold">
-          ✦
+          <GoldMark size="md" />
         </span>
         <span className="min-w-0 flex-1 leading-tight">
           <span className="block text-sm font-bold text-surface">แม่หมอของคุณ</span>

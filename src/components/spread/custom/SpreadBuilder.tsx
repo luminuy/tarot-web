@@ -260,7 +260,7 @@ export const SpreadBuilder: React.FC = () => {
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-20 space-y-8">
       <header className="text-center space-y-2">
-        <p className="text-[11px] sm:text-xs tracking-[0.2em] uppercase text-gold-ink font-serif-th">✦ {L("ห้องออกแบบผัง", "Spread workshop")}</p>
+        <p className="text-[11px] sm:text-xs tracking-[0.2em] uppercase text-gold-ink font-serif-th">{L("ห้องออกแบบผัง", "Spread workshop")}</p>
         <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-ink-deep [text-wrap:balance]">
           <ThaiPhrases>{L("ผังที่ถามตรงกับใจคุณ", "A spread that asks what you mean")}</ThaiPhrases>
         </h1>
@@ -474,10 +474,10 @@ export const SpreadBuilder: React.FC = () => {
           {touched && (check.errors.length > 0 || check.warnings.length > 0) && (
             <div aria-live="polite" className="space-y-1.5 text-xs sm:text-sm font-serif-th">
               {check.errors.map((e) => (
-                <p key={e} className="text-err">✦ {e}</p>
+                <p key={e} className="text-err">{e}</p>
               ))}
               {check.warnings.map((w) => (
-                <p key={w} className="text-muted">✦ {w}</p>
+                <p key={w} className="text-muted">{w}</p>
               ))}
             </div>
           )}

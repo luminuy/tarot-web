@@ -1553,6 +1553,26 @@ async function testConsultFlowUx(readerId: string, sessionSecret: string) {
     throw new Error("❌ 19.14 loading ของ /readers ต้องอยู่ในกลุ่ม (directory) เท่านั้น (ไม่งั้นโปรไฟล์ที่ไม่มีอยู่ได้ 200) และแถบคุกกี้ในกลุ่มแม่หมอต้องเป็นแบบย่อใต้หัวเว็บ");
   }
   console.log("  ✓ 19.14 /readers/<ไม่มีอยู่> ตอบ 404 จริง (loading อยู่แค่หน้ารวม) · แถบคุกกี้ย่อใต้หัวเว็บในกลุ่มแม่หมอ");
+
+  // ── 19.18 ฟอร์ม "แจ้งเตือนฉันเมื่อมีเวลาว่าง" ไม่ถูกบีบในการ์ดแคบ (เจ้าของเห็น 2026-10-12) ─────────
+  // ฟอร์มอยู่ในการ์ดราคาคอลัมน์ขวาของหน้าแม่หมอ (~290px บนคอม) — จัดแถวตามความกว้างจอ (`sm:flex-row`)
+  // ทำให้ปุ่มโดนบีบจน "แจ้งเตือนฉัน" หักทีละตัวอักษร ➔ ต้องจัดตามความกว้างฟอร์มเอง (container query)
+  // และปุ่มต้องกดได้เสมอ (ขาดอะไรบอกใต้ช่อง) ไม่จางเทาจนคนไม่รู้ว่าต้องทำอะไร
+  // ตัดคอมเมนต์ก่อน — คอมเมนต์อธิบายของเดิม (`sm:flex-row`) ไม่ใช่การใช้งาน
+  const waitlist = src("src/components/marketplace/WaitlistForm.tsx")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^\s*\/\/.*$/gm, "");
+  if (
+    !/className=\{`@container /.test(waitlist) ||
+    !waitlist.includes("@sm:flex-row") ||
+    /(^|[\s"'`])sm:flex-row/.test(waitlist) ||
+    !/type="submit"[\s\S]{0,80}disabled=\{state === "sending"\}/.test(waitlist) ||
+    !/whitespace-nowrap/.test(waitlist) ||
+    !waitlist.includes("noValidate")
+  ) {
+    throw new Error("❌ 19.18 ฟอร์มแจ้งเตือนเมื่อมีเวลาว่างต้องจัดแถวตามความกว้างฟอร์ม (@container · @sm:flex-row) ปุ่มไม่หักบรรทัด และปุ่มกดได้เสมอ (บอกสิ่งที่ขาดใต้ช่อง)");
+  }
+  console.log("  ✓ 19.18 ฟอร์มแจ้งเตือนเมื่อมีเวลาว่าง: การ์ดแคบเรียงบน-ล่าง · ปุ่มไม่หักบรรทัด · กดได้เสมอแล้วบอกสิ่งที่ขาด");
 }
 
 /**

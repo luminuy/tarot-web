@@ -17,6 +17,7 @@ import type { ReadingEvent, UsageInfo } from "@/lib/ai/types";
 import { getPositionMeaning, getPositionName } from "@/data/spreads-helpers";
 import { recordEvents } from "@/lib/stats/record";
 import { generateMindfulMicroRitual } from "@/lib/ai/ritual";
+import { stripEmoji } from "@/lib/text/no-emoji";
 import type { TarotCard } from "@/data/cards/types";
 import { redactPii } from "@/lib/security/pii";
 import { reviewedCardAdvice } from "@/data/cards/card-advice";
@@ -832,10 +833,10 @@ function headingTone(views: DrawnView[], lang: Lang): AdviceTone {
 }
 
 const MINDFUL_EN: Record<string, string> = {
-  ไฟ: "🧘 One-minute practice: stand tall, take three deep breaths, step forward once, and say out loud one thing you will do today.",
-  น้ำ: "🧘 One-minute practice: hand on your chest, drink a glass of water slowly, and tell yourself it is okay to feel what you feel.",
-  ลม: "🧘 One-minute practice: breathe in for four, hold for four, out for four, hold for four — repeat until the thoughts slow down.",
-  ดิน: "🧘 One-minute practice: feet flat on the floor, notice the weight of your body, then write down the smallest next step.",
+  ไฟ: "One-minute practice: stand tall, take three deep breaths, step forward once, and say out loud one thing you will do today.",
+  น้ำ: "One-minute practice: hand on your chest, drink a glass of water slowly, and tell yourself it is okay to feel what you feel.",
+  ลม: "One-minute practice: breathe in for four, hold for four, out for four, hold for four — repeat until the thoughts slow down.",
+  ดิน: "One-minute practice: feet flat on the floor, notice the weight of your body, then write down the smallest next step.",
 };
 
 export const MOCK_TIMING: Record<string, Record<Lang, string>> = {
@@ -955,10 +956,11 @@ export async function* streamMockGeminiReading(
   yield { type: "summary", text: summary };
   await new Promise((r) => setTimeout(r, 30));
 
-  // 5. คำแนะนำ 2 ข้อตามธาตุเด่น + กิจกรรมฝึกสติ 1 นาทีปิดท้าย (schema กำหนดให้ข้อสุดท้ายขึ้นต้นด้วย 🧘)
+  // 5. คำแนะนำ 2 ข้อตามธาตุเด่น + กิจกรรมฝึกสติ 1 นาทีปิดท้าย
+  //    ข้อความจาก ritual.ts มี 🧘 (ใช้ใน prompt) ➔ ตัดทิ้งก่อนถึงจอ (ห้ามอิโมจิบนหน้าเว็บ · 2026-10-07)
   const mindful = isEn
     ? MINDFUL_EN[dominantElement] ?? MINDFUL_EN.ดิน
-    : generateMindfulMicroRitual(lacking, dominantElement).adviceString;
+    : stripEmoji(generateMindfulMicroRitual(lacking, dominantElement).adviceString);
   // คำแนะนำ: ประเภทคำถาม (ถ้ามีชุดเฉพาะ) ➔ หมวด × ขั้วปลายทาง · ข้อฝึกสติตามธาตุปิดท้ายเหมือนเดิม
   const topical =
     (intent && INTENT_ADVICE[intent]?.[lang]) ??
