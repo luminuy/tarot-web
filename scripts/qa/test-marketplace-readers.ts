@@ -1766,7 +1766,10 @@ async function testPrivateRoom(readerId: string) {
     !src("src/app/_shared/speculation-rules.ts").includes('"/readers/room/*"') ||
     !src("migrations/0032_reader_invites.sql").includes("CREATE TABLE IF NOT EXISTS reader_invites") ||
     !src("src/lib/marketplace/readers.repo.ts").includes("DELETE FROM reader_invites WHERE reader_id = ?") ||
-    !src("src/lib/marketplace/queue.repo.ts").includes("DELETE FROM reader_invites WHERE expires_at < ?")
+    !src("src/lib/marketplace/queue.repo.ts").includes("DELETE FROM reader_invites WHERE expires_at < ?") ||
+    // อีเมลยืนยัน/แจ้งแม่หมอต้องพูดว่า "ห้องส่วนตัว" ไม่ใช่ "คิวสด" ให้ตรงกับหน้าเว็บ
+    !src("src/lib/marketplace/booking-mail.ts").includes("EXISTS (SELECT 1 FROM reader_invites i WHERE i.ticket_id = t.id) AS private_room") ||
+    !src("src/lib/marketplace/booking-mail.ts").includes("ห้องคุยส่วนตัว · เข้าห้องเมื่อแม่หมอกดรับ")
   ) {
     throw new Error("❌ 19.17 ลิงก์ห้องส่วนตัวต้องต่อครบ: หน้าลิงก์ noindex/no-referrer · แผงมีการ์ด + ปุ่มรับเข้าห้อง · SW ไม่แคช · ลบแม่หมอ/หมดอายุแล้วลบลิงก์");
   }

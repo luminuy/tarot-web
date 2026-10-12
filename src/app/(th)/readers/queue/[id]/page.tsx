@@ -133,14 +133,15 @@ export default function CustomerQueuePage() {
 
   // ถึงคิวแล้วให้ชื่อแท็บเปลี่ยน — คนที่สลับไปแท็บอื่นระหว่างรอจะเห็นทันที
   const isReady = data?.ticket.status === "ready";
+  const isPrivateRoom = data?.privateRoom === true;
   useEffect(() => {
     if (!isReady) return;
     const previous = document.title;
-    document.title = "ถึงคิวของคุณแล้ว · SeerTarot";
+    document.title = isPrivateRoom ? "แม่หมอรับคุณเข้าห้องแล้ว · SeerTarot" : "ถึงคิวของคุณแล้ว · SeerTarot";
     return () => {
       document.title = previous;
     };
-  }, [isReady]);
+  }, [isReady, isPrivateRoom]);
 
   if (loading && !data) {
     return (
@@ -383,7 +384,7 @@ export default function CustomerQueuePage() {
                     ✓
                   </span>
                   <div className="space-y-0.5">
-                    <h3 className="font-bold text-lg text-ink">ถึงคิวของคุณแล้ว</h3>
+                    <h3 className="font-bold text-lg text-ink">{privateRoom ? "แม่หมอรับคุณเข้าห้องแล้ว" : "ถึงคิวของคุณแล้ว"}</h3>
                     <p className="text-sm text-ink leading-relaxed">
                       <ThaiPhrases>
                         {videoCallAvailable
