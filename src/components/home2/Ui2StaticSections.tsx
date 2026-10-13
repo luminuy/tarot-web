@@ -622,7 +622,9 @@ export function Ui2ShowcaseSection({ isEnglish, href }: { isEnglish: boolean; hr
   }));
 
   return (
-    <section className="ui2-sec ui2-day" data-home-section="showcase" aria-labelledby="ui2-show-title">
+    // พื้นกลางคืนต่อเนื่องตั้งแต่ส่วนเปิดไพ่ถึงท้ายหน้า (เจ้าของ 2026-10-13 "ยังไม่สวยถูกใจ") — ความสว่างมาจากการ์ด ไม่ใช่สีพื้นส่วน
+    <section className="ui2-sec ui2-night ui2-show-sec" data-home-section="showcase" data-ui2-dark data-anim-section aria-labelledby="ui2-show-title">
+      <div className="ui2-stars ui2-loop" aria-hidden="true" />
       <div className="ui2-wrap">
         <div className="ui2-show-head">
           <span className="ui2-kicker">
@@ -994,8 +996,9 @@ export function Ui2ExploreSection({ isEnglish }: { isEnglish: boolean; href: Hre
     "faq-good-questions": <FaqAskMock isEnglish={isEnglish} />,
   };
   return (
-    <section className="ui2-sec ui2-day ui2-fq-sec" data-home-section="faq" aria-labelledby="ui2-faq-title">
-      <div className="ui2-fq-sheet ui2-night" data-ui2-dark>
+    <section className="ui2-sec ui2-night ui2-fq-sec" data-home-section="faq" data-ui2-dark data-anim-section aria-labelledby="ui2-faq-title">
+      <div className="ui2-stars ui2-loop" aria-hidden="true" />
+      <div className="ui2-fq-sheet">
         <div className="ui2-wrap">
           <div className="ui2-fq-head">
             <span className="ui2-kicker">

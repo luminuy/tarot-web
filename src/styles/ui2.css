@@ -97,65 +97,12 @@
     radial-gradient(46% 30% at 92% 62%, var(--ui2-aurora-night-amber) 0%, rgba(233, 160, 70, 0) 70%),
     var(--ui2-night);
 }
-/* ── รอยต่อระหว่างส่วน: ไล่สีต่อกันเป็นผืนเดียว (เจ้าของ 2026-10-13 "สีพื้นหลังที่ขั้นรู้สึกขัด ไม่สมูท ไม่เหมือนเรียงต่อกัน")
-   1. แสงออโรราของแต่ละส่วนอยู่กลางส่วน จางหมดก่อนถึงขอบบน/ล่าง ➔ ส่วนสีเดียวกันต่อกันไม่เห็นรอย
-   2. มืด ↔ สว่าง = แถบ "ฟ้ารุ่ง/ฟ้าค่ำ" (ม่วงเข้ม ➔ ถ่านอำพัน ➔ ทองนวล ➔ ครีม) แบ่งครึ่งระหว่างท้ายส่วนก่อนกับหัวส่วนถัดไป
-      ทั้งสองฝั่งพบกันที่สีเดียวกัน (--ui2-dawn-mid) จึงไม่มีเส้นขอบ · เพิ่มระยะบน/ล่างให้ตัวหนังสือไม่ตกอยู่ในช่วงสีกลาง ───── */
-:root {
-  --ui2-dawn-mid: #3A2822;
-  --ui2-dawn-top-day: linear-gradient(180deg, #3A2822 0, #7E5B41 64px, #C9A57C 132px, #EAD9BD 190px, rgba(247, 240, 227, 0) 250px);
-  --ui2-dawn-bottom-day: linear-gradient(0deg, #3A2822 0, #7E5B41 64px, #C9A57C 132px, #EAD9BD 190px, rgba(247, 240, 227, 0) 250px);
-  --ui2-dawn-top-night: linear-gradient(180deg, #3A2822 0, #22171A 56px, rgba(12, 10, 15, 0) 150px);
-  --ui2-dawn-bottom-night: linear-gradient(0deg, #3A2822 0, #22171A 56px, rgba(12, 10, 15, 0) 150px);
-}
-.ui2-night + .ui2-day::before {
-  background: var(--ui2-dawn-top-day), var(--ui2-sec-bg);
-}
-.ui2-day:has(+ .ui2-night)::before {
-  background: var(--ui2-dawn-bottom-day), var(--ui2-sec-bg);
-}
-.ui2-night + .ui2-day:has(+ .ui2-night)::before {
-  background: var(--ui2-dawn-top-day), var(--ui2-dawn-bottom-day), var(--ui2-sec-bg);
-}
-.ui2-day + .ui2-night::before {
-  background: var(--ui2-dawn-top-night), var(--ui2-sec-bg);
-}
-.ui2-night:has(+ .ui2-day)::before {
-  background: var(--ui2-dawn-bottom-night), var(--ui2-sec-bg);
-}
-.ui2-day + .ui2-night:has(+ .ui2-day)::before {
-  background: var(--ui2-dawn-top-night), var(--ui2-dawn-bottom-night), var(--ui2-sec-bg);
-}
-/* ระยะเผื่อช่วงสีกลาง — ตัวหนังสือเริ่มหลังแถบไล่สีเกือบจบ */
-.ui2-night + .ui2-day {
-  padding-top: 200px;
-}
-.ui2-day:has(+ .ui2-night) {
-  padding-bottom: 200px;
-}
-.ui2-day + .ui2-night {
-  padding-top: 110px;
-}
-.ui2-night:has(+ .ui2-day) {
-  padding-bottom: 110px;
-}
-/* ส่วนสุดท้ายของหน้าแรก (FAQ บนพื้นครีม) ➔ ท้ายเว็บพื้นมืด (#171512): ไล่ลงเป็นสีเดียวกับท้ายเว็บ */
+/* ── พื้นหลังต่อเนื่อง (เจ้าของ 2026-10-13: "สีที่ขั้นรู้สึกขัด" ➔ "ยังไม่สวยถูกใจ สวยกว่านี้")
+   ตั้งแต่ส่วนเปิดไพ่จนท้ายหน้าเป็นท้องฟ้ากลางคืนผืนเดียว (ไม่มีพื้นครีมคั่น) — ความสว่างมาจากการ์ด/แผ่นกระดาษในส่วน
+   แสงออโรราของแต่ละส่วนวางกลางส่วนและจางหมดก่อนขอบ ส่วนต่อกันจึงไม่เห็นรอย
+   ส่วนสุดท้ายไล่ลงเป็นสีท้ายเว็บ (#171512) ─────────────────────────────────────────── */
 .ui2-fq-sec::before {
-  background:
-    linear-gradient(0deg, #171512 0, #3A2822 60px, #9C7752 130px, #E3CDAE 190px, rgba(247, 240, 227, 0) 240px),
-    var(--ui2-sec-bg);
-}
-.ui2-night + .ui2-fq-sec::before {
-  background:
-    var(--ui2-dawn-top-day),
-    linear-gradient(0deg, #171512 0, #3A2822 60px, #9C7752 130px, #E3CDAE 190px, rgba(247, 240, 227, 0) 240px),
-    var(--ui2-sec-bg);
-}
-.ui2-fq-sec {
-  padding-bottom: 220px;
-}
-.ui2-night + .ui2-fq-sec {
-  padding-top: 200px;
+  background: linear-gradient(0deg, #171512 0, rgba(23, 21, 18, 0) 220px), var(--ui2-sec-bg);
 }
 
 /* ดาว — วาดครั้งเดียวด้วย radial-gradient (lite: 1 ชั้น · นิ่ง) */
@@ -1714,6 +1661,20 @@ a.ui2-tile:active {
   outline-offset: 3px;
 }
 
+/* คลังไพ่บนพื้นกลางคืน: หัวเรื่องเทา/สว่าง · เม็ดหัวเรื่อง (มือถือ) กระจกมืด ที่เลือก = กระดาษสว่าง */
+.ui2-show-sec .ui2-show-tab {
+  color: var(--ui2-on-night-soft);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+}
+.ui2-show-sec .ui2-show-tab[aria-selected="true"] {
+  color: var(--ui2-ink);
+  background: var(--ui2-paper);
+  box-shadow: 0 10px 22px -12px rgba(0, 0, 0, 0.8);
+}
+.ui2-show-sec .ui2-show-tab:focus-visible {
+  outline-color: var(--ui2-gold-solid);
+}
 /* การ์ดข้อมูล — กระดาษขาวขอบคู่ (เส้นบาง + ขอบนวลด้านนอก) แบบกรอบโชว์ผลงานของต้นแบบ */
 .ui2-show-card {
   position: relative;
@@ -1722,10 +1683,11 @@ a.ui2-tile:active {
   border-radius: var(--ui2-radius-xl);
   background: var(--ui2-paper);
   box-shadow:
-    0 0 0 1px var(--ui2-line-day),
-    0 0 0 8px rgba(255, 252, 246, 0.6),
-    0 0 0 9px rgba(30, 25, 20, 0.06),
-    0 48px 90px -50px rgba(74, 47, 16, 0.45);
+    0 0 0 1px rgba(255, 236, 200, 0.5),
+    0 0 0 8px rgba(255, 236, 200, 0.06),
+    0 0 0 9px rgba(255, 236, 200, 0.12),
+    0 60px 120px -50px rgba(0, 0, 0, 0.9),
+    0 0 120px -40px rgba(233, 160, 70, 0.35);
 }
 .ui2-show-panel[hidden] {
   display: none;
@@ -2255,8 +2217,8 @@ a.ui2-tile:active {
     padding: 0;
     overflow: visible;
   }
-  .ui2-show-tab,
-  .ui2-show-tab[aria-selected="true"] {
+  .ui2-show-sec .ui2-show-tab,
+  .ui2-show-sec .ui2-show-tab[aria-selected="true"] {
     position: relative;
     min-height: 50px;
     padding: 0 0 0 24px;
@@ -2267,11 +2229,11 @@ a.ui2-tile:active {
     background: none;
     box-shadow: none;
   }
-  .ui2-show-tab {
-    color: var(--ui2-grey-head);
+  .ui2-show-sec .ui2-show-tab {
+    color: rgba(246, 238, 226, 0.42);
   }
-  .ui2-show-tab[aria-selected="true"] {
-    color: var(--ui2-ink);
+  .ui2-show-sec .ui2-show-tab[aria-selected="true"] {
+    color: var(--ui2-on-night);
   }
   .ui2-show-tab::before {
     content: "";
@@ -2282,7 +2244,7 @@ a.ui2-tile:active {
     height: 8px;
     rotate: 45deg;
     translate: 0 -50%;
-    background: var(--ui2-gold-ink);
+    background: var(--ui2-gold-solid);
     opacity: 0;
     scale: 0.4;
     transition: opacity var(--dur-fast) var(--ease-out), scale var(--dur-fast) var(--ease-out);
@@ -2304,8 +2266,8 @@ a.ui2-tile:active {
     grid-template-columns: 300px minmax(0, 1fr);
     gap: 72px;
   }
-  .ui2-show-tab,
-  .ui2-show-tab[aria-selected="true"] {
+  .ui2-show-sec .ui2-show-tab,
+  .ui2-show-sec .ui2-show-tab[aria-selected="true"] {
     font-size: 27px;
   }
   .ui2-show-topics {
@@ -2407,20 +2369,12 @@ details[open] > summary .ui2-plus {
 
 /* ── ส่วน 7 · คำถามที่พบบ่อย — การ์ดมืดใหญ่บนพื้นกลางวัน (เข้าชุดกับการ์ดปิดท้าย) + แถวสลับซ้ายขวา
    ต้นแบบ fastwork.com/selling "One platform is everything you need": ภาพจำลองหน้าจอพื้นพาสเทล ↔ ข้อความ ─────── */
-/* ส่วนสุดท้ายของหน้าแรก (ส่วนปิดท้ายถูกถอดตามคำสั่งเจ้าของ 2026-10-13) — ระยะบน/ล่างอยู่กับกฎรอยต่อไล่สี */
+/* ส่วนสุดท้ายของหน้าแรก (ส่วนปิดท้ายถูกถอดตามคำสั่งเจ้าของ 2026-10-13) — อยู่บนพื้นกลางคืนผืนเดียวกับส่วนก่อนหน้า ไม่มีการ์ดครอบ */
 .ui2-fq-sec {
-  padding-top: 24px;
+  padding-bottom: 120px;
 }
 .ui2-fq-sheet {
   position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  padding: 52px 18px 40px;
-  border-radius: 40px;
-  background:
-    radial-gradient(50% 30% at 8% 4%, var(--ui2-aurora-night-teal) 0%, rgba(79, 179, 169, 0) 70%),
-    radial-gradient(46% 30% at 94% 40%, var(--ui2-aurora-night-amber) 0%, rgba(233, 160, 70, 0) 70%),
-    var(--ui2-night);
 }
 .ui2-fq-head {
   max-width: 640px;
@@ -2656,10 +2610,6 @@ details[open] > summary .ui2-plus {
 }
 
 @media (min-width: 768px) {
-  .ui2-fq-sheet {
-    padding: 72px 40px 56px;
-    border-radius: 48px;
-  }
   .ui2-fq-mock {
     min-height: 340px;
   }
@@ -2683,9 +2633,6 @@ details[open] > summary .ui2-plus {
   }
   .ui2-fq-mock {
     min-height: 380px;
-  }
-  .ui2-fq-sheet {
-    padding: 88px 64px 64px;
   }
 }
 
@@ -2923,7 +2870,7 @@ html[data-consent-ask] .ui2-sticky {
 /* จอที่มี hover จริง (เมาส์/แทร็กแพด) — มือถือ/iPad ใช้ :active แทน (หัวข้อ 4) */
 @media (hover: hover) {
   .ui2-show-tab:not([aria-selected="true"]):hover {
-    color: var(--ui2-ink-soft);
+    color: var(--ui2-on-night);
   }
   a.ui2-show-topic:hover,
   a.ui2-show-sign:hover {
