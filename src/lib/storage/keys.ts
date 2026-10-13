@@ -95,6 +95,9 @@ export const STORAGE_KEYS = {
   studioReaderToken: "studio_reader_token",
   /** แคชไพ่ประจำวันรุ่นเก่า — อ่านเพื่อย้ายไปคีย์ `dailyCard` แล้วลบทิ้ง */
   legacyDailyCard: "seer:daily-card",
+
+  /** ระดับเอฟเฟกต์ UI 2.0 ที่ตัวกันพัง FPS ลดเครื่องนี้ลงเป็น `lite` แล้วในแท็บนี้ (sessionStorage · `src/app/_shared/ui2-fx.ts`) */
+  ui2Fx: "tarot_ui2_fx",
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

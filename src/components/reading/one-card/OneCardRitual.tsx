@@ -266,12 +266,12 @@ export function OneCardRitual({
                 <span>{deckLabel}</span>
               </div>
               <h3 className="text-lg sm:text-2xl font-serif-th font-bold text-ink tracking-tight"><ThaiPhrases>
-                {isEn ? "Your Sacred Card Awaits" : "ไพ่ตอบรับเจตจำนงของคุณแล้ว"}
+                {isEn ? "Your card is ready" : "ไพ่ของคุณมาแล้ว"}
               </ThaiPhrases></h3>
               <p className="text-xs sm:text-sm text-muted">
                 {isEn
-                  ? "Tap the card to reveal your oracle message in full 3D"
-                  : "แตะที่ตัวไพ่เพื่อพลิกเฉลยสารพยากรณ์แบบ 3D"}
+                  ? "Take a breath, then tap the card to turn it over"
+                  : "หายใจลึก ๆ แล้วแตะที่ไพ่เพื่อพลิกดู"}
               </p>
             </div>
 
@@ -297,7 +297,7 @@ export function OneCardRitual({
             </div>
 
             <p className="text-xs text-gold-ink font-serif-th font-semibold tracking-wide">
-              {isEnglish ? "Touch card above to reveal" : "แตะที่ตัวไพ่ด้านบนเพื่อเปิดเผยคำทำนาย"}
+              {isEnglish ? "The reading appears once you turn it over" : "พลิกไพ่แล้วคำอ่านจะขึ้นด้านล่าง"}
             </p>
           </div>
         )}

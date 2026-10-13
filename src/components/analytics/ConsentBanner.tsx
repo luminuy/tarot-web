@@ -104,8 +104,13 @@ export function ConsentBanner() {
         เดสก์ท็อปได้เป็นแถวเดียวจริง: ข้อความซ้าย · ปุ่มขวา · ลิงก์นโยบายอยู่ในบรรทัดเดียวกับข้อความ
         จอแคบวางซ้อนเป็นสองชั้น (ข้อความบน · ปุ่มล่างเต็มความกว้าง) เพราะแถวเดียวจะบีบปุ่มจนกดยาก
       */}
-      <div className="consent-bar mx-auto flex max-w-6xl flex-col gap-2.5 px-4 py-3 lg:flex-row lg:items-center lg:gap-4 lg:py-2.5 lg:pl-5 lg:pr-3">
-        <p className="min-w-0 flex-1 text-[13px] leading-relaxed text-ink">
+      {/*
+        📱 มือถือย่อเหลือข้อความ 1–2 บรรทัด + ปุ่มสองปุ่มแถวเดียว (SeerTarot UI 2.0 หัวข้อ 5.4)
+        เดิมกินจอแรกราว 1 ใน 4 และบังส่วนเปิดไพ่ · ข้อความและตรรกะความยินยอมเหมือนเดิมทุกตัวอักษร
+        (INC-0245 · ด่าน test-analytics-integrity) — ลิงก์นโยบายย้ายมาต่อท้ายข้อความบนจอแคบแทนการกินแถวของตัวเอง
+      */}
+      <div className="consent-bar mx-auto flex max-w-6xl flex-col gap-2 px-3.5 py-2.5 sm:gap-2.5 sm:px-4 sm:py-3 lg:flex-row lg:items-center lg:gap-4 lg:py-2.5 lg:pl-5 lg:pr-3">
+        <p className="min-w-0 flex-1 text-[12px] leading-snug text-ink sm:text-[13px] sm:leading-relaxed">
           <span className="font-bold text-gold-ink">
             {isEnglish ? "Before we begin" : "ก่อนเริ่มดูดวง"}
           </span>
@@ -113,11 +118,17 @@ export function ConsentBanner() {
           {isEnglish
             ? "We collect anonymous usage stats to improve the site. Your questions and readings are never sent to analytics."
             : "เราเก็บสถิติการใช้งานแบบไม่ระบุตัวตนเพื่อปรับปรุงเว็บ คำถามและคำทำนายของคุณไม่ถูกส่งเข้าระบบสถิติ"}
+          <span className="lg:hidden">
+            {" · "}
+            <Link href="/privacy" prefetch={false} className="text-muted underline underline-offset-2 hover:text-gold-ink">
+              {isEnglish ? "Privacy policy" : "นโยบายความเป็นส่วนตัว"}
+            </Link>
+          </span>
         </p>
 
         {/*
           จอกว้าง (≥1024px): ลิงก์นโยบายยืนอยู่ในแถวเดียวกับปุ่ม เพื่อให้ข้อความด้านซ้ายได้อยู่บรรทัดเดียวจริง
-          จอแคบกว่านั้น: `order-last w-full` ดันลิงก์ลงไปอยู่ใต้ปุ่ม (ปุ่มต้องได้ความกว้างเต็มเพื่อให้กดถนัด)
+          จอแคบกว่านั้น: ลิงก์นี้ซ่อน แล้วใช้ลิงก์ที่ต่อท้ายข้อความแทน ปุ่มสองปุ่มจึงได้แถวเดียวเต็มความกว้าง (UI 2.0 หัวข้อ 5.4)
         */}
         <div /*
             `items-stretch` ตอนจอแคบ — ปุ่มที่ตัวหนังสือตัดสองบรรทัดจะสูงกว่าเพื่อน
@@ -136,7 +147,7 @@ export function ConsentBanner() {
           <Link
             href="/privacy"
             prefetch={false}
-            className="tap-overlay-y order-last w-full whitespace-nowrap text-[12px] text-muted underline underline-offset-2 hover:text-gold-ink lg:order-none lg:w-auto"
+            className="tap-overlay-y hidden whitespace-nowrap text-[12px] text-muted underline underline-offset-2 hover:text-gold-ink lg:inline"
           >
             {isEnglish ? "Privacy policy" : "นโยบายความเป็นส่วนตัว"}
           </Link>
@@ -152,7 +163,7 @@ export function ConsentBanner() {
               (`overflow: visible` ไม่มีอะไรมาตัด) — วัดจากการเรนเดอร์จริง
               ปล่อยให้ตัดบรรทัดในปุ่มได้แทน ปุ่มสูงขึ้นสองบรรทัดยังอ่านออก ดีกว่าตัวหนังสือหลุดกรอบ
             */
-            className="btn-glass-ghost tap-target min-w-0 flex-1 px-4 py-2 text-[13px] font-bold lg:flex-none"
+            className="btn-glass-ghost tap-target min-w-0 flex-1 px-3 py-1.5 text-[13px] font-bold sm:px-4 sm:py-2 lg:flex-none"
           >
             {isEnglish ? "Only what's needed" : "เฉพาะที่จำเป็น"}
           </button>
@@ -161,7 +172,7 @@ export function ConsentBanner() {
             data-consent-accept=""
             onClick={() => decide("granted")}
             /* เหตุผลเดียวกับปุ่มด้านบน (INC-0215) — `flex-1` กับ `nowrap` อยู่ด้วยกันไม่ได้ */
-            className="btn-glass-primary tap-target min-w-0 flex-1 px-5 py-2 text-[13px] font-bold lg:flex-none"
+            className="btn-glass-primary tap-target min-w-0 flex-1 px-4 py-1.5 text-[13px] font-bold sm:px-5 sm:py-2 lg:flex-none"
           >
             {isEnglish ? "Allow" : "ยินยอม"}
           </button>

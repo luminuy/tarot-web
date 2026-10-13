@@ -50,6 +50,15 @@ export default defineConfig({
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],
+    build: {
+      /*
+       * 🎯 เป้าหมายเบราว์เซอร์ของตัวย่อ CSS (lightningcss ของ Vite) — ห้ามลบ (INC-0264)
+       * ไม่ตั้ง = Vite ส่ง targets ว่างให้ lightningcss ➔ มันรวม `animation-timeline: view()` เข้าไปใน shorthand `animation`
+       * ซึ่ง Chrome/Safari ยังไม่รับ ➔ ทั้งกฎถูกทิ้ง motion ตอนเลื่อนทั้งหน้าหายเงียบ ๆ (ด่าน test-ui2-fx ข้อ scroll-timeline เฝ้าอยู่)
+       * ค่าตรงกับ browserslist ใน package.json (2 รุ่นล่าสุดของแต่ละเบราว์เซอร์)
+       */
+      cssTarget: ["chrome120", "edge120", "firefox120", "safari17", "ios17"],
+    },
     resolve: {
       alias: {
         "@": resolve("./src"),

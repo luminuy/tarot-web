@@ -71,6 +71,11 @@ export interface RouteBudget {
    * ก็ไม่มีภาพหน้าไพ่ให้จัดลำดับตั้งแต่แรก
    */
   expectLcpImage?: boolean;
+  /**
+   * งบ CSS เฉพาะเส้นทาง (gzip, KB) — ไม่ใส่ = ใช้ `MAX_CSS_GZIP_KB`
+   * ⚠️ ใส่ได้เฉพาะหน้าที่มีเหตุผลวัดจริงกำกับไว้ข้าง ๆ เท่านั้น (ดูหน้าแรก `/` · `/en`)
+   */
+  maxCssGzipKb?: number;
 }
 
 /**
@@ -130,7 +135,23 @@ export const BUDGETS: RouteBudget[] = [
      * ⚠️ นี่คือ**การขยับเพดานครั้งเดียวที่มีเหตุผลกำกับ** ห้ามใช้เป็นบรรทัดฐานขยับซ้ำ
      *    ถ้ารอบหน้าชนเพดานอีก ให้ไปลดของจริงก่อนเสมอ
      */
-    maxHtmlGzipKb: 42, // Current: 41 KB (38 KB ก่อนเปิด AVIF)
+    maxHtmlGzipKb: 40, // เจ้าของสั่ง "ขยายเพดาน ปลดข้อจำกัด" 2026-10-13 (31 ➔ 40) · วัดจริง 2026-10-13 (UI 2.0 + คลังไพ่): 30 KB · 2026-10-12: 25 KB · เดิม 42 (production ก่อน UI 2.0 วัดได้ 37 KB)
+    /*
+     * 🎨 SeerTarot UI 2.0 (2026-10-12) — งบ CSS เฉพาะหน้าแรก 38 KB (ค่าตั้งต้นทั้งเว็บ 32 KB)
+     * หน้าแรกแบบ D+ ย้ายส่วน 4–8 เป็น HTML นิ่ง + CSS ล้วน (ไม่มี JS) สไตล์ของหน้าแรกจึงแยกไฟล์
+     * (`src/styles/ui2-home.css` โหลดเฉพาะหน้าที่มี TarotFlow · หน้าอื่นลดเหลือ 30 KB)
+     * วัดจริงของที่บล็อกการเรนเดอร์ (HTML + CSS gzip):
+     *   production ก่อน UI 2.0: HTML 37 KB + CSS 30 KB = **67 KB**
+     *   UI 2.0:                 HTML 25 KB + CSS 37 KB = **62 KB** (ลดลง 5 KB · DOM 1,409 ➔ ~940)
+     * จึงรัดงบ HTML ลงพร้อมกันในรอบเดียว — ห้ามขยับงบ CSS ขึ้นอีก ถ้าชนให้ไปลดของจริงใน ui2.css ก่อน
+     *
+     * ⚠️ ขยับครั้งเดียวตามคำสั่งเจ้าของ 2026-10-13 "ขนาดได้เลยไม่กำหนด งบต้องการความสวย" — เพิ่มส่วน "คลังไพ่ยิปซี"
+     *    (หัวเรื่องซ้าย ข้อมูลขวา · 6 แผง) ที่รวมวิธีดูดวง 5 ขั้นตอน + กลุ่มลิงก์ค้นตามหัวข้อเดิมเข้าไว้ด้วย
+     *    วัดจริง: HTML 29 KB + CSS 40 KB = **69 KB** (production ก่อน UI 2.0 = 67 KB) · CSS 38 ➔ 41 · HTML 28 ➔ 31
+     *    รอบหน้าชนอีก ➔ ถามเจ้าของก่อน ห้ามขยับเองโดยอ้างคำสั่งนี้
+     *    ➔ เจ้าของสั่งต่อ 2026-10-13 "ขยายเพดาน ปลดข้อจำกัด" ➔ CSS 41 ➔ 50 · HTML 31 ➔ 40 (`/en` 28 ➔ 37) · DOM 1,500 ➔ 2,500
+     */
+    maxCssGzipKb: 50,
   },
   {
     /*
@@ -142,7 +163,8 @@ export const BUDGETS: RouteBudget[] = [
      */
     route: "/en",
     maxJsGzipKb: 232,
-    maxHtmlGzipKb: 40,
+    maxHtmlGzipKb: 37, // เจ้าของสั่งขยาย 2026-10-13 (28 ➔ 37) · วัดจริง 2026-10-13 (UI 2.0 + คลังไพ่): 26 KB · 2026-10-12: 22 KB · เดิม 40
+    maxCssGzipKb: 50, // เหตุผลเดียวกับ `/` ข้างบน
   },
   {
     route: "/cards",
@@ -214,7 +236,13 @@ export const BUDGETS: RouteBudget[] = [
      * ⚠️ ตั้งงบจากค่าที่ CI วัดได้ + ระยะหายใจ 10% เสมอ (ดูคำเตือนเหนือตารางนี้)
      */
     maxJsGzipKb: 145, // dev 122 KB · เผื่อส่วนต่าง CI ~9 KB
-    maxHtmlGzipKb: 22, // วัดจริง 2026-09-15: 15 KB
+    maxHtmlGzipKb: 22, // วัดจริง 2026-09-15: 15 KB · UI 2.0 กลางคืน (2026-10-13): dev 17 KB
+    /*
+     * 🌅 UI 2.0 กลางคืน (เจ้าของ "หน้านี้ก็ต้องออกแบบใหม่ จัดมาให้สวยๆ" 2026-10-13): หน้านี้โหลด `ui2-daily.css`
+     * (ชิ้นกลาง ui2-core + โทเคนกลางคืนของพิธี + ตัวเลือกเรื่อง + บทความ/FAQ + เอฟเฟกต์ full) เพิ่มจาก CSS กลาง
+     * วัดบิลด์ dev: 35 KB · เหตุผลเดียวกับ /spreads ("งบต้องการความสวย")
+     */
+    maxCssGzipKb: 40,
   },
   {
     route: "/love/1-card",
@@ -233,7 +261,7 @@ export const BUDGETS: RouteBudget[] = [
      * ไม่มี React runtime + router + เพย์โหลด RSC ติดมากับทุกหน้าอีกต่อไป
      *
      * 🔁 **2026-09-17 (R-02): เลิก hydrate คลังผังทั้งก้อน** — การ์ดทั้ง 25 ใบเรนเดอร์เป็น
-     * HTML ตั้งแต่ตอนบิลด์ · แท็บทำงานด้วยสคริปต์ ~1 KB (`astro/scripts/spreads-tabs.ts`)
+     * HTML ตั้งแต่ตอนบิลด์ · แท็บทำงานด้วยสคริปต์ ~1 KB (เดิม `spreads-tabs.ts` · ตอนนี้ `astro/scripts/spreads-pop.ts`)
      * ปุ่มขยายใช้ `<details>` ของเบราว์เซอร์
      *
      * **นี่คือการแลกที่ตั้งใจ และวัดมาแล้วทั้งสองฝั่ง** (บิลด์จริงบนเครื่อง dev):
@@ -246,7 +274,13 @@ export const BUDGETS: RouteBudget[] = [
      *    มีตัวเลขฝั่งที่ลดลงมากกว่ามาแลกตรง ๆ ไม่ใช่เพราะ "ของโตขึ้นแล้วให้ผ่านไปก่อน"
      */
     maxJsGzipKb: 120, // dev วัดได้ 100.1 KB · CI มักสูงกว่า dev ~9 KB + ระยะหายใจ
-    maxHtmlGzipKb: 42, // CI วัดได้ 39 KB (dev 33.8 KB) + ระยะหายใจ ~10%
+    maxHtmlGzipKb: 42, // CI วัดได้ 39 KB (dev 33.8 KB) + ระยะหายใจ ~10% · UI 2.0 ไพ่กระจาย (2026-10-13): dev 23.8 KB
+    /*
+     * 🃏 UI 2.0 "ไพ่กระจาย 6 หมวด แตะแล้วเด้ง" (แผน UI_2_0_SPREADS · 2026-10-13): หน้านี้โหลด `ui2-spreads.css`
+     * (ชิ้นกลาง ui2-core + ไพ่ผัง + หน้าต่างไพ่เด้ง + เอฟเฟกต์ full) เพิ่มจาก CSS กลาง — แลกกับ HTML ที่ลด 39 ➔ ~24 KB
+     * (ตัด `<details>` ความหมายรายตำแหน่ง + ปุ่ม 2 ปุ่มต่อใบ) · เจ้าของสั่ง "งบต้องการความสวย" เหมือนหน้าแรก
+     */
+    maxCssGzipKb: 40,
   },
   {
     /*
@@ -453,6 +487,7 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
     jsOk: boolean;
     htmlOk: boolean;
     cssGzipKb: number;
+    maxCssKb: number;
     fontPreloadBytes: number;
     lcpIssues: string[];
     topChunks: { name: string; sizeKb: number }[];
@@ -607,13 +642,14 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
 
       const jsOk = jsGzipKb <= b.maxJsGzipKb;
       const htmlOk = htmlGzipKb <= b.maxHtmlGzipKb;
-      const cssOk = cssGzipKb <= MAX_CSS_GZIP_KB;
+      const maxCssKb = b.maxCssGzipKb ?? MAX_CSS_GZIP_KB;
+      const cssOk = cssGzipKb <= maxCssKb;
       const fontOk = fontPreloadBytes <= MAX_PRELOADED_FONT_BYTES;
 
       if (!jsOk || !htmlOk || !cssOk || !fontOk || lcpIssues.length > 0) {
         hasFailure = true;
       }
-      if (!cssOk) lcpIssues.push(`CSS รวม ${cssGzipKb} KB gzip เกินงบ ${MAX_CSS_GZIP_KB} KB`);
+      if (!cssOk) lcpIssues.push(`CSS รวม ${cssGzipKb} KB gzip เกินงบ ${maxCssKb} KB`);
       if (!fontOk) {
         lcpIssues.push(
           `ฟอนต์ที่พรีโหลดรวม ${fontPreloadBytes.toLocaleString()} B เกินงบ ${MAX_PRELOADED_FONT_BYTES.toLocaleString()} B`,
@@ -630,6 +666,7 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
         jsOk,
         htmlOk,
         cssGzipKb,
+        maxCssKb,
         fontPreloadBytes,
         lcpIssues,
         topChunks: chunkDetails.filter((c) => !c.isPolyfill).slice(0, 3),
@@ -673,7 +710,7 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
       console.log(`  ❌ HTML เกินงบ (${r.htmlGzipKb} KB > ${r.maxHtmlGzipKb} KB)!`);
     }
     console.log(
-      `     CSS ${r.cssGzipKb} KB (≤ ${MAX_CSS_GZIP_KB}) · ฟอนต์ที่พรีโหลด ${r.fontPreloadBytes.toLocaleString()} B (≤ ${MAX_PRELOADED_FONT_BYTES.toLocaleString()})`,
+      `     CSS ${r.cssGzipKb} KB (≤ ${r.maxCssKb}) · ฟอนต์ที่พรีโหลด ${r.fontPreloadBytes.toLocaleString()} B (≤ ${MAX_PRELOADED_FONT_BYTES.toLocaleString()})`,
     );
     for (const issue of r.lcpIssues) {
       console.log(`  ❌ ${issue}`);
@@ -807,14 +844,17 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
    * เวลาจัดหน้า (style + layout) ตอนโหลดโต ~50% และคะแนน Lighthouse มือถือตก — แต่ไม่มีด่านไหนเห็น
    * เพราะ HTML gzip ยังไม่ชนเพดาน 42 KB (class ซ้ำ ๆ บีบอัดได้ดีมาก จึงวัดแค่ไบต์ไม่พอ)
    * ➔ ของที่อยู่นอกจอและไม่ใช่เนื้อหาหลัก (การ์ดท้ายแถวปัด) ให้เติมตอนผู้ใช้แตะ ไม่ใช่ใส่ใน HTML
-   * ⚠️ ปรับลดได้อย่างเดียว ห้ามขยับขึ้นเพื่อให้ผ่าน
+   * ⚠️ ปรับลดได้อย่างเดียว ห้ามขยับขึ้นเพื่อให้ผ่าน — ยกเว้นเจ้าของสั่งเอง:
+   *    2026-10-13 เจ้าของสั่ง "ขยายเพดาน ปลดข้อจำกัด" (UI 2.0 + คลังไพ่ · เดิม 1,500 ➔ 2,500)
+   *    วัดจริงวันนั้นแบบเดียวกับ CI (ตั้ง IMAGEKIT): `/` 1,475 · `/en` 1,398
+   *    ยังเก็บด่านไว้เป็นตาข่ายกันพลาดใหญ่ (เช่น ใส่การ์ด 26 ผังลง HTML แบบ #624) ไม่ใช่งบจัดหน้า
    * ⚠️ วัดในเครื่องต้องบิลด์ด้วย `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT` แบบเดียวกับ CI/production —
    *    ตั้งค่านี้แล้วภาพไพ่ทุกใบมี `<source>` AVIF เพิ่มอีกชั้น (หน้าแรก +76~78 element)
    *    ไม่ตั้ง = เห็นผ่านในเครื่องแต่ตกใน CI (เกิดจริงกับ #630: เครื่อง 1,451 · CI 1,529)
    *    ของประดับที่ไม่ใช่เนื้อหา (ไอคอนชิป · หัวลูกศร · ประกายการ์ด) วาดด้วย pseudo-element แทน element จริง
    */
   {
-    const MAX_HOME_ELEMENTS = 1_500; // วัดจริง 2026-09-27: 1,408 (ก่อนแก้ 1,933)
+    const MAX_HOME_ELEMENTS = 2_500; // เจ้าของสั่งขยาย 2026-10-13 (เดิม 1,500) · วัดจริง 2026-10-13: 1,475 · 2026-09-27: 1,408
     for (const route of ["/", "/en"]) {
       const file = htmlFileFor(route);
       if (!file || !fs.existsSync(file)) {

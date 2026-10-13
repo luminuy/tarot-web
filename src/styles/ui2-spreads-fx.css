@@ -1,0 +1,162 @@
+/*
+ * 🃏 คลังผัง `/spreads` — เอฟเฟกต์ระดับ full (คอม · iPad) เท่านั้น
+ * นำเข้าต่อจาก `ui2-spreads.css` ในหน้า .astro ของคลังผัง
+ * ⚠️ ทุกกฎขึ้นต้น `[data-fx="full"]` และอยู่ใต้ `@media (min-width: 768px)` · หนึ่งตัวเลือกต่อบรรทัด
+ *    (ด่าน test-motion-quality กฎ 2b · test-ui2-fx) — มือถือ / ลดการเคลื่อนไหว / เครื่องช้า ไม่มีวันได้ไฟล์นี้ทำงาน
+ * ⚠️ ของวนทุกชิ้นมีคลาส `ui2-loop` และอยู่ใต้ `[data-anim-section]` (หยุดเองเมื่อพ้นจอ)
+ */
+@media (min-width: 768px) {
+  /* ดาว 2 ชั้นกะพริบ */
+  [data-fx="full"] .ui2-sp .ui2-stars {
+    animation: ui2-sp-twinkle 6s ease-in-out infinite;
+  }
+  [data-fx="full"] .ui2-sp .ui2-stars-2 {
+    display: block;
+    background-size: 300px 300px;
+    background-position: 140px 90px;
+    animation: ui2-sp-twinkle 8s ease-in-out -3s infinite;
+  }
+
+  /* แสงออโรราลอยหลังหัวหน้า */
+  [data-fx="full"] .ui2-sp .ui2-aurora {
+    display: block;
+    inset-block-start: -240px;
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 70%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 0%, #000 70%, transparent 100%);
+  }
+  [data-fx="full"] .ui2-sp .ui2-blob {
+    position: absolute;
+    width: 42vw;
+    max-width: 600px;
+    aspect-ratio: 1;
+    border-radius: 999px;
+    filter: blur(80px);
+    opacity: 0.32;
+    animation: ui2-sp-drift var(--dur, 20s) ease-in-out infinite;
+  }
+
+  /* ทองไล่สีวิ่งบนตัวเลขหัวข้อ */
+  [data-fx="full"] .ui2-sp-h1 .ui2-gold-night {
+    animation: ui2-sp-shimmer 5s linear infinite;
+  }
+
+  /* ไพ่คว่ำตกแต่ง 8 ใบลอยข้างหัวข้อ · ใบไกลเบลอ */
+  [data-fx="full"] .ui2-sp-deco-card {
+    display: block;
+    animation: ui2-sp-bob var(--bob, 8s) ease-in-out var(--delay, 0s) infinite;
+  }
+  [data-fx="full"] .ui2-sp-deco-1 {
+    --w: 78px;
+    --r: -13deg;
+    --bob: 8s;
+    left: 2%;
+    top: 70px;
+  }
+  [data-fx="full"] .ui2-sp-deco-2 {
+    --w: 60px;
+    --r: 9deg;
+    --bob: 9s;
+    --delay: -2s;
+    left: 12%;
+    top: 230px;
+    right: auto;
+  }
+  [data-fx="full"] .ui2-sp-deco-3 {
+    --w: 46px;
+    --r: -4deg;
+    --bob: 10s;
+    --delay: -5s;
+    left: 7%;
+    top: 380px;
+    opacity: 0.7;
+    filter: blur(1.6px);
+  }
+  [data-fx="full"] .ui2-sp-deco-4 {
+    --w: 42px;
+    --r: 16deg;
+    --bob: 7.5s;
+    --delay: -1s;
+    left: 19%;
+    top: 40px;
+    opacity: 0.7;
+    filter: blur(1.6px);
+  }
+  [data-fx="full"] .ui2-sp-deco-5 {
+    --w: 80px;
+    --r: 12deg;
+    --bob: 8.5s;
+    --delay: -3s;
+    right: 2%;
+    top: 90px;
+  }
+  [data-fx="full"] .ui2-sp-deco-6 {
+    --w: 58px;
+    --r: -8deg;
+    --bob: 9.5s;
+    --delay: -4s;
+    right: 13%;
+    top: 250px;
+  }
+  [data-fx="full"] .ui2-sp-deco-7 {
+    --w: 44px;
+    --r: 5deg;
+    --bob: 10.5s;
+    --delay: -6s;
+    right: 6%;
+    top: 400px;
+    opacity: 0.7;
+    filter: blur(1.6px);
+  }
+  [data-fx="full"] .ui2-sp-deco-8 {
+    --w: 40px;
+    --r: -15deg;
+    --bob: 7s;
+    --delay: -2.5s;
+    right: 20%;
+    top: 36px;
+    opacity: 0.7;
+    filter: blur(1.6px);
+  }
+
+  /* ไพ่ผังลอยขึ้นลงเบา ๆ บนโต๊ะ (ลอยที่ช่อง · ยก/ตั้งตรงที่ตัวไพ่ จึงไม่ชนกัน) */
+  [data-fx="full"] .ui2-sc-slot {
+    animation: ui2-sp-bob calc(8s + var(--i, 0) * 0.6s) ease-in-out calc(var(--i, 0) * -1.7s) infinite;
+  }
+
+  /* พื้นหลังหน้าต่างไพ่เด้ง: มืด + เบลอ */
+  [data-fx="full"] .ui2-spread-pop::backdrop {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+  /* วงแสงทองหลังไพ่ใหญ่เต้น */
+  [data-fx="full"] .ui2-pop-glow {
+    animation: ui2-sp-glow 2.4s ease-in-out infinite;
+  }
+}
+
+@media (min-width: 768px) and (hover: hover) {
+  [data-fx="full"] .ui2-sc-slot:hover {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes ui2-sp-twinkle {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 0.35; }
+}
+@keyframes ui2-sp-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(80px, 40px) scale(1.15); }
+}
+@keyframes ui2-sp-shimmer {
+  from { background-position: 0% 50%; }
+  to { background-position: 200% 50%; }
+}
+@keyframes ui2-sp-bob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -10px; }
+}
+@keyframes ui2-sp-glow {
+  0%, 100% { opacity: 0.7; scale: 1; }
+  50% { opacity: 1; scale: 1.08; }
+}

@@ -5,6 +5,7 @@
   "compatibility_date": "2026-09-15",
   "compatibility_flags": ["nodejs_compat"],
 
+
   // ── Static assets (ภาพไพ่ 1909 · _next/static · หน้าเนื้อหาที่เรนเดอร์ด้วย Astro) ──
   //
   // 🚦 ลำดับที่ Cloudflare ใช้ตัดสิน: **ไฟล์ static มาก่อน Worker เสมอ**

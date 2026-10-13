@@ -4,6 +4,8 @@ import { buildSpreadsIndexMetadata } from "@/app/_shared/pages/spreads-index";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { SpreadsIndexBodyRoot } from "../../components/PageBodies";
 import { SpreadsLibraryRoot } from "../../islands/SpreadIslands";
+import "@/styles/ui2-spreads.css";
+import "@/styles/ui2-spreads-fx.css";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
 
 /** 📐 คลังผังพยากรณ์ 26 แบบ — หน้ารวม (ต้นไม้ภาษาไทย) */
@@ -21,9 +23,9 @@ const locale = "th" as const;
 </BaseLayout>
 
 <!--
-  🗂️ แท็บหมวดของคลังผัง — สคริปต์ ~1 KB แทนการ hydrate คลังทั้งก้อน (R-02)
-  การ์ดทั้ง 25 ใบอยู่ใน HTML แล้ว สคริปต์แค่สลับ `hidden` เท่านั้น
+  🃏 ไพ่เด้ง + หยุดของวนนอกจอ — สคริปต์ธรรมดา ≤ 3 KB แทนการ hydrate คลังทั้งก้อน (R-02 · UI_2_0_SPREADS หัวข้อ 5)
+  ไพ่ทั้ง 26 ใบเป็นลิงก์จริงใน HTML แล้ว สคริปต์แค่เปิดหน้าต่างผังแทนการเปลี่ยนหน้า
 -->
 <script>
-  import "../../scripts/spreads-tabs";
+  import "../../scripts/spreads-pop";
 </script>

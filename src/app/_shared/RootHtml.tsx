@@ -13,6 +13,7 @@ import type { Locale } from "@/lib/i18n/types";
 
 import { FONT_PRELOADS, FONT_PRELOADS_LOW } from "./root-metadata";
 import { buildSpeculationRules } from "./speculation-rules";
+import { UI2_FX_SCRIPT } from "./ui2-fx";
 import { SkipToContent } from "@/components/layout/SkipToContent";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 
@@ -123,6 +124,9 @@ export function RootHtml({
     <html lang={locale} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
+        {/* 🎨 ระดับเอฟเฟกต์ UI 2.0 (full · lite · off) — ฝาแฝดของ BaseLayout.astro · ต้องรันก่อนเฟรมแรก
+            ตั้งแอตทริบิวต์บน <html> จึงพึ่ง suppressHydrationWarning ข้างบน (เหตุผลเดียวกับสวิตช์แถบยินยอม) */}
+        <script dangerouslySetInnerHTML={{ __html: UI2_FX_SCRIPT }} />
 
 
         {/*

@@ -34,11 +34,13 @@ import { CARD_SUMMARIES } from "../../src/data/cards/summary";
 import { CARD_GROUPS } from "../../src/data/cards/group-seo";
 import { PersonaCardSelector } from "../../src/components/reading/PersonaCardSelector";
 import { IntentionAltarInput } from "../../src/components/reading/IntentionAltarInput";
-import { QuickFortunePicker } from "../../src/components/reading/QuickFortunePicker";
+import { Ui2Hero } from "../../src/components/home2/Ui2Hero";
+import { Ui2Ribbon } from "../../src/components/home2/Ui2Ribbon";
+import { Ui2PickSection } from "../../src/components/home2/Ui2PickSection";
+import { HomeSeoContent } from "../../src/components/seo/HomeSeoContent";
 import { ProvablyFairPanel } from "../../src/components/reading/ProvablyFairPanel";
 import { AccuracyRatingWidget } from "../../src/components/reading/AccuracyRatingWidget";
 import { OracleMantraCard } from "../../src/components/reading/OracleMantraCard";
-import { DailyCardStrip } from "../../src/components/reading/DailyCardStrip";
 import { TTSReaderButton } from "../../src/components/reading/TTSReaderButton";
 import { ShareModal } from "../../src/components/reading/ShareModal";
 import { FollowUpChat } from "../../src/components/reading/FollowUpChat";
@@ -289,7 +291,14 @@ export function runQa() {
         persona={persona}
       />,
     ],
-    ["QuickFortunePicker", <QuickFortunePicker currentNickname="Alex" onSelectTopic={noop} />],
+    /* 🎨 หน้าแรก UI 2.0 — ส่วน 1–3 (island) + ส่วน 4–8 (HTML นิ่ง) ภาษาอังกฤษต้องไม่มีอักษรไทยหลุด */
+    ["Ui2Hero", <Ui2Hero isEnglish />],
+    ["Ui2Ribbon", <Ui2Ribbon isEnglish />],
+    [
+      "Ui2PickSection",
+      <Ui2PickSection isEnglish spreadCount={26} canDraw={() => true} onDraw={async () => null} onReadWithAI={noop} onReset={noop} />,
+    ],
+    ["HomeSeoContent", <HomeSeoContent isEnglish />],
     [
       "ProvablyFairPanel",
       <ProvablyFairPanel
@@ -300,7 +309,6 @@ export function runQa() {
     ],
     ["AccuracyRatingWidget", <AccuracyRatingWidget personaId={persona.id} readingId="r1" />],
     ["OracleMantraCard", <OracleMantraCard cards={[six]} />],
-    ["DailyCardStrip", <DailyCardStrip />],
     ["TTSReaderButton", <TTSReaderButton textToRead="A season of visible progress." />],
     [
       "ShareModal",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 import { CardImage } from "@/components/card/CardImage";
@@ -9,7 +9,7 @@ import { useLocale } from "@/lib/i18n";
 import { APP_TIME_ZONE } from "@/lib/time/bangkok";
 import { saveReading } from "@/lib/utils/history";
 import { soundManager } from "@/lib/utils/audio";
-import { RitualHero } from "@/components/reading/one-card/RitualHero";
+import { GoldMark } from "@/components/ui/GoldMark";
 import { OneCardRitual } from "@/components/reading/one-card/OneCardRitual";
 import { DailyStreakRibbon } from "@/components/daily/DailyStreakRibbon";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
@@ -36,60 +36,60 @@ interface FocusChamber {
 const FOCUS_CHAMBERS: FocusChamber[] = [
   {
     id: "general",
-    titleTh: "มหาภาพรวม",
-    titleEn: "Cosmic Totality",
-    elementTh: "มิติภาพรวม",
-    elementEn: "General Dimension",
-    descTh: "คลื่นพลังงานหลัก และเข็มทิศชีวิตประจำวัน",
-    descEn: "Overall energy and spiritual alignment",
+    titleTh: "ภาพรวมวันนี้",
+    titleEn: "The day ahead",
+    elementTh: "ไพ่ใหญ่",
+    elementEn: "Major Arcana",
+    descTh: "พลังงานหลักและทิศทางของวัน",
+    descEn: "The overall energy and direction of your day",
     cardImage: "major-19.jpg",
     cardNameTh: "ดวงอาทิตย์",
     cardNameEn: "The Sun",
   },
   {
     id: "work",
-    titleTh: "การงาน & ภารกิจ",
-    titleEn: "Career & Purpose",
-    elementTh: "ธาตุไฟ (Wands)",
-    elementEn: "Fire Element (Wands)",
+    titleTh: "การงาน",
+    titleEn: "Work",
+    elementTh: "ธาตุไฟ",
+    elementEn: "Fire · Wands",
     descTh: "การตัดสินใจ ภาวะผู้นำ และความก้าวหน้า",
-    descEn: "Professional decisions and purposeful action",
+    descEn: "Decisions, leadership and moving forward",
     cardImage: "wands-01.jpg",
     cardNameTh: "เอซแห่งไม้เท้า",
     cardNameEn: "Ace of Wands",
   },
   {
     id: "money",
-    titleTh: "การเงิน & โชคลาภ",
-    titleEn: "Wealth & Luck",
-    elementTh: "ธาตุดิน (Pentacles)",
-    elementEn: "Earth Element (Pentacles)",
-    descTh: "ความมั่งคั่ง สภาพคล่อง และโชคชะตา",
-    descEn: "Financial liquidity and material harmony",
+    titleTh: "การเงิน",
+    titleEn: "Money",
+    elementTh: "ธาตุดิน",
+    elementEn: "Earth · Pentacles",
+    descTh: "รายรับ รายจ่าย และโชคลาภ",
+    descEn: "Spending, saving and good fortune",
     cardImage: "pentacles-01.jpg",
     cardNameTh: "เอซแห่งเหรียญ",
     cardNameEn: "Ace of Pentacles",
   },
   {
     id: "love",
-    titleTh: "ความรัก & สัมพันธภาพ",
-    titleEn: "Love & Bonds",
-    elementTh: "ธาตุน้ำ (Cups)",
-    elementEn: "Water Element (Cups)",
-    descTh: "ความผูกพัน คนในใจ และความจริงในดวงใจ",
-    descEn: "Emotional resonance and sacred bonds",
+    titleTh: "ความรัก",
+    titleEn: "Love",
+    elementTh: "ธาตุน้ำ",
+    elementEn: "Water · Cups",
+    descTh: "คนในใจ ความผูกพัน และความรู้สึกจริง",
+    descEn: "The people you care about and how you feel",
     cardImage: "cups-01.jpg",
     cardNameTh: "เอซแห่งถ้วย",
     cardNameEn: "Ace of Cups",
   },
   {
     id: "mind",
-    titleTh: "สติปัญญา & จิตวิญญาณ",
-    titleEn: "Mind & Spirit",
-    elementTh: "ธาตุลม (Swords)",
-    elementEn: "Air Element (Swords)",
-    descTh: "ความสงบภายใน สติสัมปชัญญะ และการปล่อยวาง",
-    descEn: "Mental clarity and inner stillness",
+    titleTh: "ใจและสติ",
+    titleEn: "Mind & spirit",
+    elementTh: "ธาตุลม",
+    elementEn: "Air · Swords",
+    descTh: "ความสงบในใจ สติ และการปล่อยวาง",
+    descEn: "Calm, clarity and letting go",
     cardImage: "swords-01.jpg",
     cardNameTh: "เอซแห่งดาบ",
     cardNameEn: "Ace of Swords",
@@ -202,18 +202,39 @@ export function DailyClient() {
   ];
 
   return (
-    <div className="space-y-8">
-      {/* Hero Header */}
-      <RitualHero
-        breadcrumbs={breadcrumbs}
-        badgeText={todayDateString ?? (isEnglish ? "Today's Card" : "ไพ่ประจำวันนี้")}
-        title={isEnglish ? "Daily Tarot Oracle" : "ดูดวงไพ่ยิปซีรายวัน"}
-        tagline={
-          isEnglish
-            ? "Align your heart with the 78 archetypes of 1909 Rider-Waite. Choose your focus chamber and draw 1 card for today's wisdom."
-            : "น้อมจิตสู่ความสงบ เชื่อมโยงกับแม่พิมพ์จิตวิทยาโบราณ 1909 Rider-Waite เลือกวิหารพลังงานที่คุณต้องการเปิดรับคำแนะนำ แล้วเปิดไพ่ 1 ใบเพื่อรับแสงสว่างนำทางชีวิต"
-        }
-      />
+    <div className="ui2-dy-ritual">
+      {/* หัวหน้า UI 2.0 (คืนท้องฟ้า · แผน UI_2_0) — h1 ข้อความเดิม "ดูดวงไพ่ยิปซีรายวัน" (คำว่า "รายวัน" เป็นทองไล่สี) */}
+      <header className="ui2-dy-hero">
+        <nav aria-label="Breadcrumb" className="ui2-dy-crumb">
+          <ol>
+            {breadcrumbs.map((crumb, idx) => (
+              <li key={idx} aria-current={idx === breadcrumbs.length - 1 ? "page" : undefined}>
+                {crumb.href ? <Link href={crumb.href}>{crumb.label}</Link> : <span>{crumb.label}</span>}
+              </li>
+            ))}
+          </ol>
+        </nav>
+        <span className="ui2-chip ui2-dy-date">
+          <GoldMark className="ui2-mark" />
+          {todayDateString ?? (isEnglish ? "Today's Card" : "ไพ่ประจำวันนี้")}
+        </span>
+        <h1 className="ui2-h1 ui2-dy-h1">
+          {isEnglish ? (
+            <>
+              <span className="ui2-gold-night ui2-loop">Daily</span> Tarot Oracle
+            </>
+          ) : (
+            <ThaiPhrases>
+              ดูดวงไพ่ยิปซี<span className="tp ui2-gold-night ui2-loop">รายวัน</span>
+            </ThaiPhrases>
+          )}
+        </h1>
+        <p className="ui2-lede ui2-dy-lede">
+          {isEnglish
+            ? "Choose what you want guidance on, set a quiet intention, and draw one card from the 1909 Rider-Waite deck for today."
+            : "เลือกเรื่องที่อยากรู้ ตั้งใจถามสั้น ๆ แล้วเปิดไพ่ 1 ใบจากสำรับ 1909 Rider-Waite รับข้อคิดนำทางสำหรับวันนี้"}
+        </p>
+      </header>
 
       {/* Main Interactive Ritual Canvas */}
       <OneCardRitual
@@ -221,8 +242,8 @@ export function DailyClient() {
         category="general"
         question={dailyQuestion}
         spreadName={isEnglish ? "Daily Tarot" : "ไพ่ยิปซีรายวัน"}
-        deckLabel={isEnglish ? `Chamber: ${currentChamber.titleEn}` : `วิหาร: ${currentChamber.titleTh}`}
-        drawButtonText={isEnglish ? "Draw Today's Card" : "เปิดไพ่รับสารนำทางวันนี้"}
+        deckLabel={isEnglish ? `Focus: ${currentChamber.titleEn}` : `เรื่อง: ${currentChamber.titleTh}`}
+        drawButtonText={isEnglish ? "Draw today's card" : "เปิดไพ่ของวันนี้"}
         intention={intentionText}
         isEnglish={isEnglish}
         onRevealed={handleRevealed}
@@ -232,97 +253,62 @@ export function DailyClient() {
             {/* ✦ กลับมาวันเดียวกัน = เช็กอินเย็น · มีพิธีหลายวันแล้ว = แถบ 7 วัน */}
             <EveningCheckin isEnglish={isEnglish} />
             <WeekStrip isEnglish={isEnglish} />
-            {/* Chamber Selection */}
-            <div className="space-y-3">
-              <div className="space-y-1">
-                <span className="text-xs font-serif-th font-semibold text-gold-ink">
-                  {isEnglish ? "Step 1: Choose Your Daily Chamber" : "ขั้นที่ 1: เลือกวิหารเจตจำนงของวัน"}
-                </span>
-                <h2 className="text-base sm:text-lg font-serif-th font-bold text-ink"><ThaiPhrases>
-                  {isEnglish ? "Select the energy you wish to illuminate today" : "เลือกมิติพลังงาน ที่ต้องการเปิดรับสารนำทาง"}
-                </ThaiPhrases></h2>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                {FOCUS_CHAMBERS.map((chamber) => {
+            {/* ขั้น 1 — เลือกเรื่องของวัน: พัดไพ่จริง 5 ใบบนผ้าปูกำมะหยี่ (แบบส่วนเปิดไพ่หน้าแรก)
+                ใบที่เลือกยกขึ้นเรืองทอง · คำบรรยายใหญ่ใต้พัดเปลี่ยนตามใบที่เลือก (เจ้าของ "อยากได้ให้ดีกว่า" 2026-10-13) */}
+            <div className="ui2-dy-step ui2-dy-step-center">
+              <p className="ui2-dy-step-k">
+                <span className="ui2-num">1</span>
+                {isEnglish ? "Your focus for today" : "วันนี้อยากรู้เรื่องไหน"}
+              </p>
+              <h2 className="ui2-dy-step-h"><ThaiPhrases>
+                {isEnglish ? "Pick what you want the card to speak to" : "เลือกเรื่องที่อยากให้ไพ่ชี้ทาง"}
+              </ThaiPhrases></h2>
+            </div>
+            <div className="ui2-dy-table">
+              <span className="ui2-dy-altar" aria-hidden="true" />
+              <div className="ui2-dy-fan" role="group" aria-label={isEnglish ? "Focus for today" : "เรื่องของวันนี้"}>
+                {FOCUS_CHAMBERS.map((chamber, i) => {
                   const isSelected = selectedFocus === chamber.id;
+                  const o = i - (FOCUS_CHAMBERS.length - 1) / 2;
                   return (
                     <button
                       key={chamber.id}
                       type="button"
+                      aria-pressed={isSelected}
                       onClick={() => {
                         soundManager.playMenuTapSound();
                         setSelectedFocus(chamber.id);
                       }}
-                      className={`group text-left p-4 sm:p-4.5 rounded-2xl border transition duration-200 cursor-pointer relative flex flex-col justify-between ${
-                        isSelected
-                          ? "altar-panel-active ring-1 ring-gold shadow-raised"
-                          : "altar-card-porcelain hover:border-gold/60 hover:shadow-xs"
-                      }`}
+                      className="ui2-dy-fan-card"
+                      style={{ "--o": o, "--drop": `${Math.abs(o) * 14}px` } as CSSProperties}
                     >
-                      <div>
-                        <div className="flex items-center justify-between gap-2 mb-2">
-                          <span className="text-[11px] font-serif-th font-semibold px-2.5 py-0.5 rounded-full border bg-surface border-line text-gold-ink shadow-2xs">
-                            {isEnglish ? chamber.elementEn : chamber.elementTh}
-                          </span>
-                          <span
-                            className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-colors ${
-                              isSelected
-                                ? "border-gold-ink bg-gold-ink"
-                                : "border-line bg-transparent"
-                            }`}
-                          >
-                            {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-                          </span>
-                        </div>
-
-                        <div className="flex items-start gap-3">
-                          {/* ภาพหน้าไพ่ 1909 Rider-Waite ประจำวิหาร (กฎเหล็กข้อ 8 — ต้องผ่าน <CardImage /> พร้อม sizes) */}
-                          <div
-                            className={`shrink-0 w-12 h-18 rounded-lg overflow-hidden border-2 bg-inset-warm shadow-sm transition duration-300 group-hover:scale-105 ${
-                              isSelected ? "border-gold-ink" : "border-line-warm"
-                            }`}
-                          >
-                            <CardImage
-                              image={chamber.cardImage}
-                              /* ภาพประกอบล้วน — บรรทัด `chamber.cardNameEn` ใต้หัวข้อบอกชื่อไพ่ให้อยู่แล้ว
-                                 ถ้าใส่ alt ซ้ำ screen reader จะอ่านชื่อไพ่สองรอบต่อการ์ดหนึ่งใบ
-                                 ปุ่มยังมีชื่อเรียก (accessible name) จากตัวหนังสือข้างในครบถ้วน */
-                              alt=""
-                              className="w-full h-full object-cover"
-                              sizes="48px"
-                            />
-                          </div>
-
-                          <div className="min-w-0">
-                            <h3 className="font-serif-th font-bold text-sm sm:text-base text-ink"><ThaiPhrases>
-                              {isEnglish ? chamber.titleEn : chamber.titleTh}
-                            </ThaiPhrases></h3>
-                            <span className="block text-[11px] font-mono text-gold-ink font-semibold mt-0.5">
-                              {chamber.cardNameEn}
-                            </span>
-                            <p className="text-xs font-sans text-muted mt-1.5 leading-relaxed line-clamp-2">
-                              {/* ห่อวลี — เดิมหัก "ประจำ / วัน" กลางคำบนมือถือ (เจ้าของทัก) */}
-                              <ThaiPhrases>{isEnglish ? chamber.descEn : chamber.descTh}</ThaiPhrases>
-                            </p>
-                          </div>
-                        </div>
-                      </div>
+                      {/* ภาพหน้าไพ่ 1909 ประจำเรื่อง (กฎเหล็กข้อ 8 — ผ่าน <CardImage /> พร้อม sizes) · ภาพประกอบ ไม่ใช่ผลสุ่ม */}
+                      <span className="ui2-dy-fan-face">
+                        <CardImage image={chamber.cardImage} alt="" sizes="(min-width: 1024px) 150px, (min-width: 768px) 120px, 64px" />
+                      </span>
+                      <span className="ui2-dy-fan-name">{isEnglish ? chamber.titleEn : chamber.titleTh}</span>
                     </button>
                   );
                 })}
               </div>
+              {/* คำบรรยายของใบที่เลือก */}
+              <div className="ui2-dy-caption" aria-live="polite">
+                <span className="ui2-dy-caption-el">
+                  <GoldMark className="ui2-mark" />
+                  {isEnglish ? currentChamber.elementEn : currentChamber.elementTh}
+                  <span aria-hidden="true"> · </span>
+                  {isEnglish ? currentChamber.cardNameEn : currentChamber.cardNameTh}
+                </span>
+                <span className="ui2-dy-caption-name">{isEnglish ? currentChamber.titleEn : currentChamber.titleTh}</span>
+                <span className="ui2-dy-caption-desc">{isEnglish ? currentChamber.descEn : currentChamber.descTh}</span>
+              </div>
             </div>
 
-            {/* Intention Input */}
-            <div className="space-y-2">
-              <label
-                htmlFor="daily-intention"
-                className="block text-xs sm:text-sm font-serif-th font-semibold text-ink"
-              >
-                {isEnglish
-                  ? "Set Your Daily Intention or Focus (Optional)"
-                  : "ตั้งจิตอธิษฐานหรือระบุเรื่องที่ต้องการถามประจำวัน (ไม่บังคับ)"}
+            {/* ขั้น 2 — ตั้งใจถาม (ไม่บังคับ) */}
+            <div className="ui2-dy-intent">
+              <label htmlFor="daily-intention" className="ui2-dy-step-k">
+                <span className="ui2-num">2</span>
+                {isEnglish ? "Set an intention (optional)" : "ตั้งใจถามสั้น ๆ (ไม่ใส่ก็ได้)"}
               </label>
               <input
                 id="daily-intention"
@@ -332,10 +318,10 @@ export function DailyClient() {
                 maxLength={150}
                 placeholder={
                   isEnglish
-                    ? "e.g. Guidance on today's presentation, emotional calm, peace..."
-                    : "เช่น สิ่งที่ควรระวังในที่ทำงานวันนี้, แนวทางรับมือเรื่องคน, กำลังใจ..."
+                    ? "e.g. How should I handle today's presentation?"
+                    : "เช่น วันนี้ควรระวังอะไรในที่ทำงาน, ขอกำลังใจหน่อย"
                 }
-                className="w-full rounded-xl border border-line-interactive bg-surface-warm px-4 py-3 text-xs sm:text-sm font-sans text-ink placeholder-muted/60 focus:border-gold focus:outline-hidden focus:ring-1 focus:ring-gold transition-colors"
+                className="ui2-dy-input"
               />
             </div>
           </div>

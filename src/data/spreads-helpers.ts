@@ -94,3 +94,14 @@ export function getPositionMeaning(pos: SpreadPosition, isEnglishOrLocale: boole
   const isEn = typeof isEnglishOrLocale === "boolean" ? isEnglishOrLocale : isEnglishOrLocale === "en";
   return isEn ? (pos.meaningEn || pos.meaning) : pos.meaning;
 }
+
+/**
+ * ชื่อผังแบบสั้นสำหรับไพ่ผังในคลัง `/spreads` — ตัดท้าย "(ไพ่ N ใบ)" / "(N Cards)" ออก
+ * เพราะจำนวนใบอยู่บนป้ายหัวไพ่แล้ว · วงเล็บที่ไม่ใช่จำนวน เช่น "(เซลติกครอส)" คงไว้
+ * ⚠️ สารบัญท้ายหน้าใช้ชื่อเต็ม (`getSpreadName`) เหมือนเดิม — เป็นข้อความลิงก์ที่ Google เห็นอยู่
+ */
+export function getSpreadShortName(spread: Spread, isEnglishOrLocale: boolean | string): string {
+  return getSpreadName(spread, isEnglishOrLocale)
+    .replace(/\s*\((?:ไพ่\s*\d+\s*ใบ|\d+\s*Cards?)\)\s*$/u, "")
+    .trim();
+}
