@@ -185,6 +185,25 @@ export function Ui2PickSection({
         </div>
 
         <div className="ui2-window">
+          {/* แถบหัวหน้าต่าง (ต้นแบบ D+): เรื่องที่เลือก ซ้าย · ชิปล็อกลำดับไพ่ ขวา */}
+          <div className="ui2-pick-bar">
+            <span className="ui2-pick-bar-title">
+              {isEnglish ? `1-card reading · ${shortName[topic.id][1]}` : `ไพ่ด่วน 1 ใบ · เรื่อง${shortName[topic.id][0]}`}
+            </span>
+            <span className="ui2-chip ui2-lock">
+              <span className="ui2-dot" aria-hidden="true" />
+              {draw?.commitment ? (
+                <>
+                  {isEnglish ? "Deck order locked · " : "ลำดับไพ่ถูกล็อกแล้ว · "}
+                  <code title={draw.commitment}>{shortCommitment(draw.commitment)}</code>
+                </>
+              ) : isEnglish ? (
+                "Truly random, verifiable"
+              ) : (
+                "สุ่มจริง ตรวจสอบได้"
+              )}
+            </span>
+          </div>
           <div className="ui2-pick-grid">
             <div className="ui2-topics" role="group" aria-label={isEnglish ? "Choose a topic" : "เลือกเรื่องที่อยากรู้"}>
               {QUICK_TOPICS.map((t, i) => (
@@ -198,21 +217,30 @@ export function Ui2PickSection({
                   data-home-target={`quick:${t.id}`}
                 >
                   <span className="ui2-topic-num ui2-num" aria-hidden="true">{`0${i + 1}`}</span>
-                  <span>{shortName[t.id][isEnglish ? 1 : 0]}</span>
+                  <span className="ui2-topic-text">
+                    <span>{shortName[t.id][isEnglish ? 1 : 0]}</span>
+                    {/* คำโปรยของหัวข้อ (quick-topics.ts) — คอมโชว์ใต้หัวข้อที่เลือก · มือถือซ่อน */}
+                    <small className="ui2-topic-tag">{isEnglish ? (t.taglineEn ?? t.tagline) : t.tagline}</small>
+                  </span>
                 </button>
               ))}
             </div>
 
             <div>
               <div className="ui2-cloth">
+                {/* แท่นทอง: วงรีเรืองแสงใต้พัดไพ่ (ตกแต่งล้วน) */}
+                <span className="ui2-altar" aria-hidden="true" />
                 {positions.map((pos, slot) => {
                   const state = stateOf(slot);
                   const shown = state === "revealed" && draw;
+                  // พัดไพ่: ใบกลาง = 0 · ซ้าย/ขวาเอียงออกและต่ำลงตามระยะจากกลาง (โค้งแบบต้นแบบ D+)
+                  const offset = slot - (positions.length - 1) / 2;
                   return (
                     <button
                       key={`${pos}-${slot}`}
                       type="button"
                       className="ui2-pick-card"
+                      style={{ ["--o" as string]: offset, ["--drop" as string]: `${offset * offset * 7}px` }}
                       data-state={state}
                       disabled={active !== null && slot !== active}
                       onClick={() => void pickCard(slot)}
@@ -239,6 +267,22 @@ export function Ui2PickSection({
                 })}
               </div>
 
+            </div>
+
+            {/* แผงขวา (ต้นแบบ D+): ก่อนแตะ = วิธีเล่น · ระหว่างรอ = สถานะ · หลังพลิก = ผลไพ่ + ปุ่มอ่านต่อ */}
+            <div className="ui2-pick-side">
+              {!draw && !error && (
+                <div className="ui2-pick-guide">
+                  <h3 className="ui2-pick-guide-title">
+                    <ThaiPhrases>{isEnglish ? "Tap the one card your heart picks" : "แตะไพ่ 1 ใบ ที่ใจเลือก"}</ThaiPhrases>
+                  </h3>
+                  <p>
+                    {isEnglish
+                      ? "All 78 cards are shuffled and their order is locked first. The card you tap is the card you get."
+                      : "ไพ่ 78 ใบถูกสับและล็อกลำดับไว้แล้ว ใบที่คุณแตะคือใบที่ได้จริง"}
+                  </p>
+                </div>
+              )}
               <p className="ui2-pick-hint" aria-live="polite">
                 {error
                   ? ""
@@ -252,22 +296,6 @@ export function Ui2PickSection({
                         ? `Topic: ${topicName(topic)} · tap the card your heart picks`
                         : `เรื่อง${topicName(topic)} · แตะใบที่ใจเลือก`}
               </p>
-
-              <div className="ui2-lock-chip">
-                <span className="ui2-chip">
-                  <span className="ui2-dot" aria-hidden="true" />
-                  {draw?.commitment ? (
-                    <>
-                      {isEnglish ? "Deck order locked · " : "ลำดับไพ่ถูกล็อกแล้ว · "}
-                      <code title={draw.commitment}>{shortCommitment(draw.commitment)}</code>
-                    </>
-                  ) : isEnglish ? (
-                    "Truly random, verifiable"
-                  ) : (
-                    "สุ่มจริง ตรวจสอบได้"
-                  )}
-                </span>
-              </div>
 
               {error && (
                 <div role="alert" className="ui2-error">
