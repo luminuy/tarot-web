@@ -172,7 +172,8 @@
 }
 
 /* ═════════════════════════════════════════════════════════════════════════
-   "ล้ำ สวย สมูท ว้าว" (เจ้าของ 2026-10-13) — ระดับ full เท่านั้น · ลูกเล่นตามเมาส์ถอดออกแล้วตามคำสั่งเจ้าของ (เหลือพารัลแลกซ์ดาว)
+   "ล้ำ สวย สมูท ว้าว" (เจ้าของ 2026-10-13) — ระดับ full เท่านั้น · astro/scripts/ui2-home.ts ข้อ 10 ตั้งตัวแปร
+   ⚠️ ทุกชิ้นขยับด้วย transform / translate / rotate / opacity (compositor) · ไม่มีเมาส์ (มือถือ) = ไม่มีผล
    ═════════════════════════════════════════════════════════════════════════ */
 @media (min-width: 768px) {
   /* ดาวสองชั้นเลื่อนคนละความเร็วตอนเลื่อนหน้า (ท้องฟ้ามีความลึก) — translate แยกจาก transform ที่จัดกึ่งกลางอยู่ */
@@ -194,4 +195,95 @@
 @keyframes ui2-star-drift-far {
   from { translate: 0 -150px; }
   to { translate: 0 150px; }
+}
+
+/* ตัวแปรตำแหน่งเมาส์ (ui2-home.ts ข้อ 10) — ประกาศชนิดไว้ให้ transition ของ transform คำนวณได้ (ด่าน motion กฎ 8) */
+@property --mx {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --my {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --depth {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 22;
+}
+@media (min-width: 768px) {
+  @media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  /* การ์ดลอยหัวหน้าเอนตามเมาส์ — ใบใกล้ขยับมาก ใบไกลขยับน้อย (--mx/--my -1…1 บน .ui2-floats) */
+  [data-fx="full"] .ui2-fc {
+    transform: translate(calc(var(--mx, 0) * var(--depth) * 1px), calc(var(--my, 0) * var(--depth) * 1px));
+    transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  [data-fx="full"] .ui2-fc-far {
+    --depth: 9;
+  }
+  [data-fx="full"] .ui2-fc:nth-child(odd):not(.ui2-fc-far) {
+    --depth: 30;
+  }
+
+  /* การ์ดเอียง 3 มิติตามเมาส์ + แสงสะท้อน — ใช้คุณสมบัติ rotate (แยกจาก transform ของอนิเมชันเข้า/ออก) */
+  [data-fx="full"] .ui2-bento,
+  [data-fx="full"] .ui2-show-topics,
+  [data-fx="full"] .ui2-show-cards,
+  [data-fx="full"] .ui2-show-zodiac,
+  [data-fx="full"] .ui2-fq-row {
+    perspective: 1100px;
+  }
+  [data-fx="full"] [data-tilt] {
+    rotate: calc(var(--ty, 0) * -1) var(--tx, 1) 0 var(--ta, 0deg);
+    transition: rotate 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  [data-fx="full"] [data-tilt].is-tilting {
+    transition-duration: 0.12s;
+  }
+  [data-fx="full"] [data-tilt]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 246, 225, 0.32), rgba(255, 246, 225, 0) 55%);
+    transition: opacity 0.4s ease;
+  }
+  [data-fx="full"] [data-tilt].is-tilting::after {
+    opacity: 1;
+  }
+  [data-fx="full"] .ui2-show-topic[data-tilt],
+  [data-fx="full"] .ui2-show-major[data-tilt],
+  [data-fx="full"] .ui2-show-sign[data-tilt],
+  [data-fx="full"] .ui2-fq-mock[data-tilt] {
+    position: relative;
+  }
+
+  /* หลังไพ่เปิดไพ่ด่วน — แถบแสงโฮโลแกรมวิ่งตามเมาส์ */
+  [data-fx="full"] .ui2-face-back::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(115deg, rgba(255, 217, 143, 0) 30%, rgba(255, 236, 190, 0.38) 48%, rgba(159, 227, 217, 0.22) 54%, rgba(255, 217, 143, 0) 70%);
+    background-size: 250% 250%;
+    background-position: var(--hx, 50%) var(--hy, 50%);
+    transition: opacity 0.4s ease;
+  }
+  [data-fx="full"] .ui2-pick-card:hover .ui2-face-back::after {
+    opacity: 1;
+  }
+
+  /* ปุ่มหลักดูดเข้าหาเมาส์เบา ๆ (แม่เหล็ก) */
+  [data-fx="full"] .ui2-btn[data-magnet] {
+    translate: calc(var(--bx, 0) * 1px) calc(var(--by, 0) * 1px);
+    transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), translate 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
 }
