@@ -67,6 +67,29 @@ jobs:
           NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: ${{ secrets.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || vars.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '' }}
           NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || vars.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '' }}
 
+      # เปิด "ลิงก์ทดลอง" (previews_enabled) ของ Worker ผ่าน API — ค่านี้ไม่ใช่ของเวอร์ชัน
+      # `versions upload` จึงตั้งให้ไม่ได้ (รอบแรกอัปโหลดสำเร็จแต่ไม่ได้ลิงก์) · แตะเฉพาะ previews_enabled
+      # **คงค่า `enabled` (เส้น workers.dev ของ production) ตามเดิมเสมอ** — ไม่เปิดช่องทางใหม่ให้เว็บจริง
+      - name: 🔓 เปิดลิงก์ทดลองของ Worker (เฉพาะ previews_enabled)
+        id: sub
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          api="https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT}/workers"
+          cur=$(curl -sS -H "Authorization: Bearer ${CF_TOKEN}" "$api/scripts/tarot-web/subdomain")
+          echo "สถานะเดิม: $(echo "$cur" | jq -c '.result')"
+          enabled=$(echo "$cur" | jq -r '.result.enabled')
+          previews=$(echo "$cur" | jq -r '.result.previews_enabled')
+          if [ "$previews" != "true" ]; then
+            [ "$enabled" = "true" ] || enabled=false
+            res=$(curl -sS -X POST -H "Authorization: Bearer ${CF_TOKEN}" -H "Content-Type: application/json" \
+              --data "{\"enabled\":${enabled},\"previews_enabled\":true}" "$api/scripts/tarot-web/subdomain")
+            echo "ตั้งใหม่: $(echo "$res" | jq -c '{success, result, errors}')"
+          fi
+          sub=$(curl -sS -H "Authorization: Bearer ${CF_TOKEN}" "$api/subdomain" | jq -r '.result.subdomain // empty')
+          echo "subdomain=${sub}" >> "$GITHUB_OUTPUT"
+
       # ⛔ ห้ามเปลี่ยนเป็น `deploy` — upload = สร้างเวอร์ชันโดยไม่ย้ายทราฟฟิก production
       - name: 👀 Upload preview version (ไม่ย้ายทราฟฟิก)
         run: |
@@ -80,6 +103,10 @@ jobs:
         if: always()
         run: |
           urls=$(grep -Eo 'https://[a-z0-9.-]+\.workers\.dev' upload.log | sort -u || true)
+          # wrangler ไม่พิมพ์ลิงก์ (เช่นเปิด previews หลังอัปโหลด) ➔ ประกอบเองตามรูปแบบของ Cloudflare
+          if [ -z "$urls" ] && [ -n "${{ steps.sub.outputs.subdomain }}" ]; then
+            urls="https://${{ steps.alias.outputs.alias }}-tarot-web.${{ steps.sub.outputs.subdomain }}.workers.dev"
+          fi
           {
             echo "### 👀 ลิงก์ทดลอง (ไม่ใช่ production)"
             echo ""
