@@ -15,6 +15,7 @@
  *   9. ตัวเลขนับขึ้นตอนเลื่อนถึง (1909 · ตัวเลขในคลังไพ่) — HTML มีเลขจริงอยู่แล้ว (ไม่มี JS = เห็นเลขจริง)
  *  10. ลูกเล่นตามเมาส์ (ระดับ full · คอม ≥ 1024 · เมาส์จริง) — การ์ดลอยเอนตามเมาส์ ·
  *      การ์ดเอียง 3 มิติ + แสงสะท้อน · หลังไพ่โฮโลแกรม · ปุ่มแม่เหล็ก — ตัวฟังเดียว อัปเดตครั้งเดียวต่อเฟรม
+ *  11. กระดาษโน้ตร่วงลงแปะครั้งเดียวตอนส่วนเข้าจอ (is-wait ➔ is-in) — แบบผูกการเลื่อนอ่านยาก (เจ้าของ 2026-10-13)
  *   5. แม่หมอตัวจริงที่ว่างเร็วสุด — ยิง `/api/marketplace/readers/featured` ตอนกล่องใกล้จอเท่านั้น
  *      ใส่ข้อความด้วย textContent (ข้อมูลจากฐานข้อมูล ห้าม innerHTML) · ไม่มีใคร/อ่านไม่ได้ = ปล่อยลิงก์ล้วน
  *
@@ -483,3 +484,35 @@ document.documentElement.addEventListener("pointerleave", () => {
   untilt();
   unmagnet();
 });
+
+/* ── 11. กระดาษโน้ตร่วงลงแปะ ───────────────────────────────────────────────── */
+const notesObserver =
+  "IntersectionObserver" in window
+    ? new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (!e.isIntersecting) continue;
+            notesObserver?.unobserve(e.target);
+            e.target.classList.remove("is-wait");
+            e.target.classList.add("is-in");
+          }
+        },
+        { rootMargin: "0px 0px -12% 0px" },
+      )
+    : null;
+const notesSeen = new WeakSet<Element>();
+function watchNotes(): void {
+  if (!notesObserver || calm()) return;
+  document.querySelectorAll(".ui2-notes").forEach((el) => {
+    if (notesSeen.has(el)) return;
+    notesSeen.add(el);
+    // ซ่อนไว้ก่อนเฉพาะตอนยังอยู่นอกจอ (ถ้าเห็นอยู่แล้ว ไม่ซ่อนกลางสายตา)
+    if (el.getBoundingClientRect().top > innerHeight) el.classList.add("is-wait");
+    else return;
+    notesObserver.observe(el);
+  });
+}
+watchNotes();
+new MutationObserver((ms) => {
+  if (ms.some((m) => Array.from(m.addedNodes).some((n) => n instanceof Element && (n.matches(".ui2-notes") || n.querySelector(".ui2-notes") !== null)))) watchNotes();
+}).observe(document.body, { childList: true, subtree: true });

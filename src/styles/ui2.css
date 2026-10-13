@@ -3105,14 +3105,6 @@ details[open] > .ui2-faq-a {
     animation-timeline: view();
     animation-range: entry 0% cover 32%;
   }
-  /* 3. กระดาษโน้ต — ร่วงลงมาแปะทีละแผ่น (3 จังหวะสลับกัน) */
-  .ui2-note-slot {
-    animation: ui2-drop linear both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 24%;
-  }
-  .ui2-note-slot:nth-child(3n + 2) { animation-range: entry 12% cover 32%; }
-  .ui2-note-slot:nth-child(3n) { animation-range: entry 24% cover 40%; }
   /* 4. คลังไพ่ — หัวเรื่องเรียงเข้าทีละบรรทัด */
   .ui2-show-tab {
     animation: ui2-side-in linear both;
@@ -3235,7 +3227,7 @@ details[open] > .ui2-faq-a {
     animation-timeline: view();
     animation-range: exit 0% exit 100%;
   }
-  :is([data-home-section="quick"], [data-home-section="notes"], [data-home-section="features"], [data-home-section="showcase"]) > .ui2-wrap {
+  :is([data-home-section="quick"], [data-home-section="features"], [data-home-section="showcase"]) > .ui2-wrap {
     animation: ui2-sec-out linear forwards;
     animation-timeline: view();
     animation-range: exit 55% exit 100%;
@@ -3393,6 +3385,31 @@ details[open] > .ui2-faq-a {
   }
 }
 
+/* 3. กระดาษโน้ต — ร่วงลงแปะทีละแผ่นครั้งเดียวตอนส่วนเข้าจอ (เวลา ไม่ผูกการเลื่อน)
+   เจ้าของ 2026-10-13: แบบผูกการเลื่อนทำให้โน้ตจาง/ซ้อนกันค้างครึ่งทางระหว่างอ่าน "อ่านยาก ไม่สวย"
+   ➔ ui2-home.ts ข้อ 11 ใส่ is-wait (ซ่อนไว้ตอนยังอยู่นอกจอ) แล้วใส่ is-in ตอนเข้าจอ · ไม่มี JS = เห็นนิ่งครบ */
+.ui2-notes.is-wait .ui2-note-slot {
+  opacity: 0;
+}
+.ui2-notes.is-in .ui2-note-slot {
+  animation: ui2-note-in 0.7s cubic-bezier(0.2, 1.15, 0.35, 1) backwards;
+}
+.ui2-notes.is-in .ui2-note-slot:nth-child(2) { animation-delay: 55ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(3) { animation-delay: 110ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(4) { animation-delay: 165ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(5) { animation-delay: 220ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(6) { animation-delay: 275ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(7) { animation-delay: 330ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(8) { animation-delay: 385ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(9) { animation-delay: 440ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(10) { animation-delay: 495ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(11) { animation-delay: 550ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(12) { animation-delay: 605ms; }
+@keyframes ui2-note-in {
+  0% { opacity: 0; transform: translateY(-46px) rotate(-5deg) scale(1.06); }
+  45% { opacity: 1; }
+}
+
 @keyframes ui2-intro {
   from { opacity: 0; transform: translateY(26px); }
 }
@@ -3401,9 +3418,6 @@ details[open] > .ui2-faq-a {
 }
 @keyframes ui2-grow {
   from { opacity: 0.35; transform: scale(0.9) translateY(40px); }
-}
-@keyframes ui2-drop {
-  from { opacity: 0; transform: translateY(-70px) rotate(-7deg) scale(1.06); }
 }
 @keyframes ui2-side-in {
   from { opacity: 0; transform: translateX(-56px); }
