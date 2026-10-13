@@ -81,51 +81,81 @@
   pointer-events: none;
   background: var(--ui2-sec-bg, transparent);
 }
+/* แสงออโรราวางกลางส่วน (y 30–70%) รัศมีแนวตั้ง ≤ 30% ➔ จางหมดก่อนขอบบน/ล่าง (ส่วนต่อกันไม่เห็นรอย) */
 .ui2-day {
   color: var(--ui2-ink);
   --ui2-sec-bg:
-    radial-gradient(60% 46% at 12% 18%, rgba(255, 184, 92, 0.32) 0%, rgba(255, 184, 92, 0) 70%),
-    radial-gradient(52% 44% at 88% 12%, rgba(255, 222, 150, 0.5) 0%, rgba(255, 222, 150, 0) 70%),
-    radial-gradient(44% 34% at 76% 58%, rgba(132, 196, 184, 0.26) 0%, rgba(132, 196, 184, 0) 70%),
+    radial-gradient(60% 30% at 12% 34%, rgba(255, 184, 92, 0.3) 0%, rgba(255, 184, 92, 0) 70%),
+    radial-gradient(52% 28% at 88% 40%, rgba(255, 222, 150, 0.46) 0%, rgba(255, 222, 150, 0) 70%),
+    radial-gradient(44% 26% at 76% 66%, rgba(132, 196, 184, 0.24) 0%, rgba(132, 196, 184, 0) 70%),
     var(--ui2-day);
 }
 .ui2-night {
   color: var(--ui2-on-night);
   --ui2-sec-bg:
-    radial-gradient(50% 40% at 10% 8%, var(--ui2-aurora-night-teal) 0%, rgba(79, 179, 169, 0) 70%),
-    radial-gradient(46% 40% at 92% 30%, var(--ui2-aurora-night-amber) 0%, rgba(233, 160, 70, 0) 70%),
+    radial-gradient(50% 30% at 10% 36%, var(--ui2-aurora-night-teal) 0%, rgba(79, 179, 169, 0) 70%),
+    radial-gradient(46% 30% at 92% 62%, var(--ui2-aurora-night-amber) 0%, rgba(233, 160, 70, 0) 70%),
     var(--ui2-night);
 }
-/* รอยต่อพื้นสว่าง ↔ มืด = แผ่นมุมโค้งซ้อนกัน (ส่วนถัดไปเลื่อนขึ้นทับขอบล่างของส่วนก่อน · มุมเผยพื้นเดิมข้างใต้)
-   เจ้าของสั่ง 2026-10-13 สลับคลังไพ่ขึ้นก่อนกล่อง "ทุกอย่างในที่เดียว" ➔ มีรอยต่อสลับสี 3 จุด · ต้อง "สวยเท่าเดิมหรือกว่า"
-   ส่วนวาดตามลำดับ DOM (ไม่มี z-index) — ส่วนหลังจึงทับส่วนก่อนเองโดยธรรมชาติ */
-.ui2-night + .ui2-day,
-.ui2-day + .ui2-night {
-  --ui2-seam: 28px;
-  margin-top: calc(var(--ui2-seam) * -1);
-  padding-top: calc(56px + var(--ui2-seam));
+/* ── รอยต่อระหว่างส่วน: ไล่สีต่อกันเป็นผืนเดียว (เจ้าของ 2026-10-13 "สีพื้นหลังที่ขั้นรู้สึกขัด ไม่สมูท ไม่เหมือนเรียงต่อกัน")
+   1. แสงออโรราของแต่ละส่วนอยู่กลางส่วน จางหมดก่อนถึงขอบบน/ล่าง ➔ ส่วนสีเดียวกันต่อกันไม่เห็นรอย
+   2. มืด ↔ สว่าง = แถบ "ฟ้ารุ่ง/ฟ้าค่ำ" (ม่วงเข้ม ➔ ถ่านอำพัน ➔ ทองนวล ➔ ครีม) แบ่งครึ่งระหว่างท้ายส่วนก่อนกับหัวส่วนถัดไป
+      ทั้งสองฝั่งพบกันที่สีเดียวกัน (--ui2-dawn-mid) จึงไม่มีเส้นขอบ · เพิ่มระยะบน/ล่างให้ตัวหนังสือไม่ตกอยู่ในช่วงสีกลาง ───── */
+:root {
+  --ui2-dawn-mid: #3A2822;
+  --ui2-dawn-top-day: linear-gradient(180deg, #3A2822 0, #7E5B41 64px, #C9A57C 132px, #EAD9BD 190px, rgba(247, 240, 227, 0) 250px);
+  --ui2-dawn-bottom-day: linear-gradient(0deg, #3A2822 0, #7E5B41 64px, #C9A57C 132px, #EAD9BD 190px, rgba(247, 240, 227, 0) 250px);
+  --ui2-dawn-top-night: linear-gradient(180deg, #3A2822 0, #22171A 56px, rgba(12, 10, 15, 0) 150px);
+  --ui2-dawn-bottom-night: linear-gradient(0deg, #3A2822 0, #22171A 56px, rgba(12, 10, 15, 0) 150px);
 }
-.ui2-night + .ui2-day::before,
-.ui2-day + .ui2-night::before,
-.ui2-day + .ui2-night > .ui2-stars {
-  border-radius: var(--ui2-seam) var(--ui2-seam) 0 0;
+.ui2-night + .ui2-day::before {
+  background: var(--ui2-dawn-top-day), var(--ui2-sec-bg);
 }
-/* แผ่นมืดที่ทับพื้นสว่าง: เงานุ่มเหนือขอบ ให้รู้สึกเป็นแผ่นซ้อน */
+.ui2-day:has(+ .ui2-night)::before {
+  background: var(--ui2-dawn-bottom-day), var(--ui2-sec-bg);
+}
+.ui2-night + .ui2-day:has(+ .ui2-night)::before {
+  background: var(--ui2-dawn-top-day), var(--ui2-dawn-bottom-day), var(--ui2-sec-bg);
+}
 .ui2-day + .ui2-night::before {
-  box-shadow: 0 -18px 40px -24px rgba(30, 20, 12, 0.45);
+  background: var(--ui2-dawn-top-night), var(--ui2-sec-bg);
+}
+.ui2-night:has(+ .ui2-day)::before {
+  background: var(--ui2-dawn-bottom-night), var(--ui2-sec-bg);
+}
+.ui2-day + .ui2-night:has(+ .ui2-day)::before {
+  background: var(--ui2-dawn-top-night), var(--ui2-dawn-bottom-night), var(--ui2-sec-bg);
+}
+/* ระยะเผื่อช่วงสีกลาง — ตัวหนังสือเริ่มหลังแถบไล่สีเกือบจบ */
+.ui2-night + .ui2-day {
+  padding-top: 200px;
+}
+.ui2-day:has(+ .ui2-night) {
+  padding-bottom: 200px;
+}
+.ui2-day + .ui2-night {
+  padding-top: 110px;
+}
+.ui2-night:has(+ .ui2-day) {
+  padding-bottom: 110px;
+}
+/* ส่วนสุดท้ายของหน้าแรก (FAQ บนพื้นครีม) ➔ ท้ายเว็บพื้นมืด (#171512): ไล่ลงเป็นสีเดียวกับท้ายเว็บ */
+.ui2-fq-sec::before {
+  background:
+    linear-gradient(0deg, #171512 0, #3A2822 60px, #9C7752 130px, #E3CDAE 190px, rgba(247, 240, 227, 0) 240px),
+    var(--ui2-sec-bg);
+}
+.ui2-night + .ui2-fq-sec::before {
+  background:
+    var(--ui2-dawn-top-day),
+    linear-gradient(0deg, #171512 0, #3A2822 60px, #9C7752 130px, #E3CDAE 190px, rgba(247, 240, 227, 0) 240px),
+    var(--ui2-sec-bg);
+}
+.ui2-fq-sec {
+  padding-bottom: 220px;
 }
 .ui2-night + .ui2-fq-sec {
-  padding-top: calc(24px + var(--ui2-seam));
-}
-@media (min-width: 768px) {
-  .ui2-night + .ui2-day,
-  .ui2-day + .ui2-night {
-    --ui2-seam: 48px;
-    padding-top: calc(88px + var(--ui2-seam));
-  }
-  .ui2-night + .ui2-fq-sec {
-    padding-top: calc(24px + var(--ui2-seam));
-  }
+  padding-top: 200px;
 }
 
 /* ดาว — วาดครั้งเดียวด้วย radial-gradient (lite: 1 ชั้น · นิ่ง) */
@@ -2377,9 +2407,9 @@ details[open] > summary .ui2-plus {
 
 /* ── ส่วน 7 · คำถามที่พบบ่อย — การ์ดมืดใหญ่บนพื้นกลางวัน (เข้าชุดกับการ์ดปิดท้าย) + แถวสลับซ้ายขวา
    ต้นแบบ fastwork.com/selling "One platform is everything you need": ภาพจำลองหน้าจอพื้นพาสเทล ↔ ข้อความ ─────── */
-/* ส่วนสุดท้ายของหน้าแรก (ส่วนปิดท้ายถูกถอดตามคำสั่งเจ้าของ 2026-10-13) — เว้นท้ายก่อนท้ายเว็บ */
+/* ส่วนสุดท้ายของหน้าแรก (ส่วนปิดท้ายถูกถอดตามคำสั่งเจ้าของ 2026-10-13) — ระยะบน/ล่างอยู่กับกฎรอยต่อไล่สี */
 .ui2-fq-sec {
-  padding-block: 24px 56px;
+  padding-top: 24px;
 }
 .ui2-fq-sheet {
   position: relative;
