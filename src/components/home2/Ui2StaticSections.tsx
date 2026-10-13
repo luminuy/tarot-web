@@ -6,6 +6,7 @@ import { RouteLink as Link } from "@/components/ui/RouteLink";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { getArticleTitle } from "@/data/article-helpers";
 import { getFeaturedArticles } from "@/data/articles";
+import { reviewedCardAdvice } from "@/data/cards/card-advice";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 import { getHomeFaqs, getHomeHowToSteps } from "@/data/home-seo";
@@ -533,6 +534,11 @@ function fitPositions(positions: { x: number; y: number; rotate?: number }[]) {
   return positions.map((p) => ({ x: fit(p.x, minX, maxX, 0.14, 0.86), y: fit(p.y, minY, maxY, 0.13, 0.87), r: p.rotate ?? 0 }));
 }
 
+/** "1. แก่นของเรื่อง (หัวใจ…)" ➔ "แก่นของเรื่อง (หัวใจ…)" — เลขแสดงด้วยตัวนับของรายการ */
+function positionLabel(name: string): string {
+  return name.replace(/^\d+\.\s*/, "");
+}
+
 function ShowTop({ title, desc, all }: { title: string; desc: string; all?: { href: string; label: string } }) {
   return (
     <div className="ui2-show-top">
@@ -603,6 +609,7 @@ export function Ui2ShowcaseSection({ isEnglish, href }: { isEnglish: boolean; hr
     const card = cardById(link.path.replace("/cards/", ""));
     return card ? [{ link, card }] : [];
   });
+  const majorTip = (id: string) => reviewedCardAdvice(id, false, isEnglish ? "en" : "th");
   const cardExtraLinks = MAJOR_HIGHLIGHTS.filter((link) => !majorCards.some((item) => item.link === link));
   const zodiac = ZODIAC_SIGNS.flatMap((sign) => {
     const card = cardById(sign.majorCardId);
@@ -723,6 +730,12 @@ export function Ui2ShowcaseSection({ isEnglish, href }: { isEnglish: boolean; hr
                       </span>
                     ))}
                   </div>
+                  {/* ความหมายตำแหน่งจากผังจริง (src/data/spreads) — เลขตรงกับไพ่บนกระดาน */}
+                  <ol className="ui2-show-legend">
+                    {featured.spread.positions.map((pos) => (
+                      <li key={pos.index}>{positionLabel(isEnglish ? (pos.nameEn ?? pos.nameTh) : pos.nameTh)}</li>
+                    ))}
+                  </ol>
                   {drawNow && (
                     <figcaption>
                       <Link href={href(drawNow.path)} prefetch={false} className="ui2-btn">
@@ -769,9 +782,13 @@ export function Ui2ShowcaseSection({ isEnglish, href }: { isEnglish: boolean; hr
             <div className="ui2-show-cards">
               {majorCards.map(({ link, card }) => (
                 <Link key={card.id} href={href(link.path)} prefetch={false} className="ui2-show-major">
-                  <CardImage cardId={card.id} alt="" sizes="(min-width: 1024px) 120px, 28vw" className="ui2-show-major-img" />
-                  <span className="ui2-show-major-name">{isEnglish ? card.nameEn : card.nameTh}</span>
-                  <small>{isEnglish ? (CARD_KEYWORDS_EN[card.id]?.upright[0] ?? card.nameEn) : card.keywords.upright[0]}</small>
+                  <CardImage cardId={card.id} alt="" sizes="(min-width: 640px) 84px, 72px" className="ui2-show-major-img" />
+                  <span className="ui2-show-major-body">
+                    <span className="ui2-show-major-name">{isEnglish ? card.nameEn : card.nameTh}</span>
+                    <small>{isEnglish ? (CARD_KEYWORDS_EN[card.id]?.upright[0] ?? card.nameEn) : card.keywords.upright[0]}</small>
+                    {/* คำแนะนำหัวตั้งที่แม่หมอตรวจแล้วเท่านั้น (card-advice.ts) — ยังไม่ตรวจ = ไม่แสดง */}
+                    {majorTip(card.id) && <span className="ui2-show-major-tip">{majorTip(card.id)}</span>}
+                  </span>
                 </Link>
               ))}
             </div>
@@ -815,7 +832,7 @@ export function Ui2ShowcaseSection({ isEnglish, href }: { isEnglish: boolean; hr
                   <CardImage cardId={card.id} alt="" thumb sizes="44px" className="ui2-show-thumb" />
                   <span>
                     {isEnglish ? sign.nameEn : sign.nameTh}
-                    <small>{card.nameEn}</small>
+                    <small>{isEnglish ? card.nameEn : `ไพ่${card.nameTh}`}</small>
                   </span>
                 </Link>
               ))}
