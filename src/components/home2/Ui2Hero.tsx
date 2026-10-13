@@ -128,12 +128,6 @@ export function Ui2Hero({ isEnglish, streak = 0 }: { isEnglish: boolean; streak?
           </Link>
         </div>
 
-        <span className="ui2-cue ui2-loop" aria-hidden="true">
-          {isEnglish ? "Scroll" : "เลื่อนลง"}
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-            <path d="M6 9l6 6 6-6" />
-          </svg>
-        </span>
       </div>
     </section>
   );

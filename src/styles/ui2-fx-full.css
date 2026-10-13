@@ -99,10 +99,6 @@
   [data-fx="full"] .ui2-fc-far .ui2-fc-card {
     filter: blur(1.6px);
   }
-  /* ตัวบอกเลื่อนลง — ขยับขึ้นลงช้า ๆ (lite = นิ่ง) */
-  [data-fx="full"] .ui2-cue {
-    animation: ui2-cue 2.4s ease-in-out infinite;
-  }
 
   /* ── ตัวหนังสือทองมีแสงวิ่ง (lite = ทองนิ่ง เพราะอนิเมต background-position = วาดใหม่ทุกเฟรม) ── */
   [data-fx="full"] .ui2-gold-day,

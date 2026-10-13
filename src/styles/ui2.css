@@ -469,19 +469,6 @@
 .ui2-fc-lovers { display: block; --w: 56px; --r: 8deg; left: -22px; bottom: 256px; }
 .ui2-fc-priestess { display: block; --w: 56px; --r: -7deg; right: -20px; bottom: 260px; }
 
-/* ตัวบอกให้เลื่อนลง (จอ ≥ 768 · ขยับเฉพาะระดับ full ใน ui2-fx-full.css) */
-.ui2-cue {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  margin-top: 18px;
-  font-family: var(--ui2-font-display);
-  font-size: 12.5px;
-  letter-spacing: 0.08em;
-  color: var(--ui2-muted);
-}
-
 /* ภาพไพ่จิ๋วของไพ่วันนี้ในปุ่มรอง */
 .ui2-daily-thumb {
   flex: none;
@@ -2510,7 +2497,6 @@ html[data-consent-ask] .ui2-sticky {
   .ui2-fc-world { display: block; --w: 70px; --r: 5deg; right: 2.5%; top: 510px; }
   .ui2-fc-moon,
   .ui2-fc-empress { display: none; }
-  .ui2-cue { display: flex; }
   .ui2-hero {
     padding-top: 56px;
     /* 40px + ส่วนที่ริบบิ้นดึงขึ้นมาทับ (139px) */
@@ -2882,10 +2868,6 @@ html[data-consent-ask] .ui2-sticky {
 @keyframes ui2-burst {
   0% { scale: 0.55; opacity: 0.95; }
   100% { scale: 1.9; opacity: 0; }
-}
-@keyframes ui2-cue {
-  0%, 100% { translate: 0 0; opacity: 0.5; }
-  50% { translate: 0 8px; opacity: 1; }
 }
 @keyframes ui2-bob {
   0%, 100% { translate: 0 0; }
