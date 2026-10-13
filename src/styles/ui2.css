@@ -788,25 +788,52 @@
   gap: 10px;
   margin-bottom: 28px;
 }
+/*
+ * กระดาษโน้ตแบบภาพต้นแบบ: เกือบจัตุรัส มุมเหลี่ยม ลายมือใหญ่ชิดบน ป้ายผังเล็กชิดล่าง หมุดทองคร่อมขอบบน
+ * วางเหลื่อมแบบอิฐ (แถวคู่เยื้องครึ่งใบ) ขอบซ้อนกันเล็กน้อย เอียงและเหลื่อมขึ้นลงต่อใบ (--tilt · --lift จาก TSX)
+ * จำนวนต่อจอ: มือถือ 6 (2 คอลัมน์) · แท็บเล็ต 8 (3·2·3) · คอม 11 (4·3·4) — ใบเกินซ่อนด้วย nth-child
+ * ⚠️ ความสูงใช้ aspect-ratio เป็นค่าตั้งต้น ข้อความยาวดันให้สูงขึ้นเองได้ — ห้ามใส่ overflow: hidden (สระบนไทยขาด INC-0197)
+ */
 .ui2-notes {
+  list-style: none;
+  margin: 0 auto;
+  padding: 8px 0 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  align-items: start;
+  gap: 18px 12px;
+  max-width: 400px;
+  padding-inline: 4px;
+}
+.ui2-note-slot {
+  position: relative;
+  display: flex;
+}
+/* มือถือ: คอลัมน์ขวาเยื้องลงครึ่งจังหวะ ให้ดูเป็นโน้ตแปะ ไม่ใช่ตาราง */
+.ui2-note-slot:nth-child(2n) {
+  translate: 0 10px;
+}
+.ui2-note-slot:nth-child(n + 7) {
+  display: none;
+}
+.ui2-note-slot:hover,
+.ui2-note-slot:focus-within {
+  z-index: 2;
 }
 .ui2-note {
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 14px;
-  min-height: 132px;
-  padding: 22px 14px 14px;
-  border-radius: 6px 6px 18px 6px;
-  color: var(--ui2-ink);
+  gap: 10px;
+  width: 100%;
+  aspect-ratio: 1 / 0.96;
+  min-height: 160px;
+  padding: 20px 12px 12px;
+  color: var(--note-ink, var(--ui2-ink));
   background: var(--note, var(--ui2-note-1));
-  box-shadow: 0 18px 30px -18px rgba(0, 0, 0, 0.75);
-  rotate: var(--tilt, -1.5deg);
-  transition: rotate var(--dur-base) var(--ease-out), translate var(--dur-base) var(--ease-out);
+  box-shadow: 0 24px 34px -20px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  rotate: calc(var(--tilt, -2deg) * 0.6);
+  transition: rotate 0.35s ease, scale 0.35s ease, translate 0.35s ease;
 }
 .ui2-note:active {
   rotate: 0deg;
@@ -816,26 +843,44 @@
   font-family: var(--ui2-font-note);
   font-weight: 400;
   font-size: 20px;
-  line-height: 1.35;
+  line-height: 1.3;
+  /* ตัดบรรทัดให้ยาวพอ ๆ กัน — ไม่ให้ "ไหม?" ตกไปอยู่บรรทัดเดียวโดด ๆ */
+  text-wrap: balance;
+}
+/* วลีบนโน้ต (คำถามไทย) — ขึ้นบรรทัดใหม่ได้เฉพาะรอยต่อวลี ถ้าวลีเดียวยาวเกินกระดาษค่อยยอมตัดกลางวลี */
+.ui2-note-phrase {
+  display: inline-block;
+  max-width: 100%;
 }
 .ui2-note-spread {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ui2-ink-soft);
+  margin-top: auto;
+  font-size: 11.5px;
+  line-height: 1.6;
+  text-wrap: balance;
+  color: var(--note-sub, var(--ui2-ink-soft));
+}
+/* มือถือจอกลางขึ้นไป (≥ 380px) — จอ 360 ใช้ค่าข้างบนที่เล็กกว่า ไม่ให้คำถามหักกลางวลี */
+@media (min-width: 380px) {
+  .ui2-note {
+    padding-inline: 14px;
+  }
+  .ui2-note-q {
+    font-size: 22px;
+  }
+  .ui2-note-spread {
+    font-size: 12px;
+  }
 }
 .ui2-pin {
   position: absolute;
-  top: 8px;
-  left: 50%;
+  top: -6px;
+  left: var(--pin-x, 50%);
   width: 12px;
   height: 12px;
   margin-left: -6px;
   border-radius: 999px;
-  background: radial-gradient(circle at 35% 35%, #FFF5DC 0%, #FFD98F 40%, #B8691C 100%);
-  box-shadow: 0 0 10px rgba(255, 217, 143, 0.7), 0 2px 3px rgba(0, 0, 0, 0.35);
-}
-.ui2-note-desk-only {
-  display: none;
+  background: radial-gradient(circle at 35% 35%, #FFF1C9, #D9902F 60%, #7A4A12);
+  box-shadow: 0 0 12px rgba(255, 200, 110, 0.8);
 }
 .ui2-notes-more {
   margin-top: 26px;
@@ -1535,9 +1580,6 @@ html[data-consent-ask] .ui2-sticky {
   .ui2-h2 {
     font-size: 38px;
   }
-  .ui2-notes {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 @media (min-width: 768px) {
   .ui2-sec {
@@ -1744,19 +1786,6 @@ html[data-consent-ask] .ui2-sticky {
   .ui2-pick-grid .ui2-cloth {
     margin-top: 0;
   }
-  /* คอม: 7 ใบ = แถวละ 4 แล้ว 3 จัดกลาง (ไม่ปล่อยช่องว่างท้ายแถว) */
-  .ui2-notes {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 26px 22px;
-  }
-  .ui2-notes > .ui2-note {
-    flex: 0 0 calc((100% - 66px) / 4);
-  }
-  .ui2-note-desk-only {
-    display: flex;
-  }
   .ui2-bento {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-auto-rows: minmax(220px, auto);
@@ -1800,9 +1829,13 @@ html[data-consent-ask] .ui2-sticky {
   .ui2-pick-card:not(:disabled):hover {
     translate: 0 -8px;
   }
+  /* ชี้แล้วตั้งตรง + ขยายนิด ลอยขึ้นมาบนสุด (ต้นแบบ DX: rotate 0 · scale 1.06 · z-index 9) */
   .ui2-note:hover {
     rotate: 0deg;
-    translate: 0 -4px;
+    scale: 1.06;
+  }
+  .ui2-note-slot:hover {
+    z-index: 9;
   }
   .ui2-reader-link:hover {
     box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.5);
@@ -1815,6 +1848,77 @@ html[data-consent-ask] .ui2-sticky {
     rotate: 45deg;
     background: var(--ui2-ink);
     color: var(--ui2-paper);
+  }
+}
+
+/* ── กระดาษโน้ต: แท็บเล็ต 8 ใบ (3·2·3) และคอม 11 ใบ (4·3·4) วางแบบอิฐ ───────────────────────
+   ตาราง 6 / 8 ช่อง ใบละ 2 ช่อง · ใบแถวคู่เริ่มช่องคู่ = เยื้องครึ่งใบ · ใส่ตำแหน่งคอลัมน์อย่างเดียว
+   ตัววางอัตโนมัติของ grid ขึ้นแถวใหม่เองเมื่อคอลัมน์ถอยหลัง · ใบกว้างกว่าช่อง 14px = ขอบซ้อนกันนิด ๆ แบบภาพต้นแบบ */
+@media (min-width: 640px) {
+  .ui2-notes {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 14px 0;
+    max-width: 640px;
+    padding-inline: 0;
+  }
+  /* :nth-child(n) = ความเฉพาะเท่ากับกฎเยื้องคอลัมน์ขวาของมือถือ แล้วมาทีหลังจึงชนะ */
+  .ui2-note-slot:nth-child(n) {
+    display: flex;
+    grid-column-end: span 2;
+    translate: 0 var(--lift, 0);
+  }
+  .ui2-note-slot:nth-child(n + 9) {
+    display: none;
+  }
+  .ui2-note-slot:nth-child(5n + 1) { grid-column-start: 1; }
+  .ui2-note-slot:nth-child(5n + 2) { grid-column-start: 3; }
+  .ui2-note-slot:nth-child(5n + 3) { grid-column-start: 5; }
+  .ui2-note-slot:nth-child(5n + 4) { grid-column-start: 2; }
+  .ui2-note-slot:nth-child(5n + 5) { grid-column-start: 4; }
+  .ui2-note {
+    width: calc(100% + 14px);
+    margin-inline: -7px;
+    padding: 26px 20px 18px;
+    rotate: var(--tilt, -2deg);
+    box-shadow: 0 30px 40px -24px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  }
+  .ui2-pin {
+    top: -7px;
+    width: 14px;
+    height: 14px;
+    margin-left: -7px;
+    box-shadow: 0 0 14px rgba(255, 200, 110, 0.8);
+  }
+  .ui2-note-q {
+    font-size: 26px;
+  }
+  .ui2-note-spread {
+    font-size: 13px;
+  }
+}
+@media (min-width: 1024px) {
+  .ui2-notes {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 18px 0;
+    max-width: 920px;
+  }
+  .ui2-note-slot:nth-child(n) {
+    display: flex;
+  }
+  .ui2-note-slot:nth-child(7n + 1) { grid-column-start: 1; }
+  .ui2-note-slot:nth-child(7n + 2) { grid-column-start: 3; }
+  .ui2-note-slot:nth-child(7n + 3) { grid-column-start: 5; }
+  .ui2-note-slot:nth-child(7n + 4) { grid-column-start: 7; }
+  .ui2-note-slot:nth-child(7n + 5) { grid-column-start: 2; }
+  .ui2-note-slot:nth-child(7n + 6) { grid-column-start: 4; }
+  .ui2-note-slot:nth-child(7n + 7) { grid-column-start: 6; }
+  .ui2-note {
+    width: calc(100% + 16px);
+    margin-inline: -8px;
+    padding: 26px 22px 18px;
+  }
+  .ui2-note-q {
+    font-size: 28px;
   }
 }
 

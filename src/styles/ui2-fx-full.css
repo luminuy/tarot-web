@@ -124,11 +124,11 @@
     animation: ui2-bob var(--bob, 7s) ease-in-out infinite;
     --bob: 7s;
   }
-  [data-fx="full"] .ui2-note:nth-child(2n) {
+  [data-fx="full"] .ui2-note-slot:nth-child(2n) .ui2-note {
     --bob: 8.5s;
     animation-delay: -3s;
   }
-  [data-fx="full"] .ui2-note:nth-child(3n) {
+  [data-fx="full"] .ui2-note-slot:nth-child(3n) .ui2-note {
     --bob: 9.2s;
     animation-delay: -5s;
   }

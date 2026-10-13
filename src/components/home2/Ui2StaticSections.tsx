@@ -1,3 +1,5 @@
+import { Fragment } from "react";
+
 import { CardImage } from "@/components/card/CardImage";
 import { GoldMark } from "@/components/ui/GoldMark";
 import { RouteLink as Link } from "@/components/ui/RouteLink";
@@ -34,7 +36,12 @@ type Href = (path: string) => string;
 
 /* ── ส่วน 4 · เรื่องที่ค้างอยู่ในใจ (กระดาษโน้ตคำถามจริง) ─────────────────────── */
 
-/** ลำดับตามแผนหัวข้อ 6.4 · ใบสุดท้ายแสดงเฉพาะคอม */
+/**
+ * ลำดับตามแผนหัวข้อ 6.4 (7 ใบแรกตรงภาพต้นแบบ) + เพิ่มตามที่เจ้าของสั่ง 2026-10-13 "ใส่เยอะกว่าที่ออกแบบได้
+ * แต่ต้องเหมาะกับทุกจอ" ➔ คอม 11 ใบ (แถว 4·3·4) · แท็บเล็ต 8 ใบ (3·2·3) · มือถือ 6 ใบ (2 คอลัมน์ × 3)
+ * ใบที่เกินจำนวนของจอนั้นซ่อนด้วย CSS (`.ui2-notes > :nth-child(n+…)` ใน ui2.css)
+ * ⚠️ เพิ่ม/เปลี่ยนคำถาม ➔ ตัวอักษรลายมือต้องมีใน public/fonts/itim-notes.txt (ด่าน test-ui2-fx บอกตัวที่ขาด)
+ */
 const NOTE_SLUGS = [
   "does-he-love-me",
   "is-he-thinking-of-me",
@@ -43,14 +50,51 @@ const NOTE_SLUGS = [
   "should-i-change-jobs",
   "will-i-be-debt-free",
   "will-i-pass-the-exam",
+  "when-will-i-meet-my-soulmate",
+  "is-luck-coming-my-way",
+  "will-my-family-get-along",
+  "should-i-stay-or-go",
 ] as const;
-const NOTE_COLORS = ["--ui2-note-1", "--ui2-note-2", "--ui2-note-3", "--ui2-note-4", "--ui2-note-5", "--ui2-note-6", "--ui2-note-7"];
-const NOTE_TILTS = ["-2deg", "1.5deg", "-1deg", "2deg", "-1.5deg", "1deg", "-2.5deg"];
+/** สีกระดาษ 7 สี (โทเคน --ui2-note-N · หมึกคู่สี --ui2-note-ink-N / --ui2-note-sub-N ใน ui2-base.css) */
+const NOTE_COLOR_COUNT = 7;
+/** มุมเอียง · ระยะเหลื่อมขึ้นลง · ตำแหน่งหมุด ต่อใบ — ไล่ตามภาพต้นแบบ (ใบ 1–7) แล้ววนต่อ */
+const NOTE_LOOKS = [
+  { tilt: "-6deg", lift: "14px", pin: "46%" },
+  { tilt: "4deg", lift: "-12px", pin: "52%" },
+  { tilt: "-3deg", lift: "22px", pin: "44%" },
+  { tilt: "7deg", lift: "-8px", pin: "56%" },
+  { tilt: "3deg", lift: "-6px", pin: "50%" },
+  { tilt: "-5deg", lift: "14px", pin: "48%" },
+  { tilt: "5deg", lift: "-10px", pin: "54%" },
+  { tilt: "-4deg", lift: "8px", pin: "47%" },
+  { tilt: "4.5deg", lift: "-14px", pin: "53%" },
+  { tilt: "-6deg", lift: "16px", pin: "45%" },
+  { tilt: "3.5deg", lift: "-8px", pin: "51%" },
+];
 
 /** ข้อความบนโน้ต = หัวคำถามจนถึงเครื่องหมาย "?" ตัวแรก (ข้อมูลจริงจาก src/data/questions) */
 function shortQuestion(text: string): string {
   const i = text.indexOf("?");
   return i > 0 ? text.slice(0, i + 1) : text;
+}
+
+/**
+ * ตัดคำถามไทยเป็นวลีให้ขึ้นบรรทัดแบบภาพต้นแบบ ("แฟนเก่า / จะกลับมาไหม?") — ตัดก่อนคำเชื่อมตัวแรกที่ไม่ใช่ต้นประโยค
+ * ข้อความยังมาจากข้อมูลคำถามจริงทั้งก้อน (แค่แบ่งช่วง) · ภาษาอังกฤษมีช่องว่างอยู่แล้ว ไม่ต้องแบ่ง
+ */
+const NOTE_BREAK_BEFORE = /(จะ|หรือ|ช่วง)/;
+function noteLines(text: string): string[] {
+  const m = NOTE_BREAK_BEFORE.exec(text.slice(1));
+  if (!m) return [text];
+  const at = m.index + 1;
+  return [text.slice(0, at), text.slice(at)];
+}
+
+/** ป้ายล่างโน้ตแบบภาพต้นแบบ "ดวงความรักสองหัวใจ · 5 ใบ" — ชื่อผังตัดวงเล็บจำนวนใบออก แล้วนับใบจากข้อมูลผังจริง */
+function spreadLabel(name: string, count: number, isEnglish: boolean): string {
+  const base = name.replace(/\s*\([^)]*\)\s*$/, "");
+  // เว้นวรรคไม่ตัดบรรทัด — "5" กับ "ใบ" ต้องไม่แยกกันอยู่คนละบรรทัด
+  return `${base}\u00a0·\u00a0${count}\u00a0${isEnglish ? (count === 1 ? "card" : "cards") : "ใบ"}`;
 }
 
 export function Ui2NotesSection({ isEnglish, href }: { isEnglish: boolean; href: Href }) {
@@ -65,40 +109,63 @@ export function Ui2NotesSection({ isEnglish, href }: { isEnglish: boolean; href:
       <div className="ui2-stars ui2-loop" aria-hidden="true" />
       <div className="ui2-wrap">
         <div className="ui2-notes-head ui2-reveal">
-          <span className="ui2-kicker">
-            <GoldMark className="ui2-mark" />
-            {isEnglish ? "Questions people really ask" : "คำถามที่คนถามไพ่จริง"}
-          </span>
           <h2 id="ui2-notes-title" className="ui2-h2">
-            <ThaiPhrases>{isEnglish ? "That question you keep coming back to…" : "เรื่องที่ค้างอยู่ในใจ…"}</ThaiPhrases>
+            {isEnglish ? (
+              <>
+                That question <span className="tp ui2-gold-night ui2-loop">on your mind</span>…
+              </>
+            ) : (
+              <>
+                <span className="tp">เรื่องที่ค้างอยู่</span>
+                <span className="tp ui2-gold-night ui2-loop">ในใจ…</span>
+              </>
+            )}
           </h2>
           <p className="ui2-lede">
-            {isEnglish
-              ? "Each note opens a page that explains how to ask it well, with the spread that fits."
-              : "แต่ละใบพาไปหน้าที่บอกวิธีถามให้ได้คำตอบที่ใช้ได้จริง พร้อมผังที่เหมาะกับคำถามนั้น"}
+            <ThaiPhrases>
+              {isEnglish
+                ? "Tap the one that sounds like you. We pick the spread that fits."
+                : "แตะเรื่องที่ตรงกับคุณ เราเลือกผังที่เหมาะให้"}
+            </ThaiPhrases>
           </p>
         </div>
-        <div className="ui2-notes">
+        <ul className="ui2-notes">
           {notes.map(({ q, spread }, i) => {
             const copy = isEnglish ? q.en : q.th;
+            const look = NOTE_LOOKS[i % NOTE_LOOKS.length];
             return (
-              <Link
+              <li
                 key={q.slug}
-                href={href(`/questions/${q.slug}`)}
-                prefetch={false}
-                className={`ui2-note ui2-loop${i === notes.length - 1 ? " ui2-note-desk-only" : ""}`}
-                style={{ ["--note" as string]: `var(${NOTE_COLORS[i % NOTE_COLORS.length]})`, ["--tilt" as string]: NOTE_TILTS[i % NOTE_TILTS.length] }}
+                className="ui2-note-slot"
+                style={{
+                  ["--note" as string]: `var(--ui2-note-${(i % NOTE_COLOR_COUNT) + 1})`,
+                  ["--note-ink" as string]: `var(--ui2-note-ink-${(i % NOTE_COLOR_COUNT) + 1})`,
+                  ["--note-sub" as string]: `var(--ui2-note-sub-${(i % NOTE_COLOR_COUNT) + 1})`,
+                  ["--tilt" as string]: look.tilt,
+                  ["--lift" as string]: look.lift,
+                  ["--pin-x" as string]: look.pin,
+                }}
               >
-                <span className="ui2-pin" aria-hidden="true" />
-                <span className="ui2-note-q">{shortQuestion(copy.question)}</span>
-                <span className="ui2-note-spread">
-                  {isEnglish ? "Fits: " : "ผังที่เหมาะ: "}
-                  {isEnglish ? spread.nameEn : spread.nameTh}
-                </span>
-              </Link>
+                <Link href={href(`/questions/${q.slug}`)} prefetch={false} className="ui2-note ui2-loop">
+                  <span className="ui2-pin" aria-hidden="true" />
+                  <span className="ui2-note-q">
+                    {isEnglish
+                      ? shortQuestion(copy.question)
+                      : noteLines(shortQuestion(copy.question)).map((part, j) => (
+                          <Fragment key={j}>
+                            {j > 0 && <wbr />}
+                            <span className="ui2-note-phrase">{part}</span>
+                          </Fragment>
+                        ))}
+                  </span>
+                  <span className="ui2-note-spread">
+                    {spreadLabel(isEnglish ? spread.nameEn : spread.nameTh, spread.positions.length, isEnglish)}
+                  </span>
+                </Link>
+              </li>
             );
           })}
-        </div>
+        </ul>
         <p className="ui2-notes-more">
           <Link href={href("/questions")} prefetch={false} className="ui2-btn-ghost">
             {isEnglish ? "See all questions" : "ดูคำถามทั้งหมด"}

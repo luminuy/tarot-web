@@ -60,6 +60,14 @@
   --ui2-note-5: #C3EAE1;
   --ui2-note-6: #EEDABC;
   --ui2-note-7: #D9E2F3;
+  /* หมึกบนโน้ตแต่ละสี (คำถาม · ป้ายผัง) — ค่าจากไฟล์ต้นแบบ DX */
+  --ui2-note-ink-1: #20301C; --ui2-note-sub-1: #3D4A39;
+  --ui2-note-ink-2: #1C2B38; --ui2-note-sub-2: #33475A;
+  --ui2-note-ink-3: #3A2412; --ui2-note-sub-3: #5A3A20;
+  --ui2-note-ink-4: #3A2E0E; --ui2-note-sub-4: #5A4A1E;
+  --ui2-note-ink-5: #163A33; --ui2-note-sub-5: #2D5249;
+  --ui2-note-ink-6: #3A2A16; --ui2-note-sub-6: #5A4428;
+  --ui2-note-ink-7: #1E2740; --ui2-note-sub-7: #3A4664;
 }
 
 .ui2-accent {

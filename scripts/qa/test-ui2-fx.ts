@@ -207,9 +207,10 @@ const missingGlyphs = new Set<string>();
 let notesSeen = 0;
 for (const page of pages.filter((p) => p.route === "/" || p.route === "/en")) {
   const html = fs.readFileSync(page.file, "utf-8");
-  for (const m of html.matchAll(/<span class="ui2-note-q">([^<]*)<\/span>/g)) {
+  // คำถามไทยถูกแบ่งเป็นวลี (<span class="ui2-note-phrase"> + <wbr>) — ถอดแท็กข้างในออกก่อนอ่านตัวอักษร
+  for (const m of html.matchAll(/<span class="ui2-note-q">((?:(?!<\/span><span class="ui2-note-spread").)*)<\/span>/gs)) {
     notesSeen += 1;
-    const text = m[1].replace(/&amp;/g, "&").replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"');
+    const text = m[1].replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"');
     for (const ch of text) if (ch.trim() && !noteGlyphs.has(ch)) missingGlyphs.add(ch);
   }
 }
