@@ -1540,7 +1540,8 @@ a.ui2-tile:active {
   padding-block: 12px;
 }
 
-/* วิธีดูดวง 5 ขั้นตอน — เต็มความกว้างเหนือสองคอลัมน์ · การ์ดกระจกสว่าง + เลข 01–05 ทองตัวตรง */
+/* วิธีดูดวง 5 ขั้นตอน — "เส้นทางพิธี" เต็มความกว้างบนสุดของส่วน: วงกลมเลขทองตัวตรง + เส้นทองบาง ไม่มีกล่อง
+   มือถือ/แท็บเล็ต: เส้นแนวตั้งชิดซ้าย · คอม (≥ 1024): 5 ช่องแนวนอน เส้นวิ่งผ่านกลางวงกลม */
 .ui2-howto-block {
   grid-column: 1 / -1;
   text-align: center;
@@ -1548,48 +1549,108 @@ a.ui2-tile:active {
 .ui2-explore .ui2-lede {
   margin: 10px 0 18px;
 }
-.ui2-howto-block .ui2-lede {
+.ui2-explore .ui2-howto-block .ui2-lede {
   max-width: 640px;
   margin: 12px auto 0;
 }
-.ui2-howto-steps {
-  margin-top: 26px;
+.ui2-path {
+  position: relative;
+  max-width: 620px;
+  margin: 36px auto 0;
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 28px;
   text-align: left;
 }
-.ui2-howto-step {
-  padding: 18px 18px 20px;
-  border-radius: 24px;
-  background: var(--ui2-glass-day-solid);
-  box-shadow: 0 0 0 1px var(--ui2-line-day), 0 1px 0 var(--ui2-glass-edge-day) inset, 0 18px 34px -26px rgba(74, 52, 30, 0.55);
+.ui2-path::before {
+  content: "";
+  position: absolute;
+  left: 25px;
+  top: 26px;
+  bottom: 26px;
+  width: 1px;
+  background: linear-gradient(180deg, rgba(184, 105, 28, 0.55), rgba(184, 105, 28, 0.12));
 }
-.ui2-howto-num {
-  font-size: 15px;
-  letter-spacing: 0.06em;
+.ui2-path-step {
+  position: relative;
+  display: grid;
+  align-content: start;
+  grid-template-columns: 52px minmax(0, 1fr);
+  column-gap: 18px;
+  row-gap: 4px;
+}
+.ui2-path-dot {
+  grid-row: span 2;
+  align-self: start;
+  margin-top: -12px;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  font-size: 17px;
   color: var(--ui2-gold-ink);
+  background: var(--ui2-paper);
+  box-shadow: 0 0 0 1px rgba(184, 105, 28, 0.45), 0 0 0 7px var(--ui2-day), 0 16px 30px -16px rgba(138, 79, 16, 0.55);
 }
-.ui2-howto-title {
-  margin-top: 6px;
-  font-size: 18px;
+.ui2-path-title {
+  align-self: end;
+  font-size: 19px;
   line-height: 1.35;
   color: var(--ui2-ink);
 }
-.ui2-howto-text {
-  margin-top: 6px;
+.ui2-path-text {
   font-size: 14px;
-  line-height: 1.7;
+  line-height: 1.75;
   color: var(--ui2-ink-soft);
 }
+/* ค้นตามหัวข้อ — การ์ดกลุ่มลิงก์เต็มความกว้างใต้สองคอลัมน์ */
+.ui2-topics-block {
+  grid-column: 1 / -1;
+}
+.ui2-topics-block .ui2-more-groups {
+  margin-top: 14px;
+  align-items: start;
+}
 @media (min-width: 640px) {
-  .ui2-howto-steps {
+  .ui2-topics-block .ui2-more-groups {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (min-width: 1024px) {
-  .ui2-howto-steps {
+  .ui2-path {
+    max-width: none;
     grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 30px;
+    text-align: center;
+  }
+  .ui2-path::before {
+    left: 10%;
+    right: 10%;
+    top: 28px;
+    bottom: auto;
+    width: auto;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(184, 105, 28, 0.1), rgba(184, 105, 28, 0.55) 50%, rgba(184, 105, 28, 0.1));
+  }
+  .ui2-path-step {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    row-gap: 10px;
+  }
+  .ui2-path-dot {
+    grid-row: auto;
+    margin-top: 0;
+    width: 56px;
+    height: 56px;
+    font-size: 18px;
+  }
+  .ui2-path-title {
+    align-self: auto;
+    margin-top: 6px;
+  }
+  .ui2-topics-block .ui2-more-groups {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
   }
 }
 /* ผังของฉัน (ผังที่ออกแบบเอง) ใต้ส่วนเปิดไพ่ — แผงสว่างบนพื้นมืด ให้คอมโพเนนต์เดิม (ธีมสว่าง) อ่านออก */

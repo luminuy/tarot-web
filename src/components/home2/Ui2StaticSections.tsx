@@ -559,16 +559,17 @@ export function Ui2ExploreSection({ isEnglish, href }: { isEnglish: boolean; hre
                 : "ตั้งแต่เลือกผังไพ่ยิปซีจนถึงคุยต่อกับแม่หมอ AI ทุกใบคุณสับและหยิบเองกับมือ ลำดับไพ่ถูกล็อกไว้ก่อนเริ่ม ตรวจย้อนหลังได้ทุกครั้ง"}
             </ThaiPhrases>
           </p>
-          <ol className="ui2-howto-steps">
+          {/* เส้นทางพิธี — วงกลมเลขทองตัวตรงเชื่อมด้วยเส้นทองบาง (คอม: แนวนอน 5 ช่อง · มือถือ/แท็บเล็ต: แนวตั้ง) */}
+          <ol className="ui2-path">
             {howTo.map((step, i) => (
-              <li key={step.name} className="ui2-howto-step">
-                <span className="ui2-howto-num ui2-num" aria-hidden="true">
+              <li key={step.name} className="ui2-path-step">
+                <span className="ui2-path-dot ui2-num" aria-hidden="true">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <h3 className="ui2-howto-title">
+                <h3 className="ui2-path-title">
                   <ThaiPhrases>{stepName(step.name)}</ThaiPhrases>
                 </h3>
-                <p className="ui2-howto-text">{step.text}</p>
+                <p className="ui2-path-text">{step.text}</p>
               </li>
             ))}
           </ol>
@@ -598,21 +599,6 @@ export function Ui2ExploreSection({ isEnglish, href }: { isEnglish: boolean; hre
               </Link>
             ))}
           </nav>
-          <div className="ui2-more-groups">
-            {(
-              [
-                ["popular", POPULAR_SEARCHES],
-                ["ways", MORE_WAYS],
-                ["zodiac", zodiacLinks],
-                ["spreads", POPULAR_SPREADS],
-                ["major", MAJOR_HIGHLIGHTS],
-                ["articles", articleLinks],
-              ] as const
-            ).map(([key, links]) => {
-              const [title, desc] = GROUP_COPY[key][isEnglish ? "en" : "th"];
-              return <LinkGroup key={key} title={title} desc={desc} links={links} href={href} isEnglish={isEnglish} />;
-            })}
-          </div>
         </div>
 
         <div>
@@ -640,6 +626,29 @@ export function Ui2ExploreSection({ isEnglish, href }: { isEnglish: boolean; hre
               </details>
             ))}
           </div>
+        </div>
+
+        {/* ค้นตามหัวข้อ — การ์ดกลุ่มลิงก์ 3 คอลัมน์เต็มความกว้าง (หัวการ์ด h3 คำค้น + คำอธิบาย · กางดูลิงก์ทั้งหมด) */}
+        <div className="ui2-topics-block">
+          <span className="ui2-kicker">
+            <GoldMark className="ui2-mark" />
+            {isEnglish ? "Browse by topic" : "ค้นตามหัวข้อ"}
+          </span>
+          <div className="ui2-more-groups">
+            {(
+              [
+                ["popular", POPULAR_SEARCHES],
+                ["ways", MORE_WAYS],
+                ["zodiac", zodiacLinks],
+                ["spreads", POPULAR_SPREADS],
+                ["major", MAJOR_HIGHLIGHTS],
+                ["articles", articleLinks],
+              ] as const
+            ).map(([key, links]) => {
+              const [title, desc] = GROUP_COPY[key][isEnglish ? "en" : "th"];
+              return <LinkGroup key={key} title={title} desc={desc} links={links} href={href} isEnglish={isEnglish} />;
+            })}
+  </div>
         </div>
       </div>
     </section>
