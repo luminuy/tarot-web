@@ -12,22 +12,27 @@ import { useDailyCard } from "./use-daily-card";
  * 🎨 UI 2.0 ส่วน 1 · หัวหน้า (แผน UI_2_0 หัวข้อ 2 · 5.1 · 6.2)
  * ===========================================================================
  * ⚠️ ข้อความ `<h1>` ต้องเหมือนเดิมทุกตัวอักษร และเป็นหัวข้อแรกของ `<main>` (ด่าน a11y + SEO)
+ *    `<wbr>` ระหว่าง "ไพ่ทาโรต์" กับ "ออนไลน์" = จุดขึ้นบรรทัดแบบภาพต้นแบบ (คอม 2 บรรทัด) ไม่เพิ่มตัวอักษร
  *    "แม่หมอ AI" ห่อ span สีทองได้ — textContent ของ h1 ยังเท่าเดิม
- * ⚠️ มือถือ: ปุ่มหลักต้องอยู่ใน 600px แรก (ที่ 390×844) · นาฬิกาย่อเป็นชิปบรรทัดเดียวใต้ปุ่ม
- *    นาฬิกาตัวใหญ่อยู่ส่วนปิดท้าย · แท็บเล็ต/คอมเห็นนาฬิกากล่องในหัวหน้าด้วย
+ * ⚠️ มือถือ: ปุ่มหลักต้องอยู่ใน ~600px แรก (ที่ 390×844) · นาฬิกากล่องอยู่เหนือปุ่มตามภาพต้นแบบ D+ ทุกจอ
+ *    (เจ้าของสั่ง 2026-10-13 "ปรับให้เหมาะสมกับทุก device" — ย่อกล่องบนมือถือแทนการย้ายลงใต้ปุ่ม)
  * ⚠️ ภาพที่ใหญ่ที่สุดในจอแรกต้องไม่ใช่ภาพไพ่ — LCP คือ h1 · การ์ดลอยเป็นภาพประกอบล้วน (`aria-hidden`)
  *    ขนาด w128 (`thumb`) ลำดับโหลดต่ำ · ใบที่ 5–8 (จอ ≥ 768) โหลดแบบ lazy
  */
 
+/**
+ * การ์ดลอย 8 ใบตามภาพต้นแบบ D+ (กรอบกระจกขาว + ชื่อไพ่/คำสำคัญในกรอบ) — ตำแหน่งต่อจออยู่ใน ui2.css (`.ui2-fc-<key>`)
+ * มือถือ 6 ใบ (บน 4 · ข้างนาฬิกา 2 · ไม่มีป้าย) · แท็บเล็ต 6 ใบชิดขอบ · คอม/iPad แนวนอน ครบ 8 ใบ
+ */
 const FLOAT_CARDS = [
-  { id: "major-17", th: "ดวงดาว", en: "The Star", wordTh: "ความหวัง", wordEn: "Hope" },
-  { id: "major-06", th: "คู่รัก", en: "The Lovers", wordTh: "ทางเลือก", wordEn: "Choice" },
-  { id: "major-10", th: "กงล้อแห่งโชคชะตา", en: "Wheel of Fortune", wordTh: "จุดเปลี่ยน", wordEn: "Turning point" },
-  { id: "major-02", th: "นักบวชหญิง", en: "The High Priestess", wordTh: "สัญชาตญาณ", wordEn: "Intuition" },
-  { id: "major-21", th: "โลก", en: "The World", wordTh: "สำเร็จ", wordEn: "Completion" },
-  { id: "major-18", th: "ดวงจันทร์", en: "The Moon", wordTh: "ความฝัน", wordEn: "Dreams", far: true },
-  { id: "major-00", th: "คนเขลา", en: "The Fool", wordTh: "เริ่มต้นใหม่", wordEn: "New start", far: true },
-  { id: "major-03", th: "จักรพรรดินี", en: "The Empress", wordTh: "การดูแล", wordEn: "Nurture", far: true },
+  { key: "star", id: "major-17", th: "ดวงดาว", en: "The Star", wordTh: "ความหวัง", wordEn: "Hope" },
+  { key: "moon", id: "major-18", th: "ดวงจันทร์", en: "The Moon", wordTh: "สิ่งที่ซ่อนอยู่", wordEn: "What's hidden", far: true },
+  { key: "lovers", id: "major-06", th: "คู่รัก", en: "The Lovers", wordTh: "เลือกด้วยใจ", wordEn: "Choose with heart" },
+  { key: "fool", id: "major-00", th: "คนเขลา", en: "The Fool", wordTh: "เริ่มต้นใหม่", wordEn: "New start", far: true },
+  { key: "wheel", id: "major-10", th: "กงล้อแห่งโชคชะตา", en: "Wheel of Fortune", wordTh: "จังหวะเปลี่ยน", wordEn: "Turning point" },
+  { key: "empress", id: "major-03", th: "จักรพรรดินี", en: "The Empress", wordTh: "ความอุดมสมบูรณ์", wordEn: "Abundance", far: true },
+  { key: "priestess", id: "major-02", th: "นักบวชหญิง", en: "The High Priestess", wordTh: "สัญชาตญาณ", wordEn: "Intuition" },
+  { key: "world", id: "major-21", th: "โลก", en: "The World", wordTh: "ความสำเร็จ", wordEn: "Completion", far: true },
 ] as const;
 
 export function Ui2Hero({ isEnglish, streak = 0 }: { isEnglish: boolean; streak?: number }) {
@@ -51,14 +56,14 @@ export function Ui2Hero({ isEnglish, streak = 0 }: { isEnglish: boolean; streak?
 
       <div className="ui2-floats" aria-hidden="true">
         {FLOAT_CARDS.map((card, i) => (
-          <div key={card.id} className={`ui2-fc ui2-loop${"far" in card ? " ui2-fc-far" : ""}`}>
+          <div key={card.id} className={`ui2-fc ui2-fc-${card.key} ui2-loop${"far" in card ? " ui2-fc-far" : ""}`}>
             <span className="ui2-fc-card">
               <CardImage
                 cardId={card.id}
                 alt=""
                 thumb
-                sizes="(min-width: 1024px) 112px, (min-width: 768px) 96px, 54px"
-                loading={i < 4 ? "eager" : "lazy"}
+                sizes="(min-width: 1280px) 142px, (min-width: 1024px) 116px, (min-width: 768px) 84px, 72px"
+                loading={"far" in card || i > 4 ? "lazy" : "eager"}
                 fetchPriority="low"
               />
             </span>
@@ -84,7 +89,9 @@ export function Ui2Hero({ isEnglish, streak = 0 }: { isEnglish: boolean; streak?
               </>
             ) : (
               <>
-                ดูดวงไพ่ยิปซี ไพ่ทาโรต์ออนไลน์ ฟรี กับ<span className="tp ui2-gold-day ui2-loop">แม่หมอ AI</span>
+                ดูดวงไพ่ยิปซี ไพ่ทาโรต์
+                <wbr />
+                ออนไลน์ ฟรี กับ<span className="tp ui2-gold-day ui2-loop">แม่หมอ AI</span>
               </>
             )}
           </ThaiPhrases>
@@ -96,6 +103,8 @@ export function Ui2Hero({ isEnglish, streak = 0 }: { isEnglish: boolean; streak?
             : "ตั้งใจถามหนึ่งเรื่อง แล้วหยิบไพ่ด้วยมือคุณเอง แม่หมออ่านให้ทีละใบ พร้อมเหตุผล"}
         </p>
 
+        <Ui2Clock isEnglish={isEnglish} />
+
         <div className="ui2-hero-ctas">
           <a href="#home-quick" className="ui2-btn" data-home-target="hero:quick">
             <span className="ui2-btn-ring ui2-loop" aria-hidden="true" />
@@ -103,7 +112,14 @@ export function Ui2Hero({ isEnglish, streak = 0 }: { isEnglish: boolean; streak?
             <span className="ui2-btn-arrow" aria-hidden="true" />
           </a>
           <Link href="/daily" prefetch={false} className="ui2-btn-ghost ui2-daily-btn" data-home-target="hero:daily">
-            <GoldMark className="ui2-mark" />
+            {/* ภาพไพ่จิ๋วของไพ่วันนี้ตัวจริง (มาจากเซิร์ฟเวอร์) · ยังโหลดไม่เสร็จ = เครื่องหมายทองแทน ห้ามเดาไพ่ (กฎเหล็ก 14) */}
+            {daily ? (
+              <span className="ui2-daily-thumb" aria-hidden="true">
+                <CardImage cardId={daily.cardId} alt="" thumb sizes="22px" loading="lazy" fetchPriority="low" />
+              </span>
+            ) : (
+              <GoldMark className="ui2-mark" />
+            )}
             <span className="ui2-daily-name">
               {isEnglish ? "Today's card" : "ไพ่วันนี้"}
               {dailyName ? ` · ${dailyName}` : ""}
@@ -112,8 +128,12 @@ export function Ui2Hero({ isEnglish, streak = 0 }: { isEnglish: boolean; streak?
           </Link>
         </div>
 
-        <Ui2Clock isEnglish={isEnglish} variant="chip" />
-        <Ui2Clock isEnglish={isEnglish} variant="cells" />
+        <span className="ui2-cue ui2-loop" aria-hidden="true">
+          {isEnglish ? "Scroll" : "เลื่อนลง"}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </span>
       </div>
     </section>
   );

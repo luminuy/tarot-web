@@ -318,8 +318,8 @@
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  /* มือถือ: แถบว่างเหนือชิปให้การ์ดลอยสองใบบนเกาะมุม — ปุ่มหลักยังอยู่ใน 600px แรก (หัวข้อ 5.1) */
-  padding-top: 30px;
+  /* มือถือ: แถบว่างเหนือชิปให้การ์ดลอยใบบน — ปุ่มหลักยังอยู่ใน ~600px แรก (หัวข้อ 5.1) */
+  padding-top: 64px;
 }
 .ui2-h1 {
   font-family: var(--ui2-font-display);
@@ -354,27 +354,18 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* นาฬิกาแบบชิปบรรทัดเดียว (มือถือ) */
-.ui2-clock-chip {
-  display: inline-flex;
+/* นาฬิกาแบบกล่อง — ทุกจอ (ภาพต้นแบบ D+) · มือถือกล่อง 72px */
+.ui2-clock {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
-  color: var(--ui2-ink-soft);
-}
-.ui2-clock-chip .ui2-num {
-  font-size: 14px;
-  color: var(--ui2-ink);
-  min-width: 7ch;
-  text-align: left;
-}
-/* นาฬิกาแบบกล่อง (แท็บเล็ต/คอม) — ซ่อนบนมือถือ */
-.ui2-clock {
-  display: none;
 }
 .ui2-clock-label {
-  font-size: 13px;
-  color: var(--ui2-ink-soft);
+  font-family: var(--ui2-font-display);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--ui2-muted);
 }
 .ui2-clock-cells {
   display: flex;
@@ -396,7 +387,12 @@
   background: var(--ui2-glass-day-solid);
   box-shadow: 0 0 0 1px var(--ui2-line-day), 0 1px 0 var(--ui2-glass-edge-day) inset, 0 18px 34px -24px rgba(74, 52, 30, 0.6);
 }
+.ui2-clock-cell {
+  width: 72px;
+  height: 72px;
+}
 .ui2-clock-cell .ui2-num {
+  font-size: 36px;
   line-height: 1;
 }
 .ui2-clock-unit {
@@ -423,30 +419,35 @@
   color: var(--ui2-muted);
 }
 
-/* การ์ดลอยรอบหัวข้อ (ภาพประกอบล้วน · aria-hidden) */
+/* การ์ดลอยรอบหัวข้อ (ภาพประกอบล้วน · aria-hidden) — กรอบกระจกขาว + ชื่อไพ่ในกรอบ ตามภาพต้นแบบ D+
+   ชั้นการ์ดกว้างเท่าจอ (100vw) ตำแหน่ง % จึงอิงขอบจอจริงแบบต้นแบบ · ตำแหน่ง/ขนาดต่อจออยู่ท้ายส่วนนี้และใน @media
+   ⚠️ ทุกจอ: ห้ามทับหัวข้อ/ปุ่ม — ตรวจด้วยภาพที่ 360 · 390 · 768 · 820 · 1024 · 1180 · 1280 · 1440 · 1920 */
 .ui2-floats {
   position: absolute;
-  inset: 0;
+  inset-block: 0;
+  left: 50%;
+  width: 100vw;
+  translate: -50% 0;
   z-index: 1;
   isolation: isolate;
   pointer-events: none;
 }
 .ui2-fc {
   position: absolute;
-  width: 54px;
+  display: none;
+  width: var(--w, 72px);
+  padding: 5px 5px 6px;
+  border-radius: 14px;
+  background: var(--ui2-glass-day-solid);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85), 0 30px 50px -28px rgba(70, 44, 18, 0.55);
+  rotate: var(--r, 0deg);
 }
-/* มือถือ: 4 ใบเกาะมุม — สองใบบนอยู่ในแถบว่าง 88px เหนือชิป · สองใบล่างอยู่ข้างแถวนาฬิกา (ห้ามทับหัวข้อ/ปุ่ม) */
-.ui2-fc:nth-child(1) { left: -14px; top: -2px; rotate: -12deg; }
-.ui2-fc:nth-child(2) { right: -12px; top: 6px; rotate: 10deg; }
-.ui2-fc:nth-child(3) { left: -22px; bottom: -6px; rotate: 9deg; }
-.ui2-fc:nth-child(4) { right: -20px; bottom: 4px; rotate: -8deg; }
 .ui2-fc-card {
   display: block;
-  aspect-ratio: 300 / 520;
+  aspect-ratio: 3 / 5;
   border-radius: 10px;
   overflow: hidden;
   background: var(--ui2-paper);
-  box-shadow: 0 0 0 1px rgba(30, 25, 20, 0.1), 0 20px 34px -18px rgba(60, 40, 20, 0.55);
 }
 .ui2-fc-card img {
   width: 100%;
@@ -457,15 +458,43 @@
   display: none;
 }
 .ui2-fc-far {
-  opacity: 0.55;
+  opacity: 0.72;
 }
-/* ใบไกลเป็นฉากหลัง — ไม่มีป้ายชื่อ (ป้ายซ้อนใบหน้าแล้วอ่านไม่ออก) */
-.ui2-fc-far .ui2-fc-tag {
-  visibility: hidden;
-}
-/* มือถือ: 4 ใบเกาะมุม ห้ามทับหัวข้อ/ปุ่ม · ใบที่ 5 ขึ้นไปมีเฉพาะจอ ≥ 768 */
-.ui2-fc:nth-child(n + 5) {
+/* มือถือ: 4 ใบบนในแถบเหนือชิป (ใหญ่ชิดขอบ 2 · ใบไกลเล็ก 2) + 2 ใบข้างนาฬิกา — ไม่มีป้าย */
+.ui2-fc-star { display: block; --w: 74px; --r: -10deg; left: -20px; top: -14px; }
+.ui2-fc-moon { display: block; --w: 54px; --r: 6deg; left: 66px; top: -28px; }
+.ui2-fc-wheel { display: block; --w: 72px; --r: 9deg; right: -20px; top: -10px; }
+.ui2-fc-empress { display: block; --w: 52px; --r: -7deg; right: 70px; top: -30px; }
+/* สองใบล่างผูกกับขอบล่างของส่วน = อยู่ข้างแถวนาฬิกาเสมอ ไม่ว่าหัวข้อจะกี่บรรทัด (ห้ามลงไประดับปุ่ม) */
+.ui2-fc-lovers { display: block; --w: 56px; --r: 8deg; left: -22px; bottom: 150px; }
+.ui2-fc-priestess { display: block; --w: 56px; --r: -7deg; right: -20px; bottom: 154px; }
+
+/* ตัวบอกให้เลื่อนลง (จอ ≥ 768 · ขยับเฉพาะระดับ full ใน ui2-fx-full.css) */
+.ui2-cue {
   display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 18px;
+  font-family: var(--ui2-font-display);
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  color: var(--ui2-muted);
+}
+
+/* ภาพไพ่จิ๋วของไพ่วันนี้ในปุ่มรอง */
+.ui2-daily-thumb {
+  flex: none;
+  width: 22px;
+  aspect-ratio: 3 / 5;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px -4px rgba(0, 0, 0, 0.5);
+}
+.ui2-daily-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* ═════════════════════════════════════════════════════════════════════════
@@ -1585,21 +1614,23 @@ html[data-consent-ask] .ui2-sticky {
   .ui2-sec {
     padding-block: 88px;
   }
-  /* แท็บเล็ตแนวตั้ง: 6 ใบ (กว้าง 96–124px) ชิดขอบซ้าย-ขวา ไม่ทับหัวข้อ */
-  /* ข้อความหัวหน้าเว้นขอบซ้าย-ขวาให้การ์ดลอย (ห้ามทับหัวข้อ) */
-  .ui2-hero-inner { padding-inline: 100px; padding-top: 0; }
-  .ui2-fc { width: 96px; }
-  .ui2-fc:nth-child(1) { left: -10px; top: 24px; rotate: -10deg; }
-  .ui2-fc:nth-child(2) { right: -8px; top: 36px; rotate: 9deg; }
-  .ui2-fc:nth-child(3) { left: -4px; top: auto; bottom: 28px; rotate: 7deg; }
-  .ui2-fc:nth-child(4) { right: -2px; top: auto; bottom: 40px; rotate: -7deg; }
-  .ui2-fc:nth-child(5) { left: -28px; top: 236px; rotate: 4deg; }
-  .ui2-fc:nth-child(6) { right: -26px; top: 252px; rotate: -5deg; }
+  /* แท็บเล็ตแนวตั้ง: 6 ใบชิดขอบซ้าย-ขวา (ใบไกลบนซ่อน) ไม่มีป้าย · ข้อความเว้นขอบให้การ์ด (ห้ามทับหัวข้อ) */
+  .ui2-hero-inner { padding-inline: 100px; padding-top: 0; gap: 20px; }
+  .ui2-fc { padding: 6px 6px 8px; border-radius: 16px; }
+  .ui2-fc-star { --w: 92px; --r: -8deg; left: 1%; top: 8px; }
+  .ui2-fc-lovers { --w: 86px; --r: 7deg; left: 1.5%; top: 300px; bottom: auto; }
+  .ui2-fc-fool { display: block; --w: 70px; --r: -4deg; left: 2.5%; top: 500px; }
+  .ui2-fc-wheel { --w: 92px; --r: 7deg; right: 1%; top: 0; }
+  .ui2-fc-priestess { --w: 86px; --r: -6deg; right: 1.5%; top: 310px; bottom: auto; }
+  .ui2-fc-world { display: block; --w: 70px; --r: 5deg; right: 2.5%; top: 510px; }
+  .ui2-fc-moon,
+  .ui2-fc-empress { display: none; }
+  .ui2-cue { display: flex; }
   .ui2-hero {
     padding-top: 56px;
     padding-bottom: 72px;
-    /* แท็บเล็ตแนวตั้ง: สูงพอให้การ์ดลอย 3 ใบต่อข้าง (กว้าง 96px + ป้าย) ไม่ทับกัน */
-    min-height: 780px;
+    /* แท็บเล็ตแนวตั้ง: การ์ด 3 ใบต่อข้างอยู่ในความสูงของเนื้อหาแล้ว (ใบล่างสุดจบที่ ~640px) — ไม่ยืดส่วนจนเหลือที่ว่าง */
+    min-height: 0;
   }
   .ui2-h1 {
     font-size: 52px;
@@ -1615,43 +1646,20 @@ html[data-consent-ask] .ui2-sticky {
   .ui2-hero-ctas .ui2-btn {
     width: auto;
   }
-  .ui2-clock-chip {
-    display: none;
-  }
   .ui2-clock {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     gap: 10px;
-    margin-top: 10px;
+    margin-top: 4px;
+  }
+  .ui2-clock-label {
+    font-size: 13px;
   }
   .ui2-clock-cell {
     width: 88px;
     height: 88px;
+    border-radius: 22px;
   }
   .ui2-clock-cell .ui2-num {
     font-size: 40px;
-  }
-  .ui2-fc:nth-child(n + 5) {
-    display: block;
-  }
-  .ui2-fc:nth-child(n + 7) {
-    display: none; /* แท็บเล็ตแนวตั้ง 6 ใบ */
-  }
-  .ui2-fc-tag {
-    display: block;
-    margin-top: 8px;
-    text-align: center;
-    font-size: 11px;
-    line-height: 1.3;
-    color: var(--ui2-ink-soft);
-  }
-  .ui2-fc-tag b {
-    display: block;
-    font-family: var(--ui2-font-display);
-    font-weight: 500;
-    font-size: 12px;
-    color: var(--ui2-ink);
   }
   .ui2-track-card {
     width: 74px;
@@ -1729,25 +1737,42 @@ html[data-consent-ask] .ui2-sticky {
   .ui2-hero {
     min-height: 740px;
   }
-  .ui2-fc:nth-child(n + 7) {
-    display: block; /* คอม/iPad แนวนอน ครบ 8 ใบ */
+  /* iPad แนวนอน / โน้ตบุ๊กเล็ก (1024–1279): 6 ใบพร้อมป้าย ย่อ ~80% ชิดขอบ — ใบไกลบน 2 ใบเพิ่มที่ ≥ 1280 (จอแคบกว่านี้ทับหัวข้อ) */
+  .ui2-hero { min-height: 800px; }
+  .ui2-hero-inner { max-width: 700px; padding-inline: 0; gap: 22px; }
+  .ui2-fc { padding: 7px 7px 10px; border-radius: 18px; }
+  .ui2-fc-card { border-radius: 12px; }
+  .ui2-fc-tag {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 4px 0;
+    text-align: left;
+    font-size: 11.5px;
+    line-height: 1.3;
+    color: var(--ui2-muted);
   }
-  .ui2-hero-inner { max-width: 760px; padding-inline: 0; }
-  .ui2-fc { width: 112px; }
-  .ui2-fc:nth-child(1) { left: 0; top: 24px; rotate: -9deg; }
-  .ui2-fc:nth-child(2) { right: 0; top: 36px; rotate: 8deg; }
-  .ui2-fc:nth-child(3) { left: 6px; top: auto; bottom: 24px; rotate: 6deg; }
-  .ui2-fc:nth-child(4) { right: 8px; top: auto; bottom: 36px; rotate: -6deg; }
-  .ui2-fc:nth-child(5) { left: 54px; top: 262px; rotate: 4deg; width: 92px; }
-  .ui2-fc:nth-child(6) { right: 50px; top: 280px; rotate: -5deg; width: 92px; }
-  .ui2-fc:nth-child(7) { left: 112px; top: 132px; rotate: -3deg; width: 70px; z-index: -1; }
-  .ui2-fc:nth-child(8) { right: 118px; top: 150px; rotate: 5deg; width: 72px; z-index: -1; }
+  .ui2-fc-tag b {
+    font-family: var(--ui2-font-display);
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--ui2-ink);
+  }
+  .ui2-fc-star { --w: 124px; --r: -8deg; left: 2%; top: 4px; }
+  .ui2-fc-lovers { --w: 112px; --r: 7deg; left: 4.5%; top: 300px; }
+  .ui2-fc-fool { --w: 90px; --r: -4deg; left: 1.5%; top: 560px; }
+  .ui2-fc-wheel { --w: 124px; --r: 7deg; right: 2%; top: 0; }
+  .ui2-fc-priestess { --w: 110px; --r: -6deg; right: 4.5%; top: 310px; }
+  .ui2-fc-world { --w: 90px; --r: 5deg; right: 1.5%; top: 570px; }
   .ui2-clock-cell {
     width: 96px;
     height: 96px;
   }
   .ui2-clock-cell .ui2-num {
     font-size: 50px;
+  }
+  .ui2-hero-sub {
+    max-width: 520px;
+    font-size: 19px;
   }
   /* หัวข้อชิดบน (ไม่ใช่กึ่งกลาง) — ตอนแผงผลโผล่ใต้ผ้าปู รายการหัวข้อต้องไม่กระโดดลง */
   .ui2-pick-grid {
@@ -1851,6 +1876,23 @@ html[data-consent-ask] .ui2-sticky {
   }
 }
 
+/* ── การ์ดลอยหัวหน้า ≥ 1280: ครบ 8 ใบ ขนาด/ตำแหน่ง/มุมเอียงตามภาพต้นแบบ D+ (DX-Desktop) ────────── */
+@media (min-width: 1280px) {
+  .ui2-fc-star { --w: 156px; --r: -8deg; left: 4%; top: 10px; }
+  /* ใบไกลบน 2 ใบ: 1280–1439 ขยับออกขอบ (14%) ไม่ให้ซ้อนบรรทัดแรกของหัวข้อ · ≥ 1440 ตำแหน่งต้นแบบ 17% */
+  .ui2-fc-moon { display: block; --w: 104px; --r: 6deg; left: 14%; top: -14px; z-index: -1; }
+  .ui2-fc-lovers { --w: 140px; --r: 7deg; left: 13%; top: 280px; }
+  .ui2-fc-fool { --w: 112px; --r: -4deg; left: 2%; top: 500px; }
+  .ui2-fc-wheel { --w: 156px; --r: 7deg; right: 4%; top: 0; }
+  .ui2-fc-empress { display: block; --w: 100px; --r: -6deg; right: 14.5%; top: -6px; z-index: -1; }
+  .ui2-fc-priestess { --w: 138px; --r: -6deg; right: 13%; top: 290px; }
+  .ui2-fc-world { --w: 112px; --r: 5deg; right: 2.5%; top: 510px; }
+}
+@media (min-width: 1440px) {
+  .ui2-fc-moon { left: 17%; }
+  .ui2-fc-empress { right: 17.5%; }
+}
+
 /* ── กระดาษโน้ต: แท็บเล็ต 8 ใบ (3·2·3) และคอม 11 ใบ (4·3·4) วางแบบอิฐ ───────────────────────
    ตาราง 6 / 8 ช่อง ใบละ 2 ช่อง · ใบแถวคู่เริ่มช่องคู่ = เยื้องครึ่งใบ · ใส่ตำแหน่งคอลัมน์อย่างเดียว
    ตัววางอัตโนมัติของ grid ขึ้นแถวใหม่เองเมื่อคอลัมน์ถอยหลัง · ใบกว้างกว่าช่อง 14px = ขอบซ้อนกันนิด ๆ แบบภาพต้นแบบ */
@@ -1926,6 +1968,10 @@ html[data-consent-ask] .ui2-sticky {
 @keyframes ui2-drift {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(90px, 50px) scale(1.18); }
+}
+@keyframes ui2-cue {
+  0%, 100% { translate: 0 0; opacity: 0.5; }
+  50% { translate: 0 8px; opacity: 1; }
 }
 @keyframes ui2-bob {
   0%, 100% { translate: 0 0; }

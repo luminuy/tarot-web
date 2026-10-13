@@ -577,7 +577,7 @@ export function Ui2ClosingSection({ isEnglish, href }: { isEnglish: boolean; hre
         <div className="ui2-closing-bg" aria-hidden="true" />
         <div className="ui2-stars ui2-loop" aria-hidden="true" />
         <GoldRing />
-        <Ui2Clock isEnglish={isEnglish} variant="cells" />
+        <Ui2Clock isEnglish={isEnglish} />
         <h2 id="ui2-closing-title" className="ui2-closing-title">
           <ThaiPhrases>
             {isEnglish ? (

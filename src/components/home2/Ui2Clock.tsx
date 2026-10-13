@@ -14,36 +14,13 @@ const UNITS = [
   { u: "s", th: "วินาที", en: "sec" },
 ] as const;
 
-export function Ui2Clock({
-  isEnglish,
-  variant,
-}: {
-  isEnglish: boolean;
-  /** chip = บรรทัดเดียว (มือถือในหัวหน้า) · cells = กล่อง 3 ช่อง */
-  variant: "chip" | "cells";
-}) {
-  const label = isEnglish ? "New daily card in" : variant === "chip" ? "ไพ่ประจำวันใบใหม่ใน" : "ไพ่ประจำวันใบใหม่จะมาในอีก";
+/** กล่อง 3 ช่อง (หัวหน้า · ส่วนปิดท้าย) — แบบชิปบรรทัดเดียวเลิกใช้แล้ว 2026-10-13 (ภาพต้นแบบ D+ ใช้กล่องทุกจอ) */
+export function Ui2Clock({ isEnglish }: { isEnglish: boolean }) {
+  const label = isEnglish ? "New daily card in" : "ไพ่ประจำวันใบใหม่จะมาในอีก";
   const sr = isEnglish
     ? "A new card of the day arrives at midnight, Thailand time."
     : "ไพ่ประจำวันใบใหม่มาทุกเที่ยงคืนตามเวลาไทย";
   const done = isEnglish ? "The new card is here" : "ไพ่ใบใหม่มาแล้ว";
-
-  if (variant === "chip") {
-    return (
-      <p className="ui2-clock-chip" data-ui2-clock>
-        <span className="sr-only">{sr}</span>
-        <span className="ui2-clock-wait" aria-hidden="true">
-          {label}{" "}
-          <span className="ui2-num" data-u="all" suppressHydrationWarning>
-            --:--:--
-          </span>
-        </span>
-        <a className="ui2-clock-done" href={isEnglish ? "/en/daily" : "/daily"}>
-          {done}
-        </a>
-      </p>
-    );
-  }
 
   return (
     <div className="ui2-clock" data-ui2-clock>

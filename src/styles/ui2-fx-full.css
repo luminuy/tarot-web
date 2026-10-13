@@ -94,7 +94,11 @@
     animation: ui2-bob 7.5s ease-in-out infinite;
   }
   [data-fx="full"] .ui2-fc-far .ui2-fc-card {
-    filter: blur(1.5px);
+    filter: blur(1.6px);
+  }
+  /* ตัวบอกเลื่อนลง — ขยับขึ้นลงช้า ๆ (lite = นิ่ง) */
+  [data-fx="full"] .ui2-cue {
+    animation: ui2-cue 2.4s ease-in-out infinite;
   }
 
   /* ── ริบบิ้นไขว้ เส้นที่สอง (ตัวหนังสือ) ──────────────────────────────────── */
