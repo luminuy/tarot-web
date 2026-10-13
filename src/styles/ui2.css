@@ -1123,13 +1123,14 @@
 }
 .ui2-tile {
   position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   padding: 22px;
   border-radius: 30px;
   color: var(--ui2-on-night);
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.025) 100%), var(--ui2-night-2);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.065) 0%, rgba(255, 255, 255, 0.015) 100%), var(--ui2-night-2);
   box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
   overflow: hidden;
 }
@@ -1164,64 +1165,181 @@ a.ui2-tile:active {
   font-size: 14px;
   color: var(--ui2-gold-solid);
 }
-.ui2-tile-cards {
-  display: flex;
-  gap: 8px;
-}
-.ui2-tile-cards span {
-  width: 54px;
-  aspect-ratio: 300 / 520;
-  border-radius: 7px;
-  overflow: hidden;
-  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.3);
-}
-.ui2-tile-cards img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.ui2-tile-quote {
-  font-size: 15px;
-  line-height: 1.75;
-  color: var(--ui2-on-night);
-}
-.ui2-why {
-  align-self: flex-start;
-  color: var(--ui2-teal-text);
-}
 .ui2-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 .ui2-chips span {
-  padding: 5px 11px;
+  padding: 6px 12px;
   border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ui2-on-night-soft);
-  box-shadow: 0 0 0 1px var(--ui2-line-night);
+  font-family: var(--ui2-font-display);
+  font-size: 13px;
+  color: var(--ui2-on-night);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
-/* ไพ่คว่ำลอยในกล่องพิธีเช้า — หลังไพ่วาดด้วย CSS (ไม่ใช่ภาพไพ่ใบใด) */
-.ui2-tile-back {
+.ui2-chips span.is-on {
+  color: var(--ui2-button);
+  background: var(--ui2-button-text);
+  box-shadow: none;
+}
+
+/* แสงในกล่อง (radial-gradient ล้วน ไม่ใช้ filter: blur — วาดครั้งเดียว) */
+.ui2-tile-aurora {
   position: absolute;
-  right: 22px;
-  bottom: 64px;
-  width: 64px;
-  aspect-ratio: 300 / 520;
-  border-radius: 9px;
-  rotate: 8deg;
+  z-index: -1;
+  border-radius: 999px;
   pointer-events: none;
 }
-.ui2-morning-glow {
+.ui2-tile-aurora-amber {
+  left: -140px;
+  bottom: -220px;
+  width: 560px;
+  height: 400px;
+  background: radial-gradient(closest-side, rgba(233, 160, 70, 0.32), rgba(233, 160, 70, 0));
+}
+.ui2-tile-aurora-teal {
+  left: 50%;
+  top: 40%;
+  width: 440px;
+  height: 440px;
+  translate: -50% -50%;
+  background: radial-gradient(closest-side, rgba(79, 179, 169, 0.3), rgba(79, 179, 169, 0));
+}
+.ui2-tile-label {
+  font-family: var(--ui2-font-display);
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  color: var(--ui2-teal-text);
+}
+.ui2-tile-hint {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-title-line {
+  display: block;
+}
+
+/* อ่านทีละใบ — ไพ่ 3 ใบ (ใบกลางยกขึ้น ขอบทองเรือง) + แผงกระจกคำอ่านของใบกลาง */
+.ui2-reading-row {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.ui2-reading-cards {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding-top: 8px;
+}
+.ui2-reading-cards span {
+  width: 64px;
+  aspect-ratio: 3 / 5;
+  border-radius: 8px;
+  overflow: hidden;
+  opacity: 0.75;
+}
+.ui2-reading-cards span.is-focus {
+  opacity: 1;
+  translate: 0 -8px;
+  box-shadow: 0 0 0 1.5px var(--ui2-gold-solid), 0 0 34px rgba(255, 200, 110, 0.5);
+}
+.ui2-reading-cards img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ui2-reading-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.02));
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.11), 0 1px 0 rgba(255, 255, 255, 0.09) inset;
+}
+.ui2-reading-label {
+  font-size: 12.5px;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-reading-text {
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--ui2-on-night);
+}
+.ui2-reading-text b {
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+}
+.ui2-why-chip {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-size: 12.5px;
+  color: var(--ui2-on-night);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* พิธีเช้า — ไพ่คว่ำใบใหญ่กลางกล่อง + แสงทองเรืองหลังไพ่ (เต้นเฉพาะระดับ full · ui2-fx-full.css) */
+.ui2-tile-morning {
+  align-items: center;
+  text-align: center;
+}
+.ui2-tile-morning .ui2-tile-label,
+.ui2-tile-morning .ui2-tile-title {
+  align-self: stretch;
+  text-align: left;
+}
+.ui2-morning-card {
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin: 10px 0 2px;
+}
+.ui2-morning-back {
+  position: relative;
+  width: 120px;
+  aspect-ratio: 3 / 5;
+  border-radius: 10px;
+}
+.ui2-morning-burst {
   position: absolute;
-  right: -40px;
-  bottom: -60px;
   width: 220px;
   height: 220px;
   border-radius: 999px;
   pointer-events: none;
-  background: radial-gradient(circle, rgba(79, 209, 193, 0.28) 0%, rgba(79, 209, 193, 0) 70%);
+  background: radial-gradient(circle, rgba(255, 214, 140, 0.32) 0%, rgba(255, 214, 140, 0) 68%);
+}
+.ui2-tile-morning .ui2-chips {
+  justify-content: center;
+}
+
+/* สมุดดวง — แถบไพ่ย่อ 7 ช่อง */
+.ui2-journal-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+}
+.ui2-journal-strip > span {
+  aspect-ratio: 3 / 5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.ui2-journal-strip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ui2-journal-strip .is-empty {
+  background: rgba(255, 255, 255, 0.06);
+}
+.ui2-journal-strip .is-next {
+  box-shadow: inset 0 0 0 1.5px var(--ui2-gold-solid), 0 0 16px rgba(255, 200, 110, 0.4);
 }
 /* แม่หมอตัวจริงที่ว่างเร็วสุด (เติมโดย astro/scripts/ui2-home.ts) */
 .ui2-readers {
@@ -1229,6 +1347,10 @@ a.ui2-tile:active {
   gap: 8px;
 }
 .ui2-readers[hidden] {
+  display: none;
+}
+/* มีรายชื่อแม่หมอจริงแล้ว ➔ ซ่อนคำอธิบายทั่วไป (แบบภาพต้นแบบ) · ยังไม่มี/โหลดไม่ได้ = คำอธิบาย + ลิงก์ล้วน */
+[data-ui2-readers]:has(.ui2-readers:not([hidden])) > .ui2-tile-desc {
   display: none;
 }
 .ui2-reader-link {
@@ -1246,15 +1368,16 @@ a.ui2-tile:active {
   flex: none;
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 50px;
+  height: 50px;
   border-radius: 999px;
   overflow: hidden;
   font-family: var(--ui2-font-display);
   font-weight: 500;
   font-size: 18px;
-  color: var(--ui2-night);
-  background: var(--ui2-gold-solid);
+  color: var(--ui2-gold-solid);
+  background: linear-gradient(160deg, #5A4130, #241A12);
+  box-shadow: 0 0 0 2px rgba(255, 214, 140, 0.6);
 }
 .ui2-reader-avatar img {
   width: 100%;
@@ -1282,25 +1405,6 @@ a.ui2-tile:active {
 .ui2-reader-meta.is-live {
   color: var(--ui2-teal-text);
 }
-.ui2-journal-art {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  padding: 14px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.04);
-  box-shadow: 0 0 0 1px var(--ui2-line-night);
-}
-.ui2-journal-art i {
-  display: block;
-  height: 6px;
-  border-radius: 99px;
-  background: rgba(246, 238, 226, 0.16);
-}
-.ui2-journal-art i:nth-child(1) { width: 62%; background: rgba(255, 217, 143, 0.45); }
-.ui2-journal-art i:nth-child(2) { width: 88%; }
-.ui2-journal-art i:nth-child(3) { width: 74%; }
-.ui2-journal-art i:nth-child(4) { width: 40%; }
 
 /* ═════════════════════════════════════════════════════════════════════════
    ส่วน 7 · สำรวจต่อ + FAQ
@@ -1736,8 +1840,9 @@ html[data-consent-ask] .ui2-sticky {
   .ui2-bento {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  /* แท็บเล็ต: อ่านทีละใบ + พิธีเช้าเต็มแถว · สมุดดวงคู่กับแม่หมอตัวจริง (ไม่ให้กล่องใดยืดจนว่าง) */
   .ui2-tile-wide,
-  .ui2-tile-wide-md {
+  .ui2-tile-tall {
     grid-column: span 2;
   }
   .ui2-closing-card {
@@ -1849,6 +1954,7 @@ html[data-consent-ask] .ui2-sticky {
     grid-auto-rows: minmax(220px, auto);
   }
   .ui2-tile-tall {
+    grid-column: auto;
     grid-row: span 2;
   }
   .ui2-tile-wide-md {
@@ -1856,6 +1962,52 @@ html[data-consent-ask] .ui2-sticky {
   }
   .ui2-tile-wide {
     grid-column: span 2;
+  }
+  /* คอม: ตามภาพต้นแบบ DX-Desktop — กล่อง padding 30 · ไพ่ 80px · การ์ดคว่ำ 150px · ไพ่กับแผงกระจกเรียงแนวนอน */
+  .ui2-bento {
+    gap: 20px;
+  }
+  .ui2-tile {
+    gap: 18px;
+    padding: 30px;
+  }
+  .ui2-reading-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 22px;
+  }
+  .ui2-reading-cards {
+    gap: 10px;
+  }
+  .ui2-reading-cards span {
+    width: 80px;
+  }
+  .ui2-reading-panel {
+    flex: 1 1 280px;
+    padding: 18px;
+    border-radius: 20px;
+  }
+  .ui2-reading-text {
+    font-size: 15.5px;
+    line-height: 1.75;
+  }
+  .ui2-morning-card {
+    margin: 18px 0 6px;
+  }
+  .ui2-morning-back {
+    width: 150px;
+    border-radius: 12px;
+  }
+  .ui2-morning-burst {
+    width: 260px;
+    height: 260px;
+  }
+  .ui2-tile-hint {
+    font-size: 14px;
+  }
+  .ui2-journal-strip {
+    gap: 6px;
   }
   .ui2-explore {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -2001,6 +2153,10 @@ html[data-consent-ask] .ui2-sticky {
 @keyframes ui2-drift {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(90px, 50px) scale(1.18); }
+}
+@keyframes ui2-burst {
+  0% { scale: 0.55; opacity: 0.95; }
+  100% { scale: 1.9; opacity: 0; }
 }
 @keyframes ui2-cue {
   0%, 100% { translate: 0 0; opacity: 0.5; }

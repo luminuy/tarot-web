@@ -135,7 +135,7 @@ const VOID = new Set(["area", "base", "br", "col", "embed", "hr", "img", "input"
 /** คลาสเป็นโทเคนเต็มตัวเท่านั้น — `ui2-fc` ต้องไม่จับ `ui2-fc-card` (`\b` นับขีดเป็นขอบคำ) */
 const token = (names: string[]) => new RegExp(`(?:^|\\s)(?:${names.join("|")})(?=\\s|$)`);
 const LOOP_CLASS = token(["ui2-loop"]);
-const ANY_LOOP = token([...LITE_LOOPS, "ui2-fc", "ui2-blob", "ui2-stars", "ui2-note", "ui2-gold-day", "ui2-gold-night", "ui2-tile-back"]);
+const ANY_LOOP = token([...LITE_LOOPS, "ui2-fc", "ui2-blob", "ui2-stars", "ui2-note", "ui2-gold-day", "ui2-gold-night", "ui2-morning-back", "ui2-morning-burst"]);
 
 const missingScript: string[] = [];
 const scriptAfterCss: string[] = [];

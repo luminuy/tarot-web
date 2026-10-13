@@ -90,8 +90,12 @@
     --bob: 9.5s;
     animation-delay: -4s;
   }
-  [data-fx="full"] .ui2-tile-back {
-    animation: ui2-bob 7.5s ease-in-out infinite;
+  [data-fx="full"] .ui2-morning-back {
+    animation: ui2-bob 6s ease-in-out infinite;
+  }
+  /* แสงทองหลังไพ่คว่ำในกล่องพิธีเช้า — เต้นออกเป็นวง (lite = แสงนิ่ง) */
+  [data-fx="full"] .ui2-morning-burst {
+    animation: ui2-burst 3s ease-out infinite;
   }
   [data-fx="full"] .ui2-fc-far .ui2-fc-card {
     filter: blur(1.6px);

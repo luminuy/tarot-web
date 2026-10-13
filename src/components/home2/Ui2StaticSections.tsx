@@ -292,6 +292,8 @@ const SAMPLE = {
     quote:
       "คำถาม: เดือนหน้ามีสัมภาษณ์งานใหม่ จะไปได้ดีไหม — แปดแห่งเหรียญในตำแหน่งอดีตบอกว่าคุณสะสมฝีมือมานานแล้ว ตอนนี้อัศวินแห่งไม้เท้าเตือนว่าอย่ารีบจนข้ามการเตรียมตัว และดวงดาวในตำแหน่งอนาคตคือไพ่แห่งความหวัง",
     why: "ทำไมถึงอ่านแบบนี้",
+    focusLabel: "ตัวอย่าง · ตำแหน่งปัจจุบัน",
+    focusLine: "ทำให้ใจพร้อมพุ่งไปข้างหน้า แต่อย่ารีบจนข้ามการเตรียมตัว",
     note: "ตัวอย่างที่เรียบเรียงขึ้นให้เห็นรูปแบบ ไม่ใช่คำทำนายของผู้ใช้จริง",
   },
   en: {
@@ -303,9 +305,14 @@ const SAMPLE = {
     quote:
       "Question: I have a job interview next month. Will it go well? The Eight of Pentacles in the past shows skill you have built for a long time. The Knight of Wands warns you not to rush past your preparation, and The Star in the future is a card of hope.",
     why: "Why it reads this way",
+    focusLabel: "Sample · the present",
+    focusLine: "has your heart ready to charge ahead. Just don't rush past the preparation.",
     note: "An illustrative sample, not a real user's reading.",
   },
 } as const;
+
+/** แถบสมุดดวง 7 ช่องตามภาพต้นแบบ — `null` = ช่องว่าง (ช่องสุดท้ายคือวันถัดไป เรืองทอง) */
+const JOURNAL_STRIP: (string | null)[] = ["swords-04", "cups-01", null, "wands-12", "pentacles-01", null, null];
 
 export function Ui2BentoSection({ isEnglish, href }: { isEnglish: boolean; href: Href }) {
   const sample = isEnglish ? SAMPLE.en : SAMPLE.th;
@@ -324,7 +331,10 @@ export function Ui2BentoSection({ isEnglish, href }: { isEnglish: boolean; href:
         </div>
 
         <div className="ui2-bento">
-          <figure className="ui2-tile ui2-tile-wide ui2-reveal">
+          {/* กล่องตามภาพต้นแบบ D+ (DX-Desktop/DX-Mobile) — ไพ่ 3 ใบ ใบกลางเด่น + แผงกระจกคำอ่านของใบกลาง
+              ⚠️ เป็นตัวอย่างที่เรียบเรียงขึ้น ต้องบอกผู้อ่านตรง ๆ ("ตัวอย่าง" ในป้าย + figcaption สำหรับโปรแกรมอ่านจอ) */}
+          <figure className="ui2-tile ui2-tile-wide ui2-tile-reading ui2-reveal">
+            <span className="ui2-tile-aurora ui2-tile-aurora-amber" aria-hidden="true" />
             <h3 className="ui2-tile-title">
               <ThaiPhrases>
               {isEnglish ? (
@@ -338,54 +348,60 @@ export function Ui2BentoSection({ isEnglish, href }: { isEnglish: boolean; href:
               )}
               </ThaiPhrases>
             </h3>
-            <div className="ui2-tile-cards" aria-hidden="true">
-              {sample.cards.map(([id]) => (
-                <span key={id}>
-                  <CardImage cardId={id} alt="" thumb sizes="54px" />
+            <div className="ui2-reading-row">
+              <div className="ui2-reading-cards" aria-hidden="true">
+                {sample.cards.map(([id], i) => (
+                  <span key={id} className={i === 1 ? "is-focus" : undefined}>
+                    <CardImage cardId={id} alt="" thumb sizes="80px" />
+                  </span>
+                ))}
+              </div>
+              <div className="ui2-reading-panel">
+                <span className="ui2-reading-label">{sample.focusLabel}</span>
+                <p className="ui2-reading-text">
+                  <b>{sample.cards[1][1]}</b> {sample.focusLine}
+                </p>
+                <span className="ui2-why-chip">
+                  {sample.why}
+                  <span className="ui2-btn-arrow" aria-hidden="true" />
                 </span>
-              ))}
+              </div>
             </div>
-            <blockquote className="ui2-tile-quote">{sample.quote}</blockquote>
-            <span className="ui2-chip ui2-why">
-              <span className="ui2-dot" aria-hidden="true" />
-              {sample.why}
-            </span>
-            <figcaption className="ui2-tile-desc">{sample.note}</figcaption>
+            <figcaption className="sr-only">{sample.note}</figcaption>
           </figure>
 
-          <Link href={href("/daily")} prefetch={false} className="ui2-tile ui2-tile-tall ui2-reveal">
-            <span className="ui2-morning-glow" aria-hidden="true" />
-            <span className="ui2-tile-back ui2-face-back ui2-loop" aria-hidden="true" />
+          {/* พิธีเช้า — ไพ่คว่ำใบใหญ่กลางกล่อง (หลังไพ่วาดด้วย CSS ไม่ใช่ภาพไพ่ใบใด) · ทั้งกล่องเป็นลิงก์ไปหน้าไพ่วันนี้ */}
+          <Link href={href("/daily")} prefetch={false} className="ui2-tile ui2-tile-tall ui2-tile-morning ui2-reveal">
+            <span className="ui2-tile-aurora ui2-tile-aurora-teal" aria-hidden="true" />
+            <span className="ui2-tile-label">{isEnglish ? "Morning ritual · 2 min" : "พิธีเช้า · 2 นาที"}</span>
             <h3 className="ui2-tile-title">
-              <ThaiPhrases>
               {isEnglish ? (
                 <>
-                  <b>Every morning</b>, a new card
+                  <b className="ui2-title-line">Every morning,</b>
+                  <span className="ui2-title-line">a new card</span>
                 </>
               ) : (
                 <>
-                  <b className="tp">ทุกเช้า</b> <span className="tp">มีไพ่ใบใหม่</span>
+                  <b className="tp ui2-title-line">ทุกเช้า</b> <span className="tp ui2-title-line">มีไพ่ใบใหม่</span>
                 </>
               )}
-              </ThaiPhrases>
             </h3>
-            <p className="ui2-tile-desc">
-              {isEnglish
-                ? "A short morning ritual: one card for the day, and a check-in at night."
-                : "พิธีเช้าสั้น ๆ เปิดไพ่หนึ่งใบสำหรับวันนี้ แล้วกลับมาทบทวนตอนเย็น"}
-            </p>
-            <span className="ui2-chips" aria-hidden="true">
-              {(isEnglish ? ["Work", "Heart", "People", "Money", "Self"] : ["งาน", "ใจ", "คน", "เงิน", "ตัวเอง"]).map((c) => (
-                <span key={c}>{c}</span>
-              ))}
+            <span className="ui2-morning-card" aria-hidden="true">
+              <span className="ui2-morning-burst ui2-loop" />
+              <span className="ui2-face-back ui2-morning-back ui2-loop" />
             </span>
-            <span className="ui2-tile-go">
-              {isEnglish ? "Today's card" : "ไพ่ของวันนี้"}
-              <span className="ui2-btn-arrow" aria-hidden="true" />
+            <span className="ui2-tile-hint">{isEnglish ? "Tap to turn over today's card" : "แตะเพื่อพลิกไพ่ของวันนี้"}</span>
+            <span className="ui2-chips" aria-hidden="true">
+              {(isEnglish ? ["Work", "Heart", "People", "Money", "Self"] : ["งาน", "ใจ", "คน", "เงิน", "ตัวเอง"]).map((c, i) => (
+                <span key={c} className={i === 0 ? "is-on" : undefined}>
+                  {c}
+                </span>
+              ))}
             </span>
           </Link>
 
-          <Link href={href("/journal")} prefetch={false} className="ui2-tile ui2-reveal">
+          {/* สมุดดวง — แถบไพ่ย่อ 7 ช่อง (มีไพ่ · ว่าง · ช่องถัดไปเรืองทอง) ภาพประกอบล้วน */}
+          <Link href={href("/journal")} prefetch={false} className="ui2-tile ui2-tile-journal ui2-reveal">
             <h3 className="ui2-tile-title">
               <ThaiPhrases>
               {isEnglish ? (
@@ -399,15 +415,19 @@ export function Ui2BentoSection({ isEnglish, href }: { isEnglish: boolean; href:
               )}
               </ThaiPhrases>
             </h3>
-            <span className="ui2-journal-art" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-              <i />
+            <span className="ui2-journal-strip" aria-hidden="true">
+              {JOURNAL_STRIP.map((id, i) =>
+                id ? (
+                  <span key={i}>
+                    <CardImage cardId={id} alt="" thumb sizes="48px" />
+                  </span>
+                ) : (
+                  <span key={i} className={i === JOURNAL_STRIP.length - 1 ? "is-next" : "is-empty"} />
+                ),
+              )}
             </span>
-            <span className="ui2-tile-go">
-              {isEnglish ? "Open the journal" : "เปิดสมุดดวง"}
-              <span className="ui2-btn-arrow" aria-hidden="true" />
+            <span className="ui2-tile-hint">
+              {isEnglish ? "Topic \u201cNew job\u201d \u00b7 check back in 27 days" : "เรื่อง \u201cงานใหม่\u201d \u00b7 นัดกลับมาเช็กอีก 27 วัน"}
             </span>
           </Link>
 
