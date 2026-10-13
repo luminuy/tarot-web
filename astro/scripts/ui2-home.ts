@@ -11,6 +11,8 @@
  *      (ผู้สังเกตการณ์ตัวที่สองที่เฝ้าแค่แถบบนสุดของจอ · ถอดออกเมื่อออกจากหน้าเลือก)
  *   7. แท็บคลังไพ่ (หัวเรื่องซ้าย ข้อมูลขวา) — ฟังคลิก/ลูกศรที่ document ตัวเดียว (ส่วนนี้ถูกถอด/ใส่ใหม่ได้)
  *      ทุกแผงอยู่ใน HTML แล้ว แค่สลับ `hidden` + `aria-selected` ตามแบบแท็บของ WAI-ARIA
+ *   8. คลังไพ่เลื่อนแล้วสลับหัวข้อเอง (คอม ≥ 1024 · fastwork.com) — เปิดเฉพาะเมื่อแผงที่สูงที่สุดพอดีจอ ไม่งั้นคงแบบกดแท็บ
+ *   9. ตัวเลขนับขึ้นตอนเลื่อนถึง (1909 · ตัวเลขในคลังไพ่) — HTML มีเลขจริงอยู่แล้ว (ไม่มี JS = เห็นเลขจริง)
  *   5. แม่หมอตัวจริงที่ว่างเร็วสุด — ยิง `/api/marketplace/readers/featured` ตอนกล่องใกล้จอเท่านั้น
  *      ใส่ข้อความด้วย textContent (ข้อมูลจากฐานข้อมูล ห้าม innerHTML) · ไม่มีใคร/อ่านไม่ได้ = ปล่อยลิงก์ล้วน
  *
@@ -246,7 +248,7 @@ new MutationObserver((mutations) => {
 
 /* ── 7. แท็บคลังไพ่ ─────────────────────────────────────────────────────── */
 const TAB = ".ui2-show-tab";
-function selectTab(tab: HTMLElement, focus: boolean): void {
+function selectTab(tab: HTMLElement, focus: boolean, fromScroll = false): void {
   const tabs = tab.parentElement?.querySelectorAll<HTMLElement>(TAB) ?? [];
   for (const t of tabs) {
     const on = t === tab;
@@ -256,6 +258,7 @@ function selectTab(tab: HTMLElement, focus: boolean): void {
     if (panel) panel.hidden = !on;
   }
   if (focus) tab.focus();
+  if (!fromScroll) scrollToTab(tab);
   // มือถือ: แถบหัวเรื่องเลื่อนแนวนอน — เลื่อนเม็ดที่เลือกให้อยู่ในแถบ (เลื่อนเฉพาะแถบ ไม่เลื่อนทั้งหน้า)
   const bar = tab.parentElement;
   if (bar && bar.scrollWidth > bar.clientWidth) {
@@ -278,3 +281,119 @@ document.addEventListener("keydown", (e) => {
   e.preventDefault();
   selectTab(tabs[(next + tabs.length) % tabs.length], true);
 });
+
+/* ── 8. คลังไพ่เลื่อนแล้วสลับหัวข้อเอง ─────────────────────────────────────────── */
+const calm = () => root.getAttribute("data-fx") === "off" || matchMedia("(prefers-reduced-motion: reduce)").matches;
+let scrolly: { sec: HTMLElement; marker: HTMLElement; tabs: HTMLElement[]; bar: HTMLElement; top: number; range: number } | null = null;
+let lockUntil = 0;
+function setupScrolly(): void {
+  const sec = document.querySelector<HTMLElement>(".ui2-show-sec");
+  if (scrolly && scrolly.sec !== sec) scrolly = null;
+  if (!sec) return;
+  sec.classList.remove("is-scrolly");
+  scrolly = null;
+  if (calm() || innerWidth < 1024 || innerHeight < 640) return;
+  const card = sec.querySelector<HTMLElement>(".ui2-show-card");
+  const show = sec.querySelector<HTMLElement>(".ui2-show");
+  const bar = sec.querySelector<HTMLElement>(".ui2-show-tabs");
+  if (!card || !show || !bar) return;
+  const tabs = Array.from(bar.querySelectorAll<HTMLElement>(TAB));
+  const panels = Array.from(sec.querySelectorAll<HTMLElement>(".ui2-show-panel"));
+  // วัดความสูงทุกแผงครั้งเดียว (เปิดทีละแผงชั่วคราว) — การ์ดสูงคงที่ = เลื่อนแล้วไม่กระตุก
+  const was = panels.map((p) => p.hidden);
+  let max = 0;
+  for (const p of panels) {
+    panels.forEach((o) => (o.hidden = o !== p));
+    max = Math.max(max, card.offsetHeight);
+  }
+  panels.forEach((p, i) => (p.hidden = was[i]));
+  const top = (document.querySelector<HTMLElement>("[data-site-header]")?.offsetHeight ?? 78) + 20;
+  if (max > innerHeight - top - 24) return;
+  let marker = sec.querySelector<HTMLElement>("[data-show-marker]");
+  if (!marker) {
+    marker = document.createElement("div");
+    marker.setAttribute("data-show-marker", "");
+    show.before(marker);
+  }
+  sec.style.setProperty("--show-h", `${max}px`);
+  sec.style.setProperty("--steps", String(tabs.length));
+  sec.classList.add("is-scrolly");
+  scrolly = { sec, marker, tabs, bar, top, range: (tabs.length - 1) * innerHeight * 0.7 };
+  onScrolly();
+}
+let scrollyRaf = 0;
+function onScrolly(): void {
+  scrollyRaf = 0;
+  const s = scrolly;
+  if (!s) return;
+  const p = Math.min(1, Math.max(0, (s.top - s.marker.getBoundingClientRect().top) / s.range));
+  s.bar.style.setProperty("--p", p.toFixed(3));
+  if (performance.now() < lockUntil) return;
+  const tab = s.tabs[Math.round(p * (s.tabs.length - 1))];
+  if (tab && tab.getAttribute("aria-selected") !== "true") selectTab(tab, false, true);
+}
+function scrollToTab(tab: HTMLElement): void {
+  const s = scrolly;
+  if (!s) return;
+  const i = s.tabs.indexOf(tab);
+  if (i < 0) return;
+  lockUntil = performance.now() + 900;
+  const y = scrollY + s.marker.getBoundingClientRect().top - s.top + (i / (s.tabs.length - 1)) * s.range;
+  scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+}
+addEventListener("scroll", () => {
+  if (scrolly && !scrollyRaf) scrollyRaf = requestAnimationFrame(onScrolly);
+}, { passive: true });
+let resizeT = 0;
+addEventListener("resize", () => {
+  clearTimeout(resizeT);
+  resizeT = window.setTimeout(setupScrolly, 200);
+});
+
+/* ── 9. ตัวเลขนับขึ้น ───────────────────────────────────────────────────── */
+const COUNT = ".ui2-1909, .ui2-show-stats strong";
+const counted = new WeakSet<Element>();
+const countObserver =
+  "IntersectionObserver" in window
+    ? new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (!e.isIntersecting || counted.has(e.target)) continue;
+            counted.add(e.target);
+            countObserver?.unobserve(e.target);
+            const el = e.target as HTMLElement;
+            const text = el.textContent?.trim() ?? "";
+            if (!/^\d+$/.test(text) || calm()) continue;
+            const end = Number(text);
+            const t0 = performance.now();
+            const dur = end > 100 ? 1400 : 900;
+            const step = (t: number) => {
+              const k = Math.min(1, (t - t0) / dur);
+              el.textContent = String(Math.round(end * (1 - Math.pow(1 - k, 3))));
+              if (k < 1) requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
+          }
+        },
+        { threshold: 0.6 },
+      )
+    : null;
+function watchCounts(): void {
+  document.querySelectorAll(COUNT).forEach((el) => {
+    if (!counted.has(el)) countObserver?.observe(el);
+  });
+}
+watchCounts();
+setupScrolly();
+// ฟอนต์/ภาพโหลดเสร็จแล้วความสูงแผงเปลี่ยน ➔ วัดใหม่
+document.fonts?.ready.then(setupScrolly);
+addEventListener("load", setupScrolly, { once: true });
+// ส่วนนี้อยู่ใน island ที่ถอด/ใส่ DOM ใหม่ได้ — สนใจเฉพาะตอนส่วนคลังไพ่/ตัวเลขถูกใส่เข้ามา (ไม่สแกนทุกการเปลี่ยนแปลงระหว่างสตรีมคำทำนาย)
+new MutationObserver((ms) => {
+  const hit = ms.some((m) =>
+    Array.from(m.addedNodes).some((n) => n instanceof Element && (n.matches(`.ui2-show-sec, ${COUNT}`) || n.querySelector(".ui2-show-sec") !== null)),
+  );
+  if (!hit) return;
+  setupScrolly();
+  watchCounts();
+}).observe(document.body, { childList: true, subtree: true });

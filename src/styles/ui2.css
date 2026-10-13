@@ -3142,6 +3142,215 @@ details[open] > .ui2-faq-a {
   }
 }
 
+/* ── รอบ 2 (เจ้าของ "ส่วนอื่นไม่มีเพิ่มมาเหรอ") — ส่วนที่เหลือของหน้าแรก ─────────────────────── */
+/* 8. การ์ดลอยหัวหน้า — ร่อนเข้าที่ทีละใบตอนเปิดหน้า (การ์ดชั้นในเท่านั้น · ชั้นนอกมีอนิเมชันลอยวนของระดับ full) */
+.ui2-fc-card {
+  animation: ui2-card-in 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.2s;
+}
+.ui2-fc:nth-child(2) .ui2-fc-card { animation-delay: 0.28s; }
+.ui2-fc:nth-child(3) .ui2-fc-card { animation-delay: 0.36s; }
+.ui2-fc:nth-child(4) .ui2-fc-card { animation-delay: 0.44s; }
+.ui2-fc:nth-child(5) .ui2-fc-card { animation-delay: 0.32s; }
+.ui2-fc:nth-child(6) .ui2-fc-card { animation-delay: 0.4s; }
+.ui2-fc:nth-child(7) .ui2-fc-card { animation-delay: 0.48s; }
+.ui2-fc:nth-child(8) .ui2-fc-card { animation-delay: 0.56s; }
+/* 9. คลังไพ่ — สลับแท็บแล้วรายการในแผงทยอยเข้าทีละชิ้น */
+:is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a) {
+  animation: ui2-panel-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(2) { animation-delay: 45ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(3) { animation-delay: 90ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(4) { animation-delay: 135ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(5) { animation-delay: 180ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(6) { animation-delay: 225ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(7) { animation-delay: 270ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(8) { animation-delay: 315ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(9) { animation-delay: 360ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(10) { animation-delay: 405ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(11) { animation-delay: 450ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(12) { animation-delay: 495ms; }
+
+@supports (animation-timeline: view()) {
+  /* 10. เปิดไพ่ด่วน — ไพ่ 5 ใบเริ่มซ้อนเป็นกองกลาง แล้วกางออกเป็นพัดตอนเลื่อนถึง (ตำแหน่งพัดเดิมใช้ translate/rotate · ตัวนี้ใช้ transform) */
+  .ui2-pick-card {
+    animation: ui2-fan-open linear both;
+    animation-timeline: view();
+    animation-range: entry 30% cover 50%;
+  }
+  .ui2-topic {
+    animation: ui2-side-in linear both;
+    animation-timeline: view();
+    animation-range: entry 10% cover 30%;
+  }
+  /* 11. ตรวจได้ — ไพ่ 3 ใบกางขึ้น (ไพ่ใช้ transform จัดมุมอยู่แล้ว ➔ อนิเมตด้วย translate/scale) */
+  .ui2-trio span {
+    animation: ui2-pop linear both;
+    animation-timeline: view();
+    animation-range: entry 20% cover 40%;
+  }
+  .ui2-trio span:nth-child(2) { animation-range: entry 28% cover 46%; }
+  .ui2-trio span:nth-child(3) { animation-range: entry 36% cover 52%; }
+  /* 12. ทุกอย่างในที่เดียว — ไพ่ตัวอย่าง · แถบสมุดดวง · ชิปพิธีเช้า เด้งเข้าทีละชิ้น */
+  .ui2-reading-cards span,
+  .ui2-journal-strip > span,
+  .ui2-chips span {
+    animation: ui2-pop-soft linear both;
+    animation-timeline: view();
+    animation-range: entry 20% cover 40%;
+  }
+  .ui2-reading-cards span:nth-child(2),
+  .ui2-journal-strip > span:nth-child(2),
+  .ui2-chips span:nth-child(2) { animation-range: entry 26% cover 44%; }
+  .ui2-reading-cards span:nth-child(3),
+  .ui2-journal-strip > span:nth-child(3),
+  .ui2-chips span:nth-child(3) { animation-range: entry 32% cover 48%; }
+  .ui2-journal-strip > span:nth-child(4),
+  .ui2-chips span:nth-child(4) { animation-range: entry 38% cover 52%; }
+  .ui2-journal-strip > span:nth-child(5),
+  .ui2-chips span:nth-child(5) { animation-range: entry 44% cover 56%; }
+  .ui2-journal-strip > span:nth-child(6) { animation-range: entry 50% cover 60%; }
+  .ui2-journal-strip > span:nth-child(7) { animation-range: entry 56% cover 64%; }
+  /* FAQ — ไพ่ตัวอย่างในภาพจำลองกางออก */
+  .ui2-fq-card {
+    animation: ui2-pop linear both;
+    animation-timeline: view();
+    animation-range: entry 25% cover 45%;
+  }
+}
+@keyframes ui2-card-in {
+  from { opacity: 0; transform: translateY(46px) scale(0.86); }
+}
+@keyframes ui2-fan-open {
+  from { opacity: 0.4; transform: translateX(calc(var(--o, 0) * -82%)) rotate(calc(var(--o, 0) * -7deg)) translateY(calc(var(--drop, 0px) * -1)); }
+}
+@keyframes ui2-pop {
+  from { opacity: 0; translate: 0 40px; scale: 0.8; }
+}
+@keyframes ui2-pop-soft {
+  from { opacity: 0; scale: 0.7; }
+}
+
+/* คอม: แผงคลังไพ่กระชับให้ทุกแผงพอดีจอ (เงื่อนไขของโหมดเลื่อนแล้วสลับหัวข้อ) */
+@media (min-width: 1024px) {
+  .ui2-show-card {
+    padding: 28px 32px 30px;
+  }
+  .ui2-show-stats {
+    margin-top: 12px;
+    padding: 9px 4px;
+  }
+  .ui2-show-stats strong {
+    font-size: 20px;
+  }
+  .ui2-show-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .ui2-show-major {
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+  .ui2-show-major-name {
+    font-size: 15.5px;
+  }
+  .ui2-show-major-tip {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    margin-top: 4px;
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+  .ui2-show-label,
+  .ui2-show-sub {
+    margin-top: 14px;
+  }
+  .ui2-show-chips {
+    margin-top: 8px;
+  }
+  .ui2-show-chips a {
+    min-height: 34px;
+  }
+  .ui2-show-spreads {
+    margin-top: 14px;
+  }
+  .ui2-show-layout {
+    padding: 12px 14px 14px;
+    gap: 10px;
+  }
+  .ui2-show-board {
+    max-width: 240px;
+  }
+  .ui2-show-legend {
+    gap: 3px 12px;
+    font-size: 11.5px;
+    line-height: 1.4;
+  }
+  .ui2-show-row {
+    min-height: 48px;
+    padding-block: 8px;
+  }
+  .ui2-show-topics {
+    margin-top: 14px;
+  }
+  .ui2-path {
+    margin-top: 18px;
+    gap: 18px;
+  }
+  .ui2-show-cta {
+    margin-top: 18px;
+  }
+  .ui2-show-zodiac {
+    margin-top: 14px;
+  }
+}
+
+/* 13. คลังไพ่แบบเลื่อนแล้วสลับหัวข้อเอง (fastwork.com · คอม ≥ 1024) — astro/scripts/ui2-home.ts ข้อ 8 ใส่ `is-scrolly`
+   เมื่อการ์ดแผงที่สูงที่สุดพอดีจอเท่านั้น (ไม่งั้นคงแบบกดแท็บ) · ส่วนยาวขึ้น (แผง−1) × 70vh ให้การ์ดค้างอยู่ระหว่างเลื่อน */
+@media (min-width: 1024px) {
+  .ui2-show-sec.is-scrolly .ui2-wrap::after {
+    content: "";
+    display: block;
+    height: calc((var(--steps, 6) - 1) * 70vh);
+  }
+  .ui2-show-sec.is-scrolly .ui2-show {
+    position: sticky;
+    top: calc(var(--site-header-h, 78px) + 20px);
+  }
+  .ui2-show-sec.is-scrolly .ui2-show-card {
+    height: var(--show-h, auto);
+    min-height: 0;
+  }
+  /* หัวเรื่องอยู่ในกรอบที่ค้างแล้ว — ไม่ต้องค้างซ้ำ · เส้นความคืบหน้าสีทองข้างรายการ */
+  .ui2-show-sec.is-scrolly .ui2-show-tabs {
+    position: relative;
+    top: auto;
+  }
+  .ui2-show-sec.is-scrolly .ui2-show-tabs::before,
+  .ui2-show-sec.is-scrolly .ui2-show-tabs::after {
+    content: "";
+    position: absolute;
+    left: 3px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    border-radius: 2px;
+    background: rgba(246, 238, 226, 0.12);
+  }
+  .ui2-show-sec.is-scrolly .ui2-show-tabs::after {
+    background: var(--ui2-gold-solid);
+    transform-origin: top;
+    transform: scaleY(var(--p, 0));
+  }
+  .ui2-show-sec.is-scrolly .ui2-show-tab::before {
+    display: none;
+  }
+}
+
 @keyframes ui2-intro {
   from { opacity: 0; transform: translateY(26px); }
 }
