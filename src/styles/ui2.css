@@ -3218,6 +3218,43 @@ details[open] > .ui2-faq-a {
     animation-range: entry 25% cover 45%;
   }
 }
+/* ── รอบ 3 (เจ้าของ "motion การเปลี่ยน section ในหน้าแรกล่ะมีไหม") — ส่วนที่กำลังเลื่อนออก ─────────────────
+   ส่วนใหม่ลอยเข้า (ข้างบน) + ส่วนเก่าถอยหลังจางออกตอนพ้นขอบบน = รู้สึกเป็นแผ่นซ้อนเลื่อนต่อกัน (แบบ fastwork.com)
+   เริ่มจางช่วงท้ายของการออกเท่านั้น (exit 55% ➔ 100% = เนื้อหาอยู่ครึ่งบนของจอแล้ว) ไม่รบกวนตอนกำลังอ่าน
+   ⚠️ ไม่ใส่กับส่วนสุดท้าย (FAQ) — ต่อด้วยท้ายเว็บ ไม่มีส่วนถัดไปมารับ */
+@supports (animation-timeline: view()) {
+  .ui2-hero-inner {
+    animation: ui2-hero-out linear both;
+    animation-timeline: view();
+    animation-range: exit 30% exit 100%;
+  }
+  .ui2-fc-card {
+    animation: ui2-card-in 1s cubic-bezier(0.16, 1, 0.3, 1) both, ui2-float-away linear both;
+    animation-timeline: auto, view();
+    animation-range: normal, exit 0% exit 100%;
+  }
+  :is([data-home-section="quick"], [data-home-section="notes"], [data-home-section="features"], [data-home-section="showcase"]) > .ui2-wrap {
+    animation: ui2-sec-out linear both;
+    animation-timeline: view();
+    animation-range: exit 55% exit 100%;
+  }
+  /* แผ่นตรวจได้: ขยายเต็มตอนเข้า (ui2-grow) + ถอยหลังตอนออก — สองอนิเมชันคนละช่วงบนชิ้นเดียว */
+  .ui2-wrap.ui2-sheet {
+    animation: ui2-grow linear both, ui2-sec-out linear both;
+    animation-timeline: view(), view();
+    animation-range: entry 0% cover 32%, exit 55% exit 100%;
+  }
+}
+@keyframes ui2-sec-out {
+  to { opacity: 0.3; transform: translateY(-36px) scale(0.965); }
+}
+@keyframes ui2-hero-out {
+  to { opacity: 0.15; transform: translateY(-70px) scale(0.97); }
+}
+/* การ์ดลอยหัวหน้าเลื่อนขึ้นเร็วกว่าพื้น (พารัลแลกซ์) */
+@keyframes ui2-float-away {
+  to { transform: translateY(-90px); }
+}
 @keyframes ui2-card-in {
   from { opacity: 0; transform: translateY(46px) scale(0.86); }
 }
