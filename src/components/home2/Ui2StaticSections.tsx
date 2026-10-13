@@ -16,7 +16,6 @@ import { PUBLIC_SPREADS, getSpread } from "@/data/spreads";
 import { ZODIAC_ELEMENT_LABEL, ZODIAC_SIGNS } from "@/data/zodiac";
 import { ZODIAC_INDEX_PATH, zodiacSignPath } from "@/lib/tarot/zodiac";
 
-import { Ui2Clock } from "./Ui2Clock";
 import {
   MAJOR_HIGHLIGHTS,
   MORE_WAYS,
@@ -1044,64 +1043,8 @@ export function Ui2ExploreSection({ isEnglish }: { isEnglish: boolean; href: Hre
   );
 }
 
-/* ── ส่วน 8 · ปิดท้าย ─────────────────────────────────────────────────── */
-
-/** วงแหวนทอง: วงกลม 4 ชั้น · ขีด 72 ขีด (ขีดใหญ่ทุก 6 = 12 ขีด) · ดาวหกแฉก — SVG ชิ้นเดียว หมุนด้วย transform */
-function GoldRing() {
-  const ticks = Array.from({ length: 72 }, (_, i) => i);
-  return (
-    <svg className="ui2-ring ui2-loop" viewBox="-100 -100 200 200" aria-hidden="true" focusable="false">
-      <g fill="none" stroke="currentColor">
-        <circle r="98" strokeWidth="0.6" />
-        <circle r="90" strokeWidth="0.4" />
-        <circle r="62" strokeWidth="0.4" />
-        <circle r="40" strokeWidth="0.3" />
-        {ticks.map((i) => (
-          <line key={i} x1="0" y1="-98" x2="0" y2={i % 6 === 0 ? -86 : -93} strokeWidth={i % 6 === 0 ? 0.9 : 0.4} transform={`rotate(${i * 5})`} />
-        ))}
-        <path d="M0 -40 L34.6 20 L-34.6 20 Z M0 40 L-34.6 -20 L34.6 -20 Z" strokeWidth="0.5" />
-      </g>
-    </svg>
-  );
-}
-
-export function Ui2ClosingSection({ isEnglish, href }: { isEnglish: boolean; href: Href }) {
-  return (
-    <section className="ui2-sec ui2-closing" data-home-section="closing" data-anim-section data-ui2-hide-sticky aria-labelledby="ui2-closing-title">
-      <div className="ui2-closing-card" data-ui2-dark>
-        <div className="ui2-closing-bg" aria-hidden="true" />
-        <div className="ui2-stars ui2-loop" aria-hidden="true" />
-        <GoldRing />
-        <Ui2Clock isEnglish={isEnglish} />
-        <h2 id="ui2-closing-title" className="ui2-closing-title">
-          <ThaiPhrases>
-            {isEnglish ? (
-              <>
-                Your card for today <span className="tp ui2-gold-night ui2-loop">is still waiting</span>
-              </>
-            ) : (
-              <>
-                ไพ่ใบของคุณวันนี้ <span className="tp ui2-gold-night ui2-loop">ยังรออยู่</span>
-              </>
-            )}
-          </ThaiPhrases>
-        </h2>
-        <div className="ui2-closing-ctas">
-          <a href="#home-quick" className="ui2-btn" data-home-target="closing:quick">
-            <span className="ui2-btn-ring ui2-loop" aria-hidden="true" />
-            {isEnglish ? "Draw 1 card now" : "เปิดไพ่ด่วน 1 ใบ"}
-            <span className="ui2-btn-arrow" aria-hidden="true" />
-          </a>
-          <Link href={href("/account")} prefetch={false} className="ui2-btn-ghost" data-home-target="closing:account">
-            {isEnglish ? "Sign in" : "เข้าสู่ระบบ"}
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ── แถบปุ่มติดล่างจอ (มือถือ) — โผล่/ซ่อนโดย astro/scripts/ui2-home.ts ─────────── */
+
 export function Ui2StickyCta({ isEnglish }: { isEnglish: boolean }) {
   return (
     <div className="ui2-sticky" data-ui2-sticky>

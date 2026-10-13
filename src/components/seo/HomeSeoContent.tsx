@@ -1,7 +1,6 @@
 import { localeHref } from "@/lib/i18n/paths";
 import {
   Ui2BentoSection,
-  Ui2ClosingSection,
   Ui2ExploreSection,
   Ui2NotesSection,
   Ui2ShowcaseSection,
@@ -17,8 +16,8 @@ import {
  *   5. เว็บอื่นสุ่มให้ดู / ตรวจได้    (แผ่นขาว)  — แทน how_it_works · heritage · proof บางส่วน
  *   6. ทุกอย่างอยู่ในที่เดียว         (กลางคืน)  — แทน proof (ตัวอย่างคำทำนาย)
  *   6.5 คลังไพ่ยิปซี (หัวเรื่องซ้าย ข้อมูลขวา) (กลางวัน) — ดูดวงตามเรื่อง · ผัง · ไพ่เด่น · ราศี · 5 ขั้นตอน · ทางลัด
- *   7. สำรวจต่อ + คำถามที่พบบ่อย      (กลางวัน) — แทน zodiac · spreads_cards · articles · faq · "คนค้นหาบ่อย"
- *   8. ปิดท้าย                        (กลางคืน)  — นาฬิกาตัวใหญ่ + ปุ่มหลัก
+ *   7. คำถามที่พบบ่อย (การ์ดมืด แถวสลับ) — faq
+ *   (8. ปิดท้าย — ถอดตามคำสั่งเจ้าของ 2026-10-13 "เอาอันนี้ออก")
  * ส่วน 1–3 อยู่ใน island `TarotFlow` (ต้อง hydrate) — ดู `src/components/home/TarotFlow.tsx`
  *
  * ⚠️ ห้ามเป็น client component (ด่าน test-seo-wave4 P-03) · ใช้ `localeHref` แปลงลิงก์เอง
@@ -34,7 +33,6 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
         <Ui2BentoSection isEnglish={isEnglish} href={href} />
         <Ui2ShowcaseSection isEnglish={isEnglish} href={href} />
         <Ui2ExploreSection isEnglish={isEnglish} href={href} />
-        <Ui2ClosingSection isEnglish={isEnglish} href={href} />
       </div>
       <Ui2StickyCta isEnglish={isEnglish} />
     </div>

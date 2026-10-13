@@ -26,8 +26,7 @@
   }
   [data-fx="full"] .ui2-night .ui2-chip,
   [data-fx="full"] .ui2-night .ui2-btn-ghost,
-  [data-fx="full"] .ui2-fq-sheet .ui2-faq,
-  [data-fx="full"] .ui2-closing .ui2-clock-cell {
+  [data-fx="full"] .ui2-fq-sheet .ui2-faq {
     background: rgba(28, 23, 30, 0.5);
     -webkit-backdrop-filter: blur(22px) saturate(150%);
     backdrop-filter: blur(22px) saturate(150%);
