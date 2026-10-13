@@ -3070,6 +3070,97 @@ html[data-consent-ask] .ui2-sticky {
   animation-play-state: paused;
 }
 
+/* ═════════════════════════════════════════════════════════════════════════
+   Motion ตอนเลื่อน/เปิด/ใช้งาน แบบ fastwork.com (เจ้าของสั่ง 2026-10-13 "ใส่ motion ตอนเลื่อน ตอนเปิด การทำอะไรต่าง ๆ")
+   ⚠️ แตะเฉพาะ transform/opacity (compositor) — ใช้ `transform` ไม่ใช่คุณสมบัติ translate/scale/rotate
+      เพราะหลายชิ้นใช้คุณสมบัตินั้นจัดตำแหน่งอยู่แล้ว (โน้ตเยื้อง · การ์ดเอียง) ซ้อนกันได้ไม่ทับกัน
+   ⚠️ ผูกการเลื่อนอยู่ใต้ @supports (เบราว์เซอร์ที่ไม่รองรับ = เห็นหน้านิ่งครบ) · off / ลดการเคลื่อนไหว = ปิดทั้งหมด (กฎข้างล่าง)
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/* 1. เปิดหน้า — ป้าย · หัวข้อ · คำโปรย · นาฬิกา · ปุ่ม ทยอยลอยเข้าทีละชิ้น (ไม่ผูกการเลื่อน) */
+.ui2-hero-inner > * {
+  animation: ui2-intro 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.ui2-hero-inner > :nth-child(2) { animation-delay: 0.08s; }
+.ui2-hero-inner > :nth-child(3) { animation-delay: 0.16s; }
+.ui2-hero-inner > :nth-child(4) { animation-delay: 0.24s; }
+.ui2-hero-inner > :nth-child(5) { animation-delay: 0.32s; }
+.ui2-hero-inner > :nth-child(n + 6) { animation-delay: 0.4s; }
+
+/* 6. คลังไพ่ — สลับแท็บแล้วแผงใหม่ค่อย ๆ ลอยเข้า (แผงที่ซ่อนอยู่ไม่มีกล่อง ➔ แสดงเมื่อไรอนิเมชันเริ่มใหม่เอง) */
+.ui2-show-panel {
+  animation: ui2-panel-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+/* 7. FAQ — กางแล้วคำตอบค่อย ๆ ลอยเข้า */
+details[open] > .ui2-faq-a {
+  animation: ui2-panel-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@supports (animation-timeline: view()) {
+  /* 2. กรอบใหญ่ "ขยายเต็ม" ตอนเลื่อนถึง (แบบการ์ดโปรไฟล์ของ Fastwork ที่โตขึ้นเต็มจอ) */
+  .ui2-window,
+  .ui2-sheet,
+  .ui2-show-card {
+    animation: ui2-grow linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 32%;
+  }
+  /* 3. กระดาษโน้ต — ร่วงลงมาแปะทีละแผ่น (3 จังหวะสลับกัน) */
+  .ui2-note-slot {
+    animation: ui2-drop linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 24%;
+  }
+  .ui2-note-slot:nth-child(3n + 2) { animation-range: entry 12% cover 32%; }
+  .ui2-note-slot:nth-child(3n) { animation-range: entry 24% cover 40%; }
+  /* 4. คลังไพ่ — หัวเรื่องเรียงเข้าทีละบรรทัด */
+  .ui2-show-tab {
+    animation: ui2-side-in linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 30%;
+  }
+  /* 5. FAQ แถวสลับ — ภาพจำลองเลื่อนเข้าจากด้านข้าง · ข้อความลอยตาม · รายการพับลอยขึ้น */
+  .ui2-fq-mock {
+    animation: ui2-side-in linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 34%;
+  }
+  .ui2-fq-text,
+  .ui2-fq-head,
+  .ui2-show-head,
+  .ui2-faq {
+    animation: ui2-rise linear both;
+    animation-timeline: view();
+    animation-range: entry 5% cover 30%;
+  }
+}
+@media (min-width: 1024px) {
+  @supports (animation-timeline: view()) {
+    .ui2-fq-row:nth-child(even) .ui2-fq-mock {
+      animation-name: ui2-side-in-right;
+    }
+  }
+}
+
+@keyframes ui2-intro {
+  from { opacity: 0; transform: translateY(26px); }
+}
+@keyframes ui2-panel-in {
+  from { opacity: 0; transform: translateY(14px); }
+}
+@keyframes ui2-grow {
+  from { opacity: 0.35; transform: scale(0.9) translateY(40px); }
+}
+@keyframes ui2-drop {
+  from { opacity: 0; transform: translateY(-70px) rotate(-7deg) scale(1.06); }
+}
+@keyframes ui2-side-in {
+  from { opacity: 0; transform: translateX(-56px); }
+}
+@keyframes ui2-side-in-right {
+  from { opacity: 0; transform: translateX(56px); }
+}
+
 /* ── ระดับ off (ลดการเคลื่อนไหว) — นิ่งทั้งหน้า เห็นของครบ ───────────────── */
 [data-fx="off"] .ui2-sec *,
 [data-fx="off"] .ui2-sec *::before,

@@ -846,6 +846,23 @@ html[data-ui2-over-dark] .site-header-glass .text-muted:not(.absolute *) {
 [data-mega]:focus-within .mega-inner {
   translate: 0 0;
 }
+/* รายการในแผงทยอยเข้าทีละคอลัมน์ (แบบเมนู apple.com) */
+.mega-col {
+  opacity: 0;
+  translate: 0 -8px;
+  transition: opacity 260ms var(--ease-out), translate 320ms var(--ease-out);
+}
+[data-mega]:hover .mega-col,
+[data-mega]:focus-within .mega-col {
+  opacity: 1;
+  translate: 0 0;
+}
+[data-mega]:hover .mega-col:nth-child(2),
+[data-mega]:focus-within .mega-col:nth-child(2) { transition-delay: 40ms; }
+[data-mega]:hover .mega-col:nth-child(3),
+[data-mega]:focus-within .mega-col:nth-child(3) { transition-delay: 80ms; }
+[data-mega]:hover .mega-col:nth-child(4),
+[data-mega]:focus-within .mega-col:nth-child(4) { transition-delay: 120ms; }
 .mega-title {
   font-size: 12px;
   line-height: 1.4;
@@ -911,8 +928,13 @@ html[data-ui2-over-dark] .site-header-glass .text-muted:not(.absolute *) {
   filter: blur(14px);
 }
 @media (prefers-reduced-motion: reduce) {
-  .mega-inner {
+  .mega-inner,
+  .mega-col {
     translate: none;
+    transition: none;
+  }
+  .mega-col {
+    opacity: 1;
   }
 }
 
