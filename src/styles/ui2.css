@@ -235,14 +235,20 @@
   transform: rotate(45deg);
   margin-left: 2px;
 }
-/* ขอบทองหมุน — วงแหวน conic ใต้ปุ่ม (lite: หมุนเฉพาะตอนส่วนนั้นอยู่ในจอ · off: นิ่ง) */
+/* ขอบทองหมุน — วงแหวน conic รอบปุ่ม (lite: หมุนเฉพาะตอนส่วนนั้นอยู่ในจอ · off: นิ่ง)
+   ⚠️ ตัดด้วย mask ให้เหลือเฉพาะเส้นขอบ 2px — เดิมพึ่ง z-index -1 ให้พื้นปุ่มบัง แต่ตอนกด `transform: scale()`
+      ทำให้ปุ่มเป็นบริบทซ้อนใหม่ วงแหวนจึงขึ้นมาทับพื้นปุ่มเป็นลิ่มทองกลางปุ่ม (เจ้าของแคป 2026-10-13 "เวลากดไม่สวยเลย") */
 .ui2-btn-ring {
   position: absolute;
   inset: -2px;
   z-index: -1;
+  padding: 2px;
   border-radius: inherit;
   overflow: hidden;
   pointer-events: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
 }
 .ui2-btn-ring::before {
   content: "";
