@@ -514,65 +514,280 @@ html:has(.ui2-sp) .ui2-header-cta {
   isolation: isolate;
 }
 
-/* ── สารบัญ + แยกตามเรื่อง + ทางลัด ───────────────────────────────────────── */
+/* ── สารบัญ (07) · แยกตามเรื่อง (08) · ทางลัด (09) ──────────────────────────
+   เจ้าของ "ทำทั้ง 4 เลยขอสวยๆ" — ป้ายเลขแบบหมวดผัง · เส้นทองคั่น · สารบัญ 6 กลุ่มสีหมวด · การ์ดภาพไพ่ · กล่องทางลัดใหญ่ */
 .ui2-sp-dir {
-  padding-bottom: 64px;
+  padding-bottom: 72px;
 }
 .ui2-sp-dir::before {
   background: linear-gradient(0deg, #171512 0, rgba(23, 21, 18, 0) 220px), var(--ui2-sec-bg);
 }
+/* เส้นทองบางคั่นส่วน — จางที่ปลายทั้งสองข้าง */
+.ui2-sp-rule {
+  display: block;
+  height: 1px;
+  margin: 8px 0 40px;
+  background: linear-gradient(90deg, rgba(255, 217, 143, 0) 0%, rgba(255, 217, 143, 0.45) 30%, rgba(255, 217, 143, 0.45) 70%, rgba(255, 217, 143, 0) 100%);
+}
+* + .ui2-sp-rule {
+  margin-top: 56px;
+}
+.ui2-sp-dir-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.ui2-sp-badge-gold {
+  color: var(--ui2-night);
+  background: var(--ui2-gold-solid);
+}
 .ui2-sp-dir-h2 {
-  font-size: 22px;
+  font-size: 26px;
   color: var(--ui2-on-night);
 }
-.ui2-sp-dir-gap {
-  margin-top: 34px;
+
+/* สารบัญ: 6 กลุ่ม แผงกระจกมืด หัวกลุ่มจุดสีหมวด */
+.ui2-sp-dir-groups {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+.ui2-sp-dir-group {
+  padding: 16px 16px 10px;
+  border-radius: 22px;
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+}
+.ui2-sp-dir-group-h {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px 10px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 15.5px;
+  color: var(--ui2-on-night);
+  border-bottom: 1px solid var(--ui2-line-night);
+}
+.ui2-sp-dir-group-n {
+  margin-left: auto;
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  color: var(--ui2-night);
+  background: var(--cat);
 }
 .ui2-sp-dir-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px 16px;
-  margin-top: 14px;
+  margin: 4px 0 0;
   padding: 0;
   list-style: none;
 }
+.ui2-sp-dir-list li + li {
+  border-top: 1px dashed rgba(246, 238, 226, 0.08);
+}
 .ui2-sp-dir-link {
-  font-size: 14px;
-  line-height: 1.55;
-  color: var(--ui2-on-night-soft);
-  text-decoration: underline;
-  text-decoration-color: var(--ui2-line-night);
-  text-underline-offset: 4px;
-  transition: color var(--dur-fast) var(--ease-out);
-}
-.ui2-sp-dir-link:hover {
-  color: var(--ui2-gold-solid);
-}
-.ui2-sp-dir-topics {
-  gap: 10px;
-}
-.ui2-sp-dir-topic {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  min-height: 52px;
-  padding: 10px 14px;
-  border-radius: 18px;
-  text-decoration: none;
-  color: var(--ui2-on-night);
-  background: var(--ui2-glass-night-solid);
-  box-shadow: 0 0 0 1px var(--ui2-line-night);
+  align-items: baseline;
+  gap: 8px;
+  min-height: 44px;
+  padding: 11px 6px;
+  border-radius: 10px;
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--ui2-on-night-soft);
+  transition: color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
 }
-.ui2-sp-dir-count {
+.ui2-sp-dir-name {
+  flex: 1 1 auto;
+}
+.ui2-sp-dir-n {
   flex: none;
   font-size: 12.5px;
   color: var(--ui2-on-night-dim);
+  white-space: nowrap;
 }
-.ui2-sp-dir-shortcuts {
+.ui2-sp-dir-lock {
+  flex: none;
+  align-self: center;
+  color: var(--ui2-gold-solid);
+}
+.ui2-sp-dir-link:hover {
+  color: var(--ui2-gold-solid);
+  background: rgba(255, 217, 143, 0.06);
+}
+
+/* แยกตามเรื่อง: การ์ดภาพไพ่ + ชื่อเรื่อง + คำโปรย + จำนวนผัง */
+.ui2-sp-topics {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ui2-sp-topic {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  align-items: center;
+  gap: 16px;
+  height: 100%;
+  padding: 14px 18px 14px 14px;
+  border-radius: 24px;
+  color: var(--ui2-on-night);
+  background:
+    radial-gradient(80% 120% at 0% 50%, rgba(255, 217, 143, 0.1) 0%, rgba(255, 217, 143, 0) 60%),
+    var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+  transition: translate var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.ui2-sp-topic-art {
+  flex: none;
+  width: 58px;
+  padding: 3px;
+  border-radius: 9px;
+  rotate: -4deg;
+  background: linear-gradient(170deg, var(--ui2-card-ivory-top) 0%, var(--ui2-card-ivory-bottom) 100%);
+  box-shadow: 0 0 0 1px rgba(201, 161, 90, 0.6), 0 14px 24px -12px rgba(0, 0, 0, 0.95);
+  transition: rotate var(--dur-base) var(--ease-out), scale var(--dur-base) var(--ease-out);
+}
+.ui2-sp-topic-art img,
+.ui2-sp-tile-art img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 300 / 520;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.ui2-sp-topic-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.ui2-sp-topic-name {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 1.35;
+}
+.ui2-sp-topic-note {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ui2-on-night-dim);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ui2-sp-topic-n {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+}
+.ui2-sp-topic-n .ui2-btn-arrow,
+.ui2-sp-tile-go .ui2-btn-arrow {
+  width: 7px;
+  height: 7px;
+  border-top-width: 1.6px;
+  border-right-width: 1.6px;
+}
+
+/* ทางลัด: กล่องใหญ่ ภาพไพ่เอียงมุมขวาบน · ชื่อ · คำอธิบาย · ปุ่มลูกศรวงกลม */
+.ui2-sp-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ui2-sp-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+  min-height: 200px;
+  padding: 116px 16px 56px;
+  border-radius: 26px;
+  color: var(--ui2-on-night);
+  background:
+    radial-gradient(70% 60% at 85% 0%, rgba(255, 217, 143, 0.16) 0%, rgba(255, 217, 143, 0) 70%),
+    linear-gradient(180deg, #221A29 0%, #120E16 100%);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.18), 0 1px 0 var(--ui2-glass-edge-night) inset;
+  transition: translate var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.ui2-sp-tile-art {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 46px;
+  padding: 3px;
+  border-radius: 9px;
+  rotate: -6deg;
+  background: linear-gradient(170deg, var(--ui2-card-ivory-top) 0%, var(--ui2-card-ivory-bottom) 100%);
+  box-shadow: 0 0 0 1px rgba(201, 161, 90, 0.6), 0 16px 26px -12px rgba(0, 0, 0, 0.95);
+  transition: rotate var(--dur-base) var(--ease-out), scale var(--dur-base) var(--ease-out);
+}
+.ui2-sp-tile-name {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.35;
+}
+.ui2-sp-tile-note {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ui2-on-night-dim);
+}
+.ui2-sp-tile-go {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  color: var(--ui2-night);
+  background: var(--ui2-gold-solid);
+  transition: scale var(--dur-fast) var(--ease-out);
+}
+.ui2-sp-tile-go .ui2-btn-arrow {
+  margin-left: -2px;
+}
+.ui2-sp-topic:focus-visible,
+.ui2-sp-tile:focus-visible {
+  outline: 2px solid var(--ui2-gold-solid);
+  outline-offset: 3px;
+}
+.ui2-sp-topic:active,
+.ui2-sp-tile:active {
+  translate: 0 -3px;
+}
+@media (hover: hover) {
+  .ui2-sp-topic:hover,
+  .ui2-sp-tile:hover {
+    translate: 0 -6px;
+    box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.6), 0 24px 40px -22px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 217, 143, 0.14);
+  }
+  .ui2-sp-topic:hover .ui2-sp-topic-art,
+  .ui2-sp-tile:hover .ui2-sp-tile-art {
+    rotate: 0deg;
+    scale: 1.08;
+  }
+  .ui2-sp-tile:hover .ui2-sp-tile-go {
+    scale: 1.1;
+  }
 }
 
 /* ── ไพ่เด้ง (dialog) ──────────────────────────────────────────────────────
@@ -956,11 +1171,24 @@ html:has(.ui2-spread-pop[open]) {
     border-radius: 999px;
     text-align: left;
   }
-  .ui2-sp-dir-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .ui2-sp-dir-groups,
+  .ui2-sp-topics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .ui2-sp-dir-shortcuts {
-    display: flex;
+  .ui2-sp-dir-h2 {
+    font-size: 32px;
+  }
+  .ui2-sp-tile {
+    min-height: 240px;
+    padding: 138px 20px 62px;
+  }
+  .ui2-sp-tile-art {
+    top: 18px;
+    left: 20px;
+    width: 60px;
+  }
+  .ui2-sp-tile-name {
+    font-size: 17.5px;
   }
   /* หน้าต่าง: ไพ่ใหญ่ซ้าย + แผงขวา ลอยกลางจอ */
   .ui2-spread-pop {
@@ -1025,14 +1253,16 @@ html:has(.ui2-spread-pop[open]) {
     top: calc(var(--y) * 0.8 + 12px);
     translate: none;
   }
-  .ui2-sp-dir-list {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  .ui2-sp-dir-topics {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
   .ui2-sc-band {
     font-size: 14.5px;
+  }
+  .ui2-sp-dir-groups,
+  .ui2-sp-topics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .ui2-sp-tiles {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
   }
 }
 
