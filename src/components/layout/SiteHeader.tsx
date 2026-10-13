@@ -148,11 +148,8 @@ export function SiteHeader({
                 className="h-9 w-9 shrink-0 rounded-full border border-line object-cover transition-transform duration-300 group-hover:scale-[1.03] sm:h-10 sm:w-10"
               />
               <span className="flex flex-col whitespace-nowrap leading-none">
-                {/* 🎨 UI 2.0: "Seer" + "Tarot" ตัวเอียง (Instrument Serif · คำอังกฤษประดับ — ฟอนต์ละตินล้วน 17 KB ไม่พรีโหลด) */}
-                <span className="text-[17px] tracking-[0.01em] text-ink sm:text-[19px]">
-                  <span className="font-serif-th">Seer</span>
-                  <span className="ui2-accent">Tarot</span>
-                </span>
+                {/* ชื่อแบบเดิม SEERTAROT ตัวพิมพ์ใหญ่ช่องไฟกว้าง (เจ้าของสั่ง 2026-10-13 "อยากได้แบบเก่า") */}
+                <span className="font-serif-th text-[13.5px] tracking-[0.16em] text-ink sm:text-[1.05rem] sm:tracking-[0.2em]">SEERTAROT</span>
                 <span className="mt-1 font-serif-th text-[10px] tracking-[0.12em] text-muted sm:mt-1.5 sm:text-[11px] sm:tracking-[0.14em]">
                   {isEnglish ? "1909 RIDER-WAITE" : "ดูดวงไพ่ทาโรต์"}
                 </span>
