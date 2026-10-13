@@ -3255,8 +3255,9 @@ details[open] > .ui2-faq-a {
 @keyframes ui2-float-away {
   to { transform: translateY(-90px); }
 }
+/* การ์ดลอยหมุนเข้าแบบ 3 มิติ (เปิดหน้า) */
 @keyframes ui2-card-in {
-  from { opacity: 0; transform: translateY(46px) scale(0.86); }
+  from { opacity: 0; transform: perspective(700px) translateY(60px) rotateX(38deg) rotateY(-22deg) scale(0.82); }
 }
 @keyframes ui2-fan-open {
   from { opacity: 0.4; transform: translateX(calc(var(--o, 0) * -82%)) rotate(calc(var(--o, 0) * -7deg)) translateY(calc(var(--drop, 0px) * -1)); }

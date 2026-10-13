@@ -13,6 +13,8 @@
  *      ทุกแผงอยู่ใน HTML แล้ว แค่สลับ `hidden` + `aria-selected` ตามแบบแท็บของ WAI-ARIA
  *   8. คลังไพ่เลื่อนแล้วสลับหัวข้อเอง (คอม ≥ 1024 · fastwork.com) — เปิดเฉพาะเมื่อแผงที่สูงที่สุดพอดีจอ ไม่งั้นคงแบบกดแท็บ
  *   9. ตัวเลขนับขึ้นตอนเลื่อนถึง (1909 · ตัวเลขในคลังไพ่) — HTML มีเลขจริงอยู่แล้ว (ไม่มี JS = เห็นเลขจริง)
+ *  10. ลูกเล่นตามเมาส์ (ระดับ full · คอม ≥ 1024 · เมาส์จริง) — การ์ดลอยเอนตามเมาส์ · แสงทองตามเมาส์บนท้องฟ้า ·
+ *      การ์ดเอียง 3 มิติ + แสงสะท้อน · หลังไพ่โฮโลแกรม · ปุ่มแม่เหล็ก — ตัวฟังเดียว อัปเดตครั้งเดียวต่อเฟรม
  *   5. แม่หมอตัวจริงที่ว่างเร็วสุด — ยิง `/api/marketplace/readers/featured` ตอนกล่องใกล้จอเท่านั้น
  *      ใส่ข้อความด้วย textContent (ข้อมูลจากฐานข้อมูล ห้าม innerHTML) · ไม่มีใคร/อ่านไม่ได้ = ปล่อยลิงก์ล้วน
  *
@@ -397,3 +399,106 @@ new MutationObserver((ms) => {
   setupScrolly();
   watchCounts();
 }).observe(document.body, { childList: true, subtree: true });
+
+/* ── 10. ลูกเล่นตามเมาส์ ─────────────────────────────────────────────────── */
+const finePointer = matchMedia("(hover: hover) and (pointer: fine)");
+const TILT = ".ui2-tile, .ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-fq-mock";
+let last: PointerEvent | null = null;
+let fxRaf = 0;
+let tilted: HTMLElement | null = null;
+let magnet: HTMLElement | null = null;
+let spot: HTMLElement | null = null;
+const fxOn = () => root.getAttribute("data-fx") === "full" && innerWidth >= 1024 && finePointer.matches;
+function untilt(): void {
+  if (tilted) {
+    tilted.classList.remove("is-tilting");
+    tilted.style.setProperty("--ta", "0deg");
+    tilted = null;
+  }
+}
+function unmagnet(): void {
+  if (magnet) {
+    magnet.style.setProperty("--bx", "0");
+    magnet.style.setProperty("--by", "0");
+    magnet = null;
+  }
+}
+function fxFrame(): void {
+  fxRaf = 0;
+  const e = last;
+  if (!e || !fxOn()) return;
+  const t = e.target instanceof Element ? e.target : null;
+  const x = e.clientX;
+  const y = e.clientY;
+  // การ์ดลอยหัวหน้า
+  const floats = document.querySelector<HTMLElement>(".ui2-floats");
+  if (floats && floats.getBoundingClientRect().bottom > 0) {
+    floats.style.setProperty("--mx", ((x / innerWidth) * 2 - 1).toFixed(3));
+    floats.style.setProperty("--my", ((y / innerHeight) * 2 - 1).toFixed(3));
+  }
+  // แสงทองบนท้องฟ้ากลางคืน
+  const sec = t?.closest<HTMLElement>("[data-ui2-dark]") ?? null;
+  let next = sec ? sec.querySelector<HTMLElement>(":scope > .ui2-spot") : null;
+  if (sec && !next) {
+    next = document.createElement("div");
+    next.className = "ui2-spot";
+    next.setAttribute("aria-hidden", "true");
+    sec.prepend(next);
+  }
+  if (spot && spot !== next) spot.classList.remove("is-on");
+  spot = next;
+  if (sec && next) {
+    const r = sec.getBoundingClientRect();
+    next.style.setProperty("--sx", `${Math.round(x - r.left)}px`);
+    next.style.setProperty("--sy", `${Math.round(y - r.top)}px`);
+    next.classList.add("is-on");
+  }
+  // การ์ดเอียง 3 มิติ
+  const card = t?.closest<HTMLElement>(TILT) ?? null;
+  if (card !== tilted) untilt();
+  if (card) {
+    if (!card.hasAttribute("data-tilt")) card.setAttribute("data-tilt", "");
+    const r = card.getBoundingClientRect();
+    const dx = Math.max(-1, Math.min(1, ((x - r.left) / r.width) * 2 - 1));
+    const dy = Math.max(-1, Math.min(1, ((y - r.top) / r.height) * 2 - 1));
+    card.style.setProperty("--tx", dx.toFixed(3));
+    card.style.setProperty("--ty", dy.toFixed(3));
+    card.style.setProperty("--ta", `${(Math.hypot(dx, dy) * 5).toFixed(2)}deg`);
+    card.style.setProperty("--gx", `${Math.round((dx + 1) * 50)}%`);
+    card.style.setProperty("--gy", `${Math.round((dy + 1) * 50)}%`);
+    card.classList.add("is-tilting");
+    tilted = card;
+  }
+  // หลังไพ่โฮโลแกรม
+  const pick = t?.closest<HTMLElement>(".ui2-pick-card");
+  if (pick) {
+    const r = pick.getBoundingClientRect();
+    pick.style.setProperty("--hx", `${Math.round(100 - ((x - r.left) / r.width) * 100)}%`);
+    pick.style.setProperty("--hy", `${Math.round(100 - ((y - r.top) / r.height) * 100)}%`);
+  }
+  // ปุ่มแม่เหล็ก
+  const btn = t?.closest<HTMLElement>(".ui2-btn") ?? null;
+  if (btn !== magnet) unmagnet();
+  if (btn) {
+    if (!btn.hasAttribute("data-magnet")) btn.setAttribute("data-magnet", "");
+    const r = btn.getBoundingClientRect();
+    btn.style.setProperty("--bx", ((x - r.left - r.width / 2) * 0.16).toFixed(1));
+    btn.style.setProperty("--by", ((y - r.top - r.height / 2) * 0.3).toFixed(1));
+    magnet = btn;
+  }
+}
+addEventListener(
+  "pointermove",
+  (e) => {
+    if (e.pointerType !== "mouse") return;
+    last = e;
+    if (!fxRaf) fxRaf = requestAnimationFrame(fxFrame);
+  },
+  { passive: true },
+);
+document.documentElement.addEventListener("pointerleave", () => {
+  last = null;
+  untilt();
+  unmagnet();
+  spot?.classList.remove("is-on");
+});
