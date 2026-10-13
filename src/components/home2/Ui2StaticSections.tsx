@@ -515,6 +515,12 @@ const SHOW_SUITS = [
 ] as const;
 /** ข้อมูลย่อของไพ่ (ไม่ลากสำรับเต็มที่มีคำทำนายยาว · ด่าน A8-02) — หาไม่เจอ = ตัดออก ไม่แต่งไพ่แทน (กฎเหล็ก 14) */
 const cardById = (id: string) => CARD_SUMMARIES.find((card) => card.id === id);
+/** เครื่องมือในหน้ารวมราศี (หัวข้อในหน้า /cards/zodiac) — เดิมเป็นการ์ด h3 ในหน้าแรก v1 */
+const ZODIAC_TOOLS: ExploreLink[] = [
+  { path: ZODIAC_INDEX_PATH, th: "หาราศีจากวันเกิด", en: "Find your sign by birthday" },
+  { path: `${ZODIAC_INDEX_PATH}#zodiac-daily-title`, th: "ดวงรายวัน 12 ราศี", en: "Daily card for all 12 signs" },
+  { path: `${ZODIAC_INDEX_PATH}#zodiac-compat-title`, th: "ความเข้ากันสองราศี", en: "Two-sign compatibility" },
+];
 /** ผังที่โชว์เป็นแถว — ลิงก์/ข้อความลิงก์มาจาก POPULAR_SPREADS (ห้ามเปลี่ยนคำค้น) · จำนวนใบ/คำโปรยมาจากผังจริง */
 const SHOW_SPREAD_IDS = ["celtic-cross", "three-card", "decision", "daily", "twelve-houses"] as const;
 
@@ -814,6 +820,8 @@ export function Ui2ShowcaseSection({ isEnglish, href }: { isEnglish: boolean; hr
                 </Link>
               ))}
             </div>
+            {/* เครื่องมือในหน้าราศี — ลิงก์เดิมจากหน้าแรก v1 (ห้ามหาย · explore-links.ts) */}
+            <ShowChips links={ZODIAC_TOOLS} href={href} isEnglish={isEnglish} />
           </div>
 
           {/* 5 · วิธีดูดวง 5 ขั้นตอน — ข้อความชุดเดียวกับ JSON-LD HowTo (generateHowToJsonLd) ทุกข้อ */}
