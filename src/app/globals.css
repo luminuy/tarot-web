@@ -790,6 +790,132 @@ html[data-ui2-over-dark] .site-header-glass .text-muted:not(.absolute *) {
   color: #CFC3B2;
 }
 
+/*
+ * 🍎 แผงเมนูใหญ่ "ดูดวง" แบบ apple.com (เจ้าของสั่ง 2026-10-13 · ภาพอ้างอิงเมนู Store)
+ * แผงมืดเต็มกว้างตั้งแต่ขอบบนจอ วางใต้แคปซูล (z-index ติดลบในบริบทซ้อนของ <header>) · แคปซูลเปลี่ยนเป็นมืดตามแผง
+ * สองกลุ่มแรก = ลิงก์ตัวใหญ่ · กลุ่มที่เหลือ = ตัวเล็ก · หัวกลุ่มเทาเล็ก
+ * หน้าที่เหลือ: ทุกระดับมืดลง (`.mega-scrim`) · ระดับ full เบลอเพิ่มด้วย `filter` บนลูกตรงของ body
+ *   (ไม่ใช้ backdrop-filter — INC-0056 · ด่าน test-motion-quality กฎ 2)
+ * ⚠️ แผง/ฉากมืดต้องเป็น `absolute` (ห้าม `fixed` — หัวเว็บมี transform จึงเป็น containing block · ด่าน test-sticky-header)
+ */
+.mega-panel,
+.mega-scrim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms var(--ease-out), visibility 180ms;
+}
+.mega-scrim {
+  z-index: -2;
+  height: 100vh;
+  background: rgba(12, 10, 15, 0.42);
+}
+.mega-panel {
+  z-index: -1;
+  padding-top: calc(var(--site-header-h, 82px) + 26px);
+  color: #F6EEE2;
+  background: rgba(22, 17, 24, 0.985);
+  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.7);
+}
+[data-mega]:hover > .mega-panel,
+[data-mega]:focus-within > .mega-panel {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+[data-mega]:hover > .mega-scrim,
+[data-mega]:focus-within > .mega-scrim {
+  visibility: visible;
+  opacity: 1;
+}
+.mega-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 0.85fr);
+  gap: 32px;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 24px;
+  translate: 0 -6px;
+  transition: translate 240ms var(--ease-out);
+}
+[data-mega]:hover .mega-inner,
+[data-mega]:focus-within .mega-inner {
+  translate: 0 0;
+}
+.mega-title {
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(246, 238, 226, 0.56);
+}
+.mega-links {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+.mega-links a {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #E9DFD0;
+  transition: color 150ms var(--ease-out);
+}
+.mega-col-big .mega-links {
+  gap: 8px;
+}
+.mega-col-big .mega-links a {
+  font-family: var(--ui2-font-display, var(--font-sarabun));
+  font-size: clamp(20px, 14px + 0.75vw, 26px);
+  font-weight: 600;
+  line-height: 1.3;
+  color: #F6EEE2;
+}
+.mega-links a:hover,
+.mega-links a:focus-visible,
+.mega-foot a:hover,
+.mega-foot a:focus-visible {
+  color: #FFD98F;
+  outline: none;
+}
+.mega-foot {
+  max-width: 72rem;
+  margin: 30px auto 0;
+  padding: 0 24px 44px;
+}
+.mega-foot a {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #E3B868;
+}
+/* แคปซูลกลายเป็นมืดตามแผง (ข้อความในแคปซูลสว่าง · ยกเว้นของในแผงที่กางออกมา) */
+.site-header-glass:has([data-mega]:hover, [data-mega]:focus-within) {
+  background-color: rgba(30, 24, 33, 0.98);
+  border-color: rgba(255, 236, 200, 0.16);
+  box-shadow: none;
+}
+.site-header-glass:has([data-mega]:hover, [data-mega]:focus-within) :is(.text-ink, .text-ink-deep, nav):not(.absolute *, .absolute, .mega-panel *) {
+  color: #F6EEE2;
+}
+.site-header-glass:has([data-mega]:hover, [data-mega]:focus-within) .text-muted:not(.absolute *, .mega-panel *) {
+  color: #CFC3B2;
+}
+/* ระดับ full: เบลอเนื้อหาและท้ายเว็บ (พี่น้องถัดจาก <header> — หน้า Astro อยู่ใต้ body · หน้าแรกอยู่ใน island เดียวกัน)
+   filter ชั่วคราวระหว่างเปิดแผงเท่านั้น */
+[data-fx="full"] [data-site-header] ~ :is(main, footer) {
+  transition: filter 220ms var(--ease-out);
+}
+[data-fx="full"] [data-site-header]:has([data-mega]:hover, [data-mega]:focus-within) ~ :is(main, footer) {
+  filter: blur(14px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mega-inner {
+    translate: none;
+  }
+}
+
 /* แผงเลือกภาษา — ผุดจากมุมขวาบน (ปุ่มลูกโลก) แบบเมนูของระบบปฏิบัติการ · ปิดเองเมื่อ prefers-reduced-motion (กฎรวม) */
 .lang-pop {
   transform-origin: top right;

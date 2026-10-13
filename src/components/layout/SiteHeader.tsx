@@ -207,7 +207,12 @@ function DesktopNav({ isEnglish }: { isEnglish: boolean }) {
       aria-label={isEnglish ? "Main menu" : "เมนูหลัก"}
       className="hidden items-center gap-7 font-serif-th text-[15px] text-ink lg:flex"
     >
-      <div className="group/mega">
+      {/*
+        แผงเมนูใหญ่แบบ apple.com (เจ้าของสั่ง 2026-10-13): แผงมืดเต็มกว้างตั้งแต่ขอบบนจอ (แคปซูลลอยอยู่บนแผง)
+        สองกลุ่มแรกเป็นลิงก์ตัวใหญ่ · กลุ่มที่เหลือตัวเล็ก · หัวกลุ่มสีเทาเล็ก · หน้าที่เหลือเบลอ+มืดลง
+        สไตล์ทั้งหมดอยู่ใน globals.css (`.mega-*`) — CSS ล้วน ไม่มี state (หัวเว็บหน้า Astro ไม่ hydrate)
+      */}
+      <div className="group/mega" data-mega="">
         <Link href={nav.reading.all.href} prefetch={false} className={`${linkClass("/read")} gap-1`}>
           {nav.reading.label}
           <svg
@@ -223,15 +228,16 @@ function DesktopNav({ isEnglish }: { isEnglish: boolean }) {
             <path d="m6 9 6 6 6-6" />
           </svg>
         </Link>
-        <div className="invisible absolute inset-x-0 top-full z-50 border-b border-line bg-canvas opacity-0 shadow-[0_24px_48px_-32px_rgba(42,38,31,0.35)] transition-[opacity,visibility] duration-150 group-hover/mega:visible group-hover/mega:opacity-100 group-focus-within/mega:visible group-focus-within/mega:opacity-100">
-          <div className="mx-auto grid max-w-6xl grid-cols-4 gap-x-8 px-6 pb-8 pt-9">
-            {nav.reading.groups.map((group) => (
-              <div key={group.title}>
-                <p className="text-sm font-bold text-ink">{group.title}</p>
-                <ul className="mt-3 space-y-2.5">
+        <span className="mega-scrim" aria-hidden="true" />
+        <div className="mega-panel">
+          <div className="mega-inner">
+            {nav.reading.groups.map((group, i) => (
+              <div key={group.title} className={i < 2 ? "mega-col mega-col-big" : "mega-col"}>
+                <p className="mega-title">{group.title}</p>
+                <ul className="mega-links">
                   {group.links.map((link) => (
                     <li key={link.href}>
-                      <Link href={link.href} prefetch={false} className="text-sm text-muted transition-colors hover:text-gold-ink focus-visible:text-gold-ink focus-visible:outline-none">
+                      <Link href={link.href} prefetch={false}>
                         {link.label}
                       </Link>
                     </li>
@@ -240,12 +246,10 @@ function DesktopNav({ isEnglish }: { isEnglish: boolean }) {
               </div>
             ))}
           </div>
-          <div className="border-t border-line">
-            <div className="mx-auto max-w-6xl px-6 py-4">
-              <Link href={nav.reading.all.href} prefetch={false} className="text-sm font-bold text-gold-ink hover:underline focus-visible:underline focus-visible:outline-none">
-                {nav.reading.all.label} →
-              </Link>
-            </div>
+          <div className="mega-foot">
+            <Link href={nav.reading.all.href} prefetch={false}>
+              {nav.reading.all.label} →
+            </Link>
           </div>
         </div>
       </div>
