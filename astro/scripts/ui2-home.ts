@@ -9,6 +9,8 @@
  *   4. แถบปุ่มติดล่างจอ (มือถือ) — โผล่หลังเลื่อนพ้นหัวหน้า · ซ่อนเมื่อส่วนเปิดไพ่หรือส่วนปิดท้ายอยู่ในจอ
  *   6. หัวเว็บกระจกมืด — ตั้ง `data-ui2-over-dark` บน <html> เมื่อส่วนพื้นมืด (`[data-ui2-dark]`) อยู่ใต้แคปซูลหัวเว็บ
  *      (ผู้สังเกตการณ์ตัวที่สองที่เฝ้าแค่แถบบนสุดของจอ · ถอดออกเมื่อออกจากหน้าเลือก)
+ *   7. แท็บคลังไพ่ (หัวเรื่องซ้าย ข้อมูลขวา) — ฟังคลิก/ลูกศรที่ document ตัวเดียว (ส่วนนี้ถูกถอด/ใส่ใหม่ได้)
+ *      ทุกแผงอยู่ใน HTML แล้ว แค่สลับ `hidden` + `aria-selected` ตามแบบแท็บของ WAI-ARIA
  *   5. แม่หมอตัวจริงที่ว่างเร็วสุด — ยิง `/api/marketplace/readers/featured` ตอนกล่องใกล้จอเท่านั้น
  *      ใส่ข้อความด้วย textContent (ข้อมูลจากฐานข้อมูล ห้าม innerHTML) · ไม่มีใคร/อ่านไม่ได้ = ปล่อยลิงก์ล้วน
  *
@@ -241,3 +243,38 @@ new MutationObserver((mutations) => {
     scan();
   });
 }).observe(document.body, { childList: true, subtree: true });
+
+/* ── 7. แท็บคลังไพ่ ─────────────────────────────────────────────────────── */
+const TAB = ".ui2-show-tab";
+function selectTab(tab: HTMLElement, focus: boolean): void {
+  const tabs = tab.parentElement?.querySelectorAll<HTMLElement>(TAB) ?? [];
+  for (const t of tabs) {
+    const on = t === tab;
+    t.setAttribute("aria-selected", String(on));
+    t.tabIndex = on ? 0 : -1;
+    const panel = document.getElementById(t.getAttribute("aria-controls") ?? "");
+    if (panel) panel.hidden = !on;
+  }
+  if (focus) tab.focus();
+  // มือถือ: แถบหัวเรื่องเลื่อนแนวนอน — เลื่อนเม็ดที่เลือกให้อยู่ในแถบ (เลื่อนเฉพาะแถบ ไม่เลื่อนทั้งหน้า)
+  const bar = tab.parentElement;
+  if (bar && bar.scrollWidth > bar.clientWidth) {
+    bar.scrollTo({ left: tab.offsetLeft - (bar.clientWidth - tab.offsetWidth) / 2, behavior: "smooth" });
+  }
+}
+document.addEventListener("click", (e) => {
+  const tab = (e.target as Element | null)?.closest?.<HTMLElement>(TAB);
+  if (tab) selectTab(tab, false);
+});
+document.addEventListener("keydown", (e) => {
+  const tab = (e.target as Element | null)?.closest?.<HTMLElement>(TAB);
+  if (!tab?.parentElement) return;
+  const tabs = Array.from(tab.parentElement.querySelectorAll<HTMLElement>(TAB));
+  const i = tabs.indexOf(tab);
+  const k = e.key;
+  const next =
+    k === "ArrowDown" || k === "ArrowRight" ? i + 1 : k === "ArrowUp" || k === "ArrowLeft" ? i - 1 : k === "Home" ? 0 : k === "End" ? tabs.length - 1 : null;
+  if (next === null) return;
+  e.preventDefault();
+  selectTab(tabs[(next + tabs.length) % tabs.length], true);
+});

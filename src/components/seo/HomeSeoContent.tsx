@@ -4,6 +4,7 @@ import {
   Ui2ClosingSection,
   Ui2ExploreSection,
   Ui2NotesSection,
+  Ui2ShowcaseSection,
   Ui2StickyCta,
   Ui2VerifySection,
 } from "@/components/home2/Ui2StaticSections";
@@ -15,6 +16,7 @@ import {
  *   4. เรื่องที่ค้างอยู่ในใจ…       (กลางคืน)  — แทน spread_select · more_ways บางส่วน
  *   5. เว็บอื่นสุ่มให้ดู / ตรวจได้    (แผ่นขาว)  — แทน how_it_works · heritage · proof บางส่วน
  *   6. ทุกอย่างอยู่ในที่เดียว         (กลางคืน)  — แทน proof (ตัวอย่างคำทำนาย)
+ *   6.5 คลังไพ่ยิปซี (หัวเรื่องซ้าย ข้อมูลขวา) (กลางวัน) — ดูดวงตามเรื่อง · ผัง · ไพ่เด่น · ราศี · 5 ขั้นตอน · ทางลัด
  *   7. สำรวจต่อ + คำถามที่พบบ่อย      (กลางวัน) — แทน zodiac · spreads_cards · articles · faq · "คนค้นหาบ่อย"
  *   8. ปิดท้าย                        (กลางคืน)  — นาฬิกาตัวใหญ่ + ปุ่มหลัก
  * ส่วน 1–3 อยู่ใน island `TarotFlow` (ต้อง hydrate) — ดู `src/components/home/TarotFlow.tsx`
@@ -30,6 +32,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
         <Ui2NotesSection isEnglish={isEnglish} href={href} />
         <Ui2VerifySection isEnglish={isEnglish} />
         <Ui2BentoSection isEnglish={isEnglish} href={href} />
+        <Ui2ShowcaseSection isEnglish={isEnglish} href={href} />
         <Ui2ExploreSection isEnglish={isEnglish} href={href} />
         <Ui2ClosingSection isEnglish={isEnglish} href={href} />
       </div>
