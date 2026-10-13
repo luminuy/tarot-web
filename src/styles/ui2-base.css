@@ -73,6 +73,12 @@
   --ui2-note-ink-5: #163A33; --ui2-note-sub-5: #2D5249;
   --ui2-note-ink-6: #3A2A16; --ui2-note-sub-6: #5A4428;
   --ui2-note-ink-7: #1E2740; --ui2-note-sub-7: #3A4664;
+  /* ไพ่ผังงาช้างของคลัง /spreads (UI_2_0_SPREADS_PLAN หัวข้อ 4.2) */
+  --ui2-card-ivory-top: #FCF6E8;
+  --ui2-card-ivory-bottom: #F2E4C6;
+  --ui2-card-ivory-ink: #2A1F14;
+  --ui2-card-frame: #C9A15A;
+  --ui2-card-shadow: 0 34px 44px -24px rgba(0, 0, 0, 0.95);
 }
 
 .ui2-accent {

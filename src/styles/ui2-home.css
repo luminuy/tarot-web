@@ -4,5 +4,6 @@
  * ⚠️ ห้ามนำเข้าใน globals.css — ทุกหน้าจะต้องโหลดด้วย เกินงบ CSS 32 KB gzip (ด่าน test-bundle-budget)
  * ⚠️ ของหนักทุกชิ้นอยู่ใน ui2-fx-full.css ไฟล์เดียว (ด่าน test-ui2-fx · test-motion-quality กฎ 2)
  */
+@import "./ui2-core.css";
 @import "./ui2.css";
 @import "./ui2-fx-full.css";

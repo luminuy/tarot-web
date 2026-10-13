@@ -1,321 +1,341 @@
 /**
- * 📐 คลังผังพยากรณ์ 26 แบบ — **เรนเดอร์เป็น HTML ล้วน ไม่มี hydration** (R-02)
+ * 🃏 คลังผังพยากรณ์ `/spreads` — UI 2.0 "ไพ่กระจาย 6 หมวด แตะแล้วเด้ง"
  * ===========================================================================
+ * แผน: docs/plans/UI_2_0_SPREADS_PLAN_2026-10-13.md
  *
- * ## ทำไมไฟล์นี้ถึงไม่มี `useState` และไม่มี `onClick` แม้แต่ตัวเดียว
+ * ## เรนเดอร์เป็น HTML ล้วน ไม่มี hydration (R-02 — ยังบังคับ)
  *
- * ของเดิมเป็น island ที่ `client:idle` ทั้งก้อน — ซึ่งแปลว่าเบราว์เซอร์ต้องโหลด
- * React runtime + **ข้อมูลผังทั้ง 25 แบบ (17.2 KB gzip)** มาเพื่อความสามารถแค่สองอย่าง:
- * สลับแท็บหมวด กับ กดขยายดูตำแหน่งไพ่
+ * ไฟล์นี้ไม่มี `useState` / `onClick` สักตัว · ผังหนึ่งแบบ = ไพ่หนึ่งใบ เป็นลิงก์ `<a href="/spreads/<id>">` จริง
+ * - ไม่มี JS (หรือสคริปต์ล้ม) ➔ กดไพ่แล้วไปหน้าคู่มือผัง · เนื้อหาทั้ง 26 ผังอยู่ใน HTML ดิบครบ
+ * - มี JS ➔ `astro/scripts/spreads-pop.ts` (สคริปต์ธรรมดา ≤ 3 KB) เปิด `<dialog>` ไพ่เด้ง
+ *   ข้อมูลในหน้าต่าง (คำโปรย · ชื่อตำแหน่ง · ลิงก์เริ่มดูดวง) อยู่ใน `<div hidden data-pop>` ใต้ไพ่แต่ละใบ
+ *   ไพ่ใหญ่ในหน้าต่างคัดลอก (`cloneNode`) จากหน้าต่างผ้าปูของไพ่ใบที่แตะ — ไม่เรนเดอร์ผังซ้ำ 26 ชุด
  *
- * วัดจากบิลด์จริง (2026-09-17): เอา hydration ออก ➔ JS ของหน้านี้ **124.4 ➔ 99.4 KB gzip**
- * และงานก้อนยาวที่สุดตอนโหลด (687 ms บน Lighthouse mobile) หายไปทั้งก้อน
- *
- * ## แล้วแท็บกับปุ่มขยายทำงานยังไงถ้าไม่มี React
- *
- * - **ขยายดูตำแหน่งไพ่** ➔ `<details>`/`<summary>` ของเบราว์เซอร์เอง · ไม่ใช้ JS เลยสักบรรทัด
- * - **สลับแท็บหมวด** ➔ การ์ดทั้ง 25 ใบถูกเรนเดอร์ไว้ใน HTML ตั้งแต่ตอนบิลด์
- *   พร้อมแอตทริบิวต์ `data-cats` บอกว่าใบนี้อยู่หมวดไหนบ้าง
- *   สคริปต์เล็ก ๆ ที่ `astro/scripts/spreads-tabs.ts` (≈1 KB) แค่สลับแอตทริบิวต์ `hidden`
- *
- * ## ผลพลอยได้ที่สำคัญกว่าความเร็ว
- *
- * เดิม HTML ที่เซิร์ฟเวอร์ส่งออกไปมีผังแค่ 6 ใบของแท็บ "ยอดนิยมแนะนำ" อีก 19 ใบโผล่
- * ต่อเมื่อผู้ใช้กดแท็บ (นี่คือเหตุผลที่ต้องมีสารบัญฝั่งเซิร์ฟเวอร์เพิ่มใน `spreads-index.tsx`)
- * ตอนนี้ **เนื้อหาของทั้ง 26 ผังอยู่ใน HTML ดิบครบทุกใบ** ตั้งแต่ไบต์แรกที่บอตและผู้ใช้ได้รับ
- *
- * ⚠️ **ห้ามใส่ `client:*` กลับเข้าไปที่ `<SpreadsLibraryRoot>`** — จะได้ทั้งสองต้นทุนพร้อมกัน
- * (HTML ที่โตขึ้นจากการเรนเดอร์ครบ 25 ใบ + JS ที่ตั้งใจตัดทิ้ง) ด่านงบบันเดิลเฝ้าอยู่
+ * ⚠️ **ห้ามใส่ `client:*` ที่ `<SpreadsLibraryRoot>`** — งบ JS (เคยลด 124 ➔ 100 KB) · ด่านงบบันเดิลเฝ้าอยู่
+ * ⚠️ ไพ่คว่ำในผ้าปูเป็น CSS ล้วน — **ห้ามใส่หน้าไพ่จริง** (คนจะเข้าใจว่าเป็นผลที่ได้ · กฎเหล็ก 14)
+ * ⚠️ ตำแหน่ง/ขนาดไพ่คว่ำมาจาก `mapLayout()` ที่เดียว (ISSUE-034) · หมวดมาจาก `spread-shelves.ts` ที่เดียว (ISSUE-059)
+ * ⚠️ ห้ามใส่คลาส `anim-*` ขาเข้าบนไพ่ (INC-0244) — ไพ่อยู่ตำแหน่งสุดท้ายตั้งแต่เฟรมแรก
  */
 
-import React from "react";
+import React, { type CSSProperties } from "react";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import {
   type Spread,
   getSpreadName,
+  getSpreadShortName,
   getSpreadTagline,
-  getSpreadDescription,
   getPositionName,
-  getPositionMeaning,
 } from "@/data/spreads-helpers";
-import { renderSpreadIllustration } from "@/components/spread/spread-illustrations";
-import {
-  SparkleTabIcon,
-  HeartTabIcon,
-  PentacleTabIcon,
-  CrystalBallTabIcon,
-  AllSpreadsTabIcon,
-} from "@/components/ui/TarotArtIcons";
-import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
+import { SPREAD_SHELVES, SHELF_SCATTER, shelfCardRange, type SpreadShelf } from "@/data/spread-shelves";
+import { mapLayout, MAP_CARD_ASPECT } from "@/lib/tarot/spread-map-geometry";
 import { isStandardSpread } from "@/lib/entitlement/limits";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { GoldMark } from "@/components/ui/GoldMark";
 
 interface SpreadsLibraryProps {
   spreads: Spread[];
 }
 
-const CATEGORY_MAP_TH: Record<string, string> = {
-  general: "ทั่วไป",
-  love: "ความรัก",
-  career: "การงาน",
-  work: "การงาน",
-  money: "การเงิน",
-  finance: "การเงิน",
-  spiritual: "จิตวิญญาณ",
-  decision: "การตัดสินใจ",
-  all: "ทั้งหมด",
-  recommended: "แนะนำ",
-  master: "ผังใหญ่",
+type Vars = CSSProperties & Record<`--${string}`, string | number>;
+
+/** ข้อความชิปหัวหน้า — อยู่นอกบล็อกหัวหน้าเพราะมีปี "1909" (ด่าน test-spreads ห้ามเลข 2 หลักในบล็อกหัวหน้า) */
+const HERO_CHIP = {
+  th: "สำรับ 1909 แท้ · ทุกผังสุ่มจริง ตรวจสอบได้",
+  en: "The true 1909 deck · every spread is truly random and verifiable",
 };
 
-const CATEGORY_MAP_EN: Record<string, string> = {
-  general: "General",
-  love: "Love & Romance",
-  career: "Career & Work",
-  work: "Career & Work",
-  money: "Finances & Abundance",
-  finance: "Finances & Abundance",
-  spiritual: "Spiritual Growth",
-  decision: "Decision & Dilemmas",
-  all: "All",
-  recommended: "Recommended",
-  master: "Grand Spread",
-};
+/** กุญแจเล็กของป้ายผังพิเศษ (SVG เส้น — ห้ามอีโมจิ) */
+function LockGlyph() {
+  return (
+    <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <rect x="3.2" y="7" width="9.6" height="6.8" rx="1.6" />
+      <path d="M5.4 7V5.2a2.6 2.6 0 0 1 5.2 0V7" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 /**
- * สมาชิกของแต่ละแท็บ — **แหล่งความจริงเดียว** ทั้งของ HTML และของสคริปต์สลับแท็บ
- * (สคริปต์อ่านจาก `data-cats` ที่สร้างจากตารางนี้ จึงไม่มีทางหลุดจากกัน)
+ * ผ้าปูในไพ่ผัง — ไพ่คว่ำตามตำแหน่งจริงจาก `mapLayout()`
+ * กรอบผังสูง `boxHeight` เท่าของความกว้าง · หน้าต่างจัดวางแบบ contain ด้วยหน่วย container (`--bh`)
  */
-const TAB_MEMBERS: Record<string, string[]> = {
-  recommended: ["daily", "quick", "yes-no", "three-card", "situation-solution", "celtic-cross"],
-  love: ["love", "how-they-feel", "ex-reconciliation", "soulmate", "three-card"],
-  career: ["career", "money", "career-switch", "decision", "inner-potential"],
-  master: ["celtic-cross", "year-ahead", "twelve-houses", "weekly", "chakra", "monthly"],
-};
+function SpreadMap({ spread }: { spread: Spread }) {
+  const layout = mapLayout(spread.positions);
+  const cardHPct = (layout.cardW * MAP_CARD_ASPECT) / layout.boxHeight;
+  return (
+    <span className="ui2-sc-window" aria-hidden="true">
+      <span className="ui2-sc-map" style={{ "--bh": layout.boxHeight.toFixed(3) } as Vars}>
+        {spread.positions.map((pos) => {
+          const top = (pos.y * layout.yScale + layout.offsetY) / layout.boxHeight;
+          const style: Vars = {
+            left: `${(pos.x * 100).toFixed(2)}%`,
+            top: `${(top * 100).toFixed(2)}%`,
+            width: `${(layout.cardW * 100).toFixed(2)}%`,
+            height: `${(cardHPct * 100).toFixed(2)}%`,
+          };
+          if (pos.rotate) style["--r"] = `${pos.rotate}deg`;
+          return <span key={pos.index} className={pos.rotate ? "ui2-sc-spot is-cross" : "ui2-sc-spot"} style={style} />;
+        })}
+      </span>
+    </span>
+  );
+}
 
-/** แท็บที่เปิดมาเป็นค่าเริ่มต้น — ต้องตรงกับค่าเริ่มต้นในสคริปต์สลับแท็บ */
-const DEFAULT_TAB = "recommended";
-
-const catsOf = (id: string): string =>
-  ["all", ...Object.keys(TAB_MEMBERS).filter((tab) => TAB_MEMBERS[tab].includes(id))].join(" ");
-
-export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
-  const { isEnglish } = useLocale();
-
-  const categories = [
-    { id: "recommended", label: isEnglish ? "Recommended" : "ยอดนิยมแนะนำ", count: 6, Icon: SparkleTabIcon },
-    { id: "love", label: isEnglish ? "Love & Romance" : "ความรัก & คนในใจ", count: 5, Icon: HeartTabIcon },
-    { id: "career", label: isEnglish ? "Career & Finances" : "การงาน & การเงิน", count: 5, Icon: PentacleTabIcon },
-    { id: "master", label: isEnglish ? "Grand Spreads" : "ผังใหญ่เจาะลึก", count: 5, Icon: CrystalBallTabIcon },
-    { id: "all", label: isEnglish ? "All Spreads" : "ผังทั้งหมด", count: spreads.length, Icon: AllSpreadsTabIcon },
-  ];
+function ShelfSection({
+  shelf,
+  order,
+  byId,
+  isEnglish,
+}: {
+  shelf: SpreadShelf;
+  order: number;
+  byId: Map<string, Spread>;
+  isEnglish: boolean;
+}) {
+  const items = shelf.ids.map((id) => byId.get(id)).filter((s): s is Spread => !!s);
+  const scatter = SHELF_SCATTER[items.length];
+  const range = shelfCardRange(items.map((s) => s.positions.length));
+  const lead = (isEnglish ? shelf.leadEn : shelf.leadTh).replace("{range}", range);
+  const tone: Vars = { "--cat": `var(--ui2-note-${shelf.tone})`, "--cat-ink": `var(--ui2-note-ink-${shelf.tone})` };
+  const titleId = `shelf-${shelf.key}-title`;
 
   return (
-    <div className="space-y-6">
-      {/* Dynamic Bilingual Hero Header */}
-      <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
-        <div>
-          <span className="glass-chip inline-flex items-center gap-2 px-4 py-1.5 text-xs text-gold-ink font-serif-th font-bold">
-            {isEnglish
-              ? `${spreads.length} CLASSIC DIVINATION SPREADS`
-              : `${spreads.length} ผังการเปิดไพ่มาตรฐานสากล`}
-          </span>
-        </div>
-        <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-ink tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]"><ThaiPhrases>
+    <section
+      id={`shelf-${shelf.key}`}
+      aria-labelledby={titleId}
+      className="ui2-sec ui2-night ui2-sp-shelf"
+      data-ui2-dark=""
+      data-anim-section=""
+      style={tone}
+    >
+      <span className="ui2-stars ui2-loop" aria-hidden="true" />
+      <span className="ui2-stars ui2-stars-2 ui2-loop" aria-hidden="true" />
+      <div className="ui2-wrap ui2-sp-shelf-head">
+        <span className="ui2-sp-badge">
+          <span className="ui2-num">{String(order).padStart(2, "0")}</span>
+          {!isEnglish && <span className="ui2-accent">{shelf.nameEn}</span>}
+        </span>
+        <h2 id={titleId} className="ui2-h2">
+          <ThaiPhrases>{isEnglish ? shelf.nameEn : shelf.nameTh}</ThaiPhrases>
+        </h2>
+        <p className="ui2-lede">{lead}</p>
+        <p className="ui2-sp-hint">
           {isEnglish
-            ? `${spreads.length} Sacred Tarot Spreads & Layouts`
-            : `ผังการเปิดไพ่ทาโรต์ ${spreads.length} รูปแบบ`}
-        </ThaiPhrases></h1>
-        <p className="text-xs sm:text-sm text-muted max-w-2xl mx-auto leading-relaxed font-serif-th [text-wrap:balance]">
-          {isEnglish
-            ? "Select a sacred spread attuned to your inquiry. Explore positional dynamics, archetypal geometry, and card interpretations."
-            : "เลือกผังที่ตรงกับเรื่องที่คุณอยากรู้ พร้อมดูตัวอย่างการจัดวางและความหมายของแต่ละตำแหน่ง"}
+            ? `${items.length} spreads · tap the card that calls to you`
+            : `${items.length} ผัง · แตะไพ่ที่ใจเลือก`}
         </p>
-        {/* ✦ ห้องออกแบบผัง (REFLECTION_JOURNAL_PLAN 1.8) — ทางเข้าเดียวจากคลังผัง */}
-        <Link
-          href="/spreads/create"
-          className="tap-overlay-y min-h-11 inline-flex items-center px-5 rounded-full glass-chip text-sm font-serif-th text-ink-deep font-semibold hover:text-gold-ink"
-        >
-          {isEnglish ? "Or design your own spread" : "หรือออกแบบผังของคุณเอง"}
-        </Link>
-        <Link
-          href="/questions"
-          className="tap-overlay-y min-h-11 inline-flex items-center px-5 rounded-full glass-chip text-sm font-serif-th text-ink-deep font-semibold hover:text-gold-ink sm:ml-2"
-        >
-          {isEnglish ? "Questions people ask most" : "คำถามที่คนถามไพ่บ่อย"}
-        </Link>
       </div>
 
-      {/* Category Tabs with Editorial Styling */}
-      <div
-        role="tablist"
-        data-spreads-tablist
-        aria-label={isEnglish ? "Spread library categories" : "หมวดหมู่คลังผังพยากรณ์"}
-        className="flex items-center justify-start gap-2 overflow-x-auto pb-3 px-1 no-scrollbar select-none border-b border-line/40"
-      >
-        {categories.map((cat) => {
-          const isActive = cat.id === DEFAULT_TAB;
-          const Icon = cat.Icon;
-
+      <ul className="ui2-sp-table" style={{ "--table-max": `${scatter?.maxWidth ?? 1160}px` } as Vars}>
+        {items.map((spread, i) => {
+          const [x, y, angle] = scatter?.spots[i] ?? [0, 0, 0];
+          const premium = !isStandardSpread(spread.id);
+          const name = getSpreadName(spread, isEnglish);
           return (
-            <button
-              key={cat.id}
-              role="tab"
-              id={`library-tab-${cat.id}`}
-              data-spread-tab={cat.id}
-              aria-controls="library-panel"
-              aria-selected={isActive}
-              tabIndex={isActive ? 0 : -1}
-              type="button"
-              /* แท็บที่เลือกอยู่ใช้ผิวทองกระจกชุดเดียวกับปุ่มหลักทั้งเว็บ (เดิมเป็นก้อนดำ `bg-ink`)
-                 ส่วนแท็บที่ยังไม่เลือกเป็นชิปกระจก จึงเข้าชุดกับการ์ดผังที่อยู่ใต้มัน */
-              className={`tap-overlay-y px-4 py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
-                isActive ? "btn-gold-glass" : "glass-chip text-ink hover:text-gold-ink"
-              }`}
-            >
-              <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-white" : "text-muted"}`} />
-              <span>{cat.label}</span>
-              <span
-                className={`text-[12px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
-                  isActive ? "bg-white/20 text-white" : "bg-black/5 text-muted"
-                }`}
-              >
-                {cat.count}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/*
-        26 Spreads Grid — เรนเดอร์ครบทุกใบตั้งแต่ตอนบิลด์
-        ใบที่ไม่ได้อยู่ในแท็บที่เปิดอยู่ถูกซ่อนด้วยแอตทริบิวต์ `hidden`
-        (ซ่อนจากทั้งสายตาและโปรแกรมอ่านหน้าจอ — ไม่ใช่แค่ `opacity: 0`)
-        ⚠️ ห้ามใส่ `anim-swap-rise-sm` ที่นี่ (INC-0244) — คลาสจะติดไปกับ HTML ตอนบิลด์
-        กริดทั้งหน้าจึงจางหายแล้วค่อยโผล่ทุกครั้งที่เปิดหน้า · `astro/scripts/spreads-tabs.ts`
-        ใส่คลาสให้เองตอนผู้ใช้สลับแท็บแล้ว
-      */}
-      <div
-        role="tabpanel"
-        id="library-panel"
-        data-spreads-panel
-        aria-labelledby={`library-tab-${DEFAULT_TAB}`}
-        /* แถบสีอ่อนแบ่ง "การ์ดผัง" ออกจากหัวหน้าแบบหน้าแรก (`page-band`) */
-        className="page-band page-band-tint grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6"
-      >
-        {spreads.map((spread) => {
-          const cats = catsOf(spread.id);
-
-          return (
-            <div
+            <li
               key={spread.id}
-              data-spread-card
-              data-cats={cats}
-              hidden={!cats.split(" ").includes(DEFAULT_TAB)}
-              className="altar-card-porcelain p-5 sm:p-6 flex flex-col justify-between space-y-4 relative overflow-hidden group"
+              className="ui2-sc-slot ui2-loop"
+              style={{ "--x": x, "--y": `${y}px`, "--a": `${angle}deg`, "--i": i } as Vars}
             >
-              {/* Header Tag */}
-              <div className="flex items-center justify-between z-10">
-                <div className="flex items-center gap-1.5">
-                  <span className="glass-chip text-[13px] font-mono font-bold text-ink px-2.5 py-0.5">
-                    {spread.positions.length} {isEnglish ? "Cards" : "ใบ"}
-                  </span>
-                  {!isStandardSpread(spread.id) && (
-                    <span className="glass-chip text-[12px] text-gold-ink px-2 py-0.5 font-serif-th font-bold flex items-center gap-1">
-                      <SealedLockIcon className="w-3 h-3" />
-                      <span>{isEnglish ? "Grand Spread" : "ญาณพิเศษ"}</span>
-                    </span>
-                  )}
-                </div>
-                <span className="text-[13px] text-muted font-serif-th">
-                  {isEnglish
-                    ? `Category: ${CATEGORY_MAP_EN[spread.defaultCategory] || spread.defaultCategory}`
-                    : `หมวด: ${CATEGORY_MAP_TH[spread.defaultCategory] || spread.defaultCategory}`}
-                </span>
-              </div>
-
-              {/* Interactive Spread Visual Diagram on Illuminated Pedestal */}
-              <div className="glass-tile h-44 flex items-center justify-center my-1 relative select-none p-2">
-                {renderSpreadIllustration(spread.id)}
-              </div>
-
-              {/* Titles & Tagline */}
-              <div className="space-y-1.5 z-10 pt-3 border-t border-line/40">
-                {/* ชื่อผังแต่ละแบบคือหัวข้อระดับที่สองของหน้า /spreads (h1 = ชื่อหน้า) */}
-                <h2 className="font-serif-th text-base sm:text-lg font-bold text-ink leading-snug py-0.5 [text-wrap:balance]"><ThaiPhrases>
-                  {getSpreadName(spread, isEnglish)}
-                </ThaiPhrases></h2>
-                <p className="text-xs text-muted leading-relaxed font-serif-th">{getSpreadTagline(spread, isEnglish)}</p>
-              </div>
-
-              <p className="text-[13px] text-ink leading-relaxed line-clamp-2 z-10 font-serif-th [text-wrap:pretty]">
-                {getSpreadDescription(spread, isEnglish)}
-              </p>
-
-              {/*
-                ย่อ/ขยายด้วย <details> ของเบราว์เซอร์ — ไม่ใช้ JS เลยสักบรรทัด
-                (ของเดิมเป็น state ใน React ซึ่งเป็นเหตุผลหนึ่งที่ทั้งคลังต้อง hydrate)
-              */}
-              <details className="z-10 space-y-2 group/details">
-                <summary className="tap-overlay-y w-full text-left text-[13px] font-serif-th text-gold-ink hover:text-ink flex items-center justify-between py-1.5 border-t border-line/40 cursor-pointer transition-colors font-bold list-none [&::-webkit-details-marker]:hidden">
-                  <span className="flex items-center gap-1.5">
-                    {isEnglish
-                      ? `View ${spread.positions.length} card positions`
-                      : `ดูรายละเอียด ${spread.positions.length} ตำแหน่งไพ่`}
-                  </span>
-                  <span className="text-[13px]">
-                    <span className="group-open/details:hidden">{isEnglish ? "▼ Expand" : "▼ ขยาย"}</span>
-                    <span className="hidden group-open/details:inline">{isEnglish ? "▲ Collapse" : "▲ ย่อ"}</span>
-                  </span>
-                </summary>
-
-                <div className="space-y-1.5 pt-1">
-                  {spread.positions.map((pos, idx) => (
-                    <div
-                      key={idx}
-                      className="glass-tile text-[13px] p-2 flex items-start gap-2"
-                    >
-                      <span className="text-gold-ink font-mono font-bold flex-shrink-0 text-[13px]">#{idx + 1}</span>
-                      <div>
-                        <strong className="text-ink font-serif-th">{getPositionName(pos, isEnglish)}:</strong>{" "}
-                        <span className="text-muted leading-relaxed font-serif-th">
-                          {getPositionMeaning(pos, isEnglish)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </details>
-
-              {/* Primary Action Button: Link directly to Altar */}
-              <Link
-                href={`/read/${spread.id}`}
-                prefetch={false}
-                className="btn-gold-glass w-full py-3 font-serif-th font-bold text-xs sm:text-sm text-center active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5 z-10"
-              >
-                <span>
-                  {isEnglish
-                    ? isStandardSpread(spread.id)
-                      ? "Begin Reading with Spread"
-                      : "Unlock Grand Spread"
-                    : isStandardSpread(spread.id)
-                      ? "เริ่มดูดวงด้วยผังนี้"
-                      : "เปิดผังพยากรณ์พิเศษนี้"}
-                </span>
-              </Link>
               <Link
                 href={`/spreads/${spread.id}`}
                 prefetch={false}
-                className="z-10 -mt-1 text-center text-[13px] font-serif-th text-gold-ink hover:text-ink transition-colors"
+                className="ui2-spread-card"
+                data-spread-id={spread.id}
+                id={`spread-${spread.id}`}
               >
-                {isEnglish ? "Read Spread Guide →" : "อ่านคู่มือผังนี้ →"}
+                <span className="ui2-sc-count">
+                  <span className="ui2-num">{spread.positions.length}</span> {isEnglish ? "cards" : "ใบ"}
+                </span>
+                {premium && (
+                  <span className="ui2-sc-lock">
+                    <LockGlyph />
+                    <span className="sr-only">{isEnglish ? "Premium spread" : "ผังพิเศษ"}</span>
+                  </span>
+                )}
+                <SpreadMap spread={spread} />
+                <h3 className="ui2-sc-band">
+                  <ThaiPhrases>{getSpreadShortName(spread, isEnglish)}</ThaiPhrases>
+                </h3>
               </Link>
-            </div>
+              {/* ข้อมูลของหน้าต่างไพ่เด้ง — สคริปต์ย้ายไปแสดง · ไม่มี JS ก็ยังอยู่ใน HTML ให้บอตเห็น */}
+              <div hidden data-pop="" data-name={name} data-cat={isEnglish ? shelf.nameEn : shelf.nameTh}>
+                <p>{getSpreadTagline(spread, isEnglish)}</p>
+                <ol data-positions="">
+                  {spread.positions.map((pos) => (
+                    <li key={pos.index}>{getPositionName(pos, isEnglish).replace(/^\d+\.\s*/, "")}</li>
+                  ))}
+                </ol>
+                <Link href={`/read/${spread.id}`} prefetch={false} data-start="">
+                  {isEnglish ? "Start a reading with this spread" : "เริ่มดูดวงด้วยผังนี้"}
+                </Link>
+              </div>
+            </li>
           );
         })}
+      </ul>
+    </section>
+  );
+}
+
+/**
+ * หน้าต่างไพ่เด้ง — ตัวเดียวของทั้งหน้า (INC-0243: ไม่ติด stacking context ของส่วนไหน · showModal() ขึ้นชั้นบนสุดเอง)
+ * ช่องว่างทั้งหมดเติมโดย `astro/scripts/spreads-pop.ts` จากไพ่ใบที่แตะ
+ */
+function SpreadPopDialog({ isEnglish }: { isEnglish: boolean }) {
+  return (
+    <dialog className="ui2-spread-pop" aria-labelledby="spread-pop-title" data-spread-pop="" data-anim-section="">
+      <div className="ui2-pop-inner">
+        <button
+          type="button"
+          className="ui2-pop-x"
+          data-pop-close=""
+          aria-label={isEnglish ? "Close and go back to all spreads" : "ปิด แล้วกลับไปเลือกไพ่ใบอื่น"}
+        >
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+            <path d="M3.5 3.5l9 9M12.5 3.5l-9 9" />
+          </svg>
+        </button>
+        <div className="ui2-pop-stage">
+          <span className="ui2-pop-glow ui2-loop" aria-hidden="true" />
+          <div className="ui2-spread-card ui2-pop-card" data-pop-card="" aria-hidden="true" />
+        </div>
+        <div className="ui2-pop-panel">
+          <div className="ui2-pop-chips">
+            <span className="ui2-pop-chip ui2-pop-chip-cat" data-pop-cat="" />
+            <span className="ui2-pop-chip" data-pop-count="" />
+            <span className="ui2-pop-chip ui2-pop-chip-premium" data-pop-premium="" hidden>
+              <LockGlyph />
+              {isEnglish ? "Premium spread" : "ผังพิเศษ"}
+            </span>
+          </div>
+          <h2 id="spread-pop-title" className="ui2-pop-title" data-pop-title="" />
+          <p className="ui2-pop-tagline" data-pop-tagline="" />
+          <ol className="ui2-pop-list" data-pop-list="" />
+          <div className="ui2-pop-actions">
+            <a className="ui2-btn" data-pop-start="" href="#">
+              <span className="ui2-btn-ring ui2-loop" aria-hidden="true" />
+              {isEnglish ? "Start a reading with this spread" : "เริ่มดูดวงด้วยผังนี้"}
+              <span className="ui2-btn-arrow" aria-hidden="true" />
+            </a>
+            <a className="ui2-pop-guide" data-pop-guide="" href="#">
+              {isEnglish ? "Read the spread guide" : "อ่านคู่มือผังนี้"}
+            </a>
+            <button type="button" className="ui2-pop-back" data-pop-close="">
+              {isEnglish ? "Back to all spreads" : "กลับไปเลือกไพ่ใบอื่น"}
+            </button>
+          </div>
+        </div>
       </div>
+    </dialog>
+  );
+}
+
+export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
+  const { isEnglish } = useLocale();
+  const byId = new Map(spreads.map((s) => [s.id, s]));
+  const shelfCount = (shelf: SpreadShelf) => shelf.ids.filter((id) => byId.has(id)).length;
+
+  return (
+    <div className="ui2-sp" data-ui2-page-dark="">
+      {/* Dynamic Bilingual Hero Header */}
+      <section className="ui2-sec ui2-night ui2-sp-hero" data-ui2-dark="" data-anim-section="">
+        <span className="ui2-stars ui2-loop" aria-hidden="true" />
+        <span className="ui2-stars ui2-stars-2 ui2-loop" aria-hidden="true" />
+        {/* แสงออโรราลอย — แสดงจริงเฉพาะระดับ full */}
+        <span className="ui2-aurora" aria-hidden="true">
+          <span className="ui2-blob ui2-blob-amber ui2-loop" />
+          <span className="ui2-blob ui2-blob-teal ui2-loop" />
+        </span>
+        {/* ไพ่คว่ำตกแต่ง 8 ใบ (lite เห็น 2 ใบนิ่งที่มุม) */}
+        <span className="ui2-sp-deco" aria-hidden="true">
+          {Array.from({ length: 8 }, (_, i) => (
+            <span key={i} className={`ui2-sp-deco-card ui2-loop ui2-sp-deco-${i + 1}`} />
+          ))}
+        </span>
+        <div className="ui2-wrap ui2-sp-hero-inner">
+          <p className="ui2-sp-crumb">
+            <Link href="/">{isEnglish ? "Home" : "หน้าแรก"}</Link>
+            <span aria-hidden="true"> / </span>
+            <span>{isEnglish ? "Tarot Spreads" : `ผังพยากรณ์ ${spreads.length} แบบ`}</span>
+          </p>
+          <span className="ui2-chip">
+            <GoldMark className="ui2-mark" />
+            {isEnglish ? HERO_CHIP.en : HERO_CHIP.th}
+          </span>
+          <h1 className="ui2-h1 ui2-sp-h1">
+            {isEnglish ? (
+              <>
+                <span className="ui2-gold-night ui2-num ui2-loop">{spreads.length}</span> Sacred Tarot Spreads &amp; Layouts
+              </>
+            ) : (
+              <ThaiPhrases>
+                ผังการเปิดไพ่ทาโรต์{" "}
+                <span className="tp">
+                  <span className="ui2-gold-night ui2-num ui2-loop">{spreads.length}</span>
+                  &nbsp;รูปแบบ
+                </span>
+              </ThaiPhrases>
+            )}
+          </h1>
+          <p className="ui2-lede ui2-sp-lede">
+            {isEnglish
+              ? "Choose the spread that fits what you want to know — see how the cards are laid out and what each position means."
+              : "เลือกผังที่ตรงกับเรื่องที่คุณอยากรู้ พร้อมดูตัวอย่างการจัดวางและความหมายของแต่ละตำแหน่ง"}
+          </p>
+          <nav className="ui2-sp-jump" aria-label={isEnglish ? "Jump to a category" : "ไปที่หมวด"}>
+            {SPREAD_SHELVES.map((shelf) => (
+              <a
+                key={shelf.key}
+                href={`#shelf-${shelf.key}`}
+                className="ui2-sp-jump-link"
+                style={{ "--cat": `var(--ui2-note-${shelf.tone})`, "--cat-ink": `var(--ui2-note-ink-${shelf.tone})` } as Vars}
+              >
+                <span className="ui2-sp-jump-dot" aria-hidden="true" />
+                {isEnglish ? shelf.nameEn : shelf.nameTh}
+                <span className="ui2-sp-jump-count ui2-num">{shelfCount(shelf)}</span>
+              </a>
+            ))}
+          </nav>
+          {/* ห้องออกแบบผัง (REFLECTION_JOURNAL_PLAN 1.8) — ทางเข้าเดียวจากคลังผัง */}
+          <Link href="/spreads/create" className="ui2-sp-create">
+            {isEnglish ? "Or design your own spread" : "หรือออกแบบผังของคุณเอง"}
+            <span className="ui2-btn-arrow" aria-hidden="true" />
+          </Link>
+        </div>
+      </section>
+      {/* Category Tabs with Editorial Styling — (ชื่อเดิมของหมายจุด · ตอนนี้คือ 6 หมวดไพ่กระจาย ไม่มีแท็บแล้ว) */}
+
+      {SPREAD_SHELVES.map((shelf, i) => (
+        <ShelfSection key={shelf.key} shelf={shelf} order={i + 1} byId={byId} isEnglish={isEnglish} />
+      ))}
+
+      {/* ยังเลือกไม่ได้ ➔ ผัง 3 ใบ */}
+      <section className="ui2-sec ui2-night ui2-sp-unsure" data-ui2-dark="" data-anim-section="">
+        <div className="ui2-wrap">
+          <div className="ui2-sp-unsure-pill">
+            <p>
+              {isEnglish ? (
+                <>
+                  Not sure yet? <strong>Past · Present · Future</strong> works for any question
+                </>
+              ) : (
+                <>
+                  ยังเลือกไม่ได้? ผัง <strong>อดีต-ปัจจุบัน-อนาคต</strong> ถามได้ทุกเรื่อง
+                </>
+              )}
+            </p>
+            <Link href="/read/three-card" prefetch={false} className="ui2-btn">
+              <span className="ui2-btn-ring ui2-loop" aria-hidden="true" />
+              {isEnglish ? "Start with 3 cards" : "เริ่มด้วยไพ่ 3 ใบ"}
+              <span className="ui2-btn-arrow" aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <SpreadPopDialog isEnglish={isEnglish} />
     </div>
   );
 };

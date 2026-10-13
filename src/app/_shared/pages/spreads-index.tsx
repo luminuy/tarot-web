@@ -27,6 +27,14 @@ const COPY = {
     directoryLead:
       "รวมลิงก์ผังพยากรณ์ครบทั้ง 26 แบบไว้ที่เดียว กดเข้าไปอ่านความหมายรายตำแหน่งพร้อมภาพจัดวางจริงได้ทันที",
     topicsTitle: "ดูดวงไพ่ยิปซีแยกตามเรื่อง",
+    shortcutsTitle: "ทางลัด",
+    spreadsUnit: "ผัง",
+    shortcuts: [
+      { href: "/spreads/create", label: "ออกแบบผังของคุณเอง" },
+      { href: "/questions", label: "คำถามที่คนถามไพ่บ่อย" },
+      { href: "/cards", label: "ความหมายไพ่ทาโรต์ 78 ใบ" },
+      { href: "/pick-a-card", label: "Pick a Card เลือกไพ่ตามใจ" },
+    ],
   },
   en: {
     title: "26 Tarot Spreads: 1, 3, 5 & 10-Card Layouts (Free)",
@@ -40,12 +48,19 @@ const COPY = {
     directoryLead:
       "All 26 spreads in one list — open any of them for the real card layout and what each position means.",
     topicsTitle: "Tarot Spreads by Topic",
+    shortcutsTitle: "Shortcuts",
+    spreadsUnit: "spreads",
+    shortcuts: [
+      { href: "/spreads/create", label: "Design your own spread" },
+      { href: "/questions", label: "Questions people ask most" },
+      { href: "/cards", label: "All 78 tarot card meanings" },
+      { href: "/pick-a-card", label: "Pick a Card" },
+    ],
   },
 } as const;
 
 /** ลิงก์ในสารบัญผัง (ผังรายตัว + หมวด) ใช้หน้าตาเดียวกัน */
-const DIRECTORY_LINK_CLASS =
-  "text-xs sm:text-sm text-[#5E5240] hover:text-gold-ink underline decoration-[#E4DED2] underline-offset-4 transition-colors";
+const DIRECTORY_LINK_CLASS = "ui2-sp-dir-link";
 
 export function buildSpreadsIndexMetadata(locale: Locale): Metadata {
   const copy = COPY[locale];
@@ -102,12 +117,12 @@ export function SpreadsIndexBody({ locale, library }: { locale: Locale; library:
   ]);
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink p-4 sm:p-8 font-sans relative overflow-x-clip">
+    <main id="main-content" tabIndex={-1} className="ui2-sp-main min-h-screen font-sans relative overflow-x-clip px-4 sm:px-8">
       {/* Schema.org Structured Data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(spreadsJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbsJsonLd) }} />
 
-      <div className="max-w-6xl mx-auto space-y-6 relative z-10">
+      <div className="relative z-10">
         {/* Client Interactive Library with dynamic bilingual hero header */}
         {library}
 
@@ -131,14 +146,12 @@ export function SpreadsIndexBody({ locale, library }: { locale: Locale; library:
           บล็อกนี้แก้ที่ต้นเหตุ — ให้ทุกผังมีลิงก์ `<a href>` ใน HTML ดิบเสมอ
           โดยไม่แตะพฤติกรรมแท็บของ `SpreadsLibrary` เลย
         */}
-        <nav
-          aria-label={copy.directoryTitle}
-          /* แถบพื้นใสต่อจากแถบอ่อนของกริดผัง (`page-band` แบบหน้าแรก) — เดิมเป็นกล่องขอบครีม */
-          className="page-band"
-        >
-          <h2 className="text-base sm:text-lg font-serif-th font-bold text-ink"><ThaiPhrases>{copy.directoryTitle}</ThaiPhrases></h2>
-          <p className="mt-1.5 text-xs sm:text-sm text-muted leading-relaxed">{copy.directoryLead}</p>
-          <ul className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2.5">
+        {/* UI 2.0: สารบัญอยู่บนพื้นกลางคืนผืนเดียวกับหมวดไพ่ (แผน UI_2_0_SPREADS หัวข้อ 3 ข้อ 5) */}
+        <section className="ui2-sec ui2-night ui2-sp-dir" data-ui2-dark="">
+        <nav aria-label={copy.directoryTitle} className="ui2-wrap">
+          <h2 className="ui2-h2 ui2-sp-dir-h2"><ThaiPhrases>{copy.directoryTitle}</ThaiPhrases></h2>
+          <p className="ui2-lede mt-1.5">{copy.directoryLead}</p>
+          <ul className="ui2-sp-dir-list ui2-sp-dir-spreads">
             {PUBLIC_SPREADS.map((spread) => (
               <li key={spread.id}>
                 <a
@@ -153,20 +166,35 @@ export function SpreadsIndexBody({ locale, library }: { locale: Locale; library:
 
           {/* 🔗 หน้าหมวด `/spreads/topic/*` 6 หน้า — เดิมไม่มีลิงก์จากหน้าไหนเลย (มีแค่ใน sitemap)
               GSC 2026-09-27: 4 จาก 6 หน้าขึ้นว่า "Google ไม่รู้จัก URL" · ห้ามลบ */}
-          <h3 className="mt-6 text-sm sm:text-base font-serif-th font-bold text-ink"><ThaiPhrases>{copy.topicsTitle}</ThaiPhrases></h3>
-          <ul className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2.5">
+          <h2 className="ui2-h2 ui2-sp-dir-h2 ui2-sp-dir-gap"><ThaiPhrases>{copy.topicsTitle}</ThaiPhrases></h2>
+          <ul className="ui2-sp-dir-list ui2-sp-dir-topics">
             {Object.values(SPREAD_TOPICS).map((topic) => (
               <li key={topic.slug}>
                 <a
                   href={localeHref(`/spreads/topic/${topic.slug}`, locale)}
-                  className={DIRECTORY_LINK_CLASS}
+                  className={`${DIRECTORY_LINK_CLASS} ui2-sp-dir-topic`}
                 >
-                  {isEnglish ? topic.nameEn : topic.titleTh}
+                  <span>{isEnglish ? topic.nameEn : topic.titleTh}</span>
+                  <span className="ui2-sp-dir-count">
+                    <span className="ui2-num">{topic.spreadIds.length}</span> {copy.spreadsUnit}
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          <h2 className="ui2-h2 ui2-sp-dir-h2 ui2-sp-dir-gap"><ThaiPhrases>{copy.shortcutsTitle}</ThaiPhrases></h2>
+          <ul className="ui2-sp-dir-list ui2-sp-dir-shortcuts">
+            {copy.shortcuts.map((item) => (
+              <li key={item.href}>
+                <a href={localeHref(item.href, locale)} className="ui2-btn-ghost">
+                  {item.label}
                 </a>
               </li>
             ))}
           </ul>
         </nav>
+        </section>
       </div>
     </main>
   );

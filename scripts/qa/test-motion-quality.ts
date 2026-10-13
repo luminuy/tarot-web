@@ -338,7 +338,7 @@ function checkCss(violations: Violation[]): void {
       }
 
       // กฎ 2 (ฝั่ง CSS) — ไฟล์เอฟเฟกต์ระดับ full ของ UI 2.0 ตรวจโครงสร้างแยกใน checkUi2FullFx() แทน
-      if (/backdrop-filter\s*:/.test(line) && r !== UI2_FULL_FX_FILE) {
+      if (/backdrop-filter\s*:/.test(line) && !UI2_FULL_FX_FILES.includes(r)) {
         violations.push({
           ...at,
           rule: "2 · backdrop-filter (INC-0056)",
@@ -362,9 +362,14 @@ function checkCss(violations: Violation[]): void {
  *    และตัวกันพัง FPS (`astro/scripts/ui2-home.ts`) ลดเป็น lite เองเมื่อค่ากลาง > 22ms
  * ด่าน `test-ui2-fx` ตรวจซ้ำบน CSS ที่บิลด์แล้ว (ตัวย่ออาจย้ายกฎ)
  */
-const UI2_FULL_FX_FILE = "src/styles/ui2-fx-full.css";
+/** ไฟล์เอฟเฟกต์ระดับ full — หน้าแรก + คลังผัง /spreads (แต่ละหน้าโหลดไฟล์ของตัวเอง · กติกาล็อกสองชั้นเดียวกันทุกไฟล์) */
+const UI2_FULL_FX_FILES = ["src/styles/ui2-fx-full.css", "src/styles/ui2-spreads-fx.css"];
 
 function checkUi2FullFx(violations: Violation[]): void {
+  for (const file of UI2_FULL_FX_FILES) checkUi2FullFxFile(file, violations);
+}
+
+function checkUi2FullFxFile(UI2_FULL_FX_FILE: string, violations: Violation[]): void {
   const abs = path.join(ROOT, UI2_FULL_FX_FILE);
   if (!fs.existsSync(abs)) return;
   const lines = fs.readFileSync(abs, "utf-8").split("\n");

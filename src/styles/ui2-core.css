@@ -1,0 +1,295 @@
+/*
+ * 🎨 SeerTarot UI 2.0 — ชิ้นกลางที่ใช้ร่วมกันหลายหน้า (ตัวหนังสือทอง · ส่วนพื้นกลางคืน/กลางวัน · ดาว · ปุ่ม · ชิป)
+ * นำเข้าโดย `ui2-home.css` (หน้าที่มี TarotFlow) และ `ui2-spreads.css` (คลังผัง /spreads) — ไม่อยู่ใน globals.css
+ * ย้ายออกมาจากหัวไฟล์ ui2.css ตรง ๆ (2026-10-13 · แผน UI_2_0_SPREADS) ลำดับกฎบนหน้าแรกจึงเหมือนเดิมทุกบรรทัด
+ * ⚠️ กติกาเดียวกับ ui2.css: ไม่มีของหนัก · สีเป็นโทเคน · ตัวเลขตัวตรง
+ */
+/* ── ตัวช่วยตัวหนังสือ ─────────────────────────────────────────────────────── */
+.ui2-num {
+  font-family: var(--ui2-font-number);
+  font-weight: 500;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+/* ทองบนพื้นสว่าง — ใช้กับตัว ≥ 24px เท่านั้น (ทุกจุดสี ≥ 3.6:1 กับ --ui2-day · หัวข้อ 6.1.1) */
+.ui2-gold-day {
+  color: var(--ui2-gold-ink);
+  background-image: var(--ui2-gold-light);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.ui2-gold-night {
+  color: var(--ui2-gold-solid);
+  background-image: var(--ui2-gold-night);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* เครื่องหมายทอง (`<GoldMark className="ui2-mark" />`) */
+.ui2-mark {
+  color: var(--ui2-gold-ink);
+}
+.ui2-night .ui2-mark {
+  color: var(--ui2-gold-solid);
+}
+/* ตำแหน่ง/สี/จังหวะของก้อนออโรรา (แสดงจริงเฉพาะระดับ full) */
+.ui2-blob-amber { left: -8%; top: -10%; background: var(--ui2-aurora-amber); --dur: 18s; }
+.ui2-blob-gold { right: -6%; top: -16%; background: var(--ui2-aurora-gold); --dur: 24s; }
+.ui2-blob-teal { right: 18%; bottom: -30%; background: var(--ui2-aurora-teal); --dur: 26s; }
+
+/* ── ส่วน (section) เต็มความกว้างจอ ─────────────────────────────────────────
+   วาดพื้นด้วย ::before กว้าง 100vw แบบเดียวกับ `.home-band` — ไม่ต้องรื้อ max-width ของที่ครอบ
+   ⚠️ ส่วนที่มีของล้นขอบ (ริบบิ้นเอียง · การ์ดลอย) ตัดด้วย `overflow-x: clip` ที่ตัวส่วนเอง
+      ห้าม `overflow-x: hidden` ที่ body (INC-0067: หัวเว็บ sticky พัง) */
+.ui2-sec {
+  position: relative;
+  isolation: isolate;
+  padding-block: 56px;
+}
+.ui2-sec::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  inset-block: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background: var(--ui2-sec-bg, transparent);
+}
+/* แสงออโรราวางกลางส่วน (y 30–70%) รัศมีแนวตั้ง ≤ 30% ➔ จางหมดก่อนขอบบน/ล่าง (ส่วนต่อกันไม่เห็นรอย) */
+.ui2-day {
+  color: var(--ui2-ink);
+  --ui2-sec-bg:
+    radial-gradient(60% 30% at 12% 34%, rgba(255, 184, 92, 0.3) 0%, rgba(255, 184, 92, 0) 70%),
+    radial-gradient(52% 28% at 88% 40%, rgba(255, 222, 150, 0.46) 0%, rgba(255, 222, 150, 0) 70%),
+    radial-gradient(44% 26% at 76% 66%, rgba(132, 196, 184, 0.24) 0%, rgba(132, 196, 184, 0) 70%),
+    var(--ui2-day);
+}
+.ui2-night {
+  color: var(--ui2-on-night);
+  --ui2-sec-bg:
+    radial-gradient(50% 30% at 10% 36%, var(--ui2-aurora-night-teal) 0%, rgba(79, 179, 169, 0) 70%),
+    radial-gradient(46% 30% at 92% 62%, var(--ui2-aurora-night-amber) 0%, rgba(233, 160, 70, 0) 70%),
+    var(--ui2-night);
+}
+/* ── พื้นหลังต่อเนื่อง (เจ้าของ 2026-10-13: "สีที่ขั้นรู้สึกขัด" ➔ "ยังไม่สวยถูกใจ สวยกว่านี้")
+   ตั้งแต่ส่วนเปิดไพ่จนท้ายหน้าเป็นท้องฟ้ากลางคืนผืนเดียว (ไม่มีพื้นครีมคั่น) — ความสว่างมาจากการ์ด/แผ่นกระดาษในส่วน
+   แสงออโรราของแต่ละส่วนวางกลางส่วนและจางหมดก่อนขอบ ส่วนต่อกันจึงไม่เห็นรอย
+   ส่วนสุดท้ายไล่ลงเป็นสีท้ายเว็บ (#171512) ─────────────────────────────────────────── */
+.ui2-fq-sec::before {
+  background: linear-gradient(0deg, #171512 0, rgba(23, 21, 18, 0) 220px), var(--ui2-sec-bg);
+}
+
+/* ดาว — วาดครั้งเดียวด้วย radial-gradient (lite: 1 ชั้น · นิ่ง) */
+.ui2-stars {
+  position: absolute;
+  z-index: -1;
+  inset-block: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0.7;
+  background-image:
+    radial-gradient(1.2px 1.2px at 7% 12%, rgba(255, 245, 220, 0.9) 50%, transparent 51%),
+    radial-gradient(1px 1px at 23% 64%, rgba(255, 245, 220, 0.7) 50%, transparent 51%),
+    radial-gradient(1.4px 1.4px at 38% 22%, rgba(255, 245, 220, 0.85) 50%, transparent 51%),
+    radial-gradient(1px 1px at 52% 82%, rgba(255, 245, 220, 0.6) 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 66% 36%, rgba(255, 245, 220, 0.8) 50%, transparent 51%),
+    radial-gradient(1px 1px at 79% 70%, rgba(255, 245, 220, 0.7) 50%, transparent 51%),
+    radial-gradient(1.4px 1.4px at 91% 16%, rgba(255, 245, 220, 0.9) 50%, transparent 51%),
+    radial-gradient(1px 1px at 15% 90%, rgba(255, 245, 220, 0.6) 50%, transparent 51%),
+    radial-gradient(1.1px 1.1px at 47% 46%, rgba(255, 245, 220, 0.5) 50%, transparent 51%),
+    radial-gradient(1px 1px at 86% 52%, rgba(255, 245, 220, 0.65) 50%, transparent 51%);
+  background-size: 420px 420px;
+}
+.ui2-stars-2 {
+  display: none; /* ชั้นที่สองมีเฉพาะระดับ full */
+}
+/* แสงออโรราลอย + เม็ดเกรน = ระดับ full เท่านั้น (lite วาดแสงเป็น radial-gradient บนพื้นของส่วนแทน) */
+.ui2-aurora,
+.ui2-grain {
+  display: none;
+}
+.ui2-aurora {
+  position: absolute;
+  z-index: -1;
+  inset-block: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ui2-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+}
+
+/* ป้ายหัวส่วน (เล็ก) + หัวข้อส่วน */
+.ui2-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--ui2-gold-ink);
+}
+.ui2-night .ui2-kicker {
+  color: var(--ui2-gold-solid);
+}
+.ui2-h2 {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.22;
+  font-size: 30px;
+  text-wrap: balance;
+}
+.ui2-lede {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ui2-ink-soft);
+}
+.ui2-night .ui2-lede {
+  color: var(--ui2-on-night-soft);
+}
+
+/* ── ปุ่ม ──────────────────────────────────────────────────────────────── */
+.ui2-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 26px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--ui2-button-text);
+  background: var(--ui2-button);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.55) inset, 0 14px 30px -14px rgba(23, 17, 12, 0.7);
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  cursor: pointer;
+}
+.ui2-btn:active {
+  transform: scale(0.97);
+}
+.ui2-btn:focus-visible,
+.ui2-btn-ghost:focus-visible,
+.ui2-topic:focus-visible,
+.ui2-pick-card:focus-visible,
+.ui2-note:focus-visible,
+.ui2-tile:focus-visible {
+  outline: 2px solid var(--ui2-gold-ink);
+  outline-offset: 3px;
+}
+.ui2-night .ui2-btn:focus-visible,
+.ui2-night .ui2-btn-ghost:focus-visible,
+.ui2-night .ui2-topic:focus-visible,
+.ui2-night .ui2-pick-card:focus-visible,
+.ui2-night .ui2-note:focus-visible,
+.ui2-night .ui2-tile:focus-visible {
+  outline-color: var(--ui2-gold-solid);
+}
+.ui2-btn-arrow {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: rotate(45deg);
+  margin-left: 2px;
+}
+/* ขอบทองหมุน — วงแหวน conic รอบปุ่ม (lite: หมุนเฉพาะตอนส่วนนั้นอยู่ในจอ · off: นิ่ง)
+   ⚠️ ตัดด้วย mask ให้เหลือเฉพาะเส้นขอบ 2px — เดิมพึ่ง z-index -1 ให้พื้นปุ่มบัง แต่ตอนกด `transform: scale()`
+      ทำให้ปุ่มเป็นบริบทซ้อนใหม่ วงแหวนจึงขึ้นมาทับพื้นปุ่มเป็นลิ่มทองกลางปุ่ม (เจ้าของแคป 2026-10-13 "เวลากดไม่สวยเลย") */
+.ui2-btn-ring {
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  padding: 2px;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.ui2-btn-ring::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  background: conic-gradient(from 0deg, rgba(255, 217, 143, 0) 0deg, #FFD98F 60deg, rgba(255, 217, 143, 0) 130deg, rgba(255, 217, 143, 0) 360deg);
+  animation: ui2-spin 4.5s linear infinite;
+}
+.ui2-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 20px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--ui2-ink);
+  background: var(--ui2-glass-day-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-day), 0 1px 0 var(--ui2-glass-edge-day) inset;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.ui2-btn-ghost:active {
+  transform: scale(0.97);
+}
+.ui2-night .ui2-btn-ghost {
+  color: var(--ui2-on-night);
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+}
+
+/* ชิปกระจก (ป้ายเล็ก) */
+.ui2-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ui2-ink-soft);
+  background: var(--ui2-glass-day-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-day), 0 1px 0 var(--ui2-glass-edge-day) inset;
+}
+.ui2-chip .ui2-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--ui2-teal);
+  box-shadow: 0 0 0 3px rgba(79, 209, 193, 0.18);
+}
+.ui2-night .ui2-chip {
+  color: var(--ui2-on-night-soft);
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+}
+
+/* ขอบทองหมุนของปุ่ม (ย้ายมาจากกลุ่มคีย์เฟรมของ ui2.css) */
+@keyframes ui2-spin {
+  to { transform: rotate(360deg); }
+}

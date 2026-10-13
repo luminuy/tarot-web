@@ -9,6 +9,7 @@ import {
   MAP_MIN_COLUMN_PX,
   MAP_CARD_MIN_PX,
 } from "../../src/lib/tarot/spread-map-geometry";
+import { SPREAD_SHELVES, SHELF_SCATTER } from "../../src/data/spread-shelves";
 
 /**
  * QA — ตรวจความสมบูรณ์ของทุก spread
@@ -160,6 +161,34 @@ for (const spread of SPREADS) {
     }
   }
 }
+
+// ──────────────────────────────────────────────────────────────────────────────
+// ด่าน 6 หมวดของคลังผัง (UI_2_0_SPREADS_PLAN หัวข้อ 2 · ISSUE-059)
+//
+// เดิมแท็บพิมพ์สมาชิกและจำนวนเอง ➔ ป้ายเขียน 5 แต่มีผัง 6 · ผัง 6 แบบไม่อยู่แท็บไหนเลย
+// ตอนนี้ทุกผังสาธารณะต้องอยู่ใน **หนึ่ง** หมวดพอดี (ไม่ขาด ไม่ซ้ำ) และห้ามมี id แปลกปลอม
+// เพิ่มผังใหม่เมื่อไร ด่านนี้ตกจนกว่าจะเลือกหมวดให้ผังนั้น
+const publicIds = new Set(PUBLIC_SPREADS.map((s) => s.id));
+const shelfOf = new Map<string, string[]>();
+for (const shelf of SPREAD_SHELVES) {
+  for (const id of shelf.ids) shelfOf.set(id, [...(shelfOf.get(id) ?? []), shelf.key]);
+  check(
+    `หมวด "${shelf.key}" มีแถวการกระจายไพ่สำหรับ ${shelf.ids.length} ผังใน SHELF_SCATTER`,
+    SHELF_SCATTER[shelf.ids.length]?.spots.length === shelf.ids.length,
+  );
+}
+for (const id of publicIds) {
+  const shelves = shelfOf.get(id) ?? [];
+  check(`ผัง "${id}" อยู่ในหมวดของคลังผัง (ยังไม่มีหมวด)`, shelves.length > 0);
+  check(`ผัง "${id}" อยู่หมวดเดียว (ตอนนี้อยู่ ${shelves.join(" + ")})`, shelves.length <= 1);
+}
+for (const id of shelfOf.keys()) {
+  check(`หมวดของคลังผังมี "${id}" ซึ่งไม่ใช่ผังสาธารณะ (ผังภายในหรือพิมพ์ผิด)`, publicIds.has(id));
+}
+check(
+  `key ของหมวดไม่ซ้ำ (${SPREAD_SHELVES.map((s) => s.key).join(", ")})`,
+  new Set(SPREAD_SHELVES.map((s) => s.key)).size === SPREAD_SHELVES.length,
+);
 
 // ──────────────────────────────────────────────────────────────────────────────
 // ด่านกันผังภายในหลุดเข้าคลังผังสาธารณะ
