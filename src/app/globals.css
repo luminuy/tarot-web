@@ -1176,21 +1176,6 @@ html {
 }
 
 /* แถบเลื่อนของแท่นวางไพ่ — ใช้ชุดสีเดียวกับแถบเลื่อนหลัก */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #F3EDE2;
-  border-radius: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #6F5B4A;
-  border-radius: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #2E211A;
-}
 
 /* ===== Mobile-First GPU Optimizations (85%+ mobile users) ===== */
 
@@ -1240,45 +1225,9 @@ html {
   }
 }
 
-.spread-chip::after {
-  content: "";
-  order: -1;
-  flex: none;
-  width: 14px;
-  height: 14px;
-  background-color: var(--color-muted);
-  -webkit-mask: var(--chip-icon) center / contain no-repeat;
-  mask: var(--chip-icon) center / contain no-repeat;
-}
-
-.spread-chip[aria-selected="true"]::after {
-  background-color: currentColor;
-}
-
-.spread-card-sheen::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    125deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.06) 30%,
-    rgba(228, 216, 196, 0.28) 50%,
-    transparent 80%
-  );
-  opacity: 0.15;
-  transition: opacity 150ms ease;
-  pointer-events: none;
-}
-
-.spread-card-sheen:hover::after {
-  opacity: 0.3;
-}
-
 /* Disable expensive hover effects on touch devices */
 @media (hover: none) and (pointer: coarse) {
-  .gold-foil-sheen,
-  .spread-card-sheen::after {
+  .gold-foil-sheen {
     display: none !important;
   }
   /* แผงแท่นบูชาไม่ใช้ backdrop-filter แล้ว จึงไม่ต้อง override ซ้ำตรงนี้ */
@@ -1512,20 +1461,6 @@ html {
 }
 
 /* แผงที่ห้อยลงมาจากขอบบน (เมนูมือถือของแอดมิน) — มาจากด้านบน ไม่ใช่ด้านล่าง */
-.anim-drop-in {
-  animation: dropIn 0.2s var(--ease-out) both;
-}
-
-@keyframes dropIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 /* แผงของหน้าต่าง — ลอยขึ้นเล็กน้อยพร้อมจาง
    ⚠️ ห้ามใส่ `scale` (INC-0128) — การย่อ/ขยายแผงที่มีตัวอักษรเต็มใบบังคับให้ raster ใหม่ทุกเฟรม
@@ -1823,38 +1758,6 @@ html {
  *   ตอนเปิด  → visibility: visible ต้องมีผล "ทันที" ไม่ผ่าน transition
  *   ตอนปิด   → หน่วง visibility ด้วย transition-delay เท่ากับเวลา fade เพื่อให้เห็นอนิเมชันจางหาย
  */
-.dropdown-panel-base {
-  transform-origin: top right;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transition: opacity 160ms cubic-bezier(0.16, 1, 0.3, 1),
-              transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.dropdown-panel-entering {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  /* 🚨 เคยเขียนเป็น `translate3d(0, 0, 0) scale(1)` ซึ่งผิดกฎ INC-0108
-     Lightning CSS เห็นแกน z เป็น 0 แล้วยุบเหลือ transform 2D อยู่ดี ตัวเลเยอร์ GPU
-     ที่ตั้งใจบังคับจึงไม่เคยเกิดขึ้นจริง · ของที่ทำหน้าที่นั้นได้จริงคือ `will-change`
-     บรรทัดถัดไป ซึ่งมีผลเฉพาะตอนแผงกำลังเปิด (ไม่จองเลเยอร์ค้าง — ด่าน test-will-change)
-     เขียนรายการ transform ให้ "ชุดฟังก์ชันตรงกัน" กับตอนปิด เบราว์เซอร์จึงไล่ค่าทีละฟังก์ชันได้
-     ไม่ต้องถอยไปคำนวณผ่าน matrix ซึ่งทำให้ขอบตัวอักษรสั่นระหว่างทาง */
-  transform: translateY(0) scale(1);
-  will-change: opacity, transform;
-}
-
-.dropdown-panel-exiting {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transform: translateY(-6px) scale(0.98);
-  /* หน่วงเฉพาะ visibility ให้ซ่อนหลัง fade จบ — opacity/transform ยังวิ่งปกติ */
-  transition: opacity 160ms cubic-bezier(0.16, 1, 0.3, 1),
-              transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
-              visibility 0s linear 160ms;
-}
 
 /*
  * 🧭 Slide-Out Navigation Drawer (ด้านขวา) สไตล์ Quiet Luxury & GitHub-Inspired
@@ -2066,13 +1969,6 @@ input.no-focus-ring:focus-visible {
 }
 
 /* Mobile Safe Area Padding Helpers */
-.safe-pb {
-  padding-bottom: max(1rem, env(safe-area-inset-bottom));
-}
-
-.safe-pt {
-  padding-top: max(1rem, env(safe-area-inset-top));
-}
 
 /* N-01: เฟดข้ามหน้า (cross-document View Transition) — **เปิดเฉพาะจอที่ใช้เมาส์เท่านั้น**
    ─────────────────────────────────────────────────────────────────────────────
@@ -2339,14 +2235,6 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
 }
 /* แถบแรกต่อจากหัวหน้า ("เปิดไพ่ด่วน") ใช้พื้นเดียวกับหัวหน้า — padding บนเต็ม 44/64px ไม่ได้แบ่งสีอะไร
    กลายเป็นช่องว่างเปล่า (เจ้าของทัก: ใต้ไพ่ประจำวันเว้นไว้เยอะ 71px มือถือ / 91px จอใหญ่) ➔ ลดเหลือ 32/40px */
-.home-band-snug-top {
-  padding-top: 2rem;
-}
-@media (min-width: 640px) {
-  .home-band-snug-top {
-    padding-top: 2.5rem;
-  }
-}
 
 /* แถวปัดใช้ทุกความกว้างจอ — จอใหญ่จัดวางแบบเดียวกับมือถือ (คำสั่งเจ้าของ 2026-09-26: "ทำให้ตรงกัน")
    ต่างกันแค่ความกว้างการ์ด: มือถือ ~1.2 ใบ · แท็บเล็ต 2 ใบกับอีกเสี้ยว · จอใหญ่ 3 ใบกับอีกเสี้ยว
@@ -2371,15 +2259,9 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
   width: calc((100% - 32px) / 2.25);
   scroll-snap-align: start;
 }
-.home-rail.home-rail-sm > * {
-  width: calc((100% - 64px) / 4.5);
-}
 @media (min-width: 1024px) {
   .home-rail > * {
     width: calc((100% - 48px) / 3.25);
-  }
-  .home-rail.home-rail-sm > * {
-    width: calc((100% - 96px) / 6.5);
   }
 }
 @media (max-width: 639.98px) {
@@ -2393,9 +2275,6 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
     flex-grow: 0;
     width: min(80vw, 300px);
   }
-  .home-rail.home-rail-sm > * {
-    width: min(31vw, 124px);
-  }
 }
 /* การ์ดในแถวปัด: ไม่มีเงา — กล่องเลื่อน (overflow-x) ตัดเงาขอบล่างทิ้งเหลือเป็นแถบเทาดำ
    ใต้การ์ด (เจ้าของทักจากภาพหน้าจอ 2026-09-24) · การ์ดยังมีขอบ/พื้นกระจกแยกจากพื้นหลังอยู่
@@ -2406,21 +2285,10 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
 .home-rail > * > .glass-tile {
   box-shadow: none;
 }
-@media (max-width: 639.98px) {
-  .rail-flat > * {
-    box-shadow: none;
-  }
-}
-.rail-flat.rail-always > * {
-  box-shadow: none;
-}
 @media (prefers-reduced-motion: no-preference) {
   .home-rail {
     scroll-behavior: smooth;
   }
-}
-[data-rail-nav]:has(> [data-rail-prev]:disabled):has(> [data-rail-next]:disabled) {
-  display: none;
 }
 
 .home-rail-btn {
@@ -2460,17 +2328,9 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
   display: none;
 }
 @media (min-width: 640px) {
-  [data-rail],
   .rail-wrap {
     position: relative;
   }
-  .home-rail:not(.home-rail-sm),
-  .rail-flat.rail-always {
-    margin-inline: calc(50% - 50vw);
-    padding-inline: calc(50vw - 50%);
-    scroll-snap-type: none;
-  }
-  [data-rail-nav],
   .rail-nav-overlay {
     position: absolute;
     z-index: 2;
@@ -2485,12 +2345,6 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
     justify-content: space-between;
     pointer-events: none;
   }
-  [data-rail]:has(> .home-rail-sm) > [data-rail-nav] {
-    left: -22px;
-    right: -22px;
-    padding-inline: 0;
-  }
-  [data-rail-nav] > .home-rail-btn,
   .rail-nav-overlay > .home-rail-btn {
     pointer-events: auto;
     width: 48px;
@@ -2498,16 +2352,13 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
     background: rgba(236, 229, 216, 0.92);
     box-shadow: 0 2px 10px rgba(41, 38, 31, 0.12);
   }
-  [data-rail-nav] > .home-rail-btn:hover,
   .rail-nav-overlay > .home-rail-btn:hover {
     background: rgba(226, 217, 201, 0.96);
   }
-  [data-rail-nav] > .home-rail-btn:disabled,
   .rail-nav-overlay > .home-rail-btn:disabled {
     opacity: 0;
     pointer-events: none;
   }
-  [data-rail-nav] > .home-rail-btn svg,
   .rail-nav-overlay > .home-rail-btn svg {
     width: 20px;
     height: 20px;
@@ -2520,35 +2371,6 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
    • `.home-rail-stack-lg` — ลิงก์ 4 อันของส่วนราศี เรียงซ้อนเป็นคอลัมน์ขวาของวงล้อ
      ไม่ล้นแล้ว `home-rails.ts` ปิดลูกศรทั้งคู่ แถวปุ่มจึงซ่อนตัวเองตามกติกาเดิม
    • `.rail-grid-lg` — การ์ดเลือกผัง เป็นตาราง 3 คอลัมน์ เห็นครบทั้งหมวดไม่ต้องปัด (ลูกศรซ่อนด้วย `lg:hidden` ใน React) */
-@media (min-width: 1024px) {
-  .home-rail.home-rail-stack-lg {
-    flex-direction: column;
-    overflow: visible;
-    scroll-snap-type: none;
-    margin-inline: 0;
-    padding: 0;
-  }
-  .home-rail.home-rail-stack-lg > * {
-    width: auto;
-    flex: 0 0 auto;
-  }
-  .rail-flat.rail-always.rail-grid-lg {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 20px;
-    overflow: visible;
-    margin-inline: 0;
-    padding-inline: 0;
-  }
-  .rail-flat.rail-always.rail-grid-lg > * {
-    width: auto;
-    max-width: none;
-  }
-  /* หมวด "ทั้งหมด" โชว์ 6 ใบแรก ที่เหลือไปหน้ารวมผังผ่านลิงก์ใต้ตาราง */
-  .rail-flat.rail-always.rail-grid-lg-cap > :nth-child(n + 7) {
-    display: none;
-  }
-}
 
 /* (พัดไพ่พื้นหลังหัวหน้าแรกเดิม `.hero-fan` ถูกแทนด้วยการ์ดลอยของ SeerTarot UI 2.0 — ดู src/styles/ui2.css ส่วน 1) */
 
