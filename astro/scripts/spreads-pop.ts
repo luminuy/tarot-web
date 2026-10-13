@@ -10,16 +10,8 @@
  * ⚠️ ไม่มี JS หรือสคริปต์ล้ม = ไพ่เป็นลิงก์ไปหน้าคู่มือผังตามปกติ (ไม่มีอะไรหาย)
  */
 
-/* ── 1. ของวนหยุดนอกจอ ─────────────────────────────────────────────────── */
-if ("IntersectionObserver" in window) {
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const e of entries) e.target.toggleAttribute("data-inview", e.isIntersecting);
-    },
-    { rootMargin: "120px 0px" },
-  );
-  document.querySelectorAll("[data-anim-section]").forEach((el) => io.observe(el));
-}
+/* ── 1. ของวนหยุดนอกจอ (สคริปต์กลาง) ─────────────────────────────────── */
+import "./ui2-inview";
 
 /* ── 1b. แถบหมวดติดบนจอ — หมวดที่กำลังดูเรืองขึ้น (aria-current) · มือถือเลื่อนชิปให้อยู่ในจอ ── */
 const stick = document.querySelector<HTMLElement>("[data-sp-stick]");

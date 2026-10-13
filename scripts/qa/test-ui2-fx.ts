@@ -106,7 +106,7 @@ check("พบกฎระดับ full ที่ล็อกสองชั้�
  * เกินงบ 32 KB (test-bundle-budget · 2026-10-12) ทั้งที่หน้าอื่นไม่ได้ใช้สักกฎ
  */
 const globalsCss = fs.readFileSync(path.join(ROOT, "src/app/globals.css"), "utf-8");
-const homeOnlyInGlobals = ["ui2-core.css", "ui2.css", "ui2-fx-full.css", "ui2-home.css", "ui2-spreads.css", "ui2-spreads-fx.css"].filter((f) =>
+const homeOnlyInGlobals = ["ui2-core.css", "ui2.css", "ui2-fx-full.css", "ui2-home.css", "ui2-spreads.css", "ui2-spreads-fx.css", "ui2-daily.css", "ui2-daily-fx.css"].filter((f) =>
   new RegExp(`@import\\s+["'][^"']*/${f.replace(".", "\\.")}["']`).test(globalsCss),
 );
 check(
