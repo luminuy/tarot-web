@@ -78,16 +78,42 @@
   }
 
   /* ── การ์ดลอยรอบหัวข้อ: ลอยขึ้นลง · ใบไกลเบลอ + จาง ─────────────────────── */
+  /* ลอยขึ้นลง (วน) + หมุนเข้า 3 มิติตอนเปิดหน้า (ครั้งเดียว · ท้ายรายการ + fill backwards — INC-0264) */
   [data-fx="full"] .ui2-fc {
-    animation: ui2-bob var(--bob, 7s) ease-in-out infinite;
+    animation: ui2-bob var(--bob, 7s) ease-in-out infinite, ui2-card-in 1.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation-delay: 0s, 0.2s;
   }
-  [data-fx="full"] .ui2-fc:nth-child(2n) {
+  [data-fx="full"] .ui2-fc:nth-child(1) {
+    --bob: 7s;
+    animation-delay: 0s, 0.2s;
+  }
+  [data-fx="full"] .ui2-fc:nth-child(2) {
     --bob: 8.5s;
-    animation-delay: -2s;
+    animation-delay: -2s, 0.28s;
   }
-  [data-fx="full"] .ui2-fc:nth-child(3n) {
+  [data-fx="full"] .ui2-fc:nth-child(3) {
     --bob: 9.5s;
-    animation-delay: -4s;
+    animation-delay: -4s, 0.36s;
+  }
+  [data-fx="full"] .ui2-fc:nth-child(4) {
+    --bob: 8.5s;
+    animation-delay: -2s, 0.44s;
+  }
+  [data-fx="full"] .ui2-fc:nth-child(5) {
+    --bob: 7s;
+    animation-delay: 0s, 0.32s;
+  }
+  [data-fx="full"] .ui2-fc:nth-child(6) {
+    --bob: 9.5s;
+    animation-delay: -4s, 0.4s;
+  }
+  [data-fx="full"] .ui2-fc:nth-child(7) {
+    --bob: 7s;
+    animation-delay: 0s, 0.48s;
+  }
+  [data-fx="full"] .ui2-fc:nth-child(8) {
+    --bob: 8.5s;
+    animation-delay: -2s, 0.56s;
   }
   [data-fx="full"] .ui2-morning-back {
     animation: ui2-bob 6s ease-in-out infinite;

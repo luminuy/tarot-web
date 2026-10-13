@@ -3143,18 +3143,19 @@ details[open] > .ui2-faq-a {
 }
 
 /* ── รอบ 2 (เจ้าของ "ส่วนอื่นไม่มีเพิ่มมาเหรอ") — ส่วนที่เหลือของหน้าแรก ─────────────────────── */
-/* 8. การ์ดลอยหัวหน้า — ร่อนเข้าที่ทีละใบตอนเปิดหน้า (การ์ดชั้นในเท่านั้น · ชั้นนอกมีอนิเมชันลอยวนของระดับ full) */
-.ui2-fc-card {
-  animation: ui2-card-in 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+/* 8. การ์ดลอยหัวหน้า — ทั้งใบ (กรอบ + ไพ่ + ป้าย) หมุนเข้าแบบ 3 มิติทีละใบตอนเปิดหน้า
+   ระดับ full รวมกับอนิเมชันลอยขึ้นลงใน ui2-fx-full.css (ต้องเขียนรายการคู่ที่นั่น) */
+.ui2-fc {
+  animation: ui2-card-in 1.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
   animation-delay: 0.2s;
 }
-.ui2-fc:nth-child(2) .ui2-fc-card { animation-delay: 0.28s; }
-.ui2-fc:nth-child(3) .ui2-fc-card { animation-delay: 0.36s; }
-.ui2-fc:nth-child(4) .ui2-fc-card { animation-delay: 0.44s; }
-.ui2-fc:nth-child(5) .ui2-fc-card { animation-delay: 0.32s; }
-.ui2-fc:nth-child(6) .ui2-fc-card { animation-delay: 0.4s; }
-.ui2-fc:nth-child(7) .ui2-fc-card { animation-delay: 0.48s; }
-.ui2-fc:nth-child(8) .ui2-fc-card { animation-delay: 0.56s; }
+.ui2-fc:nth-child(2) { animation-delay: 0.28s; }
+.ui2-fc:nth-child(3) { animation-delay: 0.36s; }
+.ui2-fc:nth-child(4) { animation-delay: 0.44s; }
+.ui2-fc:nth-child(5) { animation-delay: 0.32s; }
+.ui2-fc:nth-child(6) { animation-delay: 0.4s; }
+.ui2-fc:nth-child(7) { animation-delay: 0.48s; }
+.ui2-fc:nth-child(8) { animation-delay: 0.56s; }
 /* 9. คลังไพ่ — สลับแท็บแล้วรายการในแผงทยอยเข้าทีละชิ้น */
 :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a) {
   animation: ui2-panel-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -3228,19 +3229,20 @@ details[open] > .ui2-faq-a {
     animation-timeline: view();
     animation-range: exit 30% exit 100%;
   }
+  /* ไพ่ในการ์ดลอยเลื่อนขึ้นเร็วกว่าพื้นตอนเลื่อนออก · fill forwards = ยังไม่ถึงช่วงไม่ทำงาน (INC-0264) */
   .ui2-fc-card {
-    animation: ui2-card-in 1s cubic-bezier(0.16, 1, 0.3, 1) both, ui2-float-away linear both;
-    animation-timeline: auto, view();
-    animation-range: normal, exit 0% exit 100%;
+    animation: ui2-float-away linear forwards;
+    animation-timeline: view();
+    animation-range: exit 0% exit 100%;
   }
   :is([data-home-section="quick"], [data-home-section="notes"], [data-home-section="features"], [data-home-section="showcase"]) > .ui2-wrap {
-    animation: ui2-sec-out linear both;
+    animation: ui2-sec-out linear forwards;
     animation-timeline: view();
     animation-range: exit 55% exit 100%;
   }
   /* แผ่นตรวจได้: ขยายเต็มตอนเข้า (ui2-grow) + ถอยหลังตอนออก — สองอนิเมชันคนละช่วงบนชิ้นเดียว */
   .ui2-wrap.ui2-sheet {
-    animation: ui2-grow linear both, ui2-sec-out linear both;
+    animation: ui2-grow linear both, ui2-sec-out linear forwards;
     animation-timeline: view(), view();
     animation-range: entry 0% cover 32%, exit 55% exit 100%;
   }
@@ -3256,8 +3258,10 @@ details[open] > .ui2-faq-a {
   to { transform: translateY(-90px); }
 }
 /* การ์ดลอยหมุนเข้าแบบ 3 มิติ (เปิดหน้า) */
+/* ความทึบเต็มตั้งแต่ 30% ของเวลา ➔ เห็นการหมุนเกือบทั้งหมด (เดิมจางอยู่ช่วงที่หมุน เจ้าของมองไม่เห็นว่าหมุน) */
 @keyframes ui2-card-in {
-  from { opacity: 0; transform: perspective(700px) translateY(60px) rotateX(38deg) rotateY(-22deg) scale(0.82); }
+  0% { opacity: 0; transform: perspective(700px) translateY(90px) rotateX(55deg) rotateY(-35deg) rotateZ(-8deg) scale(0.7); }
+  30% { opacity: 1; }
 }
 @keyframes ui2-fan-open {
   from { opacity: 0.4; transform: translateX(calc(var(--o, 0) * -82%)) rotate(calc(var(--o, 0) * -7deg)) translateY(calc(var(--drop, 0px) * -1)); }

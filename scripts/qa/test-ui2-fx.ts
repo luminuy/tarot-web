@@ -226,6 +226,22 @@ check(
   unpausable.slice(0, 6).join("\n      "),
 );
 
+// ── 6. อนิเมชันผูกการเลื่อนต้องไม่ถูกตัวย่อ CSS รวมเข้า shorthand (INC-0264) ─────────────────
+// lightningcss ที่ไม่มี targets รวม `animation-timeline: view()` เข้าไปใน `animation:` ซึ่ง Chrome/Safari ไม่รับ
+// ➔ ทั้งกฎถูกทิ้ง motion ตอนเลื่อนหายทั้งหน้าแบบเงียบ ๆ · กันไว้ที่ `vite.build.cssTarget` ใน astro.config.mjs
+const mergedTimelines: string[] = [];
+for (const file of files) {
+  const css = fs.readFileSync(file, "utf-8");
+  for (const m of css.matchAll(/(?:^|[;{])\s*animation\s*:([^;{}]*\b(?:view|scroll)\([^;{}]*)/g)) {
+    mergedTimelines.push(`${path.basename(file)}: animation:${m[1].slice(0, 80)}`);
+  }
+}
+check(
+  "ไม่มี view()/scroll() อยู่ใน shorthand `animation:` ของ CSS ที่บิลด์แล้ว (เบราว์เซอร์จะทิ้งทั้งกฎ)",
+  mergedTimelines.length === 0,
+  mergedTimelines.slice(0, 4).join("\n      ") + "\n      ➔ ตรวจ `vite.build.cssTarget` ใน astro.config.mjs (INC-0264)",
+);
+
 if (failed > 0) {
   console.log(`\n❌ ไม่ผ่าน ${failed} ข้อ\n`);
   process.exit(1);
