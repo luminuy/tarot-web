@@ -181,6 +181,38 @@
 .ui2-dy .altar-card-porcelain:hover {
   background-color: rgba(40, 32, 45, 0.95);
 }
+/* หลังไพ่ตอนรอพลิก = หลังไพ่แบบใหม่ของหน้าแรก (`.ui2-face-back` · ม่วงเข้ม ลายตารางทอง วงทองกลาง)
+   เจ้าของ "สีไพ่ไม่เหมือนอันใหม่หน้าแรกเลย" 2026-10-13 · TarotCard ใช้ร่วมหลายหน้า จึงเปลี่ยนเฉพาะในขอบเขต .ui2-dy
+   ⚠️ box-shadow ต้อง !important — TarotCard ตั้งเงาเป็น inline style */
+.ui2-dy .card-back-pattern {
+  border-color: rgba(255, 217, 143, 0.45);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 217, 143, 0.35) 0 9%, rgba(255, 217, 143, 0) 10%),
+    repeating-linear-gradient(45deg, rgba(255, 217, 143, 0.16) 0 2px, rgba(255, 217, 143, 0) 2px 10px),
+    repeating-linear-gradient(-45deg, rgba(255, 217, 143, 0.16) 0 2px, rgba(255, 217, 143, 0) 2px 10px),
+    linear-gradient(160deg, #2A1F2E 0%, #17111B 100%);
+  box-shadow:
+    0 0 0 1px rgba(255, 217, 143, 0.55) inset,
+    0 0 0 6px rgba(23, 17, 27, 1) inset,
+    0 0 0 7px rgba(255, 217, 143, 0.3) inset,
+    0 30px 50px -20px rgba(0, 0, 0, 0.95),
+    0 0 46px rgba(255, 217, 143, 0.18) !important;
+}
+/* ตัวอักษร "SACRED ORACLE" และเส้นล่างของหลังไพ่แบบเก่า — หลังไพ่ใหม่ไม่มีตัวหนังสือ */
+.ui2-dy .card-back-pattern > div:nth-child(2),
+.ui2-dy .card-back-pattern > div:nth-child(4) {
+  visibility: hidden;
+}
+/* ป้าย "แตะเพื่อเปิด" = แคปซูลมืดขอบทอง */
+.ui2-dy .card-back-pattern .anim-badge-pulse {
+  padding: 6px 14px;
+  color: var(--ui2-gold-solid);
+  background: rgba(12, 10, 15, 0.92);
+  border-color: rgba(255, 217, 143, 0.55);
+  box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.9);
+}
+
 /* ปุ่มหลักบนพื้นมืด = ทอง ตัวหนังสือเข้ม (14:1) */
 .ui2-dy .btn-gold-glass {
   background-image: none;
