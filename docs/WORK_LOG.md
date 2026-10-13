@@ -38,11 +38,13 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
-### 🗓️ 2026-10-13 (รอบ 249): ลิงก์ทดลองออนไลน์ — workflow `preview.yml` (อัปโหลดเวอร์ชันทดลองบน Cloudflare ไม่ย้ายทราฟฟิก)
+### 🗓️ 2026-10-13 (รอบ 249): ลิงก์ทดลองออนไลน์ — workflow `preview.yml` ➔ Worker แยก `tarot-web-preview`
 
-- **เจ้าของถาม**: "อยากดูแบบออนไลน์ ไม่ใช่แค่แคป" ➔ เสนอ 2 ทาง เจ้าของเลือกลิงก์ทดลองบน Cloudflare ("ได้ๆ")
-- **ทำ**: `.github/workflows/preview.yml` — push คอมมิตที่มี `[preview]` บนกิ่งที่ไม่ใช่ main ➔ build เหมือน production (`build:worker`) ➔ `opennextjs-cloudflare upload --preview-alias <ชื่อกิ่ง>` = `wrangler versions upload` สร้างเวอร์ชันใหม่**โดยไม่ย้ายทราฟฟิก** · ลิงก์ขึ้นใน Job Summary
-- **ข้อควรรู้**: ต่อ D1/KV/R2 ตัวจริง (Worker มี binding ชุดเดียว) — ล็อกอิน/เปิดไพ่บนลิงก์ทดลองบันทึกลงข้อมูลจริง · ไม่รัน D1 migration · KV cache หน้า Next เติมใต้ BUILD_ID ใหม่ (ไม่ทับของ production) · canonical ชี้ seertarot.net อยู่แล้ว
+- **เจ้าของถาม**: "อยากดูแบบออนไลน์ ไม่ใช่แค่แคป" ➔ เจ้าของเลือกลิงก์ทดลองบน Cloudflare ("ได้ๆ")
+- **ทำ**: `.github/workflows/preview.yml` — push คอมมิตที่มี `[preview]` บนกิ่งที่ไม่ใช่ main ➔ build เหมือน production (`build:worker`) ➔ `opennextjs-cloudflare deploy --name tarot-web-preview` ➔ **https://tarot-web-preview.bankjack10452.workers.dev** (กิ่งล่าสุดที่สั่งทับลิงก์เดิม)
+- **ทางที่ลองแล้วไม่ได้** (กันคนถัดไปลองซ้ำ): `versions upload --preview-alias` 3 รอบ — อัปโหลดสำเร็จแต่ Cloudflare ตอบ `has_preview: false` ให้ Worker `tarot-web` ทั้งที่ `previews_enabled: true` (เปิดอยู่แล้วแต่เดิม ไม่ได้เปลี่ยนค่า) ➔ ลิงก์ของเวอร์ชัน 404 · ตั้ง `preview_urls: true` ใน wrangler.jsonc ก็ไม่ช่วย (ถอดออกแล้ว)
+- **ข้อควรรู้**: Worker แยกไม่แตะ Worker `tarot-web` ที่เสิร์ฟ seertarot.net (ไม่มี routes ใน wrangler.jsonc — โดเมนจริงผูกที่ dashboard) · ต่อ D1/KV/R2 ตัวจริง · **ไม่มี secret ของ production** — ดูหน้าตา/อนิเมชัน/ไพ่วันนี้ได้ แต่ล็อกอิน/คำอ่าน AI อาจใช้ไม่ได้ · ไม่รัน D1 migration · canonical ชี้ seertarot.net
+- **ยืนยันแล้ว**: `/` `/en` `/cards` `/readers` `/api/bootstrap` ตอบ 200 · หน้าแรกมี UI 2.0 ครบ (การ์ดลอย · ริบบิ้น · โน้ต) · ไพ่วันนี้ดึงจริง (ภาพจิ๋วขึ้น) · นาฬิกาเดิน · ไม่มี error ฝั่งเบราว์เซอร์
 
 ### 🗓️ 2026-10-13 (รอบ 248): UI 2.0 — ริบบิ้นไขว้ตามภาพต้นแบบ D+ ทุกจอ (Draft PR #669 · ยังไม่ขึ้น production)
 
