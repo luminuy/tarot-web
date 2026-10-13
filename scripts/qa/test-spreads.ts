@@ -9,7 +9,7 @@ import {
   MAP_MIN_COLUMN_PX,
   MAP_CARD_MIN_PX,
 } from "../../src/lib/tarot/spread-map-geometry";
-import { SPREAD_SHELVES, SHELF_SCATTER } from "../../src/data/spread-shelves";
+import { SPREAD_SHELVES, SHELF_SCATTER, POPULAR_SPREAD_IDS } from "../../src/data/spread-shelves";
 
 /**
  * QA — ตรวจความสมบูรณ์ของทุก spread
@@ -172,6 +172,7 @@ const publicIds = new Set(PUBLIC_SPREADS.map((s) => s.id));
 const shelfOf = new Map<string, string[]>();
 for (const shelf of SPREAD_SHELVES) {
   for (const id of shelf.ids) shelfOf.set(id, [...(shelfOf.get(id) ?? []), shelf.key]);
+  check(`หมวด "${shelf.key}": ผังแนะนำ "${shelf.starter}" อยู่ในหมวดนี้`, shelf.ids.includes(shelf.starter));
   check(
     `หมวด "${shelf.key}" มีแถวการกระจายไพ่สำหรับ ${shelf.ids.length} ผังใน SHELF_SCATTER`,
     SHELF_SCATTER[shelf.ids.length]?.spots.length === shelf.ids.length,
@@ -185,6 +186,7 @@ for (const id of publicIds) {
 for (const id of shelfOf.keys()) {
   check(`หมวดของคลังผังมี "${id}" ซึ่งไม่ใช่ผังสาธารณะ (ผังภายในหรือพิมพ์ผิด)`, publicIds.has(id));
 }
+for (const id of POPULAR_SPREAD_IDS) check(`ป้ายยอดนิยม "${id}" เป็นผังสาธารณะ`, publicIds.has(id));
 check(
   `key ของหมวดไม่ซ้ำ (${SPREAD_SHELVES.map((s) => s.key).join(", ")})`,
   new Set(SPREAD_SHELVES.map((s) => s.key)).size === SPREAD_SHELVES.length,

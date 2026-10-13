@@ -27,7 +27,7 @@ import {
   getSpreadTagline,
   getPositionName,
 } from "@/data/spreads-helpers";
-import { SPREAD_SHELVES, SHELF_SCATTER, shelfCardRange, type SpreadShelf } from "@/data/spread-shelves";
+import { SPREAD_SHELVES, SHELF_SCATTER, POPULAR_SPREAD_IDS, shelfCardRange, type SpreadShelf } from "@/data/spread-shelves";
 import { mapLayout, boxOf, MAP_CARD_ASPECT } from "@/lib/tarot/spread-map-geometry";
 import { isStandardSpread } from "@/lib/entitlement/limits";
 import { useLocale } from "@/lib/i18n";
@@ -153,6 +153,7 @@ function ShelfSection({
   const lead = (isEnglish ? shelf.leadEn : shelf.leadTh).replace("{range}", range);
   const tone: Vars = { "--cat": `var(--ui2-note-${shelf.tone})`, "--cat-ink": `var(--ui2-note-ink-${shelf.tone})` };
   const titleId = `shelf-${shelf.key}-title`;
+  const starter = byId.get(shelf.starter);
 
   return (
     <section
@@ -166,6 +167,7 @@ function ShelfSection({
       <span className="ui2-stars ui2-loop" aria-hidden="true" />
       <span className="ui2-stars ui2-stars-2 ui2-loop" aria-hidden="true" />
       <div className="ui2-wrap ui2-sp-shelf-head">
+        <div className="ui2-sp-shelf-title">
         <span className="ui2-sp-badge">
           <span className="ui2-num">{String(order).padStart(2, "0")}</span>
           {!isEnglish && <span className="ui2-accent">{shelf.nameEn}</span>}
@@ -179,6 +181,23 @@ function ShelfSection({
             ? `${items.length} spreads · tap the card that calls to you`
             : `${items.length} ผัง · แตะไพ่ที่ใจเลือก`}
         </p>
+        </div>
+        {/* เริ่มง่ายที่สุดในหมวดนี้ — ทางลัดสำหรับคนที่ไม่อยากเลือกเอง (เติมที่ว่างขวาหัวข้อบนคอม) */}
+        {starter && (
+          <div className="ui2-sp-start">
+            <p className="ui2-sp-start-k">{isEnglish ? "Easiest place to start" : "เริ่มง่ายที่สุดในหมวดนี้"}</p>
+            <p className="ui2-sp-start-name">
+              {getSpreadShortName(starter, isEnglish)}
+              <span className="ui2-sp-start-n">
+                <span className="ui2-num">{starter.positions.length}</span> {isEnglish ? "cards" : "ใบ"}
+              </span>
+            </p>
+            <Link href={`/read/${starter.id}`} prefetch={false} className="ui2-btn ui2-sp-start-btn">
+              {isEnglish ? "Start" : "เริ่มดูดวง"}
+              <span className="ui2-btn-arrow" aria-hidden="true" />
+            </Link>
+          </div>
+        )}
       </div>
 
       <ul className="ui2-sp-table" style={{ "--table-max": `${scatter?.maxWidth ?? 1160}px` } as Vars}>
@@ -199,15 +218,23 @@ function ShelfSection({
                 data-spread-id={spread.id}
                 id={`spread-${spread.id}`}
               >
-                <span className="ui2-sc-count">
-                  <span className="ui2-num">{spread.positions.length}</span> {isEnglish ? "cards" : "ใบ"}
-                </span>
-                {premium && (
-                  <span className="ui2-sc-lock">
-                    <LockGlyph />
-                    <span className="sr-only">{isEnglish ? "Premium spread" : "ผังพิเศษ"}</span>
-                  </span>
+                {POPULAR_SPREAD_IDS.includes(spread.id) && (
+                  <span className="ui2-sc-pop-tab">{isEnglish ? "Popular" : "ยอดนิยม"}</span>
                 )}
+                <span className="ui2-sc-top">
+                  {/* ฟรี = เปิดด้วยสิทธิ์รายวันได้ (isStandardSpread) · ผังพิเศษ = ต้องใช้สิทธิ์พิเศษ */}
+                  {premium ? (
+                    <span className="ui2-sc-lock">
+                      <LockGlyph />
+                      {isEnglish ? "Premium" : "พิเศษ"}
+                    </span>
+                  ) : (
+                    <span className="ui2-sc-free">{isEnglish ? "Free" : "ฟรี"}</span>
+                  )}
+                  <span className="ui2-sc-count">
+                    <span className="ui2-num">{spread.positions.length}</span> {isEnglish ? "cards" : "ใบ"}
+                  </span>
+                </span>
                 <SpreadMap spread={spread} />
                 <h3 className="ui2-sc-band">
                   <ThaiPhrases>{getSpreadShortName(spread, isEnglish)}</ThaiPhrases>
@@ -303,7 +330,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
           <span className="ui2-blob ui2-blob-teal ui2-loop" />
         </span>
         {/* หน้าไพ่จริง 8 ใบลอยข้างหัวข้อ (เจ้าของสั่ง 2026-10-13 "เอาเป็นรูปหน้าไพ่จริง" วันเดียวกับแผน) · lite เห็น 2 ใบนิ่งที่มุม
-            ตกแต่งล้วน ไม่ใช่ผลสุ่ม (alt ว่าง · aria-hidden) — ไพ่ในผ้าปูของผังยังเป็นไพ่คว่ำ (กฎเหล็กข้อห้ามกุไพ่) */}
+            ตกแต่งล้วน ไม่ใช่ผลสุ่ม (alt ว่าง · aria-hidden) */}
         <span className="ui2-sp-deco" aria-hidden="true">
           {DECO_CARDS.map((cardId, i) => (
             <span key={cardId} className={`ui2-sp-deco-card ui2-loop ui2-sp-deco-${i + 1}`}>
@@ -348,36 +375,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
               ? "Choose the spread that fits what you want to know — see how the cards are laid out and what each position means."
               : "เลือกผังที่ตรงกับเรื่องที่คุณอยากรู้ พร้อมดูตัวอย่างการจัดวางและความหมายของแต่ละตำแหน่ง"}
           </p>
-          <nav className="ui2-sp-jump" aria-label={isEnglish ? "Jump to a category" : "ไปที่หมวด"}>
-            {SPREAD_SHELVES.map((shelf) => (
-              <a
-                key={shelf.key}
-                href={`#shelf-${shelf.key}`}
-                className="ui2-sp-jump-link"
-                style={{ "--cat": `var(--ui2-note-${shelf.tone})`, "--cat-ink": `var(--ui2-note-ink-${shelf.tone})` } as Vars}
-              >
-                <span className="ui2-sp-jump-dot" aria-hidden="true" />
-                {isEnglish ? shelf.nameEn : shelf.nameTh}
-                <span className="ui2-sp-jump-count ui2-num">{shelfCount(shelf)}</span>
-              </a>
-            ))}
-          </nav>
-          {/* ห้องออกแบบผัง (REFLECTION_JOURNAL_PLAN 1.8) — ทางเข้าเดียวจากคลังผัง */}
-          <Link href="/spreads/create" className="ui2-sp-create">
-            {isEnglish ? "Or design your own spread" : "หรือออกแบบผังของคุณเอง"}
-            <span className="ui2-btn-arrow" aria-hidden="true" />
-          </Link>
-        </div>
-      </section>
-      {/* Category Tabs with Editorial Styling — (ชื่อเดิมของหมายจุด · ตอนนี้คือ 6 หมวดไพ่กระจาย ไม่มีแท็บแล้ว) */}
-
-      {SPREAD_SHELVES.map((shelf, i) => (
-        <ShelfSection key={shelf.key} shelf={shelf} order={i + 1} byId={byId} isEnglish={isEnglish} />
-      ))}
-
-      {/* ยังเลือกไม่ได้ ➔ ผัง 3 ใบ */}
-      <section className="ui2-sec ui2-night ui2-sp-unsure" data-ui2-dark="" data-anim-section="">
-        <div className="ui2-wrap">
+          {/* ยังเลือกไม่ได้ ➔ ผัง 3 ใบ (ย้ายขึ้นมาหัวหน้า — คนที่ลังเลเห็นตั้งแต่จอแรก) */}
           <div className="ui2-sp-unsure-pill">
             <p>
               {isEnglish ? (
@@ -396,8 +394,37 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
               <span className="ui2-btn-arrow" aria-hidden="true" />
             </Link>
           </div>
+          {/* ห้องออกแบบผัง (REFLECTION_JOURNAL_PLAN 1.8) — ทางเข้าเดียวจากคลังผัง */}
+          <Link href="/spreads/create" className="ui2-sp-create">
+            {isEnglish ? "Or design your own spread" : "หรือออกแบบผังของคุณเอง"}
+            <span className="ui2-btn-arrow" aria-hidden="true" />
+          </Link>
         </div>
       </section>
+      {/* Category Tabs with Editorial Styling — (ชื่อเดิมของหมายจุด · ตอนนี้คือ 6 หมวดไพ่กระจาย ไม่มีแท็บแล้ว) */}
+
+      {/* แถบหมวดติดใต้หัวเว็บตลอดการเลื่อน — หมวดที่กำลังดูเรืองขึ้น (สคริปต์ตั้ง aria-current) */}
+      <nav className="ui2-sp-stick" aria-label={isEnglish ? "Jump to a category" : "ไปที่หมวด"} data-sp-stick="">
+        <div className="ui2-sp-stick-row">
+          {SPREAD_SHELVES.map((shelf) => (
+            <a
+              key={shelf.key}
+              href={`#shelf-${shelf.key}`}
+              className="ui2-sp-jump-link"
+              style={{ "--cat": `var(--ui2-note-${shelf.tone})`, "--cat-ink": `var(--ui2-note-ink-${shelf.tone})` } as Vars}
+            >
+              <span className="ui2-sp-jump-dot" aria-hidden="true" />
+              {isEnglish ? shelf.nameEn : shelf.nameTh}
+              <span className="ui2-sp-jump-count ui2-num">{shelfCount(shelf)}</span>
+            </a>
+          ))}
+        </div>
+      </nav>
+
+      {SPREAD_SHELVES.map((shelf, i) => (
+        <ShelfSection key={shelf.key} shelf={shelf} order={i + 1} byId={byId} isEnglish={isEnglish} />
+      ))}
+
 
       <SpreadPopDialog isEnglish={isEnglish} />
     </div>

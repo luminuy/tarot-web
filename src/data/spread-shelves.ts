@@ -24,6 +24,8 @@ export interface SpreadShelf {
   leadTh: string;
   leadEn: string;
   ids: readonly string[];
+  /** ผังแนะนำให้เริ่มของหมวด (กล่อง "เริ่มง่ายที่สุด" ขวาหัวข้อหมวด) — ต้องอยู่ใน `ids` (ด่าน test-spreads) */
+  starter: string;
 }
 
 export const SPREAD_SHELVES: readonly SpreadShelf[] = [
@@ -35,6 +37,7 @@ export const SPREAD_SHELVES: readonly SpreadShelf[] = [
     leadTh: "ไพ่ {range} ใบ สำหรับคำถามเดียวที่อยากรู้ตอนนี้",
     leadEn: "{range} cards for the one question on your mind right now",
     ids: ["daily", "quick", "yes-no", "three-card", "situation-solution"],
+    starter: "three-card",
   },
   {
     key: "love",
@@ -44,6 +47,7 @@ export const SPREAD_SHELVES: readonly SpreadShelf[] = [
     leadTh: "ใจเขา ใจเรา คนคุย แฟนเก่า และเนื้อคู่",
     leadEn: "Their feelings, yours, a new crush, an ex, and your soulmate",
     ids: ["how-they-feel", "love", "ex-reconciliation", "soulmate", "love-six"],
+    starter: "love",
   },
   {
     key: "work",
@@ -53,6 +57,7 @@ export const SPREAD_SHELVES: readonly SpreadShelf[] = [
     leadTh: "งานที่ทำอยู่ ย้ายงาน เงินไหลไปไหน และผลสอบ",
     leadEn: "Your job, a career move, where the money goes, and exam results",
     ids: ["career", "career-switch", "inner-potential", "money", "luck", "study"],
+    starter: "career",
   },
   {
     key: "self",
@@ -62,6 +67,7 @@ export const SPREAD_SHELVES: readonly SpreadShelf[] = [
     leadTh: "สมดุลกายใจ ทางแยกสองทาง และคนรอบข้าง",
     leadEn: "Body–mind balance, two-way decisions, and the people around you",
     ids: ["mind-body-spirit", "decision", "family", "chakra"],
+    starter: "decision",
   },
   {
     key: "time",
@@ -71,6 +77,7 @@ export const SPREAD_SHELVES: readonly SpreadShelf[] = [
     leadTh: "วางแผนล่วงหน้าทั้งสัปดาห์และทั้งเดือน",
     leadEn: "Plan ahead for the week and the month",
     ids: ["weekly", "monthly", "monthly-ten"],
+    starter: "weekly",
   },
   {
     key: "grand",
@@ -80,8 +87,12 @@ export const SPREAD_SHELVES: readonly SpreadShelf[] = [
     leadTh: "ไพ่ {range} ใบ เห็นภาพรวมทั้งชีวิต อ่านละเอียดที่สุด",
     leadEn: "{range} cards for the whole picture — the most detailed readings",
     ids: ["celtic-cross", "year-ahead", "twelve-houses"],
+    starter: "celtic-cross",
   },
 ];
+
+/** ป้าย "ยอดนิยม" บนไพ่ผัง — ผังที่คนเลือกบ่อยที่สุด (ช่วยคนที่เลือกไม่ถูก · แผน UX 2026-10-13) */
+export const POPULAR_SPREAD_IDS: readonly string[] = ["three-card", "love", "celtic-cross"];
 
 /** ตำแหน่งไพ่บนโต๊ะ: [สัดส่วนแนวนอนของ (กว้างโต๊ะ − กว้างไพ่), ระยะลง px, มุมเอียง deg] */
 export type ScatterSpot = readonly [x: number, y: number, angle: number];

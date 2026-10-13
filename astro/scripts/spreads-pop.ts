@@ -21,6 +21,35 @@ if ("IntersectionObserver" in window) {
   document.querySelectorAll("[data-anim-section]").forEach((el) => io.observe(el));
 }
 
+/* ── 1b. แถบหมวดติดบนจอ — หมวดที่กำลังดูเรืองขึ้น (aria-current) · มือถือเลื่อนชิปให้อยู่ในจอ ── */
+const stick = document.querySelector<HTMLElement>("[data-sp-stick]");
+if (stick && "IntersectionObserver" in window) {
+  const row = stick.firstElementChild as HTMLElement;
+  const links = Array.from(stick.querySelectorAll<HTMLAnchorElement>("a[href^='#shelf-']"));
+  const mark = (id: string | null) => {
+    stick.toggleAttribute("data-stuck", id !== null);
+    for (const a of links) {
+      const on = a.getAttribute("href") === `#${id}`;
+      if (on === (a.getAttribute("aria-current") === "true")) continue;
+      if (on) {
+        a.setAttribute("aria-current", "true");
+        row.scrollTo({ left: a.offsetLeft - (row.clientWidth - a.offsetWidth) / 2, behavior: "smooth" });
+      } else a.removeAttribute("aria-current");
+    }
+  };
+  const seen = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) if (e.isIntersecting) mark(e.target.id);
+    },
+    { rootMargin: "-45% 0px -50% 0px" },
+  );
+  document.querySelectorAll(".ui2-sp-shelf").forEach((el) => seen.observe(el));
+  // เหนือหมวดแรก (หัวหน้า) = ไม่มีหมวดไหนเรือง
+  const hero = document.querySelector(".ui2-sp-hero");
+  if (hero)
+    new IntersectionObserver((es) => es[0].isIntersecting && mark(null), { rootMargin: "-45% 0px -50% 0px" }).observe(hero);
+}
+
 /* ── 2. ไพ่เด้ง ────────────────────────────────────────────────────────── */
 const dialog = document.querySelector<HTMLDialogElement>("[data-spread-pop]");
 const CARD = "a.ui2-spread-card[data-spread-id]";
