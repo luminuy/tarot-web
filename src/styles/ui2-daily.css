@@ -145,9 +145,12 @@
 }
 
 /* ── แผงพิธี (OneCardRitual) ในโทนกลางคืน ───────────────────────────────── */
+/* แผงพิธีไม่ตีกรอบ (เดิมกล่องซ้อนกล่อง) — ผ้าปูกำมะหยี่ของแต่ละจังหวะเป็นพื้นผิวหลักเอง */
 .ui2-dy .altar-panel {
-  border-radius: 30px;
-  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.12) inset, 0 40px 80px -40px rgba(0, 0, 0, 0.95);
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
 }
 /* ผ้าปูกำมะหยี่ม่วง ชุดเดียวกับส่วนเปิดไพ่หน้าแรก (`.ui2-cloth`) */
 .ui2-dy .altar-cloth {
@@ -220,96 +223,157 @@
   line-height: 1.3;
   color: var(--ui2-on-night);
 }
-/* มือถือ: แถวเรียงลง (ภาพไพ่ซ้าย · ชื่อ + คำอธิบายขวา) */
-.ui2-dy-focus-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 10px;
-}
-.ui2-dy-focus {
-  position: relative;
-  display: flex;
+.ui2-dy-step-center {
   align-items: center;
-  gap: 14px;
-  width: 100%;
-  padding: 10px 44px 10px 10px;
-  border-radius: 20px;
-  text-align: left;
-  color: var(--ui2-on-night);
-  background: rgba(36, 29, 40, 0.92);
-  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+  text-align: center;
+}
+
+/* ผ้าปูกำมะหยี่ม่วง + แสงทองกลาง (ชุดเดียวกับ `.ui2-cloth` ของส่วนเปิดไพ่หน้าแรก) */
+.ui2-dy-table {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  padding: 30px 14px 24px;
+  border-radius: 30px;
+  background:
+    radial-gradient(55% 46% at 50% 40%, rgba(255, 217, 143, 0.22) 0%, rgba(255, 217, 143, 0) 70%),
+    radial-gradient(90% 60% at 50% 115%, rgba(79, 179, 169, 0.16) 0%, rgba(79, 179, 169, 0) 70%),
+    linear-gradient(180deg, #221A29 0%, #120E16 100%);
+  box-shadow:
+    0 0 0 1px rgba(255, 217, 143, 0.24) inset,
+    0 0 0 7px rgba(18, 14, 22, 0.9) inset,
+    0 0 0 8px rgba(255, 217, 143, 0.1) inset,
+    0 40px 70px -40px rgba(0, 0, 0, 0.95);
+}
+/* แท่นทองวงรีใต้พัด */
+.ui2-dy-altar {
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 46%;
+  width: 78%;
+  height: 34%;
+  translate: -50% 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255, 217, 143, 0.26), rgba(255, 217, 143, 0.05) 70%, rgba(255, 217, 143, 0));
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.18);
+}
+/* พัดไพ่ 5 ใบ: เอียงตามระยะจากใบกลาง (--o) และต่ำลงเป็นโค้ง (--drop) · ซ้อนกันเล็กน้อย */
+.ui2-dy-fan {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 18px;
+}
+.ui2-dy-fan-card {
+  --w: 60px;
+  position: relative;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: var(--w);
+  margin-inline: -3px;
+  border: 0;
+  background: none;
   cursor: pointer;
-  transition: translate var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), background-color var(--dur-base) var(--ease-out);
+  transform-origin: 50% 120%;
+  rotate: calc(var(--o, 0) * 6deg);
+  translate: 0 var(--drop, 0px);
+  transition: translate var(--dur-base) var(--ease-out), rotate var(--dur-base) var(--ease-out), scale var(--dur-base) var(--ease-out),
+    opacity var(--dur-base) var(--ease-out);
   -webkit-tap-highlight-color: transparent;
 }
-.ui2-dy-focus-art {
-  flex: none;
-  width: 52px;
+/* กรอบงาช้าง + กรอบทองด้านใน · หน้าไพ่เต็มใบ (ไม่ครอป) */
+.ui2-dy-fan-face {
+  position: relative;
+  display: block;
+  width: 100%;
   padding: 3px;
-  border-radius: 9px;
+  border-radius: 10px;
   background: linear-gradient(170deg, var(--ui2-card-ivory-top) 0%, var(--ui2-card-ivory-bottom) 100%);
-  box-shadow: 0 0 0 1px rgba(201, 161, 90, 0.6), 0 12px 20px -12px rgba(0, 0, 0, 0.9);
-  transition: rotate var(--dur-base) var(--ease-out), scale var(--dur-base) var(--ease-out);
+  box-shadow: 0 0 0 1px rgba(201, 161, 90, 0.7), 0 20px 30px -14px rgba(0, 0, 0, 0.95);
+  transition: box-shadow var(--dur-base) var(--ease-out);
 }
-.ui2-dy-focus-art img {
+.ui2-dy-fan-face img {
   display: block;
   width: 100%;
   aspect-ratio: 300 / 520;
-  border-radius: 6px;
+  border-radius: 7px;
   object-fit: cover;
 }
-.ui2-dy-focus-body {
+/* ชื่อใต้ไพ่ — มือถือซ่อนแบบยังอ่านออกด้วยโปรแกรมอ่านหน้าจอ (คำบรรยายใต้พัดแสดงแทน) */
+.ui2-dy-fan-name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.ui2-dy-fan-card:not([aria-pressed="true"]) {
+  opacity: 0.78;
+}
+/* ใบที่เลือก: ตั้งตรง ยกขึ้น ขยาย อยู่บนสุด เรืองทอง */
+.ui2-dy-fan-card[aria-pressed="true"] {
+  z-index: 5;
+  rotate: 0deg;
+  translate: 0 -16px;
+  scale: 1.16;
+}
+.ui2-dy-fan-card[aria-pressed="true"] .ui2-dy-fan-face {
+  box-shadow: 0 0 0 1.5px var(--ui2-gold-solid), 0 24px 36px -14px rgba(0, 0, 0, 0.95), 0 0 34px rgba(255, 217, 143, 0.45);
+}
+.ui2-dy-fan-card:focus-visible {
+  outline: none;
+}
+.ui2-dy-fan-card:focus-visible .ui2-dy-fan-face {
+  box-shadow: 0 0 0 2px var(--ui2-gold-solid), 0 0 0 5px rgba(255, 217, 143, 0.3);
+}
+@media (hover: hover) {
+  .ui2-dy-fan-card:hover {
+    opacity: 1;
+    translate: 0 calc(var(--drop, 0px) - 8px);
+  }
+  .ui2-dy-fan-card[aria-pressed="true"]:hover {
+    translate: 0 -16px;
+  }
+}
+/* คำบรรยายใบที่เลือก */
+.ui2-dy-caption {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  min-width: 0;
+  align-items: center;
+  gap: 4px;
+  min-height: 92px;
+  padding-inline: 8px;
+  text-align: center;
 }
-.ui2-dy-focus-el {
-  font-size: 12px;
+.ui2-dy-caption-el {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
   font-weight: 600;
+  letter-spacing: 0.02em;
   color: var(--ui2-gold-solid);
 }
-.ui2-dy-focus-name {
+.ui2-dy-caption-name {
   font-family: var(--ui2-font-display);
   font-weight: 500;
-  font-size: 17px;
-  line-height: 1.3;
+  font-size: 26px;
+  line-height: 1.25;
+  color: var(--ui2-on-night);
 }
-.ui2-dy-focus-desc {
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--ui2-on-night-dim);
-}
-/* วงเลือก — เติมทองเมื่อเลือก */
-.ui2-dy-focus-tick {
-  position: absolute;
-  top: 50%;
-  right: 16px;
-  width: 20px;
-  height: 20px;
-  translate: 0 -50%;
-  border-radius: 999px;
-  box-shadow: 0 0 0 1.5px rgba(246, 238, 226, 0.3) inset;
-  transition: background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
-}
-.ui2-dy-focus[aria-pressed="true"] {
-  background:
-    radial-gradient(90% 120% at 0% 50%, rgba(255, 217, 143, 0.16) 0%, rgba(255, 217, 143, 0) 70%),
-    rgba(40, 32, 45, 0.96);
-  box-shadow: 0 0 0 1.5px var(--ui2-gold-solid), 0 18px 34px -18px rgba(255, 196, 120, 0.4);
-}
-.ui2-dy-focus[aria-pressed="true"] .ui2-dy-focus-tick {
-  background:
-    radial-gradient(circle, var(--ui2-night) 0 26%, transparent 28%),
-    var(--ui2-gold-solid);
-  box-shadow: none;
-}
-.ui2-dy-focus:focus-visible {
-  outline: 2px solid var(--ui2-gold-solid);
-  outline-offset: 3px;
-}
-.ui2-dy-focus:active {
-  translate: 0 -2px;
+.ui2-dy-caption-desc {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--ui2-on-night-soft);
 }
 
 /* ── ขั้น 2: ตั้งใจถาม ────────────────────────────────────────────────────── */
@@ -521,48 +585,52 @@
   .ui2-dy-step-h {
     font-size: 26px;
   }
-  /* คอม/แท็บเล็ต: ไพ่ตั้ง 5 ใบเรียงแถว — ภาพไพ่จริงเต็มหัว · ชื่อเรื่องข้างล่าง */
-  .ui2-dy-focus-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 14px;
+  /* คอม/แท็บเล็ต: ไพ่ใหญ่ขึ้น · ชื่อใต้ไพ่แสดง */
+  .ui2-dy-table {
+    padding: 44px 24px 28px;
+    gap: 22px;
   }
-  .ui2-dy-focus {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-    padding: 10px 10px 16px;
-    border-radius: 22px;
-    text-align: center;
+  .ui2-dy-fan {
+    padding-top: 26px;
   }
-  .ui2-dy-focus-art {
-    width: auto;
+  .ui2-dy-fan-card {
+    --w: 120px;
+    margin-inline: 4px;
+  }
+  .ui2-dy-fan-face {
     padding: 4px;
-    border-radius: 14px;
+    border-radius: 13px;
   }
-  .ui2-dy-focus-art img {
-    aspect-ratio: 4 / 5;
-    object-position: 50% 30%;
-    border-radius: 10px;
+  .ui2-dy-fan-face img {
+    border-radius: 9px;
   }
-  .ui2-dy-focus-body {
-    align-items: center;
-    padding-inline: 4px;
+  .ui2-dy-fan-name {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    padding: 4px 12px 5px;
+    border-radius: 999px;
+    font-family: var(--ui2-font-display);
+    font-weight: 500;
+    font-size: 13.5px;
+    line-height: 1.3;
+    color: var(--ui2-on-night-soft);
+    background: rgba(18, 14, 22, 0.8);
+    box-shadow: 0 0 0 1px var(--ui2-line-night);
   }
-  .ui2-dy-focus-name {
-    font-size: 18px;
+  .ui2-dy-fan-card[aria-pressed="true"] {
+    translate: 0 -22px;
+    scale: 1.1;
   }
-  .ui2-dy-focus-desc {
-    font-size: 12.5px;
+  .ui2-dy-fan-card[aria-pressed="true"] .ui2-dy-fan-name {
+    color: var(--ui2-night);
+    background: var(--ui2-gold-solid);
+    box-shadow: none;
   }
-  .ui2-dy-focus-tick {
-    top: 18px;
-    right: 18px;
-    translate: none;
-    background: rgba(18, 14, 22, 0.75);
-    box-shadow: 0 0 0 1.5px rgba(255, 236, 200, 0.6) inset;
-  }
-  .ui2-dy-focus[aria-pressed="true"] {
-    translate: 0 -6px;
+  .ui2-dy-caption-name {
+    font-size: 32px;
   }
   .ui2-dy-intent {
     max-width: 640px;
@@ -573,17 +641,13 @@
     font-size: 32px;
   }
 }
-@media (hover: hover) {
-  .ui2-dy-focus:hover {
-    box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.5), 0 18px 34px -20px rgba(0, 0, 0, 0.9);
-  }
-  .ui2-dy-focus:hover .ui2-dy-focus-art {
-    scale: 1.03;
-  }
-}
 @media (min-width: 1024px) {
   .ui2-dy-h1 {
     font-size: 60px;
+  }
+  .ui2-dy-fan-card {
+    --w: 148px;
+    margin-inline: 6px;
   }
   /* หัวเรื่องซ้าย (ติดอยู่ขณะเลื่อน) · ข้อมูลขวา — แบบส่วนคลังไพ่ยิปซีของหน้าแรก */
   .ui2-dy-split {
@@ -601,8 +665,8 @@
 }
 
 /* ── ลดการเคลื่อนไหว ─────────────────────────────────────────────────────── */
-[data-fx="off"] .ui2-dy-focus,
-[data-fx="off"] .ui2-dy-focus-art,
+[data-fx="off"] .ui2-dy-fan-card,
+[data-fx="off"] .ui2-dy-fan-face,
 [data-fx="off"] .ui2-dy-faq-icon {
   transition: none;
 }

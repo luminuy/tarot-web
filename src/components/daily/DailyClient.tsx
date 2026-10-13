@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 import { CardImage } from "@/components/card/CardImage";
@@ -253,8 +253,9 @@ export function DailyClient() {
             {/* ✦ กลับมาวันเดียวกัน = เช็กอินเย็น · มีพิธีหลายวันแล้ว = แถบ 7 วัน */}
             <EveningCheckin isEnglish={isEnglish} />
             <WeekStrip isEnglish={isEnglish} />
-            {/* ขั้น 1 — เลือกเรื่องของวัน: ไพ่จริงประจำเรื่อง 5 ใบ (มือถือเป็นแถว · คอมเป็นไพ่ตั้ง) */}
-            <div className="ui2-dy-step">
+            {/* ขั้น 1 — เลือกเรื่องของวัน: พัดไพ่จริง 5 ใบบนผ้าปูกำมะหยี่ (แบบส่วนเปิดไพ่หน้าแรก)
+                ใบที่เลือกยกขึ้นเรืองทอง · คำบรรยายใหญ่ใต้พัดเปลี่ยนตามใบที่เลือก (เจ้าของ "อยากได้ให้ดีกว่า" 2026-10-13) */}
+            <div className="ui2-dy-step ui2-dy-step-center">
               <p className="ui2-dy-step-k">
                 <span className="ui2-num">1</span>
                 {isEnglish ? "Your focus for today" : "วันนี้อยากรู้เรื่องไหน"}
@@ -263,33 +264,44 @@ export function DailyClient() {
                 {isEnglish ? "Pick what you want the card to speak to" : "เลือกเรื่องที่อยากให้ไพ่ชี้ทาง"}
               </ThaiPhrases></h2>
             </div>
-            <div className="ui2-dy-focus-grid" role="group" aria-label={isEnglish ? "Focus for today" : "เรื่องของวันนี้"}>
-              {FOCUS_CHAMBERS.map((chamber) => {
-                const isSelected = selectedFocus === chamber.id;
-                return (
-                  <button
-                    key={chamber.id}
-                    type="button"
-                    aria-pressed={isSelected}
-                    onClick={() => {
-                      soundManager.playMenuTapSound();
-                      setSelectedFocus(chamber.id);
-                    }}
-                    className="ui2-dy-focus"
-                  >
-                    {/* ภาพหน้าไพ่ 1909 ประจำเรื่อง (กฎเหล็กข้อ 8 — ผ่าน <CardImage /> พร้อม sizes) · ภาพประกอบ ไม่ใช่ผลสุ่ม */}
-                    <span className="ui2-dy-focus-art">
-                      <CardImage image={chamber.cardImage} alt="" sizes="(min-width: 768px) 170px, 56px" />
-                    </span>
-                    <span className="ui2-dy-focus-body">
-                      <span className="ui2-dy-focus-el">{isEnglish ? chamber.elementEn : chamber.elementTh}</span>
-                      <span className="ui2-dy-focus-name">{isEnglish ? chamber.titleEn : chamber.titleTh}</span>
-                      <span className="ui2-dy-focus-desc">{isEnglish ? chamber.descEn : chamber.descTh}</span>
-                    </span>
-                    <span className="ui2-dy-focus-tick" aria-hidden="true" />
-                  </button>
-                );
-              })}
+            <div className="ui2-dy-table">
+              <span className="ui2-dy-altar" aria-hidden="true" />
+              <div className="ui2-dy-fan" role="group" aria-label={isEnglish ? "Focus for today" : "เรื่องของวันนี้"}>
+                {FOCUS_CHAMBERS.map((chamber, i) => {
+                  const isSelected = selectedFocus === chamber.id;
+                  const o = i - (FOCUS_CHAMBERS.length - 1) / 2;
+                  return (
+                    <button
+                      key={chamber.id}
+                      type="button"
+                      aria-pressed={isSelected}
+                      onClick={() => {
+                        soundManager.playMenuTapSound();
+                        setSelectedFocus(chamber.id);
+                      }}
+                      className="ui2-dy-fan-card"
+                      style={{ "--o": o, "--drop": `${Math.abs(o) * 14}px` } as CSSProperties}
+                    >
+                      {/* ภาพหน้าไพ่ 1909 ประจำเรื่อง (กฎเหล็กข้อ 8 — ผ่าน <CardImage /> พร้อม sizes) · ภาพประกอบ ไม่ใช่ผลสุ่ม */}
+                      <span className="ui2-dy-fan-face">
+                        <CardImage image={chamber.cardImage} alt="" sizes="(min-width: 1024px) 150px, (min-width: 768px) 120px, 64px" />
+                      </span>
+                      <span className="ui2-dy-fan-name">{isEnglish ? chamber.titleEn : chamber.titleTh}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {/* คำบรรยายของใบที่เลือก */}
+              <div className="ui2-dy-caption" aria-live="polite">
+                <span className="ui2-dy-caption-el">
+                  <GoldMark className="ui2-mark" />
+                  {isEnglish ? currentChamber.elementEn : currentChamber.elementTh}
+                  <span aria-hidden="true"> · </span>
+                  {isEnglish ? currentChamber.cardNameEn : currentChamber.cardNameTh}
+                </span>
+                <span className="ui2-dy-caption-name">{isEnglish ? currentChamber.titleEn : currentChamber.titleTh}</span>
+                <span className="ui2-dy-caption-desc">{isEnglish ? currentChamber.descEn : currentChamber.descTh}</span>
+              </div>
             </div>
 
             {/* ขั้น 2 — ตั้งใจถาม (ไม่บังคับ) */}
