@@ -1518,17 +1518,79 @@ a.ui2-tile:active {
 .ui2-more-links a:hover {
   color: var(--ui2-ink);
 }
-.ui2-howto {
+/* หัวกลุ่มลิงก์: h3 คำค้น + คำอธิบายบรรทัดเดียว (เห็นตลอด ไม่ต้องกาง) */
+.ui2-more-head {
   display: grid;
-  gap: 10px;
-  padding: 0 18px 16px;
+  gap: 1px;
+  min-width: 0;
+}
+.ui2-more-title {
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--ui2-ink);
+}
+.ui2-more-head small {
+  font-family: var(--font-sarabun);
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ui2-ink-soft);
+}
+.ui2-more > summary {
+  padding-block: 12px;
+}
+
+/* วิธีดูดวง 5 ขั้นตอน — เต็มความกว้างเหนือสองคอลัมน์ · การ์ดกระจกสว่าง + เลข 01–05 ทองตัวตรง */
+.ui2-howto-block {
+  grid-column: 1 / -1;
+  text-align: center;
+}
+.ui2-explore .ui2-lede {
+  margin: 10px 0 18px;
+}
+.ui2-howto-block .ui2-lede {
+  max-width: 640px;
+  margin: 12px auto 0;
+}
+.ui2-howto-steps {
+  margin-top: 26px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  text-align: left;
+}
+.ui2-howto-step {
+  padding: 18px 18px 20px;
+  border-radius: 24px;
+  background: var(--ui2-glass-day-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-day), 0 1px 0 var(--ui2-glass-edge-day) inset, 0 18px 34px -26px rgba(74, 52, 30, 0.55);
+}
+.ui2-howto-num {
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  color: var(--ui2-gold-ink);
+}
+.ui2-howto-title {
+  margin-top: 6px;
+  font-size: 18px;
+  line-height: 1.35;
+  color: var(--ui2-ink);
+}
+.ui2-howto-text {
+  margin-top: 6px;
   font-size: 14px;
   line-height: 1.7;
   color: var(--ui2-ink-soft);
 }
-.ui2-howto strong {
-  color: var(--ui2-ink);
-  font-weight: 600;
+@media (min-width: 640px) {
+  .ui2-howto-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .ui2-howto-steps {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
 }
 /* ผังของฉัน (ผังที่ออกแบบเอง) ใต้ส่วนเปิดไพ่ — แผงสว่างบนพื้นมืด ให้คอมโพเนนต์เดิม (ธีมสว่าง) อ่านออก */
 .ui2-myspreads:not(:empty) {
@@ -1732,11 +1794,6 @@ html[data-consent-ask] .ui2-sticky {
 /* ═════════════════════════════════════════════════════════════════════════
    แท็บเล็ต / iPad แนวตั้ง (768–1023) และคอม (หัวข้อ 4)
    ═════════════════════════════════════════════════════════════════════════ */
-@media (min-width: 640px) {
-  .ui2-h2 {
-    font-size: 38px;
-  }
-}
 @media (min-width: 768px) {
   .ui2-sec {
     padding-block: 88px;
@@ -1761,11 +1818,7 @@ html[data-consent-ask] .ui2-sticky {
     min-height: 0;
   }
   .ui2-h1 {
-    font-size: 52px;
     line-height: 1.18;
-  }
-  .ui2-hero-sub {
-    font-size: 17px;
   }
   .ui2-hero-ctas {
     flex-direction: row;
@@ -1811,10 +1864,6 @@ html[data-consent-ask] .ui2-sticky {
   .ui2-topic {
     font-size: 16px;
   }
-  .ui2-vs-a,
-  .ui2-vs-b {
-    font-size: 44px;
-  }
   .ui2-steps {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
@@ -1834,9 +1883,6 @@ html[data-consent-ask] .ui2-sticky {
     text-align: left;
     gap: 32px;
   }
-  .ui2-1909 {
-    font-size: 140px;
-  }
   .ui2-bento {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1847,9 +1893,6 @@ html[data-consent-ask] .ui2-sticky {
   }
   .ui2-closing-card {
     padding: 80px 40px;
-  }
-  .ui2-closing-title {
-    font-size: 40px;
   }
   .ui2-closing .ui2-clock-cell {
     width: 124px;
@@ -1869,9 +1912,6 @@ html[data-consent-ask] .ui2-sticky {
   }
 }
 @media (min-width: 1024px) {
-  .ui2-h1 {
-    font-size: 68px;
-  }
   .ui2-hero {
     min-height: 740px;
   }
@@ -1910,7 +1950,6 @@ html[data-consent-ask] .ui2-sticky {
   }
   .ui2-hero-sub {
     max-width: 520px;
-    font-size: 19px;
   }
   /* หัวข้อชิดบน (ไม่ใช่กึ่งกลาง) — ตอนแผงผลโผล่ใต้ผ้าปู รายการหัวข้อต้องไม่กระโดดลง */
   .ui2-pick-grid {
@@ -2013,17 +2052,6 @@ html[data-consent-ask] .ui2-sticky {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 56px;
     align-items: start;
-  }
-  .ui2-explore-link {
-    font-size: 26px;
-  }
-  .ui2-1909 {
-    font-size: 190px;
-  }
-}
-@media (min-width: 1280px) {
-  .ui2-h1 {
-    font-size: 68px;
   }
 }
 

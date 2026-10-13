@@ -470,11 +470,20 @@ export function Ui2BentoSection({ isEnglish, href }: { isEnglish: boolean; href:
 
 /* ── ส่วน 7 · สำรวจต่อ + คำถามที่พบบ่อย ───────────────────────────────────── */
 
-function LinkGroup({ title, links, href, isEnglish }: { title: string; links: ExploreLink[]; href: Href; isEnglish: boolean }) {
+/**
+ * กลุ่มลิงก์พับได้ — หัวกลุ่มเป็น h3 ที่มีคำค้นเป้าหมาย + คำอธิบายบรรทัดเดียวที่เห็นตลอด (ไม่ต้องกางก่อน)
+ * (เจ้าของสั่ง 2026-10-13: เติมหัวข้อ/ข้อความให้หน้าแรกกลับมาใกล้ v1 เพื่อ SEO แต่ต้องเข้ากับดีไซน์ v2.0)
+ */
+function LinkGroup({ title, desc, links, href, isEnglish }: { title: string; desc: string; links: ExploreLink[]; href: Href; isEnglish: boolean }) {
   return (
     <details className="ui2-more">
       <summary>
-        {title}
+        <span className="ui2-more-head">
+          <h3 className="ui2-more-title">
+            <ThaiPhrases>{title}</ThaiPhrases>
+          </h3>
+          <small>{desc}</small>
+        </span>
         <span className="ui2-plus" aria-hidden="true" />
       </summary>
       <div className="ui2-more-links">
@@ -486,6 +495,39 @@ function LinkGroup({ title, links, href, isEnglish }: { title: string; links: Ex
       </div>
     </details>
   );
+}
+
+/** หัวกลุ่มลิงก์ + คำอธิบาย (คำค้นจากหัวข้อเดิมของหน้าแรก v1 · docs/SEO_INDEXING_LOG.md) */
+const GROUP_COPY = {
+  popular: {
+    th: ["ดูดวงไพ่ยิปซียอดนิยม", "คำที่คนค้นบ่อยที่สุด ทั้งดวงรายวัน ความรัก ไพ่ 3 ใบ และใช่หรือไม่"],
+    en: ["Popular tarot readings", "What people search for most: daily, love, 3 cards and yes or no"],
+  },
+  ways: {
+    th: ["ดูดวงไพ่ยิปซีแบบอื่น ๆ", "Pick A Card เลือกกองไพ่ ดวงรายวัน ความรัก 1 ใบ และไพ่ประจำตัวจากวันเกิด"],
+    en: ["Other ways to read", "Pick a Card, the daily card, one-card love and your birth card"],
+  },
+  zodiac: {
+    th: ["ไพ่ประจำ 12 ราศี", "ไพ่ยิปซีคู่กับโหราศาสตร์ ดูไพ่ประจำราศีของคุณและคนที่คุณสนใจ"],
+    en: ["Tarot cards of the 12 signs", "Tarot meets astrology: the card for your sign and theirs"],
+  },
+  spreads: {
+    th: ["ผังการเปิดไพ่ยอดนิยม", "เซลติกครอส 10 ใบ ผัง 3 ใบ อดีต-ปัจจุบัน-อนาคต ผังตัดสินใจ และ 12 เรือนชะตา"],
+    en: ["Popular tarot spreads", "Celtic Cross, past-present-future, decision and the 12 houses"],
+  },
+  major: {
+    th: ["ไพ่ชุดใหญ่ เมเจอร์ อาร์คานา", "ไพ่ 22 ใบที่บอกจุดเปลี่ยนสำคัญของชีวิต ตั้งแต่คนเขลาถึงโลก"],
+    en: ["Major Arcana highlights", "The 22 cards of life's turning points, from The Fool to The World"],
+  },
+  articles: {
+    th: ["บทความไพ่ยิปซีน่าอ่าน", "วิธีอ่านไพ่ ความหมายรายใบ และเคล็ดลับตั้งคำถามให้ได้คำตอบที่ใช้ได้จริง"],
+    en: ["Tarot articles worth reading", "How to read, what each card means and how to ask a useful question"],
+  },
+} as const;
+
+/** "1. เลือกผัง…" ➔ "เลือกผัง…" — ตัวเลขแสดงแยกเป็น 01–05 (ข้อความยังมาจากข้อมูลชุดเดียวกับ JSON-LD HowTo) */
+function stepName(name: string): string {
+  return name.replace(/^\d+\.\s*/, "");
 }
 
 export function Ui2ExploreSection({ isEnglish, href }: { isEnglish: boolean; href: Href }) {
@@ -500,6 +542,38 @@ export function Ui2ExploreSection({ isEnglish, href }: { isEnglish: boolean; hre
   return (
     <section className="ui2-sec ui2-day" data-home-section="explore" aria-labelledby="ui2-explore-title">
       <div className="ui2-wrap ui2-explore">
+        {/* วิธีดูดวง 5 ขั้นตอน — เห็นบนจอแล้ว ตรงกับ JSON-LD HowTo (generateHowToJsonLd) ทุกข้อ
+            (เดิม v2 พับไว้ในกลุ่มลิงก์ · v1 เป็นส่วนเต็ม) · การ์ดกระจก + เลข 01–05 ทองตัวตรงแบบหัวข้อในส่วนเปิดไพ่ */}
+        <div className="ui2-howto-block">
+          <span className="ui2-kicker">
+            <GoldMark className="ui2-mark" />
+            {isEnglish ? "Your first reading" : "เปิดไพ่ครั้งแรก"}
+          </span>
+          <h2 id="ui2-howto-title" className="ui2-h2">
+            <ThaiPhrases>{isEnglish ? "How an online tarot reading works, in 5 steps" : "วิธีดูดวงไพ่ทาโรต์ออนไลน์ 5 ขั้นตอน"}</ThaiPhrases>
+          </h2>
+          <p className="ui2-lede">
+            <ThaiPhrases>
+              {isEnglish
+                ? "From choosing a spread to talking it through with the oracle. You shuffle and pick every card with your own hand, and the deck order is locked before you start."
+                : "ตั้งแต่เลือกผังไพ่ยิปซีจนถึงคุยต่อกับแม่หมอ AI ทุกใบคุณสับและหยิบเองกับมือ ลำดับไพ่ถูกล็อกไว้ก่อนเริ่ม ตรวจย้อนหลังได้ทุกครั้ง"}
+            </ThaiPhrases>
+          </p>
+          <ol className="ui2-howto-steps">
+            {howTo.map((step, i) => (
+              <li key={step.name} className="ui2-howto-step">
+                <span className="ui2-howto-num ui2-num" aria-hidden="true">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h3 className="ui2-howto-title">
+                  <ThaiPhrases>{stepName(step.name)}</ThaiPhrases>
+                </h3>
+                <p className="ui2-howto-text">{step.text}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+
         <div>
           <span className="ui2-kicker">
             <GoldMark className="ui2-mark" />
@@ -508,6 +582,11 @@ export function Ui2ExploreSection({ isEnglish, href }: { isEnglish: boolean; hre
           <h2 id="ui2-explore-title" className="ui2-h2">
             <ThaiPhrases>{isEnglish ? "Explore more" : "สำรวจต่อ"}</ThaiPhrases>
           </h2>
+          <p className="ui2-lede">
+            {isEnglish
+              ? "Card meanings, your zodiac card, every spread and the questions people ask most."
+              : "ความหมายไพ่ทาโร่ทั้ง 78 ใบ ไพ่ประจำราศี ผังเปิดไพ่ทุกแบบ และคำถามที่คนถามไพ่บ่อยที่สุด"}
+          </p>
           <nav className="ui2-explore-list" aria-labelledby="ui2-explore-title">
             {EXPLORE_PRIMARY.map((link) => (
               <Link key={link.path} href={href(link.path)} prefetch={false} className="ui2-explore-link">
@@ -520,26 +599,19 @@ export function Ui2ExploreSection({ isEnglish, href }: { isEnglish: boolean; hre
             ))}
           </nav>
           <div className="ui2-more-groups">
-            <LinkGroup title={isEnglish ? "Popular searches" : "คนค้นหาบ่อย"} links={POPULAR_SEARCHES} href={href} isEnglish={isEnglish} />
-            <LinkGroup title={isEnglish ? "Other ways to read" : "ดูดวงแบบอื่น"} links={MORE_WAYS} href={href} isEnglish={isEnglish} />
-            <LinkGroup title={isEnglish ? "Cards by zodiac sign" : "ไพ่ประจำราศี"} links={zodiacLinks} href={href} isEnglish={isEnglish} />
-            <LinkGroup title={isEnglish ? "Popular spreads" : "ผังยอดนิยม"} links={POPULAR_SPREADS} href={href} isEnglish={isEnglish} />
-            <LinkGroup title={isEnglish ? "Major Arcana highlights" : "ไพ่เมเจอร์เด่น"} links={MAJOR_HIGHLIGHTS} href={href} isEnglish={isEnglish} />
-            <LinkGroup title={isEnglish ? "Latest articles" : "บทความล่าสุด"} links={articleLinks} href={href} isEnglish={isEnglish} />
-            {/* ขั้นตอนเต็มพิธี — ตรงกับ JSON-LD HowTo ของหน้าแรก (generateHowToJsonLd) ให้ข้อมูลโครงสร้างตรงกับที่อยู่ในหน้า */}
-            <details className="ui2-more">
-              <summary>
-                {isEnglish ? "How a full reading works" : "ขั้นตอนเปิดไพ่เต็มพิธี"}
-                <span className="ui2-plus" aria-hidden="true" />
-              </summary>
-              <ol className="ui2-howto">
-                {howTo.map((step) => (
-                  <li key={step.name}>
-                    <strong>{step.name}</strong> {step.text}
-                  </li>
-                ))}
-              </ol>
-            </details>
+            {(
+              [
+                ["popular", POPULAR_SEARCHES],
+                ["ways", MORE_WAYS],
+                ["zodiac", zodiacLinks],
+                ["spreads", POPULAR_SPREADS],
+                ["major", MAJOR_HIGHLIGHTS],
+                ["articles", articleLinks],
+              ] as const
+            ).map(([key, links]) => {
+              const [title, desc] = GROUP_COPY[key][isEnglish ? "en" : "th"];
+              return <LinkGroup key={key} title={title} desc={desc} links={links} href={href} isEnglish={isEnglish} />;
+            })}
           </div>
         </div>
 
@@ -551,6 +623,11 @@ export function Ui2ExploreSection({ isEnglish, href }: { isEnglish: boolean; hre
           <h2 id="ui2-faq-title" className="ui2-h2">
             <ThaiPhrases>{isEnglish ? "Frequently asked questions" : "คำถามที่พบบ่อย"}</ThaiPhrases>
           </h2>
+          <p className="ui2-lede">
+            {isEnglish
+              ? "About free readings, how we prove the shuffle is real, and the 1909 deck."
+              : "เรื่องดูดวงฟรี วิธีพิสูจน์ว่าไพ่สุ่มจริง และสำรับไพ่ยิปซี 1909 ที่เราใช้"}
+          </p>
           {/* ครบทุกข้อใน home-seo.ts — JSON-LD FAQPage ต้องตรงกับที่อยู่ในหน้า · ข้อแรกเปิดไว้ */}
           <div className="ui2-faq-list">
             {faqs.map((faq, i) => (
