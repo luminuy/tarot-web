@@ -5,6 +5,12 @@
   "compatibility_date": "2026-09-15",
   "compatibility_flags": ["nodejs_compat"],
 
+  // ── ลิงก์ทดลองของแต่ละเวอร์ชัน (เพิ่ม 2026-10-13 · `.github/workflows/preview.yml`) ──
+  //    เปิดให้ `wrangler versions upload --preview-alias` ออกลิงก์ `<alias>-tarot-web.<sub>.workers.dev`
+  //    ให้เจ้าของดูกิ่งงานบนเครื่องจริงก่อนขึ้น production — **ไม่ย้ายทราฟฟิก** ของ seertarot.net
+  //    ⚠️ ลิงก์ทดลองใช้ binding ชุดเดียวกับ production (D1/KV/R2 ตัวจริง)
+  "preview_urls": true,
+
   // ── Static assets (ภาพไพ่ 1909 · _next/static · หน้าเนื้อหาที่เรนเดอร์ด้วย Astro) ──
   //
   // 🚦 ลำดับที่ Cloudflare ใช้ตัดสิน: **ไฟล์ static มาก่อน Worker เสมอ**
