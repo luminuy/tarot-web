@@ -30,8 +30,9 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <Ui2NotesSection isEnglish={isEnglish} href={href} />
         <Ui2VerifySection isEnglish={isEnglish} />
-        <Ui2BentoSection isEnglish={isEnglish} href={href} />
+        {/* คลังไพ่ (สว่าง) มาก่อนกล่อง "ทุกอย่างในที่เดียว" (มืด) — คั่นช่วงมืดยาว 4 ส่วนติดกัน (เจ้าของสั่ง 2026-10-13 "ลองสลับ") */}
         <Ui2ShowcaseSection isEnglish={isEnglish} href={href} />
+        <Ui2BentoSection isEnglish={isEnglish} href={href} />
         <Ui2ExploreSection isEnglish={isEnglish} href={href} />
       </div>
       <Ui2StickyCta isEnglish={isEnglish} />

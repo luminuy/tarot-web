@@ -96,6 +96,38 @@
     radial-gradient(46% 40% at 92% 30%, var(--ui2-aurora-night-amber) 0%, rgba(233, 160, 70, 0) 70%),
     var(--ui2-night);
 }
+/* รอยต่อพื้นสว่าง ↔ มืด = แผ่นมุมโค้งซ้อนกัน (ส่วนถัดไปเลื่อนขึ้นทับขอบล่างของส่วนก่อน · มุมเผยพื้นเดิมข้างใต้)
+   เจ้าของสั่ง 2026-10-13 สลับคลังไพ่ขึ้นก่อนกล่อง "ทุกอย่างในที่เดียว" ➔ มีรอยต่อสลับสี 3 จุด · ต้อง "สวยเท่าเดิมหรือกว่า"
+   ส่วนวาดตามลำดับ DOM (ไม่มี z-index) — ส่วนหลังจึงทับส่วนก่อนเองโดยธรรมชาติ */
+.ui2-night + .ui2-day,
+.ui2-day + .ui2-night {
+  --ui2-seam: 28px;
+  margin-top: calc(var(--ui2-seam) * -1);
+  padding-top: calc(56px + var(--ui2-seam));
+}
+.ui2-night + .ui2-day::before,
+.ui2-day + .ui2-night::before,
+.ui2-day + .ui2-night > .ui2-stars {
+  border-radius: var(--ui2-seam) var(--ui2-seam) 0 0;
+}
+/* แผ่นมืดที่ทับพื้นสว่าง: เงานุ่มเหนือขอบ ให้รู้สึกเป็นแผ่นซ้อน */
+.ui2-day + .ui2-night::before {
+  box-shadow: 0 -18px 40px -24px rgba(30, 20, 12, 0.45);
+}
+.ui2-night + .ui2-fq-sec {
+  padding-top: calc(24px + var(--ui2-seam));
+}
+@media (min-width: 768px) {
+  .ui2-night + .ui2-day,
+  .ui2-day + .ui2-night {
+    --ui2-seam: 48px;
+    padding-top: calc(88px + var(--ui2-seam));
+  }
+  .ui2-night + .ui2-fq-sec {
+    padding-top: calc(24px + var(--ui2-seam));
+  }
+}
+
 /* ดาว — วาดครั้งเดียวด้วย radial-gradient (lite: 1 ชั้น · นิ่ง) */
 .ui2-stars {
   position: absolute;
