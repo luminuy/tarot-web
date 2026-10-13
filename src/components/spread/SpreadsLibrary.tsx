@@ -28,17 +28,32 @@ import {
   getPositionName,
 } from "@/data/spreads-helpers";
 import { SPREAD_SHELVES, SHELF_SCATTER, shelfCardRange, type SpreadShelf } from "@/data/spread-shelves";
-import { mapLayout, MAP_CARD_ASPECT } from "@/lib/tarot/spread-map-geometry";
+import { mapLayout, boxOf, MAP_CARD_ASPECT } from "@/lib/tarot/spread-map-geometry";
 import { isStandardSpread } from "@/lib/entitlement/limits";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { GoldMark } from "@/components/ui/GoldMark";
+import { CardImage } from "@/components/card/CardImage";
 
 interface SpreadsLibraryProps {
   spreads: Spread[];
 }
 
 type Vars = CSSProperties & Record<`--${string}`, string | number>;
+
+/** ไพ่ตกแต่งหัวหน้า (ใบ 1–2 = มุมบนมือถือ) — ไพ่ใหญ่สำรับ 1909 ที่ไม่ซ้ำกับการ์ดลอยหน้าแรก */
+const DECO_CARDS = [
+  "major-01",
+  "major-19",
+  "major-09",
+  "major-14",
+  "major-17",
+  "major-10",
+  "major-04",
+  "major-20",
+] as const;
+
+const DECO_SIZES = "(min-width: 768px) 80px, 44px";
 
 /** ข้อความชิปหัวหน้า — อยู่นอกบล็อกหัวหน้าเพราะมีปี "1909" (ด่าน test-spreads ห้ามเลข 2 หลักในบล็อกหัวหน้า) */
 const HERO_CHIP = {
@@ -57,25 +72,64 @@ function LockGlyph() {
 }
 
 /**
+ * ภาพประกอบตำแหน่งบนผ้าปู — ไพ่ใหญ่ 22 ใบวนตามลำดับตำแหน่ง เริ่มคนละใบต่อผัง (ตายตัวจาก id ไม่ใช่การสุ่ม)
+ * เจ้าของสั่ง 2026-10-13 "ไพ่ตรงนี้ก็ใช้ไพ่จริง" — แทนไพ่คว่ำของแผนเดิม · เป็นภาพประกอบผัง ไม่ใช่ผลการเปิดไพ่
+ * ใช้ภาพย่อ `thumb` (64w/128w) ใบเดียวกันซ้ำข้ามผัง เบราว์เซอร์จึงโหลดจริงไม่เกิน 22 ไฟล์
+ */
+const MAJOR_COUNT = 22;
+function mapFace(spreadId: string, index: number): string {
+  let seed = 0;
+  for (const ch of spreadId) seed = (seed * 31 + ch.charCodeAt(0)) % MAJOR_COUNT;
+  return `major-${String((seed + index * 5) % MAJOR_COUNT).padStart(2, "0")}`;
+}
+
+/**
  * ผ้าปูในไพ่ผัง — ไพ่คว่ำตามตำแหน่งจริงจาก `mapLayout()`
  * กรอบผังสูง `boxHeight` เท่าของความกว้าง · หน้าต่างจัดวางแบบ contain ด้วยหน่วย container (`--bh`)
  */
 function SpreadMap({ spread }: { spread: Spread }) {
   const layout = mapLayout(spread.positions);
-  const cardHPct = (layout.cardW * MAP_CARD_ASPECT) / layout.boxHeight;
+  const cardH = layout.cardW * MAP_CARD_ASPECT;
+  /*
+   * ครอปกรอบให้พอดีกลุ่มไพ่จริง (เจ้าของ "ปรับขนาดไพ่ให้พอดีกรอบ") — ขยายทุกใบเท่ากัน ระยะห่างตาม mapLayout()
+   * จึงไม่ทับกันเหมือนเดิม (ISSUE-034) · ผังไพ่น้อยใบ (1–3) กันไม่ให้ใบเดียวโตเต็มผ้าปู: ไพ่กว้างไม่เกิน 40% ของกลุ่ม
+   */
+  const boxes = spread.positions.map((pos) => boxOf(pos, layout));
+  let left = Math.min(...boxes.map((b) => b.left));
+  let right = Math.max(...boxes.map((b) => b.right));
+  let top = Math.min(...boxes.map((b) => b.top));
+  let bottom = Math.max(...boxes.map((b) => b.bottom));
+  const minW = layout.cardW / 0.4;
+  if (right - left < minW) {
+    const grow = (minW - (right - left)) / 2;
+    left -= grow;
+    right += grow;
+  }
+  const minH = cardH / 0.62;
+  if (bottom - top < minH) {
+    const grow = (minH - (bottom - top)) / 2;
+    top -= grow;
+    bottom += grow;
+  }
+  const bw = right - left;
+  const bh = bottom - top;
   return (
     <span className="ui2-sc-window" aria-hidden="true">
-      <span className="ui2-sc-map" style={{ "--bh": layout.boxHeight.toFixed(3) } as Vars}>
+      <span className="ui2-sc-map" style={{ "--bh": (bh / bw).toFixed(3) } as Vars}>
         {spread.positions.map((pos) => {
-          const top = (pos.y * layout.yScale + layout.offsetY) / layout.boxHeight;
+          const cy = pos.y * layout.yScale + layout.offsetY;
           const style: Vars = {
-            left: `${(pos.x * 100).toFixed(2)}%`,
-            top: `${(top * 100).toFixed(2)}%`,
-            width: `${(layout.cardW * 100).toFixed(2)}%`,
-            height: `${(cardHPct * 100).toFixed(2)}%`,
+            left: `${(((pos.x - left) / bw) * 100).toFixed(2)}%`,
+            top: `${(((cy - top) / bh) * 100).toFixed(2)}%`,
+            width: `${((layout.cardW / bw) * 100).toFixed(2)}%`,
+            height: `${((cardH / bh) * 100).toFixed(2)}%`,
           };
           if (pos.rotate) style["--r"] = `${pos.rotate}deg`;
-          return <span key={pos.index} className={pos.rotate ? "ui2-sc-spot is-cross" : "ui2-sc-spot"} style={style} />;
+          return (
+            <span key={pos.index} className={pos.rotate ? "ui2-sc-spot is-cross" : "ui2-sc-spot"} style={style}>
+              <CardImage cardId={mapFace(spread.id, pos.index)} alt="" thumb sizes="64px" loading="lazy" fetchPriority="low" />
+            </span>
+          );
         })}
       </span>
     </span>
@@ -248,10 +302,20 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
           <span className="ui2-blob ui2-blob-amber ui2-loop" />
           <span className="ui2-blob ui2-blob-teal ui2-loop" />
         </span>
-        {/* ไพ่คว่ำตกแต่ง 8 ใบ (lite เห็น 2 ใบนิ่งที่มุม) */}
+        {/* หน้าไพ่จริง 8 ใบลอยข้างหัวข้อ (เจ้าของสั่ง 2026-10-13 "เอาเป็นรูปหน้าไพ่จริง" วันเดียวกับแผน) · lite เห็น 2 ใบนิ่งที่มุม
+            ตกแต่งล้วน ไม่ใช่ผลสุ่ม (alt ว่าง · aria-hidden) — ไพ่ในผ้าปูของผังยังเป็นไพ่คว่ำ (กฎเหล็กข้อห้ามกุไพ่) */}
         <span className="ui2-sp-deco" aria-hidden="true">
-          {Array.from({ length: 8 }, (_, i) => (
-            <span key={i} className={`ui2-sp-deco-card ui2-loop ui2-sp-deco-${i + 1}`} />
+          {DECO_CARDS.map((cardId, i) => (
+            <span key={cardId} className={`ui2-sp-deco-card ui2-loop ui2-sp-deco-${i + 1}`}>
+              <CardImage
+                cardId={cardId}
+                alt=""
+                thumb
+                sizes={DECO_SIZES}
+                loading={i < 2 ? "eager" : "lazy"}
+                fetchPriority="low"
+              />
+            </span>
           ))}
         </span>
         <div className="ui2-wrap ui2-sp-hero-inner">
