@@ -4,12 +4,12 @@ run-name: "👀 Preview [${{ github.ref_name }}] ${{ github.event.head_commit.me
 # ─────────────────────────────────────────────────────────────────────────────
 # ลิงก์ทดลองให้เจ้าของเปิดดูของจริงบนมือถือ/iPad/คอม ก่อนสั่งขึ้น production (เพิ่ม 2026-10-13 · UI 2.0)
 #
-# ทำอะไร: build แบบเดียวกับ deploy.yml ➔ `opennextjs-cloudflare upload` = **อัปโหลดเป็นเวอร์ชันใหม่
-#         โดยไม่ย้ายทราฟฟิก** (wrangler versions upload) ➔ ได้ลิงก์ `<alias>-tarot-web.<sub>.workers.dev`
-#         คนเข้า seertarot.net ยังเห็นเวอร์ชันเดิม 100% จนกว่า deploy.yml จะรันจาก main
+# ทำอะไร: build แบบเดียวกับ deploy.yml ➔ deploy เป็น **Worker แยกชื่อ `tarot-web-preview`**
+#         ➔ ได้ลิงก์ `tarot-web-preview.<sub>.workers.dev` (กิ่งล่าสุดที่สั่งทับลิงก์เดิม)
+#         Worker `tarot-web` ที่เสิร์ฟ seertarot.net ไม่ถูกแตะ จนกว่า deploy.yml จะรันจาก main
 #
-# ⚠️ ลิงก์นี้ต่อ **ฐานข้อมูล/KV/R2 ตัวจริง** (binding ชุดเดียวกับ production — Worker มีชุดเดียว)
-#    ล็อกอิน เปิดไพ่ จองแม่หมอบนลิงก์นี้ = บันทึกลงข้อมูลจริง
+# ⚠️ ลิงก์นี้ต่อ **ฐานข้อมูล/KV/R2 ตัวจริง** (binding ชุดเดียวกับ production ใน wrangler.jsonc)
+#    แต่ไม่มี secret ของ production — ล็อกอิน/คำอ่าน AI อาจใช้ไม่ได้ (ดูขั้น Deploy ด้านล่าง)
 # ⚠️ ไม่รัน D1 migration (ไม่แตะโครงฐานข้อมูล production) — กิ่งที่เพิ่ม migration ใหม่ต้องรอ deploy จริง
 # ⚠️ KV cache ของหน้า Next ถูกเติมใต้ BUILD_ID ใหม่ (คีย์แยกจาก production ไม่ทับของเดิม)
 # ⚠️ หน้าเว็บมี canonical ชี้ seertarot.net อยู่แล้ว — ลิงก์ทดลองไม่แย่งอันดับ SEO ถ้าบอตเผลอเจอ
@@ -49,13 +49,6 @@ jobs:
       - name: 📦 Install dependencies
         run: npm ci
 
-      # ชื่อลิงก์ = ชื่อกิ่งที่ตัดให้เหลือตัวอักษรที่ใช้ในโดเมนได้ (ซ้ำกิ่งเดิม = ลิงก์เดิม อัปเดตทับ)
-      - name: 🏷️ ตั้งชื่อลิงก์จากชื่อกิ่ง
-        id: alias
-        run: |
-          slug=$(echo "${GITHUB_REF_NAME}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g' | cut -c1-40 | sed -E 's/-+$//')
-          echo "alias=${slug:-preview}" >> "$GITHUB_OUTPUT"
-
       # build เหมือน `npm run deploy` ทุกขั้น ยกเว้นขั้นสุดท้าย (upload แทน deploy)
       - name: ⚡ Build (เหมือน production)
         run: npm run build:worker
@@ -67,34 +60,18 @@ jobs:
           NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: ${{ secrets.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || vars.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '' }}
           NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || vars.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '' }}
 
-      # เปิด "ลิงก์ทดลอง" (previews_enabled) ของ Worker ผ่าน API — ค่านี้ไม่ใช่ของเวอร์ชัน
-      # `versions upload` จึงตั้งให้ไม่ได้ (รอบแรกอัปโหลดสำเร็จแต่ไม่ได้ลิงก์) · แตะเฉพาะ previews_enabled
-      # **คงค่า `enabled` (เส้น workers.dev ของ production) ตามเดิมเสมอ** — ไม่เปิดช่องทางใหม่ให้เว็บจริง
-      - name: 🔓 เปิดลิงก์ทดลองของ Worker (เฉพาะ previews_enabled)
-        id: sub
-        env:
-          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          api="https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT}/workers"
-          cur=$(curl -sS -H "Authorization: Bearer ${CF_TOKEN}" "$api/scripts/tarot-web/subdomain")
-          echo "สถานะเดิม: $(echo "$cur" | jq -c '.result')"
-          enabled=$(echo "$cur" | jq -r '.result.enabled')
-          previews=$(echo "$cur" | jq -r '.result.previews_enabled')
-          if [ "$previews" != "true" ]; then
-            [ "$enabled" = "true" ] || enabled=false
-            res=$(curl -sS -X POST -H "Authorization: Bearer ${CF_TOKEN}" -H "Content-Type: application/json" \
-              --data "{\"enabled\":${enabled},\"previews_enabled\":true}" "$api/scripts/tarot-web/subdomain")
-            echo "ตั้งใหม่: $(echo "$res" | jq -c '{success, result, errors}')"
-          fi
-          sub=$(curl -sS -H "Authorization: Bearer ${CF_TOKEN}" "$api/subdomain" | jq -r '.result.subdomain // empty')
-          echo "subdomain=${sub}" >> "$GITHUB_OUTPUT"
-
-      # ⛔ ห้ามเปลี่ยนเป็น `deploy` — upload = สร้างเวอร์ชันโดยไม่ย้ายทราฟฟิก production
-      - name: 👀 Upload preview version (ไม่ย้ายทราฟฟิก)
+      # ── ทำไมเป็น Worker แยก ไม่ใช่ "preview URL ของเวอร์ชัน" ──────────────────────────
+      # ลองแล้ว 3 รอบ (2026-10-13): `versions upload --preview-alias` อัปโหลดสำเร็จแต่ Cloudflare ตอบ
+      # `has_preview: false` ให้ Worker ตัวนี้ (ทั้งที่ previews_enabled เปิดอยู่) ➔ ไม่มีลิงก์ให้เปิด
+      # จึง deploy เป็น Worker ชื่อแยก `tarot-web-preview` ที่ได้ `tarot-web-preview.<sub>.workers.dev`
+      # **ไม่แตะ Worker `tarot-web` (production) เลย** — ไม่มี routes/custom domain ใน wrangler.jsonc
+      #   (โดเมนจริงผูกที่ dashboard กับ Worker ชื่อ tarot-web เท่านั้น) ทราฟฟิก seertarot.net จึงไม่เปลี่ยน
+      # ⚠️ Worker แยก **ไม่มี secret** ของ production (คีย์ล็อกอิน/AI ตั้งไว้ที่ Cloudflare) — ดูหน้าตา
+      #    เลื่อนดู อนิเมชันได้ครบ แต่ล็อกอิน/คำอ่าน AI อาจใช้ไม่ได้บนลิงก์นี้
+      - name: 👀 Deploy preview Worker (tarot-web-preview · ไม่ใช่ production)
         run: |
           set -o pipefail
-          npx opennextjs-cloudflare upload --preview-alias "${{ steps.alias.outputs.alias }}" 2>&1 | tee upload.log
+          npx opennextjs-cloudflare deploy --name tarot-web-preview 2>&1 | tee upload.log
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -102,11 +79,7 @@ jobs:
       - name: 🔗 ลิงก์ทดลอง
         if: always()
         run: |
-          urls=$(grep -Eo 'https://[a-z0-9.-]+\.workers\.dev' upload.log | sort -u || true)
-          # wrangler ไม่พิมพ์ลิงก์ (เช่นเปิด previews หลังอัปโหลด) ➔ ประกอบเองตามรูปแบบของ Cloudflare
-          if [ -z "$urls" ] && [ -n "${{ steps.sub.outputs.subdomain }}" ]; then
-            urls="https://${{ steps.alias.outputs.alias }}-tarot-web.${{ steps.sub.outputs.subdomain }}.workers.dev"
-          fi
+          urls=$(grep -Eo 'https://tarot-web-preview\.[a-z0-9.-]+\.workers\.dev' upload.log | sort -u || true)
           {
             echo "### 👀 ลิงก์ทดลอง (ไม่ใช่ production)"
             echo ""
