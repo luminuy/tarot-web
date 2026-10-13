@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, type ReactNode } from "react";
 
 import { CardImage } from "@/components/card/CardImage";
 import { GoldMark } from "@/components/ui/GoldMark";
@@ -18,7 +18,6 @@ import { ZODIAC_INDEX_PATH, zodiacSignPath } from "@/lib/tarot/zodiac";
 
 import { Ui2Clock } from "./Ui2Clock";
 import {
-  EXPLORE_PRIMARY,
   MAJOR_HIGHLIGHTS,
   MORE_WAYS,
   POPULAR_SEARCHES,
@@ -879,6 +878,7 @@ export function Ui2ShowcaseSection({ isEnglish, href }: { isEnglish: boolean; hr
                 "คำที่คนค้นบ่อยที่สุด ทั้งดวงรายวัน ความรัก ไพ่ 3 ใบ และใช่หรือไม่",
                 "What people search for most: daily, love, 3 cards and yes or no.",
               )}
+              all={{ href: href("/blog"), label: t("บทความทั้งหมด", "All articles") }}
             />
             <ShowChips links={POPULAR_SEARCHES} href={href} isEnglish={isEnglish} />
             <h4 className="ui2-show-sub">
@@ -909,56 +909,127 @@ function stepName(name: string): string {
   return name.replace(/^\d+\.\s*/, "");
 }
 
-/* ── ส่วน 7 · สำรวจต่อ + คำถามที่พบบ่อย ───────────────────────────────────── */
+/* ── ส่วน 7 · คำถามที่พบบ่อย (แถวสลับซ้ายขวาบนการ์ดมืด) ─────────────────────── */
 
-export function Ui2ExploreSection({ isEnglish, href }: { isEnglish: boolean; href: Href }) {
-  const faqs = getHomeFaqs(isEnglish);
+/**
+ * เจ้าของสั่ง 2026-10-13 (ต้นแบบ fastwork.com/selling ส่วน "One platform is everything you need") — "ได้ลองทำมา"
+ * 3 ข้อเด่นเป็นแถวสลับ: ภาพจำลองหน้าจอ (ข้อมูลจริงในเว็บ) ฝั่งหนึ่ง · คำถาม + คำตอบเต็มอีกฝั่ง · ที่เหลือพับเป็นรายการ
+ * ข้อ "สุ่มจริงไหม" กับ "ไพ่ 1909" อยู่ในรายการพับ เพราะส่วน "เราให้คุณตรวจได้" ข้างบนเล่าเป็นภาพไว้แล้ว
+ * ⚠️ คำถาม/คำตอบทุกข้อต้องอยู่ในหน้าครบตาม JSON-LD FAQPage (home-seo.ts) — ห้ามตัดคำตอบให้สั้นลง
+ * (ส่วน "สำรวจต่อ" เดิมถูกถอด เพราะลิงก์ทุกเส้นอยู่ในคลังไพ่แล้ว)
+ */
+const FAQ_FEATURED = ["faq-free-reading", "faq-accuracy", "faq-good-questions"] as const;
+/** คำถามตัวอย่างในช่องพิมพ์ — "ถามแบบนี้ได้คำตอบชัดกว่า" มาจากหน้าคำถามจริงข้อนี้ (betterQuestions) */
+const FAQ_ASK_SLUG = "does-he-love-me";
+
+function FaqFreeMock({ isEnglish }: { isEnglish: boolean }) {
+  const t = (th: string, en: string) => (isEnglish ? en : th);
   return (
-    <section className="ui2-sec ui2-day" data-home-section="explore" aria-labelledby="ui2-explore-title">
-      <div className="ui2-wrap ui2-explore">
-        <div>
-          <span className="ui2-kicker">
-            <GoldMark className="ui2-mark" />
-            {isEnglish ? "Keep exploring" : "ไปต่อได้ทุกทาง"}
-          </span>
-          <h2 id="ui2-explore-title" className="ui2-h2">
-            <ThaiPhrases>{isEnglish ? "Explore more" : "สำรวจต่อ"}</ThaiPhrases>
-          </h2>
-          <p className="ui2-lede">
-            {isEnglish
-              ? "Card meanings, your zodiac card, every spread and the questions people ask most."
-              : "ความหมายไพ่ทาโร่ทั้ง 78 ใบ ไพ่ประจำราศี ผังเปิดไพ่ทุกแบบ และคำถามที่คนถามไพ่บ่อยที่สุด"}
-          </p>
-          <nav className="ui2-explore-list" aria-labelledby="ui2-explore-title">
-            {EXPLORE_PRIMARY.map((link) => (
-              <Link key={link.path} href={href(link.path)} prefetch={false} className="ui2-explore-link">
-                <span>
-                  {isEnglish ? link.en : link.th}
-                  <small>{isEnglish ? link.noteEn : link.noteTh}</small>
-                </span>
-                <span className="ui2-arrow-ne" aria-hidden="true" />
-              </Link>
-            ))}
-          </nav>
-        </div>
+    <div className="ui2-fq-mock ui2-fq-free" aria-hidden="true">
+      <div className="ui2-fq-panel">
+        <span className="ui2-fq-label">{t("บัญชีฟรี", "Free account")}</span>
+        <span className="ui2-fq-price ui2-num">{t("0 บาท", "฿0")}</span>
+        <ul className="ui2-fq-checks">
+          <li>{t("เปิดไพ่ฟรีทุกวัน", "Free readings every day")}</li>
+          <li>{t("คุยถามแม่หมอต่อได้", "Keep asking the oracle")}</li>
+          <li>{t("เก็บประวัติไว้ดูได้ทุกเครื่อง", "History on every device")}</li>
+        </ul>
+        <span className="ui2-fq-logins">
+          <span>{t("อีเมล", "Email")}</span>
+          <span>Google</span>
+          <span>LINE</span>
+        </span>
+        <small>{t("ไม่ต้องผูกบัตร", "No card needed")}</small>
+      </div>
+    </div>
+  );
+}
 
-        <div>
-          <span className="ui2-kicker">
-            <GoldMark className="ui2-mark" />
-            FAQ
-          </span>
-          <h2 id="ui2-faq-title" className="ui2-h2">
-            <ThaiPhrases>{isEnglish ? "Frequently asked questions" : "คำถามที่พบบ่อย"}</ThaiPhrases>
-          </h2>
-          <p className="ui2-lede">
-            {isEnglish
-              ? "About free readings, how we prove the shuffle is real, and the 1909 deck."
-              : "เรื่องดูดวงฟรี วิธีพิสูจน์ว่าไพ่สุ่มจริง และสำรับไพ่ยิปซี 1909 ที่เราใช้"}
-          </p>
-          {/* ครบทุกข้อใน home-seo.ts — JSON-LD FAQPage ต้องตรงกับที่อยู่ในหน้า · ข้อแรกเปิดไว้ */}
+function FaqReadingMock({ isEnglish }: { isEnglish: boolean }) {
+  const s = isEnglish ? SAMPLE.en : SAMPLE.th;
+  return (
+    <div className="ui2-fq-mock ui2-fq-reading" aria-hidden="true">
+      <div className="ui2-fq-fan">
+        {s.cards.map(([id, name]) => (
+          <CardImage key={id} cardId={id} alt={name} thumb sizes="64px" className="ui2-fq-card" />
+        ))}
+      </div>
+      <div className="ui2-fq-panel">
+        <span className="ui2-fq-label">{s.focusLabel}</span>
+        <p className="ui2-fq-line">
+          {s.cards[1][1]} {s.focusLine}
+        </p>
+        <span className="ui2-why-chip">{s.why}</span>
+      </div>
+    </div>
+  );
+}
+
+function FaqAskMock({ isEnglish }: { isEnglish: boolean }) {
+  const q = QUESTIONS.find((item) => item.slug === FAQ_ASK_SLUG);
+  if (!q) return null;
+  const copy = isEnglish ? q.en : q.th;
+  return (
+    <div className="ui2-fq-mock ui2-fq-ask" aria-hidden="true">
+      <span className="ui2-fq-ask-title">{isEnglish ? "What do you want to ask the cards?" : "อยากถามไพ่เรื่องอะไร"}</span>
+      <span className="ui2-fq-input">{shortQuestion(copy.question)}</span>
+      <div className="ui2-fq-panel">
+        <span className="ui2-fq-label">{isEnglish ? "Ask it this way for a clearer answer" : "ถามแบบนี้ได้คำตอบชัดกว่า"}</span>
+        <ul className="ui2-fq-better">
+          {copy.betterQuestions.slice(0, 3).map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+export function Ui2ExploreSection({ isEnglish }: { isEnglish: boolean; href: Href }) {
+  const faqs = getHomeFaqs(isEnglish);
+  const featured = FAQ_FEATURED.flatMap((id) => faqs.filter((faq) => faq.id === id));
+  const rest = faqs.filter((faq) => !FAQ_FEATURED.includes(faq.id as (typeof FAQ_FEATURED)[number]));
+  const mocks: Record<string, ReactNode> = {
+    "faq-free-reading": <FaqFreeMock isEnglish={isEnglish} />,
+    "faq-accuracy": <FaqReadingMock isEnglish={isEnglish} />,
+    "faq-good-questions": <FaqAskMock isEnglish={isEnglish} />,
+  };
+  return (
+    <section className="ui2-sec ui2-day ui2-fq-sec" data-home-section="faq" aria-labelledby="ui2-faq-title">
+      <div className="ui2-fq-sheet ui2-night" data-ui2-dark>
+        <div className="ui2-wrap">
+          <div className="ui2-fq-head">
+            <span className="ui2-kicker">
+              <GoldMark className="ui2-mark" />
+              FAQ
+            </span>
+            <h2 id="ui2-faq-title" className="ui2-h2">
+              <ThaiPhrases>{isEnglish ? "Frequently asked questions" : "คำถามที่พบบ่อย"}</ThaiPhrases>
+            </h2>
+            <p className="ui2-lede">
+              {isEnglish
+                ? "About free readings, how we prove the shuffle is real, and the 1909 deck."
+                : "เรื่องดูดวงฟรี วิธีพิสูจน์ว่าไพ่สุ่มจริง และสำรับไพ่ยิปซี 1909 ที่เราใช้"}
+            </p>
+          </div>
+          <div className="ui2-fq-rows">
+            {featured.map((faq) => (
+              <article key={faq.id} id={faq.id} className="ui2-fq-row">
+                {mocks[faq.id]}
+                <div className="ui2-fq-text">
+                  <h3 className="ui2-fq-q">
+                    <ThaiPhrases>{faq.question}</ThaiPhrases>
+                  </h3>
+                  <p className="ui2-fq-a">{faq.answer}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+          <p className="ui2-fq-more">{isEnglish ? "More questions" : "คำถามอื่น ๆ"}</p>
+          {/* ครบทุกข้อที่เหลือใน home-seo.ts — JSON-LD FAQPage ต้องตรงกับที่อยู่ในหน้า */}
           <div className="ui2-faq-list">
-            {faqs.map((faq, i) => (
-              <details key={faq.id} id={faq.id} className="ui2-faq" open={i === 0}>
+            {rest.map((faq) => (
+              <details key={faq.id} id={faq.id} className="ui2-faq">
                 <summary>
                   <span>{faq.question}</span>
                   <span className="ui2-plus" aria-hidden="true" />
@@ -968,7 +1039,6 @@ export function Ui2ExploreSection({ isEnglish, href }: { isEnglish: boolean; hre
             ))}
           </div>
         </div>
-
       </div>
     </section>
   );

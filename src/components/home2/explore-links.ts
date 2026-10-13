@@ -1,7 +1,5 @@
-import { ZODIAC_INDEX_PATH } from "@/lib/tarot/zodiac";
-
 /**
- * 🧭 ลิงก์ภายในทั้งหมดของหน้าแรก UI 2.0 (ส่วน 7 "สำรวจต่อ" · แผน UI_2_0 หัวข้อ 6.7)
+ * 🧭 ลิงก์ภายในทั้งหมดของหน้าแรก UI 2.0 (ส่วน "คลังไพ่ยิปซี" · แผน UI_2_0 หัวข้อ 6.7)
  * ===========================================================================
  * ⚠️ ห้ามทำลิงก์หาย — ทุกเส้นที่หน้าแรกเดิมมี (ดูดวงแบบอื่น · ราศีรายตัว · ผังยอดนิยม · ไพ่เมเจอร์เด่น ·
  *    บทความ · "คนค้นหาบ่อย") ต้องอยู่ใน HTML · พับเป็นกลุ่มได้ (`<details>`) แต่ห้ามตัดทิ้ง
@@ -15,20 +13,7 @@ export interface ExploreLink {
   path: string;
   th: string;
   en: string;
-  /** คำอธิบายบรรทัดรอง (เฉพาะลิงก์ตัวใหญ่) */
-  noteTh?: string;
-  noteEn?: string;
 }
-
-/** ลิงก์ตัวใหญ่ (หัวข้อ 6.7) */
-export const EXPLORE_PRIMARY: ExploreLink[] = [
-  { path: "/cards", th: "ความหมายไพ่ 78 ใบ", en: "All 78 card meanings", noteTh: "สารานุกรมไพ่ทาโร่ 1909 ครบทุกใบ", noteEn: "The full 1909 tarot encyclopedia" },
-  { path: ZODIAC_INDEX_PATH, th: "ไพ่ประจำ 12 ราศี", en: "Cards of the 12 signs", noteTh: "หาราศีจากวันเกิด · ดวงรายวัน · ความเข้ากัน", noteEn: "Find your sign · daily card · compatibility" },
-  { path: "/spreads", th: "ผังทั้งหมด", en: "All spreads", noteTh: "ผังเปิดไพ่ทุกแบบ ตั้งแต่ 1 ถึง 12 ใบ", noteEn: "Every layout, from one card to twelve" },
-  { path: "/pick-a-card", th: "Pick a Card", en: "Pick a Card", noteTh: "เลือกกองที่ใจเรียก · 8 หัวข้อ", noteEn: "Choose the pile that calls you · 8 topics" },
-  { path: "/questions", th: "คำถามที่คนถามบ่อย", en: "Popular questions", noteTh: "ถามไพ่แบบไหนได้คำตอบที่ใช้ได้จริง", noteEn: "How to ask so the answer is useful" },
-  { path: "/blog", th: "บทความ", en: "Articles", noteTh: "วิธีอ่านไพ่ · ผัง · จิตวิทยาของไพ่", noteEn: "How to read, spreads, and the psychology" },
-];
 
 /** ดูดวงแบบอื่น — ประตูไปหน้าที่เคยไม่มีลิงก์เข้าเลย (ย้ายมาจาก HomeMoreWaysSection เดิม) */
 export const MORE_WAYS: ExploreLink[] = [
