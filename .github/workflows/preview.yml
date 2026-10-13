@@ -1,0 +1,94 @@
+name: 👀 Preview Link (Cloudflare Workers — เวอร์ชันทดลอง ไม่ใช่ production)
+run-name: "👀 Preview [${{ github.ref_name }}] ${{ github.event.head_commit.message || 'manual' }}"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ลิงก์ทดลองให้เจ้าของเปิดดูของจริงบนมือถือ/iPad/คอม ก่อนสั่งขึ้น production (เพิ่ม 2026-10-13 · UI 2.0)
+#
+# ทำอะไร: build แบบเดียวกับ deploy.yml ➔ `opennextjs-cloudflare upload` = **อัปโหลดเป็นเวอร์ชันใหม่
+#         โดยไม่ย้ายทราฟฟิก** (wrangler versions upload) ➔ ได้ลิงก์ `<alias>-tarot-web.<sub>.workers.dev`
+#         คนเข้า seertarot.net ยังเห็นเวอร์ชันเดิม 100% จนกว่า deploy.yml จะรันจาก main
+#
+# ⚠️ ลิงก์นี้ต่อ **ฐานข้อมูล/KV/R2 ตัวจริง** (binding ชุดเดียวกับ production — Worker มีชุดเดียว)
+#    ล็อกอิน เปิดไพ่ จองแม่หมอบนลิงก์นี้ = บันทึกลงข้อมูลจริง
+# ⚠️ ไม่รัน D1 migration (ไม่แตะโครงฐานข้อมูล production) — กิ่งที่เพิ่ม migration ใหม่ต้องรอ deploy จริง
+# ⚠️ KV cache ของหน้า Next ถูกเติมใต้ BUILD_ID ใหม่ (คีย์แยกจาก production ไม่ทับของเดิม)
+# ⚠️ หน้าเว็บมี canonical ชี้ seertarot.net อยู่แล้ว — ลิงก์ทดลองไม่แย่งอันดับ SEO ถ้าบอตเผลอเจอ
+#
+# วิธีสั่ง: push คอมมิตที่ข้อความมี `[preview]` บนกิ่งใดก็ได้ที่ไม่ใช่ main
+#          (หรือกด Run workflow ในแท็บ Actions เมื่อไฟล์นี้อยู่บน main แล้ว)
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  push:
+    branches-ignore:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: preview-${{ github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    name: 👀 Upload preview version
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[preview]')
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: ⚙️ Setup Node.js 22
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      # ชื่อลิงก์ = ชื่อกิ่งที่ตัดให้เหลือตัวอักษรที่ใช้ในโดเมนได้ (ซ้ำกิ่งเดิม = ลิงก์เดิม อัปเดตทับ)
+      - name: 🏷️ ตั้งชื่อลิงก์จากชื่อกิ่ง
+        id: alias
+        run: |
+          slug=$(echo "${GITHUB_REF_NAME}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g' | cut -c1-40 | sed -E 's/-+$//')
+          echo "alias=${slug:-preview}" >> "$GITHUB_OUTPUT"
+
+      # build เหมือน `npm run deploy` ทุกขั้น ยกเว้นขั้นสุดท้าย (upload แทน deploy)
+      - name: ⚡ Build (เหมือน production)
+        run: npm run build:worker
+        env:
+          NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID || vars.NEXT_PUBLIC_GA_ID || '' }}
+          NEXT_PUBLIC_META_PIXEL_ID: ${{ secrets.NEXT_PUBLIC_META_PIXEL_ID || vars.NEXT_PUBLIC_META_PIXEL_ID || '' }}
+          NEXT_PUBLIC_GOOGLE_ADS_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_ADS_ID || vars.NEXT_PUBLIC_GOOGLE_ADS_ID || '' }}
+          NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL: ${{ secrets.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL || vars.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL || '' }}
+          NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: ${{ secrets.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || vars.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '' }}
+          NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || vars.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '' }}
+
+      # ⛔ ห้ามเปลี่ยนเป็น `deploy` — upload = สร้างเวอร์ชันโดยไม่ย้ายทราฟฟิก production
+      - name: 👀 Upload preview version (ไม่ย้ายทราฟฟิก)
+        run: |
+          set -o pipefail
+          npx opennextjs-cloudflare upload --preview-alias "${{ steps.alias.outputs.alias }}" 2>&1 | tee upload.log
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: 🔗 ลิงก์ทดลอง
+        if: always()
+        run: |
+          urls=$(grep -Eo 'https://[a-z0-9.-]+\.workers\.dev' upload.log | sort -u || true)
+          {
+            echo "### 👀 ลิงก์ทดลอง (ไม่ใช่ production)"
+            echo ""
+            if [ -n "$urls" ]; then
+              for u in $urls; do echo "- $u"; done
+            else
+              echo "ไม่พบลิงก์ใน log — ดูขั้น Upload ด้านบน (บัญชีอาจปิด workers.dev / preview URLs ไว้)"
+            fi
+            echo ""
+            echo "⚠️ ต่อฐานข้อมูลจริง — ล็อกอิน/เปิดไพ่บนลิงก์นี้บันทึกลงข้อมูลจริง"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "PREVIEW_URLS: $urls"

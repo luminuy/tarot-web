@@ -38,6 +38,12 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-13 (รอบ 249): ลิงก์ทดลองออนไลน์ — workflow `preview.yml` (อัปโหลดเวอร์ชันทดลองบน Cloudflare ไม่ย้ายทราฟฟิก)
+
+- **เจ้าของถาม**: "อยากดูแบบออนไลน์ ไม่ใช่แค่แคป" ➔ เสนอ 2 ทาง เจ้าของเลือกลิงก์ทดลองบน Cloudflare ("ได้ๆ")
+- **ทำ**: `.github/workflows/preview.yml` — push คอมมิตที่มี `[preview]` บนกิ่งที่ไม่ใช่ main ➔ build เหมือน production (`build:worker`) ➔ `opennextjs-cloudflare upload --preview-alias <ชื่อกิ่ง>` = `wrangler versions upload` สร้างเวอร์ชันใหม่**โดยไม่ย้ายทราฟฟิก** · ลิงก์ขึ้นใน Job Summary
+- **ข้อควรรู้**: ต่อ D1/KV/R2 ตัวจริง (Worker มี binding ชุดเดียว) — ล็อกอิน/เปิดไพ่บนลิงก์ทดลองบันทึกลงข้อมูลจริง · ไม่รัน D1 migration · KV cache หน้า Next เติมใต้ BUILD_ID ใหม่ (ไม่ทับของ production) · canonical ชี้ seertarot.net อยู่แล้ว
+
 ### 🗓️ 2026-10-13 (รอบ 248): UI 2.0 — ริบบิ้นไขว้ตามภาพต้นแบบ D+ ทุกจอ (Draft PR #669 · ยังไม่ขึ้น production)
 
 - **เจ้าของแคปส่ง** ส่วนริบบิ้น ("ส่วนนี้") · ไม่รัน `repo:verify` รอบนี้ตามคำสั่ง (ตรวจตอนสั่งขึ้น)
