@@ -27,7 +27,6 @@ if (stick && "IntersectionObserver" in window) {
   const row = stick.firstElementChild as HTMLElement;
   const links = Array.from(stick.querySelectorAll<HTMLAnchorElement>("a[href^='#shelf-']"));
   const mark = (id: string | null) => {
-    stick.toggleAttribute("data-stuck", id !== null);
     for (const a of links) {
       const on = a.getAttribute("href") === `#${id}`;
       if (on === (a.getAttribute("aria-current") === "true")) continue;
@@ -44,6 +43,18 @@ if (stick && "IntersectionObserver" in window) {
     { rootMargin: "-45% 0px -50% 0px" },
   );
   document.querySelectorAll(".ui2-sp-shelf").forEach((el) => seen.observe(el));
+  // พื้นทึบหลังแถบ = เฉพาะตอนแถบติดจอจริง (ตำแหน่งเท่ากับค่า top ของ sticky)
+  // ⚠️ เดิมผูกกับ "มีหมวดเรือง" — หมวดแรกถึงกลางจอก่อนแถบติด พื้นทึบเลยบังหัวหน้าเหนือแถบ (เจ้าของแคป 2026-10-13)
+  let raf = 0;
+  const syncStuck = () => {
+    raf = 0;
+    const top = parseFloat(getComputedStyle(stick).top) || 0;
+    const on = Math.abs(stick.getBoundingClientRect().top - top) < 1;
+    if (on !== stick.hasAttribute("data-stuck")) stick.toggleAttribute("data-stuck", on);
+  };
+  addEventListener("scroll", () => (raf ||= requestAnimationFrame(syncStuck)), { passive: true });
+  addEventListener("resize", () => (raf ||= requestAnimationFrame(syncStuck)), { passive: true });
+  syncStuck();
   // เหนือหมวดแรก (หัวหน้า) = ไม่มีหมวดไหนเรือง
   const hero = document.querySelector(".ui2-sp-hero");
   if (hero)
