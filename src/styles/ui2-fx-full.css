@@ -101,11 +101,6 @@
     animation: ui2-cue 2.4s ease-in-out infinite;
   }
 
-  /* ── ริบบิ้นไขว้ เส้นที่สอง (ตัวหนังสือ) ──────────────────────────────────── */
-  [data-fx="full"] .ui2-strip-text {
-    display: block;
-  }
-
   /* ── ตัวหนังสือทองมีแสงวิ่ง (lite = ทองนิ่ง เพราะอนิเมต background-position = วาดใหม่ทุกเฟรม) ── */
   [data-fx="full"] .ui2-gold-day,
   [data-fx="full"] .ui2-gold-night {

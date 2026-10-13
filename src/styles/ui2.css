@@ -302,7 +302,8 @@
    ของที่ล้นขอบ (การ์ดลอย · ริบบิ้น 130vw) ถูกตัดโดย <main className="overflow-x-clip"> และ html อยู่แล้ว (INC-0067) */
 .ui2-hero {
   padding-top: 24px;
-  padding-bottom: 40px;
+  /* 40px + ส่วนที่ริบบิ้นดึงขึ้นมาทับ (106px) — ริบบิ้นทับแค่ที่ว่าง ไม่ทับปุ่ม */
+  padding-bottom: 146px;
   text-align: center;
 }
 /* ขยายพื้นกลางวันขึ้นไปใต้หัวเว็บ — ไม่ให้เห็นรอยต่อกับพื้นเดิมของ body */
@@ -466,8 +467,8 @@
 .ui2-fc-wheel { display: block; --w: 72px; --r: 9deg; right: -20px; top: -10px; }
 .ui2-fc-empress { display: block; --w: 52px; --r: -7deg; right: 70px; top: -30px; }
 /* สองใบล่างผูกกับขอบล่างของส่วน = อยู่ข้างแถวนาฬิกาเสมอ ไม่ว่าหัวข้อจะกี่บรรทัด (ห้ามลงไประดับปุ่ม) */
-.ui2-fc-lovers { display: block; --w: 56px; --r: 8deg; left: -22px; bottom: 150px; }
-.ui2-fc-priestess { display: block; --w: 56px; --r: -7deg; right: -20px; bottom: 154px; }
+.ui2-fc-lovers { display: block; --w: 56px; --r: 8deg; left: -22px; bottom: 256px; }
+.ui2-fc-priestess { display: block; --w: 56px; --r: -7deg; right: -20px; bottom: 260px; }
 
 /* ตัวบอกให้เลื่อนลง (จอ ≥ 768 · ขยับเฉพาะระดับ full ใน ui2-fx-full.css) */
 .ui2-cue {
@@ -500,51 +501,60 @@
 /* ═════════════════════════════════════════════════════════════════════════
    ส่วน 2 · ริบบิ้นไขว้
    ═════════════════════════════════════════════════════════════════════════ */
+/* ตามภาพต้นแบบ D+ ทุกจอ: ริบบิ้นทองตัวหนังสือ (บน · เอียงขึ้น) + ริบบิ้นมืดภาพไพ่ (ล่าง · เอียงลง) ไขว้กัน
+   ดึงขึ้นทับท้ายหัวหน้า 48% ของความสูง (แบบต้นแบบ) — ช่วงที่ทับโปร่งใสให้เห็นพื้นหัวหน้า ครึ่งล่างกลางคืน
+   ⚠️ ระยะดึงขึ้นต้องเท่ากับส่วนโปร่งใสพอดี และหัวหน้าต้องเว้น padding-bottom เผื่อไว้ (ไม่งั้นทับปุ่ม/ตัวบอกเลื่อนลง) */
 .ui2-ribbon {
-  padding-block: 28px;
+  z-index: 3;
+  height: 220px;
+  margin-top: -106px;
+  padding-block: 0;
 }
 .ui2-ribbon::before {
-  background: linear-gradient(180deg, var(--ui2-day) 0%, var(--ui2-day) 42%, var(--ui2-night) 58%, var(--ui2-night) 100%);
+  background: linear-gradient(180deg, transparent 0%, transparent 48%, var(--ui2-night) 48%, var(--ui2-night) 100%);
 }
 .ui2-strip {
-  position: relative;
+  position: absolute;
   left: 50%;
-  width: 130vw;
+  width: 120vw;
   translate: -50% 0;
   overflow: hidden;
 }
-.ui2-strip-cards {
-  rotate: -3deg;
-  padding-block: 10px;
-  background: var(--ui2-night-2);
-  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.25);
-}
 .ui2-strip-text {
-  display: none; /* เส้นตัวหนังสือมีเฉพาะระดับ full (lite 1 เส้น · ui2-fx-full.css) */
-  rotate: 2.5deg;
-  margin-top: -18px;
+  z-index: 1;
+  top: 40px;
+  rotate: 4deg;
+  padding-block: 10px;
+  background: var(--ui2-ribbon-gold);
+  box-shadow: 0 16px 30px -16px rgba(0, 0, 0, 0.5);
+}
+.ui2-strip-cards {
+  z-index: 2;
+  top: 86px;
+  rotate: -4deg;
   padding-block: 12px;
-  background: var(--ui2-paper);
-  box-shadow: 0 0 0 1px rgba(30, 25, 20, 0.1);
+  background: var(--ui2-ribbon-night);
+  border-block: 1px solid rgba(255, 214, 140, 0.35);
+  box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.8);
 }
 .ui2-track {
   display: flex;
   width: max-content;
-  gap: 12px;
-  animation: ui2-marquee 60s linear infinite;
+  gap: 10px;
+  animation: ui2-marquee 50s linear infinite;
 }
 .ui2-strip-text .ui2-track {
   gap: 0;
-  animation-duration: 48s;
+  animation-duration: 40s;
   animation-direction: reverse;
 }
 .ui2-track-card {
   flex: none;
-  width: 64px;
-  aspect-ratio: 300 / 520;
-  border-radius: 7px;
+  height: 84px;
+  aspect-ratio: 3 / 5;
+  border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.3);
+  box-shadow: 0 0 0 1px rgba(255, 214, 140, 0.25);
 }
 .ui2-track-card img {
   width: 100%;
@@ -555,13 +565,26 @@
   flex: none;
   display: inline-flex;
   align-items: center;
-  gap: 18px;
-  padding-inline: 18px;
+  gap: 14px;
+  padding-right: 14px;
+  font-size: 22px;
+  line-height: 1.4;
+  color: var(--ui2-ribbon-ink);
+  white-space: nowrap;
+}
+.ui2-track-word .ui2-num,
+.ui2-track-th {
   font-family: var(--ui2-font-display);
   font-weight: 500;
-  font-size: 22px;
-  color: var(--ui2-ink);
-  white-space: nowrap;
+  font-size: 16px;
+}
+/* เครื่องหมายข้าวหลามตัดคั่นวลี — รูปทรง CSS (ไม่ใช่อีโมจิ/สัญลักษณ์ · กฎเหล็ก 2) */
+.ui2-diamond {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  rotate: 45deg;
+  background: var(--ui2-ribbon-mark);
 }
 
 /* ═════════════════════════════════════════════════════════════════════════
@@ -1628,7 +1651,8 @@ html[data-consent-ask] .ui2-sticky {
   .ui2-cue { display: flex; }
   .ui2-hero {
     padding-top: 56px;
-    padding-bottom: 72px;
+    /* 40px + ส่วนที่ริบบิ้นดึงขึ้นมาทับ (139px) */
+    padding-bottom: 180px;
     /* แท็บเล็ตแนวตั้ง: การ์ด 3 ใบต่อข้างอยู่ในความสูงของเนื้อหาแล้ว (ใบล่างสุดจบที่ ~640px) — ไม่ยืดส่วนจนเหลือที่ว่าง */
     min-height: 0;
   }
@@ -1661,9 +1685,18 @@ html[data-consent-ask] .ui2-sticky {
   .ui2-clock-cell .ui2-num {
     font-size: 40px;
   }
-  .ui2-track-card {
-    width: 74px;
-  }
+  /* ริบบิ้นบนแท็บเล็ต/คอม: ขนาดตามภาพต้นแบบ DX-Desktop */
+  .ui2-ribbon { height: 290px; margin-top: -139px; padding-block: 0; }
+  .ui2-strip { width: 110vw; }
+  .ui2-strip-text { top: 70px; rotate: 2.6deg; padding-block: 14px; box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5); }
+  .ui2-strip-cards { top: 120px; rotate: -2.4deg; padding-block: 16px; box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8); }
+  .ui2-track { gap: 14px; animation-duration: 70s; }
+  .ui2-strip-text .ui2-track { gap: 0; animation-duration: 60s; }
+  .ui2-track-card { height: 112px; border-radius: 8px; }
+  .ui2-track-word { gap: 22px; padding-right: 22px; font-size: 30px; }
+  .ui2-track-word .ui2-num,
+  .ui2-track-th { font-size: 22px; }
+  .ui2-diamond { width: 9px; height: 9px; }
   .ui2-window {
     padding: 22px;
   }
