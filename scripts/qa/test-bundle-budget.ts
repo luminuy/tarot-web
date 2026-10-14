@@ -297,7 +297,12 @@ export const BUDGETS: RouteBudget[] = [
      */
     route: "/spreads/topic/love",
     maxJsGzipKb: 8, // วัดจริง 2026-09-18: 4.7 KB (เดิม 102.6 KB)
-    maxHtmlGzipKb: 21, // วัดจริง 2026-09-18: 16.7 KB
+    /*
+     * วัดจริง 2026-09-18: 16.7 KB · ปรับ 21 ➔ 23 เมื่อ 2026-10-14 (PR #671 โหมดมืด):
+     * สคริปต์ธีมใน <head> + ปุ่มสลับในหัวเว็บเพิ่ม ~0.6 KB gzip ทุกหน้า (วัดเทียบไฟล์เดียวกัน)
+     * CI วัดหน้านี้ได้ 22 KB (เครื่อง dev 20.3 KB) ➔ งบ = ค่า CI + ระยะหายใจ
+     */
+    maxHtmlGzipKb: 23,
   },
   {
     route: "/cards/all",
