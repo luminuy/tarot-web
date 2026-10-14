@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* 🌙 โหมดมืด — ทับเฉพาะตอน <html data-theme="dark"> · โหมดสว่างไม่ถูกแตะ (รายละเอียดอยู่ในไฟล์) */
+@import "./theme-dark.css";
 
 /*
  * 🔍 ขอบเขตที่ Tailwind ใช้ "สแกนหาชื่อคลาส" (Source Detection)

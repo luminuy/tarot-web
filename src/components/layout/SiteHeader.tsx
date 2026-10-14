@@ -7,6 +7,7 @@ import { requestFreshStart } from "@/lib/utils/flow-persistence";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { HeaderAccount } from "@/components/layout/HeaderAccount";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { useLocale } from "@/lib/i18n";
 import { stripLocalePrefix } from "@/lib/i18n/paths";
 import { useCurrentPath } from "@/components/layout/current-path";
@@ -157,6 +158,7 @@ export function SiteHeader({
             <DesktopNav isEnglish={isEnglish} />
 
             <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+              <ThemeToggle isEnglish={isEnglish} />
               <LanguageSwitcher />
               {/* ไม่มีใครส่ง toolbar มา (หน้าเนื้อหาทั่วไป) ➔ ใส่ปุ่มบัญชีให้เอง หัวเว็บทุกหน้าจะได้เหมือนหน้าแรก */}
               {toolbar ?? <HeaderAccount />}

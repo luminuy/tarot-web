@@ -14,8 +14,8 @@ export function calculatePasswordStrength(password: string, isEnglish?: boolean)
     return {
       score: 0,
       label: isEnglish ? "Enter password" : "กรุณาระบุรหัสผ่าน",
-      colorClass: "text-[#635B4E]",
-      barColor: "bg-[#D9C8AC]",
+      colorClass: "text-muted",
+      barColor: "bg-line-warm",
     };
   }
 
@@ -38,30 +38,30 @@ export function calculatePasswordStrength(password: string, isEnglish?: boolean)
       return {
         score: 1,
         label: isEnglish ? "Too weak" : "รหัสผ่านสั้นเกินไป",
-        colorClass: "text-[#A6392C]",
-        barColor: "bg-[#A6392C]",
+        colorClass: "text-err",
+        barColor: "bg-err",
       };
     case 2:
       return {
         score: 2,
         label: isEnglish ? "Fair" : "พอใช้",
-        colorClass: "text-[#8F5C1A]",
-        barColor: "bg-[#8F5C1A]",
+        colorClass: "text-gold-ink",
+        barColor: "bg-gold-ink",
       };
     case 3:
       return {
         score: 3,
         label: isEnglish ? "Strong" : "ปลอดภัยดี",
-        colorClass: "text-[#3A7044]",
-        barColor: "bg-[#3A7044]",
+        colorClass: "text-ok",
+        barColor: "bg-ok",
       };
     case 4:
     default:
       return {
         score: 4,
         label: isEnglish ? "Very Strong" : "ปลอดภัยสูงมาก",
-        colorClass: "text-[#8F5C1A]",
-        barColor: "bg-[#3A7044]",
+        colorClass: "text-gold-ink",
+        barColor: "bg-ok",
       };
   }
 }
