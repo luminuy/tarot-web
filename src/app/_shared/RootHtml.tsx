@@ -8,6 +8,7 @@ import { LocaleProvider } from "@/lib/i18n";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { BRAND_SOCIAL_PROFILES, DEFAULT_SUPPORT_EMAIL, SITE_ORIGIN } from "@/lib/config/site";
 import { CONSENT_STORAGE_KEY } from "@/lib/analytics-consent";
+import { THEME_SCRIPT } from "@/lib/theme/theme-script";
 import { getImageKitOrigin } from "@/lib/tarot/card-image";
 import type { Locale } from "@/lib/i18n/types";
 
@@ -124,6 +125,9 @@ export function RootHtml({
       <head>
         <meta charSet="utf-8" />
 
+        {/* 🌙 โหมดมืด/สว่าง — ต้องรันก่อนเฟรมแรก ห้ามใส่ defer/async (เหตุผลอยู่ที่ src/lib/theme/theme-script.ts)
+            ตั้ง `data-theme` บน <html> ก่อน React ไฮเดรต — `suppressHydrationWarning` ของ <html> ครอบไว้แล้ว */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
 
         {/*
           🔌 เปิดสายไปยัง CDN ของภาพไพ่ล่วงหน้า — โฮสต์เดียวที่เบราว์เซอร์ต้องต่อจริงตอนวาดหน้า

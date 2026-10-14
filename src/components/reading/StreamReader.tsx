@@ -205,7 +205,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           {/* Authentic 1909 Tarot Card Persona Avatar */}
           <div
             className="w-10 h-15 rounded-lg border-2 overflow-hidden bg-inset-warm relative flex-shrink-0"
-            style={{ borderColor: "#D9C8AC" }}
+            style={{ borderColor: "var(--color-line-warm)" }}
           >
             <CardImage
               image={`${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}

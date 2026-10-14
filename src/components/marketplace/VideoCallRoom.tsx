@@ -785,7 +785,7 @@ export function VideoCallRoom({
       className={`${embedded ? "" : "altar-card-porcelain p-2 sm:p-4"} w-full max-w-4xl mx-auto space-y-3 font-serif-th`}
     >
       {/* สูงไม่เกิน 70% ของจอ — จอกว้างแบบเดสก์ท็อปไม่ให้ภาพดันปุ่มวางสายตกขอบล่าง */}
-      <div className="relative w-full aspect-[3/4] sm:aspect-video max-h-[70svh] rounded-2xl bg-ink-deep overflow-hidden">
+      <div className="keep-dark relative w-full aspect-[3/4] sm:aspect-video max-h-[70svh] rounded-2xl bg-ink-deep overflow-hidden">
         <div className={`absolute bg-black ${peerPos} ${layout === "self" ? "overflow-hidden" : ""}`}>
           <video
             ref={remoteVideoRef}
@@ -904,7 +904,7 @@ export function VideoCallRoom({
             ต่อสายใหม่
           </Button>
         )}
-        <Button variant="gold" className="col-span-2 sm:flex-1 !bg-err !text-white" onClick={() => void hangUp()}>
+        <Button variant="gold" className="col-span-2 sm:flex-1 !bg-err !text-surface" onClick={() => void hangUp()}>
           วางสาย
         </Button>
       </div>
