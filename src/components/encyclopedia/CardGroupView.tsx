@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/TarotArtIcons";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
-import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
 
 interface CardGroupViewProps {
   groupInfo: CardGroupInfo;
@@ -90,8 +90,10 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
     ],
   };
 
+  const groupSuit = ["major", "wands", "cups", "swords", "pentacles"].includes(groupInfo.id) ? groupInfo.id : "all";
+
   return (
-    <div className="space-y-8">
+    <div className="v2-cg space-y-8" data-suit={groupSuit}>
       {/* Schema.org Structured Data */}
       <script
         type="application/ld+json"
@@ -102,102 +104,57 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
         dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbsJsonLd) }}
       />
 
-      {/* Breadcrumb Bar */}
-      <nav aria-label="Breadcrumb" className="text-xs font-serif-th text-muted">
-        <ol className="flex items-center gap-1.5 flex-wrap">
-          <li>
-            <Link href="/" className="hover:text-gold-ink transition-colors">
-              {isEnglish ? "Home" : "หน้าแรก"}
+      {/*
+        v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — ห้องธาตุ: หัวหน้าเรืองสีธาตุของชุด + พัดไพ่จริงของชุดนั้น
+        แถบสลับหมวดสีธาตุ ➔ กริดไพ่ขึ้นก่อน (v1 ให้อ่านบทนำยาวก่อนถึงไพ่) ➔ บทนำ + 3 จุดเด่นย้ายไปท้าย
+      */}
+      <header className="v2-cg-head">
+        <div className="v2-cg-text">
+          <Ui2Crumbs
+            crumbs={[
+              { label: isEnglish ? "Home" : "หน้าแรก", href: "/" },
+              { label: isEnglish ? "Tarot Encyclopedia" : "คัมภีร์ไพ่ 78 ใบ", href: "/cards" },
+              { label: isEnglish ? groupInfo.nameEn : groupInfo.nameTh },
+            ]}
+          />
+          <h1 className="v2-cg-title">
+            <ThaiPhrases>{isEnglish ? groupInfo.nameEn : groupInfo.seoTitleTh}</ThaiPhrases>
+          </h1>
+          <p className="v2-cg-lede">
+            <ThaiPhrases>{isEnglish ? groupInfo.heroTaglineEn : groupInfo.heroTaglineTh}</ThaiPhrases>
+          </p>
+          <ul className="v2-cg-facts">
+            <li>
+              <b>{cards.length}</b> {isEnglish ? "cards" : "ใบ"}
+            </li>
+            {groupInfo.elementTh && <li>{isEnglish ? `${groupInfo.elementEn} element` : `ธาตุ${groupInfo.elementTh}`}</li>}
+            <li>{isEnglish ? "1909 Rider-Waite-Smith" : "ภาพต้นฉบับ 1909 Rider-Waite"}</li>
+          </ul>
+        </div>
+        <span className="v2-cg-fan" aria-hidden="true">
+          {cards.slice(0, 5).map((c, i) => (
+            <span key={c.id} className={`v2-cg-fan-card v2-cg-fan-${i + 1}`}>
+              <CardImage cardId={c.id} image={c.image} alt="" thumb sizes="(min-width: 1024px) 150px, 90px" loading={i < 3 ? "eager" : "lazy"} />
+            </span>
+          ))}
+        </span>
+      </header>
+
+      <nav className="v2-cg-switch" aria-label={isEnglish ? "Browse Deck Categories" : "เลือกหมวดหมู่ไพ่"}>
+        {NAV_TABS.map((tab) => {
+          const isActive = tab.id === groupInfo.id;
+          const suit = ["major", "wands", "cups", "swords", "pentacles"].includes(tab.id) ? tab.id : "all";
+          return (
+            <Link key={tab.id} href={tab.href} data-suit={suit} aria-current={isActive ? "page" : undefined}>
+              <tab.Icon className="v2-cg-switch-ic" />
+              {isEnglish ? tab.labelEn : tab.labelTh}
             </Link>
-          </li>
-          <li aria-hidden="true" className="text-gold">/</li>
-          <li>
-            <Link href="/cards" className="hover:text-gold-ink transition-colors">
-              {isEnglish ? "Tarot Encyclopedia" : "คัมภีร์ไพ่ 78 ใบ"}
-            </Link>
-          </li>
-          <li aria-hidden="true" className="text-gold">/</li>
-          <li aria-current="page" className="font-bold text-ink">
-            {isEnglish ? groupInfo.nameEn : groupInfo.nameTh}
-          </li>
-        </ol>
+          );
+        })}
       </nav>
 
-      {/* หัวหน้า UI 2.0 (เจ้าของ 2026-10-16) — ข้อความ h1 / คำโปรย / บทนำเดิมทุกตัวอักษร */}
-      <Ui2PageHero
-        title={isEnglish ? groupInfo.nameEn : groupInfo.seoTitleTh}
-        lede={isEnglish ? groupInfo.heroTaglineEn : groupInfo.heroTaglineTh}
-        trust={[
-          isEnglish ? "Tarot Compendium" : "คัมภีร์ไพ่ยิปซี 1909",
-          `${cards.length} ${isEnglish ? "Cards" : "ใบ"}`,
-          ...(groupInfo.elementTh ? [isEnglish ? `${groupInfo.elementEn} Element` : `ธาตุ${groupInfo.elementTh}`] : []),
-        ]}
-        cards={cards.slice(0, 6).map((c) => c.id)}
-      />
-
-      {/* บทนำ (≥ 300 คำ) + 3 จุดเด่น ในหน้าต่างกระจก */}
-      <section className="ui2-win ui2-rv">
-        <div className="max-w-3xl space-y-4 pt-8">
-          {/* Editorial Prose Introduction (≥300 words) */}
-          <div className="space-y-3.5 text-xs sm:text-sm text-ink font-serif-th leading-relaxed">
-            {intro.paragraphs.map((p, idx) => (
-              <p key={idx}>{p}</p>
-            ))}
-          </div>
-
-          {/* 3 Strategic Highlights */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
-            {intro.highlights.map((h, idx) => (
-              <div
-                key={idx}
-                className="glass-tile p-3.5 !rounded-xl space-y-1"
-              >
-                <h2 className="font-serif-th text-xs font-bold text-gold-ink"><ThaiPhrases>
-                  {h.title}
-                </ThaiPhrases></h2>
-                <p className="font-serif-th text-[11px] text-muted leading-normal">
-                  {h.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Group Navigation Bar */}
-      <div className="space-y-2">
-        <h2 className="font-serif-th text-xs font-bold text-muted uppercase tracking-wider"><ThaiPhrases>
-          {isEnglish ? "Browse Deck Categories" : "เลือกหมวดหมู่ไพ่"}
-        </ThaiPhrases></h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
-          {NAV_TABS.map((tab) => {
-            const isActive = tab.id === groupInfo.id;
-            return (
-              <Link
-                key={tab.id}
-                href={tab.href}
-                className={`p-2.5 rounded-xl border text-center transition duration-200 flex flex-col items-center justify-center gap-1 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
-                  isActive
-                    ? "altar-panel-active"
-                    : "glass-tile"
-                }`}
-              >
-                <tab.Icon className={`w-4 h-4 ${isActive ? "text-gold-ink" : "text-gold"}`} />
-                <span
-                  className={`font-serif-th text-xs font-bold block truncate max-w-full ${
-                    isActive ? "text-gold-ink" : "text-ink group-hover:text-gold-ink"
-                  }`}
-                >
-                  {isEnglish ? tab.labelEn : tab.labelTh}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-
       {/* Cards Grid */}
-      <section aria-label={isEnglish ? groupInfo.nameEn : groupInfo.nameTh} className="page-band page-band-tint space-y-4">
+      <section aria-label={isEnglish ? groupInfo.nameEn : groupInfo.nameTh} className="v2-cg-grid page-band page-band-tint space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-serif-th text-base font-bold text-ink"><ThaiPhrases>
             {isEnglish ? `All ${cards.length} Cards in this Group` : `รายชื่อไพ่ทั้งหมด ${cards.length} ใบ ในหมวดนี้`}
@@ -285,6 +242,28 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
             );
           })}
         </div>
+      </section>
+
+      {/* บทนำ (≥ 300 คำ) + 3 จุดเด่น — เนื้อหาเดิมครบ ย้ายมาท้ายกริด */}
+      <section className="v2-cg-intro" aria-labelledby="cg-intro-h">
+        <h2 id="cg-intro-h" className="v2-cg-h2">
+          <ThaiPhrases>{isEnglish ? `About ${groupInfo.nameEn}` : `รู้จัก${groupInfo.nameTh}`}</ThaiPhrases>
+        </h2>
+        <div className="v2-cg-prose">
+          {intro.paragraphs.map((p, idx) => (
+            <p key={idx}>{p}</p>
+          ))}
+        </div>
+        <ul className="v2-cg-highlights">
+          {intro.highlights.map((h, idx) => (
+            <li key={idx}>
+              <h3>
+                <ThaiPhrases>{h.title}</ThaiPhrases>
+              </h3>
+              <p>{h.desc}</p>
+            </li>
+          ))}
+        </ul>
       </section>
     </div>
   );
