@@ -138,7 +138,7 @@ export function BlogIndexBody({ locale, list }: { locale: Locale; list: ReactNod
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(blogJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbsJsonLd) }} />
 
-      <div className="max-w-5xl mx-auto space-y-8 pb-16">{list}</div>
+      <div className="max-w-6xl mx-auto space-y-8 pb-16">{list}</div>
     </main>
   );
 }

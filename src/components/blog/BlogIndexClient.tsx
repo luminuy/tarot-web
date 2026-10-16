@@ -12,7 +12,7 @@ import { getArticleCardArt } from "@/data/article-art";
 import { CardImage } from "@/components/card/CardImage";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
-import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
 
 const SearchIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
   <svg
@@ -91,166 +91,143 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
   const previewOnMobile = !showAllOnMobile && selectedCat === "all" && !searchQuery.trim();
 
   const featured = articles[0];
-  // ลดความซ้ำ (v1): ตอนโชว์ปกบทความเด่น ไม่ต้องซ้ำบทความเดียวกันเป็นการ์ดแรกของกริด (ลิงก์ยังอยู่ที่ปก)
-  const showFeatured = selectedCat === "all" && !searchQuery && !!featured;
-  const gridItems = showFeatured ? filtered.filter((a) => a.slug !== featured.slug) : filtered;
+  const isFront = selectedCat === "all" && !searchQuery.trim() && !!featured;
+  /* หน้าแรกของนิตยสาร: เรื่องจากปก 1 + เรื่องรอง 3 · ที่เหลือลงกริด (ไม่ซ้ำกัน) */
+  const sideStories = isFront ? articles.slice(1, 4) : [];
+  const shownOnFront = new Set([featured?.slug, ...sideStories.map((a) => a.slug)]);
+  const gridItems = isFront ? filtered.filter((a) => !shownOnFront.has(a.slug)) : filtered;
+  const readTimeOf = (a: BlogCardItem) => (isEnglish ? a.readTime.replace("นาที", "min read") : a.readTime);
 
+  /*
+   * v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — นิตยสารดูดวง
+   * หัวนิตยสาร (masthead) ➔ แถบหมวดแบบแท็บนิตยสาร + ช่องค้นหา ➔ เรื่องจากปกใหญ่ + เรื่องรอง 3 เรื่องเรียงเลข
+   * ➔ กริดบทความ 3 คอลัมน์ ภาพไพ่เป็นแถบหัวการ์ด (v1 การ์ดตัวหนังสือแน่น ภาพไพ่จิ๋ว 64px)
+   */
   return (
-    <div className="space-y-10">
-      {/* Dynamic Bilingual Hero Header */}
-      <Ui2PageHero
-        title={isEnglish ? "Tarot Wisdom Codex & Divination Essays" : "คัมภีร์บทความดูดวงไพ่ยิปซี ทาโรต์ 1909"}
-        accent={isEnglish ? "Tarot Wisdom Codex" : "คัมภีร์บทความ"}
-        lede={
-          isEnglish
-            ? "Explore depth psychology, Jungian archetypes, archetypal symbolism, and master guides for love, career, and 26 sacred spreads rooted in the authentic 1909 Rider-Waite lineage."
-            : "เจาะลึกศาสตร์ไพ่ทาโรต์ดั้งเดิม 1909 Rider-Waite จิตวิทยาเชิงลึก ปรัชญา คาร์ล ยุง และคู่มือการอ่านไพ่ความรัก การงาน และผังพยากรณ์ทั้ง 26 แบบ โดยวิหาร SeerTarot"
-        }
-        trust={[isEnglish ? "SeerTarot wisdom codex & esoteric essays" : "คลังความรู้และคู่มือศาสตร์พยากรณ์", isEnglish ? `${articles.length} articles` : `${articles.length} บทความ`]}
-        cards={["major-05", "major-09", "major-02", "major-21", "major-12", "major-03"]}
-      />
+    <div className="v2-bl">
+      <header className="v2-bl-mast">
+        <Ui2Crumbs crumbs={[{ label: isEnglish ? "Home" : "หน้าแรก", href: "/" }, { label: isEnglish ? "Articles" : "บทความ" }]} />
+        <h1 className="v2-bl-title">
+          {isEnglish ? (
+            <>
+              <span className="ui2-gold-night">Tarot Wisdom Codex</span> &amp; Divination Essays
+            </>
+          ) : (
+            <>
+              <span className="tp ui2-gold-night">คัมภีร์บทความ</span>
+              <span className="tp">ดูดวงไพ่ยิปซี ทาโรต์ 1909</span>
+            </>
+          )}
+        </h1>
+        <p className="v2-bl-issue">
+          <span>{isEnglish ? `${articles.length} articles` : `รวม ${articles.length} บทความ`}</span>
+          <span aria-hidden="true" className="v2-bl-dot" />
+          <span>{isEnglish ? "Rooted in the 1909 Rider-Waite deck" : "อ้างอิงไพ่ต้นฉบับ 1909 Rider-Waite"}</span>
+        </p>
+        <p className="v2-bl-lede">
+          <ThaiPhrases>
+            {isEnglish
+              ? "Depth psychology, Jungian archetypes, symbolism, and practical guides for love, career, and 26 spreads."
+              : "เจาะลึกศาสตร์ไพ่ทาโรต์ดั้งเดิม จิตวิทยาเชิงลึก และคู่มือการอ่านไพ่ความรัก การงาน และผังพยากรณ์ทั้ง 26 แบบ"}
+          </ThaiPhrases>
+        </p>
+      </header>
 
-      {/* Search & Category Filter Bar */}
-      <div className="space-y-4">
-        {/* Search Input — Soft Porcelain with Taupe border and Gold Accent */}
-        <div className="relative max-w-xl mx-auto">
+      {/* แถบหมวด + ค้นหา */}
+      <div className="v2-bl-nav">
+        <div className="v2-bl-tabs" role="group" aria-label={isEnglish ? "Article categories" : "หมวดบทความ"}>
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              aria-pressed={selectedCat === cat.id}
+              onClick={() => {
+                import("@/lib/utils/audio")
+                  .then(({ soundManager }) => soundManager.playMenuTapSound())
+                  .catch(() => {});
+                setSelectedCat(cat.id);
+              }}
+              className="v2-bl-tab"
+            >
+              {cat.id === "all" ? (isEnglish ? "All" : "ทั้งหมด") : isEnglish ? cat.labelEn : cat.labelTh}
+            </button>
+          ))}
+        </div>
+        <label className="v2-bl-search">
+          <SearchIcon className="v2-bl-search-ic" />
           <input
-              aria-label={isEnglish ? "Search articles" : "ค้นหาบทความ"}
-            type="text"
+            aria-label={isEnglish ? "Search articles" : "ค้นหาบทความ"}
+            type="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={
-              isEnglish
-                ? "Search articles or card meanings"
-                : "ค้นหาบทความ หรือความหมายไพ่"
-            }
-            className="glass-field w-full border border-line-interactive rounded-2xl px-5 py-3.5 pl-11 text-xs sm:text-sm text-ink placeholder:text-muted/70 focus:outline-none focus:border-gold-ink focus:ring-1 focus:ring-gold-ink transition font-serif-th"
+            placeholder={isEnglish ? "Search articles or card meanings" : "ค้นหาบทความ หรือความหมายไพ่"}
           />
-          <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-ink" />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-muted hover:text-gold-ink cursor-pointer font-serif-th"
-            >
-              {isEnglish ? "✕ Clear" : "✕ ล้าง"}
-            </button>
-          )}
-        </div>
-
-        {/* Category Filter Pills — Quiet Luxury Styling */}
-        <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-          {CATEGORIES.map((cat) => {
-            const isSelected = selectedCat === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => {
-                  import("@/lib/utils/audio")
-                    .then(({ soundManager }) => soundManager.playMenuTapSound())
-                    .catch(() => {});
-                  setSelectedCat(cat.id);
-                }}
-                className={`tap-overlay-y rounded-full px-4 py-1.5 text-xs font-serif-th font-semibold transition cursor-pointer flex items-center gap-1.5 ${
-                  isSelected
-                    ? "btn-gold-glass"
-                    : "glass-chip text-muted hover:text-gold-ink"
-                }`}
-              >
-                
-                <span>
-                  {cat.id === "all"
-                    ? isEnglish
-                      ? `All (${articles.length})`
-                      : `ทั้งหมด (${articles.length} บทความ)`
-                    : isEnglish
-                      ? cat.labelEn
-                      : cat.labelTh}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        </label>
       </div>
 
-      {/* Featured Hero Article (when no filter is applied) */}
-      {selectedCat === "all" && !searchQuery && featured && (() => {
-        const featArt = getArticleCardArt(featured);
-        const featTitle = getArticleTitle(featured, locale);
-        const featDesc = getArticleDescription(featured, locale);
-        const featCat = getArticleCategory(featured, locale);
-        const readTime = isEnglish
-          ? featured.readTime.replace("นาที", "min read")
-          : featured.readTime;
-
-        return (
-          /* เอกลักษณ์หน้านี้ (UI 2.0 · 2026-10-16): บทความเด่นเป็น "ปกนิตยสาร" — ภาพไพ่ใหญ่ 2 ใบซ้อน · หัวข้อใหญ่ */
-          <div className="ui2-mag-cover rounded-2xl border border-line-warm bg-gradient-to-br from-surface via-surface-warm to-[#F5EFE4] p-6 sm:p-8 lg:p-10 shadow-[0_4px_20px_rgba(41,38,31,0.05)] relative overflow-hidden group hover:border-gold-ink transition duration-300">
-            {/* Subtle Ambient Gold Hairline */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-[1px] bg-gradient-to-r from-transparent via-gold-ink/40 to-transparent pointer-events-none" />
-
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 relative z-10">
-              {/* 1909 Rider-Waite Card Art Showcase */}
-              <div className="ui2-mag-art w-24 h-36 sm:w-28 sm:h-42 rounded-xl overflow-hidden border-2 border-line-warm shadow-md group-hover:scale-105 group-hover:border-gold-ink transition duration-300 bg-inset-warm flex-shrink-0 relative">
-                <CardImage
-                  image={featArt.image}
-                  alt=""
-                  className="w-full h-full object-cover"
-                  sizes="112px"
-                  loading="eager"
-                  fetchPriority="high"
-                />
-              </div>
-
-              {/* Content */}
-              <div className="space-y-3.5 flex-1 text-center sm:text-left">
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                  <span className="glass-chip inline-flex items-center gap-1.5 px-3 py-0.5 text-[11px] font-serif-th font-bold text-gold-ink">
-                    {isEnglish ? "Featured Codex of the Week" : "บทความแนะนำประจำสัปดาห์"}
-                  </span>
-                  <span className="glass-chip text-[11px] font-serif-th text-muted px-2.5 py-0.5">
-                    {featCat}
-                  </span>
+      {isFront && featured && (
+        <section className="v2-bl-front" aria-label={isEnglish ? "Featured articles" : "บทความแนะนำ"}>
+          {(() => {
+            const art = getArticleCardArt(featured);
+            return (
+              <article className="v2-bl-cover">
+                <span className="v2-bl-cover-art" aria-hidden="true">
+                  <CardImage image={art.image} alt="" sizes="(min-width: 1024px) 220px, 140px" loading="eager" fetchPriority="high" />
+                </span>
+                <div className="v2-bl-cover-body">
+                  <p className="v2-bl-kicker">
+                    {isEnglish ? "Cover story" : "เรื่องจากปก"} <span>{getArticleCategory(featured, locale)}</span>
+                  </p>
+                  <h2 className="v2-bl-cover-title">
+                    <ThaiPhrases>
+                      <Link href={`/blog/${featured.slug}`} prefetch={false}>
+                        {getArticleTitle(featured, locale)}
+                      </Link>
+                    </ThaiPhrases>
+                  </h2>
+                  <p className="v2-bl-cover-desc">{getArticleDescription(featured, locale)}</p>
+                  <p className="v2-bl-meta">
+                    {isEnglish ? `Reading time ${readTimeOf(featured)}` : `เวลาอ่าน ${readTimeOf(featured)}`}
+                  </p>
                 </div>
-
-                <h2 className="ui2-mag-title font-serif-th text-xl sm:text-2xl lg:text-3xl font-bold text-ink group-hover:text-gold-ink transition-colors leading-snug"><ThaiPhrases>
-                  <Link href={`/blog/${featured.slug}`} prefetch={false}>{featTitle}</Link>
-                </ThaiPhrases></h2>
-
-                <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed line-clamp-3">
-                  {featDesc}
-                </p>
-
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 pt-2">
-                  <span className="text-xs text-muted font-serif-th flex items-center gap-1.5">
-                    
-                    {isEnglish ? `Reading time ${readTime}` : `เวลาอ่าน ${readTime}`}
-                  </span>
-                  <Link
-                    href={`/blog/${featured.slug}`}
-                    prefetch={false}
-                    className="btn-gold-glass inline-flex items-center gap-2 px-5 py-2.5 font-semibold text-xs font-serif-th group/btn"
-                  >
-                    <span>{isEnglish ? "Read Full Codex" : "อ่านคัมภีร์ฉบับเต็ม"}</span>
-                    <span className="transition-transform group-hover/btn:translate-x-0.5">→</span>
-                  </Link>
+              </article>
+            );
+          })()}
+          <ol className="v2-bl-side">
+            {sideStories.map((a, i) => (
+              <li key={a.slug}>
+                <span className="v2-bl-side-n" aria-hidden="true">
+                  {String(i + 2).padStart(2, "0")}
+                </span>
+                <div>
+                  <p className="v2-bl-kicker">{getArticleCategory(a, locale)}</p>
+                  <h3>
+                    <ThaiPhrases>
+                      <Link href={`/blog/${a.slug}`} prefetch={false}>
+                        {getArticleTitle(a, locale)}
+                      </Link>
+                    </ThaiPhrases>
+                  </h3>
+                  <p className="v2-bl-meta">{readTimeOf(a)}</p>
                 </div>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
-      {/* Articles Grid — แถบสีอ่อนแบ่งจากหัวหน้า/บทความเด่นแบบหน้าแรก (`page-band`) */}
-      <div className="page-band page-band-tint space-y-4">
-        <div className="flex items-center justify-between text-xs text-muted px-1 font-serif-th">
-          <span className="flex items-center gap-1.5">
-            
-            {isEnglish ? `Found ${filtered.length} articles` : `พบบทความ ${filtered.length} เรื่อง`}
-          </span>
-          {selectedCat !== "all" && (
+      <section className="v2-bl-all" aria-labelledby="bl-all-h">
+        <div className="v2-bl-all-h">
+          <h2 id="bl-all-h">
+            {isFront ? (isEnglish ? "More to read" : "อ่านต่อ") : isEnglish ? `Found ${filtered.length} articles` : `พบบทความ ${filtered.length} เรื่อง`}
+          </h2>
+          {(selectedCat !== "all" || searchQuery) && (
             <button
-              onClick={() => setSelectedCat("all")}
-              className="text-gold-ink hover:underline cursor-pointer font-bold"
+              type="button"
+              onClick={() => {
+                setSelectedCat("all");
+                setSearchQuery("");
+              }}
             >
               {isEnglish ? "Show All" : "แสดงทั้งหมด"}
             </button>
@@ -258,101 +235,39 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
         </div>
 
         {filtered.length === 0 ? (
-          <div className="altar-card-porcelain p-12 text-center space-y-3">
-            
-            <p className="font-serif-th text-sm text-ink">
-              {isEnglish
-                ? `No articles found matching "${searchQuery}"`
-                : `ไม่พบบทความที่ตรงกับคำค้นหา “${searchQuery}”`}
-            </p>
-            <button
-              onClick={() => {
-                setSearchQuery("");
-                setSelectedCat("all");
-              }}
-              className="text-xs text-gold-ink underline hover:text-ink cursor-pointer font-serif-th"
-            >
-              {isEnglish ? "Clear all filters" : "ล้างตัวกรองทั้งหมด"}
-            </button>
-          </div>
+          <p className="v2-bl-empty">
+            {isEnglish ? `No articles found matching "${searchQuery}"` : `ไม่พบบทความที่ตรงกับคำค้นหา “${searchQuery}”`}
+          </p>
         ) : (
-          <div className={`grid grid-cols-1 md:grid-cols-2 gap-6${previewOnMobile ? " mobile-preview-8" : ""}`}>
+          <div className={`v2-bl-grid${previewOnMobile ? " mobile-preview-8" : ""}`}>
             {gridItems.map((article, idx) => {
               const cardArt = getArticleCardArt(article);
               const artTitle = getArticleTitle(article, locale);
-              const artDesc = getArticleDescription(article, locale);
-              const artCat = getArticleCategory(article, locale);
-              const readTime = isEnglish
-                ? article.readTime.replace("นาที", "min read")
-                : article.readTime;
-              const isAboveFold = idx < 4;
-
               return (
-                <article
-                  key={article.slug}
-                  className="rounded-2xl border border-line-warm bg-gradient-to-b from-surface via-surface-warm to-[#F7F3EB] p-5 sm:p-6 space-y-4 hover:border-gold-ink transition duration-300 flex flex-col justify-between group shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-[0_10px_28px_rgba(143,92,26,0.10)] relative overflow-hidden"
-                >
-                  <div className="space-y-3.5">
-                    {/* Header: Category & Read Time */}
-                    <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-line-warm/40">
-                      <span className="glass-chip text-[11px] font-serif-th font-bold text-gold-ink px-2.5 py-0.5">
-                        {artCat}
-                      </span>
-                      <span className="text-xs font-serif-th text-muted flex items-center gap-1">
-                        <span className="text-gold-ink">•</span> {readTime}
-                      </span>
-                    </div>
-
-                    {/* Middle: Content with 1909 Card Companion */}
-                    <div className="flex items-start gap-4">
-                      <div className="space-y-2 flex-1 min-w-0">
-                        <h3 className="font-serif-th text-base sm:text-lg font-bold text-ink group-hover:text-gold-ink transition-colors leading-snug line-clamp-2"><ThaiPhrases>
-                          <Link href={`/blog/${article.slug}`} prefetch={false}>{artTitle}</Link>
-                        </ThaiPhrases></h3>
-                        <p className="text-xs text-muted font-serif-th leading-relaxed line-clamp-3">
-                          {artDesc}
-                        </p>
-                      </div>
-
-                      {/* 1909 Card Miniature */}
-                      <div className="w-14 h-21 sm:w-16 sm:h-24 rounded-lg overflow-hidden border-2 border-line-warm shadow-xs group-hover:scale-105 group-hover:border-gold-ink transition duration-300 bg-inset-warm flex-shrink-0 relative">
-                        <CardImage
-                          image={cardArt.image}
-                          alt=""
-                          className="w-full h-full object-cover"
-                          sizes="64px"
-                          loading={isAboveFold ? "eager" : "lazy"}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Footer: Tags & Read More */}
-                  <div className="pt-3 border-t border-line-warm/30 flex items-center justify-between gap-2 text-xs">
-                    {/* ป้ายคีย์เวิร์ดมีเฉพาะภาษาไทย (`keywords` ไม่มีคู่ EN) — ซ่อนบนหน้า `/en/blog`
-                        ไม่งั้นจะมีข้อความไทยหลุดไปเป็น 11% ของทั้งหน้าในฉบับภาษาอังกฤษ */}
-                    <div className="flex flex-wrap gap-1.5">
-                      {!isEnglish &&
-                        article.keywords.slice(0, 2).map((kw) => (
-                          <span
-                            key={kw}
-                            className="glass-chip text-[11px] text-muted font-serif-th px-2.5 py-0.5"
-                          >
-                            #{kw}
-                          </span>
-                        ))}
-                    </div>
-                    {/* ♿ R-23: ผู้ใช้ที่ไล่ฟัง "รายการลิงก์" จะได้ยินแค่ชื่อลิงก์เท่านั้น
-                        ถ้าทุกการ์ดใช้คำว่า "อ่านต่อ" เหมือนกันหมด จะไม่มีทางรู้ว่าลิงก์ไหนไปไหน
-                        `aria-label` จึงต้องมีชื่อบทความอยู่ด้วย ส่วนคนที่มองเห็นยังเห็นคำสั้นเหมือนเดิม */}
+                <article key={article.slug} className="v2-bl-card">
+                  <span className="v2-bl-card-art" aria-hidden="true">
+                    <CardImage image={cardArt.image} alt="" sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 92vw" loading={idx < 3 ? "eager" : "lazy"} />
+                  </span>
+                  <div className="v2-bl-card-body">
+                    <p className="v2-bl-kicker">
+                      {getArticleCategory(article, locale)} <span>{readTimeOf(article)}</span>
+                    </p>
+                    <h3>
+                      <ThaiPhrases>
+                        <Link href={`/blog/${article.slug}`} prefetch={false}>
+                          {artTitle}
+                        </Link>
+                      </ThaiPhrases>
+                    </h3>
+                    <p className="v2-bl-card-desc">{getArticleDescription(article, locale)}</p>
+                    {/* ♿ R-23: ชื่อลิงก์ต้องมีชื่อบทความ (ไม่ใช่ "อ่านต่อ" เหมือนกันทุกการ์ด) */}
                     <Link
                       href={`/blog/${article.slug}`}
                       prefetch={false}
                       aria-label={isEnglish ? `Read Codex: ${artTitle}` : `อ่านต่อ: ${artTitle}`}
-                      className="inline-flex items-center gap-1 text-xs text-ink group-hover:text-gold-ink group-hover:translate-x-0.5 transition font-serif-th font-bold flex-shrink-0"
+                      className="v2-bl-more"
                     >
-                      <span>{isEnglish ? "Read Codex" : "อ่านต่อ"}</span>
-                      <span aria-hidden="true">→</span>
+                      {isEnglish ? "Read Codex" : "อ่านต่อ"}
                     </Link>
                   </div>
                 </article>
@@ -361,17 +276,13 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
           </div>
         )}
         {previewOnMobile && filtered.length > 8 && (
-          <div className="sm:hidden flex justify-center pt-2">
-            <button
-              type="button"
-              onClick={() => setShowAllOnMobile(true)}
-              className="glass-chip tap-overlay-y px-5 py-2.5 font-serif-th text-sm font-bold text-gold-ink"
-            >
+          <div className="v2-bl-moreall">
+            <button type="button" onClick={() => setShowAllOnMobile(true)} className="ui2-btn-ghost">
               {isEnglish ? `Show all ${filtered.length} articles` : `ดูบทความทั้งหมด ${filtered.length} เรื่อง`}
             </button>
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 };

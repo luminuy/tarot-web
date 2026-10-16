@@ -1,0 +1,392 @@
+/*
+ * 📰 v2 คลังบทความ (/blog · /en/blog) — สร้างใหม่ (เจ้าของ 2026-10-16 "สร้างใหม่เลย")
+ * เอกลักษณ์: นิตยสารดูดวง — หัวนิตยสาร · แถบหมวดแบบแท็บนิตยสาร · เรื่องจากปก + เรื่องรองเรียงเลข · การ์ดมีภาพไพ่เป็นแถบหัว
+ * นำเข้าต่อจาก ui2-page.css · ไม่มี filter/backdrop/mask/อนิเมชันวน
+ */
+
+.v2-bl-mast {
+  padding: 30px 0 22px;
+  border-bottom: 1px solid rgba(255, 217, 143, 0.25);
+}
+.v2-bl-mast .ui2-ph-crumb {
+  justify-content: flex-start;
+}
+.v2-bl-mast .ui2-ph-crumb::before,
+.v2-bl-mast .ui2-ph-crumb::after {
+  display: none;
+}
+.v2-bl-title {
+  display: grid;
+  margin: 12px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(34px, 5.4vw, 68px);
+  font-weight: 700;
+  line-height: 1.06;
+  letter-spacing: -0.01em;
+  color: var(--ui2-on-night);
+}
+.v2-bl-title > span + span {
+  font-size: 0.56em;
+  font-weight: 600;
+  color: var(--ui2-on-night-soft);
+}
+.v2-bl-issue {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 10px 0;
+  border-top: 1px solid rgba(255, 236, 200, 0.1);
+  border-bottom: 1px solid rgba(255, 236, 200, 0.1);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ui2-gold-solid);
+}
+.v2-bl-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 217, 143, 0.6);
+}
+.v2-bl-lede {
+  max-width: 640px;
+  margin: 14px 0 0;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ui2-on-night-soft);
+}
+
+/* แถบหมวด + ค้นหา */
+.v2-bl-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  margin: 18px 0 28px;
+}
+.v2-bl-tabs {
+  display: flex;
+  gap: 4px 18px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.v2-bl-tabs::-webkit-scrollbar {
+  display: none;
+}
+.v2-bl-tab {
+  flex: none;
+  min-height: 44px;
+  padding: 0 2px;
+  border-bottom: 2px solid transparent;
+  font-family: var(--ui2-font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ui2-on-night-dim);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.v2-bl-tab:hover {
+  color: var(--ui2-on-night);
+}
+.v2-bl-tab[aria-pressed="true"] {
+  border-color: var(--ui2-gold-solid);
+  color: var(--ui2-gold-solid);
+}
+.v2-bl-search {
+  position: relative;
+  flex: 1 1 260px;
+  max-width: 340px;
+}
+@media (max-width: 639px) {
+  .v2-bl-search {
+    max-width: none;
+  }
+}
+.v2-bl-search-ic {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  translate: 0 -50%;
+  color: #FFD98F;
+}
+.v2-bl-search input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px 0 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.26);
+  background: rgba(18, 14, 21, 0.7);
+  font-size: 14px;
+  color: var(--ui2-on-night);
+}
+.v2-bl-search input::placeholder {
+  color: var(--ui2-on-night-dim);
+}
+.v2-bl-search input:focus-visible {
+  outline: none;
+  border-color: var(--ui2-gold-solid);
+}
+
+.v2-bl-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ui2-gold-solid);
+}
+.v2-bl-kicker span {
+  font-weight: 500;
+  color: var(--ui2-on-night-dim);
+}
+.v2-bl-meta {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ui2-on-night-dim);
+}
+
+/* หน้าปก */
+.v2-bl-front {
+  display: grid;
+  gap: 20px;
+  margin-bottom: 48px;
+}
+@media (min-width: 960px) {
+  .v2-bl-front {
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+    gap: 28px;
+  }
+}
+.v2-bl-cover {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  gap: 20px;
+  padding: 26px;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 217, 143, 0.3);
+  overflow: hidden;
+  background:
+    radial-gradient(60% 100% at 0% 50%, rgba(255, 217, 143, 0.2) 0%, rgba(255, 217, 143, 0) 70%),
+    linear-gradient(160deg, #2E2234 0%, #18121C 100%);
+}
+@media (min-width: 640px) {
+  .v2-bl-cover {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 30px;
+    padding: 34px;
+  }
+}
+.v2-bl-cover-art {
+  display: block;
+  width: 140px;
+  rotate: -4deg;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.55), 0 34px 50px -24px rgba(0, 0, 0, 0.95), 0 0 50px rgba(255, 217, 143, 0.22);
+}
+@media (min-width: 1024px) {
+  .v2-bl-cover-art {
+    width: 200px;
+  }
+}
+.v2-bl-cover-art img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.v2-bl-cover-title {
+  margin: 10px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(24px, 3vw, 36px);
+  font-weight: 700;
+  line-height: 1.22;
+  color: var(--ui2-on-night);
+}
+.v2-bl-cover-title a:hover {
+  color: var(--ui2-gold-solid);
+}
+.v2-bl-cover-desc {
+  display: -webkit-box;
+  margin: 12px 0 10px;
+  overflow: hidden;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ui2-on-night-soft);
+}
+.v2-bl-side {
+  display: grid;
+  align-content: start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2-bl-side li {
+  display: flex;
+  gap: 16px;
+  padding: 18px 4px;
+  border-bottom: 1px solid rgba(255, 236, 200, 0.1);
+}
+.v2-bl-side li:first-child {
+  padding-top: 4px;
+}
+.v2-bl-side-n {
+  flex: none;
+  font-family: var(--ui2-font-display);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(255, 217, 143, 0.4);
+}
+.v2-bl-side h3 {
+  margin: 6px 0 6px;
+  font-family: var(--ui2-font-display);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ui2-on-night);
+}
+.v2-bl-side h3 a:hover {
+  color: var(--ui2-gold-solid);
+}
+
+/* กริดบทความ */
+.v2-bl-all-h {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.v2-bl-all-h h2 {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(22px, 2.6vw, 30px);
+  font-weight: 700;
+  color: var(--ui2-on-night);
+}
+.v2-bl-all-h button {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+  cursor: pointer;
+}
+.v2-bl-grid {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 640px) {
+  .v2-bl-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .v2-bl-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.v2-bl-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 236, 200, 0.12);
+  overflow: hidden;
+  background: rgba(28, 23, 30, 0.8);
+  transition: border-color var(--dur-base) var(--ease-out), translate var(--dur-base) var(--ease-out);
+}
+.v2-bl-card:hover {
+  translate: 0 -3px;
+  border-color: rgba(255, 217, 143, 0.45);
+}
+/* ภาพไพ่เป็นแถบหัวการ์ด (ครอปช่วงบนของภาพ) */
+.v2-bl-card-art {
+  position: relative;
+  display: block;
+  height: 132px;
+  overflow: hidden;
+  background: #1B161D;
+}
+.v2-bl-card-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 28%;
+  opacity: 0.85;
+}
+.v2-bl-card-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(28, 23, 30, 0) 40%, rgba(28, 23, 30, 0.95) 100%);
+}
+.v2-bl-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px 18px;
+}
+.v2-bl-card h3 {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.38;
+  color: var(--ui2-on-night);
+}
+.v2-bl-card h3 a:hover {
+  color: var(--ui2-gold-solid);
+}
+.v2-bl-card-desc {
+  display: -webkit-box;
+  flex: 1;
+  margin: 0;
+  overflow: hidden;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--ui2-on-night-soft);
+}
+.v2-bl-more {
+  align-self: flex-start;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(255, 217, 143, 0.4);
+}
+.v2-bl-empty {
+  margin: 0;
+  padding: 40px 20px;
+  border-radius: 22px;
+  border: 1px dashed rgba(255, 236, 200, 0.16);
+  text-align: center;
+  font-size: 14px;
+  color: var(--ui2-on-night-dim);
+}
+.v2-bl-moreall {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+@media (min-width: 640px) {
+  .v2-bl-moreall {
+    display: none;
+  }
+}
