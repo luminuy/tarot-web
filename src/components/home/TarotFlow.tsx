@@ -2047,6 +2047,7 @@ export default function TarotFlow({
                   onFlipCard={handleFlipCard}
                   onRevealAll={() => dispatchDeck({ type: "revealAll" })}
                   onZoomCard={(c) => dispatchOverlay({ type: "openZoomCard", card: c })}
+                  onFocusCard={(order) => dispatchDeck({ type: "focus", order })}
                 />
               </section>
 

@@ -1532,4 +1532,7 @@
 .ui2-pg footer.bg-dark {
   --color-line: #D5CEC2;
   --color-line-warm: #D9C8AC;
+  /* หัวคอลัมน์บนมือถือ (text-surface-warm) + ชื่อแบรนด์ (text-surface) ก็โดนเปลี่ยนเป็นสีพื้นมืดเหมือนกัน */
+  --color-surface: #FFFFFF;
+  --color-surface-warm: #FAF7F2;
 }
