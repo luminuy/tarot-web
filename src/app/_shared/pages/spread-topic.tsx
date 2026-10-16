@@ -16,17 +16,8 @@ import type { Locale } from "@/lib/i18n/types";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
-import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
 
-/** ไพ่ลอยข้างหัวหน้าต่อหมวด (ตกแต่ง ไม่ใช่ผลสุ่ม) */
-const TOPIC_HERO_CARDS: Record<string, readonly string[]> = {
-  love: ["major-06", "cups-02", "major-03", "cups-10", "cups-01", "major-17"],
-  career: ["major-07", "pentacles-08", "wands-03", "major-04", "wands-06", "major-01"],
-  money: ["pentacles-01", "pentacles-10", "major-10", "pentacles-09", "pentacles-06", "major-19"],
-  health: ["major-14", "major-17", "cups-06", "major-19", "wands-09", "major-11"],
-  family: ["cups-10", "pentacles-10", "major-03", "major-04", "cups-06", "major-05"],
-  study: ["pentacles-08", "major-02", "swords-01", "major-01", "pentacles-03", "major-05"],
-};
 
 export function spreadTopicStaticParams() {
   return getAllTopicSlugs().map((slug) => ({ category: slug }));
@@ -150,23 +141,8 @@ export function SpreadTopicContent({
     })),
   };
 
-  /*
-   * แถบสีสลับแบบหน้าแรก (`page-band`) — ส่วนที่มีหรือไม่มีขึ้นกับหมวด/ภาษา จึงคำนวณลำดับจากส่วนที่แสดงจริง
-   *   ให้สลับ อ่อน / ใส ต่อกันเสมอ (ส่วนแรกเป็นแถบอ่อน ต่อจากหัวหน้าที่อยู่บนพื้นไล่สี)
-   */
-  const shownBands = [
-    "guide",
-    "spreads",
-    ...(topicQuestions.length > 0 ? ["questions"] : []),
-    ...(!isEnglish && topic.alsoFitsTh && topic.alsoFitsTh.length > 0 ? ["also"] : []),
-    ...(faqs.length > 0 ? ["faq"] : []),
-    "others",
-  ];
-  const bandClass = (id: string) =>
-    shownBands.indexOf(id) % 2 === 0 ? "page-band page-band-tint" : "page-band";
-
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink p-4 sm:p-8 font-sans relative overflow-x-clip">
+    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink px-4 sm:px-8 font-sans relative overflow-x-clip">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdScript(collectionJsonLd) }}
@@ -180,202 +156,141 @@ export function SpreadTopicContent({
         dangerouslySetInnerHTML={{ __html: jsonLdScript(faqJsonLd) }}
       />
 
-      <div className="max-w-6xl mx-auto space-y-10 py-6">
-        {/* Breadcrumb Bar */}
-        <nav aria-label="Breadcrumb" className="text-xs font-serif-th text-muted">
-          <ol className="flex items-center gap-2 flex-wrap">
-            <li>
-              <Link href="/" className="hover:text-ink transition-colors">
-                {isEnglish ? "Home" : "หน้าแรก"}
-              </Link>
-            </li>
-            <li aria-hidden="true" className="text-line">/</li>
-            <li>
-              <Link href="/spreads" className="hover:text-ink transition-colors">
-                {isEnglish ? "26 Tarot Spreads" : "ผังพยากรณ์ 26 แบบ"}
-              </Link>
-            </li>
-            <li aria-hidden="true" className="text-line">/</li>
-            <li className="font-semibold text-ink" aria-current="page">
-              {topicName}
-            </li>
-          </ol>
-        </nav>
-
-        {/* หัวหน้า UI 2.0 (เจ้าของ 2026-10-16) — ข้อความ h1 / คำโปรยเดิม · แถบหมวดเป็นชิปใต้หัวหน้า */}
-        <Ui2PageHero
-          title={topicHeading}
-          accent={isEnglish ? topic.nameEn : topic.nameTh}
-          lede={topicTagline}
-          trust={[
-            isEnglish ? `Topic category · ${spreads.length} dedicated spreads` : `หมวดหมู่ผังพยากรณ์ · ${spreads.length} ผังเฉพาะทาง`,
-          ]}
-          cards={TOPIC_HERO_CARDS[topic.slug] ?? TOPIC_HERO_CARDS.love}
-        >
-        <div className="ui2-ph-chips is-scroll">
-          <Link
-            href="/spreads"
-            className="ui2-ph-chip"
-          >
-            {isEnglish ? "All Spreads (26)" : "ผังทั้งหมด (26 ผัง)"}
-          </Link>
-          {allTopics.map((t) => {
-            const isActive = t.slug === topic.slug;
-            const tName = isEnglish && t.nameEn ? t.nameEn : t.nameTh;
-            return (
+      {/*
+        v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — ห้องหมวด: หัวสีประจำหมวด (`data-topic`) + แถบสลับหมวด
+        ➔ รายการผังขึ้นทันที (v1 ให้อ่านคู่มือยาวก่อนถึงผัง) ➔ คำถาม · ผังทั่วไป · คู่มือ · คำถามพบบ่อย · หมวดอื่น
+      */}
+      <div className="v2-tp" data-topic={topic.slug}>
+        <header className="v2-tp-head">
+          <Ui2Crumbs
+            crumbs={[
+              { label: isEnglish ? "Home" : "หน้าแรก", href: "/" },
+              { label: isEnglish ? "26 Tarot Spreads" : "ผังพยากรณ์ 26 แบบ", href: "/spreads" },
+              { label: topicName },
+            ]}
+          />
+          <h1 className="v2-tp-title">
+            <ThaiPhrases>{topicHeading}</ThaiPhrases>
+          </h1>
+          <p className="v2-tp-lede">
+            <ThaiPhrases>{topicTagline}</ThaiPhrases>
+          </p>
+          <p className="v2-tp-count">
+            <b>{spreads.length}</b>
+            {isEnglish ? " dedicated spreads" : " ผังเฉพาะหมวดนี้"}
+            <span aria-hidden="true" className="v2-tp-dot" />
+            {isEnglish
+              ? `${Math.min(...spreads.map((x) => x.positions.length))}–${Math.max(...spreads.map((x) => x.positions.length))} cards`
+              : `${Math.min(...spreads.map((x) => x.positions.length))}–${Math.max(...spreads.map((x) => x.positions.length))} ใบ`}
+          </p>
+          <nav className="v2-tp-switch" aria-label={isEnglish ? "Spread topics" : "หมวดผังพยากรณ์"}>
+            <Link href="/spreads">{isEnglish ? "All (26)" : "ทั้งหมด (26)"}</Link>
+            {allTopics.map((t) => (
               <Link
                 key={t.slug}
                 href={`/spreads/topic/${t.slug}`}
-                className="ui2-ph-chip"
-                aria-current={isActive ? "page" : undefined}
+                data-topic={t.slug}
+                aria-current={t.slug === topic.slug ? "page" : undefined}
               >
-                {tName} ({t.spreadIds.length})
+                {isEnglish && t.nameEn ? t.nameEn : t.nameTh}
+                <small>{t.spreadIds.length}</small>
               </Link>
-            );
-          })}
-        </div>
-        </Ui2PageHero>
+            ))}
+          </nav>
+        </header>
 
+        <section className="v2-tp-sec" aria-labelledby="tp-list-h">
+          <h2 id="tp-list-h" className="v2-tp-h2">
+            <ThaiPhrases>{isEnglish ? "Select a Spread for Your Question" : "เลือกผังพยากรณ์ ที่ตรงกับคำถามของคุณ"}</ThaiPhrases>
+          </h2>
+          {list}
+        </section>
 
-        {/* Editorial Guide Prose */}
-        <section className={`${bandClass("guide")} space-y-4`}>
-          <h2 className="text-base sm:text-lg font-bold font-serif-th text-ink border-b border-line-soft pb-3"><ThaiPhrases>
-            {isEnglish
-              ? `Guide to Reading ${topicName} Tarot Spreads`
-              : `คู่มือการอ่านไพ่ทาโรต์ หมวด${topic.nameTh}`}
-          </ThaiPhrases></h2>
-          <div className="space-y-3 text-xs sm:text-sm text-[#4A4338] font-serif-th leading-relaxed">
+        {topicQuestions.length > 0 && (
+          <section className="v2-tp-sec" aria-labelledby="tp-q-h">
+            <h2 id="tp-q-h" className="v2-tp-h2">
+              <ThaiPhrases>{isEnglish ? `Common ${topicName.toLowerCase()} questions` : `คำถามที่คนถามบ่อย หมวด${topic.nameTh}`}</ThaiPhrases>
+            </h2>
+            <ul className="v2-tp-qs">
+              {topicQuestions.map((q) => (
+                <li key={q.slug}>
+                  <Link href={`/questions/${q.slug}`}>{q[isEnglish ? "en" : "th"].question}</Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {!isEnglish && topic.alsoFitsTh && topic.alsoFitsTh.length > 0 && (
+          <section className="v2-tp-sec" aria-labelledby="tp-also-h">
+            <h2 id="tp-also-h" className="v2-tp-h2">
+              <ThaiPhrases>{`ถามเรื่อง${topic.nameTh} ด้วยผังทั่วไป`}</ThaiPhrases>
+            </h2>
+            <ul className="v2-tp-also">
+              {topic.alsoFitsTh.map((item) => (
+                <li key={item.spreadId}>
+                  <Link href={`/spreads/${item.spreadId}`}>{item.label}</Link>
+                  <span>{item.note}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <section className="v2-tp-sec v2-tp-guide" aria-labelledby="tp-guide-h">
+          <h2 id="tp-guide-h" className="v2-tp-h2">
+            <ThaiPhrases>{isEnglish ? `Guide to Reading ${topicName} Tarot Spreads` : `คู่มือการอ่านไพ่ทาโรต์ หมวด${topic.nameTh}`}</ThaiPhrases>
+          </h2>
+          <div className="v2-tp-prose">
             {editorialIntro.map((paragraph, index) => (
               <p key={index}>{paragraph}</p>
             ))}
           </div>
         </section>
 
-        {/* Spreads Grid */}
-        <section className={`${bandClass("spreads")} space-y-4`}>
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold font-serif-th text-ink"><ThaiPhrases>
-              {isEnglish
-                ? "Select a Spread for Your Question"
-                : "เลือกผังพยากรณ์ ที่ตรงกับคำถามของคุณ"}
-            </ThaiPhrases></h2>
-            <span className="text-xs font-serif-th text-muted">
-              {spreads.length} {isEnglish ? "spreads" : "รูปแบบ"}
-            </span>
-          </div>
-          {list}
-        </section>
+        {faqs.length > 0 && (
+          <section className="v2-tp-sec" aria-labelledby="tp-faq-h">
+            <h2 id="tp-faq-h" className="v2-tp-h2">
+              <ThaiPhrases>
+                {isEnglish ? `Frequently Asked Questions About ${topicName}` : `คำถามพบบ่อย เกี่ยวกับการดูดวง ด้าน${topic.nameTh}`}
+              </ThaiPhrases>
+            </h2>
+            <div className="v2-tp-faq">
+              {faqs.map((faq, index) => (
+                <details key={index}>
+                  <summary>
+                    <ThaiPhrases>{faq.question}</ThaiPhrases>
+                  </summary>
+                  <p>{faq.answer}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
 
-        {topicQuestions.length > 0 && (
-          <section className={`${bandClass("questions")} space-y-3`}>
-            <h2 className="text-base sm:text-lg font-bold font-serif-th text-ink"><ThaiPhrases>
-              {isEnglish ? `Common ${topicName.toLowerCase()} questions` : `คำถามที่คนถามบ่อย หมวด${topic.nameTh}`}
-            </ThaiPhrases></h2>
-            <ul className="grid gap-2 sm:grid-cols-2">
-              {topicQuestions.map((q) => (
-                <li key={q.slug}>
-                  <Link href={`/questions/${q.slug}`} className="block glass-tile !rounded-xl p-3 text-sm font-serif-th text-ink hover:text-gold-ink">
-                    {q[isEnglish ? "en" : "th"].question}
+        <section className="v2-tp-sec" aria-labelledby="tp-other-h">
+          <h2 id="tp-other-h" className="v2-tp-h2">
+            <ThaiPhrases>{isEnglish ? "Explore Other Categories" : "สำรวจหมวดหมู่อื่น ๆ"}</ThaiPhrases>
+          </h2>
+          <ul className="v2-tp-others">
+            {allTopics
+              .filter((t) => t.slug !== topic.slug)
+              .map((t) => (
+                <li key={t.slug}>
+                  <Link href={`/spreads/topic/${t.slug}`} data-topic={t.slug}>
+                    <b>{isEnglish && t.nameEn ? t.nameEn : t.nameTh}</b>
+                    <small>
+                      {t.spreadIds.length} {isEnglish ? "spreads" : "ผัง"}
+                    </small>
                   </Link>
                 </li>
               ))}
-            </ul>
-          </section>
-        )}
-
-        {/* 🔗 ผังทั่วไปที่ใช้ถามเรื่องหมวดนี้ได้ — ข้อความลิงก์ = คำที่คนค้นจริง (ดู `alsoFitsTh`) */}
-        {!isEnglish && topic.alsoFitsTh && topic.alsoFitsTh.length > 0 && (
-          <section className={`${bandClass("also")} space-y-4`}>
-            <h2 className="text-base sm:text-lg font-bold font-serif-th text-ink"><ThaiPhrases>
-              {`ถามเรื่อง${topic.nameTh} ด้วยผังทั่วไป`}
-            </ThaiPhrases></h2>
-            <ul className="space-y-3">
-              {topic.alsoFitsTh.map((item) => (
-                <li key={item.spreadId} className="text-xs sm:text-sm font-serif-th text-muted leading-relaxed">
-                  <Link
-                    href={`/spreads/${item.spreadId}`}
-                    className="font-bold text-ink hover:text-gold-ink underline underline-offset-4 transition-colors"
-                  >
-                    {item.label}
-                  </Link>{" "}
-                  — {item.note}
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {/* FAQ Section */}
-        {faqs.length > 0 && (
-          <section className={`${bandClass("faq")} space-y-6`}>
-            <div className="space-y-1">
-              <h2 className="text-lg sm:text-xl font-bold font-serif-th text-ink"><ThaiPhrases>
-                {isEnglish
-                  ? `Frequently Asked Questions About ${topicName}`
-                  : `คำถามพบบ่อย เกี่ยวกับการดูดวง ด้าน${topic.nameTh}`}
-              </ThaiPhrases></h2>
-              <p className="text-xs text-muted font-serif-th">
-                {isEnglish
-                  ? "Principles and practical advice for clear, resonant readings"
-                  : "หลักการและข้อแนะนำเพื่อการเปิดไพ่ที่ให้คำตอบชัดเจนที่สุด"}
-              </p>
-            </div>
-            <div className="divide-y divide-line-soft space-y-4 pt-2">
-              {faqs.map((faq, index) => (
-                <div key={index} className="pt-4 first:pt-0 space-y-1.5">
-                  <h3 className="font-serif-th text-sm sm:text-base font-bold text-ink"><ThaiPhrases>
-                    {faq.question}
-                  </ThaiPhrases></h3>
-                  <p className="font-serif-th text-xs sm:text-sm text-[#5E5240] leading-relaxed">
-                    {faq.answer}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Cross-Topic Internal Links Footer */}
-        <section className={`${bandClass("others")} space-y-4`}>
-          <h3
-            className={`text-xs text-gold-ink font-semibold ${
-              isEnglish ? "font-mono uppercase tracking-widest" : "font-serif-th"
-            }`}
-          ><ThaiPhrases>
-            {isEnglish ? "Explore Other Categories" : "สำรวจหมวดหมู่อื่น ๆ ในวิหารพยากรณ์"}
-          </ThaiPhrases></h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-            {allTopics.map((t) => {
-              const tName = isEnglish && t.nameEn ? t.nameEn : t.nameTh;
-              return (
-                <Link
-                  key={t.slug}
-                  href={`/spreads/topic/${t.slug}`}
-                  className="altar-card-porcelain !rounded-xl p-3 text-center transition group"
-                >
-                  <div className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink">
-                    {tName}
-                  </div>
-                  <div className="text-[11px] text-muted font-mono mt-0.5">
-                    {t.spreadIds.length} {isEnglish ? "spreads" : "ผัง"}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-          <div className="flex items-center justify-center gap-4 text-xs font-serif-th text-muted pt-4">
-            <Link href="/cards" className="hover:text-ink underline underline-offset-4">
-              {isEnglish ? "78-Card Encyclopedia" : "สารานุกรมไพ่ 78 ใบ"}
-            </Link>
-            <span className="text-line">·</span>
-            <Link href="/blog" className="hover:text-ink underline underline-offset-4">
-              {isEnglish ? "Tarot Wisdom Codex" : "คัมภีร์บทความดูดวง"}
-            </Link>
-            <span className="text-line">·</span>
-            <Link href="/" className="hover:text-ink underline underline-offset-4">
-              {isEnglish ? "Return to Sanctuary" : "กลับสู่วิหารหลัก"}
-            </Link>
-          </div>
+          </ul>
+          <p className="v2-tp-foot">
+            <Link href="/cards">{isEnglish ? "78-Card Encyclopedia" : "สารานุกรมไพ่ 78 ใบ"}</Link>
+            <Link href="/blog">{isEnglish ? "Tarot Articles" : "บทความดูดวง"}</Link>
+            <Link href="/">{isEnglish ? "Back to Home" : "กลับหน้าแรก"}</Link>
+          </p>
         </section>
       </div>
     </main>

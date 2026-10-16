@@ -1,9 +1,8 @@
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
-import type { Spread, SpreadPosition } from "@/data/spreads-helpers";
+import type { Spread } from "@/data/spreads-helpers";
 import { isStandardSpread } from "@/lib/entitlement/limits";
-import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
-import { renderSpreadIllustration } from "@/components/spread/spread-illustrations";
+import { mapLayout, MAP_CARD_ASPECT } from "@/lib/tarot/spread-map-geometry";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
@@ -28,99 +27,72 @@ interface TopicSpreadListProps {
 export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
   const { isEnglish } = useLocale();
 
+  /*
+   * v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — แถวเมนูผัง: ภาพย่อผังจริง · ชื่อ + คำโปรย · ชื่อตำแหน่งเป็นชิป · ปุ่มสองปุ่ม
+   * v1: การ์ดสูงสามคอลัมน์ ภาพประกอบเล็ก ต้องกด "ขยาย" ถึงจะรู้ว่าผังถามอะไรบ้าง ➔ v2 เห็นชื่อตำแหน่งทันที
+   * ยังเป็น HTML ล้วน ไม่ hydrate (ไม่มี state)
+   */
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {spreads.map((spread) => {
+    <ol className="v2-tp-list">
+      {spreads.map((spread, i) => {
         const isStandard = isStandardSpread(spread.id);
-
+        const map = mapLayout(spread.positions);
+        const names = spread.positions.map((pos) => (isEnglish ? pos.nameEn || pos.nameTh : pos.nameTh).replace(/^\d+\.\s*/, ""));
         return (
-          <div
-            key={spread.id}
-            className="altar-card-porcelain p-6 flex flex-col justify-between space-y-4 transition duration-300 relative overflow-hidden hover:shadow-md"
-          >
-            {/* Badges */}
-            <div className="flex items-center justify-between z-10">
-              <span className="glass-chip text-xs font-mono font-bold text-ink px-3 py-1">
-                {spread.positions.length} {isEnglish ? "Cards" : "ใบ"}
-              </span>
-              {!isStandard ? (
-                <span className="glass-chip text-xs text-gold-ink px-2.5 py-0.5 font-serif-th font-semibold flex items-center gap-1">
-                  <SealedLockIcon className="w-3 h-3" />
-                  <span>{isEnglish ? "Deep Vision" : "ผังญาณลึก"}</span>
-                </span>
-              ) : (
-                <span className="glass-chip text-xs text-[#5E5240] px-2.5 py-0.5 font-serif-th">
-                  {isEnglish ? "Free" : "เปิดฟรี"}
-                </span>
-              )}
-            </div>
-
-            {/* Visual Formation */}
-            <div className="h-44 flex items-center justify-center my-1 relative select-none rounded-xl bg-[#F7F5F0] border border-line-soft p-2 hover:border-gold/60 transition-colors">
-              {renderSpreadIllustration(spread.id)}
-            </div>
-
-            {/* Title & Description */}
-            <div className="space-y-2 z-10 pt-2 border-t border-line-soft">
-              <h2 className="font-serif-th text-lg font-bold text-ink leading-snug"><ThaiPhrases>
-                {isEnglish ? (spread.nameEn || spread.nameTh) : spread.nameTh}
-              </ThaiPhrases></h2>
-              <p className="text-xs font-serif-th text-muted leading-relaxed line-clamp-1">
-                {isEnglish ? (spread.taglineEn || spread.tagline) : spread.tagline}
-              </p>
-              <p className="text-xs font-serif-th text-[#4A4338] leading-relaxed line-clamp-3">
-                {isEnglish ? (spread.descriptionEn || spread.description) : spread.description}
-              </p>
-            </div>
-
-            {/* Positional Breakdown Accordion — `<details>` ของเบราว์เซอร์ ไม่ใช้ JS */}
-            <details className="group z-10 pt-2 border-t border-line-soft/60 space-y-2">
-              <summary className="tap-overlay-y list-none w-full text-left text-xs font-serif-th text-gold-ink hover:text-[#5E390A] flex items-center justify-between py-1 font-semibold cursor-pointer transition-colors [&::-webkit-details-marker]:hidden">
-                <span>{isEnglish ? `${spread.positions.length} Card Positions` : `ความหมาย ${spread.positions.length} ตำแหน่งไพ่`}</span>
-                <span className="text-[11px]">
-                  <span className="group-open:hidden">{isEnglish ? "▼ Details" : "▼ ขยาย"}</span>
-                  <span className="hidden group-open:inline">{isEnglish ? "▲ Hide" : "▲ ย่อ"}</span>
-                </span>
-              </summary>
-
-              <div className="altar-card-porcelain !rounded-lg space-y-1.5 pt-2 pb-1 text-xs text-muted p-3 max-h-48 overflow-y-auto">
-                {spread.positions.map((pos: SpreadPosition) => (
-                  <div key={pos.index} className="flex items-start gap-2">
-                    <span className="font-mono text-gold-ink font-bold shrink-0">
-                      {pos.index}.
-                    </span>
-                    <div>
-                      <span className="font-serif-th font-bold text-ink">
-                        {isEnglish ? (pos.nameEn || pos.nameTh) : pos.nameTh}
-                      </span>
-                      <span className="mx-1 text-line">·</span>
-                      <span className="font-serif-th text-[11px] text-muted">
-                        {isEnglish ? (pos.meaningEn || pos.meaning) : pos.meaning}
-                      </span>
-                    </div>
-                  </div>
+          <li key={spread.id} className="v2-tp-row">
+            <span className="v2-tp-rank" aria-hidden="true">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <span className="v2-tp-map" aria-hidden="true">
+              <span className="v2-tp-map-area" style={{ paddingBottom: `${(map.boxHeight * 100).toFixed(2)}%` }}>
+                {spread.positions.map((pos, j) => (
+                  <span
+                    key={j}
+                    style={{
+                      left: `${pos.x * 100}%`,
+                      top: `${(((pos.y * map.yScale + map.offsetY) / map.boxHeight) * 100).toFixed(3)}%`,
+                      width: `${(map.cardW * 100).toFixed(2)}%`,
+                      aspectRatio: `1 / ${MAP_CARD_ASPECT}`,
+                      transform: `translate(-50%, -50%) rotate(${pos.rotate ?? 0}deg)`,
+                    }}
+                  />
                 ))}
-              </div>
-            </details>
-
-            {/* CTAs */}
-            <div className="grid grid-cols-2 gap-2 pt-3 border-t border-line-soft z-10">
-              <Link
-                href={`/read/${spread.id}`}
-                className="btn-gold-glass !rounded-lg w-full py-2 px-3 text-xs font-serif-th font-bold text-center hover:bg-[#3D382E]"
-              >
+              </span>
+            </span>
+            <div className="v2-tp-body">
+              <p className="v2-tp-meta">
+                <span>
+                  {spread.positions.length} {isEnglish ? "cards" : "ใบ"}
+                </span>
+                <span className={isStandard ? "is-free" : "is-grand"}>
+                  {isStandard ? (isEnglish ? "Free" : "เปิดฟรี") : isEnglish ? "Deep Vision" : "ผังญาณลึก"}
+                </span>
+              </p>
+              <h2 className="v2-tp-name">
+                <ThaiPhrases>{isEnglish ? spread.nameEn || spread.nameTh : spread.nameTh}</ThaiPhrases>
+              </h2>
+              <p className="v2-tp-tag">{isEnglish ? spread.taglineEn || spread.tagline : spread.tagline}</p>
+              <p className="v2-tp-desc">{isEnglish ? spread.descriptionEn || spread.description : spread.description}</p>
+              <ul className="v2-tp-pos" aria-label={isEnglish ? `${names.length} card positions` : `ความหมาย ${names.length} ตำแหน่งไพ่`}>
+                {names.map((n, j) => (
+                  <li key={j}>
+                    <b>{j + 1}</b>
+                    {n}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="v2-tp-acts">
+              <Link href={`/read/${spread.id}`} className="ui2-btn v2-tp-go">
                 {isEnglish ? "Begin Reading" : "เริ่มเปิดไพ่"}
               </Link>
-              <Link
-                href={`/spreads/${spread.id}`}
-                className="w-full py-2 px-3 text-xs font-serif-th font-semibold text-center rounded-lg border border-line text-[#4A4338] hover:bg-surface-warm transition-colors"
-              >
+              <Link href={`/spreads/${spread.id}`} className="ui2-btn-ghost">
                 {isEnglish ? "Spread Details" : "รายละเอียดผัง"}
               </Link>
             </div>
-          </div>
+          </li>
         );
       })}
-    </div>
+    </ol>
   );
 }

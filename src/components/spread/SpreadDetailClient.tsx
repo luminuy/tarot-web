@@ -133,7 +133,8 @@ export const SpreadDetailClient: React.FC<Props> = ({
    * จอแรก: ข้อความ + ปุ่มเริ่มซ้าย · กระดานพิมพ์เขียวขวา (แตะไพ่ ➔ เห็นชื่อ/คำถามของตำแหน่งทันที แถวในตารางสว่างตาม)
    * v1: แผนผังเล็ก 260px กับตารางแยกกัน ต้องไล่เลขเอง · หัวหน้าใหญ่ดันแผนผังลงไปใต้จอ
    */
-  const [active, setActive] = React.useState(0);
+  /* หน้านี้เป็น HTML ล้วน (ไม่ hydrate · รอบ 97) — การแตะไพ่บนกระดานทำโดย `astro/scripts/spread-board.ts` (< 1 KB) */
+  const active = 0;
   /** ชื่อตำแหน่งบางผังขึ้นต้นด้วยเลขอยู่แล้ว ("1. แก่นของเรื่อง") — ตัดออกเพราะมีป้ายเลขข้างหน้าแล้ว */
   const posLabel = (pos: (typeof spread.positions)[number]) => getPositionName(pos, isEnglish).replace(/^\d+\.\s*/, "");
   const map = mapLayout(spread.positions);
@@ -196,8 +197,6 @@ export const SpreadDetailClient: React.FC<Props> = ({
                 className="v2-sd-slot card-back-pattern"
                 aria-pressed={active === idx}
                 aria-label={`${idx + 1}. ${getPositionName(pos, isEnglish)}`}
-                onClick={() => setActive(idx)}
-                onMouseEnter={() => setActive(idx)}
                 style={{
                   left: `${pos.x * 100}%`,
                   top: `${(((pos.y * map.yScale + map.offsetY) / map.boxHeight) * 100).toFixed(3)}%`,
@@ -247,7 +246,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
             </thead>
             <tbody>
               {spread.positions.map((pos, idx) => (
-                <tr key={idx} className={active === idx ? "is-active" : undefined} onMouseEnter={() => setActive(idx)}>
+                <tr key={idx} className={active === idx ? "is-active" : undefined}>
                   <td>
                     <span className="v2-sd-n">{idx + 1}</span>
                   </td>
