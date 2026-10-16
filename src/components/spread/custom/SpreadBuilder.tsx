@@ -38,8 +38,7 @@ import {
 import { mapLayout, MAP_CARD_ASPECT, MAP_CARD_MIN_PX } from "@/lib/tarot/spread-map-geometry";
 import { SpreadLayoutGlyph } from "./SpreadLayoutGlyph";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
-import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
-import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
 
 /**
  * ✦ ห้องออกแบบผัง `/spreads/create` (REFLECTION_JOURNAL_PLAN 1.8 · คลื่น 5)
@@ -258,105 +257,155 @@ export const SpreadBuilder: React.FC = () => {
   const built = n > 0 && layoutPoints(draft.layout, n) ? buildCustomSpread(draft) : null;
   const map = built ? mapLayout(built.positions) : null;
 
+  /*
+   * v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — สตูดิโอช่างผัง 3 โซน
+   *   คลังตำแหน่ง (เห็นความหมายทุกอัน ไม่ต้องชี้เมาส์ดู tooltip แบบ v1) · ผ้าปูวางไพ่ (ภาพผังสด) · รายการตำแหน่งในผัง
+   * ปุ่ม "ใช้ผังนี้เปิดไพ่" อยู่แถบล่างติดจอเสมอ (v1 อยู่ท้ายฟอร์ม ต้องเลื่อนหา)
+   */
+  const step = n === 0 ? 1 : check.ok ? 3 : 2;
+  const steps = [L("เลือกตำแหน่ง", "Pick positions"), L("จัดวางและตั้งชื่อ", "Arrange & name"), L("เปิดไพ่", "Read")];
+
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-20 space-y-8">
-      <Ui2PageHero
-        compact
-        crumbs={[{ label: L("หน้าแรก", "Home"), href: "/" }, { label: L("ผังพยากรณ์", "Spreads"), href: "/spreads" }, { label: L("ห้องออกแบบผัง", "Spread workshop") }]}
-        title={L("ผังที่ถามตรงกับใจคุณ", "A spread that asks what you mean")}
-        accent={L("ตรงกับใจคุณ", "what you mean")}
-        lede={L(
-          "เลือกตำแหน่ง 1–7 ใบจากคลังที่แม่หมอเขียนไว้ หรือเขียนเอง แล้วแม่หมอจะอ่านไพ่แต่ละใบผ่านคำถามของคุณตรง ๆ",
-          "Pick 1–7 positions from our readers' library or write your own — the reader will read every card through your exact question.",
-        )}
-        cards={["major-01", "wands-02", "major-03", "pentacles-03"]}
-      />
+    <div className="v2-sb">
+      <header className="v2-sb-head">
+        <div>
+          <Ui2Crumbs
+            crumbs={[{ label: L("หน้าแรก", "Home"), href: "/" }, { label: L("ผังพยากรณ์", "Spreads"), href: "/spreads" }, { label: L("ห้องออกแบบผัง", "Spread studio") }]}
+          />
+          <h1 className="v2-sb-title">
+            {isEnglish ? (
+              <>
+                Design a spread that asks <span className="ui2-gold-night">what you mean</span>
+              </>
+            ) : (
+              <>
+                <span className="tp">ออกแบบผังไพ่</span> <span className="tp ui2-gold-night">ที่ถามตรงใจคุณ</span>
+              </>
+            )}
+          </h1>
+          <p className="v2-sb-lede">
+            {L(
+              `หยิบตำแหน่ง 1–${CUSTOM_MAX_CARDS} ใบจากคลังที่แม่หมอเขียนไว้ หรือเขียนเอง แม่หมอจะอ่านไพ่ทุกใบผ่านคำถามของคุณตรง ๆ`,
+              `Pick 1–${CUSTOM_MAX_CARDS} positions from our readers' library or write your own. Every card is read through your exact question.`,
+            )}
+          </p>
+        </div>
+        <ol className="v2-sb-steps" aria-label={L("ขั้นตอน", "Steps")}>
+          {steps.map((s, i) => (
+            <li key={s} className={i + 1 < step ? "is-done" : i + 1 === step ? "is-here" : undefined} aria-current={i + 1 === step ? "step" : undefined}>
+              <span aria-hidden="true">{i + 1}</span>
+              {s}
+            </li>
+          ))}
+        </ol>
+      </header>
 
       {sharedFrom && (
-        <p className="glass-tile !rounded-xl p-3 text-center text-xs sm:text-sm font-serif-th text-ink-deep">
-          {L("ผังนี้มีคนแบ่งปันมา — แก้ได้ตามใจ แล้วบันทึกเป็นของคุณเอง", "Someone shared this spread with you — change anything, then save it as your own.")}
-        </p>
+        <p className="v2-sb-banner">{L("ผังนี้มีคนแบ่งปันมา แก้ได้ตามใจ แล้วบันทึกเป็นของคุณเอง", "Someone shared this spread with you. Edit freely, then save it as your own.")}</p>
       )}
 
-      {n === 0 && (
-        <section aria-label={L("แม่แบบตั้งต้น", "Starting points")} className="space-y-3">
-          <h2 className="font-serif-th text-base sm:text-lg text-ink-deep text-center"><ThaiPhrases>{L("เริ่มจากแม่แบบ หรือหยิบตำแหน่งด้านล่าง", "Start from a template, or pick positions below")}</ThaiPhrases></h2>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {STARTERS.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => loadStarter(s)}
-                className="tap-overlay-y glass-tile !rounded-2xl p-4 text-left space-y-2 min-h-[44px] hover:-translate-y-0.5 transition-transform"
-              >
-                <SpreadLayoutGlyph layout={s.layout} count={s.ids.length} size={64} className="text-ink-deep" />
-                <span className="block font-serif-th font-semibold text-ink-deep">{L(s.th, s.en)}</span>
-                <span className="block text-[11px] text-muted font-serif-th">
-                  {s.ids.map((id) => libById(id)).map((p) => (p ? (isEnglish ? p.nameEn : p.nameTh) : "")).join(" · ")}
-                </span>
+      <div className="v2-sb-studio">
+        {/* ── โซน 1: คลังตำแหน่ง ── */}
+        <section className="v2-sb-zone v2-sb-lib" aria-labelledby="sb-lib-h">
+          <div className="v2-sb-zone-h">
+            <h2 id="sb-lib-h">{L("คลังตำแหน่ง", "Position library")}</h2>
+            <span className="v2-sb-meter">
+              {n}/{CUSTOM_MAX_CARDS}
+            </span>
+          </div>
+          <div role="tablist" aria-label={L("หมวดตำแหน่ง", "Position groups")} className="v2-sb-groups">
+            {GROUPS.map((g) => (
+              <button key={g} type="button" role="tab" aria-selected={group === g} onClick={() => setGroup(g)} className="v2-sb-group">
+                {L(POSITION_GROUP_LABEL[g].th, POSITION_GROUP_LABEL[g].en)}
               </button>
             ))}
           </div>
+          <ul role="tabpanel" className="v2-sb-pos-list">
+            {POSITION_LIBRARY.filter((p) => p.group === group).map((p) => {
+              const used = draft.positions.some((q) => q.nameTh === p.nameTh);
+              const full = n >= CUSTOM_MAX_CARDS;
+              return (
+                <li key={p.id}>
+                  <button type="button" disabled={used || full} onClick={() => addPosition(fromLibrary(p))} className="v2-sb-pos">
+                    <span className="v2-sb-pos-name">{isEnglish ? p.nameEn : p.nameTh}</span>
+                    <span className="v2-sb-pos-mean">{isEnglish ? p.meaningEn : p.meaning}</span>
+                    <span className="v2-sb-pos-add" aria-hidden="true">{used ? L("ใส่แล้ว", "Added") : L("เพิ่ม", "Add")}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <button type="button" onClick={() => addPosition({ nameTh: "", meaning: "" })} disabled={n >= CUSTOM_MAX_CARDS} className="ui2-btn-ghost v2-sb-own">
+            {L("เขียนตำแหน่งเอง", "Write my own position")}
+          </button>
         </section>
-      )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] items-start">
-        {/* ── ภาพผังสด ── */}
-        <section aria-label={L("ภาพผัง", "Spread preview")} className="lg:sticky lg:top-24 space-y-3">
-          <div className="altar-card-porcelain !rounded-2xl p-4 sm:p-6">
-            <div className="relative w-full" style={{ paddingBottom: `${((map?.boxHeight ?? 0.6) * 100).toFixed(2)}%` }}>
-              {built && map ? (
-                built.positions.map(({ x, y }, i) => (
+        {/* ── โซน 2: ผ้าปูวางไพ่ ── */}
+        <section className="v2-sb-zone v2-sb-matzone" aria-label={L("ภาพผัง", "Spread preview")}>
+          <div className="v2-sb-mat">
+            {built && map ? (
+              <div className="v2-sb-mat-area" style={{ paddingBottom: `${(map.boxHeight * 100).toFixed(2)}%` }}>
+                {built.positions.map(({ x, y }, i) => (
                   <button
                     key={i}
                     type="button"
                     onClick={() => setActive(i)}
                     aria-label={`${L("ตำแหน่งที่", "Position")} ${i + 1}: ${posName(draft.positions[i]) || L("ยังไม่มีชื่อ", "unnamed")}`}
                     aria-pressed={active === i}
-                    className={`absolute rounded-md card-back-pattern border-2 shadow-overlay flex items-center justify-center transition-[border-color,box-shadow] duration-200 ${
-                      active === i ? "border-gold-ink ring-2 ring-gold-ink/50" : "border-line-warm/60"
-                    }`}
+                    className="v2-sb-slot card-back-pattern"
                     style={{
                       left: `${x * 100}%`,
                       top: `${(((y * map.yScale + map.offsetY) / map.boxHeight) * 100).toFixed(3)}%`,
                       width: `${(map.cardW * 100).toFixed(2)}%`,
                       minWidth: MAP_CARD_MIN_PX,
                       aspectRatio: `1 / ${MAP_CARD_ASPECT}`,
-                      transform: "translate(-50%, -50%)",
                     }}
                   >
-                    <span className="font-serif-th text-sm sm:text-base font-bold text-gold-on-dark">{i + 1}</span>
+                    <span>{i + 1}</span>
                   </button>
-                ))
-              ) : (
-                <p className="absolute inset-0 flex items-center justify-center text-center text-sm text-muted font-serif-th px-6">
-                  {L("ผังของคุณจะปรากฏตรงนี้", "Your spread will appear here")}
-                </p>
-              )}
-            </div>
-            {active !== null && draft.positions[active] && (
-              <p className="mt-3 text-center text-xs sm:text-sm font-serif-th text-ink-deep">
-                <span className="text-gold-ink font-semibold">{active + 1}. {posName(draft.positions[active]) || L("ยังไม่มีชื่อ", "Unnamed")}</span>
-                {posMeaning(draft.positions[active]) ? <span className="text-muted"> — {posMeaning(draft.positions[active])}</span> : null}
-              </p>
+                ))}
+              </div>
+            ) : (
+              /* ผ้าปูว่าง = แม่แบบตั้งต้นวางรอบนผ้า (v1 อยู่แยกกล่องเหนือฟอร์ม) */
+              <div className="v2-sb-starters">
+                <p className="v2-sb-starters-k">{L("เริ่มเร็วจากแม่แบบ", "Quick start from a template")}</p>
+                <ul>
+                  {STARTERS.map((s) => (
+                    <li key={s.id}>
+                      <button type="button" onClick={() => loadStarter(s)} className="v2-sb-starter">
+                        <SpreadLayoutGlyph layout={s.layout} count={s.ids.length} size={72} className="v2-sb-glyph" />
+                        <b>{L(s.th, s.en)}</b>
+                        <small>
+                          {s.ids
+                            .map((id) => libById(id))
+                            .map((p) => (p ? (isEnglish ? p.nameEn : p.nameTh) : ""))
+                            .join(" · ")}
+                        </small>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                <p className="v2-sb-starters-or">{L("หรือหยิบตำแหน่งจากคลังมาวางทีละใบ", "or place positions from the library one by one")}</p>
+              </div>
             )}
           </div>
 
+          {active !== null && draft.positions[active] && (
+            <p className="v2-sb-caption" aria-live="polite">
+              <b>
+                {active + 1}. {posName(draft.positions[active]) || L("ยังไม่มีชื่อ", "Unnamed")}
+              </b>
+              {posMeaning(draft.positions[active]) ? <span> {posMeaning(draft.positions[active])}</span> : null}
+            </p>
+          )}
+
           {n > 0 && (
-            <fieldset className="space-y-2">
-              <legend className="text-xs font-serif-th text-muted mb-1">{L("รูปแบบการวาง", "Layout")}</legend>
-              <div className="flex flex-wrap gap-2">
+            <fieldset className="v2-sb-layouts">
+              <legend>{L("รูปแบบการวาง", "Layout")}</legend>
+              <div>
                 {layoutsFor(n).map((id) => (
-                  <button
-                    key={id}
-                    type="button"
-                    aria-pressed={draft.layout === id}
-                    onClick={() => update({ layout: id })}
-                    className={`tap-overlay-y min-h-[44px] inline-flex items-center gap-2 pl-2 pr-4 rounded-full text-sm font-serif-th text-ink-deep ${
-                      draft.layout === id ? "btn-gold-glass font-bold" : "glass-chip"
-                    }`}
-                  >
-                    <SpreadLayoutGlyph layout={id} count={n} size={30} className="text-ink-deep" />
+                  <button key={id} type="button" aria-pressed={draft.layout === id} onClick={() => update({ layout: id })} className="v2-sb-layout">
+                    <SpreadLayoutGlyph layout={id} count={n} size={34} className="v2-sb-glyph" />
                     {L(LAYOUT_LABEL[id].th, LAYOUT_LABEL[id].en)}
                   </button>
                 ))}
@@ -365,7 +414,7 @@ export const SpreadBuilder: React.FC = () => {
           )}
 
           {isGrand && (
-            <p className="text-[11px] sm:text-xs text-muted font-serif-th leading-relaxed">
+            <p className="v2-sb-fine">
               {L(
                 `ผัง ${CUSTOM_STANDARD_MAX_CARDS + 1}–${CUSTOM_MAX_CARDS} ใบใช้สิทธิ์เดียวกับผังใหญ่ (ผู้ถือรอบที่เติมไว้ หรือสิทธิ์ลองผังใหญ่ฟรี 1 ครั้ง) · 1–${CUSTOM_STANDARD_MAX_CARDS} ใบเปิดด้วยสิทธิ์รายวันได้เลย`,
                 `Spreads of ${CUSTOM_STANDARD_MAX_CARDS + 1}–${CUSTOM_MAX_CARDS} cards use the same access as our larger spreads (credits, or your one free trial) · 1–${CUSTOM_STANDARD_MAX_CARDS} cards use your daily readings.`,
@@ -374,171 +423,131 @@ export const SpreadBuilder: React.FC = () => {
           )}
         </section>
 
-        {/* ── ตัวแก้ผัง ── */}
-        <section aria-label={L("ตัวแก้ผัง", "Spread editor")} className="space-y-5">
-          <label className="block space-y-1.5">
-            <span className="text-xs font-serif-th text-muted">{L("ชื่อผัง", "Spread name")}</span>
+        {/* ── โซน 3: ตำแหน่งในผัง ── */}
+        <section className="v2-sb-zone v2-sb-edit" aria-labelledby="sb-edit-h">
+          <div className="v2-sb-zone-h">
+            <h2 id="sb-edit-h">{L("ผังของคุณ", "Your spread")}</h2>
+          </div>
+          <label className="v2-sb-field">
+            <span>{L("ชื่อผัง", "Spread name")}</span>
             <input
               value={draft.name}
               maxLength={CUSTOM_NAME_MAX}
               onChange={(e) => update({ name: e.target.value })}
               placeholder={L("เช่น ย้ายงานดีไหม", "e.g. Should I change jobs?")}
-              className="w-full min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-4 text-sm font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
             />
           </label>
 
-          <ol className="space-y-3">
-            {draft.positions.map((p, i) => (
-              <li
-                key={i}
-                className={`glass-tile !rounded-xl p-3 sm:p-4 space-y-2 ${active === i ? "ring-2 ring-gold-ink/60" : ""}`}
-                onFocus={() => setActive(i)}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="shrink-0 w-7 h-7 rounded-full card-back-pattern flex items-center justify-center text-xs font-bold text-gold-on-dark">{i + 1}</span>
-                  <input
-                    value={posName(p)}
-                    maxLength={CUSTOM_POS_NAME_MAX}
-                    onChange={(e) => editPosition(i, "name", e.target.value)}
-                    aria-label={`${L("ชื่อตำแหน่งที่", "Name of position")} ${i + 1}`}
-                    placeholder={L("ชื่อตำแหน่ง", "Position name")}
-                    className="flex-1 min-w-0 min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-3 text-sm font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
-                  />
-                  <div className="flex shrink-0">
-                    <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label={L("เลื่อนขึ้น", "Move up")} className="tap-overlay-y min-h-[44px] min-w-[36px] text-gold-ink disabled:opacity-30">↑</button>
-                    <button type="button" onClick={() => move(i, 1)} disabled={i === n - 1} aria-label={L("เลื่อนลง", "Move down")} className="tap-overlay-y min-h-[44px] min-w-[36px] text-gold-ink disabled:opacity-30">↓</button>
-                    <button type="button" onClick={() => remove(i)} aria-label={L("ลบตำแหน่งนี้", "Remove this position")} className="tap-overlay-y min-h-[44px] min-w-[36px] text-muted hover:text-ink-deep">×</button>
+          {n === 0 ? (
+            <p className="v2-sb-empty">{L("ยังไม่มีตำแหน่ง เลือกแม่แบบบนผ้าปู หรือกดเพิ่มจากคลัง", "No positions yet. Pick a template on the mat or add from the library.")}</p>
+          ) : (
+            <ol className="v2-sb-rows">
+              {draft.positions.map((p, i) => (
+                <li key={i} className={`v2-sb-row${active === i ? " is-active" : ""}`} onFocus={() => setActive(i)}>
+                  <div className="v2-sb-row-top">
+                    <span className="v2-sb-num" aria-hidden="true">
+                      {i + 1}
+                    </span>
+                    <input
+                      value={posName(p)}
+                      maxLength={CUSTOM_POS_NAME_MAX}
+                      onChange={(e) => editPosition(i, "name", e.target.value)}
+                      aria-label={`${L("ชื่อตำแหน่งที่", "Name of position")} ${i + 1}`}
+                      placeholder={L("ชื่อตำแหน่ง", "Position name")}
+                    />
+                    <div className="v2-sb-row-tools">
+                      <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label={L("เลื่อนขึ้น", "Move up")} className="v2-sb-tool is-up" />
+                      <button type="button" onClick={() => move(i, 1)} disabled={i === n - 1} aria-label={L("เลื่อนลง", "Move down")} className="v2-sb-tool is-down" />
+                      <button type="button" onClick={() => remove(i)} aria-label={L("ลบตำแหน่งนี้", "Remove this position")} className="v2-sb-tool is-del" />
+                    </div>
                   </div>
-                </div>
-                <textarea
-                  value={posMeaning(p)}
-                  maxLength={CUSTOM_POS_MEANING_MAX}
-                  onChange={(e) => editPosition(i, "meaning", e.target.value)}
-                  rows={2}
-                  aria-label={`${L("ตำแหน่งที่", "Position")} ${i + 1} ${L("ถามอะไร", "asks")}`}
-                  placeholder={L("ตำแหน่งนี้ถามอะไร เช่น สิ่งที่ฉันยังมองไม่เห็นในเรื่องนี้", "What this position asks, e.g. what I'm not seeing yet")}
-                  className="w-full rounded-xl border border-line-interactive-warm bg-surface/80 px-3 py-2 text-sm font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
-                />
-              </li>
-            ))}
-          </ol>
-
-          {n < CUSTOM_MAX_CARDS && (
-            <div className="glass-tile !rounded-xl p-3 sm:p-4 space-y-3">
-              <div className="flex items-baseline justify-between gap-2">
-                <h2 className="font-serif-th text-sm sm:text-base text-ink-deep">
-                  {L(`เพิ่มตำแหน่ง (${n}/${CUSTOM_MAX_CARDS})`, `Add a position (${n}/${CUSTOM_MAX_CARDS})`)}
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => addPosition({ nameTh: "", meaning: "" })}
-                  className="tap-overlay-y min-h-[44px] text-xs sm:text-sm font-serif-th text-gold-ink font-semibold underline underline-offset-2"
-                >
-                  {L("เขียนเอง", "Write my own")}
-                </button>
-              </div>
-              <div role="tablist" aria-label={L("หมวดตำแหน่ง", "Position groups")} className="flex flex-wrap gap-1.5">
-                {GROUPS.map((g) => (
-                  <button
-                    key={g}
-                    type="button"
-                    role="tab"
-                    aria-selected={group === g}
-                    onClick={() => setGroup(g)}
-                    className={`tap-overlay-y min-h-[36px] px-3 rounded-full text-xs font-serif-th ${group === g ? "btn-gold-glass font-bold" : "glass-chip text-ink-deep"}`}
-                  >
-                    {L(POSITION_GROUP_LABEL[g].th, POSITION_GROUP_LABEL[g].en)}
-                  </button>
-                ))}
-              </div>
-              <div role="tabpanel" className="flex flex-wrap gap-2">
-                {POSITION_LIBRARY.filter((p) => p.group === group).map((p) => {
-                  const used = draft.positions.some((q) => q.nameTh === p.nameTh);
-                  return (
-                    <button
-                      key={p.id}
-                      type="button"
-                      disabled={used}
-                      onClick={() => addPosition(fromLibrary(p))}
-                      title={isEnglish ? p.meaningEn : p.meaning}
-                      className="tap-overlay-y min-h-[44px] px-3.5 rounded-full glass-chip text-sm font-serif-th text-ink-deep disabled:opacity-40"
-                    >
-                      + {isEnglish ? p.nameEn : p.nameTh}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+                  <textarea
+                    value={posMeaning(p)}
+                    maxLength={CUSTOM_POS_MEANING_MAX}
+                    onChange={(e) => editPosition(i, "meaning", e.target.value)}
+                    rows={2}
+                    aria-label={`${L("ตำแหน่งที่", "Position")} ${i + 1} ${L("ถามอะไร", "asks")}`}
+                    placeholder={L("ตำแหน่งนี้ถามอะไร เช่น สิ่งที่ฉันยังมองไม่เห็นในเรื่องนี้", "What does this position ask? e.g. What am I not seeing here?")}
+                  />
+                </li>
+              ))}
+            </ol>
           )}
 
           {touched && (check.errors.length > 0 || check.warnings.length > 0) && (
-            <div aria-live="polite" className="space-y-1.5 text-xs sm:text-sm font-serif-th">
+            <div aria-live="polite" className="v2-sb-checks">
               {check.errors.map((e) => (
-                <p key={e} className="text-err">{e}</p>
+                <p key={e} className="is-err">
+                  {e}
+                </p>
               ))}
               {check.warnings.map((w) => (
-                <p key={w} className="text-muted">{w}</p>
+                <p key={w}>{w}</p>
               ))}
             </div>
           )}
-
-          {notice && (
-            <p aria-live="polite" className={`text-xs sm:text-sm font-serif-th break-words ${notice.kind === "error" ? "text-err" : "text-gold-ink"}`}>
-              {notice.text}
-            </p>
-          )}
-
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={useNow}
-              disabled={n === 0}
-              className="tap-overlay-y min-h-[44px] inline-flex items-center px-6 rounded-full btn-gold-glass text-sm font-serif-th font-bold disabled:opacity-50"
-            >
-              {L("ใช้ผังนี้เปิดไพ่", "Read with this spread")}
-            </button>
-            <button
-              type="button"
-              onClick={() => void save()}
-              disabled={n === 0 || busy}
-              className="tap-overlay-y min-h-[44px] inline-flex items-center px-5 rounded-full glass-chip text-sm font-serif-th text-ink-deep disabled:opacity-50"
-            >
-              {editingId ? L("บันทึกการแก้ไข", "Save changes") : L("บันทึกผัง", "Save spread")}
-            </button>
-            {(n > 0 || editingId) && (
-              <button type="button" onClick={startOver} className="tap-overlay-y min-h-[44px] px-3 text-sm font-serif-th text-muted underline underline-offset-2">
-                {L("เริ่มใหม่", "Start over")}
-              </button>
-            )}
-          </div>
         </section>
       </div>
 
+      {/* แถบคำสั่งติดล่างจอ — เห็นตลอด ไม่ต้องเลื่อนหา */}
+      <div className="v2-sb-bar">
+        <div className="v2-sb-bar-in">
+          <p className="v2-sb-bar-info" aria-live="polite">
+            {notice ? (
+              <span className={notice.kind === "error" ? "is-err" : "is-ok"}>{notice.text}</span>
+            ) : n === 0 ? (
+              L("ยังไม่มีไพ่บนผ้าปู", "The mat is empty")
+            ) : (
+              <>
+                <b>{draft.name || L("ผังไม่มีชื่อ", "Untitled spread")}</b> · {L(`${n} ใบ`, `${n} cards`)}
+              </>
+            )}
+          </p>
+          <div className="v2-sb-bar-actions">
+            {(n > 0 || editingId) && (
+              <button type="button" onClick={startOver} className="v2-sb-reset">
+                {L("เริ่มใหม่", "Start over")}
+              </button>
+            )}
+            <button type="button" onClick={() => void save()} disabled={n === 0 || busy} className="ui2-btn-ghost v2-sb-save">
+              {editingId ? L("บันทึกการแก้ไข", "Save changes") : L("บันทึกผัง", "Save")}
+            </button>
+            <button type="button" onClick={useNow} disabled={n === 0} className="ui2-btn v2-sb-go">
+              {L("ใช้ผังนี้เปิดไพ่", "Read with this spread")}
+            </button>
+          </div>
+        </div>
+      </div>
+
       {mine && mine.length > 0 && (
-        <section aria-label={L("ผังของฉัน", "My spreads")} className="space-y-3">
-          <h2 className="font-serif-th text-base sm:text-lg text-ink-deep">
+        <section className="v2-sb-shelf" aria-labelledby="sb-mine-h">
+          <h2 id="sb-mine-h">
             {L("ผังของฉัน", "My spreads")}
-            <span className="ml-2 text-xs text-muted">{member ? L("(ในบัญชี)", "(in your account)") : L("(ในเครื่องนี้)", "(on this device)")}</span>
+            <span>{member ? L("ในบัญชี", "in your account") : L("ในเครื่องนี้", "on this device")}</span>
           </h2>
-          <ul className="grid gap-3 sm:grid-cols-2">
+          <ul>
             {mine.map((s) => (
-              <li key={s.id} className={`glass-tile !rounded-xl p-3 sm:p-4 flex gap-3 ${editingId === s.id ? "ring-2 ring-gold-ink/60" : ""}`}>
-                <SpreadLayoutGlyph layout={s.layout} count={s.positions.length} size={56} className="text-ink-deep shrink-0" />
-                <div className="min-w-0 flex-1 space-y-1">
-                  <p className="font-serif-th font-semibold text-ink-deep break-words">{s.name}</p>
-                  <p className="text-[11px] text-muted font-serif-th">
+              <li key={s.id} className={`v2-sb-saved${editingId === s.id ? " is-editing" : ""}`}>
+                <SpreadLayoutGlyph layout={s.layout} count={s.positions.length} size={64} className="v2-sb-glyph" />
+                <div>
+                  <p className="v2-sb-saved-name">{s.name}</p>
+                  <p className="v2-sb-saved-meta">
                     {L(`${s.positions.length} ใบ`, `${s.positions.length} cards`)}
                     {s.useCount ? ` · ${L(`ใช้แล้ว ${s.useCount} ครั้ง`, `used ${s.useCount}×`)}` : ""}
                     {s.shareSlug ? ` · ${L("เปิดลิงก์แบ่งปันอยู่", "shared by link")}` : ""}
                   </p>
-                  <div className="flex flex-wrap gap-x-3 text-xs font-serif-th">
-                    <button type="button" onClick={() => loadMine(s)} className="tap-overlay-y min-h-[44px] text-gold-ink font-semibold">{L("แก้ไข", "Edit")}</button>
+                  <div className="v2-sb-saved-acts">
+                    <button type="button" onClick={() => loadMine(s)}>
+                      {L("แก้ไข", "Edit")}
+                    </button>
                     {!s.local && (
-                      <button type="button" onClick={() => void toggleShare(s)} className="tap-overlay-y min-h-[44px] text-gold-ink">
+                      <button type="button" onClick={() => void toggleShare(s)}>
                         {s.shareSlug ? L("ปิดลิงก์", "Stop sharing") : L("แบ่งปันลิงก์", "Share link")}
                       </button>
                     )}
-                    <button type="button" onClick={() => void removeMine(s)} className="tap-overlay-y min-h-[44px] text-muted">{L("ลบ", "Delete")}</button>
+                    <button type="button" onClick={() => void removeMine(s)} className="is-quiet">
+                      {L("ลบ", "Delete")}
+                    </button>
                   </div>
                 </div>
               </li>
