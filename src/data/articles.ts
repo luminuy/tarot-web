@@ -5,6 +5,7 @@
  */
 
 import { ARTICLES_EN } from "./i18n/articles-en.generated";
+import { rotatingNeighborsGrouped } from "@/lib/seo/rotating-neighbors";
 
 export interface ArticleFaq {
   question: string;
@@ -1334,15 +1335,16 @@ Waite ได้ร่วมงานกับ **Pamela Colman Smith (Pixie)** �
   {
     slug: "tarot-4-cards-love-career",
     title: "ดูดวงไพ่ยิปซี 4 ใบ ความรักและการงาน: ผัง 4 ทิศเปิดใจเขาและทิศทางชีวิต",
-    seoTitle: "ดูดวงไพ่ยิปซี 4 ใบ ความรักและการงาน ผัง 4 ทิศเปิดใจเขา",
-    description: "วิธีดูดวงไพ่ยิปซี 4 ใบ เจาะลึกความรู้สึกของเขา สถานการณ์ปัจจุบัน อุปสรรค และบทสรุปความสัมพันธ์ พร้อมการประยุกต์ใช้กับเรื่องการงานและการตัดสินใจ",
+    // GSC 2026-10-16: "เปิดไพ่ 4 ใบ" + "ไพ่4ใบ" + "เปิดไพ่4ใบ" ~300 แสดงผลมาขึ้นหน้านี้ ได้ 1 คลิก
+    seoTitle: "เปิดไพ่ 4 ใบ ดูดวงไพ่ยิปซีความรักและการงาน ฟรี",
+    description: "เปิดไพ่ 4 ใบ ดูดวงไพ่ยิปซีความรักและการงานฟรี เจาะลึกความรู้สึกของเขา สถานการณ์ปัจจุบัน อุปสรรค และบทสรุปความสัมพันธ์ พร้อมวิธีอ่านทุกตำแหน่ง",
     category: "spreads",
     categoryTh: "ผังและการเปิดไพ่",
     readTime: "6 นาที",
     publishedAt: "2026-09-17T00:00:00.000Z",
     updatedAt: "2026-09-17T00:00:00.000Z",
     author: "แม่หมอแห่งวิหาร SeerTarot",
-    keywords: ["ดูดวงไพ่ยิปซี 4 ใบ", "ไพ่ยิปซี 4 ใบ", "ไพ่ยิปซี 4 ใบ ความรัก", "เปิดไพ่ 4 ใบ", "ดูดวง 4 ใบ"],
+    keywords: ["เปิดไพ่ 4 ใบ", "ดูดวงไพ่ยิปซี 4 ใบ", "ไพ่ยิปซี 4 ใบ", "ไพ่ยิปซี 4 ใบ ความรัก", "ดูดวง 4 ใบ", "สุ่มไพ่ 4 ใบ", "ไพ่ 4 ใบ"],
     targetSpreadId: "how-they-feel",
     toc: [
       { id: "why-4-cards", title: "ทำไมผังไพ่ยิปซี 4 ใบถึงแม่นยำและตอบโจทย์รอบด้าน" },
@@ -1459,7 +1461,7 @@ Waite ได้ร่วมงานกับ **Pamela Colman Smith (Pixie)** �
   {
     slug: "the-moon-love-tarot-guide",
     title: "ไพ่ The Moon ความรัก: ความคลุมเครือ ความระแวง และสิ่งที่ซ่อนไว้ในเงามืด",
-    seoTitle: "ไพ่ The Moon ความรัก แปลว่าอะไร ความลับ และความคลุมเครือ",
+    seoTitle: "ไพ่ The Moon ความรัก ความหมายหัวตั้ง กลับหัว เขาคิดอะไรอยู่",
     description: "เปิดได้ไพ่ The Moon ในเรื่องความรักหมายถึงอะไร? เจาะลึกความหมายทั้งหัวตั้งและหัวกลับ ความกังวล ความลับที่ยังไม่เปิดเผย และคำแนะนำเยียวยาใจ",
     category: "cards",
     categoryTh: "คัมภีร์ไพ่ทาโรต์",
@@ -1637,14 +1639,14 @@ export function getRelatedArticles(currentSlug: string, limit: number = 3): Arti
   const current = getArticleBySlug(canonicalSlug);
   if (!current) return ARTICLES.slice(0, limit);
 
-  return ARTICLES
-    .filter((a) => a.slug !== canonicalSlug)
-    .sort((a, b) => {
-      if (a.category === current.category && b.category !== current.category) return -1;
-      if (b.category === current.category && a.category !== current.category) return 1;
-      return 0;
-    })
-    .slice(0, limit);
+  // หมวดเดียวกันก่อน แบบหมุนวนตามตำแหน่งบทความ — เดิมเรียงแล้วตัด 3 ตัวแรก
+  // ทุกบทความในหมวดจึงชี้ไปบทความชุดเดิม ตัวท้ายหมวดไม่เคยได้ลิงก์ (ดู rotating-neighbors.ts)
+  return rotatingNeighborsGrouped(
+    ARTICLES,
+    (a) => a.slug === canonicalSlug,
+    (a) => a.category === current.category,
+    limit,
+  );
 }
 
 

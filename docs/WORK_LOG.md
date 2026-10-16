@@ -38,6 +38,16 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-16 (รอบ 244): แก้ตามผล GSC — ลิงก์ภายในที่ขาด (หาสาเหตุราก) + title/description ใส่คำค้นดูดวงที่คนค้นจริง
+
+- **เจ้าของสั่ง**: "ทำและบันทึกผล แก้ไข หาข้อผิดพลาด เพิ่มคีย์เวิร์ดเกี่ยวกับดูดวงเข้าไป ใช้ได้ทุกความสามารถ"
+- **เครื่องมือ**: `seo:gsc -- pairs` (คำค้น ➔ หน้า) + workflow `seo-gsc.yml` เก็บทุกสัปดาห์ (`pairs-th.json`)
+- **ข้อผิดพลาดที่เจอ**: แถว "ผังอื่นที่น่าสนใจ" / "บทความที่เกี่ยวข้อง" เลือก n ตัวแรกของหมวดชุดเดิมทุกหน้า ➔ ผังท้ายหมวด 12 ผังได้ 0 ลิงก์จากพี่น้อง · หน้าที่ไม่เข้าดัชนีมีลิงก์เข้าเฉลี่ย 30 vs 65 ➔ แก้หมุนวน (`src/lib/seo/rotating-neighbors.ts`) · ด่าน `test-seo-wave4` 4.1 (ย้อนแบบเดิมแล้วด่านตก 12 ผัง) · INCIDENT_LOG
+- **meta**: 9 หน้า (three-card · บทความ 4 ใบ · monthly · celtic-cross · topic family/money · zodiac · birth-card · บทความ The Moon) — ตารางเต็มใน `SEO_INDEXING_LOG.md` · `seoDescriptionTh` ฟิลด์ใหม่ของผัง (ใช้เฉพาะผลค้นหา) · keywords ผังทุกหน้า +4 วลี
+- **sitemap**: lastModified 2026-10-16 ให้ 112 URL ที่ลิงก์บนหน้าเปลี่ยนจริง
+- **ตรวจ**: บิลด์ Astro จริง · `test-meta-length` ผ่าน (title ≤ 60 · desc ≤ 160) · `test-seo-wave4` 266/266 · นับลิงก์เข้าจาก HTML: weekly/year-ahead/monthly-ten/chakra 2–3 ➔ 6
+- **ค้าง**: เจ้าของกด "ขอการจัดทำดัชนี" 12 หน้า (ทำผ่าน API ไม่ได้) · วัดผล CTR อีก 2–4 สัปดาห์
+
 ### 🗓️ 2026-10-16 (รอบ 243): ดึงผล Google Search Console รอบใหม่ลงทะเบียน SEO (เอกสารล้วน ไม่แตะโค้ด)
 
 - **เจ้าของสั่ง**: "import data gsc"

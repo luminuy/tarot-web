@@ -42,7 +42,8 @@ const birthCardOgImages = buildPageOgImage({
 });
 
 export const birthCardMetadataTh: Metadata = {
-  title: "คำนวณไพ่ทาโรต์ประจำตัว (Birth Card) จากวันเกิด ฟรี",
+  // GSC 2026-10-16: "ไพ่ประจำตัว" 26 แสดงผล 0 คลิก · "คำนวณไพ่ประจำตัว" ได้คลิก — ให้ title มีทั้งสองวลีตรงตัว
+  title: "คำนวณไพ่ประจำตัว ไพ่ทาโรต์ประจำวันเกิด (Birth Card) ฟรี",
   description:
     "ค้นหาไพ่ทาโรต์ประจำตัว (Birth Card) จากวันเดือนปีเกิดของคุณ คำนวณตามหลักเลขศาสตร์สากล 1909 Rider-Waite พร้อมคำทำนายบุคลิกภาพ จิตวิญญาณ และแนวทางพัฒนาตนเอง ฟรี",
   keywords: [

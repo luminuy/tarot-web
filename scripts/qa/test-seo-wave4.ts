@@ -1,7 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { calculateBirthCard, reduceToTarotNumber } from "../../src/lib/tarot/birth-card";
-import { ARTICLES } from "../../src/data/articles";
+import { ARTICLES, getRelatedArticles } from "../../src/data/articles";
+import { PUBLIC_SPREADS } from "../../src/data/spreads";
+import { spreadDetailProps } from "../../src/app/_shared/pages/spread-detail";
 import sitemap from "../../src/app/sitemap";
 import { SITE_ORIGIN } from "../../src/lib/config/site";
 import { assertNonEmptyCorpus } from "./lib/corpus";
@@ -111,6 +113,29 @@ assert(
   spreadPageContent.includes("tarot spread positions"),
   "_shared/pages/spread-detail.tsx ต้องมี keyword ฝั่งอังกฤษของหน้าผังด้วย",
 );
+
+// 4.1 ลิงก์ "ผัง/บทความใกล้เคียง" ต้องกระจายถึงทุกหน้า (2026-10-16 · GSC: ผังท้ายหมวดได้ลิงก์เข้าแค่ 2 หน้า
+//     เพราะทุกหน้าเลือก n ตัวแรกของหมวดชุดเดิม ➔ ค้าง "พบแล้ว - ยังไม่ได้จัดทำดัชนี")
+{
+  const spreadInbound = new Map(PUBLIC_SPREADS.map((s) => [s.id, 0]));
+  for (const s of PUBLIC_SPREADS) {
+    for (const n of spreadDetailProps(s, "th").fallbackSpreads) {
+      spreadInbound.set(n.id, (spreadInbound.get(n.id) ?? 0) + 1);
+    }
+  }
+  // ≥ 1 ไม่ใช่ ≥ 2 เพราะ `family` อยู่หมวด self คนเดียว ได้แค่ช่องเติมจากผังก่อนหน้า
+  const weakSpreads = [...spreadInbound].filter(([, n]) => n < 1).map(([id, n]) => `${id}=${n}`);
+  assert(weakSpreads.length === 0, `ทุกผังต้องได้ลิงก์จาก "ผังอื่นที่น่าสนใจ" ของผังอื่นอย่างน้อย 1 หน้า${weakSpreads.length ? ` (ขาด: ${weakSpreads.join(" ")})` : ""}`);
+
+  const articleInbound = new Map(ARTICLES.map((a) => [a.slug, 0]));
+  for (const a of ARTICLES) {
+    for (const r of getRelatedArticles(a.slug, 3)) {
+      articleInbound.set(r.slug, (articleInbound.get(r.slug) ?? 0) + 1);
+    }
+  }
+  const weakArticles = [...articleInbound].filter(([, n]) => n < 2).map(([slug, n]) => `${slug}=${n}`);
+  assert(weakArticles.length === 0, `ทุกบทความต้องได้ลิงก์จาก "บทความที่เกี่ยวข้อง" ของบทความอื่นอย่างน้อย 2 หน้า${weakArticles.length ? ` (ขาด: ${weakArticles.join(" ")})` : ""}`);
+}
 
 // 5. Blog & Readers SEO Copy (Wave 4.3 & 4.4)
 const beginnerArticle = ARTICLES.find((a) => a.slug === "how-to-read-tarot-for-beginners");

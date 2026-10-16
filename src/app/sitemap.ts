@@ -22,14 +22,19 @@ const STRUCTURAL_CONTENT_UPDATED_AT = new Date("2026-09-05T00:00:00+07:00");
  * ⚠️ ใส่เฉพาะหน้าที่ข้อความ/ลิงก์บนหน้าเปลี่ยนจริง ห้ามใส่หน้าที่แก้แค่ meta (เหตุผลเดียวกับข้างบน)
  * ปุ่ม "ขอการจัดทำดัชนี" ของ GSC ไม่มีใน API — ค่านี้คือสัญญาณที่ใกล้ที่สุดที่ส่งจากโค้ดได้
  */
-const CONTENT_UPDATED_AT: Record<string, Date> = Object.fromEntries(
-  [
+const CONTENT_UPDATED_AT: Record<string, Date> = Object.fromEntries([
+  ...[
     // #631 (2026-09-27): แถว "คนค้นหาบ่อย" · ลิงก์หน้าหัวข้อ/หมวด · หัวข้อ "ไพ่ทาโร่" · ดูดวงราศีวันนี้
     "/", "/en", "/pick-a-card", "/en/pick-a-card", "/spreads", "/en/spreads", "/spreads/topic/love",
     "/cards", "/cards/all", "/cards/major", "/cards/minor",
     ...ZODIAC_SIGNS.map((sign) => zodiacSignPath(sign.id)),
   ].map((path) => [path, new Date("2026-09-27T17:00:00+07:00")]),
-);
+  ...[
+    // 2026-10-16: แถว "ผังอื่นที่น่าสนใจ" / "บทความที่เกี่ยวข้อง" หมุนวนแล้ว — ลิงก์บนหน้าเปลี่ยนจริงทุกหน้า
+    ...PUBLIC_SPREADS.map((s) => `/spreads/${s.id}`),
+    ...ARTICLES.map((a) => `/blog/${a.slug}`),
+  ].flatMap((path) => [path, `/en${path}`].map((p) => [p, new Date("2026-10-16T17:00:00+07:00")])),
+]);
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = SITE_ORIGIN;

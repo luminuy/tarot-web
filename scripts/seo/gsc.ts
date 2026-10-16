@@ -8,6 +8,7 @@
  *   npm run seo:gsc                      คำค้นไทยที่ติด 28 วันล่าสุด (คลิก · แสดงผล · อันดับเฉลี่ย)
  *   npm run seo:gsc -- queries --all     คำค้นทุกภาษา
  *   npm run seo:gsc -- pages             หน้าไหนได้การแสดงผลเท่าไร
+ *   npm run seo:gsc -- pairs             คำค้นไทย ➔ หน้าที่ Google เอาไปแสดง (รู้ว่าต้องแก้ title หน้าไหน)
  *   npm run seo:gsc -- inspect           สถานะดัชนีรายหน้า ไล่ตาม sitemap จริง (ค่าเริ่มต้น = หน้าไทย)
  *   npm run seo:gsc -- sitemaps          ดู sitemap ที่ส่งไว้ (--submit = ส่ง sitemap.xml ซ้ำ)
  *
@@ -130,14 +131,14 @@ function dateDaysAgo(days: number): string {
   return new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10);
 }
 
-async function searchAnalytics(token: string, dimension: "query" | "page", days: number): Promise<Row[]> {
+async function searchAnalytics(token: string, dimension: "query" | "page" | "pairs", days: number): Promise<Row[]> {
   const rows: Row[] = [];
   // API คืนได้ครั้งละไม่เกิน 25,000 แถว — ไล่หน้าจนหมด
   for (let startRow = 0; ; startRow += 25_000) {
     const res = await api<{ rows?: Row[] }>(token, "POST", `${siteBase()}/searchAnalytics/query`, {
       startDate: dateDaysAgo(days),
       endDate: dateDaysAgo(0),
-      dimensions: [dimension],
+      dimensions: dimension === "pairs" ? ["query", "page"] : [dimension],
       dataState: "all",
       rowLimit: 25_000,
       startRow,
@@ -163,11 +164,13 @@ function printRows(rows: Row[], label: string, limit: number) {
   console.log("|---:|---:|---:|---:|---|");
   for (const r of sorted) {
     console.log(
-      `| ${r.position.toFixed(1)} | ${r.impressions} | ${r.clicks} | ${(r.ctr * 100).toFixed(1)}% | ${r.keys[0]} |`,
+      `| ${r.position.toFixed(1)} | ${r.impressions} | ${r.clicks} | ${(r.ctr * 100).toFixed(1)}% | ${r.keys.map(shortUrl).join(" ➔ ")} |`,
     );
   }
   if (rows.length > sorted.length) console.log(`\n… และอีก ${rows.length - sorted.length} รายการ (เพิ่ม --limit)`);
 }
+
+const shortUrl = (k: string) => k.replace("https://seertarot.net", "") || "/";
 
 async function sitemapUrls(): Promise<string[]> {
   const res = await fetch(SITEMAP_URL, { signal: AbortSignal.timeout(TIMEOUT_MS) });
@@ -278,6 +281,12 @@ async function main() {
       output = rows;
       break;
     }
+    case "pairs": {
+      const rows = (await searchAnalytics(token, "pairs", days)).filter((r) => THAI.test(r.keys[0]));
+      printRows(rows, `คู่คำค้นไทย ➔ หน้า ${days} วันล่าสุด`, Number(arg("limit") ?? 50));
+      output = rows;
+      break;
+    }
     case "inspect":
       output = await inspect(token, Number(arg("limit") ?? 2000));
       break;
@@ -285,7 +294,7 @@ async function main() {
       output = await sitemaps(token);
       break;
     default:
-      console.error(`❌ ไม่รู้จักคำสั่ง "${command}" — ใช้ได้: queries · pages · inspect · sitemaps`);
+      console.error(`❌ ไม่รู้จักคำสั่ง "${command}" — ใช้ได้: queries · pages · pairs · inspect · sitemaps`);
       process.exit(1);
   }
 

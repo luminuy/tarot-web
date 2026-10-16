@@ -77,6 +77,9 @@ jobs:
             echo "## หน้าที่ขึ้นผลค้นหา"
             npm run -s seo:gsc -- pages --days "$DAYS" --limit 30 --json gsc-report/pages.json
             echo ""
+            echo "## คำค้นไทย ➔ หน้าที่ขึ้น"
+            npm run -s seo:gsc -- pairs --days "$DAYS" --limit 80 --json gsc-report/pairs-th.json
+            echo ""
             echo "## สถานะดัชนีหน้าไทย"
             npm run -s seo:gsc -- inspect --json gsc-report/inspect-th.json
             echo ""
