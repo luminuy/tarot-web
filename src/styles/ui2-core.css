@@ -475,12 +475,13 @@ html:has([data-ui2-page-dark]) .ui2-header-cta {
 }
 .ui2-inline-card {
   display: block;
-  width: 0.78em;
+  width: 0.8em;
   aspect-ratio: 11 / 19;
   margin-inline-start: -0.26em;
   border-radius: 0.1em;
   overflow: hidden;
-  box-shadow: 0 0 0 1.5px var(--ui2-night), 0 6px 14px -6px rgba(0, 0, 0, 0.8);
+  border: 0.06em solid var(--ui2-card-ivory-top);
+  box-shadow: 0 0.1em 0.3em -0.08em rgba(0, 0, 0, 0.75), 0 0 0.6em -0.1em rgba(255, 217, 143, 0.35);
   rotate: calc(var(--k, 0) * 1deg);
 }
 .ui2-inline-card:first-child {
@@ -495,4 +496,21 @@ html:has([data-ui2-page-dark]) .ui2-header-cta {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+/* กางพัดตอนหัวข้อเลื่อนเข้าจอ (ซ้อนเป็นกองกลาง ➔ กางออก) · transform ล้วน ไม่ใช่ของหนัก · ลดการเคลื่อนไหว = นิ่ง */
+.ui2-inline-card:nth-child(1) { --s: 1.2; }
+.ui2-inline-card:nth-child(2) { --s: 0.4; }
+.ui2-inline-card:nth-child(3) { --s: -0.4; }
+.ui2-inline-card:nth-child(4) { --s: -1.2; }
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    :root:not([data-fx="off"]) .ui2-inline-card {
+      animation: ui2-inline-fan linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 40%;
+    }
+  }
+}
+@keyframes ui2-inline-fan {
+  from { transform: translateX(calc(var(--s, 0) * 0.42em)) rotate(calc(var(--k, 0) * -1deg)); }
 }

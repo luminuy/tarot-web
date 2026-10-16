@@ -168,26 +168,25 @@ function ShelfSection({
       data-anim-section=""
       style={tone}
     >
-      {/* แถบหน้าต่างแบบหน้าเว็บจริง (ต้นแบบ fastwork.com/selling — หน้าต่างโปรไฟล์) · ตกแต่งล้วน */}
+      {/* แถบบนหน้าต่าง (ต้นแบบ fastwork.com/selling — หน้าต่างโปรไฟล์) · ตกแต่งล้วน:
+          ชื่อหมวดภาษาอังกฤษเอียง · ขีดความคืบหน้า 6 ขีด (หมวดนี้สีหมวด · ที่ผ่านมาแล้วทองจาง) · ลำดับ */}
       <div className="ui2-sp-win-bar" aria-hidden="true">
-        <span className="ui2-sp-win-dots">
-          <span />
-          <span />
-          <span />
+        <span className="ui2-sp-win-name">
+          <span className="ui2-sp-win-n ui2-num">{String(order).padStart(2, "0")}</span>
+          <span className="ui2-accent">{isEnglish ? "Category" : shelf.nameEn}</span>
         </span>
-        <span className="ui2-sp-win-url">
-          seertarot.net/spreads<span className="ui2-sp-win-hash">#{shelf.key}</span>
+        <span className="ui2-sp-win-steps">
+          {Array.from({ length: total }, (_, k) => (
+            <span key={k} className={k + 1 < order ? "is-past" : k + 1 === order ? "is-here" : undefined} />
+          ))}
         </span>
         <span className="ui2-sp-win-step ui2-num">
-          {String(order).padStart(2, "0")} / {String(total).padStart(2, "0")}
+          {order}
+          <span className="ui2-sp-win-of"> / {total}</span>
         </span>
       </div>
       <div className="ui2-sp-shelf-head">
         <div className="ui2-sp-shelf-title">
-        <span className="ui2-sp-badge">
-          <span className="ui2-num">{String(order).padStart(2, "0")}</span>
-          {!isEnglish && <span className="ui2-accent">{shelf.nameEn}</span>}
-        </span>
         <h2 id={titleId} className="ui2-h2">
           <ThaiPhrases>{isEnglish ? shelf.nameEn : shelf.nameTh}</ThaiPhrases>
         </h2>
@@ -469,13 +468,25 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                 </span>
               ))}
             </span>{" "}
-            <span className="tp">{isEnglish ? "a spread of its own" : "มีผังที่ใช่รออยู่"}</span>
+            {isEnglish ? (
+              <span className="tp">
+                a <span className="ui2-gold-night">spread of its own</span>
+              </span>
+            ) : (
+              <span className="tp">
+                มี<span className="ui2-gold-night">ผังที่ใช่</span>รออยู่
+              </span>
+            )}
           </h2>
           <p className="ui2-lede ui2-sp-show-lede">
             {isEnglish
               ? "Scroll through one category at a time, then tap the spread that calls to you."
               : "เลื่อนดูทีละหมวด แล้วแตะไพ่ผังที่ใจเลือก"}
           </p>
+          {/* ตัวบอกให้เลื่อน — เส้นทองมีจุดไหลลง (CSS ล้วน · ไม่ใช่อีโมจิ) */}
+          <span className="ui2-sp-scroll-cue" aria-hidden="true">
+            <span className="ui2-sp-scroll-line ui2-loop" />
+          </span>
         </div>
         <div className="ui2-sp-stage-wrap">
           <div className="ui2-sp-stage" data-sp-stage="">
