@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { noindexAlternates } from "@/lib/config/site";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
-import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { CardImage } from "@/components/card/CardImage";
 
 /**
  * 🚧 เนื้อหน้า 404 — ใช้ร่วมกันสองที่ (INC-0112)
@@ -81,23 +81,28 @@ export function NotFoundMain({ forcedLocale = "th", ui2 = false }: { forcedLocal
   if (ui2) {
     return (
       <main id="main-content" tabIndex={-1} className="min-h-[70vh] text-ink px-4 sm:px-6 pb-16">
-        <Ui2PageHero
-          crumbs={[{ label: "404" }]}
-          title={copy.title}
-          lede={copy.desc}
-          cards={["major-00", "major-18", "major-09", "major-17", "major-12", "major-14"]}
-          actions={
-            <nav aria-label={copy.navLabel} className="ui2-ph-links">
-              {copy.links.map((link, i) => (
-                <a key={link.href} href={link.href} className={i === 0 ? "ui2-btn ui2-btn-gold" : "ui2-btn-ghost"}>
-                  {link.label}
-                  {i === 0 && <span className="ui2-btn-arrow" aria-hidden="true" />}
-                </a>
-              ))}
-            </nav>
-          }
-          note={<span className="text-ok font-medium">{copy.helpline}</span>}
-        />
+        {/* v2 (2026-10-16 "สร้างใหม่เลย") — "4 [The Fool] 4": ไพ่คนเขลา (หมายเลข 0 · ผู้ออกเดินทาง) ยืนแทนเลขศูนย์ */}
+        <section className="v2-nf">
+          <p className="v2-nf-code" aria-hidden="true">
+            <span>4</span>
+            <span className="v2-nf-card">
+              <CardImage cardId="major-00" alt="" sizes="(min-width: 768px) 200px, 120px" loading="eager" />
+            </span>
+            <span>4</span>
+          </p>
+          <h1 className="v2-nf-title">
+            <ThaiPhrases>{copy.title}</ThaiPhrases>
+          </h1>
+          <p className="v2-nf-desc">{copy.desc}</p>
+          <nav aria-label={copy.navLabel} className="v2-nf-links">
+            {copy.links.map((link, i) => (
+              <a key={link.href} href={link.href} className={i === 0 ? "ui2-btn v2-nf-go" : "ui2-btn-ghost"}>
+                {link.label}
+              </a>
+            ))}
+          </nav>
+          <p className="v2-nf-help">{copy.helpline}</p>
+        </section>
       </main>
     );
   }

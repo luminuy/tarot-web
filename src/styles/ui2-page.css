@@ -1317,3 +1317,70 @@
     height: 72px;
   }
 }
+
+/* ══ 21. v2 หน้า 404 — "4 [The Fool] 4" ไพ่หมายเลข 0 ยืนแทนเลขศูนย์ ══ */
+.v2-nf {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 56px 0 24px;
+  text-align: center;
+}
+.v2-nf-code {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 2vw, 24px);
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(110px, 18vw, 230px);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ui2-gold-solid);
+  text-shadow: 0 0 60px rgba(255, 217, 143, 0.3);
+}
+.v2-nf-card {
+  display: block;
+  width: clamp(84px, 13vw, 170px);
+  rotate: -8deg;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1.5px rgba(255, 217, 143, 0.7), 0 40px 60px -26px rgba(0, 0, 0, 0.95), 0 0 50px rgba(255, 217, 143, 0.3);
+}
+.v2-nf-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.v2-nf-title {
+  max-width: 640px;
+  margin: 18px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(26px, 3.4vw, 40px);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ui2-on-night);
+}
+.v2-nf-desc {
+  max-width: 520px;
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--ui2-on-night-soft);
+}
+.v2-nf-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+.v2-nf .v2-nf-go {
+  background: linear-gradient(180deg, #FFE3A8 0%, #F0C470 100%);
+  color: var(--ui2-night);
+}
+.v2-nf-help {
+  margin: 10px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #8FD39C;
+}
