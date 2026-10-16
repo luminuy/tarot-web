@@ -58,6 +58,7 @@ import { buildCustomSpread, CUSTOM_SPREAD_ID, layoutPoints } from "@/lib/tarot/c
 import { takeCustomLaunch, type CustomSpreadDef } from "@/lib/tarot/custom-spread-client";
 import { takeQuestionPrefill } from "@/lib/reading/question-prefill";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { RitualRail, SpreadSummaryCard, SealChip } from "@/components/home/RitualChrome";
 
 /**
  * ✦ Dynamic Code-Splitting — คอมโพเนนต์หนักทั้งหมดโหลดเมื่อถึงขั้นที่ใช้จริง
@@ -75,7 +76,8 @@ import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
  *    ไฟล์นี้คือเปลือกของหน้าแรก บรรทัดเดียวก็ลากไลบรารี 40 KB เข้าบันเดิลตั้งต้นทันที
  *    (ด่าน `test-bundle-budget` ตรวจไว้แล้วว่า `/` ต้องไม่โหลด chunk ของ motion)
  */
-const ShuffleRitual = withMotionScope(() => import("@/components/deck/ShuffleRitual").then((m) => m.ShuffleRitual));
+/* สับไพ่ v2 เป็นคีย์เฟรม CSS ล้วน — ไม่ใช้ motion จึงไม่ห่อ withMotionScope (INC-0137) */
+const ShuffleRitual = dynamic(() => import("@/components/deck/ShuffleRitual").then((m) => m.ShuffleRitual), { ssr: false });
 const InteractiveCardFan = withMotionScope(() => import("@/components/deck/InteractiveCardFan").then((m) => m.InteractiveCardFan));
 const SpreadBoard = withMotionScope(() => import("@/components/spread/SpreadBoard").then((m) => m.SpreadBoard));
 const StreamReader = withMotionScope(() => import("@/components/reading/StreamReader").then((m) => m.StreamReader));
@@ -108,7 +110,8 @@ const AccessDialog = dynamic(() => import("@/components/entitlement/AccessDialog
  */
 const reserveOneScreen = () => <div aria-hidden="true" className="min-h-svh" />;
 const PersonaCardSelector = withMotionScope(() => import("@/components/reading/PersonaCardSelector").then((m) => m.PersonaCardSelector), reserveOneScreen);
-const IntentionAltarInput = withMotionScope(() => import("@/components/reading/IntentionAltarInput").then((m) => m.IntentionAltarInput), reserveOneScreen);
+/* กล่องคำถาม v2 ไม่ใช้ motion แล้ว — dynamic ธรรมดา (INC-0137) */
+const IntentionAltarInput = dynamic(() => import("@/components/reading/IntentionAltarInput").then((m) => m.IntentionAltarInput), { ssr: false, loading: reserveOneScreen });
 /* ไพ่ไขข้อข้องใจ — ไม่ใช้ `motion` เลย จึงไม่ต้องห่อ `withMotionScope()` (INC-0137) */
 const ClarificationCard = dynamic(() => import("@/components/reading/ClarificationCard").then((m) => m.ClarificationCard), { ssr: false });
 /* หน้าต่างสายด่วน — ใช้ `Modal` ซึ่งห่อ AppMotionProvider ให้ในตัวแล้ว จึงไม่ต้องห่อซ้ำเหมือน AccessDialog */
@@ -119,19 +122,6 @@ const AnnouncementBanner = dynamic(() => import("@/components/entitlement/Announ
 /* ✦ ผังของฉัน (คลื่น 5) — โหลดเมื่อถึงขั้นเลือกผังเท่านั้น ไม่เพิ่มบันเดิลหน้าแรก */
 const MyCustomSpreadsRow = dynamic(() => import("@/components/spread/custom/MyCustomSpreadsRow"), { ssr: false });
 const ToastNotification = dynamic(() => import("@/components/ui/ToastNotification").then((m) => m.ToastNotification), { ssr: false });
-
-// P1-U1: ปุ่มย้อนกลับทีละขั้น — ใช้ร่วมในขั้นสับไพ่และเลือกไพ่
-function StepBackButton({ onClick, label }: { onClick: () => void; label?: string }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="altar-card-porcelain !rounded-lg tap-overlay-y mx-auto flex items-center gap-1.5 py-2 px-4 text-xs font-serif-th text-ink-deep transition-colors duration-150 cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2 focus-visible:ring-offset-[#F3EDE2]"
-    >
-      <span aria-hidden="true">←</span> {label || "ย้อนกลับ"}
-    </button>
-  );
-}
 
 /** ลำดับขั้นของพิธีกรรมดูดวง — คงที่ ประกาศนอกคอมโพเนนต์เพื่อไม่ให้สร้างอาเรย์ใหม่ทุกเรนเดอร์ */
 const STEP_ORDER: RitualStep[] = ["SPREAD_SELECT", "INTENTION_SELECT", "SHUFFLE", "PICK_CARDS", "READING", "SUMMARY"];
@@ -1613,6 +1603,7 @@ export default function TarotFlow({
   // P1-U1: ย้อนกลับทีละขั้นจากขั้นสับไพ่/เลือกไพ่ (เดิมทางออกเดียวคือ "เริ่มดูดวงใหม่" ที่ล้างทุกอย่าง)
   const handleStepBack = () => {
     soundManager.playCardSelectSound();
+    // v2: ขั้นสับเล่นเองอัตโนมัติ — ย้อนจากเลือกไพ่ไปขั้นสับ = สับใหม่แล้วกลับมาเลือกใหม่ (ปุ่ม "เลือกใหม่ตั้งแต่ใบแรก")
     if (currentStep === "SHUFFLE") {
       navigateStep("INTENTION_SELECT"); // เก็บคำถาม/ชื่อเล่น/ผัง/แม่หมอไว้ครบ
     } else if (currentStep === "PICK_CARDS") {
@@ -1623,6 +1614,15 @@ export default function TarotFlow({
     }
   };
 
+  // v2: ทางกลับไปแก้คำถามจากโต๊ะเลือกไพ่ (คำถาม/ผัง/แม่หมอยังอยู่ครบ · ไพ่ที่เลือกไว้ล้างทิ้ง)
+  const handleBackToQuestion = () => {
+    soundManager.playCardSelectSound();
+    isFinalizingRef.current = false;
+    dispatchDeck({ type: "clearDraw" });
+    dispatchRead({ type: "clearError" });
+    navigateStep("INTENTION_SELECT");
+  };
+
   // ✦ ปุ่มย้อนกลับของเบราว์เซอร์ = ถอยทีละขั้นก่อนเปิดไพ่ (ตั้งคำถาม ➔ เลือกผัง · สับ ➔ ตั้งคำถาม · เลือกไพ่ ➔ สับ)
   useFlowBackButton(currentStep, !routeSpread, () => {
     dispatchOverlay({ type: "closeAll" });
@@ -1630,6 +1630,8 @@ export default function TarotFlow({
       soundManager.playCardSelectSound();
       scrollToSanctuaryTop();
       navigateStep("SPREAD_SELECT");
+    } else if (currentStep === "PICK_CARDS") {
+      handleBackToQuestion(); // ไม่ถอยไปขั้นสับ — ขั้นสับเล่นเองแล้วเด้งกลับมาเลือกไพ่ ผู้ใช้จะรู้สึกว่าปุ่มย้อนกลับไม่ทำงาน
     } else {
       handleStepBack();
     }
@@ -1817,205 +1819,226 @@ export default function TarotFlow({
             </div>
           )}
 
-          {/* STEP 2: INTENTION & PRAYER */}
+          {/* STEP 2: INTENTION & PRAYER
+              v2 (เจ้าของ 2026-10-17 "ออกแบบใหม่ทั้งหมด หน้าขั้นตอนดูไพ่") — โต๊ะตั้งคำถาม
+              ซ้าย: คำถาม (ช่องเดียวที่จำเป็น มาก่อน) + รายละเอียดไม่บังคับพับเก็บ · ขวา: ผังที่เลือก + แม่หมอ (รายการเตี้ย)
+              ปุ่มต่อไปอยู่แถบติดล่างจอเสมอ (v1 อยู่ท้ายหน้ายาว ต้องเลื่อนผ่านการ์ดแม่หมอสูง 315px ห้าใบ) */}
           {currentStep === "INTENTION_SELECT" && (
-            <div
-              className="space-y-10"
-            >
-              <div className="text-center space-y-2 sm:space-y-2.5">
-                <h2 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink leading-snug sm:leading-normal pt-1 [text-wrap:balance]"><ThaiPhrases>
-                  {isEnglish ? "Set Your Intention & Choose Reader" : "ตั้งคำถาม & เลือกแม่หมอ"}
+            <div className="v2-rt v2-rt-intent">
+              <RitualRail step={1} isEnglish={isEnglish} />
+              <div className="v2-rt-head">
+                <h2 className="v2-rt-title"><ThaiPhrases>
+                  {isEnglish ? "What would you like to know?" : "อยากรู้เรื่องอะไร"}
                 </ThaiPhrases></h2>
-                <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed [text-wrap:balance]">
+                <p className="v2-rt-sub">
                   {isEnglish
-                    ? "Formulate your question and choose your preferred oracle archetype"
-                    : "พิมพ์เรื่องที่อยากรู้ พร้อมเลือกสไตล์แม่หมอที่คุณต้องการคุยด้วย"}
+                    ? "Type one question. Everything else is optional."
+                    : "พิมพ์คำถามข้อเดียวพอ ที่เหลือไม่บังคับ"}
                 </p>
               </div>
 
-              {/* Persona Selector */}
-              <PersonaCardSelector
-                selectedPersona={selectedPersona}
-                onSelectPersona={(p) => {
-                  soundManager.playCardSelectSound();
-                  setSelectedPersona(p);
-                  trackEvent("persona_select", {
-                    persona_id: p.id,
-                    persona_name: p.nameTh,
-                  });
-                }}
-                isPassHolder={isPassHolder}
-                premiumTrial={hasPremiumTrial}
-                onRequireUpgrade={() => {
-                  openAccessDialog("master_persona");
-                }}
-              />
+              <div className="v2-rt-desk">
+                <div className="v2-rt-main">
+                  {/* Input Form — คำถามมาก่อน · เรื่องที่ติดตาม/ใจตอนนี้ อยู่ในกล่องพับ "เพิ่มรายละเอียด" */}
+                  <IntentionAltarInput
+                    question={question}
+                    onQuestionChange={handleQuestionChange}
+                    nickname={nickname}
+                    onNicknameChange={setNickname}
+                    situation={situation}
+                    onSituationChange={setSituation}
+                    selectedCategory={selectedCategory}
+                    onCategoryChange={setSelectedCategory}
+                    persona={selectedPersona}
+                  >
+                    {/* 🧵 ถามต่อจากเรื่องเดิม — สมาชิกที่มีเรื่องที่ติดตามอยู่ (แตะเลือก/แตะซ้ำยกเลิก) */}
+                    {!clarificationPrompt && openThreads.length > 0 && (
+                      <div className="w-full max-w-2xl mx-auto space-y-2">
+                        <p className="text-xs sm:text-[13px] font-serif-th font-semibold text-ink-deep">
+                          {isEnglish ? "Continuing a story you follow?" : "ถามต่อจากเรื่องที่ติดตามอยู่ไหม"}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2" role="radiogroup" aria-label={isEnglish ? "Stories you follow" : "เรื่องที่ติดตามอยู่"}>
+                          {openThreads.slice(0, 6).map((t) => {
+                            const on = chosenThread?.id === t.id;
+                            return (
+                              <button
+                                key={t.id}
+                                type="button"
+                                role="radio"
+                                aria-checked={on}
+                                onClick={() => setChosenThread(on ? null : { id: t.id, title: t.title })}
+                                className={`tap-overlay-y min-h-[44px] px-3.5 rounded-full border text-xs sm:text-[13px] font-serif-th cursor-pointer transition-colors ${
+                                  on ? "bg-surface border-gold-ink text-ink-deep font-semibold" : "glass-chip border-line-warm text-ink-deep hover:border-gold-ink"
+                                }`}
+                              >
+                                {on && <GoldMark className="mr-2 -mt-0.5" />}
+                                {t.title}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
 
-              {/* Input Form */}
-              <IntentionAltarInput
-                question={question}
-                onQuestionChange={handleQuestionChange}
-                nickname={nickname}
-                onNicknameChange={setNickname}
-                situation={situation}
-                onSituationChange={setSituation}
-                selectedCategory={selectedCategory}
-                onCategoryChange={setSelectedCategory}
-                persona={selectedPersona}
-              />
+                    {/* ✦ ใจตอนนี้ — แตะเดียว ข้ามได้ (สมุดดวง v2) */}
+                    {!clarificationPrompt && (
+                      <MoodPicker
+                        value={moodBefore}
+                        onChange={setMoodBefore}
+                        isEnglish={isEnglish}
+                        label={isEnglish ? "How do you feel right now?" : "ใจตอนนี้เป็นอย่างไร"}
+                        hint={isEnglish ? "Optional · saved to your journal only" : "ไม่บังคับ · เก็บไว้ในสมุดของคุณเท่านั้น"}
+                      />
+                    )}
 
-              {/* 🧵 ถามต่อจากเรื่องเดิม — สมาชิกที่มีเรื่องที่ติดตามอยู่ (แตะเลือก/แตะซ้ำยกเลิก) */}
-              {!clarificationPrompt && openThreads.length > 0 && (
-                <div className="w-full max-w-2xl mx-auto space-y-2">
-                  <p className="text-xs sm:text-[13px] font-serif-th font-semibold text-ink-deep">
-                    {isEnglish ? "Continuing a story you follow?" : "ถามต่อจากเรื่องที่ติดตามอยู่ไหม"}
+                  </IntentionAltarInput>
+
+                  {/* Clarification Card (B-04) */}
+                  {clarificationPrompt && (
+                    <ClarificationCard
+                      question={clarificationPrompt.question}
+                      answer={clarificationAnswer}
+                      onAnswerChange={setClarificationAnswer}
+                      persona={selectedPersona}
+                      loading={loading}
+                      onSkip={() => {
+                        setClarificationPrompt(null);
+                        void executeStartSession();
+                      }}
+                      onSubmit={() => {
+                        const ans = clarificationAnswer.trim();
+                        const combined = ans
+                          ? (situation.trim() ? `${situation.trim()}\n(ข้อมูลเพิ่มเติม: ${ans})` : ans)
+                          : situation;
+                        if (ans) {
+                          setSituation(combined);
+                        }
+                        setClarificationPrompt(null);
+                        void executeStartSession(combined);
+                      }}
+                    />
+                  )}
+
+                </div>
+
+                <aside className="v2-rt-side">
+                  <SpreadSummaryCard
+                    spread={selectedSpread}
+                    isEnglish={isEnglish}
+                    onChange={() => {
+                      soundManager.playCardSelectSound();
+                      scrollToSanctuaryTop();
+                      navigateStep("SPREAD_SELECT");
+                    }}
+                  />
+                  <PersonaCardSelector
+                    selectedPersona={selectedPersona}
+                    onSelectPersona={(p) => {
+                      soundManager.playCardSelectSound();
+                      setSelectedPersona(p);
+                      trackEvent("persona_select", {
+                        persona_id: p.id,
+                        persona_name: p.nameTh,
+                      });
+                    }}
+                    isPassHolder={isPassHolder}
+                    compact
+                    premiumTrial={hasPremiumTrial}
+                    onRequireUpgrade={() => {
+                      openAccessDialog("master_persona");
+                    }}
+                  />
+
+                </aside>
+              </div>
+
+              {/* แถบปุ่มติดล่างจอ — ปุ่มเดียวที่ต้องกด (เปลี่ยนผังย้ายไปอยู่ในการ์ดผังด้านข้าง) */}
+              {!clarificationPrompt && (
+                <div className="v2-rt-bar">
+                  <p className="v2-rt-bar-hint" aria-live="polite">
+                    {question.trim()
+                      ? isEnglish
+                        ? `${selectedSpread.positions.length} cards · read by ${selectedPersona.nameEn || selectedPersona.nameTh}`
+                        : `${selectedSpread.positions.length} ใบ · ${selectedPersona.nameTh} อ่านให้`
+                      : isEnglish
+                        ? "Type your question to continue"
+                        : "พิมพ์คำถามก่อน แล้วไปเลือกไพ่กัน"}
                   </p>
-                  <div className="flex flex-wrap gap-1.5 sm:gap-2" role="radiogroup" aria-label={isEnglish ? "Stories you follow" : "เรื่องที่ติดตามอยู่"}>
-                    {openThreads.slice(0, 6).map((t) => {
-                      const on = chosenThread?.id === t.id;
-                      return (
-                        <button
-                          key={t.id}
-                          type="button"
-                          role="radio"
-                          aria-checked={on}
-                          onClick={() => setChosenThread(on ? null : { id: t.id, title: t.title })}
-                          className={`tap-overlay-y min-h-[44px] px-3.5 rounded-full border text-xs sm:text-[13px] font-serif-th cursor-pointer transition-colors ${
-                            on ? "bg-surface border-gold-ink text-ink-deep font-semibold" : "glass-chip border-line-warm text-ink-deep hover:border-gold-ink"
-                          }`}
-                        >
-                          {on && <GoldMark className="mr-2 -mt-0.5" />}
-                          {t.title}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleStartSession}
+                    disabled={loading || !question.trim()}
+                    aria-label={isEnglish ? "Next: Shuffle and select cards yourself" : "ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง"}
+                    className="v2-rt-go"
+                  >
+                    {loading ? (isEnglish ? "Loading..." : "กำลังโหลด...") : isEnglish ? "Pick my cards" : "ไปเลือกไพ่"}
+                    <span aria-hidden="true" className="v2-rt-go-arrow" />
+                  </button>
                 </div>
               )}
+            </div>
+          )}
 
-              {/* ✦ ใจตอนนี้ — แตะเดียว ข้ามได้ (สมุดดวง v2) */}
-              {!clarificationPrompt && (
-                <MoodPicker
-                  value={moodBefore}
-                  onChange={setMoodBefore}
-                  isEnglish={isEnglish}
-                  label={isEnglish ? "How do you feel right now?" : "ใจตอนนี้เป็นอย่างไร"}
-                  hint={isEnglish ? "Optional · saved to your journal only" : "ไม่บังคับ · เก็บไว้ในสมุดของคุณเท่านั้น"}
+          {/* STEP 3 + 4: สับ ➔ เลือกไพ่ บนโต๊ะเดียวกัน (v2 · เจ้าของ 2026-10-16 "ลดขั้นตอน")
+              สับเล่นเองอัตโนมัติ ~1.7 วิ แล้วกางพัดให้เลือก — ผู้ใช้เห็นเป็นขั้นเดียว "เลือกไพ่" */}
+          {(currentStep === "SHUFFLE" || currentStep === "PICK_CARDS") && (
+            <div className="v2-rt v2-rt-pick">
+              <RitualRail step={2} isEnglish={isEnglish} />
+              {currentStep === "SHUFFLE" ? (
+                <div className="v2-tb v2-tb-shuffle">
+                  <ShuffleRitual
+                    commitment={commitment}
+                    spreadName={isEnglish ? (selectedSpread.nameEn || selectedSpread.nameTh) : selectedSpread.nameTh}
+                    onShuffleComplete={handleShuffleComplete}
+                  />
+                </div>
+              ) : (
+                <InteractiveCardFan
+                  pickedIndices={pickedIndices}
+                  targetCount={selectedSpread.positions.length}
+                  positionNames={selectedSpread.positions.map((p) => (isEnglish ? p.nameEn || p.nameTh : p.nameTh))}
+                  currentPositionName={
+                    isEnglish
+                      ? (selectedSpread.positions[pickedIndices.length]?.nameEn || selectedSpread.positions[pickedIndices.length]?.nameTh || "Remaining position")
+                      : (selectedSpread.positions[pickedIndices.length]?.nameTh || "ตำแหน่งที่เหลือ")
+                  }
+                  onPickCard={handlePickCard}
+                  disabled={loading}
                 />
               )}
-
-              {/* Clarification Card (B-04) */}
-              {clarificationPrompt && (
-                <ClarificationCard
-                  question={clarificationPrompt.question}
-                  answer={clarificationAnswer}
-                  onAnswerChange={setClarificationAnswer}
-                  persona={selectedPersona}
-                  loading={loading}
-                  onSkip={() => {
-                    setClarificationPrompt(null);
-                    void executeStartSession();
-                  }}
-                  onSubmit={() => {
-                    const ans = clarificationAnswer.trim();
-                    const combined = ans
-                      ? (situation.trim() ? `${situation.trim()}\n(ข้อมูลเพิ่มเติม: ${ans})` : ans)
-                      : situation;
-                    if (ans) {
-                      setSituation(combined);
-                    }
-                    setClarificationPrompt(null);
-                    void executeStartSession(combined);
-                  }}
-                />
-              )}
-
-              {/* Action Bar */}
-              {!clarificationPrompt && (
-                <div className="altar-card-porcelain !rounded-xl w-full max-w-2xl mx-auto p-4 sm:p-5 flex flex-nowrap items-center justify-between gap-2.5 sm:gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    soundManager.playCardSelectSound();
-                    scrollToSanctuaryTop();
-                    navigateStep("SPREAD_SELECT");
-                  }}
-                  aria-label={isEnglish ? `Change spread (currently ${selectedSpread.nameEn || selectedSpread.nameTh})` : `เปลี่ยนผัง (ตอนนี้เลือก ${selectedSpread.nameTh})`}
-                  className="glass-chip shrink-0 max-w-[42%] py-3 px-3.5 sm:px-5 text-xs font-serif-th text-ink hover:text-gold-ink transition-colors duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap overflow-hidden"
-                >
-                  <span aria-hidden="true">←</span>
-                  <span>{isEnglish ? "Change Spread" : "เปลี่ยนผัง"}</span>
-                  <span className="hidden lg:inline truncate text-muted">({isEnglish ? (selectedSpread.nameEn || selectedSpread.nameTh) : selectedSpread.nameTh})</span>
+              <div className="v2-rt-foot">
+                <button type="button" className="v2-rt-link" onClick={handleBackToQuestion}>
+                  {isEnglish ? "Edit question" : "แก้คำถาม"}
                 </button>
-
-                <button
-                  type="button"
-                  onClick={handleStartSession}
-                  disabled={loading || !question.trim()}
-                  aria-label={isEnglish ? "Next: Shuffle and select cards yourself" : "ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง"}
-                  className={`flex-1 min-w-0 py-3 px-3 sm:px-7 rounded-full text-xs sm:text-sm font-bold font-serif-th transition-transform duration-150 flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap shadow-sm ${
-                    !question.trim()
-                      ? "bg-inset text-muted border border-line cursor-not-allowed"
-                      : "btn-gold-glass active:scale-95 cursor-pointer"
-                  }`}
-                >
-                  
-                  {loading ? (
-                    <span className="truncate">{isEnglish ? "Loading..." : "กำลังโหลด..."}</span>
-                  ) : (
-                    <>
-                      <span className="truncate sm:hidden">{isEnglish ? "Next: Shuffle" : "ต่อไป: สับไพ่"}</span>
-                      <span className="truncate hidden sm:inline">{isEnglish ? "Next: Shuffle and Select Cards" : "ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง"}</span>
-                    </>
-                  )}
-                  <span aria-hidden="true">→</span>
-                </button>
+                {currentStep === "PICK_CARDS" && pickedIndices.length > 0 && !loading && (
+                  <button type="button" className="v2-rt-link" onClick={handleStepBack}>
+                    {isEnglish ? "Start picking again" : "เลือกใหม่ตั้งแต่ใบแรก"}
+                  </button>
+                )}
+                <SealChip commitment={commitment} isEnglish={isEnglish} />
               </div>
-              )}
             </div>
           )}
 
-          {/* STEP 3: SHUFFLE RITUAL */}
-          {currentStep === "SHUFFLE" && (
-            <div
-              className="space-y-6"
-            >
-              <ShuffleRitual
-                commitment={commitment}
-                spreadName={isEnglish ? (selectedSpread.nameEn || selectedSpread.nameTh) : selectedSpread.nameTh}
-                onShuffleComplete={handleShuffleComplete}
-              />
-              <StepBackButton onClick={handleStepBack} label={isEnglish ? "Back" : "ย้อนกลับ"} />
-            </div>
-          )}
-
-          {/* STEP 4: INTERACTIVE CARD PICKING */}
-          {currentStep === "PICK_CARDS" && (
-            <div
-              className="space-y-3.5 sm:space-y-6"
-            >
-              <InteractiveCardFan
-                pickedIndices={pickedIndices}
-                targetCount={selectedSpread.positions.length}
-                currentPositionName={
-                  isEnglish
-                    ? (selectedSpread.positions[pickedIndices.length]?.nameEn || selectedSpread.positions[pickedIndices.length]?.nameTh || "Remaining position")
-                    : (selectedSpread.positions[pickedIndices.length]?.nameTh || "ตำแหน่งที่เหลือ")
-                }
-                onPickCard={handlePickCard}
-                disabled={loading}
-              />
-              <StepBackButton onClick={handleStepBack} label={isEnglish ? "Back" : "ย้อนกลับ"} />
-            </div>
-          )}
-
-          {/* STEP 5 & 6: DUAL-PANE SACRED SANCTUARY */}
+          {/* STEP 5 & 6: อ่านคำทำนาย (v2 · เจ้าของ 2026-10-16 "ออกแบบใหม่ทั้งหมด หน้าขั้นตอนดูไพ่")
+              หัว: คำถามของผู้ใช้เป็นตัวเอก · ผังไพ่บนผ้าปูโต๊ะ · คำทำนาย + แถบข้างติดจอ (แชท · แชร์ · ดูเรื่องอื่น) */}
           {(currentStep === "READING" || currentStep === "SUMMARY") && (
-            <div
-              className="space-y-10"
-            >
-              {/* HERO ROW: Centered 3D Sacred Spread Altar (รูปที่ 2: ผังไพ่อันเดียวตรงกลางสง่างาม) */}
-              <section aria-label={isEnglish ? "Sacred Tarot spread altar" : "แท่นผังไพ่พยากรณ์"} className="w-full max-w-5xl mx-auto">
+            <div className="v2-rt v2-rt-read">
+              <RitualRail step={3} isEnglish={isEnglish} />
+              <header className="v2-rd-head">
+                <p className="v2-rd-k">
+                  {isEnglish ? (selectedSpread.nameEn || selectedSpread.nameTh) : selectedSpread.nameTh}
+                  <span aria-hidden="true" className="v2-rd-dot" />
+                  {isEnglish ? `read by ${selectedPersona.nameEn || selectedPersona.nameTh}` : `${selectedPersona.nameTh} อ่านให้`}
+                </p>
+                {question.trim() && (
+                  <h2 className="v2-rd-q">
+                    <ThaiPhrases>{question.trim()}</ThaiPhrases>
+                  </h2>
+                )}
+              </header>
+
+              <section aria-label={isEnglish ? "Sacred Tarot spread altar" : "แท่นผังไพ่พยากรณ์"} className="v2-rd-board">
                 <SpreadBoard
                   spread={selectedSpread}
                   drawnCards={drawnCards}
@@ -2029,8 +2052,8 @@ export default function TarotFlow({
 
               {/* TWO-COLUMN ROW: คำทำนายไพ่ (ซ้าย ~75%) + การ์ดเข้าห้องแชทแม่หมอ (ขวา ~25% ติดหนึบ)
                   จอเล็กเรียงบนลงล่าง · จอ lg ขึ้นไปแบ่ง 3:1 */}
-              <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-6 lg:grid-cols-4 lg:items-start">
-                <section aria-label={isEnglish ? "Tarot reading interpretation" : "คำทำนายไพ่ทาโรต์"} className="w-full lg:col-span-3">
+              <div className="v2-rd-grid">
+                <section aria-label={isEnglish ? "Tarot reading interpretation" : "คำทำนายไพ่ทาโรต์"} className="v2-rd-main">
                   {selectedSpread.resultStyle === "quick" ? (
                     <QuickChatResult
                       readingId={readingId}
@@ -2078,75 +2101,58 @@ export default function TarotFlow({
                   )}
                 </section>
 
-                {/* การ์ดเข้าห้องแชทกับแม่หมอ — จัดวางแนวตั้งให้พอดีคอลัมน์แคบ กดแล้วไปหน้าแชทเต็มจอ */}
-                {readingId && (
-                  <aside className="w-full lg:col-span-1 lg:sticky lg:top-24">
+                {/* แถบข้าง: แชทต่อกับแม่หมอ · แชร์ · ดูเรื่องอื่น — ติดจอบนเดสก์ท็อป */}
+                <aside className="v2-rd-side">
+                  {readingId && (
                     <Link
                       href="/reading/chat"
                       onClick={() => soundManager.playCardSelectSound()}
                       aria-label={isEnglish ? `Chat online with ${selectedPersona.nameEn || selectedPersona.nameTh}` : `แชทออนไลน์กับ${selectedPersona.nameTh}`}
-                      className="altar-card-porcelain !rounded-xl group flex flex-col gap-3 p-4 sm:p-5 transition hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                      className="v2-rd-chat"
                     >
-                      <span className="flex items-center justify-between gap-2">
-                        <span className="glass-tile !rounded-lg relative flex h-14 w-11 shrink-0 overflow-hidden">
-                          <CardImage
-                            image={selectedPersona.cardImage}
-                            /* ภาพประกอบล้วน — <Link> มี aria-label และตัวหนังสือข้างในบอกชื่อแม่หมออยู่แล้ว (INC-0125) */
-                            alt=""
-                            className="h-full w-full object-cover object-top"
-                            sizes="44px"
-                          />
-                        </span>
-                        <span className="flex items-center gap-1 rounded-full border border-line bg-[#EBF3ED] px-2 py-0.5 text-[13px] font-medium text-ok">
-                          <span className="h-1.5 w-1.5 rounded-full bg-ok animate-pulse" /> {isEnglish ? "Online" : "ออนไลน์"}
-                        </span>
+                      <span className="v2-rd-chat-img">
+                        <CardImage
+                          image={selectedPersona.cardImage}
+                          /* ภาพประกอบล้วน — <Link> มี aria-label และตัวหนังสือข้างในบอกชื่อแม่หมออยู่แล้ว (INC-0125) */
+                          alt=""
+                          className="h-full w-full object-cover object-top"
+                          sizes="48px"
+                        />
                       </span>
-                      <span className="block font-serif-th text-sm font-bold text-ink">
-                        {isEnglish ? `Chat Online with ${selectedPersona.nameEn || selectedPersona.nameTh}` : `แชทออนไลน์กับ ${selectedPersona.nameTh}`}
+                      <span className="v2-rd-chat-txt">
+                        <span className="v2-rd-chat-on">{isEnglish ? "Online" : "ออนไลน์"}</span>
+                        <b>{isEnglish ? `Ask ${selectedPersona.nameEn || selectedPersona.nameTh} more` : `ถาม${selectedPersona.nameTh}ต่อ`}</b>
+                        <small>
+                          {isEnglish
+                            ? "Open full-screen chat to dig deeper into these cards."
+                            : "เปิดห้องแชท ถามเจาะลึกต่อจากไพ่ชุดนี้ได้ทันที"}
+                        </small>
                       </span>
-                      <span className="block font-serif-th text-[13px] leading-relaxed text-muted [text-wrap:pretty]">
-                        {isEnglish
-                          ? "Open full-screen chat to delve deeper into these drawn cards with your oracle reader."
-                          : "เปิดห้องแชทเต็มจอ พิมพ์ถามเจาะลึกต่อจากไพ่ชุดนี้ได้ทันที"}
-                      </span>
-                      <span className="btn-gold-glass mt-1 flex items-center justify-center gap-2 px-4 py-2.5 font-serif-th text-xs font-bold">
-                        {isEnglish ? "Open Chat" : "เปิดห้องแชท"}
-                        <span className="transition-transform group-hover:translate-x-0.5">→</span>
-                      </span>
+                      <span className="v2-rd-chat-go">{isEnglish ? "Open chat" : "เปิดห้องแชท"}</span>
                     </Link>
-                  </aside>
-                )}
+                  )}
+                  <div className="v2-rd-acts">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundManager.playCardSelectSound();
+                        dispatchOverlay({ type: "openShare" });
+                      }}
+                      className="v2-rd-act"
+                    >
+                      {isEnglish ? "Share reading" : "แชร์ผลคำทำนาย"}
+                    </button>
+                    <button type="button" onClick={handleReset} className="v2-rd-act is-gold">
+                      {isEnglish ? "Start another reading" : "ดูดวงเรื่องอื่นต่อ"}
+                    </button>
+                  </div>
+                  <p className="v2-rd-note">
+                    {isEnglish ? "Save or share this reading for future reference" : "บันทึกหรือแชร์คำทำนายนี้เก็บไว้ดูย้อนหลังได้"}
+                  </p>
+                </aside>
               </div>
 
-              {/* Bottom Quick Luxury Actions Deck */}
-              <div className="altar-card-porcelain !rounded-xl p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-2 text-xs text-muted font-serif-th">
-                  
-                  <span>{isEnglish ? "Save or share this tarot reading for future reference" : "บันทึกหรือแชร์คำทำนายนี้เก็บไว้ดูย้อนหลังได้"}</span>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      soundManager.playCardSelectSound();
-                      dispatchOverlay({ type: "openShare" });
-                    }}
-                    className="glass-chip py-3 px-5 text-ink hover:text-gold-ink font-serif-th text-xs transition cursor-pointer flex items-center gap-2"
-                  >
-                    {isEnglish ? "Share Reading" : "แชร์ผลคำทำนาย"}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleReset}
-                    className="btn-gold-glass py-3 px-6 font-bold font-serif-th text-xs active:scale-95 cursor-pointer flex items-center gap-1.5"
-                  >
-                    {isEnglish ? "Start Another Reading" : "ดูดวงเรื่องอื่นต่อ"}
-                  </button>
-                </div>
-              </div>
-
+              <div className="v2-rd-after">
               {/* ✦ ใจตอนนี้หลังอ่านจบ — เทียบกับก่อนเปิดไพ่ได้ในสมุดดวง */}
               {currentStep === "SUMMARY" && !isStreaming && savedJournalId && (
                 <div className="glass-tile !rounded-xl p-4 sm:p-5 w-full max-w-2xl mx-auto space-y-3">
@@ -2209,6 +2215,7 @@ export default function TarotFlow({
                     onBuyCredits={() => dispatchOverlay({ type: "openBuyCredits" })}
                   />
                 )}
+              </div>
             </div>
           )}
         </div>

@@ -243,7 +243,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
       {/* Querent Sacred Question Banner */}
       {question && (
-        <div className="altar-card-porcelain !rounded-xl anim-page-transition p-4 space-y-1.5">
+        <div data-sr-question="" className="altar-card-porcelain !rounded-xl anim-page-transition p-4 space-y-1.5">
           <div className="flex items-center justify-between text-xs text-gold-ink font-serif-th font-semibold">
             <span>{isEnglish ? "Your Sacred Question" : "คำถามที่คุณตั้งจิตถาม"}</span>
             {nickname && (

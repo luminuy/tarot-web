@@ -6,6 +6,8 @@ import { LocaleProvider } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/types";
 // สไตล์หน้าแรก UI 2.0 — โหลดเฉพาะหน้าที่มี island นี้ ไม่ใส่ใน globals.css (งบ CSS ต่อหน้า · src/styles/ui2-home.css)
 import "@/styles/ui2-home.css";
+// หน้าขั้นตอนดูดวง v2 (ตั้งคำถาม · เลือกไพ่ · อ่านคำทำนาย) — ใช้ทั้งหน้าแรกและ /read/*
+import "@/styles/v2-ritual.css";
 
 /**
  * 🏠 พิธีเปิดไพ่เต็มรูปแบบของหน้าแรก — island ก้อนเดียวที่ครอบทั้งหน้า

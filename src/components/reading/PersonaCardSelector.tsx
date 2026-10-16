@@ -25,6 +25,8 @@ interface PersonaCardSelectorProps {
   /** ✦ ยังลองแม่หมอพิเศษฟรีได้ 1 ครั้ง — ไม่ล็อก แต่ติดป้าย "ลองฟรี" แทน */
   premiumTrial?: boolean;
   onRequireUpgrade?: (reason: "master_persona", persona: Persona) => void;
+  /** v2 — รายการแนวตั้งเตี้ย ๆ สำหรับคอลัมน์ข้าง (พิธีเปิดไพ่ /read) แทนการ์ดสูง 315px ห้าใบ */
+  compact?: boolean;
 }
 
 const PERSONA_GREETINGS: Record<string, string> = {
@@ -82,6 +84,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
   isPassHolder,
   premiumTrial = false,
   onRequireUpgrade,
+  compact = false,
 }) => {
   const { isEnglish } = useLocale();
   const carouselRef = React.useRef<HTMLDivElement>(null);
@@ -109,6 +112,95 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
       setActiveScrollIndex(index);
     }
   };
+
+  if (compact) {
+    return (
+      <div className="v2-pc">
+        <p className="v2-pc-k">{isEnglish ? "Your reader" : "แม่หมอที่จะอ่านให้คุณ"}</p>
+        <div role="radiogroup" aria-label={isEnglish ? "Select reader persona" : "เลือกสไตล์การทำนายของแม่หมอ"} className="v2-pc-list">
+          {PERSONAS.map((p) => {
+            const isSelected = selectedPersona.id === p.id;
+            const meta = PERSONA_DETAILS[p.id] || PERSONA_DETAILS.warm;
+            const isMaster = isMasterPersona(p.id);
+            const isTrial = isMaster && !isPassHolder && premiumTrial;
+            const isLocked = isMaster && !isPassHolder && !premiumTrial;
+            const pick = () => {
+              if (isLocked) {
+                soundManager.playMenuTapSound();
+                onRequireUpgrade?.("master_persona", p);
+                return;
+              }
+              onSelectPersona(p);
+            };
+            return (
+              <div
+                key={p.id}
+                role="radio"
+                tabIndex={0}
+                aria-checked={isSelected}
+                aria-label={
+                  isEnglish
+                    ? `Reader ${p.nameEn || p.nameTh}${isLocked ? " - Unlock with Grand Tier" : ""} - ${p.taglineEn || p.tagline}`
+                    : `แม่หมอ ${p.nameTh}${isLocked ? " - ปลดล็อกด้วยญาณพยากรณ์พิเศษ" : ""} - ${p.tagline}`
+                }
+                onClick={pick}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    pick();
+                  }
+                }}
+                className={`v2-pc-row${isSelected ? " is-on" : ""}${isLocked ? " is-locked" : ""}`}
+              >
+                <span className="v2-pc-art" aria-hidden="true">
+                  {meta.renderArt()}
+                </span>
+                <span className="v2-pc-txt">
+                  <b>
+                    {isEnglish ? p.nameEn || p.nameTh : p.nameTh}
+                    {isTrial && <em className="is-trial">{isEnglish ? "Try free once" : "ลองฟรี 1 ครั้ง"}</em>}
+                    {isLocked && (
+                      <em className="is-lock">
+                        <SealedLockIcon className="w-3 h-3" />
+                        {isEnglish ? "Master Tier" : "ผู้เชี่ยวชาญพิเศษ"}
+                      </em>
+                    )}
+                  </b>
+                  <small>{isEnglish ? meta.archetypeEn : meta.archetypeTh}</small>
+                </span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (isLocked) {
+                      soundManager.playMenuTapSound();
+                      onRequireUpgrade?.("master_persona", p);
+                      return;
+                    }
+                    onSelectPersona(p);
+                    const greeting = isEnglish ? PERSONA_GREETINGS_EN[p.id] || "Greetings, seeker." : PERSONA_GREETINGS[p.id] || "สวัสดีค่ะ";
+                    soundManager.speakProphecy(greeting, p.id);
+                  }}
+                  className="v2-pc-voice"
+                  aria-label={
+                    isLocked
+                      ? isEnglish
+                        ? `Unlock voice greeting of ${p.nameEn || p.nameTh}`
+                        : `ปลดล็อกเสียงทักทายของ ${p.nameTh}`
+                      : isEnglish
+                        ? `Listen to voice of ${p.nameEn || p.nameTh}`
+                        : `ฟังเสียงทักทายของ ${p.nameTh}`
+                  }
+                >
+                  <SpeakerTabIcon className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 w-full">

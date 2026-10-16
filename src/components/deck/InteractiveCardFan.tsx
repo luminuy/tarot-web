@@ -3,7 +3,6 @@
 import React, { useState, useMemo, useRef, useEffect, useLayoutEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { soundManager } from "@/lib/utils/audio";
-import { CardImage } from "@/components/card/CardImage";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
@@ -15,6 +14,8 @@ interface InteractiveCardFanProps {
   pickedIndices: number[];
   targetCount: number;
   currentPositionName?: string;
+  /** ชื่อตำแหน่งทุกใบตามลำดับ — ใช้วาดช่องวางไพ่ใต้พัด (v2) */
+  positionNames?: string[];
   onPickCard: (fanIndex: number) => void;
   disabled?: boolean;
 }
@@ -23,6 +24,8 @@ interface FanCardProps {
   cardIdx: number;
   posInTier: number;
   tierIdx: number;
+  /** จำนวนไพ่ต่อแถว — 26 (3 แถว) บนจอกว้าง · 13 (6 แถว) บนมือถือ ให้ไพ่ใหญ่พอจิ้มได้ */
+  perTier: number;
   isPicked: boolean;
   disabled: boolean;
   onClick: (idx: number) => void;
@@ -35,14 +38,13 @@ interface FanCardProps {
   isEnglish?: boolean;
 }
 
-const FanCard = React.memo<FanCardProps>(({ cardIdx, posInTier, tierIdx, isPicked, disabled, onClick, isTabStop, onKeyNav, isEnglish }) => {
+const FanCard = React.memo<FanCardProps>(({ cardIdx, posInTier, tierIdx, perTier, isPicked, disabled, onClick, isTabStop, onKeyNav, isEnglish }) => {
   if (isPicked) return null;
 
   // P1-M4: True mathematical arc geometry
   // Each tier has 26 cards; use position within tier for arc spread
   const TIER_SPREAD_DEG = 22; // total arc spread per tier in degrees
-  const CARDS_PER_TIER = 26;
-  const normalized = (posInTier % CARDS_PER_TIER) / (CARDS_PER_TIER - 1) - 0.5; // -0.5 to 0.5
+  const normalized = (posInTier % perTier) / (perTier - 1) - 0.5; // -0.5 to 0.5
   const angle = normalized * TIER_SPREAD_DEG;
 
   // Arc Y: cards at edges of fan dip down following the circumference
@@ -95,16 +97,14 @@ const FanCard = React.memo<FanCardProps>(({ cardIdx, posInTier, tierIdx, isPicke
           onKeyNav(cardIdx, dir);
         }
       }}
-      className="cursor-pointer relative select-none flex-shrink-0 w-[46px] sm:w-[66px] md:w-[74px] group focus-visible:outline-none"
+      className="v2-fan-card"
       style={{ zIndex: tierIdx * 40 + posInTier, originY: 1 }}
     >
-      <div className="w-[46px] h-[78px] sm:w-[66px] sm:h-[112px] md:w-[74px] md:h-[124px] rounded-lg sm:rounded-lg border-2 card-back-pattern flex flex-col items-center justify-between p-1 sm:p-1.5 relative overflow-hidden transition duration-200 border-line-warm group-hover:border-gold-ink group-hover:ring-2 group-hover:ring-gold-ink/60 group-focus-visible:border-line-warm group-focus-visible:ring-2 group-focus-visible:ring-gold-ink bg-[#382518]">
-        {/* A5-14: หลังไพ่พื้นเข้ม #382518 — gold-ink (ออกแบบให้พื้นสว่าง) ×0.9×0.8 เหลือ ~2:1
-            ใช้ gold-on-dark ทึบเต็ม ≈ 6.3:1 */}
-        <div className="w-full flex items-center justify-end text-[12px] sm:text-[12px] text-gold-on-dark">
+      <div className="v2-fan-back card-back-pattern">
+        {/* A5-14: เลขบนหลังไพ่พื้นเข้มใช้ gold-on-dark ทึบเต็ม (≈ 6.3:1) */}
+        <span className="v2-fan-no text-gold-on-dark">
           <span className="font-mono">#{cardIdx + 1}</span>
-        </div>
-        <div className="gold-foil-sheen absolute inset-0 opacity-20 group-hover:opacity-50 transition-opacity pointer-events-none" />
+        </span>
       </div>
     </motion.div>
   );
@@ -118,13 +118,14 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
   pickedIndices,
   targetCount,
   currentPositionName,
+  positionNames,
   onPickCard,
   disabled = false,
 }) => {
   const { isEnglish } = useLocale();
   // ป้ายชื่อตำแหน่งสำรอง: ต้องเลือกภาษาตอนเรนเดอร์ ไม่ใช่ค่า default ของพารามิเตอร์
   // (ค่า default เป็นภาษาไทยตายตัว ทำให้โหมด EN เห็นคำไทยหลุดมา)
-  const positionLabel = currentPositionName || (isEnglish ? "Next Position" : "ตำแหน่งถัดไป");
+  const positionLabel = (currentPositionName || (isEnglish ? "Next Position" : "ตำแหน่งถัดไป")).replace(/^\d+\.\s*/, "");
   const stageRef = useRef<HTMLDivElement>(null);
   const fanRef = useRef<HTMLDivElement>(null);
   const [fanFit, setFanFit] = useState({ scale: 1, trimY: 0 });
@@ -157,6 +158,8 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
     if (!stage || typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver(fitFan);
     ro.observe(stage);
+    // พัดเปลี่ยนความกว้างเอง (สลับจำนวนแถว · ไพ่ถูกหยิบ) — ดูด้วย ไม่ใช่รอตัวจับเวลาอย่างเดียว
+    if (fanRef.current) ro.observe(fanRef.current);
     return () => ro.disconnect();
   }, [fitFan]);
 
@@ -166,18 +169,32 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
     return () => window.clearTimeout(id);
   }, [pickedIndices.length, targetCount, fitFan]);
 
-  // Split 78 cards into 3 cascading tiers (26 cards each)
+  /*
+   * แบ่งสำรับเป็นแถว — จอกว้าง 3 แถว × 26 ใบ · มือถือ (< 640px) 6 แถว × 13 ใบ
+   * v1 ใช้ 3 แถวทุกจอ บนมือถือพัดถูกย่อจนไพ่กว้าง ~15px จิ้มโดนใบข้าง ๆ (v2 · 2026-10-16)
+   * อ่านขนาดจอตั้งแต่เรนเดอร์แรก — พัดไพ่ไม่เคยอยู่ใน HTML จากเซิร์ฟเวอร์ (ขั้นนี้เกิดหลังกดในเบราว์เซอร์เสมอ)
+   * ถ้าเริ่ม 3 แถวแล้วค่อยสลับ ไพ่ทุกใบย้ายแถว = AnimatePresence เล่นขาออกทั้งสำรับ (เห็นไพ่ปลิว)
+   */
+  const [rows, setRows] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia?.("(max-width: 639px)").matches ? 6 : 3,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const apply = () => setRows(mq.matches ? 6 : 3);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+  useEffect(() => {
+    const id = window.setTimeout(fitFan, 30);
+    return () => window.clearTimeout(id);
+  }, [rows, fitFan]);
+  const perTier = Math.ceil(totalCards / rows);
   const tiers = useMemo(() => {
-    const t1: number[] = [];
-    const t2: number[] = [];
-    const t3: number[] = [];
-    for (let i = 0; i < totalCards; i++) {
-      if (i < 26) t1.push(i);
-      else if (i < 52) t2.push(i);
-      else t3.push(i);
-    }
-    return [t1, t2, t3];
-  }, [totalCards]);
+    const out: number[][] = Array.from({ length: rows }, () => []);
+    for (let i = 0; i < totalCards; i++) out[Math.min(rows - 1, Math.floor(i / perTier))].push(i);
+    return out;
+  }, [totalCards, rows, perTier]);
 
   /**
    * ⚠️ ต้องเป็น useCallback ที่ identity นิ่ง ไม่งั้น React.memo ของ FanCard ไร้ผลทั้งหมด
@@ -251,63 +268,43 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
     handleCardClick(randomIdx);
   };
 
+  /*
+   * v2 (เจ้าของ 2026-10-16 "ลดขั้นตอน ทำให้ใช้ง่ายกว่านี้ และสวย") — โต๊ะเลือกไพ่
+   * หัว: บอกแค่ "ใบนี้สำหรับตำแหน่งไหน" · กลาง: พัดไพ่บนผ้าปูโต๊ะ · ล่าง: ช่องวางไพ่ตามตำแหน่งจริง
+   * (v1 มีแถบความคืบหน้า + ป้าย "ใบที่ n" + ภาพไพ่ประดับ ซ้ำกันสามที่ และปุ่มสุ่มเล็กจนหาไม่เจอ)
+   */
+  const names = positionNames ?? [];
   return (
-    <div className="w-full flex flex-col items-center select-none space-y-3.5 sm:space-y-6">
-      {/* Top Sacred Guidance & Target Slot Focus */}
-      <div className="text-center space-y-1.5 relative z-10 px-3">
+    <div className="v2-pick">
+      <div className="v2-pick-head" aria-live="polite">
         {!isComplete ? (
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="space-y-1.5">
-            {/* Status Pill Badge — Warm Minimalist Luxury */}
-            <div className="glass-chip inline-flex items-center gap-2 px-3.5 sm:px-5 py-1 sm:py-1.5">
-              <span className="w-2 h-2 rounded-full bg-gold-ink animate-ping" />
-              <span className="text-[13px] sm:text-xs font-serif-th font-bold text-ink-deep">
-                {isEnglish
-                  ? `Choosing card ${pickedIndices.length + 1} of ${targetCount}`
-                  : `เลือกไพ่ใบที่ ${pickedIndices.length + 1} จากทั้งหมด ${targetCount} ใบ`}
-              </span>
-            </div>
-
-            {/* Position Heading with Inline Non-Breaking Quotes */}
-            <h3 className="text-lg sm:text-3xl font-serif-th font-bold font-mystic-gold tracking-wide drop-shadow leading-snug py-0.5 px-2"><ThaiPhrases>
-              {isEnglish ? "Choose a card for" : "เลือกไพ่สำหรับ"}{" "}
-              <span className="text-gold-ink inline-block font-bold">&ldquo;{positionLabel}&rdquo;</span>
-            </ThaiPhrases></h3>
-            <p className="text-[13px] sm:text-xs text-muted max-w-xl mx-auto leading-normal">
+          <>
+            <p className="v2-pick-k">
               {isEnglish
-                ? "Tap the card you feel drawn to, or press \u201cDraw for Me\u201d below."
-                : "แตะเลือกไพ่ใบที่คุณรู้สึกถูกชะตา หรือกดปุ่ม \u201cสุ่มเลือกให้ฉัน\u201d ด้านล่าง"}
+                ? `Card ${pickedIndices.length + 1} of ${targetCount}`
+                : `ใบที่ ${pickedIndices.length + 1} จาก ${targetCount}`}
             </p>
-          </motion.div>
+            <h2 className="v2-pick-t">
+              <ThaiPhrases>{isEnglish ? "Pick a card for" : "เลือกไพ่สำหรับ"}</ThaiPhrases>{" "}
+              <span>{positionLabel}</span>
+            </h2>
+          </>
         ) : (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="space-y-1 py-1"
-          >
-            <h3 className="text-lg sm:text-2xl font-serif-th font-bold font-mystic-gold flex items-center justify-center gap-2">
-              {isEnglish
-                ? `All ${targetCount} cards have been chosen`
-                : `เลือกไพ่ครบ ${targetCount} ใบเรียบร้อยแล้ว`}
-            </h3>
-            <p className="text-[13px] sm:text-xs text-muted">
-              {isEnglish
-                ? "Preparing your cards and reading..."
-                : "กำลังเตรียมเปิดไพ่และคำทำนายของคุณ..."}
-            </p>
-          </motion.div>
+          <>
+            <p className="v2-pick-k">{isEnglish ? "All cards chosen" : "เลือกครบแล้ว"}</p>
+            <h2 className="v2-pick-t">
+              {isEnglish ? "Laying out your cards..." : "กำลังวางไพ่ลงผังของคุณ..."}
+            </h2>
+          </>
         )}
       </div>
 
-      {/* Unified Masterpiece Altar Stage (No Row-Level Clipping) */}
-      <div className="altar-card-porcelain !rounded-lg w-full relative overflow-hidden">
-        {/* UNIFIED STAGE — พัดไพ่ทั้ง 3 ชั้นย่อพอดีความกว้าง ไม่ต้องเลื่อน (P1-U10) */}
-        <div
-          ref={stageRef}
-          className="w-full overflow-hidden pt-6 pb-6 sm:pt-10 sm:pb-8 px-4 sm:px-8 relative z-10"
-        >
+      {/* โต๊ะผ้าปู — พัดไพ่ทั้ง 3 ชั้นย่อพอดีความกว้าง ไม่ต้องเลื่อน (P1-U10) */}
+      <div className="v2-tb">
+        <div ref={stageRef} className="v2-tb-stage">
           <div
             ref={fanRef}
-            className="min-w-max mx-auto flex flex-col items-center gap-3.5 sm:gap-6 py-1"
+            className="v2-tb-fan"
             style={{
               transform: `scale(${fanFit.scale})`,
               // ย่อจากมุมซ้ายบน: เมื่อพัดกว้างกว่ากรอบ mx-auto จะ pin ไว้ซ้าย → origin ต้องเป็นซ้ายด้วย
@@ -315,158 +312,63 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
               marginBottom: -fanFit.trimY,
             }}
           >
-            {tiers.map((tierCards, tierIdx) => {
-              const tierOffsetClass = tierIdx === 1 ? "pl-6 sm:pl-10" : tierIdx === 2 ? "pl-12 sm:pl-20" : "pl-0";
-
-              return (
-                <div
-                  key={tierIdx}
-                  className={`flex items-center justify-center -space-x-3.5 sm:-space-x-5 md:-space-x-6 relative ${tierOffsetClass}`}
-                  style={{ zIndex: tierIdx * 30 }}
-                >
-                  <AnimatePresence>
-                    {tierCards.map((cardIdx, posInTier) => (
-                      <FanCard
-                        key={cardIdx}
-                        cardIdx={cardIdx}
-                        posInTier={posInTier}
-                        tierIdx={tierIdx}
-                        isPicked={pickedIndices.includes(cardIdx)}
-                        disabled={disabled}
-                        onClick={handleCardClick}
-                        isTabStop={cardIdx === tabStopIdx}
-                        onKeyNav={handleKeyNav}
-                        isEnglish={isEnglish}
-                      />
-                    ))}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
+            {tiers.map((tierCards, tierIdx) => (
+              <div key={tierIdx} className={`v2-tb-tier is-t${tierIdx % 3}`} style={{ zIndex: tierIdx * 30 }}>
+                <AnimatePresence>
+                  {tierCards.map((cardIdx, posInTier) => (
+                    <FanCard
+                      key={cardIdx}
+                      cardIdx={cardIdx}
+                      posInTier={posInTier}
+                      tierIdx={tierIdx}
+                      perTier={perTier}
+                      isPicked={pickedIndices.includes(cardIdx)}
+                      disabled={disabled}
+                      onClick={handleCardClick}
+                      isTabStop={cardIdx === tabStopIdx}
+                      onKeyNav={handleKeyNav}
+                      isEnglish={isEnglish}
+                    />
+                  ))}
+                </AnimatePresence>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Masterpiece Sacred Selection Slim Progress Dock */}
-        <div className="border-t border-line-warm/30 bg-inset-warm p-3 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-5 relative z-20">
-          {/* Left: Layered Sacred Deck Emblem & Status */}
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            {/* Tarot Deck Seal Icon */}
-            <div className="relative w-9 h-12 sm:w-11 sm:h-15 flex-shrink-0 group">
-              <div className="glass-tile !rounded-lg absolute inset-0 translate-x-1 -translate-y-0.5 transform rotate-4 opacity-70" />
-              <div className="altar-card-porcelain !rounded-lg absolute inset-0 overflow-hidden transform -rotate-1 group-hover:rotate-0 transition-transform duration-300">
-                <CardImage
-                  image="major-01.jpg"
-                  alt="Sacred Tarot Altar"
-                  className="w-full h-full object-cover object-top tarot-hd-card-image"
-                  sizes="72px"
-                />
-                <div className="gold-foil-sheen absolute inset-0 opacity-20 pointer-events-none" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-gold-ink border border-line-warm" />
-            </div>
-
-            {/* Typography & Animated Progress Bar */}
-            <div className="space-y-1 flex-1 min-w-[160px]">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[13px] text-ink-deep font-serif-th font-bold flex items-center gap-1">
-                  
-                  <span>{isEnglish ? "Sacred Card Selection" : "ความคืบหน้าพิธีจับไพ่"}</span>
+        {/* ช่องวางไพ่ตามตำแหน่งของผัง — เห็นทันทีว่าเหลืออีกกี่ใบ และใบต่อไปไปลงตรงไหน */}
+        <ol className="v2-tb-slots" aria-label={isEnglish ? "Your spread positions" : "ตำแหน่งในผัง"}>
+          {Array.from({ length: targetCount }).map((_, idx) => {
+            const isFilled = idx < pickedIndices.length;
+            const isCurrent = idx === pickedIndices.length;
+            const label = (names[idx] || (isEnglish ? `Card ${idx + 1}` : `ใบที่ ${idx + 1}`)).replace(/^\d+\.\s*/, "");
+            return (
+              <li key={idx} className={isFilled ? "is-filled" : isCurrent ? "is-now" : ""}>
+                <span className={`v2-tb-slot${isFilled ? " card-back-pattern" : ""}`} aria-hidden="true">
+                  {!isFilled && idx + 1}
                 </span>
-                <span className="glass-chip text-[13px] sm:text-xs font-mono font-bold text-ink-deep px-2 py-0.2">
-                  {pickedIndices.length} / {targetCount}
-                </span>
-              </div>
-
-              {/* Luminous Animated Progress Bar */}
-              <div className="glass-chip w-full h-1.5 sm:h-2 overflow-hidden p-0.5 relative">
-                <motion.div
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: pickedIndices.length / targetCount }}
-                  style={{ transformOrigin: "left" }}
-                  transition={{ duration: 0.35, ease: "easeOut" }}
-                  className="h-full w-full rounded-full bg-gradient-to-r from-gold-ink via-ink-soft to-gold-ink relative"
-                >
-                  <div className="absolute inset-0 bg-white/35 animate-[pulse_2s_infinite]" />
-                </motion.div>
-              </div>
-
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-[13px] sm:text-[13px] text-muted font-serif-th leading-[1.7] truncate">
-                  {isComplete ? (
-                    <span className="text-ok font-semibold">
-                      {isEnglish
-                        ? "All cards chosen. Revealing sacred prophecies..."
-                        : "เลือกไพ่ครบถ้วนแล้ว พร้อมเปิดคำทำนาย"}
-                    </span>
-                  ) : (
-                    <span>
-                      {isEnglish ? (
-                        <>
-                          Drawing for <strong className="text-ink-deep">&ldquo;{positionLabel}&rdquo;</strong>
-                        </>
-                      ) : (
-                        <>
-                          กำลังเลือกใบสำหรับ <strong className="text-ink-deep">&ldquo;{positionLabel}&rdquo;</strong>
-                        </>
-                      )}
-                    </span>
-                  )}
-                </p>
-
-                {/* P1-U6: Auto-Pick fallback button for keyboard / assistive users */}
-                {!isComplete && (
-                  <button
-                    type="button"
-                    onClick={handleAutoPick}
-                    disabled={disabled}
-                    className="altar-card-porcelain !rounded-lg tap-overlay-y flex-shrink-0 text-[13px] sm:text-[13px] text-ink-deep hover:text-gold-ink px-2.5 py-0.5 transition cursor-pointer font-serif-th focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
-                    aria-label={isEnglish ? "Auto-draw next card" : "สุ่มเลือกไพ่ใบถัดไปอัตโนมัติ"}
-                  >
-                    {isEnglish ? "Draw for Me" : "สุ่มเลือกให้ฉัน"}
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Talisman Target Badges */}
-          <div className="flex items-center gap-1.5 max-w-full overflow-x-auto pb-0.5 no-scrollbar w-full sm:w-auto justify-start sm:justify-end">
-            {Array.from({ length: targetCount }).map((_, idx) => {
-              const isFilled = idx < pickedIndices.length;
-              const isCurrent = idx === pickedIndices.length;
-
-              return (
-                <motion.div
-                  key={idx}
-                  whileHover={{ scale: 1.04 }}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[13px] sm:text-xs transition duration-300 font-serif-th whitespace-nowrap select-none ${
-                    isFilled
-                      ? "bg-gold-ink text-surface font-bold border border-line-warm"
-                      : isCurrent
-                        ? "bg-surface border border-line-warm text-ink-deep ring-1 ring-gold-ink/40 font-bold"
-                        : "bg-inset-warm border border-line-warm/50 text-muted"
-                  }`}
-                >
-                  <div
-                    className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[12px] font-mono font-bold ${
-                      isFilled
-                        ? "bg-surface text-ink-deep"
-                        : isCurrent
-                          ? "bg-gold-ink text-surface"
-                          : "bg-inset-warm/30 text-muted"
-                    }`}
-                  >
-                    {isFilled ? "✓" : idx + 1}
-                  </div>
-                  <span className="text-[13px] sm:text-[13px] tracking-wide">
-                    {isEnglish ? `Card #${idx + 1}` : `ใบที่ ${idx + 1}`}
-                  </span>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
+                <span className="v2-tb-slot-name">{label}</span>
+              </li>
+            );
+          })}
+        </ol>
       </div>
+
+      {!isComplete && (
+        <div className="v2-pick-tools">
+          <p>{isEnglish ? "Tap the card you feel drawn to" : "แตะใบที่รู้สึกว่าใช่ ไม่มีถูกหรือผิด"}</p>
+          {/* P1-U6: ทางเลือกสำหรับคีย์บอร์ด/คนไม่อยากเลือกเอง */}
+          <button
+            type="button"
+            onClick={handleAutoPick}
+            disabled={disabled}
+            className="v2-pick-auto"
+            aria-label={isEnglish ? "Auto-draw next card" : "สุ่มเลือกไพ่ใบถัดไปอัตโนมัติ"}
+          >
+            {isEnglish ? "Draw for me" : "สุ่มให้ฉัน"}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

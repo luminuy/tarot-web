@@ -1,310 +1,71 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { motion } from "motion/react";
+import React, { useEffect, useRef } from "react";
 import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
-import { copyToClipboard } from "@/lib/utils/clipboard";
-import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 interface ShuffleRitualProps {
-  commitment: string;
+  /** คงไว้ให้ผู้เรียกเดิม — รหัสล็อกลำดับไพ่ย้ายไปแสดงที่ `SealChip` ของหน้าขั้นตอน */
+  commitment?: string;
   spreadName: string;
   onShuffleComplete: (clientSeed: string) => void;
 }
 
-export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spreadName, onShuffleComplete }) => {
+/** เวลาสับทั้งหมด — สั้นพอไม่ให้รอ ยาวพอให้เห็นว่าไพ่ถูกสับจริง */
+const SHUFFLE_MS = 1700;
+const SHUFFLE_MS_REDUCED = 500;
+
+/**
+ * 🃏 สับไพ่อัตโนมัติ (v2 · เจ้าของ 2026-10-16 "ลดขั้นตอน ทำให้ใช้ง่ายกว่านี้")
+ * ---------------------------------------------------------------------------
+ * v1 ให้ผู้ใช้ "แตะเพื่อสับ" เป็นอีกหน้าหนึ่ง แล้วรอ 2.2 วินาที — เป็นขั้นที่ไม่ได้ตัดสินใจอะไรเลย
+ * v2 สับเองทันทีที่เข้าขั้นเลือกไพ่ (บนโต๊ะเดียวกับพัดไพ่) แล้วกางพัดให้เลือกต่อ
+ *
+ * ℹ️ ความโปร่งใสไม่ลดลง — ผลไพ่มาจาก serverSeed (ผูกมัดด้วย commitment ก่อน) + เมล็ดของผู้ใช้
+ *    ที่สร้างด้วย crypto ตั้งแต่ /start (`createClientSeed` ใน TarotFlow) เซิร์ฟเวอร์ใช้เมล็ดตัวนั้นเป็นหลัก
+ *    ค่าที่ส่งจากตรงนี้เป็นแค่ทางสำรอง จึงผสม crypto + การขยับเมาส์/นิ้วไว้ด้วยกันเสมอ
+ */
+export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ spreadName, onShuffleComplete }) => {
   const { isEnglish } = useLocale();
-  const [shuffling, setShuffling] = useState(false);
-  const [copiedHash, setCopiedHash] = useState(false);
-  const [shufflePhase, setShufflePhase] = useState<"idle" | "split" | "riffle" | "bridge" | "gather">("idle");
   const entropyRef = useRef<number[]>([]);
-  const rafRef = useRef<number | null>(null);
-  const finishTimerRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number>(0);
-  /**
-   * ⚠️ ความคืบหน้าการสับไพ่เขียนลง DOM ตรง ๆ ไม่เก็บเป็น React state
-   * ของเดิมเรียก setProgress ทุกเฟรม = React reconcile ทั้งเวทีสับไพ่
-   * (รวมลูก motion ทุกตัว) ราว 100 รอบภายใน 2.2 วินาที แย่งเวลา main thread
-   * กับอนิเมชันที่กำลังเล่นอยู่พอดี · เหลือ state ไว้แค่ "เฟส" ซึ่งเปลี่ยนแค่ 4 ครั้ง
-   */
-  const progressBarRef = useRef<HTMLDivElement>(null);
-  const progressTextRef = useRef<HTMLSpanElement>(null);
+  const doneRef = useRef(onShuffleComplete);
+  doneRef.current = onShuffleComplete;
 
-  // Cleanup rAF on unmount
   useEffect(() => {
-    return () => {
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-      // ⚠️ ต้องเคลียร์ตัวจับเวลา 420ms ท้ายพิธีด้วย ของเดิมเคลียร์แต่ rAF
-      // ถ้า unmount ในช่วงนั้น onShuffleComplete จะยิงบนคอมโพเนนต์ที่ตายแล้ว
-      // แล้วดันขั้นตอนพิธีกรรมเดินหน้าเองโดยที่ผู้ใช้ออกจากหน้าไปแล้ว
-      if (finishTimerRef.current !== null) window.clearTimeout(finishTimerRef.current);
-    };
+    const reduced = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    try {
+      soundManager.playShuffleSound();
+    } catch {
+      /* เสียงไม่สำคัญต่อพิธี */
+    }
+    const timer = window.setTimeout(() => {
+      const bytes = new Uint8Array(16);
+      crypto.getRandomValues(bytes);
+      const rand = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+      doneRef.current(`${rand}:${entropyRef.current.join(":")}:${Date.now()}`);
+    }, reduced ? SHUFFLE_MS_REDUCED : SHUFFLE_MS);
+    return () => window.clearTimeout(timer);
   }, []);
-
-  // Collect entropy from user's micro-gestures
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (shuffling && entropyRef.current.length < 50) {
-      entropyRef.current.push(e.clientX + e.clientY + Date.now());
-    }
-  };
-
-  // P1-M5: rAF-based shuffle progress (frame-accurate, GPU-synchronized)
-  const SHUFFLE_DURATION_MS = 2200; // total shuffle duration
-
-  const shuffleTick = (timestamp: number) => {
-    if (startTimeRef.current === 0) startTimeRef.current = timestamp;
-    const elapsed = timestamp - startTimeRef.current;
-    const cur = Math.min(100, (elapsed / SHUFFLE_DURATION_MS) * 100);
-    // scaleX เป็น transform (composited) ไม่ทำให้เกิด layout ซ้ำเหมือนการเปลี่ยน width
-    if (progressBarRef.current) progressBarRef.current.style.transform = `scaleX(${cur / 100})`;
-    if (progressTextRef.current) progressTextRef.current.textContent = String(Math.round(cur));
-
-    // Phase transitions
-    if (cur >= 10 && cur < 20) setShufflePhase("split");
-    else if (cur >= 20 && cur < 65) setShufflePhase("riffle");
-    else if (cur >= 65 && cur < 85) setShufflePhase("bridge");
-    else if (cur >= 85) setShufflePhase("gather");
-
-    if (cur < 100) {
-      rafRef.current = requestAnimationFrame(shuffleTick);
-    } else {
-      rafRef.current = null;
-      finishTimerRef.current = window.setTimeout(() => {
-        finishTimerRef.current = null;
-        const rawSeed = entropyRef.current.join(":") + ":" + Date.now();
-        onShuffleComplete(rawSeed);
-      }, 420);
-    }
-  };
-
-  const startShuffle = () => {
-    soundManager.playShuffleSound();
-    if (typeof navigator !== "undefined" && navigator.vibrate) {
-      navigator.vibrate([30, 40, 30, 50, 40]);
-    }
-    setShuffling(true);
-    setShufflePhase("split");
-    startTimeRef.current = 0;
-    rafRef.current = requestAnimationFrame(shuffleTick);
-  };
 
   return (
     <div
-      onPointerMove={handlePointerMove}
-      className="w-full max-w-xl mx-auto flex flex-col items-center justify-center p-6 text-center select-none relative z-10"
+      className="v2-sh"
+      onPointerMove={(e) => {
+        if (entropyRef.current.length < 50) entropyRef.current.push(e.clientX + e.clientY + Date.now());
+      }}
     >
-      {/* 3D Physical Riffle & Cascade Deck Stage */}
-      <div className="h-64 sm:h-72 w-full flex items-center justify-center relative my-4" style={{ perspective: 1400 }}>
-        {!shuffling ? (
-          <motion.button
-            type="button"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.96 }}
-            onClick={startShuffle}
-            aria-label={isEnglish ? "Tap to shuffle tarot deck" : "แตะเพื่อเริ่มสับไพ่"}
-            className="anim-tarot-idle w-36 h-54 sm:w-44 sm:h-64 rounded-lg border-2 border-line-warm card-back-pattern shadow-overlay flex flex-col items-center justify-between p-4 cursor-pointer overflow-hidden group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2 focus-visible:ring-offset-[#F3EDE2]"
-          >
-            <div className="w-full flex justify-center items-center opacity-85">
-              <span className="text-[12px] font-serif-th text-surface tracking-[0.2em] uppercase font-bold">
-                SACRED ORACLE
-              </span>
-            </div>
-
-            {/* Clean Center */}
-            <div className="my-auto" />
-
-            <span className="text-xs font-serif-th font-bold text-surface tracking-wide">
-              {isEnglish ? "Tap to Shuffle Deck" : "สัมผัสเพื่อสับไพ่"}
-            </span>
-
-            {/* Dynamic Gold Sheen */}
-            <div className="gold-foil-sheen absolute inset-0 opacity-30 group-hover:opacity-60 transition-opacity" />
-          </motion.button>
-        ) : (
-          /* Multi-Layer Physical 3D Riffle Shuffle Animation */
-          <div
-            className="relative w-72 h-64 flex items-center justify-center"
-            style={{ transformStyle: "preserve-3d" }}
-          >
-            {/* Left Deck Stack */}
-            <motion.div
-              animate={{
-                x:
-                  shufflePhase === "split"
-                    ? -60
-                    : shufflePhase === "riffle"
-                      ? [-60, -10, -60]
-                      : shufflePhase === "bridge"
-                        ? -15
-                        : 0,
-                y: shufflePhase === "bridge" ? -25 : 0,
-                rotateZ:
-                  shufflePhase === "split"
-                    ? -16
-                    : shufflePhase === "riffle"
-                      ? [-16, -4, -16]
-                      : shufflePhase === "bridge"
-                        ? -8
-                        : 0,
-                rotateY: shufflePhase === "split" ? 25 : 0,
-              }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-              className="w-32 h-48 sm:w-36 sm:h-54 rounded-lg border-2 border-line-warm card-back-pattern absolute shadow-overlay flex items-center justify-center"
-            >
-              <div className="w-8 h-8 rounded-full border border-line-warm flex items-center justify-center text-xs text-gold-ink">
-                ·
-              </div>
-            </motion.div>
-
-            {/* Right Deck Stack */}
-            <motion.div
-              animate={{
-                x:
-                  shufflePhase === "split"
-                    ? 60
-                    : shufflePhase === "riffle"
-                      ? [60, 10, 60]
-                      : shufflePhase === "bridge"
-                        ? 15
-                        : 0,
-                y: shufflePhase === "bridge" ? -25 : 0,
-                rotateZ:
-                  shufflePhase === "split"
-                    ? 16
-                    : shufflePhase === "riffle"
-                      ? [16, 4, 16]
-                      : shufflePhase === "bridge"
-                        ? 8
-                        : 0,
-                rotateY: shufflePhase === "split" ? -25 : 0,
-              }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-              className="w-32 h-48 sm:w-36 sm:h-54 rounded-lg border-2 border-line-warm card-back-pattern absolute shadow-overlay flex items-center justify-center"
-            />
-
-            {/* Center Weaving Cascade Cards */}
-            {shufflePhase === "riffle" && (
-              <>
-                <motion.div
-                  initial={{ y: 0, rotateZ: 0, scale: 1, opacity: 0 }}
-                  animate={{
-                    y: [-14, 10, -8, 6, -4, 2, 0],
-                    rotateZ: [-5, 5, -3, 3, -1, 1, 0],
-                    scale: [0.95, 1.04, 0.97, 1.02, 0.99, 1.01, 1],
-                    opacity: 1,
-                  }}
-                  transition={{ duration: 1.4, ease: "easeInOut" }}
-                  className="w-30 h-44 rounded-lg border border-line-warm card-back-pattern absolute z-20 shadow-overlay opacity-95"
-                />
-                <motion.div
-                  initial={{ y: 0, rotateZ: 0, scale: 1, opacity: 0 }}
-                  animate={{
-                    y: [10, -14, 6, -8, 2, -4, 0],
-                    rotateZ: [5, -5, 3, -3, 1, -1, 0],
-                    scale: [1.02, 0.96, 1.01, 0.98, 1, 0.99, 1],
-                    opacity: 1,
-                  }}
-                  transition={{ duration: 1.4, ease: "easeInOut", delay: 0.05 }}
-                  className="w-30 h-44 rounded-lg border border-line-warm card-back-pattern absolute z-20 shadow-overlay opacity-90"
-                />
-              </>
-            )}
-
-            {/* Bridge Arch Glow Effect */}
-            {shufflePhase === "bridge" && (
-              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1.15 }} />
-            )}
-          </div>
-        )}
+      <div className="v2-sh-deck" aria-hidden="true">
+        {Array.from({ length: 7 }).map((_, i) => (
+          <span key={i} className="v2-sh-card card-back-pattern" style={{ "--i": i } as React.CSSProperties} />
+        ))}
       </div>
-
-      {/* Sacred Ritual Subtitle & Title */}
-      <span className="text-[13px] font-serif-th text-ink-deep font-bold bg-inset-warm/30 px-4 py-1 rounded-full border border-line-warm mb-2 inline-block ">
-        {isEnglish ? "Sacred Shuffling Ritual" : "ขั้นตอนสับไพ่"}
-      </span>
-      <h2 className="text-2xl sm:text-3xl font-serif-th font-bold font-mystic-gold filter py-0.5 leading-normal"><ThaiPhrases>
-        {isEnglish ? "Center Your Mind on Your Inquiry" : "ตั้งสมาธิและนึกถึงคำถามของคุณ"}
-      </ThaiPhrases></h2>
-      <p className="text-xs sm:text-sm text-muted mt-1 max-w-md leading-relaxed">
-        {isEnglish
-          ? `Breathe deeply and hold your question in gentle awareness for the "${spreadName}".`
-          : `ทำใจให้สบาย แล้วนึกถึงเรื่องที่อยากรู้สำหรับผัง "${spreadName}"`}
+      <p className="v2-sh-t" role="status">
+        {isEnglish ? `Shuffling all 78 cards for "${spreadName}"` : `กำลังสับไพ่ทั้ง 78 ใบ สำหรับผัง "${spreadName}"`}
       </p>
-
-      {/* Commitment Preview for Commit-Reveal Transparency */}
-      {commitment && (
-        <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-inset-warm border border-line-warm text-[13px] font-mono text-muted">
-          <span>
-            {isEnglish ? "Deck lock code: " : "รหัสล็อกลำดับไพ่: "}
-            {commitment.slice(0, 16)}…{commitment.slice(-8)}
-          </span>
-          <button
-            type="button"
-            onClick={async () => {
-              const ok = await copyToClipboard(commitment);
-              if (ok) {
-                setCopiedHash(true);
-                setTimeout(() => setCopiedHash(false), 2000);
-              }
-            }}
-            title={isEnglish ? (copiedHash ? "Copied!" : "Copy verification commitment") : (copiedHash ? "คัดลอกแล้ว!" : "คัดลอกรหัสยืนยันความโปร่งใส")}
-            aria-label={isEnglish ? (copiedHash ? "Copied!" : "Copy verification commitment") : (copiedHash ? "คัดลอกแล้ว!" : "คัดลอกรหัสยืนยันความโปร่งใส")}
-            className="tap-overlay-y text-gold-ink hover:text-ink-deep cursor-pointer px-1 py-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink font-mono text-xs"
-          >
-            {copiedHash ? "✓" : "⧉"}
-          </button>
-        </div>
-      )}
-
-      {/* Progress or Start Button */}
-      <div className="w-full max-w-xs mt-6">
-        {!shuffling ? (
-          <button
-            type="button"
-            onClick={startShuffle}
-            className="w-full py-4 px-6 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface font-bold font-serif-th shadow-overlay hover:scale-105 active:scale-95 transition cursor-pointer flex items-center justify-center gap-2"
-          >
-            
-            <span>{isEnglish ? "Tap to Shuffle Deck" : "แตะเพื่อเริ่มสับไพ่"}</span>
-            
-          </button>
-        ) : (
-          <div className="space-y-3">
-            <div className="w-full h-2.5 bg-inset-warm rounded-full overflow-hidden border border-line-warm">
-              <div
-                ref={progressBarRef}
-                className="h-full w-full origin-left bg-gradient-to-r from-gold-ink via-ink-soft to-gold-ink"
-                style={{ transform: "scaleX(0)" }}
-              />
-            </div>
-            <span className="text-xs text-ink-deep font-medium flex items-center justify-center gap-1.5 animate-pulse font-serif-th">
-              <span className="w-2 h-2 rounded-full bg-gold-ink" />
-              {shufflePhase === "split" &&
-                (isEnglish ? "Splitting the deck..." : "กำลังแบ่งสำรับไพ่...")}
-              {shufflePhase === "riffle" && (
-                <>
-                  {isEnglish ? (
-                    <>
-                      Riffling 78 sacred cards (<span ref={progressTextRef}>0</span>%)
-                    </>
-                  ) : (
-                    <>
-                      กำลังสับไพ่ทั้ง 78 ใบ (<span ref={progressTextRef}>0</span>%)
-                    </>
-                  )}
-                </>
-              )}
-              {shufflePhase === "bridge" &&
-                (isEnglish ? "Bridging the card stacks..." : "กำลังรวมสำรับไพ่เข้าด้วยกัน...")}
-              {shufflePhase === "gather" &&
-                (isEnglish
-                  ? "Deck gathered. Fanning out for your draw..."
-                  : "สับไพ่เรียบร้อย กำลังคลี่ไพ่ให้คุณเลือก...")}
-            </span>
-          </div>
-        )}
-      </div>
+      <p className="v2-sh-s">{isEnglish ? "Hold your question in mind" : "นึกถึงคำถามของคุณไว้ในใจ"}</p>
+      <span className="v2-sh-bar" aria-hidden="true">
+        <span />
+      </span>
     </div>
   );
 };

@@ -1,0 +1,1297 @@
+/*
+ * 🔮 v2 หน้าขั้นตอนดูดวง (`/read/<ผัง>` · `/en/read/<ผัง>` · หน้าแรกเมื่อเข้าพิธี)
+ * เจ้าของ 2026-10-16: "ออกแบบใหม่ทั้งหมด หน้าขั้นตอนดูไพ่" + "ลดขั้นตอน ทำให้ใช้ง่ายกว่านี้ เเละ สวย"
+ *
+ * 3 ขั้นที่ผู้ใช้เห็น: ตั้งคำถาม ➔ เลือกไพ่ (สับเองอัตโนมัติบนโต๊ะเดียวกัน) ➔ อ่านคำทำนาย
+ * เอกลักษณ์: ห้องกลางคืน + โต๊ะผ้าปูกำมะหยี่ · แถบขั้นตอนบนสุด · ปุ่มหลักติดล่างจอ
+ *
+ * นำเข้าโดย astro/islands/TarotFlowRoot.tsx (หน้าเดียวกับ ui2-home.css)
+ * `.v2-rt` ตั้งโทเคนกลางคืนเอง — หน้าแรกเป็นพื้นสว่าง แต่พิธีต้องมืดเหมือนกันทุกหน้า
+ * ⚠️ ไม่มี backdrop-filter / filter: blur / mask / ของวนไม่รู้จบ (ด่าน test-ui2-fx · test-motion-quality)
+ */
+
+/* ── 0. ห้องพิธี (โทเคนกลางคืนชุดเดียวกับ .ui2-pg) ───────────────────────── */
+.v2-rt {
+  --color-ink: #F6EEE2;
+  --color-ink-deep: #F6EEE2;
+  --color-muted: #CFC3B2;
+  --color-gold: #E7C27F;
+  --color-gold-ink: #FFD98F;
+  --color-gold-ink-deep: #FFE3A8;
+  --color-line: rgba(246, 238, 226, 0.14);
+  --color-line-warm: rgba(246, 238, 226, 0.14);
+  --color-line-interactive: rgba(255, 217, 143, 0.42);
+  --color-line-interactive-warm: rgba(255, 217, 143, 0.42);
+  --color-surface: #1E1822;
+  --color-surface-warm: #1E1822;
+  --color-canvas: #251E2A;
+  --color-inset: #251E2A;
+  --color-inset-warm: #251E2A;
+  --color-err: #DB8479;
+  --color-err-wash: rgba(219, 132, 121, 0.12);
+  --color-ok: #5DAB6B;
+  --glass-fill: rgba(28, 23, 30, 0.9);
+  --glass-sheen: linear-gradient(180deg, rgba(255, 236, 200, 0.05) 0%, rgba(255, 236, 200, 0) 60%);
+  --glass-edge: rgba(255, 236, 200, 0.14);
+  --glass-edge-on: rgba(255, 217, 143, 0.6);
+  --glass-ring: rgba(255, 236, 200, 0.08);
+  --glass-shadow: 0 30px 60px -36px rgba(0, 0, 0, 0.9);
+  --glass-shadow-lift: 0 34px 60px -30px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 217, 143, 0.12);
+  --rt-gold: #FFD98F;
+  --rt-line: rgba(255, 236, 200, 0.13);
+  --rt-panel: rgba(28, 23, 30, 0.78);
+  --rt-felt: #1B1420;
+  position: relative;
+  display: grid;
+  gap: 22px;
+  color: var(--ui2-on-night, #F6EEE2);
+  /* หน้าแรก (พื้นสว่าง) — ห้องมืดมุมโค้ง · หน้า /read อยู่ใน .ui2-pg ที่มืดอยู่แล้ว ไม่ต้องมีกรอบ */
+  padding: 20px 16px 28px;
+  border-radius: 28px;
+  background:
+    radial-gradient(70% 380px at 50% -60px, rgba(233, 160, 70, 0.14) 0%, rgba(233, 160, 70, 0) 100%),
+    var(--ui2-night, #120E15);
+}
+.ui2-pg .v2-rt {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+}
+@media (min-width: 768px) {
+  .v2-rt {
+    padding: 28px 32px 36px;
+  }
+}
+.v2-rt h2,
+.v2-rt h3 {
+  font-family: var(--ui2-font-display);
+}
+.v2-rt button:focus-visible,
+.v2-rt a:focus-visible,
+.v2-rt [role="radio"]:focus-visible,
+.v2-rt [role="button"]:focus-visible {
+  outline: 2px solid var(--rt-gold);
+  outline-offset: 3px;
+}
+
+/* ── 1. แถบขั้นตอน 3 ขั้น ───────────────────────────────────────────────── */
+.v2-rail {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+.v2-rail li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui2-on-night-dim, #A89C8C);
+}
+.v2-rail li + li::before {
+  content: "";
+  width: clamp(18px, 6vw, 56px);
+  height: 1px;
+  margin-right: 2px;
+  background: var(--rt-line);
+}
+.v2-rail li.is-done + li::before,
+.v2-rail li.is-now + li::before {
+  background: linear-gradient(90deg, rgba(255, 217, 143, 0.7), rgba(255, 217, 143, 0.15));
+}
+.v2-rail-n {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--rt-line);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+.v2-rail li.is-done .v2-rail-n {
+  border-color: rgba(255, 217, 143, 0.5);
+  color: var(--rt-gold);
+}
+.v2-rail li.is-now {
+  color: var(--ui2-on-night, #F6EEE2);
+}
+.v2-rail li.is-now .v2-rail-n {
+  border-color: var(--rt-gold);
+  color: var(--ui2-night, #120E15);
+  background: linear-gradient(180deg, #FFE3A8 0%, #F0C470 100%);
+  box-shadow: 0 0 0 4px rgba(255, 217, 143, 0.14);
+}
+@media (max-width: 479px) {
+  .v2-rail li:not(.is-now) .v2-rail-t {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* ── 2. ขั้นตั้งคำถาม ───────────────────────────────────────────────────── */
+.v2-rt-head {
+  text-align: center;
+}
+.v2-rt-title {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ui2-on-night, #F6EEE2);
+  text-wrap: balance;
+}
+.v2-rt-sub {
+  margin: 8px 0 0;
+  font-size: 15px;
+  color: var(--ui2-on-night-soft, #CFC3B2);
+}
+.v2-rt-desk {
+  display: grid;
+  gap: 18px;
+  align-items: start;
+}
+@media (min-width: 1024px) {
+  .v2-rt-desk {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+    gap: 24px;
+  }
+  .v2-rt-side {
+    position: sticky;
+    top: 96px;
+  }
+}
+.v2-rt-main {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.v2-rt-side {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* กล่องคำถาม */
+.v2-rt .v2-in {
+  display: grid;
+  gap: 20px;
+  padding: 20px;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 217, 143, 0.22);
+  background:
+    radial-gradient(90% 60% at 0% 0%, rgba(255, 217, 143, 0.1) 0%, rgba(255, 217, 143, 0) 70%),
+    var(--rt-panel);
+  box-shadow: 0 30px 60px -40px rgba(0, 0, 0, 0.9);
+}
+.v2-rt .v2-in > * + * {
+  margin-top: 0;
+}
+@media (min-width: 640px) {
+  .v2-rt .v2-in {
+    padding: 28px;
+  }
+}
+/* คำทักของแม่หมอ — ฟองคำพูด */
+.v2-rt .v2-in-greet {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+.v2-rt .v2-in-greet-img {
+  width: 44px;
+  height: 66px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 217, 143, 0.4);
+  box-shadow: 0 10px 20px -12px rgba(0, 0, 0, 0.9);
+}
+.v2-rt .v2-in-greet-say {
+  position: relative;
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 4px 18px 18px 18px;
+  background: rgba(255, 236, 200, 0.06);
+  border: 1px solid var(--rt-line);
+}
+.v2-rt .v2-in-greet p {
+  font-size: 14px;
+  color: var(--ui2-on-night-soft, #CFC3B2);
+}
+.v2-rt .v2-in-q label {
+  font-size: 15px;
+}
+.v2-rt .v2-in-textarea {
+  min-height: 132px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  font-size: 16px;
+  line-height: 1.7;
+  background: rgba(10, 8, 12, 0.55);
+  color: var(--ui2-on-night, #F6EEE2);
+}
+.v2-rt .v2-in-textarea::placeholder {
+  color: rgba(207, 195, 178, 0.62);
+}
+/* หัวข้อสำเร็จรูป */
+.v2-in-topics-k {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--ui2-on-night-dim, #A89C8C);
+}
+.v2-in-topic-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.v2-in-topic {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 60px;
+  padding: 8px 10px;
+  border-radius: 16px;
+  border: 1px solid var(--rt-line);
+  background: rgba(255, 236, 200, 0.03);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur-fast, 0.15s) ease, background-color var(--dur-fast, 0.15s) ease;
+}
+.v2-in-topic:hover {
+  border-color: rgba(255, 217, 143, 0.45);
+}
+.v2-in-topic[aria-pressed="true"] {
+  border-color: var(--rt-gold);
+  background: rgba(255, 217, 143, 0.1);
+}
+.v2-in-topic-img {
+  flex: none;
+  width: 30px;
+  height: 46px;
+  overflow: hidden;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 217, 143, 0.35);
+}
+.v2-in-topic-txt {
+  display: grid;
+  min-width: 0;
+}
+.v2-in-topic-txt b {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ui2-on-night, #F6EEE2);
+}
+.v2-in-topic-txt small {
+  font-size: 12px;
+  color: var(--ui2-on-night-dim, #A89C8C);
+}
+/* รายละเอียดเพิ่ม (พับ) */
+.v2-in-more {
+  border-top: 1px solid var(--rt-line);
+}
+.v2-in-more summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding-top: 14px;
+  list-style: none;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ui2-on-night, #F6EEE2);
+  cursor: pointer;
+}
+.v2-in-more summary::-webkit-details-marker {
+  display: none;
+}
+.v2-in-more summary span {
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--rt-line);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ui2-on-night-dim, #A89C8C);
+}
+.v2-in-more summary::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  margin-left: auto;
+  border-right: 1.5px solid var(--rt-gold);
+  border-bottom: 1.5px solid var(--rt-gold);
+  rotate: 45deg;
+  transition: rotate var(--dur-fast, 0.15s) ease;
+}
+.v2-in-more[open] summary::after {
+  rotate: 225deg;
+}
+.v2-in-more-body {
+  padding-top: 14px;
+}
+
+/* แม่หมอ — รายการเตี้ย */
+.v2-pc {
+  padding: 16px;
+  border-radius: 24px;
+  border: 1px solid var(--rt-line);
+  background: var(--rt-panel);
+}
+.v2-pc-k,
+.v2-ss-k {
+  margin: 0 0 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--rt-gold);
+}
+.v2-pc-list {
+  display: grid;
+  gap: 6px;
+}
+.v2-pc-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 6px 8px 6px 6px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: border-color var(--dur-fast, 0.15s) ease, background-color var(--dur-fast, 0.15s) ease;
+}
+.v2-pc-row:hover {
+  background: rgba(255, 236, 200, 0.04);
+}
+.v2-pc-row.is-on {
+  border-color: rgba(255, 217, 143, 0.6);
+  background: rgba(255, 217, 143, 0.09);
+}
+.v2-pc-row.is-locked {
+  opacity: 0.78;
+}
+.v2-pc-art {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 52px;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 217, 143, 0.3);
+  background: #F3EDE2;
+}
+.v2-pc-art svg {
+  width: 36px !important;
+  height: 52px !important;
+}
+.v2-pc-txt {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.v2-pc-txt b {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ui2-on-night, #F6EEE2);
+}
+.v2-pc-txt small {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ui2-on-night-dim, #A89C8C);
+}
+.v2-pc-txt em {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 600;
+}
+.v2-pc-txt em.is-trial {
+  color: var(--ui2-night, #120E15);
+  background: var(--rt-gold);
+}
+.v2-pc-txt em.is-lock {
+  color: var(--rt-gold);
+  border: 1px solid rgba(255, 217, 143, 0.4);
+}
+.v2-pc-row.is-on .v2-pc-txt b::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--rt-gold);
+  box-shadow: 0 0 0 3px rgba(255, 217, 143, 0.2);
+}
+.v2-pc-voice {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: var(--ui2-on-night-dim, #A89C8C);
+  cursor: pointer;
+}
+.v2-pc-voice:hover {
+  color: var(--rt-gold);
+  background: rgba(255, 236, 200, 0.06);
+}
+
+/* ผังที่เลือก */
+.v2-ss {
+  padding: 16px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 217, 143, 0.24);
+  background:
+    radial-gradient(80% 80% at 100% 0%, rgba(255, 217, 143, 0.1) 0%, rgba(255, 217, 143, 0) 70%),
+    var(--rt-panel);
+}
+.v2-ss-top {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+.v2-ss-map {
+  display: block;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 217, 143, 0.18);
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 236, 200, 0.04) 0 1px, transparent 1px 12px),
+    repeating-linear-gradient(90deg, rgba(255, 236, 200, 0.04) 0 1px, transparent 1px 12px),
+    rgba(12, 10, 15, 0.6);
+}
+.v2-ss-map-area {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+.v2-ss-map-area span {
+  position: absolute;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 217, 143, 0.8);
+  background: rgba(255, 217, 143, 0.16);
+}
+.v2-ss-k {
+  margin-bottom: 4px;
+}
+.v2-ss-name {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ui2-on-night, #F6EEE2);
+}
+.v2-ss-n {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--ui2-on-night-dim, #A89C8C);
+}
+.v2-ss-change {
+  margin-top: 6px;
+  min-height: 36px;
+  padding: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--rt-gold);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+.v2-ss-pos {
+  margin-top: 12px;
+  border-top: 1px solid var(--rt-line);
+}
+.v2-ss-pos summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  list-style: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ui2-on-night-soft, #CFC3B2);
+  cursor: pointer;
+}
+.v2-ss-pos summary::-webkit-details-marker {
+  display: none;
+}
+.v2-ss-pos summary::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  border-right: 1.5px solid var(--rt-gold);
+  border-bottom: 1.5px solid var(--rt-gold);
+  rotate: 45deg;
+}
+.v2-ss-pos[open] summary::after {
+  rotate: 225deg;
+}
+.v2-ss-pos ol {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0 0 4px;
+  list-style: none;
+}
+.v2-ss-pos li {
+  display: flex;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ui2-on-night-soft, #CFC3B2);
+}
+.v2-ss-pos li span {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 217, 143, 0.4);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--rt-gold);
+}
+
+/* แถบปุ่มติดล่างจอ */
+.v2-rt-bar {
+  position: sticky;
+  bottom: 12px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 10px 10px 10px 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.3);
+  background: rgba(22, 17, 25, 0.96);
+  box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(0, 0, 0, 0.3);
+}
+.v2-rt-bar-hint {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 13.5px;
+  color: var(--ui2-on-night-soft, #CFC3B2);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.v2-rt-go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex: none;
+  min-height: 52px;
+  padding: 0 26px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ui2-night, #120E15);
+  background: linear-gradient(180deg, #FFE3A8 0%, #F0C470 100%);
+  box-shadow: 0 10px 24px -10px rgba(240, 196, 112, 0.7);
+  cursor: pointer;
+  transition: transform var(--dur-fast, 0.15s) ease, opacity var(--dur-fast, 0.15s) ease;
+}
+.v2-rt-go:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.v2-rt-go:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.v2-rt-go:disabled {
+  color: var(--ui2-on-night-dim, #A89C8C);
+  background: rgba(255, 236, 200, 0.08);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.v2-rt-go-arrow {
+  width: 9px;
+  height: 9px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  rotate: 45deg;
+}
+@media (max-width: 479px) {
+  .v2-rt-bar {
+    bottom: 8px;
+    padding-left: 16px;
+  }
+  .v2-rt-bar-hint {
+    font-size: 12.5px;
+  }
+  .v2-rt-go {
+    padding: 0 20px;
+    font-size: 15px;
+  }
+}
+
+/* ── 3. ขั้นเลือกไพ่ (สับ ➔ พัดไพ่บนโต๊ะเดียวกัน) ──────────────────────── */
+.v2-pick {
+  display: grid;
+  gap: 18px;
+}
+.v2-pick-head {
+  text-align: center;
+}
+.v2-pick-k {
+  display: inline-block;
+  margin: 0;
+  padding: 4px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.35);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--rt-gold);
+}
+.v2-pick-t {
+  margin: 12px 0 0;
+  font-size: clamp(24px, 3.6vw, 38px);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ui2-on-night, #F6EEE2);
+  text-wrap: balance;
+}
+.v2-pick-t span {
+  color: var(--rt-gold);
+}
+
+/* โต๊ะผ้าปูกำมะหยี่ */
+.v2-tb {
+  position: relative;
+  overflow: hidden;
+  border-radius: 32px;
+  border: 1px solid rgba(255, 217, 143, 0.22);
+  background:
+    radial-gradient(60% 70% at 50% 40%, rgba(120, 60, 90, 0.35) 0%, rgba(120, 60, 90, 0) 75%),
+    radial-gradient(120% 90% at 50% 120%, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0) 60%),
+    var(--rt-felt);
+  box-shadow: inset 0 0 0 6px rgba(0, 0, 0, 0.18), inset 0 0 0 7px rgba(255, 217, 143, 0.1), 0 40px 80px -50px rgba(0, 0, 0, 1);
+}
+.v2-tb-stage {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding: 28px 16px 22px;
+}
+@media (min-width: 640px) {
+  .v2-tb-stage {
+    padding: 40px 32px 30px;
+  }
+}
+.v2-tb-fan {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  min-width: max-content;
+  margin: 0 auto;
+  padding: 4px 0;
+}
+@media (min-width: 640px) {
+  .v2-tb-fan {
+    gap: 22px;
+  }
+}
+.v2-tb-tier {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.v2-tb-tier > * + * {
+  margin-left: -14px;
+}
+.v2-tb-tier.is-t1 {
+  padding-left: 24px;
+}
+.v2-tb-tier.is-t2 {
+  padding-left: 48px;
+}
+@media (min-width: 640px) {
+  .v2-tb-tier > * + * {
+    margin-left: -20px;
+  }
+  .v2-tb-tier.is-t1 {
+    padding-left: 40px;
+  }
+  .v2-tb-tier.is-t2 {
+    padding-left: 80px;
+  }
+}
+@media (min-width: 768px) {
+  .v2-tb-tier > * + * {
+    margin-left: -24px;
+  }
+}
+.v2-fan-card {
+  position: relative;
+  flex-shrink: 0;
+  width: 46px;
+  cursor: pointer;
+  user-select: none;
+}
+.v2-fan-card:focus-visible {
+  outline: none;
+}
+.v2-fan-back {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  width: 46px;
+  height: 78px;
+  padding: 3px 4px;
+  overflow: hidden;
+  border-radius: 7px;
+  border: 1.5px solid rgba(255, 217, 143, 0.4);
+  background-color: #382518;
+  box-shadow: -3px 6px 12px -6px rgba(0, 0, 0, 0.85);
+  transition: border-color var(--dur-fast, 0.15s) ease, box-shadow var(--dur-fast, 0.15s) ease;
+}
+@media (min-width: 640px) {
+  .v2-fan-card,
+  .v2-fan-back {
+    width: 66px;
+  }
+  .v2-fan-back {
+    height: 112px;
+    border-radius: 9px;
+  }
+}
+@media (min-width: 768px) {
+  .v2-fan-card,
+  .v2-fan-back {
+    width: 74px;
+  }
+  .v2-fan-back {
+    height: 124px;
+  }
+}
+.v2-fan-card:hover .v2-fan-back,
+.v2-fan-card:focus-visible .v2-fan-back {
+  border-color: var(--rt-gold);
+  box-shadow: 0 0 0 2px rgba(255, 217, 143, 0.5), 0 18px 30px -12px rgba(0, 0, 0, 0.9), 0 0 26px rgba(255, 217, 143, 0.35);
+}
+.v2-fan-no {
+  font-size: 10px;
+  line-height: 1;
+}
+@media (min-width: 640px) {
+  .v2-fan-no {
+    font-size: 11px;
+  }
+}
+
+/* ช่องวางไพ่ตามตำแหน่ง */
+.v2-tb-slots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 0;
+  padding: 16px 16px 20px;
+  overflow-x: auto;
+  list-style: none;
+  border-top: 1px solid rgba(255, 217, 143, 0.14);
+  background: rgba(0, 0, 0, 0.22);
+  scrollbar-width: none;
+}
+.v2-tb-slots::-webkit-scrollbar {
+  display: none;
+}
+@media (max-width: 639px) {
+  .v2-tb-slots {
+    justify-content: flex-start;
+  }
+}
+.v2-tb-slots li {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  flex: none;
+  width: 72px;
+}
+.v2-tb-slot {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 62px;
+  border-radius: 7px;
+  border: 1.5px dashed rgba(255, 236, 200, 0.22);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ui2-on-night-dim, #A89C8C);
+  transition: border-color var(--dur-fast, 0.15s) ease;
+}
+.v2-tb-slots li.is-now .v2-tb-slot {
+  border-color: var(--rt-gold);
+  border-style: solid;
+  color: var(--rt-gold);
+  box-shadow: 0 0 0 4px rgba(255, 217, 143, 0.12), 0 0 20px rgba(255, 217, 143, 0.25);
+}
+.v2-tb-slots li.is-filled .v2-tb-slot {
+  border: 1.5px solid rgba(255, 217, 143, 0.6);
+  background-color: #382518;
+  animation: v2-slot-in 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+.v2-tb-slot-name {
+  width: 100%;
+  overflow: hidden;
+  font-size: 11.5px;
+  line-height: 1.3;
+  text-align: center;
+  color: var(--ui2-on-night-dim, #A89C8C);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.v2-tb-slots li.is-now .v2-tb-slot-name {
+  font-weight: 600;
+  color: var(--ui2-on-night, #F6EEE2);
+}
+@keyframes v2-slot-in {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.v2-pick-tools {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px 16px;
+}
+.v2-pick-tools p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ui2-on-night-soft, #CFC3B2);
+}
+.v2-pick-auto {
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.45);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rt-gold);
+  cursor: pointer;
+  transition: background-color var(--dur-fast, 0.15s) ease;
+}
+.v2-pick-auto:hover:not(:disabled) {
+  background: rgba(255, 217, 143, 0.1);
+}
+
+/* สับไพ่อัตโนมัติ */
+.v2-tb-shuffle {
+  min-height: 360px;
+}
+.v2-sh {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 44px 20px 36px;
+  text-align: center;
+}
+.v2-sh-deck {
+  position: relative;
+  width: 96px;
+  height: 152px;
+  margin-bottom: 18px;
+}
+.v2-sh-card {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255, 217, 143, 0.45);
+  background-color: #382518;
+  box-shadow: 0 14px 26px -14px rgba(0, 0, 0, 0.95);
+  animation: v2-riffle 1.7s cubic-bezier(0.45, 0, 0.2, 1) both;
+  animation-delay: calc(var(--i) * 40ms);
+}
+.v2-sh-card:nth-child(odd) {
+  animation-name: v2-riffle-l;
+}
+@keyframes v2-riffle {
+  0% {
+    transform: none;
+  }
+  30% {
+    transform: translateX(62px) rotate(10deg);
+  }
+  55% {
+    transform: translateX(14px) translateY(-10px) rotate(3deg);
+  }
+  80%,
+  100% {
+    transform: none;
+  }
+}
+@keyframes v2-riffle-l {
+  0% {
+    transform: none;
+  }
+  30% {
+    transform: translateX(-62px) rotate(-10deg);
+  }
+  55% {
+    transform: translateX(-14px) translateY(-10px) rotate(-3deg);
+  }
+  80%,
+  100% {
+    transform: none;
+  }
+}
+.v2-sh-t {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 600;
+  color: var(--ui2-on-night, #F6EEE2);
+  text-wrap: balance;
+}
+.v2-sh-s {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ui2-on-night-soft, #CFC3B2);
+}
+.v2-sh-bar {
+  display: block;
+  width: 180px;
+  height: 3px;
+  margin-top: 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 236, 200, 0.1);
+}
+.v2-sh-bar span {
+  display: block;
+  height: 100%;
+  background: var(--rt-gold);
+  transform-origin: left;
+  animation: v2-sh-fill 1.7s linear both;
+}
+@keyframes v2-sh-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2-sh-card,
+  .v2-sh-bar span,
+  .v2-tb-slots li.is-filled .v2-tb-slot {
+    animation-duration: 0.01ms;
+  }
+}
+
+/* ท้ายโต๊ะ — ทางกลับ + ตราล็อกสำรับ */
+.v2-rt-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px 20px;
+}
+.v2-rt-link {
+  min-height: 44px;
+  padding: 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ui2-on-night-soft, #CFC3B2);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 236, 200, 0.3);
+  text-underline-offset: 5px;
+  cursor: pointer;
+}
+.v2-rt-link:hover {
+  color: var(--rt-gold);
+}
+.v2-seal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 4px 4px 4px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--rt-line);
+  font-size: 12.5px;
+  color: var(--ui2-on-night-dim, #A89C8C);
+}
+.v2-seal-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #5DAB6B;
+  box-shadow: 0 0 0 3px rgba(93, 171, 107, 0.2);
+}
+.v2-seal-t {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+}
+.v2-seal code {
+  font-size: 11.5px;
+  color: var(--ui2-on-night-soft, #CFC3B2);
+}
+.v2-seal-copy {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--rt-gold);
+  background: rgba(255, 236, 200, 0.06);
+  cursor: pointer;
+}
+
+/* ── 4. ขั้นอ่านคำทำนาย ─────────────────────────────────────────────────── */
+.v2-rd-head {
+  max-width: 820px;
+  margin: 0 auto;
+  text-align: center;
+}
+.v2-rd-k {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rt-gold);
+}
+.v2-rd-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 217, 143, 0.55);
+}
+.v2-rd-q {
+  margin: 12px 0 0;
+  font-size: clamp(22px, 3.2vw, 34px);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ui2-on-night, #F6EEE2);
+  text-wrap: balance;
+}
+.v2-rd-q::before,
+.v2-rd-q::after {
+  color: rgba(255, 217, 143, 0.6);
+}
+.v2-rd-q::before {
+  content: "\201C";
+  margin-right: 4px;
+}
+.v2-rd-q::after {
+  content: "\201D";
+  margin-left: 4px;
+}
+.v2-rd-board {
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+.v2-rd-grid {
+  display: grid;
+  gap: 20px;
+  align-items: start;
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+@media (min-width: 1024px) {
+  .v2-rd-grid {
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 28px;
+  }
+  .v2-rd-side {
+    position: sticky;
+    top: 96px;
+  }
+}
+.v2-rd-main {
+  min-width: 0;
+}
+.v2-rd-side {
+  display: grid;
+  gap: 12px;
+}
+.v2-rd-chat {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 12px 14px;
+  padding: 16px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 217, 143, 0.32);
+  background:
+    radial-gradient(90% 90% at 0% 0%, rgba(255, 217, 143, 0.14) 0%, rgba(255, 217, 143, 0) 70%),
+    var(--rt-panel);
+  transition: border-color var(--dur-fast, 0.15s) ease;
+}
+.v2-rd-chat:hover {
+  border-color: var(--rt-gold);
+}
+.v2-rd-chat-img {
+  width: 48px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 217, 143, 0.4);
+}
+.v2-rd-chat-txt {
+  display: grid;
+  gap: 3px;
+  align-content: start;
+}
+.v2-rd-chat-on {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #7FC78C;
+}
+.v2-rd-chat-on::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #5DAB6B;
+}
+.v2-rd-chat-txt b {
+  font-size: 15px;
+  color: var(--ui2-on-night, #F6EEE2);
+}
+.v2-rd-chat-txt small {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ui2-on-night-dim, #A89C8C);
+}
+.v2-rd-chat-go {
+  grid-column: 1 / -1;
+  display: grid;
+  place-items: center;
+  min-height: 46px;
+  border-radius: 999px;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ui2-night, #120E15);
+  background: linear-gradient(180deg, #FFE3A8 0%, #F0C470 100%);
+}
+.v2-rd-acts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+@media (min-width: 1024px) {
+  .v2-rd-acts {
+    grid-template-columns: 1fr;
+  }
+}
+.v2-rd-act {
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.35);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ui2-on-night, #F6EEE2);
+  background: rgba(255, 236, 200, 0.04);
+  cursor: pointer;
+  transition: background-color var(--dur-fast, 0.15s) ease, border-color var(--dur-fast, 0.15s) ease;
+}
+.v2-rd-act:hover {
+  border-color: var(--rt-gold);
+  background: rgba(255, 217, 143, 0.08);
+}
+.v2-rd-act.is-gold {
+  color: var(--rt-gold);
+}
+.v2-rd-note {
+  margin: 0;
+  font-size: 12.5px;
+  text-align: center;
+  color: var(--ui2-on-night-dim, #A89C8C);
+}
+.v2-rd-after {
+  display: grid;
+  gap: 18px;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.v2-rd-after:empty {
+  display: none;
+}
+
+/* แถบปุ่มหลัก — เดสก์ท็อปอยู่ใต้คอลัมน์คำถาม · มือถือหลบปุ่มแชทลอยมุมขวาล่าง (56px) */
+@media (min-width: 1024px) {
+  .v2-rt-intent .v2-rt-bar {
+    width: calc((100% - 24px) * 7 / 11);
+    max-width: none;
+    margin-left: 0;
+  }
+}
+@media (max-width: 767px) {
+  .v2-rt-bar {
+    width: calc(100% - 64px);
+    margin-left: 0;
+  }
+  .v2-in-topic-txt small {
+    display: none;
+  }
+  .v2-in-topic {
+    min-height: 56px;
+  }
+}
+.v2-seal-copy {
+  white-space: nowrap;
+}
+@media (max-width: 639px) {
+  .v2-tb-fan {
+    gap: 8px;
+  }
+}
+/* คำถามขึ้นเป็นหัวหน้าแล้ว (.v2-rd-q) — ไม่ต้องซ้ำในกล่องคำทำนาย */
+.v2-rt-read [data-sr-question] {
+  display: none;
+}
