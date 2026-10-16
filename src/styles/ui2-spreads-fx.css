@@ -184,7 +184,7 @@
     [data-fx="full"] .ui2-sp-deco {
       animation: ui2-sp-deco-out linear both;
       animation-timeline: view();
-      animation-range: exit 0% exit 100%;
+      animation-range: exit 0% exit 60%;
     }
   }
 
@@ -212,8 +212,9 @@
 @keyframes ui2-sp-hero-out {
   to { opacity: 0; filter: blur(16px); transform: translateY(-48px) scale(0.95); }
 }
+/* จางหายหมดและขยายนิดเดียว — เดิม scale 1.4 + ค้าง 15% ทำให้ไพ่ขอบจอถูกดันล้นจอ เห็นครึ่งใบค้างมุมบน (เจ้าของ 2026-10-17 "บัค") */
 @keyframes ui2-sp-deco-out {
-  to { opacity: 0.15; transform: scale(1.4); }
+  to { opacity: 0; transform: translateY(-24px) scale(1.06); }
 }
 @keyframes ui2-sp-head-rise {
   from { opacity: 0; transform: translateY(18px); }
