@@ -38,6 +38,10 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-17 (รอบ 267): /spreads แถบชิปหมวดติดจอแสดงเฉพาะมือถือ (เจ้าของ "แถบนี้ทำให้มีปัญหา ไม่ต้องโชว์ในคอม โชว์แค่ในมือถือ" · ขึ้นพรีวิว)
+- `ui2-spreads.css`: `.ui2-sp-stick` ซ่อนตั้งแต่ 768px (เดิมซ่อนเฉพาะ ≥ 1200) — คอม ≥ 1200 ใช้รายชื่อหมวดซ้ายของโชว์เคส · แท็บเล็ตเลื่อนดูหมวดเรียงต่อกัน · มือถือ < 768 ยังมีแถบเหมือนเดิม
+- ด่าน: test-spreads 1604/1604 · ภาพ 1024 (ไม่มีแถบ) / 390 (มีแถบ)
+
 ### 🗓️ 2026-10-17 (รอบ 266): ปุ่ม "เริ่มดูดวง" บนหัวเว็บไปหน้าคลังผัง (เจ้าของ "กดปุ่มให้ลิงก์ไปหน้าผัง" · ขึ้นพรีวิว)
 - `SiteHeader.tsx`: ปุ่ม "เริ่มดูดวง" / "Start a reading" ทุกหน้า ➔ `/spreads` · `/en/spreads` (เดิม `/#home-quick` ส่วนเปิดไพ่ด่วนหน้าแรก) · ป้ายวัดผล `header:start` คงเดิม
 - ด่าน: typecheck · test-en-routing · test-analytics-integrity · test-static-headers ผ่าน

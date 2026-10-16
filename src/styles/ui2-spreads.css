@@ -1070,9 +1070,10 @@ html:has(.ui2-spread-pop[open]) {
   .ui2-sp .ui2-sec {
     padding-block: 40px;
   }
+  /* แถบชิปหมวดติดจอ = มือถือเท่านั้น (เจ้าของ 2026-10-17 "แถบนี้ทำให้มีปัญหา ไม่ต้องโชว์ในคอม โชว์แค่ในมือถือ")
+     จอ ≥ 768 ไม่แสดง — คอม ≥ 1200 มีรายชื่อหมวดซ้ายของโชว์เคสแทน · แท็บเล็ตเลื่อนดูหมวดเรียงต่อกันได้เลย */
   .ui2-sp-stick {
-    top: 84px;
-    margin-inline: 0;
+    display: none;
   }
   .ui2-sp-shelf {
     scroll-margin-top: 56px;
@@ -1374,11 +1375,8 @@ html:has(.ui2-spread-pop[open]) {
   }
 }
 
-/* คอม ≥ 1200: รายชื่อหมวดซ้าย + หน้าต่างขวา (แทนแถบชิปบนจอ) */
+/* คอม ≥ 1200: รายชื่อหมวดซ้าย + หน้าต่างขวา (แถบชิปซ่อนตั้งแต่ 768 แล้ว) */
 @media (min-width: 1200px) {
-  .ui2-sp-stick {
-    display: none;
-  }
   .ui2-sp-stage {
     display: grid;
     grid-template-columns: 250px minmax(0, 1fr);
