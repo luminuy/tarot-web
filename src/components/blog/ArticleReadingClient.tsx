@@ -182,7 +182,6 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
         </h2>
         <Link href="/" className="ui2-btn v2-ar-go">
           {isEnglish ? "Begin Free Tarot Reading Now" : "เปิดไพ่ทำนายดวงชะตาฟรีทันที"}
-          <span className="ui2-btn-arrow" aria-hidden="true" />
         </Link>
       </section>
 

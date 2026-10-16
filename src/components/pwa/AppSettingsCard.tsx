@@ -67,8 +67,8 @@ export const AppSettingsCard: React.FC<{ isEnglish: boolean; isMember: boolean }
           {status.needsInstallOnIos ? (
             <p className="text-xs sm:text-[13px] text-muted">
               {L({
-                th: "บน iPhone ต้องเพิ่ม SeerTarot ไปยังหน้าจอโฮมก่อน (แชร์ ➔ เพิ่มไปยังหน้าจอโฮม) แล้วเปิดจากไอคอน จึงจะรับการเตือนได้",
-                en: "On iPhone, add SeerTarot to your Home Screen first (Share ➔ Add to Home Screen), then open it from the icon to get reminders.",
+                th: "บน iPhone ต้องเพิ่ม SeerTarot ไปยังหน้าจอโฮมก่อน (แชร์ แล้ว เพิ่มไปยังหน้าจอโฮม) แล้วเปิดจากไอคอน จึงจะรับการเตือนได้",
+                en: "On iPhone, add SeerTarot to your Home Screen first (Share, then Add to Home Screen), then open it from the icon to get reminders.",
               })}
             </p>
           ) : (

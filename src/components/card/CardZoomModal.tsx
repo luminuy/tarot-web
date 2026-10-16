@@ -7,6 +7,7 @@ import type { TarotCard } from "@/data/cards/types";
 import { useLocale } from "@/lib/i18n";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { CloseIcon } from "@/components/ui/LineIcons";
 
 const elementEnMap: Record<string, string> = {
   "ไฟ": "Fire",
@@ -82,7 +83,7 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
             aria-label={isEnglish ? "Close card zoom view" : "ปิดหน้าต่างซูมไพ่"}
             className="glass-chip absolute top-4 right-4 w-11 h-11 text-ink-deep hover:text-surface text-sm flex items-center justify-center transition cursor-pointer z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
           >
-            ✕
+            <CloseIcon />
           </button>
 
           {/* ชั้นเนื้อหาที่เลื่อนได้ — ไพ่ใบใหญ่ 353–408px ทำให้แผงสูงเกินจอเตี้ยจนตกขอบ (`min-h-0` จำเป็นสำหรับ flex item) */}

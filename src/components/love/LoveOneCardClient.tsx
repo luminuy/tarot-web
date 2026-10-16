@@ -12,7 +12,6 @@ import { OneCardRitual } from "@/components/reading/one-card/OneCardRitual";
 import { CardImage } from "@/components/card/CardImage";
 import { copyToClipboard } from "@/lib/utils/clipboard";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
-import { GoldMark } from "@/components/ui/GoldMark";
 
 type RelationshipStatus = "single" | "situationship" | "coupled" | "breakup";
 
@@ -325,7 +324,6 @@ export function LoveOneCardClient() {
               {currentStatusObj && (
                 <div className="ui2-dy-caption" aria-live="polite">
                   <span className="ui2-dy-caption-el">
-                    <GoldMark className="ui2-mark" />
                     {isEnglish ? currentStatusObj.cardNameEn : currentStatusObj.cardNameTh}
                   </span>
                   <span className="ui2-dy-caption-name">{isEnglish ? currentStatusObj.titleEn : currentStatusObj.titleTh}</span>

@@ -1,7 +1,6 @@
 import { Fragment, type ReactNode } from "react";
 
 import { CardImage } from "@/components/card/CardImage";
-import { GoldMark } from "@/components/ui/GoldMark";
 import { RouteLink as Link } from "@/components/ui/RouteLink";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { getArticleTitle } from "@/data/article-helpers";
@@ -29,7 +28,7 @@ import {
  * ===========================================================================
  * แผน: docs/plans/UI_2_0_PLAN_2026-10-12.md หัวข้อ 2 · 6.4–6.8
  * import ข้อมูลได้เต็มที่ (คำถาม · ผัง · ราศี · FAQ) เพราะไม่มีบันเดิล — ⚠️ ห้ามย้ายเข้า island
- * ⚠️ ห้ามอีโมจิ/✦ ✨ — ของตกแต่งใช้ `<GoldMark />` (กฎเหล็ก 2) · ห้ามสีฮาร์ดโค้ดในไฟล์นี้ (ใช้คลาส ui2-* ใน ui2.css)
+ * ⚠️ ห้ามอีโมจิ/✦ ✨ — ของตกแต่งใช้ `` (กฎเหล็ก 2) · ห้ามสีฮาร์ดโค้ดในไฟล์นี้ (ใช้คลาส ui2-* ใน ui2.css)
  * ⚠️ ห้ามใส่ชื่อ/ราคา/เวลาแม่หมอสมมุติ — กล่อง "คุยกับแม่หมอตัวจริง" เป็นลิงก์ล้วนจนกว่าเจ้าของเคาะว่าจะโชว์ใคร
  *    (คำถามเปิดข้อ 1 ในแผน) · ตัวอย่างคำทำนายต้องบอกผู้อ่านตรง ๆ ว่าเป็นตัวอย่าง
  */
@@ -171,7 +170,6 @@ export function Ui2NotesSection({ isEnglish, href }: { isEnglish: boolean; href:
         <p className="ui2-notes-more">
           <Link href={href("/questions")} prefetch={false} className="ui2-btn-ghost">
             {isEnglish ? "See all questions" : "ดูคำถามทั้งหมด"}
-            <span className="ui2-btn-arrow" aria-hidden="true" />
           </Link>
         </p>
       </div>
@@ -324,7 +322,6 @@ export function Ui2BentoSection({ isEnglish, href }: { isEnglish: boolean; href:
       <div className="ui2-wrap">
         <div className="ui2-bento-head ui2-reveal">
           <span className="ui2-kicker">
-            <GoldMark className="ui2-mark" />
             {isEnglish ? "Everything in one place" : "ครบในที่เดียว"}
           </span>
           <h2 id="ui2-bento-title" className="ui2-h2">
@@ -365,7 +362,6 @@ export function Ui2BentoSection({ isEnglish, href }: { isEnglish: boolean; href:
                 </p>
                 <span className="ui2-why-chip">
                   {sample.why}
-                  <span className="ui2-btn-arrow" aria-hidden="true" />
                 </span>
               </div>
             </div>
@@ -461,7 +457,6 @@ export function Ui2BentoSection({ isEnglish, href }: { isEnglish: boolean; href:
             <ul className="ui2-readers" data-ui2-readers-list hidden />
             <Link href={href("/readers")} prefetch={false} className="ui2-tile-go">
               {isEnglish ? "See all readers" : "ดูแม่หมอทั้งหมด"}
-              <span className="ui2-btn-arrow" aria-hidden="true" />
             </Link>
           </div>
         </div>
@@ -553,7 +548,6 @@ function ShowTop({ title, desc, all }: { title: string; desc: string; all?: { hr
       {all && (
         <Link href={all.href} prefetch={false} className="ui2-show-all">
           {all.label}
-          <span className="ui2-arrow-ne" aria-hidden="true" />
         </Link>
       )}
     </div>
@@ -630,7 +624,6 @@ export function Ui2ShowcaseSection({ isEnglish, href }: { isEnglish: boolean; hr
       <div className="ui2-wrap">
         <div className="ui2-show-head">
           <span className="ui2-kicker">
-            <GoldMark className="ui2-mark" />
             {t("คลังไพ่ยิปซี", "The tarot library")}
           </span>
           {/* ไพ่แทรกกลางหัวข้อ (แบบ "pe[รูปคน]ple" ของ fastwork.com/selling · เจ้าของ 2026-10-16) — ตกแต่งล้วน ไม่ใช่ผลสุ่ม */}
@@ -877,7 +870,6 @@ export function Ui2ShowcaseSection({ isEnglish, href }: { isEnglish: boolean; hr
             <p className="ui2-show-cta">
               <a href="#home-quick" className="ui2-btn" data-home-target="showcase:start">
                 {t("เริ่มเปิดไพ่เลย", "Start a reading")}
-                <span className="ui2-btn-arrow" aria-hidden="true" />
               </a>
             </p>
           </div>
@@ -904,7 +896,6 @@ export function Ui2ShowcaseSection({ isEnglish, href }: { isEnglish: boolean; hr
               {articleLinks.map((link) => (
                 <Link key={link.path} href={href(link.path)} prefetch={false} className="ui2-show-row">
                   <span>{isEnglish ? link.en : link.th}</span>
-                  <span className="ui2-arrow-ne" aria-hidden="true" />
                 </Link>
               ))}
             </div>
@@ -1013,7 +1004,6 @@ export function Ui2ExploreSection({ isEnglish }: { isEnglish: boolean; href: Hre
         <div className="ui2-wrap">
           <div className="ui2-fq-head">
             <span className="ui2-kicker">
-              <GoldMark className="ui2-mark" />
               FAQ
             </span>
             <h2 id="ui2-faq-title" className="ui2-h2">
@@ -1064,7 +1054,6 @@ export function Ui2StickyCta({ isEnglish }: { isEnglish: boolean }) {
     <div className="ui2-sticky" data-ui2-sticky>
       <a href="#home-quick" className="ui2-btn" data-home-target="sticky:quick">
         {isEnglish ? "Draw 1 card now" : "เปิดไพ่ด่วน 1 ใบ"}
-        <span className="ui2-btn-arrow" aria-hidden="true" />
       </a>
     </div>
   );

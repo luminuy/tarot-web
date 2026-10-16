@@ -179,7 +179,6 @@ export const SpreadDetailClient: React.FC<Props> = ({
                 : isEnglish
                   ? "Unlock Grand Spread"
                   : "เปิดผังพยากรณ์พิเศษนี้"}
-              <span className="ui2-btn-arrow" aria-hidden="true" />
             </Link>
             <a href="#sd-positions" className="ui2-btn-ghost">
               {isEnglish ? "See every position" : "ดูความหมายทุกตำแหน่ง"}

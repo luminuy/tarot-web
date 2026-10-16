@@ -721,9 +721,15 @@ check(
    *   2. ตรวจแค่ .tsx/.astro ➔ ข้อความในไฟล์ .ts (บทความ · คำแนะนำฝึกสติ 🧘) ไม่มีใครดู
    * ตอนนี้ใช้ `Extended_Pictographic` ทั้งชุด + ✦ ✧ + ตัวเลือกรูปแบบอิโมจิ และตรวจไฟล์ .ts ด้วย
    */
-  const EMOJI = /[\p{Extended_Pictographic}\p{Regional_Indicator}\u{2726}\u{2727}\u{FE0F}]/u;
-  // ★ ดาวคะแนนรีวิวแม่หมอ (ตัวอักษรขาวดำ ไม่ใช่อิโมจิ) · © ลิขสิทธิ์ท้ายเว็บ
-  const EMOJI_ALLOWED = new Set(["\u2605", "\u00A9"]);
+  /*
+   * เจ้าของสั่งเพิ่ม (2026-10-16): "อีโมจิอื่น ๆ ด้วยก็ไม่เอา เอาออกทั้งหมดในเว็บ"
+   * ➔ ห้ามสัญลักษณ์ตัวอักษรทุกชนิดด้วย: ลูกศร (U+2190–21FF · ➔ ➜) · ติ๊ก/กากบาท ✓ ✕ · ดาว ★ ☆
+   *    รูปทรงเรขาคณิต ▲ ▼ ▾ ◆ ● (U+25A0–25FF) · dingbats ทั้งช่วง (U+2700–27BF) · U+2B00–2BFF · จุด •
+   *    ปุ่มที่ต้องมีไอคอนใช้ `src/components/ui/LineIcons.tsx` (SVG เส้น) · ดาวคะแนนรีวิวเป็นตัวเลข "4.8/5"
+   * เหลือที่อนุญาตตัวเดียว: © ลิขสิทธิ์ท้ายเว็บ
+   */
+  const EMOJI = /[\p{Extended_Pictographic}\p{Regional_Indicator}\u{2726}\u{2727}\u{FE0F}\u{2190}-\u{21FF}\u{2700}-\u{27BF}\u{25A0}-\u{25FF}\u{2B00}-\u{2BFF}\u{2022}]/u;
+  const EMOJI_ALLOWED = new Set(["\u00A9"]);
   /*
    * prompt ที่ส่งให้โมเดลอ่าน ไม่ได้แสดงบนจอ — ส่วนคำตอบของโมเดลถูกกวาดด้วย stripEmoji() ก่อนถึงจอ (A5-03b)
    * ไม่แก้อิโมจิใน prompt เพราะแก้แล้วต้องขึ้น PROMPT_VERSION + วัด ai:judge ใหม่ทั้งชุด
@@ -734,6 +740,17 @@ check(
     "src/lib/ai/ritual.ts",
     "src/data/ai/exemplars.ts",
     "src/lib/schema/reading.ts",
+    // ตัวประกอบ prompt อื่น ๆ (ใช้ • เป็นหัวข้อย่อยให้โมเดลอ่าน ไม่แสดงบนจอ — เพิ่มเข้ามาเมื่อด่านเริ่มนับ • 2026-10-16)
+    "src/lib/ai/alchemy.ts",
+    "src/lib/ai/chat-context.ts",
+    "src/lib/ai/gaze.ts",
+    "src/lib/ai/intent.ts",
+    "src/lib/ai/karmic.ts",
+    "src/lib/ai/numerology.ts",
+    "src/lib/studio/draft.ts",
+    "src/data/cards/visual-lore.ts",
+    "src/data/cards/visual-lore-en.ts",
+    "src/app/api/reading/[id]/chat/route.ts",
   ]);
   const emojiHits: string[] = [];
   for (const f of [...sources, ...walkAny(path.join(ROOT, "astro"), /\.(tsx?|astro)$/)]) {
@@ -751,7 +768,12 @@ check(
         if (bad.length > 0) emojiHits.push(`${rel(f)}:${i + 1} ${bad.join("")}`);
       });
   }
-  check(`A5-03: ไม่มีอิโมจิ/สัญลักษณ์ตกแต่ง (รวม ✦ ✨) ในข้อความที่ผู้ใช้เห็น`, emojiHits.length === 0, emojiHits.slice(0, 8).join(" · "));
+  check(`A5-03: ไม่มีอิโมจิ/สัญลักษณ์ตกแต่ง (รวม ✦ ✨ ลูกศร ✓ ✕ ★ ▼ •) ในข้อความที่ผู้ใช้เห็น`, emojiHits.length === 0, emojiHits.slice(0, 400).join(" · "));
+  // เครื่องหมายทองรูปข้าวหลามตัด (GoldMark) ก็นับเป็นของตกแต่งรูปสัญลักษณ์ — ถอดทั้งเว็บแล้ว 2026-10-16 ห้ามกลับมา
+  check(
+    "A5-03c: ไม่มีคอมโพเนนต์ GoldMark (ของตกแต่งรูปข้าวหลามตัด) ในเว็บ",
+    !fs.existsSync(path.join(ROOT, "src/components/ui/GoldMark.tsx")) && !sources.some((f) => /<GoldMark\b/.test(fs.readFileSync(f, "utf-8"))),
+  );
   /*
    * A5-03b: ข้อความที่ AI เขียน ด่านตรวจโค้ดมองไม่เห็น ➔ ต้องกวาดตรงทางออก
    * ยิงเคสจริงผ่าน stripEmoji() + ยืนยันว่าทางออกหลักทุกเส้นเรียกใช้อยู่

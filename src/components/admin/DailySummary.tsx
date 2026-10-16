@@ -18,6 +18,7 @@ import { PERSONAS } from "@/data/personas";
 import { SPREADS } from "@/data/spreads";
 import { useAdminResource } from "@/lib/admin/use-admin-resource";
 import { CATEGORY_NAME, FLAG_NAME, summarize } from "@/lib/stats/admin-metrics";
+import { RefreshIcon } from "@/components/ui/LineIcons";
 
 const SPREAD_NAME = Object.fromEntries(SPREADS.map((s) => [s.id, s.nameTh]));
 const PERSONA_NAME = Object.fromEntries(PERSONAS.map((p) => [p.id, p.nameTh]));
@@ -137,7 +138,7 @@ export default function DailySummary({ day, onDayChange }: { day: string; onDayC
             className="tap-overlay-y rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-medium text-ink hover:bg-canvas disabled:opacity-50 cursor-pointer"
             title="โหลดตัวเลขล่าสุด"
           >
-            <span className={loading ? "inline-block animate-spin" : "inline-block"}>↻</span>
+            <RefreshIcon className={loading ? "inline-block w-4 h-4 animate-spin" : "inline-block w-4 h-4"} />
             <span className="ml-1 hidden sm:inline">โหลดล่าสุด</span>
           </button>
         </div>

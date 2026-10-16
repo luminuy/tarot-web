@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { GoldMark } from "@/components/ui/GoldMark";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CardImage } from "@/components/card/CardImage";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
@@ -189,7 +188,7 @@ export function QuestionPageContent({ question: q, locale, askBox }: { question:
         <section className="space-y-3">
           <H2>{isEn ? "Ask it this way for a usable answer" : "ถามแบบนี้ได้คำตอบที่ใช้ได้จริงกว่า"}</H2>
           <ul className="space-y-2 text-sm text-[#4A4338] font-serif-th leading-relaxed list-none">
-            {c.betterQuestions.map((b, i) => <li key={i} className="pl-5 relative"><GoldMark className="absolute left-0.5 top-[0.6em] text-gold-ink" />{b}</li>)}
+            {c.betterQuestions.map((b, i) => <li key={i} className="pl-3 border-l-2 border-line-warm">{b}</li>)}
           </ul>
         </section>
 
@@ -272,7 +271,7 @@ export function QuestionPageContent({ question: q, locale, askBox }: { question:
         <section className="space-y-3">
           <H2>{isEn ? "After the cards answer" : "เมื่อไพ่ตอบแล้ว ทำอะไรต่อ"}</H2>
           <ul className="space-y-2 text-sm text-[#4A4338] font-serif-th leading-relaxed list-none">
-            {c.afterReading.map((b, i) => <li key={i} className="pl-5 relative"><GoldMark className="absolute left-0.5 top-[0.6em] text-gold-ink" />{b}</li>)}
+            {c.afterReading.map((b, i) => <li key={i} className="pl-3 border-l-2 border-line-warm">{b}</li>)}
           </ul>
         </section>
 

@@ -311,7 +311,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
               }}
               className="tap-overlay-y mt-1 flex min-h-[44px] items-center px-2.5 font-serif-th text-[13px] font-bold text-gold-ink hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold rounded-xl"
             >
-              {nav.reading.all.label} →
+              {nav.reading.all.label}
             </Link>
           </div>
 

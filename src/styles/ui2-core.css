@@ -30,13 +30,6 @@
   -webkit-text-fill-color: transparent;
 }
 
-/* เครื่องหมายทอง (`<GoldMark className="ui2-mark" />`) */
-.ui2-mark {
-  color: var(--ui2-gold-ink);
-}
-.ui2-night .ui2-mark {
-  color: var(--ui2-gold-solid);
-}
 /* ตำแหน่ง/สี/จังหวะของก้อนออโรรา (แสดงจริงเฉพาะระดับ full) */
 .ui2-blob-amber { left: -8%; top: -10%; background: var(--ui2-aurora-amber); --dur: 18s; }
 .ui2-blob-gold { right: -6%; top: -16%; background: var(--ui2-aurora-gold); --dur: 24s; }

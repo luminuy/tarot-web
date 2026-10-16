@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { GoldMark } from "@/components/ui/GoldMark";
 import {
   getReadings,
   deleteReading,
@@ -18,6 +17,7 @@ import { useLocale } from "@/lib/i18n";
 import { stripEmojiDeep } from "@/lib/text/no-emoji";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { CloseIcon } from "@/components/ui/LineIcons";
 
 interface ReadingHistoryModalProps {
   isOpen: boolean;
@@ -281,7 +281,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 aria-label={isEn ? "Close reading history" : "ปิดประวัติการดูดวง"}
                 className="glass-chip tap-overlay-y w-9 h-9 text-ink hover:bg-ink hover:text-canvas text-sm flex items-center justify-center transition cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
               >
-                ✕
+                <CloseIcon />
               </button>
             </div>
           </div>
@@ -337,7 +337,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 className="tap-overlay-y absolute top-3 right-3 text-muted hover:text-ink text-xs p-1 cursor-pointer"
                 title={isEn ? "Close summary" : "ปิดสรุป"}
               >
-                ✕
+                <CloseIcon />
               </button>
 
               <div className="flex items-center gap-2">
@@ -375,7 +375,6 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                   <ul className="space-y-1 text-[13px] text-ink">
                     {monthlySummary.lifeLessons.map((lesson, idx) => (
                       <li key={idx} className="flex items-start gap-1.5">
-                        <span className="text-gold-ink">✓</span>
                         <span>{lesson}</span>
                       </li>
                     ))}
@@ -481,8 +480,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
               className="glass-tile !rounded-xl mb-3 flex items-start justify-between gap-3 px-3.5 py-2.5 text-[13px] font-serif-th text-ink-deep"
             >
               <span className="leading-relaxed">
-                <GoldMark className="text-gold-ink mr-2 -mt-0.5" />
-                {isEn
+                                {isEn
                   ? `Your device keeps the latest ${LOCAL_HISTORY_LIMIT} readings — older ones have been removed. Sign in to archive them all.`
                   : `ประวัติบนเครื่องเต็ม ${LOCAL_HISTORY_LIMIT} รายการ รายการเก่าสุดถูกลบไปแล้ว — เข้าสู่ระบบเพื่อเก็บถาวรไม่จำกัด`}
               </span>
@@ -495,7 +493,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 className="tap-overlay-y flex-shrink-0 rounded-full px-2 py-1 text-xs text-muted hover:text-ink transition cursor-pointer"
                 aria-label={isEn ? "Dismiss notice" : "ปิดข้อความแจ้งเตือน"}
               >
-                ✕
+                <CloseIcon />
               </button>
             </div>
           )}
@@ -569,7 +567,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                           title={isEn ? "Delete entry" : "ลบบันทึกนี้"}
                           aria-label={isEn ? "Delete entry" : "ลบบันทึกนี้"}
                         >
-                          ✕
+                          <CloseIcon />
                         </button>
                       </div>
                     </div>
@@ -588,8 +586,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         role="alert"
                         className="glass-tile !rounded-lg flex items-center gap-2 px-3 py-2 text-[13px] font-serif-th text-ink-deep"
                       >
-                        <GoldMark className="text-gold-ink" />
-                        <span>
+                                                <span>
                           {isEn
                             ? "This entry's card data could not be read. Please refresh the page and try again."
                             : "ข้อมูลไพ่ของบันทึกนี้เสียหาย กรุณาโหลดใหม่อีกครั้ง"}
@@ -673,7 +670,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                               : "bg-err-wash text-err border border-line"
                           }`}
                         >
-                          {isEn ? "✕ Not Manifested" : "✕ ไม่เกิดขึ้น"}
+                          {isEn ? "Not Manifested" : "ไม่เกิดขึ้น"}
                         </button>
                       </div>
 

@@ -218,11 +218,11 @@
   box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
   transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
 }
+/* แถบสีประจำหมวด (เดิมรูปข้าวหลามตัด — ถอดตามกฎห้ามสัญลักษณ์ตกแต่ง 2026-10-16) */
 .ui2-sp-jump-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 3px;
-  rotate: 45deg;
+  width: 12px;
+  height: 4px;
+  border-radius: 2px;
   background: var(--cat);
 }
 .ui2-sp-jump-count {

@@ -8,6 +8,7 @@ import DailySummary, { statDayKey } from "@/components/admin/DailySummary";
 import { KeyValueList, Meter, SectionTitle, StatCard, fmt, fmtPct } from "@/components/admin/StatsWidgets";
 import { useAdminResource } from "@/lib/admin/use-admin-resource";
 import { summarize } from "@/lib/stats/admin-metrics";
+import { RefreshIcon } from "@/components/ui/LineIcons";
 
 interface StatsSnapshot {
   allTime: Record<string, number>;
@@ -110,7 +111,7 @@ export default function StatsDashboard() {
               className="altar-card-porcelain !rounded-lg tap-overlay-y inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-ink hover:bg-canvas transition-colors cursor-pointer disabled:opacity-50"
               title="โหลดตัวเลขล่าสุด"
             >
-              <span className={loading ? "inline-block animate-spin" : "inline-block"}>↻</span>
+              <RefreshIcon className={loading ? "inline-block w-4 h-4 animate-spin" : "inline-block w-4 h-4"} />
               <span className="hidden sm:inline">โหลดล่าสุด</span>
             </button>
           </div>
@@ -218,7 +219,7 @@ export default function StatsDashboard() {
           </div>
 
           <p className="text-xs text-muted">
-            ต้องการยิงทดสอบการเชื่อมต่อ AI จริง หรือดูว่าคีย์ใช้ได้ไหม ➔ เมนู &quot;ตรวจสุขภาพระบบ&quot;
+            ต้องการยิงทดสอบการเชื่อมต่อ AI จริง หรือดูว่าคีย์ใช้ได้ไหม ไปที่เมนู &quot;ตรวจสุขภาพระบบ&quot;
           </p>
         </div>
       )}

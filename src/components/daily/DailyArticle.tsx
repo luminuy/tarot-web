@@ -124,7 +124,6 @@ export function DailyArticle({
                 <span className="ui2-sp-tile-name">{item.label}</span>
                 <span className="ui2-sp-tile-note">{item.note}</span>
                 <span className="ui2-sp-tile-go" aria-hidden="true">
-                  <span className="ui2-btn-arrow" />
                 </span>
               </a>
             </li>

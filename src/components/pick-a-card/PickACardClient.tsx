@@ -514,7 +514,6 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                   {/* Tap affordance */}
                   <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-mono text-gold-ink group-hover:underline">
                     <span>{isEnglish ? "TAP TO REVEAL" : "แตะเพื่อเปิดคำทำนาย"}</span>
-                    <span aria-hidden="true">→</span>
                   </span>
                 </div>
               );
@@ -787,7 +786,6 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                       ? "Consult AI Oracle for Deep Spread"
                       : "เปิดไพ่เจาะลึกเต็มรูปแบบกับแม่หมอ AI"}
                   </span>
-                  <span aria-hidden="true">→</span>
                 </Link>
               </div>
             </article>

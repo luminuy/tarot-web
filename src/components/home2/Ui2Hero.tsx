@@ -1,7 +1,6 @@
 "use client";
 
 import { CardImage } from "@/components/card/CardImage";
-import { GoldMark } from "@/components/ui/GoldMark";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
@@ -77,7 +76,6 @@ export function Ui2Hero({ isEnglish, streak = 0 }: { isEnglish: boolean; streak?
 
       <div className="ui2-hero-inner">
         <p className="ui2-chip">
-          <GoldMark className="ui2-mark" />
           {isEnglish ? "Authentic 1909 deck · truly random, verifiable" : "สำรับ 1909 แท้ · สุ่มจริง ตรวจสอบได้"}
         </p>
 
@@ -109,17 +107,14 @@ export function Ui2Hero({ isEnglish, streak = 0 }: { isEnglish: boolean; streak?
           <a href="#home-quick" className="ui2-btn" data-home-target="hero:quick">
             <span className="ui2-btn-ring ui2-loop" aria-hidden="true" />
             {isEnglish ? "Draw 1 card now" : "เปิดไพ่ด่วน 1 ใบ"}
-            <span className="ui2-btn-arrow" aria-hidden="true" />
           </a>
           <Link href="/daily" prefetch={false} className="ui2-btn-ghost ui2-daily-btn" data-home-target="hero:daily">
-            {/* ภาพไพ่จิ๋วของไพ่วันนี้ตัวจริง (มาจากเซิร์ฟเวอร์) · ยังโหลดไม่เสร็จ = เครื่องหมายทองแทน ห้ามเดาไพ่ (กฎเหล็ก 14) */}
+            {/* ภาพไพ่จิ๋วของไพ่วันนี้ตัวจริง (มาจากเซิร์ฟเวอร์) · ยังโหลดไม่เสร็จ = ไม่แสดงอะไร ห้ามเดาไพ่ (กฎเหล็ก 14) */}
             {daily ? (
               <span className="ui2-daily-thumb" aria-hidden="true">
                 <CardImage cardId={daily.cardId} alt="" thumb sizes="22px" loading="lazy" fetchPriority="low" />
               </span>
-            ) : (
-              <GoldMark className="ui2-mark" />
-            )}
+            ) : null}
             <span className="ui2-daily-name">
               {isEnglish ? "Today's card" : "ไพ่วันนี้"}
               {dailyName ? ` · ${dailyName}` : ""}

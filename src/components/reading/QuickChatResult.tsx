@@ -25,6 +25,7 @@ import type { ReadingBasis } from "@/lib/tarot/explain-types";
 import { CardWhyPanel } from "./insight/CardWhyPanel";
 import { ReadingBasisPanel } from "./insight/ReadingBasisPanel";
 import { explainUrl } from "./insight/use-reading-explain";
+import { CheckIcon, ChevronIcon } from "@/components/ui/LineIcons";
 
 export interface QuickChatResultProps {
   reading?: Partial<Reading> | null;
@@ -404,7 +405,7 @@ isEnglish
                   {reading.advice.slice(0, 2).map((item, idx) => (
                     <li key={idx} className="flex items-start gap-2 text-xs sm:text-sm text-ink-deep font-serif-th">
                       <span className="w-4 h-4 rounded-full bg-gold-ink/20 text-gold-ink font-bold flex items-center justify-center flex-shrink-0 text-[11px] mt-0.5">
-                        ✓
+                        <CheckIcon />
                       </span>
                       <span className="leading-snug">{item}</span>
                     </li>
@@ -422,7 +423,7 @@ isEnglish
             >
               <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gold-ink text-surface text-sm shadow-sm group-hover:scale-105 group-hover:bg-gold-ink-deep transition font-sans font-bold">
-                  ➔
+                  <ChevronIcon direction="right" />
                 </span>
                 <div>
                   <span className="block font-serif-th text-sm font-bold text-ink-deep">
@@ -439,7 +440,6 @@ isEnglish
               </div>
               <span className="flex items-center gap-1 font-serif-th text-xs font-bold text-gold-ink px-2.5 py-1 rounded-full bg-gold-ink/10 border border-gold-ink/20 flex-shrink-0 group-hover:translate-x-0.5 transition-transform">
                 <span>{isEnglish ? "Continue Chat" : "คุยต่อ"}</span>
-                <span>➔</span>
               </span>
             </Link>
           )}
@@ -520,7 +520,6 @@ isEnglish
                     className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 transition cursor-pointer whitespace-nowrap"
                   >
                     <span>{isEnglish ? "Consult Human Reader" : "ปรึกษาแม่หมอตัวจริง"}</span>
-                    <span>➔</span>
                   </Link>
                 </div>
               </div>

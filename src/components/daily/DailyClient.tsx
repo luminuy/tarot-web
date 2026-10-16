@@ -9,7 +9,6 @@ import { useLocale } from "@/lib/i18n";
 import { APP_TIME_ZONE } from "@/lib/time/bangkok";
 import { saveReading } from "@/lib/utils/history";
 import { soundManager } from "@/lib/utils/audio";
-import { GoldMark } from "@/components/ui/GoldMark";
 import { OneCardRitual } from "@/components/reading/one-card/OneCardRitual";
 import { DailyStreakRibbon } from "@/components/daily/DailyStreakRibbon";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
@@ -215,7 +214,6 @@ export function DailyClient() {
           </ol>
         </nav>
         <span className="ui2-chip ui2-dy-date">
-          <GoldMark className="ui2-mark" />
           {todayDateString ?? (isEnglish ? "Today's Card" : "ไพ่ประจำวันนี้")}
         </span>
         <h1 className="ui2-h1 ui2-dy-h1">
@@ -294,7 +292,6 @@ export function DailyClient() {
               {/* คำบรรยายของใบที่เลือก */}
               <div className="ui2-dy-caption" aria-live="polite">
                 <span className="ui2-dy-caption-el">
-                  <GoldMark className="ui2-mark" />
                   {isEnglish ? currentChamber.elementEn : currentChamber.elementTh}
                   <span aria-hidden="true"> · </span>
                   {isEnglish ? currentChamber.cardNameEn : currentChamber.cardNameTh}

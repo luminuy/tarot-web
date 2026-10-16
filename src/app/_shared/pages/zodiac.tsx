@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { GoldMark } from "@/components/ui/GoldMark";
 
 import { RitualHero } from "@/components/reading/one-card/RitualHero";
 import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
@@ -581,7 +580,7 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
                     {aspect.name}
                     <span aria-hidden="true" className="ml-2 inline-flex items-center gap-1.5 text-gold-ink">
                       {Array.from({ length: aspect.harmony }, (_, i) => (
-                        <GoldMark key={i} />
+                        <span key={i} className="h-1 w-4 rounded-full bg-current" />
                       ))}
                     </span>
                   </p>
@@ -655,13 +654,13 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
           </div>
           <nav aria-label={isEnglish ? "Other signs" : "ราศีอื่น"} className="flex justify-between gap-3 pt-4 border-t border-line text-sm font-serif-th">
             <Link href={zodiacSignPath(prev.id)} className="text-muted hover:text-gold-ink transition-colors">
-              ← {isEnglish ? prev.nameEn : prev.nameTh}
+              {isEnglish ? prev.nameEn : prev.nameTh}
             </Link>
             <Link href={INDEX_PATH} className="text-muted hover:text-gold-ink transition-colors">
               {isEnglish ? "All signs" : "ทุกราศี"}
             </Link>
             <Link href={zodiacSignPath(next.id)} className="text-muted hover:text-gold-ink transition-colors">
-              {isEnglish ? next.nameEn : next.nameTh} →
+              {isEnglish ? next.nameEn : next.nameTh}
             </Link>
           </nav>
         </section>

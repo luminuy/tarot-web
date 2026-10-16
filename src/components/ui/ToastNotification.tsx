@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale } from "@/lib/i18n";
+import { CloseIcon, CheckIcon } from "@/components/ui/LineIcons";
 
 export interface ToastData {
   id?: string;
@@ -130,7 +131,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
               : "bg-inset-warm border border-line-warm text-gold-ink"
           }`}
         >
-          {isError ? "!" : "✓"}
+          {isError ? "!" : <CheckIcon />}
         </div>
 
         {/* Content text */}
@@ -162,7 +163,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
               : "text-muted hover:text-ink-deep hover:bg-inset-warm"
           }`}
         >
-          ✕
+          <CloseIcon />
         </button>
       </div>
 

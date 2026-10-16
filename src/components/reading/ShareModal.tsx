@@ -14,6 +14,7 @@ import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 import { useLocale } from "@/lib/i18n";
 import { copyToClipboard } from "@/lib/utils/clipboard";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { CloseIcon } from "@/components/ui/LineIcons";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -484,7 +485,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
               aria-label={isEnglish ? "Close share dialog" : "ปิดหน้าต่างแชร์ผลคำทำนาย"}
               className="glass-chip w-10 h-10 text-ink-deep hover:text-surface text-sm flex items-center justify-center transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
             >
-              ✕
+              <CloseIcon />
             </button>
           </div>
 

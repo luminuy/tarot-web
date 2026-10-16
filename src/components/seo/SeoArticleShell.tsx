@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { RouteLink as Link } from "@/components/ui/RouteLink";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { ChevronIcon } from "@/components/ui/LineIcons";
 
 export interface SeoFaqItem {
   q: string;
@@ -96,7 +97,7 @@ export function SeoArticleShell({
                       }`}
                       aria-hidden="true"
                     >
-                      ▾
+                      <ChevronIcon />
                     </span>
                   </button>
                   {isOpen && (

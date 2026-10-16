@@ -318,7 +318,6 @@ export function Ui2PickSection({
                   <div className="ui2-result-actions">
                     <button type="button" className="ui2-btn" onClick={onReadWithAI} data-home-target="quick:read">
                       {isEnglish ? "Let the AI oracle read on" : "ให้แม่หมอ AI อ่านต่อ"}
-                      <span className="ui2-btn-arrow" aria-hidden="true" />
                     </button>
                     <button type="button" className="ui2-btn-ghost" onClick={() => reset(true)} data-home-target="quick:reshuffle">
                       {isEnglish ? "Shuffle again" : "สับใหม่"}

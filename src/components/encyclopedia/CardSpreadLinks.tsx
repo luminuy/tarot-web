@@ -72,7 +72,7 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
             href={href("/spreads")}
             className="text-xs font-serif-th text-muted hover:text-gold-ink transition-colors"
           >
-            {isEnglish ? "All spreads →" : "ดูผังทั้งหมด →"}
+            {isEnglish ? "All spreads" : "ดูผังทั้งหมด"}
           </Link>
         </div>
 
@@ -96,7 +96,7 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
               </div>
               <div className="pt-2 mt-2 border-t border-line/40 text-right">
                 <span className="text-[11px] font-serif-th text-gold-ink group-hover:underline">
-                  {isEnglish ? "Start this spread →" : "เริ่มเปิดไพ่ผังนี้ →"}
+                  {isEnglish ? "Start this spread" : "เริ่มเปิดไพ่ผังนี้"}
                 </span>
               </div>
             </Link>
@@ -117,7 +117,7 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
               href="/blog"
               className="text-xs font-serif-th text-muted hover:text-gold-ink transition-colors"
             >
-              คลังบทความทั้งหมด →
+              คลังบทความทั้งหมด
             </Link>
           </div>
 
@@ -141,7 +141,7 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
                 </div>
                 <div className="pt-2 mt-2 border-t border-line/40 text-right">
                   <span className="text-[11px] font-serif-th text-gold-ink group-hover:underline">
-                    อ่านบทความ →
+                    อ่านบทความ
                   </span>
                 </div>
               </Link>

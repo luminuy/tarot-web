@@ -372,8 +372,8 @@ export function OneCardRitual({
                     className="text-xs font-serif-th font-semibold text-gold-ink hover:text-ink underline underline-offset-4 transition-colors"
                   >
                     {isEn
-                      ? "Explore full symbolism and card meaning →"
-                      : "เปิดคัมภีร์เจาะลึกความหมายไพ่ใบนี้ →"}
+                      ? "Explore full symbolism and card meaning"
+                      : "เปิดคัมภีร์เจาะลึกความหมายไพ่ใบนี้"}
                   </Link>
                 </div>
               </div>
@@ -402,7 +402,7 @@ export function OneCardRitual({
                 onClick={handleRestart}
                 className="glass-chip w-full sm:w-auto px-6 py-3 text-xs sm:text-sm font-serif-th font-semibold text-ink transition cursor-pointer"
               >
-                {isEn ? "← Draw Another Reading" : "← เริ่มเปิดไพ่อีกครั้ง"}
+                {isEn ? "Draw Another Reading" : "เริ่มเปิดไพ่อีกครั้ง"}
               </button>
 
               <button

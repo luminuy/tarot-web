@@ -245,7 +245,7 @@ function DesktopNav({ isEnglish }: { isEnglish: boolean }) {
           </div>
           <div className="mega-foot">
             <Link href={nav.reading.all.href} prefetch={false}>
-              {nav.reading.all.label} →
+              {nav.reading.all.label}
             </Link>
           </div>
         </div>

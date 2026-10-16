@@ -529,7 +529,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       autoComplete={mode === "signup" ? "new-password" : "current-password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder={mode === "signup" ? (isEn ? "At least 10 characters" : "อย่างน้อย 10 ตัวอักษร") : "••••••••••"}
+                      placeholder={mode === "signup" ? (isEn ? "At least 10 characters" : "อย่างน้อย 10 ตัวอักษร") : (isEn ? "Your password" : "รหัสผ่านของคุณ")}
                     />
                     <button
                       type="button"

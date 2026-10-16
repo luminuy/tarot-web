@@ -168,7 +168,7 @@ export function ChangePasswordCard({ icon }: { icon?: React.ReactNode } = {}) {
               aria-describedby={errorMsg ? errorId : undefined}
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
-              placeholder="••••••••••"
+              placeholder="รหัสผ่านปัจจุบัน"
               className="w-full h-10 px-3.5 rounded-lg bg-inset-warm border border-line-interactive-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
             />
           </div>

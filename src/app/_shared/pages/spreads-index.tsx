@@ -258,7 +258,6 @@ export function SpreadsIndexBody({ locale, library }: { locale: Locale; library:
                     <span className="ui2-sp-topic-note">{isEnglish ? (topic.taglineEn ?? topic.tagline) : topic.tagline}</span>
                     <span className="ui2-sp-topic-n">
                       <span className="ui2-num">{topic.spreadIds.length}</span> {copy.spreadsUnit}
-                      <span className="ui2-btn-arrow" aria-hidden="true" />
                     </span>
                   </span>
                 </a>
@@ -282,7 +281,6 @@ export function SpreadsIndexBody({ locale, library }: { locale: Locale; library:
                   <span className="ui2-sp-tile-name">{item.label}</span>
                   <span className="ui2-sp-tile-note">{item.note}</span>
                   <span className="ui2-sp-tile-go" aria-hidden="true">
-                    <span className="ui2-btn-arrow" />
                   </span>
                 </a>
               </li>

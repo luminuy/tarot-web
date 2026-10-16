@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useLocale } from "@/lib/i18n";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { CloseIcon } from "@/components/ui/LineIcons";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -164,7 +165,7 @@ export const Modal: React.FC<ModalProps> = ({
                 aria-label={isEnglish ? "Close dialog" : "ปิดหน้าต่าง"}
                 className="glass-chip w-11 h-11 shrink-0 flex items-center justify-center text-muted hover:text-ink-deep hover:border-gold-ink transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink cursor-pointer"
               >
-                ✕
+                <CloseIcon />
               </button>
             )}
           </div>

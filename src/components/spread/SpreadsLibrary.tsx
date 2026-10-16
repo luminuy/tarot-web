@@ -32,7 +32,6 @@ import { mapLayout, boxOf, MAP_CARD_ASPECT } from "@/lib/tarot/spread-map-geomet
 import { isStandardSpread } from "@/lib/entitlement/limits";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
-import { GoldMark } from "@/components/ui/GoldMark";
 import { CardImage } from "@/components/card/CardImage";
 
 interface SpreadsLibraryProps {
@@ -68,7 +67,6 @@ function HeroTrust({ isEnglish }: { isEnglish: boolean }) {
     <ul className="ui2-sp-trust">
       {(isEnglish ? HERO_TRUST.en : HERO_TRUST.th).map((text) => (
         <li key={text}>
-          <GoldMark className="ui2-mark" />
           {text}
         </li>
       ))}
@@ -221,7 +219,6 @@ function ShelfSection({
             </p>
             <Link href={`/read/${starter.id}`} prefetch={false} className="ui2-btn ui2-sp-start-btn">
               {isEnglish ? "Start" : "เริ่มดูดวง"}
-              <span className="ui2-btn-arrow" aria-hidden="true" />
             </Link>
           </div>
         )}
@@ -325,7 +322,6 @@ function SpreadPopDialog({ isEnglish }: { isEnglish: boolean }) {
             <a className="ui2-btn" data-pop-start="" href="#">
               <span className="ui2-btn-ring ui2-loop" aria-hidden="true" />
               {isEnglish ? "Start a reading with this spread" : "เริ่มดูดวงด้วยผังนี้"}
-              <span className="ui2-btn-arrow" aria-hidden="true" />
             </a>
             <a className="ui2-pop-guide" data-pop-guide="" href="#">
               {isEnglish ? "Read the spread guide" : "อ่านคู่มือผังนี้"}
@@ -404,7 +400,6 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
           <div className="ui2-sp-hero-ctas">
             <Link href="/read/three-card" prefetch={false} className="ui2-btn ui2-sp-cta">
               {isEnglish ? "Start with 3 cards" : "เริ่มด้วยไพ่ 3 ใบ"}
-              <span className="ui2-btn-arrow" aria-hidden="true" />
             </Link>
             {/* ห้องออกแบบผัง (REFLECTION_JOURNAL_PLAN 1.8) — ทางเข้าเดียวจากคลังผัง */}
             <Link href="/spreads/create" className="ui2-btn-ghost ui2-sp-create">

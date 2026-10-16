@@ -6,6 +6,7 @@ import Link from "next/link";
 import { calculatePasswordStrength } from "@/lib/auth/strength";
 import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
+import { CloseIcon, CheckIcon } from "@/components/ui/LineIcons";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +56,7 @@ function ResetPasswordForm() {
     return (
       <div className="text-center space-y-4">
         <div className="w-14 h-14 rounded-lg bg-err-wash border border-line-warm text-err flex items-center justify-center text-2xl mx-auto ">
-          ✕
+          <CloseIcon className="w-7 h-7" />
         </div>
         <h2 className="text-xl font-bold font-serif-th text-ink-deep">
           {isEn ? "Invalid or Expired Link" : "ลิงก์ไม่ถูกต้องหรือหมดอายุ"}
@@ -218,7 +219,7 @@ export default function ResetPasswordPage() {
   return (
     <main id="main-content" tabIndex={-1} className="min-h-[70vh] text-ink-deep flex items-center justify-center p-4">
       <div className="w-full max-w-md rounded-lg bg-surface border border-line-warm p-6 sm:p-8 relative overflow-hidden text-center space-y-6">
-        <div className="w-14 h-14 rounded-lg bg-inset-warm border border-line-warm text-gold-ink flex items-center justify-center text-2xl mx-auto font-bold">✓</div>
+        <div className="w-14 h-14 rounded-lg bg-inset-warm border border-line-warm text-gold-ink flex items-center justify-center text-2xl mx-auto font-bold"><CheckIcon /></div>
 
         <div className="space-y-1">
           <h1 className="text-xl sm:text-2xl font-serif-th font-bold font-mystic-gold">

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useId, useState } from "react";
-import { GoldMark } from "@/components/ui/GoldMark";
 import { CardImage } from "@/components/card/CardImage";
 import { deckMeta } from "@/data/cards/deck-index-meta";
 import { MAX_TAG_LENGTH, MAX_TAGS_PER_ENTRY, normalizeTags, RITUAL_FOCUS_LABEL } from "@/lib/journal/journal-types";
@@ -9,6 +8,7 @@ import { moodLabel, moodOption, type MoodLevel } from "@/lib/journal/mood";
 import type { ReadingMetaPatch, ReadingOutcome, SavedReadingItem } from "@/lib/utils/history";
 import { MoodPicker } from "./MoodPicker";
 import { CATEGORY_LABEL, OUTCOME_LABEL, formatDate } from "./journal-format";
+import { ChevronIcon, PinIcon } from "@/components/ui/LineIcons";
 
 /**
  * ✦ การ์ดบันทึกหนึ่งรายการในสมุดดวง (REFLECTION_JOURNAL_PLAN 1.3)
@@ -82,7 +82,7 @@ export const JournalEntryCard: React.FC<{
             item.pinned ? "text-gold-ink" : "text-line-warm hover:text-gold-ink"
           }`}
         >
-          <GoldMark size="lg" hollow={!item.pinned} />
+          <PinIcon filled={!!item.pinned} />
         </button>
       </header>
 
@@ -114,7 +114,7 @@ export const JournalEntryCard: React.FC<{
               <Dot color={before?.color} />
               {moodLabel(item.moodBefore, isEnglish) ?? "—"}
               <span aria-hidden="true" className="text-muted">
-                ➔
+                <ChevronIcon direction="right" />
               </span>
               <span className="sr-only">{L({ th: " เปลี่ยนเป็น ", en: " changed to " })}</span>
               <Dot color={after?.color} />

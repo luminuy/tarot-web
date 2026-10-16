@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { useAdminResource } from "@/lib/admin/use-admin-resource";
 import { summarize } from "@/lib/stats/admin-metrics";
 import { APP_TIME_ZONE } from "@/lib/time/bangkok";
+import { RefreshIcon } from "@/components/ui/LineIcons";
 
 interface ServiceCheck {
   ok: boolean;
@@ -165,7 +166,7 @@ export default function AdminOverview({ onNavigateTab }: { onNavigateTab: (tabId
               <p className="text-sm font-bold text-amber-900">ต้องดำเนินการ</p>
               <ul className="space-y-1 text-xs leading-relaxed text-amber-900">
                 {health.warnings.map((w) => (
-                  <li key={w}>• {w}</li>
+                  <li key={w}>{w}</li>
                 ))}
               </ul>
             </div>
@@ -326,7 +327,7 @@ export default function AdminOverview({ onNavigateTab }: { onNavigateTab: (tabId
             className="flex min-h-11 w-full items-center justify-between rounded-lg border border-line bg-white px-3 text-left text-sm text-ink hover:bg-canvas disabled:opacity-50"
           >
             {rebuilding ? "กำลังอัปเดตระบบค้นหา…" : "อัปเดตระบบค้นหาไพ่ (Search Index)"}
-            <span aria-hidden className="text-muted">↻</span>
+            <RefreshIcon className="w-4 h-4 text-muted" />
           </button>
           {actionMsg ? (
             <p className="text-xs text-muted" aria-live="polite">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { PublicReaderProfile } from "@/lib/marketplace/readers.repo";
 import { CONSULTATION_MINUTES, readerPriceThb } from "@/lib/marketplace/offer";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { CloseIcon, CheckIcon } from "@/components/ui/LineIcons";
 
 interface ReadersDirectoryProps {
   initialReaders: PublicReaderProfile[];
@@ -58,7 +59,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
         <h2 className="text-lg font-bold text-ink">ยังไม่มีแม่หมอเปิดให้คำปรึกษาตอนนี้</h2>
         <p className="text-sm text-muted">ระหว่างนี้ลองเปิดไพ่กับแม่หมอ AI ได้ฟรี แล้วกลับมาดูใหม่เร็ว ๆ นี้</p>
         <Link href="/" className="btn-gold-glass inline-flex items-center gap-2 mt-2 px-6 py-3 text-sm font-bold">
-          ดูดวงกับแม่หมอ AI ฟรี <span aria-hidden="true">→</span>
+          ดูดวงกับแม่หมอ AI ฟรี
         </Link>
       </section>
     );
@@ -93,7 +94,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
                 aria-label="ล้างคำค้นหา"
                 className="absolute right-1 top-1/2 -translate-y-1/2 h-11 w-11 grid place-items-center text-muted hover:text-ink cursor-pointer"
               >
-                <span aria-hidden="true">✕</span>
+                <CloseIcon />
               </button>
             )}
           </div>
@@ -173,13 +174,13 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
                         <ThaiPhrases>{reader.displayName}</ThaiPhrases>
                       </h3>
                       <p className="inline-flex items-center gap-1.5 text-[13px] text-ok font-semibold">
-                        <span aria-hidden="true" className="h-4 w-4 rounded-full bg-ok text-white grid place-items-center text-[10px]">✓</span>
+                        <span aria-hidden="true" className="h-4 w-4 rounded-full bg-ok text-white grid place-items-center text-[10px]"><CheckIcon /></span>
                         ยืนยันตัวตนแล้ว
                       </p>
                       {rating && (
                         <p className="text-[13px] text-ink">
-                          <span aria-hidden="true" className="text-gold-ink">★</span>{" "}
-                          <strong className="font-bold">{rating.average.toFixed(1)}</strong>
+                          <span className="text-muted">คะแนน </span>
+                          <strong className="font-bold">{rating.average.toFixed(1)}/5</strong>
                           <span className="text-muted"> · {rating.count} รีวิว</span>
                         </p>
                       )}
@@ -210,7 +211,6 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
                         className="inline-flex items-center justify-center gap-2 rounded-full bg-ink-deep px-6 py-3 text-sm font-bold text-surface whitespace-nowrap transition-colors hover:bg-gold-ink"
                       >
                         {isLive ? "คุยกับแม่หมอ" : "ดูโปรไฟล์"}
-                        <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">→</span>
                       </Link>
                     </div>
                   </div>

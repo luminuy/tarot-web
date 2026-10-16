@@ -76,11 +76,11 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
   ];
 
   const categories = [
-    { id: "general" as const, nameTh: "ภาพรวมและเส้นทางชีวิต", nameEn: "Life overview", icon: "•", color: "#8F5C1A" },
-    { id: "love" as const, nameTh: "ความรักและคนในใจ", nameEn: "Love & Relationships", icon: "•", color: "#A6392C" },
-    { id: "work" as const, nameTh: "การงานและโครงการ", nameEn: "Career & Ambitions", icon: "•", color: "#6F5B4A" },
-    { id: "money" as const, nameTh: "การเงินและโชคลาภ", nameEn: "Finances & Abundance", icon: "◆", color: "#3A7044" },
-    { id: "self" as const, nameTh: "จิตวิทยาและการเติบโตภายใน", nameEn: "Psychology & Inner Growth", icon: "•", color: "#6F5B4A" },
+    { id: "general" as const, nameTh: "ภาพรวมและเส้นทางชีวิต", nameEn: "Life overview", icon: "", color: "#8F5C1A" },
+    { id: "love" as const, nameTh: "ความรักและคนในใจ", nameEn: "Love & Relationships", icon: "", color: "#A6392C" },
+    { id: "work" as const, nameTh: "การงานและโครงการ", nameEn: "Career & Ambitions", icon: "", color: "#6F5B4A" },
+    { id: "money" as const, nameTh: "การเงินและโชคลาภ", nameEn: "Finances & Abundance", icon: "", color: "#3A7044" },
+    { id: "self" as const, nameTh: "จิตวิทยาและการเติบโตภายใน", nameEn: "Psychology & Inner Growth", icon: "", color: "#6F5B4A" },
   ];
 
   /* ผังที่ปุ่มเปิดไพ่พาไป — ปุ่มหลักกับแถบติดล่างจอต้องไปที่เดียวกัน */

@@ -426,8 +426,8 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
             </p>
             <p className="sr-only">
               {isEnglish
-                ? `Numerological Sum: ${result.day} + ${result.month} + ${result.yearCe} = ${result.calculatedSum} → Card #${result.primaryNumber}`
-                : `ผลรวมเลขศาสตร์: ${result.day} + ${result.month} + ${result.yearCe} = ${result.calculatedSum} → ไพ่หมายเลข ${result.primaryNumber}`}
+                ? `Numerological Sum: ${result.day} + ${result.month} + ${result.yearCe} = ${result.calculatedSum}, Card #${result.primaryNumber}`
+                : `ผลรวมเลขศาสตร์: ${result.day} + ${result.month} + ${result.yearCe} = ${result.calculatedSum} ได้ไพ่หมายเลข ${result.primaryNumber}`}
             </p>
             <ol className="ui2-bc-eq" aria-hidden="true">
               <li><b>{result.day}</b><small>{isEnglish ? "day" : "วัน"}</small></li>

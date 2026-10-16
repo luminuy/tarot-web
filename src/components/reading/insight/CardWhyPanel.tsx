@@ -4,6 +4,7 @@ import React, { useId, useState } from "react";
 import { trackReflectionEvent } from "@/lib/stats/reflection-events";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { useReadingExplain } from "./use-reading-explain";
+import { ChevronIcon } from "@/components/ui/LineIcons";
 
 /**
  * ✦ "ทำไมแม่หมออ่านแบบนี้?" — แผงพับได้ใต้คำอ่านรายใบ (REFLECTION_JOURNAL_PLAN 1.2)
@@ -43,7 +44,7 @@ export const CardWhyPanel: React.FC<{
       >
         <span>{isEnglish ? "Why did the reader read it this way?" : "ทำไมแม่หมออ่านแบบนี้?"}</span>
         <span aria-hidden="true" className={`transition-transform ${open ? "rotate-180" : ""}`}>
-          ▾
+          <ChevronIcon />
         </span>
       </button>
 

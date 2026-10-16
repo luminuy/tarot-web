@@ -78,8 +78,7 @@ export function ReadingChatBodyTh() {
           href="/"
           aria-label={isEnglish ? "Back to Reading" : "กลับไปหน้าคำทำนาย"}
           className="flex items-center gap-1.5 rounded-lg py-1.5 pr-2 font-serif-th text-xs text-ink transition-colors hover:text-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-        >
-          <span aria-hidden="true">←</span> {isEnglish ? "Back to Reading" : "กลับไปหน้าคำทำนาย"}
+        > {isEnglish ? "Back to Reading" : "กลับไปหน้าคำทำนาย"}
         </LocaleLink>
         <span className="flex items-center gap-1.5 font-serif-th text-xs font-bold text-ink">
           

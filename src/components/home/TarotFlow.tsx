@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { GoldMark } from "@/components/ui/GoldMark";
 import { overlayReducer, OVERLAY_INITIAL, isOverlay } from "@/components/home/flow-overlay";
 import { deckReducer, DECK_INITIAL } from "@/components/home/flow-deck";
 import { sessionReducer, SESSION_INITIAL } from "@/components/home/flow-session";
@@ -1871,7 +1870,6 @@ export default function TarotFlow({
                                   on ? "bg-surface border-gold-ink text-ink-deep font-semibold" : "glass-chip border-line-warm text-ink-deep hover:border-gold-ink"
                                 }`}
                               >
-                                {on && <GoldMark className="mr-2 -mt-0.5" />}
                                 {t.title}
                               </button>
                             );
@@ -1972,7 +1970,6 @@ export default function TarotFlow({
                     className="v2-rt-go"
                   >
                     {loading ? (isEnglish ? "Loading..." : "กำลังโหลด...") : isEnglish ? "Pick my cards" : "ไปเลือกไพ่"}
-                    <span aria-hidden="true" className="v2-rt-go-arrow" />
                   </button>
                 </div>
               )}

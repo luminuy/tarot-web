@@ -17,10 +17,10 @@
  */
 
 const CONFIRM_TH =
-  "ยืนยันการลบข้อมูลทั้งหมด?\n\nการดำเนินการนี้จะลบ:\n• ประวัติการเปิดไพ่ทั้งหมด (ทั้งในเครื่องและบนบัญชี)\n• ข้อมูลบัญชีผู้ใช้และบันทึกส่วนตัว\n• การตั้งค่าทั้งหมด\n\nข้อมูลจะไม่สามารถกู้คืนได้";
+  "ยืนยันการลบข้อมูลทั้งหมด?\n\nการดำเนินการนี้จะลบ:\n- ประวัติการเปิดไพ่ทั้งหมด (ทั้งในเครื่องและบนบัญชี)\n- ข้อมูลบัญชีผู้ใช้และบันทึกส่วนตัว\n- การตั้งค่าทั้งหมด\n\nข้อมูลจะไม่สามารถกู้คืนได้";
 
 const CONFIRM_EN =
-  "Confirm permanent deletion of all data?\n\nThis action will delete:\n• All reading history (both local and cloud)\n• User account details and personal reflection notes\n• All preferences and settings\n\nThis action cannot be undone.";
+  "Confirm permanent deletion of all data?\n\nThis action will delete:\n- All reading history (both local and cloud)\n- User account details and personal reflection notes\n- All preferences and settings\n\nThis action cannot be undone.";
 
 /** ข้อความยืนยันก่อนลบ — แยกออกมาให้ทั้งสองปลายทางถามคำถามเดียวกันเป๊ะ */
 export function deleteAllDataConfirmMessage(isEn: boolean): string {

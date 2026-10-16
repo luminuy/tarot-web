@@ -6,6 +6,7 @@ import { DAILY_LIMIT, GUEST_LIMIT, READINGS_EN, REQUIRE_SIGNUP_TO_READ } from "@
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useLocale } from "@/lib/i18n";
 import { STORAGE_KEYS } from "@/lib/storage/keys";
+import { CloseIcon } from "@/components/ui/LineIcons";
 
 /**
  * แบนเนอร์ประกาศล่วงหน้า: "ระบบสิทธิ์เปิดไพ่กำลังจะมา" (ENTITLEMENT_PLAN PR F / ข้อ 10)
@@ -77,7 +78,7 @@ export function AnnouncementBanner() {
         aria-label={isEn ? "Dismiss announcement" : "ปิดประกาศระบบสิทธิ์"}
         className="tap-overlay-y flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-inset-warm hover:text-ink-deep cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
       >
-        ✕
+        <CloseIcon />
       </button>
     </div>
   );

@@ -12,7 +12,6 @@
 import type { ReactNode } from "react";
 
 import { CardImage } from "@/components/card/CardImage";
-import { GoldMark } from "@/components/ui/GoldMark";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
@@ -130,7 +129,6 @@ export function Ui2PageHero({
           <ul className="ui2-ph-trust">
             {trust.map((t) => (
               <li key={t}>
-                <GoldMark className="ui2-mark" />
                 {t}
               </li>
             ))}

@@ -68,8 +68,7 @@ export default async function ReaderBookPage({ params, searchParams }: PageProps
           <Link
             href={`/readers/${encodeURIComponent(reader.id)}`}
             className="tap-overlay-y inline-flex items-center gap-1.5 text-sm text-gold-ink transition-colors hover:text-gold-ink-deep"
-          >
-            <span aria-hidden="true">←</span> กลับไปหน้าแม่หมอ
+          > กลับไปหน้าแม่หมอ
           </Link>
           <BookingFlow
             reader={{ id: reader.id, displayName: reader.displayName, avatarUrl: reader.avatarUrl }}

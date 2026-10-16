@@ -295,12 +295,13 @@
   font-size: 16px;
 }
 /* เครื่องหมายข้าวหลามตัดคั่นวลี — รูปทรง CSS (ไม่ใช่อีโมจิ/สัญลักษณ์ · กฎเหล็ก 2) */
+/* ตัวคั่นในริบบิ้น — เส้นตั้งบาง (เดิมรูปข้าวหลามตัด ถอดตามกฎห้ามสัญลักษณ์ตกแต่ง 2026-10-16) */
 .ui2-diamond {
   flex: none;
-  width: 7px;
-  height: 7px;
-  rotate: 45deg;
+  width: 1px;
+  height: 14px;
   background: var(--ui2-ribbon-mark);
+  opacity: 0.6;
 }
 
 /* ═════════════════════════════════════════════════════════════════════════
@@ -1956,14 +1957,15 @@ a.ui2-tile:active {
   .ui2-show-sec .ui2-show-tab[aria-selected="true"] {
     color: var(--ui2-on-night);
   }
+  /* แถบบอกแท็บที่เลือก — เส้นตั้งสั้น (เดิมรูปข้าวหลามตัด ถอดตามกฎห้ามสัญลักษณ์ตกแต่ง 2026-10-16) */
   .ui2-show-tab::before {
     content: "";
     position: absolute;
     left: 0;
     top: 50%;
-    width: 8px;
-    height: 8px;
-    rotate: 45deg;
+    width: 3px;
+    height: 16px;
+    border-radius: 2px;
     translate: 0 -50%;
     background: var(--ui2-gold-solid);
     opacity: 0;
@@ -2175,31 +2177,11 @@ details[open] > summary .ui2-plus {
   font-size: 14px;
   line-height: 1.45;
 }
+/* ไม่มีเครื่องหมายถูกหน้ารายการ (เจ้าของ 2026-10-16 ห้ามสัญลักษณ์ทุกรูปแบบ) — เส้นทองซ้ายแทน */
 .ui2-fq-checks li {
   position: relative;
-  padding-left: 28px;
-}
-/* เครื่องหมายถูก = วงกลมทอง + ขีด L หมุน (รูปทรง CSS ไม่ใช่อีโมจิ) */
-.ui2-fq-checks li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 1px;
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  background: rgba(184, 105, 28, 0.14);
-}
-.ui2-fq-checks li::after {
-  content: "";
-  position: absolute;
-  left: 6px;
-  top: 4px;
-  width: 5px;
-  height: 9px;
-  border-right: 2px solid var(--ui2-gold-ink);
-  border-bottom: 2px solid var(--ui2-gold-ink);
-  rotate: 45deg;
+  padding-left: 12px;
+  border-left: 2px solid rgba(184, 105, 28, 0.35);
 }
 .ui2-fq-logins {
   display: flex;
@@ -2457,7 +2439,7 @@ html[data-consent-ask] .ui2-sticky {
   .ui2-track-word { gap: 22px; padding-right: 22px; font-size: 30px; }
   .ui2-track-word .ui2-num,
   .ui2-track-th { font-size: 22px; }
-  .ui2-diamond { width: 9px; height: 9px; }
+  .ui2-diamond { width: 1px; height: 18px; }
   .ui2-steps {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }

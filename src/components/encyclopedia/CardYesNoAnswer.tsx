@@ -65,13 +65,13 @@ export const CardYesNoAnswer: React.FC<CardYesNoAnswerProps> = ({ card, isEnglis
               href="/spreads/yes-no"
               className="text-gold-ink hover:underline font-bold transition flex items-center gap-1"
             >
-              {isEnglish ? "Try Free 3-Card Yes/No Spread →" : "เปิดไพ่ ใช่หรือไม่ 3 ใบ ฟรี →"}
+              {isEnglish ? "Try Free 3-Card Yes/No Spread" : "เปิดไพ่ ใช่หรือไม่ 3 ใบ ฟรี"}
             </Link>
             <Link
               href="/read/yes-no"
               className="text-muted hover:text-ink transition underline underline-offset-4"
             >
-              {isEnglish ? "Consult AI Tarot with your question →" : "ถามแม่หมอ AI ด้วยคำถามของคุณเอง →"}
+              {isEnglish ? "Consult AI Tarot with your question" : "ถามแม่หมอ AI ด้วยคำถามของคุณเอง"}
             </Link>
           </div>
         </div>

@@ -8,6 +8,7 @@ import { useLocale } from "@/lib/i18n";
 import { trackEvent } from "@/lib/analytics";
 import type { SearchResult } from "@/lib/search/vectorize";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { CloseIcon } from "@/components/ui/LineIcons";
 
 export interface SemanticSearchPanelProps {
   query: string;
@@ -123,7 +124,7 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
               className="tap-overlay-y text-xs font-mono text-muted hover:text-ink p-1.5 rounded-lg border border-transparent hover:border-line transition-colors cursor-pointer"
               aria-label={isEnglish ? "Close semantic results" : "ปิดผลการค้นหาด้วยความรู้สึก"}
             >
-              ✕
+              <CloseIcon />
             </button>
           )}
         </div>

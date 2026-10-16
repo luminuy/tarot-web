@@ -27,16 +27,16 @@ interface CardsExplorerProps {
 const SUIT_TABS = [
   { id: "all", labelTh: "ไพ่ทั้งหมด", labelEn: "All Cards", Icon: SparkleTabIcon, descTh: "ครบ 78 ใบ", descEn: "Complete 78 cards", count: 78 },
   { id: "major", labelTh: "ไพ่ชุดใหญ่ (Major)", labelEn: "Major Arcana", Icon: CrownTabIcon, descTh: "ไพ่หลัก 22 ใบ", descEn: "22 Trump cards", count: 22 },
-  { id: "wands", labelTh: "ไม้เท้า (Wands)", labelEn: "Wands", Icon: FireElementIcon, descTh: "ธาตุไฟ • พลังงาน & การงาน", descEn: "Fire • Passion & Will", count: 14 },
-  { id: "cups", labelTh: "ถ้วย (Cups)", labelEn: "Cups", Icon: WaterElementIcon, descTh: "ธาตุน้ำ • ความรัก & อารมณ์", descEn: "Water • Love & Emotion", count: 14 },
-  { id: "swords", labelTh: "ดาบ (Swords)", labelEn: "Swords", Icon: AirElementIcon, descTh: "ธาตุลม • ความคิด & การตัดสินใจ", descEn: "Air • Intellect & Truth", count: 14 },
+  { id: "wands", labelTh: "ไม้เท้า (Wands)", labelEn: "Wands", Icon: FireElementIcon, descTh: "ธาตุไฟ · พลังงาน & การงาน", descEn: "Fire · Passion & Will", count: 14 },
+  { id: "cups", labelTh: "ถ้วย (Cups)", labelEn: "Cups", Icon: WaterElementIcon, descTh: "ธาตุน้ำ · ความรัก & อารมณ์", descEn: "Water · Love & Emotion", count: 14 },
+  { id: "swords", labelTh: "ดาบ (Swords)", labelEn: "Swords", Icon: AirElementIcon, descTh: "ธาตุลม · ความคิด & การตัดสินใจ", descEn: "Air · Intellect & Truth", count: 14 },
   {
     id: "pentacles",
     labelTh: "เหรียญ (Pentacles)",
     labelEn: "Pentacles",
     Icon: PentacleTabIcon,
-    descTh: "ธาตุดิน • การเงิน & ความมั่นคง",
-    descEn: "Earth • Material & Stability",
+    descTh: "ธาตุดิน · การเงิน & ความมั่นคง",
+    descEn: "Earth · Material & Stability",
     count: 14,
   },
 ];
