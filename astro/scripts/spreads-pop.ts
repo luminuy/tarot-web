@@ -15,16 +15,21 @@ import "./ui2-inview";
 
 /* ── 1b. แถบหมวดติดบนจอ — หมวดที่กำลังดูเรืองขึ้น (aria-current) · มือถือเลื่อนชิปให้อยู่ในจอ ── */
 const stick = document.querySelector<HTMLElement>("[data-sp-stick]");
+const show = document.querySelector<HTMLElement>("[data-sp-show]");
+const scrolly = () => show?.classList.contains("is-scrolly") === true;
 if (stick && "IntersectionObserver" in window) {
   const row = stick.firstElementChild as HTMLElement;
-  const links = Array.from(stick.querySelectorAll<HTMLAnchorElement>("a[href^='#shelf-']"));
+  // แถบชิป (จอ < 1200) + รายชื่อหมวดซ้ายของโชว์เคส (จอ ≥ 1200) เรืองตามหมวดที่กำลังดู
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>("[data-sp-stick] a[href^='#shelf-'], .ui2-sp-rail a"));
   const mark = (id: string | null) => {
+    // โหมดเลื่อนแล้วสลับหมวด: หน้าต่างซ้อนกันที่เดียว ➔ ข้อ 1c เป็นคนตั้งเอง
+    if (scrolly()) return;
     for (const a of links) {
       const on = a.getAttribute("href") === `#${id}`;
       if (on === (a.getAttribute("aria-current") === "true")) continue;
       if (on) {
         a.setAttribute("aria-current", "true");
-        row.scrollTo({ left: a.offsetLeft - (row.clientWidth - a.offsetWidth) / 2, behavior: "smooth" });
+        if (stick.contains(a)) row.scrollTo({ left: a.offsetLeft - (row.clientWidth - a.offsetWidth) / 2, behavior: "smooth" });
       } else a.removeAttribute("aria-current");
     }
   };
@@ -51,6 +56,126 @@ if (stick && "IntersectionObserver" in window) {
   const hero = document.querySelector(".ui2-sp-hero");
   if (hero)
     new IntersectionObserver((es) => es[0].isIntersecting && mark(null), { rootMargin: "-45% 0px -50% 0px" }).observe(hero);
+}
+
+/* ── 1c. โชว์เคสหมวดแบบ fastwork.com/selling ─────────────────────────────────
+   คอม ≥ 1200 · จอสูง ≥ 700 · ไม่ลดการเคลื่อนไหว · หน้าต่างที่สูงที่สุดพอดีจอ ➔ `is-scrolly`
+   หน้าต่างค้างกลางจอ เลื่อนลง (หมวด−1) × 75vh แล้วสลับหมวดทีละบาน · ระดับ full แจกไพ่ใหม่ทุกครั้งที่สลับ
+   เงื่อนไขไม่ครบ = หน้าต่างเรียงต่อกันตามปกติ (ระดับ full: แจกไพ่ตอนหน้าต่างเลื่อนเข้าจอครั้งแรก) */
+if (show) {
+  const root = document.documentElement;
+  const wrap = show.querySelector<HTMLElement>(".ui2-sp-stage-wrap")!;
+  const stage = show.querySelector<HTMLElement>("[data-sp-stage]")!;
+  const panels = Array.from(show.querySelectorAll<HTMLElement>(".ui2-sp-shelf"));
+  const rail = Array.from(show.querySelectorAll<HTMLAnchorElement>(".ui2-sp-rail a"));
+  const railList = show.querySelector<HTMLElement>(".ui2-sp-rail ol");
+  const calm = () => root.getAttribute("data-fx") === "off" || matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const full = () => root.getAttribute("data-fx") === "full" && innerWidth >= 1024 && !calm();
+  let top = 0;
+  let range = 0;
+  let cur = -1;
+  let lockUntil = 0;
+  let raf = 0;
+
+  const deal = (p: HTMLElement) => {
+    p.classList.remove("is-wait", "is-deal");
+    if (!full()) return;
+    void p.offsetWidth; // เริ่มอนิเมชันใหม่ทุกครั้ง
+    p.classList.add("is-deal");
+  };
+  const activate = (i: number) => {
+    if (i === cur) return;
+    const first = cur < 0;
+    cur = i;
+    panels.forEach((p, k) => p.toggleAttribute("data-active", k === i));
+    rail.forEach((a, k) => (k === i ? a.setAttribute("aria-current", "true") : a.removeAttribute("aria-current")));
+    if (!first) deal(panels[i]);
+  };
+  const tick = () => {
+    raf = 0;
+    if (!scrolly()) return;
+    const y = wrap.getBoundingClientRect().top;
+    const enter = Math.min(1, Math.max(0, 1 - (y - top) / (innerHeight * 0.55)));
+    show.style.setProperty("--enter", enter.toFixed(3));
+    // หน้าต่างลอยขึ้นมาเกินครึ่งทาง ➔ แจกไพ่ของหมวดแรก (ครั้งเดียว)
+    if (enter > 0.55 && panels[cur]?.classList.contains("is-wait")) deal(panels[cur]);
+    const p = Math.min(1, Math.max(0, (top - y) / range));
+    railList?.style.setProperty("--p", p.toFixed(3));
+    if (performance.now() < lockUntil) return;
+    activate(Math.round(p * (panels.length - 1)));
+  };
+  const goTo = (i: number, smooth: boolean) => {
+    lockUntil = performance.now() + (smooth ? 900 : 0);
+    activate(i);
+    const y = scrollY + wrap.getBoundingClientRect().top - top + (i / (panels.length - 1)) * range;
+    scrollTo({ top: Math.max(0, y), behavior: smooth ? "smooth" : "auto" });
+  };
+
+  // ระดับ full แบบเรียงต่อกัน: แจกไพ่ตอนหน้าต่างเข้าจอครั้งแรก (หน้าต่างที่อยู่ในจอแล้วไม่ต้องรอ)
+  const dealOnView =
+    "IntersectionObserver" in window
+      ? new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (!e.isIntersecting || scrolly()) continue;
+              dealOnView?.unobserve(e.target);
+              deal(e.target as HTMLElement);
+            }
+          },
+          { rootMargin: "0px 0px -18% 0px" },
+        )
+      : null;
+
+  const setup = () => {
+    show.classList.remove("is-scrolly");
+    show.style.removeProperty("--enter");
+    panels.forEach((p) => {
+      p.removeAttribute("data-active");
+      p.classList.remove("is-wait", "is-deal");
+    });
+    dealOnView?.disconnect();
+    cur = -1;
+    const below = (el: HTMLElement) => el.getBoundingClientRect().top > innerHeight * 0.82;
+    if (!calm() && innerWidth >= 1200 && innerHeight >= 700) {
+      show.classList.add("is-scrolly");
+      top = (document.querySelector<HTMLElement>("[data-site-header]")?.offsetHeight ?? 78) + 14;
+      // หน้าต่างที่สูงที่สุดต้องพอดีจอ ไม่งั้นกลับไปเรียงต่อกัน (ไม่มีใครต้องอ่านครึ่งหน้าต่างที่ล้นจอ)
+      if (stage.offsetHeight <= innerHeight - top - 12) {
+        range = (panels.length - 1) * innerHeight * 0.75;
+        show.style.setProperty("--sp-steps-h", `${range}px`);
+        if (full() && below(wrap)) panels[0].classList.add("is-wait");
+        activate(0);
+        tick();
+        return;
+      }
+      show.classList.remove("is-scrolly");
+    }
+    if (!full()) return;
+    for (const p of panels) {
+      if (!below(p)) continue;
+      p.classList.add("is-wait");
+      dealOnView?.observe(p);
+    }
+  };
+
+  // รายชื่อหมวด / แถบชิป ในโหมดเลื่อนแล้วสลับหมวด = เลื่อนไปช่วงของหมวดนั้น (ไม่กระโดดไป id ที่ซ้อนกันอยู่)
+  document.addEventListener("click", (e) => {
+    const a = (e.target as Element | null)?.closest?.<HTMLAnchorElement>("a[href^='#shelf-']");
+    if (!a || !scrolly()) return;
+    const i = panels.findIndex((p) => `#${p.id}` === a.getAttribute("href"));
+    if (i < 0) return;
+    e.preventDefault();
+    goTo(i, true);
+  });
+  addEventListener("scroll", () => (raf ||= requestAnimationFrame(tick)), { passive: true });
+  let resizeT = 0;
+  addEventListener("resize", () => {
+    clearTimeout(resizeT);
+    resizeT = window.setTimeout(setup, 200);
+  });
+  setup();
+  const hashed = location.hash.startsWith("#shelf-") ? panels.findIndex((p) => `#${p.id}` === location.hash) : -1;
+  if (hashed >= 0 && scrolly()) goTo(hashed, false);
 }
 
 /* ── 2. ไพ่เด้ง ────────────────────────────────────────────────────────── */

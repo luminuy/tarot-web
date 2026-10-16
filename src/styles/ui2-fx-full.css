@@ -313,3 +313,21 @@
   }
 }
 }
+
+/* ── fastwork.com/selling รอบ 2 (เจ้าของ 2026-10-16 "สวยแต่ไม่ว้าว ไม่น่าจดจำ") ─────────────────────
+   1. หัวหน้าเบลอ + จางออกตอนเลื่อนพ้น (เดิมแค่จาง) — เปลี่ยนเฉพาะชื่อคีย์เฟรม ช่วงเลื่อนเดิมจาก ui2.css
+   2. คลังไพ่: การ์ดลอยขึ้นมากลางจอก่อน แล้วเลื่อนหลบไปขวาให้รายการหัวเรื่องเข้ามา (--enter จาก ui2-home.ts ข้อ 8)
+      ใช้คุณสมบัติ translate แยกจาก transform ของ ui2-grow จึงไม่ชนกัน */
+@media (min-width: 768px) {
+  @supports (animation-timeline: view()) {
+    [data-fx="full"] .ui2-hero-inner {
+      animation-name: ui2-hero-out-blur;
+    }
+  }
+  [data-fx="full"] .ui2-show-sec.is-scrolly .ui2-show-card {
+    translate: calc((1 - var(--enter, 1)) * -150px) calc((1 - var(--enter, 1)) * 40px);
+  }
+}
+@keyframes ui2-hero-out-blur {
+  to { opacity: 0.1; filter: blur(14px); transform: translateY(-70px) scale(0.96); }
+}

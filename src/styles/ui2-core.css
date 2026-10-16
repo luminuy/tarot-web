@@ -464,3 +464,35 @@ html:has([data-ui2-page-dark]) .ui2-header-cta {
   color: var(--ui2-night);
   background: var(--ui2-gold-solid);
 }
+
+/* ── ไพ่แทรกกลางหัวข้อ (แบบ "pe[รูปคน]ple" ของ fastwork.com/selling) — 4 ใบซ้อนเป็นพัดเล็ก สูงเท่าตัวอักษร
+   ใช้ที่หัวข้อโชว์เคส /spreads และหัวข้อคลังไพ่หน้าแรก · ตกแต่งล้วน (aria-hidden · alt ว่าง) ไม่ใช่ผลสุ่ม ── */
+.ui2-inline-fan {
+  display: inline-flex;
+  vertical-align: -0.12em;
+  margin-inline: 0.08em;
+  padding-inline: 0.12em;
+}
+.ui2-inline-card {
+  display: block;
+  width: 0.78em;
+  aspect-ratio: 11 / 19;
+  margin-inline-start: -0.26em;
+  border-radius: 0.1em;
+  overflow: hidden;
+  box-shadow: 0 0 0 1.5px var(--ui2-night), 0 6px 14px -6px rgba(0, 0, 0, 0.8);
+  rotate: calc(var(--k, 0) * 1deg);
+}
+.ui2-inline-card:first-child {
+  margin-inline-start: 0;
+}
+.ui2-inline-card:nth-child(1) { --k: -14; }
+.ui2-inline-card:nth-child(2) { --k: -5; translate: 0 -0.06em; }
+.ui2-inline-card:nth-child(3) { --k: 5; translate: 0 -0.06em; }
+.ui2-inline-card:nth-child(4) { --k: 14; }
+.ui2-inline-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

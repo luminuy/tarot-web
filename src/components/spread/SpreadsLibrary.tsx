@@ -55,6 +55,9 @@ const DECO_CARDS = [
 
 const DECO_SIZES = "(min-width: 768px) 80px, 44px";
 
+/** ไพ่ 4 ใบแทรกกลางหัวข้อโชว์เคส — ไม่ซ้ำกับไพ่ลอยหัวหน้า */
+const INLINE_FAN = ["major-02", "major-06", "major-11", "major-21"] as const;
+
 /** ข้อความชิปหัวหน้า — อยู่นอกบล็อกหัวหน้าเพราะมีปี "1909" (ด่าน test-spreads ห้ามเลข 2 หลักในบล็อกหัวหน้า) */
 const HERO_CHIP = {
   th: "สำรับ 1909 แท้ · ทุกผังสุ่มจริง ตรวจสอบได้",
@@ -139,11 +142,13 @@ function SpreadMap({ spread }: { spread: Spread }) {
 function ShelfSection({
   shelf,
   order,
+  total,
   byId,
   isEnglish,
 }: {
   shelf: SpreadShelf;
   order: number;
+  total: number;
   byId: Map<string, Spread>;
   isEnglish: boolean;
 }) {
@@ -159,14 +164,25 @@ function ShelfSection({
     <section
       id={`shelf-${shelf.key}`}
       aria-labelledby={titleId}
-      className="ui2-sec ui2-night ui2-sp-shelf"
-      data-ui2-dark=""
+      className="ui2-sp-shelf"
       data-anim-section=""
       style={tone}
     >
-      <span className="ui2-stars ui2-loop" aria-hidden="true" />
-      <span className="ui2-stars ui2-stars-2 ui2-loop" aria-hidden="true" />
-      <div className="ui2-wrap ui2-sp-shelf-head">
+      {/* แถบหน้าต่างแบบหน้าเว็บจริง (ต้นแบบ fastwork.com/selling — หน้าต่างโปรไฟล์) · ตกแต่งล้วน */}
+      <div className="ui2-sp-win-bar" aria-hidden="true">
+        <span className="ui2-sp-win-dots">
+          <span />
+          <span />
+          <span />
+        </span>
+        <span className="ui2-sp-win-url">
+          seertarot.net/spreads<span className="ui2-sp-win-hash">#{shelf.key}</span>
+        </span>
+        <span className="ui2-sp-win-step ui2-num">
+          {String(order).padStart(2, "0")} / {String(total).padStart(2, "0")}
+        </span>
+      </div>
+      <div className="ui2-sp-shelf-head">
         <div className="ui2-sp-shelf-title">
         <span className="ui2-sp-badge">
           <span className="ui2-num">{String(order).padStart(2, "0")}</span>
@@ -421,9 +437,80 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
         </div>
       </nav>
 
-      {SPREAD_SHELVES.map((shelf, i) => (
-        <ShelfSection key={shelf.key} shelf={shelf} order={i + 1} byId={byId} isEnglish={isEnglish} />
-      ))}
+      {/*
+        โชว์เคส 6 หมวด (เจ้าของ 2026-10-16 "สวยแต่ไม่ว้าว ไม่น่าจดจำ" + ต้นแบบ fastwork.com/selling#profile-showcase)
+        หมวด = หน้าต่างหนึ่งบาน · คอม ≥ 1200: รายชื่อหมวดซ้าย + หน้าต่างขวา
+        ระดับไม่ลดการเคลื่อนไหว + จอพอ ➔ spreads-pop.ts ใส่ `is-scrolly`: หน้าต่างค้างกลางจอ เลื่อนแล้วสลับหมวด ไพ่ถูกแจกลงโต๊ะใหม่ทุกครั้ง
+        ไม่มี JS / มือถือ / จอเตี้ย = หน้าต่างเรียงต่อกันครบ 6 บาน (ไพ่ทั้ง 26 ใบอยู่ใน HTML และมองเห็นเสมอ)
+      */}
+      <section
+        className="ui2-sec ui2-night ui2-sp-show"
+        data-ui2-dark=""
+        data-anim-section=""
+        data-sp-show=""
+        aria-labelledby="sp-show-title"
+      >
+        <span className="ui2-stars ui2-loop" aria-hidden="true" />
+        <span className="ui2-stars ui2-stars-2 ui2-loop" aria-hidden="true" />
+        <div className="ui2-wrap ui2-sp-show-head">
+          <span className="ui2-kicker">
+            <GoldMark className="ui2-mark" />
+            {isEnglish
+              ? `${SPREAD_SHELVES.length} categories · ${spreads.length} spreads`
+              : `${SPREAD_SHELVES.length} หมวด · ${spreads.length} ผัง`}
+          </span>
+          {/* ภาพไพ่แทรกกลางหัวข้อ (แบบ "pe[รูปคน]ple" ของ fastwork) — ตกแต่งล้วน ไม่ใช่ผลสุ่ม */}
+          <h2 id="sp-show-title" className="ui2-h2 ui2-sp-show-h2">
+            <span className="tp">{isEnglish ? "Every question has" : "ทุกเรื่องที่อยากรู้"}</span>{" "}
+            <span className="ui2-inline-fan" aria-hidden="true">
+              {INLINE_FAN.map((cardId) => (
+                <span key={cardId} className="ui2-inline-card">
+                  <CardImage cardId={cardId} alt="" thumb sizes="40px" loading="lazy" fetchPriority="low" />
+                </span>
+              ))}
+            </span>{" "}
+            <span className="tp">{isEnglish ? "a spread of its own" : "มีผังที่ใช่รออยู่"}</span>
+          </h2>
+          <p className="ui2-lede ui2-sp-show-lede">
+            {isEnglish
+              ? "Scroll through one category at a time, then tap the spread that calls to you."
+              : "เลื่อนดูทีละหมวด แล้วแตะไพ่ผังที่ใจเลือก"}
+          </p>
+        </div>
+        <div className="ui2-sp-stage-wrap">
+          <div className="ui2-sp-stage" data-sp-stage="">
+            <nav className="ui2-sp-rail" aria-label={isEnglish ? "Spread categories" : "หมวดผังพยากรณ์"}>
+              <ol>
+                {SPREAD_SHELVES.map((shelf, i) => (
+                  <li key={shelf.key}>
+                    <a
+                      href={`#shelf-${shelf.key}`}
+                      className="ui2-sp-rail-link"
+                      style={{ "--cat": `var(--ui2-note-${shelf.tone})` } as Vars}
+                    >
+                      <span className="ui2-sp-rail-n ui2-num">{String(i + 1).padStart(2, "0")}</span>
+                      <span className="ui2-sp-rail-name">{isEnglish ? shelf.nameEn : shelf.nameTh}</span>
+                      <span className="ui2-sp-rail-count ui2-num">{shelfCount(shelf)}</span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+            <div className="ui2-sp-panels">
+              {SPREAD_SHELVES.map((shelf, i) => (
+                <ShelfSection
+                  key={shelf.key}
+                  shelf={shelf}
+                  order={i + 1}
+                  total={SPREAD_SHELVES.length}
+                  byId={byId}
+                  isEnglish={isEnglish}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
 
       <SpreadPopDialog isEnglish={isEnglish} />

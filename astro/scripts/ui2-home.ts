@@ -329,8 +329,11 @@ function onScrolly(): void {
   scrollyRaf = 0;
   const s = scrolly;
   if (!s) return;
-  const p = Math.min(1, Math.max(0, (s.top - s.marker.getBoundingClientRect().top) / s.range));
+  const y = s.marker.getBoundingClientRect().top;
+  const p = Math.min(1, Math.max(0, (s.top - y) / s.range));
   s.bar.style.setProperty("--p", p.toFixed(3));
+  // การ์ดลอยเข้ามากลางจอแล้วเลื่อนหลบไปขวาเผยรายการหัวเรื่อง (fastwork.com/selling · ใช้ใน ui2-fx-full.css ระดับ full)
+  s.sec.style.setProperty("--enter", Math.min(1, Math.max(0, 1 - (y - s.top) / (innerHeight * 0.55))).toFixed(3));
   if (performance.now() < lockUntil) return;
   const tab = s.tabs[Math.round(p * (s.tabs.length - 1))];
   if (tab && tab.getAttribute("aria-selected") !== "true") selectTab(tab, false, true);

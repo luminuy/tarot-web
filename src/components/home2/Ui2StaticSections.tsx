@@ -521,6 +521,8 @@ const ZODIAC_TOOLS: ExploreLink[] = [
   { path: `${ZODIAC_INDEX_PATH}#zodiac-compat-title`, th: "ความเข้ากันสองราศี", en: "Two-sign compatibility" },
 ];
 /** ผังที่โชว์เป็นแถว — ลิงก์/ข้อความลิงก์มาจาก POPULAR_SPREADS (ห้ามเปลี่ยนคำค้น) · จำนวนใบ/คำโปรยมาจากผังจริง */
+/** ไพ่ 4 ใบแทรกกลางหัวข้อคลังไพ่ */
+const SHOW_INLINE_FAN = ["major-06", "major-17", "major-10", "major-19"] as const;
 const SHOW_SPREAD_IDS = ["celtic-cross", "three-card", "decision", "daily", "twelve-houses"] as const;
 
 /** กรอบภาพผัง: แปลงพิกัดผังจริง (0–1) ให้เต็มกล่องแสดงผลพอดี ไม่ชิดขอบข้างใดข้างหนึ่ง */
@@ -631,8 +633,17 @@ export function Ui2ShowcaseSection({ isEnglish, href }: { isEnglish: boolean; hr
             <GoldMark className="ui2-mark" />
             {t("คลังไพ่ยิปซี", "The tarot library")}
           </span>
+          {/* ไพ่แทรกกลางหัวข้อ (แบบ "pe[รูปคน]ple" ของ fastwork.com/selling · เจ้าของ 2026-10-16) — ตกแต่งล้วน ไม่ใช่ผลสุ่ม */}
           <h2 id="ui2-show-title" className="ui2-h2">
-            <ThaiPhrases>{t("อยากรู้เรื่องไหน เลือกดูได้เลย", "Pick what you want to explore")}</ThaiPhrases>
+            <span className="tp">{t("อยากรู้เรื่องไหน", "Pick what")}</span>{" "}
+            <span className="ui2-inline-fan" aria-hidden="true">
+              {SHOW_INLINE_FAN.map((cardId) => (
+                <span key={cardId} className="ui2-inline-card">
+                  <CardImage cardId={cardId} alt="" thumb sizes="40px" loading="lazy" fetchPriority="low" />
+                </span>
+              ))}
+            </span>{" "}
+            <span className="tp">{t("เลือกดูได้เลย", "you want to explore")}</span>
           </h2>
           <p className="ui2-lede">
             <ThaiPhrases>

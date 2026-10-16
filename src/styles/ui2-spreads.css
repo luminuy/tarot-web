@@ -1125,6 +1125,262 @@ html:has(.ui2-spread-pop[open]) {
   }
 }
 
+/* ── โชว์เคส 6 หมวด (เจ้าของ 2026-10-16 "สวยแต่ไม่ว้าว" · ต้นแบบ fastwork.com/selling#profile-showcase) ──
+   หมวด = หน้าต่างหนึ่งบาน (`.ui2-sp-shelf`) · คอม ≥ 1200 รายชื่อหมวดซ้าย (`.ui2-sp-rail`) แทนแถบชิป
+   `is-scrolly` (ใส่โดย spreads-pop.ts เท่านั้น) = หน้าต่างค้างกลางจอ เลื่อนแล้วสลับหมวด · ไม่มีคลาสนี้ = หน้าต่างเรียงต่อกันครบ */
+.ui2-sp .ui2-sp-show {
+  padding-top: 36px;
+}
+.ui2-sp-show-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.ui2-sp-show-h2 {
+  color: var(--ui2-on-night);
+  font-size: 30px;
+}
+.ui2-sp-show-lede {
+  color: var(--ui2-on-night-soft);
+}
+.ui2-sp-stage-wrap {
+  margin-top: 26px;
+}
+.ui2-sp-rail {
+  display: none;
+}
+.ui2-sp-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* หน้าต่างหนึ่งหมวด */
+.ui2-sp .ui2-sp-shelf {
+  position: relative;
+  padding: 0 14px 6px;
+  border-radius: 26px;
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset, 0 40px 80px -40px rgba(0, 0, 0, 0.85);
+}
+/* เส้นสีหมวดบางบนขอบบนหน้าต่าง */
+.ui2-sp .ui2-sp-shelf::before {
+  content: "";
+  position: absolute;
+  left: 26px;
+  right: 26px;
+  top: 0;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: var(--cat);
+  opacity: 0.85;
+}
+.ui2-sp-win-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 44px;
+  margin-inline: -14px;
+  padding-inline: 18px;
+  border-bottom: 1px solid var(--ui2-line-night);
+  font-size: 12px;
+  color: var(--ui2-on-night-dim);
+}
+.ui2-sp-win-dots {
+  display: flex;
+  gap: 6px;
+}
+.ui2-sp-win-dots span {
+  width: 9px;
+  height: 9px;
+  border-radius: 99px;
+  background: var(--ui2-line-night);
+}
+.ui2-sp-win-dots span:first-child {
+  background: var(--cat);
+}
+.ui2-sp-win-url {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 320px;
+  margin-inline: auto;
+  padding: 5px 14px;
+  border-radius: 99px;
+  text-align: center;
+  background: rgba(246, 238, 226, 0.06);
+}
+.ui2-sp-win-hash {
+  color: var(--cat);
+}
+.ui2-sp-win-step {
+  letter-spacing: 0.08em;
+}
+.ui2-sp .ui2-sp-shelf .ui2-sp-shelf-head {
+  padding-top: 22px;
+}
+
+@media (min-width: 768px) {
+  .ui2-sp-show-h2 {
+    font-size: 40px;
+  }
+  .ui2-sp .ui2-sp-shelf {
+    padding: 0 28px 10px;
+    border-radius: 32px;
+  }
+  .ui2-sp-win-bar {
+    margin-inline: -28px;
+    padding-inline: 22px;
+  }
+  .ui2-sp .ui2-sp-shelf .ui2-sp-shelf-head {
+    padding: 28px 0 0;
+  }
+}
+@media (min-width: 1024px) {
+  .ui2-sp-show-h2 {
+    font-size: 48px;
+  }
+  /* ไพ่กระจาย: ระยะเลื่อนตอนแจกไพ่คิดจากความกว้างโต๊ะจริง (cqw) */
+  .ui2-sp-table {
+    container-type: inline-size;
+  }
+}
+
+/* คอม ≥ 1200: รายชื่อหมวดซ้าย + หน้าต่างขวา (แทนแถบชิปบนจอ) */
+@media (min-width: 1200px) {
+  .ui2-sp-stick {
+    display: none;
+  }
+  .ui2-sp-stage {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    align-items: start;
+    gap: 40px;
+    max-width: 1360px;
+    margin-inline: auto;
+  }
+  .ui2-sp-rail {
+    display: block;
+    position: sticky;
+    top: calc(var(--site-header-h, 78px) + 48px);
+  }
+  .ui2-sp-rail ol {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 0 0 0 18px;
+    list-style: none;
+  }
+  /* เส้นความคืบหน้า (--p ตั้งโดย spreads-pop.ts ตอน is-scrolly) */
+  .ui2-sp-rail ol::before,
+  .ui2-sp-rail ol::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--ui2-line-night);
+  }
+  .ui2-sp-rail ol::after {
+    background: var(--ui2-gold-solid);
+    transform-origin: top;
+    transform: scaleY(var(--p, 0));
+  }
+  .ui2-sp-rail-link {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 8px;
+    padding: 9px 0;
+    font-family: var(--ui2-font-display);
+    font-weight: 500;
+    font-size: 16.5px;
+    line-height: 1.3;
+    white-space: nowrap;
+    color: var(--ui2-on-night-dim);
+    transition: color var(--dur-base) var(--ease-out);
+  }
+  .ui2-sp-rail-name {
+    display: block;
+    transform-origin: 0 50%;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .ui2-sp-rail-n {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: var(--ui2-on-night-dim);
+  }
+  .ui2-sp-rail-count {
+    font-size: 12px;
+    color: var(--ui2-on-night-dim);
+  }
+  .ui2-sp-rail-link:hover {
+    color: var(--ui2-on-night-soft);
+  }
+  .ui2-sp-rail-link:focus-visible {
+    outline: 2px solid var(--ui2-gold-solid);
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
+  /* หมวดที่กำลังดู: ตัวใหญ่ขึ้นแบบรายชื่ออาชีพของ fastwork (ขยายด้วย scale — ไม่ดันบรรทัดอื่น) */
+  .ui2-sp-rail-link[aria-current="true"] {
+    color: var(--ui2-on-night);
+  }
+  .ui2-sp-rail-link[aria-current="true"] .ui2-sp-rail-name {
+    transform: scale(1.22);
+  }
+  /* ชื่อที่ขยายแล้วกินที่ตัวเลขจำนวนผัง — ซ่อนเลขของหมวดที่กำลังดู (หน้าต่างบอกจำนวนอยู่แล้ว) */
+  .ui2-sp-rail-link[aria-current="true"] .ui2-sp-rail-count {
+    opacity: 0;
+  }
+  .ui2-sp-rail-link[aria-current="true"] .ui2-sp-rail-n {
+    color: var(--cat);
+  }
+  /* โต๊ะในหน้าต่างแคบลง (มีรายชื่อหมวดซ้าย) — ไพ่เล็กลงตามจอ */
+  .ui2-sp-shelf .ui2-sp-table {
+    --card-w: clamp(136px, 12.2vw, 184px);
+    height: 450px;
+  }
+
+  /* ── โหมดเลื่อนแล้วสลับหมวด ── */
+  .ui2-sp-show.is-scrolly .ui2-sp-stage-wrap::after {
+    content: "";
+    display: block;
+    height: var(--sp-steps-h, 0px);
+  }
+  .ui2-sp-show.is-scrolly .ui2-sp-stage {
+    position: sticky;
+    top: calc(var(--site-header-h, 78px) + 14px);
+  }
+  .ui2-sp-show.is-scrolly .ui2-sp-rail {
+    position: relative;
+    top: auto;
+    align-self: center;
+  }
+  .ui2-sp-show.is-scrolly .ui2-sp-panels {
+    display: grid;
+  }
+  .ui2-sp-show.is-scrolly .ui2-sp-shelf {
+    grid-area: 1 / 1;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.32s var(--ease-out), visibility 0s linear 0.32s;
+  }
+  .ui2-sp-show.is-scrolly .ui2-sp-shelf[data-active] {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.32s var(--ease-out);
+  }
+}
+
 /* ── ลดการเคลื่อนไหว — นิ่งทั้งหน้า เห็นของครบ ─────────────────────────── */
 [data-fx="off"] .ui2-spread-card,
 [data-fx="off"] .ui2-sp-jump-link,
