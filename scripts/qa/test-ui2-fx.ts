@@ -242,6 +242,28 @@ check(
   mergedTimelines.slice(0, 4).join("\n      ") + "\n      ➔ ตรวจ `vite.build.cssTarget` ใน astro.config.mjs (INC-0264)",
 );
 
+// ── 7. ไพ่ตกแต่งหัวหน้า /spreads ต้องจางหมดก่อนแตะหัวเว็บ (INC-0269) ─────────────────────────
+// ไพ่แถวบนอยู่ใต้หัวเว็บแค่ ~6px ถ้าผูกการจางกับ view() ของกล่องหัวหน้า (สูง ~530px) ไพ่จะถูกขอบจอตัดค้างครึ่งใบ
+// ที่มุมบนก่อนจางหมด — ต้องผูกกับระยะเลื่อนของหน้า (scroll()) · จางถึง 0 · และเลื่อนลงเท่าช่วงพอดี (นิ่งกับที่ระหว่างจาง)
+const decoRules: string[] = [];
+const decoKeyframes: string[] = [];
+for (const file of files) {
+  const css = fs.readFileSync(file, "utf-8");
+  for (const m of css.matchAll(/\.ui2-sp-deco\{([^}]*animation-timeline[^}]*)\}/g)) decoRules.push(m[1]);
+  for (const m of css.matchAll(/@keyframes ui2-sp-deco-out\{(.*?)\}\}/g)) decoKeyframes.push(m[1]);
+}
+const decoRangeEnd = decoRules.map((r) => /animation-range:\s*0(?:px)?\s+(\d+)px/.exec(r)?.[1]).find(Boolean);
+const decoPinned = decoKeyframes.some((k) => /opacity:\s*0\b/.test(k) && decoRangeEnd !== undefined && new RegExp(`translateY\\(${decoRangeEnd}px\\)`).test(k));
+check(
+  "ไพ่ตกแต่งหัวหน้า /spreads จางหมดตามระยะเลื่อนของหน้า (scroll() ≤ 160px · นิ่งกับที่ระหว่างจาง) ไม่ใช่ view() ของกล่องหัวหน้า",
+  decoRules.length > 0 &&
+    decoRules.every((r) => /animation-timeline:\s*scroll\(/.test(r)) &&
+    decoRangeEnd !== undefined &&
+    Number(decoRangeEnd) <= 160 &&
+    decoPinned,
+  `กฎ: ${decoRules.join(" / ").slice(0, 160) || "(ไม่พบ)"} · คีย์เฟรม: ${decoKeyframes.join(" / ").slice(0, 120) || "(ไม่พบ)"}\n      ➔ ดู src/styles/ui2-spreads-fx.css (INC-0269)`,
+);
+
 if (failed > 0) {
   console.log(`\n❌ ไม่ผ่าน ${failed} ข้อ\n`);
   process.exit(1);

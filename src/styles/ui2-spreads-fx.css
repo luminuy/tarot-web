@@ -171,7 +171,7 @@
 }
 
 /* ── โชว์เคสแบบ fastwork.com/selling (เจ้าของ 2026-10-16 "สวยแต่ไม่ว้าว ไม่น่าจดจำ") ─────────────────
-   1. หัวหน้าเบลอ + จางออกตอนเลื่อนพ้น · ไพ่ลอยรอบหัวข้อแตกออกด้านข้าง (ผูกการเลื่อน · view timeline)
+   1. หัวหน้าเบลอ + จางออกตอนเลื่อนพ้น · ไพ่ลอยรอบหัวข้อนิ่งกับที่แล้วจางหายใน 120px แรก (ผูกระยะเลื่อนของหน้า · INC-0269)
    2. หน้าต่างหมวดลอยขึ้นจากล่างกลางจอ แล้วเลื่อนหลบไปขวาเผยรายชื่อหมวด (--enter ตั้งโดย spreads-pop.ts)
    3. สลับหมวด = แจกไพ่ผังลงโต๊ะใหม่จากกองกลาง (is-deal ใส่โดยสคริปต์เท่านั้น — HTML ไม่มีคลาสนี้ · INC-0244) */
 @media (min-width: 768px) {
@@ -181,10 +181,16 @@
       animation-timeline: view();
       animation-range: exit 15% exit 85%;
     }
+  }
+  /* ไพ่ตกแต่งหัวหน้า: นิ่งอยู่กับที่แล้วจางหายหมดภายใน 120px แรกของการเลื่อน (INC-0269)
+     ผูกกับระยะเลื่อนของหน้า ไม่ใช่ view() ของกล่องหัวหน้า — กล่องสูง ~530px แต่ไพ่แถวบนอยู่ใต้หัวเว็บแค่ ~6px
+     ช่วงจางเดิมจึงเริ่มช้าและยาวเกิน ไพ่ถูกขอบจอตัดค้างครึ่งใบที่มุมบนก่อนจะจางหมด (แก้ตัวเลขคีย์เฟรมกี่รอบก็ไม่หาย)
+     translateY ในคีย์เฟรมเท่ากับช่วง 120px พอดี (linear) = หักล้างการเลื่อน ไพ่จึงไม่เคยแตะหัวเว็บหรือขอบจอระหว่างจาง */
+  @supports (animation-timeline: scroll()) {
     [data-fx="full"] .ui2-sp-deco {
       animation: ui2-sp-deco-out linear both;
-      animation-timeline: view();
-      animation-range: exit 0% exit 60%;
+      animation-timeline: scroll(root block);
+      animation-range: 0px 120px;
     }
   }
 
@@ -212,9 +218,9 @@
 @keyframes ui2-sp-hero-out {
   to { opacity: 0; filter: blur(16px); transform: translateY(-48px) scale(0.95); }
 }
-/* จางหายหมดและขยายนิดเดียว — เดิม scale 1.4 + ค้าง 15% ทำให้ไพ่ขอบจอถูกดันล้นจอ เห็นครึ่งใบค้างมุมบน (เจ้าของ 2026-10-17 "บัค") */
+/* จางหายหมดขณะนิ่งกับที่ (translateY = ช่วงเลื่อน 120px) · ย่อนิดเดียวให้รู้สึกถอยห่าง — ห้ามขยาย (INC-0267: ขยายแล้วล้นขอบจอ) */
 @keyframes ui2-sp-deco-out {
-  to { opacity: 0; transform: translateY(-24px) scale(1.06); }
+  to { opacity: 0; transform: translateY(120px) scale(0.97); }
 }
 @keyframes ui2-sp-head-rise {
   from { opacity: 0; transform: translateY(18px); }
