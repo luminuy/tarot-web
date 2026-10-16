@@ -19,7 +19,7 @@ import {
   WaterElementIcon,
 } from "@/components/ui/TarotArtIcons";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
-import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
 interface CardsExplorerProps {
   cards: readonly CardSummary[];
 }
@@ -125,117 +125,69 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
   }, [searchQuery, filteredCards.length]);
 
   return (
-      <div className="space-y-8 relative z-10">
-      {/* Dynamic Bilingual Hero Header — UI 2.0 (เจ้าของ 2026-10-16) · ข้อความ h1 / คำโปรยเดิม */}
-      <Ui2PageHero
-        title={isEnglish ? "The Complete 78 Tarot Cards & Meanings" : "ความหมายไพ่ทาโร่ ไพ่ยิปซี ทั้ง 78 ใบ"}
-        accent={isEnglish ? "78 Tarot Cards" : "78 ใบ"}
-        lede={
-          isEnglish
-            ? "Explore depth psychological, archetypal, and practical divinatory meanings across love, career, and finances in the 1909 Rider-Waite lineage."
-            : "ค้นหาความหมายและคำทำนายของไพ่ทาโรต์ 78 ใบ ครบทุกมิติความรัก การงาน และการเงิน"
-        }
-        trust={isEnglish ? ["78-card tarot encyclopedia", "Original 1909 Rider-Waite art"] : ["สารานุกรมความหมายไพ่ 78 ใบ", "ภาพต้นฉบับ 1909 Rider-Waite"]}
-        cards={["major-00", "major-01", "major-21", "major-19", "major-02", "major-17"]}
-      />
-
-      {/* Sacred Search & Filter Dashboard */}
-      <div className="ui2-cx-panel altar-panel p-4 sm:p-6 space-y-5">
-        {/* Search Bar & Result Stats */}
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-          <div className="relative flex-1 max-w-xl">
-            
-            <input
-              type="text"
-              aria-label={isEnglish ? "Search 78 tarot cards" : "ค้นหาไพ่ทาโรต์ 78 ใบ"}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              // ข้อความตัวอย่างต้องสั้นพอดีจอมือถือ — เดิมยาวจนถูกตัดครึ่งคำ "ความหม" (เจ้าของทัก) · ช่องค้นหายังค้นได้ทุกอย่างเหมือนเดิม
-              placeholder={isEnglish ? "Search card name or meaning" : "ค้นหาชื่อไพ่ หรือความหมาย"}
-              className="glass-field w-full pl-10 pr-10 py-3.5 rounded-xl border border-line-interactive text-ink placeholder-muted/60 text-xs sm:text-sm font-sans focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery("");
-                  setShowSemanticSearch(false);
-                }}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink text-xs bg-black/5 hover:bg-black/10 w-6 h-6 rounded-full flex items-center justify-center transition-colors cursor-pointer"
-                aria-label={isEnglish ? "Clear search" : "ล้างคำค้นหา"}
-              >
-                ✕
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center justify-between md:justify-end gap-3 text-xs font-mono text-muted">
-            <span>
-              {isEnglish ? (
-                <>
-                  Found <strong className="text-gold-ink text-sm font-bold">{filteredCards.length}</strong> of {cards.length} cards
-                </>
-              ) : (
-                <>
-                  ค้นพบ <strong className="text-gold-ink text-sm font-bold">{filteredCards.length}</strong> จาก {cards.length} ใบ
-                </>
-              )}
-            </span>
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery("");
-                  setShowSemanticSearch(false);
-                  selectFilter("all");
-                }}
-                className="text-[13px] text-gold-ink hover:underline cursor-pointer font-bold font-serif-th"
-              >
-                {isEnglish ? "Clear Search" : "ล้างคำค้นหา"}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Semantic Search Prompt / Toggle Button */}
-        {searchQuery.trim().length >= 4 && (
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-line/40">
+      <div className="v2-cx space-y-8 relative z-10">
+      {/*
+        v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — ห้องสมุดไพ่
+        หัวหน้าคือช่องค้นหาใหญ่ + คำค้นแนะนำ (v1 ช่องค้นหาเล็กอยู่ในกล่องใต้หัวหน้าใหญ่)
+        แถบชุดไพ่ติดจอสีธาตุ สลับชุดได้ตลอดขณะเลื่อนดู 78 ใบ (v1 ต้องเลื่อนกลับขึ้นไปบนสุด)
+        ลิงก์คู่มือย่อยย้ายไปเป็นชั้นหนังสือท้ายกริด (v1 เป็นตัวหนังสือเรียงยาวในกล่องค้นหา)
+      */}
+      <header className="v2-cx-head">
+        <Ui2Crumbs crumbs={[{ label: isEnglish ? "Home" : "หน้าแรก", href: "/" }, { label: isEnglish ? "78 Card Meanings" : "ความหมายไพ่ 78 ใบ" }]} />
+        <h1 className="v2-cx-title">
+          {isEnglish ? (
+            <>
+              The Complete <span className="ui2-gold-night">78 Tarot Cards</span> &amp; Meanings
+            </>
+          ) : (
+            <>
+              <span className="tp">ความหมายไพ่ทาโร่ ไพ่ยิปซี</span> <span className="tp">ทั้ง <span className="ui2-gold-night">78 ใบ</span></span>
+            </>
+          )}
+        </h1>
+        <p className="v2-cx-lede">
+          <ThaiPhrases>
+            {isEnglish
+              ? "Explore depth psychological, archetypal, and practical divinatory meanings across love, career, and finances in the 1909 Rider-Waite lineage."
+              : "ค้นหาความหมายและคำทำนายของไพ่ทาโรต์ 78 ใบ ครบทุกมิติความรัก การงาน และการเงิน"}
+          </ThaiPhrases>
+        </p>
+        <div className="v2-cx-search">
+          <input
+            type="search"
+            aria-label={isEnglish ? "Search 78 tarot cards" : "ค้นหาไพ่ทาโรต์ 78 ใบ"}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={isEnglish ? "Search card name or meaning" : "ค้นหาชื่อไพ่ หรือความหมาย"}
+          />
+          {searchQuery && (
             <button
               type="button"
-              onClick={() => setShowSemanticSearch((prev) => !prev)}
-              className={`tap-overlay-y inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border text-xs font-serif-th font-bold transition cursor-pointer ${
-                showSemanticSearch
-                  ? "border-gold-ink bg-gold-ink text-white shadow-2xs"
-                  : filteredCards.length < 3 && searchQuery.trim().length >= 6
-                    ? "glass-chip !rounded-lg border-gold-ink text-gold-ink"
-                    : "glass-chip !rounded-lg text-muted hover:text-ink hover:border-gold-ink"
-              }`}
-            >
-              <span>
-                {showSemanticSearch
-                  ? isEnglish
-                    ? "Hide Semantic Results"
-                    : "ซ่อนผลค้นหาด้วยความรู้สึก"
-                  : isEnglish
-                    ? "Search by Feeling Instead"
-                    : "ค้นหาด้วยความรู้สึกแทน"}
-              </span>
+              className="v2-cx-clear"
+              onClick={() => {
+                setSearchQuery("");
+                setShowSemanticSearch(false);
+              }}
+              aria-label={isEnglish ? "Clear search" : "ล้างคำค้นหา"}
+            />
+          )}
+        </div>
+        <p className="v2-cx-try">
+          <span>{isEnglish ? "Try" : "ลองค้น"}</span>
+          {(isEnglish ? ["Love", "Money", "The Sun", "Fire", "New beginnings"] : ["ความรัก", "การเงิน", "The Sun", "ธาตุไฟ", "เริ่มต้นใหม่"]).map((q) => (
+            <button key={q} type="button" onClick={() => setSearchQuery(q)} aria-pressed={searchQuery === q}>
+              {q}
             </button>
-            {filteredCards.length < 3 && searchQuery.trim().length >= 6 && !showSemanticSearch && (
-              <span className="text-[11px] font-serif-th text-gold-ink">
-                {isEnglish
-                  ? "Few exact word matches. Try semantic search."
-                  : "พบน้อยกว่า 3 ใบ แนะนำให้ลองค้นหาด้วยความรู้สึก"}
-              </span>
-            )}
-          </div>
-        )}
+          ))}
+        </p>
+      </header>
 
-        {/* Suit & Arcana Filter Tabs */}
+      {/* แถบชุดไพ่ติดจอ */}
+      <div className="v2-cx-bar">
         <div
           role="tablist"
           aria-label={isEnglish ? "Card suits and arcana categories" : "หมวดหมู่ชุดไพ่และสำรับ"}
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5"
+          className="v2-cx-tabs"
         >
           {SUIT_TABS.map((tab, tabIdx) => {
             const isActive = activeFilter === tab.id;
@@ -249,6 +201,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 aria-selected={isActive}
                 tabIndex={isActive ? 0 : -1}
                 type="button"
+                title={isEnglish ? tab.descEn : tab.descTh}
                 onClick={() => selectFilter(tab.id)}
                 onKeyDown={(e) => {
                   let nextIdx = -1;
@@ -257,85 +210,48 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   if (nextIdx !== -1) {
                     e.preventDefault();
                     selectFilter(SUIT_TABS[nextIdx].id);
-                    const nextTab = document.getElementById(`card-tab-${SUIT_TABS[nextIdx].id}`);
-                    nextTab?.focus();
+                    document.getElementById(`card-tab-${SUIT_TABS[nextIdx].id}`)?.focus();
                   }
                 }}
-                className={`p-3 rounded-xl border text-left transition duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden group select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
-                  isActive
-                    ? "altar-panel-active !rounded-xl"
-                    : "glass-tile !rounded-xl hover:border-gold"
-                }`}
+                className="v2-cx-tab"
               >
-                <div className="flex items-center justify-between w-full mb-1">
-                  <tab.Icon className="w-4 h-4 text-gold-ink" />
-                  <span
-                    className={`text-[13px] font-mono px-2 py-0.5 rounded-full font-bold ${
-                      isActive ? "bg-gold-ink text-white" : "bg-black/5 text-muted group-hover:text-ink"
-                    }`}
-                  >
-                    {tab.count}
-                  </span>
-                </div>
-                <div>
-                  <span
-                    className={`block font-serif-th text-xs font-bold leading-tight ${
-                      isActive ? "text-gold-ink" : "text-ink group-hover:text-gold-ink"
-                    }`}
-                  >
-                    {isEnglish ? tab.labelEn : tab.labelTh}
-                  </span>
-                  <p className="text-[13px] text-muted truncate mt-0.5">{isEnglish ? tab.descEn : tab.descTh}</p>
-                </div>
+                <tab.Icon className="v2-cx-tab-ic" />
+                <span>{isEnglish ? tab.labelEn : tab.labelTh.replace(/\s*\(.*\)$/, "")}</span>
+                <small>{tab.count}</small>
               </button>
             );
           })}
         </div>
-
-        {/* Dedicated Category & Master Table Links for Search Crawlers and Fast Navigation */}
-        <div className="pt-2 flex items-center justify-between flex-wrap gap-2 text-xs font-serif-th border-t border-line/40">
-          <span className="text-muted">
-            {isEnglish ? "Explore dedicated guides & master table:" : "อ่านคู่มือเจาะลึกแต่ละหมวดและตารางสรุป:"}
-          </span>
-          <div className="flex flex-wrap items-center gap-2">
-            <Link href="/cards/major" className="text-gold-ink hover:underline font-bold">
-              {isEnglish ? "Major Arcana (22)" : "ไพ่ชุดใหญ่ (22 ใบ)"}
-            </Link>
-            <span className="text-line" aria-hidden="true">·</span>
-            <Link href="/cards/minor" className="text-gold-ink hover:underline font-bold">
-              {isEnglish ? "Minor Arcana (56)" : "ไพ่ชุดเล็ก (56 ใบ)"}
-            </Link>
-            <span className="text-line" aria-hidden="true">·</span>
-            <Link href="/cards/wands" className="text-gold-ink hover:underline">
-              {isEnglish ? "Wands" : "ไม้เท้า"}
-            </Link>
-            <span className="text-line" aria-hidden="true">·</span>
-            <Link href="/cards/cups" className="text-gold-ink hover:underline">
-              {isEnglish ? "Cups" : "ถ้วย"}
-            </Link>
-            <span className="text-line" aria-hidden="true">·</span>
-            <Link href="/cards/swords" className="text-gold-ink hover:underline">
-              {isEnglish ? "Swords" : "ดาบ"}
-            </Link>
-            <span className="text-line" aria-hidden="true">·</span>
-            <Link href="/cards/pentacles" className="text-gold-ink hover:underline">
-              {isEnglish ? "Pentacles" : "เหรียญ"}
-            </Link>
-            <span className="text-line" aria-hidden="true">·</span>
-            <Link href="/cards/all" className="text-gold-ink hover:underline font-bold">
-              {isEnglish ? "Summary Table (78)" : "ตารางสรุป 78 ใบ"}
-            </Link>
-            <span className="text-line" aria-hidden="true">·</span>
-            <Link href="/cards/birth-card" className="text-gold-ink hover:underline font-bold">
-              {isEnglish ? "Birth Card Tool" : "คำนวณไพ่ประจำตัว"}
-            </Link>
-            <span className="text-line" aria-hidden="true">·</span>
-            <Link href="/cards/zodiac" className="text-gold-ink hover:underline font-bold">
-              {isEnglish ? "Zodiac Cards" : "ไพ่ประจำราศี"}
-            </Link>
-          </div>
-        </div>
+        <p className="v2-cx-found" role="status">
+          {isEnglish ? (
+            <>
+              <b>{filteredCards.length}</b> of {cards.length}
+            </>
+          ) : (
+            <>
+              <b>{filteredCards.length}</b> จาก {cards.length} ใบ
+            </>
+          )}
+        </p>
       </div>
+
+      {/* ค้นด้วยความรู้สึก — โผล่เมื่อพิมพ์ยาวพอ */}
+      {searchQuery.trim().length >= 4 && (
+        <div className="v2-cx-feel">
+          <button type="button" onClick={() => setShowSemanticSearch((prev) => !prev)} aria-pressed={showSemanticSearch}>
+            {showSemanticSearch
+              ? isEnglish
+                ? "Hide Semantic Results"
+                : "ซ่อนผลค้นหาด้วยความรู้สึก"
+              : isEnglish
+                ? "Search by Feeling Instead"
+                : "ค้นหาด้วยความรู้สึกแทน"}
+          </button>
+          {filteredCards.length < 3 && searchQuery.trim().length >= 6 && !showSemanticSearch && (
+            <span>{isEnglish ? "Few exact word matches. Try semantic search." : "พบน้อยกว่า 3 ใบ แนะนำให้ลองค้นหาด้วยความรู้สึก"}</span>
+          )}
+        </div>
+      )}
 
       {/* Semantic Feelings Search Panel */}
       {showSemanticSearch && searchQuery.trim().length >= 2 && (
@@ -490,6 +406,31 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
           </button>
         </div>
       )}
+
+      {/* ชั้นหนังสือคู่มือย่อย — ลิงก์ภายในที่บอทเห็น (เดิมอยู่ในกล่องค้นหา) */}
+      <nav className="v2-cx-shelf" aria-label={isEnglish ? "Explore dedicated guides & master table" : "อ่านคู่มือเจาะลึกแต่ละหมวดและตารางสรุป"}>
+        <p className="v2-cx-shelf-k">{isEnglish ? "Explore dedicated guides & master table" : "อ่านคู่มือเจาะลึกแต่ละหมวดและตารางสรุป"}</p>
+        <ul>
+          {[
+            { href: "/cards/major", suit: "major", th: "ไพ่ชุดใหญ่", en: "Major Arcana", n: "22" },
+            { href: "/cards/minor", suit: "all", th: "ไพ่ชุดเล็ก", en: "Minor Arcana", n: "56" },
+            { href: "/cards/wands", suit: "wands", th: "ไม้เท้า", en: "Wands", n: "14" },
+            { href: "/cards/cups", suit: "cups", th: "ถ้วย", en: "Cups", n: "14" },
+            { href: "/cards/swords", suit: "swords", th: "ดาบ", en: "Swords", n: "14" },
+            { href: "/cards/pentacles", suit: "pentacles", th: "เหรียญ", en: "Pentacles", n: "14" },
+            { href: "/cards/all", suit: "major", th: "ตารางสรุป 78 ใบ", en: "Summary Table", n: "78" },
+            { href: "/cards/birth-card", suit: "major", th: "คำนวณไพ่ประจำตัว", en: "Birth Card Tool", n: "" },
+            { href: "/cards/zodiac", suit: "major", th: "ไพ่ประจำราศี", en: "Zodiac Cards", n: "12" },
+          ].map((l) => (
+            <li key={l.href}>
+              <Link href={l.href} data-suit={l.suit} className="v2-cx-book">
+                <b>{isEnglish ? l.en : l.th}</b>
+                {l.n && <small>{isEnglish ? `${l.n} cards` : `${l.n} ใบ`}</small>}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
       </div>
   );
 };

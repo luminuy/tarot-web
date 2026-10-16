@@ -1,0 +1,307 @@
+/*
+ * 📚 v2 หน้าความหมายไพ่ 78 ใบ (/cards · /en/cards) — สร้างใหม่ (เจ้าของ 2026-10-16 "สร้างใหม่เลย")
+ * เอกลักษณ์: ห้องสมุดไพ่ — ช่องค้นหาใหญ่เป็นหัวหน้า · แถบชุดไพ่ติดจอสีธาตุ · ชั้นหนังสือคู่มือย่อยท้ายกริด
+ * ⚠️ ไม่แตะการ์ดในกริด (`card-tile-cv` · คอลัมน์ · gap · padding · สัดส่วนภาพ) — ด่าน test-card-tile-height
+ * สีธาตุใช้ `--el` จาก ui2-page.css หัวข้อ 12 · ไม่มี filter/backdrop/mask/อนิเมชันวน
+ */
+
+.v2-cx-head {
+  padding: 34px 0 6px;
+  text-align: center;
+}
+.v2-cx-head .ui2-ph-crumb {
+  justify-content: center;
+}
+.v2-cx-title {
+  margin: 12px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(32px, 4.8vw, 58px);
+  font-weight: 700;
+  line-height: 1.12;
+  color: var(--ui2-on-night);
+  text-wrap: balance;
+}
+.v2-cx-lede {
+  max-width: 620px;
+  margin: 12px auto 0;
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--ui2-on-night-soft);
+}
+.v2-cx-search {
+  position: relative;
+  max-width: 640px;
+  margin: 26px auto 0;
+}
+.v2-cx-search::before {
+  content: "";
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  translate: 0 -60%;
+  border: 2px solid #FFD98F;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.v2-cx-search::after {
+  content: "";
+  position: absolute;
+  left: 36px;
+  top: 50%;
+  width: 7px;
+  height: 2px;
+  translate: 0 5px;
+  rotate: 45deg;
+  background: #FFD98F;
+  border-radius: 2px;
+  pointer-events: none;
+}
+.v2-cx-search input {
+  width: 100%;
+  height: 62px;
+  padding: 0 56px 0 60px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.4);
+  background: rgba(20, 15, 22, 0.9);
+  box-shadow: 0 0 0 6px rgba(255, 217, 143, 0.06), 0 30px 60px -30px rgba(0, 0, 0, 0.95);
+  font-size: 17px;
+  color: var(--ui2-on-night);
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.v2-cx-search input::placeholder {
+  color: var(--ui2-on-night-dim);
+}
+.v2-cx-search input::-webkit-search-cancel-button {
+  display: none;
+}
+.v2-cx-search input:focus-visible {
+  outline: none;
+  border-color: var(--ui2-gold-solid);
+  box-shadow: 0 0 0 6px rgba(255, 217, 143, 0.16), 0 30px 60px -30px rgba(0, 0, 0, 0.95);
+}
+.v2-cx-clear {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 38px;
+  height: 38px;
+  translate: 0 -50%;
+  border-radius: 50%;
+  background: rgba(255, 236, 200, 0.08);
+  cursor: pointer;
+}
+.v2-cx-clear::before,
+.v2-cx-clear::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 13px;
+  height: 1.5px;
+  background: #CFC3B2;
+  translate: -50% -50%;
+  rotate: 45deg;
+}
+.v2-cx-clear::after {
+  rotate: -45deg;
+}
+.v2-cx-try {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin: 14px 0 0;
+  font-size: 13px;
+  color: var(--ui2-on-night-dim);
+}
+.v2-cx-try button {
+  min-height: 34px;
+  padding: 0 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 236, 200, 0.14);
+  font-size: 13px;
+  color: var(--ui2-on-night-soft);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.v2-cx-try button:hover,
+.v2-cx-try button[aria-pressed="true"] {
+  border-color: rgba(255, 217, 143, 0.55);
+  color: var(--ui2-gold-solid);
+}
+
+/* แถบชุดไพ่ติดจอ */
+.v2-cx-bar {
+  position: sticky;
+  z-index: 15;
+  top: 84px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.22);
+  background: rgba(18, 14, 21, 0.96);
+  box-shadow: 0 20px 40px -24px rgba(0, 0, 0, 0.95);
+}
+@media (max-width: 767px) {
+  .v2-cx-bar {
+    top: 76px;
+    border-radius: 20px;
+  }
+}
+.v2-cx-tabs {
+  display: flex;
+  flex: 1;
+  gap: 4px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.v2-cx-tabs::-webkit-scrollbar {
+  display: none;
+}
+.ui2-pg .v2-cx [role="tab"].v2-cx-tab {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  box-shadow: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ui2-on-night-soft);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+@media (min-width: 1024px) {
+  .v2-cx .v2-cx-tab {
+    flex: 1;
+    justify-content: center;
+  }
+}
+.v2-cx .v2-cx-tab:hover {
+  color: rgb(var(--el));
+}
+.v2-cx-tab-ic {
+  width: 16px;
+  height: 16px;
+  color: rgb(var(--el));
+}
+.v2-cx-tab small {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(var(--el), 0.16);
+  text-align: center;
+  font-size: 11.5px;
+  color: rgb(var(--el));
+}
+.ui2-pg .v2-cx [role="tab"].v2-cx-tab[aria-selected="true"] {
+  border-color: rgba(var(--el), 0.6);
+  background: radial-gradient(90% 140% at 50% 0%, rgba(var(--el), 0.3) 0%, rgba(var(--el), 0.08) 80%);
+  box-shadow: none;
+  color: var(--ui2-on-night);
+}
+.v2-cx-found {
+  flex: none;
+  margin: 0;
+  padding: 0 12px 0 4px;
+  font-size: 13px;
+  color: var(--ui2-on-night-dim);
+}
+.v2-cx-found b {
+  font-family: var(--ui2-font-display);
+  font-size: 17px;
+  color: var(--ui2-gold-solid);
+}
+@media (max-width: 639px) {
+  .v2-cx-found {
+    display: none;
+  }
+}
+.v2-cx-feel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--ui2-gold-solid);
+}
+.v2-cx-feel button {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.4);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+  cursor: pointer;
+}
+.v2-cx-feel button[aria-pressed="true"] {
+  background: var(--ui2-gold-solid);
+  color: var(--ui2-night);
+}
+
+/* ชั้นหนังสือคู่มือย่อย */
+.v2-cx-shelf {
+  padding-top: 12px;
+}
+.v2-cx-shelf-k {
+  margin: 0 0 14px;
+  font-family: var(--ui2-font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ui2-on-night);
+}
+.v2-cx-shelf ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2-cx-book {
+  position: relative;
+  display: grid;
+  align-content: end;
+  gap: 2px;
+  min-height: 108px;
+  padding: 16px 14px 14px 20px;
+  border-radius: 8px 16px 16px 8px;
+  border: 1px solid rgba(var(--el), 0.32);
+  background: linear-gradient(180deg, rgba(var(--el), 0.16) 0%, rgba(28, 23, 30, 0.85) 75%);
+  transition: translate var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+/* สันหนังสือสีธาตุ */
+.v2-cx-book::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  border-radius: 8px 0 0 8px;
+  background: rgb(var(--el));
+}
+.v2-cx-book:hover {
+  translate: 0 -3px;
+  border-color: rgb(var(--el));
+}
+.v2-cx-book b {
+  font-size: 14.5px;
+  line-height: 1.35;
+  color: var(--ui2-on-night);
+}
+.v2-cx-book small {
+  font-size: 12px;
+  color: rgb(var(--el));
+}
