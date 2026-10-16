@@ -104,8 +104,9 @@ if (show) {
     raf = 0;
     if (!scrolly()) return;
     const y = wrap.getBoundingClientRect().top;
+    // ⚠️ ห้ามเขียน enter ลง style ของโชว์เคส (เดิม --enter) — ตัวแปร CSS สืบทอดลงทุกลูก
+    //    เขียนทุกเฟรมที่เลื่อน = คำนวณสไตล์ใหม่ทั้งโชว์เคส 6 หมวด × ไพ่ทุกใบ (เครื่องหนักทั้งหน้า · 2026-10-17)
     const enter = Math.min(1, Math.max(0, 1 - (y - top) / (innerHeight * 0.55)));
-    show.style.setProperty("--enter", enter.toFixed(3));
     // หน้าต่างลอยขึ้นมาเกินครึ่งทาง ➔ แจกไพ่ของหมวดแรก (ครั้งเดียว)
     if (enter > 0.55 && panels[cur]?.classList.contains("is-wait")) deal(panels[cur]);
     const p = Math.min(1, Math.max(0, (top - y) / range));
@@ -141,7 +142,6 @@ if (show) {
     requestAnimationFrame(() => requestAnimationFrame(() => show.classList.remove("is-setting")));
     show.classList.remove("is-scrolly");
     panelsBox.style.zoom = "";
-    show.style.removeProperty("--enter");
     panels.forEach((p) => {
       p.removeAttribute("data-active");
       p.classList.remove("is-wait", "is-deal");

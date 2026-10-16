@@ -3,6 +3,8 @@
 import React from "react";
 import type { Spread } from "@/data/spreads";
 import { mapLayout, MAP_CARD_ASPECT } from "@/lib/tarot/spread-map-geometry";
+// import แบบ static เท่านั้น — import() ทำให้ชังก์ clipboard ผูกตัวช่วยจากชังก์ React ➔ หน้าบทความ 60 หน้าโหลด React ติดไป (A8-08)
+import { copyToClipboard } from "@/lib/utils/clipboard";
 
 /**
  * 🧭 ชิ้นส่วนกลางของหน้าขั้นตอนดูดวง v2 (`/read/<ผัง>` · หน้าแรกเมื่อเข้าพิธี)
@@ -114,7 +116,6 @@ export function SealChip({ commitment, isEnglish }: { commitment: string; isEngl
         type="button"
         className="v2-seal-copy"
         onClick={async () => {
-          const { copyToClipboard } = await import("@/lib/utils/clipboard");
           if (await copyToClipboard(commitment)) {
             setCopied(true);
             window.setTimeout(() => setCopied(false), 2000);

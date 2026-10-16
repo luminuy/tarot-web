@@ -261,12 +261,14 @@
   rotate: var(--r, 0deg);
   /* โผล่เมื่อภาพหน้าไพ่โหลดเสร็จแล้วเท่านั้น (spreads-pop.ts ใส่ is-ready) — เดิมเห็นกรอบงาช้างเปล่าสีขาวแวบก่อนภาพมา (INC-0271) */
   opacity: 0;
-  transition: opacity 0.45s ease;
+  scale: 0.86;
+  transition: opacity 0.5s ease, scale 0.9s cubic-bezier(0.2, 0.9, 0.25, 1.12);
   background: linear-gradient(170deg, var(--ui2-card-ivory-top) 0%, var(--ui2-card-ivory-bottom) 100%);
   box-shadow: 0 0 0 1px rgba(201, 161, 90, 0.6), 0 22px 34px -16px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 217, 143, 0.12);
 }
 .ui2-sp-deco-card.is-ready {
   opacity: 1;
+  scale: 1;
 }
 /* หน้าไพ่จริง (CardImage ภาพย่อ) — สัดส่วนเดียวกับไพ่ 1909 */
 .ui2-sp-deco-card img {

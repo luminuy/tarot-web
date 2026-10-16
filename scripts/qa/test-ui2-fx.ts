@@ -76,6 +76,9 @@ const heavyLeaks: string[] = [];
 const loopLeaks: string[] = [];
 let ui2Rules = 0;
 let fullRules = 0;
+/** ตัวหนังสือทองยังสั่งวนไม่รู้จบอยู่ไหม — แสงทองวิ่ง "ครั้งเดียว" ตั้งแต่ 2026-10-17 (เจ้าของ "รู้สึกหนักเกินไป")
+ *  ถ้ามีใครกลับไปใส่ infinite ด่านข้อ 3–4 จะนับคลาสทองเป็นของวนอีกครั้ง (ต้องมี ui2-loop + data-anim-section) */
+let goldLoops = false;
 for (const file of files) {
   const root = postcss.parse(fs.readFileSync(file, "utf-8"));
   root.walkRules((rule) => {
@@ -91,6 +94,7 @@ for (const file of files) {
       const heavy = HEAVY.test(decl.prop) || (/^filter$/.test(decl.prop) && /blur\(/.test(decl.value));
       if (heavy && !gated) heavyLeaks.push(where);
       const infinite = /^animation(-iteration-count)?$/.test(decl.prop) && /\binfinite\b/.test(decl.value);
+      if (infinite && /\.ui2-gold-(?:day|night)(?![\w-])/.test(rule.selector)) goldLoops = true;
       if (infinite && !gated) {
         const okLoop = LITE_LOOPS.some((c) => new RegExp(`\\.${c}(?![\\w-])`).test(rule.selector));
         if (!okLoop) loopLeaks.push(where);
@@ -135,7 +139,16 @@ const VOID = new Set(["area", "base", "br", "col", "embed", "hr", "img", "input"
 /** คลาสเป็นโทเคนเต็มตัวเท่านั้น — `ui2-fc` ต้องไม่จับ `ui2-fc-card` (`\b` นับขีดเป็นขอบคำ) */
 const token = (names: string[]) => new RegExp(`(?:^|\\s)(?:${names.join("|")})(?=\\s|$)`);
 const LOOP_CLASS = token(["ui2-loop"]);
-const ANY_LOOP = token([...LITE_LOOPS, "ui2-fc", "ui2-blob", "ui2-stars", "ui2-note", "ui2-gold-day", "ui2-gold-night", "ui2-morning-back", "ui2-morning-burst"]);
+const ANY_LOOP = token([
+  ...LITE_LOOPS,
+  "ui2-fc",
+  "ui2-blob",
+  "ui2-stars",
+  "ui2-note",
+  ...(goldLoops ? ["ui2-gold-day", "ui2-gold-night"] : []),
+  "ui2-morning-back",
+  "ui2-morning-burst",
+]);
 
 const missingScript: string[] = [];
 const scriptAfterCss: string[] = [];

@@ -6,15 +6,9 @@
  * ⚠️ ของวนทุกชิ้นมีคลาส `ui2-loop` และอยู่ใต้ `[data-anim-section]` (หยุดเองเมื่อพ้นจอ)
  */
 @media (min-width: 768px) {
-  /* ดาว 2 ชั้นกะพริบ */
+  /* ดาวกะพริบช้า ๆ ชั้นเดียว (เดิม 2 ชั้นเต็มจอ — 2026-10-17 เจ้าของ "รู้สึกหนักเกินไป") */
   [data-fx="full"] .ui2-sp .ui2-stars {
-    animation: ui2-sp-twinkle 6s ease-in-out infinite;
-  }
-  [data-fx="full"] .ui2-sp .ui2-stars-2 {
-    display: block;
-    background-size: 300px 300px;
-    background-position: 140px 90px;
-    animation: ui2-sp-twinkle 8s ease-in-out -3s infinite;
+    animation: ui2-sp-twinkle 9s ease-in-out infinite;
   }
 
   /* แสงออโรราลอยหลังหัวหน้า */
@@ -32,12 +26,12 @@
     border-radius: 999px;
     filter: blur(80px);
     opacity: 0.32;
-    animation: ui2-sp-drift var(--dur, 20s) ease-in-out infinite;
+    /* นิ่ง — ก้อนเบลอ 600px ที่ลอยไปมาต้องวาดใหม่ทุกเฟรม (ตัวหนักที่สุดของหน้า) */
   }
 
-  /* ทองไล่สีวิ่งบนตัวเลขหัวข้อ */
+  /* ทองไล่สีวิ่งผ่านตัวเลขหัวข้อ "ครั้งเดียว" ตอนเปิดหน้า (เดิมวนไม่หยุด = วาดตัวหนังสือใหม่ทุกเฟรม) */
   [data-fx="full"] .ui2-sp-h1 .ui2-gold-night {
-    animation: ui2-sp-shimmer 5s linear infinite;
+    animation: ui2-sp-shimmer 2.4s cubic-bezier(0.45, 0, 0.2, 1) 0.4s 1 backwards;
   }
 
   /* ไพ่คว่ำตกแต่ง 8 ใบลอยข้างหัวข้อ · ใบไกลเบลอ */
@@ -148,15 +142,29 @@
     }
   }
 
-  /* ไพ่ผังลอยขึ้นลงเบา ๆ บนโต๊ะ (ลอยที่ช่อง · ยก/ตั้งตรงที่ตัวไพ่ จึงไม่ชนกัน) */
-  [data-fx="full"] .ui2-sc-slot {
-    animation: ui2-sp-bob calc(8s + var(--i, 0) * 0.6s) ease-in-out calc(var(--i, 0) * -1.7s) infinite;
+  /* หัวหน้าเปิดตัวครั้งเดียว: ลอยขึ้นทีละบรรทัด (transform/opacity ล้วน · ไม่วน) */
+  [data-fx="full"] .ui2-sp-hero-inner > * {
+    animation: ui2-sp-head-rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+  [data-fx="full"] .ui2-sp-hero-inner > :nth-child(2) {
+    animation-delay: 0.08s;
+  }
+  [data-fx="full"] .ui2-sp-hero-inner > :nth-child(3) {
+    animation-delay: 0.16s;
+  }
+  [data-fx="full"] .ui2-sp-hero-inner > :nth-child(4) {
+    animation-delay: 0.24s;
+  }
+  [data-fx="full"] .ui2-sp-hero-inner > :nth-child(n + 5) {
+    animation-delay: 0.32s;
   }
 
-  /* พื้นหลังหน้าต่างไพ่เด้ง: มืด + เบลอ */
+  /* ไพ่ผังบนโต๊ะนิ่ง — ลอยเฉพาะตอนชี้ (hover ยกขึ้น) · เดิมทุกใบลอยขึ้นลงไม่หยุด 26+ ใบ = หน้าหนัก (2026-10-17) */
+
+  /* พื้นหลังหน้าต่างไพ่เด้ง: มืด + เบลอบาง ๆ */
   [data-fx="full"] .ui2-spread-pop::backdrop {
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
   }
   /* วงแสงทองหลังไพ่ใหญ่เต้น */
   [data-fx="full"] .ui2-pop-glow {
@@ -164,11 +172,6 @@
   }
 }
 
-@media (min-width: 768px) and (hover: hover) {
-  [data-fx="full"] .ui2-sc-slot:hover {
-    animation-play-state: paused;
-  }
-}
 
 /* ── โชว์เคสแบบ fastwork.com/selling (เจ้าของ 2026-10-16 "สวยแต่ไม่ว้าว ไม่น่าจดจำ") ─────────────────
    1. หัวหน้าเบลอ + จางออกตอนเลื่อนพ้น · ไพ่ลอยรอบหัวข้อนิ่งกับที่แล้วจางหายใน 120px แรก (ผูกระยะเลื่อนของหน้า · INC-0269)
@@ -204,15 +207,16 @@
     opacity: 0;
   }
   [data-fx="full"] .ui2-sp-shelf.is-deal .ui2-sc-slot {
-    animation: ui2-sp-deal 0.6s cubic-bezier(0.2, 0.8, 0.25, 1) calc(var(--i, 0) * 60ms) backwards, ui2-sp-bob calc(8s + var(--i, 0) * 0.6s) ease-in-out calc(var(--i, 0) * -1.7s) infinite;
+    animation: ui2-sp-deal 0.6s cubic-bezier(0.2, 0.8, 0.25, 1) calc(var(--i, 0) * 60ms) backwards;
   }
   [data-fx="full"] .ui2-sp-shelf.is-deal .ui2-sp-shelf-head {
     animation: ui2-sp-head-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
   }
 }
 
+/* หัวหน้าจางขึ้นตอนเลื่อนพ้น — ไม่เบลอแล้ว (filter: blur ผูกการเลื่อน = วาดหัวหน้าทั้งก้อนใหม่ทุกเฟรมที่เลื่อน) */
 @keyframes ui2-sp-hero-out {
-  to { opacity: 0; filter: blur(16px); transform: translateY(-48px) scale(0.95); }
+  to { opacity: 0; transform: translateY(-48px) scale(0.96); }
 }
 /* จางหายหมดขณะนิ่งกับที่ (translateY = ช่วงเลื่อน 120px) · ย่อนิดเดียวให้รู้สึกถอยห่าง — ห้ามขยาย (INC-0267: ขยายแล้วล้นขอบจอ) */
 @keyframes ui2-sp-deco-out {
@@ -239,13 +243,9 @@
   0%, 100% { opacity: 0.7; }
   50% { opacity: 0.35; }
 }
-@keyframes ui2-sp-drift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(80px, 40px) scale(1.15); }
-}
 @keyframes ui2-sp-shimmer {
-  from { background-position: 0% 50%; }
-  to { background-position: 200% 50%; }
+  from { background-position: 200% 50%; }
+  to { background-position: 0% 50%; }
 }
 @keyframes ui2-sp-bob {
   0%, 100% { translate: 0 0; }

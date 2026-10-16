@@ -5,17 +5,13 @@
  * ⚠️ ของวนทุกชิ้นมีคลาส `ui2-loop` และอยู่ใต้ `[data-anim-section]` (หยุดเองเมื่อพ้นจอ · astro/scripts/ui2-inview.ts)
  */
 @media (min-width: 768px) {
+  /* ดาวชั้นเดียว (เดิม 2 ชั้นเต็มจอ · ลดภาระ 2026-10-17) */
   [data-fx="full"] .ui2-dy .ui2-stars {
-    animation: ui2-dy-twinkle 6s ease-in-out infinite;
+    animation: ui2-dy-twinkle 9s ease-in-out infinite;
   }
-  [data-fx="full"] .ui2-dy .ui2-stars-2 {
-    display: block;
-    background-size: 300px 300px;
-    background-position: 140px 90px;
-    animation: ui2-dy-twinkle 8s ease-in-out -3s infinite;
-  }
+  /* แสงทองวิ่งผ่านหัวข้อครั้งเดียว (เดิมวนไม่หยุด = วาดใหม่ทุกเฟรม · 2026-10-17) */
   [data-fx="full"] .ui2-dy-h1 .ui2-gold-night {
-    animation: ui2-dy-shimmer 5s linear infinite;
+    animation: ui2-dy-shimmer 2.6s cubic-bezier(0.45, 0, 0.2, 1) 0.4s 1 backwards;
   }
   [data-fx="full"] .ui2-dy-deco-card {
     display: block;
@@ -36,6 +32,7 @@
     right: 4%;
     top: 110px;
   }
+  /* ใบไกล 3–6 จางอย่างเดียว ไม่เบลอ — filter บนไพ่ที่ลอยวน = เบลอใหม่ทุกเฟรม */
   [data-fx="full"] .ui2-dy-deco-3 {
     --w: 48px;
     --r: 6deg;
@@ -44,7 +41,6 @@
     left: 14%;
     top: 280px;
     opacity: 0.7;
-    filter: blur(1.6px);
   }
   [data-fx="full"] .ui2-dy-deco-4 {
     --w: 46px;
@@ -54,7 +50,6 @@
     right: 15%;
     top: 300px;
     opacity: 0.7;
-    filter: blur(1.6px);
   }
   [data-fx="full"] .ui2-dy-deco-5 {
     --w: 40px;
@@ -64,7 +59,6 @@
     left: 21%;
     top: 40px;
     opacity: 0.6;
-    filter: blur(2px);
   }
   [data-fx="full"] .ui2-dy-deco-6 {
     --w: 40px;
@@ -74,7 +68,6 @@
     right: 22%;
     top: 34px;
     opacity: 0.6;
-    filter: blur(2px);
   }
 }
 @keyframes ui2-dy-twinkle {

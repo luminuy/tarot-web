@@ -15,26 +15,25 @@
  */
 
 @media (min-width: 768px) {
-  /* ── แผงกระจกจริง (backdrop-filter) ─────────────────────────────────────── */
+  /* ── แผงกระจก ───────────────────────────────────────────────────────────
+     เม็ด/ปุ่มรอง/ช่องนาฬิกา/FAQ ใช้พื้นทึบเกือบเต็ม — เดิม backdrop-filter ทุกชิ้น (หลายสิบชิ้นต่อหน้า)
+     ทำให้เบราว์เซอร์ต้องเบลอฉากหลังใหม่ทุกเฟรมที่ของข้างหลังขยับ (เจ้าของ 2026-10-17 "หน้าแรกหนักมาก")
+     เหลือกระจกจริงแค่หน้าต่างแชตจำลองชิ้นเดียว · เบลอ 14px */
   [data-fx="full"] .ui2-chip,
   [data-fx="full"] .ui2-btn-ghost,
   [data-fx="full"] .ui2-clock-cell,
   [data-fx="full"] .ui2-faq {
-    background: rgba(255, 252, 246, 0.56);
-    -webkit-backdrop-filter: blur(20px) saturate(160%);
-    backdrop-filter: blur(20px) saturate(160%);
+    background: rgba(255, 252, 246, 0.86);
   }
   [data-fx="full"] .ui2-night .ui2-chip,
   [data-fx="full"] .ui2-night .ui2-btn-ghost,
   [data-fx="full"] .ui2-fq-sheet .ui2-faq {
-    background: rgba(28, 23, 30, 0.5);
-    -webkit-backdrop-filter: blur(22px) saturate(150%);
-    backdrop-filter: blur(22px) saturate(150%);
+    background: rgba(28, 23, 30, 0.82);
   }
   [data-fx="full"] .ui2-window {
-    background: rgba(26, 21, 29, 0.55);
-    -webkit-backdrop-filter: blur(24px) saturate(170%);
-    backdrop-filter: blur(24px) saturate(170%);
+    background: rgba(26, 21, 29, 0.6);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%);
   }
 
   /* ── แสงออโรราลอย (ก้อนสีเบลอ) ─────────────────────────────────────────── */
@@ -55,7 +54,7 @@
     border-radius: 999px;
     filter: blur(72px);
     opacity: 0.7;
-    animation: ui2-drift var(--dur, 20s) ease-in-out infinite;
+    /* นิ่ง — ก้อนเบลอ 72px ที่ลอยไปมา = วาดเบลอใหม่ทุกเฟรมตลอดเวลา (ตัวกิน GPU อันดับหนึ่งของหน้าแรก) */
   }
 
   /* ── เม็ดเกรนฟิล์ม ─────────────────────────────────────────────────────── */
@@ -71,8 +70,8 @@
     /* จางลงที่ขอบล่าง — ไม่ให้เห็นรอยต่อกับส่วนถัดไปที่ไม่มีเกรน */
     -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 72%, transparent 100%);
     mask-image: linear-gradient(180deg, #000 0%, #000 72%, transparent 100%);
-    opacity: 0.32;
-    mix-blend-mode: multiply;
+    /* ไม่ใช้ mix-blend-mode — ผสมสีทั้งจอใหม่ทุกครั้งที่ของข้างหลังขยับ */
+    opacity: 0.16;
     background-image: url(/ui2/grain.webp);
     background-size: 180px 180px;
   }
@@ -122,46 +121,24 @@
   [data-fx="full"] .ui2-morning-burst {
     animation: ui2-burst 3s ease-out infinite;
   }
+  /* ใบไกลจางแทนเบลอ — filter บนไพ่ที่ลอยอยู่ = เบลอใหม่ทุกเฟรม */
   [data-fx="full"] .ui2-fc-far .ui2-fc-card {
-    filter: blur(1.6px);
+    opacity: 0.72;
   }
 
-  /* ── ตัวหนังสือทองมีแสงวิ่ง (lite = ทองนิ่ง เพราะอนิเมต background-position = วาดใหม่ทุกเฟรม) ── */
+  /* ── ตัวหนังสือทองมีแสงวิ่ง "ครั้งเดียว" ตอนเปิดหน้า (lite = ทองนิ่ง)
+     เดิมวนไม่หยุด — อนิเมต background-position = วาดตัวหนังสือใหม่ทุกเฟรมทุกหัวข้อทั้งเว็บ (เจ้าของ 2026-10-17 "รู้สึกหนักเกินไป") ── */
   [data-fx="full"] .ui2-gold-day,
   [data-fx="full"] .ui2-gold-night {
-    animation: ui2-shimmer 5.5s linear infinite;
+    animation: ui2-shimmer 2.6s cubic-bezier(0.45, 0, 0.2, 1) 0.4s 1 backwards;
   }
 
-  /* ── ดาวกะพริบ 2 ชั้น ─────────────────────────────────────────────────── */
+  /* ── ดาวกะพริบชั้นเดียว (เดิม 2 ชั้นเต็มจอ) ───────────────────────────────── */
   [data-fx="full"] .ui2-stars {
-    animation: ui2-twinkle 6s ease-in-out infinite;
-  }
-  [data-fx="full"] .ui2-stars-2 {
-    display: block;
-    background-size: 300px 300px;
-    background-position: 140px 90px;
-    animation: ui2-twinkle 8s ease-in-out -3s infinite;
+    animation: ui2-twinkle 9s ease-in-out infinite;
   }
 
-  /* ── กระดาษโน้ตลอยแกว่งเบา ๆ (lite = นิ่ง มีแค่ตอบสนองตอนแตะ) ─────────────── */
-  [data-fx="full"] .ui2-note {
-    animation: ui2-bob var(--bob, 7s) ease-in-out infinite;
-    --bob: 7s;
-  }
-  [data-fx="full"] .ui2-note-slot:nth-child(2n) .ui2-note {
-    --bob: 8.5s;
-    animation-delay: -3s;
-  }
-  [data-fx="full"] .ui2-note-slot:nth-child(3n) .ui2-note {
-    --bob: 9.2s;
-    animation-delay: -5s;
-  }
-}
-
-@media (min-width: 768px) and (hover: hover) {
-  [data-fx="full"] .ui2-note:hover {
-    animation-play-state: paused;
-  }
+  /* กระดาษโน้ตนิ่ง (เดิมลอยวนทุกใบ) — ยังยกขึ้นตอนชี้/แตะตาม ui2.css */
 }
 
 /* ── เปิดหน้า: หัวข้อหลักเบลอแล้วค่อยคมขึ้น (แบบหัวหน้า fastwork.com) — ครั้งเดียวตอนโหลด · lite = ลอยเข้าอย่างเดียว ── */
@@ -172,7 +149,7 @@
   }
 }
 @keyframes ui2-intro-blur {
-  from { opacity: 0; transform: translateY(26px); filter: blur(14px); }
+  from { opacity: 0; transform: translateY(26px); filter: blur(8px); }
 }
 
 /* ── เลื่อนแล้วส่วนลอยขึ้น: ระยะเต็ม 90px (lite ใช้ 48px ใน ui2.css) ─────────────── */
@@ -205,11 +182,7 @@
   /* ดาวสองชั้นเลื่อนคนละความเร็วตอนเลื่อนหน้า (ท้องฟ้ามีความลึก) — translate แยกจาก transform ที่จัดกึ่งกลางอยู่ */
   @supports (animation-timeline: view()) {
     [data-fx="full"] .ui2-stars {
-      animation: ui2-twinkle 6s ease-in-out infinite, ui2-star-drift linear both;
-      animation-timeline: auto, view();
-    }
-    [data-fx="full"] .ui2-stars-2 {
-      animation: ui2-twinkle 8s ease-in-out -3s infinite, ui2-star-drift-far linear both;
+      animation: ui2-twinkle 9s ease-in-out infinite, ui2-star-drift linear both;
       animation-timeline: auto, view();
     }
   }
@@ -217,10 +190,6 @@
 @keyframes ui2-star-drift {
   from { translate: 0 -70px; }
   to { translate: 0 70px; }
-}
-@keyframes ui2-star-drift-far {
-  from { translate: 0 -150px; }
-  to { translate: 0 150px; }
 }
 
 /* ตัวแปรตำแหน่งเมาส์ (ui2-home.ts ข้อ 10) — ประกาศชนิดไว้ให้ transition ของ transform คำนวณได้ (ด่าน motion กฎ 8) */
@@ -315,8 +284,8 @@
 }
 
 /* ── fastwork.com/selling รอบ 2 (เจ้าของ 2026-10-16 "สวยแต่ไม่ว้าว ไม่น่าจดจำ") ─────────────────────
-   1. หัวหน้าเบลอ + จางออกตอนเลื่อนพ้น (เดิมแค่จาง) — เปลี่ยนเฉพาะชื่อคีย์เฟรม ช่วงเลื่อนเดิมจาก ui2.css
-   2. คลังไพ่: การ์ดลอยขึ้นมากลางจอก่อน แล้วเลื่อนหลบไปขวาให้รายการหัวเรื่องเข้ามา (--enter จาก ui2-home.ts ข้อ 8)
+   1. หัวหน้าจาง + ลอยขึ้น + ย่อตอนเลื่อนพ้น — เปลี่ยนเฉพาะชื่อคีย์เฟรม ช่วงเลื่อนเดิมจาก ui2.css
+   2. คลังไพ่: การ์ดลอยขึ้นมากลางจอก่อน แล้วเลื่อนหลบไปขวาให้รายการหัวเรื่องเข้ามา (ui2-home.ts ข้อ 8)
       ใช้คุณสมบัติ translate แยกจาก transform ของ ui2-grow จึงไม่ชนกัน */
 @media (min-width: 768px) {
   @supports (animation-timeline: view()) {
@@ -324,10 +293,10 @@
       animation-name: ui2-hero-out-blur;
     }
   }
-  [data-fx="full"] .ui2-show-sec.is-scrolly .ui2-show-card {
-    translate: calc((1 - var(--enter, 1)) * -150px) calc((1 - var(--enter, 1)) * 40px);
-  }
+  /* การ์ดคลังไพ่เลื่อนเข้า: ui2-home.ts ข้อ 8 ตั้ง translate ที่ตัวการ์ดตรง ๆ
+     (เดิมตั้งตัวแปร --enter ที่ทั้งส่วนทุกเฟรมเลื่อน = คำนวณสไตล์ใหม่ทั้งส่วน — INC-0272) */
 }
+/* ไม่เบลอตอนเลื่อนพ้น — filter ผูกกับการเลื่อน = เบลอหัวหน้าทั้งก้อนใหม่ทุกเฟรม */
 @keyframes ui2-hero-out-blur {
-  to { opacity: 0.1; filter: blur(14px); transform: translateY(-70px) scale(0.96); }
+  to { opacity: 0.1; transform: translateY(-70px) scale(0.96); }
 }

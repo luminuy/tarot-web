@@ -68,7 +68,7 @@
     display: none;
   }
 
-  /* หัวหน้าเบลอ + จางออกตอนเลื่อนพ้น · ไพ่ลอยแตกออกด้านข้าง */
+  /* หัวหน้าจาง + ลอยขึ้นตอนเลื่อนพ้น · ไพ่ลอยแตกออกด้านข้าง */
   @supports (animation-timeline: view()) {
     [data-fx="full"] .ui2-ph-inner {
       animation: ui2-pg-hero-out linear both;
@@ -94,8 +94,9 @@
   0%, 100% { translate: 0 0; }
   50% { translate: 0 -10px; }
 }
+/* ไม่เบลอ — filter ผูกการเลื่อน = วาดหัวหน้าทั้งก้อนใหม่ทุกเฟรมที่เลื่อน (2026-10-17 ลดภาระทั้งเว็บ) */
 @keyframes ui2-pg-hero-out {
-  to { opacity: 0; filter: blur(16px); transform: translateY(-48px) scale(0.95); }
+  to { opacity: 0; transform: translateY(-48px) scale(0.95); }
 }
 @keyframes ui2-pg-deco-out {
   to { opacity: 0.15; transform: scale(1.4); }

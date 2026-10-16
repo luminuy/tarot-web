@@ -287,13 +287,14 @@ document.addEventListener("keydown", (e) => {
 
 /* ── 8. คลังไพ่เลื่อนแล้วสลับหัวข้อเอง ─────────────────────────────────────────── */
 const calm = () => root.getAttribute("data-fx") === "off" || matchMedia("(prefers-reduced-motion: reduce)").matches;
-let scrolly: { sec: HTMLElement; marker: HTMLElement; tabs: HTMLElement[]; bar: HTMLElement; top: number; range: number } | null = null;
+let scrolly: { sec: HTMLElement; card: HTMLElement; marker: HTMLElement; tabs: HTMLElement[]; bar: HTMLElement; top: number; range: number; enter: string } | null = null;
 let lockUntil = 0;
 function setupScrolly(): void {
   const sec = document.querySelector<HTMLElement>(".ui2-show-sec");
   if (scrolly && scrolly.sec !== sec) scrolly = null;
   if (!sec) return;
   sec.classList.remove("is-scrolly");
+  sec.querySelector<HTMLElement>(".ui2-show-card")?.style.removeProperty("translate");
   scrolly = null;
   if (calm() || innerWidth < 1024 || innerHeight < 640) return;
   const card = sec.querySelector<HTMLElement>(".ui2-show-card");
@@ -321,7 +322,7 @@ function setupScrolly(): void {
   sec.style.setProperty("--show-h", `${max}px`);
   sec.style.setProperty("--steps", String(tabs.length));
   sec.classList.add("is-scrolly");
-  scrolly = { sec, marker, tabs, bar, top, range: (tabs.length - 1) * innerHeight * 0.7 };
+  scrolly = { sec, card, marker, tabs, bar, top, range: (tabs.length - 1) * innerHeight * 0.7, enter: "" };
   onScrolly();
 }
 let scrollyRaf = 0;
@@ -332,8 +333,16 @@ function onScrolly(): void {
   const y = s.marker.getBoundingClientRect().top;
   const p = Math.min(1, Math.max(0, (s.top - y) / s.range));
   s.bar.style.setProperty("--p", p.toFixed(3));
-  // การ์ดลอยเข้ามากลางจอแล้วเลื่อนหลบไปขวาเผยรายการหัวเรื่อง (fastwork.com/selling · ใช้ใน ui2-fx-full.css ระดับ full)
-  s.sec.style.setProperty("--enter", Math.min(1, Math.max(0, 1 - (y - s.top) / (innerHeight * 0.55))).toFixed(3));
+  // การ์ดลอยเข้ามากลางจอแล้วเลื่อนหลบไปขวาเผยรายการหัวเรื่อง (fastwork.com/selling · ระดับ full เท่านั้น)
+  // ⚠️ ตั้ง translate ที่ตัวการ์ดตรง ๆ และเขียนเฉพาะเมื่อค่าเปลี่ยน — ห้ามกลับไปตั้งตัวแปร CSS (--enter) ที่ทั้งส่วน:
+  //    ตัวแปรสืบทอดลงทุกลูก ➔ เบราว์เซอร์คำนวณสไตล์ใหม่ทั้งส่วนทุกเฟรมที่เลื่อน (INC-0272 · เจ้าของ "หน้าแรกหนักมาก")
+  const k = root.getAttribute("data-fx") === "full" ? 1 - Math.min(1, Math.max(0, 1 - (y - s.top) / (innerHeight * 0.55))) : 0;
+  const enter = k < 0.002 ? "" : `${(k * -150).toFixed(1)}px ${(k * 40).toFixed(1)}px`;
+  if (enter !== s.enter) {
+    s.enter = enter;
+    if (enter) s.card.style.translate = enter;
+    else s.card.style.removeProperty("translate");
+  }
   if (performance.now() < lockUntil) return;
   const tab = s.tabs[Math.round(p * (s.tabs.length - 1))];
   if (tab && tab.getAttribute("aria-selected") !== "true") selectTab(tab, false, true);
