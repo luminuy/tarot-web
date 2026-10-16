@@ -68,8 +68,6 @@
     --r: -4deg;
     --bob: 10s;
     --delay: -5s;
-    opacity: 0.75;
-    filter: blur(1.2px);
     left: 11.5%;
     top: 470px;
     right: auto;
@@ -79,8 +77,6 @@
     --r: 14deg;
     --bob: 7.5s;
     --delay: -1s;
-    opacity: 0.6;
-    filter: blur(2px);
     left: 13%;
     top: 16px;
     right: auto;
@@ -106,8 +102,6 @@
     --r: 5deg;
     --bob: 10.5s;
     --delay: -6s;
-    opacity: 0.75;
-    filter: blur(1.2px);
     right: 11.5%;
     top: 24px;
   }
@@ -116,12 +110,16 @@
     --r: -13deg;
     --bob: 7s;
     --delay: -2.5s;
-    opacity: 0.6;
-    filter: blur(2px);
     right: 13%;
     top: 480px;
   }
 
+  /* ใบเล็กล่าง 2 ใบล้นหัวหน้าลงไปทับรายชื่อหมวด (เจ้าของ 2026-10-16 "เหมือนมีบัค") — ไม่แสดง
+     ใบเล็กไม่เบลอแล้ว: ภาพเบลอดูเหมือนภาพโหลดไม่ขึ้น */
+  [data-fx="full"] .ui2-sp-deco-3,
+  [data-fx="full"] .ui2-sp-deco-8 {
+    display: none;
+  }
   /* ใบเล็กแนวใน: เฉพาะจอกว้างพอที่ไม่ชนหัวข้อ */
   @media (max-width: 1279px) {
     [data-fx="full"] .ui2-sp-deco-3,

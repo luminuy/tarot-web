@@ -66,6 +66,7 @@ if (show) {
   const root = document.documentElement;
   const wrap = show.querySelector<HTMLElement>(".ui2-sp-stage-wrap")!;
   const stage = show.querySelector<HTMLElement>("[data-sp-stage]")!;
+  const panelsBox = show.querySelector<HTMLElement>(".ui2-sp-panels")!;
   const panels = Array.from(show.querySelectorAll<HTMLElement>(".ui2-sp-shelf"));
   const rail = Array.from(show.querySelectorAll<HTMLAnchorElement>(".ui2-sp-rail a"));
   const railList = show.querySelector<HTMLElement>(".ui2-sp-rail ol");
@@ -128,6 +129,7 @@ if (show) {
 
   const setup = () => {
     show.classList.remove("is-scrolly");
+    panelsBox.style.zoom = "";
     show.style.removeProperty("--enter");
     panels.forEach((p) => {
       p.removeAttribute("data-active");
@@ -139,8 +141,12 @@ if (show) {
     if (!calm() && innerWidth >= 1200 && innerHeight >= 700) {
       show.classList.add("is-scrolly");
       top = (document.querySelector<HTMLElement>("[data-site-header]")?.offsetHeight ?? 78) + 14;
-      // หน้าต่างที่สูงที่สุดต้องพอดีจอ ไม่งั้นกลับไปเรียงต่อกัน (ไม่มีใครต้องอ่านครึ่งหน้าต่างที่ล้นจอ)
-      if (stage.offsetHeight <= innerHeight - top - 12) {
+      // หน้าต่างที่สูงที่สุดต้องพอดีจอ — จอโน้ตบุ๊ก (สูง ~760–800) ย่อหน้าต่างลงได้ถึง 78% ด้วย zoom (ย่อทั้งเลย์เอาต์ ไม่ใช่แค่ภาพ)
+      // ย่อแล้วยังล้น = กลับไปเรียงต่อกัน (เจ้าของ 2026-10-16: จอโน้ตบุ๊กตกไปแบบเรียงต่อกันจนรายชื่อหมวดโผล่ชิดหัวหน้า)
+      const room = innerHeight - top - 12;
+      const fit = Math.min(1, (room - 4) / stage.offsetHeight);
+      panelsBox.style.zoom = fit < 1 && fit >= 0.78 ? fit.toFixed(3) : "";
+      if (stage.offsetHeight <= room) {
         range = (panels.length - 1) * innerHeight * 0.75;
         show.style.setProperty("--sp-steps-h", `${range}px`);
         if (full() && below(wrap)) panels[0].classList.add("is-wait");
