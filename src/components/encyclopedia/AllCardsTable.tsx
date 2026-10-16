@@ -25,13 +25,6 @@ const TABS = [
   { id: "pentacles", labelTh: "เหรียญ (14)", labelEn: "Pentacles (14)", count: 14, Icon: PentacleTabIcon },
 ];
 
-const ELEMENT_STYLES: Record<string, { bg: string; text: string; border: string }> = {
-  ไฟ: { bg: "bg-gold-ink/10", text: "text-gold-ink", border: "border-gold-ink/30" },
-  น้ำ: { bg: "bg-ink-soft/10", text: "text-muted", border: "border-ink-soft/30" },
-  ลม: { bg: "bg-ink-soft/10", text: "text-muted", border: "border-ink-soft/30" },
-  ดิน: { bg: "bg-ok/10", text: "text-ok", border: "border-ok/30" },
-};
-
 const ELEMENT_EN: Record<string, string> = {
   ไฟ: "Fire",
   น้ำ: "Water",
@@ -78,182 +71,135 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
     });
   }, [cards, activeSuit, query]);
 
+  const groupOf = (card: CardSummary) => (card.arcana === "major" ? "major" : (card.suit ?? "major"));
+  const showGroups = activeSuit === "all" && !query.trim();
+
+  /*
+   * v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — แผ่นอ้างอิงไพ่ 78 ใบ
+   * แถบค้นหา + ชุดไพ่ติดจอ · แถวจัดกลุ่มตามชุดมีแถบหัวสีธาตุ (v1 ตารางยาว 78 แถวไม่มีจุดพัก)
+   * มือถือ: แถวกลายเป็นการ์ดสองบรรทัด ไม่ต้องเลื่อนตารางแนวนอน
+   */
   return (
-    <div className="space-y-6">
-      {/* Controls Bar: Search & Filter Tabs */}
-      <div className="altar-card-porcelain p-4 sm:p-6 space-y-4">
-        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-          <div className="relative flex-1 max-w-md">
-            <input
-          aria-label={isEnglish ? "Search cards in table" : "ค้นหาไพ่ในตาราง"}
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={isEnglish ? "Search card name, keyword, element..." : "ค้นหาชื่อไพ่, คำสำคัญ, ธาตุ..."}
-              className="glass-field w-full px-3.5 py-2.5 rounded-xl border border-line-interactive text-xs sm:text-sm font-serif-th text-ink placeholder:text-muted/60 focus:outline-none focus:border-gold-ink focus:ring-1 focus:ring-gold-ink"
-            />
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-serif-th text-muted hover:text-ink"
-              >
-                {isEnglish ? "Clear" : "ล้าง"}
-              </button>
-            )}
-          </div>
-
-          <div className="text-xs font-serif-th text-muted self-center sm:self-auto">
-            {isEnglish ? (
-              <>Showing <strong className="text-gold-ink">{filteredCards.length}</strong> of 78 cards</>
-            ) : (
-              <>แสดง <strong className="text-gold-ink">{filteredCards.length}</strong> จาก 78 ใบ</>
-            )}
-          </div>
+    <div className="v2-ca">
+      <div className="v2-ca-bar">
+        <div className="v2-ca-search">
+          <input
+            aria-label={isEnglish ? "Search cards in table" : "ค้นหาไพ่ในตาราง"}
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={isEnglish ? "Search card name, keyword, element..." : "ค้นหาชื่อไพ่, คำสำคัญ, ธาตุ..."}
+          />
+          {query && (
+            <button type="button" onClick={() => setQuery("")}>
+              {isEnglish ? "Clear" : "ล้าง"}
+            </button>
+          )}
         </div>
-
-        {/* Suit Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-          {TABS.map((tab) => {
-            const isActive = activeSuit === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveSuit(tab.id)}
-                aria-pressed={isActive}
-                className={`tap-overlay-y px-3 py-1.5 rounded-xl border text-xs font-serif-th font-bold shrink-0 transition-colors flex items-center gap-1.5 cursor-pointer ${
-                  isActive
-                    ? "btn-gold-glass border-gold-ink"
-                    : "border-line bg-surface-warm text-muted hover:bg-surface hover:text-ink"
-                }`}
-              >
-                <tab.Icon className="w-3.5 h-3.5" />
-                <span>{isEnglish ? tab.labelEn : tab.labelTh}</span>
-              </button>
-            );
-          })}
+        <div className="v2-ca-tabs">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              data-suit={tab.id}
+              onClick={() => setActiveSuit(tab.id)}
+              aria-pressed={activeSuit === tab.id}
+              className="v2-ca-tab"
+            >
+              <tab.Icon className="v2-ca-tab-ic" />
+              <span>{isEnglish ? tab.labelEn : tab.labelTh}</span>
+            </button>
+          ))}
         </div>
+        <p className="v2-ca-count" role="status">
+          {isEnglish ? (
+            <>
+              Showing <b>{filteredCards.length}</b> of 78 cards
+            </>
+          ) : (
+            <>
+              แสดง <b>{filteredCards.length}</b> จาก 78 ใบ
+            </>
+          )}
+        </p>
       </div>
 
-      {/* Master 78-Card Table */}
-      <div className="altar-card-porcelain overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs sm:text-sm font-serif-th">
-            <thead>
-              <tr className="border-b border-line bg-surface-warm text-ink">
-                <th className="py-3 px-3 sm:px-4 font-bold w-12 text-center">#</th>
-                <th className="py-3 px-2 sm:px-3 font-bold w-16 sm:w-20 text-center">{isEnglish ? "Card" : "ไพ่"}</th>
-                <th className="py-3 px-3 sm:px-4 font-bold min-w-[140px] sm:min-w-[180px]">{isEnglish ? "Name" : "ชื่อไพ่"}</th>
-                <th className="py-3 px-2 sm:px-3 font-bold min-w-[90px]">{isEnglish ? "Element" : "ธาตุ / ชุด"}</th>
-                <th className="py-3 px-3 sm:px-4 font-bold min-w-[160px] sm:min-w-[200px]">{isEnglish ? "Upright Meaning" : "ความหมายหัวตั้ง"}</th>
-                <th className="py-3 px-3 sm:px-4 font-bold min-w-[160px] sm:min-w-[200px]">{isEnglish ? "Reversed Meaning" : "ความหมายกลับหัว"}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line/60">
-              {filteredCards.map((card, idx) => {
-                const elemStyle = ELEMENT_STYLES[card.element] || ELEMENT_STYLES["ไฟ"];
-                const kwEn = CARD_KEYWORDS_EN[card.id];
-                const uprightKws = isEnglish && kwEn?.upright?.length ? kwEn.upright : card.keywords.upright;
-                const reversedKws = isEnglish && kwEn?.reversed?.length ? kwEn.reversed : card.keywords.reversed;
-
-                return (
-                  <tr
-                    key={card.id}
-                    className="hover:bg-surface-warm/70 transition-colors group"
-                  >
-                    {/* Index */}
-                    <td className="py-3 px-3 sm:px-4 text-center font-mono text-[11px] text-muted">
-                      {idx + 1}
-                    </td>
-
-                    {/* Thumbnail */}
-                    <td className="py-2.5 px-2 sm:px-3 text-center">
+      <div className="v2-ca-sheet">
+        <table className="v2-ca-table">
+          <thead>
+            <tr>
+              <th className="is-n">#</th>
+              <th className="is-img">{isEnglish ? "Card" : "ไพ่"}</th>
+              <th>{isEnglish ? "Name" : "ชื่อไพ่"}</th>
+              <th>{isEnglish ? "Element" : "ธาตุ / ชุด"}</th>
+              <th>{isEnglish ? "Upright Meaning" : "ความหมายหัวตั้ง"}</th>
+              <th>{isEnglish ? "Reversed Meaning" : "ความหมายกลับหัว"}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredCards.map((card, idx) => {
+              const kwEn = CARD_KEYWORDS_EN[card.id];
+              const uprightKws = isEnglish && kwEn?.upright?.length ? kwEn.upright : card.keywords.upright;
+              const reversedKws = isEnglish && kwEn?.reversed?.length ? kwEn.reversed : card.keywords.reversed;
+              const g = groupOf(card);
+              const newGroup = showGroups && (idx === 0 || groupOf(filteredCards[idx - 1]) !== g);
+              const tab = TABS.find((t) => t.id === g);
+              return (
+                <React.Fragment key={card.id}>
+                  {newGroup && tab && (
+                    <tr className="v2-ca-group" data-suit={g}>
+                      <th colSpan={6} scope="colgroup">
+                        <tab.Icon className="v2-ca-tab-ic" />
+                        {isEnglish ? tab.labelEn : tab.labelTh}
+                      </th>
+                    </tr>
+                  )}
+                  <tr className="v2-ca-row" data-suit={g}>
+                    <td className="is-n">{idx + 1}</td>
+                    <td className="is-img">
                       <Link
                         href={`/cards/${card.id}`}
-                        /*
-                         * ⚠️ ลิงก์นี้มี "ภาพย่อ" เป็นเนื้อหาชิ้นเดียว ไม่มีตัวหนังสือเลย
-                         * ชื่อเรียก (accessible name) จึงต้องมาจาก aria-label ตรงนี้เท่านั้น
-                         * ห้ามถอด aria-label ออกแล้วปล่อยให้ภาพข้างในเป็น alt="" พร้อมกัน
-                         * เพราะลิงก์จะกลายเป็นลิงก์ไร้ชื่อ ผิด WCAG 2.4.4 (บทเรียน INC-0125)
-                         */
+                        /* ⚠️ ลิงก์ภาพย่อไม่มีตัวหนังสือ — ชื่อเรียกมาจาก aria-label เท่านั้น (INC-0125 · WCAG 2.4.4) */
                         aria-label={isEnglish ? card.nameEn : card.nameTh}
-                        className="glass-tile !rounded inline-block w-9 h-15 overflow-hidden transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
+                        className="v2-ca-thumb"
                       >
-                        <CardImage
-                          image={card.image}
-                          cardId={card.id}
-                          /* ชื่อไพ่ย้ายไปอยู่ที่ aria-label ของ <Link> ด้านบนแล้ว ไม่ใส่ซ้ำที่นี่ */
-                          alt=""
-                          className="w-full h-full object-cover"
-                          sizes="36px"
-                        />
+                        <CardImage image={card.image} cardId={card.id} alt="" className="w-full h-full object-cover" sizes="44px" />
                       </Link>
                     </td>
-
-                    {/* Card Names */}
-                    <td className="py-3 px-3 sm:px-4">
-                      <Link
-                        href={`/cards/${card.id}`}
-                        className="group-hover:text-gold-ink transition-colors focus-visible:outline-none focus-visible:underline"
-                      >
-                        <span className="font-bold text-ink block text-xs sm:text-sm">
-                          {isEnglish ? card.nameEn : card.nameTh}
-                        </span>
-                        <span className="text-[11px] font-mono text-muted block">
-                          {isEnglish ? "" : card.nameEn}
-                        </span>
+                    <td className="is-name">
+                      <Link href={`/cards/${card.id}`}>
+                        <b>{isEnglish ? card.nameEn : card.nameTh}</b>
+                        {!isEnglish && <small>{card.nameEn}</small>}
                       </Link>
                     </td>
-
-                    {/* Suit & Element */}
-                    <td className="py-3 px-2 sm:px-3">
-                      <span
-                        className={`inline-block text-[11px] font-mono px-2 py-0.5 rounded border ${elemStyle.border} ${elemStyle.bg} ${elemStyle.text} font-bold`}
-                      >
-                        {isEnglish ? ELEMENT_EN[card.element] || card.element : `ธาตุ${card.element}`}
-                      </span>
+                    <td className="is-el">
+                      <span>{isEnglish ? ELEMENT_EN[card.element] || card.element : `ธาตุ${card.element}`}</span>
                     </td>
-
-                    {/* Upright Keywords */}
-                    <td className="py-3 px-3 sm:px-4">
-                      <div className="flex flex-wrap gap-1">
-                        {uprightKws.map((kw, i) => (
-                          <span
-                            key={i}
-                            className="altar-card-porcelain !rounded text-[11px] px-1.5 py-0.5 text-ink"
-                          >
-                            {kw}
-                          </span>
-                        ))}
-                      </div>
+                    <td className="is-up">
+                      <span className="v2-ca-k">{isEnglish ? "Upright" : "หัวตั้ง"}</span>
+                      {uprightKws.map((kw, i) => (
+                        <span key={i} className="v2-ca-kw">
+                          {kw}
+                        </span>
+                      ))}
                     </td>
-
-                    {/* Reversed Keywords */}
-                    <td className="py-3 px-3 sm:px-4">
-                      <div className="flex flex-wrap gap-1">
-                        {reversedKws.map((kw, i) => (
-                          <span
-                            key={i}
-                            className="altar-card-porcelain !rounded text-[11px] px-1.5 py-0.5 text-muted"
-                          >
-                            {kw}
-                          </span>
-                        ))}
-                      </div>
+                    <td className="is-rev">
+                      <span className="v2-ca-k">{isEnglish ? "Reversed" : "กลับหัว"}</span>
+                      {reversedKws.map((kw, i) => (
+                        <span key={i} className="v2-ca-kw">
+                          {kw}
+                        </span>
+                      ))}
                     </td>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                </React.Fragment>
+              );
+            })}
+          </tbody>
+        </table>
 
-        {/* Empty Search Result */}
         {filteredCards.length === 0 && (
-          <div className="p-8 text-center text-xs sm:text-sm text-muted">
-            {isEnglish ? `No cards matched "${query}"` : `ไม่พบไพ่ที่ตรงกับ "${query}"`}
-          </div>
+          <p className="v2-ca-empty">{isEnglish ? `No cards matched "${query}"` : `ไม่พบไพ่ที่ตรงกับ "${query}"`}</p>
         )}
       </div>
     </div>

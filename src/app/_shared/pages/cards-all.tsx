@@ -9,7 +9,8 @@ import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
-import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 const PATH = "/cards/all";
 
@@ -108,46 +109,32 @@ export function CardsAllBody({ locale, table }: { locale: Locale; table: ReactNo
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbsJsonLd) }} />
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
-        {/* Breadcrumb Bar */}
-        <nav aria-label="Breadcrumb" className="text-xs font-serif-th text-muted">
-          <ol className="flex items-center gap-1.5 flex-wrap">
-            <li>
-              <Link href={href("/")} className="hover:text-gold-ink transition-colors">
-                {homeCrumb(locale).name}
-              </Link>
-            </li>
-            <li aria-hidden="true" className="text-gold">/</li>
-            <li>
-              <Link href={href("/cards")} className="hover:text-gold-ink transition-colors">
-                {copy.crumbCards}
-              </Link>
-            </li>
-            <li aria-hidden="true" className="text-gold">/</li>
-            <li aria-current="page" className="font-bold text-ink">
-              {copy.crumbHere}
-            </li>
-          </ol>
-        </nav>
-
-        {/* หัวหน้า UI 2.0 (เจ้าของ 2026-10-16) — ข้อความเดิม · ชิปกลุ่มไพ่เป็นปุ่มกระจกใต้คำโปรย */}
-        <Ui2PageHero
-          title={copy.title}
-          accent={locale === "en" ? undefined : "78 ใบ"}
-          lede={copy.lede}
-          trust={[copy.badgeLeft, copy.badgeRight]}
-          cards={["major-00", "cups-01", "major-21", "swords-01", "wands-01", "pentacles-01"]}
-        >
-          <div className="ui2-ph-chips">
+        {/* v2 — หัวสั้นชิดซ้าย ให้ตารางขึ้นเร็ว (v1 หัวใหญ่ + ไพ่ลอยดันตารางลงจอที่สอง) */}
+        <header className="v2-ca-head">
+          <Ui2Crumbs
+            crumbs={[
+              { label: homeCrumb(locale).name, href: "/" },
+              { label: copy.crumbCards, href: "/cards" },
+              { label: copy.crumbHere },
+            ]}
+          />
+          <h1 className="v2-ca-title">
+            <ThaiPhrases>{copy.title}</ThaiPhrases>
+          </h1>
+          <p className="v2-ca-lede">
+            <ThaiPhrases>{copy.lede}</ThaiPhrases>
+          </p>
+          <nav className="v2-ca-chips" aria-label={copy.crumbCards}>
             {copy.chips.map((chip) => (
-              <Link key={chip.href} href={href(chip.href)} className="ui2-ph-chip">
+              <Link key={chip.href} href={href(chip.href)}>
                 {chip.label}
               </Link>
             ))}
-          </div>
-        </Ui2PageHero>
+          </nav>
+        </header>
 
         {/* Interactive Master Table — แถบสีอ่อนแบ่งจากหัวหน้าแบบหน้าแรก (`page-band`) · ห่อ div เพราะ <astro-island> เป็น display:contents */}
-        <div className="page-band page-band-tint">{table}</div>
+        <div>{table}</div>
       </div>
     </main>
   );
