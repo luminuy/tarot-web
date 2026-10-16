@@ -548,7 +548,8 @@
     :root:not([data-fx="off"]) .ui2-pg .ui2-rv {
       animation: ui2-pg-rise linear both;
       animation-timeline: view();
-      animation-range: entry 0% cover 22%;
+      /* ระยะคงที่ (ไม่ใช่ % ของความสูง) — ก้อนสูงมากอย่างกริด 78 ใบ ไม่ค้างจาง */
+      animation-range: entry 0% entry 280px;
     }
   }
 }
@@ -732,4 +733,157 @@
 .ui2-pac-pile h2 {
   -webkit-line-clamp: 2;
   line-clamp: 2;
+}
+
+/* ══ 12. ความหมายไพ่ 78 ใบ — เอกลักษณ์หน้า: ตู้โชว์ไพ่ แยกสีตามธาตุ ══
+   ทอง = ชุดใหญ่ · ไฟ = ไม้เท้า · น้ำ = ถ้วย · ลม = ดาบ · ดิน = เหรียญ (ป้าย data-suit บนแท็บและการ์ด)
+   ⚠️ ห้ามแตะ padding / gap / สัดส่วนภาพของการ์ด — สูตรความสูง card-tile-cv (ด่าน test-card-tile-height) */
+[data-suit="all"],
+[data-suit="major"] { --el: 255, 217, 143; }
+[data-suit="wands"] { --el: 255, 146, 92; }
+[data-suit="cups"] { --el: 120, 176, 255; }
+[data-suit="swords"] { --el: 190, 210, 238; }
+[data-suit="pentacles"] { --el: 128, 206, 146; }
+.ui2-pg .ui2-cx-panel {
+  border-radius: 28px;
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset, 0 40px 80px -40px rgba(0, 0, 0, 0.85);
+}
+/* แท็บชุดไพ่: แถบสีธาตุด้านบน · แท็บที่เลือกเรืองสีธาตุ */
+.ui2-pg [role="tab"][data-suit] {
+  box-shadow: inset 0 2px 0 rgba(var(--el), 0.75);
+}
+.ui2-pg [role="tab"][data-suit] svg {
+  color: rgb(var(--el));
+}
+.ui2-pg [role="tab"][data-suit][aria-selected="true"] {
+  background: radial-gradient(90% 120% at 50% 0%, rgba(var(--el), 0.26) 0%, rgba(var(--el), 0.04) 70%), rgba(28, 23, 30, 0.95);
+  border-color: rgba(var(--el), 0.7);
+  box-shadow: inset 0 2px 0 rgb(var(--el)), 0 0 28px rgba(var(--el), 0.22);
+}
+.ui2-pg [role="tab"][data-suit][aria-selected="true"] .text-gold-ink {
+  color: rgb(var(--el));
+}
+/* การ์ดไพ่ในตู้: ขอบและแสงตามธาตุตอนชี้ */
+.ui2-pg a[data-suit].card-tile-cv {
+  border-color: rgba(var(--el), 0.16);
+}
+.ui2-pg a[data-suit].card-tile-cv:hover {
+  border-color: rgba(var(--el), 0.65);
+  box-shadow: 0 0 34px rgba(var(--el), 0.22), 0 24px 40px -20px rgba(0, 0, 0, 0.9);
+}
+.ui2-pg a[data-suit].card-tile-cv:hover h2 {
+  color: rgb(var(--el));
+}
+.ui2-pg a[data-suit].card-tile-cv .bg-gold-ink {
+  background: rgb(var(--el));
+  color: var(--ui2-night);
+}
+.ui2-pg a[data-suit].card-tile-cv .bg-ink\/90 {
+  background: rgba(12, 10, 15, 0.86);
+}
+.ui2-pg a[data-suit].card-tile-cv .text-canvas {
+  color: rgb(var(--el));
+}
+
+/* ══ 13. หน้าไพ่รายใบ — เอกลักษณ์หน้า: ไพ่ใบใหญ่บนแท่นทอง รัศมีแสงหลังไพ่ ══ */
+.ui2-cd-stage {
+  isolation: isolate;
+  padding: 18px 18px 34px;
+}
+/* แสงทองนุ่มหลังไพ่ — อยู่ในกรอบคอลัมน์ไพ่ ไม่ทับคอลัมน์ข้อความ (radial นิ่ง · ไม่ใช่ filter) */
+.ui2-cd-rays {
+  position: absolute;
+  z-index: -2;
+  inset: -6% -4% 4%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255, 217, 143, 0.5) 0%, rgba(255, 217, 143, 0.16) 50%, rgba(255, 217, 143, 0) 100%);
+}
+/* แท่นทองวงรีใต้ไพ่ */
+.ui2-cd-plinth {
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  bottom: 6px;
+  width: 92%;
+  height: 46px;
+  translate: -50% 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255, 217, 143, 0.4), rgba(255, 217, 143, 0.08) 70%, rgba(255, 217, 143, 0));
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.28);
+}
+.ui2-pg .ui2-cd-stage .altar-panel {
+  background: linear-gradient(170deg, var(--ui2-card-ivory-top) 0%, var(--ui2-card-ivory-bottom) 100%);
+  border-color: rgba(201, 161, 90, 0.7);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.5), 0 40px 60px -26px rgba(0, 0, 0, 0.95), 0 0 60px rgba(255, 217, 143, 0.22);
+}
+
+/* ══ 14. คำถามที่คนถามบ่อย — เอกลักษณ์หน้า: ผนังกระดาษโน้ตแบบหน้าแรก (หมวดละสี · เอียงสลับ · หมุดทอง) ══ */
+.ui2-qn-wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
+  gap: 18px 16px;
+  margin: 0;
+  padding: 8px 2px 4px;
+  list-style: none;
+}
+.ui2-qn-note {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 150px;
+  padding: 22px 18px 18px;
+  border-radius: 6px 6px 18px 6px;
+  color: var(--note-ink);
+  background: linear-gradient(170deg, var(--note) 0%, color-mix(in srgb, var(--note) 86%, #000) 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 18px 30px -18px rgba(0, 0, 0, 0.9);
+  rotate: -1.2deg;
+  transition: rotate var(--dur-base) var(--ease-out), translate var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.ui2-qn-wall li:nth-child(even) .ui2-qn-note {
+  rotate: 1.4deg;
+}
+.ui2-qn-wall li:nth-child(3n) .ui2-qn-note {
+  rotate: -0.6deg;
+}
+/* หมุดทองกลางขอบบน */
+.ui2-qn-note::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #FFF1C8 0%, var(--ui2-gold-solid) 45%, #B57A2A 100%);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+}
+.ui2-qn-q {
+  font-family: var(--ui2-font-display);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.ui2-qn-d {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--note-sub);
+}
+@media (hover: hover) {
+  .ui2-qn-note:hover {
+    rotate: 0deg;
+    translate: 0 -6px;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 26px 40px -18px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 217, 143, 0.18);
+  }
+}
+.ui2-qn-note:focus-visible {
+  outline: 2px solid var(--ui2-gold-solid);
+  outline-offset: 4px;
+}
+[data-fx="off"] .ui2-qn-note {
+  transition: none;
 }

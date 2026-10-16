@@ -321,24 +321,30 @@ export function QuestionsHubContent({ locale }: { locale: Locale }) {
           trust={isEn ? [`${QUESTIONS.length} questions`, "Each with a spread that fits"] : [`${QUESTIONS.length} คำถาม`, "ทุกคำถามมีผังที่เหมาะ"]}
           cards={["major-06", "major-07", "pentacles-01", "major-02", "cups-10", "pentacles-08"]}
         />
-        {QUESTION_TOPIC_ORDER.map((topic) => {
+        {QUESTION_TOPIC_ORDER.map((topic, topicIndex) => {
           const items = QUESTIONS.filter((q) => q.topic === topic);
           if (items.length === 0) return null;
           const parent = TOPIC_PARENT[topic];
+          // เอกลักษณ์หน้านี้ (UI 2.0 · 2026-10-16): คำถามเป็นกระดาษโน้ตแปะผนังแบบหน้าแรก — หมวดละสี
+          const tone = (topicIndex % 7) + 1;
           return (
-            <section key={topic} className="space-y-3">
+            <section
+              key={topic}
+              className="space-y-3 ui2-qn-sec"
+              style={{ "--note": `var(--ui2-note-${tone})`, "--note-ink": `var(--ui2-note-ink-${tone})`, "--note-sub": `var(--ui2-note-sub-${tone})` } as React.CSSProperties}
+            >
               <div className="flex items-baseline justify-between gap-3">
                 <H2>{isEn ? parent.en : parent.th}</H2>
                 <Link href={parent.path} className="text-xs font-serif-th text-gold-ink underline underline-offset-2 shrink-0">
                   {isEn ? "Spreads for this topic" : "ผังในหมวดนี้"}
                 </Link>
               </div>
-              <ul className="grid gap-2 sm:grid-cols-2">
+              <ul className="ui2-qn-wall">
                 {items.map((q) => (
                   <li key={q.slug}>
-                    <Link href={questionPath(q.slug)} className="block glass-tile !rounded-xl p-4 space-y-1 hover:text-gold-ink">
-                      <span className="block font-serif-th font-semibold text-ink-deep text-sm sm:text-base">{q[isEn ? "en" : "th"].question}</span>
-                      <span className="block text-xs text-muted font-serif-th">{q[isEn ? "en" : "th"].description}</span>
+                    <Link href={questionPath(q.slug)} className="ui2-qn-note">
+                      <span className="ui2-qn-q">{q[isEn ? "en" : "th"].question}</span>
+                      <span className="ui2-qn-d">{q[isEn ? "en" : "th"].description}</span>
                     </Link>
                   </li>
                 ))}

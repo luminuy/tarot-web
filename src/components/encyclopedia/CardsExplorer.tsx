@@ -140,7 +140,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
       />
 
       {/* Sacred Search & Filter Dashboard */}
-      <div className="altar-panel p-4 sm:p-6 space-y-5">
+      <div className="ui2-cx-panel altar-panel p-4 sm:p-6 space-y-5">
         {/* Search Bar & Result Stats */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-xl">
@@ -243,6 +243,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               <button
                 key={tab.id}
                 role="tab"
+                data-suit={tab.id}
                 id={`card-tab-${tab.id}`}
                 aria-controls={`card-panel-${tab.id}`}
                 aria-selected={isActive}
@@ -380,6 +381,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                    ใช้ได้เพราะแถวคีย์เวิร์ดด้านล่างถูกล็อกความสูงแล้ว การ์ดทุกใบจึงสูงเท่ากัน
                    ห้ามแก้สัดส่วนภาพ/ระยะห่างของการ์ดโดยไม่อัปเดตสูตรใน globals.css — ด่าน
                    `test-card-tile-height.ts` จะตกทันทีถ้าของที่สูตรพึ่งพาถูกแก้ (กริด · gap · padding · สัดส่วนภาพ) */
+                data-suit={card.arcana === "major" ? "major" : (card.suit ?? "major")}
                 className="card-tile-cv altar-card-porcelain !rounded-xl p-3 flex flex-col justify-between group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1.5"
               >
                 {/* Card Artwork Showcase (1909 Authentic Rider-Waite-Smith) */}

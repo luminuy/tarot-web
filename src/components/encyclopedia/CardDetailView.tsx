@@ -173,8 +173,10 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
 
         {/* Left Column: 3D Showcase Card & Orientation Controller */}
         <div className="md:col-span-5 lg:col-span-4 md:col-start-1 md:row-start-1 md:row-span-2 flex flex-col items-center space-y-5">
-          {/* 3D Sacred Card Container */}
-          <div className="relative group">
+          {/* 3D Sacred Card Container — UI 2.0 เอกลักษณ์หน้า: ไพ่ใบใหญ่บนแท่นทอง มีรัศมีหลังไพ่ (`.ui2-cd-stage`) */}
+          <div className="ui2-cd-stage relative group">
+            <span className="ui2-cd-rays" aria-hidden="true" />
+            <span className="ui2-cd-plinth" aria-hidden="true" />
             {/* ใส่คลาสอนิเมชันเฉพาะหลัง mount — เรนเดอร์แรกฝั่งเซิร์ฟเวอร์ต้องออกมา
                 ที่สถานะปลายทางเสมอ ไม่งั้นภาพไพ่ซึ่งเป็น LCP ของหน้าถูกส่งไปแบบ opacity 0 */}
             <div className="altar-panel relative w-64 sm:w-72 aspect-[7/12] !rounded-xl overflow-hidden p-1.5">
