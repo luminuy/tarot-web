@@ -1073,3 +1073,75 @@
     width: 14px;
   }
 }
+
+/* ══ 19. v2 หัวหน้าเตี้ยของหน้าเครื่องมือ (`Ui2TightHead`) — เครื่องมือขึ้นจอแรก · แสงสีประจำหน้า ══ */
+.v2-th {
+  --tone: 255, 217, 143;
+  position: relative;
+  isolation: isolate;
+  padding: 34px 8px 26px;
+  text-align: center;
+}
+.v2-th[data-tone="rose"] {
+  --tone: 240, 150, 170;
+}
+.v2-th[data-tone="indigo"] {
+  --tone: 150, 160, 255;
+}
+.v2-th[data-tone="star"] {
+  --tone: 200, 190, 255;
+}
+.v2-th::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: -40px;
+  width: min(900px, 100vw);
+  height: 300px;
+  translate: -50% 0;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(var(--tone), 0.2) 0%, rgba(var(--tone), 0) 100%);
+}
+.v2-th .ui2-ph-crumb {
+  justify-content: center;
+}
+.v2-th-title {
+  margin: 10px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(32px, 4.4vw, 54px);
+  font-weight: 700;
+  line-height: 1.12;
+  color: var(--ui2-on-night);
+  text-wrap: balance;
+}
+.v2-th-lede {
+  max-width: 620px;
+  margin: 12px auto 0;
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--ui2-on-night-soft);
+}
+.v2-th-trust {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 18px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12.5px;
+  color: var(--ui2-on-night-dim);
+}
+.v2-th-trust li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.v2-th-trust li::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  rotate: 45deg;
+  background: rgb(var(--tone));
+}

@@ -249,6 +249,7 @@ export function LoveOneCardClient() {
     <div className="ui2-dy ui2-love ui2-dy-ritual">
       {/* Hero Header */}
       <RitualHero
+        tone="rose"
         breadcrumbs={breadcrumbs}
         badgeText={isEnglish ? "Original 1909 deck · 78 cards" : "สำรับ 1909 แท้ 78 ใบ"}
         title={isEnglish ? "Love Tarot 1 Card Reading" : "ดูดวงความรัก 1 ใบ ไขคำตอบสถานะหัวใจ"}

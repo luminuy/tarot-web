@@ -286,6 +286,7 @@ export function ZodiacIndexBody({
       <JsonLd data={faqJsonLd} />
       <div className="max-w-4xl mx-auto space-y-10">
         <RitualHero
+          tone="star"
           breadcrumbs={breadcrumbs}
           badgeText={isEnglish ? "Tarot × Astrology" : "ไพ่ทาโรต์ × โหราศาสตร์"}
           title={isEnglish ? "Zodiac Tarot Cards" : "ไพ่ประจำราศี 12 ราศี"}
@@ -467,6 +468,7 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
       <JsonLd data={breadcrumbJsonLd} />
       <div className="max-w-4xl mx-auto space-y-10">
         <RitualHero
+          tone="star"
           breadcrumbs={breadcrumbs}
           badgeText={isEnglish ? `${sign.nameEn} · ${major.nameEn}` : `${sign.nameTh} · ${major.nameEn}`}
           title={isEnglish ? `${sign.nameEn} Tarot Cards` : `ดูดวง${sign.nameTh} ไพ่ยิปซีและไพ่ประจำราศี`}

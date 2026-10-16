@@ -172,3 +172,41 @@ export function Ui2SectionHead({
     </div>
   );
 }
+
+/**
+ * v2 หัวหน้าเตี้ยสำหรับ "หน้าเครื่องมือ" (ดูดวงความรัก · Pick A Card · ไพ่ประจำราศี) — เจ้าของ 2026-10-16 "สร้างใหม่เลย"
+ * ไม่มีไพ่ลอย · สูงราวครึ่งของ Ui2PageHero ➔ ตัวเครื่องมือ (พัดไพ่ · กองไพ่ · หน้าปัด) ขึ้นในจอแรก
+ * `tone` = สีแสงประจำหน้า (rose · indigo · star) · สไตล์ `.v2-th*` ใน ui2-page.css หัวข้อ 19
+ */
+export function Ui2TightHead({
+  crumbs,
+  title,
+  accent,
+  lede,
+  trust,
+  tone,
+}: {
+  crumbs?: Ui2Crumb[];
+  title: string;
+  accent?: string;
+  lede?: ReactNode;
+  trust?: readonly string[];
+  tone?: "rose" | "indigo" | "star";
+}) {
+  return (
+    <header className="v2-th" data-tone={tone} data-anim-section="">
+      {crumbs && crumbs.length > 0 && <Ui2Crumbs crumbs={crumbs} />}
+      <h1 className="v2-th-title">
+        <TitleWithAccent title={title} accent={accent} />
+      </h1>
+      {lede && <p className="v2-th-lede">{lede}</p>}
+      {trust && trust.length > 0 && (
+        <ul className="v2-th-trust">
+          {trust.map((t) => (
+            <li key={t}>{t}</li>
+          ))}
+        </ul>
+      )}
+    </header>
+  );
+}
