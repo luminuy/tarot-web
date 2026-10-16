@@ -1,0 +1,429 @@
+/*
+ * 📐 v2 หน้าคู่มือผัง (/spreads/[id] · /en/spreads/[id]) — สร้างใหม่ทั้งหน้า (เจ้าของ 2026-10-16 "สร้างใหม่เลย")
+ * เอกลักษณ์: พิมพ์เขียวผัง — กระดานกรมท่าเส้นตารางทอง วางไพ่ตามพิกัดจริง แตะไพ่แล้วเห็นความหมายตำแหน่ง
+ * นำเข้าต่อจาก ui2-page.css · ไม่มี filter/backdrop/mask/อนิเมชันวน
+ */
+
+.v2-sd {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 0 40px;
+}
+
+/* ── จอแรก ── */
+.v2-sd-top {
+  display: grid;
+  gap: 28px;
+  align-items: center;
+  margin-bottom: 72px;
+}
+@media (min-width: 960px) {
+  .v2-sd-top {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 48px;
+    min-height: min(640px, calc(100svh - 140px));
+  }
+}
+.v2-sd-intro .ui2-ph-crumb {
+  justify-content: flex-start;
+}
+.v2-sd-intro .ui2-ph-crumb::before,
+.v2-sd-intro .ui2-ph-crumb::after {
+  display: none;
+}
+.v2-sd-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.v2-sd-tags li {
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.32);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+}
+.v2-sd-title {
+  margin: 14px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(32px, 4.2vw, 52px);
+  font-weight: 700;
+  line-height: 1.14;
+  color: var(--ui2-on-night);
+  text-wrap: balance;
+}
+.v2-sd-tagline {
+  margin: 12px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+}
+.v2-sd-desc {
+  max-width: 540px;
+  margin: 10px 0 0;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ui2-on-night-soft);
+}
+.v2-sd-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+.v2-sd .v2-sd-go {
+  background: linear-gradient(180deg, #FFE3A8 0%, #F0C470 100%);
+  color: var(--ui2-night);
+}
+
+/* กระดานพิมพ์เขียว */
+.v2-sd-board {
+  margin: 0;
+  padding: 20px;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 217, 143, 0.3);
+  background:
+    repeating-linear-gradient(0deg, rgba(160, 196, 255, 0.07) 0 1px, transparent 1px 24px),
+    repeating-linear-gradient(90deg, rgba(160, 196, 255, 0.07) 0 1px, transparent 1px 24px),
+    repeating-linear-gradient(0deg, rgba(160, 196, 255, 0.1) 0 1px, transparent 1px 120px),
+    repeating-linear-gradient(90deg, rgba(160, 196, 255, 0.1) 0 1px, transparent 1px 120px),
+    radial-gradient(80% 80% at 50% 40%, #1B2A4A 0%, #121C33 70%, #0E1628 100%);
+  box-shadow: inset 0 0 0 5px rgba(12, 10, 15, 0.3), inset 0 0 0 6px rgba(255, 217, 143, 0.18), 0 50px 90px -46px rgba(0, 0, 0, 0.95);
+}
+@media (min-width: 960px) {
+  .v2-sd-board {
+    padding: 34px;
+  }
+}
+.v2-sd-board-area {
+  position: relative;
+  width: 100%;
+}
+.v2-sd-slot {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  border: 1.5px solid rgba(255, 217, 143, 0.55);
+  box-shadow: 0 12px 20px -12px rgba(0, 0, 0, 0.95);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.v2-sd-slot span {
+  font-family: var(--ui2-font-display);
+  font-size: clamp(12px, 1.4vw, 20px);
+  font-weight: 700;
+  color: var(--ui2-gold-solid);
+}
+.v2-sd-slot[aria-pressed="true"] {
+  border-color: var(--ui2-gold-solid);
+  box-shadow: 0 0 0 3px rgba(255, 217, 143, 0.35), 0 0 30px rgba(255, 217, 143, 0.45), 0 12px 20px -12px rgba(0, 0, 0, 0.95);
+}
+.v2-sd-cap {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 217, 143, 0.2);
+  background: rgba(12, 10, 15, 0.55);
+}
+.v2-sd-cap-n {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--ui2-gold-solid);
+  font-family: var(--ui2-font-display);
+  font-weight: 700;
+  color: var(--ui2-night);
+}
+.v2-sd-cap b {
+  display: block;
+  font-size: 15px;
+  color: var(--ui2-on-night);
+}
+.v2-sd-cap small {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ui2-on-night-soft);
+}
+
+/* ── ส่วนล่าง ── */
+.v2-sd-sec {
+  margin-bottom: 72px;
+}
+.v2-sd-ledger {
+  margin-top: 22px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 217, 143, 0.2);
+  background: rgba(28, 23, 30, 0.7);
+}
+.v2-sd-ledger table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.v2-sd-ledger thead th {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 217, 143, 0.25);
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ui2-gold-solid);
+}
+.v2-sd-ledger thead th:first-child {
+  width: 64px;
+  text-align: center;
+}
+.v2-sd-ledger tbody tr {
+  border-bottom: 1px solid rgba(255, 236, 200, 0.07);
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+.v2-sd-ledger tbody tr:last-child {
+  border-bottom: 0;
+}
+.v2-sd-ledger tbody tr.is-active {
+  background: linear-gradient(90deg, rgba(255, 217, 143, 0.14) 0%, rgba(255, 217, 143, 0.02) 100%);
+}
+.v2-sd-ledger tbody td,
+.v2-sd-ledger tbody th {
+  padding: 14px 16px;
+  vertical-align: top;
+  text-align: left;
+  line-height: 1.7;
+}
+.v2-sd-ledger tbody td:first-child {
+  text-align: center;
+}
+.v2-sd-ledger tbody th {
+  width: 30%;
+  font-weight: 600;
+  color: var(--ui2-on-night);
+}
+.v2-sd-ledger tbody td:last-child {
+  color: var(--ui2-on-night-soft);
+}
+.v2-sd-n {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 217, 143, 0.4);
+  font-weight: 700;
+  color: var(--ui2-gold-solid);
+}
+tr.is-active .v2-sd-n {
+  border-color: transparent;
+  background: var(--ui2-gold-solid);
+  color: var(--ui2-night);
+}
+@media (max-width: 639px) {
+  .v2-sd-ledger thead {
+    display: none;
+  }
+  .v2-sd-ledger tbody tr {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr);
+    padding: 12px 10px;
+  }
+  .v2-sd-ledger tbody td,
+  .v2-sd-ledger tbody th {
+    padding: 0 4px;
+  }
+  .v2-sd-ledger tbody td:first-child {
+    grid-row: span 2;
+  }
+  .v2-sd-ledger tbody th {
+    width: auto;
+  }
+  .v2-sd-ledger tbody td:last-child {
+    margin-top: 2px;
+    font-size: 13px;
+  }
+}
+
+.v2-sd-steps {
+  display: grid;
+  gap: 12px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 760px) {
+  .v2-sd-steps {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.v2-sd-steps li {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 20px 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 217, 143, 0.18);
+  background: linear-gradient(180deg, rgba(43, 33, 48, 0.75) 0%, rgba(22, 17, 26, 0.75) 100%);
+}
+.v2-sd-stepn {
+  font-family: var(--ui2-font-display);
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(255, 217, 143, 0.32);
+}
+.v2-sd-steps h3 {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: 17px;
+  color: var(--ui2-on-night);
+}
+.v2-sd-steps p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--ui2-on-night-soft);
+}
+
+.v2-sd-split {
+  display: grid;
+  gap: 40px;
+}
+@media (min-width: 960px) {
+  .v2-sd-split {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  }
+}
+.v2-sd-faq {
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+}
+.v2-sd-faq details {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 217, 143, 0.16);
+  background: rgba(28, 23, 30, 0.7);
+}
+.v2-sd-faq summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  list-style: none;
+  font-weight: 600;
+  color: var(--ui2-on-night);
+  cursor: pointer;
+}
+.v2-sd-faq summary::-webkit-details-marker {
+  display: none;
+}
+.v2-sd-faq summary::after {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-left: auto;
+  border-right: 1.5px solid var(--ui2-gold-solid);
+  border-bottom: 1.5px solid var(--ui2-gold-solid);
+  rotate: 45deg;
+  transition: rotate var(--dur-fast) var(--ease-out);
+}
+.v2-sd-faq details[open] summary::after {
+  rotate: 225deg;
+}
+.v2-sd-faq p {
+  margin: 0;
+  padding: 0 18px 16px;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--ui2-on-night-soft);
+}
+.v2-sd-articles {
+  display: grid;
+  gap: 8px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.v2-sd-articles a {
+  display: block;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 217, 143, 0.16);
+  background: rgba(28, 23, 30, 0.6);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ui2-on-night);
+  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.v2-sd-articles a:hover {
+  border-color: rgba(255, 217, 143, 0.5);
+  color: var(--ui2-gold-solid);
+}
+
+.v2-sd-more {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: 12px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.v2-sd-more-card {
+  display: grid;
+  gap: 6px;
+  height: 100%;
+  padding: 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 217, 143, 0.18);
+  background: rgba(28, 23, 30, 0.7);
+  transition: border-color var(--dur-fast) var(--ease-out), translate var(--dur-fast) var(--ease-out);
+}
+.v2-sd-more-card:hover {
+  translate: 0 -2px;
+  border-color: rgba(255, 217, 143, 0.5);
+}
+.v2-sd-more-card b {
+  margin-top: 6px;
+  font-size: 15px;
+  color: var(--ui2-on-night);
+}
+.v2-sd-more-card small {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ui2-on-night-dim);
+}
+.v2-sd-mini {
+  position: relative;
+  display: block;
+  width: 100%;
+  border-radius: 14px;
+  background: radial-gradient(80% 80% at 50% 40%, #1B2A4A 0%, #121C33 100%);
+}
+.v2-sd-mini span {
+  position: absolute;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 217, 143, 0.6);
+  background: rgba(255, 217, 143, 0.12);
+}
+.v2-sd-all {
+  display: inline-block;
+  margin-top: 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(255, 217, 143, 0.4);
+}
