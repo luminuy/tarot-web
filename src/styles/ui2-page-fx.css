@@ -100,3 +100,23 @@
 @keyframes ui2-pg-deco-out {
   to { opacity: 0.15; transform: scale(1.4); }
 }
+
+/* 🎂 ไพ่ประจำตัว v2 — ไพ่ที่เซิร์ฟเวอร์ยืนยันแล้วพลิกขึ้นในช่องไพ่ (ครั้งเดียว ไม่วน) */
+@media (min-width: 768px) {
+  [data-fx="full"] .v2-bc-card-frame {
+    animation: v2-bc-flip 900ms var(--ease-out) both;
+  }
+  [data-fx="full"] .v2-bc-card + .v2-bc-card .v2-bc-card-frame {
+    animation-delay: 240ms;
+  }
+}
+@keyframes v2-bc-flip {
+  from {
+    opacity: 0;
+    transform: perspective(900px) rotateY(-75deg) translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

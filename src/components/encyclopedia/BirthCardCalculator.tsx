@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useTransition } from "react";
-import dynamic from "next/dynamic";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { calculateBirthCard, getMaxDaysInMonth, type BirthCardResult, type BirthCardItem } from "@/lib/tarot/birth-card";
@@ -17,22 +16,13 @@ import { copyToClipboard } from "@/lib/utils/clipboard";
  */
 import { useAiReading } from "@/lib/reading/use-ai-reading";
 import { AiReadingPanel } from "@/components/reading/ai/AiReadingPanel";
-import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { CardImage } from "@/components/card/CardImage";
 /* 💤 กล่องสิทธิ์/กล่องสมัครสมาชิกโหลดตอนถูกเรียกใช้จริงเท่านั้น (บทเรียนงบบันเดิลของ `/daily`) */
 const AccessDialog = React.lazy(() =>
   import("@/components/entitlement/AccessDialog").then((m) => ({ default: m.AccessDialog }))
 );
 const AuthModal = React.lazy(() =>
   import("@/components/auth/AuthModal").then((m) => ({ default: m.AuthModal }))
-);
-
-const TarotCard = dynamic(
-  () => import("@/components/card/TarotCard").then((mod) => mod.TarotCard),
-  {
-    loading: () => (
-      <div className="altar-card-porcelain !rounded-xl w-[140px] h-[238px] animate-pulse" />
-    ),
-  },
 );
 
 const MONTHS = [
@@ -60,8 +50,9 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
   const [day, setDay] = useState<number>(1);
   const [month, setMonth] = useState<number>(1);
-  const [yearInput, setYearInput] = useState<string>("2540");
-  const [era, setEra] = useState<"be" | "ce">("be");
+  // ผู้ใช้อังกฤษเริ่มที่ ค.ศ. (v1 ตั้ง พ.ศ. 2540 ให้ทุกภาษา คนต่างชาติต้องสลับเองก่อน)
+  const [yearInput, setYearInput] = useState<string>(isEnglish ? "1997" : "2540");
+  const [era, setEra] = useState<"be" | "ce">(isEnglish ? "ce" : "be");
   const [result, setResult] = useState<BirthCardResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -235,431 +226,284 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
     }
   };
 
+  const yearForDays =
+    era === "be"
+      ? (Number.parseInt(yearInput.trim(), 10) || 2540) - 543
+      : Number.parseInt(yearInput.trim(), 10) || 1997;
+  /** สลับ พ.ศ./ค.ศ. แล้วแปลงปีที่กรอกไว้ให้ด้วย (v1 สลับแค่ป้าย ปี 2540 กลายเป็น ค.ศ. 2540 แล้วฟ้องผิด) */
+  const switchEra = (next: "be" | "ce") => {
+    if (next === era) return;
+    const y = Number.parseInt(yearInput.trim(), 10);
+    if (y) setYearInput(String(next === "ce" ? y - 543 : y + 543));
+    setEra(next);
+  };
+  const monthName = (m: number) => (isEnglish ? MONTHS[m - 1].nameEn : MONTHS[m - 1].nameTh);
+  const errorProps = {
+    "aria-invalid": errorMsg ? true : undefined,
+    "aria-describedby": errorMsg ? "birth-card-error" : undefined,
+  } as const;
+
+  /** ไพ่ที่ขึ้นจอ = ผลที่เซิร์ฟเวอร์ยืนยันแล้วเท่านั้น (กฎเหล็กข้อ 14) */
+  const shownCards = result
+    ? [
+        {
+          card: result.primaryCard,
+          n: result.primaryNumber,
+          label: result.secondaryCard
+            ? isEnglish ? "Personality Card" : "ไพ่บุคลิกภาพ"
+            : isEnglish ? "Personality & Soul Card" : "ไพ่บุคลิกภาพและจิตวิญญาณ",
+        },
+        ...(result.secondaryCard
+          ? [{ card: result.secondaryCard, n: result.secondaryNumber ?? 0, label: isEnglish ? "Soul Card" : "ไพ่จิตวิญญาณ" }]
+          : []),
+      ]
+    : [];
+
   return (
-    <div className="space-y-8">
-      {/* Interactive Form Panel */}
-      <form
-        onSubmit={handleCalculate}
-        className="ui2-bc-tablet altar-panel rounded-2xl p-6 sm:p-8 max-w-2xl mx-auto space-y-6"
-      >
-        <div className="text-center space-y-1.5">
-          <span className="text-xs uppercase tracking-wider font-serif-th font-semibold text-gold-ink">
-            {isEnglish ? "Natal Numerology Oracle" : "เลขศาสตร์วันเกิด"}
-          </span>
-          <h2 className="font-serif-th text-xl sm:text-2xl font-bold text-ink"><ThaiPhrases>
-            {isEnglish ? "Enter Your Date of Birth" : "ใส่วันเดือนปีเกิดของคุณ"}
-          </ThaiPhrases></h2>
-          <p className="font-sans text-xs sm:text-sm text-muted">
+    <div className="v2-bc">
+      {/*
+        โต๊ะคำนวณ v2 — ฟอร์มกับช่องไพ่อยู่จอเดียวกัน (v1 ต้องเลื่อนลงไปดูผลอีกกล่อง)
+        ซ้าย: ใส่วันเกิด 3 ช่อง + อ่านทวน · ขวา: ไพ่คว่ำรอ ➔ ไพ่จริงของคุณเมื่อเซิร์ฟเวอร์ยืนยัน
+      */}
+      <div className={`v2-bc-desk${result ? " is-done" : ""}`}>
+        <form onSubmit={handleCalculate} className="v2-bc-form" noValidate>
+          <p className="v2-bc-step">
+            <span aria-hidden="true">1</span>
+            {isEnglish ? "Your date of birth" : "ใส่วันเกิดของคุณ"}
+          </p>
+
+          <div className="v2-bc-fields">
+            <div className="v2-bc-f v2-bc-f-day">
+              <label htmlFor="birth-day">{isEnglish ? "Day" : "วันที่"}</label>
+              <select
+                id="birth-day"
+                {...errorProps}
+                value={day}
+                onChange={(e) => setDay(Number.parseInt(e.target.value, 10))}
+              >
+                {Array.from({ length: getMaxDaysInMonth(yearForDays, month) }, (_, i) => i + 1).map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="v2-bc-f v2-bc-f-month">
+              <label htmlFor="birth-month">{isEnglish ? "Month" : "เดือน"}</label>
+              <select
+                id="birth-month"
+                {...errorProps}
+                value={month}
+                onChange={(e) => {
+                  const newMonth = Number.parseInt(e.target.value, 10);
+                  setMonth(newMonth);
+                  const maxD = getMaxDaysInMonth(yearForDays, newMonth);
+                  if (day > maxD) setDay(maxD);
+                }}
+              >
+                {MONTHS.map((m) => (
+                  <option key={m.value} value={m.value}>
+                    {monthName(m.value)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="v2-bc-f v2-bc-f-year">
+              <label htmlFor="birth-year">{isEnglish ? "Year" : "ปีเกิด"}</label>
+              <div className="v2-bc-year">
+                <input
+                  id="birth-year"
+                  {...errorProps}
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="bday-year"
+                  maxLength={4}
+                  value={yearInput}
+                  onChange={(e) => setYearInput(e.target.value.replace(/\D/g, ""))}
+                  placeholder={era === "be" ? "2540" : "1997"}
+                />
+                <div role="group" aria-label={isEnglish ? "Calendar" : "ปฏิทิน"} className="v2-bc-era">
+                  <button type="button" onClick={() => switchEra("be")} aria-pressed={era === "be"}>
+                    {isEnglish ? "BE" : "พ.ศ."}
+                  </button>
+                  <button type="button" onClick={() => switchEra("ce")} aria-pressed={era === "ce"}>
+                    {isEnglish ? "CE" : "ค.ศ."}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* อ่านทวนวันเกิดเป็นประโยคเดียว — เห็นทันทีว่ากรอกถูก ก่อนกดใช้สิทธิ์ */}
+          <p className="v2-bc-preview" aria-live="polite">
             {isEnglish
-              ? "Calculated using 1909 Rider-Waite Major Arcana numerological reduction."
-              : "ระบบคำนวณตามหลักเลขศาสตร์ไพ่ทาโรต์สากล 1909 Rider-Waite Major Arcana"}
+              ? `Born ${monthName(month)} ${day}, ${yearInput || "—"} ${era === "be" ? "BE" : "CE"}`
+              : `เกิดวันที่ ${day} ${monthName(month)} ${era === "be" ? "พ.ศ." : "ค.ศ."} ${yearInput || "—"}`}
           </p>
-        </div>
 
-        {/* Inputs Grid */}
-        <div className="ui2-bc-grid grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-          {/* Day */}
-          <div className="space-y-1">
-            <label htmlFor="birth-day" className="ui2-bc-label block text-xs font-serif-th font-semibold text-ink">
-              {isEnglish ? "Day" : "วันที่เกิด"}
-            </label>
-            <select
-              id="birth-day"
-              aria-invalid={errorMsg ? true : undefined}
-              aria-describedby={errorMsg ? "birth-card-error" : undefined}
-              value={day}
-              onChange={(e) => setDay(Number.parseInt(e.target.value, 10))}
-              className="ui2-bc-field glass-field w-full rounded-xl border border-line-interactive-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
-            >
-              {Array.from(
-                {
-                  length: getMaxDaysInMonth(
-                    era === "be"
-                      ? (Number.parseInt(yearInput.trim(), 10) || 2540) - 543
-                      : Number.parseInt(yearInput.trim(), 10) || 1997,
-                    month
-                  ),
-                },
-                (_, i) => i + 1
-              ).map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Month */}
-          <div className="space-y-1">
-            <label htmlFor="birth-month" className="ui2-bc-label block text-xs font-serif-th font-semibold text-ink">
-              {isEnglish ? "Month" : "เดือนเกิด"}
-            </label>
-            <select
-              id="birth-month"
-              aria-invalid={errorMsg ? true : undefined}
-              aria-describedby={errorMsg ? "birth-card-error" : undefined}
-              value={month}
-              onChange={(e) => {
-                const newMonth = Number.parseInt(e.target.value, 10);
-                setMonth(newMonth);
-                const currentY =
-                  era === "be"
-                    ? (Number.parseInt(yearInput.trim(), 10) || 2540) - 543
-                    : Number.parseInt(yearInput.trim(), 10) || 1997;
-                const maxD = getMaxDaysInMonth(currentY, newMonth);
-                if (day > maxD) setDay(maxD);
-              }}
-              className="ui2-bc-field glass-field w-full rounded-xl border border-line-interactive-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
-            >
-              {MONTHS.map((m) => (
-                <option key={m.value} value={m.value}>
-                  {isEnglish ? m.nameEn : m.nameTh}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Year */}
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <label htmlFor="birth-year" className="ui2-bc-label block text-xs font-serif-th font-semibold text-ink">
-                {isEnglish ? "Year" : "ปีเกิด"}
-              </label>
-              <div role="group" aria-label={isEnglish ? "Calendar" : "ปฏิทิน"} className="ui2-bc-era flex items-center gap-1 text-[11px] font-sans">
-                <button
-                  type="button"
-                  onClick={() => setEra("be")}
-                  aria-pressed={era === "be"}
-                  className={`tap-overlay-y px-2 py-0.5 rounded transition-colors ${
-                    era === "be"
-                      ? "btn-gold-glass font-bold"
-                      : "text-muted hover:text-ink"
-                  }`}
-                >
-                  {isEnglish ? "BE" : "พ.ศ."}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEra("ce")}
-                  aria-pressed={era === "ce"}
-                  className={`tap-overlay-y px-2 py-0.5 rounded transition-colors ${
-                    era === "ce"
-                      ? "btn-gold-glass font-bold"
-                      : "text-muted hover:text-ink"
-                  }`}
-                >
-                  {isEnglish ? "CE" : "ค.ศ."}
-                </button>
-              </div>
-            </div>
-            <input
-              id="birth-year"
-              aria-invalid={errorMsg ? true : undefined}
-              aria-describedby={errorMsg ? "birth-card-error" : undefined}
-              type="text"
-              inputMode="numeric"
-              autoComplete="bday-year"
-              maxLength={4}
-              value={yearInput}
-              onChange={(e) => setYearInput(e.target.value.replace(/\D/g, ""))}
-              placeholder={era === "be" ? "2540" : "1997"}
-              className="ui2-bc-field glass-field w-full rounded-xl border border-line-interactive-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
-            />
-          </div>
-        </div>
-
-        {/* ♿ R-21: วันเกิดที่กรอกผิดต้องถูกประกาศทันที ไม่ใช่โผล่เป็นกล่องสีแดงเฉย ๆ
-            ทุกช่องกรอกผูกกับกล่องนี้ด้วย aria-describedby เพื่อบอกว่าผิดตรงไหน */}
-        {errorMsg && (
-          <div
-            id="birth-card-error"
-            role="alert"
-            className="p-3.5 rounded-xl bg-[#FAF0ED] border border-[#E8C5BE] text-xs font-sans text-[#8F2E1A] text-center"
-          >
-            {errorMsg}
-          </div>
-        )}
-
-        {/* อ่านทวนวันเกิดเป็นประโยคเดียว — เห็นทันทีว่ากรอกถูก ก่อนกดใช้สิทธิ์ (v1 ต้องเดาจากสามช่องเอง) */}
-        <p className="ui2-bc-preview" aria-live="polite">
-          {isEnglish
-            ? `Born ${MONTHS[month - 1].nameEn} ${day}, ${yearInput || "—"} ${era === "be" ? "BE" : "CE"}`
-            : `เกิดวันที่ ${day} ${MONTHS[month - 1].nameTh} ${era === "be" ? "พ.ศ." : "ค.ศ."} ${yearInput || "—"}`}
-        </p>
-
-        <button
-          type="submit"
-          disabled={oracle.isPreparing}
-          className="ui2-bc-go btn-gold-glass w-full py-3 px-6 text-xs sm:text-sm font-serif-th font-bold duration-200 cursor-pointer active:scale-95 tracking-wide disabled:opacity-60 disabled:cursor-wait"
-        >
-          {oracle.isPreparing
-            ? isEnglish
-              ? "Connecting to the Oracle…"
-              : "กำลังเชื่อมสัญญาณกับแม่หมอ…"
-            : isEnglish
-              ? "Calculate Your Birth Card"
-              : "คำนวณไพ่ประจำตัวของคุณ"}
-        </button>
-
-        {/* สตรีมสะดุด/เซิร์ฟเวอร์ไม่ตอบ — บอกตรง ๆ ตรงนี้ ไม่ต้องรอให้ผู้ใช้เดาว่าปุ่มเสีย */}
-        {!result && oracle.state.error && (
-          <p role="alert" className="text-xs font-sans text-[#8F2E1A] text-center">
-            {oracle.state.error}
-          </p>
-        )}
-      </form>
-
-      {/* Result Presentation */}
-      {result && (
-        <div className="altar-panel rounded-2xl p-6 sm:p-8 max-w-4xl mx-auto space-y-8 anim-swap-rise">
-          {/* Header & Arithmetic Trail */}
-          <div className="text-center space-y-2.5 border-b border-line-warm/40 pb-6">
-            <div className="glass-chip inline-flex items-center gap-2 px-3.5 py-1 text-xs font-sans font-semibold text-gold-ink">
-              <span>{isEnglish ? "Birth Date:" : "วันเกิด:"}</span>
-              <span>
-                {result.day} {isEnglish ? MONTHS[result.month - 1].nameEn : MONTHS[result.month - 1].nameTh} {result.yearBe} (ค.ศ. {result.yearCe})
-              </span>
-            </div>
-
-            <h3 className="text-2xl sm:text-3xl font-bold font-serif-th text-ink"><ThaiPhrases>
-              {isEnglish
-                ? `Your Birth Card is ${result.primaryCard.nameEn}`
-                : `ไพ่ประจำตัวของคุณคือ ${result.primaryCard.nameTh}`}
-            </ThaiPhrases></h3>
-
-            <p className="text-xs sm:text-sm font-sans text-muted">
-              {result.primaryCard.nameEn} · {isEnglish ? `Card #${result.primaryNumber} of Major Arcana` : `หมายเลข ${result.primaryNumber} แห่งสำรับไพ่ชุดใหญ่ (Major Arcana)`}
+          {/* ♿ R-21: วันเกิดที่กรอกผิดต้องถูกประกาศทันที — ทุกช่องผูกกับกล่องนี้ด้วย aria-describedby */}
+          {errorMsg && (
+            <p id="birth-card-error" role="alert" className="v2-bc-alert">
+              {errorMsg}
             </p>
+          )}
 
-            {/* รอยทางเลขศาสตร์เป็นแผ่นเลขเรียงกัน — อ่านออกในแวบเดียวว่าเลขไพ่มาจากไหน */}
-            <div className="pt-2">
-              <p className="sr-only">
-                {isEnglish
-                  ? `Numerological Sum: ${result.day} + ${result.month} + ${result.yearCe} = ${result.calculatedSum} → Card #${result.primaryNumber}`
-                  : `ผลรวมเลขศาสตร์: ${result.day} + ${result.month} + ${result.yearCe} = ${result.calculatedSum} → ไพ่หมายเลข ${result.primaryNumber}`}
+          <button type="submit" disabled={oracle.isPreparing} className="ui2-btn v2-bc-go">
+            {oracle.isPreparing
+              ? isEnglish
+                ? "Connecting to the Oracle…"
+                : "กำลังเชื่อมสัญญาณกับแม่หมอ…"
+              : result
+                ? isEnglish
+                  ? "Calculate Again"
+                  : "คำนวณใหม่"
+                : isEnglish
+                  ? "Reveal My Birth Card"
+                  : "เปิดไพ่ประจำตัวของฉัน"}
+          </button>
+
+          {/* สตรีมสะดุด/เซิร์ฟเวอร์ไม่ตอบ — บอกตรง ๆ ตรงนี้ ไม่ต้องรอให้ผู้ใช้เดาว่าปุ่มเสีย */}
+          {!result && oracle.state.error && (
+            <p role="alert" className="v2-bc-alert">
+              {oracle.state.error}
+            </p>
+          )}
+
+          <p className="v2-bc-fine">
+            {isEnglish
+              ? "Standard tarot numerology · 22 Major Arcana of the 1909 Rider-Waite deck"
+              : "เลขศาสตร์ไพ่ทาโรต์สากล · ไพ่ชุดใหญ่ 22 ใบของสำรับ 1909 Rider-Waite"}
+          </p>
+        </form>
+
+        {/* ช่องไพ่ — ก่อนคำนวณเป็นไพ่คว่ำ (ไม่ใช่ไพ่ใบไหน) · หลังยืนยันเป็นไพ่จริงพลิกขึ้น */}
+        <div className="v2-bc-slot" aria-live="polite">
+          {result ? (
+            <ul className={`v2-bc-cards${shownCards.length > 1 ? " is-pair" : ""}`}>
+              {shownCards.map(({ card, n, label }) => (
+                <li key={card.id} className="v2-bc-card">
+                  <span className="v2-bc-card-label">{label}</span>
+                  <span className="v2-bc-card-frame">
+                    <span className="ui2-cd-rays" aria-hidden="true" />
+                    <CardImage
+                      cardId={card.id}
+                      image={card.image}
+                      alt={isEnglish ? card.nameEn : `${card.nameTh} (${card.nameEn})`}
+                      sizes="(min-width: 1024px) 200px, 140px"
+                      className="v2-bc-card-img"
+                    />
+                  </span>
+                  <span className="v2-bc-card-name">
+                    <b>{n}</b>
+                    {isEnglish ? card.nameEn : card.nameTh}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className={`v2-bc-wait${oracle.isPreparing || pendingResult ? " is-busy" : ""}`}>
+              <span className="v2-bc-back card-back-pattern" aria-hidden="true" />
+              <span className="v2-bc-back card-back-pattern" aria-hidden="true" />
+              <p>
+                {isEnglish ? "Your two birth cards appear here" : "ไพ่ประจำตัวของคุณจะปรากฏตรงนี้"}
               </p>
-              <ol className="ui2-bc-eq" aria-hidden="true">
-                <li><b>{result.day}</b><small>{isEnglish ? "day" : "วัน"}</small></li>
-                <li className="ui2-bc-op">+</li>
-                <li><b>{result.month}</b><small>{isEnglish ? "month" : "เดือน"}</small></li>
-                <li className="ui2-bc-op">+</li>
-                <li><b>{result.yearCe}</b><small>{isEnglish ? "year CE" : "ปี ค.ศ."}</small></li>
-                <li className="ui2-bc-op">=</li>
-                <li><b>{result.calculatedSum}</b><small>{isEnglish ? "sum" : "ผลรวม"}</small></li>
-                <li className="ui2-bc-op ui2-bc-arrow" />
-                <li className="ui2-bc-final"><b>{result.primaryNumber}</b><small>{isEnglish ? "card no." : "ไพ่หมายเลข"}</small></li>
-              </ol>
             </div>
+          )}
+        </div>
+      </div>
+
+      {result && (
+        <div className="v2-bc-result">
+          {/* รอยทางเลขศาสตร์เป็นแผ่นเลขเรียงกัน — อ่านออกในแวบเดียวว่าเลขไพ่มาจากไหน */}
+          <div className="v2-bc-trail">
+            <p className="v2-bc-step">
+              <span aria-hidden="true">2</span>
+              {isEnglish
+                ? `How ${result.day} ${monthName(result.month)} ${result.yearCe} became card ${result.primaryNumber}`
+                : `วันเกิด ${result.day} ${monthName(result.month)} ${result.yearBe} กลายเป็นไพ่หมายเลข ${result.primaryNumber} ได้อย่างไร`}
+            </p>
+            <p className="sr-only">
+              {isEnglish
+                ? `Numerological Sum: ${result.day} + ${result.month} + ${result.yearCe} = ${result.calculatedSum} → Card #${result.primaryNumber}`
+                : `ผลรวมเลขศาสตร์: ${result.day} + ${result.month} + ${result.yearCe} = ${result.calculatedSum} → ไพ่หมายเลข ${result.primaryNumber}`}
+            </p>
+            <ol className="ui2-bc-eq" aria-hidden="true">
+              <li><b>{result.day}</b><small>{isEnglish ? "day" : "วัน"}</small></li>
+              <li className="ui2-bc-op">+</li>
+              <li><b>{result.month}</b><small>{isEnglish ? "month" : "เดือน"}</small></li>
+              <li className="ui2-bc-op">+</li>
+              <li><b>{result.yearCe}</b><small>{isEnglish ? "year CE" : "ปี ค.ศ."}</small></li>
+              <li className="ui2-bc-op">=</li>
+              <li><b>{result.calculatedSum}</b><small>{isEnglish ? "sum" : "ผลรวม"}</small></li>
+              <li className="ui2-bc-op ui2-bc-arrow" />
+              <li className="ui2-bc-final"><b>{result.primaryNumber}</b><small>{isEnglish ? "card no." : "ไพ่หมายเลข"}</small></li>
+            </ol>
           </div>
 
-          {/* Altar Cloth Stage for Twin Vitrines */}
-          <div className="altar-cloth p-6 sm:p-8 rounded-2xl">
-            <div
-              className={`grid gap-6 items-start ${
-                result.secondaryCard ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 max-w-md mx-auto"
-              }`}
-            >
-              {/* Primary Card (Personality Card) */}
-              <div className="altar-card-porcelain rounded-xl p-5 sm:p-6 space-y-4 flex flex-col items-center text-center shadow-xs">
-                <span className="glass-chip px-3 py-1 text-xs font-serif-th font-semibold text-gold-ink">
-                  {isEnglish ? "Personality Card" : "ไพ่บุคลิกภาพ & พลังงานหลัก"}
-                </span>
-
-                <div className="ui2-cd-stage ui2-bc-stage relative py-2 flex justify-center">
-                  <span className="ui2-cd-rays" aria-hidden="true" />
-                  <span className="ui2-cd-plinth" aria-hidden="true" />
-                  <TarotCard
-                    card={result.primaryCard}
-                    isRevealed={true}
-                    size="lg"
-                    className="shadow-overlay"
-                  />
-                </div>
-
-                <div className="space-y-1 w-full text-center">
-                  <div className="text-lg sm:text-xl font-bold font-serif-th text-ink">
-                    {result.primaryCard.nameTh} ({result.primaryCard.nameEn})
-                  </div>
-                  <div className="text-xs font-sans text-muted">
-                    {isEnglish
-                      ? `Element: ${result.primaryCard.element} · Astrology: ${result.primaryCard.astrologyEn || result.primaryCard.astrology}`
-                      : `ธาตุ: ${result.primaryCard.element || "มิติแห่งดวงดาว"} · โหราศาสตร์: ${result.primaryCard.astrology}`}
-                  </div>
-                </div>
-
-                <div className="text-xs sm:text-sm font-sans text-ink leading-relaxed text-left pt-3 border-t border-line-warm/40 w-full space-y-2">
-                  <p>
-                    {isEnglish && result.primaryCard.numerologyEn
-                      ? result.primaryCard.numerologyEn
-                      : result.primaryCard.numerology ||
-                        result.primaryCard.meanings?.self?.upright ||
-                        result.primaryCard.meanings?.general?.upright}
-                  </p>
-                </div>
-
-                <Link
-                  href={`/cards/${result.primaryCard.id}`}
-                  className="text-xs font-serif-th font-bold text-gold-ink hover:underline mt-auto pt-2"
-                >
-                  {isEnglish ? "Read Full Card Guide →" : "อ่านคัมภีร์เจาะลึกไพ่ใบนี้ →"}
+          {/* ความหมายรายใบ — การ์ดข้อความคู่ ไม่ใช่การ์ดซ้อนการ์ดแบบ v1 */}
+          <div className={`v2-bc-meanings${shownCards.length > 1 ? " is-pair" : ""}`}>
+            {shownCards.map(({ card, label }) => (
+              <article key={card.id} className="v2-bc-meaning">
+                <p className="v2-bc-meaning-k">{label}</p>
+                <h3 className="tp">{isEnglish ? card.nameEn : `${card.nameTh} (${card.nameEn})`}</h3>
+                <p className="v2-bc-meaning-meta">
+                  {isEnglish
+                    ? `Element: ${card.element} · Astrology: ${card.astrologyEn || card.astrology}`
+                    : `ธาตุ: ${card.element || "มิติแห่งดวงดาว"} · โหราศาสตร์: ${card.astrology}`}
+                </p>
+                <p className="v2-bc-meaning-body">
+                  {isEnglish && card.numerologyEn
+                    ? card.numerologyEn
+                    : card.numerology || card.meanings?.self?.upright || card.meanings?.general?.upright}
+                </p>
+                <Link href={`/cards/${card.id}`} className="v2-bc-more">
+                  {isEnglish ? "Read the full card guide" : "อ่านความหมายไพ่ใบนี้แบบเต็ม"}
                 </Link>
-              </div>
-
-              {/* Secondary Card (Soul Card) */}
-              {result.secondaryCard && (
-                <div className="altar-card-porcelain rounded-xl p-5 sm:p-6 space-y-4 flex flex-col items-center text-center shadow-xs">
-                  <span className="glass-chip px-3 py-1 text-xs font-serif-th font-semibold text-gold-ink">
-                    {isEnglish ? "Soul Card" : "ไพ่จิตวิญญาณ & เจตนารมณ์ลึก"}
-                  </span>
-
-                  <div className="ui2-cd-stage ui2-bc-stage relative py-2 flex justify-center">
-                    <span className="ui2-cd-rays" aria-hidden="true" />
-                    <span className="ui2-cd-plinth" aria-hidden="true" />
-                    <TarotCard
-                      card={result.secondaryCard}
-                      isRevealed={true}
-                      size="lg"
-                      className="shadow-overlay"
-                    />
-                  </div>
-
-                  <div className="space-y-1 w-full text-center">
-                    <div className="text-lg sm:text-xl font-bold font-serif-th text-ink">
-                      {result.secondaryCard.nameTh} ({result.secondaryCard.nameEn})
-                    </div>
-                    <div className="text-xs font-sans text-muted">
-                      {isEnglish
-                        ? `Element: ${result.secondaryCard.element} · Astrology: ${result.secondaryCard.astrologyEn || result.secondaryCard.astrology}`
-                        : `ธาตุ: ${result.secondaryCard.element || "มิติแห่งดวงดาว"} · โหราศาสตร์: ${result.secondaryCard.astrology}`}
-                    </div>
-                  </div>
-
-                  <div className="text-xs sm:text-sm font-sans text-ink leading-relaxed text-left pt-3 border-t border-line-warm/40 w-full space-y-2">
-                    <p>
-                      {isEnglish && result.secondaryCard.numerologyEn
-                        ? result.secondaryCard.numerologyEn
-                        : result.secondaryCard.numerology ||
-                          result.secondaryCard.meanings?.self?.upright ||
-                          result.secondaryCard.meanings?.general?.upright}
-                    </p>
-                  </div>
-
-                  <Link
-                    href={`/cards/${result.secondaryCard.id}`}
-                    className="text-xs font-serif-th font-bold text-gold-ink hover:underline mt-auto pt-2"
-                  >
-                    {isEnglish ? "Read Full Card Guide →" : "อ่านคัมภีร์เจาะลึกไพ่ใบนี้ →"}
-                  </Link>
-                </div>
-              )}
-            </div>
+              </article>
+            ))}
           </div>
 
           {/* คำอ่านของแม่หมอ — สตรีมสดทุกครั้ง ไม่ใช่ข้อความสำเร็จรูป */}
-          <div className="pt-2">
-            <AiReadingPanel
-              insight={oracle}
-              state={oracle.state}
-              isEn={isEnglish}
-              onRetry={() => {
-                // A3-10: อ่านไพ่ชุดเดิมซ้ำ ไม่เปิดเซสชันใหม่ (ไม่หักสิทธิ์ซ้ำ)
-                void oracle.retryRead().then((ok) => {
-                  if (!ok) handleCalculate();
-                });
-              }}
-              cardLabels={
-                isEnglish
-                  ? ["Personality Card", "Soul Card"]
-                  : ["ไพ่บุคลิกภาพ", "ไพ่จิตวิญญาณ"]
-              }
-              title={
-                isEnglish ? "The Oracle Reads Your Birth Cards" : "คำอ่านไพ่ประจำตัวจากแม่หมอ"
-              }
-            />
-          </div>
+          <AiReadingPanel
+            insight={oracle}
+            state={oracle.state}
+            isEn={isEnglish}
+            onRetry={() => {
+              // A3-10: อ่านไพ่ชุดเดิมซ้ำ ไม่เปิดเซสชันใหม่ (ไม่หักสิทธิ์ซ้ำ)
+              void oracle.retryRead().then((ok) => {
+                if (!ok) handleCalculate();
+              });
+            }}
+            cardLabels={isEnglish ? ["Personality Card", "Soul Card"] : ["ไพ่บุคลิกภาพ", "ไพ่จิตวิญญาณ"]}
+            title={isEnglish ? "The Oracle Reads Your Birth Cards" : "คำอ่านไพ่ประจำตัวจากแม่หมอ"}
+          />
 
-          {/* Action & Next Steps Bar */}
-          <div className="space-y-6 pt-2 border-t border-line-warm/40">
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={handleShare}
-                className="glass-chip tap-overlay-y w-full sm:w-auto px-6 py-2.5 text-xs font-serif-th font-bold text-ink transition cursor-pointer"
-              >
-                <span>
-                  {copied
-                    ? isEnglish
-                      ? "Link Copied!"
-                      : "คัดลอกลิงก์ผลลัพธ์แล้ว"
-                    : isEnglish
-                    ? "Share Birth Card"
-                    : "แชร์ผลลัพธ์ไพ่ประจำตัว"}
-                </span>
-              </button>
-
-              <Link
-                href="/spreads/celtic-cross"
-                className="btn-gold-glass w-full sm:w-auto px-6 py-2.5 text-xs font-serif-th font-bold text-center"
-              >
-                {isEnglish ? "10-Card Celtic Cross Life Reading" : "เปิดผังเซลติกครอส 10 ใบ พยากรณ์ชะตาชีวิต"}
-              </Link>
-            </div>
-
-            {/* Recommended Next Readings */}
-            <div className="pt-4 border-t border-line-warm/40 space-y-3">
-              <div className="text-center sm:text-left space-y-1">
-                <h4 className="text-sm sm:text-base font-serif-th font-bold text-ink">
-                  {isEnglish ? "Recommended Next Readings" : "ขั้นตอนพยากรณ์ชะตาถัดไปที่แนะนำ"}
-                </h4>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <Link
-                  href="/daily"
-                  className="altar-card-porcelain !rounded-xl p-4 text-center transition duration-300 group block"
-                >
-                  <div className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
-                    {isEnglish ? "Daily Tarot Oracle" : "ดูดวงไพ่ยิปซีรายวัน"}
-                  </div>
-                  <p className="text-[11px] font-sans text-muted mt-1">
-                    {isEnglish ? "Check daily energy across 5 chambers" : "เช็กพลังงานประจำวัน 5 มิติ"}
-                  </p>
-                </Link>
-
-                <Link
-                  href="/love/1-card"
-                  className="altar-card-porcelain !rounded-xl p-4 text-center transition duration-300 group block"
-                >
-                  <div className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
-                    {isEnglish ? "Love Tarot 1 Card" : "ดูดวงความรัก 1 ใบ"}
-                  </div>
-                  <p className="text-[11px] font-sans text-muted mt-1">
-                    {isEnglish ? "Guidance tailored to 4 relationship states" : "ไขคำตอบสถานะหัวใจ 4 มิติ"}
-                  </p>
-                </Link>
-
-                <Link
-                  href="/readers"
-                  className="altar-card-porcelain !rounded-xl p-4 text-center transition duration-300 group block"
-                >
-                  <div className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
-                    {isEnglish ? "Personal Readers" : "ปรึกษาแม่หมอตัวจริง"}
-                  </div>
-                  <p className="text-[11px] font-sans text-muted mt-1">
-                    {isEnglish ? "Connect with seasoned practitioners" : "พูดคุยกับนักพยากรณ์มืออาชีพ"}
-                  </p>
-                </Link>
-              </div>
-            </div>
+          {/* ไปต่อ — ปุ่มแชร์ + ทางไปต่อ 3 ทางในแถวเดียว */}
+          <div className="v2-bc-next">
+            <button type="button" onClick={handleShare} className="ui2-btn-ghost v2-bc-share">
+              {copied
+                ? isEnglish
+                  ? "Link Copied!"
+                  : "คัดลอกลิงก์ผลลัพธ์แล้ว"
+                : isEnglish
+                  ? "Share My Birth Card"
+                  : "แชร์ไพ่ประจำตัวของฉัน"}
+            </button>
+            <nav aria-label={isEnglish ? "Next readings" : "ดูดวงต่อ"} className="v2-bc-links">
+              <Link href="/daily">{isEnglish ? "Daily Tarot" : "ดูดวงรายวัน"}</Link>
+              <Link href="/love/1-card">{isEnglish ? "Love Tarot 1 Card" : "ดูดวงความรัก 1 ใบ"}</Link>
+              <Link href="/spreads/celtic-cross">{isEnglish ? "Celtic Cross 10 Cards" : "ผังเซลติกครอส 10 ใบ"}</Link>
+              <Link href="/readers">{isEnglish ? "Talk to a Reader" : "ปรึกษาแม่หมอตัวจริง"}</Link>
+            </nav>
           </div>
         </div>
       )}
 
       {/* ด่านความปลอดภัย: สัญญาณวิกฤต ➔ สายด่วน (กฎเหล็กข้อ 6) */}
       {oracle.crisisMessage && (
-        <div className="altar-card-porcelain !rounded-xl p-5 text-sm leading-relaxed text-ink whitespace-pre-line max-w-2xl mx-auto">
-          {oracle.crisisMessage}
-        </div>
+        <div className="v2-bc-crisis">{oracle.crisisMessage}</div>
       )}
 
       {/* กำแพงสิทธิ์ — เซิร์ฟเวอร์เป็นผู้ตัดสิน หน้าเว็บแค่เล่าให้ฟัง */}

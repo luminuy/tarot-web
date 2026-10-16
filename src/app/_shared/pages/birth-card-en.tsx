@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { RitualHero } from "@/components/reading/one-card/RitualHero";
+import { Ui2Crumbs, Ui2SectionHead } from "@/components/ui2/Ui2PageHero";
+import { CardImage } from "@/components/card/CardImage";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
@@ -102,6 +103,27 @@ const BIRTH_CARD_LINKS_EN = [
   { href: "/en", label: "Start a Reading" },
 ];
 
+const BIRTH_STEPS_EN = [
+  { title: "Add day, month and year", math: "14 + 2 + 1997 = 2013", text: "Use the Gregorian (CE) year. Entered a Buddhist Era year? We subtract 543 for you." },
+  { title: "Add the digits", math: "2 + 0 + 1 + 3 = 6", text: "Keep adding digits until the number is 22 or less, matching the 22 Major Arcana (22 is The Fool, card 0)." },
+  { title: "Meet your birth card", math: "6 = The Lovers", text: "Land on 10 to 21? Add those two digits once more to find your second card, the Soul Card." },
+];
+
+const BIRTH_PAIRS_EN: { cards: number[]; title: string; text: string }[] = [
+  { cards: [10, 1], title: "The Wheel of Fortune & The Magician", text: "Life brings frequent turning points, and you have a gift for turning crisis into opportunity." },
+  { cards: [11, 2], title: "Justice & The High Priestess", text: "Discernment meets inner knowing. Others often come to you for fair, wise counsel." },
+  { cards: [12, 3], title: "The Hanged Man & The Empress", text: "Pausing to see from a new angle lets creativity and abundance flow." },
+  { cards: [13, 4], title: "Death & The Emperor", text: "Clearing away worn-out structures to build a stronger, steadier order." },
+  { cards: [14, 5], title: "Temperance & The Hierophant", text: "Blending tradition with flexibility to create harmony and spiritual learning." },
+  { cards: [15, 6], title: "The Devil & The Lovers", text: "Exploring desire and attachment, and choosing the love that sets you free." },
+  { cards: [16, 7], title: "The Tower & The Chariot", text: "Strong willpower that learns to let go of ego when sudden change arrives." },
+  { cards: [17, 8], title: "The Star & Strength", text: "Hope, gentle resilience, and quiet courage that calms wild instincts." },
+  { cards: [18, 9], title: "The Moon & The Hermit", text: "Walking through fear and uncertainty with inner wisdom as your lantern." },
+  { cards: [19, 10, 1], title: "The Sun, The Wheel of Fortune & The Magician", text: "A rare trio of light, clarity, and joyful success." },
+  { cards: [20, 2], title: "Judgement & The High Priestess", text: "A call to awaken, release the past, and begin again with a clear heart." },
+  { cards: [21, 3], title: "The World & The Empress", text: "Wholeness, abundance, and a sense of oneness with the world." },
+];
+
 export function BirthCardBodyEn({ calculator }: { calculator: ReactNode }) {
   const url = localizedUrl(PATH, "en");
 
@@ -143,7 +165,7 @@ export function BirthCardBodyEn({ calculator }: { calculator: ReactNode }) {
     <main
       id="main-content"
       tabIndex={-1}
-      className="min-h-screen text-ink py-6 sm:py-10 px-4 sm:px-6 font-sans relative overflow-x-clip"
+      className="min-h-screen text-ink pb-10 px-4 sm:px-6 font-sans relative overflow-x-clip"
     >
       {/* Schema.org Structured Data */}
       <script
@@ -159,20 +181,61 @@ export function BirthCardBodyEn({ calculator }: { calculator: ReactNode }) {
         dangerouslySetInnerHTML={{ __html: jsonLdScript(faqJsonLd) }}
       />
 
-      <div className="max-w-4xl mx-auto space-y-10">
-        {/* Ritual Hero */}
-        <RitualHero
-          breadcrumbs={breadcrumbs}
-          badgeText="Tarot Numerology"
-          title="Tarot Birth Card Calculator"
-          accent="Birth Card"
-          cards={["major-01", "major-10", "major-02", "major-19", "major-17", "major-21"]}
-          tagline="Discover the psychological archetypes and lifelong soul lessons woven into your birth date through the authentic 1909 Rider-Waite deck."
-        />
+      <div className="v2-bcp">
+        {/* v2 — จอแรกคือเครื่องคำนวณเลย (ดูเหตุผลที่ birth-card-th.tsx) */}
+        <header className="v2-bcp-head">
+          <Ui2Crumbs crumbs={breadcrumbs} />
+          <h1 className="v2-bcp-title">
+            Tarot <span className="ui2-gold-night">Birth Card</span> Calculator
+            <span className="v2-bcp-title-sub">Hidden in your date of birth</span>
+          </h1>
+          <p className="v2-bcp-lede">
+            Enter your birthday and see which Major Arcana card is yours, with a reading from the Oracle.
+          </p>
+        </header>
 
-        {/* Interactive Calculator Component */}
-        {/* ห่อ div — <astro-island> เป็น display:contents จึงไม่รับระยะจาก space-y */}
-        <div>{calculator}</div>
+        <div className="v2-bcp-tool">{calculator}</div>
+
+        <section className="v2-bcp-sec" aria-labelledby="bc-how">
+          <Ui2SectionHead n="01" word="How it works" title="The birth card formula in 3 steps" id="bc-how" />
+          <ol className="v2-bcp-steps">
+            {BIRTH_STEPS_EN.map((step, i) => (
+              <li key={step.title} className="v2-bcp-stepcard">
+                <span className="v2-bcp-stepn" aria-hidden="true">{i + 1}</span>
+                <h3>{step.title}</h3>
+                <p className="v2-bcp-math">{step.math}</p>
+                <p>{step.text}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section className="v2-bcp-sec" aria-labelledby="bc-pairs">
+          <Ui2SectionHead
+            n="02"
+            word="Card pairs"
+            title="What your two cards say"
+            lede="Birth card pairs show the interplay between your outward persona and your inner calling. There are twelve."
+            id="bc-pairs"
+          />
+          <ul className="v2-bcp-pairs">
+            {BIRTH_PAIRS_EN.map((pair) => (
+              <li key={pair.title} className="v2-bcp-pair">
+                <span className="v2-bcp-pair-fan" aria-hidden="true">
+                  {pair.cards.map((n) => (
+                    <span key={n} className="v2-bcp-pair-card">
+                      <CardImage cardId={`major-${String(n).padStart(2, "0")}`} alt="" thumb sizes="64px" loading="lazy" />
+                    </span>
+                  ))}
+                </span>
+                <div>
+                  <h3>{pair.title}</h3>
+                  <p>{pair.text}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         {/* Editorial Guide Article */}
         <SeoArticleShell
@@ -209,77 +272,6 @@ export function BirthCardBodyEn({ calculator }: { calculator: ReactNode }) {
               whose initial sum reduces straight into the 1 to 9 bracket, that single Major Arcana figure serves as both
               Personality and Soul card, suggesting an innate coherence between outward engagement and inner purpose.
             </p>
-
-            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3"><ThaiPhrases>
-              The Twelve Archetypal Constellations and Pairings
-            </ThaiPhrases></h3>
-            <p>
-              Working with birth card pairings illuminates the dynamic interplay between your conscious social persona
-              and your deeper internal inclinations. Each classic pairing invites you to harmonize two complementary
-              dimensions of experience:
-            </p>
-            <ul className="list-disc pl-5 space-y-2 text-muted">
-              <li>
-                <strong>The Wheel of Fortune (10) and The Magician (1):</strong> Individuals navigating this constellation
-                frequently encounter shifting circumstances and cyclical turning points. Their gift lies in harnessing
-                focused willpower and resourcefulness to transmute unexpected volatility into creative momentum.
-              </li>
-              <li>
-                <strong>Justice (11) and The High Priestess (2):</strong> A pairing of discernment and inner knowing.
-                It brings together analytical fairness with profound intuitive insight, guiding individuals toward
-                uncompromising truth, balance, and quiet moral clarity.
-              </li>
-              <li>
-                <strong>The Hanged Man (12) and The Empress (3):</strong> The capacity to pause, surrender habitual
-                control, and adopt unconventional viewpoints. Through intentional stillness, new creative fertility
-                and emotional abundance are nurtured into being.
-              </li>
-              <li>
-                <strong>Death (13) and The Emperor (4):</strong> The transformative mastery of structure and release.
-                This pairing represents the courage to dissolve outworn patterns in order to establish resilient,
-                sustainable foundations that serve long-term order.
-              </li>
-              <li>
-                <strong>Temperance (14) and The Hierophant (5):</strong> The synthesis of traditional wisdom and
-                spiritual flexibility. It represents the conscious alchemy of blending diverse perspectives, finding
-                moderation, and translating sacred principles into everyday community life.
-              </li>
-              <li>
-                <strong>The Devil (15) and The Lovers (6):</strong> The profound exploration of attachment, desire,
-                and conscious choice. It challenges the soul to recognize unconscious conditioning and illusions of
-                bondage, ultimately choosing authenticity and unconditional self-respect.
-              </li>
-              <li>
-                <strong>The Tower (16) and The Chariot (7):</strong> Driven willpower tempered by humbling breakthroughs.
-                This constellation teaches that true inner strength is forged when ego-driven ambition yields to sudden
-                clarity, allowing for more authentic and purposeful self-direction.
-              </li>
-              <li>
-                <strong>The Star (17) and Strength (8):</strong> Hope, gentle resilience, and quiet spiritual renewal.
-                This pairing cultivates the profound courage required to meet primal instincts with patience and compassion,
-                radiating calm faith even in the wake of trial.
-              </li>
-              <li>
-                <strong>The Moon (18) and The Hermit (9):</strong> Navigation of subconscious depths and inner truth.
-                By retreating into solitary reflection, the seeker illuminates shadows, demystifies fear, and returns
-                with the lantern of self-validated insight.
-              </li>
-              <li>
-                <strong>The Sun (19), The Wheel of Fortune (10), and The Magician (1):</strong> A unique three-card
-                constellation radiating vitality, joy, and conscious manifestation. It represents the ability to align
-                with life&apos;s natural rhythms and express truth with unclouded lucidity.
-              </li>
-              <li>
-                <strong>Judgement (20) and The High Priestess (2):</strong> The spiritual awakening to a higher calling.
-                Deep intuition meets the resonant sound of renewal, inviting the shedding of past regrets and a bold
-                rebirth into purposeful living.
-              </li>
-              <li>
-                <strong>The World (21) and The Empress (3):</strong> The realization of wholeness and generative joy.
-                This constellation honors the completion of expansive karmic cycles and the celebration of life&apos;s
-                abundant, interconnected tapestry.
-              </li>
-            </ul>
 
             <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3"><ThaiPhrases>
               Applying Your Birth Card for Conscious Self-Development

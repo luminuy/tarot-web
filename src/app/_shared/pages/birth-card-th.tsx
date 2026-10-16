@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { RitualHero } from "@/components/reading/one-card/RitualHero";
+import { Ui2Crumbs, Ui2SectionHead } from "@/components/ui2/Ui2PageHero";
+import { CardImage } from "@/components/card/CardImage";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
@@ -92,6 +93,29 @@ const BIRTH_CARD_FAQS = [
   },
 ];
 
+/** สูตรสามขั้น (ตัวอย่างจริง: 14 ก.พ. 1997) — ตัวเลขตรงกับ `calculateBirthCard` */
+const BIRTH_STEPS = [
+  { title: "บวกวัน เดือน ปี ค.ศ.", math: "14 + 2 + 1997 = 2013", text: "ใช้ปีคริสต์ศักราช (ค.ศ.) ถ้ากรอกเป็น พ.ศ. ระบบลบ 543 ให้เอง" },
+  { title: "บวกเลขทีละหลัก", math: "2 + 0 + 1 + 3 = 6", text: "บวกซ้ำจนเหลือไม่เกิน 22 ตรงกับไพ่ชุดใหญ่ 22 ใบ (22 คือ The Fool หมายเลข 0)" },
+  { title: "ได้ไพ่ประจำตัว", math: "6 = The Lovers", text: "ถ้าได้ 10 ถึง 21 บวกสองหลักอีกครั้งเป็นไพ่ใบที่สอง (ไพ่จิตวิญญาณ)" },
+];
+
+/** คู่ไพ่ประจำตัว 12 แบบ (เลขไพ่ชุดใหญ่ · ไพ่บุคลิกภาพก่อน ไพ่จิตวิญญาณหลัง) */
+const BIRTH_PAIRS: { cards: number[]; title: string; text: string }[] = [
+  { cards: [10, 1], title: "The Wheel of Fortune และ The Magician", text: "เจอจุดเปลี่ยนบ่อย แต่มีพรสวรรค์เปลี่ยนวิกฤตเป็นโอกาสด้วยสติปัญญาและทักษะรอบด้าน" },
+  { cards: [11, 2], title: "Justice และ The High Priestess", text: "ญาณหยั่งรู้ลึกซึ้งคู่กับความยึดมั่นในความถูกต้อง มักเป็นที่พึ่งและผู้ไกล่เกลี่ยให้คนอื่น" },
+  { cards: [12, 3], title: "The Hanged Man และ The Empress", text: "ยอมหยุดเพื่อเห็นมุมใหม่ แล้วความคิดสร้างสรรค์และความอุดมสมบูรณ์ทางใจจะตามมา" },
+  { cards: [13, 4], title: "Death และ The Emperor", text: "รื้อโครงสร้างเก่าที่ไม่จำเป็น เพื่อสร้างความมั่นคงและระเบียบใหม่ที่แข็งแรงกว่าเดิม" },
+  { cards: [14, 5], title: "Temperance และ The Hierophant", text: "ผสมความเชื่อและธรรมเนียมเข้ากับความยืดหยุ่น เพื่อสร้างความสงบและการเรียนรู้ทางใจ" },
+  { cards: [15, 6], title: "The Devil และ The Lovers", text: "บททดสอบของความปรารถนาและพันธนาการทางใจ ที่ท้าให้เลือกความรักที่ทำให้ใจเป็นอิสระ" },
+  { cards: [16, 7], title: "The Tower และ The Chariot", text: "แรงมุ่งมั่นพุ่งไปข้างหน้า ที่ต้องเรียนรู้การปล่อยวางตัวตนเมื่อเจอการเปลี่ยนแปลงฉับพลัน" },
+  { cards: [17, 8], title: "The Star และ Strength", text: "ความหวัง การเยียวยาใจ และความอ่อนโยนที่สยบความดุร้ายในตัวเองได้อย่างสงบ" },
+  { cards: [18, 9], title: "The Moon และ The Hermit", text: "เดินผ่านความกลัวและความกำกวมในใจ โดยมีปัญญาเป็นตะเกียงส่องทาง" },
+  { cards: [19, 10, 1], title: "The Sun, The Wheel of Fortune และ The Magician", text: "ไพ่สามใบแห่งแสงสว่าง ความชัดเจน และความสำเร็จที่เบิกบาน" },
+  { cards: [20, 2], title: "Judgement และ The High Priestess", text: "เสียงเรียกให้ตื่นรู้ ปล่อยอดีตลง แล้วเริ่มต้นชีวิตใหม่อย่างบริสุทธิ์ใจ" },
+  { cards: [21, 3], title: "The World และ The Empress", text: "การเดินทางที่ครบสมบูรณ์ ความอุดมสมบูรณ์ และความรู้สึกเป็นหนึ่งเดียวกับโลก" },
+];
+
 export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
   const url = `${SITE_ORIGIN}/cards/birth-card`;
 
@@ -149,7 +173,7 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
   ];
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink py-6 sm:py-10 px-4 sm:px-6 font-sans relative overflow-x-clip">
+    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink pb-10 px-4 sm:px-6 font-sans relative overflow-x-clip">
       {/* Schema.org Structured Data */}
       <script
         type="application/ld+json"
@@ -164,21 +188,68 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
         dangerouslySetInnerHTML={{ __html: jsonLdScript(faqJsonLd) }}
       />
 
-      <div className="max-w-4xl mx-auto space-y-10">
-        {/* Ritual Hero */}
-        <RitualHero
-          breadcrumbs={breadcrumbs}
-          badgeText="เลขศาสตร์ทาโรต์สากล"
-          title="คำนวณไพ่ทาโรต์ประจำตัว"
-          accent="ไพ่ทาโรต์ประจำตัว"
-          cards={["major-01", "major-10", "major-02", "major-19", "major-17", "major-21"]}
-          trust={["ใส่วันเกิดแล้วรู้ผลทันที", "ไพ่ชุดใหญ่ 1909 Rider-Waite"]}
-          tagline="รู้จักนิสัยแท้และบทเรียนชีวิตที่ซ่อนอยู่ในวันเกิดของคุณ ด้วยไพ่ดั้งเดิม 1909 Rider-Waite"
-        />
+      <div className="v2-bcp">
+        {/*
+          v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย ไม่ใช่เอา UI เก่ามาอัปเกรด") — จอแรกคือเครื่องคำนวณเลย
+          v1: หัวใหญ่ + ไพ่ลอย ➔ เลื่อนลงไปกรอก ➔ เลื่อนอีกทีไปดูผล · v2: หัวสั้น ➔ โต๊ะกรอก+ช่องไพ่ในจอเดียว
+        */}
+        <header className="v2-bcp-head">
+          <Ui2Crumbs crumbs={breadcrumbs} />
+          <h1 className="v2-bcp-title">
+            <span className="tp">คำนวณ</span>{" "}
+            <span className="tp ui2-gold-night">ไพ่ทาโรต์ประจำตัว</span>
+            <span className="v2-bcp-title-sub tp">จากวันเกิดของคุณ</span>
+          </h1>
+          <p className="v2-bcp-lede">
+            <ThaiPhrases>ใส่วันเดือนปีเกิด แล้วรู้ทันทีว่าไพ่ชุดใหญ่ใบไหนคือตัวตนของคุณ พร้อมคำอ่านจากแม่หมอ</ThaiPhrases>
+          </p>
+        </header>
 
-        {/* Interactive Calculator Component */}
-        {/* ห่อ div — <astro-island> เป็น display:contents จึงไม่รับระยะจาก space-y */}
-        <div>{calculator}</div>
+        {/* ห่อ div — <astro-island> เป็น display:contents */}
+        <div className="v2-bcp-tool">{calculator}</div>
+
+        {/* สูตรสามขั้น — ตัวอย่างจริงทีละขั้น แทนย่อหน้ายาวของ v1 */}
+        <section className="v2-bcp-sec" aria-labelledby="bc-how">
+          <Ui2SectionHead n="01" word="How it works" title="สูตรไพ่ประจำตัว 3 ขั้น" id="bc-how" />
+          <ol className="v2-bcp-steps">
+            {BIRTH_STEPS.map((step, i) => (
+              <li key={step.title} className="v2-bcp-stepcard">
+                <span className="v2-bcp-stepn" aria-hidden="true">{i + 1}</span>
+                <h3 className="tp">{step.title}</h3>
+                <p className="v2-bcp-math">{step.math}</p>
+                <p>{step.text}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {/* คู่ไพ่ 12 แบบ — ภาพไพ่จริงคู่กัน แทนรายการตัวหนังสือยาวของ v1 */}
+        <section className="v2-bcp-sec" aria-labelledby="bc-pairs">
+          <Ui2SectionHead
+            n="02"
+            word="Card pairs"
+            title="ไพ่สองใบของคุณ บอกอะไร"
+            lede="คู่ไพ่ประจำตัวช่วยให้เข้าใจความขัดแย้งและความสมดุลในตัวเอง ทั้งหมดมี 12 แบบ"
+            id="bc-pairs"
+          />
+          <ul className="v2-bcp-pairs">
+            {BIRTH_PAIRS.map((pair) => (
+              <li key={pair.title} className="v2-bcp-pair">
+                <span className="v2-bcp-pair-fan" aria-hidden="true">
+                  {pair.cards.map((n) => (
+                    <span key={n} className="v2-bcp-pair-card">
+                      <CardImage cardId={`major-${String(n).padStart(2, "0")}`} alt="" thumb sizes="64px" loading="lazy" />
+                    </span>
+                  ))}
+                </span>
+                <div>
+                  <h3>{pair.title}</h3>
+                  <p>{pair.text}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         {/* Editorial Guide Article */}
         <SeoArticleShell
@@ -214,59 +285,6 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
               และเมื่อนำตัวเลขสองหลักนั้นมาบวกกันอีกครั้ง จะได้ตัวเลขหลักเดียว (1-9) ซึ่งเป็นตัวแทนของ <strong>ไพ่จิตวิญญาณ (Soul Card)</strong>
               ส่วนผู้ที่มีผลลัพธ์เป็นตัวเลข 1 ถึง 9 ตั้งแต่แรก จะถือว่ามีพลังงานของไพ่บุคลิกภาพและจิตวิญญาณเป็นหนึ่งเดียวกันอย่างลึกซึ้ง
             </p>
-
-            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3"><ThaiPhrases>
-              ไพ่สองใบของคุณ บอกอะไร
-            </ThaiPhrases></h3>
-            <p>
-              คู่ไพ่ประจำตัวช่วยให้เราเข้าใจความขัดแย้งและความสมดุลภายในตนเอง ตัวอย่างเช่น:
-            </p>
-            <ul className="list-disc pl-5 space-y-2 text-muted">
-              <li>
-                <strong>The Wheel of Fortune (10) และ The Magician (1):</strong> ผู้ที่ถือครองคู่ไพ่นี้มักเผชิญกับจุดเปลี่ยนและจังหวะชีวิตที่ไม่หยุดนิ่ง
-                แต่มีพรสวรรค์ในการแปรเปลี่ยนวิกฤตให้เป็นโอกาสด้วยสติปัญญาและทักษะรอบด้าน
-              </li>
-              <li>
-                <strong>Justice (11) และ The High Priestess (2):</strong> สะท้อนบุคคลผู้มีญาณหยั่งรู้ลึกซึ้ง ควบคู่กับความยึดมั่นในสัจธรรมและความยุติธรรม
-                มักทำหน้าที่เป็นที่พึ่งทางปัญญาและผู้ไกล่เกลี่ยปัญหาให้ผู้อื่น
-              </li>
-              <li>
-                <strong>The Hanged Man (12) และ The Empress (3):</strong> สัญลักษณ์แห่งการยอมจำนนเพื่อค้นพบมุมมองใหม่ นำไปสู่การกำเนิดของความคิดสร้างสรรค์
-                และความอุดมสมบูรณ์ทางจิตใจ
-              </li>
-              <li>
-                <strong>Death (13) และ The Emperor (4):</strong> พลังงานแห่งการผลัดเปลี่ยนโครงสร้างเดิม การทลายสิ่งเก่าที่ไม่จำเป็นเพื่อสถาปนาความมั่นคง
-                และระเบียบวินัยใหม่อันแข็งแกร่ง
-              </li>
-              <li>
-                <strong>Temperance (14) และ The Hierophant (5):</strong> การผสมผสานความเชื่อ ธรรมเนียมประเพณี เข้ากับความยืดหยุ่นและการประนีประนอม
-                เพื่อสร้างสันติภาพและการเรียนรู้ทางจิตวิญญาณ
-              </li>
-              <li>
-                <strong>The Devil (15) และ The Lovers (6):</strong> บททดสอบแห่งความปรารถนา กิเลส และพันธนาการทางใจ ซึ่งท้าทายให้มนุษย์เลือกเส้นทางแห่งความรักบริสุทธิ์
-                และการตระหนักรู้ในอิสรภาพที่แท้จริง
-              </li>
-              <li>
-                <strong>The Tower (16) และ The Chariot (7):</strong> พลังงานแห่งความมุ่งมั่นพุ่งทะยานที่ต้องผ่านบทเรียนการปล่อยวางตัวตน (Ego)
-                เมื่อเผชิญกับการเปลี่ยนแปลงแบบฉับพลัน เพื่อสร้างความแข็งแกร่งจากภายใน
-              </li>
-              <li>
-                <strong>The Star (17) และ Strength (8):</strong> ความหวัง การเยียวยาจิตวิญญาณ และพลังแห่งความอ่อนโยนที่สามารถสยบความดุร้ายของสัญชาตญาณได้อย่างสงบงาม
-              </li>
-              <li>
-                <strong>The Moon (18) และ The Hermit (9):</strong> การเดินทางข้ามผ่านความกลัว ความกำกวม และภาพลวงตาในจิตใต้สำนึก โดยอาศัยแสงประทีปแห่งปัญญา
-                และการปลีกวิเวกเพื่อค้นพบสัจธรรมในตน
-              </li>
-              <li>
-                <strong>The Sun (19), The Wheel of Fortune (10) และ The Magician (1):</strong> กลุ่มไพ่สามประสานแห่งแสงสว่าง ความกระจ่างแจ้ง และความสำเร็จอันเบิกบาน
-              </li>
-              <li>
-                <strong>Judgement (20) และ The High Priestess (2):</strong> เสียงเพรียกแห่งการตื่นรู้ทางจิตวิญญาณและการปลดปล่อยอดีตเพื่อเริ่มต้นชีวิตใหม่อย่างบริสุทธิ์
-              </li>
-              <li>
-                <strong>The World (21) และ The Empress (3):</strong> ความสมบูรณ์แบบของการเดินทาง ความอุดมสมบูรณ์ และการรวมเป็นหนึ่งเดียวกับจักรวาล
-              </li>
-            </ul>
 
             <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3"><ThaiPhrases>
               วิธีนำพลังงานไพ่ประจำตัว ไปปรับใช้เพื่อการพัฒนาตนเอง
