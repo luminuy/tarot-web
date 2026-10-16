@@ -91,6 +91,9 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
   const previewOnMobile = !showAllOnMobile && selectedCat === "all" && !searchQuery.trim();
 
   const featured = articles[0];
+  // ลดความซ้ำ (v1): ตอนโชว์ปกบทความเด่น ไม่ต้องซ้ำบทความเดียวกันเป็นการ์ดแรกของกริด (ลิงก์ยังอยู่ที่ปก)
+  const showFeatured = selectedCat === "all" && !searchQuery && !!featured;
+  const gridItems = showFeatured ? filtered.filter((a) => a.slug !== featured.slug) : filtered;
 
   return (
     <div className="space-y-10">
@@ -180,13 +183,14 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
           : featured.readTime;
 
         return (
-          <div className="rounded-2xl border border-line-warm bg-gradient-to-br from-surface via-surface-warm to-[#F5EFE4] p-6 sm:p-8 lg:p-10 shadow-[0_4px_20px_rgba(41,38,31,0.05)] relative overflow-hidden group hover:border-gold-ink transition duration-300">
+          /* เอกลักษณ์หน้านี้ (UI 2.0 · 2026-10-16): บทความเด่นเป็น "ปกนิตยสาร" — ภาพไพ่ใหญ่ 2 ใบซ้อน · หัวข้อใหญ่ */
+          <div className="ui2-mag-cover rounded-2xl border border-line-warm bg-gradient-to-br from-surface via-surface-warm to-[#F5EFE4] p-6 sm:p-8 lg:p-10 shadow-[0_4px_20px_rgba(41,38,31,0.05)] relative overflow-hidden group hover:border-gold-ink transition duration-300">
             {/* Subtle Ambient Gold Hairline */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-[1px] bg-gradient-to-r from-transparent via-gold-ink/40 to-transparent pointer-events-none" />
 
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 relative z-10">
               {/* 1909 Rider-Waite Card Art Showcase */}
-              <div className="w-24 h-36 sm:w-28 sm:h-42 rounded-xl overflow-hidden border-2 border-line-warm shadow-md group-hover:scale-105 group-hover:border-gold-ink transition duration-300 bg-inset-warm flex-shrink-0 relative">
+              <div className="ui2-mag-art w-24 h-36 sm:w-28 sm:h-42 rounded-xl overflow-hidden border-2 border-line-warm shadow-md group-hover:scale-105 group-hover:border-gold-ink transition duration-300 bg-inset-warm flex-shrink-0 relative">
                 <CardImage
                   image={featArt.image}
                   alt=""
@@ -208,7 +212,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                   </span>
                 </div>
 
-                <h2 className="font-serif-th text-xl sm:text-2xl lg:text-3xl font-bold text-ink group-hover:text-gold-ink transition-colors leading-snug"><ThaiPhrases>
+                <h2 className="ui2-mag-title font-serif-th text-xl sm:text-2xl lg:text-3xl font-bold text-ink group-hover:text-gold-ink transition-colors leading-snug"><ThaiPhrases>
                   <Link href={`/blog/${featured.slug}`} prefetch={false}>{featTitle}</Link>
                 </ThaiPhrases></h2>
 
@@ -273,7 +277,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
           </div>
         ) : (
           <div className={`grid grid-cols-1 md:grid-cols-2 gap-6${previewOnMobile ? " mobile-preview-8" : ""}`}>
-            {filtered.map((article, idx) => {
+            {gridItems.map((article, idx) => {
               const cardArt = getArticleCardArt(article);
               const artTitle = getArticleTitle(article, locale);
               const artDesc = getArticleDescription(article, locale);

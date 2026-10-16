@@ -114,7 +114,8 @@ export function PricingPlans() {
   };
 
   const bonus = ent?.bonusRemaining ?? 0;
-  const cardBase = "relative flex flex-col p-6";
+  // เอกลักษณ์หน้าราคา (UI 2.0 · 2026-10-16): การ์ดแพ็กเป็น "ตั๋วทอง" — รอยปรุ + รอยเว้าสองข้างคั่นราคากับสิทธิ์ (`ui2-tix*` ใน ui2-page.css)
+  const cardBase = "ui2-tix relative flex flex-col p-6";
   const btnBase =
     "flex min-h-[48px] w-full items-center justify-center px-5 font-serif-th text-base font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2";
   const btnPress = "cursor-pointer active:scale-[0.98] disabled:cursor-wait disabled:opacity-80";
@@ -156,7 +157,7 @@ export function PricingPlans() {
               {isEn ? "Sign up free" : "สมัครฟรี"}
             </button>
           )}
-          <ul className="mt-6 space-y-2.5 border-t border-line-warm/60 pt-5">
+          <ul className="ui2-tix-stub mt-6 space-y-2.5 border-t border-line-warm/60 pt-5">
             {(isEn ? FREE_EN : FREE_TH).map((t) => (
               <li key={t} className="flex items-start gap-2 font-serif-th text-sm text-ink-deep">
                 <CheckMarkIcon className="mt-0.5 h-4 w-4 shrink-0 text-gold-ink" />
@@ -171,7 +172,7 @@ export function PricingPlans() {
           const badge = packageBadge(pkg, packages, isEn);
           const busy = busyId === pkg.id;
           return (
-            <li key={pkg.id} className={`${cardBase} ${pkg.isPopular ? "altar-panel-active" : "altar-panel"}`}>
+            <li key={pkg.id} className={`${cardBase} ${pkg.isPopular ? "altar-panel-active ui2-tix-popular" : "altar-panel"}`}>
               <div className="flex items-start justify-between gap-2">
                 <h3 className="font-serif-th text-base font-bold text-ink-deep">
                   <ThaiPhrases>{creditsLabel(pkg.credits, isEn)}</ThaiPhrases>
@@ -213,7 +214,7 @@ export function PricingPlans() {
                       : "ซื้อแพ็กนี้"}
               </button>
 
-              <ul className="mt-6 space-y-2.5 border-t border-line-warm/60 pt-5">
+              <ul className="ui2-tix-stub mt-6 space-y-2.5 border-t border-line-warm/60 pt-5">
                 <li className="font-serif-th text-xs font-semibold text-muted">
                   {isEn ? "Everything in Free, plus:" : "ทุกอย่างในแพ็กฟรี และ"}
                 </li>
