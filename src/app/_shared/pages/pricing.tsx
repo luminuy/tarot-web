@@ -10,7 +10,7 @@ import { CHEAPEST_PACKAGE_THB, DAILY_LIMIT, READINGS_EN } from "@/lib/entitlemen
 import { CheckMarkIcon, DashMarkIcon } from "@/components/entitlement/EntitlementIcons";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import type { Locale } from "@/lib/i18n/types";
-import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
 
 /**
  * 💳 หน้า "ราคาและแพ็กเกจ" (`/pricing` · `/en/pricing`)
@@ -245,20 +245,49 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
       <div className="mx-auto max-w-6xl space-y-16 px-4 pt-12 sm:px-6 sm:pt-16">
         {/* ── หัวหน้า — ไม่มีกล่อง ตัวอักษรสีหมึกเท่านั้น (สีทองบนพื้นไล่สีคอนทราสต์ไม่ผ่าน · HANDOFF_GLASS_HOME 2.4) ── */}
         {/* หัวหน้า UI 2.0 (เจ้าของ 2026-10-16) — ข้อความ h1 / คำโปรยเดิมทุกตัวอักษร */}
-        <Ui2PageHero
-          crumbs={[{ label: isEn ? "Home" : "หน้าแรก", href: "/" }, { label: isEn ? "Pricing" : "ราคาและแพ็กเกจ" }]}
-          title={isEn ? "Read free every day. Top up when you want more." : "ดูดวงฟรีทุกวัน เติมรอบเมื่ออยากถามเพิ่ม"}
-          accent={isEn ? "free every day." : "ดูดวงฟรีทุกวัน"}
-          lede={
-            <ThaiPhrases>
-              {isEn
-                ? `Pay once — no subscription, and purchased readings never expire. Packages from ${CHEAPEST_PACKAGE_THB} THB.`
-                : `จ่ายครั้งเดียว ไม่มีรายเดือน รอบที่เติมไม่มีวันหมดอายุ · แพ็กเริ่มต้น ${CHEAPEST_PACKAGE_THB} บาท`}
-            </ThaiPhrases>
-          }
-          trust={isEn ? ["No subscription", "Readings never expire"] : ["ไม่มีรายเดือน", "รอบที่เติมไม่มีวันหมดอายุ"]}
-          cards={["pentacles-10", "major-19", "pentacles-01", "major-21", "pentacles-09", "major-17"]}
-        />
+        {/*
+          v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — ตู้ขายตั๋ว: ซ้ายข้อความ · ขวาตั๋วใบใหญ่ "ฟรีวันละ N ครั้ง"
+          บอกสิ่งที่ได้ฟรีก่อนสิ่งที่ต้องจ่าย (v1 หัวกลางพร้อมไพ่ลอย ไม่เห็นว่าฟรีได้แค่ไหนจนเลื่อนถึงตาราง)
+        */}
+        <header className="v2-pr-head">
+          <div>
+            <Ui2Crumbs crumbs={[{ label: isEn ? "Home" : "หน้าแรก", href: "/" }, { label: isEn ? "Pricing" : "ราคาและแพ็กเกจ" }]} />
+            <h1 className="v2-pr-title">
+              {isEn ? (
+                <>
+                  Read <span className="ui2-gold-night">free every day.</span> Top up when you want more.
+                </>
+              ) : (
+                <>
+                  <span className="tp ui2-gold-night">ดูดวงฟรีทุกวัน</span> <span className="tp">เติมรอบเมื่ออยากถามเพิ่ม</span>
+                </>
+              )}
+            </h1>
+            <p className="v2-pr-lede">
+              <ThaiPhrases>
+                {isEn
+                  ? `Pay once — no subscription, and purchased readings never expire. Packages from ${CHEAPEST_PACKAGE_THB} THB.`
+                  : `จ่ายครั้งเดียว ไม่มีรายเดือน รอบที่เติมไม่มีวันหมดอายุ · แพ็กเริ่มต้น ${CHEAPEST_PACKAGE_THB} บาท`}
+              </ThaiPhrases>
+            </p>
+            <ul className="v2-pr-promise">
+              {(isEn ? ["No subscription", "Readings never expire", "Card or PromptPay"] : ["ไม่มีรายเดือน", "รอบที่เติมไม่มีวันหมดอายุ", "บัตร หรือ PromptPay"]).map((t) => (
+                <li key={t}>{t}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="v2-pr-free" aria-label={isEn ? "Free membership" : "สมาชิกฟรี"}>
+            <p className="v2-pr-free-k">{isEn ? "Free member" : "สมาชิกฟรี"}</p>
+            <p className="v2-pr-free-n">
+              <b>{DAILY_LIMIT}</b>
+              <span>{isEn ? (DAILY_LIMIT === 1 ? "reading a day" : "readings a day") : "ครั้งต่อวัน"}</span>
+            </p>
+            <p className="v2-pr-free-d">{isEn ? "Standard 1–4 card spreads · resets at midnight" : "ผังมาตรฐาน 1–4 ใบ · รีเซ็ตทุกเที่ยงคืน"}</p>
+            <a href={isEn ? "/en" : "/"} className="ui2-btn v2-pr-go">
+              {isEn ? "Start a free reading" : "เริ่มดูดวงฟรี"}
+            </a>
+          </div>
+        </header>
 
         {/* ── แพ็ก (island) ───────────────────────────────────────── */}
         {/* แถบสีสลับแบบหน้าแรก (`page-band`): แพ็ก (อ่อน) · ตารางเทียบ (ใส) · คำถาม (อ่อน) · ปิดท้าย (ใส) */}
@@ -269,9 +298,10 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
           {plans}
         </section>
 
+        <div className="v2-pr-two">
         {/* ── ตารางเทียบสิทธิ์ ────────────────────────────────────── */}
-        <section aria-labelledby="pricing-compare" className="page-band mx-auto max-w-4xl space-y-6">
-          <h2 id="pricing-compare" className="text-center font-serif-th text-2xl font-bold text-ink-deep sm:text-3xl">
+        <section aria-labelledby="pricing-compare" className="space-y-6">
+          <h2 id="pricing-compare" className="v2-pr-h2">
             <ThaiPhrases>{isEn ? "Compare plans" : "เทียบสิทธิ์ทั้งหมด"}</ThaiPhrases>
           </h2>
           <div className="altar-panel">
@@ -310,8 +340,8 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
         </section>
 
         {/* ── คำถามที่พบบ่อย ──────────────────────────────────────── */}
-        <section aria-labelledby="pricing-faq" className="page-band page-band-tint mx-auto max-w-3xl space-y-6">
-          <h2 id="pricing-faq" className="text-center font-serif-th text-2xl font-bold text-ink-deep sm:text-3xl">
+        <section aria-labelledby="pricing-faq" className="space-y-6">
+          <h2 id="pricing-faq" className="v2-pr-h2">
             <ThaiPhrases>{isEn ? "Frequently asked questions" : "คำถามที่พบบ่อย"}</ThaiPhrases>
           </h2>
           <div className="altar-panel divide-y divide-line-warm/50 px-5 sm:px-6">
@@ -333,6 +363,8 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
             ))}
           </div>
         </section>
+
+        </div>
 
         {/* ── ปิดท้าย ─────────────────────────────────────────────── */}
         <section className="page-band mx-auto max-w-3xl space-y-4 text-center">
