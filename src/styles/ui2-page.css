@@ -541,10 +541,13 @@
   }
 }
 
-/* ══ 8. ลอยเข้าเมื่อเลื่อนถึง (view timeline · transform/opacity ล้วน · ลดการเคลื่อนไหว = นิ่ง) ══ */
+/* ══ 8. ลอยเข้าเมื่อเลื่อนถึง (view timeline · transform/opacity ล้วน · ลดการเคลื่อนไหว = นิ่ง) ══
+   ⚠️ ห้ามใส่กับก้อนใหญ่อย่าง `.page-band-tint` (INC-0273): อนิเมชันผูกการเลื่อนทำให้ Chrome ยกเป็นเลเยอร์ GPU ตลอดอายุหน้า
+      แม้เล่นจบแล้ว — แถบกริดไพ่ 78 ใบใน /cards สูง 5,700px = เลเยอร์ 9.3 ล้านพิกเซลค้างตลอด (จอทั้งจอ 1.5 ล้าน)
+      แผงเนื้อหาทั่วไป (สูง 1–2 จอ) ยังลอยเข้าได้ · แผงที่มีกริดไพ่ (`.card-tile-cv`) ไม่ลอย */
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
-    :root:not([data-fx="off"]) .ui2-pg .page-band-tint,
+    :root:not([data-fx="off"]) .ui2-pg .page-band-tint:not(:has(.card-tile-cv)),
     :root:not([data-fx="off"]) .ui2-pg .ui2-rv {
       animation: ui2-pg-rise linear both;
       animation-timeline: view();

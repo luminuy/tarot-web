@@ -535,12 +535,16 @@ body {
    *    ⚠️ ชื่อโทเคน `--glow-rose-w` คงไว้ตามเดิมเพื่อไม่ให้ต้องไล่แก้สามจุดใน media query
    */
   background-image:
+    /* เนื้อผ้าลินิน (ความทึบ 0.055 ฝังใน SVG · ปูซ้ำ) — เดิม body::after แบบ fixed (INC-0273) */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E"),
+    /* แสงเทียนขาวอมครีมเหนือหัวหน้า (≤ 0.30 · รอบ 115) — เดิม body::before แบบ fixed */
+    radial-gradient(110% 560px at 50% -127px, rgba(255, 250, 238, 0.28) 0%, rgba(255, 250, 238, 0) 62%),
     radial-gradient(var(--glow-amber-w) 620px at 0% 60px,    rgba(255, 186, 96, 0.36) 0%, rgba(255, 186, 96, 0) 76%),
     radial-gradient(var(--glow-crown-w) 820px at 50% -140px, rgba(255, 208, 130, 0.80) 0%, rgba(255, 208, 130, 0) 76%),
     radial-gradient(var(--glow-rose-w) 560px at 100% 300px,  rgba(236, 192, 148, 0.30) 0%, rgba(236, 192, 148, 0) 74%),
     radial-gradient(var(--glow-pool-w) 700px at 50% 1320px,  rgba(232, 196, 150, 0.32) 0%, rgba(232, 196, 150, 0) 74%),
     linear-gradient(168deg, #FCF1DF 0px, #F6E7D0 820px, #F2E3CC 1600px);
-  background-repeat: no-repeat;
+  background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
   /* 🚨 ห้ามใช้ background-attachment: fixed เด็ดขาด
      `fixed` บังคับให้เบราว์เซอร์วาดพื้นหลังใหม่ทุกเฟรมที่เลื่อนจอ
      ซึ่งเป็นความผิดพลาดแบบเดียวกับ backdrop-filter ใน INC-0056 เป๊ะ ๆ
@@ -574,44 +578,15 @@ html {
 }
 
 /*
- * ชั้นที่ 1 — แสงเทียนเหนือแท่นบูชา (นิ่ง ไม่ขยับ)
+ * ชั้นแสงเทียน + เนื้อผ้าลินิน — อยู่ใน background-image ของ body ด้านบนแล้ว (2026-10-17 · INC-0273)
  *
- * ⚠️ ห้ามย้ายกลับไปใส่เป็น `background-image` + `background-attachment: fixed` บน <body>
- * iOS Safari ไม่รองรับ `background-attachment: fixed` จริง (ปฏิบัติเป็น `scroll`)
- * แสงจะเลื่อนหายไปตอนผู้ใช้สกรอลล์ — กระทบผู้ใช้มือถือซึ่งเป็น 85% ของเว็บนี้
- * และบนเดสก์ท็อปมันยังบังคับให้เบราว์เซอร์วาดพื้นหลังใหม่ทุกครั้งที่สกรอลล์ด้วย
- * ใช้ pseudo-element ที่ `position: fixed` แทน — ยึดกับ viewport จริงทุกแพลตฟอร์ม
+ * 🚨 ห้ามกลับไปทำเป็น `body::before` / `body::after` แบบ `position: fixed` อีก
+ * ชั้น fixed เต็มจอ = เลเยอร์ GPU ตรึงจอ และ <main> (z-index 1) ที่วาดทับมันต้องถูกยกเป็นเลเยอร์แยกทั้งก้อน
+ * (Chrome: compositing reason "Overlap") — หน้าแรกเลเยอร์รวม 83 ล้านพิกเซล (จอ 1.5 ล้าน) · <main> ก้อนเดียว 17.8 ล้าน
+ * ทุกหน้าทั้งเว็บโดนหมด และของที่ขยับข้างในต้อง composite ทับซ้อนกันทุกเฟรม (เจ้าของ "หน้าแรกหนักมาก")
+ * ใน background ของ body: วาดครั้งเดียวตามเอกสาร ไม่มีเลเยอร์ · ความทึบลินิน 0.055 ฝังใน SVG แทน opacity
+ * ส่วน UI 2.0 ปูพื้นของตัวเองทับอยู่แล้ว สองชั้นนี้จึงเห็นเฉพาะหน้าที่ยังไม่มีพื้นเอง
  */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  /* ⚠️ ความทึบของกลีบนี้ต้องต่ำ (≤0.30) และเป็น "ขาวอมครีม" ไม่ใช่ขาวเกือบทึบ
-     ของเดิมเป็น #FFFDF9 ทึบเต็ม 100% ที่ใจกลาง มันจึงฟอกแสงทองของพื้นหลังทิ้ง
-     ทั้งแถบบนสุด จอแรกที่ผู้ใช้เห็นจึงเหลือแค่ครีมซีด (แก้ในรอบ 115) */
-  background-image: radial-gradient(
-    110% 62% at 50% -14%,
-    rgba(255, 250, 238, 0.28) 0%,
-    rgba(255, 250, 238, 0) 62%
-  );
-}
-
-/*
- * ชั้นที่ 2 — เนื้อผ้าลินิน (SVG นิ่ง ไม่มี JS ไม่มีเฟรม)
- * ต้องอยู่เหนือชั้นแสง เพื่อให้ผิวสัมผัสคลุมทั้งพื้น จึงใช้ ::after
- * opacity ต้องอยู่ระหว่าง 0.045–0.070 เท่านั้น เกิน 0.08 จะกลายเป็นจอทีวีไม่มีสัญญาณ
- */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.055;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
-}
 
 /* เนื้อหาทุกอย่างต้องอยู่เหนือชั้นลินิน (ยกเว้น fixed portal / floating elements)
  *

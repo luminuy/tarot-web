@@ -5,10 +5,7 @@
  * ⚠️ ของวนทุกชิ้นมีคลาส `ui2-loop` และอยู่ใต้ `[data-anim-section]` (หยุดเองเมื่อพ้นจอ · astro/scripts/ui2-inview.ts)
  */
 @media (min-width: 768px) {
-  /* ดาวชั้นเดียว (เดิม 2 ชั้นเต็มจอ · ลดภาระ 2026-10-17) */
-  [data-fx="full"] .ui2-dy .ui2-stars {
-    animation: ui2-dy-twinkle 9s ease-in-out infinite;
-  }
+  /* ดาวนิ่ง (INC-0273): ชั้นดาวสูงเต็มส่วนที่กะพริบ/เลื่อน = เลเยอร์ GPU หลายล้านพิกเซล และของทุกชิ้นที่วาดทับต้องถูกยกเป็นเลเยอร์ตาม */
   /* แสงทองวิ่งผ่านหัวข้อครั้งเดียว (เดิมวนไม่หยุด = วาดใหม่ทุกเฟรม · 2026-10-17) */
   [data-fx="full"] .ui2-dy-h1 .ui2-gold-night {
     animation: ui2-dy-shimmer 2.6s cubic-bezier(0.45, 0, 0.2, 1) 0.4s 1 backwards;
@@ -69,10 +66,6 @@
     top: 34px;
     opacity: 0.6;
   }
-}
-@keyframes ui2-dy-twinkle {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 0.35; }
 }
 @keyframes ui2-dy-shimmer {
   from { background-position: 0% 50%; }

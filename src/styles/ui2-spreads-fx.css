@@ -6,10 +6,7 @@
  * ⚠️ ของวนทุกชิ้นมีคลาส `ui2-loop` และอยู่ใต้ `[data-anim-section]` (หยุดเองเมื่อพ้นจอ)
  */
 @media (min-width: 768px) {
-  /* ดาวกะพริบช้า ๆ ชั้นเดียว (เดิม 2 ชั้นเต็มจอ — 2026-10-17 เจ้าของ "รู้สึกหนักเกินไป") */
-  [data-fx="full"] .ui2-sp .ui2-stars {
-    animation: ui2-sp-twinkle 9s ease-in-out infinite;
-  }
+  /* ดาวนิ่ง (INC-0273): ชั้นดาวสูงเต็มส่วนที่กะพริบ/เลื่อน = เลเยอร์ GPU หลายล้านพิกเซล และของทุกชิ้นที่วาดทับต้องถูกยกเป็นเลเยอร์ตาม */
 
   /* แสงออโรราลอยหลังหัวหน้า */
   [data-fx="full"] .ui2-sp .ui2-aurora {
@@ -239,10 +236,6 @@
   }
 }
 
-@keyframes ui2-sp-twinkle {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 0.35; }
-}
 @keyframes ui2-sp-shimmer {
   from { background-position: 200% 50%; }
   to { background-position: 0% 50%; }
