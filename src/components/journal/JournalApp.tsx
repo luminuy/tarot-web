@@ -24,9 +24,10 @@ import { JournalThreads } from "./JournalThreads";
 import { ReflectionPanel } from "./ReflectionPanel";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { AppSettingsCard } from "@/components/pwa/AppSettingsCard";
-import { CATEGORY_LABEL, OUTCOME_LABEL, dayKeyOf, formatDate } from "./journal-format";
+import { CATEGORY_LABEL, OUTCOME_LABEL, dayKeyOf, formatDate, formatMonth } from "./journal-format";
+import { APP_TIME_ZONE } from "@/lib/time/bangkok";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
-import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
 
 /**
  * ✦ สมุดดวงของฉัน — หน้าเต็ม `/journal` (REFLECTION_JOURNAL_PLAN 1.3 · คลื่น 2)
@@ -201,222 +202,307 @@ export function JournalApp() {
     { id: "stories", label: L({ th: "เรื่องที่ติดตาม", en: "Stories" }) },
   ];
 
+  /*
+   * v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — สมุดหนังเล่มจริง: สันสมุดซ้าย (ริบบิ้นคั่นหน้า · ค้นหา · ตัวกรองพับเก็บ)
+   * หน้ากระดาษขวาเป็นไดอารี่ไล่ตามเดือน มีตราวันที่ข้างทุกบันทึก
+   * v1: ตัวกรอง 4 ตัว + แท็ก 12 อันกางค้างทุกครั้ง ➔ v2: ค้นหาอย่างเดียวก่อน ตัวกรองอยู่ในปุ่ม "ตัวกรอง" (นับจำนวนที่เปิดอยู่)
+   */
+  const monthKeyNow = dayKeyOf(Date.now()).slice(0, 7);
+  const stats = [
+    { n: items.length, label: L({ th: "บันทึกทั้งหมด", en: "entries" }) },
+    { n: items.filter((r) => dayKeyOf(r.date).startsWith(monthKeyNow)).length, label: L({ th: "เดือนนี้", en: "this month" }) },
+    { n: items.filter((r) => r.outcome && r.outcome !== "PENDING").length, label: L({ th: "จดผลจริงแล้ว", en: "outcomes noted" }) },
+  ];
+  const filterCount = [tagFilter, category !== "all", outcome !== "ALL", pinnedOnly, range !== "all"].filter(Boolean).length;
+  const pinned = filtered.filter((r) => r.pinned);
+  const months: Array<{ key: string; label: string; rows: SavedReadingItem[] }> = [];
+  for (const r of filtered) {
+    if (r.pinned) continue;
+    const key = dayKeyOf(r.date).slice(0, 7);
+    let group = months.find((m) => m.key === key);
+    if (!group) {
+      group = { key, label: formatMonth(Number(key.slice(0, 4)), Number(key.slice(5, 7)) - 1, isEnglish), rows: [] };
+      months.push(group);
+    }
+    group.rows.push(r);
+  }
+  const weekday = (iso: string) =>
+    new Intl.DateTimeFormat(isEnglish ? "en-GB" : "th-TH", { weekday: "short", timeZone: APP_TIME_ZONE }).format(new Date(iso));
+  const renderEntry = (r: SavedReadingItem) => (
+    <li key={r.id} className="v2-jr-entry">
+      <span className="v2-jr-stamp" aria-hidden="true">
+        <b>{Number(dayKeyOf(r.date).slice(8, 10))}</b>
+        <small>{weekday(r.date)}</small>
+      </span>
+      <div className="v2-jr-entry-body">
+        <JournalEntryCard
+          item={r}
+          isEnglish={isEnglish}
+          isMember={isMember}
+          knownTags={knownTags}
+          onPatch={onPatch}
+          onDelete={onDelete}
+          onTagClick={(t) => setTagFilter(t)}
+          defaultOpen={focusEntry === r.id}
+        />
+      </div>
+    </li>
+  );
+
   return (
-    <main id="main-content" className="w-full max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-16 space-y-6">
-      <Ui2PageHero
-        compact
-        crumbs={[{ label: L({ th: "หน้าแรก", en: "Home" }), href: "/" }, { label: L({ th: "สมุดดวงของฉัน", en: "My reading journal" }) }]}
-        title={L({ th: "ทุกคำอ่าน คือบทหนึ่งของเรื่องคุณ", en: "Every reading is a chapter of your story" })}
-        accent={L({ th: "บทหนึ่งของเรื่องคุณ", en: "a chapter" })}
-        lede={L({
-          th: "กลับมาเขียนว่าเกิดอะไรขึ้นจริง ดูว่าใจเปลี่ยนไปอย่างไร และเห็นไพ่ที่วนมาหาคุณแบบไม่หลอกตัวเอง",
-          en: "Come back to write what really happened, see how your heart shifted, and notice which cards keep returning — honestly.",
-        })}
-        cards={["major-02", "cups-04", "major-09", "swords-04"]}
-      />
+    <main id="main-content" className="v2-jr">
+      {/* ปกสมุด — ชื่อเล่ม + ตัวเลขสั้น ๆ ที่ชวนกลับมาเขียน */}
+      <header className="v2-jr-cover">
+        <div className="v2-jr-cover-text">
+          <Ui2Crumbs crumbs={[{ label: L({ th: "หน้าแรก", en: "Home" }), href: "/" }, { label: L({ th: "สมุดดวงของฉัน", en: "My reading journal" }) }]} />
+          <h1 className="v2-jr-title">
+            {isEnglish ? (
+              <>
+                My <span className="ui2-gold-night">reading journal</span>
+              </>
+            ) : (
+              <>
+                <span className="tp">สมุดดวง</span>
+                <span className="tp ui2-gold-night">ของฉัน</span>
+              </>
+            )}
+          </h1>
+          <p className="v2-jr-lede">
+            {L({
+              th: "ทุกคำอ่านคือหนึ่งบทของเรื่องคุณ กลับมาจดว่าเกิดอะไรขึ้นจริง แล้วดูว่าไพ่ใบไหนวนกลับมาหา",
+              en: "Every reading is a chapter of your story. Come back to note what really happened and see which cards keep returning.",
+            })}
+          </p>
+        </div>
+        {items.length > 0 && (
+          <ul className="v2-jr-stats">
+            {stats.map((s) => (
+              <li key={s.label}>
+                <b>{s.n}</b>
+                <span>{s.label}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </header>
 
       <InstallPrompt isEnglish={isEnglish} />
 
-      {!sessionLoading && !isMember && (
-        <div className="glass-tile !rounded-xl p-4 text-xs sm:text-sm font-serif-th text-ink-deep text-center">
-          {L({
-            th: "ตอนนี้สมุดอยู่ในเครื่องนี้เท่านั้น (สูงสุด 50 รายการ) — เข้าสู่ระบบเพื่อเก็บถาวรและเปิดได้ทุกเครื่อง",
-            en: "Your journal lives on this device only (up to 50 entries). Sign in to keep it safely across devices.",
-          })}{" "}
-          <a href={isEnglish ? "/en/account" : "/account"} className="text-gold-ink font-semibold underline underline-offset-2">
-            {L({ th: "เข้าสู่ระบบ", en: "Sign in" })}
-          </a>
-        </div>
-      )}
-
-      <div role="tablist" aria-label={L({ th: "มุมมองสมุดดวง", en: "Journal views" })} className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
-        {tabs.map((t) => (
-          <button
-            key={t.id}
-            role="tab"
-            id={`journal-tab-${t.id}`}
-            aria-selected={view === t.id}
-            aria-controls={`journal-panel-${t.id}`}
-            onClick={() => chooseView(t.id)}
-            className={`tap-overlay-y min-h-[44px] px-4 sm:px-6 rounded-full text-xs sm:text-sm font-serif-th font-semibold cursor-pointer transition-colors ${
-              view === t.id ? "btn-gold-glass" : "glass-chip text-ink-deep hover:text-gold-ink"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {!loaded && items.length === 0 ? (
-        <p className="text-center text-sm text-muted font-serif-th italic" role="status">
-          {L({ th: "กำลังเปิดสมุด…", en: "Opening your journal…" })}
-        </p>
-      ) : items.length === 0 ? (
-        <div className="altar-card-porcelain !rounded-2xl p-6 sm:p-10 text-center space-y-3">
-          <p className="font-serif-th text-base sm:text-lg text-ink-deep">
-            {L({ th: "สมุดยังว่างอยู่ — หน้าแรกรอคำถามแรกของคุณ", en: "Your journal is empty — the first page is waiting for your first question." })}
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            <a href={isEnglish ? "/en" : "/"} className="tap-overlay-y min-h-[44px] inline-flex items-center px-5 rounded-full btn-gold-glass text-sm font-serif-th font-bold">
-              {L({ th: "เปิดไพ่เรื่องแรก", en: "Do your first reading" })}
-            </a>
-            <a href={isEnglish ? "/en/daily" : "/daily"} className="tap-overlay-y min-h-[44px] inline-flex items-center px-5 rounded-full glass-chip text-sm font-serif-th text-ink-deep">
-              {L({ th: "เริ่มพิธีเช้า 2 นาที", en: "Start the 2-minute morning ritual" })}
-            </a>
+      <div className="v2-jr-book">
+        {/* สันสมุด */}
+        <aside className="v2-jr-spine">
+          <div role="tablist" aria-label={L({ th: "มุมมองสมุดดวง", en: "Journal views" })} className="v2-jr-tabs">
+            {tabs.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                role="tab"
+                id={`journal-tab-${t.id}`}
+                aria-selected={view === t.id}
+                aria-controls={`journal-panel-${t.id}`}
+                onClick={() => chooseView(t.id)}
+                className="v2-jr-tab"
+              >
+                {t.label}
+              </button>
+            ))}
           </div>
-        </div>
-      ) : (
-        <>
-          <div id="journal-panel-list" role="tabpanel" aria-labelledby="journal-tab-list" hidden={view !== "list"} className="space-y-4">
-            {/* ตัวกรอง */}
-            <div className="glass-tile !rounded-xl p-3 sm:p-4 space-y-3">
+
+          {view === "list" && items.length > 0 && (
+            <div className="v2-jr-find">
               <input
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={L({ th: "ค้นคำถาม ชื่อไพ่ บันทึก หรือแท็ก…", en: "Search questions, cards, notes or tags…" })}
+                placeholder={L({ th: "ค้นคำถาม ชื่อไพ่ บันทึก…", en: "Search questions, cards, notes…" })}
                 aria-label={L({ th: "ค้นหาในสมุด", en: "Search the journal" })}
-                className="w-full min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-4 text-sm font-serif-th text-ink-deep placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+                className="v2-jr-search"
               />
-              <div className="flex flex-wrap gap-1.5 text-xs font-serif-th">
-                <Chip on={pinnedOnly} onClick={() => setPinnedOnly((v) => !v)}>
-                  {L({ th: "ปักหมุด", en: "Pinned" })}
-                </Chip>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  aria-label={L({ th: "หมวด", en: "Category" })}
-                  className="min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-3 text-ink-deep"
-                >
-                  <option value="all">{L({ th: "ทุกหมวด", en: "All topics" })}</option>
-                  {Object.entries(CATEGORY_LABEL).map(([k, v]) => (
-                    <option key={k} value={k}>
-                      {L(v)}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={outcome}
-                  onChange={(e) => setOutcome(e.target.value as "ALL" | ReadingOutcome)}
-                  aria-label={L({ th: "ผลจริง", en: "Outcome" })}
-                  className="min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-3 text-ink-deep"
-                >
-                  <option value="ALL">{L({ th: "ทุกผล", en: "Any outcome" })}</option>
-                  {(Object.keys(OUTCOME_LABEL) as ReadingOutcome[]).map((o) => (
-                    <option key={o} value={o}>
-                      {L(OUTCOME_LABEL[o])}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={range}
-                  onChange={(e) => setRange(e.target.value as Range)}
-                  aria-label={L({ th: "ช่วงเวลา", en: "Time range" })}
-                  className="min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-3 text-ink-deep"
-                >
-                  <option value="all">{L({ th: "ทั้งหมด", en: "All time" })}</option>
-                  <option value="7">{L({ th: "7 วัน", en: "7 days" })}</option>
-                  <option value="30">{L({ th: "30 วัน", en: "30 days" })}</option>
-                  <option value="90">{L({ th: "90 วัน", en: "90 days" })}</option>
-                </select>
-              </div>
-              {knownTags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 text-xs font-serif-th">
-                  {knownTags.slice(0, 12).map((t) => (
-                    <Chip key={t} on={tagFilter === t} onClick={() => setTagFilter((cur) => (cur === t ? null : t))}>
-                      #{t}
-                    </Chip>
-                  ))}
+              <details className="v2-jr-filters" open={filterCount > 0 ? true : undefined}>
+                <summary>
+                  {L({ th: "ตัวกรอง", en: "Filters" })}
+                  {filterCount > 0 && <span className="v2-jr-count">{filterCount}</span>}
+                </summary>
+                <div className="v2-jr-filter-body">
+                  <Chip on={pinnedOnly} onClick={() => setPinnedOnly((v) => !v)}>
+                    {L({ th: "เฉพาะที่ปักหมุด", en: "Pinned only" })}
+                  </Chip>
+                  <label className="v2-jr-sel">
+                    <span>{L({ th: "หมวด", en: "Topic" })}</span>
+                    <select value={category} onChange={(e) => setCategory(e.target.value)}>
+                      <option value="all">{L({ th: "ทุกหมวด", en: "All topics" })}</option>
+                      {Object.entries(CATEGORY_LABEL).map(([k, v]) => (
+                        <option key={k} value={k}>
+                          {L(v)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="v2-jr-sel">
+                    <span>{L({ th: "ผลจริง", en: "Outcome" })}</span>
+                    <select value={outcome} onChange={(e) => setOutcome(e.target.value as "ALL" | ReadingOutcome)}>
+                      <option value="ALL">{L({ th: "ทุกผล", en: "Any outcome" })}</option>
+                      {(Object.keys(OUTCOME_LABEL) as ReadingOutcome[]).map((o) => (
+                        <option key={o} value={o}>
+                          {L(OUTCOME_LABEL[o])}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="v2-jr-sel">
+                    <span>{L({ th: "ช่วงเวลา", en: "Time range" })}</span>
+                    <select value={range} onChange={(e) => setRange(e.target.value as Range)}>
+                      <option value="all">{L({ th: "ทั้งหมด", en: "All time" })}</option>
+                      <option value="7">{L({ th: "7 วัน", en: "7 days" })}</option>
+                      <option value="30">{L({ th: "30 วัน", en: "30 days" })}</option>
+                      <option value="90">{L({ th: "90 วัน", en: "90 days" })}</option>
+                    </select>
+                  </label>
+                  {knownTags.length > 0 && (
+                    <div className="v2-jr-tags">
+                      {knownTags.slice(0, 12).map((t) => (
+                        <Chip key={t} on={tagFilter === t} onClick={() => setTagFilter((cur) => (cur === t ? null : t))}>
+                          #{t}
+                        </Chip>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
+              </details>
               {activeFilters && (
-                <div className="flex items-center justify-between gap-2 text-xs font-serif-th">
-                  <span className="text-muted" role="status">
+                <p className="v2-jr-found" role="status">
+                  <span>
                     {day && `${formatDate(`${day}T12:00:00+07:00`, isEnglish)} · `}
                     {L({ th: `พบ ${filtered.length} รายการ`, en: `${filtered.length} found` })}
                   </span>
-                  <button type="button" onClick={clearFilters} className="tap-overlay-y min-h-[44px] px-2 text-gold-ink font-semibold cursor-pointer">
-                    {L({ th: "ล้างตัวกรอง", en: "Clear filters" })}
+                  <button type="button" onClick={clearFilters}>
+                    {L({ th: "ล้าง", en: "Clear" })}
                   </button>
-                </div>
+                </p>
               )}
             </div>
+          )}
 
-            <div className="space-y-3">
-              {filtered.map((r) => (
-                <JournalEntryCard
-                  key={r.id}
-                  item={r}
-                  isEnglish={isEnglish}
-                  isMember={isMember}
-                  knownTags={knownTags}
-                  onPatch={onPatch}
-                  onDelete={onDelete}
-                  onTagClick={(t) => setTagFilter(t)}
-                  defaultOpen={focusEntry === r.id}
-                />
-              ))}
-              {filtered.length === 0 && (
-                <p className="text-center text-sm text-muted font-serif-th py-6">{L({ th: "ไม่พบบันทึกที่ตรงกับตัวกรอง", en: "No entries match these filters." })}</p>
-              )}
+          <a href={isEnglish ? "/en" : "/"} className="ui2-btn v2-jr-new">
+            {L({ th: "เปิดไพ่เรื่องใหม่", en: "New reading" })}
+          </a>
+
+          {!sessionLoading && !isMember && (
+            <p className="v2-jr-guest">
+              {L({
+                th: "สมุดเล่มนี้อยู่ในเครื่องนี้เท่านั้น (สูงสุด 50 รายการ) เข้าสู่ระบบเพื่อเก็บไว้ทุกเครื่อง",
+                en: "This journal lives on this device only (up to 50 entries). Sign in to keep it across devices.",
+              })}{" "}
+              <a href={isEnglish ? "/en/account" : "/account"}>{L({ th: "เข้าสู่ระบบ", en: "Sign in" })}</a>
+            </p>
+          )}
+        </aside>
+
+        {/* หน้ากระดาษ */}
+        <div className="v2-jr-pages">
+          {!loaded && items.length === 0 ? (
+            <p className="v2-jr-opening" role="status">
+              {L({ th: "กำลังเปิดสมุด…", en: "Opening your journal…" })}
+            </p>
+          ) : items.length === 0 ? (
+            <div className="v2-jr-blank">
+              <p className="v2-jr-blank-k">{L({ th: "หน้าแรก", en: "Page one" })}</p>
+              <h2 className="tp">{L({ th: "สมุดยังว่างอยู่ รอคำถามแรกของคุณ", en: "Your journal is empty, waiting for your first question" })}</h2>
+              <p>
+                {L({
+                  th: "เปิดไพ่เรื่องไหนก็ได้ คำอ่านจะถูกเก็บไว้ที่นี่ให้กลับมาจดผลจริงทีหลัง",
+                  en: "Do any reading and it lands here, ready for you to note what really happened later.",
+                })}
+              </p>
+              <div className="v2-jr-blank-cta">
+                <a href={isEnglish ? "/en" : "/"} className="ui2-btn">
+                  {L({ th: "เปิดไพ่เรื่องแรก", en: "Do your first reading" })}
+                </a>
+                <a href={isEnglish ? "/en/daily" : "/daily"} className="ui2-btn-ghost">
+                  {L({ th: "เริ่มพิธีเช้า 2 นาที", en: "Start the 2-minute morning ritual" })}
+                </a>
+              </div>
             </div>
-          </div>
-
-          <div id="journal-panel-calendar" role="tabpanel" aria-labelledby="journal-tab-calendar" hidden={view !== "calendar"}>
-            {view === "calendar" && (
-              <JournalCalendar
-                items={items}
-                isEnglish={isEnglish}
-                onPickDay={(k) => {
-                  clearFilters();
-                  setDay(k);
-                  chooseView("list");
-                }}
-              />
-            )}
-          </div>
-
-          <div id="journal-panel-stories" role="tabpanel" aria-labelledby="journal-tab-stories" hidden={view !== "stories"}>
-            {view === "stories" && (
-              <JournalThreads
-                isEnglish={isEnglish}
-                isMember={isMember}
-                initialThreadId={initialThread}
-                knownTags={knownTags}
-                onPatch={onPatch}
-                onDelete={onDelete}
-                renderReflection={(threadId) => (
-                  <ReflectionPanel
-                    scope={{ threadId }}
-                    isEnglish={isEnglish}
-                    onOpenEntry={(id) => document.getElementById(`entry-${id}`)?.scrollIntoView({ behavior: smoothScrollBehavior(), block: "start" })}
-                  />
+          ) : (
+            <>
+              <div id="journal-panel-list" role="tabpanel" aria-labelledby="journal-tab-list" hidden={view !== "list"}>
+                {pinned.length > 0 && (
+                  <section className="v2-jr-month" aria-label={L({ th: "ปักหมุดไว้", en: "Pinned" })}>
+                    <h2 className="v2-jr-month-h">{L({ th: "ปักหมุดไว้", en: "Pinned" })}</h2>
+                    <ol className="v2-jr-list">{pinned.map(renderEntry)}</ol>
+                  </section>
                 )}
-              />
-            )}
-          </div>
+                {months.map((m) => (
+                  <section key={m.key} className="v2-jr-month" aria-label={m.label}>
+                    <h2 className="v2-jr-month-h">
+                      {m.label}
+                      <span>{L({ th: `${m.rows.length} บันทึก`, en: `${m.rows.length} entries` })}</span>
+                    </h2>
+                    <ol className="v2-jr-list">{m.rows.map(renderEntry)}</ol>
+                  </section>
+                ))}
+                {filtered.length === 0 && (
+                  <p className="v2-jr-opening">{L({ th: "ไม่พบบันทึกที่ตรงกับตัวกรอง", en: "No entries match these filters." })}</p>
+                )}
+              </div>
 
-          <div id="journal-panel-overview" role="tabpanel" aria-labelledby="journal-tab-overview" hidden={view !== "overview"}>
-            {view === "overview" && (
-              <div className="space-y-5">
-                {isMember && (
-                  <ReflectionPanel
-                    scope={{ days: 90 }}
+              <div id="journal-panel-calendar" role="tabpanel" aria-labelledby="journal-tab-calendar" hidden={view !== "calendar"}>
+                {view === "calendar" && (
+                  <JournalCalendar
+                    items={items}
                     isEnglish={isEnglish}
-                    onOpenEntry={(id) => {
+                    onPickDay={(k) => {
                       clearFilters();
-                      setFocusEntry(id);
+                      setDay(k);
                       chooseView("list");
                     }}
                   />
                 )}
-                <JournalOverview items={items} isEnglish={isEnglish} isMember={isMember} />
-                <AppSettingsCard isEnglish={isEnglish} isMember={isMember} />
               </div>
-            )}
-          </div>
-        </>
-      )}
+
+              <div id="journal-panel-stories" role="tabpanel" aria-labelledby="journal-tab-stories" hidden={view !== "stories"}>
+                {view === "stories" && (
+                  <JournalThreads
+                    isEnglish={isEnglish}
+                    isMember={isMember}
+                    initialThreadId={initialThread}
+                    knownTags={knownTags}
+                    onPatch={onPatch}
+                    onDelete={onDelete}
+                    renderReflection={(threadId) => (
+                      <ReflectionPanel
+                        scope={{ threadId }}
+                        isEnglish={isEnglish}
+                        onOpenEntry={(id) => document.getElementById(`entry-${id}`)?.scrollIntoView({ behavior: smoothScrollBehavior(), block: "start" })}
+                      />
+                    )}
+                  />
+                )}
+              </div>
+
+              <div id="journal-panel-overview" role="tabpanel" aria-labelledby="journal-tab-overview" hidden={view !== "overview"}>
+                {view === "overview" && (
+                  <div className="space-y-5">
+                    {isMember && (
+                      <ReflectionPanel
+                        scope={{ days: 90 }}
+                        isEnglish={isEnglish}
+                        onOpenEntry={(id) => {
+                          clearFilters();
+                          setFocusEntry(id);
+                          chooseView("list");
+                        }}
+                      />
+                    )}
+                    <JournalOverview items={items} isEnglish={isEnglish} isMember={isMember} />
+                    <AppSettingsCard isEnglish={isEnglish} isMember={isMember} />
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </main>
   );
 }
