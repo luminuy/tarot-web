@@ -66,6 +66,68 @@
 .ui2-sp-lede {
   max-width: 600px;
   text-wrap: balance;
+  color: var(--ui2-on-night-soft);
+}
+/* ปุ่มหลักทอง + ปุ่มรองกระจก เรียงแถวเดียว (มือถือซ้อนเต็มกว้าง) */
+.ui2-sp-hero-ctas {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
+  max-width: 340px;
+  margin-top: 10px;
+}
+.ui2-sp .ui2-sp-cta {
+  color: var(--ui2-night);
+  background: var(--ui2-gold-solid);
+  box-shadow: 0 14px 34px -14px rgba(255, 217, 143, 0.55), 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+  transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.ui2-sp .ui2-sp-cta .ui2-btn-arrow {
+  border-color: var(--ui2-night);
+}
+.ui2-sp .ui2-sp-cta:active {
+  transform: scale(0.97);
+}
+@media (hover: hover) {
+  .ui2-sp .ui2-sp-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px -14px rgba(255, 217, 143, 0.7), 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+  }
+}
+.ui2-sp .ui2-sp-create {
+  min-height: 52px;
+  padding: 0 24px;
+  background: rgba(246, 238, 226, 0.06);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+}
+.ui2-sp-unsure {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ui2-on-night-dim);
+  text-wrap: balance;
+}
+.ui2-sp-unsure strong {
+  font-weight: 600;
+  color: var(--ui2-on-night-soft);
+}
+/* แถวความน่าเชื่อถือ — ตัวเล็ก คั่นด้วยเครื่องหมายทอง */
+.ui2-sp-trust {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 20px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  color: var(--ui2-on-night-dim);
+}
+.ui2-sp-trust li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 .ui2-sp-jump {
   display: flex;
@@ -111,30 +173,11 @@
   transform: scale(0.97);
 }
 .ui2-sp-jump-link:focus-visible,
-.ui2-sp-create:focus-visible,
 .ui2-sp-crumb a:focus-visible,
 .ui2-sp-dir-link:focus-visible {
   outline: 2px solid var(--ui2-gold-solid);
   outline-offset: 3px;
 }
-.ui2-sp-create {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 44px;
-  font-size: 14px;
-  color: var(--ui2-gold-solid);
-  text-decoration: underline;
-  text-decoration-color: rgba(255, 217, 143, 0.4);
-  text-underline-offset: 5px;
-}
-.ui2-sp-create .ui2-btn-arrow {
-  width: 7px;
-  height: 7px;
-  border-top-width: 1.6px;
-  border-right-width: 1.6px;
-}
-
 /* ไพ่คว่ำตกแต่งข้างหัวข้อ — lite เห็น 2 ใบนิ่งที่มุม (ใบอื่นมีเฉพาะระดับ full) */
 .ui2-sp-deco {
   position: absolute;
@@ -452,31 +495,6 @@
 }
 
 /* ── ยังเลือกไม่ได้ ───────────────────────────────────────────────────────── */
-.ui2-sp-unsure-pill {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  max-width: 720px;
-  margin: 6px auto 0;
-  padding: 16px 16px;
-  border-radius: 26px;
-  text-align: center;
-  font-size: 15px;
-  line-height: 1.6;
-  color: var(--ui2-on-night-soft);
-  background: var(--ui2-glass-night-solid);
-  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
-}
-.ui2-sp-unsure-pill strong {
-  font-weight: 600;
-  color: var(--ui2-on-night);
-}
-.ui2-sp-unsure-pill .ui2-btn {
-  isolation: isolate;
-}
-
 /* ── สารบัญ (07) · แยกตามเรื่อง (08) · ทางลัด (09) ──────────────────────────
    เจ้าของ "ทำทั้ง 4 เลยขอสวยๆ" — ป้ายเลขแบบหมวดผัง · เส้นทองคั่น · สารบัญ 6 กลุ่มสีหมวด · การ์ดภาพไพ่ · กล่องทางลัดใหญ่ */
 .ui2-sp-dir {
@@ -1000,7 +1018,17 @@ html:has(.ui2-spread-pop[open]) {
     gap: 14px;
   }
   .ui2-sp-h1 {
-    font-size: 48px;
+    font-size: 50px;
+  }
+  .ui2-sp-hero-ctas {
+    flex-direction: row;
+    justify-content: center;
+    width: auto;
+    max-width: none;
+    margin-top: 14px;
+  }
+  .ui2-sp-trust {
+    margin-top: 14px;
   }
   .ui2-sp-shelf-head {
     flex-direction: row;
@@ -1038,13 +1066,6 @@ html:has(.ui2-spread-pop[open]) {
   .ui2-sc-slot .ui2-spread-card,
   .ui2-sc-slot:nth-child(n) .ui2-spread-card {
     --tilt: calc(var(--a) * 0.5);
-  }
-  .ui2-sp-unsure-pill {
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 10px 10px 10px 26px;
-    border-radius: 999px;
-    text-align: left;
   }
   .ui2-sp-dir-groups,
   .ui2-sp-topics {
@@ -1096,7 +1117,13 @@ html:has(.ui2-spread-pop[open]) {
 }
 @media (min-width: 1024px) {
   .ui2-sp-h1 {
-    font-size: 56px;
+    font-size: clamp(48px, 4.3vw, 62px);
+    letter-spacing: -0.025em;
+  }
+  .ui2-sp-hero-inner {
+    gap: 16px;
+    padding-top: 72px;
+    padding-bottom: 28px;
   }
   /* คอม: ไพ่กระจายอิสระตามตารางใน spread-shelves.ts · ขนาดไพ่ย่อตามจอจนถึง 196px (จอ 1024 ไพ่ 6 ใบไม่ทับชื่อกัน) */
   .ui2-sp-table {

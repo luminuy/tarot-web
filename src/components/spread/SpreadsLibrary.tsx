@@ -53,16 +53,30 @@ const DECO_CARDS = [
   "major-20",
 ] as const;
 
-const DECO_SIZES = "(min-width: 768px) 80px, 44px";
+const DECO_SIZES = "(min-width: 768px) 128px, 44px";
 
 /** ไพ่ 4 ใบแทรกกลางหัวข้อโชว์เคส — ไม่ซ้ำกับไพ่ลอยหัวหน้า */
 const INLINE_FAN = ["major-02", "major-06", "major-11", "major-21"] as const;
 
 /** ข้อความชิปหัวหน้า — อยู่นอกบล็อกหัวหน้าเพราะมีปี "1909" (ด่าน test-spreads ห้ามเลข 2 หลักในบล็อกหัวหน้า) */
-const HERO_CHIP = {
-  th: "สำรับ 1909 แท้ · ทุกผังสุ่มจริง ตรวจสอบได้",
-  en: "The true 1909 deck · every spread is truly random and verifiable",
+const HERO_TRUST = {
+  th: ["สำรับ Rider-Waite 1909 แท้", "ทุกผังสุ่มจริง ตรวจสอบได้", "ความหมายครบทุกตำแหน่ง"],
+  en: ["The true 1909 Rider-Waite deck", "Truly random, verifiable draws", "Every position explained"],
 };
+
+/** แถวความน่าเชื่อถือใต้ปุ่มหัวหน้า (แยกคอมโพเนนต์เพราะมีปี "1909" — ด่าน test-spreads ห้ามเลข 2 หลักในบล็อกหัวหน้า) */
+function HeroTrust({ isEnglish }: { isEnglish: boolean }) {
+  return (
+    <ul className="ui2-sp-trust">
+      {(isEnglish ? HERO_TRUST.en : HERO_TRUST.th).map((text) => (
+        <li key={text}>
+          <GoldMark className="ui2-mark" />
+          {text}
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 /** กุญแจเล็กของป้ายผังพิเศษ (SVG เส้น — ห้ามอีโมจิ) */
 function LockGlyph() {
@@ -366,10 +380,6 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
             <span aria-hidden="true"> / </span>
             <span>{isEnglish ? "Tarot Spreads" : `ผังพยากรณ์ ${spreads.length} แบบ`}</span>
           </p>
-          <span className="ui2-chip">
-            <GoldMark className="ui2-mark" />
-            {isEnglish ? HERO_CHIP.en : HERO_CHIP.th}
-          </span>
           <h1 className="ui2-h1 ui2-sp-h1">
             {isEnglish ? (
               <>
@@ -390,30 +400,29 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
               ? "Choose the spread that fits what you want to know — see how the cards are laid out and what each position means."
               : "เลือกผังที่ตรงกับเรื่องที่คุณอยากรู้ พร้อมดูตัวอย่างการจัดวางและความหมายของแต่ละตำแหน่ง"}
           </p>
-          {/* ยังเลือกไม่ได้ ➔ ผัง 3 ใบ (ย้ายขึ้นมาหัวหน้า — คนที่ลังเลเห็นตั้งแต่จอแรก) */}
-          <div className="ui2-sp-unsure-pill">
-            <p>
-              {isEnglish ? (
-                <>
-                  Not sure yet? <strong>Past · Present · Future</strong> works for any question
-                </>
-              ) : (
-                <>
-                  ยังเลือกไม่ได้? ผัง <strong>อดีต-ปัจจุบัน-อนาคต</strong> ถามได้ทุกเรื่อง
-                </>
-              )}
-            </p>
-            <Link href="/read/three-card" prefetch={false} className="ui2-btn">
-              <span className="ui2-btn-ring ui2-loop" aria-hidden="true" />
+          {/* ปุ่มหลัก + ปุ่มรอง เรียงแถวเดียว (มาตรฐานหัวหน้าเว็บ) · คนที่ลังเลอ่านบรรทัดใต้ปุ่ม */}
+          <div className="ui2-sp-hero-ctas">
+            <Link href="/read/three-card" prefetch={false} className="ui2-btn ui2-sp-cta">
               {isEnglish ? "Start with 3 cards" : "เริ่มด้วยไพ่ 3 ใบ"}
               <span className="ui2-btn-arrow" aria-hidden="true" />
             </Link>
+            {/* ห้องออกแบบผัง (REFLECTION_JOURNAL_PLAN 1.8) — ทางเข้าเดียวจากคลังผัง */}
+            <Link href="/spreads/create" className="ui2-btn-ghost ui2-sp-create">
+              {isEnglish ? "Design your own spread" : "ออกแบบผังของคุณเอง"}
+            </Link>
           </div>
-          {/* ห้องออกแบบผัง (REFLECTION_JOURNAL_PLAN 1.8) — ทางเข้าเดียวจากคลังผัง */}
-          <Link href="/spreads/create" className="ui2-sp-create">
-            {isEnglish ? "Or design your own spread" : "หรือออกแบบผังของคุณเอง"}
-            <span className="ui2-btn-arrow" aria-hidden="true" />
-          </Link>
+          <p className="ui2-sp-unsure">
+            {isEnglish ? (
+              <>
+                Not sure yet? <strong>Past · Present · Future</strong> works for any question
+              </>
+            ) : (
+              <>
+                ยังเลือกไม่ได้? ผัง <strong>อดีต-ปัจจุบัน-อนาคต</strong> ถามได้ทุกเรื่อง
+              </>
+            )}
+          </p>
+          <HeroTrust isEnglish={isEnglish} />
         </div>
       </section>
       {/* Category Tabs with Editorial Styling — (ชื่อเดิมของหมายจุด · ตอนนี้คือ 6 หมวดไพ่กระจาย ไม่มีแท็บแล้ว) */}

@@ -45,77 +45,91 @@
     display: block;
     animation: ui2-sp-bob var(--bob, 8s) ease-in-out var(--delay, 0s) infinite;
   }
+  /* จัดเป็น 2 แนวต่อข้างแบบหัวหน้า fastwork (ไพ่ใหญ่ใกล้ขอบ · ใบเล็กลึกเข้าด้านใน) — เจ้าของ 2026-10-16 "ให้ได้มาตรฐานกว่านี้"
+     ขนาดตามความกว้างจอ ไม่ล้นขอบจอ · ใบลึกเบลอเล็กน้อยให้มีระยะ */
   [data-fx="full"] .ui2-sp-deco-1 {
-    --w: 78px;
-    --r: -13deg;
+    --w: clamp(84px, 9.2vw, 136px);
+    --r: -9deg;
     --bob: 8s;
-    left: 2%;
-    top: 70px;
+    left: 2.5%;
+    top: 64px;
   }
   [data-fx="full"] .ui2-sp-deco-2 {
-    --w: 60px;
-    --r: 9deg;
+    --w: clamp(70px, 7.4vw, 108px);
+    --r: 7deg;
     --bob: 9s;
     --delay: -2s;
-    left: 12%;
-    top: 230px;
+    left: 4%;
+    top: 330px;
     right: auto;
   }
   [data-fx="full"] .ui2-sp-deco-3 {
-    --w: 46px;
+    --w: clamp(56px, 5.4vw, 80px);
     --r: -4deg;
     --bob: 10s;
     --delay: -5s;
-    left: 7%;
-    top: 380px;
-    opacity: 0.7;
-    filter: blur(1.6px);
+    opacity: 0.75;
+    filter: blur(1.2px);
+    left: 11.5%;
+    top: 470px;
+    right: auto;
   }
   [data-fx="full"] .ui2-sp-deco-4 {
-    --w: 42px;
-    --r: 16deg;
+    --w: clamp(48px, 4.4vw, 64px);
+    --r: 14deg;
     --bob: 7.5s;
     --delay: -1s;
-    left: 19%;
-    top: 40px;
-    opacity: 0.7;
-    filter: blur(1.6px);
+    opacity: 0.6;
+    filter: blur(2px);
+    left: 13%;
+    top: 16px;
+    right: auto;
   }
   [data-fx="full"] .ui2-sp-deco-5 {
-    --w: 80px;
-    --r: 12deg;
+    --w: clamp(84px, 9.2vw, 136px);
+    --r: 10deg;
     --bob: 8.5s;
     --delay: -3s;
-    right: 2%;
-    top: 90px;
+    right: 2.5%;
+    top: 84px;
   }
   [data-fx="full"] .ui2-sp-deco-6 {
-    --w: 58px;
-    --r: -8deg;
+    --w: clamp(70px, 7.4vw, 108px);
+    --r: -7deg;
     --bob: 9.5s;
     --delay: -4s;
-    right: 13%;
-    top: 250px;
+    right: 4.5%;
+    top: 350px;
   }
   [data-fx="full"] .ui2-sp-deco-7 {
-    --w: 44px;
+    --w: clamp(56px, 5.4vw, 80px);
     --r: 5deg;
     --bob: 10.5s;
     --delay: -6s;
-    right: 6%;
-    top: 400px;
-    opacity: 0.7;
-    filter: blur(1.6px);
+    opacity: 0.75;
+    filter: blur(1.2px);
+    right: 11.5%;
+    top: 24px;
   }
   [data-fx="full"] .ui2-sp-deco-8 {
-    --w: 40px;
-    --r: -15deg;
+    --w: clamp(48px, 4.4vw, 64px);
+    --r: -13deg;
     --bob: 7s;
     --delay: -2.5s;
-    right: 20%;
-    top: 36px;
-    opacity: 0.7;
-    filter: blur(1.6px);
+    opacity: 0.6;
+    filter: blur(2px);
+    right: 13%;
+    top: 480px;
+  }
+
+  /* ใบเล็กแนวใน: เฉพาะจอกว้างพอที่ไม่ชนหัวข้อ */
+  @media (max-width: 1279px) {
+    [data-fx="full"] .ui2-sp-deco-3,
+    [data-fx="full"] .ui2-sp-deco-4,
+    [data-fx="full"] .ui2-sp-deco-7,
+    [data-fx="full"] .ui2-sp-deco-8 {
+      display: none;
+    }
   }
 
   /* ไพ่ผังลอยขึ้นลงเบา ๆ บนโต๊ะ (ลอยที่ช่อง · ยก/ตั้งตรงที่ตัวไพ่ จึงไม่ชนกัน) */
