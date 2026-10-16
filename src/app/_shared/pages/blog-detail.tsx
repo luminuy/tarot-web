@@ -178,7 +178,7 @@ export function BlogDetailContent({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdFaq) }} />
       )}
 
-      <div className="max-w-4xl mx-auto space-y-8 pb-20">{reader}</div>
+      <div className="max-w-6xl mx-auto space-y-8 pb-20">{reader}</div>
     </main>
   );
 }

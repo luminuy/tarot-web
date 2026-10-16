@@ -13,7 +13,7 @@ import {
 import { COUNTS } from "@/components/layout/nav-links";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases, thaiPhrasesHtml } from "@/components/ui/ThaiPhrases";
-import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
 
 interface Props {
   article: Article;
@@ -43,247 +43,167 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
   const effectiveToc = isEnglish && article.tocEn && article.tocEn.length > 0 ? article.tocEn : article.toc;
   const effectiveFaqs = isEnglish && article.faqsEn && article.faqsEn.length > 0 ? article.faqsEn : article.faqs;
 
+  const tocList = effectiveToc && effectiveToc.length > 0 && (
+    <ol className="v2-ar-toc-list">
+      {effectiveToc.map((item, idx) => {
+        /* 🔢 เลขข้อต้องมีชั้นเดียว (INC-0214) — ชื่อหัวข้อบางบทความมีเลขนำหน้าอยู่แล้ว */
+        const { marker, label } = splitTocNumber(item.title, idx + 1);
+        return (
+          <li key={item.id}>
+            <span className="v2-ar-toc-n shrink-0">{marker}.</span>
+            <a href={`#${item.id}`}>{label}</a>
+          </li>
+        );
+      })}
+    </ol>
+  );
+
+  /*
+   * v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — ห้องอ่านหนังสือ
+   * หัวบทความแบบหน้าแรกของบทในนิตยสาร (หมวด · เวลาอ่าน · ผู้เขียน · ชื่อใหญ่ · คำโปรย)
+   * คอม: สารบัญติดจอซ้าย + คอลัมน์อ่านกว้างพอดีตา 17px (v1 ตัวหนังสือ 13–14px เต็มความกว้าง)
+   * มือถือ: สารบัญพับได้ใต้หัวบทความ
+   * ⚠️ หน้านี้ไม่ hydrate — ปุ่มคัดลอกลิงก์ใช้ `astro/scripts/article-share.ts` (คงตะขอ data-article-share / data-copy-link)
+   */
   return (
-    <div className="space-y-10">
-      {/* Top Breadcrumb Navigation */}
-      <nav
-        aria-label="Breadcrumb"
-        className="flex items-center gap-2 text-xs font-serif-th text-muted border-b border-line/40 pb-4 overflow-x-auto whitespace-nowrap"
-      >
-        <Link href="/" className="hover:text-gold-ink transition-colors">
-          {isEnglish ? "Home" : "หน้าแรก"}
-        </Link>
-        <span>/</span>
-        <Link href="/blog" className="hover:text-gold-ink transition-colors">
-          {isEnglish ? "Wisdom Codex" : "คัมภีร์บทความ"}
-        </Link>
-        <span>/</span>
-        <span className="text-ink truncate font-bold">{articleCat}</span>
-      </nav>
-
-      {/* Article Header */}
-      {/* หัวบทความ UI 2.0 (เจ้าของ 2026-10-16) — ข้อความเดิม */}
-      <Ui2PageHero
-        compact
-        title={articleTitle}
-        lede={articleDesc}
-        trust={[articleCat, isEnglish ? `${readTimeFormatted}` : `เวลาอ่าน ${article.readTime}`, isEnglish ? `By ${articleAuthor}` : `โดย ${article.author}`]}
-        cards={["major-02", "major-17", "major-09", "major-21"]}
-      />
-
-      {/* Table of Contents (TOC) */}
-      {effectiveToc && effectiveToc.length > 0 && (
-        <div className="altar-card-porcelain !rounded-xl p-5 sm:p-6 space-y-3">
-          <div className="flex items-center gap-2 text-xs font-serif-th font-bold text-ink">
-            
-            {isEnglish
-              ? "Table of Contents (Wisdom Codex)"
-              : "สารบัญคัมภีร์ความรู้ (Table of Contents)"}
-          </div>
-          <ul className="space-y-2 text-xs sm:text-sm font-serif-th text-ink">
-            {effectiveToc.map((item, idx) => {
-              /*
-               * 🔢 เลขข้อต้องมีชั้นเดียว (INC-0214)
-               * ชื่อหัวข้อของบางบทความเขียนเลขนำหน้ามาด้วย ("1. แก่นแท้ของความรัก…")
-               * ถ้าเรนเดอร์ `idx + 1` ทับไปอีกชั้น ผู้ใช้จะเห็น "1. 1. แก่นแท้…"
-               */
-              const { marker, label } = splitTocNumber(item.title, idx + 1);
-              return (
-                <li key={item.id} className="flex items-start gap-2">
-                  {/*
-                    ⛔ `shrink-0` ห้ามหาย — ไม่งั้นเลขข้อถูกบีบจนจุดตกไปอยู่บรรทัดใหม่
-                    (เห็นเป็น "3" บรรทัดหนึ่ง "." อีกบรรทัดหนึ่ง เฉพาะข้อที่ชื่อยาวสองบรรทัด)
-                    เป็นอาการเดียวกับ INC-0211 ที่ลายน้ำการ์ดแชร์ถูกบีบจนตัดกลางคำ
-                  */}
-                  <span className="shrink-0 tabular-nums text-gold-ink font-mono text-xs font-bold">
-                    {marker}.
-                  </span>
-                  <a href={`#${item.id}`} className="hover:text-gold-ink hover:underline transition-colors">
-                    {label}
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
-
-      {/* Target Card Highlight Box if available */}
-      {article.targetCardId && article.cardNameTh && (
-        <div className="altar-card-porcelain !rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="space-y-1 text-center sm:text-left">
-            <div className="text-[13px] font-mono text-gold-ink font-bold">
-              {isEnglish ? "Explore this card in the 78-Card Encyclopedia" : "สำรวจไพ่ใบนี้ในสารานุกรม 78 ใบ"}
-            </div>
-            <div className="font-serif-th font-bold text-base text-ink">
-              {isEnglish
-                ? `Card: ${article.targetCardId.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())} (1909 Rider-Waite)`
-                : `ไพ่ ${article.cardNameTh} (1909 Rider-Waite)`}
-            </div>
-            <p className="text-xs text-muted font-serif-th">
-              {isEnglish
-                ? "View full 1909 artwork, 5-dimensional archetypal interpretations, and spread positions."
-                : "ดูภาพขยาย 1909 ความหมายลึกซึ้ง 5 ด้าน และตำแหน่งในผังพยากรณ์"}
-            </p>
-          </div>
-          <Link
-            href={`/cards/${article.targetCardId}`}
-            className="glass-chip shrink-0 px-4 py-2 text-ink hover:text-gold-ink text-xs font-serif-th font-bold transition"
-          >
-            {isEnglish ? "View 78-Card Details →" : "เปิดดูรายละเอียดไพ่ 78 ใบ →"}
-          </Link>
-        </div>
-      )}
-
-      {/* Main Content Body */}
-      <article className="prose prose-stone max-w-none font-serif-th text-xs sm:text-sm leading-relaxed text-ink space-y-6">
-        <div
-          dangerouslySetInnerHTML={{
-            __html: effectiveContent
-              // หัวข้อในเนื้อบทความห่อวลีด้วย `.tp` ด้วย — ไม่งั้น "เซลติกค / รอส" หักกลางคำ (ดู ThaiPhrases.tsx)
-              .replace(
-                /## (.*?)\n/g,
-                (_m, t: string) =>
-                  `<h2 class="text-lg sm:text-2xl font-bold text-ink mt-8 mb-4 border-b border-line/40 pb-2"><ThaiPhrases>${thaiPhrasesHtml(t)}</ThaiPhrases></h2>`
-              )
-              .replace(
-                /### (.*?)\n/g,
-                (_m, t: string) => `<h3 class="text-base sm:text-xl font-bold text-ink mt-6 mb-3"><ThaiPhrases>${thaiPhrasesHtml(t)}</ThaiPhrases></h3>`
-              )
-              .replace(/\*\*(.*?)\*\*/g, '<strong class="text-ink font-semibold">$1</strong>')
-              .replace(/\*(.*?)\*/g, '<em class="text-gold-ink font-medium">$1</em>')
-              .replace(/- (.*?)\n/g, '<li class="ml-4 list-disc text-ink my-1">$1</li>')
-              .replace(/\n\n/g, '<p class="my-4 leading-relaxed text-ink"></p>')
-              .replace(/---/g, '<hr class="border-line/40 my-6" />'),
-          }}
+    <div className="v2-ar">
+      <header className="v2-ar-head">
+        <Ui2Crumbs
+          crumbs={[
+            { label: isEnglish ? "Home" : "หน้าแรก", href: "/" },
+            { label: isEnglish ? "Wisdom Codex" : "คัมภีร์บทความ", href: "/blog" },
+            { label: articleCat },
+          ]}
         />
-      </article>
-
-      {/* FAQ Section with Accordion */}
-      {effectiveFaqs && effectiveFaqs.length > 0 && (
-        <section className="page-band page-band-tint space-y-4">
-          <h2 className="flex items-center gap-2 text-sm sm:text-base font-serif-th font-bold text-ink">
-            
-            {isEnglish ? "Frequently Asked Questions (FAQ)" : "คำถามที่พบบ่อย (FAQ)"}
-          </h2>
-          {/* ใช้ <details> ของเบราว์เซอร์ เพื่อให้ "คำตอบ" อยู่ใน HTML ตั้งแต่ฝั่งเซิร์ฟเวอร์เสมอ
-              หน้านี้ประกาศ FAQPage JSON-LD ที่มีทั้งคำถามและคำตอบไว้ ถ้าคำตอบโผล่เฉพาะตอนคลิก
-              จะกลายเป็น structured data ที่อ้างถึงข้อความซึ่งไม่มีอยู่บนหน้า */}
-          <div className="space-y-3">
-            {effectiveFaqs.map((faq, idx) => (
-              <details
-                key={idx}
-                className="altar-card-porcelain !rounded-xl group overflow-hidden transition"
-              >
-                <summary className="w-full flex items-center justify-between p-4 text-left font-serif-th text-xs sm:text-sm font-semibold text-ink hover:text-gold-ink transition-colors gap-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-                  <span>{faq.question}</span>
-                  <span
-                    aria-hidden="true"
-                    className="text-gold-ink font-mono text-sm font-bold transition-transform duration-300 group-open:rotate-45"
-                  >
-                    +
-                  </span>
-                </summary>
-                <div className="p-4 pt-0 text-xs font-serif-th text-ink leading-relaxed border-t border-line/40 bg-inset">
-                  {faq.answer}
-                </div>
-              </details>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* High-Impact Interactive CTA Box */}
-      <div className="altar-card-porcelain !rounded-xl p-6 sm:p-8 text-center space-y-4 relative overflow-hidden">
-        <div className="glass-chip inline-flex items-center gap-2 px-3 py-1 text-[13px] text-gold-ink font-serif-th font-bold">
-          {isEnglish ? "Draw your own cards · verifiable shuffle" : "เปิดไพ่ด้วยมือคุณเอง · สุ่มจริง ตรวจสอบได้"}
-        </div>
-        <h2 className="font-serif-th text-xl sm:text-3xl font-bold text-ink"><ThaiPhrases>
-          {isEnglish
-            ? "Ready to Reveal the Hidden Wisdom of Your Path?"
-            : "พร้อมเปิดไพ่ รับคำตอบสำหรับชีวิตคุณหรือยัง?"}
-        </ThaiPhrases></h2>
-        <p className="text-xs sm:text-sm text-muted font-serif-th max-w-lg mx-auto leading-relaxed">
-          {isEnglish
-            ? "Experience 3D tactile card shuffling and draw with free will from the complete 78-card Rider-Waite deck, illuminated by provably-fair cryptography and deep archetypal guidance 24/7."
-            : "สัมผัสประสบการณ์สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยตัวคุณเองแบบ 3D พร้อมรับคำพยากรณ์เจาะลึกจากแม่หมอ AI ตลอด 24 ชั่วโมง"}
+        <p className="v2-ar-kicker">
+          <span>{articleCat}</span>
+          <span aria-hidden="true" className="v2-ar-dot" />
+          <span>{isEnglish ? readTimeFormatted : `เวลาอ่าน ${article.readTime}`}</span>
+          <span aria-hidden="true" className="v2-ar-dot" />
+          <span>{isEnglish ? `By ${articleAuthor}` : `โดย ${article.author}`}</span>
         </p>
-        <div className="pt-2">
-          <Link
-            href="/"
-            className="btn-gold-glass inline-flex items-center gap-2 px-7 py-3.5 font-bold text-sm hover:scale-[1.02] font-serif-th cursor-pointer"
+        <h1 className="v2-ar-title">
+          <ThaiPhrases>{articleTitle}</ThaiPhrases>
+        </h1>
+        <p className="v2-ar-stand">
+          <ThaiPhrases>{articleDesc}</ThaiPhrases>
+        </p>
+      </header>
+
+      <div className="v2-ar-layout">
+        <aside className="v2-ar-aside">
+          {tocList && (
+            <details className="v2-ar-toc" open>
+              <summary>{isEnglish ? "Table of Contents" : "สารบัญ"}</summary>
+              {tocList}
+            </details>
+          )}
+          {article.targetCardId && article.cardNameTh && (
+            <Link href={`/cards/${article.targetCardId}`} className="v2-ar-cardlink">
+              <span className="v2-ar-cardlink-k">
+                {isEnglish ? "Explore this card in the 78-Card Encyclopedia" : "สำรวจไพ่ใบนี้ในสารานุกรม 78 ใบ"}
+              </span>
+              <b>
+                {isEnglish
+                  ? `${article.targetCardId.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())} (1909 Rider-Waite)`
+                  : `ไพ่ ${article.cardNameTh} (1909 Rider-Waite)`}
+              </b>
+              <small>
+                {isEnglish
+                  ? "Full 1909 artwork, 5-dimensional meanings and spread positions."
+                  : "ดูภาพขยาย 1909 ความหมายลึกซึ้ง 5 ด้าน และตำแหน่งในผังพยากรณ์"}
+              </small>
+            </Link>
+          )}
+        </aside>
+
+        <div className="v2-ar-main">
+          <article className="v2-ar-body">
+            <div
+              dangerouslySetInnerHTML={{
+                __html: effectiveContent
+                  // หัวข้อในเนื้อบทความห่อวลีด้วย `.tp` — ไม่งั้นหัวข้อหักกลางคำ
+                  .replace(/## (.*?)\n/g, (_m, t: string) => `<h2>${thaiPhrasesHtml(t)}</h2>`)
+                  .replace(/### (.*?)\n/g, (_m, t: string) => `<h3>${thaiPhrasesHtml(t)}</h3>`)
+                  .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                  .replace(/\*(.*?)\*/g, "<em>$1</em>")
+                  .replace(/- (.*?)\n/g, "<li>$1</li>")
+                  .replace(/\n\n/g, '<p class="v2-ar-gap"></p>')
+                  .replace(/---/g, "<hr />"),
+              }}
+            />
+          </article>
+
+          {effectiveFaqs && effectiveFaqs.length > 0 && (
+            <section className="v2-ar-faq" aria-labelledby="ar-faq-h">
+              <h2 id="ar-faq-h">{isEnglish ? "Frequently Asked Questions (FAQ)" : "คำถามที่พบบ่อย (FAQ)"}</h2>
+              {/* <details> ของเบราว์เซอร์ — คำตอบอยู่ใน HTML ตั้งแต่ฝั่งเซิร์ฟเวอร์ (ตรงกับ FAQPage JSON-LD) */}
+              {effectiveFaqs.map((faq, idx) => (
+                <details key={idx}>
+                  <summary>{faq.question}</summary>
+                  <p>{faq.answer}</p>
+                </details>
+              ))}
+            </section>
+          )}
+
+          <div
+            className="v2-ar-share"
+            data-article-share=""
+            data-article-slug={article.slug}
+            /* ⚠️ ต้องเป็นภาษาของหน้าเสมอ — กันอักษรไทยหลุดเข้า HTML หน้าอังกฤษ */
+            data-article-title={articleTitle}
+            data-article-category={articleCat}
           >
-            <span>{isEnglish ? "Begin Free Tarot Reading Now" : "เปิดไพ่ทำนายดวงชะตาฟรีทันที"}</span>
-            <span>→</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* Share / Copy Link Toolbar */}
-      <div
-        className="flex flex-wrap items-center justify-between gap-4 py-4 border-y border-line/40 text-xs font-serif-th"
-        data-article-share=""
-        data-article-slug={article.slug}
-        /* ⚠️ ต้องเป็นภาษาของหน้าเสมอ — ส่ง `article.title` (ไทย) ตรง ๆ จะทำให้อักษรไทย
-           หลุดเข้า HTML ของหน้าอังกฤษ และด่านภาษาอังกฤษจะฟ้องทันที (บทเรียนจากหน้าไพ่รายใบ)
-           `slug` เป็นกุญแจกลางที่ไม่ขึ้นกับภาษาอยู่แล้ว รายงานจึงยังรวมสองภาษาได้ */
-        data-article-title={articleTitle}
-        data-article-category={articleCat}
-      >
-        <div className="flex items-center gap-2 text-muted">
-          <span>{isEnglish ? "Share this codex:" : "แชร์คัมภีร์นี้:"}</span>
-          <button
-            type="button"
-            data-copy-link=""
-            data-label-copied={isEnglish ? "Link Copied!" : "คัดลอกลิงก์สำเร็จ!"}
-            data-label-failed={
-              isEnglish ? "Can't copy — press and hold the address bar instead" : "คัดลอกไม่ได้ ลองกดค้างที่แถบที่อยู่แทน"
-            }
-            className="glass-chip tap-overlay-y px-3.5 py-1.5 text-ink hover:text-gold-ink transition-colors flex items-center gap-1.5 cursor-pointer"
-          >
-            <span data-copy-label="" aria-live="polite">{isEnglish ? "Copy Link" : "คัดลอกลิงก์"}</span>
-          </button>
-        </div>
-        <Link href="/blog" className="text-gold-ink hover:underline font-bold">
-          {isEnglish
-            ? `← Back to Wisdom Codex (${COUNTS.articles} articles)`
-            : `← กลับสู่คัมภีร์ทั้งหมด (${COUNTS.articles} บทความ)`}
-        </Link>
-      </div>
-
-      {/* Related Articles Carousel/Grid */}
-      {relatedArticles.length > 0 && (
-        <section className="page-band page-band-tint space-y-4">
-          <h2 className="font-serif-th text-lg sm:text-xl font-bold text-ink"><ThaiPhrases>
-            {isEnglish ? "Resonant & Related Articles" : "คัมภีร์บทความที่เกี่ยวข้อง"}
-          </ThaiPhrases></h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {relatedArticles.map((rel) => {
-              const relTitle = getArticleTitle(rel, locale);
-              const relCat = getArticleCategory(rel, locale);
-              const relReadTime = isEnglish
-                ? rel.readTime.replace("นาที", "min read")
-                : rel.readTime;
-
-              return (
-                <Link
-                  key={rel.slug}
-                  href={`/blog/${rel.slug}`}
-                  className="altar-card-porcelain !rounded-xl p-4 space-y-2 transition group flex flex-col justify-between"
-                >
-                  <div className="space-y-1.5">
-                    <div className="text-[13px] font-mono text-gold-ink font-bold">{relCat}</div>
-                    <h3 className="font-serif-th text-xs sm:text-sm font-bold text-ink group-hover:text-gold-ink transition-colors line-clamp-2"><ThaiPhrases>
-                      {relTitle}
-                    </ThaiPhrases></h3>
-                  </div>
-                  <div className="text-[13px] text-muted font-mono pt-2 border-t border-line/40">
-                    {relReadTime}
-                  </div>
-                </Link>
-              );
-            })}
+            <span>{isEnglish ? "Share this codex:" : "แชร์คัมภีร์นี้:"}</span>
+            <button
+              type="button"
+              data-copy-link=""
+              data-label-copied={isEnglish ? "Link Copied!" : "คัดลอกลิงก์สำเร็จ!"}
+              data-label-failed={isEnglish ? "Can't copy — press and hold the address bar instead" : "คัดลอกไม่ได้ ลองกดค้างที่แถบที่อยู่แทน"}
+              className="v2-ar-copy"
+            >
+              <span data-copy-label="" aria-live="polite">
+                {isEnglish ? "Copy Link" : "คัดลอกลิงก์"}
+              </span>
+            </button>
+            <Link href="/blog" className="v2-ar-back">
+              {isEnglish ? `Back to Wisdom Codex (${COUNTS.articles} articles)` : `กลับสู่คัมภีร์ทั้งหมด (${COUNTS.articles} บทความ)`}
+            </Link>
           </div>
+        </div>
+      </div>
+
+      {/* ชวนเปิดไพ่ */}
+      <section className="v2-ar-cta">
+        <p className="v2-ar-cta-k">{isEnglish ? "Draw your own cards · verifiable shuffle" : "เปิดไพ่ด้วยมือคุณเอง · สุ่มจริง ตรวจสอบได้"}</p>
+        <h2>
+          <ThaiPhrases>{isEnglish ? "Ready to Reveal the Hidden Wisdom of Your Path?" : "พร้อมเปิดไพ่ รับคำตอบสำหรับชีวิตคุณหรือยัง?"}</ThaiPhrases>
+        </h2>
+        <Link href="/" className="ui2-btn v2-ar-go">
+          {isEnglish ? "Begin Free Tarot Reading Now" : "เปิดไพ่ทำนายดวงชะตาฟรีทันที"}
+          <span className="ui2-btn-arrow" aria-hidden="true" />
+        </Link>
+      </section>
+
+      {relatedArticles.length > 0 && (
+        <section className="v2-ar-related" aria-labelledby="ar-rel-h">
+          <h2 id="ar-rel-h">
+            <ThaiPhrases>{isEnglish ? "Resonant & Related Articles" : "คัมภีร์บทความที่เกี่ยวข้อง"}</ThaiPhrases>
+          </h2>
+          <ul>
+            {relatedArticles.map((rel) => (
+              <li key={rel.slug}>
+                <Link href={`/blog/${rel.slug}`}>
+                  <small>{getArticleCategory(rel, locale)}</small>
+                  <b>
+                    <ThaiPhrases>{getArticleTitle(rel, locale)}</ThaiPhrases>
+                  </b>
+                  <span>{isEnglish ? rel.readTime.replace("นาที", "min read") : rel.readTime}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
     </div>
