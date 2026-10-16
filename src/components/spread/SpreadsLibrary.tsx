@@ -55,8 +55,6 @@ const DECO_CARDS = [
 
 const DECO_SIZES = "(min-width: 768px) 128px, 44px";
 
-/** ไพ่ 4 ใบแทรกกลางหัวข้อโชว์เคส — ไม่ซ้ำกับไพ่ลอยหัวหน้า */
-const INLINE_FAN = ["major-02", "major-06", "major-11", "major-21"] as const;
 
 /** ข้อความชิปหัวหน้า — อยู่นอกบล็อกหัวหน้าเพราะมีปี "1909" (ด่าน test-spreads ห้ามเลข 2 หลักในบล็อกหัวหน้า) */
 const HERO_TRUST = {
@@ -380,6 +378,8 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
             <span aria-hidden="true"> / </span>
             <span>{isEnglish ? "Tarot Spreads" : `ผังพยากรณ์ ${spreads.length} แบบ`}</span>
           </p>
+          {/* หัวข้อเดียวของหน้า — รวมหัวข้อโชว์เคสที่ซ้ำกันเข้ามาแล้ว (เจ้าของ 2026-10-16 "เอาสองอันนี้รวมกัน ไม่ชอบมันซ้ำซ้อน")
+              ไม่มีไพ่แทรกในหัวข้อ (เจ้าของ "ไม่ต้องโชว์ไพ่นี่") */}
           <h1 className="ui2-h1 ui2-sp-h1">
             {isEnglish ? (
               <>
@@ -456,47 +456,10 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
         data-ui2-dark=""
         data-anim-section=""
         data-sp-show=""
-        aria-labelledby="sp-show-title"
+        aria-label={isEnglish ? "Spreads by category" : "ผังพยากรณ์แยกตามหมวด"}
       >
         <span className="ui2-stars ui2-loop" aria-hidden="true" />
         <span className="ui2-stars ui2-stars-2 ui2-loop" aria-hidden="true" />
-        <div className="ui2-wrap ui2-sp-show-head">
-          <span className="ui2-kicker">
-            <GoldMark className="ui2-mark" />
-            {isEnglish
-              ? `${SPREAD_SHELVES.length} categories · ${spreads.length} spreads`
-              : `${SPREAD_SHELVES.length} หมวด · ${spreads.length} ผัง`}
-          </span>
-          {/* ภาพไพ่แทรกกลางหัวข้อ (แบบ "pe[รูปคน]ple" ของ fastwork) — ตกแต่งล้วน ไม่ใช่ผลสุ่ม */}
-          <h2 id="sp-show-title" className="ui2-h2 ui2-sp-show-h2">
-            <span className="tp">{isEnglish ? "Every question has" : "ทุกเรื่องที่อยากรู้"}</span>{" "}
-            <span className="ui2-inline-fan" aria-hidden="true">
-              {INLINE_FAN.map((cardId) => (
-                <span key={cardId} className="ui2-inline-card">
-                  <CardImage cardId={cardId} alt="" thumb sizes="40px" loading="lazy" fetchPriority="low" />
-                </span>
-              ))}
-            </span>{" "}
-            {isEnglish ? (
-              <span className="tp">
-                a <span className="ui2-gold-night">spread of its own</span>
-              </span>
-            ) : (
-              <span className="tp">
-                มี<span className="ui2-gold-night">ผังที่ใช่</span>รออยู่
-              </span>
-            )}
-          </h2>
-          <p className="ui2-lede ui2-sp-show-lede">
-            {isEnglish
-              ? "Scroll through one category at a time, then tap the spread that calls to you."
-              : "เลื่อนดูทีละหมวด แล้วแตะไพ่ผังที่ใจเลือก"}
-          </p>
-          {/* ตัวบอกให้เลื่อน — เส้นทองมีจุดไหลลง (CSS ล้วน · ไม่ใช่อีโมจิ) */}
-          <span className="ui2-sp-scroll-cue" aria-hidden="true">
-            <span className="ui2-sp-scroll-line ui2-loop" />
-          </span>
-        </div>
         <div className="ui2-sp-stage-wrap">
           <div className="ui2-sp-stage" data-sp-stage="">
             <nav className="ui2-sp-rail" aria-label={isEnglish ? "Spread categories" : "หมวดผังพยากรณ์"}>
