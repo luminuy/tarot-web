@@ -118,7 +118,10 @@ export const SPREADS: Spread[] = [
     id: "three-card",
     nameTh: "อดีต-ปัจจุบัน-อนาคต (ไพ่ 3 ใบ)",
     nameEn: "Past · Present · Future (3 Cards)",
-    seoTitleTh: "ดูดวงไพ่ยิปซี 3 ใบ อดีต ปัจจุบัน อนาคต ฟรี",
+    // GSC 2026-10-16: "เปิดไพ่ 3 ใบ" 277 แสดงผล · อันดับ 9.9 · 2 คลิก — วลีนี้ไม่เคยอยู่ใน title
+    seoTitleTh: "เปิดไพ่ 3 ใบ ดูดวงไพ่ยิปซี อดีต ปัจจุบัน อนาคต ฟรี",
+    seoDescriptionTh:
+      "เปิดไพ่ 3 ใบออนไลน์ฟรี ดูดวงไพ่ยิปซีอดีต ปัจจุบัน อนาคต สุ่มไพ่ทาโร่จากสำรับ 1909 แท้ 78 ใบ สับและจับไพ่เอง พร้อมคำอ่านครบทั้ง 3 ตำแหน่ง",
     tagline: "มองเห็นที่มา สิ่งที่เป็นอยู่ และแนวโน้มข้างหน้า",
     taglineEn: "Understand origins, present reality, and emerging trajectory",
     description:
@@ -809,6 +812,8 @@ export const SPREADS: Spread[] = [
     nameTh: "ดวงรายเดือน 4 สัปดาห์ (ไพ่ 4 ใบ)",
     nameEn: "4-Week Monthly Forecast (4 Cards)",
     seoTitleTh: "ดูดวงไพ่ยิปซีรายเดือน 4 ใบ ฟรี แม่น ๆ",
+    seoDescriptionTh:
+      "เปิดไพ่ 4 ใบ ดูดวงไพ่ยิปซีรายเดือนฟรี รู้จังหวะชีวิตครบ 4 สัปดาห์ ช่วงไหนควรลุย ช่วงไหนควรเก็บตัว และเดือนนี้จะปิดท้ายอย่างไร พร้อมความหมายทุกตำแหน่ง",
     tagline: "มองเห็นภาพรวมตลอดทั้งเดือน วางแผนล่วงหน้า",
     taglineEn: "Gain full-month perspective to master life's pacing",
     description:
@@ -853,7 +858,8 @@ export const SPREADS: Spread[] = [
     id: "celtic-cross",
     nameTh: "ส่องชะตาเจาะลึก 10 มิติ (เซลติกครอส)",
     nameEn: "The Celtic Cross: 10 Dimensions of Destiny (10 Cards)",
-    seoTitleTh: "ดูดวงไพ่ยิปซี 10 ใบ เซลติกครอส ฟรี",
+    // GSC 2026-10-16: คนค้น "ไพ่ทาโร่ 10 ใบ" มากกว่า "ไพ่ยิปซี 10 ใบ" ราว 2 เท่า
+    seoTitleTh: "ดูดวงไพ่ยิปซี ไพ่ทาโร่ 10 ใบ เซลติกครอส ฟรี",
     tagline: "ผัง 10 ใบในตำนาน อ่านละเอียดและแม่นยำที่สุด",
     taglineEn: "The legendary 10-card master spread for utmost depth and precision",
     description:

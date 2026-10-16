@@ -85,7 +85,9 @@ export function spreadDetailMetadata(id: string, locale: Locale): Metadata {
         spread.descriptionEn,
         `What each of the ${cardCount} positions means and how to read it.`,
       )
-    : clampDescription(spread.description, `พร้อมความหมายครบทั้ง ${cardCount} ตำแหน่ง`);
+    : spread.seoDescriptionTh
+      ? clampDescription(spread.seoDescriptionTh)
+      : clampDescription(spread.description, `พร้อมความหมายครบทั้ง ${cardCount} ตำแหน่ง`);
 
   const keywords = isEnglish
     ? [
@@ -98,6 +100,10 @@ export function spreadDetailMetadata(id: string, locale: Locale): Metadata {
       ]
     : [
         `ดูดวงไพ่ยิปซี ${cardCount} ใบ`,
+        `เปิดไพ่ ${cardCount} ใบ`,
+        `สุ่มไพ่ ${cardCount} ใบ`,
+        `ดูดวง ${cardCount} ใบ`,
+        `ไพ่ทาโร่ ${cardCount} ใบ`,
         `ไพ่ยิปซี ${cardCount} ใบ`,
         `ไพ่ยิปซี ${cardCount} ใบ ตำแหน่ง`,
         `เปิดไพ่ยิปซี ${cardCount} ใบ`,
