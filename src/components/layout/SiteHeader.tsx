@@ -159,9 +159,9 @@ export function SiteHeader({
             <DesktopNav isEnglish={isEnglish} />
 
             <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
-              {/* ปุ่มดำ "เริ่มดูดวง" (แผน UI 2.0 หัวข้อ 6.2) — พาไปส่วนเปิดไพ่ของหน้าแรก · มือถือซ่อน (ที่แคบ มีปุ่มหลักในหน้าอยู่แล้ว) */}
-              {/* <a> ธรรมดา: localeHref เติม "/" ท้าย /en ก่อน # (ได้ /en/#…) · หน้าแรกเป็นหน้า Astro ไม่ต้องพึ่ง router */}
-              <a href={isEnglish ? "/en#home-quick" : "/#home-quick"} className="ui2-header-cta mr-1 hidden sm:inline-flex" data-home-target="header:start">
+              {/* ปุ่ม "เริ่มดูดวง" ➔ คลังผังพยากรณ์ /spreads (เจ้าของ 2026-10-17 "กดปุ่มให้ลิงก์ไปหน้าผัง")
+                  เดิมพาไปส่วนเปิดไพ่ด่วนของหน้าแรก (#home-quick) · มือถือซ่อน (ที่แคบ มีปุ่มหลักในหน้าอยู่แล้ว) */}
+              <a href={isEnglish ? "/en/spreads" : "/spreads"} className="ui2-header-cta mr-1 hidden sm:inline-flex" data-home-target="header:start">
                 {isEnglish ? "Start a reading" : "เริ่มดูดวง"}
               </a>
               <LanguageSwitcher />
