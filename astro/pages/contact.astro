@@ -4,6 +4,7 @@ import { contactMetadataTh } from "@/app/_shared/pages/contact-th";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { ContactBodyThRoot } from "../components/PageBodies";
 import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
+import "@/styles/ui2-page.css";
 
 /** ✉️ ช่องทางติดต่อ — หน้าข้อความล้วน ไม่มีส่วนไหนต้องใช้ JS เลย */
 const locale = "th" as const;
@@ -11,6 +12,8 @@ const locale = "th" as const;
 
 <BaseLayout locale={locale} metadata={contactMetadataTh}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <ContactBodyThRoot />
+  </div>
   <SiteFooterRoot locale={locale} spacing="tight" />
 </BaseLayout>

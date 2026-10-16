@@ -3,6 +3,7 @@ import { readingChatMetadataEn } from "@/app/_shared/pages/reading-chat-en";
 
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { ReadingChatRootEn } from "../../../islands/ReadingChatRoot";
+import "@/styles/ui2-page.css";
 
 /**
  * 💬 ห้องสนทนากับแม่หมอ (ต้นไม้ภาษาอังกฤษ)
@@ -13,5 +14,7 @@ const locale = "en" as const;
 ---
 
 <BaseLayout hasSiteHeader={false} locale={locale} metadata={readingChatMetadataEn}>
+  <div class="ui2-pg" data-ui2-page-dark="">
   <ReadingChatRootEn client:load />
+  </div>
 </BaseLayout>

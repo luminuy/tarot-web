@@ -4,6 +4,7 @@ import { notFoundMetadataEn } from "@/app/_shared/pages/not-found";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { NotFoundMainEnRoot } from "../../components/PageBodies";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+import "@/styles/ui2-page.css";
 
 /**
  * 🚧 หน้า 404 ภาษาอังกฤษที่เสิร์ฟจากขอบ (R-25)
@@ -19,6 +20,8 @@ const locale = "en" as const;
 
 <BaseLayout locale={locale} metadata={notFoundMetadataEn}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <NotFoundMainEnRoot />
+  </div>
   <SiteFooterRoot locale={locale} spacing="tight" />
 </BaseLayout>

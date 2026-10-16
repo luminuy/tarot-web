@@ -7,6 +7,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { QuestionPageContentRoot } from "../../components/PageBodies";
 import { AskNowRoot } from "../../islands/AskNowRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+import "@/styles/ui2-page.css";
 
 /**
  * ❓ หน้าคำถาม 20 หน้า (REFLECTION_JOURNAL_PLAN 1.11 · แทร็ก Q) — เนื้อหา SSR ทั้งหมด
@@ -25,6 +26,7 @@ const copy = question[locale];
 
 <BaseLayout locale={locale} metadata={questionMetadata(question.slug, locale)}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <QuestionPageContentRoot question={question} locale={locale}>
     <Fragment slot="askBox">
       <AskNowRoot
@@ -38,5 +40,6 @@ const copy = question[locale];
       />
     </Fragment>
   </QuestionPageContentRoot>
+  </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>

@@ -4,6 +4,7 @@ import { spreadBuilderMetadataTh } from "@/app/_shared/pages/spread-builder-meta
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { SpreadBuilderRoot } from "../../islands/SpreadBuilderRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+import "@/styles/ui2-page.css";
 
 /**
  * ✦ ห้องออกแบบผัง (REFLECTION_JOURNAL_PLAN 1.8 · คลื่น 5) — เชลล์ static + island เดียว · noindex
@@ -15,6 +16,8 @@ const locale = "th" as const;
 
 <BaseLayout locale={locale} metadata={spreadBuilderMetadataTh}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <SpreadBuilderRoot locale={locale} client:load />
+  </div>
   <SiteFooterRoot locale={locale} spacing="tight" />
 </BaseLayout>

@@ -13,6 +13,7 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { CardDetailRelatedRoot } from "../../../components/CardDetailRelated";
 import { CardDetailViewRoot } from "../../../islands/CardDetailRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
+import "@/styles/ui2-page.css";
 
 /**
  * 🃏 ความหมายไพ่รายใบ 78 หน้า (ต้นไม้ภาษาอังกฤษ)
@@ -33,6 +34,7 @@ const { currentIndex, totalCards, prevCard, nextCard } = cardNeighbors(card);
 
 <BaseLayout locale={locale} metadata={cardDetailMetadata(card.id, locale)}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <main id="main-content" tabindex="-1" class={CARD_DETAIL_MAIN_CLASS}>
     <script type="application/ld+json" is:inline set:html={JSON.stringify(cardDetailJsonLd(card, locale))} />
     <script type="application/ld+json" is:inline set:html={JSON.stringify(cardDetailBreadcrumbJsonLd(card, locale))} />
@@ -50,6 +52,7 @@ const { currentIndex, totalCards, prevCard, nextCard } = cardNeighbors(card);
       </Fragment>
     </CardDetailViewRoot>
   </main>
+  </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>
 

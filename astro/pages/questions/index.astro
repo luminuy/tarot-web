@@ -4,6 +4,7 @@ import { questionsHubMetadata } from "@/app/_shared/pages/question-page";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { QuestionsHubContentRoot } from "../../components/PageBodies";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+import "@/styles/ui2-page.css";
 
 /** ❓ หน้ารวมคำถามดูดวง 20 ข้อ (REFLECTION_JOURNAL_PLAN 1.11 · แทร็ก Q) — ไม่มี JS */
 const locale = "th" as const;
@@ -11,6 +12,8 @@ const locale = "th" as const;
 
 <BaseLayout locale={locale} metadata={questionsHubMetadata(locale)}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <QuestionsHubContentRoot locale={locale} />
+  </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>

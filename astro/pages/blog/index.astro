@@ -5,6 +5,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { BlogIndexBodyRoot } from "../../components/PageBodies";
 import { BlogIndexRoot } from "../../islands/BlogIslands";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+import "@/styles/ui2-page.css";
 
 /** 📚 คัมภีร์บทความ — หน้ารวม (ต้นไม้ภาษาไทย) */
 const locale = "th" as const;
@@ -12,10 +13,12 @@ const locale = "th" as const;
 
 <BaseLayout locale={locale} metadata={buildBlogIndexMetadata(locale)}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <BlogIndexBodyRoot locale={locale}>
     <Fragment slot="list">
       <BlogIndexRoot locale={locale} articles={blogCardItems(locale)} client:idle />
     </Fragment>
   </BlogIndexBodyRoot>
+  </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>

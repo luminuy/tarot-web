@@ -5,6 +5,7 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { BirthCardBodyEnRoot } from "../../../components/PageBodies";
 import { BirthCardCalculatorRoot } from "../../../islands/BirthCardCalculatorRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
+import "@/styles/ui2-page.css";
 
 /** 🎂 คำนวณไพ่ทาโรต์ประจำตัวจากวันเกิด (ต้นไม้ภาษาอังกฤษ) */
 const locale = "en" as const;
@@ -12,10 +13,12 @@ const locale = "en" as const;
 
 <BaseLayout locale={locale} metadata={birthCardMetadataEn}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <BirthCardBodyEnRoot>
     <Fragment slot="calculator">
       <BirthCardCalculatorRoot majorCards={MAJOR_CARDS} locale={locale} client:idle />
     </Fragment>
   </BirthCardBodyEnRoot>
+  </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>

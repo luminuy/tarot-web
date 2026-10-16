@@ -5,6 +5,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { ZodiacIndexBodyRoot } from "../../components/PageBodies";
 import { ZodiacCompatibilityRoot, ZodiacDailyRoot, ZodiacFinderRoot } from "../../islands/ZodiacFinderRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+import "@/styles/ui2-page.css";
 
 /** ✦ ไพ่ประจำราศี 12 ราศี — หน้ารวม + เครื่องหาราศีจากวันเกิด (ต้นไม้ภาษาไทย) */
 const locale = "th" as const;
@@ -12,6 +13,7 @@ const locale = "th" as const;
 
 <BaseLayout locale={locale} metadata={zodiacIndexMetadata(locale)}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <ZodiacIndexBodyRoot locale={locale}>
     <Fragment slot="finder">
       <ZodiacFinderRoot signs={ZODIAC_FINDER_ITEMS} locale={locale} client:idle />
@@ -23,5 +25,6 @@ const locale = "th" as const;
       <ZodiacCompatibilityRoot signs={ZODIAC_FINDER_ITEMS} locale={locale} client:visible />
     </Fragment>
   </ZodiacIndexBodyRoot>
+  </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>

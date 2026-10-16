@@ -4,6 +4,7 @@ import { buildCardGroupMetadata } from "@/app/_shared/pages/card-group";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { CardGroupBodyRoot } from "../../../components/PageBodies";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
+import "@/styles/ui2-page.css";
 
 /** 🃏 หน้าหมวดหมู่ไพ่ `pentacles` (ต้นไม้ภาษาอังกฤษ) — ไม่มีส่วนที่ต้องใช้ JS เลย */
 const locale = "en" as const;
@@ -12,6 +13,8 @@ const groupId = "pentacles" as const;
 
 <BaseLayout locale={locale} metadata={buildCardGroupMetadata(groupId, locale)}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <CardGroupBodyRoot groupId={groupId} locale={locale} />
+  </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>

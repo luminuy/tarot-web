@@ -4,6 +4,7 @@
  * ย้ายออกมาจากหัวไฟล์ ui2.css ตรง ๆ (2026-10-13 · แผน UI_2_0_SPREADS) ลำดับกฎบนหน้าแรกจึงเหมือนเดิมทุกบรรทัด
  * ⚠️ กติกาเดียวกับ ui2.css: ไม่มีของหนัก · สีเป็นโทเคน · ตัวเลขตัวตรง
  */
+@import "./ui2-dark-shell.css";
 /* ── ตัวช่วยตัวหนังสือ ─────────────────────────────────────────────────────── */
 .ui2-num {
   font-family: var(--ui2-font-number);
@@ -444,26 +445,7 @@
   }
 }
 
-/* ══ หน้าที่มืดทั้งหน้า (`data-ui2-page-dark` · คลัง /spreads · ไพ่รายวัน /daily) — พื้น body + หัวเว็บมืดตั้งแต่เฟรมแรก ══ */
-html:has([data-ui2-page-dark]) body {
-  background: var(--ui2-night);
-}
-/* หัวเว็บกระจกมืดตั้งแต่เฟรมแรก — ชุดเดียวกับ `html[data-ui2-over-dark]` ใน globals.css (หน้าที่มืดทั้งหน้า) */
-html:has([data-ui2-page-dark]) .site-header-glass {
-  background-color: rgba(22, 17, 24, 0.96);
-  border-color: rgba(255, 236, 200, 0.18);
-  box-shadow: 0 16px 34px -24px rgba(0, 0, 0, 0.8);
-}
-html:has([data-ui2-page-dark]) .site-header-glass :is(.text-ink, .text-ink-deep, nav):not(.absolute *, .absolute) {
-  color: var(--ui2-on-night);
-}
-html:has([data-ui2-page-dark]) .site-header-glass .text-muted:not(.absolute *) {
-  color: var(--ui2-on-night-soft);
-}
-html:has([data-ui2-page-dark]) .ui2-header-cta {
-  color: var(--ui2-night);
-  background: var(--ui2-gold-solid);
-}
+/* หน้าที่มืดทั้งหน้า (`data-ui2-page-dark`) อยู่ใน ui2-dark-shell.css (นำเข้าที่หัวไฟล์) */
 
 /* ── ไพ่แทรกกลางหัวข้อ (แบบ "pe[รูปคน]ple" ของ fastwork.com/selling) — 4 ใบซ้อนเป็นพัดเล็ก สูงเท่าตัวอักษร
    ใช้ที่หัวข้อโชว์เคส /spreads และหัวข้อคลังไพ่หน้าแรก · ตกแต่งล้วน (aria-hidden · alt ว่าง) ไม่ใช่ผลสุ่ม ── */

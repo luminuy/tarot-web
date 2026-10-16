@@ -4,6 +4,7 @@ import { notFoundMetadata } from "@/app/_shared/pages/not-found";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { NotFoundMainThRoot } from "../components/PageBodies";
 import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
+import "@/styles/ui2-page.css";
 
 /**
  * 🚧 หน้า 404 ที่ Cloudflare เสิร์ฟจากขอบ (R-25)
@@ -25,6 +26,8 @@ const locale = "th" as const;
 
 <BaseLayout locale={locale} metadata={notFoundMetadata}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <NotFoundMainThRoot />
+  </div>
   <SiteFooterRoot locale={locale} spacing="tight" />
 </BaseLayout>

@@ -5,6 +5,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { PickACardBodyEnRoot } from "../../components/PageBodies";
 import { PickACardIsland } from "../../islands/PickACardIsland";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+import "@/styles/ui2-page.css";
 
 /** 🔮 Pick A Card — Interactive 4-Pile Oracle Island with Static SEO Content */
 const locale = "en" as const;
@@ -12,10 +13,12 @@ const locale = "en" as const;
 
 <BaseLayout locale={locale} metadata={pickACardMetadataEn}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <PickACardBodyEnRoot>
     <Fragment slot="ritual">
       <PickACardIsland locale={locale} client:load />
     </Fragment>
   </PickACardBodyEnRoot>
+  </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>

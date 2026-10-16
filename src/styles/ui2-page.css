@@ -1,0 +1,233 @@
+/*
+ * 🌌 SeerTarot UI 2.0 — ผิวกลางคืนสำหรับ "หน้าอื่นทั้งเว็บ" (หน้าที่ยังไม่มีดีไซน์ 2.0 เฉพาะของตัวเอง)
+ * ===========================================================================
+ * เจ้าของ 2026-10-16: "มาเริ่มปรับปรุงหน้าอื่น ๆ ให้เข้ากับ 2.0 กัน ยึดการออกแบบตามเดิม … ให้ครบทุกหน้า"
+ * นำเข้าโดยหน้า .astro ที่ห่อเนื้อหาด้วย `<div class="ui2-pg" data-ui2-page-dark>` (หัวเว็บ/ท้ายเว็บอยู่นอกตัวห่อ)
+ *
+ * หลักการ (สูตรเดียวกับ /daily รอบ 255):
+ *  1. เปลี่ยนโทเคน `--color-*` / `--glass-*` ในขอบเขต `.ui2-pg` เป็นโทนกลางคืน — Tailwind v4 อ่าน `var(--color-*)`
+ *     คอมโพเนนต์เดิมทุกตัว (การ์ด · ปุ่ม · ตัวหนังสือ) จึงกลายเป็นกลางคืนโดยไม่ต้องแก้ทีละไฟล์
+ *  2. สีฮาร์ดโค้ดที่เหลือ (bg-white · text-[#4A4338] ฯลฯ) แปลงในขอบเขตนี้ที่เดียว
+ *  3. ภาษาดีไซน์ 2.0: พื้นท้องฟ้ากลางคืน + ดาว · หัวข้อ Anuphan · แผงกระจกมืดมุมโค้ง · ทองเป็นสีเน้น
+ * หน้าที่ได้ดีไซน์เฉพาะแล้ว (/ · /spreads · /daily) ไม่ใช้ไฟล์นี้
+ *
+ * ⚠️ ไม่มีของหนัก (backdrop-filter · filter: blur · ของวนไม่รู้จบ) — ด่าน test-ui2-fx / test-motion-quality
+ * ⚠️ สีใหม่ใช้โทเคน `--ui2-*` จาก ui2-base.css
+ */
+@import "./ui2-dark-shell.css";
+
+/* ── 1. โทเคนกลางคืน ─────────────────────────────────────────────────────── */
+.ui2-pg {
+  --color-ink: #F6EEE2;
+  --color-ink-deep: #F6EEE2;
+  --color-muted: #CFC3B2;
+  --color-gold: #E7C27F;
+  --color-gold-ink: #FFD98F;
+  --color-gold-ink-deep: #FFE3A8;
+  --color-line: rgba(246, 238, 226, 0.14);
+  --color-line-warm: rgba(246, 238, 226, 0.14);
+  --color-line-interactive: rgba(255, 217, 143, 0.42);
+  --color-line-interactive-warm: rgba(255, 217, 143, 0.42);
+  --color-surface: #1E1822;
+  --color-surface-warm: #1E1822;
+  --color-canvas: #251E2A;
+  --color-inset: #251E2A;
+  --color-inset-warm: #251E2A;
+  --color-err: #DB8479;
+  --color-err-wash: rgba(219, 132, 121, 0.12);
+  --color-ok: #5DAB6B;
+  --glass-fill: rgba(28, 23, 30, 0.9);
+  --glass-sheen: linear-gradient(180deg, rgba(255, 236, 200, 0.05) 0%, rgba(255, 236, 200, 0) 60%);
+  --glass-edge: rgba(255, 236, 200, 0.14);
+  --glass-edge-on: rgba(255, 217, 143, 0.6);
+  --glass-ring: rgba(255, 236, 200, 0.08);
+  --glass-shadow: 0 30px 60px -36px rgba(0, 0, 0, 0.9);
+  --glass-shadow-lift: 0 34px 60px -30px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 217, 143, 0.12);
+  --home-band-bg: transparent;
+  position: relative;
+  isolation: isolate;
+  color: var(--ui2-on-night);
+  background:
+    radial-gradient(60% 520px at 50% -80px, rgba(233, 160, 70, 0.13) 0%, rgba(233, 160, 70, 0) 100%),
+    radial-gradient(40% 40% at 8% 30%, var(--ui2-aurora-night-teal) 0%, rgba(79, 179, 169, 0) 70%),
+    radial-gradient(40% 40% at 94% 70%, var(--ui2-aurora-night-amber) 0%, rgba(233, 160, 70, 0) 70%),
+    var(--ui2-night);
+}
+/* ดาวทั้งหน้า (ชุดเดียวกับ .ui2-stars ของหน้าแรก · นิ่ง) */
+.ui2-pg::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background-image:
+    radial-gradient(1.2px 1.2px at 7% 12%, rgba(255, 245, 220, 0.9) 50%, transparent 51%),
+    radial-gradient(1px 1px at 23% 64%, rgba(255, 245, 220, 0.7) 50%, transparent 51%),
+    radial-gradient(1.4px 1.4px at 38% 22%, rgba(255, 245, 220, 0.85) 50%, transparent 51%),
+    radial-gradient(1px 1px at 52% 82%, rgba(255, 245, 220, 0.6) 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 66% 36%, rgba(255, 245, 220, 0.8) 50%, transparent 51%),
+    radial-gradient(1px 1px at 79% 70%, rgba(255, 245, 220, 0.7) 50%, transparent 51%),
+    radial-gradient(1.4px 1.4px at 91% 16%, rgba(255, 245, 220, 0.9) 50%, transparent 51%);
+  background-size: 420px 420px;
+}
+/* พื้นของ <main> เดิม (ไล่สีครีม) ไม่ทับท้องฟ้า */
+.ui2-pg main,
+.ui2-pg .page-band::before,
+.ui2-pg .home-band::before {
+  background: transparent;
+}
+
+/* ── 2. สีฮาร์ดโค้ดในคอมโพเนนต์เดิม ➔ โทนกลางคืน ───────────────────────────── */
+.ui2-pg .bg-white,
+.ui2-pg [class*="bg-white/"],
+.ui2-pg [class*="bg-[#F"],
+.ui2-pg [class*="bg-[#E"],
+.ui2-pg [class*="bg-[#f"],
+.ui2-pg [class*="bg-[#e"] {
+  background-color: var(--color-surface);
+}
+.ui2-pg [class*="from-[#F"],
+.ui2-pg [class*="from-[#E"],
+.ui2-pg [class*="via-[#F"],
+.ui2-pg [class*="to-[#F"] {
+  --tw-gradient-from: #1E1822;
+  --tw-gradient-via: #1E1822;
+  --tw-gradient-to: #251E2A;
+}
+.ui2-pg [class*="text-[#4"],
+.ui2-pg [class*="text-[#5"],
+.ui2-pg [class*="text-[#6"],
+.ui2-pg [class*="text-[#7"],
+.ui2-pg [class*="text-[#8"],
+.ui2-pg [class*="text-[#A"],
+.ui2-pg [class*="text-[#a"] {
+  color: var(--ui2-on-night-soft);
+}
+.ui2-pg [class*="text-[#9E"],
+.ui2-pg [class*="text-[#8F2"] {
+  color: #E4A08A;
+}
+.ui2-pg [class*="border-[#"] {
+  border-color: var(--color-line);
+}
+
+/* ── 3. ตัวหนังสือแบบ 2.0 ─────────────────────────────────────────────────── */
+.ui2-pg h1,
+.ui2-pg h2,
+.ui2-pg h3 {
+  font-family: var(--ui2-font-display);
+  letter-spacing: -0.01em;
+}
+.ui2-pg main h1 {
+  font-weight: 500;
+  color: var(--ui2-on-night);
+  text-shadow: 0 0 42px rgba(255, 217, 143, 0.16);
+}
+.ui2-pg main h2 {
+  font-weight: 500;
+  color: var(--ui2-on-night);
+}
+.ui2-pg a:focus-visible,
+.ui2-pg button:focus-visible {
+  outline: 2px solid var(--ui2-gold-solid);
+  outline-offset: 3px;
+}
+.ui2-pg ::selection {
+  color: var(--ui2-night);
+  background: var(--ui2-gold-solid);
+}
+
+/* ── 4. แผงกระจกมืด (บทความ SEO · กล่องเนื้อหา) ─────────────────────────────── */
+.ui2-pg .page-band-tint {
+  padding-inline: 18px;
+  border-radius: 26px;
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset, 0 40px 80px -40px rgba(0, 0, 0, 0.85);
+}
+@media (min-width: 768px) {
+  .ui2-pg .page-band-tint {
+    padding-inline: 36px;
+    border-radius: 32px;
+  }
+}
+.ui2-pg .page-band-tint > :first-child {
+  border-bottom-color: var(--ui2-line-night);
+}
+
+/* ปุ่มหลักสีเข้มเดิม (bg-ink) ➔ ปุ่มทองแบบ 2.0 */
+.ui2-pg .bg-ink {
+  color: var(--ui2-night);
+  background-color: var(--ui2-gold-solid);
+}
+.ui2-pg .bg-ink.text-white,
+.ui2-pg .bg-ink .text-white {
+  color: var(--ui2-night);
+}
+
+/* ── 5. คลาสกระจกกลางของ globals.css ที่ฮาร์ดโค้ดพื้นครีม ➔ กระจกมืด ─────────────── */
+.ui2-pg .glass-tile {
+  background-color: rgba(246, 238, 226, 0.045);
+  background-image: linear-gradient(170deg, rgba(255, 236, 200, 0.06) 0%, rgba(255, 236, 200, 0) 62%);
+  border-color: var(--ui2-line-night);
+  box-shadow: 0 1px 0 var(--ui2-glass-edge-night) inset, 0 14px 30px -18px rgba(0, 0, 0, 0.8);
+}
+.ui2-pg .glass-tile:hover {
+  background-color: rgba(246, 238, 226, 0.08);
+  border-color: rgba(255, 217, 143, 0.5);
+  box-shadow: 0 1px 0 var(--ui2-glass-edge-night) inset, 0 18px 34px -16px rgba(0, 0, 0, 0.85), 0 0 26px rgba(255, 217, 143, 0.1);
+}
+.ui2-pg .glass-chip {
+  background-color: rgba(246, 238, 226, 0.07);
+  background-image: none;
+  border-color: var(--ui2-line-night);
+  box-shadow: none;
+}
+.ui2-pg .glass-field {
+  color: var(--ui2-on-night);
+  background-color: rgba(12, 10, 15, 0.55);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4) inset;
+}
+.ui2-pg .glass-field::placeholder {
+  color: rgba(246, 238, 226, 0.45);
+}
+.ui2-pg select.glass-field option {
+  color: var(--ui2-on-night);
+  background: #1E1822;
+}
+.ui2-pg .altar-cloth {
+  background-color: rgba(12, 10, 15, 0.45);
+  background-image: linear-gradient(180deg, rgba(255, 236, 200, 0.04) 0%, rgba(255, 236, 200, 0) 62%);
+  border-color: var(--ui2-line-night);
+}
+.ui2-pg .altar-modal {
+  background-color: rgba(28, 23, 30, 0.98);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 26px 64px -20px rgba(0, 0, 0, 0.9);
+}
+.ui2-pg .glass-divider-b {
+  border-bottom-color: var(--ui2-line-night);
+}
+.ui2-pg .glass-divider-t {
+  border-top-color: var(--ui2-line-night);
+}
+/* ปุ่มรองกระจก ➔ กระจกมืดขอบบาง */
+.ui2-pg .btn-glass-ghost {
+  color: var(--ui2-on-night);
+  background-image: none;
+  background-color: rgba(246, 238, 226, 0.06);
+  border-color: var(--ui2-line-night);
+  box-shadow: 0 1px 0 var(--ui2-glass-edge-night) inset;
+}
+/* ปุ่มหลักน้ำตาลเข้ม / ทองหมึก ➔ ปุ่มทองสว่างแบบ 2.0 (ปุ่ม "เริ่มด้วยไพ่ 3 ใบ" ของ /spreads) */
+.ui2-pg .btn-glass-primary,
+.ui2-pg .btn-gold-glass,
+.ui2-pg .orientation-tab[aria-pressed="true"] {
+  color: var(--ui2-night);
+  background-image: none;
+  background-color: var(--ui2-gold-solid);
+  box-shadow: 0 14px 30px -14px rgba(255, 217, 143, 0.5), 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+}
+/* ป้ายสีทองตัวหนังสือเข้ม (bg-gold-ink text-surface) — โทเคน surface เปลี่ยนเป็นมืดแล้ว ป้ายจึงยังอ่านได้ */
+.ui2-pg .bg-gold-ink {
+  color: var(--ui2-night);
+}
