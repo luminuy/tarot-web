@@ -6,6 +6,10 @@
 html:has([data-ui2-page-dark]) body {
   background: var(--ui2-night);
 }
+/* แถบเลื่อนโทนมืด — เดิมรางครีม #F3EDE2 (globals.css) โผล่เป็นแถบสว่างขอบขวาของหน้ามืดทั้งหน้า */
+html:has([data-ui2-page-dark]) {
+  scrollbar-color: #5c4b3e var(--ui2-night);
+}
 /* หัวเว็บกระจกมืดตั้งแต่เฟรมแรก — ชุดเดียวกับ `html[data-ui2-over-dark]` ใน globals.css (หน้าที่มืดทั้งหน้า) */
 html:has([data-ui2-page-dark]) .site-header-glass {
   background-color: rgba(22, 17, 24, 0.96);
