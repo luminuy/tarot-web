@@ -8,6 +8,24 @@ import { soundManager } from "@/lib/utils/audio";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { CardImage } from "@/components/card/CardImage";
+
+/**
+ * สไตล์หน้าต่างเข้าสู่ระบบ v2 — โหลดแยกเฉพาะตอนมีคนเปิดหน้าต่างนี้ (ไม่เพิ่ม CSS ให้ทุกหน้า)
+ * ⚠️ ต้องเป็น dynamic import ฝั่งเบราว์เซอร์เท่านั้น — ด่านที่เรนเดอร์คอมโพเนนต์ใน Node (test-en-thai-leak)
+ *    อ่านไฟล์ .css ไม่ได้ ถ้า import แบบ static ทั้งด่านล้มตั้งแต่บรรทัดแรก
+ * หน้าต่างรอจน CSS มาก่อนค่อยวาด (ไม่มีจังหวะเห็นฟอร์มเปล่าไร้สไตล์)
+ */
+const authCss: Promise<unknown> | null = typeof window !== "undefined" ? import("@/styles/v2-auth.css") : null;
+let authCssLoaded = authCss === null;
+void authCss?.then(
+  () => {
+    authCssLoaded = true;
+  },
+  () => {
+    authCssLoaded = true; // โหลดไม่ได้ก็ยังต้องเปิดหน้าต่างได้ — ล็อกอินสำคัญกว่าหน้าตา
+  },
+);
 
 export interface AuthModalProps {
   isOpen: boolean;
@@ -123,6 +141,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const closeDelayMs = 170;
   const [isMounted, setIsMounted] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
+  const [cssReady, setCssReady] = useState(authCssLoaded);
+  useEffect(() => {
+    if (cssReady || !authCss) return;
+    let alive = true;
+    const done = () => {
+      if (alive) setCssReady(true);
+    };
+    authCss.then(done, done);
+    return () => {
+      alive = false;
+    };
+  }, [cssReady]);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -322,8 +352,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  if (!isMounted) return null;
+  if (!isMounted || !cssReady) return null;
 
+  const benefits = isEn
+    ? ["Every reading saved to your journal", "Your reader remembers what you asked before", "Truly random cards you can verify"]
+    : ["เก็บทุกคำทำนายไว้ในสมุดดวง กลับมาอ่านได้เสมอ", "แม่หมอจำเรื่องที่คุณเคยถาม อ่านต่อได้ตรงขึ้น", "ไพ่สุ่มจริง ตรวจสอบย้อนหลังได้ทุกใบ"];
+
+  /*
+   * v2 (เจ้าของ 2026-10-16 "ออกแบบใหม่หน่อย") — บัตรผ่านเข้าห้องดูดวง
+   * v1: โลโก้กลม ➔ แท็บ ➔ ฟอร์มอีเมล ➔ Google/LINE เล็ก ๆ ท้ายสุด (ทั้งที่คนส่วนใหญ่ใช้ Google/LINE)
+   *     ปุ่ม "ดู" รหัสผ่านเป็นตัวหนังสือที่ถูกตัดครึ่ง · ปุ่ม LINE พื้นมืดกลืนหาย
+   * v2: จอกว้างสองฝั่ง (ไพ่นักบวชหญิง + สิ่งที่ได้ | ฟอร์ม) · Google/LINE ขึ้นก่อนเป็นปุ่มเต็มสีแบรนด์
+   *     อีเมลรองลงมา · สลับเข้าสู่ระบบ/สมัครเป็นลิงก์บรรทัดเดียวท้ายฟอร์ม · ตาเปิด/ปิดรหัสเป็นไอคอน
+   */
   return (
     <div
       className={`fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-3 sm:p-4 modal-scrim gpu-layer ${
@@ -339,360 +380,251 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       <div
         ref={dialogRef}
         onClick={(e) => e.stopPropagation()}
-        /* 🪟 แผงกระจกของหน้าต่างลอย — ต้องเป็น `.altar-modal` (ทึบ 0.97) ไม่ใช่
-           `.altar-card-porcelain` (0.62) เพราะแผงนี้วางอยู่บน `.modal-scrim` ที่เกือบดำ
-           ถ้าโปร่งเท่าการ์ดในหน้า สีเข้มจะซึมขึ้นมาจนคอนทราสต์ตัวหนังสือตกทั้งใบ */
-        className={`altar-modal !rounded-xl w-full max-w-md max-h-[calc(100svh-1.5rem)] sm:max-h-[calc(100svh-2rem)] flex flex-col relative overflow-hidden text-ink ${
+        /* แผงทึบเต็ม (ไม่โปร่ง) — วางบน `.modal-scrim` ที่เกือบดำ ความโปร่งทำคอนทราสต์ตก */
+        className={`v2-au w-full max-w-[880px] max-h-[calc(100svh-1.5rem)] sm:max-h-[calc(100svh-2rem)] flex flex-col relative overflow-hidden ${
           isClosing ? "anim-modal-sink" : "anim-modal-rise"
         }`}
       >
-          {/* Close button with high-contrast luxury border */}
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={isEn ? "Close authentication window" : "ปิดหน้าต่างเข้าสู่ระบบ"}
-            /*
-             * 🎯 T-31: 44×44 ไม่ใช่ 32×32 — นี่คือ modal ที่คนเจอบ่อยที่สุด (ผู้ใช้ที่ยังไม่ล็อกอิน
-             * ทุกคนเจอ) และทราฟฟิกเว็บนี้เป็นมือถือ 85%+ · ด่าน tap-target เดิมตั้งเพดานไว้ 24px
-             * จึงปล่อยผ่านมาตลอด · ขนาดไอคอนคงเดิม ขยายเฉพาะพื้นที่กด (ตรงกับ CardZoomModal)
-             */
-            className="glass-chip tap-overlay-y absolute top-4 right-4 z-10 w-11 h-11 text-ink hover:text-gold-ink text-xs flex items-center justify-center transition cursor-pointer"
-          >
-            ✕
-          </button>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={isEn ? "Close authentication window" : "ปิดหน้าต่างเข้าสู่ระบบ"}
+          /* 🎯 T-31: พื้นที่กด 44×44 — หน้าต่างที่คนเจอบ่อยที่สุด ทราฟฟิกมือถือ 85%+ */
+          className="v2-au-close tap-overlay-y absolute top-3 right-3 z-10 w-11 h-11"
+        >
+          <span aria-hidden="true" />
+        </button>
 
-          {/* ชั้นเนื้อหาที่เลื่อนได้ — `min-h-0` จำเป็นเพราะ flex item ปกติหดต่ำกว่าเนื้อหาไม่ได้ (INC: ล็อกอินตกขอบจอ) */}
-          <div className="flex flex-col items-center min-h-0 overflow-y-auto overscroll-contain p-6 sm:p-8">
-
-          {/* Seer Brand Logo Frame */}
-          <div className="relative mb-3.5 group select-none">
-            {/* Circular Seer Brand Logo */}
-            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full border-2 border-line overflow-hidden relative flex-shrink-0 bg-canvas group-hover:scale-105 transition duration-300 shadow-xs">
-              <img
-                src="/logo.webp"
-                alt="SeerTarot"
-                width={72}
-                height={72}
-                className="w-full h-full object-cover"
-                loading="eager"
-              />
+        {/* ชั้นที่เลื่อนได้ — `min-h-0` จำเป็นเพราะ flex item ปกติหดต่ำกว่าเนื้อหาไม่ได้ (INC: ล็อกอินตกขอบจอ) */}
+        <div className="v2-au-scroll min-h-0 overflow-y-auto overscroll-contain">
+          {/* ฝั่งภาพ — ไพ่นักบวชหญิง (ผู้เฝ้าประตูความรู้) + สิ่งที่ได้เมื่อมีบัญชี */}
+          <aside className="v2-au-art">
+            <span className="v2-au-card" aria-hidden="true">
+              <CardImage image="major-02.jpg" alt="" className="w-full h-full object-cover object-top" sizes="(min-width: 768px) 132px, 64px" />
+            </span>
+            <div className="v2-au-art-txt">
+              <p className="v2-au-brand">SeerTarot</p>
+              <p className="v2-au-art-t">{isEn ? "Your reading room" : "ห้องดูดวงของคุณ"}</p>
+              <ul className="v2-au-perks">
+                {benefits.map((b) => (
+                  <li key={b}>{b}</li>
+                ))}
+              </ul>
             </div>
-          </div>
+          </aside>
 
-          {/* Header Typography */}
-          <div className="space-y-1 text-center mb-4">
-            <h3 id="auth-modal-title" className="text-xl sm:text-2xl font-serif-th font-bold text-ink"><ThaiPhrases>
-              {mode === "signin" && (isEn ? "Sign In" : "เข้าสู่ระบบ")}
-              {mode === "signup" && (isEn ? "Create Free Account" : "สมัครสมาชิกฟรี")}
-              {mode === "forgot" && (isEn ? "Reset Password" : "ตั้งรหัสผ่านใหม่ (ลืมรหัสผ่าน)")}
-            </ThaiPhrases></h3>
-            {mode === "forgot" && (
-              <p className="text-xs text-muted font-serif-th max-w-xs mx-auto leading-relaxed">
-                {isEn
-                  ? "Enter your registered email address to receive a secure password reset link"
-                  : "ระบุอีเมลของคุณ เพื่อรับลิงก์สำหรับตั้งรหัสผ่านใหม่อย่างปลอดภัย"}
+          {/* ฝั่งฟอร์ม */}
+          <div className="v2-au-form">
+            <header className="v2-au-head">
+              <h3 id="auth-modal-title" className="v2-au-title"><ThaiPhrases>
+                {mode === "signin" && (isEn ? "Sign In" : "เข้าสู่ระบบ")}
+                {mode === "signup" && (isEn ? "Create Free Account" : "สมัครสมาชิกฟรี")}
+                {mode === "forgot" && (isEn ? "Reset Password" : "ตั้งรหัสผ่านใหม่")}
+              </ThaiPhrases></h3>
+              <p className="v2-au-sub">
+                {mode === "signin" && (isEn ? "Welcome back. Pick the way that suits you." : "ยินดีต้อนรับกลับ เลือกวิธีที่สะดวกได้เลย")}
+                {mode === "signup" && (isEn ? "Takes less than a minute." : "ใช้เวลาไม่ถึงนาที ไม่มีค่าใช้จ่าย")}
+                {mode === "forgot" &&
+                  (isEn
+                    ? "Enter your registered email address to receive a secure password reset link"
+                    : "ระบุอีเมลของคุณ เพื่อรับลิงก์สำหรับตั้งรหัสผ่านใหม่อย่างปลอดภัย")}
               </p>
-            )}
-          </div>
+            </header>
 
-          {/* Segmented Mode Switcher (Tab System) */}
-          {mode !== "forgot" && (
-            <div className="glass-chip w-full grid grid-cols-2 p-1 mb-4">
-              <button
-                type="button"
-                onClick={() => switchMode("signin")}
-                className={`tap-overlay-y py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
-                  mode === "signin" ? "btn-gold-glass" : "text-muted hover:text-ink"
-                }`}
-              >
-                
-                <span>{isEn ? "Sign In" : "เข้าสู่ระบบ"}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => switchMode("signup")}
-                className={`tap-overlay-y py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
-                  mode === "signup" ? "btn-gold-glass" : "text-muted hover:text-ink"
-                }`}
-              >
-                
-                <span>{isEn ? "Register" : "สมัครสมาชิก"}</span>
-              </button>
-            </div>
-          )}
-
-          {/* Feedback messages */}
-          <div aria-live="polite" className="w-full">
-            {errorMsg && (
-              <div className="w-full mb-3 p-3 rounded-xl bg-err-wash border border-line text-err text-xs font-serif-th text-center">
-                {errorMsg}
-              </div>
-            )}
-            {successMsg && (
-              <div className="w-full mb-3 p-3 rounded-xl bg-[#EBF3ED] border border-line text-ok text-xs font-serif-th text-center">
-                {successMsg}
-              </div>
-            )}
-          </div>
-
-          {/* Email/Password Form */}
-          <form onSubmit={handleSubmit} className="w-full space-y-3.5">
-            {mode === "signup" && (
-              <div className="space-y-1.5 text-left">
-                <label htmlFor="auth-name" className="block text-[13px] font-semibold text-ink font-serif-th">
-                  {isEn ? "Name or Nickname" : "ชื่อหรือนามแฝง"}
-                </label>
-                <div className="relative flex items-center">
-                  <span className="absolute left-3.5 text-gold pointer-events-none">
-                    <FieldIcon variant="person" />
-                  </span>
-                  <input
-                    id="auth-name"
-                    type="text"
-                    required
-                    autoComplete="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder={isEn ? "e.g. Alex, Sarah, Morgan" : "เช่น ฟ้า, พลอย, บิ๊ก"}
-                    className="glass-field w-full h-11 pl-9 pr-3.5 rounded-xl border border-line-interactive text-ink text-xs font-serif-th placeholder-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-1.5 text-left">
-              <label htmlFor="auth-email" className="block text-[13px] font-semibold text-ink font-serif-th">
-                {isEn ? "Email Address" : "ที่อยู่อีเมล"}
-              </label>
-              <div className="relative flex items-center">
-                <span className="absolute left-3.5 text-gold pointer-events-none">
-                  <FieldIcon variant="mail" />
-                </span>
-                <input
-                  id="auth-email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  inputMode="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  className="glass-field w-full h-11 pl-9 pr-3.5 rounded-xl border border-line-interactive text-ink text-xs font-serif-th placeholder-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
-                />
-              </div>
-            </div>
-
+            {/* Google / LINE ก่อน — ทางที่คนใช้มากที่สุด */}
             {mode !== "forgot" && (
-              <div className="space-y-1.5 text-left">
-                <div className="flex justify-between items-center">
-                  <label
-                    htmlFor="auth-password"
-                    className="block text-[13px] font-semibold text-ink font-serif-th"
-                  >
-                    {isEn ? "Password" : "รหัสผ่าน"}
-                  </label>
-                  {mode === "signin" && (
-                    <button
-                      type="button"
-                      onClick={() => switchMode("forgot")}
-                      className="text-[13px] text-gold-ink hover:text-ink hover:underline cursor-pointer font-serif-th font-bold"
-                    >
-                      {isEn ? "Forgot password?" : "ลืมรหัสผ่าน?"}
-                    </button>
-                  )}
-                </div>
-                <div className="relative flex items-center">
-                  <span className="absolute left-3.5 text-gold pointer-events-none">
-                    <FieldIcon variant="key" />
-                  </span>
-                  <input
-                    id="auth-password"
-                    type={showPassword ? "text" : "password"}
-                    required
-                    autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={mode === "signup" ? (isEn ? "At least 10 characters" : "อย่างน้อย 10 ตัวอักษร") : "••••••••••"}
-                    className="glass-field w-full h-11 pl-9 pr-12 rounded-xl border border-line-interactive text-ink text-xs font-serif-th placeholder-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? (isEn ? "Hide password" : "ซ่อนรหัสผ่าน") : (isEn ? "Show password" : "แสดงรหัสผ่าน")}
-                    className="tap-overlay-y absolute right-0 top-0 h-11 px-3.5 flex items-center justify-center text-muted hover:text-ink text-xs font-serif-th cursor-pointer rounded-r-xl transition-colors"
-                  >
-                    {showPassword ? (isEn ? "Hide" : "ซ่อน") : (isEn ? "Show" : "ดู")}
+              <>
+                <div className="v2-au-social">
+                  <button type="button" onClick={handleLoginGoogle} className="v2-au-sbtn is-google">
+                    <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                    </svg>
+                    <span>{isEn ? "Continue with Google" : "ต่อด้วย Google"}</span>
+                  </button>
+                  <button type="button" onClick={handleLoginLine} className="v2-au-sbtn is-line">
+                    {/* ตราสัญลักษณ์ LINE — ฟองคำพูดขาวบนปุ่มเขียว ตัวอักษรวาดเป็นเส้นเรขาคณิต (path เดิมคัดลอกผิดจนอ่านไม่ออก) */}
+                    <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        fill="#FFFFFF"
+                        d="M24 10.3c0-4.8-5.4-8.8-12-8.8S0 5.5 0 10.3c0 4.3 3.8 7.9 9 8.6.4.1.9.3 1 .6.1.4 0 1.2-.1 1.7-.1.4-.4 1.7-.6 2.1-.2.5-.9 2 .8 1.1 1.8-.9 4.8-2.9 6.5-4.9 4.6-1.5 7.4-4.8 7.4-8.6z"
+                      />
+                      <g fill="none" stroke="#06C755" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5.9 7.9v4.2h2.2" />
+                        <path d="M9.7 7.9v4.2" />
+                        <path d="M11.4 12.1V7.9l2.8 4.2V7.9" />
+                        <path d="M18.1 7.9h-2.4v4.2h2.4" />
+                        <path d="M15.7 10h2.1" />
+                      </g>
+                    </svg>
+                    <span>{isEn ? "Continue with LINE" : "ต่อด้วย LINE"}</span>
                   </button>
                 </div>
+                <p className="v2-au-or">
+                  <span>{isEn ? "or use email" : "หรือใช้อีเมล"}</span>
+                </p>
+              </>
+            )}
 
-                {/* Gemstone Password Strength Meter on Signup */}
-                {mode === "signup" && password.length > 0 && (
-                  <div className="pt-2 space-y-1.5">
-                    <div className="grid grid-cols-4 gap-1.5">
-                      {[1, 2, 3, 4].map((step) => {
-                        const active = strength.score >= step;
-                        return (
-                          <div
-                            key={step}
-                            className={`h-1.5 rounded-full transition duration-300 ${
-                              active
-                                ? strength.score <= 1
-                                  ? "bg-err"
-                                  : strength.score === 2
-                                    ? "bg-gold"
-                                    : "bg-ok"
-                                : "bg-inset"
-                            }`}
-                          />
-                        );
-                      })}
-                    </div>
-                    <div className="flex justify-between items-center text-[13px] font-serif-th text-muted">
-                      <span>{isEn ? "Strength:" : "ความปลอดภัย:"}</span>
-                      <span className={`font-semibold ${strength.colorClass}`}>{strength.label}</span>
-                    </div>
+            {/* Feedback messages */}
+            <div aria-live="polite" className="w-full">
+              {errorMsg && <div className="v2-au-msg is-err">{errorMsg}</div>}
+              {successMsg && <div className="v2-au-msg is-ok">{successMsg}</div>}
+            </div>
+
+            <form onSubmit={handleSubmit} className="v2-au-fields">
+              {mode === "signup" && (
+                <div className="v2-au-field">
+                  <label htmlFor="auth-name">{isEn ? "Name or Nickname" : "ชื่อหรือนามแฝง"}</label>
+                  <span className="v2-au-input">
+                    <FieldIcon variant="person" className="w-4 h-4" />
+                    <input
+                      id="auth-name"
+                      type="text"
+                      required
+                      autoComplete="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder={isEn ? "e.g. Alex, Sarah, Morgan" : "เช่น ฟ้า, พลอย, บิ๊ก"}
+                    />
+                  </span>
+                </div>
+              )}
+
+              <div className="v2-au-field">
+                <label htmlFor="auth-email">{isEn ? "Email Address" : "อีเมล"}</label>
+                <span className="v2-au-input">
+                  <FieldIcon variant="mail" className="w-4 h-4" />
+                  <input
+                    id="auth-email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    inputMode="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@example.com"
+                  />
+                </span>
+              </div>
+
+              {mode !== "forgot" && (
+                <div className="v2-au-field">
+                  <div className="v2-au-label-row">
+                    <label htmlFor="auth-password">{isEn ? "Password" : "รหัสผ่าน"}</label>
+                    {mode === "signin" && (
+                      <button type="button" onClick={() => switchMode("forgot")} className="v2-au-link">
+                        {isEn ? "Forgot password?" : "ลืมรหัสผ่าน?"}
+                      </button>
+                    )}
                   </div>
-                )}
-              </div>
-            )}
+                  <span className="v2-au-input">
+                    <FieldIcon variant="key" className="w-4 h-4" />
+                    <input
+                      id="auth-password"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={mode === "signup" ? (isEn ? "At least 10 characters" : "อย่างน้อย 10 ตัวอักษร") : "••••••••••"}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? (isEn ? "Hide password" : "ซ่อนรหัสผ่าน") : (isEn ? "Show password" : "แสดงรหัสผ่าน")}
+                      aria-pressed={showPassword}
+                      className="v2-au-eye"
+                    >
+                      <svg viewBox="0 0 24 24" className="w-[18px] h-[18px] fill-none stroke-current" strokeWidth={1.6} aria-hidden="true">
+                        <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" strokeLinejoin="round" />
+                        <circle cx="12" cy="12" r="3" />
+                        {showPassword && <path d="M4 20L20 4" strokeLinecap="round" />}
+                      </svg>
+                    </button>
+                  </span>
 
-            {/* ด่านกันบอท (แสดงเฉพาะเมื่อตั้งค่า Turnstile ครบ) */}
-            <TurnstileWidget onToken={setTurnstileToken} resetKey={`${mode}-${turnstileAttempt}`} isEn={isEn} />
+                  {/* แถบความแข็งแรงของรหัส (สมัครเท่านั้น) */}
+                  {mode === "signup" && password.length > 0 && (
+                    <div className="v2-au-strength">
+                      <span className="v2-au-bars" aria-hidden="true">
+                        {[1, 2, 3, 4].map((step) => (
+                          <i
+                            key={step}
+                            className={
+                              strength.score >= step ? (strength.score <= 1 ? "is-weak" : strength.score === 2 ? "is-mid" : "is-good") : ""
+                            }
+                          />
+                        ))}
+                      </span>
+                      <span>
+                        {isEn ? "Strength: " : "ความปลอดภัย: "}
+                        <b className={strength.colorClass}>{strength.label}</b>
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
 
-            {/* กำลังตรวจ Turnstile อยู่ — บอกผู้ใช้ว่าปุ่มกดไม่ได้เพราะอะไร
-                ⚠️ ห่อด้วยกล่องที่จองความสูงไว้ เพราะบรรทัดนี้หายไปเองตอนผู้ใช้ผ่านด่าน
-                ถ้าไม่จองที่ ปุ่ม "เข้าสู่ระบบ" จะเลื่อนขึ้นราว 11px พอดีจังหวะที่คนกำลังจะกด
-                กล่องนี้มีเฉพาะตอนด่านเปิดจริง (`turnstileToken !== null`) จึงไม่เหลือที่ว่างลอย ๆ
-                ให้คนที่ด่านปิด */}
-            {turnstileToken !== null && (
-              <div className="min-h-[18px]">
-                {turnstileToken === "" && !loading && (
-                  <p className="text-xs text-muted text-center flex items-center justify-center gap-1.5">
-                    <span className="inline-block w-3 h-3 rounded-full border-2 border-gold border-t-transparent animate-spin" />
-                    {isEn ? "Verifying security…" : "กำลังตรวจสอบความปลอดภัย…"}
-                  </p>
-                )}
-              </div>
-            )}
+              {/* ด่านกันบอท (แสดงเฉพาะเมื่อตั้งค่า Turnstile ครบ) */}
+              <TurnstileWidget onToken={setTurnstileToken} resetKey={`${mode}-${turnstileAttempt}`} isEn={isEn} />
 
-            {/* Primary Submit Button */}
-            <button
-              type="submit"
-              disabled={loading || turnstileToken === ""}
-              aria-busy={loading}
-              className="btn-gold-glass w-full h-11.5 mt-2 font-bold font-serif-th text-xs sm:text-sm active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {loading ? (
-                <span>{isEn ? "Processing…" : "กำลังดำเนินการ…"}</span>
-              ) : (
-                <>
-                  
+              {/* กำลังตรวจ Turnstile — จองความสูงไว้ ไม่ให้ปุ่มกระโดดตอนบรรทัดนี้หาย (เฉพาะตอนด่านเปิดจริง) */}
+              {turnstileToken !== null && (
+                <div className="min-h-[18px]">
+                  {turnstileToken === "" && !loading && (
+                    <p className="v2-au-verify">
+                      <span className="inline-block w-3 h-3 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                      {isEn ? "Verifying security…" : "กำลังตรวจสอบความปลอดภัย…"}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <button type="submit" disabled={loading || turnstileToken === ""} aria-busy={loading} className="v2-au-submit">
+                {loading ? (
+                  <span>{isEn ? "Processing…" : "กำลังดำเนินการ…"}</span>
+                ) : (
                   <span>
                     {mode === "signin" && (isEn ? "Sign In with Email" : "เข้าสู่ระบบด้วยอีเมล")}
-                    {mode === "signup" && (isEn ? "Confirm Registration" : "ยืนยันการสมัครสมาชิก")}
-                    {mode === "forgot" && (isEn ? "Send Reset Link" : "ส่งลิงก์รีเซ็ตรหัสผ่าน")}
+                    {mode === "signup" && (isEn ? "Confirm Registration" : "สมัครสมาชิก")}
+                    {mode === "forgot" && (isEn ? "Send Reset Link" : "ส่งลิงก์ตั้งรหัสผ่านใหม่")}
                   </span>
+                )}
+              </button>
+            </form>
+
+            {/* สลับโหมด — บรรทัดเดียวท้ายฟอร์ม (แทนแท็บด้านบน) */}
+            <p className="v2-au-switch">
+              {mode === "signin" && (
+                <>
+                  {isEn ? "New here? " : "ยังไม่มีบัญชี? "}
+                  <button type="button" onClick={() => switchMode("signup")} className="v2-au-link">
+                    {isEn ? "Register" : "สมัครสมาชิก"}
+                  </button>
                 </>
               )}
-            </button>
-          </form>
-
-          {/* Mode Switcher Return Link for Forgot Password */}
-          {mode === "forgot" && (
-            <div className="pt-3 text-xs font-serif-th text-muted">
-              {isEn ? "Remembered your password? " : "จำรหัสผ่านได้แล้ว? "}
-              <button
-                type="button"
-                onClick={() => switchMode("signin")}
-                className="text-gold hover:underline font-bold cursor-pointer ml-1"
-              >
-                {isEn ? "Back to Sign In" : "กลับไปเข้าสู่ระบบ"}
-              </button>
-            </div>
-          )}
-
-          {/* Sanctuary Divider */}
-          <div className="w-full flex items-center my-4">
-            <div className="flex-1 border-t border-line/40" />
-            <span className="px-3 text-[13px] text-muted font-serif-th font-medium">
-              {isEn ? "Or continue with" : "หรือเชื่อมต่อทันทีด้วย"}
-            </span>
-            <div className="flex-1 border-t border-line/40" />
+              {mode === "signup" && (
+                <>
+                  {isEn ? "Already have an account? " : "มีบัญชีแล้ว? "}
+                  <button type="button" onClick={() => switchMode("signin")} className="v2-au-link">
+                    {isEn ? "Sign In" : "เข้าสู่ระบบ"}
+                  </button>
+                </>
+              )}
+              {mode === "forgot" && (
+                <>
+                  {isEn ? "Remembered your password? " : "จำรหัสผ่านได้แล้ว? "}
+                  <button type="button" onClick={() => switchMode("signin")} className="v2-au-link">
+                    {isEn ? "Back to Sign In" : "กลับไปเข้าสู่ระบบ"}
+                  </button>
+                </>
+              )}
+            </p>
           </div>
-
-          {/* World-Class Luxury Social OAuth Cards */}
-          <div className="w-full grid grid-cols-2 gap-2.5">
-            {/* Google Sanctuary Card */}
-            <button
-              type="button"
-              onClick={handleLoginGoogle}
-              className="glass-chip tap-overlay-y py-2.5 px-3.5 text-ink font-serif-th font-semibold text-xs transition cursor-pointer flex items-center justify-center gap-2 active:scale-95 group"
-            >
-              <div className="glass-chip w-5 h-5 flex items-center justify-center flex-shrink-0">
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                  />
-                </svg>
-              </div>
-              <span className="group-hover:text-gold transition-colors">Google</span>
-            </button>
-
-            {/* LINE Sanctuary Card */}
-            <button
-              type="button"
-              onClick={handleLoginLine}
-              className="tap-overlay-y py-2.5 px-3.5 rounded-full bg-surface hover:bg-[#F0FFF4] border border-[#06C755]/40 hover:border-[#06C755] text-ok font-serif-th font-semibold text-xs transition cursor-pointer flex items-center justify-center gap-2 active:scale-95 group shadow-xs"
-            >
-              {/*
-                ตราสัญลักษณ์ LINE — ฟองคำพูดเขียว + ตัวอักษร "LINE" สีขาว
-                ⚠️ ของเดิมวาดตัวอักษรด้วย path เส้นเดียวที่คัดลอกมาผิด (`s-.5.2-.5.5`
-                แทน `s.5.2.5.5`) ตัว N กับ E จึงบิดจนอ่านออกมาเป็นอักษรมั่ว ๆ ในวงกลม
-                เขียนใหม่เป็นเส้น (stroke) ทรงเรขาคณิตตรงตามโลโก้จริง — อ่านออกทุกขนาด
-                และแก้ง่ายเพราะพิกัดทุกตัวอ่านรู้เรื่อง ไม่ใช่ path ก้อนเดียวที่แก้ไม่ได้
-              */}
-              <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  fill="#06C755"
-                  d="M24 10.3c0-4.8-5.4-8.8-12-8.8S0 5.5 0 10.3c0 4.3 3.8 7.9 9 8.6.4.1.9.3 1 .6.1.4 0 1.2-.1 1.7-.1.4-.4 1.7-.6 2.1-.2.5-.9 2 .8 1.1 1.8-.9 4.8-2.9 6.5-4.9 4.6-1.5 7.4-4.8 7.4-8.6z"
-                />
-                <g
-                  fill="none"
-                  stroke="#FFFFFF"
-                  strokeWidth="1.3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  {/* L */}
-                  <path d="M5.9 7.9v4.2h2.2" />
-                  {/* I */}
-                  <path d="M9.7 7.9v4.2" />
-                  {/* N */}
-                  <path d="M11.4 12.1V7.9l2.8 4.2V7.9" />
-                  {/* E */}
-                  <path d="M18.1 7.9h-2.4v4.2h2.4" />
-                  <path d="M15.7 10h2.1" />
-                </g>
-              </svg>
-              <span className="group-hover:text-[#06C755] transition-colors">LINE</span>
-            </button>
-          </div>
-
-          </div>
+        </div>
       </div>
     </div>
   );

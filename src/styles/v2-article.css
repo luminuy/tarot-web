@@ -204,21 +204,13 @@
   font-weight: 600;
   color: var(--ui2-gold-solid);
 }
+/* จุดหน้ารายการเป็นจุดกลมมาตรฐานของเบราว์เซอร์ — ไม่ใช้รูปเพชรทอง (กฎห้ามสัญลักษณ์ตกแต่ง) */
 .v2-ar-body li {
-  position: relative;
-  margin: 8px 0;
-  padding-left: 22px;
-  list-style: none;
+  margin: 8px 0 8px 22px;
+  list-style: disc;
 }
-.v2-ar-body li::before {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 0.82em;
-  width: 7px;
-  height: 7px;
-  rotate: 45deg;
-  background: rgba(255, 217, 143, 0.7);
+.v2-ar-body li::marker {
+  color: rgba(255, 217, 143, 0.7);
 }
 .v2-ar-gap {
   height: 4px;

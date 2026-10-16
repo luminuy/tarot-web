@@ -260,7 +260,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                       </ThaiPhrases>
                     </h3>
                     <p className="v2-bl-card-desc">{getArticleDescription(article, locale)}</p>
-                    {/* ♿ R-23: ชื่อลิงก์ต้องมีชื่อบทความ (ไม่ใช่ "อ่านต่อ" เหมือนกันทุกการ์ด) */}
+                    {/* ♿ R-23: ชื่อลิงก์ต้องมีชื่อบทความ (ไม่ใช่คำสั้นคำเดียวกันทุกการ์ด) */}
                     <Link
                       href={`/blog/${article.slug}`}
                       prefetch={false}

@@ -436,14 +436,6 @@
   color: var(--rt-gold);
   border: 1px solid rgba(255, 217, 143, 0.4);
 }
-.v2-pc-row.is-on .v2-pc-txt b::after {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--rt-gold);
-  box-shadow: 0 0 0 3px rgba(255, 217, 143, 0.2);
-}
 .v2-pc-voice {
   flex: none;
   display: grid;

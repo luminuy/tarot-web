@@ -1138,13 +1138,6 @@
   align-items: center;
   gap: 8px;
 }
-.v2-th-trust li::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  rotate: 45deg;
-  background: rgb(var(--tone));
-}
 
 /* ══ 20. v2 หน้าเอกสาร (เกี่ยวกับเรา · ติดต่อเรา · ความเป็นส่วนตัว) — หัวกระดาษ + ตราประจำหน้า + บทเรียงเป็นแผ่นกระดาษ ══ */
 .v2-doc {
@@ -1215,18 +1208,12 @@
   position: relative;
   display: block;
 }
-/* ตราประทับ: ดาวแปดแฉก (สี่เหลี่ยมสองชั้นหมุน 45°) */
+/* ตราประทับ: วงแหวนเส้นทองชั้นใน (เดิมดาวแปดแฉก — ถอดตามกฎห้ามสัญลักษณ์ตกแต่ง 2026-10-16) */
 .v2-doc-mark.is-seal > span {
-  width: 30px;
-  height: 30px;
-  background: #FFD98F;
-}
-.v2-doc-mark.is-seal > span::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: #FFD98F;
-  rotate: 45deg;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid #FFD98F;
 }
 /* ซองจดหมาย: สี่เหลี่ยมเส้นทอง + ฝาซองสามเหลี่ยม */
 .v2-doc-mark.is-letter > span {
