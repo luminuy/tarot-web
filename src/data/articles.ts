@@ -5,6 +5,7 @@
  */
 
 import { ARTICLES_EN } from "./i18n/articles-en.generated";
+import { rotatingNeighborsGrouped } from "@/lib/seo/rotating-neighbors";
 
 export interface ArticleFaq {
   question: string;
@@ -1637,14 +1638,14 @@ export function getRelatedArticles(currentSlug: string, limit: number = 3): Arti
   const current = getArticleBySlug(canonicalSlug);
   if (!current) return ARTICLES.slice(0, limit);
 
-  return ARTICLES
-    .filter((a) => a.slug !== canonicalSlug)
-    .sort((a, b) => {
-      if (a.category === current.category && b.category !== current.category) return -1;
-      if (b.category === current.category && a.category !== current.category) return 1;
-      return 0;
-    })
-    .slice(0, limit);
+  // หมวดเดียวกันก่อน แบบหมุนวนตามตำแหน่งบทความ — เดิมเรียงแล้วตัด 3 ตัวแรก
+  // ทุกบทความในหมวดจึงชี้ไปบทความชุดเดิม ตัวท้ายหมวดไม่เคยได้ลิงก์ (ดู rotating-neighbors.ts)
+  return rotatingNeighborsGrouped(
+    ARTICLES,
+    (a) => a.slug === canonicalSlug,
+    (a) => a.category === current.category,
+    limit,
+  );
 }
 
 
