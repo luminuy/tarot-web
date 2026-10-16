@@ -76,6 +76,8 @@ Service Account ที่ใช้: `seertarot-gsc@tarot-web-507218.iam.gservice
 - sitemap: lastModified 2026-10-16 ให้หน้าผัง 26 + บทความ 30 (สองภาษา = 112 URL) เพราะลิงก์บนหน้าเปลี่ยนจริง
 - **ไม่ได้แตะ**: แม่แบบ title หน้าไพ่รายใบ 78 ใบ (`/cards/major-18` ติด "the moon ความหมาย" อันดับ 10 อยู่แล้ว แบบ title ถูกต้อง — เป็นเรื่องอันดับ ไม่ใช่ CTR) · หน้าแรก (คำค้น `sai เคราะห์` ไม่เกี่ยว)
 - **วัดผล**: รอ 2–4 สัปดาห์ แล้วดู `pairs` ของ 9 หน้านี้เทียบ CTR/อันดับกับตารางข้างบน
+- **ขึ้นจริงแล้ว** (PR #673 · deploy run 38856475762 สำเร็จ 2026-10-16 12:41 น.) — ตรวจ title จริงบน seertarot.net ตรงกับตาราง · sitemap มี 112 URL วันที่ 2026-10-16
+- **IndexNow**: 116 URL (หน้าผัง 26 × 2 ภาษา · บทความไทย 30 + อังกฤษที่มีฉบับแปล · `/cards/zodiac` · `/cards/birth-card` · `/spreads/topic/family` · `/spreads/topic/money`) ➔ HTTP 200
 
 ---
 
