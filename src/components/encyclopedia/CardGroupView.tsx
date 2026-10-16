@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/TarotArtIcons";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
 
 interface CardGroupViewProps {
   groupInfo: CardGroupInfo;
@@ -122,31 +123,23 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
         </ol>
       </nav>
 
-      {/* Header & Editorial Hero */}
-      <header className="altar-panel p-6 sm:p-10 relative overflow-hidden">
-        <div className="max-w-3xl space-y-4">
-          <div className="glass-chip inline-flex items-center gap-2 px-3 py-1 text-gold-ink text-xs font-serif-th font-bold">
-            <span>{isEnglish ? "Tarot Compendium" : "คัมภีร์ไพ่ยิปซี 1909"}</span>
-            <span className="w-1 h-1 rounded-full bg-gold" />
-            <span>{cards.length} {isEnglish ? "Cards" : "ใบ"}</span>
-            {groupInfo.elementTh && (
-              <>
-                <span className="w-1 h-1 rounded-full bg-gold" />
-                <span>{isEnglish ? `${groupInfo.elementEn} Element` : `ธาตุ${groupInfo.elementTh}`}</span>
-              </>
-            )}
-          </div>
+      {/* หัวหน้า UI 2.0 (เจ้าของ 2026-10-16) — ข้อความ h1 / คำโปรย / บทนำเดิมทุกตัวอักษร */}
+      <Ui2PageHero
+        title={isEnglish ? groupInfo.nameEn : groupInfo.seoTitleTh}
+        lede={isEnglish ? groupInfo.heroTaglineEn : groupInfo.heroTaglineTh}
+        trust={[
+          isEnglish ? "Tarot Compendium" : "คัมภีร์ไพ่ยิปซี 1909",
+          `${cards.length} ${isEnglish ? "Cards" : "ใบ"}`,
+          ...(groupInfo.elementTh ? [isEnglish ? `${groupInfo.elementEn} Element` : `ธาตุ${groupInfo.elementTh}`] : []),
+        ]}
+        cards={cards.slice(0, 6).map((c) => c.id)}
+      />
 
-          <h1 className="font-serif-th text-2xl sm:text-3xl lg:text-4xl font-bold text-ink leading-snug"><ThaiPhrases>
-            {isEnglish ? groupInfo.nameEn : groupInfo.seoTitleTh}
-          </ThaiPhrases></h1>
-
-          <p className="font-serif-th text-sm sm:text-base text-muted leading-relaxed">
-            {isEnglish ? groupInfo.heroTaglineEn : groupInfo.heroTaglineTh}
-          </p>
-
+      {/* บทนำ (≥ 300 คำ) + 3 จุดเด่น ในหน้าต่างกระจก */}
+      <section className="ui2-win ui2-rv">
+        <div className="max-w-3xl space-y-4 pt-8">
           {/* Editorial Prose Introduction (≥300 words) */}
-          <div className="pt-4 border-t border-line/60 space-y-3.5 text-xs sm:text-sm text-ink font-serif-th leading-relaxed">
+          <div className="space-y-3.5 text-xs sm:text-sm text-ink font-serif-th leading-relaxed">
             {intro.paragraphs.map((p, idx) => (
               <p key={idx}>{p}</p>
             ))}
@@ -169,7 +162,7 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
             ))}
           </div>
         </div>
-      </header>
+      </section>
 
       {/* Group Navigation Bar */}
       <div className="space-y-2">

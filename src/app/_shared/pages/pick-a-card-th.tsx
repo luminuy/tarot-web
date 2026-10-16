@@ -6,6 +6,7 @@ import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
 
 const pickACardOgImages = buildPageOgImage({
   title: "Pick A Card เลือกกองไพ่พยากรณ์",
@@ -150,14 +151,14 @@ export function PickACardBodyTh({ ritual }: { ritual: ReactNode }) {
         <div className="max-w-4xl mx-auto space-y-8">
           {/* ชื่อหน้า — เดิมหน้านี้ไม่มีหัวเรื่องบอกว่าเป็นหน้าอะไร <h1> คือหัวข้อที่เลือกอยู่ ("เขาคิดยังไงกับเรา…")
               ซึ่งไม่ตรงกับชื่อหน้าในผลค้นหา (เจ้าของทัก) · หัวข้อที่เลือกในพิธีจึงลดเป็น <h2> บนหน้านี้ */}
-          <header className="text-center space-y-2 pt-2">
-            <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink leading-snug [text-wrap:balance]">
-              <ThaiPhrases>{"Pick A Card เลือกกองไพ่พยากรณ์"}</ThaiPhrases>
-            </h1>
-            <p className="text-sm sm:text-base text-muted font-serif-th leading-relaxed">
-              <ThaiPhrases>{"เลือกหัวข้อที่อยากรู้ ตั้งจิตถึงเรื่องนั้น แล้วเลือกกองไพ่ที่ใจเรียก"}</ThaiPhrases>
-            </p>
-          </header>
+          <Ui2PageHero
+            crumbs={[{ label: "หน้าแรก", href: "/" }, { label: "Pick A Card" }]}
+            title="Pick A Card เลือกกองไพ่พยากรณ์"
+            accent="Pick A Card"
+            lede="เลือกหัวข้อที่อยากรู้ ตั้งจิตถึงเรื่องนั้น แล้วเลือกกองไพ่ที่ใจเรียก"
+            trust={["4 กองไพ่ · เลือกตามใจ", "สำรับ 1909 แท้", "อ่านฟรี"]}
+            cards={["major-02", "major-18", "major-17", "major-10", "cups-07", "major-21"]}
+          />
 
           {/* ห่อ div — <astro-island> เป็น display:contents จึงไม่รับระยะจาก space-y ทำให้กล่องพิธีชิดกล่องบทความ */}
           <div>{ritual}</div>

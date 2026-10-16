@@ -253,6 +253,9 @@ export function LoveOneCardClient() {
         breadcrumbs={breadcrumbs}
         badgeText={isEnglish ? "Original 1909 deck · 78 cards" : "สำรับ 1909 แท้ 78 ใบ"}
         title={isEnglish ? "Love Tarot 1 Card Reading" : "ดูดวงความรัก 1 ใบ ไขคำตอบสถานะหัวใจ"}
+        accent={isEnglish ? "Love Tarot" : "ความรัก"}
+        cards={["major-06", "cups-02", "major-03", "cups-10", "major-17", "cups-01"]}
+        trust={isEnglish ? ["Truly random, verifiable", "For singles, crushes, couples, exes"] : ["สุ่มจริง ตรวจสอบได้", "โสด · คนคุย · มีแฟน · คนเก่า"]}
         tagline={
           isEnglish
             ? "Draw one card to reveal romantic energies, intentions, and clear guidance tailored to your current relationship status."

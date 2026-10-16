@@ -16,6 +16,17 @@ import type { Locale } from "@/lib/i18n/types";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+
+/** ไพ่ลอยข้างหัวหน้าต่อหมวด (ตกแต่ง ไม่ใช่ผลสุ่ม) */
+const TOPIC_HERO_CARDS: Record<string, readonly string[]> = {
+  love: ["major-06", "cups-02", "major-03", "cups-10", "cups-01", "major-17"],
+  career: ["major-07", "pentacles-08", "wands-03", "major-04", "wands-06", "major-01"],
+  money: ["pentacles-01", "pentacles-10", "major-10", "pentacles-09", "pentacles-06", "major-19"],
+  health: ["major-14", "major-17", "cups-06", "major-19", "wands-09", "major-11"],
+  family: ["cups-10", "pentacles-10", "major-03", "major-04", "cups-06", "major-05"],
+  study: ["pentacles-08", "major-02", "swords-01", "major-01", "pentacles-03", "major-05"],
+};
 
 export function spreadTopicStaticParams() {
   return getAllTopicSlugs().map((slug) => ({ category: slug }));
@@ -191,11 +202,20 @@ export function SpreadTopicContent({
           </ol>
         </nav>
 
-        {/* Category Navigation Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-line/60">
+        {/* หัวหน้า UI 2.0 (เจ้าของ 2026-10-16) — ข้อความ h1 / คำโปรยเดิม · แถบหมวดเป็นชิปใต้หัวหน้า */}
+        <Ui2PageHero
+          title={topicHeading}
+          accent={isEnglish ? topic.nameEn : topic.nameTh}
+          lede={topicTagline}
+          trust={[
+            isEnglish ? `Topic category · ${spreads.length} dedicated spreads` : `หมวดหมู่ผังพยากรณ์ · ${spreads.length} ผังเฉพาะทาง`,
+          ]}
+          cards={TOPIC_HERO_CARDS[topic.slug] ?? TOPIC_HERO_CARDS.love}
+        >
+        <div className="ui2-ph-chips is-scroll">
           <Link
             href="/spreads"
-            className="px-4 py-1.5 rounded-full text-xs font-serif-th font-semibold whitespace-nowrap bg-inset text-[#5E5240] hover:bg-[#DDD8CD] transition-colors"
+            className="ui2-ph-chip"
           >
             {isEnglish ? "All Spreads (26)" : "ผังทั้งหมด (26 ผัง)"}
           </Link>
@@ -206,32 +226,16 @@ export function SpreadTopicContent({
               <Link
                 key={t.slug}
                 href={`/spreads/topic/${t.slug}`}
-                className={`px-4 py-1.5 rounded-full text-xs font-serif-th font-semibold whitespace-nowrap transition ${
-                  isActive
-                    ? "btn-gold-glass"
-                    : "bg-surface border border-line text-[#4A4338] hover:border-gold"
-                }`}
+                className="ui2-ph-chip"
+                aria-current={isActive ? "page" : undefined}
               >
                 {tName} ({t.spreadIds.length})
               </Link>
             );
           })}
         </div>
+        </Ui2PageHero>
 
-        {/* Hero Header */}
-        <header className="space-y-4 max-w-3xl">
-          <div className="glass-chip inline-flex items-center gap-2 px-3 py-1 text-xs text-gold-ink font-serif-th font-semibold">
-            {isEnglish
-              ? `Topic Category · ${spreads.length} Dedicated Spreads`
-              : `หมวดหมู่ผังพยากรณ์ · ${spreads.length} ผังเฉพาะทาง`}
-          </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-serif-th text-ink tracking-tight leading-tight"><ThaiPhrases>
-            {topicHeading}
-          </ThaiPhrases></h1>
-          <p className="text-sm sm:text-base text-muted leading-relaxed font-serif-th">
-            {topicTagline}
-          </p>
-        </header>
 
         {/* Editorial Guide Prose */}
         <section className={`${bandClass("guide")} space-y-4`}>

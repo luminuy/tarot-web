@@ -6,6 +6,7 @@ import { BirthCardBodyEnRoot } from "../../../components/PageBodies";
 import { BirthCardCalculatorRoot } from "../../../islands/BirthCardCalculatorRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
 import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
 
 /** 🎂 คำนวณไพ่ทาโรต์ประจำตัวจากวันเกิด (ต้นไม้ภาษาอังกฤษ) */
 const locale = "en" as const;
@@ -22,3 +23,8 @@ const locale = "en" as const;
   </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../../scripts/ui2-inview";
+</script>

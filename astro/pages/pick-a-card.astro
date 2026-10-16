@@ -6,6 +6,7 @@ import { PickACardBodyThRoot } from "../components/PageBodies";
 import { PickACardIsland } from "../islands/PickACardIsland";
 import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
 import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
 
 /** 🔮 Pick A Card — พิธีเลือกกองไพ่เป็น island · เนื้อหา SEO ท้ายหน้าเป็น HTML ล้วน */
 const locale = "th" as const;
@@ -22,3 +23,8 @@ const locale = "th" as const;
   </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../scripts/ui2-inview";
+</script>

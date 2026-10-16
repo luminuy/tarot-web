@@ -1,8 +1,9 @@
-"use client";
-
-import React from "react";
-import { LocaleLink as Link } from "@/components/ui/LocaleLink";
-import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+/**
+ * หัวหน้าของหน้าพิธีเปิดไพ่ / หน้าคำนวณ (ดูดวงความรัก 1 ใบ · ไพ่ประจำตัว · ไพ่ประจำราศี)
+ * UI 2.0 (เจ้าของ 2026-10-16 "ต้องสวย ต้องว้าว เหมือนหน้าที่ทำมาก่อนหน้านี้") — ส่งต่อให้ `Ui2PageHero`
+ * หัวเล็กสีทอง · h1 คำเน้นทอง · คำโปรย · แคปซูล (`badgeText`) · ไพ่จริงลอย 2 แนวต่อข้าง
+ */
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
 
 export interface BreadcrumbItem {
   label: string;
@@ -14,68 +15,23 @@ export interface RitualHeroProps {
   badgeText: string;
   title: string;
   tagline: string;
+  /** คำใน `title` ที่จะเป็นทองไล่สี */
+  accent?: string;
+  /** ไพ่ลอยข้างหัวข้อ (ตกแต่ง ไม่ใช่ผลสุ่ม) */
+  cards?: readonly string[];
+  /** ข้อความเพิ่มในแคปซูลต่อจาก `badgeText` */
+  trust?: readonly string[];
 }
 
-export function RitualHero({
-  breadcrumbs,
-  badgeText,
-  title,
-  tagline,
-}: RitualHeroProps) {
+export function RitualHero({ breadcrumbs, badgeText, title, tagline, accent, cards, trust }: RitualHeroProps) {
   return (
-    <div className="space-y-4">
-      {/* Breadcrumb Navigation */}
-      <nav aria-label="Breadcrumb" className="text-xs font-serif-th text-muted">
-        <ol className="flex items-center gap-2 flex-wrap">
-          {breadcrumbs.map((crumb, idx) => {
-            const isLast = idx === breadcrumbs.length - 1;
-            return (
-              <React.Fragment key={idx}>
-                {idx > 0 && (
-                  <li aria-hidden="true" className="text-line">
-                    /
-                  </li>
-                )}
-                <li
-                  className={isLast ? "font-semibold text-ink" : ""}
-                  aria-current={isLast ? "page" : undefined}
-                >
-                  {crumb.href && !isLast ? (
-                    <Link
-                      href={crumb.href}
-                      className="hover:text-ink transition-colors"
-                    >
-                      {crumb.label}
-                    </Link>
-                  ) : (
-                    <span>{crumb.label}</span>
-                  )}
-                </li>
-              </React.Fragment>
-            );
-          })}
-        </ol>
-      </nav>
-
-      {/* Hero Header */}
-      <header className="text-center space-y-3 pt-2 max-w-2xl mx-auto">
-        {/* Sacred Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-line bg-surface shadow-raised">
-          <span className="text-xs font-serif-th font-semibold text-gold-ink">
-            {badgeText}
-          </span>
-        </div>
-
-        {/* H1 Title */}
-        <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink tracking-tight leading-tight [text-wrap:balance]"><ThaiPhrases>
-          {title}
-        </ThaiPhrases></h1>
-
-        {/* Tagline */}
-        <p className="text-xs sm:text-sm text-muted max-w-xl mx-auto leading-relaxed [text-wrap:balance]">
-          {tagline}
-        </p>
-      </header>
-    </div>
+    <Ui2PageHero
+      crumbs={breadcrumbs}
+      title={title}
+      accent={accent}
+      lede={tagline}
+      trust={[badgeText, ...(trust ?? [])]}
+      cards={cards}
+    />
   );
 }

@@ -39,6 +39,7 @@ import { mapLayout, MAP_CARD_ASPECT, MAP_CARD_MIN_PX } from "@/lib/tarot/spread-
 import { SpreadLayoutGlyph } from "./SpreadLayoutGlyph";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
 
 /**
  * ✦ ห้องออกแบบผัง `/spreads/create` (REFLECTION_JOURNAL_PLAN 1.8 · คลื่น 5)
@@ -259,18 +260,17 @@ export const SpreadBuilder: React.FC = () => {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-20 space-y-8">
-      <header className="text-center space-y-2">
-        <p className="text-[11px] sm:text-xs tracking-[0.2em] uppercase text-gold-ink font-serif-th">{L("ห้องออกแบบผัง", "Spread workshop")}</p>
-        <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-ink-deep [text-wrap:balance]">
-          <ThaiPhrases>{L("ผังที่ถามตรงกับใจคุณ", "A spread that asks what you mean")}</ThaiPhrases>
-        </h1>
-        <p className="text-xs sm:text-sm text-muted font-serif-th max-w-xl mx-auto leading-relaxed [text-wrap:balance]">
-          {L(
-            "เลือกตำแหน่ง 1–7 ใบจากคลังที่แม่หมอเขียนไว้ หรือเขียนเอง แล้วแม่หมอจะอ่านไพ่แต่ละใบผ่านคำถามของคุณตรง ๆ",
-            "Pick 1–7 positions from our readers' library or write your own — the reader will read every card through your exact question.",
-          )}
-        </p>
-      </header>
+      <Ui2PageHero
+        compact
+        crumbs={[{ label: L("หน้าแรก", "Home"), href: "/" }, { label: L("ผังพยากรณ์", "Spreads"), href: "/spreads" }, { label: L("ห้องออกแบบผัง", "Spread workshop") }]}
+        title={L("ผังที่ถามตรงกับใจคุณ", "A spread that asks what you mean")}
+        accent={L("ตรงกับใจคุณ", "what you mean")}
+        lede={L(
+          "เลือกตำแหน่ง 1–7 ใบจากคลังที่แม่หมอเขียนไว้ หรือเขียนเอง แล้วแม่หมอจะอ่านไพ่แต่ละใบผ่านคำถามของคุณตรง ๆ",
+          "Pick 1–7 positions from our readers' library or write your own — the reader will read every card through your exact question.",
+        )}
+        cards={["major-01", "wands-02", "major-03", "pentacles-03"]}
+      />
 
       {sharedFrom && (
         <p className="glass-tile !rounded-xl p-3 text-center text-xs sm:text-sm font-serif-th text-ink-deep">

@@ -16,6 +16,7 @@ import { getArticleTitle } from "@/data/article-helpers";
 import { SpreadPositionMap } from "@/components/spread/SpreadPositionMap";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
 
 interface Props {
   spread: Spread;
@@ -145,38 +146,30 @@ export const SpreadDetailClient: React.FC<Props> = ({
         <span className="truncate font-bold text-ink">{spreadName}</span>
       </nav>
 
-      {/* Header */}
-      <header className="space-y-4">
-        <div className="flex flex-wrap items-center gap-2 text-[13px] font-serif-th">
-          <span className="glass-chip px-2.5 py-0.5 font-mono font-bold">
-            {spread.positions.length} {isEnglish ? "Cards" : "ใบ"}
-          </span>
-          <span className="glass-chip px-2.5 py-0.5">
-            {isEnglish ? `Category: ${categoryLabel}` : `หมวด ${categoryLabel}`}
-          </span>
-          <span className="glass-chip px-2.5 py-0.5">
-            {standard ? (isEnglish ? "Standard Spread" : "ผังมาตรฐาน") : (isEnglish ? "Grand Spread" : "ญาณพิเศษ")}
-          </span>
-        </div>
-        <h1 className="font-serif-th text-3xl font-bold leading-tight sm:text-4xl [text-wrap:balance]"><ThaiPhrases>
-          {isEnglish ? spreadName : (spread.seoTitleTh ?? `ผัง${spread.nameTh}`)}
-        </ThaiPhrases></h1>
-        <p className="font-serif-th text-lg text-gold-ink [text-wrap:balance]">{spreadTagline}</p>
-        <p className="max-w-2xl font-serif-th leading-relaxed text-ink [text-wrap:pretty]">
-          {spreadDesc}
-        </p>
-        <Link
-          href={`/read/${spread.id}`}
-          className="btn-gold-glass inline-flex items-center gap-1.5 px-6 py-3 font-serif-th text-sm font-bold active:scale-[0.98]"
-        >
-          
-          <span>
+      {/* หัวหน้า UI 2.0 (เจ้าของ 2026-10-16) — ข้อความ h1 / คำโปรย / ปุ่มเดิม */}
+      <Ui2PageHero
+        title={isEnglish ? spreadName : (spread.seoTitleTh ?? `ผัง${spread.nameTh}`)}
+        lede={
+          <>
+            <span className="ui2-ph-tagline">{spreadTagline}</span>
+            {spreadDesc}
+          </>
+        }
+        trust={[
+          `${spread.positions.length} ${isEnglish ? "Cards" : "ใบ"}`,
+          isEnglish ? `Category: ${categoryLabel}` : `หมวด ${categoryLabel}`,
+          standard ? (isEnglish ? "Standard Spread" : "ผังมาตรฐาน") : (isEnglish ? "Grand Spread" : "ญาณพิเศษ"),
+        ]}
+        actions={
+          <Link href={`/read/${spread.id}`} className="ui2-btn ui2-btn-gold">
             {standard
               ? (isEnglish ? "Begin Reading with Spread" : "เริ่มดูดวงด้วยผังนี้")
               : (isEnglish ? "Unlock Grand Spread" : "เปิดผังพยากรณ์พิเศษนี้")}
-          </span>
-        </Link>
-      </header>
+            <span className="ui2-btn-arrow" aria-hidden="true" />
+          </Link>
+        }
+        cards={["major-17", "major-01", "major-21", "major-10", "major-02", "major-19"]}
+      />
 
       {/* Diagram + Positions */}
       {/* แถบสีสลับแบบหน้าแรก (`page-band`): ตำแหน่งไพ่ (อ่อน) · วิธีอ่าน (ใส) · คำถาม (อ่อน) · บทความ (ใส) · ผังอื่น (สลับต่อ) */}

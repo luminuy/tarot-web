@@ -7,6 +7,7 @@ import { BlogDetailContentRoot } from "../../../components/PageBodies";
 import { ArticleReaderRoot } from "../../../islands/ArticleReaderIsland";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
 import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
 
 /**
  * 📖 บทความรายเรื่อง (ต้นไม้ภาษาอังกฤษ)
@@ -44,4 +45,9 @@ const related = getRelatedArticles(article.slug, 3);
 -->
 <script>
   import "../../../scripts/article-share";
+</script>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../../scripts/ui2-inview";
 </script>

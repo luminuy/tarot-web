@@ -165,6 +165,8 @@ export function BirthCardBodyEn({ calculator }: { calculator: ReactNode }) {
           breadcrumbs={breadcrumbs}
           badgeText="Tarot Numerology"
           title="Tarot Birth Card Calculator"
+          accent="Birth Card"
+          cards={["major-01", "major-10", "major-02", "major-19", "major-17", "major-21"]}
           tagline="Discover the psychological archetypes and lifelong soul lessons woven into your birth date through the authentic 1909 Rider-Waite deck."
         />
 

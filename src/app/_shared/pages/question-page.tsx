@@ -21,6 +21,7 @@ import { getCategoryCardImage } from "@/lib/media/og-card-art";
 import type { Locale } from "@/lib/i18n/types";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
 
 /**
  * ❓ หน้าคำถาม `/questions/[slug]` + หน้ารวม `/questions` (REFLECTION_JOURNAL_PLAN 1.11 · แทร็ก Q)
@@ -153,15 +154,18 @@ export function QuestionPageContent({ question: q, locale, askBox }: { question:
           </ol>
         </nav>
 
-        <header className="space-y-4">
-          <p className="glass-chip inline-flex items-center gap-2 px-3 py-1 text-xs text-gold-ink font-serif-th font-semibold">
-            {isEn ? `${parent.en} question` : `คำถามหมวด${parent.th}`}
-          </p>
-          <h1 className="text-3xl sm:text-4xl font-bold font-serif-th text-ink-deep leading-tight [text-wrap:balance]"><ThaiPhrases>{c.question}</ThaiPhrases></h1>
-          <div className="space-y-3 text-sm sm:text-base text-[#4A4338] font-serif-th leading-relaxed">
+        {/* หัวหน้า UI 2.0 (เจ้าของ 2026-10-16) — คำถามเป็น h1 · บทนำเดิมอยู่ในหน้าต่างกระจกใต้หัวหน้า */}
+        <Ui2PageHero
+          compact
+          title={c.question}
+          trust={[isEn ? `${parent.en} question` : `คำถามหมวด${parent.th}`]}
+          cards={["major-02", "major-17", "major-06", "major-10"]}
+        />
+        <section className="ui2-win ui2-rv">
+          <div className="space-y-3 pt-7 text-sm sm:text-base text-[#4A4338] font-serif-th leading-relaxed">
             {c.intro.map((p, i) => <p key={i}>{p}</p>)}
           </div>
-        </header>
+        </section>
 
         <section className="space-y-3">
           <H2>{isEn ? "What the cards can — and can't — answer" : "ไพ่ตอบอะไรได้ และอะไรที่ไม่ควรถามไพ่"}</H2>
@@ -310,11 +314,13 @@ export function QuestionsHubContent({ locale }: { locale: Locale }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(itemList) }} />
       <div className="max-w-4xl mx-auto space-y-10 py-6">
-        <header className="space-y-3 text-center">
-          <p className="text-[11px] sm:text-xs tracking-[0.2em] uppercase text-gold-ink font-serif-th">{isEn ? "Tarot questions" : "คำถามดูดวง"}</p>
-          <h1 className="text-3xl sm:text-4xl font-bold font-serif-th text-ink-deep [text-wrap:balance]"><ThaiPhrases>{c.heading}</ThaiPhrases></h1>
-          <p className="text-sm text-muted font-serif-th max-w-2xl mx-auto leading-relaxed [text-wrap:balance]">{c.lead}</p>
-        </header>
+        <Ui2PageHero
+          crumbs={[{ label: isEn ? "Home" : "หน้าแรก", href: "/" }, { label: isEn ? "Tarot questions" : "คำถามดูดวง" }]}
+          title={c.heading}
+          lede={c.lead}
+          trust={isEn ? [`${QUESTIONS.length} questions`, "Each with a spread that fits"] : [`${QUESTIONS.length} คำถาม`, "ทุกคำถามมีผังที่เหมาะ"]}
+          cards={["major-06", "major-07", "pentacles-01", "major-02", "cups-10", "pentacles-08"]}
+        />
         {QUESTION_TOPIC_ORDER.map((topic) => {
           const items = QUESTIONS.filter((q) => q.topic === topic);
           if (items.length === 0) return null;

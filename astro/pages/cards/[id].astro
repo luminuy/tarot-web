@@ -14,6 +14,7 @@ import { CardDetailRelatedRoot } from "../../components/CardDetailRelated";
 import { CardDetailViewRoot } from "../../islands/CardDetailRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
 import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
 
 /**
  * 🃏 ความหมายไพ่รายใบ 78 หน้า (ต้นไม้ภาษาไทย)
@@ -62,4 +63,9 @@ const { currentIndex, totalCards, prevCard, nextCard } = cardNeighbors(card);
 -->
 <script>
   import "../../scripts/card-orientation";
+</script>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../scripts/ui2-inview";
 </script>

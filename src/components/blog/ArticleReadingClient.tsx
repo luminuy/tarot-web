@@ -13,6 +13,7 @@ import {
 import { COUNTS } from "@/components/layout/nav-links";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases, thaiPhrasesHtml } from "@/components/ui/ThaiPhrases";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
 
 interface Props {
   article: Article;
@@ -61,28 +62,14 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       </nav>
 
       {/* Article Header */}
-      <header className="space-y-4 text-center sm:text-left">
-        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 text-xs font-mono">
-          <span className="glass-chip px-3 py-1 text-gold-ink font-bold">
-            {articleCat}
-          </span>
-          <span className="text-muted">
-            {isEnglish ? `${readTimeFormatted}` : `เวลาอ่าน ${article.readTime}`}
-          </span>
-          <span className="text-muted">·</span>
-          <span className="text-muted">
-            {isEnglish ? `By ${articleAuthor}` : `โดย ${article.author}`}
-          </span>
-        </div>
-
-        <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-ink leading-snug sm:leading-normal py-0.5 [text-wrap:balance]"><ThaiPhrases>
-          {articleTitle}
-        </ThaiPhrases></h1>
-
-        <p className="text-sm sm:text-base text-ink font-serif-th leading-relaxed border-l-2 border-line pl-4 py-1 italic bg-surface rounded-r-xl shadow-xs [text-wrap:pretty]">
-          {articleDesc}
-        </p>
-      </header>
+      {/* หัวบทความ UI 2.0 (เจ้าของ 2026-10-16) — ข้อความเดิม */}
+      <Ui2PageHero
+        compact
+        title={articleTitle}
+        lede={articleDesc}
+        trust={[articleCat, isEnglish ? `${readTimeFormatted}` : `เวลาอ่าน ${article.readTime}`, isEnglish ? `By ${articleAuthor}` : `โดย ${article.author}`]}
+        cards={["major-02", "major-17", "major-09", "major-21"]}
+      />
 
       {/* Table of Contents (TOC) */}
       {effectiveToc && effectiveToc.length > 0 && (

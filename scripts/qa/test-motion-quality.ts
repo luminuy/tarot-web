@@ -363,7 +363,7 @@ function checkCss(violations: Violation[]): void {
  * ด่าน `test-ui2-fx` ตรวจซ้ำบน CSS ที่บิลด์แล้ว (ตัวย่ออาจย้ายกฎ)
  */
 /** ไฟล์เอฟเฟกต์ระดับ full — หน้าแรก + คลังผัง /spreads (แต่ละหน้าโหลดไฟล์ของตัวเอง · กติกาล็อกสองชั้นเดียวกันทุกไฟล์) */
-const UI2_FULL_FX_FILES = ["src/styles/ui2-fx-full.css", "src/styles/ui2-spreads-fx.css", "src/styles/ui2-daily-fx.css"];
+const UI2_FULL_FX_FILES = ["src/styles/ui2-fx-full.css", "src/styles/ui2-spreads-fx.css", "src/styles/ui2-daily-fx.css", "src/styles/ui2-page-fx.css"];
 
 function checkUi2FullFx(violations: Violation[]): void {
   for (const file of UI2_FULL_FX_FILES) checkUi2FullFxFile(file, violations);

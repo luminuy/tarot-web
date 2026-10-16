@@ -9,7 +9,7 @@ import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
-import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
 
 const PATH = "/cards/all";
 
@@ -129,30 +129,22 @@ export function CardsAllBody({ locale, table }: { locale: Locale; table: ReactNo
           </ol>
         </nav>
 
-        {/* Hero Header */}
-        <header className="rounded-2xl border border-line bg-surface p-6 sm:p-8 shadow-xs space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gold/40 bg-surface-warm text-gold-ink text-xs font-serif-th font-bold">
-            <span>{copy.badgeLeft}</span>
-            <span className="w-1 h-1 rounded-full bg-gold" />
-            <span>{copy.badgeRight}</span>
-          </div>
-
-          <h1 className="font-serif-th text-2xl sm:text-3xl font-bold text-ink"><ThaiPhrases>{copy.title}</ThaiPhrases></h1>
-
-          <p className="font-serif-th text-xs sm:text-sm text-muted leading-relaxed max-w-3xl">{copy.lede}</p>
-
-          <div className="pt-2 flex flex-wrap gap-2 text-xs font-serif-th">
+        {/* หัวหน้า UI 2.0 (เจ้าของ 2026-10-16) — ข้อความเดิม · ชิปกลุ่มไพ่เป็นปุ่มกระจกใต้คำโปรย */}
+        <Ui2PageHero
+          title={copy.title}
+          accent={locale === "en" ? undefined : "78 ใบ"}
+          lede={copy.lede}
+          trust={[copy.badgeLeft, copy.badgeRight]}
+          cards={["major-00", "cups-01", "major-21", "swords-01", "wands-01", "pentacles-01"]}
+        >
+          <div className="ui2-ph-chips">
             {copy.chips.map((chip) => (
-              <Link
-                key={chip.href}
-                href={href(chip.href)}
-                className="px-3 py-1 rounded-lg border border-line bg-surface-warm hover:bg-surface text-ink"
-              >
+              <Link key={chip.href} href={href(chip.href)} className="ui2-ph-chip">
                 {chip.label}
               </Link>
             ))}
           </div>
-        </header>
+        </Ui2PageHero>
 
         {/* Interactive Master Table — แถบสีอ่อนแบ่งจากหัวหน้าแบบหน้าแรก (`page-band`) · ห่อ div เพราะ <astro-island> เป็น display:contents */}
         <div className="page-band page-band-tint">{table}</div>

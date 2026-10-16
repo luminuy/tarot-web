@@ -4,6 +4,7 @@ import { readingChatMetadataEn } from "@/app/_shared/pages/reading-chat-en";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { ReadingChatRootEn } from "../../../islands/ReadingChatRoot";
 import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
 
 /**
  * 💬 ห้องสนทนากับแม่หมอ (ต้นไม้ภาษาอังกฤษ)
@@ -18,3 +19,8 @@ const locale = "en" as const;
   <ReadingChatRootEn client:load />
   </div>
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../../scripts/ui2-inview";
+</script>

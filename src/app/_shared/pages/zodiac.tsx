@@ -289,6 +289,8 @@ export function ZodiacIndexBody({
           breadcrumbs={breadcrumbs}
           badgeText={isEnglish ? "Tarot × Astrology" : "ไพ่ทาโรต์ × โหราศาสตร์"}
           title={isEnglish ? "Zodiac Tarot Cards" : "ไพ่ประจำราศี 12 ราศี"}
+          accent={isEnglish ? "Zodiac" : "12 ราศี"}
+          cards={["major-04", "major-05", "major-06", "major-07", "major-08", "major-09"]}
           tagline={
             isEnglish
               ? "Every sign has its own tarot cards. Find yours from your birthday and see what the 1909 Rider-Waite deck says about your sign."
@@ -468,6 +470,8 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
           breadcrumbs={breadcrumbs}
           badgeText={isEnglish ? `${sign.nameEn} · ${major.nameEn}` : `${sign.nameTh} · ${major.nameEn}`}
           title={isEnglish ? `${sign.nameEn} Tarot Cards` : `ดูดวง${sign.nameTh} ไพ่ยิปซีและไพ่ประจำราศี`}
+          accent={isEnglish ? sign.nameEn : `ดูดวง${sign.nameTh}`}
+          cards={[sign.majorCardId, "major-17", "major-19", "major-18", "major-21", "major-10"]}
           tagline={copy.tagline}
         />
 

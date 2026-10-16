@@ -6,6 +6,7 @@ import { PrivacyBodyThRoot } from "../components/PageBodies";
 import { DeleteAllDataRoot } from "../islands/DeleteAllDataRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
 import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
 
 /**
  * 🔐 นโยบายความเป็นส่วนตัว — หน้านี้ **ไม่โหลด React เลยสักไบต์** (2026-09-18)
@@ -33,3 +34,8 @@ const locale = "th" as const;
     import "../scripts/delete-all-data";
   </script>
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../scripts/ui2-inview";
+</script>

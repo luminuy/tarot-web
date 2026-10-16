@@ -10,6 +10,7 @@ import { CHEAPEST_PACKAGE_THB, DAILY_LIMIT, READINGS_EN } from "@/lib/entitlemen
 import { CheckMarkIcon, DashMarkIcon } from "@/components/entitlement/EntitlementIcons";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import type { Locale } from "@/lib/i18n/types";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
 
 /**
  * 💳 หน้า "ราคาและแพ็กเกจ" (`/pricing` · `/en/pricing`)
@@ -243,19 +244,21 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
 
       <div className="mx-auto max-w-6xl space-y-16 px-4 pt-12 sm:px-6 sm:pt-16">
         {/* ── หัวหน้า — ไม่มีกล่อง ตัวอักษรสีหมึกเท่านั้น (สีทองบนพื้นไล่สีคอนทราสต์ไม่ผ่าน · HANDOFF_GLASS_HOME 2.4) ── */}
-        <header className="mx-auto max-w-3xl space-y-4 text-center">
-          <p className="font-serif-th text-sm font-semibold text-muted">{isEn ? "Pricing" : "ราคาและแพ็กเกจ"}</p>
-          <h1 className="font-serif-th text-3xl font-bold leading-snug text-ink-deep sm:text-5xl">
-            <ThaiPhrases>{isEn ? "Read free every day. Top up when you want more." : "ดูดวงฟรีทุกวัน เติมรอบเมื่ออยากถามเพิ่ม"}</ThaiPhrases>
-          </h1>
-          <p className="mx-auto max-w-2xl font-serif-th text-base leading-relaxed text-muted sm:text-lg">
+        {/* หัวหน้า UI 2.0 (เจ้าของ 2026-10-16) — ข้อความ h1 / คำโปรยเดิมทุกตัวอักษร */}
+        <Ui2PageHero
+          crumbs={[{ label: isEn ? "Home" : "หน้าแรก", href: "/" }, { label: isEn ? "Pricing" : "ราคาและแพ็กเกจ" }]}
+          title={isEn ? "Read free every day. Top up when you want more." : "ดูดวงฟรีทุกวัน เติมรอบเมื่ออยากถามเพิ่ม"}
+          accent={isEn ? "free every day." : "ดูดวงฟรีทุกวัน"}
+          lede={
             <ThaiPhrases>
               {isEn
                 ? `Pay once — no subscription, and purchased readings never expire. Packages from ${CHEAPEST_PACKAGE_THB} THB.`
                 : `จ่ายครั้งเดียว ไม่มีรายเดือน รอบที่เติมไม่มีวันหมดอายุ · แพ็กเริ่มต้น ${CHEAPEST_PACKAGE_THB} บาท`}
             </ThaiPhrases>
-          </p>
-        </header>
+          }
+          trust={isEn ? ["No subscription", "Readings never expire"] : ["ไม่มีรายเดือน", "รอบที่เติมไม่มีวันหมดอายุ"]}
+          cards={["pentacles-10", "major-19", "pentacles-01", "major-21", "pentacles-09", "major-17"]}
+        />
 
         {/* ── แพ็ก (island) ───────────────────────────────────────── */}
         {/* แถบสีสลับแบบหน้าแรก (`page-band`): แพ็ก (อ่อน) · ตารางเทียบ (ใส) · คำถาม (อ่อน) · ปิดท้าย (ใส) */}

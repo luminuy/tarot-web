@@ -5,6 +5,7 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { SpreadBuilderRoot } from "../../../islands/SpreadBuilderRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
 import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
 
 /**
  * ✦ ห้องออกแบบผัง (REFLECTION_JOURNAL_PLAN 1.8 · คลื่น 5) — เชลล์ static + island เดียว · noindex
@@ -21,3 +22,8 @@ const locale = "en" as const;
   </div>
   <SiteFooterRoot locale={locale} spacing="tight" />
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../../scripts/ui2-inview";
+</script>

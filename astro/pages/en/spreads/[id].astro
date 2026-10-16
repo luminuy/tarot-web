@@ -11,6 +11,7 @@ import { SpreadDetailContentRoot } from "../../../components/PageBodies";
 import { SpreadDetailRoot } from "../../../islands/SpreadIslands";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
 import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
 
 /** 📐 คู่มือผังพยากรณ์รายผัง 26 หน้า (ต้นไม้ภาษาอังกฤษ) */
 const locale = "en" as const;
@@ -34,3 +35,8 @@ const detailProps = spreadDetailProps(spread, locale);
   </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../../scripts/ui2-inview";
+</script>

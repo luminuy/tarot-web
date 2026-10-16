@@ -4,6 +4,7 @@ import { readSpreadMetadata, readSpreadStaticParams } from "@/app/_shared/pages/
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { TarotFlowRoot } from "../../../islands/TarotFlowRoot";
 import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
 
 /**
  * 🔮 หน้าดูดวงรายผัง 26 หน้า (ต้นไม้ภาษาอังกฤษ) — ปลายทางของปุ่ม "เริ่มดูดวงด้วยผังนี้" ทุกปุ่ม
@@ -27,3 +28,8 @@ const spreadId = Astro.params.id!;
   <TarotFlowRoot locale={locale} initialSpreadId={spreadId} pathname={Astro.url.pathname} client:load />
   </div>
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../../scripts/ui2-inview";
+</script>

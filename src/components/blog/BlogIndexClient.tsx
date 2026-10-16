@@ -12,6 +12,7 @@ import { getArticleCardArt } from "@/data/article-art";
 import { CardImage } from "@/components/card/CardImage";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
 
 const SearchIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
   <svg
@@ -94,23 +95,17 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
   return (
     <div className="space-y-10">
       {/* Dynamic Bilingual Hero Header */}
-      <header className="text-center space-y-4 pt-2">
-        <p className="text-xs sm:text-sm font-semibold tracking-wider text-gold-ink uppercase font-serif-th">
-          {isEnglish
-            ? "SEERTAROT WISDOM CODEX & ESOTERIC ESSAYS"
-            : "คลังความรู้และคู่มือศาสตร์พยากรณ์"}
-        </p>
-        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold font-serif-th text-ink tracking-tight leading-tight"><ThaiPhrases>
-          {isEnglish
-            ? "Tarot Wisdom Codex & Divination Essays"
-            : "คัมภีร์บทความดูดวงไพ่ยิปซี ทาโรต์ 1909"}
-        </ThaiPhrases></h1>
-        <p className="text-xs sm:text-sm md:text-base text-muted max-w-2xl mx-auto leading-relaxed font-serif-th">
-          {isEnglish
+      <Ui2PageHero
+        title={isEnglish ? "Tarot Wisdom Codex & Divination Essays" : "คัมภีร์บทความดูดวงไพ่ยิปซี ทาโรต์ 1909"}
+        accent={isEnglish ? "Tarot Wisdom Codex" : "คัมภีร์บทความ"}
+        lede={
+          isEnglish
             ? "Explore depth psychology, Jungian archetypes, archetypal symbolism, and master guides for love, career, and 26 sacred spreads rooted in the authentic 1909 Rider-Waite lineage."
-            : "เจาะลึกศาสตร์ไพ่ทาโรต์ดั้งเดิม 1909 Rider-Waite จิตวิทยาเชิงลึก ปรัชญา คาร์ล ยุง และคู่มือการอ่านไพ่ความรัก การงาน และผังพยากรณ์ทั้ง 26 แบบ โดยวิหาร SeerTarot"}
-        </p>
-      </header>
+            : "เจาะลึกศาสตร์ไพ่ทาโรต์ดั้งเดิม 1909 Rider-Waite จิตวิทยาเชิงลึก ปรัชญา คาร์ล ยุง และคู่มือการอ่านไพ่ความรัก การงาน และผังพยากรณ์ทั้ง 26 แบบ โดยวิหาร SeerTarot"
+        }
+        trust={[isEnglish ? "SeerTarot wisdom codex & esoteric essays" : "คลังความรู้และคู่มือศาสตร์พยากรณ์", isEnglish ? `${articles.length} articles` : `${articles.length} บทความ`]}
+        cards={["major-05", "major-09", "major-02", "major-21", "major-12", "major-03"]}
+      />
 
       {/* Search & Category Filter Bar */}
       <div className="space-y-4">

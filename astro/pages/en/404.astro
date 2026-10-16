@@ -5,6 +5,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { NotFoundMainEnRoot } from "../../components/PageBodies";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
 import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
 
 /**
  * 🚧 หน้า 404 ภาษาอังกฤษที่เสิร์ฟจากขอบ (R-25)
@@ -25,3 +26,8 @@ const locale = "en" as const;
   </div>
   <SiteFooterRoot locale={locale} spacing="tight" />
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../scripts/ui2-inview";
+</script>

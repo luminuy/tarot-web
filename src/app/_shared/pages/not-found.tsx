@@ -4,6 +4,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { noindexAlternates } from "@/lib/config/site";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
 
 /**
  * 🚧 เนื้อหน้า 404 — ใช้ร่วมกันสองที่ (INC-0112)
@@ -73,8 +74,33 @@ const COPY = {
  * ⚠️ ข้อความอยู่ใน `COPY` ที่เดียว ห้ามคัดลอกไปเขียนซ้ำในไฟล์ `.astro`
  * สองหน้านี้ต้องพูดเหมือนกันเสมอ (บทเรียน INC-0112)
  */
-export function NotFoundMain({ forcedLocale = "th" }: { forcedLocale?: "th" | "en" } = {}) {
+export function NotFoundMain({ forcedLocale = "th", ui2 = false }: { forcedLocale?: "th" | "en"; ui2?: boolean } = {}) {
   const copy = forcedLocale === "en" ? COPY.en : COPY.th;
+
+  // UI 2.0 (หน้า Astro ที่สวมผิว .ui2-pg เท่านั้น — ฝั่ง Next ยังไม่มีสไตล์ 2.0 จึงคงแบบเดิม)
+  if (ui2) {
+    return (
+      <main id="main-content" tabIndex={-1} className="min-h-[70vh] text-ink px-4 sm:px-6 pb-16">
+        <Ui2PageHero
+          crumbs={[{ label: "404" }]}
+          title={copy.title}
+          lede={copy.desc}
+          cards={["major-00", "major-18", "major-09", "major-17", "major-12", "major-14"]}
+          actions={
+            <nav aria-label={copy.navLabel} className="ui2-ph-links">
+              {copy.links.map((link, i) => (
+                <a key={link.href} href={link.href} className={i === 0 ? "ui2-btn ui2-btn-gold" : "ui2-btn-ghost"}>
+                  {link.label}
+                  {i === 0 && <span className="ui2-btn-arrow" aria-hidden="true" />}
+                </a>
+              ))}
+            </nav>
+          }
+          note={<span className="text-ok font-medium">{copy.helpline}</span>}
+        />
+      </main>
+    );
+  }
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-[60vh] text-ink flex items-center justify-center px-6 py-20">

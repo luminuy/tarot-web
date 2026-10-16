@@ -8,6 +8,7 @@ import { QuestionPageContentRoot } from "../../components/PageBodies";
 import { AskNowRoot } from "../../islands/AskNowRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
 import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
 
 /**
  * ❓ หน้าคำถาม 20 หน้า (REFLECTION_JOURNAL_PLAN 1.11 · แทร็ก Q) — เนื้อหา SSR ทั้งหมด
@@ -43,3 +44,8 @@ const copy = question[locale];
   </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../scripts/ui2-inview";
+</script>

@@ -5,6 +5,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { CardGroupBodyRoot } from "../../components/PageBodies";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
 import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
 
 /** 🃏 หน้าหมวดหมู่ไพ่ `wands` (ต้นไม้ภาษาไทย) — ไม่มีส่วนที่ต้องใช้ JS เลย */
 const locale = "th" as const;
@@ -18,3 +19,8 @@ const groupId = "wands" as const;
   </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../scripts/ui2-inview";
+</script>

@@ -410,10 +410,10 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
       <header className="text-center max-w-2xl mx-auto space-y-2.5">
         {/* หน้า /pick-a-card มี <h1> "Pick A Card" ของหน้าเองแล้ว หัวข้อที่เลือกจึงเป็น <h2>
             ส่วนหน้า /pick-a-card/<หัวข้อ> หัวข้อนี้คือชื่อหน้า จึงเป็น <h1> */}
-        <TopicHeading className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-ink leading-tight"><ThaiPhrases>
+        <TopicHeading className={initialTopicSlug ? "ui2-ph-title" : "ui2-sh-title"}><ThaiPhrases>
           {isEnglish ? activeTopic.titleEn : activeTopic.titleTh}
         </ThaiPhrases></TopicHeading>
-        <p className="text-sm sm:text-base font-serif-th text-muted leading-relaxed">
+        <p className="ui2-ph-lede mx-auto">
           {isEnglish ? activeTopic.descriptionEn : activeTopic.descriptionTh}
         </p>
       </header>

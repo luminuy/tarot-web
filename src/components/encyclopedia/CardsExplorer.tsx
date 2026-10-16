@@ -19,6 +19,7 @@ import {
   WaterElementIcon,
 } from "@/components/ui/TarotArtIcons";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
 interface CardsExplorerProps {
   cards: readonly CardSummary[];
 }
@@ -125,24 +126,18 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
   return (
       <div className="space-y-8 relative z-10">
-      {/* Dynamic Bilingual Hero Header */}
-      <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
-        <div>
-          <span className="glass-chip inline-flex items-center gap-2 px-4 py-1.5 text-xs text-gold-ink font-serif-th font-bold">
-            
-            {isEnglish ? "78-CARD TAROT ENCYCLOPEDIA" : "สารานุกรมความหมายไพ่ 78 ใบ"}{" "}
-            
-          </span>
-        </div>
-        <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-ink tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]"><ThaiPhrases>
-          {isEnglish ? "The Complete 78 Tarot Cards & Meanings" : "ความหมายไพ่ทาโร่ ไพ่ยิปซี ทั้ง 78 ใบ"}
-        </ThaiPhrases></h1>
-        <p className="text-xs sm:text-sm text-muted max-w-2xl mx-auto leading-relaxed font-serif-th [text-wrap:balance]">
-          {isEnglish
+      {/* Dynamic Bilingual Hero Header — UI 2.0 (เจ้าของ 2026-10-16) · ข้อความ h1 / คำโปรยเดิม */}
+      <Ui2PageHero
+        title={isEnglish ? "The Complete 78 Tarot Cards & Meanings" : "ความหมายไพ่ทาโร่ ไพ่ยิปซี ทั้ง 78 ใบ"}
+        accent={isEnglish ? "78 Tarot Cards" : "78 ใบ"}
+        lede={
+          isEnglish
             ? "Explore depth psychological, archetypal, and practical divinatory meanings across love, career, and finances in the 1909 Rider-Waite lineage."
-            : "ค้นหาความหมายและคำทำนายของไพ่ทาโรต์ 78 ใบ ครบทุกมิติความรัก การงาน และการเงิน"}
-        </p>
-      </div>
+            : "ค้นหาความหมายและคำทำนายของไพ่ทาโรต์ 78 ใบ ครบทุกมิติความรัก การงาน และการเงิน"
+        }
+        trust={isEnglish ? ["78-card tarot encyclopedia", "Original 1909 Rider-Waite art"] : ["สารานุกรมความหมายไพ่ 78 ใบ", "ภาพต้นฉบับ 1909 Rider-Waite"]}
+        cards={["major-00", "major-01", "major-21", "major-19", "major-02", "major-17"]}
+      />
 
       {/* Sacred Search & Filter Dashboard */}
       <div className="altar-panel p-4 sm:p-6 space-y-5">

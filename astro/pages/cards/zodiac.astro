@@ -6,6 +6,7 @@ import { ZodiacIndexBodyRoot } from "../../components/PageBodies";
 import { ZodiacCompatibilityRoot, ZodiacDailyRoot, ZodiacFinderRoot } from "../../islands/ZodiacFinderRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
 import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
 
 /** ✦ ไพ่ประจำราศี 12 ราศี — หน้ารวม + เครื่องหาราศีจากวันเกิด (ต้นไม้ภาษาไทย) */
 const locale = "th" as const;
@@ -28,3 +29,8 @@ const locale = "th" as const;
   </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../scripts/ui2-inview";
+</script>

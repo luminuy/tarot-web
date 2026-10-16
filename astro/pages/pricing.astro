@@ -6,6 +6,7 @@ import { PricingBodyRoot } from "../components/PageBodies";
 import { PricingRoot } from "../islands/PricingRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
 import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
 
 /** 💳 ราคาและแพ็กเกจ — เนื้อหาเป็น HTML ล้วน · การ์ดแพ็ก (ปุ่มซื้อ) เป็น island เดียว */
 const locale = "th" as const;
@@ -22,3 +23,8 @@ const locale = "th" as const;
   </div>
   <SiteFooterRoot locale={locale} spacing="tight" />
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../scripts/ui2-inview";
+</script>

@@ -6,6 +6,7 @@ import { buildPageOgImage } from "@/lib/media/og-image";
 import { buildBreadcrumbJsonLd, homeCrumb } from "@/app/_shared/seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
 
 /**
  * 🏛️ หน้า "เกี่ยวกับเรา"
@@ -96,10 +97,14 @@ export function AboutBodyTh() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdBreadcrumbs) }} />
 
       <div className="max-w-3xl mx-auto px-6 pt-16 space-y-10">
-        <div className="text-center space-y-3 pb-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif-th"><ThaiPhrases>เกี่ยวกับ SeerTarot</ThaiPhrases></h1>
-          <p className="text-xs text-muted">ใครอยู่เบื้องหลัง และคำทำนายมาจากไหน</p>
-        </div>
+        <Ui2PageHero
+          compact
+          crumbs={[{ label: "หน้าแรก", href: "/" }, { label: "เกี่ยวกับเรา" }]}
+          title="เกี่ยวกับ SeerTarot"
+          accent="SeerTarot"
+          lede="ใครอยู่เบื้องหลัง และคำทำนายมาจากไหน"
+          cards={["major-09", "major-02", "major-05", "major-17"]}
+        />
 
         <section className="page-band page-band-compact page-band-tint space-y-3">
           <p className="text-sm text-ink leading-relaxed font-serif-th">

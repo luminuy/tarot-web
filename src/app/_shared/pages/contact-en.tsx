@@ -8,6 +8,7 @@ import { buildBreadcrumbJsonLd, homeCrumb } from "@/app/_shared/seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { SOCIAL_BADGE_STYLE, SocialGlyph } from "@/components/ui/SocialIcons";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
 
 /**
  * ✉️ Contact Us Page (English Twin)
@@ -94,10 +95,14 @@ export function ContactBodyEn() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdBreadcrumbs) }} />
 
       <div className="max-w-3xl mx-auto px-6 pt-16 space-y-10">
-        <div className="text-center space-y-3 pb-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif-th"><ThaiPhrases>Contact Us</ThaiPhrases></h1>
-          <p className="text-xs text-muted">We personally review and attend to every message received.</p>
-        </div>
+        <Ui2PageHero
+          compact
+          crumbs={[{ label: "Home", href: "/" }, { label: "Contact" }]}
+          title="Contact Us"
+          accent="Contact"
+          lede="We personally review and attend to every message received."
+          cards={["cups-03", "major-06", "wands-03", "major-14"]}
+        />
 
         <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>Electronic Mail</ThaiPhrases></h2>

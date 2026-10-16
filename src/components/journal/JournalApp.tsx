@@ -26,7 +26,7 @@ import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { AppSettingsCard } from "@/components/pwa/AppSettingsCard";
 import { CATEGORY_LABEL, OUTCOME_LABEL, dayKeyOf, formatDate } from "./journal-format";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
-import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
 
 /**
  * ✦ สมุดดวงของฉัน — หน้าเต็ม `/journal` (REFLECTION_JOURNAL_PLAN 1.3 · คลื่น 2)
@@ -203,18 +203,17 @@ export function JournalApp() {
 
   return (
     <main id="main-content" className="w-full max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-16 space-y-6">
-      <header className="text-center space-y-2">
-        <p className="text-[11px] sm:text-xs tracking-[0.2em] uppercase text-gold-ink font-serif-th">{L({ th: "สมุดดวงของฉัน", en: "My reading journal" })}</p>
-        <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-ink-deep [text-wrap:balance]">
-          <ThaiPhrases>{L({ th: "ทุกคำอ่าน คือบทหนึ่งของเรื่องคุณ", en: "Every reading is a chapter of your story" })}</ThaiPhrases>
-        </h1>
-        <p className="text-xs sm:text-sm text-muted font-serif-th max-w-xl mx-auto leading-relaxed [text-wrap:balance]">
-          {L({
-            th: "กลับมาเขียนว่าเกิดอะไรขึ้นจริง ดูว่าใจเปลี่ยนไปอย่างไร และเห็นไพ่ที่วนมาหาคุณแบบไม่หลอกตัวเอง",
-            en: "Come back to write what really happened, see how your heart shifted, and notice which cards keep returning — honestly.",
-          })}
-        </p>
-      </header>
+      <Ui2PageHero
+        compact
+        crumbs={[{ label: L({ th: "หน้าแรก", en: "Home" }), href: "/" }, { label: L({ th: "สมุดดวงของฉัน", en: "My reading journal" }) }]}
+        title={L({ th: "ทุกคำอ่าน คือบทหนึ่งของเรื่องคุณ", en: "Every reading is a chapter of your story" })}
+        accent={L({ th: "บทหนึ่งของเรื่องคุณ", en: "a chapter" })}
+        lede={L({
+          th: "กลับมาเขียนว่าเกิดอะไรขึ้นจริง ดูว่าใจเปลี่ยนไปอย่างไร และเห็นไพ่ที่วนมาหาคุณแบบไม่หลอกตัวเอง",
+          en: "Come back to write what really happened, see how your heart shifted, and notice which cards keep returning — honestly.",
+        })}
+        cards={["major-02", "cups-04", "major-09", "swords-04"]}
+      />
 
       <InstallPrompt isEnglish={isEnglish} />
 

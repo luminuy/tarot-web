@@ -207,7 +207,7 @@ export function AboutBodyThRoot() {
 export function NotFoundMainThRoot() {
   return (
     <LocaleProvider forcedLocale="th">
-      <NotFoundMain forcedLocale="th" />
+      <NotFoundMain forcedLocale="th" ui2 />
     </LocaleProvider>
   );
 }
@@ -215,7 +215,7 @@ export function NotFoundMainThRoot() {
 export function NotFoundMainEnRoot() {
   return (
     <LocaleProvider forcedLocale="en">
-      <NotFoundMain forcedLocale="en" />
+      <NotFoundMain forcedLocale="en" ui2 />
     </LocaleProvider>
   );
 }

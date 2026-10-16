@@ -11,10 +11,11 @@
  *  3. ภาษาดีไซน์ 2.0: พื้นท้องฟ้ากลางคืน + ดาว · หัวข้อ Anuphan · แผงกระจกมืดมุมโค้ง · ทองเป็นสีเน้น
  * หน้าที่ได้ดีไซน์เฉพาะแล้ว (/ · /spreads · /daily) ไม่ใช้ไฟล์นี้
  *
- * ⚠️ ไม่มีของหนัก (backdrop-filter · filter: blur · ของวนไม่รู้จบ) — ด่าน test-ui2-fx / test-motion-quality
+ * ⚠️ ไม่มีของหนัก (backdrop-filter · filter: blur · ของวนไม่รู้จบ) — อยู่ใน ui2-page-fx.css (ด่าน test-ui2-fx / test-motion-quality)
+ * 💸 งบ CSS: เจ้าของอนุมัติให้เกินงบเดิม 2026-10-16 ("อนุมัติให้เกินงบได้ ปลดลิมิตทุกอย่าง ต้องสวย ต้องว้าว") — นำเข้า ui2-core.css ทั้งไฟล์
  * ⚠️ สีใหม่ใช้โทเคน `--ui2-*` จาก ui2-base.css
  */
-@import "./ui2-dark-shell.css";
+@import "./ui2-core.css";
 
 /* ── 1. โทเคนกลางคืน ─────────────────────────────────────────────────────── */
 .ui2-pg {
@@ -46,6 +47,7 @@
   --home-band-bg: transparent;
   position: relative;
   isolation: isolate;
+  overflow-x: clip;
   color: var(--ui2-on-night);
   background:
     radial-gradient(60% 520px at 50% -80px, rgba(233, 160, 70, 0.13) 0%, rgba(233, 160, 70, 0) 100%),
@@ -230,4 +232,436 @@
 /* ป้ายสีทองตัวหนังสือเข้ม (bg-gold-ink text-surface) — โทเคน surface เปลี่ยนเป็นมืดแล้ว ป้ายจึงยังอ่านได้ */
 .ui2-pg .bg-gold-ink {
   color: var(--ui2-night);
+}
+
+/* หยุดของวนเมื่อส่วนพ้นจอ (astro/scripts/ui2-inview.ts สลับ data-inview) · ไม่มี JS = นิ่ง */
+.ui2-pg [data-anim-section]:not([data-inview]) .ui2-loop,
+.ui2-pg [data-anim-section]:not([data-inview]) .ui2-loop::before,
+.ui2-pg [data-anim-section]:not([data-inview]) .ui2-loop::after {
+  animation-play-state: paused;
+}
+
+/* ══ 6. ชุดหัวหน้า 2.0 กลาง (`Ui2PageHero` · src/components/ui2/Ui2PageHero.tsx) — ภาษาภาพเดียวกับหัวหน้า /spreads ══ */
+.ui2-ph {
+  position: relative;
+  isolation: isolate;
+  padding: 8px 0 20px;
+  text-align: center;
+}
+.ui2-ph-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  max-width: 860px;
+  margin-inline: auto;
+  padding-top: 36px;
+}
+/* แสงทองนุ่มหลังหัวข้อ — จุดโฟกัส */
+.ui2-ph-inner::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 46%;
+  width: min(980px, 100vw);
+  height: 560px;
+  translate: -50% -50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255, 217, 143, 0.17) 0%, rgba(255, 217, 143, 0.06) 45%, rgba(255, 217, 143, 0) 100%);
+}
+/* เส้นทางหน้า = หัวเล็กสีทอง */
+.ui2-ph-crumb {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-ph-crumb-i + .ui2-ph-crumb-i::before {
+  content: "/";
+  margin-inline: 10px;
+  color: var(--ui2-on-night-dim);
+}
+.ui2-ph-crumb a {
+  color: var(--ui2-gold-solid);
+  text-decoration: none;
+}
+.ui2-ph-crumb a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.ui2-ph-title {
+  max-width: 920px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 32px;
+  line-height: 1.22;
+  letter-spacing: -0.02em;
+  color: var(--ui2-on-night);
+  text-wrap: balance;
+  text-shadow: 0 0 42px rgba(255, 217, 143, 0.16);
+}
+.ui2-ph-accent {
+  font-weight: 600;
+  text-shadow: none;
+}
+.ui2-ph-lede {
+  max-width: 640px;
+  font-size: 15.5px;
+  line-height: 1.75;
+  color: var(--ui2-on-night-soft);
+  text-wrap: balance;
+}
+.ui2-ph-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
+  max-width: 340px;
+  margin-top: 8px;
+}
+.ui2-ph-note {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ui2-on-night-dim);
+  text-wrap: balance;
+}
+.ui2-ph-note strong {
+  font-weight: 600;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-ph-trust {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 18px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  color: var(--ui2-on-night-dim);
+}
+.ui2-ph-trust li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ปุ่มทอง (ปุ่มหลัก) + ปุ่มกระจกมืด (ปุ่มรอง) */
+.ui2-pg .ui2-btn-gold {
+  color: var(--ui2-night);
+  background: var(--ui2-gold-solid);
+  box-shadow: 0 14px 34px -14px rgba(255, 217, 143, 0.55), 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+  transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.ui2-pg .ui2-btn-gold .ui2-btn-arrow {
+  border-color: var(--ui2-night);
+}
+@media (hover: hover) {
+  .ui2-pg .ui2-btn-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px -14px rgba(255, 217, 143, 0.7), 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+  }
+}
+.ui2-pg .ui2-btn-ghost {
+  min-height: 52px;
+  padding: 0 24px;
+  color: var(--ui2-on-night);
+  background: rgba(246, 238, 226, 0.06);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+}
+
+/* ไพ่ลอยข้างหัวข้อ — มือถือ/lite: 2 ใบเล็กนิ่งที่มุม · ระดับ full จัด 2 แนวต่อข้างใน ui2-page-fx.css */
+/* ชั้นไพ่กว้างเต็มจอเสมอ แม้หัวหน้าอยู่ในกล่องแคบ (เช่น max-w-4xl ของหน้าพิธี) — ตัวห่อ .ui2-pg ตัดส่วนเกินแนวนอน */
+.ui2-ph-deco {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  translate: -50% 0;
+  pointer-events: none;
+}
+.ui2-ph-card {
+  position: absolute;
+  display: none;
+  width: var(--w, 46px);
+  padding: 3px;
+  border-radius: 9px;
+  rotate: var(--r, 0deg);
+  background: linear-gradient(170deg, var(--ui2-card-ivory-top) 0%, var(--ui2-card-ivory-bottom) 100%);
+  box-shadow: 0 0 0 1px rgba(201, 161, 90, 0.6), 0 22px 34px -16px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 217, 143, 0.12);
+}
+.ui2-ph-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 300 / 520;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.ui2-ph-card-1 { display: block; --w: 44px; --r: -12deg; left: 4px; top: 10px; }
+.ui2-ph-card-3 { display: block; --w: 40px; --r: 10deg; right: 6px; top: 26px; }
+
+/* หัวหน้าเตี้ย (หน้าบทความ · หน้าที่เนื้อหาหลักต่อทันที) */
+.ui2-ph.is-compact .ui2-ph-inner {
+  padding-top: 24px;
+}
+
+@media (min-width: 768px) {
+  .ui2-ph-inner {
+    padding-top: 48px;
+    gap: 16px;
+  }
+  .ui2-ph-title {
+    font-size: 46px;
+  }
+  .ui2-ph-lede {
+    font-size: 17px;
+  }
+  .ui2-ph-actions {
+    flex-direction: row;
+    justify-content: center;
+    width: auto;
+    max-width: none;
+    margin-top: 12px;
+  }
+  .ui2-ph-crumb::before,
+  .ui2-ph-crumb::after {
+    content: "";
+    width: 40px;
+    height: 1px;
+    margin-inline: 12px;
+    opacity: 0.7;
+    background: linear-gradient(90deg, rgba(255, 217, 143, 0) 0%, var(--ui2-gold-solid) 100%);
+  }
+  .ui2-ph-crumb::after {
+    background: linear-gradient(90deg, var(--ui2-gold-solid) 0%, rgba(255, 217, 143, 0) 100%);
+  }
+  .ui2-ph-trust {
+    flex-wrap: nowrap;
+    gap: 0;
+    margin-top: 14px;
+    padding: 10px 6px;
+    border-radius: 999px;
+    background: rgba(246, 238, 226, 0.045);
+    box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+  }
+  .ui2-ph-trust li {
+    padding-inline: 18px;
+    white-space: nowrap;
+  }
+  .ui2-ph-trust li + li {
+    border-left: 1px solid var(--ui2-line-night);
+  }
+}
+@media (min-width: 1024px) {
+  .ui2-ph {
+    padding-bottom: 36px;
+  }
+  .ui2-ph-inner {
+    max-width: 980px;
+    padding-top: 72px;
+  }
+  .ui2-ph.is-compact .ui2-ph-inner {
+    padding-top: 40px;
+  }
+  .ui2-ph-title {
+    font-size: clamp(46px, 4.2vw, 60px);
+  }
+  .ui2-ph.is-compact .ui2-ph-title {
+    font-size: clamp(38px, 3.4vw, 48px);
+  }
+}
+
+/* ══ 7. หัวส่วน + หน้าต่างกระจก (`Ui2SectionHead` · `.ui2-win`) ══ */
+.ui2-sh {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.ui2-sh.is-center {
+  align-items: center;
+  text-align: center;
+}
+.ui2-sh-title {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 26px;
+  line-height: 1.3;
+  color: var(--ui2-on-night);
+  text-wrap: balance;
+}
+.ui2-sh-lede {
+  max-width: 640px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ui2-on-night-soft);
+}
+@media (min-width: 768px) {
+  .ui2-sh-title {
+    font-size: 34px;
+  }
+}
+.ui2-win {
+  position: relative;
+  padding: 0 16px 18px;
+  border-radius: 26px;
+  background:
+    radial-gradient(70% 160px at 50% 0, rgba(255, 217, 143, 0.08) 0%, transparent 100%),
+    var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset, 0 40px 80px -40px rgba(0, 0, 0, 0.85);
+}
+.ui2-win::before {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--ui2-gold-solid) 30%, var(--ui2-gold-solid) 70%, transparent 100%);
+  opacity: 0.8;
+}
+@media (min-width: 768px) {
+  .ui2-win {
+    padding: 0 32px 28px;
+    border-radius: 32px;
+  }
+}
+
+/* ══ 8. ลอยเข้าเมื่อเลื่อนถึง (view timeline · transform/opacity ล้วน · ลดการเคลื่อนไหว = นิ่ง) ══ */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    :root:not([data-fx="off"]) .ui2-pg .page-band-tint,
+    :root:not([data-fx="off"]) .ui2-pg .ui2-rv {
+      animation: ui2-pg-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 22%;
+    }
+  }
+}
+@keyframes ui2-pg-rise {
+  from { opacity: 0.2; transform: translateY(44px) scale(0.97); }
+}
+
+/* เครื่องหมายทอง (GoldMark) บนพื้นกลางคืน */
+.ui2-pg .ui2-mark {
+  color: var(--ui2-gold-solid);
+}
+
+/* ปุ่มหลายปุ่มในหัวหน้า (เช่น หน้า 404) — ห่อบรรทัดได้ */
+.ui2-ph-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* ชิปลิงก์ใต้หัวหน้า (หมวด · กลุ่มไพ่) — กระจกมืด · หน้าปัจจุบันเป็นทอง */
+.ui2-ph-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: 860px;
+  margin-top: 6px;
+}
+.ui2-ph-chips.is-scroll {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 4px 2px;
+}
+.ui2-ph-chips.is-scroll::-webkit-scrollbar {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .ui2-ph-chips.is-scroll {
+    flex-wrap: wrap;
+    justify-content: center;
+    overflow: visible;
+  }
+}
+.ui2-ph-chip {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-size: 14px;
+  white-space: nowrap;
+  color: var(--ui2-on-night-soft);
+  background: rgba(246, 238, 226, 0.05);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+  transition: color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), background-color var(--dur-base) var(--ease-out);
+}
+.ui2-ph-chip:hover {
+  color: var(--ui2-on-night);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.5);
+}
+.ui2-ph-chip[aria-current="page"] {
+  color: var(--ui2-night);
+  background: var(--ui2-gold-solid);
+  box-shadow: none;
+}
+
+/* ══ 9. หลังไพ่แบบใหม่ของหน้าแรก (ม่วงเข้ม ลายตารางทอง วงทองกลาง กรอบทองสองชั้น) — ชุดเดียวกับ /daily ══
+   ใช้กับไพ่คว่ำทุกใบในหน้าอื่น (กองไพ่ Pick A Card · ไพ่ในพิธีเปิดไพ่) · ตัวอักษร "SACRED ORACLE" ของแบบเก่าซ่อน */
+.ui2-pg .card-back-pattern {
+  border-color: rgba(255, 217, 143, 0.45);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 217, 143, 0.35) 0 9%, rgba(255, 217, 143, 0) 10%),
+    repeating-linear-gradient(45deg, rgba(255, 217, 143, 0.16) 0 2px, rgba(255, 217, 143, 0) 2px 10px),
+    repeating-linear-gradient(-45deg, rgba(255, 217, 143, 0.16) 0 2px, rgba(255, 217, 143, 0) 2px 10px),
+    linear-gradient(160deg, #2A1F2E 0%, #17111B 100%);
+  box-shadow:
+    0 0 0 1px rgba(255, 217, 143, 0.55) inset,
+    0 0 0 5px rgba(23, 17, 27, 1) inset,
+    0 0 0 6px rgba(255, 217, 143, 0.3) inset,
+    0 24px 40px -20px rgba(0, 0, 0, 0.95),
+    0 0 36px rgba(255, 217, 143, 0.14);
+}
+.ui2-pg .card-back-pattern .tracking-\[0\.18em\],
+.ui2-pg .card-back-pattern .tracking-\[0\.25em\] {
+  visibility: hidden;
+}
+/* เลขกองไพ่ = เหรียญทอง */
+.ui2-pg .card-back-pattern .bg-ink-deep\/90 {
+  color: var(--ui2-night);
+  background: var(--ui2-gold-solid);
+  border-color: rgba(255, 236, 200, 0.7);
+  box-shadow: 0 0 20px rgba(255, 217, 143, 0.45);
+}
+
+/* การ์ดกระจก (กองไพ่ · การ์ดเลือก) ตอนชี้ — กระจกมืดยกขึ้น ขอบทอง (globals เดิมเป็นพื้นครีม) */
+.ui2-pg .altar-card-porcelain:hover {
+  background-color: rgba(40, 32, 44, 0.95);
+  border-color: rgba(255, 217, 143, 0.55);
+  box-shadow: 0 1px 0 var(--ui2-glass-edge-night) inset, 0 22px 40px -18px rgba(0, 0, 0, 0.9), 0 0 32px rgba(255, 217, 143, 0.14);
+}
+
+/* บรรทัดคำโปรยสีทองนำหน้าคำอธิบาย (หน้าคู่มือผัง) */
+.ui2-ph-tagline {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--ui2-font-display);
+  font-size: 1.12em;
+  color: var(--ui2-gold-solid);
 }

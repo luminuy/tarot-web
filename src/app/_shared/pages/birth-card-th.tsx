@@ -170,6 +170,9 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
           breadcrumbs={breadcrumbs}
           badgeText="เลขศาสตร์ทาโรต์สากล"
           title="คำนวณไพ่ทาโรต์ประจำตัว"
+          accent="ไพ่ทาโรต์ประจำตัว"
+          cards={["major-01", "major-10", "major-02", "major-19", "major-17", "major-21"]}
+          trust={["ใส่วันเกิดแล้วรู้ผลทันที", "ไพ่ชุดใหญ่ 1909 Rider-Waite"]}
           tagline="รู้จักนิสัยแท้และบทเรียนชีวิตที่ซ่อนอยู่ในวันเกิดของคุณ ด้วยไพ่ดั้งเดิม 1909 Rider-Waite"
         />
 
