@@ -999,3 +999,176 @@
 .ui2-pg .ui2-zw a:hover .ui2-zw-card {
   box-shadow: 0 14px 24px -10px rgba(0, 0, 0, 0.9), 0 0 26px rgba(255, 217, 143, 0.4);
 }
+
+/* ══ 18. ไพ่ประจำตัว — เอกลักษณ์หน้า: แผ่นจารึกเลขศาสตร์ (ช่องตัวเลขใหญ่ · อ่านทวนวันเกิด · แผ่นเลขเรียงเป็นสมการ) ══ */
+.ui2-pg .ui2-bc-tablet {
+  position: relative;
+  isolation: isolate;
+  border-color: rgba(255, 217, 143, 0.4);
+  background:
+    radial-gradient(70% 50% at 50% 0%, rgba(255, 217, 143, 0.14) 0%, rgba(255, 217, 143, 0) 70%),
+    linear-gradient(180deg, #241C27 0%, #16111A 100%);
+  box-shadow: 0 0 0 6px rgba(12, 10, 15, 0.55), 0 0 0 7px rgba(255, 217, 143, 0.16), 0 50px 90px -40px rgba(0, 0, 0, 0.95);
+}
+/* จุดดาวจาง ๆ บนแผ่น — พื้นผิวนิ่ง (gradient ล้วน ไม่มี filter/mask) */
+.ui2-pg .ui2-bc-tablet::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255, 217, 143, 0.16) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+  opacity: 0.6;
+}
+.ui2-pg .ui2-bc-label {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--ui2-gold-solid);
+}
+.ui2-pg .ui2-bc-field {
+  height: 64px;
+  padding: 0 14px;
+  border-radius: 16px;
+  border-color: rgba(255, 217, 143, 0.3);
+  background: rgba(12, 10, 15, 0.55);
+  font-family: var(--ui2-font-display);
+  font-size: 22px;
+  font-weight: 600;
+  text-align: center;
+  text-align-last: center;
+  color: var(--ui2-on-night);
+  box-shadow: inset 0 -2px 0 rgba(255, 217, 143, 0.35);
+}
+.ui2-pg .ui2-bc-field:focus-visible {
+  border-color: var(--ui2-gold-solid);
+  box-shadow: inset 0 -2px 0 var(--ui2-gold-solid), 0 0 0 3px rgba(255, 217, 143, 0.25);
+}
+.ui2-pg select.ui2-bc-field option {
+  background: #1B161D;
+  color: var(--ui2-on-night);
+  font-size: 16px;
+}
+/* สลับ พ.ศ./ค.ศ. เป็นแคปซูลสองช่องที่กดง่าย (v1 เป็นปุ่มจิ๋ว 11px) */
+.ui2-pg .ui2-bc-era {
+  padding: 3px;
+  gap: 2px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.28);
+  background: rgba(12, 10, 15, 0.5);
+}
+.ui2-pg .ui2-bc-era button {
+  min-width: 46px;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+.ui2-pg .ui2-bc-preview {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 217, 143, 0.3);
+  text-align: center;
+  font-family: var(--ui2-font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+}
+.ui2-pg .ui2-bc-go {
+  min-height: 54px;
+  font-size: 15px;
+}
+.ui2-bc-eq {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ui2-bc-eq li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.ui2-bc-eq li:not(.ui2-bc-op) {
+  min-width: 58px;
+  padding: 8px 12px 6px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 217, 143, 0.3);
+  background: rgba(12, 10, 15, 0.5);
+}
+.ui2-bc-eq b {
+  font-family: var(--ui2-font-display);
+  font-size: 22px;
+  line-height: 1.1;
+  color: var(--ui2-on-night);
+}
+.ui2-bc-eq small {
+  font-size: 11px;
+  color: var(--ui2-on-night-dim);
+}
+.ui2-bc-op {
+  font-family: var(--ui2-font-display);
+  font-size: 20px;
+  color: var(--ui2-gold-solid);
+}
+.ui2-bc-arrow::before {
+  content: "";
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255, 217, 143, 0), var(--ui2-gold-solid));
+}
+.ui2-bc-eq li.ui2-bc-final {
+  border-color: var(--ui2-gold-solid);
+  background: linear-gradient(180deg, rgba(255, 217, 143, 0.95), rgba(214, 170, 92, 0.95));
+  box-shadow: 0 0 28px rgba(255, 217, 143, 0.35);
+}
+.ui2-bc-eq .ui2-bc-final b,
+.ui2-bc-eq .ui2-bc-final small {
+  color: var(--ui2-night);
+}
+.ui2-pg .ui2-bc-stage {
+  padding: 18px 18px 34px;
+}
+/* ป้ายช่องปีสูงกว่า (มีสวิตช์ พ.ศ./ค.ศ.) — ชิดล่างให้สามช่องตรงแนวเดียวกัน */
+.ui2-pg .ui2-bc-grid {
+  align-items: end;
+}
+/* มือถือ: วัน + เดือนแถวเดียวกัน ปีเต็มแถว — ฟอร์มสั้นลงครึ่งจอ */
+@media (max-width: 639px) {
+  .ui2-pg .ui2-bc-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr);
+  }
+  .ui2-pg .ui2-bc-grid > :last-child {
+    grid-column: 1 / -1;
+  }
+  .ui2-pg .ui2-bc-field {
+    height: 56px;
+    font-size: 19px;
+  }
+}
+@media (max-width: 479px) {
+  .ui2-bc-eq {
+    gap: 6px 4px;
+  }
+  .ui2-bc-eq li:not(.ui2-bc-op) {
+    min-width: 44px;
+    padding: 6px 8px 5px;
+  }
+  .ui2-bc-eq b {
+    font-size: 17px;
+  }
+  .ui2-bc-op {
+    font-size: 16px;
+  }
+  .ui2-bc-arrow::before {
+    width: 14px;
+  }
+}

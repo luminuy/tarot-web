@@ -240,7 +240,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
       {/* Interactive Form Panel */}
       <form
         onSubmit={handleCalculate}
-        className="altar-panel rounded-2xl p-6 sm:p-8 max-w-2xl mx-auto space-y-6"
+        className="ui2-bc-tablet altar-panel rounded-2xl p-6 sm:p-8 max-w-2xl mx-auto space-y-6"
       >
         <div className="text-center space-y-1.5">
           <span className="text-xs uppercase tracking-wider font-serif-th font-semibold text-gold-ink">
@@ -257,10 +257,10 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
         </div>
 
         {/* Inputs Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <div className="ui2-bc-grid grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           {/* Day */}
           <div className="space-y-1">
-            <label htmlFor="birth-day" className="block text-xs font-serif-th font-semibold text-ink">
+            <label htmlFor="birth-day" className="ui2-bc-label block text-xs font-serif-th font-semibold text-ink">
               {isEnglish ? "Day" : "วันที่เกิด"}
             </label>
             <select
@@ -269,7 +269,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
               aria-describedby={errorMsg ? "birth-card-error" : undefined}
               value={day}
               onChange={(e) => setDay(Number.parseInt(e.target.value, 10))}
-              className="glass-field w-full rounded-xl border border-line-interactive-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
+              className="ui2-bc-field glass-field w-full rounded-xl border border-line-interactive-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
             >
               {Array.from(
                 {
@@ -283,7 +283,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                 (_, i) => i + 1
               ).map((d) => (
                 <option key={d} value={d}>
-                  {isEnglish ? `${d}` : `วันที่ ${d}`}
+                  {d}
                 </option>
               ))}
             </select>
@@ -291,7 +291,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
           {/* Month */}
           <div className="space-y-1">
-            <label htmlFor="birth-month" className="block text-xs font-serif-th font-semibold text-ink">
+            <label htmlFor="birth-month" className="ui2-bc-label block text-xs font-serif-th font-semibold text-ink">
               {isEnglish ? "Month" : "เดือนเกิด"}
             </label>
             <select
@@ -309,7 +309,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                 const maxD = getMaxDaysInMonth(currentY, newMonth);
                 if (day > maxD) setDay(maxD);
               }}
-              className="glass-field w-full rounded-xl border border-line-interactive-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
+              className="ui2-bc-field glass-field w-full rounded-xl border border-line-interactive-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
             >
               {MONTHS.map((m) => (
                 <option key={m.value} value={m.value}>
@@ -322,10 +322,10 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
           {/* Year */}
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label htmlFor="birth-year" className="block text-xs font-serif-th font-semibold text-ink">
+              <label htmlFor="birth-year" className="ui2-bc-label block text-xs font-serif-th font-semibold text-ink">
                 {isEnglish ? "Year" : "ปีเกิด"}
               </label>
-              <div className="flex items-center gap-1 text-[11px] font-sans">
+              <div role="group" aria-label={isEnglish ? "Calendar" : "ปฏิทิน"} className="ui2-bc-era flex items-center gap-1 text-[11px] font-sans">
                 <button
                   type="button"
                   onClick={() => setEra("be")}
@@ -338,7 +338,6 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                 >
                   {isEnglish ? "BE" : "พ.ศ."}
                 </button>
-                <span className="text-line">/</span>
                 <button
                   type="button"
                   onClick={() => setEra("ce")}
@@ -357,11 +356,14 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
               id="birth-year"
               aria-invalid={errorMsg ? true : undefined}
               aria-describedby={errorMsg ? "birth-card-error" : undefined}
-              type="number"
+              type="text"
+              inputMode="numeric"
+              autoComplete="bday-year"
+              maxLength={4}
               value={yearInput}
-              onChange={(e) => setYearInput(e.target.value)}
+              onChange={(e) => setYearInput(e.target.value.replace(/\D/g, ""))}
               placeholder={era === "be" ? "2540" : "1997"}
-              className="glass-field w-full rounded-xl border border-line-interactive-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
+              className="ui2-bc-field glass-field w-full rounded-xl border border-line-interactive-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
             />
           </div>
         </div>
@@ -378,10 +380,17 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
           </div>
         )}
 
+        {/* อ่านทวนวันเกิดเป็นประโยคเดียว — เห็นทันทีว่ากรอกถูก ก่อนกดใช้สิทธิ์ (v1 ต้องเดาจากสามช่องเอง) */}
+        <p className="ui2-bc-preview" aria-live="polite">
+          {isEnglish
+            ? `Born ${MONTHS[month - 1].nameEn} ${day}, ${yearInput || "—"} ${era === "be" ? "BE" : "CE"}`
+            : `เกิดวันที่ ${day} ${MONTHS[month - 1].nameTh} ${era === "be" ? "พ.ศ." : "ค.ศ."} ${yearInput || "—"}`}
+        </p>
+
         <button
           type="submit"
           disabled={oracle.isPreparing}
-          className="btn-gold-glass w-full py-3 px-6 text-xs sm:text-sm font-serif-th font-bold duration-200 cursor-pointer active:scale-95 tracking-wide disabled:opacity-60 disabled:cursor-wait"
+          className="ui2-bc-go btn-gold-glass w-full py-3 px-6 text-xs sm:text-sm font-serif-th font-bold duration-200 cursor-pointer active:scale-95 tracking-wide disabled:opacity-60 disabled:cursor-wait"
         >
           {oracle.isPreparing
             ? isEnglish
@@ -422,12 +431,24 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
               {result.primaryCard.nameEn} · {isEnglish ? `Card #${result.primaryNumber} of Major Arcana` : `หมายเลข ${result.primaryNumber} แห่งสำรับไพ่ชุดใหญ่ (Major Arcana)`}
             </p>
 
-            <div className="pt-1">
-              <span className="glass-chip inline-block px-3 py-1 text-[11px] font-sans text-muted">
+            {/* รอยทางเลขศาสตร์เป็นแผ่นเลขเรียงกัน — อ่านออกในแวบเดียวว่าเลขไพ่มาจากไหน */}
+            <div className="pt-2">
+              <p className="sr-only">
                 {isEnglish
                   ? `Numerological Sum: ${result.day} + ${result.month} + ${result.yearCe} = ${result.calculatedSum} → Card #${result.primaryNumber}`
                   : `ผลรวมเลขศาสตร์: ${result.day} + ${result.month} + ${result.yearCe} = ${result.calculatedSum} → ไพ่หมายเลข ${result.primaryNumber}`}
-              </span>
+              </p>
+              <ol className="ui2-bc-eq" aria-hidden="true">
+                <li><b>{result.day}</b><small>{isEnglish ? "day" : "วัน"}</small></li>
+                <li className="ui2-bc-op">+</li>
+                <li><b>{result.month}</b><small>{isEnglish ? "month" : "เดือน"}</small></li>
+                <li className="ui2-bc-op">+</li>
+                <li><b>{result.yearCe}</b><small>{isEnglish ? "year CE" : "ปี ค.ศ."}</small></li>
+                <li className="ui2-bc-op">=</li>
+                <li><b>{result.calculatedSum}</b><small>{isEnglish ? "sum" : "ผลรวม"}</small></li>
+                <li className="ui2-bc-op ui2-bc-arrow" />
+                <li className="ui2-bc-final"><b>{result.primaryNumber}</b><small>{isEnglish ? "card no." : "ไพ่หมายเลข"}</small></li>
+              </ol>
             </div>
           </div>
 
@@ -444,7 +465,9 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                   {isEnglish ? "Personality Card" : "ไพ่บุคลิกภาพ & พลังงานหลัก"}
                 </span>
 
-                <div className="py-2 flex justify-center">
+                <div className="ui2-cd-stage ui2-bc-stage relative py-2 flex justify-center">
+                  <span className="ui2-cd-rays" aria-hidden="true" />
+                  <span className="ui2-cd-plinth" aria-hidden="true" />
                   <TarotCard
                     card={result.primaryCard}
                     isRevealed={true}
@@ -489,7 +512,9 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                     {isEnglish ? "Soul Card" : "ไพ่จิตวิญญาณ & เจตนารมณ์ลึก"}
                   </span>
 
-                  <div className="py-2 flex justify-center">
+                  <div className="ui2-cd-stage ui2-bc-stage relative py-2 flex justify-center">
+                    <span className="ui2-cd-rays" aria-hidden="true" />
+                    <span className="ui2-cd-plinth" aria-hidden="true" />
                     <TarotCard
                       card={result.secondaryCard}
                       isRevealed={true}
