@@ -210,3 +210,38 @@ export function Ui2TightHead({
     </header>
   );
 }
+
+/**
+ * v2 หัวเอกสาร (เกี่ยวกับเรา · ติดต่อเรา · ความเป็นส่วนตัว) — เจ้าของ 2026-10-16 "สร้างใหม่เลย"
+ * หัวกระดาษแบบจดหมายทางการ + ตราประจำหน้า (รูปทรง CSS ล้วน ไม่ใช่อีโมจิ): ตราประทับ · ซองจดหมาย · แม่กุญแจ
+ * เนื้อหาเป็นบทมีเลข (CSS counter ใน `.v2-doc`) · สไตล์ `.v2-doc*` ใน ui2-page.css หัวข้อ 20
+ */
+export function Ui2DocHead({
+  crumbs,
+  title,
+  lede,
+  kind,
+  meta,
+}: {
+  crumbs?: Ui2Crumb[];
+  title: string;
+  lede?: ReactNode;
+  kind: "seal" | "letter" | "lock";
+  meta?: string;
+}) {
+  return (
+    <header className="v2-doc-head">
+      <span className={`v2-doc-mark is-${kind}`} aria-hidden="true">
+        <span />
+      </span>
+      <div>
+        {crumbs && crumbs.length > 0 && <Ui2Crumbs crumbs={crumbs} />}
+        <h1 className="v2-doc-title">
+          <Phrase text={title} />
+        </h1>
+        {lede && <p className="v2-doc-lede">{lede}</p>}
+        {meta && <p className="v2-doc-meta">{meta}</p>}
+      </div>
+    </header>
+  );
+}

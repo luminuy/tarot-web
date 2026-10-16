@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
-import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { Ui2DocHead } from "@/components/ui2/Ui2PageHero";
 
 const privacyOgImages = buildPageOgImage({
   title: "Privacy Policy & Data Rights",
@@ -39,15 +39,13 @@ export const privacyMetadataEn: Metadata = {
 export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen text-ink">
-      <div className="max-w-3xl mx-auto px-6 pt-16 space-y-10">
+      <div className="v2-doc">
         {/* Header */}
-        <Ui2PageHero
-          compact
+        <Ui2DocHead
+          kind="lock"
           crumbs={[{ label: "Home", href: "/" }, { label: "Privacy" }]}
           title="Privacy Policy & Data Protection"
-          accent="Privacy Policy"
           lede="Compliance Framework for PDPA (B.E. 2562), GDPR (EU 2016/679), and CCPA/CPRA"
-          cards={["swords-04", "major-11", "pentacles-04", "major-20"]}
         />
 
         {/* Section 1 */}

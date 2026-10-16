@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
-import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { Ui2DocHead } from "@/components/ui2/Ui2PageHero";
 
 const privacyOgImages = buildPageOgImage({
   title: "นโยบายความเป็นส่วนตัวและ PDPA",
@@ -39,15 +39,13 @@ export const privacyMetadataTh: Metadata = {
 export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen text-ink">
-      <div className="max-w-3xl mx-auto px-6 pt-16 space-y-10">
+      <div className="v2-doc">
         {/* Header */}
-        <Ui2PageHero
-          compact
+        <Ui2DocHead
+          kind="lock"
           crumbs={[{ label: "หน้าแรก", href: "/" }, { label: "นโยบายความเป็นส่วนตัว" }]}
           title="นโยบายความเป็นส่วนตัว และการคุ้มครองข้อมูลส่วนบุคคล"
-          accent="นโยบายความเป็นส่วนตัว"
           lede="กรอบการปฏิบัติตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA) และมาตรฐานสากล (GDPR / CCPA)"
-          cards={["swords-04", "major-11", "pentacles-04", "major-20"]}
         />
 
         {/* Section 1 */}

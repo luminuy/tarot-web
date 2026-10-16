@@ -7,7 +7,7 @@ import { buildBreadcrumbJsonLd, homeCrumb } from "@/app/_shared/seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { SOCIAL_BADGE_STYLE, SocialGlyph } from "@/components/ui/SocialIcons";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
-import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { Ui2DocHead } from "@/components/ui2/Ui2PageHero";
 
 /**
  * ✉️ หน้า "ติดต่อเรา"
@@ -97,14 +97,12 @@ export function ContactBodyTh() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdContact) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdBreadcrumbs) }} />
 
-      <div className="max-w-3xl mx-auto px-6 pt-16 space-y-10">
-        <Ui2PageHero
-          compact
+      <div className="v2-doc">
+        <Ui2DocHead
+          kind="letter"
           crumbs={[{ label: "หน้าแรก", href: "/" }, { label: "ติดต่อเรา" }]}
           title="ติดต่อเรา"
-          accent="ติดต่อเรา"
           lede="เราอ่านทุกข้อความที่ส่งเข้ามา"
-          cards={["cups-03", "major-06", "wands-03", "major-14"]}
         />
 
         <section className="page-band page-band-compact page-band-tint space-y-3">
