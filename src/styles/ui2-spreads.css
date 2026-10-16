@@ -259,8 +259,14 @@
   padding: 3px;
   border-radius: 9px;
   rotate: var(--r, 0deg);
+  /* โผล่เมื่อภาพหน้าไพ่โหลดเสร็จแล้วเท่านั้น (spreads-pop.ts ใส่ is-ready) — เดิมเห็นกรอบงาช้างเปล่าสีขาวแวบก่อนภาพมา (INC-0271) */
+  opacity: 0;
+  transition: opacity 0.45s ease;
   background: linear-gradient(170deg, var(--ui2-card-ivory-top) 0%, var(--ui2-card-ivory-bottom) 100%);
   box-shadow: 0 0 0 1px rgba(201, 161, 90, 0.6), 0 22px 34px -16px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 217, 143, 0.12);
+}
+.ui2-sp-deco-card.is-ready {
+  opacity: 1;
 }
 /* หน้าไพ่จริง (CardImage ภาพย่อ) — สัดส่วนเดียวกับไพ่ 1909 */
 .ui2-sp-deco-card img {
@@ -1385,10 +1391,13 @@ html:has(.ui2-spread-pop[open]) {
     max-width: 1360px;
     margin-inline: auto;
   }
+  /* รายชื่อหมวดชิดบนเท่ากันทั้งก่อน/หลังสคริปต์เปิดโหมดหน้าต่างค้าง (เว้นบน 64px ให้อยู่ระดับหัวข้อหมวด)
+     เดิมโหมดค้างใช้ align-self: center ➔ ตอนโหลดรายชื่อกระโดดลงกลางจอแวบหนึ่ง (INC-0271) */
   .ui2-sp-rail {
     display: block;
     position: sticky;
     top: calc(var(--site-header-h, 78px) + 48px);
+    padding-top: 64px;
   }
   .ui2-sp-rail ol {
     position: relative;
@@ -1485,7 +1494,6 @@ html:has(.ui2-spread-pop[open]) {
   .ui2-sp-show.is-scrolly .ui2-sp-rail {
     position: relative;
     top: auto;
-    align-self: center;
   }
   .ui2-sp-show.is-scrolly .ui2-sp-panels {
     display: grid;
@@ -1497,6 +1505,11 @@ html:has(.ui2-spread-pop[open]) {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.14s var(--ease-out), visibility 0s linear 0.14s;
+  }
+  /* ตอนสคริปต์จัดหน้าต่างครั้งแรก ห้ามมีการจาง — ไม่งั้นหน้าต่างทั้ง 6 หมวดที่เพิ่งย้ายมาซ้อนที่เดียวกัน
+     จางหายพร้อมกัน เห็นหมวดสุดท้ายทับหมวดแรกแวบหนึ่ง (เจ้าของ "เข้ามาตอนแรกเหมือนภาพซ้อนแล้วหายไป" · INC-0271) */
+  .ui2-sp-show.is-setting .ui2-sp-shelf {
+    transition: none !important;
   }
   .ui2-sp-show.is-scrolly .ui2-sp-shelf[data-active] {
     opacity: 1;

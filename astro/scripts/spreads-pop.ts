@@ -13,6 +13,14 @@
 /* ── 1. ของวนหยุดนอกจอ (สคริปต์กลาง) ─────────────────────────────────── */
 import "./ui2-inview";
 
+/* ── 1a. ไพ่ตกแต่งหัวหน้าโผล่เมื่อภาพโหลดเสร็จ (ไม่เห็นกรอบขาวเปล่าแวบ · INC-0271) ── */
+for (const card of document.querySelectorAll<HTMLElement>(".ui2-sp-deco-card")) {
+  const img = card.querySelector("img");
+  const ready = () => card.classList.add("is-ready");
+  if (!img || (img.complete && img.naturalWidth > 0)) ready();
+  else img.addEventListener("load", ready, { once: true });
+}
+
 /* ── 1b. แถบหมวดติดบนจอ — หมวดที่กำลังดูเรืองขึ้น (aria-current) · มือถือเลื่อนชิปให้อยู่ในจอ ── */
 const stick = document.querySelector<HTMLElement>("[data-sp-stick]");
 const show = document.querySelector<HTMLElement>("[data-sp-show]");
@@ -128,6 +136,9 @@ if (show) {
       : null;
 
   const setup = () => {
+    // จัดหน้าต่างใหม่โดยไม่ให้มีการจางข้ามกัน (INC-0271) — ปลดหลังเบราว์เซอร์วาดสถานะใหม่แล้ว
+    show.classList.add("is-setting");
+    requestAnimationFrame(() => requestAnimationFrame(() => show.classList.remove("is-setting")));
     show.classList.remove("is-scrolly");
     panelsBox.style.zoom = "";
     show.style.removeProperty("--enter");
