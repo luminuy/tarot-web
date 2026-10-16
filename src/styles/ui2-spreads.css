@@ -46,19 +46,39 @@
   max-width: 860px;
   padding-top: 40px;
 }
+/* เส้นทางหน้าเป็นหัวเล็กสีทอง มีเส้นทองไล่จางสองข้าง (เจ้าของ "ปรับตรงนี้ให้สวย") */
 .ui2-sp-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
   font-size: 13px;
-  color: var(--ui2-on-night-dim);
+  letter-spacing: 0.04em;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-sp-crumb::before,
+.ui2-sp-crumb::after {
+  content: "";
+  display: none;
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 217, 143, 0) 0%, var(--ui2-gold-solid) 100%);
+  opacity: 0.7;
+}
+.ui2-sp-crumb::after {
+  background: linear-gradient(90deg, var(--ui2-gold-solid) 0%, rgba(255, 217, 143, 0) 100%);
 }
 .ui2-sp-crumb a {
-  color: var(--ui2-on-night-soft);
+  color: var(--ui2-gold-solid);
+  text-decoration: none;
+}
+.ui2-sp-crumb a:hover {
   text-decoration: underline;
-  text-decoration-color: var(--ui2-line-night);
   text-underline-offset: 4px;
 }
 .ui2-sp-h1 {
   color: var(--ui2-on-night);
   font-size: 32px;
+  text-shadow: 0 0 42px rgba(255, 217, 143, 0.16);
 }
 .ui2-sp-h1 .ui2-gold-night {
   font-weight: 600;
@@ -153,6 +173,28 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+}
+/* แท็บเล็ตขึ้นไป: รวมเป็นแคปซูลกระจกใบเดียว คั่นด้วยเส้นบาง */
+@media (min-width: 768px) {
+  .ui2-sp-crumb::before,
+  .ui2-sp-crumb::after {
+    display: block;
+  }
+  .ui2-sp-trust {
+    flex-wrap: nowrap;
+    gap: 0;
+    padding: 10px 6px;
+    border-radius: 999px;
+    background: rgba(246, 238, 226, 0.045);
+    box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+  }
+  .ui2-sp-trust li {
+    padding-inline: 18px;
+    white-space: nowrap;
+  }
+  .ui2-sp-trust li + li {
+    border-left: 1px solid var(--ui2-line-night);
+  }
 }
 .ui2-sp-jump {
   display: flex;
