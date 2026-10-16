@@ -120,6 +120,24 @@
   [data-fx="full"] .ui2-sp-deco-8 {
     display: none;
   }
+  /* แท็บเล็ต 768–1023: ไพ่ใหญ่ 2 แนวชนหัวข้อ/แคปซูล (เจ้าของ 2026-10-17 "มีบัค") —
+     เหลือใบมุมบนซ้าย-ขวาใบเล็ก เหนือหัวข้อ ไม่ทับตัวหนังสือ */
+  @media (max-width: 1023px) {
+    [data-fx="full"] .ui2-sp-deco-2,
+    [data-fx="full"] .ui2-sp-deco-6 {
+      display: none;
+    }
+    [data-fx="full"] .ui2-sp-deco-1 {
+      --w: 64px;
+      left: 14px;
+      top: 8px;
+    }
+    [data-fx="full"] .ui2-sp-deco-5 {
+      --w: 64px;
+      right: 14px;
+      top: 18px;
+    }
+  }
   /* ใบเล็กแนวใน: เฉพาะจอกว้างพอที่ไม่ชนหัวข้อ */
   @media (max-width: 1279px) {
     [data-fx="full"] .ui2-sp-deco-3,
