@@ -208,7 +208,7 @@
     opacity: 0;
   }
   [data-fx="full"] .ui2-sp-shelf.is-deal .ui2-sc-slot {
-    animation: ui2-sp-deal 0.95s cubic-bezier(0.18, 0.9, 0.24, 1) calc(var(--i, 0) * 85ms) backwards, ui2-sp-bob calc(8s + var(--i, 0) * 0.6s) ease-in-out calc(var(--i, 0) * -1.7s) infinite;
+    animation: ui2-sp-deal 0.6s cubic-bezier(0.2, 0.8, 0.25, 1) calc(var(--i, 0) * 60ms) backwards, ui2-sp-bob calc(8s + var(--i, 0) * 0.6s) ease-in-out calc(var(--i, 0) * -1.7s) infinite;
   }
   [data-fx="full"] .ui2-sp-shelf.is-deal .ui2-sp-shelf-head {
     animation: ui2-sp-head-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
@@ -225,13 +225,16 @@
 @keyframes ui2-sp-head-rise {
   from { opacity: 0; transform: translateY(18px); }
 }
-/* แจกจากกองกลางล่างของโต๊ะ ➔ ตำแหน่งกระจายของใบนั้น (--x เศษส่วนความกว้าง · --a มุมเอียง จาก SHELF_SCATTER) */
+/* แจกไพ่ลงที่ตำแหน่งของใบนั้นเลย — ลอยขึ้นสั้น ๆ + เอียงกลับเข้าที่ (--a มุมเอียงจาก SHELF_SCATTER)
+   ⚠️ ห้ามกลับไปแจก "จากกองกลางใต้โต๊ะ" (เดิม translate ลง 260px + รวมกลาง): ระหว่างอนิเมชันไพ่ล้นออกนอกกรอบหน้าต่าง
+      และวิ่งตัดผ่านกันเป็นกองโปร่ง ๆ ใต้หน้าต่าง (เจ้าของ 2026-10-17 "บัคอยู่ที่ motion อนิเมชั่น พื้นที่" · INC-0270)
+      ระยะเลื่อนต้องเล็กกว่าขอบล่างของหน้าต่าง (ด่าน test-ui2-fx ข้อ 8) */
 @keyframes ui2-sp-deal {
   0% {
     opacity: 0;
-    transform: translate(calc((0.5 - var(--x, 0.5)) * (100cqw - var(--card-w, 160px))), 260px) rotate(calc(var(--a, 0deg) * -2)) scale(0.78);
+    transform: translateY(26px) rotate(calc(var(--a, 0deg) * -0.6)) scale(0.94);
   }
-  35% {
+  55% {
     opacity: 1;
   }
 }

@@ -264,6 +264,24 @@ check(
   `กฎ: ${decoRules.join(" / ").slice(0, 160) || "(ไม่พบ)"} · คีย์เฟรม: ${decoKeyframes.join(" / ").slice(0, 120) || "(ไม่พบ)"}\n      ➔ ดู src/styles/ui2-spreads-fx.css (INC-0269)`,
 );
 
+// ── 8. แจกไพ่ตอนสลับหมวด /spreads ต้องอยู่ในกรอบหน้าต่าง (INC-0270) ─────────────────────────────────
+// เดิมไพ่พุ่งขึ้นจากใต้โต๊ะ 260px และรวมจากกองกลาง ➔ ระหว่างอนิเมชันไพ่ล้นออกนอกหน้าต่างและวิ่งตัดกันเป็นกองโปร่ง
+// ตรวจจากซอร์ส (ไม่ต้องบิลด์): ระยะลอยขึ้น ≤ 40px · ไม่มีการเลื่อนแนวนอน (translate X / cqw) · หมวดเก่าหายภายใน ≤ 0.2 วิ
+{
+  const fxSrc = fs.readFileSync(path.join(ROOT, "src/styles/ui2-spreads-fx.css"), "utf-8");
+  const dealKf = /@keyframes ui2-sp-deal\s*\{([\s\S]*?)\n\}/.exec(fxSrc)?.[1] ?? "";
+  const lift = Math.max(0, ...[...dealKf.matchAll(/translateY\((\d+(?:\.\d+)?)px\)/g)].map((m) => Number(m[1])));
+  const sideways = /translate\(|translateX\(|cqw/.test(dealKf);
+  const shelfCss = fs.readFileSync(path.join(ROOT, "src/styles/ui2-spreads.css"), "utf-8");
+  const outRule = /\.ui2-sp-show\.is-scrolly \.ui2-sp-shelf \{([^}]*)\}/.exec(shelfCss)?.[1] ?? "";
+  const outSec = Number(/transition:\s*opacity\s+([\d.]+)s/.exec(outRule)?.[1] ?? "9");
+  check(
+    "แจกไพ่ตอนสลับหมวด /spreads อยู่ในกรอบหน้าต่าง (ลอยขึ้น ≤ 40px · ไม่เลื่อนข้าง · หมวดเก่าหาย ≤ 0.2 วิ)",
+    dealKf.length > 0 && lift <= 40 && !sideways && outSec <= 0.2,
+    `ลอยขึ้น ${lift}px · เลื่อนข้าง ${sideways} · หมวดเก่าหาย ${outSec} วิ\n      ➔ ดู src/styles/ui2-spreads-fx.css + ui2-spreads.css (INC-0270)`,
+  );
+}
+
 if (failed > 0) {
   console.log(`\n❌ ไม่ผ่าน ${failed} ข้อ\n`);
   process.exit(1);

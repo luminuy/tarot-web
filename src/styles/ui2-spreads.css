@@ -1492,16 +1492,18 @@ html:has(.ui2-spread-pop[open]) {
   .ui2-sp-show.is-scrolly .ui2-sp-panels {
     display: grid;
   }
+  /* สลับหมวด: หมวดเก่าหายเร็ว (0.14 วิ) แล้วหมวดใหม่ค่อยขึ้น — ห้ามจางไขว้กันนาน
+     เดิมเก่าจาง 0.32 วิ ทับหมวดใหม่ที่กำลังแจกไพ่ เห็นไพ่โปร่งสองชุดซ้อนกันกลางหน้าต่าง (INC-0270) */
   .ui2-sp-show.is-scrolly .ui2-sp-shelf {
     grid-area: 1 / 1;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.32s var(--ease-out), visibility 0s linear 0.32s;
+    transition: opacity 0.14s var(--ease-out), visibility 0s linear 0.14s;
   }
   .ui2-sp-show.is-scrolly .ui2-sp-shelf[data-active] {
     opacity: 1;
     visibility: visible;
-    transition: opacity 0.32s var(--ease-out);
+    transition: opacity 0.22s var(--ease-out) 0.1s;
   }
 }
 
