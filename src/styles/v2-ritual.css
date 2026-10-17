@@ -2108,3 +2108,225 @@
 .v2-sr-tab-more {
   margin-left: -4px;
 }
+
+/* ── เปลี่ยนผังในหน้าเดิม (SpreadSwitcher · เจ้าของ 2026-10-17 "ทำให้เปลี่ยนได้ที่หน้านี้เลย") ──
+   คอม: กล่องกลางจอ · มือถือ: แผ่นเลื่อนขึ้นจากล่าง · เข้าครั้งเดียว ไม่มีของวน ไม่มี backdrop-filter */
+.v2-sw {
+  width: min(760px, calc(100vw - 32px));
+  max-width: none;
+  max-height: min(86vh, 760px);
+  margin: auto;
+  padding: 0;
+  border: 1px solid rgba(255, 217, 143, 0.28);
+  border-radius: 28px;
+  color: #F6EEE2;
+  background: #17121A;
+  box-shadow: 0 50px 100px -40px rgba(0, 0, 0, 0.95);
+  overflow: hidden;
+}
+.v2-sw::backdrop {
+  background: rgba(6, 4, 8, 0.74);
+}
+.v2-sw[open] {
+  animation: v2-sw-in 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes v2-sw-in {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+}
+.v2-sw-box {
+  display: flex;
+  flex-direction: column;
+  max-height: inherit;
+}
+.v2-sw-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 20px 8px 24px;
+}
+.v2-sw-head h2 {
+  margin: 0;
+  font-family: var(--ui2-font-display, inherit);
+  font-size: 24px;
+  font-weight: 600;
+  color: #F6EEE2;
+}
+.v2-sw-x {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 236, 200, 0.16);
+  color: #F6EEE2;
+  cursor: pointer;
+}
+.v2-sw-x:hover {
+  border-color: rgba(255, 217, 143, 0.6);
+}
+.v2-sw-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 6px 24px 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid rgba(255, 236, 200, 0.1);
+}
+.v2-sw-tabs::-webkit-scrollbar {
+  display: none;
+}
+.v2-sw-tabs button {
+  flex: none;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 236, 200, 0.16);
+  font-size: 14px;
+  font-weight: 600;
+  color: #CFC3B2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+.v2-sw-tabs button:hover {
+  color: #F6EEE2;
+  border-color: rgba(255, 217, 143, 0.45);
+}
+.v2-sw-tabs button.is-on {
+  color: #120E15;
+  border-color: transparent;
+  background: linear-gradient(180deg, #FFE3A8 0%, #F0C470 100%);
+}
+.v2-sw-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 16px 24px 24px;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+@media (min-width: 640px) {
+  .v2-sw-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.v2-sw-tile {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  padding: 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 236, 200, 0.12);
+  text-align: left;
+  color: inherit;
+  background: rgba(255, 236, 200, 0.03);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+}
+.v2-sw-tile:hover {
+  border-color: rgba(255, 217, 143, 0.5);
+  background: rgba(255, 217, 143, 0.06);
+  transform: translateY(-2px);
+}
+.v2-sw-tile:active {
+  transform: scale(0.98);
+}
+.v2-sw-tile:focus-visible,
+.v2-sw-tabs button:focus-visible,
+.v2-sw-x:focus-visible {
+  outline: 2px solid #FFD98F;
+  outline-offset: 2px;
+}
+.v2-sw-tile.is-now {
+  border-color: rgba(255, 217, 143, 0.75);
+  background: rgba(255, 217, 143, 0.08);
+}
+.v2-sw-map {
+  display: block;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 217, 143, 0.14);
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 236, 200, 0.04) 0 1px, transparent 1px 12px),
+    repeating-linear-gradient(90deg, rgba(255, 236, 200, 0.04) 0 1px, transparent 1px 12px),
+    rgba(12, 10, 15, 0.6);
+}
+.v2-sw-map .v2-ss-map-area {
+  max-width: 132px;
+  margin: 0 auto;
+}
+.v2-sw-t {
+  display: grid;
+  gap: 4px;
+}
+.v2-sw-t b {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #F6EEE2;
+}
+.v2-sw-t > span {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #A89C8C;
+}
+.v2-sw-t em {
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.35);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  color: #FFD98F;
+}
+.v2-sw-t em.is-now {
+  color: #120E15;
+  border-color: transparent;
+  background: #FFD98F;
+}
+/* มือถือ: แผ่นเลื่อนขึ้นจากล่าง ชิดขอบ */
+@media (max-width: 639px) {
+  .v2-sw {
+    width: 100vw;
+    max-height: 88vh;
+    margin: auto 0 0;
+    border-radius: 26px 26px 0 0;
+    border-bottom: 0;
+  }
+  .v2-sw[open] {
+    animation-name: v2-sw-up;
+  }
+  .v2-sw-head {
+    padding: 16px 16px 6px 20px;
+  }
+  .v2-sw-tabs {
+    padding: 4px 20px 12px;
+  }
+  .v2-sw-grid {
+    gap: 10px;
+    padding: 14px 16px calc(20px + env(safe-area-inset-bottom));
+  }
+}
+@keyframes v2-sw-up {
+  from { transform: translateY(40px); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2-sw[open] {
+    animation: none;
+  }
+  .v2-sw-tile,
+  .v2-sw-tile:hover {
+    transform: none;
+  }
+}
+/* กล่องผังที่เลือกเพิ่งเปลี่ยน — ลอยเข้าเบา ๆ ครั้งเดียว (key เปลี่ยน = เล่นใหม่) */
+.v2-ss {
+  animation: v2-sw-in 0.36s cubic-bezier(0.16, 1, 0.3, 1);
+}

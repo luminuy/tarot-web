@@ -57,7 +57,7 @@ import { buildCustomSpread, CUSTOM_SPREAD_ID, layoutPoints } from "@/lib/tarot/c
 import { takeCustomLaunch, type CustomSpreadDef } from "@/lib/tarot/custom-spread-client";
 import { takeQuestionPrefill } from "@/lib/reading/question-prefill";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
-import { RitualRail, SpreadSummaryCard, SealChip } from "@/components/home/RitualChrome";
+import { RitualRail, SpreadSummaryCard, SealChip, SpreadSwitcher } from "@/components/home/RitualChrome";
 
 /**
  * ✦ Dynamic Code-Splitting — คอมโพเนนต์หนักทั้งหมดโหลดเมื่อถึงขั้นที่ใช้จริง
@@ -265,6 +265,14 @@ export default function TarotFlow({
   const [currentUser, setCurrentUser] = useState<{ id: string; name?: string; email?: string } | null>(null);
   const entitlement = useEntitlement();
   const entitlementView = describeEntitlement(entitlement);
+  /** ผังที่ต้องใช้รอบเติม (ป้ายในหน้าต่างเปลี่ยนผัง) — ตัดสินด้วย decideSpreadAccess ชุดเดียวกับตอนแตะ */
+  const grandLockedIds = useMemo(
+    () => new Set(PUBLIC_SPREADS.filter((sp) => {
+          const d = decideSpreadAccess(entitlement, sp.id, sp.positions.length);
+          return !d.allowed && d.reason === "grand_spread";
+        }).map((sp) => sp.id)),
+    [entitlement],
+  );
   // แอดมินปิดระบบสิทธิ์ทั้งเว็บ (/admin → เปิดระบบสิทธิ์จริง → ปิด) = ไม่มีลิมิตให้ใครเลย
   // รวมถึงผังใหญ่ + ปรมาจารย์ลับด้วย — ผูก entitlement.enabled เข้ามาไม่งั้นการ์ดจะค้าง "ล็อก"
   // ทั้งที่หลังบ้านอนุญาตให้เปิดผังใหญ่แล้ว (describeEntitlement คืน null ตอนปิดจึงไม่มี isUnlimited)
@@ -343,6 +351,8 @@ export default function TarotFlow({
 
   // Selection state
   const [selectedSpread, setSelectedSpread] = useState<Spread>(routeSpread ?? PUBLIC_SPREADS[3]); // Default: 3-card
+  /** หน้าต่างเปลี่ยนผังในหน้าเดิม (ขั้นตั้งคำถาม) — แทนการพาออกไปหน้าแรก (เจ้าของ 2026-10-17) */
+  const [switcherOpen, setSwitcherOpen] = useState(false);
   /**
    * ✦ ผังที่สร้างเอง (REFLECTION_JOURNAL_PLAN 1.8) — ตัวผังดิบที่ส่งให้ `/start` ตรวจซ้ำแล้วตรึงลงเซสชัน
    * มีผลเฉพาะเมื่อ `selectedSpread.id === "custom"` · เลือกผังในบ้านทีหลัง = ค่านี้ถูกเมินเอง
@@ -1747,7 +1757,7 @@ export default function TarotFlow({
             ไม่งั้นทั้งหน้าไม่มี <h1> ให้โปรแกรมอ่านหน้าจอกระโดดไปเลย (ขั้นต่าง ๆ ใช้ <h2>) */}
         {routeSpread && (
           <h1 className="sr-only"><ThaiPhrases>
-            {isEnglish ? `Tarot reading — ${routeSpread.nameEn}` : `ดูดวงด้วยผัง${routeSpread.nameTh}`}
+            {isEnglish ? `Tarot reading — ${selectedSpread.nameEn}` : `ดูดวงด้วยผัง${selectedSpread.nameTh}`}
           </ThaiPhrases></h1>
         )}
 
@@ -1921,12 +1931,35 @@ export default function TarotFlow({
 
                 <aside className="v2-rt-side">
                   <SpreadSummaryCard
+                    key={selectedSpread.id}
                     spread={selectedSpread}
                     isEnglish={isEnglish}
                     onChange={() => {
                       soundManager.playCardSelectSound();
-                      scrollToSanctuaryTop();
-                      navigateStep("SPREAD_SELECT");
+                      setSwitcherOpen(true);
+                    }}
+                  />
+                  <SpreadSwitcher
+                    open={switcherOpen}
+                    current={selectedSpread}
+                    isEnglish={isEnglish}
+                    lockedIds={grandLockedIds}
+                    onClose={() => setSwitcherOpen(false)}
+                    onPick={(sp) => {
+                      // ด่านสิทธิ์ชุดเดียวกับปุ่มเริ่มพิธี (ห้ามลัด) — ไม่ผ่าน = ปิดหน้าต่างแล้วเปิดกำแพงตามเหตุผล
+                      const decision = decideSpreadAccess(entitlement, sp.id, sp.positions.length);
+                      setSwitcherOpen(false);
+                      if (!decision.allowed) {
+                        openAccessDialog(decision.reason);
+                        return;
+                      }
+                      soundManager.playCardSelectSound();
+                      trackEvent("spread_select", { spread_id: sp.id, spread_name: sp.nameTh, card_count: sp.positions.length, category: "inline_switch" });
+                      setSelectedSpread(sp);
+                      // หน้า /read/<ผัง>: เปลี่ยน URL ตามผังใหม่ (รีเฟรช/แชร์ลิงก์ได้ผังที่เลือกจริง) — ไม่โหลดหน้าใหม่ คำถามที่พิมพ์ไว้อยู่ครบ
+                      if (routeSpread) {
+                        window.history.replaceState(window.history.state, "", `${isEnglish ? "/en" : ""}/read/${sp.id}`);
+                      }
                     }}
                   />
                   <PersonaCardSelector
