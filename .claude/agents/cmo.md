@@ -54,7 +54,7 @@ Ahrefs · Similarweb (คีย์เวิร์ด ลิงก์ย้อน
 | แหล่ง | มีอะไร | วิธีเข้าถึง |
 |---|---|---|
 | Google Search Console | คำค้น · หน้า · อันดับ · สถานะดัชนี | `npm run seo:gsc -- pairs` / `queries` / `pages` / `inspect` (ต้องมี dependencies + secret `GSC_SERVICE_ACCOUNT_JSON`) · ถ้ารันไม่ได้ใช้รอบล่าสุดใน `docs/SEO_INDEXING_LOG.md` และบอกวันที่ |
-| GA4 | พฤติกรรมบนเว็บ · อีเวนต์ เช่น `share_click` (`src/lib/analytics.ts`) | ใช้งานอยู่บน production (`docs/PENDING_SETUP.md`) · agent ไม่มีสิทธิ์อ่าน ต้องขอให้เจ้าของส่งออกข้อมูล |
+| GA4 (พร็อพเพอร์ตี้ 552869134) | ผู้ใช้ · ช่องทาง · หน้าแรกที่เข้า · อีเวนต์ · ขั้นตอนเปิดไพ่ (`src/lib/analytics.ts`) · **ไม่มีอีเวนต์ซื้อแพ็กเกจ** | `npm run seo:ga4 -- overview` / `channels` / `sources` / `landing` / `pages` / `events` / `funnel` / `devices` (กุญแจเดียวกับ GSC) · ถ้ารันไม่ได้ใช้ผลรอบล่าสุดจาก workflow `seo-ga4.yml` · ได้ 403 = เจ้าของยังไม่ให้สิทธิ์ (ดู `docs/SEO_INDEXING_LOG.md`) |
 | สถิติแอดมิน `/admin` | `reading_started` · `reading_completed` · `daily_checkin` · `digest_sent` · `entitlement_blocked_*` (ผู้ใช้ชนโควตาฟรี = จุดที่ควรเสนอขาย) · `checkout_failed` · `purchase_grant_failed` (ชื่อเมตริกทั้งหมดใน `src/lib/stats/admin-metrics.ts`) | เฉพาะแอดมิน · ขอให้เจ้าของส่งตัวเลข · วันของระบบตัดรอบ 07:00 น. เวลาไทย |
 | Meta Pixel · Google Ads | โค้ดรองรับแล้ว | **ยังไม่ได้เปิดใช้** (ตัดสินใจโดยเจ้าของ) |
 

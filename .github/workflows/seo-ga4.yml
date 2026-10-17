@@ -1,0 +1,104 @@
+name: 📊 GA4 รายสัปดาห์ — ดึงพฤติกรรมผู้ใช้จาก Google Analytics
+run-name: "📊 GA4 ${{ github.event_name == 'workflow_dispatch' && format('(กดเองโดย {0})', github.actor) || '(ตามเวลา)' }}"
+
+# รัน `npm run seo:ga4` ด้วย repository secret `GSC_SERVICE_ACCOUNT_JSON` (Service Account ตัวเดียวกับ GSC)
+# ------------------------------------------------------------------------------
+# ต้องเพิ่มอีเมล Service Account เป็น "ผู้ดู" ใน **พร็อพเพอร์ตี้** SeerTarot Web (552869134)
+# และเปิด Google Analytics Data API ในโปรเจกต์ Cloud ก่อน ไม่งั้นจะได้ 403
+#
+# ผลอ่านได้ที่หน้า Summary ของ workflow run · ไฟล์ JSON ดิบแนบเป็น artifact 90 วัน
+# ไม่ commit อะไรกลับเข้ารีโป · **ห้าม commit กุญแจลงรีโปเด็ดขาด** (รีโปเป็นสาธารณะ)
+#
+# ค่าใช้จ่าย: Analytics Data API ฟรี (โควตาโทเคนต่อพร็อพเพอร์ตี้ — รายงาน 8 ชุดต่อสัปดาห์ใช้น้อยมาก)
+
+on:
+  schedule:
+    - cron: "17 2 * * 1" # จันทร์ 02:17 UTC = 09:17 น. เวลาไทย (หลังรายงาน GSC 10 นาที)
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "ย้อนหลังกี่วัน"
+        required: false
+        default: "28"
+
+concurrency:
+  group: seo-ga4
+  cancel-in-progress: false
+
+# อ่านโค้ดอย่างเดียว ไม่เขียนอะไรกลับเข้ารีโป
+permissions:
+  contents: read
+
+jobs:
+  report:
+    name: 📊 ภาพรวม · ช่องทาง · หน้า · อีเวนต์ · ขั้นตอนเปิดไพ่
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: ⚙️ Setup Node.js 22
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 📊 ดึงผลจาก GA4
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          # ⚠️ ส่ง input ผ่าน env เสมอ — ห้ามฝัง ${{ inputs.* }} ลงในสคริปต์ตรง ๆ (script injection)
+          GA4_DAYS: ${{ inputs.days }}
+        run: |
+          set -o pipefail
+          if [ -z "$GSC_SERVICE_ACCOUNT_JSON" ]; then
+            echo "::error::ไม่มี GSC_SERVICE_ACCOUNT_JSON ใน repository secrets"
+            exit 1
+          fi
+          DAYS="${GA4_DAYS:-28}"
+          case "$DAYS" in ''|*[!0-9]*) echo "::error::days ต้องเป็นตัวเลขล้วน (ได้มา: $DAYS)"; exit 1;; esac
+
+          mkdir -p ga4-report
+          {
+            echo "# 📊 GA4 รายสัปดาห์ ($(date -u +%Y-%m-%d)) — ย้อนหลัง ${DAYS} วัน"
+            echo ""
+            echo "## ภาพรวม"
+            npm run -s seo:ga4 -- overview --days "$DAYS" --json ga4-report/overview.json
+            echo ""
+            echo "## ช่องทาง"
+            npm run -s seo:ga4 -- channels --days "$DAYS" --json ga4-report/channels.json
+            echo ""
+            echo "## แหล่ง / สื่อ"
+            npm run -s seo:ga4 -- sources --days "$DAYS" --limit 30 --json ga4-report/sources.json
+            echo ""
+            echo "## หน้าแรกที่คนเข้ามาเจอ"
+            npm run -s seo:ga4 -- landing --days "$DAYS" --limit 30 --json ga4-report/landing.json
+            echo ""
+            echo "## หน้าที่ถูกเปิดดู"
+            npm run -s seo:ga4 -- pages --days "$DAYS" --limit 30 --json ga4-report/pages.json
+            echo ""
+            echo "## ขั้นตอนเปิดไพ่"
+            npm run -s seo:ga4 -- funnel --days "$DAYS" --json ga4-report/funnel.json
+            echo ""
+            echo "## อีเวนต์ทั้งหมด"
+            npm run -s seo:ga4 -- events --days "$DAYS" --json ga4-report/events.json
+            echo ""
+            echo "## อุปกรณ์"
+            npm run -s seo:ga4 -- devices --days "$DAYS" --json ga4-report/devices.json
+          } 2>&1 | tee ga4-report/summary.md
+
+      - name: 📊 สรุปผลขึ้นหน้า workflow
+        if: always()
+        run: cat ga4-report/summary.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "(งานล้มก่อนได้ผล)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 📎 แนบผลดิบไว้ให้โหลด
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ga4-report
+          path: ga4-report/
+          if-no-files-found: warn
+          retention-days: 90
