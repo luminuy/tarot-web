@@ -1018,23 +1018,17 @@ html:has(.ui2-spread-pop[open]) {
   margin-inline: -16px;
   padding: 6px 0;
 }
-/* พื้นทึบหลังแถบตอนติดบนจอ (สคริปต์ตั้ง data-stuck เมื่ออยู่ในชุดหมวด) — ไพ่ของหมวดก่อนหน้าไม่โผล่ทะลุแถบ */
-.ui2-sp-stick::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  left: 50%;
-  top: -96px;
-  bottom: -22px;
-  width: 100vw;
-  translate: -50% 0;
-  pointer-events: none;
-  opacity: 0;
-  background: linear-gradient(180deg, var(--ui2-night) 0, var(--ui2-night) calc(100% - 34px), rgba(12, 10, 15, 0) 100%);
-  transition: opacity var(--dur-fast) var(--ease-out);
-}
-.ui2-sp-stick[data-stuck]::before {
-  opacity: 1;
+/* สคริปต์ทำงาน = แท็บแบบหน้าแรก: แถบไม่ติดจอ (sticky ใต้หัวเว็บสั่นบน iOS · INC-0109) · เห็นทีละหมวด (data-sp-on)
+   ไม่มีสคริปต์ = sticky + ทุกหมวดเรียงต่อกันตามเดิม */
+@media (max-width: 767px) {
+  .ui2-sp[data-sp-tabs] .ui2-sp-stick {
+    position: relative;
+    top: auto;
+    margin-bottom: 14px;
+  }
+  .ui2-sp[data-sp-tabs] .ui2-sp-shelf:not([data-sp-on]) {
+    display: none;
+  }
 }
 .ui2-sp-stick-row {
   display: flex;

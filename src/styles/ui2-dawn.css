@@ -296,6 +296,23 @@
   background: rgba(255, 217, 143, 0.32);
   box-shadow: 0 0 6px rgba(255, 217, 143, 0.25);
 }
+/* กล่อง "สรุปตรงใจ" ในกล่องคำทำนาย = แผ่นมืดบนครีม (พื้นมืดเขียนตายตัวไว้) ➔ คืนโทเคนกลางคืนให้ตัวหนังสือสว่าง
+   (เดิมรับโทเคนกลางวันจากแผงครีม ตัวหนังสือเข้มจมบนพื้นมืด อ่านไม่ออก · เจ้าของ 2026-10-17 ส่งภาพมือถือ) */
+.ui2-pg .v2-rt .v2-sr .v2-sr-answer {
+  --ui2-on-night: #F6EEE2;
+  --ui2-on-night-soft: #CFC3B2;
+  --ui2-on-night-dim: rgba(246, 238, 226, 0.62);
+  --rt-gold: #FFD98F;
+  --rt-line: rgba(255, 236, 200, 0.13);
+  --color-ink: #F6EEE2;
+  --color-ink-deep: #F6EEE2;
+  --color-muted: #CFC3B2;
+  --color-gold-ink: #FFD98F;
+  --color-surface: #1E1822;
+  --color-surface-warm: #251E2A;
+  --color-line-warm: rgba(255, 236, 200, 0.22);
+  color: #F6EEE2;
+}
 /* ชิ้นย่อยที่เขียนพื้นมืดตายตัวไว้ ➔ กระดาษขาวบนครีม */
 .ui2-pg .v2-rt .v2-in-textarea,
 .ui2-pg .v2-rt .v2-in-greet-say,

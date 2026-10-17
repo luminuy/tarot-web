@@ -26,6 +26,7 @@ declare global {
           "error-callback"?: () => void;
           theme?: "light" | "dark" | "auto";
           size?: "normal" | "flexible" | "compact";
+          appearance?: "always" | "execute" | "interaction-only";
         },
       ) => string;
       remove: (widgetId: string) => void;

@@ -184,18 +184,18 @@ html[data-theme="dark"] .site-header-glass {
   box-shadow: 0 16px 34px -24px rgba(0, 0, 0, 0.8);
 }
 
-html[data-theme="dark"] .font-mystic-gold {
+html[data-theme="dark"] .font-mystic-gold:not(.v2-qr *) {
   color: var(--color-gold);
 }
 
 /* ชิ้นธีมสว่างเดิม (การ์ดพอร์ซเลน · ผ้าปู · กระเบื้องกระจก · ช่องกรอก · เส้นคั่น · ปุ่มรอง) ในโหมดมืด
    ไม่ใช้กับหน้า UI 2.0 (.ui2-pg · .ui2-sp · .ui2-dy) — หน้านั้นวาดพื้นกลางคืน/แผ่นครีมของตัวเองทั้งสองโหมด
    (เดิมการ์ดหัวข้อหน้า Pick a Card ในโหมดมืดได้เส้นขอบเทาเข้มจากเงา 0 0 0 1px ของ .glass-tile) */
-html[data-theme="dark"] .altar-card-porcelain:not(:is(.ui2-pg, .ui2-sp, .ui2-dy) *):hover {
+html[data-theme="dark"] .altar-card-porcelain:not(:is(.ui2-pg, .ui2-sp, .ui2-dy, .v2-qr) *):hover {
   background-color: rgba(46, 39, 31, 0.84);
 }
 
-html[data-theme="dark"] .altar-cloth:not(:is(.ui2-pg, .ui2-sp, .ui2-dy) *) {
+html[data-theme="dark"] .altar-cloth:not(:is(.ui2-pg, .ui2-sp, .ui2-dy, .v2-qr) *) {
   background-color: rgba(0, 0, 0, 0.2);
   background-image: linear-gradient(180deg, rgba(255, 236, 200, 0.04) 0%, rgba(255, 236, 200, 0) 62%);
   border-color: rgba(255, 236, 200, 0.08);
@@ -215,7 +215,7 @@ html[data-theme="dark"] .btn-glass-primary {
     0 16px 30px -12px rgba(0, 0, 0, 0.7);
 }
 
-html[data-theme="dark"] .btn-glass-ghost:not(:is(.ui2-pg, .ui2-sp, .ui2-dy) *) {
+html[data-theme="dark"] .btn-glass-ghost:not(:is(.ui2-pg, .ui2-sp, .ui2-dy, .v2-qr) *) {
   background-image: linear-gradient(180deg, rgba(255, 236, 200, 0.09), rgba(255, 236, 200, 0.04));
   box-shadow:
     0 1px 0 rgba(255, 236, 200, 0.07) inset,
@@ -223,7 +223,7 @@ html[data-theme="dark"] .btn-glass-ghost:not(:is(.ui2-pg, .ui2-sp, .ui2-dy) *) {
     0 8px 18px -12px rgba(0, 0, 0, 0.6);
 }
 
-html[data-theme="dark"] .glass-tile:not(:is(.ui2-pg, .ui2-sp, .ui2-dy) *) {
+html[data-theme="dark"] .glass-tile:not(:is(.ui2-pg, .ui2-sp, .ui2-dy, .v2-qr) *) {
   background-color: rgba(42, 35, 28, 0.62);
   background-image: linear-gradient(170deg, rgba(255, 236, 200, 0.05) 0%, rgba(255, 236, 200, 0) 62%);
   border-color: rgba(255, 236, 200, 0.1);
@@ -232,7 +232,7 @@ html[data-theme="dark"] .glass-tile:not(:is(.ui2-pg, .ui2-sp, .ui2-dy) *) {
     0 0 0 1px rgba(0, 0, 0, 0.3),
     0 6px 14px -8px rgba(0, 0, 0, 0.6);
 }
-html[data-theme="dark"] .glass-tile:not(:is(.ui2-pg, .ui2-sp, .ui2-dy) *):hover {
+html[data-theme="dark"] .glass-tile:not(:is(.ui2-pg, .ui2-sp, .ui2-dy, .v2-qr) *):hover {
   background-color: rgba(52, 44, 35, 0.78);
   box-shadow:
     0 1px 0 rgba(255, 236, 200, 0.07) inset,
@@ -242,7 +242,7 @@ html[data-theme="dark"] .glass-tile:not(:is(.ui2-pg, .ui2-sp, .ui2-dy) *):hover 
 
 /* หน้า UI 2.0 (.ui2-pg · .ui2-sp · .ui2-dy) วาดชิปเองตามพื้นกลางคืน/แผ่นครีม — ห้ามทับเป็นชิปน้ำตาลเข้ม
    (เดิมป้าย "กองที่ 1–4" หน้า Pick a Card ในโหมดมืดเป็นเม็ดน้ำตาล ตัวหนังสือจมบนแผ่นครีม) */
-html[data-theme="dark"] .glass-chip:not(:is(.ui2-pg, .ui2-sp, .ui2-dy) *) {
+html[data-theme="dark"] .glass-chip:not(:is(.ui2-pg, .ui2-sp, .ui2-dy, .v2-qr) *) {
   background-color: rgba(46, 39, 31, 0.82);
   background-image: linear-gradient(180deg, rgba(255, 236, 200, 0.06), rgba(255, 236, 200, 0));
 }
@@ -256,14 +256,14 @@ html[data-theme="dark"] .altar-modal {
     0 26px 64px -20px rgba(0, 0, 0, 0.85);
 }
 
-html[data-theme="dark"] .glass-divider-b:not(:is(.ui2-pg, .ui2-sp, .ui2-dy) *) {
+html[data-theme="dark"] .glass-divider-b:not(:is(.ui2-pg, .ui2-sp, .ui2-dy, .v2-qr) *) {
   border-bottom-color: rgba(255, 236, 200, 0.1);
 }
-html[data-theme="dark"] .glass-divider-t:not(:is(.ui2-pg, .ui2-sp, .ui2-dy) *) {
+html[data-theme="dark"] .glass-divider-t:not(:is(.ui2-pg, .ui2-sp, .ui2-dy, .v2-qr) *) {
   border-top-color: rgba(255, 236, 200, 0.1);
 }
 
-html[data-theme="dark"] .glass-field:not(:is(.ui2-pg, .ui2-sp, .ui2-dy) *) {
+html[data-theme="dark"] .glass-field:not(:is(.ui2-pg, .ui2-sp, .ui2-dy, .v2-qr) *) {
   background-color: rgba(18, 14, 11, 0.62);
   box-shadow: 0 1px 0 rgba(255, 236, 200, 0.04) inset;
 }

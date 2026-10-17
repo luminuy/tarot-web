@@ -36,6 +36,17 @@
   pointer-events: none;
   background: linear-gradient(180deg, var(--ui2-night) 0, var(--ui2-night) calc(100% - 30px), rgba(12, 10, 15, 0) 100%);
 }
+/* จอ < 1200 ที่สคริปต์ทำงาน: แถบชิปเป็นแท็บแบบหน้าแรก — ไม่ติดจอ (sticky ใต้หัวเว็บสั่นบน iOS · INC-0109)
+   เห็นทีละหน้าต่าง (data-sx-on) · ไม่มีสคริปต์ = หน้าต่างครบทุกหมวดเรียงต่อกันตามเดิม */
+@media (max-width: 1199px) {
+  .ui2-sx[data-sx-tabs] .ui2-sx-chips {
+    position: relative;
+    top: auto;
+  }
+  .ui2-sx[data-sx-tabs] .ui2-sx-win:not([data-sx-on]) {
+    display: none;
+  }
+}
 .ui2-sx-chips-row {
   display: flex;
   gap: 8px;

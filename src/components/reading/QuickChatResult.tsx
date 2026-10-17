@@ -93,7 +93,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
   const personaTagline = isEnglish ? (persona.taglineEn || persona.tagline) : persona.tagline;
 
   return (
-    <div className="altar-card-porcelain !rounded-lg w-full p-5 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden">
+    <div className="v2-qr altar-card-porcelain !rounded-lg w-full p-5 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden">
       {/* Oracle Guide Header & Streaming Status */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-line-warm/30">
         <div className="flex items-center gap-3.5">
@@ -224,13 +224,13 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
                 className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-gold-ink via-[#E2C38A] to-gold-ink"
               />
 
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <div className="space-y-1.5">
-                  <span className="block text-[11px] font-serif-th font-bold uppercase tracking-[0.18em] text-gold-ink">
+              {/* หัวกล่อง: ป้าย + ปุ่มฟังเสียง ขึ้นบรรทัดใหม่ได้ (จอแคบเดิมบีบป้าย "สรุปตรงใจจากแม่หมอ" เหลือแท่งแนวตั้งทีละพยางค์) */}
+              <div className="flex flex-wrap items-end justify-between gap-3 mb-3">
+                <div className="min-w-0 space-y-1.5">
+                  <span className="block text-[11px] font-serif-th font-bold text-gold-ink">
                     {isEnglish ? "Read this first" : "อ่านสรุปนี้ก่อน"}
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold-ink/10 border border-gold-ink/30 text-gold-ink font-serif-th font-bold text-sm tracking-wide">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gold-ink" />
+                  <span className="inline-flex items-center whitespace-nowrap px-3 py-1 rounded-full bg-gold-ink/10 border border-gold-ink/30 text-gold-ink font-serif-th font-bold text-sm">
                     {isEnglish ? "Core Oracle Insight" : "สรุปตรงใจจากแม่หมอ"}
                   </span>
                 </div>
