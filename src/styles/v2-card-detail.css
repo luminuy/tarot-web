@@ -199,9 +199,15 @@
   font-weight: 600;
   color: var(--ui2-on-night);
 }
-/* สวิตช์หัวตั้ง/หัวกลับในหัวหน้าต่าง (ตะขอเดียวกับใต้ไพ่ · card-orientation.ts) */
+/* สวิตช์หัวตั้ง/หัวกลับในหัวหน้าต่าง (ตะขอเดียวกับใต้ไพ่ · card-orientation.ts) — กว้างพอ ไม่ตัดคำ */
 .v3-cd-flip {
+  width: 300px;
+  max-width: 100%;
   margin: 0;
+}
+.ui2-pg .v3-cd-flip .v2-cd-flip-btn {
+  white-space: nowrap;
+  padding-inline: 14px;
 }
 .v2-cd-yesno {
   max-width: 860px;
