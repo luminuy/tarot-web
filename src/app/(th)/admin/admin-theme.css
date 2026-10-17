@@ -16,6 +16,7 @@
  */
 
 /* พื้นทั้งหน้าเป็นขาว — ปิดแสงไล่สีและลายผ้าลินินของธีมหน้าเว็บจริง */
+html:has(.admin-shell),
 body:has(.admin-shell) {
   background: #ffffff;
 }
@@ -25,7 +26,7 @@ body:has(.admin-shell)::after {
 }
 
 .admin-shell {
-  --color-canvas: #f5f6f8;
+  --color-canvas: #f4f5f7;
   --color-surface: #ffffff;
   --color-surface-warm: #f9fafb;
   --color-inset: #eceef1;
@@ -51,9 +52,9 @@ body:has(.admin-shell)::after {
   --glass-edge: #e3e6ea;
   --glass-edge-on: #c9ced6;
   --glass-ring: transparent;
-  --glass-radius: 12px;
-  --glass-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
-  --glass-shadow-lift: 0 1px 3px rgba(16, 24, 40, 0.08);
+  --glass-radius: 14px;
+  --glass-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 2px 8px -2px rgba(16, 24, 40, 0.06);
+  --glass-shadow-lift: 0 2px 4px rgba(16, 24, 40, 0.06), 0 8px 20px -6px rgba(16, 24, 40, 0.1);
 
   background: #ffffff;
   color: var(--color-ink);
@@ -123,4 +124,56 @@ body:has(.admin-shell)::after {
 
 .admin-shell .font-mystic-gold {
   color: var(--color-ink);
+}
+
+/*
+ * 2026-10-17 รอบ 292 (เจ้าของ "ปรับปรุงให้สวยและใช้ง่ายกว่านี้ ทุกฟังก์ชัน")
+ * พื้นที่ทำงานเป็นเทาอ่อน การ์ดขาวลอยขึ้นมา — แยกส่วนด้วยระดับชั้น ไม่ต้องพึ่งเส้นขอบหนา
+ */
+.admin-shell .admin-workspace {
+  background-color: var(--color-canvas);
+}
+
+/* การ์ดกลางของ AdminLayout (AdminSection · EmptyState) */
+.admin-shell .admin-card {
+  background-color: #ffffff;
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  box-shadow: var(--glass-shadow);
+}
+
+/* ตารางทุกแผง: หัวตารางพื้นเทาอ่อน · แถวไฮไลต์ตอนชี้ ให้ตาไล่ตามแถวได้ */
+.admin-shell .admin-workspace table thead {
+  background-color: var(--color-surface-warm);
+}
+.admin-shell .admin-workspace table thead th {
+  font-weight: 600;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+.admin-shell .admin-workspace table tbody tr {
+  transition: background-color 0.12s ease;
+}
+.admin-shell .admin-workspace table tbody tr:hover {
+  background-color: #f8f9fb;
+}
+
+/* โฟกัสคีย์บอร์ดเห็นชัดทุกปุ่ม/ช่อง */
+.admin-shell :is(button, a, input, select, textarea, summary):focus-visible {
+  outline: 2px solid #111827;
+  outline-offset: 2px;
+}
+
+/* แถบขอยินยอมสถิติเป็นของหน้าเว็บลูกค้า — ในแอดมินมันบังปุ่มท้ายหน้าเปล่า ๆ */
+body:has(.admin-shell) [data-consent-banner] {
+  display: none !important;
+}
+
+/*
+ * ตัวเลข/วันที่ในตารางเคยเป็นฟอนต์พิมพ์ดีด (font-mono) ทั้งแผง อ่านแข็งและดูเป็นหน้าโปรแกรมเมอร์
+ * ในแอดมินให้ใช้ฟอนต์เดียวกับเนื้อหา + ตัวเลขกว้างเท่ากัน (tabular) — ยกเว้นช่องแก้ prompt และโค้ด
+ */
+.admin-shell .font-mono:not(textarea):not(code):not(kbd) {
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
 }

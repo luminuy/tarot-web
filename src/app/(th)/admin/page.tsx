@@ -463,6 +463,7 @@ function AdminContent() {
   }
 
   const activeItem = NAV_SECTIONS.flatMap((s) => s.items).find((i) => i.id === activeTab);
+  const activeGroup = NAV_SECTIONS.find((sec) => sec.items.some((i) => i.id === activeTab))?.group;
 
   return (
     <div className="min-h-screen text-ink">
@@ -517,7 +518,7 @@ function AdminContent() {
           <nav aria-label="เมนูแอดมิน" className="sticky top-[4.5rem] max-h-[calc(100vh-5rem)] space-y-5 overflow-y-auto pb-6">
             {NAV_SECTIONS.map((section) => (
               <div key={section.group}>
-                <p className="mb-1 px-3 text-xs font-bold text-ink-soft">{section.group}</p>
+                <p className="mb-1.5 px-3 text-[11px] font-semibold tracking-wide text-muted">{section.group}</p>
                 <ul className="space-y-0.5">
                   {section.items.map((item) => {
                     const isActive = activeTab === item.id;
@@ -528,7 +529,7 @@ function AdminContent() {
                           onClick={() => selectTab(item.id)}
                           aria-current={isActive ? "page" : undefined}
                           className={`tap-overlay-y relative flex w-full items-start gap-2.5 rounded-lg py-2 pl-3 pr-2 text-left transition-colors ${
-                            isActive ? "bg-canvas text-ink" : "text-ink-soft hover:bg-canvas hover:text-ink"
+                            isActive ? "bg-inset text-ink" : "text-ink-soft hover:bg-canvas hover:text-ink"
                           }`}
                         >
                           {isActive ? <span aria-hidden className="absolute inset-y-2 left-0 w-[3px] rounded-r bg-ink" /> : null}
@@ -580,7 +581,8 @@ function AdminContent() {
         </nav>
 
         {/* ─── พื้นที่ทำงาน ───────────────────────────────────────── */}
-        <main id="main-content" tabIndex={-1} className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
+        <main id="main-content" tabIndex={-1} className="admin-workspace min-w-0 flex-1 px-4 pb-16 pt-5 sm:px-6 sm:pt-6 lg:px-10 lg:pt-8">
+          <div className="mx-auto w-full max-w-[1320px]">
           {/*
             ⚠️ ทุกหน้าต้องมี <h1> หนึ่งอันเสมอ — มันคือ "ชื่อของหน้า" ที่ screen reader
             ใช้บอกผู้ใช้ว่าตอนนี้อยู่หน้าไหน และเป็นรากของสารบัญหัวข้อทั้งหน้า
@@ -590,22 +592,27 @@ function AdminContent() {
           <h1 className="sr-only">แผงควบคุมผู้ดูแลระบบ</h1>
 
           {activeItem && (
-            <div className="mb-6 flex flex-col gap-2 border-b border-line pb-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-ink sm:text-xl">{activeItem.label}</h2>
-                <p className="mt-0.5 text-xs text-muted">{activeItem.description}</p>
+            <div className="mb-6">
+              <p className="text-xs font-medium text-muted">{activeGroup}</p>
+              <div className="mt-0.5 flex flex-wrap items-start justify-between gap-x-6 gap-y-2">
+                <div className="min-w-0">
+                  <h2 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">{activeItem.label}</h2>
+                  <p className="mt-1 text-sm text-muted">{activeItem.description}</p>
+                </div>
                 {activeItem.help ? (
-                  <details className="mt-2 text-xs text-muted">
-                    <summary className="tap-overlay-y w-fit cursor-pointer font-semibold text-ink-soft hover:text-ink">วิธีใช้หน้านี้</summary>
-                    <ul className="mt-1.5 space-y-1 border-l-2 border-line pl-3">
+                  <details className="group w-full text-xs sm:w-auto sm:max-w-sm">
+                    <summary className="tap-overlay-y inline-flex min-h-9 w-fit cursor-pointer list-none items-center rounded-lg border border-line bg-white px-3 font-semibold text-ink-soft shadow-xs hover:text-ink [&::-webkit-details-marker]:hidden">
+                      <span className="group-open:hidden">วิธีใช้หน้านี้</span>
+                      <span className="hidden group-open:inline">ซ่อนวิธีใช้</span>
+                    </summary>
+                    <ul className="admin-card mt-2 space-y-1.5 px-4 py-3 text-muted">
                       {activeItem.help.map((h) => (
-                        <li key={h}>{h}</li>
+                        <li key={h} className="border-l-2 border-line pl-2.5">{h}</li>
                       ))}
                     </ul>
                   </details>
                 ) : null}
               </div>
-
             </div>
           )}
 
@@ -630,6 +637,7 @@ function AdminContent() {
                 }}
               />
             )}
+          </div>
           </div>
         </main>
       </div>

@@ -75,7 +75,7 @@ export default function MembersPanel() {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Member | null>(null);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(50);
+  const [pageSize, setPageSize] = useState(25);
   const [tab, setTab] = useSubTab(MEMBER_TABS);
 
   const list = useAdminResource<ListPayload>(
@@ -182,32 +182,56 @@ export default function MembersPanel() {
                   <th className="hidden py-2 pr-3 font-semibold md:table-cell">สมัคร</th>
                   <th className="hidden py-2 pr-3 font-semibold md:table-cell">เข้าล่าสุด</th>
                   <th className="w-16 py-2 pr-3 text-right font-semibold">เปิดไพ่</th>
-                  <th className="w-28 py-2 font-semibold">
+                  <th className="w-14 py-2 font-semibold sm:w-28">
                     <span className="sr-only">จัดการ</span>
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
                 {data.members.map((m) => (
-                  <tr key={m.id} className={selected?.id === m.id ? "bg-canvas" : undefined}>
+                  <tr
+                    key={m.id}
+                    onClick={() => setSelected(m)}
+                    className={`cursor-pointer ${selected?.id === m.id ? "bg-canvas" : ""} ${m.deletedAt ? "opacity-60" : ""}`}
+                  >
                     <td className="py-2.5 pr-3">
-                      <span className="block truncate font-medium text-ink">{m.name || "—"}</span>
-                      <span className="block truncate text-xs text-muted">{m.email || m.id}</span>
+                      <span className="flex min-w-0 items-center gap-3">
+                        <span
+                          aria-hidden
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-inset text-xs font-semibold text-ink-soft"
+                        >
+                          {(m.name || m.email || "?").trim().charAt(0).toUpperCase()}
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block truncate font-medium text-ink">{m.name || "ไม่มีชื่อ"}</span>
+                          <span className="block truncate text-xs text-muted">{m.email || m.id}</span>
+                        </span>
+                      </span>
                     </td>
-                    <td className="hidden py-2.5 pr-3 text-muted sm:table-cell">
-                      {PROVIDER_NAME[m.provider] ?? m.provider}
-                      {m.deletedAt ? <span className="ml-1 text-xs font-semibold text-rose-700">(ลบแล้ว)</span> : null}
+                    <td className="hidden py-2.5 pr-3 sm:table-cell">
+                      <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                        <span className="rounded-md border border-line bg-white px-2 py-0.5 text-xs text-ink-soft">
+                          {PROVIDER_NAME[m.provider] ?? m.provider}
+                        </span>
+                        {m.deletedAt ? (
+                          <span className="rounded-md bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-800">ลบบัญชีแล้ว</span>
+                        ) : null}
+                      </span>
                     </td>
                     <td className="hidden whitespace-nowrap py-2.5 pr-3 text-muted md:table-cell">{day(m.createdAt)}</td>
                     <td className="hidden whitespace-nowrap py-2.5 pr-3 text-muted md:table-cell">{day(m.lastSeenAt)}</td>
-                    <td className="py-2.5 pr-3 text-right font-mono text-ink">{fmt(m.readings)}</td>
+                    <td className="py-2.5 pr-3 text-right font-semibold tabular-nums text-ink">{fmt(m.readings)}</td>
                     <td className="py-2.5 text-right">
                       <button
                         type="button"
-                        onClick={() => setSelected(m)}
-                        className="tap-overlay-y rounded-lg border border-line px-2.5 py-1 text-xs font-medium text-ink hover:bg-canvas"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelected(m);
+                        }}
+                        className="tap-overlay-y rounded-lg border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink hover:bg-canvas"
                       >
-                        ดู / ให้สิทธิ์
+                        <span className="sm:hidden">ดู</span>
+                        <span className="hidden sm:inline">ดู / ให้สิทธิ์</span>
                       </button>
                     </td>
                   </tr>

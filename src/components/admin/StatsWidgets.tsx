@@ -75,10 +75,10 @@ export function StatCard({
   children?: ReactNode;
 }) {
   return (
-    <div className="altar-card-porcelain p-4">
-      <p className="text-xs font-semibold text-muted">{label}</p>
-      <p className="mt-1 text-2xl font-bold font-mono text-ink tabular-nums">{value}</p>
-      {sub ? <p className="mt-1 text-xs text-muted">{sub}</p> : null}
+    <div className="altar-card-porcelain p-4 sm:p-5">
+      <p className="text-xs font-medium text-muted">{label}</p>
+      <p className="mt-1.5 text-2xl font-semibold tracking-tight text-ink tabular-nums sm:text-[28px] sm:leading-9">{value}</p>
+      {sub ? <p className="mt-1 text-xs leading-relaxed text-muted">{sub}</p> : null}
       {children}
     </div>
   );
@@ -90,7 +90,7 @@ export function Meter({ value, max, marker }: { value: number; max: number; mark
   const m = marker && max > 0 ? Math.min(100, (marker / max) * 100) : null;
   return (
     <div className="relative mt-3 h-2 w-full rounded-full bg-inset" aria-hidden>
-      <span className="block h-full rounded-full bg-gold" style={{ width: `${w}%` }} />
+      <span className="block h-full rounded-full bg-[var(--viz-1)]" style={{ width: `${w}%` }} />
       {m != null ? <span className="absolute -top-1 h-4 w-0.5 bg-ink" style={{ left: `${m}%` }} /> : null}
     </div>
   );
@@ -99,7 +99,7 @@ export function Meter({ value, max, marker }: { value: number; max: number; mark
 export function SectionTitle({ title, hint }: { title: string; hint?: string }) {
   return (
     <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-      <h3 className="font-mystic-gold text-sm font-bold text-ink">{title}</h3>
+      <h3 className="font-mystic-gold text-[15px] font-semibold text-ink">{title}</h3>
       {hint ? <p className="text-xs text-muted">{hint}</p> : null}
     </div>
   );
@@ -122,7 +122,7 @@ export function KeyValueList({
             {it.hint ? <span className="block text-[11px] text-muted">{it.hint}</span> : null}
           </span>
           <span
-            className={`shrink-0 font-mono tabular-nums ${
+            className={`shrink-0 font-semibold tabular-nums ${
               alertWhenPositive && (it.value ?? 0) > 0 ? "font-semibold text-rose-700" : "text-ink"
             }`}
           >
@@ -166,7 +166,7 @@ export function BarList({
                   {name}
                 </span>
                 <span className="h-2 flex-1 rounded-full bg-inset">
-                  <span className="block h-full rounded-full bg-gold" style={{ width: `${(r.count / max) * 100}%` }} />
+                  <span className="block h-full rounded-full bg-[var(--viz-1)]" style={{ width: `${(r.count / max) * 100}%` }} />
                 </span>
                 <span className="w-20 shrink-0 text-right text-xs font-mono tabular-nums text-muted">
                   {fmt(r.count)} · {Math.round((r.count / total) * 100)}%

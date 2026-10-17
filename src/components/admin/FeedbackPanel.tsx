@@ -112,16 +112,24 @@ export default function FeedbackPanel() {
         ) : (
           <ul className="divide-y divide-line">
             {shown.map((f) => (
-              <li key={f.id} className="py-3 first:pt-0 last:pb-0">
+              <li key={f.id} className="py-4 first:pt-0 last:pb-0">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
-                  <span className="font-semibold text-ink">{CATEGORY[f.category] ?? f.category}</span>
+                  <span className="rounded-md border border-line bg-white px-2 py-0.5 font-medium text-ink-soft">
+                    {CATEGORY[f.category] ?? f.category}
+                  </span>
                   {typeof f.rating === "number" ? (
-                    <span className={f.rating <= 2 ? "font-semibold text-rose-700" : "text-ink"}>{f.rating}/5</span>
+                    <span
+                      className={`rounded-md px-2 py-0.5 font-semibold tabular-nums ${
+                        f.rating <= 2 ? "bg-rose-50 text-rose-800" : f.rating >= 4 ? "bg-emerald-50 text-emerald-800" : "bg-inset text-ink"
+                      }`}
+                    >
+                      คะแนน {f.rating}/5
+                    </span>
                   ) : null}
                   {f.persona_id ? <span>แม่หมอ: {PERSONA_NAME[f.persona_id] ?? f.persona_id}</span> : null}
                   <span>{when(f.created_at)}</span>
                 </div>
-                <p className="mt-1 whitespace-pre-line text-sm text-ink">{f.comment?.trim() || "— (ให้คะแนนอย่างเดียว)"}</p>
+                <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-ink">{f.comment?.trim() || "— (ให้คะแนนอย่างเดียว)"}</p>
                 {f.page_url || f.reading_id ? (
                   <p className="mt-1 break-all text-[11px] text-muted">
                     {f.page_url ? `หน้า: ${f.page_url}` : ""}
