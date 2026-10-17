@@ -347,7 +347,7 @@
   }
   .ui2-sx-stage {
     display: grid;
-    grid-template-columns: 230px minmax(0, 1fr);
+    grid-template-columns: 270px minmax(0, 1fr);
     align-items: start;
     gap: 40px;
   }
@@ -444,5 +444,60 @@
 @media (min-width: 768px) {
   .ui2-sx-solo-body {
     padding-top: 30px;
+  }
+}
+
+/* ── รายชื่อหมวดซ้าย = แบบหัวเรื่องคลังไพ่หน้าแรก (เจ้าของ 2026-10-17 "ตัวอักษรไม่เท่ากับหน้าแรกเลย")
+   ตัวใหญ่ 24 ➔ 27px · ยังไม่ได้ดู = เทาจาง · ที่กำลังดู = สว่าง + ขีดทองสั้นด้านซ้าย · ไม่มีเลขหมวด/จำนวน/เส้นยาว ── */
+@media (min-width: 1200px) {
+  .ui2-sx-rail ol {
+    gap: 2px;
+    padding-left: 0;
+  }
+  .ui2-sx-rail ol::before,
+  .ui2-sx-rail ol::after {
+    display: none;
+  }
+  .ui2-sx-rail-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 50px;
+    padding: 6px 0 6px 24px;
+    font-size: 24px;
+    line-height: 1.25;
+    white-space: normal;
+    text-wrap: balance;
+    color: rgba(246, 238, 226, 0.42);
+  }
+  .ui2-sx-rail-link::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 3px;
+    height: 16px;
+    border-radius: 2px;
+    translate: 0 -50%;
+    background: var(--ui2-gold-solid);
+    opacity: 0;
+    scale: 0.4;
+    transition: opacity var(--dur-fast) var(--ease-out), scale var(--dur-fast) var(--ease-out);
+  }
+  .ui2-sx-rail-link[aria-current="true"]::before {
+    opacity: 1;
+    scale: 1;
+  }
+  .ui2-sx-rail-link[aria-current="true"] .ui2-sx-rail-name {
+    transform: none;
+  }
+  .ui2-sx-rail-n,
+  .ui2-sx-rail-count {
+    display: none;
+  }
+}
+@media (min-width: 1440px) {
+  .ui2-sx-rail-link {
+    font-size: 26px;
   }
 }

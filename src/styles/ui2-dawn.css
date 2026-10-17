@@ -14,7 +14,8 @@
  */
 
 /* หัวหน้าที่เป็นแถบรุ่งอรุณ (หัวหน้ากลาง 3 แบบ + หัวหน้าเฉพาะหน้าที่เป็นข้อความบนพื้น) */
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) {
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head),
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) {
   --ui2-on-night: #2B2118;
   --ui2-on-night-soft: #5A4A3A;
   --ui2-on-night-dim: #6E604F;
@@ -67,19 +68,23 @@
 :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) :is(h1, .ui2-ph-title) {
   text-shadow: none;
 }
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-gold-night {
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-gold-night,
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-gold-night {
   color: var(--ui2-gold-ink);
 }
 /* ปุ่มหลักบนครีม = ปุ่มดำแบบหน้าแรก */
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-btn-gold {
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-btn-gold,
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-btn-gold {
   color: var(--ui2-button-text);
   background: var(--ui2-button);
   box-shadow: 0 14px 30px -14px rgba(23, 17, 12, 0.7);
 }
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-btn-gold .ui2-btn-arrow {
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-btn-gold .ui2-btn-arrow,
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-btn-gold .ui2-btn-arrow {
   border-color: var(--ui2-button-text);
 }
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-btn-ghost {
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-btn-ghost,
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-btn-ghost {
   background: rgba(255, 252, 246, 0.7);
 }
 /* ชิปลิงก์ใต้หัวหน้า: ครีมใส · หน้าปัจจุบันเป็นเม็ดดำ */
@@ -93,7 +98,7 @@
 
 /* เกาะกลางคืนในแถบครีม — ชิ้นที่ออกแบบเป็นแผ่นมืดอยู่แล้ว (ตั๋วฟรีหน้าราคา · แผ่นฟ้าไพ่ราศี · แถบขั้นตอนสร้างผัง)
    คงเป็นแผ่นมืดบนครีม (ตัดกันสวยแบบปุ่มดำหน้าแรก) ➔ คืนโทเคนกลางคืนในขอบเขตของชิ้นนั้น */
-.ui2-pg :is(.v2-pr-free, .v2-zs-sky, .v2-sb-steps, .v2-cd-placard, .v2-cd-flip, .v2-sd-board) {
+.ui2-pg :is(.v2-pr-free, .v2-zs-sky, .v2-sb-steps, .v2-cd-placard, .v2-cd-flip, .v2-sd-board, .ui2-dy-table) {
   --ui2-on-night: #F6EEE2;
   --ui2-on-night-soft: #CFC3B2;
   --ui2-on-night-dim: rgba(246, 238, 226, 0.62);
@@ -250,4 +255,79 @@
 /* ไพ่ลอยรอบหัวหน้า /daily อยู่ชั้นเดียวกับเนื้อหา — ยกขึ้นเหนือแถบครีม (เดิมจมอยู่ใต้แถบ เห็นแค่ขอบโผล่ใต้เส้นโค้ง) */
 .ui2-dy .ui2-dy-deco {
   z-index: 3;
+}
+
+/* ══ กรอบหน้าต่างทุกหน้าเป็นแผ่นครีมพาสเทล (เจ้าของ 2026-10-17 ส่งภาพแผงครีมใน FAQ หน้าแรก —
+   "ในกรอบสีเดียวกับพื้นหลังมีหลายหน้ามาก … อยากให้สีในกรอบหลายจุด หลายหน้า เหมือนรูปนี้ ปรับให้สวยงาม ดูตัวอย่างหน้าแรก")
+   หน้าต่างโชว์เคส/หน้าต่างเดี่ยว (Ui2Showcase · Ui2Window) · หน้าต่างหมวดผัง /spreads · บทในหน้าเอกสาร · แผงบทความ SEO
+   ➔ พื้นครีมไล่ทองมุมบนซ้าย เขียวน้ำทะเลมุมล่างขวา (ชุดเดียวกับแผงจำลองคำถามที่พบบ่อยหน้าแรก) + ขอบทองบางสองชั้นแบบการ์ดคลังไพ่หน้าแรก
+   ตัวหนังสือ/ชิ้นข้างในเปลี่ยนเป็นโทนกลางวันด้วยโทเคนชุดเดียวกับแถบครีม (กฎแรกของไฟล์) ══ */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) {
+  background:
+    radial-gradient(60% 340px at 6% 0%, rgba(255, 222, 150, 0.55) 0%, rgba(255, 222, 150, 0) 72%),
+    radial-gradient(50% 320px at 100% 100%, rgba(132, 196, 184, 0.32) 0%, rgba(132, 196, 184, 0) 72%),
+    var(--ui2-day);
+  box-shadow:
+    0 0 0 1px rgba(255, 236, 200, 0.5),
+    0 0 0 8px rgba(255, 236, 200, 0.05),
+    0 0 0 9px rgba(255, 236, 200, 0.1),
+    0 60px 120px -50px rgba(0, 0, 0, 0.9);
+}
+/* เส้นใต้แถบหน้าต่าง + ป้ายเลข บนครีม */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.ui2-sx-bar, .ui2-sp-win-bar)::after {
+  background: linear-gradient(90deg, transparent 0%, rgba(74, 47, 16, 0.16) 15%, rgba(74, 47, 16, 0.16) 85%, transparent 100%);
+}
+/* แผงย่อยในหน้าต่าง (กล่อง "เริ่มที่ใบนี้" · การ์ดกระจกเดิม) = กระดาษขาวบนครีม */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.ui2-sx-start, .ui2-sp-start, .altar-panel, .altar-card-porcelain, .glass-tile) {
+  background: rgba(255, 252, 246, 0.86);
+  border-color: rgba(74, 47, 16, 0.12);
+}
+/* แถบหน้าต่างบนครีม: คำอังกฤษเอียงใช้หมึกสีหมวด (สีหมวดอ่อนจางหายบนครีม) · ป้ายเลขมีขอบ · ขีดตำแหน่งปัจจุบันเข้ม */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.ui2-sx-name, .ui2-sp-win-name) .ui2-accent {
+  color: var(--cat-ink);
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.ui2-sx-n, .ui2-sp-win-n) {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--cat-ink) 30%, transparent);
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.ui2-sx-steps, .ui2-sp-win-steps) .is-here {
+  background: var(--cat-ink);
+}
+/* ปุ่มในกล่อง "เริ่มที่ใบนี้" = ปุ่มดำแบบหน้าแรก */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-sx-start-act > :is(a, button),
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-sp-start-btn {
+  color: var(--ui2-button-text);
+  background: var(--ui2-button);
+  box-shadow: 0 10px 22px -12px rgba(23, 17, 12, 0.7);
+}
+/* ตั๋วแพ็กหน้าราคาในกรอบครีม = ตั๋วกระดาษขาว (แพ็กยอดนิยมแถบทองด้านบน) · รอยเว้าสีเดียวกับพื้นกรอบ */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-tix {
+  background:
+    radial-gradient(90% 50% at 50% 0%, rgba(255, 217, 143, 0.18) 0%, rgba(255, 217, 143, 0) 70%),
+    #FFFCF6;
+  border-color: rgba(184, 105, 28, 0.2);
+  box-shadow: 0 24px 44px -30px rgba(74, 47, 16, 0.55);
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-tix-popular {
+  background:
+    linear-gradient(180deg, rgba(232, 170, 80, 0.95) 0 6px, transparent 6px),
+    radial-gradient(90% 60% at 50% 0%, rgba(255, 217, 143, 0.3) 0%, rgba(255, 217, 143, 0) 70%),
+    #FFFCF6;
+  border-color: rgba(184, 105, 28, 0.55);
+  box-shadow: 0 0 0 1px rgba(184, 105, 28, 0.25), 0 30px 54px -28px rgba(74, 47, 16, 0.6);
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-tix-stub {
+  border-top-color: rgba(184, 105, 28, 0.28);
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-tix-stub::before,
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-tix-stub::after {
+  background: #F6EEDF;
+  box-shadow: inset 0 0 0 1px rgba(184, 105, 28, 0.22);
+}
+/* ความหมาย 5 ด้าน (หน้าไพ่รายใบ) — กล่องกระดาษขาวมีแสงสีด้าน · หัวกล่องหมึกเข้ม (สีด้านอ่อนจางบนขาว) */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .v2-cd-room {
+  border-color: rgba(var(--rm), 0.55);
+  background: radial-gradient(70% 120% at 0% 0%, rgba(var(--rm), 0.2) 0%, rgba(var(--rm), 0) 70%), #FFFCF6;
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .v2-cd-room h4 {
+  color: var(--ui2-ink);
 }
