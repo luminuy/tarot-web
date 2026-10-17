@@ -16,10 +16,11 @@ html:has([data-ui2-page-dark]) .site-header-glass {
   border-color: rgba(255, 236, 200, 0.18);
   box-shadow: 0 16px 34px -24px rgba(0, 0, 0, 0.8);
 }
-html:has([data-ui2-page-dark]) .site-header-glass :is(.text-ink, .text-ink-deep, nav):not(.absolute *, .absolute) {
+/* ลิ้นชักเมนูมือถือ (.nv-panel) เป็นแผ่นครีม ตัวหนังสือหมึกเข้ม — ไม่เปลี่ยนเป็นสีกลางคืนตามหัวเว็บ */
+html:has([data-ui2-page-dark]) .site-header-glass :is(.text-ink, .text-ink-deep, nav):not(.absolute *, .absolute, .nv-panel, .nv-panel *) {
   color: var(--ui2-on-night);
 }
-html:has([data-ui2-page-dark]) .site-header-glass .text-muted:not(.absolute *) {
+html:has([data-ui2-page-dark]) .site-header-glass .text-muted:not(.absolute *, .nv-panel *) {
   color: var(--ui2-on-night-soft);
 }
 html:has([data-ui2-page-dark]) .ui2-header-cta {

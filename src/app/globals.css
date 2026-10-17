@@ -760,10 +760,10 @@ html[data-ui2-over-dark] .site-header-glass {
   border-color: rgba(255, 236, 200, 0.18);
   box-shadow: 0 16px 34px -24px rgba(0, 0, 0, 0.8);
 }
-html[data-ui2-over-dark] .site-header-glass :is(.text-ink, .text-ink-deep, nav):not(.absolute *, .absolute) {
+html[data-ui2-over-dark] .site-header-glass :is(.text-ink, .text-ink-deep, nav):not(.absolute *, .absolute, .nv-panel, .nv-panel *) {
   color: #F6EEE2;
 }
-html[data-ui2-over-dark] .site-header-glass .text-muted:not(.absolute *) {
+html[data-ui2-over-dark] .site-header-glass .text-muted:not(.absolute *, .nv-panel *) {
   color: #CFC3B2;
 }
 
@@ -1952,24 +1952,232 @@ html {
 }
 
 /*
- * แถวในลิ้นชักเมนูมือถือ (`SacredNavDropdown`) — คลาสชุดเดียวกับที่เคยเขียนเป็น utility ยาวในแต่ละแถว
- * ลิ้นชักต้องอยู่ใน HTML ของทุกหน้า Astro (หน้านั้นไม่ hydrate ถ้าไม่มีรายการใน HTML เมนูจะว่าง)
- * utility ยาวซ้ำ 17 แถวกินงบ HTML (`/spreads/topic/love` ≤ 21 KB gzip) — รวบเป็นคลาสเดียวหน้าตาเหมือนเดิมทุกพิกเซล
- * ⚠️ ส่วนที่เปลี่ยนตามหน้าปัจจุบัน (active) ยังอยู่ใน markup · `group` กับ `tap-overlay-y` ต้องอยู่ใน markup เหมือนเดิม
+ * ลิ้นชักเมนูมือถือ UI 2.0 (`SacredNavDropdown` · เจ้าของ 2026-10-17 "ปรับปรุงเมนูบาร์ในมือถือให้ใช้ง่าย เข้าใจง่าย")
+ * แผ่นครีมแบบหน้าต่างหน้าอื่น · หัวหมวดเล็กสีทองเข้ม · ดูดวงยอดนิยมเป็นกล่องภาพไพ่ 2x2 · เมนูหลักแถวใหญ่ Anuphan
+ * ดูดวงแบบอื่นพับเป็นหมวด (<details>) · ปุ่มบัญชีสีดำติดล่าง
+ * ⚠️ ลิ้นชักอยู่ใน HTML ทุกหน้า Astro — คลาสสั้นชุดเดียว ไม่เขียน utility ยาวซ้ำในทุกแถว (งบ HTML)
+ * ⛔ ห้าม `truncate` ในลิ้นชัก (INC-0209 ➜ INC-0252 · iOS Safari เฉือนบรรทัดทิ้ง)
  */
-@layer components {
-  .nav-row {
-    @apply relative w-full min-h-[44px] flex items-center gap-3 px-2.5 py-1.5 rounded-xl text-left transition-colors duration-150 cursor-pointer border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold after:content-['›'] after:shrink-0 after:text-lg after:leading-none after:text-muted hover:after:text-gold-ink;
-  }
-  .nav-row-thumb {
-    @apply relative block w-[34px] h-[54px] rounded-[5px] overflow-hidden border border-line/80 shadow-xs shrink-0 bg-canvas group-hover:border-gold/60 transition-colors duration-150;
-  }
-  .nav-row-label {
-    @apply block text-[13px] font-serif-th leading-[1.7] break-words transition-colors;
-  }
-  .nav-row-sub {
-    @apply block text-[11.5px] font-serif-th text-muted break-words mt-0.5 leading-[1.7];
-  }
+.nv-panel {
+  /* หัวลิ้นชัก (โลโก้ · ปุ่มปิด) อ่านโทเคนสี — ตรึงเป็นโทนกลางวันบนแผ่นครีม (หน้าที่เป็นธีมกลางคืนจะได้ไม่ขาวจม) */
+  --color-ink: #1E1914;
+  --color-ink-deep: #1E1914;
+  --color-muted: #5E5547;
+  --color-inset: #EFE5D3;
+  --color-line: rgba(74, 47, 16, 0.14);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 360px;
+  overflow: hidden;
+  color: #1E1914;
+  background:
+    radial-gradient(70% 280px at 0% 0%, rgba(255, 222, 150, 0.5) 0%, rgba(255, 222, 150, 0) 72%),
+    radial-gradient(60% 260px at 100% 100%, rgba(132, 196, 184, 0.28) 0%, rgba(132, 196, 184, 0) 72%),
+    #F7F0E3;
+}
+.nv-head {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(74, 47, 16, 0.12);
+}
+.nv-body {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px 14px 18px;
+}
+.nv-k {
+  margin: 16px 4px 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #8A4F10;
+}
+/* ดูดวงยอดนิยม — กล่องกระดาษขาว ภาพไพ่ + ชื่อ */
+.nv-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.nv-tile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 72px;
+  padding: 8px 10px 8px 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(74, 47, 16, 0.12);
+  background: #FFFCF6;
+  box-shadow: 0 10px 20px -16px rgba(74, 47, 16, 0.5);
+  transition: border-color 0.15s ease;
+}
+.nv-tile[aria-current="page"],
+.nv-tile:active {
+  border-color: rgba(184, 105, 28, 0.6);
+}
+.nv-tile-img {
+  flex: none;
+  width: 34px;
+  height: 56px;
+  overflow: hidden;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px rgba(201, 161, 90, 0.5);
+}
+.nv-tile-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.nv-tile b {
+  min-width: 0;
+  font-family: var(--ui2-font-display);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+/* รายการแถว — กระดาษขาวคั่นเส้นบาง */
+.nv-list {
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(74, 47, 16, 0.12);
+  background: #FFFCF6;
+}
+.nv-list + .nv-list {
+  margin-top: 8px;
+}
+.nv-list > * + *,
+.nv-acc-body > * + * {
+  border-top: 1px solid rgba(74, 47, 16, 0.09);
+}
+.nv-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 14px;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  list-style: none;
+  transition: background-color 0.15s ease;
+}
+.nv-row::-webkit-details-marker {
+  display: none;
+}
+.nv-row:active,
+.nv-row[aria-current="page"] {
+  background: #FFF4DE;
+}
+.nv-row[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: #B8691C;
+}
+.nv-row:focus-visible,
+.nv-tile:focus-visible,
+.nv-account:focus-visible {
+  outline: 2px solid #8A4F10;
+  outline-offset: -2px;
+}
+.nv-row-t {
+  display: block;
+  flex: 1;
+  min-width: 0;
+}
+.nv-row-t b {
+  display: block;
+  font-family: var(--ui2-font-display);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.nv-row-t small {
+  display: block;
+  margin-top: 1px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #5E5547;
+}
+.nv-chev {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: #8C7E6B;
+}
+.nv-acc-chev {
+  transition: transform 0.2s ease;
+}
+.nv-acc[open] .nv-acc-chev {
+  transform: rotate(180deg);
+}
+.nv-acc[open] > summary {
+  background: #FBF4E6;
+}
+.nv-acc-body {
+  border-top: 1px solid rgba(74, 47, 16, 0.09);
+  background: #FBF6EC;
+}
+.nv-acc-body .nv-row {
+  min-height: 48px;
+  padding-left: 22px;
+}
+.nv-acc-body .nv-row-t b {
+  font-size: 15px;
+  font-weight: 500;
+}
+/* ท้ายลิ้นชัก — ปุ่มบัญชีสีดำแบบปุ่มหลักหน้าแรก */
+.nv-foot {
+  flex-shrink: 0;
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(74, 47, 16, 0.12);
+  background: rgba(255, 252, 246, 0.7);
+}
+.nv-account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 50px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-size: 15.5px;
+  font-weight: 500;
+  color: #FFF6E6;
+  background: #17110C;
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.55) inset, 0 12px 24px -14px rgba(23, 17, 12, 0.7);
+}
+.nv-account span {
+  flex: 1;
+}
+.nv-account-ico {
+  width: 19px;
+  height: 19px;
+}
+.nv-account-go {
+  width: 17px;
+  height: 17px;
+}
+.nv-tag {
+  margin: 0;
+  font-size: 11.5px;
+  text-align: center;
+  color: #6E604F;
 }
 
 

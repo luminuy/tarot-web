@@ -10,6 +10,7 @@ import { useLocale } from "@/lib/i18n";
 import { stripLocalePrefix } from "@/lib/i18n/paths";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 import { useCurrentPath } from "@/components/layout/current-path";
+import { ArrowIcon, ChevronIcon, PersonIcon } from "@/components/ui/LineIcons";
 
 interface SacredNavDropdownProps {
   onOpenHistory?: () => void;
@@ -111,58 +112,41 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
   /* หัวข้อหลักชุดเดียวกับแถบเมนูบนคอม (header-nav.ts) — มือถือเห็นหมวดเดียวกัน หาง่ายเหมือนกัน */
   const nav = headerNav(isEnglish);
 
-  const renderNavCard = (item: NavItem, idx: number) => {
-    const isAction = typeof item.onClick === "function";
-    const isActive = item.href
-      ? currentPath === item.href || (item.href !== "/" && currentPath.startsWith(item.href + "/"))
-      : false;
+  const close = () => {
+    soundManager.playMenuTapSound();
+    setIsOpen(false);
+  };
+  const isActivePath = (href?: string) =>
+    !!href && (currentPath === href || (href !== "/" && currentPath.startsWith(href + "/")));
 
-    /*
-     * หน้าตาเหมือนเดิมทุกพิกเซล แต่ลด element ต่อแถว 13 ➔ 9 (ลิ้นชักอยู่ใน HTML ของทุกหน้า · งบ DOM หน้าแรก INC-0247)
-     * ลูกศรขวาวาดด้วย pseudo-element (`after:`) แทน <svg> · ไม่มี <div> ห่อแถว · ชื่อ/คำอธิบายเป็น <span> สองตัว
-     */
-    const innerContent = (
+  /*
+   * ลิ้นชัก UI 2.0 (เจ้าของ 2026-10-17 "ต้องปรับปรุง อัปเกรดเมนูบาร์ในมือถือให้ใช้ง่าย เข้าใจง่าย")
+   * เดิม: 17 แถวยาวเหยียด ภาพไพ่ทุกแถว ต้องเลื่อน 3 จอกว่าจะเจอ "ความหมายไพ่" / "ราคา"
+   * ใหม่: (1) ดูดวงยอดนิยม 4 กล่องภาพไพ่ (2) เมนูหลักแถวใหญ่ (3) ดูดวงแบบอื่นพับเป็นหมวด (<details> ไม่ต้องใช้ JS)
+   * สไตล์ `nv-*` อยู่ใน globals.css · ⚠️ ลิ้นชักอยู่ใน HTML ทุกหน้า Astro — ภาพไพ่เหลือแค่ 4 กล่อง (เดิม 17 ภาพ = งบ HTML)
+   */
+  const renderRow = (item: NavItem, idx: number, sub = true) => {
+    const isActive = isActivePath(item.href);
+    const body = (
       <>
-        {isActive && (
-          <span className="absolute left-0 top-2 bottom-2 w-1 bg-gold rounded-r-full" aria-hidden="true" />
-        )}
-        {/* คลาส `nav-row*` อยู่ใน globals.css — รวบ utility ยาวที่ซ้ำทุกแถว (ลิ้นชักอยู่ใน HTML ของทุกหน้า Astro · งบ HTML) */}
-        <span className="nav-row-thumb">
-          <CardImage cardId={item.cardId} alt="" sizes="34px" thumb loading="lazy" className="w-full h-full object-cover" />
+        <span className="nv-row-t">
+          <b>{item.label}</b>
+          {sub && <small>{item.sublabel}</small>}
         </span>
-        <span className="flex-1 min-w-0 text-left">
-          <span
-            className={`nav-row-label ${
-              isActive ? "font-bold text-gold-ink" : "font-semibold text-ink group-hover:text-gold-ink"
-            }`}
-          >
-            {item.label}
-          </span>
-          {/*
-            ⛔ ห้าม `truncate` ในลิ้นชักทั้งไฟล์ (INC-0209 ➜ INC-0252) — iOS Safari คิดความกว้างกล่องตัดได้ 0
-            แล้วเฉือนบรรทัดทิ้งทั้งบรรทัด (เจ้าของเจอบรรทัดคำอธิบายหายบน iPhone) · ข้อความสั้นอยู่แล้ว ปล่อยขึ้นบรรทัดใหม่แทน
-          */}
-          <span className="nav-row-sub">{item.sublabel}</span>
-        </span>
+        <ChevronIcon direction="right" className="nv-chev" />
       </>
     );
-
-    const buttonClass = `tap-overlay-y nav-row group ${
-      isActive ? "bg-inset/90 border-line shadow-xs" : "hover:bg-inset/60 border-transparent hover:border-line/60"
-    }`;
-
-    return isAction ? (
+    return item.onClick ? (
       <button
         key={`action-${idx}`}
         type="button"
         onClick={() => {
-          soundManager.playMenuTapSound();
-          setIsOpen(false);
+          close();
           item.onClick?.();
         }}
-        className={buttonClass}
+        className="nv-row"
       >
-        {innerContent}
+        {body}
       </button>
     ) : (
       <Link
@@ -171,16 +155,29 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         // ⛔ ห้ามเปิด prefetch — บทเรียน INC-0106
         prefetch={false}
         aria-current={isActive ? "page" : undefined}
-        onClick={() => {
-          soundManager.playMenuTapSound();
-          setIsOpen(false);
-        }}
-        className={buttonClass}
+        onClick={close}
+        className="nv-row"
       >
-        {innerContent}
+        {body}
       </Link>
     );
   };
+
+  const renderTile = (item: { label: string; href: string; cardId: string }) => (
+    <Link
+      key={item.href}
+      href={item.href}
+      prefetch={false}
+      aria-current={isActivePath(item.href) ? "page" : undefined}
+      onClick={close}
+      className="nv-tile"
+    >
+      <span className="nv-tile-img">
+        <CardImage cardId={item.cardId} alt="" sizes="40px" thumb loading="lazy" />
+      </span>
+      <b>{item.label}</b>
+    </Link>
+  );
 
   return (
     /* เดสก์ท็อป (lg+) มีเมนูเรียงกลางแถบแล้ว — ปุ่มแฮมเบอร์เกอร์มีเฉพาะจอเล็ก (แบบ Kazumi) */
@@ -231,15 +228,12 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         aria-label={isEnglish ? "Site menu" : "เมนูเว็บไซต์"}
         aria-hidden={!isOpen}
         tabIndex={isOpen ? 0 : -1}
-        className={`nav-drawer-panel-base w-full max-w-[340px] sm:max-w-[380px] bg-surface border-l border-line z-[calc(var(--z-dropdown)+1)] flex flex-col overflow-hidden ${
+        className={`nav-drawer-panel-base nv-panel z-[calc(var(--z-dropdown)+1)] ${
           isOpen ? "nav-drawer-panel-entering" : "nav-drawer-panel-exiting"
         }`}
       >
-        {/* Ambient Top Gold Accent Line */}
-        <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-gold/40 to-transparent shrink-0" />
-
         {/* Drawer Header: โลโก้ + ชื่อแบรนด์ชุดเดียวกับหัวเว็บ (SEERTAROT) & Close Button */}
-        <div className="px-4 py-3 sm:py-3.5 border-b border-line flex items-center justify-between gap-2 bg-surface shrink-0">
+        <div className="nv-head">
           <div className="flex min-w-0 flex-1 items-center gap-2.5">
             <img
               src="/logo.webp"
@@ -290,91 +284,66 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         </div>
 
         {/* Scrollable Navigation Body — เรนเดอร์เมื่อเปิดครั้งแรก (ดู hasOpened) */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-3 py-3 space-y-3 no-scrollbar">
+        <div className="nv-body no-scrollbar">
           {hasOpened && (
           <>
-          {/* หัวข้อ 1: ดูดวง — แบ่ง 3 กลุ่มย่อยเหมือนแผงเมนูใหญ่บนคอม */}
-          <div>
-            <p className="px-2.5 pb-1 font-serif-th text-sm font-bold text-ink">{nav.reading.label}</p>
-            {nav.reading.groups.map((group) => (
-              <div key={group.title} className="pt-1.5">
-                <p className="px-2.5 pb-1 font-serif-th text-xs font-semibold text-muted">{group.title}</p>
-                <div className="space-y-1">{group.links.map((item, idx) => renderNavCard(item, idx))}</div>
-              </div>
-            ))}
-            <Link
-              href={nav.reading.all.href}
-              prefetch={false}
-              onClick={() => {
-                soundManager.playMenuTapSound();
-                setIsOpen(false);
-              }}
-              className="tap-overlay-y mt-1 flex min-h-[44px] items-center px-2.5 font-serif-th text-[13px] font-bold text-gold-ink hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold rounded-xl"
-            >
-              {nav.reading.all.label}
-            </Link>
+          {/* 1. ดูดวงยอดนิยม — 4 กล่องภาพไพ่ แตะครั้งเดียวถึงหน้า */}
+          <p className="nv-k">{isEnglish ? "Popular readings" : "ดูดวงยอดนิยม"}</p>
+          <div className="nv-tiles">
+            {nav.reading.groups[0].links.map(renderTile)}
+            {renderTile({ label: nav.reading.all.label, href: nav.reading.all.href, cardId: "major-21" })}
           </div>
 
-          <div className="h-[1px] w-full bg-line/40 my-1.5" />
+          {/* 2. เมนูหลัก — ชื่อตรงกับแถบเมนูบนคอมทุกคำ */}
+          <p className="nv-k">{isEnglish ? "Menu" : "เมนูหลัก"}</p>
+          <div className="nv-list">{nav.links.map((item, idx) => renderRow(item, idx + 10))}</div>
 
-          {/* หัวข้อหลักที่เหลือ — ชื่อตรงกับแถบเมนูบนคอมทุกคำ */}
-          <div className="space-y-1">{nav.links.map((item, idx) => renderNavCard(item, idx + 10))}</div>
+          {/* 3. ดูดวงแบบอื่น — พับเป็นหมวด แตะหัวหมวดเพื่อกาง */}
+          <p className="nv-k">{isEnglish ? "More readings" : "ดูดวงแบบอื่น"}</p>
+          <div className="nv-list">
+            {nav.reading.groups.slice(1).map((group) => (
+              <details key={group.title} className="nv-acc">
+                <summary className="nv-row">
+                  <span className="nv-row-t">
+                    <b>{group.title}</b>
+                    <small>{group.links.map((l) => l.label).join(" · ")}</small>
+                  </span>
+                  <ChevronIcon className="nv-chev nv-acc-chev" />
+                </summary>
+                <div className="nv-acc-body">{group.links.map((item, idx) => renderRow(item, idx + 20, false))}</div>
+              </details>
+            ))}
+          </div>
 
-          {/* Section 3: ประวัติการดูดวง (Reading Journal) */}
           {onOpenHistory && (
-            <>
-              <div className="h-[1px] w-full bg-line/40 my-1.5" />
-              <div>
-                <div className="px-2.5 pb-1.5 text-xs font-serif-th font-semibold text-muted tracking-normal select-none">
-                  {isEnglish ? "Reading Journal" : "ประวัติ & บันทึกดวง"}
-                </div>
-                {renderNavCard(
-                  {
-                    label: isEnglish ? "Reading Journal" : "ประวัติการดูดวง",
-                    sublabel: isEnglish ? "Revisit your past cards and oracle counsel" : "ย้อนดูไพ่และคำทำนายที่คุณเคยเปิดไว้",
-                    onClick: onOpenHistory,
-                    cardId: "major-14",
-                  },
-                  99
-                )}
-              </div>
-            </>
+            <div className="nv-list">
+              {renderRow(
+                {
+                  label: isEnglish ? "Reading history" : "ประวัติการดูดวง",
+                  sublabel: isEnglish ? "Revisit your past cards and readings" : "ย้อนดูไพ่และคำทำนายที่คุณเคยเปิดไว้",
+                  onClick: onOpenHistory,
+                  cardId: "major-14",
+                },
+                99,
+              )}
+            </div>
           )}
           </>
           )}
         </div>
 
         {/* Drawer Footer: Account · Reset (if available) + Quiet Luxury Tagline */}
-        <div className="shrink-0 px-4 py-3 border-t border-line/50 bg-canvas/30 space-y-2.5">
+        <div className="nv-foot">
           {/*
             🧭 ทางเข้าหน้าบัญชีที่ "มีอยู่ทุกหน้า"
             ปุ่มไอคอนบัญชีบนหัวเว็บมีเฉพาะหน้าดูดวงหลัก (variant="app") เท่านั้น
             คนที่อยู่หน้าไพ่ บทความ หรือหน้าบัญชีเอง จึงเคยไม่มีทางกลับไปจัดการบัญชีเลย
             ลิงก์นี้ไม่ต้องรู้สถานะเซสชัน — หน้า /account จัดการทั้งสถานะสมาชิกและผู้เยี่ยมชมให้เอง
           */}
-          <Link
-            href="/account"
-            prefetch={false}
-            onClick={() => {
-              soundManager.playMenuTapSound();
-              setIsOpen(false);
-            }}
-            className="altar-card-porcelain !rounded-xl tap-overlay-y flex min-h-[44px] w-full items-center justify-center gap-2 px-3 py-2.5 font-serif-th text-xs font-bold text-ink transition-colors hover:text-gold-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-4 w-4"
-              aria-hidden="true"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-            <span>{isEnglish ? "My Account & Entitlements" : "บัญชีของฉันและสิทธิ์การใช้งาน"}</span>
+          <Link href="/account" prefetch={false} onClick={close} className="nv-account">
+            <PersonIcon className="nv-account-ico" />
+            <span>{isEnglish ? "My account" : "บัญชีของฉัน"}</span>
+            <ArrowIcon className="nv-account-go" />
           </Link>
 
           {canReset && onReset && (
@@ -390,9 +359,9 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
               <span>{isEnglish ? "Start New Reading" : "เริ่มดูดวงใหม่"}</span>
             </button>
           )}
-          <div className="text-[10px] font-mono tracking-widest text-muted text-center uppercase">
-            {isEnglish ? "1909 RIDER-WAITE TAROT · VERIFIABLE SHUFFLE" : "ไพ่ 1909 Rider-Waite แท้ · สุ่มจริง ตรวจสอบได้"}
-          </div>
+          <p className="nv-tag">
+            {isEnglish ? "1909 Rider-Waite deck · verifiable shuffle" : "ไพ่ 1909 Rider-Waite แท้ · สุ่มจริง ตรวจสอบได้"}
+          </p>
         </div>
       </nav>
     </div>
