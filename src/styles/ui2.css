@@ -1341,6 +1341,13 @@ a.ui2-tile:active {
   max-width: 640px;
   margin-top: 12px;
 }
+/* หัวข้อคลังไพ่สองบรรทัด — บรรทัดหลังทองไล่สี (แทนพัดไพ่กลางหัวข้อ · เจ้าของ 2026-10-17 "ไม่เอารูปไพ่") */
+.ui2-show-h2-line {
+  display: block;
+}
+.ui2-show-h2 .ui2-gold-night {
+  font-weight: 600;
+}
 .ui2-show-tabs {
   display: flex;
   min-width: 0;
