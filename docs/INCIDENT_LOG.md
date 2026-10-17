@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0264 · 2026-10-17 11:15 · 🟠 High · chunk ใต้ route group (th) วน 307 จน ERR_TOO_MANY_REDIRECTS — ชื่อ chunk ฝั่งเบราว์เซอร์ไม่มี ( ) [ ] แล้ว
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | หน้า /reset-password?token=... และ /tester บน production และ preview ขึ้นหน้า error กลาง เกิดข้อผิดพลาดชั่วคราวในการโหลดระบบ · console ขึ้น net::ERR_TOO_MANY_REDIRECTS และ ChunkLoadError: Loading chunk 5679 failed (/_next/static/chunks/app/(th)/layout-*.js) · curl รูป %28th%29 ได้ 307 ส่วนรูป (th) ได้ 200 |
+| **สาเหตุราก** | asset-worker ของ Cloudflare ถอดรหัส path แล้วเข้ารหัสใหม่ด้วย encodeURIComponent ทีละท่อน ถ้าไม่ตรงกับ path ที่ขอมาจะตอบ 307 (ฝังในตัว ปิดด้วย wrangler.jsonc ไม่ได้) · webpack ตั้งชื่อ chunk ตามโฟลเดอร์ app/(th)/layout · encodeURIComponent ไม่เข้ารหัสวงเล็บ รูป %28th%29 จึงโดนเด้งไป (th) เสมอ ไคลเอนต์ที่เข้ารหัสวงเล็บเองวนไม่จบ ➔ ChunkLoadError ของ layout (th) ➔ หน้า error กลางทุกหน้าที่ Next เรนเดอร์ · Chromium ในเครื่องไม่เข้ารหัสวงเล็บและในเครื่องไม่มีชั้น assets ของ Cloudflare จึงไม่มีใครเห็นอาการก่อนขึ้น |
+| **การแก้ไข** | next.config.ts แทนอักขระนอก [A-Za-z0-9._~/-] ในชื่อ chunk ฝั่งเบราว์เซอร์ด้วย _ (app/(th)/layout ➔ app/_th_/layout · s/[id] ➔ s/_id_) + ด่านตรวจชื่อไฟล์ใต้ .next/static ใน test-worker-first-routes |
+| **🛡️ กฎป้องกันถาวร** | **next.config.ts แทนอักขระนอก [A-Za-z0-9._~/-] ในชื่อ chunk ฝั่งเบราว์เซอร์ด้วย _ (filename + chunkFilename) ทุก URL ใต้ /_next/static จึงเขียนได้แบบเดียว · ด่าน test-worker-first-routes ไล่ชื่อไฟล์/โฟลเดอร์ใต้ .next/static ทุกตัว เจออักขระนอกชุดปลอดภัย = ตก (บน CI ห้ามข้าม) · ห้ามใช้ encodeURIComponent วัดความปลอดภัยของชื่อ เพราะไม่เข้ารหัส ( ) ! * '** |
+| **การพิสูจน์ว่าแก้ได้จริง** | build:worker + wrangler dev ในเครื่อง (asset-worker ตัวเดียวกับ production): chunk ทุกตัวของ /reset-password และ /tester ตอบ 200 ตรง · Playwright ฟอร์มตั้งรหัสผ่านขึ้น 2 ช่อง ไม่มีหน้า error · หน้าไพ่ Astro 174 หน้า 200 ครบ · ด่านตกจริงเมื่อใส่โฟลเดอร์ (th) · repo:verify 93/93 |
+| **บันทึกโดย** | claude · branch `claude/nice-brahmagupta-2e2jrd` · commit `2825b3f` |
+
+
 ### INC-0263 · 2026-10-16 12:11 · 🟡 Medium · ผัง/บทความท้ายหมวดไม่เคยได้ลิงก์จากพี่น้อง — Google ค้างไว้ที่ พบแล้ว-ยังไม่ได้จัดทำดัชนี
 
 | หัวข้อ | รายละเอียด |
