@@ -9,6 +9,7 @@ import { CardImage } from "@/components/card/CardImage";
 import { CardYesNoAnswer } from "./CardYesNoAnswer";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2Showcase, type Ui2ShowcaseSection } from "@/components/ui2/Ui2Showcase";
 
 export type CardNavRef = Pick<TarotCard, "id" | "image" | "nameTh" | "nameEn">;
 
@@ -114,6 +115,87 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
     ...(yesNoLabel ? [{ k: "Yes/No", v: yesNoLabel, tone: card.yesNo }] : []),
   ];
 
+  const orientationSwitch = (
+    <div className="v2-cd-flip v3-cd-flip" role="group" aria-label={isEnglish ? "Card orientation" : "ทิศของไพ่"}>
+      <button type="button" data-orientation-set="upright" aria-pressed="true" className="orientation-tab v2-cd-flip-btn">
+        {isEnglish ? "Upright" : "ไพ่หัวตั้ง"}
+      </button>
+      <button type="button" data-orientation-set="reversed" aria-pressed="false" className="orientation-tab v2-cd-flip-btn">
+        {isEnglish ? "Reversed" : "ไพ่หัวกลับ"}
+      </button>
+    </div>
+  );
+  const sections: Ui2ShowcaseSection[] = [
+    {
+      id: "meanings",
+      kicker: "Five Dimensions",
+      title: isEnglish ? "Meaning in 5 areas of life" : "ความหมาย 5 ด้านของชีวิต",
+      short: isEnglish ? "5 meanings" : "ความหมาย 5 ด้าน",
+      tone: 4,
+      lead: isEnglish
+        ? "Switch between upright and reversed to read both sides"
+        : "สลับไพ่หัวตั้งและหัวกลับเพื่ออ่านได้ทั้งสองทาง",
+      aside: orientationSwitch,
+      children: (
+        <>
+          {orientations.map((o) => (
+            <div key={o.key} data-when={o.key} className="v3-cd-side">
+              <h3 className="v3-cd-side-k">{o.headingKeywords}</h3>
+              <ul className="v3-cd-kw">
+                {keywordsByOrientation[o.key].map((kw, i) => (
+                  <li key={i}>{kw}</li>
+                ))}
+              </ul>
+              <h3 className="v3-cd-side-k">
+                <ThaiPhrases>{o.headingMeanings}</ThaiPhrases>
+              </h3>
+              <div className="v2-cd-room-grid">
+                {categories.map((cat) => {
+                  const interp = isEnglish && card.meaningsEn ? card.meaningsEn[cat.id] : card.meanings[cat.id];
+                  const text = o.key === "upright" ? interp?.upright : interp?.reversed;
+                  return (
+                    <article key={cat.id} className="v2-cd-room" data-room={cat.id}>
+                      <h4>
+                        <ThaiPhrases>{isEnglish ? cat.nameEn : cat.nameTh}</ThaiPhrases>
+                      </h4>
+                      <p>{text || (isEnglish ? "This meaning is still being written" : "กำลังรวบรวมคำแปลมิตินี้")}</p>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </>
+      ),
+    },
+    {
+      id: "yes-no",
+      kicker: "Yes or No",
+      title: isEnglish ? "Yes or no?" : "ไพ่ใบนี้ตอบใช่หรือไม่",
+      short: isEnglish ? "Yes or no" : "ใช่หรือไม่",
+      tone: 2,
+      children: (
+        <div className="v2-cd-yesno">
+          <CardYesNoAnswer card={card} isEnglish={isEnglish} />
+        </div>
+      ),
+    },
+    {
+      id: "ask",
+      kicker: "Your turn",
+      title: isEnglish ? `Ask ${card.nameEn} your question` : `ไพ่${card.nameTh}ตอบเรื่องของคุณได้`,
+      short: isEnglish ? "Ask the cards" : "ถามไพ่ใบนี้",
+      tone: 3,
+      lead: isEnglish ? "Shuffle and pick the cards yourself" : "สับและเลือกไพ่ด้วยมือคุณเอง แม่หมอ AI อ่านให้ทีละใบ",
+      aside: (
+        <Link href={readHref} className="ui2-btn v2-cd-go">
+          {isEnglish ? "Draw now" : "เปิดไพ่เลย"}
+        </Link>
+      ),
+      children: null,
+    },
+  ];
+
   /*
    * v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — เวทีไพ่แบบพิพิธภัณฑ์
    * คอม: ชื่อไพ่ซ้าย · ไพ่ใบใหญ่บนแท่นกลาง · ป้ายข้อมูลขวา ➔ แถบคีย์เวิร์ด ➔ ใช่/ไม่ใช่ ➔ ห้องความหมาย 5 ห้อง (สีประจำเรื่อง)
@@ -201,58 +283,11 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
         </aside>
       </section>
 
-      {/* คีย์เวิร์ด — ทั้งสองหัวไพ่อยู่ใน HTML · CSS ซ่อนฝั่งที่ไม่ได้เลือก */}
-      {orientations.map((o) => (
-        <div key={o.key} data-when={o.key} className="v2-cd-kw">
-          <h2>{o.headingKeywords}</h2>
-          <ul>
-            {keywordsByOrientation[o.key].map((kw, i) => (
-              <li key={i}>{kw}</li>
-            ))}
-          </ul>
-        </div>
-      ))}
-
-      <div className="v2-cd-yesno">
-        <CardYesNoAnswer card={card} isEnglish={isEnglish} />
-      </div>
-
-      {/* ห้องความหมาย 5 ห้อง — ทั้งสองหัวไพ่อยู่ใน HTML ครบ (SEO) */}
-      {orientations.map((o) => (
-        <section key={o.key} data-when={o.key} className="v2-cd-rooms">
-          <h2 className="v2-cd-h2">
-            <ThaiPhrases>{o.headingMeanings}</ThaiPhrases>
-          </h2>
-          <div className="v2-cd-room-grid">
-            {categories.map((cat) => {
-              const interp = isEnglish && card.meaningsEn ? card.meaningsEn[cat.id] : card.meanings[cat.id];
-              const text = o.key === "upright" ? interp?.upright : interp?.reversed;
-              return (
-                <article key={cat.id} className="v2-cd-room" data-room={cat.id}>
-                  <h3>
-                    <ThaiPhrases>{isEnglish ? cat.nameEn : cat.nameTh}</ThaiPhrases>
-                  </h3>
-                  <p>{text || (isEnglish ? "This meaning is still being written" : "กำลังรวบรวมคำแปลมิตินี้")}</p>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-      ))}
-
-      {/* ถามไพ่ใบนี้ */}
-      <section className="v2-cd-ask">
-        <div>
-          <p className="v2-cd-ask-k">{isEnglish ? "Your turn" : "ถึงตาคุณ"}</p>
-          <h2>
-            <ThaiPhrases>{isEnglish ? `Ask ${card.nameEn} your question` : `ไพ่${card.nameTh}ตอบเรื่องของคุณได้`}</ThaiPhrases>
-          </h2>
-          <p>{isEnglish ? "Shuffle and pick them yourself" : "สับและเลือกไพ่ด้วยมือคุณเอง"}</p>
-        </div>
-        <Link href={readHref} className="ui2-btn v2-cd-go">
-          {isEnglish ? "Draw now" : "เปิดไพ่เลย"}
-        </Link>
-      </section>
+      {/*
+        v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): เนื้อหาใต้เวทีเป็นหน้าต่างโชว์เคส + รายชื่อซ้าย ชุดเดียวกับ /spreads
+        ⚠️ ทั้งสองหัวไพ่ยังอยู่ใน HTML ครบ (data-when · CSS ซ่อนฝั่งที่ไม่ได้เลือก) — สวิตช์ในหน้าต่างแรกใช้ตะขอเดียวกับใต้ไพ่
+      */}
+      <Ui2Showcase label={isEnglish ? `${card.nameEn} meanings` : `ความหมายไพ่${card.nameTh}`} sections={sections} />
 
       {related}
 
