@@ -387,16 +387,22 @@
   flex: none;
   display: grid;
   place-items: center;
+  /* สัดส่วนไพ่ 1909 จริง (~0.58) — เดิม 36×52 กว้างเกิน ไพ่ถูกตัดหัวท้าย */
   width: 36px;
-  height: 52px;
+  height: 62px;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 7px;
   border: 1px solid rgba(255, 217, 143, 0.3);
   background: #F3EDE2;
 }
-.v2-pc-art svg {
-  width: 36px !important;
-  height: 52px !important;
+/* ภาพไพ่จาก TarotArtIcons มาเป็นกล่อง 80×136 (w-20 h-[136px]) — ย่อให้เต็มช่องพอดี ไม่ใช่ล้นแล้วโดนตัด
+   (เดิมเล็งที่ svg ซึ่งไม่มีแล้ว ภาพจึงโผล่แค่ชิ้นมุมซ้ายบนของไพ่ — เจ้าของ 2026-10-17 "รูปไม่พอดีกรอบ") */
+.v2-pc-art > * {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
 }
 .v2-pc-txt {
   display: grid;
