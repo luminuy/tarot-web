@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0281 · 2026-10-17 17:39 · 🟡 Medium · ลบ spread-categories.ts ที่แอปมือถือยังใช้ ด่าน mobile typecheck แดง
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | PR #676 ด่าน 📱 typecheck · jest · expo-doctor ล้ม: Cannot find module '@core/data/spread-categories' |
+| **สาเหตุราก** | รอบล้างโค้ดตายของ UI 2.0 ลบไฟล์เพราะฝั่งเว็บไม่มีใคร import แล้ว แต่ mobile/ import ผ่าน alias @core/* ซึ่ง repo:verify ฝั่งเว็บไม่ได้ไล่ |
+| **การแก้ไข** | กู้ src/data/spread-categories.ts จาก main + แก้คอมเมนต์ให้บอกว่าแอปมือถือใช้ |
+| **🛡️ กฎป้องกันถาวร** | **ก่อนลบไฟล์ใต้ src/ ให้ grep ใน mobile/ ด้วย (alias @core/* ชี้ src/) และรัน npm run typecheck ใน mobile/ เมื่อแตะ src/data** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/kind-meitner-ub24bz` · commit `611d6fe5` |
+
+
 ### INC-0280 · 2026-10-17 17:05 · 🟡 Medium · หน้าแรก: ไพ่ลอยใบล่าง (คนเขลา/โลก) จมใต้ริบบิ้น + ปุ่มหลักขยับหลังโหลด
 
 | หัวข้อ | รายละเอียด |

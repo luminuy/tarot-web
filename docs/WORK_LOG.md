@@ -42,6 +42,7 @@
 - รวมงาน UI 2.0 รอบ 255–286 ของกิ่ง `claude/kind-meitner-ub24bz` ขึ้น production ผ่าน PR (ด่าน CI ครบ ➔ auto-merge ➔ deploy.yml)
 - เพิ่ม `.github/workflows/preview-down.yml` (สั่งมือ) ลบ Worker `tarot-web-preview` ออกจาก Cloudflare — ชื่อเขียนตายตัว ไม่แตะ Worker `tarot-web` ของ seertarot.net · อยากได้ลิงก์ทดลองคืน = push คอมมิต `[preview]` ใหม่
 - แผน UI_2_0 / UI_2_0_SPREADS: บรรทัดสถานะเป็น "ขึ้น production 2026-10-17"
+- แก้ด่าน CI แอปมือถือ (INC-0281): กู้ `src/data/spread-categories.ts` ที่รอบล้างโค้ดตายลบไป — `mobile/` ยัง import ผ่าน `@core/*` · typecheck + jest ของ mobile ผ่าน · `repo:verify` 94/94
 
 ### 🗓️ 2026-10-17 (รอบ 286): วิเคราะห์วิดีโอหัวหน้าแรก + แก้บั๊ก (เจ้าของส่งภาพ "มีบัค ไปเช็ค บันทึกวิดีโอแล้ววิเคราะห์" · ขึ้นพรีวิว · INC-0280)
 - บันทึกวิดีโอ 1580×890 (โหลด ➔ เลื่อนลง ➔ เลื่อนกลับ) แตกเฟรม 4–5 fps + วัดตำแหน่งจริง 6 ความกว้าง
