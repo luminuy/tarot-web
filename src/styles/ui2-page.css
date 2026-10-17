@@ -1528,3 +1528,18 @@
   --color-surface: #FFFFFF;
   --color-surface-warm: #FAF7F2;
 }
+
+/* ── v3 หน้ารวมคำถาม: หน้าต่างอยู่เหนือไพ่ลอยของหัวหน้า (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง") ── */
+.v3-qn .ui2-sx {
+  position: relative;
+  z-index: 3;
+  margin-top: 4px;
+}
+.v3-qn .ui2-sx .ui2-qn-wall {
+  margin: 0;
+}
+@media (min-width: 1200px) {
+  .v3-qn .ui2-ph {
+    padding-bottom: 40px;
+  }
+}

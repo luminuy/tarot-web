@@ -20,7 +20,8 @@ import { getCategoryCardImage } from "@/lib/media/og-card-art";
 import type { Locale } from "@/lib/i18n/types";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
-import { Ui2TightHead } from "@/components/ui2/Ui2PageHero";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { Ui2Showcase, Ui2ShowcaseStarter, type Ui2ShowcaseSection } from "@/components/ui2/Ui2Showcase";
 
 /**
  * ❓ หน้าคำถาม `/questions/[slug]` + หน้ารวม `/questions` (REFLECTION_JOURNAL_PLAN 1.11 · แทร็ก Q)
@@ -323,48 +324,62 @@ export function QuestionsHubContent({ locale }: { locale: Locale }) {
     itemListElement: QUESTIONS.map((q, i) => ({ "@type": "ListItem", position: i + 1, url: localizedUrl(questionPath(q.slug), locale), name: q[isEn ? "en" : "th"].question })),
   };
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink p-4 sm:p-8 relative overflow-x-clip">
+    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink px-4 sm:px-6 pb-16 relative overflow-x-clip">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(itemList) }} />
-      <div className="max-w-4xl mx-auto space-y-10 py-6">
-        <Ui2TightHead
+      {/* v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): หัวหน้าไพ่ลอย ➔ หมวดคำถามเป็นหน้าต่างโชว์เคส · คำถามเป็นกระดาษโน้ตแบบหน้าแรก */}
+      <div className="max-w-[1360px] mx-auto relative z-10 v3-qn">
+        <Ui2PageHero
           crumbs={[{ label: isEn ? "Home" : "หน้าแรก", href: "/" }, { label: isEn ? "Tarot questions" : "คำถามดูดวง" }]}
           title={c.heading}
           lede={c.lead}
           trust={isEn ? [`${QUESTIONS.length} questions`, "Each with a spread that fits"] : [`${QUESTIONS.length} คำถาม`, "ทุกคำถามมีผังที่เหมาะ"]}
+          cards={["major-06", "major-18", "major-09", "cups-02", "major-17", "pentacles-10"]}
         />
-        {QUESTION_TOPIC_ORDER.map((topic, topicIndex) => {
-          const items = QUESTIONS.filter((q) => q.topic === topic);
-          if (items.length === 0) return null;
-          const parent = TOPIC_PARENT[topic];
-          // เอกลักษณ์หน้านี้ (UI 2.0 · 2026-10-16): คำถามเป็นกระดาษโน้ตแปะผนังแบบหน้าแรก — หมวดละสี
-          const tone = (topicIndex % 7) + 1;
-          return (
-            <section
-              key={topic}
-              className="space-y-3 ui2-qn-sec"
-              style={{ "--note": `var(--ui2-note-${tone})`, "--note-ink": `var(--ui2-note-ink-${tone})`, "--note-sub": `var(--ui2-note-sub-${tone})` } as React.CSSProperties}
-            >
-              <div className="flex items-baseline justify-between gap-3">
-                <H2>{isEn ? parent.en : parent.th}</H2>
-                <Link href={parent.path} className="text-xs font-serif-th text-gold-ink underline underline-offset-2 shrink-0">
-                  {isEn ? "Spreads for this topic" : "ผังในหมวดนี้"}
-                </Link>
-              </div>
-              <ul className="ui2-qn-wall">
-                {items.map((q) => (
-                  <li key={q.slug}>
-                    <Link href={questionPath(q.slug)} className="ui2-qn-note">
-                      <span className="ui2-qn-q">{q[isEn ? "en" : "th"].question}</span>
-                      <span className="ui2-qn-d">{q[isEn ? "en" : "th"].description}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          );
-        })}
+        <Ui2Showcase label={isEn ? "Questions by topic" : "คำถามแยกตามหมวด"} sections={hubSections(isEn)} />
       </div>
     </main>
   );
+}
+
+/** หมวดคำถาม = หน้าต่าง · สีกระดาษโน้ตกับสีหมวดชุดเดียวกัน */
+function hubSections(isEn: boolean): Ui2ShowcaseSection[] {
+  return QUESTION_TOPIC_ORDER.flatMap((topic, topicIndex) => {
+    const items = QUESTIONS.filter((q) => q.topic === topic);
+    if (items.length === 0) return [];
+    const parent = TOPIC_PARENT[topic];
+    const tone = ((topicIndex % 7) + 1) as Ui2ShowcaseSection["tone"];
+    return [
+      {
+        id: `topic-${topic}`,
+        kicker: parent.en,
+        title: isEn ? parent.en : parent.th,
+        tone,
+        count: items.length,
+        meta: isEn ? `${items.length} questions · tap one to see how the cards answer` : `${items.length} คำถาม · แตะเพื่อดูว่าไพ่ตอบเรื่องนี้อย่างไร`,
+        aside: (
+          <Ui2ShowcaseStarter
+            kicker={isEn ? "Spreads for this topic" : "ผังที่เหมาะกับหมวดนี้"}
+            name={isEn ? parent.en : parent.th}
+            action={<Link href={parent.path}>{isEn ? "See spreads" : "ดูผัง"}</Link>}
+          />
+        ),
+        children: (
+          <ul
+            className="ui2-qn-wall"
+            style={{ "--note": `var(--ui2-note-${tone})`, "--note-ink": `var(--ui2-note-ink-${tone})`, "--note-sub": `var(--ui2-note-sub-${tone})` } as React.CSSProperties}
+          >
+            {items.map((q) => (
+              <li key={q.slug}>
+                <Link href={questionPath(q.slug)} className="ui2-qn-note">
+                  <span className="ui2-qn-q">{q[isEn ? "en" : "th"].question}</span>
+                  <span className="ui2-qn-d">{q[isEn ? "en" : "th"].description}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ),
+      },
+    ];
+  });
 }
