@@ -257,7 +257,8 @@
   gap: 14px;
   max-width: 860px;
   margin-inline: auto;
-  padding-top: 36px;
+  /* มือถือ: ไพ่ 2 ใบที่มุมบนสูงถึง ~86px — หัวเล็กทองเริ่มใต้ไพ่ ไม่โดนบัง */
+  padding-top: 76px;
 }
 /* แสงทองนุ่มหลังหัวข้อ — จุดโฟกัส */
 .ui2-ph-inner::before {
@@ -303,7 +304,8 @@
   max-width: 920px;
   font-family: var(--ui2-font-display);
   font-weight: 500;
-  font-size: 32px;
+  /* มือถือ: วลีไทยห่อไม่ให้หักกลางคำ ➔ วลียาว ("ความหมายไพ่ยิปซี ดอกถ้วย") ล้นขอบจอที่ 32px — ย่อตามความกว้างจอ */
+  font-size: clamp(25px, 7.4vw, 32px);
   line-height: 1.22;
   letter-spacing: -0.02em;
   color: var(--ui2-on-night);
@@ -415,13 +417,16 @@
 
 /* หัวหน้าเตี้ย (หน้าบทความ · หน้าที่เนื้อหาหลักต่อทันที) */
 .ui2-ph.is-compact .ui2-ph-inner {
-  padding-top: 24px;
+  padding-top: 68px;
 }
 
 @media (min-width: 768px) {
   .ui2-ph-inner {
     padding-top: 48px;
     gap: 16px;
+  }
+  .ui2-ph.is-compact .ui2-ph-inner {
+    padding-top: 24px;
   }
   .ui2-ph-title {
     font-size: 46px;
