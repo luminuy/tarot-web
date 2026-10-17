@@ -125,7 +125,6 @@ export const ReaderDetailClient: React.FC<ReaderDetailClientProps> = ({ reader, 
           <div ref={ctaRef} className="space-y-2.5">
             <Link href={primary.href} className={primaryClass}>
               {primary.label}
-              <span aria-hidden="true">→</span>
             </Link>
             {isLiveOpen && hasSchedule && (
               <Link href={`${bookHref}?mode=schedule`} className={secondaryClass}>
@@ -186,7 +185,7 @@ export const ReaderDetailClient: React.FC<ReaderDetailClientProps> = ({ reader, 
               tabIndex={showBar ? undefined : -1}
               className="btn-gold-glass flex min-h-[48px] shrink-0 items-center justify-center gap-2 px-5 text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2"
             >
-              {primary.label} <span aria-hidden="true">→</span>
+              {primary.label}
             </Link>
           </div>
         </div>

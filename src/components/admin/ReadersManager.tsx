@@ -1217,7 +1217,6 @@ function ReaderCard({
               </Button>
               <Button type="button" variant="outline" onClick={onOpenConsole} aria-disabled={busy !== null}>
                 {busy === `open:${r.id}` ? "กำลังเปิด…" : "เปิดแผงแม่หมอ"}
-                <span aria-hidden className="text-muted">↗</span>
               </Button>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -1225,7 +1224,7 @@ function ReaderCard({
                 คัดลอกลิงก์หน้าจองให้ลูกค้า
               </button>
               <a href={`/readers/${r.id}`} target="_blank" rel="noopener noreferrer" className={secondary}>
-                ดูหน้าโปรไฟล์ <span aria-hidden className="ml-1 text-muted">↗</span>
+                ดูหน้าโปรไฟล์
               </a>
               {lineHref && (
                 <a href={lineHref} target="_blank" rel="noopener noreferrer" className={secondary}>

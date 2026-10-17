@@ -57,10 +57,11 @@ export function ZodiacWheel({
 }) {
   const shortName = (s: ZodiacWheelSign) => (isEnglish ? s.nameEn : s.nameTh.replace("ราศี", ""));
   return (
-    <div className="relative mx-auto w-full max-w-[560px]">
+    <div className="ui2-zw relative mx-auto w-full max-w-[560px]">
       <div className="relative w-full aspect-[4/5]">
-        <div aria-hidden="true" className="absolute inset-[4%] rounded-[50%] border border-line-warm/70 bg-surface/40" />
-        <div aria-hidden="true" className="absolute inset-[22%] rounded-[50%] border border-dashed border-line-warm/60" />
+        {/* ตัวชี้ ui2-zw-* = หน้าปัดดวงดาวของ UI 2.0 (ui2-page.css) · หน้าที่ไม่โหลดสไตล์ 2.0 เห็นวงเดิม */}
+        <div aria-hidden="true" className="ui2-zw-ring absolute inset-[4%] rounded-[50%] border border-line-warm/70 bg-surface/40" />
+        <div aria-hidden="true" className="ui2-zw-inner absolute inset-[22%] rounded-[50%] border border-dashed border-line-warm/60" />
         <ul className="contents">
           {signs.map((s, i) => {
             const isMine = markTropical === s.id;
@@ -90,7 +91,7 @@ export function ZodiacWheel({
                       cardId={s.major.id}
                       alt=""
                       sizes="(min-width: 640px) 62px, 11vw"
-                      className="w-full aspect-[1/1.7] rounded-md border border-line-warm shadow-xs object-cover"
+                      className="ui2-zw-card w-full aspect-[1/1.7] rounded-md border border-line-warm shadow-xs object-cover"
                     />
                     {isSeason && (
                       <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-gold-ink px-1.5 text-[10px] leading-4 font-bold text-surface whitespace-nowrap">

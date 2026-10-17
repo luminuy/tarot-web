@@ -8,6 +8,8 @@ import { buildBreadcrumbJsonLd, homeCrumb } from "@/app/_shared/seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { SOCIAL_BADGE_STYLE, SocialGlyph } from "@/components/ui/SocialIcons";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { BxBack, BxChips, Ui2Bento } from "@/components/ui2/Ui2Blocks";
+import { Ui2DocHead } from "@/components/ui2/Ui2PageHero";
 
 /**
  * ✉️ Contact Us Page (English Twin)
@@ -93,11 +95,14 @@ export function ContactBodyEn() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdContact) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdBreadcrumbs) }} />
 
-      <div className="max-w-3xl mx-auto px-6 pt-16 space-y-10">
-        <div className="text-center space-y-3 pb-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif-th"><ThaiPhrases>Contact Us</ThaiPhrases></h1>
-          <p className="text-xs text-muted">We personally review and attend to every message received.</p>
-        </div>
+      <div className="v2-doc">
+        <Ui2DocHead
+          kind="letter"
+          crumbs={[{ label: "Home", href: "/" }, { label: "Contact" }]}
+          title="Contact Us"
+          kicker="Replies within 1–3 business days"
+          lede="We personally review and attend to every message received."
+        />
 
         <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>Electronic Mail</ThaiPhrases></h2>
@@ -144,27 +149,53 @@ export function ContactBodyEn() {
           </section>
         )}
 
-        <section className="page-band page-band-compact page-band-tint space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>Inquiries We Welcome</ThaiPhrases></h2>
-          <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
-            <li>
-              <strong>Technical Support & Platform Glitches</strong> — Card display anomalies, stream interrupts, session recovery, or sign-in concerns. Accompanying screenshots are always appreciated.
-            </li>
-            <li>
-              <strong>Editorial & Interpretation Feedback</strong> — If any AI interpretation feels ungrounded, disquieting, or lacking ethical nuance, please let us know so we can refine our archetypal system.
-            </li>
-            <li>
-              <strong>Data Privacy & Erasure Inquiries</strong> — Initiate self-service data management directly from our{" "}
-              <Link href="/en/privacy" prefetch={false} className="text-gold-ink underline hover:text-gold-ink">
-                Privacy Policy
-              </Link>{" "}
-              page, or write to request manual verification and data deletion under PDPA, GDPR, or CCPA.
-            </li>
-            <li>
-              <strong>Professional Partnerships & Reader Affiliation</strong> — Collaborative opportunities, ethical outreach, and qualified practitioners interested in future sanctuary features.
-            </li>
-          </ul>
-        </section>
+      </div>
+
+      {/* v4 (เจ้าของ 2026-10-17 "นำสองส่วนนี้ของหน้าแรกไปใช้กับหน้าอื่น") — หัวข้อที่เขียนมาได้เป็นกล่องหลายขนาดแบบ "ครบในที่เดียว" */}
+      <div className="ui2-bk-wrap">
+        <Ui2Bento
+          id="contact-topics"
+          kicker="Write to us"
+          title="Inquiries We Welcome"
+          tiles={[
+            {
+              key: "support",
+              size: "wide",
+              glow: "amber",
+              lead: "Technical",
+              title: "Support & Platform Glitches",
+              desc: "Card display anomalies, stream interrupts, session recovery, or sign-in concerns. Accompanying screenshots are always appreciated.",
+              visual: <BxChips items={["Cards not showing", "Stuck reading", "Sign-in"]} on={-1} />,
+            },
+            {
+              key: "feedback",
+              size: "tall",
+              glow: "teal",
+              center: true,
+              lead: "Editorial",
+              title: "& Interpretation Feedback",
+              desc: "If any AI interpretation feels ungrounded, disquieting, or lacking ethical nuance, please let us know so we can refine our archetypal system.",
+              visual: <BxBack />,
+            },
+            {
+              key: "privacy",
+              lead: "Data",
+              title: "Privacy & Erasure Inquiries",
+              desc: "Initiate self-service data management directly from our Privacy Policy page, or write to request manual verification and data deletion under PDPA, GDPR, or CCPA.",
+              go: { href: "/en/privacy", label: "Open the Privacy Policy" },
+            },
+            {
+              key: "partner",
+              lead: "Professional",
+              title: "Partnerships & Reader Affiliation",
+              desc: "Collaborative opportunities, ethical outreach, and qualified practitioners interested in future sanctuary features.",
+            },
+          ]}
+        />
+      </div>
+
+      {/* บทที่เหลือต่อเลขจากบทด้านบน (อีเมล + ช่องทางโซเชียลถ้ามี) */}
+      <div className="v2-doc" style={{ counterReset: `doc-sec ${TIKTOK_URL ? 2 : 1}` }}>
 
         <section className="page-band page-band-compact space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>Matters Outside Our Scope</ThaiPhrases></h2>

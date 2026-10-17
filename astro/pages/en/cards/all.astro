@@ -5,6 +5,9 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { CardsAllBodyRoot } from "../../../components/PageBodies";
 import { AllCardsTableRoot } from "../../../islands/AllCardsTableRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
+import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
+import "@/styles/v2-cards-all.css";
 
 /** 📋 ตารางสรุปไพ่ 78 ใบ (ต้นไม้ภาษาอังกฤษ) */
 const locale = "en" as const;
@@ -12,10 +15,17 @@ const locale = "en" as const;
 
 <BaseLayout locale={locale} metadata={buildCardsAllMetadata(locale)}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <CardsAllBodyRoot locale={locale}>
     <Fragment slot="table">
       <AllCardsTableRoot locale={locale} client:idle />
     </Fragment>
   </CardsAllBodyRoot>
+  </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../../scripts/ui2-inview";
+</script>

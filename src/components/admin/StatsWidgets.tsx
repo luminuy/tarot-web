@@ -55,7 +55,7 @@ export function Delta({
   return (
     <span>
       <span className={`font-semibold ${tone}`}>
-        {diff > 0 ? "▲" : "▼"} {sign}
+        {diff > 0 ? "เพิ่ม" : "ลด"} {sign}
         {pct == null ? fmt(diff) : `${pct}%`}
       </span>
       <span className="text-muted"> จาก{prevLabel} ({fmt(prev)})</span>

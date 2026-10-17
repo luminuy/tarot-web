@@ -4,6 +4,9 @@ import { journalMetadataTh } from "@/app/_shared/pages/journal-meta";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { JournalRoot } from "../islands/JournalRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
+import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
+import "@/styles/v2-journal.css";
 
 /**
  * ✦ สมุดดวงของฉัน (REFLECTION_JOURNAL_PLAN 1.3 · คลื่น 2) — เชลล์ static + island เดียว · noindex
@@ -14,6 +17,13 @@ const locale = "th" as const;
 
 <BaseLayout locale={locale} metadata={journalMetadataTh}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <JournalRoot locale={locale} client:load />
+  </div>
   <SiteFooterRoot locale={locale} spacing="tight" />
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../scripts/ui2-inview";
+</script>

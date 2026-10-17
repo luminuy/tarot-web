@@ -6,6 +6,8 @@ import Link from "next/link";
 import { calculatePasswordStrength } from "@/lib/auth/strength";
 import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
+import { EyeIcon, KeyIcon } from "@/components/ui/LineIcons";
+import "@/styles/v2-auth.css";
 
 export const dynamic = "force-dynamic";
 
@@ -53,26 +55,18 @@ function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="text-center space-y-4">
-        <div className="w-14 h-14 rounded-lg bg-err-wash border border-line-warm text-err flex items-center justify-center text-2xl mx-auto ">
-          ✕
+      <div className="v2-au-form">
+        <div className="v2-au-head">
+          <h1 className="v2-au-title">{isEn ? "This link has expired" : "ลิงก์นี้หมดอายุแล้ว"}</h1>
+          <p className="v2-au-sub">
+            {isEn
+              ? "Reset links work for 15 minutes. Request a new one from the sign-in window."
+              : "ลิงก์ตั้งรหัสผ่านใช้ได้ 15 นาที ขอลิงก์ใหม่ได้จากหน้าต่างเข้าสู่ระบบ"}
+          </p>
         </div>
-        <h2 className="text-xl font-bold font-serif-th text-ink-deep">
-          {isEn ? "Invalid or Expired Link" : "ลิงก์ไม่ถูกต้องหรือหมดอายุ"}
-        </h2>
-        <p className="text-xs text-muted font-serif-th leading-relaxed max-w-sm mx-auto">
-          {isEn
-            ? "No valid reset token was found, or this link has expired (15-minute validity)."
-            : "ไม่พบ Token สำหรับการตั้งรหัสผ่านใหม่ หรือลิงก์นี้อาจหมดอายุไปแล้ว (อายุ 15 นาที)"}
-        </p>
-        <div className="pt-2">
-          <Link
-            href={isEn ? "/en" : "/"}
-            className="inline-block py-2.5 px-6 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface font-semibold text-xs font-serif-th transition-colors"
-          >
-            {isEn ? "Return to Sanctuary" : "กลับสู่วิหารหลัก"}
-          </Link>
-        </div>
+        <Link href={isEn ? "/en" : "/"} className="v2-au-submit">
+          {isEn ? "Back to home" : "กลับหน้าแรก"}
+        </Link>
       </div>
     );
   }
@@ -118,94 +112,86 @@ function ResetPasswordForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 text-left">
-      {/* ♿ R-21: ข้อความผิดพลาดต้องถูก "ประกาศ" ให้โปรแกรมอ่านหน้าจอ ไม่ใช่แค่โผล่บนจอ
-          `role="alert"` ทำให้อ่านทันทีที่โหนดปรากฏ · `id` ผูกกับช่องกรอกด้วย `aria-describedby`
-          เพื่อให้ผู้ใช้ที่ย้อนกลับไปที่ช่องนั้นได้ยินว่าผิดตรงไหน (ไม่ใช่แค่ว่า "มีอะไรผิด") */}
+    <form onSubmit={handleSubmit} className="v2-au-form" noValidate>
+      <div className="v2-au-head">
+        <h1 className="v2-au-title">{isEn ? "Set a new password" : "ตั้งรหัสผ่านใหม่"}</h1>
+        <p className="v2-au-sub">{isEn ? "Save it and you're signed in right away." : "บันทึกแล้วเข้าสู่ระบบให้ทันที"}</p>
+      </div>
+
+      {/* ♿ R-21: ข้อความผิดพลาดต้องถูก "ประกาศ" ให้โปรแกรมอ่านหน้าจอ · ผูกกับช่องกรอกด้วย aria-describedby */}
       {errorMsg && (
-        <div
-          id="reset-password-error"
-          role="alert"
-          className="p-3 rounded-lg bg-err/60 border border-err/40 text-err text-xs font-serif-th text-center"
-        >
+        <div id="reset-password-error" role="alert" className="v2-au-msg is-err">
           {errorMsg}
         </div>
       )}
 
-      <div className="space-y-1">
-        <label htmlFor="new-password" className="block text-xs text-ink-deep font-serif-th font-semibold">
-          {isEn ? "New Password" : "รหัสผ่านใหม่"}
-        </label>
-        <div className="relative">
-          <input
-            id="new-password"
-            type={showPassword ? "text" : "password"}
-            required
-            aria-invalid={errorMsg ? true : undefined}
-            aria-describedby={errorMsg ? "reset-password-error" : undefined}
-            autoComplete="new-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder={isEn ? "At least 10 characters" : "อย่างน้อย 10 ตัวอักษร"}
-            className="w-full h-11 px-3.5 pr-10 rounded-lg bg-inset-warm border border-line-interactive-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            aria-label={showPassword ? (isEn ? "Hide password" : "ซ่อนรหัสผ่าน") : (isEn ? "Show password" : "แสดงรหัสผ่าน")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink-deep text-xs cursor-pointer"
-          >
-            {showPassword ? (isEn ? "Hide" : "ซ่อน") : (isEn ? "Show" : "ดู")}
-          </button>
-        </div>
-
-        {/* Strength Meter */}
-        {password.length > 0 && (
-          <div className="pt-1.5 space-y-1">
-            <div className="w-full h-1.5 bg-inset-warm/30 rounded-full overflow-hidden">
-              <div
-                className={`h-full ${strength.barColor} transition duration-300`}
-                style={{ width: `${(strength.score / 4) * 100}%` }}
-              />
-            </div>
-            <div className="flex justify-between text-[13px] font-serif-th">
-              <span className="text-muted">{isEn ? "Strength:" : "ความปลอดภัย:"}</span>
-              <span className={strength.colorClass}>
-                {isEn ? getStrengthLabelEn(strength.score) : strength.label}
+      <div className="v2-au-fields">
+        <div className="v2-au-field">
+          <label htmlFor="new-password">{isEn ? "New password" : "รหัสผ่านใหม่"}</label>
+          <span className="v2-au-input">
+            <KeyIcon />
+            <input
+              id="new-password"
+              type={showPassword ? "text" : "password"}
+              required
+              aria-invalid={errorMsg ? true : undefined}
+              aria-describedby={errorMsg ? "reset-password-error" : undefined}
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={isEn ? "At least 10 characters" : "อย่างน้อย 10 ตัวอักษร"}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? (isEn ? "Hide password" : "ซ่อนรหัสผ่าน") : (isEn ? "Show password" : "แสดงรหัสผ่าน")}
+              aria-pressed={showPassword}
+              className="v2-au-eye"
+            >
+              <EyeIcon off={showPassword} />
+            </button>
+          </span>
+          {password.length > 0 && (
+            <div className="v2-au-strength">
+              <span className="v2-au-bars" aria-hidden="true">
+                {[1, 2, 3, 4].map((step) => (
+                  <i
+                    key={step}
+                    className={strength.score >= step ? (strength.score <= 1 ? "is-weak" : strength.score === 2 ? "is-mid" : "is-good") : ""}
+                  />
+                ))}
+              </span>
+              <span>
+                {isEn ? "Strength: " : "ความปลอดภัย: "}
+                <b className={strength.colorClass}>{isEn ? getStrengthLabelEn(strength.score) : strength.label}</b>
               </span>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+
+        <div className="v2-au-field">
+          <label htmlFor="confirm-password">{isEn ? "Confirm new password" : "ยืนยันรหัสผ่านใหม่"}</label>
+          <span className="v2-au-input">
+            <KeyIcon />
+            <input
+              id="confirm-password"
+              type={showPassword ? "text" : "password"}
+              required
+              aria-invalid={errorMsg ? true : undefined}
+              aria-describedby={errorMsg ? "reset-password-error" : undefined}
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder={isEn ? "Type it once more" : "พิมพ์ซ้ำอีกครั้ง"}
+            />
+          </span>
+        </div>
       </div>
 
-      <div className="space-y-1">
-        <label htmlFor="confirm-password" className="block text-xs text-ink-deep font-serif-th font-semibold">
-          {isEn ? "Confirm New Password" : "ยืนยันรหัสผ่านใหม่อีกครั้ง"}
-        </label>
-        <input
-          id="confirm-password"
-          type={showPassword ? "text" : "password"}
-          required
-          aria-invalid={errorMsg ? true : undefined}
-          aria-describedby={errorMsg ? "reset-password-error" : undefined}
-          autoComplete="new-password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder={isEn ? "Re-enter password to match" : "ระบุรหัสผ่านให้ตรงกัน"}
-          className="w-full h-11 px-3.5 rounded-lg bg-inset-warm border border-line-interactive-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
-        />
-      </div>
-
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full h-11 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface font-semibold font-serif-th text-sm transition cursor-pointer flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50 mt-2"
-      >
-        {loading ? (
-          <span>{isEn ? "Saving new password…" : "กำลังบันทึกรหัสผ่านใหม่…"}</span>
-        ) : (
-          <span>{isEn ? "Save New Password & Sign In" : "บันทึกรหัสผ่านใหม่และเข้าสู่ระบบ"}</span>
-        )}
+      <button type="submit" disabled={loading} className="v2-au-submit">
+        {loading
+          ? isEn ? "Saving…" : "กำลังบันทึก…"
+          : isEn ? "Save and sign in" : "บันทึกและเข้าสู่ระบบ"}
       </button>
     </form>
   );
@@ -215,24 +201,18 @@ export default function ResetPasswordPage() {
   const { locale, isEnglish } = useLocale();
   const isEn = isEnglish || locale === "en";
 
+  /* หน้าตาเดียวกับหน้าต่างเข้าสู่ระบบ (AuthModal · v2-auth.css) — มาตรฐานเดียวทั้งเว็บ (เจ้าของ 2026-10-17) */
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-[70vh] text-ink-deep flex items-center justify-center p-4">
-      <div className="w-full max-w-md rounded-lg bg-surface border border-line-warm p-6 sm:p-8 relative overflow-hidden text-center space-y-6">
-        <div className="w-14 h-14 rounded-lg bg-inset-warm border border-line-warm text-gold-ink flex items-center justify-center text-2xl mx-auto font-bold">✓</div>
-
-        <div className="space-y-1">
-          <h1 className="text-xl sm:text-2xl font-serif-th font-bold font-mystic-gold">
-            {isEn ? "Reset Password" : "ตั้งรหัสผ่านใหม่"}
-          </h1>
-          <p className="text-xs text-muted font-serif-th leading-relaxed">
-            {isEn ? "Set a new secure password for your SeerTarot account" : "กำหนดรหัสผ่านใหม่สำหรับบัญชี SeerTarot ของคุณ"}
-          </p>
-        </div>
-
+    <main id="main-content" tabIndex={-1} className="min-h-[70vh] flex items-center justify-center px-4 py-10">
+      <div className="v2-au w-full max-w-[460px] overflow-hidden">
         <Suspense
           fallback={
-            <div className="py-8 text-center text-xs text-muted font-serif-th animate-pulse">
-              {isEn ? "Loading…" : "กำลังโหลดข้อมูล…"}
+            /* HTML ที่บิลด์ไว้ได้แค่ส่วนนี้ (ฟอร์มอ่าน useSearchParams = เรนเดอร์ฝั่งเบราว์เซอร์) — ต้องมี h1 หนึ่งอันเสมอ (ด่าน a11y-critical) */
+            <div className="v2-au-form">
+              <div className="v2-au-head">
+                <h1 className="v2-au-title">{isEn ? "Set a new password" : "ตั้งรหัสผ่านใหม่"}</h1>
+                <p className="v2-au-sub">{isEn ? "Loading…" : "กำลังโหลด…"}</p>
+              </div>
             </div>
           }
         >

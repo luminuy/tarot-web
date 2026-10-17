@@ -9,6 +9,7 @@ import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 const PATH = "/cards/all";
@@ -108,54 +109,32 @@ export function CardsAllBody({ locale, table }: { locale: Locale; table: ReactNo
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbsJsonLd) }} />
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
-        {/* Breadcrumb Bar */}
-        <nav aria-label="Breadcrumb" className="text-xs font-serif-th text-muted">
-          <ol className="flex items-center gap-1.5 flex-wrap">
-            <li>
-              <Link href={href("/")} className="hover:text-gold-ink transition-colors">
-                {homeCrumb(locale).name}
-              </Link>
-            </li>
-            <li aria-hidden="true" className="text-gold">/</li>
-            <li>
-              <Link href={href("/cards")} className="hover:text-gold-ink transition-colors">
-                {copy.crumbCards}
-              </Link>
-            </li>
-            <li aria-hidden="true" className="text-gold">/</li>
-            <li aria-current="page" className="font-bold text-ink">
-              {copy.crumbHere}
-            </li>
-          </ol>
-        </nav>
-
-        {/* Hero Header */}
-        <header className="rounded-2xl border border-line bg-surface p-6 sm:p-8 shadow-xs space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gold/40 bg-surface-warm text-gold-ink text-xs font-serif-th font-bold">
-            <span>{copy.badgeLeft}</span>
-            <span className="w-1 h-1 rounded-full bg-gold" />
-            <span>{copy.badgeRight}</span>
-          </div>
-
-          <h1 className="font-serif-th text-2xl sm:text-3xl font-bold text-ink"><ThaiPhrases>{copy.title}</ThaiPhrases></h1>
-
-          <p className="font-serif-th text-xs sm:text-sm text-muted leading-relaxed max-w-3xl">{copy.lede}</p>
-
-          <div className="pt-2 flex flex-wrap gap-2 text-xs font-serif-th">
+        {/* v2 — หัวสั้นชิดซ้าย ให้ตารางขึ้นเร็ว (v1 หัวใหญ่ + ไพ่ลอยดันตารางลงจอที่สอง) */}
+        <header className="v2-ca-head">
+          <Ui2Crumbs
+            crumbs={[
+              { label: homeCrumb(locale).name, href: "/" },
+              { label: copy.crumbCards, href: "/cards" },
+              { label: copy.crumbHere },
+            ]}
+          />
+          <h1 className="v2-ca-title">
+            <ThaiPhrases>{copy.title}</ThaiPhrases>
+          </h1>
+          <p className="v2-ca-lede">
+            <ThaiPhrases>{copy.lede}</ThaiPhrases>
+          </p>
+          <nav className="v2-ca-chips" aria-label={copy.crumbCards}>
             {copy.chips.map((chip) => (
-              <Link
-                key={chip.href}
-                href={href(chip.href)}
-                className="px-3 py-1 rounded-lg border border-line bg-surface-warm hover:bg-surface text-ink"
-              >
+              <Link key={chip.href} href={href(chip.href)}>
                 {chip.label}
               </Link>
             ))}
-          </div>
+          </nav>
         </header>
 
         {/* Interactive Master Table — แถบสีอ่อนแบ่งจากหัวหน้าแบบหน้าแรก (`page-band`) · ห่อ div เพราะ <astro-island> เป็น display:contents */}
-        <div className="page-band page-band-tint">{table}</div>
+        <div>{table}</div>
       </div>
     </main>
   );

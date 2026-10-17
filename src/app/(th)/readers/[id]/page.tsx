@@ -145,8 +145,8 @@ export default async function ReaderDetailPage({
                 </div>
                 {reviews.average !== null && (
                   <a href="#reader-reviews" className="inline-flex items-center gap-1.5 text-sm text-ink hover:text-gold-ink">
-                    <span aria-hidden="true" className="text-gold-ink">★</span>
-                    <strong className="font-bold">{reviews.average.toFixed(1)}</strong>
+                    <span className="text-muted">คะแนน</span>
+                    <strong className="font-bold">{reviews.average.toFixed(1)}/5</strong>
                     <span className="text-muted">· {reviews.count} รีวิวจากผู้ที่ปรึกษาจริง</span>
                   </a>
                 )}
@@ -242,7 +242,7 @@ export default async function ReaderDetailPage({
                       <ThaiPhrases>รีวิวจากผู้ที่ปรึกษาจริง</ThaiPhrases>
                     </h2>
                     <p className="text-sm text-ink">
-                      <span aria-hidden="true" className="text-gold-ink">★</span>{" "}
+                      <span className="text-muted">คะแนนเฉลี่ย </span>
                       <strong className="font-bold">{reviews.average?.toFixed(1)}</strong>
                       <span className="text-muted"> จาก 5 · {reviews.count} รีวิว</span>
                     </p>
@@ -252,11 +252,7 @@ export default async function ReaderDetailPage({
                       {reviews.latest.map((rv) => (
                         <li key={rv.id} className="space-y-1 py-3 first:pt-0 last:pb-0">
                           <p className="text-[13px]">
-                            <span className="text-gold-ink" aria-hidden="true">
-                              {"★".repeat(rv.rating)}
-                              <span className="text-line-warm">{"★".repeat(5 - rv.rating)}</span>
-                            </span>
-                            <span className="sr-only">{rv.rating} ดาว</span>{" "}
+                            <strong className="text-gold-ink">{rv.rating}/5</strong>{" "}
                             <span className="font-semibold text-ink-deep">{rv.name}</span>
                           </p>
                           <p className="whitespace-pre-line text-sm leading-relaxed text-ink">{rv.comment}</p>

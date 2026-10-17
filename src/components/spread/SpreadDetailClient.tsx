@@ -13,9 +13,10 @@ import {
 } from "@/data/spreads-helpers";
 import type { Article } from "@/data/articles";
 import { getArticleTitle } from "@/data/article-helpers";
-import { SpreadPositionMap } from "@/components/spread/SpreadPositionMap";
+import { mapLayout, MAP_CARD_ASPECT, MAP_CARD_MIN_PX } from "@/lib/tarot/spread-map-geometry";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2Crumbs, Ui2SectionHead } from "@/components/ui2/Ui2PageHero";
 
 interface Props {
   spread: Spread;
@@ -127,181 +128,211 @@ export const SpreadDetailClient: React.FC<Props> = ({
     },
   ];
 
+  /*
+   * v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — "พิมพ์เขียวผัง"
+   * จอแรก: ข้อความ + ปุ่มเริ่มซ้าย · กระดานพิมพ์เขียวขวา (แตะไพ่ ➔ เห็นชื่อ/คำถามของตำแหน่งทันที แถวในตารางสว่างตาม)
+   * v1: แผนผังเล็ก 260px กับตารางแยกกัน ต้องไล่เลขเอง · หัวหน้าใหญ่ดันแผนผังลงไปใต้จอ
+   */
+  /* หน้านี้เป็น HTML ล้วน (ไม่ hydrate · รอบ 97) — การแตะไพ่บนกระดานทำโดย `astro/scripts/spread-board.ts` (< 1 KB) */
+  const active = 0;
+  /** ชื่อตำแหน่งบางผังขึ้นต้นด้วยเลขอยู่แล้ว ("1. แก่นของเรื่อง") — ตัดออกเพราะมีป้ายเลขข้างหน้าแล้ว */
+  const posLabel = (pos: (typeof spread.positions)[number]) => getPositionName(pos, isEnglish).replace(/^\d+\.\s*/, "");
+  const map = mapLayout(spread.positions);
+  const activePos = spread.positions[active];
+  const tags = [
+    `${spread.positions.length} ${isEnglish ? "cards" : "ใบ"}`,
+    isEnglish ? categoryLabel : `หมวด${categoryLabel}`,
+    standard ? (isEnglish ? "Standard spread" : "ผังมาตรฐาน") : (isEnglish ? "Grand spread" : "ผังพิเศษ"),
+  ];
+
   return (
-    <div className="mx-auto max-w-4xl space-y-10">
-      {/* Top Breadcrumb */}
-      <nav
-        aria-label="Breadcrumb"
-        className="flex items-center gap-2 overflow-x-auto whitespace-nowrap border-b border-line/40 pb-4 font-serif-th text-xs text-muted"
-      >
-        <Link href="/" className="transition-colors hover:text-gold-ink">
-          {isEnglish ? "Home" : "หน้าแรก"}
-        </Link>
-        <span>/</span>
-        <Link href="/spreads" className="transition-colors hover:text-gold-ink">
-          {isEnglish ? "Spreads Library" : "คลังผังพยากรณ์"}
-        </Link>
-        <span>/</span>
-        <span className="truncate font-bold text-ink">{spreadName}</span>
-      </nav>
-
-      {/* Header */}
-      <header className="space-y-4">
-        <div className="flex flex-wrap items-center gap-2 text-[13px] font-serif-th">
-          <span className="glass-chip px-2.5 py-0.5 font-mono font-bold">
-            {spread.positions.length} {isEnglish ? "Cards" : "ใบ"}
-          </span>
-          <span className="glass-chip px-2.5 py-0.5">
-            {isEnglish ? `Category: ${categoryLabel}` : `หมวด ${categoryLabel}`}
-          </span>
-          <span className="glass-chip px-2.5 py-0.5">
-            {standard ? (isEnglish ? "Standard Spread" : "ผังมาตรฐาน") : (isEnglish ? "Grand Spread" : "ญาณพิเศษ")}
-          </span>
+    <div className="v2-sd">
+      <section className="v2-sd-top" aria-labelledby="sd-title">
+        <div className="v2-sd-intro">
+          <Ui2Crumbs
+            crumbs={[
+              { label: isEnglish ? "Home" : "หน้าแรก", href: "/" },
+              { label: isEnglish ? "Spreads" : "คลังผังพยากรณ์", href: "/spreads" },
+              { label: spreadName },
+            ]}
+          />
+          <ul className="v2-sd-tags">
+            {tags.map((t) => (
+              <li key={t}>{t}</li>
+            ))}
+          </ul>
+          <h1 id="sd-title" className="v2-sd-title">
+            {isEnglish ? spreadName : <ThaiPhrases>{spread.seoTitleTh ?? `ผัง${spread.nameTh}`}</ThaiPhrases>}
+          </h1>
+          <p className="v2-sd-tagline">
+            <ThaiPhrases>{spreadTagline}</ThaiPhrases>
+          </p>
+          <p className="v2-sd-desc">
+            <ThaiPhrases>{spreadDesc}</ThaiPhrases>
+          </p>
+          <div className="v2-sd-ctas">
+            <Link href={`/read/${spread.id}`} className="ui2-btn v2-sd-go">
+              {standard
+                ? isEnglish
+                  ? "Begin Reading with Spread"
+                  : "เริ่มดูดวงด้วยผังนี้"
+                : isEnglish
+                  ? "Unlock Grand Spread"
+                  : "เปิดผังพยากรณ์พิเศษนี้"}
+            </Link>
+            <a href="#sd-positions" className="ui2-btn-ghost">
+              {isEnglish ? "See every position" : "ดูความหมายทุกตำแหน่ง"}
+            </a>
+          </div>
         </div>
-        <h1 className="font-serif-th text-3xl font-bold leading-tight sm:text-4xl [text-wrap:balance]"><ThaiPhrases>
-          {isEnglish ? spreadName : (spread.seoTitleTh ?? `ผัง${spread.nameTh}`)}
-        </ThaiPhrases></h1>
-        <p className="font-serif-th text-lg text-gold-ink [text-wrap:balance]">{spreadTagline}</p>
-        <p className="max-w-2xl font-serif-th leading-relaxed text-ink [text-wrap:pretty]">
-          {spreadDesc}
-        </p>
-        <Link
-          href={`/read/${spread.id}`}
-          className="btn-gold-glass inline-flex items-center gap-1.5 px-6 py-3 font-serif-th text-sm font-bold active:scale-[0.98]"
-        >
-          
-          <span>
-            {standard
-              ? (isEnglish ? "Begin Reading with Spread" : "เริ่มดูดวงด้วยผังนี้")
-              : (isEnglish ? "Unlock Grand Spread" : "เปิดผังพยากรณ์พิเศษนี้")}
-          </span>
-        </Link>
-      </header>
 
-      {/* Diagram + Positions */}
-      {/* แถบสีสลับแบบหน้าแรก (`page-band`): ตำแหน่งไพ่ (อ่อน) · วิธีอ่าน (ใส) · คำถาม (อ่อน) · บทความ (ใส) · ผังอื่น (สลับต่อ) */}
-      <section className="page-band page-band-tint space-y-6">
-        <div className="grid gap-8 sm:grid-cols-[minmax(0,260px)_1fr] sm:items-start">
-          <div>
-            <SpreadPositionMap positions={spread.positions} isEnglish={isEnglish} />
-            <p className="mt-2 text-center text-xs text-muted">
-              {isEnglish ? `Layout order 1–${spread.positions.length}` : `ลำดับการวางไพ่ 1–${spread.positions.length}`}
-            </p>
+        {/* กระดานพิมพ์เขียว */}
+        <figure className="v2-sd-board">
+          <div className="v2-sd-board-area" style={{ paddingBottom: `${(map.boxHeight * 100).toFixed(2)}%` }}>
+            {spread.positions.map((pos, idx) => (
+              <button
+                key={idx}
+                type="button"
+                className="v2-sd-slot card-back-pattern"
+                aria-pressed={active === idx}
+                aria-label={`${idx + 1}. ${getPositionName(pos, isEnglish)}`}
+                style={{
+                  left: `${pos.x * 100}%`,
+                  top: `${(((pos.y * map.yScale + map.offsetY) / map.boxHeight) * 100).toFixed(3)}%`,
+                  width: `${(map.cardW * 100).toFixed(2)}%`,
+                  minWidth: MAP_CARD_MIN_PX,
+                  aspectRatio: `1 / ${MAP_CARD_ASPECT}`,
+                  transform: `translate(-50%, -50%) rotate(${pos.rotate ?? 0}deg)`,
+                }}
+              >
+                <span style={{ transform: `rotate(${-(pos.rotate ?? 0)}deg)` }}>{idx + 1}</span>
+              </button>
+            ))}
           </div>
-          <div>
-            <h2 className="font-serif-th text-xl font-bold text-ink"><ThaiPhrases>
-              {isEnglish ? "Positional Roles & Interpretations" : `ตำแหน่งไพ่ทั้ง ${spread.positions.length} ใบและความหมาย`}
-            </ThaiPhrases></h2>
-            <p className="text-xs text-muted mt-1 font-serif-th">
-              {isEnglish
-                ? "Each card role answers a specific dimension of your inquiry:"
-                : "แต่ละตำแหน่งทำหน้าที่ตอบคำถามเฉพาะมิติเพื่อเชื่อมโยงภาพรวมของคำทำนาย:"}
-            </p>
-            <div className="altar-panel mt-4 overflow-x-auto">
-              <table className="w-full text-left text-xs font-serif-th border-collapse">
-                <thead>
-                  <tr className="glass-divider-b text-[#5E5240]">
-                    <th scope="col" className="py-2.5 px-3 font-mono font-bold w-12 text-center">#</th>
-                    <th scope="col" className="py-2.5 px-3 font-bold w-36 sm:w-44">{isEnglish ? "Position Name" : "ชื่อตำแหน่ง"}</th>
-                    <th scope="col" className="py-2.5 px-3 font-bold">{isEnglish ? "Divinatory Role & Meaning" : "คำถามที่ตำแหน่งนี้ตอบ / บทบาทการตีความ"}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-line-soft">
-                  {spread.positions.map((pos, idx) => (
-                    <tr key={idx} className="transition-colors hover:bg-[rgba(255,252,246,0.55)]">
-                      <td className="py-2.5 px-3 font-mono font-bold text-gold-ink text-center">{idx + 1}</td>
-                      <td className="py-2.5 px-3 font-bold text-ink align-top">{getPositionName(pos, isEnglish)}</td>
-                      <td className="py-2.5 px-3 text-[#5E5240] leading-relaxed align-top">{getPositionMeaning(pos, isEnglish)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          {activePos && (
+            <figcaption className="v2-sd-cap" aria-live="polite">
+              <span className="v2-sd-cap-n">{active + 1}</span>
+              <span>
+                <b>{posLabel(activePos)}</b>
+                <small>{getPositionMeaning(activePos, isEnglish)}</small>
+              </span>
+            </figcaption>
+          )}
+        </figure>
+      </section>
+
+      {/* ตำแหน่งทั้งหมด — ตารางจริง (ด่าน SEO wave 4) จัดเป็นสมุดบัญชีทอง แถวที่เลือกบนกระดานสว่างตาม */}
+      <section id="sd-positions" className="v2-sd-sec" aria-labelledby="sd-pos-h">
+        <Ui2SectionHead
+          n="01"
+          word="Positions"
+          id="sd-pos-h"
+          title={isEnglish ? "Positional Roles & Interpretations" : `ตำแหน่งไพ่ทั้ง ${spread.positions.length} ใบและความหมาย`}
+          lede={
+            isEnglish
+              ? "Each card role answers a specific dimension of your inquiry."
+              : "แต่ละตำแหน่งตอบคำถามคนละมิติ แล้วเชื่อมกันเป็นภาพรวมของคำทำนาย"
+          }
+        />
+        <div className="v2-sd-ledger">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">{isEnglish ? "Position Name" : "ชื่อตำแหน่ง"}</th>
+                <th scope="col">{isEnglish ? "Divinatory Role & Meaning" : "คำถามที่ตำแหน่งนี้ตอบ / บทบาทการตีความ"}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {spread.positions.map((pos, idx) => (
+                <tr key={idx} className={active === idx ? "is-active" : undefined}>
+                  <td>
+                    <span className="v2-sd-n">{idx + 1}</span>
+                  </td>
+                  <th scope="row">{posLabel(pos)}</th>
+                  <td>{getPositionMeaning(pos, isEnglish)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
 
-      {/* How-to Steps */}
-      <section className="page-band">
-        <h2 className="font-serif-th text-xl font-bold"><ThaiPhrases>
-          {isEnglish ? "How to Read this Spread" : "วิธีอ่านผังนี้"}
-        </ThaiPhrases></h2>
-        <ol className="mt-4 space-y-3">
+      <section className="v2-sd-sec" aria-labelledby="sd-how-h">
+        <Ui2SectionHead n="02" word="How to read" id="sd-how-h" title={isEnglish ? "How to Read this Spread" : "วิธีอ่านผังนี้"} />
+        <ol className="v2-sd-steps">
           {howToSteps.map((step, idx) => (
-            <li key={idx} className="flex items-start gap-3 font-serif-th">
-              <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gold-ink text-xs font-bold text-white">
+            <li key={idx}>
+              <span className="v2-sd-stepn" aria-hidden="true">
                 {idx + 1}
               </span>
-              <div>
-                <strong className="text-ink">{step.name}</strong>
-                <p className="leading-relaxed text-muted">{step.text}</p>
-              </div>
+              <h3>
+                <ThaiPhrases>{step.name}</ThaiPhrases>
+              </h3>
+              <p>{step.text}</p>
             </li>
           ))}
         </ol>
       </section>
 
-      {/* FAQs */}
-      <section className="page-band page-band-tint">
-        <h2 className="font-serif-th text-xl font-bold"><ThaiPhrases>
-          {isEnglish ? "Frequently Asked Questions" : "คำถามที่พบบ่อย"}
-        </ThaiPhrases></h2>
-        <div className="mt-4 space-y-3">
-          {faqs.map((faq, idx) => (
-            <details
-              key={idx}
-              className="altar-card-porcelain p-4 font-serif-th"
-            >
-              <summary className="cursor-pointer font-bold text-ink">{faq.question}</summary>
-              <p className="mt-2 leading-relaxed text-muted">{faq.answer}</p>
-            </details>
-          ))}
+      <section className="v2-sd-sec v2-sd-split">
+        <div aria-labelledby="sd-faq-h">
+          <Ui2SectionHead n="03" word="FAQ" id="sd-faq-h" title={isEnglish ? "Frequently Asked Questions" : "คำถามที่พบบ่อย"} />
+          <div className="v2-sd-faq">
+            {faqs.map((faq, idx) => (
+              <details key={idx}>
+                <summary>{faq.question}</summary>
+                <p>{faq.answer}</p>
+              </details>
+            ))}
+          </div>
         </div>
+
+        {relatedArticles.length > 0 && (
+          <div aria-labelledby="sd-art-h">
+            <Ui2SectionHead n="04" word="Read more" id="sd-art-h" title={isEnglish ? "Related Wisdom Articles" : "บทความที่เกี่ยวข้อง"} />
+            <ul className="v2-sd-articles">
+              {relatedArticles.map((a) => (
+                <li key={a.slug}>
+                  <Link href={`/blog/${a.slug}`}>{getArticleTitle(a, isEnglish)}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </section>
 
-      {/* Related Articles */}
-      {relatedArticles.length > 0 && (
-        <section className="page-band">
-          <h2 className="font-serif-th text-xl font-bold"><ThaiPhrases>
-            {isEnglish ? "Related Wisdom Articles" : "บทความที่เกี่ยวข้อง"}
-          </ThaiPhrases></h2>
-          <ul className="mt-4 space-y-2">
-            {relatedArticles.map((a) => (
-              <li key={a.slug}>
-                <Link
-                  href={`/blog/${a.slug}`}
-                  className="font-serif-th text-gold-ink underline-offset-2 hover:underline"
-                >
-                  {getArticleTitle(a, isEnglish)}
+      <section className="v2-sd-sec" aria-labelledby="sd-more-h">
+        <Ui2SectionHead n={relatedArticles.length > 0 ? "05" : "04"} word="More spreads" id="sd-more-h" title={isEnglish ? "Explore Other Spreads" : "ผังอื่นที่น่าสนใจ"} />
+        <ul className="v2-sd-more">
+          {fallbackSpreads.map((s) => {
+            const m = mapLayout(s.positions);
+            return (
+              <li key={s.id}>
+                <Link href={`/spreads/${s.id}`} className="v2-sd-more-card">
+                  <span className="v2-sd-mini" aria-hidden="true" style={{ paddingBottom: `${(m.boxHeight * 100).toFixed(2)}%` }}>
+                    {s.positions.map((pos, i) => (
+                      <span
+                        key={i}
+                        style={{
+                          left: `${pos.x * 100}%`,
+                          top: `${(((pos.y * m.yScale + m.offsetY) / m.boxHeight) * 100).toFixed(3)}%`,
+                          width: `${(m.cardW * 100).toFixed(2)}%`,
+                          aspectRatio: `1 / ${MAP_CARD_ASPECT}`,
+                          transform: `translate(-50%, -50%) rotate(${pos.rotate ?? 0}deg)`,
+                        }}
+                      />
+                    ))}
+                  </span>
+                  <b>{getSpreadName(s, isEnglish)}</b>
+                  <small>{getSpreadTagline(s, isEnglish)}</small>
                 </Link>
               </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {/* Other Spreads */}
-      <section className={relatedArticles.length > 0 ? "page-band page-band-tint" : "page-band"}>
-        <h2 className="font-serif-th text-xl font-bold"><ThaiPhrases>
-          {isEnglish ? "Explore Other Spreads" : "ผังอื่นที่น่าสนใจ"}
-        </ThaiPhrases></h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {fallbackSpreads.map((s) => (
-            <Link
-              key={s.id}
-              href={`/spreads/${s.id}`}
-              className="altar-card-porcelain p-4"
-            >
-              <p className="font-serif-th font-bold text-ink">{getSpreadName(s, isEnglish)}</p>
-              <p className="mt-1 font-serif-th text-xs text-muted">{getSpreadTagline(s, isEnglish)}</p>
-            </Link>
-          ))}
-        </div>
-        <Link
-          href="/spreads"
-          className="mt-4 inline-block font-serif-th text-sm text-gold-ink hover:underline"
-        >
-          {isEnglish ? "← View All 20 Tarot Spreads" : "← ดูคลังผังพยากรณ์ทั้งหมด"}
+            );
+          })}
+        </ul>
+        <Link href="/spreads" className="v2-sd-all">
+          {isEnglish ? "View all tarot spreads" : "ดูคลังผังพยากรณ์ทั้งหมด"}
         </Link>
       </section>
     </div>

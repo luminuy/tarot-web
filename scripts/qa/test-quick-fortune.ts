@@ -1,4 +1,4 @@
-import { QUICK_TOPICS } from "../../src/components/reading/QuickFortunePicker";
+import { QUICK_TOPICS } from "../../src/components/reading/quick-topics";
 import { SPREADS } from "../../src/data/spreads";
 import { STANDARD_SPREAD_IDS, isStandardSpread } from "../../src/lib/entitlement/limits";
 import { checkQuestion } from "../../src/lib/safety/guardrails";

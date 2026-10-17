@@ -1,0 +1,30 @@
+/*
+ * 🛎️ หน้ารวมแม่หมอ /readers — UI 2.0 (เจ้าของ 2026-10-17 "ทำได้เลย แต่อย่าเพิ่งเอาขึ้น รอสั่ง")
+ * นำเข้าโดย src/app/(th)/readers/(directory)/page.tsx ต่อจาก ui2-page.css (โทเคนกลางคืน · แถบครีมหัวหน้า · บล็อกกลาง)
+ * ⚠️ ไม่มีของหนัก (backdrop-filter · filter: blur · ของวน) — ด่าน test-ui2-fx / test-motion-quality
+ */
+
+/* เวทีวิดีโอคอลในแผงภาพจำลองขั้นที่ 3 — แผ่นมืดบนครีม กว้างพอดีแผง */
+.v3-rd-stage {
+  width: min(100%, 340px);
+  box-shadow: 0 30px 50px -30px rgba(40, 24, 8, 0.7);
+  border-radius: 28px;
+}
+
+/* การ์ดแม่หมอในหน้าต่างครีม = การ์ดกระดาษขาว (แถบกำมะหยี่ด้านบนคงเดิม) */
+.ui2-pg #readers article {
+  border-color: rgba(74, 47, 16, 0.12);
+  background: #FFFCF6;
+  box-shadow: 0 24px 44px -30px rgba(74, 47, 16, 0.55);
+}
+@media (hover: hover) {
+  .ui2-pg #readers article:hover {
+    box-shadow: 0 0 0 1px rgba(184, 105, 28, 0.35), 0 30px 50px -26px rgba(74, 47, 16, 0.6);
+  }
+}
+/* หัวรายชื่อในหน้าต่างใช้ฟอนต์หัวข้อ UI 2.0 */
+.ui2-pg #readers-list-heading {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  color: var(--ui2-on-night);
+}

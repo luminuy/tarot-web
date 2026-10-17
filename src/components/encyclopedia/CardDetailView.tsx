@@ -9,6 +9,7 @@ import { CardImage } from "@/components/card/CardImage";
 import { CardYesNoAnswer } from "./CardYesNoAnswer";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2Showcase, type Ui2ShowcaseSection } from "@/components/ui2/Ui2Showcase";
 
 export type CardNavRef = Pick<TarotCard, "id" | "image" | "nameTh" | "nameEn">;
 
@@ -28,37 +29,6 @@ interface CardDetailViewProps {
   /** ไพ่ที่พลังงานใกล้เคียง — Server Component ส่งเข้ามาเพื่อให้ลิงก์อยู่ใน HTML */
   related?: React.ReactNode;
 }
-
-const ELEMENT_CONFIG: Record<string, { border: string; glow: string; text: string; bg: string; icon: string }> = {
-  ไฟ: {
-    border: "border-gold-ink/40",
-    glow: "rgba(143, 92, 26, 0.12)",
-    text: "text-gold-ink",
-    bg: "bg-gold-ink/15",
-    icon: "•",
-  },
-  น้ำ: {
-    border: "border-ink-soft/40",
-    glow: "rgba(143, 92, 26, 0.12)",
-    text: "text-muted",
-    bg: "bg-ink-soft/15",
-    icon: "•",
-  },
-  ลม: {
-    border: "border-ink-soft/40",
-    glow: "rgba(143, 92, 26, 0.12)",
-    text: "text-muted",
-    bg: "bg-ink-soft/15",
-    icon: "•",
-  },
-  ดิน: {
-    border: "border-ok/40",
-    glow: "rgba(143, 92, 26, 0.12)",
-    text: "text-ok",
-    bg: "bg-ok/15",
-    icon: "•",
-  },
-};
 
 const ELEMENT_EN: Record<string, string> = {
   ไฟ: "Fire",
@@ -93,7 +63,6 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
     upright: isEnglish && kwEn ? kwEn.upright : card.keywords.upright,
     reversed: isEnglish && kwEn ? kwEn.reversed : card.keywords.reversed,
   } as const;
-  const elem = ELEMENT_CONFIG[card.element] || ELEMENT_CONFIG["ไฟ"];
   const orientations = [
     {
       key: "upright" as const,
@@ -108,11 +77,11 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
   ];
 
   const categories = [
-    { id: "general" as const, nameTh: "ภาพรวมและเส้นทางชีวิต", nameEn: "Life overview", icon: "•", color: "#8F5C1A" },
-    { id: "love" as const, nameTh: "ความรักและคนในใจ", nameEn: "Love & Relationships", icon: "•", color: "#A6392C" },
-    { id: "work" as const, nameTh: "การงานและโครงการ", nameEn: "Career & Ambitions", icon: "•", color: "#6F5B4A" },
-    { id: "money" as const, nameTh: "การเงินและโชคลาภ", nameEn: "Finances & Abundance", icon: "◆", color: "#3A7044" },
-    { id: "self" as const, nameTh: "จิตวิทยาและการเติบโตภายใน", nameEn: "Psychology & Inner Growth", icon: "•", color: "#6F5B4A" },
+    { id: "general" as const, nameTh: "ภาพรวมและเส้นทางชีวิต", nameEn: "Life overview", icon: "", color: "#8F5C1A" },
+    { id: "love" as const, nameTh: "ความรักและคนในใจ", nameEn: "Love & Relationships", icon: "", color: "#A6392C" },
+    { id: "work" as const, nameTh: "การงานและโครงการ", nameEn: "Career & Ambitions", icon: "", color: "#6F5B4A" },
+    { id: "money" as const, nameTh: "การเงินและโชคลาภ", nameEn: "Finances & Abundance", icon: "", color: "#3A7044" },
+    { id: "self" as const, nameTh: "จิตวิทยาและการเติบโตภายใน", nameEn: "Psychology & Inner Growth", icon: "", color: "#6F5B4A" },
   ];
 
   /* ผังที่ปุ่มเปิดไพ่พาไป — ปุ่มหลักกับแถบติดล่างจอต้องไปที่เดียวกัน */
@@ -123,60 +92,147 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
         ? "/read/career"
         : "/read/three-card";
 
-  return (
-      <div
-        data-card-detail=""
-        data-orientation="upright"
-        data-card-id={card.id}
-        /* ⚠️ ค่าที่ส่งให้สถิติต้องเป็น "ภาษาของหน้าที่ผู้ใช้ยืนอยู่" เสมอ
-           ตอนแรกเขียนเป็น `card.nameTh` / `card.element` ตรง ๆ แล้วด่านภาษาอังกฤษจับได้ทันที
-           ว่ามีอักษรไทยหลุดเข้า HTML ของหน้าอังกฤษ (แม้จะอยู่ในแอตทริบิวต์ก็ตาม)
-           `card_id` เป็นกุญแจที่ไม่ขึ้นกับภาษาอยู่แล้ว รายงานจึงยังรวมสองภาษาเข้าด้วยกันได้ */
-        data-card-name={isEnglish ? card.nameEn : card.nameTh}
-        data-card-element={isEnglish ? ELEMENT_EN[card.element] || card.element : card.element}
-        className="space-y-8 w-full max-w-5xl mx-auto relative z-10"
-      >
-      {/* Top Header Bar — Card Counter */}
-      <div className="flex items-center justify-end border-b border-line/40 pb-4 text-xs font-mono">
-        <span className="text-muted">
-          {isEnglish ? "Card " : "ลำดับที่ "}<strong className="text-gold-ink">{currentIndex + 1}</strong> / {totalCards}
-        </span>
-      </div>
+  const yesNoLabel = card.yesNo
+    ? isEnglish
+      ? card.yesNo === "yes"
+        ? "Yes"
+        : card.yesNo === "no"
+          ? "No"
+          : "Uncertain"
+      : card.yesNo === "yes"
+        ? "ใช่ (Yes)"
+        : card.yesNo === "no"
+          ? "ไม่ใช่ (No)"
+          : "ไม่แน่ชัด (Maybe)"
+    : null;
+  const facts: Array<{ k: string; v: string; tone?: string }> = [
+    {
+      k: isEnglish ? "Arcana" : "สำรับ",
+      v: card.arcana === "major" ? `Major Arcana · #${card.number}` : `${card.suit} Suit`,
+    },
+    { k: isEnglish ? "Element" : "ธาตุ", v: isEnglish ? ELEMENT_EN[card.element] || card.element : `ธาตุ${card.element}` },
+    ...(card.astrology ? [{ k: isEnglish ? "Astrology" : "โหราศาสตร์", v: isEnglish && card.astrologyEn ? card.astrologyEn : card.astrology }] : []),
+    ...(yesNoLabel ? [{ k: "Yes/No", v: yesNoLabel, tone: card.yesNo }] : []),
+  ];
 
-      {/* Main Showcase Grid */}
-      {/*
-        📱 มือถือ: ชื่อไพ่มาก่อนภาพ — เดิมภาพไพ่เต็มจอแรก ต้องเลื่อนลงถึงเห็นว่าเป็นไพ่อะไร (เจ้าของทัก)
-        🖥️ จอใหญ่: ชื่อไพ่อยู่คอลัมน์ขวาแถวบนเหมือนเดิม (grid แถว auto + 1fr ให้ส่วนที่เหลือต่อท้ายชื่อพอดี)
-      */}
-      <div className="grid grid-cols-1 md:grid-cols-12 md:grid-rows-[auto_1fr] gap-x-8 gap-y-6 md:gap-y-6 items-start">
-        <div className="md:col-span-7 lg:col-span-8 md:col-start-6 lg:col-start-5 md:row-start-1">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs font-mono text-gold-ink">
-              <span className="glass-chip px-2.5 py-0.5 font-semibold uppercase text-ink">
-                {card.arcana === "major" ? `Major Arcana · #${card.number}` : `${card.suit} Suit`}
-              </span>
-              {!isEnglish && card.nameEn && (
-                <>
-                  <span className="text-muted">|</span>
-                  <span className="text-ink font-sans tracking-wide">{card.nameEn}</span>
-                </>
-              )}
+  const orientationSwitch = (
+    <div className="v2-cd-flip v3-cd-flip" role="group" aria-label={isEnglish ? "Card orientation" : "ทิศของไพ่"}>
+      <button type="button" data-orientation-set="upright" aria-pressed="true" className="orientation-tab v2-cd-flip-btn">
+        {isEnglish ? "Upright" : "ไพ่หัวตั้ง"}
+      </button>
+      <button type="button" data-orientation-set="reversed" aria-pressed="false" className="orientation-tab v2-cd-flip-btn">
+        {isEnglish ? "Reversed" : "ไพ่หัวกลับ"}
+      </button>
+    </div>
+  );
+  const sections: Ui2ShowcaseSection[] = [
+    {
+      id: "meanings",
+      kicker: "Five Dimensions",
+      title: isEnglish ? "Meaning in 5 areas of life" : "ความหมาย 5 ด้านของชีวิต",
+      short: isEnglish ? "5 meanings" : "ความหมาย 5 ด้าน",
+      tone: 4,
+      lead: isEnglish
+        ? "Switch between upright and reversed to read both sides"
+        : "สลับไพ่หัวตั้งและหัวกลับเพื่ออ่านได้ทั้งสองทาง",
+      aside: orientationSwitch,
+      children: (
+        <>
+          {orientations.map((o) => (
+            <div key={o.key} data-when={o.key} className="v3-cd-side">
+              <h3 className="v3-cd-side-k">
+                <ThaiPhrases>{o.headingKeywords}</ThaiPhrases>
+              </h3>
+              <ul className="v3-cd-kw">
+                {keywordsByOrientation[o.key].map((kw, i) => (
+                  <li key={i}>{kw}</li>
+                ))}
+              </ul>
+              <h3 className="v3-cd-side-k">
+                <ThaiPhrases>{o.headingMeanings}</ThaiPhrases>
+              </h3>
+              <div className="v2-cd-room-grid">
+                {categories.map((cat) => {
+                  const interp = isEnglish && card.meaningsEn ? card.meaningsEn[cat.id] : card.meanings[cat.id];
+                  const text = o.key === "upright" ? interp?.upright : interp?.reversed;
+                  return (
+                    <article key={cat.id} className="v2-cd-room" data-room={cat.id}>
+                      <h4>
+                        <ThaiPhrases>{isEnglish ? cat.nameEn : cat.nameTh}</ThaiPhrases>
+                      </h4>
+                      <p>{text || (isEnglish ? "This meaning is still being written" : "กำลังรวบรวมคำแปลมิตินี้")}</p>
+                    </article>
+                  );
+                })}
+              </div>
             </div>
-            <h1 className="font-serif-th text-3xl sm:text-4xl lg:text-5xl font-bold text-ink leading-tight [text-wrap:balance]"><ThaiPhrases>
-              {isEnglish ? card.nameEn : card.nameTh}
-            </ThaiPhrases></h1>
-            <p className="text-xs sm:text-sm text-muted leading-relaxed pt-1 font-serif-th [text-wrap:pretty]">
-              {isEnglish && card.numerologyEn ? card.numerologyEn : card.numerology}
-            </p>
-          </div>
+          ))}
+        </>
+      ),
+    },
+    {
+      id: "yes-no",
+      kicker: "Yes or No",
+      title: isEnglish ? "Yes or no?" : "ไพ่ใบนี้ตอบใช่หรือไม่",
+      short: isEnglish ? "Yes or no" : "ใช่หรือไม่",
+      tone: 2,
+      children: (
+        <div className="v2-cd-yesno">
+          <CardYesNoAnswer card={card} isEnglish={isEnglish} />
+        </div>
+      ),
+    },
+    {
+      id: "ask",
+      kicker: "Your turn",
+      title: isEnglish ? `Ask ${card.nameEn} your question` : `ไพ่${card.nameTh}ตอบเรื่องของคุณได้`,
+      short: isEnglish ? "Ask the cards" : "ถามไพ่ใบนี้",
+      tone: 3,
+      lead: isEnglish ? "Shuffle and pick the cards yourself" : "สับและเลือกไพ่ด้วยมือคุณเอง แม่หมอ AI อ่านให้ทีละใบ",
+      aside: (
+        <Link href={readHref} className="ui2-btn v2-cd-go">
+          {isEnglish ? "Draw now" : "เปิดไพ่เลย"}
+        </Link>
+      ),
+      children: null,
+    },
+  ];
+
+  /*
+   * v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — เวทีไพ่แบบพิพิธภัณฑ์
+   * คอม: ชื่อไพ่ซ้าย · ไพ่ใบใหญ่บนแท่นกลาง · ป้ายข้อมูลขวา ➔ แถบคีย์เวิร์ด ➔ ใช่/ไม่ใช่ ➔ ห้องความหมาย 5 ห้อง (สีประจำเรื่อง)
+   * มือถือ: ชื่อ ➔ ไพ่ ➔ สวิตช์หัวตั้ง/หัวกลับ ➔ ป้ายข้อมูล
+   * ⚠️ คงตะขอของ `astro/scripts/card-orientation.ts` ครบ: data-card-detail · data-orientation · data-orientation-set · data-when · data-read-cta · data-read-sticky
+   */
+  return (
+    <div
+      data-card-detail=""
+      data-orientation="upright"
+      data-card-id={card.id}
+      data-card-name={isEnglish ? card.nameEn : card.nameTh}
+      data-card-element={isEnglish ? ELEMENT_EN[card.element] || card.element : card.element}
+      data-suit={card.arcana === "major" ? "major" : (card.suit ?? "major")}
+      className="v2-cd w-full relative z-10"
+    >
+      <section className="v2-cd-stage">
+        <div className="v2-cd-name">
+          <p className="v2-cd-eyebrow">
+            <span>{card.arcana === "major" ? `Major Arcana · ${card.number}` : `${card.suit} Suit`}</span>
+            <span className="v2-cd-count">
+              {currentIndex + 1} / {totalCards}
+            </span>
+          </p>
+          <h1 className="v2-cd-title">
+            <ThaiPhrases>{isEnglish ? card.nameEn : card.nameTh}</ThaiPhrases>
+          </h1>
+          {!isEnglish && card.nameEn && <p className="v2-cd-en">{card.nameEn}</p>}
+          <p className="v2-cd-lede">{isEnglish && card.numerologyEn ? card.numerologyEn : card.numerology}</p>
         </div>
 
-        {/* Left Column: 3D Showcase Card & Orientation Controller */}
-        <div className="md:col-span-5 lg:col-span-4 md:col-start-1 md:row-start-1 md:row-span-2 flex flex-col items-center space-y-5">
-          {/* 3D Sacred Card Container */}
-          <div className="relative group">
-            {/* ใส่คลาสอนิเมชันเฉพาะหลัง mount — เรนเดอร์แรกฝั่งเซิร์ฟเวอร์ต้องออกมา
-                ที่สถานะปลายทางเสมอ ไม่งั้นภาพไพ่ซึ่งเป็น LCP ของหน้าถูกส่งไปแบบ opacity 0 */}
+        <div className="v2-cd-center">
+          <div className="ui2-cd-stage relative group">
+            <span className="ui2-cd-rays" aria-hidden="true" />
+            <span className="ui2-cd-plinth" aria-hidden="true" />
             <div className="altar-panel relative w-64 sm:w-72 aspect-[7/12] !rounded-xl overflow-hidden p-1.5">
               <div className="glass-tile relative w-full h-full !rounded-lg overflow-hidden">
                 <div className="w-full h-full card-orientation-flip">
@@ -185,215 +241,90 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                     cardId={card.id}
                     alt={
                       isEnglish
-                        ? `${card.nameEn} tarot card face \u2014 1909 Rider-Waite`
+                        ? `${card.nameEn} tarot card face — 1909 Rider-Waite`
                         : `ภาพหน้าไพ่ ${card.nameTh} (${card.nameEn}) 1909 Rider-Waite`
                     }
                     className="w-full h-full object-cover tarot-card-enhance tarot-hd-card-image"
-                    /* กรอบจริงคือ w-64 / sm:w-72 = 256 / 288 CSS px — เดิมประกาศ 400/600px
-                       ทำให้เบราว์เซอร์เลือกไฟล์ใหญ่เกินความจำเป็นไปหนึ่งขั้น */
                     sizes="(min-width: 640px) 288px, 256px"
                     loading="eager"
                     fetchPriority="high"
                   />
                 </div>
                 <div className="gold-foil-sheen absolute inset-0 opacity-15 group-hover:opacity-30 transition-opacity pointer-events-none" />
-
-                {/* ⚠️ ไม่มีป้ายทับภาพไพ่แล้ว — เดิมมี "Major #17" กับ "• ลม" ลอยทับมุมภาพ บังรายละเอียดหน้าไพ่ (เจ้าของทัก)
-                    ธาตุแสดงในป้ายใต้ภาพ · เลขไพ่ย้ายไปอยู่ในป้าย "Major Arcana" ข้างชื่อไพ่ */}
               </div>
             </div>
           </div>
 
-          {/* Upright / Reversed Orientation Switcher */}
-          <div className="glass-chip flex items-center justify-center p-1 w-full max-w-xs select-none">
-            <button
-              type="button"
-              data-orientation-set="upright"
-              aria-pressed="true"
-              className="orientation-tab tap-overlay-y flex-1 py-2 text-xs font-serif-th font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1.5"
-            >
-              {isEnglish ? "Upright (Standard)" : "ไพ่หัวตั้ง (ปกติ)"}
+          {/* สวิตช์หัวตั้ง/หัวกลับ — ใหญ่ กดง่าย (v1 ชิปเล็ก 12px) */}
+          <div className="v2-cd-flip" role="group" aria-label={isEnglish ? "Card orientation" : "ทิศของไพ่"}>
+            <button type="button" data-orientation-set="upright" aria-pressed="true" className="orientation-tab v2-cd-flip-btn">
+              {isEnglish ? "Upright" : "ไพ่หัวตั้ง"}
             </button>
-            <button
-              type="button"
-              data-orientation-set="reversed"
-              aria-pressed="false"
-              className="orientation-tab tap-overlay-y flex-1 py-2 text-xs font-serif-th font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1.5"
-            >
-              <span aria-hidden="true">↻</span> {isEnglish ? "Reversed" : "ไพ่หัวกลับ"}
+            <button type="button" data-orientation-set="reversed" aria-pressed="false" className="orientation-tab v2-cd-flip-btn">
+              {isEnglish ? "Reversed" : "ไพ่หัวกลับ"}
             </button>
-          </div>
-
-          {/* Astrological & Numerological Pills */}
-          <div className="flex flex-wrap items-center justify-center gap-2 text-xs font-mono">
-            <span className={`px-3 py-1 rounded-full border ${elem.border} ${elem.bg} ${elem.text} font-bold`}>
-              {isEnglish ? `Element: ${ELEMENT_EN[card.element] || card.element}` : `ธาตุ${card.element}`}
-            </span>
-            {card.astrology && (
-              <span className="glass-chip px-3 py-1 text-ink">
-                {isEnglish && card.astrologyEn ? card.astrologyEn : card.astrology}
-              </span>
-            )}
-            {card.yesNo && (
-              <span
-                className={`px-3 py-1 rounded-full border font-bold ${
-                  card.yesNo === "yes"
-                    ? "border-ok/40 bg-[#EBF3ED] text-ok"
-                    : card.yesNo === "no"
-                      ? "border-err/40 bg-err-wash text-err"
-                      : "border-line bg-inset text-gold-ink"
-                }`}
-              >
-                Yes/No: {isEnglish ? (card.yesNo === "yes" ? "Yes" : card.yesNo === "no" ? "No" : "Uncertain") : (card.yesNo === "yes" ? "ใช่ (Yes)" : card.yesNo === "no" ? "ไม่ใช่ (No)" : "ไม่แน่ชัด (Maybe)")}
-              </span>
-            )}
           </div>
         </div>
 
-        {/* Right Column (ต่อ): Keywords & Categorized Deep Meanings */}
-        <div className="md:col-span-7 lg:col-span-8 md:col-start-6 lg:col-start-5 space-y-6">
-          {/* Keywords Ribbon — มีครบทั้งสองหัวไพ่ใน HTML · CSS ซ่อนฝั่งที่ไม่ได้เลือก */}
-          {orientations.map((o) => (
-            <div key={o.key} data-when={o.key} className="space-y-2">
-              <h2 className="text-[13px] font-mono text-gold-ink uppercase tracking-wider flex items-center gap-1.5 font-bold">
-                {o.headingKeywords}
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {keywordsByOrientation[o.key].map((kw, i) => (
-                  <span
-                    key={i}
-                    className="glass-chip text-xs px-3 py-1.5 text-ink font-serif-th font-semibold"
-                  >
-                    {kw}
-                  </span>
-                ))}
+        {/* ป้ายข้อมูลแบบพิพิธภัณฑ์ */}
+        <aside className="v2-cd-placard" aria-label={isEnglish ? "Card facts" : "ข้อมูลไพ่"}>
+          <dl>
+            {facts.map((f) => (
+              <div key={f.k} data-tone={f.tone}>
+                <dt>{f.k}</dt>
+                <dd>{f.v}</dd>
               </div>
-            </div>
-          ))}
-
-          {/* คำตอบ ใช่/ไม่ใช่ (Yes / No) — พยากรณ์เชิงฟันธงจากข้อมูล 1909 RWS */}
-          <CardYesNoAnswer card={card} isEnglish={isEnglish} />
-
-          {/* 5 Categorized Meanings List — ทั้งสองหัวไพ่อยู่ใน HTML ครบ
-              (ของเดิมเรนเดอร์เฉพาะหัวที่เลือกอยู่ ความหมาย "หัวกลับ" ของไพ่ทั้ง 78 ใบ
-               จึงไม่เคยถูกเครื่องมือค้นหาเห็นเลยสักครั้ง) */}
-          {orientations.map((o) => (
-            <div key={o.key} data-when={o.key} className="space-y-3.5 pt-2">
-              <h2 className="font-serif-th text-base font-bold text-ink flex items-center gap-2">
-                {o.headingMeanings}
-              </h2>
-
-              <div className="space-y-3">
-                {categories.map((cat) => {
-                  const interp = isEnglish && card.meaningsEn ? card.meaningsEn[cat.id] : card.meanings[cat.id];
-                  const text = o.key === "upright" ? interp?.upright : interp?.reversed;
-
-                  return (
-                    <div
-                      key={cat.id}
-                      className="altar-card-porcelain p-4 sm:p-5 space-y-2 group"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span style={{ color: cat.color }} className="text-sm">
-                          {cat.icon}
-                        </span>
-                        <h3 className="font-serif-th text-xs sm:text-sm font-bold text-ink"><ThaiPhrases>{isEnglish ? cat.nameEn : cat.nameTh}</ThaiPhrases></h3>
-                      </div>
-                      <p className="font-serif-th text-xs sm:text-sm text-ink leading-relaxed pl-4 border-l-2 border-line group-hover:border-gold transition-colors [text-wrap:pretty]">
-                        {text || (isEnglish ? "This meaning is still being written" : "กำลังรวบรวมคำแปลมิตินี้")}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-
-          {/* Action Button: Start Tarot Ritual with this Card */}
-          <div className="pt-4 flex items-center gap-4 flex-wrap">
-            <Link
-              href={readHref}
-              data-read-cta=""
-              className="btn-gold-glass px-7 py-3 text-xs sm:text-sm font-serif-th font-bold flex items-center gap-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
-            >
-              {isEnglish ? "Open Interactive Tarot Reading" : "เปิดไพ่พยากรณ์จริงกับแม่หมอ AI"}
-            </Link>
-            <Link
-              href="/spreads"
-              className="text-xs sm:text-sm font-serif-th text-muted hover:text-gold-ink transition underline underline-offset-4"
-            >
-              {isEnglish ? "Explore 26 Spreads →" : "เลือกผังพยากรณ์ (26 แบบ) →"}
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* ไพ่ที่พลังงานใกล้เคียง — Server Component ส่งเข้ามาเพื่อให้ลิงก์อยู่ใน HTML ทันที */}
-      {related}
-
-      {/* Bottom Previous / Next Card Navigation Bar */}
-      <div className="pt-8 flex items-center justify-between gap-4">
-        {prevCard ? (
-          <Link
-            href={`/cards/${prevCard.id}`}
-            className="altar-card-porcelain flex items-center gap-3 p-3.5 !rounded-xl group max-w-[48%]"
-          >
-            <div className="glass-tile w-9 h-14 !rounded-lg overflow-hidden flex-shrink-0">
-              <CardImage
-                image={prevCard.image}
-                cardId={prevCard.id}
-                alt=""
-                className="w-full h-full object-cover tarot-hd-card-image"
-                sizes="36px"
-              />
-            </div>
-            <div className="text-left overflow-hidden">
-              <span className="text-[13px] font-mono text-muted block">
-                {isEnglish ? "← Previous Card" : "← ใบก่อนหน้า"}
-              </span>
-              <span className="font-serif-th text-xs sm:text-sm font-bold text-ink group-hover:text-gold-ink truncate block">
-                {isEnglish ? prevCard.nameEn : prevCard.nameTh}
-              </span>
-            </div>
+            ))}
+          </dl>
+          <Link href={readHref} data-read-cta="" className="ui2-btn v2-cd-go">
+            {isEnglish ? "Open Interactive Tarot Reading" : "เปิดไพ่พยากรณ์จริงกับแม่หมอ AI"}
           </Link>
-        ) : (
-          <div />
-        )}
-
-        {nextCard ? (
-          <Link
-            href={`/cards/${nextCard.id}`}
-            className="altar-card-porcelain flex items-center gap-3 p-3.5 !rounded-xl group max-w-[48%] text-right"
-          >
-            <div className="text-right overflow-hidden">
-              <span className="text-[13px] font-mono text-muted block">
-                {isEnglish ? "Next Card →" : "ใบถัดไป →"}
-              </span>
-              <span className="font-serif-th text-xs sm:text-sm font-bold text-ink group-hover:text-gold-ink truncate block">
-                {isEnglish ? nextCard.nameEn : nextCard.nameTh}
-              </span>
-            </div>
-            <div className="glass-tile w-9 h-14 !rounded-lg overflow-hidden flex-shrink-0">
-              <CardImage
-                image={nextCard.image}
-                cardId={nextCard.id}
-                alt=""
-                className="w-full h-full object-cover tarot-hd-card-image"
-                sizes="36px"
-              />
-            </div>
+          <Link href="/spreads" className="v2-cd-sub">
+            {isEnglish ? "Explore 26 Spreads" : "เลือกผังพยากรณ์ (26 แบบ)"}
           </Link>
-        ) : (
-          <div />
-        )}
-      </div>
+        </aside>
+      </section>
 
       {/*
-        ✦ แถบ "เปิดไพ่เลย" ติดล่างจอ (มือถือ) — โผล่เมื่อเลื่อนเลยปุ่มเปิดไพ่หลัก (`data-read-cta`) ไปแล้ว
-        และซ่อนเมื่อฟุตเตอร์เข้าจอ · คนที่มาจาก Google อ่านความหมายจนจบจะมีปุ่มอยู่ใกล้มือเสมอ
-        HTML นิ่ง + สคริปต์ `astro/scripts/card-orientation.ts` สลับ `data-visible` (หน้านี้ไม่ hydrate React)
-        เริ่มต้น `inert` = กดไม่ได้และโปรแกรมอ่านจอข้าม จนกว่าจะโผล่
+        v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): เนื้อหาใต้เวทีเป็นหน้าต่างโชว์เคส + รายชื่อซ้าย ชุดเดียวกับ /spreads
+        ⚠️ ทั้งสองหัวไพ่ยังอยู่ใน HTML ครบ (data-when · CSS ซ่อนฝั่งที่ไม่ได้เลือก) — สวิตช์ในหน้าต่างแรกใช้ตะขอเดียวกับใต้ไพ่
       */}
+      <Ui2Showcase label={isEnglish ? `${card.nameEn} meanings` : `ความหมายไพ่${card.nameTh}`} sections={sections} />
+
+      {/* ไพ่ใกล้เคียง + ผังที่ใช้ไพ่ใบนี้ — แนวเดียวกับหน้าต่างด้านบน (ไม่ลอดใต้รายชื่อซ้าย · มีระยะห่าง) */}
+      <div className="v3-cd-after">{related}</div>
+
+      {/* ใบก่อนหน้า / ถัดไป */}
+      <nav className="v2-cd-nav" aria-label={isEnglish ? "Previous and next card" : "ไพ่ใบก่อนหน้าและถัดไป"}>
+        {prevCard ? (
+          <Link href={`/cards/${prevCard.id}`} className="v2-cd-nav-a is-prev">
+            <span className="v2-cd-nav-img">
+              <CardImage image={prevCard.image} cardId={prevCard.id} alt="" className="w-full h-full object-cover tarot-hd-card-image" sizes="56px" />
+            </span>
+            <span>
+              <small>{isEnglish ? "Previous Card" : "ใบก่อนหน้า"}</small>
+              <b>{isEnglish ? prevCard.nameEn : prevCard.nameTh}</b>
+            </span>
+          </Link>
+        ) : (
+          <span />
+        )}
+        {nextCard ? (
+          <Link href={`/cards/${nextCard.id}`} className="v2-cd-nav-a is-next">
+            <span>
+              <small>{isEnglish ? "Next Card" : "ใบถัดไป"}</small>
+              <b>{isEnglish ? nextCard.nameEn : nextCard.nameTh}</b>
+            </span>
+            <span className="v2-cd-nav-img">
+              <CardImage image={nextCard.image} cardId={nextCard.id} alt="" className="w-full h-full object-cover tarot-hd-card-image" sizes="56px" />
+            </span>
+          </Link>
+        ) : (
+          <span />
+        )}
+      </nav>
+
+      {/* แถบ "เปิดไพ่เลย" ติดล่างจอ (มือถือ) — สคริปต์ card-orientation.ts สลับ data-visible */}
       <div
         data-read-sticky=""
         data-visible="false"

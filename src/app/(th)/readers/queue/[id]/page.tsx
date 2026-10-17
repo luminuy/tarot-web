@@ -20,6 +20,7 @@ import {
 } from "@/components/marketplace/QueueBookingParts";
 import { formatSlotRange } from "@/lib/marketplace/booking-policy";
 import { detectInAppBrowser, type InAppBrowser } from "@/lib/marketplace/in-app-browser";
+import { CheckIcon } from "@/components/ui/LineIcons";
 
 interface PollResponse {
   ticket: QueueTicket;
@@ -243,8 +244,7 @@ export default function CustomerQueuePage() {
           <Link
             href="/readers"
             className="tap-overlay-y inline-flex items-center gap-1.5 text-sm text-gold-ink hover:text-gold-ink-deep transition-colors"
-          >
-            <span aria-hidden="true">←</span> แม่หมอทั้งหมด
+          > แม่หมอทั้งหมด
           </Link>
           <Link
             href="/readers/bookings"
@@ -304,7 +304,7 @@ export default function CustomerQueuePage() {
                             : "bg-surface border border-line text-muted"
                       }`}
                     >
-                      {done ? "✓" : i + 1}
+                      {done ? <CheckIcon className="w-3.5 h-3.5" /> : i + 1}
                     </span>
                     <span className={`text-[13px] leading-tight ${current ? "font-bold text-ink" : "text-muted"}`}>
                       {label}
@@ -381,7 +381,7 @@ export default function CustomerQueuePage() {
               <div className="space-y-4">
                 <div className="flex items-start gap-3 rounded-2xl bg-ok/10 border border-ok/30 p-4" role="status">
                   <span aria-hidden="true" className="h-8 w-8 shrink-0 rounded-full bg-ok text-white grid place-items-center font-bold">
-                    ✓
+                    <CheckIcon />
                   </span>
                   <div className="space-y-0.5">
                     <h3 className="font-bold text-lg text-ink">{privateRoom ? "แม่หมอรับคุณเข้าห้องแล้ว" : "ถึงคิวของคุณแล้ว"}</h3>
@@ -442,7 +442,7 @@ export default function CustomerQueuePage() {
                       /* เขียวโทเคน ok (ตัวขาว 5.9:1) — เดิมเขียว LINE สด #06c755 กับตัวขาวได้แค่ 2.26:1 อ่านยากบนปุ่มหลัก */
                       className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-ok hover:opacity-90 text-white font-bold text-sm transition"
                     >
-                      เริ่มคุยกับแม่หมอทาง LINE <span aria-hidden="true">→</span>
+                      เริ่มคุยกับแม่หมอทาง LINE
                     </a>
                   )
                 )}
@@ -452,7 +452,7 @@ export default function CustomerQueuePage() {
             {isDone && (
               <div className="text-center py-4 space-y-4">
                 <div className="h-14 w-14 mx-auto rounded-full bg-ok text-white grid place-items-center text-2xl font-bold" aria-hidden="true">
-                  ✓
+                  <CheckIcon className="w-7 h-7" />
                 </div>
                 <div className="space-y-1">
                   <h3 className="font-bold text-lg text-ink">ปรึกษาเสร็จเรียบร้อย</h3>

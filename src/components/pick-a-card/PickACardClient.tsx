@@ -275,17 +275,12 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8">
       {/* ── 1. Topic Navigation Tabs ── */}
       <nav aria-label={isEnglish ? "Pick A Card Topics" : "หัวข้อเลือกกองไพ่"} className="space-y-3">
-        <div className="flex items-center gap-3" aria-hidden="true">
-          <span className="h-px flex-1 bg-gradient-to-r from-transparent to-line" />
-          {/* ภาษาไทยห้ามถ่างตัวอักษร (tracking) — อ่านยากเป็น "เ ล ื อ ก" (เจ้าของทัก) · ถ่างเฉพาะภาษาอังกฤษ */}
-          <span
-            className={`text-muted whitespace-nowrap ${
-              isEnglish ? "text-[10.5px] font-mono uppercase tracking-[0.22em]" : "font-serif-th text-xs font-semibold"
-            }`}
-          >
-            {isEnglish ? "Select Sacred Topic" : "เลือกหัวข้อพยากรณ์"}
-          </span>
-          <span className="h-px flex-1 bg-gradient-to-l from-transparent to-line" />
+        {/* ขั้น 1 (UI 2.0 · เจ้าของ 2026-10-16 "ใช้ง่าย เข้าใจง่าย") — บอกเป็นขั้นตอนชัด ๆ แทนเส้นคั่นตัวเล็ก */}
+        <div className="ui2-dy-step ui2-dy-step-center">
+          <p className="ui2-dy-step-k">
+            <span className="ui2-num">1</span>
+            {isEnglish ? "Choose a topic" : "เลือกเรื่องที่อยากรู้"}
+          </p>
         </div>
 
         {/*
@@ -410,10 +405,10 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
       <header className="text-center max-w-2xl mx-auto space-y-2.5">
         {/* หน้า /pick-a-card มี <h1> "Pick A Card" ของหน้าเองแล้ว หัวข้อที่เลือกจึงเป็น <h2>
             ส่วนหน้า /pick-a-card/<หัวข้อ> หัวข้อนี้คือชื่อหน้า จึงเป็น <h1> */}
-        <TopicHeading className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-ink leading-tight"><ThaiPhrases>
+        <TopicHeading className={initialTopicSlug ? "ui2-ph-title" : "ui2-sh-title"}><ThaiPhrases>
           {isEnglish ? activeTopic.titleEn : activeTopic.titleTh}
         </ThaiPhrases></TopicHeading>
-        <p className="text-sm sm:text-base font-serif-th text-muted leading-relaxed">
+        <p className="ui2-ph-lede mx-auto">
           {isEnglish ? activeTopic.descriptionEn : activeTopic.descriptionTh}
         </p>
       </header>
@@ -424,20 +419,16 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
           aria-label={isEnglish ? "Card Piles Altar" : "แท่นบูชาเลือกกองไพ่"}
           className="space-y-6 pt-2"
         >
-          <div className="text-center">
-            <div className="glass-chip inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-serif-th text-muted">
-              <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" aria-hidden="true" />
-              <span>
-                {isEnglish
-                  ? "Choose 1 of 4 piles that resonates strongest with you"
-                  : "เลือก 1 ใน 4 กองไพ่ที่ดึงดูดสายตาและจิตใจคุณมากที่สุด"}
-              </span>
-            </div>
-            <p className="mt-2 text-[11.5px] font-serif-th text-muted leading-[1.7]">
+          {/* ขั้น 2 — เลือกกองบนผ้าปูกำมะหยี่ (เอกลักษณ์หน้านี้: แสงคริสตัลประจำกอง) */}
+          <div className="ui2-dy-step ui2-dy-step-center">
+            <p className="ui2-dy-step-k">
+              <span className="ui2-num">2</span>
+              {isEnglish ? "Pick the pile that calls to you" : "เลือก 1 ใน 4 กองที่ใจเรียก"}
+            </p>
+            <p className="ui2-pac-note">
               {/*
                 สำรับของแต่ละวันคำนวณฝั่งเซิร์ฟเวอร์ (เวลาไทย) หน้าเว็บจึงไม่รู้ว่าวันนี้ได้ชุดไหน
                 จนกว่าจะเปิดกองแรก — ข้อความตรงนี้ต้องเป็นข้อความเดียวทั้งก่อนและหลัง hydration
-                ไม่งั้น HTML ที่เสิร์ฟจากขอบกับรอบแรกของ hydration จะไม่ตรงกัน
               */}
               {isEnglish
                 ? "Every pile holds a different spread, and the whole set changes at midnight Thai time."
@@ -449,7 +440,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
             แท่นกองไพ่ 4 กอง — จอเล็กเป็นแถวปัดนิ้วแบบเดียวกับแถบหัวข้อและหน้าแรก
             ได้การ์ดใหญ่ขึ้นเต็มตา และเห็นกองถัดไปโผล่ขอบเป็นสัญญาณว่าปัดต่อได้
           */}
-          <div className="flex flex-row gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth px-4 -mx-4 pb-1 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-6 sm:mx-0 sm:px-0 sm:pb-0 sm:overflow-visible">
+          <div className="ui2-pac-table flex flex-row gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth px-4 -mx-4 pb-1 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-6 sm:mx-0 sm:pb-0 sm:overflow-visible">
             {activeTopic.slots.map((pile) => {
               const styling = crystalColorMap[pile.number] || crystalColorMap[1];
               return (
@@ -464,7 +455,8 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                   }}
                   role="button"
                   tabIndex={0}
-                  className="altar-card-porcelain group relative flex flex-col items-center text-center w-[62vw] max-w-[240px] shrink-0 snap-center sm:w-auto sm:max-w-none p-4 sm:p-5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                  data-crystal={pile.number}
+                  className="ui2-pac-pile altar-card-porcelain group relative flex flex-col items-center text-center w-[62vw] max-w-[240px] shrink-0 snap-center sm:w-auto sm:max-w-none p-4 sm:p-5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                   aria-label={
                     isEnglish
                       ? `Select Pile ${pile.number}: ${pile.crystalEn}`
@@ -522,7 +514,6 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                   {/* Tap affordance */}
                   <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-mono text-gold-ink group-hover:underline">
                     <span>{isEnglish ? "TAP TO REVEAL" : "แตะเพื่อเปิดคำทำนาย"}</span>
-                    <span aria-hidden="true">→</span>
                   </span>
                 </div>
               );
@@ -795,7 +786,6 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                       ? "Consult AI Oracle for Deep Spread"
                       : "เปิดไพ่เจาะลึกเต็มรูปแบบกับแม่หมอ AI"}
                   </span>
-                  <span aria-hidden="true">→</span>
                 </Link>
               </div>
             </article>

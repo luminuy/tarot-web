@@ -195,70 +195,80 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
   const totalCards = drawnCards.length;
 
+  const isQuotaError = errorMsg ? /สมัครสมาชิก|เติมรอบ|โควตา|สิทธิ์|quota|credit|member/i.test(errorMsg) : false;
+  const keywords = resolveDisplayKeywords({
+    cardId: cardData?.id,
+    keywords: cardData?.keywords,
+    keywordsEn: (cardData as any)?.keywordsEn,
+    isReversed: activeDrawnCard?.isReversed,
+    isEnglish,
+  });
+  const positionNames = [...drawnCards]
+    .sort((a, b) => a.order - b.order)
+    .map((d) => (isEnglish ? d.position.nameEn || d.position.nameTh : d.position.nameTh));
+
+  /*
+   * v2 (เจ้าของ 2026-10-16 "หน้านี้ออกแบบใหม่") — ห้องอ่านคำทำนาย
+   * v1: หัวแม่หมอ + กล่องคำถามซ้ำ + ลิงก์แชทซ้ำ (มีอีก 2 ที่ในหน้า) + ปุ่มเม็ดยา 3 ชั้นก่อนถึงคำอ่าน
+   * v2: แถบแม่หมอบาง ๆ ➔ สลับ "อ่านทีละใบ / ภาพรวม" ➔ หน้าคำอ่านแบบหน้าหนังสือ (ภาพไพ่ใหญ่ซ้าย คำอ่านขวา)
+   */
   return (
-    <div className="altar-card-porcelain !rounded-lg w-full p-5 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden">
-      {/* Background Sacred Geometric Aura */}
-
-      {/* Oracle Guide Header & Streaming Status */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-line-warm/30">
-        <div className="flex items-center gap-3.5">
-          {/* Authentic 1909 Tarot Card Persona Avatar */}
-          <div
-            className="w-10 h-15 rounded-lg border-2 overflow-hidden bg-inset-warm relative flex-shrink-0"
-            style={{ borderColor: "var(--color-line-warm)" }}
-          >
-            <CardImage
-              image={`${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
-              /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h4> ข้างภาพพิมพ์ชื่อแม่หมออยู่แล้ว */
-              alt=""
-              className="w-full h-full object-cover object-top filter contrast-[1.05] brightness-[1.02] tarot-hd-card-image"
-              sizes="40px"
-            />
-            <div className="gold-foil-sheen absolute inset-0 opacity-20" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h4 className="font-serif-th text-base font-bold font-mystic-gold">{isEnglish ? (persona.nameEn || persona.nameTh) : persona.nameTh}</h4>
-            </div>
-            <p className="text-xs text-muted mt-0.5">{isEnglish ? (persona.taglineEn || persona.tagline) : persona.tagline}</p>
-          </div>
-        </div>
-
-        {/* Live Status Pill */}
+    <div className="v2-sr">
+      {/* แม่หมอ + สถานะ */}
+      <div className="v2-sr-top">
+        <span className="v2-sr-av">
+          <CardImage
+            image={`${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
+            /* ภาพประกอบล้วน — ชื่อแม่หมออยู่ข้าง ๆ แล้ว (INC-0125) */
+            alt=""
+            className="w-full h-full object-cover object-top"
+            sizes="40px"
+          />
+        </span>
+        <span className="v2-sr-who">
+          <b>{isEnglish ? (persona.nameEn || persona.nameTh) : persona.nameTh}</b>
+          <small>
+            {nickname?.trim()
+              ? isEnglish
+                ? `Reading for ${nickname.trim()}`
+                : `อ่านให้คุณ${nickname.trim()}`
+              : isEnglish
+                ? (persona.taglineEn || persona.tagline)
+                : persona.tagline}
+          </small>
+        </span>
         {isStreaming ? (
-          <span className="glass-chip text-xs font-semibold text-ink-deep px-3.5 py-1.5 flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-gold-ink animate-ping" /> {isEnglish ? "Oracle is channeling the tarot..." : "แม่หมอกำลังอ่านคำทำนาย..."}
+          <span className="v2-sr-state is-live">
+            <span className="v2-sr-state-dot" /> {isEnglish ? "Reading your cards..." : "แม่หมอกำลังอ่านคำทำนาย..."}
           </span>
         ) : errorMsg ? (
           /* A3-05: สตรีมล้มกลางทาง — ห้ามขึ้นป้าย "ครบถ้วน" คู่กับแบนเนอร์ให้โหลดใหม่ */
-          <span className="glass-chip text-xs font-semibold text-ink-deep px-3.5 py-1.5 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-gold-ink" /> {isEnglish ? "Interpretation incomplete" : "คำทำนายยังไม่ครบ"}
+          <span className="v2-sr-state is-warn">
+            <span className="v2-sr-state-dot" /> {isEnglish ? "Interpretation incomplete" : "คำทำนายยังไม่ครบ"}
           </span>
         ) : (
-          <span className="text-xs font-semibold bg-[#EBF3ED] text-ok border border-ok/30 px-3.5 py-1.5 rounded-full flex items-center gap-2 ">
-            <span className="w-2 h-2 rounded-full bg-ok" /> {isEnglish ? "Interpretation complete" : "อ่านคำทำนายครบถ้วนแล้ว"}
+          <span className="v2-sr-state is-done">
+            <span className="v2-sr-state-dot" /> {isEnglish ? "Interpretation complete" : "อ่านคำทำนายครบถ้วนแล้ว"}
           </span>
         )}
       </div>
 
-      {/* Querent Sacred Question Banner */}
-      {question && (
-        <div className="altar-card-porcelain !rounded-xl anim-page-transition p-4 space-y-1.5">
-          <div className="flex items-center justify-between text-xs text-gold-ink font-serif-th font-semibold">
-            <span>{isEnglish ? "Your Sacred Question" : "คำถามที่คุณตั้งจิตถาม"}</span>
-            {nickname && (
-              <span className="text-muted font-normal">
-                {isEnglish ? `Querent: ${nickname}` : `ผู้รับคำทำนาย: ${nickname}`}
-              </span>
-            )}
-          </div>
-          <p className="text-sm sm:text-base font-serif-th text-ink-deep font-medium leading-relaxed italic">
-            “{question}”
-          </p>
+      {/* Error / Recovery — โทนทองอุ่น ไม่ใช่แดงตกใจ · ซ่อนปุ่มลองใหม่เมื่อเป็นเรื่องโควตา */}
+      {errorMsg && (
+        <div role="alert" aria-live="assertive" className="v2-sr-alert">
+          <span>{errorMsg}</span>
+          {onRetry && !isQuotaError && (
+            <button type="button" onClick={onRetry} className="v2-sr-btn is-gold">
+              {isEnglish ? (/reload|not found/i.test(errorMsg) ? "Reload Reading" : "Retry Reading") : (/โหลดใหม่อีกครั้ง|ไม่พบข้อมูล/.test(errorMsg) ? "โหลดใหม่อีกครั้ง" : "ลองอ่านใหม่")}
+            </button>
+          )}
         </div>
       )}
 
-      {/* World-Class Chamber Navigation Tabs */}
+      {/* คำอ่านจากคลังความหมายไพ่ (AI ไม่ว่าง) — บอกผู้ใช้ตรง ๆ พร้อมปุ่มให้แม่หมอ AI อ่านไพ่ชุดเดิมอีกรอบ */}
+      {isFallback && !isStreaming && !errorMsg && <FallbackNotice isEn={isEnglish} onRetry={onRetry} />}
+
+      {/* สลับ อ่านทีละใบ / ภาพรวม (แท็บ WAI-ARIA · A5-11) */}
       <div
         role="tablist"
         aria-label={isEnglish ? "Tarot interpretation sections" : "ส่วนแสดงผลคำทำนาย"}
@@ -271,7 +281,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           setActiveTab(next);
           document.getElementById(`chamber-tab-${next}`)?.focus();
         }}
-        className="flex items-center gap-2 border-b border-line-warm/30 pb-2 overflow-x-auto no-scrollbar"
+        className="v2-sr-tabs"
       >
         <button
           type="button"
@@ -282,18 +292,13 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           aria-controls={activeTab === "card" ? "chamber-panel-card" : undefined}
           tabIndex={activeTab === "card" ? 0 : -1}
           onClick={() => setActiveTab("card")}
-          className={`tap-overlay-y px-4 py-2 rounded-lg text-xs font-serif-th font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
-            activeTab === "card"
-              ? "bg-gold-ink text-surface"
-              : "bg-inset-warm text-ink-deep hover:text-gold-ink border border-line-warm"
-          }`}
+          className="v2-sr-tab"
         >
-          
-          <span>
-            {isEnglish ? `Card Analysis (${activeCardIndex + 1}/${totalCards})` : `อ่านรายใบ (${activeCardIndex + 1}/${totalCards})`}
-          </span>
+          {isEnglish ? "Card by card" : "อ่านทีละใบ"}
+          <small>
+            {activeCardIndex + 1}/{totalCards}
+          </small>
         </button>
-
         <button
           type="button"
           role="tab"
@@ -302,396 +307,245 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           aria-controls={activeTab === "summary" ? "chamber-panel-summary" : undefined}
           tabIndex={activeTab === "summary" ? 0 : -1}
           onClick={() => setActiveTab("summary")}
-          className={`tap-overlay-y px-4 py-2 rounded-lg text-xs font-serif-th font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
-            activeTab === "summary"
-              ? "bg-gold-ink text-surface"
-              : "bg-inset-warm text-ink-deep hover:text-gold-ink border border-line-warm"
-          }`}
+          className="v2-sr-tab"
         >
-          
-          <span>{isEnglish ? "Overview & Guidance" : "สรุปภาพรวม & คำแนะนำ"}</span>
+          {isEnglish ? "Overview" : "ภาพรวม"}
+          <span className="v2-sr-tab-more">{isEnglish ? " & advice" : " & คำแนะนำ"}</span>
+          {reading?.summary && <small className="is-ready">{isEnglish ? "ready" : "พร้อม"}</small>}
         </button>
       </div>
 
-      {/* ทางลัดเปิดห้องแชทเต็มจอกับแม่หมอ (หน้า /reading/chat) */}
-      {readingId && (
-        <Link
-          href="/reading/chat"
-          className="glass-tile !rounded-lg group flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
-        >
-          <span className="min-w-0">
-            <span className="block font-serif-th text-xs font-bold text-ink-deep sm:text-sm [text-wrap:balance]">
-              {isEnglish ? "Have more questions for your reader?" : "มีอะไรอยากถามแม่หมอต่อไหม"}
-            </span>
-            <span className="mt-0.5 block font-serif-th text-[13px] leading-relaxed text-muted [text-wrap:pretty]">
-              {isEnglish
-                ? "Open full-screen interactive consultation to delve deeper into these drawn cards."
-                : "เปิดห้องแชทเต็มจอ พิมพ์ถามเจาะลึกต่อกับแม่หมอได้ทันที"}
-            </span>
-          </span>
-          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-line-warm text-gold-ink transition-transform group-hover:translate-x-0.5">
-            →
-          </span>
-        </Link>
-      )}
-
-      {/* Error / Recovery Banner — โทนทองอุ่น ไม่ใช่แดงตกใจ · ซ่อนปุ่มลองใหม่เมื่อเป็นเรื่องโควตา */}
-      {errorMsg &&
-        (() => {
-          const isQuota = /สมัครสมาชิก|เติมรอบ|โควตา|สิทธิ์|quota|credit|member/i.test(errorMsg);
-          return (
-            <div
-              role="alert"
-              aria-live="assertive"
-              className="altar-card-porcelain !rounded-lg anim-page-transition p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-            >
-              <div className="flex items-start gap-2.5 text-xs sm:text-sm text-ink-deep font-serif-th">
-                
-                <span className="leading-relaxed">{errorMsg}</span>
-              </div>
-              {onRetry && !isQuota && (
-                <button
-                  type="button"
-                  onClick={onRetry}
-                  className="tap-overlay-y self-end sm:self-auto px-5 py-2 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface text-xs font-bold font-serif-th cursor-pointer active:scale-95 transition flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
-                >
-                  {isEnglish ? (/reload|not found/i.test(errorMsg) ? "Reload Reading" : "Retry Reading") : (/โหลดใหม่อีกครั้ง|ไม่พบข้อมูล/.test(errorMsg) ? "โหลดใหม่อีกครั้ง" : "ลองอ่านใหม่")}
-                </button>
-              )}
-            </div>
-          );
-        })()}
-
-      {/* คำอ่านจากคลังความหมายไพ่ (AI ไม่ว่าง) — บอกผู้ใช้ตรง ๆ พร้อมปุ่มให้แม่หมอ AI อ่านไพ่ชุดเดิมอีกรอบ */}
-      {isFallback && !isStreaming && !errorMsg && <FallbackNotice isEn={isEnglish} onRetry={onRetry} />}
-
-      {/* TAB 1: CARD-BY-CARD INSPECTION VIEW */}
+      {/* TAB 1: อ่านทีละใบ — หน้าหนังสือ */}
       {activeTab === "card" && (
-        <div id="chamber-panel-card" role="tabpanel" aria-labelledby="chamber-tab-card" tabIndex={0} className="space-y-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink rounded-lg">
-          {/* Card Selector Pills — ตัดบรรทัดลงมา (flex-wrap) ไม่ใช่เลื่อนแนวนอน
-              เพราะผังใหญ่ ๆ ปุ่มใบท้าย ๆ จะหลุดออกนอกกรอบจนกดไม่ถึง (คำร้องเจ้าของโปรเจกต์) */}
-          <div className="flex flex-wrap items-center gap-1.5 pb-1">
-            {drawnCards.map((d, i) => (
-              <button
-                key={d.order}
-                type="button"
-                aria-pressed={activeCardIndex === d.order}
-                onClick={() => onSelectCardIndex(d.order)}
-                className={`tap-overlay-y px-3 py-1.5 rounded-lg text-xs font-serif-th font-semibold transition cursor-pointer flex max-w-full items-center gap-1.5 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
-                  activeCardIndex === d.order
-                    ? "bg-gold-ink text-surface font-bold"
-                    : "bg-inset-warm text-ink-deep hover:bg-surface border border-line-warm"
-                }`}
-              >
-                <span className="whitespace-nowrap">{isEnglish ? `Card ${i + 1}` : `ใบที่ ${i + 1}`}</span>
-                {(() => {
-                  const card = d.card || (d.cardIndex !== undefined ? cardByIndex(d.cardIndex) : undefined);
-                  return card ? (
-                    <span className="min-w-0 truncate text-[13px] font-normal opacity-80">
-                      ({isEnglish ? (card.nameEn || card.nameTh) : card.nameTh})
-                    </span>
-                  ) : null;
-                })()}
-              </button>
-            ))}
-          </div>
-
-          {/* Active Card Interpretation Showcase */}
-          <div
-            key={activeCardIndex}
-            className="altar-card-porcelain !rounded-lg anim-page-transition p-5 sm:p-6 space-y-4"
-          >
-            {/* Position & Card Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-line-warm/30">
-              <div className="flex items-center gap-3.5">
-                {/* Real 1909 Rider-Waite Thumbnail */}
-                <div
-                  className={`w-14 h-[95px] rounded-lg overflow-hidden border border-line-warm flex-shrink-0 ${activeDrawnCard?.isReversed ? "rotate-180" : ""}`}
-                >
-                  {cardData?.image ? (
-                    <CardImage
-                      image={cardData.image}
-                      /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h4> ข้างภาพพิมพ์ชื่อไพ่ใบเดียวกันอยู่แล้ว */
-                      alt=""
-                      className="w-full h-full object-cover object-center tarot-card-enhance tarot-hd-card-image"
-                      sizes="88px"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-inset-warm flex flex-col items-center justify-center text-center p-1 border border-dashed border-line-warm">
-                      
-                      <span className="text-xs text-muted font-serif-th mt-0.5 leading-normal">
-                        {isEnglish ? "Not Found" : "ไม่พบข้อมูล"}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <span className="text-[13px] text-gold-ink font-serif-th font-semibold">
-                    {
-isEnglish
-                        ? `Position ${activeCardIndex + 1}: ${activeDrawnCard?.position.nameEn || activeDrawnCard?.position.nameTh || "Energy Point"}`
-                        : `ตำแหน่งที่ ${activeCardIndex + 1}: ${activeDrawnCard?.position.nameTh || "ตำแหน่งพลังงาน"}`}
-                  </span>
-                  <h4 className="font-serif-th text-lg sm:text-xl font-bold text-ink-deep mt-0.5">
-                    {cardData ? (
-                      <>
-                        {isEnglish ? (cardData.nameEn || cardData.nameTh) : cardData.nameTh}{" "}
-                        {!isEnglish && cardData.nameEn && (
-                          <span className="text-xs font-mono font-normal text-muted">({cardData.nameEn})</span>
-                        )}{" "}
-                        <span className="text-xs font-serif-th font-semibold text-gold-ink">
-                          {activeDrawnCard?.isReversed
-                            ? (isEnglish ? "· Reversed" : "· ไพ่กลับหัว")
-                            : (isEnglish ? "· Upright" : "· ไพ่หัวตั้ง")}
-                        </span>
-                      </>
-                    ) : (
-                      <span className="text-err text-sm font-normal">
-                        {isEnglish ? "Card data not found (Please reload)" : "ไม่พบข้อมูลไพ่ (กรุณากดโหลดใหม่อีกครั้ง)"}
-                      </span>
-                    )}
-                  </h4>
-                </div>
+        <div id="chamber-panel-card" role="tabpanel" aria-labelledby="chamber-tab-card" tabIndex={0} className="v2-sr-panel">
+          <article key={activeCardIndex} className="v2-sr-page anim-page-transition">
+            <div className="v2-sr-art">
+              <div className={`v2-sr-art-img${activeDrawnCard?.isReversed ? " is-rev" : ""}`}>
+                {cardData?.image ? (
+                  <CardImage
+                    image={cardData.image}
+                    /* ภาพประกอบล้วน — ชื่อไพ่อยู่ใน <h3> ข้าง ๆ (INC-0125) */
+                    alt=""
+                    className="w-full h-full object-cover object-center tarot-hd-card-image"
+                    sizes="(min-width: 640px) 168px, 120px"
+                  />
+                ) : (
+                  <span className="v2-sr-art-none">{isEnglish ? "Not Found" : "ไม่พบข้อมูล"}</span>
+                )}
               </div>
+              <span className="v2-sr-orient">
+                {activeDrawnCard?.isReversed ? (isEnglish ? "Reversed" : "ไพ่กลับหัว") : isEnglish ? "Upright" : "ไพ่หัวตั้ง"}
+              </span>
+            </div>
 
-              {/* Elemental & Meaning Tag */}
+            <div className="v2-sr-copy">
+              <p className="v2-sr-pos">
+                {isEnglish
+                  ? `Position ${activeCardIndex + 1} · ${(activeDrawnCard?.position.nameEn || activeDrawnCard?.position.nameTh || "Energy Point").replace(/^\d+\.\s*/, "")}`
+                  : `ตำแหน่งที่ ${activeCardIndex + 1} · ${(activeDrawnCard?.position.nameTh || "ตำแหน่งพลังงาน").replace(/^\d+\.\s*/, "")}`}
+              </p>
+              <h3 className="v2-sr-name">
+                {cardData ? (
+                  <>
+                    {isEnglish ? (cardData.nameEn || cardData.nameTh) : cardData.nameTh}
+                    {!isEnglish && cardData.nameEn && <span>{cardData.nameEn}</span>}
+                  </>
+                ) : (
+                  <span className="is-err">
+                    {isEnglish ? "Card data not found (Please reload)" : "ไม่พบข้อมูลไพ่ (กรุณากดโหลดใหม่อีกครั้ง)"}
+                  </span>
+                )}
+              </h3>
               {(activeDrawnCard?.position.meaningEn || activeDrawnCard?.position.meaning) && (
-                <span className="glass-chip text-[13px] text-ink-deep px-2.5 py-1 font-serif-th self-start sm:self-auto">
+                <p className="v2-sr-asks">
                   {isEnglish
                     ? (activeDrawnCard.position.meaningEn || activeDrawnCard.position.meaning)
                     : (activeDrawnCard.position.meaning || activeDrawnCard.position.meaningEn)}
-                </span>
+                </p>
               )}
-            </div>
-
-            {/* Keywords */}
-            {(() => {
-              const keywords = resolveDisplayKeywords({
-                cardId: cardData?.id,
-                keywords: cardData?.keywords,
-                keywordsEn: (cardData as any)?.keywordsEn,
-                isReversed: activeDrawnCard?.isReversed,
-                isEnglish,
-              });
-
-              return keywords.length > 0 ? (
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-[13px] text-muted font-serif-th font-semibold">
-                    {isEnglish ? "Key Themes:" : "ความหมายหลัก:"}
-                  </span>
+              {keywords.length > 0 && (
+                <ul className="v2-sr-kw" aria-label={isEnglish ? "Key themes" : "ความหมายหลัก"}>
                   {keywords.map((kw: string, idx: number) => (
-                    <span
-                      key={idx}
-                      className="glass-tile !rounded text-[13px] text-ink-deep px-2 py-0.5"
-                    >
-                      {kw}
-                    </span>
+                    <li key={idx}>{kw}</li>
                   ))}
+                </ul>
+              )}
+
+              {/* ไม่พบข้อมูลไพ่ = ให้โหลดใหม่ ห้ามกุคำอ่าน (กฎเหล็กข้อ 14) */}
+              {!cardData && (
+                <div className="v2-sr-alert">
+                  <span>
+                    {isEnglish
+                      ? "Card data for this position could not be found. Please reload."
+                      : "ไม่พบข้อมูลไพ่สำหรับตำแหน่งนี้ กรุณากดโหลดใหม่อีกครั้ง"}
+                  </span>
+                  {onRetry && (
+                    <button type="button" onClick={onRetry} className="v2-sr-btn is-gold">
+                      {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
+                    </button>
+                  )}
                 </div>
-              ) : null;
-            })()}
+              )}
 
-            {/* If card data could not be found, show reload prompt instead of fake reading */}
-            {!cardData && (
-              <div className="p-4 rounded-lg bg-err-wash border border-line-warm text-center space-y-2.5 my-2">
-                <p className="text-xs text-err font-serif-th">
-                  {isEnglish
-                    ? "Card data for this position could not be found. Please reload."
-                    : "ไม่พบข้อมูลไพ่สำหรับตำแหน่งนี้ กรุณากดโหลดใหม่อีกครั้ง"}
-                </p>
-                {onRetry && (
-                  <button
-                    type="button"
-                    onClick={onRetry}
-                    className="tap-overlay-y px-4 py-1.5 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface text-xs font-bold font-serif-th shadow cursor-pointer active:scale-95 transition inline-flex items-center gap-1.5"
+              <div className="v2-sr-read">
+                {(activeCardReading?.headline || activeCardReading?.reading) && (
+                  <div className="v2-sr-read-head">
+                    {activeCardReading?.headline && <h4>{activeCardReading.headline}</h4>}
+                    {activeCardReading?.reading && (
+                      <TTSReaderButton
+                        textToRead={`${activeCardReading.headline ? activeCardReading.headline + ". " : ""}${activeCardReading.reading}`}
+                        personaId={persona.id}
+                        className="ml-auto"
+                      />
+                    )}
+                  </div>
+                )}
+                {activeCardReading?.visualAnchor && (
+                  <p className="v2-sr-anchor">
+                    {isEnglish ? "On the card: " : "ภาพบนหน้าไพ่: "}
+                    {activeCardReading.visualAnchor}
+                  </p>
+                )}
+
+                {/* P1-M3: คำทำนายทยอยโผล่ทีละก้อนที่สตรีมเข้ามา (ดู StreamingChunkText) */}
+                {activeCardReading?.reading ? (
+                  <p
+                    key={`oracle-${activeCardIndex}`}
+                    className="v2-sr-text"
+                    /*
+                     * ♿ ระหว่างสตรีมต้องเป็น "off" (T-03) — ประกาศครั้งเดียวตอนจบที่โหนดซ่อนด้านล่าง
+                     */
+                    aria-live="off"
+                    aria-label={isEnglish ? "Oracle's interpretation" : "คำทำนายจากแม่หมอ"}
                   >
-                    {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
+                    <StreamingChunkText
+                      key={`chunk-${activeCardIndex}`}
+                      text={activeCardReading.reading}
+                      animate={isStreaming && motionSafe}
+                    />
+                  </p>
+                ) : (
+                  <p className="v2-sr-wait">
+                    {isStreaming
+                      ? (isEnglish
+                          ? "The oracle is reading this card..."
+                          : "แม่หมอกำลังเรียบเรียงคำทำนายของไพ่ใบนี้...")
+                      : (isEnglish ? "Awaiting the reading" : "รอการเปิดม่านพยากรณ์")}
+                  </p>
+                )}
+
+                {/* ♿ ประกาศคำทำนาย **ครั้งเดียว** ตอนสตรีมจบ (T-03) */}
+                <p className="sr-only" aria-live="polite" aria-atomic="true">
+                  {announcement}
+                </p>
+              </div>
+
+              {activeCardReading?.reading && cardData && (
+                <CardWhyPanel url={insightUrl} order={activeCardIndex} isEnglish={isEnglish} />
+              )}
+            </div>
+          </article>
+
+          {/* ใบก่อน / ใบถัดไป + จุดบอกตำแหน่ง */}
+          <nav className="v2-sr-nav" aria-label={isEnglish ? "Cards" : "เลือกไพ่"}>
+            <button
+              type="button"
+              onClick={() => onSelectCardIndex(Math.max(0, activeCardIndex - 1))}
+              disabled={activeCardIndex === 0}
+              className="v2-sr-btn"
+            >
+              {isEnglish ? "Previous" : "ใบก่อนหน้า"}
+            </button>
+            <span className="v2-sr-dots">
+              {drawnCards.map((d, i) => {
+                const card = d.card || (d.cardIndex !== undefined ? cardByIndex(d.cardIndex) : undefined);
+                const label = `${isEnglish ? `Card ${i + 1}` : `ใบที่ ${i + 1}`}${card ? ` (${isEnglish ? card.nameEn || card.nameTh : card.nameTh})` : ""}`;
+                return (
+                  <button
+                    key={d.order}
+                    type="button"
+                    aria-pressed={activeCardIndex === d.order}
+                    aria-label={label}
+                    title={label}
+                    onClick={() => onSelectCardIndex(d.order)}
+                    className="v2-sr-dot"
+                  >
+                    {i + 1}
                   </button>
-                )}
-              </div>
-            )}
-
-            {/* Interpretation Body */}
-            <div className="space-y-2 pt-1">
-              <div className="flex items-center justify-between gap-2">
-                {activeCardReading?.headline && (
-                  <h5 className="font-serif-th text-sm font-bold text-ink-deep">{activeCardReading.headline}</h5>
-                )}
-                {activeCardReading?.reading && (
-                  <TTSReaderButton
-                    textToRead={`${activeCardReading.headline ? activeCardReading.headline + ". " : ""}${activeCardReading.reading}`}
-                    personaId={persona.id}
-                    className="ml-auto"
-                  />
-                )}
-              </div>
-              {activeCardReading?.visualAnchor && (
-                <p className="text-[11px] sm:text-xs text-muted font-serif-th italic tracking-wide">
-                  {isEnglish ? "Card Visual: " : "ภาพบนหน้าไพ่: "}{activeCardReading.visualAnchor}
-                </p>
-              )}
-
-              {/* P1-M3: คำทำนายทยอยโผล่ทีละก้อนที่สตรีมเข้ามา (ดู StreamingChunkText) */}
-              {activeCardReading?.reading ? (
-                <p
-                  key={`oracle-${activeCardIndex}`}
-                  className="text-xs sm:text-sm text-ink-deep leading-relaxed font-serif-th font-normal"
-                  /*
-                   * ♿ ระหว่างสตรีมต้องเป็น "off" (T-03)
-                   * ของเดิมเป็น `aria-live="polite"` ครอบข้อความที่ยาวขึ้นเรื่อย ๆ
-                   * โปรแกรมอ่านหน้าจอจึงประกาศใหม่ทุกครั้งที่ DOM เปลี่ยน — บางตัวอ่านทับซ้อนกัน
-                   * บางตัวอ่านสตริงทั้งก้อนใหม่ตั้งแต่ต้นทุกรอบ คนตาบอดใช้ฟีเจอร์หลักของเว็บไม่ได้เลย
-                   * การประกาศ "ครั้งเดียวตอนจบ" ย้ายไปอยู่ที่โหนดซ่อนด้านล่างแทน
-                   */
-                  aria-live="off"
-                  aria-label={isEnglish ? "Oracle's interpretation" : "คำทำนายจากแม่หมอ"}
-                >
-                  <StreamingChunkText
-                    key={`chunk-${activeCardIndex}`}
-                    text={activeCardReading.reading}
-                    animate={isStreaming && motionSafe}
-                  />
-                </p>
-              ) : (
-                <p className="text-xs sm:text-sm text-muted leading-relaxed font-serif-th font-normal italic">
-                  {isStreaming
-                    ? (isEnglish
-                        ? "The oracle is attuning to the energetic currents of this card..."
-                        : "แม่หมอกำลังสัมผัสคลื่นพลังงานและเรียบเรียงคำทำนายของไพ่ใบนี้...")
-                    : (isEnglish ? "Awaiting oracle revelation" : "รอการเปิดม่านพยากรณ์")}
-                </p>
-              )}
-
-              {/*
-                ♿ ประกาศคำทำนาย **ครั้งเดียว** ตอนสตรีมจบ (T-03)
-                โหนดนี้ถูกซ่อนจากสายตาแต่โปรแกรมอ่านหน้าจอเห็น · `aria-atomic` บังคับให้อ่าน
-                ทั้งก้อนเป็นประโยคเดียว ไม่ใช่อ่านเฉพาะส่วนที่เปลี่ยน
-              */}
-              <p className="sr-only" aria-live="polite" aria-atomic="true">
-                {announcement}
-              </p>
-            </div>
-
-            {activeCardReading?.reading && cardData && (
-              <CardWhyPanel url={insightUrl} order={activeCardIndex} isEnglish={isEnglish} />
-            )}
-
-            {/* Next / Prev Card Navigation Arrows */}
-            <div className="flex items-center justify-between pt-3 border-t border-line-warm/30 text-xs">
-              <button
-                type="button"
-                onClick={() => onSelectCardIndex(Math.max(0, activeCardIndex - 1))}
-                disabled={activeCardIndex === 0}
-                className={`tap-overlay-y px-3 py-1.5 rounded-lg border flex items-center gap-1 transition ${
-                  activeCardIndex > 0
-                    ? "border-line-warm bg-surface text-ink-deep hover:bg-surface-warm hover:border-gold-ink cursor-pointer"
-                    : "border-transparent text-muted cursor-not-allowed"
-                }`}
-              >
-                <span>{isEnglish ? "← Previous Card" : "← ใบก่อนหน้า"}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => onSelectCardIndex(Math.min(totalCards - 1, activeCardIndex + 1))}
-                disabled={activeCardIndex === totalCards - 1}
-                className={`tap-overlay-y px-3 py-1.5 rounded-lg border flex items-center gap-1 transition ${
-                  activeCardIndex < totalCards - 1
-                    ? "border-line-warm bg-surface text-ink-deep hover:bg-surface-warm hover:border-gold-ink cursor-pointer"
-                    : "border-transparent text-muted cursor-not-allowed"
-                }`}
-              >
-                <span>{isEnglish ? "Next Card →" : "ใบถัดไป →"}</span>
-              </button>
-            </div>
-          </div>
+                );
+              })}
+            </span>
+            <button
+              type="button"
+              onClick={() => (activeCardIndex === totalCards - 1 ? setActiveTab("summary") : onSelectCardIndex(Math.min(totalCards - 1, activeCardIndex + 1)))}
+              className="v2-sr-btn is-gold"
+            >
+              {activeCardIndex === totalCards - 1 ? (isEnglish ? "See overview" : "ดูภาพรวม") : isEnglish ? "Next card" : "ใบถัดไป"}
+            </button>
+          </nav>
         </div>
       )}
 
-      {/* TAB 2: OVERVIEW & ACTIONABLE SUMMARY */}
+      {/* TAB 2: ภาพรวม & คำแนะนำ */}
       {activeTab === "summary" && (
-        <div id="chamber-panel-summary" role="tabpanel" aria-labelledby="chamber-tab-summary" tabIndex={0} className="space-y-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink rounded-lg">
-          {/* Opening Greeting */}
-          {reading?.opening && (
-            <div className="glass-tile !rounded-lg p-4 text-xs sm:text-sm text-ink-deep font-serif-th leading-relaxed italic">
-              “{reading.opening}”
-            </div>
-          )}
-
-          {/* Connections */}
-          {reading?.connections && (
-            <div className="altar-card-porcelain !rounded-lg p-5 space-y-1.5">
-              <h5 className="font-serif-th text-xs sm:text-sm font-bold text-ink-deep flex items-center gap-2">
-                 {isEnglish ? "Spread Synergy & Resonance" : "ความเชื่อมโยงของไพ่ทั้งชุด"}
-              </h5>
-              <p className="text-xs sm:text-sm text-ink-deep leading-relaxed">{reading.connections}</p>
-            </div>
-          )}
-
-          {/* Core Summary */}
-          {reading?.summary && (
-            <div className="relative overflow-hidden rounded-2xl border-2 border-[#C8A261] bg-gradient-to-br from-surface via-[#FDFBF7] to-[#F7EFE1] p-5 shadow-[0_4px_24px_rgba(143,92,26,0.10)] space-y-3">
-              {/* Editorial Luxury Top Gold Accent Bar */}
-              <div
-                aria-hidden="true"
-                className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gold-ink via-[#E2C38A] to-gold-ink"
-              />
-
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold-ink/10 border border-gold-ink/30 text-gold-ink font-serif-th font-bold text-xs tracking-wide">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gold-ink" />
-                    {isEnglish ? "Executive Summary & Trajectory" : "สรุปตรงใจและแนวโน้ม"}
+        <div id="chamber-panel-summary" role="tabpanel" aria-labelledby="chamber-tab-summary" tabIndex={0} className="v2-sr-panel">
+          {reading?.summary ? (
+            <section className="v2-sr-answer">
+              <div className="v2-sr-answer-top">
+                <p className="v2-sr-answer-k">{isEnglish ? "In short" : "สรุปตรงใจ"}</p>
+                {reading.yesNoAnswer && (
+                  <span className="v2-sr-yes">
+                    {isEnglish
+                      ? `Answer: ${YES_NO_DISPLAY_EN[reading.yesNoAnswer] ?? reading.yesNoAnswer}`
+                      : `คำตอบ: ${reading.yesNoAnswer}`}
                   </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  {reading.yesNoAnswer && (
-                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-gold-ink text-surface">
-                      {isEnglish
-                        ? `Answer: ${YES_NO_DISPLAY_EN[reading.yesNoAnswer] ?? reading.yesNoAnswer}`
-                        : `คำตอบ: ${reading.yesNoAnswer}`}
-                    </span>
-                  )}
-                  <TTSReaderButton
-                    textToRead={`${isEnglish ? "Executive Summary and Guidance. " : "บทสรุปคำทำนายและแนวโน้ม. "}${reading.summary || ""}. ${
-                      reading.advice ? (isEnglish ? "Actionable guidance: " : "คำแนะนำคือ ") + reading.advice.join(", ") : ""
-                    }`}
-                    personaId={persona.id}
-                    className="text-xs py-1 px-2.5 bg-surface hover:bg-surface-warm border border-line-warm shadow-xs"
-                  />
-                </div>
+                )}
+                <TTSReaderButton
+                  textToRead={`${isEnglish ? "Executive Summary and Guidance. " : "บทสรุปคำทำนายและแนวโน้ม. "}${reading.summary || ""}. ${
+                    reading.advice ? (isEnglish ? "Actionable guidance: " : "คำแนะนำคือ ") + reading.advice.join(", ") : ""
+                  }`}
+                  personaId={persona.id}
+                  className="ml-auto"
+                />
               </div>
-              <div className="pl-3 sm:pl-4 border-l-2 border-gold-ink/50">
-                <p className="text-sm sm:text-[15px] font-serif-th text-ink-deep font-medium leading-relaxed [text-wrap:pretty]">
-                  {reading.summary}
-                </p>
-              </div>
+              <p className="v2-sr-answer-t">{reading.summary}</p>
               {reading.timing && (
-                <p className="text-xs text-gold-ink pt-1 font-mono font-semibold">
-                  {isEnglish ? "Timing: " : "ช่วงเวลา: "}{reading.timing}
+                <p className="v2-sr-timing">
+                  {isEnglish ? "Timing: " : "ช่วงเวลา: "}
+                  {reading.timing}
                 </p>
               )}
-            </div>
+            </section>
+          ) : (
+            <p className="v2-sr-wait">
+              {isStreaming
+                ? isEnglish
+                  ? "The overview appears once every card has been read..."
+                  : "ภาพรวมจะขึ้นเมื่อแม่หมออ่านครบทุกใบ..."
+                : isEnglish
+                  ? "No overview yet"
+                  : "ยังไม่มีภาพรวม"}
+            </p>
           )}
 
-          {/* Actionable Advice Checklist */}
+          {reading?.opening && <blockquote className="v2-sr-quote">{reading.opening}</blockquote>}
+
+          {reading?.connections && (
+            <section className="v2-sr-block">
+              <h4>{isEnglish ? "How the cards connect" : "ไพ่ทั้งชุดเชื่อมกันอย่างไร"}</h4>
+              <p>{reading.connections}</p>
+            </section>
+          )}
+
           {reading?.advice && reading.advice.length > 0 && (
-            <div className="glass-tile !rounded-lg p-5 space-y-2.5">
-              <h5 className="font-serif-th text-xs sm:text-sm font-bold text-ink-deep flex items-center gap-2">
-                {isEnglish ? "Actionable Guidance & Next Steps" : "คำแนะนำและสิ่งที่ควรทำ"}
-              </h5>
-              <ul className="space-y-2">
+            <section className="v2-sr-block">
+              <h4>{isEnglish ? "What to do next" : "สิ่งที่ควรทำต่อจากนี้"}</h4>
+              <ol className="v2-sr-advice">
                 {reading.advice.map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-2.5 text-xs text-ink-deep">
-                    <span className="w-4 h-4 rounded-full bg-gold-ink/20 text-gold-ink font-bold flex items-center justify-center flex-shrink-0 text-[13px] mt-0.5">
-                      ✓
-                    </span>
-                    <span>{item}</span>
-                  </li>
+                  <li key={idx}>{item}</li>
                 ))}
-              </ul>
-            </div>
+              </ol>
+            </section>
           )}
 
           {/* ✦ มุมที่สอง — ไพ่ชุดเดิมเป๊ะ อ่านโดยแม่หมออีกบุคลิก (ไม่ใช้กับคำอ่านสำรอง) */}
@@ -700,9 +554,7 @@ isEnglish
               readingId={readingId}
               original={reading}
               originalPersona={persona}
-              positionNames={[...drawnCards]
-                .sort((a, b) => a.order - b.order)
-                .map((d) => (isEnglish ? d.position.nameEn || d.position.nameTh : d.position.nameTh))}
+              positionNames={positionNames}
               isEnglish={isEnglish}
             />
           )}
@@ -712,9 +564,7 @@ isEnglish
             <ReadingBasisPanel
               url={insightUrl}
               cardCount={drawnCards.length}
-              positionNames={[...drawnCards]
-                .sort((a, b) => a.order - b.order)
-                .map((d) => (isEnglish ? d.position.nameEn || d.position.nameTh : d.position.nameTh))}
+              positionNames={positionNames}
               category={category || "general"}
               basis={basis ?? null}
               hasQuestion={Boolean(question?.trim())}
@@ -723,20 +573,15 @@ isEnglish
             />
           )}
 
-          {/* ── ส่วนรอง: ยุบไว้เพื่อไม่ให้หน้ายาวเกินไป ผู้ใช้แตะเปิดเอง ── */}
-
-          {/* Sacred Oracle Mantra Card */}
+          {/* ── ส่วนรอง: ยุบไว้ ผู้ใช้แตะเปิดเอง ── */}
           {allCards.length > 0 && (
             <CollapsibleCard
               title={isEnglish ? "Sacred Oracle Wisdom" : "คำคมพลังใจศักดิ์สิทธิ์"}
               hint={isEnglish ? "Core guiding wisdom synthesized from the spread" : "ข้อคิดนำทางที่กลั่นจากไพ่ทั้งชุด"}
-              
             >
               <OracleMantraCard cards={allCards} drawn={drawnCards} personaNameTh={isEnglish ? (persona.nameEn || persona.nameTh) : persona.nameTh} />
             </CollapsibleCard>
           )}
-
-          {/* Elemental Balance 4-Elements Analysis */}
           {allCards.length > 0 && (
             <CollapsibleCard
               title={isEnglish ? "Elemental Balance Analysis" : "สมดุลพลังงาน 4 ธาตุในผัง"}
@@ -762,45 +607,34 @@ isEnglish
               }))}
           />
 
-          {/* Real Human Reader Marketplace Consultation CTA */}
-          <div className="glass-tile !rounded-lg p-5 space-y-3 relative overflow-hidden">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  
-                  <h4 className="font-serif-th text-xs sm:text-sm font-bold text-ink-deep [text-wrap:balance]">
-                    {isEnglish ? "Seek In-Depth Personal Consultation?" : "ต้องการคำปรึกษาเจาะลึกเฉพาะบุคคลเพิ่มเติม?"}
-                  </h4>
-                </div>
-                <p className="text-[13px] sm:text-xs text-muted leading-relaxed font-serif-th [text-wrap:pretty]">
-                  {isEnglish
-                    ? "Consult a certified human tarot master 1-on-1. Send your drawn spread directly to continue the dialogue in private."
-                    : "ปรึกษาแม่หมอผู้เชี่ยวชาญแบบตัวต่อตัว พร้อมส่งต่อผลการเปิดไพ่ชุดนี้เพื่อพูดคุยเจาะลึกผ่าน LINE ส่วนตัวได้ทันที"}
-                </p>
-              </div>
-
-              <Link
-                href="/readers"
-                onClick={() => trackEvent("reader_consult_click", { source: "stream_end" })}
-                className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 transition cursor-pointer whitespace-nowrap"
-              >
-                <span>{isEnglish ? "Consult Human Reader" : "ปรึกษาแม่หมอตัวจริง"}</span>
-                <span>➔</span>
-              </Link>
-            </div>
-          </div>
+          {/* ปรึกษาแม่หมอตัวจริง */}
+          <section className="v2-sr-human">
+            <span>
+              <b>{isEnglish ? "Want a human reader to go deeper?" : "อยากคุยเจาะลึกกับแม่หมอตัวจริง?"}</b>
+              <small>
+                {isEnglish
+                  ? "Consult a tarot reader 1-on-1 and bring this spread with you."
+                  : "ปรึกษาแม่หมอผู้เชี่ยวชาญแบบตัวต่อตัว พร้อมส่งต่อผลไพ่ชุดนี้ไปคุยต่อได้ทันที"}
+              </small>
+            </span>
+            <Link
+              href="/readers"
+              onClick={() => trackEvent("reader_consult_click", { source: "stream_end" })}
+              className="v2-sr-btn"
+            >
+              {isEnglish ? "Consult a reader" : "ปรึกษาแม่หมอตัวจริง"}
+            </Link>
+          </section>
         </div>
       )}
 
       {/* AI Disclosure Note & Accuracy Rating */}
-      <div className="mt-4 pt-3 border-t border-line-warm/30 space-y-2">
-        <p className="text-[13px] text-muted leading-relaxed text-center font-serif-th max-w-2xl mx-auto [text-wrap:balance]">
+      <div className="v2-sr-foot">
+        <p>
           {isEnglish
             ? "This reading is synthesized with AI from your authentic drawn cards. Provided for reflection, introspection, and spiritual guidance."
             : "คำทำนายนี้ประมวลผลด้วยระบบ AI จากหน้าไพ่ที่คุณเปิดจริง จัดทำขึ้นเพื่อเป็นแนวทางและข้อคิดในการดำเนินชีวิต"}
         </p>
-
-        {/* Accuracy Rating — A/B data collection */}
         {!isStreaming && reading?.summary && (
           <AccuracyRatingWidget personaId={persona.id} readingId={readingId || undefined} />
         )}

@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
-import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
+import { DailyArticle } from "@/components/daily/DailyArticle";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
+import { DailyStage } from "./daily-th";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
 
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
-import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
  * 🌅 ไพ่ประจำวันฉบับภาษาอังกฤษ (`/en/daily`)
@@ -73,10 +74,10 @@ const DAILY_FAQS_EN = [
 ];
 
 const DAILY_LINKS_EN = [
-  { href: "/en/cards", label: "All 78 card meanings" },
-  { href: "/en/spreads", label: "26 tarot spreads" },
-  { href: "/en/cards/major", label: "Major Arcana" },
-  { href: "/en", label: "Start a full reading" },
+  { href: "/en/cards", label: "All 78 card meanings", note: "The full 1909 deck, every area of life", card: "major-21" },
+  { href: "/en/spreads", label: "26 tarot spreads", note: "Need more than one card? Pick the spread that fits", card: "major-10" },
+  { href: "/en/cards/major", label: "Major Arcana", note: "The 22 great archetypes of the journey", card: "major-00" },
+  { href: "/en", label: "Start a full reading", note: "Ask one question and let the reader take you through it", card: "major-02" },
 ];
 
 const softwareApplicationJsonLd = {
@@ -112,57 +113,50 @@ export function DailyBodyEn({ ritual }: { ritual: ReactNode }) {
         dangerouslySetInnerHTML={{ __html: jsonLdScript(softwareApplicationJsonLd) }}
       />
 
-      <main id="main-content" tabIndex={-1} className="min-h-screen py-6 sm:py-10 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* ห่อ div — <astro-island> เป็น display:contents จึงไม่รับระยะจาก space-y ทำให้กล่องพิธีชิดกล่องบทความ */}
-          <div>{ritual}</div>
+      <main id="main-content" tabIndex={-1} data-ui2-page-dark="" className="ui2-dy ui2-dy-main min-h-screen font-sans relative overflow-x-clip px-4 sm:px-8">
+        <DailyStage>{ritual}</DailyStage>
 
-          <SeoArticleShell
-            eyebrow="Working with a daily card"
-            title="The Daily Tarot Draw: A Mirror for the Day, Not a Verdict on It"
-            faqs={DAILY_FAQS_EN}
-            links={DAILY_LINKS_EN}
-          >
+        <DailyArticle
+          isEnglish
+          eyebrow="Working with a daily card"
+          title="The Daily Tarot Draw: A Mirror for the Day, Not a Verdict on It"
+          intro={
             <p>
               A daily tarot draw is not a forecast you are stuck with. In the tradition the 1909 Rider-Waite-Smith deck
               comes from, a single card pulled in the morning works as a lens: it names one theme clearly enough that you
               start noticing it. Carl Jung&apos;s account of archetypes and synchronicity describes the same mechanism in
               psychological language — the image does not cause the day, it gives you a vocabulary for reading it.
             </p>
-
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
-              How to get something real out of a one-card pull
-            </ThaiPhrases></h3>
-            <ul className="list-disc pl-5 space-y-2 text-muted">
-              <li>
-                <strong className="text-ink">Draw before the day starts.</strong> Take one slow breath, notice the
-                mood you are actually in rather than the one you would prefer, and then pull. A card drawn at 7am can
-                change how you handle 3pm; a card drawn at 11pm can only explain it.
-              </li>
-              <li>
-                <strong className="text-ink">Read the picture, not just the keyword.</strong> Pamela Colman
-                Smith&apos;s illustrations carry the meaning in colour, posture, and where the figure is looking. Notice
-                what the character is doing before you reach for a definition — the detail that catches your eye is
-                usually the one worth sitting with.
-              </li>
-              <li>
-                <strong className="text-ink">Look back at night.</strong> Before sleep, compare the card to what
-                actually happened. Done for a month, this is the single fastest way to build real intuition, because you
-                are training against outcomes instead of memorising lists.
-              </li>
-            </ul>
-
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
-              Why the shuffle is provably fair
-            </ThaiPhrases></h3>
+          }
+          tipsTitle="How to get something real out of a one-card pull"
+          tips={[
+            {
+              title: "Draw before the day starts.",
+              body: "Take one slow breath, notice the mood you are actually in rather than the one you would prefer, and then pull. A card drawn at 7am can change how you handle 3pm; a card drawn at 11pm can only explain it.",
+            },
+            {
+              title: "Read the picture, not just the keyword.",
+              body: "Pamela Colman Smith's illustrations carry the meaning in colour, posture, and where the figure is looking. Notice what the character is doing before you reach for a definition — the detail that catches your eye is usually the one worth sitting with.",
+            },
+            {
+              title: "Look back at night.",
+              body: "Before sleep, compare the card to what actually happened. Done for a month, this is the single fastest way to build real intuition, because you are training against outcomes instead of memorising lists.",
+            },
+          ]}
+          trustTitle="Why the shuffle is provably fair"
+          trust={
             <p>
               Every shuffle here runs in your own browser through the Web Crypto API, and each reading publishes a
               SHA-256 commit-reveal proof so you can confirm the deck order was fixed before you chose. Nothing is
               weighted, nothing is withheld to sell you an upgrade, and no card is ever invented — if card data is
               missing, the reading stops and asks you to reload rather than substituting something plausible.
             </p>
-          </SeoArticleShell>
-        </div>
+          }
+          faqs={DAILY_FAQS_EN}
+          links={DAILY_LINKS_EN}
+        />
+        {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+        <Ui2NextSteps isEn={true} keys={["spreads", "pick", "journal", "questions"]} />
       </main>
     </>
   );

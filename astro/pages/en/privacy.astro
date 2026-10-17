@@ -5,6 +5,8 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { PrivacyBodyEnRoot } from "../../components/PageBodies";
 import { DeleteAllDataRoot } from "../../islands/DeleteAllDataRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
 
 /**
  * 🔐 นโยบายความเป็นส่วนตัว (อังกฤษ) — หน้านี้ **ไม่โหลด React เลยสักไบต์** (2026-09-18)
@@ -15,13 +17,20 @@ const locale = "en" as const;
 
 <BaseLayout locale={locale} metadata={privacyMetadataEn}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <PrivacyBodyEnRoot>
     <Fragment slot="deleteButton">
       <DeleteAllDataRoot locale={locale} />
     </Fragment>
   </PrivacyBodyEnRoot>
+  </div>
   <SiteFooterRoot locale={locale} spacing="tight" />
   <script>
     import "../../scripts/delete-all-data";
   </script>
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../scripts/ui2-inview";
+</script>

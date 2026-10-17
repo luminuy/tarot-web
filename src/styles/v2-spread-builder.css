@@ -1,0 +1,739 @@
+/*
+ * 🧵 v2 ห้องออกแบบผัง (/spreads/create · /en/spreads/create) — สร้างใหม่ทั้งหน้า (เจ้าของ 2026-10-16 "สร้างใหม่เลย")
+ * เอกลักษณ์: สตูดิโอช่างผัง — คลังตำแหน่ง · ผ้าสักหลาดเขียวมรกตมีเส้นตารางช่าง (ที่วางไพ่) · รายการตำแหน่ง · แถบคำสั่งติดล่างจอ
+ * นำเข้าต่อจาก ui2-page.css · ไม่มี filter/backdrop/mask/อนิเมชันวน
+ */
+
+.v2-sb {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 28px 16px 120px;
+}
+
+/* ── หัว ── */
+.v2-sb-head {
+  display: grid;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+@media (min-width: 1024px) {
+  .v2-sb-head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+}
+.v2-sb-head .ui2-ph-crumb {
+  justify-content: flex-start;
+}
+.v2-sb-head .ui2-ph-crumb::before,
+.v2-sb-head .ui2-ph-crumb::after {
+  display: none;
+}
+.v2-sb-title {
+  margin: 8px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(32px, 4.4vw, 52px);
+  font-weight: 700;
+  line-height: 1.12;
+  color: var(--ui2-on-night);
+  text-wrap: balance;
+}
+.v2-sb-lede {
+  max-width: 620px;
+  margin: 12px 0 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ui2-on-night-soft);
+}
+.v2-sb-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.2);
+  background: rgba(28, 23, 30, 0.7);
+}
+.v2-sb-steps li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui2-on-night-dim);
+}
+.v2-sb-steps li span {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 217, 143, 0.35);
+  font-size: 12px;
+}
+.v2-sb-steps li.is-done {
+  color: var(--ui2-on-night-soft);
+}
+.v2-sb-steps li.is-done span {
+  background: rgba(255, 217, 143, 0.25);
+  color: var(--ui2-gold-solid);
+}
+.v2-sb-steps li.is-here {
+  background: rgba(255, 217, 143, 0.14);
+  color: var(--ui2-gold-solid);
+}
+.v2-sb-steps li.is-here span {
+  border-color: transparent;
+  background: var(--ui2-gold-solid);
+  color: var(--ui2-night);
+}
+.v2-sb-banner {
+  margin: 0 0 18px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 217, 143, 0.35);
+  text-align: center;
+  font-size: 14px;
+  color: var(--ui2-gold-solid);
+}
+
+/* ── สตูดิโอ 3 โซน ── */
+.v2-sb-studio {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 900px) {
+  .v2-sb-studio {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    grid-template-areas:
+      "mat edit"
+      "lib edit";
+    align-items: start;
+  }
+  .v2-sb-matzone {
+    grid-area: mat;
+  }
+  .v2-sb-edit {
+    grid-area: edit;
+  }
+  .v2-sb-lib {
+    grid-area: lib;
+  }
+}
+@media (min-width: 1240px) {
+  .v2-sb-studio {
+    grid-template-columns: 300px minmax(0, 1fr) 340px;
+    grid-template-areas: "lib mat edit";
+  }
+  .v2-sb-lib,
+  .v2-sb-edit {
+    position: sticky;
+    top: 92px;
+    max-height: calc(100svh - 190px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
+  }
+}
+/* มือถือ: ผ้าปูขึ้นก่อน ➔ รายการ ➔ คลัง */
+@media (max-width: 899px) {
+  .v2-sb-matzone {
+    order: -2;
+  }
+  .v2-sb-edit {
+    order: -1;
+  }
+}
+.v2-sb-zone {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 217, 143, 0.18);
+  background: linear-gradient(180deg, rgba(43, 33, 48, 0.8) 0%, rgba(22, 17, 26, 0.8) 100%);
+}
+.v2-sb-zone-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.v2-sb-zone-h h2 {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ui2-on-night);
+}
+.v2-sb-meter {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(255, 217, 143, 0.14);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+}
+
+/* คลังตำแหน่ง */
+.v2-sb-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.v2-sb-group {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 236, 200, 0.14);
+  font-size: 12.5px;
+  color: var(--ui2-on-night-soft);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.v2-sb-group:hover {
+  border-color: rgba(255, 217, 143, 0.45);
+  color: var(--ui2-on-night);
+}
+.v2-sb-group[aria-selected="true"] {
+  border-color: transparent;
+  background: var(--ui2-gold-solid);
+  color: var(--ui2-night);
+  font-weight: 600;
+}
+.v2-sb-pos-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2-sb-pos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "name add"
+    "mean add";
+  gap: 2px 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 236, 200, 0.1);
+  background: rgba(12, 10, 15, 0.45);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.v2-sb-pos:hover:not(:disabled) {
+  border-color: rgba(255, 217, 143, 0.45);
+  background: rgba(255, 217, 143, 0.06);
+}
+.v2-sb-pos:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+.v2-sb-pos-name {
+  grid-area: name;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ui2-on-night);
+}
+.v2-sb-pos-mean {
+  grid-area: mean;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ui2-on-night-dim);
+}
+.v2-sb-pos-add {
+  grid-area: add;
+  align-self: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.4);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+}
+.v2-sb .v2-sb-own {
+  justify-content: center;
+  width: 100%;
+}
+
+/* ผ้าสักหลาดวางไพ่ */
+.v2-sb-mat {
+  position: relative;
+  isolation: isolate;
+  padding: 22px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 217, 143, 0.32);
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 236, 200, 0.045) 0 1px, transparent 1px 32px),
+    repeating-linear-gradient(90deg, rgba(255, 236, 200, 0.045) 0 1px, transparent 1px 32px),
+    radial-gradient(70% 70% at 50% 40%, #1F4A40 0%, #12302A 70%, #0E2420 100%);
+  box-shadow: inset 0 0 0 5px rgba(12, 10, 15, 0.35), inset 0 0 0 6px rgba(255, 217, 143, 0.2), inset 0 0 70px rgba(0, 0, 0, 0.5);
+}
+/* ขีดไม้บรรทัดทองที่ขอบบนผ้า */
+.v2-sb-mat::before {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 18px;
+  right: 18px;
+  height: 7px;
+  pointer-events: none;
+  background: repeating-linear-gradient(90deg, rgba(255, 217, 143, 0.5) 0 1px, transparent 1px 16px);
+  opacity: 0.6;
+}
+.v2-sb-mat-area {
+  position: relative;
+  width: 100%;
+}
+.v2-sb-slot {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  translate: -50% -50%;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 217, 143, 0.5);
+  box-shadow: 0 14px 22px -12px rgba(0, 0, 0, 0.95);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), scale var(--dur-fast) var(--ease-out);
+}
+.v2-sb-slot span {
+  font-family: var(--ui2-font-display);
+  font-size: clamp(14px, 1.6vw, 22px);
+  font-weight: 700;
+  color: var(--ui2-gold-solid);
+}
+.v2-sb-slot:hover {
+  scale: 1.04;
+}
+.v2-sb-slot[aria-pressed="true"] {
+  border-color: var(--ui2-gold-solid);
+  box-shadow: 0 0 0 3px rgba(255, 217, 143, 0.35), 0 0 28px rgba(255, 217, 143, 0.4), 0 14px 22px -12px rgba(0, 0, 0, 0.95);
+}
+.v2-sb-starters {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 18px 0 8px;
+  text-align: center;
+}
+.v2-sb-starters-k {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ui2-on-night);
+}
+.v2-sb-starters ul {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 600px) {
+  .v2-sb-starters ul {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.v2-sb-starter {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+  padding: 14px 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 217, 143, 0.28);
+  background: rgba(12, 10, 15, 0.45);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out), translate var(--dur-fast) var(--ease-out);
+}
+.v2-sb-starter:hover {
+  translate: 0 -2px;
+  border-color: var(--ui2-gold-solid);
+}
+.v2-sb-starter b {
+  font-size: 14px;
+  color: var(--ui2-on-night);
+}
+.v2-sb-starter small {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ui2-on-night-dim);
+}
+.v2-sb-glyph {
+  color: #FFD98F;
+}
+.v2-sb-starters-or {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ui2-on-night-dim);
+}
+.v2-sb-caption {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(12, 10, 15, 0.5);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ui2-on-night-soft);
+}
+.v2-sb-caption b {
+  color: var(--ui2-gold-solid);
+}
+.v2-sb-layouts {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.v2-sb-layouts legend {
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--ui2-on-night-dim);
+}
+.v2-sb-layouts > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.v2-sb-layout {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 14px 0 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 236, 200, 0.14);
+  font-size: 13px;
+  color: var(--ui2-on-night-soft);
+  cursor: pointer;
+}
+.v2-sb-layout[aria-pressed="true"] {
+  border-color: var(--ui2-gold-solid);
+  background: rgba(255, 217, 143, 0.14);
+  color: var(--ui2-gold-solid);
+  font-weight: 600;
+}
+.v2-sb-fine {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ui2-on-night-dim);
+}
+
+/* ตำแหน่งในผัง */
+.v2-sb-field {
+  display: grid;
+  gap: 6px;
+}
+.v2-sb-field span {
+  font-size: 12px;
+  color: var(--ui2-on-night-dim);
+}
+.v2-sb-field input,
+.v2-sb-row input,
+.v2-sb-row textarea {
+  width: 100%;
+  border: 1px solid rgba(255, 217, 143, 0.24);
+  background: rgba(12, 10, 15, 0.55);
+  font-size: 14px;
+  color: var(--ui2-on-night);
+}
+.v2-sb-field input {
+  min-height: 46px;
+  padding: 0 14px;
+  border-radius: 14px;
+  font-family: var(--ui2-font-display);
+  font-size: 16px;
+  font-weight: 600;
+}
+.v2-sb-field input::placeholder,
+.v2-sb-row input::placeholder,
+.v2-sb-row textarea::placeholder {
+  color: var(--ui2-on-night-dim);
+}
+.v2-sb-field input:focus-visible,
+.v2-sb-row input:focus-visible,
+.v2-sb-row textarea:focus-visible {
+  outline: none;
+  border-color: var(--ui2-gold-solid);
+  box-shadow: 0 0 0 3px rgba(255, 217, 143, 0.2);
+}
+.v2-sb-empty {
+  margin: 0;
+  padding: 18px 14px;
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 236, 200, 0.16);
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ui2-on-night-dim);
+}
+.v2-sb-rows {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2-sb-row {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 236, 200, 0.1);
+  background: rgba(12, 10, 15, 0.35);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.v2-sb-row.is-active {
+  border-color: rgba(255, 217, 143, 0.6);
+}
+.v2-sb-row-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.v2-sb-num {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 40px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(255, 217, 143, 0.5);
+  background: linear-gradient(180deg, #2B2130 0%, #18121C 100%);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ui2-gold-solid);
+}
+.v2-sb-row input {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+.v2-sb-row textarea {
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  resize: vertical;
+}
+.v2-sb-row-tools {
+  display: flex;
+  flex: none;
+}
+/* ปุ่มเลื่อน/ลบเป็นรูปทรง CSS (ไม่ใช้ลูกศร/กากบาทเป็นตัวอักษร) */
+.v2-sb-tool {
+  position: relative;
+  width: 32px;
+  height: 40px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.v2-sb-tool:hover:not(:disabled) {
+  background: rgba(255, 236, 200, 0.06);
+}
+.v2-sb-tool:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+.v2-sb-tool::before,
+.v2-sb-tool::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+}
+.v2-sb-tool.is-up::before,
+.v2-sb-tool.is-down::before {
+  width: 8px;
+  height: 8px;
+  border-left: 1.5px solid #FFD98F;
+  border-top: 1.5px solid #FFD98F;
+  translate: -50% -25%;
+  rotate: 45deg;
+}
+.v2-sb-tool.is-down::before {
+  translate: -50% -75%;
+  rotate: 225deg;
+}
+.v2-sb-tool.is-del::before,
+.v2-sb-tool.is-del::after {
+  width: 12px;
+  height: 1.5px;
+  background: #CFC3B2;
+  translate: -50% -50%;
+  rotate: 45deg;
+}
+.v2-sb-tool.is-del::after {
+  rotate: -45deg;
+}
+.v2-sb-checks {
+  display: grid;
+  gap: 4px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ui2-on-night-dim);
+}
+.v2-sb-checks p {
+  margin: 0;
+}
+.v2-sb-checks .is-err {
+  color: #F2A38F;
+}
+
+/* แถบคำสั่งติดล่างจอ */
+.v2-sb-bar {
+  position: sticky;
+  z-index: 20;
+  bottom: 12px;
+  margin-top: 18px;
+}
+.v2-sb-bar-in {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  padding: 10px 10px 10px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.32);
+  background: rgba(20, 15, 22, 0.96);
+  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.95);
+}
+@media (max-width: 639px) {
+  .v2-sb-bar-in {
+    border-radius: 22px;
+    padding: 10px;
+  }
+  .v2-sb-bar-info {
+    width: 100%;
+    text-align: center;
+  }
+  .v2-sb-bar-actions {
+    width: 100%;
+  }
+  .v2-sb-bar-actions .v2-sb-go {
+    flex: 1;
+  }
+}
+.v2-sb-bar-info {
+  min-width: 0;
+  margin: 0;
+  font-size: 13px;
+  color: var(--ui2-on-night-dim);
+}
+.v2-sb-bar-info b {
+  color: var(--ui2-on-night);
+}
+.v2-sb-bar-info .is-err {
+  color: #F2A38F;
+}
+.v2-sb-bar-info .is-ok {
+  color: var(--ui2-gold-solid);
+}
+.v2-sb-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.v2-sb-reset {
+  min-height: 44px;
+  padding: 0 10px;
+  font-size: 13px;
+  color: var(--ui2-on-night-dim);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.v2-sb .v2-sb-go {
+  justify-content: center;
+  background: linear-gradient(180deg, #FFE3A8 0%, #F0C470 100%);
+  color: var(--ui2-night);
+}
+.v2-sb .v2-sb-go:disabled,
+.v2-sb .v2-sb-save:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ชั้นผังของฉัน */
+.v2-sb-shelf {
+  margin-top: 40px;
+}
+.v2-sb-shelf h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 14px;
+  font-family: var(--ui2-font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ui2-on-night);
+}
+.v2-sb-shelf h2 span {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ui2-on-night-dim);
+}
+.v2-sb-shelf ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2-sb-saved {
+  display: flex;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 217, 143, 0.18);
+  background: rgba(28, 23, 30, 0.65);
+}
+.v2-sb-saved.is-editing {
+  border-color: var(--ui2-gold-solid);
+}
+.v2-sb-saved > div {
+  min-width: 0;
+}
+.v2-sb-saved-name {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ui2-on-night);
+  overflow-wrap: anywhere;
+}
+.v2-sb-saved-meta {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--ui2-on-night-dim);
+}
+.v2-sb-saved-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+.v2-sb-saved-acts button {
+  min-height: 40px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+  cursor: pointer;
+}
+.v2-sb-saved-acts .is-quiet {
+  font-weight: 400;
+  color: var(--ui2-on-night-dim);
+}

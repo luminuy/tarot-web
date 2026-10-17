@@ -1,0 +1,360 @@
+/*
+ * 📚 v2 หน้าความหมายไพ่ 78 ใบ (/cards · /en/cards) — สร้างใหม่ (เจ้าของ 2026-10-16 "สร้างใหม่เลย")
+ * เอกลักษณ์: ห้องสมุดไพ่ — ช่องค้นหาใหญ่เป็นหัวหน้า · แถบชุดไพ่ติดจอสีธาตุ · ชั้นหนังสือคู่มือย่อยท้ายกริด
+ * v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): หัวหน้าไพ่ลอย (Ui2PageHero) · 5 ชุดเป็นหน้าต่างโชว์เคส (Ui2Showcase)
+ *    การ์ดในกริดย้ายไป v3-card-tile.css (CardTile.tsx) — ด่าน test-card-tile-height เฝ้าสูตรที่นั่น
+ * สีธาตุใช้ `--el` จาก ui2-page.css หัวข้อ 12 · ไม่มี filter/backdrop/mask/อนิเมชันวน
+ */
+
+.v2-cx-head {
+  padding: 34px 0 6px;
+  text-align: center;
+}
+.v2-cx-head .ui2-ph-crumb {
+  justify-content: center;
+}
+.v2-cx-title {
+  margin: 12px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(32px, 4.8vw, 58px);
+  font-weight: 700;
+  line-height: 1.12;
+  color: var(--ui2-on-night);
+  text-wrap: balance;
+}
+.v2-cx-lede {
+  max-width: 620px;
+  margin: 12px auto 0;
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--ui2-on-night-soft);
+}
+.v2-cx-search {
+  position: relative;
+  max-width: 640px;
+  margin: 26px auto 0;
+}
+.v2-cx-search::before {
+  content: "";
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  translate: 0 -60%;
+  border: 2px solid #FFD98F;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.v2-cx-search::after {
+  content: "";
+  position: absolute;
+  left: 36px;
+  top: 50%;
+  width: 7px;
+  height: 2px;
+  translate: 0 5px;
+  rotate: 45deg;
+  background: #FFD98F;
+  border-radius: 2px;
+  pointer-events: none;
+}
+.v2-cx-search input {
+  width: 100%;
+  height: 62px;
+  padding: 0 56px 0 60px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.4);
+  background: rgba(20, 15, 22, 0.9);
+  box-shadow: 0 0 0 6px rgba(255, 217, 143, 0.06), 0 30px 60px -30px rgba(0, 0, 0, 0.95);
+  font-size: 17px;
+  color: var(--ui2-on-night);
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.v2-cx-search input::placeholder {
+  color: var(--ui2-on-night-dim);
+}
+.v2-cx-search input::-webkit-search-cancel-button {
+  display: none;
+}
+.v2-cx-search input:focus-visible {
+  outline: none;
+  border-color: var(--ui2-gold-solid);
+  box-shadow: 0 0 0 6px rgba(255, 217, 143, 0.16), 0 30px 60px -30px rgba(0, 0, 0, 0.95);
+}
+.v2-cx-clear {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 38px;
+  height: 38px;
+  translate: 0 -50%;
+  border-radius: 50%;
+  background: rgba(255, 236, 200, 0.08);
+  cursor: pointer;
+}
+.v2-cx-clear::before,
+.v2-cx-clear::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 13px;
+  height: 1.5px;
+  background: #CFC3B2;
+  translate: -50% -50%;
+  rotate: 45deg;
+}
+.v2-cx-clear::after {
+  rotate: -45deg;
+}
+.v2-cx-try {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin: 14px 0 0;
+  font-size: 13px;
+  color: var(--ui2-on-night-dim);
+}
+.v2-cx-try button {
+  min-height: 34px;
+  padding: 0 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 236, 200, 0.14);
+  font-size: 13px;
+  color: var(--ui2-on-night-soft);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.v2-cx-try button:hover,
+.v2-cx-try button[aria-pressed="true"] {
+  border-color: rgba(255, 217, 143, 0.55);
+  color: var(--ui2-gold-solid);
+}
+
+/* ชั้นหนังสือคู่มือย่อย */
+/* คู่มือย่อย (v2 · เจ้าของ 2026-10-17 "ชิดเกินไป และยังไม่สวย") — ส่วนของตัวเอง เว้นจากหน้าต่างสุดท้าย
+   การ์ดกระดาษครีม (ชุดเดียวกับกรอบครีมทั้งเว็บ) · ไพ่ประจำหมวดเอียง · สันสีธาตุบาง ๆ ซ้าย · ปุ่มวงกลมดำลูกศร */
+.v2-cx-shelf {
+  margin-top: 88px;
+}
+.v2-cx-shelf-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 28px;
+  text-align: center;
+}
+.v2-cx-shelf-kicker {
+  font-family: var(--ui2-font-display);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--ui2-gold-solid);
+}
+.v2-cx-shelf-k {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(26px, 21px + 1.3vw, 38px);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--ui2-on-night);
+  text-wrap: balance;
+}
+.v2-cx-shelf ul {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 560px) {
+  .v2-cx-shelf ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .v2-cx-shelf ul {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+}
+.v2-cx-book {
+  position: relative;
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 112px;
+  padding: 16px 18px 16px 22px;
+  border-radius: 22px;
+  color: var(--ui2-ink);
+  background:
+    radial-gradient(70% 140% at 0% 0%, rgba(255, 222, 150, 0.55) 0%, rgba(255, 222, 150, 0) 70%),
+    radial-gradient(60% 120% at 100% 100%, rgba(132, 196, 184, 0.28) 0%, rgba(132, 196, 184, 0) 70%),
+    #F7F0E3;
+  box-shadow: 0 0 0 1px rgba(255, 236, 200, 0.45), 0 24px 44px -28px rgba(0, 0, 0, 0.9);
+  transition: translate var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+/* สันสีธาตุบาง ๆ ด้านซ้าย */
+.v2-cx-book::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 22px;
+  bottom: 22px;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: rgb(var(--el, 255, 217, 143));
+}
+.v2-cx-book-art {
+  display: block;
+  width: 52px;
+  padding: 3px;
+  border-radius: 8px;
+  rotate: -6deg;
+  background: linear-gradient(170deg, var(--ui2-card-ivory-top) 0%, var(--ui2-card-ivory-bottom) 100%);
+  box-shadow: 0 0 0 1px rgba(201, 161, 90, 0.55), 0 12px 20px -10px rgba(40, 24, 8, 0.6);
+  transition: rotate var(--dur-base) var(--ease-out);
+}
+.v2-cx-book-art img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 300 / 520;
+  border-radius: 5px;
+  object-fit: cover;
+}
+.v2-cx-book-txt {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.v2-cx-book b {
+  font-family: var(--ui2-font-display);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--ui2-ink);
+}
+.v2-cx-book small {
+  font-size: 13px;
+  color: var(--ui2-gold-ink);
+}
+.v2-cx-book-go {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  color: var(--ui2-button-text);
+  background: var(--ui2-button);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.5) inset;
+  transition: scale var(--dur-fast) var(--ease-out);
+}
+.v2-cx-book-go svg {
+  display: block;
+  transition: translate var(--dur-fast) var(--ease-out);
+}
+.v2-cx-book:focus-visible {
+  outline: 2px solid var(--ui2-gold-solid);
+  outline-offset: 3px;
+}
+@media (hover: hover) {
+  .v2-cx-book:hover {
+    translate: 0 -3px;
+    box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.8), 0 30px 50px -26px rgba(0, 0, 0, 0.95);
+  }
+  .v2-cx-book:hover .v2-cx-book-art {
+    rotate: 0deg;
+  }
+  .v2-cx-book:hover .v2-cx-book-go svg {
+    translate: 2px 0;
+  }
+}
+
+/* ── v3: ช่องค้นหาอยู่ในหัวหน้าไพ่ลอย ── */
+.v3-cx .v2-cx-search {
+  width: 100%;
+  margin-top: 10px;
+}
+/* หัวหน้าเป็น flex คอลัมน์จัดกลาง ➔ ลูกกว้างเท่าเนื้อหา จึงไม่ขึ้นบรรทัด (ชิปล้นจอมือถือ) — ให้เต็มความกว้าง */
+.v3-cx .v2-cx-try {
+  width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 4px;
+}
+/* หน้าต่างอยู่เหนือไพ่ลอยของหัวหน้า (ไพ่ใบล่างขวาเคยทับมุมหน้าต่างแรก) */
+.v3-cx .ui2-sx {
+  position: relative;
+  z-index: 3;
+  margin-top: 4px;
+}
+.v3-cx .ui2-ph {
+  padding-bottom: 8px;
+}
+@media (min-width: 1200px) {
+  .v3-cx .ui2-ph {
+    padding-bottom: 40px;
+  }
+}
+/* สรุปผลค้นหาเหนือหน้าต่างแรก */
+.v3-cx-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 14px 18px;
+  border-radius: 20px;
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+}
+.v3-cx-status > p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--ui2-on-night-soft);
+}
+.v3-cx-status b {
+  font-size: 18px;
+  color: var(--ui2-gold-solid);
+}
+.v3-cx-status > button,
+.v3-cx-empty button {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ui2-on-night);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+  cursor: pointer;
+}
+.v3-cx-status > button[aria-pressed="true"] {
+  color: var(--ui2-night);
+  background: var(--ui2-gold-solid);
+}
+.v3-cx-status > :not(p):not(button) {
+  flex-basis: 100%;
+}
+.v3-cx-empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 26px 8px 8px;
+  text-align: center;
+}
+.v3-cx-empty h2 {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: 20px;
+  color: var(--ui2-on-night);
+}
+.v3-cx-empty p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ui2-on-night-dim);
+}

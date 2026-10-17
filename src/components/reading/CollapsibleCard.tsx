@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useId, useState } from "react";
+import { ChevronIcon } from "@/components/ui/LineIcons";
 
 export interface CollapsibleCardProps {
   /** หัวข้อสั้น ๆ ที่แสดงบนแถบให้กด */
@@ -58,7 +59,7 @@ export const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
           }`}
           aria-hidden
         >
-          ▼
+          <ChevronIcon />
         </span>
       </button>
 

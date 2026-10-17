@@ -8,11 +8,16 @@ import {
   cardNeighbors,
 } from "@/app/_shared/pages/card-detail";
 import { DECK, cardById } from "@/data/cards";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { CardDetailRelatedRoot } from "../../../components/CardDetailRelated";
 import { CardDetailViewRoot } from "../../../islands/CardDetailRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
+import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
+import "@/styles/ui2-showcase.css";
+import "@/styles/v2-card-detail.css";
 
 /**
  * 🃏 ความหมายไพ่รายใบ 78 หน้า (ต้นไม้ภาษาอังกฤษ)
@@ -33,6 +38,7 @@ const { currentIndex, totalCards, prevCard, nextCard } = cardNeighbors(card);
 
 <BaseLayout locale={locale} metadata={cardDetailMetadata(card.id, locale)}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <main id="main-content" tabindex="-1" class={CARD_DETAIL_MAIN_CLASS}>
     <script type="application/ld+json" is:inline set:html={JSON.stringify(cardDetailJsonLd(card, locale))} />
     <script type="application/ld+json" is:inline set:html={JSON.stringify(cardDetailBreadcrumbJsonLd(card, locale))} />
@@ -49,14 +55,23 @@ const { currentIndex, totalCards, prevCard, nextCard } = cardNeighbors(card);
         <CardDetailRelatedRoot card={card} locale={locale} />
       </Fragment>
     </CardDetailViewRoot>
+    <!-- ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (HTML นิ่ง ไม่ hydrate · เจ้าของ 2026-10-17) -->
+    <Ui2NextSteps isEn={true} keys={["spreads", "daily", "journal", "questions"]} />
   </main>
+  </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>
 
 <!--
-  🃏 สวิตช์หัวตั้ง/หัวกลับ — สคริปต์ไม่ถึง 1 KB แทนการ hydrate คอมโพเนนต์ทั้งก้อน
+  สวิตช์หัวตั้ง/หัวกลับ — สคริปต์ไม่ถึง 1 KB แทนการ hydrate คอมโพเนนต์ทั้งก้อน
   เนื้อหาทั้งสองหัวไพ่อยู่ใน HTML แล้ว สคริปต์แค่สลับแอตทริบิวต์เดียว
 -->
 <script>
   import "../../../scripts/card-orientation";
+</script>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../../scripts/ui2-inview";
+  import "../../../scripts/ui2-showcase";
 </script>

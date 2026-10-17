@@ -26,6 +26,7 @@ import { jsonLdScript } from "@/lib/seo/json-ld";
 import { PICK_A_CARD_TOPICS, type PickACardTopic } from "@/data/pick-a-card";
 import type { Locale } from "@/lib/i18n/types";
 import { localeHref } from "@/lib/i18n/paths";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 
 interface TopicCopy {
   metaTitleTh: string;
@@ -704,6 +705,8 @@ export function PickACardTopicBody({
             ))}
           </SeoArticleShell>
         </div>
+        {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+        <Ui2NextSteps isEn={isEnglish} keys={["spreads", "daily", "journal", "questions"]} />
       </main>
     </>
   );

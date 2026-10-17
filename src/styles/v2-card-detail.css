@@ -1,0 +1,358 @@
+/*
+ * 🃏 v2 หน้าไพ่รายใบ (/cards/[id] · /en/cards/[id] · 78 × 2 หน้า) — สร้างใหม่ (เจ้าของ 2026-10-16 "สร้างใหม่เลย")
+ * เอกลักษณ์: เวทีไพ่แบบพิพิธภัณฑ์ — ชื่อไพ่ · ไพ่ใบใหญ่บนแท่นทอง · ป้ายข้อมูล
+ * v3 (2026-10-17): ใต้เวทีเป็นหน้าต่างโชว์เคส (ความหมาย 5 ด้าน · ใช่หรือไม่ · ถามไพ่ใบนี้) + รายชื่อซ้าย แบบ /spreads
+ * สีธาตุของไพ่ใช้ `--el` (ui2-page.css หัวข้อ 12 · `data-suit` บนกล่องนอกสุด)
+ * นำเข้าต่อจาก ui2-page.css · ไม่มี filter/backdrop/mask/อนิเมชันวน
+ */
+
+.v2-cd {
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+/* ── เวที ── */
+.v2-cd-stage {
+  display: grid;
+  gap: 26px;
+  align-items: center;
+  padding: 16px 0 40px;
+}
+@media (min-width: 1024px) {
+  .v2-cd-stage {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 0.85fr);
+    gap: 44px;
+    min-height: min(720px, calc(100svh - 120px));
+  }
+}
+.v2-cd-eyebrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(var(--el));
+}
+.v2-cd-eyebrow > span:first-child {
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--el), 0.45);
+}
+.v2-cd-count {
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--ui2-on-night-dim);
+}
+.v2-cd-title {
+  margin: 14px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(40px, 5.6vw, 72px);
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--ui2-on-night);
+  text-wrap: balance;
+}
+.v2-cd-en {
+  margin: 8px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: 20px;
+  font-style: italic;
+  color: rgb(var(--el));
+}
+.v2-cd-lede {
+  max-width: 460px;
+  margin: 16px 0 0;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--ui2-on-night-soft);
+  text-wrap: pretty;
+}
+.v2-cd-center {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+}
+@media (max-width: 1023px) {
+  .v2-cd-name {
+    text-align: center;
+  }
+  .v2-cd-eyebrow {
+    justify-content: center;
+  }
+  .v2-cd-lede {
+    margin-inline: auto;
+  }
+}
+/* สวิตช์หัวตั้ง/หัวกลับ */
+.v2-cd-flip {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+  max-width: 300px;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.28);
+  background: rgba(18, 14, 21, 0.85);
+}
+.ui2-pg .v2-cd-flip .v2-cd-flip-btn {
+  flex: 1;
+  min-height: 44px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ui2-on-night-soft);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.ui2-pg .v2-cd-flip .v2-cd-flip-btn[aria-pressed="true"] {
+  background: linear-gradient(180deg, #FFE3A8 0%, #F0C470 100%);
+  color: var(--ui2-night);
+}
+
+/* ป้ายข้อมูล */
+.v2-cd-placard {
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 217, 143, 0.26);
+  background: linear-gradient(180deg, rgba(43, 33, 48, 0.85) 0%, rgba(22, 17, 26, 0.85) 100%);
+  box-shadow: inset 0 0 0 5px rgba(12, 10, 15, 0.3), inset 0 0 0 6px rgba(255, 217, 143, 0.1);
+}
+.v2-cd-placard dl {
+  display: grid;
+  margin: 0 0 6px;
+}
+.v2-cd-placard dl > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px dashed rgba(255, 236, 200, 0.12);
+}
+.v2-cd-placard dt {
+  font-size: 12.5px;
+  color: var(--ui2-on-night-dim);
+}
+.v2-cd-placard dd {
+  text-transform: capitalize;
+  margin: 0;
+  text-align: right;
+  font-size: 14.5px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--ui2-on-night);
+}
+.v2-cd-placard [data-tone="yes"] dd {
+  color: #8FD39C;
+}
+.v2-cd-placard [data-tone="no"] dd {
+  color: #F2A38F;
+}
+.v2-cd .v2-cd-go {
+  justify-content: center;
+  background: linear-gradient(180deg, #FFE3A8 0%, #F0C470 100%);
+  color: var(--ui2-night);
+}
+.v2-cd-sub {
+  justify-self: center;
+  font-size: 13px;
+  color: var(--ui2-on-night-dim);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* ── v3: เนื้อหาใต้เวทีเป็นหน้าต่างโชว์เคส (Ui2Showcase · เจ้าของ 2026-10-17) ── */
+.v2-cd .ui2-sx {
+  margin-top: 8px;
+}
+.v3-cd-side-k {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ui2-gold-solid);
+}
+.v3-cd-kw {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 26px;
+  padding: 0;
+  list-style: none;
+}
+.v3-cd-kw li {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--el), 0.35);
+  background: rgba(var(--el), 0.08);
+  font-family: var(--ui2-font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ui2-on-night);
+}
+/* สวิตช์หัวตั้ง/หัวกลับในหัวหน้าต่าง (ตะขอเดียวกับใต้ไพ่ · card-orientation.ts) — กว้างพอ ไม่ตัดคำ */
+.v3-cd-flip {
+  width: 300px;
+  max-width: 100%;
+  margin: 0;
+}
+.ui2-pg .v3-cd-flip .v2-cd-flip-btn {
+  white-space: nowrap;
+  padding-inline: 14px;
+}
+.v2-cd-yesno {
+  max-width: 860px;
+}
+
+/* ── ห้องความหมาย ── */
+.v2-cd-h2 {
+  margin: 0 0 18px;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(22px, 2.6vw, 30px);
+  font-weight: 700;
+  color: var(--ui2-on-night);
+}
+.v2-cd-room-grid {
+  display: grid;
+  gap: 12px;
+}
+@media (min-width: 900px) {
+  .v2-cd-room-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .v2-cd-room[data-room="general"] {
+    grid-column: 1 / -1;
+  }
+}
+.v2-cd-room {
+  --rm: 255, 217, 143;
+  position: relative;
+  padding: 22px 22px 22px 26px;
+  border-radius: 22px;
+  border: 1px solid rgba(var(--rm), 0.22);
+  background: radial-gradient(70% 120% at 0% 0%, rgba(var(--rm), 0.12) 0%, rgba(var(--rm), 0) 70%), rgba(28, 23, 30, 0.75);
+}
+.v2-cd-room::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 22px;
+  bottom: 22px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: rgb(var(--rm));
+}
+.v2-cd-room[data-room="love"] {
+  --rm: 240, 150, 170;
+}
+.v2-cd-room[data-room="work"] {
+  --rm: 240, 176, 96;
+}
+.v2-cd-room[data-room="money"] {
+  --rm: 150, 208, 140;
+}
+.v2-cd-room[data-room="self"] {
+  --rm: 180, 160, 245;
+}
+.v2-cd-room h4 {
+  margin: 0 0 8px;
+  font-family: var(--ui2-font-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: rgb(var(--rm));
+}
+.v2-cd-room p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--ui2-on-night-soft);
+  text-wrap: pretty;
+}
+
+/* ── ใบก่อน/ถัดไป ── */
+.v2-cd-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 40px;
+}
+.v2-cd-nav-a {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 236, 200, 0.12);
+  background: rgba(28, 23, 30, 0.7);
+  transition: border-color var(--dur-fast) var(--ease-out), translate var(--dur-fast) var(--ease-out);
+}
+.v2-cd-nav-a:hover {
+  translate: 0 -2px;
+  border-color: rgba(255, 217, 143, 0.5);
+}
+.v2-cd-nav-a.is-next {
+  justify-content: flex-end;
+  text-align: right;
+}
+.v2-cd-nav-img {
+  display: block;
+  flex: none;
+  width: 48px;
+  height: 82px;
+  overflow: hidden;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.4);
+}
+.v2-cd-nav-a small {
+  display: block;
+  font-size: 12px;
+  color: var(--ui2-on-night-dim);
+}
+.v2-cd-nav-a b {
+  display: block;
+  margin-top: 2px;
+  font-size: 15px;
+  color: var(--ui2-on-night);
+  overflow-wrap: anywhere;
+}
+
+/* ── ส่วนท้ายใต้หน้าต่างโชว์เคส (ไพ่ใกล้เคียง · ผังที่ใช้ไพ่ใบนี้) ──
+   เจ้าของ 2026-10-17 ส่งภาพ "ทับ และซ้อนกัน": แผงไพ่ใกล้เคียงชิดขอบล่างหน้าต่างที่ 03 จนมุมซ้อนกัน
+   และกว้างเต็มจนลอดใต้รายชื่อหมวดซ้าย ➔ เว้นระยะ + คอม ≥ 1200 เยื้องเท่าคอลัมน์รายชื่อ (230 + ช่องไฟ 40) */
+.v3-cd-after {
+  display: grid;
+  gap: 28px;
+  margin-top: 40px;
+}
+.v3-cd-after > .page-band {
+  margin: 0;
+  padding-block: 26px;
+}
+@media (min-width: 1200px) {
+  .v3-cd-after {
+    margin-top: 56px;
+    padding-left: 310px;
+  }
+}
+@media (min-width: 1280px) {
+  .v3-cd-after {
+    padding-left: 340px;
+  }
+}
+/* ป้าย "5 ใบ · self" ของผังที่ใช้ไพ่ใบนี้ — เดิมตัวพิมพ์ดีด 11px อ่านยาก/แข็ง ➔ ตัวหัวข้อ UI 2.0 สีทอง (เจ้าของ 2026-10-17 ปรับฟอนต์มือถือ) */
+.v3-csl-k {
+  font-family: var(--ui2-font-display);
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ui2-gold-solid);
+}

@@ -616,7 +616,7 @@ export function BookingFlow(props: BookingFlowProps) {
                 onClick={goDetails}
                 className="btn-gold-glass flex min-h-[48px] shrink-0 items-center justify-center gap-2 px-5 text-sm font-bold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2"
               >
-                ใช้เวลานี้ <span aria-hidden="true">→</span>
+                ใช้เวลานี้
               </button>
             ) : (
               <span className="shrink-0 text-right leading-none">
@@ -631,7 +631,7 @@ export function BookingFlow(props: BookingFlowProps) {
             onClick={goDetails}
             className="btn-gold-glass flex min-h-[52px] w-full items-center justify-center gap-2 px-6 text-base font-bold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2"
           >
-            ถัดไป: ใส่ชื่อและคำถาม <span aria-hidden="true">→</span>
+            ถัดไป: ใส่ชื่อและคำถาม
           </button>
         ) : (
           <div className="space-y-2">

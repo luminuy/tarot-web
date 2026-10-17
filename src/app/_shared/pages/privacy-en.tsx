@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2DocHead } from "@/components/ui2/Ui2PageHero";
 
 const privacyOgImages = buildPageOgImage({
   title: "Privacy Policy & Data Rights",
@@ -38,16 +39,16 @@ export const privacyMetadataEn: Metadata = {
 export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen text-ink">
-      <div className="max-w-3xl mx-auto px-6 pt-16 space-y-10">
+      <div className="v2-doc">
         {/* Header */}
-        <div className="text-center space-y-3 pb-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif"><ThaiPhrases>
-            Privacy Policy &amp; Data Protection
-          </ThaiPhrases></h1>
-          <p className="text-xs text-muted">
-            Compliance Framework for PDPA (B.E. 2562), GDPR (EU 2016/679), and CCPA/CPRA
-          </p>
-        </div>
+        <Ui2DocHead
+          kind="lock"
+          crumbs={[{ label: "Home", href: "/" }, { label: "Privacy" }]}
+          title="Privacy Policy & Data Protection"
+          accent="Privacy Policy"
+          kicker="PDPA · GDPR · CCPA"
+          lede="Compliance Framework for PDPA (B.E. 2562), GDPR (EU 2016/679), and CCPA/CPRA"
+        />
 
         {/* Section 1 */}
         <section className="page-band page-band-compact page-band-tint space-y-3">

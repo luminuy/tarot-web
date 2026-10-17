@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
-import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
+import { DailyArticle } from "@/components/daily/DailyArticle";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
+import { CardImage } from "@/components/card/CardImage";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
-import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 const dailyOgImages = buildPageOgImage({
   title: "ดูดวงไพ่ยิปซีรายวัน",
@@ -120,11 +121,14 @@ const DAILY_FAQS = [
 ];
 
 const DAILY_LINKS = [
-  { href: "/cards", label: "สารานุกรมไพ่ 78 ใบ" },
-  { href: "/love/1-card", label: "ดูดวงความรัก 1 ใบ" },
-  { href: "/cards/birth-card", label: "คำนวณไพ่ประจำตัว" },
-  { href: "/spreads", label: "ผังพยากรณ์ 26 แบบ" },
+  { href: "/cards", label: "สารานุกรมไพ่ 78 ใบ", note: "ความหมายไพ่ครบทั้งสำรับ 1909 ทุกด้านของชีวิต", card: "major-21" },
+  { href: "/love/1-card", label: "ดูดวงความรัก 1 ใบ", note: "เช็กหัวใจวันนี้ ทั้งคนโสด คนคุย และคนมีคู่", card: "major-06" },
+  { href: "/cards/birth-card", label: "คำนวณไพ่ประจำตัว", note: "ใส่วันเกิด แล้วดูไพ่ที่บอกตัวตนและพรสวรรค์", card: "major-09" },
+  { href: "/spreads", label: "ผังพยากรณ์ 26 แบบ", note: "อยากถามลึกกว่า 1 ใบ เลือกผังที่ตรงเรื่อง", card: "major-10" },
 ];
+
+/** ไพ่ตกแต่งรอบหัวหน้า (ภาพประกอบ ไม่ใช่ผลสุ่ม) — ไพ่ของแสงเช้า */
+export const DAILY_DECO_CARDS = ["major-19", "major-17", "major-01", "major-14", "major-21", "major-03"] as const;
 
 /** `ritual` = พิธีเปิดไพ่ (island ตัวเดียวของหน้านี้) ส่งเข้ามาจากข้างนอก */
 export function DailyBodyTh({ ritual }: { ritual: ReactNode }) {
@@ -143,55 +147,74 @@ export function DailyBodyTh({ ritual }: { ritual: ReactNode }) {
         dangerouslySetInnerHTML={{ __html: jsonLdScript(softwareApplicationJsonLd) }}
       />
 
-      <main id="main-content" tabIndex={-1} className="min-h-screen py-6 sm:py-10 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* ห่อ div — <astro-island> เป็น display:contents จึงไม่รับระยะจาก space-y ทำให้กล่องพิธีชิดกล่องบทความ */}
-          <div>{ritual}</div>
+      <main id="main-content" tabIndex={-1} data-ui2-page-dark="" className="ui2-dy ui2-dy-main min-h-screen font-sans relative overflow-x-clip px-4 sm:px-8">
+        <DailyStage>{ritual}</DailyStage>
 
-          <SeoArticleShell
-            eyebrow="ทำความเข้าใจไพ่ยิปซีรายวัน"
-            title="ศาสตร์แห่งการเปิดไพ่ยิปซีรายวัน: กระจกส่องจิตและสติสัมปชัญญะ"
-            faqs={DAILY_FAQS}
-            links={DAILY_LINKS}
-          >
+        <DailyArticle
+          isEnglish={false}
+          eyebrow="ทำความเข้าใจไพ่ยิปซีรายวัน"
+          title="ศาสตร์แห่งการเปิดไพ่ยิปซีรายวัน: กระจกส่องจิตและสติสัมปชัญญะ"
+          intro={
             <p>
               การเปิดไพ่ประจำวันไม่ใช่การทำนายโชคชะตาแบบงมงาย แต่เป็นวิธีง่าย ๆ ให้เราหยุดทบทวนใจตัวเองวันละครั้ง
               ภาพบนไพ่แต่ละใบเป็นเรื่องราวที่คนทุกยุคเข้าใจตรงกัน เช่น การเริ่มต้นใหม่ การรอคอย หรือการปล่อยวาง
               พอเห็นภาพแล้ว เรามักนึกถึงเรื่องที่กำลังเจออยู่ได้เอง
               (นักจิตวิทยา คาร์ล ยุง เรียกภาพแบบนี้ว่าภาพต้นแบบในใจคน)
             </p>
-
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
-              วิธีรับพลังงานจากไพ่ประจำวัน ให้เกิดประโยชน์สูงสุด
-            </ThaiPhrases></h3>
-            <ul className="list-disc pl-5 space-y-2 text-muted">
-              <li>
-                <strong className="text-ink">การตั้งจิตอธิษฐานในตอนเช้า:</strong> ก่อนเริ่มทำงาน ให้หลับตาและหายใจเข้าลึก ๆ
-                สังเกตอารมณ์ความรู้สึกปัจจุบัน แล้วจึงแตะเลือกไพ่ด้วยสมาธิที่นิ่งสงบ
-              </li>
-              <li>
-                <strong className="text-ink">พิจารณาสัญลักษณ์ในภาพ 1909 Rider-Waite:</strong> สำรับดั้งเดิมของ อาเธอร์ เอ็ดเวิร์ด เวท
-                และ พาเมลา คอลแมน สมิธ เต็มไปด้วยรหัสสัญลักษณ์ลึกซึ้ง เช่น สีสัน ธาตุประจำไพ่ และท่วงท่าของตัวละคร
-                ซึ่งมักสื่อความหมายตรงกับสถานการณ์ที่คุณกำลังจะเผชิญ
-              </li>
-              <li>
-                <strong className="text-ink">การทบทวนเมื่อสิ้นสุดวัน (Evening Reflection):</strong> ก่อนนอน ลองหวนนึกถึงไพ่ที่เปิดได้ในตอนเช้า
-                เทียบกับเหตุการณ์จริงที่เกิดขึ้น เพื่อฝึกฝนสัญชาตญาณและการตระหนักรู้ในตนเอง
-              </li>
-            </ul>
-
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
-              ทำไมไพ่ของเราถึงสุ่มจริง ตรวจสอบได้?
-            </ThaiPhrases></h3>
+          }
+          tipsTitle="วิธีรับพลังงานจากไพ่ประจำวัน ให้เกิดประโยชน์สูงสุด"
+          tips={[
+            {
+              title: "ตั้งใจตอนเช้า",
+              body: "ก่อนเริ่มทำงาน หลับตาหายใจเข้าลึก ๆ สังเกตอารมณ์ตอนนี้ แล้วค่อยแตะเลือกไพ่ด้วยใจที่นิ่ง",
+            },
+            {
+              title: "ดูภาพไพ่ 1909 Rider-Waite ให้ละเอียด",
+              body: "สำรับดั้งเดิมของ อาเธอร์ เอ็ดเวิร์ด เวท และ พาเมลา คอลแมน สมิธ ซ่อนความหมายไว้ในสี ธาตุ และท่าทางของตัวละคร ซึ่งมักตรงกับเรื่องที่คุณกำลังจะเจอ",
+            },
+            {
+              title: "ทบทวนก่อนนอน",
+              body: "นึกถึงไพ่ที่เปิดตอนเช้า เทียบกับเรื่องที่เกิดขึ้นจริง ทำทุกวันจะฝึกสัญชาตญาณและการรู้ทันใจตัวเองได้ดีที่สุด",
+            },
+          ]}
+          trustTitle="ทำไมไพ่ของเราถึงสุ่มจริง ตรวจสอบได้?"
+          trust={
             <p>
               ที่ SeerTarot เรายึดมั่นในความซื่อตรงและความโปร่งใสสูงสุด ทุกครั้งที่คุณกดสับไพ่
               ระบบจะสุ่มลำดับไพ่ด้วยตัวสุ่มมาตรฐานเดียวกับที่ใช้ในระบบความปลอดภัย
               แล้วล็อกลำดับไว้ให้คุณตรวจย้อนหลังได้ ไม่มีการแอบเลือกผล ไม่มีการแอบแฝงโฆษณา และไม่มีการกุไพ่ใบใดขึ้นมาเองเด็ดขาด
               เพื่อให้คุณมั่นใจได้ว่าคำทำนายทุกใบมาจากสมาธิและกระแสจิตของคุณอย่างแท้จริง
             </p>
-          </SeoArticleShell>
-        </div>
+          }
+          faqs={DAILY_FAQS}
+          links={DAILY_LINKS}
+        />
+        {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+        <Ui2NextSteps isEn={false} keys={["spreads", "pick", "journal", "questions"]} />
       </main>
     </>
+  );
+}
+
+/**
+ * 🌅 เวทีพิธีเช้า (UI 2.0 กลางคืน + แสงรุ่งอรุณ) — ใช้ร่วมกันทั้ง `/daily` และ `/en/daily`
+ * ไพ่จริงลอยรอบหัวหน้า (ตกแต่งล้วน · aria-hidden) · lite เห็น 2 ใบนิ่งที่มุม
+ */
+export function DailyStage({ children }: { children: ReactNode }) {
+  return (
+    <section className="ui2-sec ui2-night ui2-dy-stage" data-ui2-dark="" data-anim-section="">
+      <span className="ui2-stars ui2-loop" aria-hidden="true" />
+      <span className="ui2-stars ui2-stars-2 ui2-loop" aria-hidden="true" />
+      <span className="ui2-dy-dawn" aria-hidden="true" />
+      <span className="ui2-dy-deco" aria-hidden="true">
+        {DAILY_DECO_CARDS.map((cardId, i) => (
+          <span key={cardId} className={`ui2-dy-deco-card ui2-loop ui2-dy-deco-${i + 1}`}>
+            <CardImage cardId={cardId} alt="" thumb sizes="(min-width: 768px) 80px, 44px" loading={i < 2 ? "eager" : "lazy"} fetchPriority="low" />
+          </span>
+        ))}
+      </span>
+      {/* ห่อ div — <astro-island> เป็น display:contents */}
+      <div className="ui2-wrap ui2-dy-wrap">{children}</div>
+    </section>
   );
 }

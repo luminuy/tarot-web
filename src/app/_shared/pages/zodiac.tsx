@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { GoldMark } from "@/components/ui/GoldMark";
 
 import { RitualHero } from "@/components/reading/one-card/RitualHero";
+import { Ui2Window } from "@/components/ui2/Ui2Showcase";
+import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
 import { SeoArticleShell, type SeoFaqItem } from "@/components/seo/SeoArticleShell";
 import { CardImage } from "@/components/card/CardImage";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
@@ -26,6 +27,7 @@ import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 
 /**
  * ✦ ไพ่ทาโรต์ × 12 ราศี — `/cards/zodiac` และ `/cards/zodiac/<ราศี>` (สองภาษา)
@@ -286,9 +288,12 @@ export function ZodiacIndexBody({
       <JsonLd data={faqJsonLd} />
       <div className="max-w-4xl mx-auto space-y-10">
         <RitualHero
+          tone="star"
           breadcrumbs={breadcrumbs}
           badgeText={isEnglish ? "Tarot × Astrology" : "ไพ่ทาโรต์ × โหราศาสตร์"}
           title={isEnglish ? "Zodiac Tarot Cards" : "ไพ่ประจำราศี 12 ราศี"}
+          accent={isEnglish ? "Zodiac" : "12 ราศี"}
+          cards={["major-04", "major-05", "major-06", "major-07", "major-08", "major-09"]}
           tagline={
             isEnglish
               ? "Every sign has its own tarot cards. Find yours from your birthday and see what the 1909 Rider-Waite deck says about your sign."
@@ -298,15 +303,22 @@ export function ZodiacIndexBody({
 
         {/* ห่อ div ทุกช่อง — <astro-island> เป็น display:contents จึงไม่รับ margin จาก space-y
             ถ้าไม่ห่อ ส่วนต่าง ๆ จะชิดกันจนหัวข้อทับขอบกล่องข้างบน (เจ้าของเห็นจากภาพหน้าจอ) */}
-        <div>{finder}</div>
+        {/* v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): ทุกส่วนเป็นหน้าต่างเลขกำกับแบบ /spreads */}
+        <Ui2Window n="01" kicker={isEnglish ? "Find your sign" : "Find your sign"} tone={7}>
+          {finder}
+        </Ui2Window>
 
-        {/* แถบสีสลับแบบหน้าแรก (`page-band`): วันนี้ (อ่อน) · ราศีคู่ (ใส) · รายชื่อ 12 ราศี (อ่อน) · บทความ (ใส) */}
-        <div className="page-band page-band-tint">{daily}</div>
+        <Ui2Window n="02" kicker="Today" tone={4}>
+          {daily}
+        </Ui2Window>
 
-        <div className="page-band">{compat}</div>
+        <Ui2Window n="03" kicker="Compatibility" tone={3}>
+          {compat}
+        </Ui2Window>
 
         {/* รายชื่อ 12 ราศีพร้อมช่วงวันเกิด — กะทัดรัด (วงล้อด้านบนมีภาพไพ่ครบแล้ว) */}
-        <section aria-labelledby="zodiac-list-title" className="page-band page-band-tint space-y-4">
+        <Ui2Window n="04" kicker="All twelve signs" tone={5}>
+        <section aria-labelledby="zodiac-list-title" className="space-y-4">
           <h2 id="zodiac-list-title" className="text-xl sm:text-2xl font-serif-th font-bold text-ink text-center"><ThaiPhrases>
             {isEnglish ? "All 12 signs and their dates" : "12 ราศีและช่วงวันเกิด"}
           </ThaiPhrases></h2>
@@ -343,9 +355,9 @@ export function ZodiacIndexBody({
             })}
           </ul>
         </section>
+        </Ui2Window>
 
         <SeoArticleShell
-          band="plain"
           eyebrow={isEnglish ? "How it works" : "ไพ่กับดวงดาวเกี่ยวกันอย่างไร"}
           title={
             isEnglish
@@ -408,6 +420,8 @@ export function ZodiacIndexBody({
           )}
         </SeoArticleShell>
       </div>
+      {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+      <Ui2NextSteps isEn={isEnglish} keys={["spreads", "birth", "journal", "cards"]} />
     </main>
   );
 }
@@ -464,22 +478,43 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
     <main id="main-content" tabIndex={-1} className="min-h-screen text-ink py-6 sm:py-10 px-4 sm:px-6 font-sans relative overflow-x-clip">
       <JsonLd data={breadcrumbJsonLd} />
       <div className="max-w-4xl mx-auto space-y-10">
-        <RitualHero
-          breadcrumbs={breadcrumbs}
-          badgeText={isEnglish ? `${sign.nameEn} · ${major.nameEn}` : `${sign.nameTh} · ${major.nameEn}`}
-          title={isEnglish ? `${sign.nameEn} Tarot Cards` : `ดูดวง${sign.nameTh} ไพ่ยิปซีและไพ่ประจำราศี`}
-          tagline={copy.tagline}
-        />
-
-        {/* ข้อมูลราศีโดยย่อ */}
-        <dl className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-          {facts.map((f) => (
-            <div key={f.label} className="altar-card-porcelain rounded-xl p-3 text-center space-y-1">
-              <dt className="text-xs font-serif-th font-semibold text-muted">{f.label}</dt>
-              <dd className="text-sm font-serif-th font-bold text-ink">{f.value}</dd>
+        {/*
+          v2 (2026-10-16 "สร้างใหม่เลย") — แผนที่ดาวประจำราศี
+          ซ้าย: ชื่อราศี + คำโปรย + ป้ายข้อมูล 5 ข้อ · ขวา: ไพ่ประจำราศี + ไพ่ดาวผู้ครอง บนแผนที่ดาว
+          (v1/รอบก่อน: หัวใหญ่ ➔ กล่องข้อมูล 5 กล่อง ➔ ไพ่สองใบอยู่ลึกลงไปอีกสองส่วน)
+        */}
+        <header className="v2-zs-head">
+          <div className="v2-zs-text">
+            <Ui2Crumbs crumbs={breadcrumbs} />
+            <p className="v2-zs-k">{isEnglish ? `${sign.nameEn} · ${major.nameEn}` : `${sign.nameTh} · ${major.nameEn}`}</p>
+            <h1 className="v2-zs-title">
+              <ThaiPhrases>{isEnglish ? `${sign.nameEn} Tarot Cards` : `ดูดวง${sign.nameTh} ไพ่ยิปซีและไพ่ประจำราศี`}</ThaiPhrases>
+            </h1>
+            <p className="v2-zs-lede">
+              <ThaiPhrases>{copy.tagline}</ThaiPhrases>
+            </p>
+            <dl className="v2-zs-facts">
+              {facts.map((f) => (
+                <div key={f.label}>
+                  <dt>{f.label}</dt>
+                  <dd>{f.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+          <div className="v2-zs-sky">
+            <div className="v2-zs-cards">
+              <CardTile id={sign.majorCardId} label={isEnglish ? "Sign card" : "ไพ่ประจำราศี"} isEnglish={isEnglish} size="lg" />
+              <CardTile
+                id={sign.rulerCardId}
+                label={isEnglish ? `Ruler: ${sign.rulerEn}` : `ดาวผู้ครอง: ${sign.rulerTh}`}
+                isEnglish={isEnglish}
+                size="lg"
+              />
             </div>
-          ))}
-        </dl>
+            <p className="v2-zs-advice">{copy.advice}</p>
+          </div>
+        </header>
 
         {/* ดวงรายวันของราศีนี้ — หัวข้อเป็น HTML ให้บอทเห็น ตัวไพ่มาจาก island (เปลี่ยนทุกวัน) */}
         <section aria-labelledby="zodiac-today" className="page-band page-band-tint space-y-4">
@@ -494,23 +529,6 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
             </p>
           </div>
           {daily}
-        </section>
-
-        {/* ไพ่สองใบหลัก */}
-        <section aria-labelledby="zodiac-main-cards" className="page-band space-y-6">
-          <h2 id="zodiac-main-cards" className="text-lg sm:text-xl font-serif-th font-bold text-ink text-center"><ThaiPhrases>
-            {isEnglish ? `The cards of ${sign.nameEn}` : `ไพ่หลักของ${sign.nameTh}`}
-          </ThaiPhrases></h2>
-          <div className="grid grid-cols-2 gap-4 sm:gap-8 max-w-md mx-auto">
-            <CardTile id={sign.majorCardId} label={isEnglish ? "Sign card" : "ไพ่ประจำราศี"} isEnglish={isEnglish} size="lg" />
-            <CardTile
-              id={sign.rulerCardId}
-              label={isEnglish ? `Ruler: ${sign.rulerEn}` : `ดาวผู้ครอง: ${sign.rulerTh}`}
-              isEnglish={isEnglish}
-              size="lg"
-            />
-          </div>
-          <p className="text-sm text-ink font-sans leading-relaxed text-center max-w-2xl mx-auto">{copy.advice}</p>
         </section>
 
         {/* ในโหราศาสตร์ไทย — เจ้าเรือนต่างจากสากลเฉพาะพิจิก กุมภ์ มีน */}
@@ -573,7 +591,7 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
                     {aspect.name}
                     <span aria-hidden="true" className="ml-2 inline-flex items-center gap-1.5 text-gold-ink">
                       {Array.from({ length: aspect.harmony }, (_, i) => (
-                        <GoldMark key={i} />
+                        <span key={i} className="h-1 w-4 rounded-full bg-current" />
                       ))}
                     </span>
                   </p>
@@ -647,17 +665,19 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
           </div>
           <nav aria-label={isEnglish ? "Other signs" : "ราศีอื่น"} className="flex justify-between gap-3 pt-4 border-t border-line text-sm font-serif-th">
             <Link href={zodiacSignPath(prev.id)} className="text-muted hover:text-gold-ink transition-colors">
-              ← {isEnglish ? prev.nameEn : prev.nameTh}
+              {isEnglish ? prev.nameEn : prev.nameTh}
             </Link>
             <Link href={INDEX_PATH} className="text-muted hover:text-gold-ink transition-colors">
               {isEnglish ? "All signs" : "ทุกราศี"}
             </Link>
             <Link href={zodiacSignPath(next.id)} className="text-muted hover:text-gold-ink transition-colors">
-              {isEnglish ? next.nameEn : next.nameTh} →
+              {isEnglish ? next.nameEn : next.nameTh}
             </Link>
           </nav>
         </section>
       </div>
+      {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+      <Ui2NextSteps isEn={isEnglish} keys={["spreads", "birth", "journal", "cards"]} />
     </main>
   );
 }

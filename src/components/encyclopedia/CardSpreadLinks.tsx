@@ -72,7 +72,7 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
             href={href("/spreads")}
             className="text-xs font-serif-th text-muted hover:text-gold-ink transition-colors"
           >
-            {isEnglish ? "All spreads →" : "ดูผังทั้งหมด →"}
+            {isEnglish ? "All spreads" : "ดูผังทั้งหมด"}
           </Link>
         </div>
 
@@ -84,19 +84,19 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
               className="altar-card-porcelain p-3.5 !rounded-xl flex flex-col justify-between group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
             >
               <div>
-                <span className="text-[11px] font-mono font-bold text-gold-ink block mb-1">
-                  {spread.positions.length} {isEnglish ? "cards" : "ใบ"} · {spread.defaultCategory}
+                <span className="v3-csl-k block mb-1">
+                  {spread.positions.length} {isEnglish ? "cards" : "ใบ"}
                 </span>
-                <span className="font-serif-th text-xs sm:text-sm font-bold text-ink group-hover:text-gold-ink transition-colors block">
+                <span className="text-sm font-semibold text-ink group-hover:text-gold-ink transition-colors block">
                   {isEnglish ? spread.nameEn : spread.nameTh}
                 </span>
-                <p className="font-serif-th text-[11px] text-muted mt-1 line-clamp-2">
+                <p className="text-xs text-muted mt-1 line-clamp-2">
                   {isEnglish ? spread.taglineEn : spread.tagline}
                 </p>
               </div>
               <div className="pt-2 mt-2 border-t border-line/40 text-right">
                 <span className="text-[11px] font-serif-th text-gold-ink group-hover:underline">
-                  {isEnglish ? "Start this spread →" : "เริ่มเปิดไพ่ผังนี้ →"}
+                  {isEnglish ? "Start this spread" : "เริ่มเปิดไพ่ผังนี้"}
                 </span>
               </div>
             </Link>
@@ -117,7 +117,7 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
               href="/blog"
               className="text-xs font-serif-th text-muted hover:text-gold-ink transition-colors"
             >
-              คลังบทความทั้งหมด →
+              คลังบทความทั้งหมด
             </Link>
           </div>
 
@@ -135,13 +135,13 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
                   <h3 className="font-serif-th text-xs sm:text-sm font-bold text-ink group-hover:text-gold-ink transition-colors line-clamp-2"><ThaiPhrases>
                     {article.title}
                   </ThaiPhrases></h3>
-                  <p className="font-serif-th text-[11px] text-muted mt-1 line-clamp-2">
+                  <p className="text-xs text-muted mt-1 line-clamp-2">
                     {article.description}
                   </p>
                 </div>
                 <div className="pt-2 mt-2 border-t border-line/40 text-right">
                   <span className="text-[11px] font-serif-th text-gold-ink group-hover:underline">
-                    อ่านบทความ →
+                    อ่านบทความ
                   </span>
                 </div>
               </Link>

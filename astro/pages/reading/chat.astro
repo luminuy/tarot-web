@@ -3,6 +3,8 @@ import { readingChatMetadataTh } from "@/app/_shared/pages/reading-chat-th";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { ReadingChatRootTh } from "../../islands/ReadingChatRoot";
+import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
 
 /**
  * 💬 ห้องสนทนากับแม่หมอ (ต้นไม้ภาษาไทย)
@@ -13,5 +15,12 @@ const locale = "th" as const;
 ---
 
 <BaseLayout hasSiteHeader={false} locale={locale} metadata={readingChatMetadataTh}>
+  <div class="ui2-pg" data-ui2-page-dark="">
   <ReadingChatRootTh client:load />
+  </div>
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../scripts/ui2-inview";
+</script>

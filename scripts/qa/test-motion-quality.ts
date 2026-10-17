@@ -337,14 +337,96 @@ function checkCss(violations: Violation[]): void {
         });
       }
 
-      // กฎ 2 (ฝั่ง CSS)
-      if (/backdrop-filter\s*:/.test(line)) {
+      // กฎ 2 (ฝั่ง CSS) — ไฟล์เอฟเฟกต์ระดับ full ของ UI 2.0 ตรวจโครงสร้างแยกใน checkUi2FullFx() แทน
+      if (/backdrop-filter\s*:/.test(line) && !UI2_FULL_FX_FILES.includes(r)) {
         violations.push({
           ...at,
           rule: "2 · backdrop-filter (INC-0056)",
           hint: "ใช้พื้นทึบแทน",
         });
       }
+    }
+  }
+}
+
+/**
+ * กฎ 2b — ผ่อนผัน backdrop-filter ให้ไฟล์เดียว: เอฟเฟกต์ระดับ full ของ SeerTarot UI 2.0
+ * ---------------------------------------------------------------------------
+ * เจ้าของสั่ง (2026-10-12 แผน UI_2_0 หัวข้อ 0 · 3): คอม + iPad ได้เอฟเฟกต์เต็ม รวมกระจกเบลอ · มือถือต้องเบา
+ * ผ่อนผันได้เฉพาะเมื่อ **ทุกกฎในไฟล์** ขึ้นต้น `[data-fx="full"]` และอยู่ใต้ `@media (min-width: 768px)`
+ * (มือถือ · RAM ≤ 4GB · ประหยัดข้อมูล · ตกเกณฑ์ FPS · ลดการเคลื่อนไหว ไม่มีวันได้ระดับ full)
+ *
+ * 📏 ตัวเลขที่วัด (Chromium headless บนเครื่อง CI-like · ซอฟต์แวร์เรนเดอร์ ไม่มี GPU — แย่กว่าเครื่องจริงมาก)
+ *    เลื่อนหน้าแรกทั้งหน้าที่ 1440×900 · ค่ากลางเวลาเฟรม: ดูบันทึกใน WORK_LOG รอบ 242 (ทั้ง full และ lite)
+ *    ⚠️ เกณฑ์รับงานบนเครื่องจริง (แผนหัวข้อ 8: iPad รุ่นที่ 9 · MacBook Air 2020 ≥ 55–58fps) ยังต้องวัดก่อนขึ้น
+ *    และตัวกันพัง FPS (`astro/scripts/ui2-home.ts`) ลดเป็น lite เองเมื่อค่ากลาง > 22ms
+ * ด่าน `test-ui2-fx` ตรวจซ้ำบน CSS ที่บิลด์แล้ว (ตัวย่ออาจย้ายกฎ)
+ */
+/** ไฟล์เอฟเฟกต์ระดับ full — หน้าแรก + คลังผัง /spreads (แต่ละหน้าโหลดไฟล์ของตัวเอง · กติกาล็อกสองชั้นเดียวกันทุกไฟล์) */
+const UI2_FULL_FX_FILES = ["src/styles/ui2-fx-full.css", "src/styles/ui2-spreads-fx.css", "src/styles/ui2-daily-fx.css", "src/styles/ui2-page-fx.css"];
+
+function checkUi2FullFx(violations: Violation[]): void {
+  for (const file of UI2_FULL_FX_FILES) checkUi2FullFxFile(file, violations);
+}
+
+function checkUi2FullFxFile(UI2_FULL_FX_FILE: string, violations: Violation[]): void {
+  const abs = path.join(ROOT, UI2_FULL_FX_FILE);
+  if (!fs.existsSync(abs)) return;
+  const lines = fs.readFileSync(abs, "utf-8").split("\n");
+  let depth = 0;
+  const stack: string[] = [];
+  let inComment = false;
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    // ตัดคอมเมนต์ /* … */ (ข้ามบรรทัดได้)
+    if (inComment) {
+      const end = line.indexOf("*/");
+      if (end < 0) continue;
+      line = line.slice(end + 2);
+      inComment = false;
+    }
+    line = line.replace(/\/\*.*?\*\//g, "");
+    const open = line.indexOf("/*");
+    if (open >= 0) {
+      inComment = true;
+      line = line.slice(0, open);
+    }
+    const t = line.trim();
+    if (!t) continue;
+    if (t.endsWith("{")) {
+      const prelude = t.slice(0, -1).trim();
+      const inKeyframes = stack.some((p) => p.startsWith("@keyframes"));
+      if (!prelude.startsWith("@") && !inKeyframes && !/^(from|to|\d+%)/.test(prelude)) {
+        const selectors = prelude.split(",").map((x) => x.trim()).filter(Boolean);
+        const gatedMedia = stack.some((p) => /^@media\b.*min-width:\s*768px/.test(p));
+        if (!gatedMedia || !selectors.every((x) => x.startsWith('[data-fx="full"]'))) {
+          violations.push({
+            rule: "2b · เอฟเฟกต์ระดับ full ต้องล็อกสองชั้น",
+            file: UI2_FULL_FX_FILE,
+            line: i + 1,
+            code: t.slice(0, 160),
+            hint: 'ทุกกฎต้องขึ้นต้น [data-fx="full"] และอยู่ใต้ @media (min-width: 768px) — ไม่งั้นมือถือได้ของหนักไปด้วย (INC-0056)',
+          });
+        }
+      }
+      stack.push(prelude);
+      depth += 1;
+      continue;
+    }
+    if (t.startsWith("}")) {
+      stack.pop();
+      depth = Math.max(0, depth - 1);
+      continue;
+    }
+    // บรรทัดเดียวทั้งกฎ `x { a: b; }` — ไม่ใช้ในไฟล์นี้ ห้ามเพื่อให้ตรวจได้แน่นอน
+    if (t.includes("{") && t.includes("}") && !stack.some((p) => p.startsWith("@keyframes"))) {
+      violations.push({
+        rule: "2b · เขียนกฎหลายบรรทัด",
+        file: UI2_FULL_FX_FILE,
+        line: i + 1,
+        code: t.slice(0, 160),
+        hint: "แยกกฎเป็นหลายบรรทัด (selector {  …  }) ด่านนี้ตรวจทีละบรรทัด",
+      });
     }
   }
 }
@@ -827,6 +909,7 @@ function run(): void {
   checkUnscopedMotionDynamic(violations);
   checkUnregisteredTransformVars(violations);
   checkCss(violations);
+  checkUi2FullFx(violations);
   checkKeyframeCenteringConflict(violations);
   checkTokens(violations);
   checkContentVisibility(violations);

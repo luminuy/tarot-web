@@ -12,6 +12,8 @@ import { getArticleCardArt } from "@/data/article-art";
 import { CardImage } from "@/components/card/CardImage";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { Ui2Showcase, type Ui2ShowcaseSection } from "@/components/ui2/Ui2Showcase";
 
 const SearchIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
   <svg
@@ -47,332 +49,192 @@ export interface BlogIndexClientProps {
   articles: BlogCardItem[];
 }
 
+/** หมวดบทความ = หน้าต่างโชว์เคส (สีหมวด · คำอังกฤษเอียง) — เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง" */
 const CATEGORIES = [
-  { id: "all", labelTh: "ทั้งหมด", labelEn: "All Articles" },
-  { id: "love", labelTh: "ความรัก & เนื้อคู่", labelEn: "Love & Soulmates" },
-  { id: "career", labelTh: "การงาน & การเงิน", labelEn: "Career & Abundance" },
-  { id: "spreads", labelTh: "ผังการเปิดไพ่", labelEn: "Tarot Spreads" },
-  { id: "cards", labelTh: "ความหมายไพ่", labelEn: "Card Meanings" },
-  { id: "wisdom", labelTh: "จิตวิทยา & AI", labelEn: "Psychology & AI" },
-];
+  { id: "love", labelTh: "ความรัก & เนื้อคู่", labelEn: "Love & Soulmates", kicker: "Love", tone: 3, leadTh: "ใจเขา ใจเรา คนคุย แฟนเก่า และวิธีอ่านไพ่ความรักให้ตรง", leadEn: "Their feelings, yours, exes and reading love spreads well" },
+  { id: "career", labelTh: "การงาน & การเงิน", labelEn: "Career & Abundance", kicker: "Work · Money", tone: 1, leadTh: "งาน เงิน การตัดสินใจ และจังหวะชีวิตที่จับต้องได้", leadEn: "Work, money, decisions and the timing of real life" },
+  { id: "spreads", labelTh: "ผังการเปิดไพ่", labelEn: "Tarot Spreads", kicker: "Spreads", tone: 4, leadTh: "เลือกผังให้ตรงคำถาม และอ่านแต่ละตำแหน่งให้เป็น", leadEn: "Pick the right spread and read every position" },
+  { id: "cards", labelTh: "ความหมายไพ่", labelEn: "Card Meanings", kicker: "Card Meanings", tone: 2, leadTh: "เจาะไพ่รายใบและรายชุด ภาพ สัญลักษณ์ และเรื่องเล่าเบื้องหลัง", leadEn: "Cards and suits in depth: imagery, symbols and their stories" },
+  { id: "wisdom", labelTh: "จิตวิทยา & AI", labelEn: "Psychology & AI", kicker: "Wisdom", tone: 5, leadTh: "ไพ่กับจิตวิทยาเชิงลึก ความเชื่อ และการอ่านไพ่ร่วมกับ AI", leadEn: "Tarot, depth psychology, belief and reading with AI" },
+] as const;
+
+/** ไพ่ลอยรอบหัวข้อ (ตกแต่ง · ไม่ใช่ผลสุ่ม) */
+const HERO_CARDS = ["major-06", "major-02", "major-17", "major-09", "cups-02", "major-21"] as const;
 
 export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) => {
   const { isEnglish, locale } = useLocale();
-  const [selectedCat, setSelectedCat] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  /** 📱 มือถือโชว์ 8 เรื่องแรกก่อน (เดิม 30 เรื่องยาว ~9,000px) — ที่เหลือยังอยู่ใน HTML ครบ ซ่อนด้วย CSS เท่านั้น */
-  const [showAllOnMobile, setShowAllOnMobile] = useState(false);
+  /** 📱 มือถือ: หมวดที่กดดูครบแล้ว (ปกติโชว์ 3 เรื่องแรกต่อหมวด · ที่เหลืออยู่ใน HTML ครบ ซ่อนด้วย CSS เท่านั้น) */
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set());
 
+  const q = searchQuery.trim().toLowerCase();
   const filtered = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (selectedCat === "all" && !q) return articles;
-
+    if (!q) return articles;
     return articles.filter((a) => {
-      const matchCat = selectedCat === "all" || a.category === selectedCat;
-      if (!matchCat) return false;
-      if (!q) return true;
-
-      const titleTh = a.title.toLowerCase();
-      const descTh = a.description.toLowerCase();
       const titleEn = getArticleTitle(a, "en").toLowerCase();
       const descEn = getArticleDescription(a, "en").toLowerCase();
-      const matchKeywords = a.keywords.some((k) => k.toLowerCase().includes(q));
-
       return (
-        titleTh.includes(q) ||
-        descTh.includes(q) ||
+        a.title.toLowerCase().includes(q) ||
+        a.description.toLowerCase().includes(q) ||
         titleEn.includes(q) ||
         descEn.includes(q) ||
-        matchKeywords
+        a.keywords.some((k) => k.toLowerCase().includes(q))
       );
     });
-  }, [articles, selectedCat, searchQuery]);
-  const previewOnMobile = !showAllOnMobile && selectedCat === "all" && !searchQuery.trim();
+  }, [articles, q]);
 
   const featured = articles[0];
+  const showCover = !q && !!featured;
+  const readTimeOf = (a: BlogCardItem) => (isEnglish ? a.readTime.replace("นาที", "min read") : a.readTime);
+  let artIndex = 0;
+
+  const row = (article: BlogCardItem) => {
+    const art = getArticleCardArt(article);
+    const title = getArticleTitle(article, locale);
+    const i = artIndex++;
+    return (
+      <article key={article.slug} className="v3-at">
+        <span className="v3-at-art" aria-hidden="true">
+          <CardImage image={art.image} alt="" sizes="96px" loading={i < 4 ? "eager" : "lazy"} />
+        </span>
+        <div className="v3-at-body">
+          <h3 className="v3-at-title">
+            <ThaiPhrases>
+              <Link href={`/blog/${article.slug}`} prefetch={false}>
+                {title}
+              </Link>
+            </ThaiPhrases>
+          </h3>
+          <p className="v3-at-desc">{getArticleDescription(article, locale)}</p>
+          <p className="v3-at-meta">{isEnglish ? `${readTimeOf(article)}` : `อ่าน ${readTimeOf(article)}`}</p>
+        </div>
+      </article>
+    );
+  };
+
+  const sections: Ui2ShowcaseSection[] = CATEGORIES.map((cat) => {
+    const all = articles.filter((a) => a.category === cat.id && !(showCover && a.slug === featured.slug));
+    const list = filtered.filter((a) => a.category === cat.id && !(showCover && a.slug === featured.slug));
+    const clipped = !q && !expanded.has(cat.id) && list.length > 3;
+    return {
+      id: `cat-${cat.id}`,
+      kicker: cat.kicker,
+      title: isEnglish ? cat.labelEn : cat.labelTh,
+      tone: cat.tone,
+      count: q ? list.length : all.length,
+      hidden: list.length === 0,
+      lead: <ThaiPhrases>{isEnglish ? cat.leadEn : cat.leadTh}</ThaiPhrases>,
+      meta: q
+        ? isEnglish
+          ? `${list.length} matching articles`
+          : `ตรงคำค้น ${list.length} เรื่อง`
+        : isEnglish
+          ? `${all.length} articles`
+          : `${all.length} บทความ`,
+      children: (
+        <>
+          <div className={`v3-at-grid${clipped ? " is-clipped" : ""}`}>{list.map(row)}</div>
+          {clipped && (
+            <p className="v3-at-more">
+              <button type="button" onClick={() => setExpanded((prev) => new Set(prev).add(cat.id))}>
+                {isEnglish ? `Show all ${list.length}` : `ดูอีก ${list.length - 3} เรื่อง`}
+              </button>
+            </p>
+          )}
+        </>
+      ),
+    };
+  });
 
   return (
-    <div className="space-y-10">
-      {/* Dynamic Bilingual Hero Header */}
-      <header className="text-center space-y-4 pt-2">
-        <p className="text-xs sm:text-sm font-semibold tracking-wider text-gold-ink uppercase font-serif-th">
-          {isEnglish
-            ? "SEERTAROT WISDOM CODEX & ESOTERIC ESSAYS"
-            : "คลังความรู้และคู่มือศาสตร์พยากรณ์"}
-        </p>
-        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold font-serif-th text-ink tracking-tight leading-tight"><ThaiPhrases>
-          {isEnglish
-            ? "Tarot Wisdom Codex & Divination Essays"
-            : "คัมภีร์บทความดูดวงไพ่ยิปซี ทาโรต์ 1909"}
-        </ThaiPhrases></h1>
-        <p className="text-xs sm:text-sm md:text-base text-muted max-w-2xl mx-auto leading-relaxed font-serif-th">
-          {isEnglish
-            ? "Explore depth psychology, Jungian archetypes, archetypal symbolism, and master guides for love, career, and 26 sacred spreads rooted in the authentic 1909 Rider-Waite lineage."
-            : "เจาะลึกศาสตร์ไพ่ทาโรต์ดั้งเดิม 1909 Rider-Waite จิตวิทยาเชิงลึก ปรัชญา คาร์ล ยุง และคู่มือการอ่านไพ่ความรัก การงาน และผังพยากรณ์ทั้ง 26 แบบ โดยวิหาร SeerTarot"}
-        </p>
-      </header>
-
-      {/* Search & Category Filter Bar */}
-      <div className="space-y-4">
-        {/* Search Input — Soft Porcelain with Taupe border and Gold Accent */}
-        <div className="relative max-w-xl mx-auto">
+    <div className="v3-bl">
+      <Ui2PageHero
+        crumbs={[{ label: isEnglish ? "Home" : "หน้าแรก", href: "/" }, { label: isEnglish ? "Articles" : "บทความ" }]}
+        title={isEnglish ? "Tarot Wisdom Codex & Divination Essays" : "คัมภีร์บทความ ดูดวงไพ่ยิปซี ทาโรต์ 1909"}
+        accent={isEnglish ? "Tarot Wisdom Codex" : "คัมภีร์บทความ"}
+        lede={
+          <ThaiPhrases>
+            {isEnglish
+              ? "Depth psychology, symbolism, and practical guides for love, career and all 26 spreads."
+              : "เจาะลึกศาสตร์ไพ่ทาโรต์ดั้งเดิม จิตวิทยาเชิงลึก และคู่มือการอ่านไพ่ความรัก การงาน และผังพยากรณ์ทั้ง 26 แบบ"}
+          </ThaiPhrases>
+        }
+        trust={[
+          isEnglish ? `${articles.length} articles` : `รวม ${articles.length} บทความ`,
+          isEnglish ? "Rooted in the 1909 Rider-Waite deck" : "อ้างอิงไพ่ต้นฉบับ 1909 Rider-Waite",
+        ]}
+        cards={HERO_CARDS}
+      >
+        <label className="v3-bl-search">
+          <SearchIcon className="v3-bl-search-ic" />
           <input
-              aria-label={isEnglish ? "Search articles" : "ค้นหาบทความ"}
-            type="text"
+            aria-label={isEnglish ? "Search articles" : "ค้นหาบทความ"}
+            type="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={
-              isEnglish
-                ? "Search articles or card meanings"
-                : "ค้นหาบทความ หรือความหมายไพ่"
-            }
-            className="glass-field w-full border border-line-interactive rounded-2xl px-5 py-3.5 pl-11 text-xs sm:text-sm text-ink placeholder:text-muted/70 focus:outline-none focus:border-gold-ink focus:ring-1 focus:ring-gold-ink transition font-serif-th"
+            placeholder={isEnglish ? "Search articles or card meanings" : "ค้นหาบทความ หรือความหมายไพ่"}
           />
-          <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-ink" />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-muted hover:text-gold-ink cursor-pointer font-serif-th"
-            >
-              {isEnglish ? "✕ Clear" : "✕ ล้าง"}
-            </button>
-          )}
-        </div>
+        </label>
+      </Ui2PageHero>
 
-        {/* Category Filter Pills — Quiet Luxury Styling */}
-        <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-          {CATEGORIES.map((cat) => {
-            const isSelected = selectedCat === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => {
-                  import("@/lib/utils/audio")
-                    .then(({ soundManager }) => soundManager.playMenuTapSound())
-                    .catch(() => {});
-                  setSelectedCat(cat.id);
-                }}
-                className={`tap-overlay-y rounded-full px-4 py-1.5 text-xs font-serif-th font-semibold transition cursor-pointer flex items-center gap-1.5 ${
-                  isSelected
-                    ? "btn-gold-glass"
-                    : "glass-chip text-muted hover:text-gold-ink"
-                }`}
-              >
-                
-                <span>
-                  {cat.id === "all"
-                    ? isEnglish
-                      ? `All (${articles.length})`
-                      : `ทั้งหมด (${articles.length} บทความ)`
-                    : isEnglish
-                      ? cat.labelEn
-                      : cat.labelTh}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Featured Hero Article (when no filter is applied) */}
-      {selectedCat === "all" && !searchQuery && featured && (() => {
-        const featArt = getArticleCardArt(featured);
-        const featTitle = getArticleTitle(featured, locale);
-        const featDesc = getArticleDescription(featured, locale);
-        const featCat = getArticleCategory(featured, locale);
-        const readTime = isEnglish
-          ? featured.readTime.replace("นาที", "min read")
-          : featured.readTime;
-
-        return (
-          <div className="rounded-2xl border border-line-warm bg-gradient-to-br from-surface via-surface-warm to-[#F5EFE4] p-6 sm:p-8 lg:p-10 shadow-[0_4px_20px_rgba(41,38,31,0.05)] relative overflow-hidden group hover:border-gold-ink transition duration-300">
-            {/* Subtle Ambient Gold Hairline */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-[1px] bg-gradient-to-r from-transparent via-gold-ink/40 to-transparent pointer-events-none" />
-
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 relative z-10">
-              {/* 1909 Rider-Waite Card Art Showcase */}
-              <div className="w-24 h-36 sm:w-28 sm:h-42 rounded-xl overflow-hidden border-2 border-line-warm shadow-md group-hover:scale-105 group-hover:border-gold-ink transition duration-300 bg-inset-warm flex-shrink-0 relative">
-                <CardImage
-                  image={featArt.image}
-                  alt=""
-                  className="w-full h-full object-cover"
-                  sizes="112px"
-                  loading="eager"
-                  fetchPriority="high"
-                />
-              </div>
-
-              {/* Content */}
-              <div className="space-y-3.5 flex-1 text-center sm:text-left">
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                  <span className="glass-chip inline-flex items-center gap-1.5 px-3 py-0.5 text-[11px] font-serif-th font-bold text-gold-ink">
-                    {isEnglish ? "Featured Codex of the Week" : "บทความแนะนำประจำสัปดาห์"}
-                  </span>
-                  <span className="glass-chip text-[11px] font-serif-th text-muted px-2.5 py-0.5">
-                    {featCat}
-                  </span>
-                </div>
-
-                <h2 className="font-serif-th text-xl sm:text-2xl lg:text-3xl font-bold text-ink group-hover:text-gold-ink transition-colors leading-snug"><ThaiPhrases>
-                  <Link href={`/blog/${featured.slug}`} prefetch={false}>{featTitle}</Link>
-                </ThaiPhrases></h2>
-
-                <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed line-clamp-3">
-                  {featDesc}
+      <Ui2Showcase
+        label={isEnglish ? "Articles by topic" : "บทความแยกตามหมวด"}
+        sections={sections}
+        before={
+          <>
+            {showCover && featured && (
+              (() => {
+                const art = getArticleCardArt(featured);
+                return (
+                  <article className="v3-bl-cover" aria-label={isEnglish ? "Cover story" : "เรื่องจากปก"}>
+                    <span className="v3-bl-cover-art" aria-hidden="true">
+                      <CardImage image={art.image} alt="" sizes="(min-width: 1024px) 220px, 150px" loading="eager" fetchPriority="high" />
+                    </span>
+                    <div className="v3-bl-cover-body">
+                      <p className="v3-bl-cover-k">
+                        <span className="ui2-accent">{isEnglish ? "Cover story" : "เรื่องจากปก"}</span>
+                        <span>{getArticleCategory(featured, locale)}</span>
+                      </p>
+                      <h2 className="v3-bl-cover-title">
+                        <ThaiPhrases>
+                          <Link href={`/blog/${featured.slug}`} prefetch={false}>
+                            {getArticleTitle(featured, locale)}
+                          </Link>
+                        </ThaiPhrases>
+                      </h2>
+                      <p className="v3-bl-cover-desc">{getArticleDescription(featured, locale)}</p>
+                      <p className="v3-at-meta">{isEnglish ? `Reading time ${readTimeOf(featured)}` : `เวลาอ่าน ${readTimeOf(featured)}`}</p>
+                    </div>
+                  </article>
+                );
+              })()
+            )}
+            {q && (
+              <div className="v3-bl-status" role="status">
+                <p>
+                  {isEnglish ? (
+                    <>
+                      <b>{filtered.length}</b> articles match
+                    </>
+                  ) : (
+                    <>
+                      พบ <b>{filtered.length}</b> บทความ
+                    </>
+                  )}
                 </p>
-
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 pt-2">
-                  <span className="text-xs text-muted font-serif-th flex items-center gap-1.5">
-                    
-                    {isEnglish ? `Reading time ${readTime}` : `เวลาอ่าน ${readTime}`}
-                  </span>
-                  <Link
-                    href={`/blog/${featured.slug}`}
-                    prefetch={false}
-                    className="btn-gold-glass inline-flex items-center gap-2 px-5 py-2.5 font-semibold text-xs font-serif-th group/btn"
-                  >
-                    <span>{isEnglish ? "Read Full Codex" : "อ่านคัมภีร์ฉบับเต็ม"}</span>
-                    <span className="transition-transform group-hover/btn:translate-x-0.5">→</span>
-                  </Link>
-                </div>
+                <button type="button" onClick={() => setSearchQuery("")}>
+                  {isEnglish ? "Clear search" : "ล้างคำค้น"}
+                </button>
+                {filtered.length === 0 && (
+                  <p className="v3-bl-empty">
+                    {isEnglish ? `No articles found matching "${searchQuery}"` : `ไม่พบบทความที่ตรงกับ "${searchQuery}"`}
+                  </p>
+                )}
               </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* Articles Grid — แถบสีอ่อนแบ่งจากหัวหน้า/บทความเด่นแบบหน้าแรก (`page-band`) */}
-      <div className="page-band page-band-tint space-y-4">
-        <div className="flex items-center justify-between text-xs text-muted px-1 font-serif-th">
-          <span className="flex items-center gap-1.5">
-            
-            {isEnglish ? `Found ${filtered.length} articles` : `พบบทความ ${filtered.length} เรื่อง`}
-          </span>
-          {selectedCat !== "all" && (
-            <button
-              onClick={() => setSelectedCat("all")}
-              className="text-gold-ink hover:underline cursor-pointer font-bold"
-            >
-              {isEnglish ? "Show All" : "แสดงทั้งหมด"}
-            </button>
-          )}
-        </div>
-
-        {filtered.length === 0 ? (
-          <div className="altar-card-porcelain p-12 text-center space-y-3">
-            
-            <p className="font-serif-th text-sm text-ink">
-              {isEnglish
-                ? `No articles found matching "${searchQuery}"`
-                : `ไม่พบบทความที่ตรงกับคำค้นหา “${searchQuery}”`}
-            </p>
-            <button
-              onClick={() => {
-                setSearchQuery("");
-                setSelectedCat("all");
-              }}
-              className="text-xs text-gold-ink underline hover:text-ink cursor-pointer font-serif-th"
-            >
-              {isEnglish ? "Clear all filters" : "ล้างตัวกรองทั้งหมด"}
-            </button>
-          </div>
-        ) : (
-          <div className={`grid grid-cols-1 md:grid-cols-2 gap-6${previewOnMobile ? " mobile-preview-8" : ""}`}>
-            {filtered.map((article, idx) => {
-              const cardArt = getArticleCardArt(article);
-              const artTitle = getArticleTitle(article, locale);
-              const artDesc = getArticleDescription(article, locale);
-              const artCat = getArticleCategory(article, locale);
-              const readTime = isEnglish
-                ? article.readTime.replace("นาที", "min read")
-                : article.readTime;
-              const isAboveFold = idx < 4;
-
-              return (
-                <article
-                  key={article.slug}
-                  className="rounded-2xl border border-line-warm bg-gradient-to-b from-surface via-surface-warm to-[#F7F3EB] p-5 sm:p-6 space-y-4 hover:border-gold-ink transition duration-300 flex flex-col justify-between group shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-[0_10px_28px_rgba(143,92,26,0.10)] relative overflow-hidden"
-                >
-                  <div className="space-y-3.5">
-                    {/* Header: Category & Read Time */}
-                    <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-line-warm/40">
-                      <span className="glass-chip text-[11px] font-serif-th font-bold text-gold-ink px-2.5 py-0.5">
-                        {artCat}
-                      </span>
-                      <span className="text-xs font-serif-th text-muted flex items-center gap-1">
-                        <span className="text-gold-ink">•</span> {readTime}
-                      </span>
-                    </div>
-
-                    {/* Middle: Content with 1909 Card Companion */}
-                    <div className="flex items-start gap-4">
-                      <div className="space-y-2 flex-1 min-w-0">
-                        <h3 className="font-serif-th text-base sm:text-lg font-bold text-ink group-hover:text-gold-ink transition-colors leading-snug line-clamp-2"><ThaiPhrases>
-                          <Link href={`/blog/${article.slug}`} prefetch={false}>{artTitle}</Link>
-                        </ThaiPhrases></h3>
-                        <p className="text-xs text-muted font-serif-th leading-relaxed line-clamp-3">
-                          {artDesc}
-                        </p>
-                      </div>
-
-                      {/* 1909 Card Miniature */}
-                      <div className="w-14 h-21 sm:w-16 sm:h-24 rounded-lg overflow-hidden border-2 border-line-warm shadow-xs group-hover:scale-105 group-hover:border-gold-ink transition duration-300 bg-inset-warm flex-shrink-0 relative">
-                        <CardImage
-                          image={cardArt.image}
-                          alt=""
-                          className="w-full h-full object-cover"
-                          sizes="64px"
-                          loading={isAboveFold ? "eager" : "lazy"}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Footer: Tags & Read More */}
-                  <div className="pt-3 border-t border-line-warm/30 flex items-center justify-between gap-2 text-xs">
-                    {/* ป้ายคีย์เวิร์ดมีเฉพาะภาษาไทย (`keywords` ไม่มีคู่ EN) — ซ่อนบนหน้า `/en/blog`
-                        ไม่งั้นจะมีข้อความไทยหลุดไปเป็น 11% ของทั้งหน้าในฉบับภาษาอังกฤษ */}
-                    <div className="flex flex-wrap gap-1.5">
-                      {!isEnglish &&
-                        article.keywords.slice(0, 2).map((kw) => (
-                          <span
-                            key={kw}
-                            className="glass-chip text-[11px] text-muted font-serif-th px-2.5 py-0.5"
-                          >
-                            #{kw}
-                          </span>
-                        ))}
-                    </div>
-                    {/* ♿ R-23: ผู้ใช้ที่ไล่ฟัง "รายการลิงก์" จะได้ยินแค่ชื่อลิงก์เท่านั้น
-                        ถ้าทุกการ์ดใช้คำว่า "อ่านต่อ" เหมือนกันหมด จะไม่มีทางรู้ว่าลิงก์ไหนไปไหน
-                        `aria-label` จึงต้องมีชื่อบทความอยู่ด้วย ส่วนคนที่มองเห็นยังเห็นคำสั้นเหมือนเดิม */}
-                    <Link
-                      href={`/blog/${article.slug}`}
-                      prefetch={false}
-                      aria-label={isEnglish ? `Read Codex: ${artTitle}` : `อ่านต่อ: ${artTitle}`}
-                      className="inline-flex items-center gap-1 text-xs text-ink group-hover:text-gold-ink group-hover:translate-x-0.5 transition font-serif-th font-bold flex-shrink-0"
-                    >
-                      <span>{isEnglish ? "Read Codex" : "อ่านต่อ"}</span>
-                      <span aria-hidden="true">→</span>
-                    </Link>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
-        {previewOnMobile && filtered.length > 8 && (
-          <div className="sm:hidden flex justify-center pt-2">
-            <button
-              type="button"
-              onClick={() => setShowAllOnMobile(true)}
-              className="glass-chip tap-overlay-y px-5 py-2.5 font-serif-th text-sm font-bold text-gold-ink"
-            >
-              {isEnglish ? `Show all ${filtered.length} articles` : `ดูบทความทั้งหมด ${filtered.length} เรื่อง`}
-            </button>
-          </div>
-        )}
-      </div>
+            )}
+          </>
+        }
+      />
     </div>
   );
 };

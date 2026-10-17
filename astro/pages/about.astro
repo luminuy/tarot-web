@@ -4,6 +4,8 @@ import { aboutMetadataTh } from "@/app/_shared/pages/about-th";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { AboutBodyThRoot } from "../components/PageBodies";
 import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
+import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
 
 /** 🏛️ เกี่ยวกับวิหาร — หน้าข้อความล้วน ไม่มีส่วนไหนต้องใช้ JS เลย */
 const locale = "th" as const;
@@ -11,6 +13,13 @@ const locale = "th" as const;
 
 <BaseLayout locale={locale} metadata={aboutMetadataTh}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <AboutBodyThRoot />
+  </div>
   <SiteFooterRoot locale={locale} spacing="tight" />
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../scripts/ui2-inview";
+</script>

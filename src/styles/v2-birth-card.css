@@ -1,0 +1,611 @@
+/*
+ * 🎂 v2 หน้าไพ่ประจำตัว (/cards/birth-card · /en/cards/birth-card) — สร้างใหม่ทั้งหน้า (เจ้าของ 2026-10-16)
+ * นำเข้าต่อจาก `ui2-page.css` เฉพาะสองหน้านี้
+ * เอกลักษณ์: "โต๊ะคำนวณ" จอแรก — ฟอร์มวันเกิดซ้าย · ช่องไพ่คว่ำขวาที่พลิกเป็นไพ่จริงเมื่อเซิร์ฟเวอร์ยืนยัน
+ * ⚠️ ไฟล์นี้ไม่มี filter/backdrop/mask และไม่มีอนิเมชัน (อนิเมชันอยู่ใน ui2-page-fx.css ใต้ data-fx="full")
+ */
+
+/* ── หัวหน้า: สั้น ชิดกลาง ให้โต๊ะคำนวณขึ้นมาในจอแรก ── */
+.v2-bcp {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+.v2-bcp-head {
+  padding: 40px 0 26px;
+  text-align: center;
+}
+.v2-bcp-head .ui2-ph-crumb {
+  justify-content: center;
+}
+.v2-bcp-title {
+  margin: 10px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(34px, 5vw, 58px);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  color: var(--ui2-on-night);
+  text-wrap: balance;
+}
+.v2-bcp-title-sub {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.46em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ui2-on-night-soft);
+}
+.v2-bcp-lede {
+  max-width: 560px;
+  margin: 14px auto 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ui2-on-night-soft);
+}
+
+/* ── โต๊ะคำนวณ ── */
+.v2-bc-desk {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  gap: 28px;
+  padding: 26px 20px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 217, 143, 0.3);
+  background:
+    radial-gradient(60% 70% at 78% 40%, rgba(255, 217, 143, 0.16) 0%, rgba(255, 217, 143, 0) 70%),
+    linear-gradient(160deg, #261D2A 0%, #140F17 100%);
+  box-shadow: 0 0 0 6px rgba(12, 10, 15, 0.5), 0 0 0 7px rgba(255, 217, 143, 0.14), 0 60px 110px -50px rgba(0, 0, 0, 0.95);
+}
+/* จุดดาวบนผ้าโต๊ะ (gradient ล้วน) */
+.v2-bc-desk::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255, 217, 143, 0.14) 1px, transparent 1.4px);
+  background-size: 24px 24px;
+}
+@media (min-width: 900px) {
+  .v2-bc-desk {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 40px;
+    padding: 40px 44px;
+  }
+}
+
+.v2-bc-form {
+  display: grid;
+  gap: 16px;
+}
+.v2-bc-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ui2-on-night);
+}
+.v2-bc-step > span {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ui2-gold-solid);
+  font-size: 14px;
+  color: var(--ui2-night);
+}
+
+.v2-bc-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr);
+  gap: 12px;
+}
+.v2-bc-f-year {
+  grid-column: 1 / -1;
+}
+@media (min-width: 600px) {
+  .v2-bc-fields {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr) minmax(0, 1.5fr);
+  }
+  .v2-bc-f-year {
+    grid-column: auto;
+  }
+}
+.v2-bc-f {
+  display: grid;
+  gap: 6px;
+}
+.v2-bc-f label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ui2-gold-solid);
+}
+.v2-bc-f select,
+.v2-bc-f input {
+  width: 100%;
+  height: 60px;
+  padding: 0 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 217, 143, 0.3);
+  background: rgba(12, 10, 15, 0.6);
+  box-shadow: inset 0 -2px 0 rgba(255, 217, 143, 0.32);
+  font-family: var(--ui2-font-display);
+  font-size: 21px;
+  font-weight: 600;
+  text-align: center;
+  text-align-last: center;
+  color: var(--ui2-on-night);
+  appearance: none;
+  transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.v2-bc-f select {
+  padding-right: 30px;
+  background-image: linear-gradient(45deg, transparent 50%, #FFD98F 50%), linear-gradient(135deg, #FFD98F 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+.v2-bc-f select option {
+  background: #1B161D;
+  color: #F6EFE4;
+  font-size: 16px;
+}
+.v2-bc-f select:focus-visible,
+.v2-bc-f input:focus-visible {
+  outline: none;
+  border-color: var(--ui2-gold-solid);
+  box-shadow: inset 0 -2px 0 var(--ui2-gold-solid), 0 0 0 3px rgba(255, 217, 143, 0.25);
+}
+.v2-bc-f [aria-invalid="true"] {
+  border-color: #F2A38F;
+}
+/* ปีเกิด + สวิตช์ พ.ศ./ค.ศ. ในช่องเดียว (v1 แยกปุ่มจิ๋วไว้เหนือช่อง) */
+.v2-bc-year {
+  position: relative;
+}
+.v2-bc-year input {
+  padding-right: 108px;
+  text-align: left;
+  padding-left: 18px;
+}
+.v2-bc-era {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  translate: 0 -50%;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.26);
+  background: rgba(12, 10, 15, 0.7);
+}
+.v2-bc-era button {
+  min-width: 44px;
+  min-height: 34px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui2-on-night-dim);
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.v2-bc-era button[aria-pressed="true"] {
+  background: var(--ui2-gold-solid);
+  color: var(--ui2-night);
+}
+
+.v2-bc-preview {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 217, 143, 0.32);
+  text-align: center;
+  font-family: var(--ui2-font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+}
+.v2-bc-alert {
+  margin: 0;
+  padding: 11px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(242, 163, 143, 0.45);
+  background: rgba(120, 36, 20, 0.35);
+  text-align: center;
+  font-size: 13px;
+  color: #FFD9CF;
+}
+.v2-bc .v2-bc-go {
+  width: 100%;
+  min-height: 56px;
+  justify-content: center;
+  font-size: 16px;
+  background: linear-gradient(180deg, #FFE3A8 0%, #F0C470 100%);
+  color: var(--ui2-night);
+  box-shadow: 0 18px 36px -18px rgba(255, 217, 143, 0.7);
+}
+.v2-bc .v2-bc-go:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.v2-bc-fine {
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--ui2-on-night-dim);
+}
+
+/* ── ช่องไพ่ ── */
+.v2-bc-slot {
+  display: grid;
+  place-items: center;
+  min-height: 240px;
+}
+.v2-bc-wait {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+}
+.v2-bc-wait p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ui2-on-night-dim);
+}
+.v2-bc-back {
+  display: block;
+  width: 118px;
+  aspect-ratio: 7 / 12;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 217, 143, 0.55);
+  box-shadow: 0 26px 40px -22px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 217, 143, 0.16);
+}
+.v2-bc-back + .v2-bc-back {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -26px;
+  rotate: 9deg;
+}
+.v2-bc-back:first-child {
+  rotate: -7deg;
+  translate: -24px 0;
+}
+@media (min-width: 900px) {
+  .v2-bc-slot {
+    min-height: 380px;
+  }
+  .v2-bc-back {
+    width: 168px;
+  }
+  .v2-bc-back + .v2-bc-back {
+    margin-left: -40px;
+  }
+  .v2-bc-back:first-child {
+    translate: -38px 0;
+  }
+}
+/* มือถือ: ก่อนคำนวณไม่ต้องโชว์ไพ่คว่ำ — ให้ปุ่มขึ้นจอแรก */
+@media (max-width: 899px) {
+  .v2-bc-desk:not(.is-done) .v2-bc-slot {
+    display: none;
+  }
+  .v2-bc-desk.is-done .v2-bc-slot {
+    order: -1;
+  }
+}
+
+.v2-bc-cards {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2-bc-card {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.v2-bc-card-label {
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.4);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+}
+.v2-bc-card-frame {
+  position: relative;
+  isolation: isolate;
+  display: block;
+  width: 150px;
+  padding: 10px 10px 18px;
+}
+.v2-bc-cards.is-pair .v2-bc-card-frame {
+  width: 132px;
+}
+@media (min-width: 900px) {
+  .v2-bc-card-frame {
+    width: 220px;
+  }
+  .v2-bc-cards.is-pair .v2-bc-card-frame {
+    width: 190px;
+  }
+}
+.v2-bc-card-img,
+.v2-bc-card-img img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+.v2-bc-card-img {
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.55), 0 34px 50px -24px rgba(0, 0, 0, 0.95), 0 0 46px rgba(255, 217, 143, 0.28);
+}
+.v2-bc-card-name {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  font-family: var(--ui2-font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ui2-on-night);
+}
+.v2-bc-card-name b {
+  font-size: 26px;
+  line-height: 1;
+  color: var(--ui2-gold-solid);
+}
+
+/* ── ผล ── */
+.v2-bc-result {
+  display: grid;
+  gap: 26px;
+  margin-top: 26px;
+}
+.v2-bc-trail {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 22px 16px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 217, 143, 0.2);
+  background: rgba(28, 23, 30, 0.6);
+}
+.v2-bc-trail .v2-bc-step {
+  text-align: center;
+  font-size: 15px;
+}
+.v2-bc-meanings {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 760px) {
+  .v2-bc-meanings.is-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.v2-bc-meaning {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 22px 22px 20px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 217, 143, 0.22);
+  background: linear-gradient(180deg, rgba(43, 33, 48, 0.8) 0%, rgba(24, 18, 28, 0.8) 100%);
+}
+.v2-bc-meaning-k {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ui2-gold-solid);
+}
+.v2-bc-meaning h3 {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: 21px;
+  line-height: 1.3;
+  color: var(--ui2-on-night);
+}
+.v2-bc-meaning-meta {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ui2-on-night-dim);
+}
+.v2-bc-meaning-body {
+  margin: 4px 0 0;
+  font-size: 14.5px;
+  line-height: 1.8;
+  color: var(--ui2-on-night-soft);
+}
+.v2-bc-more {
+  justify-self: start;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(255, 217, 143, 0.4);
+}
+.v2-bc-next {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+}
+.v2-bc-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.v2-bc-links a {
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.26);
+  background: rgba(28, 23, 30, 0.7);
+  font-size: 13px;
+  color: var(--ui2-on-night);
+  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.v2-bc-links a:hover {
+  border-color: var(--ui2-gold-solid);
+  color: var(--ui2-gold-solid);
+}
+.v2-bc-crisis {
+  max-width: 640px;
+  margin: 20px auto 0;
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 217, 143, 0.3);
+  background: rgba(28, 23, 30, 0.85);
+  font-size: 14px;
+  line-height: 1.8;
+  white-space: pre-line;
+  color: var(--ui2-on-night);
+}
+
+/* ── ส่วนอธิบาย ── */
+.v2-bcp-tool {
+  margin-bottom: 72px;
+}
+.v2-bcp-sec {
+  margin-bottom: 72px;
+}
+.v2-bcp-steps {
+  display: grid;
+  gap: 14px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+@media (min-width: 760px) {
+  .v2-bcp-steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.v2-bcp-stepcard {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 24px 22px 22px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 217, 143, 0.22);
+  background: linear-gradient(180deg, rgba(43, 33, 48, 0.75) 0%, rgba(22, 17, 26, 0.75) 100%);
+}
+.v2-bcp-stepn {
+  font-family: var(--ui2-font-display);
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(255, 217, 143, 0.3);
+}
+.v2-bcp-stepcard h3 {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: 19px;
+  color: var(--ui2-on-night);
+}
+.v2-bcp-math {
+  justify-self: start;
+  margin: 2px 0 0 !important;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(255, 217, 143, 0.12);
+  font-family: var(--ui2-font-display);
+  font-size: 16px !important;
+  font-weight: 600;
+  color: var(--ui2-gold-solid) !important;
+}
+.v2-bcp-stepcard p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--ui2-on-night-soft);
+}
+
+.v2-bcp-pairs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 12px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.v2-bcp-pair {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px 14px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 217, 143, 0.18);
+  background: rgba(28, 23, 30, 0.6);
+  transition: border-color var(--dur-base) var(--ease-out), background-color var(--dur-base) var(--ease-out);
+}
+.v2-bcp-pair:hover {
+  border-color: rgba(255, 217, 143, 0.45);
+  background: rgba(43, 33, 48, 0.75);
+}
+.v2-bcp-pair-fan {
+  position: relative;
+  flex: none;
+  display: flex;
+  width: 84px;
+  height: 84px;
+  align-items: center;
+}
+.v2-bcp-pair-card {
+  position: absolute;
+  top: 2px;
+  display: block;
+  width: 46px;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.4), 0 12px 18px -10px rgba(0, 0, 0, 0.95);
+}
+.v2-bcp-pair-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.v2-bcp-pair-card:nth-child(1) {
+  left: 0;
+  rotate: -8deg;
+}
+.v2-bcp-pair-card:nth-child(2) {
+  left: 30px;
+  rotate: 7deg;
+}
+.v2-bcp-pair-card:nth-child(3) {
+  left: 15px;
+  top: 10px;
+  rotate: 0deg;
+}
+.v2-bcp-pair h3 {
+  margin: 0 0 4px;
+  font-family: var(--ui2-font-display);
+  font-size: 15.5px;
+  line-height: 1.35;
+  color: var(--ui2-on-night);
+}
+.v2-bcp-pair p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ui2-on-night-soft);
+}

@@ -25,6 +25,12 @@ export interface SiteHeaderProps {
   toolbar?: ReactNode;
   /** เมนู dropdown — ส่งเข้ามาเพื่อให้หน้าแรกส่ง callback ได้ หน้าเนื้อหาส่ง <SacredNavDropdown /> เปล่า */
   nav?: ReactNode;
+  /**
+   * ปุ่มหลักฝั่งขวาแทน "เริ่มดูดวง" — หน้าดูดวงที่เริ่มรอบไปแล้วส่งปุ่ม "เริ่มดูดวงใหม่" มาวางที่เดียวกัน
+   * (เจ้าของ 2026-10-17: "เปิดไพ่แล้ว บาร์ข้างบนยังมีเริ่มดูดวง ควรมีแค่ดูดวงใหม่ มาอยู่ตำแหน่งเริ่มดูดวง")
+   * ไม่ส่ง = ลิงก์ "เริ่มดูดวง" ไปคลังผังตามเดิม
+   */
+  cta?: ReactNode;
 }
 
 /**
@@ -53,6 +59,7 @@ export function SiteHeader({
   breadcrumb,
   toolbar,
   nav,
+  cta,
 }: SiteHeaderProps) {
   const { isEnglish } = useLocale();
   const headerRef = useRef<HTMLElement | null>(null);
@@ -129,7 +136,8 @@ export function SiteHeader({
           ⚠️ ห้ามใส่ `relative` ให้ชั้นใน — แผงเมนูใหญ่ (`absolute inset-x-0`) ต้องอ้างอิง <header> จึงกางเต็มจอ
         */}
         <div className="site-header-glass">
-          <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:h-[68px] sm:px-6">
+          {/* 🎨 UI 2.0 (คลื่น 2): แคปซูลลอย สูง 56px (มือถือ) / 62px — ความสูงเดียวกับลิงก์เมนูใน DesktopNav */}
+          <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 pl-2 pr-1.5 sm:h-[62px] sm:pl-3 sm:pr-2.5">
             <Link
               href="/"
               prefetch={false}
@@ -148,6 +156,7 @@ export function SiteHeader({
                 className="h-9 w-9 shrink-0 rounded-full border border-line object-cover transition-transform duration-300 group-hover:scale-[1.03] sm:h-10 sm:w-10"
               />
               <span className="flex flex-col whitespace-nowrap leading-none">
+                {/* ชื่อแบบเดิม SEERTAROT ตัวพิมพ์ใหญ่ช่องไฟกว้าง (เจ้าของสั่ง 2026-10-13 "อยากได้แบบเก่า") */}
                 <span className="font-serif-th text-[13.5px] tracking-[0.16em] text-ink sm:text-[1.05rem] sm:tracking-[0.2em]">SEERTAROT</span>
                 <span className="mt-1 font-serif-th text-[10px] tracking-[0.12em] text-muted sm:mt-1.5 sm:text-[11px] sm:tracking-[0.14em]">
                   {isEnglish ? "1909 RIDER-WAITE" : "ดูดวงไพ่ทาโรต์"}
@@ -158,6 +167,13 @@ export function SiteHeader({
             <DesktopNav isEnglish={isEnglish} />
 
             <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+              {/* ปุ่ม "เริ่มดูดวง" ➔ คลังผังพยากรณ์ /spreads (เจ้าของ 2026-10-17 "กดปุ่มให้ลิงก์ไปหน้าผัง")
+                  เดิมพาไปส่วนเปิดไพ่ด่วนของหน้าแรก (#home-quick) · มือถือซ่อน (ที่แคบ มีปุ่มหลักในหน้าอยู่แล้ว) */}
+              {cta ?? (
+                <a href={isEnglish ? "/en/spreads" : "/spreads"} className="ui2-header-cta mr-1 hidden sm:inline-flex" data-home-target="header:start">
+                  {isEnglish ? "Start a reading" : "เริ่มดูดวง"}
+                </a>
+              )}
               <ThemeToggle isEnglish={isEnglish} />
               <LanguageSwitcher />
               {/* ไม่มีใครส่ง toolbar มา (หน้าเนื้อหาทั่วไป) ➔ ใส่ปุ่มบัญชีให้เอง หัวเว็บทุกหน้าจะได้เหมือนหน้าแรก */}
@@ -173,7 +189,7 @@ export function SiteHeader({
           </div>
 
           {breadcrumb ? (
-            <div className="mx-auto max-w-6xl px-4 pb-2.5 sm:px-6">{breadcrumb}</div>
+            <div className="site-header-crumbs mx-auto max-w-6xl px-4 pb-2.5 sm:px-6">{breadcrumb}</div>
           ) : null}
         </div>
       </header>
@@ -190,7 +206,7 @@ function DesktopNav({ isEnglish }: { isEnglish: boolean }) {
   const currentPath = stripLocalePrefix(useCurrentPath());
   const nav = headerNav(isEnglish);
   const linkClass = (href: string) =>
-    `flex h-16 sm:h-[68px] items-center whitespace-nowrap transition-colors hover:text-gold-ink focus-visible:outline-none focus-visible:text-gold-ink ${
+    `flex h-14 sm:h-[62px] items-center whitespace-nowrap transition-colors hover:text-gold-ink focus-visible:outline-none focus-visible:text-gold-ink ${
       isActiveNavPath(currentPath, href) ? "text-gold-ink" : ""
     }`;
 
@@ -199,7 +215,12 @@ function DesktopNav({ isEnglish }: { isEnglish: boolean }) {
       aria-label={isEnglish ? "Main menu" : "เมนูหลัก"}
       className="hidden items-center gap-7 font-serif-th text-[15px] text-ink lg:flex"
     >
-      <div className="group/mega">
+      {/*
+        แผงเมนูใหญ่แบบ apple.com (เจ้าของสั่ง 2026-10-13): แผงมืดเต็มกว้างตั้งแต่ขอบบนจอ (แคปซูลลอยอยู่บนแผง)
+        สองกลุ่มแรกเป็นลิงก์ตัวใหญ่ · กลุ่มที่เหลือตัวเล็ก · หัวกลุ่มสีเทาเล็ก · หน้าที่เหลือเบลอ+มืดลง
+        สไตล์ทั้งหมดอยู่ใน globals.css (`.mega-*`) — CSS ล้วน ไม่มี state (หัวเว็บหน้า Astro ไม่ hydrate)
+      */}
+      <div className="group/mega" data-mega="">
         <Link href={nav.reading.all.href} prefetch={false} className={`${linkClass("/read")} gap-1`}>
           {nav.reading.label}
           <svg
@@ -215,15 +236,16 @@ function DesktopNav({ isEnglish }: { isEnglish: boolean }) {
             <path d="m6 9 6 6 6-6" />
           </svg>
         </Link>
-        <div className="invisible absolute inset-x-0 top-full z-50 border-b border-line bg-canvas opacity-0 shadow-[0_24px_48px_-32px_rgba(42,38,31,0.35)] transition-[opacity,visibility] duration-150 group-hover/mega:visible group-hover/mega:opacity-100 group-focus-within/mega:visible group-focus-within/mega:opacity-100">
-          <div className="mx-auto grid max-w-6xl grid-cols-4 gap-x-8 px-6 pb-8 pt-9">
-            {nav.reading.groups.map((group) => (
-              <div key={group.title}>
-                <p className="text-sm font-bold text-ink">{group.title}</p>
-                <ul className="mt-3 space-y-2.5">
+        <span className="mega-scrim" aria-hidden="true" />
+        <div className="mega-panel">
+          <div className="mega-inner">
+            {nav.reading.groups.map((group, i) => (
+              <div key={group.title} className={i < 2 ? "mega-col mega-col-big" : "mega-col"}>
+                <p className="mega-title">{group.title}</p>
+                <ul className="mega-links">
                   {group.links.map((link) => (
                     <li key={link.href}>
-                      <Link href={link.href} prefetch={false} className="text-sm text-muted transition-colors hover:text-gold-ink focus-visible:text-gold-ink focus-visible:outline-none">
+                      <Link href={link.href} prefetch={false}>
                         {link.label}
                       </Link>
                     </li>
@@ -232,12 +254,10 @@ function DesktopNav({ isEnglish }: { isEnglish: boolean }) {
               </div>
             ))}
           </div>
-          <div className="border-t border-line">
-            <div className="mx-auto max-w-6xl px-6 py-4">
-              <Link href={nav.reading.all.href} prefetch={false} className="text-sm font-bold text-gold-ink hover:underline focus-visible:underline focus-visible:outline-none">
-                {nav.reading.all.label} →
-              </Link>
-            </div>
+          <div className="mega-foot">
+            <Link href={nav.reading.all.href} prefetch={false}>
+              {nav.reading.all.label}
+            </Link>
           </div>
         </div>
       </div>

@@ -1,0 +1,148 @@
+/*
+ * 🌌 UI 2.0 หน้าอื่นทั้งเว็บ — เอฟเฟกต์ระดับ full (คอม · iPad) เท่านั้น
+ * นำเข้าต่อจาก `ui2-page.css` ในหน้า .astro
+ * ⚠️ ทุกกฎขึ้นต้น `[data-fx="full"]` และอยู่ใต้ `@media (min-width: 768px)` · หนึ่งตัวเลือกต่อบรรทัด
+ *    (ด่าน test-motion-quality กฎ 2b · test-ui2-fx) · ของวนมีคลาส `ui2-loop` ใต้ `[data-anim-section]` (หยุดนอกจอ)
+ * ⚠️ ไพ่ตกแต่งห้ามเบลอ (INC บันทึก 2026-10-16 · ดูเหมือนภาพโหลดไม่ขึ้น) · ห้ามเลยขอบล่างหัวหน้า
+ */
+@media (min-width: 768px) {
+  /* ไพ่จริง 2 แนวต่อข้าง (ชุดเดียวกับหัวหน้า /spreads) */
+  [data-fx="full"] .ui2-ph-card {
+    display: block;
+    animation: ui2-pg-bob var(--bob, 8s) ease-in-out var(--delay, 0s) infinite;
+  }
+  [data-fx="full"] .ui2-ph-card-1 {
+    --w: clamp(84px, 9.2vw, 136px);
+    --r: -9deg;
+    --bob: 8s;
+    left: 2.5%;
+    top: 64px;
+    right: auto;
+  }
+  [data-fx="full"] .ui2-ph-card-2 {
+    --w: clamp(64px, 6.4vw, 92px);
+    --r: 7deg;
+    --bob: 9s;
+    --delay: -2s;
+    left: 4%;
+    top: 304px;
+  }
+  [data-fx="full"] .ui2-ph-card-3 {
+    --w: clamp(84px, 9.2vw, 136px);
+    --r: 10deg;
+    --bob: 8.5s;
+    --delay: -3s;
+    right: 2.5%;
+    top: 84px;
+    left: auto;
+  }
+  [data-fx="full"] .ui2-ph-card-4 {
+    --w: clamp(64px, 6.4vw, 92px);
+    --r: -7deg;
+    --bob: 9.5s;
+    --delay: -4s;
+    right: 4.5%;
+    top: 318px;
+  }
+  /*
+   * ไพ่แนวล่างต้องไม่เลยขอบล่างหัวหน้า (เจ้าของ 2026-10-17 ส่งภาพ /cards "ไพ่ทับตัวอักษร" — ไพ่ล่างทับรายชื่อหมวด/หน้าต่าง)
+   * หัวหน้าที่เนื้อหาน้อย (/cards · /questions · /blog) สูงแค่ 320–410px แต่ไพ่สองแนวต้องใช้ ~500px
+   * ➔ ระดับ full ให้หัวหน้าสูงอย่างน้อย 520px แล้ววางเนื้อหากลางแนวตั้ง (หัวเตี้ยมีไพ่แนวบนแนวเดียว ไม่ต้องสูง)
+   */
+  [data-fx="full"] .ui2-ph:not(.is-compact) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 520px;
+  }
+  [data-fx="full"] .ui2-ph-card-5 {
+    --w: clamp(48px, 4.4vw, 64px);
+    --r: 14deg;
+    --bob: 7.5s;
+    --delay: -1s;
+    left: 13%;
+    top: 16px;
+  }
+  [data-fx="full"] .ui2-ph-card-6 {
+    --w: clamp(56px, 5.4vw, 80px);
+    --r: 5deg;
+    --bob: 10.5s;
+    --delay: -6s;
+    right: 11.5%;
+    top: 24px;
+  }
+  /* หัวหน้าเตี้ย: เฉพาะไพ่ใหญ่ 2 ใบบน */
+  [data-fx="full"] .ui2-ph.is-compact .ui2-ph-card-2,
+  [data-fx="full"] .ui2-ph.is-compact .ui2-ph-card-4,
+  [data-fx="full"] .ui2-ph.is-compact .ui2-ph-card-5,
+  [data-fx="full"] .ui2-ph.is-compact .ui2-ph-card-6 {
+    display: none;
+  }
+
+  /* หัวหน้าจาง + ลอยขึ้นตอนเลื่อนพ้น · ไพ่ลอยแตกออกด้านข้าง */
+  @supports (animation-timeline: view()) {
+    [data-fx="full"] .ui2-ph-inner {
+      animation: ui2-pg-hero-out linear both;
+      animation-timeline: view();
+      animation-range: exit 15% exit 85%;
+    }
+    [data-fx="full"] .ui2-ph-deco {
+      animation: ui2-pg-deco-out linear both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 100%;
+    }
+  }
+}
+/* ใบเล็กแนวใน: เฉพาะจอกว้างพอที่ไม่ชนหัวข้อ */
+@media (min-width: 768px) and (max-width: 1279px) {
+  [data-fx="full"] .ui2-ph-card-5,
+  [data-fx="full"] .ui2-ph-card-6 {
+    display: none;
+  }
+}
+
+/* กล่องหลายขนาด (ui2-blocks.css) — หลังไพ่ลอย + แสงทองเต้น (ชุดเดียวกับกล่องพิธีเช้าหน้าแรก) */
+@media (min-width: 768px) {
+  [data-fx="full"] .ui2-bx-back {
+    animation: ui2-pg-bob 6s ease-in-out infinite;
+  }
+  [data-fx="full"] .ui2-bx-burst {
+    animation: ui2-bx-burst 3s ease-out infinite;
+  }
+}
+@keyframes ui2-bx-burst {
+  0% { scale: 0.55; opacity: 0.95; }
+  100% { scale: 1.9; opacity: 0; }
+}
+
+@keyframes ui2-pg-bob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -10px; }
+}
+/* ไม่เบลอ — filter ผูกการเลื่อน = วาดหัวหน้าทั้งก้อนใหม่ทุกเฟรมที่เลื่อน (2026-10-17 ลดภาระทั้งเว็บ) */
+@keyframes ui2-pg-hero-out {
+  to { opacity: 0; transform: translateY(-48px) scale(0.95); }
+}
+@keyframes ui2-pg-deco-out {
+  to { opacity: 0.15; transform: scale(1.4); }
+}
+
+/* 🎂 ไพ่ประจำตัว v2 — ไพ่ที่เซิร์ฟเวอร์ยืนยันแล้วพลิกขึ้นในช่องไพ่ (ครั้งเดียว ไม่วน) */
+@media (min-width: 768px) {
+  [data-fx="full"] .v2-bc-card-frame {
+    animation: v2-bc-flip 900ms var(--ease-out) both;
+  }
+  [data-fx="full"] .v2-bc-card + .v2-bc-card .v2-bc-card-frame {
+    animation-delay: 240ms;
+  }
+}
+@keyframes v2-bc-flip {
+  from {
+    opacity: 0;
+    transform: perspective(900px) rotateY(-75deg) translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

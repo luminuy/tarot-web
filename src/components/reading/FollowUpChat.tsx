@@ -12,6 +12,7 @@ import { TTSReaderButton } from "./TTSReaderButton";
 import { trackEvent } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
+import { CheckIcon, ChevronIcon, RefreshIcon } from "@/components/ui/LineIcons";
 
 interface Message {
   id: string;
@@ -100,7 +101,7 @@ const ChatMessageRenderer = React.memo<{ text: string; isError?: boolean }>(({ t
     <div className="space-y-2.5 w-full">
       {paragraphs.map((p, pIdx) => {
         // Case 1: การ์ดวิเคราะห์ไพ่ทาโรต์ (เช่น "• **ตำแหน่งหัวใจ (9 ดาบ):** คำอธิบาย..." หรือ "• ตำแหน่ง...:")
-        const cardMatch = p.match(/^[•\-\u2726]\s*\*\*(.*?)\*\*\s*:?\s*(.*)/s) || p.match(/^[•\-\u2726]\s*([^\n:]+):\s*(.*)/s);
+        const cardMatch = p.match(/^[\u2022\-\u2726]\s*\*\*(.*?)\*\*\s*:?\s*(.*)/s) || p.match(/^[\u2022\-\u2726]\s*([^\n:]+):\s*(.*)/s);
 
         if (cardMatch) {
           const cardTitle = cardMatch[1];
@@ -407,7 +408,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                 >
                   <span>"{q}"</span>
                   <span className="text-gold-ink text-xs opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition font-sans">
-                    ➔
+                    <ChevronIcon direction="right" />
                   </span>
                 </button>
               ))}
@@ -466,7 +467,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                         onClick={() => window.location.reload()}
                         className="altar-card-porcelain !rounded-lg tap-overlay-y mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-ink-deep cursor-pointer"
                       >
-                        <span>↻</span> {isEnglish ? "Refresh page to reconnect deck" : "รีเฟรชหน้าเว็บเพื่อเชื่อมต่อสำรับไพ่อีกครั้ง"}
+                        <RefreshIcon className="w-3.5 h-3.5" /> {isEnglish ? "Refresh page to reconnect deck" : "รีเฟรชหน้าเว็บเพื่อเชื่อมต่อสำรับไพ่อีกครั้ง"}
                       </button>
                     )}
                   </div>
@@ -611,7 +612,7 @@ isEnglish
           <div className="altar-card-porcelain !rounded-lg space-y-2 p-3.5">
             <div className="flex items-start gap-2.5">
               <span className="glass-tile !rounded-lg mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center text-gold-ink text-xs font-bold">
-                ✓
+                <CheckIcon />
               </span>
               <div className="min-w-0 space-y-0.5">
                 <p className="font-serif-th text-xs font-bold text-ink-deep [text-wrap:balance]">

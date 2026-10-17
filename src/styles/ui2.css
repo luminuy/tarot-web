@@ -1,0 +1,3213 @@
+/*
+ * 🎨 SeerTarot UI 2.0 — หน้าตาตั้งต้น (ระดับ lite) ของหน้าแรกแบบ D+
+ * โหลดเฉพาะหน้าที่มี TarotFlow (`astro/islands/TarotFlowRoot.tsx`) · โทเคน `--ui2-*` อยู่ที่ `ui2-base.css` (ทั้งเว็บ)
+ * ===========================================================================
+ * แผน: docs/plans/UI_2_0_PLAN_2026-10-12.md
+ *
+ * ⚠️ ไฟล์นี้คือ "ค่าตั้งต้นปลอดภัย" — ไม่มี data-fx (ไม่มี JS) หรือเป็น lite/off ต้องได้หน้าตานี้
+ *    ห้ามมี backdrop-filter · filter: blur · mix-blend-mode · อนิเมชันวน infinite ที่ไม่ได้หยุดนอกจอ
+ *    ของหนักทุกชิ้นอยู่ใน `ui2-fx-full.css` ใต้ `[data-fx="full"]` + `@media (min-width: 768px)` เท่านั้น
+ *    (ด่าน `scripts/qa/test-ui2-fx.ts` ตรวจ CSS ที่บิลด์แล้ว)
+ * ⚠️ สีทั้งหมดเป็นโทเคน `--ui2-*` — ห้ามเขียนสีลงคอมโพเนนต์ตรง ๆ (ด่าน palette-drift)
+ * ⚠️ ตัวเลขทุกจุดใช้ `--ui2-font-number` (Anuphan ตัวตรง) — ห้ามตัวเอียง (เจ้าของสั่ง 2026-10-12)
+ * ⚠️ คีย์เฟรมแตะแค่ transform / opacity / translate / scale (+ background-position เฉพาะ full)
+ *    ค่าตั้งต้นของทุกชิ้น = ตำแหน่งสุดท้าย · ห้ามมี translate(%) ซ้ำกับยูทิลิตี้ translate ของ Tailwind (INC-0123)
+ */
+
+/* ลายมือบนกระดาษโน้ตคำถามของหน้าแรก UI 2.0 เท่านั้น — ตัดเฉพาะตัวอักษรบนโน้ต (public/fonts/itim-notes.txt)
+   ไม่พรีโหลด · ตัวอักษรที่ไม่มีในไฟล์ถอยไป Anuphan เอง (ด่าน test-ui2-fx ตรวจว่าโน้ตทุกตัวอักษรมีในไฟล์) */
+@font-face {
+  font-family: "itimNotes";
+  src: url(/fonts/itim-notes.woff2) format("woff2");
+  font-display: swap;
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ส่วน 1 · หัวหน้า
+   ═════════════════════════════════════════════════════════════════════════ */
+/* ⚠️ ห้ามใส่ overflow-x: clip ที่ตัวส่วนนี้/ริบบิ้น — มันตัดพื้นเต็มจอ (::before 100vw) ทิ้งด้วย เห็นเป็นแถบสีอ่อนสองข้าง
+   ของที่ล้นขอบ (การ์ดลอย · ริบบิ้น 130vw) ถูกตัดโดย <main className="overflow-x-clip"> และ html อยู่แล้ว (INC-0067) */
+.ui2-hero {
+  padding-top: 24px;
+  /* 40px + ส่วนที่ริบบิ้นดึงขึ้นมาทับ (106px) — ริบบิ้นทับแค่ที่ว่าง ไม่ทับปุ่ม */
+  padding-bottom: 146px;
+  text-align: center;
+}
+/* ขยายพื้นกลางวันขึ้นไปใต้หัวเว็บ — ไม่ให้เห็นรอยต่อกับพื้นเดิมของ body */
+.ui2-hero::before {
+  inset-block-start: -240px;
+}
+.ui2-hero-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 820px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  /* มือถือ: แถบว่างเหนือชิปให้การ์ดลอยใบบน — ปุ่มหลักยังอยู่ใน ~600px แรก (หัวข้อ 5.1) */
+  padding-top: 64px;
+}
+.ui2-h1 {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 34px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ui2-ink);
+  text-wrap: balance;
+}
+.ui2-hero-sub {
+  max-width: 560px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ui2-ink-soft);
+}
+.ui2-hero-ctas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.ui2-hero-ctas .ui2-btn {
+  width: min(100%, 320px);
+}
+.ui2-daily-btn {
+  max-width: min(100%, 320px);
+}
+.ui2-daily-btn .ui2-daily-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* นาฬิกาแบบกล่อง — ทุกจอ (ภาพต้นแบบ D+) · มือถือกล่อง 72px */
+.ui2-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.ui2-clock-label {
+  font-family: var(--ui2-font-display);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--ui2-muted);
+}
+.ui2-clock-cells {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.ui2-clock-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ui2-clock-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background: var(--ui2-glass-day-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-day), 0 1px 0 var(--ui2-glass-edge-day) inset, 0 18px 34px -24px rgba(74, 52, 30, 0.6);
+}
+.ui2-clock-cell {
+  width: 72px;
+  height: 72px;
+}
+.ui2-clock-cell .ui2-num {
+  font-size: 36px;
+  line-height: 1;
+}
+.ui2-clock-unit {
+  font-size: 11px;
+  color: var(--ui2-muted);
+  margin-top: 4px;
+}
+/* ถึงเที่ยงคืน (สคริปต์ตั้ง data-done) — ซ่อนตัวเลข เปลี่ยนเป็นลิงก์ "ไพ่ใบใหม่มาแล้ว" */
+.ui2-clock-done {
+  display: none;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+[data-ui2-clock][data-done] .ui2-clock-wait,
+[data-ui2-clock][data-done] .ui2-clock-cells {
+  display: none;
+}
+[data-ui2-clock][data-done] .ui2-clock-done {
+  display: inline;
+}
+.ui2-clock-sep {
+  font-family: var(--ui2-font-number);
+  color: var(--ui2-muted);
+}
+
+/* การ์ดลอยรอบหัวข้อ (ภาพประกอบล้วน · aria-hidden) — กรอบกระจกขาว + ชื่อไพ่ในกรอบ ตามภาพต้นแบบ D+
+   ชั้นการ์ดกว้างเท่าจอ (100vw) ตำแหน่ง % จึงอิงขอบจอจริงแบบต้นแบบ · ตำแหน่ง/ขนาดต่อจออยู่ท้ายส่วนนี้และใน @media
+   ⚠️ ทุกจอ: ห้ามทับหัวข้อ/ปุ่ม — ตรวจด้วยภาพที่ 360 · 390 · 768 · 820 · 1024 · 1180 · 1280 · 1440 · 1920 */
+.ui2-floats {
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  width: 100vw;
+  translate: -50% 0;
+  z-index: 1;
+  isolation: isolate;
+  pointer-events: none;
+}
+.ui2-fc {
+  position: absolute;
+  display: none;
+  width: var(--w, 72px);
+  padding: 5px 5px 6px;
+  border-radius: 14px;
+  background: var(--ui2-glass-day-solid);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85), 0 30px 50px -28px rgba(70, 44, 18, 0.55);
+  rotate: var(--r, 0deg);
+}
+.ui2-fc-card {
+  display: block;
+  aspect-ratio: 3 / 5;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--ui2-paper);
+}
+.ui2-fc-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ui2-fc-tag {
+  display: none;
+}
+.ui2-fc-far {
+  opacity: 0.72;
+}
+/* มือถือ: 4 ใบบนในแถบเหนือชิป (ใหญ่ชิดขอบ 2 · ใบไกลเล็ก 2) + 2 ใบข้างนาฬิกา — ไม่มีป้าย */
+.ui2-fc-star { display: block; --w: 74px; --r: -10deg; left: -20px; top: -14px; }
+.ui2-fc-moon { display: block; --w: 54px; --r: 6deg; left: 66px; top: -28px; }
+.ui2-fc-wheel { display: block; --w: 72px; --r: 9deg; right: -20px; top: -10px; }
+.ui2-fc-empress { display: block; --w: 52px; --r: -7deg; right: 70px; top: -30px; }
+/* สองใบล่างผูกกับขอบล่างของส่วน = อยู่ข้างแถวนาฬิกาเสมอ ไม่ว่าหัวข้อจะกี่บรรทัด (ห้ามลงไประดับปุ่ม) */
+.ui2-fc-lovers { display: block; --w: 56px; --r: 8deg; left: -22px; bottom: 256px; }
+.ui2-fc-priestess { display: block; --w: 56px; --r: -7deg; right: -20px; bottom: 260px; }
+
+/* ภาพไพ่จิ๋วของไพ่วันนี้ในปุ่มรอง */
+.ui2-daily-thumb {
+  flex: none;
+  width: 22px;
+  aspect-ratio: 3 / 5;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px -4px rgba(0, 0, 0, 0.5);
+}
+.ui2-daily-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ส่วน 2 · ริบบิ้นไขว้
+   ═════════════════════════════════════════════════════════════════════════ */
+/* ตามภาพต้นแบบ D+ ทุกจอ: ริบบิ้นทองตัวหนังสือ (บน · เอียงขึ้น) + ริบบิ้นมืดภาพไพ่ (ล่าง · เอียงลง) ไขว้กัน
+   ดึงขึ้นทับท้ายหัวหน้า 48% ของความสูง (แบบต้นแบบ) — ช่วงที่ทับโปร่งใสให้เห็นพื้นหัวหน้า ครึ่งล่างกลางคืน
+   ⚠️ ระยะดึงขึ้นต้องเท่ากับส่วนโปร่งใสพอดี และหัวหน้าต้องเว้น padding-bottom เผื่อไว้ (ไม่งั้นทับปุ่ม/ตัวบอกเลื่อนลง) */
+.ui2-ribbon {
+  z-index: 3;
+  height: 220px;
+  margin-top: -106px;
+  padding-block: 0;
+}
+.ui2-ribbon::before {
+  background: linear-gradient(180deg, transparent 0%, transparent 48%, var(--ui2-night) 48%, var(--ui2-night) 100%);
+}
+.ui2-strip {
+  position: absolute;
+  left: 50%;
+  width: 120vw;
+  translate: -50% 0;
+  overflow: hidden;
+}
+.ui2-strip-text {
+  z-index: 1;
+  top: 40px;
+  rotate: 4deg;
+  padding-block: 10px;
+  background: var(--ui2-ribbon-gold);
+  box-shadow: 0 16px 30px -16px rgba(0, 0, 0, 0.5);
+}
+.ui2-strip-cards {
+  z-index: 2;
+  top: 86px;
+  rotate: -4deg;
+  padding-block: 12px;
+  background: var(--ui2-ribbon-night);
+  border-block: 1px solid rgba(255, 214, 140, 0.35);
+  box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.8);
+}
+.ui2-track {
+  display: flex;
+  width: max-content;
+  gap: 10px;
+  animation: ui2-marquee 50s linear infinite;
+}
+.ui2-strip-text .ui2-track {
+  gap: 0;
+  animation-duration: 40s;
+  animation-direction: reverse;
+}
+.ui2-track-card {
+  flex: none;
+  height: 84px;
+  aspect-ratio: 3 / 5;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255, 214, 140, 0.25);
+}
+.ui2-track-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ui2-track-word {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding-right: 14px;
+  font-size: 22px;
+  line-height: 1.4;
+  color: var(--ui2-ribbon-ink);
+  white-space: nowrap;
+}
+.ui2-track-word .ui2-num,
+.ui2-track-th {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 16px;
+}
+/* เครื่องหมายข้าวหลามตัดคั่นวลี — รูปทรง CSS (ไม่ใช่อีโมจิ/สัญลักษณ์ · กฎเหล็ก 2) */
+/* ตัวคั่นในริบบิ้น — เส้นตั้งบาง (เดิมรูปข้าวหลามตัด ถอดตามกฎห้ามสัญลักษณ์ตกแต่ง 2026-10-16) */
+.ui2-diamond {
+  flex: none;
+  width: 1px;
+  height: 14px;
+  background: var(--ui2-ribbon-mark);
+  opacity: 0.6;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ส่วน 3 · ใจคุณเลือกเอง (เปิดไพ่ด่วน)
+   ═════════════════════════════════════════════════════════════════════════ */
+.ui2-pick {
+  padding-top: 40px;
+}
+.ui2-pick-head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+/* หน้าต่างกระจกมืด: แถบหัว (เรื่อง · ชิปล็อก) + หัวข้อ | พัดไพ่บนแท่นทอง | แผงวิธีเล่น/ผลไพ่ (ต้นแบบ D+) */
+.ui2-window {
+  position: relative;
+  border-radius: var(--ui2-radius-xl);
+  padding: 14px 14px 18px;
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset, 0 40px 80px -40px rgba(0, 0, 0, 0.8);
+}
+.ui2-pick-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding: 2px 4px 14px;
+}
+.ui2-pick-bar-title {
+  font-family: var(--ui2-font-display);
+  font-size: 13px;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-lock {
+  min-height: 30px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: var(--ui2-teal-text);
+}
+.ui2-lock code {
+  font-family: var(--ui2-font-number);
+  letter-spacing: 0.02em;
+}
+/* หัวข้อ — มือถือ: เม็ด 4 ช่อง · คอม: รายการตัวใหญ่ (ดู @media ท้ายส่วน) */
+.ui2-topics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.ui2-topic {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 60px;
+  padding: 8px 4px;
+  border-radius: 18px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--ui2-on-night-dim);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out),
+    font-size var(--dur-base) var(--ease-out);
+}
+.ui2-topic:active {
+  transform: scale(0.97);
+}
+.ui2-topic-num {
+  flex: none;
+  white-space: nowrap;
+  font-family: var(--ui2-font-number);
+  font-size: 12px;
+  color: var(--ui2-gold-solid);
+}
+.ui2-topic-text {
+  display: grid;
+  gap: 4px;
+}
+.ui2-topic-tag {
+  display: none;
+}
+.ui2-topic[aria-pressed="true"] {
+  color: var(--ui2-on-night);
+  background: rgba(255, 217, 143, 0.12);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.6);
+}
+
+/* เวที: ผ้าปูกำมะหยี่ม่วงเข้ม + แสงทองกลาง + แท่นวงรี — ไพ่ 5 ใบกางเป็นพัดโค้ง
+   ⚠️ ไม่มี overflow: hidden (กฎเหล็ก 3 Zero-Clipping — ไพ่ที่ยกขึ้น/เอียงต้องไม่ถูกตัด) */
+.ui2-cloth {
+  position: relative;
+  isolation: isolate;
+  margin-top: 14px;
+  height: 300px;
+  border-radius: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px 0;
+  background:
+    radial-gradient(55% 50% at 50% 42%, rgba(255, 217, 143, 0.2) 0%, rgba(255, 217, 143, 0) 70%),
+    radial-gradient(90% 60% at 50% 115%, rgba(79, 179, 169, 0.16) 0%, rgba(79, 179, 169, 0) 70%),
+    linear-gradient(180deg, #221A29 0%, #120E16 100%);
+  box-shadow:
+    0 0 0 1px rgba(255, 217, 143, 0.22) inset,
+    0 0 0 7px rgba(18, 14, 22, 0.9) inset,
+    0 0 0 8px rgba(255, 217, 143, 0.1) inset,
+    0 30px 60px -36px rgba(0, 0, 0, 0.9);
+}
+/* แท่นทอง — วงรีเรืองแสง + เส้นขอบบาง ใต้พัดไพ่ */
+.ui2-altar {
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  bottom: 11%;
+  width: 80%;
+  height: 24%;
+  translate: -50% 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255, 217, 143, 0.3), rgba(255, 217, 143, 0.06) 70%, rgba(255, 217, 143, 0));
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.22);
+}
+.ui2-altar::after {
+  content: "";
+  position: absolute;
+  inset: 18% 12%;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.14);
+}
+/* พัดไพ่: เอียงตามระยะจากใบกลาง (--o = -2…2) และต่ำลงเป็นโค้ง (--drop) · ซ้อนกันเล็กน้อย */
+.ui2-pick-card {
+  position: relative;
+  flex: none;
+  width: 66px;
+  margin-inline: -15px;
+  aspect-ratio: 300 / 520;
+  border-radius: 10px;
+  perspective: 900px;
+  cursor: pointer;
+  transform-origin: 50% 120%;
+  rotate: calc(var(--o, 0) * 7deg);
+  translate: 0 var(--drop, 0px);
+  transition: translate var(--dur-base) var(--ease-out), rotate var(--dur-base) var(--ease-out), scale var(--dur-base) var(--ease-out),
+    opacity var(--dur-base) var(--ease-out);
+}
+/* ใบที่เลือก: ตั้งตรง ยกขึ้น ขยาย อยู่บนสุด */
+.ui2-pick-card[data-state="lifted"],
+.ui2-pick-card[data-state="revealed"] {
+  z-index: 5;
+  rotate: 0deg;
+  translate: 0 -22px;
+  scale: 1.16;
+}
+.ui2-pick-card[data-state="dim"] {
+  opacity: 0.28;
+}
+.ui2-pick-card:disabled {
+  cursor: default;
+}
+.ui2-flip {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 1s cubic-bezier(0.2, 0.85, 0.2, 1);
+}
+.ui2-pick-card[data-state="revealed"] .ui2-flip {
+  transform: rotateY(180deg);
+}
+.ui2-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  isolation: isolate;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.ui2-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ui2-face-front {
+  transform: rotateY(180deg);
+  background: var(--ui2-paper);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.6), 0 24px 40px -16px rgba(0, 0, 0, 0.9), 0 0 40px rgba(255, 217, 143, 0.25);
+}
+.ui2-face-front.is-reversed img {
+  rotate: 180deg;
+}
+/* หลังไพ่ — วาดด้วย CSS (ไม่ใช่ภาพไพ่ปลอม) */
+.ui2-face-back {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 217, 143, 0.35) 0 9%, rgba(255, 217, 143, 0) 10%),
+    repeating-linear-gradient(45deg, rgba(255, 217, 143, 0.16) 0 2px, rgba(255, 217, 143, 0) 2px 10px),
+    repeating-linear-gradient(-45deg, rgba(255, 217, 143, 0.16) 0 2px, rgba(255, 217, 143, 0) 2px 10px),
+    linear-gradient(160deg, #2A1F2E 0%, #17111B 100%);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.55) inset, 0 0 0 4px rgba(23, 17, 27, 1) inset, 0 0 0 5px rgba(255, 217, 143, 0.3) inset, 0 16px 30px -14px rgba(0, 0, 0, 0.9);
+}
+/* วงแสงทองเต้นระหว่างรอเซิร์ฟเวอร์ */
+.ui2-pulse {
+  position: absolute;
+  inset: -10%;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle, rgba(255, 217, 143, 0.55) 0%, rgba(255, 217, 143, 0) 65%);
+}
+.ui2-pick-card[data-state="lifted"] .ui2-pulse {
+  animation: ui2-pulse 1.4s ease-out infinite;
+}
+
+/* แผงขวา — วิธีเล่น / สถานะ / ผลไพ่ */
+.ui2-pick-side {
+  margin-top: 16px;
+  text-align: center;
+}
+.ui2-pick-guide-title {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.3;
+  color: var(--ui2-on-night);
+}
+.ui2-pick-guide p {
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-pick-hint {
+  margin-top: 10px;
+  font-size: 13.5px;
+  color: var(--ui2-gold-solid);
+  min-height: 22px;
+}
+.ui2-result {
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+}
+.ui2-result-name {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 26px;
+  line-height: 1.3;
+}
+.ui2-result-sub {
+  font-size: 13px;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-result-advice {
+  margin-top: 8px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ui2-on-night);
+}
+.ui2-result-actions {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.ui2-error {
+  padding: 12px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  color: var(--ui2-on-night);
+  background: rgba(166, 57, 44, 0.28);
+  box-shadow: 0 0 0 1px rgba(255, 140, 120, 0.4);
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .ui2-window {
+    padding: 18px 22px 24px;
+  }
+  .ui2-cloth {
+    height: 380px;
+  }
+  .ui2-pick-card {
+    width: 100px;
+    margin-inline: -20px;
+  }
+  .ui2-topic {
+    font-size: 16px;
+  }
+  .ui2-pick-guide-title {
+    font-size: 26px;
+  }
+}
+/* คอม: 3 คอลัมน์ — หัวข้อตัวใหญ่ | เวที | แผงขวา */
+@media (min-width: 1024px) {
+  .ui2-pick-grid {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr) 240px;
+    gap: 28px;
+    align-items: center;
+  }
+  .ui2-pick-grid .ui2-topics {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .ui2-pick-grid .ui2-topic {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: baseline;
+    gap: 12px;
+    min-height: 0;
+    padding: 6px 2px;
+    font-size: 26px;
+    text-align: left;
+    color: rgba(246, 238, 226, 0.42);
+    background: transparent;
+    box-shadow: none;
+  }
+  .ui2-pick-grid .ui2-topic[aria-pressed="true"] {
+    font-size: 40px;
+    color: var(--ui2-on-night);
+    background: transparent;
+    box-shadow: none;
+  }
+  .ui2-pick-grid .ui2-topic[aria-pressed="true"] .ui2-topic-tag {
+    display: block;
+    font-family: var(--font-sarabun);
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--ui2-on-night-soft);
+  }
+  .ui2-pick-grid .ui2-topic-num {
+    font-size: 15px;
+  }
+  .ui2-pick-grid .ui2-cloth {
+    margin-top: 0;
+    height: 400px;
+  }
+  .ui2-pick-card {
+    width: 88px;
+    margin-inline: -22px;
+  }
+  .ui2-pick-side {
+    margin-top: 0;
+    text-align: left;
+  }
+  .ui2-result-actions {
+    justify-content: flex-start;
+  }
+}
+@media (min-width: 1280px) {
+  .ui2-pick-grid {
+    grid-template-columns: 250px minmax(0, 1fr) 270px;
+    gap: 36px;
+  }
+  .ui2-pick-card {
+    width: 108px;
+    margin-inline: -27px;
+  }
+  .ui2-pick-grid .ui2-cloth {
+    height: 420px;
+  }
+  .ui2-pick-grid .ui2-topic[aria-pressed="true"] {
+    font-size: 46px;
+  }
+}
+@media (hover: hover) {
+  .ui2-pick-card:not(:disabled):not([data-state="lifted"]):not([data-state="revealed"]):hover {
+    translate: 0 calc(var(--drop, 0px) - 18px);
+    rotate: calc(var(--o, 0) * 4deg);
+  }
+}
+.ui2-under {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.ui2-deeper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 14px;
+  font-size: 14px;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-deeper a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 4px 16px;
+  border-radius: 999px;
+  color: var(--ui2-on-night);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+  transition: box-shadow var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.ui2-deeper a:hover {
+  background: rgba(255, 217, 143, 0.1);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.5);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ส่วน 4 · กระดาษโน้ตคำถาม
+   ═════════════════════════════════════════════════════════════════════════ */
+.ui2-notes-head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+/*
+ * กระดาษโน้ตแบบภาพต้นแบบ: เกือบจัตุรัส มุมเหลี่ยม ลายมือใหญ่ชิดบน ป้ายผังเล็กชิดล่าง หมุดทองคร่อมขอบบน
+ * วางเหลื่อมแบบอิฐ (แถวคู่เยื้องครึ่งใบ) ขอบซ้อนกันเล็กน้อย เอียงและเหลื่อมขึ้นลงต่อใบ (--tilt · --lift จาก TSX)
+ * จำนวนต่อจอ: มือถือ 6 (2 คอลัมน์) · แท็บเล็ต 8 (3·2·3) · คอม 11 (4·3·4) — ใบเกินซ่อนด้วย nth-child
+ * ⚠️ ความสูงใช้ aspect-ratio เป็นค่าตั้งต้น ข้อความยาวดันให้สูงขึ้นเองได้ — ห้ามใส่ overflow: hidden (สระบนไทยขาด INC-0197)
+ */
+.ui2-notes {
+  list-style: none;
+  margin: 0 auto;
+  padding: 8px 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 18px 12px;
+  max-width: 400px;
+  padding-inline: 4px;
+}
+.ui2-note-slot {
+  position: relative;
+  display: flex;
+}
+/* มือถือ: คอลัมน์ขวาเยื้องลงครึ่งจังหวะ ให้ดูเป็นโน้ตแปะ ไม่ใช่ตาราง */
+.ui2-note-slot:nth-child(2n) {
+  translate: 0 10px;
+}
+.ui2-note-slot:nth-child(n + 7) {
+  display: none;
+}
+.ui2-note-slot:hover,
+.ui2-note-slot:focus-within {
+  z-index: 2;
+}
+.ui2-note {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  aspect-ratio: 1 / 0.96;
+  min-height: 160px;
+  padding: 20px 12px 12px;
+  color: var(--note-ink, var(--ui2-ink));
+  background: var(--note, var(--ui2-note-1));
+  box-shadow: 0 24px 34px -20px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  rotate: calc(var(--tilt, -2deg) * 0.6);
+  transition: rotate 0.35s ease, scale 0.35s ease, translate 0.35s ease;
+}
+.ui2-note:active {
+  rotate: 0deg;
+  translate: 0 -3px;
+}
+.ui2-note-q {
+  font-family: var(--ui2-font-note);
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 1.3;
+  /* ตัดบรรทัดให้ยาวพอ ๆ กัน — ไม่ให้ "ไหม?" ตกไปอยู่บรรทัดเดียวโดด ๆ */
+  text-wrap: balance;
+}
+/* วลีบนโน้ต (คำถามไทย) — ขึ้นบรรทัดใหม่ได้เฉพาะรอยต่อวลี ถ้าวลีเดียวยาวเกินกระดาษค่อยยอมตัดกลางวลี */
+.ui2-note-phrase {
+  display: inline-block;
+  max-width: 100%;
+}
+.ui2-note-spread {
+  margin-top: auto;
+  font-size: 11.5px;
+  line-height: 1.6;
+  text-wrap: balance;
+  color: var(--note-sub, var(--ui2-ink-soft));
+}
+/* มือถือจอกลางขึ้นไป (≥ 380px) — จอ 360 ใช้ค่าข้างบนที่เล็กกว่า ไม่ให้คำถามหักกลางวลี */
+@media (min-width: 380px) {
+  .ui2-note {
+    padding-inline: 14px;
+  }
+  .ui2-note-q {
+    font-size: 22px;
+  }
+  .ui2-note-spread {
+    font-size: 12px;
+  }
+}
+.ui2-pin {
+  position: absolute;
+  top: -6px;
+  left: var(--pin-x, 50%);
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 35%, #FFF1C9, #D9902F 60%, #7A4A12);
+  box-shadow: 0 0 12px rgba(255, 200, 110, 0.8);
+}
+.ui2-notes-more {
+  margin-top: 26px;
+  text-align: center;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ส่วน 5 · แผ่นขาว "เราให้คุณตรวจได้"
+   ═════════════════════════════════════════════════════════════════════════ */
+/* ส่วนนี้เป็นพื้นมืด (มุมโค้งของแผ่นขาวจึงเห็นพื้นมืดต่อเนื่อง) แล้วแผ่นขาวดึงขึ้นทับส่วนก่อนหน้า
+   ⚠️ ดึงขึ้นได้แค่ในระยะ padding ล่างของส่วนกระดาษโน้ต — ห้ามบังโน้ตแถวล่าง (หัวข้อ 6.5) */
+.ui2-verify {
+  padding-top: 0;
+}
+.ui2-sheet {
+  z-index: 1;
+  margin-top: -36px;
+  padding: 44px 18px 48px;
+  border-radius: 40px;
+  color: var(--ui2-ink);
+  background: var(--ui2-paper);
+  box-shadow: 0 -24px 60px -30px rgba(0, 0, 0, 0.6);
+}
+.ui2-vs {
+  text-align: center;
+}
+.ui2-vs-a {
+  display: block;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 30px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ui2-grey-head);
+}
+.ui2-vs-b {
+  display: block;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 30px;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--ui2-ink);
+}
+.ui2-underline {
+  display: block;
+  width: min(260px, 70%);
+  height: 14px;
+  margin: 2px auto 0;
+  overflow: visible;
+}
+.ui2-underline path {
+  fill: none;
+  stroke: #B8691C;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 420;
+  stroke-dashoffset: 0;
+}
+.ui2-steps {
+  position: relative;
+  margin-top: 34px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  counter-reset: none;
+}
+.ui2-step {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: 22px;
+  background: var(--ui2-day);
+  box-shadow: 0 0 0 1px var(--ui2-line-day);
+}
+.ui2-step-num {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  font-size: 18px;
+  color: var(--ui2-button-text);
+  background: var(--ui2-button);
+}
+.ui2-step-title,
+.ui2-step-desc {
+  display: block;
+}
+.ui2-step-title {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 1.35;
+}
+.ui2-step-desc {
+  margin-top: 2px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ui2-ink-soft);
+}
+.ui2-sheet-note {
+  margin: 22px auto 0;
+  max-width: 640px;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ui2-ink-soft);
+}
+.ui2-heritage {
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid var(--ui2-line-day);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 22px;
+  align-items: center;
+  text-align: center;
+}
+.ui2-1909 {
+  font-family: var(--ui2-font-number);
+  font-weight: 500;
+  font-size: 96px;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+.ui2-trio {
+  display: flex;
+  justify-content: center;
+  perspective: 900px;
+}
+.ui2-trio span {
+  display: block;
+  width: 76px;
+  aspect-ratio: 300 / 520;
+  border-radius: 9px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(30, 25, 20, 0.12), 0 22px 30px -18px rgba(60, 40, 20, 0.6);
+  background: var(--ui2-paper);
+}
+.ui2-trio span:nth-child(1) {
+  transform: rotateY(18deg) rotate(-8deg) translateX(14px);
+}
+.ui2-trio span:nth-child(2) {
+  position: relative;
+  z-index: 1;
+  transform: translateY(-8px);
+}
+.ui2-trio span:nth-child(3) {
+  transform: rotateY(-18deg) rotate(8deg) translateX(-14px);
+}
+.ui2-trio img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ui2-heritage-title {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1.3;
+}
+.ui2-heritage-desc {
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ui2-ink-soft);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ส่วน 6 · กล่องหลายขนาด (bento)
+   ═════════════════════════════════════════════════════════════════════════ */
+.ui2-bento-head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 26px;
+}
+.ui2-bento {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+.ui2-tile {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px;
+  border-radius: 30px;
+  color: var(--ui2-on-night);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.065) 0%, rgba(255, 255, 255, 0.015) 100%), var(--ui2-night-2);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+  overflow: hidden;
+}
+a.ui2-tile {
+  transition: translate var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+a.ui2-tile:active {
+  translate: 0 -2px;
+}
+.ui2-tile-title {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.3;
+}
+.ui2-tile-title b {
+  font-weight: 500;
+  color: var(--ui2-gold-solid);
+}
+.ui2-tile-desc {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-tile-go {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--ui2-gold-solid);
+}
+.ui2-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ui2-chips span {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-size: 13px;
+  color: var(--ui2-on-night);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+.ui2-chips span.is-on {
+  color: var(--ui2-button);
+  background: var(--ui2-button-text);
+  box-shadow: none;
+}
+
+/* แสงในกล่อง (radial-gradient ล้วน ไม่ใช้ filter: blur — วาดครั้งเดียว) */
+.ui2-tile-aurora {
+  position: absolute;
+  z-index: -1;
+  border-radius: 999px;
+  pointer-events: none;
+}
+.ui2-tile-aurora-amber {
+  left: -140px;
+  bottom: -220px;
+  width: 560px;
+  height: 400px;
+  background: radial-gradient(closest-side, rgba(233, 160, 70, 0.32), rgba(233, 160, 70, 0));
+}
+.ui2-tile-aurora-teal {
+  left: 50%;
+  top: 40%;
+  width: 440px;
+  height: 440px;
+  translate: -50% -50%;
+  background: radial-gradient(closest-side, rgba(79, 179, 169, 0.3), rgba(79, 179, 169, 0));
+}
+.ui2-tile-label {
+  font-family: var(--ui2-font-display);
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  color: var(--ui2-teal-text);
+}
+.ui2-tile-hint {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-title-line {
+  display: block;
+}
+
+/* อ่านทีละใบ — ไพ่ 3 ใบ (ใบกลางยกขึ้น ขอบทองเรือง) + แผงกระจกคำอ่านของใบกลาง */
+.ui2-reading-row {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.ui2-reading-cards {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding-top: 8px;
+}
+.ui2-reading-cards span {
+  width: 64px;
+  aspect-ratio: 3 / 5;
+  border-radius: 8px;
+  overflow: hidden;
+  opacity: 0.75;
+}
+.ui2-reading-cards span.is-focus {
+  opacity: 1;
+  translate: 0 -8px;
+  box-shadow: 0 0 0 1.5px var(--ui2-gold-solid), 0 0 34px rgba(255, 200, 110, 0.5);
+}
+.ui2-reading-cards img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ui2-reading-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.02));
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.11), 0 1px 0 rgba(255, 255, 255, 0.09) inset;
+}
+.ui2-reading-label {
+  font-size: 12.5px;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-reading-text {
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--ui2-on-night);
+}
+.ui2-reading-text b {
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+}
+.ui2-why-chip {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-size: 12.5px;
+  color: var(--ui2-on-night);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* พิธีเช้า — ไพ่คว่ำใบใหญ่กลางกล่อง + แสงทองเรืองหลังไพ่ (เต้นเฉพาะระดับ full · ui2-fx-full.css) */
+.ui2-tile-morning {
+  align-items: center;
+  text-align: center;
+}
+.ui2-tile-morning .ui2-tile-label,
+.ui2-tile-morning .ui2-tile-title {
+  align-self: stretch;
+  text-align: left;
+}
+.ui2-morning-card {
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin: 10px 0 2px;
+}
+.ui2-morning-back {
+  position: relative;
+  width: 120px;
+  aspect-ratio: 3 / 5;
+  border-radius: 10px;
+}
+.ui2-morning-burst {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border-radius: 999px;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 214, 140, 0.32) 0%, rgba(255, 214, 140, 0) 68%);
+}
+.ui2-tile-morning .ui2-chips {
+  justify-content: center;
+}
+
+/* สมุดดวง — แถบไพ่ย่อ 7 ช่อง */
+.ui2-journal-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+}
+.ui2-journal-strip > span {
+  aspect-ratio: 3 / 5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.ui2-journal-strip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ui2-journal-strip .is-empty {
+  background: rgba(255, 255, 255, 0.06);
+}
+.ui2-journal-strip .is-next {
+  box-shadow: inset 0 0 0 1.5px var(--ui2-gold-solid), 0 0 16px rgba(255, 200, 110, 0.4);
+}
+/* แม่หมอตัวจริงที่ว่างเร็วสุด (เติมโดย astro/scripts/ui2-home.ts) */
+.ui2-readers {
+  display: grid;
+  gap: 8px;
+}
+.ui2-readers[hidden] {
+  display: none;
+}
+/* มีรายชื่อแม่หมอจริงแล้ว ➔ ซ่อนคำอธิบายทั่วไป (แบบภาพต้นแบบ) · ยังไม่มี/โหลดไม่ได้ = คำอธิบาย + ลิงก์ล้วน */
+[data-ui2-readers]:has(.ui2-readers:not([hidden])) > .ui2-tile-desc {
+  display: none;
+}
+.ui2-reader-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 8px 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+  transition: box-shadow var(--dur-fast) var(--ease-out);
+}
+.ui2-reader-avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 999px;
+  overflow: hidden;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 18px;
+  color: var(--ui2-gold-solid);
+  background: linear-gradient(160deg, #5A4130, #241A12);
+  box-shadow: 0 0 0 2px rgba(255, 214, 140, 0.6);
+}
+.ui2-reader-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ui2-reader-body {
+  display: grid;
+  min-width: 0;
+}
+.ui2-reader-name {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 16px;
+  color: var(--ui2-on-night);
+}
+.ui2-reader-meta {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ui2-on-night-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui2-reader-meta.is-live {
+  color: var(--ui2-teal-text);
+}
+
+/* ลูกศรเฉียงในวงกลม (ลิงก์ "ดูทั้งหมด" · แถวบทความในคลังไพ่) */
+.ui2-arrow-ne {
+  flex: none;
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px var(--ui2-line-day);
+  transition: background-color var(--dur-fast) var(--ease-out), rotate var(--dur-base) var(--ease-out);
+}
+.ui2-arrow-ne::before {
+  content: "";
+  position: absolute;
+  left: 13px;
+  top: 11px;
+  width: 9px;
+  height: 9px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+}
+/* ก้านลูกศรเฉียง */
+.ui2-arrow-ne::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 16px;
+  width: 13px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  rotate: -45deg;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ส่วน 6.5 · คลังไพ่ยิปซี — หัวเรื่องซ้าย ข้อมูลขวา (ต้นแบบ fastwork.com/selling#profile-showcase)
+   มือถือ/แท็บเล็ต (< 1024): หัวเรื่องเป็นแถบเม็ดยาเลื่อนแนวนอนเหนือการ์ด · คอม: รายการหัวเรื่องตัวใหญ่เทา/ดำ
+   ═════════════════════════════════════════════════════════════════════════ */
+.ui2-show {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px;
+}
+.ui2-show-head .ui2-lede {
+  max-width: 640px;
+  margin-top: 12px;
+}
+/* หัวข้อคลังไพ่สองบรรทัด — บรรทัดหลังทองไล่สี (แทนพัดไพ่กลางหัวข้อ · เจ้าของ 2026-10-17 "ไม่เอารูปไพ่") */
+.ui2-show-h2-line {
+  display: block;
+}
+.ui2-show-h2 .ui2-gold-night {
+  font-weight: 600;
+}
+.ui2-show-tabs {
+  display: flex;
+  min-width: 0;
+  gap: 8px;
+  margin: 22px -16px 0;
+  padding: 4px 16px 8px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 16px;
+  scrollbar-width: none;
+}
+.ui2-show-tabs::-webkit-scrollbar {
+  display: none;
+}
+.ui2-show-tab {
+  flex: none;
+  scroll-snap-align: start;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--ui2-ink-soft);
+  background: var(--ui2-glass-day-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-day);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.ui2-show-tab[aria-selected="true"] {
+  color: var(--ui2-button-text);
+  background: var(--ui2-button);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.55) inset, 0 10px 22px -12px rgba(23, 17, 12, 0.7);
+}
+.ui2-show-tab:focus-visible {
+  outline: 2px solid var(--ui2-gold-ink);
+  outline-offset: 3px;
+}
+
+/* คลังไพ่บนพื้นกลางคืน: หัวเรื่องเทา/สว่าง · เม็ดหัวเรื่อง (มือถือ) กระจกมืด ที่เลือก = กระดาษสว่าง */
+.ui2-show-sec .ui2-show-tab {
+  color: var(--ui2-on-night-soft);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+}
+.ui2-show-sec .ui2-show-tab[aria-selected="true"] {
+  color: var(--ui2-ink);
+  background: var(--ui2-paper);
+  box-shadow: 0 10px 22px -12px rgba(0, 0, 0, 0.8);
+}
+.ui2-show-sec .ui2-show-tab:focus-visible {
+  outline-color: var(--ui2-gold-solid);
+}
+/* การ์ดข้อมูล — กระดาษขาวขอบคู่ (เส้นบาง + ขอบนวลด้านนอก) แบบกรอบโชว์ผลงานของต้นแบบ */
+.ui2-show-card {
+  position: relative;
+  min-width: 0;
+  padding: 20px 16px 22px;
+  border-radius: var(--ui2-radius-xl);
+  background: var(--ui2-paper);
+  box-shadow:
+    0 0 0 1px rgba(255, 236, 200, 0.5),
+    0 0 0 8px rgba(255, 236, 200, 0.06),
+    0 0 0 9px rgba(255, 236, 200, 0.12),
+    0 60px 120px -50px rgba(0, 0, 0, 0.9),
+    0 0 120px -40px rgba(233, 160, 70, 0.35);
+}
+.ui2-show-panel[hidden] {
+  display: none;
+}
+.ui2-show-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.ui2-show-title {
+  font-size: 23px;
+  line-height: 1.3;
+  color: var(--ui2-ink);
+}
+.ui2-show-desc {
+  max-width: 560px;
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ui2-ink-soft);
+}
+.ui2-show-all {
+  flex: none;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--ui2-ink);
+}
+.ui2-show-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 16px;
+  padding: 12px 4px;
+  border-radius: 18px;
+  box-shadow: 0 0 0 1px var(--ui2-line-day);
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--ui2-muted);
+}
+.ui2-show-stats li + li {
+  box-shadow: -1px 0 0 var(--ui2-line-day);
+}
+.ui2-show-stats li {
+  padding-inline: 6px;
+}
+.ui2-show-stats strong {
+  display: block;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ui2-ink);
+}
+
+/* แผง 1 · หมวดเรื่อง: ไพ่หน้าปกเล็ก + ชื่อหมวด + จำนวนผัง + คำโปรย 2 บรรทัด */
+.ui2-show-topics {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+.ui2-show-topic,
+.ui2-show-sign {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px 12px 12px;
+  border-radius: 20px;
+  background: var(--ui2-day);
+  box-shadow: 0 0 0 1px var(--ui2-line-day);
+  transition: translate var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.ui2-show-thumb {
+  width: 46px;
+  aspect-ratio: 0.58;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px rgba(30, 25, 20, 0.14), 0 10px 18px -10px rgba(30, 25, 20, 0.6);
+}
+.ui2-show-topic:nth-child(odd) .ui2-show-thumb {
+  rotate: -4deg;
+}
+.ui2-show-topic:nth-child(even) .ui2-show-thumb {
+  rotate: 3deg;
+}
+.ui2-show-topic-text {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.ui2-show-topic-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1.3;
+  color: var(--ui2-ink);
+}
+.ui2-show-topic small {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ui2-ink-soft);
+}
+.ui2-show-count {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--ui2-gold-ink);
+  background: rgba(184, 105, 28, 0.1);
+}
+.ui2-show-label,
+.ui2-show-sub {
+  margin-top: 22px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--ui2-ink);
+}
+.ui2-show-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.ui2-show-chips a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ui2-ink-soft);
+  background: var(--ui2-glass-day-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-day);
+  transition: color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+
+/* แผง 2 · ผังยอดนิยม: กระดานผังจริง (พื้นกลางคืน · หลังไพ่ของเรา) + แถวผัง */
+.ui2-show-spreads {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+.ui2-show-layout {
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  padding: 16px 16px 18px;
+  border-radius: 26px;
+  background:
+    radial-gradient(70% 60% at 50% 40%, rgba(233, 160, 70, 0.22), rgba(233, 160, 70, 0) 70%),
+    var(--ui2-night);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.18) inset;
+}
+.ui2-show-board {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  aspect-ratio: 1;
+}
+.ui2-show-slot {
+  position: absolute;
+  left: calc(var(--x) * 100%);
+  top: calc(var(--y) * 100%);
+  width: 13%;
+  aspect-ratio: 0.6;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  translate: -50% -50%;
+  rotate: var(--r);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 217, 143, 0.28) 0 22%, rgba(255, 217, 143, 0) 24%),
+    repeating-linear-gradient(45deg, rgba(255, 217, 143, 0.14) 0 1px, rgba(255, 217, 143, 0) 1px 6px),
+    repeating-linear-gradient(-45deg, rgba(255, 217, 143, 0.14) 0 1px, rgba(255, 217, 143, 0) 1px 6px),
+    linear-gradient(160deg, #2A1F2E 0%, #17111B 100%);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.6) inset, 0 0 0 3px rgba(23, 17, 27, 1) inset, 0 12px 22px -10px rgba(0, 0, 0, 0.9);
+}
+/* ใบขวาง (ตำแหน่งที่ 2 ของเซลติกครอส) ทับใบแรก — เลข 1 ขึ้นไปอยู่ปลายบนของใบตั้ง · เลข 2 อยู่ปลายขวาของใบขวาง (ตั้งตรง) */
+.ui2-show-slot:first-child {
+  place-items: start center;
+  padding-top: 3px;
+  font-size: 11px;
+}
+.ui2-show-slot:nth-child(2) {
+  z-index: 1;
+  place-items: start center;
+  padding-top: 3px;
+  font-size: 0;
+}
+.ui2-show-slot:nth-child(2)::after {
+  content: "2";
+  rotate: -90deg;
+  font-size: 11px;
+}
+.ui2-show-legend {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 14px;
+  counter-reset: pos;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-show-legend li {
+  counter-increment: pos;
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 6px;
+}
+.ui2-show-legend li::before {
+  content: counter(pos);
+  font-family: var(--ui2-font-number);
+  font-weight: 600;
+  text-align: right;
+  color: var(--ui2-gold-solid);
+}
+.ui2-show-layout .ui2-btn {
+  min-height: 46px;
+  padding: 0 22px;
+  font-size: 15px;
+  color: var(--ui2-ink);
+  background: var(--ui2-gold-night);
+  box-shadow: 0 14px 30px -14px rgba(233, 160, 70, 0.8);
+}
+.ui2-show-rows {
+  display: grid;
+  align-content: start;
+  border-top: 1px solid var(--ui2-line-day);
+}
+.ui2-show-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 56px;
+  padding: 12px 2px;
+  border-bottom: 1px solid var(--ui2-line-day);
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 1.35;
+  color: var(--ui2-ink);
+}
+.ui2-show-row small {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-sarabun);
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ui2-ink-soft);
+}
+
+/* แผง 3 · ไพ่เด่น: ไพ่ + ชื่อ + คำสำคัญ + คำแนะนำจากไพ่ (เอียงสลับ · ชี้แล้วตั้งตรง)
+   มือถือ 1 คอลัมน์ · ตั้งแต่ 640 ขึ้นไป 2 คอลัมน์ (3 คอลัมน์แคบจนชื่อไพ่ขาดบรรทัด) */
+.ui2-show-cards {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+.ui2-show-major {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+  padding: 14px 16px 14px 14px;
+  border-radius: 20px;
+  background: var(--ui2-day);
+  box-shadow: 0 0 0 1px var(--ui2-line-day);
+  transition: box-shadow var(--dur-fast) var(--ease-out);
+}
+/* <picture> ของ CardImage เป็น display: contents — <source> จึงกินช่องตาราง ต้องวางไพ่/ข้อความลงช่องเอง */
+.ui2-show-major-img {
+  grid-area: 1 / 1;
+  width: 100%;
+  aspect-ratio: 0.58;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px rgba(30, 25, 20, 0.14), 0 16px 26px -14px rgba(30, 25, 20, 0.65);
+  transition: rotate var(--dur-base) var(--ease-out), translate var(--dur-base) var(--ease-out);
+}
+.ui2-show-major:nth-child(odd) .ui2-show-major-img {
+  rotate: -3deg;
+}
+.ui2-show-major:nth-child(even) .ui2-show-major-img {
+  rotate: 2.5deg;
+}
+.ui2-show-major-body {
+  grid-area: 1 / 2;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding-top: 2px;
+}
+.ui2-show-major-name {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 1.3;
+  color: var(--ui2-ink);
+}
+.ui2-show-major small {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ui2-gold-ink);
+}
+.ui2-show-major-tip {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--ui2-ink-soft);
+}
+.ui2-show-suits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.ui2-show-suit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 46px;
+  padding: 6px 8px 6px 16px;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--ui2-ink);
+  background: var(--ui2-day);
+  box-shadow: 0 0 0 1px var(--ui2-line-day);
+}
+.ui2-show-suit:first-child {
+  color: var(--ui2-button-text);
+  background: var(--ui2-button);
+}
+.ui2-show-suit:first-child .ui2-show-count {
+  color: var(--ui2-gold-solid);
+  background: rgba(255, 217, 143, 0.14);
+}
+
+/* แผง 4 · 12 ราศี: พื้นสีตามธาตุ (ไฟ ส้ม · ดิน เขียว · ลม ฟ้า · น้ำ เขียวน้ำทะเล) */
+.ui2-show-zodiac {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 18px;
+}
+.ui2-show-sign {
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px;
+  border-radius: 16px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.3;
+  color: var(--ui2-ink);
+}
+.ui2-show-sign[data-el="fire"] { background: var(--ui2-note-3); }
+.ui2-show-sign[data-el="earth"] { background: var(--ui2-note-1); }
+.ui2-show-sign[data-el="air"] { background: var(--ui2-note-7); }
+.ui2-show-sign[data-el="water"] { background: var(--ui2-note-5); }
+.ui2-show-sign .ui2-show-thumb {
+  width: 36px;
+}
+.ui2-show-sign small {
+  display: block;
+  margin-top: 1px;
+  font-family: var(--font-sarabun);
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--ui2-ink-soft);
+}
+
+/* แผง 5 · วิธีดูดวง: "เส้นทางพิธี" แนวตั้ง — วงกลมเลขทองตัวตรงเชื่อมด้วยเส้นทองบาง */
+.ui2-path {
+  position: relative;
+  margin-top: 26px;
+  display: grid;
+  gap: 26px;
+}
+.ui2-path::before {
+  content: "";
+  position: absolute;
+  left: 25px;
+  top: 26px;
+  bottom: 26px;
+  width: 1px;
+  background: linear-gradient(180deg, rgba(184, 105, 28, 0.55), rgba(184, 105, 28, 0.12));
+}
+.ui2-path-step {
+  position: relative;
+  display: grid;
+  align-content: start;
+  grid-template-columns: 52px minmax(0, 1fr);
+  column-gap: 18px;
+  row-gap: 4px;
+}
+.ui2-path-dot {
+  grid-row: span 2;
+  align-self: start;
+  margin-top: -12px;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  font-size: 17px;
+  color: var(--ui2-gold-ink);
+  background: var(--ui2-paper);
+  box-shadow: 0 0 0 1px rgba(184, 105, 28, 0.45), 0 0 0 7px var(--ui2-paper), 0 16px 30px -16px rgba(138, 79, 16, 0.55);
+}
+.ui2-path-title {
+  align-self: end;
+  font-size: 18px;
+  line-height: 1.35;
+  color: var(--ui2-ink);
+}
+.ui2-path-text {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--ui2-ink-soft);
+}
+.ui2-show-cta {
+  margin-top: 26px;
+}
+
+/* มือถือเล็ก: หมวดเรื่อง 2 คอลัมน์แบบกะทัดรัด (ไพ่ + ชื่อ + จำนวนผัง · คำโปรยอยู่ใน HTML ให้บอทอ่าน แต่ไม่โชว์) */
+@media (max-width: 479px) {
+  .ui2-show-topics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ui2-show-topic {
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px;
+    border-radius: 16px;
+  }
+  .ui2-show-topic .ui2-show-thumb {
+    width: 34px;
+  }
+  .ui2-show-topic-name {
+    font-size: 15px;
+  }
+  .ui2-show-topic small {
+    display: none;
+  }
+}
+@media (min-width: 480px) {
+  .ui2-show-topics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ui2-show-zodiac {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 640px) {
+  .ui2-show-card {
+    padding: 28px 28px 30px;
+  }
+  .ui2-show-all {
+    display: inline-flex;
+  }
+  .ui2-show-title {
+    font-size: 26px;
+  }
+  .ui2-show-stats {
+    max-width: 480px;
+  }
+  .ui2-show-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ui2-show-major {
+    grid-template-columns: 84px minmax(0, 1fr);
+  }
+  .ui2-show-zodiac {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .ui2-show-spreads {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 22px;
+  }
+}
+@media (min-width: 1024px) {
+  .ui2-show {
+    grid-template-columns: minmax(250px, 300px) minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
+  }
+  .ui2-show-tabs {
+    position: sticky;
+    top: 104px;
+  }
+  /* หัวเรื่องแนวตั้งตัวใหญ่: เทา = ยังไม่เลือก · ดำ + ขีดทอง = ที่เลือก (แบบรายการอาชีพของต้นแบบ) */
+  .ui2-show-tabs {
+    flex-direction: column;
+    gap: 2px;
+    margin: 18px 0 0;
+    padding: 0;
+    overflow: visible;
+  }
+  .ui2-show-sec .ui2-show-tab,
+  .ui2-show-sec .ui2-show-tab[aria-selected="true"] {
+    position: relative;
+    min-height: 50px;
+    padding: 0 0 0 24px;
+    border-radius: 0;
+    font-size: 24px;
+    text-align: left;
+    white-space: normal;
+    background: none;
+    box-shadow: none;
+  }
+  .ui2-show-sec .ui2-show-tab {
+    color: rgba(246, 238, 226, 0.42);
+  }
+  .ui2-show-sec .ui2-show-tab[aria-selected="true"] {
+    color: var(--ui2-on-night);
+  }
+  /* แถบบอกแท็บที่เลือก — เส้นตั้งสั้น (เดิมรูปข้าวหลามตัด ถอดตามกฎห้ามสัญลักษณ์ตกแต่ง 2026-10-16) */
+  .ui2-show-tab::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 3px;
+    height: 16px;
+    border-radius: 2px;
+    translate: 0 -50%;
+    background: var(--ui2-gold-solid);
+    opacity: 0;
+    scale: 0.4;
+    transition: opacity var(--dur-fast) var(--ease-out), scale var(--dur-fast) var(--ease-out);
+  }
+  .ui2-show-tab[aria-selected="true"]::before {
+    opacity: 1;
+    scale: 1;
+  }
+  .ui2-show-card {
+    min-height: 600px;
+    padding: 36px 38px 38px;
+  }
+  .ui2-show-zodiac {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  .ui2-show {
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: 72px;
+  }
+  .ui2-show-sec .ui2-show-tab,
+  .ui2-show-sec .ui2-show-tab[aria-selected="true"] {
+    font-size: 27px;
+  }
+  .ui2-show-topics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .ui2-show-zodiac {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .ui2-show-title {
+    font-size: 30px;
+  }
+}
+/* ผังของฉัน (ผังที่ออกแบบเอง) ใต้ส่วนเปิดไพ่ — แผงกระจกมืดเข้าชุดกับหน้าต่างเปิดไพ่
+   คอมโพเนนต์เดิมใช้คลาสธีมสว่าง (text-ink-deep · text-muted · glass-chip) จึงแปลงสีเฉพาะในกล่องนี้ */
+.ui2-myspreads:not(:empty) {
+  position: relative;
+  width: 100%;
+  max-width: 760px;
+  margin: 6px auto 0;
+  padding: 14px 18px;
+  border-radius: 22px;
+  color: var(--ui2-on-night);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+}
+.ui2-myspreads .text-ink-deep {
+  color: var(--ui2-on-night);
+}
+.ui2-myspreads .text-muted {
+  color: var(--ui2-on-night-soft);
+}
+.ui2-myspreads .text-gold-ink {
+  color: var(--ui2-gold-solid);
+}
+.ui2-myspreads .glass-chip {
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+}
+/* FAQ — แผงกระจก แตะแล้วไอคอน + หมุนเป็น × */
+.ui2-faq-list {
+  display: grid;
+  gap: 10px;
+}
+.ui2-faq {
+  border-radius: 20px;
+  background: var(--ui2-glass-day-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-day), 0 1px 0 var(--ui2-glass-edge-day) inset;
+}
+.ui2-faq > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 56px;
+  padding: 14px 18px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.ui2-faq > summary::-webkit-details-marker {
+  display: none;
+}
+.ui2-plus {
+  flex: none;
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px var(--ui2-line-day);
+  transition: rotate var(--dur-base) var(--ease-out);
+}
+.ui2-plus::before,
+.ui2-plus::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 2px;
+  margin: -1px 0 0 -6px;
+  border-radius: 2px;
+  background: currentColor;
+}
+.ui2-plus::after {
+  rotate: 90deg;
+}
+details[open] > summary .ui2-plus {
+  rotate: 45deg;
+}
+.ui2-faq-a {
+  padding: 0 18px 18px;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ui2-ink-soft);
+}
+
+/* ── ส่วน 7 · คำถามที่พบบ่อย — การ์ดมืดใหญ่บนพื้นกลางวัน (เข้าชุดกับการ์ดปิดท้าย) + แถวสลับซ้ายขวา
+   ต้นแบบ fastwork.com/selling "One platform is everything you need": ภาพจำลองหน้าจอพื้นพาสเทล ↔ ข้อความ ─────── */
+/* ส่วนสุดท้ายของหน้าแรก (ส่วนปิดท้ายถูกถอดตามคำสั่งเจ้าของ 2026-10-13) — อยู่บนพื้นกลางคืนผืนเดียวกับส่วนก่อนหน้า ไม่มีการ์ดครอบ */
+.ui2-fq-sec {
+  padding-bottom: 120px;
+}
+.ui2-fq-sheet {
+  position: relative;
+}
+.ui2-fq-head {
+  max-width: 640px;
+  margin-inline: auto;
+  text-align: center;
+}
+.ui2-fq-head .ui2-kicker {
+  justify-content: center;
+}
+.ui2-fq-head .ui2-lede {
+  margin-top: 10px;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-fq-rows {
+  display: grid;
+  gap: 44px;
+  margin-top: 40px;
+}
+.ui2-fq-row {
+  display: grid;
+  gap: 22px;
+  align-items: center;
+  scroll-margin-top: 110px;
+}
+.ui2-fq-q {
+  line-height: 1.3;
+  color: var(--ui2-on-night);
+}
+.ui2-fq-a {
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--ui2-on-night-soft);
+}
+
+/* ภาพจำลอง: การ์ดพาสเทลสว่าง (ทอง-ครีม-เขียวน้ำทะเล) + แผงกระดาษขาวด้านใน */
+.ui2-fq-mock {
+  position: relative;
+  display: grid;
+  place-items: center;
+  gap: 14px;
+  min-height: 260px;
+  padding: 28px 20px;
+  border-radius: 30px;
+  color: var(--ui2-ink);
+  background:
+    radial-gradient(70% 60% at 18% 12%, rgba(255, 222, 150, 0.85) 0%, rgba(255, 222, 150, 0) 70%),
+    radial-gradient(60% 60% at 90% 90%, rgba(132, 196, 184, 0.7) 0%, rgba(132, 196, 184, 0) 70%),
+    var(--ui2-day);
+}
+.ui2-fq-panel {
+  width: min(100%, 330px);
+  display: grid;
+  gap: 10px;
+  padding: 18px 18px 16px;
+  border-radius: 22px;
+  background: var(--ui2-paper);
+  box-shadow: 0 0 0 1px var(--ui2-line-day), 0 30px 50px -30px rgba(74, 47, 16, 0.55);
+}
+.ui2-fq-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ui2-gold-ink);
+}
+/* ข้อ 1 · ฟรี */
+.ui2-fq-price {
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ui2-ink);
+}
+.ui2-fq-checks {
+  display: grid;
+  gap: 8px;
+  padding-block: 4px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+/* ไม่มีเครื่องหมายถูกหน้ารายการ (เจ้าของ 2026-10-16 ห้ามสัญลักษณ์ทุกรูปแบบ) — เส้นทองซ้ายแทน */
+.ui2-fq-checks li {
+  position: relative;
+  padding-left: 12px;
+  border-left: 2px solid rgba(184, 105, 28, 0.35);
+}
+.ui2-fq-logins {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--ui2-line-day);
+}
+.ui2-fq-logins span {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: var(--ui2-day);
+  box-shadow: 0 0 0 1px var(--ui2-line-day);
+}
+.ui2-fq-panel small {
+  font-size: 12px;
+  color: var(--ui2-muted);
+}
+/* ข้อ 2 · ความแม่น — ไพ่ตัวอย่าง 3 ใบกางเป็นพัด + บรรทัดคำอ่านพร้อมเหตุผล */
+.ui2-fq-fan {
+  display: flex;
+  justify-content: center;
+  padding-top: 6px;
+}
+.ui2-fq-card {
+  width: 64px;
+  aspect-ratio: 0.58;
+  object-fit: cover;
+  margin-inline: -6px;
+  border-radius: 7px;
+  box-shadow: 0 0 0 1px rgba(30, 25, 20, 0.14), 0 18px 26px -14px rgba(30, 25, 20, 0.7);
+}
+.ui2-fq-card:first-child {
+  rotate: -9deg;
+  translate: 0 8px;
+}
+.ui2-fq-card:nth-child(2) {
+  position: relative;
+  z-index: 1;
+  width: 74px;
+}
+.ui2-fq-card:last-child {
+  rotate: 9deg;
+  translate: 0 8px;
+}
+.ui2-fq-line {
+  font-size: 14px;
+  line-height: 1.65;
+}
+/* ป้ายเดิมออกแบบไว้บนพื้นมืด (กล่องอ่านทีละใบ) — บนแผงกระดาษขาวต้องเป็นทองเข้ม */
+.ui2-fq-reading .ui2-why-chip {
+  justify-self: start;
+  color: var(--ui2-gold-ink);
+  background: rgba(184, 105, 28, 0.12);
+}
+/* ข้อ 3 · คำถามที่เหมาะ — ช่องพิมพ์แบบต้นแบบ "What do you need help with?" */
+.ui2-fq-ask-title {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 21px;
+  line-height: 1.3;
+  text-align: center;
+}
+.ui2-fq-input {
+  position: relative;
+  width: min(100%, 330px);
+  padding: 12px 18px 12px 42px;
+  border-radius: 999px;
+  font-size: 14.5px;
+  background: var(--ui2-paper);
+  box-shadow: 0 0 0 1px var(--ui2-line-day), 0 16px 30px -20px rgba(74, 47, 16, 0.5);
+}
+/* แว่นขยาย = วงกลม + ก้าน (CSS) */
+.ui2-fq-input::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -7px;
+  border: 2px solid var(--ui2-muted);
+  border-radius: 999px;
+}
+.ui2-fq-input::after {
+  content: "";
+  position: absolute;
+  left: 28px;
+  top: 50%;
+  width: 6px;
+  height: 2px;
+  margin-top: 3px;
+  border-radius: 2px;
+  background: var(--ui2-muted);
+  rotate: 45deg;
+}
+.ui2-fq-better {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.ui2-fq-better li {
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: var(--ui2-day);
+}
+
+/* คำถามอื่น ๆ — รายการพับบนพื้นมืด */
+.ui2-fq-more {
+  margin: 48px 0 14px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 18px;
+  color: var(--ui2-on-night);
+}
+.ui2-fq-sheet .ui2-faq {
+  color: var(--ui2-on-night);
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+}
+.ui2-fq-sheet .ui2-plus {
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+}
+.ui2-fq-sheet .ui2-faq-a {
+  color: var(--ui2-on-night-soft);
+}
+
+@media (min-width: 768px) {
+  .ui2-fq-mock {
+    min-height: 340px;
+  }
+  .ui2-faq-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+@media (min-width: 1024px) {
+  .ui2-fq-rows {
+    gap: 64px;
+    margin-top: 56px;
+  }
+  /* แถวสลับ: ภาพซ้าย ข้อความขวา · แถวคู่กลับข้าง */
+  .ui2-fq-row {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 64px;
+  }
+  .ui2-fq-row:nth-child(even) .ui2-fq-mock {
+    order: 2;
+  }
+  .ui2-fq-mock {
+    min-height: 380px;
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   แถบปุ่มติดล่างจอ (มือถือ) — หัวข้อ 5.2
+   ═════════════════════════════════════════════════════════════════════════ */
+.ui2-sticky {
+  position: fixed;
+  z-index: var(--z-sticky);
+  left: 12px;
+  /* เว้นฝั่งขวาให้ปุ่มแชทลอยมุมขวาล่าง — ห้ามทับ */
+  right: 84px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  justify-content: flex-start;
+  pointer-events: none;
+  opacity: 0;
+  translate: 0 16px;
+  transition: opacity var(--dur-base) var(--ease-out), translate var(--dur-base) var(--ease-out);
+}
+.ui2-sticky[data-show] {
+  opacity: 1;
+  translate: 0 0;
+}
+.ui2-sticky[data-show] .ui2-btn {
+  pointer-events: auto;
+}
+.ui2-sticky .ui2-btn {
+  min-height: 50px;
+  width: 100%;
+  max-width: 320px;
+}
+@media (min-width: 768px) {
+  .ui2-sticky {
+    display: none;
+  }
+}
+/* แถบยินยอมคุกกี้กำลังขึ้น = ไม่วางแถบซ้อนกัน */
+html[data-consent-ask] .ui2-sticky {
+  display: none;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   แท็บเล็ต / iPad แนวตั้ง (768–1023) และคอม (หัวข้อ 4)
+   ═════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+  .ui2-sec {
+    padding-block: 88px;
+  }
+  /* แท็บเล็ตแนวตั้ง: 6 ใบชิดขอบซ้าย-ขวา (ใบไกลบนซ่อน) ไม่มีป้าย · ข้อความเว้นขอบให้การ์ด (ห้ามทับหัวข้อ) */
+  .ui2-hero-inner { padding-inline: 100px; padding-top: 0; gap: 20px; }
+  .ui2-fc { padding: 6px 6px 8px; border-radius: 16px; }
+  .ui2-fc-star { --w: 92px; --r: -8deg; left: 1%; top: 8px; }
+  .ui2-fc-lovers { --w: 86px; --r: 7deg; left: 1.5%; top: 300px; bottom: auto; }
+  /* คนเขลา/โลก (ใบล่างสุด) ไม่แสดงที่จอ < 1280 — ที่ตำแหน่งเดิมลงไปใต้ริบบิ้น 55–96px ป้ายชื่อถูกทับ (INC-0280) · ขยับขึ้นก็ซ้อนใบคู่รัก/นักบวชหญิง */
+  .ui2-fc-wheel { --w: 92px; --r: 7deg; right: 1%; top: 0; }
+  .ui2-fc-priestess { --w: 86px; --r: -6deg; right: 1.5%; top: 310px; bottom: auto; }
+  .ui2-fc-moon,
+  .ui2-fc-empress { display: none; }
+  .ui2-hero {
+    padding-top: 56px;
+    /* 40px + ส่วนที่ริบบิ้นดึงขึ้นมาทับ (139px) */
+    padding-bottom: 180px;
+    /* แท็บเล็ตแนวตั้ง: การ์ด 3 ใบต่อข้างอยู่ในความสูงของเนื้อหาแล้ว (ใบล่างสุดจบที่ ~640px) — ไม่ยืดส่วนจนเหลือที่ว่าง */
+    min-height: 0;
+  }
+  .ui2-h1 {
+    line-height: 1.18;
+  }
+  /* สองคอลัมน์เท่ากันรอบเส้นกลาง — ปุ่ม "ไพ่วันนี้" ยาวขึ้นตอนข้อมูลมาถึง (+ภาพไพ่ + ชื่อไพ่) ไม่ดันปุ่มหลักให้เลื่อน
+     (เดิม flex จัดกลาง: ปุ่มหลักขยับซ้ายราว 12px หลังโหลด ~2 วินาที · INC-0280) */
+  .ui2-hero-ctas {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    justify-items: start;
+  }
+  .ui2-hero-ctas .ui2-btn {
+    justify-self: end;
+    width: auto;
+  }
+  .ui2-clock {
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .ui2-clock-label {
+    font-size: 13px;
+  }
+  .ui2-clock-cell {
+    width: 88px;
+    height: 88px;
+    border-radius: 22px;
+  }
+  .ui2-clock-cell .ui2-num {
+    font-size: 40px;
+  }
+  /* ริบบิ้นบนแท็บเล็ต/คอม: ขนาดตามภาพต้นแบบ DX-Desktop */
+  .ui2-ribbon { height: 290px; margin-top: -139px; padding-block: 0; }
+  .ui2-strip { width: 110vw; }
+  .ui2-strip-text { top: 70px; rotate: 2.6deg; padding-block: 14px; box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5); }
+  .ui2-strip-cards { top: 120px; rotate: -2.4deg; padding-block: 16px; box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8); }
+  .ui2-track { gap: 14px; animation-duration: 70s; }
+  .ui2-strip-text .ui2-track { gap: 0; animation-duration: 60s; }
+  .ui2-track-card { height: 112px; border-radius: 8px; }
+  .ui2-track-word { gap: 22px; padding-right: 22px; font-size: 30px; }
+  .ui2-track-word .ui2-num,
+  .ui2-track-th { font-size: 22px; }
+  .ui2-diamond { width: 1px; height: 18px; }
+  .ui2-steps {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .ui2-step {
+    flex-direction: column;
+  }
+  .ui2-sheet {
+    padding: 64px 40px;
+    border-radius: 44px;
+    margin-top: -56px;
+  }
+  .ui2-verify {
+    padding-top: 0;
+  }
+  .ui2-heritage {
+    grid-template-columns: auto auto 1fr;
+    text-align: left;
+    gap: 32px;
+  }
+  .ui2-bento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* แท็บเล็ต: อ่านทีละใบ + พิธีเช้าเต็มแถว · สมุดดวงคู่กับแม่หมอตัวจริง (ไม่ให้กล่องใดยืดจนว่าง) */
+  .ui2-tile-wide,
+  .ui2-tile-tall {
+    grid-column: span 2;
+  }
+}
+@media (min-width: 1024px) {
+  .ui2-hero {
+    min-height: 740px;
+  }
+  /* iPad แนวนอน / โน้ตบุ๊กเล็ก (1024–1279): 6 ใบพร้อมป้าย ย่อ ~80% ชิดขอบ — ใบไกลบน 2 ใบเพิ่มที่ ≥ 1280 (จอแคบกว่านี้ทับหัวข้อ) */
+  .ui2-hero { min-height: 800px; }
+  .ui2-hero-inner { max-width: 700px; padding-inline: 0; gap: 22px; }
+  .ui2-fc { padding: 7px 7px 10px; border-radius: 18px; }
+  .ui2-fc-card { border-radius: 12px; }
+  .ui2-fc-tag {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 4px 0;
+    text-align: left;
+    font-size: 11.5px;
+    line-height: 1.3;
+    color: var(--ui2-muted);
+  }
+  .ui2-fc-tag b {
+    font-family: var(--ui2-font-display);
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--ui2-ink);
+  }
+  .ui2-fc-star { --w: 124px; --r: -8deg; left: 2%; top: 4px; }
+  .ui2-fc-lovers { --w: 112px; --r: 7deg; left: 4.5%; top: 300px; }
+  .ui2-fc-wheel { --w: 124px; --r: 7deg; right: 2%; top: 0; }
+  .ui2-fc-priestess { --w: 110px; --r: -6deg; right: 4.5%; top: 310px; }
+  .ui2-clock-cell {
+    width: 96px;
+    height: 96px;
+  }
+  .ui2-clock-cell .ui2-num {
+    font-size: 50px;
+  }
+  .ui2-hero-sub {
+    max-width: 520px;
+  }
+  .ui2-bento {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: minmax(220px, auto);
+  }
+  .ui2-tile-tall {
+    grid-column: auto;
+    grid-row: span 2;
+  }
+  .ui2-tile-wide-md {
+    grid-column: auto;
+  }
+  .ui2-tile-wide {
+    grid-column: span 2;
+  }
+  /* คอม: ตามภาพต้นแบบ DX-Desktop — กล่อง padding 30 · ไพ่ 80px · การ์ดคว่ำ 150px · ไพ่กับแผงกระจกเรียงแนวนอน */
+  .ui2-bento {
+    gap: 20px;
+  }
+  .ui2-tile {
+    gap: 18px;
+    padding: 30px;
+  }
+  .ui2-reading-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 22px;
+  }
+  .ui2-reading-cards {
+    gap: 10px;
+  }
+  .ui2-reading-cards span {
+    width: 80px;
+  }
+  .ui2-reading-panel {
+    flex: 1 1 280px;
+    padding: 18px;
+    border-radius: 20px;
+  }
+  .ui2-reading-text {
+    font-size: 15.5px;
+    line-height: 1.75;
+  }
+  .ui2-morning-card {
+    margin: 18px 0 6px;
+  }
+  .ui2-morning-back {
+    width: 150px;
+    border-radius: 12px;
+  }
+  .ui2-morning-burst {
+    width: 260px;
+    height: 260px;
+  }
+  .ui2-tile-hint {
+    font-size: 14px;
+  }
+  .ui2-journal-strip {
+    gap: 6px;
+  }
+}
+
+/* จอที่มี hover จริง (เมาส์/แทร็กแพด) — มือถือ/iPad ใช้ :active แทน (หัวข้อ 4) */
+@media (hover: hover) {
+  .ui2-show-tab:not([aria-selected="true"]):hover {
+    color: var(--ui2-on-night);
+  }
+  a.ui2-show-topic:hover,
+  a.ui2-show-sign:hover {
+    translate: 0 -3px;
+    box-shadow: 0 0 0 1px rgba(184, 105, 28, 0.35), 0 16px 26px -18px rgba(74, 47, 16, 0.6);
+  }
+  .ui2-show-major:hover .ui2-show-major-img {
+    rotate: 0deg;
+    translate: 0 -4px;
+  }
+  .ui2-show-major:hover {
+    box-shadow: 0 0 0 1px rgba(184, 105, 28, 0.35), 0 16px 26px -18px rgba(74, 47, 16, 0.6);
+  }
+  .ui2-show-chips a:hover {
+    color: var(--ui2-ink);
+    box-shadow: 0 0 0 1px rgba(184, 105, 28, 0.45);
+  }
+  .ui2-show-row:hover .ui2-arrow-ne,
+  .ui2-show-all:hover .ui2-arrow-ne {
+    rotate: 45deg;
+    background: var(--ui2-ink);
+    color: var(--ui2-paper);
+  }
+  .ui2-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.75) inset, 0 20px 36px -16px rgba(23, 17, 12, 0.75);
+  }
+  .ui2-topic:hover {
+    color: var(--ui2-on-night);
+  }
+  /* ชี้แล้วตั้งตรง + ขยายนิด ลอยขึ้นมาบนสุด (ต้นแบบ DX: rotate 0 · scale 1.06 · z-index 9) */
+  .ui2-note:hover {
+    rotate: 0deg;
+    scale: 1.06;
+  }
+  .ui2-note-slot:hover {
+    z-index: 9;
+  }
+  .ui2-reader-link:hover {
+    box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.5);
+  }
+  a.ui2-tile:hover {
+    translate: 0 -4px;
+    box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.4), 0 1px 0 var(--ui2-glass-edge-night) inset;
+  }
+}
+
+/* ── การ์ดลอยหัวหน้า ≥ 1280: ครบ 8 ใบ ขนาด/ตำแหน่ง/มุมเอียงตามภาพต้นแบบ D+ (DX-Desktop) ────────── */
+@media (min-width: 1280px) {
+  .ui2-fc-star { --w: 156px; --r: -8deg; left: 4%; top: 10px; }
+  /* ใบไกลบน 2 ใบ: 1280–1439 ขยับออกขอบ (14%) ไม่ให้ซ้อนบรรทัดแรกของหัวข้อ · ≥ 1440 ตำแหน่งต้นแบบ 17% */
+  .ui2-fc-moon { display: block; --w: 104px; --r: 6deg; left: 14%; top: -14px; z-index: -1; }
+  .ui2-fc-lovers { --w: 140px; --r: 7deg; left: 13%; top: 280px; }
+  /* ใบล่างสุดเหนือริบบิ้นเสมอ (เดิม top 500/510 ลงไปใต้ริบบิ้น 63–74px · ป้าย "คนเขลา"/"โลก" ถูกทับ · INC-0280) */
+  .ui2-fc-fool { display: block; --w: 112px; --r: -4deg; left: 2%; top: 400px; }
+  .ui2-fc-wheel { --w: 156px; --r: 7deg; right: 4%; top: 0; }
+  .ui2-fc-empress { display: block; --w: 100px; --r: -6deg; right: 14.5%; top: -6px; z-index: -1; }
+  .ui2-fc-priestess { --w: 138px; --r: -6deg; right: 13%; top: 290px; }
+  .ui2-fc-world { display: block; --w: 112px; --r: 5deg; right: 2.5%; top: 410px; }
+}
+@media (min-width: 1440px) {
+  .ui2-fc-moon { left: 17%; }
+  .ui2-fc-empress { right: 17.5%; }
+}
+
+/* ── กระดาษโน้ต: แท็บเล็ต 8 ใบ (3·2·3) และคอม 11 ใบ (4·3·4) วางแบบอิฐ ───────────────────────
+   ตาราง 6 / 8 ช่อง ใบละ 2 ช่อง · ใบแถวคู่เริ่มช่องคู่ = เยื้องครึ่งใบ · ใส่ตำแหน่งคอลัมน์อย่างเดียว
+   ตัววางอัตโนมัติของ grid ขึ้นแถวใหม่เองเมื่อคอลัมน์ถอยหลัง · ใบกว้างกว่าช่อง 14px = ขอบซ้อนกันนิด ๆ แบบภาพต้นแบบ */
+@media (min-width: 640px) {
+  .ui2-notes {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 14px 0;
+    max-width: 640px;
+    padding-inline: 0;
+  }
+  /* :nth-child(n) = ความเฉพาะเท่ากับกฎเยื้องคอลัมน์ขวาของมือถือ แล้วมาทีหลังจึงชนะ */
+  .ui2-note-slot:nth-child(n) {
+    display: flex;
+    grid-column-end: span 2;
+    translate: 0 var(--lift, 0);
+  }
+  .ui2-note-slot:nth-child(n + 9) {
+    display: none;
+  }
+  .ui2-note-slot:nth-child(5n + 1) { grid-column-start: 1; }
+  .ui2-note-slot:nth-child(5n + 2) { grid-column-start: 3; }
+  .ui2-note-slot:nth-child(5n + 3) { grid-column-start: 5; }
+  .ui2-note-slot:nth-child(5n + 4) { grid-column-start: 2; }
+  .ui2-note-slot:nth-child(5n + 5) { grid-column-start: 4; }
+  .ui2-note {
+    width: calc(100% + 14px);
+    margin-inline: -7px;
+    padding: 26px 20px 18px;
+    rotate: var(--tilt, -2deg);
+    box-shadow: 0 30px 40px -24px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  }
+  .ui2-pin {
+    top: -7px;
+    width: 14px;
+    height: 14px;
+    margin-left: -7px;
+    box-shadow: 0 0 14px rgba(255, 200, 110, 0.8);
+  }
+  .ui2-note-q {
+    font-size: 26px;
+  }
+  .ui2-note-spread {
+    font-size: 13px;
+  }
+}
+@media (min-width: 1024px) {
+  .ui2-notes {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 18px 0;
+    max-width: 920px;
+  }
+  .ui2-note-slot:nth-child(n) {
+    display: flex;
+  }
+  .ui2-note-slot:nth-child(7n + 1) { grid-column-start: 1; }
+  .ui2-note-slot:nth-child(7n + 2) { grid-column-start: 3; }
+  .ui2-note-slot:nth-child(7n + 3) { grid-column-start: 5; }
+  .ui2-note-slot:nth-child(7n + 4) { grid-column-start: 7; }
+  .ui2-note-slot:nth-child(7n + 5) { grid-column-start: 2; }
+  .ui2-note-slot:nth-child(7n + 6) { grid-column-start: 4; }
+  .ui2-note-slot:nth-child(7n + 7) { grid-column-start: 6; }
+  .ui2-note {
+    width: calc(100% + 16px);
+    margin-inline: -8px;
+    padding: 26px 22px 18px;
+  }
+  .ui2-note-q {
+    font-size: 28px;
+  }
+}
+
+/* ── คีย์เฟรม (แตะแค่ transform / opacity / translate / scale) ─────────────── */
+@keyframes ui2-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(90px, 50px) scale(1.18); }
+}
+@keyframes ui2-burst {
+  0% { scale: 0.55; opacity: 0.95; }
+  100% { scale: 1.9; opacity: 0; }
+}
+@keyframes ui2-bob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -16px; }
+}
+@keyframes ui2-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes ui2-pulse {
+  0% { transform: scale(0.55); opacity: 0.95; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+@keyframes ui2-rise {
+  from { opacity: 0; translate: 0 48px; scale: 0.96; }
+}
+@keyframes ui2-draw {
+  from { stroke-dashoffset: 420; }
+}
+@keyframes ui2-fade-in {
+  from { opacity: 0; }
+}
+
+/* เลื่อนแล้วส่วนลอยขึ้น — ทำงานบน compositor (lite ระยะสั้นกว่า full) · ไม่รองรับ = เห็นของนิ่งครบ */
+@supports (animation-timeline: view()) {
+  .ui2-reveal {
+    animation: ui2-rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 18%;
+  }
+  .ui2-underline path {
+    animation: ui2-draw linear both;
+    animation-timeline: view();
+    animation-range: entry 10% cover 40%;
+  }
+}
+
+/* หยุดอนิเมชันวนเมื่อส่วนนั้นพ้นจอ — `astro/scripts/ui2-home.ts` สลับ data-inview ด้วย IntersectionObserver ตัวเดียว
+   ⚠️ หยุดเฉพาะของที่วน (`.ui2-loop`) — ห้ามกวาดทุกลูก: `.ui2-reveal` เป็นอนิเมชันผูกการเลื่อน (view timeline)
+      ถ้าโดนหยุดตอนไม่มี JS (ไม่มีใครตั้ง data-inview) มันจะค้างที่เฟรมแรก = เนื้อหาจางหายทั้งส่วน
+   ไม่มี JS = ไม่มี data-inview ➔ ของวนทั้งหมดนิ่ง (ตรงกับหน้าตา lite แบบนิ่ง) */
+[data-anim-section]:not([data-inview]) .ui2-loop,
+[data-anim-section]:not([data-inview]) .ui2-loop::before,
+[data-anim-section]:not([data-inview]) .ui2-loop::after {
+  animation-play-state: paused;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   Motion ตอนเลื่อน/เปิด/ใช้งาน แบบ fastwork.com (เจ้าของสั่ง 2026-10-13 "ใส่ motion ตอนเลื่อน ตอนเปิด การทำอะไรต่าง ๆ")
+   ⚠️ แตะเฉพาะ transform/opacity (compositor) — ใช้ `transform` ไม่ใช่คุณสมบัติ translate/scale/rotate
+      เพราะหลายชิ้นใช้คุณสมบัตินั้นจัดตำแหน่งอยู่แล้ว (โน้ตเยื้อง · การ์ดเอียง) ซ้อนกันได้ไม่ทับกัน
+   ⚠️ ผูกการเลื่อนอยู่ใต้ @supports (เบราว์เซอร์ที่ไม่รองรับ = เห็นหน้านิ่งครบ) · off / ลดการเคลื่อนไหว = ปิดทั้งหมด (กฎข้างล่าง)
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/* 1. เปิดหน้า — ป้าย · หัวข้อ · คำโปรย ขึ้นทันทีตั้งแต่เฟรมแรก (ไม่มีอนิเมชัน) · นาฬิกา · ปุ่ม ค่อยลอยเข้าตามหลัง
+   v2 (เจ้าของ 2026-10-17 วิดีโอหัวหน้า "จัดเลย แก้เลย"): เดิมหัวข้อเริ่มที่ความทึบ 0 + เบลอ — ช่วงโหลดสคริปต์เธรดหลักไม่ว่าง
+   อนิเมชันค้างราวครึ่งวินาทีแล้วกระโดดมา 66% (หัวข้อ "โผล่" ทีหลังคำโปรย) และหัวข้อคือ LCP ของหน้า ➔ ไม่ซ่อนข้อความหลักอีก */
+.ui2-hero-inner > :is(.ui2-clock, .ui2-hero-ctas) {
+  animation: ui2-intro 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.ui2-hero-inner > .ui2-hero-ctas { animation-delay: 0.1s; }
+
+/* 6. คลังไพ่ — สลับแท็บแล้วแผงใหม่ค่อย ๆ ลอยเข้า (แผงที่ซ่อนอยู่ไม่มีกล่อง ➔ แสดงเมื่อไรอนิเมชันเริ่มใหม่เอง) */
+.ui2-show-panel {
+  animation: ui2-panel-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+/* 7. FAQ — กางแล้วคำตอบค่อย ๆ ลอยเข้า */
+details[open] > .ui2-faq-a {
+  animation: ui2-panel-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@supports (animation-timeline: view()) {
+  /* 2. กรอบใหญ่ "ขยายเต็ม" ตอนเลื่อนถึง (แบบการ์ดโปรไฟล์ของ Fastwork ที่โตขึ้นเต็มจอ) */
+  .ui2-window,
+  .ui2-sheet,
+  .ui2-show-card {
+    animation: ui2-grow linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 32%;
+  }
+  /* 4. คลังไพ่ — หัวเรื่องเรียงเข้าทีละบรรทัด */
+  .ui2-show-tab {
+    animation: ui2-side-in linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 30%;
+  }
+  /* 5. FAQ แถวสลับ — ภาพจำลองเลื่อนเข้าจากด้านข้าง · ข้อความลอยตาม · รายการพับลอยขึ้น */
+  .ui2-fq-mock {
+    animation: ui2-side-in linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 34%;
+  }
+  .ui2-fq-text,
+  .ui2-fq-head,
+  .ui2-show-head,
+  .ui2-faq {
+    animation: ui2-rise linear both;
+    animation-timeline: view();
+    animation-range: entry 5% cover 30%;
+  }
+}
+@media (min-width: 1024px) {
+  @supports (animation-timeline: view()) {
+    .ui2-fq-row:nth-child(even) .ui2-fq-mock {
+      animation-name: ui2-side-in-right;
+    }
+  }
+}
+
+/* ── รอบ 2 (เจ้าของ "ส่วนอื่นไม่มีเพิ่มมาเหรอ") — ส่วนที่เหลือของหน้าแรก ─────────────────────── */
+/* 8. การ์ดลอยหัวหน้า — ทั้งใบ (กรอบ + ไพ่ + ป้าย) หมุนเข้าแบบ 3 มิติทีละใบตอนเปิดหน้า
+   ระดับ full รวมกับอนิเมชันลอยขึ้นลงใน ui2-fx-full.css (ต้องเขียนรายการคู่ที่นั่น) */
+.ui2-fc {
+  animation: ui2-card-in 1.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: 0.2s;
+}
+.ui2-fc:nth-child(2) { animation-delay: 0.28s; }
+.ui2-fc:nth-child(3) { animation-delay: 0.36s; }
+.ui2-fc:nth-child(4) { animation-delay: 0.44s; }
+.ui2-fc:nth-child(5) { animation-delay: 0.32s; }
+.ui2-fc:nth-child(6) { animation-delay: 0.4s; }
+.ui2-fc:nth-child(7) { animation-delay: 0.48s; }
+.ui2-fc:nth-child(8) { animation-delay: 0.56s; }
+/* 9. คลังไพ่ — สลับแท็บแล้วรายการในแผงทยอยเข้าทีละชิ้น */
+:is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a) {
+  animation: ui2-panel-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(2) { animation-delay: 45ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(3) { animation-delay: 90ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(4) { animation-delay: 135ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(5) { animation-delay: 180ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(6) { animation-delay: 225ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(7) { animation-delay: 270ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(8) { animation-delay: 315ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(9) { animation-delay: 360ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(10) { animation-delay: 405ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(11) { animation-delay: 450ms; }
+  :is(.ui2-show-topic, .ui2-show-major, .ui2-show-sign, .ui2-show-row, .ui2-path-step, .ui2-show-chips > a):nth-child(12) { animation-delay: 495ms; }
+
+@supports (animation-timeline: view()) {
+  /* 10. เปิดไพ่ด่วน — ไพ่ 5 ใบเริ่มซ้อนเป็นกองกลาง แล้วกางออกเป็นพัดตอนเลื่อนถึง (ตำแหน่งพัดเดิมใช้ translate/rotate · ตัวนี้ใช้ transform) */
+  .ui2-pick-card {
+    animation: ui2-fan-open linear both;
+    animation-timeline: view();
+    animation-range: entry 30% cover 50%;
+  }
+  .ui2-topic {
+    animation: ui2-side-in linear both;
+    animation-timeline: view();
+    animation-range: entry 10% cover 30%;
+  }
+  /* 11. ตรวจได้ — ไพ่ 3 ใบกางขึ้น (ไพ่ใช้ transform จัดมุมอยู่แล้ว ➔ อนิเมตด้วย translate/scale) */
+  .ui2-trio span {
+    animation: ui2-pop linear both;
+    animation-timeline: view();
+    animation-range: entry 20% cover 40%;
+  }
+  .ui2-trio span:nth-child(2) { animation-range: entry 28% cover 46%; }
+  .ui2-trio span:nth-child(3) { animation-range: entry 36% cover 52%; }
+  /* 12. ทุกอย่างในที่เดียว — ไพ่ตัวอย่าง · แถบสมุดดวง · ชิปพิธีเช้า เด้งเข้าทีละชิ้น */
+  .ui2-reading-cards span,
+  .ui2-journal-strip > span,
+  .ui2-chips span {
+    animation: ui2-pop-soft linear both;
+    animation-timeline: view();
+    animation-range: entry 20% cover 40%;
+  }
+  .ui2-reading-cards span:nth-child(2),
+  .ui2-journal-strip > span:nth-child(2),
+  .ui2-chips span:nth-child(2) { animation-range: entry 26% cover 44%; }
+  .ui2-reading-cards span:nth-child(3),
+  .ui2-journal-strip > span:nth-child(3),
+  .ui2-chips span:nth-child(3) { animation-range: entry 32% cover 48%; }
+  .ui2-journal-strip > span:nth-child(4),
+  .ui2-chips span:nth-child(4) { animation-range: entry 38% cover 52%; }
+  .ui2-journal-strip > span:nth-child(5),
+  .ui2-chips span:nth-child(5) { animation-range: entry 44% cover 56%; }
+  .ui2-journal-strip > span:nth-child(6) { animation-range: entry 50% cover 60%; }
+  .ui2-journal-strip > span:nth-child(7) { animation-range: entry 56% cover 64%; }
+  /* FAQ — ไพ่ตัวอย่างในภาพจำลองกางออก */
+  .ui2-fq-card {
+    animation: ui2-pop linear both;
+    animation-timeline: view();
+    animation-range: entry 25% cover 45%;
+  }
+}
+/* ── รอบ 3 (เจ้าของ "motion การเปลี่ยน section ในหน้าแรกล่ะมีไหม") — ส่วนที่กำลังเลื่อนออก ─────────────────
+   ส่วนใหม่ลอยเข้า (ข้างบน) + ส่วนเก่าถอยหลังจางออกตอนพ้นขอบบน = รู้สึกเป็นแผ่นซ้อนเลื่อนต่อกัน (แบบ fastwork.com)
+   เริ่มจางช่วงท้ายของการออกเท่านั้น (exit 55% ➔ 100% = เนื้อหาอยู่ครึ่งบนของจอแล้ว) ไม่รบกวนตอนกำลังอ่าน
+   ⚠️ ไม่ใส่กับส่วนสุดท้าย (FAQ) — ต่อด้วยท้ายเว็บ ไม่มีส่วนถัดไปมารับ */
+@supports (animation-timeline: view()) {
+  .ui2-hero-inner {
+    animation: ui2-hero-out linear both;
+    animation-timeline: view();
+    animation-range: exit 30% exit 100%;
+  }
+  /* ไพ่ในการ์ดลอยเลื่อนขึ้นเร็วกว่าพื้นตอนเลื่อนออก · fill forwards = ยังไม่ถึงช่วงไม่ทำงาน (INC-0264) */
+  .ui2-fc-card {
+    animation: ui2-float-away linear forwards;
+    animation-timeline: view();
+    animation-range: exit 0% exit 100%;
+  }
+  :is([data-home-section="quick"], [data-home-section="features"], [data-home-section="showcase"]) > .ui2-wrap {
+    animation: ui2-sec-out linear forwards;
+    animation-timeline: view();
+    animation-range: exit 55% exit 100%;
+  }
+  /* แผ่นตรวจได้: ขยายเต็มตอนเข้า (ui2-grow) + ถอยหลังตอนออก — สองอนิเมชันคนละช่วงบนชิ้นเดียว */
+  .ui2-wrap.ui2-sheet {
+    animation: ui2-grow linear both, ui2-sec-out linear forwards;
+    animation-timeline: view(), view();
+    animation-range: entry 0% cover 32%, exit 55% exit 100%;
+  }
+}
+@keyframes ui2-sec-out {
+  to { opacity: 0.3; transform: translateY(-36px) scale(0.965); }
+}
+@keyframes ui2-hero-out {
+  to { opacity: 0.15; transform: translateY(-70px) scale(0.97); }
+}
+/* การ์ดลอยหัวหน้าเลื่อนขึ้นเร็วกว่าพื้น (พารัลแลกซ์) */
+@keyframes ui2-float-away {
+  to { transform: translateY(-90px); }
+}
+/* การ์ดลอยหมุนเข้าแบบ 3 มิติ (เปิดหน้า) */
+/* ความทึบเต็มตั้งแต่ 30% ของเวลา ➔ เห็นการหมุนเกือบทั้งหมด (เดิมจางอยู่ช่วงที่หมุน เจ้าของมองไม่เห็นว่าหมุน) */
+@keyframes ui2-card-in {
+  0% { opacity: 0; transform: perspective(700px) translateY(90px) rotateX(55deg) rotateY(-35deg) rotateZ(-8deg) scale(0.7); }
+  30% { opacity: 1; }
+}
+@keyframes ui2-fan-open {
+  from { opacity: 0.4; transform: translateX(calc(var(--o, 0) * -82%)) rotate(calc(var(--o, 0) * -7deg)) translateY(calc(var(--drop, 0px) * -1)); }
+}
+@keyframes ui2-pop {
+  from { opacity: 0; translate: 0 40px; scale: 0.8; }
+}
+@keyframes ui2-pop-soft {
+  from { opacity: 0; scale: 0.7; }
+}
+
+/* คอม: แผงคลังไพ่กระชับให้ทุกแผงพอดีจอ (เงื่อนไขของโหมดเลื่อนแล้วสลับหัวข้อ) */
+@media (min-width: 1024px) {
+  .ui2-show-card {
+    padding: 28px 32px 30px;
+  }
+  .ui2-show-stats {
+    margin-top: 12px;
+    padding: 9px 4px;
+  }
+  .ui2-show-stats strong {
+    font-size: 20px;
+  }
+  .ui2-show-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .ui2-show-major {
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+  .ui2-show-major-name {
+    font-size: 15.5px;
+  }
+  .ui2-show-major-tip {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    margin-top: 4px;
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+  .ui2-show-label,
+  .ui2-show-sub {
+    margin-top: 14px;
+  }
+  .ui2-show-chips {
+    margin-top: 8px;
+  }
+  .ui2-show-chips a {
+    min-height: 34px;
+  }
+  .ui2-show-spreads {
+    margin-top: 14px;
+  }
+  .ui2-show-layout {
+    padding: 12px 14px 14px;
+    gap: 10px;
+  }
+  .ui2-show-board {
+    max-width: 240px;
+  }
+  .ui2-show-legend {
+    gap: 3px 12px;
+    font-size: 11.5px;
+    line-height: 1.4;
+  }
+  .ui2-show-row {
+    min-height: 48px;
+    padding-block: 8px;
+  }
+  .ui2-show-topics {
+    margin-top: 14px;
+  }
+  .ui2-path {
+    margin-top: 18px;
+    gap: 18px;
+  }
+  .ui2-show-cta {
+    margin-top: 18px;
+  }
+  .ui2-show-zodiac {
+    margin-top: 14px;
+  }
+}
+
+/* 13. คลังไพ่แบบเลื่อนแล้วสลับหัวข้อเอง (fastwork.com · คอม ≥ 1024) — astro/scripts/ui2-home.ts ข้อ 8 ใส่ `is-scrolly`
+   เมื่อการ์ดแผงที่สูงที่สุดพอดีจอเท่านั้น (ไม่งั้นคงแบบกดแท็บ) · ส่วนยาวขึ้น (แผง−1) × 70vh ให้การ์ดค้างอยู่ระหว่างเลื่อน */
+@media (min-width: 1024px) {
+  .ui2-show-sec.is-scrolly .ui2-wrap::after {
+    content: "";
+    display: block;
+    height: calc((var(--steps, 6) - 1) * 70vh);
+  }
+  .ui2-show-sec.is-scrolly .ui2-show {
+    position: sticky;
+    top: calc(var(--site-header-h, 78px) + 20px);
+  }
+  .ui2-show-sec.is-scrolly .ui2-show-card {
+    height: var(--show-h, auto);
+    min-height: 0;
+  }
+  /* หัวเรื่องอยู่ในกรอบที่ค้างแล้ว — ไม่ต้องค้างซ้ำ · เส้นความคืบหน้าสีทองข้างรายการ */
+  .ui2-show-sec.is-scrolly .ui2-show-tabs {
+    position: relative;
+    top: auto;
+  }
+  .ui2-show-sec.is-scrolly .ui2-show-tabs::before,
+  .ui2-show-sec.is-scrolly .ui2-show-tabs::after {
+    content: "";
+    position: absolute;
+    left: 3px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    border-radius: 2px;
+    background: rgba(246, 238, 226, 0.12);
+  }
+  .ui2-show-sec.is-scrolly .ui2-show-tabs::after {
+    background: var(--ui2-gold-solid);
+    transform-origin: top;
+    transform: scaleY(var(--p, 0));
+  }
+  .ui2-show-sec.is-scrolly .ui2-show-tab::before {
+    display: none;
+  }
+}
+
+/* 3. กระดาษโน้ต — ร่วงลงแปะทีละแผ่นครั้งเดียวตอนส่วนเข้าจอ (เวลา ไม่ผูกการเลื่อน)
+   เจ้าของ 2026-10-13: แบบผูกการเลื่อนทำให้โน้ตจาง/ซ้อนกันค้างครึ่งทางระหว่างอ่าน "อ่านยาก ไม่สวย"
+   ➔ ui2-home.ts ข้อ 11 ใส่ is-wait (ซ่อนไว้ตอนยังอยู่นอกจอ) แล้วใส่ is-in ตอนเข้าจอ · ไม่มี JS = เห็นนิ่งครบ */
+.ui2-notes.is-wait .ui2-note-slot {
+  opacity: 0;
+}
+.ui2-notes.is-in .ui2-note-slot {
+  animation: ui2-note-in 0.7s cubic-bezier(0.2, 1.15, 0.35, 1) backwards;
+}
+.ui2-notes.is-in .ui2-note-slot:nth-child(2) { animation-delay: 55ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(3) { animation-delay: 110ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(4) { animation-delay: 165ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(5) { animation-delay: 220ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(6) { animation-delay: 275ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(7) { animation-delay: 330ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(8) { animation-delay: 385ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(9) { animation-delay: 440ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(10) { animation-delay: 495ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(11) { animation-delay: 550ms; }
+.ui2-notes.is-in .ui2-note-slot:nth-child(12) { animation-delay: 605ms; }
+@keyframes ui2-note-in {
+  0% { opacity: 0; transform: translateY(-46px) rotate(-5deg) scale(1.06); }
+  45% { opacity: 1; }
+}
+
+@keyframes ui2-intro {
+  from { opacity: 0; transform: translateY(26px); }
+}
+@keyframes ui2-panel-in {
+  from { opacity: 0; transform: translateY(14px); }
+}
+@keyframes ui2-grow {
+  from { opacity: 0.35; transform: scale(0.9) translateY(40px); }
+}
+@keyframes ui2-side-in {
+  from { opacity: 0; transform: translateX(-56px); }
+}
+@keyframes ui2-side-in-right {
+  from { opacity: 0; transform: translateX(56px); }
+}
+
+/* ── ระดับ off (ลดการเคลื่อนไหว) — นิ่งทั้งหน้า เห็นของครบ ───────────────── */
+[data-fx="off"] .ui2-sec *,
+[data-fx="off"] .ui2-sec *::before,
+[data-fx="off"] .ui2-sec *::after,
+[data-fx="off"] .ui2-sticky {
+  animation: none !important;
+  transition: none !important;
+}
+/* off: พลิกไพ่แบบจางแทนหมุน */
+[data-fx="off"] .ui2-flip {
+  transform: none !important;
+}
+[data-fx="off"] .ui2-face-front {
+  transform: none;
+  opacity: 0;
+}
+[data-fx="off"] .ui2-pick-card[data-state="revealed"] .ui2-face-front {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui2-sec *,
+  .ui2-sec *::before,
+  .ui2-sec *::after {
+    animation: none !important;
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ขนาดตัวหนังสือหน้าแรก — ไล่ตามภาพต้นแบบ D+ (DX-Mobile 390px ➔ DX-Desktop 1440px)
+   ═════════════════════════════════════════════════════════════════════════
+   เจ้าของทัก 2026-10-13 "ขนาดตัวหนังสือในหลาย ๆ จุดไม่ตรงกัน" — วัดแล้วหัวข้อส่วนของเราเล็กกว่าต้นแบบ
+   (เช่น 38 แทน 60px) และแต่ละส่วนไม่สอดคล้องกัน ส่วนลิงก์สำรวจต่อกลับใหญ่กว่า
+   ➔ ทุกขนาดไล่ลื่นด้วย clamp(มือถือ, เส้นตรงตามความกว้างจอ, คอม) จากค่าที่วัดในไฟล์ต้นแบบทั้งสองกรอบ
+   ⚠️ บล็อกนี้ต้องอยู่ท้ายไฟล์ (ทับค่าในแต่ละ @media ข้างบน) · ฟอนต์คงของเรา (เจ้าของสั่ง) เปลี่ยนแค่ขนาด
+   ⚠️ แก้ขนาดหัวข้อส่วนใดให้แก้ที่นี่ที่เดียว ห้ามไปตั้งซ้ำใน @media ข้างบน */
+/* หัวข้อหน้า (h1): 37 ➔ 68px */
+.ui2-hero .ui2-h1 {
+  font-size: clamp(37px, 25.49px + 2.952vw, 68px);
+}
+/* คำโปรยใต้ h1: 16 ➔ 19px */
+.ui2-hero .ui2-hero-sub {
+  font-size: clamp(16px, 14.89px + 0.286vw, 19px);
+}
+/* หัวข้อส่วน (ใจคุณเลือกเอง · เรื่องที่ค้างอยู่ในใจ): 38 ➔ 60px */
+.ui2-sec .ui2-h2 {
+  font-size: clamp(38px, 29.83px + 2.095vw, 60px);
+}
+/* คำโปรยใต้หัวข้อส่วน: 15 ➔ 18px */
+.ui2-sec .ui2-lede {
+  font-size: clamp(15px, 13.89px + 0.286vw, 18px);
+}
+/* เว็บอื่นสุ่มให้ดู / เราให้คุณตรวจได้: 30 ➔ 50px */
+.ui2-verify .ui2-vs-a,
+.ui2-verify .ui2-vs-b {
+  font-size: clamp(30px, 22.57px + 1.905vw, 50px);
+}
+/* ตัวเลข 1909 (ตัวตรง): 112 ➔ 190px */
+.ui2-verify .ui2-1909 {
+  font-size: clamp(112px, 83.03px + 7.429vw, 190px);
+}
+/* ภาพไพ่ต้นฉบับ ไม่ใช่ภาพ AI: 23 ➔ 32px */
+.ui2-verify .ui2-heritage-title {
+  font-size: clamp(23px, 19.66px + 0.857vw, 32px);
+}
+/* ทุกอย่างที่ต้องใช้ อยู่ในที่เดียว: 32 ➔ 52px */
+[data-home-section="features"] .ui2-h2 {
+  font-size: clamp(32px, 24.57px + 1.905vw, 52px);
+}
+/* กล่องเล็ก (สมุดดวง · แม่หมอตัวจริง): 26 ➔ 30px */
+.ui2-tile .ui2-tile-title {
+  font-size: clamp(26px, 24.51px + 0.381vw, 30px);
+}
+/* กล่องใหญ่ (อ่านทีละใบ · ทุกเช้า): 28 ➔ 36px */
+.ui2-tile-wide .ui2-tile-title,
+.ui2-tile-tall .ui2-tile-title {
+  font-size: clamp(28px, 25.03px + 0.762vw, 36px);
+}
+/* คำถามที่พบบ่อย: 32 ➔ 44px · คำถามในแถวเด่น 22 ➔ 32px */
+[data-home-section="faq"] .ui2-h2 {
+  font-size: clamp(32px, 27.54px + 1.143vw, 44px);
+}
+.ui2-fq-q {
+  font-size: clamp(22px, 18.28px + 0.952vw, 32px);
+}

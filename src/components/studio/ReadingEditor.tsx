@@ -258,7 +258,7 @@ export function ReadingEditor({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button type="button" onClick={onBack} className="min-h-11 text-sm font-semibold text-gold-ink hover:underline">
-          ← คำอ่านทั้งหมด
+          คำอ่านทั้งหมด
         </button>
         <button type="button" onClick={remove} disabled={busy === "delete"} className="min-h-11 text-sm text-err hover:underline">
           ลบคำอ่านนี้

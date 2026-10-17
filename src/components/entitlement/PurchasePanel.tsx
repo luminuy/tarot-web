@@ -313,7 +313,7 @@ export function PurchasePanel({ user: userProp, onRequireAuth, onDone }: Purchas
               onClick={() => setSimulated(null)}
               className="tap-overlay-y font-serif-th text-xs text-muted hover:text-ink-deep cursor-pointer"
             >
-              {isEn ? "← Choose another package" : "← เปลี่ยนแพ็กเกจ"}
+              {isEn ? "Choose another package" : "เปลี่ยนแพ็กเกจ"}
             </button>
           </div>
         )}

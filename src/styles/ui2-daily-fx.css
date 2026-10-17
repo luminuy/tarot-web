@@ -1,0 +1,77 @@
+/*
+ * 🌅 ไพ่ประจำวัน `/daily` — เอฟเฟกต์ระดับ full (คอม · iPad) เท่านั้น
+ * นำเข้าต่อจาก `ui2-daily.css` ในหน้า .astro
+ * ⚠️ ทุกกฎขึ้นต้น `[data-fx="full"]` และอยู่ใต้ `@media (min-width: 768px)` · หนึ่งตัวเลือกต่อบรรทัด (ด่าน test-motion-quality 2b · test-ui2-fx)
+ * ⚠️ ของวนทุกชิ้นมีคลาส `ui2-loop` และอยู่ใต้ `[data-anim-section]` (หยุดเองเมื่อพ้นจอ · astro/scripts/ui2-inview.ts)
+ */
+@media (min-width: 768px) {
+  /* ดาวนิ่ง (INC-0273): ชั้นดาวสูงเต็มส่วนที่กะพริบ/เลื่อน = เลเยอร์ GPU หลายล้านพิกเซล และของทุกชิ้นที่วาดทับต้องถูกยกเป็นเลเยอร์ตาม */
+  /* แสงทองวิ่งผ่านหัวข้อครั้งเดียว (เดิมวนไม่หยุด = วาดใหม่ทุกเฟรม · 2026-10-17) */
+  [data-fx="full"] .ui2-dy-h1 .ui2-gold-night {
+    animation: ui2-dy-shimmer 2.6s cubic-bezier(0.45, 0, 0.2, 1) 0.4s 1 backwards;
+  }
+  [data-fx="full"] .ui2-dy-deco-card {
+    display: block;
+    animation: ui2-dy-bob var(--bob, 8s) ease-in-out var(--delay, 0s) infinite;
+  }
+  [data-fx="full"] .ui2-dy-deco-1 {
+    --w: 82px;
+    --r: -12deg;
+    left: 3%;
+    top: 90px;
+  }
+  [data-fx="full"] .ui2-dy-deco-2 {
+    --w: 62px;
+    --r: 9deg;
+    --bob: 9s;
+    --delay: -2s;
+    left: auto;
+    right: 4%;
+    top: 110px;
+  }
+  /* ใบไกล 3–6 จางอย่างเดียว ไม่เบลอ — filter บนไพ่ที่ลอยวน = เบลอใหม่ทุกเฟรม */
+  [data-fx="full"] .ui2-dy-deco-3 {
+    --w: 48px;
+    --r: 6deg;
+    --bob: 10s;
+    --delay: -4s;
+    left: 14%;
+    top: 280px;
+    opacity: 0.7;
+  }
+  [data-fx="full"] .ui2-dy-deco-4 {
+    --w: 46px;
+    --r: -8deg;
+    --bob: 7.5s;
+    --delay: -1s;
+    right: 15%;
+    top: 300px;
+    opacity: 0.7;
+  }
+  [data-fx="full"] .ui2-dy-deco-5 {
+    --w: 40px;
+    --r: 14deg;
+    --bob: 9.5s;
+    --delay: -5s;
+    left: 21%;
+    top: 40px;
+    opacity: 0.6;
+  }
+  [data-fx="full"] .ui2-dy-deco-6 {
+    --w: 40px;
+    --r: -14deg;
+    --bob: 8.5s;
+    --delay: -3s;
+    right: 22%;
+    top: 34px;
+    opacity: 0.6;
+  }
+}
+@keyframes ui2-dy-shimmer {
+  from { background-position: 0% 50%; }
+  to { background-position: 200% 50%; }
+}
+@keyframes ui2-dy-bob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -10px; }
+}

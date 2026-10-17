@@ -5,6 +5,7 @@ import { verifyReading, type VerificationResult } from "@/lib/tarot/verify-clien
 import { trackEvent } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n";
 import { copyToClipboard } from "@/lib/utils/clipboard";
+import { CloseIcon, CheckIcon, ChevronIcon } from "@/components/ui/LineIcons";
 
 export interface ProvablyFairPanelProps {
   commitment: string;
@@ -114,7 +115,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
       >
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="glass-chip w-8 h-8 flex-shrink-0 flex items-center justify-center text-xs text-gold-ink">
-            ✓
+            <CheckIcon />
           </div>
           <div className="min-w-0">
             <h4 className="font-serif-th text-xs sm:text-sm font-bold text-ink-deep">
@@ -144,7 +145,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
             }`}
             aria-hidden
           >
-            ▼
+            <ChevronIcon />
           </span>
         </div>
       </button>
@@ -178,8 +179,8 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                     >
                       {copiedKey === "comm_pre"
                         ? isEnglish
-                          ? "✓ Copied"
-                          : "✓ คัดลอกแล้ว"
+                          ? "Copied"
+                          : "คัดลอกแล้ว"
                         : isEnglish
                           ? "Copy Hash"
                           : "คัดลอกรหัส"}
@@ -221,7 +222,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                           onClick={() => handleCopy(effectiveCommitment, "comm")}
                           className="text-[13px] text-gold-ink font-bold hover:underline cursor-pointer"
                         >
-                          {copiedKey === "comm" ? (isEnglish ? "✓ Copied" : "✓ คัดลอกแล้ว") : isEnglish ? "Copy" : "คัดลอก"}
+                          {copiedKey === "comm" ? (isEnglish ? "Copied" : "คัดลอกแล้ว") : isEnglish ? "Copy" : "คัดลอก"}
                         </button>
                       </div>
                       <p className="text-[13px] text-ink-deep break-all select-all font-mono">{effectiveCommitment}</p>
@@ -238,7 +239,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                           onClick={() => handleCopy(serverSeed || "", "server")}
                           className="text-[13px] text-gold-ink font-bold hover:underline cursor-pointer"
                         >
-                          {copiedKey === "server" ? (isEnglish ? "✓ Copied" : "✓ คัดลอกแล้ว") : isEnglish ? "Copy" : "คัดลอก"}
+                          {copiedKey === "server" ? (isEnglish ? "Copied" : "คัดลอกแล้ว") : isEnglish ? "Copy" : "คัดลอก"}
                         </button>
                       </div>
                       <p className="text-[13px] text-ink-deep break-all select-all font-mono">{serverSeed}</p>
@@ -255,7 +256,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                           onClick={() => handleCopy(clientSeed || "", "client")}
                           className="text-[13px] text-gold-ink font-bold hover:underline cursor-pointer"
                         >
-                          {copiedKey === "client" ? (isEnglish ? "✓ Copied" : "✓ คัดลอกแล้ว") : isEnglish ? "Copy" : "คัดลอก"}
+                          {copiedKey === "client" ? (isEnglish ? "Copied" : "คัดลอกแล้ว") : isEnglish ? "Copy" : "คัดลอก"}
                         </button>
                       </div>
                       <p className="text-[13px] text-ink-deep break-all select-all font-mono">{clientSeed}</p>
@@ -303,7 +304,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                           <div className="p-4 rounded-lg bg-[#EBF3ED] border border-ok/50 space-y-2 ">
                             <div className="flex items-center gap-2 text-ok font-serif-th font-bold text-xs sm:text-sm">
                               <span className="w-5 h-5 rounded-full bg-ok text-white flex items-center justify-center text-xs">
-                                ✓
+                                <CheckIcon />
                               </span>
                               <span>
                                 {isEnglish
@@ -313,7 +314,6 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                             </div>
                             <ul className="space-y-1 text-xs text-ok font-serif-th pl-7">
                               <li className="flex items-center gap-1.5">
-                                <span>✓</span>
                                 <span>
                                   <strong>
                                     {isEnglish ? "Lock code matches the key:" : "รหัสล็อกตรงกับกุญแจสุ่ม:"}
@@ -322,7 +322,6 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                                 </span>
                               </li>
                               <li className="flex items-center gap-1.5">
-                                <span>✓</span>
                                 <span>
                                   {isEnglish ? (
                                     <>
@@ -343,7 +342,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                           <div className="p-4 rounded-lg bg-err-wash border border-line-warm space-y-2 ">
                             <div className="flex items-center gap-2 text-err font-serif-th font-bold text-xs sm:text-sm">
                               <span className="w-5 h-5 rounded-full bg-err text-white flex items-center justify-center text-xs">
-                                ✕
+                                <CloseIcon />
                               </span>
                               <span>
                                 {isEnglish
@@ -392,7 +391,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                         </span>
                       </span>
                       <span className="text-xs font-mono">
-                        <span aria-hidden="true">{showIndependentGuide ? "▲ " : "▼ "}</span>
+                        <ChevronIcon direction={showIndependentGuide ? "up" : "down"} className="inline w-3.5 h-3.5 mr-1 -mt-0.5" />
                         {showIndependentGuide
                           ? isEnglish
                             ? "Close"
@@ -425,8 +424,8 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                           >
                             {copiedKey === "payload"
                               ? isEnglish
-                                ? "✓ Copied"
-                                : "✓ คัดลอกแล้ว"
+                                ? "Copied"
+                                : "คัดลอกแล้ว"
                               : isEnglish
                                 ? "Copy JSON"
                                 : "คัดลอก JSON"}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, type CSSProperties } from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 import type { TarotCard as TarotCardType } from "@/data/cards/types";
@@ -8,6 +8,7 @@ import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
 import { saveReading } from "@/lib/utils/history";
 import { RitualHero } from "@/components/reading/one-card/RitualHero";
+import { Ui2Window } from "@/components/ui2/Ui2Showcase";
 import { OneCardRitual } from "@/components/reading/one-card/OneCardRitual";
 import { CardImage } from "@/components/card/CardImage";
 import { copyToClipboard } from "@/lib/utils/clipboard";
@@ -74,11 +75,9 @@ export function LoveOneCardClient() {
   const { isEnglish } = useLocale();
 
   const [selectedStatus, setSelectedStatus] = useState<RelationshipStatus>("single");
-  /* 🏷️ สองช่องนี้มี <label> ที่ตาเห็นอยู่แล้ว แต่ไม่ได้ผูกด้วย htmlFor (UX-10) */
-  const yourNameId = useId();
+  /* 🏷️ ช่องกรอกผูก <label> ด้วย htmlFor (UX-10) */
   const partnerNameId = useId();
 
-  const [yourName, setYourName] = useState("");
   const [partnerName, setPartnerName] = useState("");
   const [copied, setCopied] = useState(false);
   const [savedToHistory, setSavedToHistory] = useState(false);
@@ -247,12 +246,16 @@ export function LoveOneCardClient() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="ui2-dy ui2-love ui2-dy-ritual">
       {/* Hero Header */}
       <RitualHero
+        tone="rose"
         breadcrumbs={breadcrumbs}
         badgeText={isEnglish ? "Original 1909 deck · 78 cards" : "สำรับ 1909 แท้ 78 ใบ"}
         title={isEnglish ? "Love Tarot 1 Card Reading" : "ดูดวงความรัก 1 ใบ ไขคำตอบสถานะหัวใจ"}
+        accent={isEnglish ? "Love Tarot" : "ความรัก"}
+        cards={["major-06", "cups-02", "major-03", "cups-10", "major-17", "cups-01"]}
+        trust={isEnglish ? ["Truly random, verifiable", "For singles, crushes, couples, exes"] : ["สุ่มจริง ตรวจสอบได้", "โสด · คนคุย · มีแฟน · คนเก่า"]}
         tagline={
           isEnglish
             ? "Draw one card to reveal romantic energies, intentions, and clear guidance tailored to your current relationship status."
@@ -260,7 +263,8 @@ export function LoveOneCardClient() {
         }
       />
 
-      {/* Main Ritual Panel */}
+      {/* Main Ritual Panel — v3 (2026-10-17): อยู่ในหน้าต่างเลขกำกับแบบ /spreads */}
+      <Ui2Window kicker="Love · One card" note={isEnglish ? "1909 deck · 78 cards" : "สำรับ 1909 · 78 ใบ"} tone={3} className="v3-love-win">
       <OneCardRitual
         spreadId="love-one"
         category="love"
@@ -279,106 +283,71 @@ export function LoveOneCardClient() {
         onRevealed={handleRevealed}
         onReset={handleReset}
         headerSlot={
-          <div className="space-y-5">
-            <div className="space-y-2.5">
-              <label className="block text-xs uppercase tracking-wider font-serif-th font-semibold text-gold-ink text-center">
-                {isEnglish
-                  ? "Step 1: Select Your Current Love Status"
-                  : "ขั้นตอนที่ 1: เลือกสถานะความรักปัจจุบันของคุณ"}
-              </label>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-3.5">
-                {STATUS_OPTIONS.map((opt) => {
+          /* UI 2.0 เอกลักษณ์หน้านี้ (เจ้าของ 2026-10-16): เลือกสถานะหัวใจด้วยพัดไพ่บนผ้ากำมะหยี่โทนกุหลาบ
+             (ระบบพัดไพ่ชุดเดียวกับ /daily ที่เจ้าของรับแล้ว) · ใบที่เลือกยกเรืองทอง · คำบรรยายใหญ่ใต้พัด
+             ลดความยุ่งยากจาก v1: ถอดช่อง "ชื่อเล่นของคุณ" (ไม่ได้ใช้ในคำอ่าน) เหลือช่องเดียวที่ไม่บังคับ */
+          <div className="space-y-6">
+            <div className="ui2-dy-step ui2-dy-step-center">
+              <p className="ui2-dy-step-k">
+                <span className="ui2-num">1</span>
+                {isEnglish ? "Your heart right now" : "ตอนนี้หัวใจคุณอยู่ตรงไหน"}
+              </p>
+              <h2 className="ui2-dy-step-h"><ThaiPhrases>
+                {isEnglish ? "Tap the card that matches your status" : "แตะไพ่ที่ตรงกับสถานะของคุณ"}
+              </ThaiPhrases></h2>
+            </div>
+            <div className="ui2-dy-table">
+              <span className="ui2-dy-altar" aria-hidden="true" />
+              <div className="ui2-dy-fan" role="group" aria-label={isEnglish ? "Relationship status" : "สถานะความสัมพันธ์"}>
+                {STATUS_OPTIONS.map((opt, i) => {
                   const isSelected = selectedStatus === opt.id;
+                  const o = i - (STATUS_OPTIONS.length - 1) / 2;
                   return (
                     <button
                       key={opt.id}
                       type="button"
+                      aria-pressed={isSelected}
                       onClick={() => {
                         soundManager.playMenuTapSound();
                         setSelectedStatus(opt.id);
                       }}
-                      className={`group p-3.5 sm:p-4 rounded-2xl text-left border transition duration-200 flex flex-col justify-between cursor-pointer relative ${
-                        isSelected
-                          ? "altar-panel-active ring-1 ring-gold shadow-raised text-ink"
-                          : "altar-card-porcelain hover:border-gold/60 text-muted hover:shadow-xs"
-                      }`}
+                      className="ui2-dy-fan-card"
+                      style={{ "--o": o, "--drop": `${Math.abs(o) * 14}px` } as CSSProperties}
                     >
-                      <div>
-                        <div className="flex items-center justify-between gap-1.5 mb-2">
-                          {/* ชิปบอกชื่อไพ่ประจำสถานะ — เดิมชิปนี้พิมพ์ชื่อสถานะซ้ำกับหัวข้อข้างล่างเป๊ะ ๆ */}
-                          <span className="glass-chip text-[10px] sm:text-[11px] font-serif-th font-semibold px-2 py-0.5 text-gold-ink">
-                            {isEnglish ? opt.cardNameEn : opt.cardNameTh}
-                          </span>
-                          <span
-                            className={`w-3.5 h-3.5 shrink-0 rounded-full border flex items-center justify-center transition-colors ${
-                              isSelected
-                                ? "border-gold-ink bg-gold-ink"
-                                : "border-line bg-transparent"
-                            }`}
-                          >
-                            {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-                          </span>
-                        </div>
-
-                        {/* ภาพหน้าไพ่ 1909 Rider-Waite (กฎเหล็กข้อ 8 — ต้องผ่าน <CardImage /> พร้อม sizes) */}
-                        <div
-                          className={`w-12 h-18 rounded-lg overflow-hidden border-2 bg-inset-warm shadow-sm transition duration-300 group-hover:scale-105 ${
-                            isSelected ? "border-gold-ink" : "border-line-warm"
-                          }`}
-                        >
-                          <CardImage
-                            image={opt.cardImage}
-                            /* ภาพประกอบล้วน — ชิปเหนือภาพบอกชื่อไพ่ใบเดียวกันอยู่แล้ว
-                               ถ้าใส่ alt ซ้ำ screen reader จะอ่านชื่อไพ่สองรอบต่อการ์ดหนึ่งใบ
-                               ปุ่มยังมีชื่อเรียก (accessible name) จากตัวหนังสือข้างในครบถ้วน */
-                            alt=""
-                            className="w-full h-full object-cover"
-                            sizes="48px"
-                          />
-                        </div>
-
-                        <div className="font-serif-th font-bold text-xs sm:text-sm text-ink mt-2.5">
-                          {isEnglish ? opt.titleEn : opt.titleTh}
-                        </div>
-                        <p className="text-[11px] font-sans text-muted mt-1.5 leading-snug line-clamp-2">
-                          {isEnglish ? opt.descEn : opt.descTh}
-                        </p>
-                      </div>
+                      {/* ภาพหน้าไพ่ 1909 ประจำสถานะ (กฎเหล็กข้อ 8 — ผ่าน <CardImage /> พร้อม sizes) · ภาพประกอบ ไม่ใช่ผลสุ่ม */}
+                      <span className="ui2-dy-fan-face">
+                        <CardImage image={opt.cardImage} alt="" sizes="(min-width: 1024px) 150px, (min-width: 768px) 120px, 64px" />
+                      </span>
+                      <span className="ui2-dy-fan-name">{isEnglish ? opt.titleEn : opt.titleTh}</span>
                     </button>
                   );
                 })}
               </div>
+              {currentStatusObj && (
+                <div className="ui2-dy-caption" aria-live="polite">
+                  <span className="ui2-dy-caption-el">
+                    {isEnglish ? currentStatusObj.cardNameEn : currentStatusObj.cardNameTh}
+                  </span>
+                  <span className="ui2-dy-caption-name">{isEnglish ? currentStatusObj.titleEn : currentStatusObj.titleTh}</span>
+                  <span className="ui2-dy-caption-desc">{isEnglish ? currentStatusObj.descEn : currentStatusObj.descTh}</span>
+                </div>
+              )}
             </div>
 
-            {/* Names & Intention Inputs */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto pt-1">
-              <div>
-                <label htmlFor={yourNameId} className="block text-[11px] font-serif-th text-muted mb-1">
-                  {isEnglish ? "Your Nickname (Optional)" : "ชื่อเล่นของคุณ (ระบุหรือไม่ก็ได้)"}
-                </label>
-                <input
-                  id={yourNameId}
-                  type="text"
-                  value={yourName}
-                  onChange={(e) => setYourName(e.target.value)}
-                  placeholder={isEnglish ? "e.g. Alex" : "เช่น แพรว, แบงค์"}
-                  className="glass-field w-full rounded-xl border border-line-interactive px-3.5 py-2 text-xs font-sans text-ink focus:border-gold focus:outline-hidden focus:ring-1 focus:ring-gold transition-colors"
-                />
-              </div>
-              <div>
-                <label htmlFor={partnerNameId} className="block text-[11px] font-serif-th text-muted mb-1">
-                  {isEnglish ? "Person in Mind (Optional)" : "ชื่อคนในใจ (หรือสิ่งที่กังวล)"}
-                </label>
-                <input
-                  id={partnerNameId}
-                  type="text"
-                  value={partnerName}
-                  onChange={(e) => setPartnerName(e.target.value)}
-                  placeholder={isEnglish ? "e.g. Crush, Ex" : "เช่น คนคุย, คนรักเก่า"}
-                  className="glass-field w-full rounded-xl border border-line-interactive px-3.5 py-2 text-xs font-sans text-ink focus:border-gold focus:outline-hidden focus:ring-1 focus:ring-gold transition-colors"
-                />
-              </div>
+            <div className="ui2-dy-intent">
+              <label htmlFor={partnerNameId} className="ui2-dy-step-k">
+                <span className="ui2-num">2</span>
+                {isEnglish ? "Who or what is on your mind? (optional)" : "นึกถึงใคร หรือกังวลเรื่องอะไร (ไม่ใส่ก็ได้)"}
+              </label>
+              <input
+                id={partnerNameId}
+                type="text"
+                value={partnerName}
+                onChange={(e) => setPartnerName(e.target.value)}
+                maxLength={80}
+                placeholder={isEnglish ? "e.g. my crush, my ex" : "เช่น คนคุย, แฟนเก่า, เขาจะทักมาไหม"}
+                className="ui2-dy-input"
+              />
             </div>
           </div>
         }
@@ -550,6 +519,7 @@ export function LoveOneCardClient() {
           </div>
         }
       />
+      </Ui2Window>
     </div>
   );
 }

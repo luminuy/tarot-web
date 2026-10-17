@@ -1,4 +1,7 @@
 @import "tailwindcss";
+/* 🎨 SeerTarot UI 2.0 — ส่วนที่ใช้ทั้งเว็บ (โทเคน · ตัวเอียงโลโก้ · ปุ่มดำหัวเว็บ)
+   สไตล์หน้าแรก (ui2.css + ui2-fx-full.css) โหลดเฉพาะหน้าที่มี TarotFlow — ห้ามย้ายมาที่นี่ (งบ CSS ต่อหน้า · ด่าน test-bundle-budget) */
+@import "../styles/ui2-base.css";
 /* 🌙 โหมดมืด — ทับเฉพาะตอน <html data-theme="dark"> · โหมดสว่างไม่ถูกแตะ (รายละเอียดอยู่ในไฟล์) */
 @import "./theme-dark.css";
 
@@ -88,6 +91,42 @@
   descent-override: 23.87%;
   line-gap-override: 0.00%;
   size-adjust: 97.21%;
+}
+/*
+ * 🎨 SeerTarot UI 2.0 — หัวข้อ · ปุ่ม · ตัวเลขทุกจุด (ตัวตรง · เจ้าของสั่ง 2026-10-12) · พรีโหลดทุกหน้า (FONT_PRELOADS · หัวข้อ h1–h3 ทั้งเว็บ)
+ * ค่าชดเชยเมตริกคำนวณด้วยสูตรเดียวกับ next/font (ความกว้างเฉลี่ยตัวละตินถ่วงความถี่ภาษาอังกฤษ เทียบ Arial)
+ * ตรวจสูตรแล้ว: คำนวณ Sarabun ได้ 97.21% / 109.87% / 23.87% ตรงกับค่าข้างบนทุกหลัก
+ */
+@font-face {
+  font-family: "anuphan";
+  src: url(/fonts/anuphan-500.woff2) format("woff2");
+  font-display: swap;
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: "anuphan Fallback";
+  src: local("Arial");
+  ascent-override: 100.34%;
+  descent-override: 26.92%;
+  line-gap-override: 0.00%;
+  size-adjust: 102.15%;
+}
+/* คำอังกฤษประดับ (ตัวเอียง) เท่านั้น — ละตินล้วน · ไม่พรีโหลด · ห้ามใช้กับตัวเลข */
+@font-face {
+  font-family: "instrumentSerif";
+  src: url(/fonts/instrument-serif-italic.woff2) format("woff2");
+  font-display: swap;
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: "instrumentSerif Fallback";
+  src: local("Arial");
+  ascent-override: 123.52%;
+  descent-override: 38.68%;
+  line-gap-override: 0.00%;
+  size-adjust: 80.15%;
 }
 
 /*
@@ -420,7 +459,9 @@
   --glow-pool-w: 88%;
 
   /* ความสูงจริงของ [data-site-header] — แถบเต็มกว้างแบบ Kazumi: แถว 64px (มือถือ) / 68px (sm+)
-     + เส้นขอบล่าง 1px = 65 / 69px · วัดใหม่ด้วย Chromium ทุกครั้งที่แตะความสูงของแถบ
+     + เส้นขอบล่าง 1px = 65 / 69px (แถบเต็มกว้างเดิม)
+     UI 2.0 แคปซูลลอย: ระยะบน 10 / 14px + แคปซูล 56 / 62px + ขอบ 2px = 68 / 78px (วัดด้วย Chromium 2026-10-12)
+     · วัดใหม่ด้วย Chromium ทุกครั้งที่แตะความสูงของแถบ
      ต้องบวก safe-area-inset-top ด้วย เพราะหัวเว็บกันพื้นที่ใต้ status bar ไว้เองแล้ว
      ตอนเปิดจากไอคอนหน้าจอโฮม (display: standalone) — ในเบราว์เซอร์ปกติค่านี้ = 0
 
@@ -429,7 +470,7 @@
      ด้วยค่านี้โดยตรง — เผื่อเกิน = เห็นเป็นช่องว่างใต้หัวเว็บทุกหน้า / ขาด = หัวเว็บทับเนื้อหา
      ระยะหายใจของ anchor ย้ายไปบวกที่ `scroll-padding-top` แทนแล้ว
      SiteHeader.tsx ยังวัดของจริงด้วย ResizeObserver แล้วเขียนทับค่านี้ให้อีกชั้น */
-  --site-header-h: calc(65px + env(safe-area-inset-top, 0px));
+  --site-header-h: calc(68px + env(safe-area-inset-top, 0px));
 }
 
 @media (max-width: 639px) {
@@ -443,7 +484,7 @@
 
 @media (min-width: 640px) {
   :root {
-    --site-header-h: calc(69px + env(safe-area-inset-top, 0px));
+    --site-header-h: calc(78px + env(safe-area-inset-top, 0px));
   }
 }
 
@@ -496,12 +537,16 @@ body {
    *    ⚠️ ชื่อโทเคน `--glow-rose-w` คงไว้ตามเดิมเพื่อไม่ให้ต้องไล่แก้สามจุดใน media query
    */
   background-image:
+    /* เนื้อผ้าลินิน (ความทึบ 0.055 ฝังใน SVG · ปูซ้ำ) — เดิม body::after แบบ fixed (INC-0273) */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E"),
+    /* แสงเทียนขาวอมครีมเหนือหัวหน้า (≤ 0.30 · รอบ 115) — เดิม body::before แบบ fixed */
+    radial-gradient(110% 560px at 50% -127px, rgba(255, 250, 238, 0.28) 0%, rgba(255, 250, 238, 0) 62%),
     radial-gradient(var(--glow-amber-w) 620px at 0% 60px,    rgba(255, 186, 96, 0.36) 0%, rgba(255, 186, 96, 0) 76%),
     radial-gradient(var(--glow-crown-w) 820px at 50% -140px, rgba(255, 208, 130, 0.80) 0%, rgba(255, 208, 130, 0) 76%),
     radial-gradient(var(--glow-rose-w) 560px at 100% 300px,  rgba(236, 192, 148, 0.30) 0%, rgba(236, 192, 148, 0) 74%),
     radial-gradient(var(--glow-pool-w) 700px at 50% 1320px,  rgba(232, 196, 150, 0.32) 0%, rgba(232, 196, 150, 0) 74%),
     linear-gradient(168deg, #FCF1DF 0px, #F6E7D0 820px, #F2E3CC 1600px);
-  background-repeat: no-repeat;
+  background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
   /* 🚨 ห้ามใช้ background-attachment: fixed เด็ดขาด
      `fixed` บังคับให้เบราว์เซอร์วาดพื้นหลังใหม่ทุกเฟรมที่เลื่อนจอ
      ซึ่งเป็นความผิดพลาดแบบเดียวกับ backdrop-filter ใน INC-0056 เป๊ะ ๆ
@@ -535,44 +580,15 @@ html {
 }
 
 /*
- * ชั้นที่ 1 — แสงเทียนเหนือแท่นบูชา (นิ่ง ไม่ขยับ)
+ * ชั้นแสงเทียน + เนื้อผ้าลินิน — อยู่ใน background-image ของ body ด้านบนแล้ว (2026-10-17 · INC-0273)
  *
- * ⚠️ ห้ามย้ายกลับไปใส่เป็น `background-image` + `background-attachment: fixed` บน <body>
- * iOS Safari ไม่รองรับ `background-attachment: fixed` จริง (ปฏิบัติเป็น `scroll`)
- * แสงจะเลื่อนหายไปตอนผู้ใช้สกรอลล์ — กระทบผู้ใช้มือถือซึ่งเป็น 85% ของเว็บนี้
- * และบนเดสก์ท็อปมันยังบังคับให้เบราว์เซอร์วาดพื้นหลังใหม่ทุกครั้งที่สกรอลล์ด้วย
- * ใช้ pseudo-element ที่ `position: fixed` แทน — ยึดกับ viewport จริงทุกแพลตฟอร์ม
+ * 🚨 ห้ามกลับไปทำเป็น `body::before` / `body::after` แบบ `position: fixed` อีก
+ * ชั้น fixed เต็มจอ = เลเยอร์ GPU ตรึงจอ และ <main> (z-index 1) ที่วาดทับมันต้องถูกยกเป็นเลเยอร์แยกทั้งก้อน
+ * (Chrome: compositing reason "Overlap") — หน้าแรกเลเยอร์รวม 83 ล้านพิกเซล (จอ 1.5 ล้าน) · <main> ก้อนเดียว 17.8 ล้าน
+ * ทุกหน้าทั้งเว็บโดนหมด และของที่ขยับข้างในต้อง composite ทับซ้อนกันทุกเฟรม (เจ้าของ "หน้าแรกหนักมาก")
+ * ใน background ของ body: วาดครั้งเดียวตามเอกสาร ไม่มีเลเยอร์ · ความทึบลินิน 0.055 ฝังใน SVG แทน opacity
+ * ส่วน UI 2.0 ปูพื้นของตัวเองทับอยู่แล้ว สองชั้นนี้จึงเห็นเฉพาะหน้าที่ยังไม่มีพื้นเอง
  */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  /* ⚠️ ความทึบของกลีบนี้ต้องต่ำ (≤0.30) และเป็น "ขาวอมครีม" ไม่ใช่ขาวเกือบทึบ
-     ของเดิมเป็น #FFFDF9 ทึบเต็ม 100% ที่ใจกลาง มันจึงฟอกแสงทองของพื้นหลังทิ้ง
-     ทั้งแถบบนสุด จอแรกที่ผู้ใช้เห็นจึงเหลือแค่ครีมซีด (แก้ในรอบ 115) */
-  background-image: radial-gradient(
-    110% 62% at 50% -14%,
-    rgba(255, 250, 238, 0.28) 0%,
-    rgba(255, 250, 238, 0) 62%
-  );
-}
-
-/*
- * ชั้นที่ 2 — เนื้อผ้าลินิน (SVG นิ่ง ไม่มี JS ไม่มีเฟรม)
- * ต้องอยู่เหนือชั้นแสง เพื่อให้ผิวสัมผัสคลุมทั้งพื้น จึงใช้ ::after
- * opacity ต้องอยู่ระหว่าง 0.045–0.070 เท่านั้น เกิน 0.08 จะกลายเป็นจอทีวีไม่มีสัญญาณ
- */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.055;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
-}
 
 /* เนื้อหาทุกอย่างต้องอยู่เหนือชั้นลินิน (ยกเว้น fixed portal / floating elements)
  *
@@ -709,12 +725,194 @@ body > *:not(.fixed):not([data-floating]):not([data-site-header]) {
  */
 .site-header-glass {
   /*
-   * แถบเต็มกว้างแบบ Kazumi Clinic (เจ้าของเลือก 2026-10-02) — พื้นทึบ เส้นขอบล่างเส้นเดียว ไม่มีมุมโค้ง/เงาลอย
+   * 🎨 SeerTarot UI 2.0 (คลื่น 2 · เจ้าของสั่ง 2026-10-12): แคปซูลลอย ห่างขอบบน 10px (มือถือ) / 14px — แทนแถบเต็มกว้าง
+   *    แบบ Kazumi Clinic (2026-10-02) · `<header>` ยังกางเต็มกว้าง + `data-site-header` (ด่านเดิม · แผงเมนูใหญ่อ้างอิงมัน)
    * ความทึบต้อง >= 0.96 (INC-0211) — หัวเว็บเป็น `fixed` ลอยทับเนื้อหาที่เลื่อนอยู่ข้างหลังตลอดเวลา
    * ที่ 0.78 ตัวหนังสือข้างหลังทะลุขึ้นมาอ่านออก (เจ้าของถ่ายภาพมายืนยัน) · 0.97 แทบมองไม่เห็น
+   * ⚠️ ความสูงรวมเปลี่ยน ➔ ค่าตั้งต้น `--site-header-h` ด้านบนต้องตรงกับที่วัดจริงเสมอ (ไม่งั้น CLS ตอนโหลด · INC-0248)
    */
   background-color: rgba(255, 252, 246, 0.97);
-  border-bottom: 1px solid var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  margin: 10px 12px 0;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 16px 34px -24px rgba(46, 33, 26, 0.55);
+  transition: background-color var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
+}
+@media (min-width: 640px) {
+  .site-header-glass {
+    width: min(100% - 32px, 1200px);
+    margin: 14px auto 0;
+  }
+}
+/* breadcrumb ซ่อนแบบ sr-only อยู่แล้ว — ตัด padding ของแถวมันทิ้งตอนไม่มีโฟกัส แคปซูลจะได้สูงเท่ากันทุกหน้า */
+.site-header-crumbs:not(:focus-within) {
+  padding-bottom: 0;
+}
+/*
+ * 🌑 กระจกมืดเมื่อแคปซูลอยู่เหนือส่วนพื้นมืดของหน้าแรก UI 2.0 (คำถามเปิดข้อ 3 · เจ้าของเคาะ 2026-10-12)
+ * `astro/scripts/ui2-home.ts` ตั้ง `data-ui2-over-dark` บน <html> เมื่อส่วนมืดอยู่ใต้แคปซูล
+ * ⚠️ เปลี่ยนสีเฉพาะตัวแถบ — ห้ามแตะแผงที่กางออกมา (แผงเมนูใหญ่ · ภาษา · ลิ้นชัก เป็น `.absolute` พื้นสว่างของตัวเอง)
+ */
+html[data-ui2-over-dark] .site-header-glass {
+  background-color: rgba(22, 17, 24, 0.96);
+  border-color: rgba(255, 236, 200, 0.18);
+  box-shadow: 0 16px 34px -24px rgba(0, 0, 0, 0.8);
+}
+html[data-ui2-over-dark] .site-header-glass :is(.text-ink, .text-ink-deep, nav):not(.absolute *, .absolute) {
+  color: #F6EEE2;
+}
+html[data-ui2-over-dark] .site-header-glass .text-muted:not(.absolute *) {
+  color: #CFC3B2;
+}
+
+/*
+ * 🍎 แผงเมนูใหญ่ "ดูดวง" แบบ apple.com (เจ้าของสั่ง 2026-10-13 · ภาพอ้างอิงเมนู Store)
+ * แผงมืดเต็มกว้างตั้งแต่ขอบบนจอ วางใต้แคปซูล (z-index ติดลบในบริบทซ้อนของ <header>) · แคปซูลเปลี่ยนเป็นมืดตามแผง
+ * สองกลุ่มแรก = ลิงก์ตัวใหญ่ · กลุ่มที่เหลือ = ตัวเล็ก · หัวกลุ่มเทาเล็ก
+ * หน้าที่เหลือ: ทุกระดับมืดลง (`.mega-scrim`) · ระดับ full เบลอเพิ่มด้วย `filter` บนลูกตรงของ body
+ *   (ไม่ใช้ backdrop-filter — INC-0056 · ด่าน test-motion-quality กฎ 2)
+ * ⚠️ แผง/ฉากมืดต้องเป็น `absolute` (ห้าม `fixed` — หัวเว็บมี transform จึงเป็น containing block · ด่าน test-sticky-header)
+ */
+.mega-panel,
+.mega-scrim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms var(--ease-out), visibility 180ms;
+}
+.mega-scrim {
+  z-index: -2;
+  height: 100vh;
+  background: rgba(12, 10, 15, 0.42);
+}
+.mega-panel {
+  z-index: -1;
+  padding-top: calc(var(--site-header-h, 82px) + 26px);
+  color: #F6EEE2;
+  background: rgba(22, 17, 24, 0.985);
+  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.7);
+}
+[data-mega]:hover > .mega-panel,
+[data-mega]:focus-within > .mega-panel {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+[data-mega]:hover > .mega-scrim,
+[data-mega]:focus-within > .mega-scrim {
+  visibility: visible;
+  opacity: 1;
+}
+.mega-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 0.85fr);
+  gap: 32px;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 24px;
+  translate: 0 -6px;
+  transition: translate 240ms var(--ease-out);
+}
+[data-mega]:hover .mega-inner,
+[data-mega]:focus-within .mega-inner {
+  translate: 0 0;
+}
+/* รายการในแผงทยอยเข้าทีละคอลัมน์ (แบบเมนู apple.com) */
+.mega-col {
+  opacity: 0;
+  translate: 0 -8px;
+  transition: opacity 260ms var(--ease-out), translate 320ms var(--ease-out);
+}
+[data-mega]:hover .mega-col,
+[data-mega]:focus-within .mega-col {
+  opacity: 1;
+  translate: 0 0;
+}
+[data-mega]:hover .mega-col:nth-child(2),
+[data-mega]:focus-within .mega-col:nth-child(2) { transition-delay: 40ms; }
+[data-mega]:hover .mega-col:nth-child(3),
+[data-mega]:focus-within .mega-col:nth-child(3) { transition-delay: 80ms; }
+[data-mega]:hover .mega-col:nth-child(4),
+[data-mega]:focus-within .mega-col:nth-child(4) { transition-delay: 120ms; }
+.mega-title {
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(246, 238, 226, 0.56);
+}
+.mega-links {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+.mega-links a {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #E9DFD0;
+  transition: color 150ms var(--ease-out);
+}
+.mega-col-big .mega-links {
+  gap: 8px;
+}
+.mega-col-big .mega-links a {
+  font-family: var(--ui2-font-display, var(--font-sarabun));
+  font-size: clamp(20px, 14px + 0.75vw, 26px);
+  font-weight: 600;
+  line-height: 1.3;
+  color: #F6EEE2;
+}
+.mega-links a:hover,
+.mega-links a:focus-visible,
+.mega-foot a:hover,
+.mega-foot a:focus-visible {
+  color: #FFD98F;
+  outline: none;
+}
+.mega-foot {
+  max-width: 72rem;
+  margin: 30px auto 0;
+  padding: 0 24px 44px;
+}
+.mega-foot a {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #E3B868;
+}
+/* แคปซูลกลายเป็นมืดตามแผง (ข้อความในแคปซูลสว่าง · ยกเว้นของในแผงที่กางออกมา) */
+.site-header-glass:has([data-mega]:hover, [data-mega]:focus-within) {
+  background-color: rgba(30, 24, 33, 0.98);
+  border-color: rgba(255, 236, 200, 0.16);
+  box-shadow: none;
+}
+.site-header-glass:has([data-mega]:hover, [data-mega]:focus-within) :is(.text-ink, .text-ink-deep, nav):not(.absolute *, .absolute, .mega-panel *) {
+  color: #F6EEE2;
+}
+.site-header-glass:has([data-mega]:hover, [data-mega]:focus-within) .text-muted:not(.absolute *, .mega-panel *) {
+  color: #CFC3B2;
+}
+/* ระดับ full: เบลอเนื้อหาและท้ายเว็บ (พี่น้องถัดจาก <header> — หน้า Astro อยู่ใต้ body · หน้าแรกอยู่ใน island เดียวกัน)
+   filter ชั่วคราวระหว่างเปิดแผงเท่านั้น */
+[data-fx="full"] [data-site-header] ~ :is(main, footer) {
+  transition: filter 220ms var(--ease-out);
+}
+[data-fx="full"] [data-site-header]:has([data-mega]:hover, [data-mega]:focus-within) ~ :is(main, footer) {
+  filter: blur(14px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mega-inner,
+  .mega-col {
+    translate: none;
+    transition: none;
+  }
+  .mega-col {
+    opacity: 1;
+  }
 }
 
 /* แผงเลือกภาษา — ผุดจากมุมขวาบน (ปุ่มลูกโลก) แบบเมนูของระบบปฏิบัติการ · ปิดเองเมื่อ prefers-reduced-motion (กฎรวม) */
@@ -1103,21 +1301,6 @@ html {
 }
 
 /* แถบเลื่อนของแท่นวางไพ่ — ใช้ชุดสีเดียวกับแถบเลื่อนหลัก */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #F3EDE2;
-  border-radius: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #6F5B4A;
-  border-radius: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #2E211A;
-}
 
 /* ===== Mobile-First GPU Optimizations (85%+ mobile users) ===== */
 
@@ -1167,45 +1350,9 @@ html {
   }
 }
 
-.spread-chip::after {
-  content: "";
-  order: -1;
-  flex: none;
-  width: 14px;
-  height: 14px;
-  background-color: var(--color-muted);
-  -webkit-mask: var(--chip-icon) center / contain no-repeat;
-  mask: var(--chip-icon) center / contain no-repeat;
-}
-
-.spread-chip[aria-selected="true"]::after {
-  background-color: currentColor;
-}
-
-.spread-card-sheen::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    125deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.06) 30%,
-    rgba(228, 216, 196, 0.28) 50%,
-    transparent 80%
-  );
-  opacity: 0.15;
-  transition: opacity 150ms ease;
-  pointer-events: none;
-}
-
-.spread-card-sheen:hover::after {
-  opacity: 0.3;
-}
-
 /* Disable expensive hover effects on touch devices */
 @media (hover: none) and (pointer: coarse) {
-  .gold-foil-sheen,
-  .spread-card-sheen::after {
+  .gold-foil-sheen {
     display: none !important;
   }
   /* แผงแท่นบูชาไม่ใช้ backdrop-filter แล้ว จึงไม่ต้อง override ซ้ำตรงนี้ */
@@ -1301,32 +1448,10 @@ html {
  */
 .card-tile-cv {
   content-visibility: auto;
-  contain-intrinsic-size: auto calc(85.71vw + 39.6px);
 }
-
-@media (min-width: 640px) {
-  .card-tile-cv {
-    contain-intrinsic-size: auto calc(56.7vw + 27.1px);
-  }
-}
-
-@media (min-width: 768px) {
-  .card-tile-cv {
-    contain-intrinsic-size: auto calc(43.03vw + 23.3px);
-  }
-}
-
-@media (min-width: 1024px) {
-  .card-tile-cv {
-    contain-intrinsic-size: auto calc(28.25vw + 37.1px);
-  }
-}
-
-@media (min-width: 1280px) {
-  .card-tile-cv {
-    contain-intrinsic-size: auto 383px;
-  }
-}
+/* 📐 2026-10-17 (v3 การ์ดกรอบงาช้าง · CardTile.tsx): ความสูงที่จองไว้ย้ายไป src/styles/v3-card-tile.css
+   คำนวณตรงจากความกว้างกริดจริง (cqi) แทนตาราง vw ที่วัดจาก 18 ความกว้างจอข้างบน (การ์ดแบบเดิมเลิกใช้แล้ว)
+   ⚠️ ห้ามใช้ `.card-tile-cv` กับการ์ดที่ไม่มีสูตรความสูงของตัวเอง — ไม่มีสูตร = เลื่อนแล้วกระตุก (INC-0174) */
 
 /* ป้องกัน iOS Safari และเบราว์เซอร์มือถือไม่ให้ Auto-Zoom เมื่อผู้ใช้แตะพิมพ์ */
 @media screen and (max-width: 768px) {
@@ -1439,20 +1564,6 @@ html {
 }
 
 /* แผงที่ห้อยลงมาจากขอบบน (เมนูมือถือของแอดมิน) — มาจากด้านบน ไม่ใช่ด้านล่าง */
-.anim-drop-in {
-  animation: dropIn 0.2s var(--ease-out) both;
-}
-
-@keyframes dropIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 /* แผงของหน้าต่าง — ลอยขึ้นเล็กน้อยพร้อมจาง
    ⚠️ ห้ามใส่ `scale` (INC-0128) — การย่อ/ขยายแผงที่มีตัวอักษรเต็มใบบังคับให้ raster ใหม่ทุกเฟรม
@@ -1750,38 +1861,6 @@ html {
  *   ตอนเปิด  → visibility: visible ต้องมีผล "ทันที" ไม่ผ่าน transition
  *   ตอนปิด   → หน่วง visibility ด้วย transition-delay เท่ากับเวลา fade เพื่อให้เห็นอนิเมชันจางหาย
  */
-.dropdown-panel-base {
-  transform-origin: top right;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transition: opacity 160ms cubic-bezier(0.16, 1, 0.3, 1),
-              transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.dropdown-panel-entering {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  /* 🚨 เคยเขียนเป็น `translate3d(0, 0, 0) scale(1)` ซึ่งผิดกฎ INC-0108
-     Lightning CSS เห็นแกน z เป็น 0 แล้วยุบเหลือ transform 2D อยู่ดี ตัวเลเยอร์ GPU
-     ที่ตั้งใจบังคับจึงไม่เคยเกิดขึ้นจริง · ของที่ทำหน้าที่นั้นได้จริงคือ `will-change`
-     บรรทัดถัดไป ซึ่งมีผลเฉพาะตอนแผงกำลังเปิด (ไม่จองเลเยอร์ค้าง — ด่าน test-will-change)
-     เขียนรายการ transform ให้ "ชุดฟังก์ชันตรงกัน" กับตอนปิด เบราว์เซอร์จึงไล่ค่าทีละฟังก์ชันได้
-     ไม่ต้องถอยไปคำนวณผ่าน matrix ซึ่งทำให้ขอบตัวอักษรสั่นระหว่างทาง */
-  transform: translateY(0) scale(1);
-  will-change: opacity, transform;
-}
-
-.dropdown-panel-exiting {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transform: translateY(-6px) scale(0.98);
-  /* หน่วงเฉพาะ visibility ให้ซ่อนหลัง fade จบ — opacity/transform ยังวิ่งปกติ */
-  transition: opacity 160ms cubic-bezier(0.16, 1, 0.3, 1),
-              transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
-              visibility 0s linear 160ms;
-}
 
 /*
  * 🧭 Slide-Out Navigation Drawer (ด้านขวา) สไตล์ Quiet Luxury & GitHub-Inspired
@@ -1993,13 +2072,6 @@ input.no-focus-ring:focus-visible {
 }
 
 /* Mobile Safe Area Padding Helpers */
-.safe-pb {
-  padding-bottom: max(1rem, env(safe-area-inset-bottom));
-}
-
-.safe-pt {
-  padding-top: max(1rem, env(safe-area-inset-top));
-}
 
 /* N-01: เฟดข้ามหน้า (cross-document View Transition) — **เปิดเฉพาะจอที่ใช้เมาส์เท่านั้น**
    ─────────────────────────────────────────────────────────────────────────────
@@ -2266,14 +2338,6 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
 }
 /* แถบแรกต่อจากหัวหน้า ("เปิดไพ่ด่วน") ใช้พื้นเดียวกับหัวหน้า — padding บนเต็ม 44/64px ไม่ได้แบ่งสีอะไร
    กลายเป็นช่องว่างเปล่า (เจ้าของทัก: ใต้ไพ่ประจำวันเว้นไว้เยอะ 71px มือถือ / 91px จอใหญ่) ➔ ลดเหลือ 32/40px */
-.home-band-snug-top {
-  padding-top: 2rem;
-}
-@media (min-width: 640px) {
-  .home-band-snug-top {
-    padding-top: 2.5rem;
-  }
-}
 
 /* แถวปัดใช้ทุกความกว้างจอ — จอใหญ่จัดวางแบบเดียวกับมือถือ (คำสั่งเจ้าของ 2026-09-26: "ทำให้ตรงกัน")
    ต่างกันแค่ความกว้างการ์ด: มือถือ ~1.2 ใบ · แท็บเล็ต 2 ใบกับอีกเสี้ยว · จอใหญ่ 3 ใบกับอีกเสี้ยว
@@ -2298,15 +2362,9 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
   width: calc((100% - 32px) / 2.25);
   scroll-snap-align: start;
 }
-.home-rail.home-rail-sm > * {
-  width: calc((100% - 64px) / 4.5);
-}
 @media (min-width: 1024px) {
   .home-rail > * {
     width: calc((100% - 48px) / 3.25);
-  }
-  .home-rail.home-rail-sm > * {
-    width: calc((100% - 96px) / 6.5);
   }
 }
 @media (max-width: 639.98px) {
@@ -2320,9 +2378,6 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
     flex-grow: 0;
     width: min(80vw, 300px);
   }
-  .home-rail.home-rail-sm > * {
-    width: min(31vw, 124px);
-  }
 }
 /* การ์ดในแถวปัด: ไม่มีเงา — กล่องเลื่อน (overflow-x) ตัดเงาขอบล่างทิ้งเหลือเป็นแถบเทาดำ
    ใต้การ์ด (เจ้าของทักจากภาพหน้าจอ 2026-09-24) · การ์ดยังมีขอบ/พื้นกระจกแยกจากพื้นหลังอยู่
@@ -2333,21 +2388,10 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
 .home-rail > * > .glass-tile {
   box-shadow: none;
 }
-@media (max-width: 639.98px) {
-  .rail-flat > * {
-    box-shadow: none;
-  }
-}
-.rail-flat.rail-always > * {
-  box-shadow: none;
-}
 @media (prefers-reduced-motion: no-preference) {
   .home-rail {
     scroll-behavior: smooth;
   }
-}
-[data-rail-nav]:has(> [data-rail-prev]:disabled):has(> [data-rail-next]:disabled) {
-  display: none;
 }
 
 .home-rail-btn {
@@ -2387,17 +2431,9 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
   display: none;
 }
 @media (min-width: 640px) {
-  [data-rail],
   .rail-wrap {
     position: relative;
   }
-  .home-rail:not(.home-rail-sm),
-  .rail-flat.rail-always {
-    margin-inline: calc(50% - 50vw);
-    padding-inline: calc(50vw - 50%);
-    scroll-snap-type: none;
-  }
-  [data-rail-nav],
   .rail-nav-overlay {
     position: absolute;
     z-index: 2;
@@ -2412,12 +2448,6 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
     justify-content: space-between;
     pointer-events: none;
   }
-  [data-rail]:has(> .home-rail-sm) > [data-rail-nav] {
-    left: -22px;
-    right: -22px;
-    padding-inline: 0;
-  }
-  [data-rail-nav] > .home-rail-btn,
   .rail-nav-overlay > .home-rail-btn {
     pointer-events: auto;
     width: 48px;
@@ -2425,16 +2455,13 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
     background: rgba(236, 229, 216, 0.92);
     box-shadow: 0 2px 10px rgba(41, 38, 31, 0.12);
   }
-  [data-rail-nav] > .home-rail-btn:hover,
   .rail-nav-overlay > .home-rail-btn:hover {
     background: rgba(226, 217, 201, 0.96);
   }
-  [data-rail-nav] > .home-rail-btn:disabled,
   .rail-nav-overlay > .home-rail-btn:disabled {
     opacity: 0;
     pointer-events: none;
   }
-  [data-rail-nav] > .home-rail-btn svg,
   .rail-nav-overlay > .home-rail-btn svg {
     width: 20px;
     height: 20px;
@@ -2447,138 +2474,85 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
    • `.home-rail-stack-lg` — ลิงก์ 4 อันของส่วนราศี เรียงซ้อนเป็นคอลัมน์ขวาของวงล้อ
      ไม่ล้นแล้ว `home-rails.ts` ปิดลูกศรทั้งคู่ แถวปุ่มจึงซ่อนตัวเองตามกติกาเดิม
    • `.rail-grid-lg` — การ์ดเลือกผัง เป็นตาราง 3 คอลัมน์ เห็นครบทั้งหมวดไม่ต้องปัด (ลูกศรซ่อนด้วย `lg:hidden` ใน React) */
-@media (min-width: 1024px) {
-  .home-rail.home-rail-stack-lg {
-    flex-direction: column;
-    overflow: visible;
-    scroll-snap-type: none;
-    margin-inline: 0;
-    padding: 0;
-  }
-  .home-rail.home-rail-stack-lg > * {
-    width: auto;
-    flex: 0 0 auto;
-  }
-  .rail-flat.rail-always.rail-grid-lg {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 20px;
-    overflow: visible;
-    margin-inline: 0;
-    padding-inline: 0;
-  }
-  .rail-flat.rail-always.rail-grid-lg > * {
-    width: auto;
-    max-width: none;
-  }
-  /* หมวด "ทั้งหมด" โชว์ 6 ใบแรก ที่เหลือไปหน้ารวมผังผ่านลิงก์ใต้ตาราง */
-  .rail-flat.rail-always.rail-grid-lg-cap > :nth-child(n + 7) {
-    display: none;
-  }
-}
 
-/* ✦ พัดไพ่ 1909 เป็นพื้นหลังจาง ๆ หลังหัวหน้าแรก (`TarotFlow` · aria-hidden · ไม่รับการแตะ) — ไพ่แต่ละใบรู้ลำดับจาก `--i` (-3 … 3)
-   ลอยอยู่ชั้นล่างสุดของส่วนหัว (`isolate` + z-index -1) ไม่กินพื้นที่ · จางด้วย opacity + ไล่จางขอบล่างด้วย mask
-   (mask ไม่ใช่ blur — ไม่มี backdrop-filter/filter · INC-0056) · ผู้ใช้ปิดแอนิเมชัน = นิ่งสนิท */
-.hero-fan {
-  /* ขนาดไพ่ผูกกับความกว้างจอ — ใบริมสุดต้องอยู่ในกรอบส่วนหัวเสมอ (เคยกว้างตายตัวแล้วใบริมโดนตัดขอบ เจ้าของทัก 2026-10-10)
-     ระยะจากกลางถึงขอบนอกใบริม ≈ (ใบ × ระยะห่าง) + ครึ่งใบ + ส่วนที่หมุนยื่น ≈ 2.2w (5 ใบ) / 3.1w (7 ใบ) ต้อง ≤ ครึ่งกรอบ */
-  --w: min(96px, calc((100vw / 2 - 16px) / 2.2));
-  --gap: calc(var(--w) * 0.6);
-  position: absolute;
-  z-index: -1;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: calc(var(--w) * 1.7 + 50px);
-  opacity: 0.2;
-  pointer-events: none;
-  -webkit-mask-image: linear-gradient(to bottom, #000 45%, transparent 96%);
-  mask-image: linear-gradient(to bottom, #000 45%, transparent 96%);
+/* (พัดไพ่พื้นหลังหัวหน้าแรกเดิม `.hero-fan` ถูกแทนด้วยการ์ดลอยของ SeerTarot UI 2.0 — ดู src/styles/ui2.css ส่วน 1) */
+
+/* ✦ ท้ายเว็บ UI 2.0 (`SiteFooter` · เจ้าของ 2026-10-17 "ต้องปรับใหม่ไหม" ➔ "ได้เลย ปรับให้ครบทุกหน้า")
+   เดิม: พื้นน้ำตาลอมเขียว (bg-dark ธีมเก่า) + ตัวมีเชิงทั้งก้อน ➔ เห็นรอยต่อสีกับท้องฟ้ากลางคืนของทุกหน้า
+   ใหม่: พื้นกลางคืนเดียวกับหน้า (แสงเขียวน้ำทะเล/อำพันจาง ๆ ที่มุม) · เส้นทองไล่จางขอบบน · หัวคอลัมน์ Anuphan ทอง ·
+   ลิงก์ตัวไม่มีเชิงสีครีมจาง ชี้แล้วสว่าง · สายด่วน 1323/1669 เป็นกล่องครีมเล็ก (เด่นแต่ไม่แสบตา · กฎเหล็ก 6)
+   สีเขียนตายตัว ไม่อ่านโทเคน --color-* (ท้ายเว็บมืดเสมอ ทั้งธีมสว่าง/มืดและทุกหน้า) */
+.site-footer {
+  position: relative;
+  overflow: hidden;
+  color: rgba(246, 238, 226, 0.72);
+  background:
+    radial-gradient(46% 260px at 8% 0%, rgba(79, 179, 169, 0.1) 0%, rgba(79, 179, 169, 0) 70%),
+    radial-gradient(46% 300px at 94% 100%, rgba(233, 160, 70, 0.11) 0%, rgba(233, 160, 70, 0) 70%),
+    #0C0A0F;
 }
-@media (min-width: 640px) {
-  .hero-fan {
-    --w: min(150px, calc((100vw / 2 - 40px) / 2.3));
-    --gap: calc(var(--w) * 0.69);
-    top: -12px;
-    opacity: 0.22;
-  }
-}
-/* จอใหญ่: ไพ่ใหญ่ขึ้น + 7 ใบ กางเกือบเต็มกว้างส่วนหัว (เจ้าของขอ 2026-10-10) · กรอบส่วนหัวกว้างสุด 1,152px (max-w-6xl) */
-@media (min-width: 1024px) {
-  .hero-fan {
-    --w: min(190px, calc((min(100vw, 1152px) / 2 - 48px) / 3.1));
-    --gap: calc(var(--w) * 0.72);
-    top: -28px;
-  }
-}
-/* ✦ ให้ตัวหนังสือบนพัดอ่านง่าย (เจ้าของขอ 2026-10-10) — สองชั้น ไม่ใช้ blur/filter (INC-0056):
-   1) `.hero-wash::after` แสงครีมวงรีเฉพาะหลังกลุ่มหัวเรื่อง·คำโปรย·ชิป วาดทับพัด (z-index -1 เท่ากัน แต่มาทีหลังในลำดับ DOM)
-      แต่อยู่ใต้ตัวหนังสือ · ลายไพ่ตรงกลางจางลง ขอบพัดซ้ายขวายังเห็นชัด
-   2) `.hero-text-halo` เงาเรืองสีครีมรอบตัวอักษร กันเส้นลายไพ่ตัดผ่านขอบตัวหนังสือ */
-.hero-wash::after {
+.site-footer::before {
   content: "";
   position: absolute;
-  z-index: -1;
-  left: 50%;
-  top: -24px;
-  width: min(100%, 980px);
-  height: 340px;
-  transform: translateX(-50%);
-  background: radial-gradient(closest-side, rgba(251, 241, 224, 0.92), rgba(251, 241, 224, 0.7) 55%, rgba(251, 241, 224, 0) 100%);
-  pointer-events: none;
+  top: 0;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 217, 143, 0) 0%, rgba(255, 217, 143, 0.5) 50%, rgba(255, 217, 143, 0) 100%);
 }
-@media (min-width: 640px) {
-  .hero-wash::after {
-    height: 330px;
-  }
+.site-footer :is(.border-b, .border-t) {
+  border-color: rgba(246, 238, 226, 0.1);
 }
-.hero-text-halo {
-  text-shadow:
-    0 0 2px rgba(251, 241, 224, 0.95),
-    0 0 14px rgba(251, 241, 224, 0.9),
-    0 0 28px rgba(251, 241, 224, 0.75);
+.site-footer-brand {
+  color: #F6EEE2;
 }
-/* ใบริมสุดสองใบมีเฉพาะจอใหญ่ — จอเล็กพัดกว้างเกินจอ */
-.hero-fan-card--edge {
-  display: none;
+.site-footer-dim {
+  color: rgba(246, 238, 226, 0.55);
 }
-@media (min-width: 1024px) {
-  .hero-fan-card--edge {
-    display: block;
-  }
+.site-footer-gold {
+  color: #FFD98F;
 }
-.hero-fan-card {
-  --d: max(var(--i), calc(var(--i) * -1)); /* ระยะห่างจากใบกลาง 0 · 1 · 2 · 3 */
-  position: absolute;
-  left: 50%;
-  top: 10px;
-  z-index: calc(4 - var(--d));
-  width: var(--w);
-  aspect-ratio: 1 / 1.7;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #f4ead6;
-  box-shadow:
-    0 0 0 1px rgba(143, 92, 26, 0.35),
-    0 0 0 3px rgba(255, 250, 240, 0.9),
-    0 18px 34px -14px rgba(56, 37, 24, 0.5);
-  transform: translateX(calc(-50% + var(--i) * var(--gap))) translateY(calc(var(--d) * var(--d) * 5px + var(--d) * 6px))
-    rotate(calc(var(--i) * 7deg)) scale(calc(1 - var(--d) * 0.07));
-  transform-origin: 50% 100%;
+.site-footer .footer-col-title,
+.site-footer .footer-col-toggle {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 15.5px;
+  letter-spacing: 0.01em;
+  color: #FFD98F;
 }
-/* เปิดหน้ามา ไพ่ค่อย ๆ กางจากกองกลาง (ครั้งเดียว · สั้น) — ปิดแอนิเมชันในเครื่อง = ไม่เล่น */
-@media (prefers-reduced-motion: no-preference) {
-  .hero-fan-card {
-    animation: hero-fan-in 900ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
-    animation-delay: calc(var(--d) * 80ms);
-  }
+.site-footer .footer-col-chevron {
+  color: rgba(246, 238, 226, 0.55);
 }
-@keyframes hero-fan-in {
-  from {
-    transform: translateX(-50%) translateY(14px) rotate(0deg) scale(0.94);
-    opacity: 0;
-  }
+.site-footer a:not(.footer-social) {
+  color: rgba(246, 238, 226, 0.72);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.site-footer a:not(.footer-social):hover {
+  color: #F6EEE2;
+}
+.site-footer a:not(.footer-social):focus-visible {
+  outline: 2px solid #FFD98F;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+/* สายด่วน/คำยืนยัน — กล่องครีมเล็ก หัวกล่องสีเข้มตามความหมาย (ทอง · เขียว · แดง) */
+.site-footer .site-footer-hot {
+  padding: 10px 14px;
+  border-radius: 14px;
+  color: #5A4A3A;
+  background:
+    radial-gradient(80% 120% at 0% 0%, rgba(255, 222, 150, 0.5) 0%, rgba(255, 222, 150, 0) 70%),
+    #F7F0E3;
+  box-shadow: 0 0 0 1px rgba(255, 236, 200, 0.4), 0 14px 26px -18px rgba(0, 0, 0, 0.9);
+}
+.site-footer .site-footer-hot > span {
+  color: #8A4F10;
+}
+.site-footer .site-footer-hot > .text-ok-on-dark {
+  color: #23703F;
+}
+.site-footer .site-footer-hot > .text-err-on-dark {
+  color: #A8362B;
 }
 
 /* ✦ ไอคอนช่องทางทางการในท้ายเว็บ (`SiteFooter`) — ไฟล์ SVG แยกใน `public/icons/social/` วาดเป็นพื้นหลัง
@@ -2774,4 +2748,43 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
     animation: none;
     transition: none;
   }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   🎨 SeerTarot UI 2.0 — คลื่น 3 "ทุกหน้า" (เจ้าของสั่ง 2026-10-12: "ทำต่อให้ครบทุกหน้าเลย")
+   ─────────────────────────────────────────────────────────────────────────
+   ลงภาษาดีไซน์ที่ระดับคลาสกลาง ทุกหน้า (~460 หน้า ทั้ง Astro และ Next) เปลี่ยนพร้อมกันโดยไม่ต้องรื้อทีละหน้า:
+     1. หัวข้อ h1–h3 ใช้ Anuphan 500 (ตัวเดียวกับหัวหน้าแรก) — พรีโหลดทุกหน้าแล้ว (FONT_PRELOADS)
+     2. ปุ่มหลัก `.btn-gold-glass` (ใช้ ~106 จุด) เป็นปุ่มดำขอบทองแบบ `.ui2-btn` · บนพื้นมืดกลับเป็นปุ่มทองตัวหนังสือเข้ม
+     3. มุมแผงกระจกโค้งขึ้นเล็กน้อย (22 ➔ 26px) ให้เข้ากับแผ่นใหญ่ของ UI 2.0
+   ⚠️ อยู่นอก @layer โดยตั้งใจ — ชนะยูทิลิตี้ของ Tailwind (`font-serif-th` · `font-bold`) โดยไม่ต้อง !important
+   ⚠️ ห้ามย้ายขึ้นไปไว้ก่อนบล็อก `.btn-gold-glass` เดิม — กฎนอก @layer ที่น้ำหนักเท่ากัน ตัวหลังชนะ
+   ═════════════════════════════════════════════════════════════════════════ */
+:root {
+  --glass-radius: 26px;
+}
+:where(h1, h2, h3) {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.btn-gold-glass {
+  background-image: none;
+  background-color: var(--ui2-button);
+  color: var(--ui2-button-text);
+  box-shadow:
+    0 0 0 1px rgba(255, 217, 143, 0.55) inset,
+    0 14px 28px -14px rgba(23, 17, 12, 0.7);
+}
+.btn-gold-glass:hover {
+  filter: none;
+  box-shadow:
+    0 0 0 1px rgba(255, 217, 143, 0.8) inset,
+    0 18px 34px -14px rgba(23, 17, 12, 0.75);
+}
+/* บนพื้นมืด (เวทีปรึกษาแม่หมอ · พื้นหมึก) ปุ่มดำจะจมหาย — ใช้ปุ่มทองตัวหนังสือเข้ม (คอนทราสต์ #17110C บน #FFD98F ≈ 14:1) */
+:is(.consult-stage, .bg-ink-deep, .bg-dark) .btn-gold-glass {
+  background-color: var(--ui2-gold-solid);
+  color: var(--ui2-button);
+  box-shadow: 0 14px 28px -14px rgba(0, 0, 0, 0.7);
 }

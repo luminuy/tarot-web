@@ -281,7 +281,7 @@ function AdminContent() {
             rel="noopener noreferrer"
             className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-line bg-white px-3 text-xs font-medium text-ink hover:bg-canvas"
           >
-            เปิดหน้าเว็บ <span aria-hidden className="text-muted">↗</span>
+            เปิดหน้าเว็บ
           </a>
           <Button variant="ghost" size="sm" onClick={logout} className="text-xs text-muted hover:text-rose-700">
             ออกจากระบบ

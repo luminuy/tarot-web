@@ -214,7 +214,7 @@ export default function BookingsAdmin() {
               <li key={r.id} className={`flex flex-wrap items-start justify-between gap-3 p-3 text-xs ${r.hidden ? "opacity-60" : ""}`}>
                 <span className="min-w-0 flex-1 space-y-0.5">
                   <span className="block">
-                    <span className="text-gold-ink">{"★".repeat(r.rating)}</span> <strong>{r.readerName}</strong> · คุณ
+                    <span className="text-gold-ink">{r.rating}/5</span> <strong>{r.readerName}</strong> · คุณ
                     {r.nickname || "-"} {r.hidden && <span className="text-err">(ซ่อนอยู่)</span>}
                   </span>
                   {r.comment && <span className="block whitespace-pre-line text-ink">{r.comment}</span>}

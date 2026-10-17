@@ -5,36 +5,82 @@ import React from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import type { CardSummary } from "@/data/cards/summary";
 import type { CardGroupInfo } from "@/data/cards/group-seo";
-import { CardImage } from "@/components/card/CardImage";
-import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { useLocale } from "@/lib/i18n";
 import { localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
-import {
-  AirElementIcon,
-  CrownTabIcon,
-  FireElementIcon,
-  PentacleTabIcon,
-  SparkleTabIcon,
-  WaterElementIcon,
-} from "@/components/ui/TarotArtIcons";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { Ui2Showcase, type Ui2ShowcaseSection } from "@/components/ui2/Ui2Showcase";
+import { CardTile } from "@/components/encyclopedia/CardTile";
 
 interface CardGroupViewProps {
   groupInfo: CardGroupInfo;
   cards: readonly CardSummary[];
 }
 
+/** สลับไปหมวดอื่น (ชิปใต้หัวหน้า) */
 const NAV_TABS = [
-  { id: "all", href: "/cards", labelTh: "ไพ่ทั้งหมด (78)", labelEn: "All 78 Cards", Icon: SparkleTabIcon },
-  { id: "major", href: "/cards/major", labelTh: "ชุดใหญ่ (22)", labelEn: "Major Arcana (22)", Icon: CrownTabIcon },
-  { id: "minor", href: "/cards/minor", labelTh: "ชุดเล็ก (56)", labelEn: "Minor Arcana (56)", Icon: SparkleTabIcon },
-  { id: "wands", href: "/cards/wands", labelTh: "ไม้เท้า (14)", labelEn: "Wands (14)", Icon: FireElementIcon },
-  { id: "cups", href: "/cards/cups", labelTh: "ถ้วย (14)", labelEn: "Cups (14)", Icon: WaterElementIcon },
-  { id: "swords", href: "/cards/swords", labelTh: "ดาบ (14)", labelEn: "Swords (14)", Icon: AirElementIcon },
-  { id: "pentacles", href: "/cards/pentacles", labelTh: "เหรียญ (14)", labelEn: "Pentacles (14)", Icon: PentacleTabIcon },
-  { id: "table", href: "/cards/all", labelTh: "ตารางสรุป", labelEn: "Summary Table", Icon: SparkleTabIcon },
+  { id: "all", href: "/cards", labelTh: "ไพ่ทั้งหมด", labelEn: "All 78", n: 78 },
+  { id: "major", href: "/cards/major", labelTh: "ชุดใหญ่", labelEn: "Major", n: 22 },
+  { id: "minor", href: "/cards/minor", labelTh: "ชุดเล็ก", labelEn: "Minor", n: 56 },
+  { id: "wands", href: "/cards/wands", labelTh: "ไม้เท้า", labelEn: "Wands", n: 14 },
+  { id: "cups", href: "/cards/cups", labelTh: "ถ้วย", labelEn: "Cups", n: 14 },
+  { id: "swords", href: "/cards/swords", labelTh: "ดาบ", labelEn: "Swords", n: 14 },
+  { id: "pentacles", href: "/cards/pentacles", labelTh: "เหรียญ", labelEn: "Pentacles", n: 14 },
+  { id: "table", href: "/cards/all", labelTh: "ตารางสรุป", labelEn: "Summary table", n: 0 },
 ];
+
+/** สีหมวด (ชุดเดียวกับหน้า /cards) */
+const SUIT_TONE: Record<string, Ui2ShowcaseSection["tone"]> = { major: 4, wands: 3, cups: 2, swords: 7, pentacles: 1 };
+const SUIT_NAME: Record<string, { th: string; en: string; kicker: string }> = {
+  wands: { th: "ไม้เท้า", en: "Wands", kicker: "Wands · Fire" },
+  cups: { th: "ถ้วย", en: "Cups", kicker: "Cups · Water" },
+  swords: { th: "ดาบ", en: "Swords", kicker: "Swords · Air" },
+  pentacles: { th: "เหรียญ", en: "Pentacles", kicker: "Pentacles · Earth" },
+};
+
+interface Chapter {
+  id: string;
+  kicker: string;
+  th: string;
+  en: string;
+  leadTh: string;
+  leadEn: string;
+  tone: Ui2ShowcaseSection["tone"];
+  cards: readonly CardSummary[];
+}
+
+/**
+ * แบ่งไพ่ของหมวดเป็นบท (หน้าต่างโชว์เคส · เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง")
+ * ชุดใหญ่ = การเดินทางของคนเขลา 3 องก์ · ชุดเล็ก = 4 ชุด · ชุดเดียว = ไพ่ตัวเลข + ไพ่ราชสำนัก
+ */
+function chaptersOf(groupId: CardGroupInfo["id"], cards: readonly CardSummary[]): Chapter[] {
+  if (groupId === "major") {
+    const act = (from: number, to: number) => cards.filter((c) => c.number >= from && c.number <= to);
+    return [
+      { id: "act-1", kicker: "The Fool's Journey · I", th: "องก์ 1 ก้าวออกสู่โลก", en: "Act I · Into the world", leadTh: "ไพ่ 0–7 คนเขลาเรียนรู้จากโลกภายนอก ครู พ่อแม่ ความรัก และชัยชนะแรก", leadEn: "Cards 0–7: the Fool learns from the outer world, teachers, family, love and a first victory", tone: 4, cards: act(0, 7) },
+      { id: "act-2", kicker: "The Fool's Journey · II", th: "องก์ 2 หันกลับมามองข้างใน", en: "Act II · Looking within", leadTh: "ไพ่ 8–14 แรงใจ ความเงียบ โชคชะตา และการปล่อยวาง", leadEn: "Cards 8–14: inner strength, solitude, fate and letting go", tone: 2, cards: act(8, 14) },
+      { id: "act-3", kicker: "The Fool's Journey · III", th: "องก์ 3 สู่ความสมบูรณ์", en: "Act III · Toward wholeness", leadTh: "ไพ่ 15–21 เงามืด การพังทลาย ความหวัง และโลกที่ครบรอบ", leadEn: "Cards 15–21: shadow, upheaval, hope and the completed world", tone: 5, cards: act(15, 21) },
+    ];
+  }
+  if (groupId === "minor") {
+    return (["wands", "cups", "swords", "pentacles"] as const).map((suit) => ({
+      id: `suit-${suit}`,
+      kicker: SUIT_NAME[suit].kicker,
+      th: SUIT_NAME[suit].th,
+      en: SUIT_NAME[suit].en,
+      leadTh: "ไพ่ตัวเลข 1–10 และไพ่ราชสำนัก 4 ใบ",
+      leadEn: "Ace to Ten, plus four court cards",
+      tone: SUIT_TONE[suit],
+      cards: cards.filter((c) => c.suit === suit),
+    }));
+  }
+  const tone = SUIT_TONE[groupId] ?? 4;
+  return [
+    { id: "pips", kicker: "Ace to Ten", th: "ไพ่ตัวเลข 1–10", en: "Ace to Ten", leadTh: "เรื่องราวของธาตุนี้ตั้งแต่เมล็ดแรกจนถึงจุดสุดทาง", leadEn: "The story of this element from the first seed to its fullest", tone, cards: cards.filter((c) => c.number <= 10) },
+    { id: "court", kicker: "Court Cards", th: "ไพ่ราชสำนัก", en: "Court cards", leadTh: "เด็กรับใช้ อัศวิน ราชินี และราชา บุคลิกของคนหรือท่าทีของเรา", leadEn: "Page, Knight, Queen and King: people, or the stance you take", tone: 6, cards: cards.filter((c) => c.number > 10) },
+  ];
+}
 
 export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }) => {
   const { isEnglish } = useLocale();
@@ -89,210 +135,98 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
     ],
   };
 
-  return (
-    <div className="space-y-8">
-      {/* Schema.org Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLdScript(collectionJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbsJsonLd) }}
-      />
+  const groupSuit = ["major", "wands", "cups", "swords", "pentacles"].includes(groupInfo.id) ? groupInfo.id : "all";
 
-      {/* Breadcrumb Bar */}
-      <nav aria-label="Breadcrumb" className="text-xs font-serif-th text-muted">
-        <ol className="flex items-center gap-1.5 flex-wrap">
-          <li>
-            <Link href="/" className="hover:text-gold-ink transition-colors">
-              {isEnglish ? "Home" : "หน้าแรก"}
-            </Link>
-          </li>
-          <li aria-hidden="true" className="text-gold">/</li>
-          <li>
-            <Link href="/cards" className="hover:text-gold-ink transition-colors">
-              {isEnglish ? "Tarot Encyclopedia" : "คัมภีร์ไพ่ 78 ใบ"}
-            </Link>
-          </li>
-          <li aria-hidden="true" className="text-gold">/</li>
-          <li aria-current="page" className="font-bold text-ink">
-            {isEnglish ? groupInfo.nameEn : groupInfo.nameTh}
-          </li>
-        </ol>
-      </nav>
-
-      {/* Header & Editorial Hero */}
-      <header className="altar-panel p-6 sm:p-10 relative overflow-hidden">
-        <div className="max-w-3xl space-y-4">
-          <div className="glass-chip inline-flex items-center gap-2 px-3 py-1 text-gold-ink text-xs font-serif-th font-bold">
-            <span>{isEnglish ? "Tarot Compendium" : "คัมภีร์ไพ่ยิปซี 1909"}</span>
-            <span className="w-1 h-1 rounded-full bg-gold" />
-            <span>{cards.length} {isEnglish ? "Cards" : "ใบ"}</span>
-            {groupInfo.elementTh && (
-              <>
-                <span className="w-1 h-1 rounded-full bg-gold" />
-                <span>{isEnglish ? `${groupInfo.elementEn} Element` : `ธาตุ${groupInfo.elementTh}`}</span>
-              </>
-            )}
+  const chapters = chaptersOf(groupInfo.id, cards);
+  let tileIndex = 0;
+  const sections: Ui2ShowcaseSection[] = [
+    ...chapters.map((ch) => ({
+      id: ch.id,
+      kicker: ch.kicker,
+      title: isEnglish ? ch.en : ch.th,
+      tone: ch.tone,
+      count: ch.cards.length,
+      lead: <ThaiPhrases>{isEnglish ? ch.leadEn : ch.leadTh}</ThaiPhrases>,
+      meta: isEnglish ? `${ch.cards.length} cards · tap a card to read its meaning` : `${ch.cards.length} ใบ · แตะไพ่เพื่ออ่านความหมาย`,
+      children: (
+        <div className="v3-grid-wrap">
+          <div className="v3-grid">
+            {ch.cards.map((card) => {
+              const i = tileIndex++;
+              return <CardTile key={card.id} card={card} isEnglish={isEnglish} eager={i < 5} priority={i === 0} />;
+            })}
           </div>
-
-          <h1 className="font-serif-th text-2xl sm:text-3xl lg:text-4xl font-bold text-ink leading-snug"><ThaiPhrases>
-            {isEnglish ? groupInfo.nameEn : groupInfo.seoTitleTh}
-          </ThaiPhrases></h1>
-
-          <p className="font-serif-th text-sm sm:text-base text-muted leading-relaxed">
-            {isEnglish ? groupInfo.heroTaglineEn : groupInfo.heroTaglineTh}
-          </p>
-
-          {/* Editorial Prose Introduction (≥300 words) */}
-          <div className="pt-4 border-t border-line/60 space-y-3.5 text-xs sm:text-sm text-ink font-serif-th leading-relaxed">
+        </div>
+      ),
+    })),
+    {
+      id: "guide",
+      kicker: "Guide",
+      title: isEnglish ? `About ${groupInfo.nameEn}` : `รู้จัก${groupInfo.nameTh}`,
+      short: isEnglish ? "Guide" : "คู่มืออ่าน",
+      tone: 6,
+      children: (
+        <div className="v2-cg-intro">
+          <div className="v2-cg-prose">
             {intro.paragraphs.map((p, idx) => (
               <p key={idx}>{p}</p>
             ))}
           </div>
-
-          {/* 3 Strategic Highlights */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
+          <ul className="v2-cg-highlights">
             {intro.highlights.map((h, idx) => (
-              <div
-                key={idx}
-                className="glass-tile p-3.5 !rounded-xl space-y-1"
-              >
-                <h2 className="font-serif-th text-xs font-bold text-gold-ink"><ThaiPhrases>
-                  {h.title}
-                </ThaiPhrases></h2>
-                <p className="font-serif-th text-[11px] text-muted leading-normal">
-                  {h.desc}
-                </p>
-              </div>
+              <li key={idx}>
+                <h3>
+                  <ThaiPhrases>{h.title}</ThaiPhrases>
+                </h3>
+                <p>{h.desc}</p>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
-      </header>
+      ),
+    },
+  ];
 
-      {/* Group Navigation Bar */}
-      <div className="space-y-2">
-        <h2 className="font-serif-th text-xs font-bold text-muted uppercase tracking-wider"><ThaiPhrases>
-          {isEnglish ? "Browse Deck Categories" : "เลือกหมวดหมู่ไพ่"}
-        </ThaiPhrases></h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
-          {NAV_TABS.map((tab) => {
-            const isActive = tab.id === groupInfo.id;
-            return (
-              <Link
-                key={tab.id}
-                href={tab.href}
-                className={`p-2.5 rounded-xl border text-center transition duration-200 flex flex-col items-center justify-center gap-1 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
-                  isActive
-                    ? "altar-panel-active"
-                    : "glass-tile"
-                }`}
-              >
-                <tab.Icon className={`w-4 h-4 ${isActive ? "text-gold-ink" : "text-gold"}`} />
-                <span
-                  className={`font-serif-th text-xs font-bold block truncate max-w-full ${
-                    isActive ? "text-gold-ink" : "text-ink group-hover:text-gold-ink"
-                  }`}
-                >
-                  {isEnglish ? tab.labelEn : tab.labelTh}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
+  return (
+    <div className="v3-cg" data-suit={groupSuit}>
+      {/* Schema.org Structured Data */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(collectionJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbsJsonLd) }} />
 
-      {/* Cards Grid */}
-      <section aria-label={isEnglish ? groupInfo.nameEn : groupInfo.nameTh} className="page-band page-band-tint space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="font-serif-th text-base font-bold text-ink"><ThaiPhrases>
-            {isEnglish ? `All ${cards.length} Cards in this Group` : `รายชื่อไพ่ทั้งหมด ${cards.length} ใบ ในหมวดนี้`}
-          </ThaiPhrases></h2>
-          <span className="font-serif-th text-xs text-muted">
-            {isEnglish ? "1909 Rider-Waite-Smith" : "ภาพต้นฉบับ 1909 Rider-Waite"}
-          </span>
-        </div>
+      {/* v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): ไพ่จริงของหมวดนี้ลอยรอบหัวข้อ ➔ ชิปสลับหมวด ➔ บทของหมวดเป็นหน้าต่าง */}
+      <Ui2PageHero
+        crumbs={[
+          { label: isEnglish ? "Home" : "หน้าแรก", href: "/" },
+          { label: isEnglish ? "Tarot Encyclopedia" : "คัมภีร์ไพ่ 78 ใบ", href: "/cards" },
+          { label: isEnglish ? groupInfo.nameEn : groupInfo.nameTh },
+        ]}
+        title={isEnglish ? groupInfo.nameEn : groupInfo.seoTitleTh}
+        lede={<ThaiPhrases>{isEnglish ? groupInfo.heroTaglineEn : groupInfo.heroTaglineTh}</ThaiPhrases>}
+        trust={[
+          isEnglish ? `${cards.length} cards` : `${cards.length} ใบ`,
+          ...(groupInfo.elementTh ? [isEnglish ? `${groupInfo.elementEn} element` : `ธาตุ${groupInfo.elementTh}`] : []),
+          isEnglish ? "1909 Rider-Waite-Smith" : "ภาพต้นฉบับ 1909 Rider-Waite",
+        ]}
+        cards={heroCards(cards)}
+      >
+        <nav className="v3-cg-switch" aria-label={isEnglish ? "Browse deck categories" : "เลือกหมวดหมู่ไพ่"}>
+          {NAV_TABS.map((tab) => (
+            <Link key={tab.id} href={tab.href} aria-current={tab.id === groupInfo.id ? "page" : undefined}>
+              {isEnglish ? tab.labelEn : tab.labelTh}
+              {tab.n > 0 && <span className="ui2-num">{tab.n}</span>}
+            </Link>
+          ))}
+        </nav>
+      </Ui2PageHero>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-          {cards.map((card) => {
-            return (
-              <Link
-                key={card.id}
-                href={`/cards/${card.id}`}
-                prefetch={false}
-                /* ⚡ `card-tile-cv` = กลไกข้ามการวาดของนอกจอที่ปลอดภัยแล้ว (INC-0174)
-                   ความสูงที่จองไว้คำนวณจากความกว้างจอด้วย calc(vw) ต่อ breakpoint ไม่ใช่ตัวเลขเดา
-                   ใช้ได้เพราะแถวคีย์เวิร์ดด้านล่างถูกล็อกความสูงแล้ว การ์ดทุกใบจึงสูงเท่ากัน
-                   ห้ามแก้สัดส่วนภาพ/ระยะห่างของการ์ดโดยไม่อัปเดตสูตรใน globals.css — ด่าน
-                   `test-card-tile-height.ts` จะตกทันทีถ้าของที่สูตรพึ่งพาถูกแก้ (กริด · gap · padding · สัดส่วนภาพ) */
-                className="card-tile-cv altar-card-porcelain !rounded-xl p-3 flex flex-col justify-between group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
-              >
-                {/* Card Artwork */}
-                <div className="glass-tile relative aspect-[7/12] w-full !rounded-lg overflow-hidden mb-2.5">
-                  <CardImage
-                    image={card.image}
-                    cardId={card.id}
-                    /* ภาพประกอบล้วน — <h3> ใต้ภาพในลิงก์เดียวกันพิมพ์ชื่อไพ่อยู่แล้ว ลิงก์จึงมีชื่อเรียกครบ (INC-0125) */
-                    alt=""
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 tarot-hd-card-image"
-                    sizes="(min-width: 1024px) 152px, (min-width: 768px) 136px, (min-width: 640px) 156px, 38vw"
-                  />
-
-                  {/* Top Badge: Number / Arcana & Element */}
-                  <div className="absolute top-1.5 left-1.5 right-1.5 flex items-center justify-between pointer-events-none">
-                    <span className="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-gold-ink text-white">
-                      {card.arcana === "major" ? `#${card.number}` : card.suit?.toUpperCase().slice(0, 1)}
-                    </span>
-                    {/* ป้ายธาตุบนภาพไพ่ถอดออก — ทับรายละเอียดหน้าไพ่ (เจ้าของทักที่หน้าไพ่รายใบ · ตามแก้ให้เหมือนกันทั้งเว็บ) */}
-                  </div>
-
-                  {/* Hover Overlay */}
-                  <div className="absolute inset-x-0 bottom-0 p-2 bg-ink/90 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-xs font-serif-th font-bold text-canvas">
-                      {isEnglish ? "View Meaning" : "อ่านความหมาย"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Card Info */}
-                <div className="text-center space-y-1">
-                  <span className="text-[11px] font-mono text-muted block truncate">
-                    {isEnglish ? "" : card.nameEn}
-                  </span>
-                  <h3 className="font-serif-th text-xs sm:text-sm font-bold text-ink group-hover:text-gold-ink transition-colors truncate">
-                    {isEnglish ? card.nameEn : card.nameTh}
-                  </h3>
-
-                  {/* Top 2 Keywords */}
-                  {/* ⚠️ ความสูงคงที่ 2 บรรทัดโดยตั้งใจ (INC-0174 · ISSUE-048)
-                      คีย์เวิร์ดบางใบยาวจนตกบรรทัดที่สอง บางใบไม่ตก ความสูงการ์ดจึงต่างกัน 31px
-                      ซึ่งทำให้กลไกข้ามการวาดเดาความสูงไม่ได้และหน้าจอกระตุกตอนเลื่อน
-                      ล็อกไว้ที่ 2 บรรทัดเสมอ ➔ การ์ดทุกใบสูงเท่ากันที่ทุกความกว้างจอ
-                      (ด่าน `test-card-tile-height.ts` เฝ้าข้อนี้อยู่ ห้ามถอดความสูงคงที่ออก) */}
-                  <div className="flex flex-wrap items-start justify-center gap-1 pt-1 h-[3.8125rem] overflow-hidden">
-                    {(() => {
-                      const kwEnList = CARD_KEYWORDS_EN[card.id]?.upright;
-                      const displayKws =
-                        isEnglish && kwEnList && kwEnList.length > 0
-                          ? kwEnList.slice(0, 2)
-                          : card.keywords.upright.slice(0, 2);
-                      return displayKws.map((kw, i) => (
-                        <span
-                          key={i}
-                          className="text-[11px] font-serif-th px-1.5 py-0.5 rounded-full bg-surface-warm text-ink border border-line truncate max-w-full"
-                        >
-                          {kw}
-                        </span>
-                      ));
-                    })()}
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
+      <Ui2Showcase label={isEnglish ? `${groupInfo.nameEn} by chapter` : `${groupInfo.nameTh}แยกเป็นบท`} sections={sections} />
     </div>
   );
 };
+
+/** ไพ่ลอยรอบหัวข้อ = ไพ่จริงของหมวดนี้ 6 ใบ (กระจายทั้งหมวด ไม่ใช่ 6 ใบแรกติดกัน) */
+function heroCards(cards: readonly CardSummary[]): string[] {
+  if (cards.length <= 6) return cards.map((c) => c.id);
+  const step = cards.length / 6;
+  return Array.from({ length: 6 }, (_, i) => cards[Math.floor(i * step)].id);
+}

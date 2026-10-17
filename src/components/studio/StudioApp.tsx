@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { GoldMark } from "@/components/ui/GoldMark";
 import { PURGE_CONFIRM_TEXT } from "@/lib/studio/dpa";
 import { layoutsFor } from "@/lib/tarot/custom-spread";
 import { APP_TIME_ZONE } from "@/lib/time/bangkok";
@@ -114,8 +113,7 @@ export function StudioApp({ token }: { token: string | null }) {
   if (fatal) {
     return (
       <div className={`${card} mx-auto max-w-lg space-y-3 text-center`}>
-        <p className="text-gold-ink"><GoldMark size="lg" /></p>
-        <h1 className="text-xl font-bold text-ink-deep">{fatal.code === "studio_disabled" ? "สตูดิโอแม่หมอยังไม่เปิดให้ใช้งาน" : "เข้าสตูดิโอไม่ได้"}</h1>
+                <h1 className="text-xl font-bold text-ink-deep">{fatal.code === "studio_disabled" ? "สตูดิโอแม่หมอยังไม่เปิดให้ใช้งาน" : "เข้าสตูดิโอไม่ได้"}</h1>
         <p className="text-sm leading-relaxed text-muted">{fatal.code === "studio_disabled" ? "เรากำลังเตรียมข้อตกลงการดูแลข้อมูลลูกค้าให้รัดกุมก่อนเปิดใช้ แล้วจะแจ้งให้ทราบ" : fatal.text}</p>
       </div>
     );

@@ -13,6 +13,7 @@ import type { Locale } from "@/lib/i18n/types";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { rotatingNeighborsGrouped } from "@/lib/seo/rotating-neighbors";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 
 const CATEGORY_TH: Record<string, string> = {
   general: "ทั่วไป",
@@ -296,6 +297,8 @@ export function SpreadDetailContent({
       ))}
 
       {detail}
+      {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+      <Ui2NextSteps isEn={isEnglish} keys={["cards", "daily", "journal", "questions"]} />
     </main>
   );
 }

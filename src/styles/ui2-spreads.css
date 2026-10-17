@@ -1,0 +1,1588 @@
+/*
+ * 🃏 SeerTarot UI 2.0 — คลังผัง `/spreads` · `/en/spreads` "ไพ่กระจาย 6 หมวด แตะแล้วเด้ง"
+ * นำเข้าโดย `astro/pages/spreads/index.astro` และ `astro/pages/en/spreads/index.astro` เท่านั้น
+ * แผน: docs/plans/UI_2_0_SPREADS_PLAN_2026-10-13.md
+ *
+ * ⚠️ ไฟล์นี้คือหน้าตาตั้งต้น (lite / off / ไม่มี JS) — ไม่มี backdrop-filter · filter: blur · ของวนนอกระดับ full
+ *    ของหนักทั้งหมดอยู่ใน `ui2-spreads-fx.css` (นำเข้าต่อจากไฟล์นี้ในหน้า .astro) ใต้ `[data-fx="full"]` + `@media (min-width: 768px)` (ด่าน test-ui2-fx · test-motion-quality)
+ * ⚠️ ไพ่อยู่ตำแหน่งสุดท้ายตั้งแต่เฟรมแรก — ไม่มีอนิเมชันขาเข้าบนไพ่ (INC-0244)
+ * ⚠️ ไพ่เอียงล้นขอบ ➔ `overflow-x: clip` ที่ <main> (ห้ามที่ body — INC-0067)
+ * ⚠️ ตัวเลขทุกจุดตัวตรง (`.ui2-num`) · ตัวเอียงใช้กับคำอังกฤษประดับเท่านั้น
+ */
+@import "./ui2-core.css";
+/* หัวหน้าเป็นแถบครีมพาสเทลแบบหน้าแรก ชุดเดียวกับทุกหน้า (เจ้าของ 2026-10-17 "หน้านี้ยังไม่ปรับสีล่าสุด") */
+@import "./ui2-dawn.css";
+
+/* ── หน้า: ท้องฟ้ากลางคืนผืนเดียว ─────────────────────────────────────────── */
+.ui2-sp-main {
+  color: var(--ui2-on-night);
+  background: var(--ui2-night);
+}
+.ui2-sp .ui2-sec {
+  padding-block: 44px;
+}
+
+/* หยุดของวนเมื่อส่วนพ้นจอ (`astro/scripts/spreads-pop.ts` สลับ data-inview) · ไม่มี JS = นิ่ง */
+[data-anim-section]:not([data-inview]) .ui2-loop,
+[data-anim-section]:not([data-inview]) .ui2-loop::before,
+[data-anim-section]:not([data-inview]) .ui2-loop::after {
+  animation-play-state: paused;
+}
+
+/* ── หัวหน้า ─────────────────────────────────────────────────────────────── */
+.ui2-sp .ui2-sp-hero {
+  padding-top: 18px;
+  padding-bottom: 8px;
+  text-align: center;
+}
+/* ขยายพื้นกลางคืนขึ้นไปใต้แคปซูลหัวเว็บ */
+.ui2-sp-hero::before {
+  inset-block-start: -240px;
+}
+.ui2-sp-hero-inner {
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  max-width: 860px;
+  padding-top: 40px;
+}
+/* เส้นทางหน้าเป็นหัวเล็กสีทอง มีเส้นทองไล่จางสองข้าง (เจ้าของ "ปรับตรงนี้ให้สวย") */
+.ui2-sp-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-sp-crumb::before,
+.ui2-sp-crumb::after {
+  content: "";
+  display: none;
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 217, 143, 0) 0%, var(--ui2-gold-solid) 100%);
+  opacity: 0.7;
+}
+.ui2-sp-crumb::after {
+  background: linear-gradient(90deg, var(--ui2-gold-solid) 0%, rgba(255, 217, 143, 0) 100%);
+}
+.ui2-sp-crumb a {
+  color: var(--ui2-gold-solid);
+  text-decoration: none;
+}
+.ui2-sp-crumb a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.ui2-sp-h1 {
+  color: var(--ui2-on-night);
+  font-size: 32px;
+  text-shadow: 0 0 42px rgba(255, 217, 143, 0.16);
+}
+.ui2-sp-h1 .ui2-gold-night {
+  font-weight: 600;
+  font-size: 1.16em;
+  line-height: 1;
+}
+/* แสงทองนุ่มกลางหัวหน้า — จุดโฟกัสหลังหัวข้อ (เจ้าของ "สวยแต่ไม่สะดุดตา") · gradient ล้วน ไม่ใช่ของหนัก */
+.ui2-sp-hero-inner {
+  position: relative;
+}
+.ui2-sp-hero-inner::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 46%;
+  width: min(980px, 100vw);
+  height: 560px;
+  translate: -50% -50%;
+  pointer-events: none;
+  background:
+    radial-gradient(closest-side, rgba(255, 217, 143, 0.17) 0%, rgba(255, 217, 143, 0.06) 45%, rgba(255, 217, 143, 0) 100%);
+}
+.ui2-sp-lede {
+  max-width: 600px;
+  text-wrap: balance;
+  color: var(--ui2-on-night-soft);
+}
+/* ปุ่มหลักทอง + ปุ่มรองกระจก เรียงแถวเดียว (มือถือซ้อนเต็มกว้าง) */
+.ui2-sp-hero-ctas {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
+  max-width: 340px;
+  margin-top: 10px;
+}
+.ui2-sp .ui2-sp-cta {
+  color: var(--ui2-night);
+  background: var(--ui2-gold-solid);
+  box-shadow: 0 14px 34px -14px rgba(255, 217, 143, 0.55), 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+  transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.ui2-sp .ui2-sp-cta .ui2-btn-arrow {
+  border-color: var(--ui2-night);
+}
+.ui2-sp .ui2-sp-cta:active {
+  transform: scale(0.97);
+}
+@media (hover: hover) {
+  .ui2-sp .ui2-sp-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px -14px rgba(255, 217, 143, 0.7), 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+  }
+}
+.ui2-sp .ui2-sp-create {
+  min-height: 52px;
+  padding: 0 24px;
+  background: rgba(246, 238, 226, 0.06);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+}
+.ui2-sp-unsure {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ui2-on-night-dim);
+  text-wrap: balance;
+}
+.ui2-sp-unsure strong {
+  font-weight: 600;
+  color: var(--ui2-on-night-soft);
+}
+/* แถวความน่าเชื่อถือ — ตัวเล็ก คั่นด้วยเครื่องหมายทอง */
+.ui2-sp-trust {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 20px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  color: var(--ui2-on-night-dim);
+}
+.ui2-sp-trust li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+/* แท็บเล็ตขึ้นไป: รวมเป็นแคปซูลกระจกใบเดียว คั่นด้วยเส้นบาง */
+@media (min-width: 768px) {
+  .ui2-sp-crumb::before,
+  .ui2-sp-crumb::after {
+    display: block;
+  }
+  .ui2-sp-trust {
+    flex-wrap: nowrap;
+    gap: 0;
+    padding: 10px 6px;
+    border-radius: 999px;
+    background: rgba(246, 238, 226, 0.045);
+    box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+  }
+  .ui2-sp-trust li {
+    padding-inline: 18px;
+    white-space: nowrap;
+  }
+  .ui2-sp-trust li + li {
+    border-left: 1px solid var(--ui2-line-night);
+  }
+}
+.ui2-sp-jump {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.ui2-sp-jump-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 8px 0 14px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--ui2-on-night);
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+/* แถบสีประจำหมวด (เดิมรูปข้าวหลามตัด — ถอดตามกฎห้ามสัญลักษณ์ตกแต่ง 2026-10-16) */
+.ui2-sp-jump-dot {
+  width: 12px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--cat);
+}
+.ui2-sp-jump-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--cat-ink);
+  background: var(--cat);
+}
+.ui2-sp-jump-link:active {
+  transform: scale(0.97);
+}
+.ui2-sp-jump-link:focus-visible,
+.ui2-sp-crumb a:focus-visible,
+.ui2-sp-dir-link:focus-visible {
+  outline: 2px solid var(--ui2-gold-solid);
+  outline-offset: 3px;
+}
+/* ไพ่คว่ำตกแต่งข้างหัวข้อ — lite เห็น 2 ใบนิ่งที่มุม (ใบอื่นมีเฉพาะระดับ full) */
+.ui2-sp-deco {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.ui2-sp-deco-card {
+  position: absolute;
+  display: none;
+  width: var(--w, 48px);
+  padding: 3px;
+  border-radius: 9px;
+  rotate: var(--r, 0deg);
+  /* โผล่เมื่อภาพหน้าไพ่โหลดเสร็จแล้วเท่านั้น (spreads-pop.ts ใส่ is-ready) — เดิมเห็นกรอบงาช้างเปล่าสีขาวแวบก่อนภาพมา (INC-0271) */
+  opacity: 0;
+  scale: 0.86;
+  transition: opacity 0.5s ease, scale 0.9s cubic-bezier(0.2, 0.9, 0.25, 1.12);
+  background: linear-gradient(170deg, var(--ui2-card-ivory-top) 0%, var(--ui2-card-ivory-bottom) 100%);
+  box-shadow: 0 0 0 1px rgba(201, 161, 90, 0.6), 0 22px 34px -16px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 217, 143, 0.12);
+}
+.ui2-sp-deco-card.is-ready {
+  opacity: 1;
+  scale: 1;
+}
+/* หน้าไพ่จริง (CardImage ภาพย่อ) — สัดส่วนเดียวกับไพ่ 1909 */
+.ui2-sp-deco-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 300 / 520;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.ui2-sp-deco-1 { display: block; --w: 44px; --r: -12deg; left: 4px; top: 6px; }
+.ui2-sp-deco-2 { display: block; --w: 40px; --r: 10deg; right: 6px; top: 22px; }
+
+/* ── หมวด ──────────────────────────────────────────────────────────────── */
+/* เลื่อนไปหมวดแล้วหัวข้อไม่จมใต้แถบหมวด — html มี scroll-padding-top กันหัวเว็บอยู่แล้ว (บวกกัน) จึงเผื่อแค่ความสูงแถบ */
+.ui2-sp-shelf {
+  scroll-margin-top: 48px;
+}
+.ui2-sp-shelf-head {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-inline: 2px;
+}
+.ui2-sp-shelf-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+/* กล่อง "เริ่มง่ายที่สุดในหมวดนี้" */
+.ui2-sp-start {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 2px 14px;
+  padding: 12px 12px 12px 18px;
+  border-radius: 22px;
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+}
+.ui2-sp-start-k {
+  grid-column: 1;
+  font-size: 12.5px;
+  color: var(--ui2-on-night-dim);
+}
+.ui2-sp-start-name {
+  grid-column: 1;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.35;
+  color: var(--ui2-on-night);
+}
+.ui2-sp-start-n {
+  margin-left: 8px;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--cat);
+}
+.ui2-sp-start-btn {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  min-height: 44px;
+  padding: 0 18px;
+  font-size: 14.5px;
+  isolation: isolate;
+}
+.ui2-sp-shelf .ui2-h2 {
+  color: var(--ui2-on-night);
+  font-size: 27px;
+}
+.ui2-sp-hint {
+  font-size: 13.5px;
+  color: var(--ui2-on-night-dim);
+}
+.ui2-sp-hint::before {
+  content: "";
+  display: inline-block;
+  width: 18px;
+  height: 1px;
+  margin-right: 8px;
+  vertical-align: middle;
+  background: var(--cat);
+}
+
+/* โต๊ะไพ่ — มือถือ: ตาราง 2 คอลัมน์ คอลัมน์ขวาเยื้องลง · เอียงสลับ ±5° (ไม่ล้นจอ ไม่ต้อง overflow) */
+.ui2-sp-table {
+  --card-w: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 10px;
+  row-gap: 22px;
+  margin: 26px auto 0;
+  padding: 0 4px 34px;
+  list-style: none;
+}
+.ui2-sc-slot {
+  position: relative;
+  min-width: 0;
+  margin-inline: -1.5px;
+}
+.ui2-sc-slot:nth-child(even) {
+  translate: 0 34px;
+}
+.ui2-sc-slot:hover,
+.ui2-sc-slot:focus-within {
+  z-index: 5;
+}
+
+/* ── ไพ่ผัง (งาช้าง + กรอบทองด้านใน) ───────────────────────────────────── */
+.ui2-spread-card {
+  --tilt: -3deg;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: var(--card-w);
+  aspect-ratio: 3 / 5;
+  padding: 12px 11px 11px;
+  border-radius: 14px;
+  color: var(--ui2-card-ivory-ink);
+  background: linear-gradient(170deg, var(--ui2-card-ivory-top) 0%, var(--ui2-card-ivory-bottom) 100%);
+  box-shadow: var(--ui2-card-shadow);
+  rotate: var(--tilt);
+  transition: rotate var(--dur-base) var(--ease-out), translate var(--dur-base) var(--ease-out), scale var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+/* เอียงน้อยลง (เจ้าของ 2026-10-13) — ชื่อผังอ่านง่าย ยังคงฟีลไพ่วางกระจาย */
+.ui2-sc-slot:nth-child(even) .ui2-spread-card {
+  --tilt: 3deg;
+}
+.ui2-sc-slot:nth-child(4n + 3) .ui2-spread-card {
+  --tilt: -2deg;
+}
+.ui2-sc-slot:nth-child(4n) .ui2-spread-card {
+  --tilt: 3.5deg;
+}
+.ui2-spread-card::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: 10px;
+  border: 1px solid var(--ui2-card-frame);
+  pointer-events: none;
+}
+.ui2-spread-card:active {
+  translate: 0 -8px;
+}
+.ui2-spread-card:focus-visible {
+  outline: none;
+  rotate: 0deg;
+  translate: 0 -18px;
+  scale: 1.07;
+  box-shadow: var(--ui2-card-shadow), 0 0 0 2px var(--ui2-gold-solid), 0 0 36px rgba(255, 217, 143, 0.45);
+}
+@media (hover: hover) {
+  .ui2-spread-card:hover {
+    rotate: 0deg;
+    translate: 0 -18px;
+    scale: 1.07;
+    box-shadow: var(--ui2-card-shadow), 0 0 0 1px rgba(255, 217, 143, 0.7), 0 0 36px rgba(255, 217, 143, 0.4);
+  }
+}
+/* แถวบนของไพ่: ฟรี / ผังพิเศษ ซ้าย · จำนวนใบขวา */
+.ui2-sc-top {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding-inline: 2px;
+}
+.ui2-sc-free,
+.ui2-sc-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px 4px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.ui2-sc-free {
+  color: var(--ui2-note-ink-1);
+  background: var(--ui2-note-1);
+  box-shadow: 0 0 0 1px rgba(32, 48, 28, 0.18);
+}
+/* ป้าย "ยอดนิยม" — แถบทองยื่นเหนือขอบบนไพ่ */
+.ui2-sc-pop-tab {
+  position: absolute;
+  z-index: 3;
+  top: -11px;
+  left: 50%;
+  translate: -50% 0;
+  padding: 3px 12px 4px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-weight: 600;
+  font-size: 11.5px;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--ui2-night);
+  background: var(--ui2-gold-solid);
+  box-shadow: 0 6px 14px -6px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(181, 113, 31, 0.5);
+}
+.ui2-sc-count {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  white-space: nowrap;
+  padding: 3px 11px 4px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-weight: 600;
+  font-size: 12.5px;
+  line-height: 1.3;
+  color: var(--cat-ink);
+  background: var(--cat);
+}
+.ui2-sc-lock {
+  color: var(--ui2-gold-solid);
+  background: var(--ui2-button);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.5);
+}
+
+/* ผ้าปูในไพ่ — ผังวางแบบ contain ด้วยหน่วย container (ห้ามยืด) */
+.ui2-sc-window {
+  position: relative;
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: 14px 12px;
+  border-radius: 8px;
+  container-type: size;
+  /* ผ้าปูกำมะหยี่ม่วงเข้ม + แสงทองกลาง ชุดเดียวกับส่วนเปิดไพ่หน้าแรก (`.ui2-cloth` · เจ้าของ "ปรับสีให้ตรงหน้าแรก") */
+  background:
+    radial-gradient(55% 50% at 50% 42%, rgba(255, 217, 143, 0.2) 0%, rgba(255, 217, 143, 0) 70%),
+    radial-gradient(90% 60% at 50% 115%, rgba(79, 179, 169, 0.16) 0%, rgba(79, 179, 169, 0) 70%),
+    linear-gradient(180deg, #221A29 0%, #120E16 100%);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.32) inset, 0 0 0 4px rgba(18, 14, 22, 0.9) inset, 0 0 0 5px rgba(255, 217, 143, 0.12) inset;
+}
+.ui2-sc-map {
+  position: relative;
+  width: min(100cqw, calc(100cqh / var(--bh)));
+  aspect-ratio: 1 / var(--bh);
+  counter-reset: spot;
+}
+.ui2-sc-spot {
+  position: absolute;
+  translate: -50% -50%;
+  rotate: var(--r, 0deg);
+  border-radius: 2px;
+  overflow: hidden;
+  counter-increment: spot;
+  background: var(--ui2-paper);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.6), 0 3px 7px -2px rgba(0, 0, 0, 0.8);
+  transition: box-shadow var(--dur-fast) var(--ease-out), scale var(--dur-fast) var(--ease-out);
+}
+.ui2-sc-spot.is-cross {
+  z-index: 2;
+}
+/* หน้าไพ่จริง (CardImage ภาพย่อ) เต็มช่อง */
+.ui2-sc-spot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* แถบชื่อผัง — สีหมวด */
+.ui2-sc-band {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  min-height: 50px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.32;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--cat-ink);
+  background: var(--cat);
+}
+
+/* ── ยังเลือกไม่ได้ ───────────────────────────────────────────────────────── */
+/* ── สารบัญ (07) · แยกตามเรื่อง (08) · ทางลัด (09) ──────────────────────────
+   เจ้าของ "ทำทั้ง 4 เลยขอสวยๆ" — ป้ายเลขแบบหมวดผัง · เส้นทองคั่น · สารบัญ 6 กลุ่มสีหมวด · การ์ดภาพไพ่ · กล่องทางลัดใหญ่ */
+.ui2-sp-dir {
+  padding-bottom: 72px;
+}
+.ui2-sp-dir::before {
+  background: linear-gradient(0deg, #171512 0, rgba(23, 21, 18, 0) 220px), var(--ui2-sec-bg);
+}
+.ui2-sp-dir-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.ui2-sp-dir-h2 {
+  font-size: 26px;
+  color: var(--ui2-on-night);
+}
+
+/* สารบัญ: 6 กลุ่ม แผงกระจกมืด หัวกลุ่มจุดสีหมวด */
+.ui2-sp-dir-groups {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+.ui2-sp-dir-group {
+  padding: 16px 16px 10px;
+  border-radius: 22px;
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+}
+.ui2-sp-dir-group-h {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px 10px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 15.5px;
+  color: var(--ui2-on-night);
+  border-bottom: 1px solid var(--ui2-line-night);
+}
+.ui2-sp-dir-group-n {
+  margin-left: auto;
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  color: var(--ui2-night);
+  background: var(--cat);
+}
+.ui2-sp-dir-list {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.ui2-sp-dir-list li + li {
+  border-top: 1px dashed rgba(246, 238, 226, 0.08);
+}
+.ui2-sp-dir-link {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-height: 44px;
+  padding: 11px 6px;
+  border-radius: 10px;
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--ui2-on-night-soft);
+  transition: color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.ui2-sp-dir-name {
+  flex: 1 1 auto;
+}
+.ui2-sp-dir-n {
+  flex: none;
+  font-size: 12.5px;
+  color: var(--ui2-on-night-dim);
+  white-space: nowrap;
+}
+.ui2-sp-dir-lock {
+  flex: none;
+  align-self: center;
+  color: var(--ui2-gold-solid);
+}
+.ui2-sp-dir-link:hover {
+  color: var(--ui2-gold-solid);
+  background: rgba(255, 217, 143, 0.06);
+}
+
+/* แยกตามเรื่อง: การ์ดภาพไพ่ + ชื่อเรื่อง + คำโปรย + จำนวนผัง */
+.ui2-sp-topics {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ui2-sp-topic {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 100%;
+  padding: 14px 18px 14px 14px;
+  border-radius: 24px;
+  color: var(--ui2-on-night);
+  background:
+    radial-gradient(80% 120% at 0% 50%, rgba(255, 217, 143, 0.1) 0%, rgba(255, 217, 143, 0) 60%),
+    var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+  transition: translate var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.ui2-sp-topic-art {
+  flex: none;
+  width: 58px;
+  padding: 3px;
+  border-radius: 9px;
+  rotate: -4deg;
+  background: linear-gradient(170deg, var(--ui2-card-ivory-top) 0%, var(--ui2-card-ivory-bottom) 100%);
+  box-shadow: 0 0 0 1px rgba(201, 161, 90, 0.6), 0 14px 24px -12px rgba(0, 0, 0, 0.95);
+  transition: rotate var(--dur-base) var(--ease-out), scale var(--dur-base) var(--ease-out);
+}
+.ui2-sp-topic-art img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 300 / 520;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.ui2-sp-topic-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.ui2-sp-topic-name {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 1.35;
+}
+.ui2-sp-topic-note {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ui2-on-night-dim);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ui2-sp-topic-n {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+}
+.ui2-sp-topic-n .ui2-btn-arrow {
+  width: 7px;
+  height: 7px;
+  border-top-width: 1.6px;
+  border-right-width: 1.6px;
+}
+.ui2-sp-topic:focus-visible {
+  outline: 2px solid var(--ui2-gold-solid);
+  outline-offset: 3px;
+}
+.ui2-sp-topic:active {
+  translate: 0 -3px;
+}
+@media (hover: hover) {
+  .ui2-sp-topic:hover {
+    translate: 0 -6px;
+    box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.6), 0 24px 40px -22px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 217, 143, 0.14);
+  }
+  .ui2-sp-topic:hover .ui2-sp-topic-art {
+    rotate: 0deg;
+    scale: 1.08;
+  }
+}
+
+/* ── ไพ่เด้ง (dialog) ──────────────────────────────────────────────────────
+   ตัวเดียวท้าย <main> · เปิดด้วย showModal() (`astro/scripts/spreads-pop.ts`)
+   มือถือ: แผ่นเลื่อนขึ้นจากล่าง · คอม/iPad: ไพ่ใหญ่ซ้าย + แผงข้อมูลขวา */
+.ui2-spread-pop {
+  position: fixed;
+  inset: auto 0 0;
+  width: 100%;
+  max-width: 100%;
+  max-height: 92dvh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 30px 30px 0 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  color: var(--ui2-on-night);
+  background: linear-gradient(180deg, #1E1822 0%, var(--ui2-night) 100%);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 -30px 60px -20px rgba(0, 0, 0, 0.8);
+}
+.ui2-spread-pop::backdrop {
+  background: rgba(8, 6, 10, 0.86);
+}
+.ui2-spread-pop[open] {
+  display: block;
+}
+.ui2-pop-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 26px 20px calc(18px + env(safe-area-inset-bottom));
+}
+.ui2-pop-x {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  color: var(--ui2-on-night);
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+  cursor: pointer;
+}
+.ui2-pop-x:focus-visible,
+.ui2-pop-back:focus-visible,
+.ui2-pop-guide:focus-visible,
+.ui2-spread-pop .ui2-btn:focus-visible {
+  outline: 2px solid var(--ui2-gold-solid);
+  outline-offset: 3px;
+}
+.ui2-pop-stage {
+  position: relative;
+  flex: none;
+  isolation: isolate;
+}
+/* วงแสงทองหลังไพ่ */
+.ui2-pop-glow {
+  position: absolute;
+  z-index: -1;
+  inset: -16%;
+  border-radius: 999px;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255, 217, 143, 0.32), rgba(255, 217, 143, 0));
+}
+.ui2-pop-card {
+  --card-w: 230px;
+  rotate: 0deg;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+/* ไพ่ใหญ่ไม่ใช่ลิงก์ — ไม่ยก/ไม่เอียงตามเมาส์ */
+.ui2-pop-card,
+.ui2-pop-card:hover {
+  translate: none;
+  scale: none;
+  box-shadow: var(--ui2-card-shadow);
+}
+/* ล็อกการเลื่อนหน้าข้างหลังตอนหน้าต่างเปิด (ที่ html ไม่ใช่ body — INC-0067) */
+html:has(.ui2-spread-pop[open]) {
+  overflow: hidden;
+}
+.ui2-pop-card .ui2-sc-band {
+  font-size: 16px;
+  min-height: 56px;
+}
+/* เลขตำแหน่งบนไพ่คว่ำ (เฉพาะไพ่ใหญ่ในหน้าต่าง) — นับด้วย CSS counter ไม่ต้องใช้ JS */
+.ui2-pop-card .ui2-sc-spot {
+  overflow: visible;
+}
+.ui2-pop-card .ui2-sc-spot img {
+  border-radius: 2px;
+}
+/* เลขตำแหน่งเป็นเหรียญมืดกลางภาพ — อ่านออกบนหน้าไพ่ทุกใบ */
+.ui2-pop-card .ui2-sc-window {
+  padding: 22px 20px;
+}
+.ui2-pop-card .ui2-sc-spot::after {
+  content: counter(spot);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  translate: -50% -50%;
+  rotate: calc(-1 * var(--r, 0deg));
+  font-family: var(--ui2-font-number);
+  font-weight: 600;
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--ui2-gold-solid);
+  background: rgba(12, 10, 15, 0.86);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.55);
+}
+.ui2-pop-card .ui2-sc-spot[data-hot] {
+  z-index: 3;
+  scale: 1.18;
+  box-shadow: 0 0 0 1.5px var(--ui2-gold-solid), 0 0 14px rgba(255, 217, 143, 0.85);
+}
+.ui2-pop-panel {
+  width: 100%;
+  max-width: 560px;
+}
+.ui2-pop-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ui2-pop-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px 5px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ui2-on-night-soft);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+}
+.ui2-pop-chip-cat {
+  color: var(--cat-ink);
+  background: var(--cat);
+  box-shadow: none;
+}
+.ui2-pop-chip-premium {
+  color: var(--ui2-gold-solid);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.45);
+}
+.ui2-pop-title {
+  margin-top: 12px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+.ui2-pop-tagline {
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-pop-list {
+  display: grid;
+  gap: 4px;
+  margin-top: 16px;
+  padding: 0;
+  list-style: none;
+  counter-reset: pos;
+}
+.ui2-pop-list li {
+  counter-increment: pos;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 7px 10px;
+  border-radius: 12px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+.ui2-pop-list li::before {
+  content: counter(pos);
+  flex: none;
+  min-width: 18px;
+  font-family: var(--ui2-font-number);
+  font-weight: 600;
+  font-style: normal;
+  color: var(--ui2-gold-solid);
+}
+.ui2-pop-list li[data-hot] {
+  background: rgba(255, 217, 143, 0.1);
+}
+.ui2-pop-actions {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 18px;
+  padding-top: 12px;
+  background: linear-gradient(180deg, rgba(12, 10, 15, 0) 0, var(--ui2-night) 14px);
+}
+.ui2-pop-actions .ui2-btn {
+  isolation: isolate;
+  width: 100%;
+}
+.ui2-pop-guide,
+.ui2-pop-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  font-size: 14.5px;
+  color: var(--ui2-gold-solid);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.ui2-pop-back {
+  color: var(--ui2-on-night-soft);
+}
+
+/* จังหวะเด้ง — แตะ transform / opacity เท่านั้น (ทุกระดับยกเว้น off · หัวใจของหน้า) */
+.ui2-spread-pop[open] .ui2-pop-stage {
+  animation: ui2-pop-flip 0.85s cubic-bezier(0.2, 0.85, 0.2, 1) backwards;
+}
+.ui2-spread-pop[open] .ui2-pop-panel {
+  animation: ui2-pop-panel 0.6s cubic-bezier(0.2, 0.85, 0.2, 1) 0.25s backwards;
+}
+[data-fx="off"] .ui2-spread-pop[open] .ui2-pop-stage,
+[data-fx="off"] .ui2-spread-pop[open] .ui2-pop-panel {
+  animation: ui2-fade-in 0.2s ease-out backwards;
+}
+@keyframes ui2-pop-flip {
+  0% { opacity: 0; transform: perspective(1400px) translateY(120px) rotateY(85deg) rotateZ(-10deg) scale(0.55); }
+  55% { opacity: 1; transform: perspective(1400px) translateY(-14px) rotateY(-10deg) rotateZ(2deg) scale(1.05); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes ui2-pop-panel {
+  from { opacity: 0; transform: translateY(24px); }
+}
+@keyframes ui2-fade-in {
+  from { opacity: 0; }
+}
+
+/* ── แถบหมวดติดใต้หัวเว็บ ───────────────────────────────────────────────
+   sticky ภายในชุดหมวด (.ui2-sp) — พ้นหมวดสุดท้ายแถบเลื่อนออกไปเอง · มือถือปัดแถบซ้ายขวาได้ */
+.ui2-sp-stick {
+  position: sticky;
+  z-index: 30;
+  top: 74px;
+  margin-inline: -16px;
+  padding: 6px 0;
+}
+/* พื้นทึบหลังแถบตอนติดบนจอ (สคริปต์ตั้ง data-stuck เมื่ออยู่ในชุดหมวด) — ไพ่ของหมวดก่อนหน้าไม่โผล่ทะลุแถบ */
+.ui2-sp-stick::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: -96px;
+  bottom: -22px;
+  width: 100vw;
+  translate: -50% 0;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(180deg, var(--ui2-night) 0, var(--ui2-night) calc(100% - 34px), rgba(12, 10, 15, 0) 100%);
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.ui2-sp-stick[data-stuck]::before {
+  opacity: 1;
+}
+.ui2-sp-stick-row {
+  display: flex;
+  gap: 8px;
+  width: max-content;
+  max-width: 100%;
+  margin-inline: auto;
+  padding: 6px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.ui2-sp-stick-row::-webkit-scrollbar {
+  display: none;
+}
+.ui2-sp-stick .ui2-sp-jump-link {
+  flex: none;
+  min-height: 40px;
+  background: rgba(22, 17, 24, 0.94);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 10px 24px -14px rgba(0, 0, 0, 0.9);
+}
+.ui2-sp-stick .ui2-sp-jump-link[aria-current="true"] {
+  color: var(--cat-ink);
+  background: var(--cat);
+  box-shadow: 0 0 0 1px var(--cat), 0 10px 24px -12px rgba(0, 0, 0, 0.9);
+}
+.ui2-sp-stick .ui2-sp-jump-link[aria-current="true"] .ui2-sp-jump-dot {
+  background: var(--cat-ink);
+}
+.ui2-sp-stick .ui2-sp-jump-link[aria-current="true"] .ui2-sp-jump-count {
+  color: var(--cat);
+  background: var(--cat-ink);
+}
+
+/* ── แท็บเล็ต 768–1023 / คอม ≥ 1024 — ไพ่กระจายบนโต๊ะ ───────────────────── */
+@media (min-width: 768px) {
+  .ui2-sp .ui2-sec {
+    padding-block: 40px;
+  }
+  /* แถบชิปหมวดติดจอ = มือถือเท่านั้น (เจ้าของ 2026-10-17 "แถบนี้ทำให้มีปัญหา ไม่ต้องโชว์ในคอม โชว์แค่ในมือถือ")
+     จอ ≥ 768 ไม่แสดง — คอม ≥ 1200 มีรายชื่อหมวดซ้ายของโชว์เคสแทน · แท็บเล็ตเลื่อนดูหมวดเรียงต่อกันได้เลย */
+  .ui2-sp-stick {
+    display: none;
+  }
+  .ui2-sp-shelf {
+    scroll-margin-top: 56px;
+  }
+  .ui2-sp .ui2-sp-hero {
+    padding-bottom: 12px;
+  }
+  .ui2-sp-hero-inner {
+    padding-top: 40px;
+    gap: 14px;
+  }
+  .ui2-sp-h1 {
+    font-size: 50px;
+  }
+  .ui2-sp-hero-ctas {
+    flex-direction: row;
+    justify-content: center;
+    width: auto;
+    max-width: none;
+    margin-top: 14px;
+  }
+  .ui2-sp-trust {
+    margin-top: 14px;
+  }
+  .ui2-sp-shelf-head {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-inline: 8px;
+  }
+  .ui2-sp-start {
+    flex: none;
+    width: 360px;
+  }
+  .ui2-sp-shelf .ui2-h2 {
+    font-size: 36px;
+  }
+  /* แท็บเล็ตแนวตั้ง: วางเป็นแถวละ 3 ใบ เอียงตามตาราง · ใบกลางยกขึ้น (ตำแหน่งอิสระทำให้ 6 ใบทับชื่อกันที่จอ 768) */
+  .ui2-sp-table {
+    --card-w: 168px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 34px 26px;
+    max-width: 640px;
+    margin-top: 30px;
+    padding: 0 0 26px;
+  }
+  .ui2-sc-slot,
+  .ui2-sc-slot:nth-child(even) {
+    width: var(--card-w);
+    margin: 0;
+    translate: none;
+  }
+  .ui2-sc-slot:nth-child(3n + 2) {
+    translate: 0 -26px;
+  }
+  .ui2-sc-slot .ui2-spread-card,
+  .ui2-sc-slot:nth-child(n) .ui2-spread-card {
+    --tilt: calc(var(--a) * 0.5);
+  }
+  .ui2-sp-dir-groups,
+  .ui2-sp-topics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ui2-sp-dir-h2 {
+    font-size: 32px;
+  }
+  /* หน้าต่าง: ไพ่ใหญ่ซ้าย + แผงขวา ลอยกลางจอ */
+  .ui2-spread-pop {
+    inset: 0;
+    width: min(960px, calc(100vw - 48px));
+    max-height: min(760px, calc(100dvh - 48px));
+    margin: auto;
+    border-radius: 30px;
+  }
+  .ui2-spread-pop::backdrop {
+    background: rgba(8, 6, 10, 0.72);
+  }
+  .ui2-pop-inner {
+    flex-direction: row;
+    align-items: center;
+    gap: 44px;
+    padding: 44px 48px;
+  }
+  .ui2-pop-card {
+    --card-w: 300px;
+  }
+  .ui2-pop-title {
+    font-size: 30px;
+  }
+  .ui2-pop-list.is-long {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 10px;
+  }
+  .ui2-pop-actions {
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    background: none;
+  }
+  .ui2-pop-actions .ui2-btn {
+    width: auto;
+  }
+  .ui2-pop-back {
+    display: none;
+  }
+}
+@media (min-width: 1024px) {
+  .ui2-sp-h1 {
+    font-size: clamp(48px, 4.3vw, 62px);
+    letter-spacing: -0.025em;
+  }
+  .ui2-sp-hero-inner {
+    max-width: 980px;
+    gap: 16px;
+    padding-top: 72px;
+    padding-bottom: 28px;
+  }
+  /* คอม: ไพ่กระจายอิสระตามตารางใน spread-shelves.ts · ขนาดไพ่ย่อตามจอจนถึง 196px (จอ 1024 ไพ่ 6 ใบไม่ทับชื่อกัน) */
+  .ui2-sp-table {
+    --card-w: clamp(150px, 15vw, 196px);
+    position: relative;
+    display: block;
+    height: 470px;
+    max-width: var(--table-max);
+    margin-top: 22px;
+    padding: 0;
+  }
+  .ui2-sc-slot,
+  .ui2-sc-slot:nth-child(even),
+  .ui2-sc-slot:nth-child(3n + 2) {
+    position: absolute;
+    left: calc(var(--x) * (100% - var(--card-w)));
+    top: calc(var(--y) * 0.8 + 12px);
+    translate: none;
+  }
+  .ui2-sc-band {
+    font-size: 14.5px;
+  }
+  .ui2-sp-dir-groups,
+  .ui2-sp-topics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ── โชว์เคส 6 หมวด (เจ้าของ 2026-10-16 "สวยแต่ไม่ว้าว" · ต้นแบบ fastwork.com/selling#profile-showcase) ──
+   หมวด = หน้าต่างหนึ่งบาน (`.ui2-sp-shelf`) · คอม ≥ 1200 รายชื่อหมวดซ้าย (`.ui2-sp-rail`) แทนแถบชิป
+   `is-scrolly` (ใส่โดย spreads-pop.ts เท่านั้น) = หน้าต่างค้างกลางจอ เลื่อนแล้วสลับหมวด · ไม่มีคลาสนี้ = หน้าต่างเรียงต่อกันครบ */
+.ui2-sp .ui2-sp-show {
+  padding-top: 20px;
+}
+/* พื้นของส่วนนี้ไม่ทึบ (มีแค่แสงออโรรา) — สีกลางคืนมาจาก <main> อยู่แล้ว
+   พื้นทึบเดิมทับแสงออโรราที่ล้นลงมาจากหัวหน้า เห็นเป็นรอยตัดแนวนอน (เจ้าของแคป 2026-10-16) */
+.ui2-sp .ui2-sp-show::before {
+  background:
+    radial-gradient(50% 30% at 10% 36%, var(--ui2-aurora-night-teal) 0%, rgba(79, 179, 169, 0) 70%),
+    radial-gradient(46% 30% at 92% 62%, var(--ui2-aurora-night-amber) 0%, rgba(233, 160, 70, 0) 70%);
+}
+.ui2-sp-stage-wrap {
+  margin-top: 0;
+}
+.ui2-sp-rail {
+  display: none;
+}
+.ui2-sp-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* หน้าต่างหนึ่งหมวด — แสงสีหมวดจาง ๆ จากขอบบน */
+.ui2-sp .ui2-sp-shelf {
+  position: relative;
+  padding: 0 14px 6px;
+  border-radius: 26px;
+  background: var(--ui2-glass-night-solid);
+  background:
+    radial-gradient(70% 160px at 50% 0, color-mix(in srgb, var(--cat) 13%, transparent) 0%, transparent 100%),
+    var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset, 0 40px 80px -40px rgba(0, 0, 0, 0.85);
+}
+/* เส้นสีหมวดบางบนขอบบนหน้าต่าง */
+.ui2-sp .ui2-sp-shelf::before {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 0;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--cat) 30%, var(--cat) 70%, transparent 100%);
+}
+/* แถบบน: เลขหมวด + คำอังกฤษเอียง · ขีดความคืบหน้า · ลำดับ */
+.ui2-sp-win-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 54px;
+  margin-inline: -14px;
+  padding-inline: 16px;
+  font-size: 12px;
+  color: var(--ui2-on-night-dim);
+}
+.ui2-sp-win-bar::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--ui2-line-night) 15%, var(--ui2-line-night) 85%, transparent 100%);
+}
+.ui2-sp-win-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  white-space: nowrap;
+}
+.ui2-sp-win-n {
+  display: inline-grid;
+  place-items: center;
+  min-width: 30px;
+  height: 24px;
+  padding-inline: 8px;
+  border-radius: 99px;
+  font-size: 12.5px;
+  color: var(--cat-ink);
+  background: var(--cat);
+}
+.ui2-sp-win-name .ui2-accent {
+  font-size: 17px;
+  color: var(--cat);
+}
+.ui2-sp-win-steps {
+  display: none;
+  align-items: center;
+  gap: 5px;
+}
+.ui2-sp-win-steps span {
+  width: 16px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--ui2-line-night);
+}
+.ui2-sp-win-steps .is-past {
+  background: var(--ui2-gold-solid);
+  opacity: 0.45;
+}
+.ui2-sp-win-steps .is-here {
+  width: 34px;
+  background: var(--cat);
+}
+.ui2-sp-win-step {
+  font-size: 15px;
+  color: var(--ui2-on-night);
+  white-space: nowrap;
+}
+.ui2-sp-win-of {
+  font-size: 12px;
+  color: var(--ui2-on-night-dim);
+}
+.ui2-sp .ui2-sp-shelf .ui2-sp-shelf-head {
+  padding-top: 22px;
+}
+
+@media (min-width: 768px) {
+  .ui2-sp .ui2-sp-show {
+    padding-top: 36px;
+  }
+  .ui2-sp-win-steps {
+    display: inline-flex;
+  }
+  .ui2-sp .ui2-sp-shelf {
+    padding: 0 28px 10px;
+    border-radius: 32px;
+  }
+  .ui2-sp-win-bar {
+    height: 60px;
+    margin-inline: -28px;
+    padding-inline: 24px;
+  }
+  .ui2-sp-win-bar::after {
+    left: 24px;
+    right: 24px;
+  }
+  .ui2-sp .ui2-sp-shelf .ui2-sp-shelf-head {
+    padding: 28px 0 0;
+  }
+}
+@media (min-width: 1024px) {
+  /* ไพ่กระจาย: ระยะเลื่อนตอนแจกไพ่คิดจากความกว้างโต๊ะจริง (cqw) */
+  .ui2-sp-table {
+    container-type: inline-size;
+  }
+}
+
+/* คอม ≥ 1200: รายชื่อหมวดซ้าย + หน้าต่างขวา (แถบชิปซ่อนตั้งแต่ 768 แล้ว) */
+@media (min-width: 1200px) {
+  .ui2-sp-stage {
+    display: grid;
+    grid-template-columns: 270px minmax(0, 1fr);
+    align-items: start;
+    gap: 40px;
+    max-width: 1360px;
+    margin-inline: auto;
+  }
+  /* รายชื่อหมวดชิดบนเท่ากันทั้งก่อน/หลังสคริปต์เปิดโหมดหน้าต่างค้าง (เว้นบน 64px ให้อยู่ระดับหัวข้อหมวด)
+     เดิมโหมดค้างใช้ align-self: center ➔ ตอนโหลดรายชื่อกระโดดลงกลางจอแวบหนึ่ง (INC-0271) */
+  .ui2-sp-rail {
+    display: block;
+    position: sticky;
+    top: calc(var(--site-header-h, 78px) + 48px);
+    padding-top: 64px;
+  }
+  .ui2-sp-rail ol {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 0 0 0 18px;
+    list-style: none;
+  }
+  /* เส้นความคืบหน้า (--p ตั้งโดย spreads-pop.ts ตอน is-scrolly) */
+  .ui2-sp-rail ol::before,
+  .ui2-sp-rail ol::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--ui2-line-night);
+  }
+  .ui2-sp-rail ol::after {
+    background: var(--ui2-gold-solid);
+    transform-origin: top;
+    transform: scaleY(var(--p, 0));
+  }
+  .ui2-sp-rail-link {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 8px;
+    padding: 9px 0;
+    font-family: var(--ui2-font-display);
+    font-weight: 500;
+    font-size: 16.5px;
+    line-height: 1.3;
+    white-space: nowrap;
+    color: var(--ui2-on-night-dim);
+    transition: color var(--dur-base) var(--ease-out);
+  }
+  .ui2-sp-rail-name {
+    display: block;
+    transform-origin: 0 50%;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .ui2-sp-rail-n {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: var(--ui2-on-night-dim);
+  }
+  .ui2-sp-rail-count {
+    font-size: 12px;
+    color: var(--ui2-on-night-dim);
+  }
+  .ui2-sp-rail-link:hover {
+    color: var(--ui2-on-night-soft);
+  }
+  .ui2-sp-rail-link:focus-visible {
+    outline: 2px solid var(--ui2-gold-solid);
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
+  /* หมวดที่กำลังดู: ตัวใหญ่ขึ้นแบบรายชื่ออาชีพของ fastwork (ขยายด้วย scale — ไม่ดันบรรทัดอื่น) */
+  .ui2-sp-rail-link[aria-current="true"] {
+    color: var(--ui2-on-night);
+  }
+  .ui2-sp-rail-link[aria-current="true"] .ui2-sp-rail-name {
+    transform: scale(1.22);
+  }
+  /* ชื่อที่ขยายแล้วกินที่ตัวเลขจำนวนผัง — ซ่อนเลขของหมวดที่กำลังดู (หน้าต่างบอกจำนวนอยู่แล้ว) */
+  .ui2-sp-rail-link[aria-current="true"] .ui2-sp-rail-count {
+    opacity: 0;
+  }
+  .ui2-sp-rail-link[aria-current="true"] .ui2-sp-rail-n {
+    color: var(--cat);
+  }
+  /* โต๊ะในหน้าต่างแคบลง (มีรายชื่อหมวดซ้าย) — ไพ่เล็กลงตามจอ */
+  .ui2-sp-shelf .ui2-sp-table {
+    --card-w: clamp(136px, 12.2vw, 184px);
+    height: 450px;
+  }
+
+  /* ── โหมดเลื่อนแล้วสลับหมวด ── */
+  .ui2-sp-show.is-scrolly .ui2-sp-stage-wrap::after {
+    content: "";
+    display: block;
+    height: var(--sp-steps-h, 0px);
+  }
+  .ui2-sp-show.is-scrolly .ui2-sp-stage {
+    position: sticky;
+    top: calc(var(--site-header-h, 78px) + 14px);
+  }
+  .ui2-sp-show.is-scrolly .ui2-sp-rail {
+    position: relative;
+    top: auto;
+  }
+  .ui2-sp-show.is-scrolly .ui2-sp-panels {
+    display: grid;
+  }
+  /* สลับหมวด: หมวดเก่าหายเร็ว (0.14 วิ) แล้วหมวดใหม่ค่อยขึ้น — ห้ามจางไขว้กันนาน
+     เดิมเก่าจาง 0.32 วิ ทับหมวดใหม่ที่กำลังแจกไพ่ เห็นไพ่โปร่งสองชุดซ้อนกันกลางหน้าต่าง (INC-0270) */
+  .ui2-sp-show.is-scrolly .ui2-sp-shelf {
+    grid-area: 1 / 1;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.14s var(--ease-out), visibility 0s linear 0.14s;
+  }
+  /* ตอนสคริปต์จัดหน้าต่างครั้งแรก ห้ามมีการจาง — ไม่งั้นหน้าต่างทั้ง 6 หมวดที่เพิ่งย้ายมาซ้อนที่เดียวกัน
+     จางหายพร้อมกัน เห็นหมวดสุดท้ายทับหมวดแรกแวบหนึ่ง (เจ้าของ "เข้ามาตอนแรกเหมือนภาพซ้อนแล้วหายไป" · INC-0271) */
+  .ui2-sp-show.is-setting .ui2-sp-shelf {
+    transition: none !important;
+  }
+  .ui2-sp-show.is-scrolly .ui2-sp-shelf[data-active] {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.22s var(--ease-out) 0.1s;
+  }
+}
+
+/* ── ลดการเคลื่อนไหว — นิ่งทั้งหน้า เห็นของครบ ─────────────────────────── */
+[data-fx="off"] .ui2-spread-card,
+[data-fx="off"] .ui2-sp-jump-link,
+[data-fx="off"] .ui2-sc-spot {
+  transition: none;
+}
+[data-fx="off"] .ui2-btn-ring::before {
+  animation: none;
+}
+
+/* ── รายชื่อหมวดซ้าย = แบบหัวเรื่องคลังไพ่หน้าแรก (เจ้าของ 2026-10-17 "ตัวอักษรไม่เท่ากับหน้าแรกเลย")
+   ตัวใหญ่ 24 ➔ 27px · ยังไม่ได้ดู = เทาจาง · ที่กำลังดู = สว่าง + ขีดทองสั้นด้านซ้าย · ไม่มีเลขหมวด/จำนวน/เส้นยาว ── */
+@media (min-width: 1200px) {
+  .ui2-sp-rail ol {
+    gap: 2px;
+    padding-left: 0;
+  }
+  .ui2-sp-rail ol::before,
+  .ui2-sp-rail ol::after {
+    display: none;
+  }
+  .ui2-sp-rail-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 50px;
+    padding: 6px 0 6px 24px;
+    font-size: 24px;
+    line-height: 1.25;
+    white-space: normal;
+    text-wrap: balance;
+    color: rgba(246, 238, 226, 0.42);
+  }
+  .ui2-sp-rail-link::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 3px;
+    height: 16px;
+    border-radius: 2px;
+    translate: 0 -50%;
+    background: var(--ui2-gold-solid);
+    opacity: 0;
+    scale: 0.4;
+    transition: opacity var(--dur-fast) var(--ease-out), scale var(--dur-fast) var(--ease-out);
+  }
+  .ui2-sp-rail-link[aria-current="true"]::before {
+    opacity: 1;
+    scale: 1;
+  }
+  .ui2-sp-rail-link[aria-current="true"] .ui2-sp-rail-name {
+    transform: none;
+  }
+  .ui2-sp-rail-n,
+  .ui2-sp-rail-count {
+    display: none;
+  }
+}
+@media (min-width: 1440px) {
+  .ui2-sp-rail-link {
+    font-size: 26px;
+  }
+}
+/* คอลัมน์รายชื่อกว้างขึ้นที่จอ ≥ 1280 — ชื่อหมวดยาว ("การงาน การเงิน การเรียน") ไม่หักกลางคำ */
+@media (min-width: 1280px) {
+  .ui2-sp-stage {
+    grid-template-columns: 300px minmax(0, 1fr);
+  }
+}

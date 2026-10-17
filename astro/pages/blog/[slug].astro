@@ -6,6 +6,9 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { BlogDetailContentRoot } from "../../components/PageBodies";
 import { ArticleReaderRoot } from "../../islands/ArticleReaderIsland";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
+import "@/styles/v2-article.css";
 
 /**
  * 📖 บทความรายเรื่อง (ต้นไม้ภาษาไทย)
@@ -28,17 +31,24 @@ const related = getRelatedArticles(article.slug, 3);
 
 <BaseLayout locale={locale} metadata={blogDetailMetadata(article.slug, locale)}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <BlogDetailContentRoot article={article} locale={locale}>
     <Fragment slot="reader">
       <ArticleReaderRoot article={article} relatedArticles={related} locale={locale} />
     </Fragment>
   </BlogDetailContentRoot>
+  </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>
 
 <!--
-  📰 ปุ่มคัดลอกลิงก์ + สถิติการอ่าน — สคริปต์ไม่ถึง 1 KB แทนการ hydrate ทั้งคอมโพเนนต์
+  ปุ่มคัดลอกลิงก์ + สถิติการอ่าน — สคริปต์ไม่ถึง 1 KB แทนการ hydrate ทั้งคอมโพเนนต์
 -->
 <script>
   import "../../scripts/article-share";
+</script>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../scripts/ui2-inview";
 </script>

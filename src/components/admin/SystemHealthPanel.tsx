@@ -137,10 +137,10 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
       };
       setRebuild({
         busy: false,
-        msg: j.ok ? `✅ อัปเดต index แล้ว ${j.upserted} รายการ` : `❌ ${j.error || "ล้มเหลว"}`,
+        msg: j.ok ? `อัปเดต index แล้ว ${j.upserted} รายการ` : `ล้มเหลว: ${j.error || "ล้มเหลว"}`,
       });
     } catch {
-      setRebuild({ busy: false, msg: "❌ เชื่อมต่อไม่ได้" });
+      setRebuild({ busy: false, msg: "เชื่อมต่อไม่ได้" });
     }
   }, []);
 
@@ -422,7 +422,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
                     onClick={() => onSwitchTab("ai")}
                     className="text-gold-ink hover:text-gold-deep text-xs font-semibold underline underline-offset-2 flex items-center gap-1 cursor-pointer"
                   >
-                    <span>ตรวจสอบเชิงลึกรายโมเดล & วัด Latency ในแท็บสุขภาพ AI →</span>
+                    <span>ตรวจสอบเชิงลึกรายโมเดล & วัด Latency ในแท็บสุขภาพ AI</span>
                   </button>
                 )}
               </div>

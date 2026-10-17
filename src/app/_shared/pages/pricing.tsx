@@ -8,8 +8,12 @@ import { jsonLdScript } from "@/lib/seo/json-ld";
 import { getCreditPackages } from "@/lib/entitlement/packages";
 import { CHEAPEST_PACKAGE_THB, DAILY_LIMIT, READINGS_EN } from "@/lib/entitlement/copy";
 import { CheckMarkIcon, DashMarkIcon } from "@/components/entitlement/EntitlementIcons";
+import { CardImage } from "@/components/card/CardImage";
+import { Ui2Window } from "@/components/ui2/Ui2Showcase";
+import { FrBig, FrFan, FrList, FrMock, FrPanel, FrPills, Ui2FeatureRows } from "@/components/ui2/Ui2Blocks";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import type { Locale } from "@/lib/i18n/types";
+import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
 
 /**
  * 💳 หน้า "ราคาและแพ็กเกจ" (`/pricing` · `/en/pricing`)
@@ -184,6 +188,29 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
   const faqs = faqItems(locale);
   const rows = compareRows(locale);
   const packages = getCreditPackages(isEn);
+  const t = (th: string, en: string) => (isEn ? en : th);
+  /* ภาพจำลองของคำถาม 3 ข้อแรก (ฟรี · รายเดือน · หมดอายุ) — ข้อความมาจากคำตอบของข้อนั้นเอง */
+  const faqMocks: ReactNode[] = [
+    <FrMock key="free">
+      <FrPanel label={t("สมาชิกฟรี", "Free member")}>
+        <FrBig>{DAILY_LIMIT}</FrBig>
+        <small>{t("ครั้งต่อวัน · ผังมาตรฐาน 1–4 ใบ", "a day · standard 1–4 card spreads")}</small>
+        <FrPills items={["Email", "Google", "LINE"]} />
+      </FrPanel>
+    </FrMock>,
+    <FrMock key="once" tint="teal">
+      <FrPanel label={t("แพ็กเติมรอบ", "Top-up package")}>
+        <FrList boxed items={isEn ? ["One-time payment", "Nothing renews", "Never charged again"] : ["จ่ายครั้งเดียวจบ", "ไม่มีการต่ออายุ", "ไม่ตัดเงินซ้ำ"]} />
+      </FrPanel>
+    </FrMock>,
+    <FrMock key="expire" tint="violet">
+      <FrFan cards={["major-17", "major-19", "pentacles-10"]} />
+      <FrPanel label={t("ลำดับการใช้สิทธิ์", "Which reading is used")}>
+        <FrList items={isEn ? ["Today's free reading first", "Then your purchased readings"] : ["สิทธิ์ฟรีของวันนั้นก่อน", "แล้วจึงหักรอบที่เติมไว้"]} />
+        <small>{t("รอบที่เติมไม่มีวันหมดอายุ", "Purchased readings never expire")}</small>
+      </FrPanel>
+    </FrMock>,
+  ];
 
   const jsonLdBreadcrumbs = buildBreadcrumbJsonLd(locale, [homeCrumb(locale), { name: c.crumb, path: PATH }]);
   const jsonLdFaq = {
@@ -243,32 +270,74 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
 
       <div className="mx-auto max-w-6xl space-y-16 px-4 pt-12 sm:px-6 sm:pt-16">
         {/* ── หัวหน้า — ไม่มีกล่อง ตัวอักษรสีหมึกเท่านั้น (สีทองบนพื้นไล่สีคอนทราสต์ไม่ผ่าน · HANDOFF_GLASS_HOME 2.4) ── */}
-        <header className="mx-auto max-w-3xl space-y-4 text-center">
-          <p className="font-serif-th text-sm font-semibold text-muted">{isEn ? "Pricing" : "ราคาและแพ็กเกจ"}</p>
-          <h1 className="font-serif-th text-3xl font-bold leading-snug text-ink-deep sm:text-5xl">
-            <ThaiPhrases>{isEn ? "Read free every day. Top up when you want more." : "ดูดวงฟรีทุกวัน เติมรอบเมื่ออยากถามเพิ่ม"}</ThaiPhrases>
-          </h1>
-          <p className="mx-auto max-w-2xl font-serif-th text-base leading-relaxed text-muted sm:text-lg">
-            <ThaiPhrases>
-              {isEn
-                ? `Pay once — no subscription, and purchased readings never expire. Packages from ${CHEAPEST_PACKAGE_THB} THB.`
-                : `จ่ายครั้งเดียว ไม่มีรายเดือน รอบที่เติมไม่มีวันหมดอายุ · แพ็กเริ่มต้น ${CHEAPEST_PACKAGE_THB} บาท`}
-            </ThaiPhrases>
-          </p>
+        {/* หัวหน้า UI 2.0 (เจ้าของ 2026-10-16) — ข้อความ h1 / คำโปรยเดิมทุกตัวอักษร */}
+        {/*
+          v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — ตู้ขายตั๋ว: ซ้ายข้อความ · ขวาตั๋วใบใหญ่ "ฟรีวันละ N ครั้ง"
+          บอกสิ่งที่ได้ฟรีก่อนสิ่งที่ต้องจ่าย (v1 หัวกลางพร้อมไพ่ลอย ไม่เห็นว่าฟรีได้แค่ไหนจนเลื่อนถึงตาราง)
+        */}
+        {/* v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): ไพ่จริงลอยสองข้าง + เนื้อหาเป็นหน้าต่างเลขกำกับ */}
+        <div className="v3-pr-hero" data-anim-section="">
+        <span className="ui2-ph-deco" aria-hidden="true">
+          {(["major-19", "pentacles-10"] as const).map((cardId, i) => (
+            <span key={cardId} className={`ui2-ph-card ui2-loop ui2-ph-card-${i === 0 ? 1 : 3}`}>
+              <CardImage cardId={cardId} alt="" thumb sizes="(min-width: 768px) 128px, 44px" loading="eager" fetchPriority="low" />
+            </span>
+          ))}
+        </span>
+        <header className="v2-pr-head">
+          <div>
+            <Ui2Crumbs crumbs={[{ label: isEn ? "Home" : "หน้าแรก", href: "/" }, { label: isEn ? "Pricing" : "ราคาและแพ็กเกจ" }]} />
+            <h1 className="v2-pr-title">
+              {isEn ? (
+                <>
+                  Read <span className="ui2-gold-night">free every day.</span> Top up when you want more.
+                </>
+              ) : (
+                <>
+                  <span className="tp ui2-gold-night">ดูดวงฟรีทุกวัน</span> <span className="tp">เติมรอบเมื่ออยากถามเพิ่ม</span>
+                </>
+              )}
+            </h1>
+            <p className="v2-pr-lede">
+              <ThaiPhrases>
+                {isEn
+                  ? `Pay once — no subscription, and purchased readings never expire. Packages from ${CHEAPEST_PACKAGE_THB} THB.`
+                  : `จ่ายครั้งเดียว ไม่มีรายเดือน รอบที่เติมไม่มีวันหมดอายุ · แพ็กเริ่มต้น ${CHEAPEST_PACKAGE_THB} บาท`}
+              </ThaiPhrases>
+            </p>
+            <ul className="v2-pr-promise">
+              {(isEn ? ["No subscription", "Readings never expire", "Card or PromptPay"] : ["ไม่มีรายเดือน", "รอบที่เติมไม่มีวันหมดอายุ", "บัตร หรือ PromptPay"]).map((t) => (
+                <li key={t}>{t}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="v2-pr-free" aria-label={isEn ? "Free membership" : "สมาชิกฟรี"}>
+            <p className="v2-pr-free-k">{isEn ? "Free member" : "สมาชิกฟรี"}</p>
+            <p className="v2-pr-free-n">
+              <b>{DAILY_LIMIT}</b>
+              <span>{isEn ? (DAILY_LIMIT === 1 ? "reading a day" : "readings a day") : "ครั้งต่อวัน"}</span>
+            </p>
+            <p className="v2-pr-free-d">{isEn ? "Standard 1–4 card spreads · resets at midnight" : "ผังมาตรฐาน 1–4 ใบ · รีเซ็ตทุกเที่ยงคืน"}</p>
+            <a href={isEn ? "/en" : "/"} className="ui2-btn v2-pr-go">
+              {isEn ? "Start a free reading" : "เริ่มดูดวงฟรี"}
+            </a>
+          </div>
         </header>
+        </div>
 
         {/* ── แพ็ก (island) ───────────────────────────────────────── */}
         {/* แถบสีสลับแบบหน้าแรก (`page-band`): แพ็ก (อ่อน) · ตารางเทียบ (ใส) · คำถาม (อ่อน) · ปิดท้าย (ใส) */}
-        <section aria-labelledby="pricing-packages" className="page-band page-band-tint">
+        <Ui2Window n="01" kicker="Top-up packages" note={isEn ? "Pay once · never expires" : "จ่ายครั้งเดียว · ไม่มีวันหมดอายุ"} tone={4}>
           <h2 id="pricing-packages" className="sr-only">
             {isEn ? "Plans and packages" : "แพ็กเกจทั้งหมด"}
           </h2>
           {plans}
-        </section>
+        </Ui2Window>
 
         {/* ── ตารางเทียบสิทธิ์ ────────────────────────────────────── */}
-        <section aria-labelledby="pricing-compare" className="page-band mx-auto max-w-4xl space-y-6">
-          <h2 id="pricing-compare" className="text-center font-serif-th text-2xl font-bold text-ink-deep sm:text-3xl">
+        <Ui2Window n="02" kicker="Compare" tone={2}>
+        <section aria-labelledby="pricing-compare" className="space-y-6">
+          <h2 id="pricing-compare" className="v2-pr-h2">
             <ThaiPhrases>{isEn ? "Compare plans" : "เทียบสิทธิ์ทั้งหมด"}</ThaiPhrases>
           </h2>
           <div className="altar-panel">
@@ -305,31 +374,18 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
             </table>
           </div>
         </section>
+        </Ui2Window>
 
-        {/* ── คำถามที่พบบ่อย ──────────────────────────────────────── */}
-        <section aria-labelledby="pricing-faq" className="page-band page-band-tint mx-auto max-w-3xl space-y-6">
-          <h2 id="pricing-faq" className="text-center font-serif-th text-2xl font-bold text-ink-deep sm:text-3xl">
-            <ThaiPhrases>{isEn ? "Frequently asked questions" : "คำถามที่พบบ่อย"}</ThaiPhrases>
-          </h2>
-          <div className="altar-panel divide-y divide-line-warm/50 px-5 sm:px-6">
-            {faqs.map((f) => (
-              <details key={f.q} className="group py-4">
-                <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-4 font-serif-th text-base font-semibold text-ink-deep">
-                  {f.q}
-                  <svg
-                    viewBox="0 0 20 20"
-                    aria-hidden="true"
-                    className="h-5 w-5 shrink-0 fill-none stroke-current text-muted transition-transform duration-150 group-open:rotate-180"
-                    strokeWidth={2}
-                  >
-                    <path d="M5 7.5l5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </summary>
-                <p className="pt-2 font-serif-th text-sm leading-relaxed text-muted">{f.a}</p>
-              </details>
-            ))}
-          </div>
-        </section>
+        {/* ── คำถามที่พบบ่อย — แถวสลับซ้ายขวาแบบหน้าแรก (v4 · เจ้าของ 2026-10-17 "นำสองส่วนนี้ไปใช้กับหน้าอื่น")
+            สามข้อแรกมีภาพจำลอง · ที่เหลือเป็นรายการพับ (คำตอบอยู่ใน HTML ครบ ตรงกับ JSON-LD FAQPage) ── */}
+        <Ui2FeatureRows
+          id="pricing-faq"
+          kicker="FAQ"
+          title={isEn ? "Frequently asked questions" : "คำถามที่พบบ่อย"}
+          rows={faqs.slice(0, 3).map((f, i) => ({ title: f.q, body: <p>{f.a}</p>, mock: faqMocks[i] }))}
+          rest={faqs.slice(3)}
+          restLabel={isEn ? "More questions" : "คำถามอื่น ๆ"}
+        />
 
         {/* ── ปิดท้าย ─────────────────────────────────────────────── */}
         <section className="page-band mx-auto max-w-3xl space-y-4 text-center">

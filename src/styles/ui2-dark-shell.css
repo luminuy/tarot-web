@@ -1,0 +1,44 @@
+/*
+ * 🌑 UI 2.0 — หน้าที่มืดทั้งหน้า (`data-ui2-page-dark`): พื้น body + หัวเว็บกระจกมืดตั้งแต่เฟรมแรก
+ * แยกจาก ui2-core.css (2026-10-16) — หน้าอื่นทั้งเว็บ (ui2-page.css) ต้องการแค่ส่วนนี้ ไม่ลาก core ทั้งไฟล์ (งบ CSS หน้าอื่น ≤ 32 KB)
+ * นำเข้าโดย ui2-core.css และ ui2-page.css
+ */
+html:has([data-ui2-page-dark]) body {
+  background: var(--ui2-night);
+}
+/* แถบเลื่อนโทนมืด — เดิมรางครีม #F3EDE2 (globals.css) โผล่เป็นแถบสว่างขอบขวาของหน้ามืดทั้งหน้า */
+html:has([data-ui2-page-dark]) {
+  scrollbar-color: #5c4b3e var(--ui2-night);
+}
+/* หัวเว็บกระจกมืดตั้งแต่เฟรมแรก — ชุดเดียวกับ `html[data-ui2-over-dark]` ใน globals.css (หน้าที่มืดทั้งหน้า) */
+html:has([data-ui2-page-dark]) .site-header-glass {
+  background-color: rgba(22, 17, 24, 0.96);
+  border-color: rgba(255, 236, 200, 0.18);
+  box-shadow: 0 16px 34px -24px rgba(0, 0, 0, 0.8);
+}
+html:has([data-ui2-page-dark]) .site-header-glass :is(.text-ink, .text-ink-deep, nav):not(.absolute *, .absolute) {
+  color: var(--ui2-on-night);
+}
+html:has([data-ui2-page-dark]) .site-header-glass .text-muted:not(.absolute *) {
+  color: var(--ui2-on-night-soft);
+}
+html:has([data-ui2-page-dark]) .ui2-header-cta {
+  color: var(--ui2-night);
+  background: var(--ui2-gold-solid);
+}
+
+/*
+ * แถบเลื่อนของกล่องที่เลื่อนในหน้า (คลังตำแหน่งหน้าสร้างผัง · รายการยาวในแผงต่าง ๆ) — เส้นทองบางบนรางใส
+ * เดิมรับสีจาก <html> (ก้อนน้ำตาลบนรางดำเต็มสูง) ดูเป็นแท่งหนักข้างกล่อง (เจ้าของ 2026-10-17 "แถบเลื่อนลงแบบนี้ไม่สวย ออกแบบใหม่")
+ * scrollbar-color สืบทอดลงลูกทุกตัว · scrollbar-width ไม่สืบทอด จึงตั้งด้วย :where(*) (ความเจาะจง 0 · ทับได้ทุกที่)
+ * ชี้ที่กล่องเลื่อนของหน้าสร้างผังแล้วเส้นสว่างขึ้นให้รู้ว่าลากได้ (เฉพาะกล่องที่รู้จัก — :hover กับทุกชิ้นทำให้คำนวณสไตล์ใหม่ทั้งหน้าทุกครั้งที่ขยับเมาส์)
+ */
+[data-ui2-page-dark] {
+  scrollbar-color: rgba(255, 217, 143, 0.28) transparent;
+}
+[data-ui2-page-dark] :where(*) {
+  scrollbar-width: thin;
+}
+[data-ui2-page-dark] :is(.v2-sb-lib, .v2-sb-edit):hover {
+  scrollbar-color: rgba(255, 217, 143, 0.55) transparent;
+}

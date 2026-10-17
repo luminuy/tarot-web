@@ -58,7 +58,6 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
         <div className="space-y-1">
           <div className="flex justify-between text-xs">
             <span className="flex items-center gap-1.5 font-bold text-ink-deep">
-              <span className="text-xs text-gold-ink">•</span> 
               {isEnglish ? "Fire (Passion / Action / Creative Will)" : "ธาตุไฟ (แพชชัน / งาน / แรงผลักดัน)"}
             </span>
             <span className="font-mono font-bold text-ink-deep">{breakdown.fire}%</span>
@@ -78,7 +77,6 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
         <div className="space-y-1">
           <div className="flex justify-between text-xs">
             <span className="flex items-center gap-1.5 font-bold text-ink-deep">
-              <span className="text-xs text-gold-ink">•</span> 
               {isEnglish ? "Water (Emotion / Intuition / Depth)" : "ธาตุน้ำ (อารมณ์ / ความรู้สึก / สัญชาตญาณ)"}
             </span>
             <span className="font-mono font-bold text-ink-deep">{breakdown.water}%</span>
@@ -98,7 +96,6 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
         <div className="space-y-1">
           <div className="flex justify-between text-xs">
             <span className="flex items-center gap-1.5 font-bold text-ink-deep">
-              <span className="text-xs text-gold-ink">•</span> 
               {isEnglish ? "Air (Logic / Intellect / Truth)" : "ธาตุลม (ตรรกะ / ความคิด / การตัดสินใจ)"}
             </span>
             <span className="font-mono font-bold text-ink-deep">{breakdown.air}%</span>
@@ -118,7 +115,6 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
         <div className="space-y-1">
           <div className="flex justify-between text-xs">
             <span className="flex items-center gap-1.5 font-bold text-ink-deep">
-              <span className="text-xs text-gold-ink">•</span> 
               {isEnglish ? "Earth (Stability / Wealth / Manifestation)" : "ธาตุดิน (การเงิน / ทรัพย์สิน / ความมั่นคง)"}
             </span>
             <span className="font-mono font-bold text-ink-deep">{breakdown.earth}%</span>

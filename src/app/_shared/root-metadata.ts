@@ -205,7 +205,12 @@ export const VIEWPORT_CONTENT =
  * แต่ค่าชุดนั้นคำนวณจาก **น้ำหนักปกติ** เท่านั้น — น้ำหนักหนาจึงอยู่ใน `FONT_PRELOADS_LOW` ข้างล่าง
  */
 export const FONT_PRELOADS = [
-  "/fonts/noto-serif-thai-400.woff2",
+  /*
+   * 🎨 SeerTarot UI 2.0 (คลื่น 3 · 2026-10-12): หัวข้อ h1–h3 ทั้งเว็บใช้ Anuphan 500 — h1 คือตัว LCP ของหลายหน้า
+   * จึงพรีโหลดลำดับปกติ · Noto Serif Thai 400 ย้ายไป `FONT_PRELOADS_LOW` (เหลือเป็นฟอนต์เนื้อความบางจุด)
+   * รวม Anuphan 19,384 + Sarabun 16,684 = 36,068 B ≤ งบ 40,000 B (`test-bundle-budget`)
+   */
+  "/fonts/anuphan-500.woff2",
   "/fonts/sarabun-400.woff2",
 ] as const;
 
@@ -225,6 +230,7 @@ export const FONT_PRELOADS = [
  * ⚠️ ห้ามถอดออกโดยไม่วัดการกระพริบตอนเปลี่ยนหน้าบนมือถือมาเทียบ
  */
 export const FONT_PRELOADS_LOW = [
+  "/fonts/noto-serif-thai-400.woff2",
   "/fonts/noto-serif-thai-700.woff2",
   "/fonts/sarabun-600.woff2",
 ] as const;

@@ -40,38 +40,44 @@ const ROOT = process.cwd();
  *    และ padding+ขอบ ยังรวมได้ 26px เป๊ะทุกความกว้าง ตามที่สูตรหักไว้
  */
 const FINGERPRINTS: { file: string; needles: string[]; why: string }[] = [
+  /*
+   * v3 (2026-10-17 · เจ้าของ "ทำแบบหน้าแรกกับหน้าผัง"): /cards ใช้ CardTile.tsx + v3-card-tile.css
+   * สูตรไม่ได้มาจากการวัดเดา — คำนวณตรงจากโครงการ์ด: สูง = (W − 12) × 12/7 + 78 · W จากความกว้างกริดจริง (100cqi)
+   * ด่านเฝ้าทุกตัวเลขที่สูตรตั้งอยู่บน: padding กรอบ 6px · ภาพ 7/12 · บล็อกชื่อ 66px · คอลัมน์+ช่องทุกช่วง
+   */
   {
     file: "src/components/encyclopedia/CardsExplorer.tsx",
+    needles: ["<CardTile", "v3-grid-wrap", "v3-grid"],
+    why: "หน้า /cards ต้องใช้การ์ด v3 ในกริดที่เป็น container — สูตร cqi พึ่งพาโครงนี้",
+  },
+  {
+    file: "src/components/encyclopedia/CardTile.tsx",
+    needles: ["card-tile-cv v3-tile", "v3-tile-frame", "v3-tile-txt"],
+    why: "โครงการ์ด v3 (กรอบ + บล็อกชื่อ) คือฐานของสูตรความสูง",
+  },
+  {
+    file: "src/styles/v3-card-tile.css",
     needles: [
-      "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-5",
-      "card-tile-cv altar-card-porcelain !rounded-xl p-3",
-      'aspect-[7/12]',
-      "h-[3.8125rem]",
+      "container-type: inline-size;",
+      "padding: 6px;",
+      "aspect-ratio: 7 / 12;",
+      "height: 66px;",
+      "contain-intrinsic-size: auto calc(((100cqi - 12px) / 2 - 12px) * 12 / 7 + 78px);",
+      "contain-intrinsic-size: auto calc(((100cqi - 28px) / 3 - 12px) * 12 / 7 + 78px);",
+      "contain-intrinsic-size: auto calc(((100cqi - 48px) / 4 - 12px) * 12 / 7 + 78px);",
+      "contain-intrinsic-size: auto calc(((100cqi - 72px) / 5 - 12px) * 12 / 7 + 78px);",
+      "gap: 22px 12px;",
+      "column-gap: 14px;",
+      "column-gap: 16px;",
+      "column-gap: 18px;",
     ],
-    why: "จำนวนคอลัมน์ · gap · padding การ์ด · สัดส่วนภาพ · ความสูงแถวคีย์เวิร์ด — ทั้งห้าอย่างนี้อยู่ในสูตรโดยตรง",
+    why: "สูตร = ((กริด − ช่องรวม) / คอลัมน์ − 12) × 12/7 + 12 + 66 — padding กรอบ 6×2 · ภาพ 7:12 · บล็อกชื่อ 66px · ช่องคอลัมน์ 12/14/16/18",
   },
   {
     file: "src/components/encyclopedia/CardGroupView.tsx",
-    needles: [
-      "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4",
-      "card-tile-cv altar-card-porcelain !rounded-xl p-3",
-      'aspect-[7/12]',
-      "h-[3.8125rem]",
-    ],
-    why:
-      "หน้าไพ่ตามชุด (/cards/major · /cards/cups ฯลฯ) ใช้การ์ดทรงเดียวกับ /cards แต่ gap แคบกว่านิดหน่อย " +
-      "(gap-3 sm:gap-4 เทียบกับ gap-3.5 sm:gap-5) ➔ วัดแล้วสูตรเดียวกันคลาดแค่ 0–4px ซึ่งรับได้ " +
-      "แต่ถ้าใครแก้ gap ของหน้านี้ให้ต่างจากเดิมมาก ความคลาดจะโตขึ้นจนเห็นเป็นการกระตุก",
+    needles: ["<CardTile", "v3-grid-wrap", "v3-grid"],
+    why: "หน้าไพ่ตามชุดใช้การ์ด v3 ในกริด container เดียวกับ /cards — สูตร cqi พึ่งพาโครงนี้",
   },
-];
-
-/** สูตรที่วัดมาแล้ว — ค่าเหล่านี้คือ content box (หักขอบ+padding 26px ออกแล้ว) */
-const FORMULAS: { media: string; value: string }[] = [
-  { media: "base", value: "contain-intrinsic-size: auto calc(85.71vw + 39.6px);" },
-  { media: "min-width: 640px", value: "contain-intrinsic-size: auto calc(56.7vw + 27.1px);" },
-  { media: "min-width: 768px", value: "contain-intrinsic-size: auto calc(43.03vw + 23.3px);" },
-  { media: "min-width: 1024px", value: "contain-intrinsic-size: auto calc(28.25vw + 37.1px);" },
-  { media: "min-width: 1280px", value: "contain-intrinsic-size: auto 383px;" },
 ];
 
 function run(): void {
@@ -88,7 +94,7 @@ function run(): void {
     for (const needle of fp.needles) {
       if (!src.includes(needle)) {
         problems.push(
-          `${fp.file} ไม่มี \`${needle}\` แล้ว\n      เหตุผลที่ต้องมี: ${fp.why}\n      ➔ ถ้าตั้งใจแก้หน้าตาการ์ด ต้องวัดความสูงใหม่แล้วอัปเดตสูตรใน globals.css พร้อมกัน`
+          `${fp.file} ไม่มี \`${needle}\` แล้ว\n      เหตุผลที่ต้องมี: ${fp.why}\n      ➔ ถ้าตั้งใจแก้หน้าตาการ์ด ต้องแก้สูตรใน src/styles/v3-card-tile.css ให้ตรงโครงใหม่พร้อมกัน`
         );
       }
     }
@@ -99,12 +105,11 @@ function run(): void {
   if (!css.includes(".card-tile-cv {")) {
     problems.push("globals.css ไม่มีคลาส `.card-tile-cv` แล้ว — กริดไพ่จะกลับไปวาดครบ 78 ใบทุกครั้ง (TBT ~4,200 ms)");
   }
-  for (const f of FORMULAS) {
-    if (!css.includes(f.value)) {
-      problems.push(
-        `globals.css ไม่มีสูตรของช่วงจอ "${f.media}": \`${f.value}\`\n      ➔ ถ้าจะเปลี่ยนตัวเลข ต้องวัดจริงก่อนแล้วแก้ทั้งในไฟล์นี้และในด่านนี้ให้ตรงกัน`
-      );
-    }
+  if (!/\.card-tile-cv \{\s*content-visibility: auto;/.test(css)) {
+    problems.push("globals.css: `.card-tile-cv` ต้องเปิด `content-visibility: auto` (ข้ามการวาดการ์ดนอกจอ)");
+  }
+  if (/\.card-tile-cv \{[^}]*contain-intrinsic-size/.test(css)) {
+    problems.push("globals.css: ห้ามตั้ง contain-intrinsic-size ของ `.card-tile-cv` ที่นี่อีก — สูตรอยู่ที่ v3-card-tile.css ที่เดียว");
   }
 
   if (problems.length > 0) {
@@ -118,7 +123,7 @@ function run(): void {
   }
 
   console.log(
-    "✅ สูตรความสูงการ์ดยังตรงกับของจริง: กริด 2/3/4/6 คอลัมน์ · การ์ด p-3 · ภาพ 7:12 · แถวคีย์เวิร์ดสูงคงที่ · `.card-tile-cv` ครบทั้ง 5 ช่วงจอ\n"
+    "✅ สูตรความสูงการ์ด v3 ยังตรงกับโครงจริง: กริด container 2/3/4/5 คอลัมน์ · กรอบ 6px · ภาพ 7:12 · บล็อกชื่อ 66px\n"
   );
   process.exit(0);
 }

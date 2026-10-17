@@ -1,0 +1,398 @@
+/*
+ * 🌅 แถบรุ่งอรุณ — หัวหน้าทุกหน้าเป็นพื้นครีมพาสเทลแบบหัวหน้าหน้าแรก แล้วต่อด้วยท้องฟ้ากลางคืน
+ * ===========================================================================
+ * เจ้าของ 2026-10-17 (ส่งภาพหัวหน้าหน้าแรก + แผงครีมใน FAQ): "อยากให้เพิ่มสีแบบนี้ในทุก ๆ [หน้า] เพราะเป็นสีที่
+ * ซีอีโอเจ้าของเว็บชอบ … ตอนนี้พื้นหลังโทนเข้มอยู่แล้ว ทำจัดวางสีออกมาให้สวยงาม"
+ * ➔ จัดวางแบบหน้าแรก: ส่วนบนสุด (หัวหน้า) สว่างครีม-ทอง-เขียวน้ำทะเล · เนื้อหาด้านล่างเป็นกลางคืน
+ *    ขอบล่างแถบโค้งเป็นเส้นขอบฟ้า (ไม่ใช่เส้นตรงตัด)
+ *
+ * วิธี: ไม่แก้ markup ของหัวหน้าทีละแบบ — ในขอบเขตหัวหน้า "สลับโทเคนกลางคืนเป็นโทเคนกลางวัน"
+ *    (`--ui2-on-night*` · `--ui2-line-night` · `--ui2-glass-night*` · `--ui2-gold-solid` · `--color-*`)
+ *    สไตล์เดิมของหัวหน้าทุกแบบที่อ่านโทเคนจึงกลายเป็นตัวหมึกบนครีมเอง · เหลือแก้เฉพาะสีที่เขียนตายตัว
+ * ⚠️ ไม่มีของหนัก (พื้นเป็น gradient วาดครั้งเดียว) · ไม่มีรูปทรงตกแต่ง (กฎเหล็ก 2)
+ * ⚠️ ทองบนครีมต้องเป็นทองเข้ม (`--ui2-gold-ink`) — ทองสว่างคอนทราสต์ไม่ผ่าน (แผน UI 2.0 หัวข้อ 6.1.1)
+ */
+
+/* หัวหน้าที่เป็นแถบรุ่งอรุณ (หัวหน้ากลาง 3 แบบ + หัวหน้าเฉพาะหน้าที่เป็นข้อความบนพื้น) */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head),
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) {
+  --ui2-on-night: #2B2118;
+  --ui2-on-night-soft: #5A4A3A;
+  --ui2-on-night-dim: #6E604F;
+  --ui2-line-night: rgba(74, 47, 16, 0.16);
+  --ui2-glass-night-solid: rgba(255, 252, 246, 0.82);
+  --ui2-glass-edge-night: rgba(255, 255, 255, 0.9);
+  --ui2-gold-solid: var(--ui2-gold-ink);
+  --ui2-gold-night: var(--ui2-gold-light);
+  --color-ink: #29261F;
+  --color-ink-deep: #1F1B15;
+  --color-muted: #5E5547;
+  --color-gold: #A58A5C;
+  --color-gold-ink: #8A5512;
+  --color-gold-ink-deep: #6E430D;
+  --color-line: rgba(74, 47, 16, 0.16);
+  --color-line-warm: rgba(74, 47, 16, 0.16);
+  --color-surface: #FFFCF6;
+  --color-surface-warm: #FFFCF6;
+  --color-canvas: #F7F0E3;
+  --color-inset: #F3EADB;
+  --glass-fill: rgba(255, 252, 246, 0.86);
+  --glass-edge: rgba(74, 47, 16, 0.14);
+  position: relative;
+  isolation: isolate;
+  color: var(--ui2-ink);
+}
+
+/* แถบครีมเต็มจอ — ขยายขึ้นไปใต้หัวเว็บ (หัวเว็บแคปซูลมืดลอยบนครีมแบบหน้าแรก) · ขอบล่างโค้งเป็นขอบฟ้า */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head)::after {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  top: -320px;
+  bottom: var(--dawn-bottom, -28px);
+  left: 50%;
+  width: 100vw;
+  translate: -50% 0;
+  pointer-events: none;
+  border-radius: 0 0 50% 50% / 0 0 64px 64px;
+  background:
+    radial-gradient(48% 40% at 10% 62%, rgba(255, 184, 92, 0.32) 0%, rgba(255, 184, 92, 0) 70%),
+    radial-gradient(42% 38% at 90% 58%, rgba(255, 222, 150, 0.5) 0%, rgba(255, 222, 150, 0) 70%),
+    radial-gradient(40% 34% at 72% 96%, rgba(132, 196, 184, 0.3) 0%, rgba(132, 196, 184, 0) 70%),
+    radial-gradient(36% 30% at 24% 100%, rgba(132, 196, 184, 0.2) 0%, rgba(132, 196, 184, 0) 70%),
+    var(--ui2-day);
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.6);
+}
+
+/* ตัวหนังสือ/ป้ายที่เขียนสีตายตัวไว้สำหรับพื้นมืด */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) :is(h1, .ui2-ph-title) {
+  text-shadow: none;
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-gold-night,
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-gold-night {
+  color: var(--ui2-gold-ink);
+}
+/* ปุ่มหลักบนครีม = ปุ่มดำแบบหน้าแรก */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-btn-gold,
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-btn-gold {
+  color: var(--ui2-button-text);
+  background: var(--ui2-button);
+  box-shadow: 0 14px 30px -14px rgba(23, 17, 12, 0.7);
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-btn-gold .ui2-btn-arrow,
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-btn-gold .ui2-btn-arrow {
+  border-color: var(--ui2-button-text);
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-btn-ghost,
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-btn-ghost {
+  background: rgba(255, 252, 246, 0.7);
+}
+/* ชิปลิงก์ใต้หัวหน้า: ครีมใส · หน้าปัจจุบันเป็นเม็ดดำ */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-ph-chip {
+  background: rgba(255, 252, 246, 0.6);
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-ph-chip[aria-current="page"] {
+  color: var(--ui2-button-text);
+  background: var(--ui2-button);
+}
+
+/* เกาะกลางคืนในแถบครีม — ชิ้นที่ออกแบบเป็นแผ่นมืดอยู่แล้ว (ตั๋วฟรีหน้าราคา · แผ่นฟ้าไพ่ราศี · แถบขั้นตอนสร้างผัง)
+   คงเป็นแผ่นมืดบนครีม (ตัดกันสวยแบบปุ่มดำหน้าแรก) ➔ คืนโทเคนกลางคืนในขอบเขตของชิ้นนั้น */
+.ui2-pg :is(.v2-pr-free, .v2-zs-sky, .v2-sb-steps, .v2-cd-placard, .v2-cd-flip, .v2-sd-board, .ui2-dy-table) {
+  --ui2-on-night: #F6EEE2;
+  --ui2-on-night-soft: #CFC3B2;
+  --ui2-on-night-dim: rgba(246, 238, 226, 0.62);
+  --ui2-line-night: rgba(246, 238, 226, 0.14);
+  --ui2-glass-night-solid: rgba(28, 23, 30, 0.9);
+  --ui2-glass-edge-night: rgba(255, 236, 200, 0.16);
+  --ui2-gold-solid: #FFD98F;
+  --ui2-gold-night: linear-gradient(100deg, #E39A3E 0%, #FFD98F 25%, #FFF5DC 50%, #FFD98F 75%, #E39A3E 100%);
+  --color-ink: #F6EEE2;
+  --color-ink-deep: #F6EEE2;
+  --color-muted: #CFC3B2;
+  --color-gold-ink: #FFD98F;
+  color: var(--ui2-on-night);
+}
+/* รอยเว้าข้างตั๋วต้องเป็นสีพื้นครีม (เดิมสีพื้นกลางคืน) */
+.ui2-pg .v3-pr-hero .v2-pr-free::before,
+.ui2-pg .v3-pr-hero .v2-pr-free::after {
+  background: #F6EBD8;
+  box-shadow: inset 0 0 0 1px rgba(184, 105, 28, 0.35);
+}
+.ui2-pg .v3-pr-hero .v2-pr-free {
+  box-shadow: 0 0 0 6px rgba(255, 252, 246, 0.6), 0 0 0 7px rgba(184, 105, 28, 0.22), 0 40px 70px -36px rgba(40, 24, 8, 0.75);
+}
+/* หัวเล็กสีม่วงอ่อนของหน้าราศี — บนครีมเป็นม่วงเข้ม */
+.ui2-pg .v2-zs-head .v2-zs-k {
+  color: #5B4B9A;
+}
+/* แถบขั้นตอนสร้างผัง: พื้นมืดทึบ (เดิมโปร่ง 70% บนท้องฟ้า) */
+.ui2-pg .v2-sb-steps {
+  background: #1E1822;
+}
+
+/* เว้นระยะจากขอบฟ้า — เนื้อหาถัดไปไม่ชนเส้นโค้ง */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) {
+  margin-bottom: 64px;
+}
+@media (max-width: 767px) {
+  :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) {
+    margin-bottom: 52px;
+  }
+  :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head)::after {
+    border-radius: 0 0 50% 50% / 0 0 32px 32px;
+  }
+}
+
+/* สีธาตุของไพ่ (`--el`) ออกแบบไว้สว่างสำหรับพื้นมืด — บนครีมใช้เฉดเข้ม (หัวเล็ก · ชื่ออังกฤษ หน้าไพ่รายใบ) */
+.ui2-pg .v2-cd-stage {
+  --el: 138, 79, 16;
+}
+.ui2-pg [data-suit="wands"] .v2-cd-stage {
+  --el: 168, 66, 22;
+}
+.ui2-pg [data-suit="cups"] .v2-cd-stage {
+  --el: 36, 84, 160;
+}
+.ui2-pg [data-suit="swords"] .v2-cd-stage {
+  --el: 64, 82, 112;
+}
+.ui2-pg [data-suit="pentacles"] .v2-cd-stage {
+  --el: 34, 112, 58;
+}
+/* ป้ายหมวดหน้าผัง */
+.ui2-pg .v2-sd-top .v2-sd-tags li {
+  border-color: rgba(138, 79, 16, 0.3);
+}
+
+/* ── ช่องค้นหาในหัวหน้า (/blog · /cards) — บนครีมเป็นกระดาษขาวแบบช่องพิมพ์ในคำถามที่พบบ่อยหน้าแรก
+   เดิมพื้นดำโปร่ง 70–90% บนครีมกลายเป็นก้อนเทาขุ่น ตัวหนังสือในช่องจมหาย (เจ้าของ 2026-10-17 "ปรับส่วนนี้ด้วย") ── */
+.ui2-pg :is(.v3-bl-search, .v2-cx-search) input {
+  border: 1px solid rgba(74, 47, 16, 0.14);
+  color: var(--ui2-ink);
+  background: var(--ui2-paper);
+  box-shadow: 0 0 0 6px rgba(255, 252, 246, 0.5), 0 22px 40px -22px rgba(74, 47, 16, 0.45);
+}
+.ui2-pg :is(.v3-bl-search, .v2-cx-search) input::placeholder {
+  color: #7A6B58;
+}
+.ui2-pg :is(.v3-bl-search, .v2-cx-search) input:focus-visible {
+  border-color: var(--ui2-gold-ink);
+  box-shadow: 0 0 0 4px rgba(184, 105, 28, 0.18), 0 22px 40px -22px rgba(74, 47, 16, 0.45);
+}
+.ui2-pg .v3-bl-search-ic {
+  color: var(--ui2-gold-ink);
+}
+.ui2-pg .v2-cx-search::before {
+  border-color: var(--ui2-gold-ink);
+}
+.ui2-pg .v2-cx-search::after {
+  background: var(--ui2-gold-ink);
+}
+/* คำค้นแนะนำใต้ช่องค้นหา (/cards) — เม็ดครีมมีขอบ */
+.ui2-pg .v2-cx-try button {
+  border-color: rgba(74, 47, 16, 0.16);
+  background: rgba(255, 252, 246, 0.7);
+}
+.ui2-pg .v2-cx-try button:hover,
+.ui2-pg .v2-cx-try button[aria-pressed="true"] {
+  border-color: rgba(184, 105, 28, 0.5);
+  color: var(--ui2-gold-ink);
+}
+/* แถบข้อเท็จจริงใต้หัวหน้า ("รวม 30 บทความ | อ้างอิงไพ่ต้นฉบับ 1909") — เม็ดกระดาษขาวชัดขึ้น */
+@media (min-width: 768px) {
+  .ui2-pg .ui2-ph .ui2-ph-trust {
+    background: rgba(255, 252, 246, 0.75);
+    box-shadow: 0 0 0 1px var(--ui2-line-night), 0 12px 26px -20px rgba(74, 47, 16, 0.5);
+  }
+}
+
+/* ── คลังผัง /spreads (ui2-spreads.css นำเข้าไฟล์นี้ด้วย · เจ้าของ 2026-10-17 "หน้านี้ยังไม่ปรับสีล่าสุด") ──
+   หัวหน้าเป็นส่วน .ui2-night ที่วาดท้องฟ้าด้วย ::before — แถบครีม (::after) วาดทับ · ดาว/ก้อนแสงกลางคืนในหัวหน้าไม่แสดง */
+.ui2-sp .ui2-sp-hero :is(.ui2-stars, .ui2-aurora) {
+  display: none;
+}
+.ui2-sp .ui2-sp-hero .ui2-sp-cta {
+  color: var(--ui2-button-text);
+  background: var(--ui2-button);
+  box-shadow: 0 14px 30px -14px rgba(23, 17, 12, 0.7);
+}
+.ui2-sp .ui2-sp-hero .ui2-sp-cta .ui2-btn-arrow {
+  border-color: var(--ui2-button-text);
+}
+.ui2-sp .ui2-sp-hero .ui2-btn-ghost {
+  color: var(--ui2-ink);
+  background: rgba(255, 252, 246, 0.75);
+  box-shadow: 0 0 0 1px rgba(74, 47, 16, 0.16);
+}
+.ui2-sp .ui2-sp-hero .ui2-sp-h1,
+.ui2-sp .ui2-sp-hero .ui2-lede {
+  text-shadow: none;
+}
+.ui2-sp .ui2-sp-hero-inner::before {
+  background: radial-gradient(closest-side, rgba(255, 222, 150, 0.35) 0%, rgba(255, 222, 150, 0) 100%);
+}
+
+/* ── หน้าเปิดไพ่ /read/* (TarotFlow · 26 ผัง) — ขั้น "ตั้งคำถาม": แถบครีมใต้หัวข้อ "อยากรู้เรื่องอะไร"
+   ครอบแถบขั้นตอนด้านบนด้วย (แถบขยายขึ้น 320px) ➔ แถบขั้นตอนใช้สีกลางวันเฉพาะตอนอยู่ขั้นนี้ (ขั้นอื่นไม่มีหัวข้อ = ท้องฟ้ามืดเหมือนเดิม)
+   (เจ้าของ 2026-10-17 "/read/three-card · /read/love · /read/celtic-cross สีใหม่ยังไม่มี") ── */
+.ui2-pg:has(.v2-rt-head) .v2-rail {
+  --ui2-on-night: #2B2118;
+  --ui2-on-night-dim: #6E604F;
+  --rt-line: rgba(74, 47, 16, 0.2);
+  --rt-gold: #8A4F10;
+  position: relative;
+  z-index: 1;
+}
+.ui2-pg .v2-rt-head {
+  padding-bottom: 8px;
+}
+
+/* ── ไพ่ประจำวัน /daily (ui2-daily.css นำเข้าไฟล์นี้) — หัวหน้าพิธีบนครีม · พัดไพ่ใต้เส้นขอบฟ้าบนท้องฟ้าเดิม ── */
+.ui2-dy .ui2-dy-hero {
+  padding-bottom: 12px;
+}
+/* ไพ่ลอยรอบหัวหน้า /daily อยู่ชั้นเดียวกับเนื้อหา — ยกขึ้นเหนือแถบครีม (เดิมจมอยู่ใต้แถบ เห็นแค่ขอบโผล่ใต้เส้นโค้ง) */
+.ui2-dy .ui2-dy-deco {
+  z-index: 3;
+}
+
+/* ══ กรอบหน้าต่างทุกหน้าเป็นแผ่นครีมพาสเทล (เจ้าของ 2026-10-17 ส่งภาพแผงครีมใน FAQ หน้าแรก —
+   "ในกรอบสีเดียวกับพื้นหลังมีหลายหน้ามาก … อยากให้สีในกรอบหลายจุด หลายหน้า เหมือนรูปนี้ ปรับให้สวยงาม ดูตัวอย่างหน้าแรก")
+   หน้าต่างโชว์เคส/หน้าต่างเดี่ยว (Ui2Showcase · Ui2Window) · หน้าต่างหมวดผัง /spreads · บทในหน้าเอกสาร · แผงบทความ SEO
+   ➔ พื้นครีมไล่ทองมุมบนซ้าย เขียวน้ำทะเลมุมล่างขวา (ชุดเดียวกับแผงจำลองคำถามที่พบบ่อยหน้าแรก) + ขอบทองบางสองชั้นแบบการ์ดคลังไพ่หน้าแรก
+   ตัวหนังสือ/ชิ้นข้างในเปลี่ยนเป็นโทนกลางวันด้วยโทเคนชุดเดียวกับแถบครีม (กฎแรกของไฟล์)
+   `html` นำหน้า: ไฟล์นี้นำเข้าก่อนกฎบทหน้าเอกสาร (`.ui2-pg .v2-doc > section` ความเจาะจงเท่ากัน) — ต้องชนะเสมอ ══ */
+html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) {
+  background:
+    radial-gradient(60% 340px at 6% 0%, rgba(255, 222, 150, 0.55) 0%, rgba(255, 222, 150, 0) 72%),
+    radial-gradient(50% 320px at 100% 100%, rgba(132, 196, 184, 0.32) 0%, rgba(132, 196, 184, 0) 72%),
+    var(--ui2-day);
+  box-shadow:
+    0 0 0 1px rgba(255, 236, 200, 0.5),
+    0 0 0 8px rgba(255, 236, 200, 0.05),
+    0 0 0 9px rgba(255, 236, 200, 0.1),
+    0 60px 120px -50px rgba(0, 0, 0, 0.9);
+}
+/* เส้นใต้แถบหน้าต่าง + ป้ายเลข บนครีม */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.ui2-sx-bar, .ui2-sp-win-bar)::after {
+  background: linear-gradient(90deg, transparent 0%, rgba(74, 47, 16, 0.16) 15%, rgba(74, 47, 16, 0.16) 85%, transparent 100%);
+}
+/* แผงย่อยในหน้าต่าง (กล่อง "เริ่มที่ใบนี้" · การ์ดกระจกเดิม) = กระดาษขาวบนครีม */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.ui2-sx-start, .ui2-sp-start, .altar-panel, .altar-card-porcelain, .glass-tile) {
+  background: rgba(255, 252, 246, 0.86);
+  border-color: rgba(74, 47, 16, 0.12);
+}
+/* แถบหน้าต่างบนครีม: คำอังกฤษเอียงใช้หมึกสีหมวด (สีหมวดอ่อนจางหายบนครีม) · ป้ายเลขมีขอบ · ขีดตำแหน่งปัจจุบันเข้ม */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.ui2-sx-name, .ui2-sp-win-name) .ui2-accent {
+  color: var(--cat-ink);
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.ui2-sx-n, .ui2-sp-win-n) {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--cat-ink) 30%, transparent);
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.ui2-sx-steps, .ui2-sp-win-steps) .is-here {
+  background: var(--cat-ink);
+}
+/* ปุ่มในกล่อง "เริ่มที่ใบนี้" = ปุ่มดำแบบหน้าแรก */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-sx-start-act > :is(a, button),
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-sp-start-btn {
+  color: var(--ui2-button-text);
+  background: var(--ui2-button);
+  box-shadow: 0 10px 22px -12px rgba(23, 17, 12, 0.7);
+}
+/* ตั๋วแพ็กหน้าราคาในกรอบครีม = ตั๋วกระดาษขาว (แพ็กยอดนิยมแถบทองด้านบน) · รอยเว้าสีเดียวกับพื้นกรอบ */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-tix {
+  background:
+    radial-gradient(90% 50% at 50% 0%, rgba(255, 217, 143, 0.18) 0%, rgba(255, 217, 143, 0) 70%),
+    #FFFCF6;
+  border-color: rgba(184, 105, 28, 0.2);
+  box-shadow: 0 24px 44px -30px rgba(74, 47, 16, 0.55);
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-tix-popular {
+  background:
+    linear-gradient(180deg, rgba(232, 170, 80, 0.95) 0 6px, transparent 6px),
+    radial-gradient(90% 60% at 50% 0%, rgba(255, 217, 143, 0.3) 0%, rgba(255, 217, 143, 0) 70%),
+    #FFFCF6;
+  border-color: rgba(184, 105, 28, 0.55);
+  box-shadow: 0 0 0 1px rgba(184, 105, 28, 0.25), 0 30px 54px -28px rgba(74, 47, 16, 0.6);
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-tix-stub {
+  border-top-color: rgba(184, 105, 28, 0.28);
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-tix-stub::before,
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-tix-stub::after {
+  background: #F6EEDF;
+  box-shadow: inset 0 0 0 1px rgba(184, 105, 28, 0.22);
+}
+/* ความหมาย 5 ด้าน (หน้าไพ่รายใบ) — กล่องกระดาษขาวมีแสงสีด้าน · หัวกล่องหมึกเข้ม (สีด้านอ่อนจางบนขาว) */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .v2-cd-room {
+  border-color: rgba(var(--rm), 0.55);
+  background: radial-gradient(70% 120% at 0% 0%, rgba(var(--rm), 0.2) 0%, rgba(var(--rm), 0) 70%), #FFFCF6;
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .v2-cd-room h4 {
+  color: var(--ui2-ink);
+}
+/* ปุ่มทองเดิม (.btn-gold-glass น้ำตาลเข้มของธีมสว่าง) บนครีม = ปุ่มดำขอบทองแบบปุ่มหลักหน้าแรก
+   (เจ้าของ 2026-10-17 ส่งภาพปุ่ม "เข้าสู่ระบบเพื่อซื้อ" — "สีปุ่มไม่สวยเลย") */
+html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) :is(.btn-gold-glass, .btn-glass-primary),
+html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.btn-gold-glass, .btn-glass-primary) {
+  color: var(--ui2-button-text);
+  background-image: none;
+  background-color: var(--ui2-button);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.55) inset, 0 12px 26px -14px rgba(23, 17, 12, 0.7);
+}
+html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.btn-gold-glass, .btn-glass-primary):hover {
+  filter: none;
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.85) inset, 0 16px 30px -14px rgba(23, 17, 12, 0.75);
+}
+/* ป้ายทอง (bg-gold-ink · เช่น "ยอดนิยม" บนตั๋ว) บนครีม = เม็ดทองไล่สี ตัวหมึก (เดิมเม็ดน้ำตาล) */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .bg-gold-ink {
+  color: var(--ui2-ink);
+  background: linear-gradient(180deg, #FFE3A8 0%, #F0C470 100%);
+  box-shadow: 0 0 0 1px rgba(184, 105, 28, 0.35);
+}
+/* เงาดำหนักใต้ไพ่/การ์ด (ออกแบบไว้บนพื้นมืด) บนกรอบครีมกลายเป็นสี่เหลี่ยมเทาใต้ไพ่
+   (เจ้าของ 2026-10-17 ส่งภาพไพ่คนเขลา/การตื่นขึ้น "ข้างล่างสี่เหลี่ยมที่ขึ้นมาคืออะไร ไม่เอา") ➔ ในกรอบครีมใช้เงาอุ่นจาง */
+html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) {
+  --ui2-card-shadow: 0 0 0 1px rgba(201, 161, 90, 0.5), 0 18px 28px -20px rgba(74, 47, 16, 0.5);
+}
+html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.v3-tile-frame, .ui2-qn-note, .v2-qp-note, .v3-at-art, .ui2-sp-topic-art, .ui2-zw-card, .v3-bl-cover-art) {
+  box-shadow: 0 0 0 1px rgba(201, 161, 90, 0.45), 0 14px 22px -18px rgba(74, 47, 16, 0.5);
+}
+@media (hover: hover) {
+  html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .v3-tile:hover .v3-tile-frame {
+    box-shadow: 0 0 0 1px rgba(184, 105, 28, 0.6), 0 22px 34px -20px rgba(74, 47, 16, 0.55);
+  }
+}
+
+/* ── มือถือ/ทุกจอ: เก็บรายละเอียดตัวหนังสือบนครีม (เจ้าของ 2026-10-17 "ปรับสัดส่วน ฟอนต์ต่าง ๆ ในมือถือให้สวยและเหมาะสม") ── */
+/* จำนวนใบในกล่อง "เริ่มที่ใบนี้/เริ่มง่ายที่สุด" — สีหมวดอ่อนจางบนขาว ➔ หมึกสีหมวด */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.ui2-sx-start-n, .ui2-sp-start-n) {
+  color: var(--cat-ink);
+}
+/* เม็ดคำสัญญาหัวหน้าราคา ("ไม่มีรายเดือน" …) — ขอบทองจางหายบนครีม ➔ เม็ดกระดาษขาวมีขอบ */
+.ui2-pg .v3-pr-hero .v2-pr-promise li {
+  border-color: rgba(184, 105, 28, 0.22);
+  background: rgba(255, 252, 246, 0.8);
+}
+@media (max-width: 767px) {
+  /* ป้ายชื่อผังบนการ์ด /spreads — การ์ดแคบ ชื่อยาวหักหลายบรรทัด ➔ เล็กลงนิด + แบ่งบรรทัดสมดุล */
+  .ui2-sp .ui2-sc-band {
+    font-size: 13px;
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+  /* ตัวเนื้อหาในหน้าต่างครีม: ระยะบรรทัดโปร่งขึ้นเล็กน้อย อ่านภาษาไทยสบายตา */
+  :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.ui2-sx-lead, .ui2-sp-shelf .ui2-lede) {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+}
+/*
+ * ตัวมีเชิง (Noto Serif Thai · `font-serif-th`) ในคอมโพเนนต์รุ่นเก่า ➔ ตัวเนื้อหาไม่มีเชิง (Sarabun) แบบหน้าแรก
+ * บนมือถือตัวมีเชิงขนาด 11–13px อ่านยากและดูคนละชุดกับหัวข้อ Anuphan (เจ้าของ 2026-10-17 "ปรับฟอนต์ในมือถือให้สวยและเหมาะสม")
+ * หัวข้อ h1–h3 ยังเป็น Anuphan จาก globals.css · ชื่อแบรนด์ในหัวเว็บ/ท้ายเว็บอยู่นอกขอบเขตนี้ (คงตัวมีเชิง)
+ */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) .font-serif-th:not(h1, h2, h3) {
+  font-family: var(--font-sans-th);
+}

@@ -1,0 +1,735 @@
+/*
+ * 🧱 บล็อกกลางจากหน้าแรก — กล่องหลายขนาด (bento) + แถวสลับซ้ายขวา (ภาพจำลอง ↔ ข้อความ)
+ * ===========================================================================
+ * คอมโพเนนต์: src/components/ui2/Ui2Blocks.tsx · นำเข้าโดย ui2-page.css (ทุกหน้า UI 2.0 ที่ไม่ใช่หน้าแรก)
+ * ภาษาภาพชุดเดียวกับ `.ui2-bento` / `.ui2-fq-*` ใน ui2.css (หน้าแรก) — คลาสแยกชื่อ `ui2-bx-*` / `ui2-fr-*`
+ * เพราะหน้าแรกโหลด ui2.css เฉพาะของตัวเอง (ไม่โหลดไฟล์นี้) และมีขนาดหัวข้อปรับเฉพาะหน้าแรกท้ายไฟล์
+ *
+ * ⚠️ ไม่มีของหนักในไฟล์นี้ — หลังไพ่ลอย/แสงเต้นอยู่ใน ui2-page-fx.css (ระดับ full · ui2-loop ใต้ data-anim-section)
+ * ⚠️ ไม่มีอีโมจิ/สัญลักษณ์ตกแต่ง (กฎเหล็ก 2) — รายการใช้เส้นซ้าย · แว่นขยายในช่องพิมพ์จำลองคือไอคอนใช้งาน
+ */
+
+/* ตัวห่อกว้างสำหรับหน้าเอกสาร (เนื้อหาหลักกว้าง 820) — บล็อกต้องการที่ถึง 1200 */
+.ui2-bk-wrap {
+  display: grid;
+  gap: 72px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 8px 16px 72px;
+}
+/* ท้ายหน้าทั่วไป (Ui2NextSteps): กว้างไม่เกิน 1200 · เว้นจากเนื้อหาด้านบน · ตัวห่อหน้าแต่ละหน้ามีขอบซ้ายขวาอยู่แล้ว */
+.ui2-next-wrap {
+  max-width: 1200px;
+  margin-inline: auto;
+  /* กล่องแถวสุดท้ายห้ามชนท้ายเว็บ (หน้า /daily ไม่มีระยะล่างใน <main> · เจ้าของส่งภาพ 2026-10-17) */
+  padding-bottom: 64px;
+}
+.ui2-next {
+  margin-top: 72px;
+}
+@media (min-width: 1024px) {
+  .ui2-bk-wrap {
+    gap: 110px;
+    padding: 24px 24px 96px;
+  }
+  .ui2-next {
+    margin-top: 110px;
+  }
+}
+
+/* ── หัวส่วน ───────────────────────────────────────────────────────────── */
+.ui2-bk {
+  position: relative;
+  display: grid;
+  gap: 26px;
+  scroll-margin-top: 110px;
+}
+.ui2-bk-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 680px;
+  margin-inline: auto;
+  text-align: center;
+}
+.ui2-bk-kicker {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--ui2-gold-solid);
+}
+.ui2-bk-h2 {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.22;
+  font-size: clamp(28px, 22.4px + 1.43vw, 44px);
+  text-wrap: balance;
+  color: var(--ui2-on-night);
+}
+.ui2-bk-lede {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ui2-on-night-soft);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   กล่องหลายขนาด
+   ═════════════════════════════════════════════════════════════════════════ */
+.ui2-bx {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+.ui2-bx-tile {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 22px;
+  border-radius: 30px;
+  color: var(--ui2-on-night);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.065) 0%, rgba(255, 255, 255, 0.015) 100%), var(--ui2-night-2);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+  overflow: hidden;
+  text-decoration: none;
+}
+a.ui2-bx-tile {
+  transition: translate var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+a.ui2-bx-tile:active {
+  translate: 0 -2px;
+}
+a.ui2-bx-tile:focus-visible {
+  outline: 2px solid var(--ui2-gold-solid);
+  outline-offset: 3px;
+}
+.ui2-bx-tile.is-center {
+  align-items: center;
+  text-align: center;
+}
+.ui2-bx-tile.is-center .ui2-bx-label,
+.ui2-bx-tile.is-center .ui2-bx-title,
+.ui2-bx-tile.is-center .ui2-bx-desc {
+  align-self: stretch;
+  text-align: left;
+}
+.ui2-bx-label {
+  font-family: var(--ui2-font-display);
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  color: var(--ui2-teal-text);
+}
+.ui2-bx-title {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: clamp(24px, 22.5px + 0.4vw, 28px);
+  line-height: 1.3;
+}
+.is-wide > .ui2-bx-title,
+.is-tall > .ui2-bx-title {
+  font-size: clamp(26px, 23px + 0.76vw, 34px);
+}
+.ui2-bx-title b {
+  font-weight: 500;
+  color: var(--ui2-gold-solid);
+}
+.ui2-bx-desc {
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-bx-hint {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-bx-go {
+  margin-top: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 14.5px;
+  color: var(--ui2-gold-solid);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 217, 143, 0.35);
+  text-underline-offset: 5px;
+}
+
+/* แสงในกล่อง (radial-gradient ล้วน · วาดครั้งเดียว) */
+.ui2-bx-glow {
+  position: absolute;
+  z-index: -1;
+  border-radius: 999px;
+  pointer-events: none;
+}
+.ui2-bx-glow.is-amber {
+  left: -140px;
+  bottom: -220px;
+  width: 560px;
+  height: 400px;
+  background: radial-gradient(closest-side, rgba(233, 160, 70, 0.3), rgba(233, 160, 70, 0));
+}
+.ui2-bx-glow.is-teal {
+  left: 50%;
+  top: 46%;
+  width: 440px;
+  height: 440px;
+  translate: -50% -50%;
+  background: radial-gradient(closest-side, rgba(79, 179, 169, 0.28), rgba(79, 179, 169, 0));
+}
+
+/* ไพ่ 3 ใบ + แผงคำอ่าน */
+.ui2-bx-fan {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.ui2-bx-fan-cards {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding-top: 8px;
+}
+.ui2-bx-fan-cards > span {
+  width: 64px;
+  aspect-ratio: 3 / 5;
+  border-radius: 8px;
+  overflow: hidden;
+  opacity: 0.75;
+}
+.ui2-bx-fan-cards > span.is-focus {
+  opacity: 1;
+  translate: 0 -8px;
+  box-shadow: 0 0 0 1.5px var(--ui2-gold-solid), 0 0 34px rgba(255, 200, 110, 0.5);
+}
+.ui2-bx-fan-cards img,
+.ui2-bx-strip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ui2-bx-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.02));
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.11), 0 1px 0 rgba(255, 255, 255, 0.09) inset;
+}
+.ui2-bx-panel-k {
+  font-size: 12.5px;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-bx-panel-t {
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+.ui2-bx-panel-t b {
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+}
+.ui2-bx-chip {
+  align-self: flex-start;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-size: 12.5px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* หลังไพ่ใบใหญ่ + แสงทอง (หลังไพ่วาดด้วย CSS — ชุดเดียวกับ .ui2-face-back ของหน้าแรก) */
+.ui2-bx-back-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin: 10px 0 2px;
+}
+.ui2-bx-back {
+  position: relative;
+  width: 120px;
+  aspect-ratio: 3 / 5;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 217, 143, 0.35) 0 9%, rgba(255, 217, 143, 0) 10%),
+    repeating-linear-gradient(45deg, rgba(255, 217, 143, 0.16) 0 2px, rgba(255, 217, 143, 0) 2px 10px),
+    repeating-linear-gradient(-45deg, rgba(255, 217, 143, 0.16) 0 2px, rgba(255, 217, 143, 0) 2px 10px),
+    linear-gradient(160deg, #2A1F2E 0%, #17111B 100%);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.55) inset, 0 0 0 4px rgba(23, 17, 27, 1) inset, 0 0 0 5px rgba(255, 217, 143, 0.3) inset, 0 16px 30px -14px rgba(0, 0, 0, 0.9);
+}
+.ui2-bx-burst {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border-radius: 999px;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 214, 140, 0.32) 0%, rgba(255, 214, 140, 0) 68%);
+}
+
+/* แถบไพ่ย่อ */
+.ui2-bx-strip {
+  display: grid;
+  gap: 5px;
+}
+.ui2-bx-strip > span {
+  aspect-ratio: 3 / 5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.ui2-bx-strip .is-empty {
+  background: rgba(255, 255, 255, 0.06);
+}
+.ui2-bx-strip .is-next {
+  box-shadow: inset 0 0 0 1.5px var(--ui2-gold-solid), 0 0 16px rgba(255, 200, 110, 0.4);
+}
+
+/* เม็ด */
+.ui2-bx-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.is-center .ui2-bx-chips {
+  justify-content: center;
+}
+.ui2-bx-chips > span {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-size: 13px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+.ui2-bx-chips > span.is-on {
+  color: var(--ui2-button);
+  background: var(--ui2-button-text);
+  box-shadow: none;
+}
+
+/* ตัวเลขใหญ่ */
+.ui2-bx-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.ui2-bx-stat b {
+  font-size: clamp(48px, 40px + 2vw, 68px);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ui2-gold-solid);
+}
+.ui2-bx-stat span {
+  font-family: var(--ui2-font-display);
+  font-size: 15px;
+  color: var(--ui2-on-night-soft);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   แถวสลับซ้ายขวา
+   ═════════════════════════════════════════════════════════════════════════ */
+.ui2-fr-rows {
+  display: grid;
+  gap: 44px;
+  margin-top: 14px;
+}
+.ui2-fr-row {
+  display: grid;
+  gap: 22px;
+  align-items: center;
+  scroll-margin-top: 110px;
+}
+.ui2-fr-kicker {
+  display: block;
+  margin-bottom: 8px;
+  font-family: var(--ui2-font-display);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--ui2-teal-text);
+}
+.ui2-fr-q {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: clamp(22px, 18.3px + 0.95vw, 32px);
+  line-height: 1.3;
+  color: var(--ui2-on-night);
+}
+.ui2-fr-a {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-fr-a strong {
+  color: var(--ui2-on-night);
+}
+.ui2-fr-a a {
+  color: var(--ui2-gold-solid);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.ui2-fr-go {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 10px;
+  padding: 0 20px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--ui2-button);
+  background: var(--ui2-button-text);
+  transition: translate var(--dur-base) var(--ease-out);
+}
+.ui2-fr-go:active {
+  translate: 0 1px;
+}
+
+/* ภาพจำลอง: การ์ดพาสเทลสว่าง + แผงกระดาษขาวด้านใน */
+.ui2-fr-mock {
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  min-height: 260px;
+  padding: 28px 20px;
+  border-radius: 30px;
+  color: var(--ui2-ink);
+  background:
+    radial-gradient(70% 60% at 18% 12%, rgba(255, 222, 150, 0.85) 0%, rgba(255, 222, 150, 0) 70%),
+    radial-gradient(60% 60% at 90% 90%, rgba(132, 196, 184, 0.7) 0%, rgba(132, 196, 184, 0) 70%),
+    var(--ui2-day);
+}
+.ui2-fr-mock.is-teal {
+  background:
+    radial-gradient(70% 60% at 82% 10%, rgba(132, 196, 184, 0.85) 0%, rgba(132, 196, 184, 0) 70%),
+    radial-gradient(60% 60% at 10% 92%, rgba(255, 222, 150, 0.75) 0%, rgba(255, 222, 150, 0) 70%),
+    var(--ui2-day);
+}
+.ui2-fr-mock.is-violet {
+  background:
+    radial-gradient(70% 60% at 16% 88%, rgba(196, 176, 226, 0.85) 0%, rgba(196, 176, 226, 0) 70%),
+    radial-gradient(60% 60% at 88% 12%, rgba(255, 222, 150, 0.8) 0%, rgba(255, 222, 150, 0) 70%),
+    var(--ui2-day);
+}
+.ui2-fr-panel {
+  width: min(100%, 330px);
+  display: grid;
+  gap: 10px;
+  padding: 18px 18px 16px;
+  border-radius: 22px;
+  background: var(--ui2-paper);
+  box-shadow: 0 0 0 1px var(--ui2-line-day), 0 30px 50px -30px rgba(74, 47, 16, 0.55);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.ui2-fr-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ui2-gold-ink);
+}
+.ui2-fr-big {
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ui2-ink);
+}
+.ui2-fr-checks {
+  display: grid;
+  gap: 8px;
+  padding-block: 4px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.ui2-fr-checks li {
+  padding-left: 12px;
+  border-left: 2px solid rgba(184, 105, 28, 0.35);
+}
+.ui2-fr-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--ui2-line-day);
+}
+.ui2-fr-pills > span {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: var(--ui2-day);
+  box-shadow: 0 0 0 1px var(--ui2-line-day);
+}
+.ui2-fr-panel small {
+  font-size: 12px;
+  color: var(--ui2-muted);
+}
+.ui2-fr-fan {
+  display: flex;
+  justify-content: center;
+  padding-top: 6px;
+}
+.ui2-fr-card {
+  width: 64px;
+  aspect-ratio: 0.58;
+  object-fit: cover;
+  margin-inline: -6px;
+  border-radius: 7px;
+  box-shadow: 0 0 0 1px rgba(30, 25, 20, 0.14), 0 18px 26px -14px rgba(30, 25, 20, 0.7);
+}
+.ui2-fr-card:first-child {
+  rotate: -9deg;
+  translate: 0 8px;
+}
+.ui2-fr-card:nth-child(2) {
+  position: relative;
+  z-index: 1;
+  width: 74px;
+}
+.ui2-fr-card:last-child:not(:nth-child(2)) {
+  rotate: 9deg;
+  translate: 0 8px;
+}
+.ui2-fr-ask {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 21px;
+  line-height: 1.3;
+  text-align: center;
+}
+.ui2-fr-input {
+  position: relative;
+  width: min(100%, 330px);
+  padding: 12px 18px 12px 42px;
+  border-radius: 999px;
+  font-size: 14.5px;
+  background: var(--ui2-paper);
+  box-shadow: 0 0 0 1px var(--ui2-line-day), 0 16px 30px -20px rgba(74, 47, 16, 0.5);
+}
+.ui2-fr-input::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -7px;
+  border: 2px solid var(--ui2-muted);
+  border-radius: 999px;
+}
+.ui2-fr-input::after {
+  content: "";
+  position: absolute;
+  left: 28px;
+  top: 50%;
+  width: 6px;
+  height: 2px;
+  margin-top: 3px;
+  border-radius: 2px;
+  background: var(--ui2-muted);
+  rotate: 45deg;
+}
+.ui2-fr-boxes li {
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--ui2-day);
+}
+.ui2-fr-boxes {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* รายการพับต่อท้าย */
+.ui2-fr-more {
+  margin: 30px 0 0;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 18px;
+  color: var(--ui2-on-night);
+}
+.ui2-fr-list {
+  display: grid;
+  gap: 10px;
+}
+.ui2-fr-faq {
+  border-radius: 20px;
+  color: var(--ui2-on-night);
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+}
+.ui2-fr-faq > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 56px;
+  padding: 14px 18px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.ui2-fr-faq > summary::-webkit-details-marker {
+  display: none;
+}
+.ui2-fr-faq > summary:focus-visible {
+  outline: 2px solid var(--ui2-gold-solid);
+  outline-offset: 2px;
+  border-radius: 20px;
+}
+.ui2-fr-plus {
+  flex: none;
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+  transition: rotate var(--dur-base) var(--ease-out);
+}
+.ui2-fr-plus::before,
+.ui2-fr-plus::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 2px;
+  margin: -1px 0 0 -6px;
+  border-radius: 2px;
+  background: currentColor;
+}
+.ui2-fr-plus::after {
+  rotate: 90deg;
+}
+.ui2-fr-faq[open] .ui2-fr-plus {
+  rotate: 45deg;
+}
+.ui2-fr-faq-a {
+  padding: 0 18px 18px;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ui2-on-night-soft);
+}
+
+/* ── จอกว้างขึ้น ───────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .ui2-bx {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ui2-bx-tile.is-wide,
+  .ui2-bx-tile.is-tall {
+    grid-column: span 2;
+  }
+  .ui2-fr-mock {
+    min-height: 320px;
+  }
+  .ui2-fr-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+@media (min-width: 1024px) {
+  .ui2-bk {
+    gap: 34px;
+  }
+  .ui2-bx {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: minmax(220px, auto);
+    gap: 20px;
+  }
+  .ui2-bx-tile {
+    gap: 18px;
+    padding: 30px;
+  }
+  .ui2-bx-tile.is-tall {
+    grid-column: auto;
+    grid-row: span 2;
+  }
+  .ui2-bx-tile.is-wide {
+    grid-column: span 2;
+  }
+  .ui2-bx-fan {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 22px;
+  }
+  .ui2-bx-fan-cards {
+    gap: 10px;
+  }
+  .ui2-bx-fan-cards > span {
+    width: 80px;
+  }
+  .ui2-bx-panel {
+    flex: 1 1 260px;
+    padding: 18px;
+    border-radius: 20px;
+  }
+  .ui2-bx-panel-t {
+    font-size: 15.5px;
+    line-height: 1.75;
+  }
+  .ui2-bx-back-wrap {
+    margin: 18px 0 6px;
+  }
+  .ui2-bx-back {
+    width: 150px;
+    border-radius: 12px;
+  }
+  .ui2-bx-burst {
+    width: 260px;
+    height: 260px;
+  }
+  .ui2-bx-strip {
+    gap: 6px;
+  }
+  .ui2-fr-rows {
+    gap: 64px;
+    margin-top: 22px;
+  }
+  .ui2-fr-row {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 64px;
+  }
+  .ui2-fr-row:nth-child(even) > .ui2-fr-mock {
+    order: 2;
+  }
+  .ui2-fr-mock {
+    min-height: 360px;
+  }
+}
+@media (hover: hover) {
+  a.ui2-bx-tile:hover {
+    translate: 0 -4px;
+    box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.4), 0 1px 0 var(--ui2-glass-edge-night) inset;
+  }
+  .ui2-bx-go:hover {
+    text-decoration-color: currentColor;
+  }
+  .ui2-fr-go:hover {
+    translate: 0 -2px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  a.ui2-bx-tile,
+  .ui2-fr-plus,
+  .ui2-fr-go {
+    transition: none;
+  }
+}

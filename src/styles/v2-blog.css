@@ -1,0 +1,293 @@
+/*
+ * 📚 หน้ารวมบทความ (/blog · /en/blog)
+ * v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): หัวหน้าไพ่ลอย (Ui2PageHero) + ช่องค้นหา
+ *    ➔ เรื่องจากปก ➔ 5 หมวดเป็นหน้าต่างโชว์เคส (Ui2Showcase · ui2-showcase.css) · บทความหนึ่งเรื่อง = ไพ่งาช้างเอียง + ชื่อ + คำโปรย
+ * ไม่มี filter/backdrop/mask/อนิเมชันวน
+ */
+
+/* ช่องค้นหาในหัวหน้า */
+.v3-bl-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  margin-top: 8px;
+}
+.v3-bl-search-ic {
+  position: absolute;
+  left: 22px;
+  width: 18px;
+  height: 18px;
+  color: var(--ui2-gold-solid);
+  pointer-events: none;
+}
+.v3-bl-search input {
+  width: 100%;
+  min-height: 56px;
+  padding: 0 22px 0 52px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.3);
+  font-size: 16px;
+  color: var(--ui2-on-night);
+  background: rgba(12, 10, 15, 0.7);
+  box-shadow: 0 0 0 6px rgba(255, 217, 143, 0.04);
+}
+.v3-bl-search input::placeholder {
+  color: var(--ui2-on-night-dim);
+}
+.v3-bl-search input:focus-visible {
+  outline: none;
+  border-color: var(--ui2-gold-solid);
+  box-shadow: 0 0 0 4px rgba(255, 217, 143, 0.16);
+}
+.v3-bl .ui2-sx {
+  position: relative;
+  z-index: 3;
+  margin-top: 4px;
+}
+@media (min-width: 1200px) {
+  .v3-bl .ui2-ph {
+    padding-bottom: 40px;
+  }
+}
+
+/* ── เรื่องจากปก ── */
+.v3-bl-cover {
+  display: grid;
+  gap: 20px;
+  align-items: center;
+  padding: 22px;
+  border-radius: 28px;
+  background:
+    radial-gradient(60% 120% at 0% 50%, rgba(255, 217, 143, 0.16) 0%, rgba(255, 217, 143, 0) 70%),
+    var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.28), 0 1px 0 var(--ui2-glass-edge-night) inset, 0 40px 80px -40px rgba(0, 0, 0, 0.85);
+}
+@media (min-width: 720px) {
+  .v3-bl-cover {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 36px;
+    padding: 30px 36px;
+    border-radius: 32px;
+  }
+}
+.v3-bl-cover-art {
+  justify-self: center;
+  display: block;
+  width: 150px;
+  padding: 6px;
+  border-radius: 14px;
+  rotate: -5deg;
+  background: linear-gradient(180deg, #FBF4E6 0%, #EFE3CC 100%);
+  box-shadow: 0 0 0 1px rgba(255, 236, 200, 0.5), 0 26px 44px -18px rgba(0, 0, 0, 0.95), 0 0 40px -6px rgba(255, 217, 143, 0.3);
+}
+@media (min-width: 1024px) {
+  .v3-bl-cover-art {
+    width: 200px;
+  }
+}
+.v3-bl-cover-art picture,
+.v3-bl-cover-art img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 7 / 12;
+  object-fit: cover;
+  border-radius: 9px;
+}
+.v3-bl-cover-k {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--ui2-on-night-dim);
+}
+.v3-bl-cover-k .ui2-accent {
+  font-size: 20px;
+  color: var(--ui2-gold-solid);
+}
+.v3-bl-cover-title {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(24px, 3vw, 36px);
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--ui2-on-night);
+  text-wrap: balance;
+}
+.v3-bl-cover-title a {
+  color: inherit;
+  text-decoration: none;
+}
+.v3-bl-cover-title a:hover {
+  color: var(--ui2-gold-solid);
+}
+.v3-bl-cover-desc {
+  margin: 12px 0 0;
+  max-width: 620px;
+  font-size: 15.5px;
+  line-height: 1.75;
+  color: var(--ui2-on-night-soft);
+}
+
+/* ── บทความหนึ่งเรื่องในหน้าต่าง: ไพ่งาช้างเอียง + ชื่อ + คำโปรย ── */
+.v3-at-grid {
+  display: grid;
+  gap: 14px;
+}
+@media (min-width: 900px) {
+  .v3-at-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 22px;
+  }
+}
+@media (max-width: 719px) {
+  .v3-at-grid.is-clipped > :nth-child(n + 4) {
+    display: none;
+  }
+}
+.v3-at {
+  position: relative;
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255, 236, 200, 0.03);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+  transition: background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+@media (min-width: 640px) {
+  .v3-at {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 20px;
+    padding: 18px 20px;
+  }
+}
+.v3-at-art {
+  display: block;
+  padding: 4px;
+  border-radius: 10px;
+  rotate: -4deg;
+  background: linear-gradient(180deg, #FBF4E6 0%, #EFE3CC 100%);
+  box-shadow: 0 0 0 1px rgba(255, 236, 200, 0.45), 0 14px 26px -14px rgba(0, 0, 0, 0.9);
+  transition: rotate 0.28s cubic-bezier(0.16, 1, 0.3, 1), translate 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.v3-at:nth-child(even) .v3-at-art {
+  rotate: 4deg;
+}
+.v3-at-art picture,
+.v3-at-art img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 7 / 12;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.v3-at-title {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ui2-on-night);
+}
+/* ทั้งการ์ดกดได้ (ลิงก์ชื่อเรื่องยืดคลุมการ์ด) */
+.v3-at-title a {
+  color: inherit;
+  text-decoration: none;
+}
+.v3-at-title a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.v3-at-title a:focus-visible {
+  outline: none;
+}
+.v3-at-title a:focus-visible::after {
+  box-shadow: 0 0 0 2px var(--ui2-gold-solid);
+}
+.v3-at-desc {
+  display: -webkit-box;
+  margin: 8px 0 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ui2-on-night-soft);
+}
+.v3-at-meta {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  color: var(--ui2-on-night-dim);
+}
+@media (hover: hover) {
+  .v3-at:hover {
+    background: color-mix(in srgb, var(--cat, #FFD98F) 8%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--cat, #FFD98F) 50%, transparent);
+  }
+  .v3-at:hover .v3-at-art {
+    rotate: 0deg;
+    translate: 0 -4px;
+  }
+  .v3-at:hover .v3-at-title {
+    color: var(--ui2-gold-solid);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v3-at-art {
+    transition: none;
+  }
+}
+.v3-at-more {
+  display: none;
+}
+@media (max-width: 719px) {
+  .v3-at-more {
+    display: flex;
+    justify-content: center;
+    margin: 16px 0 0;
+  }
+}
+.v3-at-more button,
+.v3-bl-status button {
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ui2-on-night);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+  background: rgba(255, 236, 200, 0.04);
+  cursor: pointer;
+}
+
+/* สรุปผลค้นหา */
+.v3-bl-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 14px 18px;
+  border-radius: 20px;
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+}
+.v3-bl-status > p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--ui2-on-night-soft);
+}
+.v3-bl-status b {
+  font-size: 18px;
+  color: var(--ui2-gold-solid);
+}
+.v3-bl-status .v3-bl-empty {
+  flex-basis: 100%;
+}

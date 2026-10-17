@@ -6,6 +6,8 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { ZodiacSignBodyRoot } from "../../../components/PageBodies";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
 import { ZodiacDailyRoot } from "../../../islands/ZodiacFinderRoot";
+import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
 
 /** ✦ ไพ่ประจำราศีรายราศี 12 หน้า (ต้นไม้ภาษาไทย) */
 const locale = "th" as const;
@@ -19,10 +21,17 @@ const sign = getZodiacSign(Astro.params.sign!)!;
 
 <BaseLayout locale={locale} metadata={zodiacSignMetadata(sign.id, locale)}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <ZodiacSignBodyRoot sign={sign} locale={locale}>
     <Fragment slot="daily">
       <ZodiacDailyRoot signs={ZODIAC_SIGN_NAMES} sign={sign.id} locale={locale} client:visible />
     </Fragment>
   </ZodiacSignBodyRoot>
+  </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../../scripts/ui2-inview";
+</script>

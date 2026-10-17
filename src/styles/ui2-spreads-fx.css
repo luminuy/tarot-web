@@ -1,0 +1,250 @@
+/*
+ * 🃏 คลังผัง `/spreads` — เอฟเฟกต์ระดับ full (คอม · iPad) เท่านั้น
+ * นำเข้าต่อจาก `ui2-spreads.css` ในหน้า .astro ของคลังผัง
+ * ⚠️ ทุกกฎขึ้นต้น `[data-fx="full"]` และอยู่ใต้ `@media (min-width: 768px)` · หนึ่งตัวเลือกต่อบรรทัด
+ *    (ด่าน test-motion-quality กฎ 2b · test-ui2-fx) — มือถือ / ลดการเคลื่อนไหว / เครื่องช้า ไม่มีวันได้ไฟล์นี้ทำงาน
+ * ⚠️ ของวนทุกชิ้นมีคลาส `ui2-loop` และอยู่ใต้ `[data-anim-section]` (หยุดเองเมื่อพ้นจอ)
+ */
+@media (min-width: 768px) {
+  /* ดาวนิ่ง (INC-0273): ชั้นดาวสูงเต็มส่วนที่กะพริบ/เลื่อน = เลเยอร์ GPU หลายล้านพิกเซล และของทุกชิ้นที่วาดทับต้องถูกยกเป็นเลเยอร์ตาม */
+
+  /* แสงออโรราลอยหลังหัวหน้า */
+  [data-fx="full"] .ui2-sp .ui2-aurora {
+    display: block;
+    inset-block-start: -240px;
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 70%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 0%, #000 70%, transparent 100%);
+  }
+  [data-fx="full"] .ui2-sp .ui2-blob {
+    position: absolute;
+    width: 42vw;
+    max-width: 600px;
+    aspect-ratio: 1;
+    border-radius: 999px;
+    filter: blur(80px);
+    opacity: 0.32;
+    /* นิ่ง — ก้อนเบลอ 600px ที่ลอยไปมาต้องวาดใหม่ทุกเฟรม (ตัวหนักที่สุดของหน้า) */
+  }
+
+  /* ทองไล่สีวิ่งผ่านตัวเลขหัวข้อ "ครั้งเดียว" ตอนเปิดหน้า (เดิมวนไม่หยุด = วาดตัวหนังสือใหม่ทุกเฟรม) */
+  [data-fx="full"] .ui2-sp-h1 .ui2-gold-night {
+    animation: ui2-sp-shimmer 2.4s cubic-bezier(0.45, 0, 0.2, 1) 0.4s 1 backwards;
+  }
+
+  /* ไพ่คว่ำตกแต่ง 8 ใบลอยข้างหัวข้อ · ใบไกลเบลอ */
+  [data-fx="full"] .ui2-sp-deco-card {
+    display: block;
+    animation: ui2-sp-bob var(--bob, 8s) ease-in-out var(--delay, 0s) infinite;
+  }
+  /* จัดเป็น 2 แนวต่อข้างแบบหัวหน้า fastwork (ไพ่ใหญ่ใกล้ขอบ · ใบเล็กลึกเข้าด้านใน) — เจ้าของ 2026-10-16 "ให้ได้มาตรฐานกว่านี้"
+     ขนาดตามความกว้างจอ ไม่ล้นขอบจอ · ใบลึกเบลอเล็กน้อยให้มีระยะ */
+  [data-fx="full"] .ui2-sp-deco-1 {
+    --w: clamp(84px, 9.2vw, 136px);
+    --r: -9deg;
+    --bob: 8s;
+    left: 2.5%;
+    top: 64px;
+  }
+  [data-fx="full"] .ui2-sp-deco-2 {
+    --w: clamp(70px, 7.4vw, 108px);
+    --r: 7deg;
+    --bob: 9s;
+    --delay: -2s;
+    left: 4%;
+    top: 330px;
+    right: auto;
+  }
+  [data-fx="full"] .ui2-sp-deco-3 {
+    --w: clamp(56px, 5.4vw, 80px);
+    --r: -4deg;
+    --bob: 10s;
+    --delay: -5s;
+    left: 11.5%;
+    top: 470px;
+    right: auto;
+  }
+  [data-fx="full"] .ui2-sp-deco-4 {
+    --w: clamp(48px, 4.4vw, 64px);
+    --r: 14deg;
+    --bob: 7.5s;
+    --delay: -1s;
+    left: 13%;
+    top: 16px;
+    right: auto;
+  }
+  [data-fx="full"] .ui2-sp-deco-5 {
+    --w: clamp(84px, 9.2vw, 136px);
+    --r: 10deg;
+    --bob: 8.5s;
+    --delay: -3s;
+    right: 2.5%;
+    top: 84px;
+  }
+  [data-fx="full"] .ui2-sp-deco-6 {
+    --w: clamp(70px, 7.4vw, 108px);
+    --r: -7deg;
+    --bob: 9.5s;
+    --delay: -4s;
+    right: 4.5%;
+    top: 350px;
+  }
+  [data-fx="full"] .ui2-sp-deco-7 {
+    --w: clamp(56px, 5.4vw, 80px);
+    --r: 5deg;
+    --bob: 10.5s;
+    --delay: -6s;
+    right: 11.5%;
+    top: 24px;
+  }
+  [data-fx="full"] .ui2-sp-deco-8 {
+    --w: clamp(48px, 4.4vw, 64px);
+    --r: -13deg;
+    --bob: 7s;
+    --delay: -2.5s;
+    right: 13%;
+    top: 480px;
+  }
+
+  /* ใบเล็กล่าง 2 ใบล้นหัวหน้าลงไปทับรายชื่อหมวด (เจ้าของ 2026-10-16 "เหมือนมีบัค") — ไม่แสดง
+     ใบเล็กไม่เบลอแล้ว: ภาพเบลอดูเหมือนภาพโหลดไม่ขึ้น */
+  [data-fx="full"] .ui2-sp-deco-3,
+  [data-fx="full"] .ui2-sp-deco-8 {
+    display: none;
+  }
+  /* แท็บเล็ต 768–1023: ไพ่ใหญ่ 2 แนวชนหัวข้อ/แคปซูล (เจ้าของ 2026-10-17 "มีบัค") —
+     เหลือใบมุมบนซ้าย-ขวาใบเล็ก เหนือหัวข้อ ไม่ทับตัวหนังสือ */
+  @media (max-width: 1023px) {
+    [data-fx="full"] .ui2-sp-deco-2,
+    [data-fx="full"] .ui2-sp-deco-6 {
+      display: none;
+    }
+    [data-fx="full"] .ui2-sp-deco-1 {
+      --w: 64px;
+      left: 14px;
+      top: 8px;
+    }
+    [data-fx="full"] .ui2-sp-deco-5 {
+      --w: 64px;
+      right: 14px;
+      top: 18px;
+    }
+  }
+  /* ใบเล็กแนวใน: เฉพาะจอกว้างพอที่ไม่ชนหัวข้อ */
+  @media (max-width: 1279px) {
+    [data-fx="full"] .ui2-sp-deco-3,
+    [data-fx="full"] .ui2-sp-deco-4,
+    [data-fx="full"] .ui2-sp-deco-7,
+    [data-fx="full"] .ui2-sp-deco-8 {
+      display: none;
+    }
+  }
+
+  /* หัวหน้าเปิดตัวครั้งเดียว: ลอยขึ้นทีละบรรทัด (transform/opacity ล้วน · ไม่วน) */
+  [data-fx="full"] .ui2-sp-hero-inner > * {
+    animation: ui2-sp-head-rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+  [data-fx="full"] .ui2-sp-hero-inner > :nth-child(2) {
+    animation-delay: 0.08s;
+  }
+  [data-fx="full"] .ui2-sp-hero-inner > :nth-child(3) {
+    animation-delay: 0.16s;
+  }
+  [data-fx="full"] .ui2-sp-hero-inner > :nth-child(4) {
+    animation-delay: 0.24s;
+  }
+  [data-fx="full"] .ui2-sp-hero-inner > :nth-child(n + 5) {
+    animation-delay: 0.32s;
+  }
+
+  /* ไพ่ผังบนโต๊ะนิ่ง — ลอยเฉพาะตอนชี้ (hover ยกขึ้น) · เดิมทุกใบลอยขึ้นลงไม่หยุด 26+ ใบ = หน้าหนัก (2026-10-17) */
+
+  /* พื้นหลังหน้าต่างไพ่เด้ง: มืด + เบลอบาง ๆ */
+  [data-fx="full"] .ui2-spread-pop::backdrop {
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+  /* วงแสงทองหลังไพ่ใหญ่เต้น */
+  [data-fx="full"] .ui2-pop-glow {
+    animation: ui2-sp-glow 2.4s ease-in-out infinite;
+  }
+}
+
+
+/* ── โชว์เคสแบบ fastwork.com/selling (เจ้าของ 2026-10-16 "สวยแต่ไม่ว้าว ไม่น่าจดจำ") ─────────────────
+   1. หัวหน้าเบลอ + จางออกตอนเลื่อนพ้น · ไพ่ลอยรอบหัวข้อนิ่งกับที่แล้วจางหายใน 120px แรก (ผูกระยะเลื่อนของหน้า · INC-0269b)
+   2. หน้าต่างหมวดลอยขึ้นจากล่างกลางจอ แล้วเลื่อนหลบไปขวาเผยรายชื่อหมวด (--enter ตั้งโดย spreads-pop.ts)
+   3. สลับหมวด = แจกไพ่ผังลงโต๊ะใหม่จากกองกลาง (is-deal ใส่โดยสคริปต์เท่านั้น — HTML ไม่มีคลาสนี้ · INC-0244) */
+@media (min-width: 768px) {
+  @supports (animation-timeline: view()) {
+    [data-fx="full"] .ui2-sp-hero-inner {
+      animation: ui2-sp-hero-out linear both;
+      animation-timeline: view();
+      animation-range: exit 15% exit 85%;
+    }
+  }
+  /* ไพ่ตกแต่งหัวหน้า: นิ่งอยู่กับที่แล้วจางหายหมดภายใน 120px แรกของการเลื่อน (INC-0269b)
+     ผูกกับระยะเลื่อนของหน้า ไม่ใช่ view() ของกล่องหัวหน้า — กล่องสูง ~530px แต่ไพ่แถวบนอยู่ใต้หัวเว็บแค่ ~6px
+     ช่วงจางเดิมจึงเริ่มช้าและยาวเกิน ไพ่ถูกขอบจอตัดค้างครึ่งใบที่มุมบนก่อนจะจางหมด (แก้ตัวเลขคีย์เฟรมกี่รอบก็ไม่หาย)
+     translateY ในคีย์เฟรมเท่ากับช่วง 120px พอดี (linear) = หักล้างการเลื่อน ไพ่จึงไม่เคยแตะหัวเว็บหรือขอบจอระหว่างจาง */
+  @supports (animation-timeline: scroll()) {
+    [data-fx="full"] .ui2-sp-deco {
+      animation: ui2-sp-deco-out linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0px 120px;
+    }
+  }
+
+  /* ⚠️ ไม่มีอนิเมชัน "หน้าต่างลอยเข้า/รายชื่อหมวดเลื่อนเข้า" ตามระยะเลื่อนแล้ว (เจ้าของ 2026-10-17 "เข้ามาตอนแรกเหมือนภาพซ้อนแล้วหายไป" · INC-0271)
+     เดิมผูก transform/opacity กับ --enter ที่สคริปต์ตั้งหลังหน้าโหลด ➔ HTML วาดหน้าต่าง+รายชื่อที่ตำแหน่งปกติก่อน
+     แล้วกระโดดไปท่าเริ่ม (ซ้าย 135px · ลง 90px · ย่อ 0.9 · รายชื่อจางหาย) ทันทีที่สคริปต์ทำงาน = เห็นภาพซ้อนแวบแล้วหาย
+     ห้ามผูกตำแหน่งของที่อยู่ในจอแรกกับค่าที่สคริปต์ตั้งทีหลัง — --enter เหลือไว้ใช้แค่จังหวะเริ่มแจกไพ่ */
+
+  /* ไพ่ที่ยังไม่ถูกแจก (หน้าต่างอยู่ใต้จอตอนสคริปต์เริ่ม) — ซ่อนไว้ก่อน ไม่งั้นเห็นไพ่วางอยู่แล้วกระโดดหายตอนเริ่มแจก */
+  [data-fx="full"] .ui2-sp-shelf.is-wait .ui2-sc-slot {
+    opacity: 0;
+  }
+  [data-fx="full"] .ui2-sp-shelf.is-deal .ui2-sc-slot {
+    animation: ui2-sp-deal 0.6s cubic-bezier(0.2, 0.8, 0.25, 1) calc(var(--i, 0) * 60ms) backwards;
+  }
+  [data-fx="full"] .ui2-sp-shelf.is-deal .ui2-sp-shelf-head {
+    animation: ui2-sp-head-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+}
+
+/* หัวหน้าจางขึ้นตอนเลื่อนพ้น — ไม่เบลอแล้ว (filter: blur ผูกการเลื่อน = วาดหัวหน้าทั้งก้อนใหม่ทุกเฟรมที่เลื่อน) */
+@keyframes ui2-sp-hero-out {
+  to { opacity: 0; transform: translateY(-48px) scale(0.96); }
+}
+/* จางหายหมดขณะนิ่งกับที่ (translateY = ช่วงเลื่อน 120px) · ย่อนิดเดียวให้รู้สึกถอยห่าง — ห้ามขยาย (INC-0267: ขยายแล้วล้นขอบจอ) */
+@keyframes ui2-sp-deco-out {
+  to { opacity: 0; transform: translateY(120px) scale(0.97); }
+}
+@keyframes ui2-sp-head-rise {
+  from { opacity: 0; transform: translateY(18px); }
+}
+/* แจกไพ่ลงที่ตำแหน่งของใบนั้นเลย — ลอยขึ้นสั้น ๆ + เอียงกลับเข้าที่ (--a มุมเอียงจาก SHELF_SCATTER)
+   ⚠️ ห้ามกลับไปแจก "จากกองกลางใต้โต๊ะ" (เดิม translate ลง 260px + รวมกลาง): ระหว่างอนิเมชันไพ่ล้นออกนอกกรอบหน้าต่าง
+      และวิ่งตัดผ่านกันเป็นกองโปร่ง ๆ ใต้หน้าต่าง (เจ้าของ 2026-10-17 "บัคอยู่ที่ motion อนิเมชั่น พื้นที่" · INC-0270)
+      ระยะเลื่อนต้องเล็กกว่าขอบล่างของหน้าต่าง (ด่าน test-ui2-fx ข้อ 8) */
+@keyframes ui2-sp-deal {
+  0% {
+    opacity: 0;
+    transform: translateY(26px) rotate(calc(var(--a, 0deg) * -0.6)) scale(0.94);
+  }
+  55% {
+    opacity: 1;
+  }
+}
+
+@keyframes ui2-sp-shimmer {
+  from { background-position: 200% 50%; }
+  to { background-position: 0% 50%; }
+}
+@keyframes ui2-sp-bob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -10px; }
+}
+@keyframes ui2-sp-glow {
+  0%, 100% { opacity: 0.7; scale: 1; }
+  50% { opacity: 1; scale: 1.08; }
+}

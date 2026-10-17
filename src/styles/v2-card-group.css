@@ -1,0 +1,108 @@
+/*
+ * 🜄 หน้าไพ่ตามชุด (/cards/major · minor · wands · cups · swords · pentacles · ทั้งสองภาษา)
+ * v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): หัวหน้าไพ่ลอย (ไพ่จริงของหมวดนั้น) + ชิปสลับหมวด
+ *    ➔ บทของหมวดเป็นหน้าต่างโชว์เคส (Ui2Showcase) · การ์ด v3-card-tile.css · คู่มืออ่านเป็นหน้าต่างสุดท้าย
+ * สีธาตุ `--el` จาก ui2-page.css หัวข้อ 12 · ไม่มี filter/backdrop/mask/อนิเมชันวน
+ */
+
+/* ชิปสลับหมวด (อยู่ในหัวหน้า) */
+.v3-cg-switch {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 6px;
+}
+.v3-cg-switch a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--ui2-on-night-soft);
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+  transition: color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.v3-cg-switch a span {
+  font-size: 12px;
+  color: var(--ui2-on-night-dim);
+}
+.v3-cg-switch a:hover {
+  color: var(--ui2-on-night);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.5);
+}
+.v3-cg-switch a[aria-current="page"] {
+  color: var(--ui2-night);
+  background: var(--ui2-gold-solid);
+  box-shadow: none;
+}
+.v3-cg-switch a[aria-current="page"] span {
+  color: rgba(12, 10, 15, 0.7);
+}
+.v3-cg-switch a:focus-visible {
+  outline: 2px solid var(--ui2-gold-solid);
+  outline-offset: 3px;
+}
+/* หน้าต่างอยู่เหนือไพ่ลอยของหัวหน้า */
+.v3-cg .ui2-sx {
+  position: relative;
+  z-index: 3;
+  margin-top: 4px;
+}
+@media (min-width: 1200px) {
+  .v3-cg .ui2-ph {
+    padding-bottom: 40px;
+  }
+}
+
+/* คู่มืออ่าน = หน้าต่างสุดท้ายของโชว์เคส (กรอบมาจากหน้าต่างแล้ว ไม่ซ้อนกล่อง) */
+.v2-cg-intro {
+  padding-bottom: 6px;
+}
+.v2-cg-prose {
+  display: grid;
+  gap: 14px;
+  max-width: 820px;
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--ui2-on-night-soft);
+}
+.v2-cg-prose p {
+  margin: 0;
+}
+.v2-cg-highlights {
+  display: grid;
+  gap: 10px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 760px) {
+  .v2-cg-highlights {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.v2-cg-highlights li {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(var(--el), 0.25);
+  background: radial-gradient(90% 90% at 0% 0%, rgba(var(--el), 0.12) 0%, rgba(var(--el), 0) 70%), rgba(18, 14, 21, 0.6);
+}
+.v2-cg-highlights h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 700;
+  color: rgb(var(--el));
+}
+.v2-cg-highlights p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--ui2-on-night-soft);
+}

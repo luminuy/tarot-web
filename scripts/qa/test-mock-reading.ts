@@ -281,8 +281,9 @@ async function run() {
     /"Cache-Control": `public, max-age=\$\{browserMaxAge\}, s-maxage=\$\{secondsUntilMidnight\}, stale-while-revalidate=\$\{swr\}`/.test(dailySrc) &&
       !/stale-while-revalidate=86400/.test(dailySrc.replace(/\/\*[\s\S]*?\*\//g, "")),
   );
-  const stripSrc = fs.readFileSync(path.resolve("src/components/reading/DailyCardStrip.tsx"), "utf8");
-  check("A2-06: DailyCardStrip ตรวจ dateKey ของข้อมูลก่อนจำลงเครื่อง", /d\.dateKey === today/.test(stripSrc));
+  // ตรรกะโหลดไพ่ประจำวันย้ายจาก DailyCardStrip ไป hook กลางของหน้าแรก UI 2.0 (ข้อตรวจเดิมทุกข้อ)
+  const stripSrc = fs.readFileSync(path.resolve("src/components/home2/use-daily-card.ts"), "utf8");
+  check("A2-06: useDailyCard ตรวจ dateKey ของข้อมูลก่อนจำลงเครื่อง", /d\.dateKey === today/.test(stripSrc));
   {
     const { readWithIdleTimeout, StreamIdleTimeoutError } = await import("../../src/lib/ai/abort");
     const stalled = new ReadableStream<Uint8Array>({ start() {} }).getReader();

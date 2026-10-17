@@ -9,6 +9,7 @@ import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useLocale } from "@/lib/i18n";
 import { STORAGE_KEYS } from "@/lib/storage/keys";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { CloseIcon } from "@/components/ui/LineIcons";
 
 /**
  * การ์ดชวนสมัครหลังอ่านไพ่จบ (ENTITLEMENT_PLAN PR E)
@@ -92,7 +93,7 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
           aria-label={isEn ? "Dismiss sign up invitation" : "ปิดคำชวนสมัครสมาชิก"}
           className="tap-overlay-y flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm text-muted transition-colors hover:bg-inset-warm hover:text-ink-deep cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
         >
-          ✕
+          <CloseIcon />
         </button>
       </div>
 

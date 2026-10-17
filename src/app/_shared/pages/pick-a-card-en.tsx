@@ -6,6 +6,9 @@ import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
+import { Ui2TightHead } from "@/components/ui2/Ui2PageHero";
+import { Ui2Window } from "@/components/ui2/Ui2Showcase";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 
 const pickACardOgImages = buildPageOgImage({
   title: "Pick A Card Tarot Reading",
@@ -150,17 +153,19 @@ export function PickACardBodyEn({ ritual }: { ritual: ReactNode }) {
         <div className="max-w-4xl mx-auto space-y-8">
           {/* ชื่อหน้า — เดิมหน้านี้ไม่มีหัวเรื่องบอกว่าเป็นหน้าอะไร <h1> คือหัวข้อที่เลือกอยู่ ("เขาคิดยังไงกับเรา…")
               ซึ่งไม่ตรงกับชื่อหน้าในผลค้นหา (เจ้าของทัก) · หัวข้อที่เลือกในพิธีจึงลดเป็น <h2> บนหน้านี้ */}
-          <header className="text-center space-y-2 pt-2">
-            <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink leading-snug [text-wrap:balance]">
-              <ThaiPhrases>{"Pick A Card Tarot Reading"}</ThaiPhrases>
-            </h1>
-            <p className="text-sm sm:text-base text-muted font-serif-th leading-relaxed">
-              <ThaiPhrases>{"Choose a topic, hold it in mind, and pick the pile that calls to you."}</ThaiPhrases>
-            </p>
-          </header>
+          <Ui2TightHead
+            tone="indigo"
+            crumbs={[{ label: "Home", href: "/" }, { label: "Pick A Card" }]}
+            title="Pick A Card Tarot Reading"
+            accent="Pick A Card"
+            lede="Choose a topic, hold it in mind, and pick the pile that calls to you."
+            trust={["4 piles · follow your intuition", "The true 1909 deck", "Free reading"]}
+          />
 
           {/* ห่อ div — <astro-island> เป็น display:contents จึงไม่รับระยะจาก space-y ทำให้กล่องพิธีชิดกล่องบทความ */}
-          <div>{ritual}</div>
+          <Ui2Window kicker="Pick a Card" note="4 piles · 1909 deck" tone={2}>
+            {ritual}
+          </Ui2Window>
 
           <SeoArticleShell
             eyebrow="The Science of Pile Divination"
@@ -207,6 +212,8 @@ export function PickACardBodyEn({ ritual }: { ritual: ReactNode }) {
             </p>
           </SeoArticleShell>
         </div>
+        {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+        <Ui2NextSteps isEn={true} keys={["spreads", "daily", "journal", "questions"]} />
       </main>
     </>
   );

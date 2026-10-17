@@ -103,19 +103,25 @@ function writeEarlyHintLinks(): void {
     process.exit(1);
   }
 
-  const links = css.map((f) => `</_astro/${f}>; rel=preload; as=style`).join(", ");
+  /*
+   * ⚠️ พรีโหลดเฉพาะสไตล์ชีตกลางที่ "ทุกหน้า" ใช้ (BaseLayout) — สไตล์ชีตรายหน้า (v2-*.css · ui2-spreads · ui2-daily ฯลฯ)
+   * ห้ามพรีโหลดทั้งเว็บ: เดิมส่งทุกไฟล์ให้ทุกหน้า พอมี CSS รายหน้า ~20 ไฟล์ (UI 2.0 v2 · 2026-10-17)
+   * ทุกหน้าต้องโหลดของหน้าอื่นทิ้งเปล่า ๆ และเบราว์เซอร์เตือน "preloaded but not used" ทุกไฟล์
+   */
+  const shared = css.filter((f) => f.startsWith("BaseLayout."));
+  const links = (shared.length > 0 ? shared : css).map((f) => `</_astro/${f}>; rel=preload; as=style`).join(", ");
   const generated = [
     "",
     "",
     EARLY_HINTS_MARKER,
     "# แก้ที่สคริปต์เท่านั้น — เขียนทับทุกครั้งที่บิลด์ (ชื่อไฟล์ CSS มีแฮชจึงเขียนมือไม่ได้)",
-    `# ไฟล์ที่พรีโหลด: ${css.join(" · ")}`,
+    `# ไฟล์ที่พรีโหลด: ${(shared.length > 0 ? shared : css).join(" · ")}`,
     ...htmlRoutes.flatMap((route) => [route, `  Link: ${links}`, ""]),
   ].join("\n");
 
   fs.writeFileSync(headersPath, `${base}${generated}`);
   console.log(
-    `⚡ เติมส่วนหัว Link (Early Hints) ให้ ${htmlRoutes.length} เส้นทาง — พรีโหลด ${css.length} ไฟล์ CSS`,
+    `⚡ เติมส่วนหัว Link (Early Hints) ให้ ${htmlRoutes.length} เส้นทาง — พรีโหลด ${(shared.length > 0 ? shared : css).length} ไฟล์ CSS`,
   );
 }
 

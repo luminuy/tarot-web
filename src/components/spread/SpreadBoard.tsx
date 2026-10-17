@@ -10,7 +10,7 @@ import { useLocale } from "@/lib/i18n";
 import { ExpandTabIcon } from "@/components/ui/TarotArtIcons";
 import { useMotionSafe } from "@/lib/use-motion-safe";
 import { useNarrowViewport } from "@/lib/use-narrow-viewport";
-import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { mapLayout, boxOf } from "@/lib/tarot/spread-map-geometry";
 
 export interface DrawnSlotCard {
   order: number;
@@ -37,6 +37,8 @@ interface SpreadBoardProps {
   onFlipCard?: (order: number) => void;
   onRevealAll?: () => void;
   onZoomCard?: (card: DrawnSlotCard) => void;
+  /** เลื่อนคำอ่านไปที่ใบนั้นโดยไม่พลิก — ใช้กับรายการตำแหน่งใต้โต๊ะ (ใบที่เปิดแล้วแตะซ้ำต้องไม่คว่ำกลับ) */
+  onFocusCard?: (order: number) => void;
   compact?: boolean;
 }
 
@@ -55,6 +57,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
   onFlipCard,
   onRevealAll,
   onZoomCard,
+  onFocusCard,
 }) => {
   const { isEnglish } = useLocale();
   const railRef = React.useRef<HTMLDivElement>(null);
@@ -82,7 +85,10 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
    */
   const isPhone = useNarrowViewport();
   /* ผัง 1 ใบไม่มีอะไรให้ปัด — ใช้แท่นบูชาจัดกึ่งกลางแทน (รางชิดซ้ายเพราะ px-6 ไพ่ใบเดียวจึงเยื้อง) */
-  const useRail = (isPhone && spread.positions.length > 1) || spread.positions.length >= RAIL_THRESHOLD;
+  /* v2 (2026-10-16): จอกว้างวางไพ่บนโต๊ะตามพิกัดจริงของผังทุกขนาด (เซลติกครอสก็เห็นเป็นกากบาทจริง)
+     รางเลื่อนเหลือไว้เฉพาะมือถือ — RAIL_THRESHOLD ไม่ใช้ตัดสินแล้ว คงไว้เป็นประวัติ */
+  void RAIL_THRESHOLD;
+  const useRail = isPhone && spread.positions.length > 1;
   /** หนึ่งใบต่อหนึ่งหน้าจอ (โผล่ใบถัดไปนิดหน่อยให้รู้ว่าปัดต่อได้) */
   const oneUp = isPhone;
 
@@ -168,15 +174,45 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
   };
 
   const isAllRevealed = drawnCards.length > 0 && revealedOrders.length === drawnCards.length;
+  const map = React.useMemo(() => mapLayout(spread.positions), [spread.positions]);
+  /**
+   * กรอบจริงของไพ่ทั้งผัง (หน่วยเทียบความกว้างโต๊ะ) — สูตรแผนผังย่อเผื่อที่ว่างด้านบนไว้ตามพิกัด y
+   * โต๊ะจริงตัดที่ว่างนั้นทิ้ง ไม่งั้นผังแถวเดียวลอยอยู่ก้นโต๊ะสูงครึ่งจอ
+   */
+  const bounds = React.useMemo(() => {
+    let top = Infinity;
+    let bottom = -Infinity;
+    for (const pos of spread.positions) {
+      const b = boxOf(pos, map);
+      top = Math.min(top, b.top);
+      bottom = Math.max(bottom, b.bottom);
+    }
+    if (!Number.isFinite(top)) return { top: 0, height: map.boxHeight };
+    return { top, height: bottom - top };
+  }, [spread.positions, map]);
+  /** โต๊ะสูงไม่เกิน ~540px — ผังสูง (เซลติกครอส) จึงแคบลงแทนที่จะยาวจนต้องเลื่อน */
+  const tableMaxWidth = Math.round(540 / Math.max(0.2, bounds.height));
+  /** ไพ่ 1909 สูง:กว้าง ≈ 1.7 แต่สูตรผังคิดที่ 1.5 — ย่อความกว้างให้ความสูงเท่าที่ผังเผื่อไว้ ไม่ทับกัน */
+  const TABLE_CARD_SHRINK = (1.5 / 1.7) * 0.9; // เผื่อช่องไฟ ~10% ไม่ให้ไพ่แถวตั้ง (เซลติกครอส ใบ 7–10) ชนกัน
 
-  const renderSlot = (pos: SpreadPosition) => {
+  const renderSlot = (pos: SpreadPosition, mode: "rail" | "table" | "single") => {
     const drawn = drawnCards.find((d) => d.order === pos.index);
     const isRevealed = revealedOrders.includes(pos.index);
     const isCurrentReading = currentReadingPosition === pos.index;
 
     const posName = getPositionName(pos, isEnglish);
+    const tableStyle: React.CSSProperties | undefined =
+      mode === "table"
+        ? {
+            left: `${pos.x * 100}%`,
+            top: `${(((pos.y * map.yScale + map.offsetY - bounds.top) / bounds.height) * 100).toFixed(3)}%`,
+            width: `${(map.cardW * TABLE_CARD_SHRINK * 100).toFixed(2)}%`,
+            transform: `translate(-50%, -50%) rotate(${pos.rotate ?? 0}deg)`,
+            zIndex: isCurrentReading ? 20 : 10 + pos.index,
+          }
+        : undefined;
 
-    return (
+    const slot = (
       <motion.div
         key={pos.index}
         data-slot-order={pos.index}
@@ -187,10 +223,10 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
             ? `Position #${pos.index + 1}: ${posName} - ${isRevealed ? (drawn?.card?.nameEn || "Card Revealed") : "Tap to reveal card"}`
             : `ตำแหน่งที่ ${pos.index + 1}: ${pos.nameTh} - ${isRevealed ? drawn?.card?.nameTh || "เปิดไพ่แล้ว" : "แตะหรือกดเพื่อเปิดไพ่"}`
         }
-        initial={{ opacity: 0, scale: 0.85 }}
-        animate={{ opacity: 1, scale: 1 }}
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: pos.index * 0.06 }}
-        className={`flex flex-col items-center cursor-pointer focus-visible:outline-none group rounded-lg ${
+        className={`v2-sb-slot is-${mode}${isCurrentReading ? " is-now" : ""}${isRevealed ? " is-open" : ""} group ${
           useRail ? "snap-center flex-shrink-0" : ""
         } ${oneUp ? "basis-[74%] max-w-[74%]" : ""}`}
         onClick={() => handleCardClick(pos.index)}
@@ -205,12 +241,14 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
         }}
       >
         {/*
-          Card Container — ⚠️ ห้ามใส่ `scale-*` / `hover:scale-*` / `ring-*` ของไพ่ที่กำลังอ่านที่ชั้นนี้
-          `TarotCard` ยก+ขยายไพ่เองแล้ว (`.card-lift` = ขึ้น 10px · ขยาย 1.08 · มีวงทองบนหน้าไพ่)
-          ของเดิมขยายซ้ำอีก 1.05 ที่นี่ รวมเป็น ~1.15 เท่า ไพ่จึงล้นทับเส้นหัวแผงด้านบน
-          และทับ "ใบที่ 1" ด้านล่าง (บนมือถือ hover ยังค้างหลังแตะด้วย)
+          ⚠️ ห้ามใส่ `scale-*` ของไพ่ที่กำลังอ่านที่ชั้นนี้ — `TarotCard` ยก+ขยายไพ่เองแล้ว (`.card-lift`)
         */}
-        <div className="relative rounded-lg group-focus-visible:ring-2 group-focus-visible:ring-gold-ink">
+        <div className="v2-sb-card relative rounded-lg group-focus-visible:ring-2 group-focus-visible:ring-gold-ink">
+          {mode === "table" && (
+            <span className="v2-sb-no" aria-hidden="true">
+              {pos.index + 1}
+            </span>
+          )}
           {isRevealed && onZoomCard && drawn && (
             <button
               type="button"
@@ -218,11 +256,11 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
                 e.stopPropagation();
                 onZoomCard(drawn);
               }}
-              className="tap-overlay-y absolute -top-2.5 -right-2.5 px-2.5 py-1 rounded-full bg-surface hover:bg-surface-warm border border-line-warm hover:border-gold-ink text-ink-deep hover:text-gold-ink transition duration-300 cursor-pointer flex items-center gap-1.5 z-30 group hover:scale-105 active:scale-95"
+              className="v2-sb-zoom absolute -top-2.5 -right-2.5 z-30"
               title={isEnglish ? "Zoom 3D High-Definition Card" : "ซูมดูไพ่ 3D ความละเอียดสูง"}
             >
-              <ExpandTabIcon className="w-3 h-3 text-gold-ink group-hover:text-gold-ink-deep transition-colors" />
-              <span className="text-[12px] font-serif-th font-bold tracking-wide">
+              <ExpandTabIcon className="w-3 h-3" />
+              <span>
                 {isEnglish ? "Zoom" : "ขยาย"}
               </span>
             </button>
@@ -230,97 +268,92 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
 
           {drawn ? (
             <TarotCard
-              imageSizes="(min-width: 640px) 112px, 96px"
+              imageSizes={mode === "table" ? "(min-width: 1024px) 140px, 120px" : oneUp ? "176px" : "(min-width: 640px) 140px, 112px"}
               card={drawn.card || { cardIndex: drawn.cardIndex }}
               isReversed={drawn.isReversed}
               isRevealed={isRevealed}
               isHighlighted={isCurrentReading}
-              className={oneUp ? "w-44 h-[299px]" : "w-24 h-[163px] sm:w-28 sm:h-[190px]"}
+              className={mode === "table" ? "!w-full !h-auto aspect-[1/1.7]" : oneUp ? "w-44 h-[299px]" : "w-32 h-[218px] sm:w-36 sm:h-[245px]"}
             />
           ) : (
-            <div className={`${oneUp ? "w-44 h-[299px]" : "w-24 h-[163px] sm:w-28 sm:h-[190px]"} rounded-lg border-2 border-dashed border-line-warm bg-inset-warm flex items-center justify-center text-xs text-muted`}>
+            <div className={`${mode === "table" ? "w-full aspect-[1/1.7]" : oneUp ? "w-44 h-[299px]" : "w-32 h-[218px]"} v2-sb-empty`}>
               {pos.index + 1}
             </div>
           )}
         </div>
 
-        {/* Slot Position Name Tag */}
-        <div className={`text-center mt-3.5 ${oneUp ? "w-full px-1" : "w-28 sm:w-32"}`}>
-          <span className="text-[13px] text-gold-ink font-mono block font-semibold">
-            {isEnglish ? `Card #${pos.index + 1}` : `ใบที่ ${pos.index + 1}`}
-          </span>
-          {/*
-            บนมือถือ (หนึ่งใบต่อหน้าจอ) มีที่พอให้ชื่อตำแหน่งขึ้นครบ จึงไม่ย่อด้วยจุดไข่ปลา
-            — ชื่อตำแหน่งคือสิ่งที่บอกว่าไพ่ใบนั้นตอบคำถามอะไร ย่อทิ้งเท่ากับทิ้งความหมายของผัง
-            จอกว้างยังต้องย่ออยู่ เพราะไพ่เรียงกันหลายใบและกล่องกว้างแค่ 112–128px
-          */}
-          <span
-            className={`text-xs font-serif-th font-bold text-ink-deep leading-snug py-0.5 block ${
-              oneUp ? "[text-wrap:balance]" : "truncate"
-            }`}
-            title={posName}
-          >
-            {posName}
-          </span>
-        </div>
+        {/* Slot Position Name Tag — โหมดโต๊ะไม่มีป้ายใต้ไพ่ (ไพ่วางชิดกันตามผังจริง) ชื่อตำแหน่งอยู่ในรายการใต้โต๊ะแทน */}
+        {mode !== "table" && (
+          <div className={`v2-sb-label ${oneUp ? "w-full px-1" : "w-36"}`}>
+            <span className="v2-sb-label-n">
+              {isEnglish ? `Card ${pos.index + 1}` : `ใบที่ ${pos.index + 1}`}
+            </span>
+            {/*
+              บนมือถือ (หนึ่งใบต่อหน้าจอ) มีที่พอให้ชื่อตำแหน่งขึ้นครบ จึงไม่ย่อด้วยจุดไข่ปลา
+              — ชื่อตำแหน่งคือสิ่งที่บอกว่าไพ่ใบนั้นตอบคำถามอะไร ย่อทิ้งเท่ากับทิ้งความหมายของผัง
+            */}
+            <span
+              className={`v2-sb-label-t py-0.5 ${oneUp ? "[text-wrap:balance]" : "truncate"}`}
+              title={posName}
+            >
+              {posName}
+            </span>
+          </div>
+        )}
       </motion.div>
+    );
+    /* โหมดโต๊ะ: ตัวหมุด (พิกัด + หมุน) ต้องเป็นคนละชั้นกับ motion.div — motion เขียน transform ของตัวเองทับ
+       translate(-50%,-50%) rotate(...) จนไพ่หลุดตำแหน่งและไพ่ขวางไม่ขวาง */
+    return mode === "table" ? (
+      <div key={pos.index} className="v2-sb-pin" style={tableStyle}>
+        {slot}
+      </div>
+    ) : (
+      slot
     );
   };
 
   const spreadNameLocalized = getSpreadName(spread, isEnglish);
+  const single = spread.positions.length === 1;
 
   return (
-    <div className="w-full rounded-lg border border-line-warm bg-surface p-4 sm:p-6 flex flex-col justify-between space-y-4 select-none relative overflow-hidden">
+    <div className="v2-sb">
       {/* ♿ ประกาศชื่อไพ่ที่เพิ่งเปิด (T-33) — ซ่อนจากสายตา แต่โปรแกรมอ่านหน้าจอเห็น */}
       <p className="sr-only" aria-live="polite" aria-atomic="true">
         {flipAnnouncement}
       </p>
 
-      {/* Header Bar: Spread Name & Quick Flip Button */}
-      <div className="flex items-center justify-between pb-3 border-b border-line-warm/30 relative z-10">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] text-muted font-serif-th font-semibold">
-              {isEnglish ? "Spread:" : "ผังพยากรณ์:"}
-            </span>
-            <span className="text-xs text-surface bg-gold-ink px-2.5 py-0.5 rounded-full font-bold font-mono ">
-              {spread.positions.length} {isEnglish ? "Cards" : "ใบ"}
-            </span>
-          </div>
-          <h3 className="font-serif-th text-base sm:text-lg font-bold text-ink-deep mt-0.5"><ThaiPhrases>
-            {spreadNameLocalized}
-          </ThaiPhrases></h3>
-        </div>
-
-        {/* Reveal All Cards Action Button or Revealed Badge */}
-        {drawnCards.length > 0 &&
-          (isAllRevealed ? (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-inset-warm border border-line-warm text-muted text-xs font-serif-th font-semibold ">
-              
-              <span>{isEnglish ? "All Cards Revealed" : "เปิดไพ่ครบแล้ว"}</span>
-            </div>
-          ) : onRevealAll ? (
-            <button
-              type="button"
-              onClick={onRevealAll}
-              className="tap-overlay-y px-3.5 py-1.5 rounded-full text-xs font-serif-th font-bold bg-gold-ink hover:bg-gold-ink-deep text-surface transition cursor-pointer flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink active:scale-95"
-            >
-              
-              <span>{isEnglish ? "Reveal All Cards" : "พลิกดูไพ่ทั้งหมด"}</span>
-            </button>
-          ) : null)}
+      {/* แถบบนโต๊ะ: บอกว่าต้องทำอะไร + ปุ่มเปิดทั้งหมด (ชื่อผังอยู่หัวหน้าแล้ว ไม่ซ้ำ) */}
+      <div className="v2-sb-bar">
+        <p className="v2-sb-hint">
+          {isAllRevealed
+            ? isEnglish
+              ? "All cards revealed · tap a card to read it"
+              : "เปิดครบแล้ว · แตะไพ่เพื่ออ่านใบนั้น"
+            : useRail
+              ? isEnglish
+                ? "Swipe to browse · tap a card to flip it"
+                : "ปัดดูใบอื่น · แตะไพ่เพื่อพลิก"
+              : isEnglish
+                ? "Tap each card to flip it"
+                : "แตะไพ่ทีละใบเพื่อพลิกดู"}
+        </p>
+        {drawnCards.length > 0 && !isAllRevealed && onRevealAll && (
+          <button type="button" onClick={onRevealAll} className="v2-sb-all">
+            {isEnglish ? "Reveal all" : "พลิกทั้งหมด"}
+          </button>
+        )}
       </div>
 
       {useRail ? (
-        /* ── ผังใหญ่: รางเลื่อนแนวนอนผืนเดียว (Unified Rail) ── */
-        <div className="relative z-10">
-          {/* มือถือ: ช่องไพ่กว้าง 74% ➔ ใส่ตัวเว้นระยะหัว–ท้ายราง (before/after) กว้าง 13% − gap
-              ให้ใบแรก/ใบสุดท้ายเลื่อนมาอยู่กลางได้ (เดิมชิดซ้าย 32–41px เพราะรางเลื่อนต่อไม่ได้แล้ว)
+        /* ── มือถือ: รางเลื่อนทีละใบ ── */
+        <div className="relative">
+          {/* ช่องไพ่กว้าง 74% ➔ ตัวเว้นระยะหัว–ท้ายราง (before/after) 13% − gap ให้ใบแรก/ใบสุดท้ายอยู่กลางได้
               ⚠️ ห้ามใช้ px-[13%] แทน — basis 74% คิดจากพื้นที่ด้านในราง ขอบยิ่งกว้างช่องไพ่ยิ่งหด ไม่มีวันตรงกลาง */}
           <div
             ref={railRef}
             onScroll={syncRailEdges}
-            className={`flex snap-x snap-mandatory items-start gap-4 sm:gap-6 overflow-x-auto overscroll-x-contain pt-8 pb-6 no-scrollbar ${
+            className={`flex snap-x snap-mandatory items-start gap-4 overflow-x-auto overscroll-x-contain pt-8 pb-4 no-scrollbar ${
               oneUp
                 ? "px-6 before:content-[''] before:shrink-0 before:basis-[calc(13%-1rem)] after:content-[''] after:shrink-0 after:basis-[calc(13%-1rem)]"
                 : "px-6"
@@ -332,68 +365,68 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
                 : `ไพ่ทั้ง ${spread.positions.length} ใบในผัง ${spread.nameTh} — ปัดซ้ายขวาเพื่อดูใบอื่น`
             }
           >
-            {spread.positions.map((pos) => renderSlot(pos))}
+            {spread.positions.map((pos) => renderSlot(pos, "rail"))}
           </div>
-
-          {/* ขอบจางซ้าย/ขวา บอกใบ้ว่ายังมีไพ่ต่อไปอีก */}
-          <div
-            aria-hidden="true"
-            className={`pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-surface to-transparent transition-opacity duration-300 ${
-              canScrollLeft ? "opacity-100" : "opacity-0"
-            }`}
-          />
-          <div
-            aria-hidden="true"
-            className={`pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-surface to-transparent transition-opacity duration-300 ${
-              canScrollRight ? "opacity-100" : "opacity-0"
-            }`}
-          />
-
-          {/* ปุ่มเลื่อนสำหรับเมาส์/คีย์บอร์ด */}
+          <span aria-hidden="true" className={`v2-sb-fade is-l${canScrollLeft ? " is-on" : ""}`} />
+          <span aria-hidden="true" className={`v2-sb-fade is-r${canScrollRight ? " is-on" : ""}`} />
           <button
             type="button"
             onClick={() => nudgeRail(-1)}
             disabled={!canScrollLeft}
             aria-label={isEnglish ? "Scroll left" : "เลื่อนดูไพ่ทางซ้าย"}
-            className={`tap-overlay-y absolute left-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-line-warm bg-inset-warm text-ink-deep transition hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
-              canScrollLeft ? "cursor-pointer opacity-100" : "pointer-events-none opacity-0"
-            }`}
-          >
-            ←
-          </button>
+            className={`v2-sb-nudge is-l${canScrollLeft ? " is-on" : ""}`}
+          />
           <button
             type="button"
             onClick={() => nudgeRail(1)}
             disabled={!canScrollRight}
             aria-label={isEnglish ? "Scroll right" : "เลื่อนดูไพ่ทางขวา"}
-            className={`tap-overlay-y absolute right-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-line-warm bg-inset-warm text-ink-deep transition hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
-              canScrollRight ? "cursor-pointer opacity-100" : "pointer-events-none opacity-0"
-            }`}
-          >
-            →
-          </button>
+            className={`v2-sb-nudge is-r${canScrollRight ? " is-on" : ""}`}
+          />
         </div>
+      ) : single ? (
+        <div className="v2-sb-single">{spread.positions.map((pos) => renderSlot(pos, "single"))}</div>
       ) : (
-        /* ── ผังเล็ก: แท่นบูชา Unified Canvas แบบเดิม เห็นครบทุกใบในตาเดียว ── */
-        /* pt-8 = ที่ให้ไพ่ที่ถูกยกขึ้น (สูงสุด ~28px เหนือกล่อง) ไม่ข้ามเส้นหัวแผง */
-        <div className="w-full flex-1 flex flex-wrap items-center justify-center gap-4 sm:gap-6 pt-8 pb-2 relative z-10 min-h-[220px]">
-          {spread.positions.map((pos) => renderSlot(pos))}
+        /* ── จอกว้าง: วางไพ่ตามพิกัดจริงของผัง (สูตรเดียวกับแผนผังย่อในหน้า /spreads) ── */
+        <div className="v2-sb-table" style={{ maxWidth: `${tableMaxWidth}px` }}>
+          <div
+            className="v2-sb-area"
+            style={{ paddingBottom: `${(bounds.height * 100).toFixed(2)}%` }}
+            role="group"
+            aria-label={isEnglish ? `${spreadNameLocalized} — ${spread.positions.length} cards` : `ผัง${spread.nameTh} — ${spread.positions.length} ใบ`}
+          >
+            {spread.positions.map((pos) => renderSlot(pos, "table"))}
+          </div>
         </div>
       )}
 
-      {/* Helpful Hint */}
-      <div className="text-center pt-2 border-t border-line-warm/30 text-[13px] text-muted relative z-10 flex items-center justify-center gap-1.5 font-serif-th">
-        
-        <span>
-          {useRail
-            ? isEnglish
-              ? "Swipe horizontally to navigate cards. Tap any card to reveal its sacred artwork."
-              : "ปัดซ้าย–ขวาเพื่อดูไพ่ใบอื่น แตะที่การ์ดเพื่อพลิกดูหน้าไพ่"
-            : isEnglish
-              ? "Tap any card to reveal its sacred artwork or read its interpretation."
-              : "แตะที่การ์ดเพื่อพลิกดูหน้าไพ่ หรือเลือกอ่านคำทำนายของใบนั้น"}
-        </span>
-      </div>
+      {/* รายการตำแหน่ง — ทุกใบตอบเรื่องอะไร (แตะใบที่เปิดแล้ว = อ่านใบนั้น · ใบที่ยังคว่ำ = พลิก) */}
+      {!single && (
+        <ol className="v2-sb-legend">
+          {spread.positions.map((pos) => {
+            const drawn = drawnCards.find((d) => d.order === pos.index);
+            const isRevealed = revealedOrders.includes(pos.index);
+            const isNow = currentReadingPosition === pos.index;
+            const cardName = isRevealed ? (isEnglish ? drawn?.card?.nameEn || drawn?.card?.nameTh : drawn?.card?.nameTh) : "";
+            return (
+              <li key={pos.index}>
+                <button
+                  type="button"
+                  aria-current={isNow ? "true" : undefined}
+                  className={`v2-sb-leg${isNow ? " is-now" : ""}${isRevealed ? " is-open" : ""}`}
+                  onClick={() => (isRevealed && onFocusCard ? onFocusCard(pos.index) : handleCardClick(pos.index))}
+                >
+                  <span className="v2-sb-leg-n">{pos.index + 1}</span>
+                  <span className="v2-sb-leg-t">
+                    <b>{getPositionName(pos, isEnglish).replace(/^\d+\.\s*/, "")}</b>
+                    <small>{cardName || (isEnglish ? "Face down · tap to flip" : "ยังคว่ำอยู่ · แตะเพื่อพลิก")}</small>
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      )}
     </div>
   );
 };

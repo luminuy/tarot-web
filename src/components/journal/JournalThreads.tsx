@@ -96,7 +96,7 @@ export const JournalThreads: React.FC<{
     return (
       <section className="space-y-4" aria-label={L({ th: "เส้นเวลาของเรื่อง", en: "Story timeline" })}>
         <button type="button" onClick={() => setOpenId(null)} className="tap-overlay-y min-h-[44px] text-xs sm:text-sm font-serif-th font-semibold text-gold-ink cursor-pointer">
-          ← {L({ th: "เรื่องทั้งหมด", en: "All stories" })}
+          {L({ th: "เรื่องทั้งหมด", en: "All stories" })}
         </button>
         {loadingDetail && !detail ? (
           <p className="text-sm text-muted font-serif-th italic" role="status">
@@ -231,7 +231,7 @@ export const JournalThreads: React.FC<{
                           <p className="text-[11px] font-serif-th text-muted inline-flex items-center gap-1">
                             <span aria-hidden="true" className="w-2 h-2 rounded-full" style={{ backgroundColor: mood.color }} />
                             {moodLabel(nowMood, isEnglish)}
-                            {prevMood && nowMood && nowMood !== prevMood ? (nowMood > prevMood ? " ↑" : " ↓") : ""}
+                            {prevMood && nowMood && nowMood !== prevMood ? (nowMood > prevMood ? " (ดีขึ้น)" : " (ลดลง)") : ""}
                           </p>
                         )}
                         <p className="text-[11px] font-serif-th text-gold-ink">{L(OUTCOME_LABEL[e.outcome ?? "PENDING"])}</p>

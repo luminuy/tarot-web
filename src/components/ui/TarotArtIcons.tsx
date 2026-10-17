@@ -765,9 +765,17 @@ interface IconProps {
   className?: string;
 }
 
+/**
+ * ไอคอน "ไพ่ทั้งหมด / ชุดไพ่" — ไพ่ 4 ใบเรียงเป็นตาราง
+ * ⚠️ ชื่อยังเป็น SparkleTabIcon ให้ผู้เรียกเดิมไม่พัง แต่ **ห้ามกลับไปวาดเป็นรูปประกาย** —
+ *    รูปดาวสี่แฉกคือ ✦ ในรูปเวกเตอร์ ผิดกฎห้ามสัญลักษณ์ตกแต่ง (เจ้าของ 2026-10-16 "อีโมจิทุกรูปแบบบนหน้าเว็บห้ามใช้")
+ */
 export const SparkleTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-    <path d="M12 3L13.5 9.5L20 11L13.5 12.5L12 19L10.5 12.5L4 11L10.5 9.5L12 3Z" />
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinejoin="round" className={className} aria-hidden="true">
+    <rect x="4" y="3.5" width="6.5" height="8" rx="1.2" />
+    <rect x="13.5" y="3.5" width="6.5" height="8" rx="1.2" />
+    <rect x="4" y="13.5" width="6.5" height="8" rx="1.2" />
+    <rect x="13.5" y="13.5" width="6.5" height="8" rx="1.2" />
   </svg>
 );
 

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { GoldMark } from "@/components/ui/GoldMark";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CardImage } from "@/components/card/CardImage";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
@@ -21,6 +20,10 @@ import { getCategoryCardImage } from "@/lib/media/og-card-art";
 import type { Locale } from "@/lib/i18n/types";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { FrFan, FrInput, FrList, FrMock, FrPanel, Ui2FeatureRows } from "@/components/ui2/Ui2Blocks";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
+import { Ui2Showcase, Ui2ShowcaseStarter, type Ui2ShowcaseSection } from "@/components/ui2/Ui2Showcase";
 
 /**
  * ❓ หน้าคำถาม `/questions/[slug]` + หน้ารวม `/questions` (REFLECTION_JOURNAL_PLAN 1.11 · แทร็ก Q)
@@ -136,6 +139,8 @@ export function QuestionPageContent({ question: q, locale, askBox }: { question:
     about: { "@type": "Thing", name: isEn ? "Tarot reading" : "การดูดวงไพ่ยิปซี" },
   };
   const breadcrumbJsonLd = buildBreadcrumbJsonLd(locale, crumbs(q, locale));
+  /* สีโน้ตตามหมวด — ลำดับเดียวกับผนังโน้ตหน้ารวม */
+  const noteTone = (Math.max(0, QUESTION_TOPIC_ORDER.indexOf(q.topic)) % 7) + 1;
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen text-ink p-4 sm:p-8 relative overflow-x-clip">
@@ -153,15 +158,30 @@ export function QuestionPageContent({ question: q, locale, askBox }: { question:
           </ol>
         </nav>
 
-        <header className="space-y-4">
-          <p className="glass-chip inline-flex items-center gap-2 px-3 py-1 text-xs text-gold-ink font-serif-th font-semibold">
-            {isEn ? `${parent.en} question` : `คำถามหมวด${parent.th}`}
-          </p>
-          <h1 className="text-3xl sm:text-4xl font-bold font-serif-th text-ink-deep leading-tight [text-wrap:balance]"><ThaiPhrases>{c.question}</ThaiPhrases></h1>
-          <div className="space-y-3 text-sm sm:text-base text-[#4A4338] font-serif-th leading-relaxed">
-            {c.intro.map((p, i) => <p key={i}>{p}</p>)}
+        {/* หัวหน้า UI 2.0 (เจ้าของ 2026-10-16) — คำถามเป็น h1 · บทนำเดิมอยู่ในหน้าต่างกระจกใต้หัวหน้า */}
+        {/* v2 (2026-10-16 "สร้างใหม่เลย") — คำถามคือกระดาษโน้ตใบใหญ่แปะหมุดทอง (ชุดเดียวกับผนังโน้ตหน้ารวมคำถาม) */}
+        <header
+          className="v2-qp-head"
+          style={
+            {
+              "--note": `var(--ui2-note-${noteTone})`,
+              "--note-ink": `var(--ui2-note-ink-${noteTone})`,
+              "--note-sub": `var(--ui2-note-sub-${noteTone})`,
+            } as React.CSSProperties
+          }
+        >
+          <div className="v2-qp-note">
+            <p className="v2-qp-k">{isEn ? `${parent.en} question` : `คำถามหมวด${parent.th}`}</p>
+            <h1 className="v2-qp-q">
+              <ThaiPhrases>{c.question}</ThaiPhrases>
+            </h1>
           </div>
         </header>
+        <section className="ui2-win ui2-rv">
+          <div className="space-y-3 pt-7 text-sm sm:text-base text-[#4A4338] font-serif-th leading-relaxed">
+            {c.intro.map((p, i) => <p key={i}>{p}</p>)}
+          </div>
+        </section>
 
         <section className="space-y-3">
           <H2>{isEn ? "What the cards can — and can't — answer" : "ไพ่ตอบอะไรได้ และอะไรที่ไม่ควรถามไพ่"}</H2>
@@ -171,7 +191,7 @@ export function QuestionPageContent({ question: q, locale, askBox }: { question:
         <section className="space-y-3">
           <H2>{isEn ? "Ask it this way for a usable answer" : "ถามแบบนี้ได้คำตอบที่ใช้ได้จริงกว่า"}</H2>
           <ul className="space-y-2 text-sm text-[#4A4338] font-serif-th leading-relaxed list-none">
-            {c.betterQuestions.map((b, i) => <li key={i} className="pl-5 relative"><GoldMark className="absolute left-0.5 top-[0.6em] text-gold-ink" />{b}</li>)}
+            {c.betterQuestions.map((b, i) => <li key={i} className="pl-3 border-l-2 border-line-warm">{b}</li>)}
           </ul>
         </section>
 
@@ -254,7 +274,7 @@ export function QuestionPageContent({ question: q, locale, askBox }: { question:
         <section className="space-y-3">
           <H2>{isEn ? "After the cards answer" : "เมื่อไพ่ตอบแล้ว ทำอะไรต่อ"}</H2>
           <ul className="space-y-2 text-sm text-[#4A4338] font-serif-th leading-relaxed list-none">
-            {c.afterReading.map((b, i) => <li key={i} className="pl-5 relative"><GoldMark className="absolute left-0.5 top-[0.6em] text-gold-ink" />{b}</li>)}
+            {c.afterReading.map((b, i) => <li key={i} className="pl-3 border-l-2 border-line-warm">{b}</li>)}
           </ul>
         </section>
 
@@ -290,6 +310,8 @@ export function QuestionPageContent({ question: q, locale, askBox }: { question:
           </p>
         </nav>
       </article>
+      {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+      <Ui2NextSteps isEn={locale === "en"} keys={["spreads", "daily", "journal", "cards"]} />
     </main>
   );
 }
@@ -306,41 +328,103 @@ export function QuestionsHubContent({ locale }: { locale: Locale }) {
     itemListElement: QUESTIONS.map((q, i) => ({ "@type": "ListItem", position: i + 1, url: localizedUrl(questionPath(q.slug), locale), name: q[isEn ? "en" : "th"].question })),
   };
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink p-4 sm:p-8 relative overflow-x-clip">
+    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink px-4 sm:px-6 pb-16 relative overflow-x-clip">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(itemList) }} />
-      <div className="max-w-4xl mx-auto space-y-10 py-6">
-        <header className="space-y-3 text-center">
-          <p className="text-[11px] sm:text-xs tracking-[0.2em] uppercase text-gold-ink font-serif-th">{isEn ? "Tarot questions" : "คำถามดูดวง"}</p>
-          <h1 className="text-3xl sm:text-4xl font-bold font-serif-th text-ink-deep [text-wrap:balance]"><ThaiPhrases>{c.heading}</ThaiPhrases></h1>
-          <p className="text-sm text-muted font-serif-th max-w-2xl mx-auto leading-relaxed [text-wrap:balance]">{c.lead}</p>
-        </header>
-        {QUESTION_TOPIC_ORDER.map((topic) => {
-          const items = QUESTIONS.filter((q) => q.topic === topic);
-          if (items.length === 0) return null;
-          const parent = TOPIC_PARENT[topic];
-          return (
-            <section key={topic} className="space-y-3">
-              <div className="flex items-baseline justify-between gap-3">
-                <H2>{isEn ? parent.en : parent.th}</H2>
-                <Link href={parent.path} className="text-xs font-serif-th text-gold-ink underline underline-offset-2 shrink-0">
-                  {isEn ? "Spreads for this topic" : "ผังในหมวดนี้"}
-                </Link>
-              </div>
-              <ul className="grid gap-2 sm:grid-cols-2">
-                {items.map((q) => (
-                  <li key={q.slug}>
-                    <Link href={questionPath(q.slug)} className="block glass-tile !rounded-xl p-4 space-y-1 hover:text-gold-ink">
-                      <span className="block font-serif-th font-semibold text-ink-deep text-sm sm:text-base">{q[isEn ? "en" : "th"].question}</span>
-                      <span className="block text-xs text-muted font-serif-th">{q[isEn ? "en" : "th"].description}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          );
-        })}
+      {/* v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): หัวหน้าไพ่ลอย ➔ หมวดคำถามเป็นหน้าต่างโชว์เคส · คำถามเป็นกระดาษโน้ตแบบหน้าแรก */}
+      <div className="max-w-[1360px] mx-auto relative z-10 v3-qn">
+        <Ui2PageHero
+          crumbs={[{ label: isEn ? "Home" : "หน้าแรก", href: "/" }, { label: isEn ? "Tarot questions" : "คำถามดูดวง" }]}
+          title={c.heading}
+          lede={c.lead}
+          trust={isEn ? [`${QUESTIONS.length} questions`, "Each with a spread that fits"] : [`${QUESTIONS.length} คำถาม`, "ทุกคำถามมีผังที่เหมาะ"]}
+          cards={["major-06", "major-18", "major-09", "cups-02", "major-17", "pentacles-10"]}
+        />
+        <Ui2Showcase label={isEn ? "Questions by topic" : "คำถามแยกตามหมวด"} sections={hubSections(isEn)} />
+        <HubAskRows isEn={isEn} />
+        <Ui2NextSteps isEn={isEn} keys={["spreads", "daily", "journal", "cards"]} />
       </div>
     </main>
   );
+}
+
+/**
+ * ถามแบบไหนให้ไพ่ตอบชัด — แถวสลับซ้ายขวาแบบคำถามที่พบบ่อยหน้าแรก (v4 · เจ้าของ 2026-10-17)
+ * หมวดละหนึ่งคำถาม (3 หมวดแรก) · ภาพจำลอง = ช่องพิมพ์คำถาม + "ถามแบบนี้ได้คำตอบชัดกว่า" จากข้อมูลของคำถามนั้นเอง
+ * ไพ่ในภาพ = ไพ่ตัวอย่างของคำถามนั้น (example.cards ในไฟล์ข้อมูล · ไม่ใช่ผลเปิดไพ่ของใคร)
+ */
+function HubAskRows({ isEn }: { isEn: boolean }) {
+  const picks = QUESTION_TOPIC_ORDER.flatMap((topic) => QUESTIONS.filter((q) => q.topic === topic).slice(0, 1)).slice(0, 3);
+  const tints = ["gold", "teal", "violet"] as const;
+  return (
+    <div className="ui2-next">
+      <Ui2FeatureRows
+        id="questions-ask"
+        kicker={isEn ? "Ask it well" : "ถามให้ตรงจุด"}
+        title={isEn ? "Ask so the cards can answer clearly" : "ถามแบบไหน ให้ไพ่ตอบได้ชัด"}
+        rows={picks.map((q, i) => {
+          const copy = q[isEn ? "en" : "th"];
+          const parent = TOPIC_PARENT[q.topic];
+          return {
+            id: `ask-${q.slug}`,
+            kicker: isEn ? parent.en : parent.th,
+            title: copy.question,
+            body: <p>{copy.description}</p>,
+            link: { href: `${isEn ? "/en" : ""}${questionPath(q.slug)}`, label: isEn ? "See how the cards answer" : "ดูว่าไพ่ตอบอย่างไร" },
+            mock: (
+              <FrMock tint={tints[i % 3]}>
+                {i === 1 ? <FrFan cards={copy.example.cards.slice(0, 3).map((c) => c.id)} /> : null}
+                <FrInput title={i === 0 ? (isEn ? "What do you want to ask the cards?" : "อยากถามไพ่เรื่องอะไร") : undefined} text={copy.question.split(/[?？]/)[0] + "?"} />
+                <FrPanel label={isEn ? "Ask it this way for a clearer answer" : "ถามแบบนี้ได้คำตอบชัดกว่า"}>
+                  <FrList boxed={i !== 1} items={copy.betterQuestions.slice(0, i === 1 ? 2 : 3)} />
+                </FrPanel>
+              </FrMock>
+            ),
+          };
+        })}
+      />
+    </div>
+  );
+}
+
+/** หมวดคำถาม = หน้าต่าง · สีกระดาษโน้ตกับสีหมวดชุดเดียวกัน */
+function hubSections(isEn: boolean): Ui2ShowcaseSection[] {
+  return QUESTION_TOPIC_ORDER.flatMap((topic, topicIndex) => {
+    const items = QUESTIONS.filter((q) => q.topic === topic);
+    if (items.length === 0) return [];
+    const parent = TOPIC_PARENT[topic];
+    const tone = ((topicIndex % 7) + 1) as Ui2ShowcaseSection["tone"];
+    return [
+      {
+        id: `topic-${topic}`,
+        kicker: parent.en,
+        title: isEn ? parent.en : parent.th,
+        tone,
+        count: items.length,
+        meta: isEn ? `${items.length} questions · tap one to see how the cards answer` : `${items.length} คำถาม · แตะเพื่อดูว่าไพ่ตอบเรื่องนี้อย่างไร`,
+        aside: (
+          <Ui2ShowcaseStarter
+            kicker={isEn ? "Spreads for this topic" : "ผังที่เหมาะกับหมวดนี้"}
+            name={isEn ? parent.en : parent.th}
+            action={<Link href={parent.path}>{isEn ? "See spreads" : "ดูผัง"}</Link>}
+          />
+        ),
+        children: (
+          <ul
+            className="ui2-qn-wall"
+            style={{ "--note": `var(--ui2-note-${tone})`, "--note-ink": `var(--ui2-note-ink-${tone})`, "--note-sub": `var(--ui2-note-sub-${tone})` } as React.CSSProperties}
+          >
+            {items.map((q) => (
+              <li key={q.slug}>
+                <Link href={questionPath(q.slug)} className="ui2-qn-note">
+                  <span className="ui2-qn-q">{q[isEn ? "en" : "th"].question}</span>
+                  <span className="ui2-qn-d">{q[isEn ? "en" : "th"].description}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ),
+      },
+    ];
+  });
 }

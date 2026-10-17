@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { motion } from "motion/react";
 import type { Category } from "@/data/cards/types";
 import type { Persona } from "@/data/personas";
 import { CardImage } from "@/components/card/CardImage";
@@ -18,6 +17,8 @@ interface IntentionAltarInputProps {
   selectedCategory: Category;
   onCategoryChange: (val: Category) => void;
   persona?: Persona;
+  /** ของไม่บังคับเพิ่มเติมจาก TarotFlow (เรื่องที่ติดตาม · ใจตอนนี้) — อยู่ในกล่องพับ "เพิ่มรายละเอียด" */
+  children?: React.ReactNode;
 }
 
 interface MysticSeal {
@@ -104,6 +105,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
   selectedCategory,
   onCategoryChange,
   persona,
+  children,
 }) => {
   const { isEnglish } = useLocale();
 
@@ -115,13 +117,16 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
   const [touchedQuestion, setTouchedQuestion] = React.useState(false);
   const isQuestionEmpty = touchedQuestion && !question.trim();
 
+  /*
+   * v2 (เจ้าของ 2026-10-17 "ออกแบบใหม่ทั้งหมด หน้าขั้นตอนดูไพ่") — คำถามมาก่อน
+   * v1: ชื่อเล่น ➔ สถานการณ์ ➔ ชิป ➔ คำถาม (ช่องเดียวที่จำเป็นอยู่ลำดับที่ 3) ➔ การ์ดหัวข้อสูง 260px
+   * v2: คำทักของแม่หมอ ➔ **คำถาม** ➔ หัวข้อสำเร็จรูปเป็นชิป ➔ รายละเอียดเพิ่ม (ไม่บังคับ) พับเก็บ
+   */
   return (
-    <div className="altar-card-porcelain !rounded-lg w-full p-5 sm:p-8 space-y-6 relative overflow-hidden">
-      {/* Background Sacred Geometric Aura */}
-
+    <div className="v2-in w-full relative">
       {/* Persona Welcoming Sanctuary Dialogue */}
-      <div className="glass-tile !rounded-lg flex items-start gap-3.5 p-4 relative overflow-hidden">
-        <div className="altar-card-porcelain !rounded-lg w-10 h-15 overflow-hidden flex-shrink-0">
+      <div className="v2-in-greet">
+        <div className="v2-in-greet-img overflow-hidden flex-shrink-0">
           <CardImage
             image={persona?.cardImage || "major-02.jpg"}
             /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <span> ข้างภาพพิมพ์ชื่อแม่หมออยู่แล้ว */
@@ -130,7 +135,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             sizes="40px"
           />
         </div>
-        <div className="space-y-1 my-auto">
+        <div className="v2-in-greet-say space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-xs sm:text-sm font-serif-th font-bold font-mystic-gold">
               {isEnglish ? (persona?.nameEn || persona?.nameTh || "Tarot Reader") : (persona?.nameTh || "แม่หมอประจำวิหาร")}
@@ -155,96 +160,14 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
         </div>
       </div>
 
-      {/* Step 1 & 2: Name & Situation Chips */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Step 1: Nickname */}
-        <div className="space-y-1.5">
-          <div className="flex justify-between items-center">
-            <label
-              htmlFor="altar-nickname"
-              className="text-xs sm:text-sm text-ink-deep flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
-            >
-              {isEnglish ? "1. Your Name or Pseudonym" : "1. ชื่อเล่นของคุณ"}
-              <span className="whitespace-nowrap text-muted font-serif-th text-xs font-normal">{isEnglish ? "(Optional)" : "(ไม่บังคับ)"}</span>
-            </label>
-            <span className="text-[13px] text-muted font-mono">{nickname.length}/24</span>
-          </div>
-          <input
-            id="altar-nickname"
-            type="text"
-            maxLength={24}
-            value={nickname}
-            onChange={(e) => onNicknameChange(e.target.value)}
-            placeholder={isEnglish ? "e.g., Alex, Jordan (or leave blank)" : "เช่น ฟ้า, บิ๊ก, พลอย (เว้นว่างได้)"}
-            className="glass-field w-full rounded-lg px-4 py-3 text-xs sm:text-sm text-ink-deep placeholder-ink-soft/70 focus:outline-none transition duration-200 border border-line-interactive-warm focus:border-gold-ink focus:ring-1 focus:ring-gold-ink"
-          />
-        </div>
-
-        {/* Step 2: Custom Situation */}
-        <div className="space-y-1.5">
-          <label
-            htmlFor="altar-situation"
-            className="text-xs sm:text-sm text-ink-deep flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
-          >
-            {isEnglish ? "2. Brief Context or Situation" : "2. เล่าเรื่องราวหรือสถานการณ์คร่าว ๆ"}
-            <span className="whitespace-nowrap text-[13px] text-muted font-normal">{isEnglish ? "(Helps ground the reading)" : "(ช่วยให้อ่านได้ตรงจุดยิ่งขึ้น)"}</span>
-          </label>
-          <input
-            id="altar-situation"
-            type="text"
-            maxLength={100}
-            value={situation}
-            onChange={(e) => onSituationChange(e.target.value)}
-            placeholder={isEnglish ? "e.g., Navigating relationship friction / Awaiting job interview results" : "เช่น กำลังคุยกับคนเก่า / กำลังรอผลสัมภาษณ์งาน"}
-            className="glass-field w-full border border-line-interactive-warm focus:border-gold-ink focus:ring-1 focus:ring-gold-ink rounded-lg px-4 py-3 text-xs sm:text-sm text-ink-deep placeholder-ink-soft/70 focus:outline-none transition"
-          />
-        </div>
-      </div>
-
-      {/* Quick Situation Selector Chips */}
-      <div className="space-y-2">
-        <span className="text-[13px] text-muted font-serif-th">
-          {isEnglish ? "Or tap a quick situation:" : "หรือแตะเลือกเรื่องราวด่วน:"}
-        </span>
-        <div className="flex flex-wrap gap-2">
-          {(isEnglish
-            ? [
-                "Just starting out, discerning direction",
-                "Facing obstacles, seeking a breakthrough",
-                "At a crossroads between two choices",
-                "Seeking an overview & spiritual guidance",
-              ]
-            : [
-                "เพิ่งเริ่มต้น กำลังดูทิศทาง",
-                "ติดปัญหา อยากหาทางออก",
-                "กำลังลังเล เลือกระหว่าง 2 ทาง",
-                "อยากรู้ภาพรวมและคำแนะนำ",
-              ]
-          ).map((sit) => (
-            <button
-              key={sit}
-              type="button"
-              onClick={() => onSituationChange(sit)}
-              className={`tap-overlay-y px-3 py-1.5 rounded-lg text-xs font-serif-th transition cursor-pointer ${
-                situation === sit
-                  ? "bg-gold-ink text-surface font-bold"
-                  : "bg-inset-warm text-ink-deep hover:bg-surface/30 border border-line-warm"
-              }`}
-            >
-              {sit}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Step 3: Main Mystic Question Textarea */}
-      <div className="space-y-2">
+      <div className="v2-in-q space-y-2">
         <div className="flex justify-between items-center">
           <label
             htmlFor="altar-question"
             className="text-xs sm:text-sm text-ink-deep flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
           >
-            {isEnglish ? "3. The Core Question on Your Heart" : "3. คำถามที่คุณอยากรู้มากที่สุด"}
+            {isEnglish ? "The Core Question on Your Heart" : "คำถามที่คุณอยากรู้มากที่สุด"}
             <span className="whitespace-nowrap text-err font-mono text-xs">{isEnglish ? "(Required *)" : "(จำเป็น *)"}</span>
           </label>
           <span className="text-[13px] text-muted font-mono">{question.length}/300</span>
@@ -252,7 +175,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
         <div className="relative group">
           <textarea
             id="altar-question"
-            rows={3}
+            rows={4}
             maxLength={300}
             value={question}
             onBlur={() => setTouchedQuestion(true)}
@@ -262,7 +185,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
                 ? "Type the inquiry you wish the cards to illuminate, e.g., What is the trajectory of this relationship and how should I best guard my peace? / Will this career move align with my long-term purpose?..."
                 : "พิมพ์คำถามที่คุณอยากให้ไพ่ช่วยชี้ทาง เช่น ความสัมพันธ์กับเขาจะมีทิศทางอย่างไร / งานใหม่ที่กำลังจะย้ายไปจะดีไหม..."
             }
-            className={`w-full bg-surface rounded-lg p-4 text-xs sm:text-sm text-ink-deep placeholder-ink-soft/70 focus:outline-none transition duration-200 leading-relaxed resize-none ${
+            className={`v2-in-textarea w-full bg-surface rounded-lg p-4 text-xs sm:text-sm text-ink-deep placeholder-ink-soft/70 focus:outline-none transition duration-200 leading-relaxed resize-none ${
               isQuestionEmpty
                 ? "border border-err focus:border-err focus:ring-2 focus:ring-err/30"
                 : "border border-line-interactive-warm group-hover:border-gold-ink focus:border-gold-ink focus:ring-2 focus:ring-gold-ink/30"
@@ -271,88 +194,134 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
         </div>
       </div>
 
-      {/* 4 Authentic 1909 Rider-Waite Cards for Quick Question Selection */}
-      <div className="space-y-3 pt-2 border-t border-line-warm/30">
-        <label className="text-xs sm:text-sm font-serif-th font-bold text-ink-deep tracking-wide flex items-center gap-2 [text-wrap:balance]">
-          
-          {isEnglish
-            ? "Or select a preset question (tap to apply):"
-            : "หรือเลือกหัวข้อคำถามสำเร็จรูป (แตะเพื่อใช้งานทันที)"}
-        </label>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-4">
+      {/* หัวข้อสำเร็จรูป — ชิปพร้อมภาพไพ่ แตะแล้วเติมคำถามให้ (v1 เป็นการ์ดสูง 260px สี่ใบ ดันเนื้อหาลงไปไกล) */}
+      <div className="v2-in-topics">
+        <p className="v2-in-topics-k">
+          {isEnglish ? "Or select a preset question (tap to apply):" : "หรือเลือกหัวข้อคำถามสำเร็จรูป (แตะเพื่อใช้งานทันที)"}
+        </p>
+        <div className="v2-in-topic-row">
           {MYSTIC_SEALS.map((seal) => {
             const isActive = Boolean(
               selectedCategory === seal.category &&
-              (question === seal.promptSeed ||
-                question === seal.promptSeedEn ||
-                question.includes(seal.title) ||
-                (seal.titleEn && question.includes(seal.titleEn)))
+                (question === seal.promptSeed ||
+                  question === seal.promptSeedEn ||
+                  question.includes(seal.title) ||
+                  (seal.titleEn && question.includes(seal.titleEn))),
             );
-
             return (
-              <motion.div
+              <button
                 key={seal.id}
-                role="button"
-                tabIndex={0}
+                type="button"
                 aria-pressed={isActive}
                 aria-label={isEnglish ? `Select preset topic: ${seal.titleEn || seal.title}` : `เลือกหัวข้อสำเร็จรูป: ${seal.title}`}
-                whileHover={{ y: -6, scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={() => handleSelectSeal(seal)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    handleSelectSeal(seal);
-                  }
-                }}
-                className={`rounded-lg border transition duration-300 cursor-pointer flex flex-col justify-between p-3 sm:p-4 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
-                  isActive
-                    ? "bg-surface border-line-warm ring-2 ring-gold-ink/50 shadow-overlay"
-                    : "bg-inset-warm border-line-warm hover:border-gold-ink hover:bg-surface-warm"
-                }`}
-                style={{ minHeight: "260px" }}
+                className="v2-in-topic"
               >
-                {/* Top Card Badge: Roman Numeral & Title */}
-                <div className="flex items-center justify-between text-[13px] text-muted font-mono pb-1.5 border-b border-line-warm/30">
-                  <span className="text-ink-deep font-bold bg-inset-warm/25 px-1.5 py-0.5 rounded">
-                    {seal.romanNum}
-                  </span>
-                  <span className="tracking-widest uppercase text-[12px] truncate max-w-[90px] text-muted">
-                    {seal.majorCard}
-                  </span>
-                </div>
-
-                {/* Center Authentic 1909 Rider-Waite Image */}
-                <div className="my-auto py-1 flex items-center justify-center">
-                  <div className="w-18 h-28 sm:w-20 sm:h-30 rounded-lg border border-line-warm overflow-hidden ">
-                    <CardImage
-                      image={seal.image}
-                      /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h4> ใต้ภาพพิมพ์ชื่อชุดเดียวกันอยู่แล้ว */
-                      alt=""
-                      className="w-full h-full object-cover object-top tarot-hd-card-image"
-                      sizes="112px"
-                    />
-                  </div>
-                </div>
-
-                {/* Bottom Card Title & Subtitle */}
-                <div className="text-center pt-2 border-t border-line-warm/30">
-                  <h4 className="font-serif-th text-xs sm:text-sm font-bold text-ink-deep group-hover:text-gold-ink transition-colors">
-                    {isEnglish ? (seal.titleEn || seal.title) : seal.title}
-                  </h4>
-                  <p className="text-[12px] text-muted mt-0.5">
-                    {isEnglish ? (seal.subtitleEn || seal.subtitle) : seal.subtitle}
-                  </p>
-                </div>
-
-                {/* Holographic Sheen Layer */}
-                <div className="gold-foil-sheen absolute inset-0 opacity-15 hover:opacity-30 transition-opacity" />
-              </motion.div>
+                <span className="v2-in-topic-img" aria-hidden="true">
+                  <CardImage image={seal.image} alt="" className="w-full h-full object-cover object-top" sizes="40px" />
+                </span>
+                <span className="v2-in-topic-txt">
+                  <b>{isEnglish ? seal.titleEn || seal.title : seal.title}</b>
+                  <small>{isEnglish ? seal.subtitleEn || seal.subtitle : seal.subtitle}</small>
+                </span>
+              </button>
             );
           })}
         </div>
       </div>
+
+      {/* รายละเอียดเพิ่ม — ไม่บังคับ พับไว้ (เปิดค้างถ้ากรอกไว้แล้ว) */}
+      <details className="v2-in-more" open={nickname || situation ? true : undefined}>
+        <summary>
+          {isEnglish ? "Add details for the reader" : "เพิ่มรายละเอียดให้แม่หมอ"}
+          <span>{isEnglish ? "Optional" : "ไม่บังคับ"}</span>
+        </summary>
+        <div className="v2-in-more-body space-y-5">
+          {/* Step 1 & 2: Name & Situation Chips */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Step 1: Nickname */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center">
+                <label
+                  htmlFor="altar-nickname"
+                  className="text-xs sm:text-sm text-ink-deep flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
+                >
+                  {isEnglish ? "Your Name or Pseudonym" : "ชื่อเล่นของคุณ"}
+                  <span className="whitespace-nowrap text-muted font-serif-th text-xs font-normal">{isEnglish ? "(Optional)" : "(ไม่บังคับ)"}</span>
+                </label>
+                <span className="text-[13px] text-muted font-mono">{nickname.length}/24</span>
+              </div>
+              <input
+                id="altar-nickname"
+                type="text"
+                maxLength={24}
+                value={nickname}
+                onChange={(e) => onNicknameChange(e.target.value)}
+                placeholder={isEnglish ? "e.g., Alex, Jordan (or leave blank)" : "เช่น ฟ้า, บิ๊ก, พลอย (เว้นว่างได้)"}
+                className="glass-field w-full rounded-lg px-4 py-3 text-xs sm:text-sm text-ink-deep placeholder-ink-soft/70 focus:outline-none transition duration-200 border border-line-interactive-warm focus:border-gold-ink focus:ring-1 focus:ring-gold-ink"
+              />
+            </div>
+
+            {/* Step 2: Custom Situation */}
+            <div className="space-y-1.5">
+              <label
+                htmlFor="altar-situation"
+                className="text-xs sm:text-sm text-ink-deep flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
+              >
+                {isEnglish ? "Brief Context or Situation" : "เล่าเรื่องราวหรือสถานการณ์คร่าว ๆ"}
+                <span className="whitespace-nowrap text-[13px] text-muted font-normal">{isEnglish ? "(Helps ground the reading)" : "(ช่วยให้อ่านได้ตรงจุดยิ่งขึ้น)"}</span>
+              </label>
+              <input
+                id="altar-situation"
+                type="text"
+                maxLength={100}
+                value={situation}
+                onChange={(e) => onSituationChange(e.target.value)}
+                placeholder={isEnglish ? "e.g., Navigating relationship friction / Awaiting job interview results" : "เช่น กำลังคุยกับคนเก่า / กำลังรอผลสัมภาษณ์งาน"}
+                className="glass-field w-full border border-line-interactive-warm focus:border-gold-ink focus:ring-1 focus:ring-gold-ink rounded-lg px-4 py-3 text-xs sm:text-sm text-ink-deep placeholder-ink-soft/70 focus:outline-none transition"
+              />
+            </div>
+          </div>
+
+          {/* Quick Situation Selector Chips */}
+          <div className="space-y-2">
+            <span className="text-[13px] text-muted font-serif-th">
+              {isEnglish ? "Or tap a quick situation:" : "หรือแตะเลือกเรื่องราวด่วน:"}
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {(isEnglish
+                ? [
+                    "Just starting out, discerning direction",
+                    "Facing obstacles, seeking a breakthrough",
+                    "At a crossroads between two choices",
+                    "Seeking an overview & spiritual guidance",
+                  ]
+                : [
+                    "เพิ่งเริ่มต้น กำลังดูทิศทาง",
+                    "ติดปัญหา อยากหาทางออก",
+                    "กำลังลังเล เลือกระหว่าง 2 ทาง",
+                    "อยากรู้ภาพรวมและคำแนะนำ",
+                  ]
+              ).map((sit) => (
+                <button
+                  key={sit}
+                  type="button"
+                  onClick={() => onSituationChange(sit)}
+                  className={`tap-overlay-y px-3 py-1.5 rounded-lg text-xs font-serif-th transition cursor-pointer ${
+                    situation === sit
+                      ? "bg-gold-ink text-surface font-bold"
+                      : "bg-inset-warm text-ink-deep hover:bg-surface/30 border border-line-warm"
+                  }`}
+                >
+                  {sit}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {children}
+        </div>
+      </details>
     </div>
   );
 };

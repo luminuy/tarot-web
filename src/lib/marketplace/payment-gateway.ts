@@ -147,7 +147,7 @@ async function stripeRequest(
   if (!res.ok) {
     // ห้ามโยนข้อความดิบของ Stripe ขึ้นหน้าเว็บ (A1-08) — ผู้เรียกจับแล้วตอบข้อความคงที่เอง
     const err = (data.error ?? {}) as Record<string, unknown>;
-    throw new Error(`[Stripe] ${method} ${path} → ${res.status} ${String(err.type ?? "")} ${String(err.code ?? "")}`.trim());
+    throw new Error(`[Stripe] ${method} ${path} status ${res.status} ${String(err.type ?? "")} ${String(err.code ?? "")}`.trim());
   }
   return data;
 }
@@ -206,7 +206,7 @@ export async function createGatewayCharge(input: CreateChargeInput): Promise<Cha
     } catch (err) {
       // 400 = Stripe ไม่รับพารามิเตอร์ (เช่นบัญชีใช้ API รุ่นเก่าที่ยังไม่มี branding_settings)
       // ยิงซ้ำหนึ่งครั้งโดยไม่ส่งส่วนหน้าตา · ใช้คีย์กันซ้ำคนละตัว เพราะเนื้อคำขอไม่เหมือนเดิม
-      if (!(err instanceof Error) || !/ → 400 /.test(err.message)) throw err;
+      if (!(err instanceof Error) || !/ status 400 /.test(err.message)) throw err;
       console.warn("[Stripe] branding_settings ถูกปฏิเสธ — สร้างหน้าจ่ายเงินแบบไม่ปรับหน้าตา", err.message);
       delete params.branding_settings;
       session = await stripeRequest(

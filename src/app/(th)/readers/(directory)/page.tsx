@@ -1,6 +1,4 @@
-import Link from "next/link";
 import { listPublicApprovedReaders, type PublicReaderProfile } from "@/lib/marketplace/readers.repo";
-import { GoldMark } from "@/components/ui/GoldMark";
 import { listLiveReaderIds } from "@/lib/marketplace/queue.repo";
 import { CONSULTATION_MINUTES } from "@/lib/marketplace/offer";
 import { getAllReaderRatings } from "@/lib/marketplace/reviews.repo";
@@ -13,8 +11,14 @@ import type { Metadata } from "next";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { ConsultHeroStage } from "@/components/marketplace/ConsultStage";
-import { ChevronIcon } from "@/components/marketplace/ConsultIcons";
-import { ReadersValueRail } from "@/components/readers/ReadersValueRail";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { Ui2Window } from "@/components/ui2/Ui2Showcase";
+import { BxBack, BxChips, FrInput, FrList, FrMock, FrPanel, FrPills, Ui2Bento, Ui2FeatureRows } from "@/components/ui2/Ui2Blocks";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
+import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
+import "@/styles/ui2-showcase.css";
+import "@/styles/v3-readers.css";
 
 export const dynamic = "force-dynamic";
 
@@ -104,115 +108,150 @@ export default async function ReadersPage() {
   return (
     <>
       <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="min-h-screen text-ink-deep px-4 pb-16 sm:px-8 font-serif-th relative overflow-x-clip">
+      {/*
+        v3 UI 2.0 (เจ้าของ 2026-10-17 "ทำได้เลย แต่อย่าเพิ่งเอาขึ้น รอสั่ง"): ภาษาภาพเดียวกับทั้งเว็บ
+        หัวหน้าแถบครีม (Ui2PageHero + ui2-dawn.css) ➔ รายชื่อแม่หมอในหน้าต่างเลขกำกับ ➔ ขั้นตอนเป็นแถวสลับซ้ายขวา
+        ➔ เหตุผลที่ไว้ใจได้เป็นกล่องหลายขนาด ➔ คำถามที่พบบ่อยแผงพับ ➔ ไปต่อจากตรงนี้
+        ⚠️ ห้ามชื่อ/รีวิว/ราคาสมมุติในภาพประกอบ — ข้อมูลแม่หมอมาจาก ReadersDirectory (ฐานข้อมูลจริง) เท่านั้น
+      */}
+      <div className="ui2-pg" data-ui2-page-dark="">
+      <main id="main-content" tabIndex={-1} className="min-h-screen text-ink px-4 pb-16 sm:px-6 font-sans relative overflow-x-clip">
         {/* Schema.org Structured Data */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbsJsonLd) }}
         />
 
-        <div className="max-w-6xl mx-auto relative z-10">
-          {/* Top Breadcrumb */}
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 pt-4 text-[13px] text-muted overflow-x-auto whitespace-nowrap">
-            <Link href="/" className="hover:text-gold-ink transition-colors">
-              หน้าแรก
-            </Link>
-            <span aria-hidden="true">/</span>
-            <span className="text-ink-deep font-semibold">ปรึกษาแม่หมอตัวจริง</span>
-          </nav>
-
-          {/* ── Hero: ซ้ายคือคำสัญญา · ขวาคือภาพว่าจะได้อะไร ─────────────────────── */}
-          <section className="grid items-center gap-10 lg:gap-14 lg:grid-cols-[1.05fr_0.95fr] pt-8 sm:pt-12 pb-14 sm:pb-20">
-            <div className="space-y-6 text-center lg:text-left">
-              <p className="inline-flex items-center gap-2 text-[13px] font-bold tracking-wide text-gold-ink">
-                <GoldMark /> แม่หมอตัวจริง · คุยตัวต่อตัว
-              </p>
-              <h1 className="text-[2.5rem] leading-[1.15] sm:text-6xl sm:leading-[1.1] font-bold text-ink-deep [text-wrap:balance]">
-                <ThaiPhrases>ปรึกษาแม่หมอ ตัวต่อตัว</ThaiPhrases>
-                <span className="block font-mystic-gold mt-1">ผ่านวิดีโอคอล</span>
-              </h1>
-              <p className="text-base sm:text-lg text-ink leading-relaxed max-w-xl mx-auto lg:mx-0">
-                <ThaiPhrases>
-                  เลือกแม่หมอที่ถนัดเรื่องของคุณ พิมพ์สิ่งที่อยากถาม แล้วคุยกันสด ๆ ในเว็บนี้ ไม่ต้องลงแอป ไม่ต้องแอด LINE
-                </ThaiPhrases>
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                <a href="#readers" className="btn-gold-glass inline-flex items-center justify-center gap-2 px-7 py-3.5 text-base font-bold">
-                  เลือกแม่หมอ <span aria-hidden="true">→</span>
+        <div className="max-w-[1200px] mx-auto relative z-10">
+          <Ui2PageHero
+            crumbs={[{ label: "หน้าแรก", href: "/" }, { label: "ปรึกษาแม่หมอตัวจริง" }]}
+            title="ปรึกษาแม่หมอ ตัวต่อตัว ผ่านวิดีโอคอล"
+            accent="ผ่านวิดีโอคอล"
+            lede={
+              <ThaiPhrases>
+                เลือกแม่หมอที่ถนัดเรื่องของคุณ พิมพ์สิ่งที่อยากถาม แล้วคุยกันสด ๆ ในเว็บนี้ ไม่ต้องลงแอป ไม่ต้องแอด LINE
+              </ThaiPhrases>
+            }
+            actions={
+              <>
+                <a href="#readers" className="ui2-btn ui2-btn-gold">
+                  เลือกแม่หมอ
                 </a>
-                <a
-                  href="#how-it-works"
-                  className="inline-flex items-center justify-center px-7 py-3.5 rounded-full border border-line bg-surface text-base font-semibold text-ink hover:border-gold transition"
-                >
+                <a href="#how-it-works" className="ui2-btn-ghost">
                   ใช้งานอย่างไร
                 </a>
-              </div>
-              <p className="text-[13px] text-muted">
-                ตัวต่อตัว {CONSULTATION_MINUTES} นาที · รู้ราคาก่อนจอง · ไม่บันทึกภาพและเสียง
-              </p>
-            </div>
-            <div className="max-w-md w-full mx-auto lg:max-w-none">
-              <ConsultHeroStage />
-            </div>
-          </section>
+              </>
+            }
+            trust={[`ตัวต่อตัว ${CONSULTATION_MINUTES} นาที`, "รู้ราคาก่อนจอง", "ไม่บันทึกภาพและเสียง"]}
+            cards={["major-02", "major-05", "major-09", "major-17", "cups-02", "major-21"]}
+          />
 
-          {/* ── รายชื่อแม่หมอ ─────────────────────────────────────────────────── */}
+          {/* ── รายชื่อแม่หมอ (ข้อมูลจริง) ── */}
           <div id="readers" className="scroll-mt-24">
-            <ReadersDirectory initialReaders={readers} liveReaderIds={liveReaderIds} ratings={ratings} />
+            <Ui2Window n="01" kicker="Readers" note={`ตัวต่อตัว ${CONSULTATION_MINUTES} นาที`} tone={4}>
+              <ReadersDirectory initialReaders={readers} liveReaderIds={liveReaderIds} ratings={ratings} />
+            </Ui2Window>
           </div>
 
-          {/* ── เหตุผลที่ไว้ใจได้ — แถวปัดแบบหน้าแรก ───────────────────────────── */}
-          <ReadersValueRail />
+          {/* ── ขั้นตอน — แถวสลับซ้ายขวาแบบคำถามที่พบบ่อยหน้าแรก ── */}
+          <div id="how-it-works" className="ui2-next scroll-mt-24">
+            <Ui2FeatureRows
+              id="readers-how-it-works"
+              kicker="ใช้งานอย่างไร"
+              title="สามขั้น จากคำถาม ถึงคำตอบ"
+              rows={[
+                {
+                  kicker: "ขั้นที่ 1",
+                  title: "เลือกแม่หมอ",
+                  body: <p>ดูความถนัด แล้วพิมพ์สิ่งที่อยากถามสั้น ๆ</p>,
+                  mock: (
+                    <FrMock>
+                      <FrInput title="อยากถามแม่หมอเรื่องอะไร" text="งานใหม่ที่กำลังจะย้ายไปจะดีไหม" />
+                      <FrPanel label="เลือกแม่หมอตามความถนัด">
+                        <FrPills items={["ความรัก", "การงาน", "การเงิน"]} />
+                      </FrPanel>
+                    </FrMock>
+                  ),
+                },
+                {
+                  kicker: "ขั้นที่ 2",
+                  title: "รอคิวสบาย ๆ",
+                  body: <p>AI สรุปคำถามให้แม่หมออ่านก่อน คุณเปิดหน้าคิวทิ้งไว้ได้เลย</p>,
+                  mock: (
+                    <FrMock tint="teal">
+                      <FrPanel label="ก่อนถึงคิว">
+                        <FrList boxed items={["AI สรุปคำถามให้แม่หมออ่านก่อน", "ไม่ต้องเล่าใหม่ตั้งแต่ต้น", "เปิดหน้าคิวทิ้งไว้ได้"]} />
+                      </FrPanel>
+                    </FrMock>
+                  ),
+                },
+                {
+                  kicker: "ขั้นที่ 3",
+                  title: "คุยผ่านวิดีโอคอล",
+                  body: <p>ถึงคิวแล้วกดเข้าห้อง คุยตัวต่อตัวกับแม่หมอในเว็บนี้</p>,
+                  mock: (
+                    <FrMock tint="violet">
+                      <div className="v3-rd-stage">
+                        <ConsultHeroStage />
+                      </div>
+                    </FrMock>
+                  ),
+                },
+              ]}
+            />
+          </div>
 
-          {/* ── ขั้นตอน ──────────────────────────────────────────────────────── */}
-          <section id="how-it-works" aria-labelledby="readers-how-it-works" className="pt-20 sm:pt-24 space-y-8 scroll-mt-24">
-            <div className="text-center space-y-2">
-              <p className="text-[13px] font-bold text-gold-ink">ใช้งานอย่างไร</p>
-              <h2 id="readers-how-it-works" className="text-2xl sm:text-3xl font-bold text-ink-deep">
-                <ThaiPhrases>สามขั้น จากคำถาม ถึงคำตอบ</ThaiPhrases>
-              </h2>
-            </div>
-            <ol className="relative grid gap-6 sm:grid-cols-3">
-              <span aria-hidden="true" className="hidden sm:block absolute top-6 left-[16.6%] right-[16.6%] h-px bg-line" />
-              {[
-                { title: "เลือกแม่หมอ", body: "ดูความถนัด แล้วพิมพ์สิ่งที่อยากถามสั้น ๆ" },
-                { title: "รอคิวสบาย ๆ", body: "AI สรุปคำถามให้แม่หมออ่านก่อน คุณเปิดหน้าคิวทิ้งไว้ได้เลย" },
-                { title: "คุยผ่านวิดีโอคอล", body: "ถึงคิวแล้วกดเข้าห้อง คุยตัวต่อตัวกับแม่หมอในเว็บนี้" },
-              ].map((step, i) => (
-                <li key={step.title} className="relative text-center space-y-3 px-4">
-                  <span className="relative mx-auto h-12 w-12 rounded-full bg-ink-deep text-surface grid place-items-center text-lg font-bold">
-                    {i + 1}
-                  </span>
-                  <h3 className="font-bold text-ink-deep text-lg">{step.title}</h3>
-                  <p className="text-sm text-muted leading-relaxed max-w-xs mx-auto">
-                    <ThaiPhrases>{step.body}</ThaiPhrases>
-                  </p>
-                </li>
-              ))}
-            </ol>
-          </section>
+          {/* ── เหตุผลที่ไว้ใจได้ — กล่องหลายขนาดแบบหน้าแรก ── */}
+          <div className="ui2-next">
+            <Ui2Bento
+              id="readers-why"
+              kicker="ทำไมต้องปรึกษาที่นี่"
+              title="สบายใจ ตั้งแต่ก่อนเริ่มคุย"
+              tiles={[
+                {
+                  key: "video",
+                  size: "wide",
+                  glow: "amber",
+                  lead: "วิดีโอคอล",
+                  title: "ในเว็บ",
+                  desc: "กดเข้าห้องได้จากมือถือหรือคอม ไม่ต้องลงแอป ไม่ต้องแอด LINE",
+                  visual: <BxChips items={["มือถือ", "คอม", "ไม่ต้องลงแอป"]} on={-1} />,
+                },
+                {
+                  key: "privacy",
+                  size: "tall",
+                  glow: "teal",
+                  center: true,
+                  lead: "ความเป็นส่วนตัว",
+                  title: "มาก่อน",
+                  desc: "แม่หมอไม่เห็นเบอร์โทรและ IP ของคุณ เว็บไม่บันทึกภาพและเสียง",
+                  visual: <BxBack />,
+                },
+                {
+                  key: "brief",
+                  lead: "แม่หมอ",
+                  title: "รู้เรื่องก่อนคุย",
+                  desc: "AI สรุปคำถามให้แม่หมออ่านก่อน ไม่ต้องเล่าใหม่ตั้งแต่ต้น",
+                },
+                {
+                  key: "time",
+                  lead: `${CONSULTATION_MINUTES} นาที`,
+                  title: "เต็ม",
+                  desc: "รู้ราคาก่อนจอง จ่ายครั้งเดียว ยกเลิกก่อนนัด 24 ชม. คืนเงินเต็ม",
+                },
+              ]}
+            />
+          </div>
 
-          {/* ── คำถามที่พบบ่อย ───────────────────────────────────────────────── */}
-          <section aria-labelledby="readers-faq" className="pt-20 sm:pt-24 max-w-3xl mx-auto space-y-6">
-            <h2 id="readers-faq" className="text-2xl sm:text-3xl font-bold text-ink-deep text-center">
-              คำถามที่พบบ่อย
-            </h2>
-            <div className="divide-y divide-line rounded-3xl border border-line bg-surface">
-              {faqs.map((f) => (
-                <details key={f.q} className="group px-6">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 font-semibold text-ink-deep [&::-webkit-details-marker]:hidden">
-                    {f.q}
-                    <ChevronIcon className="shrink-0 text-muted transition-transform group-open:rotate-180" />
-                  </summary>
-                  <p className="pb-5 -mt-1 text-sm text-ink leading-relaxed">
-                    <ThaiPhrases>{f.a}</ThaiPhrases>
-                  </p>
-                </details>
-              ))}
-            </div>
-          </section>
+          {/* ── คำถามที่พบบ่อย — แผงพับแบบหน้าแรก (คำตอบอยู่ใน HTML ครบ) ── */}
+          <div className="ui2-next">
+            <Ui2FeatureRows id="readers-faq" kicker="FAQ" title="คำถามที่พบบ่อย" rows={[]} rest={faqs} />
+          </div>
+
+          <Ui2NextSteps isEn={false} keys={["spreads", "daily", "journal", "cards"]} />
         </div>
       </main>
+      </div>
       <SiteFooter />
     </>
   );

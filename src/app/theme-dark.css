@@ -178,6 +178,10 @@ html[data-theme="dark"] .theme-icon-moon {
 /* ── 5. คลาสส่วนกลางใน globals.css ที่เขียนสีตรง ๆ ไว้สำหรับพื้นสว่าง ─────────── */
 html[data-theme="dark"] .site-header-glass {
   background-color: rgba(21, 17, 13, 0.96);
+  /* เส้นขอบ + เงาของโหมดสว่างมีเส้นขาวด้านใน (inset 0 1px 0 ขาว 0.9) — บนแคปซูลมืดกลายเป็นขอบขาวซ้อนไม่พอดีขอบ
+     (เจ้าของ 2026-10-17 "เปิดโหมดมืดไม่พอดีขอบ") ➔ ใช้ชุดเดียวกับแคปซูลมืดของ UI 2.0 */
+  border-color: rgba(255, 236, 200, 0.18);
+  box-shadow: 0 16px 34px -24px rgba(0, 0, 0, 0.8);
 }
 
 html[data-theme="dark"] .font-mystic-gold {

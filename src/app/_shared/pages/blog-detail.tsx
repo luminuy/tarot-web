@@ -13,6 +13,7 @@ import { getCategoryCardImage } from "@/lib/media/og-card-art";
 import type { Locale } from "@/lib/i18n/types";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 
 export function blogDetailStaticParams(locale: Locale) {
   const articles = getAllArticles();
@@ -178,7 +179,9 @@ export function BlogDetailContent({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdFaq) }} />
       )}
 
-      <div className="max-w-4xl mx-auto space-y-8 pb-20">{reader}</div>
+      <div className="max-w-6xl mx-auto space-y-8 pb-20">{reader}</div>
+      {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+      <Ui2NextSteps isEn={isEnglish} keys={["spreads", "daily", "journal", "cards"]} />
     </main>
   );
 }

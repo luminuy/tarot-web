@@ -16,10 +16,15 @@
  * อิโมจิทุกชนิด (`Extended_Pictographic` ครอบทั้งอิโมจิสีและสัญลักษณ์อย่าง ⚠ ★ ❌)
  * + ธงชาติ · สีผิว · ตัวต่ออิโมจิ (ZWJ · ตัวเลือกรูปแบบ) + ดาวสี่แฉก ✦ ✧
  */
+/*
+ * + ลูกศร · ติ๊ก/กากบาท · ดาว · รูปทรงเรขาคณิต · dingbats (เจ้าของ 2026-10-16 "อีโมจิอื่น ๆ ด้วยก็ไม่เอา")
+ * ⚠️ ไม่รวม "•" — ตัวจัดรูปแบบแชท (format-chat-text) ใช้ "• **หัวข้อ:**" เป็นเครื่องหมายภายในให้คอมโพเนนต์แปลงเป็นการ์ด
+ *    ตัวคอมโพเนนต์ตัดจุดนั้นทิ้งเองก่อนแสดง ถ้ากวาดที่นี่ การ์ดหัวข้อในแชทจะหายทั้งหมด
+ */
 const EMOJI_RUN =
-  /[ \t]*(?:[\p{Extended_Pictographic}\p{Regional_Indicator}\u{1F3FB}-\u{1F3FF}\u{FE0E}\u{FE0F}\u{20E3}\u{200D}\u{2726}\u{2727}])+[ \t]*/gu;
+  /[ \t]*(?:[\p{Extended_Pictographic}\p{Regional_Indicator}\u{1F3FB}-\u{1F3FF}\u{FE0E}\u{FE0F}\u{20E3}\u{200D}\u{2726}\u{2727}\u{2190}-\u{21FF}\u{2700}-\u{27BF}\u{25A0}-\u{25FF}\u{2B00}-\u{2BFF}])+[ \t]*/gu;
 
-const HAS_EMOJI = /[\p{Extended_Pictographic}\p{Regional_Indicator}\u{2726}\u{2727}\u{FE0F}]/u;
+const HAS_EMOJI = /[\p{Extended_Pictographic}\p{Regional_Indicator}\u{2726}\u{2727}\u{FE0F}\u{2190}-\u{21FF}\u{2700}-\u{27BF}\u{25A0}-\u{25FF}\u{2B00}-\u{2BFF}]/u;
 
 /** มีอิโมจิ/สัญลักษณ์ตกแต่งที่หน้าเว็บห้ามแสดงหรือไม่ */
 export function hasEmoji(text: string): boolean {

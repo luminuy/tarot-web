@@ -5,6 +5,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { PricingBodyRoot } from "../components/PageBodies";
 import { PricingRoot } from "../islands/PricingRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
+import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
+import "@/styles/v2-pricing.css";
 
 /** 💳 ราคาและแพ็กเกจ — เนื้อหาเป็น HTML ล้วน · การ์ดแพ็ก (ปุ่มซื้อ) เป็น island เดียว */
 const locale = "th" as const;
@@ -12,10 +15,17 @@ const locale = "th" as const;
 
 <BaseLayout locale={locale} metadata={pricingMetadataTh}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <PricingBodyRoot locale={locale}>
     <Fragment slot="plans">
       <PricingRoot locale={locale} client:load />
     </Fragment>
   </PricingBodyRoot>
+  </div>
   <SiteFooterRoot locale={locale} spacing="tight" />
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../scripts/ui2-inview";
+</script>

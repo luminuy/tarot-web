@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { RouteLink as Link } from "@/components/ui/RouteLink";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
@@ -39,16 +39,20 @@ export function SeoArticleShell({
   band = "tint",
 }: SeoArticleShellProps) {
   const { isEnglish } = useLocale();
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
-
-  const toggleFaq = (idx: number) => {
-    setOpenFaqIndex((prev) => (prev === idx ? null : idx));
-  };
-
   return (
     <section
       className={`page-band${band === "tint" ? " page-band-tint" : ""} space-y-6 ${className}`}
+      style={{ "--cat": "var(--ui2-note-4)", "--cat-ink": "var(--ui2-note-ink-4)" } as React.CSSProperties}
     >
+      {/* แถบบนแบบหน้าต่าง /spreads (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง") — สไตล์ ui2-showcase.css · .v3-sa-bar ใน ui2-page.css */}
+      {band === "tint" && (
+        <div className="ui2-sx-bar v3-sa-bar" aria-hidden="true">
+          <span className="ui2-sx-name">
+            <span className="ui2-sx-n ui2-num">{isEnglish ? "Read" : "อ่าน"}</span>
+            <span className="ui2-accent">Guide</span>
+          </span>
+        </div>
+      )}
       {/* Header */}
       <div className="space-y-2 border-b border-line pb-4">
         <span className="text-xs font-serif-th font-semibold text-gold-ink">
@@ -76,37 +80,18 @@ export function SeoArticleShell({
           <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink"><ThaiPhrases>
             {isEnglish ? "Frequently Asked Questions (FAQ)" : "คำถามที่พบบ่อย (FAQ)"}
           </ThaiPhrases></h3>
-          <div className="divide-y divide-line rounded-xl border border-line bg-surface-warm overflow-hidden">
-            {faqs.map((faq, idx) => {
-              const isOpen = openFaqIndex === idx;
-              return (
-                <div key={idx} className="transition-colors">
-                  <button
-                    type="button"
-                    onClick={() => toggleFaq(idx)}
-                    className="w-full text-left px-4 py-3.5 flex items-center justify-between gap-3 cursor-pointer hover:bg-canvas transition-colors"
-                    aria-expanded={isOpen}
-                  >
-                    <span className="text-xs sm:text-sm font-serif-th font-semibold text-ink">
-                      {faq.q}
-                    </span>
-                    <span
-                      className={`text-xs text-gold-ink transition-transform duration-200 ${
-                        isOpen ? "rotate-180" : ""
-                      }`}
-                      aria-hidden="true"
-                    >
-                      ▾
-                    </span>
-                  </button>
-                  {isOpen && (
-                    <div className="px-4 pb-4 pt-1 text-xs sm:text-sm text-muted leading-relaxed font-sans border-t border-line/40 bg-surface">
-                      {faq.a}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+          {/* แผงพับแบบ "คำถามอื่น ๆ" ของหน้าแรก (ui2-blocks.css · เจ้าของ 2026-10-17) — <details> ล้วน:
+              คำตอบอยู่ใน HTML ครบ (ตรงกับ JSON-LD) และเปิดได้แม้หน้าไม่ได้ hydrate (เดิม useState = หน้า Astro เปิดไม่ได้) */}
+          <div className="ui2-fr-list">
+            {faqs.map((faq) => (
+              <details key={faq.q} className="ui2-fr-faq">
+                <summary>
+                  <span>{faq.q}</span>
+                  <span className="ui2-fr-plus" aria-hidden="true" />
+                </summary>
+                <div className="ui2-fr-faq-a">{faq.a}</div>
+              </details>
+            ))}
           </div>
         </div>
       )}

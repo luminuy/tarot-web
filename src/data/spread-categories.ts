@@ -1,7 +1,7 @@
 import { PUBLIC_SPREADS, type Spread } from "./spreads";
 
 /**
- * หมวดหมู่ของแถวผังหน้าแรก (`SpreadCardSelector` โหมด featured)
+ * หมวดหมู่ผังพยากรณ์ — ใช้โดยแอปมือถือ (`mobile/app/(tabs)/index.tsx` · `read.tsx` ผ่าน `@core/data/spread-categories`)
  *
  * กติกา:
  * - หมวดตามเรื่อง (quick · love · career · time · life) แบ่งผังสาธารณะ **ครบทุกผัง ผังละหมวดเดียว**

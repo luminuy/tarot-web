@@ -52,7 +52,7 @@ function LinkActions({ url, readerName, inputLabel }: { url: string; readerName:
         onClick={() => void copy()}
         className="min-h-[46px] shrink-0 rounded-full border border-line-interactive-warm bg-surface px-5 font-serif-th text-sm font-semibold text-ink-deep transition-colors cursor-pointer hover:border-gold-ink"
       >
-        <span aria-live="polite">{copied === "ok" ? "คัดลอกแล้ว ✓" : copied === "fail" ? "กดค้างที่ลิงก์เพื่อคัดลอก" : "คัดลอกลิงก์ห้อง"}</span>
+        <span aria-live="polite">{copied === "ok" ? "คัดลอกแล้ว" : copied === "fail" ? "กดค้างที่ลิงก์เพื่อคัดลอก" : "คัดลอกลิงก์ห้อง"}</span>
       </button>
       <a
         href={`https://line.me/R/msg/text/?${encodeURIComponent(lineMessage(readerName, url))}`}

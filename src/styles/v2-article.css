@@ -1,0 +1,406 @@
+/*
+ * 📖 v2 หน้าอ่านบทความ (/blog/[slug] · /en/blog/[slug]) — สร้างใหม่ (เจ้าของ 2026-10-16 "สร้างใหม่เลย")
+ * เอกลักษณ์: ห้องอ่านหนังสือ — หัวบทแบบนิตยสาร · สารบัญติดจอซ้าย · คอลัมน์อ่าน 17px ระยะบรรทัดสบายตา
+ * นำเข้าต่อจาก ui2-page.css · ไม่มี filter/backdrop/mask/อนิเมชันวน
+ */
+
+.v2-ar-head {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 34px 0 30px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 217, 143, 0.22);
+}
+.v2-ar-head .ui2-ph-crumb {
+  justify-content: center;
+}
+.v2-ar-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px 10px;
+  margin: 16px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+}
+.v2-ar-kicker span:not(:first-child) {
+  font-weight: 500;
+  color: var(--ui2-on-night-dim);
+}
+.v2-ar-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 217, 143, 0.55);
+}
+.v2-ar-title {
+  margin: 16px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(30px, 4.4vw, 54px);
+  font-weight: 700;
+  line-height: 1.16;
+  color: var(--ui2-on-night);
+  text-wrap: balance;
+}
+.v2-ar-stand {
+  max-width: 680px;
+  margin: 16px auto 0;
+  font-size: 17px;
+  line-height: 1.75;
+  color: var(--ui2-on-night-soft);
+}
+
+/* ── สองคอลัมน์ ── */
+.v2-ar-layout {
+  display: grid;
+  gap: 24px;
+  margin-top: 30px;
+}
+@media (min-width: 1024px) {
+  .v2-ar-layout {
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 48px;
+    align-items: start;
+  }
+  .v2-ar-aside {
+    position: sticky;
+    top: 100px;
+  }
+}
+.v2-ar-aside {
+  display: grid;
+  gap: 14px;
+}
+.v2-ar-toc {
+  border-radius: 20px;
+  border: 1px solid rgba(255, 217, 143, 0.2);
+  background: rgba(28, 23, 30, 0.7);
+}
+.v2-ar-toc summary {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 18px;
+  list-style: none;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ui2-gold-solid);
+  cursor: pointer;
+}
+.v2-ar-toc summary::-webkit-details-marker {
+  display: none;
+}
+.v2-ar-toc summary::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  border-right: 1.5px solid var(--ui2-gold-solid);
+  border-bottom: 1.5px solid var(--ui2-gold-solid);
+  rotate: 45deg;
+  transition: rotate var(--dur-fast) var(--ease-out);
+}
+.v2-ar-toc[open] summary::after {
+  rotate: 225deg;
+}
+.v2-ar-toc-list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0 10px 12px;
+  list-style: none;
+}
+.v2-ar-toc-list li {
+  display: flex;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.v2-ar-toc-list li:hover {
+  background: rgba(255, 236, 200, 0.05);
+}
+.v2-ar-toc-n {
+  min-width: 18px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--ui2-gold-solid);
+}
+.v2-ar-toc-list a {
+  color: var(--ui2-on-night-soft);
+}
+.v2-ar-toc-list a:hover {
+  color: var(--ui2-on-night);
+}
+.v2-ar-cardlink {
+  display: grid;
+  gap: 4px;
+  padding: 16px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 217, 143, 0.32);
+  background: radial-gradient(90% 90% at 0% 0%, rgba(255, 217, 143, 0.16) 0%, rgba(255, 217, 143, 0) 70%), rgba(28, 23, 30, 0.75);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.v2-ar-cardlink:hover {
+  border-color: var(--ui2-gold-solid);
+}
+.v2-ar-cardlink-k {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+}
+.v2-ar-cardlink b {
+  font-size: 15px;
+  color: var(--ui2-on-night);
+}
+.v2-ar-cardlink small {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ui2-on-night-dim);
+}
+
+/* ── เนื้อบทความ ── */
+.v2-ar-main {
+  min-width: 0;
+  max-width: 760px;
+}
+.v2-ar-body {
+  font-size: 17px;
+  line-height: 1.95;
+  color: var(--ui2-on-night-soft);
+}
+.v2-ar-body h2 {
+  margin: 44px 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 217, 143, 0.2);
+  font-family: var(--ui2-font-display);
+  font-size: clamp(22px, 2.6vw, 30px);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ui2-on-night);
+  scroll-margin-top: 110px;
+}
+.v2-ar-body h2:first-child {
+  margin-top: 0;
+}
+.v2-ar-body h3 {
+  margin: 30px 0 12px;
+  font-family: var(--ui2-font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ui2-gold-solid);
+  scroll-margin-top: 110px;
+}
+.v2-ar-body strong {
+  font-weight: 700;
+  color: var(--ui2-on-night);
+}
+.v2-ar-body em {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+}
+/* รายการไม่มีเครื่องหมายนำหน้า (เจ้าของ 2026-10-16 ห้ามสัญลักษณ์ทุกรูปแบบ) — ใช้เส้นทองบาง ๆ ด้านซ้ายแทน */
+.v2-ar-body li {
+  margin: 10px 0;
+  padding-left: 14px;
+  list-style: none;
+  border-left: 2px solid rgba(255, 217, 143, 0.35);
+}
+.v2-ar-gap {
+  height: 4px;
+  margin: 10px 0;
+}
+.v2-ar-body hr {
+  margin: 34px 0;
+  border: 0;
+  border-top: 1px solid rgba(255, 236, 200, 0.12);
+}
+
+.v2-ar-faq {
+  margin-top: 48px;
+}
+.v2-ar-faq h2 {
+  margin: 0 0 16px;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(22px, 2.6vw, 28px);
+  font-weight: 700;
+  color: var(--ui2-on-night);
+}
+.v2-ar-faq details {
+  margin-bottom: 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 236, 200, 0.12);
+  background: rgba(28, 23, 30, 0.7);
+}
+.v2-ar-faq summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  list-style: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ui2-on-night);
+  cursor: pointer;
+}
+.v2-ar-faq summary::-webkit-details-marker {
+  display: none;
+}
+.v2-ar-faq summary::after {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-left: auto;
+  border-right: 1.5px solid var(--ui2-gold-solid);
+  border-bottom: 1.5px solid var(--ui2-gold-solid);
+  rotate: 45deg;
+  transition: rotate var(--dur-fast) var(--ease-out);
+}
+.v2-ar-faq details[open] summary::after {
+  rotate: 225deg;
+}
+.v2-ar-faq p {
+  margin: 0;
+  padding: 0 18px 16px;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--ui2-on-night-soft);
+}
+
+.v2-ar-share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: 36px;
+  padding: 16px 0;
+  border-top: 1px solid rgba(255, 236, 200, 0.1);
+  border-bottom: 1px solid rgba(255, 236, 200, 0.1);
+  font-size: 13.5px;
+  color: var(--ui2-on-night-dim);
+}
+.v2-ar-copy {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.35);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+  cursor: pointer;
+}
+.v2-ar-back {
+  margin-left: auto;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* ── ชวนเปิดไพ่ + บทความที่เกี่ยวข้อง ── */
+.v2-ar-cta {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin: 56px 0;
+  padding: 36px 24px;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 217, 143, 0.32);
+  text-align: center;
+  background: radial-gradient(70% 120% at 50% 0%, rgba(255, 217, 143, 0.2) 0%, rgba(255, 217, 143, 0) 70%), rgba(28, 23, 30, 0.85);
+}
+.v2-ar-cta-k {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+}
+.v2-ar-cta h2 {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(24px, 3vw, 36px);
+  font-weight: 700;
+  color: var(--ui2-on-night);
+}
+.v2-ar .v2-ar-go {
+  margin-top: 6px;
+  background: linear-gradient(180deg, #FFE3A8 0%, #F0C470 100%);
+  color: var(--ui2-night);
+}
+.v2-ar-related h2 {
+  margin: 0 0 16px;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(22px, 2.6vw, 28px);
+  font-weight: 700;
+  color: var(--ui2-on-night);
+}
+.v2-ar-related ul {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 760px) {
+  .v2-ar-related ul {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.v2-ar-related a {
+  display: grid;
+  gap: 6px;
+  height: 100%;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 236, 200, 0.12);
+  background: rgba(28, 23, 30, 0.75);
+  transition: border-color var(--dur-fast) var(--ease-out), translate var(--dur-fast) var(--ease-out);
+}
+.v2-ar-related a:hover {
+  translate: 0 -2px;
+  border-color: rgba(255, 217, 143, 0.5);
+}
+.v2-ar-related small {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+}
+.v2-ar-related b {
+  font-size: 15.5px;
+  line-height: 1.45;
+  color: var(--ui2-on-night);
+}
+.v2-ar-related span {
+  font-size: 12.5px;
+  color: var(--ui2-on-night-dim);
+}
+@media (max-width: 639px) {
+  .v2-ar-stand {
+    font-size: 15.5px;
+  }
+  .v2-ar-body {
+    font-size: 16px;
+  }
+}
+
+/* ── v3: ไพ่จริงลอยข้างหัวบทความ (ชุดเดียวกับ Ui2PageHero · ui2-page.css / ui2-page-fx.css) ── */
+.v3-ar-hero {
+  position: relative;
+  isolation: isolate;
+}
+.v3-ar-hero .v2-ar-head {
+  position: relative;
+  z-index: 2;
+}
+/* มือถือ: ไพ่ 2 ใบที่มุมบนสูงถึง ~86px — หัวเล็กทองเริ่มใต้ไพ่ */
+@media (max-width: 767px) {
+  .v3-ar-hero .v2-ar-head {
+    padding-top: 76px;
+  }
+}

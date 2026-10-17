@@ -1,0 +1,509 @@
+/*
+ * 🪟 โชว์เคสกลาง "รายชื่อหมวดซ้าย + หน้าต่างขวา" — ภาษาภาพเดียวกับ /spreads (เจ้าของ 2026-10-17 "หน้าอื่นไม่มีการทำแบบหน้าแรกกับหน้าผัง")
+ * คอมโพเนนต์: src/components/ui2/Ui2Showcase.tsx · สคริปต์บอกหมวดที่กำลังดู: astro/scripts/ui2-showcase.ts
+ * ⚠️ ไม่มี backdrop-filter / filter: blur / ของวนไม่รู้จบ · อนิเมชันเฉพาะ transition สั้นตอนชี้/ตอนหมวดเปลี่ยน
+ * ⚠️ สีหมวดจาก --ui2-note-N (ไม่มีชมพู ตามคำสั่ง 2026-09-21)
+ */
+/* ความคืบหน้าของรายชื่อซ้าย (0–1 · ตั้งที่ <ol> แล้ว ::after อ่านต่อ จึงต้องสืบทอด) — ประกาศชนิดให้ transition ทำงาน (ด่าน motion กฎ 8) */
+@property --p {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+.ui2-sx {
+  position: relative;
+  padding-top: 8px;
+}
+
+/* ── แถบชิปหมวด (ต่ำกว่า 1200) ── */
+.ui2-sx-chips {
+  position: sticky;
+  z-index: 30;
+  top: calc(var(--site-header-h, 74px) + 4px);
+  margin: 0 -16px 14px;
+  padding: 6px 0;
+}
+/* พื้นทึบหลังแถบ — แค่รอบตัวแถบ (เดิมยื่นขึ้นไป 96px ทับท้ายหัวหน้าจนชิป/ข้อมูลหายไปครึ่งหนึ่ง) */
+.ui2-sx-chips::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: -10px;
+  bottom: -18px;
+  width: 100vw;
+  translate: -50% 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, var(--ui2-night) 0, var(--ui2-night) calc(100% - 30px), rgba(12, 10, 15, 0) 100%);
+}
+.ui2-sx-chips-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 16px;
+  scrollbar-width: none;
+}
+.ui2-sx-chips-row::-webkit-scrollbar {
+  display: none;
+}
+.ui2-sx-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 8px 0 14px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--ui2-on-night);
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+  transition: box-shadow var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.ui2-sx-chip-dot {
+  width: 12px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--cat);
+}
+.ui2-sx-chip-n {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  color: var(--cat-ink);
+  background: var(--cat);
+}
+.ui2-sx-chip[aria-current="true"] {
+  box-shadow: 0 0 0 1.5px var(--cat), 0 1px 0 var(--ui2-glass-edge-night) inset;
+  background: color-mix(in srgb, var(--cat) 14%, var(--ui2-glass-night-solid));
+}
+.ui2-sx-chip:focus-visible,
+.ui2-sx-rail-link:focus-visible {
+  outline: 2px solid var(--ui2-gold-solid);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+/* ── รายชื่อซ้าย (≥ 1200) ── */
+.ui2-sx-rail {
+  display: none;
+}
+.ui2-sx-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+
+/* ── หน้าต่างหนึ่งหมวด ── */
+.ui2-sx-win {
+  position: relative;
+  scroll-margin-top: calc(var(--site-header-h, 74px) + 64px);
+  padding: 0 14px 18px;
+  border-radius: 26px;
+  background:
+    radial-gradient(70% 160px at 50% 0, color-mix(in srgb, var(--cat) 13%, transparent) 0%, transparent 100%),
+    var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset, 0 40px 80px -40px rgba(0, 0, 0, 0.85);
+}
+.ui2-sx-win[hidden] {
+  display: none;
+}
+/* เส้นสีหมวดบนขอบบน */
+.ui2-sx-win::before {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 0;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--cat) 30%, var(--cat) 70%, transparent 100%);
+}
+.ui2-sx-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 54px;
+  margin-inline: -14px;
+  padding-inline: 16px;
+  font-size: 12px;
+  color: var(--ui2-on-night-dim);
+}
+.ui2-sx-bar::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--ui2-line-night) 15%, var(--ui2-line-night) 85%, transparent 100%);
+}
+.ui2-sx-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  white-space: nowrap;
+}
+.ui2-sx-n {
+  display: inline-grid;
+  place-items: center;
+  min-width: 30px;
+  height: 24px;
+  padding-inline: 8px;
+  border-radius: 99px;
+  font-size: 12.5px;
+  color: var(--cat-ink);
+  background: var(--cat);
+}
+.ui2-sx-name .ui2-accent {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 17px;
+  color: var(--cat);
+}
+.ui2-sx-steps {
+  display: none;
+  align-items: center;
+  gap: 5px;
+}
+.ui2-sx-steps span {
+  width: 16px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--ui2-line-night);
+}
+.ui2-sx-steps .is-past {
+  background: var(--ui2-gold-solid);
+  opacity: 0.45;
+}
+.ui2-sx-steps .is-here {
+  width: 34px;
+  background: var(--cat);
+}
+.ui2-sx-step {
+  font-size: 15px;
+  color: var(--ui2-on-night);
+  white-space: nowrap;
+}
+.ui2-sx-of {
+  font-size: 12px;
+  color: var(--ui2-on-night-dim);
+}
+.ui2-sx-head {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px 2px 20px;
+}
+.ui2-sx-head-txt {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+.ui2-sx-title {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 27px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--ui2-on-night);
+}
+.ui2-sx-lead {
+  margin: 0;
+  max-width: 560px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-sx-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--ui2-on-night-dim);
+}
+.ui2-sx-meta::before {
+  content: "";
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+}
+
+/* กล่อง "เริ่มที่นี่" */
+.ui2-sx-start {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2px 14px;
+  padding: 12px 12px 12px 18px;
+  border-radius: 22px;
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset;
+}
+.ui2-sx-start-k {
+  grid-column: 1;
+  font-size: 12.5px;
+  color: var(--ui2-on-night-dim);
+}
+.ui2-sx-start-name {
+  grid-column: 1;
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.35;
+  color: var(--ui2-on-night);
+}
+.ui2-sx-start-n {
+  margin-left: 8px;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--cat);
+}
+.ui2-sx-start-act {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+.ui2-sx-start-act > a,
+.ui2-sx-start-act > button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--ui2-on-night);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--cat) 60%, transparent);
+  background: rgba(0, 0, 0, 0.25);
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+.ui2-sx-start-act > a:hover,
+.ui2-sx-start-act > button:hover {
+  background: color-mix(in srgb, var(--cat) 18%, transparent);
+}
+
+@media (min-width: 768px) {
+  .ui2-sx-chips {
+    margin-inline: 0;
+  }
+  .ui2-sx-chips-row {
+    justify-content: center;
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+  .ui2-sx-steps {
+    display: inline-flex;
+  }
+  .ui2-sx-win {
+    padding: 0 28px 26px;
+    border-radius: 32px;
+  }
+  .ui2-sx-bar {
+    height: 60px;
+    margin-inline: -28px;
+    padding-inline: 24px;
+  }
+  .ui2-sx-bar::after {
+    left: 24px;
+    right: 24px;
+  }
+  .ui2-sx-head {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 28px 0 24px;
+  }
+  .ui2-sx-aside {
+    flex: none;
+    max-width: 380px;
+  }
+  .ui2-sx-title {
+    font-size: 32px;
+  }
+}
+
+/* คอม ≥ 1200: รายชื่อหมวดซ้าย + หน้าต่างขวา */
+@media (min-width: 1200px) {
+  .ui2-sx-chips {
+    display: none;
+  }
+  .ui2-sx-stage {
+    display: grid;
+    grid-template-columns: 270px minmax(0, 1fr);
+    align-items: start;
+    gap: 40px;
+  }
+  .ui2-sx-rail {
+    display: block;
+    position: sticky;
+    top: calc(var(--site-header-h, 78px) + 48px);
+    padding-top: 64px;
+  }
+  .ui2-sx-rail ol {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 0 0 0 18px;
+    list-style: none;
+  }
+  /* เส้นความคืบหน้า (--p ตั้งโดย ui2-showcase.ts) */
+  .ui2-sx-rail ol::before,
+  .ui2-sx-rail ol::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--ui2-line-night);
+  }
+  .ui2-sx-rail ol::after {
+    background: var(--ui2-gold-solid);
+    transform-origin: top;
+    transform: scaleY(var(--p, 0));
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .ui2-sx-rail-link {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 8px;
+    padding: 9px 0;
+    font-family: var(--ui2-font-display);
+    font-weight: 500;
+    font-size: 16.5px;
+    line-height: 1.3;
+    white-space: nowrap;
+    text-decoration: none;
+    color: var(--ui2-on-night-dim);
+    transition: color var(--dur-base) var(--ease-out);
+  }
+  .ui2-sx-rail-name {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transform-origin: 0 50%;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .ui2-sx-rail-n,
+  .ui2-sx-rail-count {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: var(--ui2-on-night-dim);
+  }
+  .ui2-sx-rail-link:hover {
+    color: var(--ui2-on-night-soft);
+  }
+  /* หมวดที่กำลังดู: ตัวใหญ่ขึ้น (scale — ไม่ดันบรรทัดอื่น) */
+  .ui2-sx-rail-link[aria-current="true"] {
+    color: var(--ui2-on-night);
+  }
+  .ui2-sx-rail-link[aria-current="true"] .ui2-sx-rail-name {
+    transform: scale(1.18);
+  }
+  .ui2-sx-rail-link[aria-current="true"] .ui2-sx-rail-count {
+    opacity: 0;
+  }
+  .ui2-sx-rail-link[aria-current="true"] .ui2-sx-rail-n {
+    color: var(--cat);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui2-sx-rail-name,
+  .ui2-sx-rail ol::after {
+    transition: none;
+  }
+}
+
+/* หน้าต่างบานเดียวครอบเครื่องมือ (Ui2Window) */
+.ui2-sx-solo-body {
+  padding-top: 22px;
+}
+@media (min-width: 768px) {
+  .ui2-sx-solo-body {
+    padding-top: 30px;
+  }
+}
+
+/* ── รายชื่อหมวดซ้าย = แบบหัวเรื่องคลังไพ่หน้าแรก (เจ้าของ 2026-10-17 "ตัวอักษรไม่เท่ากับหน้าแรกเลย")
+   ตัวใหญ่ 24 ➔ 27px · ยังไม่ได้ดู = เทาจาง · ที่กำลังดู = สว่าง + ขีดทองสั้นด้านซ้าย · ไม่มีเลขหมวด/จำนวน/เส้นยาว ── */
+@media (min-width: 1200px) {
+  .ui2-sx-rail ol {
+    gap: 2px;
+    padding-left: 0;
+  }
+  .ui2-sx-rail ol::before,
+  .ui2-sx-rail ol::after {
+    display: none;
+  }
+  .ui2-sx-rail-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 50px;
+    padding: 6px 0 6px 24px;
+    font-size: 24px;
+    line-height: 1.25;
+    white-space: normal;
+    text-wrap: balance;
+    color: rgba(246, 238, 226, 0.42);
+  }
+  .ui2-sx-rail-link::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 3px;
+    height: 16px;
+    border-radius: 2px;
+    translate: 0 -50%;
+    background: var(--ui2-gold-solid);
+    opacity: 0;
+    scale: 0.4;
+    transition: opacity var(--dur-fast) var(--ease-out), scale var(--dur-fast) var(--ease-out);
+  }
+  .ui2-sx-rail-link[aria-current="true"]::before {
+    opacity: 1;
+    scale: 1;
+  }
+  .ui2-sx-rail-link[aria-current="true"] .ui2-sx-rail-name {
+    transform: none;
+  }
+  .ui2-sx-rail-n,
+  .ui2-sx-rail-count {
+    display: none;
+  }
+}
+@media (min-width: 1440px) {
+  .ui2-sx-rail-link {
+    font-size: 26px;
+  }
+}
+/* คอลัมน์รายชื่อกว้างขึ้นที่จอ ≥ 1280 — ชื่อหมวดยาว ("การงาน การเงิน การเรียน") ไม่หักกลางคำ */
+@media (min-width: 1280px) {
+  .ui2-sx-stage {
+    grid-template-columns: 300px minmax(0, 1fr);
+  }
+}

@@ -845,8 +845,8 @@ const RAW_ARTICLES: Article[] = [
 คำถามที่แย่ที่สุดในการดูดวงคือคำถามที่ผลักความรับผิดชอบทั้งหมดให้โชคชะตา เช่น *"ฉันจะรวยไหม?"* หรือ *"เขาจะทิ้งฉันไหม?"*
 
 เมื่อคุณเปลี่ยนเป็นคำถามเชิงรุก (Empowering Questions) เช่น:
-- แทนที่จะถาม *"ฉันจะสอบติดไหม?"* ➔ ลองถามว่า **"ฉันควรเน้นอ่านหนังสือวิชาไหน และมีจุดบอดอะไรที่ต้องระวังในการสอบ?"**
-- แทนที่จะถาม *"เขาจริงใจไหม?"* ➔ ลองถามว่า **"ความรู้สึกที่แท้จริงของเขาต่อฉันคืออะไร และฉันควรวางตัวอย่างไร?"**
+- แทนที่จะถาม *"ฉันจะสอบติดไหม?"* ให้ลองถามว่า **"ฉันควรเน้นอ่านหนังสือวิชาไหน และมีจุดบอดอะไรที่ต้องระวังในการสอบ?"**
+- แทนที่จะถาม *"เขาจริงใจไหม?"* ให้ลองถามว่า **"ความรู้สึกที่แท้จริงของเขาต่อฉันคืออะไร และฉันควรวางตัวอย่างไร?"**
 
 คุณจะได้รับคำพยากรณ์ที่ไม่ได้มีแค่คำทำนาย แต่มี **"แผนการและกลยุทธ์"** ในการนำชีวิตไปสู่ความสำเร็จ
 `
@@ -1244,13 +1244,13 @@ Waite ได้ร่วมงานกับ **Pamela Colman Smith (Pixie)** �
 ไพ่ชุดใหญ่ **22 ใบ (Major Arcana)** เปรียบเสมือนแผนที่นำทางชีวิตของมนุษย์ทุกคน:
 
 1. **ระยะที่ 1: การสร้างตัวตนในโลกทางกายภาพ (The Material World - ใบที่ 0 ถึง 7)**
-   - The Fool (0) ➔ The Magician (1) ➔ The High Priestess (2) ➔ The Empress (3) ➔ The Emperor (4) ➔ The Hierophant (5) ➔ The Lovers (6) ➔ The Chariot (7)
+   - The Fool (0) · The Magician (1) · The High Priestess (2) · The Empress (3) · The Emperor (4) · The Hierophant (5) · The Lovers (6) · The Chariot (7)
 
 2. **ระยะที่ 2: การเผชิญหน้ากับกฎแห่งกรรมและจิตใจ (The Inner Journey - ใบที่ 8 ถึง 14)**
-   - Strength (8) ➔ The Hermit (9) ➔ Wheel of Fortune (10) ➔ Justice (11) ➔ The Hanged Man (12) ➔ Death (13) ➔ Temperance (14)
+   - Strength (8) · The Hermit (9) · Wheel of Fortune (10) · Justice (11) · The Hanged Man (12) · Death (13) · Temperance (14)
 
 3. **ระยะที่ 3: การเผชิญเงามืดและการเข้าถึงความสุขอันแท้จริง (Spiritual Enlightenment - ใบที่ 15 ถึง 21)**
-   - The Devil (15) ➔ The Tower (16) ➔ The Star (17) ➔ The Moon (18) ➔ The Sun (19) ➔ Judgement (20) ➔ The World (21)
+   - The Devil (15) · The Tower (16) · The Star (17) · The Moon (18) · The Sun (19) · Judgement (20) · The World (21)
 `
   },
   {

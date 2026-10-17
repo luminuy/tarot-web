@@ -17,7 +17,7 @@
 
 export type PiiKind = "nationalId" | "phone" | "email" | "card" | "bankAccount";
 
-export const PII_PLACEHOLDER = "[•••]";
+export const PII_PLACEHOLDER = "[…]";
 
 export interface RedactionResult {
   text: string;

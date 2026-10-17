@@ -6,6 +6,7 @@ import { deckMeta } from "@/data/cards/deck-index-meta";
 import { moodOption } from "@/lib/journal/mood";
 import type { SavedReadingItem } from "@/lib/utils/history";
 import { dayKeyOf, formatMonth, moonMarker, primaryCard } from "./journal-format";
+import { ChevronIcon } from "@/components/ui/LineIcons";
 
 /**
  * ✦ ปฏิทินสมุดดวง — "หนึ่งเดือนในหน้าไพ่" (REFLECTION_JOURNAL_PLAN 1.3)
@@ -58,7 +59,7 @@ export const JournalCalendar: React.FC<{
           aria-label={isEnglish ? "Previous month" : "เดือนก่อน"}
           className="tap-overlay-y w-11 h-11 rounded-full glass-chip text-ink-deep cursor-pointer"
         >
-          ←
+          <ChevronIcon direction="left" />
         </button>
         <div className="text-center">
           <h2 className="font-serif-th text-lg sm:text-xl font-bold text-ink-deep">{formatMonth(ym.y, ym.m, isEnglish)}</h2>
@@ -72,7 +73,7 @@ export const JournalCalendar: React.FC<{
           aria-label={isEnglish ? "Next month" : "เดือนถัดไป"}
           className="tap-overlay-y w-11 h-11 rounded-full glass-chip text-ink-deep cursor-pointer"
         >
-          →
+          <ChevronIcon direction="right" />
         </button>
       </header>
 

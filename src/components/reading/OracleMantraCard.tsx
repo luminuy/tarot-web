@@ -104,7 +104,6 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
                 exit={{ opacity: 0, scale: 0.8 }}
                 className="flex items-center gap-1.5 text-ok font-bold"
               >
-                <span>✓</span>
                 <span>{isEnglish ? "Wisdom Copied!" : "คัดลอกคำคมแล้ว!"}</span>
               </motion.span>
             ) : (

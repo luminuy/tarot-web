@@ -4,6 +4,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { noindexAlternates } from "@/lib/config/site";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { CardImage } from "@/components/card/CardImage";
 
 /**
  * 🚧 เนื้อหน้า 404 — ใช้ร่วมกันสองที่ (INC-0112)
@@ -73,8 +74,38 @@ const COPY = {
  * ⚠️ ข้อความอยู่ใน `COPY` ที่เดียว ห้ามคัดลอกไปเขียนซ้ำในไฟล์ `.astro`
  * สองหน้านี้ต้องพูดเหมือนกันเสมอ (บทเรียน INC-0112)
  */
-export function NotFoundMain({ forcedLocale = "th" }: { forcedLocale?: "th" | "en" } = {}) {
+export function NotFoundMain({ forcedLocale = "th", ui2 = false }: { forcedLocale?: "th" | "en"; ui2?: boolean } = {}) {
   const copy = forcedLocale === "en" ? COPY.en : COPY.th;
+
+  // UI 2.0 (หน้า Astro ที่สวมผิว .ui2-pg เท่านั้น — ฝั่ง Next ยังไม่มีสไตล์ 2.0 จึงคงแบบเดิม)
+  if (ui2) {
+    return (
+      <main id="main-content" tabIndex={-1} className="min-h-[70vh] text-ink px-4 sm:px-6 pb-16">
+        {/* v2 (2026-10-16 "สร้างใหม่เลย") — "4 [The Fool] 4": ไพ่คนเขลา (หมายเลข 0 · ผู้ออกเดินทาง) ยืนแทนเลขศูนย์ */}
+        <section className="v2-nf">
+          <p className="v2-nf-code" aria-hidden="true">
+            <span>4</span>
+            <span className="v2-nf-card">
+              <CardImage cardId="major-00" alt="" sizes="(min-width: 768px) 200px, 120px" loading="eager" />
+            </span>
+            <span>4</span>
+          </p>
+          <h1 className="v2-nf-title">
+            <ThaiPhrases>{copy.title}</ThaiPhrases>
+          </h1>
+          <p className="v2-nf-desc">{copy.desc}</p>
+          <nav aria-label={copy.navLabel} className="v2-nf-links">
+            {copy.links.map((link, i) => (
+              <a key={link.href} href={link.href} className={i === 0 ? "ui2-btn v2-nf-go" : "ui2-btn-ghost"}>
+                {link.label}
+              </a>
+            ))}
+          </nav>
+          <p className="v2-nf-help">{copy.helpline}</p>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-[60vh] text-ink flex items-center justify-center px-6 py-20">

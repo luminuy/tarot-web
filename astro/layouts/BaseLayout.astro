@@ -21,6 +21,7 @@ import {
 } from "@/app/_shared/root-metadata";
 import { BRAND_SOCIAL_PROFILES, DEFAULT_SUPPORT_EMAIL, SITE_ORIGIN } from "@/lib/config/site";
 import { CONSENT_STORAGE_KEY } from "@/lib/analytics-consent";
+import { UI2_FX_SCRIPT } from "@/app/_shared/ui2-fx";
 import { THEME_SCRIPT } from "@/lib/theme/theme-script";
 import { getImageKitOrigin } from "@/lib/tarot/card-image";
 import type { Locale } from "@/lib/i18n/types";
@@ -142,6 +143,9 @@ const consentScript = `try{if(!localStorage.getItem(${JSON.stringify(CONSENT_STO
 <html lang={locale}>
   <head>
     <meta charset="utf-8" />
+    {/* 🎨 ระดับเอฟเฟกต์ UI 2.0 (full · lite · off) — ต้องเป็นสคริปต์แรกของ <head> ก่อนสไตล์ชีตและเฟรมแรก
+        ห้ามใส่ defer/async · ตรรกะและเหตุผลอยู่ที่ src/app/_shared/ui2-fx.ts (ด่าน test-ui2-fx) */}
+    <script is:inline set:html={UI2_FX_SCRIPT} />
     <meta name="viewport" content={VIEWPORT_CONTENT} />
     <meta name="theme-color" content={SITE_THEME_COLOR} />
 

@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { SlotPicker } from "@/components/marketplace/SlotPicker";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { IN_APP_BROWSER_LABEL, withLineExternalBrowser, type InAppBrowser } from "@/lib/marketplace/in-app-browser";
+import { CheckIcon } from "@/components/ui/LineIcons";
 import {
   buildIcs,
   CHECKOUT_EXPIRES_MINUTES,
@@ -176,7 +177,7 @@ export function BookingConfirmedPanel({
     <div className="space-y-4">
       <div className="flex items-start gap-3 rounded-2xl border border-ok/30 bg-ok/10 p-4" role="status">
         <span aria-hidden="true" className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ok font-bold text-white">
-          ✓
+          <CheckIcon />
         </span>
         <div className="space-y-0.5">
           <h3 className="text-lg font-bold text-ink">นัดของคุณยืนยันแล้ว</h3>
@@ -265,7 +266,7 @@ function CopyLinkButton({ text, label = "คัดลอกลิงก์", cla
       }}
       className={`flex min-h-[46px] items-center justify-center gap-2 rounded-full border border-line-interactive-warm bg-surface px-4 text-sm font-semibold text-ink-deep transition-colors cursor-pointer hover:border-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${className}`}
     >
-      <span aria-live="polite">{state === "copied" ? "คัดลอกแล้ว ✓" : state === "failed" ? "กดค้างที่ลิงก์เพื่อคัดลอก" : label}</span>
+      <span aria-live="polite">{state === "copied" ? "คัดลอกแล้ว" : state === "failed" ? "กดค้างที่ลิงก์เพื่อคัดลอก" : label}</span>
     </button>
   );
 }
@@ -317,7 +318,7 @@ export function InAppBrowserNotice({ app, accessUrl }: { app: InAppBrowser; acce
           href={withLineExternalBrowser(accessUrl)}
           className="btn-gold-glass flex min-h-[48px] w-full items-center justify-center gap-2 px-5 text-sm font-bold"
         >
-          เปิดใน Safari / Chrome <span aria-hidden="true">→</span>
+          เปิดใน Safari / Chrome
         </a>
       ) : (
         <>
@@ -552,7 +553,7 @@ export function ReviewPanel({
   if (done) {
     return (
       <p role="status" className="rounded-2xl border border-ok/30 bg-ok/10 p-4 text-center text-sm text-ink">
-        <span className="text-gold-ink" aria-hidden="true">{"★".repeat(done)}</span>{" "}
+        <strong className="text-gold-ink">ให้ {done} จาก 5 คะแนน</strong>{" "}
         ขอบคุณสำหรับรีวิว ช่วยให้คนอื่นเลือกแม่หมอได้ง่ายขึ้นมาก
       </p>
     );
@@ -593,11 +594,12 @@ export function ReviewPanel({
             aria-label={`${n} ดาว`}
             onClick={() => setRating(n)}
             onMouseEnter={() => setHover(n)}
-            className={`grid h-11 w-11 place-items-center rounded-full text-3xl leading-none transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
-              n <= shown ? "text-gold-ink" : "text-line-warm"
+            /* ปุ่มตัวเลข 1–5 (ไม่ใช้ตัวอักษรดาว — กฎห้ามสัญลักษณ์บนหน้าเว็บ 2026-10-16) */
+            className={`grid h-11 w-11 place-items-center rounded-full border text-base font-bold leading-none transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
+              n <= shown ? "border-gold-ink bg-gold-ink text-surface" : "border-line-warm text-muted"
             }`}
           >
-            ★
+            {n}
           </button>
         ))}
         <span className="ml-2 text-[13px] text-muted" aria-live="polite">

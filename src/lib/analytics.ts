@@ -261,6 +261,17 @@ export type TarotAnalyticsEvent =
         section: string;
         target: string;
       };
+    }
+  /**
+   * 🎨 UI 2.0: ตัวกันพัง FPS ลดเครื่องนี้จาก full ➔ lite (ค่ากลางเวลาเฟรม 2 วินาทีแรก > 22ms)
+   * ไว้ดูว่าเกิดกับเครื่องแบบไหน — ส่งแค่ตัวเลขและความกว้างจอ ไม่มีข้อมูลระบุตัวคน
+   */
+  | {
+      name: "ui2_fx_downgrade";
+      params: {
+        median_ms: number;
+        viewport_w: number;
+      };
     };
 
 /**

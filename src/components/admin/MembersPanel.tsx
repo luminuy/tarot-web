@@ -240,7 +240,7 @@ export default function MembersPanel() {
                 disabled={currentPage <= 1 || list.loading}
                 onClick={() => goTo(currentPage - 1)}
               >
-                ← ก่อนหน้า
+                ก่อนหน้า
               </Button>
               <span className="min-w-24 text-center text-sm text-ink" aria-live="polite">
                 หน้า {fmt(currentPage)} / {fmt(pageCount)}
@@ -253,7 +253,7 @@ export default function MembersPanel() {
                 disabled={currentPage >= pageCount || list.loading}
                 onClick={() => goTo(currentPage + 1)}
               >
-                ถัดไป →
+                ถัดไป
               </Button>
             </div>
           </nav>
@@ -305,7 +305,7 @@ function MemberDetail({ id, onClose }: { id: string; onClose: () => void }) {
       <div className="mb-3 flex items-center justify-between gap-3">
         <h4 className="text-sm font-bold text-ink">{d ? d.member.name || d.member.email || d.member.id : "รายละเอียดสมาชิก"}</h4>
         <button type="button" onClick={onClose} className="tap-overlay-y text-xs text-muted hover:text-ink">
-          ปิด ✕
+          ปิด
         </button>
       </div>
 

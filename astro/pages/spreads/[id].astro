@@ -10,6 +10,9 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { SpreadDetailContentRoot } from "../../components/PageBodies";
 import { SpreadDetailRoot } from "../../islands/SpreadIslands";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
+import "@/styles/v2-spread-detail.css";
 
 /** 📐 คู่มือผังพยากรณ์รายผัง 26 หน้า (ต้นไม้ภาษาไทย) */
 const locale = "th" as const;
@@ -24,10 +27,18 @@ const detailProps = spreadDetailProps(spread, locale);
 
 <BaseLayout locale={locale} metadata={spreadDetailMetadata(spread.id, locale)}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
   <SpreadDetailContentRoot spread={spread} locale={locale}>
     <Fragment slot="detail">
       <SpreadDetailRoot {...detailProps} locale={locale} />
     </Fragment>
   </SpreadDetailContentRoot>
+  </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../scripts/ui2-inview";
+  import "../../scripts/spread-board";
+</script>
