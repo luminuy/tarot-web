@@ -1,0 +1,186 @@
+/*
+ * 🃏 การ์ดไพ่ในกริด v3 (CardTile.tsx) — กรอบกระดาษงาช้างแบบไพ่บนโต๊ะของ /spreads (เจ้าของ 2026-10-17)
+ * ===========================================================================
+ * 📐 สูตรความสูง (`contain-intrinsic-size` ของ `.card-tile-cv`) — คำนวณตรง ไม่ต้องวัดเดา
+ *    การ์ด = กรอบ (ภาพ 7:12 + padding 6px รอบ) + บล็อกชื่อสูงตายตัว 66px · ไม่มี padding/ขอบที่ตัวการ์ด
+ *    สูง = (W − 12) × 12/7 + 12 + 66  โดย W = ความกว้างการ์ด = (ความกว้างกริด − ช่องคอลัมน์รวม) / คอลัมน์
+ *    กริดอยู่ใน `.v3-grid-wrap` ที่เป็น container ➔ 100cqi = ความกว้างกริดจริง (มีรายชื่อหมวดซ้ายหรือไม่ก็ถูก)
+ *    ด่าน scripts/qa/test-card-tile-height.ts เฝ้าตัวเลข 12 · 66 · 7/12 และช่องคอลัมน์ทุกช่วง — แก้ที่เดียวด่านตก
+ */
+.v3-grid-wrap {
+  container-type: inline-size;
+}
+.v3-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 12px;
+}
+.v3-tile.card-tile-cv {
+  contain-intrinsic-size: auto calc(((100cqi - 12px) / 2 - 12px) * 12 / 7 + 78px);
+}
+@container (min-width: 520px) {
+  .v3-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 14px;
+  }
+  .v3-tile.card-tile-cv {
+    contain-intrinsic-size: auto calc(((100cqi - 28px) / 3 - 12px) * 12 / 7 + 78px);
+  }
+}
+@container (min-width: 760px) {
+  .v3-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: 16px;
+  }
+  .v3-tile.card-tile-cv {
+    contain-intrinsic-size: auto calc(((100cqi - 48px) / 4 - 12px) * 12 / 7 + 78px);
+  }
+}
+@container (min-width: 980px) {
+  .v3-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    column-gap: 18px;
+  }
+  .v3-tile.card-tile-cv {
+    contain-intrinsic-size: auto calc(((100cqi - 72px) / 5 - 12px) * 12 / 7 + 78px);
+  }
+}
+
+.v3-tile {
+  display: block;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
+.v3-tile-frame {
+  position: relative;
+  display: block;
+  padding: 6px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #FBF4E6 0%, #EFE3CC 100%);
+  box-shadow: 0 0 0 1px rgba(255, 236, 200, 0.5), 0 18px 34px -18px rgba(0, 0, 0, 0.9);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease;
+}
+.v3-tile-frame picture {
+  display: block;
+}
+.v3-tile-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 7 / 12;
+  object-fit: cover;
+  border-radius: 9px;
+}
+/* เลขไพ่ชุดใหญ่ — ป้ายงาช้างมุมซ้ายบน */
+.v3-tile-no {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #3A2E0E;
+  background: #F9E6A2;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+/* บล็อกชื่อสูงตายตัว 66px (อยู่ในสูตรความสูง) */
+.v3-tile-txt {
+  display: block;
+  box-sizing: border-box;
+  height: 66px;
+  padding-top: 10px;
+  overflow: hidden;
+  text-align: center;
+}
+.v3-tile-name,
+.v3-tile-en,
+.v3-tile-kw {
+  display: block;
+  margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.v3-tile-name {
+  height: 22px;
+  font-family: var(--ui2-font-display);
+  font-size: 15.5px;
+  font-weight: 600;
+  line-height: 22px;
+  color: var(--ui2-on-night);
+  transition: color 0.2s ease;
+}
+.v3-tile-en {
+  height: 18px;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--ui2-gold-solid);
+}
+.v3-tile-kw {
+  height: 16px;
+  font-size: 12.5px;
+  line-height: 16px;
+  color: var(--ui2-on-night-dim);
+}
+@media (hover: hover) {
+  .v3-tile:hover .v3-tile-frame {
+    transform: translateY(-6px) rotate(-1.2deg);
+    box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.9), 0 26px 44px -18px rgba(0, 0, 0, 0.95), 0 0 34px -6px rgba(255, 217, 143, 0.35);
+  }
+  .v3-tile:nth-child(even):hover .v3-tile-frame {
+    transform: translateY(-6px) rotate(1.2deg);
+  }
+  .v3-tile:hover .v3-tile-name {
+    color: var(--ui2-gold-solid);
+  }
+}
+.v3-tile:focus-visible {
+  outline: none;
+}
+.v3-tile:focus-visible .v3-tile-frame {
+  box-shadow: 0 0 0 3px var(--ui2-gold-solid), 0 18px 34px -18px rgba(0, 0, 0, 0.9);
+}
+@media (prefers-reduced-motion: reduce) {
+  .v3-tile-frame {
+    transition: none;
+  }
+  .v3-tile:hover .v3-tile-frame,
+  .v3-tile:nth-child(even):hover .v3-tile-frame {
+    transform: none;
+  }
+}
+
+/* มือถือ: แต่ละหมวดโชว์ 6 ใบแรก + ปุ่มดูต่อ (ใบที่เหลืออยู่ใน HTML ครบ ซ่อนด้วย CSS เท่านั้น — ข้อห้าม SEO) */
+@container (max-width: 519px) {
+  .v3-grid.is-clipped > :nth-child(n + 7) {
+    display: none;
+  }
+}
+.v3-more {
+  display: none;
+}
+@container (max-width: 519px) {
+  .v3-more {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 18px;
+  }
+}
+.v3-more button {
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ui2-on-night);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+  background: rgba(255, 236, 200, 0.04);
+  cursor: pointer;
+}

@@ -40,15 +40,38 @@ const ROOT = process.cwd();
  *    และ padding+ขอบ ยังรวมได้ 26px เป๊ะทุกความกว้าง ตามที่สูตรหักไว้
  */
 const FINGERPRINTS: { file: string; needles: string[]; why: string }[] = [
+  /*
+   * v3 (2026-10-17 · เจ้าของ "ทำแบบหน้าแรกกับหน้าผัง"): /cards ใช้ CardTile.tsx + v3-card-tile.css
+   * สูตรไม่ได้มาจากการวัดเดา — คำนวณตรงจากโครงการ์ด: สูง = (W − 12) × 12/7 + 78 · W จากความกว้างกริดจริง (100cqi)
+   * ด่านเฝ้าทุกตัวเลขที่สูตรตั้งอยู่บน: padding กรอบ 6px · ภาพ 7/12 · บล็อกชื่อ 66px · คอลัมน์+ช่องทุกช่วง
+   */
   {
     file: "src/components/encyclopedia/CardsExplorer.tsx",
+    needles: ["<CardTile", "v3-grid-wrap", "v3-grid"],
+    why: "หน้า /cards ต้องใช้การ์ด v3 ในกริดที่เป็น container — สูตร cqi พึ่งพาโครงนี้",
+  },
+  {
+    file: "src/components/encyclopedia/CardTile.tsx",
+    needles: ["card-tile-cv v3-tile", "v3-tile-frame", "v3-tile-txt"],
+    why: "โครงการ์ด v3 (กรอบ + บล็อกชื่อ) คือฐานของสูตรความสูง",
+  },
+  {
+    file: "src/styles/v3-card-tile.css",
     needles: [
-      "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-5",
-      "card-tile-cv altar-card-porcelain !rounded-xl p-3",
-      'aspect-[7/12]',
-      "h-[3.8125rem]",
+      "container-type: inline-size;",
+      "padding: 6px;",
+      "aspect-ratio: 7 / 12;",
+      "height: 66px;",
+      "contain-intrinsic-size: auto calc(((100cqi - 12px) / 2 - 12px) * 12 / 7 + 78px);",
+      "contain-intrinsic-size: auto calc(((100cqi - 28px) / 3 - 12px) * 12 / 7 + 78px);",
+      "contain-intrinsic-size: auto calc(((100cqi - 48px) / 4 - 12px) * 12 / 7 + 78px);",
+      "contain-intrinsic-size: auto calc(((100cqi - 72px) / 5 - 12px) * 12 / 7 + 78px);",
+      "gap: 22px 12px;",
+      "column-gap: 14px;",
+      "column-gap: 16px;",
+      "column-gap: 18px;",
     ],
-    why: "จำนวนคอลัมน์ · gap · padding การ์ด · สัดส่วนภาพ · ความสูงแถวคีย์เวิร์ด — ทั้งห้าอย่างนี้อยู่ในสูตรโดยตรง",
+    why: "สูตร = ((กริด − ช่องรวม) / คอลัมน์ − 12) × 12/7 + 12 + 66 — padding กรอบ 6×2 · ภาพ 7:12 · บล็อกชื่อ 66px · ช่องคอลัมน์ 12/14/16/18",
   },
   {
     file: "src/components/encyclopedia/CardGroupView.tsx",

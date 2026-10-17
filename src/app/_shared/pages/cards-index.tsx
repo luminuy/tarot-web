@@ -93,12 +93,13 @@ export function CardsIndexBody({ locale, explorer }: { locale: Locale; explorer:
   ]);
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink p-4 sm:p-8 font-sans relative overflow-x-clip">
+    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink px-4 sm:px-6 pb-16 font-sans relative overflow-x-clip">
       {/* Schema.org Structured Data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(collectionJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbsJsonLd) }} />
 
-      <div className="max-w-6xl mx-auto space-y-6 relative z-10">
+      {/* กว้างพอสำหรับรายชื่อหมวดซ้าย + หน้าต่าง (ชุดเดียวกับ /spreads) */}
+      <div className="max-w-[1360px] mx-auto relative z-10">
         {/* Client Interactive Explorer with dynamic bilingual hero header */}
         {explorer}
       </div>

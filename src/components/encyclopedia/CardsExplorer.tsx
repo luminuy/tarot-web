@@ -6,40 +6,88 @@ import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import dynamic from "next/dynamic";
 import type { CardSummary } from "@/data/cards/summary";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
-import { CardImage } from "@/components/card/CardImage";
 import { trackEvent } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n";
 
-import {
-  AirElementIcon,
-  CrownTabIcon,
-  FireElementIcon,
-  PentacleTabIcon,
-  SparkleTabIcon,
-  WaterElementIcon,
-} from "@/components/ui/TarotArtIcons";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
-import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
+import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { Ui2Showcase, Ui2ShowcaseStarter, type Ui2ShowcaseSection } from "@/components/ui2/Ui2Showcase";
+import { CardTile } from "@/components/encyclopedia/CardTile";
 interface CardsExplorerProps {
   cards: readonly CardSummary[];
 }
 
-const SUIT_TABS = [
-  { id: "all", labelTh: "ไพ่ทั้งหมด", labelEn: "All Cards", Icon: SparkleTabIcon, descTh: "ครบ 78 ใบ", descEn: "Complete 78 cards", count: 78 },
-  { id: "major", labelTh: "ไพ่ชุดใหญ่ (Major)", labelEn: "Major Arcana", Icon: CrownTabIcon, descTh: "ไพ่หลัก 22 ใบ", descEn: "22 Trump cards", count: 22 },
-  { id: "wands", labelTh: "ไม้เท้า (Wands)", labelEn: "Wands", Icon: FireElementIcon, descTh: "ธาตุไฟ · พลังงาน & การงาน", descEn: "Fire · Passion & Will", count: 14 },
-  { id: "cups", labelTh: "ถ้วย (Cups)", labelEn: "Cups", Icon: WaterElementIcon, descTh: "ธาตุน้ำ · ความรัก & อารมณ์", descEn: "Water · Love & Emotion", count: 14 },
-  { id: "swords", labelTh: "ดาบ (Swords)", labelEn: "Swords", Icon: AirElementIcon, descTh: "ธาตุลม · ความคิด & การตัดสินใจ", descEn: "Air · Intellect & Truth", count: 14 },
+/**
+ * 5 หมวดของสำรับ = 5 หน้าต่างในโชว์เคส (ภาษาภาพเดียวกับ /spreads · เจ้าของ 2026-10-17)
+ * เดิมเป็นแท็บกรองไพ่ + กริด 78 ใบก้อนเดียว ➔ ตอนนี้ทุกชุดมีหน้าต่างของตัวเอง เลื่อนดูต่อกันได้ รายชื่อซ้ายพากระโดด
+ */
+const GROUPS = [
+  {
+    id: "major",
+    tone: 4,
+    kicker: "Major Arcana",
+    th: "ไพ่ชุดใหญ่",
+    en: "Major Arcana",
+    leadTh: "22 บทใหญ่ของชีวิต ตั้งแต่ก้าวแรกของคนเขลาจนถึงโลกที่สมบูรณ์",
+    leadEn: "22 great chapters of life, from the Fool's first step to the completed World",
+    starter: "major-00",
+    starterTh: "เริ่มอ่านที่ใบแรกของการเดินทาง",
+    starterEn: "Start with the first card of the journey",
+  },
+  {
+    id: "wands",
+    tone: 3,
+    kicker: "Wands · Fire",
+    th: "ไม้เท้า",
+    en: "Wands",
+    leadTh: "ธาตุไฟ ไฟในใจ ความกล้า การงาน และสิ่งที่อยากลงมือทำ",
+    leadEn: "Fire: drive, courage, work and the things you want to make happen",
+    starter: "wands-01",
+    starterTh: "จุดเริ่มของธาตุไฟ",
+    starterEn: "Where the fire begins",
+  },
+  {
+    id: "cups",
+    tone: 2,
+    kicker: "Cups · Water",
+    th: "ถ้วย",
+    en: "Cups",
+    leadTh: "ธาตุน้ำ ความรัก ความรู้สึก และความสัมพันธ์รอบตัว",
+    leadEn: "Water: love, feelings and the relationships around you",
+    starter: "cups-01",
+    starterTh: "จุดเริ่มของหัวใจ",
+    starterEn: "Where the heart begins",
+  },
+  {
+    id: "swords",
+    tone: 7,
+    kicker: "Swords · Air",
+    th: "ดาบ",
+    en: "Swords",
+    leadTh: "ธาตุลม ความคิด การตัดสินใจ และความจริงที่ต้องเผชิญ",
+    leadEn: "Air: thoughts, decisions and the truths you have to face",
+    starter: "swords-01",
+    starterTh: "จุดเริ่มของความคิดที่ชัด",
+    starterEn: "Where clear thinking begins",
+  },
   {
     id: "pentacles",
-    labelTh: "เหรียญ (Pentacles)",
-    labelEn: "Pentacles",
-    Icon: PentacleTabIcon,
-    descTh: "ธาตุดิน · การเงิน & ความมั่นคง",
-    descEn: "Earth · Material & Stability",
-    count: 14,
+    tone: 1,
+    kicker: "Pentacles · Earth",
+    th: "เหรียญ",
+    en: "Pentacles",
+    leadTh: "ธาตุดิน เงิน งานที่จับต้องได้ สุขภาพ และความมั่นคง",
+    leadEn: "Earth: money, tangible work, health and stability",
+    starter: "pentacles-01",
+    starterTh: "จุดเริ่มของความมั่นคง",
+    starterEn: "Where stability begins",
   },
-];
+] as const;
+
+const groupOf = (card: CardSummary) => (card.arcana === "major" ? "major" : (card.suit ?? "major"));
+
+/** ไพ่ลอยข้างหัวข้อ (ตกแต่ง · ไม่ใช่ผลสุ่ม) */
+const HERO_CARDS = ["major-00", "major-19", "major-17", "major-10", "major-01", "major-21"] as const;
 
 const ELEMENT_EN: Record<string, string> = {
   ไฟ: "Fire",
@@ -55,103 +103,131 @@ const SemanticSearchPanel = dynamic(
 
 export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
   const { isEnglish } = useLocale();
-  const [activeFilter, setActiveFilter] = useState<string>("all");
-  /* คลาสเฟดขาเข้าของกริดใส่ก็ต่อเมื่อผู้ใช้สลับแท็บเองแล้วเท่านั้น (INC-0244)
-     ถ้าใส่ตั้งแต่เรนเดอร์แรก HTML จากเซิร์ฟเวอร์จะพาคลาสมาด้วย กริด 78 ใบจึงจางหายแล้วค่อยโผล่
-     ทุกครั้งที่เปิดหน้า = กระพริบบนมือถือ (กติกาเดียวกับ `hasSwappedTab` ใน SpreadCardSelector) */
-  const [hasSwappedTab, setHasSwappedTab] = useState(false);
-  const selectFilter = (id: string) => {
-    if (id === activeFilter) return;
-    setHasSwappedTab(true);
-    setActiveFilter(id);
-  };
   const [searchQuery, setSearchQuery] = useState<string>("");
-  /**
-   * 📱 มือถือโชว์ไพ่ 12 ใบแรกก่อน แล้วมีปุ่ม "ดูทั้งหมด" — เดิมกริด 78 ใบ 2 คอลัมน์ยาว ~16,000px (27 จอ · เจ้าของทัก)
-   * ⚠️ ไพ่ทั้ง 78 ใบยังอยู่ใน HTML ครบ (ซ่อนด้วย CSS `.mobile-preview-12` เท่านั้น) — ข้อห้าม SEO "ไพ่ครบใน HTML" ยังจริง
-   *    และไม่แตะสูตรความสูงการ์ด (`card-tile-cv`) เพราะไม่ได้เปลี่ยนคอลัมน์ · gap · ขนาดการ์ด
-   * ย่อเฉพาะมุมมอง "ไพ่ทั้งหมด" ที่ไม่ได้ค้นหา — กดหมวดหรือพิมพ์ค้นหา = เห็นผลครบทันที
-   */
-  const [showAllOnMobile, setShowAllOnMobile] = useState(false);
   const [showSemanticSearch, setShowSemanticSearch] = useState<boolean>(false);
+  /** 📱 มือถือ: หมวดที่กดดูครบแล้ว (ปกติโชว์ 6 ใบแรกต่อหมวด · ใบที่เหลืออยู่ใน HTML ครบ ซ่อนด้วย CSS เท่านั้น) */
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set());
 
+  const query = searchQuery.toLowerCase().trim();
   const filteredCards = useMemo(() => {
+    if (!query) return cards;
     return cards.filter((card) => {
-      // Suit filter
-      let matchesFilter = true;
-      if (activeFilter === "major") matchesFilter = card.arcana === "major";
-      else if (activeFilter === "wands") matchesFilter = card.suit === "wands";
-      else if (activeFilter === "cups") matchesFilter = card.suit === "cups";
-      else if (activeFilter === "swords") matchesFilter = card.suit === "swords";
-      else if (activeFilter === "pentacles") matchesFilter = card.suit === "pentacles";
-
-      if (!matchesFilter) return false;
-
-      // Search filter
-      if (!searchQuery.trim()) return true;
-      const q = searchQuery.toLowerCase().trim();
-      const nameTh = card.nameTh.toLowerCase();
-      const nameEn = card.nameEn.toLowerCase();
       const element = card.element ? card.element.toLowerCase() : "";
       const elementEn = (card.element && ELEMENT_EN[card.element] ? ELEMENT_EN[card.element] : "").toLowerCase();
       const astro = card.astrology ? card.astrology.toLowerCase() : "";
       const keywords = [...card.keywords.upright, ...card.keywords.reversed].join(" ").toLowerCase();
       const kwEnObj = CARD_KEYWORDS_EN[card.id];
       const keywordsEn = kwEnObj ? [...kwEnObj.upright, ...kwEnObj.reversed].join(" ").toLowerCase() : "";
-
       return (
-        nameTh.includes(q) ||
-        nameEn.includes(q) ||
-        keywords.includes(q) ||
-        keywordsEn.includes(q) ||
-        element.includes(q) ||
-        elementEn.includes(q) ||
-        astro.includes(q)
+        card.nameTh.toLowerCase().includes(query) ||
+        card.nameEn.toLowerCase().includes(query) ||
+        keywords.includes(query) ||
+        keywordsEn.includes(query) ||
+        element.includes(query) ||
+        elementEn.includes(query) ||
+        astro.includes(query)
       );
     });
-  }, [cards, activeFilter, searchQuery]);
-  const previewOnMobile = !showAllOnMobile && activeFilter === "all" && !searchQuery.trim();
+  }, [cards, query]);
 
   useEffect(() => {
-    if (!searchQuery.trim()) return;
+    if (!query) return;
     const timer = setTimeout(() => {
       // ส่งแค่ความยาว ไม่ส่งข้อความที่พิมพ์ (A4-10 — คำสัญญาในแถบยินยอม)
       trackEvent("card_search", {
-        query_len: searchQuery.trim().length,
+        query_len: query.length,
         results_count: filteredCards.length,
       });
     }, 1000);
     return () => clearTimeout(timer);
-  }, [searchQuery, filteredCards.length]);
+  }, [query, filteredCards.length]);
+
+  const byId = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards]);
+  let tileIndex = 0;
+  const sections: Ui2ShowcaseSection[] = GROUPS.map((g) => {
+    const all = cards.filter((c) => groupOf(c) === g.id);
+    const list = filteredCards.filter((c) => groupOf(c) === g.id);
+    const clipped = !query && !expanded.has(g.id) && list.length > 6;
+    const starter = byId.get(g.starter);
+    return {
+      id: `suit-${g.id}`,
+      kicker: g.kicker,
+      title: isEnglish ? g.en : g.th,
+      tone: g.tone,
+      count: query ? list.length : all.length,
+      hidden: list.length === 0,
+      lead: <ThaiPhrases>{isEnglish ? g.leadEn : g.leadTh}</ThaiPhrases>,
+      meta: query
+        ? isEnglish
+          ? `${list.length} of ${all.length} cards match`
+          : `ตรงคำค้น ${list.length} จาก ${all.length} ใบ`
+        : isEnglish
+          ? `${all.length} cards · tap a card to read its meaning`
+          : `${all.length} ใบ · แตะไพ่เพื่ออ่านความหมาย`,
+      aside:
+        starter && !query ? (
+          <Ui2ShowcaseStarter
+            kicker={isEnglish ? g.starterEn : g.starterTh}
+            name={isEnglish ? starter.nameEn : starter.nameTh}
+            action={
+              <Link href={`/cards/${starter.id}`} prefetch={false}>
+                {isEnglish ? "Read" : "อ่านความหมาย"}
+              </Link>
+            }
+          />
+        ) : undefined,
+      children: (
+        <div className="v3-grid-wrap">
+          <div className={`v3-grid${clipped ? " is-clipped" : ""}`}>
+            {list.map((card) => {
+              const i = tileIndex++;
+              // แถวแรกของหน้าต่างแรกคือผู้สมัคร LCP — ห้าม lazy (เบราว์เซอร์รู้จักภาพแรกช้าไปหนึ่งรอบเครือข่าย)
+              return <CardTile key={card.id} card={card} isEnglish={isEnglish} eager={i < 5} priority={i === 0} />;
+            })}
+          </div>
+          {clipped && (
+            <p className="v3-more">
+              <button
+                type="button"
+                onClick={() => setExpanded((prev) => new Set(prev).add(g.id))}
+              >
+                {isEnglish ? `Show all ${list.length} ${g.en}` : `ดู${g.th}ครบ ${list.length} ใบ`}
+              </button>
+            </p>
+          )}
+        </div>
+      ),
+    };
+  });
 
   return (
-      <div className="v2-cx space-y-8 relative z-10">
-      {/*
-        v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — ห้องสมุดไพ่
-        หัวหน้าคือช่องค้นหาใหญ่ + คำค้นแนะนำ (v1 ช่องค้นหาเล็กอยู่ในกล่องใต้หัวหน้าใหญ่)
-        แถบชุดไพ่ติดจอสีธาตุ สลับชุดได้ตลอดขณะเลื่อนดู 78 ใบ (v1 ต้องเลื่อนกลับขึ้นไปบนสุด)
-        ลิงก์คู่มือย่อยย้ายไปเป็นชั้นหนังสือท้ายกริด (v1 เป็นตัวหนังสือเรียงยาวในกล่องค้นหา)
-      */}
-      <header className="v2-cx-head">
-        <Ui2Crumbs crumbs={[{ label: isEnglish ? "Home" : "หน้าแรก", href: "/" }, { label: isEnglish ? "78 Card Meanings" : "ความหมายไพ่ 78 ใบ" }]} />
-        <h1 className="v2-cx-title">
-          {isEnglish ? (
+    <div className="v3-cx">
+      <Ui2PageHero
+        crumbs={[{ label: isEnglish ? "Home" : "หน้าแรก", href: "/" }, { label: isEnglish ? "78 Card Meanings" : "ความหมายไพ่ 78 ใบ" }]}
+        title=""
+        titleNode={
+          isEnglish ? (
             <>
-              The Complete <span className="ui2-gold-night">78 Tarot Cards</span> &amp; Meanings
+              The Complete <span className="ui2-gold-night ui2-loop">78 Tarot Cards</span> &amp; Meanings
             </>
           ) : (
             <>
-              <span className="tp">ความหมายไพ่ทาโร่ ไพ่ยิปซี</span> <span className="tp">ทั้ง <span className="ui2-gold-night">78 ใบ</span></span>
+              <span className="tp">ความหมายไพ่ทาโร่ ไพ่ยิปซี</span>{" "}
+              <span className="tp">
+                ทั้ง <span className="ui2-gold-night ui2-loop">78 ใบ</span>
+              </span>
             </>
-          )}
-        </h1>
-        <p className="v2-cx-lede">
+          )
+        }
+        lede={
           <ThaiPhrases>
             {isEnglish
-              ? "Explore depth psychological, archetypal, and practical divinatory meanings across love, career, and finances in the 1909 Rider-Waite lineage."
+              ? "Every card of the 1909 Rider-Waite deck, upright and reversed, for love, work and money."
               : "ค้นหาความหมายและคำทำนายของไพ่ทาโรต์ 78 ใบ ครบทุกมิติความรัก การงาน และการเงิน"}
           </ThaiPhrases>
-        </p>
+        }
+        cards={HERO_CARDS}
+      >
         <div className="v2-cx-search">
           <input
             type="search"
@@ -180,234 +256,60 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
             </button>
           ))}
         </p>
-      </header>
+      </Ui2PageHero>
 
-      {/* แถบชุดไพ่ติดจอ */}
-      <div className="v2-cx-bar">
-        <div
-          role="tablist"
-          aria-label={isEnglish ? "Card suits and arcana categories" : "หมวดหมู่ชุดไพ่และสำรับ"}
-          className="v2-cx-tabs"
-        >
-          {SUIT_TABS.map((tab, tabIdx) => {
-            const isActive = activeFilter === tab.id;
-            return (
-              <button
-                key={tab.id}
-                role="tab"
-                data-suit={tab.id}
-                id={`card-tab-${tab.id}`}
-                aria-controls={`card-panel-${tab.id}`}
-                aria-selected={isActive}
-                tabIndex={isActive ? 0 : -1}
-                type="button"
-                title={isEnglish ? tab.descEn : tab.descTh}
-                onClick={() => selectFilter(tab.id)}
-                onKeyDown={(e) => {
-                  let nextIdx = -1;
-                  if (e.key === "ArrowRight") nextIdx = (tabIdx + 1) % SUIT_TABS.length;
-                  else if (e.key === "ArrowLeft") nextIdx = (tabIdx - 1 + SUIT_TABS.length) % SUIT_TABS.length;
-                  if (nextIdx !== -1) {
-                    e.preventDefault();
-                    selectFilter(SUIT_TABS[nextIdx].id);
-                    document.getElementById(`card-tab-${SUIT_TABS[nextIdx].id}`)?.focus();
-                  }
-                }}
-                className="v2-cx-tab"
-              >
-                <tab.Icon className="v2-cx-tab-ic" />
-                <span>{isEnglish ? tab.labelEn : tab.labelTh.replace(/\s*\(.*\)$/, "")}</span>
-                <small>{tab.count}</small>
-              </button>
-            );
-          })}
-        </div>
-        <p className="v2-cx-found" role="status">
-          {isEnglish ? (
-            <>
-              <b>{filteredCards.length}</b> of {cards.length}
-            </>
-          ) : (
-            <>
-              <b>{filteredCards.length}</b> จาก {cards.length} ใบ
-            </>
-          )}
-        </p>
-      </div>
-
-      {/* ค้นด้วยความรู้สึก — โผล่เมื่อพิมพ์ยาวพอ */}
-      {searchQuery.trim().length >= 4 && (
-        <div className="v2-cx-feel">
-          <button type="button" onClick={() => setShowSemanticSearch((prev) => !prev)} aria-pressed={showSemanticSearch}>
-            {showSemanticSearch
-              ? isEnglish
-                ? "Hide Semantic Results"
-                : "ซ่อนผลค้นหาด้วยความรู้สึก"
-              : isEnglish
-                ? "Search by Feeling Instead"
-                : "ค้นหาด้วยความรู้สึกแทน"}
-          </button>
-          {filteredCards.length < 3 && searchQuery.trim().length >= 6 && !showSemanticSearch && (
-            <span>{isEnglish ? "Few exact word matches. Try semantic search." : "พบน้อยกว่า 3 ใบ แนะนำให้ลองค้นหาด้วยความรู้สึก"}</span>
-          )}
-        </div>
-      )}
-
-      {/* Semantic Feelings Search Panel */}
-      {showSemanticSearch && searchQuery.trim().length >= 2 && (
-        <SemanticSearchPanel
-          query={searchQuery}
-          onClose={() => setShowSemanticSearch(false)}
-        />
-      )}
-
-      {/* 78 Cards Luxury Masterpiece Grid */}
-      {/* `key` เปลี่ยน → React remount → คลาส .anim-swap-rise เล่นเฟดขึ้นใหม่ทุกครั้ง
-          (เดิมใช้ AnimatePresence ซึ่งลาก motion 39.8 KB เข้ามาทั้งก้อนเพื่ออนิเมชัน 0.2 วิ) */}
-      {/*
-        🔗 แผงนี้คือ "ปลายทาง" ของแท็บด้านบน จึงต้องเป็น `role="tabpanel"` ที่มี
-        `id` ตรงกับ `aria-controls` ของแท็บ และ `aria-labelledby` ชี้กลับไปหาแท็บ (UX-11)
-        ⚠️ `key={activeFilter}` ต้องคงไว้ — มันคือกลไก remount ที่ทำให้คลาส .anim-swap-rise
-        เล่นใหม่ทุกครั้งที่สลับแท็บ (แทน AnimatePresence ที่ลาก motion 39.8 KB เข้ามา)
-      */}
-      <div
-        key={activeFilter}
-        role="tabpanel"
-        id={`card-panel-${activeFilter}`}
-        aria-labelledby={`card-tab-${activeFilter}`}
-        /* แถบสีอ่อนแบ่ง "กริดไพ่" ออกจากหัวหน้า + แผงค้นหา แบบหน้าแรก (`page-band`) */
-        className={`page-band page-band-tint${hasSwappedTab ? " anim-swap-rise" : ""}`}
-      >
-        <div
-          className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-5${
-            previewOnMobile ? " mobile-preview-12" : ""
-          }`}
-        >
-          {filteredCards.map((card, idx) => {
-            // แถวแรกของกริดคือผู้สมัคร LCP ของหน้านี้ — ถ้าปล่อย lazy ทั้ง 78 ใบ
-            // เบราว์เซอร์จะรู้จักภาพแรกก็ต่อเมื่อจัดเลย์เอาต์เสร็จแล้ว เสียไปหนึ่งรอบเครือข่ายเต็ม ๆ
-            const isAboveFold = idx < 6;
-            return (
-              <Link
-                key={card.id}
-                href={`/cards/${card.id}`}
-                prefetch={false}
-                /* ⚡ `card-tile-cv` = กลไกข้ามการวาดของนอกจอที่ปลอดภัยแล้ว (INC-0174)
-                   ความสูงที่จองไว้คำนวณจากความกว้างจอด้วย calc(vw) ต่อ breakpoint ไม่ใช่ตัวเลขเดา
-                   ใช้ได้เพราะแถวคีย์เวิร์ดด้านล่างถูกล็อกความสูงแล้ว การ์ดทุกใบจึงสูงเท่ากัน
-                   ห้ามแก้สัดส่วนภาพ/ระยะห่างของการ์ดโดยไม่อัปเดตสูตรใน globals.css — ด่าน
-                   `test-card-tile-height.ts` จะตกทันทีถ้าของที่สูตรพึ่งพาถูกแก้ (กริด · gap · padding · สัดส่วนภาพ) */
-                data-suit={card.arcana === "major" ? "major" : (card.suit ?? "major")}
-                className="card-tile-cv altar-card-porcelain !rounded-xl p-3 flex flex-col justify-between group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1.5"
-              >
-                {/* Card Artwork Showcase (1909 Authentic Rider-Waite-Smith) */}
-                <div className="glass-tile relative aspect-[7/12] w-full overflow-hidden mb-3">
-                  <CardImage
-                    image={card.image}
-                    cardId={card.id}
-                    /* ภาพประกอบล้วน — <h2> ใต้ภาพในลิงก์เดียวกันพิมพ์ชื่อไพ่อยู่แล้ว ลิงก์จึงมีชื่อเรียกครบ (INC-0125) */
-                    alt=""
-                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 tarot-hd-card-image"
-                    sizes="(min-width: 1024px) 152px, (min-width: 768px) 136px, (min-width: 640px) 156px, 38vw"
-                    loading={isAboveFold ? "eager" : "lazy"}
-                    fetchPriority={idx === 0 ? "high" : undefined}
-                  />
-                  <div className="gold-foil-sheen absolute inset-0 opacity-10 group-hover:opacity-30 transition-opacity pointer-events-none" />
-
-                  {/* Top Badge: Number & Arcana */}
-                  <div className="absolute top-1.5 left-1.5 right-1.5 flex items-center justify-between pointer-events-none">
-                    <span className="text-[12px] font-mono font-bold px-1.5 py-0.5 rounded bg-gold-ink text-white">
-                      {card.arcana === "major" ? `#${card.number}` : card.suit?.toUpperCase().slice(0, 1)}
-                    </span>
-                    {/* ป้ายธาตุบนภาพไพ่ถอดออก — ทับรายละเอียดหน้าไพ่ (เจ้าของทักที่หน้าไพ่รายใบ · ตามแก้ให้เหมือนกันทั้งเว็บ) */}
-                  </div>
-
-                  {/* Bottom Hover Action Overlay */}
-                  <div className="absolute inset-x-0 bottom-0 p-2 bg-ink/90 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-[13px] font-serif-th font-bold text-canvas flex items-center gap-1">
-                       {isEnglish ? "View Meaning" : "ดูความหมาย"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Card Title & English Subtitle */}
-                <div className="text-center space-y-1 z-10">
-                  {/* บรรทัดรองของหน้าอังกฤษไม่แสดงชื่อไทย — เป็นภาษาที่ผู้อ่านไม่ได้ขอและเจือจางสัญญาณภาษาของหน้า */}
-                  {!isEnglish && (
-                    <span className="text-[13px] font-mono text-muted block truncate">{card.nameEn}</span>
-                  )}
-                  {/* ชื่อไพ่แต่ละใบคือหัวข้อระดับที่สองของหน้า /cards (h1 = ชื่อหน้า) */}
-                  <h2 className="font-serif-th text-xs sm:text-sm font-bold text-ink group-hover:text-gold-ink transition-colors truncate">
-                    {isEnglish ? card.nameEn : card.nameTh}
+      <Ui2Showcase
+        label={isEnglish ? "Cards by suit" : "ไพ่แยกตามชุด"}
+        sections={sections}
+        before={
+          query ? (
+            <div className="v3-cx-status">
+              <p role="status">
+                {isEnglish ? (
+                  <>
+                    <b>{filteredCards.length}</b> of {cards.length} cards match
+                  </>
+                ) : (
+                  <>
+                    พบ <b>{filteredCards.length}</b> จาก {cards.length} ใบ
+                  </>
+                )}
+              </p>
+              {query.length >= 4 && (
+                <button type="button" onClick={() => setShowSemanticSearch((prev) => !prev)} aria-pressed={showSemanticSearch}>
+                  {showSemanticSearch
+                    ? isEnglish
+                      ? "Hide feeling search"
+                      : "ซ่อนผลค้นหาด้วยความรู้สึก"
+                    : isEnglish
+                      ? "Search by feeling instead"
+                      : "ค้นหาด้วยความรู้สึกแทน"}
+                </button>
+              )}
+              {showSemanticSearch && query.length >= 2 && (
+                <SemanticSearchPanel query={searchQuery} onClose={() => setShowSemanticSearch(false)} />
+              )}
+              {filteredCards.length === 0 && (
+                <div className="v3-cx-empty">
+                  <h2>
+                    <ThaiPhrases>{isEnglish ? `No cards matching "${searchQuery}"` : `ไม่พบไพ่ที่ตรงกับ "${searchQuery}"`}</ThaiPhrases>
                   </h2>
-
-                  {/* Top 2 Upright Keywords */}
-                  {/* ⚠️ ความสูงคงที่ 2 บรรทัดโดยตั้งใจ (INC-0174 · ISSUE-048)
-                      คีย์เวิร์ดบางใบยาวจนตกบรรทัดที่สอง บางใบไม่ตก ความสูงการ์ดจึงต่างกัน 31px
-                      ซึ่งทำให้กลไกข้ามการวาดเดาความสูงไม่ได้และหน้าจอกระตุกตอนเลื่อน
-                      ล็อกไว้ที่ 2 บรรทัดเสมอ ➔ การ์ดทุกใบสูงเท่ากันที่ทุกความกว้างจอ
-                      (ด่าน `test-card-tile-height.ts` เฝ้าข้อนี้อยู่ ห้ามถอดความสูงคงที่ออก) */}
-                  <div className="flex flex-wrap items-start justify-center gap-1 pt-1 h-[3.8125rem] overflow-hidden">
-                    {(() => {
-                      const kwEnList = CARD_KEYWORDS_EN[card.id]?.upright;
-                      const displayKws = isEnglish && kwEnList && kwEnList.length > 0 ? kwEnList.slice(0, 2) : card.keywords.upright.slice(0, 2);
-                      return displayKws.map((kw, i) => (
-                        <span
-                          key={i}
-                          className="glass-chip text-[12px] font-serif-th px-2 py-0.5 text-ink truncate max-w-full"
-                        >
-                          {kw}
-                        </span>
-                      ));
-                    })()}
-                  </div>
+                  <p>
+                    {isEnglish
+                      ? 'Try another word such as "Love", "The Sun", "Jupiter" or "Fire".'
+                      : 'ลองคำอื่น เช่น "ความรัก", "The Sun", "ดาวพฤหัสบดี" หรือ "ธาตุไฟ"'}
+                  </p>
+                  <button type="button" onClick={() => setSearchQuery("")}>
+                    {isEnglish ? "Clear search" : "ล้างคำค้นหา"}
+                  </button>
                 </div>
+              )}
+            </div>
+          ) : undefined
+        }
+      />
 
-                
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-
-      {previewOnMobile && filteredCards.length > 12 && (
-        <div className="sm:hidden flex justify-center">
-          <button
-            type="button"
-            onClick={() => setShowAllOnMobile(true)}
-            className="glass-chip tap-overlay-y px-5 py-2.5 font-serif-th text-sm font-bold text-gold-ink"
-          >
-            {isEnglish ? `Show all ${filteredCards.length} cards` : `ดูไพ่ทั้งหมด ${filteredCards.length} ใบ`}
-          </button>
-        </div>
-      )}
-
-      {/* Empty State */}
-      {filteredCards.length === 0 && (
-        <div className="altar-card-porcelain text-center py-16 p-8 space-y-3">
-          <div className="text-sm text-gold-ink font-serif-th">SeerTarot</div>
-          <h2 className="font-serif-th text-lg font-bold text-ink"><ThaiPhrases>
-            {isEnglish ? `No cards matching "${searchQuery}"` : `ไม่พบไพ่ที่ตรงกับ "${searchQuery}"`}
-          </ThaiPhrases></h2>
-          <p className="text-xs text-muted max-w-md mx-auto font-serif-th">
-            {isEnglish
-              ? 'Try searching by another term such as "Love", "The Sun", "Jupiter", or "Fire".'
-              : 'ลองค้นหาด้วยชื่ออื่น เช่น "ความรัก", "The Sun", "ดาวพฤหัสบดี" หรือ "ธาตุไฟ"'}
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              setSearchQuery("");
-              selectFilter("all");
-            }}
-            className="btn-gold-glass tap-overlay-y px-6 py-2 text-xs font-serif-th font-bold cursor-pointer"
-          >
-            {isEnglish ? "Clear All Filters" : "ล้างตัวกรองทั้งหมด"}
-          </button>
-        </div>
-      )}
-
-      {/* ชั้นหนังสือคู่มือย่อย — ลิงก์ภายในที่บอทเห็น (เดิมอยู่ในกล่องค้นหา) */}
+      {/* ชั้นหนังสือคู่มือย่อย — ลิงก์ภายในที่บอทเห็น */}
       <nav className="v2-cx-shelf" aria-label={isEnglish ? "Explore dedicated guides & master table" : "อ่านคู่มือเจาะลึกแต่ละหมวดและตารางสรุป"}>
         <p className="v2-cx-shelf-k">{isEnglish ? "Explore dedicated guides & master table" : "อ่านคู่มือเจาะลึกแต่ละหมวดและตารางสรุป"}</p>
         <ul>
@@ -431,6 +333,6 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
           ))}
         </ul>
       </nav>
-      </div>
+    </div>
   );
 };
