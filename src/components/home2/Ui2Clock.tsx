@@ -46,6 +46,14 @@ export function Ui2Clock({ isEnglish }: { isEnglish: boolean }) {
           </div>
         ))}
       </div>
+      {/* เติมตัวเลขทันทีที่ HTML ถึงเบราว์เซอร์ (ไม่รอสคริปต์หน้า ~1 วินาที · เดิมเห็น "--") — เวลาไทย UTC+7 ไม่มีเวลาออมแสง
+          สูตรเดียวกับ `bangkokNextMidnightISO()` · สคริปต์หน้า (ui2-home.ts) เดินต่อทุกวินาทีตามเดิม */}
+      <script dangerouslySetInnerHTML={{ __html: CLOCK_NOW }} />
     </div>
   );
 }
+
+const CLOCK_NOW =
+  "(function(s){var l=864e5-(Date.now()+252e5)%864e5,p=function(n){return(n<10?'0':'')+n}," +
+  "v={h:p(Math.floor(l/36e5)),m:p(Math.floor(l%36e5/6e4)),s:p(Math.floor(l%6e4/1e3))};" +
+  "s.parentNode.querySelectorAll('[data-u]').forEach(function(e){e.textContent=v[e.getAttribute('data-u')]})})(document.currentScript)";

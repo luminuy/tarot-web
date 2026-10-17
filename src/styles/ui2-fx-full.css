@@ -135,16 +135,7 @@
   /* กระดาษโน้ตนิ่ง (เดิมลอยวนทุกใบ) — ยังยกขึ้นตอนชี้/แตะตาม ui2.css */
 }
 
-/* ── เปิดหน้า: หัวข้อหลักเบลอแล้วค่อยคมขึ้น (แบบหัวหน้า fastwork.com) — ครั้งเดียวตอนโหลด · lite = ลอยเข้าอย่างเดียว ── */
-@media (min-width: 768px) {
-  [data-fx="full"] .ui2-hero-inner > .ui2-h1 {
-    animation-name: ui2-intro-blur;
-    animation-duration: 1.1s;
-  }
-}
-@keyframes ui2-intro-blur {
-  from { opacity: 0; transform: translateY(26px); filter: blur(8px); }
-}
+/* (เดิม: หัวข้อหลักเบลอแล้วค่อยคมขึ้นตอนโหลด — ถอดแล้ว หัวข้อขึ้นทันที ดู ui2.css "1. เปิดหน้า") */
 
 /* ── เลื่อนแล้วส่วนลอยขึ้น: ระยะเต็ม 90px (lite ใช้ 48px ใน ui2.css) ─────────────── */
 @media (min-width: 768px) {
