@@ -6,6 +6,7 @@ import { CardImage } from "@/components/card/CardImage";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Input, Textarea } from "@/components/ui/Input";
+import { AdminSubTabs, useSubTab } from "@/components/admin/AdminLayout";
 
 type Cat = "general" | "love" | "work" | "money" | "self";
 const CATS: { id: Cat; label: string }[] = [
@@ -50,9 +51,10 @@ interface CardDetail {
 }
 
 type SubTab = "prompt" | "persona" | "card";
+const CONTENT_TABS: SubTab[] = ["prompt", "persona", "card"];
 
 export default function ContentEditor() {
-  const [sub, setSub] = useState<SubTab>("prompt");
+  const [sub, setSub] = useSubTab<SubTab>(CONTENT_TABS);
   const [doc, setDoc] = useState<Doc>({});
   const [defaults, setDefaults] = useState<{
     systemCore: string;
@@ -113,27 +115,18 @@ export default function ContentEditor() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex gap-1.5">
-          {(
-            [
-              ["prompt", "prompt กลาง"],
-              ["persona", "บุคลิกแม่หมอ"],
-              ["card", "ความหมายไพ่"],
-            ] as [SubTab, string][]
-          ).map(([id, label]) => (
-            <button
-              key={id}
-              onClick={() => setSub(id)}
-              className={`tap-overlay-y rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
-                sub === id
-                  ? "btn-gold-glass border-ink"
-                  : "border-line bg-white text-muted hover:bg-canvas hover:text-ink"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div className="min-w-0 flex-1">
+          <AdminSubTabs
+            label="หมวดเนื้อหา"
+            active={sub}
+            onChange={setSub}
+            tabs={[
+              { id: "prompt", label: "คำสั่งระบบกลาง", hint: "กติกาที่แม่หมอ AI ทุกคนใช้" },
+              { id: "persona", label: "บุคลิกแม่หมอ", hint: "ชื่อ คำโปรย น้ำเสียง" },
+              { id: "card", label: "ความหมายไพ่ 78 ใบ", hint: "คำอ่าน คีย์เวิร์ด ใช่/ไม่ใช่" },
+            ]}
+          />
         </div>
         <div className="flex items-center gap-3">
           {msg ? <span className="text-xs text-muted">{msg}</span> : null}
@@ -142,6 +135,7 @@ export default function ContentEditor() {
               {loadError}
             </span>
           ) : null}
+          {dirty ? <span className="text-xs font-semibold text-amber-900">มีการแก้ที่ยังไม่บันทึก</span> : null}
           <Button size="sm" onClick={save} isLoading={saving} disabled={!dirty}>
             บันทึกทั้งหมด
           </Button>

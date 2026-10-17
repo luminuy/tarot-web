@@ -154,37 +154,29 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
 
   return (
     <div className="space-y-6">
-      {/* Top Banner */}
-      <div className="altar-card-porcelain p-6 sm:p-7">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2.5">
-              
-              <h2 className="font-mystic-gold text-lg sm:text-xl font-bold text-ink tracking-tight">
-                ศูนย์บัญชาการสถานะระบบคลาวด์ (Cloud & Integrations)
-              </h2>
-            </div>
-            <p className="text-xs sm:text-sm text-muted">
-              {data?.summary || "ระบบมอนิเตอร์และตรวจสอบการเชื่อมต่อบริการภายนอก 7 เสาหลักแบบเรียลไทม์"}
+      {/* แถบสรุปผลตรวจ — ชื่อหน้าอยู่ที่หัวแผงแอดมินแล้ว */}
+      <div className="rounded-xl border border-line bg-white p-5">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="space-y-1">
+            <p className="text-sm font-bold text-ink">
+              {data ? `ผ่าน ${data.passedCount} จาก ${data.totalCount} ระบบ` : "ยังไม่มีผลตรวจ"}
             </p>
-            {data && (
+            <p className="text-xs text-muted">{data?.summary || "ตรวจการเชื่อมต่อบริการภายนอกทั้งหมดแบบสด"}</p>
+            {data ? (
               <p className="text-[13px] text-muted">
-                ตรวจสัญญาณสดล่าสุด: <span className="text-ink font-mono font-medium">{formattedTime}</span> · ผ่าน {data.passedCount} จาก {data.totalCount} ระบบ
+                ตรวจล่าสุด <span className="font-mono font-medium text-ink">{formattedTime}</span>
               </p>
-            )}
+            ) : null}
           </div>
-
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={probe}
-              disabled={loading}
-              className="btn-gold-glass hover:bg-dark font-medium text-xs border-transparent"
-            >
-              {loading ? "กำลังยิงตรวจสัญญาณ…" : "ยิงตรวจสัญญาณสดทั้งหมด"}
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={probe}
+            disabled={loading}
+            className="btn-gold-glass border-transparent text-xs font-medium hover:bg-dark"
+          >
+            {loading ? "กำลังตรวจ…" : "ตรวจสดทั้งหมดอีกครั้ง"}
+          </Button>
         </div>
 
         {/* ♿ + R-28: ต้องประกาศให้โปรแกรมอ่านหน้าจอด้วย ไม่ใช่แค่โผล่เป็นกล่องสีแดง */}
@@ -200,6 +192,10 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
 
       {data && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="md:col-span-2 pt-2">
+            <h3 className="text-xs font-bold text-ink-soft">เว็บและความปลอดภัย</h3>
+            <p className="text-[11px] text-muted">โดเมน SSL และกุญแจเข้ารหัสที่ทุกหน้าใช้</p>
+          </div>
           {/* 1. โดเมน & การเข้าถึงเว็บ */}
           <div className="altar-card-porcelain p-5 space-y-3">
             <div className="flex items-center justify-between">
@@ -227,6 +223,39 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
             </div>
           </div>
 
+          {/* 7. ระบบความปลอดภัย & การเข้ารหัส */}
+          <div className="altar-card-porcelain p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                
+                <h3 className="font-semibold text-sm text-ink">ระบบความปลอดภัย & ถอดรหัส (Security)</h3>
+              </div>
+              <StatusPill ok={data.services.security.ok} />
+            </div>
+            <div className="space-y-1.5 text-xs text-muted">
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">Web Crypto SHA-256:</span>
+                <span className="text-emerald-700 font-semibold">สมบูรณ์ (Provably-Fair Sanity Passed)</span>
+              </div>
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">PASSWORD_PEPPER:</span>
+                <span className={data.services.security.passwordPepperOk ? "text-emerald-700 font-semibold" : "text-rose-700 font-semibold"}>
+                  {data.services.security.passwordPepperOk ? "เปิดใช้งาน (≥24 ตัวอักษร)" : "สั้นเกินไปหรือยังไม่ตั้ง"}
+                </span>
+              </div>
+              <div className="flex justify-between py-1.5">
+                <span className="text-muted">TAROT_SESSION_SECRET:</span>
+                <span className={data.services.security.sessionSecretOk ? "text-emerald-700 font-semibold" : "text-rose-700 font-semibold"}>
+                  {data.services.security.sessionSecretOk ? "แข็งแกร่ง (≥32 ตัวอักษร)" : "สั้นเกินไปหรือยังไม่ตั้ง"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="md:col-span-2 pt-2">
+            <h3 className="text-xs font-bold text-ink-soft">การเข้าสู่ระบบและอีเมล</h3>
+            <p className="text-[11px] text-muted">ถ้าแดง ลูกค้าจะล็อกอินหรือรับอีเมลยืนยันไม่ได้</p>
+          </div>
           {/* 2. เข้าสู่ระบบด้วย Google */}
           <div className="altar-card-porcelain p-5 space-y-3">
             <div className="flex items-center justify-between">
@@ -308,6 +337,10 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
             </div>
           </div>
 
+          <div className="md:col-span-2 pt-2">
+            <h3 className="text-xs font-bold text-ink-soft">ฐานข้อมูล</h3>
+            <p className="text-[11px] text-muted">ที่เก็บสมาชิก การจ่ายเงิน สถิติ และแคช</p>
+          </div>
           {/* 5. ฐานข้อมูล Cloudflare D1 */}
           <div className="altar-card-porcelain p-5 space-y-3">
             <div className="flex items-center justify-between">
@@ -364,35 +397,10 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
             </div>
           </div>
 
-          {/* 7. ระบบความปลอดภัย & การเข้ารหัส */}
-          <div className="altar-card-porcelain p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                
-                <h3 className="font-semibold text-sm text-ink">ระบบความปลอดภัย & ถอดรหัส (Security)</h3>
-              </div>
-              <StatusPill ok={data.services.security.ok} />
-            </div>
-            <div className="space-y-1.5 text-xs text-muted">
-              <div className="flex justify-between py-1.5 border-b border-line-soft">
-                <span className="text-muted">Web Crypto SHA-256:</span>
-                <span className="text-emerald-700 font-semibold">สมบูรณ์ (Provably-Fair Sanity Passed)</span>
-              </div>
-              <div className="flex justify-between py-1.5 border-b border-line-soft">
-                <span className="text-muted">PASSWORD_PEPPER:</span>
-                <span className={data.services.security.passwordPepperOk ? "text-emerald-700 font-semibold" : "text-rose-700 font-semibold"}>
-                  {data.services.security.passwordPepperOk ? "เปิดใช้งาน (≥24 ตัวอักษร)" : "สั้นเกินไปหรือยังไม่ตั้ง"}
-                </span>
-              </div>
-              <div className="flex justify-between py-1.5">
-                <span className="text-muted">TAROT_SESSION_SECRET:</span>
-                <span className={data.services.security.sessionSecretOk ? "text-emerald-700 font-semibold" : "text-rose-700 font-semibold"}>
-                  {data.services.security.sessionSecretOk ? "แข็งแกร่ง (≥32 ตัวอักษร)" : "สั้นเกินไปหรือยังไม่ตั้ง"}
-                </span>
-              </div>
-            </div>
+          <div className="md:col-span-2 pt-2">
+            <h3 className="text-xs font-bold text-ink-soft">AI และบริการเสริม</h3>
+            <p className="text-[11px] text-muted">ผู้ให้บริการ AI และบริการฟรีของ Cloudflare</p>
           </div>
-
           {/* 8. ปัญญาประดิษฐ์ AI Engine */}
           <div className="altar-card-porcelain p-5 space-y-3">
             <div className="flex items-center justify-between">

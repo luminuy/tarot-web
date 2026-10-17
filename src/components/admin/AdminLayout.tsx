@@ -1,0 +1,204 @@
+"use client";
+
+/**
+ * 🧱 โครงหน้ากลางของแผงแอดมิน — ทุกเมนูจัดหน้าขวาแบบเดียวกัน
+ * ---------------------------------------------------------------------------
+ *   1. สรุปตัวเลขบนสุด (`KpiGrid` + `StatCard`)
+ *   2. แท็บหมวดย่อยในหน้า (`AdminSubTabs`) — จำค่าใน URL `?sub=` เปิดลิงก์เดิมแล้วกลับมาที่หมวดเดิม
+ *   3. การ์ดแต่ละส่วน (`AdminSection`) มีหัวข้อ คำอธิบายหนึ่งบรรทัด และปุ่มของส่วนนั้นชิดขวา
+ *
+ * เพิ่มหน้าแอดมินใหม่ให้ประกอบจากชิ้นเหล่านี้ จะได้หน้าตาและวิธีใช้เหมือนกันทั้งระบบ
+ */
+
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, type ReactNode } from "react";
+
+export interface SubTab<T extends string> {
+  id: T;
+  label: string;
+  /** คำอธิบายสั้นใต้ชื่อแท็บ */
+  hint?: string;
+  /** ตัวเลขเตือนข้างชื่อแท็บ (แสดงเมื่อ > 0) */
+  count?: number | null;
+  /** สีของตัวเลข — `alert` ใช้กับเรื่องที่ต้องทำทันที */
+  tone?: "alert" | "neutral";
+}
+
+/** แท็บย่อยที่จำค่าใน URL `?sub=` · ค่าที่ไม่รู้จักถอยไปแท็บแรก */
+export function useSubTab<T extends string>(ids: readonly T[], fallback: T = ids[0]): [T, (id: T) => void] {
+  const router = useRouter();
+  const params = useSearchParams();
+  const raw = params.get("sub");
+  const current = (ids as readonly string[]).includes(raw ?? "") ? (raw as T) : fallback;
+  const set = useCallback(
+    (id: T) => {
+      const next = new URLSearchParams(window.location.search);
+      next.set("sub", id);
+      router.replace(`${window.location.pathname}?${next.toString()}`, { scroll: false });
+    },
+    [router],
+  );
+  return [current, set];
+}
+
+export function AdminSubTabs<T extends string>({
+  tabs,
+  active,
+  onChange,
+  label,
+}: {
+  tabs: SubTab<T>[];
+  active: T;
+  onChange: (id: T) => void;
+  /** ชื่อกลุ่มแท็บสำหรับโปรแกรมอ่านจอ */
+  label: string;
+}) {
+  return (
+    <div role="tablist" aria-label={label} className="flex flex-wrap gap-x-1 gap-y-2 border-b border-line">
+      {tabs.map((t) => {
+        const on = t.id === active;
+        return (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={on}
+            onClick={() => onChange(t.id)}
+            className={`tap-overlay-y -mb-px border-b-2 px-3 pb-2 pt-1 text-left text-sm transition-colors ${
+              on ? "border-ink font-semibold text-ink" : "border-transparent text-muted hover:text-ink"
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              {t.label}
+              {t.count != null && t.count > 0 ? (
+                <span
+                  className={`rounded-full px-1.5 py-px text-[11px] font-bold tabular-nums ${
+                    t.tone === "alert" ? "bg-rose-700 text-white" : "bg-inset text-ink"
+                  }`}
+                >
+                  {t.count > 99 ? "99+" : t.count}
+                </span>
+              ) : null}
+            </span>
+            {t.hint ? <span className="block text-[11px] font-normal text-muted">{t.hint}</span> : null}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** การ์ดหนึ่งส่วนของหน้า: หัวข้อ · คำอธิบาย · ปุ่มของส่วนนี้ (ชิดขวา) · เนื้อหา */
+export function AdminSection({
+  title,
+  hint,
+  actions,
+  tone = "default",
+  padded = true,
+  children,
+  id,
+}: {
+  title: string;
+  hint?: ReactNode;
+  actions?: ReactNode;
+  /** `alert` = กรอบแดงอ่อน สำหรับเรื่องที่ต้องทำทันที */
+  tone?: "default" | "alert";
+  /** ปิดระยะขอบในเมื่อเนื้อหาเป็นตารางเต็มกว้าง */
+  padded?: boolean;
+  children?: ReactNode;
+  id?: string;
+}) {
+  return (
+    <section
+      aria-labelledby={id ? `${id}-title` : undefined}
+      className={`overflow-hidden rounded-xl border bg-white ${tone === "alert" ? "border-rose-200" : "border-line"}`}
+    >
+      <header
+        className={`flex flex-wrap items-start justify-between gap-3 px-5 py-4 ${
+          tone === "alert" ? "bg-rose-50" : ""
+        } ${padded ? "" : "border-b border-line"}`}
+      >
+        <div className="min-w-0">
+          <h3 id={id ? `${id}-title` : undefined} className={`text-sm font-bold ${tone === "alert" ? "text-rose-800" : "text-ink"}`}>
+            {title}
+          </h3>
+          {hint ? <p className="mt-0.5 text-xs text-muted">{hint}</p> : null}
+        </div>
+        {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
+      </header>
+      {children ? <div className={padded ? "px-5 pb-5" : ""}>{children}</div> : null}
+    </section>
+  );
+}
+
+/** แถวการ์ดตัวเลขสรุปบนสุดของหน้า (2 คอลัมน์บนมือถือ · สูงสุด 4 บนจอกว้าง) */
+export function KpiGrid({ children, cols = 4 }: { children: ReactNode; cols?: 3 | 4 }) {
+  return <div className={`grid grid-cols-2 gap-3 sm:gap-4 ${cols === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}>{children}</div>;
+}
+
+/**
+ * แผงรายละเอียดเลื่อนออกจากขวา (แบบหน้ารายละเอียดลูกค้าของร้านค้าออนไลน์)
+ * กดดูแถวไหนก็เห็นรายละเอียดข้างตารางทันที ไม่ต้องเลื่อนลงไปหาท้ายหน้า · Esc หรือกดพื้นหลังเพื่อปิด
+ */
+export function AdminDrawer({
+  open,
+  title,
+  subtitle,
+  onClose,
+  children,
+}: {
+  open: boolean;
+  title: string;
+  subtitle?: string;
+  onClose: () => void;
+  children: ReactNode;
+}) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-40 flex justify-end bg-ink/20" onMouseDown={onClose}>
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className="flex h-full w-full max-w-[30rem] flex-col border-l border-line bg-white shadow-lg"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <header className="flex items-start justify-between gap-3 border-b border-line px-5 py-4">
+          <div className="min-w-0">
+            <h3 className="truncate text-base font-bold text-ink">{title}</h3>
+            {subtitle ? <p className="mt-0.5 break-all text-xs text-muted">{subtitle}</p> : null}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="tap-overlay-y shrink-0 rounded-lg border border-line px-3 py-1.5 text-xs text-ink hover:bg-canvas"
+          >
+            ปิด
+          </button>
+        </header>
+        <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">{children}</div>
+      </aside>
+    </div>
+  );
+}
+
+/** หัวข้อย่อยในแผงรายละเอียด/การ์ด */
+export function SubHeading({ children }: { children: ReactNode }) {
+  return <h4 className="mb-2 text-xs font-bold text-ink-soft">{children}</h4>;
+}
+
+/** กล่องว่างแบบมีคำแนะนำ — ใช้แทนข้อความ "ไม่มีข้อมูล" เปล่า ๆ */
+export function EmptyState({ title, hint }: { title: string; hint?: string }) {
+  return (
+    <div className="rounded-lg border border-dashed border-line px-4 py-8 text-center">
+      <p className="text-sm font-medium text-ink">{title}</p>
+      {hint ? <p className="mt-1 text-xs text-muted">{hint}</p> : null}
+    </div>
+  );
+}

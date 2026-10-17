@@ -18,6 +18,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
+import { AdminSubTabs, useSubTab } from "@/components/admin/AdminLayout";
 import { CommandPalette } from "@/components/admin/CommandPalette";
 import type { NavBadges } from "@/lib/admin/executive-data";
 
@@ -118,6 +119,8 @@ interface NavItem {
   badge?: { key: "refundDue" | "pendingReaders" | "newFeedback"; tone: "alert" | "watch" | "info"; label: string };
   /** คำค้นเสริมของช่องค้นหาเมนู (Ctrl+K) */
   keywords?: string;
+  /** "วิธีใช้หน้านี้" — 2–4 บรรทัด ภาษาคน บอกว่าทำอะไรได้และเริ่มตรงไหน */
+  help?: string[];
 }
 
 interface NavSection {
@@ -139,18 +142,21 @@ const NAV_SECTIONS: NavSection[] = [
         label: "แดชบอร์ดผู้บริหาร",
         short: "เงิน คนใช้ และสิ่งที่ต้องดู",
         description: "รายได้ · Stripe · คนเปิดไพ่ · อัตราซื้อ · AI — เทียบช่วงก่อนหน้า พร้อมสิ่งที่ต้องดู (สำหรับ CMO · COO)",
+        help: ["เลือกช่วงเวลา 7 / 28 / 90 วันด้านบน ทุกตัวเลขในหน้าจะเปลี่ยนตาม", "แท็บ ภาพรวม = ตัวเลขหลัก · การตลาด = คนเข้าจนถึงคนซื้อ · การดำเนินงาน = เงิน Stripe และ AI", "กล่อง สิ่งที่ต้องดู สรุปเรื่องที่ควรจัดการให้อัตโนมัติ เรียงเรื่องด่วนก่อน"],
       },
       {
         id: "overview",
         label: "สถานะระบบวันนี้",
         short: "ไฟบริการ ตัวเลข 7 วัน งานแอดมินล่าสุด",
         description: "สถานะระบบ ตัวเลขสำคัญ 7 วัน และกิจกรรมแอดมินล่าสุด",
+        help: ["ไฟสถานะบอกว่าบริการไหนทำงานปกติ ถ้าแดงให้ไปที่เมนู สุขภาพระบบ", "รายการ สิ่งที่ต้องทำ มีปุ่มพาไปหน้าที่เกี่ยวข้องทันที"],
       },
       {
         id: "stats",
         label: "สถิติละเอียดรายวัน",
         short: "เลือกดูทีละวัน แนวโน้ม ส่งออก CSV",
         description: "สรุปรายวันแบบเลือกวันได้ · แนวโน้มและความนิยม · โควตาและความเสถียรของ AI",
+        help: ["สรุปรายวัน: เลือกวันแล้วเทียบกับวันก่อน", "แนวโน้ม: ดูกราฟและตารางย้อนหลัง 7–90 วัน ส่งออก CSV ได้", "AI และระบบ: ดูโควตา AI วันนี้ ความเร็ว และจุดที่ผู้ใช้ถูกกั้นสิทธิ์"],
       },
     ],
   },
@@ -162,6 +168,7 @@ const NAV_SECTIONS: NavSection[] = [
         label: "รายการชำระเงิน",
         short: "ทุกการจ่ายเงิน ค้นหา เปิดใน Stripe",
         description: "ทุกการจ่ายเงินทุกสินค้า (แพ็กเติมรอบ · ปรึกษาแม่หมอ · AI ช่วยเขียน) — กรองสถานะ ค้นด้วยเลขคำสั่งซื้อ เปิดรายการใน Stripe",
+        help: ["ค่าเริ่มต้นแสดงเฉพาะเงินจริง เลือก รายการทดสอบ ถ้าต้องการดูรายการทดสอบ", "ค้นด้วยเลขคำสั่งซื้อ รหัสผู้ใช้ หรือรหัส Stripe แบบตรงตัว", "กด เปิดใน Stripe เพื่อคืนเงินหรือดูรายละเอียดบัตร"],
         keywords: "stripe order คำสั่งซื้อ ธุรกรรม ใบเสร็จ ซื้อ แพ็ก",
       },
       {
@@ -169,6 +176,7 @@ const NAV_SECTIONS: NavSection[] = [
         label: "การจองและการเงิน",
         short: "เงินต้องคืน การจอง ยอดโอนให้แม่หมอ",
         description: "เงินที่ต้องคืน · รายการจอง · ยอดที่ต้องโอนให้แม่หมอ · รีวิว",
+        help: ["แท็บ ต้องทำ คือเงินที่ต้องคืนลูกค้า ควรว่างทุกวัน", "แท็บ ยอดโอนให้แม่หมอ ใช้ตอนโอนเงินรอบเดือน", "แท็บ รีวิว ซ่อนรีวิวที่ไม่เหมาะสมได้ทันที"],
         badge: { key: "refundDue", tone: "alert", label: "รายการเงินที่ต้องคืนลูกค้า" },
         keywords: "คืนเงิน refund โอนเงินแม่หมอ รีวิว นัด",
       },
@@ -177,6 +185,7 @@ const NAV_SECTIONS: NavSection[] = [
         label: "แม่หมอพาร์ทเนอร์",
         short: "รับสมัคร ตรวจ และจัดการโปรไฟล์",
         description: "รับสมัคร ตรวจสอบ และจัดการโปรไฟล์หมอดูตัวจริง · ราคาแพ็กเกจ AI ช่วยเขียน",
+        help: ["แท็บสถานะด้านบนกรองรายชื่อ แท็บ รอตรวจ คือใบสมัครที่ต้องอนุมัติ", "ในการ์ดแต่ละคนมีปุ่มส่งลิงก์แผงแม่หมอ แก้ข้อมูล และหยุดรับลูกค้า", "หมวด ราคา AI ช่วยเขียน ตั้งราคาปกติและราคาพิเศษรายคน"],
         badge: { key: "pendingReaders", tone: "watch", label: "แม่หมอรอตรวจใบสมัคร" },
       },
     ],
@@ -189,12 +198,14 @@ const NAV_SECTIONS: NavSection[] = [
         label: "สมาชิก",
         short: "ค้นหา ดูสิทธิ์คงเหลือ ให้สิทธิ์เพิ่ม",
         description: "ค้นหาสมาชิก ดูสิทธิ์คงเหลือ ให้สิทธิ์เพิ่ม และรายชื่อผู้รับข่าวสาร",
+        help: ["ค้นด้วยอีเมล ชื่อ หรือรหัสผู้ใช้ แล้วกด ดู / ให้สิทธิ์", "รายละเอียดเปิดเป็นแผงด้านขวา ให้สิทธิ์เพิ่มได้จากในแผงนั้น (ต้องใส่เหตุผล)", "แท็บ ผู้รับข่าวสาร ดาวน์โหลดรายชื่อเป็น CSV ได้"],
       },
       {
         id: "feedback",
         label: "ความเห็นจากผู้ใช้",
         short: "คะแนนและข้อความที่ส่งมา",
         description: "คะแนนและข้อความที่ผู้ใช้ส่งเข้ามา",
+        help: ["แท็บ คะแนนต่ำ และ แจ้งปัญหา คือเรื่องที่ควรอ่านก่อน", "ถ้ามีรหัสคำอ่านแนบมา ค้นต่อได้ที่ทีมเทคนิค"],
         badge: { key: "newFeedback", tone: "info", label: "ความเห็นใหม่ใน 7 วัน" },
       },
       {
@@ -202,6 +213,7 @@ const NAV_SECTIONS: NavSection[] = [
         label: "รหัสแลกสิทธิ์",
         short: "สร้างรหัสแจกสิทธิ์ ดูคนที่แลก",
         description: "สร้างรหัส กำหนดเพดานและวันหมดอายุ ดูประวัติการแลก",
+        help: ["สร้างรหัสต้องตั้งเพดานจำนวนคนและวันหมดอายุทุกครั้ง", "ปิดรหัสได้ทันทีถ้ารหัสหลุด ประวัติการแลกจะเก็บไว้เสมอ"],
       },
     ],
   },
@@ -213,12 +225,14 @@ const NAV_SECTIONS: NavSection[] = [
         label: "โควตาฟรีและสิทธิ์",
         short: "เปิดปิดระบบสิทธิ์ ประกาศล่วงหน้า",
         description: "สวิตช์ระบบสิทธิ์ ประกาศล่วงหน้า และตัวเลขการถูกกั้นสิทธิ์",
+        help: ["แท็บ สวิตช์และกติกา เปิดปิดระบบสิทธิ์ทั้งเว็บ (มีผลทันที)", "แท็บ สุขภาพฐานข้อมูล ทุกค่าควรเป็น 0", "ก่อนเปลี่ยนกติกา ให้เปิดแบนเนอร์ประกาศล่วงหน้าอย่างน้อย 7 วัน"],
       },
       {
         id: "content",
         label: "แก้คำทำนาย AI และไพ่",
         short: "คำสั่ง AI บุคลิกแม่หมอ ความหมายไพ่",
         description: "แก้คำสั่งระบบ บุคลิกแม่หมอ และความหมายไพ่ 78 ใบแบบสด ไม่ต้อง deploy",
+        help: ["แก้ได้เฉพาะข้อความ ไม่กระทบโครงไพ่ 78 ใบ", "กด บันทึกทั้งหมด แล้วมีผลกับคำอ่านใหม่ภายใน 1 นาที", "ช่องว่าง = กลับไปใช้ค่าเริ่มต้น"],
       },
     ],
   },
@@ -230,6 +244,7 @@ const NAV_SECTIONS: NavSection[] = [
         label: "สุขภาพระบบ",
         short: "ตรวจฐานข้อมูล อีเมล ล็อกอิน และ AI",
         description: "ตรวจ D1 · KV · ล็อกอิน · อีเมล และยิงทดสอบ AI จริง",
+        help: ["แท็บ เว็บและฐานข้อมูล ตรวจโดเมน ล็อกอิน อีเมล D1 และ KV", "แท็บ AI ยิงทดสอบ AI จริงได้ (ใช้โควตา AI เล็กน้อย)"],
         keywords: "ai groq gemini ล่ม error",
       },
       {
@@ -237,6 +252,7 @@ const NAV_SECTIONS: NavSection[] = [
         label: "บันทึกการทำงานแอดมิน",
         short: "ใครทำอะไรเมื่อไร ย้อนหลัง 180 วัน",
         description: "ทุกการกระทำในแผงแอดมิน — กรองตามหมวด ค้นจากข้อความ เตือนเมื่อมีคนใส่รหัสผิด",
+        help: ["ทุกการกระทำในแผงแอดมินถูกบันทึกที่นี่ 180 วัน", "ถ้ามีแถบแดงเรื่องใส่รหัสผิด และไม่ใช่คุณ ให้เปลี่ยนรหัสแอดมินทันที"],
         keywords: "audit log ประวัติ ความปลอดภัย รหัสผิด",
       },
     ],
@@ -310,6 +326,57 @@ function NavBadge({ item, badges }: { item: NavItem; badges: NavBadges | null })
   );
 }
 
+const READER_SUBS = ["list", "pricing"] as const;
+
+/** แม่หมอพาร์ทเนอร์: รายชื่อ (ตรวจ อนุมัติ ส่งลิงก์) กับราคาแพ็กเกจ AI ช่วยเขียน แยกเป็นสองหมวด */
+function ReadersPage() {
+  const [sub, setSub] = useSubTab(READER_SUBS);
+  return (
+    <div className="space-y-6">
+      <AdminSubTabs
+        label="หมวดแม่หมอพาร์ทเนอร์"
+        active={sub}
+        onChange={setSub}
+        tabs={[
+          { id: "list", label: "รายชื่อแม่หมอ", hint: "ตรวจ อนุมัติ ส่งลิงก์ แก้ข้อมูล" },
+          { id: "pricing", label: "ราคา AI ช่วยเขียน", hint: "ราคาปกติและราคาพิเศษรายคน" },
+        ]}
+      />
+      {sub === "list" ? <ReadersManager /> : <StudioPassPricing />}
+    </div>
+  );
+}
+
+const HEALTH_SUBS = ["system", "ai"] as const;
+
+/** สุขภาพระบบ: เว็บ/ฐานข้อมูล กับ AI · ลิงก์เก่า `?tab=system` / `?tab=ai` ยังพามาหมวดที่ถูก */
+function HealthPage({ fallback, onSwitchTab }: { fallback: "system" | "ai"; onSwitchTab: (target: string) => void }) {
+  const [sub, setSub] = useSubTab(HEALTH_SUBS, fallback);
+  return (
+    <div className="space-y-6">
+      <AdminSubTabs
+        label="หมวดสุขภาพระบบ"
+        active={sub}
+        onChange={setSub}
+        tabs={[
+          { id: "system", label: "เว็บและฐานข้อมูล", hint: "โดเมน ล็อกอิน อีเมล D1 KV" },
+          { id: "ai", label: "AI", hint: "สถานะผู้ให้บริการ ยิงทดสอบจริง" },
+        ]}
+      />
+      {sub === "system" ? (
+        <SystemHealthPanel
+          onSwitchTab={(target) => {
+            if (target === "ai") setSub("ai");
+            else onSwitchTab(target);
+          }}
+        />
+      ) : (
+        <AiHealthPanel />
+      )}
+    </div>
+  );
+}
+
 function AdminContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -373,6 +440,9 @@ function AdminContent() {
 
       const params = new URLSearchParams(window.location.search);
       params.set("tab", r.tab);
+      // หมวดย่อยเป็นของแต่ละหน้า — เปลี่ยนเมนูแล้วเริ่มที่หมวดแรกของหน้าใหม่
+      if (r.health) params.set("sub", r.health);
+      else params.delete("sub");
       router.replace(`/admin?${params.toString()}`, { scroll: false });
     },
     [router],
@@ -524,31 +594,18 @@ function AdminContent() {
               <div>
                 <h2 className="text-lg font-bold text-ink sm:text-xl">{activeItem.label}</h2>
                 <p className="mt-0.5 text-xs text-muted">{activeItem.description}</p>
+                {activeItem.help ? (
+                  <details className="mt-2 text-xs text-muted">
+                    <summary className="tap-overlay-y w-fit cursor-pointer font-semibold text-ink-soft hover:text-ink">วิธีใช้หน้านี้</summary>
+                    <ul className="mt-1.5 space-y-1 border-l-2 border-line pl-3">
+                      {activeItem.help.map((h) => (
+                        <li key={h}>{h}</li>
+                      ))}
+                    </ul>
+                  </details>
+                ) : null}
               </div>
 
-              {activeTab === "health" && (
-                <div role="tablist" aria-label="หมวดสุขภาพระบบ" className="flex w-fit items-center gap-1 rounded-lg border border-line bg-canvas p-1 text-xs">
-                  {(
-                    [
-                      ["system", "Cloudflare & D1"],
-                      ["ai", "AI"],
-                    ] as const
-                  ).map(([id, label]) => (
-                    <button
-                      key={id}
-                      type="button"
-                      role="tab"
-                      aria-selected={healthSubTab === id}
-                      onClick={() => setHealthSubTab(id)}
-                      className={`tap-overlay-y rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                        healthSubTab === id ? "border border-line bg-white font-semibold text-ink" : "text-muted hover:text-ink"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
           )}
 
@@ -561,26 +618,18 @@ function AdminContent() {
             {activeTab === "redeem" && <RedeemCodesManager />}
             {activeTab === "entitlement" && <EntitlementAdmin />}
             {activeTab === "content" && <ContentEditor />}
-            {activeTab === "readers" && (
-              <div className="space-y-6">
-                <ReadersManager />
-                <StudioPassPricing />
-              </div>
-            )}
+            {activeTab === "readers" && <ReadersPage />}
             {activeTab === "bookings" && <BookingsAdmin />}
             {activeTab === "payments" && <PaymentsPanel />}
             {activeTab === "audit" && <AuditLogPanel />}
-            {activeTab === "health" &&
-              (healthSubTab === "system" ? (
-                <SystemHealthPanel
-                  onSwitchTab={(target) => {
-                    if (target === "ai") setHealthSubTab("ai");
-                    else selectTab(target);
-                  }}
-                />
-              ) : (
-                <AiHealthPanel />
-              ))}
+            {activeTab === "health" && (
+              <HealthPage
+                fallback={healthSubTab}
+                onSwitchTab={(target) => {
+                  if (target !== "ai") selectTab(target);
+                }}
+              />
+            )}
           </div>
         </main>
       </div>

@@ -4,7 +4,8 @@ import { useState } from "react";
 
 import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
 import MarketingAudience from "@/components/admin/MarketingAudience";
-import { SectionTitle, StatCard, fmt } from "@/components/admin/StatsWidgets";
+import { AdminDrawer, AdminSection, AdminSubTabs, EmptyState, KpiGrid, SubHeading, useSubTab } from "@/components/admin/AdminLayout";
+import { StatCard, fmt } from "@/components/admin/StatsWidgets";
 import { Button } from "@/components/ui/Button";
 import { useAdminResource } from "@/lib/admin/use-admin-resource";
 import { APP_TIME_ZONE } from "@/lib/time/bangkok";
@@ -67,12 +68,15 @@ function day(ts: number): string {
   );
 }
 
+const MEMBER_TABS = ["list", "audience"] as const;
+
 export default function MembersPanel() {
   const [input, setInput] = useState("");
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Member | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
+  const [tab, setTab] = useSubTab(MEMBER_TABS);
 
   const list = useAdminResource<ListPayload>(
     `/api/admin/members?q=${encodeURIComponent(query)}&page=${page}&pageSize=${pageSize}`,
@@ -81,87 +85,95 @@ export default function MembersPanel() {
   // ใช้หน้าที่เซิร์ฟเวอร์ตอบจริง (เซิร์ฟเวอร์หนีบหน้าที่เกินจำนวนหน้าให้แล้ว)
   const currentPage = data?.page ?? page;
   const pageCount = data?.pageCount ?? 1;
-  const goTo = (p: number) => {
-    setSelected(null);
-    setPage(Math.min(Math.max(1, p), pageCount));
-  };
+  const goTo = (p: number) => setPage(Math.min(Math.max(1, p), pageCount));
 
   return (
     <div className="space-y-6">
-      {list.data ? (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <StatCard label="สมาชิกทั้งหมด" value={fmt(list.data.totals.total)} sub="ไม่นับบัญชีที่ลบแล้ว" />
-          <StatCard label="สมัครใหม่ 7 วัน" value={fmt(list.data.totals.new7d)} />
-          <StatCard label="เข้าใช้ใน 7 วัน" value={fmt(list.data.totals.active7d)} />
-        </div>
-      ) : null}
+      <KpiGrid cols={3}>
+        <StatCard label="สมาชิกทั้งหมด" value={fmt(data?.totals.total)} sub="ไม่นับบัญชีที่ลบแล้ว" />
+        <StatCard label="สมัครใหม่ 7 วัน" value={fmt(data?.totals.new7d)} sub="บัญชีที่สร้างในสัปดาห์นี้" />
+        <StatCard label="เข้าใช้ใน 7 วัน" value={fmt(data?.totals.active7d)} sub="เปิดเว็บแล้วล็อกอินอยู่" />
+      </KpiGrid>
 
-      <section className="altar-card-porcelain space-y-4 p-5" aria-labelledby="members-list">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div id="members-list">
-            <SectionTitle title={query ? `ผลค้นหา “${query}”` : "สมาชิกที่สมัครล่าสุด"} />
-            <p className="mt-0.5 text-xs text-muted">
-              ค้นจากอีเมล ชื่อ หรือรหัสผู้ใช้
+      <AdminSubTabs
+        label="หมวดในหน้าสมาชิก"
+        active={tab}
+        onChange={setTab}
+        tabs={[
+          { id: "list", label: "รายชื่อสมาชิก", hint: "ค้นหา ดูสิทธิ์ ให้สิทธิ์เพิ่ม" },
+          { id: "audience", label: "ผู้รับข่าวสาร", hint: "รายชื่อที่ยินยอมรับอีเมล" },
+        ]}
+      />
+
+      {tab === "audience" ? (
+        <MarketingAudience />
+      ) : (
+        <AdminSection
+          title={query ? `ผลค้นหา "${query}"` : "สมาชิกที่สมัครล่าสุด"}
+          hint={
+            <>
+              กด "ดู / ให้สิทธิ์" เพื่อเปิดรายละเอียดด้านขวา
               {data && data.matched > 0
                 ? ` · แสดง ${fmt((data.page - 1) * data.pageSize + 1)}–${fmt((data.page - 1) * data.pageSize + data.members.length)} จาก ${fmt(data.matched)} คน`
                 : null}
-            </p>
-          </div>
-          <form
-            role="search"
-            className="flex w-full gap-2 sm:w-auto"
-            onSubmit={(e) => {
-              e.preventDefault();
-              setSelected(null);
-              setPage(1);
-              setQuery(input.trim());
-            }}
-          >
-            <label htmlFor="member-search" className="sr-only">
-              ค้นหาสมาชิก
-            </label>
-            <input
-              id="member-search"
-              type="search"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="อีเมล / ชื่อ / รหัสผู้ใช้"
-              className="min-h-11 w-full min-w-0 rounded-lg border border-line-interactive bg-white px-3 text-sm text-ink sm:w-72"
-            />
-            <Button type="submit" size="sm" className="min-h-11 shrink-0">
-              ค้นหา
-            </Button>
-            {query ? (
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="min-h-11 shrink-0"
-                onClick={() => {
-                  setInput("");
-                  setQuery("");
-                  setPage(1);
-                  setSelected(null);
-                }}
-              >
-                ล้าง
+            </>
+          }
+          actions={
+            <form
+              role="search"
+              className="flex w-full gap-2 sm:w-auto"
+              onSubmit={(e) => {
+                e.preventDefault();
+                setPage(1);
+                setQuery(input.trim());
+              }}
+            >
+              <label htmlFor="member-search" className="sr-only">
+                ค้นหาสมาชิก
+              </label>
+              <input
+                id="member-search"
+                type="search"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="อีเมล / ชื่อ / รหัสผู้ใช้"
+                className="min-h-11 w-full min-w-0 rounded-lg border border-line-interactive bg-white px-3 text-sm text-ink sm:w-72"
+              />
+              <Button type="submit" size="sm" className="min-h-11 shrink-0">
+                ค้นหา
               </Button>
-            ) : null}
-          </form>
-        </div>
+              {query ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="min-h-11 shrink-0"
+                  onClick={() => {
+                    setInput("");
+                    setQuery("");
+                    setPage(1);
+                  }}
+                >
+                  ล้าง
+                </Button>
+              ) : null}
+            </form>
+          }
+        >
+          {list.error ? <AdminErrorBanner error={list.error} onRetry={() => void list.reload()} /> : null}
 
-        {list.error ? <AdminErrorBanner error={list.error} onRetry={() => void list.reload()} /> : null}
-
-        {!list.data ? (
-          list.loading ? (
-            <p className="text-sm text-muted" aria-live="polite">
-              กำลังโหลด…
-            </p>
-          ) : null
-        ) : list.data.members.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted">{query ? "ไม่พบสมาชิกที่ตรงกับคำค้น" : "ยังไม่มีสมาชิก"}</p>
-        ) : (
-          <div>
+          {!data ? (
+            list.loading ? (
+              <p className="text-sm text-muted" aria-live="polite">
+                กำลังโหลด…
+              </p>
+            ) : null
+          ) : data.members.length === 0 ? (
+            <EmptyState
+              title={query ? "ไม่พบสมาชิกที่ตรงกับคำค้น" : "ยังไม่มีสมาชิก"}
+              hint={query ? "ลองค้นด้วยอีเมลเต็ม หรือรหัสผู้ใช้จากหน้ารายการชำระเงิน" : undefined}
+            />
+          ) : (
             <table className="w-full table-fixed text-left text-sm sm:table-auto">
               <thead>
                 <tr className="border-b border-line text-xs text-muted">
@@ -176,8 +188,8 @@ export default function MembersPanel() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
-                {list.data.members.map((m) => (
-                  <tr key={m.id} className={selected === m.id ? "bg-canvas" : undefined}>
+                {data.members.map((m) => (
+                  <tr key={m.id} className={selected?.id === m.id ? "bg-canvas" : undefined}>
                     <td className="py-2.5 pr-3">
                       <span className="block truncate font-medium text-ink">{m.name || "—"}</span>
                       <span className="block truncate text-xs text-muted">{m.email || m.id}</span>
@@ -192,82 +204,85 @@ export default function MembersPanel() {
                     <td className="py-2.5 text-right">
                       <button
                         type="button"
-                        onClick={() => setSelected(selected === m.id ? null : m.id)}
-                        aria-expanded={selected === m.id}
+                        onClick={() => setSelected(m)}
                         className="tap-overlay-y rounded-lg border border-line px-2.5 py-1 text-xs font-medium text-ink hover:bg-canvas"
                       >
-                        {selected === m.id ? "ปิด" : "ดู / ให้สิทธิ์"}
+                        ดู / ให้สิทธิ์
                       </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-        )}
+          )}
 
-        {data && data.matched > 0 ? (
-          <nav
-            aria-label="แบ่งหน้ารายชื่อสมาชิก"
-            className="flex flex-col gap-3 border-t border-line pt-3 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div className="flex items-center gap-2 text-xs text-muted">
-              <label htmlFor="member-page-size">แสดงหน้าละ</label>
-              <select
-                id="member-page-size"
-                value={pageSize}
-                onChange={(e) => {
-                  setSelected(null);
-                  setPage(1);
-                  setPageSize(Number(e.target.value));
-                }}
-                className="glass-field min-h-11 rounded-xl border border-line-interactive px-3 text-sm text-ink focus:border-ink focus:outline-none"
-              >
-                {(data.pageSizes ?? FALLBACK_PAGE_SIZES).map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-              <span>คน</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="min-h-11"
-                disabled={currentPage <= 1 || list.loading}
-                onClick={() => goTo(currentPage - 1)}
-              >
-                ก่อนหน้า
-              </Button>
-              <span className="min-w-24 text-center text-sm text-ink" aria-live="polite">
-                หน้า {fmt(currentPage)} / {fmt(pageCount)}
-              </span>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="min-h-11"
-                disabled={currentPage >= pageCount || list.loading}
-                onClick={() => goTo(currentPage + 1)}
-              >
-                ถัดไป
-              </Button>
-            </div>
-          </nav>
-        ) : null}
+          {data && data.matched > 0 ? (
+            <nav
+              aria-label="แบ่งหน้ารายชื่อสมาชิก"
+              className="mt-4 flex flex-col gap-3 border-t border-line pt-3 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="flex items-center gap-2 text-xs text-muted">
+                <label htmlFor="member-page-size">แสดงหน้าละ</label>
+                <select
+                  id="member-page-size"
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPage(1);
+                    setPageSize(Number(e.target.value));
+                  }}
+                  className="glass-field min-h-11 rounded-xl border border-line-interactive px-3 text-sm text-ink focus:border-ink focus:outline-none"
+                >
+                  {(data.pageSizes ?? FALLBACK_PAGE_SIZES).map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+                <span>คน</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="min-h-11"
+                  disabled={currentPage <= 1 || list.loading}
+                  onClick={() => goTo(currentPage - 1)}
+                >
+                  ก่อนหน้า
+                </Button>
+                <span className="min-w-24 text-center text-sm text-ink" aria-live="polite">
+                  หน้า {fmt(currentPage)} / {fmt(pageCount)}
+                </span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="min-h-11"
+                  disabled={currentPage >= pageCount || list.loading}
+                  onClick={() => goTo(currentPage + 1)}
+                >
+                  ถัดไป
+                </Button>
+              </div>
+            </nav>
+          ) : null}
+        </AdminSection>
+      )}
 
-        {selected ? <MemberDetail key={selected} id={selected} onClose={() => setSelected(null)} /> : null}
-      </section>
-
-      <MarketingAudience />
+      <AdminDrawer
+        open={!!selected}
+        title={selected ? selected.name || selected.email || "สมาชิก" : ""}
+        subtitle={selected ? selected.email ?? selected.id : undefined}
+        onClose={() => setSelected(null)}
+      >
+        {selected ? <MemberDetail key={selected.id} id={selected.id} /> : null}
+      </AdminDrawer>
     </div>
   );
 }
 
-function MemberDetail({ id, onClose }: { id: string; onClose: () => void }) {
+function MemberDetail({ id }: { id: string }) {
   const detail = useAdminResource<DetailPayload>(`/api/admin/members?id=${encodeURIComponent(id)}`);
   const [amount, setAmount] = useState(1);
   const [note, setNote] = useState("");
@@ -301,20 +316,16 @@ function MemberDetail({ id, onClose }: { id: string; onClose: () => void }) {
 
   const d = detail.data;
   return (
-    <div className="rounded-xl border border-line bg-canvas p-4">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h4 className="text-sm font-bold text-ink">{d ? d.member.name || d.member.email || d.member.id : "รายละเอียดสมาชิก"}</h4>
-        <button type="button" onClick={onClose} className="tap-overlay-y text-xs text-muted hover:text-ink">
-          ปิด
-        </button>
-      </div>
+    <div className="space-y-5">
 
       {detail.error ? <AdminErrorBanner error={detail.error} onRetry={() => void detail.reload()} /> : null}
       {!d ? (
         detail.loading ? <p className="text-xs text-muted">กำลังโหลด…</p> : null
       ) : (
-        <div className="grid gap-4 md:grid-cols-3">
-          <dl className="space-y-1.5 text-xs">
+        <div className="space-y-6">
+          <div>
+          <SubHeading>ข้อมูลบัญชี</SubHeading>
+          <dl className="space-y-1.5 rounded-lg border border-line p-3 text-xs">
             {(
               [
                 ["รหัสผู้ใช้", d.member.id],
@@ -332,11 +343,12 @@ function MemberDetail({ id, onClose }: { id: string; onClose: () => void }) {
               </div>
             ))}
           </dl>
+          </div>
 
           <div className="space-y-2 text-xs">
-            <p className="font-semibold text-ink">สิทธิ์คงเหลือตอนนี้</p>
+            <SubHeading>สิทธิ์คงเหลือตอนนี้</SubHeading>
             {d.entitlement ? (
-              <ul className="space-y-1.5">
+              <ul className="space-y-1.5 rounded-lg border border-line p-3">
                 <li className="flex justify-between">
                   <span className="text-muted">รวมเปิดได้อีก</span>
                   <span className="font-mono font-semibold text-ink">{fmt(d.entitlement.remaining)}</span>
@@ -363,7 +375,7 @@ function MemberDetail({ id, onClose }: { id: string; onClose: () => void }) {
             )}
             {d.bonuses.length > 0 ? (
               <>
-                <p className="pt-2 font-semibold text-ink">ประวัติได้รับสิทธิ์</p>
+                <div className="pt-3"><SubHeading>ประวัติได้รับสิทธิ์</SubHeading></div>
                 <ul className="space-y-1">
                   {d.bonuses.map((b) => (
                     <li key={`${b.reason}-${b.grantedAt}`} className="flex justify-between gap-2">
@@ -379,13 +391,13 @@ function MemberDetail({ id, onClose }: { id: string; onClose: () => void }) {
           </div>
 
           <form
-            className="space-y-2 text-xs"
+            className="space-y-2 rounded-lg border border-line bg-canvas p-3 text-xs"
             onSubmit={(e) => {
               e.preventDefault();
               void grant();
             }}
           >
-            <p className="font-semibold text-ink">ให้สิทธิ์เปิดไพ่เพิ่ม</p>
+            <SubHeading>ให้สิทธิ์เปิดไพ่เพิ่ม</SubHeading>
             <p className="text-muted">ใช้ชดเชยลูกค้าที่เจอปัญหา · ไม่หมดอายุ · ไม่ปลดล็อกผังพรีเมียม · บันทึกในกิจกรรมแอดมิน</p>
             <label className="block">
               <span className="text-muted">จำนวนครั้ง (1–50)</span>

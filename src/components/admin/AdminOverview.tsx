@@ -174,7 +174,7 @@ export default function AdminOverview({ onNavigateTab }: { onNavigateTab: (tabId
       {loadError && <AdminErrorBanner error={loadError} onRetry={loadData} />}
 
       {/* ─── ตัวเลขหลัก ─────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard
           label="สมาชิกทั้งหมด"
           value={loading && !d1 ? "…" : fmt(d1?.metrics.totalUsers ?? null)}
@@ -346,7 +346,13 @@ export default function AdminOverview({ onNavigateTab }: { onNavigateTab: (tabId
           <h3 id="ov-audit" className="text-sm font-bold text-ink">
             กิจกรรมแอดมินล่าสุด
           </h3>
-          <span className="text-xs text-muted">{stats?.audit.length ? `${Math.min(15, stats.audit.length)} รายการล่าสุด` : ""}</span>
+          <button
+            type="button"
+            onClick={() => onNavigateTab("audit")}
+            className="tap-overlay-y text-xs font-semibold text-ink underline underline-offset-2"
+          >
+            ดูบันทึกทั้งหมด
+          </button>
         </div>
         {!stats?.audit || stats.audit.length === 0 ? (
           <p className="py-4 text-center text-xs text-muted">ยังไม่มีกิจกรรมที่บันทึกไว้</p>
@@ -360,7 +366,7 @@ export default function AdminOverview({ onNavigateTab }: { onNavigateTab: (tabId
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
-              {stats.audit.slice(0, 15).map((entry, idx) => (
+              {stats.audit.slice(0, 8).map((entry, idx) => (
                 <tr key={`${entry.ts}-${idx}`}>
                   <td className="whitespace-nowrap py-2.5 pr-3 font-mono text-muted">{formatTime(entry.ts)}</td>
                   <td className={`py-2.5 pr-3 ${AUDIT_ALERT.has(entry.action) ? "font-semibold text-rose-700" : "text-ink"}`}>

@@ -12,6 +12,8 @@ import type {
   RedemptionRow,
 } from "@/lib/entitlement/redeem-admin.repo";
 import { APP_TIME_ZONE, bangkokDayKey } from "@/lib/time/bangkok";
+import { AdminSubTabs, KpiGrid } from "@/components/admin/AdminLayout";
+import { StatCard } from "@/components/admin/StatsWidgets";
 
 /* 🕗 R-25: เส้นแบ่งวันมาจาก `@/lib/time/bangkok` ที่เดียว (เคยเขียน Intl + en-CA เองที่นี่) */
 function todayISO(): string {
@@ -308,6 +310,18 @@ export default function RedeemCodesManager() {
     return { total, active, totalRedemptions };
   }, [codes, now]);
 
+  const counts = useMemo(() => {
+    const expired = (c: RedeemCodeRow) => c.expiresAt !== null && now > c.expiresAt;
+    const depleted = (c: RedeemCodeRow) => c.maxUses !== -1 && c.usedCount >= c.maxUses;
+    return {
+      all: codes.length,
+      active: codes.filter((c) => c.isActive && !expired(c) && !depleted(c)).length,
+      inactive: codes.filter((c) => !c.isActive).length,
+      expired: codes.filter(expired).length,
+      depleted: codes.filter(depleted).length,
+    };
+  }, [codes, now]);
+
   return (
     <div className="space-y-6">
       {/* Toast Notification */}
@@ -317,91 +331,40 @@ export default function RedeemCodesManager() {
         </div>
       )}
 
-      {/* ชื่อหน้าอยู่ที่หัวแผงแอดมินแล้ว — ที่นี่เหลือแค่ปุ่มหลัก (เดิมซ้ำหัวข้อสองชั้น) */}
-      <div className="flex justify-end">
-        <Button variant="gold" onClick={openCreateModal} className="w-full sm:w-auto">
-          สร้างรหัสใหม่
-        </Button>
-      </div>
+      {/* ตัวเลขสรุป → แท็บสถานะ (มีจำนวน) → ค้นหา + ปุ่มสร้างรหัส */}
+      <KpiGrid>
+        <StatCard label="รหัสทั้งหมด" value={String(summary.total)} sub="ทุกสถานะ" />
+        <StatCard label="พร้อมใช้งาน" value={String(summary.active)} sub="ยังไม่หมดอายุและยังแลกได้" />
+        <StatCard label="ยอดแลกรวม" value={`${summary.totalRedemptions} ครั้ง`} sub="ทุกรหัสรวมกัน" />
+        <StatCard label="ใช้ไม่ได้แล้ว" value={String(counts.expired + counts.depleted)} sub="หมดอายุ หรือคนแลกครบ" />
+      </KpiGrid>
 
-      {/* Metrics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="altar-card-porcelain !rounded-xl p-4">
-          <p className="text-xs text-muted">รหัสทั้งหมดในระบบ</p>
-          <p className="mt-1 text-2xl font-bold text-ink">{summary.total}</p>
-        </div>
-        <div className="altar-card-porcelain !rounded-xl p-4">
-          <p className="text-xs text-muted">รหัสที่พร้อมใช้งาน</p>
-          <p className="mt-1 text-2xl font-bold text-emerald-700">{summary.active}</p>
-        </div>
-        <div className="altar-card-porcelain !rounded-xl p-4">
-          <p className="text-xs text-muted">ยอดแลกรับสิทธิ์รวม</p>
-          <p className="mt-1 text-2xl font-bold text-gold-ink">{summary.totalRedemptions} ครั้ง</p>
-        </div>
-      </div>
+      <AdminSubTabs
+        label="สถานะรหัส"
+        active={filter}
+        onChange={setFilter}
+        tabs={[
+          { id: "all", label: "ทั้งหมด", count: counts.all },
+          { id: "active", label: "พร้อมใช้", count: counts.active },
+          { id: "inactive", label: "ปิดใช้งาน", count: counts.inactive },
+          { id: "expired", label: "หมดอายุ", count: counts.expired },
+          { id: "depleted", label: "สิทธิ์เต็ม", count: counts.depleted },
+        ]}
+      />
 
-      {/* Filter and Search */}
-      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-        <div className="flex-1 max-w-sm">
+      <div className="flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="max-w-sm flex-1">
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="ค้นหารหัส หรือชื่อแคมเปญ…"
+            placeholder="ค้นหารหัส หรือชื่อแคมเปญ"
+            aria-label="ค้นหารหัส หรือชื่อแคมเปญ"
             className="w-full text-xs"
           />
         </div>
-        <div className="flex flex-wrap gap-1.5 text-xs">
-          <button
-            onClick={() => setFilter("all")}
-            className={`tap-overlay-y px-3 py-1.5 rounded-lg border transition-colors ${
-              filter === "all"
-                ? "btn-gold-glass border-ink"
-                : "bg-white text-muted border-line hover:bg-canvas"
-            }`}
-          >
-            ทั้งหมด ({codes.length})
-          </button>
-          <button
-            onClick={() => setFilter("active")}
-            className={`tap-overlay-y px-3 py-1.5 rounded-lg border transition-colors ${
-              filter === "active"
-                ? "bg-emerald-800 text-white border-emerald-800"
-                : "bg-white text-muted border-line hover:bg-canvas"
-            }`}
-          >
-            เปิดใช้งาน
-          </button>
-          <button
-            onClick={() => setFilter("inactive")}
-            className={`tap-overlay-y px-3 py-1.5 rounded-lg border transition-colors ${
-              filter === "inactive"
-                ? "bg-muted text-white border-muted"
-                : "bg-white text-muted border-line hover:bg-canvas"
-            }`}
-          >
-            ปิดใช้งาน
-          </button>
-          <button
-            onClick={() => setFilter("expired")}
-            className={`tap-overlay-y px-3 py-1.5 rounded-lg border transition-colors ${
-              filter === "expired"
-                ? "bg-amber-800 text-white border-amber-800"
-                : "bg-white text-muted border-line hover:bg-canvas"
-            }`}
-          >
-            หมดอายุ
-          </button>
-          <button
-            onClick={() => setFilter("depleted")}
-            className={`tap-overlay-y px-3 py-1.5 rounded-lg border transition-colors ${
-              filter === "depleted"
-                ? "bg-rose-800 text-white border-rose-800"
-                : "bg-white text-muted border-line hover:bg-canvas"
-            }`}
-          >
-            สิทธิ์เต็ม
-          </button>
-        </div>
+        <Button variant="gold" onClick={openCreateModal} className="w-full sm:w-auto">
+          สร้างรหัสใหม่
+        </Button>
       </div>
 
       {/* Main Table / List View */}
