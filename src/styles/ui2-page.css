@@ -1311,6 +1311,11 @@
 .ui2-pg .v2-doc > section::before {
   content: counter(doc-sec, decimal-leading-zero);
   position: absolute;
+  /* บทเหล่านี้มีคลาส page-band ด้วย — ล้างค่า ::before ของแถบเต็มจอ (inset-block · width 100vw · transform) ไม่งั้นป้ายยืดเต็มจอ */
+  inset: auto;
+  z-index: 1;
+  width: auto;
+  transform: none;
   left: 24px;
   top: 18px;
   display: inline-grid;
@@ -1329,6 +1334,9 @@
 .ui2-pg .v2-doc > section::after {
   content: "";
   position: absolute;
+  inset: auto;
+  width: auto;
+  transform: none;
   left: 16px;
   right: 16px;
   top: 58px;
