@@ -39,6 +39,12 @@ export function RitualRail({ step, isEnglish }: { step: 1 | 2 | 3; isEnglish: bo
   );
 }
 
+/** ชื่อผังไม่ต้องมี "(ไพ่ N ใบ)" ต่อท้าย — จำนวนใบแสดงแยกบรรทัดอยู่แล้ว (ไม่พูดซ้ำ) */
+function spreadTitle(spread: Spread, isEnglish: boolean): string {
+  const raw = isEnglish ? spread.nameEn || spread.nameTh : spread.nameTh;
+  return raw.replace(/\s*[(（][^()（）]*\d+[^()（）]*[)）]\s*$/, "").trim() || raw;
+}
+
 /** แผนผังย่อจากพิกัดจริงของผัง (สูตรเดียวกับหน้า /spreads) — ใช้ทั้งกล่องผังที่เลือกและหน้าต่างเปลี่ยนผัง */
 function MiniMap({ spread, className }: { spread: Spread; className: string }) {
   const map = mapLayout(spread.positions);
@@ -72,7 +78,7 @@ export function SpreadSummaryCard({
   isEnglish: boolean;
   onChange?: () => void;
 }) {
-  const name = isEnglish ? spread.nameEn || spread.nameTh : spread.nameTh;
+  const name = spreadTitle(spread, isEnglish);
   return (
     <section className="v2-ss" aria-label={isEnglish ? "Chosen spread" : "ผังที่เลือก"}>
       <div className="v2-ss-top">
@@ -227,7 +233,7 @@ export function SpreadSwitcher({
                 >
                   <MiniMap spread={sp} className="v2-sw-map" />
                   <span className="v2-sw-t">
-                    <b>{isEnglish ? sp.nameEn || sp.nameTh : sp.nameTh}</b>
+                    <b>{spreadTitle(sp, isEnglish)}</b>
                     <span>
                       {sp.positions.length} {isEnglish ? "cards" : "ใบ"}
                       {isNow && <em className="is-now">{isEnglish ? "Current" : "ใช้อยู่"}</em>}
