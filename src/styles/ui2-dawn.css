@@ -364,3 +364,35 @@ html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > se
     box-shadow: 0 0 0 1px rgba(184, 105, 28, 0.6), 0 22px 34px -20px rgba(74, 47, 16, 0.55);
   }
 }
+
+/* ── มือถือ/ทุกจอ: เก็บรายละเอียดตัวหนังสือบนครีม (เจ้าของ 2026-10-17 "ปรับสัดส่วน ฟอนต์ต่าง ๆ ในมือถือให้สวยและเหมาะสม") ── */
+/* จำนวนใบในกล่อง "เริ่มที่ใบนี้/เริ่มง่ายที่สุด" — สีหมวดอ่อนจางบนขาว ➔ หมึกสีหมวด */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.ui2-sx-start-n, .ui2-sp-start-n) {
+  color: var(--cat-ink);
+}
+/* เม็ดคำสัญญาหัวหน้าราคา ("ไม่มีรายเดือน" …) — ขอบทองจางหายบนครีม ➔ เม็ดกระดาษขาวมีขอบ */
+.ui2-pg .v3-pr-hero .v2-pr-promise li {
+  border-color: rgba(184, 105, 28, 0.22);
+  background: rgba(255, 252, 246, 0.8);
+}
+@media (max-width: 767px) {
+  /* ป้ายชื่อผังบนการ์ด /spreads — การ์ดแคบ ชื่อยาวหักหลายบรรทัด ➔ เล็กลงนิด + แบ่งบรรทัดสมดุล */
+  .ui2-sp .ui2-sc-band {
+    font-size: 13px;
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+  /* ตัวเนื้อหาในหน้าต่างครีม: ระยะบรรทัดโปร่งขึ้นเล็กน้อย อ่านภาษาไทยสบายตา */
+  :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.ui2-sx-lead, .ui2-sp-shelf .ui2-lede) {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+}
+/*
+ * ตัวมีเชิง (Noto Serif Thai · `font-serif-th`) ในคอมโพเนนต์รุ่นเก่า ➔ ตัวเนื้อหาไม่มีเชิง (Sarabun) แบบหน้าแรก
+ * บนมือถือตัวมีเชิงขนาด 11–13px อ่านยากและดูคนละชุดกับหัวข้อ Anuphan (เจ้าของ 2026-10-17 "ปรับฟอนต์ในมือถือให้สวยและเหมาะสม")
+ * หัวข้อ h1–h3 ยังเป็น Anuphan จาก globals.css · ชื่อแบรนด์ในหัวเว็บ/ท้ายเว็บอยู่นอกขอบเขตนี้ (คงตัวมีเชิง)
+ */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) .font-serif-th:not(h1, h2, h3) {
+  font-family: var(--font-sans-th);
+}

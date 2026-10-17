@@ -348,3 +348,11 @@
     padding-left: 340px;
   }
 }
+/* ป้าย "5 ใบ · self" ของผังที่ใช้ไพ่ใบนี้ — เดิมตัวพิมพ์ดีด 11px อ่านยาก/แข็ง ➔ ตัวหัวข้อ UI 2.0 สีทอง (เจ้าของ 2026-10-17 ปรับฟอนต์มือถือ) */
+.v3-csl-k {
+  font-family: var(--ui2-font-display);
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ui2-gold-solid);
+}
