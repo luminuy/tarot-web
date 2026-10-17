@@ -8,6 +8,7 @@ import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
 import { Ui2TightHead } from "@/components/ui2/Ui2PageHero";
 import { Ui2Window } from "@/components/ui2/Ui2Showcase";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 
 const pickACardOgImages = buildPageOgImage({
   title: "Pick A Card Tarot Reading",
@@ -211,6 +212,8 @@ export function PickACardBodyEn({ ritual }: { ritual: ReactNode }) {
             </p>
           </SeoArticleShell>
         </div>
+        {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+        <Ui2NextSteps isEn={true} keys={["spreads", "daily", "journal", "questions"]} />
       </main>
     </>
   );

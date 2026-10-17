@@ -6,6 +6,7 @@ import { buildPageOgImage } from "@/lib/media/og-image";
 import { buildBreadcrumbJsonLd, homeCrumb } from "@/app/_shared/seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { BxBack, BxChips, FrBig, FrFan, FrList, FrMock, FrPanel, Ui2Bento, Ui2FeatureRows } from "@/components/ui2/Ui2Blocks";
 import { Ui2DocHead } from "@/components/ui2/Ui2PageHero";
 
 /**
@@ -115,76 +116,148 @@ export function AboutBodyTh() {
           </p>
         </section>
 
-        <section className="page-band page-band-compact space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>คำทำนายมาจากไหน</ThaiPhrases></h2>
-          <p className="text-sm text-ink leading-relaxed font-serif-th">
-            <strong>คำทำนายบนเว็บนี้เขียนโดยปัญญาประดิษฐ์ (AI) ที่เราออกแบบและปรับแต่งเอง</strong> ไม่ใช่หมอดูมนุษย์
-            เราบอกเรื่องนี้ตรง ๆ ตั้งแต่ต้น เพราะคิดว่าคุณควรรู้ว่ากำลังอ่านอะไรอยู่
-          </p>
-          <p className="text-sm text-ink leading-relaxed font-serif-th">
-            AI ของเราไม่ได้เดาคำตอบลอย ๆ แต่อ่านจากความหมายดั้งเดิมของไพ่แต่ละใบตามตำรา 1909 Rider-Waite-Smith
-            ประกอบกับตำแหน่งที่ไพ่ใบนั้นตกในผัง และคำถามที่คุณถาม แล้วเรียบเรียงออกมาเป็นภาษาที่อ่านเข้าใจ
-          </p>
-          <p className="text-sm text-ink leading-relaxed font-serif-th">
-            ถ้าคุณอยากคุยกับคนจริง ๆ เรามีหน้า{" "}
-            <Link href="/readers" prefetch={false} className="text-gold-ink underline hover:text-gold-ink">
-              แม่หมอตัวจริง
-            </Link>{" "}
-            แยกไว้ต่างหาก และจะบอกเสมอว่าอันไหนคือ AI อันไหนคือคน
-          </p>
-        </section>
+      </div>
 
-        <section className="page-band page-band-compact page-band-tint space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>ไพ่ถูกสุ่มจริงไหม — พิสูจน์ได้</ThaiPhrases></h2>
-          <p className="text-sm text-ink leading-relaxed font-serif-th">
-            นี่คือเรื่องที่เราให้ความสำคัญที่สุด เว็บดูดวงทั่วไปไม่มีทางให้คุณรู้เลยว่าไพ่ถูกสุ่มจริง
-            หรือถูกเลือกมาให้ทีหลังเพื่อให้เข้ากับคำทำนาย
-          </p>
-          <p className="text-sm text-ink leading-relaxed font-serif-th">
-            ก่อนคุณจะเลือกไพ่ ระบบจะ <strong>ล็อกลำดับไพ่ทั้งสำรับไว้ก่อนแล้ว</strong> และโชว์ &quot;รหัสล็อก&quot;
-            ของลำดับนั้นให้คุณเห็น (เหมือนปิดผนึกซองไว้ต่อหน้าคุณ) เมื่อเปิดไพ่เสร็จ ระบบจะเปิดลำดับจริงให้ดู
-            คุณเอาไปเทียบได้เองว่าตรงกับรหัสล็อกเดิมไหม (หลักการนี้เรียกว่า Provably Fair)
-          </p>
-          <p className="text-sm text-ink leading-relaxed font-serif-th">
-            แปลว่า <strong>เราไม่สามารถเปลี่ยนไพ่ของคุณหลังจากคุณเลือกแล้วได้เลย</strong> แม้จะอยากทำก็ทำไม่ได้
-            เพราะรหัสล็อกจะไม่ตรงทันที และคุณตรวจเองได้ทุกครั้ง
-          </p>
-        </section>
+      {/* v4 (เจ้าของ 2026-10-17 "นำสองส่วนนี้ของหน้าแรกไปใช้กับหน้าอื่น"):
+          สามเรื่องหลักเป็นแถวสลับซ้ายขวาแบบคำถามที่พบบ่อยหน้าแรก · ขอบเขตงานเป็นกล่องหลายขนาดแบบ "ครบในที่เดียว"
+          ข้อความทุกย่อหน้าเดิมทุกตัวอักษร (หน้านี้มีไว้เพื่อความน่าเชื่อถือ — ดูกติกาหัวไฟล์) */}
+      <div className="ui2-bk-wrap">
+        <Ui2FeatureRows
+          id="about-behind"
+          kicker="เบื้องหลังทุกคำทำนาย"
+          title="สามเรื่องที่เราเปิดเผยทั้งหมด"
+          rows={[
+            {
+              id: "about-source",
+              title: "คำทำนายมาจากไหน",
+              mock: (
+                <FrMock>
+                  <FrFan cards={["major-01", "major-02", "major-09"]} />
+                  <FrPanel label="AI อ่านจาก 3 อย่าง">
+                    <FrList items={["ความหมายดั้งเดิมของไพ่ตามตำรา 1909", "ตำแหน่งที่ไพ่ตกในผัง", "คำถามที่คุณถาม"]} />
+                  </FrPanel>
+                </FrMock>
+              ),
+              body: (
+                <>
+                  <p>
+                    <strong>คำทำนายบนเว็บนี้เขียนโดยปัญญาประดิษฐ์ (AI) ที่เราออกแบบและปรับแต่งเอง</strong> ไม่ใช่หมอดูมนุษย์
+                    เราบอกเรื่องนี้ตรง ๆ ตั้งแต่ต้น เพราะคิดว่าคุณควรรู้ว่ากำลังอ่านอะไรอยู่
+                  </p>
+                  <p>
+                    AI ของเราไม่ได้เดาคำตอบลอย ๆ แต่อ่านจากความหมายดั้งเดิมของไพ่แต่ละใบตามตำรา 1909 Rider-Waite-Smith
+                    ประกอบกับตำแหน่งที่ไพ่ใบนั้นตกในผัง และคำถามที่คุณถาม แล้วเรียบเรียงออกมาเป็นภาษาที่อ่านเข้าใจ
+                  </p>
+                  <p>
+                    ถ้าคุณอยากคุยกับคนจริง ๆ เรามีหน้า{" "}
+                    <Link href="/readers" prefetch={false}>
+                      แม่หมอตัวจริง
+                    </Link>{" "}
+                    แยกไว้ต่างหาก และจะบอกเสมอว่าอันไหนคือ AI อันไหนคือคน
+                  </p>
+                </>
+              ),
+            },
+            {
+              id: "about-fair",
+              title: "ไพ่ถูกสุ่มจริงไหม — พิสูจน์ได้",
+              mock: (
+                <FrMock tint="teal">
+                  <FrPanel label="ทุกครั้งที่เปิดไพ่">
+                    <FrList boxed items={["ล็อกลำดับไพ่ทั้งสำรับไว้ก่อน", "โชว์รหัสล็อกให้คุณเห็น", "คุณเลือกไพ่เอง", "เปิดลำดับจริงให้เทียบ"]} />
+                    <small>Provably Fair</small>
+                  </FrPanel>
+                </FrMock>
+              ),
+              body: (
+                <>
+                  <p>
+                    นี่คือเรื่องที่เราให้ความสำคัญที่สุด เว็บดูดวงทั่วไปไม่มีทางให้คุณรู้เลยว่าไพ่ถูกสุ่มจริง
+                    หรือถูกเลือกมาให้ทีหลังเพื่อให้เข้ากับคำทำนาย
+                  </p>
+                  <p>
+                    ก่อนคุณจะเลือกไพ่ ระบบจะ <strong>ล็อกลำดับไพ่ทั้งสำรับไว้ก่อนแล้ว</strong> และโชว์ &quot;รหัสล็อก&quot;
+                    ของลำดับนั้นให้คุณเห็น (เหมือนปิดผนึกซองไว้ต่อหน้าคุณ) เมื่อเปิดไพ่เสร็จ ระบบจะเปิดลำดับจริงให้ดู
+                    คุณเอาไปเทียบได้เองว่าตรงกับรหัสล็อกเดิมไหม (หลักการนี้เรียกว่า Provably Fair)
+                  </p>
+                  <p>
+                    แปลว่า <strong>เราไม่สามารถเปลี่ยนไพ่ของคุณหลังจากคุณเลือกแล้วได้เลย</strong> แม้จะอยากทำก็ทำไม่ได้
+                    เพราะรหัสล็อกจะไม่ตรงทันที และคุณตรวจเองได้ทุกครั้ง
+                  </p>
+                </>
+              ),
+            },
+            {
+              id: "about-deck",
+              title: "สำรับไพ่ที่เราใช้",
+              mock: (
+                <FrMock tint="violet">
+                  <FrFan cards={["major-00", "major-10", "major-21"]} />
+                  <FrPanel label="1909 Rider-Waite-Smith">
+                    <FrBig>78</FrBig>
+                    <small>ใบ ครบทั้งสำรับ · ไม่มีไพ่ที่สร้างขึ้นเอง</small>
+                  </FrPanel>
+                </FrMock>
+              ),
+              body: (
+                <>
+                  <p>
+                    เราใช้ภาพไพ่จากสำรับ <strong>1909 Rider-Waite-Smith</strong> ต้นฉบับ ครบทั้ง 78 ใบ
+                    ซึ่งเป็นสำรับที่เป็นรากของการอ่านไพ่ทาโรต์สมัยใหม่แทบทั้งหมด
+                  </p>
+                  <p>
+                    เรามีกฎภายในข้อหนึ่งที่เข้มมาก คือ <strong>ห้ามสร้างไพ่ปลอมขึ้นมาเองเด็ดขาด</strong> ถ้าข้อมูลไพ่ใบไหน
+                    มีปัญหา ระบบจะแจ้งให้คุณโหลดใหม่ แทนที่จะแอบใส่ไพ่ใบอื่นแทนให้เนียน ๆ
+                  </p>
+                </>
+              ),
+            },
+          ]}
+        />
 
-        <section className="page-band page-band-compact space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>สำรับไพ่ที่เราใช้</ThaiPhrases></h2>
-          <p className="text-sm text-ink leading-relaxed font-serif-th">
-            เราใช้ภาพไพ่จากสำรับ <strong>1909 Rider-Waite-Smith</strong> ต้นฉบับ ครบทั้ง 78 ใบ
-            ซึ่งเป็นสำรับที่เป็นรากของการอ่านไพ่ทาโรต์สมัยใหม่แทบทั้งหมด
-          </p>
-          <p className="text-sm text-ink leading-relaxed font-serif-th">
-            เรามีกฎภายในข้อหนึ่งที่เข้มมาก คือ <strong>ห้ามสร้างไพ่ปลอมขึ้นมาเองเด็ดขาด</strong> ถ้าข้อมูลไพ่ใบไหน
-            มีปัญหา ระบบจะแจ้งให้คุณโหลดใหม่ แทนที่จะแอบใส่ไพ่ใบอื่นแทนให้เนียน ๆ
-          </p>
-        </section>
+        <Ui2Bento
+          id="about-not"
+          kicker="ขอบเขตที่ชัดเจน"
+          title="สิ่งที่เราไม่ใช่ และไม่รับทำ"
+          tiles={[
+            {
+              key: "advice",
+              size: "wide",
+              glow: "amber",
+              lead: "ไม่ใช่",
+              title: "คำแนะนำทางการแพทย์ กฎหมาย หรือการเงิน",
+              desc: "คำทำนายมีไว้เพื่อทบทวนความคิดและให้กำลังใจ ถ้าคุณมีเรื่องสุขภาพ คดีความ หรือการลงทุน โปรดปรึกษาผู้เชี่ยวชาญตัวจริง",
+              visual: <BxChips items={["สุขภาพ", "คดีความ", "การลงทุน"]} on={-1} />,
+            },
+            {
+              key: "fate",
+              size: "tall",
+              glow: "teal",
+              center: true,
+              lead: "ไม่",
+              title: "ฟันธงชะตา",
+              desc: "ไม่ทำนายเรื่องความเป็นความตาย โรคร้าย หรือชี้ชะตาแบบฟันธง",
+              visual: <BxBack />,
+            },
+            {
+              key: "charms",
+              lead: "ไม่ขาย",
+              title: "เครื่องราง ไม่รับแก้กรรม",
+              desc: "ไม่มีการเรียกเก็บเงินเพื่อสะเดาะเคราะห์",
+            },
+            {
+              key: "train",
+              lead: "ไม่เอา",
+              title: "คำถามของคุณไปเทรน AI",
+              desc: "ไม่เอาคำถามหรือบันทึกของคุณไปเทรนโมเดล AI",
+              go: { href: "/privacy", label: "อ่านนโยบายความเป็นส่วนตัว" },
+            },
+          ]}
+        />
+      </div>
 
-        <section className="page-band page-band-compact page-band-tint space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>สิ่งที่เราไม่ใช่ และไม่รับทำ</ThaiPhrases></h2>
-          <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
-            <li>
-              <strong>ไม่ใช่คำแนะนำทางการแพทย์ กฎหมาย หรือการเงิน</strong> — คำทำนายมีไว้เพื่อทบทวนความคิดและให้กำลังใจ
-              ถ้าคุณมีเรื่องสุขภาพ คดีความ หรือการลงทุน โปรดปรึกษาผู้เชี่ยวชาญตัวจริง
-            </li>
-            <li>
-              <strong>ไม่ทำนายเรื่องความเป็นความตาย โรคร้าย หรือชี้ชะตาแบบฟันธง</strong>
-            </li>
-            <li>
-              <strong>ไม่ขายเครื่องราง ไม่รับแก้กรรม ไม่มีการเรียกเก็บเงินเพื่อสะเดาะเคราะห์</strong>
-            </li>
-            <li>
-              <strong>ไม่เอาคำถามหรือบันทึกของคุณไปเทรนโมเดล AI</strong> — รายละเอียดอยู่ใน{" "}
-              <Link href="/privacy" prefetch={false} className="text-gold-ink underline hover:text-gold-ink">
-                นโยบายความเป็นส่วนตัว
-              </Link>
-            </li>
-          </ul>
-        </section>
-
+      {/* บทที่เหลือต่อเลข 02 03 จากบทแนะนำด้านบน */}
+      <div className="v2-doc" style={{ counterReset: "doc-sec 1" }}>
         <section className="page-band page-band-compact space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>ถ้าคุณกำลังรู้สึกแย่มาก</ThaiPhrases></h2>
           <p className="text-sm text-ink leading-relaxed font-serif-th">

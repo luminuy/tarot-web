@@ -9,6 +9,7 @@ import { getCategoryCardImage } from "@/lib/media/og-card-art";
 import type { Locale } from "@/lib/i18n/types";
 
 import { buildOpenGraph } from "../seo";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 
 type GroupId = CardGroupInfo["id"];
 
@@ -51,7 +52,7 @@ function cardsInGroup(groupId: GroupId) {
   return CARD_SUMMARIES.filter((card) => card.suit === groupId);
 }
 
-export function CardGroupBody({ groupId }: { groupId: GroupId; locale: Locale }) {
+export function CardGroupBody({ groupId, locale }: { groupId: GroupId; locale: Locale }) {
   const group = CARD_GROUPS[groupId];
 
   return (
@@ -60,6 +61,8 @@ export function CardGroupBody({ groupId }: { groupId: GroupId; locale: Locale })
       <div className="max-w-[1360px] mx-auto relative z-10">
         <CardGroupView groupInfo={group} cards={cardsInGroup(groupId)} />
       </div>
+      {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+      <Ui2NextSteps isEn={locale === "en"} keys={["spreads", "daily", "journal", "questions"]} />
     </main>
   );
 }

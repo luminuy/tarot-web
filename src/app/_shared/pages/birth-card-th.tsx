@@ -9,6 +9,7 @@ import { DECK } from "@/data/cards";
 import type { BirthCardItem } from "@/lib/tarot/birth-card";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 
 /**
  * ⚠️ ส่งเฉพาะฟิลด์ที่ `BirthCardCalculator` ใช้จริงเท่านั้น
@@ -311,6 +312,8 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
           </div>
         </SeoArticleShell>
       </div>
+      {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+      <Ui2NextSteps isEn={false} keys={["spreads", "daily", "journal", "cards"]} />
     </main>
   );
 }

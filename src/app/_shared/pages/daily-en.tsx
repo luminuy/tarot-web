@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { DailyArticle } from "@/components/daily/DailyArticle";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 import { DailyStage } from "./daily-th";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
 
@@ -154,6 +155,8 @@ export function DailyBodyEn({ ritual }: { ritual: ReactNode }) {
           faqs={DAILY_FAQS_EN}
           links={DAILY_LINKS_EN}
         />
+        {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+        <Ui2NextSteps isEn={true} keys={["spreads", "pick", "journal", "questions"]} />
       </main>
     </>
   );

@@ -121,17 +121,6 @@
   background: linear-gradient(180deg, #FFE3A8 0%, #F0C470 100%);
   color: var(--ui2-night);
 }
-.v2-pr-two {
-  display: grid;
-  gap: 48px;
-}
-@media (min-width: 1024px) {
-  .v2-pr-two {
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-    align-items: start;
-    gap: 36px;
-  }
-}
 .v2-pr-h2 {
   margin: 0;
   font-family: var(--ui2-font-display);

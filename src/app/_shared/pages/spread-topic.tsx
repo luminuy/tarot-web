@@ -17,6 +17,7 @@ import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 
 
 export function spreadTopicStaticParams() {
@@ -293,6 +294,8 @@ export function SpreadTopicContent({
           </p>
         </section>
       </div>
+      {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+      <Ui2NextSteps isEn={isEnglish} keys={["cards", "daily", "journal", "questions"]} />
     </main>
   );
 }

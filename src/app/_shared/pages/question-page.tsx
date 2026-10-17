@@ -21,6 +21,8 @@ import type { Locale } from "@/lib/i18n/types";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
+import { FrFan, FrInput, FrList, FrMock, FrPanel, Ui2FeatureRows } from "@/components/ui2/Ui2Blocks";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 import { Ui2Showcase, Ui2ShowcaseStarter, type Ui2ShowcaseSection } from "@/components/ui2/Ui2Showcase";
 
 /**
@@ -308,6 +310,8 @@ export function QuestionPageContent({ question: q, locale, askBox }: { question:
           </p>
         </nav>
       </article>
+      {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+      <Ui2NextSteps isEn={locale === "en"} keys={["spreads", "daily", "journal", "cards"]} />
     </main>
   );
 }
@@ -337,8 +341,49 @@ export function QuestionsHubContent({ locale }: { locale: Locale }) {
           cards={["major-06", "major-18", "major-09", "cups-02", "major-17", "pentacles-10"]}
         />
         <Ui2Showcase label={isEn ? "Questions by topic" : "คำถามแยกตามหมวด"} sections={hubSections(isEn)} />
+        <HubAskRows isEn={isEn} />
+        <Ui2NextSteps isEn={isEn} keys={["spreads", "daily", "journal", "cards"]} />
       </div>
     </main>
+  );
+}
+
+/**
+ * ถามแบบไหนให้ไพ่ตอบชัด — แถวสลับซ้ายขวาแบบคำถามที่พบบ่อยหน้าแรก (v4 · เจ้าของ 2026-10-17)
+ * หมวดละหนึ่งคำถาม (3 หมวดแรก) · ภาพจำลอง = ช่องพิมพ์คำถาม + "ถามแบบนี้ได้คำตอบชัดกว่า" จากข้อมูลของคำถามนั้นเอง
+ * ไพ่ในภาพ = ไพ่ตัวอย่างของคำถามนั้น (example.cards ในไฟล์ข้อมูล · ไม่ใช่ผลเปิดไพ่ของใคร)
+ */
+function HubAskRows({ isEn }: { isEn: boolean }) {
+  const picks = QUESTION_TOPIC_ORDER.flatMap((topic) => QUESTIONS.filter((q) => q.topic === topic).slice(0, 1)).slice(0, 3);
+  const tints = ["gold", "teal", "violet"] as const;
+  return (
+    <div className="ui2-next">
+      <Ui2FeatureRows
+        id="questions-ask"
+        kicker={isEn ? "Ask it well" : "ถามให้ตรงจุด"}
+        title={isEn ? "Ask so the cards can answer clearly" : "ถามแบบไหน ให้ไพ่ตอบได้ชัด"}
+        rows={picks.map((q, i) => {
+          const copy = q[isEn ? "en" : "th"];
+          const parent = TOPIC_PARENT[q.topic];
+          return {
+            id: `ask-${q.slug}`,
+            kicker: isEn ? parent.en : parent.th,
+            title: copy.question,
+            body: <p>{copy.description}</p>,
+            link: { href: `${isEn ? "/en" : ""}${questionPath(q.slug)}`, label: isEn ? "See how the cards answer" : "ดูว่าไพ่ตอบอย่างไร" },
+            mock: (
+              <FrMock tint={tints[i % 3]}>
+                {i === 1 ? <FrFan cards={copy.example.cards.slice(0, 3).map((c) => c.id)} /> : null}
+                <FrInput title={i === 0 ? (isEn ? "What do you want to ask the cards?" : "อยากถามไพ่เรื่องอะไร") : undefined} text={copy.question.split(/[?？]/)[0] + "?"} />
+                <FrPanel label={isEn ? "Ask it this way for a clearer answer" : "ถามแบบนี้ได้คำตอบชัดกว่า"}>
+                  <FrList boxed={i !== 1} items={copy.betterQuestions.slice(0, i === 1 ? 2 : 3)} />
+                </FrPanel>
+              </FrMock>
+            ),
+          };
+        })}
+      />
+    </div>
   );
 }
 

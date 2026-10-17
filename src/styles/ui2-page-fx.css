@@ -90,6 +90,20 @@
   }
 }
 
+/* กล่องหลายขนาด (ui2-blocks.css) — หลังไพ่ลอย + แสงทองเต้น (ชุดเดียวกับกล่องพิธีเช้าหน้าแรก) */
+@media (min-width: 768px) {
+  [data-fx="full"] .ui2-bx-back {
+    animation: ui2-pg-bob 6s ease-in-out infinite;
+  }
+  [data-fx="full"] .ui2-bx-burst {
+    animation: ui2-bx-burst 3s ease-out infinite;
+  }
+}
+@keyframes ui2-bx-burst {
+  0% { scale: 0.55; opacity: 0.95; }
+  100% { scale: 1.9; opacity: 0; }
+}
+
 @keyframes ui2-pg-bob {
   0%, 100% { translate: 0 0; }
   50% { translate: 0 -10px; }

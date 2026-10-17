@@ -8,6 +8,8 @@
  * ⚠️ ห้าม backdrop-filter / filter: blur / ของวนนอกระดับ full ในไฟล์นี้ (ด่าน test-ui2-fx · test-motion-quality)
  */
 @import "./ui2-core.css";
+/* แผงพับคำถามที่พบบ่อย (SeoArticleShell) + กล่อง "ไปต่อจากตรงนี้" ใช้ชุดเดียวกับหน้าอื่น */
+@import "./ui2-blocks.css";
 
 /* ── โทเคนกลางคืนในขอบเขตหน้า ─────────────────────────────────────────── */
 .ui2-dy {

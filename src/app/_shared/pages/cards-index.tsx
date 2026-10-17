@@ -8,6 +8,7 @@ import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 
 const PATH = "/cards";
 
@@ -103,6 +104,8 @@ export function CardsIndexBody({ locale, explorer }: { locale: Locale; explorer:
         {/* Client Interactive Explorer with dynamic bilingual hero header */}
         {explorer}
       </div>
+      {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+      <Ui2NextSteps isEn={locale === "en"} keys={["spreads", "birth", "journal", "questions"]} />
     </main>
   );
 }

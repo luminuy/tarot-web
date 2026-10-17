@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { DailyArticle } from "@/components/daily/DailyArticle";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 import { CardImage } from "@/components/card/CardImage";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
@@ -188,6 +189,8 @@ export function DailyBodyTh({ ritual }: { ritual: ReactNode }) {
           faqs={DAILY_FAQS}
           links={DAILY_LINKS}
         />
+        {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+        <Ui2NextSteps isEn={false} keys={["spreads", "pick", "journal", "questions"]} />
       </main>
     </>
   );

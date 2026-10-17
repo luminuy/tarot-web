@@ -5,6 +5,7 @@ import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 
 const loveOgImages = buildPageOgImage({
   title: "ดูดวงความรัก 1 ใบ",
@@ -214,6 +215,8 @@ export function LoveOneCardBodyTh({ ritual }: { ritual: ReactNode }) {
             </div>
           </SeoArticleShell>
         </div>
+        {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+        <Ui2NextSteps isEn={false} keys={["spreads", "pick", "journal", "questions"]} />
       </main>
     </>
   );

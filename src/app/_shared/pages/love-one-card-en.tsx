@@ -8,6 +8,7 @@ import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 
 /**
  * 💗 ดูดวงความรัก 1 ใบ ฉบับภาษาอังกฤษ (`/en/love/1-card`)
@@ -161,6 +162,8 @@ export function LoveOneCardBodyEn({ ritual }: { ritual: ReactNode }) {
             </p>
           </SeoArticleShell>
         </div>
+        {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+        <Ui2NextSteps isEn={true} keys={["spreads", "pick", "journal", "questions"]} />
       </main>
     </>
   );

@@ -7,6 +7,7 @@ import { buildBreadcrumbJsonLd, homeCrumb } from "@/app/_shared/seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { SOCIAL_BADGE_STYLE, SocialGlyph } from "@/components/ui/SocialIcons";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { BxBack, BxChips, Ui2Bento } from "@/components/ui2/Ui2Blocks";
 import { Ui2DocHead } from "@/components/ui2/Ui2PageHero";
 
 /**
@@ -150,29 +151,53 @@ export function ContactBodyTh() {
           </section>
         )}
 
-        <section className="page-band page-band-compact page-band-tint space-y-3">
-          <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>เรื่องที่เขียนมาได้</ThaiPhrases></h2>
-          <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
-            <li>
-              <strong>แจ้งปัญหาการใช้งาน</strong> — ไพ่ไม่ขึ้น คำทำนายค้าง เข้าสู่ระบบไม่ได้ ฯลฯ
-              ถ้าแนบภาพหน้าจอมาด้วยจะช่วยเราได้มาก
-            </li>
-            <li>
-              <strong>ติชมคำทำนาย</strong> — ถ้าเจอคำทำนายที่อ่านแล้วรู้สึกไม่เหมาะสม ไม่สุภาพ
-              หรือชี้นำในทางที่ไม่ดี บอกเราได้เลย เราเอาไปปรับจริง
-            </li>
-            <li>
-              <strong>ขอลบข้อมูลส่วนตัว</strong> — ทำเองได้ทันทีจากหน้า{" "}
-              <Link href="/privacy" prefetch={false} className="text-gold-ink underline hover:text-gold-ink">
-                นโยบายความเป็นส่วนตัว
-              </Link>{" "}
-              หรือเขียนมาให้เราจัดการให้
-            </li>
-            <li>
-              <strong>ความร่วมมือและการติดต่อเชิงธุรกิจ</strong> — รวมถึงแม่หมอที่สนใจเข้าร่วมให้บริการ
-            </li>
-          </ul>
-        </section>
+      </div>
+
+      {/* v4 (เจ้าของ 2026-10-17 "นำสองส่วนนี้ของหน้าแรกไปใช้กับหน้าอื่น") — หัวข้อที่เขียนมาได้เป็นกล่องหลายขนาดแบบ "ครบในที่เดียว" */}
+      <div className="ui2-bk-wrap">
+        <Ui2Bento
+          id="contact-topics"
+          kicker="เขียนถึงเรา"
+          title="เรื่องที่เขียนมาได้"
+          tiles={[
+            {
+              key: "support",
+              size: "wide",
+              glow: "amber",
+              lead: "แจ้ง",
+              title: "ปัญหาการใช้งาน",
+              desc: "ไพ่ไม่ขึ้น คำทำนายค้าง เข้าสู่ระบบไม่ได้ ฯลฯ ถ้าแนบภาพหน้าจอมาด้วยจะช่วยเราได้มาก",
+              visual: <BxChips items={["ไพ่ไม่ขึ้น", "คำทำนายค้าง", "เข้าสู่ระบบไม่ได้"]} on={-1} />,
+            },
+            {
+              key: "feedback",
+              size: "tall",
+              glow: "teal",
+              center: true,
+              lead: "ติชม",
+              title: "คำทำนาย",
+              desc: "ถ้าเจอคำทำนายที่อ่านแล้วรู้สึกไม่เหมาะสม ไม่สุภาพ หรือชี้นำในทางที่ไม่ดี บอกเราได้เลย เราเอาไปปรับจริง",
+              visual: <BxBack />,
+            },
+            {
+              key: "privacy",
+              lead: "ขอลบ",
+              title: "ข้อมูลส่วนตัว",
+              desc: "ทำเองได้ทันทีจากหน้านโยบายความเป็นส่วนตัว หรือเขียนมาให้เราจัดการให้",
+              go: { href: "/privacy", label: "ไปหน้านโยบายความเป็นส่วนตัว" },
+            },
+            {
+              key: "partner",
+              lead: "ร่วมงาน",
+              title: "เชิงธุรกิจ",
+              desc: "ความร่วมมือและการติดต่อเชิงธุรกิจ รวมถึงแม่หมอที่สนใจเข้าร่วมให้บริการ",
+            },
+          ]}
+        />
+      </div>
+
+      {/* บทที่เหลือต่อเลขจากบทด้านบน (อีเมล + ช่องทางโซเชียลถ้ามี) */}
+      <div className="v2-doc" style={{ counterReset: `doc-sec ${TIKTOK_URL ? 2 : 1}` }}>
 
         <section className="page-band page-band-compact space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>เรื่องที่ตอบให้ไม่ได้</ThaiPhrases></h2>

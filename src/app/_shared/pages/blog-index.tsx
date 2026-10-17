@@ -7,6 +7,7 @@ import { buildPageOgImage } from "@/lib/media/og-image";
 import type { Locale } from "@/lib/i18n/types";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 
 const PATH = "/blog";
 
@@ -140,6 +141,8 @@ export function BlogIndexBody({ locale, list }: { locale: Locale; list: ReactNod
 
       {/* กว้างพอสำหรับรายชื่อหมวดซ้าย + หน้าต่าง (ชุดเดียวกับ /spreads) */}
       <div className="max-w-[1360px] mx-auto pb-16 relative z-10">{list}</div>
+      {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+      <Ui2NextSteps isEn={isEnglish} keys={["spreads", "daily", "journal", "cards"]} />
     </main>
   );
 }

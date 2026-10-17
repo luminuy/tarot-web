@@ -27,6 +27,7 @@ import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 
 /**
  * ✦ ไพ่ทาโรต์ × 12 ราศี — `/cards/zodiac` และ `/cards/zodiac/<ราศี>` (สองภาษา)
@@ -419,6 +420,8 @@ export function ZodiacIndexBody({
           )}
         </SeoArticleShell>
       </div>
+      {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+      <Ui2NextSteps isEn={isEnglish} keys={["spreads", "birth", "journal", "cards"]} />
     </main>
   );
 }
@@ -673,6 +676,8 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
           </nav>
         </section>
       </div>
+      {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+      <Ui2NextSteps isEn={isEnglish} keys={["spreads", "birth", "journal", "cards"]} />
     </main>
   );
 }

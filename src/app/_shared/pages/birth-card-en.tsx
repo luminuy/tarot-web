@@ -10,6 +10,7 @@ import type { BirthCardItem } from "@/lib/tarot/birth-card";
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 
 /**
  * 🎂 Tarot Birth Card Calculator — English Edition (`/en/cards/birth-card`)
@@ -300,6 +301,8 @@ export function BirthCardBodyEn({ calculator }: { calculator: ReactNode }) {
           </div>
         </SeoArticleShell>
       </div>
+      {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
+      <Ui2NextSteps isEn={true} keys={["spreads", "daily", "journal", "cards"]} />
     </main>
   );
 }

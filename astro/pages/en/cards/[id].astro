@@ -8,6 +8,7 @@ import {
   cardNeighbors,
 } from "@/app/_shared/pages/card-detail";
 import { DECK, cardById } from "@/data/cards";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { CardDetailRelatedRoot } from "../../../components/CardDetailRelated";
@@ -54,6 +55,8 @@ const { currentIndex, totalCards, prevCard, nextCard } = cardNeighbors(card);
         <CardDetailRelatedRoot card={card} locale={locale} />
       </Fragment>
     </CardDetailViewRoot>
+    <!-- ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (HTML นิ่ง ไม่ hydrate · เจ้าของ 2026-10-17) -->
+    <Ui2NextSteps isEn={true} keys={["spreads", "daily", "journal", "questions"]} />
   </main>
   </div>
   <SiteFooterRoot locale={locale} />

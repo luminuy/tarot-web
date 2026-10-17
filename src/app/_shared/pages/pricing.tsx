@@ -10,6 +10,7 @@ import { CHEAPEST_PACKAGE_THB, DAILY_LIMIT, READINGS_EN } from "@/lib/entitlemen
 import { CheckMarkIcon, DashMarkIcon } from "@/components/entitlement/EntitlementIcons";
 import { CardImage } from "@/components/card/CardImage";
 import { Ui2Window } from "@/components/ui2/Ui2Showcase";
+import { FrBig, FrFan, FrList, FrMock, FrPanel, FrPills, Ui2FeatureRows } from "@/components/ui2/Ui2Blocks";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import type { Locale } from "@/lib/i18n/types";
 import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
@@ -187,6 +188,29 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
   const faqs = faqItems(locale);
   const rows = compareRows(locale);
   const packages = getCreditPackages(isEn);
+  const t = (th: string, en: string) => (isEn ? en : th);
+  /* ภาพจำลองของคำถาม 3 ข้อแรก (ฟรี · รายเดือน · หมดอายุ) — ข้อความมาจากคำตอบของข้อนั้นเอง */
+  const faqMocks: ReactNode[] = [
+    <FrMock key="free">
+      <FrPanel label={t("สมาชิกฟรี", "Free member")}>
+        <FrBig>{DAILY_LIMIT}</FrBig>
+        <small>{t("ครั้งต่อวัน · ผังมาตรฐาน 1–4 ใบ", "a day · standard 1–4 card spreads")}</small>
+        <FrPills items={["Email", "Google", "LINE"]} />
+      </FrPanel>
+    </FrMock>,
+    <FrMock key="once" tint="teal">
+      <FrPanel label={t("แพ็กเติมรอบ", "Top-up package")}>
+        <FrList boxed items={isEn ? ["One-time payment", "Nothing renews", "Never charged again"] : ["จ่ายครั้งเดียวจบ", "ไม่มีการต่ออายุ", "ไม่ตัดเงินซ้ำ"]} />
+      </FrPanel>
+    </FrMock>,
+    <FrMock key="expire" tint="violet">
+      <FrFan cards={["major-17", "major-19", "pentacles-10"]} />
+      <FrPanel label={t("ลำดับการใช้สิทธิ์", "Which reading is used")}>
+        <FrList items={isEn ? ["Today's free reading first", "Then your purchased readings"] : ["สิทธิ์ฟรีของวันนั้นก่อน", "แล้วจึงหักรอบที่เติมไว้"]} />
+        <small>{t("รอบที่เติมไม่มีวันหมดอายุ", "Purchased readings never expire")}</small>
+      </FrPanel>
+    </FrMock>,
+  ];
 
   const jsonLdBreadcrumbs = buildBreadcrumbJsonLd(locale, [homeCrumb(locale), { name: c.crumb, path: PATH }]);
   const jsonLdFaq = {
@@ -310,7 +334,6 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
           {plans}
         </Ui2Window>
 
-        <div className="v2-pr-two">
         {/* ── ตารางเทียบสิทธิ์ ────────────────────────────────────── */}
         <Ui2Window n="02" kicker="Compare" tone={2}>
         <section aria-labelledby="pricing-compare" className="space-y-6">
@@ -353,34 +376,16 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
         </section>
         </Ui2Window>
 
-        {/* ── คำถามที่พบบ่อย ──────────────────────────────────────── */}
-        <Ui2Window n="03" kicker="Questions" tone={5}>
-        <section aria-labelledby="pricing-faq" className="space-y-6">
-          <h2 id="pricing-faq" className="v2-pr-h2">
-            <ThaiPhrases>{isEn ? "Frequently asked questions" : "คำถามที่พบบ่อย"}</ThaiPhrases>
-          </h2>
-          <div className="altar-panel divide-y divide-line-warm/50 px-5 sm:px-6">
-            {faqs.map((f) => (
-              <details key={f.q} className="group py-4">
-                <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-4 font-serif-th text-base font-semibold text-ink-deep">
-                  {f.q}
-                  <svg
-                    viewBox="0 0 20 20"
-                    aria-hidden="true"
-                    className="h-5 w-5 shrink-0 fill-none stroke-current text-muted transition-transform duration-150 group-open:rotate-180"
-                    strokeWidth={2}
-                  >
-                    <path d="M5 7.5l5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </summary>
-                <p className="pt-2 font-serif-th text-sm leading-relaxed text-muted">{f.a}</p>
-              </details>
-            ))}
-          </div>
-        </section>
-        </Ui2Window>
-
-        </div>
+        {/* ── คำถามที่พบบ่อย — แถวสลับซ้ายขวาแบบหน้าแรก (v4 · เจ้าของ 2026-10-17 "นำสองส่วนนี้ไปใช้กับหน้าอื่น")
+            สามข้อแรกมีภาพจำลอง · ที่เหลือเป็นรายการพับ (คำตอบอยู่ใน HTML ครบ ตรงกับ JSON-LD FAQPage) ── */}
+        <Ui2FeatureRows
+          id="pricing-faq"
+          kicker="FAQ"
+          title={isEn ? "Frequently asked questions" : "คำถามที่พบบ่อย"}
+          rows={faqs.slice(0, 3).map((f, i) => ({ title: f.q, body: <p>{f.a}</p>, mock: faqMocks[i] }))}
+          rest={faqs.slice(3)}
+          restLabel={isEn ? "More questions" : "คำถามอื่น ๆ"}
+        />
 
         {/* ── ปิดท้าย ─────────────────────────────────────────────── */}
         <section className="page-band mx-auto max-w-3xl space-y-4 text-center">

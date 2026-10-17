@@ -206,7 +206,15 @@ export default function ResetPasswordPage() {
     <main id="main-content" tabIndex={-1} className="min-h-[70vh] flex items-center justify-center px-4 py-10">
       <div className="v2-au w-full max-w-[460px] overflow-hidden">
         <Suspense
-          fallback={<div className="v2-au-form v2-au-sub text-center">{isEn ? "Loading…" : "กำลังโหลด…"}</div>}
+          fallback={
+            /* HTML ที่บิลด์ไว้ได้แค่ส่วนนี้ (ฟอร์มอ่าน useSearchParams = เรนเดอร์ฝั่งเบราว์เซอร์) — ต้องมี h1 หนึ่งอันเสมอ (ด่าน a11y-critical) */
+            <div className="v2-au-form">
+              <div className="v2-au-head">
+                <h1 className="v2-au-title">{isEn ? "Set a new password" : "ตั้งรหัสผ่านใหม่"}</h1>
+                <p className="v2-au-sub">{isEn ? "Loading…" : "กำลังโหลด…"}</p>
+              </div>
+            </div>
+          }
         >
           <ResetPasswordForm />
         </Suspense>
