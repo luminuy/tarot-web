@@ -2397,10 +2397,9 @@ html[data-consent-ask] .ui2-sticky {
   .ui2-fc { padding: 6px 6px 8px; border-radius: 16px; }
   .ui2-fc-star { --w: 92px; --r: -8deg; left: 1%; top: 8px; }
   .ui2-fc-lovers { --w: 86px; --r: 7deg; left: 1.5%; top: 300px; bottom: auto; }
-  .ui2-fc-fool { display: block; --w: 70px; --r: -4deg; left: 2.5%; top: 500px; }
+  /* คนเขลา/โลก (ใบล่างสุด) ไม่แสดงที่จอ < 1280 — ที่ตำแหน่งเดิมลงไปใต้ริบบิ้น 55–96px ป้ายชื่อถูกทับ (INC-0280) · ขยับขึ้นก็ซ้อนใบคู่รัก/นักบวชหญิง */
   .ui2-fc-wheel { --w: 92px; --r: 7deg; right: 1%; top: 0; }
   .ui2-fc-priestess { --w: 86px; --r: -6deg; right: 1.5%; top: 310px; bottom: auto; }
-  .ui2-fc-world { display: block; --w: 70px; --r: 5deg; right: 2.5%; top: 510px; }
   .ui2-fc-moon,
   .ui2-fc-empress { display: none; }
   .ui2-hero {
@@ -2413,11 +2412,15 @@ html[data-consent-ask] .ui2-sticky {
   .ui2-h1 {
     line-height: 1.18;
   }
+  /* สองคอลัมน์เท่ากันรอบเส้นกลาง — ปุ่ม "ไพ่วันนี้" ยาวขึ้นตอนข้อมูลมาถึง (+ภาพไพ่ + ชื่อไพ่) ไม่ดันปุ่มหลักให้เลื่อน
+     (เดิม flex จัดกลาง: ปุ่มหลักขยับซ้ายราว 12px หลังโหลด ~2 วินาที · INC-0280) */
   .ui2-hero-ctas {
-    flex-direction: row;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    justify-items: start;
   }
   .ui2-hero-ctas .ui2-btn {
+    justify-self: end;
     width: auto;
   }
   .ui2-clock {
@@ -2501,10 +2504,8 @@ html[data-consent-ask] .ui2-sticky {
   }
   .ui2-fc-star { --w: 124px; --r: -8deg; left: 2%; top: 4px; }
   .ui2-fc-lovers { --w: 112px; --r: 7deg; left: 4.5%; top: 300px; }
-  .ui2-fc-fool { --w: 90px; --r: -4deg; left: 1.5%; top: 560px; }
   .ui2-fc-wheel { --w: 124px; --r: 7deg; right: 2%; top: 0; }
   .ui2-fc-priestess { --w: 110px; --r: -6deg; right: 4.5%; top: 310px; }
-  .ui2-fc-world { --w: 90px; --r: 5deg; right: 1.5%; top: 570px; }
   .ui2-clock-cell {
     width: 96px;
     height: 96px;
@@ -2634,11 +2635,12 @@ html[data-consent-ask] .ui2-sticky {
   /* ใบไกลบน 2 ใบ: 1280–1439 ขยับออกขอบ (14%) ไม่ให้ซ้อนบรรทัดแรกของหัวข้อ · ≥ 1440 ตำแหน่งต้นแบบ 17% */
   .ui2-fc-moon { display: block; --w: 104px; --r: 6deg; left: 14%; top: -14px; z-index: -1; }
   .ui2-fc-lovers { --w: 140px; --r: 7deg; left: 13%; top: 280px; }
-  .ui2-fc-fool { --w: 112px; --r: -4deg; left: 2%; top: 500px; }
+  /* ใบล่างสุดเหนือริบบิ้นเสมอ (เดิม top 500/510 ลงไปใต้ริบบิ้น 63–74px · ป้าย "คนเขลา"/"โลก" ถูกทับ · INC-0280) */
+  .ui2-fc-fool { display: block; --w: 112px; --r: -4deg; left: 2%; top: 400px; }
   .ui2-fc-wheel { --w: 156px; --r: 7deg; right: 4%; top: 0; }
   .ui2-fc-empress { display: block; --w: 100px; --r: -6deg; right: 14.5%; top: -6px; z-index: -1; }
   .ui2-fc-priestess { --w: 138px; --r: -6deg; right: 13%; top: 290px; }
-  .ui2-fc-world { --w: 112px; --r: 5deg; right: 2.5%; top: 510px; }
+  .ui2-fc-world { display: block; --w: 112px; --r: 5deg; right: 2.5%; top: 410px; }
 }
 @media (min-width: 1440px) {
   .ui2-fc-moon { left: 17%; }
