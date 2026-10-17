@@ -18,12 +18,21 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
+import { CommandPalette } from "@/components/admin/CommandPalette";
 import type { NavBadges } from "@/lib/admin/executive-data";
 
 // Dynamic Admin Panels
 const ExecutiveDashboard = dynamic(() => import("@/components/admin/ExecutiveDashboard"), {
   ssr: false,
   loading: () => <AdminLoading label="กำลังรวมตัวเลขผู้บริหาร…" />,
+});
+const PaymentsPanel = dynamic(() => import("@/components/admin/PaymentsPanel"), {
+  ssr: false,
+  loading: () => <AdminLoading label="กำลังโหลดรายการชำระเงิน…" />,
+});
+const AuditLogPanel = dynamic(() => import("@/components/admin/AuditLogPanel"), {
+  ssr: false,
+  loading: () => <AdminLoading label="กำลังโหลดบันทึกการทำงาน…" />,
 });
 const AdminOverview = dynamic(() => import("@/components/admin/AdminOverview"), {
   ssr: false,
@@ -94,7 +103,9 @@ type TabId =
   | "content"
   | "readers"
   | "bookings"
-  | "health";
+  | "payments"
+  | "health"
+  | "audit";
 
 interface NavItem {
   id: TabId;
@@ -104,7 +115,9 @@ interface NavItem {
   /** คำอธิบายเต็มบนหัวหน้า */
   description: string;
   /** ตัวเลขเตือนจาก `/api/admin/nav-badges` */
-  badge?: { key: keyof NavBadges; tone: "alert" | "watch" | "info"; label: string };
+  badge?: { key: "refundDue" | "pendingReaders" | "newFeedback"; tone: "alert" | "watch" | "info"; label: string };
+  /** คำค้นเสริมของช่องค้นหาเมนู (Ctrl+K) */
+  keywords?: string;
 }
 
 interface NavSection {
@@ -145,11 +158,19 @@ const NAV_SECTIONS: NavSection[] = [
     group: "เงินและแม่หมอ",
     items: [
       {
+        id: "payments",
+        label: "รายการชำระเงิน",
+        short: "ทุกการจ่ายเงิน ค้นหา เปิดใน Stripe",
+        description: "ทุกการจ่ายเงินทุกสินค้า (แพ็กเติมรอบ · ปรึกษาแม่หมอ · AI ช่วยเขียน) — กรองสถานะ ค้นด้วยเลขคำสั่งซื้อ เปิดรายการใน Stripe",
+        keywords: "stripe order คำสั่งซื้อ ธุรกรรม ใบเสร็จ ซื้อ แพ็ก",
+      },
+      {
         id: "bookings",
         label: "การจองและการเงิน",
         short: "เงินต้องคืน การจอง ยอดโอนให้แม่หมอ",
         description: "เงินที่ต้องคืน · รายการจอง · ยอดที่ต้องโอนให้แม่หมอ · รีวิว",
         badge: { key: "refundDue", tone: "alert", label: "รายการเงินที่ต้องคืนลูกค้า" },
+        keywords: "คืนเงิน refund โอนเงินแม่หมอ รีวิว นัด",
       },
       {
         id: "readers",
@@ -199,11 +220,24 @@ const NAV_SECTIONS: NavSection[] = [
         short: "คำสั่ง AI บุคลิกแม่หมอ ความหมายไพ่",
         description: "แก้คำสั่งระบบ บุคลิกแม่หมอ และความหมายไพ่ 78 ใบแบบสด ไม่ต้อง deploy",
       },
+    ],
+  },
+  {
+    group: "ระบบ",
+    items: [
       {
         id: "health",
         label: "สุขภาพระบบ",
         short: "ตรวจฐานข้อมูล อีเมล ล็อกอิน และ AI",
         description: "ตรวจ D1 · KV · ล็อกอิน · อีเมล และยิงทดสอบ AI จริง",
+        keywords: "ai groq gemini ล่ม error",
+      },
+      {
+        id: "audit",
+        label: "บันทึกการทำงานแอดมิน",
+        short: "ใครทำอะไรเมื่อไร ย้อนหลัง 180 วัน",
+        description: "ทุกการกระทำในแผงแอดมิน — กรองตามหมวด ค้นจากข้อความ เตือนเมื่อมีคนใส่รหัสผิด",
+        keywords: "audit log ประวัติ ความปลอดภัย รหัสผิด",
       },
     ],
   },
@@ -218,6 +252,8 @@ const TAB_ALIASES: Record<string, TabId> = { marketing: "members" };
 function TabIcon({ id, className = "w-4 h-4" }: { id: TabId; className?: string }) {
   const d: Record<TabId, string> = {
     executive: "M4 19h16M7 16V11m5 5V7m5 9v-6",
+    payments: "M3 7h18v10H3V7zm0 4h18M7 15h3",
+    audit: "M9 5h10M9 12h10M9 19h10M5 5h.01M5 12h.01M5 19h.01",
     overview:
       "M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z",
     stats:
@@ -282,6 +318,19 @@ function AdminContent() {
   const [activeTab, setActiveTab] = useState<TabId>("executive");
   const [healthSubTab, setHealthSubTab] = useState<"system" | "ai">("system");
   const [badges, setBadges] = useState<NavBadges | null>(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+
+  // Ctrl+K / Cmd+K เปิดช่องค้นหาเมนู
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen((o) => !o);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   // Sync tab from URL query params
   useEffect(() => {
@@ -358,19 +407,35 @@ function AdminContent() {
             className="h-8 w-8 shrink-0 rounded-full border border-line object-cover"
             loading="eager"
           />
-          <span className="text-sm font-bold text-ink sm:text-base">SeerTarot Admin</span>
+          <span className="whitespace-nowrap text-sm font-bold text-ink sm:text-base">SeerTarot Admin</span>
+          {badges?.stripeMode === "test" ? (
+            <span className="hidden rounded border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-900 sm:inline">
+              Stripe โหมดทดสอบ — ยังไม่ใช่เงินจริง
+            </span>
+          ) : badges && badges.stripeMode === null ? (
+            <span className="hidden rounded border border-line bg-canvas px-2 py-0.5 text-[11px] text-muted sm:inline">ยังไม่ได้ตั้ง Stripe</span>
+          ) : null}
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setPaletteOpen(true)}
+            className="tap-overlay-y hidden min-h-11 items-center gap-2 whitespace-nowrap rounded-lg border border-line bg-white px-3 text-xs text-muted hover:bg-canvas hover:text-ink sm:inline-flex"
+            aria-keyshortcuts="Control+K Meta+K"
+          >
+            ค้นหาเมนู
+            <kbd className="hidden rounded border border-line bg-canvas px-1.5 font-sans text-[10px] text-muted sm:inline">Ctrl K</kbd>
+          </button>
           <a
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-line bg-white px-3 text-xs font-medium text-ink hover:bg-canvas"
+            className="inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-white px-3 text-xs font-medium text-ink hover:bg-canvas"
           >
             เปิดหน้าเว็บ
           </a>
-          <Button variant="ghost" size="sm" onClick={logout} className="text-xs text-muted hover:text-rose-700">
+          <Button variant="ghost" size="sm" onClick={logout} className="whitespace-nowrap text-xs text-muted hover:text-rose-700">
             ออกจากระบบ
           </Button>
         </div>
@@ -503,6 +568,8 @@ function AdminContent() {
               </div>
             )}
             {activeTab === "bookings" && <BookingsAdmin />}
+            {activeTab === "payments" && <PaymentsPanel />}
+            {activeTab === "audit" && <AuditLogPanel />}
             {activeTab === "health" &&
               (healthSubTab === "system" ? (
                 <SystemHealthPanel
@@ -517,6 +584,15 @@ function AdminContent() {
           </div>
         </main>
       </div>
+
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        onSelect={selectTab}
+        items={NAV_SECTIONS.flatMap((sec) =>
+          sec.items.map((i) => ({ id: i.id, label: i.label, hint: i.short, group: sec.group, keywords: `${i.description} ${i.keywords ?? ""}` })),
+        )}
+      />
     </div>
   );
 }

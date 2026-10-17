@@ -67,6 +67,13 @@ function stripeSecretKey(): string | null {
   return key && !key.startsWith("mock_") ? key : null;
 }
 
+/** โหมดของคีย์ Stripe ที่ตั้งไว้ — ไม่เรียก API (ใช้กับป้ายเตือนบนหัวแอดมิน) · `null` = ยังไม่ตั้งคีย์ (ใช้ตัวจำลอง) */
+export function stripeKeyMode(): "live" | "test" | null {
+  const key = stripeSecretKey();
+  if (!key) return null;
+  return /^(sk|rk)_test_/.test(key) ? "test" : "live";
+}
+
 /**
  * 🔒 คีย์ทดสอบ (`sk_test_` / `rk_test_`) บน production — ช่วงทดสอบบนเว็บจริงก่อนเปิดบัญชี live
  *
@@ -195,7 +202,7 @@ export async function getStripeAdminSummary(fromSec: number, toSec: number): Pro
   if (!key) {
     return { configured: false, mode: null, balance: null, period: null, payouts: null, error: null };
   }
-  const mode = /^(sk|rk)_test_/.test(key) ? "test" : "live";
+  const mode = stripeKeyMode();
   const thb = (rows: unknown) =>
     (Array.isArray(rows) ? rows : [])
       .filter((r) => (r as Record<string, unknown>).currency === "thb")

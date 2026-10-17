@@ -7,7 +7,7 @@
  * PDPA: คืนแค่ยอดรวม ไม่มีอีเมล ชื่อ หรือรหัสผู้ใช้ออกจากไฟล์นี้
  */
 
-import { getStripeAdminSummary, type StripeAdminSummary } from "@/lib/marketplace/payment-gateway";
+import { getStripeAdminSummary, stripeKeyMode, type StripeAdminSummary } from "@/lib/marketplace/payment-gateway";
 import { getAppDB } from "@/lib/platform/db";
 import { getStats } from "@/lib/stats/read";
 import { utcDay } from "@/lib/stats/record";
@@ -164,12 +164,14 @@ export interface NavBadges {
   pendingReaders: number | null;
   /** ความเห็นจากผู้ใช้ใน 7 วันล่าสุด */
   newFeedback: number | null;
+  /** โหมดคีย์ Stripe — `test` = ป้ายเตือนบนหัวแอดมินว่ายังไม่ใช่เงินจริง */
+  stripeMode: "live" | "test" | null;
 }
 
 /** ตัวเลขเตือนบนเมนูข้างของแอดมิน — นับอย่างเดียว 3 คำถาม เบาพอจะเรียกทุกครั้งที่เปลี่ยนแท็บ */
 export async function getNavBadges(): Promise<NavBadges> {
   const db = await safe(() => getAppDB());
-  if (!db) return { refundDue: null, pendingReaders: null, newFeedback: null };
+  if (!db) return { refundDue: null, pendingReaders: null, newFeedback: null, stripeMode: stripeKeyMode() };
   const count = (sql: string, ...args: unknown[]) =>
     safe(async () => Number((await db.prepare(sql).bind(...args).first<{ n: number }>())?.n ?? 0));
   const [refundDue, pendingReaders, newFeedback] = await Promise.all([
@@ -179,7 +181,7 @@ export async function getNavBadges(): Promise<NavBadges> {
     count("SELECT COUNT(*) AS n FROM readers WHERE status = 'pending'"),
     count("SELECT COUNT(*) AS n FROM user_feedback WHERE created_at >= ?", Date.now() - 7 * 86_400_000),
   ]);
-  return { refundDue, pendingReaders, newFeedback };
+  return { refundDue, pendingReaders, newFeedback, stripeMode: stripeKeyMode() };
 }
 
 /** รายงานผู้บริหารช่วง `days` วันล่าสุด (รวมวันนี้) เทียบช่วงก่อนหน้ายาวเท่ากัน + สรุปเงินจาก Stripe */
