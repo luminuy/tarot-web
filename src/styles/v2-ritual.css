@@ -1278,6 +1278,65 @@
     gap: 8px;
   }
 }
+/* ── คำทำนายด่วน 1 ใบ (QuickChatResult) ในห้องพิธีมืด — แผ่นครีมพาสเทลแบบกล่องคำทำนายหลายใบ ──
+   คอมโพเนนต์นี้ออกแบบไว้สำหรับธีมสว่าง (การ์ดพอร์ซเลน · ไล่สีจาก surface ไป #F7EFE1 · ตัวหมึกเข้ม)
+   เดิมวางในห้องมืด (.v2-rt ตั้งโทเคนกลางคืน) ➔ การ์ดกระจกสว่างโปร่งบนพื้นมืดกลายเป็นเทาขุ่น ตัวหนังสือสีอ่อนจมบนส่วนที่สว่าง
+   (เจ้าของ 2026-10-17 ส่งภาพมือถือ "ทำไมถึงเป็นงี้หลายส่วนเลย") ➔ คืนโทเคนธีมสว่างทั้งชุดในขอบเขตกล่องนี้ ทั้งหน้าแรกและ /read/quick
+   ⚠️ ตั้งค่าตายตัว ไม่อ่านโทเคนธีม — โหมดมืดต้องเหมือนโหมดสว่าง (theme-dark.css ยกเว้น .v2-qr ไว้แล้ว) */
+html .v2-rt .v2-qr {
+  --ui2-on-night: #2B2118;
+  --ui2-on-night-soft: #5A4A3A;
+  --ui2-on-night-dim: #6E604F;
+  --rt-gold: #8A4F10;
+  --rt-line: rgba(74, 47, 16, 0.14);
+  --color-canvas: #F7EDDC;
+  --color-surface: #FFFCF6;
+  --color-surface-warm: #FAF7F2;
+  --color-inset: #F3EADB;
+  --color-inset-warm: #F3EDE2;
+  --color-line: rgba(74, 47, 16, 0.16);
+  --color-line-warm: #D9C8AC;
+  --color-line-soft: #E8E2D8;
+  --color-line-interactive: #938265;
+  --color-line-interactive-warm: #A07F49;
+  --color-ink: #29261F;
+  --color-ink-deep: #2E211A;
+  --color-ink-soft: #6F5B4A;
+  --color-muted: #5E5547;
+  --color-gold: #A58A5C;
+  --color-gold-ink: #8F5C1A;
+  --color-gold-ink-deep: #74490F;
+  --color-ok: #3A7044;
+  --color-err: #A6392C;
+  --color-err-wash: #FCEEEA;
+  --glass-fill: rgba(255, 252, 246, 0.9);
+  --glass-edge: rgba(74, 47, 16, 0.12);
+  --glass-ring: rgba(120, 88, 54, 0.11);
+  color: #29261F;
+  border: 1px solid rgba(255, 236, 200, 0.5);
+  background:
+    radial-gradient(60% 300px at 6% 0%, rgba(255, 222, 150, 0.55) 0%, rgba(255, 222, 150, 0) 72%),
+    radial-gradient(50% 280px at 100% 100%, rgba(132, 196, 184, 0.3) 0%, rgba(132, 196, 184, 0) 72%),
+    #F7F0E3;
+  box-shadow: 0 0 0 1px rgba(255, 236, 200, 0.5), 0 40px 80px -46px rgba(0, 0, 0, 0.9);
+}
+/* การ์ดย่อยในกล่อง = กระดาษขาว · ชิปครีม (ไม่ใช่กระจกมืดของห้องพิธี) */
+.v2-rt .v2-qr :is(.altar-card-porcelain, .glass-tile) {
+  background: #FFFCF6;
+  background-image: none;
+  border-color: rgba(74, 47, 16, 0.12);
+  box-shadow: 0 14px 26px -22px rgba(74, 47, 16, 0.5);
+}
+.v2-rt .v2-qr .glass-chip {
+  background: #F7F0E3;
+  background-image: none;
+  border-color: rgba(74, 47, 16, 0.14);
+  box-shadow: none;
+}
+.v2-rt .v2-qr .font-mystic-gold {
+  color: #8A4F10;
+}
+
 /* คำถามขึ้นเป็นหัวหน้าแล้ว (.v2-rd-q) — ไม่ต้องซ้ำในกล่องคำทำนาย */
 .v2-rt-read [data-sr-question] {
   display: none;

@@ -65,9 +65,11 @@
   background: rgba(18, 14, 21, 0.96);
   box-shadow: 0 20px 40px -24px rgba(0, 0, 0, 0.95);
 }
+/* มือถือ: ไม่ติดจอ — แบบแท็บส่วนโชว์เคสของหน้าแรก (เจ้าของ 2026-10-17 "สั่นเวลาเลื่อน" · sticky ใต้หัวเว็บสั่นบน iOS · INC-0109) */
 @media (max-width: 767px) {
   .v2-ca-bar {
-    top: 76px;
+    position: relative;
+    top: auto;
   }
 }
 .v2-ca-search {

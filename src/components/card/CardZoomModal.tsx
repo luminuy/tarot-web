@@ -123,9 +123,12 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
               <span className="glass-chip px-2.5 py-0.5 text-gold-ink font-semibold">
                 {isEnglish ? `Element: ${elementEnMap[card.element] || card.element}` : `ธาตุ: ${card.element}`}
               </span>
-              <span className="glass-chip px-2.5 py-0.5 text-ink-deep">
-                {isEnglish ? (card.astrologyEn || card.astrology) : card.astrology}
-              </span>
+              {/* ไพ่ราชสำนักบางใบไม่มีโหราศาสตร์ — ไม่งั้นได้ป้ายว่างเปล่า */}
+              {card.astrology && (
+                <span className="glass-chip px-2.5 py-0.5 text-ink-deep">
+                  {isEnglish ? (card.astrologyEn || card.astrology) : card.astrology}
+                </span>
+              )}
             </div>
           </div>
 

@@ -86,37 +86,37 @@
   background: transparent;
 }
 
-/* ── 2. สีฮาร์ดโค้ดในคอมโพเนนต์เดิม ➔ โทนกลางคืน ───────────────────────────── */
-.ui2-pg .bg-white,
-.ui2-pg [class*="bg-white/"],
-.ui2-pg [class*="bg-[#F"],
-.ui2-pg [class*="bg-[#E"],
-.ui2-pg [class*="bg-[#f"],
-.ui2-pg [class*="bg-[#e"] {
+/* ── 2. สีฮาร์ดโค้ดในคอมโพเนนต์เดิม ➔ โทนกลางคืน (ยกเว้นกล่องคำทำนายด่วน .v2-qr ซึ่งเป็นแผ่นครีมธีมสว่าง · v2-ritual.css) ───────────────────────────── */
+.ui2-pg .bg-white:not(.v2-qr *),
+.ui2-pg [class*="bg-white/"]:not(.v2-qr *),
+.ui2-pg [class*="bg-[#F"]:not(.v2-qr *),
+.ui2-pg [class*="bg-[#E"]:not(.v2-qr *),
+.ui2-pg [class*="bg-[#f"]:not(.v2-qr *),
+.ui2-pg [class*="bg-[#e"]:not(.v2-qr *) {
   background-color: var(--color-surface);
 }
-.ui2-pg [class*="from-[#F"],
-.ui2-pg [class*="from-[#E"],
-.ui2-pg [class*="via-[#F"],
-.ui2-pg [class*="to-[#F"] {
+.ui2-pg [class*="from-[#F"]:not(.v2-qr *),
+.ui2-pg [class*="from-[#E"]:not(.v2-qr *),
+.ui2-pg [class*="via-[#F"]:not(.v2-qr *),
+.ui2-pg [class*="to-[#F"]:not(.v2-qr *) {
   --tw-gradient-from: #1E1822;
   --tw-gradient-via: #1E1822;
   --tw-gradient-to: #251E2A;
 }
-.ui2-pg [class*="text-[#4"],
-.ui2-pg [class*="text-[#5"],
-.ui2-pg [class*="text-[#6"],
-.ui2-pg [class*="text-[#7"],
-.ui2-pg [class*="text-[#8"],
-.ui2-pg [class*="text-[#A"],
-.ui2-pg [class*="text-[#a"] {
+.ui2-pg [class*="text-[#4"]:not(.v2-qr *),
+.ui2-pg [class*="text-[#5"]:not(.v2-qr *),
+.ui2-pg [class*="text-[#6"]:not(.v2-qr *),
+.ui2-pg [class*="text-[#7"]:not(.v2-qr *),
+.ui2-pg [class*="text-[#8"]:not(.v2-qr *),
+.ui2-pg [class*="text-[#A"]:not(.v2-qr *),
+.ui2-pg [class*="text-[#a"]:not(.v2-qr *) {
   color: var(--ui2-on-night-soft);
 }
-.ui2-pg [class*="text-[#9E"],
-.ui2-pg [class*="text-[#8F2"] {
+.ui2-pg [class*="text-[#9E"]:not(.v2-qr *),
+.ui2-pg [class*="text-[#8F2"]:not(.v2-qr *) {
   color: #E4A08A;
 }
-.ui2-pg [class*="border-[#"] {
+.ui2-pg [class*="border-[#"]:not(.v2-qr *) {
   border-color: var(--color-line);
 }
 

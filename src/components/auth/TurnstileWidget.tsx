@@ -16,6 +16,10 @@ import { fetchTurnstileSiteKey, loadTurnstileScript } from "@/lib/auth/turnstile
  * หน้าต่างจัดกึ่งกลางแนวตั้ง ➔ ความสูงที่เพิ่มมาดันเนื้อหาเด้ง**ทั้งขึ้นและลง**อย่างละครึ่ง
  * ทุกปุ่มในฟอร์มจึงขยับหลังหน้าต่างเปิดไปแล้ว (กดพลาดได้ด้วย) · ตอนนี้จองที่ไว้ตั้งแต่แรก
  * แล้วยุบทิ้งเฉพาะเมื่อ**รู้แน่**ว่าด่านปิด
+ *
+ * 2026-10-17 เจ้าของ: "หน้าลงชื่อไม่พอดี เพราะ cloudflare ใหญ่ไป ไม่ต้องโชว์ก็ได้"
+ * ➔ `appearance: "interaction-only"` — คนทั่วไปผ่านเงียบ ๆ ไม่เห็นกล่องเลย กล่องโผล่เฉพาะตอน Cloudflare
+ * สงสัยจริงและต้องให้กดยืนยัน · เลิกจองความสูง 65px (กล่องที่ซ่อนอยู่มีความสูงแค่ 0)
  */
 
 interface TurnstileWidgetProps {
@@ -71,6 +75,8 @@ export function TurnstileWidget({ onToken, resetKey, isEn = false }: TurnstileWi
             // ⚠️ ห้ามใช้ "auto" (INC-0128) — เครื่องที่ตั้งโหมดมืดจะได้กล่องสีเข้มมาแปะกลางแผงสีขาว
             // แล้วสลับสีตอนโหลดเสร็จ เห็นเป็นแถบดำแวบหนึ่ง · เว็บนี้เป็นธีมสว่างล้วนอยู่แล้ว
             theme: "light",
+            // โชว์กล่องเฉพาะตอนต้องให้ผู้ใช้กดยืนยันจริง — ปกติผ่านเงียบ ๆ ไม่กินที่ในหน้าต่าง
+            appearance: "interaction-only",
             callback: (token: string) => onTokenRef.current(token),
             "expired-callback": () => onTokenRef.current(""),
             "error-callback": () => onTokenRef.current(""),
@@ -101,7 +107,8 @@ export function TurnstileWidget({ onToken, resetKey, isEn = false }: TurnstileWi
     <div
       ref={containerRef}
       // "normal" กว้าง 300px คงที่ — จัดกึ่งกลางเองไม่งั้นกล่องจะไปชิดซ้ายแผง
-      className="min-h-[65px] flex justify-center"
+      // ไม่จองความสูง: interaction-only ซ่อนกล่องไว้ (สูง 0) จนกว่าจะต้องให้ผู้ใช้กด
+      className="flex justify-center"
       aria-label={isEn ? "Verify that you are not a bot" : "ตรวจสอบว่าคุณไม่ใช่บอต"}
     />
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { hasPendingCheckout, pricingPathFor } from "@/lib/entitlement/pending-checkout";
 import { calculatePasswordStrength } from "@/lib/auth/strength";
 import { invalidateSessionCache } from "@/lib/auth/use-session";
@@ -365,7 +366,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
    * v2: จอกว้างสองฝั่ง (ไพ่นักบวชหญิง + สิ่งที่ได้ | ฟอร์ม) · Google/LINE ขึ้นก่อนเป็นปุ่มเต็มสีแบรนด์
    *     อีเมลรองลงมา · สลับเข้าสู่ระบบ/สมัครเป็นลิงก์บรรทัดเดียวท้ายฟอร์ม · ตาเปิด/ปิดรหัสเป็นไอคอน
    */
-  return (
+  // ⚠️ ต้องวางที่ <body> — หน้า UI 2.0 ห่อด้วย `.ui2-pg` ที่ `isolation: isolate` (ชั้นซ้อนแยก)
+  // หน้าต่างที่ค้างอยู่ข้างในจึงอยู่ใต้หัวเว็บลอย (z 50) เสมอ แม้ตั้ง z 80 — หัวเว็บบังหัวหน้าต่างและปุ่มปิด
+  const dialog = (
     <div
       className={`fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-3 sm:p-4 modal-scrim gpu-layer ${
         isClosing ? "anim-scrim-out" : "anim-scrim-in"
@@ -628,4 +631,5 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       </div>
     </div>
   );
+  return typeof document === "undefined" ? dialog : createPortal(dialog, document.body);
 };

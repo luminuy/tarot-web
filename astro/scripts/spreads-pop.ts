@@ -21,12 +21,14 @@ for (const card of document.querySelectorAll<HTMLElement>(".ui2-sp-deco-card")) 
   else img.addEventListener("load", ready, { once: true });
 }
 
-/* ── 1b. แถบหมวดติดบนจอ — หมวดที่กำลังดูเรืองขึ้น (aria-current) · มือถือเลื่อนชิปให้อยู่ในจอ ── */
+/* ── 1b. แถบหมวด — มือถือเป็นแท็บสลับหมวด · จอกว้างรายชื่อซ้ายเรืองตามหมวดที่กำลังดู (aria-current) ── */
 const stick = document.querySelector<HTMLElement>("[data-sp-stick]");
 const show = document.querySelector<HTMLElement>("[data-sp-show]");
 const scrolly = () => show?.classList.contains("is-scrolly") === true;
 if (stick && "IntersectionObserver" in window) {
   const row = stick.firstElementChild as HTMLElement;
+  // จอที่แถบชิปแสดง (< 768) = โหมดแท็บ (ดูด้านล่าง)
+  const tabs = matchMedia("(max-width: 767px)");
   // แถบชิป (จอ < 1200) + รายชื่อหมวดซ้ายของโชว์เคส (จอ ≥ 1200) เรืองตามหมวดที่กำลังดู
   const links = Array.from(document.querySelectorAll<HTMLAnchorElement>("[data-sp-stick] a[href^='#shelf-'], .ui2-sp-rail a"));
   const mark = (id: string | null) => {
@@ -43,27 +45,47 @@ if (stick && "IntersectionObserver" in window) {
   };
   const seen = new IntersectionObserver(
     (entries) => {
+      if (tabs.matches) return;
       for (const e of entries) if (e.isIntersecting) mark(e.target.id);
     },
     { rootMargin: "-45% 0px -50% 0px" },
   );
   document.querySelectorAll(".ui2-sp-shelf").forEach((el) => seen.observe(el));
-  // พื้นทึบหลังแถบ = เฉพาะตอนแถบติดจอจริง (ตำแหน่งเท่ากับค่า top ของ sticky)
-  // ⚠️ เดิมผูกกับ "มีหมวดเรือง" — หมวดแรกถึงกลางจอก่อนแถบติด พื้นทึบเลยบังหัวหน้าเหนือแถบ (เจ้าของแคป 2026-10-13)
-  let raf = 0;
-  const syncStuck = () => {
-    raf = 0;
-    const top = parseFloat(getComputedStyle(stick).top) || 0;
-    const on = Math.abs(stick.getBoundingClientRect().top - top) < 1;
-    if (on !== stick.hasAttribute("data-stuck")) stick.toggleAttribute("data-stuck", on);
+  // ── จอ < 768 (ที่แถบชิปแสดง): แท็บแบบส่วนโชว์เคสของหน้าแรก ──
+  // เจ้าของ 2026-10-17 "สั่นเวลาเลื่อน" ➔ "แก้แบบหน้าแรกไปเลย" · sticky ใต้หัวเว็บสั่นบน iOS (INC-0109)
+  // แตะชิป = สลับไปหมวดนั้น เห็นทีละหมวด · แถบไม่ติดจอ · ไม่มี JS = ทุกหมวดเรียงต่อกัน ชิปเป็นลิงก์กระโดด
+  const shelves = Array.from(document.querySelectorAll<HTMLElement>(".ui2-sp-shelf"));
+  let chosen = "";
+  const pick = (want: string) => {
+    chosen = shelves.some((s) => s.id === want) ? want : (shelves[0]?.id ?? "");
+    for (const s of shelves) if ((s.id === chosen) !== s.hasAttribute("data-sp-on")) s.toggleAttribute("data-sp-on", s.id === chosen);
+    if (tabs.matches) mark(chosen);
   };
-  addEventListener("scroll", () => (raf ||= requestAnimationFrame(syncStuck)), { passive: true });
-  addEventListener("resize", () => (raf ||= requestAnimationFrame(syncStuck)), { passive: true });
-  syncStuck();
+  // ลิงก์ลึก #shelf-… หรือ #spread-… (ไพ่ผังในหมวด) ➔ เปิดแท็บของหมวดนั้น
+  const openHash = (scroll: boolean) => {
+    const target = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
+    const shelf = target?.closest<HTMLElement>(".ui2-sp-shelf");
+    if (!shelf) return false;
+    pick(shelf.id);
+    if (scroll && tabs.matches && target === shelf) shelf.scrollIntoView();
+    return true;
+  };
+  if (!openHash(true)) pick("");
+  stick.closest(".ui2-sp")?.setAttribute("data-sp-tabs", "");
+  addEventListener("hashchange", () => openHash(true));
+  stick.addEventListener("click", (e) => {
+    if (!tabs.matches || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = (e.target as Element).closest<HTMLAnchorElement>("a[href^='#shelf-']");
+    if (!a) return;
+    e.preventDefault();
+    pick(a.getAttribute("href")!.slice(1));
+    history.replaceState(history.state, "", `#${chosen}`);
+  });
+  tabs.addEventListener("change", () => tabs.matches && mark(chosen));
   // เหนือหมวดแรก (หัวหน้า) = ไม่มีหมวดไหนเรือง
   const hero = document.querySelector(".ui2-sp-hero");
   if (hero)
-    new IntersectionObserver((es) => es[0].isIntersecting && mark(null), { rootMargin: "-45% 0px -50% 0px" }).observe(hero);
+    new IntersectionObserver((es) => !tabs.matches && es[0].isIntersecting && mark(null), { rootMargin: "-45% 0px -50% 0px" }).observe(hero);
 }
 
 /* ── 1c. โชว์เคสหมวดแบบ fastwork.com/selling ─────────────────────────────────
