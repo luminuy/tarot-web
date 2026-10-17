@@ -13,6 +13,8 @@ import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
 import { Ui2Showcase, Ui2ShowcaseStarter, type Ui2ShowcaseSection } from "@/components/ui2/Ui2Showcase";
 import { CardTile } from "@/components/encyclopedia/CardTile";
+import { CardImage } from "@/components/card/CardImage";
+import { ArrowIcon } from "@/components/ui/LineIcons";
 interface CardsExplorerProps {
   cards: readonly CardSummary[];
 }
@@ -309,25 +311,40 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
         }
       />
 
-      {/* ชั้นหนังสือคู่มือย่อย — ลิงก์ภายในที่บอทเห็น */}
-      <nav className="v2-cx-shelf" aria-label={isEnglish ? "Explore dedicated guides & master table" : "อ่านคู่มือเจาะลึกแต่ละหมวดและตารางสรุป"}>
-        <p className="v2-cx-shelf-k">{isEnglish ? "Explore dedicated guides & master table" : "อ่านคู่มือเจาะลึกแต่ละหมวดและตารางสรุป"}</p>
+      {/* คู่มือย่อย — ลิงก์ภายในที่บอทเห็น · v2 (เจ้าของ 2026-10-17 "ชิดเกินไป และยังไม่สวย"):
+          เดิมสันหนังสือ 9 ก้อนเล็กชิดใต้หน้าต่างสุดท้าย ➔ ส่วนของตัวเองมีหัวกลาง เว้นจากหน้าต่าง · การ์ดกระดาษครีม
+          ไพ่ประจำหมวดเอียงซ้าย (ภาพประกอบตามความหมายดั้งเดิม ไม่ใช่ผลสุ่ม) · ปุ่มวงกลมลูกศร */}
+      <nav className="v2-cx-shelf" aria-labelledby="cx-shelf-title">
+        <div className="v2-cx-shelf-head">
+          <span className="v2-cx-shelf-kicker">{isEnglish ? "Go deeper" : "อ่านต่อแบบเจาะลึก"}</span>
+          <h2 id="cx-shelf-title" className="v2-cx-shelf-k">
+            <ThaiPhrases>{isEnglish ? "Dedicated guides & the master table" : "คู่มือเจาะลึกแต่ละหมวด และตารางสรุป"}</ThaiPhrases>
+          </h2>
+        </div>
         <ul>
           {[
-            { href: "/cards/major", suit: "major", th: "ไพ่ชุดใหญ่", en: "Major Arcana", n: "22" },
-            { href: "/cards/minor", suit: "all", th: "ไพ่ชุดเล็ก", en: "Minor Arcana", n: "56" },
-            { href: "/cards/wands", suit: "wands", th: "ไม้เท้า", en: "Wands", n: "14" },
-            { href: "/cards/cups", suit: "cups", th: "ถ้วย", en: "Cups", n: "14" },
-            { href: "/cards/swords", suit: "swords", th: "ดาบ", en: "Swords", n: "14" },
-            { href: "/cards/pentacles", suit: "pentacles", th: "เหรียญ", en: "Pentacles", n: "14" },
-            { href: "/cards/all", suit: "major", th: "ตารางสรุป 78 ใบ", en: "Summary Table", n: "78" },
-            { href: "/cards/birth-card", suit: "major", th: "คำนวณไพ่ประจำตัว", en: "Birth Card Tool", n: "" },
-            { href: "/cards/zodiac", suit: "major", th: "ไพ่ประจำราศี", en: "Zodiac Cards", n: "12" },
+            { href: "/cards/major", suit: "major", card: "major-21", th: "ไพ่ชุดใหญ่", en: "Major Arcana", n: "22" },
+            { href: "/cards/minor", suit: "all", card: "cups-10", th: "ไพ่ชุดเล็ก", en: "Minor Arcana", n: "56" },
+            { href: "/cards/wands", suit: "wands", card: "wands-01", th: "ไม้เท้า", en: "Wands", n: "14" },
+            { href: "/cards/cups", suit: "cups", card: "cups-01", th: "ถ้วย", en: "Cups", n: "14" },
+            { href: "/cards/swords", suit: "swords", card: "swords-01", th: "ดาบ", en: "Swords", n: "14" },
+            { href: "/cards/pentacles", suit: "pentacles", card: "pentacles-01", th: "เหรียญ", en: "Pentacles", n: "14" },
+            { href: "/cards/all", suit: "major", card: "major-10", th: "ตารางสรุป 78 ใบ", en: "Summary Table", n: "78" },
+            { href: "/cards/birth-card", suit: "major", card: "major-19", th: "คำนวณไพ่ประจำตัว", en: "Birth Card Tool", n: "" },
+            { href: "/cards/zodiac", suit: "major", card: "major-17", th: "ไพ่ประจำราศี", en: "Zodiac Cards", n: "12" },
           ].map((l) => (
             <li key={l.href}>
               <Link href={l.href} data-suit={l.suit} className="v2-cx-book">
-                <b>{isEnglish ? l.en : l.th}</b>
-                {l.n && <small>{isEnglish ? `${l.n} cards` : `${l.n} ใบ`}</small>}
+                <span className="v2-cx-book-art" aria-hidden="true">
+                  <CardImage cardId={l.card} alt="" thumb sizes="64px" loading="lazy" fetchPriority="low" />
+                </span>
+                <span className="v2-cx-book-txt">
+                  <b>{isEnglish ? l.en : l.th}</b>
+                  <small>{l.n ? (isEnglish ? `${l.n} cards` : `${l.n} ใบ`) : isEnglish ? "From your birthday" : "จากวันเกิดของคุณ"}</small>
+                </span>
+                <span className="v2-cx-book-go" aria-hidden="true">
+                  <ArrowIcon className="w-[18px] h-[18px]" />
+                </span>
               </Link>
             </li>
           ))}
