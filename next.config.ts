@@ -40,9 +40,36 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error", "warn"] } : false,
   },
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     config.output = config.output || {};
     config.output.hashFunction = "sha256";
+    /*
+     * 🔁 ชื่อไฟล์ chunk ฝั่งเบราว์เซอร์ต้องไม่มีอักขระที่ "เขียนได้สองแบบ" ใน URL (ISSUE-060 · ERR_TOO_MANY_REDIRECTS)
+     * ---------------------------------------------------------------------------
+     * webpack ตั้งชื่อ chunk ของหน้าแอปตามโฟลเดอร์ เช่น `app/(th)/layout` · `app/(th)/s/[id]/page`
+     * ชั้น assets ของ Cloudflare ถอดรหัส path แล้วเข้ารหัสใหม่ทีละท่อนด้วย `encodeURIComponent`
+     * ถ้าไม่ตรงกับ path ที่ขอมา **ตอบ 307 ไปรูปที่มันถือว่าถูก** (ฝังในตัว asset-worker · ปิดด้วย config ไม่ได้)
+     *
+     *   `%28th%29` ➔ 307 ไป `(th)`        `[id]` ➔ 307 ไป `%5Bid%5D`
+     *
+     * ไคลเอนต์ใดที่เข้ารหัสวงเล็บเองตอนตามลิงก์ (เบราว์เซอร์/พร็อกซีบางตัว) จึงวนไม่จบ
+     * ➔ chunk ของ layout `(th)` โหลดไม่ขึ้น ➔ ChunkLoadError ➔ หน้า error กลางทุกหน้าที่ Next เรนเดอร์
+     *
+     * ทางแก้ที่ต้นทาง: แทนอักขระนอกชุด [A-Za-z0-9 . _ ~ / -] ในชื่อ chunk ด้วย `_`
+     * ทุกรูปการเขียนของ URL จึงเหลือแบบเดียว ไม่มี redirect ให้วน · ชื่อปกติ (เลข id ฯลฯ) ไม่ถูกแตะ
+     * ด่าน test-worker-first-routes ตรวจไฟล์จริงใน `.next/static/chunks` ทุกครั้งที่ build
+     */
+    if (!isServer) {
+      const urlSafe = (name: string) => name.replace(/[^A-Za-z0-9._~/-]/g, "_");
+      for (const key of ["filename", "chunkFilename"] as const) {
+        const template = config.output[key];
+        if (typeof template !== "string" || !template.includes("[name]")) continue;
+        config.output[key] = (pathData: { chunk?: { name?: string | null } }) => {
+          const name = pathData.chunk?.name;
+          return name && urlSafe(name) !== name ? template.replace("[name]", urlSafe(name)) : template;
+        };
+      }
+    }
     return config;
   },
   async redirects() {
