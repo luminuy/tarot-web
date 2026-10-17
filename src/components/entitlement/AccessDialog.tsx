@@ -59,11 +59,26 @@ export function AccessDialog({
   const view = describeEntitlement(ent, isEn);
   const isOpen = reason !== null;
 
-  useEffect(() => {
-    if (reason) trackEntitlementEvent(`access_dialog_shown:${reason}`);
-  }, [reason]);
+  /*
+   * คนที่ "แค่ยังไม่ได้เข้าสู่ระบบ" (ทุกเหตุผลที่ปุ่มหลักคือสมัคร ยกเว้นผู้ใช้กดดูสิทธิ์เอง) ➔ เปิดหน้าเข้าสู่ระบบทันที
+   * ไม่มีหน้าต่างอธิบายสิทธิ์มาคั่น — เจ้าของสั่ง 2026-09-09 (TarotFlow) และย้ำ 2026-10-17 "ให้เป็นหน้าเข้าสู่ระบบ ไม่ต้องบอกอะไร"
+   * ตั้งไว้ที่ตัวหน้าต่างนี้เลย ทุกหน้าที่เรียก (ไพ่รายวัน · ไพ่ความรัก · Pick a Card · ไพ่ประจำตัว) จึงได้พฤติกรรมเดียวกัน
+   */
+  const signInOnly = reason !== null && reason !== "explore" && getUpgradeCopy(reason, isEn).primaryAction === "signup";
 
-  if (!isOpen || !reason) return null;
+  useEffect(() => {
+    if (!reason) return;
+    if (signInOnly) {
+      trackEntitlementEvent(`access_dialog_to_signin:${reason}`);
+      onClose();
+      onSignin();
+      return;
+    }
+    trackEntitlementEvent(`access_dialog_shown:${reason}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- เรียกครั้งเดียวต่อการเปิด (callback ของผู้เรียกเปลี่ยนทุกเรนเดอร์)
+  }, [reason, signInOnly]);
+
+  if (!isOpen || !reason || signInOnly) return null;
 
   const copy = getUpgradeCopy(reason, isEn);
   const countdown = formatResetCountdown(ent?.resetAt ?? null, Date.now(), isEn);
