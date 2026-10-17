@@ -173,9 +173,18 @@ export function Ui2SectionHead({
 
 /**
  * v2 หัวหน้าเตี้ยสำหรับ "หน้าเครื่องมือ" (ดูดวงความรัก · Pick A Card · ไพ่ประจำราศี) — เจ้าของ 2026-10-16 "สร้างใหม่เลย"
- * ไม่มีไพ่ลอย · สูงราวครึ่งของ Ui2PageHero ➔ ตัวเครื่องมือ (พัดไพ่ · กองไพ่ · หน้าปัด) ขึ้นในจอแรก
+ * สูงราวครึ่งของ Ui2PageHero ➔ ตัวเครื่องมือ (พัดไพ่ · กองไพ่ · หน้าปัด) ขึ้นในจอแรก
+ * v3 (2026-10-17): มีไพ่จริงลอยสองข้างแบบ /spreads (ใบใหญ่ซ้าย-ขวาเท่านั้น ไม่เพิ่มความสูง)
  * `tone` = สีแสงประจำหน้า (rose · indigo · star) · สไตล์ `.v2-th*` ใน ui2-page.css หัวข้อ 19
  */
+/** ไพ่ลอยสองข้างของหัวเตี้ย ตามโทนหน้า (ตกแต่ง · ไม่ใช่ผลสุ่ม) */
+const TIGHT_CARDS: Record<string, readonly [string, string]> = {
+  rose: ["major-06", "cups-02"],
+  indigo: ["major-02", "major-18"],
+  star: ["major-17", "major-19"],
+  default: ["major-17", "major-10"],
+};
+
 export function Ui2TightHead({
   crumbs,
   title,
@@ -183,6 +192,7 @@ export function Ui2TightHead({
   lede,
   trust,
   tone,
+  cards,
 }: {
   crumbs?: Ui2Crumb[];
   title: string;
@@ -190,9 +200,20 @@ export function Ui2TightHead({
   lede?: ReactNode;
   trust?: readonly string[];
   tone?: "rose" | "indigo" | "star";
+  /** ไพ่จริงลอยซ้าย/ขวา 2 ใบ (ไม่ใส่ = ตามโทน) */
+  cards?: readonly [string, string];
 }) {
+  const deco = cards ?? TIGHT_CARDS[tone ?? "default"];
   return (
     <header className="v2-th" data-tone={tone} data-anim-section="">
+      {/* v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): ไพ่จริงลอยสองข้างแบบหัวหน้า /spreads — หัวยังเตี้ยเท่าเดิม เครื่องมือขึ้นจอแรก */}
+      <span className="ui2-ph-deco v2-th-deco" aria-hidden="true">
+        {deco.map((cardId, i) => (
+          <span key={cardId} className={`ui2-ph-card ui2-loop ui2-ph-card-${i === 0 ? 1 : 3}`}>
+            <CardImage cardId={cardId} alt="" thumb sizes={CARD_SIZES} loading="eager" fetchPriority="low" />
+          </span>
+        ))}
+      </span>
       {crumbs && crumbs.length > 0 && <Ui2Crumbs crumbs={crumbs} />}
       <h1 className="v2-th-title">
         <TitleWithAccent title={title} accent={accent} />
