@@ -9,6 +9,7 @@ import { useAdminResource } from "@/lib/admin/use-admin-resource";
 import { summarize } from "@/lib/stats/admin-metrics";
 import { APP_TIME_ZONE } from "@/lib/time/bangkok";
 import { RefreshIcon } from "@/components/ui/LineIcons";
+import { AUDIT_ALERT, AUDIT_LABEL } from "@/lib/admin/audit-labels";
 
 interface ServiceCheck {
   ok: boolean;
@@ -54,30 +55,6 @@ interface StatsData {
   audit: AuditEntry[];
   ai: { usedToday: number; dailyCap: number; guestCap: number; memberCapReached: boolean; guestCapReached: boolean };
 }
-
-/** ชื่อไทยของทุก action ที่ `recordAudit()` บันทึกจริง — action ที่ไม่มีในนี้จะโชว์ชื่อดิบ */
-const AUDIT_LABEL: Record<string, string> = {
-  admin_login_success: "เข้าสู่ระบบแอดมิน",
-  admin_login_fail: "ใส่รหัสแอดมินผิด",
-  content_update: "แก้เนื้อหา / คำสั่งแม่หมอ",
-  create_reader: "เพิ่มหมอดูพาร์ทเนอร์",
-  update_reader: "แก้ข้อมูลหมอดูพาร์ทเนอร์",
-  delete_reader: "ลบหมอดูพาร์ทเนอร์",
-  revoke_reader_links: "ยกเลิกลิงก์แผงแม่หมอทั้งหมด",
-  entitlement_flag: "เปิด/ปิดระบบสิทธิ์",
-  entitlement_announce: "เปิด/ปิดแบนเนอร์ประกาศ",
-  entitlement_init_db: "เตรียมตารางสิทธิ์",
-  entitlement_grandfather: "แจกโบนัสผู้ใช้เดิม",
-  redeem_code_create: "สร้างรหัสแลกสิทธิ์",
-  redeem_code_toggle: "เปิด/ปิดรหัสแลกสิทธิ์",
-  redeem_code_update: "แก้รหัสแลกสิทธิ์",
-  marketing_audience_export: "ส่งออกรายชื่อผู้รับข่าวสาร",
-  member_bonus_grant: "ให้สิทธิ์เปิดไพ่เพิ่มแก่สมาชิก",
-  search_index_rebuild: "อัปเดตระบบค้นหา",
-};
-
-/** action ที่ควรสะดุดตา (อาจเป็นการพยายามบุกรุก) */
-const AUDIT_ALERT = new Set(["admin_login_fail"]);
 
 function formatTime(ts: number): string {
   return new Intl.DateTimeFormat("th-TH", {
@@ -176,7 +153,7 @@ export default function AdminOverview({ onNavigateTab }: { onNavigateTab: (tabId
                 onClick={() => onNavigateTab("entitlement")}
                 className="shrink-0 border-transparent bg-amber-900 text-xs font-semibold text-white hover:bg-amber-950"
               >
-                ไปที่สิทธิ์ & โควตา
+                ไปที่โควตาฟรีและสิทธิ์
               </Button>
             )}
           </div>

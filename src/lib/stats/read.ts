@@ -18,19 +18,25 @@ function addInto(target: Record<string, number>, src: Record<string, number> | n
   for (const [k, v] of Object.entries(src)) target[k] = (target[k] ?? 0) + v;
 }
 
+/** D1 รับพารามิเตอร์ผูกได้ไม่เกิน 100 ตัวต่อคำสั่ง — แบ่งรายการวันเป็นชุดละไม่เกินนี้ */
+const D1_BIND_CHUNK = 90;
+
 async function readD1Counters(days: string[]): Promise<Map<string, Record<string, number>>> {
   const out = new Map<string, Record<string, number>>();
   try {
     const db = await getAppDB();
     const keys = [...days, "all"];
-    const { results } = await db
-      .prepare(`SELECT day, metric, n FROM stat_counters WHERE day IN (${keys.map(() => "?").join(",")})`)
-      .bind(...keys)
-      .all<{ day: string; metric: string; n: number }>();
-    for (const row of results || []) {
-      const doc = out.get(row.day) ?? {};
-      doc[row.metric] = (doc[row.metric] ?? 0) + Number(row.n);
-      out.set(row.day, doc);
+    for (let i = 0; i < keys.length; i += D1_BIND_CHUNK) {
+      const chunk = keys.slice(i, i + D1_BIND_CHUNK);
+      const { results } = await db
+        .prepare(`SELECT day, metric, n FROM stat_counters WHERE day IN (${chunk.map(() => "?").join(",")})`)
+        .bind(...chunk)
+        .all<{ day: string; metric: string; n: number }>();
+      for (const row of results || []) {
+        const doc = out.get(row.day) ?? {};
+        doc[row.metric] = (doc[row.metric] ?? 0) + Number(row.n);
+        out.set(row.day, doc);
+      }
     }
   } catch {
     // D1 ใช้ไม่ได้ — ยังเห็นยอดจาก KV

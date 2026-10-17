@@ -23,6 +23,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { buildExecutiveReport } from "../../src/lib/admin/executive-report";
 import { METRIC, PREFIX, change, pctOf, summarize } from "../../src/lib/stats/admin-metrics";
 import { assertNonEmptyCorpus } from "./lib/corpus";
 
@@ -110,6 +111,53 @@ check("เวลาเฉลี่ย = 2000 ms", s.ai.avgLatencyMs === 2000, `�
 check("หมวดยอดนิยมเรียงมากไปน้อย", s.top.categories[0]?.key === "work", JSON.stringify(s.top.categories));
 check("ตัวหาร 0 ➔ null (แสดง — ไม่ใช่ 0%)", pctOf(3, 0) === null && summarize({}).ai.avgLatencyMs === null);
 check("ส่วนต่าง: 0 ➔ 5 ไม่มีเปอร์เซ็นต์ · 10 ➔ 15 = +50%", change(5, 0).pct === null && change(15, 10).pct === 50);
+
+// ── ง. แดชบอร์ดผู้บริหาร (executive-report.ts) ─────────────────────────────
+console.log("\nง. แดชบอร์ดผู้บริหาร — แบ่งช่วง · รายได้จริง · สิ่งที่ต้องดู");
+{
+  const today = "2026-10-17";
+  const daily = {
+    // ช่วงนี้ (7 วัน: 11–17 ต.ค.)
+    "2026-10-17": { reading_started: 30, reading_completed: 24, entitlement_blocked_start: 10, ai_cap_hit: 2, "ai_call:groq": 20 },
+    "2026-10-11": { reading_started: 10, reading_completed: 6 },
+    // ช่วงก่อน (4–10 ต.ค.)
+    "2026-10-10": { reading_started: 20, reading_completed: 18 },
+    // นอกทั้งสองช่วง — ห้ามถูกนับ
+    "2026-10-03": { reading_started: 999 },
+  };
+  const r = buildExecutiveReport({
+    days: 7,
+    today,
+    daily,
+    d1: {
+      payments: [
+        { day: "2026-10-16", product: "packs", status: "paid", test: false, n: 2, satang: 29_800 },
+        { day: "2026-10-16", product: "packs", status: "paid", test: true, n: 5, satang: 99_900 },
+        { day: "2026-10-12", product: "consult", status: "paid", test: false, n: 1, satang: 29_900 },
+        { day: "2026-10-12", product: "consult", status: "refunded", test: false, n: 1, satang: 29_900 },
+        { day: "2026-10-05", product: "packs", status: "paid", test: false, n: 1, satang: 5_900 },
+      ],
+      signups: [{ day: "2026-10-15", n: 3 }],
+      payers: { cur: 2, prev: 1 },
+      members: { total: 50, active: 10, returning: 4 },
+      refundDue: { count: 1, satang: 29_900 },
+      pending: 0,
+      feedback: null,
+    },
+    now: 0,
+  });
+  check("ช่วงนี้ = 11–17 ต.ค. · ช่วงก่อน = 4–10 ต.ค.", r.range.from === "2026-10-11" && r.prevRange.to === "2026-10-10", JSON.stringify([r.range, r.prevRange]));
+  check("ตัวนับนอกช่วงไม่ถูกนับ (เริ่ม 40 / ช่วงก่อน 20)", r.kpi.started.cur === 40 && r.kpi.started.prev === 20, JSON.stringify(r.kpi.started));
+  check("รายได้ตัดรายการทดสอบ = 298 + 299 บาท", r.kpi.netRevenueThb.cur === 597 && r.kpi.netRevenueThb.prev === 59, JSON.stringify(r.kpi.netRevenueThb));
+  check("รายงานจำนวนรายการทดสอบที่ตัด", r.revenue.testExcluded === 5, `ได้ ${r.revenue.testExcluded}`);
+  check("ชนโควตาไม่รวมเพดานงบ AI", r.kpi.quotaHits.cur === 10, `ได้ ${r.kpi.quotaHits.cur}`);
+  check("ซื้อแพ็กต่อการชนโควตา = 20%", r.kpi.quotaToPurchasePct.cur === 20, `ได้ ${r.kpi.quotaToPurchasePct.cur}`);
+  check("ชุดรายวันยาว 7 วัน เรียงเก่าไปใหม่", r.series.length === 7 && r.series[0].day === "2026-10-11" && r.series[6].started === 30);
+  check("สิ่งที่ต้องดู: เงินต้องคืนขึ้นเป็นเรื่องด่วนอันดับแรก", r.insights[0]?.level === "alert" && r.insights[0].title.includes("ต้องคืน"), JSON.stringify(r.insights[0]));
+  check("สิ่งที่ต้องดู: เตือนชนเพดานงบ AI", r.insights.some((i) => i.title.includes("เพดานงบ AI")));
+  const none = buildExecutiveReport({ days: 7, today, daily: {}, d1: { payments: null, signups: null, payers: null, members: null, refundDue: null, pending: null, feedback: null } });
+  check("อ่าน D1 ไม่ได้ ➔ ช่วงก่อนเป็น null (ไม่ใช่ 0)", none.kpi.netRevenueThb.prev === null && none.kpi.signups === null && !none.revenue.available);
+}
 
 if (failed > 0) {
   console.error(`\n❌ ไม่ผ่าน ${failed} ข้อ`);

@@ -18,8 +18,22 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
+import { CommandPalette } from "@/components/admin/CommandPalette";
+import type { NavBadges } from "@/lib/admin/executive-data";
 
 // Dynamic Admin Panels
+const ExecutiveDashboard = dynamic(() => import("@/components/admin/ExecutiveDashboard"), {
+  ssr: false,
+  loading: () => <AdminLoading label="กำลังรวมตัวเลขผู้บริหาร…" />,
+});
+const PaymentsPanel = dynamic(() => import("@/components/admin/PaymentsPanel"), {
+  ssr: false,
+  loading: () => <AdminLoading label="กำลังโหลดรายการชำระเงิน…" />,
+});
+const AuditLogPanel = dynamic(() => import("@/components/admin/AuditLogPanel"), {
+  ssr: false,
+  loading: () => <AdminLoading label="กำลังโหลดบันทึกการทำงาน…" />,
+});
 const AdminOverview = dynamic(() => import("@/components/admin/AdminOverview"), {
   ssr: false,
   loading: () => <AdminLoading label="กำลังโหลดภาพรวม…" />,
@@ -79,6 +93,7 @@ function AdminLoading({ label }: { label: string }) {
 }
 
 type TabId =
+  | "executive"
   | "overview"
   | "stats"
   | "members"
@@ -88,12 +103,21 @@ type TabId =
   | "content"
   | "readers"
   | "bookings"
-  | "health";
+  | "payments"
+  | "health"
+  | "audit";
 
 interface NavItem {
   id: TabId;
   label: string;
+  /** คำอธิบายบรรทัดเดียวใต้ชื่อเมนู — บอกว่ากดแล้วได้อะไร */
+  short: string;
+  /** คำอธิบายเต็มบนหัวหน้า */
   description: string;
+  /** ตัวเลขเตือนจาก `/api/admin/nav-badges` */
+  badge?: { key: "refundDue" | "pendingReaders" | "newFeedback"; tone: "alert" | "watch" | "info"; label: string };
+  /** คำค้นเสริมของช่องค้นหาเมนู (Ctrl+K) */
+  keywords?: string;
 }
 
 interface NavSection {
@@ -102,43 +126,99 @@ interface NavSection {
 }
 
 /**
- * เมนูจัดตามงานที่แอดมินทำจริง: ดูตัวเลข ➔ ดูแลผู้ใช้ ➔ ตั้งค่าบริการ ➔ ดูแลระบบ
- * (เดิม "สิทธิ์ & โควตา" อยู่ใต้ "ปรับแต่งเนื้อหาและไพ่" และ "รายชื่อสมาชิก" มีแค่รายชื่อรับข่าวสาร)
+ * เมนูจัดตามงานที่ทำจริง เรียงจากสิ่งที่เปิดบ่อยที่สุด: ดูตัวเลข ➔ เงินและแม่หมอ ➔ ลูกค้า ➔ ตั้งค่าเว็บ
+ * ชื่อเมนูเป็นภาษาคน (ไม่ใช่ชื่อระบบ) + คำอธิบายสั้นใต้ทุกเมนู + ตัวเลขเตือนเรื่องที่รอทำ
+ * ⚠️ `id` คือค่าใน URL `?tab=` — เปลี่ยนชื่อเมนูได้ แต่ห้ามเปลี่ยน id (ลิงก์ที่บุ๊กมาร์กไว้จะพัง)
  */
 const NAV_SECTIONS: NavSection[] = [
   {
-    group: "ภาพรวม",
+    group: "ดูตัวเลข",
     items: [
-      { id: "overview", label: "ภาพรวม", description: "สถานะระบบ ตัวเลขสำคัญ 7 วัน และกิจกรรมแอดมินล่าสุด" },
+      {
+        id: "executive",
+        label: "แดชบอร์ดผู้บริหาร",
+        short: "เงิน คนใช้ และสิ่งที่ต้องดู",
+        description: "รายได้ · Stripe · คนเปิดไพ่ · อัตราซื้อ · AI — เทียบช่วงก่อนหน้า พร้อมสิ่งที่ต้องดู (สำหรับ CMO · COO)",
+      },
+      {
+        id: "overview",
+        label: "สถานะระบบวันนี้",
+        short: "ไฟบริการ ตัวเลข 7 วัน งานแอดมินล่าสุด",
+        description: "สถานะระบบ ตัวเลขสำคัญ 7 วัน และกิจกรรมแอดมินล่าสุด",
+      },
       {
         id: "stats",
-        label: "สถิติการใช้งาน",
+        label: "สถิติละเอียดรายวัน",
+        short: "เลือกดูทีละวัน แนวโน้ม ส่งออก CSV",
         description: "สรุปรายวันแบบเลือกวันได้ · แนวโน้มและความนิยม · โควตาและความเสถียรของ AI",
       },
     ],
   },
   {
-    group: "ผู้ใช้",
+    group: "เงินและแม่หมอ",
+    items: [
+      {
+        id: "payments",
+        label: "รายการชำระเงิน",
+        short: "ทุกการจ่ายเงิน ค้นหา เปิดใน Stripe",
+        description: "ทุกการจ่ายเงินทุกสินค้า (แพ็กเติมรอบ · ปรึกษาแม่หมอ · AI ช่วยเขียน) — กรองสถานะ ค้นด้วยเลขคำสั่งซื้อ เปิดรายการใน Stripe",
+        keywords: "stripe order คำสั่งซื้อ ธุรกรรม ใบเสร็จ ซื้อ แพ็ก",
+      },
+      {
+        id: "bookings",
+        label: "การจองและการเงิน",
+        short: "เงินต้องคืน การจอง ยอดโอนให้แม่หมอ",
+        description: "เงินที่ต้องคืน · รายการจอง · ยอดที่ต้องโอนให้แม่หมอ · รีวิว",
+        badge: { key: "refundDue", tone: "alert", label: "รายการเงินที่ต้องคืนลูกค้า" },
+        keywords: "คืนเงิน refund โอนเงินแม่หมอ รีวิว นัด",
+      },
+      {
+        id: "readers",
+        label: "แม่หมอพาร์ทเนอร์",
+        short: "รับสมัคร ตรวจ และจัดการโปรไฟล์",
+        description: "รับสมัคร ตรวจสอบ และจัดการโปรไฟล์หมอดูตัวจริง · ราคาแพ็กเกจ AI ช่วยเขียน",
+        badge: { key: "pendingReaders", tone: "watch", label: "แม่หมอรอตรวจใบสมัคร" },
+      },
+    ],
+  },
+  {
+    group: "ลูกค้า",
     items: [
       {
         id: "members",
         label: "สมาชิก",
+        short: "ค้นหา ดูสิทธิ์คงเหลือ ให้สิทธิ์เพิ่ม",
         description: "ค้นหาสมาชิก ดูสิทธิ์คงเหลือ ให้สิทธิ์เพิ่ม และรายชื่อผู้รับข่าวสาร",
       },
-      { id: "feedback", label: "ความเห็นจากผู้ใช้", description: "คะแนนและข้อความที่ผู้ใช้ส่งเข้ามา" },
-      { id: "redeem", label: "รหัสแลกสิทธิ์", description: "สร้างรหัส กำหนดเพดานและวันหมดอายุ ดูประวัติการแลก" },
+      {
+        id: "feedback",
+        label: "ความเห็นจากผู้ใช้",
+        short: "คะแนนและข้อความที่ส่งมา",
+        description: "คะแนนและข้อความที่ผู้ใช้ส่งเข้ามา",
+        badge: { key: "newFeedback", tone: "info", label: "ความเห็นใหม่ใน 7 วัน" },
+      },
+      {
+        id: "redeem",
+        label: "รหัสแลกสิทธิ์",
+        short: "สร้างรหัสแจกสิทธิ์ ดูคนที่แลก",
+        description: "สร้างรหัส กำหนดเพดานและวันหมดอายุ ดูประวัติการแลก",
+      },
     ],
   },
   {
-    group: "ตั้งค่าบริการ",
+    group: "ตั้งค่าเว็บ",
     items: [
-      { id: "entitlement", label: "สิทธิ์ & โควตา", description: "สวิตช์ระบบสิทธิ์ ประกาศล่วงหน้า และตัวเลขการถูกกั้นสิทธิ์" },
-      { id: "content", label: "แม่หมอ & ไพ่ 78 ใบ", description: "แก้คำสั่งระบบ บุคลิกแม่หมอ และความหมายไพ่แบบสด" },
-      { id: "readers", label: "หมอดูพาร์ทเนอร์", description: "รับสมัคร ตรวจสอบ และจัดการโปรไฟล์หมอดูตัวจริง" },
       {
-        id: "bookings",
-        label: "การจอง & การเงิน",
-        description: "เงินที่ต้องคืน · รายการจอง · ยอดที่ต้องโอนให้แม่หมอ · รีวิว",
+        id: "entitlement",
+        label: "โควตาฟรีและสิทธิ์",
+        short: "เปิดปิดระบบสิทธิ์ ประกาศล่วงหน้า",
+        description: "สวิตช์ระบบสิทธิ์ ประกาศล่วงหน้า และตัวเลขการถูกกั้นสิทธิ์",
+      },
+      {
+        id: "content",
+        label: "แก้คำทำนาย AI และไพ่",
+        short: "คำสั่ง AI บุคลิกแม่หมอ ความหมายไพ่",
+        description: "แก้คำสั่งระบบ บุคลิกแม่หมอ และความหมายไพ่ 78 ใบแบบสด ไม่ต้อง deploy",
       },
     ],
   },
@@ -147,8 +227,17 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       {
         id: "health",
-        label: "สุขภาพระบบ & AI",
+        label: "สุขภาพระบบ",
+        short: "ตรวจฐานข้อมูล อีเมล ล็อกอิน และ AI",
         description: "ตรวจ D1 · KV · ล็อกอิน · อีเมล และยิงทดสอบ AI จริง",
+        keywords: "ai groq gemini ล่ม error",
+      },
+      {
+        id: "audit",
+        label: "บันทึกการทำงานแอดมิน",
+        short: "ใครทำอะไรเมื่อไร ย้อนหลัง 180 วัน",
+        description: "ทุกการกระทำในแผงแอดมิน — กรองตามหมวด ค้นจากข้อความ เตือนเมื่อมีคนใส่รหัสผิด",
+        keywords: "audit log ประวัติ ความปลอดภัย รหัสผิด",
       },
     ],
   },
@@ -162,6 +251,9 @@ const TAB_ALIASES: Record<string, TabId> = { marketing: "members" };
 // SVG Icons for clean, standardized executive feel (No cartoon emojis)
 function TabIcon({ id, className = "w-4 h-4" }: { id: TabId; className?: string }) {
   const d: Record<TabId, string> = {
+    executive: "M4 19h16M7 16V11m5 5V7m5 9v-6",
+    payments: "M3 7h18v10H3V7zm0 4h18M7 15h3",
+    audit: "M9 5h10M9 12h10M9 19h10M5 5h.01M5 12h.01M5 19h.01",
     overview:
       "M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z",
     stats:
@@ -189,12 +281,33 @@ function TabIcon({ id, className = "w-4 h-4" }: { id: TabId; className?: string 
 
 /** แปลงค่าจาก URL/ปุ่มลัด เป็นแท็บจริง (+ แท็บย่อยของหน้าสุขภาพระบบ) */
 function resolveTab(raw: string | null): { tab: TabId; health?: "system" | "ai" } {
-  if (!raw) return { tab: "overview" };
+  if (!raw) return { tab: "executive" };
   if (raw === "system") return { tab: "health", health: "system" };
   if (raw === "ai") return { tab: "health", health: "ai" };
   if (TAB_ALIASES[raw]) return { tab: TAB_ALIASES[raw] };
   if ((ALL_TABS as string[]).includes(raw)) return { tab: raw as TabId };
-  return { tab: "overview" };
+  return { tab: "executive" };
+}
+
+const BADGE_TONE: Record<NonNullable<NavItem["badge"]>["tone"], string> = {
+  alert: "bg-rose-700 text-white",
+  watch: "bg-amber-100 text-amber-900 border border-amber-300",
+  info: "bg-inset text-ink",
+};
+
+/** ตัวเลขเตือนบนเมนู — แสดงเมื่อ > 0 เท่านั้น · มีคำอธิบายให้โปรแกรมอ่านจอ (ไม่ใช้สีอย่างเดียว) */
+function NavBadge({ item, badges }: { item: NavItem; badges: NavBadges | null }) {
+  const n = item.badge && badges ? badges[item.badge.key] : null;
+  if (!item.badge || n == null || n <= 0) return null;
+  return (
+    <span
+      className={`ml-auto shrink-0 rounded-full px-1.5 py-px text-[11px] font-bold tabular-nums ${BADGE_TONE[item.badge.tone]}`}
+      title={item.badge.label}
+    >
+      {n > 99 ? "99+" : n}
+      <span className="sr-only"> {item.badge.label}</span>
+    </span>
+  );
 }
 
 function AdminContent() {
@@ -202,8 +315,22 @@ function AdminContent() {
   const searchParams = useSearchParams();
 
   const [authState, setAuthState] = useState<"loading" | "ready" | "denied">("loading");
-  const [activeTab, setActiveTab] = useState<TabId>("overview");
+  const [activeTab, setActiveTab] = useState<TabId>("executive");
   const [healthSubTab, setHealthSubTab] = useState<"system" | "ai">("system");
+  const [badges, setBadges] = useState<NavBadges | null>(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+
+  // Ctrl+K / Cmd+K เปิดช่องค้นหาเมนู
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen((o) => !o);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   // Sync tab from URL query params
   useEffect(() => {
@@ -228,6 +355,15 @@ function AdminContent() {
         router.replace("/admin/login");
       });
   }, [router]);
+
+  // ตัวเลขเตือนบนเมนู — โหลดใหม่ทุกครั้งที่เปลี่ยนแท็บ (คำถามนับ 3 ตัว เบามาก)
+  useEffect(() => {
+    if (authState !== "ready") return;
+    fetch("/api/admin/nav-badges", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setBadges(d?.badges ?? null))
+      .catch(() => setBadges(null));
+  }, [authState, activeTab]);
 
   const selectTab = useCallback(
     (tabId: string) => {
@@ -271,19 +407,35 @@ function AdminContent() {
             className="h-8 w-8 shrink-0 rounded-full border border-line object-cover"
             loading="eager"
           />
-          <span className="text-sm font-bold text-ink sm:text-base">SeerTarot Admin</span>
+          <span className="whitespace-nowrap text-sm font-bold text-ink sm:text-base">SeerTarot Admin</span>
+          {badges?.stripeMode === "test" ? (
+            <span className="hidden rounded border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-900 sm:inline">
+              Stripe โหมดทดสอบ — ยังไม่ใช่เงินจริง
+            </span>
+          ) : badges && badges.stripeMode === null ? (
+            <span className="hidden rounded border border-line bg-canvas px-2 py-0.5 text-[11px] text-muted sm:inline">ยังไม่ได้ตั้ง Stripe</span>
+          ) : null}
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setPaletteOpen(true)}
+            className="tap-overlay-y hidden min-h-11 items-center gap-2 whitespace-nowrap rounded-lg border border-line bg-white px-3 text-xs text-muted hover:bg-canvas hover:text-ink sm:inline-flex"
+            aria-keyshortcuts="Control+K Meta+K"
+          >
+            ค้นหาเมนู
+            <kbd className="hidden rounded border border-line bg-canvas px-1.5 font-sans text-[10px] text-muted sm:inline">Ctrl K</kbd>
+          </button>
           <a
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-line bg-white px-3 text-xs font-medium text-ink hover:bg-canvas"
+            className="inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-white px-3 text-xs font-medium text-ink hover:bg-canvas"
           >
             เปิดหน้าเว็บ
           </a>
-          <Button variant="ghost" size="sm" onClick={logout} className="text-xs text-muted hover:text-rose-700">
+          <Button variant="ghost" size="sm" onClick={logout} className="whitespace-nowrap text-xs text-muted hover:text-rose-700">
             ออกจากระบบ
           </Button>
         </div>
@@ -291,55 +443,70 @@ function AdminContent() {
 
       <div className="flex w-full flex-col lg:flex-row min-h-[calc(100vh-3.5rem)]">
         {/* ─── เมนูข้าง (เดสก์ท็อป) ────────────────────────────────── */}
-        <aside className="hidden w-60 shrink-0 border-r border-line bg-white p-3 lg:block">
-          <nav aria-label="เมนูแอดมิน" className="sticky top-[4.5rem] space-y-5">
+        <aside className="hidden w-64 shrink-0 border-r border-line bg-white px-3 py-4 lg:block">
+          <nav aria-label="เมนูแอดมิน" className="sticky top-[4.5rem] max-h-[calc(100vh-5rem)] space-y-5 overflow-y-auto pb-6">
             {NAV_SECTIONS.map((section) => (
-              <div key={section.group} className="space-y-1">
-                <p className="px-3 text-[11px] font-semibold text-muted">{section.group}</p>
-                {section.items.map((item) => {
-                  const isActive = activeTab === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => selectTab(item.id)}
-                      aria-current={isActive ? "page" : undefined}
-                      className={`tap-overlay-y flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                        isActive ? "bg-canvas font-semibold text-ink" : "text-muted hover:bg-canvas hover:text-ink"
-                      }`}
-                    >
-                      <TabIcon id={item.id} className="h-4 w-4 shrink-0" />
-                      <span className="truncate">{item.label}</span>
-                    </button>
-                  );
-                })}
+              <div key={section.group}>
+                <p className="mb-1 px-3 text-xs font-bold text-ink-soft">{section.group}</p>
+                <ul className="space-y-0.5">
+                  {section.items.map((item) => {
+                    const isActive = activeTab === item.id;
+                    return (
+                      <li key={item.id}>
+                        <button
+                          type="button"
+                          onClick={() => selectTab(item.id)}
+                          aria-current={isActive ? "page" : undefined}
+                          className={`tap-overlay-y relative flex w-full items-start gap-2.5 rounded-lg py-2 pl-3 pr-2 text-left transition-colors ${
+                            isActive ? "bg-canvas text-ink" : "text-ink-soft hover:bg-canvas hover:text-ink"
+                          }`}
+                        >
+                          {isActive ? <span aria-hidden className="absolute inset-y-2 left-0 w-[3px] rounded-r bg-ink" /> : null}
+                          <TabIcon id={item.id} className="mt-0.5 h-4 w-4 shrink-0" />
+                          <span className="min-w-0 flex-1">
+                            <span className={`block text-sm ${isActive ? "font-semibold" : "font-medium"}`}>{item.label}</span>
+                            <span className="block text-[11px] leading-snug text-muted">{item.short}</span>
+                          </span>
+                          <NavBadge item={item} badges={badges} />
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
             ))}
           </nav>
         </aside>
 
-        {/* ─── แถบเมนู (มือถือ/แท็บเล็ต) ──────────────────────────────── */}
+        {/* ─── แถบเมนู (มือถือ/แท็บเล็ต) — ชื่อกลุ่มคั่นให้รู้ว่าอยู่หมวดไหน ─────────── */}
         <nav
           aria-label="เมนูแอดมิน"
-          className="flex gap-1.5 overflow-x-auto border-b border-line bg-white px-4 py-2 lg:hidden no-scrollbar"
+          className="flex items-center gap-1.5 overflow-x-auto border-b border-line bg-white px-4 py-2 lg:hidden no-scrollbar"
         >
-          {NAV_SECTIONS.flatMap((s) => s.items).map((item) => {
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => selectTab(item.id)}
-                aria-current={isActive ? "page" : undefined}
-                className={`tap-overlay-y flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs transition-colors ${
-                  isActive ? "btn-gold-glass font-semibold" : "border border-line bg-white text-muted hover:text-ink"
-                }`}
-              >
-                <TabIcon id={item.id} className="h-3.5 w-3.5" />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
+          {NAV_SECTIONS.map((section, si) => (
+            <div key={section.group} className="flex shrink-0 items-center gap-1.5">
+              {si > 0 ? <span aria-hidden className="mx-1 h-5 w-px bg-line" /> : null}
+              <span className="text-[11px] font-bold text-ink-soft">{section.group}</span>
+              {section.items.map((item) => {
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => selectTab(item.id)}
+                    aria-current={isActive ? "page" : undefined}
+                    className={`tap-overlay-y flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs transition-colors ${
+                      isActive ? "btn-gold-glass font-semibold" : "border border-line bg-white text-muted hover:text-ink"
+                    }`}
+                  >
+                    <TabIcon id={item.id} className="h-3.5 w-3.5" />
+                    <span>{item.label}</span>
+                    <NavBadge item={item} badges={badges} />
+                  </button>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
         {/* ─── พื้นที่ทำงาน ───────────────────────────────────────── */}
@@ -386,6 +553,7 @@ function AdminContent() {
           )}
 
           <div className="space-y-6">
+            {activeTab === "executive" && <ExecutiveDashboard />}
             {activeTab === "overview" && <AdminOverview onNavigateTab={selectTab} />}
             {activeTab === "stats" && <StatsDashboard />}
             {activeTab === "members" && <MembersPanel />}
@@ -400,6 +568,8 @@ function AdminContent() {
               </div>
             )}
             {activeTab === "bookings" && <BookingsAdmin />}
+            {activeTab === "payments" && <PaymentsPanel />}
+            {activeTab === "audit" && <AuditLogPanel />}
             {activeTab === "health" &&
               (healthSubTab === "system" ? (
                 <SystemHealthPanel
@@ -414,6 +584,15 @@ function AdminContent() {
           </div>
         </main>
       </div>
+
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        onSelect={selectTab}
+        items={NAV_SECTIONS.flatMap((sec) =>
+          sec.items.map((i) => ({ id: i.id, label: i.label, hint: i.short, group: sec.group, keywords: `${i.description} ${i.keywords ?? ""}` })),
+        )}
+      />
     </div>
   );
 }

@@ -47,6 +47,7 @@
     "og:share-base": "python3 scripts/generate-share-base.py",
     "seo:ping": "tsx scripts/seo/ping-indexnow.ts",
     "seo:gsc": "tsx scripts/seo/gsc.ts",
+    "seo:ga4": "tsx scripts/seo/ga4.ts",
     "agent:status": "tsx scripts/agent-guard.ts status",
     "agent:check": "tsx scripts/agent-guard.ts check",
     "agent:lock": "tsx scripts/agent-guard.ts lock",

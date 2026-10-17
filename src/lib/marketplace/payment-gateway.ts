@@ -67,6 +67,13 @@ function stripeSecretKey(): string | null {
   return key && !key.startsWith("mock_") ? key : null;
 }
 
+/** โหมดของคีย์ Stripe ที่ตั้งไว้ — ไม่เรียก API (ใช้กับป้ายเตือนบนหัวแอดมิน) · `null` = ยังไม่ตั้งคีย์ (ใช้ตัวจำลอง) */
+export function stripeKeyMode(): "live" | "test" | null {
+  const key = stripeSecretKey();
+  if (!key) return null;
+  return /^(sk|rk)_test_/.test(key) ? "test" : "live";
+}
+
 /**
  * 🔒 คีย์ทดสอบ (`sk_test_` / `rk_test_`) บน production — ช่วงทดสอบบนเว็บจริงก่อนเปิดบัญชี live
  *
@@ -150,6 +157,126 @@ async function stripeRequest(
     throw new Error(`[Stripe] ${method} ${path} status ${res.status} ${String(err.type ?? "")} ${String(err.code ?? "")}`.trim());
   }
   return data;
+}
+
+export interface StripeAdminSummary {
+  configured: boolean;
+  mode: "live" | "test" | null;
+  /** ยอดในบัญชี Stripe ตอนนี้ (บาท) — `available` โอนออกได้ · `pending` รอเคลียร์ */
+  balance: { availableThb: number; pendingThb: number } | null;
+  /** รายการเงินเข้าออกในช่วงที่ขอ (บาท · นับเฉพาะสกุล THB) */
+  period: {
+    grossThb: number;
+    feeThb: number;
+    netThb: number;
+    refundThb: number;
+    charges: number;
+    refunds: number;
+    disputes: number;
+    /** มีรายการเกินที่ดึงมา (1,000 รายการ) — ตัวเลขช่วงนี้ไม่ครบ */
+    truncated: boolean;
+  } | null;
+  payouts: { amountThb: number; arrivalDate: string; status: string }[] | null;
+  /** ข้อความคงที่เมื่ออ่านบางส่วนไม่ได้ (ไม่ส่งข้อความดิบของ Stripe ขึ้นจอ · A1-08) */
+  error: string | null;
+}
+
+const STRIPE_SUMMARY_MAX_PAGES = 10;
+
+/** ปัดยอดเงินที่บวกสะสมแบบทศนิยมให้เหลือ 2 ตำแหน่ง (กันเลขอย่าง 149.00000000003 ขึ้นจอ) */
+function roundMoney<T extends Record<string, number | boolean>>(o: T): T {
+  const out = { ...o };
+  for (const k of Object.keys(out) as (keyof T)[]) {
+    if (typeof out[k] === "number") out[k] = (Math.round((out[k] as number) * 100) / 100) as T[keyof T];
+  }
+  return out;
+}
+
+/**
+ * 📊 สรุปเงินจาก Stripe ให้แผงแอดมิน (อ่านอย่างเดียว)
+ * ยอดคงเหลือ · ค่าธรรมเนียมและยอดสุทธิในช่วง `[fromSec, toSec)` · รอบโอนเข้าบัญชีธนาคารล่าสุด
+ * คีย์แบบจำกัดสิทธิ์ (`rk_`) ที่ไม่มีสิทธิ์อ่าน Balance/Payouts จะได้ `error` แทนตัวเลข
+ */
+export async function getStripeAdminSummary(fromSec: number, toSec: number): Promise<StripeAdminSummary> {
+  const key = stripeSecretKey();
+  if (!key) {
+    return { configured: false, mode: null, balance: null, period: null, payouts: null, error: null };
+  }
+  const mode = stripeKeyMode();
+  const thb = (rows: unknown) =>
+    (Array.isArray(rows) ? rows : [])
+      .filter((r) => (r as Record<string, unknown>).currency === "thb")
+      .reduce((s, r) => s + Number((r as Record<string, unknown>).amount ?? 0), 0) / 100;
+  let failed = false;
+
+  const balance = await stripeRequest(key, "GET", "/balance")
+    .then((b) => ({ availableThb: thb(b.available), pendingThb: thb(b.pending) }))
+    .catch(() => {
+      failed = true;
+      return null;
+    });
+
+  const period = await (async () => {
+    const out = { grossThb: 0, feeThb: 0, netThb: 0, refundThb: 0, charges: 0, refunds: 0, disputes: 0, truncated: false };
+    let after: string | null = null;
+    for (let page = 0; page < STRIPE_SUMMARY_MAX_PAGES; page++) {
+      const q = new URLSearchParams({ limit: "100", "created[gte]": String(fromSec), "created[lt]": String(toSec) });
+      if (after) q.set("starting_after", after);
+      const res = await stripeRequest(key, "GET", `/balance_transactions?${q}`);
+      const data = (Array.isArray(res.data) ? res.data : []) as Record<string, unknown>[];
+      for (const t of data) {
+        if (t.currency !== "thb") continue;
+        const type = String(t.type ?? "");
+        const amount = Number(t.amount ?? 0) / 100;
+        const fee = Number(t.fee ?? 0) / 100;
+        if (type === "charge" || type === "payment") {
+          out.grossThb += amount;
+          out.charges += 1;
+        } else if (type === "refund" || type === "payment_refund") {
+          out.refundThb += -amount;
+          out.refunds += 1;
+        } else if (type.startsWith("dispute")) {
+          out.disputes += 1;
+        }
+        // เงินโอนออกเข้าบัญชีธนาคารไม่ใช่รายได้หรือรายจ่าย — ไม่นับในยอดสุทธิของช่วง
+        if (type !== "payout") {
+          out.feeThb += fee;
+          out.netThb += Number(t.net ?? 0) / 100;
+        }
+      }
+      if (res.has_more !== true || data.length === 0) return roundMoney(out);
+      after = String(data[data.length - 1].id);
+    }
+    out.truncated = true;
+    return roundMoney(out);
+  })().catch(() => {
+    failed = true;
+    return null;
+  });
+
+  const payouts = await stripeRequest(key, "GET", "/payouts?limit=5")
+    .then((res) =>
+      ((Array.isArray(res.data) ? res.data : []) as Record<string, unknown>[])
+        .filter((p) => p.currency === "thb")
+        .map((p) => ({
+          amountThb: Number(p.amount ?? 0) / 100,
+          arrivalDate: new Date(Number(p.arrival_date ?? 0) * 1000).toISOString().slice(0, 10),
+          status: String(p.status ?? ""),
+        })),
+    )
+    .catch(() => {
+      failed = true;
+      return null;
+    });
+
+  return {
+    configured: true,
+    mode,
+    balance,
+    period,
+    payouts,
+    error: failed ? "อ่านข้อมูลจาก Stripe ได้ไม่ครบ — คีย์อาจไม่มีสิทธิ์อ่านยอดเงิน หรือ Stripe ไม่ตอบ" : null,
+  };
 }
 
 /**
