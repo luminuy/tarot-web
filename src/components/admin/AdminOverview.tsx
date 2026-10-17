@@ -176,7 +176,7 @@ export default function AdminOverview({ onNavigateTab }: { onNavigateTab: (tabId
                 onClick={() => onNavigateTab("entitlement")}
                 className="shrink-0 border-transparent bg-amber-900 text-xs font-semibold text-white hover:bg-amber-950"
               >
-                ไปที่สิทธิ์ & โควตา
+                ไปที่โควตาฟรีและสิทธิ์
               </Button>
             )}
           </div>
