@@ -183,7 +183,7 @@ export function SpreadsIndexBody({ locale, library }: { locale: Locale; library:
           โดยไม่แตะพฤติกรรมแท็บของ `SpreadsLibrary` เลย
         */}
         {/* UI 2.0: สารบัญ · แยกตามเรื่อง · ทางลัด บนพื้นกลางคืนผืนเดียวกับหมวดไพ่ (แผน UI_2_0_SPREADS หัวข้อ 3 ข้อ 5)
-            รอบออกแบบเพิ่ม (เจ้าของ "ทำทั้ง 4 เลยขอสวยๆ"): สารบัญจัด 6 กลุ่มตามหมวด · การ์ดภาพไพ่ต่อเรื่อง · กล่องทางลัดใหญ่ · ป้ายเลขแบบหมวดผัง */}
+            รอบออกแบบเพิ่ม (เจ้าของ "ทำทั้ง 4 เลยขอสวย ๆ"): สารบัญจัด 6 กลุ่มตามหมวด · การ์ดภาพไพ่ต่อเรื่อง · กล่องทางลัดใหญ่ · ป้ายเลขแบบหมวดผัง */}
         <section className="ui2-sec ui2-night ui2-sp-dir" data-ui2-dark="">
         <nav aria-label={copy.directoryTitle} className="ui2-wrap">
           <span className="ui2-sp-rule" aria-hidden="true" />

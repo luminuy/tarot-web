@@ -36,7 +36,9 @@ export type OverlayState =
   | { kind: "auth"; mode: "signin" | "signup"; fromWall: boolean }
   | { kind: "buyCredits" }
   | { kind: "upgrade"; reason: UpgradeReason }
-  | { kind: "zoomCard"; card: DrawnSlotCard };
+  | { kind: "zoomCard"; card: DrawnSlotCard }
+  /** หน้าต่างเปลี่ยนผังในหน้าเดิม (SpreadSwitcher · รอบ 273) — เดิมเป็น useState อิสระ ยุบเข้ามาให้เปิดทับบานอื่นไม่ได้ */
+  | { kind: "spreadSwitcher" };
 
 export type OverlayAction =
   | { type: "closeAll" }
@@ -46,6 +48,7 @@ export type OverlayAction =
   | { type: "openBuyCredits" }
   | { type: "openUpgrade"; reason: UpgradeReason }
   | { type: "openZoomCard"; card: DrawnSlotCard }
+  | { type: "openSpreadSwitcher" }
   /** ปิดเฉพาะบานที่ระบุ — กันการปิดบานที่เพิ่งถูกเปิดทับไปแล้ว */
   | { type: "close"; kind: NonNullable<OverlayState>["kind"] };
 
@@ -67,6 +70,8 @@ export function overlayReducer(state: OverlayState, action: OverlayAction): Over
       return { kind: "upgrade", reason: action.reason };
     case "openZoomCard":
       return { kind: "zoomCard", card: action.card };
+    case "openSpreadSwitcher":
+      return { kind: "spreadSwitcher" };
     case "close":
       /*
        * ⚠️ ต้องเทียบชนิดก่อนปิดเสมอ

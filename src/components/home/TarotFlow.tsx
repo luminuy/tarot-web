@@ -262,6 +262,7 @@ export default function TarotFlow({
   /** เหตุผลที่เปิดหน้าต่างสิทธิ์ — null = ปิดอยู่ (จุดเดียวที่คุมกำแพงสิทธิ์ทั้งเว็บ) */
   const accessReason: UpgradeReason | null = isOverlay(overlay, "upgrade") ? overlay.reason : null;
   const zoomedCard: DrawnSlotCard | null = isOverlay(overlay, "zoomCard") ? overlay.card : null;
+  const switcherOpen = isOverlay(overlay, "spreadSwitcher");
   const [currentUser, setCurrentUser] = useState<{ id: string; name?: string; email?: string } | null>(null);
   const entitlement = useEntitlement();
   const entitlementView = describeEntitlement(entitlement);
@@ -352,7 +353,6 @@ export default function TarotFlow({
   // Selection state
   const [selectedSpread, setSelectedSpread] = useState<Spread>(routeSpread ?? PUBLIC_SPREADS[3]); // Default: 3-card
   /** หน้าต่างเปลี่ยนผังในหน้าเดิม (ขั้นตั้งคำถาม) — แทนการพาออกไปหน้าแรก (เจ้าของ 2026-10-17) */
-  const [switcherOpen, setSwitcherOpen] = useState(false);
   /**
    * ✦ ผังที่สร้างเอง (REFLECTION_JOURNAL_PLAN 1.8) — ตัวผังดิบที่ส่งให้ `/start` ตรวจซ้ำแล้วตรึงลงเซสชัน
    * มีผลเฉพาะเมื่อ `selectedSpread.id === "custom"` · เลือกผังในบ้านทีหลัง = ค่านี้ถูกเมินเอง
@@ -1935,7 +1935,7 @@ export default function TarotFlow({
                     isEnglish={isEnglish}
                     onChange={() => {
                       soundManager.playCardSelectSound();
-                      setSwitcherOpen(true);
+                      dispatchOverlay({ type: "openSpreadSwitcher" });
                     }}
                   />
                   <SpreadSwitcher
@@ -1943,11 +1943,11 @@ export default function TarotFlow({
                     current={selectedSpread}
                     isEnglish={isEnglish}
                     lockedIds={grandLockedIds}
-                    onClose={() => setSwitcherOpen(false)}
+                    onClose={() => dispatchOverlay({ type: "close", kind: "spreadSwitcher" })}
                     onPick={(sp) => {
                       // ด่านสิทธิ์ชุดเดียวกับปุ่มเริ่มพิธี (ห้ามลัด) — ไม่ผ่าน = ปิดหน้าต่างแล้วเปิดกำแพงตามเหตุผล
                       const decision = decideSpreadAccess(entitlement, sp.id, sp.positions.length);
-                      setSwitcherOpen(false);
+                      dispatchOverlay({ type: "close", kind: "spreadSwitcher" });
                       if (!decision.allowed) {
                         openAccessDialog(decision.reason);
                         return;
