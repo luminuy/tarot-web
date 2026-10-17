@@ -4,8 +4,10 @@ import { accountMetadataTh } from "@/app/_shared/pages/account-th";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { AccountRoot } from "../islands/AccountRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
+import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 import "@/styles/ui2-page.css";
 import "@/styles/ui2-page-fx.css";
+import "@/styles/v3-account.css";
 
 /**
  * 🔐 บัญชีสมาชิก — ย้ายออกจาก Next มาเป็นไฟล์ static ที่ขอบ (คลื่นที่ 4)
@@ -25,6 +27,7 @@ const locale = "th" as const;
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
   <div class="ui2-pg" data-ui2-page-dark="">
   <AccountRoot locale={locale} client:load />
+  <Ui2NextSteps isEn={false} keys={["journal", "spreads", "daily", "readers"]} />
   </div>
   <SiteFooterRoot locale={locale} spacing="tight" />
 </BaseLayout>

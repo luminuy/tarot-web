@@ -4,16 +4,14 @@ import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 /**
- * ✦ ชิ้นส่วนหน้าบัญชี — แบบ "หน้าตั้งค่าของเว็บระดับโลก" (Apple ID · Google Account)
+ * ✦ ชิ้นส่วนหน้าบัญชี — UI 2.0 (เจ้าของ 2026-10-17 "หน้านี้ยังไม่ได้ทำใหม่เลย ทั้ง ui ทั้งสี")
  * ---------------------------------------------------------------------------
- * โครงเดียวทั้งหน้า: หัวข้อกลุ่มอยู่นอกการ์ด · การ์ดหนึ่งใบคือกลุ่มของ "แถว" คั่นด้วยเส้นบาง
- * แถวหนึ่งแถว = ไอคอน · ชื่อ · คำอธิบาย · ค่า/การกระทำทางขวา (ทั้งแถวกดได้เมื่อเป็นลิงก์/ปุ่ม)
+ * โครงเดียวทั้งหน้า: หนึ่งกลุ่ม = แผงครีมพาสเทล (`.page-band-tint` ➔ ui2-dawn.css สลับโทเคนเป็นกลางวันให้)
+ * หัวกลุ่ม Anuphan อยู่ในแผง · แถวเป็นกระดาษขาวคั่นเส้นบาง · ไอคอนทองเข้มในช่องครีม
+ * สไตล์: `src/styles/v3-account.css`
  *
- * ⚠️ ห้ามกลับไปใช้การ์ดหลายแบบปนกัน (บทเรียนรอบก่อน: การ์ดสองระบบในหน้าเดียว ตาเห็นว่าเป็นคนละเว็บ)
- *    ทุกกลุ่มต้องผ่าน `SettingsSection` และทุกบรรทัดต้องผ่าน `SettingsRow`
+ * ⚠️ ทุกกลุ่มต้องผ่าน `SettingsSection` และทุกบรรทัดต้องผ่าน `SettingsRow` (การ์ดสองระบบในหน้าเดียว ตาเห็นว่าเป็นคนละเว็บ)
  */
-
-export const GROUP_SHELL = "altar-card-porcelain !rounded-2xl divide-y divide-line-warm/60";
 
 export function SettingsSection({
   id,
@@ -27,41 +25,32 @@ export function SettingsSection({
   children: ReactNode;
 }) {
   return (
-    <section aria-labelledby={id} className="space-y-2.5">
-      <div className="px-1">
-        <h2 id={id} className="font-serif-th text-sm font-bold text-ink-deep">
+    <section aria-labelledby={id} className="v3-ac-sec page-band-tint">
+      <div className="v3-ac-sec-head">
+        <h2 id={id} className="v3-ac-sec-title">
           <ThaiPhrases>{title}</ThaiPhrases>
         </h2>
-        {description && <p className="mt-0.5 font-serif-th text-xs leading-relaxed text-muted">{description}</p>}
+        {description && <p className="v3-ac-sec-desc">{description}</p>}
       </div>
-      <div className={GROUP_SHELL}>{children}</div>
+      <div className="v3-ac-rows">{children}</div>
     </section>
   );
 }
 
-const ROW = "flex w-full min-h-[64px] items-center gap-3.5 px-4 py-3.5 text-left sm:px-5";
-const ROW_INTERACTIVE =
-  "transition-colors hover:bg-inset/50 focus-visible:bg-inset/60 focus-visible:outline-none cursor-pointer";
-
-/** ไอคอนในวงกลมหน้าแถว — สีทองบนพื้นครีม ชุดเดียวทั้งหน้า */
+/** ไอคอนในช่องหน้าแถว — ทองเข้มบนครีม (ลบข้อมูล = แดง) */
 export function RowIcon({ children, tone = "gold" }: { children: ReactNode; tone?: "gold" | "danger" }) {
   return (
-    <span
-      aria-hidden="true"
-      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
-        tone === "danger" ? "bg-err-wash text-err" : "bg-inset-warm text-gold-ink"
-      }`}
-    >
+    <span aria-hidden="true" className={tone === "danger" ? "v3-ac-ico is-danger" : "v3-ac-ico"}>
       {children}
     </span>
   );
 }
 
-function RowText({ label, hint }: { label: ReactNode; hint?: ReactNode }) {
+export function RowText({ label, hint }: { label: ReactNode; hint?: ReactNode }) {
   return (
-    <span className="min-w-0 flex-1">
-      <span className="block font-serif-th text-sm font-bold text-ink-deep">{label}</span>
-      {hint && <span className="mt-0.5 block font-serif-th text-xs leading-relaxed text-muted">{hint}</span>}
+    <span className="v3-ac-row-text">
+      <span className="v3-ac-row-label">{label}</span>
+      {hint && <span className="v3-ac-row-hint">{hint}</span>}
     </span>
   );
 }
@@ -75,7 +64,7 @@ export function ChevronRight() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-4 w-4 shrink-0 text-muted"
+      className="v3-ac-chev"
       aria-hidden="true"
     >
       <path d="m9 6 6 6-6 6" />
@@ -113,35 +102,35 @@ export function SettingsRow({
   );
   if (href) {
     return (
-      <Link href={href} prefetch={false} className={`${ROW} ${ROW_INTERACTIVE}`}>
+      <Link href={href} prefetch={false} className="v3-ac-row is-link">
         {body}
       </Link>
     );
   }
   if (onClick) {
     return (
-      <button type="button" onClick={onClick} className={`${ROW} ${ROW_INTERACTIVE}`}>
+      <button type="button" onClick={onClick} className="v3-ac-row is-link">
         {body}
       </button>
     );
   }
-  return <div className={ROW}>{body}</div>;
+  return <div className="v3-ac-row">{body}</div>;
 }
 
-/** ตัวเลขสรุปบนหัวหน้า — ป้าย · ตัวเลขใหญ่ · บรรทัดรอง */
+/** ตัวเลขสรุปบนหัวหน้า — ป้าย · ตัวเลขใหญ่ · บรรทัดรอง (กระดาษขาวบนแถบครีม) */
 export function StatTile({ label, value, sub }: { label: string; value: ReactNode; sub?: string }) {
   return (
-    <div className="altar-card-porcelain !rounded-2xl flex flex-col gap-1 p-3.5 sm:p-5">
-      <span className="font-serif-th text-[11px] leading-snug text-muted sm:text-xs">{label}</span>
-      <span className="font-serif-th text-xl font-bold leading-tight text-ink-deep sm:text-3xl">{value}</span>
-      {sub && <span className="font-serif-th text-[11px] leading-snug text-muted sm:text-xs">{sub}</span>}
+    <div className="v3-ac-stat">
+      <span className="v3-ac-stat-k">{label}</span>
+      <span className="v3-ac-stat-v">{value}</span>
+      {sub && <span className="v3-ac-stat-sub">{sub}</span>}
     </div>
   );
 }
 
 /* ── ไอคอนเส้นชุดเดียวทั้งหน้า (stroke 1.8 · 24px viewBox) ───────────────────── */
 
-function Line({ children, className = "h-[18px] w-[18px]" }: { children: ReactNode; className?: string }) {
+function Line({ children, className = "v3-ac-svg" }: { children: ReactNode; className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -223,7 +212,7 @@ export const IconTrash = () => (
   </Line>
 );
 export const IconLogout = () => (
-  <Line className="h-4 w-4">
+  <Line className="v3-ac-svg is-sm">
     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
     <path d="M16 17l5-5-5-5M21 12H9" />
   </Line>
