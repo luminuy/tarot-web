@@ -53,37 +53,44 @@ export function AdminSubTabs<T extends string>({
   /** ชื่อกลุ่มแท็บสำหรับโปรแกรมอ่านจอ */
   label: string;
 }) {
+  const current = tabs.find((t) => t.id === active);
   return (
-    <div role="tablist" aria-label={label} className="flex flex-wrap gap-x-1 gap-y-2 border-b border-line">
-      {tabs.map((t) => {
-        const on = t.id === active;
-        return (
-          <button
-            key={t.id}
-            type="button"
-            role="tab"
-            aria-selected={on}
-            onClick={() => onChange(t.id)}
-            className={`tap-overlay-y -mb-px border-b-2 px-3 pb-2 pt-1 text-left text-sm transition-colors ${
-              on ? "border-ink font-semibold text-ink" : "border-transparent text-muted hover:text-ink"
-            }`}
-          >
-            <span className="flex items-center gap-1.5">
+    <div className="min-w-0">
+      {/* แถบสลับหมวดแบบปุ่มกลุ่ม (segmented) · มือถือเลื่อนแนวนอนได้ ไม่ตัดบรรทัด */}
+      <div
+        role="tablist"
+        aria-label={label}
+        className="no-scrollbar inline-flex max-w-full gap-1 overflow-x-auto rounded-xl border border-line bg-white p-1 shadow-xs"
+      >
+        {tabs.map((t) => {
+          const on = t.id === active;
+          return (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={on}
+              title={t.hint}
+              onClick={() => onChange(t.id)}
+              className={`tap-overlay-y flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-3.5 py-2 text-sm transition-colors ${
+                on ? "bg-ink font-semibold text-white" : "font-medium text-ink-soft hover:bg-canvas hover:text-ink"
+              }`}
+            >
               {t.label}
               {t.count != null && t.count > 0 ? (
                 <span
                   className={`rounded-full px-1.5 py-px text-[11px] font-bold tabular-nums ${
-                    t.tone === "alert" ? "bg-rose-700 text-white" : "bg-inset text-ink"
+                    t.tone === "alert" ? "bg-rose-700 text-white" : on ? "bg-white text-ink" : "bg-inset text-ink"
                   }`}
                 >
                   {t.count > 99 ? "99+" : t.count}
                 </span>
               ) : null}
-            </span>
-            {t.hint ? <span className="block text-[11px] font-normal text-muted">{t.hint}</span> : null}
-          </button>
-        );
-      })}
+            </button>
+          );
+        })}
+      </div>
+      {current?.hint ? <p className="mt-2 text-xs text-muted">{current.hint}</p> : null}
     </div>
   );
 }
@@ -111,7 +118,7 @@ export function AdminSection({
   return (
     <section
       aria-labelledby={id ? `${id}-title` : undefined}
-      className={`overflow-hidden rounded-xl border bg-white ${tone === "alert" ? "border-rose-200" : "border-line"}`}
+      className={`admin-card overflow-hidden ${tone === "alert" ? "!border-rose-200" : ""}`}
     >
       <header
         className={`flex flex-wrap items-start justify-between gap-3 px-5 py-4 ${
@@ -119,12 +126,12 @@ export function AdminSection({
         } ${padded ? "" : "border-b border-line"}`}
       >
         <div className="min-w-0">
-          <h3 id={id ? `${id}-title` : undefined} className={`text-sm font-bold ${tone === "alert" ? "text-rose-800" : "text-ink"}`}>
+          <h3 id={id ? `${id}-title` : undefined} className={`text-[15px] font-semibold ${tone === "alert" ? "text-rose-800" : "text-ink"}`}>
             {title}
           </h3>
           {hint ? <p className="mt-0.5 text-xs text-muted">{hint}</p> : null}
         </div>
-        {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
+        {actions ? <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:shrink-0">{actions}</div> : null}
       </header>
       {children ? <div className={padded ? "px-5 pb-5" : ""}>{children}</div> : null}
     </section>
@@ -196,9 +203,9 @@ export function SubHeading({ children }: { children: ReactNode }) {
 /** กล่องว่างแบบมีคำแนะนำ — ใช้แทนข้อความ "ไม่มีข้อมูล" เปล่า ๆ */
 export function EmptyState({ title, hint }: { title: string; hint?: string }) {
   return (
-    <div className="rounded-lg border border-dashed border-line px-4 py-8 text-center">
-      <p className="text-sm font-medium text-ink">{title}</p>
-      {hint ? <p className="mt-1 text-xs text-muted">{hint}</p> : null}
+    <div className="rounded-xl border border-dashed border-line bg-surface-warm px-4 py-10 text-center">
+      <p className="text-sm font-semibold text-ink">{title}</p>
+      {hint ? <p className="mx-auto mt-1 max-w-md text-xs leading-relaxed text-muted">{hint}</p> : null}
     </div>
   );
 }

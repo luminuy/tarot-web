@@ -115,7 +115,7 @@ export default function ContentEditor() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 flex-1">
           <AdminSubTabs
             label="หมวดเนื้อหา"
@@ -308,7 +308,7 @@ type SuitFilter = "all" | "major" | "wands" | "cups" | "swords" | "pentacles";
 
 const SUIT_OPTIONS: { id: SuitFilter; label: string }[] = [
   { id: "all", label: "ทั้งหมด" },
-  { id: "major", label: "Major (22)" },
+  { id: "major", label: "ไพ่ชุดใหญ่ (22)" },
   { id: "wands", label: "ไม้เท้า (14)" },
   { id: "cups", label: "ถ้วย (14)" },
   { id: "swords", label: "ดาบ (14)" },

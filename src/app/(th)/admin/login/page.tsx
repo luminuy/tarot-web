@@ -13,6 +13,7 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [show, setShow] = useState(false);
 
   // ถ้าเข้าระบบอยู่แล้ว เด้งเข้าแผงเลย
   useEffect(() => {
@@ -48,8 +49,8 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main id="main-content" tabIndex={-1} className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
-      <div className="rounded-xl border border-line bg-white p-7 shadow-xs">
+    <main id="main-content" tabIndex={-1} className="admin-workspace flex min-h-screen flex-col justify-center px-6">
+      <div className="admin-card mx-auto w-full max-w-sm p-7 sm:p-8">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-line bg-surface-warm shadow-xs">
           <Image
             src="/logo.webp"
@@ -70,7 +71,7 @@ export default function AdminLoginPage() {
             {(field) => (
               <Input
                 {...field}
-                type="password"
+                type={show ? "text" : "password"}
                 autoComplete="current-password"
                 autoFocus
                 value={password}
@@ -78,6 +79,10 @@ export default function AdminLoginPage() {
               />
             )}
           </Field>
+          <label className="-mt-2 inline-flex w-fit cursor-pointer items-center gap-2 text-xs text-muted">
+            <input type="checkbox" checked={show} onChange={(e) => setShow(e.target.checked)} className="h-4 w-4 accent-ink" />
+            แสดงรหัสผ่าน
+          </label>
           <Button type="submit" isLoading={loading} disabled={!password}>
             เข้าสู่ระบบ
           </Button>
