@@ -190,14 +190,26 @@
 .ui2-fc-far {
   opacity: 0.72;
 }
-/* มือถือ: 4 ใบบนในแถบเหนือชิป (ใหญ่ชิดขอบ 2 · ใบไกลเล็ก 2) + 2 ใบข้างนาฬิกา — ไม่มีป้าย */
-.ui2-fc-star { display: block; --w: 74px; --r: -10deg; left: -20px; top: -14px; }
-.ui2-fc-moon { display: block; --w: 54px; --r: 6deg; left: 66px; top: -28px; }
-.ui2-fc-wheel { display: block; --w: 72px; --r: 9deg; right: -20px; top: -10px; }
-.ui2-fc-empress { display: block; --w: 52px; --r: -7deg; right: 70px; top: -30px; }
+/* มือถือ: 4 ใบบนในแถบเหนือชิป (ใหญ่ชิดขอบ 2 · ใบไกลเล็ก 2) + 2 ใบข้างนาฬิกา — ไม่มีป้าย
+   ⚠️ ทุกใบต้องอยู่ในจอทั้งใบ และไม่มุดใต้หัวเว็บแคปซูล (เจ้าของ 2026-10-17 "ไพ่ในมือถือไม่พอดี" —
+      เดิมใบใหญ่ล้นขอบจอ 20px ถูกตัดครึ่ง · ใบไกลบน top -28px จมใต้หัวเว็บเหลือแค่ครึ่งล่าง) */
+.ui2-fc-star { display: block; --w: 62px; --r: -8deg; left: 12px; top: -4px; }
+.ui2-fc-moon { display: block; --w: 42px; --r: 6deg; left: 84px; top: -2px; }
+.ui2-fc-wheel { display: block; --w: 62px; --r: 8deg; right: 12px; top: -2px; }
+.ui2-fc-empress { display: block; --w: 42px; --r: -6deg; right: 84px; top: -4px; }
 /* สองใบล่างผูกกับขอบล่างของส่วน = อยู่ข้างแถวนาฬิกาเสมอ ไม่ว่าหัวข้อจะกี่บรรทัด (ห้ามลงไประดับปุ่ม) */
-.ui2-fc-lovers { display: block; --w: 56px; --r: 8deg; left: -22px; bottom: 256px; }
-.ui2-fc-priestess { display: block; --w: 56px; --r: -7deg; right: -20px; bottom: 260px; }
+.ui2-fc-lovers { display: block; --w: 44px; --r: 7deg; left: 10px; bottom: 262px; }
+.ui2-fc-priestess { display: block; --w: 44px; --r: -6deg; right: 10px; bottom: 266px; }
+@media (max-width: 374px) {
+  .ui2-fc-star,
+  .ui2-fc-wheel { --w: 54px; }
+  .ui2-fc-moon { left: 72px; }
+  .ui2-fc-empress { right: 72px; }
+  .ui2-fc-lovers,
+  .ui2-fc-priestess { --w: 38px; }
+  .ui2-fc-lovers { left: 6px; }
+  .ui2-fc-priestess { right: 6px; }
+}
 
 /* ภาพไพ่จิ๋วของไพ่วันนี้ในปุ่มรอง */
 .ui2-daily-thumb {
