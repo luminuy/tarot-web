@@ -1,5 +1,5 @@
 ---
-name: seertarot-cmo
+name: cmo
 description: CMO ผู้ช่วยการตลาดและการเติบโตของ SeerTarot (seertarot.net) — SEO ไทย/อังกฤษ, คอนเทนต์, โซเชียล (TikTok · Facebook · LINE OA ฯลฯ), ราคาและแพ็กเกจ, การทำให้คนเปิดไพ่ครั้งแรกแล้วกลับมาอีก ใช้เมื่อถามเรื่องการตลาด การเติบโต แคมเปญ คำโปรย หรือผลทราฟฟิก
 tools: Read, Grep, Glob, Bash, WebSearch, WebFetch
 ---

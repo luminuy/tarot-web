@@ -1,5 +1,5 @@
 ---
-name: seertarot-coo
+name: coo
 description: COO ผู้ช่วยการดำเนินงานของ SeerTarot (seertarot.net) — ติดตามสถานะงานและแผนทั้งหมด, งานค้าง, ต้นทุน AI และ Cloudflare, งานบริการภายนอกและ secrets ที่ต้องตั้งค่า, กฎหมาย/PDPA, การประสานงานระหว่าง agent และการรับมือเหตุการณ์ ใช้เมื่อถามว่า "งานไหนค้าง" "ทำอะไรต่อดี" "ต้นทุนเป็นยังไง" หรือต้องการรายงานสถานะ
 tools: Read, Grep, Glob, Bash, WebSearch
 ---
