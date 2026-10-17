@@ -79,3 +79,24 @@ export function PersonIcon({ className = "w-5 h-5" }: LineIconProps) {
     </svg>
   );
 }
+
+/** กุญแจ — หน้าช่องรหัสผ่าน */
+export function KeyIcon({ className = "w-4 h-4" }: LineIconProps) {
+  return (
+    <svg {...base(className)}>
+      <circle cx="8.5" cy="12" r="3.5" />
+      <path d="M12 12h8M17.5 12v3M20 12v2.4" />
+    </svg>
+  );
+}
+
+/** ตา — ปุ่มแสดง/ซ่อนรหัสผ่าน (`off` = ขีดฆ่า) */
+export function EyeIcon({ className = "w-[18px] h-[18px]", off = false }: LineIconProps & { off?: boolean }) {
+  return (
+    <svg {...base(className)}>
+      <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" />
+      <circle cx="12" cy="12" r="3" />
+      {off && <path d="M4 20L20 4" />}
+    </svg>
+  );
+}

@@ -422,7 +422,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 {mode === "forgot" && (isEn ? "Reset Password" : "ตั้งรหัสผ่านใหม่")}
               </ThaiPhrases></h3>
               <p className="v2-au-sub">
-                {mode === "signin" && (isEn ? "Welcome back. Pick the way that suits you." : "ยินดีต้อนรับกลับ เลือกวิธีที่สะดวกได้เลย")}
+                {mode === "signin" && (isEn ? "Pick the way that suits you." : "เลือกวิธีที่สะดวกได้เลย")}
                 {mode === "signup" && (isEn ? "Takes less than a minute." : "ใช้เวลาไม่ถึงนาที ไม่มีค่าใช้จ่าย")}
                 {mode === "forgot" &&
                   (isEn
