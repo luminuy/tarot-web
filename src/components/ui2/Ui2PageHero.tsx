@@ -74,13 +74,14 @@ function TitleWithAccent({ title, accent }: { title: string; accent?: string }) 
 }
 
 /**
- * หัวเล็กสีทอง = เส้นทางหน้า แบบเดียวกับหัวหน้า /spreads ที่เจ้าของรับแล้ว
- * ⚠️ ใช้ `<p>` ไม่ใช่ `<nav aria-label="Breadcrumb">` — globals.css ซ่อน nav เส้นทางทุกตัว (เจ้าของ 2026-09-24 "ไม่ต้องโชว์")
- *    แต่หัวเล็กทองของ 2.0 เป็นส่วนหนึ่งของดีไซน์ที่เจ้าของเห็นและรับบน /spreads (2026-10-16) · JSON-LD BreadcrumbList ยังอยู่ที่หน้าเดิม
+ * เส้นทางหน้า ("หน้าแรก / …") — ไม่แสดงบนจอ (เจ้าของ 2026-10-17 "ไม่ต้องโชว์แบบนี้ในทุกหน้า" · ย้ำคำสั่ง 2026-09-24)
+ * ใช้ `<nav aria-label="Breadcrumb">` ซึ่ง globals.css ซ่อนจากตาแบบ sr-only ทั้งเว็บ — โปรแกรมอ่านหน้าจอยังอ่านได้
+ * JSON-LD BreadcrumbList อยู่ที่หน้าเดิม (ผลค้นหา Google ยังเห็นเส้นทาง)
+ * ⚠️ ห้ามกลับไปเป็น `<p>` หัวเล็กสีทองที่มองเห็น
  */
 export function Ui2Crumbs({ crumbs }: { crumbs: Ui2Crumb[] }) {
   return (
-    <p className="ui2-ph-crumb">
+    <nav aria-label="Breadcrumb" className="ui2-ph-crumb">
       {crumbs.map((crumb, i) => {
         const last = i === crumbs.length - 1;
         return (
@@ -89,7 +90,7 @@ export function Ui2Crumbs({ crumbs }: { crumbs: Ui2Crumb[] }) {
           </span>
         );
       })}
-    </p>
+    </nav>
   );
 }
 
