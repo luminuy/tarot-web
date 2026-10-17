@@ -43,6 +43,7 @@
 - เพิ่ม `.github/workflows/preview-down.yml` (สั่งมือ) ลบ Worker `tarot-web-preview` ออกจาก Cloudflare — ชื่อเขียนตายตัว ไม่แตะ Worker `tarot-web` ของ seertarot.net · อยากได้ลิงก์ทดลองคืน = push คอมมิต `[preview]` ใหม่
 - แผน UI_2_0 / UI_2_0_SPREADS: บรรทัดสถานะเป็น "ขึ้น production 2026-10-17"
 - แก้ด่าน CI แอปมือถือ (INC-0281): กู้ `src/data/spread-categories.ts` ที่รอบล้างโค้ดตายลบไป — `mobile/` ยัง import ผ่าน `@core/*` · typecheck + jest ของ mobile ผ่าน · `repo:verify` 94/94
+- ขยายงบ HTML ตามผล CI (เจ้าของอนุญาตขยายเพดาน): `/cards` 28 ➔ 33 KB (CI วัด 30) · `/spreads/celtic-cross` 16 ➔ 19 KB (CI วัด 17) — CI วัดได้มากกว่าในเครื่องราว 3–4 KB
 
 ### 🗓️ 2026-10-17 (รอบ 286): วิเคราะห์วิดีโอหัวหน้าแรก + แก้บั๊ก (เจ้าของส่งภาพ "มีบัค ไปเช็ค บันทึกวิดีโอแล้ววิเคราะห์" · ขึ้นพรีวิว · INC-0280)
 - บันทึกวิดีโอ 1580×890 (โหลด ➔ เลื่อนลง ➔ เลื่อนกลับ) แตกเฟรม 4–5 fps + วัดตำแหน่งจริง 6 ความกว้าง
