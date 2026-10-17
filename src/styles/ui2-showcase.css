@@ -436,3 +436,13 @@
     transition: none;
   }
 }
+
+/* หน้าต่างบานเดียวครอบเครื่องมือ (Ui2Window) */
+.ui2-sx-solo-body {
+  padding-top: 22px;
+}
+@media (min-width: 768px) {
+  .ui2-sx-solo-body {
+    padding-top: 30px;
+  }
+}

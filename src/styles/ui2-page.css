@@ -16,6 +16,8 @@
  * ⚠️ สีใหม่ใช้โทเคน `--ui2-*` จาก ui2-base.css
  */
 @import "./ui2-core.css";
+/* หน้าต่างโชว์เคส/รายชื่อหมวดแบบ /spreads ใช้ได้ทุกหน้า UI 2.0 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง") */
+@import "./ui2-showcase.css";
 
 /* ── 1. โทเคนกลางคืน ─────────────────────────────────────────────────────── */
 .ui2-pg {
@@ -1552,5 +1554,20 @@
 @media (min-width: 1200px) {
   .v3-qn .ui2-ph {
     padding-bottom: 40px;
+  }
+}
+
+/* ── v3 บทความ SEO ท้ายหน้า (SeoArticleShell) มีแถบบนแบบหน้าต่าง /spreads ── */
+.ui2-pg .v3-sa-bar {
+  margin: -2.75rem -18px 22px;
+}
+@media (min-width: 640px) {
+  .ui2-pg .v3-sa-bar {
+    margin-top: -4rem;
+  }
+}
+@media (min-width: 768px) {
+  .ui2-pg .v3-sa-bar {
+    margin-inline: -36px;
   }
 }

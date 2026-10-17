@@ -49,7 +49,17 @@ export function SeoArticleShell({
   return (
     <section
       className={`page-band${band === "tint" ? " page-band-tint" : ""} space-y-6 ${className}`}
+      style={{ "--cat": "var(--ui2-note-4)", "--cat-ink": "var(--ui2-note-ink-4)" } as React.CSSProperties}
     >
+      {/* แถบบนแบบหน้าต่าง /spreads (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง") — สไตล์ ui2-showcase.css · .v3-sa-bar ใน ui2-page.css */}
+      {band === "tint" && (
+        <div className="ui2-sx-bar v3-sa-bar" aria-hidden="true">
+          <span className="ui2-sx-name">
+            <span className="ui2-sx-n ui2-num">{isEnglish ? "Read" : "อ่าน"}</span>
+            <span className="ui2-accent">Guide</span>
+          </span>
+        </div>
+      )}
       {/* Header */}
       <div className="space-y-2 border-b border-line pb-4">
         <span className="text-xs font-serif-th font-semibold text-gold-ink">

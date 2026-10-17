@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { RitualHero } from "@/components/reading/one-card/RitualHero";
+import { Ui2Window } from "@/components/ui2/Ui2Showcase";
 import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
 import { SeoArticleShell, type SeoFaqItem } from "@/components/seo/SeoArticleShell";
 import { CardImage } from "@/components/card/CardImage";
@@ -301,15 +302,22 @@ export function ZodiacIndexBody({
 
         {/* ห่อ div ทุกช่อง — <astro-island> เป็น display:contents จึงไม่รับ margin จาก space-y
             ถ้าไม่ห่อ ส่วนต่าง ๆ จะชิดกันจนหัวข้อทับขอบกล่องข้างบน (เจ้าของเห็นจากภาพหน้าจอ) */}
-        <div>{finder}</div>
+        {/* v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): ทุกส่วนเป็นหน้าต่างเลขกำกับแบบ /spreads */}
+        <Ui2Window n="01" kicker={isEnglish ? "Find your sign" : "Find your sign"} tone={7}>
+          {finder}
+        </Ui2Window>
 
-        {/* แถบสีสลับแบบหน้าแรก (`page-band`): วันนี้ (อ่อน) · ราศีคู่ (ใส) · รายชื่อ 12 ราศี (อ่อน) · บทความ (ใส) */}
-        <div className="page-band page-band-tint">{daily}</div>
+        <Ui2Window n="02" kicker="Today" tone={4}>
+          {daily}
+        </Ui2Window>
 
-        <div className="page-band">{compat}</div>
+        <Ui2Window n="03" kicker="Compatibility" tone={3}>
+          {compat}
+        </Ui2Window>
 
         {/* รายชื่อ 12 ราศีพร้อมช่วงวันเกิด — กะทัดรัด (วงล้อด้านบนมีภาพไพ่ครบแล้ว) */}
-        <section aria-labelledby="zodiac-list-title" className="page-band page-band-tint space-y-4">
+        <Ui2Window n="04" kicker="All twelve signs" tone={5}>
+        <section aria-labelledby="zodiac-list-title" className="space-y-4">
           <h2 id="zodiac-list-title" className="text-xl sm:text-2xl font-serif-th font-bold text-ink text-center"><ThaiPhrases>
             {isEnglish ? "All 12 signs and their dates" : "12 ราศีและช่วงวันเกิด"}
           </ThaiPhrases></h2>
@@ -346,9 +354,9 @@ export function ZodiacIndexBody({
             })}
           </ul>
         </section>
+        </Ui2Window>
 
         <SeoArticleShell
-          band="plain"
           eyebrow={isEnglish ? "How it works" : "ไพ่กับดวงดาวเกี่ยวกันอย่างไร"}
           title={
             isEnglish

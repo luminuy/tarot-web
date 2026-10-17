@@ -8,6 +8,7 @@ import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
 import { saveReading } from "@/lib/utils/history";
 import { RitualHero } from "@/components/reading/one-card/RitualHero";
+import { Ui2Window } from "@/components/ui2/Ui2Showcase";
 import { OneCardRitual } from "@/components/reading/one-card/OneCardRitual";
 import { CardImage } from "@/components/card/CardImage";
 import { copyToClipboard } from "@/lib/utils/clipboard";
@@ -262,7 +263,8 @@ export function LoveOneCardClient() {
         }
       />
 
-      {/* Main Ritual Panel */}
+      {/* Main Ritual Panel — v3 (2026-10-17): อยู่ในหน้าต่างเลขกำกับแบบ /spreads */}
+      <Ui2Window kicker="Love · One card" note={isEnglish ? "1909 deck · 78 cards" : "สำรับ 1909 · 78 ใบ"} tone={3} className="v3-love-win">
       <OneCardRitual
         spreadId="love-one"
         category="love"
@@ -517,6 +519,7 @@ export function LoveOneCardClient() {
           </div>
         }
       />
+      </Ui2Window>
     </div>
   );
 }

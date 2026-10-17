@@ -154,3 +154,37 @@ export function Ui2ShowcaseStarter({ kicker, name, extra, action }: { kicker: st
     </div>
   );
 }
+
+/**
+ * หน้าต่างบานเดียว (ไม่มีรายชื่อซ้าย) — ครอบเครื่องมือของหน้า (Pick a Card · ดูดวงความรัก · ไพ่ราศี · ไพ่ประจำตัว)
+ * ให้ได้กรอบ/แถบบนชุดเดียวกับหน้าต่างของ /spreads (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง")
+ */
+export function Ui2Window({
+  n = "01",
+  kicker,
+  note,
+  tone = 4,
+  className,
+  children,
+}: {
+  n?: string;
+  kicker: string;
+  /** ข้อความเล็กขวาสุดของแถบ (เช่น "สำรับ 1909") */
+  note?: ReactNode;
+  tone?: Ui2ShowcaseSection["tone"];
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className={`ui2-sx-win ui2-sx-solo${className ? ` ${className}` : ""}`} style={tone ? { "--cat": `var(--ui2-note-${tone})`, "--cat-ink": `var(--ui2-note-ink-${tone})` } as CSSProperties : undefined}>
+      <header className="ui2-sx-bar">
+        <span className="ui2-sx-name">
+          <span className="ui2-sx-n ui2-num">{n}</span>
+          <span className="ui2-accent">{kicker}</span>
+        </span>
+        {note && <span className="ui2-sx-of">{note}</span>}
+      </header>
+      <div className="ui2-sx-body ui2-sx-solo-body">{children}</div>
+    </section>
+  );
+}

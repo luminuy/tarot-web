@@ -7,6 +7,7 @@ import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
 import { Ui2TightHead } from "@/components/ui2/Ui2PageHero";
+import { Ui2Window } from "@/components/ui2/Ui2Showcase";
 
 const pickACardOgImages = buildPageOgImage({
   title: "Pick A Card เลือกกองไพ่พยากรณ์",
@@ -161,7 +162,9 @@ export function PickACardBodyTh({ ritual }: { ritual: ReactNode }) {
           />
 
           {/* ห่อ div — <astro-island> เป็น display:contents จึงไม่รับระยะจาก space-y ทำให้กล่องพิธีชิดกล่องบทความ */}
-          <div>{ritual}</div>
+          <Ui2Window kicker="Pick a Card" note="4 กองไพ่ · สำรับ 1909" tone={2}>
+            {ritual}
+          </Ui2Window>
 
           <SeoArticleShell
             eyebrow="ศาสตร์แห่งการเลือกกองไพ่"
