@@ -1,199 +1,69 @@
 /*
- * 🜄 v2 หน้าไพ่ตามชุด (/cards/major · minor · wands · cups · swords · pentacles · ทั้งสองภาษา) — สร้างใหม่ (เจ้าของ 2026-10-16)
- * เอกลักษณ์: ห้องธาตุ — หัวหน้าเรืองสีธาตุของชุด + พัดไพ่จริง 5 ใบของชุด · แถบสลับหมวดสีธาตุ · กริดขึ้นก่อนบทนำ
- * ⚠️ ไม่แตะการ์ดในกริด (ด่าน test-card-tile-height) · สีธาตุ `--el` จาก ui2-page.css หัวข้อ 12
- * นำเข้าต่อจาก ui2-page.css · ไม่มี filter/backdrop/mask/อนิเมชันวน
+ * 🜄 หน้าไพ่ตามชุด (/cards/major · minor · wands · cups · swords · pentacles · ทั้งสองภาษา)
+ * v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): หัวหน้าไพ่ลอย (ไพ่จริงของหมวดนั้น) + ชิปสลับหมวด
+ *    ➔ บทของหมวดเป็นหน้าต่างโชว์เคส (Ui2Showcase) · การ์ด v3-card-tile.css · คู่มืออ่านเป็นหน้าต่างสุดท้าย
+ * สีธาตุ `--el` จาก ui2-page.css หัวข้อ 12 · ไม่มี filter/backdrop/mask/อนิเมชันวน
  */
 
-.v2-cg-head {
-  position: relative;
-  isolation: isolate;
-  display: grid;
-  gap: 24px;
-  align-items: center;
-  margin-top: 8px;
-  padding: 30px 22px;
-  border-radius: 30px;
-  border: 1px solid rgba(var(--el), 0.35);
-  overflow: hidden;
-  background:
-    radial-gradient(60% 100% at 85% 50%, rgba(var(--el), 0.22) 0%, rgba(var(--el), 0) 70%),
-    linear-gradient(180deg, rgba(36, 28, 40, 0.92) 0%, rgba(18, 14, 21, 0.92) 100%);
-  box-shadow: 0 50px 90px -50px rgba(0, 0, 0, 0.95);
-}
-@media (min-width: 900px) {
-  .v2-cg-head {
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-    min-height: 380px;
-    padding: 44px 48px;
-  }
-}
-.v2-cg-head .ui2-ph-crumb {
-  justify-content: flex-start;
-}
-.v2-cg-head .ui2-ph-crumb::before,
-.v2-cg-head .ui2-ph-crumb::after {
-  display: none;
-}
-.v2-cg-title {
-  margin: 12px 0 0;
-  font-family: var(--ui2-font-display);
-  font-size: clamp(30px, 4.2vw, 52px);
-  font-weight: 700;
-  line-height: 1.14;
-  color: var(--ui2-on-night);
-  text-wrap: balance;
-}
-.v2-cg-lede {
-  max-width: 520px;
-  margin: 12px 0 0;
-  font-size: 15.5px;
-  line-height: 1.75;
-  color: var(--ui2-on-night-soft);
-}
-.v2-cg-facts {
+/* ชิปสลับหมวด (อยู่ในหัวหน้า) */
+.v3-cg-switch {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 8px;
-  margin: 20px 0 0;
-  padding: 0;
-  list-style: none;
-}
-.v2-cg-facts li {
-  padding: 6px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(var(--el), 0.4);
-  font-size: 13px;
-  color: var(--ui2-on-night-soft);
-}
-.v2-cg-facts b {
-  font-family: var(--ui2-font-display);
-  font-size: 16px;
-  color: rgb(var(--el));
-}
-
-/* พัดไพ่ของชุด */
-.v2-cg-fan {
-  position: relative;
-  display: block;
-  height: 170px;
-}
-@media (min-width: 900px) {
-  .v2-cg-fan {
-    height: 300px;
-  }
-}
-.v2-cg-fan-card {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  display: block;
-  width: 92px;
-  border-radius: 8px;
-  overflow: hidden;
-  transform-origin: 50% 120%;
-  box-shadow: 0 0 0 1px rgba(var(--el), 0.6), 0 22px 34px -16px rgba(0, 0, 0, 0.95);
-  translate: -50% 0;
-}
-@media (min-width: 900px) {
-  .v2-cg-fan-card {
-    width: 150px;
-    border-radius: 10px;
-  }
-}
-.v2-cg-fan-card img {
-  display: block;
   width: 100%;
-  height: auto;
+  margin-top: 6px;
 }
-.v2-cg-fan-1 {
-  z-index: 1;
-  rotate: -24deg;
-}
-.v2-cg-fan-2 {
-  z-index: 2;
-  rotate: -12deg;
-}
-.v2-cg-fan-3 {
-  z-index: 3;
-  rotate: 0deg;
-  box-shadow: 0 0 0 1.5px rgb(var(--el)), 0 0 40px rgba(var(--el), 0.35), 0 22px 34px -16px rgba(0, 0, 0, 0.95);
-}
-.v2-cg-fan-4 {
-  z-index: 2;
-  rotate: 12deg;
-}
-.v2-cg-fan-5 {
-  z-index: 1;
-  rotate: 24deg;
-}
-
-/* แถบสลับหมวด */
-.v2-cg-switch {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  padding-bottom: 2px;
-}
-.v2-cg-switch::-webkit-scrollbar {
-  display: none;
-}
-@media (min-width: 1024px) {
-  .v2-cg-switch {
-    flex-wrap: wrap;
-    justify-content: center;
-    overflow: visible;
-  }
-}
-.v2-cg-switch a {
+.v3-cg-switch a {
   display: inline-flex;
-  flex: none;
   align-items: center;
   gap: 8px;
-  min-height: 42px;
-  padding: 0 15px;
+  min-height: 40px;
+  padding: 0 14px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 236, 200, 0.14);
-  background: rgba(18, 14, 21, 0.75);
-  font-size: 13.5px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
   color: var(--ui2-on-night-soft);
-  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night);
+  transition: color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
 }
-.v2-cg-switch a:hover {
-  border-color: rgba(var(--el), 0.6);
-  color: rgb(var(--el));
+.v3-cg-switch a span {
+  font-size: 12px;
+  color: var(--ui2-on-night-dim);
 }
-.v2-cg-switch-ic {
-  width: 15px;
-  height: 15px;
-  color: rgb(var(--el));
-}
-.v2-cg-switch a[aria-current="page"] {
-  border-color: rgba(var(--el), 0.7);
-  background: radial-gradient(90% 140% at 50% 0%, rgba(var(--el), 0.3) 0%, rgba(var(--el), 0.08) 80%);
-  font-weight: 600;
+.v3-cg-switch a:hover {
   color: var(--ui2-on-night);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.5);
 }
-
-/* บทนำท้ายกริด */
-.v2-cg-intro {
-  padding: 28px 22px;
-  border-radius: 26px;
-  border: 1px solid rgba(255, 236, 200, 0.1);
-  background: rgba(28, 23, 30, 0.6);
+.v3-cg-switch a[aria-current="page"] {
+  color: var(--ui2-night);
+  background: var(--ui2-gold-solid);
+  box-shadow: none;
 }
-@media (min-width: 768px) {
-  .v2-cg-intro {
-    padding: 36px 42px;
+.v3-cg-switch a[aria-current="page"] span {
+  color: rgba(12, 10, 15, 0.7);
+}
+.v3-cg-switch a:focus-visible {
+  outline: 2px solid var(--ui2-gold-solid);
+  outline-offset: 3px;
+}
+/* หน้าต่างอยู่เหนือไพ่ลอยของหัวหน้า */
+.v3-cg .ui2-sx {
+  position: relative;
+  z-index: 3;
+  margin-top: 4px;
+}
+@media (min-width: 1200px) {
+  .v3-cg .ui2-ph {
+    padding-bottom: 40px;
   }
 }
-.v2-cg-h2 {
-  margin: 0 0 16px;
-  font-family: var(--ui2-font-display);
-  font-size: clamp(22px, 2.6vw, 30px);
-  font-weight: 700;
-  color: var(--ui2-on-night);
+
+/* คู่มืออ่าน = หน้าต่างสุดท้ายของโชว์เคส (กรอบมาจากหน้าต่างแล้ว ไม่ซ้อนกล่อง) */
+.v2-cg-intro {
+  padding-bottom: 6px;
 }
 .v2-cg-prose {
   display: grid;

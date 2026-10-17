@@ -195,11 +195,26 @@
   width: 100%;
   margin-top: 10px;
 }
+/* หัวหน้าเป็น flex คอลัมน์จัดกลาง ➔ ลูกกว้างเท่าเนื้อหา จึงไม่ขึ้นบรรทัด (ชิปล้นจอมือถือ) — ให้เต็มความกว้าง */
 .v3-cx .v2-cx-try {
+  width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
   margin-top: 4px;
 }
+/* หน้าต่างอยู่เหนือไพ่ลอยของหัวหน้า (ไพ่ใบล่างขวาเคยทับมุมหน้าต่างแรก) */
 .v3-cx .ui2-sx {
-  margin-top: 12px;
+  position: relative;
+  z-index: 3;
+  margin-top: 4px;
+}
+.v3-cx .ui2-ph {
+  padding-bottom: 8px;
+}
+@media (min-width: 1200px) {
+  .v3-cx .ui2-ph {
+    padding-bottom: 40px;
+  }
 }
 /* สรุปผลค้นหาเหนือหน้าต่างแรก */
 .v3-cx-status {
