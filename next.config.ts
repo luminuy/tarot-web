@@ -44,7 +44,7 @@ const nextConfig: NextConfig = {
     config.output = config.output || {};
     config.output.hashFunction = "sha256";
     /*
-     * 🔁 ชื่อไฟล์ chunk ฝั่งเบราว์เซอร์ต้องไม่มีอักขระที่ "เขียนได้สองแบบ" ใน URL (ISSUE-060 · ERR_TOO_MANY_REDIRECTS)
+     * 🔁 ชื่อไฟล์ chunk ฝั่งเบราว์เซอร์ต้องไม่มีอักขระที่ "เขียนได้สองแบบ" ใน URL (INC-0264 · ISSUE-060 · ERR_TOO_MANY_REDIRECTS)
      * ---------------------------------------------------------------------------
      * webpack ตั้งชื่อ chunk ของหน้าแอปตามโฟลเดอร์ เช่น `app/(th)/layout` · `app/(th)/s/[id]/page`
      * ชั้น assets ของ Cloudflare ถอดรหัส path แล้วเข้ารหัสใหม่ทีละท่อนด้วย `encodeURIComponent`

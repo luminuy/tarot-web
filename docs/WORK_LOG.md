@@ -38,7 +38,7 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
-### 🗓️ 2026-10-17 (รอบ 245): หน้าที่ Next เรนเดอร์ (`/reset-password` · `/tester` ฯลฯ) ขึ้นหน้า error กลาง — chunk ใต้ `(th)` วน 307 จน ERR_TOO_MANY_REDIRECTS (ISSUE-060)
+### 🗓️ 2026-10-17 (รอบ 245): หน้าที่ Next เรนเดอร์ (`/reset-password` · `/tester` ฯลฯ) ขึ้นหน้า error กลาง — chunk ใต้ `(th)` วน 307 จน ERR_TOO_MANY_REDIRECTS (INC-0264 · ISSUE-060)
 
 - **อาการ**: production + preview ขึ้น "เกิดข้อผิดพลาดชั่วคราวในการโหลดระบบ" · console: `ERR_TOO_MANY_REDIRECTS` + `ChunkLoadError: Loading chunk 5679 failed (/_next/static/chunks/app/(th)/layout-*.js)`
 - **วัดจริง**: `curl` path `%28th%29` ➔ **307** ไป `(th)` · `[id]` ➔ 307 ไป `%5Bid%5D` · คนออก 307 คือ **asset-worker ของ Cloudflare เอง** (ถอดรหัส path แล้วเข้ารหัสใหม่ด้วย `encodeURIComponent` ทีละท่อน ไม่ตรง = 307 · อ่านจาก `miniflare/dist/src/workers/assets/assets.worker.js` · ไม่มีค่าใน `wrangler.jsonc` ที่ปิดได้) · `encodeURIComponent` ไม่เข้ารหัสวงเล็บ ไคลเอนต์ที่เข้ารหัสวงเล็บเองจึงวนไม่จบ (Chromium ในเครื่องไม่เข้ารหัส จึงไม่เห็นอาการ)
