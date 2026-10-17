@@ -351,3 +351,16 @@ html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > se
   background: linear-gradient(180deg, #FFE3A8 0%, #F0C470 100%);
   box-shadow: 0 0 0 1px rgba(184, 105, 28, 0.35);
 }
+/* เงาดำหนักใต้ไพ่/การ์ด (ออกแบบไว้บนพื้นมืด) บนกรอบครีมกลายเป็นสี่เหลี่ยมเทาใต้ไพ่
+   (เจ้าของ 2026-10-17 ส่งภาพไพ่คนเขลา/การตื่นขึ้น "ข้างล่างสี่เหลี่ยมที่ขึ้นมาคืออะไร ไม่เอา") ➔ ในกรอบครีมใช้เงาอุ่นจาง */
+html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) {
+  --ui2-card-shadow: 0 0 0 1px rgba(201, 161, 90, 0.5), 0 18px 28px -20px rgba(74, 47, 16, 0.5);
+}
+html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.v3-tile-frame, .ui2-qn-note, .v2-qp-note, .v3-at-art, .ui2-sp-topic-art, .ui2-zw-card, .v3-bl-cover-art) {
+  box-shadow: 0 0 0 1px rgba(201, 161, 90, 0.45), 0 14px 22px -18px rgba(74, 47, 16, 0.5);
+}
+@media (hover: hover) {
+  html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .v3-tile:hover .v3-tile-frame {
+    box-shadow: 0 0 0 1px rgba(184, 105, 28, 0.6), 0 22px 34px -20px rgba(74, 47, 16, 0.55);
+  }
+}
