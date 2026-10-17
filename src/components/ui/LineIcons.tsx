@@ -51,6 +51,15 @@ export function ChevronIcon({ className = "w-4 h-4", direction = "down" }: LineI
   );
 }
 
+/** ลูกศรไปต่อ (ก้าน + หัว) — ปุ่มวงกลมท้ายการ์ดลิงก์ (เจ้าของ 2026-10-17 "ใส่ลูกศรลงในปุ่ม ไม่งั้นดูแปลก") */
+export function ArrowIcon({ className = "w-4 h-4" }: LineIconProps) {
+  return (
+    <svg {...base(className)} strokeWidth={2.2}>
+      <path d="M5 12h13M13 6.5l5.5 5.5-5.5 5.5" />
+    </svg>
+  );
+}
+
 /** ลูกศรวน — โหลดใหม่ */
 export function RefreshIcon({ className = "w-4 h-4" }: LineIconProps) {
   return (

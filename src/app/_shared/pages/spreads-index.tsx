@@ -14,6 +14,7 @@ import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { CardImage } from "@/components/card/CardImage";
 import { SPREAD_SHELVES } from "@/data/spread-shelves";
 import { isStandardSpread } from "@/lib/entitlement/limits";
+import { ArrowIcon } from "@/components/ui/LineIcons";
 
 const PATH = "/spreads";
 
@@ -281,6 +282,7 @@ export function SpreadsIndexBody({ locale, library }: { locale: Locale; library:
                   <span className="ui2-sp-tile-name">{item.label}</span>
                   <span className="ui2-sp-tile-note">{item.note}</span>
                   <span className="ui2-sp-tile-go" aria-hidden="true">
+                    <ArrowIcon className="w-[18px] h-[18px]" />
                   </span>
                 </a>
               </li>

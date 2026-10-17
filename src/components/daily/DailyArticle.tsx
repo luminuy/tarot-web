@@ -10,6 +10,7 @@ import type { ReactNode } from "react";
 
 import { CardImage } from "@/components/card/CardImage";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { ArrowIcon } from "@/components/ui/LineIcons";
 
 export interface DailyTip {
   title: string;
@@ -124,7 +125,8 @@ export function DailyArticle({
                 <span className="ui2-sp-tile-name">{item.label}</span>
                 <span className="ui2-sp-tile-note">{item.note}</span>
                 <span className="ui2-sp-tile-go" aria-hidden="true">
-                </span>
+                    <ArrowIcon className="w-[18px] h-[18px]" />
+                  </span>
               </a>
             </li>
           ))}

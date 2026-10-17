@@ -395,12 +395,8 @@
   background: var(--ui2-gold-solid);
   transition: scale var(--dur-fast) var(--ease-out);
 }
-.ui2-sp-tile-go .ui2-btn-arrow {
-  width: 7px;
-  height: 7px;
-  margin-left: -2px;
-  border-top-width: 1.6px;
-  border-right-width: 1.6px;
+.ui2-sp-tile-go svg {
+  display: block;
 }
 .ui2-sp-tile-art img {
   display: block;
@@ -427,6 +423,9 @@
   }
   .ui2-sp-tile:hover .ui2-sp-tile-go {
     scale: 1.1;
+  }
+  .ui2-sp-tile:hover .ui2-sp-tile-go svg {
+    translate: 2px 0;
   }
 }
 @media (min-width: 768px) {
