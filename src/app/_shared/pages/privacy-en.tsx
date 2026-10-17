@@ -45,6 +45,8 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
           kind="lock"
           crumbs={[{ label: "Home", href: "/" }, { label: "Privacy" }]}
           title="Privacy Policy & Data Protection"
+          accent="Privacy Policy"
+          kicker="PDPA · GDPR · CCPA"
           lede="Compliance Framework for PDPA (B.E. 2562), GDPR (EU 2016/679), and CCPA/CPRA"
         />
 

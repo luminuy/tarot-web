@@ -246,12 +246,18 @@ const DOC_CARDS: Record<"seal" | "letter" | "lock", readonly [string, string]> =
 export function Ui2DocHead({
   crumbs,
   title,
+  accent,
+  kicker,
   lede,
   kind,
   meta,
 }: {
   crumbs?: Ui2Crumb[];
   title: string;
+  /** คำในหัวข้อที่เป็นทอง (ต้องเป็นส่วนหนึ่งของ title) */
+  accent?: string;
+  /** เม็ดเล็กเหนือหัวข้อแบบหัวหน้าหน้าแรก ("สำรับ 1909 แท้ · สุ่มจริง ตรวจสอบได้") — ข้อเท็จจริงของหน้า */
+  kicker?: string;
   lede?: ReactNode;
   kind: "seal" | "letter" | "lock";
   meta?: string;
@@ -266,13 +272,13 @@ export function Ui2DocHead({
           </span>
         ))}
       </span>
-      <span className={`v2-doc-mark is-${kind}`} aria-hidden="true">
-        <span />
-      </span>
-      <div>
+      {/* v4 (เจ้าของ 2026-10-17 "ปรับปรุงตรงนี้หน่อย"): ถอดตราวงกลมทองซ้ายหัวข้อ (รูปทรงตกแต่ง · กฎเหล็ก 2) ➔ จัดกลางแบบหัวหน้าหน้าแรก
+          เม็ดข้อเท็จจริงเหนือหัวข้อ · หัวข้อใหญ่มีคำทอง · คำโปรยอ่านง่ายขึ้น */}
+      <div className="v2-doc-head-in">
         {crumbs && crumbs.length > 0 && <Ui2Crumbs crumbs={crumbs} />}
+        {kicker && <p className="v2-doc-pill">{kicker}</p>}
         <h1 className="v2-doc-title">
-          <Phrase text={title} />
+          <TitleWithAccent title={title} accent={accent} />
         </h1>
         {lede && <p className="v2-doc-lede">{lede}</p>}
         {meta && <p className="v2-doc-meta">{meta}</p>}

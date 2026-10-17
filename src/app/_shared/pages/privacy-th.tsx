@@ -45,6 +45,8 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
           kind="lock"
           crumbs={[{ label: "หน้าแรก", href: "/" }, { label: "นโยบายความเป็นส่วนตัว" }]}
           title="นโยบายความเป็นส่วนตัว และการคุ้มครองข้อมูลส่วนบุคคล"
+          accent="นโยบายความเป็นส่วนตัว"
+          kicker="PDPA · GDPR · CCPA"
           lede="กรอบการปฏิบัติตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA) และมาตรฐานสากล (GDPR / CCPA)"
         />
 

@@ -103,6 +103,7 @@ export function ContactBodyTh() {
           kind="letter"
           crumbs={[{ label: "หน้าแรก", href: "/" }, { label: "ติดต่อเรา" }]}
           title="ติดต่อเรา"
+          kicker="ตอบกลับภายใน 1–3 วันทำการ"
           lede="เราอ่านทุกข้อความที่ส่งเข้ามา"
         />
 

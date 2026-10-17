@@ -29,6 +29,18 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+/*
+ * สระล่าง/วรรณยุกต์ไทยถูกตัด (เจ้าของ 2026-10-17 ส่งภาพ "ดูดวงฟรีทุกวัน" — ุ ของ ดู/ทุ ขาดครึ่ง)
+ * background-clip: text วาดสีได้แค่ในกล่องพื้นหลังของตัวหนังสือ — หัวข้อ line-height ต่ำ กล่องเตี้ยกว่าสระล่าง/บน
+ * ➔ ขยายกล่องพื้นหลังบน-ล่างด้วย padding แล้วหักคืนด้วย margin ติดลบ (ตำแหน่งตัวหนังสือ/ระยะบรรทัดไม่เปลี่ยน)
+ */
+.ui2-gold-day,
+.ui2-gold-night {
+  padding-block: 0.22em;
+  margin-block: -0.22em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
 
 /* ตำแหน่ง/สี/จังหวะของก้อนออโรรา (แสดงจริงเฉพาะระดับ full) */
 .ui2-blob-amber { left: -8%; top: -10%; background: var(--ui2-aurora-amber); --dur: 18s; }

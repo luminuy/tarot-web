@@ -100,6 +100,7 @@ export function ContactBodyEn() {
           kind="letter"
           crumbs={[{ label: "Home", href: "/" }, { label: "Contact" }]}
           title="Contact Us"
+          kicker="Replies within 1–3 business days"
           lede="We personally review and attend to every message received."
         />
 

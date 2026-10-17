@@ -21,6 +21,8 @@
 .ui2-next-wrap {
   max-width: 1200px;
   margin-inline: auto;
+  /* กล่องแถวสุดท้ายห้ามชนท้ายเว็บ (หน้า /daily ไม่มีระยะล่างใน <main> · เจ้าของส่งภาพ 2026-10-17) */
+  padding-bottom: 64px;
 }
 .ui2-next {
   margin-top: 72px;

@@ -102,6 +102,8 @@ export function AboutBodyTh() {
           kind="seal"
           crumbs={[{ label: "หน้าแรก", href: "/" }, { label: "เกี่ยวกับเรา" }]}
           title="เกี่ยวกับ SeerTarot"
+          accent="SeerTarot"
+          kicker="เปิดเผยทุกขั้นตอน · ตรวจสอบได้จริง"
           lede="ใครอยู่เบื้องหลัง และคำทำนายมาจากไหน"
         />
 
