@@ -139,3 +139,18 @@
   font-weight: 700;
   color: var(--ui2-on-night);
 }
+
+/* ── v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): ไพ่จริงลอยสองข้างหัวหน้า ── */
+.v3-pr-hero {
+  position: relative;
+  isolation: isolate;
+}
+.v3-pr-hero .v2-pr-head {
+  position: relative;
+  z-index: 2;
+}
+@media (max-width: 767px) {
+  .v3-pr-hero .v2-pr-head {
+    padding-top: 56px;
+  }
+}

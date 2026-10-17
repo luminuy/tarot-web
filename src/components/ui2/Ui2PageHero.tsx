@@ -235,6 +235,13 @@ export function Ui2TightHead({
  * หัวกระดาษแบบจดหมายทางการ + ตราประจำหน้า (รูปทรง CSS ล้วน ไม่ใช่อีโมจิ): ตราประทับ · ซองจดหมาย · แม่กุญแจ
  * เนื้อหาเป็นบทมีเลข (CSS counter ใน `.v2-doc`) · สไตล์ `.v2-doc*` ใน ui2-page.css หัวข้อ 20
  */
+/** ไพ่ลอยสองข้างหัวเอกสาร ตามชนิดหน้า (ตกแต่ง · ไม่ใช่ผลสุ่ม) */
+const DOC_CARDS: Record<"seal" | "letter" | "lock", readonly [string, string]> = {
+  seal: ["major-01", "major-21"],
+  letter: ["major-03", "cups-03"],
+  lock: ["major-11", "swords-04"],
+};
+
 export function Ui2DocHead({
   crumbs,
   title,
@@ -249,7 +256,15 @@ export function Ui2DocHead({
   meta?: string;
 }) {
   return (
-    <header className="v2-doc-head">
+    <header className="v2-doc-head" data-anim-section="">
+      {/* v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): ไพ่จริงลอยสองข้างหัวกระดาษ (คอม · iPad) */}
+      <span className="ui2-ph-deco v2-doc-deco" aria-hidden="true">
+        {DOC_CARDS[kind].map((cardId, i) => (
+          <span key={cardId} className={`ui2-ph-card ui2-loop ui2-ph-card-${i === 0 ? 1 : 3}`}>
+            <CardImage cardId={cardId} alt="" thumb sizes={CARD_SIZES} loading="lazy" fetchPriority="low" />
+          </span>
+        ))}
+      </span>
       <span className={`v2-doc-mark is-${kind}`} aria-hidden="true">
         <span />
       </span>

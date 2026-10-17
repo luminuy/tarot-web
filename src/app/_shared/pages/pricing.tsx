@@ -8,6 +8,8 @@ import { jsonLdScript } from "@/lib/seo/json-ld";
 import { getCreditPackages } from "@/lib/entitlement/packages";
 import { CHEAPEST_PACKAGE_THB, DAILY_LIMIT, READINGS_EN } from "@/lib/entitlement/copy";
 import { CheckMarkIcon, DashMarkIcon } from "@/components/entitlement/EntitlementIcons";
+import { CardImage } from "@/components/card/CardImage";
+import { Ui2Window } from "@/components/ui2/Ui2Showcase";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import type { Locale } from "@/lib/i18n/types";
 import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
@@ -249,6 +251,15 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
           v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — ตู้ขายตั๋ว: ซ้ายข้อความ · ขวาตั๋วใบใหญ่ "ฟรีวันละ N ครั้ง"
           บอกสิ่งที่ได้ฟรีก่อนสิ่งที่ต้องจ่าย (v1 หัวกลางพร้อมไพ่ลอย ไม่เห็นว่าฟรีได้แค่ไหนจนเลื่อนถึงตาราง)
         */}
+        {/* v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): ไพ่จริงลอยสองข้าง + เนื้อหาเป็นหน้าต่างเลขกำกับ */}
+        <div className="v3-pr-hero" data-anim-section="">
+        <span className="ui2-ph-deco" aria-hidden="true">
+          {(["major-19", "pentacles-10"] as const).map((cardId, i) => (
+            <span key={cardId} className={`ui2-ph-card ui2-loop ui2-ph-card-${i === 0 ? 1 : 3}`}>
+              <CardImage cardId={cardId} alt="" thumb sizes="(min-width: 768px) 128px, 44px" loading="eager" fetchPriority="low" />
+            </span>
+          ))}
+        </span>
         <header className="v2-pr-head">
           <div>
             <Ui2Crumbs crumbs={[{ label: isEn ? "Home" : "หน้าแรก", href: "/" }, { label: isEn ? "Pricing" : "ราคาและแพ็กเกจ" }]} />
@@ -288,18 +299,20 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
             </a>
           </div>
         </header>
+        </div>
 
         {/* ── แพ็ก (island) ───────────────────────────────────────── */}
         {/* แถบสีสลับแบบหน้าแรก (`page-band`): แพ็ก (อ่อน) · ตารางเทียบ (ใส) · คำถาม (อ่อน) · ปิดท้าย (ใส) */}
-        <section aria-labelledby="pricing-packages" className="page-band page-band-tint">
+        <Ui2Window n="01" kicker="Top-up packages" note={isEn ? "Pay once · never expires" : "จ่ายครั้งเดียว · ไม่มีวันหมดอายุ"} tone={4}>
           <h2 id="pricing-packages" className="sr-only">
             {isEn ? "Plans and packages" : "แพ็กเกจทั้งหมด"}
           </h2>
           {plans}
-        </section>
+        </Ui2Window>
 
         <div className="v2-pr-two">
         {/* ── ตารางเทียบสิทธิ์ ────────────────────────────────────── */}
+        <Ui2Window n="02" kicker="Compare" tone={2}>
         <section aria-labelledby="pricing-compare" className="space-y-6">
           <h2 id="pricing-compare" className="v2-pr-h2">
             <ThaiPhrases>{isEn ? "Compare plans" : "เทียบสิทธิ์ทั้งหมด"}</ThaiPhrases>
@@ -338,8 +351,10 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
             </table>
           </div>
         </section>
+        </Ui2Window>
 
         {/* ── คำถามที่พบบ่อย ──────────────────────────────────────── */}
+        <Ui2Window n="03" kicker="Questions" tone={5}>
         <section aria-labelledby="pricing-faq" className="space-y-6">
           <h2 id="pricing-faq" className="v2-pr-h2">
             <ThaiPhrases>{isEn ? "Frequently asked questions" : "คำถามที่พบบ่อย"}</ThaiPhrases>
@@ -363,6 +378,7 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
             ))}
           </div>
         </section>
+        </Ui2Window>
 
         </div>
 

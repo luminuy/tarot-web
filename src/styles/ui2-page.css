@@ -1284,24 +1284,79 @@
   border-radius: 3px;
   background: #241B26;
 }
-/* บท = แผ่นกระดาษมืดมีเส้นทองซ้าย (แทนแถบสีสลับของ v1) */
-.ui2-pg .v2-doc > section {
-  position: relative;
-  margin: 0 0 14px;
-  padding: 24px 24px 24px 28px;
-  border-radius: 22px;
-  border: 1px solid rgba(255, 236, 200, 0.1);
-  background: linear-gradient(180deg, rgba(36, 28, 40, 0.8) 0%, rgba(22, 17, 26, 0.8) 100%);
+/* บท = หน้าต่างเลขกำกับแบบ /spreads (v3 · เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง")
+   ป้ายเลขสร้างจาก CSS counter — ไม่ต้องแก้ markup ของ 6 หน้า · เส้นทองบนขอบ + เส้นใต้แถบเหมือนหน้าต่างโชว์เคส */
+.ui2-pg .v2-doc {
+  counter-reset: doc-sec;
 }
+.ui2-pg .v2-doc > section {
+  counter-increment: doc-sec;
+  position: relative;
+  margin: 0 0 18px;
+  padding: 78px 24px 26px;
+  border-radius: 26px;
+  border: 0;
+  background:
+    radial-gradient(70% 140px at 50% 0, rgba(255, 217, 143, 0.1) 0%, transparent 100%),
+    var(--ui2-glass-night-solid);
+  box-shadow: 0 0 0 1px var(--ui2-line-night), 0 1px 0 var(--ui2-glass-edge-night) inset, 0 40px 80px -40px rgba(0, 0, 0, 0.85);
+}
+@media (min-width: 768px) {
+  .ui2-pg .v2-doc > section {
+    padding: 84px 32px 30px;
+    border-radius: 32px;
+  }
+}
+/* ป้ายเลข 01 02 … บนแถบ */
 .ui2-pg .v2-doc > section::before {
+  content: counter(doc-sec, decimal-leading-zero);
+  position: absolute;
+  left: 24px;
+  top: 18px;
+  display: inline-grid;
+  place-items: center;
+  min-width: 30px;
+  height: 24px;
+  padding-inline: 8px;
+  border-radius: 99px;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui2-note-ink-4);
+  background: var(--ui2-note-4);
+}
+/* เส้นใต้แถบ + เส้นทองบนขอบ */
+.ui2-pg .v2-doc > section::after {
   content: "";
   position: absolute;
-  left: 0;
-  top: 24px;
-  bottom: 24px;
-  width: 3px;
-  border-radius: 0 3px 3px 0;
-  background: linear-gradient(180deg, #FFD98F, rgba(255, 217, 143, 0.2));
+  left: 16px;
+  right: 16px;
+  top: 58px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--ui2-line-night) 15%, var(--ui2-line-night) 85%, transparent 100%);
+}
+@media (min-width: 768px) {
+  .ui2-pg .v2-doc > section::before {
+    left: 28px;
+    top: 20px;
+  }
+  .ui2-pg .v2-doc > section::after {
+    top: 62px;
+  }
+}
+/* หัวกระดาษ: ไพ่ลอยอยู่หลังเนื้อหา · มือถือไม่มีไพ่ (ตราประจำหน้าอยู่มุมซ้ายบนแล้ว) */
+.v2-doc-head {
+  position: relative;
+  isolation: isolate;
+}
+.v2-doc-head > :not(.v2-doc-deco) {
+  position: relative;
+  z-index: 2;
+}
+@media (max-width: 767px) {
+  .v2-doc-deco {
+    display: none;
+  }
 }
 .ui2-pg .v2-doc > section h2 {
   font-family: var(--ui2-font-display);
