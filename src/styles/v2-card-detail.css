@@ -324,3 +324,22 @@
   color: var(--ui2-on-night);
   overflow-wrap: anywhere;
 }
+
+/* ── ส่วนท้ายใต้หน้าต่างโชว์เคส (ไพ่ใกล้เคียง · ผังที่ใช้ไพ่ใบนี้) ──
+   เจ้าของ 2026-10-17 ส่งภาพ "ทับ และซ้อนกัน": แผงไพ่ใกล้เคียงชิดขอบล่างหน้าต่างที่ 03 จนมุมซ้อนกัน
+   และกว้างเต็มจนลอดใต้รายชื่อหมวดซ้าย ➔ เว้นระยะ + คอม ≥ 1200 เยื้องเท่าคอลัมน์รายชื่อ (230 + ช่องไฟ 40) */
+.v3-cd-after {
+  display: grid;
+  gap: 28px;
+  margin-top: 40px;
+}
+.v3-cd-after > .page-band {
+  margin: 0;
+  padding-block: 26px;
+}
+@media (min-width: 1200px) {
+  .v3-cd-after {
+    margin-top: 56px;
+    padding-left: 270px;
+  }
+}

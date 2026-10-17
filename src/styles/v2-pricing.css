@@ -150,10 +150,11 @@
     left: 0.6%;
     top: 120px;
   }
+  /* ใบขวาอยู่บน — หัวหน้าหน้านี้สูงแค่ ~315px ใบล่างเดิม (top 300) เลยลงไปทับหน้าต่างแพ็ก (เจ้าของ 2026-10-17 "ไพ่ทับตัวอักษร") */
   [data-fx="full"] .v3-pr-hero .ui2-ph-card-3 {
     --w: clamp(64px, 6.6vw, 100px);
     right: 0.6%;
-    top: 300px;
+    top: 16px;
   }
 }
 @media (min-width: 768px) and (max-width: 1399px) {

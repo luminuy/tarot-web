@@ -291,7 +291,8 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
       */}
       <Ui2Showcase label={isEnglish ? `${card.nameEn} meanings` : `ความหมายไพ่${card.nameTh}`} sections={sections} />
 
-      {related}
+      {/* ไพ่ใกล้เคียง + ผังที่ใช้ไพ่ใบนี้ — แนวเดียวกับหน้าต่างด้านบน (ไม่ลอดใต้รายชื่อซ้าย · มีระยะห่าง) */}
+      <div className="v3-cd-after">{related}</div>
 
       {/* ใบก่อนหน้า / ถัดไป */}
       <nav className="v2-cd-nav" aria-label={isEnglish ? "Previous and next card" : "ไพ่ใบก่อนหน้าและถัดไป"}>

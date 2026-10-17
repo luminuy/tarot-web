@@ -20,12 +20,12 @@
     right: auto;
   }
   [data-fx="full"] .ui2-ph-card-2 {
-    --w: clamp(70px, 7.4vw, 108px);
+    --w: clamp(64px, 6.4vw, 92px);
     --r: 7deg;
     --bob: 9s;
     --delay: -2s;
     left: 4%;
-    top: 320px;
+    top: 304px;
   }
   [data-fx="full"] .ui2-ph-card-3 {
     --w: clamp(84px, 9.2vw, 136px);
@@ -37,12 +37,23 @@
     left: auto;
   }
   [data-fx="full"] .ui2-ph-card-4 {
-    --w: clamp(70px, 7.4vw, 108px);
+    --w: clamp(64px, 6.4vw, 92px);
     --r: -7deg;
     --bob: 9.5s;
     --delay: -4s;
     right: 4.5%;
-    top: 340px;
+    top: 318px;
+  }
+  /*
+   * ไพ่แนวล่างต้องไม่เลยขอบล่างหัวหน้า (เจ้าของ 2026-10-17 ส่งภาพ /cards "ไพ่ทับตัวอักษร" — ไพ่ล่างทับรายชื่อหมวด/หน้าต่าง)
+   * หัวหน้าที่เนื้อหาน้อย (/cards · /questions · /blog) สูงแค่ 320–410px แต่ไพ่สองแนวต้องใช้ ~500px
+   * ➔ ระดับ full ให้หัวหน้าสูงอย่างน้อย 520px แล้ววางเนื้อหากลางแนวตั้ง (หัวเตี้ยมีไพ่แนวบนแนวเดียว ไม่ต้องสูง)
+   */
+  [data-fx="full"] .ui2-ph:not(.is-compact) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 520px;
   }
   [data-fx="full"] .ui2-ph-card-5 {
     --w: clamp(48px, 4.4vw, 64px);
