@@ -215,7 +215,9 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
             {BIRTH_STEPS.map((step, i) => (
               <li key={step.title} className="v2-bcp-stepcard">
                 <span className="v2-bcp-stepn" aria-hidden="true">{i + 1}</span>
-                <h3 className="tp">{step.title}</h3>
+                <h3>
+                  <ThaiPhrases>{step.title}</ThaiPhrases>
+                </h3>
                 <p className="v2-bcp-math">{step.math}</p>
                 <p>{step.text}</p>
               </li>

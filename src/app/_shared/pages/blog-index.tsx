@@ -134,11 +134,12 @@ export function BlogIndexBody({ locale, list }: { locale: Locale; list: ReactNod
   ]);
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink p-4 sm:p-8 font-sans selection:bg-gold/20 selection:text-ink">
+    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink px-4 sm:px-6 font-sans relative overflow-x-clip selection:bg-gold/20 selection:text-ink">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(blogJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbsJsonLd) }} />
 
-      <div className="max-w-6xl mx-auto space-y-8 pb-16">{list}</div>
+      {/* กว้างพอสำหรับรายชื่อหมวดซ้าย + หน้าต่าง (ชุดเดียวกับ /spreads) */}
+      <div className="max-w-[1360px] mx-auto pb-16 relative z-10">{list}</div>
     </main>
   );
 }

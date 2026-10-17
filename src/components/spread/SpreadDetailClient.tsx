@@ -266,7 +266,9 @@ export const SpreadDetailClient: React.FC<Props> = ({
               <span className="v2-sd-stepn" aria-hidden="true">
                 {idx + 1}
               </span>
-              <h3>{step.name}</h3>
+              <h3>
+                <ThaiPhrases>{step.name}</ThaiPhrases>
+              </h3>
               <p>{step.text}</p>
             </li>
           ))}

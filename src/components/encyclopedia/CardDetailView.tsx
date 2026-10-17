@@ -140,7 +140,9 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
         <>
           {orientations.map((o) => (
             <div key={o.key} data-when={o.key} className="v3-cd-side">
-              <h3 className="v3-cd-side-k">{o.headingKeywords}</h3>
+              <h3 className="v3-cd-side-k">
+                <ThaiPhrases>{o.headingKeywords}</ThaiPhrases>
+              </h3>
               <ul className="v3-cd-kw">
                 {keywordsByOrientation[o.key].map((kw, i) => (
                   <li key={i}>{kw}</li>
