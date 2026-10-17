@@ -8,7 +8,8 @@
 import { useMemo, useState } from "react";
 
 import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
-import { thaiDay } from "@/components/admin/StatsWidgets";
+import { AdminSection, AdminSubTabs, EmptyState, KpiGrid, useSubTab, type SubTab } from "@/components/admin/AdminLayout";
+import { StatCard, thaiDay } from "@/components/admin/StatsWidgets";
 import { AUDIT_ACTIONS, AUDIT_ALERT, AUDIT_GROUP_NAME, auditGroupOf, type AuditGroup } from "@/lib/admin/audit-labels";
 import { useAdminResource } from "@/lib/admin/use-admin-resource";
 import { APP_TIME_ZONE } from "@/lib/time/bangkok";
@@ -28,7 +29,9 @@ const dayKey = (ms: number) => new Intl.DateTimeFormat("en-CA", { timeZone: APP_
 
 export default function AuditLogPanel() {
   const { data, loading, error, reload } = useAdminResource<Entry[]>("/api/admin/audit?limit=500", { select });
-  const [group, setGroup] = useState<AuditGroup | "">("");
+  const groupIds = useMemo(() => ["all", ...Object.keys(AUDIT_GROUP_NAME)] as ("all" | AuditGroup)[], []);
+  const [tab, setTab] = useSubTab<"all" | AuditGroup>(groupIds);
+  const group = tab === "all" ? "" : tab;
   const [text, setText] = useState("");
 
   const entries = useMemo(() => {
@@ -41,6 +44,15 @@ export default function AuditLogPanel() {
   }, [data, group, text]);
 
   const failedLogins24h = (data ?? []).filter((e) => AUDIT_ALERT.has(e.action) && Date.now() - e.ts < 86_400_000).length;
+  const today = dayKey(Date.now());
+  const todayCount = (data ?? []).filter((e) => dayKey(e.ts) === today).length;
+  const last = data?.[0];
+
+  const tabs: SubTab<"all" | AuditGroup>[] = groupIds.map((id) => ({
+    id,
+    label: id === "all" ? "ทั้งหมด" : AUDIT_GROUP_NAME[id],
+    count: id === "all" ? null : (data ?? []).filter((e) => auditGroupOf(e.action) === id).length,
+  }));
 
   return (
     <div className="space-y-4">
@@ -50,39 +62,39 @@ export default function AuditLogPanel() {
         </p>
       ) : null}
 
-      <div className="flex flex-wrap items-end gap-3 rounded-xl border border-line bg-white p-3">
-        <div role="radiogroup" aria-label="หมวด" className="flex flex-wrap gap-1.5">
-          {([["", "ทั้งหมด"], ...Object.entries(AUDIT_GROUP_NAME)] as [AuditGroup | "", string][]).map(([k, label]) => (
-            <button
-              key={k || "all"}
-              type="button"
-              role="radio"
-              aria-checked={group === k}
-              onClick={() => setGroup(k)}
-              className={`tap-overlay-y rounded-full border px-3 py-1 text-xs ${group === k ? "border-ink bg-ink text-white" : "border-line bg-white text-muted hover:text-ink"}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="ค้นจากข้อความ เช่น ชื่อแม่หมอ หรือรหัสแลกสิทธิ์"
-          aria-label="ค้นจากข้อความ"
-          className="min-h-9 min-w-[14rem] flex-1 rounded-lg border border-line-interactive bg-white px-3 text-xs text-ink"
+      <KpiGrid>
+        <StatCard label="รายการที่โหลดมา" value={(data?.length ?? 0).toLocaleString("th-TH")} sub="ล่าสุด 500 รายการ · เก็บ 180 วัน" />
+        <StatCard label="วันนี้" value={todayCount.toLocaleString("th-TH")} sub="การกระทำของแอดมินวันนี้" />
+        <StatCard
+          label="ใส่รหัสผิด 24 ชม."
+          value={failedLogins24h.toLocaleString("th-TH")}
+          sub={failedLogins24h > 0 ? "ตรวจว่าเป็นคุณหรือไม่" : "ไม่พบความผิดปกติ"}
         />
-      </div>
+        <StatCard label="ล่าสุด" value={last ? when(last.ts) : "—"} sub={last ? AUDIT_ACTIONS[last.action]?.label ?? last.action : "ยังไม่มีรายการ"} />
+      </KpiGrid>
+
+      <AdminSubTabs label="หมวดบันทึก" tabs={tabs} active={tab} onChange={setTab} />
 
       {error ? <AdminErrorBanner error={error} onRetry={() => void reload()} /> : null}
 
-      <section className="altar-card-porcelain p-0">
-        <div className="flex items-center justify-between border-b border-line px-4 py-3 text-xs text-muted">
-          <span>{loading && !data ? "กำลังโหลด…" : `${entries.length.toLocaleString("th-TH")} รายการ`}</span>
-          <span>ล่าสุด 500 รายการ · เก็บย้อนหลัง 180 วัน</span>
-        </div>
+      <AdminSection
+        title={loading && !data ? "กำลังโหลด…" : `${entries.length.toLocaleString("th-TH")} รายการ`}
+        hint="เรียงจากใหม่ไปเก่า แบ่งตามวัน · ตัวสีแดงคือการใส่รหัสผิด"
+        padded={false}
+        actions={
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="ค้น เช่น ชื่อแม่หมอ หรือรหัสแลกสิทธิ์"
+            aria-label="ค้นจากข้อความ"
+            className="min-h-9 w-full min-w-[14rem] rounded-lg border border-line-interactive bg-white px-3 text-xs text-ink sm:w-72"
+          />
+        }
+      >
         {entries.length === 0 && !loading ? (
-          <p className="px-4 py-10 text-center text-xs text-muted">ไม่มีรายการตามตัวกรองนี้</p>
+          <div className="p-5">
+            <EmptyState title="ไม่มีรายการตามตัวกรองนี้" hint="ลองเลือกหมวด ทั้งหมด หรือล้างช่องค้นหา" />
+          </div>
         ) : (
           <ol className="divide-y divide-line">
             {entries.map((e, i) => {
@@ -107,7 +119,7 @@ export default function AuditLogPanel() {
             })}
           </ol>
         )}
-      </section>
+      </AdminSection>
     </div>
   );
 }

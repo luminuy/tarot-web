@@ -12,6 +12,7 @@
 
 import { useState } from "react";
 
+import { AdminSubTabs, useSubTab } from "@/components/admin/AdminLayout";
 import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
 import { ChartCard, DailyBars, FunnelChart, Sparkline, TrendChart } from "@/components/admin/ExecCharts";
 import { BarList, Delta, KeyValueList, StatCard, fmt, fmtPct, thaiDay } from "@/components/admin/StatsWidgets";
@@ -34,6 +35,7 @@ const VIEWS: { id: View; label: string; hint: string }[] = [
   { id: "marketing", label: "การตลาด (CMO)", hint: "คนเข้า · อ่านจบ · ซื้อ · กลับมาใช้" },
   { id: "operations", label: "การดำเนินงาน (COO)", hint: "เงิน · Stripe · AI · ความเสถียร" },
 ];
+const VIEW_IDS = VIEWS.map((v) => v.id);
 
 const baht = (n: number | null | undefined) =>
   n == null ? "—" : `${n.toLocaleString("th-TH", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} บาท`;
@@ -406,7 +408,7 @@ function OperationsView({ r }: { r: Report }) {
 
 export default function ExecutiveDashboard() {
   const [days, setDays] = useState<ExecutiveRange>(28);
-  const [view, setView] = useState<View>("summary");
+  const [view, setView] = useSubTab<View>(VIEW_IDS);
   const { data, loading, error, reload } = useAdminResource<Report>(`/api/admin/executive?days=${days}`, { select: selectReport });
 
   return (
@@ -458,23 +460,7 @@ export default function ExecutiveDashboard() {
       </div>
 
       {/* หน้ารายงาน */}
-      <div role="tablist" aria-label="หน้ารายงาน" className="flex flex-wrap gap-2 border-b border-line">
-        {VIEWS.map((v) => (
-          <button
-            key={v.id}
-            type="button"
-            role="tab"
-            aria-selected={view === v.id}
-            onClick={() => setView(v.id)}
-            className={`tap-overlay-y -mb-px border-b-2 px-3 pb-2 pt-1 text-left text-sm ${
-              view === v.id ? "border-ink font-semibold text-ink" : "border-transparent text-muted hover:text-ink"
-            }`}
-          >
-            {v.label}
-            <span className="block text-[11px] font-normal text-muted">{v.hint}</span>
-          </button>
-        ))}
-      </div>
+      <AdminSubTabs label="หน้ารายงาน" tabs={VIEWS} active={view} onChange={setView} />
 
       {error ? <AdminErrorBanner error={error} onRetry={() => void reload()} /> : null}
 

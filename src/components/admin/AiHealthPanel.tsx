@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { Button } from "@/components/ui/Button";
+import { AdminSection } from "@/components/admin/AdminLayout";
 import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
 import { useAdminResource } from "@/lib/admin/use-admin-resource";
 
@@ -144,23 +145,108 @@ export default function AiHealthPanel() {
             </div>
           </div>
 
+          {data.models.length > 0 && (
+            <AdminSection title="1. ทดสอบเชื่อมต่อรายโมเดล" hint="ยิงคำถามสั้น 1 ครั้งต่อโมเดล ดูว่าคีย์และโมเดลตอบได้" padded={false}>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[560px] text-left text-xs">
+                <thead className="bg-surface-warm text-muted border-b border-line">
+                  <tr>
+                    <th className="px-3.5 py-2.5 font-semibold">โมเดล</th>
+                    <th className="px-3.5 py-2.5 font-semibold">ผล</th>
+                    <th className="px-3.5 py-2.5 font-semibold">เวลา</th>
+                    <th className="px-3.5 py-2.5 font-semibold">รายละเอียด</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line-soft text-ink">
+                  {data.models.map((m) => (
+                    <tr key={m.model} className="hover:bg-surface-warm transition-colors align-top">
+                      <td className="px-3.5 py-3 font-mono text-xs">{m.model}</td>
+                      <td className="px-3.5 py-3">
+                        <span
+                          className={`inline-block rounded-md px-2 py-0.5 text-[11px] font-semibold ${
+                            m.ok
+                              ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                              : "bg-rose-50 text-rose-800 border border-rose-200"
+                          }`}
+                        >
+                          {m.ok ? "ผ่าน" : m.status ? `HTTP ${m.status}` : "ล้มเหลว"}
+                        </span>
+                      </td>
+                      <td className="px-3.5 py-3 font-mono text-xs text-muted">{m.elapsedMs}ms</td>
+                      <td className="px-3.5 py-3 leading-relaxed">
+                        {m.ok ? (
+                          <>
+                            <span className="text-ink">ตอบว่า “{m.answerPreview}”</span>
+                            <span className="block text-[11px] text-muted mt-0.5">
+                              parts ทั้งหมด {m.partCount} · เป็น part ความคิด {m.thoughtPartCount}
+                              {m.finishReason ? ` · finishReason ${m.finishReason}` : ""}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="break-all text-xs text-rose-700 font-mono">{m.error}</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            </AdminSection>
+          )}
+
+          {data.chatProbe && data.chatProbe.length > 0 && (
+            <AdminSection
+              title="2. ทดสอบแบบห้องคุยจริง"
+              hint="ใช้ prompt ชุดเดียวกับห้องคุยจริง (บุคลิกแม่หมอ + ไพ่ + ประวัติสนทนา) — ข้อนี้คือตัวชี้ขาด ผ่านข้อ 1 ไม่ได้แปลว่าห้องคุยจะผ่าน"
+            >
+              <div className="space-y-3">
+              {data.chatProbe.map((m) => (
+                <div
+                  key={m.model}
+                  className={`rounded-2xl border p-4 text-xs shadow-xs ${
+                    m.ok
+                      ? "border-emerald-200 bg-emerald-50/50"
+                      : "border-rose-200 bg-rose-50/50"
+                  }`}
+                >
+                  <p className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-xs font-semibold text-ink">{m.model}</span>
+                    <span
+                      className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${
+                        m.ok
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-rose-100 text-rose-800"
+                      }`}
+                    >
+                      {m.ok ? "ตอบได้จริง" : m.status ? `HTTP ${m.status}` : "ล้มเหลว"}
+                    </span>
+                    <span className="font-mono text-xs text-muted">{m.elapsedMs}ms</span>
+                    {m.promptChars ? (
+                      <span className="text-xs text-muted">prompt {m.promptChars} ตัวอักษร</span>
+                    ) : null}
+                  </p>
+                  <p className={`mt-2 leading-relaxed ${m.ok ? "text-ink" : "break-all text-rose-800 font-mono"}`}>
+                    {m.ok ? `“${m.answerPreview}”` : m.error}
+                  </p>
+                </div>
+              ))}
+            </div>
+            </AdminSection>
+          )}
+
           {/* 📊 AI Reading Quality Telemetry (AI_INTELLIGENCE_PLAN W1.1) */}
-          <div className="altar-card-porcelain p-5 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line-soft pb-3">
-              <div>
-                <h3 className="text-sm font-bold text-ink flex items-center gap-1.5">
-                  สถิติคุณภาพและการตอบสนอง AI (Reading Quality Telemetry)
-                </h3>
-                <p className="mt-0.5 text-xs text-muted">
-                  ประมวลผลจากตาราง reading_quality: อัตราความแม่นยำจริง, เวลาหน่วง, อัตราสลับโมเดล และเทียบตามเวอร์ชัน Prompt
-                </p>
-              </div>
-              {quality && (
+          <AdminSection
+            title="3. คุณภาพคำอ่านจากการใช้งานจริง"
+            hint="จากคำอ่านจริงของผู้ใช้: ความแม่นที่ผู้ใช้ให้คะแนน เวลารอ การสลับโมเดล และเทียบตามรุ่น prompt"
+            actions={
+              quality ? (
                 <span className="glass-chip px-2.5 py-0.5 text-[11px] font-semibold text-ink">
                   บันทึกทั้งหมด {quality.totalReadings.toLocaleString()} ครั้ง
                 </span>
-              )}
-            </div>
+              ) : null
+            }
+          >
+            <div className="space-y-4">
 
             {quality ? (
               <>
@@ -292,95 +378,7 @@ export default function AiHealthPanel() {
               <p className="text-xs text-muted py-2">กำลังโหลดข้อมูล telemetry...</p>
             )}
           </div>
-
-          {data.models.length > 0 && (
-            <div className="altar-card-porcelain overflow-x-auto">
-              <table className="w-full min-w-[560px] text-left text-xs">
-                <thead className="bg-surface-warm text-muted border-b border-line">
-                  <tr>
-                    <th className="px-3.5 py-2.5 font-semibold">โมเดล</th>
-                    <th className="px-3.5 py-2.5 font-semibold">ผล</th>
-                    <th className="px-3.5 py-2.5 font-semibold">เวลา</th>
-                    <th className="px-3.5 py-2.5 font-semibold">รายละเอียด</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-line-soft text-ink">
-                  {data.models.map((m) => (
-                    <tr key={m.model} className="hover:bg-surface-warm transition-colors align-top">
-                      <td className="px-3.5 py-3 font-mono text-xs">{m.model}</td>
-                      <td className="px-3.5 py-3">
-                        <span
-                          className={`inline-block rounded-md px-2 py-0.5 text-[11px] font-semibold ${
-                            m.ok
-                              ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                              : "bg-rose-50 text-rose-800 border border-rose-200"
-                          }`}
-                        >
-                          {m.ok ? "ผ่าน" : m.status ? `HTTP ${m.status}` : "ล้มเหลว"}
-                        </span>
-                      </td>
-                      <td className="px-3.5 py-3 font-mono text-xs text-muted">{m.elapsedMs}ms</td>
-                      <td className="px-3.5 py-3 leading-relaxed">
-                        {m.ok ? (
-                          <>
-                            <span className="text-ink">ตอบว่า “{m.answerPreview}”</span>
-                            <span className="block text-[11px] text-muted mt-0.5">
-                              parts ทั้งหมด {m.partCount} · เป็น part ความคิด {m.thoughtPartCount}
-                              {m.finishReason ? ` · finishReason ${m.finishReason}` : ""}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="break-all text-xs text-rose-700 font-mono">{m.error}</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {data.chatProbe && data.chatProbe.length > 0 && (
-            <div className="space-y-3">
-              <div>
-                <h3 className="text-sm font-bold text-ink">ทดสอบแบบห้องคุยจริง</h3>
-                <p className="mt-0.5 text-xs leading-relaxed text-muted">
-                  ยิงด้วย prompt ชุดเดียวกับที่ห้องคุยใช้จริง (บุคลิกแม่หมอเต็ม + ไพ่ + ประวัติสนทนา)
-                  — ผ่าน ping สั้น ๆ ไม่ได้แปลว่าห้องคุยจะผ่าน ช่องนี้คือตัวชี้ขาด
-                </p>
-              </div>
-              {data.chatProbe.map((m) => (
-                <div
-                  key={m.model}
-                  className={`rounded-2xl border p-4 text-xs shadow-xs ${
-                    m.ok
-                      ? "border-emerald-200 bg-emerald-50/50"
-                      : "border-rose-200 bg-rose-50/50"
-                  }`}
-                >
-                  <p className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-xs font-semibold text-ink">{m.model}</span>
-                    <span
-                      className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${
-                        m.ok
-                          ? "bg-emerald-100 text-emerald-800"
-                          : "bg-rose-100 text-rose-800"
-                      }`}
-                    >
-                      {m.ok ? "ตอบได้จริง" : m.status ? `HTTP ${m.status}` : "ล้มเหลว"}
-                    </span>
-                    <span className="font-mono text-xs text-muted">{m.elapsedMs}ms</span>
-                    {m.promptChars ? (
-                      <span className="text-xs text-muted">prompt {m.promptChars} ตัวอักษร</span>
-                    ) : null}
-                  </p>
-                  <p className={`mt-2 leading-relaxed ${m.ok ? "text-ink" : "break-all text-rose-800 font-mono"}`}>
-                    {m.ok ? `“${m.answerPreview}”` : m.error}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
+          </AdminSection>
 
           <p className="text-xs text-muted">
             ตรวจเมื่อ {new Date(data.checkedAt).toLocaleString("th-TH")}

@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 
+import { AdminSubTabs, useSubTab } from "@/components/admin/AdminLayout";
+
 import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
 import DailyStatsTable from "@/components/admin/DailyStatsTable";
 import DailySummary, { statDayKey } from "@/components/admin/DailySummary";
@@ -28,11 +30,12 @@ interface AiUsage {
 
 type SubView = "daily" | "trend" | "ai";
 
-const TABS: { id: SubView; label: string }[] = [
-  { id: "daily", label: "สรุปรายวัน" },
-  { id: "trend", label: "แนวโน้ม & ความนิยม" },
-  { id: "ai", label: "AI & ระบบ" },
+const TABS: { id: SubView; label: string; hint: string }[] = [
+  { id: "daily", label: "สรุปรายวัน", hint: "เลือกวัน เทียบวันก่อน" },
+  { id: "trend", label: "แนวโน้มและความนิยม", hint: "กราฟ ตารางย้อนหลัง CSV" },
+  { id: "ai", label: "AI และระบบ", hint: "โควตา ความเสถียร ความเร็ว" },
 ];
+const SUB_VIEWS = TABS.map((t) => t.id);
 
 const RANGES = [7, 14, 30, 90] as const;
 
@@ -45,7 +48,7 @@ const RANGES = [7, 14, 30, 90] as const;
  * บันทึกการเข้าแอดมินอยู่ที่แผง "ภาพรวมวิหาร" ที่เดียว (เคยซ้ำอยู่ในแท็บ AI ของหน้านี้)
  */
 export default function StatsDashboard() {
-  const [subView, setSubView] = useState<SubView>("daily");
+  const [subView, setSubView] = useSubTab<SubView>(SUB_VIEWS);
   const [days, setDays] = useState<number>(14);
   const [day, setDay] = useState<string>(() => statDayKey());
 
@@ -68,24 +71,9 @@ export default function StatsDashboard() {
   return (
     <div className="flex flex-col gap-5">
       {/* ─── แถบควบคุม ─────────────────────────────────────────────── */}
-      <div className="flex flex-col justify-between gap-3 border-b border-line pb-4 lg:flex-row lg:items-center">
-        <div role="tablist" aria-label="หมวดสถิติ" className="inline-flex w-fit items-center gap-1 rounded-xl border border-line bg-canvas p-1 text-xs">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              role="tab"
-              aria-selected={subView === t.id}
-              onClick={() => setSubView(t.id)}
-              className={`tap-overlay-y rounded-lg px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
-                subView === t.id
-                  ? "border border-line bg-white font-semibold text-ink shadow-2xs"
-                  : "text-muted hover:text-ink"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
+      <div className="flex flex-col justify-between gap-3 lg:flex-row lg:items-end">
+        <div className="min-w-0 flex-1">
+          <AdminSubTabs label="หมวดสถิติ" tabs={TABS} active={subView} onChange={setSubView} />
         </div>
 
         {subView !== "daily" ? (

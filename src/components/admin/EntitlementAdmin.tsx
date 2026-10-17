@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/Input";
 import { DAILY_LIMIT, GUEST_LIMIT, REQUIRE_SIGNUP_TO_READ } from "@/lib/entitlement/limits";
 import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
 import { useAdminResource } from "@/lib/admin/use-admin-resource";
+import { AdminSubTabs, KpiGrid, useSubTab } from "@/components/admin/AdminLayout";
+import { StatCard } from "@/components/admin/StatsWidgets";
 
 interface State {
   enabled: boolean;
@@ -62,6 +64,8 @@ async function ops(action: string, before?: string) {
   return { ok: res.ok, data: await res.json().catch(() => ({})) };
 }
 
+const ENT_TABS = ["switch", "metrics", "health", "announce", "setup"] as const;
+
 export default function EntitlementAdmin() {
   /*
    * 🔴 R-28: ของเดิม `.catch(() => setMsg("โหลดไม่สำเร็จ"))` ปล่อยให้ `s` เป็น null ต่อไป
@@ -78,6 +82,7 @@ export default function EntitlementAdmin() {
 
   const [dbReady, setDbReady] = useState<boolean | null>(null);
   const [dbBusy, setDbBusy] = useState(false);
+  const [tab, setTab] = useSubTab(ENT_TABS);
 
   const [gfDate, setGfDate] = useState("");
   const [gfBusy, setGfBusy] = useState(false);
@@ -163,8 +168,31 @@ export default function EntitlementAdmin() {
     ? `ผู้เยี่ยมชมต้องสมัครสมาชิกก่อนเปิดไพ่ · สมาชิกวันละ ${DAILY_LIMIT} ครั้ง · แชทเฉพาะสมาชิก`
     : `ผู้เยี่ยมชม ${GUEST_LIMIT} ครั้ง · สมาชิกวันละ ${DAILY_LIMIT} ครั้ง · แชทเฉพาะสมาชิก`;
 
+  const dbProblems = DB_HEALTH_METRICS.filter(({ key }) => (s.metrics[key] ?? 0) > 0).length;
+  const blocked7d = Object.keys(METRIC_LABEL).reduce((n, k) => n + (s.metrics[k] ?? 0), 0);
+
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
+      <KpiGrid>
+        <StatCard label="ระบบสิทธิ์" value={s.enabled ? "เปิดอยู่" : "ปิดอยู่"} sub={s.enabled ? "โควตาถูกบังคับ" : "เปิดไพ่ได้ไม่จำกัด"} />
+        <StatCard label="ตัวเลขระบบสิทธิ์ 7 วัน" value={blocked7d.toLocaleString("th-TH")} sub="รวมทุกตัวในแท็บตัวเลข" />
+        <StatCard label="ปัญหาฐานข้อมูลสิทธิ์" value={String(dbProblems)} sub={dbProblems ? "ต้องตรวจ" : "ปกติทุกค่า"} />
+        <StatCard label="แบนเนอร์ประกาศ" value={s.announce ? "แสดงอยู่" : "ซ่อนอยู่"} sub={s.announceResetDate?.trim() || "ยังไม่ตั้งวันที่"} />
+      </KpiGrid>
+
+      <AdminSubTabs
+        label="หมวดโควตาฟรีและสิทธิ์"
+        active={tab}
+        onChange={setTab}
+        tabs={[
+          { id: "switch", label: "สวิตช์และกติกา", hint: "เปิดปิดระบบสิทธิ์" },
+          { id: "metrics", label: "ตัวเลข 7 วัน", hint: "การถูกกั้นสิทธิ์" },
+          { id: "health", label: "สุขภาพฐานข้อมูล", hint: "ทุกค่าควรเป็น 0", count: dbProblems, tone: "alert" },
+          { id: "announce", label: "ประกาศล่วงหน้า", hint: "แบนเนอร์หน้าแรก" },
+          { id: "setup", label: "ตั้งค่าครั้งแรก", hint: "ซ่อมตาราง · โบนัสผู้ใช้เดิม", count: dbReady === false ? 1 : 0, tone: "alert" },
+        ]}
+      />
+
       {msg ? (
         <p role="status" className="text-xs text-muted">
           {msg}
@@ -172,7 +200,7 @@ export default function EntitlementAdmin() {
       ) : null}
 
       {/* ── สวิตช์หลัก ── */}
-      <section
+      {tab === "switch" ? <section
         className={`rounded-xl border bg-white p-5 ${s.enabled ? "border-line" : "border-rose-300"}`}
         aria-labelledby="ent-switch"
       >
@@ -216,10 +244,10 @@ export default function EntitlementAdmin() {
             {s.enabled ? "ปิดระบบสิทธิ์" : "เปิดระบบสิทธิ์"}
           </Button>
         </div>
-      </section>
+      </section> : null}
 
       {/* ── ตัวเลข 7 วัน ── */}
-      <section className="altar-card-porcelain p-5" aria-labelledby="ent-metrics">
+      {tab === "metrics" ? <section className="altar-card-porcelain p-5" aria-labelledby="ent-metrics">
         <div className="flex items-center justify-between">
           <h3 id="ent-metrics" className="text-sm font-semibold text-ink">
             ตัวเลขระบบสิทธิ์ (7 วันล่าสุด)
@@ -236,9 +264,12 @@ export default function EntitlementAdmin() {
             </div>
           ))}
         </div>
+      </section> : null}
 
-        <h4 className="mt-5 text-xs font-semibold text-ink">สุขภาพฐานข้อมูลสิทธิ์ — ทุกค่าควรเป็น 0</h4>
-        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+      {tab === "health" ? <section className="altar-card-porcelain p-5" aria-labelledby="ent-health">
+        <h3 id="ent-health" className="text-sm font-semibold text-ink">สุขภาพฐานข้อมูลสิทธิ์</h3>
+        <p className="mt-1 text-xs text-muted">ทุกค่าควรเป็น 0 · มีตัวเลข = ผู้ใช้อาจโดนหักสิทธิ์ผิด ให้ส่งทีมเทคนิคตรวจ</p>
+        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
           {DB_HEALTH_METRICS.map(({ key, label, hint }) => {
             const value = s.metrics[key] ?? 0;
             const bad = value > 0;
@@ -253,10 +284,10 @@ export default function EntitlementAdmin() {
             );
           })}
         </div>
-      </section>
+      </section> : null}
 
       {/* ── แบนเนอร์ประกาศล่วงหน้า ── */}
-      <section className="altar-card-porcelain p-5" aria-labelledby="ent-announce">
+      {tab === "announce" ? <section className="altar-card-porcelain p-5" aria-labelledby="ent-announce">
         <h3 id="ent-announce" className="text-sm font-semibold text-ink">
           แบนเนอร์ประกาศเปลี่ยนกติกา
         </h3>
@@ -305,7 +336,7 @@ export default function EntitlementAdmin() {
             {s.announceResetDate?.trim() ? ` เริ่ม ${s.announceResetDate.trim()}` : ""}
           </span>
         </p>
-      </section>
+      </section> : null}
 
       {/*
         ── งานตั้งค่าครั้งแรก ──
@@ -313,7 +344,7 @@ export default function EntitlementAdmin() {
         ยังต้องมีไว้: ถ้าตารางหาย ปุ่ม "เตรียมฐานข้อมูล" คือทางซ่อมที่ไม่ต้องใช้ terminal
         (การ์ด "รหัสแลกสิทธิ์" ที่เคยอยู่ตรงนี้ถูกถอด — ซ้ำกับเมนู "รหัสแลกสิทธิ์")
       */}
-      <details className="altar-card-porcelain p-5" open={dbReady === false}>
+      {tab === "setup" ? <details className="altar-card-porcelain p-5" open>
         <summary className="cursor-pointer text-sm font-semibold text-ink">
           งานตั้งค่าครั้งแรก (ทำครั้งเดียว)
         </summary>
@@ -353,7 +384,7 @@ export default function EntitlementAdmin() {
           </div>
           {gfResult ? <p className="mt-3 text-xs font-medium text-ink">{gfResult}</p> : null}
         </div>
-      </details>
+      </details> : null}
     </div>
   );
 }

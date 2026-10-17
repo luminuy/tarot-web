@@ -13,6 +13,7 @@ import { PRODUCT_NAME, type Product } from "@/lib/admin/executive-report";
 import type { AdminPaymentRow } from "@/lib/admin/payments-admin";
 import { useAdminResource } from "@/lib/admin/use-admin-resource";
 import { APP_TIME_ZONE } from "@/lib/time/bangkok";
+import { AdminSubTabs, useSubTab } from "@/components/admin/AdminLayout";
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   paid: { label: "จ่ายแล้ว", cls: "border-emerald-200 bg-emerald-50 text-emerald-800" },
@@ -27,6 +28,7 @@ const when = (ms: number) =>
 const baht = (n: number) => `${n.toLocaleString("th-TH", { maximumFractionDigits: 2 })} บาท`;
 
 type Resp = { rows: AdminPaymentRow[]; hasMore: boolean };
+const STATUS_TABS = ["all", "paid", "pending", "failed", "refunded"] as const;
 const select = (b: Record<string, unknown>) => ({ rows: (b.rows as AdminPaymentRow[]) ?? [], hasMore: b.hasMore === true });
 
 function Select({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: [string, string][] }) {
@@ -49,7 +51,8 @@ function Select({ label, value, onChange, options }: { label: string; value: str
 }
 
 export default function PaymentsPanel() {
-  const [status, setStatus] = useState("");
+  const [statusTab, setStatusTab] = useSubTab(STATUS_TABS);
+  const status = statusTab === "all" ? "" : statusTab;
   const [product, setProduct] = useState("");
   const [mode, setMode] = useState("real");
   const [query, setQuery] = useState("");
@@ -66,6 +69,21 @@ export default function PaymentsPanel() {
 
   return (
     <div className="space-y-4">
+      <AdminSubTabs
+        label="สถานะการจ่ายเงิน"
+        active={statusTab}
+        onChange={(id) => {
+          resetPaging();
+          setStatusTab(id);
+        }}
+        tabs={[
+          { id: "all", label: "ทั้งหมด" },
+          { id: "paid", label: "จ่ายแล้ว", hint: "นับเป็นรายได้" },
+          { id: "pending", label: "รอจ่าย", hint: "เปิดหน้าจ่ายแต่ยังไม่จ่าย" },
+          { id: "failed", label: "ไม่สำเร็จ" },
+          { id: "refunded", label: "คืนเงินแล้ว" },
+        ]}
+      />
       <form
         className="flex flex-wrap items-end gap-3 rounded-xl border border-line bg-white p-3"
         onSubmit={(e) => {
@@ -74,7 +92,6 @@ export default function PaymentsPanel() {
           setQ(query.trim());
         }}
       >
-        <Select label="สถานะ" value={status} onChange={(v) => { resetPaging(); setStatus(v); }} options={[["", "ทุกสถานะ"], ...Object.entries(STATUS).map(([k, v]) => [k, v.label] as [string, string])]} />
         <Select label="สินค้า" value={product} onChange={(v) => { resetPaging(); setProduct(v); }} options={[["", "ทุกสินค้า"], ...(Object.entries(PRODUCT_NAME) as [Product, string][])]} />
         <Select label="ประเภทเงิน" value={mode} onChange={(v) => { resetPaging(); setMode(v); }} options={[["real", "เงินจริงเท่านั้น"], ["test", "รายการทดสอบ"], ["all", "ทั้งหมด"]]} />
         <label className="flex min-w-[14rem] flex-1 flex-col gap-1 text-[11px] text-muted">

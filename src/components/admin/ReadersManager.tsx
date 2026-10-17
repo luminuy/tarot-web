@@ -24,6 +24,8 @@ import {
 } from "@/lib/marketplace/offer";
 import { useVisibleInterval } from "@/lib/utils/use-visible-interval";
 import { copyToClipboard } from "@/lib/utils/clipboard";
+import { AdminSubTabs, KpiGrid } from "@/components/admin/AdminLayout";
+import { StatCard } from "@/components/admin/StatsWidgets";
 
 /**
  * ✦ แท็บ "หมอดูพาร์ทเนอร์" ในแผงแอดมิน (CONSULT_FLOW_UX_PLAN คลื่น 4)
@@ -530,24 +532,28 @@ export default function ReadersManager() {
 
   return (
     <div className="space-y-5">
-      {/* แถบบน: เพิ่มแม่หมอ + ค้นหา + กรองสถานะ */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap gap-2" role="group" aria-label="กรองตามสถานะ">
-          {filters.map((f) => (
-            <button
-              key={f.id}
-              type="button"
-              aria-pressed={filter === f.id}
-              onClick={() => setFilter(f.id)}
-              className={`tap-overlay-y inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 text-sm font-medium transition-colors ${
-                filter === f.id ? "btn-gold-glass font-semibold" : "border border-line bg-surface text-muted hover:text-ink"
-              }`}
-            >
-              {f.label}
-              <span className="text-xs tabular-nums">{f.count}</span>
-            </button>
-          ))}
-        </div>
+      {/* ตัวเลขสรุป → แท็บสถานะ (มีจำนวนกำกับ) → ค้นหา + เพิ่มแม่หมอ */}
+      <KpiGrid>
+        <StatCard label="แม่หมอทั้งหมด" value={String(counts.all)} sub="ทุกสถานะ" />
+        <StatCard label="รอตรวจใบสมัคร" value={String(counts.pending)} sub={counts.pending ? "ตรวจแล้วกดอนุมัติ" : "ไม่มีค้าง"} />
+        <StatCard label={STATUS_INFO.approved.label} value={String(counts.approved)} sub="ลูกค้าเห็นและจองได้" />
+        <StatCard label={STATUS_INFO.suspended.label} value={String(counts.suspended)} sub="ซ่อนจากลูกค้า" />
+      </KpiGrid>
+
+      <AdminSubTabs
+        label="กรองตามสถานะ"
+        active={filter}
+        onChange={setFilter}
+        tabs={filters.map((f) => ({
+          id: f.id,
+          label: f.label,
+          count: f.count,
+          tone: f.id === "pending" ? ("alert" as const) : undefined,
+        }))}
+      />
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs text-muted">กดปุ่มในการ์ดแม่หมอเพื่อส่งลิงก์แผงแม่หมอ แก้ข้อมูล อนุมัติ หรือหยุดรับลูกค้าชั่วคราว</p>
         <div className="flex gap-2">
           <Input
             type="search"
@@ -558,7 +564,7 @@ export default function ReadersManager() {
             className="min-h-11 sm:w-60"
           />
           <Button onClick={openCreateModal} variant="gold" className="shrink-0 whitespace-nowrap">
-            + เพิ่มแม่หมอ
+            เพิ่มแม่หมอ
           </Button>
         </div>
       </div>
