@@ -97,16 +97,16 @@ export function ChangePasswordCard({ icon }: { icon?: React.ReactNode } = {}) {
    */
   return (
     /* แถวหนึ่งในกลุ่ม "การเข้าสู่ระบบและความปลอดภัย" ของหน้าบัญชี (โครงเดียวกับ `SettingsRow`) */
-    <details className="group text-left">
-      <summary className="flex min-h-[64px] cursor-pointer list-none items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-inset/50 focus-visible:bg-inset/60 focus-visible:outline-none sm:px-5 [&::-webkit-details-marker]:hidden">
+    <details className="v3-ac-pw">
+      <summary className="v3-ac-row is-link">
         {icon}
-        <span className="min-w-0 flex-1">
-          <h3 className="font-serif-th text-sm font-bold text-ink-deep"><ThaiPhrases>
+        <span className="v3-ac-row-text">
+          <h3 className="v3-ac-row-label"><ThaiPhrases>
             {hasPassword
               ? (isEn ? "Change password" : "เปลี่ยนรหัสผ่าน")
               : (isEn ? "Set an email password" : "ตั้งรหัสผ่านสำหรับเข้าสู่ระบบด้วยอีเมล")}
           </ThaiPhrases></h3>
-          <span className="mt-0.5 block font-serif-th text-xs leading-relaxed text-muted">
+          <span className="v3-ac-row-hint">
             {hasPassword
               ? (isEn
                 ? "You'll be signed out on other devices"
@@ -123,14 +123,14 @@ export function ChangePasswordCard({ icon }: { icon?: React.ReactNode } = {}) {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="h-4 w-4 shrink-0 text-muted transition-transform group-open:rotate-90"
+          className="v3-ac-chev v3-ac-pw-chev"
           aria-hidden="true"
         >
           <path d="m9 6 6 6-6 6" />
         </svg>
       </summary>
 
-      <div className="space-y-4 px-4 pb-5 sm:px-5">
+      <div className="v3-ac-pw-body">
       {/* ♿ R-21: `role="alert"` ทำให้โปรแกรมอ่านหน้าจออ่านข้อความทันทีที่โหนดปรากฏ
           ของเดิมข้อความโผล่บนจออย่างเดียว ผู้ใช้ที่มองไม่เห็นจึงไม่รู้ว่ากรอกผิด */}
       {errorMsg && (
@@ -169,7 +169,7 @@ export function ChangePasswordCard({ icon }: { icon?: React.ReactNode } = {}) {
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
               placeholder="รหัสผ่านปัจจุบัน"
-              className="w-full h-10 px-3.5 rounded-lg bg-inset-warm border border-line-interactive-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
+              className="v3-ac-input"
             />
           </div>
         )}
@@ -196,7 +196,7 @@ export function ChangePasswordCard({ icon }: { icon?: React.ReactNode } = {}) {
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder={isEn ? "At least 10 characters" : "อย่างน้อย 10 ตัวอักษร"}
-            className="w-full h-10 px-3.5 rounded-lg bg-inset-warm border border-line-interactive-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
+            className="v3-ac-input"
           />
           {newPassword.length > 0 && (
             <div className="pt-1.5 space-y-1">
@@ -227,14 +227,14 @@ export function ChangePasswordCard({ icon }: { icon?: React.ReactNode } = {}) {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder={isEn ? "Re-enter new password" : "ระบุรหัสผ่านให้ตรงกัน"}
-            className="w-full h-10 px-3.5 rounded-lg bg-inset-warm border border-line-interactive-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
+            className="v3-ac-input"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="tap-overlay-y py-2.5 px-5 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface font-semibold font-serif-th text-xs transition cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 active:scale-98"
+          className="v3-ac-btn"
         >
           {loading
             ? (isEn ? "Saving..." : "กำลังบันทึก…")

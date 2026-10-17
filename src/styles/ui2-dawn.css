@@ -14,7 +14,7 @@
  */
 
 /* หัวหน้าที่เป็นแถบรุ่งอรุณ (หัวหน้ากลาง 3 แบบ + หัวหน้าเฉพาะหน้าที่เป็นข้อความบนพื้น) */
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head),
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head),
 :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) {
   --ui2-on-night: #2B2118;
   --ui2-on-night-soft: #5A4A3A;
@@ -38,13 +38,15 @@
   --color-inset: #F3EADB;
   --glass-fill: rgba(255, 252, 246, 0.86);
   --glass-edge: rgba(74, 47, 16, 0.14);
+  --rt-gold: #8A4F10;
+  --rt-line: rgba(74, 47, 16, 0.16);
   position: relative;
   isolation: isolate;
   color: var(--ui2-ink);
 }
 
 /* แถบครีมเต็มจอ — ขยายขึ้นไปใต้หัวเว็บ (หัวเว็บแคปซูลมืดลอยบนครีมแบบหน้าแรก) · ขอบล่างโค้งเป็นขอบฟ้า */
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head)::after {
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head)::after {
   content: "";
   position: absolute;
   z-index: -2;
@@ -65,33 +67,33 @@
 }
 
 /* ตัวหนังสือ/ป้ายที่เขียนสีตายตัวไว้สำหรับพื้นมืด */
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) :is(h1, .ui2-ph-title) {
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) :is(h1, .ui2-ph-title) {
   text-shadow: none;
 }
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-gold-night,
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) .ui2-gold-night,
 :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-gold-night {
   color: var(--ui2-gold-ink);
 }
 /* ปุ่มหลักบนครีม = ปุ่มดำแบบหน้าแรก */
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-btn-gold,
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) .ui2-btn-gold,
 :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-btn-gold {
   color: var(--ui2-button-text);
   background: var(--ui2-button);
   box-shadow: 0 14px 30px -14px rgba(23, 17, 12, 0.7);
 }
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-btn-gold .ui2-btn-arrow,
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) .ui2-btn-gold .ui2-btn-arrow,
 :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-btn-gold .ui2-btn-arrow {
   border-color: var(--ui2-button-text);
 }
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-btn-ghost,
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) .ui2-btn-ghost,
 :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-btn-ghost {
   background: rgba(255, 252, 246, 0.7);
 }
 /* ชิปลิงก์ใต้หัวหน้า: ครีมใส · หน้าปัจจุบันเป็นเม็ดดำ */
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-ph-chip {
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) .ui2-ph-chip {
   background: rgba(255, 252, 246, 0.6);
 }
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) .ui2-ph-chip[aria-current="page"] {
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) .ui2-ph-chip[aria-current="page"] {
   color: var(--ui2-button-text);
   background: var(--ui2-button);
 }
@@ -132,14 +134,14 @@
 }
 
 /* เว้นระยะจากขอบฟ้า — เนื้อหาถัดไปไม่ชนเส้นโค้ง */
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) {
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) {
   margin-bottom: 64px;
 }
 @media (max-width: 767px) {
-  :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) {
+  :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) {
     margin-bottom: 52px;
   }
-  :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head)::after {
+  :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head)::after {
     border-radius: 0 0 50% 50% / 0 0 32px 32px;
   }
 }
@@ -236,7 +238,7 @@
 /* ── หน้าเปิดไพ่ /read/* (TarotFlow · 26 ผัง) — ขั้น "ตั้งคำถาม": แถบครีมใต้หัวข้อ "อยากรู้เรื่องอะไร"
    ครอบแถบขั้นตอนด้านบนด้วย (แถบขยายขึ้น 320px) ➔ แถบขั้นตอนใช้สีกลางวันเฉพาะตอนอยู่ขั้นนี้ (ขั้นอื่นไม่มีหัวข้อ = ท้องฟ้ามืดเหมือนเดิม)
    (เจ้าของ 2026-10-17 "/read/three-card · /read/love · /read/celtic-cross สีใหม่ยังไม่มี") ── */
-.ui2-pg:has(.v2-rt-head) .v2-rail {
+.ui2-pg:has(.v2-rt-head, .v2-pick-head, .v2-rd-head) .v2-rail {
   --ui2-on-night: #2B2118;
   --ui2-on-night-dim: #6E604F;
   --rt-line: rgba(74, 47, 16, 0.2);
@@ -246,6 +248,87 @@
 }
 .ui2-pg .v2-rt-head {
   padding-bottom: 8px;
+}
+/* แผงในพิธีเปิดไพ่ทั้ง 3 ขั้น = แผ่นครีมพาสเทลแบบหน้าต่างหน้าอื่น (เจ้าของ 2026-10-17 "หน้าอ่านไพ่ทั้ง 3 ขั้นตอน สีเหมือนยังไม่ได้อัปเดตเลย")
+   กล่องคำถาม · การ์ดผังที่เลือก · รายชื่อแม่หมอ · กล่องคำทำนาย · การ์ดชวนแชท
+   โต๊ะผ้าปูกำมะหยี่ (เลือกไพ่ · ผังไพ่) และแถบปุ่มติดล่างจอคงเป็นแผ่นมืด — ไพ่บนผ้ากำมะหยี่คือเอกลักษณ์ของพิธี */
+.ui2-pg .v2-rt :is(.v2-in, .v2-pc, .v2-ss, .v2-sr, .v2-rd-chat) {
+  --ui2-on-night: #2B2118;
+  --ui2-on-night-soft: #5A4A3A;
+  --ui2-on-night-dim: #6E604F;
+  --rt-gold: #8A4F10;
+  --rt-line: rgba(74, 47, 16, 0.14);
+  --color-ink: #29261F;
+  --color-ink-deep: #1F1B15;
+  --color-muted: #5E5547;
+  --color-gold: #A58A5C;
+  --color-gold-ink: #8A5512;
+  --color-line: rgba(74, 47, 16, 0.16);
+  --color-line-warm: rgba(74, 47, 16, 0.16);
+  --color-line-interactive: rgba(138, 79, 16, 0.35);
+  --color-line-interactive-warm: rgba(138, 79, 16, 0.35);
+  --color-surface: #FFFCF6;
+  --color-surface-warm: #FFFCF6;
+  --color-inset: #F3EADB;
+  --color-inset-warm: #F3EADB;
+  --color-err: #9A2E22;
+  --glass-fill: #FFFCF6;
+  --glass-edge: rgba(74, 47, 16, 0.14);
+  color: var(--ui2-ink);
+  border-color: rgba(255, 236, 200, 0.5);
+  background:
+    radial-gradient(60% 300px at 6% 0%, rgba(255, 222, 150, 0.55) 0%, rgba(255, 222, 150, 0) 72%),
+    radial-gradient(50% 280px at 100% 100%, rgba(132, 196, 184, 0.3) 0%, rgba(132, 196, 184, 0) 72%),
+    var(--ui2-day);
+  box-shadow: 0 0 0 1px rgba(255, 236, 200, 0.5), 0 0 0 7px rgba(255, 236, 200, 0.05), 0 40px 80px -46px rgba(0, 0, 0, 0.9);
+}
+/* ผังย่อในการ์ดผังที่เลือก = ผ้ากำมะหยี่จิ๋วทึบแบบโต๊ะเปิดไพ่ ช่องไพ่ทองชัด
+   (เดิมพื้นดำโปร่ง 60% บนครีมกลายเป็นเทาขุ่น ช่องไพ่จางหาย · เจ้าของ 2026-10-17 "ผังรูปไพ่ไม่ชัด") */
+.ui2-pg .v2-rt .v2-ss-map {
+  border-color: rgba(184, 105, 28, 0.45);
+  background:
+    radial-gradient(70% 80% at 50% 40%, rgba(120, 60, 90, 0.45) 0%, rgba(120, 60, 90, 0) 75%),
+    #1B1420;
+  box-shadow: 0 10px 20px -12px rgba(40, 24, 8, 0.6);
+}
+.ui2-pg .v2-rt .v2-ss-map-area span {
+  border-color: #FFD98F;
+  background: rgba(255, 217, 143, 0.32);
+  box-shadow: 0 0 6px rgba(255, 217, 143, 0.25);
+}
+/* ชิ้นย่อยที่เขียนพื้นมืดตายตัวไว้ ➔ กระดาษขาวบนครีม */
+.ui2-pg .v2-rt .v2-in-textarea,
+.ui2-pg .v2-rt .v2-in-greet-say,
+.ui2-pg .v2-rt .v2-in-topic,
+.ui2-pg .v2-rt .v2-sr-tabs {
+  background: #FFFCF6;
+  border-color: rgba(74, 47, 16, 0.14);
+}
+.ui2-pg .v2-rt .v2-in-textarea {
+  color: var(--ui2-ink);
+}
+.ui2-pg .v2-rt .v2-in-textarea::placeholder {
+  color: #8C7E6B;
+}
+.ui2-pg .v2-rt .v2-in-topic[aria-pressed="true"],
+.ui2-pg .v2-rt .v2-pc-row.is-on {
+  border-color: var(--ui2-gold-ink);
+  background: #FFF4DE;
+}
+.ui2-pg .v2-rt .v2-pc-row:hover {
+  background: rgba(255, 252, 246, 0.8);
+}
+.ui2-pg .v2-rt :is(.v2-sr-state.is-done, .v2-rd-chat-on) {
+  color: #2E6B3A;
+}
+.ui2-pg .v2-rt .v2-sr-state.is-done {
+  border-color: rgba(46, 107, 58, 0.35);
+}
+/* ปุ่มหลักในแผง (ทองไล่สีเดิม) = ปุ่มดำแบบหน้าแรก */
+.ui2-pg .v2-rt .v2-rd-chat-go {
+  color: var(--ui2-button-text);
+  background: var(--ui2-button);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.55) inset, 0 12px 24px -14px rgba(23, 17, 12, 0.7);
 }
 
 /* ── ไพ่ประจำวัน /daily (ui2-daily.css นำเข้าไฟล์นี้) — หัวหน้าพิธีบนครีม · พัดไพ่ใต้เส้นขอบฟ้าบนท้องฟ้าเดิม ── */
@@ -334,7 +417,7 @@ html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > se
 }
 /* ปุ่มทองเดิม (.btn-gold-glass น้ำตาลเข้มของธีมสว่าง) บนครีม = ปุ่มดำขอบทองแบบปุ่มหลักหน้าแรก
    (เจ้าของ 2026-10-17 ส่งภาพปุ่ม "เข้าสู่ระบบเพื่อซื้อ" — "สีปุ่มไม่สวยเลย") */
-html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head) :is(.btn-gold-glass, .btn-glass-primary),
+html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) :is(.btn-gold-glass, .btn-glass-primary),
 html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.btn-gold-glass, .btn-glass-primary) {
   color: var(--ui2-button-text);
   background-image: none;

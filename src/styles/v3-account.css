@@ -1,0 +1,645 @@
+/*
+ * 🔐 หน้าบัญชี /account — UI 2.0 (เจ้าของ 2026-10-17 ส่งภาพหน้าบัญชี "ยังไม่ได้ทำใหม่เลย ทั้ง ui ทั้งสี")
+ * ===========================================================================
+ * หัวหน้า = แถบครีมรุ่งอรุณ (`.v3-ac-hero` อยู่ในรายชื่อหัวหน้าของ ui2-dawn.css) — ซ้ายหัวข้อ · ขวาบัตรสมาชิก + ตัวเลข
+ * กลุ่มตั้งค่า = แผงครีมพาสเทล (`.page-band-tint` ➔ ui2-dawn.css สลับโทเคนเป็นกลางวัน) · แถวเป็นกระดาษขาว
+ * นำเข้าโดย astro/pages/account.astro ต่อจาก ui2-page.css
+ * ⚠️ ไม่มีของหนัก (backdrop-filter · filter: blur · ของวน) · ไม่มีรูปทรงตกแต่ง (กฎเหล็ก 2)
+ */
+
+.v3-ac {
+  width: 100%;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+/* ── หัวหน้า ── */
+.v3-ac-hero {
+  display: grid;
+  gap: 24px;
+  padding: 12px 0 8px;
+}
+@media (min-width: 960px) {
+  .v3-ac-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
+    align-items: center;
+    gap: 48px;
+    padding: 28px 0 16px;
+  }
+}
+.v3-ac-kicker {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ui2-gold-ink);
+}
+.v3-ac-title {
+  margin: 8px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(40px, 6vw, 64px);
+  font-weight: 600;
+  line-height: 1.08;
+  color: var(--ui2-on-night);
+}
+.v3-ac-lede {
+  max-width: 480px;
+  margin: 14px 0 0;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--ui2-on-night-soft);
+}
+.v3-ac-cta {
+  margin-top: 22px;
+}
+.v3-ac-cta-arrow {
+  width: 18px;
+  height: 18px;
+}
+.v3-ac-hero-side {
+  display: grid;
+  gap: 12px;
+}
+
+/* บัตรสมาชิก — กระดาษขาวบนครีม ขอบทองบาง */
+.v3-ac-card {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 26px;
+  border: 1px solid rgba(74, 47, 16, 0.12);
+  background: #FFFCF6;
+  box-shadow: 0 0 0 6px rgba(255, 252, 246, 0.45), 0 0 0 7px rgba(184, 105, 28, 0.16), 0 30px 50px -34px rgba(74, 47, 16, 0.6);
+}
+.v3-ac-card-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+.v3-ac-avatar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 68px;
+  height: 68px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: linear-gradient(160deg, #24161A 0%, #3A2620 100%);
+  box-shadow: 0 0 0 3px #FFFCF6, 0 0 0 4px rgba(184, 105, 28, 0.55);
+  font-family: var(--ui2-font-display);
+  font-size: 24px;
+  font-weight: 600;
+  color: #FFD98F;
+}
+.v3-ac-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.v3-ac-who {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.v3-ac-name {
+  font-family: var(--ui2-font-display);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ui2-ink);
+  overflow-wrap: anywhere;
+}
+.v3-ac-email {
+  font-size: 14px;
+  color: #5E5547;
+  overflow-wrap: anywhere;
+}
+.v3-ac-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.v3-ac-chip {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(74, 47, 16, 0.14);
+  background: #F7F0E3;
+  font-size: 13px;
+  color: #3E352A;
+}
+
+/* อีเมลยังไม่ยืนยัน */
+.v3-ac-verify {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(178, 58, 46, 0.28);
+  background: #FBEDEA;
+}
+@media (min-width: 520px) {
+  .v3-ac-verify {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+}
+.v3-ac-verify-t {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #9A2E22;
+}
+.v3-ac-verify-d {
+  margin: 2px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #5E5547;
+}
+.v3-ac-verify-btn {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(154, 46, 34, 0.4);
+  background: #FFFCF6;
+  font-size: 13px;
+  font-weight: 700;
+  color: #9A2E22;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* โครงร่างระหว่างโหลด */
+.v3-ac-card.is-skel {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  min-height: 132px;
+}
+.v3-ac-card.is-skel .v3-ac-avatar {
+  grid-row: span 2;
+  background: #F3EADB;
+  box-shadow: none;
+}
+.v3-ac-skel-line {
+  display: block;
+  height: 14px;
+  border-radius: 999px;
+  background: #F3EADB;
+}
+.v3-ac-skel-line.is-w1 {
+  width: 60%;
+  height: 20px;
+  align-self: end;
+}
+.v3-ac-skel-line.is-w2 {
+  width: 80%;
+  align-self: start;
+}
+
+/* ตัวเลขสรุป 3 ช่อง */
+.v3-ac-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.v3-ac-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 14px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(74, 47, 16, 0.12);
+  background: rgba(255, 252, 246, 0.86);
+  box-shadow: 0 18px 30px -24px rgba(74, 47, 16, 0.55);
+}
+@media (min-width: 640px) {
+  .v3-ac-stat {
+    padding: 16px 18px;
+  }
+}
+.v3-ac-stat-k,
+.v3-ac-stat-sub {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #5E5547;
+}
+.v3-ac-stat-v {
+  font-family: var(--ui2-font-display);
+  font-size: clamp(26px, 4vw, 34px);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--ui2-ink);
+}
+.v3-ac-stat-v small {
+  font-size: 0.5em;
+  font-weight: 500;
+  color: #6E604F;
+}
+
+/* สิ่งที่สมาชิกได้ (ยังไม่เข้าระบบ) — รายการเส้นซ้าย ไม่มีจุดนำ/ติ๊ก */
+.v3-ac-perks-t {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ui2-ink);
+}
+.v3-ac-perks {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v3-ac-perks li {
+  padding: 2px 0 2px 14px;
+  border-left: 2px solid rgba(184, 105, 28, 0.55);
+  font-size: 15px;
+  line-height: 1.6;
+  color: #3E352A;
+}
+
+/* ── เนื้อหา: สองคอลัมน์บนคอม (สมาชิก) · คอลัมน์เดียวกลางจอ (ยังไม่เข้าระบบ) ── */
+.v3-ac-body {
+  display: grid;
+  gap: 20px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.v3-ac-col {
+  display: grid;
+  align-content: start;
+  gap: 20px;
+}
+.v3-ac-col:empty {
+  display: none;
+}
+@media (min-width: 960px) {
+  .v3-ac.has-user .v3-ac-body {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: none;
+    gap: 24px;
+  }
+  .v3-ac.has-user .v3-ac-col {
+    gap: 24px;
+  }
+}
+
+/* แผงกลุ่ม — พื้นครีมมาจาก ui2-dawn.css (.page-band-tint) */
+.v3-ac-sec {
+  padding: 22px 16px 16px;
+  border-radius: 28px;
+}
+@media (min-width: 640px) {
+  .v3-ac-sec {
+    padding: 26px 22px 20px;
+  }
+}
+.v3-ac-sec-head {
+  padding: 0 4px 14px;
+}
+.v3-ac-sec-title {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ui2-ink);
+}
+.v3-ac-sec-desc {
+  margin: 4px 0 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #5E5547;
+}
+.v3-ac-rows {
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid rgba(74, 47, 16, 0.12);
+  background: #FFFCF6;
+  box-shadow: 0 18px 32px -26px rgba(74, 47, 16, 0.5);
+}
+.v3-ac-rows > * + * {
+  border-top: 1px solid rgba(74, 47, 16, 0.1);
+}
+
+/* แถว */
+.v3-ac-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 68px;
+  padding: 14px 16px;
+  text-align: left;
+  color: var(--ui2-ink);
+  background: transparent;
+}
+.v3-ac-row.is-link {
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+@media (hover: hover) {
+  .v3-ac-row.is-link:hover {
+    background: #F9F2E5;
+  }
+}
+.v3-ac-row.is-link:focus-visible {
+  outline: 2px solid var(--ui2-gold-ink);
+  outline-offset: -2px;
+}
+/* แถวลบข้อมูล: ปุ่มลงบรรทัดใต้คำอธิบาย (คอลัมน์แคบ ปุ่มข้างกันบีบคำอธิบายจนขาดคำ) */
+.v3-ac-row.is-stack {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+.v3-ac-row.is-stack > button {
+  margin-left: 54px;
+}
+.v3-ac-row-main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.v3-ac-row-text {
+  display: block;
+  flex: 1;
+  min-width: 0;
+}
+.v3-ac-row-label {
+  display: block;
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ui2-ink);
+}
+.v3-ac-row-hint {
+  display: block;
+  margin-top: 2px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #5E5547;
+}
+.v3-ac-ico {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  background: #F6ECDA;
+  box-shadow: inset 0 0 0 1px rgba(184, 105, 28, 0.18);
+  color: var(--ui2-gold-ink);
+}
+.v3-ac-ico.is-danger {
+  background: #FBEDEA;
+  box-shadow: inset 0 0 0 1px rgba(178, 58, 46, 0.2);
+  color: #9A2E22;
+}
+.v3-ac-svg {
+  width: 19px;
+  height: 19px;
+}
+.v3-ac-svg.is-sm {
+  width: 17px;
+  height: 17px;
+}
+.v3-ac-chev {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: #8C7E6B;
+}
+
+/* ปุ่มดำแบบหน้าแรก (เติมรอบ · บันทึกรหัสผ่าน) */
+.v3-ac-btn {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-family: var(--ui2-font-display);
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--ui2-button-text);
+  background: var(--ui2-button);
+  box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.55) inset, 0 12px 24px -14px rgba(23, 17, 12, 0.7);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.v3-ac-btn:active {
+  transform: scale(0.97);
+}
+.v3-ac-btn:disabled {
+  opacity: 0.55;
+}
+.v3-ac-btn:focus-visible {
+  outline: 2px solid var(--ui2-gold-ink);
+  outline-offset: 3px;
+}
+
+/* ป้าย "รอติดตาม N" — เม็ดทองไล่สี ตัวหมึก */
+.v3-ac-badge {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #FFE3A8 0%, #F0C470 100%);
+  box-shadow: 0 0 0 1px rgba(184, 105, 28, 0.35);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ui2-ink);
+  white-space: nowrap;
+}
+
+/* สวิตช์ความยินยอม — ราง 48x28 (เกณฑ์แตะ WCAG 2.2) */
+.v3-ac-switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 48px;
+  height: 28px;
+  border-radius: 999px;
+  background: #E6DCCB;
+  box-shadow: inset 0 0 0 1px rgba(74, 47, 16, 0.16);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+.v3-ac-switch > span {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #FFFCF6;
+  box-shadow: 0 2px 6px rgba(40, 24, 8, 0.3);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.v3-ac-switch[aria-checked="true"] {
+  background: var(--ui2-button);
+  box-shadow: inset 0 0 0 1px rgba(255, 217, 143, 0.55);
+}
+.v3-ac-switch[aria-checked="true"] > span {
+  transform: translateX(20px);
+  background: #FFD98F;
+}
+.v3-ac-switch:disabled {
+  opacity: 0.5;
+}
+.v3-ac-switch:focus-visible {
+  outline: 2px solid var(--ui2-gold-ink);
+  outline-offset: 3px;
+}
+.v3-ac-alert {
+  margin: 0;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #9A2E22;
+}
+
+/* เปลี่ยนรหัสผ่าน — แถวพับ */
+.v3-ac-pw > summary {
+  list-style: none;
+}
+.v3-ac-pw > summary::-webkit-details-marker {
+  display: none;
+}
+.v3-ac-pw-chev {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.v3-ac-pw[open] .v3-ac-pw-chev {
+  transform: rotate(90deg);
+}
+.v3-ac-pw-body {
+  display: grid;
+  gap: 14px;
+  padding: 0 16px 18px;
+}
+.v3-ac-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(74, 47, 16, 0.2);
+  background: #FFFFFF;
+  font-size: 15px;
+  color: var(--ui2-ink);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.v3-ac-input:focus {
+  outline: none;
+  border-color: var(--ui2-gold-ink);
+  box-shadow: 0 0 0 3px rgba(184, 105, 28, 0.15);
+}
+
+/* ออกจากระบบ — แผ่นมืดขอบทองบนท้องฟ้า */
+.v3-ac-out {
+  display: grid;
+  gap: 10px;
+  text-align: center;
+}
+.v3-ac-out-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 54px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 143, 0.3);
+  background: rgba(28, 23, 30, 0.9);
+  font-family: var(--ui2-font-display);
+  font-size: 16px;
+  font-weight: 500;
+  color: #F6EEE2;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+@media (hover: hover) {
+  .v3-ac-out-btn:hover {
+    border-color: rgba(255, 140, 120, 0.6);
+    color: #FFC2B5;
+  }
+}
+.v3-ac-out-btn:focus-visible {
+  outline: 2px solid #FFD98F;
+  outline-offset: 3px;
+}
+.v3-ac-out-note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ui2-on-night-soft);
+  overflow-wrap: anywhere;
+}
+
+/* ── มือถือ: เพิ่มที่ให้ตัวหนังสือในแถว (แผงและแถวเว้นขอบน้อยลง · ไอคอนเล็กลง) ── */
+@media (max-width: 639px) {
+  .v3-ac-sec {
+    padding: 18px 10px 10px;
+    border-radius: 24px;
+  }
+  .v3-ac-sec-head {
+    padding: 0 8px 12px;
+  }
+  .v3-ac-sec-title {
+    font-size: 19px;
+  }
+  .v3-ac-rows {
+    border-radius: 16px;
+  }
+  .v3-ac-row {
+    gap: 12px;
+    padding: 13px 12px;
+  }
+  .v3-ac-ico {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+  }
+  .v3-ac-svg {
+    width: 17px;
+    height: 17px;
+  }
+  .v3-ac-row-label {
+    font-size: 15.5px;
+  }
+  .v3-ac-row-hint {
+    font-size: 13px;
+  }
+  .v3-ac-btn {
+    min-height: 40px;
+    padding: 0 15px;
+    font-size: 14.5px;
+  }
+  .v3-ac-row.is-stack > button {
+    margin-left: 46px;
+  }
+  .v3-ac-card {
+    padding: 16px;
+  }
+  .v3-ac-avatar {
+    width: 58px;
+    height: 58px;
+    font-size: 21px;
+  }
+  .v3-ac-name {
+    font-size: 20px;
+  }
+  .v3-ac-stats {
+    gap: 8px;
+  }
+  .v3-ac-stat {
+    padding: 12px 10px;
+    border-radius: 16px;
+  }
+}
