@@ -343,3 +343,8 @@
     padding-left: 310px;
   }
 }
+@media (min-width: 1280px) {
+  .v3-cd-after {
+    padding-left: 340px;
+  }
+}

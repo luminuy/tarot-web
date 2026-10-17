@@ -1580,3 +1580,9 @@ html:has(.ui2-spread-pop[open]) {
     font-size: 26px;
   }
 }
+/* คอลัมน์รายชื่อกว้างขึ้นที่จอ ≥ 1280 — ชื่อหมวดยาว ("การงาน การเงิน การเรียน") ไม่หักกลางคำ */
+@media (min-width: 1280px) {
+  .ui2-sp-stage {
+    grid-template-columns: 300px minmax(0, 1fr);
+  }
+}

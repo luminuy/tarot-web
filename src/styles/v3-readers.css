@@ -11,15 +11,15 @@
   border-radius: 28px;
 }
 
-/* การ์ดแม่หมอในหน้าต่าง: พื้นการ์ดเป็นกระจกมืด ขอบทองจาง (คลาส Tailwind เดิมอ่านโทเคนกลางคืนของ .ui2-pg) */
+/* การ์ดแม่หมอในหน้าต่างครีม = การ์ดกระดาษขาว (แถบกำมะหยี่ด้านบนคงเดิม) */
 .ui2-pg #readers article {
-  border-color: var(--ui2-line-night);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%), #1E1822;
-  box-shadow: 0 1px 0 var(--ui2-glass-edge-night) inset, 0 30px 50px -30px rgba(0, 0, 0, 0.9);
+  border-color: rgba(74, 47, 16, 0.12);
+  background: #FFFCF6;
+  box-shadow: 0 24px 44px -30px rgba(74, 47, 16, 0.55);
 }
 @media (hover: hover) {
   .ui2-pg #readers article:hover {
-    box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.4), 0 30px 50px -26px rgba(0, 0, 0, 0.95);
+    box-shadow: 0 0 0 1px rgba(184, 105, 28, 0.35), 0 30px 50px -26px rgba(74, 47, 16, 0.6);
   }
 }
 /* หัวรายชื่อในหน้าต่างใช้ฟอนต์หัวข้อ UI 2.0 */
