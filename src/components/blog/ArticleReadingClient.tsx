@@ -14,6 +14,8 @@ import { COUNTS } from "@/components/layout/nav-links";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases, thaiPhrasesHtml } from "@/components/ui/ThaiPhrases";
 import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
+import { CardImage } from "@/components/card/CardImage";
+import { getArticleCardArt } from "@/data/article-art";
 
 interface Props {
   article: Article;
@@ -67,6 +69,15 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
    */
   return (
     <div className="v2-ar">
+      {/* v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): ไพ่จริงลอยข้างหัวบทความ — ใบแรกคือไพ่ประจำบทความ (ตกแต่ง · ไม่ใช่ผลสุ่ม) */}
+      <div className="v3-ar-hero" data-anim-section="">
+      <span className="ui2-ph-deco" aria-hidden="true">
+        {[getArticleCardArt(article).image, "major-17", "major-21", "major-10"].map((img, i) => (
+          <span key={`${img}-${i}`} className={`ui2-ph-card ui2-loop ui2-ph-card-${[1, 3, 2, 4][i]}`}>
+            <CardImage image={i === 0 ? img : undefined} cardId={i === 0 ? undefined : img} alt="" thumb sizes="(min-width: 768px) 128px, 44px" loading={i < 2 ? "eager" : "lazy"} fetchPriority="low" />
+          </span>
+        ))}
+      </span>
       <header className="v2-ar-head">
         <Ui2Crumbs
           crumbs={[
@@ -89,6 +100,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
           <ThaiPhrases>{articleDesc}</ThaiPhrases>
         </p>
       </header>
+      </div>
 
       <div className="v2-ar-layout">
         <aside className="v2-ar-aside">

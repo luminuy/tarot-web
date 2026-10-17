@@ -388,3 +388,19 @@
     font-size: 16px;
   }
 }
+
+/* ── v3: ไพ่จริงลอยข้างหัวบทความ (ชุดเดียวกับ Ui2PageHero · ui2-page.css / ui2-page-fx.css) ── */
+.v3-ar-hero {
+  position: relative;
+  isolation: isolate;
+}
+.v3-ar-hero .v2-ar-head {
+  position: relative;
+  z-index: 2;
+}
+/* มือถือ: ไพ่ 2 ใบที่มุมบนสูงถึง ~86px — หัวเล็กทองเริ่มใต้ไพ่ */
+@media (max-width: 767px) {
+  .v3-ar-hero .v2-ar-head {
+    padding-top: 76px;
+  }
+}
