@@ -1696,16 +1696,15 @@ export default function TarotFlow({
               canReset={currentStep !== "SPREAD_SELECT"}
             />
 
-            {currentStep !== "SPREAD_SELECT" && (
-              <button
-                type="button"
-                onClick={handleReset}
-                className="btn-gold-glass tap-overlay-y text-xs font-bold px-4 py-1.5 sm:py-2 cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1.5 font-serif-th"
-              >
-                {isEnglish ? "New Reading" : "เริ่มดูดวงใหม่"}
-              </button>
-            )}
           </>
+        }
+        /* เริ่มรอบแล้ว ➔ "เริ่มดูดวงใหม่" แทนที่ปุ่ม "เริ่มดูดวง" ตำแหน่งเดิม (ไม่มีสองปุ่มซ้อนกัน · เจ้าของ 2026-10-17) */
+        cta={
+          currentStep !== "SPREAD_SELECT" ? (
+            <button type="button" onClick={handleReset} className="ui2-header-cta mr-1 hidden sm:inline-flex cursor-pointer">
+              {isEnglish ? "New Reading" : "เริ่มดูดวงใหม่"}
+            </button>
+          ) : undefined
         }
       />
 

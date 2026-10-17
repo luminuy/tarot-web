@@ -25,6 +25,12 @@ export interface SiteHeaderProps {
   toolbar?: ReactNode;
   /** เมนู dropdown — ส่งเข้ามาเพื่อให้หน้าแรกส่ง callback ได้ หน้าเนื้อหาส่ง <SacredNavDropdown /> เปล่า */
   nav?: ReactNode;
+  /**
+   * ปุ่มหลักฝั่งขวาแทน "เริ่มดูดวง" — หน้าดูดวงที่เริ่มรอบไปแล้วส่งปุ่ม "เริ่มดูดวงใหม่" มาวางที่เดียวกัน
+   * (เจ้าของ 2026-10-17: "เปิดไพ่แล้ว บาร์ข้างบนยังมีเริ่มดูดวง ควรมีแค่ดูดวงใหม่ มาอยู่ตำแหน่งเริ่มดูดวง")
+   * ไม่ส่ง = ลิงก์ "เริ่มดูดวง" ไปคลังผังตามเดิม
+   */
+  cta?: ReactNode;
 }
 
 /**
@@ -53,6 +59,7 @@ export function SiteHeader({
   breadcrumb,
   toolbar,
   nav,
+  cta,
 }: SiteHeaderProps) {
   const { isEnglish } = useLocale();
   const headerRef = useRef<HTMLElement | null>(null);
@@ -162,9 +169,11 @@ export function SiteHeader({
             <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
               {/* ปุ่ม "เริ่มดูดวง" ➔ คลังผังพยากรณ์ /spreads (เจ้าของ 2026-10-17 "กดปุ่มให้ลิงก์ไปหน้าผัง")
                   เดิมพาไปส่วนเปิดไพ่ด่วนของหน้าแรก (#home-quick) · มือถือซ่อน (ที่แคบ มีปุ่มหลักในหน้าอยู่แล้ว) */}
-              <a href={isEnglish ? "/en/spreads" : "/spreads"} className="ui2-header-cta mr-1 hidden sm:inline-flex" data-home-target="header:start">
-                {isEnglish ? "Start a reading" : "เริ่มดูดวง"}
-              </a>
+              {cta ?? (
+                <a href={isEnglish ? "/en/spreads" : "/spreads"} className="ui2-header-cta mr-1 hidden sm:inline-flex" data-home-target="header:start">
+                  {isEnglish ? "Start a reading" : "เริ่มดูดวง"}
+                </a>
+              )}
               <ThemeToggle isEnglish={isEnglish} />
               <LanguageSwitcher />
               {/* ไม่มีใครส่ง toolbar มา (หน้าเนื้อหาทั่วไป) ➔ ใส่ปุ่มบัญชีให้เอง หัวเว็บทุกหน้าจะได้เหมือนหน้าแรก */}

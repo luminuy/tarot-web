@@ -136,6 +136,7 @@
     max-height: calc(100svh - 190px);
     overflow-y: auto;
     scrollbar-width: thin;
+    scrollbar-gutter: stable;
   }
 }
 /* มือถือ: ผ้าปูขึ้นก่อน ➔ รายการ ➔ คลัง */
