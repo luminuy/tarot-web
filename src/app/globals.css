@@ -2477,6 +2477,84 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
 
 /* (พัดไพ่พื้นหลังหัวหน้าแรกเดิม `.hero-fan` ถูกแทนด้วยการ์ดลอยของ SeerTarot UI 2.0 — ดู src/styles/ui2.css ส่วน 1) */
 
+/* ✦ ท้ายเว็บ UI 2.0 (`SiteFooter` · เจ้าของ 2026-10-17 "ต้องปรับใหม่ไหม" ➔ "ได้เลย ปรับให้ครบทุกหน้า")
+   เดิม: พื้นน้ำตาลอมเขียว (bg-dark ธีมเก่า) + ตัวมีเชิงทั้งก้อน ➔ เห็นรอยต่อสีกับท้องฟ้ากลางคืนของทุกหน้า
+   ใหม่: พื้นกลางคืนเดียวกับหน้า (แสงเขียวน้ำทะเล/อำพันจาง ๆ ที่มุม) · เส้นทองไล่จางขอบบน · หัวคอลัมน์ Anuphan ทอง ·
+   ลิงก์ตัวไม่มีเชิงสีครีมจาง ชี้แล้วสว่าง · สายด่วน 1323/1669 เป็นกล่องครีมเล็ก (เด่นแต่ไม่แสบตา · กฎเหล็ก 6)
+   สีเขียนตายตัว ไม่อ่านโทเคน --color-* (ท้ายเว็บมืดเสมอ ทั้งธีมสว่าง/มืดและทุกหน้า) */
+.site-footer {
+  position: relative;
+  overflow: hidden;
+  color: rgba(246, 238, 226, 0.72);
+  background:
+    radial-gradient(46% 260px at 8% 0%, rgba(79, 179, 169, 0.1) 0%, rgba(79, 179, 169, 0) 70%),
+    radial-gradient(46% 300px at 94% 100%, rgba(233, 160, 70, 0.11) 0%, rgba(233, 160, 70, 0) 70%),
+    #0C0A0F;
+}
+.site-footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 217, 143, 0) 0%, rgba(255, 217, 143, 0.5) 50%, rgba(255, 217, 143, 0) 100%);
+}
+.site-footer :is(.border-b, .border-t) {
+  border-color: rgba(246, 238, 226, 0.1);
+}
+.site-footer-brand {
+  color: #F6EEE2;
+}
+.site-footer-dim {
+  color: rgba(246, 238, 226, 0.55);
+}
+.site-footer-gold {
+  color: #FFD98F;
+}
+.site-footer .footer-col-title,
+.site-footer .footer-col-toggle {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 15.5px;
+  letter-spacing: 0.01em;
+  color: #FFD98F;
+}
+.site-footer .footer-col-chevron {
+  color: rgba(246, 238, 226, 0.55);
+}
+.site-footer a:not(.footer-social) {
+  color: rgba(246, 238, 226, 0.72);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.site-footer a:not(.footer-social):hover {
+  color: #F6EEE2;
+}
+.site-footer a:not(.footer-social):focus-visible {
+  outline: 2px solid #FFD98F;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+/* สายด่วน/คำยืนยัน — กล่องครีมเล็ก หัวกล่องสีเข้มตามความหมาย (ทอง · เขียว · แดง) */
+.site-footer .site-footer-hot {
+  padding: 10px 14px;
+  border-radius: 14px;
+  color: #5A4A3A;
+  background:
+    radial-gradient(80% 120% at 0% 0%, rgba(255, 222, 150, 0.5) 0%, rgba(255, 222, 150, 0) 70%),
+    #F7F0E3;
+  box-shadow: 0 0 0 1px rgba(255, 236, 200, 0.4), 0 14px 26px -18px rgba(0, 0, 0, 0.9);
+}
+.site-footer .site-footer-hot > span {
+  color: #8A4F10;
+}
+.site-footer .site-footer-hot > .text-ok-on-dark {
+  color: #23703F;
+}
+.site-footer .site-footer-hot > .text-err-on-dark {
+  color: #A8362B;
+}
+
 /* ✦ ไอคอนช่องทางทางการในท้ายเว็บ (`SiteFooter`) — ไฟล์ SVG แยกใน `public/icons/social/` วาดเป็นพื้นหลัง
    ไม่ฝัง path ลง HTML ของทุกหน้า (งบ HTML ตึง) · `a` เปล่า 1 element ต่อช่องทาง (งบ DOM หน้าแรก)
    วงกลม 36px · พื้นที่กดจริง 44px จาก `.tap-overlay` */

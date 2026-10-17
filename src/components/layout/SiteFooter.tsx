@@ -14,7 +14,8 @@ export interface SiteFooterProps {
 }
 
 /**
- * 🏛️ Fat Footer สไตล์ Quiet Luxury สีเข้ม (#171512) กลางของทั้งวิหารพยากรณ์
+ * 🏛️ Fat Footer กลางของทั้งวิหารพยากรณ์ — UI 2.0 (เจ้าของ 2026-10-17 "ปรับให้ครบทุกหน้า"): ท้องฟ้ากลางคืนเดียวกับหน้า ·
+ * หัวคอลัมน์ Anuphan ทอง · ลิงก์ตัวไม่มีเชิงสีครีมจาง · สายด่วนเป็นกล่องครีม · สไตล์ `.site-footer*` ใน globals.css (ทุกหน้าโหลด)
  * บรรจุลิงก์ภายใน, ช่องทางทางการ, คำเตือน AI Disclosure, สายด่วน 1323/1669 หรือ 988/911, และ PDPA
  */
 export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
@@ -30,7 +31,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
 
   return (
     <footer
-      className={`w-full bg-dark text-line ${paddingClass} border-t border-line/30 relative overflow-hidden`}
+      className={`site-footer w-full ${paddingClass}`}
     >
       {/*
         ✦ ท้ายเว็บแบบมาตรฐาน (เจ้าของสั่ง 2026-10-10 "สวยและได้มาตรฐาน") — 4 ชั้นจากบนลงล่าง:
@@ -43,7 +44,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
       */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10 sm:space-y-12 relative z-10">
         {/* 1) แบรนด์ + ช่องทางทางการ */}
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between border-b border-line/15 pb-8 sm:pb-10">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between border-b pb-8 sm:pb-10">
           <div className="space-y-3 max-w-md">
             <Link
               href="/"
@@ -59,13 +60,13 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                 className="w-11 h-11 rounded-full border border-gold/40 bg-canvas object-cover flex-shrink-0 transition-transform duration-300 group-hover:scale-105"
                 loading="lazy"
               />
-              <span className="font-serif-th text-xl sm:text-2xl font-bold tracking-wider text-surface-warm">SeerTarot</span>
+              <span className="site-footer-brand font-serif-th text-xl sm:text-2xl font-bold tracking-wider">SeerTarot</span>
             </Link>
-            <p className="font-serif-th text-sm text-line/80 leading-relaxed">{t.footer.brandMission}</p>
+            <p className="text-sm leading-relaxed">{t.footer.brandMission}</p>
           </div>
           {/* ช่องทางทางการ — ไอคอนวาดด้วย CSS (`.footer-social--*` ใน globals.css) · ชื่อช่องทางอยู่ใน aria-label/title */}
           <div className="flex items-center gap-3">
-            <span className="font-serif-th text-xs text-line/60">{isEnglish ? "Follow us" : "ติดตามเรา"}</span>
+            <span className="site-footer-dim text-xs">{isEnglish ? "Follow us" : "ติดตามเรา"}</span>
             {BRAND_SOCIAL_LINKS.map((social) => {
               // หน้าอังกฤษใช้ชื่อช่องทางล้วน — ชื่อเพจ Facebook เป็นภาษาไทย (ด่าน test-en-thai-leak ตรวจแอตทริบิวต์ด้วย)
               const label = isEnglish ? social.name : `${social.name} ${social.handle}`;
@@ -120,7 +121,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                     data-footer-toggle
                     aria-expanded="false"
                     aria-controls={listId}
-                    className={`footer-col-toggle w-full items-center justify-between gap-3 border-b border-line/15 pb-2.5 font-serif-th text-sm font-bold text-surface-warm text-left ${isEnglish ? "uppercase tracking-wider" : ""}`}
+                    className="footer-col-toggle w-full items-center justify-between gap-3 border-b pb-2.5 text-left"
                   >
                     <span>{col.title}</span>
                     <svg
@@ -131,22 +132,22 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="footer-col-chevron h-4 w-4 shrink-0 text-line/70"
+                      className="footer-col-chevron h-4 w-4 shrink-0"
                     >
                       <path d="M5 7.5 10 12.5 15 7.5" />
                     </svg>
                   </button>
                 )}
                 {/* ⚠️ ห้ามเป็น <h*> — ป้ายกลุ่มลิงก์ไม่ใช่หัวข้อเอกสาร (โผล่ในสารบัญทุกหน้า · ลำดับ h1 ➔ h3 ข้ามขั้น) ด่าน `test-a11y-critical` ตรวจอยู่ */}
-                <div className={`footer-col-title font-serif-th font-bold text-sm text-gold-on-dark ${isEnglish ? "uppercase tracking-wider" : "tracking-wide"}`}>
+                <div className="footer-col-title">
                   {col.title}
                 </div>
                 {"links" in col && col.links ? (
-                  <ul id={listId} className="footer-col-list space-y-2.5 text-sm font-serif-th text-line/75 leading-snug">
+                  <ul id={listId} className="footer-col-list space-y-2.5 text-sm leading-snug">
                     {col.links.map((link, lIdx) => {
                       return (
                         <li key={lIdx}>
-                          <Link href={link.href} prefetch={false} className="hover:text-surface-warm transition-colors">
+                          <Link href={link.href} prefetch={false}>
                             {link.label}
                           </Link>
                         </li>
@@ -154,21 +155,21 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                   })}
                 </ul>
               ) : "items" in col && col.items ? (
-                <ul className="space-y-3 text-sm font-serif-th text-line/75 leading-snug">
+                <ul className="space-y-3 text-sm leading-snug">
                   {col.items.map((item, iIdx) => {
                     const hasHref = "href" in item && Boolean(item.href);
                     const href = hasHref ? (item as any).href : "";
                     return (
-                      <li key={iIdx}>
+                      <li key={iIdx} className={hasHref ? undefined : "site-footer-hot"}>
                         {hasHref ? (
-                          <Link href={href} prefetch={false} className="hover:text-surface-warm transition-colors">
+                          <Link href={href} prefetch={false}>
                             {item.title}
                           </Link>
                         ) : (
                           <>
                             <span className={`${"color" in item ? item.color : "text-gold-on-dark"} font-semibold`}>{item.title}</span>
                             {"description" in item && item.description && (
-                              <p className="text-xs text-line/60 mt-0.5">{item.description}</p>
+                              <p className="text-xs mt-0.5">{item.description}</p>
                             )}
                           </>
                         )}
@@ -183,15 +184,15 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
         </div>
 
         {/* 3) ข้อควรทราบ — ⚠️ ป้ายห้ามเป็น <h*> (เหตุผลเดียวกับชื่อคอลัมน์) */}
-        <p className="border-t border-line/15 pt-6 font-serif-th text-xs text-line/60 leading-relaxed">
-          <span className="font-bold text-gold-on-dark">
+        <p className="site-footer-dim border-t pt-6 text-xs leading-relaxed">
+          <span className="site-footer-gold font-bold">
             {isEnglish ? "Ethical Reading Notice & AI Disclosure: " : "ข้อควรทราบเกี่ยวกับการทำนาย: "}
           </span>
           {t.footer.ethicalDisclaimer}
         </p>
 
         {/* 4) แถบล่าง — ลิขสิทธิ์ · ลิงก์นโยบาย */}
-        <div className="-mt-4 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between font-serif-th text-xs text-line/60">
+        <div className="site-footer-dim -mt-4 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between text-xs">
           <p>
             {isEnglish
               ? "© 2026 SeerTarot · 1909 Rider-Waite online tarot · All rights reserved"
@@ -202,18 +203,18 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
           <div className="flex flex-wrap gap-x-5 gap-y-1.5">
             {!isEnglish && (
               <>
-                <Link href="/about" prefetch={false} className="hover:text-surface-warm transition-colors">
+                <Link href="/about" prefetch={false}>
                   เกี่ยวกับเรา
                 </Link>
-                <Link href="/contact" prefetch={false} className="hover:text-surface-warm transition-colors">
+                <Link href="/contact" prefetch={false}>
                   ติดต่อเรา
                 </Link>
               </>
             )}
-            <Link href="/pricing" prefetch={false} className="hover:text-surface-warm transition-colors">
+            <Link href="/pricing" prefetch={false}>
               {isEnglish ? "Pricing" : "ราคาและแพ็กเกจ"}
             </Link>
-            <Link href="/privacy" prefetch={false} className="hover:text-surface-warm transition-colors">
+            <Link href="/privacy" prefetch={false}>
               {isEnglish ? "Privacy Policy" : "นโยบายความเป็นส่วนตัว"}
             </Link>
           </div>
