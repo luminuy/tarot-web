@@ -234,6 +234,44 @@ console.log("\n── 4. redirect ของ URL เก่า ──");
   );
 }
 
+// ── ชื่อไฟล์ใต้ /_next/static ต้องเขียน URL ได้แบบเดียว ──────────────────────
+// ชั้น assets ของ Cloudflare ตอบ 307 ทุกคำขอที่ path ไม่ตรง encodeURIComponent ของตัวมันเอง
+// ชื่อที่มี `(` `)` `[` `]` จึงมีสองรูป (ดิบ/เข้ารหัส) และรูปหนึ่งโดนเด้งเสมอ — ไคลเอนต์ที่เข้ารหัส
+// วงเล็บเองวนจน ERR_TOO_MANY_REDIRECTS ➔ ChunkLoadError ทุกหน้าของ Next (ต้นเหตุแก้ใน next.config.ts)
+// ต้องมีบิลด์ก่อน — บน CI บิลด์ก่อน repo:verify เสมอ (R-06) จึงห้ามข้าม · ในเครื่องที่ยังไม่บิลด์ข้ามได้
+{
+  const staticDir = path.join(ROOT, ".next/static");
+  if (!fs.existsSync(staticDir)) {
+    check(
+      "ชื่อไฟล์ใต้ .next/static ไม่มีอักขระที่ Cloudflare เด้ง 307 (ต้องบิลด์ก่อน)",
+      !process.env.CI,
+      "ไม่เจอ .next/static — บน CI ต้องรันหลัง npm run build",
+    );
+    if (!process.env.CI) console.log("      (ข้าม — ยังไม่ได้บิลด์ในเครื่องนี้)");
+  } else {
+    const unsafe: string[] = [];
+    let total = 0;
+    const walk = (dir: string) => {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        // ชุดเดียวกับ urlSafe ใน next.config.ts — ⚠️ ห้ามใช้ encodeURIComponent วัด: มันไม่เข้ารหัส ( ) ! * '
+        if (/[^A-Za-z0-9._~-]/.test(entry.name)) {
+          unsafe.push(path.relative(staticDir, path.join(dir, entry.name)));
+        }
+        if (entry.isDirectory()) walk(path.join(dir, entry.name));
+        else total += 1;
+      }
+    };
+    walk(staticDir);
+    check(
+      `ชื่อไฟล์/โฟลเดอร์ใต้ .next/static ไม่มีอักขระที่ Cloudflare เด้ง 307 (${total} ไฟล์)`,
+      total > 0 && unsafe.length === 0,
+      unsafe.length
+        ? `${unsafe.slice(0, 5).join(" · ")} — ดูตัวแปลงชื่อ chunk ใน next.config.ts`
+        : "ไม่เจอไฟล์เลย = บิลด์ไม่สมบูรณ์",
+    );
+  }
+}
+
 // ── สรุป ──────────────────────────────────────────────────────────────────
 if (failed > 0) {
   console.log(`\n❌ ไม่ผ่าน ${failed} ข้อ\n`);

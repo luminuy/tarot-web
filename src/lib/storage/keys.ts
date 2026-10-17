@@ -89,6 +89,8 @@ export const STORAGE_KEYS = {
   readerBeautyLevel: "tarot_reader_beauty_v1",
   /** สถานะแอปแบบติดตั้ง (PWA): เคยเสนอติดตั้ง/ปิดไปเมื่อไร · สารานุกรมออฟไลน์ (`pwa-client.ts`) */
   pwaState: "tarot_pwa_state_v1",
+  /** โหมดสีที่ผู้ใช้กดเลือกเอง ("dark" | "light") — ไม่มีค่า = ตามที่ตั้งไว้ในเครื่อง (อ่านในสคริปต์ <head> ของ `src/lib/theme/theme-script.ts`) */
+  theme: "tarot_theme_v1",
 
   /* ── ลงทะเบียนย้อนหลัง 2026-10-12 (ด่านเริ่มจับค่าคงที่ในไฟล์) — มีผู้ใช้จริงแล้ว ห้ามเปลี่ยนชื่อ ── */
   /** โทเคนสตูดิโอแม่หมอของแท็บนี้ (sessionStorage) — ย้ายจาก `?token=` ใน URL มาเก็บแล้วลบออกจาก URL */

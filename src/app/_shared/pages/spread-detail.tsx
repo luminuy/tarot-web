@@ -12,6 +12,7 @@ import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { rotatingNeighborsGrouped } from "@/lib/seo/rotating-neighbors";
 
 const CATEGORY_TH: Record<string, string> = {
   general: "ทั่วไป",
@@ -84,7 +85,9 @@ export function spreadDetailMetadata(id: string, locale: Locale): Metadata {
         spread.descriptionEn,
         `What each of the ${cardCount} positions means and how to read it.`,
       )
-    : clampDescription(spread.description, `พร้อมความหมายครบทั้ง ${cardCount} ตำแหน่ง`);
+    : spread.seoDescriptionTh
+      ? clampDescription(spread.seoDescriptionTh)
+      : clampDescription(spread.description, `พร้อมความหมายครบทั้ง ${cardCount} ตำแหน่ง`);
 
   const keywords = isEnglish
     ? [
@@ -97,6 +100,10 @@ export function spreadDetailMetadata(id: string, locale: Locale): Metadata {
       ]
     : [
         `ดูดวงไพ่ยิปซี ${cardCount} ใบ`,
+        `เปิดไพ่ ${cardCount} ใบ`,
+        `สุ่มไพ่ ${cardCount} ใบ`,
+        `ดูดวง ${cardCount} ใบ`,
+        `ไพ่ทาโร่ ${cardCount} ใบ`,
         `ไพ่ยิปซี ${cardCount} ใบ`,
         `ไพ่ยิปซี ${cardCount} ใบ ตำแหน่ง`,
         `เปิดไพ่ยิปซี ${cardCount} ใบ`,
@@ -299,15 +306,18 @@ export function spreadDetailProps(spread: NonNullable<ReturnType<typeof getSprea
   const relatedArticles = isEnglish
     ? ARTICLES.filter((a) => a.targetSpreadId === spread.id && Boolean(a.contentEn)).slice(0, 6)
     : ARTICLES.filter((a) => a.targetSpreadId === spread.id).slice(0, 6);
-  const otherSpreads = PUBLIC_SPREADS.filter(
-    (s) => s.id !== spread.id && s.defaultCategory === spread.defaultCategory,
-  ).slice(0, 4);
+  // หมุนวนตามตำแหน่งผัง — ไม่ใช่ 4 ผังแรกของหมวดชุดเดิมทุกหน้า (ดู rotating-neighbors.ts)
+  const fallbackSpreads = rotatingNeighborsGrouped(
+    PUBLIC_SPREADS,
+    (s) => s.id === spread.id,
+    (s) => s.defaultCategory === spread.defaultCategory,
+    4,
+    3,
+  );
   return {
     spread,
     standard: isStandardSpread(spread.id),
     relatedArticles,
-    fallbackSpreads: otherSpreads.length
-      ? otherSpreads
-      : PUBLIC_SPREADS.filter((s) => s.id !== spread.id).slice(0, 4),
+    fallbackSpreads,
   };
 }

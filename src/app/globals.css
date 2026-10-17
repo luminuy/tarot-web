@@ -2,6 +2,8 @@
 /* 🎨 SeerTarot UI 2.0 — ส่วนที่ใช้ทั้งเว็บ (โทเคน · ตัวเอียงโลโก้ · ปุ่มดำหัวเว็บ)
    สไตล์หน้าแรก (ui2.css + ui2-fx-full.css) โหลดเฉพาะหน้าที่มี TarotFlow — ห้ามย้ายมาที่นี่ (งบ CSS ต่อหน้า · ด่าน test-bundle-budget) */
 @import "../styles/ui2-base.css";
+/* 🌙 โหมดมืด — ทับเฉพาะตอน <html data-theme="dark"> · โหมดสว่างไม่ถูกแตะ (รายละเอียดอยู่ในไฟล์) */
+@import "./theme-dark.css";
 
 /*
  * 🔍 ขอบเขตที่ Tailwind ใช้ "สแกนหาชื่อคลาส" (Source Detection)

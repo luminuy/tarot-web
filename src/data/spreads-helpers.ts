@@ -44,6 +44,11 @@ export interface Spread {
    * ที่มา: คนไทยค้น "ไพ่ยิปซี" มากกว่า "ไพ่ทาโรต์" (Google Autocomplete 8/10)
    */
   seoTitleTh?: string;
+  /**
+   * description ของหน้าคู่มือผังสำหรับผลค้นหาเท่านั้น (ไม่ขึ้นบนหน้าเว็บ) — ไม่ใส่ = ใช้ `description`
+   * ใส่เฉพาะผังที่ GSC บอกว่าคนค้นด้วยวลีที่ `description` ไม่มี เช่น "เปิดไพ่ 3 ใบ" (2026-10-16)
+   */
+  seoDescriptionTh?: string;
   /** คำโปรยสั้น ๆ บนหน้าเลือก spread */
   tagline: string;
   taglineEn: string;

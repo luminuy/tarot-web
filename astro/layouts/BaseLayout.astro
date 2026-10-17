@@ -22,6 +22,7 @@ import {
 import { BRAND_SOCIAL_PROFILES, DEFAULT_SUPPORT_EMAIL, SITE_ORIGIN } from "@/lib/config/site";
 import { CONSENT_STORAGE_KEY } from "@/lib/analytics-consent";
 import { UI2_FX_SCRIPT } from "@/app/_shared/ui2-fx";
+import { THEME_SCRIPT } from "@/lib/theme/theme-script";
 import { getImageKitOrigin } from "@/lib/tarot/card-image";
 import type { Locale } from "@/lib/i18n/types";
 
@@ -147,6 +148,9 @@ const consentScript = `try{if(!localStorage.getItem(${JSON.stringify(CONSENT_STO
     <script is:inline set:html={UI2_FX_SCRIPT} />
     <meta name="viewport" content={VIEWPORT_CONTENT} />
     <meta name="theme-color" content={SITE_THEME_COLOR} />
+
+    {/* 🌙 โหมดมืด/สว่าง — ต้องรันก่อนเฟรมแรก ห้ามใส่ defer/async (เหตุผลอยู่ที่ src/lib/theme/theme-script.ts) */}
+    <script is:inline set:html={THEME_SCRIPT} />
 
     {/* ✒️ ฟอนต์ไทยที่ตัดเอง — เหตุผลที่ต้องพรีโหลดครบทุกไฟล์อยู่ใน src/app/globals.css */}
     {FONT_PRELOADS.map((href) => (

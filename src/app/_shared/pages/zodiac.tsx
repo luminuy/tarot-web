@@ -86,13 +86,13 @@ export function zodiacIndexMetadata(locale: Locale): Metadata {
   const isEnglish = locale === "en";
   const title = isEnglish
     ? pickTitle(["Zodiac Tarot Cards: Your Sign's Tarot Card & Decan", "Zodiac Tarot Cards for All 12 Signs"])
-    : pickTitle(["ไพ่ยิปซีประจำราศี 12 ราศี — หาไพ่ทาโรต์ประจำวันเกิด", "ไพ่ประจำราศี 12 ราศี"]);
+    : pickTitle(["ไพ่ประจำราศี 12 ราศี — ดูดวงไพ่ยิปซีตามวันเกิด ฟรี", "ไพ่ประจำราศี 12 ราศี"]);
   const description = isEnglish
     ? clampDescription(
         "Find the tarot card for your zodiac sign, your ruling planet's card and the Minor Arcana card of your birth decan, using the Golden Dawn system behind the 1909 Rider-Waite deck.",
       )
     : clampDescription(
-        "หาไพ่ยิปซีประจำราศีของคุณจากวันเกิด พร้อมไพ่ดาวผู้ครองราศีและไพ่ประจำช่วงวันเกิด ตามตำราเดียวกับที่ผู้สร้างไพ่ 1909 Rider-Waite ใช้ ครบ 12 ราศี ฟรี",
+        "ไพ่ประจำราศีของคุณคือใบไหน หาไพ่ยิปซีประจำราศีจากวันเกิด ครบ 12 ราศี พร้อมไพ่ดาวผู้ครองราศีและไพ่ประจำช่วงวันเกิด ตามตำรา 1909 Rider-Waite ฟรี",
       );
   const ogImages = buildPageOgImage({
     title: isEnglish ? "Zodiac Tarot Cards" : "ไพ่ประจำราศี 12 ราศี",

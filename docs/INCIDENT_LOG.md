@@ -201,6 +201,27 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 | **การแก้ไข** | ตัดวงแหวนด้วย mask (content-box exclude) ให้เหลือเฉพาะเส้นขอบ 2px เสมอ ไม่ขึ้นกับลำดับการวาด |
 | **🛡️ กฎป้องกันถาวร** | **ของตกแต่งที่ต้องอยู่เฉพาะขอบให้ตัดด้วย mask/clip ไม่พึ่ง z-index ติดลบ เพราะพังทันทีที่ตัวพ่อมี transform/filter/opacity** |
 | **บันทึกโดย** | ไม่ระบุ · branch `claude/gracious-hopper-juiny4` · commit `0c2ad1d` |
+### INC-0264 · 2026-10-17 11:15 · 🟠 High · chunk ใต้ route group (th) วน 307 จน ERR_TOO_MANY_REDIRECTS — ชื่อ chunk ฝั่งเบราว์เซอร์ไม่มี ( ) [ ] แล้ว
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | หน้า /reset-password?token=... และ /tester บน production และ preview ขึ้นหน้า error กลาง เกิดข้อผิดพลาดชั่วคราวในการโหลดระบบ · console ขึ้น net::ERR_TOO_MANY_REDIRECTS และ ChunkLoadError: Loading chunk 5679 failed (/_next/static/chunks/app/(th)/layout-*.js) · curl รูป %28th%29 ได้ 307 ส่วนรูป (th) ได้ 200 |
+| **สาเหตุราก** | asset-worker ของ Cloudflare ถอดรหัส path แล้วเข้ารหัสใหม่ด้วย encodeURIComponent ทีละท่อน ถ้าไม่ตรงกับ path ที่ขอมาจะตอบ 307 (ฝังในตัว ปิดด้วย wrangler.jsonc ไม่ได้) · webpack ตั้งชื่อ chunk ตามโฟลเดอร์ app/(th)/layout · encodeURIComponent ไม่เข้ารหัสวงเล็บ รูป %28th%29 จึงโดนเด้งไป (th) เสมอ ไคลเอนต์ที่เข้ารหัสวงเล็บเองวนไม่จบ ➔ ChunkLoadError ของ layout (th) ➔ หน้า error กลางทุกหน้าที่ Next เรนเดอร์ · Chromium ในเครื่องไม่เข้ารหัสวงเล็บและในเครื่องไม่มีชั้น assets ของ Cloudflare จึงไม่มีใครเห็นอาการก่อนขึ้น |
+| **การแก้ไข** | next.config.ts แทนอักขระนอก [A-Za-z0-9._~/-] ในชื่อ chunk ฝั่งเบราว์เซอร์ด้วย _ (app/(th)/layout ➔ app/_th_/layout · s/[id] ➔ s/_id_) + ด่านตรวจชื่อไฟล์ใต้ .next/static ใน test-worker-first-routes |
+| **🛡️ กฎป้องกันถาวร** | **next.config.ts แทนอักขระนอก [A-Za-z0-9._~/-] ในชื่อ chunk ฝั่งเบราว์เซอร์ด้วย _ (filename + chunkFilename) ทุก URL ใต้ /_next/static จึงเขียนได้แบบเดียว · ด่าน test-worker-first-routes ไล่ชื่อไฟล์/โฟลเดอร์ใต้ .next/static ทุกตัว เจออักขระนอกชุดปลอดภัย = ตก (บน CI ห้ามข้าม) · ห้ามใช้ encodeURIComponent วัดความปลอดภัยของชื่อ เพราะไม่เข้ารหัส ( ) ! * '** |
+| **การพิสูจน์ว่าแก้ได้จริง** | build:worker + wrangler dev ในเครื่อง (asset-worker ตัวเดียวกับ production): chunk ทุกตัวของ /reset-password และ /tester ตอบ 200 ตรง · Playwright ฟอร์มตั้งรหัสผ่านขึ้น 2 ช่อง ไม่มีหน้า error · หน้าไพ่ Astro 174 หน้า 200 ครบ · ด่านตกจริงเมื่อใส่โฟลเดอร์ (th) · repo:verify 93/93 |
+| **บันทึกโดย** | claude · branch `claude/nice-brahmagupta-2e2jrd` · commit `2825b3f` |
+
+
+### INC-0263 · 2026-10-16 12:11 · 🟡 Medium · ผัง/บทความท้ายหมวดไม่เคยได้ลิงก์จากพี่น้อง — Google ค้างไว้ที่ พบแล้ว-ยังไม่ได้จัดทำดัชนี
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | GSC 2026-10-16: /spreads/weekly /spreads/year-ahead /spreads/monthly-ten มีลิงก์เข้าแค่ 2 หน้าทั้งเว็บ (หน้าตัวเอง + หน้ารวม) ขณะที่ผังหัวหมวดได้ 231 หน้า · หน้าที่ยังไม่เข้าดัชนีมีลิงก์เข้าเฉลี่ย 30 เทียบกับ 65 ของหน้าที่เข้าแล้ว |
+| **สาเหตุราก** | spreadDetailProps กับ getRelatedArticles เลือกผัง/บทความใกล้เคียงด้วย filter แล้ว slice(0, n) จากลำดับคงที่ ทุกหน้าในหมวดจึงชี้ไป n ตัวแรกชุดเดิม ตัวท้ายหมวด 12 ผังได้ 0 ลิงก์จากพี่น้อง และ family อยู่หมวดเดียวไม่มีใครชี้ |
+| **การแก้ไข** | เพิ่ม src/lib/seo/rotating-neighbors.ts เลือกแบบหมุนวนเริ่มจากตัวถัดจากหน้าปัจจุบัน · หน้าผังเอาหมวดเดียวกันไม่เกิน 3 + ช่องเติมจากทั้งลิสต์ 1 · บทความหมวดเดียวกันก่อน |
+| **🛡️ กฎป้องกันถาวร** | **test-seo-wave4 หัวข้อ 4.1 คำนวณลิงก์เข้าของทุกผัง/บทความจากฟังก์ชันจริง ผังต้อง >= 1 บทความต้อง >= 2 — ลองย้อนเป็นแบบเดิมแล้วด่านตก 12 ผัง** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/gallant-hopper-q0lm5n` · commit `893e1e4` |
 
 
 ### INC-0262 · 2026-10-12 20:39 · 🟡 Medium · เลิกอีโมจิและ ✦ ✨ บนหน้าเว็บค้างไม่ได้ขึ้นจริง · ปุ่มแจ้งเตือนเมื่อมีเวลาว่างถูกบีบในการ์ดแคบ

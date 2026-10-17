@@ -329,7 +329,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
           {/* Authentic 1909 Persona Card Avatar */}
           <div
             className="w-10 h-14 rounded-lg border-2 overflow-hidden bg-inset-warm relative shrink-0"
-            style={{ borderColor: "#D9C8AC" }}
+            style={{ borderColor: "var(--color-line-warm)" }}
           >
             <CardImage
               image={`${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
