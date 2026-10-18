@@ -29,7 +29,14 @@ import { saveReading, updateReadingMeta } from "@/lib/utils/history";
 import { MoodPicker } from "@/components/journal/MoodPicker";
 import { FollowStoryCard } from "@/components/journal/FollowStoryCard";
 import { fetchThreads } from "@/lib/journal/threads-client";
-import { saveFlowState, loadFlowState, clearFlowState, FRESH_START_EVENT } from "@/lib/utils/flow-persistence";
+import {
+  saveFlowState,
+  loadFlowState,
+  clearFlowState,
+  FRESH_START_EVENT,
+  markAuthDetour,
+  takeAuthDetour,
+} from "@/lib/utils/flow-persistence";
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
 import { prefetchTurnstile } from "@/lib/auth/turnstile";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -329,6 +336,9 @@ export default function TarotFlow({
     // กล่องจะโผล่ทีหลังแล้วดันปุ่มขยับ — ขอไว้ตั้งแต่วินาทีที่กด
     prefetchTurnstile();
     void ensureEntitlement();
+    // ทุกทางลงชื่อโหลดหน้าใหม่ — จดไว้ว่าออกไปจากหน้าผังไหน กลับมาแล้วจะได้กู้คำถามคืน (ดู `takeAuthDetour`)
+    // หน้าแรกไม่ต้องจด: ไม่มีผังในที่อยู่ รอบที่ค้างถูกกู้คืนเองอยู่แล้ว
+    if (routeSpread) markAuthDetour(routeSpread.id);
     dispatchOverlay({ type: "openAuth", mode, fromWall });
   };
 
@@ -550,7 +560,8 @@ export default function TarotFlow({
     const intent = resolveEntryIntent({
       routeSpread: routeSpread?.id ?? null,
       isKnownSpread: (id) => Boolean(getSpread(id)),
-      returning: isReturnVisit(),
+      // กลับมาจากหน้าลงชื่อเข้าใช้ = กลับมาหน้าเดิม (เบราว์เซอร์นับเป็น navigate ไม่ใช่ reload)
+      returning: isReturnVisit() || (routeSpread ? takeAuthDetour(routeSpread.id) : false),
       savedStep: saved?.currentStep ?? null,
       savedSpread: saved?.spreadId ?? null,
     });
