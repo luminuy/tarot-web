@@ -22,10 +22,16 @@
  * จึงผ่าน `npm ci` ฉลุยทั้งที่ตัวแปลงยังไม่เคยเห็น Next 17 มาก่อนเลยสักบรรทัด
  * ด่านนี้จึงตรวจ **สองชั้น**: ช่วงที่ประกาศไว้ (ชั้นล่าง) + คู่รุ่นใหญ่ที่พิสูจน์แล้ว (ชั้นบน)
  *
+ * ⚠️ INC-0285 (2026-10-18): Next ขึ้นแค่รุ่นย่อย 16.3 ➔ 16.4 ก็พังได้ — บิลด์ผ่าน deploy ผ่าน
+ *    แต่ worker โยน error ทุกคำขอ (Error 1101) เพราะตัวแปลงรุ่นเก่าไม่รู้จัก manifest ใหม่
+ *    ด่านเดิมเทียบแค่รุ่นใหญ่ จึงต้องพิสูจน์ถึง **รุ่นย่อยของ Next** และ **รุ่นขั้นต่ำของตัวแปลง**
+ *
  * 📌 วันที่ต้องขยับคู่นี้จริง ๆ ให้ทำตามนี้แล้วด่านจะเขียวเอง:
  *    1. อัปเกรดทั้งสองตัวพร้อมกัน (`next` และ `@opennextjs/cloudflare`)
- *    2. `npm run build:worker` ให้ผ่านในเครื่องก่อน — นี่คือขั้นที่ล้มจริงถ้าคู่ไม่เข้ากัน
- *    3. อัปเดต `PROVEN_PAIR` ข้างล่างให้ตรงกับคู่ใหม่ พร้อมวันที่ที่ยืนยัน
+ *    2. `npm run build:worker` ให้ผ่านในเครื่องก่อน
+ *    3. รัน worker จริง (`npx wrangler dev` โดยถอด binding ai/vectorize ที่ต้องต่อ remote ออกจาก config ชั่วคราว)
+ *       แล้วยิง `/admin/login` กับ `/api/config/app` ต้องได้ 200 — บิลด์ผ่านอย่างเดียวไม่พอ (INC-0285)
+ *    4. อัปเดต `PROVEN_PAIR` ข้างล่างให้ตรงกับคู่ใหม่ พร้อมวันที่ที่ยืนยัน
  *
  * ℹ️ เกี่ยวกับแผนย้าย Astro: ตราบใดที่ยังมี 9 หน้าหลังบ้าน + `/api/*` อยู่กับ Next
  *    คู่นี้ต้องอยู่ต่อ · วันที่ตัวแปลงตามรุ่นใหม่ของ Next ไม่ทันจนขวางการอัปเกรด
@@ -40,10 +46,10 @@ import path from "node:path";
 import { ROOT } from "./lib/rendered-pages";
 
 /**
- * คู่รุ่นใหญ่ที่ "บิลด์ Worker ผ่านจริง" แล้ว — ไม่ใช่ค่าที่เดาเอา
- * ยืนยันจาก `npm run build:worker` บนคู่นี้ (2026-09-18)
+ * คู่ที่ "บิลด์ Worker ผ่าน และรัน worker จริงตอบ 200" แล้ว — ไม่ใช่ค่าที่เดาเอา
+ * ยืนยัน 2026-10-18: next 16.4.1 + @opennextjs/cloudflare 1.20.12 · build:worker + wrangler dev (INC-0285)
  */
-const PROVEN_PAIR = { nextMajor: 16, adapterMajor: 1 } as const;
+const PROVEN_PAIR = { nextMajor: 16, nextMinor: 4, adapterMajor: 1, adapterMin: "1.20.12" } as const;
 
 let failed = 0;
 const check = (label: string, ok: boolean, detail?: string) => {
@@ -181,6 +187,26 @@ check(
     "ช่วงที่ตัวแปลงประกาศเปิดปลายด้านบน `npm ci` จึงไม่ฟ้อง — แต่ `opennextjs-cloudflare build` ล้มได้",
     "ทำตามขั้นตอนในหัวไฟล์นี้: อัปเกรดคู่กัน ➔ `npm run build:worker` ผ่าน ➔ อัปเดต PROVEN_PAIR",
   ].join("\n      "),
+);
+
+const nextMinor = parse(nextVersion)?.[1];
+check(
+  `next รุ่นย่อย = ${nextMajor}.${nextMinor} (พิสูจน์ไว้ที่ ${PROVEN_PAIR.nextMajor}.${PROVEN_PAIR.nextMinor})`,
+  nextMajor === PROVEN_PAIR.nextMajor && nextMinor === PROVEN_PAIR.nextMinor,
+  [
+    "Next ขึ้นรุ่นย่อยแล้วยังไม่ได้พิสูจน์ว่าตัวแปลงรุ่นนี้รันได้จริง (INC-0285: 16.4 ทำ worker ล่มทั้งที่บิลด์ผ่าน)",
+    "ทำตามขั้นตอนในหัวไฟล์นี้: อัปเกรดคู่กัน ➔ build:worker ➔ wrangler dev ยิงจริงได้ 200 ➔ อัปเดต PROVEN_PAIR",
+  ].join("\n      "),
+);
+
+check(
+  `@opennextjs/cloudflare ${adapterVersion} ไม่ต่ำกว่ารุ่นที่พิสูจน์ (${PROVEN_PAIR.adapterMin})`,
+  (() => {
+    const a = parse(adapterVersion);
+    const min = parse(PROVEN_PAIR.adapterMin);
+    return Boolean(a && min && cmp(a, min) >= 0);
+  })(),
+  "ตัวแปลงต่ำกว่ารุ่นที่พิสูจน์กับ Next รุ่นนี้ — lockfile ถอยหลังหรือเปล่า?",
 );
 
 check(
