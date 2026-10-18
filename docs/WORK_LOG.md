@@ -38,6 +38,11 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-18 (รอบ 293): ยก Next 16.4.2 คู่ OpenNext 1.20.12 (ปิดช่องโหว่ Server Actions DoS · GHSA-p3m5-59mp-jv5r)
+- ทำตามกฎ INC-0285: ยกคู่กัน · OpenNext 1.20.12 รองรับ Next 16.4 และฝัง `preview-props.json` เข้า worker แล้ว · ตรึง exact ทั้งคู่ · dependabot ยัง ignore minor/major ของ next
+- ลองแบบ worker จริงในเครื่อง (`opennextjs-cloudflare build` + `wrangler dev`): `/api/config/turnstile` `/api/auth/me` `/api/bootstrap` `/readers` `/admin` `/admin/login` = 200 · `/api/reading/start` ตอบตามกติกาสิทธิ์ · ไม่มี error loadManifest
+- typecheck · build · `repo:verify` 94/94 ผ่าน
+
 ### 🗓️ 2026-10-18 (รอบ 292): กู้ production ล่ม 1101 หลัง dependabot ยก Next 16.4.1 (INC-0285)
 - อาการ: 03:24–04:00 UTC ทุกเส้นทางของ Next (`/api/*` · `/readers` · `/admin`) ตอบ Error 1101 · หน้าเปิดไพ่ขึ้น "แม่หมอเชื่อมสัญญาณไม่ติด"
 - ต้นเหตุ: dependabot merge #685 (next 16.3.4 ➔ 16.4.1) · Next 16.4 อ่าน `.next/server/preview-props.json` ที่ OpenNext 1.20.5 ไม่ได้ฝังเข้า worker (ทำซ้ำได้ด้วย `opennextjs-cloudflare build` + `wrangler dev`)
