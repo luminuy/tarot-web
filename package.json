@@ -87,7 +87,7 @@
     "eslint": "^10.10.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-unused-imports": "^4.4.1",
-    "postcss": "^8.5.26",
+    "postcss": "^8.5.30",
     "sharp": "0.35.5",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.12",
