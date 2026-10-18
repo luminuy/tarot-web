@@ -11,3 +11,10 @@ updates:
     #    ปล่อยว่างไว้ dependabot จะติดป้าย `dependencies` ของมันเองซึ่งสร้างให้อัตโนมัติ
     commit-message:
       prefix: "chore(deps)"
+    # ⚠️ INC-0285: Next 16.4.1 อ่านไฟล์ใหม่ (.next/server/preview-props.json) ที่ @opennextjs/cloudflare 1.20.x
+    #    ไม่ได้ฝังเข้า worker ➔ ทุกเส้นทางของ Next (/api/* · /readers · /admin) ล้ม 1101 บน production
+    #    บิลด์และชุดตรวจผ่านหมด เพราะพังตอนรันใน worker เท่านั้น — ห้าม dependabot ยกรุ่น minor/major ของ Next เอง
+    #    ยก Next ด้วยมือคู่กับ OpenNext แล้วลอง `opennextjs-cloudflare build` + `wrangler dev` ยิง /api/auth/me ก่อนทุกครั้ง
+    ignore:
+      - dependency-name: "next"
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
