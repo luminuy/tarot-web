@@ -96,3 +96,49 @@ export function requestFreshStart(): void {
   clearFlowState();
   window.dispatchEvent(new Event(FRESH_START_EVENT));
 }
+
+/**
+ * ✦ ออกไปลงชื่อเข้าใช้กลางพิธีแล้วกลับมา = "กลับมาหน้าเดิม" ไม่ใช่ "กดเข้ามาใหม่"
+ * ---------------------------------------------------------------------------
+ * เจ้าของแจ้ง 2026-10-18: พิมพ์คำถามแล้วเด้งหน้าลงชื่อ ลงชื่อเสร็จคำถามหาย ต้องพิมพ์ใหม่
+ *
+ * ทุกทางลงชื่อ (Google · LINE · อีเมล) โหลดหน้า `/read/<ผัง>` ใหม่ทั้งหน้า ซึ่งเบราว์เซอร์นับเป็น
+ * `navigate` ไม่ใช่ `reload` ➔ `resolveEntryIntent` ตัดสินว่า "กดลิงก์เข้ามาใหม่" แล้วล้างรอบที่ค้างทิ้ง
+ * คำถามที่เพิ่งพิมพ์จึงหายไปพร้อมรอบนั้น
+ *
+ * จึงจดไว้ตอนเปิดหน้าต่างลงชื่อว่าออกไปจากผังไหน · กลับมาหน้าผังเดิมภายในเวลาที่กำหนด = กู้คืน
+ * ใช้ได้ครั้งเดียวแล้วลบทิ้ง กันกดลิงก์ผังเดิมทีหลังแล้วถูกลากกลับรอบเก่า (บทเรียนรอบ 132)
+ */
+const AUTH_DETOUR_MAX_AGE_MS = 30 * 60 * 1000;
+
+export function markAuthDetour(spreadId: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(STORAGE_KEYS.authDetour, JSON.stringify({ spreadId, at: Date.now() }));
+  } catch {
+    /* โหมดส่วนตัวเขียนไม่ได้ — ผลแค่ต้องพิมพ์คำถามใหม่เหมือนเดิม */
+  }
+}
+
+/** ตรรกะล้วนของ `takeAuthDetour` — แยกออกมาให้ด่านตรวจเรียกได้โดยไม่ต้องมีเบราว์เซอร์ */
+export function authDetourMatches(raw: string | null, spreadId: string, now: number): boolean {
+  if (!raw) return false;
+  try {
+    const v = JSON.parse(raw) as { spreadId?: unknown; at?: unknown };
+    return v.spreadId === spreadId && typeof v.at === "number" && now - v.at >= 0 && now - v.at <= AUTH_DETOUR_MAX_AGE_MS;
+  } catch {
+    return false;
+  }
+}
+
+/** กลับมาจากการลงชื่อเข้าใช้ที่หน้าผังเดิมหรือเปล่า — อ่านแล้วลบทิ้งเสมอ (ใช้ได้ครั้งเดียว) */
+export function takeAuthDetour(spreadId: string): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const raw = window.sessionStorage.getItem(STORAGE_KEYS.authDetour);
+    window.sessionStorage.removeItem(STORAGE_KEYS.authDetour);
+    return authDetourMatches(raw, spreadId, Date.now());
+  } catch {
+    return false;
+  }
+}
