@@ -11,3 +11,13 @@ updates:
     #    ปล่อยว่างไว้ dependabot จะติดป้าย `dependencies` ของมันเองซึ่งสร้างให้อัตโนมัติ
     commit-message:
       prefix: "chore(deps)"
+    # ⚠️ next กับตัวแปลง OpenNext ต้องขึ้นรุ่นพร้อมกันใน PR เดียวเสมอ (INC 2026-10-18)
+    #    next 16.4.1 ถูกอัปเดี่ยว ๆ ขณะ @opennextjs/cloudflare ยังเป็น 1.20.5 ซึ่งไม่รู้จัก
+    #    preview-props.json ของ Next รุ่นใหม่ ➔ worker โยน error ทุกคำขอที่ผ่าน Next (Error 1101)
+    #    บิลด์ใน CI ผ่านหมดเพราะไม่มีด่านไหนรัน worker จริง
+    groups:
+      next-runtime:
+        patterns:
+          - "next"
+          - "@opennextjs/*"
+          - "wrangler"

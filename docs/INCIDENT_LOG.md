@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0285 · 2026-10-18 11:05 · 🔴 Critical · เว็บล่ม Error 1101 ทุกเส้นที่ผ่าน Next หลัง dependabot อัป next 16.4.1
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | เปิด /admin เจอหน้า Cloudflare Error 1101 Worker threw exception · API /api/* ทั้งหมดตอบ 500 (ดูดวง ล็อกอิน จ่ายเงิน) ตั้งแต่ deploy 03:24 UTC 2026-10-18 |
+| **สาเหตุราก** | dependabot อัป next 16.3.4 เป็น 16.4.1 (#685) แยกจาก @opennextjs/cloudflare ที่ค้าง 1.20.5 · Next 16.4 อ่าน manifest ใหม่ preview-props.json ตอนสร้าง NextNodeServer แต่ตัวแปลงรุ่นเก่าไม่ได้ฝังไฟล์นี้ จึงโยน Unexpected loadManifest call ทุกคำขอ · CI บิลด์ผ่านเพราะไม่มีด่านรัน worker จริง |
+| **การแก้ไข** | อัป @opennextjs/cloudflare เป็น 1.20.12 (peer รองรับ next >=16.4.1) · ทดสอบด้วย wrangler dev บนบิลด์จริง: /admin /api/admin/session /api/config/app ตอบ 200 ไม่มี error |
+| **🛡️ กฎป้องกันถาวร** | **dependabot จัดกลุ่ม next + @opennextjs/* + wrangler ให้ขึ้นใน PR เดียว · ก่อน merge อัป next ต้องเช็ก peerDependencies ของ @opennextjs/cloudflare ว่ารองรับรุ่นนั้น และลอง wrangler dev บนบิลด์ worker จริง** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/peaceful-hopper-xjhsfo` · commit `c3d4b17` |
+
+
 ### INC-0284 · 2026-10-17 23:01 · 🟠 High · กล่องผลคำทำนายอ่านไม่ออก + แถบชิปหมวดสั่นตอนเลื่อนบนมือถือ + หน้าต่างลงชื่อล้นจอ
 
 | หัวข้อ | รายละเอียด |
