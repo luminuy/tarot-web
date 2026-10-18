@@ -19,3 +19,12 @@ updates:
     ignore:
       - dependency-name: "next"
         update-types: ["version-update:semver-minor", "version-update:semver-major"]
+    # react / react-dom / @types/* ต้องรุ่นตรงกันเป๊ะ (react-dom มี peer "react": "^<รุ่นเดียวกัน>")
+    # แยกคนละ PR = ตกด่านทั้งคู่ (เกิดจริง #687 + #697) ➔ รวมเป็นกลุ่มเดียว
+    groups:
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"

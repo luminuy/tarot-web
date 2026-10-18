@@ -38,6 +38,13 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-18 (รอบ 294): ยก React 19.3 ทั้งชุดในก้อนเดียว + เก็บ PR ค้าง (เจ้าของ "คืออะไร แก้เลย")
+- dependabot แยก `react` (#697) กับ `react-dom` (#687) คนละ PR ➔ ตกด่านทั้งคู่ (react-dom 19.3.1 ต้องการ react ^19.3.1 รุ่นเดียวกัน)
+- รวมเป็นก้อนเดียว: react 19.3.1 · react-dom 19.3.1 · @types/react 19.3.0 · @types/react-dom 19.3.0 · `dependabot.yml` เพิ่ม group `react` ให้มาเป็น PR เดียวเสมอ
+- ตรวจ: typecheck · build (462 หน้า) · `opennextjs-cloudflare build` + `wrangler dev` (`/api/auth/me` `/api/bootstrap` `/readers` `/admin` `/admin/login` = 200) · Playwright มือถือ: พิธีเปิดไพ่ 3 ใบครบจนผลคำทำนาย · หน้าต่างลงชื่อ · แท็บ `/cards` ไม่มี page error · `repo:verify` 94/94
+- React 19.3 ทำ JS หน้ามี island โต 3–8 KB gzip (ตัวหลัก React ~63 KB) ➔ ขยายงบ `test-bundle-budget` 4 หน้าตามที่เจ้าของอนุญาต: `/blog` 90➔98 · `/daily` `/love/1-card` 145➔152 · `/pick-a-card` 115➔128
+- ปิด #687 · #697 (ถูกแทนด้วยก้อนนี้) · ปิด Draft #669 (งานทั้งกิ่ง `gracious-hopper` ขึ้น production แล้วผ่าน #676)
+
 ### 🗓️ 2026-10-18 (รอบ 293): ยก Next 16.4.2 คู่ OpenNext 1.20.12 (ปิดช่องโหว่ Server Actions DoS · GHSA-p3m5-59mp-jv5r)
 - ทำตามกฎ INC-0285: ยกคู่กัน · OpenNext 1.20.12 รองรับ Next 16.4 และฝัง `preview-props.json` เข้า worker แล้ว · ตรึง exact ทั้งคู่ · dependabot ยัง ignore minor/major ของ next
 - ลองแบบ worker จริงในเครื่อง (`opennextjs-cloudflare build` + `wrangler dev`): `/api/config/turnstile` `/api/auth/me` `/api/bootstrap` `/readers` `/admin` `/admin/login` = 200 · `/api/reading/start` ตอบตามกติกาสิทธิ์ · ไม่มี error loadManifest
