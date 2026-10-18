@@ -38,6 +38,13 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-18 (รอบ 292): กู้ production ล่ม 1101 หลัง dependabot ยก Next 16.4.1 (INC-0285)
+- อาการ: 03:24–04:00 UTC ทุกเส้นทางของ Next (`/api/*` · `/readers` · `/admin`) ตอบ Error 1101 · หน้าเปิดไพ่ขึ้น "แม่หมอเชื่อมสัญญาณไม่ติด"
+- ต้นเหตุ: dependabot merge #685 (next 16.3.4 ➔ 16.4.1) · Next 16.4 อ่าน `.next/server/preview-props.json` ที่ OpenNext 1.20.5 ไม่ได้ฝังเข้า worker (ทำซ้ำได้ด้วย `opennextjs-cloudflare build` + `wrangler dev`)
+- กู้: `rollback.yml` ไปเวอร์ชัน `4fd854d3` (บิลด์ #683) — รอบแรกเว้น version_id แล้วได้เวอร์ชันจากบิลด์ที่พังเดียวกัน (ขั้น Stripe `secret put` สร้างเวอร์ชันซ้อน)
+- แก้ถาวร: ตรึง `next` 16.3.4 แบบ exact · dependabot ignore minor/major ของ next · ลองบิลด์ worker + `wrangler dev` ยิง `/api/auth/me` `/api/config/turnstile` `/readers` ได้ 200 ครบ
+- wrangler 4.151 / postcss / tsx ไม่เกี่ยว (ทดสอบในเครื่องกับ wrangler 4.151 ผ่าน)
+
 ### 🗓️ 2026-10-17 (รอบ 291): กล่องผลคำทำนายอ่านไม่ออก + หน้าต่างลงชื่อไม่พอดีจอ (เจ้าของ "หลายจุดแก้ด่วน" · "หน้าลงชื่อใหม่ไม่พอดี เพราะ cloudflare ใหญ่ไป")
 - กล่อง "สรุปตรงใจ" ในผลอ่านไพ่ (พื้นมืด) ตัวหนังสือเข้มจม ➔ เกาะกลางคืนใน `ui2-dawn.css` (`.v2-sr .v2-sr-answer` ใช้โทเคนกลางคืนทั้งชุด รวมปุ่มฟังเสียง)
 - ผลทำนายด่วน (`QuickChatResult` · หน้าแรก + `/read/quick`) เทาทั้งกล่อง/การ์ดสรุปกลายเป็นมืด ➔ คลาส `.v2-qr` เป็นเกาะธีมสว่างใน `v2-ritual.css` · กฎแปลงสีเดิมใน `ui2-page.css` และ `theme-dark.css` ยกเว้น `.v2-qr`

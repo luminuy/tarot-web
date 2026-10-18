@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0285 · 2026-10-18 10:55 · 🔴 Critical · Production ล่ม 1101 ทุกเส้นทาง Next หลัง dependabot ยก Next 16.4.1
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | 2026-10-18 03:24–04:00 UTC: /api/* · /readers · /admin ตอบ Error 1101 Worker threw exception · หน้าเปิดไพ่ขึ้น 'แม่หมอเชื่อมสัญญาณไม่ติด' · หน้า Astro ยังปกติ |
+| **สาเหตุราก** | dependabot merge #685 ยก next 16.3.4 เป็น 16.4.1 อัตโนมัติ · Next 16.4 เรียก loadManifest(.next/server/preview-props.json) ที่ @opennextjs/cloudflare 1.20.5 ไม่ได้ฝังเข้า worker ➔ ทุกคำขอที่เข้า Next ล้ม · บิลด์และ 94 ด่านผ่านเพราะพังตอนรันใน worker เท่านั้น |
+| **การแก้ไข** | ถอย Worker กลับเวอร์ชัน 4fd854d3 (บิลด์ #683) ด้วย rollback.yml · ตรึง next 16.3.4 แบบ exact · dependabot ignore minor/major ของ next |
+| **🛡️ กฎป้องกันถาวร** | **ห้าม dependabot ยก Next minor/major เอง · ยก Next ต้องคู่กับ OpenNext และลอง opennextjs-cloudflare build + wrangler dev ยิง /api/auth/me ก่อน · rollback ห้ามเว้น version_id เพราะ secret put สร้างเวอร์ชันโค้ดเดิมซ้อน ต้องระบุ Version ID ของบิลด์ก่อนหน้าจาก log deploy** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/kind-meitner-ub24bz` · commit `c3d4b179` |
+
+
 ### INC-0284 · 2026-10-17 23:01 · 🟠 High · กล่องผลคำทำนายอ่านไม่ออก + แถบชิปหมวดสั่นตอนเลื่อนบนมือถือ + หน้าต่างลงชื่อล้นจอ
 
 | หัวข้อ | รายละเอียด |
