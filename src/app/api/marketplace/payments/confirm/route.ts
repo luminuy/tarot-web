@@ -17,6 +17,17 @@ const ConfirmSchema = z.object({
 });
 
 /**
+ * ยอดสำหรับอีเวนต์ `purchase` ของ GA4 ฝั่งหน้าคิว — ยอดเงินกับว่า "นับเป็นเงินจริงไหม" เท่านั้น ไม่มีอีเมลหรือชื่อ
+ * ตัวจำลองและ Stripe โหมดทดสอบ (`cs_test_`) ไม่นับ — กติกาเดียวกับรายได้ในแดชบอร์ดผู้บริหาร
+ */
+function purchaseSummary(p: { amountSatang: number; provider: string; providerRef?: string | null }) {
+  return {
+    valueThb: Math.round(p.amountSatang) / 100,
+    countable: p.provider === "stripe" && !(p.providerRef ?? "").startsWith("cs_test_"),
+  };
+}
+
+/**
  * POST /api/marketplace/payments/confirm — ลูกค้ากลับจากหน้าจ่ายเงิน Stripe (`?paid=1`)
  * ---------------------------------------------------------------------------
  * ⚠️ การถูกเรียกปลายทางนี้ **ไม่ใช่หลักฐานการจ่ายเงิน** (ใครก็พิมพ์ `?paid=1` เองได้)
@@ -48,8 +59,9 @@ export async function POST(request: Request) {
     }
 
     const payments = await listPaymentsForTicket(ticketId);
-    if (payments.some((p) => p.status === "paid")) {
-      return NextResponse.json({ status: "confirmed" });
+    const alreadyPaid = payments.find((p) => p.status === "paid");
+    if (alreadyPaid) {
+      return NextResponse.json({ status: "confirmed", purchase: purchaseSummary(alreadyPaid) });
     }
 
     for (const payment of payments.filter((p) => p.status === "pending" || p.status === "failed")) {
@@ -69,7 +81,8 @@ export async function POST(request: Request) {
       }
       if (!verified) continue;
       const state = await settleConsultationPayment(payment.id, { email });
-      return NextResponse.json({ status: state === "already" ? "confirmed" : state });
+      const status = state === "already" ? "confirmed" : state;
+      return NextResponse.json(status === "confirmed" ? { status, purchase: purchaseSummary(payment) } : { status });
     }
 
     // ยังไม่จ่าย / PromptPay ที่ยังรอธนาคารยืนยัน ➔ หน้าคิวถามสถานะต่อเอง webhook จะตามมา

@@ -159,6 +159,27 @@ console.log("\nง. แดชบอร์ดผู้บริหาร — แ�
   check("อ่าน D1 ไม่ได้ ➔ ช่วงก่อนเป็น null (ไม่ใช่ 0)", none.kpi.netRevenueThb.prev === null && none.kpi.signups === null && !none.revenue.available);
 }
 
+// ── จ. รหัสอ่านรายงานผู้บริหาร (ADMIN_REPORT_TOKEN) ใช้ได้แค่ route อ่านอย่างเดียวที่ไม่มีข้อมูลส่วนตัว ──
+console.log("\nจ. รหัสอ่านรายงาน — เปิดได้แค่ 2 เส้นที่อ่านอย่างเดียว");
+{
+  const ALLOWED = ["src/app/api/admin/executive/route.ts", "src/app/api/admin/nav-badges/route.ts"];
+  const users = sources
+    .filter((f) => f.rel.startsWith("src/app/") && /requireAdminOrReportToken|hasValidReportToken/.test(f.text))
+    .map((f) => f.rel)
+    .sort();
+  check(
+    "มีแค่ /api/admin/executive กับ /api/admin/nav-badges ที่รับรหัสอ่านรายงาน",
+    JSON.stringify(users) === JSON.stringify(ALLOWED),
+    `   ได้: ${users.join(" · ") || "(ไม่มี)"}\n   ➔ route อื่นที่มีอีเมล/ชื่อ/รหัสผู้ใช้ หรือเขียนข้อมูล ต้องใช้ requireAdmin() เท่านั้น`,
+  );
+  for (const rel of ALLOWED) {
+    const text = sources.find((f) => f.rel === rel)?.text ?? "";
+    check(`${rel} มีแค่ GET (ไม่มี POST/PUT/PATCH/DELETE)`, !/export async function (POST|PUT|PATCH|DELETE)\b/.test(text));
+  }
+  const guard = sources.find((f) => f.rel === "src/lib/auth/require-admin.ts")?.text ?? "";
+  check("เทียบรหัสแบบ constant-time และบังคับยาว ≥ 32 ตัว", guard.includes("timingSafeEqual") && /MIN_REPORT_TOKEN_LEN = 32/.test(guard));
+}
+
 if (failed > 0) {
   console.error(`\n❌ ไม่ผ่าน ${failed} ข้อ`);
   process.exit(1);

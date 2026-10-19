@@ -48,6 +48,7 @@
     "seo:ping": "tsx scripts/seo/ping-indexnow.ts",
     "seo:gsc": "tsx scripts/seo/gsc.ts",
     "seo:ga4": "tsx scripts/seo/ga4.ts",
+    "exec:report": "tsx scripts/exec-report.ts",
     "agent:status": "tsx scripts/agent-guard.ts status",
     "agent:check": "tsx scripts/agent-guard.ts check",
     "agent:lock": "tsx scripts/agent-guard.ts lock",

@@ -378,5 +378,46 @@ async function checkPlanStatusIndex() {
   console.log(`✅ สถานะแผน ${plans.length} ไฟล์ตรงกับตารางใน CLAUDE.md และ INDEX.md (ยังเปิด ${open} แผน — ดู npm run docs:status)`);
 }
 
+/**
+ * 🤝 ไฟล์ผู้ช่วยผู้บริหาร (`.claude/agents/*.md`) ต้องชี้ของที่มีอยู่จริง
+ * ผู้ช่วยทำตามไฟล์นี้ตรงตัว — ไฟล์ที่ถูกย้าย หรือคำสั่ง npm ที่ถูกลบ ทำให้มันตอบผิดเงียบ ๆ
+ * (เคยพบบรรทัดค้างของเซสชันเก่าและจำนวนด่านตายตัวในรอบตรวจ 2026-10-19)
+ */
+function checkAgentFiles() {
+  const dir = path.join(ROOT, ".claude/agents");
+  if (!fs.existsSync(dir)) return;
+  const files = fs.readdirSync(dir).filter((n) => n.endsWith(".md"));
+  if (files.length === 0) {
+    console.error("❌ ไม่พบไฟล์ผู้ช่วยใน .claude/agents — ด่านนี้ไม่ได้ตรวจอะไรเลย");
+    process.exit(1);
+  }
+  const scripts = Object.keys(JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8")).scripts ?? {});
+  const problems: string[] = [];
+  for (const name of files) {
+    const text = fs.readFileSync(path.join(dir, name), "utf8");
+    const front = /^---\n([\s\S]*?)\n---/.exec(text)?.[1] ?? "";
+    const declared = /^name:\s*(\S+)/m.exec(front)?.[1];
+    if (declared !== name.replace(/\.md$/, "")) problems.push(`${name}: name ใน frontmatter (${declared ?? "ไม่มี"}) ไม่ตรงชื่อไฟล์`);
+    if (!/^description:\s*\S/m.test(front)) problems.push(`${name}: ไม่มี description`);
+    if (!/^tools:\s*\S/m.test(front)) problems.push(`${name}: ไม่มี tools`);
+    if (/^tools:.*\b(Edit|Write)\b/m.test(front)) problems.push(`${name}: ผู้ช่วยผู้บริหารต้องอ่านอย่างเดียว ห้ามมี Edit/Write`);
+    if (!text.includes("docs/exec/DECISIONS.md")) problems.push(`${name}: ต้องสั่งให้อ่าน docs/exec/DECISIONS.md ก่อนเสนอ`);
+    for (const m of text.matchAll(/`((?:docs|src|scripts|mobile|\.github)\/[^`\s*<>]+)`/g)) {
+      const rel = m[1].replace(/[.,:;)]+$/, "");
+      if (!fs.existsSync(path.join(ROOT, rel))) problems.push(`${name}: อ้างไฟล์ที่ไม่มีอยู่ \`${rel}\``);
+    }
+    for (const m of text.matchAll(/npm run ([a-z0-9:-]+)/g)) {
+      if (!scripts.includes(m[1])) problems.push(`${name}: อ้างคำสั่งที่ไม่มีใน package.json \`npm run ${m[1]}\``);
+    }
+  }
+  if (problems.length > 0) {
+    console.error("❌ ไฟล์ผู้ช่วยผู้บริหารชี้ของที่ไม่มีอยู่จริง:");
+    for (const p of problems) console.error(`  - ${p}`);
+    process.exit(1);
+  }
+  console.log(`✅ ไฟล์ผู้ช่วยผู้บริหาร ${files.length} ไฟล์ชี้ไฟล์และคำสั่งที่มีอยู่จริงครบ`);
+}
+
 checkDocs();
 await checkPlanStatusIndex();
+checkAgentFiles();

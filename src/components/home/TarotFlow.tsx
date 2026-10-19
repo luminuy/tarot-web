@@ -43,7 +43,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { describeAuthError, fetchSessionUser, invalidateSessionCache } from "@/lib/auth/use-session";
 import type { ToastData } from "@/components/ui/ToastNotification";
-import { trackEvent } from "@/lib/analytics";
+import { trackEvent, trackPurchase } from "@/lib/analytics";
 import {
   DAILY_LIMIT,
   GUEST_BLOCK_REASON,
@@ -652,6 +652,9 @@ export default function TarotFlow({
         cleanUrl.searchParams.delete("pw_reset");
         cleanUrl.searchParams.delete("purchase_success");
         cleanUrl.searchParams.delete("credits");
+        cleanUrl.searchParams.delete("order");
+        cleanUrl.searchParams.delete("pkg");
+        cleanUrl.searchParams.delete("value");
         cleanUrl.searchParams.delete("purchase_error");
         cleanUrl.searchParams.delete("verify_error");
         cleanUrl.searchParams.delete("auth_error");
@@ -672,6 +675,13 @@ export default function TarotFlow({
           duration: 4500,
         });
         refreshEntitlement();
+        // GA4 purchase — เซิร์ฟเวอร์แนบ order/pkg/value มาเฉพาะเงินจริงที่ยืนยันแล้ว (confirm route)
+        const order = searchParams.get("order");
+        const pkg = searchParams.get("pkg");
+        const value = Number(searchParams.get("value"));
+        if (order && pkg) {
+          trackPurchase({ transactionId: order, valueThb: value, itemId: pkg, itemName: `แพ็กเติมรอบ ${pkg}`, category: "credit_pack" });
+        }
       } else if (purchaseError) {
         setToast({
           type: "error",

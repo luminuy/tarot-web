@@ -102,6 +102,15 @@ Local dev: ใส่ `ADMIN_PASSWORD=...` ใน `.env.local`
 - ตัวนับรายวันอ่านย้อนได้ 180 วัน (90 วัน × 2 ช่วง) — `readD1Counters` แบ่งคำถามละ 90 วันเพราะ D1 รับพารามิเตอร์ได้ไม่เกิน 100
 - ด่าน `test-admin-stats-keys` หัวข้อ ง. ตรวจการแบ่งช่วง · ตัดรายการทดสอบ · กฎสิ่งที่ต้องดู · อ่าน D1 ไม่ได้ต้องได้ `null`
 
+## รหัสอ่านรายงานผู้บริหาร · ตัวเช็กเว็บล่ม (2026-10-19)
+
+| เรื่อง | ไฟล์ | หมายเหตุ |
+| :-- | :-- | :-- |
+| รหัสอ่านรายงาน `ADMIN_REPORT_TOKEN` | `requireAdminOrReportToken()` ใน `src/lib/auth/require-admin.ts` | ใช้ได้แค่ `GET /api/admin/executive` · `GET /api/admin/nav-badges` (ด่าน `test-admin-stats-keys` หัวข้อ จ.) · หัว `Authorization: Bearer` ผิด = 401 ทันที ไม่ถอยไปตรวจคุกกี้ |
+| `npm run exec:report` | `scripts/exec-report.ts` | สรุปภาษาไทย 7/28/90 วัน · `--json` เก็บผลดิบ · ยิงเข้า `*.workers.dev` (Bot Fight Mode ของโดเมนหลักตอบ challenge ให้ IP ดาต้าเซ็นเตอร์) · วิธีตั้งรหัสใน `docs/PENDING_SETUP.md` |
+| ตัวเช็กเว็บล่ม | `.github/workflows/uptime.yml` | ทุก 10 นาที: หน้าแรก · `/readers` · `/api/admin/session` · โดเมนหลัก · ล่ม = เปิด issue "[เว็บล่ม]" (ต่อคอมเมนต์ถ้ามีอยู่แล้ว) · กลับมา = ปิด issue เอง |
+| อีเวนต์ `purchase` ของ GA4 | `trackPurchase()` ใน `src/lib/analytics.ts` | ยิงเฉพาะเงินจริงที่เซิร์ฟเวอร์ยืนยัน: แพ็กเติมรอบ (`/api/entitlement/checkout/confirm` แนบ order/pkg/value เมื่อ Stripe เป็น live) · ปรึกษาแม่หมอ (`/api/marketplace/payments/confirm` คืน `purchase.countable`) · ดูแยกช่องทาง `npm run seo:ga4 -- purchases` |
+
 ## รายการชำระเงิน และบันทึกการทำงานแอดมิน (2026-10-17)
 
 | เรื่อง | ไฟล์ | หมายเหตุ |

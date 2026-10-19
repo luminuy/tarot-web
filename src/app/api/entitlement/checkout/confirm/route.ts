@@ -8,7 +8,7 @@ import {
   type PaymentRowForGrant,
 } from "@/lib/entitlement/purchase";
 import { updatePaymentStatus } from "@/lib/marketplace/payments.repo";
-import { retrieveGatewayCharge } from "@/lib/marketplace/payment-gateway";
+import { retrieveGatewayCharge, stripeKeyMode } from "@/lib/marketplace/payment-gateway";
 import { getAppDB } from "@/lib/platform/db";
 import { getSessionUser } from "@/lib/auth/session";
 import { isPrivilegedTestRequest } from "@/lib/security/privileged";
@@ -167,7 +167,13 @@ export async function GET(request: Request) {
     if (!result.ok) {
       return NextResponse.redirect(`${origin}${targetPath}?purchase_error=${encodeURIComponent(result.message)}`);
     }
-    return NextResponse.redirect(`${origin}${targetPath}?purchase_success=1&credits=${result.credits}`);
+    // ยอดสำหรับอีเวนต์ purchase ของ GA4 — แนบเฉพาะเงินจริง (Stripe โหมด live) ไม่มีข้อมูลส่วนตัว
+    const pkg = getCreditPackageById(packageId);
+    const purchase =
+      pkg && stripeKeyMode() === "live" && userId !== "usr_privileged_test"
+        ? `&order=${encodeURIComponent(orderId)}&pkg=${encodeURIComponent(pkg.id)}&value=${pkg.priceThb}`
+        : "";
+    return NextResponse.redirect(`${origin}${targetPath}?purchase_success=1&credits=${result.credits}${purchase}`);
   } catch (error) {
     console.error("[Credit Checkout Confirmation Error]:", error);
     const errorMsg = isEnglish ? "Payment confirmation failed" : "การยืนยันรายการชำระเงินล้มเหลว";
