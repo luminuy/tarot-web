@@ -191,6 +191,11 @@ async function runTest() {
   // 2. Create Booking First to satisfy Foreign Key
   const { getAppDB } = await import("../../src/lib/platform/db");
   const db = await getAppDB();
+  // ตัวนับเพดานข้าม isolate อยู่ในไฟล์ .dev-marketplace.db ที่ค้างข้ามรอบ — รันด่านซ้ำภายในอายุตัวนับ (เช่น 36 นาทีของการกันที่)
+  // จะชนเพดานของรอบก่อนแล้วได้ 429 · ล้างเฉพาะตัวนับของระบบนัด/รายชื่อรอก่อนเริ่ม ให้ผลด่านไม่ขึ้นกับรอบก่อนหน้า
+  await db
+    .prepare("DELETE FROM edge_rate_buckets WHERE key LIKE 'app:edgerl:mkt_hold:%' OR key LIKE 'app:edgerl:waitlist:%'")
+    .run();
   const testBookingId = `book_test_${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`;
   const now = Date.now();
   await db
