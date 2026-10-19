@@ -38,6 +38,12 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-19 (รอบ 294): ตรวจใหญ่ทั้งระบบ 10 ด้าน (บั๊ก · ความปลอดภัย · โค้ดตาย · SEO · UX/UI · perf · infra)
+- เอเจนท์ตรวจ 10 ตัว (ตรวจอย่างเดียว) + ผู้คุมงานตรวจซ้ำข้อร้ายแรงด้วยการอ่านโค้ด/รันซ้ำ · ได้ 86 ข้อ · แผน `docs/plans/AUDIT_2026-10-18.md` · กระดาน `docs/audits/2026-10-18/PROGRESS.md`
+- 🔒 repo นี้เป็นสาธารณะ — ไฟล์ผลรายด้านมีขั้นตอนเจาะระบบที่ยังไม่แก้ จึงเก็บนอก repo (`.git/info/exclude`) · เจ้าของจะเปลี่ยน repo เป็น private หลังแก้เสร็จ
+- ค่าฐาน: typecheck 0 error · eslint 0 error · `npm audit --omit=dev` 0 · บิลด์ผ่าน 462 หน้า
+- ยังไม่ได้แก้โค้ด — รอเจ้าของสั่งเริ่มคลื่นแก้
+
 ### 🗓️ 2026-10-18 (รอบ 293): ยก Next 16.4.2 คู่ OpenNext 1.20.12 (ปิดช่องโหว่ Server Actions DoS · GHSA-p3m5-59mp-jv5r)
 - ทำตามกฎ INC-0285: ยกคู่กัน · OpenNext 1.20.12 รองรับ Next 16.4 และฝัง `preview-props.json` เข้า worker แล้ว · ตรึง exact ทั้งคู่ · dependabot ยัง ignore minor/major ของ next
 - ลองแบบ worker จริงในเครื่อง (`opennextjs-cloudflare build` + `wrangler dev`): `/api/config/turnstile` `/api/auth/me` `/api/bootstrap` `/readers` `/admin` `/admin/login` = 200 · `/api/reading/start` ตอบตามกติกาสิทธิ์ · ไม่มี error loadManifest
