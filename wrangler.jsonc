@@ -125,6 +125,27 @@
     }
   ],
 
+  // ── Analytics Engine (Workers Paid รวม 10M จุดข้อมูล/เดือน) ──────────────────
+  // สถิติความเสถียรวิดีโอคอลแม่หมอ — 1 จุดต่อผู้ร่วมสายต่อสาย (src/lib/marketplace/call-metrics.ts)
+  // ไม่มีข้อมูลส่วนตัว: บทบาท · ผลลัพธ์ · ชนิดเครื่อง · ตัวเลขเวลา/จำนวนครั้ง · อ่านผลด้วย `npm run cf:call-stats`
+  // dataset ถูกสร้างเองตอนเขียนครั้งแรก · schema: RawConfig.analytics_engine_datasets = [{ binding, dataset }]
+  "analytics_engine_datasets": [
+    {
+      "binding": "CALL_METRICS",
+      "dataset": "seertarot_calls"
+    }
+  ],
+
+  // ── Workers Logs (Workers Paid รวมในแพ็กเกจ · ทราฟฟิกตอนนี้ต่ำกว่าโควตามาก) ─────────
+  // ดู log/ข้อผิดพลาดจริงบน production ที่ Dashboard ➔ Workers ➔ tarot-web ➔ Logs (เก็บ 7 วัน)
+  // redact_query_string: ตัด ?token= ของลิงก์รีเซ็ตรหัสผ่าน / ?code= ของ OAuth ออกจาก log (PDPA)
+  // ทราฟฟิกโตจนใกล้โควตา ➔ ลด head_sampling_rate (เช่น 0.2 = เก็บ 20%) แทนการปิด
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "redact_query_string": true
+  },
+
   "vars": {
     "NODE_ENV": "production",
     "NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT": "https://ik.imagekit.io/seertarotweb",

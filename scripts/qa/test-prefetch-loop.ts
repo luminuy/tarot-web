@@ -89,6 +89,16 @@ async function run(): Promise<void> {
     );
   }
 
+  // ── กฎ 1b: แคชหน้า Next ต้องไม่อยู่ใน KV (บิล KV Storage 14 GB · 2026-10-19) ──
+  if (/incremental-cache\/kv-incremental-cache/.test(config)) {
+    errors.push(
+      "open-next.config.ts ใช้ `kv-incremental-cache`\n" +
+        "    แบบ KV seed หน้าทั้งชุดใต้ `incremental-cache/<BUILD_ID>/…` ทุก deploy และไม่เคยลบชุดเก่า\n" +
+        "    → KV Storage บวมจนเสียเงินรายวัน (เคยสะสมถึง 14 GB)\n" +
+        "    💡 ใช้ `static-assets-incremental-cache` (เว็บนี้ SSG ล้วน) — ถ้าต้องมี ISR ให้ใช้ R2 ไม่ใช่ KV",
+    );
+  }
+
   // ── กฎ 2: ห้ามเขียน prefetch={true} ตรง ๆ ───────────────────────────────
   for (const file of tsxFiles) {
     const source = codeOnly(fs.readFileSync(file, "utf-8"));

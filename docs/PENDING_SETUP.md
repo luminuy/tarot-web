@@ -64,6 +64,18 @@
 
 ---
 
+## 🟡 1.6 รอเจ้าของตั้งค่า — แจ้งเตือนค่าใช้จ่าย Cloudflare (เพิ่ม 2026-10-19 · หลังเหตุ KV Storage 14 GB INC-0287)
+
+ทำใน Dashboard เท่านั้น (ไม่มีในโค้ด) · ฟรี:
+1. Cloudflare Dashboard ➔ **Manage Account ➔ Notifications** ➔ **Add**
+2. เลือก **Usage Based Billing** ➔ เลือกบริการ (ทำซ้ำทีละตัว): **Workers KV Storage** · **Workers Standard Requests** · **Workers CPU ms** · **Realtime (TURN)** · **Workers Logs**
+3. ตั้งเกณฑ์ = ใกล้เพดานโควตาฟรีของแต่ละตัว (เช่น KV Storage 0.8 GB · Realtime 800 GB) ➔ อีเมล `bankjack10452@gmail.com`
+4. (เสริม) **Billing ➔ Billable Usage** ดูยอดรายวันได้ตลอด
+
+อ่านสถิติวิดีโอคอล (`npm run cf:call-stats`) ต้องใช้ token อีกตัวที่มีสิทธิ์ **Account · Account Analytics · Read** (token deploy ไม่ต้องเพิ่มสิทธิ์)
+
+---
+
 ## 📋 2. รายการ Secrets ทั้งหมดบน Cloudflare Worker (`tarot-web`)
 
 สามารถตรวจสอบได้ด้วยคำสั่ง: `npx wrangler secret list`
