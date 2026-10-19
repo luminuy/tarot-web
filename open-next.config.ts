@@ -11,7 +11,7 @@ import staticAssetsIncrementalCache from "@opennextjs/cloudflare/overrides/incre
  *                     (`.open-next/assets/cdn-cgi/_next_cache/<BUILD_ID>/…` — Worker อ่านได้ผู้เดียว)
  *                     `opennextjs-cloudflare deploy` คัดลอกไฟล์เหล่านี้เข้าชุด assets ให้เอง
  *
- * ⛔ ห้ามกลับไปใช้ `kv-incremental-cache` (บทเรียน INC KV Storage 2026-10-19)
+ * ⛔ ห้ามกลับไปใช้ `kv-incremental-cache` (บทเรียน INC-0287)
  *    แบบ KV จะ seed หน้าทั้งชุดใต้คีย์ `incremental-cache/<BUILD_ID>/…` ทุกครั้งที่ deploy
  *    (ทั้ง production และ Worker preview) และ **ไม่มีวันลบชุดเก่า** — สะสมจนเกิน 14 GB
  *    เสียค่า KV Storage $0.50/GB-เดือน ทั้งที่ใช้จริงแค่ชุดของ BUILD_ID ปัจจุบันชุดเดียว
