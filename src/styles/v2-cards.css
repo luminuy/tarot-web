@@ -6,29 +6,6 @@
  * สีธาตุใช้ `--el` จาก ui2-page.css หัวข้อ 12 · ไม่มี filter/backdrop/mask/อนิเมชันวน
  */
 
-.v2-cx-head {
-  padding: 34px 0 6px;
-  text-align: center;
-}
-.v2-cx-head .ui2-ph-crumb {
-  justify-content: center;
-}
-.v2-cx-title {
-  margin: 12px 0 0;
-  font-family: var(--ui2-font-display);
-  font-size: clamp(32px, 4.8vw, 58px);
-  font-weight: 700;
-  line-height: 1.12;
-  color: var(--ui2-on-night);
-  text-wrap: balance;
-}
-.v2-cx-lede {
-  max-width: 620px;
-  margin: 12px auto 0;
-  font-size: 15.5px;
-  line-height: 1.7;
-  color: var(--ui2-on-night-soft);
-}
 .v2-cx-search {
   position: relative;
   max-width: 640px;

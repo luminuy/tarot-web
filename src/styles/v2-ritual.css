@@ -632,13 +632,6 @@
   box-shadow: none;
   cursor: not-allowed;
 }
-.v2-rt-go-arrow {
-  width: 9px;
-  height: 9px;
-  border-top: 2px solid currentColor;
-  border-right: 2px solid currentColor;
-  rotate: 45deg;
-}
 @media (max-width: 479px) {
   .v2-rt-bar {
     bottom: 8px;

@@ -11,6 +11,8 @@
  *  3. ข้อความ error จาก `?auth_error=` ถูกเอาไปแสดงดิบ ๆ บนหน้าเว็บ
  *  4. เพดานถี่ของเส้นเปิดไพ่/แชท (`edge-ratelimit.ts`) นับแบบ อ่าน ➔ +1 ➔ เขียน บน KV
  *     ยิงพร้อมกันทะลุเพดานได้ + กินโควตาเขียน KV — ย้ายไป D1 แบบ atomic แล้ว (ข้อ 7)
+ *  5. ปลายทาง "กลับไปหน้าเดิม" หลังล็อกอิน Google/LINE ต้องอยู่บนโดเมนเราเสมอ (ข้อ 9 · A1-02)
+ *  6. สิทธิ์ผู้ทดสอบ/หัว bypass ต้องไม่ปลดด่านกันเดารหัสผ่าน (ข้อ 10 · A1-09)
  */
 
 import { signUserSession, verifyUserSession, type UserProfile } from "../../src/lib/auth/edge-auth";
@@ -20,6 +22,8 @@ import { isRequestAuthorizedOrigin, readBearerToken } from "../../src/lib/securi
 import { resolveAppOrigin } from "../../src/lib/security/app-origin";
 import { SITE_DOMAIN, SITE_ORIGIN } from "../../src/lib/config/site";
 import { describeAuthError } from "../../src/lib/auth/use-session";
+import { describePurchaseError, safeCreditCount } from "../../src/lib/account/purchase-notice";
+import { buildSafeReturnUrl, toSafeReturnPath } from "../../src/lib/auth/return-path";
 import {
   checkAuthRateLimit,
   releaseAuthAttempt,
@@ -128,6 +132,16 @@ async function run() {
       throw new Error(`❌ resolveAppOrigin ปฏิเสธโดเมนของเราเอง: ${legit}`);
     }
 
+    // A1-08: ชื่อ Worker ใครก็ตั้งซ้ำได้บนบัญชี Cloudflare ของตัวเอง — ต้องรับเฉพาะ subdomain ของบัญชีเรา
+    const lookalike = resolveAppOrigin(
+      new Request(`${SITE_ORIGIN}/api/auth/email/forgot`, {
+        headers: { "x-forwarded-host": "tarot-web.someone-else.workers.dev" },
+      }),
+    );
+    if (lookalike.includes("someone-else")) {
+      throw new Error("❌ A1-08: resolveAppOrigin เชื่อโฮสต์ tarot-web.<บัญชีอื่น>.workers.dev — ลิงก์ในอีเมลชี้ออกนอกเว็บได้");
+    }
+
     // ห้าม downgrade เป็น http ผ่าน header บนโดเมน production
     const downgraded = resolveAppOrigin(
       new Request(`${SITE_ORIGIN}/x`, { headers: { "x-forwarded-proto": "http" } }),
@@ -139,7 +153,7 @@ async function run() {
     if (savedOrigin === undefined) delete process.env.APP_ORIGIN;
     else process.env.APP_ORIGIN = savedOrigin;
   }
-  console.log("  ✓ 4. resolveAppOrigin กัน host header injection และ protocol downgrade");
+  console.log("  ✓ 4. resolveAppOrigin กัน host header injection · protocol downgrade · โฮสต์ workers.dev ของบัญชีอื่น (A1-08)");
 
   // ── 5. ข้อความ error ต้องมาจากรายการที่กำหนดเอง ไม่ใช่ค่าดิบจาก URL ──────
   const injected = "บัญชีถูกระงับ กรุณาโทร 08X-XXX-XXXX";
@@ -149,7 +163,21 @@ async function run() {
   if (!describeAuthError("state_mismatch").includes("เข้าสู่ระบบ")) {
     throw new Error("❌ describeAuthError ไม่คืนข้อความไทยสำหรับรหัสที่รู้จัก");
   }
-  console.log("  ✓ 5. ข้อความ auth_error มาจากรายการที่กำหนดไว้เท่านั้น");
+  // A1-07: ข้อความแจ้งผลชำระเงินก็เช่นกัน · ค่า % เดี่ยวต้องไม่ทำให้หน้าพัง · เครดิตรับแต่ตัวเลข
+  const purchaseInjected = "ระบบตัดเงินซ้ำ กรุณาติดต่อช่องทางนี้เพื่อขอคืนเงิน";
+  if (describePurchaseError(purchaseInjected).includes(purchaseInjected) || describePurchaseError("constructor") === "") {
+    throw new Error("❌ A1-07: describePurchaseError เอาข้อความดิบจาก query string ไปแสดงบนหน้าเว็บ");
+  }
+  if (!describePurchaseError("grant_failed").includes("support@seertarot.net") || !describePurchaseError("%").length) {
+    throw new Error("❌ A1-07: describePurchaseError ไม่คืนข้อความของเราสำหรับรหัสที่รู้จัก/ค่าแปลก");
+  }
+  if (describePurchaseError("ยอดชำระไม่ตรงกับแพ็กเกจที่สั่งซื้อ") !== "ยอดชำระไม่ตรงกับแพ็กเกจที่สั่งซื้อ") {
+    throw new Error("❌ A1-07: ข้อความเดิมที่เส้น confirm ส่งอยู่ต้องยังแสดงได้ระหว่างย้ายไปใช้รหัส");
+  }
+  if (safeCreditCount("3") !== "3" || safeCreditCount("3 ครั้ง ติดต่อ") !== "" || safeCreditCount(null) !== "") {
+    throw new Error("❌ A1-07: safeCreditCount รับค่าที่ไม่ใช่ตัวเลขล้วน");
+  }
+  console.log("  ✓ 5. ข้อความ auth_error / purchase_error มาจากรายการที่กำหนดไว้เท่านั้น (A1-07)");
 
   // ── 6. Rate limit ของการเข้าสู่ระบบ ──────────────────────────────────────
   const loginReq = (ip: string) =>
@@ -283,6 +311,45 @@ async function run() {
     throw new Error("❌ ช่องทางแอปต้องได้ sessionToken ใน body และห้ามตั้งคุกกี้");
   }
   console.log("  ✓ 8. ช่องทางแอป iOS: Bearer ผ่านด่าน Origin · หัวผิดรูป/ต่างโดเมนยังโดนกั้น · ล็อกอินคืนโทเคนใน body");
+
+  // ── 9. ปลายทางหลังล็อกอิน OAuth ต้องอยู่บนโดเมนเรา (A1-02) ─────────────────
+  for (const good of ["/", "/en/cards", "/readers/bookings?tab=1#x"]) {
+    if (toSafeReturnPath(good) !== good) throw new Error(`❌ A1-02: path ปกติ "${good}" ถูกปฏิเสธ`);
+  }
+  // ค่าที่ตัวแยก URL ตีความเป็นโฮสต์อื่นได้ (อักขระควบคุม · backslash · ยุบ path แล้วขึ้นต้น //)
+  for (const bad of ["//x.example", "/\t/x.example", "/\\x.example", "/.//x.example", "/a/..//x.example", "https://x.example", "x", ""]) {
+    if (toSafeReturnPath(bad) !== null) throw new Error(`❌ A1-02: returnUrl ${JSON.stringify(bad)} ผ่านด่าน`);
+    if (buildSafeReturnUrl(bad, SITE_ORIGIN).origin !== SITE_ORIGIN) {
+      throw new Error(`❌ A1-02: returnUrl ${JSON.stringify(bad)} พาออกนอกโดเมนเรา`);
+    }
+  }
+  console.log("  ✓ 9. ปลายทางหลังล็อกอิน OAuth ตรวจหลังแยก URL · ออกนอกโดเมนไม่ได้ (A1-02)");
+
+  // ── 10. สิทธิ์ข้ามเพดานต้องไม่ปลดด่านกันเดารหัสผ่าน (A1-09) ─────────────────
+  const savedBypass = process.env.RATE_LIMIT_BYPASS_TOKEN;
+  process.env.RATE_LIMIT_BYPASS_TOKEN = "qa-bypass-token-".padEnd(32, "x");
+  try {
+    const bypassIp = `192.0.2.${((Date.now() + 97) % 200) + 1}`;
+    const results = [];
+    for (let i = 0; i < 12; i++) {
+      results.push(
+        await checkAuthRateLimit(
+          new Request(`${SITE_ORIGIN}/api/admin/login`, {
+            method: "POST",
+            headers: { "cf-connecting-ip": bypassIp, "x-tarot-bypass": process.env.RATE_LIMIT_BYPASS_TOKEN },
+          }),
+          "admin_login",
+        ),
+      );
+    }
+    if (results.filter((r) => r.allowed).length > 8) {
+      throw new Error("❌ A1-09: หัว bypass ปลดเพดานเดารหัสแอดมิน — ผู้ถือสิทธิ์ใช้เว็บไม่จำกัดเดารหัสได้ไม่จำกัด");
+    }
+  } finally {
+    if (savedBypass === undefined) delete process.env.RATE_LIMIT_BYPASS_TOKEN;
+    else process.env.RATE_LIMIT_BYPASS_TOKEN = savedBypass;
+  }
+  console.log("  ✓ 10. สิทธิ์ผู้ทดสอบ/หัว bypass ไม่ปลดด่านกันเดารหัสผ่าน (A1-09)");
 
   console.log("✅ [QA] ด่านกันบั๊กเซสชันและการเข้าสู่ระบบผ่านครบทุกข้อ\n");
 }

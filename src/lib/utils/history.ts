@@ -6,6 +6,7 @@ import type { ReadingBasis } from "@/lib/tarot/explain-types";
 import type { MoodLevel } from "@/lib/journal/mood";
 import type { JournalRitual, RitualKind } from "@/lib/journal/journal-types";
 import { stripEmoji } from "@/lib/text/no-emoji";
+import { hasSessionHint } from "@/lib/auth/session-hint";
 export interface SavedCardDetail {
   order: number;
   positionName: string;
@@ -93,6 +94,34 @@ const pendingServerPatches = new Map<string, ReadingMetaPatch>();
 const STORAGE_KEY = STORAGE_KEYS.journal;
 
 /**
+ * 🔐 เจ้าของสำเนาสมุดในเครื่อง (A5-05) — มีค่า = สำเนานี้เขียนตอนล็อกอินอยู่ (id ของสมาชิก
+ * หรือ `"member"` ถ้ายังไม่รู้ id) · ไม่มีค่า = ประวัติผู้เยี่ยมชมจริง
+ * กติกา: สำเนาที่มีเจ้าของ (1) ไม่ถูก "นำเข้าประวัติผู้เยี่ยมชม" เข้าบัญชีใดเลย
+ * (2) ถูกล้างทิ้งเมื่อเครื่องไม่มีเซสชันแล้ว — คนถัดไปที่ใช้เครื่องร่วมจึงไม่เห็นสมุดของเจ้าของเดิม
+ * คีย์ต่อท้ายจากคีย์สมุดในทะเบียน · ถ้าคีย์สมุดหายไป (เช่นออกจากระบบล้างแล้ว) ค่านี้ถือว่าไม่มีผล
+ */
+const OWNER_KEY = `${STORAGE_KEYS.journal}:owner`;
+const MEMBER_PLACEHOLDER = "member";
+
+function readOwner(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return localStorage.getItem(OWNER_KEY) || null;
+  } catch {
+    return null;
+  }
+}
+
+function writeOwner(owner: string | null): void {
+  try {
+    if (owner) localStorage.setItem(OWNER_KEY, owner);
+    else localStorage.removeItem(OWNER_KEY);
+  } catch {
+    /* โหมดส่วนตัว — ข้าม */
+  }
+}
+
+/**
  * เพดานจำนวนรายการที่เก็บบนเครื่องของผู้ใช้ที่ไม่ได้ล็อกอิน
  * เกินแล้วตัวเก่าสุดถูกตัดทิ้ง — **ต้องบอกผู้ใช้** เพราะสำหรับคนที่ไม่ได้ซิงก์
  * นี่คือการสูญหายจริงของสิ่งที่เขาเคยเห็นว่า "บันทึกไว้แล้ว" (T-46)
@@ -143,10 +172,12 @@ function markHistoryTrimmed(): void {
  * และใน TarotFlow error จาก `saveReading` ไปตกใน catch ของสตรีม
  * ทำให้ `trackEvent("reading_complete")` ไม่ถูกยิง — ยอดดูดวงสำเร็จหายเงียบ ๆ
  */
-function writeStorage(value: string): boolean {
+function writeStorage(value: string, owner?: string | null): boolean {
   if (typeof window === "undefined") return false;
   try {
     localStorage.setItem(STORAGE_KEY, value);
+    // owner: undefined = คงเจ้าของเดิม · string = ตั้งเจ้าของ · null = สำเนาผู้เยี่ยมชม
+    if (owner !== undefined) writeOwner(owner);
     return true;
   } catch (err) {
     console.warn("[Journal] เขียนประวัติลงเครื่องไม่สำเร็จ:", err);
@@ -158,6 +189,7 @@ function clearStorage(): void {
   if (typeof window === "undefined") return;
   try {
     localStorage.removeItem(STORAGE_KEY);
+    writeOwner(null);
   } catch (err) {
     console.warn("[Journal] ล้างประวัติในเครื่องไม่สำเร็จ:", err);
   }
@@ -181,6 +213,11 @@ export function getReadings(): SavedReadingItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
+    // สำเนาของสมาชิกแต่เครื่องไม่มีเซสชันแล้ว (ออกจากระบบ/คุกกี้หมดอายุ) ➔ ล้าง ไม่โชว์ให้คนถัดไป
+    if (readOwner() && !hasSessionHint()) {
+      clearStorage();
+      return [];
+    }
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? cleanAiText(parsed) : [];
   } catch {
@@ -204,7 +241,11 @@ export async function fetchServerReadings(opts?: {
   // `fetchSessionUser()` มีแคช/รวมคำขอซ้ำอยู่แล้ว จึงไม่ได้เพิ่มคำขอใหม่ให้สมาชิก
   const { fetchSessionUser } = await import("@/lib/auth/use-session");
   const viewer = await fetchSessionUser();
-  if (!viewer) return getReadings();
+  if (!viewer) {
+    // เซิร์ฟเวอร์ยืนยันว่าไม่มีเซสชัน — สำเนาที่เป็นของสมาชิกต้องไม่ค้างในเครื่อง (A5-05)
+    if (readOwner()) clearStorage();
+    return getReadings();
+  }
 
   try {
     const res = await fetch("/api/journal", { cache: "no-store" });
@@ -214,7 +255,7 @@ export async function fetchServerReadings(opts?: {
     const data = (await res.json()) as { readings?: SavedReadingItem[] };
     if (data.readings && Array.isArray(data.readings)) {
       if (opts?.shouldCommit && !opts.shouldCommit()) return getReadings();
-      writeStorage(JSON.stringify(data.readings.slice(0, LOCAL_HISTORY_LIMIT)));
+      writeStorage(JSON.stringify(data.readings.slice(0, LOCAL_HISTORY_LIMIT)), viewer.id);
       return cleanAiText(data.readings);
     }
   } catch (err) {
@@ -254,7 +295,8 @@ export function saveReading(item: Omit<SavedReadingItem, "id" | "date">): SavedR
     // T-46: ของเดิม `.slice(0, 50)` ตัดตัวเก่าสุดทิ้งเงียบ ๆ โดยไม่มีการแจ้งเลยสักครั้ง
     if (merged.length > updated.length) markHistoryTrimmed();
     if (typeof window !== "undefined") {
-      writeStorage(JSON.stringify(updated));
+      // บันทึกตอนล็อกอินอยู่ = ของสมาชิก (ห้ามนำเข้าเป็นประวัติผู้เยี่ยมชมของบัญชีอื่น) · ไม่ล็อกอิน = ผู้เยี่ยมชม
+      writeStorage(JSON.stringify(updated), hasSessionHint() ? (readOwner() ?? MEMBER_PLACEHOLDER) : null);
     }
 
     // Dual-Mode Sync to server (Non-blocking)
@@ -323,7 +365,9 @@ export function updateReadingOutcome(
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ outcome, userNote }),
-    }).catch(() => {});
+    })
+      .then(announceCrisis)
+      .catch(() => {});
   }
 }
 
@@ -333,6 +377,26 @@ export function updateReadingOutcome(
  * ส่งซ้ำด้วย `flushPendingJournalPatches()` (หน้าสมุดเรียกตอนเปิดและตอน `online`)
  */
 const PENDING_KEY = STORAGE_KEYS.journalPendingPatches;
+
+/**
+ * 🛟 กฎเหล็กข้อ 6 (A3-07): `PATCH /api/journal/[id]` ตอบ `crisisMessage` เมื่อบันทึกที่เขียนมีสัญญาณวิกฤต
+ * (บันทึกได้ตามปกติ ไม่บล็อก) · การแก้สมุดเป็นแบบไม่รอผล จึงประกาศเป็นอีเวนต์ของหน้าต่าง
+ * ให้หน้าจอที่ฟังอยู่ (`JournalCrisisListener`) เปิดหน้าต่างสายด่วน 1323 ทันที
+ */
+export const JOURNAL_CRISIS_EVENT = "seer:journal-crisis";
+
+function announceCrisis(res: Response): void {
+  if (!res.ok || typeof window === "undefined") return;
+  res
+    .clone()
+    .json()
+    .then((data: { crisisMessage?: unknown } | null) => {
+      if (data && typeof data.crisisMessage === "string" && data.crisisMessage) {
+        window.dispatchEvent(new CustomEvent(JOURNAL_CRISIS_EVENT, { detail: { message: data.crisisMessage } }));
+      }
+    })
+    .catch(() => {});
+}
 
 function readPending(): Record<string, ReadingMetaPatch> {
   try {
@@ -368,6 +432,7 @@ function sendMetaPatch(id: string, patch: ReadingMetaPatch): Promise<boolean> {
   })
     .then((res) => {
       if (res.status >= 500) enqueuePatch(id, patch);
+      announceCrisis(res);
       return res.ok;
     })
     .catch(() => {
@@ -456,6 +521,8 @@ export async function syncAnonymousHistoryToServer(): Promise<{ merged: number; 
   if (typeof window === "undefined") return { merged: 0, skipped: 0 };
   const localItems = getReadings();
   if (localItems.length === 0) return { merged: 0, skipped: 0 };
+  // สำเนาที่เขียนตอนล็อกอินอยู่ไม่ใช่ประวัติผู้เยี่ยมชม — นำเข้าเฉพาะที่ไม่มีเจ้าของเท่านั้น (A5-05)
+  if (readOwner()) return { merged: 0, skipped: localItems.length };
 
   try {
     const res = await fetch("/api/journal/import", {

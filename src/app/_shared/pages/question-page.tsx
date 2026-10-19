@@ -17,6 +17,7 @@ import {
 import { buildAlternates, localizedUrl, noindexAlternates } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { getCategoryCardImage } from "@/lib/media/og-card-art";
+import { hasEnglishTwin } from "@/lib/i18n/paths";
 import type { Locale } from "@/lib/i18n/types";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
@@ -134,7 +135,7 @@ export function QuestionPageContent({ question: q, locale, askBox }: { question:
     datePublished: q.updatedAt,
     dateModified: q.updatedAt,
     mainEntityOfPage: url,
-    author: { "@type": "Organization", name: "SeerTarot", url: localizedUrl("/about", locale) },
+    author: { "@type": "Organization", name: "SeerTarot", url: localizedUrl("/about", hasEnglishTwin("/about") ? locale : "th") }, // `/about` ยังไม่มีฉบับอังกฤษ — ห้ามชี้ /en/about (A7-02)
     publisher: { "@type": "Organization", name: "SeerTarot" },
     about: { "@type": "Thing", name: isEn ? "Tarot reading" : "การดูดวงไพ่ยิปซี" },
   };

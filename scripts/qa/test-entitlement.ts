@@ -470,6 +470,84 @@ async function main() {
     await softDeleteUser(paidUid);
   }
 
+  // ── ✦ A3-01: ผังใหญ่/ปรมาจารย์ลับหักจากรอบที่ซื้อเท่านั้น ไม่ไปหักโควตาฟรีรายวันแทน ──
+  {
+    console.log("\n💎 ผังใหญ่หักรอบที่ซื้อ:");
+    const vipUid = `vip_${Date.now()}`;
+    await upsertUserOnLogin({ id: vipUid, provider: "google", name: "ผู้ซื้อแพ็ก 3" });
+    const vip: Viewer = { kind: "member", userId: vipUid };
+    await grantBonus(vipUid, 3, "purchase_pack_3_test");
+    for (let i = 1; i <= 3; i++) {
+      const r = await consumeReading(vip, `r_${vipUid}_g${i}`, "celtic-cross", { premium: true });
+      check(`ผังใหญ่ครั้งที่ ${i}/3 หักรอบที่ซื้อ`, r.status === "inserted");
+    }
+    const after3 = await getEntitlement(vip);
+    check("ใช้ผังใหญ่ครบ 3 ครั้ง ➔ hasPaidCredits = false (ไม่ปลดถาวร)", after3.hasPaidCredits === false && after3.bonusRemaining === 0);
+    check(`โควตาฟรีรายวันยังเต็ม ${DAILY_LIMIT} (ผังใหญ่ไม่ได้ไปหักแถว daily)`, after3.dailyRemaining === DAILY_LIMIT);
+    check(
+      "รอบที่ซื้อหมดแล้ว ➔ ผังใหญ่ครั้งที่ 4 ถูกปฏิเสธ (ไม่ตกไปหักโควตาฟรี)",
+      (await consumeReading(vip, `r_${vipUid}_g4`, "celtic-cross", { premium: true })).status === "denied",
+    );
+    check("ผังมาตรฐานยังเปิดด้วยโควตาฟรีรายวันได้ตามปกติ", (await consumeReading(vip, `r_${vipUid}_s1`, "three-card")).status === "inserted");
+
+    // โบนัสฟรี (ไม่ใช่การซื้อ) ต้องไม่ปลดผังใหญ่
+    const freeUid = `vip_free_${Date.now()}`;
+    await upsertUserOnLogin({ id: freeUid, provider: "google", name: "มีแต่โบนัสฟรี" });
+    await grantBonus(freeUid, 5, "grandfather");
+    check(
+      "โบนัสฟรีอย่างเดียว ➔ ผังใหญ่ถูกปฏิเสธ",
+      (await consumeReading({ kind: "member", userId: freeUid }, `r_${freeUid}_g1`, "celtic-cross", { premium: true })).status === "denied",
+    );
+    // รอบลองผังใหญ่ฟรีมาก่อนเสมอ (ไม่ต้องมีรอบที่ซื้อ)
+    check(
+      "รอบลองผังใหญ่ฟรียังใช้ได้แม้ไม่มีรอบที่ซื้อ",
+      (await consumeReading({ kind: "member", userId: freeUid }, `r_${freeUid}_t1`, "celtic-cross", { premium: true, premiumTrial: true })).status === "inserted",
+    );
+    await softDeleteUser(vipUid);
+    await softDeleteUser(freeUid);
+  }
+
+  // ── 🔴 A3-06: ตัดสายหลังได้คำอ่านแล้ว ต้องไม่คืนสิทธิ์ และต้องนับต้นทุน ──
+  {
+    const readRoute = fs.readFileSync(
+      path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../src/app/api/reading/[id]/read/route.ts"),
+      "utf8",
+    );
+    check(
+      "A3-06: /read แยกผู้ใช้ตัดสายหลังได้คำอ่าน ออกจากความล้มเหลวของระบบ (ไม่คืนสิทธิ์)",
+      /if \(!completedOk && !abandonedAfterContent\(\)\) await refundIfConsumed\(\)/.test(readRoute) &&
+        /const abandonedAfterContent = \(\) => clientGone\(\) && aiContentDelivered\(\)/.test(readRoute),
+    );
+    check(
+      "A3-06: ตัดสายก่อนเฟรม done ยังนับเพดานรวม + บัญชีต้นทุนรายคน (ประมาณจากอักขระ)",
+      /const settleClientAbort = async \(\) => \{[\s\S]{0,400}recordAiCall\(1\)[\s\S]{0,300}recordAiUsage\(costSubj, estimateTokens\(usageMeter\.promptChars\)/.test(readRoute),
+    );
+    check(
+      "A3-06: นับโควตาต่อ IP ตั้งแต่เริ่มเรียกโมเดล ไม่ใช่ตอนอ่านจบ",
+      /if \(!privileged\) void recordPerIpReadQuota\(clientIp\);\s*\n\s*for await \(const rawEvent of streamMultiProviderReading\(\)\)/.test(readRoute),
+    );
+    check(
+      "A3-06: ไพ่ชุดเดียวกันเรียกโมเดลซ้ำได้จำกัด (เพดานต่อเซสชันข้าม isolate)",
+      /edgeRateLimitKey\("read:reading", id\)/.test(readRoute),
+    );
+    check("A3-01: /read ส่งชนิดคำขอพรีเมียมเข้า consumeReading", /premiumTrial: record\.premiumTrial === true,\s*premium,/.test(readRoute));
+
+    // ฝั่งสิทธิ์: แถวที่ไม่ถูกคืนต้องอยู่จริง และยิง id เดิมซ้ำไม่หักเพิ่ม
+    const abUid = `abort_${Date.now()}`;
+    await upsertUserOnLogin({ id: abUid, provider: "google", name: "ตัดสาย" });
+    const ab: Viewer = { kind: "member", userId: abUid };
+    const firstTry = await consumeReading(ab, `r_${abUid}_x`, "celtic-cross", { premiumTrial: true, premium: true });
+    check("ลองผังใหญ่ฟรี: หักแถว trial", firstTry.status === "inserted");
+    // (ตัดสายหลังได้คำอ่าน = ไม่เรียก refundReading) ➔ สิทธิ์ลองต้องหมดจริง
+    const abEnt = await getEntitlement(ab);
+    check("ตัดสายหลังได้คำอ่าน ➔ สิทธิ์ลองผังใหญ่ไม่กลับมา", abEnt.premiumTrialAvailable === false);
+    check(
+      "ยิง /read id เดิมซ้ำ ➔ already (ไม่หักใหม่ และไม่มีแถวให้คืน)",
+      (await consumeReading(ab, `r_${abUid}_x`, "celtic-cross", { premiumTrial: true, premium: true })).status === "already",
+    );
+    await softDeleteUser(abUid);
+  }
+
   console.log("\n🎟 รหัสแลกสิทธิ์:");
   const { runRedeemTests } = await import("./test-redeem-code");
   const redeem = await runRedeemTests();

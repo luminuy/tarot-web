@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
-import { loadMySpreads, type CustomSpreadDef, type MyCustomSpread } from "@/lib/tarot/custom-spread-client";
+import type { CustomSpreadDef, MyCustomSpread } from "@/lib/tarot/custom-spread-client";
 import { SpreadLayoutGlyph } from "./SpreadLayoutGlyph";
+import { loadMyAndMigrate } from "./load-mine";
 
 /**
  * ✦ "ผังของฉัน" ในขั้นเลือกผังของพิธีเปิดไพ่ (REFLECTION_JOURNAL_PLAN 1.8)
@@ -20,11 +21,11 @@ const MyCustomSpreadsRow: React.FC<{
 
   useEffect(() => {
     let alive = true;
-    void loadMySpreads().then((r) => alive && setSpreads(r.spreads));
+    void loadMyAndMigrate(isEnglish ? "en" : "th").then((r) => alive && setSpreads(r.spreads));
     return () => {
       alive = false;
     };
-  }, []);
+  }, [isEnglish]);
 
   return (
     <section aria-label={isEnglish ? "My spreads" : "ผังของฉัน"} className="space-y-2.5">

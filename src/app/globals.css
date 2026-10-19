@@ -203,6 +203,9 @@
 
   --font-serif-th: var(--font-noto-serif-thai), "Noto Serif Thai", serif;
   --font-sans-th: var(--font-sarabun), "Sarabun", system-ui, sans-serif;
+  /* utility `font-sans` ของ Tailwind ต้องชี้ Sarabun ด้วย — ไม่งั้นย่อหน้าในหน้าที่ใส่ `font-sans` ที่ <main> (ผัง · ไพ่ · บทความ · รายวัน · ความรัก)
+     เรนเดอร์ด้วยฟอนต์ระบบต่างกันตามเครื่อง ขณะที่หัวข้อเป็น Anuphan (A6-04) */
+  --font-sans: var(--font-sans-th);
 
   /*
    * อ่านง่ายสำหรับทุกวัย (Legibility Floor)
@@ -580,6 +583,26 @@ html {
 }
 
 /*
+ * ล็อกการเลื่อนหน้าตอนมีหน้าต่างลอย (ลิ้นชักเมนู · ลงชื่อเข้าใช้ · แชร์ · ซูมไพ่ · ประวัติ) — A5-08
+ * ทุกจุดล็อกด้วย `document.body.style.overflow = "hidden"` แต่ค่า overflow ของ <body> จะถูกส่งต่อไปที่ viewport
+ * ก็ต่อเมื่อ <html> เป็น `overflow: visible` — ด้านบน <html> เป็น `overflow-x: clip` ค่าของ body จึงไม่มีผลกับการเลื่อนหน้า
+ * ➔ ส่งต่อด้วยตัวเลือก: เมื่อ body ถูกล็อก ให้ <html> ล็อกเอง (ไม่ต้องแก้ตัวเรียกทีละจุด · คืนค่าเมื่อ body กลับเป็นปกติ)
+ */
+html:has(> body[style*="overflow: hidden"]) {
+  overflow: hidden;
+}
+
+/*
+ * รายการข้อความ = เส้นซ้ายแทนจุดนำ (กฎเหล็กข้อ 2 · `list-style: disc` วาดจุด `::marker` ซึ่งเป็นสัญลักษณ์ตกแต่ง) — A6-07
+ * ใช้กับ `<ul>` ที่เดิมเป็น `list-disc` · ลิสต์ลำดับเลข (`list-decimal`) เป็นตัวเลขจริงไม่ผิดกฎ
+ */
+.list-rule {
+  list-style: none;
+  padding-inline-start: 0.875rem;
+  border-inline-start: 2px solid color-mix(in srgb, var(--color-gold-ink) 38%, transparent);
+}
+
+/*
  * ชั้นแสงเทียน + เนื้อผ้าลินิน — อยู่ใน background-image ของ body ด้านบนแล้ว (2026-10-17 · INC-0273)
  *
  * 🚨 ห้ามกลับไปทำเป็น `body::before` / `body::after` แบบ `position: fixed` อีก
@@ -766,6 +789,10 @@ html[data-ui2-over-dark] .site-header-glass :is(.text-ink, .text-ink-deep, nav):
 html[data-ui2-over-dark] .site-header-glass .text-muted:not(.absolute *, .nv-panel *) {
   color: #CFC3B2;
 }
+/* เมนูที่ "อยู่หน้านี้"/ชี้อยู่ ใช้ทองสว่างบนแคปซูลมืด — ทองเข้มของพื้นครีม (#8F5C1A) บนแคปซูลดำเหลือ 3.0:1 (A6-03) */
+html[data-ui2-over-dark] .site-header-glass nav:not(.absolute *, .absolute, .nv-panel, .nv-panel *) {
+  --color-gold-ink: #FFD98F;
+}
 
 /*
  * 🍎 แผงเมนูใหญ่ "ดูดวง" แบบ apple.com (เจ้าของสั่ง 2026-10-13 · ภาพอ้างอิงเมนู Store)
@@ -895,6 +922,9 @@ html[data-ui2-over-dark] .site-header-glass .text-muted:not(.absolute *, .nv-pan
 }
 .site-header-glass:has([data-mega]:hover, [data-mega]:focus-within) .text-muted:not(.absolute *, .mega-panel *) {
   color: #CFC3B2;
+}
+.site-header-glass:has([data-mega]:hover, [data-mega]:focus-within) nav:not(.absolute *, .absolute, .mega-panel *) {
+  --color-gold-ink: #FFD98F;
 }
 /* ระดับ full: เบลอเนื้อหาและท้ายเว็บ (พี่น้องถัดจาก <header> — หน้า Astro อยู่ใต้ body · หน้าแรกอยู่ใน island เดียวกัน)
    filter ชั่วคราวระหว่างเปิดแผงเท่านั้น */
@@ -1634,19 +1664,6 @@ html {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-.anim-tarot-idle {
-  animation: tarotIdleFloat 4s ease-in-out infinite;
-}
-
-@keyframes tarotIdleFloat {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
   }
 }
 
@@ -2491,10 +2508,8 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
       วาดสีด้วย ::before กว้าง 100vw จึงไม่ต้องรื้อ max-width / padding ของแต่ละส่วน
       ⚠️ ห้ามทาสีทึบ — พื้นไล่สีอุ่นของ body ต้องโปร่งทะลุได้ (ดูคอมเมนต์ใน TarotFlow)
       ⚠️ ห้าม backdrop-filter (INC-0056)
-   2) `.home-rail` — กริดการ์ดกลายเป็นแถวปัดซ้ายขวา snap ทีละใบ ทุกความกว้างจอ (2026-09-26)
-      เห็นใบถัดไปโผล่ขอบ (บอกว่าปัดได้) · คลาส grid-cols-* ที่เหลือใน JSX ไม่มีผลแล้ว (display ถูกทับ)
-      เขียนนอก @layer จึงชนะคลาส `grid` ของ Tailwind ได้โดยไม่ต้อง !important
-      ปุ่มลูกศร (`.home-rail-btn`) ทำงานด้วย `astro/scripts/home-rails.ts`
+   2) ปุ่มลูกศรสไลด์ (`.home-rail-btn`) — ใช้โดย `RailArrows` · ชุดกฎแถวปัด `.home-rail` ถูกถอดแล้ว
+      (หน้าแรก UI 2.0 เลิกใช้แถวปัด)
    ═════════════════════════════════════════════════════════════════════════ */
 .home-band,
 .page-band {
@@ -2542,63 +2557,6 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
 @media (min-width: 640px) {
   .page-band.page-band-compact {
     padding-block: 2.25rem;
-  }
-}
-/* แถบแรกต่อจากหัวหน้า ("เปิดไพ่ด่วน") ใช้พื้นเดียวกับหัวหน้า — padding บนเต็ม 44/64px ไม่ได้แบ่งสีอะไร
-   กลายเป็นช่องว่างเปล่า (เจ้าของทัก: ใต้ไพ่ประจำวันเว้นไว้เยอะ 71px มือถือ / 91px จอใหญ่) ➔ ลดเหลือ 32/40px */
-
-/* แถวปัดใช้ทุกความกว้างจอ — จอใหญ่จัดวางแบบเดียวกับมือถือ (คำสั่งเจ้าของ 2026-09-26: "ทำให้ตรงกัน")
-   ต่างกันแค่ความกว้างการ์ด: มือถือ ~1.2 ใบ · แท็บเล็ต 2 ใบกับอีกเสี้ยว · จอใหญ่ 3 ใบกับอีกเสี้ยว
-   (เสี้ยวที่โผล่ขอบขวา = สัญญาณว่าปัดได้) · สูตรเดียวกับ `SPREAD_RAIL_ITEM` / การ์ดเปิดไพ่ด่วน
-   การ์ดพอดีแถวไม่ต้องเลื่อน ➔ สคริปต์ปิดปุ่มทั้งคู่ แล้ว `[data-rail-nav]` ซ่อนตัวเอง (ดูท้ายบล็อก) */
-.home-rail {
-  display: flex;
-  gap: 16px;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
-  padding: 6px 0 18px;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-.home-rail::-webkit-scrollbar {
-  display: none;
-}
-/* grow 1 = แถวที่การ์ดน้อยพอดีจอ (เช่น 3 ใบ) ยืดเต็มแถว ไม่เหลือที่ว่างขวา · แถวที่ล้นไม่มีที่ว่างให้ยืด จึงไม่มีผล */
-.home-rail > * {
-  flex: 1 0 auto;
-  width: calc((100% - 32px) / 2.25);
-  scroll-snap-align: start;
-}
-@media (min-width: 1024px) {
-  .home-rail > * {
-    width: calc((100% - 48px) / 3.25);
-  }
-}
-@media (max-width: 639.98px) {
-  .home-rail {
-    gap: 12px;
-    scroll-padding-inline: 16px;
-    margin-inline: -16px;
-    padding: 6px 16px 18px;
-  }
-  .home-rail > * {
-    flex-grow: 0;
-    width: min(80vw, 300px);
-  }
-}
-/* การ์ดในแถวปัด: ไม่มีเงา — กล่องเลื่อน (overflow-x) ตัดเงาขอบล่างทิ้งเหลือเป็นแถบเทาดำ
-   ใต้การ์ด (เจ้าของทักจากภาพหน้าจอ 2026-09-24) · การ์ดยังมีขอบ/พื้นกระจกแยกจากพื้นหลังอยู่
-   `.rail-flat` = แถวปัดฝั่ง React (เปิดไพ่ด่วน · เลือกผัง) ที่ไม่ได้ใช้คลาส `.home-rail`
-   `.rail-always` = แถวฝั่ง React ที่เป็นแถวปัดทุกความกว้างจอ (หน้าแรก) — แถวอื่นจอใหญ่ยังเป็นกริด มีเงาได้ */
-.home-rail > *,
-.home-rail > * > .altar-card-porcelain,
-.home-rail > * > .glass-tile {
-  box-shadow: none;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .home-rail {
-    scroll-behavior: smooth;
   }
 }
 
@@ -2675,13 +2633,6 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
     height: 20px;
   }
 }
-
-/* ✦ จอใหญ่ (lg+) เลิกเป็นแถวปัดในสองที่ของหน้าแรก (เจ้าของเลือกจากแบบของเพื่อน 2026-10-10 · จอเล็กยังเป็นแถวปัดเหมือนเดิม)
-   ⚠️ ต้องอยู่ "หลัง" บล็อกแถวปัดเต็มจอข้างบน — `.home-rail:not(.home-rail-sm)` / `.rail-flat.rail-always` มีน้ำหนักเท่ากัน
-      ใครอยู่ทีหลังชนะ ถ้าย้ายขึ้นไป margin/padding ทะลุขอบจอจะกลับมา
-   • `.home-rail-stack-lg` — ลิงก์ 4 อันของส่วนราศี เรียงซ้อนเป็นคอลัมน์ขวาของวงล้อ
-     ไม่ล้นแล้ว `home-rails.ts` ปิดลูกศรทั้งคู่ แถวปุ่มจึงซ่อนตัวเองตามกติกาเดิม
-   • `.rail-grid-lg` — การ์ดเลือกผัง เป็นตาราง 3 คอลัมน์ เห็นครบทั้งหมวดไม่ต้องปัด (ลูกศรซ่อนด้วย `lg:hidden` ใน React) */
 
 /* (พัดไพ่พื้นหลังหัวหน้าแรกเดิม `.hero-fan` ถูกแทนด้วยการ์ดลอยของ SeerTarot UI 2.0 — ดู src/styles/ui2.css ส่วน 1) */
 
@@ -2826,15 +2777,6 @@ nav[aria-label="Breadcrumb"]:not(:focus-within) {
    ไม่หักกลางคำ "ทา / โรต์" · วลีที่ยาวเกินบรรทัดยังตัดข้างในได้ (ไม่ล้นจอ) */
 .tp {
   display: inline-block;
-}
-
-/* 📱 กริดยาว (ไพ่ 78 ใบ · บทความ 30 เรื่อง) บนมือถือโชว์แค่ต้นรายการ แล้วมีปุ่ม "ดูทั้งหมด"
-   ของที่ซ่อนยังอยู่ใน HTML ครบ (บอตเห็นทุกลิงก์) · จอ sm ขึ้นไปแสดงครบตามเดิม */
-@media (max-width: 639.98px) {
-  .mobile-preview-12 > :nth-child(n + 13),
-  .mobile-preview-8 > :nth-child(n + 9) {
-    display: none;
-  }
 }
 
 /* ✦ ปุ่มลอยช่องทางทางการ (`SocialFloatingButtons`) — ปุ่มหลักอันเดียว กดแล้วกาง LINE · Facebook · TikTok

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { signUserSession } from "@/lib/auth/edge-auth";
 import { setAuthCookie } from "@/lib/auth/session";
-import { issueToken } from "@/lib/auth/auth-tokens.repo";
+import { invalidateUserTokens, issueToken } from "@/lib/auth/auth-tokens.repo";
 import { hashPassword, isPasswordConfigError } from "@/lib/auth/password";
 import { validatePasswordPolicy } from "@/lib/auth/password-policy";
 import { sendEmail } from "@/lib/email/send";
@@ -22,7 +22,7 @@ import {
   getUserByEmail,
   getUserByEmailIncludingDeleted,
   normalizeEmail,
-  reviveEmailUser,
+  stageEmailRevival,
 } from "@/lib/users/users.repo";
 import { resolveAppOrigin } from "@/lib/security/app-origin";
 
@@ -141,9 +141,33 @@ export async function POST(request: Request) {
     const passwordHash = await hashPassword(password);
     const deletedUser = await getUserByEmailIncludingDeleted(emailLower);
 
-    const newUser = deletedUser
-      ? await reviveEmailUser({ id: deletedUser.id, email, name, passwordHash })
-      : await createEmailUser({ email, name, passwordHash });
+    // อีเมลนี้เคยเป็นบัญชีที่ถูกลบ ➔ คืนชีพได้เมื่อเจ้าของอีเมลกดลิงก์ยืนยันเท่านั้น (A1-04)
+    // ไม่ออกเซสชันที่นี่ — การสมัครไม่ได้พิสูจน์ความเป็นเจ้าของอีเมล และ id เดิมยังผูกข้อมูลเก่าอยู่
+    // ตอบข้อความกลางแบบเดียวกับกิ่ง "มีบัญชีอยู่แล้ว" (ไม่บอกว่าอีเมลนี้เคยมีบัญชี)
+    if (deletedUser) {
+      await stageEmailRevival({ id: deletedUser.id, email, name, passwordHash });
+      try {
+        // ลิงก์ยืนยันใบก่อน ๆ ใช้ไม่ได้แล้ว — รหัสผ่านที่รอคือของการสมัครครั้งล่าสุด
+        await invalidateUserTokens(deletedUser.id, "verify");
+        const verifyToken = await issueToken(deletedUser.id, "verify", 24 * 60 * 60 * 1000);
+        const verifyLink = `${origin}/api/auth/email/verify?token=${encodeURIComponent(verifyToken)}${isEnglish ? "&lang=en" : ""}`;
+        await sendEmail(
+          email,
+          isEnglish ? "Verify Your Email Address — SeerTarot" : "ยืนยันที่อยู่อีเมลของคุณ — SeerTarot",
+          verifyEmailHtml(verifyLink, name, lang),
+          verifyEmailText(verifyLink, name, lang)
+        );
+      } catch (emailErr) {
+        console.error("[Signup revival verify email failed]", emailErr);
+      }
+      return NextResponse.json({
+        ok: true,
+        message: isEnglish ? "If an account exists with this email, confirmation details have been sent." : "ระบบได้ส่งข้อมูลการยืนยันไปยังอีเมลของคุณเรียบร้อยแล้ว",
+        user: null,
+      });
+    }
+
+    const newUser = await createEmailUser({ email, name, passwordHash });
 
     // โบนัสสมัครใหม่ (ENTITLEMENT_PLAN ข้อ 5) — idempotent
     try {

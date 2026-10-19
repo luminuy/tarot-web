@@ -5,6 +5,8 @@ import { listThreadEntries } from "@/lib/journal/journal.repo";
 import { deleteThread, getThread, updateThread } from "@/lib/journal/threads.repo";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { apiOk } from "@/lib/api/envelope";
+import { noteHasCrisisSignal } from "@/lib/ai/memory";
+import { getCrisisMessage } from "@/lib/safety/guardrails";
 
 export const runtime = "nodejs";
 
@@ -32,6 +34,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
   const ok = await updateThread(user.id, id, parsed.data);
   if (!ok) return NextResponse.json({ error: "ไม่พบเรื่องนี้" }, { status: 404 });
+  // 🛟 กฎเหล็กข้อ 6 (A3-07): บทสรุปปิดเรื่องมีสัญญาณวิกฤต ➔ บันทึกตามปกติ + ตอบข้อความสายด่วน 1323 ให้หน้าเว็บแสดง
+  if (noteHasCrisisSignal(parsed.data.closingNote)) {
+    const lang = /^https?:\/\/[^/]+\/en(\/|$|\?)/.test(request.headers.get("referer") ?? "") ? "en" : "th";
+    return apiOk({ crisis: true, crisisMessage: getCrisisMessage(lang) });
+  }
   return apiOk();
 }
 

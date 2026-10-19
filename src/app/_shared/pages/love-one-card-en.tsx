@@ -133,7 +133,7 @@ export function LoveOneCardBodyEn({ ritual }: { ritual: ReactNode }) {
             <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
               Four situations, four different readings
             </ThaiPhrases></h3>
-            <ul className="list-disc pl-5 space-y-2 text-muted">
+            <ul className="list-rule space-y-2 text-muted">
               <li>
                 <strong className="text-ink">Single.</strong> The card speaks to what you are carrying into the
                 next connection, and what would need to shift for it to land differently than the last one.

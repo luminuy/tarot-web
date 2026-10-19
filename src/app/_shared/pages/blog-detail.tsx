@@ -7,6 +7,7 @@ import {
   getArticleTitle,
   getArticleDescription,
 } from "@/data/articles";
+import { getArticleAuthor } from "@/data/article-helpers";
 import { buildAlternates, localizedUrl, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { getCategoryCardImage } from "@/lib/media/og-card-art";
@@ -73,7 +74,7 @@ export function blogDetailMetadata(slug: string, locale: Locale): Metadata {
       locale: isEnglish ? "en_US" : "th_TH",
       publishedTime: article.publishedAt,
       modifiedTime: article.updatedAt,
-      authors: [article.author],
+      authors: [getArticleAuthor(article, locale)],
       images: ogImages,
     },
     twitter: {
@@ -131,7 +132,7 @@ export function BlogDetailContent({
        เดิมใส่เป็น `Organization` ทับชื่อผู้เขียนที่มีอยู่แล้วใน `article.author` */
     author: {
       "@type": "Person",
-      name: isEnglish && article.authorEn ? article.authorEn : article.author,
+      name: getArticleAuthor(article, locale), // ตัวเดียวกับไบไลน์ที่มองเห็นบนหน้า (A7-01)
       url: localizedUrl("/", locale),
     },
     publisher: {

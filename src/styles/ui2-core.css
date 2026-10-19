@@ -212,15 +212,6 @@
 .ui2-night .ui2-tile:focus-visible {
   outline-color: var(--ui2-gold-solid);
 }
-.ui2-btn-arrow {
-  display: inline-block;
-  width: 9px;
-  height: 9px;
-  border-top: 2px solid currentColor;
-  border-right: 2px solid currentColor;
-  transform: rotate(45deg);
-  margin-left: 2px;
-}
 /* ขอบทองหมุน — วงแหวน conic รอบปุ่ม (lite: หมุนเฉพาะตอนส่วนนั้นอยู่ในจอ · off: นิ่ง)
    ⚠️ ตัดด้วย mask ให้เหลือเฉพาะเส้นขอบ 2px — เดิมพึ่ง z-index -1 ให้พื้นปุ่มบัง แต่ตอนกด `transform: scale()`
       ทำให้ปุ่มเป็นบริบทซ้อนใหม่ วงแหวนจึงขึ้นมาทับพื้นปุ่มเป็นลิ่มทองกลางปุ่ม (เจ้าของแคป 2026-10-13 "เวลากดไม่สวยเลย") */

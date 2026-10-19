@@ -25,6 +25,12 @@ export type GatewayRefundResult = "credits_revoked" | "booking_cancelled" | "stu
 
 export async function applyGatewayRefund(paymentId: string): Promise<GatewayRefundResult> {
   const db = await getAppDB();
+  // ธงต้องคืนก่อนจองแถว — การจองแถวด้านล่างล้างธงนี้ทิ้ง
+  const before = await db
+    .prepare("SELECT refund_due FROM payments WHERE id = ? LIMIT 1")
+    .bind(paymentId)
+    .first<{ refund_due: number | null }>();
+  const wasRefundDue = Number(before?.refund_due ?? 0) === 1;
   const claim = await db
     .prepare("UPDATE payments SET status = 'refunded', refund_due = 0, updated_at = ? WHERE id = ? AND status = 'paid'")
     .bind(Date.now(), paymentId)
@@ -42,6 +48,28 @@ export async function applyGatewayRefund(paymentId: string): Promise<GatewayRefu
 
   if (row.ticket_id) {
     const now = Date.now();
+    /*
+     * คืนรายการที่ "ไม่ใช่เงินที่ทำให้ได้นัด" ➔ ปิดเรื่องเงินอย่างเดียว ไม่แตะตั๋ว/ใบจอง
+     *   • ยังมีรายการอื่นของตั๋วเดียวกันที่จ่ายถูกต้องอยู่ (จ่ายซ้ำสองหน้า — นัดยังเป็นของรายการนั้น)
+     *   • รายการนี้ติดธงต้องคืนอยู่แล้ว (ระบบตั้งใจคืนเอง แต่คืนอัตโนมัติไม่สำเร็จ แอดมินจึงคืนจากแดชบอร์ด)
+     */
+    const otherPaid = await db
+      .prepare(
+        "SELECT COUNT(*) AS count FROM payments WHERE ticket_id = ? AND id != ? AND status = 'paid' AND COALESCE(refund_due, 0) = 0"
+      )
+      .bind(row.ticket_id, paymentId)
+      .first<{ count: number }>();
+    if (Number(otherPaid?.count ?? 0) > 0 || wasRefundDue) {
+      if (Number(otherPaid?.count ?? 0) === 0) {
+        // นัดถูกยกเลิกไปแล้วแต่คืนเงินค้าง ➔ ตอนนี้คืนครบแล้ว
+        await db
+          .prepare("UPDATE bookings SET refund_status = 'refunded' WHERE ticket_id = ? AND refund_status = 'failed'")
+          .bind(row.ticket_id)
+          .run();
+      }
+      recordEvent("consultation_due_refund_settled_outside");
+      return "marked_refunded";
+    }
     const res = await db
       .prepare("UPDATE queue_tickets SET status = 'cancelled' WHERE id = ? AND status IN ('pending_payment', 'waiting', 'ready')")
       .bind(row.ticket_id)

@@ -30,7 +30,7 @@
  * ```
  *
  * `catch` ที่ตั้งใจกลืนจริง ๆ (เช่น `localStorage` ในโหมดส่วนตัว) ไม่ต้องเรียกฟังก์ชันนี้
- * แต่ **ต้องเขียนคอมเมนต์กำกับว่าทำไมถึงกลืนได้** — ด่าน `scripts/qa/test-catch-telemetry.ts` บังคับไว้
+ * แต่ **ต้องเขียนคอมเมนต์กำกับว่าทำไมถึงกลืนได้** — ด่านข้อ R-27 ใน `scripts/qa/test-code-debt.ts` บังคับไว้
  */
 
 import { recordEvent } from "@/lib/stats/record";

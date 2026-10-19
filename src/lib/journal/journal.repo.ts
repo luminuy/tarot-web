@@ -508,6 +508,16 @@ export async function listDueCheckins(now: number, limit: number): Promise<DueCh
   }));
 }
 
+/** จำนวนนัดเช็กที่ถูกจองส่งไปแล้วตั้งแต่เวลานี้ — ใช้คุมเพดานอีเมลต่อวันเมื่อ cron ถูกเรียกหลายรอบ (A3-05) */
+export async function countCheckinsClaimedSince(sinceMs: number): Promise<number> {
+  const db = await getAppDB();
+  const row = await db
+    .prepare(`SELECT COUNT(*) AS n FROM reading_journal WHERE checkin_sent_at IS NOT NULL AND checkin_sent_at >= ?`)
+    .bind(sinceMs)
+    .first<{ n: number }>();
+  return Number(row?.n ?? 0);
+}
+
 /** จองการส่งเตือน (กันส่งซ้ำเมื่อ cron ทำงานซ้อน) — true = รอบนี้เป็นคนส่ง */
 export async function claimCheckin(id: string, now: number): Promise<boolean> {
   const db = await getAppDB();

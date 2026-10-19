@@ -53,7 +53,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
         {/* Section 1 */}
         <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>1. ข้อมูลที่เราเก็บ</ThaiPhrases></h2>
-          <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
+          <ul className="space-y-2 text-sm text-ink list-rule leading-relaxed font-serif-th">
             <li>
               <strong>การระบุตัวตนและโปรไฟล์ (OAuth)</strong> — หากคุณเข้าสู่ระบบผ่าน Google หรือ LINE
               เราประมวลผลชื่อที่แสดง รูปโปรไฟล์ และรหัสประจำตัวบัญชีเพื่อระบุตัวตน รักษาความปลอดภัย
@@ -104,7 +104,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
         {/* Section 2 */}
         <section className="page-band page-band-compact space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>2. สิ่งที่เราไม่ทำเด็ดขาด (คำมั่นสัญญาความปลอดภัย)</ThaiPhrases></h2>
-          <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
+          <ul className="space-y-2 text-sm text-ink list-rule leading-relaxed font-serif-th">
             <li>
               <strong>ไม่นำข้อมูลคำถามหรือบันทึกของคุณไปเทรนโมเดล AI</strong> — ข้อมูลการเปิดไพ่และการสะท้อนความคิดเป็นเรื่องส่วนบุคคลสูงสุด จะไม่มีการนำไปใช้ฝึกฝน ปรับแต่ง หรือป้อนเข้าสู่โมเดลปัญญาประดิษฐ์ใด ๆ ทั้งสิ้น
             </li>
@@ -145,7 +145,7 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
           <h2 className="text-lg font-bold text-gold-ink font-serif-th"><ThaiPhrases>
             4. สิทธิของคุณตามกฎหมาย PDPA และมาตรฐานสากล
           </ThaiPhrases></h2>
-          <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
+          <ul className="space-y-2 text-sm text-ink list-rule leading-relaxed font-serif-th">
             <li>
               <strong>สิทธิในการลบข้อมูล (Right to Erasure)</strong> —
               สั่งลบประวัติ บันทึก และบัญชีทั้งหมดได้อย่างสมบูรณ์ทันทีผ่านระบบบริการตนเองด้านล่าง
@@ -198,10 +198,10 @@ export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
           </ThaiPhrases></h2>
           <div className="text-sm text-err leading-relaxed space-y-2 font-serif-th">
             <p>ระบบของเรามีตัวกรองความปลอดภัยที่ทำงานตรวจจับความเสี่ยงตลอดเวลา:</p>
-            <ul className="space-y-1.5 list-disc list-inside">
+            <ul className="space-y-1.5 list-rule">
               <li>
                 <strong>การตรวจจับวิกฤตทางจิตใจ:</strong> เมื่อพบสัญญาณความทุกข์หรือสภาวะวิกฤต ระบบจะแสดงคำแนะนำและสายด่วนช่วยเหลือทันที:
-                <ul className="pl-5 space-y-1 list-disc list-inside text-xs">
+                <ul className="space-y-1 list-rule text-xs">
                   <li>สายด่วนสุขภาพจิต (กรมสุขภาพจิต ประเทศไทย): <strong>1323</strong> (โทรฟรีตลอด 24 ชั่วโมง)</li>
                   <li>สถาบันการแพทย์ฉุกเฉินแห่งชาติ (ประเทศไทย): <strong>1669</strong></li>
                   <li>สายด่วนสุขภาพจิตสากล (สหรัฐฯ และแคนาดา): <strong>988</strong></li>

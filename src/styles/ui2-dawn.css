@@ -36,6 +36,11 @@
   --color-surface-warm: #FFFCF6;
   --color-canvas: #F7F0E3;
   --color-inset: #F3EADB;
+  /* สีแดง/เขียวสถานะบนครีมต้องเป็นเฉดเข้ม (≥ 4.5:1 บน #F7F0E3) — โทเคนของ `.ui2-pg` เป็นเฉดสว่างสำหรับพื้นมืด
+     ที่ตั้งเฉพาะแผงพิธีเปิดไพ่ไว้ที่เดียวทำให้ปุ่มลบข้อมูล · ป้ายประหยัด · ข้อความสายด่วนบนครีมจางจนอ่านไม่ออก (A6-01/02) */
+  --color-err: #9A2E22;
+  --color-err-wash: rgba(154, 46, 34, 0.08);
+  --color-ok: #2F6B3A;
   --glass-fill: rgba(255, 252, 246, 0.86);
   --glass-edge: rgba(74, 47, 16, 0.14);
   --rt-gold: #8A4F10;
@@ -81,21 +86,9 @@
   background: var(--ui2-button);
   box-shadow: 0 14px 30px -14px rgba(23, 17, 12, 0.7);
 }
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) .ui2-btn-gold .ui2-btn-arrow,
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-btn-gold .ui2-btn-arrow {
-  border-color: var(--ui2-button-text);
-}
 :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) .ui2-btn-ghost,
 :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-btn-ghost {
   background: rgba(255, 252, 246, 0.7);
-}
-/* ชิปลิงก์ใต้หัวหน้า: ครีมใส · หน้าปัจจุบันเป็นเม็ดดำ */
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) .ui2-ph-chip {
-  background: rgba(255, 252, 246, 0.6);
-}
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) .ui2-ph-chip[aria-current="page"] {
-  color: var(--ui2-button-text);
-  background: var(--ui2-button);
 }
 
 /* เกาะกลางคืนในแถบครีม — ชิ้นที่ออกแบบเป็นแผ่นมืดอยู่แล้ว (ตั๋วฟรีหน้าราคา · แผ่นฟ้าไพ่ราศี · แถบขั้นตอนสร้างผัง)
@@ -218,9 +211,6 @@
   color: var(--ui2-button-text);
   background: var(--ui2-button);
   box-shadow: 0 14px 30px -14px rgba(23, 17, 12, 0.7);
-}
-.ui2-sp .ui2-sp-hero .ui2-sp-cta .ui2-btn-arrow {
-  border-color: var(--ui2-button-text);
 }
 .ui2-sp .ui2-sp-hero .ui2-btn-ghost {
   color: var(--ui2-ink);

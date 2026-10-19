@@ -71,7 +71,7 @@ export const JournalThreads: React.FC<{
         <p className="text-base text-ink-deep">
           {L({ th: "เข้าสู่ระบบเพื่อติดตามเรื่องเดียวกันข้ามหลายคำอ่าน", en: "Sign in to follow one story across many readings." })}
         </p>
-        <a href={isEnglish ? "/en/account" : "/account"} className="tap-overlay-y inline-flex min-h-[44px] items-center px-5 rounded-full btn-gold-glass text-sm font-bold">
+        <a href="/account" className="tap-overlay-y inline-flex min-h-[44px] items-center px-5 rounded-full btn-gold-glass text-sm font-bold">
           {L({ th: "เข้าสู่ระบบ", en: "Sign in" })}
         </a>
       </div>

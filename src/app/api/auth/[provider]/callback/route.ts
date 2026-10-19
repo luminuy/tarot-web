@@ -4,6 +4,7 @@ import { signUserSession, type UserProfile } from "@/lib/auth/edge-auth";
 import { setAuthCookie } from "@/lib/auth/session";
 import { OAUTH_STATE_COOKIE, OAUTH_RETURN_COOKIE } from "@/lib/auth/cookie-names";
 import { resolveAppOrigin } from "@/lib/security/app-origin";
+import { buildSafeReturnUrl } from "@/lib/auth/return-path";
 
 export const runtime = "nodejs";
 
@@ -263,17 +264,8 @@ export async function GET(
 
     const sessionToken = await signUserSession(profile);
 
-    let targetPath = "/";
-    if (
-      rawReturnUrl &&
-      rawReturnUrl.startsWith("/") &&
-      !rawReturnUrl.startsWith("//") &&
-      !rawReturnUrl.includes("\\")
-    ) {
-      targetPath = rawReturnUrl;
-    }
-
-    const redirectUrl = new URL(targetPath, origin);
+    // คุกกี้ return ตรวจซ้ำที่นี่ด้วยตัวตรวจเดียวกับตอนเริ่ม — ปลายทางต้องอยู่บน origin ของเว็บเราเสมอ
+    const redirectUrl = buildSafeReturnUrl(rawReturnUrl, origin);
     redirectUrl.searchParams.set("auth_success", "1");
     if (isNewUser) {
       redirectUrl.searchParams.set("new_user", "1");

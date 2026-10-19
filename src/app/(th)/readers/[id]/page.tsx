@@ -11,6 +11,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { buildAlternates, SITE_ORIGIN, noindexAlternates } from "@/lib/config/site";
 import type { Metadata } from "next";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { buildPageOgImage } from "@/lib/media/og-image";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { BriefIcon, ClockIcon, ShieldIcon, VideoIcon } from "@/components/marketplace/ConsultIcons";
 import { CONSULTATION_MINUTES } from "@/lib/marketplace/offer";
@@ -23,10 +24,26 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!reader) {
     return { title: "ไม่พบแม่หมอ", robots: { index: false, follow: true }, alternates: noindexAlternates() };
   }
+  const title = `${reader.displayName} · ปรึกษาแม่หมอตัวจริง`;
+  const description = reader.bio || `ปรึกษาดวงชะตากับ ${reader.displayName} ผ่านศาสตร์ไพ่ทาโรต์`;
+  const url = `${SITE_ORIGIN}/readers/${reader.id}`;
+  /*
+   * A7-04: การ์ดแชร์ของโปรไฟล์ต้องเป็นของแม่หมอคนนี้ (ชื่อ · คำแนะนำตัว · ลิงก์ของหน้าเอง)
+   * ไม่ตั้ง = รับ openGraph ของ root layout ทั้งก้อน แชร์ลง LINE/Facebook แล้วขึ้นข้อความหน้าแรก
+   * รูปใช้ท่อภาพแชร์กลาง (Cloudinary · ถอยไป og/default.png) แบบหน้า /readers
+   */
+  const images = buildPageOgImage({
+    title: reader.displayName,
+    eyebrow: "ปรึกษาแม่หมอตัวจริง",
+    cardImage: "major-02.jpg",
+    alt: `${reader.displayName} · ปรึกษาแม่หมอตัวจริงที่ SeerTarot`,
+  });
   return {
-    title: `${reader.displayName} · ปรึกษาแม่หมอตัวจริง`,
-    description: reader.bio || `ปรึกษาดวงชะตากับ ${reader.displayName} ผ่านศาสตร์ไพ่ทาโรต์`,
+    title,
+    description,
     alternates: buildAlternates(`/readers/${reader.id}`),
+    openGraph: { title: `${title} · SeerTarot`, description, url, siteName: "SeerTarot", type: "profile", images },
+    twitter: { card: "summary_large_image", title: `${title} · SeerTarot`, description, images: [images[0].url] },
   };
 }
 

@@ -212,9 +212,23 @@ function hreflangHrefs(route: string): string[] {
     .filter(Boolean);
 }
 
+// ฝาแฝดที่ทั้งคู่ noindex (หน้าส่วนตัว) — ไม่ประกาศ hreflang โดยตั้งใจ · เช็กแทนว่า noindex ไม่หาย
+const NOINDEX_TWIN_ROUTES: readonly string[] = ["/journal"];
+
 for (const route of EN_TWIN_ROUTES) {
   const thaiRoute = route;
   const englishRoute = route === "/" ? "/en" : `/en${route}`;
+  if (NOINDEX_TWIN_ROUTES.includes(route)) {
+    for (const current of [thaiRoute, englishRoute]) {
+      const page = routeMap.get(current);
+      const html = page ? fs.readFileSync(page.file, "utf-8") : "";
+      check(
+        `${current} เป็นหน้า noindex และไม่ประกาศ hreflang (ฝาแฝดส่วนตัว)`,
+        /<meta[^>]+name="robots"[^>]*noindex/i.test(html) && hreflangHrefs(current).length === 0,
+      );
+    }
+    continue;
+  }
   const thaiUrl = `${SITE_ORIGIN}${thaiRoute === "/" ? "" : thaiRoute}`;
   const englishUrl = `${SITE_ORIGIN}${englishRoute}`;
 
@@ -547,6 +561,70 @@ for (const entry of phraseLeaks.slice(0, 10)) {
     "A6-07: JSON-LD ของหน้าอังกฤษไม่ชี้ URL ไทยที่มีฝาแฝดอังกฤษ",
     jsonLdThai.size === 0,
     jsonLdThai.size ? `${jsonLdThai.size} จุด · เช่น ${[...jsonLdThai.keys()].slice(0, 4).join(" · ")}` : undefined,
+  );
+}
+
+/* ── 7b. ลิงก์ fragment (`href="#x"` หรือ `href="/path#x"`) ต้องมี `id="x"` ในหน้าปลายทางจริง (A7-07 · A7-08) ──
+ * เคยพลาด: สารบัญบทความ 60 หน้ากดแล้วไม่เลื่อน (`<h2>` ไม่มี id) · ลิงก์ข้ามไปเนื้อหาของหน้าสร้างผังไม่มีเป้าหมาย
+ * ข้าม fragment ที่ JS ใช้จัดการเอง (`#` ว่าง · `#!`) */
+{
+  const pages = collectRenderedPages();
+  const htmlOf = new Map<string, string>();
+  const routeKey = (r: string) => (r.length > 1 && r.endsWith("/") ? r.slice(0, -1) : r);
+  for (const page of pages) htmlOf.set(routeKey(page.route), fs.readFileSync(page.file, "utf-8"));
+  const hasId = (html: string, id: string) =>
+    html.includes(`id="${id}"`) || html.includes(`id='${id}'`) || html.includes(`name="${id}"`);
+  const dead = new Map<string, string>();
+  // สตูดิโอแม่หมอ (noindex · วาดทั้งหน้าฝั่งไคลเอนต์ — `<main>` เกิดหลังโหลด) ยังไม่มีเป้าหมายใน HTML ดิบ · เจ้าของโค้ด: ระบบแม่หมอ ➔ ตามแก้แล้วลบบรรทัดนี้
+  const FRAGMENT_PENDING = new Set(["/readers/studio#main-content"]);
+  for (const page of pages) {
+    const html = htmlOf.get(routeKey(page.route)) ?? "";
+    for (const m of html.matchAll(/<a\b[^>]*?\shref="([^"]*#[^"]+)"/g)) {
+      const [pathPart, frag] = m[1].split("#");
+      if (!frag || frag === "!" || /^[:\/]|^https?:/.test(pathPart)) continue;
+      const targetRoute = routeKey(pathPart === "" ? page.route : pathPart);
+      const targetHtml = htmlOf.get(targetRoute);
+      if (targetHtml === undefined) continue; // เส้นที่ Worker ตอบ — เทียบไม่ได้ (ด่านลิงก์ข้างบนตรวจแล้ว)
+      let id = frag;
+      try {
+        id = decodeURIComponent(frag);
+      } catch {
+        /* ใช้ค่าดิบ */
+      }
+      if (FRAGMENT_PENDING.has(`${targetRoute}#${id}`)) continue;
+      if (!hasId(targetHtml, id)) dead.set(`${targetRoute}#${id}`, page.route);
+    }
+  }
+  check(
+    "A7-07/08: ลิงก์ fragment ในหน้าที่บิลด์จริงทุกเส้นมี id รองรับในหน้าปลายทาง",
+    dead.size === 0,
+    dead.size ? `${dead.size} จุด · เช่น ${[...dead].filter(([t]) => !/^(\/en)?\/blog\//.test(t)).slice(0, 12).map(([t, from]) => `${t} (จาก ${from})`).join(" · ")}` : undefined,
+  );
+}
+
+/* ── 8. ลิงก์ `/en/...` ที่เขียนตายตัวในโค้ด React/Astro ต้องชี้หน้าที่เรนเดอร์ออกมาจริง ──
+ * ด่านลิงก์จาก HTML ที่บิลด์ไม่เห็นลิงก์ที่ island วาดหลัง hydrate (เคยพลาด: ปุ่มเข้าสู่ระบบในสมุดดวงอังกฤษชี้ `/en/account` ที่ไม่มีหน้า · A8-08)
+ * ข้ามคอมเมนต์ · ข้ามลิงก์ที่ลงท้าย `/` (ต่อสตริงเป็นพาธไดนามิก) */
+{
+  const literalRe = /["'`](\/en(?:\/[a-z0-9][a-z0-9-]*)+)["'`]/g;
+  const missing = new Map<string, string>();
+  const walk = (dir: string) => {
+    for (const name of fs.readdirSync(dir)) {
+      const full = path.join(dir, name);
+      if (fs.statSync(full).isDirectory()) walk(full);
+      else if (/\.(tsx?|astro)$/.test(name)) {
+        for (const [, lit] of stripComments(fs.readFileSync(full, "utf-8")).matchAll(literalRe)) {
+          const known = routeMap.has(lit) || [...routeMap.keys()].some((r) => r.startsWith(`${lit}/`));
+          if (!known) missing.set(lit, path.relative(ROOT, full));
+        }
+      }
+    }
+  };
+  for (const dir of ["src/components", "astro"]) walk(path.join(ROOT, dir));
+  check(
+    "A8-08: ลิงก์ /en/... ที่เขียนตายตัวในโค้ดชี้หน้าอังกฤษที่มีอยู่จริงทุกเส้น",
+    missing.size === 0,
+    missing.size ? [...missing].slice(0, 6).map(([l, f]) => `${l} (${f})`).join(" · ") : undefined,
   );
 }
 

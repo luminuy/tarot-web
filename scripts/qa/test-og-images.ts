@@ -13,7 +13,7 @@
 
 import assert from "node:assert";
 import fs from "node:fs";
-import { encodeOverlayText, truncateForOverlay, buildCloudinaryShareImageUrl } from "../../src/lib/media/cloudinary";
+import { encodeOverlayText, splitTitleForOverlay, truncateForOverlay, buildCloudinaryShareImageUrl } from "../../src/lib/media/cloudinary";
 import { buildPageOgImage } from "../../src/lib/media/og-image";
 import { getCategoryCardImage } from "../../src/lib/media/og-card-art";
 import { DECK } from "../../src/data/cards";
@@ -48,6 +48,21 @@ const truncated = truncateForOverlay(longTitle, 60);
 assert(truncated.endsWith("…"), "หัวข้อที่ยาวเกิน 60 ตัวอักษรต้องลงท้ายด้วย …");
 assert(truncated.length <= 65, "หัวข้อที่ตัดแล้วต้องไม่ยาวเกินขอบเขต");
 console.log("  ✓ การตัดหัวข้อยาวมีจุดไข่ปลา … ลงท้ายอย่างสุภาพ");
+
+// 1.3b หัวเรื่องไทยยาวต้องถูกแบ่งบรรทัดที่ขอบคำ ไม่ให้ Cloudinary หักกลางคำแล้วใส่ "-" (A7-11)
+{
+  const thaiLong = "ไพ่ยิปซีกับคำถามที่ต้องตอบตัวเองก่อนว่าเขาจะกลับมาไหม";
+  const lines = splitTitleForOverlay(thaiLong);
+  assert(lines.length === 2 && lines.every((l) => l.length <= 27), "หัวเรื่องไทยยาวต้องแบ่งเป็น 2 บรรทัด บรรทัดละไม่เกิน 27 ตัวอักษร");
+  assert(lines.join("") === thaiLong, "แบ่งบรรทัดแล้วข้อความต้องครบเท่าเดิม (ไม่ตัด ไม่เติมขีด)");
+  assert(lines.every((l) => !l.includes("-")), "บรรทัดต้องไม่มีขีดแทรก");
+  const boundary = [...new Intl.Segmenter("th", { granularity: "word" }).segment(thaiLong)].some((x) => x.index === lines[0].length);
+  assert(boundary, "จุดหักบรรทัดต้องตรงขอบคำ");
+  assert(splitTitleForOverlay("ดูดวงความรัก").length === 1, "หัวเรื่องสั้นต้องอยู่บรรทัดเดียว");
+  const url = buildCloudinaryShareImageUrl({ title: thaiLong }) ?? "";
+  assert((url.match(/l_text:Arial_50_bold:/g) ?? []).length === 2, "URL ภาพแชร์ต้องมีชั้นหัวเรื่อง 2 ชั้นสำหรับหัวเรื่องยาว");
+  console.log("  ✓ หัวเรื่องไทยยาวถูกแบ่ง 2 บรรทัดที่ขอบคำ");
+}
 
 // 1.4 การคืนค่าสัดส่วน 1200x630 เสมอ (OG-05)
 const testOg = buildPageOgImage({

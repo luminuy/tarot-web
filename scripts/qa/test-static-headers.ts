@@ -81,6 +81,14 @@ if (globalRule) {
         : `ค่าไม่ตรง\n      _headers: ${actual}\n      โค้ดกลาง : ${header.value}`,
     );
   }
+
+  // A1-06: บันเดิลที่ส่งจริงไม่มีโค้ดตัวไหนต้องประเมินสตริงเป็นโค้ด — CSP ของ production ต้องไม่เปิด eval
+  const csp = globalRule.get("Content-Security-Policy") ?? "";
+  check(
+    "CSP ของไฟล์ static ไม่เปิด 'unsafe-eval'",
+    csp !== "" && !csp.includes("'unsafe-eval'"),
+    "เปิดได้เฉพาะตอน next dev ผ่าน DEV_ONLY_EVAL ใน security-headers.ts เท่านั้น",
+  );
 }
 
 // ── 2. กฎแคชที่ห้ามผิด ────────────────────────────────────────────────────

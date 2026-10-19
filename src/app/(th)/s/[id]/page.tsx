@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 
-import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
+import { noindexAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { getShareBucket } from "@/lib/platform/cf";
 import { buildCloudinaryShareImageUrl, isCloudinaryEnabled } from "@/lib/media/cloudinary";
 
@@ -61,13 +61,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: buildAlternates("/"),
+    // หน้า noindex ห้ามมี canonical/hreflang ชี้หน้าอื่น (A6-01 · A7-03) · og:url = ลิงก์แชร์ของตัวเอง
+    // ไม่ใช่หน้าแรก — ตัวสแครปที่ยึด og:url จะได้ดึงภาพคำทำนายของลิงก์นี้ ไม่ใช่การ์ดหน้าแรก
+    alternates: noindexAlternates(),
     robots: { index: false, follow: true },
     openGraph: {
       type: "article",
       title,
       description,
-      url: `${SITE_ORIGIN}/`,
+      url: ID_RE.test(id) ? `${SITE_ORIGIN}/s/${id}` : `${SITE_ORIGIN}/`,
       images: [
         {
           url: imageUrl,

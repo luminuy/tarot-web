@@ -247,17 +247,34 @@ export function pageOfDate(days: readonly SlotDay[], date: string | null, pageSi
 
 export type ReminderKind = "24h" | "1h";
 
+/** เตือน "ใกล้ถึงเวลานัด" ได้ตั้งแต่เหลือกี่ชั่วโมง — กว้างพอให้ตัวจับเวลาที่รันห่างเป็นชั่วโมงยังทันส่งก่อนนัด */
+export const SOON_REMINDER_HOURS = 6;
+
 /**
- * ถึงเวลาส่งอีเมลเตือนนัดแบบไหน (ตัวจับเวลาอยู่ GitHub Actions ทุก 15 นาที — ดีเลย์ได้ 5–15 นาที หน้าต่างจึงกว้าง)
+ * ถึงเวลาส่งอีเมลเตือนนัดแบบไหน
+ * ตัวจับเวลา (GitHub Actions) ตั้งไว้ทุก 15 นาทีแต่รันจริงห่างกันได้หลายชั่วโมง — ฟังก์ชันนี้จึงไม่พึ่งการรันตรงเวลา:
+ * รอบแรกที่เห็นนัดอยู่ในหน้าต่างจะส่ง แล้วจองสิทธิ์ในฐานข้อมูลกันส่งซ้ำ (`claim` ใน booking-mail.ts)
  * - "24h": เหลือ 12–25 ชม. และจองไว้นานกว่า 6 ชม. แล้ว (เพิ่งจองไม่ต้องเตือนซ้ำกับอีเมลยืนยัน)
- * - "1h" : เหลือไม่เกิน 75 นาทีและยังไม่ถึงเวลานัด
+ * - "1h" (เตือนใกล้ถึงเวลา): เหลือไม่เกิน 6 ชม. และยังไม่ถึงเวลานัด · เพิ่งจองไม่ถึงชั่วโมงและนัดยังไม่ใกล้ (เกิน 75 นาที)
+ *   ไม่ส่ง เพราะอีเมลยืนยันเพิ่งบอกไป · หัวเรื่องอีเมลบอกเวลาที่เหลือจริง (`soonReminderTitle`)
  */
 export function reminderDue(slotStart: number, createdAt: number, nowMs: number): ReminderKind | null {
   const left = slotStart - nowMs;
   if (left <= 0) return null;
-  if (left <= 75 * MINUTE) return "1h";
+  if (left <= SOON_REMINDER_HOURS * HOUR) {
+    if (left > 75 * MINUTE && nowMs - createdAt < HOUR) return null;
+    return "1h";
+  }
   if (left > 12 * HOUR && left <= 25 * HOUR && nowMs - createdAt >= 6 * HOUR) return "24h";
   return null;
+}
+
+/** หัวเรื่องอีเมลเตือนใกล้ถึงเวลานัด ตามเวลาที่เหลือจริงตอนส่ง */
+export function soonReminderTitle(slotStart: number, nowMs: number): string {
+  const left = slotStart - nowMs;
+  if (left <= 60 * MINUTE) return "อีกไม่ถึงชั่วโมงถึงเวลานัด";
+  if (left <= 90 * MINUTE) return "อีกราวหนึ่งชั่วโมงถึงเวลานัด";
+  return `วันนี้มีนัดปรึกษาแม่หมอ อีกราว ${Math.round(left / HOUR)} ชั่วโมง`;
 }
 
 export type CancelActor = "customer" | "reader";
@@ -295,6 +312,7 @@ export function paidGraceUntil(paidAt: number | null | undefined, slotStart: num
  * | นัดล่วงหน้า เลยเวลานัด 15 นาทีแล้วแม่หมอยังไม่เริ่ม | คืนเต็ม (แม่หมอไม่มาตามนัด) |
  * | นัดล่วงหน้า น้อยกว่า 24 ชม. | ยกเลิกได้ ไม่คืนเงิน |
  * | แม่หมอเรียกคิว/เริ่มคุยแล้ว | ลูกค้ายกเลิกเองไม่ได้ |
+ * | แม่หมอเรียกคิวแล้ว แต่ลูกค้ารอในห้องวิดีโอครบ 15 นาทีโดยแม่หมอไม่เคยเข้า | คืนเต็ม (`readerMissedRoom`) |
  */
 export function decideCancellation(input: {
   actor: CancelActor;
@@ -305,12 +323,18 @@ export function decideCancellation(input: {
   nowMs: number;
   /** เวลาที่จ่ายสำเร็จ — ใช้ตัดสินช่วงผ่อนผันหลังจ่าย (ไม่ส่ง = ไม่มีช่วงผ่อนผัน) */
   paidAt?: number | null;
+  /** ผลจาก `readerMissedRoom` ของห้องวิดีโอของตั๋วนี้ (ไม่ส่ง = ไม่รู้ ถือว่าแม่หมออยู่) */
+  readerMissedRoom?: boolean;
 }): CancelDecision {
   const { actor, kind, ticketStatus, paid, slotStart, nowMs } = input;
   const open = ticketStatus === "pending_payment" || ticketStatus === "waiting" || ticketStatus === "screening";
   if (actor === "reader") {
     if (open || ticketStatus === "ready") return { allowed: true, refund: paid, reason: "reader_cancelled" };
     return { allowed: false, refund: false, reason: "closed" };
+  }
+  // แม่หมอกดเริ่มนัดแล้วหายไป — ลูกค้ารอในห้องคนเดียวครบเวลา ➔ ยกเลิกเองและได้เงินคืนเต็ม
+  if (ticketStatus === "ready" && paid && input.readerMissedRoom === true) {
+    return { allowed: true, refund: true, reason: "reader_absent" };
   }
   if (!open) return { allowed: false, refund: false, reason: ticketStatus === "ready" ? "in_session" : "closed" };
   if (!paid) return { allowed: true, refund: false, reason: "unpaid" };
@@ -346,9 +370,29 @@ export function canStartBooking(slotStart: number | null, nowMs: number): boolea
   return slotStart === null || nowMs >= slotStart - EARLY_START_MINUTES * MINUTE;
 }
 
-/** แม่หมอแจ้ง "ลูกค้าไม่มาตามนัด" ได้หรือยัง */
+/** แม่หมอแจ้ง "ลูกค้าไม่มาตามนัด" ได้หรือยัง (ด่านเวลา — ต้องผ่าน `customerMissedRoom` ด้วยเสมอ) */
 export function canMarkNoShow(slotStart: number | null, nowMs: number): boolean {
   return slotStart !== null && nowMs >= slotStart + NO_SHOW_GRACE_MINUTES * MINUTE;
+}
+
+/** ใครเคยอยู่ในห้องวิดีโอของตั๋วนี้บ้าง (`call_sessions`) — `openedAt` = เวลาที่ห้องถูกเปิดครั้งแรก */
+export interface RoomAttendance {
+  openedAt: number;
+  readerSeenAt: number | null;
+  customerSeenAt: number | null;
+}
+
+/**
+ * หลักฐานว่า "ลูกค้าไม่มา" — แม่หมอเปิดห้องรอครบ 15 นาทีแล้วลูกค้าไม่เคยเข้าห้องเลย
+ * ลูกค้าเข้าห้องเองไม่ได้จนกว่าแม่หมอจะกดเริ่มนัด ตั๋วที่ยังรออยู่จึงไม่มีทางเป็น "ลูกค้าไม่มา"
+ */
+export function customerMissedRoom(room: RoomAttendance | null, nowMs: number): boolean {
+  return Boolean(room && room.readerSeenAt && !room.customerSeenAt && nowMs - room.openedAt >= NO_SHOW_GRACE_MINUTES * MINUTE);
+}
+
+/** กลับด้านกัน — ลูกค้าอยู่ในห้องครบ 15 นาทีแล้วแม่หมอไม่เคยเข้าห้องเลยหลังกดเริ่มนัด */
+export function readerMissedRoom(room: RoomAttendance | null, nowMs: number): boolean {
+  return Boolean(room && room.customerSeenAt && !room.readerSeenAt && nowMs - room.openedAt >= NO_SHOW_GRACE_MINUTES * MINUTE);
 }
 
 /* ── การแสดงผลเวลาไทย (ผลเหมือนกันทั้งเซิร์ฟเวอร์และเบราว์เซอร์) ─────────────── */
@@ -358,7 +402,6 @@ const TH_WEEKDAY_SHORT = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", 
 const TH_MONTH_SHORT = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
 
 export const WEEKDAY_LABELS = TH_WEEKDAY;
-export const WEEKDAY_SHORT_LABELS = TH_WEEKDAY_SHORT;
 
 const pad = (n: number) => String(n).padStart(2, "0");
 

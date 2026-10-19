@@ -53,7 +53,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
         {/* Section 1 */}
         <section className="page-band page-band-compact page-band-tint space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif"><ThaiPhrases>1. Information We Collect</ThaiPhrases></h2>
-          <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed">
+          <ul className="space-y-2 text-sm text-ink list-rule leading-relaxed">
             <li>
               <strong>Identity &amp; Profile Details (OAuth)</strong> — When authenticating via Google or LINE,
               we process your public display name, profile avatar, and verified user identifier solely to secure
@@ -107,7 +107,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
         {/* Section 2 */}
         <section className="page-band page-band-compact space-y-3">
           <h2 className="text-lg font-bold text-gold-ink font-serif"><ThaiPhrases>2. Prohibited Practices &amp; Core Commitments</ThaiPhrases></h2>
-          <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed">
+          <ul className="space-y-2 text-sm text-ink list-rule leading-relaxed">
             <li>
               <strong>Zero AI Training on Personal Readings</strong> — We never use your private questions, drawn
               cards, or journal reflections to train, calibrate, or fine-tune public or proprietary artificial
@@ -155,7 +155,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
           <h2 className="text-lg font-bold text-gold-ink font-serif"><ThaiPhrases>
             4. Your Legal Rights (PDPA, GDPR &amp; CCPA/CPRA)
           </ThaiPhrases></h2>
-          <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed">
+          <ul className="space-y-2 text-sm text-ink list-rule leading-relaxed">
             <li>
               <strong>Right to Erasure / &quot;Right to be Forgotten&quot;</strong> — Delete your complete reading history,
               reflections, and registered account permanently via the self-service controls below.
@@ -210,11 +210,11 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
           </ThaiPhrases></h2>
           <div className="text-sm text-err leading-relaxed space-y-2">
             <p>Our infrastructure enforces automated, continuous safety filters:</p>
-            <ul className="space-y-1.5 list-disc list-inside">
+            <ul className="space-y-1.5 list-rule">
               <li>
                 <strong>Mental Health Crisis Detection:</strong> Automated intervention prompts immediately direct users
                 in distress to certified crisis resources:
-                <ul className="pl-5 space-y-1 list-disc list-inside text-xs">
+                <ul className="space-y-1 list-rule text-xs">
                   <li>Thailand Department of Mental Health Hotline: <strong>1323</strong> (24/7 Free)</li>
                   <li>National Emergency Medical Service (Thailand): <strong>1669</strong></li>
                   <li>US &amp; Canada Suicide &amp; Crisis Lifeline: <strong>988</strong></li>
@@ -262,7 +262,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
             href="/en"
             className="btn-gold-glass inline-flex items-center gap-2 px-6 py-3 font-bold text-sm"
           >
-            &larr; Return to Tarot Sanctuary
+            Return to Tarot Sanctuary
           </a>
         </div>
       </div>

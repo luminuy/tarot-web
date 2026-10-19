@@ -11,6 +11,9 @@ import type { Locale } from "./types";
  * มีด่านตรวจใน `scripts/qa/test-en-routing.ts` คอยจับให้
  *
  * หน้าที่ **ยังไม่มี** ฝาแฝดโดยตั้งใจ: `/account` (หน้าที่ปิด index หรือเฉพาะผู้ใช้ล็อกอิน)
+ *
+ * `/journal` มีฝาแฝด `/en/journal` (`astro/pages/en/journal.astro`) แต่ทั้งคู่ noindex และไม่ประกาศ hreflang —
+ * อยู่ในรายการนี้เพื่อให้เมนู · ลิงก์ในหน้า · ปุ่มสลับภาษา พาไปหน้าภาษาเดียวกัน (ด่านยกเว้นเฉพาะส่วน hreflang ตรงนี้)
  */
 export const EN_TWIN_ROUTES = [
   "/",
@@ -33,6 +36,7 @@ export const EN_TWIN_ROUTES = [
   "/contact",
   "/pricing",
   "/questions",
+  "/journal",
 ] as const;
 
 /** เส้นทางที่มีพารามิเตอร์ — ลูกทุกใบใต้ prefix นี้มีฝาแฝดครบ */

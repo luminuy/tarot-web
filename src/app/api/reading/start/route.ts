@@ -167,8 +167,18 @@ export async function POST(request: Request) {
   }
 
   if (!parsed.success) {
+    // A3-02: ข้อความมีอักขระที่ไม่อนุญาต ➔ บอกตรง ๆ ว่าช่องไหน (ข้อความกลางทำให้ผู้ใช้กดส่งซ้ำ)
+    const textIssue = parsed.error.issues.find((i) => i.code === "custom");
     return NextResponse.json(
-      { error: isEnInitial ? "Invalid request data" : "ข้อมูลที่ส่งมาไม่ถูกต้อง" },
+      {
+        error: textIssue
+          ? isEnInitial
+            ? "Your text contains characters that are not allowed. Please type plain text."
+            : textIssue.message
+          : isEnInitial
+            ? "Invalid request data"
+            : "ข้อมูลที่ส่งมาไม่ถูกต้อง",
+      },
       { status: 400 },
     );
   }

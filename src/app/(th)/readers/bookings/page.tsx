@@ -117,7 +117,9 @@ export default function MyBookingsPage() {
                         const status = statusOf(item);
                         return (
                           <li key={item.ticketId}>
-                            <Link
+                            {/* <a> ธรรมดา ไม่ใช่ <Link> — หน้าคิวต้องโหลดเอกสารใหม่ทั้งหน้า สิทธิ์กล้อง/ไมค์
+                                (Permissions-Policy) ผูกกับเอกสารที่โหลด การเปลี่ยนหน้าฝั่ง client จะติดสิทธิ์ของหน้านี้ไป */}
+                            <a
                               href={`/readers/queue/${item.ticketId}`}
                               className="flex items-center gap-3.5 p-4 transition-colors hover:bg-inset/50 sm:px-5"
                             >
@@ -142,7 +144,7 @@ export default function MyBookingsPage() {
                                 </span>
                               </span>
                               <span aria-hidden="true" className="text-muted">›</span>
-                            </Link>
+                            </a>
                           </li>
                         );
                       })}

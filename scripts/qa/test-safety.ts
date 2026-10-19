@@ -5,6 +5,7 @@ import { CRISIS_MESSAGE, CRISIS_MESSAGE_EN, checkQuestion, getCrisisHotlines } f
 import { hasSoftDistressSignal, mayNeedDeepCrisisCheck } from "../../src/lib/safety/ai-classifier";
 import { CRISIS_LEXEMES_TH } from "../../src/lib/safety/crisis-lexicon";
 import { assertNonEmptyCorpus } from "./lib/corpus";
+import { noteCrisisCareLine, noteCrisisPromptGuard, noteHasCrisisSignal } from "../../src/lib/ai/memory";
 
 /**
  * QA — ทดสอบระบบคัดกรองความปลอดภัยด้วยคำถามตัวอย่างจริง
@@ -277,6 +278,27 @@ for (const [lang, message] of [
       "เบอร์บนปุ่มกับในข้อความไม่ตรงกัน",
     );
   }
+}
+
+// 🛟 A3-07: บันทึกที่ยินยอมให้แม่หมออ่านต้องผ่านด่านวิกฤตก่อนเข้า prompt ของคำอ่านครั้งถัดไป
+assertUi("บันทึกที่มีสัญญาณวิกฤต (ไทย) ถูกจับ", noteHasCrisisSignal("เขาทิ้งไปแล้ว ไม่อยากมีชีวิตอยู่ต่อแล้ว"));
+assertUi("บันทึกที่มีสัญญาณวิกฤต (อังกฤษ) ถูกจับ แม้หน้าเป็นภาษาไทย", noteHasCrisisSignal("I want to kill myself"));
+assertUi("บันทึกปกติไม่ถูกจับ", !noteHasCrisisSignal("วันนี้เหนื่อยจะตาย แต่งานออกมาดี") && !noteHasCrisisSignal(""));
+assertUi("ประโยคดูแลใจมีสายด่วน 1323 ทั้งสองภาษา", noteCrisisCareLine("th").includes("1323") && noteCrisisCareLine("en").includes("1323"));
+assertUi("คำสั่งเพิ่มให้ AI ไม่มีเนื้อหาบันทึก", !noteCrisisPromptGuard("th").includes("ไม่อยากมีชีวิต"));
+{
+  const memorySrc = readFileSync("src/lib/ai/memory.ts", "utf-8");
+  const readSrc = readFileSync("src/app/api/reading/[id]/read/route.ts", "utf-8");
+  const journalSrc = readFileSync("src/app/api/journal/[id]/route.ts", "utf-8");
+  assertUi(
+    "ความทรงจำแม่หมอ: บันทึกที่มีสัญญาณวิกฤตไม่เข้า prompt (ส่งแค่ธง)",
+    /noteHasCrisisSignal\(latest\.userNote\)\s*\?\s*\{ noteCrisis: true \}/.test(memorySrc),
+  );
+  assertUi(
+    "/read: ธงวิกฤตจากบันทึก ➔ คำสั่งดูแลใจ + ต่อท้ายสรุปด้วยสายด่วน",
+    readSrc.includes("noteCrisisPromptGuard(readingLang)") && readSrc.includes("noteCrisisCareLine(readingLang)"),
+  );
+  assertUi("บันทึกผลจริง: ตอบข้อความสายด่วนกลับเมื่อพบสัญญาณวิกฤต", journalSrc.includes("crisisMessage: getCrisisMessage(lang)"));
 }
 
 console.log(`\nรวม ${pass + uiPass + corpusPass}/${cases.length + gateCases.length + uiTotal + corpusTotal} ผ่าน`);

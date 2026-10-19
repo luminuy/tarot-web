@@ -37,8 +37,14 @@ export function logoKeyFromPath(path: string | null | undefined): string | null 
   return m ? `studio-logo/${m[1]}/${m[2]}.${m[3]}` : null;
 }
 
-/** ลบไฟล์โลโก้ของระบบเราแบบไม่ให้ล้มงานหลัก (ลิงก์ภายนอก = ไม่ทำอะไร) */
-export async function deleteOwnLogo(path: string | null | undefined): Promise<void> {
+/**
+ * ลบไฟล์โลโก้ของระบบเราแบบไม่ให้ล้มงานหลัก (ลิงก์ภายนอก = ไม่ทำอะไร)
+ * ตรวจเองว่า path อยู่ใต้รหัสของแม่หมอ `readerId` เท่านั้น — path ของแม่หมอคนอื่นไม่ลบ (A2-06)
+ * ไม่ต้องพึ่งให้ผู้เรียกทุกจุดจำตรวจเอง
+ */
+export async function deleteOwnLogo(path: string | null | undefined, readerId: string): Promise<void> {
+  const m = STUDIO_LOGO_PATH_RE.exec((path ?? "").trim());
+  if (!m || !readerId || m[1] !== readerId) return;
   const key = logoKeyFromPath(path);
   if (!key) return;
   const bucket = await getShareBucket();

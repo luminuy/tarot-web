@@ -155,7 +155,7 @@ export const JournalOverview: React.FC<{ items: SavedReadingItem[]; isEnglish: b
             {summary.title && <p className="font-semibold">{summary.title}</p>}
             {summary.synthesis && <p className="text-sm leading-relaxed">{summary.synthesis}</p>}
             {summary.lifeLessons && summary.lifeLessons.length > 0 && (
-              <ul className="list-disc pl-5 text-sm space-y-1">
+              <ul className="list-rule text-sm space-y-1">
                 {summary.lifeLessons.map((l, i) => (
                   <li key={i}>{l}</li>
                 ))}

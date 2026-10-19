@@ -26,6 +26,7 @@ import { bootstrapAnalytics } from "@/lib/analytics-bootstrap";
 import { setAnalyticsConsent } from "@/lib/analytics";
 import { writeConsent, type ConsentChoice } from "@/lib/analytics-consent";
 import {
+  createBrowserPassiveReload,
   createSessionSkipFlag,
   isServiceWorkerAllowed,
   safeSessionStorage,
@@ -85,6 +86,7 @@ function installServiceWorker(): void {
       return () => window.removeEventListener("pagehide", fn);
     },
     skipFlag: createSessionSkipFlag(safeSessionStorage(), STORAGE_KEYS.swSkipRequestedAt),
+    passiveReload: createBrowserPassiveReload(),
     log: (level, message, detail) => {
       if (level === "warn") console.warn(message, detail);
       else console.info(message);

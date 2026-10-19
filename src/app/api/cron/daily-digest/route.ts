@@ -32,6 +32,12 @@ export const runtime = "nodejs";
 
 /** เพดานต่อรอบ — ต่ำกว่าโควตา Resend แผนฟรี (100/วัน) เผื่ออีเมลธุรกรรมของระบบ */
 const MAX_DIGEST_PER_RUN = 80;
+/**
+ * เพดานต่อวัน (วันไทย) — นับทุกฉบับที่จองส่งไปแล้ววันนี้ ไม่ใช่แค่รอบนี้ (A3-05)
+ * ตัวจับเวลาของ GitHub ทิ้งรอบหรือดีเลย์ได้หลายชั่วโมง การตั้งรอบเสริมในวันเดียวกันจึงต้องปลอดภัย:
+ * รอบที่มาทีหลังส่งเฉพาะคิวที่เหลือ และยอดรวมของวันไม่เกินโควตาเดิม
+ */
+const MAX_DIGEST_PER_DAY = 80;
 
 /** เทียบความลับแบบเวลาคงที่ — เทียบด้วย `===` เฉย ๆ รั่วความยาวและตำแหน่งที่ต่างออกไป */
 function timingSafeEqual(a: string, b: string): boolean {
@@ -77,7 +83,16 @@ export async function POST(request: Request) {
 
   const readUrl = `${SITE_ORIGIN}/daily?utm_source=digest&utm_medium=email&utm_campaign=daily`;
 
-  const recipients = await listDigestRecipients(sendDate, MAX_DIGEST_PER_RUN);
+  // อ่านยอดของวันไม่ได้ ➔ ไม่ส่งรอบนี้ (ปลอดภัยไว้ก่อน — ส่งเกินโควตาแล้วอีเมลยืนยันตัวตนทั้งระบบล่มตาม)
+  const totalsBefore = await summarizeDigestDay(sendDate).catch(() => null);
+  const usedToday = totalsBefore ? Object.values(totalsBefore).reduce((a, b) => a + b, 0) : MAX_DIGEST_PER_DAY;
+  const budget = Math.max(0, Math.min(MAX_DIGEST_PER_RUN, MAX_DIGEST_PER_DAY - usedToday));
+  if (budget === 0) {
+    recordEvent("digest_day_cap_reached");
+    return NextResponse.json({ ok: true, reason: "daily_cap_reached", sendDate, scanned: 0, sent: 0, skipped: 0, failed: 0 });
+  }
+
+  const recipients = await listDigestRecipients(sendDate, budget);
   let sent = 0;
   let skipped = 0;
   let failed = 0;

@@ -322,8 +322,46 @@ export async function updateReader(id: string, input: UpdateReaderInput): Promis
 /**
  * ลบแม่หมอออกจากระบบ พร้อมเก็บกวาดข้อมูลคิวและการเงินที่เกี่ยวข้อง
  */
-export async function deleteReader(id: string): Promise<boolean> {
+/**
+ * นัดของแม่หมอคนนี้ที่ลูกค้าจ่ายเงินแล้วแต่ยังไม่จบ + รายการเงินที่ยังค้างคืนลูกค้า
+ * มากกว่า 0 = ลบแม่หมอไม่ได้ ต้องพักงานแล้วยกเลิกนัดที่ค้าง (คืนเงิน + อีเมลแจ้งลูกค้า) ก่อน
+ */
+export async function countOpenPaidConsultations(readerId: string): Promise<number> {
   const db = await getAppDB();
+  try {
+    const row = await db
+      .prepare(
+        `SELECT COUNT(DISTINCT t.id) AS count FROM queue_tickets t
+          WHERE t.reader_id = ?
+            AND EXISTS (SELECT 1 FROM payments p WHERE p.ticket_id = t.id
+                         AND (COALESCE(p.refund_due, 0) = 1
+                              OR (p.status = 'paid' AND t.status IN ('pending_payment', 'screening', 'waiting', 'ready'))))`
+      )
+      .bind(readerId)
+      .first<{ count: number }>();
+    return Number(row?.count ?? 0);
+  } catch {
+    return 0; // ฐานข้อมูลเก่าที่ยังไม่มีตาราง/คอลัมน์ = ไม่มีนัดที่จ่ายเงิน
+  }
+}
+
+/**
+ * ลบแม่หมอและข้อมูลที่ผูกอยู่ทั้งหมด — คืน false (ไม่ลบอะไรเลย) เมื่อยังมีลูกค้าที่จ่ายเงินรออยู่
+ * หรือมีเงินค้างคืนลูกค้า (`countOpenPaidConsultations`) · แถว `payments` เก็บไว้เป็นหลักฐานการเงินเสมอ
+ */
+export async function deleteReader(id: string): Promise<boolean> {
+  if ((await countOpenPaidConsultations(id)) > 0) return false;
+  const db = await getAppDB();
+  // ผลคัดกรอง AI เก็บคำถามลูกค้าทั้งประโยค และไม่มี FK ถึงตั๋ว — ต้องลบตามตั๋วก่อนตั๋วหาย
+  try {
+    await db.prepare("UPDATE queue_tickets SET ai_screen_id = NULL WHERE reader_id = ?").bind(id).run();
+    await db
+      .prepare("DELETE FROM ai_screening WHERE ticket_id IN (SELECT id FROM queue_tickets WHERE reader_id = ?)")
+      .bind(id)
+      .run();
+  } catch {
+    // ignore if table not yet created
+  }
   // 📹 ห้องวิดีโอคอล (migrations/0019) อ้าง FK ถึงตั๋ว — ต้องลบก่อนตั๋ว · แยก try ไว้
   // เพราะถ้าฐานข้อมูลเก่ายังไม่มีตารางนี้ ต้องไม่ทำให้การลบที่เหลือข้างล่างถูกข้ามไปทั้งชุด
   try {
@@ -335,7 +373,14 @@ export async function deleteReader(id: string): Promise<boolean> {
     // ignore if table not yet created
   }
   try {
-    await db.prepare("DELETE FROM payments WHERE booking_id IN (SELECT id FROM bookings WHERE reader_id = ?)").bind(id).run();
+    // แถว payments ไม่มี FK — เก็บไว้เป็นหลักฐานการเงิน (ยอดรับ · เลขอ้างอิงผู้ให้บริการจ่ายเงิน) · ลบเฉพาะที่ไม่เคยมีเงินเข้า
+    await db
+      .prepare(
+        "DELETE FROM payments WHERE status NOT IN ('paid', 'refunded') AND booking_id IN (SELECT id FROM bookings WHERE reader_id = ?)"
+      )
+      .bind(id)
+      .run();
+    // payouts อ้าง FK ถึงแม่หมอ จึงต้องลบตามแถวแม่หมอ
     await db.prepare("DELETE FROM payouts WHERE reader_id = ?").bind(id).run();
     await db.prepare("DELETE FROM bookings WHERE reader_id = ?").bind(id).run();
     await db.prepare("DELETE FROM queue_tickets WHERE reader_id = ?").bind(id).run();

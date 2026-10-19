@@ -12,6 +12,7 @@ import { TTSReaderButton } from "./TTSReaderButton";
 import { trackEvent } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
+import { CHAT_MESSAGE_MAX, clampChatHistory } from "@/lib/reading/chat-limits";
 import { CheckIcon, ChevronIcon, RefreshIcon } from "@/components/ui/LineIcons";
 
 interface Message {
@@ -255,8 +256,10 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
     });
 
     try {
-      const validHistory = messages
-        .filter(
+      // A4-08: เซิร์ฟเวอร์ปฏิเสธทั้งคำขอถ้ามีตาใดยาวเกิน 800 ตัวอักษร (หรือเกิน 50 ตา)
+      // จึงตัดให้พอดีเพดานเดียวกับ route ผ่าน clampChatHistory — คำตอบแม่หมอที่ยาวไม่ทำให้แชทตายทั้งห้อง
+      const validHistory = clampChatHistory(
+        messages.filter(
           (m) =>
             !m.isError &&
             m.text !== "กรุณาระบุคำถามที่ต้องการถามเพิ่มเติม" &&
@@ -264,7 +267,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
             !m.text.includes("ขออภัยนะ แม่หมอไม่สามารถตอบคำถามนี้ได้ในขณะนี้") &&
             !m.text.includes("Connection interrupted")
         )
-        .map((m) => ({ sender: m.sender, text: m.text.slice(0, 4000) }));
+      );
 
       const res = await fetch(`/api/reading/${readingId}/chat`, {
         method: "POST",
@@ -649,6 +652,7 @@ isEnglish
                 placeholder={isEnglish ? `Ask ${personaName} anything about your spread...` : `พิมพ์ถาม ${persona.nameTh} ที่นี่...`}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                maxLength={CHAT_MESSAGE_MAX}
                 disabled={loading}
                 aria-label={isEnglish ? "Type your inquiry to the Oracle" : "พิมพ์คำถามถึงแม่หมอ"}
                 className="no-focus-ring min-w-0 flex-1 bg-transparent font-serif-th text-xs sm:text-sm text-ink-deep placeholder-ink-soft/60 border-none outline-none focus:outline-none focus:border-none focus:ring-0 !shadow-none"

@@ -39,7 +39,8 @@ async function ownsVerifiedEmail(userId: string, email: string): Promise<boolean
 
 /**
  * true = "ผู้ทดสอบที่ได้รับอนุญาต" — ข้าม: rate limit ต่อ IP, concurrency, global spend cap, origin guard
- * ไม่ข้าม: safety checkQuestion, provably-fair integrity, body-size cap, auth ของ feature อื่น
+ * ไม่ข้าม: safety checkQuestion, provably-fair integrity, body-size cap, auth ของ feature อื่น,
+ *   ด่านกันเดารหัสผ่าน/รหัสแลกสิทธิ์ (`auth-ratelimit.ts` ไม่เรียกฟังก์ชันนี้ — A1-09)
  * 4 ทางเข้า:
  *   1) cookie แอดมิน `tarot_admin` (ล็อกอินที่ /admin) — ทดสอบผ่านเบราว์เซอร์
  *   2) cookie ผู้ทดสอบ `tarot_tester` (ล็อกอินที่ /tester) — หุ้นส่วน/ทีมงานใช้เว็บไม่จำกัด โดยไม่เห็นแผงแอดมิน

@@ -19,10 +19,9 @@ import { tallyYesNo } from "@/data/cards/yes-no";
 import { enforceThaiQuality } from "@/lib/ai/thai-quality";
 import { recordEvent } from "@/lib/stats/record";
 import { resolveThinkingOutputBudget } from "@/lib/ai/reading-stream";
-import { streamMockGeminiReading, type MockReason } from "@/lib/ai/mock-reading";
+import { streamMockGeminiReading } from "@/lib/ai/mock-reading";
 import { clampToBudget } from "@/lib/ai/retry-budget";
 
-export { streamMockGeminiReading, type MockReason };
 /**
  * ตัวเชื่อมกับ Google Gemini API (Ultra-Low Latency Streaming)
  * -------------------------------------------------
@@ -287,6 +286,7 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
     lang: ctx.lang,
   });
   const userPrompt = buildReadingMessage(ctx);
+  if (ctx.usageMeter) ctx.usageMeter.promptChars = systemInstruction.length + userPrompt.length;
   const maxOutputTokens = resolveThinkingOutputBudget(ctx.drawn.length, GEMINI_OUTPUT_BUDGET);
 
   /*

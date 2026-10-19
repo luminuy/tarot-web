@@ -19,14 +19,10 @@ const CANONICAL_ORIGIN = SITE_ORIGIN;
 function isAllowedHost(host: string): boolean {
   if (!host) return false;
   if (ALLOWED_HOSTS.has(host)) return true;
-  // preview deployment ของโปรเจกต์เอง — ล็อคเฉพาะ subdomain ของโปรเจกต์นี้เท่านั้น
-  // ห้ามใช้ host.endsWith(".workers.dev") กว้าง ๆ เพราะผู้โจมตีที่ใช้ Cloudflare เช่นกัน
-  // จะส่ง X-Forwarded-Host: attacker.workers.dev มาขโมย token รีเซ็ตรหัสผ่านได้
-  if (
-    host === "tarot-web.bankjack10452.workers.dev" ||
-    host.endsWith(".bankjack10452.workers.dev") ||
-    (host.startsWith("tarot-web.") && host.endsWith(".workers.dev"))
-  ) {
+  // preview deployment ของโปรเจกต์เอง — ล็อคเฉพาะ subdomain ของบัญชี Cloudflare ของเราเท่านั้น
+  // ห้ามใช้ host.endsWith(".workers.dev") กว้าง ๆ และห้ามรับตามชื่อ Worker (`tarot-web.*.workers.dev`)
+  // เพราะชื่อ Worker ใครก็ตั้งซ้ำได้บนบัญชีของตัวเอง — ต้องผูกกับชื่อบัญชีเสมอ (A1-08)
+  if (host === "tarot-web.bankjack10452.workers.dev" || host.endsWith(".bankjack10452.workers.dev")) {
     return true;
   }
   if (host.endsWith(`.${SITE_DOMAIN}`)) return true;

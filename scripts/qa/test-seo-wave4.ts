@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { calculateBirthCard, reduceToTarotNumber } from "../../src/lib/tarot/birth-card";
 import { ARTICLES, getRelatedArticles } from "../../src/data/articles";
+import { resolveArticleToc } from "../../src/components/blog/article-toc";
 import { PUBLIC_SPREADS } from "../../src/data/spreads";
 import { spreadDetailProps } from "../../src/app/_shared/pages/spread-detail";
 import sitemap from "../../src/app/sitemap";
@@ -497,6 +498,28 @@ assert(
   for (const sign of ZODIAC_SIGNS) {
     assert(sitemapUrls.has(`${SITE_ORIGIN}/cards/zodiac/${sign.id}`), `sitemap ต้องมี /cards/zodiac/${sign.id}`);
   }
+}
+
+// A7-07: สารบัญบทความต้องลิงก์ไปหัวข้อที่มี id จริง (ทั้งสองภาษา) — รายการที่ไม่มีหัวข้อรองรับต้องไม่ถูกโชว์เป็นลิงก์ตาย
+{
+  let deadLinks = 0;
+  let dupIds = 0;
+  let articlesWithToc = 0;
+  for (const a of ARTICLES) {
+    const variants = [
+      { content: a.content, toc: a.toc },
+      { content: a.contentEn ?? a.content, toc: a.tocEn && a.tocEn.length > 0 ? a.tocEn : a.toc },
+    ];
+    for (const v of variants) {
+      const { headingIds, items } = resolveArticleToc(v.content, v.toc);
+      if (items.length > 0) articlesWithToc += 1;
+      deadLinks += items.filter((it) => !headingIds.includes(it.id)).length;
+      if (new Set(headingIds).size !== headingIds.length) dupIds += 1;
+    }
+  }
+  assert(articlesWithToc >= ARTICLES.length, `สารบัญบทความต้องมีรายการลิงก์ได้อย่างน้อยหนึ่งรายการต่อบทความ (พบ ${articlesWithToc} จาก ${ARTICLES.length * 2} หน้า)`);
+  assert(deadLinks === 0, "สารบัญบทความ: ทุกลิงก์ #id ต้องมี <h2 id> รองรับ");
+  assert(dupIds === 0, "สารบัญบทความ: id ของหัวข้อในบทความเดียวกันต้องไม่ซ้ำ");
 }
 
 console.log(`\n📊 ผลสรุปการทดสอบ: ผ่าน ${passed} ด่าน | ล้มเหลว ${failed} ด่าน\n`);

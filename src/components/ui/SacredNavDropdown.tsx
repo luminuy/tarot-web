@@ -72,6 +72,17 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
     return () => window.removeEventListener("tarot:close-menus", handleClose);
   }, []);
 
+  // ขยายจอ/หมุนเครื่องข้ามจุดที่ปุ่มเมนูหายไป (`lg:`) ต้องปิดลิ้นชักด้วย — ไม่งั้นการล็อกสกรอลล์ค้างโดยไม่มีปุ่มปิด (A5-08)
+  useEffect(() => {
+    if (!isOpen || typeof window.matchMedia !== "function") return;
+    const wide = window.matchMedia("(min-width: 1024px)");
+    const onChange = (e: MediaQueryListEvent) => {
+      if (e.matches) setIsOpen(false);
+    };
+    wide.addEventListener("change", onChange);
+    return () => wide.removeEventListener("change", onChange);
+  }, [isOpen]);
+
   // Close drawer when clicking outside (safety backstop for desktop/mobile)
   useEffect(() => {
     if (!isOpen) return;

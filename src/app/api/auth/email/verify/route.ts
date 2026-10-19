@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { consumeToken, findUsedTokenOwner } from "@/lib/auth/auth-tokens.repo";
-import { getUserById, markEmailVerified } from "@/lib/users/users.repo";
+import { completeEmailRevival, getUserById, markEmailVerified } from "@/lib/users/users.repo";
 import { resolveAppOrigin } from "@/lib/security/app-origin";
 import { checkAuthRateLimit } from "@/lib/security/auth-ratelimit";
 import { LOCALE_COOKIE_KEY } from "@/lib/i18n/types";
@@ -49,6 +49,17 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}${targetPath}?verify_error=expired`);
     }
 
+    // บัญชีที่ถูกลบแล้วมีคนสมัครด้วยอีเมลเดิมไว้ (stageEmailRevival) — เจ้าของอีเมลกดลิงก์แล้ว
+    // จึงคืนชีพได้ (A1-04) · ยังไม่ออกเซสชันตามกติกาด้านบน เจ้าของล็อกอินด้วยรหัสผ่านที่ตั้งไว้เอง
+    const revived = await completeEmailRevival(result.userId);
+    if (revived) {
+      try {
+        const { grantSignupBonus } = await import("@/lib/entitlement/entitlement");
+        await grantSignupBonus(revived.id);
+      } catch (bonusErr) {
+        console.error("[Verify revival bonus failed]", bonusErr);
+      }
+    }
     await markEmailVerified(result.userId);
     // ล้างแคชโปรไฟล์ของ isolate นี้ทันที ไม่งั้น /api/auth/me อาจตอบข้อมูลเก่าได้อีก 30 วิ
     (await import("@/lib/auth/user-cache")).invalidateUserCache(result.userId);

@@ -7,7 +7,8 @@ import { hashPassword, isPasswordConfigError, verifyPassword } from "../../src/l
 import {
   createEmailUser,
   getUserByEmailIncludingDeleted,
-  reviveEmailUser,
+  stageEmailRevival,
+  completeEmailRevival,
   findUserIdByOAuth,
   getUserByEmail,
   getUserPasswordHash,
@@ -183,18 +184,43 @@ async function runPasswordTests() {
     );
   }
 
-  const revived = await reviveEmailUser({
+  // 12.1 (A1-04) สมัครด้วยอีเมลของบัญชีที่ถูกลบ = รอยืนยันอีเมลก่อน — ยังล็อกอินไม่ได้
+  await stageEmailRevival({
     id: ghost.id,
     email: revivalEmail,
     name: "กลับมาใหม่",
     passwordHash: await hashPassword("SecondAccountPass2026!#"),
   });
+  if (await getUserByEmail(revivalEmail)) {
+    throw new Error(
+      "❌ A1-04: สมัครด้วยอีเมลของบัญชีที่ถูกลบแล้วคืนชีพทันทีก่อนยืนยันอีเมล — " +
+        "คนที่แค่รู้อีเมลจะได้ id เดิมพร้อมข้อมูลที่ผูกอยู่",
+    );
+  }
+  if (await getUserPasswordHash(ghost.id)) {
+    throw new Error("❌ A1-04: บัญชีที่รอยืนยันมีรหัสผ่านใช้ล็อกอินได้แล้ว");
+  }
+
+  // 12.2 บัญชีที่ลบแล้วโดยไม่มีใครสมัครรอไว้ ต้องคืนชีพผ่านลิงก์ยืนยันไม่ได้
+  const untouched = await createEmailUser({
+    email: `revive_none_${Date.now()}@example.com`,
+    name: "ไม่มีใครกลับมา",
+    passwordHash: await hashPassword("UntouchedAccount2026!#"),
+  });
+  await softDeleteUser(untouched.id);
+  if (await completeEmailRevival(untouched.id)) {
+    throw new Error("❌ A1-04: completeEmailRevival คืนชีพบัญชีที่ไม่มีการสมัครรอยืนยัน");
+  }
+
+  // 12.3 กดลิงก์ยืนยันแล้ว ➔ คืนชีพ id เดิม
+  const revived = await completeEmailRevival(ghost.id);
+  if (!revived) throw new Error("❌ กดยืนยันอีเมลแล้วบัญชีที่รอคืนชีพไม่กลับมา");
   if (revived.id !== firstAccount.id) {
     throw new Error("❌ คืนชีพแล้วได้ id ใหม่ — โบนัสสมัครใหม่จะถูกแจกซ้ำได้ไม่จำกัด");
   }
   if (revived.deletedAt) throw new Error("❌ คืนชีพแล้ว deleted_at ยังไม่ถูกล้าง");
   if (!revived.hasPassword) throw new Error("❌ คืนชีพแล้วไม่มีรหัสผ่านใหม่");
-  if (revived.emailVerified) throw new Error("❌ คืนชีพแล้วต้องเริ่มนับยืนยันอีเมลใหม่");
+  if (!revived.emailVerified) throw new Error("❌ คืนชีพผ่านลิงก์ยืนยันแล้วต้องนับว่ายืนยันอีเมลแล้ว");
   if (revived.tokenVersion <= firstAccount.tokenVersion) {
     throw new Error("❌ คืนชีพแล้วต้องเพิ่ม token_version เพื่อเตะเซสชันเก่าออก");
   }
@@ -206,7 +232,7 @@ async function runPasswordTests() {
     throw new Error("❌ คืนชีพแล้วล็อกอินด้วยรหัสผ่านใหม่ไม่ได้");
   }
   await softDeleteUser(firstAccount.id);
-  console.log("  ✓ 12. ลบบัญชีแล้วสมัครด้วยอีเมลเดิมได้อีก (คืนชีพ id เดิม กันโบนัสซ้ำ)");
+  console.log("  ✓ 12. ลบบัญชีแล้วสมัครด้วยอีเมลเดิมได้อีก (รอยืนยันอีเมลก่อนคืนชีพ id เดิม กันโบนัสซ้ำ · A1-04)");
 
   // Cleanup
   await softDeleteUser(createdUser.id);

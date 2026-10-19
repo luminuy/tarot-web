@@ -1,11 +1,17 @@
 import { apiFail, apiOk } from "@/lib/api/envelope";
 import { getShareBucket } from "@/lib/platform/cf";
 import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
+import { STUDIO_LOGO_PATH_RE } from "@/lib/studio/brand";
 import { studioGate } from "@/lib/studio/gate";
 import { STUDIO_LOGO_MAX_BYTES, deleteOwnLogo, logoContentType, logoPath, sniffLogoKind } from "@/lib/studio/logo";
 import { setStudioLogo } from "@/lib/studio/studio.repo";
 
 export const runtime = "nodejs";
+
+/** ลบไฟล์โลโก้เก่าได้เฉพาะไฟล์ใต้รหัสของแม่หมอผู้เรียกเอง */
+async function deleteLogoIfOwn(path: string | null | undefined, readerId: string): Promise<void> {
+  if (path && STUDIO_LOGO_PATH_RE.exec(path)?.[1] === readerId) await deleteOwnLogo(path, readerId);
+}
 
 /**
  * POST   /api/marketplace/studio/logo — อัปโหลดโลโก้ (body = ไฟล์รูปดิบที่หน้าเว็บย่อเป็น 256px แล้ว) ➔ ตั้งเป็นโลโก้ทันที
@@ -36,7 +42,7 @@ export async function POST(request: Request) {
     });
     const path = logoPath(gate.readerId, id, kind);
     const before = await setStudioLogo(gate.readerId, path);
-    if (before && before !== path) await deleteOwnLogo(before);
+    if (before && before !== path) await deleteLogoIfOwn(before, gate.readerId);
     return apiOk({ logoUrl: path });
   } catch (err) {
     console.error("[Studio logo] อัปโหลดไม่สำเร็จ", err);
@@ -48,6 +54,6 @@ export async function DELETE(request: Request) {
   const gate = await studioGate(request);
   if (!gate.ok) return gate.response;
   const before = await setStudioLogo(gate.readerId, null);
-  await deleteOwnLogo(before);
+  await deleteLogoIfOwn(before, gate.readerId);
   return apiOk({ logoUrl: null });
 }

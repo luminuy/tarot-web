@@ -13,8 +13,8 @@ import {
   submitOffer,
   type CallRole,
 } from "@/lib/marketplace/call.repo";
-import { readCustomerRefFromCookie } from "@/lib/marketplace/customer-ref";
 import { getQueueTicketById, type QueueTicket } from "@/lib/marketplace/queue.repo";
+import { isTicketOwner } from "@/lib/marketplace/ticket-owner";
 import { generateTurnIceServers, isTurnConfigured, revokeTurnCredential } from "@/lib/marketplace/turn";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { consumeEdgeRateLimit, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
@@ -30,7 +30,8 @@ export const runtime = "nodejs";
  *   POST { as: "reader",   action: "answer", round, sdp }
  *   POST { as, action: "restart" | "end" }
  *
- * 🔒 สิทธิ์: ลูกค้า = คุกกี้ customerRef ตรงกับตั๋ว · แม่หมอ = โทเคนแม่หมอเจ้าของคิว
+ * 🔒 สิทธิ์: ลูกค้า = เจ้าของตั๋วตาม `isTicketOwner` (คุกกี้ customerRef หรือบัญชีที่ล็อกอินตอนจอง — ด่านเดียวกับหน้าคิว)
+ *    · แม่หมอ = โทเคนแม่หมอเจ้าของคิว
  *    ไม่มีสิทธิ์ = 404 เสมอ (ไม่ยืนยันว่าตั๋วนี้มีอยู่จริง — แนวเดียวกับ /tickets/[id])
  * 🔒 คุยได้เฉพาะตอนตั๋วอยู่สถานะ `ready` (แม่หมอเรียกคิวแล้ว) เท่านั้น
  */
@@ -59,8 +60,8 @@ async function resolveParticipant(
   const ticket = await getQueueTicketById(ticketId);
   if (!ticket) return null;
   if (role === "customer") {
-    const ref = await readCustomerRefFromCookie(request);
-    return ref && ref === ticket.customerRef ? ticket : null;
+    // ใช้ด่านเจ้าของตั๋วเดียวกับหน้าคิว — หน้าคิวขึ้นปุ่มเข้าห้องให้ใคร เส้นนี้ต้องรับคนนั้นด้วย
+    return (await isTicketOwner(request, ticket)) ? ticket : null;
   }
   const auth = await requireReader(request);
   return auth.success && auth.readerId === ticket.readerId ? ticket : null;

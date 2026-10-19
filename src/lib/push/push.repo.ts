@@ -70,14 +70,31 @@ export async function listUserSubscriptions(userId: string): Promise<StoredSubsc
   return (results || []).map(map);
 }
 
-/** ผู้ที่ตั้งเตือนพิธีเช้าตรงชั่วโมงนี้ และยังไม่ได้รับเตือนของวันนี้ */
-export async function listMorningDue(hour: number, dayKey: string, limit: number): Promise<StoredSubscription[]> {
+/**
+ * ผู้ที่ถึงเวลาเตือนพิธีเช้าแล้ว และยังไม่ได้รับเตือนของวันนี้
+ *
+ * A3-05: ตัวจับเวลาไม่ได้มาครบทุกชั่วโมง (รอบหลุด/ดีเลย์ได้หลายชั่วโมง) — เดิมเลือกเฉพาะ
+ * `morning_hour = ชั่วโมงตอนรัน` ชั่วโมงที่ไม่มีรอบจึงไม่มีใครได้เตือนเลย
+ * ตอนนี้ตามส่งย้อนหลังได้ไม่เกิน `catchUpHours` ชั่วโมง (ช้ากว่านั้นไม่ส่ง — เตือนพิธีเช้าตอนบ่ายไม่มีประโยชน์)
+ * เรียงชั่วโมงที่เลยมานานสุดก่อน + id ให้ลำดับคงที่ ผู้เรียกวนดึงจนหมดคิว
+ */
+export async function listMorningDue(
+  hour: number,
+  dayKey: string,
+  limit: number,
+  catchUpHours = 0,
+): Promise<StoredSubscription[]> {
   const db = await getAppDB();
+  const fromHour = Math.max(0, hour - Math.max(0, catchUpHours));
   const { results } = await db
     .prepare(
-      `SELECT * FROM push_subscriptions WHERE morning_hour = ? AND (last_morning_day IS NULL OR last_morning_day <> ?) LIMIT ?`
+      `SELECT * FROM push_subscriptions
+        WHERE morning_hour IS NOT NULL AND morning_hour <= ? AND morning_hour >= ?
+          AND (last_morning_day IS NULL OR last_morning_day <> ?)
+        ORDER BY morning_hour ASC, id ASC
+        LIMIT ?`
     )
-    .bind(hour, dayKey, limit)
+    .bind(hour, fromHour, dayKey, limit)
     .all<Row>();
   return (results || []).map(map);
 }

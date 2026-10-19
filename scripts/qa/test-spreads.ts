@@ -113,7 +113,7 @@ for (const [id, count] of Object.entries(expectedCounts)) {
 //      ซึ่งเป็นเคสที่เกิดจริงใน 4 ผัง: chakra (ทับ 48–52%) · year-ahead (24–44%) ·
 //      celtic-cross และ monthly-ten (20%)
 //
-// รอบนี้ตรวจ **ทุกคู่** ด้วยเรขาคณิตชุดเดียวกับที่ `SpreadPositionMap.tsx` ใช้วาดจริง
+// รอบนี้ตรวจ **ทุกคู่** ด้วยเรขาคณิตชุดเดียวกับที่ผู้วาดแผนผังจริง (`SpreadsLibrary` · `SpreadDetailClient` ฯลฯ) ใช้
 // (`@/lib/tarot/spread-map-geometry`) จึงไม่มีทางเลื่อนออกจากกันได้อีก
 for (const spread of SPREADS) {
   const label = `spread "${spread.id}"`;

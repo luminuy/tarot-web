@@ -241,6 +241,11 @@ export interface ReadingContext {
   abortSignal?: AbortSignal;
   /** 🛡️ งบลองใหม่ของทั้งสายสำรอง (แทร็ก S · retry-budget.ts) — ไม่ส่ง = ลองครบทุกโมเดลแบบเดิม */
   retryBudget?: import("@/lib/ai/retry-budget").RetryBudget;
+  /**
+   * มาตรวัดขนาด prompt ที่ส่งเข้าโมเดลจริง (อักขระ) — ผู้ให้บริการเขียนค่าเองตอนประกอบ prompt เสร็จ
+   * ใช้ประมาณโทเคนเข้าเมื่อสตรีมจบโดยไม่มี `usage` จากผู้ให้บริการ (เช่น ผู้ใช้ตัดสายกลางทาง · A3-06)
+   */
+  usageMeter?: { promptChars: number; offline?: boolean };
 }
 
 /**

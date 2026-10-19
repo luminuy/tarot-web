@@ -325,6 +325,14 @@ check(
   "มีฮุกโหลดข้อมูลกลางของแผงแอดมิน (use-admin-resource.ts)",
   fs.existsSync(path.join(ROOT, "src/lib/admin/use-admin-resource.ts")),
 );
+{
+  // A5-09: คำขอเก่าที่กลับมาทีหลังห้ามทับของใหม่ (เลขลำดับ + AbortController) — ตัวกรองแอดมินเปลี่ยน URL ได้เร็ว
+  const hookSrc = fs.readFileSync(path.join(ROOT, "src/lib/admin/use-admin-resource.ts"), "utf-8");
+  check(
+    "A5-09: useAdminResource ทิ้งผลคำขอที่ไม่ใช่ลำดับล่าสุด (seq + AbortController)",
+    hookSrc.includes("new AbortController()") && hookSrc.includes("signal: controller.signal") && /isLatest\(\)/.test(hookSrc),
+  );
+}
 
 /*
  * 🔴 R-31: ด่านสองข้อบนตรวจแค่ "ไฟล์มีอยู่" ซึ่งตกไม่ได้เลยตราบใดที่ไม่มีใครลบไฟล์ทิ้ง
@@ -751,7 +759,22 @@ check(
     "src/data/cards/visual-lore.ts",
     "src/data/cards/visual-lore-en.ts",
     "src/app/api/reading/[id]/chat/route.ts",
+    // `src/lib/chat/format-chat-text.ts` ไม่ได้รับยกเว้นแล้ว (2026-10-19): เครื่องหมายหัวข้อภายในเปลี่ยนเป็นขีด `-` และจุดนำที่เหลือถูกตัดก่อนถึงจอ
   ]);
+  const NAMED_SYMBOL_ENTITIES: Record<string, number> = {
+    larr: 0x2190, uarr: 0x2191, rarr: 0x2192, darr: 0x2193, harr: 0x2194, bull: 0x2022, check: 0x2713, cross: 0x2717,
+    starf: 0x2605, star: 0x2606, hearts: 0x2665, spades: 0x2660, clubs: 0x2663, diams: 0x2666,
+  };
+  const decodeSymbolEscapes = (line: string): string =>
+    line
+      .replace(/&#x([0-9a-f]+);/gi, (_m, h: string) => String.fromCodePoint(parseInt(h, 16)))
+      .replace(/&#(\d+);/g, (_m, d: string) => String.fromCodePoint(Number(d)))
+      .replace(/&([a-z]+);/gi, (m, n: string) => (NAMED_SYMBOL_ENTITIES[n] ? String.fromCodePoint(NAMED_SYMBOL_ENTITIES[n]) : m))
+      // `\u2192` · `\u{2192}` — ข้ามบรรทัดที่เป็น regex/ตารางตัวกรองเอง (ไม่ใช่ข้อความที่แสดง)
+      .replace(/\\u\{([0-9a-f]+)\}|\\u([0-9a-f]{4})/gi, (m, a: string | undefined, b: string | undefined) => {
+        if (/\[\^?[^\]]*\\u|\/[a-z]*u\b|RegExp/.test(line)) return m;
+        return String.fromCodePoint(parseInt((a ?? b) as string, 16));
+      });
   const emojiHits: string[] = [];
   for (const f of [...sources, ...walkAny(path.join(ROOT, "astro"), /\.(tsx?|astro)$/)]) {
     if (!/\.(tsx?|astro)$/.test(f) || /[\\/]admin[\\/]/.test(f) || EMOJI_EXEMPT.has(rel(f))) continue;
@@ -764,7 +787,8 @@ check(
         if (/^\s*(\*|\/\/|\{\/\*|--)/.test(line)) return;
         // ข้อความใน console ผู้ใช้ไม่เห็น
         if (/console\./.test(line) || /console\.\w+\(\s*$/.test(lines[i - 1] ?? "")) return;
-        const bad = [...line].filter((c) => EMOJI.test(c) && !EMOJI_ALLOWED.has(c));
+        // A5-07: สัญลักษณ์ที่เขียนเป็น entity (`&larr;` `&#8594;` `&bull;`) หรือ escape (`\u2192`) ผู้ใช้เห็นเหมือนตัวอักษรจริง — ถอดรหัสก่อนตรวจ
+        const bad = [...decodeSymbolEscapes(line)].filter((c) => EMOJI.test(c) && !EMOJI_ALLOWED.has(c));
         if (bad.length > 0) emojiHits.push(`${rel(f)}:${i + 1} ${bad.join("")}`);
       });
   }
@@ -774,6 +798,18 @@ check(
     "A5-03c: ไม่มีคอมโพเนนต์ GoldMark (ของตกแต่งรูปข้าวหลามตัด) ในเว็บ",
     !fs.existsSync(path.join(ROOT, "src/components/ui/GoldMark.tsx")) && !sources.some((f) => /<GoldMark\b/.test(fs.readFileSync(f, "utf-8"))),
   );
+  // A6-07: จุดนำรายการ (`list-disc` / `list-style: disc`) วาด ::marker เป็นสัญลักษณ์ตกแต่ง — ใช้ `.list-rule` (เส้นซ้าย) แทน
+  // ย้ายครบทุกไฟล์แล้ว (2026-10-19) — ห้ามเพิ่มข้อยกเว้นกลับมา
+  const DISC_PENDING = new Set<string>();
+  const discHits = [...sources, ...walkAny(path.join(ROOT, "astro"), /\.(tsx?|astro)$/)].filter(
+    (f) => !DISC_PENDING.has(rel(f)) && /\blist-disc\b|list-style(?:-type)?:\s*disc/.test(stripComments(fs.readFileSync(f, "utf-8"))),
+  );
+  // A5-08: ล็อกสกรอลล์ของหน้าต่างลอยตั้ง `body.style.overflow` — <html> ที่เป็น overflow-x: clip ตัดทางส่งต่อไป viewport ต้องมีกฎให้ <html> ล็อกตาม
+  check(
+    "A5-08: globals.css ให้ <html> ล็อกการเลื่อนเมื่อ body ถูกล็อก (html:has(> body[style*=\"overflow: hidden\"]))",
+    fs.readFileSync(path.join(ROOT, "src/app/globals.css"), "utf-8").includes('html:has(> body[style*="overflow: hidden"])'),
+  );
+  check("A6-07: ไม่มี list-disc (จุดนำรายการ) ในเว็บ — ใช้ .list-rule เส้นซ้ายแทน", discHits.length === 0, discHits.map(rel).join(" · "));
   /*
    * A5-03b: ข้อความที่ AI เขียน ด่านตรวจโค้ดมองไม่เห็น ➔ ต้องกวาดตรงทางออก
    * ยิงเคสจริงผ่าน stripEmoji() + ยืนยันว่าทางออกหลักทุกเส้นเรียกใช้อยู่
@@ -793,6 +829,8 @@ check(
       ["src/app/api/reading/[id]/read/route.ts", /const event = stripEmojiDeep\(rawEvent\)/],
       ["src/components/home/flow-reading.ts", /stripEmojiDeep\(action\.reading\)/],
       ["src/lib/chat/format-chat-text.ts", /stripEmoji\(p\)/],
+      // คำถามที่ AI เกลาให้ + เหตุผลที่ถามกลับ (หน้าต่างถามกลับก่อนเปิดไพ่)
+      ["src/lib/ai/clarify.ts", /stripEmoji\(finalQuestion\)[\s\S]*stripEmoji\(parsed\.reason\)/],
       ["src/lib/utils/history.ts", /cleanAiText\(/],
       ["src/components/reading/insight/SecondPerspectivePanel.tsx", /stripEmojiDeep\(data\.reading/],
       ["src/lib/ai/mock-reading.ts", /stripEmoji\(generateMindfulMicroRitual/],
@@ -866,6 +904,51 @@ check(
     threw = true;
   }
   check("A6-08: buildBreadcrumbJsonLd ปฏิเสธ path ที่มี /en นำหน้า (กัน /en/en/…)", threw && !/path: "\/en\//.test(src("src/app/_shared/pages/contact-en.tsx")));
+}
+
+/*
+ * A7-05 (2026-10-19): `public/llms.txt` คือสรุปเว็บที่บอต AI search อ่าน — เลขข้อเท็จจริงเคยค้าง
+ * (ผัง 25 · บทความ 26 · 299 หน้า) ขณะที่ของจริงเพิ่มไปแล้ว · ถ้าจะใส่เลขจำนวนผัง/บทความ ต้องตรงกับข้อมูลจริง
+ * และห้ามใส่เลขจำนวนหน้าทั้งเว็บ (เปลี่ยนทุกครั้งที่เพิ่มเนื้อหา) · ลิงก์หมวดใหม่ต้องอยู่ในไฟล์
+ */
+{
+  const llms = fs.readFileSync(path.join(ROOT, "public/llms.txt"), "utf-8");
+  const { PUBLIC_SPREADS } = await import("../../src/data/spreads");
+  const { ARTICLES } = await import("../../src/data/articles");
+  const wrong: string[] = [];
+  for (const m of llms.matchAll(/(\d+)\s+(?:tarot\s+)?spreads\b|ผังพยากรณ์\s*(\d+)\s*แบบ/gi)) {
+    if (Number(m[1] ?? m[2]) !== PUBLIC_SPREADS.length) wrong.push(`"${m[0]}" (จริง ${PUBLIC_SPREADS.length})`);
+  }
+  for (const m of llms.matchAll(/(\d+)\s+(?:in-depth\s+)?(?:articles|guides)\b/gi)) {
+    if (Number(m[1]) !== ARTICLES.length) wrong.push(`"${m[0]}" (จริง ${ARTICLES.length})`);
+  }
+  for (const m of llms.matchAll(/\d+\s+(?:indexed\s+)?pages\b/gi)) wrong.push(`"${m[0]}" (ห้ามใส่จำนวนหน้า)`);
+  check("A7-05: llms.txt ไม่มีเลขจำนวนผัง/บทความ/หน้าที่ไม่ตรงของจริง", wrong.length === 0, wrong.join(" · "));
+  const sections = ["/spreads", "/cards", "/blog", "/daily", "/pick-a-card", "/questions", "/cards/zodiac", "/readers"];
+  const missingSections = sections.filter((p) => !llms.includes(`https://seertarot.net${p})`));
+  check("A7-05: llms.txt ลิงก์ครบทุกหมวดหลัก (รวมคำถามยอดฮิต · ไพ่ประจำราศี · Pick a Card)", missingSections.length === 0, missingSections.join(" · "));
+}
+
+/* A7-03 · A7-04 · A7-06 (2026-10-19): เมทาดาตาของหน้า Next ที่ด่านฝั่ง Astro (`dist/`) มองไม่เห็น */
+{
+  const src = (f: string) => stripComments(fs.readFileSync(path.join(ROOT, f), "utf-8"));
+  const share = src("src/app/(th)/s/[id]/page.tsx");
+  check(
+    "A7-03: หน้าแชร์ /s/[id] (noindex) ไม่มี canonical ชี้หน้าแรก · og:url เป็นลิงก์ของตัวเอง",
+    /alternates:\s*noindexAlternates\(\)/.test(share) && !/buildAlternates\(/.test(share) && /\$\{SITE_ORIGIN\}\/s\/\$\{id\}/.test(share),
+  );
+  const robots = src("src/app/robots.ts");
+  check(
+    "A7-06: robots.txt เปิด /api/share/image/ (ภาพแชร์คำทำนาย) ในทุกกลุ่มที่ปิด /api/",
+    /PUBLIC_API_PATHS = \["\/api\/share\/image\/"\]/.test(robots) &&
+      (robots.match(/disallow: PRIVATE_PATHS/g) ?? []).length === (robots.match(/allow: \["\/", \.\.\.PUBLIC_API_PATHS\]/g) ?? []).length,
+  );
+  const readerPage = src("src/app/(th)/readers/[id]/page.tsx");
+  check(
+    "A7-04: โปรไฟล์แม่หมอมี openGraph/twitter ของตัวเอง + sitemap โปรไฟล์ประกาศใน robots.txt",
+    /openGraph:\s*\{[^\n]*\burl\b/.test(readerPage) && /twitter:/.test(readerPage) &&
+      fs.existsSync(path.join(ROOT, "src/app/(th)/readers/sitemap.ts")) && robots.includes("/readers/sitemap.xml"),
+  );
 }
 
 console.log(`\n📊 ผ่าน ${pass} ข้อ | ล้มเหลว ${fail} ข้อ\n`);

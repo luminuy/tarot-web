@@ -1,7 +1,8 @@
 import { createHash } from "node:crypto";
 import { getAppDB } from "@/lib/platform/db";
 import { subnetPrefix } from "@/lib/security/ai-budget";
-import { recordEvent, utcDay } from "@/lib/stats/record";
+import { recordEvent } from "@/lib/stats/record";
+import { bangkokDayKey } from "@/lib/time/bangkok";
 
 /**
  * 🛡️ บัญชีต้นทุน AI ต่อผู้ใช้ต่อวัน (REFLECTION_JOURNAL_PLAN 1.14 · แทร็ก S · migrations/0026)
@@ -13,7 +14,13 @@ import { recordEvent, utcDay } from "@/lib/stats/record";
  *  • เพดานรายวันตามระดับ: ผู้เยี่ยมชม < สมาชิก < ผู้ถือรอบที่ซื้อ/ไม่จำกัด (ตั้งผ่าน env ได้)
  *  • fail-open: D1 ล่ม ➔ ไม่บล็อกใคร (มีเพดานรวมทั้งเว็บกันอยู่อีกชั้น) แต่ยิง metric ให้เห็น
  *  • ข้อมูลรายบัญชีเป็นข้อมูลส่วนบุคคล ➔ ลงทะเบียนส่งออก/ลบใน `src/lib/privacy/user-data.ts`
+ *  • วันของบัญชีตัดตามวันไทย (`bangkokDayKey`) ให้ตรงกับข้อความ "พรุ่งนี้กลับมาใช้ได้" ที่ผู้ใช้เห็น (A3-03)
  */
+
+/** วันของบัญชีต้นทุน — ตัดเที่ยงคืนเวลาไทย เส้นเดียวกับโควตาเปิดไพ่รายวัน */
+function ledgerDay(d = new Date()): string {
+  return bangkokDayKey(d);
+}
 
 /** `reader` = แม่หมอใน Reader Studio (โควตาร่างคำอ่านแยกจากผู้ใช้ทั่วไป — แผน 1.13) */
 export type CostTier = "guest" | "member" | "paid" | "reader";
@@ -52,10 +59,10 @@ export async function recordAiUsage(subject: string, tokensIn: number, tokensOut
         `INSERT INTO ai_usage_daily (day, subject, calls, tokens_in, tokens_out) VALUES (?, ?, 1, ?, ?)
          ON CONFLICT(day, subject) DO UPDATE SET calls = calls + 1, tokens_in = tokens_in + excluded.tokens_in, tokens_out = tokens_out + excluded.tokens_out`,
       )
-      .bind(utcDay(), subject, tin, tout)
+      .bind(ledgerDay(), subject, tin, tout)
       .run();
     if (Math.random() < 0.01) {
-      const cutoff = utcDay(new Date(Date.now() - 35 * 86_400_000));
+      const cutoff = ledgerDay(new Date(Date.now() - 35 * 86_400_000));
       await db.prepare(`DELETE FROM ai_usage_daily WHERE day < ?`).bind(cutoff).run().catch(() => undefined);
     }
   } catch {
@@ -63,7 +70,7 @@ export async function recordAiUsage(subject: string, tokensIn: number, tokensOut
   }
 }
 
-export async function getAiUsageFor(subject: string, day = utcDay()): Promise<{ calls: number; tokens: number }> {
+export async function getAiUsageFor(subject: string, day = ledgerDay()): Promise<{ calls: number; tokens: number }> {
   try {
     const db = await getAppDB();
     const row = await db
@@ -76,11 +83,26 @@ export async function getAiUsageFor(subject: string, day = utcDay()): Promise<{ 
   }
 }
 
-/** true = วันนี้ตัวตนนี้ใช้โทเคนครบเพดานของระดับตัวเองแล้ว (ตรวจ "ก่อน" เรียกโมเดล) */
-export async function isUserTokenCapReached(subject: string, tier: CostTier): Promise<boolean> {
+/**
+ * true = วันนี้ตัวตนนี้ใช้โทเคนครบเพดานของระดับตัวเองแล้ว (ตรวจ "ก่อน" เรียกโมเดล)
+ *
+ * A3-03: สมาชิกที่ถือรอบที่ซื้อได้เพดาน `paid` — ผู้เรียกส่ง `hasPaidCredits` มาให้
+ * อ่านสิทธิ์เฉพาะเมื่อใช้ถึงเพดานสมาชิกแล้วเท่านั้น คำขอส่วนใหญ่จึงไม่ต้องอ่าน D1 เพิ่ม
+ * อ่านสิทธิ์ไม่ได้ ➔ ใช้เพดานสมาชิกตามเดิม (ไม่ให้เพดานสูงขึ้นเพราะระบบเราพัง)
+ */
+export async function isUserTokenCapReached(
+  subject: string,
+  tier: CostTier,
+  opts: { hasPaidCredits?: () => Promise<boolean> } = {},
+): Promise<boolean> {
   const { tokens } = await getAiUsageFor(subject);
-  const reached = tokens >= dailyTokenCap(tier);
-  if (reached) recordEvent(`ai_user_cap_reached:${tier}`);
+  let effective: CostTier = tier;
+  if (tier === "member" && opts.hasPaidCredits && tokens >= dailyTokenCap("member")) {
+    const paid = await opts.hasPaidCredits().catch(() => false);
+    if (paid) effective = "paid";
+  }
+  const reached = tokens >= dailyTokenCap(effective);
+  if (reached) recordEvent(`ai_user_cap_reached:${effective}`);
   return reached;
 }
 

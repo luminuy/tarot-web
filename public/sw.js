@@ -44,6 +44,22 @@ async function trimCache(cache, maxEntries) {
   }
 }
 
+/**
+ * หน้าเว็บที่เก็บลง Cache Storage ได้ ต้องไม่มีความลับใน URL และเซิร์ฟเวอร์ไม่ได้สั่งห้ามเก็บ (A5-01)
+ * คีย์แคชคือ URL เต็ม — ถ้ามีโทเคนอยู่ใน query โทเคนจะค้างอยู่ในเครื่องแม้หน้าจะลบออกจากแถบที่อยู่แล้ว
+ * และหน้าที่ตอบ `Cache-Control: no-store`/`private` คือหน้าส่วนตัวที่ต้องตรวจสิทธิ์ทุกครั้งที่เปิด
+ * ด่านนี้กันเส้นใหม่ในอนาคตที่ลืมใส่ในรายการ Network-Only ของตัวจัดการ fetch
+ */
+function isCacheableNavigation(url, response) {
+  if (!response || response.status !== 200) return false;
+  for (const key of url.searchParams.keys()) {
+    if (/token|secret|code|sig/i.test(key)) return false;
+  }
+  const cacheControl = (response.headers.get("cache-control") || "").toLowerCase();
+  if (/\bno-store\b|\bprivate\b/.test(cacheControl)) return false;
+  return true;
+}
+
 // ติดตั้ง Service Worker และโหลด Precache สำคัญ
 // ⚠️ ห้ามเรียก self.skipWaiting() ตรงนี้เด็ดขาด
 // ถ้า skip ทันทีตอน install → activate ทำงานต่อทันที ลบแคช `seertarot-static-<เวอร์ชันเก่า>`
@@ -98,6 +114,11 @@ self.addEventListener("fetch", (event) => {
     url.pathname.startsWith("/readers/queue") ||
     // ลิงก์ห้องส่วนตัวที่แม่หมอส่งให้ — มีรหัสห้องใน URL ห้ามเก็บลง Cache Storage (แบบเดียวกับ A4-14)
     url.pathname.startsWith("/readers/room") ||
+    // สตูดิโอแม่หมอ — เปิดครั้งแรกมีโทเคนเข้าแผงอยู่ใน URL (A5-01)
+    url.pathname.startsWith("/readers/studio") ||
+    // ลิงก์คำอ่านส่วนตัวของลูกค้า — โทเคนอยู่ใน path และหน้าต้องตรวจรหัส/หมดอายุ/เพิกถอนทุกครั้งที่เปิด (A5-01)
+    // ใช้ "/r/" มีขีดปิด ไม่ไปจับ /readers หรือ /reading
+    url.pathname.startsWith("/r/") ||
     // หน้าที่มีความลับอยู่ใน URL (token ตั้งรหัสผ่านใหม่) — ห้ามเก็บลง Cache Storage ของเครื่อง (A4-14)
     url.pathname.startsWith("/reset-password") ||
     url.pathname.startsWith("/en/reset-password") ||
@@ -122,7 +143,7 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request)
         .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
+          if (isCacheableNavigation(url, networkResponse)) {
             const responseToCache = networkResponse.clone();
             caches.open(RUNTIME_CACHE_NAME).then(async (cache) => {
               await cache.put(request, responseToCache);

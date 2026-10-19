@@ -563,8 +563,12 @@ export default function CustomerQueuePage() {
           <ConsultLinkPanel accessUrl={accessUrl} />
         )}
 
-        {/* จัดการนัด/คิว — เลื่อน · ยกเลิก (นโยบายคืนเงินคำนวณฝั่งเซิร์ฟเวอร์) */}
-        {!confirming && (ticket.status === "waiting" || ticket.status === "pending_payment") && (
+        {/* จัดการนัด/คิว — เลื่อน · ยกเลิก (นโยบายคืนเงินคำนวณฝั่งเซิร์ฟเวอร์)
+            เรียกคิวแล้วโผล่เฉพาะตอนเซิร์ฟเวอร์ยอมให้ยกเลิก (รอในห้องครบเวลาแล้วแม่หมอไม่เคยเข้า) */}
+        {!confirming &&
+          (ticket.status === "waiting" ||
+            ticket.status === "pending_payment" ||
+            (ticket.status === "ready" && booking?.cancel.allowed === true)) && (
           <ManageBooking
             key={`${booking?.slotStart}-${ticket.status}`}
             ticketId={ticket.id}

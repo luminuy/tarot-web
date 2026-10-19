@@ -50,14 +50,6 @@ export const SparkSealIcon: FC<IconProps> = ({ className = "w-4 h-4" }) => (
   </svg>
 );
 
-/** เหรียญ — แพ็กเกจเติมรอบ */
-export const CoinSealIcon: FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg viewBox="0 0 24 24" className={`${base} ${className}`} strokeWidth={1.5} aria-hidden="true">
-    <circle cx="12" cy="12" r="8.2" />
-    <path d="M12 7.6v8.8M9.6 9.8h3.6a1.9 1.9 0 010 3.8H9.6" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
 /** บัตร — ช่องทางชำระด้วยบัตรเครดิต/เดบิต */
 export const PaymentCardIcon: FC<IconProps> = ({ className = "w-4 h-4" }) => (
   <svg viewBox="0 0 24 24" className={`${base} ${className}`} strokeWidth={1.6} aria-hidden="true">

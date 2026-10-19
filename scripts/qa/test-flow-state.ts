@@ -35,7 +35,13 @@ import {
   hasPremiumTrialOf,
   isPassHolderOf,
 } from "../../src/components/home/flow-access";
-import { resolveEntryIntent } from "../../src/components/home/flow-entry";
+import { resolveEntryIntent, isCrossLanguageFlow, needsFinalizeOnResume } from "../../src/components/home/flow-entry";
+import { createRunGuard } from "../../src/components/home/flow-run-guard";
+import { friendlyError, NETWORK_ERROR_EN, NETWORK_ERROR_TH } from "../../src/lib/reading/friendly-error";
+import { orientedMeaning, orientedTone } from "../../src/lib/reading/orientation";
+import { START_SITUATION_MAX, CLARIFY_ANSWER_MAX } from "../../src/lib/reading/start-limits";
+import { yesNoWeight } from "../../src/data/cards/yes-no";
+import { loadMyAndMigrate } from "../../src/components/spread/custom/load-mine";
 import { wantsBackEntry } from "../../src/components/home/use-flow-back";
 import { PUBLIC_SPREADS } from "../../src/data/spreads";
 import { readSpreadMetadata } from "../../src/app/_shared/pages/read-spread";
@@ -627,6 +633,287 @@ console.log("\n\n── 15. ปุ่ม \"เริ่มดูดวงด้�
     const abs = path.join(ROOT, page);
     const src = fs.existsSync(abs) ? fs.readFileSync(abs, "utf-8") : "";
     check(`${page} เด้งลิงก์เก่า \`?spread=\` ไปหน้า \`/read/<ผัง>\``, /location\.replace\(readPrefix/.test(src));
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+console.log("\n\n── 16. รีเฟรชตอน /shuffle ยังบินอยู่ (A4-02) · ทิ้งรอบกลางทาง (A4-03) · ข้ามภาษา (A4-05) ──");
+// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * A4-02: เลือกไพ่ครบแต่ไพ่ยังไม่มา แล้วรีเฟรช ➔ เคยค้าง "กำลังวางไพ่ลงผัง" ตลอดกาล ไม่มีคำขอวิ่งอยู่
+ * A4-03: กดแก้คำถาม/ย้อนกลับ/เริ่มใหม่ระหว่างรอ /shuffle ➔ เคยถูกลากเข้าขั้นอ่านเองและหักโควตา
+ * A4-05: สลับ TH ↔ EN กลางพิธีบนหน้าแรก ➔ เคยเห็นรอบภาษาเดิมครอบหน้าภาษาใหม่
+ */
+const resumeOk = { step: "PICK_CARDS" as RitualStep, pickedCount: 3, drawnCount: 0, capacity: 3, hasSession: true };
+check("A4-02: เลือกครบ ไม่มีไพ่ ขั้นเลือกไพ่ ➔ ต้องส่งซ้ำ", needsFinalizeOnResume(resumeOk));
+check("A4-02: เลือกยังไม่ครบ ➔ ไม่ส่ง (ผู้ใช้เลือกต่อเอง)", !needsFinalizeOnResume({ ...resumeOk, pickedCount: 2 }));
+check("A4-02: มีไพ่แล้ว ➔ ไม่ส่งซ้ำ (ไม่แตะรอบที่ไพ่มาแล้ว)", !needsFinalizeOnResume({ ...resumeOk, drawnCount: 3 }));
+check("A4-02: ขั้นอื่นไม่ส่งซ้ำ", (["SPREAD_SELECT", "INTENTION_SELECT", "SHUFFLE", "READING", "SUMMARY"] as RitualStep[]).every((step) => !needsFinalizeOnResume({ ...resumeOk, step })));
+check("A4-02: ไม่มีเซสชันเดิม/ไม่รู้จำนวนใบของผัง ➔ ไม่ส่ง", !needsFinalizeOnResume({ ...resumeOk, hasSession: false }) && !needsFinalizeOnResume({ ...resumeOk, capacity: 0 }));
+
+// A4-03 — ตัวคุมรอบ: ยิงลำดับจริง
+{
+  const guard = createRunGuard();
+  const r1 = guard.begin();
+  check("A4-03: รอบที่เพิ่งเริ่มยังไม่เป็นของเก่า", !r1.isStale() && !r1.signal.aborted);
+  check("A4-03: ยกเลิกระหว่างบิน ➔ รอบกลายเป็นของเก่า + ตัดคำขอ + บอกผู้เรียกว่ามีรอบบินอยู่", guard.cancel() === true && r1.isStale() && r1.signal.aborted);
+  check("A4-03: ยกเลิกซ้ำตอนไม่มีรอบบิน ➔ คืน false (ไม่ปล่อย loading ซ้ำ)", guard.cancel() === false);
+  const r2 = guard.begin();
+  const r3 = guard.begin();
+  check("A4-03: รอบใหม่ทับรอบเก่า (เก่ากลายเป็นของเก่า + ถูกตัดคำขอ)", r2.isStale() && r2.signal.aborted && !r3.isStale());
+  r3.release();
+  check("A4-03: จบตามปกติแล้วปล่อยตัวยกเลิก ➔ ตัวรอบไม่เป็นของเก่า · cancel ภายหลังไม่ถือว่ามีรอบบิน", !r3.isStale() && guard.cancel() === false);
+}
+// จำลองลำดับของ handleFinalizePickedCards: ผู้ใช้ยกเลิกระหว่าง await ➔ ห้ามแจกไพ่/เข้าขั้นอ่าน/ยิง /read
+{
+  const guard = createRunGuard();
+  const log: string[] = [];
+  const finalize = async (delay: Promise<void>) => {
+    const run = guard.begin();
+    try {
+      await delay;
+      if (run.isStale()) return;
+      log.push("deal", "READING", "read");
+      run.release();
+    } finally {
+      if (!run.isStale()) log.push("loading:false");
+    }
+  };
+  let resolveShuffle!: () => void;
+  const pending = new Promise<void>((r) => (resolveShuffle = r));
+  const inflight = finalize(pending);
+  guard.cancel(); // ผู้ใช้กด "แก้คำถาม"
+  resolveShuffle(); // /shuffle ตอบมาทีหลัง
+  await inflight;
+  check("A4-03: คำตอบ /shuffle ที่มาหลังผู้ใช้ยกเลิก ไม่แจกไพ่ ไม่เข้าขั้นอ่าน ไม่ยิง /read ไม่แตะ loading", log.length === 0, `log=${JSON.stringify(log)}`);
+
+  const log2: string[] = [];
+  const guard2 = createRunGuard();
+  const finalizeOk = async () => {
+    const run = guard2.begin();
+    try {
+      await Promise.resolve();
+      if (run.isStale()) return;
+      log2.push("deal", "READING", "read");
+      run.release();
+    } finally {
+      if (!run.isStale()) log2.push("loading:false");
+    }
+  };
+  await finalizeOk();
+  check("A4-03: รอบที่ไม่ถูกยกเลิกยังทำงานครบเหมือนเดิม", log2.join(",") === "deal,READING,read,loading:false");
+}
+
+// A4-05 — ไม่กู้คืนข้ามภาษา
+check("A4-05: ภาษาเดียวกัน/รอบเก่าไม่มีฟิลด์ lang ➔ กู้ได้", !isCrossLanguageFlow("th", "th") && !isCrossLanguageFlow(undefined, "en") && !isCrossLanguageFlow(null, "th"));
+check("A4-05: ภาษาต่างกัน ➔ ข้ามภาษา", isCrossLanguageFlow("th", "en") && isCrossLanguageFlow("en", "th"));
+for (const step of ["INTENTION_SELECT", "SHUFFLE", "PICK_CARDS", "READING", "SUMMARY"] as RitualStep[]) {
+  check(
+    `A4-05: หน้าแรก EN ค้างรอบ TH ขั้น ${step} ➔ เริ่มหน้าเปล่า ไม่กู้คืนข้ามภาษา`,
+    intent(null, step, {}).kind === "resume" &&
+      resolveEntryIntent({ routeSpread: null, isKnownSpread: known, savedStep: step, savedLang: "th", pageLang: "en" }).kind === "fresh",
+  );
+}
+check(
+  "A4-05: หน้าแรกภาษาเดียวกันยังกู้คืนรอบค้างได้ (ปุ่มกลับไปหน้าคำทำนายของแชทพึ่งอยู่)",
+  resolveEntryIntent({ routeSpread: null, isKnownSpread: known, savedStep: "SUMMARY", savedLang: "en", pageLang: "en" }).kind === "resume",
+);
+check(
+  "A4-05: รีเฟรชหน้า /read/<ผัง> ที่ภาษาเดียวกันยังกู้คืน · ข้ามภาษา ➔ เริ่มผังของหน้า",
+  resolveEntryIntent({ routeSpread: "celtic-cross", isKnownSpread: known, savedStep: "READING", returning: true, savedSpread: "celtic-cross", savedLang: "th", pageLang: "th" }).kind === "resume" &&
+    resolveEntryIntent({ routeSpread: "celtic-cross", isKnownSpread: known, savedStep: "READING", returning: true, savedSpread: "celtic-cross", savedLang: "th", pageLang: "en" }).kind === "deepLink",
+);
+
+if (!fs.existsSync(FLOW)) {
+  check("หาไฟล์ TarotFlow.tsx เจอ (ส่วน A4-02/03/05)", false, "ไฟล์ถูกย้าย/เปลี่ยนชื่อ — ด่านนี้ตรวจอะไรไม่ได้");
+} else {
+  const flowSrc = fs.readFileSync(FLOW, "utf-8");
+  const body = (startMarker: string, endMarker: string): string => {
+    const a = flowSrc.indexOf(startMarker);
+    const b = flowSrc.indexOf(endMarker, a + startMarker.length);
+    return a >= 0 && b > a ? flowSrc.slice(a, b) : "";
+  };
+  const finalizeBody = body("const handleFinalizePickedCards = async", "// Step 4: Stream AI interpretation");
+  check("A4-03: handleFinalizePickedCards เริ่มรอบผ่านตัวคุมรอบ + ส่ง signal ให้ /shuffle", /finalizeGuard\.begin\(\)/.test(finalizeBody) && /signal:\s*run\.signal/.test(finalizeBody));
+  check(
+    "A4-03: handleFinalizePickedCards ตรวจ isStale() ก่อนแจกไพ่ทุกจุดหลัง await (หลังหน่วง · หลัง /shuffle · หลังสำรับ)",
+    (finalizeBody.match(/if \(isStale\(\)\) return;/g) ?? []).length >= 3 &&
+      finalizeBody.indexOf("if (isStale()) return;", finalizeBody.indexOf("await deckReady")) < finalizeBody.indexOf('type: "deal"'),
+  );
+  for (const [name, marker, end] of [
+    ["handleBackToQuestion", "const handleBackToQuestion = () => {", "// ✦ ปุ่มย้อนกลับของเบราว์เซอร์"],
+    ["handleStepBack", "const handleStepBack = () => {", "// v2: ทางกลับไปแก้คำถาม"],
+    ["handleReset", "const handleReset = () => {", "// P1-U1: ย้อนกลับทีละขั้น"],
+  ] as const) {
+    check(`A4-03: ${name} ยกเลิกรอบ /shuffle ที่ยังบินอยู่ (cancelFinalize)`, /cancelFinalize\(\)/.test(body(marker, end)));
+  }
+  check("A4-03: ถอดหน้าแล้วยกเลิกรอบที่บินอยู่", /finalizeGuard\.cancel\(\);\s*\n\s*\};\s*\n\s*\}, \[finalizeGuard\]\)/.test(flowSrc));
+  check(
+    "A4-02: ตัวกู้คืนตัดสินด้วย needsFinalizeOnResume แล้วส่งซ้ำ handleFinalizePickedCards(pickedIndices) เมื่อสถานะถึงจอ",
+    /needsFinalizeOnResume\(/.test(flowSrc) &&
+      /resumeFinalizePendingRef\.current[\s\S]{0,400}handleFinalizePickedCards\(pickedIndices\)/.test(flowSrc),
+  );
+  check("A4-05: ตัวกู้คืนเทียบภาษาของรอบที่ค้างกับภาษาของหน้า และล้างรอบข้ามภาษา", /isCrossLanguageFlow\(saved\.lang, pageLang\)\) clearFlowState\(\)/.test(flowSrc) && /savedLang:\s*saved\?\.lang/.test(flowSrc) && /pageLang,/.test(flowSrc));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+console.log("\n\n── 17. ข้อความผิดพลาดเครือข่าย (A4-04) · เพดานข้อความที่ส่ง /start (A4-07) ──");
+// ─────────────────────────────────────────────────────────────────────────────
+const FB = "ข้อความสำรอง";
+check("A4-04: fetch ล้ม (Chrome) ➔ ข้อความไทยของหน้า ไม่ใช่ 'Failed to fetch'", friendlyError(new TypeError("Failed to fetch"), false, FB) === NETWORK_ERROR_TH);
+check("A4-04: fetch ล้ม (Safari iOS 'Load failed') บนหน้า EN ➔ ข้อความอังกฤษของหน้า", friendlyError(new TypeError("Load failed"), true, FB) === NETWORK_ERROR_EN);
+check("A4-04: Firefox 'NetworkError when attempting to fetch resource.' ➔ ข้อความของหน้า", friendlyError(new Error("NetworkError when attempting to fetch resource."), false, FB) === NETWORK_ERROR_TH);
+check("A4-04: สตรีมขาดกลางทาง (TypeError: network error) ➔ ข้อความของหน้า", friendlyError(new TypeError("network error"), true, FB) === NETWORK_ERROR_EN);
+check("A4-04: ข้อความที่เซิร์ฟเวอร์ส่งมาเอง (data.error) ผ่านตรง ๆ", friendlyError(new Error("คุณใช้สิทธิ์ฟรีวันนี้ครบแล้ว"), false, FB) === "คุณใช้สิทธิ์ฟรีวันนี้ครบแล้ว");
+check("A4-04: ข้อความว่าง ➔ ใช้ข้อความสำรอง", friendlyError(new Error("  "), false, FB) === FB && friendlyError(undefined, false, FB) === FB);
+check("A4-04: ผู้ใช้ยกเลิกเอง (AbortError) ไม่ขึ้นข้อความดิบ", friendlyError(Object.assign(new Error("The user aborted a request."), { name: "AbortError" }), false, FB) === FB);
+for (const file of ["src/components/home/TarotFlow.tsx", "src/lib/reading/use-ai-reading.ts"]) {
+  const src = fs.existsSync(path.join(process.cwd(), file)) ? fs.readFileSync(path.join(process.cwd(), file), "utf-8") : "";
+  check(`A4-04: ${file} ไม่เอา err.message ดิบขึ้นจออีก (ใช้ friendlyError)`, src.length > 0 && !/\(err as Error\)\?\.message\s*\|\|/.test(src) && !/message:\s*err\.message\s*\|\|/.test(src) && /friendlyError\(/.test(src));
+}
+
+{
+  const startRoute = path.join(process.cwd(), "src/app/api/reading/start/route.ts");
+  const m = fs.readFileSync(startRoute, "utf-8").match(/situation:\s*noInjection\([^)]*\)\.max\((\d+)\)/);
+  check("A4-07: START_SITUATION_MAX ตรงกับเพดาน intake.situation ใน /start จริง", Boolean(m) && Number(m![1]) === START_SITUATION_MAX, m ? `route=${m[1]} client=${START_SITUATION_MAX}` : "ไม่พบ .max(N) ของ situation ใน route");
+  const card = fs.readFileSync(path.join(process.cwd(), "src/components/reading/ClarificationCard.tsx"), "utf-8");
+  check("A4-07: ช่องตอบของแม่หมอจำกัดความยาว (maxLength) ไม่เกินเพดานของเซิร์ฟเวอร์", CLARIFY_ANSWER_MAX <= START_SITUATION_MAX && /maxLength=\{CLARIFY_ANSWER_MAX\}/.test(card));
+  const flowSrc2 = fs.readFileSync(FLOW, "utf-8");
+  check(
+    "A4-07: ตัด situation ให้พอดีเพดานก่อนเก็บลง state และก่อนส่ง /start",
+    /\.slice\(0,\s*START_SITUATION_MAX\);\s*\n\s*if \(ans\)/.test(flowSrc2) && /\.trim\(\)\.slice\(0,\s*START_SITUATION_MAX\)/.test(flowSrc2),
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+console.log("\n\n── 18. ไพ่ใบเดียว: แผงเสริมต้องอ่านตามทิศที่เซิร์ฟเวอร์จั่วจริง (A4-01) ──");
+// ─────────────────────────────────────────────────────────────────────────────
+{
+  const fake = {
+    meanings: {
+      general: { upright: "TH-up", reversed: "TH-rev" },
+      work: { upright: "w-up", reversed: "w-rev" },
+      money: { upright: "m-up", reversed: "m-rev" },
+      love: { upright: "l-up", reversed: "l-rev" },
+      self: { upright: "s-up", reversed: "s-rev" },
+    },
+    meaningsEn: {
+      general: { upright: "EN-up", reversed: "EN-rev" },
+      work: { upright: "", reversed: "" },
+      money: { upright: "", reversed: "" },
+      love: { upright: "", reversed: "" },
+      self: { upright: "", reversed: "" },
+    },
+  };
+  check("A4-01: หัวตั้ง ➔ ความหมายหัวตั้ง", orientedMeaning(fake, "general", false, false) === "TH-up");
+  check("A4-01: กลับหัว ➔ ความหมายกลับหัว (ไม่ใช่หัวตั้งตายตัว)", orientedMeaning(fake, "general", true, false) === "TH-rev" && orientedMeaning(fake, "love", true, false) === "l-rev");
+  check("A4-01: อังกฤษใช้ meaningsEn ตามทิศ · ถ้าว่างถอยไปภาษาไทยทิศเดิม", orientedMeaning(fake, "general", true, true) === "EN-rev" && orientedMeaning(fake, "work", true, true) === "w-rev");
+  let parity = true;
+  for (const yn of ["yes", "no", "maybe"] as const) {
+    for (const rev of [false, true]) {
+      const w = yesNoWeight({ yesNo: yn }, rev);
+      const expected = w >= 1 ? "positive" : w <= -1 ? "negative" : "neutral";
+      if (orientedTone(yn, rev) !== expected) parity = false;
+    }
+  }
+  check("A4-01: ขั้ว ใช่/ไม่ใช่ ตรงกับ yesNoWeight ของหน้าสารานุกรมทุกชุด (กลับหัวไม่กลับขั้ว แรงลดครึ่ง)", parity);
+  check("A4-01: ไพ่ yes กลับหัวไม่ใช่ 'บวก' อีกต่อไป (เดิมคำแนะนำอ่านเหมือนหัวตั้ง)", orientedTone("yes", false) === "positive" && orientedTone("yes", true) === "neutral");
+
+  for (const file of ["src/components/daily/DailyClient.tsx", "src/components/love/LoveOneCardClient.tsx"]) {
+    const src = fs.readFileSync(path.join(process.cwd(), file), "utf-8");
+    const a = src.indexOf("renderReading={");
+    const b = src.indexOf("recommendations={", a);
+    const block = a >= 0 && b > a ? src.slice(a, b) : "";
+    check(`A4-01: ${file} renderReading รับทิศ (card, isReversed)`, /renderReading=\{\(card, isReversed\)/.test(block));
+    check(
+      `A4-01: ${file} renderReading ไม่อ่านความหมายหัวตั้งตายตัว (.upright} / .yesNo)`,
+      // คีย์เวิร์ดที่เลือกด้วยเงื่อนไข isReversed อยู่ในบล็อกนี้ได้ — ห้ามเฉพาะความหมายรายหมวด/ขั้ว ใช่-ไม่ใช่ ที่ตายตัวหัวตั้ง
+      block.length > 0 && !/meanings(En)?\??\.\w+\??\.upright/.test(block) && !/card\.yesNo/.test(block),
+    );
+  }
+  const loveSrc = fs.readFileSync(path.join(process.cwd(), "src/components/love/LoveOneCardClient.tsx"), "utf-8");
+  check("A4-01: คำแนะนำตามสถานะหัวใจไม่ใช้ card.yesNo ของหัวตั้งตรง ๆ (ใช้ orientedTone)", !/card\.yesNo\s*===/.test(loveSrc) && /orientedTone\(card\.yesNo,\s*isReversed\)/.test(loveSrc));
+  const ritualSrc = fs.readFileSync(path.join(process.cwd(), "src/components/reading/one-card/OneCardRitual.tsx"), "utf-8");
+  check("A4-01: OneCardRitual ส่งทิศจริง (drawnReversed) ให้ renderReading", /renderReading\?\.\(drawnCard,\s*drawnReversed\)/.test(ritualSrc));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+console.log("\n\n── 19. ผังของฉันในเครื่อง ย้ายขึ้นบัญชีหลังล็อกอิน (A4-06) ──");
+// ─────────────────────────────────────────────────────────────────────────────
+{
+  const store = new Map<string, string>();
+  const g = globalThis as unknown as Record<string, unknown>;
+  const prevLs = g.localStorage;
+  const prevFetch = g.fetch;
+  g.localStorage = {
+    getItem: (k: string) => store.get(k) ?? null,
+    setItem: (k: string, v: string) => void store.set(k, v),
+    removeItem: (k: string) => void store.delete(k),
+  };
+  const LS_KEY = "tarot_custom_spreads_v1";
+  const mkLocal = (id: string, name: string, updatedAt: number) => ({
+    id,
+    name,
+    layout: "row",
+    positions: [{ nameTh: "ก", nameEn: "a", meaning: "m", meaningEn: "m" }],
+    updatedAt,
+    local: true,
+  });
+  const seed = () => store.set(LS_KEY, JSON.stringify([mkLocal("local_a", "ผัง A", 2), mkLocal("local_b", "ผัง B", 1)]));
+  const localCount = () => (JSON.parse(store.get(LS_KEY) ?? "[]") as unknown[]).length;
+
+  let signedIn = true;
+  let acceptPosts = true;
+  const remote: Array<Record<string, unknown>> = [];
+  let posts = 0;
+  g.fetch = async (_url: string, init?: { method?: string; body?: string }) => {
+    const json = (status: number, body: unknown) => ({ ok: status < 400, status, json: async () => body });
+    if (!signedIn) return json(401, { spreads: [] });
+    if (init?.method === "POST") {
+      posts++;
+      if (!acceptPosts) return json(409, { error: "เก็บผังได้สูงสุดแล้ว" });
+      const spread = { ...(JSON.parse(init.body ?? "{}").spread as object), id: `cs_${remote.length}`, shareSlug: null, useCount: 0, updatedAt: Date.now() };
+      remote.push(spread);
+      return json(201, { spread });
+    }
+    return json(200, { spreads: remote });
+  };
+
+  try {
+    // ผู้เยี่ยมชม: เห็นผังในเครื่อง ไม่อัปโหลดอะไร
+    seed();
+    signedIn = false;
+    const guest = await loadMyAndMigrate("th");
+    check("A4-06: ผู้เยี่ยมชมเห็นผังในเครื่อง ไม่ยิงอัปโหลด", !guest.member && guest.spreads.length === 2 && posts === 0);
+
+    // ล็อกอินแล้ว: ผังในเครื่องขึ้นบัญชีครบ + ล้างออกจากเครื่อง
+    signedIn = true;
+    const member = await loadMyAndMigrate("th");
+    check(
+      "A4-06: ล็อกอินแล้วผังในเครื่องขึ้นบัญชีครบทุกผัง ไม่หายจากรายการ",
+      member.member && member.spreads.length === 2 && posts === 2 && remote.length === 2 && member.spreads.every((s) => !s.local),
+      `member=${member.member} spreads=${member.spreads.length} posts=${posts}`,
+    );
+    check("A4-06: ล้างผังที่ขึ้นสำเร็จออกจากเครื่อง (ไม่ค้างเป็นกำพร้า)", localCount() === 0);
+    const again = await loadMyAndMigrate("th");
+    check("A4-06: โหลดซ้ำไม่อัปโหลดซ้ำ (ผังในบัญชีไม่ซ้ำ)", again.spreads.length === 2 && posts === 2);
+
+    // ขึ้นบัญชีไม่ได้ (เต็ม/ไม่ผ่านด่าน): ผังค้างอยู่ในเครื่องและยังมองเห็น ไม่ยิงซ้ำรัว ๆ
+    remote.length = 0;
+    posts = 0;
+    seed();
+    acceptPosts = false;
+    const blocked = await loadMyAndMigrate("th");
+    check(
+      "A4-06: ขึ้นบัญชีไม่ได้ ➔ ผังไม่ถูกลบ และยังแสดงต่อท้ายรายการ (ลบเองได้)",
+      blocked.member && blocked.spreads.length === 2 && blocked.spreads.every((s) => s.local) && localCount() === 2,
+    );
+    const postsAfterFirst = posts;
+    await loadMyAndMigrate("th");
+    check("A4-06: ผังที่ขึ้นไม่ได้ไม่ถูกยิงซ้ำทุกครั้งที่รีเฟรชรายการ", posts === postsAfterFirst);
+  } finally {
+    g.localStorage = prevLs;
+    g.fetch = prevFetch;
   }
 }
 

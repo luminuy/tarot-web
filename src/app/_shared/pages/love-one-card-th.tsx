@@ -182,7 +182,7 @@ export function LoveOneCardBodyTh({ ritual }: { ritual: ReactNode }) {
               <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3"><ThaiPhrases>
                 เจาะลึก 4 สถานะความสัมพันธ์ผ่านมุมมองไพ่ทาโรต์
               </ThaiPhrases></h3>
-              <ul className="list-disc pl-5 space-y-2.5 text-[#5E5240]">
+              <ul className="list-rule space-y-2.5 text-[#5E5240]">
                 <li>
                   <strong>คนโสด (Single):</strong> ไพ่จะสะท้อนพลังงานดึงดูดและสภาพจิตใจของคุณเป็นหลัก
                   หากคุณพร้อมเปิดรับรักใหม่ ไพ่จะชี้ถึงโอกาสและทิศทาง แต่หากในใจยังมีความกลัวหรือยังรักอิสระ

@@ -23,7 +23,7 @@
  * (R-29) — ฮุกนี้จึงไม่ต้องรู้ว่า route ปลายทางตอบด้วย `ok` · `success` หรือ `error`
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { readEnvelope } from "@/lib/api/envelope";
 
 export interface AdminResource<T> {
@@ -49,13 +49,29 @@ export function useAdminResource<T = Record<string, unknown>>(
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(immediate);
   const [error, setError] = useState<string | null>(null);
+  /*
+   * A5-09: ตัวกรองเปลี่ยน ➔ URL เปลี่ยน ➔ ยิงคำขอใหม่ — คำขอเก่าที่กลับมาทีหลังห้ามทับของใหม่ และห้ามปิดสถานะ "กำลังโหลด" แทนคำขอล่าสุด
+   * ใช้เลขลำดับ + AbortController: ผลของคำขอที่ไม่ใช่ลำดับล่าสุดถูกทิ้งทั้งหมด (data · error · loading)
+   */
+  const seq = useRef(0);
+  const abortRef = useRef<AbortController | null>(null);
+  const loadedUrl = useRef<string | null>(null);
 
   const reload = useCallback(async () => {
+    const mine = ++seq.current;
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const isLatest = () => mine === seq.current;
+
     setLoading(true);
     setError(null);
+    // เปลี่ยนไปโหลดคนละ URL (ตัวกรอง/ช่วงวัน/คำค้นใหม่) = ข้อมูลเดิมเป็นของอีกชุด ห้ามค้างโชว์ใต้ป้ายของชุดใหม่ (R-28)
+    if (loadedUrl.current !== null && loadedUrl.current !== url) setData(null);
     try {
-      const res = await fetch(url, { cache: "no-store" });
+      const res = await fetch(url, { cache: "no-store", signal: controller.signal });
       const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+      if (!isLatest()) return;
       const envelope = readEnvelope(body, res.ok);
 
       if (!envelope.ok) {
@@ -67,8 +83,10 @@ export function useAdminResource<T = Record<string, unknown>>(
         return;
       }
 
+      loadedUrl.current = url;
       setData(select ? select(envelope.data) : (envelope.data as T));
     } catch (err) {
+      if (!isLatest()) return;
       setData(null);
       setError(
         err instanceof Error
@@ -76,13 +94,22 @@ export function useAdminResource<T = Record<string, unknown>>(
           : "ติดต่อเซิร์ฟเวอร์ไม่ได้",
       );
     } finally {
-      setLoading(false);
+      if (isLatest()) setLoading(false);
     }
   }, [url, select]);
 
   useEffect(() => {
     if (immediate) void reload();
   }, [immediate, reload]);
+
+  // ออกจากหน้า: ยกเลิกคำขอที่ค้าง และทำให้ผลที่กลับมาทีหลังถูกทิ้ง (ไม่ setState หลัง unmount)
+  useEffect(
+    () => () => {
+      seq.current += 1;
+      abortRef.current?.abort();
+    },
+    [],
+  );
 
   return { data, loading, error, reload };
 }

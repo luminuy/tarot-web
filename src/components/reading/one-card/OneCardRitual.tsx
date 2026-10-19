@@ -63,7 +63,8 @@ export interface OneCardRitualProps {
   /** isReversed = ทิศที่เซิร์ฟเวอร์สุ่มจริง (ต้องตรงกับที่ AI อ่าน) */
   onRevealed: (card: TarotCardType, isReversed: boolean) => void;
   /** เนื้อหาเสริมของแต่ละหน้า — วางใต้คำอ่านของแม่หมอ (คำอ่านหลักมาจาก AI แล้ว) */
-  renderReading?: (card: TarotCardType) => React.ReactNode;
+  /** isReversed = ทิศที่เซิร์ฟเวอร์สุ่มจริง — แผงเสริมต้องเลือกความหมายตามทิศนี้ ห้ามอ่านหัวตั้งตายตัว (A4-01) */
+  renderReading?: (card: TarotCardType, isReversed: boolean) => React.ReactNode;
   recommendations?: React.ReactNode;
   onReset?: () => void;
   headerSlot?: React.ReactNode;
@@ -393,7 +394,7 @@ export function OneCardRitual({
             />
 
             {/* เนื้อหาเสริมเฉพาะหน้า (ถ้ามี) */}
-            {renderReading?.(drawnCard)}
+            {renderReading?.(drawnCard, drawnReversed)}
 
             {/* Action Bar (Share & Restart) */}
             <div className="pt-4 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4">

@@ -507,9 +507,12 @@ export async function setStudioLogo(readerId: string, logoUrl: string | null): P
 }
 
 export async function purgeStudioData(readerId: string): Promise<{ clients: number; readings: number; templates: number }> {
+  // ไม่มีรหัสแม่หมอ = ไม่ลบอะไรเลย (กัน WHERE reader_id = '' หรือค่าว่างหลุดมาจากผู้เรียก)
+  if (!readerId) return { clients: 0, readings: 0, templates: 0 };
   const db = await getAppDB();
   const logo = await db.prepare(`SELECT logo_url FROM reader_studio_settings WHERE reader_id = ?`).bind(readerId).first<{ logo_url: string | null }>();
-  await deleteOwnLogo(logo?.logo_url);
+  // ค่าในแถวอาจเป็น path ของแม่หมอคนอื่น (บันทึกไว้ก่อนมีด่าน) — deleteOwnLogo ลบเฉพาะไฟล์ใต้รหัสของ readerId
+  await deleteOwnLogo(logo?.logo_url, readerId);
   const r = await db.prepare(`DELETE FROM reader_readings WHERE reader_id = ?`).bind(readerId).run();
   const c = await db.prepare(`DELETE FROM reader_clients WHERE reader_id = ?`).bind(readerId).run();
   const t = await db.prepare(`DELETE FROM reader_templates WHERE reader_id = ?`).bind(readerId).run();

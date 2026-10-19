@@ -22,6 +22,7 @@ import { JournalCalendar } from "./JournalCalendar";
 import { JournalOverview } from "./JournalOverview";
 import { JournalThreads } from "./JournalThreads";
 import { ReflectionPanel } from "./ReflectionPanel";
+import { JournalCrisisListener } from "./JournalCrisisListener";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { AppSettingsCard } from "@/components/pwa/AppSettingsCard";
 import { CATEGORY_LABEL, OUTCOME_LABEL, dayKeyOf, formatDate, formatMonth } from "./journal-format";
@@ -251,6 +252,8 @@ export function JournalApp() {
 
   return (
     <main id="main-content" className="v2-jr">
+      {/* บันทึกที่มีสัญญาณวิกฤต ➔ หน้าต่างสายด่วน 1323 (กฎเหล็กข้อ 6 · A3-07) */}
+      <JournalCrisisListener />
       {/* ปกสมุด — ชื่อเล่ม + ตัวเลขสั้น ๆ ที่ชวนกลับมาเขียน */}
       <header className="v2-jr-cover">
         <div className="v2-jr-cover-text">
@@ -393,7 +396,7 @@ export function JournalApp() {
                 th: "สมุดเล่มนี้อยู่ในเครื่องนี้เท่านั้น (สูงสุด 50 รายการ) เข้าสู่ระบบเพื่อเก็บไว้ทุกเครื่อง",
                 en: "This journal lives on this device only (up to 50 entries). Sign in to keep it across devices.",
               })}{" "}
-              <a href={isEnglish ? "/en/account" : "/account"}>{L({ th: "เข้าสู่ระบบ", en: "Sign in" })}</a>
+              <a href="/account">{L({ th: "เข้าสู่ระบบ", en: "Sign in" })}</a>
             </p>
           )}
         </aside>

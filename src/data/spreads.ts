@@ -6,13 +6,6 @@ import type { Spread } from "./spreads-helpers";
  */
 
 export type { Spread, SpreadPosition } from "./spreads-helpers";
-export {
-  getSpreadName,
-  getSpreadTagline,
-  getSpreadDescription,
-  getPositionName,
-  getPositionMeaning,
-} from "./spreads-helpers";
 
 export const SPREADS: Spread[] = [
   // ==========================================

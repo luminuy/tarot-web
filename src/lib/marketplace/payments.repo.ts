@@ -1,5 +1,6 @@
 import { CONSULTATION_PRICE_THB } from "@/lib/marketplace/offer";
 import { getAppDB } from "@/lib/platform/db";
+import { bangkokDayStartMs, bangkokParts } from "@/lib/time/bangkok";
 
 /**
  * 💰 ราคาค่าปรึกษาแม่หมอตัวจริง 1 ครั้ง (หน่วยสตางค์ — 29900 = 299 บาท)
@@ -31,6 +32,11 @@ export interface PaymentRecord {
   currency: string;
   status: PaymentStatus;
   webhookLog: string | null;
+  /**
+   * ระบบตั้งใจคืนเงินรายการนี้แต่ยังคืนไม่สำเร็จ (migrations/0020) — เช่นรายการที่จ่ายซ้ำ
+   * แถวที่ติดธงนี้ไม่ใช่เงินที่ทำให้ได้นัด และไม่นับเป็นรายได้แม่หมอ
+   */
+  refundDue?: boolean;
   createdAt: number;
   updatedAt: number;
 }
@@ -58,6 +64,7 @@ interface RawPaymentRow {
   currency: string;
   status: string;
   webhook_log: string | null;
+  refund_due?: number | null;
   created_at: number;
   updated_at: number;
 }
@@ -75,6 +82,7 @@ function mapRowToPayment(row: RawPaymentRow): PaymentRecord {
     currency: row.currency,
     status: row.status as PaymentStatus,
     webhookLog: row.webhook_log,
+    refundDue: Number(row.refund_due ?? 0) === 1,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -116,6 +124,7 @@ export async function createPaymentRecord(input: CreatePaymentInput): Promise<Pa
     currency,
     status: "pending",
     webhookLog: null,
+    refundDue: false,
     createdAt: now,
     updatedAt: now,
   };
@@ -217,53 +226,108 @@ export async function updatePaymentStatus(
   return getPaymentById(id);
 }
 
-/**
- * คำนวณส่วนแบ่งรายได้ของแม่หมอและแพลตฟอร์ม
- */
-export async function calculateReaderEarnings(
-  readerId: string,
-  period?: string
-): Promise<{
+/** งวด "YYYY-MM" ตามนาฬิกากรุงเทพฯ ของเวลา `ms` */
+export function bangkokPeriodOf(ms: number = Date.now()): string {
+  const p = bangkokParts(ms);
+  return `${p.year}-${String(p.month + 1).padStart(2, "0")}`;
+}
+
+/** รูปแบบงวดถูกต้องไหม (YYYY-MM · เดือน 01–12) */
+export function isPayoutPeriod(value: unknown): value is string {
+  return typeof value === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
+}
+
+/** ช่วงเวลาของงวด [start, end) เป็น ms — เริ่มเที่ยงคืนวันที่ 1 เวลากรุงเทพฯ */
+export function payoutPeriodRange(period: string): { start: number; end: number } {
+  const [y, m] = period.split("-").map(Number);
+  // เที่ยงวัน UTC ของวันที่ 1 ตกอยู่ในวันที่ 1 ของกรุงเทพฯ เสมอ ➔ หาเที่ยงคืนของวันนั้นด้วยตัวช่วยกลาง
+  return {
+    start: bangkokDayStartMs(Date.UTC(y, m - 1, 1, 12)),
+    end: bangkokDayStartMs(Date.UTC(y, m, 1, 12)),
+  };
+}
+
+export interface ReaderEarnings {
   readerId: string;
   period: string;
   totalBookings: number;
   grossSatang: number;
   commissionSatang: number;
   netSatang: number;
-}> {
-  const db = await getAppDB();
-  const targetPeriod = period || new Date().toISOString().slice(0, 7); // YYYY-MM
+  /** ยอดที่บันทึกว่าโอนให้แม่หมอแล้วในงวดนี้ (ตาราง payouts) */
+  paidOutSatang: number;
+  /** ยอดที่ยังต้องโอน = net − ที่โอนแล้ว (ไม่ติดลบ) */
+  outstandingSatang: number;
+}
 
-  // Get reader commission percentage
+/**
+ * 💰 รายได้ของแม่หมอ "ในงวดนั้น" — ตัวเลขที่แอดมินใช้โอนเงินจริง
+ * ---------------------------------------------------------------------------
+ * นับเฉพาะเงินที่เป็นของแม่หมอแล้วจริง:
+ *   • ใบจองที่ให้บริการจบแล้ว (`done`) · ลูกค้าไม่มาตามนัด (`no_show`) · ลูกค้ายกเลิกช้าแบบไม่คืนเงิน
+ *   • รายการจ่ายที่ `paid` และไม่ติดธงต้องคืน (`refund_due = 0`) — เงินที่ค้างคืนลูกค้าไม่ใช่รายได้
+ *   • เวลานัด (`slot_start`) อยู่ในงวด ตามนาฬิกากรุงเทพฯ — นัดที่ยังไม่ถึง/กำลังคุยยังไม่นับ
+ * แล้วหักยอดที่บันทึกว่าโอนไปแล้วของงวดเดียวกัน (`payouts`) ออก — กดดูซ้ำกี่ครั้งก็ไม่โอนซ้ำ
+ */
+export async function calculateReaderEarnings(readerId: string, period?: string): Promise<ReaderEarnings> {
+  const db = await getAppDB();
+  const targetPeriod = isPayoutPeriod(period) ? period : bangkokPeriodOf();
+  const { start, end } = payoutPeriodRange(targetPeriod);
+
   const readerRow = await db
     .prepare("SELECT commission_pct FROM readers WHERE id = ? LIMIT 1")
     .bind(readerId)
     .first<{ commission_pct: number }>();
-
   const commissionPct = readerRow?.commission_pct ?? 20;
 
-  // Sum all paid payments for this reader
   const sumRow = await db
     .prepare(
-      `SELECT COUNT(p.id) as count, COALESCE(SUM(p.amount_satang), 0) as total_satang
-       FROM payments p
-       JOIN bookings b ON p.booking_id = b.id
-       WHERE b.reader_id = ? AND p.status = 'paid'`
+      `SELECT COUNT(DISTINCT b.id) AS count, COALESCE(SUM(p.amount_satang), 0) AS total_satang
+         FROM payments p
+         JOIN bookings b ON p.booking_id = b.id
+        WHERE b.reader_id = ?
+          AND p.status = 'paid' AND COALESCE(p.refund_due, 0) = 0
+          AND (b.status IN ('done', 'no_show') OR (b.status = 'cancelled' AND b.refund_status = 'none'))
+          AND b.slot_start >= ? AND b.slot_start < ?`
     )
-    .bind(readerId)
+    .bind(readerId, start, end)
     .first<{ count: number; total_satang: number }>();
 
-  const grossSatang = sumRow?.total_satang || 0;
+  const grossSatang = Number(sumRow?.total_satang ?? 0);
   const commissionSatang = Math.round((grossSatang * commissionPct) / 100);
   const netSatang = grossSatang - commissionSatang;
+  const paidOutSatang = (await sumRecordedPayouts(readerId, targetPeriod)).netSatang;
 
   return {
     readerId,
     period: targetPeriod,
-    totalBookings: sumRow?.count || 0,
+    totalBookings: Number(sumRow?.count ?? 0),
     grossSatang,
     commissionSatang,
     netSatang,
+    paidOutSatang,
+    outstandingSatang: Math.max(0, netSatang - paidOutSatang),
+  };
+}
+
+/** ยอดที่บันทึกการโอนไว้แล้วของงวดนั้น (ไม่นับรายการที่ยกเลิก) */
+async function sumRecordedPayouts(
+  readerId: string,
+  period: string
+): Promise<{ grossSatang: number; commissionSatang: number; netSatang: number }> {
+  const db = await getAppDB();
+  const row = await db
+    .prepare(
+      `SELECT COALESCE(SUM(gross_satang), 0) AS gross, COALESCE(SUM(commission_satang), 0) AS commission,
+              COALESCE(SUM(net_satang), 0) AS net
+         FROM payouts WHERE reader_id = ? AND period = ? AND status != 'cancelled'`
+    )
+    .bind(readerId, period)
+    .first<{ gross: number; commission: number; net: number }>();
+  return {
+    grossSatang: Number(row?.gross ?? 0),
+    commissionSatang: Number(row?.commission ?? 0),
+    netSatang: Number(row?.net ?? 0),
   };
 }
 
@@ -276,6 +340,7 @@ export async function recordReaderPayout(input: {
   grossSatang: number;
   commissionSatang: number;
   netSatang: number;
+  status?: PayoutStatus;
 }): Promise<PayoutRecord> {
   const db = await getAppDB();
   const id = `payout_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
@@ -288,7 +353,7 @@ export async function recordReaderPayout(input: {
     grossSatang: input.grossSatang,
     commissionSatang: input.commissionSatang,
     netSatang: input.netSatang,
-    status: "pending",
+    status: input.status ?? "pending",
     createdAt: now,
   };
 
@@ -311,4 +376,31 @@ export async function recordReaderPayout(input: {
     .run();
 
   return record;
+}
+
+export type SettlePayoutResult =
+  | { ok: true; payout: PayoutRecord; earnings: ReaderEarnings }
+  | { ok: false; reason: "nothing_due" };
+
+/**
+ * แอดมินกด "บันทึกว่าโอนแล้ว" — คำนวณยอดค้างโอนฝั่งเซิร์ฟเวอร์ (ไม่รับยอดจากหน้าเว็บ)
+ * แล้วบันทึกเฉพาะส่วนต่างจากที่เคยบันทึกไว้ในงวดเดียวกัน · ไม่มียอดค้าง = ไม่บันทึก
+ */
+export async function settleReaderPayout(readerId: string, period: string): Promise<SettlePayoutResult> {
+  const earnings = await calculateReaderEarnings(readerId, period);
+  if (earnings.outstandingSatang <= 0) return { ok: false, reason: "nothing_due" };
+  const recorded = await sumRecordedPayouts(readerId, earnings.period);
+  const payout = await recordReaderPayout({
+    readerId,
+    period: earnings.period,
+    grossSatang: Math.max(0, earnings.grossSatang - recorded.grossSatang),
+    commissionSatang: Math.max(0, earnings.commissionSatang - recorded.commissionSatang),
+    netSatang: earnings.outstandingSatang,
+    status: "completed",
+  });
+  return {
+    ok: true,
+    payout,
+    earnings: { ...earnings, paidOutSatang: earnings.paidOutSatang + payout.netSatang, outstandingSatang: 0 },
+  };
 }

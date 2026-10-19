@@ -25,7 +25,8 @@
  * 📌 วันที่ต้องขยับคู่นี้จริง ๆ ให้ทำตามนี้แล้วด่านจะเขียวเอง:
  *    1. อัปเกรดทั้งสองตัวพร้อมกัน (`next` และ `@opennextjs/cloudflare`)
  *    2. `npm run build:worker` ให้ผ่านในเครื่องก่อน — นี่คือขั้นที่ล้มจริงถ้าคู่ไม่เข้ากัน
- *    3. อัปเดต `PROVEN_PAIR` ข้างล่างให้ตรงกับคู่ใหม่ พร้อมวันที่ที่ยืนยัน
+ *    3. อัปเดต `PROVEN_PAIR` และ `PROVEN_EXACT` (รุ่นเต็มของทั้งสองตัว) ข้างล่างให้ตรงกับคู่ใหม่ พร้อมวันที่ที่ยืนยัน
+ *       (รุ่นใหญ่ตรงแต่รุ่นเต็มเปลี่ยน = ด่านตก โดยตั้งใจ — INC-0285 พังที่รุ่นรองของ next)
  *
  * ℹ️ เกี่ยวกับแผนย้าย Astro: ตราบใดที่ยังมี 9 หน้าหลังบ้าน + `/api/*` อยู่กับ Next
  *    คู่นี้ต้องอยู่ต่อ · วันที่ตัวแปลงตามรุ่นใหม่ของ Next ไม่ทันจนขวางการอัปเกรด
@@ -44,6 +45,21 @@ import { ROOT } from "./lib/rendered-pages";
  * ยืนยันจาก `npm run build:worker` บนคู่นี้ (2026-09-18)
  */
 const PROVEN_PAIR = { nextMajor: 16, adapterMajor: 1 } as const;
+
+/**
+ * 🔒 คู่ "รุ่นเต็ม" ที่รันใน worker จริงแล้ว (A10-02 · กฎถาวร INC-0285)
+ *
+ * รุ่นใหญ่อย่างเดียวไม่พอ: ช่วง peer ของตัวแปลงเปิดปลายด้านบน (`>=16.4.1`) คู่ที่ทำ production ล่มใน INC-0285
+ * (next 16.4.1 + ตัวแปลงรุ่นก่อนหน้า) จึงผ่านทั้งด่านชั้นล่างและชั้นรุ่นใหญ่ — พังเฉพาะตอนรันใน workerd
+ * ด่านนี้จึงตรึงรุ่นเต็มของทั้งสองตัว: ยกตัวใดตัวหนึ่งแล้วด่านตก ➔ บังคับให้คนลองใน worker ก่อนแก้เลขตรงนี้
+ *
+ * 📌 เปลี่ยนคู่เมื่อไรต้องทำครบ 3 ข้อก่อนแก้ค่าข้างล่าง:
+ *    1. `npm run build:worker` ผ่าน
+ *    2. `npx wrangler dev` (หรือ `npm run preview:worker`) แล้วยิง `/api/auth/me` กับ `/readers` ได้ 200
+ *    3. จดวันที่ที่ลองไว้ในคอมเมนต์นี้
+ * ยืนยันล่าสุด: next 16.4.2 + @opennextjs/cloudflare 1.20.12 — ยืนยันบน production 2026-10-18/19 หลังแก้ INC-0285
+ */
+const PROVEN_EXACT = { next: "16.4.2", adapter: "1.20.12" } as const;
 
 let failed = 0;
 const check = (label: string, ok: boolean, detail?: string) => {
@@ -189,6 +205,21 @@ check(
   "ตัวแปลงข้ามรุ่นใหญ่ — ต้องบิลด์ Worker ผ่านในเครื่องก่อน แล้วค่อยอัปเดต PROVEN_PAIR",
 );
 
+check(
+  `next ที่ติดตั้ง = ${PROVEN_EXACT.next} (รุ่นเต็มที่พิสูจน์ใน worker แล้ว · ติดตั้งจริง ${nextVersion})`,
+  nextVersion === PROVEN_EXACT.next,
+  [
+    "รุ่นของ next เปลี่ยนไปจากคู่ที่ลองใน worker แล้ว — บิลด์และด่านอื่นผ่านได้แต่ Worker ล้มตอนรันจริง (INC-0285)",
+    "ลองตามขั้นตอนใน `PROVEN_EXACT` แล้วจึงแก้เลขในด่านนี้",
+  ].join("\n      "),
+);
+
+check(
+  `@opennextjs/cloudflare ที่ติดตั้ง = ${PROVEN_EXACT.adapter} (ติดตั้งจริง ${adapterVersion})`,
+  adapterVersion === PROVEN_EXACT.adapter,
+  "ตัวแปลงเปลี่ยนรุ่น — ต้องลองใน worker จริงก่อนแล้วจึงแก้ `PROVEN_EXACT` (รุ่นรองก็พังได้ เช่น 1.20.5 ไม่รองรับ next 16.4)",
+);
+
 // ── 4. package.json กับของที่ติดตั้งต้องเป็นเรื่องเดียวกัน ─────────────────
 console.log("\n── 4. package.json ประกาศคู่นี้ไว้ครบ ──");
 
@@ -201,6 +232,18 @@ const declaredAdapter = rootPkg.devDependencies?.["@opennextjs/cloudflare"];
 
 check("package.json ประกาศ next", Boolean(declaredNext));
 check("package.json ประกาศ @opennextjs/cloudflare", Boolean(declaredAdapter));
+
+// ตรึงแบบ exact (ไม่มี ^ ~ >) — ไม่งั้น `npm update` / dependabot ยกรุ่นเองโดยไม่ผ่านด่านรุ่นเต็มด้านบน
+check(
+  `package.json ตรึง next เป็นรุ่นเต็ม (ประกาศ ${declaredNext ?? "—"})`,
+  declaredNext === PROVEN_EXACT.next,
+  `ต้องเป็น "${PROVEN_EXACT.next}" ตรงตัว ไม่ใช้ช่วงเวอร์ชัน`,
+);
+check(
+  `package.json ตรึง @opennextjs/cloudflare เป็นรุ่นเต็ม (ประกาศ ${declaredAdapter ?? "—"})`,
+  declaredAdapter === PROVEN_EXACT.adapter,
+  `ต้องเป็น "${PROVEN_EXACT.adapter}" ตรงตัว ไม่ใช้ช่วงเวอร์ชัน`,
+);
 
 if (declaredNext) {
   const ok = satisfies(nextVersion, declaredNext);

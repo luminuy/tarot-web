@@ -42,15 +42,19 @@ export function sanitizePromptValue(raw: string | undefined | null, maxLen = 200
 
 /**
  * true = ข้อความมีรูปแบบที่ตั้งใจปิดแท็บของ prompt
- * ใช้ปฏิเสธตั้งแต่ชั้น Zod — ผู้ใช้จริงไม่มีเหตุผลต้องพิมพ์ `</` ในคำถามดูดวง
+ * ใช้ปฏิเสธตั้งแต่ชั้น Zod — ผู้ใช้จริงไม่มีเหตุผลต้องพิมพ์แท็กปิด (`</ชื่อแท็ก`) ในคำถามดูดวง
  */
 export function looksLikePromptInjection(raw: string): boolean {
   return looksLikeTagInjection(raw) || looksLikeInstructionAttack(raw);
 }
 
-/** ปิด/เปิดแท็กของ prompt (T-13) */
+/**
+ * ปิด/เปิดแท็กของ prompt (T-13)
+ * จับ `</` เฉพาะเมื่อตามด้วยชื่อแท็ก (ตัวอักษร/ขีดล่าง) — อีโมติคอนอกหัก `</3` ที่คนพิมพ์ในคำถามความรักจริงต้องผ่าน (A3-02)
+ * ข้อความผู้ใช้ทุกช่องยังถูกแปลง `<` `>` เป็นตัวเต็มความกว้างใน `sanitizePromptValue` อีกชั้นเสมอ
+ */
 export function looksLikeTagInjection(raw: string): boolean {
-  return /<\s*\//.test(raw) || /<\s*(system|user|assistant|question|nickname|user_profile|context_details)\b/i.test(raw);
+  return /<\s*\/\s*[a-z_]/i.test(raw) || /<\s*(system|user|assistant|question|nickname|user_profile|context_details)\b/i.test(raw);
 }
 
 /*

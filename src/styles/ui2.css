@@ -1307,39 +1307,6 @@ a.ui2-tile:active {
   color: var(--ui2-teal-text);
 }
 
-/* ลูกศรเฉียงในวงกลม (ลิงก์ "ดูทั้งหมด" · แถวบทความในคลังไพ่) */
-.ui2-arrow-ne {
-  flex: none;
-  position: relative;
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  box-shadow: 0 0 0 1px var(--ui2-line-day);
-  transition: background-color var(--dur-fast) var(--ease-out), rotate var(--dur-base) var(--ease-out);
-}
-.ui2-arrow-ne::before {
-  content: "";
-  position: absolute;
-  left: 13px;
-  top: 11px;
-  width: 9px;
-  height: 9px;
-  border-top: 2px solid currentColor;
-  border-right: 2px solid currentColor;
-}
-/* ก้านลูกศรเฉียง */
-.ui2-arrow-ne::after {
-  content: "";
-  position: absolute;
-  left: 10px;
-  top: 16px;
-  width: 13px;
-  height: 2px;
-  border-radius: 2px;
-  background: currentColor;
-  rotate: -45deg;
-}
-
 /* ═════════════════════════════════════════════════════════════════════════
    ส่วน 6.5 · คลังไพ่ยิปซี — หัวเรื่องซ้าย ข้อมูลขวา (ต้นแบบ fastwork.com/selling#profile-showcase)
    มือถือ/แท็บเล็ต (< 1024): หัวเรื่องเป็นแถบเม็ดยาเลื่อนแนวนอนเหนือการ์ด · คอม: รายการหัวเรื่องตัวใหญ่เทา/ดำ
@@ -2611,12 +2578,6 @@ html[data-consent-ask] .ui2-sticky {
     color: var(--ui2-ink);
     box-shadow: 0 0 0 1px rgba(184, 105, 28, 0.45);
   }
-  .ui2-show-row:hover .ui2-arrow-ne,
-  .ui2-show-all:hover .ui2-arrow-ne {
-    rotate: 45deg;
-    background: var(--ui2-ink);
-    color: var(--ui2-paper);
-  }
   .ui2-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 0 0 1px rgba(255, 217, 143, 0.75) inset, 0 20px 36px -16px rgba(23, 17, 12, 0.75);
@@ -2731,10 +2692,6 @@ html[data-consent-ask] .ui2-sticky {
 }
 
 /* ── คีย์เฟรม (แตะแค่ transform / opacity / translate / scale) ─────────────── */
-@keyframes ui2-drift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(90px, 50px) scale(1.18); }
-}
 @keyframes ui2-burst {
   0% { scale: 0.55; opacity: 0.95; }
   100% { scale: 1.9; opacity: 0; }

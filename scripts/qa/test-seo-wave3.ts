@@ -3,6 +3,7 @@ import path from "node:path";
 import { SPREADS, PUBLIC_SPREADS } from "../../src/data/spreads";
 import { isStandardSpread } from "../../src/lib/entitlement/limits";
 import { SPREAD_TOPICS, getAllTopicSlugs, getSpreadsForTopic } from "../../src/data/spread-topics";
+import { boxOf, mapLayout } from "../../src/lib/tarot/spread-map-geometry";
 
 console.log("\n🧪 กำลังทดสอบระบบ SEO Wave 3: Spreads Expansion & Topic Hubs (25 ผัง)\n");
 
@@ -62,17 +63,28 @@ assert(
   `ผังมาตรฐานที่ผู้ใช้เลือกได้ต้องมี 10 ผัง (ปัจจุบัน: ${publicStandardCount})`
 );
 
-// 3. Spreads Artworks Check
-const artIconsPath = path.join(process.cwd(), "src/components/ui/TarotArtIcons.tsx");
-const artContent = fs.readFileSync(artIconsPath, "utf-8");
-for (const artName of [
-  "LoveSixSpreadArt",
-  "MonthlyTenSpreadArt",
-  "FamilySpreadArt",
-  "LuckSpreadArt",
-  "StudySpreadArt",
-]) {
-  assert(artContent.includes(`export const ${artName}`), `TarotArtIcons.tsx ต้องส่งออกคอมโพเนนต์ '${artName}'`);
+// 3. แผนผังตำแหน่งไพ่ของผังใหม่ — ตรวจสิ่งที่ผู้ใช้เห็นจริง (`mapLayout` ที่ `SpreadsLibrary` วาด)
+// ภาพ SVG รายผังรุ่นก่อน UI 2.0 ถูกถอดแล้ว ด่านนี้จึงไม่ตรวจ "การมีอยู่" ของภาพนั้นอีก
+const libraryContent = fs.readFileSync(path.join(process.cwd(), "src/components/spread/SpreadsLibrary.tsx"), "utf-8");
+assert(
+  libraryContent.includes("mapLayout"),
+  "SpreadsLibrary.tsx ต้องวาดแผนผังจากเรขาคณิตกลาง mapLayout() (ไม่ใช่ภาพนิ่งแยกรายผัง)",
+);
+for (const id of expectedNewSpreads) {
+  const spread = SPREADS.find((s) => s.id === id);
+  if (!spread) continue;
+  const layout = mapLayout(spread.positions);
+  assert(
+    Number.isFinite(layout.boxHeight) && layout.boxHeight > 0 && layout.cardW > 0,
+    `ผัง '${id}' ต้องคำนวณแผนผังตำแหน่งไพ่ได้ (mapLayout)`,
+  );
+  assert(
+    spread.positions.every((p) => {
+      const box = boxOf(p, layout);
+      return box.left >= -1e-9 && box.right <= 1 + 1e-9;
+    }),
+    `ไพ่ทุกใบในแผนผังของผัง '${id}' ต้องอยู่ในกรอบแนวนอน`,
+  );
 }
 
 // 4. Topic Spreads Hubs (Wave 3.3)

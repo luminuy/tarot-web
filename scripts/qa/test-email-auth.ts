@@ -285,6 +285,119 @@ async function runEmailAuthQATests() {
     console.log("  ✓ 14. บันทึกแอดมินเรียงใหม่สุดก่อน (A1-10)");
   }
 
+  // 15. (A1-04) สมัครด้วยอีเมลของบัญชีที่ถูกลบ ➔ ห้ามออกเซสชันของ id เดิมก่อนยืนยันอีเมล
+  {
+    const { AUTH_COOKIE_NAME } = await import("../../src/lib/auth/cookie-names");
+    const goneEmail = `gone_${Date.now()}@example.com`;
+    const gone = await createEmailUser({
+      email: goneEmail,
+      name: "บัญชีที่ลบไปแล้ว",
+      passwordHash: await hashPassword("GoneAccountPassword2026!#"),
+    });
+    await softDeleteUser(gone.id);
+    const res = await signupPost(
+      new Request("https://seertarot.net/api/auth/email/signup", {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: "https://seertarot.net", "cf-connecting-ip": runIp(79) },
+        body: JSON.stringify({ email: goneEmail, password: "SomeoneElsePassword2026!#", name: "คนสมัครใหม่" }),
+      }),
+    );
+    const body = (await res.json()) as { ok?: boolean; user?: unknown };
+    if ((res.headers.get("set-cookie") ?? "").includes(`${AUTH_COOKIE_NAME}=`) || body.user) {
+      throw new Error("❌ A1-04: สมัครด้วยอีเมลของบัญชีที่ถูกลบแล้วได้เซสชันของ id เดิมทันทีโดยไม่ต้องยืนยันอีเมล");
+    }
+    if (res.status !== 200 || !body.ok) {
+      throw new Error(`❌ A1-04: กิ่งรอยืนยันต้องตอบข้อความกลาง 200 (ได้ ${res.status})`);
+    }
+    if (await getUserById(gone.id)) {
+      throw new Error("❌ A1-04: บัญชีที่ถูกลบกลับมาใช้งานได้ก่อนเจ้าของอีเมลกดยืนยัน");
+    }
+    // เจ้าของอีเมลกดลิงก์ยืนยัน ➔ คืนชีพ id เดิม (ยังไม่ออกคุกกี้จากลิงก์ ตามข้อ 12)
+    const { GET: verifyRoute } = await import("../../src/app/api/auth/email/verify/route");
+    const revivalToken = await issueToken(gone.id, "verify", 60 * 60 * 1000);
+    const verified = await verifyRoute(
+      new Request(`https://seertarot.net/api/auth/email/verify?token=${encodeURIComponent(revivalToken)}`, {
+        headers: { "cf-connecting-ip": runIp(80) },
+      }),
+    );
+    const back = await getUserById(gone.id);
+    if (!back?.emailVerified || (verified.headers.get("set-cookie") ?? "").includes(`${AUTH_COOKIE_NAME}=`)) {
+      throw new Error("❌ A1-04: กดลิงก์ยืนยันแล้วบัญชีที่รอคืนชีพไม่กลับมา (หรือออกคุกกี้จากลิงก์)");
+    }
+    await softDeleteUser(gone.id);
+    console.log("  ✓ 15. สมัครด้วยอีเมลของบัญชีที่ถูกลบ: ไม่ออกเซสชัน · รอยืนยันอีเมลก่อนคืนชีพ (A1-04)");
+  }
+
+  // 16. (A1-05 · A2-01) ลบบัญชีต้องลบ/ล้างประวัติไพ่ประจำวัน · บันทึกอีเมลดวง · ข้อมูลส่วนบุคคลในนัดแม่หมอ
+  {
+    const { getAppDB } = await import("../../src/lib/platform/db");
+    const { eraseExtraUserData, exportExtraUserData } = await import("../../src/lib/privacy/user-data");
+    const conn = await getAppDB();
+    const uid = `email_pdpa_${Date.now()}`;
+    const ticketId = `qt_pdpa_${Date.now()}`;
+    await conn
+      .prepare(`INSERT INTO daily_readings (id, user_key, date_key, reading_id, created_at) VALUES (?, ?, '2026-10-01', 'r1', ?)`)
+      .bind(`dr_${uid}`, uid, Date.now())
+      .run();
+    await conn
+      .prepare(`INSERT INTO digest_log (user_id, send_date, channel, status, reason, created_at) VALUES (?, '2026-10-01', 'email', 'sent', NULL, ?)`)
+      .bind(uid, Date.now())
+      .run();
+    // แม่หมอจำลองสถานะ pending (ไม่โผล่หน้ารวมแม่หมอ) — ตั๋วอ้าง FK ถึงตาราง readers
+    await conn
+      .prepare(
+        `INSERT OR IGNORE INTO readers (id, display_name, line_url, status, session_secret, created_at, updated_at)
+         VALUES ('reader_pdpa', 'แม่หมอทดสอบ PDPA', 'https://line.me/ti/p/test', 'pending', 'qa-secret', ?, ?)`,
+      )
+      .bind(Date.now(), Date.now())
+      .run();
+    await conn
+      .prepare(
+        `INSERT INTO queue_tickets (id, reader_id, kind, status, customer_ref, nickname, question, reading_snapshot, created_at, expires_at, user_id)
+         VALUES (?, 'reader_pdpa', 'scheduled', 'done', 'cref_pdpa', 'ชื่อเล่นทดสอบ', 'คำถามส่วนตัวทดสอบ', '{}', ?, ?, ?)`,
+      )
+      .bind(ticketId, Date.now(), Date.now() + 86_400_000, uid)
+      .run();
+    await conn
+      .prepare(`INSERT INTO bookings (id, ticket_id, reader_id, slot_start, slot_end, status, created_at, contact_email) VALUES (?, ?, 'reader_pdpa', 1, 2, 'done', ?, 'pdpa@example.com')`)
+      .bind(`bk_${uid}`, ticketId, Date.now())
+      .run();
+
+    const exported = await exportExtraUserData(uid);
+    const bookingsOut = exported.data.marketplaceBookings as Array<{ question?: string }> | undefined;
+    if (!Array.isArray(exported.data.dailyReadings) || !Array.isArray(exported.data.digestLog) || bookingsOut?.[0]?.question !== "คำถามส่วนตัวทดสอบ") {
+      throw new Error(`❌ A1-05/A2-01: ไฟล์ส่งออก PDPA ไม่มีประวัติไพ่ประจำวัน/อีเมลดวง/นัดแม่หมอ (${JSON.stringify(exported.failed)})`);
+    }
+
+    const erased = await eraseExtraUserData(uid);
+    if (erased.failed.length > 0) throw new Error(`❌ ลบข้อมูลบางส่วนไม่สำเร็จ: ${erased.failed.join(", ")}`);
+    const left = await conn
+      .prepare(
+        `SELECT (SELECT COUNT(*) FROM daily_readings WHERE user_key = ?) AS daily,
+                (SELECT COUNT(*) FROM digest_log WHERE user_id = ?) AS digest`,
+      )
+      .bind(uid, uid)
+      .first<{ daily: number; digest: number }>();
+    if (Number(left?.daily) !== 0 || Number(left?.digest) !== 0) {
+      throw new Error(`❌ A1-05: ลบบัญชีแล้ว daily_readings/digest_log ยังค้าง (${JSON.stringify(left)})`);
+    }
+    const ticket = await conn
+      .prepare(
+        `SELECT t.user_id, t.nickname, t.question, t.reading_snapshot, b.contact_email
+           FROM queue_tickets t LEFT JOIN bookings b ON b.ticket_id = t.id WHERE t.id = ?`,
+      )
+      .bind(ticketId)
+      .first<Record<string, unknown>>();
+    if (!ticket) throw new Error("❌ A2-01: ลบบัญชีแล้วแถวตั๋วหายทั้งแถว — แถวการเงิน/ใบจองต้องเก็บไว้ ล้างแค่ข้อมูลส่วนบุคคล");
+    if (ticket.user_id !== null || ticket.nickname !== null || ticket.question !== null || ticket.reading_snapshot !== null || ticket.contact_email !== null) {
+      throw new Error(`❌ A2-01: ลบบัญชีแล้วข้อมูลส่วนบุคคลในนัดแม่หมอยังค้าง (${JSON.stringify(ticket)})`);
+    }
+    await conn.prepare(`DELETE FROM bookings WHERE ticket_id = ?`).bind(ticketId).run();
+    await conn.prepare(`DELETE FROM queue_tickets WHERE id = ?`).bind(ticketId).run();
+    await conn.prepare(`DELETE FROM readers WHERE id = 'reader_pdpa'`).run();
+    console.log("  ✓ 16. ลบบัญชี: ประวัติไพ่ประจำวัน + อีเมลดวงถูกลบ (A1-05) · นัดแม่หมอล้างข้อมูลส่วนบุคคล เก็บแถวการเงิน (A2-01) · ส่งออกครบ");
+  }
+
   // Cleanup
   await softDeleteUser(newUser.id);
   console.log("  ✓ 9. Cleanup: ทำความสะอาดข้อมูลทดสอบเรียบร้อย");

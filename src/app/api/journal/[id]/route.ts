@@ -4,6 +4,8 @@ import { JournalPatchSchema } from "@/lib/journal/journal.schema";
 import { getSessionUser } from "@/lib/auth/session";
 import { updateJournalMeta, deleteJournalItem } from "@/lib/journal/journal.repo";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
+import { noteHasCrisisSignal } from "@/lib/ai/memory";
+import { getCrisisMessage } from "@/lib/safety/guardrails";
 
 export const runtime = "nodejs";
 
@@ -61,7 +63,17 @@ export async function PATCH(
     }
     if (parsed.data.moodAfter !== undefined && parsed.data.moodAfter !== null) recordEvent("journal_mood_after_set");
 
-    return NextResponse.json({ success: true });
+    /*
+     * 🛟 กฎเหล็กข้อ 6 (A3-07): บันทึกที่เขียนมีสัญญาณวิกฤต ➔ บันทึกได้ตามปกติ (ไม่บล็อก)
+     * แต่ตอบข้อความสายด่วน 1323 กลับไปให้หน้าเว็บแสดงทันที (รูปแบบเดียวกับ /api/journal/reflect)
+     * ตัวบันทึกเองจะไม่ถูกส่งเข้า prompt ของคำอ่านครั้งถัดไป (ดู lib/ai/memory.ts)
+     */
+    const notes = [parsed.data.userNote, parsed.data.ritual?.morningNote, parsed.data.ritual?.eveningNote];
+    const crisis = notes.some((n) => noteHasCrisisSignal(n));
+    if (crisis) recordEvent("safety_flag:journal_note_crisis");
+    const lang = /^https?:\/\/[^/]+\/en(\/|$|\?)/.test(request.headers.get("referer") ?? "") ? "en" : "th";
+
+    return NextResponse.json({ success: true, ...(crisis ? { crisis: true, crisisMessage: getCrisisMessage(lang) } : {}) });
   } catch (error) {
     console.error("[Journal Item PATCH Error]:", error);
     return NextResponse.json({ error: "ไม่สามารถอัปเดตสถานะบันทึกได้" }, { status: 500 });

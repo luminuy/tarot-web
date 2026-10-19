@@ -1,6 +1,6 @@
 # SeerTarot · วิหารพยากรณ์ไพ่ทาโรต์
 
-> SeerTarot (ไทย: วิหารพยากรณ์ไพ่ทาโรต์) is a provably-fair online tarot platform built on the authentic 1909 Rider-Waite-Smith deck, with 25 tarot spreads, a 78-card encyclopedia, and an AI reading engine. The site is Thai-first (`/`) with a full English mirror (`/en`).
+> SeerTarot (ไทย: วิหารพยากรณ์ไพ่ทาโรต์) is a provably-fair online tarot platform built on the authentic 1909 Rider-Waite-Smith deck, with a library of tarot spreads, a 78-card encyclopedia, and an AI reading engine. The site is Thai-first (`/`) with a full English mirror (`/en`).
 
 ## Overview
 
@@ -12,18 +12,25 @@ The primary audience is Thai. Thai is the default language at the site root; Eng
 
 - **Interactive Manual Self-Reveal**: Cards begin face-down on an altar canvas; the user taps to flip each one. Nothing is auto-revealed.
 - **Provably Fair Shuffling**: Client seed plus server seed commitment guarantees the deck was not manipulated after the question was asked.
-- **25 Tarot Spreads**: From single-card daily draws to the 10-card Celtic Cross, 7-chakra balancing, 12-month year-ahead, and relationship layouts.
+- **Tarot Spread Library**: From single-card daily draws to the 10-card Celtic Cross, 7-chakra balancing, 12-month year-ahead, and relationship layouts.
 - **78-Card Encyclopedia**: All 22 Major Arcana and 56 Minor Arcana with upright and reversed meanings, elemental and astrological correspondences.
-- **26 In-Depth Articles**: Guides on reading method, card meanings, and spread interpretation — every article available in both Thai and English.
-- **Bilingual**: 299 indexed pages total, Thai and English, with reciprocal hreflang.
+- **In-Depth Articles**: Guides on reading method, card meanings, and spread interpretation — every article available in both Thai and English.
+- **Question Guides**: Pages that answer common life questions (love, work, money, an ex) with the cards and spreads that fit each one.
+- **Zodiac Cards**: The tarot card linked to each of the 12 zodiac signs, with a daily reading per sign.
+- **Reading Journal**: Signed-in users keep their readings, real-life outcomes and private notes in one place.
+- **Bilingual**: Every public page exists in Thai and English, with reciprocal hreflang.
 
 ## Primary Sections
 
 - [Home / หน้าแรก](https://seertarot.net/): Start a reading. Choose a spread, shuffle, draw.
-- [Spreads / ผังพยากรณ์](https://seertarot.net/spreads): All 25 spreads with per-position meaning guides.
+- [Spreads / ผังพยากรณ์](https://seertarot.net/spreads): Every spread with per-position meaning guides.
 - [Cards / ความหมายไพ่](https://seertarot.net/cards): The full 78-card encyclopedia.
-- [Articles / บทความ](https://seertarot.net/blog): 26 guides on tarot method, symbolism, and history.
+- [Articles / บทความ](https://seertarot.net/blog): Guides on tarot method, symbolism, and history.
 - [Daily Card / ไพ่ประจำวัน](https://seertarot.net/daily): One deterministic card per day, with a provably-fair proof.
+- [Pick a Card / เลือกไพ่](https://seertarot.net/pick-a-card): Quick pick-a-card readings by topic.
+- [Questions / คำถามยอดฮิต](https://seertarot.net/questions): Answers to common questions with the right spread for each.
+- [Zodiac Cards / ไพ่ประจำราศี](https://seertarot.net/cards/zodiac): The tarot card of each zodiac sign.
+- [Pricing / ราคา](https://seertarot.net/pricing): Free readings and paid reading packs.
 - [Readers / แม่หมอตัวจริง](https://seertarot.net/readers): Directory for live human consultations.
 
 English mirrors live at the same paths under `/en` — for example [/en/cards](https://seertarot.net/en/cards) and [/en/spreads](https://seertarot.net/en/spreads).
@@ -35,10 +42,12 @@ SeerTarot คือเว็บ **ดูดวงไพ่ยิปซี** แ�
 สิ่งที่ทำได้บนเว็บนี้:
 
 - **เปิดไพ่ฟรีด้วยตัวเอง** — สับไพ่และแตะเลือกไพ่เอง ไพ่คว่ำหน้าทุกใบจนกว่าจะแตะพลิก ไม่มีการเปิดให้อัตโนมัติ
-- **ผังพยากรณ์ 25 แบบ** — ตั้งแต่ไพ่ใบเดียว ผังสามใบ ไปจนถึงเซลติกครอส 10 ใบ ผังจักระ 7 ใบ และผังดูดวงรายปี 12 เดือน
+- **ผังพยากรณ์หลากหลายแบบ** — ตั้งแต่ไพ่ใบเดียว ผังสามใบ ไปจนถึงเซลติกครอส 10 ใบ ผังจักระ 7 ใบ และผังดูดวงรายปี 12 เดือน
 - **ความหมายไพ่ครบ 78 ใบ** — ทั้งหัวตั้งและหัวกลับ พร้อมธาตุประจำไพ่และความหมายทางโหราศาสตร์
 - **ดูดวงเฉพาะเรื่อง** — ความรัก เนื้อคู่ คนเก่า การงาน การเงิน การเรียน ครอบครัว และโชคลาภ
 - **ไพ่ประจำวัน** — ไพ่ประจำวันที่ทุกคนได้ใบเดียวกันในวันเดียวกัน ตรวจสอบย้อนหลังได้
+- **คำถามยอดฮิต · ไพ่ประจำราศี · Pick a Card** — คำตอบของคำถามที่คนถามบ่อย ไพ่ประจำ 12 ราศี และเลือกไพ่ตามหัวข้อ
+- **สมุดดวง** — สมาชิกเก็บคำอ่าน ผลที่เกิดขึ้นจริง และบันทึกส่วนตัวไว้ในที่เดียว
 - **ระบบสุ่มที่พิสูจน์ได้ (Provably Fair)** — ทุกครั้งที่เปิดไพ่จะมีค่าแฮช SHA-256 ให้ตรวจว่าไพ่ถูกสุ่มไว้ก่อนแล้วจริง ไม่ได้เลือกให้ทีหลัง
 
 คำที่คนไทยใช้เรียกสิ่งเดียวกัน: ไพ่ยิปซี · ไพ่ทาโรต์ · ทาโรต์ · ไพ่ทำนาย · ดูดวงออนไลน์

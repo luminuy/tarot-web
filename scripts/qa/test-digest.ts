@@ -277,6 +277,46 @@ async function main() {
   const cronSrc = readSrc("src/app/api/cron/daily-digest/route.ts");
   check("รอบส่งรายงานคิวค้าง (remaining + digest_over_cap)", /remaining/.test(cronSrc) && /digest_over_cap/.test(cronSrc));
 
+  // ── 6b. (A3-05) ตัวจับเวลาทิ้งรอบได้ — เรียกซ้ำในวันเดียวกันต้องปลอดภัย และรอบถัดไปตามส่งที่หลุด ──
+  console.log("\n⏰ รอบหลุด/รอบเสริม (A3-05):");
+  check(
+    "digest: เพดานต่อวันนับยอดที่จองไปแล้ววันนี้ก่อนดึงคิว",
+    /MAX_DIGEST_PER_DAY/.test(cronSrc) && cronSrc.indexOf("summarizeDigestDay(sendDate)") < cronSrc.indexOf("listDigestRecipients("),
+  );
+  const checkinSrc = readSrc("src/app/api/cron/checkins/route.ts");
+  check(
+    "นัดเช็ก: เพดานต่อวันไทย (รอบเสริมไม่ทำให้อีเมลเกินโควตา)",
+    /countCheckinsClaimedSince\(bangkokDayStartMs\(now\)\)/.test(checkinSrc) && /MAX_PER_DAY/.test(checkinSrc),
+  );
+  const pushRepoSrc = readSrc("src/lib/push/push.repo.ts");
+  const pushCronSrc = readSrc("src/app/api/cron/push-reminders/route.ts");
+  check(
+    "เตือนพิธีเช้า: ตามส่งชั่วโมงที่หลุด (ไม่ใช่เฉพาะชั่วโมงตอนรัน) + เรียงลำดับคงที่",
+    /morning_hour <= \? AND morning_hour >= \?/.test(pushRepoSrc) && /ORDER BY morning_hour ASC, id ASC/.test(pushRepoSrc),
+  );
+  check(
+    "เตือนพิธีเช้า: วนดึงจนหมดคิว ไม่ตัดคนเกินชุดแรกทิ้ง",
+    /while \(scanned < MAX_PER_RUN/.test(pushCronSrc) && /CATCH_UP_HOURS\)/.test(pushCronSrc),
+  );
+  {
+    // ด่านพฤติกรรม: ชั่วโมงที่ไม่มีรอบ ➔ รอบถัดไป (ภายในช่วงตามส่ง) ยังเห็นผู้ใช้คนนั้น
+    const { upsertPushSubscription, listMorningDue, claimMorning, deleteAllPushSubscriptions } = await import(
+      "../../src/lib/push/push.repo"
+    );
+    const pushUid = `push_catchup_${Date.now()}`;
+    const endpoint = `https://fcm.googleapis.com/fcm/send/${pushUid}`;
+    await upsertPushSubscription(pushUid, { endpoint, p256dh: "p", auth: "a" }, { lang: "th", morningHour: 6, checkins: false });
+    const dayKey = `2099-01-${String(1 + (Date.now() % 27)).padStart(2, "0")}`;
+    const mine = (list: Array<{ userId: string }>) => list.some((s) => s.userId === pushUid);
+    check("ตั้งเตือน 06:00 รอบ 09:00 ยังตามส่ง (ช่วงตามส่ง 4 ชม.)", mine(await listMorningDue(9, dayKey, 5000, 4)));
+    check("ช้าเกินช่วงตามส่ง (11:00) ไม่ส่ง", !mine(await listMorningDue(11, dayKey, 5000, 4)));
+    check("ยังไม่ถึงเวลา (05:00) ไม่ส่ง", !mine(await listMorningDue(5, dayKey, 5000, 4)));
+    const sub = (await listMorningDue(9, dayKey, 5000, 4)).find((s) => s.userId === pushUid);
+    if (sub) await claimMorning(sub.id, dayKey);
+    check("ส่งแล้ววันนี้ ไม่ส่งซ้ำ", !mine(await listMorningDue(9, dayKey, 5000, 4)));
+    await deleteAllPushSubscriptions(pushUid);
+  }
+
   // ── 7. (A2-17) ชื่อผู้ใช้ในอีเมลต้องถูก escape ──
   console.log("\n🧼 ชื่อผู้ใช้ในอีเมล (A2-17):");
   const evil = '<a href="https://evil.example">กดยืนยันที่นี่</a>';

@@ -183,9 +183,9 @@ export function ZodiacDaily({ signs, sign }: { signs: ZodiacDailySignName[]; sig
   const chosenOpen = !!revealed[`day:${chosen.sign}`];
   const seasonOpen = !!revealed.season;
   return (
-    <section aria-labelledby="zodiac-daily-title" className="space-y-5">
+    <section aria-labelledby="zodiac-daily-heading" className="space-y-5">
       <div className="text-center space-y-1">
-        <h2 id="zodiac-daily-title" className="text-xl sm:text-2xl font-serif-th font-bold text-ink"><ThaiPhrases>
+        <h2 id="zodiac-daily-heading" className="text-xl sm:text-2xl font-serif-th font-bold text-ink"><ThaiPhrases>
           {isEnglish ? "Today's card for your sign" : "ดวงรายวัน — ไพ่วันนี้ของราศีคุณ"}
         </ThaiPhrases></h2>
         <p className="text-xs sm:text-sm text-muted font-sans">

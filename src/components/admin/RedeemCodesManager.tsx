@@ -672,7 +672,7 @@ export default function RedeemCodesManager() {
                   required
                   value={createCode}
                   onChange={(e) => setCreateCode(e.target.value.toUpperCase())}
-                  placeholder="เช่น VIP3-TAROT-2026 หรือ SEER-9K7X-4M2P"
+                  placeholder="เช่น SEER-XXXX-XXXX"
                   className="font-mono uppercase font-semibold"
                 />
                 <Button

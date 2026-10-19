@@ -11,7 +11,8 @@
  */
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, type ReactNode } from "react";
+import { useCallback, useRef, type ReactNode } from "react";
+import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 
 export interface SubTab<T extends string> {
   id: T;
@@ -160,16 +161,15 @@ export function AdminDrawer({
   onClose: () => void;
   children: ReactNode;
 }) {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  // A5-10: หน้าต่างลอยที่ประกาศ aria-modal ต้องกักโฟกัส · ย้ายโฟกัสเข้า · คืนโฟกัสตอนปิด · ล็อกสกรอลล์ (ฮุกกลางตัวเดียวกับหน้าต่างฝั่งสาธารณะ)
+  const panelRef = useRef<HTMLElement>(null);
+  useDialogBehavior(open, onClose, panelRef);
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-40 flex justify-end bg-ink/20" onMouseDown={onClose}>
       <aside
+        ref={panelRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label={title}

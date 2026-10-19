@@ -34,6 +34,41 @@ export type EntryIntent =
   | { kind: "resume" }
   | { kind: "fresh" };
 
+/** ภาษาของหน้า/ของรอบที่ค้าง — ตรงกับฟิลด์ `lang` ที่ตัวบันทึก flow เขียนไว้ */
+export type FlowLang = "th" | "en";
+
+/**
+ * รอบที่ค้างถูกสร้างจากหน้าอีกภาษา = ห้ามกู้คืนข้ามภาษา (A4-05)
+ * หน้าแรกไม่มี `routeSpread` จึงเคยคืน `resume` ให้ทุกรอบที่ค้าง ผู้ใช้กดสลับ TH ↔ EN กลางพิธี
+ * แล้วเห็นคำถาม/คำอ่านภาษาเดิมครอบหน้าภาษาใหม่ · รอบเก่าที่ไม่มีฟิลด์ `lang` ถือว่ากู้ได้เหมือนเดิม
+ */
+export function isCrossLanguageFlow(savedLang: FlowLang | null | undefined, pageLang: FlowLang | null | undefined): boolean {
+  return Boolean(savedLang && pageLang && savedLang !== pageLang);
+}
+
+/**
+ * กู้คืนมาแล้วอยู่ที่ขั้นเลือกไพ่ ครบทุกใบแต่ยังไม่มีไพ่จากเซิร์ฟเวอร์ = รีเฟรชตอน `/shuffle` ยังบินอยู่ (A4-02)
+ * ตัวบันทึก flow เขียน `pickedIndices` ครบทันทีที่แตะใบสุดท้าย แต่ไพ่มาทีหลังคำตอบ `/shuffle`
+ * ถ้าไม่ส่งซ้ำ หน้าจะค้าง "กำลังวางไพ่ลงผัง" ตลอดกาล · ส่งซ้ำปลอดภัย: เซิร์ฟเวอร์คืนไพ่ชุดเดิมที่จั่วไว้แล้ว ไม่จั่วใหม่
+ */
+export function needsFinalizeOnResume(opts: {
+  step: RitualStep;
+  pickedCount: number;
+  drawnCount: number;
+  /** จำนวนใบที่ผังต้องการ — `0`/ไม่ทราบ = ไม่ส่งซ้ำ */
+  capacity: number;
+  /** ต้องมีเซสชันเดิมให้ส่งต่อ */
+  hasSession: boolean;
+}): boolean {
+  return (
+    opts.step === "PICK_CARDS" &&
+    opts.hasSession &&
+    opts.capacity > 0 &&
+    opts.pickedCount >= opts.capacity &&
+    opts.drawnCount === 0
+  );
+}
+
 export interface EntryContext {
   /** ผังของหน้า `/read/<ผัง>` — `null` = เปิดจากหน้าแรก */
   routeSpread: string | null;
@@ -45,6 +80,9 @@ export interface EntryContext {
   savedStep: RitualStep | null;
   /** ผังของรอบที่ค้างอยู่ */
   savedSpread?: string | null;
+  /** ภาษาของรอบที่ค้าง และภาษาของหน้านี้ — ต่างกัน = ไม่นับว่ามีอะไรค้าง (A4-05) */
+  savedLang?: FlowLang | null;
+  pageLang?: FlowLang | null;
 }
 
 /** ค้างอยู่ที่ขั้นเลือกผัง = ยังไม่ได้เริ่มอะไรเลย ไม่มีอะไรให้กู้คืน */
@@ -56,9 +94,13 @@ export function resolveEntryIntent({
   routeSpread,
   isKnownSpread,
   returning = false,
-  savedStep,
+  savedStep: savedStepRaw,
   savedSpread = null,
+  savedLang = null,
+  pageLang = null,
 }: EntryContext): EntryIntent {
+  // รอบของอีกภาษาเท่ากับไม่มีรอบค้าง — ไม่กู้คืนข้ามภาษา (A4-05)
+  const savedStep = isCrossLanguageFlow(savedLang, pageLang) ? null : savedStepRaw;
   if (routeSpread && isKnownSpread(routeSpread)) {
     if (returning && savedSpread === routeSpread && hasSomethingToResume(savedStep)) {
       return { kind: "resume" };

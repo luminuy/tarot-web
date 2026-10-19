@@ -1,6 +1,5 @@
 import { createHash } from "node:crypto";
 import { getAppDB } from "@/lib/platform/db";
-import { isPrivilegedTestRequest } from "@/lib/security/privileged";
 import { getClientIdentifier } from "@/lib/utils/rate-limit";
 
 interface RateLimitBucket {
@@ -214,7 +213,9 @@ export async function reserveAuthAttempt(
   action: AuthRateLimitAction,
   identifier?: string
 ): Promise<AuthRateLimitResult> {
-  if (await isPrivilegedTestRequest(request)) return { allowed: true };
+  // ⚠️ ไม่มีทางลัดสำหรับผู้ทดสอบ/บัญชีไม่จำกัด/หัว bypass ของ CI (A1-09)
+  // ด่านนี้กันเดารหัสผ่าน (รวมรหัสแอดมิน) และรหัสแลกสิทธิ์ — สิทธิ์ "ใช้เว็บไม่จำกัด" ข้ามแค่เพดานการใช้งาน
+  // ไม่ใช่ด่านยืนยันตัวตน · โหลดเทสต์ที่ต้องยิงถี่ให้ใช้ IP/บัญชีแยกแทน
   return reserveUnchecked(request, action, identifier);
 }
 
@@ -263,10 +264,7 @@ export async function checkAuthRateLimit(
   action: AuthRateLimitAction,
   identifier?: string
 ): Promise<AuthRateLimitResult> {
-  // ตรวจสิทธิ์ผู้ทดสอบครั้งเดียวแล้วใช้ตัวในที่ไม่ตรวจซ้ำ —
-  // ไม่งั้นหนึ่งคำขอจะอ่านคุกกี้ + เทียบ token_version สองรอบโดยไม่จำเป็น
-  if (await isPrivilegedTestRequest(request)) return { allowed: true };
-
+  // ไม่มีทางลัดสำหรับผู้ทดสอบ/บัญชีไม่จำกัด/หัว bypass ของ CI — เหตุผลเดียวกับ reserveAuthAttempt (A1-09)
   // นับและตัดสินในก้าวเดียว (A1-02) — เดิม peek แล้วค่อยนับ ยิงพร้อมกันผ่านได้ทั้งชุด
   return reserveUnchecked(request, action, identifier);
 }
