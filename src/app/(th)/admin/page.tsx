@@ -15,9 +15,9 @@
 
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 
-import { Button } from "@/components/ui/Button";
+import { CloseIcon, MenuIcon, PersonIcon, SearchIcon } from "@/components/ui/LineIcons";
 import { AdminSubTabs, useSubTab } from "@/components/admin/AdminLayout";
 import { CommandPalette } from "@/components/admin/CommandPalette";
 import type { NavBadges } from "@/lib/admin/executive-data";
@@ -305,10 +305,11 @@ function resolveTab(raw: string | null): { tab: TabId; health?: "system" | "ai" 
   return { tab: "executive" };
 }
 
+/** สีป้ายบนเมนูข้างพื้นกรมท่า — แดง = ต้องทำทันที · เหลือง = รอตรวจ · ขาวโปร่ง = แจ้งให้ทราบ */
 const BADGE_TONE: Record<NonNullable<NavItem["badge"]>["tone"], string> = {
-  alert: "bg-rose-700 text-white",
-  watch: "bg-amber-100 text-amber-900 border border-amber-300",
-  info: "bg-inset text-ink",
+  alert: "bg-rose-600 text-white",
+  watch: "bg-amber-300 text-amber-950",
+  info: "admin-nav-badge-info",
 };
 
 /** ตัวเลขเตือนบนเมนู — แสดงเมื่อ > 0 เท่านั้น · มีคำอธิบายให้โปรแกรมอ่านจอ (ไม่ใช้สีอย่างเดียว) */
@@ -386,6 +387,24 @@ function AdminContent() {
   const [healthSubTab, setHealthSubTab] = useState<"system" | "ai">("system");
   const [badges, setBadges] = useState<NavBadges | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+
+  // เปลี่ยนเมนูแล้วพับกล่องวิธีใช้ของหน้าเดิม
+  useEffect(() => setHelpOpen(false), [activeTab]);
+
+  // ลิ้นชักเมนูมือถือ: Esc ปิด · ล็อกการเลื่อนพื้นหลังระหว่างเปิด
+  useEffect(() => {
+    if (!navOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setNavOpen(false);
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [navOpen]);
 
   // Ctrl+K / Cmd+K เปิดช่องค้นหาเมนู
   useEffect(() => {
@@ -466,123 +485,82 @@ function AdminContent() {
   const activeGroup = NAV_SECTIONS.find((sec) => sec.items.some((i) => i.id === activeTab))?.group;
 
   return (
-    <div className="min-h-screen text-ink">
-      {/* ─── แถบบน ──────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-line bg-white px-4 sm:px-6">
-        <div className="flex items-center gap-3">
-          <img
-            src="/logo.webp"
-            alt=""
-            width={32}
-            height={32}
-            className="h-8 w-8 shrink-0 rounded-full border border-line object-cover"
-            loading="eager"
-          />
-          <span className="whitespace-nowrap text-sm font-bold text-ink sm:text-base">SeerTarot Admin</span>
-          {badges?.stripeMode === "test" ? (
-            <span className="hidden rounded border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-900 sm:inline">
-              Stripe โหมดทดสอบ — ยังไม่ใช่เงินจริง
-            </span>
-          ) : badges && badges.stripeMode === null ? (
-            <span className="hidden rounded border border-line bg-canvas px-2 py-0.5 text-[11px] text-muted sm:inline">ยังไม่ได้ตั้ง Stripe</span>
-          ) : null}
-        </div>
+    <div className="flex min-h-screen text-ink">
+      {/* ─── เมนูข้าง (เดสก์ท็อป) — พื้นกรมท่าเต็มความสูง ─────────────── */}
+      <aside className="admin-sidebar sticky top-0 hidden h-screen w-64 shrink-0 flex-col lg:flex">
+        <AdminSidebar activeTab={activeTab} badges={badges} onSelect={selectTab} />
+      </aside>
 
-        <div className="flex items-center gap-2">
+      {/* ─── เมนูข้าง (มือถือ/แท็บเล็ต) — ลิ้นชักจากซ้าย ─────────────── */}
+      {navOpen ? (
+        <div className="fixed inset-0 z-50 flex bg-ink/40 lg:hidden" onMouseDown={() => setNavOpen(false)}>
+          <aside
+            role="dialog"
+            aria-modal="true"
+            aria-label="เมนูแอดมิน"
+            className="admin-sidebar flex h-full w-[17rem] max-w-[85vw] flex-col shadow-lg"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <AdminSidebar
+              activeTab={activeTab}
+              badges={badges}
+              onSelect={(id) => {
+                selectTab(id);
+                setNavOpen(false);
+              }}
+              onClose={() => setNavOpen(false)}
+            />
+          </aside>
+        </div>
+      ) : null}
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* ─── แถบบน: เส้นทางหน้า · ค้นหา · บัญชี ───────────────────── */}
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-line bg-white px-4 sm:px-6">
+          <button
+            type="button"
+            onClick={() => setNavOpen(true)}
+            aria-label="เปิดเมนู"
+            className="admin-btn-secondary tap-overlay-y inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md lg:hidden"
+          >
+            <MenuIcon />
+          </button>
+
+          <nav aria-label="เส้นทางหน้า" className="min-w-0 flex-1">
+            <ol className="flex min-w-0 items-center gap-2 text-sm">
+              <li className="hidden shrink-0 text-muted sm:block">ผู้ดูแลระบบ</li>
+              <li aria-hidden className="hidden text-line-interactive sm:block">/</li>
+              <li className="hidden shrink-0 text-muted md:block">{activeGroup}</li>
+              <li aria-hidden className="hidden text-line-interactive md:block">/</li>
+              <li aria-current="page" className="truncate font-semibold text-ink">
+                {activeItem?.label}
+              </li>
+            </ol>
+          </nav>
+
           <button
             type="button"
             onClick={() => setPaletteOpen(true)}
-            className="tap-overlay-y hidden min-h-11 items-center gap-2 whitespace-nowrap rounded-lg border border-line bg-white px-3 text-xs text-muted hover:bg-canvas hover:text-ink sm:inline-flex"
             aria-keyshortcuts="Control+K Meta+K"
+            aria-label="ค้นหาเมนู"
+            className="admin-btn-secondary tap-overlay-y inline-flex h-10 shrink-0 items-center gap-2 rounded-md px-3 text-sm text-muted md:w-64"
           >
-            ค้นหาเมนู
-            <kbd className="hidden rounded border border-line bg-canvas px-1.5 font-sans text-[10px] text-muted sm:inline">Ctrl K</kbd>
+            <SearchIcon className="h-4 w-4 shrink-0" />
+            <span className="hidden flex-1 text-left md:inline">ค้นหาเมนู</span>
+            <kbd className="hidden rounded border border-line bg-canvas px-1.5 font-sans text-[11px] text-muted md:inline">Ctrl K</kbd>
           </button>
-          <a
-            href="/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-white px-3 text-xs font-medium text-ink hover:bg-canvas"
-          >
-            เปิดหน้าเว็บ
-          </a>
-          <Button variant="ghost" size="sm" onClick={logout} className="whitespace-nowrap text-xs text-muted hover:text-rose-700">
-            ออกจากระบบ
-          </Button>
-        </div>
-      </header>
 
-      <div className="flex w-full flex-col lg:flex-row min-h-[calc(100vh-3.5rem)]">
-        {/* ─── เมนูข้าง (เดสก์ท็อป) ────────────────────────────────── */}
-        <aside className="hidden w-64 shrink-0 border-r border-line bg-white px-3 py-4 lg:block">
-          <nav aria-label="เมนูแอดมิน" className="sticky top-[4.5rem] max-h-[calc(100vh-5rem)] space-y-5 overflow-y-auto pb-6">
-            {NAV_SECTIONS.map((section) => (
-              <div key={section.group}>
-                <p className="mb-1.5 px-3 text-[11px] font-semibold tracking-wide text-muted">{section.group}</p>
-                <ul className="space-y-0.5">
-                  {section.items.map((item) => {
-                    const isActive = activeTab === item.id;
-                    return (
-                      <li key={item.id}>
-                        <button
-                          type="button"
-                          onClick={() => selectTab(item.id)}
-                          aria-current={isActive ? "page" : undefined}
-                          className={`tap-overlay-y relative flex w-full items-start gap-2.5 rounded-lg py-2 pl-3 pr-2 text-left transition-colors ${
-                            isActive ? "bg-inset text-ink" : "text-ink-soft hover:bg-canvas hover:text-ink"
-                          }`}
-                        >
-                          {isActive ? <span aria-hidden className="absolute inset-y-2 left-0 w-[3px] rounded-r bg-ink" /> : null}
-                          <TabIcon id={item.id} className="mt-0.5 h-4 w-4 shrink-0" />
-                          <span className="min-w-0 flex-1">
-                            <span className={`block text-sm ${isActive ? "font-semibold" : "font-medium"}`}>{item.label}</span>
-                            <span className="block text-[11px] leading-snug text-muted">{item.short}</span>
-                          </span>
-                          <NavBadge item={item} badges={badges} />
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            ))}
-          </nav>
-        </aside>
+          <AccountMenu onLogout={logout} />
+        </header>
 
-        {/* ─── แถบเมนู (มือถือ/แท็บเล็ต) — ชื่อกลุ่มคั่นให้รู้ว่าอยู่หมวดไหน ─────────── */}
-        <nav
-          aria-label="เมนูแอดมิน"
-          className="flex items-center gap-1.5 overflow-x-auto border-b border-line bg-white px-4 py-2 lg:hidden no-scrollbar"
-        >
-          {NAV_SECTIONS.map((section, si) => (
-            <div key={section.group} className="flex shrink-0 items-center gap-1.5">
-              {si > 0 ? <span aria-hidden className="mx-1 h-5 w-px bg-line" /> : null}
-              <span className="text-[11px] font-bold text-ink-soft">{section.group}</span>
-              {section.items.map((item) => {
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => selectTab(item.id)}
-                    aria-current={isActive ? "page" : undefined}
-                    className={`tap-overlay-y flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs transition-colors ${
-                      isActive ? "btn-gold-glass font-semibold" : "border border-line bg-white text-muted hover:text-ink"
-                    }`}
-                  >
-                    <TabIcon id={item.id} className="h-3.5 w-3.5" />
-                    <span>{item.label}</span>
-                    <NavBadge item={item} badges={badges} />
-                  </button>
-                );
-              })}
-            </div>
-          ))}
-        </nav>
+        {/* แถบเตือนสภาพแวดล้อมเงิน — เห็นทุกหน้า ไม่ใช่แค่จอกว้าง */}
+        {badges?.stripeMode === "test" ? (
+          <div role="status" className="border-b border-amber-300 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-900 sm:px-6">
+            Stripe อยู่ในโหมดทดสอบ — รายการชำระเงินที่เห็นยังไม่ใช่เงินจริง
+          </div>
+        ) : null}
 
-        {/* ─── พื้นที่ทำงาน ───────────────────────────────────────── */}
-        <main id="main-content" tabIndex={-1} className="admin-workspace min-w-0 flex-1 px-4 pb-16 pt-5 sm:px-6 sm:pt-6 lg:px-10 lg:pt-8">
-          <div className="mx-auto w-full max-w-[1320px]">
+        <main id="main-content" tabIndex={-1} className="admin-workspace flex min-w-0 flex-1 flex-col">
           {/*
             ⚠️ ทุกหน้าต้องมี <h1> หนึ่งอันเสมอ — มันคือ "ชื่อของหน้า" ที่ screen reader
             ใช้บอกผู้ใช้ว่าตอนนี้อยู่หน้าไหน และเป็นรากของสารบัญหัวข้อทั้งหน้า
@@ -591,54 +569,74 @@ function AdminContent() {
           */}
           <h1 className="sr-only">แผงควบคุมผู้ดูแลระบบ</h1>
 
+          {/* ─── หัวหน้า: แถบขาวคั่นเส้น ─────────────────────────────── */}
           {activeItem && (
-            <div className="mb-6">
-              <p className="text-xs font-medium text-muted">{activeGroup}</p>
-              <div className="mt-0.5 flex flex-wrap items-start justify-between gap-x-6 gap-y-2">
-                <div className="min-w-0">
-                  <h2 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">{activeItem.label}</h2>
-                  <p className="mt-1 text-sm text-muted">{activeItem.description}</p>
+            <div className="border-b border-line bg-white">
+              <div className="mx-auto w-full max-w-[1320px] px-4 py-5 sm:px-6 lg:px-8">
+                <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+                  <div className="min-w-0">
+                    <h2 className="text-xl font-semibold text-ink sm:text-2xl">{activeItem.label}</h2>
+                    <p className="mt-1 max-w-3xl text-sm text-muted">{activeItem.description}</p>
+                  </div>
+                  {activeItem.help ? (
+                    <button
+                      type="button"
+                      onClick={() => setHelpOpen((o) => !o)}
+                      aria-expanded={helpOpen}
+                      aria-controls="admin-page-help"
+                      className="admin-btn-secondary tap-overlay-y inline-flex min-h-10 shrink-0 items-center rounded-md px-3.5 text-sm font-medium"
+                    >
+                      {helpOpen ? "ซ่อนวิธีใช้" : "วิธีใช้หน้านี้"}
+                    </button>
+                  ) : null}
                 </div>
-                {activeItem.help ? (
-                  <details className="group w-full text-xs sm:w-auto sm:max-w-sm">
-                    <summary className="tap-overlay-y inline-flex min-h-9 w-fit cursor-pointer list-none items-center rounded-lg border border-line bg-white px-3 font-semibold text-ink-soft shadow-xs hover:text-ink [&::-webkit-details-marker]:hidden">
-                      <span className="group-open:hidden">วิธีใช้หน้านี้</span>
-                      <span className="hidden group-open:inline">ซ่อนวิธีใช้</span>
-                    </summary>
-                    <ul className="admin-card mt-2 space-y-1.5 px-4 py-3 text-muted">
+                {activeItem.help && helpOpen ? (
+                  <div id="admin-page-help" className="admin-help mt-4 px-4 py-3">
+                    <p className="text-xs font-semibold text-ink">วิธีใช้หน้านี้</p>
+                    <ol className="mt-1.5 list-decimal space-y-1 pl-5 text-sm text-ink-soft">
                       {activeItem.help.map((h) => (
-                        <li key={h} className="border-l-2 border-line pl-2.5">{h}</li>
+                        <li key={h}>{h}</li>
                       ))}
-                    </ul>
-                  </details>
+                    </ol>
+                  </div>
                 ) : null}
               </div>
             </div>
           )}
 
-          <div className="space-y-6">
-            {activeTab === "executive" && <ExecutiveDashboard />}
-            {activeTab === "overview" && <AdminOverview onNavigateTab={selectTab} />}
-            {activeTab === "stats" && <StatsDashboard />}
-            {activeTab === "members" && <MembersPanel />}
-            {activeTab === "feedback" && <FeedbackPanel />}
-            {activeTab === "redeem" && <RedeemCodesManager />}
-            {activeTab === "entitlement" && <EntitlementAdmin />}
-            {activeTab === "content" && <ContentEditor />}
-            {activeTab === "readers" && <ReadersPage />}
-            {activeTab === "bookings" && <BookingsAdmin />}
-            {activeTab === "payments" && <PaymentsPanel />}
-            {activeTab === "audit" && <AuditLogPanel />}
-            {activeTab === "health" && (
-              <HealthPage
-                fallback={healthSubTab}
-                onSwitchTab={(target) => {
-                  if (target !== "ai") selectTab(target);
-                }}
-              />
-            )}
+          <div className="mx-auto w-full max-w-[1320px] flex-1 px-4 pb-12 pt-6 sm:px-6 lg:px-8">
+            <div className="space-y-6">
+              {activeTab === "executive" && <ExecutiveDashboard />}
+              {activeTab === "overview" && <AdminOverview onNavigateTab={selectTab} />}
+              {activeTab === "stats" && <StatsDashboard />}
+              {activeTab === "members" && <MembersPanel />}
+              {activeTab === "feedback" && <FeedbackPanel />}
+              {activeTab === "redeem" && <RedeemCodesManager />}
+              {activeTab === "entitlement" && <EntitlementAdmin />}
+              {activeTab === "content" && <ContentEditor />}
+              {activeTab === "readers" && <ReadersPage />}
+              {activeTab === "bookings" && <BookingsAdmin />}
+              {activeTab === "payments" && <PaymentsPanel />}
+              {activeTab === "audit" && <AuditLogPanel />}
+              {activeTab === "health" && (
+                <HealthPage
+                  fallback={healthSubTab}
+                  onSwitchTab={(target) => {
+                    if (target !== "ai") selectTab(target);
+                  }}
+                />
+              )}
+            </div>
           </div>
-          </div>
+
+          <footer className="border-t border-line bg-white">
+            <div className="mx-auto flex w-full max-w-[1320px] flex-wrap items-center justify-between gap-2 px-4 py-3 text-xs text-muted sm:px-6 lg:px-8">
+              <span>SeerTarot Admin Console · ระบบภายในสำหรับผู้ดูแลที่ได้รับอนุญาตเท่านั้น</span>
+              <button type="button" onClick={() => selectTab("audit")} className="tap-overlay-y font-medium text-gold-ink hover:underline">
+                ทุกการกระทำถูกบันทึกไว้ในบันทึกการทำงาน
+              </button>
+            </div>
+          </footer>
         </main>
       </div>
 
@@ -650,6 +648,145 @@ function AdminContent() {
           sec.items.map((i) => ({ id: i.id, label: i.label, hint: i.short, group: sec.group, keywords: `${i.description} ${i.keywords ?? ""}` })),
         )}
       />
+    </div>
+  );
+}
+
+/** สถานะเงินของระบบ — ท้ายเมนูข้าง ให้รู้ตลอดว่ากำลังดูเงินจริงหรือเงินทดสอบ */
+function StripeModeLine({ badges }: { badges: NavBadges | null }) {
+  if (!badges) return null;
+  const text =
+    badges.stripeMode === "test" ? "Stripe: โหมดทดสอบ" : badges.stripeMode === null ? "Stripe: ยังไม่ได้ตั้งค่า" : "Stripe: เงินจริง";
+  return <p className="admin-nav-muted text-[11px]">{text}</p>;
+}
+
+/** เนื้อในเมนูข้าง — ใช้ร่วมระหว่างจอกว้าง (ติดซ้าย) กับมือถือ (ลิ้นชัก) */
+function AdminSidebar({
+  activeTab,
+  badges,
+  onSelect,
+  onClose,
+}: {
+  activeTab: TabId;
+  badges: NavBadges | null;
+  onSelect: (id: TabId) => void;
+  /** มีเฉพาะในลิ้นชักมือถือ */
+  onClose?: () => void;
+}) {
+  return (
+    <>
+      <div className="admin-sidebar-line flex h-14 shrink-0 items-center gap-3 border-b px-4">
+        <img src="/logo.webp" alt="" width={28} height={28} className="h-7 w-7 shrink-0 rounded-full object-cover" loading="eager" />
+        <span className="min-w-0 flex-1 leading-tight">
+          <span className="block truncate text-sm font-semibold text-white">SeerTarot</span>
+          <span className="admin-nav-muted block truncate text-[11px]">Admin Console</span>
+        </span>
+        {onClose ? (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="ปิดเมนู"
+            className="admin-nav-item tap-overlay-y inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md"
+          >
+            <CloseIcon />
+          </button>
+        ) : null}
+      </div>
+
+      <nav aria-label="เมนูแอดมิน" className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
+        {NAV_SECTIONS.map((section) => (
+          <div key={section.group}>
+            <p className="admin-nav-group mb-1 px-3 text-[11px] font-semibold">{section.group}</p>
+            <ul className="space-y-px">
+              {section.items.map((item) => {
+                const isActive = activeTab === item.id;
+                return (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      onClick={() => onSelect(item.id)}
+                      aria-current={isActive ? "page" : undefined}
+                      title={item.short}
+                      className={`admin-nav-item tap-overlay-y relative flex min-h-10 w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm ${
+                        isActive ? "font-semibold" : "font-medium"
+                      }`}
+                    >
+                      <TabIcon id={item.id} className="h-[18px] w-[18px] shrink-0 opacity-80" />
+                      <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                      <NavBadge item={item} badges={badges} />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </nav>
+
+      <div className="admin-sidebar-line shrink-0 border-t px-4 py-3">
+        <StripeModeLine badges={badges} />
+        <a href="/" target="_blank" rel="noopener noreferrer" className="admin-nav-muted mt-1 inline-block text-[11px] hover:text-white hover:underline">
+          เปิดหน้าเว็บจริง (แท็บใหม่)
+        </a>
+      </div>
+    </>
+  );
+}
+
+/** เมนูบัญชีมุมขวาบน — ไปหน้าเว็บจริง · ออกจากระบบ */
+function AccountMenu({ onLogout }: { onLogout: () => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+  return (
+    <div ref={ref} className="relative shrink-0">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className="admin-btn-secondary tap-overlay-y inline-flex h-10 items-center gap-2 rounded-md pl-1.5 pr-3 text-sm font-medium"
+      >
+        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-inset text-ink-soft">
+          <PersonIcon className="h-4 w-4" />
+        </span>
+        <span className="hidden sm:inline">ผู้ดูแลระบบ</span>
+      </button>
+      {open ? (
+        <div role="menu" className="absolute right-0 top-full z-40 mt-1.5 w-56 overflow-hidden rounded-md border border-line bg-white py-1 shadow-lg">
+          <p className="border-b border-line px-3.5 py-2 text-xs text-muted">เข้าสู่ระบบด้วยรหัสผู้ดูแล · หมดอายุใน 8 ชั่วโมง</p>
+          <a
+            role="menuitem"
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setOpen(false)}
+            className="block min-h-11 px-3.5 py-2.5 text-sm text-ink hover:bg-canvas"
+          >
+            เปิดหน้าเว็บจริง
+          </a>
+          <button
+            role="menuitem"
+            type="button"
+            onClick={onLogout}
+            className="block min-h-11 w-full px-3.5 py-2.5 text-left text-sm font-medium text-rose-700 hover:bg-rose-50"
+          >
+            ออกจากระบบ
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

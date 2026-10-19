@@ -49,44 +49,55 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main id="main-content" tabIndex={-1} className="admin-workspace flex min-h-screen flex-col justify-center px-6">
-      <div className="admin-card mx-auto w-full max-w-sm p-7 sm:p-8">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-line bg-surface-warm shadow-xs">
-          <Image
-            src="/logo.webp"
-            alt="SeerTarot Logo"
-            width={56}
-            height={56}
-            className="h-full w-full object-cover"
-            priority
-          />
+    <main id="main-content" tabIndex={-1} className="admin-workspace flex min-h-screen items-center justify-center px-4 py-10">
+      <div className="admin-card grid w-full max-w-3xl overflow-hidden md:grid-cols-[1fr_1.1fr]">
+        {/* แผงแบรนด์ — บอกชัดว่าเป็นระบบภายใน */}
+        <div className="admin-login-brand flex flex-col justify-between gap-8 p-7 sm:p-8">
+          <div className="flex items-center gap-3">
+            <Image src="/logo.webp" alt="" width={36} height={36} className="h-9 w-9 rounded-full object-cover" priority />
+            <span className="leading-tight">
+              <span className="block text-sm font-semibold text-white">SeerTarot</span>
+              <span className="admin-nav-muted block text-xs">Admin Console</span>
+            </span>
+          </div>
+          <div>
+            <p className="text-lg font-semibold text-white">ระบบผู้ดูแล</p>
+            <p className="admin-nav-muted mt-2 text-sm leading-relaxed">
+              สำหรับผู้ดูแลที่ได้รับอนุญาตเท่านั้น การเข้าสู่ระบบและทุกการกระทำในระบบนี้ถูกบันทึกไว้
+            </p>
+          </div>
         </div>
-        <h1 className="text-center text-lg font-bold text-ink">แผงแอดมิน SeerTarot</h1>
-        <p className="mt-1 text-center text-xs text-muted">
-          ใส่รหัสผ่านผู้ดูแลระบบเพื่อเข้าจัดการ
-        </p>
 
-        <form onSubmit={submit} className="mt-6 flex flex-col gap-4">
-          <Field label="รหัสผ่านแอดมิน" error={error}>
-            {(field) => (
-              <Input
-                {...field}
-                type={show ? "text" : "password"}
-                autoComplete="current-password"
-                autoFocus
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            )}
-          </Field>
-          <label className="-mt-2 inline-flex w-fit cursor-pointer items-center gap-2 text-xs text-muted">
-            <input type="checkbox" checked={show} onChange={(e) => setShow(e.target.checked)} className="h-4 w-4 accent-ink" />
-            แสดงรหัสผ่าน
-          </label>
-          <Button type="submit" isLoading={loading} disabled={!password}>
-            เข้าสู่ระบบ
-          </Button>
-        </form>
+        <div className="p-7 sm:p-8">
+          <h1 className="text-xl font-semibold text-ink">เข้าสู่ระบบ</h1>
+          <p className="mt-1 text-sm text-muted">ใส่รหัสผ่านผู้ดูแลระบบเพื่อเข้าจัดการ</p>
+
+          <form onSubmit={submit} className="mt-6 flex flex-col gap-4">
+            <Field label="รหัสผ่านแอดมิน" error={error}>
+              {(field) => (
+                <Input
+                  {...field}
+                  type={show ? "text" : "password"}
+                  autoComplete="current-password"
+                  autoFocus
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              )}
+            </Field>
+            <label className="-mt-2 inline-flex w-fit cursor-pointer items-center gap-2 text-xs text-muted">
+              <input type="checkbox" checked={show} onChange={(e) => setShow(e.target.checked)} className="h-4 w-4 accent-gold-ink" />
+              แสดงรหัสผ่าน
+            </label>
+            <Button type="submit" isLoading={loading} disabled={!password}>
+              เข้าสู่ระบบ
+            </Button>
+          </form>
+
+          <p className="mt-6 border-t border-line pt-4 text-xs leading-relaxed text-muted">
+            ใส่รหัสผิดหลายครั้งติดกัน ระบบจะพักการเข้าสู่ระบบชั่วคราว 15 นาที · เข้าสู่ระบบแล้วอยู่ได้ 8 ชั่วโมง
+          </p>
+        </div>
       </div>
     </main>
   );
