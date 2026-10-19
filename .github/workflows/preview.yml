@@ -11,7 +11,7 @@ run-name: "👀 Preview [${{ github.ref_name }}] ${{ github.event.head_commit.me
 # ⚠️ ลิงก์นี้ต่อ **ฐานข้อมูล/KV/R2 ตัวจริง** (binding ชุดเดียวกับ production ใน wrangler.jsonc)
 #    แต่ไม่มี secret ของ production — ล็อกอิน/คำอ่าน AI อาจใช้ไม่ได้ (ดูขั้น Deploy ด้านล่าง)
 # ⚠️ ไม่รัน D1 migration (ไม่แตะโครงฐานข้อมูล production) — กิ่งที่เพิ่ม migration ใหม่ต้องรอ deploy จริง
-# ⚠️ KV cache ของหน้า Next ถูกเติมใต้ BUILD_ID ใหม่ (คีย์แยกจาก production ไม่ทับของเดิม)
+# ℹ️ แคชหน้า Next อยู่ใน static assets ของ Worker preview เอง (ไม่เขียนลง KV แล้ว · 2026-10-19)
 # ⚠️ หน้าเว็บมี canonical ชี้ seertarot.net อยู่แล้ว — ลิงก์ทดลองไม่แย่งอันดับ SEO ถ้าบอตเผลอเจอ
 #
 # วิธีสั่ง: push คอมมิตที่ข้อความมี `[preview]` บนกิ่งใดก็ได้ที่ไม่ใช่ main

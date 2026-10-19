@@ -62,6 +62,30 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0288 · 2026-10-19 22:25 · 🟡 Medium · ย้ายแคชหน้า Next ออกจาก KV ไป static assets + ลบคีย์แคชเก่าที่สะสม 14 GB
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | บิล Cloudflare ขึ้นค่า KV Storage 14.78 GB-เดือน ($7 ต่อรอบ) โตขึ้นทุกเดือน ($0.50 ➔ $1.50 ➔ $7) ทั้งที่ข้อมูลแอปใน KV มีแค่ตัวนับกับธงเล็ก ๆ ที่มี TTL |
+| **สาเหตุราก** | open-next.config.ts ใช้ kv-incremental-cache ซึ่ง seed หน้าที่ prerender ทั้งชุดใต้คีย์ incremental-cache/<BUILD_ID>/ ทุกครั้งที่ deploy ทั้ง production และ Worker preview แต่ OpenNext ไม่เคยลบชุดของ BUILD_ID เก่า ทุก deploy จึงทิ้งขยะไว้หนึ่งชุดสะสมไม่มีที่สิ้นสุด |
+| **การแก้ไข** | เปลี่ยนเป็น static-assets-incremental-cache (แคชผูกกับเวอร์ชัน Worker ไม่มีค่าเก็บ) + สคริปต์ cf:kv-prune ลบคีย์ incremental-cache/ ทั้งหมดท้าย deploy.yml โดยไม่แตะ app:* |
+| **🛡️ กฎป้องกันถาวร** | **ด่าน test-prefetch-loop กฎ 1b ล้มถ้า open-next.config.ts กลับไปใช้ kv-incremental-cache · ถ้าต้องมี ISR ให้ใช้ R2 ไม่ใช่ KV · ขั้นท้าย deploy.yml ลบคีย์ incremental-cache/ ทุกรอบเป็นตาข่ายรองรับ** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npm run build:worker ผ่าน · opennextjs-cloudflare preview ในเครื่อง หน้า /admin/login /tester ตอบ 200 พร้อม x-nextjs-cache: HIT จาก static assets · test-prefetch-loop ผ่าน · typecheck ผ่าน |
+| **บันทึกโดย** | claude-kv · branch `claude/charming-shannon-ymzagt` · commit `7bf2844` |
+
+
+### INC-0287 · 2026-10-19 22:22 · 🟡 Medium · ย้ายแคชหน้า Next ออกจาก KV ไป static assets + ลบคีย์แคชเก่าที่สะสม 14 GB
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | บิล Cloudflare ขึ้นค่า KV Storage 14.78 GB-เดือน ($7 ต่อรอบ $0.50 ต่อวัน) ทั้งที่ข้อมูลแอปใน KV มีแค่ตัวนับกับธงเล็ก ๆ ที่มี TTL |
+| **สาเหตุราก** | open-next.config.ts ใช้ kv-incremental-cache ซึ่ง seed หน้าที่ prerender ทั้งชุดใต้คีย์ incremental-cache/<BUILD_ID>/ ทุกครั้งที่ deploy ทั้ง production และ Worker preview แต่ OpenNext ไม่เคยลบชุดของ BUILD_ID เก่า ทุก deploy จึงทิ้งขยะไว้หนึ่งชุดสะสมไม่มีที่สิ้นสุด |
+| **การแก้ไข** | เปลี่ยนเป็น static-assets-incremental-cache (แคชผูกกับเวอร์ชัน Worker ไม่มีค่าเก็บ) + สคริปต์ cf:kv-prune ลบคีย์ incremental-cache/ ทั้งหมดท้าย deploy.yml โดยไม่แตะ app:* |
+| **🛡️ กฎป้องกันถาวร** | **ด่าน test-prefetch-loop กฎ 1b ล้มถ้า open-next.config.ts กลับไปใช้ kv-incremental-cache · ถ้าต้องมี ISR ให้ใช้ R2 ไม่ใช่ KV · ขั้นท้าย deploy.yml ลบคีย์ incremental-cache/ ทุกรอบเป็นตาข่ายรองรับ** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npm run build:worker ผ่าน · opennextjs-cloudflare preview ในเครื่อง หน้า /admin/login /tester ตอบ 200 พร้อม x-nextjs-cache: HIT จาก static assets · test-prefetch-loop ผ่าน · typecheck ผ่าน |
+| **บันทึกโดย** | claude-kv · branch `claude/charming-shannon-ymzagt` · commit `7bf2844` |
+
+
 ### INC-0286 · 2026-10-18 13:22 · 🟠 High · คำถามหายหลังลงชื่อเข้าใช้กลางพิธีเปิดไพ่ (หน้า /read/<ผัง>)
 
 | หัวข้อ | รายละเอียด |

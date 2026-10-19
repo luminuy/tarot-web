@@ -38,6 +38,11 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-19 (รอบ 295): บิล KV Storage 14.78 GB-เดือน ($7/รอบ) — ย้ายแคชหน้า Next ออกจาก KV (เจ้าของ "เราใช้ kv storage มากเกินไป" · "รีดประสิทธิภาพให้คุ้มที่สุด ทำให้ดีและฟรี")
+- สาเหตุ: `open-next.config.ts` ใช้ `kv-incremental-cache` ➔ ทุก deploy (production + Worker preview) seed หน้าที่ prerender ทั้งชุดใต้ `incremental-cache/<BUILD_ID>/…` และไม่เคยลบชุดเก่า (ยุคก่อนย้าย Astro หน้า Next มีหลายร้อยหน้า ชุดละหลายสิบ MB) ทั้งที่ใช้จริงแค่ชุดปัจจุบัน · คีย์แอป `app:*` มี TTL ครบ ไม่ใช่ต้นเหตุ
+- แก้: เปลี่ยนเป็น `static-assets-incremental-cache` (แคชไปอยู่ `cdn-cgi/_next_cache` ใน assets ของ Worker · ผูกกับเวอร์ชัน · ฟรี · เว็บ SSG ล้วนไม่มี ISR) · สคริปต์ `npm run cf:kv-prune` ลบคีย์ `incremental-cache/` ทั้งหมด (ไม่แตะ `app:*`) รันท้าย `deploy.yml` อัตโนมัติ · ด่าน `test-prefetch-loop` กฎ 1b ห้ามกลับไปใช้ KV cache
+- ตรวจ: `build:worker` ผ่าน · แคชชุดปัจจุบัน 15 ไฟล์ 1.4 MB · รัน Worker ในเครื่อง (`opennextjs-cloudflare preview`) หน้า Next ตอบ `x-nextjs-cache: HIT` จาก static assets · บิล KV Storage ควรเหลือ ~0 หลัง deploy แรก (ค่าลบคีย์อยู่ในโควตาฟรี 1M ครั้ง/เดือน) · Worker preview ตัวเก่าจะไม่มีแคชจนกว่าจะสั่ง preview ใหม่
+
 ### 🗓️ 2026-10-18 (รอบ 294): คำถามไม่หายหลังลงชื่อเข้าใช้กลางพิธี (เจ้าของ "ใส่คำถามไปแล้ว เด้งหน้าให้ลงชื่อ เข้าใส่เสร็จ แต่คำถามหาย ต้องพิมพ์ใหม่" · INC บันทึกแล้ว)
 - สาเหตุ: ทุกทางลงชื่อ (Google · LINE · อีเมล) โหลดหน้า `/read/<ผัง>` ใหม่แบบ navigate ➔ ถูกตัดสินว่า "กดลิงก์เข้ามาใหม่" แล้วล้างรอบที่ค้างพร้อมคำถาม
 - แก้: เปิดหน้าต่างลงชื่อจากหน้าผัง = จด `tarot_auth_detour_v1` (ผัง + เวลา) · กลับมาหน้าผังเดิมภายใน 30 นาที = กู้คืนรอบเดิม (ใช้ได้ครั้งเดียว) · ต่างผัง/หมดเวลา = เริ่มใหม่ตามกติกาเดิม (รอบ 132)
