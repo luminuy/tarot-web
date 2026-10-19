@@ -14,6 +14,7 @@
  * ⚠️ ห้ามย้ายไปตั้งค่าใน React หลัง hydrate — หน้าจะแวบเป็นสีสว่างก่อนแล้วค่อยมืด
  * ⚠️ ห้ามใส่ defer / async — ต้องรันก่อน `<body>` ถูกวาด
  * ⚠️ อ่าน localStorage ไม่ได้ (โหมดส่วนตัวบางเบราว์เซอร์) = ใช้ค่าของเครื่องต่อไป ไม่ล้ม
+ * ⚠️ `/admin` บังคับโหมดสว่างเสมอ (ธีมแอดมินออกแบบบนพื้นขาวอย่างเดียว · `admin-theme.css`)
  * ⚠️ ปุ่มสลับมี `aria-pressed` — สคริปต์ปรับให้ตรงกับโหมดจริงตอนหน้าโหลดเสร็จและทุกครั้งที่สลับ
  *
  * สีของแถบเบราว์เซอร์ (`<meta name="theme-color">`) ถูกปรับตามโหมดด้วย
@@ -38,7 +39,9 @@ export const THEME_SCRIPT =
   JSON.stringify(SITE_THEME_COLOR) +
   ",q=document.querySelectorAll('meta[name=\"theme-color\"]'),i;for(i=0;i<q.length;i++)q[i].setAttribute('content',c);" +
   "q=document.querySelectorAll('[data-theme-toggle]');for(i=0;i<q.length;i++)q[i].setAttribute('aria-pressed',t==='dark'?'true':'false')}" +
-  "function apply(t){d.setAttribute('data-theme',t);sync(t)}" +
+  // แผงแอดมินเป็นพื้นขาวเสมอ ไม่ตามโหมดมืดของเครื่อง (เจ้าของ 2026-10-19 "ดำได้ไหม อ่านไม่รู้เรื่อง")
+  // โทเคนโหมดมืดทับการ์ดแอดมินจนตัวหนังสือเข้มจมพื้นเข้ม — ตัดที่ต้นทางก่อนวาดเฟรมแรก ไม่ไล่ทับด้วย CSS
+  "function apply(t){if(/^\\/admin(\\/|$)/.test(location.pathname))t='light';d.setAttribute('data-theme',t);sync(t)}" +
   // เขียนไม่ได้ (โหมดส่วนตัว / ปิดคุกกี้) = โหมดยังสลับในหน้านี้ แค่ไม่จำข้ามหน้า
   "function save(t){try{localStorage.setItem(k,t);return true}catch(x){return false}}" +
   "apply(saved()||(m&&m.matches?'dark':'light'));" +
