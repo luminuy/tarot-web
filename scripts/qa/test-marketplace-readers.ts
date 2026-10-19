@@ -1182,6 +1182,63 @@ async function testVideoCall(readerId: string, sessionSecret: string) {
     throw new Error("❌ VideoCallRoom ต้องล็อกภาพ 720p และเพดาน 1.5 Mbps (คุมโควตาฟรี TURN)");
   }
   console.log("  ✓ 16.5 กล้อง/ไมค์เปิดเฉพาะหน้าวิดีโอคอล · เบราว์เซอร์บังคับ relay · ล็อก 720p/1.5 Mbps");
+
+  // ── 16.6 ต่อสายใหม่อัตโนมัติ + ป้ายคุณภาพสาย (2026-10-19) ─────────────────
+  const rec = await import("../../src/lib/marketplace/call-recovery");
+  const base = {
+    now: 100_000,
+    connected: false,
+    roundStartedAt: 90_000,
+    lostAt: null as number | null,
+    failed: false,
+    lastRestartAt: null as number | null,
+    attempts: 0,
+    peerPresent: true,
+    online: true,
+    networkReturned: false,
+  };
+  const cases: Array<[string, Partial<typeof base>, string]> = [
+    ["สายติดอยู่", { connected: true, lostAt: 1 }, "wait"],
+    ["อีกฝั่งไม่อยู่ในห้อง", { failed: true, peerPresent: false }, "wait"],
+    ["เครื่องเราไม่มีเน็ต", { failed: true, online: false }, "wait"],
+    ["หลุดชั่วคราว ยังไม่ครบ 5 วิ", { lostAt: 97_000 }, "wait"],
+    ["หลุดชั่วคราว ครบ 5 วิ", { lostAt: 95_000 }, "restart"],
+    ["หลุดถาวร ต่อใหม่ทันที", { lostAt: 99_900, failed: true }, "restart"],
+    ["เจรจารอบใหม่ยังไม่ครบ 20 วิ", { roundStartedAt: 85_000 }, "wait"],
+    ["เจรจารอบใหม่ค้างเกิน 20 วิ", { roundStartedAt: 79_000 }, "restart"],
+    ["ยังอยู่ในระยะเว้นของครั้งที่ 2", { failed: true, attempts: 1, lastRestartAt: 95_000 }, "wait"],
+    ["พ้นระยะเว้นของครั้งที่ 2", { failed: true, attempts: 1, lastRestartAt: 89_000 }, "restart"],
+    ["เน็ตเพิ่งกลับมา ไม่ต้องรอระยะเว้น", { networkReturned: true, attempts: 3, lastRestartAt: 99_000 }, "restart"],
+    ["ครบเพดานครั้งแล้ว ให้คนกดเอง", { failed: true, attempts: rec.MAX_AUTO_RESTARTS }, "give-up"],
+  ];
+  for (const [label, patch, want] of cases) {
+    const got = rec.decideRecovery({ ...base, ...patch });
+    if (got !== want) throw new Error(`❌ decideRecovery "${label}" ต้องได้ ${want} (ได้ ${got})`);
+  }
+  if (rec.restartBackoffMs(0) !== 0 || rec.restartBackoffMs(2) !== 20_000 || rec.restartBackoffMs(9) !== 30_000) {
+    throw new Error("❌ ระยะเว้นต่อสายใหม่ต้องเป็น 0 · 10 · 20 · 30 วิ แล้วคงที่ 30 วิ");
+  }
+  if (
+    rec.lossRatio(null, { received: 0, lost: 0 }) !== 0 ||
+    Math.abs(rec.lossRatio({ received: 100, lost: 0 }, { received: 190, lost: 10 }) - 0.1) > 1e-9 ||
+    rec.classifyCallQuality(0.05, 0) !== "good" ||
+    rec.classifyCallQuality(0.4, 0) !== "fair" ||
+    rec.classifyCallQuality(0.05, 0.05) !== "fair" ||
+    rec.classifyCallQuality(0.8, 0) !== "weak" ||
+    rec.classifyCallQuality(null, 0.2) !== "weak"
+  ) {
+    throw new Error("❌ ป้ายคุณภาพสายต้องจัดระดับ ดี/พอใช้/อ่อน ตามเวลาไป-กลับและแพ็กเก็ตหาย");
+  }
+  if (
+    !room.includes("decideRecovery(") ||
+    !room.includes('this.o.role !== "customer"') || // ฝั่งลูกค้าสั่งต่อใหม่ฝั่งเดียว — สองฝั่งสั่ง = round กระโดดไล่กัน
+    !room.includes('window.addEventListener("online", this.onOnline)') ||
+    !room.includes('window.removeEventListener("online", this.onOnline)') ||
+    !room.includes("manualRestart()")
+  ) {
+    throw new Error("❌ VideoCallRoom ต้องต่อสายใหม่อัตโนมัติจากฝั่งลูกค้า + ฟังเน็ตกลับมา + มีปุ่มต่อเองสำรอง");
+  }
+  console.log(`  ✓ 16.6 ต่อสายใหม่อัตโนมัติ ${cases.length} สถานการณ์ถูกต้อง · ระยะเว้น 0/10/20/30 วิ · ป้ายคุณภาพสาย 3 ระดับ`);
 }
 
 /**

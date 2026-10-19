@@ -38,6 +38,11 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-19 (รอบ 296): วิดีโอคอลแม่หมอต่อสายใหม่อัตโนมัติ + ป้ายคุณภาพสาย (เจ้าของ "ความเสถียรล่ะ" ➔ "ทำเลย ตรวจหลังทำเสร็จทีเดียว")
+- เดิม: เน็ตกระตุก (สลับ Wi-Fi ↔ 4G · เข้าลิฟต์) สายค้างที่ "สัญญาณหลุด" จนกว่าคนกด "ต่อสายใหม่" เอง
+- แก้ (`VideoCallRoom.tsx` + ตรรกะล้วน `src/lib/marketplace/call-recovery.ts`): ฝั่งลูกค้าสั่งต่อใหม่ฝั่งเดียว — หลุดชั่วคราวรอ 5 วิให้ ICE ฟื้นเอง · หลุดถาวรต่อทันที · เจรจาค้างเกิน 20 วิต่อใหม่ · เว้น 0/10/20/30 วิ ไม่เกิน 8 ครั้งต่อช่วงหลุด (กันชนเพดาน 120 ครั้ง/ชม.) · เน็ตกลับมา (`online`) ต่อทันที · ปุ่มต่อเองยังอยู่ · แม่หมอส่งภาพแบบ `detail`/`maintain-resolution` (ไพ่คมไว้ก่อน) ลูกค้าแบบ `motion`/`maintain-framerate` · ป้าย "สัญญาณดี/พอใช้/อ่อน" จาก `getStats()` ในเครื่อง (ไม่ยิงอะไรเพิ่ม)
+- ตรวจ: `test-marketplace-readers` 16.6 (12 สถานการณ์ต่อสายใหม่ + ระยะเว้น + ป้ายคุณภาพ) · `repo:verify` · ⏸️ ยังต้องลองโทรจริงบนมือถือ 2 เครื่อง (สลับ Wi-Fi ↔ 4G กลางสาย) — ในเครื่องไม่มี TURN จริง
+
 ### 🗓️ 2026-10-19 (รอบ 295): บิล KV Storage 14.78 GB-เดือน ($7/รอบ) — ย้ายแคชหน้า Next ออกจาก KV (เจ้าของ "เราใช้ kv storage มากเกินไป" · "รีดประสิทธิภาพให้คุ้มที่สุด ทำให้ดีและฟรี")
 - สาเหตุ: `open-next.config.ts` ใช้ `kv-incremental-cache` ➔ ทุก deploy (production + Worker preview) seed หน้าที่ prerender ทั้งชุดใต้ `incremental-cache/<BUILD_ID>/…` และไม่เคยลบชุดเก่า (ยุคก่อนย้าย Astro หน้า Next มีหลายร้อยหน้า ชุดละหลายสิบ MB) ทั้งที่ใช้จริงแค่ชุดปัจจุบัน · คีย์แอป `app:*` มี TTL ครบ ไม่ใช่ต้นเหตุ
 - แก้: เปลี่ยนเป็น `static-assets-incremental-cache` (แคชไปอยู่ `cdn-cgi/_next_cache` ใน assets ของ Worker · ผูกกับเวอร์ชัน · ฟรี · เว็บ SSG ล้วนไม่มี ISR) · สคริปต์ `npm run cf:kv-prune` ลบคีย์ `incremental-cache/` ทั้งหมด (ไม่แตะ `app:*`) รันท้าย `deploy.yml` อัตโนมัติ · ด่าน `test-prefetch-loop` กฎ 1b ห้ามกลับไปใช้ KV cache
