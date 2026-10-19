@@ -46,7 +46,7 @@ export function CommandPalette({ open, onClose, items, onSelect }: { open: boole
         role="dialog"
         aria-modal="true"
         aria-label="ค้นหาเมนูแอดมิน"
-        className="w-full max-w-lg overflow-hidden rounded-xl border border-line bg-white shadow-lg"
+        className="w-full max-w-lg overflow-hidden rounded-lg border border-line bg-white shadow-lg"
         onMouseDown={(e) => e.stopPropagation()}
         onKeyDown={(e) => {
           if (e.key === "Escape") onClose();
@@ -83,7 +83,7 @@ export function CommandPalette({ open, onClose, items, onSelect }: { open: boole
               aria-selected={i === active}
               onMouseEnter={() => setActive(i)}
               onClick={() => choose(r.id)}
-              className={`cursor-pointer px-4 py-2 ${i === active ? "bg-canvas" : ""}`}
+              className={`cursor-pointer border-l-2 px-4 py-2 ${i === active ? "border-gold-ink bg-gold-wash" : "border-transparent"}`}
             >
               <span className="flex items-baseline justify-between gap-3">
                 <span className="text-sm font-medium text-ink">{r.label}</span>

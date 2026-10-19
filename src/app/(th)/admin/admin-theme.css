@@ -26,35 +26,52 @@ body:has(.admin-shell)::after {
 }
 
 .admin-shell {
-  --color-canvas: #f4f5f7;
+  /*
+   * 2026-10-19 (เจ้าของ "ออกแบบ ui/ux หน้าแอดมินใหม่ ให้ดูเป็นทางการมาตรฐาน")
+   * สีเน้นเดียวทั้งระบบเป็นน้ำเงินองค์กร — โทเคน gold* ของหน้าเว็บจริงถูกสลับเป็นน้ำเงินในแอดมิน
+   * ทุกแผงที่ใช้ `text-gold-ink` · `border-gold` · `bg-gold-ink/10` · ปุ่ม `Button` จึงเปลี่ยนตามเองโดยไม่ต้องแก้ทีละไฟล์
+   * คอนทราสต์บนขาว: accent #1d4ed8 = 6.7:1 · accent-deep #1e3a8a = 10.4:1
+   */
+  --admin-accent: #1d4ed8;
+  --admin-accent-hover: #1e40af;
+  --admin-accent-wash: #eff4ff;
+  --admin-nav: #0f1b2d;
+  --admin-nav-line: rgba(255, 255, 255, 0.08);
+  --admin-nav-text: #cbd5e1;
+  --admin-nav-muted: #8b9bb4;
+  --admin-nav-active: rgba(255, 255, 255, 0.09);
+  --admin-nav-indicator: #60a5fa;
+
+  --color-canvas: #f3f4f6;
   --color-surface: #ffffff;
   --color-surface-warm: #f9fafb;
   --color-inset: #eceef1;
   --color-inset-warm: #f3f4f6;
-  --color-line: #e3e6ea;
+  --color-line: #e2e5ea;
   --color-line-soft: #eef0f2;
-  --color-line-warm: #e3e6ea;
+  --color-line-warm: #e2e5ea;
   --color-line-interactive: #6b7280;
   --color-line-interactive-warm: #6b7280;
   --color-ink: #111827;
   --color-ink-deep: #111827;
-  --color-ink-soft: #4b5563;
+  --color-ink-soft: #374151;
   --color-muted: #4b5563;
-  --color-gold: #374151;
-  --color-gold-deep: #111827;
-  --color-gold-ink: #111827;
-  --color-gold-ink-deep: #000000;
-  --color-gold-wash: rgba(17, 24, 39, 0.05);
+  --color-gold: #2563eb;
+  --color-gold-deep: #1e40af;
+  --color-gold-ink: #1d4ed8;
+  --color-gold-ink-deep: #1e3a8a;
+  --color-gold-wash: rgba(29, 78, 216, 0.06);
   --color-dark: #111827;
 
   --glass-fill: #ffffff;
   --glass-sheen: none;
-  --glass-edge: #e3e6ea;
+  --glass-edge: #e2e5ea;
   --glass-edge-on: #c9ced6;
   --glass-ring: transparent;
-  --glass-radius: 14px;
-  --glass-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 2px 8px -2px rgba(16, 24, 40, 0.06);
-  --glass-shadow-lift: 0 2px 4px rgba(16, 24, 40, 0.06), 0 8px 20px -6px rgba(16, 24, 40, 0.1);
+  /* มุมการ์ด 8px ทั้งระบบ — หน้าจองานทางการไม่ใช้มุมมนแบบหน้าโชว์ */
+  --glass-radius: 8px;
+  --glass-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --glass-shadow-lift: 0 1px 3px rgba(16, 24, 40, 0.08), 0 4px 12px -4px rgba(16, 24, 40, 0.08);
 
   background: #ffffff;
   color: var(--color-ink);
@@ -86,7 +103,7 @@ body:has(.admin-shell)::after {
   background-color: #ffffff;
   background-image: none;
   border: 1px solid var(--color-line);
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 20px 40px -12px rgba(16, 24, 40, 0.25);
 }
 
@@ -109,16 +126,16 @@ body:has(.admin-shell)::after {
   border-top-color: var(--color-line);
 }
 
-/* ปุ่ม/ป้ายหลัก: ดำเรียบ ตัวขาว */
+/* ปุ่ม/ป้ายหลัก: น้ำเงินองค์กร ตัวขาว (ขาวบน #1d4ed8 = 6.7:1) */
 .admin-shell .btn-gold-glass {
   background-image: none;
-  background-color: #111827;
+  background-color: var(--admin-accent);
   color: #ffffff;
   box-shadow: none;
 }
 .admin-shell .btn-gold-glass:hover {
   filter: none;
-  background-color: #000000;
+  background-color: var(--admin-accent-hover);
   box-shadow: none;
 }
 
@@ -138,7 +155,7 @@ body:has(.admin-shell)::after {
 .admin-shell .admin-card {
   background-color: #ffffff;
   border: 1px solid var(--color-line);
-  border-radius: 14px;
+  border-radius: 8px;
   box-shadow: var(--glass-shadow);
 }
 
@@ -147,9 +164,14 @@ body:has(.admin-shell)::after {
   background-color: var(--color-surface-warm);
 }
 .admin-shell .admin-workspace table thead th {
+  font-size: 12px;
   font-weight: 600;
   color: var(--color-muted);
   white-space: nowrap;
+  border-bottom: 1px solid var(--color-line);
+}
+.admin-shell .admin-workspace table tbody tr + tr {
+  border-top: 1px solid var(--color-line-soft);
 }
 .admin-shell .admin-workspace table tbody tr {
   transition: background-color 0.12s ease;
@@ -160,8 +182,11 @@ body:has(.admin-shell)::after {
 
 /* โฟกัสคีย์บอร์ดเห็นชัดทุกปุ่ม/ช่อง */
 .admin-shell :is(button, a, input, select, textarea, summary):focus-visible {
-  outline: 2px solid #111827;
+  outline: 2px solid var(--admin-accent);
   outline-offset: 2px;
+}
+.admin-shell :is(input, select, textarea):focus {
+  border-color: var(--admin-accent);
 }
 
 /* แถบขอยินยอมสถิติเป็นของหน้าเว็บลูกค้า — ในแอดมินมันบังปุ่มท้ายหน้าเปล่า ๆ */
@@ -176,4 +201,109 @@ body:has(.admin-shell) [data-consent-banner] {
 .admin-shell .font-mono:not(textarea):not(code):not(kbd) {
   font-family: inherit;
   font-variant-numeric: tabular-nums;
+}
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * โครงหน้าแบบคอนโซลองค์กร (2026-10-19 · เจ้าของ "ให้ดูเป็นทางการมาตรฐาน")
+ * ───────────────────────────────────────────────────────────────────────────
+ * เมนูข้างพื้นกรมท่าเต็มความสูง · แถบบนขาวมีเส้นทางหน้า (breadcrumb) · หัวหน้าเป็นแถบขาวคั่นเส้น
+ * พื้นที่ทำงานเทาอ่อน · มุมทุกกล่อง 8px · หัวข้อใช้น้ำหนัก 600 แบบเอกสารทางการ
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+.admin-shell :where(h1, h2, h3) {
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+/* มุมมนของกล่องย่อยในทุกแผง (rounded-xl/2xl เดิม 12–16px) ให้เท่ากับการ์ด */
+.admin-shell .admin-workspace :is(.rounded-xl, .rounded-2xl, .rounded-3xl) {
+  border-radius: 8px;
+}
+
+/* ปุ่มทรงแคปซูลในแผงเดิมให้เป็นมุม 6px แบบปุ่มมาตรฐาน (ป้ายสถานะยังเป็นแคปซูลได้) */
+.admin-shell .admin-workspace :is(button, a).rounded-full {
+  border-radius: 6px;
+}
+
+/* เมนูข้าง */
+.admin-shell .admin-sidebar {
+  background-color: var(--admin-nav);
+  color: var(--admin-nav-text);
+}
+.admin-shell .admin-sidebar-line {
+  border-color: var(--admin-nav-line);
+}
+.admin-shell .admin-nav-group {
+  color: var(--admin-nav-muted);
+}
+.admin-shell .admin-nav-item {
+  color: var(--admin-nav-text);
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+.admin-shell .admin-nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+.admin-shell .admin-nav-item[aria-current="page"] {
+  background-color: var(--admin-nav-active);
+  color: #ffffff;
+}
+.admin-shell .admin-nav-item[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  inset: 8px auto 8px 0;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background-color: var(--admin-nav-indicator);
+}
+.admin-shell .admin-sidebar :focus-visible {
+  outline-color: var(--admin-nav-indicator);
+}
+.admin-shell .admin-nav-muted {
+  color: var(--admin-nav-muted);
+}
+
+/* ป้ายตัวเลขบนเมนูมืด */
+.admin-shell .admin-nav-badge-info {
+  background-color: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+/* ปุ่มรองบนแถบบน (ขอบเทา พื้นขาว) */
+.admin-shell .admin-btn-secondary {
+  background-color: #ffffff;
+  border: 1px solid var(--color-line);
+  color: var(--color-ink);
+}
+.admin-shell .admin-btn-secondary:hover {
+  background-color: var(--color-surface-warm);
+  border-color: #c9ced6;
+}
+
+/* แท็บหมวดย่อยแบบเส้นใต้ (มาตรฐานคอนโซลองค์กร) */
+.admin-shell .admin-tab {
+  color: var(--color-muted);
+  border-bottom: 2px solid transparent;
+}
+.admin-shell .admin-tab:hover {
+  color: var(--color-ink);
+  border-bottom-color: #c9ced6;
+}
+.admin-shell .admin-tab[aria-selected="true"] {
+  color: var(--admin-accent);
+  border-bottom-color: var(--admin-accent);
+}
+
+/* กล่องวิธีใช้หน้านี้ */
+.admin-shell .admin-help {
+  background-color: var(--admin-accent-wash);
+  border: 1px solid #c7d7fe;
+  border-radius: 8px;
+}
+
+/* หน้าเข้าสู่ระบบ: แผงแบรนด์ซ้าย */
+.admin-shell .admin-login-brand {
+  background-color: var(--admin-nav);
+  color: var(--admin-nav-text);
 }

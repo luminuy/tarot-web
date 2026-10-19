@@ -14,7 +14,9 @@ docs/
 │   ├── INCIDENT_LOG.md                  # บันทึกบทเรียนความผิดพลาด (Blameless Post-Mortem)
 │   ├── KNOWN_ISSUES.md                  # ดัชนีสถานะบั๊กค้างและข้อจำกัดระบบ
 │   ├── SEO_INDEXING_LOG.md              # ทะเบียนส่ง URL เข้า Google Search Console (กันส่งซ้ำ/เปลืองโควตา)
-│   └── WORK_LOG.md                      # บันทึกประวัติการพัฒนาและสถานะส่งต่องาน (Live Handoff)
+│   ├── WORK_LOG.md                      # บันทึกประวัติการพัฒนาและสถานะส่งต่องาน (Live Handoff)
+│   ├── exec/DECISIONS.md                # บันทึกการตัดสินใจและการทดลองของผู้บริหาร (ผู้ช่วย cmo · coo · cto อ่านก่อนเสนอ)
+│   └── exec/AGENT_EVALS.md              # ชุดคำถามทดสอบผู้ช่วย cmo · coo · cto (รันก่อน/หลังแก้ไฟล์ผู้ช่วย)
 │
 ├── 🏛️ สถาปัตยกรรมและคู่มือระบบ (Architecture & System Manuals)
 │   ├── ARCHITECTURE.md                  # สถาปัตยกรรมระบบ Edge, Provably Fair, Data Flow, แผนที่ Env Vars
