@@ -5,6 +5,15 @@ import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 
 import { Button } from "@/components/ui/Button";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { BeautyFilter, isBeautyFilterSupported, isBeautyLevel, type BeautyLevel } from "@/lib/marketplace/beauty-filter";
+import {
+  CALL_QUALITY_LABEL,
+  classifyCallQuality,
+  decideRecovery,
+  lossRatio,
+  type CallQuality,
+  type PacketCounters,
+} from "@/lib/marketplace/call-recovery";
+import type { CallReport } from "@/lib/marketplace/call-metrics";
 import type { CallRole, CallView } from "@/lib/marketplace/call.repo";
 import type { IceServerConfig } from "@/lib/marketplace/turn";
 import { STORAGE_KEYS } from "@/lib/storage/keys";
@@ -17,6 +26,9 @@ import { STORAGE_KEYS } from "@/lib/storage/keys";
  * - **ล็อกภาพไว้ที่ 720p** + เพดานบิตเรต 1.5 Mbps — คุมให้อยู่ในโควตาฟรีของ Cloudflare
  *   (ราว 1.35 GB/ชม. ทั้งสองฝั่งรวมกัน) — ห้ามปลดเพดานโดยไม่คำนวณโควตาใหม่
  * - นัดเชื่อมสายผ่าน `/api/marketplace/calls/[ticketId]` แบบถามสถานะเป็นระยะ (ไม่ใช้ WebSocket)
+ * - **ต่อสายใหม่อัตโนมัติ** เมื่อเน็ตสะดุด — ฝั่งลูกค้าเป็นคนสั่งฝั่งเดียว (กติกาเต็มใน `call-recovery.ts`)
+ *   ปุ่ม "ต่อสายใหม่" ยังอยู่เป็นทางสำรอง · บอกคุณภาพสาย ดี/พอใช้/อ่อน จาก `getStats()` ในเครื่อง
+ * - ออกจากห้อง ➔ ส่ง "สรุปสาย" ครั้งเดียว (ตัวเลขล้วน ไม่มีข้อมูลส่วนตัว) ลง Analytics Engine (`call-metrics.ts`)
  *   ลูกค้า = ฝั่งเสนอ (offer) · แม่หมอ = ฝั่งตอบ (answer) · `round` เปลี่ยน = เริ่มต่อสายใหม่
  * - ไม่บันทึกภาพ เสียง หรือบทสนทนาใด ๆ
  */
@@ -64,6 +76,7 @@ interface EngineOptions {
   onPeerPresence: (present: boolean) => void;
   onEnded: (endedBy: CallRole | null) => void;
   onError: (message: string) => void;
+  onQuality: (quality: CallQuality | null) => void;
 }
 
 function waitForIceGathering(pc: RTCPeerConnection): Promise<void> {
@@ -82,14 +95,29 @@ function waitForIceGathering(pc: RTCPeerConnection): Promise<void> {
   });
 }
 
+/**
+ * เน็ตช้าแล้วจะยอมเสียอะไรก่อน — ฝั่งแม่หมอส่งภาพไพ่ ต้องคมไว้ก่อน (ยอมให้เฟรมกระตุก)
+ * ฝั่งลูกค้าส่งภาพหน้า ต้องขยับลื่นไว้ก่อน (ยอมให้ภาพเบลอ)
+ */
+function videoHintFor(role: CallRole): "detail" | "motion" {
+  return role === "reader" ? "detail" : "motion";
+}
+
+function applyVideoHint(track: MediaStreamTrack, role: CallRole): void {
+  if (track.kind === "video" && "contentHint" in track) track.contentHint = videoHintFor(role);
+}
+
 /** เพดานบิตเรตต่อแทร็ก — ภาพ 1.5 Mbps · เสียง 64 kbps (เบราว์เซอร์ที่ไม่รองรับก็แค่ข้าม) */
-async function capBitrate(pc: RTCPeerConnection): Promise<void> {
+async function capBitrate(pc: RTCPeerConnection, role: CallRole): Promise<void> {
   for (const sender of pc.getSenders()) {
     if (!sender.track) continue;
     try {
-      const params = sender.getParameters();
+      const params = sender.getParameters() as RTCRtpSendParameters & { degradationPreference?: string };
       if (!params.encodings || params.encodings.length === 0) params.encodings = [{}];
       params.encodings[0].maxBitrate = sender.track.kind === "video" ? MAX_VIDEO_BITRATE : MAX_AUDIO_BITRATE;
+      if (sender.track.kind === "video") {
+        params.degradationPreference = role === "reader" ? "maintain-resolution" : "maintain-framerate";
+      }
       await sender.setParameters(params);
     } catch {
       // Firefox รุ่นเก่าไม่ให้ตั้ง encodings ก่อนเจรจาเสร็จ — ภาพยังถูกล็อก 720p จาก getUserMedia อยู่ดี
@@ -108,11 +136,64 @@ class CallEngine {
   private busy = false;
   private stopped = false;
   private timer: ReturnType<typeof setTimeout> | null = null;
+  // ── ต่อสายใหม่อัตโนมัติ (ใช้จริงเฉพาะฝั่งลูกค้า — ดู call-recovery.ts) ──
+  private peerPresent = false;
+  private roundStartedAt = Date.now();
+  private lostAt: number | null = null;
+  private failed = false;
+  private lastRestartAt: number | null = null;
+  private attempts = 0;
+  private gaveUp = false;
+  private restarting = false;
+  private networkReturned = false;
+  // ── คุณภาพสาย ──
+  private lastPackets: PacketCounters | null = null;
+  // ── สรุปสาย (ส่งครั้งเดียวตอนออกจากห้อง) ──
+  private readonly joinedAt = Date.now();
+  private connectedSince: number | null = null;
+  private hadLoss = false;
+  private reported = false;
+  private readonly report: CallReport = {
+    firstConnectMs: -1,
+    connectedMs: 0,
+    autoRestarts: 0,
+    manualRestarts: 0,
+    recoveries: 0,
+    gaveUps: 0,
+    drops: 0,
+    qualityGood: 0,
+    qualityFair: 0,
+    qualityWeak: 0,
+    peerSeen: false,
+  };
 
   constructor(private readonly o: EngineOptions) {}
 
   start(initial: CallView): void {
+    window.addEventListener("online", this.onOnline);
+    window.addEventListener("pagehide", this.sendReport);
     void this.handle(initial).finally(() => this.schedule());
+  }
+
+  /** เน็ตกลับมา ➔ ถามสถานะทันที · ฝั่งลูกค้าต่อสายใหม่เลยถ้ายังไม่ติด (นับรอบใหม่) */
+  private onOnline = (): void => {
+    if (this.stopped) return;
+    this.networkReturned = true;
+    this.attempts = 0;
+    this.gaveUp = false;
+    if (this.timer) clearTimeout(this.timer);
+    void this.tick();
+  };
+
+  /** ปุ่ม "ต่อสายใหม่" — สั่งรอบใหม่ทันทีและนับจำนวนครั้งอัตโนมัติใหม่ */
+  async manualRestart(): Promise<void> {
+    this.report.manualRestarts += 1;
+    this.attempts = 0;
+    this.gaveUp = false;
+    this.lastRestartAt = Date.now();
+    this.o.onLink("negotiating");
+    const res = await this.post({ action: "restart" });
+    if (!res.ok) throw new Error(`restart failed: ${res.status}`);
   }
 
   /**
@@ -120,15 +201,40 @@ class CallEngine {
    * สายรอบถัดไป (ต่อสายใหม่) หยิบแทร็กจาก `o.stream` ซึ่งผู้เรียกเปลี่ยนแทร็กในนั้นแล้ว
    */
   async replaceVideoTrack(track: MediaStreamTrack): Promise<void> {
+    applyVideoHint(track, this.o.role);
     const sender = this.pc?.getSenders().find((s) => s.track?.kind === "video");
     if (sender) await sender.replaceTrack(track);
   }
 
   stop(): void {
+    this.sendReport();
     this.stopped = true;
+    window.removeEventListener("online", this.onOnline);
+    window.removeEventListener("pagehide", this.sendReport);
     if (this.timer) clearTimeout(this.timer);
     this.timer = null;
     this.closePc();
+  }
+
+  /** ส่งสรุปสายครั้งเดียว — keepalive ให้ไปถึงแม้หน้ากำลังปิด · พลาดก็ไม่เป็นไร */
+  private sendReport = (): void => {
+    if (this.reported) return;
+    this.reported = true;
+    this.markDisconnected();
+    void fetch(this.o.endpoint, {
+      method: "POST",
+      keepalive: true,
+      headers: { ...this.o.headers, "Content-Type": "application/json" },
+      body: JSON.stringify({ as: this.o.role, action: "report", ...this.report }),
+    }).catch(() => undefined);
+  };
+
+  /** ปิดช่วง "ติดอยู่" — รวมเวลาที่ติดเข้าสรุป */
+  private markDisconnected(): void {
+    if (this.connectedSince === null) return;
+    this.report.connectedMs += Date.now() - this.connectedSince;
+    this.connectedSince = null;
+    this.hadLoss = true;
   }
 
   async post(body: Record<string, unknown>): Promise<Response> {
@@ -150,6 +256,8 @@ class CallEngine {
       if (res.ok) {
         const json = (await res.json()) as { call: CallView };
         await this.handle(json.call);
+        await this.maybeRecover();
+        await this.sampleQuality();
       } else if (res.status === 404) {
         this.o.onEnded(null);
         this.stop();
@@ -168,15 +276,23 @@ class CallEngine {
       this.stop();
       return;
     }
+    this.peerPresent = call.peerPresent;
+    if (call.peerPresent) this.report.peerSeen = true;
     this.o.onPeerPresence(call.peerPresent);
     if (this.busy) return;
     this.busy = true;
     try {
       if (call.round !== this.round) {
         this.round = call.round;
+        // อีกฝั่งสั่งต่อสายใหม่ขณะเรายังติดอยู่ = นับเป็นการหลุดหนึ่งครั้ง
+        if (this.connected) this.report.drops += 1;
+        this.markDisconnected();
         this.closePc();
         this.connected = false;
-        this.o.onLink("negotiating");
+        this.roundStartedAt = Date.now();
+        this.lostAt = null;
+        this.failed = false;
+        this.o.onLink(this.attempts > 0 ? "reconnecting" : "negotiating");
       }
       if (this.o.role === "customer") {
         if (this.offeredRound !== this.round) {
@@ -194,9 +310,87 @@ class CallEngine {
       }
     } catch (err) {
       console.warn("[VideoCall] negotiation error", err);
-      this.o.onLink("failed");
+      this.failed = true;
+      this.reportLost();
     } finally {
       this.busy = false;
+    }
+  }
+
+  /** สายหลุด — ฝั่งลูกค้าที่ยังต่อใหม่เองได้บอก "กำลังเชื่อมต่อใหม่" · หมดทางแล้ว/ฝั่งแม่หมอบอก "หลุด" */
+  private reportLost(): void {
+    const autoRecovering = this.o.role === "customer" && !this.gaveUp;
+    this.o.onLink(this.failed && !autoRecovering ? "failed" : "reconnecting");
+  }
+
+  /** ฝั่งลูกค้าเท่านั้น — ตัดสินว่าถึงเวลาต่อสายใหม่เองหรือยัง */
+  private async maybeRecover(): Promise<void> {
+    if (this.o.role !== "customer" || this.stopped || this.restarting || this.gaveUp) return;
+    const decision = decideRecovery({
+      now: Date.now(),
+      connected: this.connected,
+      roundStartedAt: this.roundStartedAt,
+      lostAt: this.lostAt,
+      failed: this.failed,
+      lastRestartAt: this.lastRestartAt,
+      attempts: this.attempts,
+      peerPresent: this.peerPresent,
+      online: navigator.onLine !== false,
+      networkReturned: this.networkReturned,
+    });
+    if (decision === "give-up") {
+      this.report.gaveUps += 1;
+      this.gaveUp = true;
+      this.failed = true;
+      this.o.onLink("failed");
+      return;
+    }
+    if (decision !== "restart") return;
+    this.restarting = true;
+    this.networkReturned = false;
+    this.attempts += 1;
+    this.report.autoRestarts += 1;
+    this.lastRestartAt = Date.now();
+    this.o.onLink("reconnecting");
+    try {
+      await this.post({ action: "restart" });
+    } catch {
+      // เน็ตยังไม่กลับ — รอบหน้าลองใหม่ตามระยะเว้น
+    } finally {
+      this.restarting = false;
+    }
+  }
+
+  /** วัดคุณภาพสายจาก getStats() ในเครื่อง (ไม่ยิงอะไรออกเน็ต) — ทุกรอบถามสถานะตอนสายติด */
+  private async sampleQuality(): Promise<void> {
+    const pc = this.pc;
+    if (!pc || !this.connected) {
+      this.lastPackets = null;
+      this.o.onQuality(null);
+      return;
+    }
+    try {
+      const report = await pc.getStats();
+      let rtt: number | null = null;
+      const cur: PacketCounters = { received: 0, lost: 0 };
+      report.forEach((s: Record<string, unknown>) => {
+        if (s.type === "candidate-pair" && s.state === "succeeded" && s.nominated && typeof s.currentRoundTripTime === "number") {
+          rtt = s.currentRoundTripTime;
+        } else if (s.type === "inbound-rtp") {
+          cur.received += typeof s.packetsReceived === "number" ? s.packetsReceived : 0;
+          cur.lost += typeof s.packetsLost === "number" ? s.packetsLost : 0;
+        }
+      });
+      const loss = lossRatio(this.lastPackets, cur);
+      this.lastPackets = cur;
+      if (this.pc !== pc) return;
+      const quality = classifyCallQuality(rtt, loss);
+      if (quality === "good") this.report.qualityGood += 1;
+      else if (quality === "fair") this.report.qualityFair += 1;
+      else this.report.qualityWeak += 1;
+      this.o.onQuality(quality);
+    } catch {
+      // เบราว์เซอร์ไม่ให้สถิติ — ไม่โชว์ป้ายคุณภาพ ไม่กระทบสาย
     }
   }
 
@@ -208,20 +402,47 @@ class CallEngine {
       iceTransportPolicy: "relay",
       bundlePolicy: "max-bundle",
     });
-    for (const track of this.o.stream.getTracks()) pc.addTrack(track, this.o.stream);
+    for (const track of this.o.stream.getTracks()) {
+      applyVideoHint(track, this.o.role);
+      pc.addTrack(track, this.o.stream);
+    }
     pc.ontrack = (e) => {
       if (this.pc === pc) this.o.onRemoteStream(e.streams[0] ?? new MediaStream([e.track]));
     };
     pc.onconnectionstatechange = () => {
       if (this.pc !== pc) return;
       if (pc.connectionState === "connected") {
+        const now = Date.now();
+        if (this.report.firstConnectMs < 0) this.report.firstConnectMs = now - this.joinedAt;
+        if (this.hadLoss) this.report.recoveries += 1;
+        this.hadLoss = false;
+        if (this.connectedSince === null) this.connectedSince = now;
         this.connected = true;
+        this.lostAt = null;
+        this.failed = false;
+        this.attempts = 0;
+        this.lastRestartAt = null;
+        this.gaveUp = false;
+        this.networkReturned = false;
         this.o.onLink("connected");
       } else if (pc.connectionState === "disconnected") {
-        this.o.onLink("reconnecting");
-      } else if (pc.connectionState === "failed") {
+        // ถามสถานะถี่ขึ้นระหว่างกู้สาย · จดเวลาที่เริ่มหลุดไว้ให้ตัวตัดสินต่อใหม่
+        if (this.connected) {
+          this.lostAt = Date.now();
+          this.report.drops += 1;
+        }
+        this.markDisconnected();
         this.connected = false;
-        this.o.onLink("failed");
+        this.reportLost();
+      } else if (pc.connectionState === "failed") {
+        if (this.connected) {
+          this.lostAt = Date.now();
+          this.report.drops += 1;
+        }
+        this.markDisconnected();
+        this.connected = false;
+        this.failed = true;
+        this.reportLost();
       }
     };
     this.pc = pc;
@@ -232,6 +453,7 @@ class CallEngine {
     if (!this.pc) return;
     const pc = this.pc;
     this.pc = null;
+    this.lastPackets = null;
     pc.ontrack = null;
     pc.onconnectionstatechange = null;
     pc.close();
@@ -242,7 +464,7 @@ class CallEngine {
     const pc = this.createPc();
     await pc.setLocalDescription(await pc.createOffer());
     await waitForIceGathering(pc);
-    await capBitrate(pc);
+    await capBitrate(pc, this.o.role);
     if (this.stopped || round !== this.round || this.pc !== pc) return;
     await this.sendSdp("offer", round, pc);
     this.offeredRound = round;
@@ -254,7 +476,7 @@ class CallEngine {
     await pc.setRemoteDescription({ type: "offer", sdp: offerSdp });
     await pc.setLocalDescription(await pc.createAnswer());
     await waitForIceGathering(pc);
-    await capBitrate(pc);
+    await capBitrate(pc, this.o.role);
     if (this.stopped || round !== this.round || this.pc !== pc) return;
     await this.sendSdp("answer", round, pc);
     this.answeredRound = round;
@@ -329,6 +551,7 @@ export function VideoCallRoom({
   const [camOn, setCamOn] = useState(true);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [quality, setQuality] = useState<CallQuality | null>(null);
   /*
    * 🎴 จัดจอ (เจ้าของสั่ง 2026-10-11: "แม่หมอเวลาเปิดไพ่ต้องเห็นไพ่ตัวเองในกล้อง แต่ภาพตัวเองอันเล็ก")
    * แม่หมอเริ่มที่ "สองฝั่งเท่ากัน" — เห็นภาพตัวเองใหญ่พอจัดไพ่ให้อยู่ในกรอบ · ลูกค้าเริ่มที่ "แม่หมอใหญ่"
@@ -376,6 +599,7 @@ export function VideoCallRoom({
     sendStreamRef.current = null;
     setLocalStream(null);
     setRemoteStream(null);
+    setQuality(null);
   }, []);
 
   useEffect(() => {
@@ -568,6 +792,7 @@ export function VideoCallRoom({
           setPhase("ended");
         },
         onError: setError,
+        onQuality: setQuality,
       });
       engineRef.current = engine;
       setLink("negotiating");
@@ -594,9 +819,8 @@ export function VideoCallRoom({
 
   const reconnect = async () => {
     setError(null);
-    setLink("negotiating");
     try {
-      await engineRef.current?.post({ action: "restart" });
+      await engineRef.current?.manualRestart();
     } catch {
       setError("ต่อสายใหม่ไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ต");
     }
@@ -745,9 +969,11 @@ export function VideoCallRoom({
     phase === "starting"
       ? "กำลังเปิดกล้อง…"
       : link === "failed"
-        ? "สัญญาณหลุด กด “ต่อสายใหม่” เพื่อเชื่อมต่ออีกครั้ง"
+        ? role === "customer"
+          ? "ต่อสายใหม่อัตโนมัติไม่สำเร็จ ลองสลับ Wi-Fi/เน็ตมือถือ แล้วกด “ต่อสายใหม่”"
+          : "สัญญาณหลุด กำลังรอลูกค้าต่อสายใหม่ หรือกด “ต่อสายใหม่”"
         : link === "reconnecting"
-          ? "สัญญาณไม่เสถียร กำลังเชื่อมต่อใหม่…"
+          ? "สัญญาณหลุด กำลังต่อสายใหม่ให้อัตโนมัติ…"
           : !connected && !peerPresent
             ? `รอ${peerName}เข้าห้อง…`
             : !connected
@@ -806,6 +1032,15 @@ export function VideoCallRoom({
           )}
           {/* กรอบเล็กมุมจอ + มีข้อความสถานะ (ซึ่งมีชื่ออีกฝั่งอยู่แล้ว) ➔ ไม่ต้องมีป้ายชื่อซ้อน — เดิมสองข้อความทับกัน */}
           {!(status && layout === "self") && <span className={tileLabel}>{peerName}</span>}
+          {connected && quality && layout !== "self" && (
+            <span
+              className={`pointer-events-none absolute right-2 top-2 z-20 rounded-full px-2 py-0.5 text-[12px] ${
+                quality === "weak" ? "bg-err text-surface" : "bg-black/55 text-white"
+              }`}
+            >
+              {CALL_QUALITY_LABEL[quality]}
+            </span>
+          )}
         </div>
         <div className={`absolute bg-black ${selfPos} ${layout === "peer" ? "overflow-hidden" : ""}`}>
           <video

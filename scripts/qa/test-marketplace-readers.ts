@@ -1154,6 +1154,69 @@ async function testVideoCall(readerId: string, sessionSecret: string) {
   }
   console.log("  ✓ 16.4 API ห้องวิดีโอ: คนนอก 404 · ยังไม่ตั้ง TURN = 503 · offer ไม่มี relay = 400 · ปิดคิว = จบสาย + เพิกถอน TURN");
 
+  // ── 16.4b สรุปสายลง Analytics Engine (2026-10-19) ──────────────────────────
+  const metrics = await import("../../src/lib/marketplace/call-metrics");
+  const { setCallMetricsForTests } = await import("../../src/lib/platform/cf");
+  const points: Array<{ indexes?: string[]; blobs?: string[]; doubles?: number[] }> = [];
+  setCallMetricsForTests({ writeDataPoint: (p) => points.push(p) });
+  const summary = {
+    firstConnectMs: 4200,
+    connectedMs: 1_800_000,
+    autoRestarts: 2,
+    manualRestarts: 0,
+    recoveries: 2,
+    gaveUps: 0,
+    drops: 2,
+    qualityGood: 400,
+    qualityFair: 40,
+    qualityWeak: 10,
+    peerSeen: true,
+  };
+  try {
+    // คิวปิดไปแล้วข้างบน — สรุปสายต้องยังรับ (มาตอนออกจากห้อง)
+    const okRes = await post(
+      { cookie: owner, "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit Line/14.0" },
+      { as: "customer", action: "report", ...summary },
+    );
+    if (okRes.status !== 200 || points.length !== 1) throw new Error(`❌ สรุปสายของผู้ร่วมสายต้องถูกบันทึก (ได้ ${okRes.status} · ${points.length} จุด)`);
+    const p = points[0];
+    if (
+      p.indexes?.[0] !== readerId ||
+      p.blobs?.join() !== "customer,recovered,ios-line" ||
+      p.doubles?.join() !== "4200,1800000,2,0,2,0,2,400,40,10,1"
+    ) {
+      throw new Error(`❌ ลำดับคอลัมน์สรุปสายเพี้ยน (ห้ามสลับ — ข้อมูลเก่าจะอ่านผิด): ${JSON.stringify(p)}`);
+    }
+    if (JSON.stringify(p).includes("cust_video_device_1")) throw new Error("❌ สรุปสายห้ามมีรหัสลูกค้า");
+    if ((await post({ cookie: stranger }, { as: "customer", action: "report", ...summary })).status !== 404 || points.length !== 1) {
+      throw new Error("❌ คนนอกต้องส่งสรุปสายไม่ได้ (404)");
+    }
+    if ((await post({ cookie: owner }, { as: "customer", action: "report", ...summary, drops: -1 })).status !== 400) {
+      throw new Error("❌ สรุปสายที่ตัวเลขผิดช่วงต้องถูกปฏิเสธ (400)");
+    }
+  } finally {
+    setCallMetricsForTests(undefined);
+  }
+  const outcome = (patch: Partial<typeof summary>) => metrics.callOutcome({ ...summary, ...patch });
+  if (
+    outcome({ firstConnectMs: -1, peerSeen: false }) !== "peer-absent" ||
+    outcome({ firstConnectMs: -1 }) !== "never-connected" ||
+    outcome({ gaveUps: 1 }) !== "gave-up" ||
+    outcome({ drops: 0 }) !== "clean" ||
+    outcome({ drops: 3, recoveries: 1 }) !== "dropped" ||
+    metrics.deviceFamily("Mozilla/5.0 (Linux; Android 14) Chrome/130 Mobile") !== "android-chrome" ||
+    metrics.deviceFamily("Mozilla/5.0 (Windows NT 10.0) Chrome/130 Edg/130") !== "windows-edge" ||
+    metrics.deviceFamily(null) !== "other-other" ||
+    metrics.recordCallReport(null, summary, { role: "reader", readerId, userAgent: null }) !== false
+  ) {
+    throw new Error("❌ จัดผลลัพธ์สาย/ชนิดเครื่องผิด หรือไม่มี binding แล้วไม่ข้ามเงียบ");
+  }
+  const roomSrc = fs.readFileSync(path.join(process.cwd(), "src/components/marketplace/VideoCallRoom.tsx"), "utf-8");
+  if (!roomSrc.includes('action: "report"') || !roomSrc.includes("keepalive: true") || !roomSrc.includes('addEventListener("pagehide", this.sendReport)')) {
+    throw new Error("❌ ห้องวิดีโอต้องส่งสรุปสายครั้งเดียวตอนออก (keepalive · pagehide)");
+  }
+  console.log("  ✓ 16.4b สรุปสายลง Analytics Engine: ผู้ร่วมสายเท่านั้น · รับหลังปิดคิว · ลำดับคอลัมน์คงที่ · ไม่มีรหัสลูกค้า");
+
   // ── 16.5 สิทธิ์กล้อง/ไมค์ + ล็อก relay ในเบราว์เซอร์ ────────────────────────
   const globalPolicy = SECURITY_HEADERS.find((h) => h.key === "Permissions-Policy")?.value ?? "";
   if (!globalPolicy.includes("camera=()") || !globalPolicy.includes("microphone=()")) {
@@ -1182,6 +1245,63 @@ async function testVideoCall(readerId: string, sessionSecret: string) {
     throw new Error("❌ VideoCallRoom ต้องล็อกภาพ 720p และเพดาน 1.5 Mbps (คุมโควตาฟรี TURN)");
   }
   console.log("  ✓ 16.5 กล้อง/ไมค์เปิดเฉพาะหน้าวิดีโอคอล · เบราว์เซอร์บังคับ relay · ล็อก 720p/1.5 Mbps");
+
+  // ── 16.6 ต่อสายใหม่อัตโนมัติ + ป้ายคุณภาพสาย (2026-10-19) ─────────────────
+  const rec = await import("../../src/lib/marketplace/call-recovery");
+  const base = {
+    now: 100_000,
+    connected: false,
+    roundStartedAt: 90_000,
+    lostAt: null as number | null,
+    failed: false,
+    lastRestartAt: null as number | null,
+    attempts: 0,
+    peerPresent: true,
+    online: true,
+    networkReturned: false,
+  };
+  const cases: Array<[string, Partial<typeof base>, string]> = [
+    ["สายติดอยู่", { connected: true, lostAt: 1 }, "wait"],
+    ["อีกฝั่งไม่อยู่ในห้อง", { failed: true, peerPresent: false }, "wait"],
+    ["เครื่องเราไม่มีเน็ต", { failed: true, online: false }, "wait"],
+    ["หลุดชั่วคราว ยังไม่ครบ 5 วิ", { lostAt: 97_000 }, "wait"],
+    ["หลุดชั่วคราว ครบ 5 วิ", { lostAt: 95_000 }, "restart"],
+    ["หลุดถาวร ต่อใหม่ทันที", { lostAt: 99_900, failed: true }, "restart"],
+    ["เจรจารอบใหม่ยังไม่ครบ 20 วิ", { roundStartedAt: 85_000 }, "wait"],
+    ["เจรจารอบใหม่ค้างเกิน 20 วิ", { roundStartedAt: 79_000 }, "restart"],
+    ["ยังอยู่ในระยะเว้นของครั้งที่ 2", { failed: true, attempts: 1, lastRestartAt: 95_000 }, "wait"],
+    ["พ้นระยะเว้นของครั้งที่ 2", { failed: true, attempts: 1, lastRestartAt: 89_000 }, "restart"],
+    ["เน็ตเพิ่งกลับมา ไม่ต้องรอระยะเว้น", { networkReturned: true, attempts: 3, lastRestartAt: 99_000 }, "restart"],
+    ["ครบเพดานครั้งแล้ว ให้คนกดเอง", { failed: true, attempts: rec.MAX_AUTO_RESTARTS }, "give-up"],
+  ];
+  for (const [label, patch, want] of cases) {
+    const got = rec.decideRecovery({ ...base, ...patch });
+    if (got !== want) throw new Error(`❌ decideRecovery "${label}" ต้องได้ ${want} (ได้ ${got})`);
+  }
+  if (rec.restartBackoffMs(0) !== 0 || rec.restartBackoffMs(2) !== 20_000 || rec.restartBackoffMs(9) !== 30_000) {
+    throw new Error("❌ ระยะเว้นต่อสายใหม่ต้องเป็น 0 · 10 · 20 · 30 วิ แล้วคงที่ 30 วิ");
+  }
+  if (
+    rec.lossRatio(null, { received: 0, lost: 0 }) !== 0 ||
+    Math.abs(rec.lossRatio({ received: 100, lost: 0 }, { received: 190, lost: 10 }) - 0.1) > 1e-9 ||
+    rec.classifyCallQuality(0.05, 0) !== "good" ||
+    rec.classifyCallQuality(0.4, 0) !== "fair" ||
+    rec.classifyCallQuality(0.05, 0.05) !== "fair" ||
+    rec.classifyCallQuality(0.8, 0) !== "weak" ||
+    rec.classifyCallQuality(null, 0.2) !== "weak"
+  ) {
+    throw new Error("❌ ป้ายคุณภาพสายต้องจัดระดับ ดี/พอใช้/อ่อน ตามเวลาไป-กลับและแพ็กเก็ตหาย");
+  }
+  if (
+    !room.includes("decideRecovery(") ||
+    !room.includes('this.o.role !== "customer"') || // ฝั่งลูกค้าสั่งต่อใหม่ฝั่งเดียว — สองฝั่งสั่ง = round กระโดดไล่กัน
+    !room.includes('window.addEventListener("online", this.onOnline)') ||
+    !room.includes('window.removeEventListener("online", this.onOnline)') ||
+    !room.includes("manualRestart()")
+  ) {
+    throw new Error("❌ VideoCallRoom ต้องต่อสายใหม่อัตโนมัติจากฝั่งลูกค้า + ฟังเน็ตกลับมา + มีปุ่มต่อเองสำรอง");
+  }
+  console.log(`  ✓ 16.6 ต่อสายใหม่อัตโนมัติ ${cases.length} สถานการณ์ถูกต้อง · ระยะเว้น 0/10/20/30 วิ · ป้ายคุณภาพสาย 3 ระดับ`);
 }
 
 /**
