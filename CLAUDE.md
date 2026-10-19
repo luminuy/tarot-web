@@ -24,6 +24,7 @@
 | [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md) | บั๊กค้าง/สถานะระบบ (วันที่อัปเดตดูที่หัวไฟล์) |
 | [docs/WORK_LOG.md](docs/WORK_LOG.md) | ประวัติงานที่ทำ — **ต้องอัปเดตทุกครั้ง** |
 | [docs/SEO_INDEXING_LOG.md](docs/SEO_INDEXING_LOG.md) | ทะเบียนส่ง URL เข้า Google Search Console — **ต้องจดทุกครั้งที่ส่ง** ไม่งั้นรอบหน้าจะยิงซ้ำเปลืองโควตา |
+| [docs/exec/DECISIONS.md](docs/exec/DECISIONS.md) | บันทึกการตัดสินใจและการทดลองของผู้บริหาร — ผู้ช่วย `cmo` · `coo` · `cto` อ่านก่อนเสนอ กันเสนอเรื่องที่ตัดสินแล้วซ้ำ |
 | [docs/AI_COLLABORATION_GUIDELINES.md](docs/AI_COLLABORATION_GUIDELINES.md) | กฎการทำงานร่วมกัน, แบ่ง Domain, ดีไซน์ |
 | [docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md](docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md) | ขั้นตอน deploy ขึ้น Cloudflare Workers & Custom Domain |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | สถาปัตยกรรมระดับองค์กร + Provably Fair Flow |
