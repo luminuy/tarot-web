@@ -13,6 +13,7 @@ import {
   type CallQuality,
   type PacketCounters,
 } from "@/lib/marketplace/call-recovery";
+import type { CallReport } from "@/lib/marketplace/call-metrics";
 import type { CallRole, CallView } from "@/lib/marketplace/call.repo";
 import type { IceServerConfig } from "@/lib/marketplace/turn";
 import { STORAGE_KEYS } from "@/lib/storage/keys";
@@ -27,6 +28,7 @@ import { STORAGE_KEYS } from "@/lib/storage/keys";
  * - นัดเชื่อมสายผ่าน `/api/marketplace/calls/[ticketId]` แบบถามสถานะเป็นระยะ (ไม่ใช้ WebSocket)
  * - **ต่อสายใหม่อัตโนมัติ** เมื่อเน็ตสะดุด — ฝั่งลูกค้าเป็นคนสั่งฝั่งเดียว (กติกาเต็มใน `call-recovery.ts`)
  *   ปุ่ม "ต่อสายใหม่" ยังอยู่เป็นทางสำรอง · บอกคุณภาพสาย ดี/พอใช้/อ่อน จาก `getStats()` ในเครื่อง
+ * - ออกจากห้อง ➔ ส่ง "สรุปสาย" ครั้งเดียว (ตัวเลขล้วน ไม่มีข้อมูลส่วนตัว) ลง Analytics Engine (`call-metrics.ts`)
  *   ลูกค้า = ฝั่งเสนอ (offer) · แม่หมอ = ฝั่งตอบ (answer) · `round` เปลี่ยน = เริ่มต่อสายใหม่
  * - ไม่บันทึกภาพ เสียง หรือบทสนทนาใด ๆ
  */
@@ -146,11 +148,30 @@ class CallEngine {
   private networkReturned = false;
   // ── คุณภาพสาย ──
   private lastPackets: PacketCounters | null = null;
+  // ── สรุปสาย (ส่งครั้งเดียวตอนออกจากห้อง) ──
+  private readonly joinedAt = Date.now();
+  private connectedSince: number | null = null;
+  private hadLoss = false;
+  private reported = false;
+  private readonly report: CallReport = {
+    firstConnectMs: -1,
+    connectedMs: 0,
+    autoRestarts: 0,
+    manualRestarts: 0,
+    recoveries: 0,
+    gaveUps: 0,
+    drops: 0,
+    qualityGood: 0,
+    qualityFair: 0,
+    qualityWeak: 0,
+    peerSeen: false,
+  };
 
   constructor(private readonly o: EngineOptions) {}
 
   start(initial: CallView): void {
     window.addEventListener("online", this.onOnline);
+    window.addEventListener("pagehide", this.sendReport);
     void this.handle(initial).finally(() => this.schedule());
   }
 
@@ -166,6 +187,7 @@ class CallEngine {
 
   /** ปุ่ม "ต่อสายใหม่" — สั่งรอบใหม่ทันทีและนับจำนวนครั้งอัตโนมัติใหม่ */
   async manualRestart(): Promise<void> {
+    this.report.manualRestarts += 1;
     this.attempts = 0;
     this.gaveUp = false;
     this.lastRestartAt = Date.now();
@@ -185,11 +207,34 @@ class CallEngine {
   }
 
   stop(): void {
+    this.sendReport();
     this.stopped = true;
     window.removeEventListener("online", this.onOnline);
+    window.removeEventListener("pagehide", this.sendReport);
     if (this.timer) clearTimeout(this.timer);
     this.timer = null;
     this.closePc();
+  }
+
+  /** ส่งสรุปสายครั้งเดียว — keepalive ให้ไปถึงแม้หน้ากำลังปิด · พลาดก็ไม่เป็นไร */
+  private sendReport = (): void => {
+    if (this.reported) return;
+    this.reported = true;
+    this.markDisconnected();
+    void fetch(this.o.endpoint, {
+      method: "POST",
+      keepalive: true,
+      headers: { ...this.o.headers, "Content-Type": "application/json" },
+      body: JSON.stringify({ as: this.o.role, action: "report", ...this.report }),
+    }).catch(() => undefined);
+  };
+
+  /** ปิดช่วง "ติดอยู่" — รวมเวลาที่ติดเข้าสรุป */
+  private markDisconnected(): void {
+    if (this.connectedSince === null) return;
+    this.report.connectedMs += Date.now() - this.connectedSince;
+    this.connectedSince = null;
+    this.hadLoss = true;
   }
 
   async post(body: Record<string, unknown>): Promise<Response> {
@@ -232,12 +277,16 @@ class CallEngine {
       return;
     }
     this.peerPresent = call.peerPresent;
+    if (call.peerPresent) this.report.peerSeen = true;
     this.o.onPeerPresence(call.peerPresent);
     if (this.busy) return;
     this.busy = true;
     try {
       if (call.round !== this.round) {
         this.round = call.round;
+        // อีกฝั่งสั่งต่อสายใหม่ขณะเรายังติดอยู่ = นับเป็นการหลุดหนึ่งครั้ง
+        if (this.connected) this.report.drops += 1;
+        this.markDisconnected();
         this.closePc();
         this.connected = false;
         this.roundStartedAt = Date.now();
@@ -290,6 +339,7 @@ class CallEngine {
       networkReturned: this.networkReturned,
     });
     if (decision === "give-up") {
+      this.report.gaveUps += 1;
       this.gaveUp = true;
       this.failed = true;
       this.o.onLink("failed");
@@ -299,6 +349,7 @@ class CallEngine {
     this.restarting = true;
     this.networkReturned = false;
     this.attempts += 1;
+    this.report.autoRestarts += 1;
     this.lastRestartAt = Date.now();
     this.o.onLink("reconnecting");
     try {
@@ -332,7 +383,12 @@ class CallEngine {
       });
       const loss = lossRatio(this.lastPackets, cur);
       this.lastPackets = cur;
-      if (this.pc === pc) this.o.onQuality(classifyCallQuality(rtt, loss));
+      if (this.pc !== pc) return;
+      const quality = classifyCallQuality(rtt, loss);
+      if (quality === "good") this.report.qualityGood += 1;
+      else if (quality === "fair") this.report.qualityFair += 1;
+      else this.report.qualityWeak += 1;
+      this.o.onQuality(quality);
     } catch {
       // เบราว์เซอร์ไม่ให้สถิติ — ไม่โชว์ป้ายคุณภาพ ไม่กระทบสาย
     }
@@ -356,6 +412,11 @@ class CallEngine {
     pc.onconnectionstatechange = () => {
       if (this.pc !== pc) return;
       if (pc.connectionState === "connected") {
+        const now = Date.now();
+        if (this.report.firstConnectMs < 0) this.report.firstConnectMs = now - this.joinedAt;
+        if (this.hadLoss) this.report.recoveries += 1;
+        this.hadLoss = false;
+        if (this.connectedSince === null) this.connectedSince = now;
         this.connected = true;
         this.lostAt = null;
         this.failed = false;
@@ -366,11 +427,19 @@ class CallEngine {
         this.o.onLink("connected");
       } else if (pc.connectionState === "disconnected") {
         // ถามสถานะถี่ขึ้นระหว่างกู้สาย · จดเวลาที่เริ่มหลุดไว้ให้ตัวตัดสินต่อใหม่
-        if (this.connected) this.lostAt = Date.now();
+        if (this.connected) {
+          this.lostAt = Date.now();
+          this.report.drops += 1;
+        }
+        this.markDisconnected();
         this.connected = false;
         this.reportLost();
       } else if (pc.connectionState === "failed") {
-        if (this.connected) this.lostAt = Date.now();
+        if (this.connected) {
+          this.lostAt = Date.now();
+          this.report.drops += 1;
+        }
+        this.markDisconnected();
         this.connected = false;
         this.failed = true;
         this.reportLost();

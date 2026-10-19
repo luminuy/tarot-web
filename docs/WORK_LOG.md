@@ -38,6 +38,13 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-19 (รอบ 297): Workers Logs + สถิติวิดีโอคอลบน Analytics Engine + ขั้นตอนแจ้งเตือนบิล (เจ้าของ "ไม่เอา zero trust อีก 3 อันเอา")
+- Workers Logs: `observability` ใน `wrangler.jsonc` (เก็บทุกคำขอ · ตัด query string กัน ?token= / ?code= หลุดลง log) — ดูที่ Dashboard ➔ Workers ➔ tarot-web ➔ Logs
+- Analytics Engine `seertarot_calls` (binding `CALL_METRICS`): ห้องวิดีโอส่ง "สรุปสาย" ครั้งเดียวตอนออก (keepalive · pagehide) ➔ `action: "report"` ➔ 1 จุดต่อฝั่งต่อสาย — ผลลัพธ์ (ติดตลอด/หลุดแล้วกลับมา/หลุดไม่กลับ/หมดเพดาน/ต่อไม่ติด) · เวลาจนต่อติด · เวลาคุย · จำนวนหลุด/ต่อใหม่ · คุณภาพสาย · ชนิดเครื่อง (แยกเบราว์เซอร์ในแอป LINE/Facebook) · ไม่มีข้อมูลส่วนตัว · อ่านด้วย `npm run cf:call-stats`
+- แจ้งเตือนบิล: ขั้นตอนใน `docs/PENDING_SETUP.md` 1.6 (เจ้าของกดเองใน Dashboard)
+- ถอย: ร่างด่าน Zero Trust Access หน้าแอดมิน — เจ้าของไม่เอา ไม่ได้ commit
+- ตรวจ: `test-marketplace-readers` 16.4b · `repo:verify`
+
 ### 🗓️ 2026-10-19 (รอบ 296): วิดีโอคอลแม่หมอต่อสายใหม่อัตโนมัติ + ป้ายคุณภาพสาย (เจ้าของ "ความเสถียรล่ะ" ➔ "ทำเลย ตรวจหลังทำเสร็จทีเดียว")
 - เดิม: เน็ตกระตุก (สลับ Wi-Fi ↔ 4G · เข้าลิฟต์) สายค้างที่ "สัญญาณหลุด" จนกว่าคนกด "ต่อสายใหม่" เอง
 - แก้ (`VideoCallRoom.tsx` + ตรรกะล้วน `src/lib/marketplace/call-recovery.ts`): ฝั่งลูกค้าสั่งต่อใหม่ฝั่งเดียว — หลุดชั่วคราวรอ 5 วิให้ ICE ฟื้นเอง · หลุดถาวรต่อทันที · เจรจาค้างเกิน 20 วิต่อใหม่ · เว้น 0/10/20/30 วิ ไม่เกิน 8 ครั้งต่อช่วงหลุด (กันชนเพดาน 120 ครั้ง/ชม.) · เน็ตกลับมา (`online`) ต่อทันที · ปุ่มต่อเองยังอยู่ · แม่หมอส่งภาพแบบ `detail`/`maintain-resolution` (ไพ่คมไว้ก่อน) ลูกค้าแบบ `motion`/`maintain-framerate` · ป้าย "สัญญาณดี/พอใช้/อ่อน" จาก `getStats()` ในเครื่อง (ไม่ยิงอะไรเพิ่ม)

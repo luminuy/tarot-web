@@ -1154,6 +1154,69 @@ async function testVideoCall(readerId: string, sessionSecret: string) {
   }
   console.log("  ✓ 16.4 API ห้องวิดีโอ: คนนอก 404 · ยังไม่ตั้ง TURN = 503 · offer ไม่มี relay = 400 · ปิดคิว = จบสาย + เพิกถอน TURN");
 
+  // ── 16.4b สรุปสายลง Analytics Engine (2026-10-19) ──────────────────────────
+  const metrics = await import("../../src/lib/marketplace/call-metrics");
+  const { setCallMetricsForTests } = await import("../../src/lib/platform/cf");
+  const points: Array<{ indexes?: string[]; blobs?: string[]; doubles?: number[] }> = [];
+  setCallMetricsForTests({ writeDataPoint: (p) => points.push(p) });
+  const summary = {
+    firstConnectMs: 4200,
+    connectedMs: 1_800_000,
+    autoRestarts: 2,
+    manualRestarts: 0,
+    recoveries: 2,
+    gaveUps: 0,
+    drops: 2,
+    qualityGood: 400,
+    qualityFair: 40,
+    qualityWeak: 10,
+    peerSeen: true,
+  };
+  try {
+    // คิวปิดไปแล้วข้างบน — สรุปสายต้องยังรับ (มาตอนออกจากห้อง)
+    const okRes = await post(
+      { cookie: owner, "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit Line/14.0" },
+      { as: "customer", action: "report", ...summary },
+    );
+    if (okRes.status !== 200 || points.length !== 1) throw new Error(`❌ สรุปสายของผู้ร่วมสายต้องถูกบันทึก (ได้ ${okRes.status} · ${points.length} จุด)`);
+    const p = points[0];
+    if (
+      p.indexes?.[0] !== readerId ||
+      p.blobs?.join() !== "customer,recovered,ios-line" ||
+      p.doubles?.join() !== "4200,1800000,2,0,2,0,2,400,40,10,1"
+    ) {
+      throw new Error(`❌ ลำดับคอลัมน์สรุปสายเพี้ยน (ห้ามสลับ — ข้อมูลเก่าจะอ่านผิด): ${JSON.stringify(p)}`);
+    }
+    if (JSON.stringify(p).includes("cust_video_device_1")) throw new Error("❌ สรุปสายห้ามมีรหัสลูกค้า");
+    if ((await post({ cookie: stranger }, { as: "customer", action: "report", ...summary })).status !== 404 || points.length !== 1) {
+      throw new Error("❌ คนนอกต้องส่งสรุปสายไม่ได้ (404)");
+    }
+    if ((await post({ cookie: owner }, { as: "customer", action: "report", ...summary, drops: -1 })).status !== 400) {
+      throw new Error("❌ สรุปสายที่ตัวเลขผิดช่วงต้องถูกปฏิเสธ (400)");
+    }
+  } finally {
+    setCallMetricsForTests(undefined);
+  }
+  const outcome = (patch: Partial<typeof summary>) => metrics.callOutcome({ ...summary, ...patch });
+  if (
+    outcome({ firstConnectMs: -1, peerSeen: false }) !== "peer-absent" ||
+    outcome({ firstConnectMs: -1 }) !== "never-connected" ||
+    outcome({ gaveUps: 1 }) !== "gave-up" ||
+    outcome({ drops: 0 }) !== "clean" ||
+    outcome({ drops: 3, recoveries: 1 }) !== "dropped" ||
+    metrics.deviceFamily("Mozilla/5.0 (Linux; Android 14) Chrome/130 Mobile") !== "android-chrome" ||
+    metrics.deviceFamily("Mozilla/5.0 (Windows NT 10.0) Chrome/130 Edg/130") !== "windows-edge" ||
+    metrics.deviceFamily(null) !== "other-other" ||
+    metrics.recordCallReport(null, summary, { role: "reader", readerId, userAgent: null }) !== false
+  ) {
+    throw new Error("❌ จัดผลลัพธ์สาย/ชนิดเครื่องผิด หรือไม่มี binding แล้วไม่ข้ามเงียบ");
+  }
+  const roomSrc = fs.readFileSync(path.join(process.cwd(), "src/components/marketplace/VideoCallRoom.tsx"), "utf-8");
+  if (!roomSrc.includes('action: "report"') || !roomSrc.includes("keepalive: true") || !roomSrc.includes('addEventListener("pagehide", this.sendReport)')) {
+    throw new Error("❌ ห้องวิดีโอต้องส่งสรุปสายครั้งเดียวตอนออก (keepalive · pagehide)");
+  }
+  console.log("  ✓ 16.4b สรุปสายลง Analytics Engine: ผู้ร่วมสายเท่านั้น · รับหลังปิดคิว · ลำดับคอลัมน์คงที่ · ไม่มีรหัสลูกค้า");
+
   // ── 16.5 สิทธิ์กล้อง/ไมค์ + ล็อก relay ในเบราว์เซอร์ ────────────────────────
   const globalPolicy = SECURITY_HEADERS.find((h) => h.key === "Permissions-Policy")?.value ?? "";
   if (!globalPolicy.includes("camera=()") || !globalPolicy.includes("microphone=()")) {

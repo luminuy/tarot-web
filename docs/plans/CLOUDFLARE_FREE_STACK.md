@@ -1,6 +1,6 @@
 # ☁️ แผนใช้บริการฟรีของ Cloudflare ต่อยอด SeerTarot
 
-> **สถานะ**: ✅ เสร็จแล้ว — 6 บริการใช้งานจริงบน production · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: ตรวจ production 2026-09-03
+> **สถานะ**: ✅ เสร็จแล้ว — 6 บริการใช้งานจริงบน production + 2026-10-19 เพิ่ม Workers Logs · Analytics Engine (สถิติวิดีโอคอล `npm run cf:call-stats`) · ย้ายแคชหน้า Next ออกจาก KV (INC-0287) · **ตรวจล่าสุด**: 2026-10-19 · **หลักฐาน**: ตรวจ production 2026-09-03
 
 > **สถานะ (2026-09-03):** ✅ **6 บริการ LIVE + verified บน production แล้ว** — เหลือ 3 ตัวที่บล็อกจริง
 > ทุกตัวออกแบบให้ **degrade เงียบ** — ไม่มี binding/config = ระบบเดิมทำงานปกติ
@@ -23,6 +23,8 @@
 | 4-8 | **Durable Objects** | 🔴 บล็อก — payoff คือห้องสด Marketplace · Marketplace ยังไม่เปิด (D1 provisioning + PDPA sign-off — `docs/specs/MARKETPLACE.md`) | — |
 | 4-9 | **Realtime (SFU/TURN)** | 🔴 บล็อก — ต้องมี Marketplace + Durable Objects ก่อน | — |
 | 5-10 | **Dual-Engine Media (ImageKit + Cloudinary)** — เสิร์ฟไพ่ 78 ใบ + เจนรูปแชร์ผลดวง ตัดโหลด Next.js 100% | 🟡 **แผนบรรจุ (Ready)** — ฟรี 100% ไม่แตะโควตา Worker CPU/Bandwidth | — |
+| 6-11 | **Workers Logs** — log/ข้อผิดพลาดจริงบน production (Dashboard ➔ Workers ➔ tarot-web ➔ Logs · เก็บ 7 วัน · ตัด query string) | ✅ โค้ด 2026-10-19 (`observability` ใน `wrangler.jsonc`) — ขึ้นพร้อม deploy | — |
+| 6-12 | **Analytics Engine** — สถิติความเสถียรวิดีโอคอล 1 จุดต่อฝั่งต่อสาย (`seertarot_calls`) | ✅ โค้ด 2026-10-19 · อ่านผล `npm run cf:call-stats` (token ต้องมี Account Analytics: Read) | — |
 
 ### 📌 ค่าที่ตั้งบน production แล้ว
 | ตัว | ค่า |
