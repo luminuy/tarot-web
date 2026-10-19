@@ -3,6 +3,16 @@
 > ผู้ตรวจ: A2 (Marketplace · จ่ายเงิน · จอง · ห้องวิดีโอ · Reader Studio) · ฐานโค้ด 47efdef · 2026-10-18
 
 ## ความคืบหน้า
+- [x] src/app/api/marketplace/payments/** (POST · confirm · webhook) + src/lib/marketplace/payment-gateway.ts · consultation-checkout.ts · refund-sync.ts · payments.repo.ts
+- [x] src/lib/marketplace/booking.repo.ts · booking-policy.ts · queue.repo.ts · ticket-owner.ts · customer-ref.ts
+- [x] src/app/api/marketplace/tickets/** (POST/GET · [id] · access · review) + reviews.repo.ts
+- [x] src/app/api/marketplace/calls/[ticketId] + call.repo.ts · turn.ts · Permissions-Policy (next.config.ts CALL_PAGE_SOURCES)
+- [x] src/app/api/marketplace/console/* (queue · schedule · settings · invites) + invites.repo.ts · reader-auth.ts
+- [x] src/app/api/marketplace/readers/[id]/* (slots · waitlist · availability) · readers/featured · my-bookings
+- [x] src/app/api/admin/{payments,bookings,payouts,studio-pass}
+- [x] src/app/api/marketplace/studio/** + src/app/api/studio/** + src/lib/studio/* (gate · dpa · plan · share · logo · brand · queue-import) · /r/[token]
+- [x] src/app/api/cron/booking-reminders + booking-mail.ts
+- [x] migrations 0020 (unique index slot)
 
 ## ข้อค้นพบ
 
@@ -22,3 +32,43 @@
 - แนวแก้: กรองตามงวด (`p.updated_at` ในช่วงเดือน เวลาไทย) + `AND p.refund_due = 0` + นับเฉพาะใบจองที่ `done`/`no_show`/ยกเลิกช้าไม่คืนเงิน · มีตาราง payouts อยู่แล้ว ให้ปุ่ม "บันทึกว่าโอนแล้ว" เขียน `recordReaderPayout` แล้วหักออก · ห้ามลบแถว payments ใน `cleanupExpiredTickets` (ล้างเฉพาะคอลัมน์ข้อมูลส่วนบุคคล)
 - ความมั่นใจ: ไล่โค้ดแล้ว (traced)
 
+
+### 🟠 A2-03 · ลูกค้าที่เปิดนัดผ่าน "บัญชีที่ล็อกอิน" (นัดของฉัน · เครื่องอื่น/เบราว์เซอร์อื่น) เห็นปุ่มวิดีโอคอล แต่เข้าห้องไม่ได้ — ได้ "ไม่พบห้องวิดีโอคอลนี้"
+- ที่: `src/app/api/marketplace/calls/[ticketId]/route.ts:54-67` (`resolveParticipant` ฝั่งลูกค้าเทียบแค่คุกกี้ `customerRef`) เทียบกับ `src/lib/marketplace/ticket-owner.ts:13-19` (ผ่านได้ด้วย `user_id` ของบัญชี) · `src/app/api/marketplace/tickets/[id]/route.ts:87,132` (ส่ง `videoCallAvailable: true` ให้เจ้าของทุกแบบ) · `src/components/marketplace/VideoCallRoom.tsx:542-553` (join ไม่ ok ➔ โยน error ข้อความจากเซิร์ฟเวอร์)
+- ปัญหา: #648 เพิ่มความเป็นเจ้าของตั๋วแบบที่สอง (ล็อกอินบัญชีเดียวกับที่จอง ➔ เปิด "นัดของฉัน" ได้ทุกเครื่อง · `/readers/bookings` + `/api/marketplace/my-bookings`) และหน้า/เส้นอื่นทุกเส้นย้ายไปใช้ `isTicketOwner` แล้ว แต่เส้นห้องวิดีโอ (สร้างใน #644 ก่อนหน้า) ยังตรวจแค่ `ref === ticket.customerRef`
+- ผลกระทบ/สถานการณ์พัง: ลูกค้าจองจากมือถือในแอป LINE (คุกกี้อยู่ในเบราว์เซอร์ของแอป) ➔ ถึงคิวเปิดจากคอม/Chrome ที่ล็อกอินบัญชีเดียวกัน ➔ `GET /tickets/[id]` ผ่านด้วย `user_id` หน้าคิวขึ้น "ถึงคิวของคุณแล้ว กดเข้าห้องวิดีโอคอล" ➔ กดแล้ว `POST /calls/[id] {as:"customer",action:"join"}` ได้ 404 ➔ จอขึ้น "ไม่พบห้องวิดีโอคอลนี้" ทั้งที่จ่ายเงินแล้วและแม่หมอรออยู่ในห้อง (แผน CONSULT_FLOW P6 ตั้งใจให้ "เปลี่ยนเบราว์เซอร์แล้วเข้านัดได้" ซึ่งทางลิงก์ `accessUrl` ทำได้ แต่ทางบัญชีที่ล็อกอินไม่ได้) · ข้อความแนะนำใต้ห้อง (`mediaHelp`) โผล่เฉพาะตอนกล้องเปิดไม่ได้ ไม่ใช่ตอน 404 จึงไม่มีทางออกบนจอ
+- หลักฐาน: `grep -n "customerRef\|isTicketOwner" src/app/api/marketplace/calls/[ticketId]/route.ts` ➔ มีแค่ `ref === ticket.customerRef` · `git log --oneline -- src/lib/marketplace/ticket-owner.ts` ➔ เกิดใน ceb3559 (#648) หลัง d27d4d2 (#644) ที่สร้างเส้นห้อง
+- แนวแก้: ฝั่งลูกค้าใน `resolveParticipant` ใช้ `isTicketOwner(request, ticket)` แบบเดียวกับเส้นอื่น (ยังคง 404 เมื่อไม่ผ่าน) · เพิ่มด่านใน `test-marketplace-readers` ว่าเจ้าของแบบล็อกอิน join ได้
+- ความมั่นใจ: ไล่โค้ดแล้ว (traced)
+
+### 🟠 A2-04 · ด่าน "กันกวาดเวลาว่างทั้งตาราง" (`MAX_ACTIVE_PER_CUSTOMER = 3`) ข้ามได้ด้วยการไม่ส่งคุกกี้ — คนเดียวกันที่นั่งของแม่หมอได้ทั้งตารางโดยไม่จ่ายเงิน
+- ที่: `src/app/api/marketplace/tickets/route.ts:121-122,164-175` (นับโควตาเฉพาะเมื่อมีคุกกี้ `existingRef` · ไม่มี = สุ่ม `customerRef` ใหม่) · `src/lib/marketplace/booking-policy.ts:76-77` (คอมเมนต์ "กันกวาดเวลาว่างทั้งตาราง") · `src/app/api/marketplace/tickets/route.ts:83-86` (กันถี่ด้วย `checkRateLimit` ในหน่วยความจำต่อ isolate 10 ครั้ง/10 นาที)
+- ปัญหา: ทุกคำขอที่ไม่มีคุกกี้ถือเป็น "ลูกค้าใหม่" จึงไม่เคยถูกนับโควตา และแต่ละคำขอได้ `holdBooking` (status `reserved` กันที่ 36 นาที — ช่องนั้นหายจาก `getAvailableSlots` ของทุกคน) + หน้าจ่าย Stripe ใบใหม่ โดยไม่ต้องจ่าย ไม่ต้องล็อกอิน ไม่ต้องผ่าน Turnstile · เพดานเดียวที่เหลือคือ `checkRateLimit` แบบ Map ต่อ isolate (ไม่ใช่ D1 `edge_rate_buckets` แบบเส้นเปิดไพ่)
+- ผลกระทบ/สถานการณ์พัง: สคริปต์ยิง `POST /api/marketplace/tickets {kind:"booking", slotStart:<ช่องถัดไป>}` วนไปโดยทิ้งคุกกี้ ➔ IP เดียวถือได้ราว 36 ช่องพร้อมกัน (10 ครั้ง/10 นาที × อายุกัน 36 นาที · มากกว่านี้เมื่อคำขอกระจายหลาย isolate/colo) ➔ ไม่กี่ IP ก็ปิดตารางนัด 14 วันของแม่หมอคนหนึ่งได้ต่อเนื่อง (แม่หมอคู่แข่ง/ผู้ไม่หวังดี) ลูกค้าจริงเห็น "ไม่มีเวลาว่าง" แม่หมอเสียรายได้ และ Stripe มี Checkout Session ขยะเต็มแดชบอร์ด
+- หลักฐาน: repro ในเครื่อง (`scratchpad/a2/run/hold-sweep.ts` เรียก handler `POST` จริงบน node:sqlite): 6 คำขอไม่มีคุกกี้ ➔ `200` ทั้ง 6 · `reserved holds now: 6` · ช่องว่าง 78 ➔ 72 · ชุดควบคุมที่แนบคุกกี้ใบแรก ➔ คำขอที่ 3 ได้ `429` (ด่านทำงานเฉพาะคนที่ยอมส่งคุกกี้)
+- แนวแก้: เพดานถือที่ต่อ IP/อุปกรณ์แบบข้าม isolate (`consumeEdgeRateLimits` บน D1 เหมือนเส้นเปิดไพ่ · เช่น ≤3 ใบ `reserved` ต่อ IP ต่อแม่หมอ) และ/หรือ Turnstile ก่อนกันที่ · นับ "ใบที่ยังกันอยู่" จากฐานข้อมูลตาม IP-hash ที่บันทึกตอนสร้าง แทนการพึ่งคุกกี้ที่ลูกค้าเลือกไม่ส่งได้ · พิจารณาลดเวลากันก่อนผู้ใช้กดไปถึงหน้า Stripe
+- ความมั่นใจ: ยืนยันแล้ว (repro)
+
+### 🟠 A2-05 · แม่หมอที่ "ไม่เริ่มนัดเอง" กด "ลูกค้าไม่มา" ได้ — ยึดเงินลูกค้าไว้ทั้งที่ตามข้อตกลงต้องคืนเต็ม (สถานะเดียวกัน สองฝ่ายตีความตรงข้าม ใครกดก่อนชนะ)
+- ที่: `src/lib/marketplace/booking.repo.ts:704-718` (`markNoShow` รับตั๋ว `waiting` ด้วย) · `src/app/api/marketplace/console/queue/route.ts:179-185` (ตรวจแค่ `canMarkNoShow` = เลยเวลานัด 15 นาที) · `src/lib/marketplace/booking-policy.ts:357` (ฝั่งลูกค้า: ตั๋ว `waiting` เลยเวลานัด 15 นาที = `reader_no_show` คืนเต็ม) · ปุ่ม `src/components/marketplace/ConsoleBookingParts.tsx:236-246` (โผล่ข้างปุ่ม "เริ่มนัด" ของนัดที่ยังไม่เริ่ม)
+- ปัญหา: ในระบบนี้ลูกค้า "มาถึง" เองไม่ได้ — ห้องวิดีโอ/ปุ่ม LINE เปิดให้ลูกค้าก็ต่อเมื่อแม่หมอกด "เริ่มนัด" (`accept` ➔ `ready`) เท่านั้น ตั๋วที่ยัง `waiting` เลยเวลานัด 15 นาทีจึงแปลว่า "แม่หมอยังไม่เข้า" ซึ่ง `decideCancellation` และข้อตกลงแม่หมอ (`docs/legal/READER_TERMS_DRAFT.md` ข้อ 10.1: "แม่หมอ…ไม่เข้าการปรึกษาภายใน 15 นาทีนับจากเวลานัด ➔ คืนเงินเต็ม · ส่วนแบ่งแม่หมอ: ไม่มี") ตีความถูก แต่ `markNoShow` กลับยอมให้แม่หมอตีตั๋วสถานะเดียวกันเป็น `no_show` (`refund_status = 'none'`) ได้ทันทีที่เวลาเดียวกัน — ไม่ต้องเคยเปิดห้อง ไม่มีหลักฐานว่าลูกค้าไม่อยู่ (ระบบมี `call_sessions.customer_seen_at` แต่ไม่ได้ใช้) และไม่ส่งอีเมลแจ้งลูกค้า
+- ผลกระทบ/สถานการณ์พัง: แม่หมอลืม/ไม่ว่างตามนัด ➔ 15 นาทีหลังเวลานัดเปิดแผงเห็นปุ่ม "ลูกค้าไม่มา" ➔ กด ➔ ตั๋ว `expired` ใบจอง `no_show` ลูกค้าไม่ได้เงินคืน (และยอดนี้ถูกนับเป็นรายได้แม่หมอใน `calculateReaderEarnings`) · ลูกค้าที่รออยู่หน้าคิวเห็นแค่คิวปิด ไม่มีปุ่มยกเลิก/ขอคืนเงินอีกแล้ว (`decideCancellation` ➔ `closed`) ต้องไปร้องเรียนเอง
+- หลักฐาน: SQL `markNoShow`: `UPDATE queue_tickets SET status = 'expired' WHERE id = ? AND status IN ('waiting', 'ready')` · ไม่มีเงื่อนไข "แม่หมอเริ่มนัดแล้ว" หรือดู `call_sessions` · `grep -n "sendBooking" src/lib/marketplace/booking.repo.ts` ➔ ไม่มีอีเมลในเส้น no-show
+- แนวแก้: ยอม `no_show` เฉพาะตั๋วที่แม่หมอ "เริ่มนัด" แล้ว (`ready`) และเปิดห้องรอเกิน 15 นาทีโดยลูกค้าไม่เข้า (`call_sessions.reader_seen_at` มี · `customer_seen_at` ว่าง) · ตั๋ว `waiting` เลยเวลา = ซ่อนปุ่มและให้ระบบ/ลูกค้ายกเลิกคืนเงินแทน · ส่งอีเมลแจ้งลูกค้าทุกครั้งที่ถูกตีว่าไม่มา พร้อมช่องทางโต้แย้ง
+- ความมั่นใจ: ไล่โค้ดแล้ว (traced)
+
+### 🟡 A2-06 · แม่หมอลบไฟล์โลโก้ของแม่หมอคนอื่นใน R2 ได้ — ตั้ง `logoUrl` เป็น path โลโก้ของคนอื่นแล้วเปลี่ยน/เอาออก
+- ที่: `src/lib/studio/brand.ts:71-77` (`STUDIO_LOGO_PATH_RE` รับ `readerId` ใดก็ได้) · `src/app/api/marketplace/studio/settings/route.ts:20-31` · `src/app/api/marketplace/studio/logo/route.ts:38-39,50-51` · `src/lib/studio/logo.ts:41-46` (`deleteOwnLogo` ไม่เทียบ readerId ใน path กับเจ้าของ) · `src/lib/studio/studio.repo.ts:509-` (`purgeStudioData` ลบตามค่าในแถวเช่นกัน)
+- ปัญหา: `sanitizeLogoUrl` ยอมรับ `/api/studio/logo/<readerId ใดก็ได้>/<id>.png` เป็น "โลโก้ของระบบเรา" แล้วบันทึกเป็นโลโก้ของแม่หมอผู้ส่ง · ครั้งถัดไปที่แม่หมอคนนั้นเปลี่ยนโลโก้ (PUT settings ค่าใหม่ · POST/DELETE logo · ลบข้อมูลสตูดิโอ) ระบบเรียก `deleteOwnLogo(ค่าเดิม)` ซึ่งแปลง path เป็น key `studio-logo/<readerId ของคนอื่น>/…` แล้ว `bucket.delete` ทันที — ชื่อฟังก์ชันบอก "own" แต่ไม่ได้ตรวจว่าเป็นของตัวเอง
+- ผลกระทบ/สถานการณ์พัง: แม่หมอ A เห็น path โลโก้ของแม่หมอ B จากหน้าคำอ่าน `/r/<token>` ที่ B ส่งให้ลูกค้า (หรือ A เป็นลูกค้า B เอง) ➔ `PUT /api/marketplace/studio/settings {logoUrl:"/api/studio/logo/<B>/<id>.png"}` ➔ `PUT … {logoUrl:null}` ➔ โลโก้ของ B หายจากทุกหน้าคำอ่านที่ส่งให้ลูกค้าไปแล้ว (รูปแตก) · ทำได้ซ้ำทุกครั้งที่ B อัปโหลดใหม่ · ตอนนี้สตูดิโอยังปิด (`READER_STUDIO_ENABLED` ไม่ได้ตั้ง) จึงเป็นความเสี่ยงที่รอวันเปิด
+- หลักฐาน: regex `^\/api\/studio\/logo\/([a-z0-9_]{3,64})\/([a-f0-9]{32})\.(png|webp|jpg)$` ไม่ผูกกับผู้เรียก · `deleteOwnLogo` เรียก `logoKeyFromPath` แล้ว `bucket.delete(key)` ตรง ๆ
+- แนวแก้: `sanitizeLogoUrl(raw, readerId)` ยอมรับ path ภายในเฉพาะที่ `m[1] === readerId` · `deleteOwnLogo(path, readerId)` ลบเฉพาะ key ใต้ `studio-logo/<readerId>/`
+- ความมั่นใจ: ไล่โค้ดแล้ว (traced)
+
+### 🟠 A2-07 · รายชื่อรอเวลาว่างรับอีเมลใครก็ได้โดยไม่ยืนยัน แล้ว cron ส่งได้ 40 ฉบับ/15 นาที — ยิงอีเมลขยะในนามโดเมนเรา และเผาโควตา Resend 100 ฉบับ/วันจนอีเมลยืนยันตัวตน/รีเซ็ตรหัส/ยืนยันนัดส่งไม่ออก
+- ที่: `src/app/api/marketplace/readers/[id]/waitlist/route.ts:12-41` (ไม่ล็อกอิน · ไม่ Turnstile · ไม่ double opt-in · กันถี่แบบ Map ต่อ isolate 5 ครั้ง/10 นาที) · `src/app/api/cron/booking-reminders/route.ts:21,81-103` (เพดาน 40 ฉบับ "ต่อรอบ" × 96 รอบ/วัน) · `docs/PENDING_SETUP.md:141` ("แผนฟรี 100 ฉบับ/วันใช้ร่วมกับอีเมลยืนยันตัวตน — เพดานต่อรอบของ cron จองตั้งไว้ 40")
+- ปัญหา: (1) API รับอีเมลใดก็ได้ต่อแม่หมอใดก็ได้ (UNIQUE แค่คู่ reader+email · `a+1@…`, `a+2@…` นับเป็นคนละแถว) และไม่สนว่าแม่หมอคนนั้นมีเวลาว่างอยู่แล้วหรือไม่ — ฟอร์มบนหน้าเว็บโผล่เฉพาะตอนเต็ม แต่ API ไม่ตรวจ · (2) cron ส่งทุกแถวของแม่หมอที่ "ตอนนี้มีเวลาว่าง" ทันทีรอบถัดไป เพดาน 40 เป็นต่อรอบไม่ใช่ต่อวัน จึงไม่ได้กันโควตารายวันของ Resend ตามที่เอกสารตั้งใจ
+- ผลกระทบ/สถานการณ์พัง: สคริปต์ยิง `POST /api/marketplace/readers/<แม่หมอที่มีเวลาว่าง>/waitlist {email:"victim+N@gmail.com",consent:true}` วนหลาย IP/แม่หมอ ➔ cron 15 นาทีถัดไปส่ง 40 ฉบับ "แม่หมอมีเวลาว่างแล้ว" ไปยังที่อยู่ที่ไม่เคยขอ (ใช้เป็นช่องส่งอีเมลรบกวน/ทำชื่อเสียงผู้ส่ง `noreply@seertarot.net` เสีย ถ้าใช้ที่อยู่สุ่มจะเด้งกลับจน Resend ระงับบัญชีได้) ➔ ราว 2–3 รอบก็ครบ 100 ฉบับ/วัน ➔ ที่เหลือของวัน OTP ยืนยันอีเมล · รีเซ็ตรหัสผ่าน · อีเมลยืนยันนัด/ลิงก์นัด (`sendBookingConfirmed`) · เตือนนัด ส่งไม่ออกทั้งระบบ
+- หลักฐาน: route ไม่มีการตรวจอื่นนอกจาก `isRequestAuthorizedOrigin` (ตั้งหัว Origin เองได้) + `checkRateLimit` ในหน่วยความจำ · cron: `let budget = MAX_EMAILS_PER_RUN` รีเซ็ตทุกครั้งที่ถูกเรียก ไม่มีตัวนับรายวัน
+- แนวแก้: รับลงชื่อเฉพาะเมื่อแม่หมอไม่มีเวลาว่างจริง (เรียก `getNextAvailableSlot` ใน route) · ผูกกับบัญชีที่ยืนยันอีเมลแล้ว หรือส่งอีเมลยืนยันก่อนเข้ารายชื่อ + Turnstile · เพดานถี่แบบ D1 (`consumeEdgeRateLimits`) ต่อ IP และต่ออีเมล · cron ใช้ตัวนับรายวันใน KV/D1 ร่วมกับอีเมลระบบทั้งหมด (สำรองโควตาให้ OTP/รีเซ็ตรหัส)
+- ความมั่นใจ: ไล่โค้ดแล้ว (traced)
