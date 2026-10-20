@@ -314,7 +314,12 @@ export const TarotCard: React.FC<TarotCardProps> = ({
         {/* ========================================================= */}
         {/* 2. ด้านหน้าไพ่ (Card Face - Pure 1909 Rider-Waite Luxury) */}
         {/* ========================================================= */}
+        {/*
+          ⚠️ หน้าไพ่ถูกวาดไว้ล่วงหน้าเพื่อให้พลิกได้ลื่น (ภาพโหลดเสร็จก่อนแตะ) แต่ opacity-0 ไม่ได้ซ่อนจากโปรแกรมอ่านจอ
+          ต้อง aria-hidden ตอนยังคว่ำ — ไม่งั้นชื่อไพ่ (alt) และป้าย "กลับหัว" ถูกอ่านออกเสียงก่อนผู้ใช้พลิกเอง (กฎเหล็กข้อ 4)
+        */}
         <div
+          aria-hidden={isRevealed ? undefined : true}
           className={`card-face card-face--back absolute inset-0 rounded-lg overflow-hidden border-2 bg-inset-warm transition-opacity duration-300 ${
             !isRevealed ? "pointer-events-none opacity-0" : "opacity-100"
           } ${isHighlighted ? "ring-2 ring-gold-ink ring-offset-2 ring-offset-[#F3EDE2]" : ""}`}

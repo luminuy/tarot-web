@@ -1428,6 +1428,18 @@ async function testVideoCall(readerId: string, sessionSecret: string) {
     throw new Error("❌ VideoCallRoom ต้องต่อสายใหม่อัตโนมัติจากฝั่งลูกค้า + ฟังเน็ตกลับมา + มีปุ่มต่อเองสำรอง");
   }
   console.log(`  ✓ 16.6 ต่อสายใหม่อัตโนมัติ ${cases.length} สถานการณ์ถูกต้อง · ระยะเว้น 0/10/20/30 วิ · ป้ายคุณภาพสาย 3 ระดับ`);
+
+  // 16.6b กล้องที่ได้มาหลังวางสาย/ออกจากหน้า (รออนุญาตกล้อง · สลับกล้อง) ต้องถูกปิดทันที — ไม่งั้นไฟกล้องค้าง
+  const genGuards = room.match(/gen !== mediaGenRef\.current/g)?.length ?? 0;
+  if (
+    !/const releaseMedia = useCallback\(\(\) => \{\s*mediaGenRef\.current \+= 1;/.test(room) ||
+    !/if \(gen !== mediaGenRef\.current\) \{\s*stream\.getTracks\(\)\.forEach\(\(t\) => t\.stop\(\)\);/.test(room) ||
+    !/if \(gen !== mediaGenRef\.current\) \{\s*track\?\.stop\(\);/.test(room) ||
+    genGuards < 5
+  ) {
+    throw new Error("❌ VideoCallRoom ต้องปิดกล้องที่ได้มาหลังปล่อยกล้องแล้ว (เทียบ mediaGenRef ทุกจุดที่ await กล้อง/เข้าห้อง)");
+  }
+  console.log(`  ✓ 16.6b กล้องที่ได้มาหลังวางสาย/ออกจากหน้าถูกปิดทันที (${genGuards} จุดเทียบรุ่น)`);
 }
 
 /**

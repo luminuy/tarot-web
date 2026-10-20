@@ -243,12 +243,20 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
      * คัดลอก "ของจริงที่อยู่บนหน้าจอ" — ชื่อไพ่ที่เซิร์ฟเวอร์เปิด + คำอ่านของแม่หมอเท่าที่มาถึงแล้ว
      * (เดิมคัดลอกคำอ่านที่เขียนไว้ล่วงหน้า ซึ่งตอนนี้เป็นแค่บทเสริม ไม่ใช่คำอ่านหลักอีกแล้ว)
      */
+    // คัดลอกเฉพาะใบที่ผู้ใช้พลิกแล้ว — ใบที่ยังคว่ำห้ามเฉลยชื่อผ่านคลิปบอร์ด (กฎเหล็กข้อ 4)
     const cardLines = drawnCards
-      .map((card, i) => `${positionLabels[i] ?? i + 1}: ${isEnglish ? card.nameEn : `${card.nameTh} (${card.nameEn})`}`)
-      .join("\n");
-    const oracleText = [oracle.state.reading?.opening, oracle.state.reading?.summary]
+      .map((card, i) =>
+        revealedIndices.has(i)
+          ? `${positionLabels[i] ?? i + 1}: ${isEnglish ? card.nameEn : `${card.nameTh} (${card.nameEn})`}`
+          : null,
+      )
       .filter(Boolean)
-      .join("\n\n");
+      .join("\n");
+    // คำอ่านของแม่หมอพูดถึงไพ่ทั้งกอง — แนบได้เมื่อพลิกครบแล้วเท่านั้น (เกณฑ์เดียวกับที่หน้าจอแสดง)
+    const oracleText =
+      revealedIndices.size === drawnCards.length
+        ? [oracle.state.reading?.opening, oracle.state.reading?.summary].filter(Boolean).join("\n\n")
+        : "";
     const closing = isEnglish
       ? "Open your own cards: https://seertarot.net/en/pick-a-card"
       : "เปิดไพ่พยากรณ์: https://seertarot.net/pick-a-card";

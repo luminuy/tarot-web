@@ -2193,7 +2193,15 @@ export default function TarotFlow({
                   จอเล็กเรียงบนลงล่าง · จอ lg ขึ้นไปแบ่ง 3:1 */}
               <div className="v2-rd-grid">
                 <section aria-label={isEnglish ? "Tarot reading interpretation" : "คำทำนายไพ่ทาโรต์"} className="v2-rd-main">
-                  {selectedSpread.resultStyle === "quick" ? (
+                  {selectedSpread.resultStyle === "quick" &&
+                  !drawnCards.every((c) => revealedOrders.includes(c.order)) ? (
+                    /* 🃏 กฎเหล็กข้อ 4 — คำอ่านสตรีมมาแล้วแต่ไพ่ยังคว่ำ ห้ามเฉลยชื่อ/ภาพ/คำอ่านก่อนผู้ใช้พลิกเอง */
+                    <p className="v2-sr-wait">
+                      {isEnglish
+                        ? "Tap the card on the spread to turn it over yourself — the reading appears here once it is face up."
+                        : "แตะไพ่บนผ้าปูเพื่อพลิกดูเอง พอหงายหน้าแล้วคำอ่านของแม่หมอจะขึ้นตรงนี้"}
+                    </p>
+                  ) : selectedSpread.resultStyle === "quick" ? (
                     <QuickChatResult
                       readingId={readingId}
                       persona={selectedPersona}
@@ -2223,6 +2231,8 @@ export default function TarotFlow({
                       activeCardIndex={activeCardIndex}
                       onSelectCardIndex={(order) => dispatchDeck({ type: "focus", order })}
                       drawnCards={drawnCards}
+                      revealedOrders={revealedOrders}
+                      onRevealCard={handleFlipCard}
                       proof={proof}
                       errorMsg={errorMsg}
                       question={question}

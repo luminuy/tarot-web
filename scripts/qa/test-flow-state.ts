@@ -943,5 +943,48 @@ console.log("\n\n── 19. ผังของฉันในเครื่อ�
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+console.log("\n\n── 20. ไพ่ต้องไม่ถูกเฉลยก่อนผู้ใช้พลิก + ปุ่มเปิดไพ่ใบเดียวกดซ้ำไม่จั่วใหม่ (ตรวจรอบ 2026-10-20) ──");
+// ─────────────────────────────────────────────────────────────────────────────
+{
+  const read = (f: string) => fs.readFileSync(path.join(process.cwd(), f), "utf-8");
+  const sr = read("src/components/reading/StreamReader.tsx");
+  check(
+    "กฎข้อ 4: แผงคำอ่านรับ revealedOrders และแยกหน้าไพ่ที่ยังคว่ำ (ไม่แสดงภาพ/ชื่อ/คำอ่าน)",
+    /revealedOrders\?: number\[\]/.test(sr) && /!activeRevealed \? \(/.test(sr),
+  );
+  check(
+    "กฎข้อ 4: ภาพรวม/Provably Fair ขึ้นเมื่อพลิกครบเท่านั้น · จุดเลือกไพ่ไม่บอกชื่อใบที่ยังคว่ำ",
+    /!allRevealed \? \(/.test(sr) && /card && isOrderRevealed\(d\.order\)/.test(sr),
+  );
+  check(
+    "กฎข้อ 4: ประกาศคำอ่านให้โปรแกรมอ่านจอเฉพาะใบที่พลิกแล้ว",
+    /const finishedReading = !isStreaming && activeRevealed/.test(sr),
+  );
+  const flow = read("src/components/home/TarotFlow.tsx");
+  check(
+    "กฎข้อ 4: TarotFlow ส่ง revealedOrders ให้ StreamReader และกั้นคำอ่านด่วนจนกว่าจะพลิก",
+    /<StreamReader[\s\S]{0,800}?revealedOrders=\{revealedOrders\}/.test(flow) &&
+      /resultStyle === "quick" &&\s*!drawnCards\.every\(\(c\) => revealedOrders\.includes\(c\.order\)\)/.test(flow),
+  );
+  const card = read("src/components/card/TarotCard.tsx");
+  check(
+    "กฎข้อ 4: หน้าไพ่ที่ยังคว่ำซ่อนจากโปรแกรมอ่านจอ (alt ชื่อไพ่ไม่หลุด)",
+    /aria-hidden=\{isRevealed \? undefined : true\}\s*className=\{`card-face card-face--back/.test(card),
+  );
+  const pac = read("src/components/pick-a-card/PickACardClient.tsx");
+  check(
+    "กฎข้อ 4: Pick A Card คัดลอกเฉพาะใบที่พลิกแล้ว",
+    /revealedIndices\.has\(i\)\s*\?/.test(pac),
+  );
+  const ritual = read("src/components/reading/one-card/OneCardRitual.tsx");
+  check(
+    "ไพ่ใบเดียว: กดเปิดไพ่ซ้ำ/กดระหว่างรอไพ่ขึ้นจอ ไม่จั่วใบใหม่ (ไม่เสียสิทธิ์ซ้ำ)",
+    /if \(drawLockRef\.current \|\| oracle\.rawDrawn\.length > 0\) return;/.test(ritual) &&
+      /onClick=\{awaitingCard \? retryDeckLoad : handleDraw\}/.test(ritual) &&
+      /disabled=\{drawBusy\}/.test(ritual),
+  );
+}
+
 console.log(`\n📊 สรุป: ผ่าน ${pass} ข้อ | ล้มเหลว ${fail} ข้อ\n`);
 if (fail > 0) process.exit(1);

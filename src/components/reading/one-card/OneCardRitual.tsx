@@ -101,6 +101,14 @@ export function OneCardRitual({
   const [authMode, setAuthMode] = useState<"signin" | "signup" | null>(null);
   /** ประกอบไพ่จากสำรับไม่สำเร็จ (โหลดชังก์ล้ม · หาไพ่ไม่เจอ) — ต้องบอกผู้ใช้ ห้ามเงียบ (A3-03) */
   const [loadError, setLoadError] = useState<string | null>(null);
+  /** นับรอบประกอบไพ่ใบเดิมซ้ำ — ปุ่ม "โหลดไพ่อีกครั้ง" เพิ่มค่านี้แทนการจั่วใบใหม่ */
+  const [deckAttempt, setDeckAttempt] = useState(0);
+  /*
+   * กันกดปุ่มเปิดไพ่ซ้อน — state `isPreparing` ยังไม่ทันเรนเดอร์ปุ่มเป็น disabled ระหว่างแตะรัว ๆ
+   * และหลังได้เลขไพ่แล้ว `isPreparing` กลับเป็น false ทั้งที่ไพ่ยังไม่ขึ้นจอ (รอโหลดสำรับ)
+   * ช่วงนั้นคำอ่านกำลังสตรีมและหักสิทธิ์ไปแล้ว — กดซ้ำ = ทิ้งไพ่ใบแรก + เสียสิทธิ์อีกครั้ง
+   */
+  const drawLockRef = React.useRef(false);
 
   /*
    * ทุกการเปิดไพ่เดินผ่านท่อเดียวกับหน้าแรก (คำสั่งเจ้าของโปรเจกต์ 2026-09-18)
@@ -121,6 +129,9 @@ export function OneCardRitual({
 
   // จังหวะที่ 1 ➔ จังหวะที่ 2: สุ่มไพ่ทันทีด้วย Web Crypto API โดยไม่ผ่านหน้าจอสับหรือพัดไพ่
   const handleDraw = async () => {
+    // ได้ไพ่ของรอบนี้แล้ว (หรือกำลังขอ) ➔ ห้ามจั่วใหม่ · เริ่มรอบใหม่ได้ทางปุ่ม "เริ่มใหม่" เท่านั้น
+    if (drawLockRef.current || oracle.rawDrawn.length > 0) return;
+    drawLockRef.current = true;
     soundManager.playCardSelectSound();
     setLoadError(null);
     warmDeck();
@@ -130,13 +141,25 @@ export function OneCardRitual({
      * ถ้าปล่อยให้ท่อแปลงให้ จะลาก `@/data/cards` (พ่วงคำทำนายอังกฤษ ≈126 KB) เข้ามา
      * ซึ่งเป็นสิ่งที่สำรับไทยล้วนถูกสร้างขึ้นมาเพื่อเลี่ยงตั้งแต่แรก
      */
-    await oracle.run({
-      spreadId,
-      category,
-      question,
-      nickname,
-      resolveCards: false,
-    });
+    try {
+      await oracle.run({
+        spreadId,
+        category,
+        question,
+        nickname,
+        resolveCards: false,
+      });
+    } finally {
+      drawLockRef.current = false;
+    }
+  };
+
+  /* ประกอบไพ่ใบเดิมอีกครั้งเมื่อโหลดสำรับล้ม — ไม่เปิดเซสชันใหม่ ไม่หักสิทธิ์ซ้ำ */
+  const retryDeckLoad = () => {
+    deckPromise = null;
+    enrichPromise = null;
+    setLoadError(null);
+    setDeckAttempt((n) => n + 1);
   };
 
   /* ได้เลขไพ่จากเซิร์ฟเวอร์แล้วค่อยเปิดสำรับไทยมาประกอบเป็นไพ่เต็มใบ */
@@ -164,8 +187,8 @@ export function OneCardRitual({
         if (!cancelled) {
           setLoadError(
             isEn
-              ? "Could not load your card. Please reload and try again."
-              : "โหลดข้อมูลไพ่ไม่สำเร็จ กรุณาโหลดใหม่อีกครั้ง",
+              ? "Could not load your card. Tap the button below to load it again — your card is kept."
+              : "โหลดข้อมูลไพ่ไม่สำเร็จ กดปุ่มด้านล่างเพื่อโหลดใหม่อีกครั้ง ไพ่ใบเดิมของคุณยังอยู่",
           );
         }
       }
@@ -174,7 +197,7 @@ export function OneCardRitual({
     return () => {
       cancelled = true;
     };
-  }, [drawnIndex, isEn]);
+  }, [drawnIndex, isEn, deckAttempt]);
 
   // เมื่อผู้ใช้แตะพลิกไพ่ 3D
   const handleReveal = () => {
@@ -224,6 +247,9 @@ export function OneCardRitual({
 
   // ข้อผิดพลาดของขั้น start/shuffle — เดิมแสดงเฉพาะตอนเปิดไพ่แล้ว ปุ่มจึงกลับมากดได้เฉย ๆ ไม่มีข้อความ (A3-03)
   const idleError = status !== "revealed" ? loadError || oracle.state.error : null;
+  /** ได้เลขไพ่จากเซิร์ฟเวอร์แล้วแต่ไพ่ยังไม่ขึ้นจอ — ปุ่มต้องไม่จั่วใบใหม่ */
+  const awaitingCard = drawnIndex !== undefined;
+  const drawBusy = oracle.isPreparing || (awaitingCard && !loadError);
 
   return (
     <div className="altar-panel rounded-2xl p-5 sm:p-8 space-y-8">
@@ -240,17 +266,21 @@ export function OneCardRitual({
             <div className="pt-2 flex flex-col items-center justify-center space-y-3 text-center">
               <button
                 type="button"
-                onClick={handleDraw}
+                onClick={awaitingCard ? retryDeckLoad : handleDraw}
                 onPointerEnter={warmDeck}
                 onFocus={warmDeck}
-                disabled={oracle.isPreparing}
+                disabled={drawBusy}
                 className="btn-gold-glass w-full sm:w-auto disabled:opacity-60 disabled:cursor-wait px-10 py-3.5 sm:py-4 font-serif-th text-sm sm:text-base font-bold active:scale-[0.98] cursor-pointer tracking-wide flex items-center justify-center gap-2"
               >
                 <span>
-                  {oracle.isPreparing
+                  {drawBusy
                     ? isEn
                       ? "Connecting to the Oracle…"
                       : "กำลังเชื่อมสัญญาณกับแม่หมอ…"
+                    : awaitingCard
+                    ? isEn
+                      ? "Load my card again"
+                      : "โหลดไพ่อีกครั้ง"
                     : drawButtonText || (isEn ? "Draw 1 Card" : "เปิดไพ่ 1 ใบ")}
                 </span>
               </button>
