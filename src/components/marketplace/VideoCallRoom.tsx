@@ -247,10 +247,17 @@ class CallEngine {
 
   private schedule(): void {
     if (this.stopped) return;
+    // ล้างตัวเก่าก่อนเสมอ — ไม่งั้น `online` ที่ยิงระหว่าง tick สร้างโซ่ถามสถานะซ้อนสองสาย (B4-08)
+    if (this.timer) clearTimeout(this.timer);
     this.timer = setTimeout(() => void this.tick(), this.connected ? POLL_CONNECTED_MS : POLL_NEGOTIATING_MS);
   }
 
+  /** มี tick บินอยู่ — tick ที่สองยิงซ้อนไม่ได้ (ตัวที่บินอยู่จะนัดรอบถัดไปเอง) */
+  private ticking = false;
+
   private async tick(): Promise<void> {
+    if (this.stopped || this.ticking) return;
+    this.ticking = true;
     try {
       const res = await fetch(`${this.o.endpoint}?as=${this.o.role}`, { headers: this.o.headers, cache: "no-store" });
       if (res.ok) {
@@ -265,6 +272,7 @@ class CallEngine {
     } catch {
       // เน็ตสะดุดชั่วคราว — ถามใหม่รอบหน้า
     } finally {
+      this.ticking = false;
       this.schedule();
     }
   }
@@ -594,6 +602,8 @@ export function VideoCallRoom({
    * ไม่งั้นกล้องที่เพิ่งได้มาหลังวางสาย/ออกจากหน้าแล้ว จะเปิดค้างโดยไม่มีใครปิด (ไฟกล้องไม่ดับ)
    */
   const mediaGenRef = useRef(0);
+  /** ผู้ใช้กด "วางสาย" เอง (ต่างจากออกจากหน้า) — ใช้ตัดสินว่าต้องบอกเลิกสายที่ join สำเร็จหลังกดหรือไม่ */
+  const hangUpRequestedRef = useRef(false);
 
   const releaseMedia = useCallback(() => {
     mediaGenRef.current += 1;
@@ -739,6 +749,7 @@ export function VideoCallRoom({
     setError(null);
     setEndedBy(null);
     setPhase("starting");
+    hangUpRequestedRef.current = false;
     const gen = mediaGenRef.current;
     if (typeof RTCPeerConnection === "undefined" || !navigator.mediaDevices?.getUserMedia) {
       setError("เบราว์เซอร์นี้ไม่รองรับวิดีโอคอล กรุณาเปิดด้วย Chrome, Safari หรือ Firefox รุ่นล่าสุด");
@@ -787,7 +798,18 @@ export function VideoCallRoom({
         call?: CallView;
         error?: string;
       };
-      if (gen !== mediaGenRef.current) return; // ปล่อยกล้องไปแล้วระหว่างรอเข้าห้อง — ห้ามเริ่มสายที่ไม่มีใครถือ
+      if (gen !== mediaGenRef.current) {
+        // ปล่อยกล้องไปแล้วระหว่างรอเข้าห้อง — ห้ามเริ่มสายที่ไม่มีใครถือ
+        // กด "วางสาย" ระหว่างเข้าห้อง แต่ join ไปถึงเซิร์ฟเวอร์แล้ว ➔ บอกเลิกด้วย ไม่งั้นอีกฝั่งเห็นว่าเรายังอยู่ในห้อง (B4-08)
+        if (res.ok && hangUpRequestedRef.current) {
+          void fetch(endpoint, {
+            method: "POST",
+            headers: { ...headers, "Content-Type": "application/json" },
+            body: JSON.stringify({ as: role, action: "end" }),
+          }).catch(() => undefined);
+        }
+        return;
+      }
       if (!res.ok || !json.iceServers || !json.call) {
         throw new Error(json.error || "เข้าห้องไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
       }
@@ -823,6 +845,7 @@ export function VideoCallRoom({
 
   const hangUp = async () => {
     const engine = engineRef.current;
+    hangUpRequestedRef.current = true;
     releaseMedia();
     setEndedBy(role);
     setPhase("ended");

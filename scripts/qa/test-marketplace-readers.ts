@@ -1498,6 +1498,26 @@ async function testVideoCall(readerId: string, sessionSecret: string) {
     throw new Error("❌ VideoCallRoom ต้องปิดกล้องที่ได้มาหลังปล่อยกล้องแล้ว (เทียบ mediaGenRef ทุกจุดที่ await กล้อง/เข้าห้อง)");
   }
   console.log(`  ✓ 16.6b กล้องที่ได้มาหลังวางสาย/ออกจากหน้าถูกปิดทันที (${genGuards} จุดเทียบรุ่น)`);
+  // 16.6c (B4-08) กดวางสายระหว่างเข้าห้อง ➔ บอกเลิกสายที่ join ไปแล้ว · ตัวคุมสายไม่ถามสถานะซ้อนสองโซ่
+  if (
+    !/if \(res\.ok && hangUpRequestedRef\.current\)/.test(room) ||
+    !/if \(this\.stopped \|\| this\.ticking\) return;/.test(room) ||
+    !/if \(this\.timer\) clearTimeout\(this\.timer\);\s*this\.timer = setTimeout/.test(room)
+  ) {
+    throw new Error("❌ VideoCallRoom: วางสายระหว่างเข้าห้องต้องส่ง end · tick ห้ามซ้อน · schedule ต้องล้างตัวจับเวลาเก่า (B4-08)");
+  }
+  console.log("  ✓ 16.6c วางสายระหว่างเข้าห้องบอกเลิกสาย · ตัวคุมสายถามสถานะโซ่เดียว (B4-08)");
+  // 16.6d (B4-09) ถามสถานะพลาดชั่วคราวกลางคิว ➔ ห้ามล้างหน้า/ถอดห้องวิดีโอ ทั้งฝั่งลูกค้าและแม่หมอ
+  const queuePage = fs.readFileSync(path.join(process.cwd(), "src/app/(th)/readers/queue/[id]/page.tsx"), "utf-8");
+  const consolePage = fs.readFileSync(path.join(process.cwd(), "src/app/(th)/readers/console/page.tsx"), "utf-8");
+  if (
+    !/else if \(res\.status === 404 \|\| res\.status === 403\) \{[\s\S]{0,200}setError\(/.test(queuePage) ||
+    !/setUnstable\(true\);/.test(queuePage) ||
+    !/\(res\.status >= 500 \|\| res\.status === 429\) && hasData\.current\) \{[\s\S]{0,200}setUnstable\(true\);/.test(consolePage)
+  ) {
+    throw new Error("❌ หน้าคิว/แผงแม่หมอ: 5xx/429/เน็ตสะดุดต้องเก็บข้อมูลเดิม (setUnstable) ไม่ใช่ setError ที่ถอดห้องวิดีโอ (B4-09)");
+  }
+  console.log("  ✓ 16.6d ถามสถานะพลาดชั่วคราวไม่ถอดห้องวิดีโอ ทั้งหน้าคิวลูกค้าและแผงแม่หมอ (B4-09)");
 }
 
 /**

@@ -74,6 +74,8 @@ export default function CustomerQueuePage() {
   const [error, setError] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [notice, setNotice] = useState<string | null>(null);
+  /** ถามสถานะล่าสุดล้มชั่วคราว (เน็ต/5xx/429) — แสดงแถบเล็ก ไม่ล้างหน้า ไม่ถอดห้องวิดีโอ */
+  const [unstable, setUnstable] = useState(false);
   const [confirming, setConfirming] = useState(false);
   /** เปิดอยู่ในเบราว์เซอร์ของแอป (LINE · Facebook · IG · TikTok) — อ่านหลัง mount เท่านั้น (HTML ฝั่งเซิร์ฟเวอร์ต้องตรงกัน) */
   const [inApp, setInApp] = useState<InAppBrowser | null>(null);
@@ -91,12 +93,22 @@ export default function CustomerQueuePage() {
         setNow(Date.now());
         setError(null);
         if (json.ticket.status !== "pending_payment") setConfirming(false);
-      } else {
-        const json = await res.json();
+        setUnstable(false);
+      } else if (res.status === 404 || res.status === 403) {
+        // ไม่พบ/ไม่ใช่เจ้าของตั๋ว = ทางตันจริง
+        const json = (await res.json().catch(() => ({}))) as { error?: string };
         setError(json.error || "ไม่พบข้อมูลคิว");
+      } else {
+        /*
+         * 5xx/429 = เซิร์ฟเวอร์สะดุดชั่วคราว (B4-09) — เดิมตั้ง error ทุกกรณีแล้วทั้งหน้ากลายเป็น
+         * "เปิดนัดนี้จากที่นี่ไม่ได้" ถอดห้องวิดีโอทิ้งกลางสายที่ลูกค้าจ่ายเงินแล้ว
+         * ➔ เก็บข้อมูลเดิมไว้ บอกว่ากำลังลองใหม่ แล้วรอรอบถามถัดไป
+         */
+        setUnstable(true);
       }
     } catch {
-      // Network hiccup - ignore transient polling failure
+      // เน็ตสะดุดชั่วคราว — เก็บข้อมูลเดิม รอรอบถัดไป
+      setUnstable(true);
     } finally {
       setLoading(false);
     }
@@ -157,12 +169,14 @@ export default function CustomerQueuePage() {
     };
   }, [isReady, isPrivateRoom]);
 
-  if (loading && !data) {
+  if ((loading || unstable) && !data && !error) {
     return (
       <main id="main-content" tabIndex={-1} className="min-h-[70vh] text-ink flex items-center justify-center p-4">
         <div className="altar-card-porcelain p-8 text-center space-y-3 z-10">
           <div className="h-8 w-8 mx-auto border-2 border-gold-ink border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-muted font-serif-th">กำลังตรวจสอบข้อมูลคิวของคุณ…</p>
+          <p className="text-xs text-muted font-serif-th">
+            {unstable ? "เชื่อมต่อไม่เสถียร กำลังลองใหม่อัตโนมัติ…" : "กำลังตรวจสอบข้อมูลคิวของคุณ…"}
+          </p>
         </div>
       </main>
     );
@@ -183,16 +197,14 @@ export default function CustomerQueuePage() {
           <p className="text-sm leading-relaxed text-ink">
             ลิงก์หน้าคิวเปิดได้เฉพาะคนที่จองไว้ ถ้าเป็นนัดของคุณ ลองทางใดทางหนึ่งนี้:
           </p>
-          <ul className="space-y-2 text-[13px] leading-relaxed text-ink">
+          {/* รายการใช้เส้นซ้าย ไม่ใช่จุดนำ (กฎเหล็กข้อ 2) */}
+          <ul className="list-rule space-y-2 text-[13px] leading-relaxed text-ink">
             {[
               'เปิด "ลิงก์นัดของคุณ" หรือปุ่ม "ดูนัดของฉัน" ในอีเมลยืนยันการจอง (เปิดได้ทุกเครื่อง)',
               "กลับไปเปิดในแอปหรือเบราว์เซอร์ที่ใช้ตอนจอง (เช่น ในแอป LINE)",
               'เข้าสู่ระบบด้วยบัญชีที่ใช้ตอนจอง แล้วดูที่ "นัดของฉัน"',
             ].map((line) => (
-              <li key={line} className="flex gap-2">
-                <span aria-hidden="true" className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold-ink" />
-                {line}
-              </li>
+              <li key={line}>{line}</li>
             ))}
           </ul>
           <div className="flex flex-col gap-2 sm:flex-row">
@@ -338,6 +350,11 @@ export default function CustomerQueuePage() {
               </div>
             )}
 
+            {unstable && (
+              <p role="status" className="rounded-xl border border-line-warm bg-inset-warm p-3 text-[13px] text-ink">
+                เชื่อมต่อไม่เสถียร กำลังลองใหม่อัตโนมัติ — ไม่ต้องรีเฟรชหน้า
+              </p>
+            )}
             {notice && !isBlocked && (
               <p role="status" className="rounded-xl border border-gold-ink/30 bg-inset-warm p-3 text-[13px] text-ink">
                 {notice}
