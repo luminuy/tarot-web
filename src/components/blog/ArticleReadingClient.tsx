@@ -42,6 +42,9 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
     ? article.readTime.replace("นาที", "min read")
     : article.readTime;
 
+  // ผังประจำบทความ ➔ พิธีเปิดไพ่ของผังนั้นตรง ๆ (ไม่มีผัง = ปุ่มท้ายบทความไปหน้าแรกตามเดิม)
+  const readHref = article.targetSpreadId ? `/read/${article.targetSpreadId}` : undefined;
+
   const effectiveContent = isEnglish && article.contentEn ? article.contentEn : article.content;
   const effectiveToc = isEnglish && article.tocEn && article.tocEn.length > 0 ? article.tocEn : article.toc;
   const effectiveFaqs = isEnglish && article.faqsEn && article.faqsEn.length > 0 ? article.faqsEn : article.faqs;
@@ -104,6 +107,13 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
         <p className="v2-ar-stand">
           <ThaiPhrases>{articleDesc}</ThaiPhrases>
         </p>
+        {/* GSC 2026-10-19: คำค้นแบบ "เปิดไพ่ 4 ใบ" ~300 แสดงผลมาลงบทความ ได้ 0 คลิก — คนค้นอยากเปิดไพ่ ไม่ใช่อ่าน
+            ปุ่มเข้าพิธีเปิดไพ่ของผังประจำบทความต้องเห็นตั้งแต่หัวหน้า ไม่ใช่รอเลื่อนถึงท้ายบทความ */}
+        {readHref && (
+          <Link href={readHref} className="ui2-btn v2-ar-go v2-ar-try">
+            {isEnglish ? "Try this spread free" : "เปิดไพ่ผังนี้ฟรี"}
+          </Link>
+        )}
       </header>
       </div>
 
@@ -197,7 +207,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
         <h2>
           <ThaiPhrases>{isEnglish ? "Ready to Reveal the Hidden Wisdom of Your Path?" : "พร้อมเปิดไพ่ รับคำตอบสำหรับชีวิตคุณหรือยัง?"}</ThaiPhrases>
         </h2>
-        <Link href="/" className="ui2-btn v2-ar-go">
+        <Link href={readHref ?? "/"} className="ui2-btn v2-ar-go">
           {isEnglish ? "Begin Free Tarot Reading Now" : "เปิดไพ่ทำนายดวงชะตาฟรีทันที"}
         </Link>
       </section>
