@@ -35,6 +35,7 @@ import {
   updateRedeemCode,
 } from "../../src/lib/entitlement/redeem-admin.repo";
 import { getAppDB } from "../../src/lib/platform/db";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 type AppDB = Awaited<ReturnType<typeof getAppDB>>;
 
@@ -44,9 +45,10 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 /** รหัสที่เคยอยู่ในไฟล์ migration ของรีโปสาธารณะ — ถือว่าเปิดเผยแล้ว ต้องใช้งานไม่ได้ (A10-01) */
 const SEEDED_REPO_CODES = ["VIP3-TAROT-2026", "SEER3PASS"] as const;
 
-/** ไล่หาสตริงรหัสในไฟล์ซอร์สของหน้าเว็บ — คืนรายการ path ที่เจอ */
+/** ไล่หาสตริงรหัสในไฟล์ซอร์สของหน้าเว็บ — คืนรายการ path ที่เจอ (ล้มทันทีถ้าไม่ได้สแกนสักไฟล์) */
 function scanForCodes(dirs: string[], codes: readonly string[]): string[] {
   const found: string[] = [];
+  const scanned: string[] = [];
   const walk = (dir: string) => {
     if (!fs.existsSync(dir)) return;
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -54,12 +56,14 @@ function scanForCodes(dirs: string[], codes: readonly string[]): string[] {
       if (entry.isDirectory()) {
         if (entry.name !== "node_modules") walk(abs);
       } else if (/\.(tsx?|astro|js|html|json)$/.test(entry.name)) {
+        scanned.push(abs);
         const text = fs.readFileSync(abs, "utf8").toUpperCase();
         if (codes.some((c) => text.includes(c))) found.push(path.relative(ROOT, abs));
       }
     }
   };
   for (const d of dirs) walk(path.join(ROOT, d));
+  assertNonEmptyCorpus("ไฟล์ซอร์สที่สแกนหารหัส seed", scanned, `ไม่พบไฟล์ใน ${dirs.join(", ")}`);
   return found;
 }
 
