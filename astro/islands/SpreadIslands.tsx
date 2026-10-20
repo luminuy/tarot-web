@@ -39,11 +39,12 @@ export function SpreadDetailRoot({
 
 export function TopicSpreadListRoot({
   spreads,
+  topic,
   locale,
 }: ComponentProps<typeof TopicSpreadList> & { locale: Locale }) {
   return (
     <LocaleProvider forcedLocale={locale}>
-      <TopicSpreadList spreads={spreads} />
+      <TopicSpreadList spreads={spreads} topic={topic} />
     </LocaleProvider>
   );
 }

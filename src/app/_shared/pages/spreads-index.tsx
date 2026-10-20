@@ -242,7 +242,8 @@ export function SpreadsIndexBody({ locale, library }: { locale: Locale; library:
           {/* 🔗 หน้าหมวด `/spreads/topic/*` 6 หน้า — เดิมไม่มีลิงก์จากหน้าไหนเลย (มีแค่ใน sitemap)
               GSC 2026-09-27: 4 จาก 6 หน้าขึ้นว่า "Google ไม่รู้จัก URL" · ห้ามลบ */}
           <span className="ui2-sp-rule" aria-hidden="true" />
-          <div className="ui2-sp-dir-head">
+          {/* id="topics" = ปลายทางของ `/spreads/topic` (ไม่มีหน้าของตัวเอง · public/_redirects) */}
+          <div id="topics" className="ui2-sp-dir-head">
             <SectionBadge n="08" word="By topic" />
             <h2 className="ui2-h2 ui2-sp-dir-h2"><ThaiPhrases>{copy.topicsTitle}</ThaiPhrases></h2>
             <p className="ui2-lede">{copy.topicsLead}</p>

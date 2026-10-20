@@ -109,42 +109,50 @@
     overflow: visible;
   }
 }
+/* แถบสลับหมวดบนแถบครีม (ui2-dawn) — เม็ดขาวครีมตัวหมึก · หมวดที่อยู่ = สีประจำหมวดตัวหมึก
+   (เดิมเป็นกระจกมืดสำหรับหัวหน้าโทนมืด ➔ บนครีมกลายเป็นเม็ดเทาขุ่น ตัวหนังสือจม · เจ้าของ 2026-10-20 "ยังไม่สวย") */
 .v2-tp-switch a {
   display: inline-flex;
   flex: none;
   align-items: center;
   gap: 8px;
   min-height: 42px;
-  padding: 0 16px;
+  padding: 0 14px 0 16px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 236, 200, 0.14);
-  background: rgba(12, 10, 15, 0.45);
+  border: 1px solid rgba(74, 47, 16, 0.14);
+  background: rgba(255, 252, 246, 0.92);
+  box-shadow: 0 8px 18px -14px rgba(74, 47, 16, 0.45);
   font-size: 13.5px;
-  color: var(--ui2-on-night-soft);
-  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  font-weight: 500;
+  color: #4A3B2C;
+  transition: border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
 }
 .v2-tp-switch a:hover {
-  border-color: rgba(var(--tp), 0.6);
-  color: var(--ui2-on-night);
+  border-color: rgba(var(--tp), 0.9);
+  background: #FFFFFF;
 }
 .v2-tp-switch small {
-  min-width: 20px;
-  padding: 1px 6px;
+  min-width: 22px;
+  padding: 1px 7px;
   border-radius: 999px;
-  background: rgba(var(--tp), 0.18);
+  background: rgba(74, 47, 16, 0.08);
   text-align: center;
-  font-size: 11px;
-  color: rgb(var(--tp));
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #5A4A3A;
+}
+.v2-tp-switch a[data-topic] small {
+  background: rgba(var(--tp), 0.3);
 }
 .v2-tp-switch a[aria-current="page"] {
-  border-color: transparent;
+  border-color: rgba(74, 47, 16, 0.18);
   background: rgb(var(--tp));
-  font-weight: 600;
-  color: var(--ui2-night);
+  font-weight: 700;
+  color: #2B2118;
 }
 .v2-tp-switch a[aria-current="page"] small {
-  background: rgba(12, 10, 15, 0.2);
-  color: var(--ui2-night);
+  background: rgba(255, 255, 255, 0.55);
+  color: #2B2118;
 }
 
 /* ── ส่วน ── */
@@ -220,11 +228,20 @@
   display: block;
   width: 100%;
 }
-.v2-tp-map-area span {
+/* ไพ่ในภาพย่อผัง = ภาพไพ่ 1909 จริง (เจ้าของ 2026-10-20) · ขอบทองบางแบบไพ่บนโต๊ะ */
+.v2-tp-map-area > span {
   position: absolute;
+  overflow: hidden;
   border-radius: 3px;
-  border: 1px solid rgba(var(--tp), 0.75);
-  background: rgba(var(--tp), 0.16);
+  border: 1px solid rgba(255, 217, 143, 0.55);
+  background: #1E1822;
+  box-shadow: 0 4px 10px -4px rgba(0, 0, 0, 0.7);
+}
+.v2-tp-map-area img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .v2-tp-body {
   min-width: 0;
