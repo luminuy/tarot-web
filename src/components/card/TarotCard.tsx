@@ -364,7 +364,8 @@ export const TarotCard: React.FC<TarotCardProps> = ({
             (วัดจริงที่ 320 · 360 · 390 · 430px — จอ ≥640px ไพ่กว้างขึ้นจึงไม่ทับ จึงไม่มีใครเห็น)
             ⚠️ ห้ามย้ายกลับไปไว้แถวบนของไพ่ ถ้าไม่ได้ย้ายปุ่มขยายออกจากมุมบนขวาพร้อมกัน
           */}
-          {isReversed && (
+          {/* โผล่หลังพลิกเท่านั้น — ตอนคว่ำหน้าไพ่แค่ opacity-0 ข้อความยังอยู่ในหน้า (คัดลอก/ค้นหาในหน้าเจอ) */}
+          {isReversed && isRevealed && (
             <div className="absolute bottom-2 left-2 z-20 pointer-events-none">
               <span className="text-[12px] font-bold font-serif-th bg-ink-deep/90 text-surface border border-line-warm/80 px-2 py-0.5 rounded-full ">
                 {isEnglish ? "Reversed" : "กลับหัว"}

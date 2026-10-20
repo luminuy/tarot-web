@@ -2260,7 +2260,8 @@ export default function TarotFlow({
 
                 {/* แถบข้าง: แชทต่อกับแม่หมอ · แชร์ · ดูเรื่องอื่น — ติดจอบนเดสก์ท็อป */}
                 <aside className="v2-rd-side">
-                  {readingId && (
+                  {/* คำอ่านสำรอง (AI ไม่ว่าง · ไม่หักสิทธิ์) ยังถามต่อไม่ได้ — เซิร์ฟเวอร์ตอบ 409 (B4-01) · ให้กด "ให้แม่หมอ AI อ่านใหม่" ในป้ายด้านบนก่อน */}
+                  {readingId && !read.fallback && (
                     <Link
                       href="/reading/chat"
                       onClick={() => soundManager.playCardSelectSound()}

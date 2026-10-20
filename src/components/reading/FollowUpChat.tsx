@@ -200,7 +200,8 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
     ent.role === "admin" ||
     ent.role === "unlimited" ||
     (typeof ent.bonusRemaining === "number" && ent.bonusRemaining > 0);
-  const userQuestionsCount = messages.filter((m) => m.sender === "user").length;
+  // นับเฉพาะคำถามที่แม่หมอตอบได้จริง — ตาที่ล้ม (เน็ตหลุด · เซิร์ฟเวอร์ปฏิเสธ) ไม่กินสิทธิ์ถามฟรี
+  const userQuestionsCount = messages.filter((m) => m.sender === "bot" && !m.isError).length;
   const freeChatLimitReached = !isUnlimited && userQuestionsCount >= 2;
   const chatLogRef = React.useRef<HTMLDivElement>(null);
 

@@ -172,6 +172,23 @@ export function runChatSchemaTests() {
   }
   console.log("  ✓ Test 6: ข้อความเพดานแชทแยกระหว่าง 'รอสักครู่' กับ 'ครบโควตาวันนี้' (B4-02)");
 
+  // Test 7: คำอ่านสำรอง (FAILED) ถูกบล็อกแชท — ปุ่ม "ถามแม่หมอต่อ" ต้องไม่โผล่บนคำอ่านสำรอง
+  // และตาแชทที่ล้มต้องไม่กินสิทธิ์ถามฟรี (เจอจากการเปิดไพ่จริงในเครื่อง: ตอบ 409 สองครั้ง ➔ "ใช้สิทธิ์ฟรีครบ 2 ข้อแล้ว")
+  const root = process.cwd();
+  const flowSrc = fs.readFileSync(path.join(root, "src/components/home/TarotFlow.tsx"), "utf8");
+  const quickSrc = fs.readFileSync(path.join(root, "src/components/reading/QuickChatResult.tsx"), "utf8");
+  const chatUiSrc = fs.readFileSync(path.join(root, "src/components/reading/FollowUpChat.tsx"), "utf8");
+  if (!/readingId && !read\.fallback && \(\s*<Link\s+href="\/reading\/chat"/.test(flowSrc) || !/readingId && !isFallback && \(\s*<Link\s+href="\/reading\/chat"/.test(quickSrc)) {
+    throw new Error("Test 7 Failed: ลิงก์ /reading/chat ต้องซ่อนเมื่อเป็นคำอ่านสำรอง (fallback) ทั้งใน TarotFlow และ QuickChatResult");
+  }
+  if (!/const fromFallback = record\?\.status === "FAILED";/.test(chatRouteSrc)) {
+    throw new Error("Test 7 Failed: 409 ของคำอ่านสำรองต้องบอกให้กด 'ให้แม่หมอ AI อ่านใหม่' ไม่ใช่ 'ให้อ่านจบก่อน'");
+  }
+  if (!/userQuestionsCount = messages\.filter\(\(m\) => m\.sender === "bot" && !m\.isError\)\.length/.test(chatUiSrc)) {
+    throw new Error("Test 7 Failed: สิทธิ์ถามฟรีต้องนับเฉพาะคำถามที่ได้คำตอบจริง (ไม่นับตาที่ล้ม)");
+  }
+  console.log("  ✓ Test 7: คำอ่านสำรองไม่มีปุ่มแชท + 409 บอกทางไปต่อ + ตาที่ล้มไม่กินสิทธิ์ถามฟรี");
+
   console.log("✨ All Chat BodySchema tests passed successfully!");
 }
 

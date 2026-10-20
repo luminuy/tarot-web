@@ -326,10 +326,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       }
       if (!isReadingFinished(record)) {
         recordEvent("chat_blocked_unfinished");
+        // FAILED = ผู้ใช้เห็นคำอ่านสำรองจากคลังความหมายไพ่ (AI ไม่ว่าง · ไม่หักสิทธิ์) — บอกทางไปต่อให้ตรงกับที่เห็นบนจอ
+        const fromFallback = record?.status === "FAILED";
         return NextResponse.json(
           {
-            error:
-              initialLang === "en"
+            error: fromFallback
+              ? initialLang === "en"
+                ? "This reading came from our card-meaning library while the AI oracle was busy. Go back and tap \"Ask the AI oracle again\" first, then you can ask follow-up questions."
+                : "คำอ่านชุดนี้มาจากคลังความหมายไพ่ตอนแม่หมอ AI ไม่ว่าง กลับไปกด \"ให้แม่หมอ AI อ่านใหม่\" ก่อน แล้วค่อยถามต่อได้เลยนะ"
+              : initialLang === "en"
                 ? "Let the Oracle finish reading this spread first, then you can ask follow-up questions."
                 : "ให้แม่หมออ่านไพ่ชุดนี้ให้จบก่อน แล้วค่อยถามต่อได้เลยนะ",
             reason: "reading_not_finished",
