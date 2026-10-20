@@ -34,6 +34,9 @@ export function CardTile({
       prefetch={false}
       data-suit={card.arcana === "major" ? "major" : (card.suit ?? "major")}
       className="card-tile-cv v3-tile"
+      /* `content-visibility: auto` ข้ามการวาดใบที่อยู่นอกจอ — Chrome ตัดข้อความข้างในออกจาก accessibility tree ด้วย
+         ลิงก์จึงไม่มีชื่อให้โปรแกรมอ่านจอ (B1 2026-10-20) ➔ ตั้งชื่อตรง ๆ */
+      aria-label={isEnglish ? card.nameEn : `${card.nameTh} (${card.nameEn})`}
     >
       <span className="v3-tile-frame">
         <CardImage
