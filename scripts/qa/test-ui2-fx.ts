@@ -295,6 +295,20 @@ check(
   );
 }
 
+// ── 9. ปุ่ม "เปิดไพ่ด่วน 1 ใบ" ต้องพาไปจนหน้าต่างเปิดไพ่พอดีจอ (INC-0290) ──────────────────────────────
+// เป้า #home-quick ต้องเป็นหมุด `.ui2-pick-anchor` ที่ไม่มีท่าเข้าฉาก (ถ้าอยู่ที่ `.ui2-window` ที่ย่อ+เลื่อนตอนเข้าฉาก
+// เบราว์เซอร์คิดจุดหยุดผิด ~61px) · ห้ามมี `scroll-mt-*` ซ้อนกับ scroll-padding-top ของ html (เดิมหยุดต่ำไป ~150px)
+{
+  const pickSrc = fs.readFileSync(path.join(ROOT, "src/components/home2/Ui2PickSection.tsx"), "utf-8");
+  const target = /<[a-z]+[^>]*\bid="home-quick"[^>]*>/.exec(pickSrc)?.[0] ?? "";
+  const pickCss = fs.readFileSync(path.join(ROOT, "src/styles/ui2.css"), "utf-8");
+  check(
+    "เป้า #home-quick เป็นหมุด .ui2-pick-anchor ไม่มี scroll-mt ซ้อน และ ui2.css คุม scroll-margin-top ของหมุดไว้",
+    /className="ui2-pick-anchor"/.test(target) && !/scroll-mt-/.test(pickSrc) && /\.ui2-pick-anchor\s*\{\s*scroll-margin-top:/.test(pickCss),
+    `เป้าตอนนี้: ${target || "(ไม่พบ)"}\n      ➔ ดู src/components/home2/Ui2PickSection.tsx + .ui2-pick-anchor ใน src/styles/ui2.css (INC-0290)`,
+  );
+}
+
 if (failed > 0) {
   console.log(`\n❌ ไม่ผ่าน ${failed} ข้อ\n`);
   process.exit(1);
