@@ -366,6 +366,27 @@
   line-height: 1.65;
   color: var(--ui2-on-night-soft);
 }
+/* เลือกผังตามสถานการณ์ — สถานะ (ตัวเล็กสีหมวด) · ชื่อผังที่เป็นลิงก์ · คำอธิบาย · คอม 2 คอลัมน์ */
+.v2-tp-sit small {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgb(var(--tp));
+}
+.v2-tp-sit em {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ui2-teal-text);
+}
+@media (min-width: 768px) {
+  .v2-tp-sit {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 .v2-tp-guide {
   padding: 26px 22px;
   border-radius: 24px;

@@ -23,6 +23,8 @@ interface Props {
   standard: boolean;
   relatedArticles: Article[];
   fallbackSpreads: Spread[];
+  /** หมวดที่ผังนี้สังกัด (คำนวณฝั่งเซิร์ฟเวอร์ใน `spreadDetailProps`) — ห้าม import คลังหมวดเข้า island นี้ */
+  topicCrumb?: { label: string; path: string };
 }
 
 const CATEGORY_TH: Record<string, string> = {
@@ -52,6 +54,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
   standard,
   relatedArticles,
   fallbackSpreads,
+  topicCrumb,
 }) => {
   const { isEnglish } = useLocale();
 
@@ -153,6 +156,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
             crumbs={[
               { label: isEnglish ? "Home" : "หน้าแรก", href: "/" },
               { label: isEnglish ? "Spreads" : "คลังผังพยากรณ์", href: "/spreads" },
+              ...(topicCrumb ? [{ label: topicCrumb.label, href: topicCrumb.path }] : []),
               { label: spreadName },
             ]}
           />
@@ -331,6 +335,12 @@ export const SpreadDetailClient: React.FC<Props> = ({
             );
           })}
         </ul>
+        {/* ลิงก์ขึ้นหมวดที่มองเห็นได้ (breadcrumb ด้านบนซ่อนจากสายตา) — ข้อความเป็นคำที่คนค้น */}
+        {topicCrumb && (
+          <Link href={topicCrumb.path} className="v2-sd-all">
+            {isEnglish ? `All ${topicCrumb.label}` : `รวมผัง${topicCrumb.label}`}
+          </Link>
+        )}
         <Link href="/spreads" className="v2-sd-all">
           {isEnglish ? "View all tarot spreads" : "ดูคลังผังพยากรณ์ทั้งหมด"}
         </Link>

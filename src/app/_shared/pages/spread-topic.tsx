@@ -207,6 +207,27 @@ export function SpreadTopicContent({
           {list}
         </section>
 
+        {/* เลือกผังตามสถานะของคนถาม — ตอบคำค้น "ดูดวงไพ่ยิปซี + หมวด" ตรง ๆ (GSC 2026-10-19 · ไทยเท่านั้น) */}
+        {!isEnglish && topic.situationsTh && topic.situationsTh.length > 0 && (
+          <section className="v2-tp-sec" aria-labelledby="tp-sit-h">
+            <h2 id="tp-sit-h" className="v2-tp-h2">
+              <ThaiPhrases>{`${topic.titleTh} เลือกผังตามสถานการณ์ของคุณ`}</ThaiPhrases>
+            </h2>
+            <ul className="v2-tp-also v2-tp-sit">
+              {topic.situationsTh.map((item) => (
+                <li key={item.href}>
+                  <small>
+                    {item.situation}
+                    {item.free ? <em>เปิดได้ฟรี</em> : null}
+                  </small>
+                  <Link href={item.href}>{item.label}</Link>
+                  <span>{item.note}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {topicQuestions.length > 0 && (
           <section className="v2-tp-sec" aria-labelledby="tp-q-h">
             <h2 id="tp-q-h" className="v2-tp-h2">

@@ -165,7 +165,7 @@ export function LoveOneCardBodyTh({ ritual }: { ritual: ReactNode }) {
               },
             ]}
             links={[
-              { label: "รวมผังดูดวงความรักทุกแบบ", href: "/spreads/topic/love" },
+              { label: "รวมผังดูดวงไพ่ยิปซีความรักทุกแบบ", href: "/spreads/topic/love" },
               { label: "ดูดวงไพ่ยิปซีรายวัน", href: "/daily" },
               { label: "คำนวณไพ่ประจำตัว", href: "/cards/birth-card" },
               { label: "ปรึกษาแม่หมอตัวจริง", href: "/readers" },

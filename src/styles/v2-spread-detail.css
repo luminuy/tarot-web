@@ -420,6 +420,7 @@ tr.is-active .v2-sd-n {
 .v2-sd-all {
   display: inline-block;
   margin-top: 18px;
+  margin-inline-end: 20px;
   font-size: 14px;
   font-weight: 600;
   color: var(--ui2-gold-solid);
