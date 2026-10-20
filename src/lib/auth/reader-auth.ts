@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getReaderById, type Reader } from "@/lib/marketplace/readers.repo";
 
-export const READER_COOKIE_NAME = "tarot_reader_session";
+const READER_COOKIE_NAME = "tarot_reader_session";
 
 interface ReaderSessionPayload {
   readerId: string;

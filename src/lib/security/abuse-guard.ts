@@ -13,8 +13,8 @@ import { recordEvent } from "@/lib/stats/record";
  *  • ครั้งที่ 1–2 ยังได้ข้อความปกติ "มีข้อความที่ไม่อนุญาต" (คนพิมพ์พลาดไม่ควรโดนพักทันที)
  */
 export const INJECTION_STRIKES = 3;
-export const INJECTION_WINDOW_SEC = 3600;
-export const INJECTION_COOLDOWN_SEC = 3600;
+const INJECTION_WINDOW_SEC = 3600;
+const INJECTION_COOLDOWN_SEC = 3600;
 
 const strikeKey = (id: string) => edgeRateLimitKey("inj_strike", id);
 const coolKey = (id: string) => edgeRateLimitKey("inj_cool", id);

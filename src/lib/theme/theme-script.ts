@@ -24,9 +24,9 @@ import { SITE_THEME_COLOR } from "@/app/_shared/root-metadata";
 import { STORAGE_KEYS } from "@/lib/storage/keys";
 
 /** สีพื้นของโหมดมืด — ต้องตรงกับ `--color-canvas` ใน `src/app/theme-dark.css` */
-export const SITE_THEME_COLOR_DARK = "#15110D";
+const SITE_THEME_COLOR_DARK = "#15110D";
 
-export const THEME_STORAGE_KEY = STORAGE_KEYS.theme;
+const THEME_STORAGE_KEY = STORAGE_KEYS.theme;
 
 export const THEME_SCRIPT =
   "(function(){var d=document.documentElement,k=" +

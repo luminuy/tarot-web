@@ -18,7 +18,7 @@ export interface CloudinaryShareCardParams {
   cardImageNames?: string[]; // เช่น ['major-00.jpg', 'major-01.jpg']
 }
 
-export function getCloudinaryCloudName(): string {
+function getCloudinaryCloudName(): string {
   const raw = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "";
   const name = raw.trim().replace(/^["']+|["']+$/g, "");
   // ถ้า env ไม่ถูกส่งเข้ามาตอน build (เช่นขั้น verify ใน CI) ให้ใช้ค่าเริ่มต้นที่ฝังไว้

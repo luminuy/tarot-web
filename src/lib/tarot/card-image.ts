@@ -63,7 +63,7 @@ const IMAGEKIT_NO_TRANSFORM = "?tr=orig-true";
  * ดึง URL Endpoint ของ ImageKit CDN จาก Environment Variable
  * หากไม่ได้ตั้งค่า จะคืนค่าสตริงว่าง เพื่อให้ระบบถอยไปใช้ Path ภายในเครื่อง (Zero Breaking Change)
  */
-export function getImageKitEndpoint(): string {
+function getImageKitEndpoint(): string {
   const endpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || "";
   return endpoint.trim().replace(/^["']+|["']+$/g, "").replace(/\/+$/, "");
 }

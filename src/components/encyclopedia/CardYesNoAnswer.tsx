@@ -2,6 +2,7 @@ import React from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import type { TarotCard } from "@/data/cards/types";
 import { buildYesNoAnswer, YES_NO_TONE } from "@/data/cards/yes-no";
+import { cardYesNoQuestion } from "@/lib/seo/faq";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 interface CardYesNoAnswerProps {
@@ -23,7 +24,8 @@ export const CardYesNoAnswer: React.FC<CardYesNoAnswerProps> = ({ card, isEnglis
     <section aria-labelledby="yes-no-heading" className="space-y-3.5 pt-2">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <h2 id="yes-no-heading" className="font-serif-th text-base font-bold text-ink flex items-center gap-2">
-          {isEnglish ? `Is ${card.nameEn} a Yes or No Card?` : `ไพ่ ${card.nameTh} ใช่หรือไม่ (Yes / No)`}
+          {/* ข้อความเดียวกับคำถามใน FAQPage JSON-LD ของหน้าไพ่ (A7-10) */}
+          {cardYesNoQuestion(card, isEnglish)}
         </h2>
         <span className={`px-3 py-1 rounded-full border text-xs font-bold ${tone.badgeClass}`}>
           {uprightAnswer.verdictLabel}

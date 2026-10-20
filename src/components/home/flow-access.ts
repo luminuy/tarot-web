@@ -31,7 +31,7 @@ import {
 /** ผ่าน = พาไปขั้นต่อไปได้ · ไม่ผ่าน = เปิดกำแพงสิทธิ์ด้วยเหตุผลที่ระบุ */
 export type AccessDecision = { allowed: true } | { allowed: false; reason: UpgradeReason };
 
-export const ALLOWED: AccessDecision = { allowed: true };
+const ALLOWED: AccessDecision = { allowed: true };
 
 /**
  * "ผู้ถือสิทธิ์เต็ม" — คนที่ไม่ควรเจอกำแพงผังใหญ่หรือปรมาจารย์ลับ

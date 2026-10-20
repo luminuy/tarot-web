@@ -949,7 +949,20 @@ async function testBookingCare(readerId: string) {
   if (!byUser.some((x) => x.id === t.id) || byStranger.some((x) => x.id === t.id) || (await listTicketsForOwner({})).length !== 0) {
     throw new Error("❌ นัดของฉัน: ต้องเห็นเฉพาะตั๋วของบัญชีตัวเอง");
   }
-  console.log("  ✓ 18.4 เงินเข้า ➔ เก็บอีเมลจากหน้าจ่าย + ยืนยันครั้งเดียว · นัดของฉันเห็นเฉพาะของบัญชีตัวเอง");
+  // A1-04: บัญชีอีเมลต้องยืนยันอีเมลแล้วจึงนับเป็นเจ้าของตั๋วที่ผูก user id · OAuth ผ่านทันที
+  {
+    const { verifiedOwnerUserId } = await import("../../src/lib/marketplace/ticket-owner");
+    const { createEmailUser, markEmailVerified } = await import("../../src/lib/users/users.repo");
+    const mailUser = await createEmailUser({ email: `own_${crypto.randomUUID().slice(0, 8)}@example.com`, name: "ทดสอบเจ้าของ", passwordHash: "x" });
+    const before = await verifiedOwnerUserId({ id: mailUser.id, provider: "email" });
+    await markEmailVerified(mailUser.id);
+    const after = await verifiedOwnerUserId({ id: mailUser.id, provider: "email" });
+    if (before !== null || after !== mailUser.id || (await verifiedOwnerUserId({ id: "usr_g", provider: "google" })) !== "usr_g" || (await verifiedOwnerUserId(null)) !== null) {
+      throw new Error(`❌ A1-04: เจ้าของตั๋วผ่านบัญชีอีเมลต้องยืนยันอีเมลก่อน (${before}/${after})`);
+    }
+    await db.prepare("DELETE FROM users WHERE id = ?").bind(mailUser.id).run();
+  }
+  console.log("  ✓ 18.4 เงินเข้า ➔ เก็บอีเมลจากหน้าจ่าย + ยืนยันครั้งเดียว · นัดของฉันเห็นเฉพาะของบัญชีตัวเอง · บัญชีอีเมลที่ยังไม่ยืนยันไม่นับเป็นเจ้าของ");
 
   // ── 18.5 รีวิว: เฉพาะคุยจบ+จ่ายแล้ว · ครั้งเดียว · ซ่อนชื่อเล่น ───────────────────
   const { POST: postReview } = await import("../../src/app/api/marketplace/tickets/[id]/review/route");
@@ -1013,6 +1026,51 @@ async function testBookingCare(readerId: string) {
       throw new Error(`❌ cron: ${res.status} ${JSON.stringify(json)} waitlist_left=${left?.c}`);
     }
     if ((await getQueueTicketById(tl.id))?.status !== "expired") throw new Error("❌ cron ต้องปิดตั๋วที่หมดเวลาจ่าย");
+
+    // A2-10: แม่หมอกดเริ่มแล้วไม่เคยเข้าห้อง — ปิด + คืนเงินอัตโนมัติ "เฉพาะ" ห้องวิดีโอที่มีหลักฐานว่าลูกค้ารอแล้วไปแล้ว
+    const paidReady = async (ref: string) => {
+      const tk = await createQueueTicket({ readerId, kind: "walkup", customerRef: ref, nickname: "ห้อง", question: "ห้องร้าง", initialStatus: "pending_payment" });
+      const hd = await repo.holdBooking({ ticketId: tk.id, readerId, kind: "walkup", slotStart: Date.now() });
+      if (!hd.ok) throw new Error("❌ เตรียมเคสห้องร้าง: hold ล้ม");
+      const py = await createPaymentRecord({ bookingId: hd.booking.id, ticketId: tk.id, provider: "simulator", providerRef: `chrg_${ref}`, amountSatang: 29900 });
+      await repo.settleConsultationPayment(py.id);
+      await updateTicketStatus(tk.id, "ready", readerId);
+      return tk.id;
+    };
+    const room = (id: string, openedMinAgo: number, customerSeenMinAgo: number | null, readerSeenMinAgo: number | null) => {
+      const at = (m: number | null) => (m === null ? null : Date.now() - m * 60_000);
+      return db
+        .prepare(
+          `INSERT OR REPLACE INTO call_sessions (ticket_id, round, customer_seen_at, reader_seen_at, created_at, updated_at)
+           VALUES (?, 1, ?, ?, ?, ?)`
+        )
+        .bind(id, at(customerSeenMinAgo), at(readerSeenMinAgo), at(openedMinAgo), Date.now())
+        .run();
+    };
+    const gone = await paidReady("cust_room_gone"); // ลูกค้ารอ 20 นาทีแล้วออกไปนาน ➔ ปิด
+    const waiting = await paidReady("cust_room_wait"); // ลูกค้ายังรออยู่ในห้อง ➔ ไม่แตะ
+    const met = await paidReady("cust_room_met"); // แม่หมอเข้าห้องแล้ว ➔ ไม่แตะ
+    const lineOnly = await paidReady("cust_room_line"); // ไม่มีห้องวิดีโอ (คุยทาง LINE) ➔ ไม่มีหลักฐาน ไม่แตะ
+    await room(gone, 60, 40, null);
+    await room(waiting, 60, 0, null);
+    await room(met, 60, 40, 50);
+    const res2 = await cron(
+      new Request("https://x/api/cron/booking-reminders", { method: "POST", headers: { authorization: "Bearer cron_test_secret_value" } }),
+    );
+    const json2 = (await res2.json()) as { abandonedRooms: number };
+    const st = async (id: string) => (await getQueueTicketById(id))?.status;
+    const closedRow = await db
+      .prepare("SELECT status, cancelled_by, refund_status FROM bookings WHERE ticket_id = ?")
+      .bind(gone)
+      .first<{ status: string; cancelled_by: string | null; refund_status: string | null }>();
+    if (
+      res2.status !== 200 || json2.abandonedRooms !== 1 ||
+      (await st(gone)) !== "cancelled" || closedRow?.status !== "cancelled" || closedRow.cancelled_by !== "system" || closedRow.refund_status !== "refunded" ||
+      (await st(waiting)) !== "ready" || (await st(met)) !== "ready" || (await st(lineOnly)) !== "ready"
+    ) {
+      throw new Error(`❌ A2-10 cron ปิดห้องร้าง: ${res2.status} ${JSON.stringify(json2)} ${JSON.stringify(closedRow)} ${await st(gone)}/${await st(waiting)}/${await st(met)}/${await st(lineOnly)}`);
+    }
+    console.log("  ✓ 18.6b cron ปิดนัดวิดีโอที่แม่หมอไม่เคยเข้าห้อง + คืนเงินเต็ม · ไม่แตะห้องที่ลูกค้ายังรอ/แม่หมอเข้าแล้ว/ไม่มีห้องวิดีโอ (LINE)");
   } finally {
     if (savedSecret === undefined) delete process.env.CRON_SECRET;
     else process.env.CRON_SECRET = savedSecret;

@@ -247,7 +247,7 @@ export function describeEntitlement(ent: ClientEntitlement | null, isEnglish?: b
 }
 
 /** สิ่งที่สมาชิกได้รับ — ใช้ทั้งในหน้าต่างชวนสมัครและตารางเทียบสิทธิ์ */
-export const MEMBER_BENEFITS: Array<{ title: string; detail: string }> = [
+const MEMBER_BENEFITS: Array<{ title: string; detail: string }> = [
   {
     title: `เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง`,
     detail: "รีเซ็ตให้ใหม่ทุกเที่ยงคืน สำหรับผังมาตรฐาน 1–4 ใบ",
@@ -359,7 +359,7 @@ export interface AccessPlan {
   features: Array<{ label: string; included: boolean }>;
 }
 
-export const ACCESS_PLANS: AccessPlan[] = [
+const ACCESS_PLANS: AccessPlan[] = [
   {
     id: "guest",
     name: "ผู้เยี่ยมชม",

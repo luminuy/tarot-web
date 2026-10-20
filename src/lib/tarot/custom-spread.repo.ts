@@ -80,7 +80,7 @@ export async function getSharedCustomSpread(slug: string): Promise<CustomSpreadI
   return { name: s.name, layout: s.layout, positions: s.positions };
 }
 
-export async function countCustomSpreads(userId: string): Promise<number> {
+async function countCustomSpreads(userId: string): Promise<number> {
   const db = await getAppDB();
   const row = await db.prepare(`SELECT COUNT(*) AS n FROM custom_spreads WHERE user_id = ?`).bind(userId).first<{ n: number }>();
   return row?.n ?? 0;

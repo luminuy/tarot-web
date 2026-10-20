@@ -101,10 +101,32 @@ function memberSinceLabel(createdAt: string | undefined, isEn: boolean): string 
   return isEn ? `Member since ${month}` : `สมาชิกตั้งแต่ ${month}`;
 }
 
+/** กล่อง "สมาชิกได้อะไรบ้าง" ของผู้ยังไม่เข้าสู่ระบบ (รายการเส้นซ้าย · กฎเหล็ก 2) */
+function MemberPerks({ isEn, className }: { isEn: boolean; className?: string }) {
+  return (
+    <div className={`v3-ac-card${className ? ` ${className}` : ""}`}>
+      <p className="v3-ac-perks-t">{isEn ? "What members get" : "สมาชิกได้อะไรบ้าง"}</p>
+      <ul className="v3-ac-perks">
+        {getMemberBenefits(isEn).map((b) => (
+          <li key={b.title}>
+            <ThaiPhrases>{b.title}</ThaiPhrases>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export function AccountClient() {
   const { locale, isEnglish } = useLocale();
   const isEn = isEnglish || locale === "en";
   const { user, loading } = useSessionUser();
+  const guestLede = isEn
+    ? "Free membership — keep your readings, get a free reading every day, and track how they turn out."
+    : "สมัครฟรี เก็บประวัติการเปิดไพ่ ดูดวงฟรีทุกวัน และติดตามผลคำทำนายได้ต่อเนื่อง";
+  const memberLede = isEn
+    ? "Your readings, top-ups, history and email settings — all in one place."
+    : "สิทธิ์ดูดวง เติมรอบ ประวัติคำทำนาย และการแจ้งเตือน รวมไว้ในที่เดียว";
 
   const [pendingCount, setPendingCount] = useState(0);
   const [resendStatus, setResendStatus] = useState<string | null>(null);
@@ -280,18 +302,19 @@ export function AccountClient() {
               )}
             </h1>
             <p className="v3-ac-lede">
-              <ThaiPhrases>
-                {!loading && !user
-                  ? isEn
-                    ? "Free membership — keep your readings, get a free reading every day, and track how they turn out."
-                    : "สมัครฟรี เก็บประวัติการเปิดไพ่ ดูดวงฟรีทุกวัน และติดตามผลคำทำนายได้ต่อเนื่อง"
-                  : isEn
-                    ? "Your readings, top-ups, history and email settings — all in one place."
-                    : "สิทธิ์ดูดวง เติมรอบ ประวัติคำทำนาย และการแจ้งเตือน รวมไว้ในที่เดียว"}
-              </ThaiPhrases>
+              {/* ระหว่างโหลด: วาดทั้งสองแบบ แล้วให้ CSS เลือกตามคุกกี้ใบ้ (`data-ac-hint` จาก account.astro)
+                  ผู้เยี่ยมชมจึงเห็นโครงขนาดเท่าของจริงตั้งแต่เฟรมแรก หน้าไม่กระโดดตอน hydrate (A6-06) */}
+              {loading ? (
+                <>
+                  <span className="v3-ac-when-guest"><ThaiPhrases>{guestLede}</ThaiPhrases></span>
+                  <span className="v3-ac-when-member"><ThaiPhrases>{memberLede}</ThaiPhrases></span>
+                </>
+              ) : (
+                <ThaiPhrases>{user ? memberLede : guestLede}</ThaiPhrases>
+              )}
             </p>
-            {!loading && !user && (
-              <button type="button" onClick={signIn} className="ui2-btn ui2-btn-gold v3-ac-cta">
+            {(loading || !user) && (
+              <button type="button" onClick={signIn} className={`ui2-btn ui2-btn-gold v3-ac-cta${loading ? " v3-ac-when-guest" : ""}`}>
                 {isEn ? "Sign in / Sign up free" : "เข้าสู่ระบบ / สมัครฟรี"}
                 <ArrowIcon className="v3-ac-cta-arrow" />
               </button>
@@ -301,12 +324,13 @@ export function AccountClient() {
           <div className="v3-ac-hero-side">
             {/* โครงร่างระหว่างโหลด — สูงใกล้เคียงบัตรจริง หน้าไม่กระโดดตอนเซสชันมาถึง */}
             {loading && (
-              <div className="v3-ac-card is-skel" aria-hidden="true">
+              <div className="v3-ac-card is-skel v3-ac-when-member" aria-hidden="true">
                 <span className="v3-ac-avatar" />
                 <span className="v3-ac-skel-line is-w1" />
                 <span className="v3-ac-skel-line is-w2" />
               </div>
             )}
+            {loading && <MemberPerks isEn={isEn} className="v3-ac-when-guest" />}
 
             {!loading && user && (
               <div className="v3-ac-card">
@@ -395,18 +419,7 @@ export function AccountClient() {
             )}
 
             {/* ── ยังไม่ได้เข้าสู่ระบบ: สมัครแล้วได้อะไร (รายการเส้นซ้าย · กฎเหล็ก 2) ── */}
-            {!loading && !user && (
-              <div className="v3-ac-card">
-                <p className="v3-ac-perks-t">{isEn ? "What members get" : "สมาชิกได้อะไรบ้าง"}</p>
-                <ul className="v3-ac-perks">
-                  {getMemberBenefits(isEn).map((b) => (
-                    <li key={b.title}>
-                      <ThaiPhrases>{b.title}</ThaiPhrases>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {!loading && !user && <MemberPerks isEn={isEn} />}
           </div>
         </header>
 

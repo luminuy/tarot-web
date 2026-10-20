@@ -66,7 +66,7 @@ export function findZodiacByDate<T extends ZodiacLookupItem>(
 }
 
 /** วันสุดท้ายของช่วง = วันก่อนช่วงถัดไปเริ่ม (ข้ามปีได้) */
-export function decanEnd(nextStart: MonthDay): MonthDay {
+function decanEnd(nextStart: MonthDay): MonthDay {
   if (nextStart.day > 1) return { month: nextStart.month, day: nextStart.day - 1 };
   const prevMonth = nextStart.month === 1 ? 12 : nextStart.month - 1;
   const lastDay = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][prevMonth - 1];

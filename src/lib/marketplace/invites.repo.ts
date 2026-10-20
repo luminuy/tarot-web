@@ -22,7 +22,7 @@ import { getAppDB } from "@/lib/platform/db";
  *    ลูกค้าได้คุกกี้ `customerRef` ของตัวเองตอนจ่าย เหมือนการจองปกติ (บทเรียน A2-13)
  */
 
-export const INVITE_TTL_HOURS = 24;
+const INVITE_TTL_HOURS = 24;
 /** ลิงก์ที่ยังไม่มีใครใช้ต่อแม่หมอหนึ่งคน — กันกดสร้างรัว ๆ จนรายการรก */
 export const MAX_OPEN_INVITES = 10;
 export const INVITE_LABEL_MAX = 40;

@@ -11,7 +11,6 @@ import { getAppDB } from "@/lib/platform/db";
  * การเหมารวมสองอย่างเป็นอันเดียว = ส่งอีเมลรายวันหาคนที่ไม่เคยขอ ซึ่งผิดทั้งกฎหมายและมารยาท
  */
 
-export type DigestChannel = "email";
 export type DigestStatus = "sending" | "sent" | "skipped" | "failed";
 
 export interface DigestRecipient {

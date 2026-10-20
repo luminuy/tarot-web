@@ -108,7 +108,7 @@ function mapRowToReader(row: RawReaderRow): Reader {
   };
 }
 
-export function toPublicReaderProfile(reader: Reader): PublicReaderProfile {
+function toPublicReaderProfile(reader: Reader): PublicReaderProfile {
   return {
     id: reader.id,
     displayName: reader.displayName,

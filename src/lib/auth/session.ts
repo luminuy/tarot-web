@@ -24,10 +24,10 @@ import {
 
 export type SessionUser = UserProfile & { tokenVersion: number };
 
-export const AUTH_SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 วัน
+const AUTH_SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 วัน
 
 /** คุณสมบัติคุกกี้เซสชัน — ต้องเหมือนกันทุกจุดที่ set/delete ไม่งั้นลบไม่ออก */
-export function authCookieOptions() {
+function authCookieOptions() {
   return {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -52,7 +52,7 @@ export function setAuthCookie(response: NextResponse, token: string): void {
 }
 
 /** คำขอนี้มาจากแอป iOS ไหม — แอปส่ง `X-Client: ios` (แผน IOS_APP_PLAN 4.1) */
-export function isAppClientRequest(request: Request): boolean {
+function isAppClientRequest(request: Request): boolean {
   return request.headers.get("x-client") === "ios";
 }
 

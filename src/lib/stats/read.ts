@@ -64,7 +64,7 @@ async function readDayDocs(days: string[]): Promise<{ allTime: Record<string, nu
 }
 
 /** วันก่อนหน้าของคีย์วัน `YYYY-MM-DD` (ตามปฏิทิน UTC เดียวกับที่ตัวนับใช้) */
-export function previousDay(day: string): string {
+function previousDay(day: string): string {
   const d = new Date(`${day}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() - 1);
   return utcDay(d);

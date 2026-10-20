@@ -8,7 +8,7 @@ import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypt
  */
 
 export const SHARE_EXPIRY_DAYS = [7, 30, 90] as const;
-export const VIEW_COOKIE_PREFIX = "st_view_";
+const VIEW_COOKIE_PREFIX = "st_view_";
 const VIEW_COOKIE_TTL_MS = 12 * 3600 * 1000;
 
 export function newShareToken(): string {

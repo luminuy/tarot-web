@@ -56,7 +56,7 @@ export async function setAdminDefaultPassPriceThb(priceThb: number | null): Prom
 }
 
 /** ราคากลางที่ใช้จริง = ที่แอดมินตั้ง ➔ ค่าตั้งต้น */
-export async function defaultPassPriceThb(): Promise<number | null> {
+async function defaultPassPriceThb(): Promise<number | null> {
   return (await getAdminDefaultPassPriceThb()) ?? envPassPriceThb();
 }
 

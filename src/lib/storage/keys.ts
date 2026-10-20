@@ -101,8 +101,6 @@ export const STORAGE_KEYS = {
   ui2Fx: "tarot_ui2_fx",
 } as const;
 
-export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];
-
 /**
  * คีย์ที่มีส่วนเปลี่ยนแปลงตามข้อมูล (id ของการเปิดไพ่ · id ของผู้ใช้)
  *

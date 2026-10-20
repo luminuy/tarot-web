@@ -374,7 +374,7 @@ export async function reclaimUnverifiedEmailAccount(userId: string): Promise<num
 /**
  * ดึง token_version ของผู้ใช้
  */
-export async function getTokenVersion(userId: string): Promise<number> {
+async function getTokenVersion(userId: string): Promise<number> {
   const db = await getAppDB();
   const row = await db
     .prepare(`SELECT token_version FROM users WHERE id = ? LIMIT 1`)

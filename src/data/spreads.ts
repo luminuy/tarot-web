@@ -1510,7 +1510,7 @@ export const SPREADS: Spread[] = [
  */
 export const PUBLIC_SPREADS: Spread[] = SPREADS.filter((s) => !s.internal);
 
-export const SPREAD_BY_ID = new Map(SPREADS.map((s) => [s.id, s]));
+const SPREAD_BY_ID = new Map(SPREADS.map((s) => [s.id, s]));
 
 export function getSpread(id: string): Spread | undefined {
   return SPREAD_BY_ID.get(id);

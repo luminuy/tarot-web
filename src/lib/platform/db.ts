@@ -433,6 +433,10 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     );
     safeExec("CREATE INDEX IF NOT EXISTS idx_reader_invites_reader ON reader_invites(reader_id, created_at)");
     safeExec("CREATE INDEX IF NOT EXISTS idx_reader_invites_ticket ON reader_invites(ticket_id)");
+    // index ของคำสั่งที่เดิมอ่านทั้งตาราง (migrations/0033 · A9-05) — ต้องตรงกับไฟล์ migration
+    safeExec("CREATE INDEX IF NOT EXISTS idx_users_created ON users(created_at DESC, id DESC)");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_bookings_status_hold ON bookings(status, hold_expires_at)");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_bookings_status_slot ON bookings(status, kind, slot_start)");
     safeExec(
       "CREATE TABLE IF NOT EXISTS reader_blocked_dates (reader_id TEXT NOT NULL REFERENCES readers(id), date_key TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (reader_id, date_key))"
     );
@@ -528,20 +532,21 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec(
       "CREATE INDEX IF NOT EXISTS idx_reader_templates_reader ON reader_templates(reader_id)"
     );
-    // 🎟 รหัสแลกสิทธิ์ตั้งต้นของเครื่อง dev — ต้องมีเพดานและวันหมดอายุเท่ากับ migrations/0013
-    // (ห้ามปล่อย max_uses = -1 อีก: รหัสที่เขียนไว้ในรีโปแปลว่าใครอ่านซอร์สเจอก็แลกได้)
-    // รหัสสำหรับแจกจริงให้สร้างจากแผงแอดมินซึ่งสุ่มรหัสใหม่ทุกครั้ง — อย่า seed ลงไฟล์
+    // 🎟 รหัสแลกสิทธิ์ 2 ตัวที่ migrations/0012 เคย seed — ปิดใช้งานแล้ว (migrations/0034 · A10-01)
+    // รหัสที่เขียนไว้ในรีโปสาธารณะแปลว่าใครอ่านซอร์สเจอก็แลกได้ จึงคงแถวไว้ให้ตรงกับ production แต่ is_active = 0
+    // รหัสสำหรับแจกจริงให้สร้างจากแผงแอดมินซึ่งสุ่มรหัสใหม่ทุกครั้ง — อย่า seed รหัสที่ใช้งานได้ลงไฟล์
+    // ชุดทดสอบสร้างรหัสของตัวเอง (scripts/qa/test-redeem-code.ts)
     safeExec(`
       INSERT OR IGNORE INTO redeem_codes (code, title, credits, max_uses, used_count, reason_prefix, expires_at, is_active, created_at)
       VALUES 
-        ('VIP3-TAROT-2026', 'สิทธิ์ญาณพยากรณ์พิเศษ 3 ครั้ง (เปิดได้ทุกผังและปรมาจารย์ลับ)', 3, 50, 0, 'purchase_redeem', 1798736399000, 1, 1726000000000),
-        ('SEER3PASS', 'สิทธิ์ญาณพยากรณ์พิเศษ 3 ครั้ง (เปิดได้ทุกผังและปรมาจารย์ลับ)', 3, 50, 0, 'purchase_redeem', 1798736399000, 1, 1726000000000)
+        ('VIP3-TAROT-2026', 'สิทธิ์ญาณพยากรณ์พิเศษ 3 ครั้ง (เปิดได้ทุกผังและปรมาจารย์ลับ)', 3, 50, 0, 'purchase_redeem', 1798736399000, 0, 1726000000000),
+        ('SEER3PASS', 'สิทธิ์ญาณพยากรณ์พิเศษ 3 ครั้ง (เปิดได้ทุกผังและปรมาจารย์ลับ)', 3, 50, 0, 'purchase_redeem', 1798736399000, 0, 1726000000000)
     `);
-    // เครื่องที่มี local.db อยู่ก่อนแล้วจะไม่โดน INSERT OR IGNORE ด้านบน — ต้องรัดเพดานย้อนหลังให้ด้วย
+    // เครื่องที่มี local.db อยู่ก่อนแล้วจะไม่โดน INSERT OR IGNORE ด้านบน — ต้องปิดย้อนหลังให้ด้วย (ตรงกับ migrations/0034)
     safeExec(`
       UPDATE redeem_codes
-         SET max_uses = 50, expires_at = 1798736399000
-       WHERE code IN ('VIP3-TAROT-2026', 'SEER3PASS') AND max_uses = -1
+         SET is_active = 0, max_uses = 50, expires_at = 1798736399000
+       WHERE code IN ('VIP3-TAROT-2026', 'SEER3PASS')
     `);
 
 

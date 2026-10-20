@@ -35,7 +35,7 @@ interface FollowUpChatProps {
 }
 
 /** id ของส่วน "คุยต่อกับแม่หมอ" — ใช้เป็นจุดหมายของปุ่มเลื่อนลงมาจากแผงคำทำนาย */
-export const ASK_ORACLE_SECTION_ID = "ask-oracle";
+const ASK_ORACLE_SECTION_ID = "ask-oracle";
 
 const SUGGESTED_QUESTIONS_TH = [
   "ไพ่แนะนำให้ฉันระวังเรื่องอะไรมากที่สุด?",

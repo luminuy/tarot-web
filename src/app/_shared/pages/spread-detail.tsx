@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { ARTICLES } from "@/data/articles";
 import { PUBLIC_SPREADS, getSpread } from "@/data/spreads";
 import { SPREAD_TOPICS } from "@/data/spread-topics";
-import { getSpreadDescription, getSpreadName } from "@/data/spreads-helpers";
 import { isStandardSpread } from "@/lib/entitlement/limits";
 import { clampDescription, headline, pickTitle, stripCardCount } from "@/lib/config/meta-length";
 import { buildAlternates, localizedUrl, noindexAlternates } from "@/lib/config/site";
@@ -14,19 +13,9 @@ import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { buildFaqPageJsonLd, buildSpreadFaqs, SPREAD_CATEGORY_TH } from "@/lib/seo/faq";
 import { rotatingNeighborsGrouped } from "@/lib/seo/rotating-neighbors";
 import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
-
-const CATEGORY_TH: Record<string, string> = {
-  general: "ทั่วไป",
-  love: "ความรัก",
-  career: "การงาน",
-  work: "การงาน",
-  money: "การเงิน",
-  finance: "การเงิน",
-  spiritual: "จิตวิญญาณ",
-  decision: "การตัดสินใจ",
-};
 
 const CATEGORY_EN: Record<string, string> = {
   general: "general",
@@ -169,7 +158,7 @@ export function SpreadDetailContent({
   const topicCrumb = spreadTopicCrumb(spread.id, locale);
   const categoryLabel = isEnglish
     ? CATEGORY_EN[spread.defaultCategory] ?? spread.defaultCategory
-    : CATEGORY_TH[spread.defaultCategory] ?? spread.defaultCategory;
+    : SPREAD_CATEGORY_TH[spread.defaultCategory] ?? spread.defaultCategory;
 
   /* บทความที่เกี่ยวข้องและผังใกล้เคียงย้ายไปอยู่ที่ `spreadDetailProps()` ท้ายไฟล์
      เพราะเป็น prop ของแผงรายละเอียด ไม่ได้ถูกใช้ในส่วนที่ไฟล์นี้เรนเดอร์เอง */
@@ -219,45 +208,8 @@ export function SpreadDetailContent({
         },
       ];
 
-  /* FAQPage JSON-LD ต้องตรงกับ FAQ ที่มองเห็นบนหน้า (`SpreadDetailClient.tsx`) ทั้งคำถามและคำตอบ — ฝั่งอังกฤษใช้ถ้อยคำและตัวช่วยชุดเดียวกัน (A7-10)
-     ⚠️ แก้ถ้อยคำฝั่งใดฝั่งหนึ่งต้องแก้อีกฝั่งด้วย */
-  const spreadNameEn = getSpreadName(spread, true);
-  const spreadDescEn = getSpreadDescription(spread, true);
-  const faqs = isEnglish
-    ? [
-        {
-          question: `What types of questions suit the ${spreadNameEn}?`,
-          answer: `${spreadDescEn} It is designed to reveal hidden dynamics and offer practical guidance.`,
-        },
-        {
-          question: "How many cards are drawn in this spread?",
-          answer: `This layout uses ${cardCount} cards arranged in a deliberate geometric pattern.`,
-        },
-        {
-          question: standard ? "Is this spread available on the standard tier?" : "Why is this spread designated as a Grand Spread?",
-          answer: standard
-            ? "Yes, this is an open spread available to all seekers under daily quota."
-            : "This layout features complex multi-card geometry and deep syntheses, unlocked for seekers with Grand Oracle access.",
-        },
-      ]
-    : [
-        {
-          question: `ผัง${spread.nameTh} เหมาะกับคำถามแบบไหน`,
-          answer: `${spread.description} ${
-            topicPhrase ? `จึงเหมาะกับ${topicPhrase}ที่อยากเห็นภาพรวมและปัจจัยรอบด้าน` : ""
-          }`.trim(),
-        },
-        {
-          question: `ผังนี้ใช้ไพ่กี่ใบ`,
-          answer: `ผังนี้ใช้ไพ่ ${cardCount} ใบ วางตามตำแหน่งที่กำหนดไว้`,
-        },
-        {
-          question: standard ? "ผังนี้เปิดใช้ฟรีได้ไหม" : "ทำไมผังนี้เป็นผังพิเศษ",
-          answer: standard
-            ? "ได้ ผังนี้เป็นผังมาตรฐานที่สมาชิกทุกคนเปิดได้ตามโควตาปกติ"
-            : "ผังนี้มีจำนวนไพ่มากและตีความละเอียด จึงสงวนไว้สำหรับผู้ถือสิทธิ์ญาณพยากรณ์พิเศษ",
-        },
-      ];
+  /* FAQPage JSON-LD = ชุดเดียวกับ FAQ ที่มองเห็นบนหน้า (`SpreadDetailClient.tsx`) — ตัวสร้างกลาง `buildSpreadFaqs` (A7-10) */
+  const faqs = buildSpreadFaqs(spread, isEnglish, standard);
 
   const jsonLd = [
     {
@@ -281,15 +233,7 @@ export function SpreadDetailContent({
       ...(topicCrumb ? [{ name: topicCrumb.label, path: topicCrumb.path }] : []),
       { name: isEnglish ? spread.nameEn : spread.nameTh, path: `/spreads/${spread.id}` },
     ]),
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: faqs.map((faq) => ({
-        "@type": "Question",
-        name: faq.question,
-        acceptedAnswer: { "@type": "Answer", text: faq.answer },
-      })),
-    },
+    buildFaqPageJsonLd(faqs),
   ];
 
   return (

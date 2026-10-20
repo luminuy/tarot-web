@@ -19,7 +19,7 @@ export interface HomeHowToStep {
   image: string;
 }
 
-export const HOME_FAQS: HomeFaqItem[] = [
+const HOME_FAQS: HomeFaqItem[] = [
   {
     id: "faq-free-reading",
     question: "ดูดวงไพ่ทาโรต์ออนไลน์ที่ SeerTarot มีค่าใช้จ่ายหรือไม่?",
@@ -114,7 +114,7 @@ export function getHomeFaqs(isEnglishOrLocale?: boolean | string): HomeFaqItem[]
   return isEn ? HOME_FAQS_EN : HOME_FAQS;
 }
 
-export const HOME_HOW_TO_STEPS: HomeHowToStep[] = [
+const HOME_HOW_TO_STEPS: HomeHowToStep[] = [
   {
     name: "1. เลือกผังการเปิดไพ่",
     text: "เลือกรูปแบบการวางไพ่ที่ตรงกับเรื่องที่ต้องการถาม เช่น ผัง 1 ใบสำหรับดวงประจำวัน, ผัง 3 ใบสำหรับอดีต-ปัจจุบัน-อนาคต, หรือผังเซลติกครอส 10 ใบสำหรับส่องชะตาชีวิตเจาะลึก",

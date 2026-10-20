@@ -34,11 +34,43 @@ export function readBearerToken(headers: Headers): string | null {
   return value.slice("Bearer ".length);
 }
 
+/**
+ * เส้นทาง "ก่อนล็อกอิน" ที่แอป native เรียกได้ทั้งที่ยังไม่มี Bearer (แอปยังไม่มีโทเคนจนกว่าจะล็อกอินสำเร็จ)
+ * ทุกเส้นในรายการนี้ต้องมีด่านกันบอทของตัวเองซ้อนอยู่หลังด่านนี้เสมอ (Turnstile + เพดานครั้งที่ลองต่ออีเมล/IP)
+ * ห้ามเพิ่มปลายทางที่เรียกโมเดล แจกสิทธิ์ หรือใช้เงิน — เส้นพวกนั้นแอปต้องล็อกอินก่อน (มี Bearer)
+ */
+const NATIVE_APP_PRELOGIN_PATHS = new Set(["/api/auth/email/login"]);
+
+/**
+ * คำขอก่อนล็อกอินจากแอป native (`X-Client: ios`) — ผ่านด่าน CSRF ได้เฉพาะเมื่อครบทุกข้อ:
+ * - เป็น POST ไปยังเส้นใน `NATIVE_APP_PRELOGIN_PATHS` เท่านั้น
+ * - **ไม่มี** `Origin` / `Referer` / `Sec-Fetch-Site` เลย — เบราว์เซอร์ส่งหัวเหล่านี้เสมอ
+ *   คำขอจากเบราว์เซอร์จึงไม่เข้าทางนี้ และยังถูกตรวจ origin ตามปกติทุกประการ
+ * - `X-Client` เป็นหัวที่ไม่ใช่ CORS-safelisted เว็บอื่นตั้งข้ามโดเมนไม่ได้ถ้าเราไม่เปิด CORS ให้หัวนี้
+ *   (ห้ามเพิ่ม `x-client` ใน Access-Control-Allow-Headers เด็ดขาด)
+ * ช่องทางชั่วคราวจนกว่า App Attest (แผน IOS_APP_PLAN 4.2) พร้อม — ด่านนี้ไม่ใช่ด่านกันบอท (ดูหัวไฟล์)
+ */
+function isNativeAppPreLoginRequest(request: Request): boolean {
+  if (request.method !== "POST") return false;
+  if (request.headers.get("x-client") !== "ios") return false;
+  if (request.headers.has("origin") || request.headers.has("referer") || request.headers.has("sec-fetch-site")) {
+    return false;
+  }
+  let pathname: string;
+  try {
+    pathname = new URL(request.url).pathname.replace(/\/+$/, "");
+  } catch {
+    return false;
+  }
+  return NATIVE_APP_PRELOGIN_PATHS.has(pathname);
+}
+
 export function isRequestAuthorizedOrigin(request: Request): boolean {
   // ช่องทางแอป (แผน IOS_APP_PLAN 4.1): ด่านนี้กัน CSRF ซึ่งเกิดจากเบราว์เซอร์แนบคุกกี้ให้เอง
   // หัว Authorization เบราว์เซอร์ไม่แนบให้ และเว็บอื่นตั้งข้ามโดเมนไม่ได้ถ้าเราไม่เปิด CORS
   // จึงไม่มีช่อง CSRF — ห้ามเปิด Access-Control-Allow-Headers: authorization เด็ดขาด
   if (readBearerToken(request.headers)) return true;
+  if (isNativeAppPreLoginRequest(request)) return true;
 
   const origin = request.headers.get("origin");
   const referer = request.headers.get("referer");

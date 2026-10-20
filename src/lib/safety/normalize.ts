@@ -54,7 +54,7 @@ export function looseForm(input: string): string {
  * รูปที่ 2ก — "ถอดวรรณยุกต์": ตัดช่องว่าง + ถอดวรรณยุกต์ แต่ **ไม่** ยุบอักษรซ้ำ
  * ใช้กับกฎที่เป็นเรกเอ็กซ์ เพราะการยุบอักษรซ้ำในตัวเรกเอ็กซ์เองจะทำให้ `{0,24}` พัง
  */
-export function toneStrippedForm(input: string): string {
+function toneStrippedForm(input: string): string {
   return foldThai(tightForm(input));
 }
 
@@ -72,7 +72,7 @@ export function stripToneMarksFromSource(source: string): string {
  * รูปที่ 3 — "มีช่องว่าง": ยุบช่องว่างให้เหลือช่องเดียว
  * เก็บไว้สำหรับเรกเอ็กซ์อังกฤษที่ต้องพึ่งขอบคำ `\b` (เช่น `kms` ที่ห้ามไปชนกับ `10 kms`)
  */
-export function spacedForm(input: string): string {
+function spacedForm(input: string): string {
   return input
     .normalize("NFC")
     .replace(INVISIBLE, "")
@@ -82,7 +82,7 @@ export function spacedForm(input: string): string {
 }
 
 /** ยุบอักษรเดียวกันที่ซ้ำติดกันตั้งแต่ 2 ตัวขึ้นไปให้เหลือตัวเดียว */
-export function squeezeRepeats(input: string): string {
+function squeezeRepeats(input: string): string {
   let out = "";
   let prev = "";
   for (const ch of input) {

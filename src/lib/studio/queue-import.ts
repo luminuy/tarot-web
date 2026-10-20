@@ -11,11 +11,11 @@ import { looksLikePromptInjection } from "@/lib/ai/prompt-guard";
  *  • คำถามจากตั๋วที่มีคำสั่งแฝง ➔ ไม่เติมให้ (หมอพิมพ์เองได้)
  */
 
-export const IMPORT_WINDOW_DAYS = 60;
+const IMPORT_WINDOW_DAYS = 60;
 const IMPORTABLE_STATUSES = ["waiting", "ready", "handed_off"] as const;
-export const TICKET_ID = /^ticket_[0-9a-f]{16}$/;
+const TICKET_ID = /^ticket_[0-9a-f]{16}$/;
 
-export function customerSourceHash(readerId: string, customerRef: string): string {
+function customerSourceHash(readerId: string, customerRef: string): string {
   return createHash("sha256").update(`studio-client:${readerId}:${customerRef}`).digest("hex");
 }
 

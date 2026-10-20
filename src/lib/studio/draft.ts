@@ -34,7 +34,7 @@ export interface DraftPart extends StudioBodyPart {
   fromKeywords?: boolean;
 }
 
-export const cardKey = (order: number) => `card:${order}`;
+const cardKey = (order: number) => `card:${order}`;
 
 function cardOf(c: StudioCard) {
   const card = DECK[c.cardIndex];

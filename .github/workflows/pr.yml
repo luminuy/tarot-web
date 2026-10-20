@@ -54,7 +54,8 @@ jobs:
       #    เคสที่เจอบ่อยสุดคือ PR ของ dependabot ที่แก้ package.json แต่ไม่แตะ lockfile
       - name: 📦 Install dependencies
         run: |
-          if ! npm ci; then
+          # --ignore-scripts: ไม่ให้แพ็กเกจรัน lifecycle script ใน job ที่ตรวจโค้ดจาก PR (A10-04 — รายละเอียดที่ deploy.yml)
+          if ! npm ci --ignore-scripts; then
             echo "::error title=lockfile ไม่ตรงกับ package.json::รัน \`npm run deps:relock\` แล้ว commit package-lock.json ตามไปด้วย — PR ที่แก้เฉพาะ package.json จะตกด่านนี้เสมอ"
             exit 1
           fi

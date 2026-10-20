@@ -17,6 +17,7 @@ import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { LOCALE_COOKIE_KEY } from "@/lib/i18n/types";
 import { recordEvent } from "@/lib/stats/record";
+import type { PurchaseErrorCode } from "@/lib/account/purchase-notice";
 
 export const runtime = "nodejs";
 
@@ -38,9 +39,13 @@ export const runtime = "nodejs";
  * ไปโผล่ได้ทั้งใน log ของเกตเวย์ · `Referer` · ประวัติเบราว์เซอร์
  */
 
+/**
+ * `code` = รหัสที่ส่งกลับหน้าเว็บทาง `?purchase_error=` (หน้าเว็บแปลเป็นข้อความเอง — `purchase-notice.ts`)
+ * `message` = ข้อความไทยสำหรับตอบ JSON ของเมธอด POST เท่านั้น
+ */
 type GrantOutcome =
   | { ok: true; credits: number }
-  | { ok: false; status: 400 | 401 | 402 | 404 | 500; message: string };
+  | { ok: false; status: 400 | 401 | 402 | 404 | 500; code: PurchaseErrorCode; message: string };
 
 async function processPaymentGrant(
   request: Request,
@@ -50,7 +55,7 @@ async function processPaymentGrant(
 ): Promise<GrantOutcome> {
   const pkg = getCreditPackageById(packageId);
   if (!pkg || !userId || !orderId) {
-    return { ok: false, status: 400, message: "ข้อมูลการชำระเงินไม่ถูกต้อง" };
+    return { ok: false, status: 400, code: "invalid", message: "ข้อมูลการชำระเงินไม่ถูกต้อง" };
   }
 
   // ด่าน 1 — ต้องเป็นเจ้าของบัญชีนั้นเอง
@@ -58,7 +63,12 @@ async function processPaymentGrant(
   if (!sessionUser || sessionUser.id !== userId) {
     const privileged = await isPrivilegedTestRequest(request);
     if (!privileged || userId !== "usr_privileged_test") {
-      return { ok: false, status: 401, message: "กรุณาเข้าสู่ระบบด้วยบัญชีที่สั่งซื้อก่อนยืนยันรายการ" };
+      return {
+        ok: false,
+        status: 401,
+        code: "signin_required",
+        message: "กรุณาเข้าสู่ระบบด้วยบัญชีที่สั่งซื้อก่อนยืนยันรายการ",
+      };
     }
   }
 
@@ -115,7 +125,12 @@ async function processPaymentGrant(
       recordEvent("purchase_owner_mismatch");
       console.warn("[Credit Confirmation] ออร์เดอร์นี้ไม่ใช่ของบัญชีที่ล็อกอินอยู่", { orderId });
     }
-    return { ok: false, status: decision.status, message: decision.message };
+    return {
+      ok: false,
+      status: decision.status,
+      code: decision.code === "bad_input" ? "invalid" : decision.code,
+      message: decision.message,
+    };
   }
 
   // ผ่านครบทุกด่าน → แจกโควตา (idempotent ด้วย UNIQUE(user_id, reason))
@@ -128,6 +143,7 @@ async function processPaymentGrant(
     return {
       ok: false,
       status: 500,
+      code: "grant_failed",
       message: GRANT_WRITE_FAILED_MESSAGE,
     };
   }
@@ -156,16 +172,18 @@ export async function GET(request: Request) {
   const paramLang = url.searchParams.get("lang");
   const isEnglish = paramLang === "en" || cookieLang === "en";
   const targetPath = isEnglish ? "/en" : "/";
+  // ส่งกลับเป็น "รหัส" เท่านั้น ไม่ส่งประโยค — หน้าแรกแปลเป็นข้อความเองตามภาษา (A1-07)
+  const redirectError = (code: PurchaseErrorCode) =>
+    NextResponse.redirect(`${origin}${targetPath}?purchase_error=${code}`);
 
   if (!orderId || !packageId || !userId) {
-    const errorMsg = isEnglish ? "Incomplete payment details" : "ข้อมูลการชำระเงินไม่ครบถ้วน";
-    return NextResponse.redirect(`${origin}${targetPath}?purchase_error=${encodeURIComponent(errorMsg)}`);
+    return redirectError("invalid");
   }
 
   try {
     const result = await processPaymentGrant(request, orderId, packageId, userId);
     if (!result.ok) {
-      return NextResponse.redirect(`${origin}${targetPath}?purchase_error=${encodeURIComponent(result.message)}`);
+      return redirectError(result.code);
     }
     // ยอดสำหรับอีเวนต์ purchase ของ GA4 — แนบเฉพาะเงินจริง (Stripe โหมด live) ไม่มีข้อมูลส่วนตัว
     const pkg = getCreditPackageById(packageId);
@@ -176,10 +194,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}${targetPath}?purchase_success=1&credits=${result.credits}${purchase}`);
   } catch (error) {
     console.error("[Credit Checkout Confirmation Error]:", error);
-    const errorMsg = isEnglish ? "Payment confirmation failed" : "การยืนยันรายการชำระเงินล้มเหลว";
-    return NextResponse.redirect(
-      `${origin}${targetPath}?purchase_error=${encodeURIComponent(errorMsg)}`
-    );
+    return redirectError("confirm_failed");
   }
 }
 

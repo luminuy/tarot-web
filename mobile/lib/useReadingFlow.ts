@@ -14,9 +14,20 @@ export type Verification = "pending" | "ok" | "fail" | null;
 const newClientSeed = (): string =>
   Array.from(Crypto.getRandomBytes(32), (b) => b.toString(16).padStart(2, "0")).join("");
 
-/** เหตุผลที่หลังบ้านบอกว่า "ต้องล็อกอินก่อน" — ใช้พาผู้ใช้ไปหน้าเข้าสู่ระบบโดยไม่ทิ้งคำถาม */
+/**
+ * เหตุผลที่หลังบ้านบอกว่า "ต้องล็อกอินก่อน" — ใช้พาผู้ใช้ไปหน้าเข้าสู่ระบบโดยไม่ทิ้งคำถาม
+ * ยังไม่มีโทเคนแล้วได้ 403 ก็นับด้วย: เส้นเปิดไพ่รับคำขอจากแอปเฉพาะที่แนบ Bearer
+ * (ด่าน Origin ของหลังบ้านปฏิเสธคำขอแอปที่ยังไม่ล็อกอินตั้งแต่ต้น ก่อนถึงด่านโควตา)
+ */
 const isSignInReason = (e: unknown) =>
-  e instanceof ApiError && (e.status === 401 || /signin|sign_in|guest/i.test(e.body.reason ?? ""));
+  e instanceof ApiError &&
+  (e.status === 401 || (e.status === 403 && !getToken()) || /signin|sign_in|guest/i.test(e.body.reason ?? ""));
+
+const SIGN_IN_MESSAGE = "เข้าสู่ระบบก่อนนะ แล้วเปิดไพ่ต่อได้เลย คำถามของคุณยังอยู่ครบ";
+
+/** ข้อความที่ผู้ใช้เห็น — กรณีต้องล็อกอินใช้ข้อความชวนล็อกอิน ไม่โชว์ข้อความดิบของด่านหลังบ้าน */
+const errorMessage = (e: unknown, fallback: string) =>
+  isSignInReason(e) ? SIGN_IN_MESSAGE : e instanceof Error ? e.message : fallback;
 
 /**
  * ตัวขับพิธีเปิดไพ่: ต่อ state machine (`reading-flow.ts`) เข้ากับหลังบ้านเดิมของเว็บ
@@ -33,7 +44,7 @@ export function useReadingFlow(spread: Spread, init?: { topic?: Topic; question?
 
   const fail = useCallback((e: unknown, fallback = "เกิดข้อผิดพลาด โหลดใหม่อีกครั้งนะ") => {
     setNeedsSignIn(isSignInReason(e));
-    dispatch({ type: "error", message: e instanceof Error ? e.message : fallback });
+    dispatch({ type: "error", message: errorMessage(e, fallback) });
   }, []);
 
   /** ขั้น 2 → 3: เปิดเซสชัน (เซิร์ฟเวอร์ประกาศคำมั่นก่อนผู้ใช้เลือกไพ่) */
@@ -147,7 +158,7 @@ export function useReadingFlow(spread: Spread, init?: { topic?: Topic; question?
       if (!done) throw new Error("คำอ่านขาดตอน กรุณาลองอีกครั้ง");
     } catch (e) {
       setNeedsSignIn(isSignInReason(e));
-      dispatch({ type: "readFailed", message: e instanceof Error ? e.message : "อ่านไพ่ไม่สำเร็จ ลองใหม่อีกครั้งนะ" });
+      dispatch({ type: "readFailed", message: errorMessage(e, "อ่านไพ่ไม่สำเร็จ ลองใหม่อีกครั้งนะ") });
     }
   }, [saveJournal]);
 

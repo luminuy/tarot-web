@@ -129,7 +129,7 @@ export function countForeignCharacters(text: string | null | undefined): number 
 /**
  * ตารางแปลงคำภาษาจีนที่โมเดลตระกูล Qwen มักเผลอหลุดออกมา ให้เป็นคำภาษาไทยธรรมชาติก่อนทำความสะอาด
  */
-export const CHINESE_LEAK_MAP: Record<string, string> = {
+const CHINESE_LEAK_MAP: Record<string, string> = {
   "仓促": "รีบร้อน",
   "向你": "สู่คุณ",
   "以及": "และ",
@@ -193,20 +193,6 @@ export function objectHasForeignScript(value: unknown): boolean {
   if (Array.isArray(value)) return value.some(objectHasForeignScript);
   if (value && typeof value === "object" && value !== null) return Object.values(value).some(objectHasForeignScript);
   return false;
-}
-
-/**
- * นับจำนวนอักษรต่างด้าวสะสมในวัตถุซ้อนชั้น
- */
-export function countObjectForeignCharacters(value: unknown): number {
-  if (typeof value === "string") return countForeignCharacters(value);
-  if (Array.isArray(value)) {
-    return value.reduce((sum, item) => sum + countObjectForeignCharacters(item), 0);
-  }
-  if (value && typeof value === "object" && value !== null) {
-    return Object.values(value).reduce((sum, val) => sum + countObjectForeignCharacters(val), 0);
-  }
-  return 0;
 }
 
 /**

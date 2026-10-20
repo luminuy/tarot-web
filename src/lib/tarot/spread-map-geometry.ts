@@ -21,7 +21,7 @@ import type { SpreadPosition } from "@/data/spreads";
  */
 
 /** ความกว้างการ์ดสูงสุด เทียบความกว้างกรอบ (ค่าที่ใช้มาตลอด) */
-export const MAP_CARD_W_MAX = 0.13;
+const MAP_CARD_W_MAX = 0.13;
 
 /**
  * ความกว้างการ์ดต่ำสุด — ห้ามเล็กกว่านี้
@@ -71,7 +71,7 @@ export interface HalfExtent {
  * ครึ่งความกว้าง/ความสูงของกล่องครอบการ์ด (หน่วยเดียวกับแกน x คือเทียบความกว้างกรอบ)
  * ใบที่ `rotate: 90` สลับด้าน กล่องจึงกว้างเท่าความสูงการ์ด และสูงเท่าความกว้างการ์ด
  */
-export function halfExtentOf(pos: Pick<SpreadPosition, "rotate">, cardW: number): HalfExtent {
+function halfExtentOf(pos: Pick<SpreadPosition, "rotate">, cardW: number): HalfExtent {
   const cardH = cardW * MAP_CARD_ASPECT;
   const rotated = pos.rotate === 90 || pos.rotate === 270;
   return {
@@ -92,7 +92,7 @@ export function halfExtentOf(pos: Pick<SpreadPosition, "rotate">, cardW: number)
  * ห่างกันแกน y ทีละ 0.20 · ที่สเกลเดิม 0.78 ระยะจริงเหลือ 0.156 ขณะที่การ์ดสูง 0.195
  * → ทับกัน 0.039 = 20% ของความสูงการ์ด ตรงกับที่รายงานไว้เป๊ะ
  */
-export function mapYScale(positions: readonly SpreadPosition[], cardW: number): number {
+function mapYScale(positions: readonly SpreadPosition[], cardW: number): number {
   let scale = BASE_Y_SCALE;
 
   for (let i = 0; i < positions.length; i++) {

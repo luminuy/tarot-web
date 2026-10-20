@@ -12,7 +12,7 @@
  * เผาผลาญโควตา Cloudinary และรูปพรีวิวบนโซเชียลไม่คงที่
  */
 
-export const OG_CARD_ART: Record<string, string> = {
+const OG_CARD_ART: Record<string, string> = {
   // หมวดหมู่ชีวิต & บทความ
   love: "cups-02.jpg",
   career: "wands-08.jpg",

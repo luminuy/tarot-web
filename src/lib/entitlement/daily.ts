@@ -14,7 +14,7 @@ import { bangkokDayKey, bangkokYesterdayKey } from "@/lib/time/bangkok";
  * สองชื่อข้างล่างคงไว้เพื่อไม่ให้จุดเรียกใช้ทั่วระบบต้องแก้ตาม
  */
 export const todayDateKey = bangkokDayKey;
-export const yesterdayDateKey = bangkokYesterdayKey;
+const yesterdayDateKey = bangkokYesterdayKey;
 
 /**
  * ตรวจสอบว่าผู้ใช้นี้ได้ใช้สิทธิ์เปิดไพ่ประจำวันฟรีของวันนี้ไปแล้วหรือยัง

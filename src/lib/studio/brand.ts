@@ -7,7 +7,7 @@
 
 export const STUDIO_PAPER = "#FAF7F2";
 export const STUDIO_DEFAULT_COLOR = "#8F5C1A";
-export const MIN_TEXT_CONTRAST = 4.5;
+const MIN_TEXT_CONTRAST = 4.5;
 
 const HEX = /^#?([0-9a-f]{6})$/i;
 
@@ -26,7 +26,7 @@ function channel(c: number): number {
   return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
 }
 
-export function luminance(hex: string): number {
+function luminance(hex: string): number {
   const [r, g, b] = rgb(hex);
   return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
 }

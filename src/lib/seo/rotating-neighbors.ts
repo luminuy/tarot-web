@@ -8,7 +8,7 @@
  * วิธีนี้เริ่มจากตัวถัดจากหน้าปัจจุบันแล้ววนกลับต้นลิสต์ ทุกตัวในหมวดที่มีมากกว่า `limit`
  * จึงได้ลิงก์เข้าจากพี่น้องครบ `limit` หน้าเท่ากัน (ด่าน test-seo-wave4 เฝ้าอยู่)
  */
-export function rotatingNeighbors<T>(
+function rotatingNeighbors<T>(
   list: readonly T[],
   isCurrent: (item: T) => boolean,
   limit: number,

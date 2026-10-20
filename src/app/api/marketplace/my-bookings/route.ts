@@ -4,6 +4,7 @@ import { getBookingsByTicketIds } from "@/lib/marketplace/booking.repo";
 import { readCustomerRefFromCookie } from "@/lib/marketplace/customer-ref";
 import { listTicketsForOwner } from "@/lib/marketplace/queue.repo";
 import { getReaderById } from "@/lib/marketplace/readers.repo";
+import { verifiedOwnerUserId } from "@/lib/marketplace/ticket-owner";
 
 export const runtime = "nodejs";
 
@@ -18,7 +19,9 @@ export async function GET(request: Request) {
       readCustomerRefFromCookie(request),
       getSessionUser().catch(() => null),
     ]);
-    const tickets = (await listTicketsForOwner({ customerRef, userId: user?.id ?? null })).filter(
+    // บัญชีอีเมลที่ยังไม่ยืนยันอีเมลไม่ถูกนับเป็นเจ้าของนัดที่ผูกกับ user id (A1-04) — ยังเห็นนัดของเบราว์เซอร์นี้ผ่านคุกกี้
+    const ownerUserId = await verifiedOwnerUserId(user);
+    const tickets = (await listTicketsForOwner({ customerRef, userId: ownerUserId })).filter(
       // ตั๋วที่ไม่เคยจ่ายเงินและหมดเวลาไปแล้วไม่ใช่ "นัด" — ไม่ต้องรกรายการ
       (t) => t.status !== "expired" || t.kind === "booking"
     );
