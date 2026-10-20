@@ -32,6 +32,25 @@ export function CloseIcon({ className = "w-4 h-4" }: LineIconProps) {
   );
 }
 
+/** สามขีด — ปุ่มเปิดเมนูข้างบนจอแคบ (แผงแอดมิน) */
+export function MenuIcon({ className = "w-5 h-5" }: LineIconProps) {
+  return (
+    <svg {...base(className)}>
+      <path d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  );
+}
+
+/** แว่นขยาย — ปุ่ม/ช่องค้นหา */
+export function SearchIcon({ className = "w-4 h-4" }: LineIconProps) {
+  return (
+    <svg {...base(className)}>
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="M16 16l4.5 4.5" />
+    </svg>
+  );
+}
+
 /** ติ๊ก — สถานะเสร็จ/ผ่าน */
 export function CheckIcon({ className = "w-4 h-4" }: LineIconProps) {
   return (

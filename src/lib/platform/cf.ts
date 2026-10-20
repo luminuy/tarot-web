@@ -189,6 +189,38 @@ export async function getVectorizeBinding(): Promise<AppVectorize | null> {
   return null;
 }
 
+/** ส่วนของ Analytics Engine dataset ที่แอปนี้ใช้จริง (structural) */
+export interface AppAnalyticsDataset {
+  writeDataPoint(point: { indexes?: string[]; blobs?: string[]; doubles?: number[] }): void;
+}
+
+let cachedCallMetrics: AppAnalyticsDataset | null | undefined;
+
+/**
+ * คืน Analytics Engine dataset สถิติวิดีโอคอล (`env.CALL_METRICS`)
+ * dev / test / ยังไม่ deploy = ไม่มี binding → คืน `null` (ผู้เรียกข้ามการบันทึกเอง)
+ */
+export async function getCallMetricsDataset(): Promise<AppAnalyticsDataset | null> {
+  if (cachedCallMetrics !== undefined) return cachedCallMetrics;
+  try {
+    const ctx = await safelyGetCloudflareContext();
+    const binding = (ctx?.env as Record<string, unknown> | undefined)?.CALL_METRICS;
+    if (binding && typeof (binding as AppAnalyticsDataset).writeDataPoint === "function") {
+      cachedCallMetrics = binding as AppAnalyticsDataset;
+      return cachedCallMetrics;
+    }
+  } catch {
+    // ไม่มี Cloudflare context
+  }
+  cachedCallMetrics = null;
+  return null;
+}
+
+/** ชุดทดสอบเท่านั้น — ใส่ dataset ในหน่วยความจำแทนของจริง */
+export function setCallMetricsForTests(dataset: AppAnalyticsDataset | null | undefined): void {
+  cachedCallMetrics = dataset;
+}
+
 /** ส่วนของ R2 bucket ที่แอปนี้ใช้จริง (structural) */
 export interface AppR2Object {
   body: ReadableStream | null;

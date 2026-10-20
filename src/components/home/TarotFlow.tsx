@@ -29,14 +29,21 @@ import { saveReading, updateReadingMeta } from "@/lib/utils/history";
 import { MoodPicker } from "@/components/journal/MoodPicker";
 import { FollowStoryCard } from "@/components/journal/FollowStoryCard";
 import { fetchThreads } from "@/lib/journal/threads-client";
-import { saveFlowState, loadFlowState, clearFlowState, FRESH_START_EVENT } from "@/lib/utils/flow-persistence";
+import {
+  saveFlowState,
+  loadFlowState,
+  clearFlowState,
+  FRESH_START_EVENT,
+  markAuthDetour,
+  takeAuthDetour,
+} from "@/lib/utils/flow-persistence";
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
 import { prefetchTurnstile } from "@/lib/auth/turnstile";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { describeAuthError, fetchSessionUser, invalidateSessionCache } from "@/lib/auth/use-session";
 import type { ToastData } from "@/components/ui/ToastNotification";
-import { trackEvent } from "@/lib/analytics";
+import { trackEvent, trackPurchase } from "@/lib/analytics";
 import {
   DAILY_LIMIT,
   GUEST_BLOCK_REASON,
@@ -333,6 +340,9 @@ export default function TarotFlow({
     // กล่องจะโผล่ทีหลังแล้วดันปุ่มขยับ — ขอไว้ตั้งแต่วินาทีที่กด
     prefetchTurnstile();
     void ensureEntitlement();
+    // ทุกทางลงชื่อโหลดหน้าใหม่ — จดไว้ว่าออกไปจากหน้าผังไหน กลับมาแล้วจะได้กู้คำถามคืน (ดู `takeAuthDetour`)
+    // หน้าแรกไม่ต้องจด: ไม่มีผังในที่อยู่ รอบที่ค้างถูกกู้คืนเองอยู่แล้ว
+    if (routeSpread) markAuthDetour(routeSpread.id);
     dispatchOverlay({ type: "openAuth", mode, fromWall });
   };
 
@@ -567,7 +577,8 @@ export default function TarotFlow({
     const intent = resolveEntryIntent({
       routeSpread: routeSpread?.id ?? null,
       isKnownSpread: (id) => Boolean(getSpread(id)),
-      returning: isReturnVisit(),
+      // กลับมาจากหน้าลงชื่อเข้าใช้ = กลับมาหน้าเดิม (เบราว์เซอร์นับเป็น navigate ไม่ใช่ reload)
+      returning: isReturnVisit() || (routeSpread ? takeAuthDetour(routeSpread.id) : false),
       savedStep: saved?.currentStep ?? null,
       savedSpread: saved?.spreadId ?? null,
       savedLang: saved?.lang ?? null,
@@ -669,6 +680,9 @@ export default function TarotFlow({
         cleanUrl.searchParams.delete("pw_reset");
         cleanUrl.searchParams.delete("purchase_success");
         cleanUrl.searchParams.delete("credits");
+        cleanUrl.searchParams.delete("order");
+        cleanUrl.searchParams.delete("pkg");
+        cleanUrl.searchParams.delete("value");
         cleanUrl.searchParams.delete("purchase_error");
         cleanUrl.searchParams.delete("verify_error");
         cleanUrl.searchParams.delete("auth_error");
@@ -689,6 +703,13 @@ export default function TarotFlow({
           duration: 4500,
         });
         refreshEntitlement();
+        // GA4 purchase — เซิร์ฟเวอร์แนบ order/pkg/value มาเฉพาะเงินจริงที่ยืนยันแล้ว (confirm route)
+        const order = searchParams.get("order");
+        const pkg = searchParams.get("pkg");
+        const value = Number(searchParams.get("value"));
+        if (order && pkg) {
+          trackPurchase({ transactionId: order, valueThb: value, itemId: pkg, itemName: `แพ็กเติมรอบ ${pkg}`, category: "credit_pack" });
+        }
       } else if (purchaseError) {
         setToast({
           type: "error",

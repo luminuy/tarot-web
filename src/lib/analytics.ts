@@ -272,6 +272,20 @@ export type TarotAnalyticsEvent =
         median_ms: number;
         viewport_w: number;
       };
+    }
+  /**
+   * 💳 ซื้อสำเร็จ (อีเวนต์มาตรฐาน ecommerce ของ GA4) — ยิงผ่าน `trackPurchase()` เท่านั้น
+   * ยิงเฉพาะเงินจริงที่เซิร์ฟเวอร์ยืนยันแล้ว (ไม่ใช่ตัวจำลองหรือ Stripe โหมดทดสอบ)
+   * `transaction_id` = เลขคำสั่งซื้อ/ตั๋ว ให้ GA4 ตัดรายการซ้ำเอง · ไม่มีอีเมล ชื่อ หรือรหัสผู้ใช้
+   */
+  | {
+      name: "purchase";
+      params: {
+        transaction_id: string;
+        value: number;
+        currency: "THB";
+        items: { item_id: string; item_name: string; item_category: "credit_pack" | "consultation"; price: number; quantity: 1 }[];
+      };
     };
 
 /**
@@ -328,6 +342,9 @@ export function trackEvent<T extends TarotAnalyticsEvent>(
         });
       } else if (name === "tarot_session_start") {
         window.fbq("trackCustom", "TarotSessionStart", payload);
+      } else if (name === "purchase") {
+        const p = payload as { value?: number; currency?: string };
+        window.fbq("track", "Purchase", { value: p.value, currency: p.currency });
       } else if (name === "share_click") {
         window.fbq("trackCustom", "ShareTarotReading", payload);
       } else {
@@ -472,3 +489,32 @@ export function setAnalyticsConsent(granted: boolean) {
   queueGtag("consent", "update", payload);
 }
 
+
+/**
+ * 💳 ยิงอีเวนต์ `purchase` ครั้งเดียวต่อคำสั่งซื้อ (กันรีเฟรช/กดย้อนกลับแล้วนับซ้ำ)
+ * GA4 ตัดซ้ำด้วย `transaction_id` อยู่แล้ว · ชั้นนี้กันซ้ำในแท็บเดียวกันอีกชั้น
+ */
+export function trackPurchase(input: {
+  transactionId: string;
+  valueThb: number;
+  itemId: string;
+  itemName: string;
+  category: "credit_pack" | "consultation";
+}): void {
+  if (typeof window === "undefined" || !input.transactionId || !(input.valueThb > 0)) return;
+  const key = `seertarot_purchase_sent_${input.transactionId}`;
+  try {
+    if (window.sessionStorage.getItem(key)) return;
+    window.sessionStorage.setItem(key, "1");
+  } catch {
+    /* ที่เก็บข้อมูลถูกปิด — ปล่อยให้ GA4 ตัดซ้ำด้วย transaction_id */
+  }
+  trackEvent("purchase", {
+    transaction_id: input.transactionId,
+    value: input.valueThb,
+    currency: "THB",
+    items: [
+      { item_id: input.itemId, item_name: input.itemName, item_category: input.category, price: input.valueThb, quantity: 1 },
+    ],
+  });
+}

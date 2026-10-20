@@ -21,6 +21,7 @@ import {
 import { formatSlotRange } from "@/lib/marketplace/booking-policy";
 import { detectInAppBrowser, type InAppBrowser } from "@/lib/marketplace/in-app-browser";
 import { CheckIcon } from "@/components/ui/LineIcons";
+import { trackPurchase } from "@/lib/analytics";
 
 interface PollResponse {
   ticket: QueueTicket;
@@ -120,7 +121,19 @@ export default function CustomerQueuePage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ticketId, testChargeId: params.get("test_charge_id") || undefined }),
         });
-        const json = (await res.json().catch(() => ({}))) as { status?: string };
+        const json = (await res.json().catch(() => ({}))) as {
+          status?: string;
+          purchase?: { valueThb: number; countable: boolean };
+        };
+        if (json.status === "confirmed" && json.purchase?.countable) {
+          trackPurchase({
+            transactionId: ticketId,
+            valueThb: json.purchase.valueThb,
+            itemId: "consultation",
+            itemName: "ปรึกษาแม่หมอ",
+            category: "consultation",
+          });
+        }
         if (json.status === "refunded") {
           setNotice("เวลานี้ถูกจองไปก่อนที่การชำระเงินจะเสร็จ ระบบคืนเงินเต็มจำนวนให้แล้ว");
         }

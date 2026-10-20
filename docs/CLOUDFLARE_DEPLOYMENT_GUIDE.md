@@ -26,7 +26,7 @@
 
 | Binding | ประเภท | หน้าที่ |
 | :--- | :--- | :--- |
-| `NEXT_INC_CACHE_KV` | KV Namespace | เก็บ HTML/RSC ของหน้า SSG ทั้งหมด (seed ตอน deploy), Stat Counters, Content Overrides |
+| `NEXT_INC_CACHE_KV` | KV Namespace | Stat Counters, Content Overrides, Session Backstop (คีย์ `app:*`) — แคช HTML/RSC ของหน้า SSG ย้ายไป static assets แล้ว (2026-10-19 · ห้ามกลับมาใช้ KV เพราะ seed ทุก deploy ไม่เคยลบ) |
 | `ASSETS` | Static Assets | ภาพไพ่ 1909, `_next/static` |
 | `APP_DB` | D1 Database | เก็บข้อมูล users, reading_journal, reading_usage, user_bonus, marketplace |
 | `AI` | Workers AI | ตัวคัดกรองความปลอดภัยฉุกเฉินชั้น 3 |

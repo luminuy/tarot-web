@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requireAdminOrReportToken } from "@/lib/auth/require-admin";
 import { getExecutiveReport } from "@/lib/admin/executive-data";
 import { EXECUTIVE_RANGES, type ExecutiveRange } from "@/lib/admin/executive-report";
 
@@ -10,9 +10,10 @@ export const runtime = "nodejs";
  * GET /api/admin/executive?days=7|28|90
  * รายงานผู้บริหาร (แท็บ "แดชบอร์ดผู้บริหาร") — ตัวเลขหลักเทียบช่วงก่อนหน้า · รายได้จริง · Stripe · สิ่งที่ต้องดู
  * ⚠️ วันในระบบสถิติคือวัน UTC (ตัดรอบ 07:00 น. เวลาไทย)
+ * เข้าได้ด้วยคุกกี้แอดมิน หรือรหัสอ่านรายงาน `ADMIN_REPORT_TOKEN` (`npm run exec:report`) — รายงานนี้ไม่มีข้อมูลส่วนตัวลูกค้า
  */
 export async function GET(request: Request) {
-  const denied = await requireAdmin();
+  const denied = await requireAdminOrReportToken(request);
   if (denied) return denied;
 
   const raw = Number(new URL(request.url).searchParams.get("days"));

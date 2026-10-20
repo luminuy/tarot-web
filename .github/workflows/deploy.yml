@@ -167,7 +167,7 @@ jobs:
           fi
 
       # `npm run deploy` = opennextjs-cloudflare build && opennextjs-cloudflare deploy
-      # ขั้น deploy จะ populateCache: seed หน้า SSG ทั้งหมดลง KV ก่อน `wrangler deploy`
+      # ขั้น deploy จะ populateCache: คัดลอกแคชหน้า SSG เข้า static assets (`cdn-cgi/_next_cache`) ก่อน `wrangler deploy`
       # ⚠️ CLOUDFLARE_API_TOKEN ต้องมี Workers Scripts:Edit + Workers KV Storage:Edit
       #    ถ้าขาด ขั้น populateCache จะ fail แบบระบุชัดว่าขาดสิทธิ์อะไร
       - name: 🚀 Build & Deploy to Cloudflare Workers
@@ -305,3 +305,16 @@ jobs:
           echo "::error::แก้ได้ 2 ทาง — (1) เติมสิทธิ์ 'Zone · Single Redirect · Edit' ให้ token แล้ว re-run"
           echo "::error::                (2) Cloudflare ➔ Rules ➔ Redirect Rules ➔ Create rule ตามที่สคริปต์พิมพ์ไว้ด้านบน"
           exit 1
+
+      # ── ล้างแคชหน้า Next รุ่นเก่าที่ค้างใน KV (บิล KV Storage 14 GB · 2026-10-19) ──────
+      # แคชหน้า Next ย้ายจาก KV ไป Workers Static Assets แล้ว (open-next.config.ts)
+      # คีย์ `incremental-cache/<BUILD_ID>/…` ที่ deploy รุ่นก่อน ๆ seed ทิ้งไว้จึงไม่มีใครอ่านอีก
+      # รอบแรกลบของสะสมทั้งหมด · รอบต่อไปเหลือ list ว่าง 1 ครั้ง (ไม่แตะคีย์ข้อมูลแอป `app:*`)
+      # วางไว้ "หลัง" deploy เสมอ — Worker เวอร์ชันใหม่ต้องเลิกอ่าน KV ก่อนค่อยลบ
+      # ล้มได้โดยไม่ทำให้ deploy แดง (โค้ดขึ้นแล้ว) แต่ขึ้นคำเตือนให้เห็น
+      - name: 🧹 ล้างแคชหน้า Next เก่าใน KV
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npm run cf:kv-prune

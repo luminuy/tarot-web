@@ -36,6 +36,7 @@ import {
   isPassHolderOf,
 } from "../../src/components/home/flow-access";
 import { resolveEntryIntent, isCrossLanguageFlow, needsFinalizeOnResume } from "../../src/components/home/flow-entry";
+import { authDetourMatches } from "../../src/lib/utils/flow-persistence";
 import { createRunGuard } from "../../src/components/home/flow-run-guard";
 import { friendlyError, NETWORK_ERROR_EN, NETWORK_ERROR_TH } from "../../src/lib/reading/friendly-error";
 import { orientedMeaning, orientedTone } from "../../src/lib/reading/orientation";
@@ -548,6 +549,31 @@ if (!fs.existsSync(FLOW)) {
   check(
     "TarotFlow แยก \"รีเฟรช/ย้อนกลับ\" ออกจาก \"กดเข้ามาใหม่\" (กันรีเฟรชกลางพิธีแล้วล้างไพ่ทิ้ง)",
     /returning:\s*isReturnVisit\(\)/.test(flowSrc) && /"reload"/.test(flowSrc) && /"back_forward"/.test(flowSrc),
+  );
+  /*
+   * เจ้าของแจ้ง 2026-10-18: พิมพ์คำถาม ➔ เด้งหน้าลงชื่อ ➔ ลงชื่อเสร็จ คำถามหาย
+   * ทุกทางลงชื่อโหลดหน้า `/read/<ผัง>` ใหม่แบบ navigate (ไม่ใช่ reload) จึงต้องมีเครื่องหมาย "ออกไปลงชื่อ"
+   */
+  check(
+    "เปิดหน้าลงชื่อจากหน้าผัง ➔ จดว่าออกไปลงชื่อ (กลับมาแล้วคำถามต้องไม่หาย)",
+    /markAuthDetour\(routeSpread\.id\)/.test(flowSrc),
+  );
+  check(
+    "กลับมาจากหน้าลงชื่อ ➔ นับเป็น \"กลับมาหน้าเดิม\" (ใช้ `takeAuthDetour`)",
+    /returning:\s*isReturnVisit\(\)\s*\|\|\s*\(routeSpread \? takeAuthDetour\(routeSpread\.id\)/.test(flowSrc),
+  );
+}
+
+{
+  const now = 1_800_000_000_000;
+  const mark = (spreadId: string, at: number) => JSON.stringify({ spreadId, at });
+  check("ลงชื่อแล้วกลับมาผังเดิมภายใน 30 นาที ➔ กู้คืน", authDetourMatches(mark("celtic-cross", now - 60_000), "celtic-cross", now));
+  check("กลับมาคนละผัง ➔ ไม่นับ (ผังที่กดต้องชนะ)", !authDetourMatches(mark("daily", now - 60_000), "celtic-cross", now));
+  check("เครื่องหมายเก่าเกิน 30 นาที ➔ ไม่นับ", !authDetourMatches(mark("celtic-cross", now - 31 * 60_000), "celtic-cross", now));
+  check("ไม่มีเครื่องหมาย / ค่าพัง ➔ ไม่นับ", !authDetourMatches(null, "celtic-cross", now) && !authDetourMatches("{พัง", "celtic-cross", now));
+  check(
+    "กลับมาจากหน้าลงชื่อ + รอบค้างผังเดียวกันที่ขั้นตั้งคำถาม ➔ กู้คืนคำถาม",
+    intent("celtic-cross", "INTENTION_SELECT", { returning: true, savedSpread: "celtic-cross" }).kind === "resume",
   );
 }
 

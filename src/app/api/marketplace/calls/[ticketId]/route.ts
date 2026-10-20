@@ -13,9 +13,11 @@ import {
   submitOffer,
   type CallRole,
 } from "@/lib/marketplace/call.repo";
+import { CallReportSchema, recordCallReport } from "@/lib/marketplace/call-metrics";
 import { getQueueTicketById, type QueueTicket } from "@/lib/marketplace/queue.repo";
 import { isTicketOwner } from "@/lib/marketplace/ticket-owner";
 import { generateTurnIceServers, isTurnConfigured, revokeTurnCredential } from "@/lib/marketplace/turn";
+import { getCallMetricsDataset } from "@/lib/platform/cf";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { consumeEdgeRateLimit, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
 
@@ -29,6 +31,7 @@ export const runtime = "nodejs";
  *   POST { as: "customer", action: "offer", round, sdp }
  *   POST { as: "reader",   action: "answer", round, sdp }
  *   POST { as, action: "restart" | "end" }
+ *   POST { as, action: "report", ...สรุปสาย }  — สถิติความเสถียรลง Analytics Engine (ครั้งเดียวตอนออกจากห้อง)
  *
  * 🔒 สิทธิ์: ลูกค้า = เจ้าของตั๋วตาม `isTicketOwner` (คุกกี้ customerRef หรือบัญชีที่ล็อกอินตอนจอง — ด่านเดียวกับหน้าคิว)
  *    · แม่หมอ = โทเคนแม่หมอเจ้าของคิว
@@ -44,11 +47,14 @@ const PostSchema = z.discriminatedUnion("action", [
   z.object({ as: z.literal("reader"), action: z.literal("answer"), round: z.number().int().positive(), sdp: z.string() }),
   z.object({ as: RoleSchema, action: z.literal("restart") }),
   z.object({ as: RoleSchema, action: z.literal("end") }),
+  CallReportSchema.extend({ as: RoleSchema, action: z.literal("report") }),
 ]);
 
 /** ขอ TURN ได้ไม่เกิน 30 ครั้ง/ชม. ต่อตั๋วต่อฝั่ง · ส่งใบนัด/ต่อสายใหม่ได้ 120 ครั้ง/ชม. */
 const JOIN_LIMIT = { max: 30, windowSec: 3600 };
 const SIGNAL_LIMIT = { max: 120, windowSec: 3600 };
+/** สรุปสายส่งครั้งเดียวต่อการเข้าห้อง — เผื่อเข้า-ออกซ้ำได้ 12 ครั้ง/ชม. */
+const REPORT_LIMIT = { max: 12, windowSec: 3600 };
 
 const notFound = () => apiFail("ไม่พบห้องวิดีโอคอลนี้", 404, "not_found");
 
@@ -110,6 +116,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ tic
   try {
     const ticket = await resolveParticipant(request, ticketId, input.as);
     if (!ticket) return notFound();
+
+    // สรุปสายมาตอนออกจากห้อง — คิวอาจถูกปิดไปแล้ว จึงรับก่อนเช็กสถานะคิว
+    if (input.action === "report") {
+      const limit = await consumeEdgeRateLimit(edgeRateLimitKey("call-report", `${ticketId}:${input.as}`), REPORT_LIMIT);
+      if (!limit.allowed) return apiOk();
+      const { as, action: _action, ...report } = input;
+      recordCallReport(await getCallMetricsDataset(), report, {
+        role: as,
+        readerId: ticket.readerId,
+        userAgent: request.headers.get("user-agent"),
+      });
+      return apiOk();
+    }
+
     if (ticket.status !== "ready") {
       return apiFail("คิวนี้ปิดไปแล้ว", 409, "ticket_closed");
     }

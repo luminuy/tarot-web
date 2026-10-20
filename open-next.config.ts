@@ -1,27 +1,31 @@
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
-import kvIncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/kv-incremental-cache";
+import staticAssetsIncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/static-assets-incremental-cache";
 
 /**
  * OpenNext Cloudflare — Edge Caching
  *
  * เว็บนี้เป็น SSG ล้วน (ทุกหน้า prerender ตอน build — ไม่มี `export const revalidate`,
- * ไม่มี `revalidateTag()` / `revalidatePath()` ที่ไหนเลย) จึงต้องการแค่:
+ * ไม่มี `revalidateTag()` / `revalidatePath()` / `unstable_cache` ที่ไหนเลย) จึงต้องการแค่:
  *
- *  incrementalCache : เก็บ HTML/RSC ของหน้าที่ prerender ไว้ใน KV (NEXT_INC_CACHE_KV)
- *                     `opennextjs-cloudflare deploy` จะ seed หน้าเหล่านี้ลง KV ตอน deploy
- *  enableCacheInterception:
- *                     เช็ก KV ก่อนเข้า Next router → หน้า SSG ตอบจาก edge ได้เลย
- *                     ไม่ต้อง boot Next runtime (ยืนยัน header `x-opennext-cache: HIT`)
- *                     ต้องเป็น false ถ้าเปิด PPR — โปรเจกต์นี้ไม่ได้ใช้
+ *  incrementalCache : เก็บ HTML/RSC ของหน้าที่ prerender ไว้ใน **Workers Static Assets**
+ *                     (`.open-next/assets/cdn-cgi/_next_cache/<BUILD_ID>/…` — Worker อ่านได้ผู้เดียว)
+ *                     `opennextjs-cloudflare deploy` คัดลอกไฟล์เหล่านี้เข้าชุด assets ให้เอง
  *
- * ❌ ไม่ใช้ tagCache (D1) / queue (Durable Object) เพราะไม่มี revalidation ให้ทำ
- *    ถ้าวันหน้าเพิ่ม ISR หรือ on-demand revalidation ค่อยเติม d1TagCache + doQueue
- *    พร้อม binding ใน wrangler.jsonc (ดู git history commit #19)
+ * ⛔ ห้ามกลับไปใช้ `kv-incremental-cache` (บทเรียน INC-0287)
+ *    แบบ KV จะ seed หน้าทั้งชุดใต้คีย์ `incremental-cache/<BUILD_ID>/…` ทุกครั้งที่ deploy
+ *    (ทั้ง production และ Worker preview) และ **ไม่มีวันลบชุดเก่า** — สะสมจนเกิน 14 GB
+ *    เสียค่า KV Storage $0.50/GB-เดือน ทั้งที่ใช้จริงแค่ชุดของ BUILD_ID ปัจจุบันชุดเดียว
+ *    Static Assets ผูกกับเวอร์ชันของ Worker เอง ชุดเก่าหายไปกับเวอร์ชันเก่า ไม่มีค่าเก็บ
+ *    ข้อแลก: แคชนี้อ่านอย่างเดียว ถ้าวันหน้าเพิ่ม ISR / on-demand revalidation ต้องย้ายไป
+ *    R2 incremental cache (ไม่ใช่ KV) พร้อม d1TagCache + doQueue
+ *
+ *    คีย์เก่าที่ค้างใน KV ถูกลบโดย `scripts/cf-kv-prune-inc-cache.ts` (รันท้าย deploy.yml)
+ *    KV `NEXT_INC_CACHE_KV` ยังอยู่ — ใช้เก็บข้อมูลแอป `app:*` (ตัวนับ · ธง · session backstop)
  *
  * docs: https://opennext.js.org/cloudflare/caching
  */
 export default defineCloudflareConfig({
-  incrementalCache: kvIncrementalCache,
+  incrementalCache: staticAssetsIncrementalCache,
 
   /**
    * ⛔ ต้องเป็น `false` เสมอ — บทเรียน INC-0106 (ห้ามเปิดกลับโดยไม่อ่านให้จบ)
@@ -41,7 +45,7 @@ export default defineCloudflareConfig({
    *
    * ปิด interception = คำขอวิ่งผ่าน Next runtime ซึ่งตอบ segment prefetch ได้ถูกต้อง
    * แลกกับ CPU ต่อคำขอที่สูงขึ้น — คุ้มมาก เพราะตัดคำขอทิ้งไปในระดับร้อยเท่า
-   * (KV incremental cache ยังทำงานเหมือนเดิม หน้ายังไม่ต้องเรนเดอร์ใหม่)
+   * (incremental cache ยังทำงานเหมือนเดิม หน้ายังไม่ต้องเรนเดอร์ใหม่)
    */
   enableCacheInterception: false,
 });

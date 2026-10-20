@@ -69,6 +69,8 @@ export const STORAGE_KEYS = {
   customSpreadLaunch: "tarot_custom_spread_launch_v1",
   /** ✦ คำถามที่ตั้งไว้ให้จากหน้าคำถาม `/questions/*` — ส่งต่อให้พิธีเปิดไพ่ครั้งเดียวแล้วลบทิ้ง (sessionStorage) */
   questionPrefill: "tarot_question_prefill_v1",
+  /** ✦ ผู้ใช้ออกไปลงชื่อเข้าใช้กลางพิธี (Google · LINE · อีเมล ล้วนโหลดหน้าใหม่) — กลับมาหน้า `/read/<ผัง>` เดิมแล้วกู้คืนคำถาม ไม่ใช่เริ่มรอบใหม่ (sessionStorage · ใช้ครั้งเดียว) */
+  authDetour: "tarot_auth_detour_v1",
 
   /* ── คีย์ที่มีผู้ใช้จริงอยู่ก่อนมีทะเบียนนี้ — ห้ามเปลี่ยนชื่อ ── */
   /** ชื่อเล่นที่ผู้ใช้เคยกรอกไว้ */

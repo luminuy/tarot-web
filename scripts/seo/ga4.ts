@@ -12,6 +12,7 @@
  *   npm run seo:ga4 -- pages             หน้าที่ถูกเปิดดูมากที่สุด
  *   npm run seo:ga4 -- events            อีเวนต์ทั้งหมดที่เว็บส่ง (ดูชื่อใน src/lib/analytics.ts)
  *   npm run seo:ga4 -- funnel            ขั้นตอนเปิดไพ่ ตั้งแต่เริ่ม ➔ อ่านจบ ➔ แชร์ / ดูแพ็กเกจ / ปรึกษาแม่หมอ
+ *   npm run seo:ga4 -- purchases         ผู้จ่ายเงินและรายได้แยกตามช่องทาง (อีเวนต์ purchase)
  *   npm run seo:ga4 -- devices           มือถือ · คอม · แท็บเล็ต
  *
  * ตัวเลือกร่วม: --days <n> (ค่าเริ่ม 28 · นับถึงเมื่อวาน) · --limit <n> · --json <ไฟล์> (เก็บผลดิบ)
@@ -23,7 +24,8 @@
  * เปลี่ยนพร็อพเพอร์ตี้ได้ด้วย env `GA4_PROPERTY_ID` (เลขล้วน ไม่ใช่ G-XXXX)
  *
  * ⚠️ ข้อจำกัดที่ต้องรู้:
- * - GA4 ยังไม่มีอีเวนต์ซื้อแพ็กเกจ — ยอดซื้อจริงดูจากสถิติแอดมิน `/admin` (D1) เท่านั้น
+ * - อีเวนต์ `purchase` (เงินจริงที่ยืนยันแล้ว · แพ็กเติมรอบ + ปรึกษาแม่หมอ) เริ่มส่งตั้งแต่ 2026-10-19 — ก่อนวันนั้นไม่มี
+ *   ยอดเงินที่ถูกต้องที่สุดยังเป็นของ `/admin` (D1) · GA4 ใช้ดูว่าผู้จ่ายมาจากช่องทางไหน (ตัวบล็อกโฆษณาทำให้ GA4 นับต่ำกว่าจริง)
  * - ข้อมูลวันล่าสุดยังไม่นิ่ง จึงตัดที่ "เมื่อวาน"
  * - ตัวเลขอาจถูกปัดซ่อน (thresholding) เมื่อผู้ใช้น้อย — สคริปต์จะเตือนเมื่อเกิด
  */
@@ -37,7 +39,7 @@ const TIMEOUT_MS = 30_000;
 /** ลำดับขั้นเปิดไพ่ — ชื่อตรงกับ `trackEvent()` ใน src/lib/analytics.ts */
 const FUNNEL_STEPS = ["tarot_session_start", "tarot_draw", "card_reveal", "reading_complete"];
 /** สิ่งที่อยากให้เกิดหลังอ่านจบ — นับเทียบกับจำนวนอ่านจบ */
-const FUNNEL_AFTER = ["share_click", "follow_up_ask", "upgrade_dialog_open", "reader_consult_click", "provably_fair_verify"];
+const FUNNEL_AFTER = ["share_click", "follow_up_ask", "upgrade_dialog_open", "reader_consult_click", "provably_fair_verify", "purchase"];
 
 interface ReportRow {
   dimensionValues?: { value: string }[];
@@ -211,7 +213,7 @@ async function funnel(token: string, days: number) {
     console.log(`| ${s} | ${u} | ${counts.get(s) ?? 0} | ${pct(u, done)} |`);
   }
   console.log("\nหมายเหตุ: บางเส้นทางอาจข้ามบางขั้น ตัวเลขจึงเป็นทิศทาง ไม่ใช่ funnel แบบเรียงลำดับเคร่งครัด");
-  console.log("ยอดซื้อแพ็กเกจยังไม่ได้ส่งเข้า GA4 — ดูที่สถิติแอดมิน /admin");
+  console.log("purchase = เงินจริงที่ยืนยันแล้ว (เริ่มส่ง 2026-10-19) · ยอดเงินที่ถูกต้องที่สุดยังเป็นของ /admin · ดูแยกช่องทางด้วยคำสั่ง purchases");
   return report;
 }
 
@@ -235,6 +237,10 @@ const SIMPLE: Record<string, { title: string; q: Query }> = {
   events: {
     title: "อีเวนต์ทั้งหมด",
     q: { dimensions: ["eventName"], metrics: ["eventCount", "totalUsers"], orderBy: "eventCount", limit: 100 },
+  },
+  purchases: {
+    title: "ผู้จ่ายเงินมาจากช่องทางไหน (อีเวนต์ purchase · เริ่ม 2026-10-19)",
+    q: { dimensions: ["sessionDefaultChannelGroup"], metrics: ["ecommercePurchases", "purchaseRevenue", "totalPurchasers", "sessions"], orderBy: "purchaseRevenue" },
   },
   devices: {
     title: "อุปกรณ์",

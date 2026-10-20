@@ -64,6 +64,18 @@
 
 ---
 
+## 🟡 1.6 รอเจ้าของตั้งค่า — แจ้งเตือนค่าใช้จ่าย Cloudflare (เพิ่ม 2026-10-19 · หลังเหตุ KV Storage 14 GB INC-0287)
+
+ทำใน Dashboard เท่านั้น (ไม่มีในโค้ด) · ฟรี:
+1. Cloudflare Dashboard ➔ **Manage Account ➔ Notifications** ➔ **Add**
+2. เลือก **Usage Based Billing** ➔ เลือกบริการ (ทำซ้ำทีละตัว): **Workers KV Storage** · **Workers Standard Requests** · **Workers CPU ms** · **Realtime (TURN)** · **Workers Logs**
+3. ตั้งเกณฑ์ = ใกล้เพดานโควตาฟรีของแต่ละตัว (เช่น KV Storage 0.8 GB · Realtime 800 GB) ➔ อีเมล `bankjack10452@gmail.com`
+4. (เสริม) **Billing ➔ Billable Usage** ดูยอดรายวันได้ตลอด
+
+อ่านสถิติวิดีโอคอล (`npm run cf:call-stats`) ต้องใช้ token อีกตัวที่มีสิทธิ์ **Account · Account Analytics · Read** (token deploy ไม่ต้องเพิ่มสิทธิ์)
+
+---
+
 ## 📋 2. รายการ Secrets ทั้งหมดบน Cloudflare Worker (`tarot-web`)
 
 สามารถตรวจสอบได้ด้วยคำสั่ง: `npx wrangler secret list`
@@ -200,6 +212,38 @@ npx wrangler secret put CRON_SECRET
 
 > **เอนจินคำอ่าน**: GROQ + GEMINI ตั้งครบ → Tier 1 Groq Qwen3-27B ทำงาน (`src/lib/ai/groq.ts` · fallback → Gemini `src/lib/ai/gemini.ts`) · เฝ้าเมตริก `ai_foreign_trip` / `ai_groq_failover` ใน `/admin`
 > **AI Gateway / Turnstile**: ตั้งครบแล้ว ไม่ใช่รายการค้างอีกต่อไป
+
+### 📊 รอตั้งเพิ่ม — `ADMIN_REPORT_TOKEN` (รหัสอ่านรายงานผู้บริหาร · เพิ่ม 2026-10-19)
+
+ให้ผู้ช่วย `cmo` · `coo` · `cto` และรายงานอัตโนมัติเช้าวันจันทร์ดึงตัวเลขจริงด้วย `npm run exec:report`
+โดยไม่ต้องรอเจ้าของส่งภาพหน้าแอดมิน · **ไม่ตั้ง = ช่องนี้ปิดสนิท** (หน้าแอดมินใช้ได้ตามปกติ)
+
+- อ่านได้แค่ `GET /api/admin/executive` กับ `GET /api/admin/nav-badges` — ตัวเลขรวม ไม่มีอีเมล ชื่อ หรือรหัสผู้ใช้ · เขียนอะไรไม่ได้
+  (ด่าน `test-admin-stats-keys` หัวข้อ จ. กันไม่ให้รหัสนี้ไปเปิด route อื่น)
+- ต้องยาวอย่างน้อย 32 ตัว · ไม่เกี่ยวกับรหัสผ่านแอดมิน · เปลี่ยนค่า = รหัสเก่าใช้ไม่ได้ทันที
+
+ต้องตั้ง **สองที่ ด้วยค่าเดียวกัน**:
+
+```bash
+# สร้างค่าสุ่ม (64 ตัวอักษร)
+openssl rand -hex 32
+
+# 1) ฝั่ง Cloudflare Worker (ตัวที่ตรวจรหัส)
+npx wrangler secret put ADMIN_REPORT_TOKEN
+
+# 2) ฝั่ง environment ของ Claude Code บนเว็บ (ตัวที่ผู้ช่วยใช้ดึงรายงาน)
+#    เมนู cloud environment บนแถบชื่อเซสชัน → Edit → ตัวแปร environment
+#    Name: ADMIN_REPORT_TOKEN   Value: <ค่าเดียวกับข้อ 1>
+#    เซสชันใหม่จึงจะเห็นค่า (รวมถึงรายงานเช้าวันจันทร์)
+```
+
+⚠️ ห้ามวางค่ารหัสลงในแชทหรือไฟล์ในรีโป
+
+**ตรวจว่าใช้ได้จริง**: เปิดเซสชันใหม่แล้วรัน `npm run exec:report -- --days 7`
+- ได้รายงานภาษาไทย = ใช้ได้
+- `401 รหัสอ่านรายงานไม่ถูกต้อง` = ค่าสองฝั่งไม่ตรงกัน
+- `401 ยังไม่ได้ตั้งรหัสอ่านรายงาน` = ฝั่ง Cloudflare ยังไม่ได้ตั้ง (หรือสั้นกว่า 32 ตัว)
+- `ยังไม่มี ADMIN_REPORT_TOKEN` (ก่อนยิง) = ฝั่ง environment ยังไม่ได้ตั้ง
 
 ### 🔔 Web Push (`VAPID_*`) — ✅ ตั้งแล้ว 2026-10-07 ผ่าน GitHub Actions (run 37568597441)
 
