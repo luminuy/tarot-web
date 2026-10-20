@@ -997,7 +997,8 @@ check(
     "B1: ui2-home เริ่มสแกน/นับเลข/โน้ตหลังสัญญาณ ui2:hydrated จาก TarotFlowRoot เท่านั้น",
     /afterHydrate\(scan\)/.test(ui2Home) && /afterHydrate\(watchNotes\)/.test(ui2Home) && /afterHydrate\(\(\) => \{\s*watchCounts\(\);/.test(ui2Home) &&
       !/^(scan|watchNotes|watchCounts|setupScrolly)\(\);/m.test(ui2Home) &&
-      /setAttribute\("data-ui2-hydrated", ""\)/.test(flowRoot) && /new Event\("ui2:hydrated"\)/.test(flowRoot),
+      /setAttribute\("data-ui2-hydrated", ""\)/.test(flowRoot) && /new Event\("ui2:hydrated"\)/.test(flowRoot) &&
+      /afterHydrate\(scan\)/.test(stripComments(fs.readFileSync(path.join(ROOT, "astro/scripts/home-track.ts"), "utf-8"))),
   );
   // B1: จุดตกแต่ง (จุดคั่นกลม · จุดเรืองแสงในชิปล็อกไพ่) ถูกถอด — ห้ามกลับมา (กฎเหล็กข้อ 2)
   const dotHits = sources.filter((f) => /className="(?:ui2-dot|v2-ar-dot|v2-tp-dot)"/.test(fs.readFileSync(f, "utf-8")));

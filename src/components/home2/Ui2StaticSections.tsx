@@ -638,6 +638,9 @@ export function Ui2ShowcaseSection({ isEnglish, href }: { isEnglish: boolean; hr
             </ThaiPhrases>
           </p>
         </div>
+        {/* หมุดวัดระยะเลื่อนของคลังไพ่ (ui2-home.ts · setupScrolly) — อยู่ใน HTML ตั้งแต่แรก
+            เดิมสคริปต์สร้างแทรกเองซึ่งอาจเกิดก่อน React hydrate ส่วนนี้เสร็จ = #418 บนจอ ≥ 1024 (B1 2026-10-20) */}
+        <div data-show-marker="" aria-hidden="true" />
         <div className="ui2-show">
           <div className="ui2-show-tabs" role="tablist" aria-label={t("หัวข้อในคลังไพ่", "Library topics")} aria-orientation="vertical">
             {SHOW_TABS.map((tab, i) => (

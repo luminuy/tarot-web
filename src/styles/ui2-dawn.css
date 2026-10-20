@@ -499,3 +499,7 @@ html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > se
     padding-bottom: 40px;
   }
 }
+/* เม็ดชุดไพ่ที่เลือก (`/cards/*`): บนครีมพื้นเม็ดกลายเป็นน้ำตาลเข้ม (--ui2-gold-solid ถูกแทน) แต่ตัวหนังสือยังดำ 3.0:1 ➔ ตัวสว่าง (~6:1) */
+.ui2-pg .v3-cg-switch a[aria-current="page"] {
+  color: #fffaf0;
+}
