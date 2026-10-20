@@ -4,7 +4,7 @@ import { COUNTS } from "@/components/layout/nav-links";
  * 🧭 เมนูหลักของหัวเว็บ — ข้อมูลชุดเดียวที่แถบเมนูเดสก์ท็อปและลิ้นชักมือถือใช้ร่วมกัน
  * ---------------------------------------------------------------------------
  * โครงตามแบบ "Kazumi Clinic" ที่เจ้าของเลือก (2026-10-02): หัวข้อหลัก 5 ข้อเรียงเหมือนกันทั้งคอมและมือถือ
- *   ดูดวง ▾ (แผงใหญ่ 3 กลุ่ม) · ความหมายไพ่ · บทความ · ปรึกษาแม่หมอ · ราคา
+ *   ดูดวง ▾ (แผงใหญ่ 5 กลุ่ม) · ความหมายไพ่ · บทความ · ปรึกษาแม่หมอ · ราคา
  * มือถือใช้หัวข้อชุดเดียวกัน + คำอธิบายสั้น (`sublabel`) และภาพไพ่ (`cardId`) ต่อแถว
  *
  * กติกาถ้อยคำ (เจ้าของสั่ง "ได้มาตรฐาน เข้าใจง่าย"): หัวข้อเป็นคำนามสั้นแบบเว็บทั่วไป
@@ -83,6 +83,49 @@ export function headerNav(isEn: boolean): HeaderNav {
               href: "/read/celtic-cross",
               sublabel: isEn ? "The full picture of a big question" : "ภาพรวมเรื่องสำคัญแบบละเอียดที่สุด",
               cardId: "major-21",
+            },
+          ],
+        },
+        {
+          // ✦ หน้าหมวด `/spreads/topic/*` — เดิมไม่มีในเมนู (เจ้าของ 2026-10-20 "กลัวคนใช้ไม่รู้ หาไม่เจอ")
+          //   ข้อความเป็นคำที่คนค้นจริง (GSC) · ภาพไพ่ชุดเดียวกับส่วนหมวดของหน้า /spreads
+          title: isEn ? "Readings by topic" : "ดูดวงตามเรื่อง",
+          links: [
+            {
+              label: isEn ? "Love" : "ดูดวงไพ่ยิปซีความรัก",
+              href: "/spreads/topic/love",
+              sublabel: isEn ? "5 spreads for singles, dating, exes and couples" : "5 ผัง คนโสด คนคุย แฟนเก่า คนมีคู่",
+              cardId: "major-06",
+            },
+            {
+              label: isEn ? "Career" : "ดูดวงการงาน",
+              href: "/spreads/topic/career",
+              sublabel: isEn ? "Job changes, promotion and crossroads" : "ย้ายงาน เลื่อนขั้น ทางแยกงาน",
+              cardId: "major-07",
+            },
+            {
+              label: isEn ? "Money & luck" : "ดูดวงการเงิน โชคลาภ",
+              href: "/spreads/topic/money",
+              sublabel: isEn ? "Cash flow and lucky chances" : "กระแสเงิน และโชคลาภ",
+              cardId: "pentacles-01",
+            },
+            {
+              label: isEn ? "Health & energy" : "ดูดวงสุขภาพ",
+              href: "/spreads/topic/health",
+              sublabel: isEn ? "Body, mind and spirit in balance" : "สมดุลกาย ใจ และจิตวิญญาณ",
+              cardId: "major-14",
+            },
+            {
+              label: isEn ? "Family" : "ดูดวงครอบครัว",
+              href: "/spreads/topic/family",
+              sublabel: isEn ? "Home and the people around you" : "คนในบ้าน และบริวาร",
+              cardId: "cups-10",
+            },
+            {
+              label: isEn ? "Study & exams" : "ดูดวงการเรียน",
+              href: "/spreads/topic/study",
+              sublabel: isEn ? "Exams, further study and focus" : "การสอบ เรียนต่อ และสมาธิ",
+              cardId: "pentacles-08",
             },
           ],
         },

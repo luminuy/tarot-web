@@ -838,8 +838,8 @@ html[data-ui2-over-dark] .site-header-glass nav:not(.absolute *, .absolute, .nv-
 }
 .mega-inner {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 0.85fr);
-  gap: 32px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(0, 0.85fr) minmax(0, 0.85fr) minmax(0, 0.85fr);
+  gap: 28px;
   max-width: 72rem;
   margin: 0 auto;
   padding: 0 24px;
@@ -867,6 +867,8 @@ html[data-ui2-over-dark] .site-header-glass nav:not(.absolute *, .absolute, .nv-
 [data-mega]:focus-within .mega-col:nth-child(3) { transition-delay: 80ms; }
 [data-mega]:hover .mega-col:nth-child(4),
 [data-mega]:focus-within .mega-col:nth-child(4) { transition-delay: 120ms; }
+[data-mega]:hover .mega-col:nth-child(5),
+[data-mega]:focus-within .mega-col:nth-child(5) { transition-delay: 160ms; }
 .mega-title {
   font-size: 12px;
   line-height: 1.4;
