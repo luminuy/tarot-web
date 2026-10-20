@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CardImage } from "@/components/card/CardImage";
 import { copyToClipboard } from "@/lib/utils/clipboard";
 import type { BodyPartT, DeckEntryT, ReadingT, StudioCall, StudioClientT } from "./studio-api";
@@ -101,12 +101,42 @@ export function ReadingEditor({
     setBody(initial.body ?? []);
   }, [initial]);
 
+  /*
+   * ค่า "ยังไม่บันทึก" ล่าสุดจริง — `apply()` ถูกเรียกหลัง await ซึ่งปิดล้อม state ของตอนกดไว้
+   * (แม่หมอพิมพ์ต่อระหว่างรอได้) จึงต้องอ่านผ่าน ref
+   */
+  const notesDirtyRef = useRef(false);
+  const bodyDirtyRef = useRef(false);
+  useEffect(() => {
+    notesDirtyRef.current = notesDirty;
+    bodyDirtyRef.current = bodyDirty;
+  }, [notesDirty, bodyDirty]);
+
+  // ออกจากหน้า/ปิดแท็บระหว่างมีของยังไม่บันทึก ➔ ให้เบราว์เซอร์ถามก่อน
+  useEffect(() => {
+    if (!notesDirty && !bodyDirty) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [notesDirty, bodyDirty]);
+
+  /**
+   * รับ reading ล่าสุดจากเซิร์ฟเวอร์ — ห้ามทับโน้ต/คำอ่านที่แม่หมอพิมพ์ค้างไว้ (B4-10)
+   * เดิมทุกช่องที่บันทึกอัตโนมัติ (เลือกลูกค้า · ชื่อ · คำถาม · ป้าย AI) ล้างข้อความที่ยังไม่กดบันทึกทิ้งเงียบ ๆ
+   */
   const apply = (next: ReadingT | null | undefined) => {
     if (!next) return;
     setR(next);
-    setNotes(next.notes);
-    setBody(next.body ?? []);
+    if (!notesDirtyRef.current) setNotes(next.notes);
+    if (!bodyDirtyRef.current) setBody(next.body ?? []);
     onChanged(next);
+  };
+
+  const leave = () => {
+    if ((notesDirty || bodyDirty) && !window.confirm("มีโน้ตหรือคำอ่านที่ยังไม่ได้บันทึก ออกจากหน้านี้แล้วข้อความที่ยังไม่บันทึกจะหายไป ออกเลยไหม?")) return;
+    onBack();
   };
 
   const keys = useMemo(() => partKeys(r, notes, body), [r, notes, body]);
@@ -168,8 +198,8 @@ export function ReadingEditor({
     }
     setFromKeywords(res.data.fromKeywords ?? []);
     const hadBody = hasBody;
+    // คำอ่านที่แก้ค้างไว้ (ยังไม่บันทึก) อยู่ต่อ — apply() ไม่ทับ จึงไม่ล้างธง "ยังไม่บันทึก" ที่นี่ (B4-10)
     apply(res.data.reading);
-    setBodyDirty(false);
     if (res.data.reason === "ai_off") {
       setMsg({ tone: "ok", text: hadBody ? "จัดโน้ตใหม่แล้ว — กด \"ใช้ข้อความนี้แทน\" ทีละส่วนที่ต้องการ (งานที่คุณแก้ไว้ไม่ถูกทับ)" : "จัดโน้ตเป็นคำอ่านแล้ว — แก้ต่อด้านล่างได้เลย" });
     } else if (res.data.mode === "ai") {
@@ -209,14 +239,20 @@ export function ReadingEditor({
 
   async function saveBody() {
     const ordered = keys.map((k) => body.find((p) => p.key === k)).filter((p): p is BodyPartT => Boolean(p));
+    // ส่งไปบันทึกแล้ว = ให้ apply() รับฉบับจากเซิร์ฟเวอร์ได้
+    bodyDirtyRef.current = false;
     if (await save({ body: ordered }, "body")) {
       setBodyDirty(false);
       setMsg({ tone: "ok", text: "บันทึกคำอ่านฉบับส่งจริงแล้ว" });
+      return true;
     }
+    bodyDirtyRef.current = bodyDirty;
+    return false;
   }
 
   async function share() {
-    if (bodyDirty) await saveBody();
+    // บันทึกไม่ผ่าน ➔ หยุด ห้ามแชร์ฉบับเก่าให้ลูกค้าทั้งที่แม่หมอเพิ่งแก้ (B4-10)
+    if (bodyDirty && !(await saveBody())) return;
     setBusy("share");
     setMsg(null);
     const res = await call<{ url: string; reading: ReadingT }>(`/readings/${r.id}/share`, { method: "POST", body: { expiresDays, password: password.trim() || null } });
@@ -257,7 +293,7 @@ export function ReadingEditor({
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <button type="button" onClick={onBack} className="min-h-11 text-sm font-semibold text-gold-ink hover:underline">
+        <button type="button" onClick={leave} className="min-h-11 text-sm font-semibold text-gold-ink hover:underline">
           คำอ่านทั้งหมด
         </button>
         <button type="button" onClick={remove} disabled={busy === "delete"} className="min-h-11 text-sm text-err hover:underline">

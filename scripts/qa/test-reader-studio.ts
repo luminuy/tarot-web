@@ -659,7 +659,19 @@ async function main() {
   check("/readers/studio ประกาศ noindex", /index:\s*false/.test(src("src/app/(th)/readers/studio/layout.tsx")));
   const editor = src("src/components/studio/ReadingEditor.tsx");
   check("ตัวแก้: ร่าง AI แยกสีจากคำของหมอ", editor.includes("border-l-amethyst") && editor.includes("ร่างจาก AI"));
-  check("ตัวแก้/หน้าสตูดิโอไม่ใส่โทเคนใน URL ของ API", !/\/api\/marketplace\/studio[^"'`]*\?token=/.test(src("src/components/studio/studio-api.ts")));
+  check(
+    "B4-10: บันทึกช่องอื่นไม่ทับโน้ต/คำอ่านที่ยังไม่บันทึก · แชร์หยุดเมื่อบันทึกคำอ่านล้ม · ถามก่อนออก",
+    /if \(!notesDirtyRef\.current\) setNotes\(next\.notes\);/.test(editor) &&
+      /if \(!bodyDirtyRef\.current\) setBody\(next\.body \?\? \[\]\);/.test(editor) &&
+      /if \(bodyDirty && !\(await saveBody\(\)\)\) return;/.test(editor) &&
+      /onClick=\{leave\}/.test(editor),
+  );
+  const studioApp = src("src/components/studio/StudioApp.tsx");
+  check(
+    "B4-11: โหลดสตูดิโอซ้ำล้มชั่วคราว ➔ แถบแจ้ง ไม่ใช่หน้าทางตัน · หน้าทางตันมีปุ่มลองอีกครั้ง",
+    /if \(bootedRef\.current && !denied\) \{/.test(studioApp) && studioApp.includes("ลองอีกครั้ง"),
+  );
+  check("ตัวแก้/หน้าสตูดิโอไม่ใส่โทเคนใน URL ของ API",!/\/api\/marketplace\/studio[^"'`]*\?token=/.test(src("src/components/studio/studio-api.ts")));
   const EMOJI = /[\p{Extended_Pictographic}\u{2726}\u{2727}]/u;
   for (const f of ["src/components/studio/StudioApp.tsx", "src/components/studio/ReadingEditor.tsx", "src/components/studio/SharedReadingParts.tsx", "src/app/(th)/r/[token]/page.tsx", "src/lib/studio/dpa.ts"]) {
     check(`${f}: ไม่มีอิโมจิ/สัญลักษณ์ตกแต่ง (กฎเหล็กข้อ 2)`, !EMOJI.test(src(f).replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "")));
