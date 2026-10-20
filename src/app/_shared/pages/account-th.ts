@@ -12,7 +12,7 @@ import { noindexAlternates } from "@/lib/config/site";
  * หน้านี้เป็นหน้าส่วนตัว — ต้องประกาศ noindex ในตัวหน้าเอง ไม่ใช่พึ่ง `robots.txt` อย่างเดียว
  */
 export const accountMetadataTh: Metadata = {
-  title: "บัญชีและประวัติการดูดวง | Sacred Account & Archive",
+  title: "บัญชีและประวัติการดูดวง",
   description: "จัดการข้อมูลส่วนบุคคล สิทธิ์ความเป็นส่วนตัว และบันทึกประวัติการดูดวงไพ่ทาโรต์",
   robots: { index: false, follow: false },
   // A6-01: หน้า noindex ห้ามสืบทอด canonical/hreflang ของหน้าแรก (สัญญาณขัดกัน) — ตัดทิ้ง

@@ -206,7 +206,7 @@ export function DailyClient() {
     <div className="ui2-dy-ritual">
       {/* หัวหน้า UI 2.0 (คืนท้องฟ้า · แผน UI_2_0) — h1 ข้อความเดิม "ดูดวงไพ่ยิปซีรายวัน" (คำว่า "รายวัน" เป็นทองไล่สี) */}
       <header className="ui2-dy-hero">
-        <nav aria-label="Breadcrumb" className="ui2-dy-crumb">
+        <nav aria-label={isEnglish ? "Breadcrumb" : "เส้นทางนำทาง"} className="ui2-dy-crumb">
           <ol>
             {breadcrumbs.map((crumb, idx) => (
               <li key={idx} aria-current={idx === breadcrumbs.length - 1 ? "page" : undefined}>

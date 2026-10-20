@@ -580,11 +580,12 @@ export function AccountClient() {
             {/* ── ความเป็นส่วนตัวและข้อมูล ── */}
             <SettingsSection
               id="account-privacy"
+              // ต้องตรงกับนโยบายความเป็นส่วนตัวหัวข้อ 3 (เก็บบนฐานข้อมูลของ Cloudflare) — เดิมเขียนว่าเก็บในเครื่อง ขัดกับนโยบาย (B1 2026-10-20)
               title={isEn ? "Privacy & your data" : "ความเป็นส่วนตัวและข้อมูลของคุณ"}
               description={
                 isEn
-                  ? "Your questions and reading notes live on your own device — we keep no unnecessary copies."
-                  : "คำถามและประวัติการดูดวงเก็บไว้ในเครื่องของคุณ เราไม่เก็บสำเนาถาวรบนเซิร์ฟเวอร์โดยไม่จำเป็น"
+                  ? "Your reading history is kept in your account in an encrypted database so you can open it on any device. Download or delete all of it yourself at any time."
+                  : "ประวัติการดูดวงเก็บในบัญชีของคุณบนฐานข้อมูลที่เข้ารหัส เปิดดูได้ทุกเครื่อง ดาวน์โหลดหรือลบทั้งหมดได้เองทุกเมื่อ"
               }
             >
               <SettingsRow

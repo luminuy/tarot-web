@@ -482,7 +482,7 @@ export const SPREADS: Spread[] = [
   // ==========================================
   {
     id: "career",
-    nameTh: "ดวงการงาน & ความก้าวหน้า (ไพ่ 5 ใบ)",
+    nameTh: "ดวงการงานและความก้าวหน้า (ไพ่ 5 ใบ)",
     nameEn: "Career Direction & Growth (5 Cards)",
     seoTitleTh: "ดูดวงไพ่ยิปซีการงาน อาชีพ 5 ใบ ฟรี",
     tagline: "งานที่ทำอยู่จะรุ่งไหม โอกาสและความสำเร็จ",
@@ -600,7 +600,7 @@ export const SPREADS: Spread[] = [
     nameTh: "ย้ายงานหรืออยู่ที่เดิม (ไพ่ 5 ใบ)",
     nameEn: "Career Pivot: Stay or Leap (5 Cards)",
     seoTitleTh: "ดูดวงไพ่ยิปซีการงาน 5 ใบ ย้ายงานดีไหม",
-    tagline: "เปรียบเทียบผลลัพธ์ถ้าอยู่ที่เดิม vs ถ้าไปที่ใหม่",
+    tagline: "เทียบผลลัพธ์ระหว่างอยู่ที่เดิมกับย้ายไปที่ใหม่",
     taglineEn: "Compare staying at your current role vs. leaping to the new",
     description:
       "สำหรับคนที่กำลังลังเลเรื่องย้ายงาน เปรียบเทียบให้เห็นชัดเจนว่าถ้าทนอยู่ที่เดิมจะเป็นอย่างไร ถ้าก้าวไปที่ใหม่จะรุ่งไหม",
@@ -1285,7 +1285,7 @@ export const SPREADS: Spread[] = [
     nameTh: "ดวงโชคลาภและการเสี่ยงโชค (ไพ่ 4 ใบ)",
     nameEn: "Fortune & Serendipity (4 Cards)",
     seoTitleTh: "ดูดวงไพ่ยิปซี โชคลาภ เสี่ยงโชค 4 ใบ",
-    tagline: "จังหวะเสี่ยงโชค โอกาสฟลุ๊ก และลาภลอย",
+    tagline: "จังหวะเสี่ยงโชค โอกาสฟลุก และลาภลอย",
     taglineEn: "Auspicious timing, windfalls, and serendipitous opportunities",
     description:
       "เปิดไพ่ตรวจดวงโชคลาภ จังหวะลาภลอย และการเสี่ยงโชค ทิศทางพลังงานการเงินก้อนใหญ่ และวิธีเปิดรับโชคอย่างมีสติ",

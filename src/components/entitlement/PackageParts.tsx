@@ -19,7 +19,7 @@ export function packageBadge(pkg: CreditPackage, all: readonly CreditPackage[], 
 
 export function perReadingLabel(pkg: CreditPackage, isEn: boolean): string {
   const each = pricePerReadingThb(pkg);
-  return isEn ? `≈ ฿${each} per reading` : `ตกครั้งละ ≈ ${each} บาท`;
+  return isEn ? `about ฿${each} per reading` : `ตกครั้งละราว ${each} บาท`;
 }
 
 export function creditsLabel(credits: number, isEn: boolean): string {

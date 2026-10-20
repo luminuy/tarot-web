@@ -90,7 +90,7 @@ export function buildYesNoAnswer(card: TarotCard, isUpright: boolean, isEnglish:
       if (card.yesNo === "yes") {
         body = `While the foundational energy leans positive, the reversed posture through ${kwStr} suggests delays, internal doubt, or friction before manifestation.`;
       } else if (card.yesNo === "no") {
-        body = `In reverse, the themes of ${kwStr} amplify underlying stagnation or strain, reinforcing a signal to pause and reconsider.`;
+        body = `Reversed, with themes of ${kwStr}, the answer still leans no but more softly: a moment to step back and regroup before acting.`;
       } else {
         body = `The reversed posture along with ${kwStr} highlights confusion or hesitance, indicating answers will emerge once clarity is restored.`;
       }
@@ -107,7 +107,8 @@ export function buildYesNoAnswer(card: TarotCard, isUpright: boolean, isEnglish:
 
   // Thai Locale
   const kwList = isUpright ? card.keywords.upright.slice(0, 3) : card.keywords.reversed.slice(0, 3);
-  const kwStr = kwList.join(", ");
+  // ภาษาไทยไม่คั่นด้วยจุลภาค — "ก ข และค" (B1 2026-10-20)
+  const kwStr = kwList.length > 1 ? `${kwList.slice(0, -1).join(" ")} และ${kwList[kwList.length - 1]}` : (kwList[0] ?? "");
   const rawCondition = isUpright ? card.meanings.general.upright : card.meanings.general.reversed;
   const condition = extractFirstSentence(rawCondition, false);
 
@@ -115,22 +116,27 @@ export function buildYesNoAnswer(card: TarotCard, isUpright: boolean, isEnglish:
     ? `ไพ่ ${card.nameTh} ใช่หรือไม่ — ${tone.labelTh}`
     : `ไพ่ ${card.nameTh} (กลับหัว) ใช่หรือไม่ — ${tone.labelTh} (มีเงื่อนไข)`;
 
+  /*
+   * กลับหัวไม่กลับขั้ว แค่แรงลดลง (`yesNoWeight`) — ประโยคต้องไม่ตีค่าคีย์เวิร์ดกลับหัวว่าดี/ร้าย
+   * เดิมเขียน "ย้ำชัดถึงความตึงเครียด" ทั้งที่คีย์เวิร์ดกลับหัวของไพ่ฝั่ง "ไม่ใช่" มักเป็นการฟื้นตัว
+   * (เช่น ห้าแห่งถ้วยกลับหัว = เริ่มก้าวข้าม ให้อภัย) — หน้าไพ่ขัดกับตัวเอง (B1 2026-10-20)
+   */
   let body = "";
   if (isUpright) {
     if (card.yesNo === "yes") {
-      body = `ด้วยพลังงานหลักของ ${kwStr} ไพ่ใบนี้สะท้อนโอกาสแห่งความสำเร็จที่สดใสและมีแนวโน้มเชิงบวก`;
+      body = `ไพ่ใบนี้พูดถึง${kwStr} เป็นพลังที่หนุนให้เรื่องเดินหน้า คำตอบจึงเอนไปทางใช่`;
     } else if (card.yesNo === "no") {
-      body = `พลังงานของ ${kwStr} ชี้ให้เห็นถึงความท้าทายหรือความเสี่ยง จึงควรระมัดระวังและไม่ควรผลีผลาม`;
+      body = `ไพ่ใบนี้พูดถึง${kwStr} บอกว่าเรื่องนี้ยังมีแรงต้านหรือจังหวะยังไม่เหมาะ คำตอบจึงเอนไปทางไม่ใช่ ค่อย ๆ ไปอย่างระวัง`;
     } else {
-      body = `สัญลักษณ์ของ ${kwStr} บอกว่าสถานการณ์ยังคงหมุนเวียน ผลลัพธ์จำเป็นต้องอาศัยการประเมินอย่างรอบคอบ`;
+      body = `ไพ่ใบนี้พูดถึง${kwStr} ผลยังไม่นิ่ง ขึ้นอยู่กับการตัดสินใจของคุณจากนี้`;
     }
   } else {
     if (card.yesNo === "yes") {
-      body = `แม้ไพ่จะเอนไปทางใช่ แต่ในตำแหน่งกลับหัว พลังของ ${kwStr} เตือนว่าอาจมีความล่าช้าหรือการติดขัดภายในที่ต้องเคลียร์ก่อน`;
+      body = `ตอนกลับหัว ไพ่ใบนี้พูดถึง${kwStr} คำตอบยังเอนไปทางใช่ แต่อาจช้ากว่าที่หวัง หรือมีเรื่องในใจที่ต้องเคลียร์ก่อน`;
     } else if (card.yesNo === "no") {
-      body = `ในตำแหน่งกลับหัว พลังของ ${kwStr} ย้ำชัดถึงความตึงเครียดหรือการยึดติด ควรปล่อยวางหรือเปลี่ยนทิศทาง`;
+      body = `ตอนกลับหัว ไพ่ใบนี้พูดถึง${kwStr} คำตอบยังเอนไปทางไม่ใช่แต่เบาลง เป็นช่วงให้ถอยมาตั้งหลักก่อนลงมือ`;
     } else {
-      body = `ตำแหน่งกลับหัวพร้อมพลังของ ${kwStr} สื่อถึงความลังเลหรือไม่แน่ชัด ควรหยุดนิ่งเพื่อสร้างความชัดเจน`;
+      body = `ตอนกลับหัว ไพ่ใบนี้พูดถึง${kwStr} ภาพยังไม่ชัด รอให้ใจนิ่งและข้อมูลครบก่อนค่อยตัดสินใจ`;
     }
   }
 

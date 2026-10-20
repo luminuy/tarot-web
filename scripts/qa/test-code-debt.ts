@@ -969,6 +969,27 @@ check(
     /role="dialog"\s*\n\s*aria-modal=\{isOpen \? true : undefined\}/.test(src("src/components/ui/SacredNavDropdown.tsx")) &&
       /panel\.setAttribute\("aria-modal", "true"\)/.test(fs.readFileSync(path.join(ROOT, "astro/scripts/site-header.ts"), "utf-8")),
   );
+  // B1: แถบเส้นทางหน้าไทยชื่อ "เส้นทางนำทาง" (ไม่ให้โปรแกรมอ่านจอพูดคำอังกฤษ) — ตัวซ่อนใน globals.css ต้องครอบทั้งสองชื่อ
+  const crumbLabels = new Set<string>();
+  for (const f of sources) {
+    for (const m of stripComments(fs.readFileSync(f, "utf-8")).matchAll(/<nav aria-label=(?:"([^"]+)"|\{[^}]*?"([^"]+)"\s*:\s*"([^"]+)"\})[^>]*className="[^"]*crumb/g)) {
+      for (const v of [m[1], m[2], m[3]]) if (v) crumbLabels.add(v);
+    }
+  }
+  const globalsCss = src("src/app/globals.css");
+  check(
+    "B1: ทุกชื่อแถบเส้นทาง (Breadcrumb · เส้นทางนำทาง) ถูกซ่อนจากตาใน globals.css",
+    crumbLabels.has("เส้นทางนำทาง") && [...crumbLabels].every((l) => globalsCss.includes(`nav[aria-label="${l}"]:not(:focus-within)`)),
+    [...crumbLabels].join(" · "),
+  );
+  // B1: ถ้อยคำบนหน้าไทยไม่ใช้สัญลักษณ์แทนคำ ("&" "≈" "+" "vs") ในของกลางที่โชว์ทุกหน้า
+  check(
+    "B1: ป้ายท้ายเว็บ/ราคา/หน้าแรก/ชื่อผังไม่ใช้ & ≈ + vs แทนคำไทย",
+    !/title: "ปลอดภัย & /.test(src("src/components/layout/nav-links.ts")) &&
+      !/ตกครั้งละ ≈/.test(src("src/components/entitlement/PackageParts.tsx")) &&
+      !/"ล็อกลำดับ \+ /.test(src("src/components/home2/Ui2StaticSections.tsx")) &&
+      !/nameTh: "[^"]* & [^"]*"|tagline: "[^"]* vs [^"]*"/.test(src("src/data/spreads.ts")),
+  );
   // B1: ผังไพ่ 1 ใบ ห้ามขึ้น "1 cards" — จำนวนที่เป็น 1 ได้ต้องผ่าน cardsEn()
   const pluralHits = sources.filter((f) => /\$\{[\w.]*positions\.length\} cards/.test(stripComments(fs.readFileSync(f, "utf-8"))));
   check("B1: ไม่มี `${…positions.length} cards` (ใช้ cardsEn กัน \"1 cards\")", pluralHits.length === 0, pluralHits.map(rel).join(" · "));

@@ -163,7 +163,7 @@ export function QuestionPageContent({ question: q, locale, askBox }: { question:
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbJsonLd) }} />
 
       <article className="max-w-3xl mx-auto space-y-10 py-6">
-        <nav aria-label="Breadcrumb" className="text-xs font-serif-th text-muted">
+        <nav aria-label={isEn ? "Breadcrumb" : "เส้นทางนำทาง"} className="text-xs font-serif-th text-muted">
           <ol className="flex items-center gap-2 flex-wrap">
             <li><Link href="/" className="hover:text-ink">{isEn ? "Home" : "หน้าแรก"}</Link></li>
             <li aria-hidden="true">/</li>

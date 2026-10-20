@@ -37,7 +37,7 @@ export const QUICK_TOPICS: QuickTopic[] = [
   {
     id: "love",
     category: "love",
-    title: "ความรัก & ความสัมพันธ์",
+    title: "ความรักและความสัมพันธ์",
     titleEn: "Love & Relationships",
     tagline: "เช็กความรู้สึก แนวโน้มหัวใจ คนคุย แฟน หรือคนโสด",
     taglineEn: "Heartspace dynamics, soul connection, partners, or dating clarity",

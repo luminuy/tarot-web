@@ -370,7 +370,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
         </span>
         <div className="ui2-wrap ui2-sp-hero-inner">
           {/* เส้นทางหน้าไม่แสดงบนจอ (เจ้าของ 2026-10-17) — nav Breadcrumb ถูกซ่อนแบบ sr-only ทั้งเว็บ */}
-          <nav aria-label="Breadcrumb" className="ui2-sp-crumb">
+          <nav aria-label={isEnglish ? "Breadcrumb" : "เส้นทางนำทาง"} className="ui2-sp-crumb">
             <Link href="/">{isEnglish ? "Home" : "หน้าแรก"}</Link>
             <span aria-hidden="true"> / </span>
             <span>{isEnglish ? "Tarot Spreads" : `ผังพยากรณ์ ${spreads.length} แบบ`}</span>
