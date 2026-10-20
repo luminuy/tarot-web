@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
 
 import { noindexAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { getShareBucket } from "@/lib/platform/cf";
@@ -15,16 +16,23 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
-async function readMeta(id: string): Promise<{ title: string; spread: string } | null> {
-  if (!ID_RE.test(id)) return null;
+type ShareMeta = { title: string; spread: string };
+
+/**
+ * อ่านข้อมูลการ์ดแชร์ — แยก "ไม่มีลิงก์นี้จริง" (`missing` ➔ 404) ออกจาก "ที่เก็บสะดุดชั่วคราว" (`error` ➔ หน้าทั่วไป 200)
+ * B3-09: เดิมทุกกรณีตอบ 200 พร้อม meta refresh — ลิงก์เสีย/หมดอายุจึงเป็นหน้า "มีอยู่จริง" ในสายตาบอต
+ */
+async function readMeta(id: string): Promise<ShareMeta | "missing" | "error"> {
+  if (!ID_RE.test(id)) return "missing";
   try {
     const bucket = await getShareBucket();
-    const obj = await bucket?.get(`${id}.json`);
-    if (!obj) return null;
+    if (!bucket) return "error";
+    const obj = await bucket.get(`${id}.json`);
+    if (!obj) return "missing";
     const raw = await obj.arrayBuffer();
-    return JSON.parse(new TextDecoder().decode(raw));
+    return JSON.parse(new TextDecoder().decode(raw)) as ShareMeta;
   } catch {
-    return null;
+    return "error";
   }
 }
 
@@ -40,7 +48,9 @@ async function detectIsEnglish(metaTitle?: string): Promise<boolean> {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const meta = await readMeta(id);
+  const found = await readMeta(id);
+  if (found === "missing") notFound();
+  const meta = found === "error" ? null : found;
   const isEn = await detectIsEnglish(meta?.title);
 
   const title = meta?.title || (isEn ? "Tarot Reading 1909 Rider-Waite on SeerTarot" : "คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot");
@@ -89,8 +99,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  */
 export default async function SharePage({ params }: Props) {
   const { id } = await params;
-  const valid = ID_RE.test(id);
-  const meta = await readMeta(id);
+  const found = await readMeta(id);
+  if (found === "missing") notFound();
+  const meta = found === "error" ? null : found;
+  const valid = Boolean(meta);
   const isEn = await detectIsEnglish(meta?.title);
   const targetUrl = isEn ? "/en" : "/";
 

@@ -14,6 +14,7 @@ import { getCategoryCardImage } from "@/lib/media/og-card-art";
 import type { Locale } from "@/lib/i18n/types";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
+import { articleModifiedAt } from "@/lib/seo/lastmod";
 import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 
 export function blogDetailStaticParams(locale: Locale) {
@@ -73,7 +74,7 @@ export function blogDetailMetadata(slug: string, locale: Locale): Metadata {
       type: "article",
       locale: isEnglish ? "en_US" : "th_TH",
       publishedTime: article.publishedAt,
-      modifiedTime: article.updatedAt,
+      modifiedTime: articleModifiedAt(article),
       authors: [getArticleAuthor(article, locale)],
       images: ogImages,
     },
@@ -126,7 +127,8 @@ export function BlogDetailContent({
     description: articleDesc,
     image: [articleImage],
     datePublished: article.publishedAt,
-    dateModified: article.updatedAt,
+    // แหล่งเดียวกับ sitemap lastmod และวันที่ที่มองเห็นบนหน้า (B3-04)
+    dateModified: articleModifiedAt(article),
     inLanguage: locale,
     /* ผู้เขียนต้องเป็น `Person` ที่มีชื่อจริงของบ้านนี้ (E-E-A-T)
        เดิมใส่เป็น `Organization` ทับชื่อผู้เขียนที่มีอยู่แล้วใน `article.author` */

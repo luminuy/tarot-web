@@ -15,7 +15,6 @@ export interface HomeFaqItem {
 export interface HomeHowToStep {
   name: string;
   text: string;
-  url: string;
   image: string;
 }
 
@@ -118,31 +117,26 @@ const HOME_HOW_TO_STEPS: HomeHowToStep[] = [
   {
     name: "1. เลือกผังการเปิดไพ่",
     text: "เลือกรูปแบบการวางไพ่ที่ตรงกับเรื่องที่ต้องการถาม เช่น ผัง 1 ใบสำหรับดวงประจำวัน, ผัง 3 ใบสำหรับอดีต-ปัจจุบัน-อนาคต, หรือผังเซลติกครอส 10 ใบสำหรับส่องชะตาชีวิตเจาะลึก",
-    url: `${SITE_ORIGIN}/#spread-select`,
     image: `${SITE_ORIGIN}/cards/major-01.jpg`,
   },
   {
     name: "2. สงบจิตใจและตั้งเจตจำนง",
     text: "สูดลมหายใจลึก ๆ พิมพ์ชื่อ คำถาม และบริบทสั้น ๆ พร้อมเลือกแม่หมอ AI ที่มีแนวทางการให้คำปรึกษาตรงกับใจคุณ",
-    url: `${SITE_ORIGIN}/#intention-select`,
     image: `${SITE_ORIGIN}/cards/major-02.jpg`,
   },
   {
     name: "3. สับไพ่ด้วยตนเอง",
     text: "กดปุ่มสับไพ่ด้วยมือคุณเอง ระบบจะสุ่มลำดับไพ่ 78 ใบและล็อกไว้ก่อนเปิด ตรวจสอบย้อนหลังได้",
-    url: `${SITE_ORIGIN}/#shuffle`,
     image: `${SITE_ORIGIN}/cards/major-10.jpg`,
   },
   {
     name: "4. สัมผัสและเลือกหยิบไพ่",
     text: "แผ่สำรับไพ่ 78 ใบ แล้วใช้มือของคุณแตะเลือกไพ่ทีละใบตามจำนวนที่ผังกำหนดด้วยความตั้งใจ",
-    url: `${SITE_ORIGIN}/#pick-cards`,
     image: `${SITE_ORIGIN}/cards/major-17.jpg`,
   },
   {
     name: "5. รับคำพยากรณ์และสนทนาต่อเนื่อง",
     text: "แตะพลิกหน้าไพ่ 1909 Rider-Waite ด้วยตนเอง อ่านคำพยากรณ์ที่สตรีมสด และสามารถพิมพ์แชทถามตอบเจาะลึกกับแม่หมอ AI ได้ทันที",
-    url: `${SITE_ORIGIN}/#reading`,
     image: `${SITE_ORIGIN}/cards/major-19.jpg`,
   },
 ];
@@ -151,31 +145,26 @@ export const HOME_HOW_TO_STEPS_EN: HomeHowToStep[] = [
   {
     name: "1. Choose Your Spread",
     text: "Choose a layout that fits your question, from a 1-card daily compass and 3-card temporal spread to the 10-card Celtic Cross.",
-    url: `${SITE_ORIGIN}/#spread-select`,
     image: `${SITE_ORIGIN}/cards/major-01.jpg`,
   },
   {
     name: "2. Set Your Intention & Focus",
     text: "Take a deep breath, ask your question honestly, and choose the AI reader whose tone suits you best.",
-    url: `${SITE_ORIGIN}/#intention-select`,
     image: `${SITE_ORIGIN}/cards/major-02.jpg`,
   },
   {
     name: "3. Shuffle with Your Own Touch",
     text: "Shuffle the full 78-card deck yourself. The order is locked before you draw, so you can check it afterwards.",
-    url: `${SITE_ORIGIN}/#shuffle`,
     image: `${SITE_ORIGIN}/cards/major-10.jpg`,
   },
   {
     name: "4. Select and Draw Cards",
     text: "The deck fans out across an illuminated altar. Use your fingertips to deliberately select each card, infusing your energy into the draw.",
-    url: `${SITE_ORIGIN}/#pick-cards`,
     image: `${SITE_ORIGIN}/cards/major-17.jpg`,
   },
   {
     name: "5. Receive Wisdom & Converse",
     text: "Turn over authentic 1909 Rider-Waite cards, listen to streaming interpretations, and converse in depth with your AI oracle.",
-    url: `${SITE_ORIGIN}/#reading`,
     image: `${SITE_ORIGIN}/cards/major-19.jpg`,
   },
 ];
@@ -236,7 +225,7 @@ export function generateHowToJsonLd(isEnglishOrLocale?: boolean | string) {
       position: index + 1,
       name: s.name,
       text: s.text,
-      url: s.url,
+      // ไม่มี url — anchor ขั้นตอน (#spread-select ฯลฯ) ไม่มีอยู่จริงในหน้า และฝั่งอังกฤษเคยชี้หน้าไทย (B3-07)
       image: s.image,
     })),
   };

@@ -945,6 +945,11 @@ check(
     "A7-03: หน้าแชร์ /s/[id] (noindex) ไม่มี canonical ชี้หน้าแรก · og:url เป็นลิงก์ของตัวเอง",
     /alternates:\s*noindexAlternates\(\)/.test(share) && !/buildAlternates\(/.test(share) && /\$\{SITE_ORIGIN\}\/s\/\$\{id\}/.test(share),
   );
+  check(
+    "B3-09: ลิงก์แชร์ที่ไม่มีจริงตอบ 404 (notFound) ทั้ง metadata และหน้า · Googlebot ได้ metadata ใน <head>",
+    (share.match(/if \(found === "missing"\) notFound\(\);/g) ?? []).length === 2 &&
+      /htmlLimitedBots:\s*\n?\s*\/Googlebot\|/.test(fs.readFileSync(path.join(ROOT, "next.config.ts"), "utf-8")),
+  );
   const robots = src("src/app/robots.ts");
   check(
     "A7-06: robots.txt เปิด /api/share/image/ (ภาพแชร์คำทำนาย) ในทุกกลุ่มที่ปิด /api/",

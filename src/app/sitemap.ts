@@ -7,33 +7,25 @@ import { ZODIAC_SIGNS } from "@/data/zodiac";
 import { QUESTIONS } from "@/data/questions";
 import { localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
 import { hasEnglishTwin } from "@/lib/i18n/paths";
-import { zodiacSignPath } from "@/lib/tarot/zodiac";
+import { articleModifiedAt, questionModifiedAt, SITE_TEMPLATE_UPDATED_AT } from "@/lib/seo/lastmod";
 
 /**
- * วันแก้ไขล่าสุดของหน้าที่เนื้อหาไม่ได้เปลี่ยนตามการ deploy
+ * วันแก้ไขล่าสุดของหน้าที่เนื้อหาไม่ได้เปลี่ยนตามการ deploy — แม่แบบทั้งเว็บ (UI 2.0 ลงทุกหน้า 2026-10-17)
  * ⚠️ ห้ามใช้ `new Date()` — ทุกครั้งที่ deploy จะประทับ "แก้ไขเมื่อกี้" ลง 100+ URL
  * ที่ไม่ได้เปลี่ยนอะไรเลย Google จึงเรียนรู้ว่าสัญญาณ lastModified ของเว็บนี้เชื่อถือไม่ได้
- * แล้วเลิกใช้ไปเลย · อัปเดตค่านี้ด้วยมือเมื่อแก้เนื้อหาโครงสร้างจริง ๆ
+ * แล้วเลิกใช้ไปเลย · ค่ากลางอยู่ที่ `src/lib/seo/lastmod.ts` (แหล่งเดียวกับ JSON-LD และวันที่บนหน้า · B3-02/04)
  */
-const STRUCTURAL_CONTENT_UPDATED_AT = new Date("2026-09-05T00:00:00+07:00");
+const STRUCTURAL_CONTENT_UPDATED_AT = new Date(SITE_TEMPLATE_UPDATED_AT);
 
 /**
- * หน้าที่ "เนื้อหาที่มองเห็น" เปลี่ยนจริงหลังวันข้างบน — ให้ lastModified บอก Google ว่าควรกลับมาอ่าน
+ * หน้าที่ "เนื้อหาที่มองเห็น" เปลี่ยนจริงหลังแม่แบบ — ให้ lastModified บอก Google ว่าควรกลับมาอ่าน
  * ⚠️ ใส่เฉพาะหน้าที่ข้อความ/ลิงก์บนหน้าเปลี่ยนจริง ห้ามใส่หน้าที่แก้แค่ meta (เหตุผลเดียวกับข้างบน)
- * ปุ่ม "ขอการจัดทำดัชนี" ของ GSC ไม่มีใน API — ค่านี้คือสัญญาณที่ใกล้ที่สุดที่ส่งจากโค้ดได้
+ * ⚠️ ใส่เฉพาะ path ไทย — ฝาแฝด `/en` ได้ค่าเดียวกันอัตโนมัติ (B3-03: เดิมยกเฉพาะฝั่งไทย 17 คู่ไม่เท่ากัน)
+ * ค่าที่เก่ากว่าค่าของเส้นทางเอง (เช่น `updatedAt` ของบทความ) ไม่ทับ — ใช้ค่าที่ใหม่กว่าเสมอ
  */
 const CONTENT_UPDATED_AT: Record<string, Date> = Object.fromEntries([
-  ...[
-    // #631 (2026-09-27): แถว "คนค้นหาบ่อย" · ลิงก์หน้าหัวข้อ/หมวด · หัวข้อ "ไพ่ทาโร่" · ดูดวงราศีวันนี้
-    "/", "/en", "/pick-a-card", "/en/pick-a-card", "/spreads", "/en/spreads", "/spreads/topic/love",
-    "/cards", "/cards/all", "/cards/major", "/cards/minor",
-    ...ZODIAC_SIGNS.map((sign) => zodiacSignPath(sign.id)),
-  ].map((path) => [path, new Date("2026-09-27T17:00:00+07:00")]),
-  ...[
-    // 2026-10-16: แถว "ผังอื่นที่น่าสนใจ" / "บทความที่เกี่ยวข้อง" หมุนวนแล้ว — ลิงก์บนหน้าเปลี่ยนจริงทุกหน้า
-    ...PUBLIC_SPREADS.map((s) => `/spreads/${s.id}`),
-    ...ARTICLES.map((a) => `/blog/${a.slug}`),
-  ].flatMap((path) => [path, `/en${path}`].map((p) => [p, new Date("2026-10-16T17:00:00+07:00")])),
+  // 2026-10-20: ป้ายชุดไพ่บนหัวหน้าไพ่รายใบเป็นภาษาคน ("ชุดถ้วย" แทน "cups Suit" · B1-02)
+  ...DECK.map((card) => [`/cards/${card.id}`, new Date("2026-10-20T17:00:00+07:00")] as const),
 ]);
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -179,7 +171,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // บทความ SEO ทั้งหมด (ใช้ updatedAt ของแต่ละบทความจริง ๆ)
   const blogRoutes: MetadataRoute.Sitemap = ARTICLES.map((article) => ({
     url: `${baseUrl}/blog/${article.slug}`,
-    lastModified: new Date(article.updatedAt),
+    // ตัวเดียวกับ JSON-LD dateModified และวันที่ "อัปเดต" ที่มองเห็นบนหน้า (B3-04)
+    lastModified: new Date(articleModifiedAt(article)),
     changeFrequency: "monthly",
     priority: 0.8,
   }));
@@ -228,10 +221,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   /** ❓ หน้าคำถาม 20 หน้า + หน้ารวม (แทร็ก Q) — lastModified ตามวันที่แก้เนื้อหาจริงของแต่ละหน้า */
   const questionRoutes: MetadataRoute.Sitemap = [
-    { url: `${baseUrl}/questions`, lastModified: new Date("2026-10-06T12:00:00+07:00"), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/questions`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     ...QUESTIONS.map((q) => ({
       url: `${baseUrl}/questions/${q.slug}`,
-      lastModified: new Date(`${q.updatedAt}T12:00:00+07:00`),
+      lastModified: new Date(questionModifiedAt(q)), // ตัวเดียวกับ JSON-LD (B3-05)
       changeFrequency: "monthly" as const,
       priority: 0.8,
     })),
@@ -248,10 +241,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...pickACardTopicRoutes,
   ];
 
-  return withEnglishTwins(thaiRoutes).map((route) => {
+  // ใส่ค่าที่ใหม่กว่าก่อนเติมฝาแฝด — คู่ไทย/อังกฤษจึงได้ค่าเดียวกันเสมอ (B3-03)
+  const withUpdates = thaiRoutes.map((route) => {
     const updated = CONTENT_UPDATED_AT[route.url.replace(SITE_ORIGIN, "") || "/"];
-    return updated ? { ...route, lastModified: updated } : route;
+    const own = route.lastModified ? new Date(route.lastModified) : now;
+    const base = own.getTime() < now.getTime() ? now : own; // ไม่มีหน้าไหนเก่ากว่าแม่แบบทั้งเว็บ
+    return { ...route, lastModified: updated && updated.getTime() > base.getTime() ? updated : base };
   });
+  return withEnglishTwins(withUpdates);
 }
 
 /**

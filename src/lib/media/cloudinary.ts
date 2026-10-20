@@ -52,17 +52,51 @@ const THAI_WORD_SEGMENTER: Intl.Segmenter | null =
  * (`w_700,c_fit`) มันหักกลางคำแล้วแทรก `-` ปลายบรรทัด · ที่นี่แบ่งเป็นชั้นข้อความแยกบรรทัดละชั้นแทน
  * บรรทัดละไม่เกิน `lineChars` ตัวอักษร · เกิน `maxLines` บรรทัดตัดท้ายที่ขอบคำแล้วเติม …
  */
+/**
+ * ความกว้างที่มองเห็นโดยประมาณ (หน่วย = อักษรไทยตัวหนึ่ง) — ตัวละตินหนา 50px กว้างกว่าไทยราว 1.25 เท่า
+ * (B3-01: หัวเรื่องอังกฤษ 27 ตัวเกิน w_700 แล้ว Cloudinary หักบรรทัดซ้อนจนตัวอักษรทับกัน)
+ * ฝั่งไทยนับสระบน/ล่างเป็นหนึ่งตัวเหมือนเดิม (เผื่อที่ไว้ — ไม่เคยล้น)
+ */
+export function overlayWidth(s: string): number {
+  let w = 0;
+  for (const ch of s) {
+    if (ch === " ") w += 0.5;
+    else if (/[A-Za-z0-9]/.test(ch)) w += 1.25;
+    else w += 1;
+  }
+  return w;
+}
+
+/**
+ * รวมเครื่องหมายเข้ากับคำข้างเคียงก่อนแบ่งบรรทัด (B3-01) — ตัวแบ่งคำตัด `(` `)` `:` `-` เป็นคำของตัวเอง
+ * บรรทัดใหม่จึงขึ้นต้นด้วย ")" โดด ๆ หรือค้าง "(" ท้ายบรรทัด · คำประสม yes-or-no ถูกหักที่ขีด
+ */
+function glueTokens(tokens: string[]): string[] {
+  const out: string[] = [];
+  for (const tok of tokens) {
+    const last = out[out.length - 1];
+    const closes = /^[)\]}:;,.?!…%]/.test(tok);
+    const hyphen = tok === "-" || tok === "–";
+    if (last !== undefined && (closes || hyphen || /[(\[{\-–]$/.test(last))) {
+      out[out.length - 1] = last + tok;
+    } else {
+      out.push(tok);
+    }
+  }
+  return out;
+}
+
 export function splitTitleForOverlay(raw: string, lineChars = 27, maxLines = 2): string[] {
   const text = raw.replace(/\s+/g, " ").trim();
   if (!text) return [];
-  const words = THAI_WORD_SEGMENTER
-    ? [...THAI_WORD_SEGMENTER.segment(text)].map((x) => x.segment)
-    : text.split(/(?<= )/);
+  const words = glueTokens(
+    THAI_WORD_SEGMENTER ? [...THAI_WORD_SEGMENTER.segment(text)].map((x) => x.segment) : text.split(/(?<= )/),
+  );
   const lines: string[] = [];
   let line = "";
   let truncated = false;
   for (const word of words) {
-    if ((line + word).trimEnd().length <= lineChars) {
+    if (overlayWidth((line + word).trimEnd()) <= lineChars) {
       line += word;
       continue;
     }

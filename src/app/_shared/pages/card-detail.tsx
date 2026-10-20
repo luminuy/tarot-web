@@ -188,7 +188,7 @@ export function cardDetailJsonLd(card: TarotCard, locale: Locale) {
     inDefinedTermSet: localizedUrl("/cards", locale),
     url: localizedUrl(`/cards/${card.id}`, locale),
     image: `${SITE_ORIGIN}/cards/${card.image}`,
-    inLanguage: locale,
+    // ไม่มี inLanguage — ไม่ใช่คุณสมบัติของ DefinedTerm (validator.schema.org เตือนทั้ง 156 หน้า · B3-06)
   };
 }
 

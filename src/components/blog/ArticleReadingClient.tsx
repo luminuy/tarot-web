@@ -17,6 +17,7 @@ import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
 import { CardImage } from "@/components/card/CardImage";
 import { getArticleCardArt } from "@/data/article-art";
 import { resolveArticleToc } from "./article-toc";
+import { articleModifiedAt, formatPageDate } from "@/lib/seo/lastmod";
 
 interface Props {
   article: Article;
@@ -100,6 +101,12 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
           <span>{isEnglish ? readTimeFormatted : `เวลาอ่าน ${article.readTime}`}</span>
           <span aria-hidden="true" className="v2-ar-dot" />
           <span>{isEnglish ? `By ${articleAuthor}` : `โดย ${article.author}`}</span>
+          <span aria-hidden="true" className="v2-ar-dot" />
+          {/* วันที่ที่มองเห็น = ค่าเดียวกับ JSON-LD dateModified และ sitemap (B3-04) */}
+          <span>
+            {isEnglish ? "Updated " : "อัปเดต "}
+            <time dateTime={articleModifiedAt(article)}>{formatPageDate(articleModifiedAt(article), isEnglish)}</time>
+          </span>
         </p>
         <h1 className="v2-ar-title">
           <ThaiPhrases>{articleTitle}</ThaiPhrases>

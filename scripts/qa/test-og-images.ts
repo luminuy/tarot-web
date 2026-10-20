@@ -13,7 +13,7 @@
 
 import assert from "node:assert";
 import fs from "node:fs";
-import { encodeOverlayText, splitTitleForOverlay, truncateForOverlay, buildCloudinaryShareImageUrl } from "../../src/lib/media/cloudinary";
+import { encodeOverlayText, overlayWidth, splitTitleForOverlay, truncateForOverlay, buildCloudinaryShareImageUrl } from "../../src/lib/media/cloudinary";
 import { buildPageOgImage } from "../../src/lib/media/og-image";
 import { getCategoryCardImage } from "../../src/lib/media/og-card-art";
 import { DECK } from "../../src/data/cards";
@@ -62,6 +62,23 @@ console.log("  ✓ การตัดหัวข้อยาวมีจุด�
   const url = buildCloudinaryShareImageUrl({ title: thaiLong }) ?? "";
   assert((url.match(/l_text:Arial_50_bold:/g) ?? []).length === 2, "URL ภาพแชร์ต้องมีชั้นหัวเรื่อง 2 ชั้นสำหรับหัวเรื่องยาว");
   console.log("  ✓ หัวเรื่องไทยยาวถูกแบ่ง 2 บรรทัดที่ขอบคำ");
+  // B3-01: บรรทัดใหม่ห้ามขึ้นต้นด้วยเครื่องหมายปิด/ทวิภาค · ห้ามค้าง "(" ท้ายบรรทัด · ไม่หักคำประสมที่ขีด · ละตินไม่ล้น w_700
+  const punctCases = [
+    "ความหมายไพ่ 7 ถ้วย (Seven of Cups) ไพ่ยิปซี ไพ่ทาโร่",
+    "ไพ่ยิปซีผังจักระ 7 ใบ (ไพ่ 7 ใบ) ปรับสมดุลพลังงาน",
+    "Twelve Houses Tarot Spread (12 Cards)",
+    "Will I get the job? A yes-or-no tarot reading",
+    "Minor Arcana: the 4 suits explained for beginners",
+    "ไพ่ประจำตัวจากวันเกิด (Birth Card) คำนวณฟรี",
+  ];
+  for (const t of punctCases) {
+    const ls = splitTitleForOverlay(t);
+    assert(ls.every((l) => !/^[)\]:,.?!]/.test(l)), `บรรทัดขึ้นต้นด้วยเครื่องหมายปิด: ${JSON.stringify(ls)}`);
+    assert(ls.every((l) => !/[(\[]$/.test(l)), `ค้างวงเล็บเปิดท้ายบรรทัด: ${JSON.stringify(ls)}`);
+    assert(ls.every((l) => !/^-/.test(l) && !/-$/.test(l)), `หักคำประสมที่ขีด: ${JSON.stringify(ls)}`);
+    assert(ls.every((l) => overlayWidth(l) <= 27), `บรรทัดกว้างเกิน w_700: ${JSON.stringify(ls)}`);
+  }
+  console.log(`  ✓ เครื่องหมายไม่ขึ้นต้น/ค้างท้ายบรรทัด · ละตินไม่ล้น (${punctCases.length} เคส · B3-01)`);
 }
 
 // 1.4 การคืนค่าสัดส่วน 1200x630 เสมอ (OG-05)
