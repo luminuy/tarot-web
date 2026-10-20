@@ -202,7 +202,7 @@ export function SpreadTopicContent({
           <p className="v2-tp-count">
             <b>{spreads.length}</b>
             {isEnglish ? " dedicated spreads" : " ผังเฉพาะหมวดนี้"}
-            <span aria-hidden="true" className="v2-tp-dot" />
+            <span aria-hidden="true" className="v2-tp-sep" />
             {isEnglish
               ? `${Math.min(...spreads.map((x) => x.positions.length))}–${Math.max(...spreads.map((x) => x.positions.length))} cards`
               : `${Math.min(...spreads.map((x) => x.positions.length))}–${Math.max(...spreads.map((x) => x.positions.length))} ใบ`}

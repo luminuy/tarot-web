@@ -83,11 +83,11 @@
   font-size: 17px;
   color: rgb(var(--tp));
 }
-.v2-tp-dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: rgba(var(--tp), 0.7);
+.v2-tp-sep {
+  /* เส้นคั่นบาง (เดิมจุดกลม — กฎเหล็กข้อ 2 ห้ามจุดตกแต่ง · B1 2026-10-20) */
+  width: 1px;
+  height: 12px;
+  background: rgba(var(--tp), 0.55);
 }
 .v2-tp-switch {
   display: flex;
@@ -410,6 +410,10 @@
   font-size: 13px;
 }
 .v2-tp-foot a {
+  /* เป้าแตะ ≥ 44px — เดิมสูงเท่าตัวหนังสือ 22px (B1 2026-10-20) */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: var(--ui2-on-night-dim);
   text-decoration: underline;
   text-underline-offset: 4px;

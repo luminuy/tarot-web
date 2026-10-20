@@ -194,7 +194,6 @@ export function Ui2PickSection({
               {isEnglish ? `1-card reading · ${shortName[topic.id][1]}` : `ไพ่ด่วน 1 ใบ · เรื่อง${shortName[topic.id][0]}`}
             </span>
             <span className="ui2-chip ui2-lock">
-              <span className="ui2-dot" aria-hidden="true" />
               {draw?.commitment ? (
                 <>
                   {isEnglish ? "Deck order locked · " : "ลำดับไพ่ถูกล็อกแล้ว · "}

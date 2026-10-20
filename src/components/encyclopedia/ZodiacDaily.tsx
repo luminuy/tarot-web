@@ -137,7 +137,17 @@ export function ZodiacDaily({ signs, sign }: { signs: ZodiacDailySignName[]; sig
   );
 
   if (!data) {
-    if (sign) return <div className="altar-panel rounded-2xl min-h-[280px] animate-pulse" aria-hidden="true" />;
+    /* หน้ารายราศี: โครงเดียวกับของจริง (ไพ่คว่ำขนาดเท่าจริง + บรรทัดคำแนะนำ) — เดิมกล่องสูง 280px คงที่
+       แต่ของจริงบนจอ ≥ 640px สูง 255px ส่วนข้างล่างจึงกระโดดขึ้นตอนข้อมูลมา (CLS 0.12 · B1 2026-10-20) */
+    if (sign)
+      return (
+        <div aria-hidden="true" className="flex flex-col sm:flex-row items-center gap-5 animate-pulse">
+          <span className="block w-[130px] sm:w-[150px] shrink-0 aspect-[1/1.7] rounded-lg card-back-pattern border-2 border-line-warm/60" />
+          <p className="text-sm text-muted font-sans">
+            {isEnglish ? "Tap the card to reveal today's energy for your sign." : "แตะไพ่เพื่อเปิดดูพลังงานวันนี้ของราศีคุณ"}
+          </p>
+        </div>
+      );
     /* หน้ารวม: โครงเดียวกับของจริง (หัวข้อ · แถบ 12 ราศี · กล่องไพ่ 2 กล่องขนาดเท่าไพ่จริง)
        กล่องจึงไม่ยืดดันส่วนข้างล่างตอนข้อมูลมาถึง (A6-06) · ยังไม่มีไพ่ใด ๆ บนจอจนกว่าข้อมูลจริงมา (กฎข้อ 14) */
     return (

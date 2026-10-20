@@ -173,7 +173,8 @@
 }
 .ui2-pg :is(.v3-bl-search, .v2-cx-search) input:focus-visible {
   border-color: var(--ui2-gold-ink);
-  box-shadow: 0 0 0 4px rgba(184, 105, 28, 0.18), 0 22px 40px -22px rgba(74, 47, 16, 0.45);
+  /* วงทึบ 3px — เดิมเงาโปร่ง 18% แยกจากตอนไม่โฟกัสแทบไม่ออก (B1 2026-10-20) */
+  box-shadow: 0 0 0 3px var(--ui2-gold-ink), 0 22px 40px -22px rgba(74, 47, 16, 0.45);
 }
 .ui2-pg .v3-bl-search-ic {
   color: var(--ui2-gold-ink);
@@ -485,4 +486,16 @@ html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > se
  */
 :is(.ui2-pg, .ui2-sp, .ui2-dy) .font-serif-th:not(h1, h2, h3) {
   font-family: var(--font-sans-th);
+}
+
+/* ── B1 2026-10-20: ตัวหนังสือที่ออกแบบไว้สำหรับพื้นมืด แต่ตอนนี้วางบนแถบครีม (วัดคอนทราสต์ทุกหน้า × 6 จอ × สว่าง/มืด) ── */
+/* ตัวเลขจำนวนผังในหัวหน้าหมวด — สีหมวดสว่าง (ชมพู/เขียวมิ้นต์) บนครีมเหลือ ~1.4–1.9:1 ➔ ผสมเข้มลงให้ ≥ 4.5:1 */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) .v2-tp-head .v2-tp-count b {
+  color: color-mix(in srgb, rgb(var(--tp)) 45%, #2a1d12);
+}
+/* หน้าโต๊ะสร้างผัง (คอม): คำโปรยบรรทัดที่สองไหลลงพ้นขอบโค้งไปอยู่บนพื้นมืด — ยืดแถบครีมลง */
+@media (min-width: 1024px) {
+  .ui2-pg .v2-sb-head {
+    padding-bottom: 40px;
+  }
 }

@@ -999,6 +999,9 @@ check(
       !/^(scan|watchNotes|watchCounts|setupScrolly)\(\);/m.test(ui2Home) &&
       /setAttribute\("data-ui2-hydrated", ""\)/.test(flowRoot) && /new Event\("ui2:hydrated"\)/.test(flowRoot),
   );
+  // B1: จุดตกแต่ง (จุดคั่นกลม · จุดเรืองแสงในชิปล็อกไพ่) ถูกถอด — ห้ามกลับมา (กฎเหล็กข้อ 2)
+  const dotHits = sources.filter((f) => /className="(?:ui2-dot|v2-ar-dot|v2-tp-dot)"/.test(fs.readFileSync(f, "utf-8")));
+  check("B1: ไม่มีจุดตกแต่ง ui2-dot · v2-ar-dot · v2-tp-dot", dotHits.length === 0, dotHits.map(rel).join(" · "));
   // B1: ผังไพ่ 1 ใบ ห้ามขึ้น "1 cards" — จำนวนที่เป็น 1 ได้ต้องผ่าน cardsEn()
   const pluralHits = sources.filter((f) => /\$\{[\w.]*positions\.length\} cards/.test(stripComments(fs.readFileSync(f, "utf-8"))));
   check("B1: ไม่มี `${…positions.length} cards` (ใช้ cardsEn กัน \"1 cards\")", pluralHits.length === 0, pluralHits.map(rel).join(" · "));

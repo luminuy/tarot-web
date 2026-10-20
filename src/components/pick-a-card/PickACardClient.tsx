@@ -473,7 +473,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                 >
                   {/* Number & Crystal Badge */}
                   <div className="glass-chip flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-mono font-medium text-ink mb-4">
-                    <span className={`w-1.5 h-1.5 rounded-full ${styling.dot}`} aria-hidden="true" />
+                    <span className={`h-1 w-3 rounded-sm ${styling.dot}`} aria-hidden="true" />
                     <span>{isEnglish ? `Pile ${pile.number}` : `กองที่ ${pile.number}`}</span>
                   </div>
 

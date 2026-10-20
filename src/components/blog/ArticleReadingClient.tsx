@@ -97,11 +97,11 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
         />
         <p className="v2-ar-kicker">
           <span>{articleCat}</span>
-          <span aria-hidden="true" className="v2-ar-dot" />
+          <span aria-hidden="true" className="v2-ar-sep" />
           <span>{isEnglish ? readTimeFormatted : `เวลาอ่าน ${article.readTime}`}</span>
-          <span aria-hidden="true" className="v2-ar-dot" />
+          <span aria-hidden="true" className="v2-ar-sep" />
           <span>{isEnglish ? `By ${articleAuthor}` : `โดย ${article.author}`}</span>
-          <span aria-hidden="true" className="v2-ar-dot" />
+          <span aria-hidden="true" className="v2-ar-sep" />
           {/* วันที่ที่มองเห็น = ค่าเดียวกับ JSON-LD dateModified และ sitemap (B3-04) */}
           <span>
             {isEnglish ? "Updated " : "อัปเดต "}

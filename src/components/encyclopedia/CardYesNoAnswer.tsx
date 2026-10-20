@@ -49,7 +49,7 @@ export const CardYesNoAnswer: React.FC<CardYesNoAnswerProps> = ({ card, isEnglis
 
           {data.condition && (
             <div className="pt-2 border-t border-line/50 text-[13px] text-muted font-serif-th leading-relaxed">
-              <span className="font-bold text-ink-soft">
+              <span className="font-bold text-ink">
                 {isEnglish ? "Context & Caution: " : "เงื่อนไขและบริบทประกอบ: "}
               </span>
               {data.condition}

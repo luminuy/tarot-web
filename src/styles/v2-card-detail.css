@@ -21,8 +21,14 @@
 @media (min-width: 1024px) {
   .v2-cd-stage {
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 0.85fr);
-    gap: 44px;
+    /* 1024–1279 ช่องป้ายข้อมูลเหลือ ~270px — ระยะห่าง 44px ทำให้ค่าในป้ายล้นขอบขวา (B1 2026-10-20) */
+    gap: 28px;
     min-height: min(720px, calc(100svh - 120px));
+  }
+}
+@media (min-width: 1280px) {
+  .v2-cd-stage {
+    gap: 44px;
   }
 }
 .v2-cd-eyebrow {
@@ -139,11 +145,15 @@
   border-bottom: 1px dashed rgba(255, 236, 200, 0.12);
 }
 .v2-cd-placard dt {
+  flex: none;
   font-size: 12.5px;
   color: var(--ui2-on-night-dim);
 }
 .v2-cd-placard dd {
   text-transform: capitalize;
+  /* ค่ายาว (ดาวผู้ครองหลายดวง · ชุด · หมายเลข) ขึ้นบรรทัดใหม่ในป้าย ไม่ล้นขอบ */
+  min-width: 0;
+  overflow-wrap: anywhere;
   margin: 0;
   text-align: right;
   font-size: 14.5px;
@@ -159,6 +169,10 @@
 }
 .v2-cd .v2-cd-go {
   justify-content: center;
+  /* ปุ่มยาวในป้ายแคบ (จอ 1024) — ตัดบรรทัดได้ ไม่ทะลุกรอบป้าย */
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
   background: linear-gradient(180deg, #FFE3A8 0%, #F0C470 100%);
   color: var(--ui2-night);
 }

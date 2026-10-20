@@ -121,7 +121,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                     data-footer-toggle
                     aria-expanded="false"
                     aria-controls={listId}
-                    className="footer-col-toggle w-full items-center justify-between gap-3 border-b pb-2.5 text-left"
+                    className="footer-col-toggle min-h-[44px] w-full items-center justify-between gap-3 border-b pb-2.5 text-left"
                   >
                     <span>{col.title}</span>
                     <svg
