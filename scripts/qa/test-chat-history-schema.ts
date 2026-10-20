@@ -7,6 +7,8 @@ import {
   CHAT_HISTORY_MAX_TURNS,
   CHAT_HISTORY_REPLAY_TURNS,
   clampChatHistory,
+  isReadingFinished,
+  CHAT_TURNS_PER_READING,
 } from "../../src/lib/reading/chat-limits";
 
 const CHAT_ROUTE = path.join(process.cwd(), "src/app/api/reading/[id]/chat/route.ts");
@@ -140,6 +142,35 @@ export function runChatSchemaTests() {
     throw new Error("Test 4 Failed: chat/route.ts must return reading_not_found when cards are missing!");
   }
   console.log("  ✓ Test 4: Provably Fair Guard - No fake card fallback (The Fool) in chat route, 404 returned on missing cards");
+
+  // Test 5 (B4-01): แชทถามต่อได้เฉพาะไพ่ชุดที่ /read อ่านจบ (หักสิทธิ์) แล้ว + เพดานคำถามต่อรอบ
+  // เดิมขอแค่ record.drawn — /start ➔ /shuffle ➔ /chat ได้คำอ่านผังใหญ่ครบชุดโดยโควตาไม่ลด
+  const gateCases: Array<[unknown, boolean, string]> = [
+    [{ status: "DRAWING", drawn: [{}] }, false, "หลัง /shuffle (ยังไม่ /read)"],
+    [{ status: "READING", drawn: [{}] }, false, "กำลังสตรีม /read"],
+    [{ status: "FAILED", drawn: [{}] }, false, "คำอ่านสำรอง (คืนสิทธิ์แล้ว)"],
+    [{ status: "COMPLETED" }, false, "COMPLETED แต่ไม่มีผล"],
+    [{ status: "COMPLETED", result: { summary: "x" } }, true, "อ่านจบ + เก็บผลแล้ว"],
+    [null, false, "ไม่มี record"],
+  ];
+  for (const [rec, want, label] of gateCases) {
+    if (isReadingFinished(rec as never) !== want) throw new Error(`Test 5 Failed (B4-01): isReadingFinished ${label} ควรได้ ${want}`);
+  }
+  const gateAt = chatRouteSrc.indexOf("if (!isReadingFinished(record)) {\n        recordEvent(");
+  const capAt = chatRouteSrc.indexOf('edgeRateLimitKey("chat:reading", id)');
+  const modelAt = chatRouteSrc.indexOf("const priorReading = formatPriorReadingForChat(");
+  if (gateAt < 0 || capAt < gateAt || modelAt < capAt || !/status: 409/.test(chatRouteSrc.slice(gateAt, capAt))) {
+    throw new Error("Test 5 Failed (B4-01): chat/route.ts ต้องตรวจ isReadingFinished (409) แล้วนับเพดานต่อรอบ ก่อนประกอบ prompt");
+  }
+  if (!(CHAT_TURNS_PER_READING > 0 && CHAT_TURNS_PER_READING <= 30)) {
+    throw new Error("Test 5 Failed (B4-01): CHAT_TURNS_PER_READING ต้องอยู่ในช่วง 1–30");
+  }
+  console.log(`  ✓ Test 5: แชทเปิดเฉพาะไพ่ที่อ่านจบแล้ว (409 ก่อนนั้น) + เพดาน ${CHAT_TURNS_PER_READING} คำถามต่อรอบ (B4-01)`);
+  // Test 6 (B4-02): เพดานต่อนาทีห้ามบอก "ครบโควตาวันนี้"
+  if (!/const shortWait = edge\.retryAfterSec <= 120;/.test(chatRouteSrc)) {
+    throw new Error("Test 6 Failed (B4-02): ข้อความเพดานแชทต้องแยกรอสั้น/ครบวัน ตาม retryAfterSec");
+  }
+  console.log("  ✓ Test 6: ข้อความเพดานแชทแยกระหว่าง 'รอสักครู่' กับ 'ครบโควตาวันนี้' (B4-02)");
 
   console.log("✨ All Chat BodySchema tests passed successfully!");
 }

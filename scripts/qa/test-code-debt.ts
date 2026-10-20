@@ -810,6 +810,14 @@ check(
     fs.readFileSync(path.join(ROOT, "src/app/globals.css"), "utf-8").includes('html:has(> body[style*="overflow: hidden"])'),
   );
   check("A6-07: ไม่มี list-disc (จุดนำรายการ) ในเว็บ — ใช้ .list-rule เส้นซ้ายแทน", discHits.length === 0, discHits.map(rel).join(" · "));
+  // B4-04: จุดเรืองแสงกะพริบ (`animate-ping` บนจุดกลมเล็ก) = "จุดเรืองแสง" ตกแต่งที่กฎข้อ 2 ห้าม — ป้ายมีข้อความอยู่แล้ว
+  //   วงกระเพื่อมรอบรูปแม่หมอในห้องวิดีโอ (h-28) สื่อสถานะ "กำลังเรียก" ไม่ใช่จุดเล็ก จึงไม่เข้าเกณฑ์นี้ (รอเจ้าของตัดสิน)
+  const pingDots = sources.filter((f) =>
+    /className="[^"]*\b(?:w|h)-(?:0\.5|1|1\.5|2|2\.5|3)\b[^"]*\banimate-ping\b|className="[^"]*\banimate-ping\b[^"]*\b(?:w|h)-(?:0\.5|1|1\.5|2|2\.5|3)\b/.test(
+      stripComments(fs.readFileSync(f, "utf-8")),
+    ),
+  );
+  check("B4-04: ไม่มีจุดเรืองแสงกะพริบ (animate-ping บนจุดเล็ก) ในเว็บ", pingDots.length === 0, pingDots.map(rel).join(" · "));
   /*
    * A5-03b: ข้อความที่ AI เขียน ด่านตรวจโค้ดมองไม่เห็น ➔ ต้องกวาดตรงทางออก
    * ยิงเคสจริงผ่าน stripEmoji() + ยืนยันว่าทางออกหลักทุกเส้นเรียกใช้อยู่

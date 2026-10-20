@@ -30,6 +30,9 @@ interface CardDetailViewProps {
   related?: React.ReactNode;
 }
 
+const SUIT_TH: Record<string, string> = { wands: "ไม้เท้า", cups: "ถ้วย", swords: "ดาบ", pentacles: "เหรียญ" };
+const SUIT_EN: Record<string, string> = { wands: "Wands", cups: "Cups", swords: "Swords", pentacles: "Pentacles" };
+
 const ELEMENT_EN: Record<string, string> = {
   ไฟ: "Fire",
   น้ำ: "Water",
@@ -105,10 +108,22 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           ? "ไม่ใช่ (No)"
           : "ไม่แน่ชัด (Maybe)"
     : null;
+  /*
+   * ชุดของไพ่ — เดิมต่อรหัสภายใน (`cups Suit`) ขึ้นหัวไพ่ทั้งหน้าไทยและอังกฤษ 112 หน้า (B1-02)
+   * ไพ่ชุดใหญ่ใช้ "หมายเลข" (The Fool = 0 · "ใบที่ 0" อ่านแปลก)
+   */
+  const suitLabel =
+    card.arcana === "major"
+      ? isEnglish
+        ? `Major Arcana · ${card.number}`
+        : `ไพ่ชุดใหญ่ · หมายเลข ${card.number}`
+      : isEnglish
+        ? `Suit of ${SUIT_EN[card.suit ?? ""] ?? card.suit}`
+        : `ไพ่ชุดเล็ก · ชุด${SUIT_TH[card.suit ?? ""] ?? card.suit}`;
   const facts: Array<{ k: string; v: string; tone?: string }> = [
     {
-      k: isEnglish ? "Arcana" : "สำรับ",
-      v: card.arcana === "major" ? `Major Arcana · #${card.number}` : `${card.suit} Suit`,
+      k: isEnglish ? "Arcana" : "ชุดไพ่",
+      v: suitLabel,
     },
     { k: isEnglish ? "Element" : "ธาตุ", v: isEnglish ? ELEMENT_EN[card.element] || card.element : `ธาตุ${card.element}` },
     ...(card.astrology ? [{ k: isEnglish ? "Astrology" : "โหราศาสตร์", v: isEnglish && card.astrologyEn ? card.astrologyEn : card.astrology }] : []),
@@ -217,7 +232,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
       <section className="v2-cd-stage">
         <div className="v2-cd-name">
           <p className="v2-cd-eyebrow">
-            <span>{card.arcana === "major" ? `Major Arcana · ${card.number}` : `${card.suit} Suit`}</span>
+            <span>{suitLabel}</span>
             <span className="v2-cd-count">
               {currentIndex + 1} / {totalCards}
             </span>

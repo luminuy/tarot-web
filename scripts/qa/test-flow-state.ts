@@ -967,6 +967,22 @@ console.log("\n\n── 20. ไพ่ต้องไม่ถูกเฉลย�
     /<StreamReader[\s\S]{0,800}?revealedOrders=\{revealedOrders\}/.test(flow) &&
       /resultStyle === "quick" &&\s*!drawnCards\.every\(\(c\) => revealedOrders\.includes\(c\.order\)\)/.test(flow),
   );
+  // B4-06: ไพ่ด่วนต้องไม่เขียนทับผัง/หมวด/คำถามของพิธีหลักตอนแตะไพ่ — ตั้งตอนกด "อ่านต่อ" เท่านั้น
+  const quickCore = flow.slice(flow.indexOf("const drawQuickCardCore"), flow.indexOf("const continueQuickReading"));
+  const quickContinue = flow.slice(flow.indexOf("const continueQuickReading"), flow.indexOf("// Step 2 -> Step 3"));
+  check(
+    "B4-06: ไพ่ด่วนไม่แตะ question/selectedSpread/selectedCategory ของพิธีหลักจนกว่าจะกดอ่านต่อ",
+    quickCore.length > 0 &&
+      !/setQuestion\(|setSelectedSpread\(|setSelectedCategory\(/.test(quickCore.replace(/\/\*[\s\S]*?\*\//g, "")) &&
+      /setQuestion\(pending\.question\)/.test(quickContinue),
+  );
+  // B4-03: ไพ่ที่เปิดแล้ว แตะ = อ่านใบนั้น ไม่คว่ำกลับ (ป้ายบอก "แตะไพ่เพื่ออ่านใบนั้น")
+  const board = read("src/components/spread/SpreadBoard.tsx");
+  check(
+    "B4-03: SpreadBoard แตะไพ่ที่เปิดแล้วเรียก onFocusCard (ทั้งเมาส์และคีย์บอร์ด)",
+    /onClick=\{\(\) => \(isRevealed && onFocusCard \? onFocusCard\(pos\.index\) : handleCardClick\(pos\.index\)\)\}/.test(board) &&
+      /if \(isRevealed && onFocusCard\) onFocusCard\(pos\.index\);\s*else handleCardClick\(pos\.index\);/.test(board),
+  );
   const card = read("src/components/card/TarotCard.tsx");
   check(
     "กฎข้อ 4: หน้าไพ่ที่ยังคว่ำซ่อนจากโปรแกรมอ่านจอ (alt ชื่อไพ่ไม่หลุด)",

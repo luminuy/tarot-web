@@ -8,6 +8,7 @@ import { getContentOverrides, resolveCardByIndex, resolvePersona, resolveSystemC
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
+import { CHAT_TURNS_PER_READING, isReadingFinished } from "@/lib/reading/chat-limits";
 import { looksLikePromptInjection, sanitizePromptValue } from "@/lib/ai/prompt-guard";
 import { redactPii } from "@/lib/security/pii";
 import { detectPromptLeak } from "@/lib/ai/leak-guard";
@@ -201,11 +202,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         : []),
     ]);
     if (!edge.allowed) {
+      /*
+       * B4-02: เพดานต่อนาทีกับเพดานรายวันใช้ข้อความเดียวกันมาตลอด — ผู้ใช้ที่พิมพ์ถี่เห็น "ครบโควตาวันนี้"
+       * ทั้งที่รอ 1 นาทีก็ถามต่อได้ จึงเลิกใช้ · แยกจากเวลาที่ต้องรอจริง
+       */
+      const shortWait = edge.retryAfterSec <= 120;
       return createRateLimitResponse(
         edge.retryAfterSec,
-        initialLang === "en"
-          ? "You have reached today's follow-up chat limit. Please come back tomorrow."
-          : "วันนี้คุณถามต่อครบโควตาแล้ว กลับมาใหม่พรุ่งนี้นะ",
+        shortWait
+          ? initialLang === "en"
+            ? "You are asking a little too fast. Wait a moment, then you can keep asking."
+            : "ส่งคำถามเร็วไปนิด รอสักครู่แล้วถามต่อได้เลยนะ"
+          : initialLang === "en"
+            ? "You have reached today's follow-up chat limit. Please come back tomorrow."
+            : "วันนี้คุณถามต่อครบโควตาแล้ว กลับมาใหม่พรุ่งนี้นะ",
       );
     }
 
@@ -296,6 +306,53 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         },
         { status: 404 },
       );
+    }
+
+    /*
+     * 🎟 B4-01: ถามต่อได้เฉพาะไพ่ชุดที่แม่หมออ่านจบแล้ว (`/read` หักสิทธิ์ + เก็บผลจริง) เท่านั้น
+     * เดิมขอแค่ `record.drawn` — ยิง /start ➔ /shuffle ➔ /chat ได้คำอ่านผังใหญ่/ปรมาจารย์ลับครบชุด
+     * โดยโควตาและสิทธิ์ลองผังใหญ่ไม่ลดเลย (โควตาถูกหักที่ /read ที่เดียว)
+     * record ในหน่วยความจำของ isolate นี้อาจเป็นสำเนาตอน /shuffle (ยัง DRAWING) ขณะที่ /read จบบนอีก isolate
+     * แล้วเขียนลงที่เก็บถาวร ➔ ถามที่เก็บถาวรซ้ำก่อนตัดสิน
+     */
+    if (!privileged) {
+      if (!isReadingFinished(record)) {
+        const { loadReadingFromKV, saveReading } = await import("@/server/store");
+        const fresher = await loadReadingFromKV(id);
+        if (isReadingFinished(fresher) && fresher?.drawn?.length) {
+          record = fresher;
+          saveReading(fresher);
+        }
+      }
+      if (!isReadingFinished(record)) {
+        recordEvent("chat_blocked_unfinished");
+        return NextResponse.json(
+          {
+            error:
+              initialLang === "en"
+                ? "Let the Oracle finish reading this spread first, then you can ask follow-up questions."
+                : "ให้แม่หมออ่านไพ่ชุดนี้ให้จบก่อน แล้วค่อยถามต่อได้เลยนะ",
+            reason: "reading_not_finished",
+          },
+          { status: 409 },
+        );
+      }
+      const perReading = await consumeEdgeRateLimits([
+        { key: edgeRateLimitKey("chat:reading", id), config: { max: CHAT_TURNS_PER_READING, windowSec: 86400 } },
+      ]);
+      if (!perReading.allowed) {
+        recordEvent("chat_blocked_turn_cap");
+        return NextResponse.json(
+          {
+            error:
+              initialLang === "en"
+                ? `You have asked ${CHAT_TURNS_PER_READING} follow-up questions about this spread. Draw a new reading to ask about something new.`
+                : `ถามต่อเรื่องไพ่ชุดนี้ครบ ${CHAT_TURNS_PER_READING} คำถามแล้ว เปิดไพ่รอบใหม่เพื่อถามเรื่องต่อไปได้เลย`,
+            reason: "chat_turns_exhausted",
+          },
+          { status: 429 },
+        );
+      }
     }
 
     const activeLang: "th" | "en" = parsed.data.lang || record.lang || initialLang;

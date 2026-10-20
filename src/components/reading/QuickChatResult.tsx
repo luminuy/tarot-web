@@ -125,7 +125,6 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
         {/* Live Status Pill */}
         {isStreaming ? (
           <span className="glass-chip text-xs font-semibold text-ink-deep px-3.5 py-1.5 flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-gold-ink animate-ping" />{" "}
             {isEnglish ? "Oracle is channeling the tarot..." : "แม่หมอกำลังอ่านคำทำนาย..."}
           </span>
         ) : (

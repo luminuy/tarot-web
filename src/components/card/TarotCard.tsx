@@ -290,7 +290,6 @@ export const TarotCard: React.FC<TarotCardProps> = ({
                * จำนวนไพ่บนจอจึงไม่มีผลกับเฟรมเรตอีกต่อไป (ดู globals.css)
                */
               <div className="anim-badge-pulse px-2.5 py-1 rounded-full bg-surface border border-line-warm z-20 flex items-center gap-1 text-[12px] text-ink-deep font-serif-th font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-gold-ink animate-ping" />
                 <span>{isEnglish ? "Tap to reveal" : "แตะเพื่อเปิด"}</span>
               </div>
             )}

@@ -229,14 +229,19 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
         className={`v2-sb-slot is-${mode}${isCurrentReading ? " is-now" : ""}${isRevealed ? " is-open" : ""} group ${
           useRail ? "snap-center flex-shrink-0" : ""
         } ${oneUp ? "basis-[74%] max-w-[74%]" : ""}`}
-        onClick={() => handleCardClick(pos.index)}
+        /*
+          ไพ่ที่เปิดแล้ว ➔ แตะ = อ่านใบนั้น (ตามป้าย "แตะไพ่เพื่ออ่านใบนั้น") ไม่คว่ำกลับ (B4-03)
+          เดิมทำไว้เฉพาะรายการใต้โต๊ะซึ่งถูกซ่อนบนมือถือ ผู้ใช้มือถือแตะตามป้ายแล้วไพ่คว่ำกลับ ดูเหมือนรีเซ็ต
+        */
+        onClick={() => (isRevealed && onFocusCard ? onFocusCard(pos.index) : handleCardClick(pos.index))}
         onKeyDown={(e) => {
           // กดปุ่มลูก (เช่น "ขยาย") ต้องไม่ถูกช่องไพ่กลืน (A5-17) — preventDefault ตรงนี้ยกเลิก
           // การ activate ปุ่มลูก Enter/Space บนปุ่มขยายจึงกลายเป็นเลือกไพ่ใบนั้นแทน
           if (e.target !== e.currentTarget) return;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            handleCardClick(pos.index);
+            if (isRevealed && onFocusCard) onFocusCard(pos.index);
+            else handleCardClick(pos.index);
           }
         }}
       >

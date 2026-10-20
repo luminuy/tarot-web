@@ -1166,9 +1166,12 @@ export default function TarotFlow({
     const defaultQ = (isEnglish && topic.defaultQuestionEn) ? topic.defaultQuestionEn : topic.defaultQuestion;
     const quickSpread = PUBLIC_SPREADS.find((s) => s.id === "quick") || selectedSpread;
     const missing = isEnglish ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง";
-    setSelectedSpread(quickSpread);
-    setSelectedCategory(topic.category);
-    setQuestion(defaultQ);
+    /*
+     * ⚠️ ห้ามตั้งผัง/หมวด/คำถามของพิธีหลักตรงนี้ (B4-06) — ไพ่ด่วนถือค่าของตัวเองใน `quickDrawRef`
+     * เดิมเขียนทับคำถามที่ผู้ใช้พิมพ์ค้างไว้ในผังของตัวเองเงียบ ๆ (และถูกบันทึกลง flow state)
+     * กลับไปกดเริ่มผังเดิมจึงส่งคำถามของหัวข้อด่วน + หมวดที่มองไม่เห็นไป /start แทน
+     * ค่าเหล่านี้ถูกตั้งตอนผู้ใช้กด "ให้แม่หมอ AI อ่านต่อ" (`continueQuickReading`) เท่านั้น
+     */
     dispatchRead({ type: "clearError" });
     soundManager.playCardSelectSound();
 
@@ -1310,6 +1313,10 @@ export default function TarotFlow({
     const pending = quickDrawRef.current;
     if (!pending) return;
     quickDrawRef.current = null;
+    // ผู้ใช้เลือกอ่านไพ่ด่วนจริงแล้ว ➔ ขั้นอ่านต้องแสดงผัง/หมวด/คำถามของไพ่ด่วน (B4-06: ตั้งตรงนี้ ไม่ใช่ตอนแตะไพ่)
+    setSelectedSpread(pending.spread);
+    setSelectedCategory(pending.category);
+    setQuestion(pending.question);
     dispatchDeck({ type: "deal", cards: pending.cards });
     // ผู้ใช้พลิกใบนี้เองแล้วบนผ้าปู (กฎเหล็ก 4) — ไม่ต้องให้พลิกซ้ำในขั้นอ่าน
     dispatchDeck({ type: "revealAll" });
