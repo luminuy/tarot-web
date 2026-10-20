@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { ARTICLES } from "@/data/articles";
 import { PUBLIC_SPREADS, getSpread } from "@/data/spreads";
+import { SPREAD_TOPICS } from "@/data/spread-topics";
 import { getSpreadDescription, getSpreadName } from "@/data/spreads-helpers";
 import { isStandardSpread } from "@/lib/entitlement/limits";
 import { clampDescription, headline, pickTitle, stripCardCount } from "@/lib/config/meta-length";
@@ -165,6 +166,7 @@ export function SpreadDetailContent({
   const isEnglish = locale === "en";
   const standard = isStandardSpread(spread.id);
   const cardCount = spread.positions.length;
+  const topicCrumb = spreadTopicCrumb(spread.id, locale);
   const categoryLabel = isEnglish
     ? CATEGORY_EN[spread.defaultCategory] ?? spread.defaultCategory
     : CATEGORY_TH[spread.defaultCategory] ?? spread.defaultCategory;
@@ -276,6 +278,7 @@ export function SpreadDetailContent({
     buildBreadcrumbJsonLd(locale, [
       homeCrumb(locale),
       { name: isEnglish ? "Tarot Spreads" : "คลังผังพยากรณ์", path: "/spreads" },
+      ...(topicCrumb ? [{ name: topicCrumb.label, path: topicCrumb.path }] : []),
       { name: isEnglish ? spread.nameEn : spread.nameTh, path: `/spreads/${spread.id}` },
     ]),
     {
@@ -307,6 +310,20 @@ export function SpreadDetailContent({
 }
 
 /** ข้อมูลประกอบที่แผงรายละเอียดผังต้องใช้ — ใช้ร่วมกันทั้งสองเครื่องมือเรนเดอร์ */
+/**
+ * หมวดที่ผังนี้สังกัด (หน้า `/spreads/topic/*`) — ใช้เป็นชั้นกลางของ breadcrumb ทั้งที่มองเห็นและ JSON-LD
+ * ลิงก์ขึ้นหมวดด้วยคำที่คนค้น ("ดูดวงไพ่ยิปซี ความรัก") จากทุกผังลูก (GSC 2026-10-19: หน้าหมวดความรักอันดับ 39.5)
+ * ผังที่ไม่อยู่ในหมวดใด = ไม่มีชั้นกลาง (breadcrumb เดิม)
+ */
+export function spreadTopicCrumb(spreadId: string, locale: Locale): { label: string; path: string } | undefined {
+  const topic = Object.values(SPREAD_TOPICS).find((t) => t.spreadIds.includes(spreadId));
+  if (!topic) return undefined;
+  return {
+    label: locale === "en" ? (topic.titleEn ?? topic.nameEn) : topic.titleTh,
+    path: `/spreads/topic/${topic.slug}`,
+  };
+}
+
 export function spreadDetailProps(spread: NonNullable<ReturnType<typeof getSpread>>, locale: Locale) {
   const isEnglish = locale === "en";
   const relatedArticles = isEnglish
@@ -325,5 +342,6 @@ export function spreadDetailProps(spread: NonNullable<ReturnType<typeof getSprea
     standard: isStandardSpread(spread.id),
     relatedArticles,
     fallbackSpreads,
+    topicCrumb: spreadTopicCrumb(spread.id, locale),
   };
 }

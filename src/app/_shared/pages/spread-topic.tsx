@@ -18,6 +18,29 @@ import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
 import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
+import { BxFan, FrFan, FrInput, FrList, FrMock, FrPanel, Ui2Bento, Ui2FeatureRows } from "@/components/ui2/Ui2Blocks";
+import { ArrowIcon } from "@/components/ui/LineIcons";
+import { topicCards } from "@/data/spread-topic-deck";
+import { SPREADS } from "@/data/spreads";
+import { localeHref } from "@/lib/i18n/paths";
+
+/** ขนาดกล่องของ "เลือกผังตามสถานการณ์" (6 กล่อง) — คอม 3 คอลัมน์เต็ม 9 ช่องพอดี · แท็บเล็ต 2 คอลัมน์ไม่มีช่องโหว่ */
+const SITUATION_SIZES = ["wide", "tall", "sm", "sm", "md", "wide"] as const;
+
+/** หัวกล่อง: คำค้นหลัก ("ดูดวงไพ่ยิปซี" / "ไพ่ยิปซี") สีทอง · ที่เหลือตัดวลีตามปกติ — ไม่ให้คำยาวติดกันหักกลางคำ */
+function splitKeyword(label: string): [string, string] {
+  for (const k of ["ดูดวงไพ่ยิปซี", "ไพ่ยิปซี"]) {
+    if (label.startsWith(k)) return [k, label.slice(k.length).trim()];
+  }
+  const cut = label.indexOf(" ");
+  return cut > 0 ? [label.slice(0, cut), label.slice(cut + 1)] : [label, ""];
+}
+
+/** จำนวนไพ่ของผังที่ลิงก์ชี้ (`/spreads/<id>`) · หน้าอื่น เช่น `/love/1-card` = 1 */
+function cardCountOf(href: string): number {
+  const id = href.startsWith("/spreads/") ? href.slice("/spreads/".length) : "";
+  return SPREADS.find((x) => x.id === id)?.positions.length ?? 1;
+}
 
 
 export function spreadTopicStaticParams() {
@@ -207,92 +230,169 @@ export function SpreadTopicContent({
           {list}
         </section>
 
+        {/*
+          v3 (เจ้าของ 2026-10-20 "ยังไม่สวยเลย สู้หน้าอื่นไม่ได้") — ส่วนล่างใช้ภาษาภาพกลางของ UI 2.0 แบบหน้าคำถาม/ราคา
+          กล่องหลายขนาด (Ui2Bento) · แถวสลับซ้ายขวา + แผงครีม (Ui2FeatureRows) · ภาพไพ่ 1909 จริงตามหมวด (ประดับ)
+        */}
+        {!isEnglish && topic.situationsTh && topic.situationsTh.length > 0 && (
+          <Ui2Bento
+            id="tp-sit-h"
+            kicker="เลือกตามสถานการณ์"
+            title={`${topic.titleTh} เลือกผังตามสถานการณ์ของคุณ`}
+            lede="ดูว่าตอนนี้คุณอยู่ตรงไหน แล้วเปิดผังที่ถามตรงเรื่องนั้นที่สุด"
+            tiles={topic.situationsTh.map((item, idx) => {
+              const [lead, rest] = splitKeyword(item.label);
+              const size = SITUATION_SIZES[idx] ?? "sm";
+              const count = cardCountOf(item.href);
+              const fan = topicCards(topic.slug, 3, idx).map((c) => [c, c] as const);
+              return {
+                key: item.href,
+                size,
+                glow: idx === 0 ? "amber" : idx === 1 ? "teal" : undefined,
+                label: item.free ? `${item.situation} · เปิดได้ฟรี` : item.situation,
+                lead,
+                title: rest || undefined,
+                // กล่องกว้าง: คำอธิบายย้ายเข้าแผงข้างพัดไพ่ (แบบกล่อง "เลือก ผังที่ใช่กับคำถาม" ของหน้าแรก)
+                desc: size === "wide" ? undefined : item.note,
+                href: item.href,
+                visual:
+                  size === "wide" ? (
+                    <BxFan cards={fan} label={`ไพ่ ${count} ใบ`} text={item.note} />
+                  ) : size === "tall" ? (
+                    <BxFan cards={fan} />
+                  ) : undefined,
+              };
+            })}
+          />
+        )}
+
         {topicQuestions.length > 0 && (
-          <section className="v2-tp-sec" aria-labelledby="tp-q-h">
-            <h2 id="tp-q-h" className="v2-tp-h2">
-              <ThaiPhrases>{isEnglish ? `Common ${topicName.toLowerCase()} questions` : `คำถามที่คนถามบ่อย หมวด${topic.nameTh}`}</ThaiPhrases>
-            </h2>
-            <ul className="v2-tp-qs">
+          <section className="ui2-bk" aria-labelledby="tp-q-h">
+            <div className="ui2-bk-head">
+              <span className="ui2-bk-kicker">{isEnglish ? "Questions" : "คำถามยอดฮิต"}</span>
+              <h2 id="tp-q-h" className="ui2-bk-h2">
+                <ThaiPhrases>{isEnglish ? `Common ${topicName.toLowerCase()} questions` : `คำถามที่คนถามบ่อย หมวด${topic.nameTh}`}</ThaiPhrases>
+              </h2>
+            </div>
+            <ul className="ui2-fr-list v2-tp-qlinks">
               {topicQuestions.map((q) => (
                 <li key={q.slug}>
-                  <Link href={`/questions/${q.slug}`}>{q[isEnglish ? "en" : "th"].question}</Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {!isEnglish && topic.alsoFitsTh && topic.alsoFitsTh.length > 0 && (
-          <section className="v2-tp-sec" aria-labelledby="tp-also-h">
-            <h2 id="tp-also-h" className="v2-tp-h2">
-              <ThaiPhrases>{`ถามเรื่อง${topic.nameTh} ด้วยผังทั่วไป`}</ThaiPhrases>
-            </h2>
-            <ul className="v2-tp-also">
-              {topic.alsoFitsTh.map((item) => (
-                <li key={item.spreadId}>
-                  <Link href={`/spreads/${item.spreadId}`}>{item.label}</Link>
-                  <span>{item.note}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        <section className="v2-tp-sec v2-tp-guide" aria-labelledby="tp-guide-h">
-          <h2 id="tp-guide-h" className="v2-tp-h2">
-            <ThaiPhrases>{isEnglish ? `Guide to Reading ${topicName} Tarot Spreads` : `คู่มือการอ่านไพ่ทาโรต์ หมวด${topic.nameTh}`}</ThaiPhrases>
-          </h2>
-          <div className="v2-tp-prose">
-            {editorialIntro.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-          </div>
-        </section>
-
-        {faqs.length > 0 && (
-          <section className="v2-tp-sec" aria-labelledby="tp-faq-h">
-            <h2 id="tp-faq-h" className="v2-tp-h2">
-              <ThaiPhrases>
-                {isEnglish ? `Frequently Asked Questions About ${topicName}` : `คำถามพบบ่อย เกี่ยวกับการดูดวง ด้าน${topic.nameTh}`}
-              </ThaiPhrases>
-            </h2>
-            <div className="v2-tp-faq">
-              {faqs.map((faq, index) => (
-                <details key={index}>
-                  <summary>
-                    <ThaiPhrases>{faq.question}</ThaiPhrases>
-                  </summary>
-                  <p>{faq.answer}</p>
-                </details>
-              ))}
-            </div>
-          </section>
-        )}
-
-        <section className="v2-tp-sec" aria-labelledby="tp-other-h">
-          <h2 id="tp-other-h" className="v2-tp-h2">
-            <ThaiPhrases>{isEnglish ? "Explore Other Categories" : "สำรวจหมวดหมู่อื่น ๆ"}</ThaiPhrases>
-          </h2>
-          <ul className="v2-tp-others">
-            {allTopics
-              .filter((t) => t.slug !== topic.slug)
-              .map((t) => (
-                <li key={t.slug}>
-                  <Link href={`/spreads/topic/${t.slug}`} data-topic={t.slug}>
-                    <b>{isEnglish && t.nameEn ? t.nameEn : t.nameTh}</b>
-                    <small>
-                      {t.spreadIds.length} {isEnglish ? "spreads" : "ผัง"}
-                    </small>
+                  <Link href={`/questions/${q.slug}`} className="ui2-fr-faq v2-tp-qlink">
+                    <span>{q[isEnglish ? "en" : "th"].question}</span>
+                    <span className="v2-tp-qgo" aria-hidden="true">
+                      <ArrowIcon className="h-3.5 w-3.5" />
+                    </span>
                   </Link>
                 </li>
               ))}
-          </ul>
-          <p className="v2-tp-foot">
-            <Link href="/cards">{isEnglish ? "78-Card Encyclopedia" : "สารานุกรมไพ่ 78 ใบ"}</Link>
-            <Link href="/blog">{isEnglish ? "Tarot Articles" : "บทความดูดวง"}</Link>
-            <Link href="/">{isEnglish ? "Back to Home" : "กลับหน้าแรก"}</Link>
-          </p>
-        </section>
+            </ul>
+          </section>
+        )}
+
+        <Ui2FeatureRows
+          id="tp-faq-h"
+          kicker={isEnglish ? "Guide & FAQ" : "คู่มือและคำถามพบบ่อย"}
+          title={isEnglish ? `Frequently Asked Questions About ${topicName}` : `คำถามพบบ่อย เกี่ยวกับการดูดวง ด้าน${topic.nameTh}`}
+          rows={[
+            {
+              id: "tp-guide",
+              kicker: isEnglish ? "Guide" : "คู่มือ",
+              title: isEnglish ? `Guide to Reading ${topicName} Tarot Spreads` : `คู่มือการอ่านไพ่ทาโรต์ หมวด${topic.nameTh}`,
+              body: (
+                <div className="v2-tp-prose">
+                  {editorialIntro.map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))}
+                </div>
+              ),
+              mock: (
+                <FrMock tint="gold">
+                  <FrFan cards={topicCards(topic.slug, 3)} />
+                  <FrPanel label={isEnglish ? `${spreads.length} dedicated spreads` : `${spreads.length} ผังเฉพาะหมวดนี้`}>
+                    <FrList items={spreads.slice(0, 3).map((x) => (isEnglish ? x.nameEn || x.nameTh : x.nameTh))} />
+                  </FrPanel>
+                </FrMock>
+              ),
+            },
+            ...(!isEnglish && topic.alsoFitsTh && topic.alsoFitsTh.length > 0
+              ? [
+                  {
+                    id: "tp-also",
+                    kicker: "ผังทั่วไป",
+                    title: `ถามเรื่อง${topic.nameTh} ด้วยผังทั่วไป`,
+                    body: (
+                      <ul className="v2-tp-also">
+                        {topic.alsoFitsTh.map((item) => (
+                          <li key={item.spreadId}>
+                            <Link href={`/spreads/${item.spreadId}`}>{item.label}</Link>
+                            <span>{item.note}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ),
+                    mock: (
+                      <FrMock tint="teal">
+                        <FrFan cards={topicCards(topic.slug, 3, 3)} />
+                      </FrMock>
+                    ),
+                  },
+                ]
+              : []),
+            ...faqs.slice(0, 1).map((faq) => ({
+              kicker: isEnglish ? "Most asked" : "ถามบ่อยที่สุด",
+              title: faq.question,
+              body: <p>{faq.answer}</p>,
+              mock: (
+                <FrMock tint="violet">
+                  <FrPanel>
+                    <FrInput title={isEnglish ? "Your question" : "คำถามของคุณ"} text={faq.question} />
+                  </FrPanel>
+                </FrMock>
+              ),
+            })),
+          ]}
+          rest={faqs.slice(1).map((faq) => ({ q: faq.question, a: <p>{faq.answer}</p> }))}
+          restLabel={isEnglish ? "More questions" : "คำถามอื่น ๆ"}
+        />
+
+        <Ui2Bento
+          id="tp-other-h"
+          kicker={isEnglish ? "Other topics" : "หมวดอื่น"}
+          title={isEnglish ? "Explore Other Categories" : "สำรวจหมวดหมู่อื่น ๆ"}
+          tiles={allTopics
+            .filter((t) => t.slug !== topic.slug)
+            .map((t, idx) => {
+              const name = isEnglish && t.nameEn ? t.nameEn : t.nameTh;
+              // หัวกล่อง: คำแรกสีทอง — ไทยตัดที่ "และ" (การงาน | และเส้นทางอาชีพ) · อังกฤษตัดที่คำแรก
+              const cut = isEnglish ? name.indexOf(" ") : name.indexOf("และ");
+              return {
+                key: t.slug,
+                size: idx === 0 ? ("wide" as const) : ("sm" as const),
+                label: isEnglish ? `${t.spreadIds.length} spreads` : `${t.spreadIds.length} ผัง`,
+                lead: cut > 0 ? name.slice(0, cut) : name,
+                title: cut > 0 ? name.slice(cut).trim() : undefined,
+                desc: isEnglish && t.taglineEn ? t.taglineEn : t.tagline,
+                href: localeHref(`/spreads/topic/${t.slug}`, locale),
+                visual:
+                  idx === 0 ? (
+                    <BxFan
+                      cards={topicCards(t.slug, 3).map((c) => [c, c] as const)}
+                      label={isEnglish ? "Spreads in this topic" : "ผังในหมวดนี้"}
+                      text={getSpreadsForTopic(t)
+                        .map((x) => (isEnglish ? x.nameEn || x.nameTh : x.nameTh))
+                        .join(" · ")}
+                    />
+                  ) : (
+                    <BxFan cards={topicCards(t.slug, 3).map((c) => [c, c] as const)} />
+                  ),
+              };
+            })}
+        />
+        <p className="v2-tp-foot">
+          <Link href="/cards">{isEnglish ? "78-Card Encyclopedia" : "สารานุกรมไพ่ 78 ใบ"}</Link>
+          <Link href="/blog">{isEnglish ? "Tarot Articles" : "บทความดูดวง"}</Link>
+          <Link href="/">{isEnglish ? "Back to Home" : "กลับหน้าแรก"}</Link>
+        </p>
       </div>
       {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
       <Ui2NextSteps isEn={isEnglish} keys={["cards", "daily", "journal", "questions"]} />

@@ -29,6 +29,8 @@ export const FOOTER_COLUMNS = [
     title: "ผังการเปิดไพ่",
     links: [
       { label: `คลังผังพยากรณ์ทั้งหมด (${COUNTS.spreads} แบบ)`, href: "/spreads" },
+      // ลิงก์ทุกหน้าเข้าหน้าหมวดความรักด้วยคำที่คนค้น (GSC 2026-10-19: "ดูดวงไพ่ยิปซีความรัก" อันดับ 39.5)
+      { label: "ดูดวงไพ่ยิปซีความรัก", href: "/spreads/topic/love" },
       { label: "ผังเซลติกครอส (Celtic Cross 10 ใบ)", href: "/spreads/celtic-cross" },
       { label: "ผัง 3 ใบ อดีต-ปัจจุบัน-อนาคต", href: "/spreads/three-card" },
       { label: "ผังทางแยกการตัดสินใจ (5 ใบ)", href: "/spreads/decision" },
@@ -90,6 +92,7 @@ export function getFooterColumns(isEnglish: boolean) {
       title: "Tarot Spreads",
       links: [
         { label: `All Spread Sanctuaries (${COUNTS.spreads})`, href: "/spreads" },
+        { label: "Love Tarot Spreads", href: "/spreads/topic/love" },
         { label: "Celtic Cross (10 Cards)", href: "/spreads/celtic-cross" },
         { label: "Past · Present · Future (3 Cards)", href: "/spreads/three-card" },
         { label: "The Decision Crossroads (5 Cards)", href: "/spreads/decision" },

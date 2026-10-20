@@ -31,7 +31,7 @@ const spreads = getSpreadsForTopic(topic);
   <div class="ui2-pg" data-ui2-page-dark="">
   <SpreadTopicContentRoot topic={topic} locale={locale}>
     <Fragment slot="list">
-      <TopicSpreadListRoot spreads={spreads} locale={locale} />
+      <TopicSpreadListRoot spreads={spreads} topic={topic.slug} locale={locale} />
     </Fragment>
   </SpreadTopicContentRoot>
   </div>

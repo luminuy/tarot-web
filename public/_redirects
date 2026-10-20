@@ -10,3 +10,8 @@
 /love /love/1-card 301
 /love-tarot /love/1-card 301
 /tarot / 301
+# ชั้นแม่ของหน้าหมวด `/spreads/topic/*` ไม่มีหน้าของตัวเอง — ส่งไปส่วน "ผังตามหมวด" ของคลังผัง (เจ้าของเปิดเจอ 404 · 2026-10-20)
+/spreads/topic /spreads#topics 301
+/spreads/topic/ /spreads#topics 301
+/en/spreads/topic /en/spreads#topics 301
+/en/spreads/topic/ /en/spreads#topics 301
