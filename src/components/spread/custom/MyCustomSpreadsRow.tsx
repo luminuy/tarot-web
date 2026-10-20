@@ -5,6 +5,7 @@ import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import type { CustomSpreadDef, MyCustomSpread } from "@/lib/tarot/custom-spread-client";
 import { SpreadLayoutGlyph } from "./SpreadLayoutGlyph";
 import { loadMyAndMigrate } from "./load-mine";
+import { cardsEn } from "@/lib/text/plural-en";
 
 /**
  * ✦ "ผังของฉัน" ในขั้นเลือกผังของพิธีเปิดไพ่ (REFLECTION_JOURNAL_PLAN 1.8)
@@ -51,7 +52,7 @@ const MyCustomSpreadsRow: React.FC<{
               >
                 <SpreadLayoutGlyph layout={s.layout} count={s.positions.length} size={30} className="text-ink-deep shrink-0" />
                 <span className="max-w-[12rem] truncate">{s.name}</span>
-                <span className="text-[11px] text-muted">{isEnglish ? `${s.positions.length} cards` : `${s.positions.length} ใบ`}</span>
+                <span className="text-[11px] text-muted">{isEnglish ? cardsEn(s.positions.length) : `${s.positions.length} ใบ`}</span>
               </button>
             );
           })}

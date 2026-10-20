@@ -11,6 +11,7 @@ import { ExpandTabIcon } from "@/components/ui/TarotArtIcons";
 import { useMotionSafe } from "@/lib/use-motion-safe";
 import { useNarrowViewport } from "@/lib/use-narrow-viewport";
 import { mapLayout, boxOf } from "@/lib/tarot/spread-map-geometry";
+import { cardsEn } from "@/lib/text/plural-en";
 
 export interface DrawnSlotCard {
   order: number;
@@ -366,7 +367,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
             role="group"
             aria-label={
               isEnglish
-                ? `All ${spread.positions.length} cards in ${spreadNameLocalized} — swipe to browse`
+                ? `All ${cardsEn(spread.positions.length)} in ${spreadNameLocalized} — swipe to browse`
                 : `ไพ่ทั้ง ${spread.positions.length} ใบในผัง ${spread.nameTh} — ปัดซ้ายขวาเพื่อดูใบอื่น`
             }
           >
@@ -398,7 +399,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
             className="v2-sb-area"
             style={{ paddingBottom: `${(bounds.height * 100).toFixed(2)}%` }}
             role="group"
-            aria-label={isEnglish ? `${spreadNameLocalized} — ${spread.positions.length} cards` : `ผัง${spread.nameTh} — ${spread.positions.length} ใบ`}
+            aria-label={isEnglish ? `${spreadNameLocalized} — ${cardsEn(spread.positions.length)}` : `ผัง${spread.nameTh} — ${spread.positions.length} ใบ`}
           >
             {spread.positions.map((pos) => renderSlot(pos, "table"))}
           </div>

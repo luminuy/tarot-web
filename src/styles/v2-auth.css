@@ -240,10 +240,12 @@
   background: #FFFFFF;
   box-shadow: 0 10px 22px -14px rgba(255, 255, 255, 0.5);
 }
+/* ตัวหนังสือขาวบนเขียว LINE สด (#06C755) ได้แค่ 2.26:1 (B1) — ข้อความต้อง ≥ 4.5:1 ➔ เขียว LINE เข้ม #00803A ได้ 5.1:1
+   (แนวเดียวกับปุ่มลอย .social-fab ใน globals.css · ตราฟองคำพูดในปุ่มยังเป็นของแบรนด์) */
 .v2-au-sbtn.is-line {
   color: #FFFFFF;
-  background: #06C755;
-  box-shadow: 0 10px 22px -14px rgba(6, 199, 85, 0.8);
+  background: #00803A;
+  box-shadow: 0 10px 22px -14px rgba(0, 128, 58, 0.8);
 }
 .v2-au-or {
   display: flex;

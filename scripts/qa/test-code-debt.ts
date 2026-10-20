@@ -963,6 +963,15 @@ check(
       (f) => /"@type": "Organization",[\s\S]{0,300}name: "SeerTarot",/.test(f) && !/github\.com\/luminuy/.test(f) && !/url: isEnglish \? `\$\{SITE_ORIGIN\}\/en`/.test(f),
     ),
   );
+  // B1: ลิ้นชักเมนูมือถือเป็นหน้าต่างลอย (role=dialog + aria-modal ตอนเปิด) ทั้ง React และสคริปต์หน้า static
+  check(
+    "B1: ลิ้นชักเมนูมือถือประกาศ role=dialog + aria-modal ตอนเปิด (React และหน้า static)",
+    /role="dialog"\s*\n\s*aria-modal=\{isOpen \? true : undefined\}/.test(src("src/components/ui/SacredNavDropdown.tsx")) &&
+      /panel\.setAttribute\("aria-modal", "true"\)/.test(fs.readFileSync(path.join(ROOT, "astro/scripts/site-header.ts"), "utf-8")),
+  );
+  // B1: ผังไพ่ 1 ใบ ห้ามขึ้น "1 cards" — จำนวนที่เป็น 1 ได้ต้องผ่าน cardsEn()
+  const pluralHits = sources.filter((f) => /\$\{[\w.]*positions\.length\} cards/.test(stripComments(fs.readFileSync(f, "utf-8"))));
+  check("B1: ไม่มี `${…positions.length} cards` (ใช้ cardsEn กัน \"1 cards\")", pluralHits.length === 0, pluralHits.map(rel).join(" · "));
   const robots = src("src/app/robots.ts");
   check(
     "A7-06: robots.txt เปิด /api/share/image/ (ภาพแชร์คำทำนาย) ในทุกกลุ่มที่ปิด /api/",

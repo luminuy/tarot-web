@@ -18,6 +18,7 @@ import { useLocale } from "@/lib/i18n";
 import { buildSpreadFaqs, SPREAD_CATEGORY_TH } from "@/lib/seo/faq";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { Ui2Crumbs, Ui2SectionHead } from "@/components/ui2/Ui2PageHero";
+import { cardsEn } from "@/lib/text/plural-en";
 
 interface Props {
   spread: Spread;
@@ -81,7 +82,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
         : "ตั้งสมาธิที่คำถามระหว่างสับไพ่ แล้วหยุดเมื่อรู้สึกว่าพอ",
     },
     {
-      name: isEnglish ? `Draw ${spread.positions.length} cards` : `เลือกไพ่ ${spread.positions.length} ใบ`,
+      name: isEnglish ? `Draw ${cardsEn(spread.positions.length)}` : `เลือกไพ่ ${spread.positions.length} ใบ`,
       text: isEnglish
         ? `Select cards one by one into positions 1 through ${spread.positions.length} without flipping them yet.`
         : `เลือกไพ่ทีละใบวางตามตำแหน่งที่ 1 ถึง ${spread.positions.length} โดยไม่เปิดดูหน้าไพ่`,
@@ -165,7 +166,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
                 type="button"
                 className="v2-sd-slot card-back-pattern"
                 aria-pressed={active === idx}
-                aria-label={`${idx + 1}. ${getPositionName(pos, isEnglish)}`}
+                aria-label={`${idx + 1}. ${posLabel(pos)}`}
                 style={{
                   left: `${pos.x * 100}%`,
                   top: `${(((pos.y * map.yScale + map.offsetY) / map.boxHeight) * 100).toFixed(3)}%`,

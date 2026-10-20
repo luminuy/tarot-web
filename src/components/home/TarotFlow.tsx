@@ -69,6 +69,7 @@ import { describePurchaseError, safeCreditCount } from "@/lib/account/purchase-n
 import { START_SITUATION_MAX } from "@/lib/reading/start-limits";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { RitualRail, SpreadSummaryCard, SealChip, SpreadSwitcher } from "@/components/home/RitualChrome";
+import { cardsEn } from "@/lib/text/plural-en";
 
 /**
  * ✦ Dynamic Code-Splitting — คอมโพเนนต์หนักทั้งหมดโหลดเมื่อถึงขั้นที่ใช้จริง
@@ -2104,7 +2105,7 @@ export default function TarotFlow({
                   <p className="v2-rt-bar-hint" aria-live="polite">
                     {question.trim()
                       ? isEnglish
-                        ? `${selectedSpread.positions.length} cards · read by ${selectedPersona.nameEn || selectedPersona.nameTh}`
+                        ? `${cardsEn(selectedSpread.positions.length)} · read by ${selectedPersona.nameEn || selectedPersona.nameTh}`
                         : `${selectedSpread.positions.length} ใบ · ${selectedPersona.nameTh} อ่านให้`
                       : isEnglish
                         ? "Type your question to continue"

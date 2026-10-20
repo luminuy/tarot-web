@@ -853,7 +853,7 @@ export const SPREADS: Spread[] = [
     nameEn: "The Celtic Cross: 10 Dimensions of Destiny (10 Cards)",
     // GSC 2026-10-16: คนค้น "ไพ่ทาโร่ 10 ใบ" มากกว่า "ไพ่ยิปซี 10 ใบ" ราว 2 เท่า
     seoTitleTh: "ดูดวงไพ่ยิปซี ไพ่ทาโร่ 10 ใบ เซลติกครอส ฟรี",
-    tagline: "ผัง 10 ใบในตำนาน อ่านละเอียดและแม่นยำที่สุด",
+    tagline: "ผัง 10 ใบในตำนาน อ่านละเอียดที่สุด",
     taglineEn: "The legendary 10-card master spread for utmost depth and precision",
     description:
       "ผังพยากรณ์ที่ละเอียดและทรงพลังที่สุด ส่องลึกถึงแก่นของปัญหา อดีตที่ผ่านมา อนาคตอันใกล้ ตัวตนของคุณ คนรอบข้าง ความหวัง ความกลัว และบทสรุปปลายทาง",

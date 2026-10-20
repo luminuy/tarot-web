@@ -23,13 +23,13 @@ const HOME_FAQS: HomeFaqItem[] = [
     id: "faq-free-reading",
     question: "ดูดวงไพ่ทาโรต์ออนไลน์ที่ SeerTarot มีค่าใช้จ่ายหรือไม่?",
     answer:
-      "ดูดวงไพ่ทาโรต์ที่ SeerTarot ฟรีทั้งหมด เพียงสมัครสมาชิกฟรีหรือเข้าสู่ระบบก่อนเปิดไพ่ (สมัครด้วยอีเมล Google หรือ LINE ไม่ต้องผูกบัตร) จากนั้นจะได้โควตาเปิดไพ่ฟรีทุกวัน คุยถามแม่หมอต่อได้ และเก็บประวัติคำทำนายไว้ดูย้อนหลังได้ทุกเครื่อง ส่วนความหมายไพ่ 78 ใบ คลังผัง และบทความทั้งหมด อ่านได้ฟรีโดยไม่ต้องสมัคร หากต้องการเปิดผังพยากรณ์ขนาดใหญ่พิเศษหรือปรึกษาเจาะลึกเพิ่มเติม จึงค่อยเลือกเติมรอบเปิดไพ่ตามต้องการ",
+      "ดูดวงไพ่ทาโรต์ที่ SeerTarot เริ่มได้ฟรี เพียงสมัครสมาชิกฟรีหรือเข้าสู่ระบบก่อนเปิดไพ่ (สมัครด้วยอีเมล Google หรือ LINE ไม่ต้องผูกบัตร) จากนั้นจะได้โควตาเปิดไพ่ฟรีทุกวัน คุยถามแม่หมอต่อได้ และเก็บประวัติคำทำนายไว้ดูย้อนหลังได้ทุกเครื่อง ส่วนความหมายไพ่ 78 ใบ คลังผัง และบทความทั้งหมด อ่านได้ฟรีโดยไม่ต้องสมัคร หากต้องการเปิดผังพยากรณ์ขนาดใหญ่พิเศษหรือปรึกษาเจาะลึกเพิ่มเติม จึงค่อยเลือกเติมรอบเปิดไพ่ตามต้องการ",
   },
   {
     id: "faq-accuracy",
     question: "การเปิดไพ่ทาโรต์บนระบบออนไลน์ มีความแม่นยำเทียบเท่ากับการไปพบหมอดูจริงหรือไม่?",
     answer:
-      "ความแม่นยำของไพ่ทาโรต์ขึ้นอยู่กับสมาธิ ความตั้งใจ และเจตจำนงของผู้ถามในขณะเปิดไพ่ ระบบ SeerTarot ออกแบบให้คุณเป็นผู้สับไพ่และเลือกจับไพ่ 78 ใบด้วยมือของคุณเองจริง ๆ ไม่ใช่การสุ่มอัตโนมัติจากคอมพิวเตอร์ จากนั้นแม่หมอ AI ซึ่งได้รับการเทรนด้วยคัมภีร์สัญลักษณ์วิทยา 1909 Rider-Waite ดั้งเดิมและจิตวิทยาเชิงลึกจะทำหน้าที่แปลความหมายและสะท้อนสภาวะจิตใจให้อย่างแม่นยำตรงไปตรงมา",
+      "ความแม่นยำของไพ่ทาโรต์ขึ้นอยู่กับสมาธิ ความตั้งใจ และเจตจำนงของผู้ถามในขณะเปิดไพ่ ที่ SeerTarot คุณเป็นคนเลือกหยิบไพ่จากสำรับ 78 ใบเอง ส่วนลำดับไพ่ทั้งสำรับถูกสุ่มและล็อกไว้ก่อนคุณเลือก ตรวจย้อนหลังได้ว่าไม่มีใครเปลี่ยนระหว่างทาง จากนั้นแม่หมอ AI อ่านจากความหมายไพ่และภาพบนหน้าไพ่ 1909 Rider-Waite แล้วเล่าให้ฟังตรงไปตรงมา คำอ่านเป็นแนวทางให้คิดต่อ ไม่ใช่คำตัดสินแทนคุณ",
   },
   {
     id: "faq-provably-fair",
@@ -68,13 +68,13 @@ export const HOME_FAQS_EN: HomeFaqItem[] = [
     id: "faq-free-reading",
     question: "Is online tarot divination on SeerTarot free of charge?",
     answer:
-      "Yes — readings are free. Simply create a free account or sign in before drawing (email, Google, or LINE; no credit card required) and you receive a free daily reading allowance, follow-up questions with your reader, and a reading journal synced across devices. The 78-card encyclopedia, spread library, and articles stay open to everyone without an account. For expansive grand spreads or in-depth counseling sessions, quota unlocks are available according to your needs.",
+      "Yes — you can start for free. Simply create a free account or sign in before drawing (email, Google, or LINE; no credit card required) and you receive a free daily reading allowance, follow-up questions with your reader, and a reading journal synced across devices. The 78-card encyclopedia, spread library, and articles stay open to everyone without an account. For expansive grand spreads or in-depth counseling sessions, quota unlocks are available according to your needs.",
   },
   {
     id: "faq-accuracy",
     question: "Is an online tarot reading as accurate as visiting an in-person reader?",
     answer:
-      "Tarot accuracy hinges upon the querent's mindfulness, intentionality, and focus. SeerTarot is engineered so that you physically shuffle and draw from all 78 cards with your own touch—never through arbitrary computer automation. Our AI oracles, trained in 1909 Rider-Waite symbolism and depth psychology, translate and mirror your psychological state with unfiltered resonance.",
+      "Tarot accuracy hinges upon the querent's mindfulness, intentionality, and focus. On SeerTarot you pick your own cards from the full 78-card deck, while the order of the whole deck is shuffled and locked before you choose, so you can verify afterwards that nothing changed in between. The AI reader then reads from each card's meaning and the imagery of the 1909 Rider-Waite deck and tells you plainly what it sees. Treat the reading as guidance to reflect on, not a verdict.",
   },
   {
     id: "faq-provably-fair",

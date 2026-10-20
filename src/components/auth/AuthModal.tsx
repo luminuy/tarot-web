@@ -454,7 +454,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         fill="#FFFFFF"
                         d="M24 10.3c0-4.8-5.4-8.8-12-8.8S0 5.5 0 10.3c0 4.3 3.8 7.9 9 8.6.4.1.9.3 1 .6.1.4 0 1.2-.1 1.7-.1.4-.4 1.7-.6 2.1-.2.5-.9 2 .8 1.1 1.8-.9 4.8-2.9 6.5-4.9 4.6-1.5 7.4-4.8 7.4-8.6z"
                       />
-                      <g fill="none" stroke="#06C755" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+                      <g fill="none" stroke="#00803A" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M5.9 7.9v4.2h2.2" />
                         <path d="M9.7 7.9v4.2" />
                         <path d="M11.4 12.1V7.9l2.8 4.2V7.9" />

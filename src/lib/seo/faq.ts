@@ -11,6 +11,7 @@
 
 import type { Spread } from "@/data/spreads-helpers";
 import { getSpreadDescription, getSpreadName } from "@/data/spreads-helpers";
+import { cardsEn } from "@/lib/text/plural-en";
 
 export interface FaqItem {
   question: string;
@@ -40,13 +41,13 @@ export function buildSpreadFaqs(spread: Spread, isEnglish: boolean, standard: bo
       },
       {
         question: "How many cards are drawn in this spread?",
-        answer: `This layout uses ${cardCount} cards arranged in a deliberate geometric pattern.`,
+        answer: `This layout uses ${cardsEn(cardCount)} arranged in a deliberate geometric pattern.`,
       },
       {
         question: standard ? "Is this spread available on the standard tier?" : "Why is this spread designated as a Grand Spread?",
         answer: standard
           ? "Yes, this is an open spread available to all seekers under daily quota."
-          : "This layout features complex multi-card geometry and deep syntheses, unlocked for seekers with Grand Oracle access.",
+          : "This layout features complex multi-card geometry and deep syntheses, opened with purchased readings (every member can try one grand spread free, once).",
       },
     ];
   }
@@ -66,7 +67,7 @@ export function buildSpreadFaqs(spread: Spread, isEnglish: boolean, standard: bo
       question: standard ? "ผังนี้เปิดใช้ฟรีได้ไหม" : "ทำไมผังนี้เป็นผังพิเศษ",
       answer: standard
         ? "ได้ ผังนี้เป็นผังมาตรฐานที่สมาชิกทุกคนเปิดได้ตามโควตาปกติ"
-        : "ผังนี้มีจำนวนไพ่มากและตีความละเอียด จึงสงวนไว้สำหรับผู้ถือสิทธิ์ญาณพยากรณ์พิเศษ",
+        : "ผังนี้มีจำนวนไพ่มากและตีความละเอียด จึงเปิดด้วยรอบที่ซื้อเพิ่ม (สมาชิกทุกคนลองผังใหญ่ฟรีได้ 1 ครั้ง)",
     },
   ];
 }

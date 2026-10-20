@@ -256,7 +256,7 @@ function ShelfSection({
                     <span className="ui2-sc-free">{isEnglish ? "Free" : "ฟรี"}</span>
                   )}
                   <span className="ui2-sc-count">
-                    <span className="ui2-num">{spread.positions.length}</span> {isEnglish ? "cards" : "ใบ"}
+                    <span className="ui2-num">{spread.positions.length}</span> {isEnglish ? (spread.positions.length === 1 ? "card" : "cards") : "ใบ"}
                   </span>
                 </span>
                 <SpreadMap spread={spread} />
