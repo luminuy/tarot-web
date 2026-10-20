@@ -40,6 +40,26 @@ const TOPIC_DECK: Record<string, string[]> = {
  *    ตอนนี้กางพร้อมกันหลายใบได้ — การ์ดแต่ละใบมีความสูงของตัวเอง ไม่มีใบไหนดันใบอื่น
  *    และไม่มีใครเคยขอให้มันพับกันเอง (ถ้าต้องบังคับทีละใบต้องใช้ `name=` ซึ่ง Safari < 17.2 ไม่รองรับ)
  */
+/**
+ * ขยายไพ่ในภาพย่อให้ใหญ่ที่สุดที่ยังไม่ทับกันและไม่ล้นกรอบ (เพดาน 1.6 เท่า)
+ * ขนาดตั้งต้นจาก `mapLayout` ออกแบบไว้สำหรับกรอบสี่เหลี่ยมว่าง — พอเป็นภาพไพ่จริงจะเล็กจนดูไม่ออก
+ */
+function cardScale(spread: Spread, map: ReturnType<typeof mapLayout>): number {
+  const w = map.cardW;
+  const h = map.cardW * MAP_CARD_ASPECT;
+  const pts = spread.positions.map((p) => ({ x: p.x, y: p.y * map.yScale + map.offsetY }));
+  let k = 1.6;
+  for (let a = 0; a < pts.length; a++) {
+    for (let b = a + 1; b < pts.length; b++) {
+      const gap = Math.max(Math.abs(pts[a].x - pts[b].x) / w, Math.abs(pts[a].y - pts[b].y) / h);
+      k = Math.min(k, gap * 0.92);
+    }
+    k = Math.min(k, ((Math.min(pts[a].x, 1 - pts[a].x) - 0.02) * 2) / w);
+    k = Math.min(k, ((Math.min(pts[a].y, map.boxHeight - pts[a].y) - 0.01) * 2) / h);
+  }
+  return Math.max(1, k);
+}
+
 export function TopicSpreadList({ spreads, topic }: TopicSpreadListProps) {
   const { isEnglish } = useLocale();
   const deck = TOPIC_DECK[topic] ?? TOPIC_DECK.love;
@@ -54,6 +74,7 @@ export function TopicSpreadList({ spreads, topic }: TopicSpreadListProps) {
       {spreads.map((spread, i) => {
         const isStandard = isStandardSpread(spread.id);
         const map = mapLayout(spread.positions);
+        const cardW = map.cardW * cardScale(spread, map);
         const names = spread.positions.map((pos) => (isEnglish ? pos.nameEn || pos.nameTh : pos.nameTh).replace(/^\d+\.\s*/, ""));
         return (
           <li key={spread.id} className="v2-tp-row">
@@ -68,7 +89,7 @@ export function TopicSpreadList({ spreads, topic }: TopicSpreadListProps) {
                     style={{
                       left: `${pos.x * 100}%`,
                       top: `${(((pos.y * map.yScale + map.offsetY) / map.boxHeight) * 100).toFixed(3)}%`,
-                      width: `${(map.cardW * 100).toFixed(2)}%`,
+                      width: `${(cardW * 100).toFixed(2)}%`,
                       aspectRatio: `1 / ${MAP_CARD_ASPECT}`,
                       transform: `translate(-50%, -50%) rotate(${pos.rotate ?? 0}deg)`,
                     }}
