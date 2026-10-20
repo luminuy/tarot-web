@@ -322,6 +322,18 @@
 .ui2-pick {
   padding-top: 40px;
 }
+/* ปุ่ม "เปิดไพ่ด่วน 1 ใบ" ➔ #home-quick (หมุดเหนือหน้าต่าง) ต้องพอดีจอทั้งกล่อง ทั้งคอมและมือถือ (เจ้าของ 2026-10-20)
+   ⚠️ html มี scroll-padding-top = หัวเว็บ + 12px อยู่แล้ว (globals.css) — ห้ามบวก scroll-mt ซ้ำ
+      (เดิม `scroll-mt-16` ที่ส่วน + padding-top ของส่วน ➔ หน้าต่างหยุดต่ำไป ~150px ล้นใต้จอ)
+   มือถือ: หน้าต่างชิดใต้หัวเว็บ (หัวข้อส่วนเลื่อนพ้นขึ้นไป · จอไม่พอ) · แท็บเล็ต/คอม: เผื่อหัวข้อส่วน (สูง ~125/144 + ช่องไฟ 22) ไว้ให้เห็นด้วย
+   ตัวเลขใน calc() = หัวเว็บ + 12 + scroll-margin + ส่วนอื่นของหน้าต่าง (แถบหัว · หัวข้อ · แผงข้าง) + ขอบล่าง 12 — วัดจริงด้วย Playwright 2026-10-20
+   ความสูงผ้าปูหดตามความสูงจอ (svh = จอตอนแถบเบราว์เซอร์มือถือโผล่) ให้หน้าต่างไม่ตกขอบล่าง */
+.ui2-pick-anchor {
+  scroll-margin-top: 0;
+}
+.ui2-pick .ui2-cloth {
+  height: clamp(170px, calc(100svh - 380px), 300px);
+}
 .ui2-pick-head {
   text-align: center;
   display: flex;
@@ -607,6 +619,12 @@
   .ui2-cloth {
     height: 380px;
   }
+  .ui2-pick-anchor {
+    scroll-margin-top: 147px;
+  }
+  .ui2-pick .ui2-cloth {
+    height: clamp(240px, calc(100svh - 525px), 380px);
+  }
   .ui2-pick-card {
     width: 100px;
     margin-inline: -20px;
@@ -660,9 +678,15 @@
   .ui2-pick-grid .ui2-topic-num {
     font-size: 15px;
   }
+  .ui2-pick-anchor {
+    scroll-margin-top: 166px;
+  }
   .ui2-pick-grid .ui2-cloth {
     margin-top: 0;
     height: 400px;
+  }
+  .ui2-pick .ui2-pick-grid .ui2-cloth {
+    height: clamp(300px, calc(100svh - 350px), 400px);
   }
   .ui2-pick-card {
     width: 88px;
@@ -687,6 +711,9 @@
   }
   .ui2-pick-grid .ui2-cloth {
     height: 420px;
+  }
+  .ui2-pick .ui2-pick-grid .ui2-cloth {
+    height: clamp(300px, calc(100svh - 350px), 420px);
   }
   .ui2-pick-grid .ui2-topic[aria-pressed="true"] {
     font-size: 46px;

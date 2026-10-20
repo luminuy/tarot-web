@@ -333,6 +333,9 @@
   background: linear-gradient(180deg, #FFE3A8 0%, #F0C470 100%);
   color: var(--ui2-night);
 }
+.v2-ar .v2-ar-try {
+  margin-top: 22px;
+}
 .v2-ar-related h2 {
   margin: 0 0 16px;
   font-family: var(--ui2-font-display);

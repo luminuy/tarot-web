@@ -150,8 +150,7 @@ export function Ui2PickSection({
 
   return (
     <section
-      id="home-quick"
-      className="ui2-sec ui2-night ui2-pick scroll-mt-16"
+      className="ui2-sec ui2-night ui2-pick"
       data-home-section="quick"
       data-ui2-dark
       data-anim-section
@@ -184,6 +183,10 @@ export function Ui2PickSection({
           </p>
         </div>
 
+        {/* #home-quick = หมุดหน้าต่าง ไม่ใช่ตัวส่วน — ปุ่ม "เปิดไพ่ด่วน 1 ใบ" ต้องพาไปจนหน้าต่างทั้งกล่องพอดีจอ
+            ⚠️ ห้ามย้าย id ไปไว้ที่ `.ui2-window` — หน้าต่างมีท่าเข้าฉาก (ย่อ + เลื่อนลง 36px) เบราว์เซอร์คิดจุดหยุดจากกล่องตอนยังไม่เข้าฉาก
+            แล้วหน้าต่างเด้งขึ้นไปทับหัวเว็บ · ระยะเลื่อนคุมด้วย scroll-margin-top ของ `.ui2-pick-anchor` ใน ui2.css */}
+        <div id="home-quick" className="ui2-pick-anchor" aria-hidden="true" />
         <div className="ui2-window">
           {/* แถบหัวหน้าต่าง (ต้นแบบ D+): เรื่องที่เลือก ซ้าย · ชิปล็อกลำดับไพ่ ขวา */}
           <div className="ui2-pick-bar">

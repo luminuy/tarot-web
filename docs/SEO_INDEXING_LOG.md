@@ -69,6 +69,42 @@ GA4 ยังไม่มีอีเวนต์ซื้อแพ็กเก�
 
 ---
 
+## 🇹🇭 2026-10-20 — คิวใหม่จาก API: 118 หน้าไทยที่ยังไม่เข้าดัชนี (4 ชุด) ⭐ **ใช้ชุดนี้แทนคิว 5 ชุดของ 2026-09-09**
+
+> ที่มา: `npm run seo:gsc -- inspect` ใน workflow run [39217517780](https://github.com/luminuy/tarot-web/actions/runs/39217517780) (2026-10-19)
+> เข้าดัชนีแล้ว **84 / 202** หน้าไทย (รอบ 2026-10-16 = 76) · ยังไม่เข้า 118 = Google ไม่รู้จัก 20 · พบแล้วแต่ไม่เคยคลาน 96 · คลานแล้วไม่เก็บ 2
+> ✅ ตรวจความพร้อมแล้ว 2026-10-20 ยิงจริงบน production ครบ 118 เส้น: HTTP 200 · ไม่มี `noindex` · `canonical` ชี้ตัวเอง — **กดได้ทันที**
+> คิว 5 ชุดของ 2026-09-09 ด้านล่างเก่าแล้ว (หลายหน้าเข้าดัชนีไปเอง) — **อย่าไล่ตามคิวเก่า**
+> **กดจบชุดไหน มาติ๊ก `[x]` พร้อมวันที่ทันที** · รอบก่อน ๆ กดได้ 30 หน้าต่อรอบไม่ติดโควตา
+
+### [ ] ชุด 1 — หน้าฮับ `/questions` + 20 หน้าที่ Google ไม่รู้จักเลย + ผังยอดนิยม 9 (30 หน้า) ⭐ **ทำก่อน**
+
+หน้าที่ "ไม่รู้จัก URL" คือ Google ยังไม่เจอแม้แต่ลิงก์ — กดขอคือทางเดียวที่เร็ว · ผังพยากรณ์เป็นหน้าที่คนเข้ามาเปิดไพ่จริง
+
+`/questions` `/blog/celtic-cross-spread-guide` `/blog/major-arcana-22-cards-complete-guide` `/blog/provably-fair-tarot-guide` `/blog/tarot-and-carl-jung-psychology` `/blog/the-lovers-card-meaning` `/cards/cups-10` `/cards/major-16` `/cards/pentacles-01` `/cards/pentacles-12` `/cards/swords-03` `/cards/swords-04` `/cards/swords-10` `/cards/swords-12` `/cards/wands-13` `/questions/is-there-someone-else` `/questions/should-i-change-jobs` `/questions/should-i-quit-my-job` `/questions/what-should-i-ask-tarot` `/questions/will-my-business-succeed` `/spreads/chakra` `/spreads/money` `/spreads/career` `/spreads/decision` `/spreads/daily` `/spreads/weekly` `/spreads/year-ahead` `/spreads/family` `/spreads/luck` `/spreads/love-six`
+
+### [ ] ชุด 2 — ผังที่เหลือ + หน้าคำถาม + บทความ 14 (30 หน้า)
+
+`/spreads/career-switch` `/spreads/ex-reconciliation` `/spreads/inner-potential` `/spreads/mind-body-spirit` `/spreads/quick` `/spreads/situation-solution` `/spreads/study` `/spreads/topic/health` `/spreads/topic/study` `/questions/how-are-my-finances-this-year` `/questions/how-often-should-i-read-tarot` `/questions/how-will-my-new-job-go` `/questions/what-does-he-think-of-me` `/questions/will-he-contact-me` `/questions/will-i-get-the-job` `/questions/will-my-family-get-along` `/blog/ai-tarot-oracle-vs-human-reader` `/blog/how-to-ask-tarot-questions` `/blog/how-to-read-tarot-for-beginners` `/blog/minor-arcana-4-suits-guide` `/blog/reversed-tarot-cards-guide` `/blog/tarot-7-chakras-spread` `/blog/tarot-daily-card-guide` `/blog/tarot-ex-return-signs` `/blog/tarot-history-1909-rider-waite` `/blog/tarot-job-interview-one-card` `/blog/tarot-love-3-cards-feelings` `/blog/tarot-love-reading-guide` `/blog/tarot-single-timing-love` `/blog/tarot-wealth-money-cards`
+
+> 📌 `/spreads/ex-reconciliation` สถานะ "รวบรวมข้อมูลแล้ว - ยังไม่ได้จัดทำดัชนี" = Google คลานแล้วแต่เลือกไม่เก็บ กดซ้ำอาจไม่ช่วย ถ้ารอบหน้ายังไม่เข้าต้องดูที่เนื้อหาหน้า
+
+### [ ] ชุด 3 — บทความที่เหลือ + ไพ่รายใบ 24 (30 หน้า)
+
+`/blog/tarot-yes-no-spread-guide` `/blog/the-devil-love-tarot-guide` `/blog/the-fool-journey-meaning` `/blog/the-tower-and-death-meaning` `/blog/the-wheel-of-fortune-meaning` `/blog/top-10-soulmate-tarot-cards` `/cards/cups-01` `/cards/cups-02` `/cards/cups-03` `/cards/cups-04` `/cards/cups-05` `/cards/cups-06` `/cards/cups-07` `/cards/cups-08` `/cards/cups-09` `/cards/cups-11` `/cards/cups-12` `/cards/cups-13` `/cards/cups-14` `/cards/major-05` `/cards/major-09` `/cards/major-11` `/cards/major-13` `/cards/major-20` `/cards/minor` `/cards/pentacles-02` `/cards/pentacles-05` `/cards/pentacles-06` `/cards/pentacles-07` `/cards/pentacles-08`
+
+> 📌 `/cards/minor` สถานะ "รวบรวมข้อมูลแล้ว - ยังไม่ได้จัดทำดัชนี" เหมือนกัน (คลานล่าสุด 2026-09-14)
+
+### [ ] ชุด 4 — ไพ่รายใบที่เหลือ + หน้าข้อมูลเว็บ (28 หน้า)
+
+`/cards/pentacles-09` `/cards/pentacles-10` `/cards/pentacles-11` `/cards/pentacles-14` `/cards/swords-01` `/cards/swords-02` `/cards/swords-06` `/cards/swords-07` `/cards/swords-08` `/cards/swords-09` `/cards/swords-11` `/cards/swords-13` `/cards/swords-14` `/cards/wands-01` `/cards/wands-02` `/cards/wands-03` `/cards/wands-04` `/cards/wands-05` `/cards/wands-06` `/cards/wands-07` `/cards/wands-08` `/cards/wands-09` `/cards/wands-11` `/cards/wands-12` `/cards/wands-14` `/about` `/contact` `/privacy`
+
+### หลังจบ 4 ชุด
+
+ดูผลได้จากรายงานรายสัปดาห์ (workflow `seo-gsc.yml` วันจันทร์) บรรทัด "เข้าดัชนีแล้ว x / 202" — ไม่ต้อง inspect เองทีละหน้า
+
+---
+
 ## 🛠️ 2026-10-16 (รอบ 244) — แก้ตามผล GSC: title/description ตามคำค้นจริง + ลิงก์ภายในที่ขาด
 
 **ข้อมูลที่ใช้**: โหมดใหม่ `seo:gsc -- pairs` (run [38854232058](https://github.com/luminuy/tarot-web/actions/runs/38854232058) · 318 คู่คำค้นไทย ➔ หน้า) — รู้ว่าคำค้นไหนไปขึ้นหน้าไหน
@@ -361,7 +397,7 @@ _หน้าที่ซ้ำกัน_ ฯลฯ) ➔ **ยิงเฉพา
 
 ---
 
-## 🇹🇭 คิวหลัก — 127 หน้าไทยที่ Google ไม่เคยคลานเลย (5 ชุด)
+## 🇹🇭 ~~คิวหลัก — 127 หน้าไทยที่ Google ไม่เคยคลานเลย (5 ชุด)~~ (เก่า — ใช้คิว 2026-10-20 ด้านบนแทน)
 
 > **คำสั่งเจ้าของ 2026-09-09**: _"ต้องทำฝั่งไทยให้เสร็จให้หมดก่อน เพราะเราทำตลาดไทย"_
 > คิว `/en` ที่เหลือ 89 URL **พักไว้** จนกว่าไทยจะจบ (รายการเดิมอยู่ท้ายไฟล์)
