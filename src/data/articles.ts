@@ -1657,10 +1657,5 @@ export function getArticleSummaries(): ArticleSummary[] {
   );
 }
 
-export {
-  getArticleTitle,
-  getArticleDescription,
-  getArticleCategory,
-  getArticleAuthor,
-} from "./article-helpers";
+export { getArticleTitle, getArticleDescription } from "./article-helpers";
 

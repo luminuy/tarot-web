@@ -11,24 +11,29 @@ concurrency:
   group: pr-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
+# 🔒 A10-04: สิทธิ์ระดับ workflow เหลืออ่านอย่างเดียว — แต่ละ job ขอสิทธิ์เขียนเท่าที่ใช้จริงเอง
+# เดิมทุก job ได้เขียน contents/checks/statuses/actions รวมถึง job ตรวจ PR ที่รัน `npm ci` (lifecycle script ของแพ็กเกจ)
+# แพ็กเกจที่ถูกยึดจึงสร้าง check run ปลอม/สั่ง deploy.yml ได้ด้วยโทเคนของ job นั้น
 permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-  statuses: write
-  checks: write
-  actions: write   # ต้องมีเพื่อสั่ง dispatch deploy.yml หลัง merge สำเร็จ
+  contents: read
 
 jobs:
   pr-verification:
     name: 🧪 Automated Verification & Quality Audit
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
+    # job นี้แค่ติดป้าย + คอมเมนต์บน PR ➔ ไม่ต้องเขียนโค้ด/เช็ก/สถานะ/ไม่ต้องสั่ง workflow อื่น
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 0
+          # ไม่ทิ้งโทเคนไว้ใน .git/config ให้สคริปต์ตอน `npm ci` / build อ่าน (รีโปสาธารณะ — git fetch ต่อได้โดยไม่ต้องล็อกอิน)
+          persist-credentials: false
 
       - name: ⚙️ Setup Node.js 22
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
@@ -219,6 +224,31 @@ jobs:
             if (!pr) {
               console.log('ℹ️ ไม่ใช่ pull_request event — ข้าม auto-merge');
               return;
+            }
+
+            // 🔒 A10-02: PR ของ dependabot ที่ยกแพ็กเกจซึ่งประกอบเป็น Worker (next · wrangler · @opennextjs/*)
+            // ไม่ merge เอง — บิลด์และด่านทั้งชุดผ่านได้ทั้งที่ Worker ล้มตอนรันจริง (INC-0285)
+            // ต้องมีคนลอง `opennextjs-cloudflare build` + `wrangler dev` ยิง /api/auth/me แล้วกด merge เอง
+            if (pr.user && pr.user.login === 'dependabot[bot]') {
+              const prFiles = await github.paginate(github.rest.pulls.listFiles, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                per_page: 100
+              });
+              const pkgFile = prFiles.find((f) => f.filename === 'package.json');
+              const touchesWorker = !!pkgFile && /^[+-]\s*"(next|wrangler|@opennextjs\/[^"]+)"\s*:/m.test(pkgFile.patch || '');
+              if (touchesWorker) {
+                console.log('🛑 PR ของ dependabot แตะ next/wrangler/@opennextjs — ไม่ auto-merge รอคนตรวจ');
+                core.notice('PR ของ dependabot ที่แตะ next / wrangler / @opennextjs ไม่ถูก merge อัตโนมัติ — ลองบิลด์ Worker แล้วรันจริงก่อน แล้วกด merge เอง');
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: '🛑 PR นี้ยกแพ็กเกจที่ประกอบเป็น Worker (`next` / `wrangler` / `@opennextjs/*`) จึงไม่ถูก merge อัตโนมัติ (A10-02 · INC-0285)\n\nก่อนกด merge: รัน `npm run build:worker` แล้ว `npx wrangler dev` ยิง `/api/auth/me` และ `/readers` ให้ตอบปกติ · ถ้าเป็นคู่ `next` ↔ `@opennextjs/cloudflare` ให้ยกสองตัวพร้อมกันและอัปเดต `PROVEN_PAIR` ใน `scripts/qa/test-next-adapter-pair.ts`'
+                });
+                return;
+              }
             }
 
             // Perform automated squash merge

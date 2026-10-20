@@ -112,7 +112,7 @@ export async function upsertUserOnLogin(p: {
  * เดิมไม่มีใครคืนชีพ ➔ ออกคุกกี้ให้ id ที่ถูกลบ ➔ `/api/auth/me` ล้างคุกกี้ทิ้งทันที
  * ผู้ใช้เห็น "ล็อกอินสำเร็จ" แต่ไม่เคยเข้าได้อีกเลย (A1-05)
  *
- * - ใช้ id เดิม (เหตุผลเดียวกับ reviveEmailUser: กันลบแล้วสมัครใหม่วนรับโบนัส)
+ * - ใช้ id เดิม (เหตุผลเดียวกับ stageEmailRevival: กันลบแล้วสมัครใหม่วนรับโบนัส)
  * - ขึ้น token_version เสมอ — คุกกี้ที่ออกก่อนลบบัญชีต้องไม่ฟื้นกลับมาใช้ได้พร้อมบัญชี
  * - ไม่แตะอีเมล: ระหว่างที่บัญชีถูกลบ อีเมลนั้นอาจถูกคนอื่นสมัครไปแล้ว (UNIQUE ชนกัน)
  * - ล้างรหัสผ่านเดิมทิ้ง: บัญชีที่เจ้าของลบไปแล้วต้องไม่ฟื้นรหัสผ่านเก่าขึ้นมาเป็นทางเข้าอีกทาง
@@ -239,44 +239,67 @@ export async function getUserByEmailIncludingDeleted(email: string): Promise<App
 }
 
 /**
- * คืนชีพบัญชีที่ถูกลบไปแล้ว เมื่อเจ้าของกลับมาสมัครด้วยอีเมลเดิม
+ * ขั้นที่ 1 ของการคืนชีพบัญชีที่ถูกลบ เมื่อมีคนสมัครด้วยอีเมลเดิม — "รอยืนยันอีเมล"
  *
  * ใช้ id เดิมโดยตั้งใจ — โบนัสสมัครใหม่ผูกกับ `(user_id, reason)` แบบ idempotent
  * ถ้าสร้าง id ใหม่ทุกครั้งจะกลายเป็นช่องให้ลบบัญชีแล้วสมัครใหม่วนรับโบนัสไม่รู้จบ
- * (ฝั่ง OAuth ก็คืนชีพด้วย `deleted_at = NULL` ใน upsertUserOnLogin อยู่แล้ว — ทำให้ตรงกัน)
+ * (ฝั่ง OAuth ก็คืนชีพ id เดิมใน reviveOAuthUser — ทำให้ตรงกัน)
+ *
+ * ⚠️ แถวยังคงสถานะ "ถูกลบ" (`deleted_at` ไม่ถูกล้าง) จนกว่าจะกดลิงก์ยืนยันในอีเมล (A1-04)
+ * การสมัครด้วยอีเมลไม่ได้พิสูจน์ว่าเป็นเจ้าของอีเมลนั้น — ถ้าคืนชีพทันที คนที่แค่รู้อีเมล
+ * จะได้เซสชันของ id เดิมพร้อมทุกอย่างที่ผูกกับ id นั้น · ระหว่างรอยืนยัน `getUserByEmail`/
+ * `getUserById` ยังมองไม่เห็นแถวนี้ จึงล็อกอินด้วยรหัสผ่านนี้ไม่ได้
+ * การสมัครซ้ำก่อนยืนยันจะเขียนรหัสผ่าน/ชื่อที่รอไว้ทับ (คนกดลิงก์ล่าสุดในกล่องอีเมลคือคนตัดสิน)
+ * ล็อกอิน Google/LINE ด้วยอีเมลนี้ระหว่างรอ ➔ reviveOAuthUser ล้างรหัสผ่านที่รอไว้ทิ้งเอง
  */
-export async function reviveEmailUser(p: {
+export async function stageEmailRevival(p: {
   id: string;
   email: string;
   name: string;
   passwordHash: string;
-}): Promise<AppUser> {
+}): Promise<void> {
   const db = await getAppDB();
-  const now = Date.now();
   const emailLower = normalizeEmail(p.email);
 
   await db
     .prepare(
       `UPDATE users
-       SET deleted_at = NULL,
-           provider = 'email',
-           email = ?,
+       SET email = ?,
            email_lower = ?,
            name = ?,
            password_hash = ?,
-           email_verified = 0,
+           email_verified = 0
+       WHERE id = ? AND deleted_at IS NOT NULL`
+    )
+    .bind(p.email.trim(), emailLower, p.name.trim(), p.passwordHash, p.id)
+    .run();
+}
+
+/**
+ * ขั้นที่ 2 — เจ้าของอีเมลกดลิงก์ยืนยันแล้ว ➔ คืนชีพบัญชีที่รอไว้จาก stageEmailRevival
+ *
+ * ทำงานเฉพาะแถวที่ยังถูกลบและมีรหัสผ่านรออยู่เท่านั้น (บัญชีปกติไม่โดนแตะ)
+ * ขึ้น token_version เสมอ — คุกกี้ที่ออกก่อนลบบัญชีต้องไม่ฟื้นกลับมาใช้ได้พร้อมบัญชี
+ * คืนผู้ใช้ที่คืนชีพแล้ว หรือ null เมื่อไม่มีการคืนชีพที่รออยู่
+ */
+export async function completeEmailRevival(userId: string): Promise<AppUser | null> {
+  const db = await getAppDB();
+  const res = await db
+    .prepare(
+      `UPDATE users
+       SET deleted_at = NULL,
+           provider = 'email',
+           email_verified = 1,
            token_version = token_version + 1,
            last_seen_at = ?
-       WHERE id = ?`
+       WHERE id = ? AND deleted_at IS NOT NULL
+         AND password_hash IS NOT NULL AND password_hash <> ''`
     )
-    .bind(p.email.trim(), emailLower, p.name.trim(), p.passwordHash, now, p.id)
+    .bind(Date.now(), userId)
     .run();
 
-  const user = await getUserById(p.id);
-  if (!user) {
-    throw new Error("ไม่สามารถคืนชีพบัญชีผู้ใช้ได้");
-  }
-  return user;
+  if (!res.meta?.changes) return null;
+  return getUserById(userId);
 }
 
 /**
@@ -443,7 +466,7 @@ export async function softDeleteUser(id: string): Promise<void> {
    * ฐานข้อมูลรั่วเมื่อไหร่ คนที่ลบบัญชีไปแล้วก็รั่วด้วย
    *
    * เก็บไว้เท่าที่จำเป็นเท่านั้น: `id` + อีเมล — ใช้กันการลบบัญชีแล้วสมัครใหม่วนรับโบนัส
-   * (ดู reviveEmailUser) และเป็นกุญแจ UNIQUE ที่กันการสมัครซ้อนอีเมลเดียวกัน
+   * (ดู stageEmailRevival) และเป็นกุญแจ UNIQUE ที่กันการสมัครซ้อนอีเมลเดียวกัน
    * ถอดการผูก OAuth ทิ้ง — กลับมาล็อกอินใหม่จะเข้าเส้นทางคืนชีพด้วยอีเมล/ id เดิมเอง (A1-05 · A1-07)
    */
   await db

@@ -1,10 +1,13 @@
 import { getAppDB } from "@/lib/platform/db";
 import { APP_TIME_ZONE } from "@/lib/time/bangkok";
 import {
+  canMarkNoShow,
   canReschedule,
+  customerMissedRoom,
   decideCancellation,
   generateSlots,
   HOLD_MINUTES,
+  readerMissedRoom,
   MAX_RESCHEDULES,
   PAID_GRACE_MINUTES,
   slotMs,
@@ -18,7 +21,13 @@ import {
   type SlotDay,
 } from "@/lib/marketplace/booking-policy";
 import { expireGatewayCharge, refundGatewayCharge } from "@/lib/marketplace/payment-gateway";
-import { sendBookingCancelled, sendBookingConfirmed, sendBookingRescheduled } from "@/lib/marketplace/booking-mail";
+import {
+  sendBookingCancelled,
+  sendBookingConfirmed,
+  sendBookingNoShow,
+  sendBookingRescheduled,
+} from "@/lib/marketplace/booking-mail";
+import { getRoomAttendance } from "@/lib/marketplace/call.repo";
 import { getPaymentById, type PaymentRecord } from "@/lib/marketplace/payments.repo";
 import { getQueueTicketById, ticketExpiresAt, type QueueTicket } from "@/lib/marketplace/queue.repo";
 
@@ -309,6 +318,14 @@ export async function listPaymentsForTicket(ticketId: string): Promise<PaymentRe
   return out;
 }
 
+/**
+ * รายการจ่ายที่ "ทำให้ได้นัด" — `paid` ที่ไม่ติดธงต้องคืน
+ * รายการจ่ายซ้ำที่ระบบกำลังตามคืน (`refund_due = 1`) ก็เป็น `paid` เหมือนกัน แต่ไม่ใช่ตัวนี้
+ */
+export function primaryPaidPayment(payments: readonly PaymentRecord[]): PaymentRecord | null {
+  return payments.find((p) => p.status === "paid" && !p.refundDue) ?? payments.find((p) => p.status === "paid") ?? null;
+}
+
 export type HoldResult = { ok: true; booking: BookingRecord } | { ok: false; reason: "slot_taken" };
 
 /**
@@ -578,7 +595,9 @@ export async function cancelConsultation(
   const db = await getAppDB();
   const booking = await getBookingByTicketId(ticket.id);
   const payments = await listPaymentsForTicket(ticket.id);
-  const paidPayment = payments.find((p) => p.status === "paid") ?? null;
+  const paidPayment = primaryPaidPayment(payments);
+  // แม่หมอเริ่มนัดแล้วแต่ไม่เคยเข้าห้อง (ลูกค้ารอในห้องครบเวลา) — หลักฐานจากห้องวิดีโอฝั่งเซิร์ฟเวอร์
+  const room = actor === "customer" && ticket.status === "ready" ? await getRoomAttendance(ticket.id) : null;
   const decision = decideCancellation({
     actor,
     kind: ticket.kind,
@@ -588,6 +607,7 @@ export async function cancelConsultation(
     nowMs,
     // เวลาที่จ่ายสำเร็จ = updated_at ของรายการที่ paid (settle ตั้งตอนเปลี่ยนเป็น paid)
     paidAt: paidPayment?.updatedAt ?? null,
+    readerMissedRoom: readerMissedRoom(room, nowMs),
   });
   if (!decision.allowed) return { ok: false, reason: decision.reason, refundStatus: null };
 
@@ -599,7 +619,9 @@ export async function cancelConsultation(
 
   let refundStatus: RefundStatus | null = paidPayment ? "none" : null;
   if (decision.refund && paidPayment) {
-    refundStatus = (await refundPaymentRecord(paidPayment)) ? "refunded" : "failed";
+    // คืนทุกรายการที่ยังเป็น paid ของตั๋วนี้ (รวมรายการจ่ายซ้ำที่ค้างคืน) — ไม่ใช่แค่รายการแรกที่เจอ
+    const results = await Promise.all(payments.filter((p) => p.status === "paid").map((p) => refundPaymentRecord(p)));
+    refundStatus = results.every(Boolean) ? "refunded" : "failed";
   }
   if (booking) {
     await db
@@ -632,7 +654,7 @@ export async function rescheduleBooking(
   if (!booking || booking.kind !== "scheduled" || booking.status !== "confirmed") {
     return { ok: false, error: "นัดนี้เลื่อนไม่ได้", status: 400 };
   }
-  const paidAt = (await listPaymentsForTicket(ticket.id)).find((p) => p.status === "paid")?.updatedAt ?? null;
+  const paidAt = primaryPaidPayment(await listPaymentsForTicket(ticket.id))?.updatedAt ?? null;
   if (
     !canReschedule({
       ticketStatus: ticket.status,
@@ -700,21 +722,32 @@ export async function completeBooking(ticketId: string): Promise<void> {
   await db.prepare("UPDATE bookings SET status = 'done' WHERE ticket_id = ? AND status = 'confirmed'").bind(ticketId).run();
 }
 
-/** แม่หมอแจ้งลูกค้าไม่มาตามนัด (หลังเวลานัด 15 นาที) ➔ ไม่คืนเงิน */
-export async function markNoShow(ticket: QueueTicket, nowMs = Date.now()): Promise<boolean> {
+export type NoShowResult = { ok: true } | { ok: false; reason: "too_early" | "not_started" | "no_evidence" | "changed" };
+
+/**
+ * แม่หมอแจ้งลูกค้าไม่มาตามนัด ➔ ไม่คืนเงิน · ส่งอีเมลแจ้งลูกค้าทุกครั้ง
+ * ยอมเฉพาะเมื่อมีหลักฐานจริง: เลยเวลานัด 15 นาที · แม่หมอกดเริ่มนัดแล้ว (`ready`)
+ * · แม่หมอเปิดห้องรอครบ 15 นาทีและลูกค้าไม่เคยเข้าห้อง (`customerMissedRoom`)
+ * ตั๋วที่ยังรออยู่ (`waiting`) เลยเวลานัด = แม่หมอยังไม่เริ่ม ตามข้อตกลงคือฝั่งลูกค้าได้เงินคืนเต็ม ไม่ใช่ "ลูกค้าไม่มา"
+ */
+export async function markNoShow(ticket: QueueTicket, nowMs = Date.now()): Promise<NoShowResult> {
+  if (ticket.kind !== "booking" || !canMarkNoShow(ticket.slotStart, nowMs)) return { ok: false, reason: "too_early" };
+  if (ticket.status !== "ready") return { ok: false, reason: "not_started" };
+  if (!customerMissedRoom(await getRoomAttendance(ticket.id), nowMs)) return { ok: false, reason: "no_evidence" };
   const db = await getAppDB();
   const res = await db
-    .prepare("UPDATE queue_tickets SET status = 'expired' WHERE id = ? AND status IN ('waiting', 'ready')")
+    .prepare("UPDATE queue_tickets SET status = 'expired' WHERE id = ? AND status = 'ready'")
     .bind(ticket.id)
     .run();
-  if ((res.meta?.changes ?? 0) === 0) return false;
+  if ((res.meta?.changes ?? 0) === 0) return { ok: false, reason: "changed" };
   await db
     .prepare(
       "UPDATE bookings SET status = 'no_show', cancelled_at = ?, cancelled_by = 'reader', refund_status = 'none' WHERE ticket_id = ? AND status = 'confirmed'"
     )
     .bind(nowMs, ticket.id)
     .run();
-  return true;
+  await sendBookingNoShow(ticket.id);
+  return { ok: true };
 }
 
 /* ── แผงแอดมิน: การจองและการเงิน ─────────────────────────────────────────── */

@@ -3,7 +3,8 @@ import type { SpreadPosition } from "@/data/spreads";
 /**
  * 📐 เรขาคณิตของแผนผังตำแหน่งไพ่ (Spread Position Map Geometry)
  *
- * ⚠️ **แหล่งความจริงเดียว** ของตัวเลขที่ `SpreadPositionMap.tsx` ใช้วาด
+ * ⚠️ **แหล่งความจริงเดียว** ของตัวเลขที่ผู้วาดแผนผังจริงใช้ (`SpreadsLibrary` · `SpreadDetailClient` ·
+ * `SpreadBoard` · `TopicSpreadList` · `RitualChrome` · `SpreadBuilder` และแอป `mobile/`)
  * และที่ `scripts/qa/test-spreads.ts` ใช้ตรวจ
  *
  * ทำไมต้องแยกออกมาเป็นโมดูล — ISSUE-034 หลุดมาได้เพราะตัวเลขชุดนี้เคยอยู่ **สองที่**

@@ -42,6 +42,7 @@ import { createClientSeed } from "@/lib/tarot/client-seed";
  */
 import type { DerivedDrawDetail, DerivedDrawInput } from "@/lib/reading/derived-draw";
 import { readMySign } from "@/lib/zodiac/my-sign";
+import { friendlyError } from "@/lib/reading/friendly-error";
 
 /** หลักฐาน Provably Fair ที่เซิร์ฟเวอร์เปิดเผยหลังอ่านจบ */
 export interface ReadingProof {
@@ -310,11 +311,13 @@ export function useAiReading(): AiReadingController {
       if ((err as Error)?.name === "AbortError") return true;
       dispatch({
         type: "fail",
-        message:
-          (err as Error)?.message ||
-          (isEnglish
+        message: friendlyError(
+          err,
+          isEnglish,
+          isEnglish
             ? "Oracle connection momentarily lost. Please reload and try again."
-            : "แม่หมอเชื่อมสัญญาณไม่ติดสักครู่ กรุณากดโหลดใหม่อีกครั้ง"),
+            : "แม่หมอเชื่อมสัญญาณไม่ติดสักครู่ กรุณากดโหลดใหม่อีกครั้ง",
+        ),
       });
     }
     return true;
@@ -504,7 +507,7 @@ export function useAiReading(): AiReadingController {
       } catch (err) {
         if ((err as Error)?.name === "AbortError") return;
         setIsPreparing(false);
-        dispatch({ type: "fail", message: (err as Error)?.message || failMessage });
+        dispatch({ type: "fail", message: friendlyError(err, isEnglish, failMessage) });
       }
     },
     [isEnglish, locale, streamRead]

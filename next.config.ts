@@ -7,6 +7,12 @@ import {
   SECURITY_HEADERS,
 } from "./src/lib/config/security-headers";
 
+/**
+ * โฮสต์ `*.workers.dev` ของ Worker ตัวจริง (ไม่ใช่ alternate host ของโดเมนหลัก — ไม่ผ่านไฟล์ canonical-host)
+ * regex ถูกยึดหัวท้ายโดย Next/OpenNext (`^…$`) · ชื่อ Worker preview (`tarot-web-preview.*`) ไม่เข้าเงื่อนไข
+ */
+const PRODUCTION_WORKERS_DEV_HOST = "tarot-web\\.[^.]+\\.workers\\.dev";
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
@@ -124,6 +130,25 @@ const nextConfig: NextConfig = {
           statusCode: 301,
         },
       ]),
+      /**
+       * 🔒 โฮสต์ `tarot-web.<บัญชี>.workers.dev` ไม่ใช่ทางเข้า `/api/*` ของผู้ใช้ (A10-07)
+       *
+       * Worker ตัวเดียวกันเปิดอยู่ที่โฮสต์นี้ด้วย แต่โฮสต์นี้อยู่นอกโซน `seertarot.net` ➔ กฎ WAF / เพดานถี่ของโซน
+       * ไม่ครอบ จึงส่ง `/api/*` กลับไปทางโดเมนหลัก (ที่กฎของโซนทำงาน) ด้วย 307 ที่คงเมทอดเดิมไว้
+       *
+       * ยกเว้น `/api/cron/*` เท่านั้น — ตัวจับเวลาใน `.github/workflows/*.yml` ยิงเข้าโฮสต์นี้โดยตั้งใจ
+       * (Bot Fight Mode ของโซนท้าทาย IP ของ GitHub · INC-0142) และทุกเส้นนั้นตรวจ Bearer `CRON_SECRET` เองแบบ fail-closed
+       * หน้าเว็บ (`/readers` ฯลฯ) ไม่เกี่ยว: ใช้เป็นจุดยืนยันว่า Worker ยังรันได้ในด่านหลัง deploy (`.github/scripts/worker-smoke.sh`)
+       *
+       * โฮสต์ preview (`tarot-web-preview.*`) ไม่เข้าเงื่อนไข — ชื่อ Worker ต่างกัน จึงยังทดลอง API บน preview ได้
+       * ⚠️ `has` ต้องตามหลัง `source` ทันที — ด่าน test-worker-first-routes แยกกฎผูกโฮสต์ออกจากกฎ path ด้วยรูปนี้
+       */
+      {
+        source: "/api/:path((?!cron/).+)",
+        has: [{ type: "host" as const, value: PRODUCTION_WORKERS_DEV_HOST }],
+        destination: `${CANONICAL_ORIGIN}/api/:path`,
+        statusCode: 307,
+      },
       // ⚠️ redirect ของ URL เก่า (บทความเปลี่ยน slug · /love · /tarot ฯลฯ) ย้ายไป `public/_redirects` แล้ว (A6-05)
       //    ที่นี่ไม่เคยทำงานบน production: เส้นที่ไม่ตรงไฟล์ static และไม่อยู่ใน `run_worker_first`
       //    ถูกขอบตอบ 404.html ทันที ไม่ถึง Worker · `_redirects` ของ Workers Assets ทำงานที่ขอบก่อน

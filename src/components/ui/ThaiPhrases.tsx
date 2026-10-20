@@ -16,7 +16,7 @@ import { Children, cloneElement, isValidElement, type ReactElement, type ReactNo
  *   • ข้อความที่ไม่มีอักษรไทยปล่อยไว้ตามเดิม (อังกฤษตัดตรงช่องว่างอยู่แล้ว)
  *
  * ⚠️ ห้ามใช้กับหัวข้อที่ `truncate` (บรรทัดเดียว) — `line-clamp` ใช้ได้ (ทดสอบแล้ว จุดไข่ปลายังขึ้น)
- * ⚠️ ด่าน `scripts/qa/test-thai-heading-phrases.ts` สแกน HTML ใน dist/ ว่าหัวข้อไทยที่มีหลายวลีห่อ `.tp` ครบ
+ * ⚠️ ด่านส่วนที่ 3 ใน `scripts/qa/test-thai-glyph-clipping.ts` สแกน HTML ใน dist/ ว่าหัวข้อไทยที่มีหลายวลีห่อ `.tp` ครบ
  */
 
 const THAI = /[฀-๿]/;

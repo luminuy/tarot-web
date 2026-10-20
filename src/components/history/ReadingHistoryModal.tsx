@@ -18,6 +18,7 @@ import { stripEmojiDeep } from "@/lib/text/no-emoji";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { CloseIcon } from "@/components/ui/LineIcons";
+import { JournalCrisisListener } from "@/components/journal/JournalCrisisListener";
 
 interface ReadingHistoryModalProps {
   isOpen: boolean;
@@ -212,6 +213,9 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
   });
 
   return (
+    <>
+    {/* บันทึกผลจริงที่มีสัญญาณวิกฤต ➔ หน้าต่างสายด่วน 1323 (กฎเหล็กข้อ 6 · A3-07) */}
+    <JournalCrisisListener />
     <AnimatePresence>
       {/* ⚠️ เงื่อนไข `isOpen` ต้องอยู่ **ข้างใน** `AnimatePresence` เท่านั้น (INC-0126 · กฎข้อ 9 ของด่าน test-motion-quality)
           ถ้าเขียน `if (!isOpen) return null` ไว้ข้างบน ตัว AnimatePresence จะหายไปพร้อมลูกในเฟรมเดียวกัน
@@ -747,7 +751,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                             <span className="text-[13px] text-gold-ink font-bold block font-serif-th">
                               {isEn ? "Guidance & Action Steps:" : "คำแนะนำและสิ่งที่ควรทำ:"}
                             </span>
-                            <ul className="list-disc list-inside space-y-0.5 text-ink text-[13px] pt-1 font-serif-th">
+                            <ul className="list-rule space-y-0.5 text-ink text-[13px] mt-1 font-serif-th">
                               {item.advice.map((adv, idx) => (
                                 <li key={idx}>{adv}</li>
                               ))}
@@ -771,5 +775,6 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
       </motion.div>
       )}
     </AnimatePresence>
+    </>
   );
 };

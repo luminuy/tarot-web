@@ -116,6 +116,18 @@ for (const file of tapFiles) {
   }
 }
 
+/* A6-06/A6-05: ลิงก์ท้ายเว็บ (คอลัมน์ลิงก์ + แถวเกี่ยวกับเรา/ติดต่อ/ราคา/นโยบาย) เป็นข้อความเปล่าสูง ~19px — ต้องมี tap-overlay-y */
+{
+  const footerSrc = fs.readFileSync(path.join(ROOT, "src/components/layout/SiteFooter.tsx"), "utf8");
+  const footerLinks = [...footerSrc.matchAll(/<Link href=(?:\{link\.href\}|\{href\}|"\/(?:about|contact|pricing|privacy)")[^>]*>/g)].map((m) => m[0]);
+  const bare = footerLinks.filter((tag) => !/\btap-overlay-y\b/.test(tag));
+  if (footerLinks.length < 6 || bare.length > 0) {
+    console.error(`❌ QA FAILED — ลิงก์ท้ายเว็บต้องมี tap-overlay-y (พบ ${footerLinks.length} ลิงก์ · ขาด ${bare.length})`);
+    for (const tag of bare) console.error(`      • ${tag}`);
+    process.exit(1);
+  }
+}
+
 if (offenders.length > MAX_SMALL_BUTTONS) {
   console.error(
     `❌ QA FAILED — ปุ่มที่พื้นที่กดเล็กเกินเกณฑ์มี ${offenders.length} จุด เกินเพดาน ${MAX_SMALL_BUTTONS}`

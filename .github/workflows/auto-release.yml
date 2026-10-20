@@ -35,7 +35,7 @@ jobs:
           body: |
             ## 🌟 Production Release Overview
             
-            - **Live Production URL**: [https://tarot-web.bankjack10452.workers.dev](https://tarot-web.bankjack10452.workers.dev)
+            - **Live Production URL**: [https://seertarot.net](https://seertarot.net)
             - **Edge Network Target**: Cloudflare Workers (Bangkok BKK Edge)
             - **Verified Features**: 78 Cards Encyclopedia, 26 Spreads, Real-time AI SSE Streaming, Provably-Fair SHA-256 Shuffling.
             

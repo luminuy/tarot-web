@@ -183,7 +183,7 @@ export function PickACardBodyTh({ ritual }: { ritual: ReactNode }) {
             <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
               ความหมายของคริสตัลทั้ง 4 ชนิดประจำกองไพ่
             </ThaiPhrases></h3>
-            <ul className="list-disc pl-5 space-y-2 text-muted">
+            <ul className="list-rule space-y-2 text-muted">
               <li>
                 <strong className="text-ink">กองที่ 1 โรสควอตซ์ (Rose Quartz):</strong> หินแห่งความอ่อนโยน
                 การเปิดใจรับความรัก และการเยียวยาบาดแผลทางอารมณ์ เหมาะสำหรับคนที่ต้องการความอบอุ่นและคำปลอบประโลมใจ

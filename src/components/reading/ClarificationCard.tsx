@@ -4,6 +4,7 @@ import React from "react";
 import type { Persona } from "@/data/personas";
 import { CardImage } from "@/components/card/CardImage";
 import { useLocale } from "@/lib/i18n";
+import { CLARIFY_ANSWER_MAX } from "@/lib/reading/start-limits";
 
 interface ClarificationCardProps {
   question: string;
@@ -63,6 +64,8 @@ export const ClarificationCard: React.FC<ClarificationCardProps> = ({
             aria-label="คำตอบของคุณสำหรับคำถามจากแม่หมอ"
           rows={2}
           value={answer}
+          // เซิร์ฟเวอร์รับเรื่องราวเพิ่มเติมได้จำกัด — จำกัดตั้งแต่ช่องพิมพ์ ไม่ให้ตอบยาวแล้วกดเริ่มไม่ผ่านซ้ำ ๆ (A4-07)
+          maxLength={CLARIFY_ANSWER_MAX}
           onChange={(e) => onAnswerChange(e.target.value)}
           placeholder={
             isEnglish
@@ -77,6 +80,9 @@ export const ClarificationCard: React.FC<ClarificationCardProps> = ({
             {isEnglish
               ? "Your answer deepens reading precision (skippable anytime)"
               : "คำตอบจะช่วยให้คำทำนายตรงจุดยิ่งขึ้น (กดข้ามได้เสมอ)"}
+            <span className="ml-2 tabular-nums">
+              {answer.length}/{CLARIFY_ANSWER_MAX}
+            </span>
           </p>
 
           <div className="flex items-center gap-2 sm:gap-3 ml-auto">

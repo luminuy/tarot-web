@@ -425,6 +425,8 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
     }
   }
 
+  if (ctx.usageMeter) ctx.usageMeter.promptChars = systemInstruction.length + userMessage.length;
+
   for (const [readingAttempt, model] of readingModels.entries()) {
     if (ctx.retryBudget && !ctx.retryBudget.take()) return;
     const state = createReadingStreamState();

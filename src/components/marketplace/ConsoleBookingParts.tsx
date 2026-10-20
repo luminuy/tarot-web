@@ -10,7 +10,6 @@ import {
   BUFFER_OPTIONS,
   DEFAULT_LEAD_MIN,
   dayChipParts,
-  canMarkNoShow,
   canStartBooking,
   EARLY_START_MINUTES,
   formatCountdown,
@@ -183,7 +182,7 @@ export function UpcomingBookings({
   tickets: QueueTicket[];
   nowMs: number;
   busyId: string | null;
-  onAction: (ticketId: string, action: "accept" | "cancel" | "no_show") => void;
+  onAction: (ticketId: string, action: "accept" | "cancel") => void;
 }) {
   const sorted = [...tickets].sort((a, b) => (a.slotStart ?? 0) - (b.slotStart ?? 0));
   return (
@@ -202,7 +201,6 @@ export function UpcomingBookings({
         <ul className="altar-card-porcelain !rounded-2xl divide-y divide-line-warm/70">
           {sorted.map((t) => {
             const startable = canStartBooking(t.slotStart, nowMs);
-            const noShow = canMarkNoShow(t.slotStart, nowMs);
             return (
               <li key={t.id} className="space-y-2.5 p-4 sm:p-5">
                 <div className="flex flex-wrap items-start justify-between gap-2">
@@ -234,18 +232,6 @@ export function UpcomingBookings({
                   >
                     เริ่มนัด
                   </button>
-                  {noShow && (
-                    <button
-                      type="button"
-                      disabled={busyId === t.id}
-                      onClick={() => {
-                        if (window.confirm("แจ้งว่าลูกค้าไม่มาตามนัด? (ไม่มีการคืนเงิน)")) onAction(t.id, "no_show");
-                      }}
-                      className="min-h-[40px] rounded-full border border-line-warm px-4 font-serif-th text-xs font-semibold text-ink cursor-pointer"
-                    >
-                      ลูกค้าไม่มา
-                    </button>
-                  )}
                   <button
                     type="button"
                     disabled={busyId === t.id}

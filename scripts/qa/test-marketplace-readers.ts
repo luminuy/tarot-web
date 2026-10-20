@@ -191,6 +191,11 @@ async function runTest() {
   // 2. Create Booking First to satisfy Foreign Key
   const { getAppDB } = await import("../../src/lib/platform/db");
   const db = await getAppDB();
+  // ตัวนับเพดานข้าม isolate อยู่ในไฟล์ .dev-marketplace.db ที่ค้างข้ามรอบ — รันด่านซ้ำภายในอายุตัวนับ (เช่น 36 นาทีของการกันที่)
+  // จะชนเพดานของรอบก่อนแล้วได้ 429 · ล้างเฉพาะตัวนับของระบบนัด/รายชื่อรอก่อนเริ่ม ให้ผลด่านไม่ขึ้นกับรอบก่อนหน้า
+  await db
+    .prepare("DELETE FROM edge_rate_buckets WHERE key LIKE 'app:edgerl:mkt_hold:%' OR key LIKE 'app:edgerl:waitlist:%'")
+    .run();
   const testBookingId = `book_test_${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`;
   const now = Date.now();
   await db
@@ -510,6 +515,64 @@ async function runTest() {
   const purgedCount = await cleanupExpiredTickets();
   console.log(`  ✓ 13. PDPA Data Retention: Auto-cleanup expired tickets (${purgedCount} purged)`);
 
+  // 13.1 (A2-01) ตั๋วหมดอายุ: ไม่มีเงินผ่านมือ ➔ ลบทั้งแถว · มีเงินผ่านมือ ➔ เก็บแถวการเงิน ล้างข้อมูลส่วนบุคคล
+  // 13.2 (A2-08) คืนรายการจ่ายซ้ำที่ค้างคืน ➔ ปิดเรื่องเงินอย่างเดียว นัดของรายการแรกยังอยู่
+  {
+    const { getAppDB } = await import("../../src/lib/platform/db");
+    const { applyGatewayRefund } = await import("../../src/lib/marketplace/refund-sync");
+    const db = await getAppDB();
+    const t0 = Date.now();
+    const run = String(t0); // ฐานข้อมูลทดสอบในเครื่องอยู่ข้ามรอบ — id ต้องไม่ซ้ำรอบก่อน (แถวการเงินถูกเก็บไว้ตามตั้งใจ)
+    const addTicket = async (id: string, status: string, expiresAt: number) => {
+      await db
+        .prepare(
+          `INSERT INTO queue_tickets (id, reader_id, kind, status, position, slot_start, customer_ref, nickname, question, reading_snapshot, ai_screen_id, created_at, expires_at)
+           VALUES (?, ?, 'booking', ?, NULL, ?, 'cust_retention', 'ชื่อทดสอบ', 'คำถามทดสอบ', '[]', NULL, ?, ?)`
+        )
+        .bind(id, created.id, status, t0 - 8 * 86_400_000, t0 - 9 * 86_400_000, expiresAt)
+        .run();
+      await db
+        .prepare(
+          "INSERT INTO bookings (id, ticket_id, reader_id, slot_start, slot_end, status, created_at, contact_email) VALUES (?, ?, ?, ?, ?, 'done', ?, 'retention@example.com')"
+        )
+        .bind(`bk_${id}`, id, created.id, t0 - 8 * 86_400_000 + (id.startsWith("tkt_ret_money") ? 0 : 1), t0 - 8 * 86_400_000 + 1_800_000, t0)
+        .run();
+    };
+    const addPayment = async (id: string, ticketId: string, status: string, refundDue = 0) => {
+      await db
+        .prepare(
+          "INSERT INTO payments (id, booking_id, ticket_id, provider, amount_satang, currency, status, refund_due, created_at, updated_at) VALUES (?, ?, ?, 'stripe', 29900, 'THB', ?, ?, ?, ?)"
+        )
+        .bind(id, `bk_${ticketId}`, ticketId, status, refundDue, t0, t0)
+        .run();
+    };
+    await addTicket(`tkt_ret_nomoney_${run}`, "expired", t0 - 1000);
+    await addPayment(`pay_ret_nomoney_${run}`, `tkt_ret_nomoney_${run}`, "expired");
+    await addTicket(`tkt_ret_money_${run}`, "handed_off", t0 - 1000);
+    await addPayment(`pay_ret_money_${run}`, `tkt_ret_money_${run}`, "paid");
+    await cleanupExpiredTickets();
+    const one = async (sql: string, id: string) => await db.prepare(sql).bind(id).first<Record<string, unknown>>();
+    if (await one("SELECT id FROM queue_tickets WHERE id = ?", `tkt_ret_nomoney_${run}`)) throw new Error("❌ A2-01: ตั๋วหมดอายุที่ไม่มีเงินผ่านมือต้องถูกลบ");
+    const kept = await one("SELECT nickname, question, reading_snapshot FROM queue_tickets WHERE id = ?", `tkt_ret_money_${run}`);
+    const keptPay = await one("SELECT status FROM payments WHERE id = ?", `pay_ret_money_${run}`);
+    const keptBooking = await one("SELECT contact_email FROM bookings WHERE ticket_id = ?", `tkt_ret_money_${run}`);
+    if (!kept || !keptPay || !keptBooking) throw new Error("❌ A2-01: ตั๋วที่มีเงินผ่านมือต้องเก็บแถวการเงินไว้");
+    if (kept.nickname || kept.question || kept.reading_snapshot || keptBooking.contact_email) {
+      throw new Error("❌ A2-01: ตั๋วหมดอายุที่เก็บแถวการเงินไว้ต้องล้างข้อมูลส่วนบุคคลออก");
+    }
+
+    await addTicket(`tkt_dup_refund_${run}`, "waiting", t0 + 86_400_000);
+    await addPayment(`pay_dup_first_${run}`, `tkt_dup_refund_${run}`, "paid");
+    await addPayment(`pay_dup_second_${run}`, `tkt_dup_refund_${run}`, "paid", 1);
+    const dup = await applyGatewayRefund(`pay_dup_second_${run}`);
+    const after = await one("SELECT status FROM queue_tickets WHERE id = ?", `tkt_dup_refund_${run}`);
+    if (dup !== "marked_refunded" || after?.status !== "waiting") {
+      throw new Error(`❌ A2-08: คืนรายการจ่ายซ้ำแล้วนัดถูกยกเลิก (${dup} · ${String(after?.status)})`);
+    }
+    await db.prepare("UPDATE queue_tickets SET status = 'handed_off' WHERE id = ?").bind(`tkt_dup_refund_${run}`).run();
+  }
+  console.log("  ✓ 13.1 ลบตั๋วหมดอายุเก็บแถวการเงิน ล้างข้อมูลส่วนบุคคล (A2-01) · คืนรายการจ่ายซ้ำไม่ยกเลิกนัด (A2-08)");
+
   // 14. Malformed JSON Body Resilience (POST /api/marketplace/tickets & POST /api/marketplace/payments)
   const { POST: postTicketRoute } = await import("../../src/app/api/marketplace/tickets/route");
   const { POST: postPaymentRoute } = await import("../../src/app/api/marketplace/payments/route");
@@ -558,16 +621,43 @@ async function runTest() {
   await testPrivateRoom(created.id);
 
   // Cleanup test reader
-  await deleteReader(created.id);
   {
     const { getAppDB } = await import("../../src/lib/platform/db");
-    const left = await (await getAppDB())
-      .prepare("SELECT COUNT(*) AS count FROM reader_invites WHERE reader_id = ?")
-      .bind(created.id)
+    const { countOpenPaidConsultations } = await import("../../src/lib/marketplace/readers.repo");
+    const db = await getAppDB();
+    const count = async (sql: string) => Number((await db.prepare(sql).bind(created.id).first<{ count: number }>())?.count ?? 0);
+    // A2-11: ยังมีลูกค้าที่จ่ายเงินรออยู่ ➔ ลบแม่หมอไม่ได้ (ไม่ลบอะไรเลย)
+    if ((await countOpenPaidConsultations(created.id)) > 0) {
+      if (await deleteReader(created.id)) throw new Error("❌ A2-11: ลบแม่หมอได้ทั้งที่ยังมีลูกค้าจ่ายเงินรออยู่");
+      if ((await count("SELECT COUNT(*) AS count FROM readers WHERE id = ?")) !== 1) throw new Error("❌ A2-11: ปฏิเสธการลบแล้วแถวแม่หมอต้องอยู่ครบ");
+      // ปิดนัดที่ค้างของข้อมูลทดสอบ แล้วลบจริง
+      await db.prepare("UPDATE queue_tickets SET status = 'handed_off' WHERE reader_id = ? AND status IN ('pending_payment','screening','waiting','ready')").bind(created.id).run();
+      await db.prepare("UPDATE payments SET refund_due = 0 WHERE ticket_id IN (SELECT id FROM queue_tickets WHERE reader_id = ?)").bind(created.id).run();
+    }
+    const paidBefore = await count(
+      "SELECT COUNT(*) AS count FROM payments WHERE status IN ('paid','refunded') AND ticket_id IN (SELECT id FROM queue_tickets WHERE reader_id = ?)"
+    );
+    const paidIds = (
+      await db
+        .prepare("SELECT id FROM payments WHERE status IN ('paid','refunded') AND ticket_id IN (SELECT id FROM queue_tickets WHERE reader_id = ?)")
+        .bind(created.id)
+        .all<{ id: string }>()
+    ).results ?? [];
+    if (!(await deleteReader(created.id))) throw new Error("❌ ลบแม่หมอไม่สำเร็จหลังปิดนัดที่ค้างแล้ว");
+    if ((await count("SELECT COUNT(*) AS count FROM reader_invites WHERE reader_id = ?")) !== 0) {
+      throw new Error("❌ ลบแม่หมอแล้วลิงก์ห้องส่วนตัวต้องหายไปด้วย (FK + ชื่อลูกค้าที่แม่หมอพิมพ์)");
+    }
+    // A10-06: ผลคัดกรอง AI (คำถามเต็มของลูกค้า) ของตั๋วแม่หมอคนนี้ต้องไม่ค้างเป็นแถวกำพร้า
+    const orphan = await db
+      .prepare("SELECT COUNT(*) AS count FROM ai_screening WHERE ticket_id IS NOT NULL AND ticket_id NOT IN (SELECT id FROM queue_tickets)")
       .first<{ count: number }>();
-    if (Number(left?.count ?? 0) !== 0) throw new Error("❌ ลบแม่หมอแล้วลิงก์ห้องส่วนตัวต้องหายไปด้วย (FK + ชื่อลูกค้าที่แม่หมอพิมพ์)");
+    if (Number(orphan?.count ?? 0) !== 0) throw new Error("❌ A10-06: ลบแม่หมอแล้วผลคัดกรอง AI ของตั๋วยังค้าง");
+    // A2-11: แถวการเงินที่มีเงินผ่านมือเก็บไว้เป็นหลักฐาน
+    let kept = 0;
+    for (const row of paidIds) kept += Number((await db.prepare("SELECT COUNT(*) AS count FROM payments WHERE id = ?").bind(row.id).first<{ count: number }>())?.count ?? 0);
+    if (kept !== paidBefore) throw new Error(`❌ A2-11: ลบแม่หมอแล้วรายการเงินหาย (${kept}/${paidBefore})`);
   }
-  console.log("  ✓ 15. ทำความสะอาดข้อมูลทดสอบเรียบร้อย (รวมลิงก์ห้องส่วนตัวของแม่หมอ)");
+  console.log("  ✓ 15. ลบแม่หมอ: ปฏิเสธเมื่อยังมีลูกค้าจ่ายเงินรอ · เก็บรายการเงิน · ไม่ค้างผลคัดกรอง AI · ลิงก์ห้องส่วนตัวหาย (A2-11 · A10-06)");
 
   console.log("\n✨ [QA] Marketplace M4-M7 Test ผ่านครบทุกด่าน 100%!");
 }
@@ -784,11 +874,40 @@ async function testBookingCare(readerId: string) {
     policy.reminderDue(slot, now - 3 * 86_400_000, now), // เหลือ 24 ชม. จองนานแล้ว ➔ 24h
     policy.reminderDue(slot, now - HOUR, now), // เพิ่งจอง ➔ ไม่ส่ง 24h
     policy.reminderDue(now + 60 * 60_000, now - 86_400_000, now), // เหลือ 1 ชม. ➔ 1h
-    policy.reminderDue(now + 5 * HOUR, now - 86_400_000, now), // เหลือ 5 ชม. ➔ ไม่มี
+    // ตัวจับเวลารันห่างเป็นชั่วโมง (A3-05) ➔ เตือนใกล้ถึงเวลาส่งได้ตั้งแต่เหลือ 6 ชม. รอบแรกที่เห็นนัดส่งเลย
+    policy.reminderDue(now + 5 * HOUR, now - 86_400_000, now), // เหลือ 5 ชม. ➔ 1h (เตือนใกล้ถึงเวลา)
     policy.reminderDue(now - 60_000, now - 86_400_000, now), // เลยแล้ว ➔ ไม่มี
+    policy.reminderDue(now + 7 * HOUR, now - 86_400_000, now), // เหลือ 7 ชม. ➔ ยังไม่เตือน
+    policy.reminderDue(now + 5 * HOUR, now - 30 * 60_000, now), // เพิ่งจอง นัดยังไม่ใกล้ ➔ ไม่เตือนซ้ำกับอีเมลยืนยัน
   ];
-  if (r.join(",") !== "24h,,1h,,") throw new Error(`❌ reminderDue ผิด: ${r.join(",")}`);
-  console.log("  ✓ 18.2 เตือนนัดก่อน 24 ชม. / 1 ชม. ถูกจังหวะ (เพิ่งจองไม่เตือนซ้ำ)");
+  if (r.join(",") !== "24h,,1h,1h,,,") throw new Error(`❌ reminderDue ผิด: ${r.join(",")}`);
+  if (!policy.soonReminderTitle(now + 5 * HOUR, now).includes("5 ชั่วโมง")) {
+    throw new Error("❌ หัวเรื่องเตือนใกล้ถึงเวลาต้องบอกเวลาที่เหลือจริง");
+  }
+  console.log("  ✓ 18.2 เตือนนัดก่อน 24 ชม. / ใกล้ถึงเวลา ถูกจังหวะ ทนตัวจับเวลาที่รันห่าง (เพิ่งจองไม่เตือนซ้ำ)");
+
+  // ── 18.2b ลูกค้าไม่มา / แม่หมอไม่มา ตัดสินจากห้องวิดีโอ (A2-05 · A2-10) ─────────────────
+  const opened = now - 20 * 60_000;
+  const readerWaited = { openedAt: opened, readerSeenAt: opened, customerSeenAt: null };
+  const customerWaited = { openedAt: opened, readerSeenAt: null, customerSeenAt: opened };
+  if (!policy.customerMissedRoom(readerWaited, now) || policy.customerMissedRoom(null, now)) {
+    throw new Error("❌ A2-05: ลูกค้าไม่มาต้องมีหลักฐานว่าแม่หมอเปิดห้องรอครบเวลา");
+  }
+  if (policy.customerMissedRoom({ ...readerWaited, openedAt: now - 5 * 60_000 }, now)) {
+    throw new Error("❌ A2-05: เปิดห้องรอยังไม่ครบเวลาต้องแจ้งลูกค้าไม่มาไม่ได้");
+  }
+  const absent = policy.decideCancellation({
+    actor: "customer", kind: "booking", ticketStatus: "ready", paid: true, slotStart: now - 30 * 60_000, nowMs: now,
+    readerMissedRoom: policy.readerMissedRoom(customerWaited, now),
+  });
+  const inSession = policy.decideCancellation({
+    actor: "customer", kind: "booking", ticketStatus: "ready", paid: true, slotStart: now - 30 * 60_000, nowMs: now,
+    readerMissedRoom: policy.readerMissedRoom(readerWaited, now),
+  });
+  if (!absent.allowed || !absent.refund || inSession.allowed) {
+    throw new Error("❌ A2-10: แม่หมอเริ่มนัดแล้วไม่เข้าห้อง ลูกค้าต้องยกเลิกและได้เงินคืนเต็ม (แต่ถ้าแม่หมออยู่ในห้องต้องยกเลิกไม่ได้)");
+  }
+  console.log("  ✓ 18.2b ลูกค้าไม่มา/แม่หมอไม่มา ตัดสินจากหลักฐานห้องวิดีโอ (A2-05 · A2-10)");
 
   // ── 18.3 ลิงก์เข้าคิวจากอีเมล: ผูกตั๋ว · หมดอายุ · ใช้แทนคุกกี้ตรง ๆ ไม่ได้ ──────────
   const tokenOk = await mail.signBookingAccess("ticket_x", "cust_link_owner", Date.now() + HOUR);
@@ -914,7 +1033,13 @@ async function testBookingCare(readerId: string) {
   }
   const uid = `usr_refund_${crypto.randomUUID().slice(0, 8)}`;
   const orderId = `ord_refund_${crypto.randomUUID().slice(0, 8)}`;
-  await grantBonus(uid, 3, purchaseGrantReason(orderId));
+  // user_bonus.user_id อ้าง FK ถึง users — ต้องมีผู้ใช้จริงก่อน ไม่งั้น grantBonus ล้มเงียบ ๆ
+  // แล้วเช็ก "ถอนรอบเหลือ 0" ข้างล่างผ่านแบบไม่ได้ทดสอบอะไรเลย (เคยเป็นแบบนั้น — 2026-10-19)
+  const { upsertUserOnLogin } = await import("../../src/lib/users/users.repo");
+  await upsertUserOnLogin({ id: uid, provider: "email", email: `${uid}@example.com`, name: "ทดสอบคืนเงิน" });
+  if (!(await grantBonus(uid, 3, purchaseGrantReason(orderId)))) throw new Error("❌ เตรียมเคสคืนเงินไม่ได้: แจกรอบที่ซื้อไม่สำเร็จ");
+  const before = await db.prepare("SELECT COALESCE(SUM(granted), 0) AS n FROM user_bonus WHERE user_id = ?").bind(uid).first<{ n: number }>();
+  if (Number(before?.n) !== 3) throw new Error(`❌ เตรียมเคสคืนเงินไม่ได้: ต้องมี 3 รอบก่อนคืนเงิน (ได้ ${before?.n})`);
   const creditPay = await createPaymentRecord({ orderId, userId: uid, provider: "stripe", providerRef: `cs_test_${orderId}`, amountSatang: 14900 });
   await db.prepare("UPDATE payments SET status = 'paid' WHERE id = ?").bind(creditPay.id).run();
   const r1 = await applyGatewayRefund(creditPay.id);
@@ -929,6 +1054,7 @@ async function testBookingCare(readerId: string) {
   if (Number(regranted?.n) !== 0) throw new Error("❌ webhook จ่ายเงินยิงซ้ำหลังคืนเงินแจกรอบคืนได้");
   await db.prepare("DELETE FROM user_bonus WHERE user_id = ?").bind(uid).run();
   await db.prepare("DELETE FROM payments WHERE id = ?").bind(creditPay.id).run();
+  await db.prepare("DELETE FROM users WHERE id = ?").bind(uid).run();
 
   const tr = await createQueueTicket({
     readerId, kind: "walkup", customerRef: "cust_refund_c", nickname: "ซี", question: "คืนเงินจากแดชบอร์ด", initialStatus: "pending_payment",

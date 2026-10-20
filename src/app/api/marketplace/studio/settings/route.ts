@@ -1,5 +1,5 @@
 import { apiFail, apiOk } from "@/lib/api/envelope";
-import { ensureReadableColor, sanitizeLogoUrl } from "@/lib/studio/brand";
+import { ensureReadableColor, sanitizeLogoUrl, STUDIO_LOGO_PATH_RE } from "@/lib/studio/brand";
 import { readJson, studioGate } from "@/lib/studio/gate";
 import { SettingsSchema } from "@/lib/studio/schemas";
 import { deleteOwnLogo } from "@/lib/studio/logo";
@@ -19,6 +19,11 @@ export async function PUT(request: Request) {
   const { brandName, logoUrl, brandColor, contactLine, showAiDisclosure, aiAssist } = parsed.data;
   const logo = sanitizeLogoUrl(logoUrl);
   if (logoUrl && !logo) return apiFail("ลิงก์โลโก้ต้องขึ้นต้นด้วย https://", 400, "logo_url");
+  // ไฟล์โลโก้ในระบบเรา ใช้ได้เฉพาะไฟล์ที่แม่หมอคนนี้อัปโหลดเอง — ไฟล์ที่ตั้งเป็นโลโก้จะถูกลบตามตอนเปลี่ยนโลโก้
+  const internalOwner = logo ? STUDIO_LOGO_PATH_RE.exec(logo)?.[1] : undefined;
+  if (internalOwner !== undefined && internalOwner !== gate.readerId) {
+    return apiFail("ใช้ได้เฉพาะโลโก้ที่อัปโหลดจากสตูดิโอของคุณเอง", 400, "logo_url");
+  }
   const color = ensureReadableColor(brandColor);
   await saveStudioSettings(gate.readerId, {
     brandName,
@@ -28,6 +33,9 @@ export async function PUT(request: Request) {
     showAiDisclosure,
     aiAssist: aiAssist ?? gate.settings.aiAssist,
   });
-  if (gate.settings.logoUrl && gate.settings.logoUrl !== logo) await deleteOwnLogo(gate.settings.logoUrl);
+  const previous = gate.settings.logoUrl;
+  if (previous && previous !== logo && STUDIO_LOGO_PATH_RE.exec(previous)?.[1] === gate.readerId) {
+    await deleteOwnLogo(previous, gate.readerId);
+  }
   return apiOk({ brandColor: color.color, colorAdjusted: color.adjusted, contrast: color.ratio, logoUrl: logo });
 }

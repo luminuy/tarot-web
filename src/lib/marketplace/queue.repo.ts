@@ -370,7 +370,31 @@ export async function listTicketsForOwner(owner: { customerRef?: string | null; 
 }
 
 /**
- * ดึงตั๋วคิวทั้งหมดสำหรับ Reader Console
+ * ลำดับคิวสด = ลำดับเวลาที่จ่ายเงินสำเร็จ (ยังไม่จ่าย ➔ เวลาสร้างตั๋ว) · เสมอกันตัดด้วย id
+ * ใช้เกณฑ์เดียวกันทั้งหน้าลูกค้า (`liveQueuePosition`) และแผงแม่หมอ (`listReaderQueueTickets`)
+ */
+const QUEUE_ORDER_KEY = `COALESCE((SELECT MIN(p.updated_at) FROM payments p WHERE p.ticket_id = t.id AND p.status = 'paid'), t.created_at)`;
+
+/**
+ * "คิวที่ N" ของคิวสด คำนวณตอนอ่านทุกครั้ง — ขยับเองเมื่อคนข้างหน้าคุยเสร็จ/ยกเลิก และไม่ซ้ำกัน
+ * (ค่า `position` ในแถวเป็นแค่ตัวเลขตอนจ่ายเงิน ไม่ใช้แสดงผลแล้ว) · ไม่ใช่คิวสดที่กำลังรอ = คืนค่าเดิม
+ */
+export async function liveQueuePosition(ticket: QueueTicket): Promise<number | null> {
+  if (ticket.kind !== "walkup" || (ticket.status !== "waiting" && ticket.status !== "ready")) return ticket.position;
+  const db = await getAppDB();
+  const row = await db
+    .prepare(
+      `SELECT COUNT(*) AS count FROM queue_tickets t, (SELECT ${QUEUE_ORDER_KEY} AS k FROM queue_tickets t WHERE t.id = ?) me
+        WHERE t.reader_id = ? AND t.kind = 'walkup' AND t.status IN ('waiting', 'ready') AND t.id != ?
+          AND (${QUEUE_ORDER_KEY} < me.k OR (${QUEUE_ORDER_KEY} = me.k AND t.id < ?))`
+    )
+    .bind(ticket.id, ticket.readerId, ticket.id, ticket.id)
+    .first<{ count: number }>();
+  return Number(row?.count ?? 0) + 1;
+}
+
+/**
+ * ดึงตั๋วคิวทั้งหมดสำหรับ Reader Console — เรียงตามลำดับคิวสด (`QUEUE_ORDER_KEY`) · เลขคิวคำนวณใหม่ทุกครั้ง
  */
 export async function listReaderQueueTickets(
   readerId: string,
@@ -382,12 +406,17 @@ export async function listReaderQueueTickets(
   const placeholders = allowedStatuses.map(() => "?").join(",");
   const { results } = await db
     .prepare(
-      `SELECT * FROM queue_tickets WHERE reader_id = ? AND status IN (${placeholders}) ORDER BY created_at ASC`
+      `SELECT t.* FROM queue_tickets t WHERE t.reader_id = ? AND t.status IN (${placeholders})
+        ORDER BY ${QUEUE_ORDER_KEY} ASC, t.id ASC`
     )
     .bind(readerId, ...allowedStatuses)
     .all<RawTicketRow>();
 
   const tickets = (results || []).map(mapRowToTicket);
+  let walkupRank = 0;
+  for (const t of tickets) {
+    if (t.kind === "walkup" && (t.status === "waiting" || t.status === "ready")) t.position = ++walkupRank;
+  }
 
   // Attach screening briefs — อ่านครั้งเดียวทั้งชุด ไม่ใช่วนอ่านทีละใบ (N+1)
   const screeningIds = tickets.map((t) => t.aiScreenId).filter((v): v is string => Boolean(v));
@@ -442,37 +471,62 @@ export async function cancelQueueTicket(ticketId: string, customerRef?: string):
   return (res.meta?.changes ?? 0) > 0;
 }
 
+/** ตั๋วนี้มีเงินจริงผ่านมือ (จ่ายแล้ว/คืนแล้ว/ค้างคืน) — แถวการเงินต้องเก็บไว้เป็นหลักฐานบัญชีและยอดโอนแม่หมอ */
+const TICKET_HAS_MONEY = `EXISTS (SELECT 1 FROM payments p WHERE p.ticket_id = t.id
+  AND (p.status IN ('paid', 'refunded') OR COALESCE(p.refund_due, 0) = 1))`;
+/** ยังมีเงินที่ต้องคืนลูกค้าค้างอยู่ — ยังไม่แตะจนกว่าเรื่องเงินจะปิด (แอดมินอาจต้องใช้ข้อมูลติดต่อ) */
+const TICKET_REFUND_OPEN = `EXISTS (SELECT 1 FROM payments p WHERE p.ticket_id = t.id AND COALESCE(p.refund_due, 0) = 1)`;
+
 /**
- * ลบตั๋วคิวที่หมดอายุแล้วออกจากฐานข้อมูล (PDPA 7-day auto-purge)
+ * 🧹 ลบข้อมูลตั๋วคิวที่หมดอายุแล้ว (PDPA — 7 วันหลังนัด · `ticketExpiresAt`)
+ * ---------------------------------------------------------------------------
+ * เรียกจากงานรอบ `/api/cron/booking-reminders` · ทำซ้ำได้ไม่มีผลข้างเคียง
+ *   • ตั๋วที่ไม่มีเงินผ่านมือ (หมดเวลาจ่าย/ยกเลิกก่อนจ่าย) ➔ ลบทั้งแถวพร้อมข้อมูลที่ผูกอยู่
+ *   • ตั๋วที่มีเงินผ่านมือ ➔ เก็บแถว `queue_tickets`/`bookings`/`payments` ไว้ (หลักฐานการเงิน · ยอดโอนแม่หมอ)
+ *     แต่ล้างข้อมูลส่วนบุคคลออก: ชื่อเล่น · คำถาม · ไพ่ที่เปิด · ผลคัดกรอง AI · ห้องวิดีโอ · อีเมลติดต่อ
+ *   • ตั๋วที่ยังค้างคืนเงินลูกค้า ➔ รอจนเรื่องเงินปิดก่อน
+ *   • ผลคัดกรอง AI ที่ตั๋วหายไปแล้ว (แถวกำพร้า) ➔ ลบ
+ * คืนจำนวนตั๋วที่ลบ + ล้างข้อมูลในรอบนี้
  */
 export async function cleanupExpiredTickets(): Promise<number> {
   const db = await getAppDB();
   const now = Date.now();
+  const dropIds = `SELECT t.id FROM queue_tickets t WHERE t.expires_at < ? AND NOT ${TICKET_HAS_MONEY}`;
+  const scrubIds = `SELECT t.id FROM queue_tickets t WHERE t.expires_at < ? AND ${TICKET_HAS_MONEY} AND NOT ${TICKET_REFUND_OPEN}`;
 
-  // ปลดการอ้างอิง ai_screen_id ก่อนลบ เพื่อความปลอดภัยกรณีเปิด PRAGMA foreign_keys
-  await db.prepare(`
-    UPDATE queue_tickets SET ai_screen_id = NULL WHERE expires_at < ?
-  `).bind(now).run();
-
-  await db.prepare(`
-    DELETE FROM payments 
-    WHERE ticket_id IN (SELECT id FROM queue_tickets WHERE expires_at < ?)
-  `).bind(now).run();
-  await db.prepare(`
-    DELETE FROM bookings 
-    WHERE ticket_id IN (SELECT id FROM queue_tickets WHERE expires_at < ?)
-  `).bind(now).run();
-  await db.prepare(`
-    DELETE FROM ai_screening
-    WHERE ticket_id IN (SELECT id FROM queue_tickets WHERE expires_at < ?)
-  `).bind(now).run();
+  // ── ตั๋วที่ไม่มีเงินผ่านมือ: ลบทั้งชุด (ปลด ai_screen_id ก่อน — กรณีเปิด PRAGMA foreign_keys)
+  await db.prepare(`UPDATE queue_tickets SET ai_screen_id = NULL WHERE id IN (${dropIds})`).bind(now).run();
+  await db.prepare(`DELETE FROM ai_screening WHERE ticket_id IN (${dropIds})`).bind(now).run();
   // 📹 ห้องวิดีโอคอลของตั๋วนั้น (migrations/0019) — ต้องลบก่อนตั๋ว เพราะอ้าง FK ถึงกัน
-  await db.prepare(`
-    DELETE FROM call_sessions
-    WHERE ticket_id IN (SELECT id FROM queue_tickets WHERE expires_at < ?)
-  `).bind(now).run();
+  await db.prepare(`DELETE FROM call_sessions WHERE ticket_id IN (${dropIds})`).bind(now).run();
+  await db.prepare(`DELETE FROM payments WHERE ticket_id IN (${dropIds})`).bind(now).run();
+  await db.prepare(`DELETE FROM bookings WHERE ticket_id IN (${dropIds})`).bind(now).run();
+  const dropped = await db.prepare(`DELETE FROM queue_tickets WHERE id IN (${dropIds})`).bind(now).run();
 
-  const res = await db.prepare("DELETE FROM queue_tickets WHERE expires_at < ?").bind(now).run();
+  // ── ตั๋วที่มีเงินผ่านมือ: เก็บแถวการเงิน ล้างข้อมูลส่วนบุคคล (เฉพาะแถวที่ยังไม่เคยล้าง)
+  const scrubbed = await db
+    .prepare(
+      `UPDATE queue_tickets SET nickname = '', question = '', reading_snapshot = NULL, ai_screen_id = NULL
+        WHERE id IN (${scrubIds})
+          AND (COALESCE(nickname, '') != '' OR COALESCE(question, '') != '' OR reading_snapshot IS NOT NULL OR ai_screen_id IS NOT NULL)`
+    )
+    .bind(now)
+    .run();
+  await db.prepare(`DELETE FROM ai_screening WHERE ticket_id IN (${scrubIds})`).bind(now).run();
+  await db.prepare(`DELETE FROM call_sessions WHERE ticket_id IN (${scrubIds})`).bind(now).run();
+  await db
+    .prepare(`UPDATE bookings SET contact_email = NULL WHERE contact_email IS NOT NULL AND ticket_id IN (${scrubIds})`)
+    .bind(now)
+    .run();
+
+  // ── ผลคัดกรอง AI ที่ไม่มีตั๋วแล้ว (เช่นตั๋วถูกลบไปตามแม่หมอ) — เว้นแถวที่เพิ่งสร้าง (ตั๋วอาจกำลังถูกสร้างตามมา)
+  await db
+    .prepare(
+      "DELETE FROM ai_screening WHERE ticket_id IS NOT NULL AND created_at < ? AND ticket_id NOT IN (SELECT id FROM queue_tickets)"
+    )
+    .bind(now - 60 * 60 * 1000)
+    .run();
+
   // ✦ ลิงก์ห้องส่วนตัว (migrations/0032) มีชื่อลูกค้าที่แม่หมอพิมพ์ไว้ — ลบหลังลิงก์หมดอายุ 7 วัน
   //   แยก try: ฐานข้อมูลเก่าที่ยังไม่มีตารางต้องไม่ทำให้การลบตั๋วข้างบนนับผิด
   try {
@@ -480,5 +534,5 @@ export async function cleanupExpiredTickets(): Promise<number> {
   } catch {
     // ignore if table not yet created
   }
-  return res.meta?.changes ?? 0;
+  return (dropped.meta?.changes ?? 0) + (scrubbed.meta?.changes ?? 0);
 }

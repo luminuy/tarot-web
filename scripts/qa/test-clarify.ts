@@ -89,6 +89,21 @@ async function runTests() {
     "clarify.ts ไม่มีสัญลักษณ์ดวงดาวหรืออิโมจิแฟนซี (Rule 2)",
     !forbiddenSymbols.test(clarifySrc.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*/g, ""))
   );
+  // A3-04: คำถามกลับจาก AI ต้องผ่านตัวกวาดกลาง — regex เขียนเองเคยตัดอิโมจิแค่ครึ่งตัวจนจอขึ้นอักขระพัง
+  check(
+    "A3-04: คำถามกลับผ่าน stripEmoji() ก่อนถึงจอ (ไม่ใช้ character class เขียนเอง)",
+    /finalQuestion = stripEmoji\(finalQuestion\)/.test(clarifySrc) && !/\\uD83D/.test(clarifySrc),
+  );
+  {
+    const { stripEmoji } = await import("../../src/lib/text/no-emoji");
+    const sample = "เรื่องงานหรือความรักคะ \u{1F52E}\u{1F495} → เลือกได้เลย";
+    const cleaned = stripEmoji(sample);
+    check(
+      "A3-04: stripEmoji ตัดอิโมจิทั้งตัวและลูกศร ไม่เหลือ surrogate เดี่ยว",
+      !/[\uD800-\uDFFF]/.test(cleaned) && !cleaned.includes("→") && cleaned.includes("เลือกได้เลย"),
+      JSON.stringify(cleaned),
+    );
+  }
 
   // ─────────────────────────────────────────────────────────────────
   // 4. Sample Clarification Thai Quality (A-01 / B-04)

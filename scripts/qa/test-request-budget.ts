@@ -13,6 +13,8 @@
  *   2. มีคุกกี้ใบ้ (ล็อกอินอยู่)        → ยิง `/api/auth/me` ครั้งเดียว
  *   3. `ensureEntitlement()`            → ยิง `/api/bootstrap` เส้นเดียว (ไม่ใช่สองเส้น)
  *      และต้องเติมผู้ใช้เข้าแคชเซสชันให้ด้วย เพื่อไม่ให้มีใครไปยิง `/api/auth/me` ซ้ำ
+ *   4. `loadMySpreads()` (แถว "ผังของฉัน" ในหน้าแรก) → ไม่มีคุกกี้ใบ้ต้องไม่ยิงอะไรเลย
+ *      และต้องได้ผังในเครื่องแทน · มีคุกกี้ใบ้ → ยิง `/api/spreads/custom` ครั้งเดียว (A9-01)
  */
 import { fileURLToPath } from "node:url";
 
@@ -98,6 +100,26 @@ async function run() {
     }
   }
 
+  // ── เกณฑ์ 4: แถว "ผังของฉัน" ของหน้าแรก — ผู้ชมไม่ล็อกอินต้องไม่ปลุก Worker (A9-01) ─
+  {
+    const calls = installBrowserStubs("");
+    const { loadMySpreads } = await import("../../src/lib/tarot/custom-spread-client");
+    const anon = await loadMySpreads();
+    if (calls.length !== 0) {
+      errors.push(`loadMySpreads() ของผู้ชมที่ไม่ล็อกอินยังยิง ${calls.length} คำขอ: ${calls.join(", ")}`);
+    }
+    if (anon.member !== false) errors.push("loadMySpreads() ของผู้ชมที่ไม่ล็อกอินต้องคืน member = false (ใช้ผังในเครื่อง)");
+  }
+  {
+    const calls = installBrowserStubs(`${AUTH_HINT_COOKIE}=1`);
+    const { loadMySpreads } = await import("../../src/lib/tarot/custom-spread-client");
+    await loadMySpreads();
+    const spreadCalls = calls.filter((c) => c.includes("/api/spreads/custom"));
+    if (spreadCalls.length !== 1) {
+      errors.push(`ผู้ใช้ที่ล็อกอินอยู่ต้องยิง /api/spreads/custom พอดี 1 ครั้ง (ยิงจริง ${spreadCalls.length} · ทั้งหมด: ${calls.join(", ") || "ไม่มี"})`);
+    }
+  }
+
   if (errors.length > 0) {
     console.error(`❌ QA FAILED — งบคำขอเกินที่ตั้งไว้ ${errors.length} ข้อ:`);
     for (const e of errors) console.error(`  - ${e}`);
@@ -106,6 +128,7 @@ async function run() {
 
   console.log("✅ ผ่าน — ผู้ชมที่ไม่ล็อกอินเปิดหน้าโดยไม่ยิง /api/* เลยสักเส้น");
   console.log("   - ผู้ใช้ที่ล็อกอินอยู่ใช้ /api/bootstrap เส้นเดียวแทนสองเส้นเดิม");
+  console.log("   - แถว \"ผังของฉัน\" ของผู้ชมที่ไม่ล็อกอินไม่ยิง /api/spreads/custom");
   process.exit(0);
 }
 

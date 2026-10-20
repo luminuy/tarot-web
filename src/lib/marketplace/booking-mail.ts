@@ -1,5 +1,5 @@
 import { signPayload, verifyPayload } from "@/lib/auth/edge-auth";
-import { SITE_ORIGIN } from "@/lib/config/site";
+import { DEFAULT_SUPPORT_EMAIL, SITE_ORIGIN } from "@/lib/config/site";
 import { sendEmail } from "@/lib/email/send";
 import { baseLayout, escapeHtml } from "@/lib/email/templates";
 import {
@@ -7,7 +7,9 @@ import {
   formatSlotRange,
   googleCalendarUrl,
   MAX_RESCHEDULES,
+  NO_SHOW_GRACE_MINUTES,
   PAID_GRACE_MINUTES,
+  soonReminderTitle,
   type ReminderKind,
 } from "@/lib/marketplace/booking-policy";
 import { CONSULTATION_MINUTES } from "@/lib/marketplace/offer";
@@ -236,7 +238,8 @@ export async function sendBookingReminder(ticketId: string, kind: ReminderKind):
     if (!ctx || !ctx.slotStart || !ctx.contactEmail) return false;
     if (!(await claim(ctx.bookingId, kind === "24h" ? "reminder_24h_at" : "reminder_1h_at"))) return false;
     const link = await bookingAccessUrl(ctx.ticketId, ctx.customerRef, ctx.slotStart);
-    const title = kind === "24h" ? "พรุ่งนี้มีนัดปรึกษาแม่หมอ" : "อีกไม่ถึงชั่วโมงถึงเวลานัด";
+    // เตือนใกล้ถึงเวลาส่งได้ตั้งแต่เหลือหลายชั่วโมง (ตัวจับเวลารันห่าง) — หัวเรื่องบอกเวลาที่เหลือจริง
+    const title = kind === "24h" ? "พรุ่งนี้มีนัดปรึกษาแม่หมอ" : soonReminderTitle(ctx.slotStart, Date.now());
     const tip =
       kind === "24h"
         ? `ถ้าไม่สะดวก ยังเลื่อนหรือยกเลิกได้ฟรีจนถึง ${FREE_CANCEL_HOURS} ชม. ก่อนนัด`
@@ -295,6 +298,36 @@ export async function sendBookingCancelled(
     if (by !== "reader") await notifyReader(ctx, "cancelled");
   } catch (err) {
     recordCaughtError("booking-mail:cancel", err);
+  }
+}
+
+/**
+ * แม่หมอแจ้งว่าลูกค้าไม่เข้าห้องตามนัด (ลูกค้า) — บอกผลเรื่องเงินตรง ๆ พร้อมช่องทางแจ้งทีมงาน
+ * ส่งทุกครั้งที่ถูกตีว่าไม่มา ลูกค้าจะได้รู้ตัวและโต้แย้งได้ก่อนข้อมูลนัดถูกลบตามอายุ 7 วัน
+ */
+export async function sendBookingNoShow(ticketId: string): Promise<void> {
+  try {
+    const ctx = await loadContext(ticketId);
+    if (!ctx) return;
+    const support = process.env.SUPPORT_EMAIL || DEFAULT_SUPPORT_EMAIL;
+    const title = "แม่หมอแจ้งว่าคุณไม่ได้เข้าห้องตามนัด";
+    const money = `แม่หมอเปิดห้องวิดีโอรอครบ ${NO_SHOW_GRACE_MINUTES} นาทีแล้วไม่พบคุณในห้อง ตามเงื่อนไขกรณีนี้ไม่มีการคืนเงิน`;
+    const dispute = `ถ้าคุณเข้าห้องแล้วแต่ไม่เจอแม่หมอ หรือเข้าห้องไม่ได้เพราะระบบขัดข้อง ตอบกลับอีเมลนี้หรือเขียนถึง ${support} ภายใน 7 วัน ทีมงานจะตรวจสอบและแจ้งผลกลับ`;
+    const html = baseLayout(
+      `<h1>${title}</h1>
+       <p>สวัสดีคุณ${escapeHtml(ctx.nickname)}</p>
+       ${detailBox([
+         ["แม่หมอ", ctx.readerName],
+         [ctx.slotStart ? "เวลานัด" : "รูปแบบ", whenText(ctx)],
+         ["การเงิน", money],
+       ])}
+       <p>${escapeHtml(dispute)}</p>`,
+      `${title} — SeerTarot`
+    );
+    const text = [`${title} — SeerTarot`, "", `แม่หมอ: ${ctx.readerName}`, whenText(ctx), money, "", dispute].join("\n");
+    await safeSend("no_show", ctx.contactEmail, `${title} · ${whenText(ctx)}`, html, text);
+  } catch (err) {
+    recordCaughtError("booking-mail:no_show", err);
   }
 }
 

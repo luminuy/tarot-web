@@ -10,6 +10,13 @@
  *
  * ด่าน `scripts/qa/test-static-headers.ts` เทียบสองที่นี้ให้อัตโนมัติทุกครั้ง
  */
+/**
+ * `'unsafe-eval'` เปิดเฉพาะตอน `next dev` — React โหมดพัฒนาใช้ eval สร้าง stack ของ error ฝั่งเซิร์ฟเวอร์
+ * บันเดิลที่ส่งจริงไม่มีโค้ดตัวไหนต้องใช้ ปิดไว้บน production ให้ CSP กันโค้ดที่ประเมินจากสตริงได้ (A1-06)
+ * (`next build` / ด่านเทียบ `_headers` ไม่ได้รันในโหมด development จึงได้ค่าที่ไม่มี eval เสมอ)
+ */
+const DEV_ONLY_EVAL = process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : "";
+
 export const SECURITY_HEADERS: { key: string; value: string }[] = [
   {
     key: "Content-Security-Policy",
@@ -22,7 +29,7 @@ export const SECURITY_HEADERS: { key: string; value: string }[] = [
       // `static.cloudflareinsights.com` = beacon ของ Cloudflare Web Analytics ที่ Cloudflare
       // แทรกให้อัตโนมัติทุกหน้า (ISSUE-035) ของเดิมไม่มีในรายการนี้ CSP จึงบล็อกทิ้งทุกครั้ง
       // ➔ บริการเปิดอยู่แต่ไม่เคยเก็บข้อมูลได้เลยสักหน้าเดียว
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://*.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://www.google.com https://connect.facebook.net https://static.cloudflareinsights.com",
+      `script-src 'self' 'unsafe-inline'${DEV_ONLY_EVAL} https://challenges.cloudflare.com https://*.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://www.google.com https://connect.facebook.net https://static.cloudflareinsights.com`,
       // next/font โฮสต์ฟอนต์เองในโดเมนเรา จึงไม่เคยเรียก fonts.googleapis.com / fonts.gstatic.com เลย
       "style-src 'self' 'unsafe-inline'",
       "font-src 'self' data:",

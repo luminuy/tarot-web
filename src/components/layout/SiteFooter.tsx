@@ -147,7 +147,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                     {col.links.map((link, lIdx) => {
                       return (
                         <li key={lIdx}>
-                          <Link href={link.href} prefetch={false}>
+                          <Link href={link.href} prefetch={false} className="tap-overlay-y">
                             {link.label}
                           </Link>
                         </li>
@@ -162,7 +162,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                     return (
                       <li key={iIdx} className={hasHref ? undefined : "site-footer-hot"}>
                         {hasHref ? (
-                          <Link href={href} prefetch={false}>
+                          <Link href={href} prefetch={false} className="tap-overlay-y">
                             {item.title}
                           </Link>
                         ) : (
@@ -198,23 +198,21 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
               ? "© 2026 SeerTarot · 1909 Rider-Waite online tarot · All rights reserved"
               : "© 2026 SeerTarot · ดูดวงไพ่ทาโรต์ 1909 Rider-Waite ออนไลน์ · สงวนลิขสิทธิ์"}
           </p>
-          {/* ลิงก์ "เกี่ยวกับเรา/ติดต่อ" ต้องอยู่ทุกหน้า — สัญญาณความน่าเชื่อถือที่ Google มองหาโดยตรง (หน้าไทยล้วน)
-              หน้าราคาต้องหาเจอจากทุกหน้า (เจ้าของขอ "หาง่าย") */}
+          {/* ลิงก์ "เกี่ยวกับเรา/ติดต่อ" ต้องอยู่ทุกหน้า — สัญญาณความน่าเชื่อถือที่ Google มองหาโดยตรง
+              `/en/contact` มีหน้าแล้ว (A7-09) ส่วน `/about` ยังเป็นไทยล้วน · หน้าราคาต้องหาเจอจากทุกหน้า (เจ้าของขอ "หาง่าย") */}
           <div className="flex flex-wrap gap-x-5 gap-y-1.5">
             {!isEnglish && (
-              <>
-                <Link href="/about" prefetch={false}>
-                  เกี่ยวกับเรา
-                </Link>
-                <Link href="/contact" prefetch={false}>
-                  ติดต่อเรา
-                </Link>
-              </>
+              <Link href="/about" prefetch={false} className="tap-overlay-y">
+                เกี่ยวกับเรา
+              </Link>
             )}
-            <Link href="/pricing" prefetch={false}>
+            <Link href="/contact" prefetch={false} className="tap-overlay-y">
+              {isEnglish ? "Contact" : "ติดต่อเรา"}
+            </Link>
+            <Link href="/pricing" prefetch={false} className="tap-overlay-y">
               {isEnglish ? "Pricing" : "ราคาและแพ็กเกจ"}
             </Link>
-            <Link href="/privacy" prefetch={false}>
+            <Link href="/privacy" prefetch={false} className="tap-overlay-y">
               {isEnglish ? "Privacy Policy" : "นโยบายความเป็นส่วนตัว"}
             </Link>
           </div>

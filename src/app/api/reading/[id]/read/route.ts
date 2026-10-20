@@ -7,7 +7,8 @@ import { stripEmojiDeep } from "@/lib/text/no-emoji";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
 import { recordEvents, recordEvent } from "@/lib/stats/record";
-import { GUEST_BLOCK_REASON, REQUIRE_SIGNUP_TO_READ } from "@/lib/entitlement/limits";
+import { GUEST_BLOCK_REASON, REQUIRE_SIGNUP_TO_READ, isMasterPersona, isStandardSpread } from "@/lib/entitlement/limits";
+import { isCustomStandard } from "@/lib/tarot/custom-spread";
 import { SIGN_IN_GATE_REASON, getSignInGateMessage, isSignInRequired } from "@/lib/entitlement/signin-gate";
 import { recordCaughtError } from "@/lib/observability/caught";
 import { resolveRecordSpread } from "@/lib/tarot/record-spread";
@@ -15,6 +16,9 @@ import { resolveRecordSpread } from "@/lib/tarot/record-spread";
 export const runtime = "nodejs";
 /** การอ่านไพ่ใช้เวลาหลายสิบวินาที ต้องกันไม่ให้ platform ตัดกลางคัน */
 export const maxDuration = 120;
+
+/** ไพ่ชุดเดียวกันเรียกโมเดลได้กี่ครั้งใน 2 ชม. (ครั้งแรก + โหลดใหม่ 2 ครั้ง) — A3-06 */
+const READ_ATTEMPTS_PER_READING = 3;
 
 /**
  * ขั้นที่ 3 — ให้แม่หมอ Gemini AI อ่าน แล้วส่งกลับเป็น Server-Sent Events แบบ Structured Streaming
@@ -159,6 +163,27 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return streamCached(record.result, record);
   }
 
+  /*
+   * A3-06: เพดานจำนวนครั้งที่ไพ่ชุดเดียวกันเรียกโมเดลได้ (ข้าม isolate)
+   * ตัดสายกลางทางหลังได้คำอ่านแล้วไม่คืนสิทธิ์ ➔ เปิด id เดิมซ้ำจะได้ "หักไปแล้ว" ไม่หักใหม่
+   * จึงต้องมีเพดานของตัวเอง — เผื่อโหลดใหม่ตอนเน็ตหลุด/AI ล่มได้ 2 ครั้ง แล้วให้เริ่มเปิดไพ่ใหม่
+   */
+  if (!privileged) {
+    const perReading = await consumeEdgeRateLimits([
+      { key: edgeRateLimitKey("read:reading", id), config: { max: READ_ATTEMPTS_PER_READING, windowSec: 2 * 60 * 60 } },
+    ]);
+    if (!perReading.allowed) {
+      limit.releaseConcurrency();
+      recordEvent("reading_attempts_capped");
+      return createRateLimitResponse(
+        perReading.retryAfterSec,
+        isEn
+          ? "This reading has been requested too many times. Please start a new reading."
+          : "ไพ่ชุดนี้ขอคำอ่านซ้ำหลายครั้งเกินไปแล้ว กรุณาเริ่มเปิดไพ่ใหม่อีกครั้ง",
+      );
+    }
+  }
+
   // ── หักสิทธิ์การเปิดไพ่ (ENTITLEMENT_PLAN ข้อ 6.1) — วางหลังบล็อกอ่านซ้ำ ก่อนเช็คเพดาน AI ──
   // 🔴 T-02: เก็บ **id ของแถวที่คำขอนี้สร้างเอง** ไม่ใช่ธง boolean ลอย ๆ
   // ธง boolean ทำให้คำขอที่ยิงซ้ำ (ซึ่ง `consumeReading` คืน "หักไปแล้ว") เข้าใจว่าตัวเอง
@@ -199,7 +224,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     // 🛡️ แทร็ก S: เพดานโทเคนต่อผู้ใช้ต่อวัน — ตรวจก่อนหักสิทธิ์ (ไม่ต้องคืนสิทธิ์ทีหลัง)
     const { costSubject, isUserTokenCapReached, tokenCapMessage } = await import("@/lib/security/cost-ledger");
     costSubj = costSubject(viewer.kind === "member" ? viewer.userId : null, clientIp);
-    if (await isUserTokenCapReached(costSubj, viewer.kind === "member" ? "member" : "guest")) {
+    // A3-03: ผู้ถือรอบที่ซื้อได้เพดาน `paid` (อ่านสิทธิ์เฉพาะตอนใช้ถึงเพดานสมาชิกแล้ว)
+    const paidCheck =
+      viewer.kind === "member"
+        ? async () => (await (await import("@/lib/entitlement/entitlement")).getEntitlement(viewer)).hasPaidCredits
+        : undefined;
+    if (await isUserTokenCapReached(costSubj, viewer.kind === "member" ? "member" : "guest", { hasPaidCredits: paidCheck })) {
       limit.releaseConcurrency();
       return Response.json({ error: tokenCapMessage(isEn ? "en" : "th") }, { status: 429 });
     }
@@ -217,17 +247,28 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         limit.releaseConcurrency();
         return aiCapResponse();
       }
-      const outcome = await consumeReading(viewer, id, record.spreadId, { premiumTrial: record.premiumTrial === true });
+      // A3-01: ผังใหญ่/ปรมาจารย์ลับหักจากรอบที่ซื้อ — ตัดสินจากเซสชันฝั่งเซิร์ฟเวอร์ (เกณฑ์เดียวกับ /start)
+      const premium =
+        !(record.customSpread ? isCustomStandard(spread) : isStandardSpread(record.spreadId, spread.positions.length)) ||
+        isMasterPersona(record.personaId);
+      const outcome = await consumeReading(viewer, id, record.spreadId, {
+        premiumTrial: record.premiumTrial === true,
+        premium,
+      });
       if (outcome.status === "inserted") consumedUsageId = outcome.usageId;
       if (outcome.status === "denied") {
         limit.releaseConcurrency();
-        recordEvent("entitlement_blocked_read");
+        recordEvent(premium && record.premiumTrial !== true ? "entitlement_blocked_read_premium" : "entitlement_blocked_read");
         return Response.json(
           {
             error:
               viewer.kind === "guest" && REQUIRE_SIGNUP_TO_READ
                 ? (isEn ? "Sign in or create a free account to continue your reading." : "สมัครสมาชิกฟรีหรือเข้าสู่ระบบก่อน แล้วเปิดไพ่ได้เลย")
-                : (isEn ? "Your reading quota has been reached." : "สิทธิ์เปิดไพ่ของคุณหมดแล้ว"),
+                : premium && record.premiumTrial !== true
+                  ? (isEn
+                      ? "Your purchased readings for this spread or reader have run out."
+                      : "รอบที่ซื้อไว้สำหรับผังนี้หรือแม่หมอท่านนี้หมดแล้ว")
+                  : (isEn ? "Your reading quota has been reached." : "สิทธิ์เปิดไพ่ของคุณหมดแล้ว"),
             reason: viewer.kind === "guest" ? GUEST_BLOCK_REASON : "daily_exhausted",
           },
           { status: 403 },
@@ -291,17 +332,32 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const encoder = new TextEncoder();
   let isClosed = false;
-  const send = (controller: ReadableStreamDefaultController, event: string, data: unknown) => {
-    if (isClosed) return;
+  /**
+   * A3-06: เนื้อหาคำอ่านที่ส่งถึงผู้ใช้แล้ว — ใช้แยก "ผู้ใช้ได้คำอ่านแล้วค่อยตัดสาย" (ไม่คืนสิทธิ์)
+   * ออกจาก "ยังไม่ได้อะไรเลย" (คืนสิทธิ์) และใช้ประมาณโทเคนออกเมื่อไม่มี `usage` จากผู้ให้บริการ
+   */
+  let deliveredCards = 0;
+  let deliveredChars = 0;
+  const send = (controller: ReadableStreamDefaultController, event: string, data: unknown): boolean => {
+    if (isClosed) return false;
     try {
-      controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
+      const payload = JSON.stringify(data);
+      controller.enqueue(encoder.encode(`event: ${event}\ndata: ${payload}\n\n`));
+      if (event === "opening" || event === "card" || event === "connections" || event === "summary") {
+        deliveredChars += payload.length;
+        if (event === "card") deliveredCards++;
+      }
+      return true;
     } catch {
       isClosed = true;
+      return false;
     }
   };
 
   const startedAt = Date.now();
   let completedOk = false;
+  /** ขนาด prompt ที่ผู้ให้บริการส่งจริง — ผู้ให้บริการเขียนค่าเองตอนประกอบ prompt (ดู ReadingContext.usageMeter) */
+  const usageMeter: { promptChars: number; offline?: boolean } = { promptChars: 0 };
   /**
    * สัญญาณ "ลูกค้าไปแล้ว" — ส่งต่อให้ Groq/Gemini เพื่อยกเลิกที่ต้นทาง (T-06)
    * ใช้ controller ของเราเองแทน `request.signal` ตรง ๆ เพราะต้องยกเลิกได้จาก `cancel()`
@@ -320,6 +376,34 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return () => sig.removeEventListener("abort", onAbort);
   })();
 
+  /** ผู้ใช้ไม่อยู่รับสตรีมแล้ว (ปิดแท็บ / ยกเลิกคำขอ / เขียนออกไม่ได้) */
+  const clientGone = () => isClosed || clientAbort.signal.aborted;
+  /** ผู้ใช้ได้คำอ่านรายใบจาก AI ไปแล้วอย่างน้อย 1 ใบ (คำอ่านสำรองจากคลังไม่นับ — รอบนั้นคืนสิทธิ์เสมอ) */
+  const aiContentDelivered = () => deliveredCards > 0 && !usageMeter.offline;
+  /** ตัดสายหลังได้คำอ่านแล้ว = ไม่คืนสิทธิ์ */
+  const abandonedAfterContent = () => clientGone() && aiContentDelivered();
+
+  /** ปิดบัญชีรอบที่ผู้ใช้ตัดสายก่อนเฟรม `done` — นับต้นทุนเสมอ · ล็อกสิทธิ์เมื่อได้คำอ่านไปแล้ว (A3-06) */
+  const settleClientAbort = async () => {
+    const modelCalled = usageMeter.promptChars > 0;
+    if (!privileged && modelCalled) {
+      void recordAiCall(1);
+      if (costSubj) {
+        const { estimateTokens, recordAiUsage } = await import("@/lib/security/cost-ledger");
+        void recordAiUsage(costSubj, estimateTokens(usageMeter.promptChars), estimateTokens(deliveredChars));
+      }
+    }
+    if (!aiContentDelivered()) return;
+    recordEvent("reading_abandoned_after_content");
+    // ผู้เยี่ยมชม: ตั๋วส่งถึงหน้าเว็บไม่ได้แล้ว ➔ ใช้เครื่องหมายฝั่งเซิร์ฟเวอร์ + ตัวนับต่อ IP แทน
+    if (guestNeedsConsume) {
+      const { markGuestUsedOnServer } = await import("@/lib/entitlement/guest");
+      if (guestGid) void markGuestUsedOnServer(guestGid);
+      const { recordGuestRead } = await import("@/lib/security/ai-budget");
+      void recordGuestRead(clientIp);
+    }
+  };
+
   const stream = new ReadableStream({
     async start(controller) {
       try {
@@ -335,11 +419,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           }
         }
 
-        const { loadKarmicMemory } = await import("@/lib/ai/memory");
+        const { loadKarmicMemory, noteCrisisCareLine, noteCrisisPromptGuard } = await import("@/lib/ai/memory");
         const [overrideDoc, pastReading] = await Promise.all([
           getContentOverrides(),
           loadKarmicMemory(memberUserId, 3, record.threadId),
         ]);
+        /*
+         * 🛟 กฎเหล็กข้อ 6 (A3-07): บันทึกล่าสุดที่ยินยอมให้แม่หมออ่านมีสัญญาณวิกฤต
+         * ตัวบันทึกไม่เข้า prompt (memory.ts) · ที่นี่สั่งโมเดลให้ดูแลใจ และต่อท้ายสรุปด้วยประโยคสายด่วน 1323 เอง
+         */
+        const noteCrisis = pastReading?.noteCrisis === true;
+        const readingLang: "th" | "en" = record.lang === "en" ? "en" : "th";
+        if (noteCrisis) recordEvent("safety_flag:journal_note_crisis");
         const resolvedCards = record.drawn!.map((d) => resolveCardByIndex(overrideDoc, d.cardIndex));
         if (resolvedCards.some((c) => !c)) {
           send(controller, "error", {
@@ -376,12 +467,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           nickname: record.nickname,
           drawn: record.drawn!,
           cards: resolvedCards as import("@/data/cards").TarotCard[],
-          safety: { flag: record.safetyFlag, block: false, promptGuard: record.safetyGuard },
+          safety: noteCrisis
+            ? {
+                flag: "crisis" as const,
+                block: false,
+                promptGuard: [record.safetyGuard, noteCrisisPromptGuard(readingLang)].filter(Boolean).join("\n"),
+              }
+            : { flag: record.safetyFlag, block: false, promptGuard: record.safetyGuard },
           pastReading,
           zodiac: record.zodiac,
           lang: record.lang || "th",
           // ผู้ใช้ปิดแท็บ → ยกเลิกคำขอไปยังผู้ให้บริการทันที ไม่จ่ายค่าโทเคนให้คำอ่านที่ไม่มีใครเห็น (T-06)
           abortSignal: clientAbort.signal,
+          usageMeter,
         };
 
         let activeProvider = "gemini";
@@ -426,10 +524,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           }
         }
 
+        // A3-06: นับโควตาต่อ IP ตั้งแต่เริ่มเรียกโมเดล — ค่าโมเดลเกิดตั้งแต่ตอนนี้ ไม่ใช่ตอนอ่านจบ
+        if (!privileged) void recordPerIpReadQuota(clientIp);
+
         for await (const rawEvent of streamMultiProviderReading()) {
           if (isClosed) break;
           // กวาดอิโมจิที่โมเดลใส่มาเองก่อนส่งถึงจอและก่อนบันทึก (คำสั่งเจ้าของ 2026-10-07)
           const event = stripEmojiDeep(rawEvent);
+          // 🛟 A3-07: ประโยคสายด่วนต่อท้ายสรุปของคำอ่านจริง — เป็นคำอ่านฉบับที่ผู้ใช้เห็นและที่บันทึกไว้
+          if (noteCrisis && event.type === "done" && event.reading) {
+            const careLine = noteCrisisCareLine(readingLang);
+            if (!event.reading.summary?.includes(careLine)) {
+              event.reading = { ...event.reading, summary: [event.reading.summary, careLine].filter(Boolean).join("\n\n") };
+            }
+          }
 
           if (event.type === "done") {
             const providerUsed = event.provider || activeProvider;
@@ -487,7 +595,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               ["ai_tokens_out", event.usage?.outputTokens ?? 0],
             ]);
             void recordAiCall(1);
-            void recordPerIpReadQuota(clientIp);
             if (costSubj) {
               const { recordAiUsage } = await import("@/lib/security/cost-ledger");
               void recordAiUsage(costSubj, event.usage?.inputTokens ?? 0, event.usage?.outputTokens ?? 0);
@@ -553,14 +660,25 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       } catch (error) {
         console.error("stream การอ่านล้มเหลว", error);
         updateReading(id, { status: "FAILED" });
-        await refundIfConsumed();
+        // ผู้ใช้ตัดสายไปแล้วหลังได้คำอ่าน = ไม่ใช่ความล้มเหลวของเรา ให้ `finally` ปิดบัญชีรอบนี้ (A3-06)
+        if (!abandonedAfterContent()) await refundIfConsumed();
         recordEvent("reading_failed");
         send(controller, "error", {
           message: isEn ? "The reading service encountered an error. Please try again." : "คำอ่านขัดข้อง ลองใหม่อีกครั้งนะ",
         });
       } finally {
-        // สตรีมถูกตัดกลางคัน / ไม่มี done ที่สำเร็จ → คืนสิทธิ์
-        if (!completedOk) await refundIfConsumed();
+        if (!completedOk && clientGone()) {
+          /*
+           * 🔴 A3-06: ผู้ใช้ตัดสายเอง (ปิดแท็บ · เน็ตหลุด · สคริปต์ปิดการเชื่อมต่อ)
+           * ค่าโมเดลเกิดขึ้นแล้วตั้งแต่เริ่มเรียก ➔ นับเข้าเพดานรวมและบัญชีต้นทุนรายคนเสมอ (ประมาณจากอักขระ)
+           * ได้คำอ่านรายใบไปแล้วอย่างน้อย 1 ใบ ➔ ถือว่ารอบนี้ส่งของถึงมือแล้ว **ไม่คืนสิทธิ์**
+           * (รวมรอบลองผังใหญ่ฟรีและสิทธิ์ทดลองของผู้เยี่ยมชม) · ยังไม่ได้อะไรเลย ➔ คืนสิทธิ์ตามเดิม
+           * การคืนสิทธิ์เหลือไว้ให้ความผิดพลาดฝั่งเรา/ผู้ให้บริการเท่านั้น (เฟรม error · catch · คำอ่านสำรอง)
+           */
+          await settleClientAbort();
+        }
+        // สตรีมล้มกลางคัน / ไม่มี done ที่สำเร็จ (ไม่ได้เกิดจากผู้ใช้ตัดสายหลังได้คำอ่าน) → คืนสิทธิ์
+        if (!completedOk && !abandonedAfterContent()) await refundIfConsumed();
         unlinkRequestAbort();
         limit.releaseConcurrency();
         if (!isClosed) {

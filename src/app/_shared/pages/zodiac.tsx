@@ -309,7 +309,8 @@ export function ZodiacIndexBody({
         </Ui2Window>
 
         <Ui2Window n="02" kicker="Today" tone={4}>
-          {daily}
+          {/* จุดหมายของลิงก์ `#zodiac-daily-title` จากหน้าแรก — ต้องอยู่ใน HTML ตั้งแต่เซิร์ฟเวอร์ (ตัว island วาดหัวข้อหลังโหลดข้อมูล) · A7-08 */}
+          <div id="zodiac-daily-title">{daily}</div>
         </Ui2Window>
 
         <Ui2Window n="03" kicker="Compatibility" tone={3}>

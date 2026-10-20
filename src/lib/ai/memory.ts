@@ -2,6 +2,35 @@ import { listJournal, listThreadEntries } from "@/lib/journal/journal.repo";
 import type { PastReadingSnapshot } from "@/lib/ai/karmic";
 import { cardByIndex } from "@/data/cards";
 import { sanitizePromptValue } from "@/lib/ai/prompt-guard";
+import { checkQuestion } from "@/lib/safety/guardrails";
+
+/**
+ * 🛟 กฎเหล็กข้อ 6 — บันทึกที่ผู้ใช้ยินยอมให้แม่หมออ่านต้องผ่านด่านวิกฤตชุดเดียวกับคำถาม
+ * (REFLECTION_JOURNAL_PLAN 1.5: บันทึกที่มีสัญญาณทำร้ายตัวเองไม่ส่งเข้า AI และต้องเห็นสายด่วน 1323)
+ * ตรวจทั้งสองภาษาเสมอ — บันทึกเขียนภาษาไหนก็ได้ ไม่ขึ้นกับภาษาของหน้า
+ */
+export function noteHasCrisisSignal(note: string | null | undefined): boolean {
+  const text = (note ?? "").trim();
+  if (!text) return false;
+  return checkQuestion(text, "th").block || checkQuestion(text, "en").block;
+}
+
+/** คำสั่งเพิ่มให้แม่หมอ AI เมื่อบันทึกล่าสุดมีสัญญาณวิกฤต — ไม่มีเนื้อหาบันทึกอยู่ในนี้ */
+export function noteCrisisPromptGuard(lang: "th" | "en"): string {
+  return lang === "en"
+    ? "The seeker's latest private note showed signs of serious distress, so it was withheld from you. Do not guess at or mention that note. Do not read any card as hopeless or as fate that cannot be changed. Keep the tone gentle, focus on caring for themselves right now and on the people around them who can help, and make the closing feel safe and supportive."
+    : "บันทึกล่าสุดของผู้ถามมีสัญญาณความทุกข์ใจหนัก ระบบจึงไม่ส่งบันทึกนั้นมาให้ ห้ามเดาหรือพูดถึงบันทึกนั้น ห้ามตีความไพ่ใบใดว่าสิ้นหวังหรือเป็นชะตาที่เปลี่ยนไม่ได้ ใช้น้ำเสียงอ่อนโยน เน้นการดูแลใจตัวเองตอนนี้และคนรอบตัวที่พึ่งพาได้ ปิดท้ายให้รู้สึกปลอดภัยและมีคนอยู่ข้าง ๆ";
+}
+
+/**
+ * ประโยคสายด่วนที่ `/read` ต่อท้ายสรุปคำอ่านเอง (ไม่พึ่งให้โมเดลพูด) เมื่อบันทึกล่าสุดมีสัญญาณวิกฤต
+ * ข้อความล้วน ไม่มีสัญลักษณ์ตกแต่ง (กฎเหล็กข้อ 2)
+ */
+export function noteCrisisCareLine(lang: "th" | "en"): string {
+  return lang === "en"
+    ? "If things feel too heavy right now, you do not have to carry them alone. The Thai mental health hotline 1323 is free and open 24 hours, and if you are in immediate danger please call 1669."
+    : "ถ้าช่วงนี้มีเรื่องหนักใจจนรับไม่ไหว ไม่ต้องแบกไว้คนเดียวนะ โทรคุยกับสายด่วนสุขภาพจิต 1323 ได้ฟรีตลอด 24 ชั่วโมง และถ้ากำลังตกอยู่ในอันตรายทันที โทร 1669";
+}
 
 /**
  * 🧠 ความทรงจำข้ามครั้งของแม่หมอ (Cross-Session Karmic Memory)
@@ -61,7 +90,15 @@ export async function loadKarmicMemory(
        * 🔐 กติกาความเป็นส่วนตัวข้อ 1 — บันทึกส่วนตัวเข้า prompt ได้เฉพาะรายการที่ผู้ใช้กดยินยอมเอง (share_with_ai)
        *    ใจตอนนี้/แท็ก/บันทึกพิธี ไม่เข้า prompt ในทุกกรณี
        */
-      ...(latest.shareWithAi && latest.userNote ? { sharedNote: sanitizePromptValue(latest.userNote, 300) || undefined } : {}),
+      /*
+       * 🛟 กฎเหล็กข้อ 6 — บันทึกที่มีสัญญาณวิกฤตไม่เข้า prompt เลย ส่งแค่ธงให้ `/read` ดูแลต่อ
+       *    (ตรวจข้อความดิบก่อนตัดความยาว ไม่ให้สัญญาณที่อยู่ท้ายบันทึกหลุดด่าน)
+       */
+      ...(latest.shareWithAi && latest.userNote
+        ? noteHasCrisisSignal(latest.userNote)
+          ? { noteCrisis: true }
+          : { sharedNote: sanitizePromptValue(latest.userNote, 300) || undefined }
+        : {}),
     };
   } catch (err) {
     console.warn("[karmic memory] อ่านประวัติไม่สำเร็จ:", err);

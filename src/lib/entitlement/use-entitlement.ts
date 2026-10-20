@@ -48,33 +48,65 @@ const listeners = new Set<(e: ClientEntitlement | null) => void>();
 const STORE_KEY = STORAGE_KEYS.entitlementSnapshot;
 const STORE_TTL_MS = 5 * 60_000;
 
-function readStoredEntitlement(): ClientEntitlement | null {
+interface StoredEntitlement {
+  value: ClientEntitlement;
+  /** id ของสมาชิกที่เป็นเจ้าของภาพนี้ (null = ผู้เยี่ยมชม) */
+  userId: string | null;
+}
+
+function readStoredEntitlement(): StoredEntitlement | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = window.sessionStorage.getItem(STORE_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as { at: number; member: boolean; value: ClientEntitlement };
+    const parsed = JSON.parse(raw) as { at: number; member: boolean; userId?: string | null; value: ClientEntitlement };
     if (!parsed?.value || Date.now() - parsed.at > STORE_TTL_MS) return null;
     // เพิ่งล็อกอินหรือเพิ่งออกจากระบบ → สิทธิ์คนละชุดกัน ต้องถามใหม่ ห้ามใช้ภาพเก่า
-    if (parsed.member !== hasSessionHint()) return null;
-    return parsed.value;
+    // ลบทิ้งด้วย — ไม่งั้นพอคนถัดไปล็อกอินในแท็บเดิม ภาพของคนก่อนจะกลับมาผ่านเงื่อนไขนี้ได้อีก (A5-06)
+    if (parsed.member !== hasSessionHint()) {
+      window.sessionStorage.removeItem(STORE_KEY);
+      return null;
+    }
+    // ภาพของสมาชิกต้องรู้ว่าเป็นของใคร — ภาพรุ่นก่อนที่ไม่มี userId ไม่ใช้ (A5-06)
+    const userId = typeof parsed.userId === "string" && parsed.userId ? parsed.userId : null;
+    if (parsed.member && !userId) return null;
+    return { value: parsed.value, userId };
   } catch {
     return null;
   }
 }
 
-function writeStoredEntitlement(value: ClientEntitlement | null): void {
+function writeStoredEntitlement(value: ClientEntitlement | null, userId: string | null = null): void {
   if (typeof window === "undefined") return;
   try {
     if (!value) window.sessionStorage.removeItem(STORE_KEY);
     else {
       window.sessionStorage.setItem(
         STORE_KEY,
-        JSON.stringify({ at: Date.now(), member: hasSessionHint(), value }),
+        JSON.stringify({ at: Date.now(), member: hasSessionHint(), userId, value }),
       );
     }
   } catch {
     // เขียน sessionStorage ไม่ได้ — กลับไปยิงถามทุกหน้าเหมือนเดิม ไม่กระทบความถูกต้อง
+  }
+}
+
+/**
+ * ภาพสิทธิ์ที่หยิบจาก sessionStorage เป็นของสมาชิกคนที่ล็อกอินอยู่จริงไหม (A5-06)
+ * ถามผ่าน `fetchSessionUser()` ซึ่งแถบโปรไฟล์ของทุกหน้าเรียกอยู่แล้ว (รวมคำขอ/แคช 30 วิ)
+ * จึงไม่เพิ่มคำขอ · ไม่ตรงคน ➔ ทิ้งภาพเก่าแล้วถามเซิร์ฟเวอร์ใหม่
+ */
+async function verifyStoredOwner(ownerId: string): Promise<void> {
+  try {
+    const { fetchSessionUser } = await import("@/lib/auth/use-session");
+    const viewer = await fetchSessionUser();
+    if (viewer?.id === ownerId) return;
+    writeStoredEntitlement(null);
+    cache = null;
+    listeners.forEach((fn) => fn(null));
+    if (hasSessionHint()) void ensureEntitlement();
+  } catch {
+    // ตรวจไม่สำเร็จ — ค่าที่แสดงเป็นแค่ภาพ การบังคับสิทธิ์จริงอยู่ฝั่งเซิร์ฟเวอร์เสมอ
   }
 }
 
@@ -104,7 +136,8 @@ async function fetchEntitlement(): Promise<ClientEntitlement | null> {
       // เติมไม่สำเร็จก็แค่ทำให้ `/api/auth/me` ถูกยิงตามปกติ ไม่กระทบความถูกต้อง
     }
 
-    writeStoredEntitlement(ent);
+    const userId = (data.user as { id?: unknown } | null | undefined)?.id;
+    writeStoredEntitlement(ent, typeof userId === "string" ? userId : null);
     return ent;
   } catch {
     return null;
@@ -148,7 +181,11 @@ export function useEntitlement(): ClientEntitlement | null {
     listeners.add(setState);
     if (!cache) {
       // หยิบภาพสิทธิ์ล่าสุดของแท็บนี้มาใช้ก่อน ถ้ายังไม่หมดอายุก็ไม่ต้องยิงถามใหม่
-      cache = readStoredEntitlement();
+      const stored = readStoredEntitlement();
+      if (stored) {
+        cache = stored.value;
+        if (stored.userId) void verifyStoredOwner(stored.userId);
+      }
     }
     if (cache) {
       setState(cache);

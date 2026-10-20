@@ -15,8 +15,8 @@ import type { Locale } from "@/lib/i18n/types";
  * จะให้ secret `APP_ORIGIN` ทับได้เสมอ — ดู `src/lib/security/app-origin.ts`
  */
 
-import { SITE_DOMAIN, SITE_ORIGIN, SITE_NAME_TH, isMeasurableHostname } from "./site-constants";
-export { SITE_DOMAIN, SITE_ORIGIN, SITE_NAME_TH, isMeasurableHostname };
+import { SITE_DOMAIN, SITE_ORIGIN, SITE_NAME_TH } from "./site-constants";
+export { SITE_DOMAIN, SITE_ORIGIN, SITE_NAME_TH };
 
 /**
  * 🖼️ ภาพพรีวิวตอนแชร์ลิงก์ (Open Graph / Twitter Card) — 1200×630 (~1.91:1)
@@ -103,9 +103,10 @@ export function isOwnHostname(hostname: string): boolean {
     hostname === "127.0.0.1" ||
     hostname === SITE_DOMAIN ||
     hostname.endsWith(`.${SITE_DOMAIN}`) ||
+    // workers.dev รับเฉพาะ subdomain ของบัญชี Cloudflare ของเรา — ห้ามรับตามชื่อ Worker
+    // (`tarot-web.*.workers.dev`) เพราะชื่อ Worker ใครก็ตั้งซ้ำได้บนบัญชีตัวเอง (A1-08 · ตรงกับ app-origin.ts)
     hostname === "tarot-web.bankjack10452.workers.dev" ||
-    hostname.endsWith(".bankjack10452.workers.dev") ||
-    (hostname.startsWith("tarot-web.") && hostname.endsWith(".workers.dev"))
+    hostname.endsWith(".bankjack10452.workers.dev")
   );
 }
 

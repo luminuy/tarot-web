@@ -21,6 +21,11 @@ export interface PastReadingSnapshot {
   sameThread?: boolean;
   /** ✦ บันทึกของผู้ใช้ — มีค่าเฉพาะเมื่อผู้ใช้กดยินยอมให้แม่หมอ AI อ่านรายการนั้น (share_with_ai) */
   sharedNote?: string;
+  /**
+   * 🛟 บันทึกที่ยินยอมให้อ่านมีสัญญาณวิกฤต (กฎเหล็กข้อ 6) — ตัวบันทึกไม่ถูกส่งเข้า prompt
+   * ธงนี้ให้ `/read` เติมคำสั่งดูแลใจ + ข้อความสายด่วน 1323 ท้ายคำอ่าน · ไม่ใช้ประกอบ prompt ตรง ๆ
+   */
+  noteCrisis?: boolean;
 }
 
 export interface KarmicBridgeAnalysis {

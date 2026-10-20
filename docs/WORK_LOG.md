@@ -38,6 +38,19 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-19 (รอบ 295): แก้ผลตรวจใหญ่ 2026-10-18 ครบ 7 กลุ่ม (ยังไม่ขึ้น production — รอเจ้าของสั่ง)
+- เจ้าของสั่ง "แก้ให้เสร็จทีเดียว ตรวจก่อนขึ้นครั้งเดียว" — แก้ทั้งหมดก่อน แล้วรันบิลด์ใหม่ + `repo:verify` ครั้งเดียวตอนจบ
+- กลุ่มที่แก้: สิทธิ์เปิดไพ่/สตรีมคำอ่าน/งบ AI · การเงินและนัดแม่หมอ (ยอดโอน · คืนเงิน · การกันที่ · ห้องวิดีโอ · ลบตั๋วตาม PDPA) · ล็อกอิน/ความเป็นส่วนตัว (การคืนชีพบัญชี · ข้อมูลในเครื่องหลังออกจากระบบ · แคช Service Worker · ลบข้อมูลครบตาราง) · หน้าเปิดไพ่ (ไพ่กลับหัว · ค้างตอนรีเฟรช · แชทถามต่อ) · UX/SEO/สองภาษา (คอนทราสต์สายด่วน 1323 · สารบัญบทความ · ล็อกการเลื่อน) · CI/infra (dependabot · ตรวจหลัง deploy) · โค้ดตาย (ไฟล์กำพร้า · CSS ตาย · API ไม่มีผู้เรียก 3 เส้น)
+- ไฟล์ใหม่ที่ควรรู้: `src/lib/auth/return-path.ts` · `src/lib/account/{clear-user-data,purchase-notice}.ts` · `src/lib/reading/{chat-limits,friendly-error,orientation,start-limits}.ts` · `src/components/home/flow-run-guard.ts` · `src/components/spread/custom/load-mine.ts` · `src/components/blog/article-toc.ts` · `src/components/journal/JournalCrisisListener.tsx` · `src/app/(th)/readers/sitemap.ts` · `.github/scripts/worker-smoke.sh`
+- ลบ: `src/components/spread/{spread-illustrations,SpreadPositionMap}.tsx` · `src/components/ui/use-rail.ts` · `src/lib/stats/breakdown.ts` · API `/api/readers` · `/api/marketplace/readers/[id]/availability` · `/api/admin/payouts`
+- รอเจ้าของตัดสิน: นโยบายผังใหญ่ใช้เฉพาะรอบที่ซื้อ · ลบบัญชีแล้วไม่ยกเลิกนัดที่จ่ายแล้ว · ลบแม่หมอที่มีประวัติโอนเงิน · ปิดรหัสแลกสิทธิ์ที่เคย seed ไว้ในแผงแอดมิน
+- รายละเอียดรายข้อเก็บนอก repo (repo เป็นสาธารณะ) · บทเรียนรวมบันทึกใน INCIDENT_LOG
+
+### 🗓️ 2026-10-19 (รอบ 294): ตรวจใหญ่ทั้งระบบ 10 ด้าน (บั๊ก · ความปลอดภัย · โค้ดตาย · SEO · UX/UI · perf · infra)
+- เอเจนท์ตรวจ 10 ตัว (ตรวจอย่างเดียว) + ผู้คุมงานตรวจซ้ำข้อร้ายแรงด้วยการอ่านโค้ด/รันซ้ำ · ได้ 86 ข้อ · แผน `docs/plans/AUDIT_2026-10-18.md` · กระดาน `docs/audits/2026-10-18/PROGRESS.md`
+- 🔒 repo นี้เป็นสาธารณะ — ไฟล์ผลรายด้านมีขั้นตอนเจาะระบบที่ยังไม่แก้ จึงเก็บนอก repo (`.git/info/exclude`) · เจ้าของจะเปลี่ยน repo เป็น private หลังแก้เสร็จ
+- ค่าฐาน: typecheck 0 error · eslint 0 error · `npm audit --omit=dev` 0 · บิลด์ผ่าน 462 หน้า
+- ยังไม่ได้แก้โค้ด — รอเจ้าของสั่งเริ่มคลื่นแก้
 ### 🗓️ 2026-10-19 (รอบ 301): แผงแอดมินเป็นพื้นขาวเสมอ ไม่ตามโหมดมืดของเครื่อง (เจ้าของส่งภาพการ์ดรายได้พื้นน้ำตาลเข้ม "ไม่ต้องใส่ ดำได้ไหม อ่านไม่รู้เรื่อง")
 - สาเหตุ: สคริปต์ธีมใน `<head>` ตั้ง `data-theme="dark"` ทุกหน้าตามเครื่อง · `theme-dark.css` ทับพื้นการ์ด (`--glass-fill` · `.altar-card-porcelain`) ด้วยสีเข้ม แต่ `admin-theme.css` ตั้งตัวหนังสือเป็นสีเข้มของธีมขาว ➔ ตัวเข้มบนพื้นเข้ม
 - แก้ที่ต้นทาง: `src/lib/theme/theme-script.ts` บังคับ `light` เมื่ออยู่ใต้ `/admin` ก่อนวาดเฟรมแรก (ไม่ไล่ทับ CSS ทีละคลาส · ไม่แวบ) · หน้าเว็บลูกค้ายังตามโหมดเครื่องเหมือนเดิม

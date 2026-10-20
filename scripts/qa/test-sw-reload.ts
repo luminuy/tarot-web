@@ -21,7 +21,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { createSessionSkipFlag, isServiceWorkerAllowed, setupServiceWorker, type SwContainerLike } from "../../src/components/pwa/sw-register";
+import { createSessionSkipFlag, isLivePath, isServiceWorkerAllowed, setupServiceWorker, type SwContainerLike } from "../../src/components/pwa/sw-register";
 
 const ROOT = process.cwd();
 
@@ -257,6 +257,108 @@ check("http บนโดเมนจริง ลงทะเบียนไม�
       fs.readFileSync(swPath, "utf-8").includes("clients.claim()"),
     );
   }
+}
+
+// ── A5-01: หน้าที่มีความลับใน URL ต้องไม่ถูกเก็บลง Cache Storage ──────────────
+// รันฟังก์ชันตัดสินจริงจาก sw.js (ไม่ใช่แค่ grep) + ยืนยันรายการ Network-Only สองเส้นที่เคยหลุด
+{
+  const swSrc = fs.readFileSync(path.join(ROOT, "public/sw.js"), "utf-8");
+  check(
+    "A5-01: /readers/studio และ /r/ อยู่ในรายการ Network-Only",
+    swSrc.includes('url.pathname.startsWith("/readers/studio")') && swSrc.includes('url.pathname.startsWith("/r/")'),
+  );
+  const fnSrc = /function isCacheableNavigation\([\s\S]*?\n}\n/.exec(swSrc)?.[0];
+  check("A5-01: sw.js มีตัวตัดสิน isCacheableNavigation", Boolean(fnSrc));
+  if (fnSrc) {
+    const decide = new Function(`${fnSrc}; return isCacheableNavigation;`)() as (u: URL, r: Response) => boolean;
+    const page = (cc?: string) => new Response("<html></html>", { status: 200, headers: cc ? { "cache-control": cc } : {} });
+    const at = (p: string) => new URL(p, "https://seertarot.net");
+    check("A5-01: หน้าสาธารณะยังเก็บแคชได้ (ออฟไลน์ใช้ได้)", decide(at("/cards"), page("public, max-age=0, must-revalidate")));
+    check("A5-01: URL มีโทเคนใน query ไม่เก็บ", !decide(at("/readers/x?id=1&token=abc"), page()));
+    check("A5-01: หน้าที่ตอบ no-store/private ไม่เก็บ", !decide(at("/x"), page("private, no-cache, no-store")) && !decide(at("/x"), page("private")));
+    check("A5-01: คำตอบที่ไม่ใช่ 200 ไม่เก็บ", !decide(at("/cards"), new Response("", { status: 404 })));
+  }
+}
+
+// ── A5-03: แท็บอื่นที่ถูกตัวใหม่ยึดตาม ต้องไม่ถูกรีโหลดทับงานที่ทำอยู่ ──────────────
+// รันโค้ดจริงของ setupServiceWorker ด้วยสภาพแวดล้อมปลอมที่มี passiveReload
+function passiveScenario(opts: { busy: boolean; hidden: boolean }) {
+  const listeners: Array<() => void> = [];
+  const hiddenHandlers: Array<() => void> = [];
+  let reloads = 0;
+  const state = { busy: opts.busy, hidden: opts.hidden };
+  const container: SwContainerLike = {
+    controller: { scriptURL: "/sw.js" },
+    addEventListener: (_t, l) => void listeners.push(l),
+    removeEventListener: (_t, l) => {
+      const i = listeners.indexOf(l);
+      if (i >= 0) listeners.splice(i, 1);
+    },
+    register: async () => ({ installing: null, onupdatefound: null }),
+  };
+  const teardown = setupServiceWorker({
+    container,
+    reload: () => void reloads++,
+    isDocumentReady: () => true,
+    onWindowLoad: () => {},
+    offWindowLoad: () => {},
+    passiveReload: {
+      isBusy: () => state.busy,
+      isHidden: () => state.hidden,
+      onHidden: (fn) => {
+        hiddenHandlers.push(fn);
+        return () => {
+          const i = hiddenHandlers.indexOf(fn);
+          if (i >= 0) hiddenHandlers.splice(i, 1);
+        };
+      },
+    },
+  });
+  return {
+    claim: () => listeners.forEach((l) => l()),
+    hide: () => {
+      state.hidden = true;
+      [...hiddenHandlers].forEach((h) => h());
+    },
+    get reloads() {
+      return reloads;
+    },
+    get hiddenListeners() {
+      return hiddenHandlers.length;
+    },
+    teardown,
+  };
+}
+
+{
+  const visible = passiveScenario({ busy: false, hidden: false });
+  visible.claim();
+  check("A5-03: แท็บที่ผู้ใช้กำลังมองอยู่ ไม่ถูกรีโหลดทันทีตอนถูกตัวใหม่ยึด", visible.reloads === 0);
+  visible.hide();
+  check("A5-03: พอแท็บถูกซ่อนแล้วค่อยรีโหลด (หนึ่งครั้ง) และถอดตัวจับ", visible.reloads === 1 && visible.hiddenListeners === 0);
+
+  const hiddenIdle = passiveScenario({ busy: false, hidden: true });
+  hiddenIdle.claim();
+  check("A5-03: แท็บที่ซ่อนอยู่และไม่ได้ทำอะไร รีโหลดได้ทันที", hiddenIdle.reloads === 1);
+
+  const live = passiveScenario({ busy: true, hidden: true });
+  live.claim();
+  live.hide();
+  check("A5-03: หน้าใช้งานสด/มีข้อความพิมพ์ค้าง ไม่รีโหลดเอง แม้แท็บถูกซ่อน", live.reloads === 0);
+
+  const early = passiveScenario({ busy: false, hidden: false });
+  early.claim();
+  early.teardown();
+  check("A5-03: teardown ถอดตัวจับ 'แท็บถูกซ่อน' ด้วย", early.hiddenListeners === 0);
+
+  for (const p of ["/readers/room/abc", "/readers/queue/1", "/reading/chat", "/en/reading/chat", "/read/three", "/readers"]) {
+    check(`A5-03: ${p} นับเป็นหน้าใช้งานสด`, isLivePath(p));
+  }
+  for (const p of ["/cards", "/spreads", "/en/cards/major-00", "/", "/blog/x"]) {
+    check(`A5-03: ${p} ไม่ใช่หน้าใช้งานสด`, !isLivePath(p));
+  }
+  const wired = fs.readFileSync(path.join(ROOT, "src/components/pwa/ServiceWorkerRegister.tsx"), "utf-8") + fs.readFileSync(path.join(ROOT, "astro/scripts/site-chrome.ts"), "utf-8");
+  check("A5-03: ทั้งหน้า Next และหน้า Astro ส่ง passiveReload จริง", (wired.match(/passiveReload: createBrowserPassiveReload\(\)/g) ?? []).length === 2);
 }
 
 console.log(`\n${pass}/${pass + fail} ผ่าน`);

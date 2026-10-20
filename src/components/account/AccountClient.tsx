@@ -25,6 +25,7 @@ import {
 import { QuotaPips } from "@/components/entitlement/QuotaPips";
 import { DeleteAllDataButton } from "@/components/ui/DeleteAllDataButton";
 import { useSessionUser, patchSessionUser, invalidateSessionCache } from "@/lib/auth/use-session";
+import { clearPerUserBrowserData } from "@/lib/account/clear-user-data";
 import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
 import {
@@ -210,6 +211,8 @@ export function AccountClient() {
     } catch {
       // ต่อเซิร์ฟเวอร์ไม่ได้ — ยังต้องล้างสถานะฝั่งหน้าเว็บอยู่ดี
     }
+    // สมุดดวง · ภาพสิทธิ์ · คำถามค้าง ของบัญชีนี้ต้องไม่ค้างให้คนถัดไปบนเครื่องเดียวกัน (A5-05 · A5-06)
+    clearPerUserBrowserData();
     invalidateSessionCache();
     window.location.href = isEn ? "/en" : "/";
   };

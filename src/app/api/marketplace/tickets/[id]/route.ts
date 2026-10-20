@@ -1,22 +1,25 @@
 import { NextResponse } from "next/server";
 import { apiOk } from "@/lib/api/envelope";
 import { z } from "zod";
-import { getQueueTicketById, toPublicTicket, type QueueTicket } from "@/lib/marketplace/queue.repo";
+import { getQueueTicketById, liveQueuePosition, toPublicTicket, type QueueTicket } from "@/lib/marketplace/queue.repo";
 import {
   cancelConsultation,
   expireLapsedHold,
   getBookingByTicketId,
   listPaymentsForTicket,
+  primaryPaidPayment,
   rescheduleBooking,
 } from "@/lib/marketplace/booking.repo";
-import { canReschedule, decideCancellation, paidGraceUntil } from "@/lib/marketplace/booking-policy";
+import { canReschedule, decideCancellation, paidGraceUntil, readerMissedRoom } from "@/lib/marketplace/booking-policy";
+import { endCall, getRoomAttendance } from "@/lib/marketplace/call.repo";
+import { DEFAULT_SUPPORT_EMAIL } from "@/lib/config/site";
 import { getReaderById } from "@/lib/marketplace/readers.repo";
 import { isTicketOwner } from "@/lib/marketplace/ticket-owner";
 import { getReviewByTicketId } from "@/lib/marketplace/reviews.repo";
 import { readerPriceThb } from "@/lib/marketplace/offer";
 import { requireReader } from "@/lib/auth/reader-auth";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
-import { isTurnConfigured } from "@/lib/marketplace/turn";
+import { isTurnConfigured, revokeTurnCredential } from "@/lib/marketplace/turn";
 import { bookingAccessUrl } from "@/lib/marketplace/booking-mail";
 import { isInviteTicket } from "@/lib/marketplace/invites.repo";
 
@@ -32,10 +35,11 @@ async function buildBookingView(ticket: QueueTicket, nowMs: number) {
   const payments = await listPaymentsForTicket(ticket.id);
   const paid = payments.some((p) => p.status === "paid");
   // เวลาที่จ่ายสำเร็จ (updated_at ของรายการที่ paid) — ใช้ตัดสินช่วงผ่อนผัน 10 นาทีหลังจ่าย
-  const paidAt = payments.find((p) => p.status === "paid")?.updatedAt ?? null;
+  const paidAt = primaryPaidPayment(payments)?.updatedAt ?? null;
   const refunded = payments.some((p) => p.status === "refunded");
   const slotStart = booking.kind === "scheduled" ? booking.slotStart : null;
   const review = ticket.status === "handed_off" ? await getReviewByTicketId(ticket.id) : null;
+  const room = ticket.status === "ready" ? await getRoomAttendance(ticket.id) : null;
   return {
     id: booking.id,
     kind: booking.kind,
@@ -51,7 +55,16 @@ async function buildBookingView(ticket: QueueTicket, nowMs: number) {
     refundStatus: booking.refundStatus ?? (refunded ? "refunded" : null),
     paid: paid || refunded,
     amountSatang: payments.find((p) => p.status === "paid" || p.status === "refunded")?.amountSatang ?? null,
-    cancel: decideCancellation({ actor: "customer", kind: ticket.kind, ticketStatus: ticket.status, paid, slotStart, nowMs, paidAt }),
+    cancel: decideCancellation({
+      actor: "customer",
+      kind: ticket.kind,
+      ticketStatus: ticket.status,
+      paid,
+      slotStart,
+      nowMs,
+      paidAt,
+      readerMissedRoom: readerMissedRoom(room, nowMs),
+    }),
     canReschedule: canReschedule({
       ticketStatus: ticket.status,
       slotStart,
@@ -108,8 +121,10 @@ export async function GET(
     const canAccessLine = ticket.status === "ready" || ticket.status === "handed_off";
 
     const booking = isOwner ? await buildBookingView(ticket, now) : null;
+    // "คิวที่ N" คำนวณสดตามลำดับการจ่ายเงิน — ไม่ใช่ตัวเลขที่แช่ไว้ตอนจ่าย
+    const position = await liveQueuePosition(ticket);
     return NextResponse.json({
-      ticket: toPublicTicket(ticket),
+      ticket: { ...toPublicTicket(ticket), position },
       reader: {
         id: reader.id,
         displayName: reader.displayName,
@@ -164,13 +179,19 @@ export async function DELETE(
 
     const result = await cancelConsultation(ticket, "customer");
     if (!result.ok) {
+      const support = process.env.SUPPORT_EMAIL || DEFAULT_SUPPORT_EMAIL;
       const message =
         result.reason === "in_session"
-          ? "แม่หมอเริ่มคุยกับคุณแล้ว ยกเลิกเองไม่ได้ หากมีปัญหาแจ้งแม่หมอในห้องได้เลย"
+          ? `แม่หมอเริ่มคุยกับคุณแล้ว ยกเลิกเองไม่ได้ ถ้าเข้าห้องแล้วไม่เจอแม่หมอ รอในห้องต่ออีกสักครู่ ครบ 15 นาทีจะยกเลิกและรับเงินคืนเต็มได้เอง หรือเขียนถึงทีมงานที่ ${support}`
           : result.reason === "changed"
             ? "สถานะคิวเพิ่งเปลี่ยน กรุณาโหลดหน้าใหม่แล้วลองอีกครั้ง"
             : "คิวนี้ปิดไปแล้ว";
       return NextResponse.json({ error: message }, { status: 409 });
+    }
+    // ยกเลิกระหว่างอยู่ในห้อง (แม่หมอไม่เข้าห้อง) ➔ ปิดห้องวิดีโอ + เพิกถอนรหัสผ่าน TURN ทันที
+    if (ticket.status === "ready") {
+      const users = await endCall(ticket.id, "customer");
+      await Promise.all(users.map(revokeTurnCredential));
     }
     const message =
       result.refundStatus === "refunded"

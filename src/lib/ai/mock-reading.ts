@@ -852,6 +852,8 @@ export async function* streamMockGeminiReading(
 ): AsyncGenerator<ReadingEvent> {
   const lang: Lang = ctx.lang === "en" ? "en" : "th";
   const isEn = lang === "en";
+  // คำอ่านสำรองไม่หักสิทธิ์ — บอกผู้เรียกว่าเนื้อหาที่ไหลออกต่อจากนี้ไม่ใช่คำอ่านจาก AI (A3-06)
+  if (ctx.usageMeter) ctx.usageMeter.offline = true;
 
   /*
    * 📊 จดสถิติทุกครั้งที่คำอ่านสำรองถึงมือผู้ใช้

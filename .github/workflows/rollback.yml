@@ -91,21 +91,16 @@ jobs:
             npx wrangler rollback --message "$REASON" --yes
           fi
 
-      - name: 🔎 ยืนยันว่าเว็บกลับมาตอบ 200
+      # ⚠️ ห้ามเช็กหน้าแรกอย่างเดียว (A10-03): หน้าแรกเป็นไฟล์ static ที่ขอบ ไม่ปลุก Worker
+      #    INC-0285 เองบันทึกว่า "หน้า Astro ยังปกติ" ขณะที่ /api/* · /readers · /admin ตอบ 1101
+      #    ถอยไปเวอร์ชันที่ยังพังแล้วขั้นนี้ขึ้นเขียวจะหลอกคนสั่งถอยว่าจบแล้ว
+      #    สคริปต์ยิงเส้นที่ต้องผ่าน Worker จริง (/readers ต้อง 200 · /api/cron/* ไม่แนบ Bearer ต้อง 401/403)
+      - name: 🔎 ยืนยันว่า Worker กลับมาตอบจากโค้ดจริง (ไม่ใช่แค่หน้าแรก)
         run: |
-          set -euo pipefail
-          # ให้ Cloudflare กระจายเวอร์ชันใหม่ไปทั่วขอบก่อน
-          for i in 1 2 3 4 5; do
-            code=$(curl -s -o /dev/null -w "%{http_code}" https://seertarot.net/ || echo "000")
-            echo "ครั้งที่ $i: HTTP $code"
-            if [ "$code" = "200" ]; then
-              echo "✅ เว็บกลับมาตอบ 200 แล้ว"
-              exit 0
-            fi
-            sleep 10
-          done
-          echo "::error::ถอยกลับแล้วแต่หน้าแรกยังไม่ตอบ 200 — ต้องเข้าไปดูที่ Cloudflare Dashboard ทันที"
-          exit 1
+          if ! bash .github/scripts/worker-smoke.sh; then
+            echo "::error::ถอยกลับแล้วแต่ Worker ยังไม่ตอบปกติ (ตรวจ /readers และ /api/cron/*) — เวอร์ชันปลายทางอาจเป็นโค้ดชุดเดียวกับที่พัง ลองระบุ version_id เวอร์ชันที่เคยใช้งานได้จริง หรือเข้า Cloudflare Dashboard ทันที"
+            exit 1
+          fi
 
       - name: 📝 สรุปการถอยกลับ
         if: always()

@@ -43,6 +43,46 @@ export function truncateForOverlay(raw: string, maxChars: number): string {
   return `${body.trimEnd()}…`;
 }
 
+/** ตัวแบ่งคำไทย — มีใน Node 16+ และ Workers (V8) · ถ้าไม่มีถอยไปแบ่งตามช่องว่าง */
+const THAI_WORD_SEGMENTER: Intl.Segmenter | null =
+  typeof Intl !== "undefined" && typeof Intl.Segmenter === "function" ? new Intl.Segmenter("th", { granularity: "word" }) : null;
+
+/**
+ * แบ่งหัวเรื่องเป็นบรรทัดที่ขอบคำ (A7-11) — ภาษาไทยไม่เว้นวรรค ถ้าปล่อยให้ Cloudinary หักบรรทัดเอง
+ * (`w_700,c_fit`) มันหักกลางคำแล้วแทรก `-` ปลายบรรทัด · ที่นี่แบ่งเป็นชั้นข้อความแยกบรรทัดละชั้นแทน
+ * บรรทัดละไม่เกิน `lineChars` ตัวอักษร · เกิน `maxLines` บรรทัดตัดท้ายที่ขอบคำแล้วเติม …
+ */
+export function splitTitleForOverlay(raw: string, lineChars = 27, maxLines = 2): string[] {
+  const text = raw.replace(/\s+/g, " ").trim();
+  if (!text) return [];
+  const words = THAI_WORD_SEGMENTER
+    ? [...THAI_WORD_SEGMENTER.segment(text)].map((x) => x.segment)
+    : text.split(/(?<= )/);
+  const lines: string[] = [];
+  let line = "";
+  let truncated = false;
+  for (const word of words) {
+    if ((line + word).trimEnd().length <= lineChars) {
+      line += word;
+      continue;
+    }
+    if (line.trim()) lines.push(line.trimEnd());
+    if (lines.length >= maxLines) {
+      truncated = true;
+      line = "";
+      break;
+    }
+    // คำเดี่ยวยาวเกินบรรทัด (ไม่มีขอบคำให้หัก) — ตัดตรงเป็นทางสุดท้าย
+    line = word.trimStart().length > lineChars ? word.trimStart().slice(0, lineChars) : word.trimStart();
+  }
+  if (line.trim() && lines.length < maxLines) lines.push(line.trimEnd());
+  if (truncated && lines.length > 0) {
+    const last = lines[lines.length - 1];
+    lines[lines.length - 1] = `${last.length >= lineChars ? last.slice(0, lineChars - 1) : last}…`;
+  }
+  return lines.slice(0, maxLines);
+}
+
 /**
  * เข้ารหัสข้อความสำหรับ `l_text:` ของ Cloudinary
  *
@@ -68,7 +108,7 @@ export function buildCloudinaryShareImageUrl(params: CloudinaryShareCardParams):
   const { title = "คำทำนายไพ่ยิปซี", spreadName = "ผังพยากรณ์", cardImageNames = [] } = params;
 
   // เข้ารหัสข้อความภาษาไทยสำหรับ URL Transformation (แก้บั๊ก OG-01 & OG-06)
-  const safeTitle = encodeOverlayText(title, 60);
+  const titleLines = splitTitleForOverlay(title).map((line) => encodeOverlayText(line, 40));
   const safeSpread = encodeOverlayText(spreadName, 40);
   const brand = encodeURIComponent("SEERTAROT · SANCTUARY");
   const foot = encodeURIComponent("PROVABLY-FAIR SHA-256 · SEERTAROT.NET");
@@ -85,7 +125,8 @@ export function buildCloudinaryShareImageUrl(params: CloudinaryShareCardParams):
     "w_1200,h_630,b_rgb:FAF7F2,c_pad,g_east",
     `l_text:Arial_22_bold:${brand},co_rgb:8F5C1A,g_north_west,x_80,y_70`,
     `l_text:Arial_30_bold:${safeSpread},co_rgb:8F5C1A,g_north_west,x_80,y_130`,
-    `l_text:Arial_50_bold:${safeTitle},co_rgb:29261F,g_north_west,x_80,y_190,w_700,c_fit`,
+    // หัวเรื่องแยกชั้นละบรรทัดที่ขอบคำ (A7-11) · w_700,c_fit เหลือไว้เป็นตาข่ายกันล้นเท่านั้น
+    ...titleLines.map((line, i) => `l_text:Arial_50_bold:${line},co_rgb:29261F,g_north_west,x_80,y_${190 + i * 62},w_700,c_fit`),
     `l_text:Arial_22:${foot},co_rgb:635B4E,g_south_west,x_80,y_70`,
     "f_auto,q_auto",
   ];

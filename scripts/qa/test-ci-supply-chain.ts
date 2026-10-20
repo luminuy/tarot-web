@@ -233,9 +233,9 @@ if (rollback) {
   check("workflow ถอยกลับกดเองได้ (`workflow_dispatch`)", /workflow_dispatch:/.test(rollback.src));
   check("workflow ถอยกลับสั่ง `wrangler rollback` จริง", /wrangler rollback/.test(rollback.src));
   check(
-    "workflow ถอยกลับยืนยันว่าเว็บกลับมาตอบ 200 หลังถอย",
-    /http_code/.test(rollback.src) && /200/.test(rollback.src),
-    "   ➔ ถอยแล้วไม่เช็ก = ไม่รู้ว่าถอยแล้วดีขึ้นหรือแย่ลง",
+    "workflow ถอยกลับยืนยัน Worker ด้วยสคริปต์ smoke (ไม่ใช่เช็กหน้าแรกที่เป็นไฟล์ static)",
+    /worker-smoke\.sh/.test(rollback.src) && !/curl[^\n]*https:\/\/seertarot\.net\/\s/.test(rollback.src),
+    "   ➔ หน้าแรกถูกชั้น assets ตอบก่อน Worker — ถอยไปเวอร์ชันที่ Worker ยังล้มก็ยังเขียว (A10-03 · INC-0285)",
   );
   /*
    * ⚠️ ต้องเทียบกับ **ค่าจริงใน deploy.yml** ไม่ใช่ฮาร์ดโค้ดชื่อกลุ่มไว้ในด่าน
@@ -349,6 +349,87 @@ check(
     "\n   ➔ วันที่แพ็กเกจแม่เลิกพึ่งมัน โค้ดเราจะพังโดยไม่มีอะไรเตือนล่วงหน้า (บทเรียน PR #368)" +
     "\n   ➔ ถ้าเป็นของที่เฟรมเวิร์กให้มาจริง ให้เพิ่มลง IMPLICIT_OK **พร้อมเหตุผล**",
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 6. A10-02 · A10-03 — ต้องมีด่านที่จับ "Worker ล้มตอนรันจริง" ทั้งหลัง deploy และหลังถอย
+// ─────────────────────────────────────────────────────────────────────────────
+const smokePath = path.join(ROOT, ".github/scripts/worker-smoke.sh");
+const smokeSrc = fs.existsSync(smokePath) ? fs.readFileSync(smokePath, "utf-8") : "";
+check("มีสคริปต์ยืนยัน Worker `.github/scripts/worker-smoke.sh`", smokeSrc.length > 0);
+check(
+  "สคริปต์ smoke ยิงเส้นที่ต้องผ่าน Worker (/readers + /api/cron/*) ไม่ใช่หน้า static",
+  /\/readers/.test(smokeSrc) && /\/api\/cron\//.test(smokeSrc),
+  "   ➔ เส้นที่ขอบตอบเองไม่ปลุก Worker — Worker ล้ม (1101) ก็ยังเขียว",
+);
+{
+  const deployWf = workflows.find((wf) => wf.name === "deploy.yml")?.src ?? "";
+  const iDeploy = deployWf.indexOf("npm run deploy");
+  const iSmoke = deployWf.indexOf("worker-smoke.sh");
+  const iStripe = deployWf.indexOf("wrangler secret put");
+  check(
+    "deploy.yml ยืนยัน Worker หลัง deploy และก่อนขั้น Stripe sync (ไม่สร้างเวอร์ชันใหม่ทับเวอร์ชันที่จะถอย)",
+    iDeploy >= 0 && iSmoke > iDeploy && iStripe > iSmoke,
+    "   ➔ ลำดับต้องเป็น: npm run deploy ➔ worker-smoke.sh ➔ wrangler secret put",
+  );
+  check(
+    "deploy.yml จดเวอร์ชันก่อน deploy และถอยด้วย version id เจาะจง (ไม่ถอยแบบเว้นว่าง)",
+    /PREV_VERSION_ID/.test(deployWf) && /wrangler rollback "\$PREV_VERSION_ID"/.test(deployWf),
+    "   ➔ ถอยแบบเว้นว่างอาจไปหาเวอร์ชันที่เกิดจาก `secret put` ซึ่งเป็นโค้ดชุดเดียวกับที่พัง (INC-0285)",
+  );
+  const rbWf = workflows.find((wf) => wf.name === "rollback.yml")?.src ?? "";
+  check(
+    "rollback.yml ไม่ยืนยันด้วย curl หน้าแรกอย่างเดียว",
+    !/curl[^\n]*seertarot\.net\/["\s]/.test(rbWf),
+  );
+}
+
+// ── dependabot: ตัวแปลงห้ามยกเอง · มี cooldown (A10-02 · A10-04) ───────────────
+{
+  const depPath = path.join(ROOT, ".github/dependabot.yml");
+  const dep = fs.existsSync(depPath) ? fs.readFileSync(depPath, "utf-8") : "";
+  const live = dep.split("\n").filter((l) => !/^\s*#/.test(l)).join("\n");
+  check("dependabot ไม่ยกรุ่น @opennextjs/* เอง (ตัวแปลงต้องยกด้วยมือคู่กับ next)", /dependency-name:\s*"@opennextjs\/\*"/.test(live));
+  check("dependabot ตั้ง cooldown (รอก่อนเปิด PR รุ่นใหม่)", /cooldown:\s*\n\s+default-days:\s*\d+/.test(live));
+}
+
+// ── pr.yml: สิทธิ์แคบ + ไม่ auto-merge ของที่ประกอบเป็น Worker (A10-02 · A10-04) ─────
+{
+  const prWf = workflows.find((wf) => wf.name === "pr.yml")?.src ?? "";
+  const topPerm = /^permissions:\s*\n((?:[ \t]+\S.*\n?)*)/m.exec(prWf)?.[1] ?? "";
+  check(
+    "pr.yml: สิทธิ์ระดับ workflow เป็น `contents: read` เท่านั้น (ไม่มี write ให้ทุก job)",
+    /contents:\s*read/.test(topPerm) && !/write/.test(topPerm),
+    "   ➔ job ที่รัน `npm ci` ได้โทเคนเขียนกว้าง = แพ็กเกจที่ถูกยึดสร้าง check run ปลอม/สั่ง deploy ได้",
+  );
+  check("pr.yml: checkout ของ job ตรวจ PR ตั้ง `persist-credentials: false`", /persist-credentials:\s*false/.test(prWf));
+  check(
+    "pr.yml: ไม่ auto-merge PR ของ dependabot ที่แตะ next / wrangler / @opennextjs",
+    /dependabot\[bot\]/.test(prWf) && /opennextjs/.test(prWf) && /touchesWorker/.test(prWf),
+  );
+}
+
+// ── A10-07: โฮสต์ workers.dev ใช้เฉพาะ /api/cron/* — ที่เหลือส่งกลับโดเมนหลัก ───────────
+{
+  const stray: string[] = [];
+  for (const wf of workflows) {
+    for (const [i, line] of wf.src.split("\n").entries()) {
+      if (/^\s*#/.test(line)) continue;
+      const m = /workers\.dev(\/api\/\S*)/.exec(line);
+      if (m && !m[1].startsWith("/api/cron/")) stray.push(`   · ${wf.name}:${i + 1} — ${line.trim()}`);
+    }
+  }
+  check(
+    "workflow ยิง /api/* เข้า workers.dev เฉพาะ /api/cron/* (เส้นอื่นถูกส่งกลับโดเมนหลักแล้ว)",
+    stray.length === 0,
+    stray.join("\n"),
+  );
+  const nextCfg = fs.readFileSync(path.join(ROOT, "next.config.ts"), "utf-8");
+  check(
+    "next.config.ts ส่ง /api/* (ยกเว้น /api/cron/) บนโฮสต์ workers.dev กลับโดเมนหลัก",
+    nextCfg.includes("workers\\\\.dev") && nextCfg.includes("PRODUCTION_WORKERS_DEV_HOST") && nextCfg.includes("(?!cron/)"),
+    "   ➔ โฮสต์นี้อยู่นอกโซน — กฎ WAF/เพดานถี่ของโซนไม่ครอบ (A10-07)",
+  );
+}
 
 console.log(`\n📊 ผ่าน ${pass} ข้อ | ล้มเหลว ${fail} ข้อ\n`);
 if (fail > 0) process.exit(1);

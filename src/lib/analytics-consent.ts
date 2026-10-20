@@ -18,17 +18,6 @@ export const CONSENT_CHANGED_EVENT = "seertarot:consent-changed";
 
 export type ConsentChoice = "granted" | "denied";
 
-export function readConsent(): ConsentChoice | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(CONSENT_STORAGE_KEY);
-    return raw === "granted" || raw === "denied" ? raw : null;
-  } catch {
-    // เบราว์เซอร์บล็อกที่เก็บข้อมูล — ถือว่ายังไม่เคยตัดสินใจ และจะไม่เก็บสถิติ
-    return null;
-  }
-}
-
 export function writeConsent(choice: ConsentChoice): void {
   if (typeof window === "undefined") return;
   try {

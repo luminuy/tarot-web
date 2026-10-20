@@ -10,6 +10,7 @@ import { saveReading } from "@/lib/utils/history";
 import { RitualHero } from "@/components/reading/one-card/RitualHero";
 import { Ui2Window } from "@/components/ui2/Ui2Showcase";
 import { OneCardRitual } from "@/components/reading/one-card/OneCardRitual";
+import { orientedMeaning, orientedTone } from "@/lib/reading/orientation";
 import { CardImage } from "@/components/card/CardImage";
 import { copyToClipboard } from "@/lib/utils/clipboard";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
@@ -98,10 +99,13 @@ export function LoveOneCardClient() {
   const getContextualLoveAdvice = (
     card: TarotCardType,
     relStatus: RelationshipStatus,
-    en: boolean
+    en: boolean,
+    isReversed: boolean
   ) => {
-    const isPositive = card.yesNo === "yes";
-    const isNeutral = card.yesNo === "maybe";
+    // ขั้วตามทิศที่เซิร์ฟเวอร์จั่วจริง (กติกาเดียวกับหน้าสารานุกรม) — ไม่งั้นคำแนะนำขัดกับคำอ่าน AI ด้านบน (A4-01)
+    const tone = orientedTone(card.yesNo, isReversed);
+    const isPositive = tone === "positive";
+    const isNeutral = tone === "neutral";
 
     switch (relStatus) {
       case "single":
@@ -351,7 +355,7 @@ export function LoveOneCardClient() {
             </div>
           </div>
         }
-        renderReading={(card) => (
+        renderReading={(card, isReversed) => (
           <div className="space-y-6 text-left">
             {/* Meta Tags */}
             <div className="flex flex-wrap items-center gap-2">
@@ -376,9 +380,7 @@ export function LoveOneCardClient() {
                   {isEnglish ? "Core Love Oracle" : "สารจากไพ่ถึงดวงใจของคุณ"}
                 </div>
                 <p className="text-xs sm:text-sm font-sans text-ink leading-relaxed">
-                  {isEnglish && card.meaningsEn?.love.upright
-                    ? card.meaningsEn.love.upright
-                    : card.meanings.love.upright}
+                  {orientedMeaning(card, "love", isReversed, isEnglish)}
                 </p>
               </div>
 
@@ -390,7 +392,7 @@ export function LoveOneCardClient() {
                     : `คำทำนายเฉพาะสำหรับสถานะ: ${currentStatusObj?.titleTh}`}
                 </div>
                 <p className="text-xs sm:text-sm font-sans text-ink leading-relaxed">
-                  {getContextualLoveAdvice(card, selectedStatus, isEnglish)}
+                  {getContextualLoveAdvice(card, selectedStatus, isEnglish, isReversed)}
                 </p>
               </div>
 

@@ -92,7 +92,7 @@ export function RedeemCodeForm({
           spellCheck={false}
           value={code}
           onChange={(e) => setCode(e.target.value)}
-          placeholder={isEn ? "e.g. VIP3-TAROT-2026" : "เช่น VIP3-TAROT-2026"}
+          placeholder={isEn ? "e.g. SEER-XXXX-XXXX" : "เช่น SEER-XXXX-XXXX"}
           disabled={loading}
           className="glass-field min-h-[44px] min-w-0 flex-1 rounded-xl border border-line-interactive-warm px-3 font-mono text-sm uppercase tracking-wider text-ink-deep focus:border-gold-ink focus:outline-none"
         />

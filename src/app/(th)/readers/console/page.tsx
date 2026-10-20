@@ -15,9 +15,17 @@ import {
   UpcomingBookings,
   type ReaderSettingsState,
 } from "@/components/marketplace/ConsoleBookingParts";
-import { LIVE_PRESENCE_TIMEOUT_MINUTES, bkkDateKey, formatTime, relativeDayLabel } from "@/lib/marketplace/booking-policy";
+import {
+  LIVE_PRESENCE_TIMEOUT_MINUTES,
+  NO_SHOW_GRACE_MINUTES,
+  bkkDateKey,
+  canMarkNoShow,
+  formatTime,
+  relativeDayLabel,
+} from "@/lib/marketplace/booking-policy";
 import { questionCategoryLabel, questionUrgencyLabel, suggestedSpreadLabel } from "@/lib/marketplace/offer";
 import { PrivateRoomCard } from "@/components/marketplace/PrivateRoomCard";
+import { STORAGE_KEYS } from "@/lib/storage/keys";
 import type { InviteView } from "@/lib/marketplace/invites.repo";
 
 export const dynamic = "force-dynamic";
@@ -75,10 +83,36 @@ function consoleAccessError(status: number): string {
 
 const LINK_WARN_MS = 3 * 60 * 60 * 1000;
 
+/** ที่เก็บโทเคนของแท็บนี้ — ใช้คีย์เดียวกับสตูดิโอ (เป็นโทเคนแม่หมอตัวเดียวกัน) */
+const TOKEN_KEY = STORAGE_KEYS.studioReaderToken;
+
 function ReaderConsoleInner() {
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  const queryToken = searchParams.get("token");
   const readerId = searchParams.get("id") || searchParams.get("readerId");
+  /*
+   * โทเคนแม่หมอเป็นรหัสผ่านเข้าแผง — รับจากลิงก์ครั้งเดียว ย้ายไปเก็บใน sessionStorage ของแท็บนี้
+   * แล้วลบออกจาก URL ทันที (แบบเดียวกับสตูดิโอ) ลิงก์ในแถบที่อยู่/ประวัติ/ระบบวัดผลจึงไม่มีโทเคน
+   * ยังไม่ย้ายเสร็จ (`tokenReady`) = ยังไม่ดึงข้อมูล กันขึ้น "ลิงก์หมดอายุ" แวบตอนรีเฟรชหน้า
+   */
+  const [token, setToken] = useState<string | null>(queryToken);
+  const [tokenReady, setTokenReady] = useState(false);
+  useEffect(() => {
+    let t = queryToken;
+    try {
+      if (t) sessionStorage.setItem(TOKEN_KEY, t);
+      else t = sessionStorage.getItem(TOKEN_KEY);
+    } catch {
+      // โหมดส่วนตัว/บล็อกที่เก็บ — ใช้โทเคนที่ได้จาก URL ในหน่วยความจำของหน้านี้ต่อ
+    }
+    if (queryToken) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("token");
+      window.history.replaceState(null, "", url.pathname + url.search);
+    }
+    setToken((prev) => t ?? prev);
+    setTokenReady(true);
+  }, [queryToken]);
 
   const [data, setData] = useState<ConsoleState | null>(null);
   const [loading, setLoading] = useState(true);
@@ -103,10 +137,11 @@ function ReaderConsoleInner() {
   }, [token]);
 
   const fetchConsoleData = useCallback(async () => {
+    if (!tokenReady) return;
     try {
       let url = "/api/marketplace/console/queue";
+      // โทเคนไปทางหัว Authorization เท่านั้น — ไม่ต่อท้าย URL (URL ค้างอยู่ใน log)
       const params = new URLSearchParams();
-      if (token) params.set("token", token);
       if (readerId) params.set("readerId", readerId);
       if (params.toString()) url += `?${params.toString()}`;
 
@@ -132,9 +167,13 @@ function ReaderConsoleInner() {
     } finally {
       setLoading(false);
     }
-  }, [token, readerId, getAuthHeaders]);
+  }, [tokenReady, readerId, getAuthHeaders]);
 
   useVisibleInterval(fetchConsoleData, 5000);
+  // รอบแรกของตัวจับเวลาข้างบนเกิดก่อนย้ายโทเคนเสร็จ (ข้ามไป) — ย้ายเสร็จแล้วดึงทันที ไม่ต้องรอรอบ 5 วินาที
+  useEffect(() => {
+    if (tokenReady) void fetchConsoleData();
+  }, [tokenReady, fetchConsoleData]);
 
   /*
    * ✦ คิวสดเปิดจริงเฉพาะตอนแม่หมออยู่ (เห็นแผงภายใน 15 นาที — migrations/0031 · แผน CONSULT_FLOW ข้อ 3.2)
@@ -192,7 +231,7 @@ function ReaderConsoleInner() {
           setNotice("รับลูกค้าเข้าห้องแล้ว — กดเปิดกล้องในห้องวิดีโอได้เลย");
         } else if (action === "accept") setNotice("เรียกคิวเรียบร้อยแล้ว");
         else if (action === "handoff") setNotice("ปิดคิวเรียบร้อยแล้ว");
-        else if (action === "no_show") setNotice("บันทึกว่าลูกค้าไม่มาตามนัดแล้ว");
+        else if (action === "no_show") setNotice("บันทึกว่าลูกค้าไม่เข้าห้องตามนัดแล้ว ระบบส่งอีเมลแจ้งลูกค้าแล้ว");
         else setNotice("ยกเลิกแล้ว ระบบคืนเงินลูกค้าเต็มจำนวนให้อัตโนมัติ");
       } else {
         const d = await res.json().catch(() => ({}));
@@ -582,6 +621,25 @@ function ReaderConsoleInner() {
                         >
                           เสร็จสิ้นคิวนี้
                         </Button>
+                        {/* นัดล่วงหน้าที่เริ่มแล้ว เลยเวลานัด 15 นาที — เซิร์ฟเวอร์ยอมเฉพาะเมื่อเปิดห้องรอครบเวลาแล้วลูกค้าไม่เข้า */}
+                        {ticket.kind === "booking" && videoCallEnabled && canMarkNoShow(ticket.slotStart, now) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs"
+                            disabled={actionLoading === ticket.id}
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  `แจ้งว่าลูกค้าไม่เข้าห้องตามนัด? ใช้ได้เมื่อคุณเปิดห้องวิดีโอรอครบ ${NO_SHOW_GRACE_MINUTES} นาทีแล้วลูกค้ายังไม่เข้า · ไม่มีการคืนเงิน และระบบส่งอีเมลแจ้งลูกค้า`
+                                )
+                              )
+                                void handleTicketAction(ticket.id, "no_show");
+                            }}
+                          >
+                            ลูกค้าไม่เข้าห้อง
+                          </Button>
+                        )}
                       </>
                     )}
 

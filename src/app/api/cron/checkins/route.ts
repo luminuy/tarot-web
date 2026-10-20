@@ -4,7 +4,8 @@ import { SITE_ORIGIN } from "@/lib/config/site";
 import { cardByIndex } from "@/data/cards";
 import { checkinHtml, checkinText } from "@/lib/email/templates";
 import { sendEmail } from "@/lib/email/send";
-import { claimCheckin, listDueCheckins } from "@/lib/journal/journal.repo";
+import { claimCheckin, countCheckinsClaimedSince, listDueCheckins } from "@/lib/journal/journal.repo";
+import { bangkokDayStartMs } from "@/lib/time/bangkok";
 import { getThread } from "@/lib/journal/threads.repo";
 import { getUserById } from "@/lib/users/users.repo";
 import { recordEvent } from "@/lib/stats/record";
@@ -22,11 +23,14 @@ export const runtime = "nodejs";
  *  • ส่งเฉพาะนัดที่ผู้ใช้ตั้งเอง และผลจริงยังเป็น PENDING (บันทึกแล้ว = ไม่ต้องเตือน)
  *  • จองก่อนส่ง (`claimCheckin`) กันรอบที่ทำงานซ้อนส่งซ้ำ · ส่งไม่สำเร็จไม่ลองซ้ำอัตโนมัติ (ไม่ถล่มกล่องจดหมาย)
  *  • อีเมลมีแค่ชื่อเรื่องที่ผู้ใช้ตั้งเอง + ชื่อไพ่ใบหลัก — ไม่มีคำถามเต็ม/บันทึก (กติกาความเป็นส่วนตัวข้อ 5)
- *  • เพดานต่อรอบ 15 ฉบับ — แบ่งโควตา Resend ฟรี 100/วัน กับ digest (80) และอีเมลระบบ
+ *  • เพดานต่อรอบ 15 ฉบับ และต่อวันไทย 15 ฉบับ — แบ่งโควตา Resend ฟรี 100/วัน กับ digest (80) และอีเมลระบบ
+ *  • นัดที่เลยเวลาแล้วไม่มีวันหมดอายุ — รอบที่หลุดไปถูกตามส่งในรอบถัดไปเสมอ (เรียงนัดที่รอนานสุดก่อน)
+ *    เพดานต่อวันทำให้ตั้งรอบเสริมในวันเดียวกันได้อย่างปลอดภัย เมื่อตัวจับเวลาทิ้งรอบ (A3-05)
  *  • ผู้ใช้ที่เปิด Web Push ไว้ (เลือกรับนัดเช็ก) ได้แจ้งเตือนบนเครื่องด้วย · ไม่มีทั้งอีเมลยืนยันและ Push = ข้าม
  */
 
 const MAX_PER_RUN = 15;
+const MAX_PER_DAY = 15;
 
 function timingSafeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
@@ -43,13 +47,20 @@ export async function POST(request: Request) {
   }
 
   const now = Date.now();
-  const due = await listDueCheckins(now, MAX_PER_RUN * 2);
+  // อ่านยอดของวันไม่ได้ ➔ ไม่ส่งรอบนี้ (ปลอดภัยไว้ก่อน — นัดยังค้างอยู่ให้รอบถัดไปส่ง)
+  const claimedToday = await countCheckinsClaimedSince(bangkokDayStartMs(now)).catch(() => MAX_PER_DAY);
+  const budget = Math.max(0, Math.min(MAX_PER_RUN, MAX_PER_DAY - claimedToday));
+  if (budget === 0) {
+    recordEvent("checkin_day_cap_reached");
+    return NextResponse.json({ ok: true, reason: "daily_cap_reached", scanned: 0, sent: 0, skipped: 0, failed: 0 });
+  }
+  const due = await listDueCheckins(now, budget * 2);
   let sent = 0;
   let skipped = 0;
   let failed = 0;
 
   for (const item of due) {
-    if (sent >= MAX_PER_RUN) break;
+    if (sent >= budget) break;
     if (!(await claimCheckin(item.id, now).catch(() => false))) {
       skipped++;
       continue;

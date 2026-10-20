@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { ARTICLES } from "@/data/articles";
 import { PUBLIC_SPREADS, getSpread } from "@/data/spreads";
+import { getSpreadDescription, getSpreadName } from "@/data/spreads-helpers";
 import { isStandardSpread } from "@/lib/entitlement/limits";
 import { clampDescription, headline, pickTitle, stripCardCount } from "@/lib/config/meta-length";
 import { buildAlternates, localizedUrl, noindexAlternates } from "@/lib/config/site";
@@ -216,23 +217,25 @@ export function SpreadDetailContent({
         },
       ];
 
+  /* FAQPage JSON-LD ต้องตรงกับ FAQ ที่มองเห็นบนหน้า (`SpreadDetailClient.tsx`) ทั้งคำถามและคำตอบ — ฝั่งอังกฤษใช้ถ้อยคำและตัวช่วยชุดเดียวกัน (A7-10)
+     ⚠️ แก้ถ้อยคำฝั่งใดฝั่งหนึ่งต้องแก้อีกฝั่งด้วย */
+  const spreadNameEn = getSpreadName(spread, true);
+  const spreadDescEn = getSpreadDescription(spread, true);
   const faqs = isEnglish
     ? [
         {
-          question: `What kind of question is the ${spread.nameEn} spread good for?`,
-          answer: `${spread.descriptionEn}${
-            spread.defaultCategory === "general" ? "" : ` It suits ${categoryLabel} questions where you want the whole picture rather than a single answer.`
-          }`,
+          question: `What types of questions suit the ${spreadNameEn}?`,
+          answer: `${spreadDescEn} It is designed to reveal hidden dynamics and offer practical guidance.`,
         },
         {
-          question: `How many cards does the ${spread.nameEn} spread use?`,
-          answer: `This spread uses ${cardCount} ${cardCount === 1 ? "card" : "cards"}, each laid in a fixed position.`,
+          question: "How many cards are drawn in this spread?",
+          answer: `This layout uses ${cardCount} cards arranged in a deliberate geometric pattern.`,
         },
         {
-          question: standard ? "Is this spread free to use?" : "Why is this spread reserved?",
+          question: standard ? "Is this spread available on the standard tier?" : "Why is this spread designated as a Grand Spread?",
           answer: standard
-            ? "Yes — this is a standard spread that every member can open within their normal quota."
-            : "This spread uses many cards and takes a much longer interpretation, so it is reserved for holders of the extended reading entitlement.",
+            ? "Yes, this is an open spread available to all seekers under daily quota."
+            : "This layout features complex multi-card geometry and deep syntheses, unlocked for seekers with Grand Oracle access.",
         },
       ]
     : [

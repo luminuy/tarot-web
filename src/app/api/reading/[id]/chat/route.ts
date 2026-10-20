@@ -31,7 +31,7 @@ export const runtime = "nodejs";
 
 /**
  * 🧱 T-13: ปฏิเสธข้อความที่ตั้งใจปิดแท็บของ prompt ตั้งแต่ชั้น Zod
- * ผู้ใช้จริงไม่มีเหตุผลต้องพิมพ์ `</` หรือ `<system>` ในคำถามดูดวง
+ * ผู้ใช้จริงไม่มีเหตุผลต้องพิมพ์แท็กปิด (`</ชื่อแท็ก`) หรือ `<system>` ในคำถามดูดวง
  */
 const noInjection = (label: string) =>
   z.string().refine((v) => !looksLikePromptInjection(v), {
@@ -183,7 +183,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
     const { costSubject, isUserTokenCapReached, tokenCapMessage } = await import("@/lib/security/cost-ledger");
     chatCostSubj = costSubject(chatUserId, clientIp);
-    if (await isUserTokenCapReached(chatCostSubj, chatUserId ? "member" : "guest")) {
+    // A3-03: ผู้ถือรอบที่ซื้อได้เพดาน `paid` — แชทยาว ๆ ต้องไม่กินสิทธิ์เปิดไพ่ที่จ่ายเงินแล้วจนหมดวัน
+    const chatPaidCheck = chatUserId
+      ? async () =>
+          (await (await import("@/lib/entitlement/entitlement")).getEntitlement({ kind: "member", userId: chatUserId }))
+            .hasPaidCredits
+      : undefined;
+    if (await isUserTokenCapReached(chatCostSubj, chatUserId ? "member" : "guest", { hasPaidCredits: chatPaidCheck })) {
       return NextResponse.json({ error: tokenCapMessage(initialLang === "en" ? "en" : "th") }, { status: 429 });
     }
 

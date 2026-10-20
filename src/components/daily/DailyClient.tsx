@@ -10,10 +10,12 @@ import { APP_TIME_ZONE } from "@/lib/time/bangkok";
 import { saveReading } from "@/lib/utils/history";
 import { soundManager } from "@/lib/utils/audio";
 import { OneCardRitual } from "@/components/reading/one-card/OneCardRitual";
+import { orientedMeaning } from "@/lib/reading/orientation";
 import { DailyStreakRibbon } from "@/components/daily/DailyStreakRibbon";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { EveningCheckin, MorningReflection, WeekStrip } from "@/components/daily/DailyReflection";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import { JournalCrisisListener } from "@/components/journal/JournalCrisisListener";
 import type { RitualFocus } from "@/lib/journal/journal-types";
 
 type DailyFocus = "general" | "work" | "money" | "love" | "mind";
@@ -234,6 +236,9 @@ export function DailyClient() {
         </p>
       </header>
 
+      {/* บันทึกพิธีเช้าเย็นที่มีสัญญาณวิกฤต ➔ เปิดหน้าต่างสายด่วน (กฎเหล็กข้อ 6) */}
+      <JournalCrisisListener />
+
       {/* Main Interactive Ritual Canvas */}
       <OneCardRitual
         spreadId="daily"
@@ -323,15 +328,15 @@ export function DailyClient() {
             </div>
           </div>
         }
-        renderReading={(card) => (
+        renderReading={(card, isReversed) => (
           <div className="space-y-6">
             <DailyStreakRibbon streak={streak} isEnglish={isEnglish} />
 
             <MorningReflection
               cardId={card.id}
-              isReversed={!!ritual?.isReversed}
+              isReversed={isReversed}
               keywords={
-                ritual?.isReversed
+                isReversed
                   ? (isEnglish ? card.keywordsEn?.reversed : undefined) ?? card.keywords.reversed
                   : (isEnglish ? card.keywordsEn?.upright : undefined) ?? card.keywords.upright
               }
@@ -358,7 +363,7 @@ export function DailyClient() {
                   {isEnglish ? "Atmosphere of the Day" : "พลังงานหลักแห่งรุ่งอรุณ"}
                 </h4>
                 <p className="text-sm font-sans text-ink leading-relaxed">
-                  {card.meanings.general.upright}
+                  {orientedMeaning(card, "general", isReversed, isEnglish)}
                 </p>
               </div>
 
@@ -371,7 +376,7 @@ export function DailyClient() {
                   {isEnglish ? "Work & Decisions" : "การงาน การตัดสินใจ และความก้าวหน้า"}
                 </h4>
                 <p className="text-sm font-sans text-ink leading-relaxed">
-                  {card.meanings.work.upright}
+                  {orientedMeaning(card, "work", isReversed, isEnglish)}
                 </p>
               </div>
 
@@ -384,7 +389,7 @@ export function DailyClient() {
                   {isEnglish ? "Financial Flow" : "การเงิน สภาพคล่อง และโอกาส"}
                 </h4>
                 <p className="text-sm font-sans text-ink leading-relaxed">
-                  {card.meanings.money.upright}
+                  {orientedMeaning(card, "money", isReversed, isEnglish)}
                 </p>
               </div>
 
@@ -397,7 +402,7 @@ export function DailyClient() {
                   {isEnglish ? "Heartspace & Bonds" : "ความสัมพันธ์และคนใกล้ชิด"}
                 </h4>
                 <p className="text-sm font-sans text-ink leading-relaxed">
-                  {card.meanings.love.upright}
+                  {orientedMeaning(card, "love", isReversed, isEnglish)}
                 </p>
               </div>
 
@@ -410,7 +415,7 @@ export function DailyClient() {
                   {isEnglish ? "Wisdom & Mindfulness" : "สติสัมปชัญญะและสิ่งพึงระวัง"}
                 </h4>
                 <p className="text-sm font-sans text-ink leading-relaxed">
-                  {card.meanings.self.upright}
+                  {orientedMeaning(card, "self", isReversed, isEnglish)}
                 </p>
               </div>
             </div>

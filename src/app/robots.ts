@@ -13,12 +13,19 @@ import { SITE_ORIGIN } from "@/lib/config/site";
  */
 const PRIVATE_PATHS = ["/api/"];
 
+/**
+ * A7-06: ภาพการ์ดคำทำนายที่ผู้ใช้กดแชร์ (`og:image` ของหน้า `/s/<id>`) เสิร์ฟจาก `/api/share/image/…`
+ * บอตแชร์ (X/Twitterbot ฯลฯ) ตรวจ robots กับ URL ภาพด้วย — ต้องเปิดเส้นนี้เส้นเดียวให้ชนะ `Disallow: /api/`
+ * (กฎที่เจาะจงกว่า = path ยาวกว่าชนะ ตาม RFC 9309) · ใช้ทั้งบล็อกบอตทั่วไปและบล็อกบอต AI search
+ */
+const PUBLIC_API_PATHS = ["/api/share/image/"];
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
+        allow: ["/", ...PUBLIC_API_PATHS],
         disallow: PRIVATE_PATHS,
       },
       {
@@ -42,7 +49,7 @@ export default function robots(): MetadataRoute.Robots {
           "Claude-User", // Claude ดึงหน้าเว็บตามที่ผู้ใช้สั่ง
           "PerplexityBot", // Perplexity
         ],
-        allow: "/",
+        allow: ["/", ...PUBLIC_API_PATHS],
         disallow: PRIVATE_PATHS,
       },
       {
@@ -72,7 +79,8 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/"],
       },
     ],
-    sitemap: `${SITE_ORIGIN}/sitemap.xml`,
+    // sitemap หลัก (หน้าคงที่ทั้งหมด) + sitemap โปรไฟล์แม่หมอที่อ่านจาก D1 สด (`src/app/(th)/readers/sitemap.ts` · A7-04)
+    sitemap: [`${SITE_ORIGIN}/sitemap.xml`, `${SITE_ORIGIN}/readers/sitemap.xml`],
     host: SITE_ORIGIN,
   };
 }

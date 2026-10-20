@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { STORAGE_KEYS } from "@/lib/storage/keys";
 
 import {
+  createBrowserPassiveReload,
   createSessionSkipFlag,
   isServiceWorkerAllowed,
   safeSessionStorage,
@@ -40,6 +41,7 @@ export function ServiceWorkerRegister() {
         return () => window.removeEventListener("pagehide", fn);
       },
       skipFlag: createSessionSkipFlag(safeSessionStorage(), STORAGE_KEYS.swSkipRequestedAt),
+      passiveReload: createBrowserPassiveReload(),
       log: (level, message, detail) => {
         if (level === "warn") console.warn(message, detail);
         else console.info(message);

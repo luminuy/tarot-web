@@ -82,6 +82,11 @@ function installNavDrawer(): void {
     if (target?.closest("a")) setOpen(false);
   });
 
+  // ขยายจอ/หมุนเครื่องข้ามจุดที่ปุ่มเมนูหายไป (`lg:` = 1024px) ต้องปิดลิ้นชักด้วย — ไม่งั้นการล็อกสกรอลล์ค้างโดยไม่มีปุ่มปิด (A5-08)
+  window.matchMedia?.("(min-width: 1024px)").addEventListener("change", (event) => {
+    if (event.matches) setOpen(false);
+  });
+
   document.addEventListener("keydown", (event) => {
     if (!open) return;
 

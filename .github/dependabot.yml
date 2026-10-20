@@ -16,15 +16,29 @@ updates:
     #    บิลด์และชุดตรวจผ่านหมด เพราะพังตอนรันใน worker เท่านั้น — ห้าม dependabot ยกรุ่น minor/major ของ Next เอง
     #    ยก Next ด้วยมือคู่กับ OpenNext แล้วลอง `opennextjs-cloudflare build` + `wrangler dev` ยิง /api/auth/me ก่อนทุกครั้ง
     #    (2026-10-18 ยกด้วยมือแล้ว: next 16.4.2 + @opennextjs/cloudflare 1.20.12 ซึ่งรองรับ 16.4 · ตรึงแบบ exact ทั้งคู่)
+    #
+    # 🔒 A10-02: INC-0285 เป็นปัญหา "คู่" next ↔ @opennextjs/cloudflare ไม่ใช่ตัวใดตัวเดียว
+    #    ตัวแปลงตรึง exact ไว้ ห้าม dependabot ยกรุ่นเอง (ยกด้วยมือคู่กับ next แล้วลองรันใน worker เสมอ)
+    #    next รุ่น patch และ wrangler ยังเปิด PR ได้ แต่รวมเป็นใบเดียวกัน และ `pr.yml` จะไม่ auto-merge
+    #    PR ของ dependabot ที่แตะสามตัวนี้ — ต้องมีคนลองและกดเอง · ด่าน test-next-adapter-pair ล็อกคู่รุ่นเต็มไว้อีกชั้น
     ignore:
       - dependency-name: "next"
         update-types: ["version-update:semver-minor", "version-update:semver-major"]
-    # react / react-dom / @types/* ต้องรุ่นตรงกันเป๊ะ (react-dom มี peer "react": "^<รุ่นเดียวกัน>")
-    # แยกคนละ PR = ตกด่านทั้งคู่ (เกิดจริง #687 + #697) ➔ รวมเป็นกลุ่มเดียว
+      - dependency-name: "@opennextjs/*"
     groups:
+      worker-runtime:
+        patterns:
+          - "next"
+          - "wrangler"
+      # react / react-dom / @types/* ต้องรุ่นตรงกันเป๊ะ (react-dom มี peer "react": "^<รุ่นเดียวกัน>")
+      # แยกคนละ PR = ตกด่านทั้งคู่ (เกิดจริง #687 + #697) ➔ รวมเป็นกลุ่มเดียว
       react:
         patterns:
           - "react"
           - "react-dom"
           - "@types/react"
           - "@types/react-dom"
+    # 🔒 A10-04: รอ 7 วันหลังแพ็กเกจปล่อยรุ่นใหม่ก่อนเปิด PR — แพ็กเกจที่ถูกยึดแล้วปล่อยรุ่นมัลแวร์มักถูกถอนใน 1–2 วัน
+    #    (อัปเดตความปลอดภัยไม่โดน cooldown จึงยังมาทันที)
+    cooldown:
+      default-days: 7

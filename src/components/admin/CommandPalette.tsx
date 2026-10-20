@@ -7,6 +7,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { useDialogBehavior } from "@/lib/use-dialog-behavior";
+
 export interface PaletteItem {
   id: string;
   label: string;
@@ -19,13 +21,16 @@ export function CommandPalette({ open, onClose, items, onSelect }: { open: boole
   const [q, setQ] = useState("");
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
     setQ("");
     setActive(0);
-    requestAnimationFrame(() => inputRef.current?.focus());
   }, [open]);
+
+  // A5-10: Esc ปิดได้แม้โฟกัสไม่ได้อยู่ในกล่อง · กัก Tab ในกล่อง · คืนโฟกัสให้ปุ่มที่เปิด · โฟกัสเข้าช่องค้นหาตอนเปิด (ฮุกกลาง)
+  useDialogBehavior(open, onClose, dialogRef);
 
   const results = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -43,14 +48,15 @@ export function CommandPalette({ open, onClose, items, onSelect }: { open: boole
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-ink/30 px-4 pt-[12vh]" onMouseDown={onClose}>
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label="ค้นหาเมนูแอดมิน"
         className="w-full max-w-lg overflow-hidden rounded-lg border border-line bg-white shadow-lg"
         onMouseDown={(e) => e.stopPropagation()}
         onKeyDown={(e) => {
-          if (e.key === "Escape") onClose();
-          else if (e.key === "ArrowDown") {
+          if (e.key === "ArrowDown") {
             e.preventDefault();
             setActive((a) => Math.min(results.length - 1, a + 1));
           } else if (e.key === "ArrowUp") {

@@ -146,6 +146,26 @@ jobs:
 
           echo "ℹ️  ยังไม่ได้ใช้งานโดยตั้งใจ (ไม่ถือว่าขาด):$UNUSED"
 
+      # ── 📌 จดเวอร์ชันของ Worker ที่ใช้อยู่ "ก่อน" deploy (A10-02 · กฎถาวร INC-0285) ──────
+      # ใช้เป็นปลายทางถอยอัตโนมัติถ้าขั้นยืนยันหลัง deploy ไม่ผ่าน
+      # ⚠️ ต้องจด version id เจาะจง ห้ามถอยแบบเว้นว่าง — ขั้น Stripe `secret put` ด้านล่างสร้างเวอร์ชันใหม่ที่ใช้โค้ดชุดเดียวกัน
+      #    ถอยแบบเว้นว่างจึงอาจถอยไปหาโค้ดชุดที่พังเอง (กับดักที่ INC-0285 บันทึกไว้)
+      # อ่านไม่ได้ (เช่น deploy ครั้งแรกสุด) = ไม่ถอยอัตโนมัติ แต่ขั้นยืนยันยังทำให้ job แดงเตือนเหมือนเดิม
+      - name: 📌 จดเวอร์ชัน Worker ที่ใช้อยู่ก่อน deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set +e
+          raw="$(npx wrangler deployments list --json 2>/dev/null)"
+          prev="$(printf '%s' "$raw" | sed -n '/^\[/,$p' | jq -r 'sort_by(.created_on) | last | .versions | max_by(.percentage) | .version_id' 2>/dev/null)"
+          if [ -n "$prev" ] && [ "$prev" != "null" ]; then
+            echo "PREV_VERSION_ID=$prev" >> "$GITHUB_ENV"
+            echo "จดเวอร์ชันก่อน deploy ไว้แล้ว: $prev"
+          else
+            echo "::warning::อ่านเวอร์ชันก่อน deploy ไม่ได้ — ถ้าขั้นยืนยันหลัง deploy ไม่ผ่านจะไม่ถอยอัตโนมัติ ต้องสั่ง rollback.yml เอง"
+          fi
+
       # `npm run deploy` = opennextjs-cloudflare build && opennextjs-cloudflare deploy
       # ขั้น deploy จะ populateCache: คัดลอกแคชหน้า SSG เข้า static assets (`cdn-cgi/_next_cache`) ก่อน `wrangler deploy`
       # ⚠️ CLOUDFLARE_API_TOKEN ต้องมี Workers Scripts:Edit + Workers KV Storage:Edit
@@ -170,6 +190,34 @@ jobs:
           NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || vars.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '' }}
 
 
+
+      # ── 🩺 ยืนยันว่า Worker "รันได้จริง" หลัง deploy · ไม่ผ่านถอยกลับเวอร์ชันก่อนหน้าเอง (A10-02) ──
+      # INC-0285: บิลด์และด่านทั้งชุดผ่านหมด แต่ทุกเส้นของ Next (/api/* · /readers · /admin) ตอบ 1101 บน production
+      # 36 นาทีจนมีคนมาเห็นเอง เพราะพังเฉพาะตอนรันใน worker — ขั้นนี้ยิงเส้นที่ต้องผ่าน Worker จริงแทนการเช็กหน้าแรก
+      # (หน้าแรกเป็นไฟล์ static ที่ขอบ ไม่ปลุก Worker) · รายละเอียดเส้นที่ยิงอยู่ใน `.github/scripts/worker-smoke.sh`
+      # วางไว้ **ก่อน** ขั้น Stripe sync โดยตั้งใจ: ล้มแล้ว job หยุดตรงนี้ ไม่สร้างเวอร์ชันใหม่ทับเวอร์ชันที่เพิ่งถอย
+      # ⚠️ การถอยไม่ย้อน migration ของ D1 (ดู rollback.yml) · ขั้นนี้ล้มเสมอเมื่อ smoke ไม่ผ่าน แม้ถอยสำเร็จ — ให้คนมาดูสาเหตุ
+      - name: 🩺 ยืนยัน Worker หลัง deploy (ไม่ผ่าน = ถอยอัตโนมัติ)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if bash .github/scripts/worker-smoke.sh; then
+            exit 0
+          fi
+
+          if [ -n "${PREV_VERSION_ID:-}" ]; then
+            echo "::error::Worker ใหม่ไม่ผ่านด่านยืนยัน — กำลังถอยกลับเวอร์ชัน ${PREV_VERSION_ID}"
+            npx wrangler rollback "$PREV_VERSION_ID" --message "auto-rollback: smoke ไม่ผ่านหลัง deploy ${GITHUB_SHA}" --yes || echo "::error::สั่งถอยไม่สำเร็จ — รัน rollback.yml ด้วยมือทันที"
+            if bash .github/scripts/worker-smoke.sh; then
+              echo "::error::ถอยกลับแล้ว Worker ตอบปกติ — โค้ดที่เพิ่ง deploy มีปัญหาตอนรันจริง ตรวจ log ก่อน deploy ซ้ำ"
+            else
+              echo "::error::ถอยกลับแล้วแต่ Worker ยังไม่ผ่าน — เข้า Cloudflare Dashboard ทันที"
+            fi
+          else
+            echo "::error::Worker ใหม่ไม่ผ่านด่านยืนยัน และไม่มีเวอร์ชันก่อนหน้าให้ถอยอัตโนมัติ — สั่ง rollback.yml ด้วยมือทันที"
+          fi
+          exit 1
 
       # ── 💳 คีย์ Stripe: GitHub Secrets ➔ Worker secret ─────────────────────────────
       # เจ้าของเก็บคีย์ไว้ที่ GitHub (Settings ➔ Secrets and variables ➔ Actions) ไม่ได้รัน wrangler เอง

@@ -28,7 +28,6 @@ import {
   deleteLocalSpread,
   deleteSpreadRemote,
   fetchSharedSpread,
-  loadMySpreads,
   queueCustomLaunch,
   saveLocalSpread,
   saveSpreadRemote,
@@ -37,6 +36,7 @@ import {
 } from "@/lib/tarot/custom-spread-client";
 import { mapLayout, MAP_CARD_ASPECT, MAP_CARD_MIN_PX } from "@/lib/tarot/spread-map-geometry";
 import { SpreadLayoutGlyph } from "./SpreadLayoutGlyph";
+import { loadMyAndMigrate } from "./load-mine";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
 
@@ -98,7 +98,7 @@ export const SpreadBuilder: React.FC = () => {
   const check = useMemo(() => validateCustomSpread(draft, lang), [draft, lang]);
   const isGrand = n > CUSTOM_STANDARD_MAX_CARDS;
 
-  const refreshMine = () => void loadMySpreads().then((r) => (setMine(r.spreads), setMember(r.member)));
+  const refreshMine = () => void loadMyAndMigrate(lang).then((r) => (setMine(r.spreads), setMember(r.member)));
   useEffect(refreshMine, [user?.id]);
 
   // ผังที่มีคนแบ่งปันมา (?s=<slug>) — ใช้เป็นจุดเริ่ม ไม่ผูกกับผังของเจ้าของเดิม

@@ -145,7 +145,13 @@ const memoryCode = memorySrc.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/g
 check("memory.ts ไม่ส่ง mood/tags/บันทึกพิธีเข้า prompt", !/moodBefore|moodAfter|\.tags\b|ritual/.test(memoryCode));
 check(
   "memory.ts ใช้ userNote เฉพาะเมื่อผู้ใช้ยินยอม (shareWithAi) และผ่าน sanitizePromptValue",
-  memoryCode.split("\n").filter((l) => /userNote/.test(l)).every((l) => /shareWithAi/.test(l) && /sanitizePromptValue/.test(l)),
+  (() => {
+    // ทุกนิพจน์ที่แตะ userNote ต้องอยู่ใต้เงื่อนไข shareWithAi และค่าที่เข้า prompt ต้องผ่าน sanitizePromptValue
+    // (นิพจน์อาจแตกหลายบรรทัด จึงตรวจทั้งก้อนที่ขึ้นต้นด้วย `...(latest.shareWithAi && latest.userNote`)
+    const block = memoryCode.match(/\.\.\.\(latest\.shareWithAi && latest\.userNote[\s\S]*?: \{\}\)/)?.[0] ?? "";
+    const outside = memoryCode.replace(block, "");
+    return block.length > 0 && /sanitizePromptValue\(latest\.userNote/.test(block) && !/userNote/.test(outside);
+  })(),
 );
 
 // ── 8. หน้า /journal เป็น noindex ──

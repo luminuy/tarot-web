@@ -18,9 +18,10 @@ const locale = "en" as const;
 
 <BaseLayout locale={locale} metadata={spreadBuilderMetadataEn}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
-  <div class="ui2-pg" data-ui2-page-dark="">
+  <!-- <main id="main-content"> = เป้าหมายของลิงก์ข้ามไปเนื้อหา (A7-08) -->
+  <main id="main-content" tabindex="-1" class="ui2-pg" data-ui2-page-dark="">
   <SpreadBuilderRoot locale={locale} client:load />
-  </div>
+  </main>
   <SiteFooterRoot locale={locale} spacing="tight" />
 </BaseLayout>
 

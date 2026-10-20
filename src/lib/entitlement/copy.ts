@@ -16,10 +16,7 @@ import {
   GUEST_LIMIT,
   READINGS_EN,
   REQUIRE_SIGNUP_TO_READ,
-  SIGNUP_BONUS,
-  STANDARD_SPREAD_IDS,
   isStandardSpread,
-  MASTER_PERSONA_IDS,
   isMasterPersona,
 } from "@/lib/entitlement/limits";
 import { CREDIT_PACKAGES } from "@/lib/entitlement/packages";
@@ -33,10 +30,7 @@ export {
   GUEST_LIMIT,
   READINGS_EN,
   REQUIRE_SIGNUP_TO_READ,
-  SIGNUP_BONUS,
-  STANDARD_SPREAD_IDS,
   isStandardSpread,
-  MASTER_PERSONA_IDS,
   isMasterPersona,
 };
 

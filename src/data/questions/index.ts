@@ -15,10 +15,6 @@ export function getQuestion(slug: string): QuestionPage | undefined {
   return BY_SLUG.get(slug);
 }
 
-export function questionStaticParams(): Array<{ slug: string }> {
-  return QUESTIONS.map((q) => ({ slug: q.slug }));
-}
-
 /** คำถามอื่นในหมวดเดียวกัน (ลิงก์ข้างเคียง) — เติมจากหมวดอื่นให้ครบ `limit` */
 export function relatedQuestions(slug: string, limit = 4): QuestionPage[] {
   const me = BY_SLUG.get(slug);

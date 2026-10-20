@@ -183,7 +183,7 @@ export function PickACardBodyEn({ ritual }: { ritual: ReactNode }) {
             <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2"><ThaiPhrases>
               Energetic Signatures of the Four Sacred Crystals
             </ThaiPhrases></h3>
-            <ul className="list-disc pl-5 space-y-2 text-muted">
+            <ul className="list-rule space-y-2 text-muted">
               <li>
                 <strong className="text-ink">Pile 1 Rose Quartz:</strong> Stone of heart-centered tenderness,
                 unconditional warmth, and emotional restoration. Ideal for soothing heartache and opening vulnerable channels.

@@ -167,7 +167,7 @@ export const SecondPerspectivePanel: React.FC<{
                 </div>
               )}
               {active.advice && active.advice.length > 0 && (
-                <ul className="list-disc pl-5 space-y-1">
+                <ul className="list-rule space-y-1">
                   {active.advice.map((a, i) => (
                     <li key={i}>{a}</li>
                   ))}

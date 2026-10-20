@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getGoogleOAuthUrl, getLineOAuthUrl } from "@/lib/auth/edge-auth";
 import { OAUTH_STATE_COOKIE, OAUTH_RETURN_COOKIE } from "@/lib/auth/cookie-names";
 import { resolveAppOrigin } from "@/lib/security/app-origin";
+import { toSafeReturnPath } from "@/lib/auth/return-path";
 
 export const runtime = "nodejs";
 
@@ -17,17 +18,8 @@ export async function GET(
   }
 
   const { searchParams } = new URL(request.url);
-  const rawReturnUrl = searchParams.get("returnUrl");
-  // ตรวจสอบความปลอดภัย: รับเฉพาะ relative path ภายในโดเมน (ขึ้นต้นด้วย "/" และไม่ขึ้นต้นด้วย "//" หรือมี "\") ป้องกัน Open Redirect
-  let safeReturnUrl: string | null = null;
-  if (
-    rawReturnUrl &&
-    rawReturnUrl.startsWith("/") &&
-    !rawReturnUrl.startsWith("//") &&
-    !rawReturnUrl.includes("\\")
-  ) {
-    safeReturnUrl = rawReturnUrl;
-  }
+  // รับเฉพาะ path ภายในเว็บเรา — ตรวจหลังแยก URL (ดู `toSafeReturnPath`) ป้องกัน Open Redirect
+  const safeReturnUrl = toSafeReturnPath(searchParams.get("returnUrl"));
 
   // ตรวจว่าตั้งค่า credential ของผู้ให้บริการนี้ไว้จริงก่อนพาผู้ใช้ออกไป —
   // ไม่งั้นผู้ใช้จะถูกเด้งไปเจอหน้า error ของ Google/LINE แทนที่จะได้คำอธิบายเป็นภาษาไทย

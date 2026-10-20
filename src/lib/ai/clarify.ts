@@ -18,6 +18,7 @@ import { isAiCapReached, recordAiCall } from "@/lib/security/ai-budget";
 import { checkThaiQuality, polishThai } from "@/lib/ai/thai-quality";
 import { recordEvent } from "@/lib/stats/record";
 import { sanitizePromptValue } from "@/lib/ai/prompt-guard";
+import { stripEmoji } from "@/lib/text/no-emoji";
 
 export interface ClarifyInput {
   question: string;
@@ -190,8 +191,13 @@ export async function evaluateClarification(input: ClarifyInput): Promise<Clarif
       }
     }
 
-    // ห้ามมีเครื่องหมายอีโมจิหรือดอกจันดาวแฟนซี
-    finalQuestion = finalQuestion.replace(/[\u2726\u2728\u2727\u2605\u2606\uD83D\uDCAB]/g, "").trim();
+    // ห้ามมีอิโมจิ/สัญลักษณ์ตกแต่ง (กฎเหล็กข้อ 2) — ใช้ตัวกวาดกลางชุดเดียวกับทางออกข้อความ AI ทุกเส้น (A3-04)
+    // กวาดแล้วเหลือสั้นเกินกว่าจะเป็นคำถาม ➔ ข้ามการถามกลับ ไม่ส่งคำถามครึ่ง ๆ กลาง ๆ ถึงจอ
+    finalQuestion = stripEmoji(finalQuestion).trim();
+    if (finalQuestion.length < 10) {
+      recordEvent("ai_clarify_too_short");
+      return { needsClarification: false, skipped: true };
+    }
 
     // บันทึกการเรียกใช้งาน AI สำเร็จ
     await recordAiCall(1).catch(() => {});
@@ -200,7 +206,7 @@ export async function evaluateClarification(input: ClarifyInput): Promise<Clarif
     return {
       needsClarification: true,
       question: finalQuestion,
-      reason: parsed.reason,
+      reason: typeof parsed.reason === "string" ? stripEmoji(parsed.reason) : parsed.reason,
     };
   } catch {
     // Timeout หรือ Abort หรือ Network error -> ข้ามเงียบตามสเปก

@@ -287,6 +287,13 @@ node-fetch · axios · okhttp · guzzle · httpx · aiohttp) · URL ขยะแ
 managed challenge สำหรับคำขอเปลี่ยนสถานะที่ไม่มี `Origin` ของเว็บเรา · ฝั่งแอป: Turnstile ที่หน้า
 เข้าสู่ระบบ/สมัคร + rate limit ฝั่งเซิร์ฟเวอร์ตอบ 429 ครบทั้ง 5 เส้นของ email auth
 
+> 📌 **กฎระดับโซนข้างบนทั้งหมด (WAF · rate limit · managed challenge) ใช้กับ `seertarot.net` เท่านั้น**
+> โฮสต์ `tarot-web.<บัญชี>.workers.dev` อยู่นอกโซน กฎเหล่านี้จึงไม่ครอบ (A10-07 · ตรวจ 2026-10-19)
+> ตั้งแต่รอบแก้ 2026-10-19: บนโฮสต์ workers.dev ทุกคำขอ `/api/*` ถูกส่งกลับไป `seertarot.net` ด้วย 307
+> (`redirects()` ใน `next.config.ts`) **ยกเว้น `/api/cron/*`** ที่ตัวจับเวลาของ GitHub ยิงเข้าโฮสต์นี้โดยตั้งใจ
+> (INC-0142) — ทุกเส้นใต้ `/api/cron/` ตรวจ Bearer `CRON_SECRET` เองแบบ fail-closed
+> ยังเปิด `workers_dev` ไว้เพราะ cron พึ่งโฮสต์นี้ · ถ้าวันหนึ่งย้าย cron ไปเรียกผ่านโดเมนหลักได้ ค่อยพิจารณาปิด
+
 **ความเสี่ยงที่ยอมรับไว้**: headless browser ที่ปลอม UA เป็นเบราว์เซอร์ปกติ กฎ UA จับไม่ได้ —
 เหลือ rate limit + Turnstile + การตรวจสิทธิ์ฝั่งเซิร์ฟเวอร์รับไว้ · แพ็กเกจฟรีตั้ง rate limit ได้กฎเดียว
 ➔ ถ้า Security Events เริ่มเห็นทราฟฟิกอัตโนมัติยิง `/api/*` ให้เพิ่ม **managed challenge เฉพาะ path**

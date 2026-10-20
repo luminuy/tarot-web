@@ -19,9 +19,6 @@ export function readerPriceThb(reader: { priceThb?: number | null } | null | und
   return typeof p === "number" && p >= READER_PRICE_MIN_THB && p <= READER_PRICE_MAX_THB ? p : CONSULTATION_PRICE_THB;
 }
 
-/** ป้ายราคาแบบสั้นสำหรับหน้าเว็บ เช่น "299 บาท · 30 นาที" */
-export const CONSULTATION_PRICE_LABEL = `${CONSULTATION_PRICE_THB} บาท · ${CONSULTATION_MINUTES} นาที`;
-
 /** หมวดคำถามที่ AI คัดกรองให้ (ค่าใน DB เป็นอังกฤษ) ➔ คำไทยที่ผู้ใช้อ่าน */
 const CATEGORY_LABEL_TH: Record<string, string> = {
   love: "ความรัก",

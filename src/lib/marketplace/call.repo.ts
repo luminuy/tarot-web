@@ -106,6 +106,22 @@ function toView(row: RawCallRow | null, role: CallRole, now: number): CallView {
   };
 }
 
+/**
+ * ใครเคยเข้าห้องของตั๋วนี้บ้าง — ใช้ตัดสิน "ลูกค้าไม่มา" / "แม่หมอไม่มา" (booking-policy `customerMissedRoom`)
+ * ไม่มีห้อง = null (ยังไม่มีใครกดเข้าห้องวิดีโอเลย)
+ */
+export async function getRoomAttendance(
+  ticketId: string,
+): Promise<{ openedAt: number; readerSeenAt: number | null; customerSeenAt: number | null } | null> {
+  const row = await readRow(ticketId);
+  if (!row) return null;
+  return {
+    openedAt: Number(row.created_at),
+    readerSeenAt: row.reader_seen_at === null ? null : Number(row.reader_seen_at),
+    customerSeenAt: row.customer_seen_at === null ? null : Number(row.customer_seen_at),
+  };
+}
+
 /** อ่านสถานะห้องของบทบาทนั้น พร้อมบันทึกว่ายังอยู่ในห้อง (เขียนไม่ถี่กว่า 8 วินาที) */
 export async function getCallView(ticketId: string, role: CallRole): Promise<CallView> {
   const now = Date.now();

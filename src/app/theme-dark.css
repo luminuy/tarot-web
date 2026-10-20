@@ -307,24 +307,6 @@ html[data-theme="dark"] .home-rail-btn:hover {
   }
 }
 
-/* หัวหน้าแรก: แสงครีมหลังหัวข้อ ➔ เงามืดนุ่ม ๆ กันลายพัดไพ่ตัดผ่านตัวหนังสือแบบเดิม */
-html[data-theme="dark"] .hero-wash::after {
-  background: radial-gradient(closest-side, rgba(21, 17, 13, 0.92), rgba(21, 17, 13, 0.7) 55%, rgba(21, 17, 13, 0) 100%);
-}
-html[data-theme="dark"] .hero-text-halo {
-  text-shadow:
-    0 0 2px rgba(21, 17, 13, 0.95),
-    0 0 14px rgba(21, 17, 13, 0.9),
-    0 0 28px rgba(21, 17, 13, 0.75);
-}
-html[data-theme="dark"] .hero-fan-card {
-  background: #2A2119;
-  box-shadow:
-    0 0 0 1px rgba(210, 163, 84, 0.4),
-    0 0 0 3px rgba(21, 17, 13, 0.9),
-    0 18px 34px -14px rgba(0, 0, 0, 0.7);
-}
-
 html[data-theme="dark"] .social-fab > a {
   box-shadow:
     0 0 0 2px rgba(21, 17, 13, 0.95),
@@ -368,40 +350,34 @@ html[data-theme="dark"] :is(.bg-ok, .bg-err, .bg-gold, .bg-gold-ink, .bg-ink, .b
  * (ถ้าเขียนนอก layer จะชนะทุกอย่างรวมถึงสีตอน hover ด้วย) */
 @layer utilities {
   /* ตัวหนังสือเนื้อหาสีน้ำตาลเข้ม ➔ ตัวหนังสือสว่างระดับรอง */
-  :where(html[data-theme="dark"]) body :is(.text-\[\#4A4338\], .text-\[\#4A3E31\]) {
+  :where(html[data-theme="dark"]) body .text-\[\#4A4338\] {
     color: var(--color-ink-soft);
   }
   :where(html[data-theme="dark"]) body :is(.text-\[\#5E5240\], .text-\[\#595042\], .text-\[\#A59A88\], .text-\[\#8C827A\]) {
     color: var(--color-muted);
   }
   /* ทองเข้ม / สนิม / แดง / เขียว ➔ คู่สีที่สว่างขึ้นของโหมดมืด */
-  :where(html[data-theme="dark"]) body :is(.text-\[\#5E390A\], .text-\[\#8C6615\]) {
+  :where(html[data-theme="dark"]) body .text-\[\#8C6615\] {
     color: var(--color-gold-ink);
   }
   :where(html[data-theme="dark"]) body .text-\[\#9E4E28\] {
     color: #E8A07A;
-  }
-  :where(html[data-theme="dark"]) body .text-\[\#8F2E1A\] {
-    color: var(--color-err);
   }
   :where(html[data-theme="dark"]) body .text-\[\#2D6A4F\] {
     color: var(--color-ok);
   }
 
   /* พื้นอ่อน (ครีม / เขียวอ่อน / ส้มอ่อน) ➔ พื้นจมของโหมดมืด หรือสีเดิมแบบโปร่ง */
-  :where(html[data-theme="dark"]) body :is(.bg-\[\#F7F5F0\], .bg-\[\#F0EEE6\], .bg-\[\#EAE4D9\], .bg-\[\#E4DFD8\]) {
+  :where(html[data-theme="dark"]) body :is(.bg-\[\#F0EEE6\], .bg-\[\#EAE4D9\], .bg-\[\#E4DFD8\]) {
     background-color: var(--color-inset);
-  }
-  :where(html[data-theme="dark"]) body .bg-\[\#F6F2EA\]\/70 {
-    background-color: color-mix(in oklab, var(--color-inset) 70%, transparent);
   }
   :where(html[data-theme="dark"]) body :is(.bg-\[\#F6EFE0\], .bg-\[\#F7F3DC\]) {
     background-color: rgba(201, 166, 107, 0.1);
   }
-  :where(html[data-theme="dark"]) body :is(.bg-\[\#EBF3ED\], .bg-\[\#EAF2EC\], .bg-\[\#F0FFF4\]) {
+  :where(html[data-theme="dark"]) body :is(.bg-\[\#EBF3ED\], .bg-\[\#EAF2EC\]) {
     background-color: rgba(109, 190, 123, 0.12);
   }
-  :where(html[data-theme="dark"]) body :is(.bg-\[\#FBF2EC\], .bg-\[\#FAF0ED\]) {
+  :where(html[data-theme="dark"]) body .bg-\[\#FBF2EC\] {
     background-color: rgba(232, 160, 122, 0.1);
   }
 
@@ -409,35 +385,18 @@ html[data-theme="dark"] :is(.bg-ok, .bg-err, .bg-gold, .bg-gold-ink, .bg-ink, .b
   :where(html[data-theme="dark"]) body :is(.border-\[\#E2D4BE\], .border-\[\#E0D8B4\], .border-\[\#DAD4C7\], .border-\[\#B9B2A8\]) {
     border-color: var(--color-line);
   }
-  :where(html[data-theme="dark"]) body :is(.border-\[\#E8D0C3\], .border-\[\#E8C5BE\]) {
+  :where(html[data-theme="dark"]) body .border-\[\#E8D0C3\] {
     border-color: rgba(232, 160, 122, 0.3);
   }
   :where(html[data-theme="dark"]) body .border-\[\#9DC3A6\] {
     border-color: rgba(109, 190, 123, 0.4);
-  }
-  :where(html[data-theme="dark"]) body .decoration-\[\#E4DED2\] {
-    text-decoration-color: var(--color-line);
   }
 
   /* ปลายไล่สีครีมของกล่องผลคำทำนาย / การ์ดบทความ ➔ ไล่ไปหาพื้นจมแทนครีม */
   :where(html[data-theme="dark"]) body :is(.via-\[\#FDFBF7\], .via-\[\#FAF6EE\]) {
     --tw-gradient-via: var(--color-surface-warm);
   }
-  :where(html[data-theme="dark"]) body :is(.to-\[\#F7EFE1\], .to-\[\#F5EEDC\], .to-\[\#F5EFE4\], .to-\[\#F7F3EB\]) {
+  :where(html[data-theme="dark"]) body :is(.to-\[\#F7EFE1\], .to-\[\#F5EEDC\]) {
     --tw-gradient-to: var(--color-inset-warm);
-  }
-
-  /* สีตอนชี้เมาส์ที่เป็น hex เอง (ความเจาะจงต้องสูงกว่าคลาส hover เดิม) */
-  @media (hover: hover) {
-    :where(html[data-theme="dark"]) body .hover\:text-\[\#5E390A\]:hover {
-      color: var(--color-gold-ink-deep);
-    }
-    :where(html[data-theme="dark"]) body .hover\:bg-\[\#DDD8CD\]:hover {
-      background-color: var(--color-line);
-    }
-    /* แถบล่างของการ์ดทำนายด่วน: ชี้แล้วพื้นเป็น `bg-ink` (โหมดมืด = สว่าง) จึงต้องได้ตัวทองเข้ม */
-    :where(html[data-theme="dark"]) body .group:hover .group-hover\:text-\[\#E8D5B5\] {
-      color: #8F5C1A;
-    }
   }
 }

@@ -138,7 +138,6 @@ async function onConsumeDbFailure(v: Viewer, where: string, e: unknown): Promise
 
 export {
   DAILY_LIMIT,
-  GUEST_BLOCK_REASON,
   REQUIRE_SIGNUP_TO_READ,
   GUEST_LIMIT,
   SIGNUP_BONUS,
@@ -367,14 +366,16 @@ function buildMemberEntitlement(
  * - ผู้เยี่ยมชม: ได้ 1 ครั้งตลอดชีพ (นับผ่าน signed guest ticket & cookie)
  * - สมาชิก: ได้ `DAILY_LIMIT` ครั้งต่อวัน — ตอนนี้ 1 ครั้ง (ตัดตามวันไทย) + ใช้โควตาโบนัสเมื่อโควตารายวันหมด
  * - กันหักซ้ำด้วย UNIQUE(reading_id): กดรัว/รีทราย/สองแท็บ ก็หักครั้งเดียว
+ * - `premium` (ผังใหญ่ / ปรมาจารย์ลับ): หักจาก "รอบที่ซื้อ" เท่านั้น ไม่มีรอบที่ซื้อเหลือ = ปฏิเสธ
+ *   ไม่ตกไปหักโควตาฟรีรายวัน (A3-01) · ยกเว้นรอบลองผังใหญ่ฟรี (`premiumTrial`) ซึ่งมาก่อนเสมอ
  */
 export async function consumeReading(
   v: Viewer,
   readingId: string,
   spreadId?: string,
-  opts: { premiumTrial?: boolean } = {},
+  opts: { premiumTrial?: boolean; premium?: boolean } = {},
 ): Promise<ConsumeOutcome> {
-  const outcome = await consumeReadingInner(v, readingId, opts.premiumTrial === true);
+  const outcome = await consumeReadingInner(v, readingId, opts.premiumTrial === true, opts.premium === true);
   /*
    * บันทึก streak ของผัง daily **หลัง** รู้ผลการหักสิทธิ์เท่านั้น (A1-13)
    * เดิมบันทึกก่อนตรวจโควตา โดนปฏิเสธ (403) ก็ยังได้ streak +1 · AI ล่มแล้วคืนสิทธิ์ก็ได้ streak ฟรี
@@ -387,7 +388,12 @@ export async function consumeReading(
   return outcome;
 }
 
-async function consumeReadingInner(v: Viewer, readingId: string, premiumTrial = false): Promise<ConsumeOutcome> {
+async function consumeReadingInner(
+  v: Viewer,
+  readingId: string,
+  premiumTrial = false,
+  premium = false,
+): Promise<ConsumeOutcome> {
   if (v.kind === "guest") {
     // การนับจริงของผู้เยี่ยมชมอยู่ที่คุกกี้ (PR C) — ที่นี่แค่ตรวจว่ายังมีสิทธิ์
     // ไม่มีแถวใน DB ให้คืน จึงไม่ใช่ "inserted" ที่ refund ได้
@@ -429,6 +435,27 @@ async function consumeReadingInner(v: Viewer, readingId: string, premiumTrial = 
         .bind(usageId, v.userId, readingId, dk, now, v.userId)
         .run();
       return (trial.meta?.changes ?? 0) > 0 ? { status: "inserted", usageId } : { status: "denied" };
+    }
+
+    // ── ผังใหญ่ / ปรมาจารย์ลับ: หักจากรอบที่ซื้อ (`purchase_*`) เท่านั้น (A3-01) ──
+    // สิทธิ์นี้ผูกกับ `hasPaidCredits` จึงต้องหักจากก้อนเดียวกัน — ถ้าไปหักโควตารายวันก่อน
+    // รอบที่ซื้อจะไม่ลดเลยและสิทธิ์ผังใหญ่จะไม่มีวันหมด · เงื่อนไขคือสูตรเดียวกับ
+    // `buildMemberEntitlement` (โบนัสที่ใช้ไปกินก้อนฟรีก่อน ที่เหลือจึงกินก้อนที่ซื้อ)
+    if (premium) {
+      const paid = await db
+        .prepare(
+          `INSERT INTO reading_usage (id, user_id, reading_id, week_key, source, consumed_at)
+           SELECT ?, ?, ?, ?, 'bonus', ?
+            WHERE (SELECT COALESCE(SUM(granted), 0) FROM user_bonus WHERE user_id = ? AND reason LIKE 'purchase_%')
+                > MAX(0,
+                    (SELECT COUNT(*) FROM reading_usage WHERE user_id = ? AND source = 'bonus')
+                    - (SELECT COALESCE(SUM(granted), 0) FROM user_bonus WHERE user_id = ?)
+                    + (SELECT COALESCE(SUM(granted), 0) FROM user_bonus WHERE user_id = ? AND reason LIKE 'purchase_%')
+                  )`
+        )
+        .bind(usageId, v.userId, readingId, dk, now, v.userId, v.userId, v.userId, v.userId)
+        .run();
+      return (paid.meta?.changes ?? 0) > 0 ? { status: "inserted", usageId } : { status: "denied" };
     }
 
     // ── ชั้นที่ 1: โควตารายวัน (`DAILY_LIMIT` ครั้ง/วัน) ──

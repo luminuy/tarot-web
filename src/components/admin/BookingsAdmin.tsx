@@ -7,6 +7,7 @@ import { AdminSection, AdminSubTabs, EmptyState, KpiGrid, useSubTab } from "@/co
 import { StatCard } from "@/components/admin/StatsWidgets";
 import { useAdminResource } from "@/lib/admin/use-admin-resource";
 import { formatSlotRange } from "@/lib/marketplace/booking-policy";
+import { bangkokParts } from "@/lib/time/bangkok";
 
 interface AdminBooking {
   bookingId: string;
@@ -32,6 +33,10 @@ interface Earning {
   grossSatang: number;
   commissionSatang: number;
   netSatang: number;
+  /** บันทึกว่าโอนแล้วในงวดนี้ */
+  paidOutSatang: number;
+  /** ยังต้องโอน = net − ที่โอนแล้ว */
+  outstandingSatang: number;
 }
 
 interface Review {
@@ -56,6 +61,21 @@ const STATUS_TH: Record<string, string> = {
 
 const baht = (satang: number) => (satang / 100).toLocaleString("th-TH");
 
+/** งวด YYYY-MM ย้อนหลัง `count` เดือน (นับเดือนนี้ตามเวลาไทยเป็นเดือนแรก) — ตัวเลือกงวดของแท็บยอดโอน */
+function recentPeriods(count = 6): string[] {
+  const now = bangkokParts(Date.now());
+  return Array.from({ length: count }, (_, i) => {
+    const d = new Date(Date.UTC(now.year, now.month - i, 1));
+    return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+  });
+}
+
+/** "2026-10" ➔ "ตุลาคม 2569" */
+function periodLabel(period: string): string {
+  const [y, m] = period.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, 15)).toLocaleDateString("th-TH", { month: "long", year: "numeric", timeZone: "UTC" });
+}
+
 const BOOKING_TABS = ["todo", "bookings", "payouts", "reviews"] as const;
 
 /**
@@ -65,13 +85,16 @@ const BOOKING_TABS = ["todo", "bookings", "payouts", "reviews"] as const;
  * ไม่มีคำถามของลูกค้าในแท็บนี้ (PDPA: เท่าที่จำเป็น)
  */
 export default function BookingsAdmin() {
+  // งวดของยอดโอน (null = เดือนนี้ตามเวลาไทย ที่เซิร์ฟเวอร์ตัดสินให้)
+  const [period, setPeriod] = useState<string | null>(null);
   // โหลดผ่าน useAdminResource ตามกติกาแผงแอดมิน (R-28): ล้มเหลว = ล้างข้อมูลเก่า + แสดงแถบข้อผิดพลาด
   const { data, error, reload } = useAdminResource<{
     bookings: AdminBooking[];
     refundDueCount: number;
+    period: string;
     earnings: Earning[];
     reviews: Review[];
-  }>("/api/admin/bookings");
+  }>(period ? `/api/admin/bookings?period=${period}` : "/api/admin/bookings");
   const [busy, setBusy] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const load = reload;
@@ -99,7 +122,9 @@ export default function BookingsAdmin() {
 
   const due = data.bookings.filter((b) => b.refundDue);
 
-  const toPay = data.earnings.reduce((n, e) => n + e.netSatang, 0);
+  // ยอดค้างโอนของงวดที่เลือก — นัดที่จบแล้ว หักส่วนแบ่งเว็บ ไม่รวมเงินที่ต้องคืนลูกค้า และหักที่บันทึกว่าโอนแล้ว
+  const toPay = data.earnings.reduce((n, e) => n + e.outstandingSatang, 0);
+  const shownPeriod = data.period ?? period ?? recentPeriods(1)[0];
   const visibleReviews = data.reviews.filter((r) => !r.hidden);
   const avgRating = visibleReviews.length ? visibleReviews.reduce((n, r) => n + r.rating, 0) / visibleReviews.length : null;
 
@@ -108,7 +133,11 @@ export default function BookingsAdmin() {
       <KpiGrid>
         <StatCard label="เงินต้องคืนค้าง" value={String(due.length)} sub={due.length ? "ต้องจัดการวันนี้" : "ไม่มีค้าง"} />
         <StatCard label="การจองล่าสุด" value={String(data.bookings.length)} sub="รายการในแท็บการจอง" />
-        <StatCard label="ยอดต้องโอนให้แม่หมอ" value={`${baht(toPay)} บาท`} sub="หักส่วนแบ่งเว็บและเงินคืนแล้ว" />
+        <StatCard
+          label="ยอดค้างโอนให้แม่หมอ"
+          value={`${baht(toPay)} บาท`}
+          sub={`งวด${periodLabel(shownPeriod)} · เฉพาะนัดที่จบแล้ว หักส่วนแบ่งเว็บและที่โอนแล้ว`}
+        />
         <StatCard
           label="คะแนนรีวิวเฉลี่ย"
           value={avgRating == null ? "—" : `${avgRating.toFixed(1)}/5`}
@@ -185,10 +214,30 @@ export default function BookingsAdmin() {
       ) : null}
 
       {tab === "payouts" ? (
-        <AdminSection title="รายได้และส่วนแบ่งต่อแม่หมอ" hint="ยอดที่จ่ายแล้ว หักเงินคืน · คอลัมน์ขวาสุดคือยอดที่ต้องโอนให้แม่หมอ" padded={false}>
+        <AdminSection
+          title={`รายได้และส่วนแบ่งต่อแม่หมอ · งวด${periodLabel(shownPeriod)}`}
+          hint="นับเฉพาะนัดที่คุยจบแล้ว ลูกค้าไม่มา หรือยกเลิกช้าแบบไม่คืนเงิน · ไม่รวมเงินที่ค้างคืนลูกค้า · โอนแล้วกดบันทึก ยอดค้างจะหักออกทันที"
+          actions={
+            <label className="flex items-center gap-2 text-xs text-muted">
+              งวด
+              <select
+                value={shownPeriod}
+                onChange={(e) => setPeriod(e.target.value)}
+                className="rounded-lg border border-line-interactive bg-surface px-2 py-1.5 text-xs text-ink"
+              >
+                {recentPeriods().map((p) => (
+                  <option key={p} value={p}>
+                    {periodLabel(p)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          }
+          padded={false}
+        >
           {data.earnings.length === 0 ? (
             <div className="p-5">
-              <EmptyState title="ยังไม่มีรายได้จากการปรึกษาแม่หมอ" />
+              <EmptyState title="ยังไม่มีรายได้จากการปรึกษาแม่หมอในงวดนี้" />
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -199,19 +248,53 @@ export default function BookingsAdmin() {
                     <th className="p-2.5 text-right">ครั้ง</th>
                     <th className="p-2.5 text-right">ยอดรวม (บาท)</th>
                     <th className="p-2.5 text-right">ส่วนแบ่งเว็บ</th>
-                    <th className="p-2.5 pr-5 text-right">ต้องโอนให้แม่หมอ</th>
+                    <th className="p-2.5 text-right">ส่วนของแม่หมอ</th>
+                    <th className="p-2.5 text-right">โอนแล้ว</th>
+                    <th className="p-2.5 text-right">ค้างโอน</th>
+                    <th className="p-2.5 pr-5 text-right">
+                      <span className="sr-only">บันทึกการโอน</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
-                  {data.earnings.map((e) => (
-                    <tr key={e.readerId}>
-                      <td className="p-2.5 pl-5 font-semibold text-ink">{e.displayName}</td>
-                      <td className="p-2.5 text-right">{e.totalBookings}</td>
-                      <td className="p-2.5 text-right">{baht(e.grossSatang)}</td>
-                      <td className="p-2.5 text-right">{baht(e.commissionSatang)}</td>
-                      <td className="p-2.5 pr-5 text-right font-bold text-ink">{baht(e.netSatang)}</td>
-                    </tr>
-                  ))}
+                  {data.earnings.map((e) => {
+                    const key = `payout_${e.readerId}`;
+                    return (
+                      <tr key={e.readerId}>
+                        <td className="p-2.5 pl-5 font-semibold text-ink">{e.displayName}</td>
+                        <td className="p-2.5 text-right">{e.totalBookings}</td>
+                        <td className="p-2.5 text-right">{baht(e.grossSatang)}</td>
+                        <td className="p-2.5 text-right">{baht(e.commissionSatang)}</td>
+                        <td className="p-2.5 text-right">{baht(e.netSatang)}</td>
+                        <td className="p-2.5 text-right">{baht(e.paidOutSatang)}</td>
+                        <td className="p-2.5 text-right font-bold text-ink">{baht(e.outstandingSatang)}</td>
+                        <td className="p-2.5 pr-5 text-right">
+                          {e.outstandingSatang > 0 && (
+                            <Button
+                              size="sm"
+                              variant="gold"
+                              disabled={busy === key}
+                              onClick={() => {
+                                if (
+                                  !window.confirm(
+                                    `บันทึกว่าโอนให้ ${e.displayName} แล้ว ${baht(e.outstandingSatang)} บาท (งวด${periodLabel(shownPeriod)})?`
+                                  )
+                                )
+                                  return;
+                                void act(
+                                  key,
+                                  { action: "record_payout", readerId: e.readerId, period: shownPeriod },
+                                  `บันทึกการโอนให้ ${e.displayName} แล้ว`
+                                );
+                              }}
+                            >
+                              บันทึกว่าโอนแล้ว
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

@@ -57,9 +57,3 @@ export const PhoneDownIcon = (p: SVGProps<SVGSVGElement>) => (
     <path d="M3.5 14.5c4.7-4.2 12.3-4.2 17 0l-1.8 2.6-3.4-1.2v-2.4a10 10 0 0 0-6.6 0v2.4l-3.4 1.2z" />
   </svg>
 );
-
-export const ChevronIcon = (p: SVGProps<SVGSVGElement>) => (
-  <svg {...base(p)}>
-    <path d="m6 9 6 6 6-6" />
-  </svg>
-);

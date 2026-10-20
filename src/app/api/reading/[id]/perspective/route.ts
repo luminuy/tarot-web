@@ -169,7 +169,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     // 🛡️ แทร็ก S: เพดานโทเคนต่อผู้ใช้ต่อวัน
     const { costSubject, isUserTokenCapReached, tokenCapMessage } = await import("@/lib/security/cost-ledger");
     costSubj = costSubject(userId, clientIp);
-    if (await isUserTokenCapReached(costSubj, "member")) {
+    // A3-03: ผู้ถือรอบที่ซื้อได้เพดาน `paid`
+    const memberId = userId;
+    const paidCheck = memberId
+      ? async () =>
+          (await (await import("@/lib/entitlement/entitlement")).getEntitlement({ kind: "member", userId: memberId }))
+            .hasPaidCredits
+      : undefined;
+    if (await isUserTokenCapReached(costSubj, "member", { hasPaidCredits: paidCheck })) {
       limit.releaseConcurrency();
       return NextResponse.json({ error: tokenCapMessage(lang) }, { status: 429 });
     }

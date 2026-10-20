@@ -6,6 +6,7 @@
  * ล้มเหลวทุกกรณีคืนค่าที่ปลอดภัย — หน้าจอต้องทำงานต่อได้แม้เครือข่ายสะดุด
  * ⚠️ ไฟล์นี้ใช้ใน island — ห้าม import สำรับ/สารานุกรม
  */
+import { isKnownAnonymous } from "@/lib/auth/session-hint";
 import { STORAGE_KEYS } from "@/lib/storage/keys";
 import type { CustomSpreadInput } from "@/lib/tarot/custom-spread";
 
@@ -103,8 +104,12 @@ type Remote = CustomSpreadInput & { id: string; shareSlug: string | null; useCou
 
 const toMine = (s: Remote): MyCustomSpread => ({ ...s, local: false });
 
-/** `null` = ยังไม่ได้ล็อกอิน (ให้ใช้ผังในเครื่องแทน) */
+/**
+ * `null` = ยังไม่ได้ล็อกอิน (ให้ใช้ผังในเครื่องแทน)
+ * ผู้ชมที่ไม่มีคุกกี้ใบ้ไม่มีบัญชีให้ถาม ➔ คืน `null` เลยโดยไม่ยิง `/api/*` (กฎ INC-0104 · ผู้ชมไม่ล็อกอิน = 0 เส้น)
+ */
 export async function fetchMySpreads(): Promise<MyCustomSpread[] | null> {
+  if (isKnownAnonymous()) return null;
   try {
     const res = await fetch("/api/spreads/custom", { cache: "no-store" });
     if (res.status === 401) return null;

@@ -18,7 +18,7 @@ import { WANDS } from "./wands";
  *
  * ⚠️ **ลำดับต้องตรงกับ `DECK` ใน `./index.ts` เป๊ะ ๆ ห้ามสลับเด็ดขาด**
  * เพราะ cardIndex ถูกเก็บเป็นตัวเลขในฐานข้อมูล และใช้พิสูจน์ Provably Fair ย้อนหลัง
- * (มีด่าน `scripts/qa/test-cards.ts` ตรวจให้ว่าสองสำรับเรียงตรงกัน)
+ * (มีด่าน `scripts/verify-cards.ts` ตรวจให้ว่าสองสำรับเรียงตรงกัน)
  */
 export const DECK_TH: readonly TarotCard[] = Object.freeze([
   ...MAJOR_A,

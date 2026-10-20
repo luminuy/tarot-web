@@ -7,6 +7,7 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { signReaderToken } from "@/lib/auth/reader-auth";
 import { normalizeConsoleLinkDays } from "@/lib/marketplace/console-link";
 import {
+  countOpenPaidConsultations,
   deleteReader,
   getReaderById,
   rotateReaderSessionSecret,
@@ -162,8 +163,31 @@ export async function DELETE(
       return NextResponse.json({ error: "ไม่พบแม่หมอที่ระบุ" }, { status: 404 });
     }
 
+    /*
+     * ยังมีลูกค้าที่จ่ายเงินรอคิวอยู่ หรือมีเงินค้างคืนลูกค้า ➔ `deleteReader` ไม่ลบอะไรเลย
+     * ต้องตอบ 409 พร้อมเหตุผลที่แอดมินทำต่อได้ ไม่ใช่ 500 "ลบไม่ได้" ที่ดูเหมือนระบบพัง
+     */
+    const openPaid = await countOpenPaidConsultations(id);
+    if (openPaid > 0) {
+      return NextResponse.json(
+        {
+          error: `ยังลบไม่ได้ — แม่หมอท่านนี้มีลูกค้าที่จ่ายเงินแล้วรอคิวอยู่ หรือมีเงินที่ต้องคืนลูกค้า ${openPaid} รายการ ปิดคิวหรือคืนเงินให้ครบก่อน (หรือเปลี่ยนสถานะเป็นระงับแทน)`,
+          code: "open_paid_consultations",
+          openPaid,
+        },
+        { status: 409 }
+      );
+    }
+
     const ok = await deleteReader(id);
     if (!ok) {
+      // ระหว่างตรวจกับลบ มีลูกค้าจ่ายเงินเข้ามาพอดี — `deleteReader` ตรวจซ้ำแล้วไม่ลบ
+      if ((await countOpenPaidConsultations(id)) > 0) {
+        return NextResponse.json(
+          { error: "ยังลบไม่ได้ — มีลูกค้าเพิ่งจ่ายเงินเข้ามา ลองโหลดรายการใหม่แล้วตรวจคิวอีกครั้ง", code: "open_paid_consultations" },
+          { status: 409 }
+        );
+      }
       return NextResponse.json({ error: "ไม่สามารถลบแม่หมอได้" }, { status: 500 });
     }
 

@@ -28,7 +28,6 @@ import {
   markNoShow,
 } from "@/lib/marketplace/booking.repo";
 import {
-  canMarkNoShow,
   canStartBooking,
   DEFAULT_LEAD_MIN,
   EARLY_START_MINUTES,
@@ -177,11 +176,18 @@ export async function PATCH(request: Request) {
         }
         await completeBooking(ticket.id);
       } else if (action === "no_show") {
-        if (ticket.kind !== "booking" || !canMarkNoShow(ticket.slotStart, now) || !(await markNoShow(ticket, now))) {
-          return NextResponse.json(
-            { error: `แจ้งลูกค้าไม่มาได้หลังเวลานัด ${NO_SHOW_GRACE_MINUTES} นาที` },
-            { status: 409 }
-          );
+        // ตัดสินด้วยหลักฐานจากห้องวิดีโอฝั่งเซิร์ฟเวอร์ (markNoShow) — ไม่ใช่แค่เวลาผ่านไป
+        const result = await markNoShow(ticket, now);
+        if (!result.ok) {
+          const message =
+            result.reason === "too_early"
+              ? `แจ้งลูกค้าไม่มาได้หลังเวลานัด ${NO_SHOW_GRACE_MINUTES} นาที`
+              : result.reason === "not_started"
+                ? "ต้องกดเริ่มนัดแล้วเปิดห้องวิดีโอรอลูกค้าก่อน ถ้าไม่สะดวกคุยนัดนี้ ให้กดยกเลิก ระบบจะคืนเงินลูกค้าเต็มจำนวน"
+                : result.reason === "no_evidence"
+                  ? `แจ้งลูกค้าไม่มาได้เมื่อเปิดห้องวิดีโอรอครบ ${NO_SHOW_GRACE_MINUTES} นาทีแล้วลูกค้ายังไม่เข้าห้อง · ถ้าลูกค้าเข้ามาแล้วให้กดเสร็จสิ้นคิว`
+                  : "สถานะคิวนี้เพิ่งเปลี่ยน กรุณาโหลดหน้าใหม่";
+          return NextResponse.json({ error: message }, { status: 409 });
         }
       } else {
         // แม่หมอยกเลิก = คืนเงินลูกค้าเต็มจำนวนเสมอ (decideCancellation)

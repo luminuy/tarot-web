@@ -16,6 +16,7 @@ import { ThaiPhrases, thaiPhrasesHtml } from "@/components/ui/ThaiPhrases";
 import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
 import { CardImage } from "@/components/card/CardImage";
 import { getArticleCardArt } from "@/data/article-art";
+import { resolveArticleToc } from "./article-toc";
 
 interface Props {
   article: Article;
@@ -45,9 +46,11 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
   const effectiveToc = isEnglish && article.tocEn && article.tocEn.length > 0 ? article.tocEn : article.toc;
   const effectiveFaqs = isEnglish && article.faqsEn && article.faqsEn.length > 0 ? article.faqsEn : article.faqs;
 
-  const tocList = effectiveToc && effectiveToc.length > 0 && (
+  /* A7-07: สารบัญลิงก์ `#id` ได้ก็ต่อเมื่อ `<h2>` ในเนื้อหามี id ตรงกัน — จับคู่ด้วยชื่อหัวข้อ · โชว์เฉพาะรายการที่มีหัวข้อจริง */
+  const resolvedToc = resolveArticleToc(effectiveContent, effectiveToc);
+  const tocList = resolvedToc.items.length > 0 && (
     <ol className="v2-ar-toc-list">
-      {effectiveToc.map((item, idx) => {
+      {resolvedToc.items.map((item, idx) => {
         /* 🔢 เลขข้อต้องมีชั้นเดียว (INC-0214) — ชื่อหัวข้อบางบทความมีเลขนำหน้าอยู่แล้ว */
         const { marker, label } = splitTocNumber(item.title, idx + 1);
         return (
@@ -59,6 +62,8 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       })}
     </ol>
   );
+
+  let h2Index = 0;
 
   /*
    * v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — ห้องอ่านหนังสือ
@@ -135,7 +140,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
               dangerouslySetInnerHTML={{
                 __html: effectiveContent
                   // หัวข้อในเนื้อบทความห่อวลีด้วย `.tp` — ไม่งั้นหัวข้อหักกลางคำ
-                  .replace(/## (.*?)\n/g, (_m, t: string) => `<h2>${thaiPhrasesHtml(t)}</h2>`)
+                  .replace(/## (.*?)\n/g, (_m, t: string) => `<h2 id="${resolvedToc.headingIds[h2Index++]}">${thaiPhrasesHtml(t)}</h2>`)
                   .replace(/### (.*?)\n/g, (_m, t: string) => `<h3>${thaiPhrasesHtml(t)}</h3>`)
                   .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
                   .replace(/\*(.*?)\*/g, "<em>$1</em>")

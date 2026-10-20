@@ -53,8 +53,9 @@ import {
   isStandardSpread,
 } from "@/lib/entitlement/copy";
 import { decideSpreadAccess, decideStartSessionAccess, hasPremiumTrialOf, isPassHolderOf } from "@/components/home/flow-access";
-import { resolveEntryIntent } from "@/components/home/flow-entry";
+import { resolveEntryIntent, isCrossLanguageFlow, needsFinalizeOnResume } from "@/components/home/flow-entry";
 import { useFlowBackButton } from "@/components/home/use-flow-back";
+import { createRunGuard } from "@/components/home/flow-run-guard";
 import { onUpgradeRequest } from "@/lib/entitlement/upgrade-bus";
 import { ensureEntitlement, refreshEntitlement, useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useLocale } from "@/lib/i18n";
@@ -63,6 +64,9 @@ import { readMySign } from "@/lib/zodiac/my-sign";
 import { buildCustomSpread, CUSTOM_SPREAD_ID, layoutPoints } from "@/lib/tarot/custom-spread";
 import { takeCustomLaunch, type CustomSpreadDef } from "@/lib/tarot/custom-spread-client";
 import { takeQuestionPrefill } from "@/lib/reading/question-prefill";
+import { friendlyError } from "@/lib/reading/friendly-error";
+import { describePurchaseError, safeCreditCount } from "@/lib/account/purchase-notice";
+import { START_SITUATION_MAX } from "@/lib/reading/start-limits";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { RitualRail, SpreadSummaryCard, SealChip, SpreadSwitcher } from "@/components/home/RitualChrome";
 
@@ -155,7 +159,7 @@ function mapBlockedReason(reason?: string): UpgradeReason | null {
 /**
  * พิธีกรรมดูดวงทั้ง 5 ขั้น (ฝั่งเบราว์เซอร์ล้วน)
  *
- * `seoContent` ถูกส่งเข้ามาจาก `src/app/page.tsx` ซึ่งเป็น **Server Component**
+ * `seoContent` ถูกส่งเข้ามาจากหน้า Astro ของหน้าแรก (`astro/pages/index.astro` · `/en` คู่กัน) ซึ่งเรนเดอร์ฝั่งเซิร์ฟเวอร์
  * เพื่อให้เนื้อหา SEO ยาว 800+ บรรทัดไม่ถูกลากเข้ามาอยู่ใน bundle ฝั่งไคลเอนต์
  * (ไฟล์นี้เป็น "use client" — อะไรที่ import เข้ามาตรง ๆ จะกลายเป็นโค้ดฝั่งไคลเอนต์ทั้งหมด)
  */
@@ -437,6 +441,16 @@ export default function TarotFlow({
     activeOrder: activeCardIndex,
   } = deck;
   const isFinalizingRef = useRef(false);
+  /**
+   * ✦ รอบ "ส่งไพ่ที่เลือกให้เซิร์ฟเวอร์" (`handleFinalizePickedCards`) ที่กำลังบินอยู่ (A4-03)
+   * ตัวคุมรอบ (`flow-run-guard.ts`): รอบที่ถูกยกเลิก (แก้คำถาม · ย้อนกลับ · เริ่มใหม่ · ถอดหน้า) หรือถูกรอบใหม่ทับ
+   * คือ "ของที่ผู้ใช้ทิ้งไปแล้ว" — ห้ามแจกไพ่ · ห้ามเปลี่ยนขั้น · ห้ามยิง `/read` (หักโควตา)
+   */
+  const finalizeGuardRef = useRef<ReturnType<typeof createRunGuard> | null>(null);
+  if (finalizeGuardRef.current === null) finalizeGuardRef.current = createRunGuard();
+  const finalizeGuard = finalizeGuardRef.current;
+  /** รีเฟรชตอน `/shuffle` ยังบินอยู่ — เลือกครบแต่ไม่มีไพ่ ต้องส่งซ้ำเมื่อสถานะที่กู้คืนมาถึงจอแล้ว (A4-02) */
+  const resumeFinalizePendingRef = useRef(false);
 
   /*
    * 📜 R-26 ขั้นที่ 2 — สถานะคำอ่านทั้ง 3 ค่ายุบเป็นตัวลดเดียว
@@ -557,6 +571,9 @@ export default function TarotFlow({
     }
 
     const saved = loadFlowState();
+    const pageLang = isEnglish ? "en" : "th";
+    // A4-05: รอบที่ค้างมาจากหน้าอีกภาษา = ทิ้ง ไม่กู้คืนข้ามภาษา (`resolveEntryIntent` ตัดสินให้แล้ว แต่ของค้างต้องล้างด้วย)
+    if (saved && isCrossLanguageFlow(saved.lang, pageLang)) clearFlowState();
     const intent = resolveEntryIntent({
       routeSpread: routeSpread?.id ?? null,
       isKnownSpread: (id) => Boolean(getSpread(id)),
@@ -564,6 +581,8 @@ export default function TarotFlow({
       returning: isReturnVisit() || (routeSpread ? takeAuthDetour(routeSpread.id) : false),
       savedStep: saved?.currentStep ?? null,
       savedSpread: saved?.spreadId ?? null,
+      savedLang: saved?.lang ?? null,
+      pageLang,
     });
 
     if (intent.kind === "deepLink" && routeSpread) {
@@ -611,6 +630,14 @@ export default function TarotFlow({
       });
       dispatchRead({ type: "restore", reading: saved.readingResult });
       setCurrentStep(saved.currentStep);
+      // A4-02: เลือกไพ่ครบแต่ไพ่ยังไม่มา (รีเฟรชตอน /shuffle บินอยู่) — ส่งซ้ำเมื่อสถานะถึงจอ ดูเอฟเฟกต์ถัดไป
+      resumeFinalizePendingRef.current = needsFinalizeOnResume({
+        step: saved.currentStep,
+        pickedCount: (saved.pickedIndices ?? []).length,
+        drawnCount: (saved.drawnCards ?? []).length,
+        capacity: spread?.positions.length ?? 0,
+        hasSession: Boolean(saved.readingId),
+      });
       // รีเฟรชหน้า `/read/<ผัง>` ตอนยังพิมพ์คำถามอยู่ = ยังไม่เคยผ่านด่านสิทธิ์ของรอบนี้ ตรวจให้เหมือนเปิดใหม่
       if (routeSpread && saved.currentStep === "INTENTION_SELECT") {
         void checkRouteAccess(routeSpread, () => deepLinkCancelledRef.current);
@@ -637,7 +664,8 @@ export default function TarotFlow({
       const isVerified = searchParams.get("verified") === "1";
       const isPwReset = searchParams.get("pw_reset") === "1";
       const isPurchaseSuccess = searchParams.get("purchase_success") === "1";
-      const purchaseCredits = searchParams.get("credits");
+      // ค่าจาก URL ใครก็ตั้งได้ — รับเฉพาะตัวเลข และแปลรหัสข้อผิดพลาดเป็นข้อความของเราเอง (A1-07)
+      const purchaseCredits = safeCreditCount(searchParams.get("credits"));
       const purchaseError = searchParams.get("purchase_error");
       const verifyError = searchParams.get("verify_error");
       const authError = searchParams.get("auth_error");
@@ -686,7 +714,7 @@ export default function TarotFlow({
         setToast({
           type: "error",
           title: isEn ? "Payment Failed" : "การชำระเงินไม่สำเร็จ",
-          subtitle: decodeURIComponent(purchaseError),
+          subtitle: describePurchaseError(purchaseError, isEn ? "en" : "th"),
           duration: 5000,
         });
       } else if (isVerified) {
@@ -810,6 +838,22 @@ export default function TarotFlow({
       deepLinkCancelledRef.current = true;
     };
   }, [isEnglish]);
+
+  /**
+   * ✦ ส่งไพ่ที่เลือกครบแล้วซ้ำหลังกู้คืน (A4-02)
+   * ตัวบันทึก flow เขียน `pickedIndices` ครบทันทีที่แตะใบสุดท้าย แต่ไพ่มาหลังคำตอบ `/shuffle`
+   * รีเฟรช/สลับแอปช่วงนั้นเคยทิ้งหน้าไว้ที่ "กำลังวางไพ่ลงผัง" โดยไม่มีคำขอวิ่งอยู่ ไม่มีข้อความผิดพลาด
+   * ส่งซ้ำปลอดภัย — เซิร์ฟเวอร์คืนไพ่ชุดเดิมที่จั่วไว้แล้ว (replay guard) ไม่จั่วใหม่ · ล้มแล้วมีแถบผิดพลาด + ถอยใบสุดท้ายให้เลือกใหม่
+   * ต้องรอให้ค่าที่กู้คืนมาถึงจอก่อน (closure ของเอฟเฟกต์กู้คืนยังเห็น `readingId` ว่าง) จึงแยกเป็นเอฟเฟกต์นี้
+   */
+  useEffect(() => {
+    if (!resumeFinalizePendingRef.current) return;
+    if (currentStep !== "PICK_CARDS" || !readingId || isFinalizingRef.current) return;
+    resumeFinalizePendingRef.current = false;
+    isFinalizingRef.current = true;
+    void handleFinalizePickedCards(pickedIndices);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ตั้งใจให้ทำงานแค่ตอนสถานะที่กู้คืนมาถึงจอ ไม่ใช่ทุกครั้งที่ไพ่/ฟังก์ชันเปลี่ยน
+  }, [currentStep, readingId]);
 
   // คอมโพเนนต์ลึก (เช่นช่องแชทที่ล็อกใน FollowUpChat) ขอเปิดหน้าต่างสิทธิ์พร้อม "เหตุผล"
   // จึงเลือกถ้อยคำและปุ่มให้ตรงสถานการณ์ได้ ไม่ใช่เด้งหน้าเข้าสู่ระบบเหมือนกันหมด
@@ -956,7 +1000,8 @@ export default function TarotFlow({
     try {
       const freshSeed = createClientSeed();
       dispatchSession({ type: "seed", clientSeed: freshSeed });
-      const effectiveSituation = (finalSituation !== undefined ? finalSituation : situation).trim();
+      // ตัดให้พอดีเพดานของเซิร์ฟเวอร์เสมอ (A4-07) — ค่ายาวเกินที่ค้างใน state ต้องไม่ทำให้กดเริ่มไม่ผ่านซ้ำ ๆ
+      const effectiveSituation = (finalSituation !== undefined ? finalSituation : situation).trim().slice(0, START_SITUATION_MAX);
       const res = await fetch("/api/reading/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1025,8 +1070,8 @@ export default function TarotFlow({
       });
 
       navigateStep("SHUFFLE");
-    } catch (err: any) {
-      dispatchRead({ type: "fail", message: err.message || (isEnglish ? "An error occurred while beginning the reading." : "เกิดข้อผิดพลาดในการเริ่มดูดวง") });
+    } catch (err: unknown) {
+      dispatchRead({ type: "fail", message: friendlyError(err, isEnglish, isEnglish ? "An error occurred while beginning the reading." : "เกิดข้อผิดพลาดในการเริ่มดูดวง") });
     } finally {
       setLoading(false);
     }
@@ -1105,7 +1150,16 @@ export default function TarotFlow({
     return true;
   };
 
+  /** ห่อ `drawQuickCardCore` — ข้อผิดพลาดเครือข่ายถูกแปลเป็นข้อความสองภาษาก่อนถึง `Ui2PickSection` ที่เอา `err.message` ขึ้นจอ (A4-04) */
   const drawQuickCard = async (topic: QuickTopic, deckPosition: number): Promise<Ui2Draw | null> => {
+    try {
+      return await drawQuickCardCore(topic, deckPosition);
+    } catch (err: unknown) {
+      throw new Error(friendlyError(err, isEnglish, isEnglish ? "An error occurred while drawing your card." : "เกิดข้อผิดพลาดระหว่างเปิดไพ่"));
+    }
+  };
+
+  const drawQuickCardCore = async (topic: QuickTopic, deckPosition: number): Promise<Ui2Draw | null> => {
     if (!canDrawQuick()) return null;
     quickDrawRef.current = null;
 
@@ -1305,13 +1359,32 @@ export default function TarotFlow({
     }
   };
 
+  /**
+   * ยกเลิกรอบ "ส่งไพ่ที่เลือก" ที่ยังบินอยู่ (A4-03) — เรียกจากทุกทางที่ผู้ใช้ทิ้งรอบนี้
+   * (แก้คำถาม · ย้อนกลับ · เริ่มดูดวงใหม่ · ถอดหน้า) รอบที่ถูกยกเลิกจะไม่แจกไพ่/เปลี่ยนขั้น/ยิง `/read` อีก
+   */
+  const cancelFinalize = () => {
+    if (finalizeGuard.cancel()) setLoading(false); // รอบที่ถูกยกเลิกไม่ปล่อย `loading` เอง
+    isFinalizingRef.current = false;
+    resumeFinalizePendingRef.current = false;
+  };
+  useEffect(() => {
+    return () => {
+      finalizeGuard.cancel();
+    };
+  }, [finalizeGuard]);
+
   // Submit picked indices to backend shuffle endpoint
   const handleFinalizePickedCards = async (finalIndices: number[]) => {
     const activeId = readingId;
     if (!activeId) {
-      dispatchRead({ type: "fail", message: "ไม่พบข้อมูลเซสชัน กรุณากดเริ่มใหม่" });
+      dispatchRead({ type: "fail", message: isEnglish ? "Session data not found. Please start again." : "ไม่พบข้อมูลเซสชัน กรุณากดเริ่มใหม่" });
       return;
     }
+
+    // รอบใหม่ทับรอบเก่าเสมอ — รอบที่ `isStale()` คือของที่ผู้ใช้ทิ้งไปแล้ว (A4-03)
+    const run = finalizeGuard.begin();
+    const isStale = run.isStale;
 
     setLoading(true);
     dispatchRead({ type: "clearError" });
@@ -1323,9 +1396,11 @@ export default function TarotFlow({
 
       // Gentle pause for pick animation
       await new Promise((r) => setTimeout(r, 450));
+      if (isStale()) return;
 
       const res = await fetch(`/api/reading/${activeId}/shuffle`, {
         method: "POST",
+        signal: run.signal,
         headers: {
           "Content-Type": "application/json",
           "x-reading-token": sessionToken || "",
@@ -1338,6 +1413,7 @@ export default function TarotFlow({
       });
 
       const data = await res.json().catch(() => ({}));
+      if (isStale()) return;
       if (!res.ok) {
         if (res.status === 410 || data.code === "SESSION_SEED_LOST") {
           throw new Error(isEnglish ? "Session expired during shuffle. Please start again." : "เซสชันหมดอายุระหว่างการสับไพ่ กรุณาเริ่มดูดวงใหม่อีกครั้ง");
@@ -1347,6 +1423,7 @@ export default function TarotFlow({
       dispatchSession({ type: "rotateToken", token: data.sessionToken });
 
       const cardByIndex = await deckReady;
+      if (isStale()) return;
 
       if (!data.drawn || !Array.isArray(data.drawn) || data.drawn.length === 0) {
         throw new Error(isEnglish ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
@@ -1388,15 +1465,23 @@ export default function TarotFlow({
       dispatchDeck({ type: "deal", cards: enrichedCards });
       navigateStep("READING");
 
+      // รอบนี้จบแล้ว (ไพ่ลงโต๊ะ) — ปล่อยตัวยกเลิกก่อน การยกเลิกสตรีมต่อจากนี้เป็นหน้าที่ของ `readStreamAbortRef`
+      run.release();
       // Auto start streaming AI interpretation in background
       startAIStreaming(activeId, enrichedCards, data.sessionToken || sessionToken);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      // ผู้ใช้ทิ้งรอบนี้ไปแล้ว (ถูกยกเลิกกลางทาง) — ไม่ใช่ความผิดพลาด ห้ามขึ้นแถบแดงหรือถอยไพ่ของรอบใหม่
+      if (isStale() || (err as { name?: unknown } | null)?.name === "AbortError") return;
       isFinalizingRef.current = false;
-      dispatchRead({ type: "fail", message: err.message || (isEnglish ? "An error occurred while processing the cards." : "เกิดข้อผิดพลาดในการประมวลผลไพ่") });
+      dispatchRead({ type: "fail", message: friendlyError(err, isEnglish, isEnglish ? "An error occurred while processing the cards." : "เกิดข้อผิดพลาดในการประมวลผลไพ่") });
       // P2-5: ถอยกลับแค่ไพ่ใบสุดท้าย ให้เลือกใหม่ได้ทันทีโดยไม่ต้องเริ่มจับใหม่ทั้งหมด
       dispatchDeck({ type: "undoLastPick" });
     } finally {
-      setLoading(false);
+      // รอบที่ถูกยกเลิกไม่แตะ `loading` — ผู้ที่ยกเลิก (`cancelFinalize`) หรือรอบใหม่เป็นเจ้าของแล้ว
+      if (!isStale()) {
+        run.release();
+        setLoading(false);
+      }
     }
   };
 
@@ -1568,7 +1653,7 @@ export default function TarotFlow({
       // ผู้ใช้ออกจากหน้าไปเอง / เริ่มรอบใหม่ทับ — ไม่ใช่ความผิดพลาด ไม่ต้องขึ้นข้อความ error
       if (err?.name === "AbortError") return;
       console.error("Stream reading failed", err);
-      dispatchRead({ type: "fail", message: err.message || (isEnglish ? "The connection momentarily stuttered. Please click reload to continue." : "สัญญาณระหว่างอ่านไพ่สะดุดชั่วคราวค่ะ กรุณากดโหลดใหม่อีกครั้ง") });
+      dispatchRead({ type: "fail", message: friendlyError(err, isEnglish, isEnglish ? "The connection momentarily stuttered. Please click reload to continue." : "สัญญาณระหว่างอ่านไพ่สะดุดชั่วคราวค่ะ กรุณากดโหลดใหม่อีกครั้ง") });
     }
   };
 
@@ -1608,6 +1693,8 @@ export default function TarotFlow({
     // แล้วลากผู้ใช้กลับไปหน้าสรุปของรอบที่เพิ่งทิ้งไป พร้อมบันทึกลงสมุดบันทึก
     // ด้วยคำถาม/ชื่อเล่นของรอบใหม่ที่ว่างเปล่า
     readStreamAbortRef.current?.abort();
+    // ตัดรอบ "ส่งไพ่ที่เลือก" ที่ยังบินอยู่ด้วย — ไม่งั้นคำตอบ /shuffle ที่มาทีหลังลากกลับเข้าขั้นอ่านด้วยคำถามว่าง (A4-03)
+    cancelFinalize();
     clearFlowState();
     soundManager.playCardSelectSound();
     navigateStep("SPREAD_SELECT");
@@ -1616,7 +1703,6 @@ export default function TarotFlow({
     dispatchDeck({ type: "reset" });
     dispatchRead({ type: "reset" });
     dispatchOverlay({ type: "closeAll" });
-    isFinalizingRef.current = false;
     setNickname("");
     setQuestion("");
     setSituation("");
@@ -1633,11 +1719,11 @@ export default function TarotFlow({
   // P1-U1: ย้อนกลับทีละขั้นจากขั้นสับไพ่/เลือกไพ่ (เดิมทางออกเดียวคือ "เริ่มดูดวงใหม่" ที่ล้างทุกอย่าง)
   const handleStepBack = () => {
     soundManager.playCardSelectSound();
+    cancelFinalize();
     // v2: ขั้นสับเล่นเองอัตโนมัติ — ย้อนจากเลือกไพ่ไปขั้นสับ = สับใหม่แล้วกลับมาเลือกใหม่ (ปุ่ม "เลือกใหม่ตั้งแต่ใบแรก")
     if (currentStep === "SHUFFLE") {
       navigateStep("INTENTION_SELECT"); // เก็บคำถาม/ชื่อเล่น/ผัง/แม่หมอไว้ครบ
     } else if (currentStep === "PICK_CARDS") {
-      isFinalizingRef.current = false;
       dispatchDeck({ type: "clearDraw" });
       dispatchRead({ type: "clearError" });
       navigateStep("SHUFFLE");
@@ -1647,7 +1733,8 @@ export default function TarotFlow({
   // v2: ทางกลับไปแก้คำถามจากโต๊ะเลือกไพ่ (คำถาม/ผัง/แม่หมอยังอยู่ครบ · ไพ่ที่เลือกไว้ล้างทิ้ง)
   const handleBackToQuestion = () => {
     soundManager.playCardSelectSound();
-    isFinalizingRef.current = false;
+    // ผู้ใช้กดแก้คำถามระหว่างรอ /shuffle = ยกเลิกรอบนั้นจริง ไม่ปล่อยให้คำตอบที่มาทีหลังลากเข้าขั้นอ่าน (A4-03)
+    cancelFinalize();
     dispatchDeck({ type: "clearDraw" });
     dispatchRead({ type: "clearError" });
     navigateStep("INTENTION_SELECT");
@@ -1692,7 +1779,7 @@ export default function TarotFlow({
    * หน้าแรกจึงเหลือ landmark แค่ `main` อันเดียว — ผู้ใช้ screen reader กระโดดไปเมนู
    * หรือท้ายเว็บไม่ได้เลยบนหน้าที่สำคัญที่สุดของเว็บ (ยืนยันจาก accessibility tree ของ production)
    *
-   * เส้นทางอื่นทั้งเว็บทำถูกอยู่แล้วผ่าน layout (ดู `src/app/(th)/cards/layout.tsx`)
+   * เส้นทางอื่นทั้งเว็บทำถูกอยู่แล้วผ่านเปลือกกลาง (`SiteHeader` · `SiteFooter` ใน `astro/layouts/` และ `src/components/layout/`)
    * หน้าแรกเป็นที่เดียวที่หลุด เพราะประกอบร่างเองในคอมโพเนนต์นี้
    */
   return (
@@ -1935,9 +2022,10 @@ export default function TarotFlow({
                       }}
                       onSubmit={() => {
                         const ans = clarificationAnswer.trim();
-                        const combined = ans
-                          ? (situation.trim() ? `${situation.trim()}\n(ข้อมูลเพิ่มเติม: ${ans})` : ans)
-                          : situation;
+                        // ตัดให้พอดีเพดานของเซิร์ฟเวอร์ก่อนเก็บลง state (A4-07) — ไม่งั้นกดเริ่มซ้ำกี่ครั้งก็ล้มด้วยค่ายาวเดิม
+                        const combined = (ans
+                          ? (situation.trim() ? `${situation.trim()}\n(${isEnglish ? "Additional info" : "ข้อมูลเพิ่มเติม"}: ${ans})` : ans)
+                          : situation).slice(0, START_SITUATION_MAX);
                         if (ans) {
                           setSituation(combined);
                         }

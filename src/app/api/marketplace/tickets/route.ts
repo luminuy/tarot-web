@@ -9,7 +9,7 @@ import {
   toPublicTicket,
 } from "@/lib/marketplace/queue.repo";
 import { checkSlotBookable, expireLapsedHold, holdBooking, releaseHold } from "@/lib/marketplace/booking.repo";
-import { MAX_ACTIVE_PER_CUSTOMER } from "@/lib/marketplace/booking-policy";
+import { HOLD_MINUTES, MAX_ACTIVE_PER_CUSTOMER } from "@/lib/marketplace/booking-policy";
 import { openConsultationCheckout } from "@/lib/marketplace/consultation-checkout";
 import { isStripeTestModeOnProduction, PAYMENTS_NOT_OPEN_MESSAGE } from "@/lib/marketplace/payment-gateway";
 import { isPrivilegedTestRequest } from "@/lib/security/privileged";
@@ -22,6 +22,7 @@ import {
   attachCustomerRefCookie,
 } from "@/lib/marketplace/customer-ref";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
+import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
 export const runtime = "nodejs";
@@ -177,6 +178,27 @@ export async function POST(request: Request) {
     // คีย์ทดสอบบนเว็บจริง = เปิดให้เฉพาะผู้ทดสอบ (บัตร 4242 ห้ามได้คิวแม่หมอฟรี)
     if (isStripeTestModeOnProduction() && !(await isPrivilegedTestRequest(request))) {
       return NextResponse.json({ error: PAYMENTS_NOT_OPEN_MESSAGE }, { status: 503 });
+    }
+
+    /*
+     * 🔒 เพดาน "กันที่โดยยังไม่จ่าย" ต่อเครื่อง แบบข้าม isolate (D1) — ด่านโควตาข้างบนนับจากคุกกี้
+     * ซึ่งคำขอที่ไม่ส่งคุกกี้จะถูกนับเป็นลูกค้าใหม่ทุกครั้ง ด่านนี้จึงนับจาก IP แทน:
+     *   ต่อแม่หมอหนึ่งคน ≤ MAX_ACTIVE_PER_CUSTOMER ครั้งต่ออายุการกันที่ · ทุกแม่หมอรวม ≤ 10 ครั้งต่ออายุการกันที่
+     * วางก่อน AI คัดกรองและการกันที่ — คำขอที่เกินเพดานไม่เสียค่า AI และไม่ทำให้เวลาว่างหายจากตาราง
+     */
+    const holdWindowSec = HOLD_MINUTES * 60;
+    const holdLimit = await consumeEdgeRateLimits([
+      {
+        key: edgeRateLimitKey("mkt_hold:reader", `${clientId}:${readerId}`),
+        config: { max: MAX_ACTIVE_PER_CUSTOMER, windowSec: holdWindowSec },
+      },
+      { key: edgeRateLimitKey("mkt_hold:ip", clientId), config: { max: 10, windowSec: holdWindowSec } },
+    ]);
+    if (!holdLimit.allowed) {
+      return createRateLimitResponse(
+        holdLimit.retryAfterSec,
+        "เครื่องนี้มีรายการรอชำระเงินหลายรายการแล้ว ชำระหรือรอให้รายการเดิมหมดเวลาก่อน แล้วค่อยจองใหม่"
+      );
     }
 
     // Create ticket with AI Screening — ยังไม่เข้าคิวจนกว่าจะจ่ายเงิน

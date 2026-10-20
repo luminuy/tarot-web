@@ -56,8 +56,49 @@ export interface SwEnv {
    * หน้าใหม่ที่เพิ่งโหลดจากเครือข่าย (network-first) สดอยู่แล้ว เจอ controllerchange ไม่ต้องรีโหลดซ้ำ
    */
   skipFlag?: { mark: () => void; consumeRecent: () => boolean };
+  /**
+   * A5-03: แท็บที่ "ไม่ได้เป็นคนสั่ง" SKIP_WAITING ก็ถูกตัวใหม่ยึด (`clients.claim()`) ไปด้วย — ห้ามรีโหลดทับสิ่งที่
+   * ผู้ใช้กำลังทำอยู่ในแท็บนั้น (ห้องวิดีโอ · แชท · ข้อความที่พิมพ์ค้าง) · ไม่ส่งมา = รีโหลดทันที (พฤติกรรมเดิม)
+   */
+  passiveReload?: {
+    /** หน้าใช้งานสด หรือมีข้อความพิมพ์ค้าง — ไม่รีโหลดเองเลย (หน้าถัดไปที่เปิดโหลดจากเครือข่ายสดอยู่แล้ว) */
+    isBusy: () => boolean;
+    /** แท็บถูกซ่อนอยู่ไหม (ของจริงคือ `document.visibilityState === "hidden"`) — แท็บที่ผู้ใช้กำลังมองอยู่ไม่ถูกรีโหลด */
+    isHidden: () => boolean;
+    /** ผูกตัวจับ "แท็บถูกซ่อน" (ของจริงคือ `visibilitychange`) — คืนฟังก์ชันถอดสาย */
+    onHidden: (fn: () => void) => () => void;
+  };
   /** บันทึกเหตุการณ์ (ของจริงคือ `console`) */
   log?: (level: "info" | "warn", message: string, detail?: unknown) => void;
+}
+
+/** หน้าที่ผู้ใช้อาจอยู่กลางงานสด — การรีโหลดเองทำให้สาย/ฟอร์ม/แชทหลุด (A5-03) */
+const LIVE_PATH_PREFIXES = ["/readers", "/reading", "/read"] as const;
+
+export function isLivePath(pathname: string): boolean {
+  const path = pathname.startsWith("/en/") ? pathname.slice(3) : pathname;
+  return LIVE_PATH_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+}
+
+/** ต่อ `passiveReload` เข้ากับเบราว์เซอร์จริง (ใช้ร่วมกันทั้งหน้า Next และหน้า Astro) */
+export function createBrowserPassiveReload(): NonNullable<SwEnv["passiveReload"]> {
+  return {
+    isBusy: () => {
+      if (isLivePath(window.location.pathname)) return true;
+      // ข้อความที่พิมพ์ค้างในช่องกรอก (แชท · คำถาม · ค้นหา) — รีโหลดแล้วหาย
+      return Array.from(document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("textarea, input:not([type]), input[type=text], input[type=search]")).some(
+        (el) => !el.disabled && el.value.trim() !== "",
+      );
+    },
+    isHidden: () => document.visibilityState === "hidden",
+    onHidden: (fn) => {
+      const handler = () => {
+        if (document.visibilityState === "hidden") fn();
+      };
+      document.addEventListener("visibilitychange", handler);
+      return () => document.removeEventListener("visibilitychange", handler);
+    },
+  };
 }
 
 /**
@@ -86,13 +127,35 @@ export function setupServiceWorker(env: SwEnv): () => void {
   const hadController = Boolean(container.controller);
 
   let reloading = false;
+  let detachHidden: (() => void) | null = null;
+  const reloadOnce = () => {
+    if (reloading) return;
+    reloading = true;
+    reload();
+  };
   const onControllerChange = () => {
     if (!hadController) return; // ยึดครั้งแรก — ไม่ใช่การเปลี่ยนเวอร์ชัน
     // หน้านี้เพิ่งโหลดสด ๆ หลังหน้าก่อนสั่งตัวใหม่ขึ้นทำงาน — ไม่มี chunk เก่าให้ซิงก์
     if (env.skipFlag?.consumeRecent()) return;
     if (reloading) return;
-    reloading = true;
-    reload();
+    const passive = env.passiveReload;
+    if (!passive) {
+      reloadOnce();
+      return;
+    }
+    // A5-03: แท็บอื่นที่ถูกยึดตาม — รีโหลดเฉพาะตอนผู้ใช้ไม่ได้มองและไม่ได้อยู่กลางงาน
+    const tryReload = (): boolean => {
+      if (passive.isBusy() || !passive.isHidden()) return false;
+      reloadOnce();
+      return true;
+    };
+    if (tryReload() || detachHidden) return;
+    detachHidden = passive.onHidden(() => {
+      if (tryReload()) {
+        detachHidden?.();
+        detachHidden = null;
+      }
+    });
   };
   container.addEventListener("controllerchange", onControllerChange);
 
@@ -149,6 +212,7 @@ export function setupServiceWorker(env: SwEnv): () => void {
 
   return () => {
     container.removeEventListener("controllerchange", onControllerChange);
+    detachHidden?.();
     detachPageHide?.();
     offWindowLoad(registerSW);
   };
