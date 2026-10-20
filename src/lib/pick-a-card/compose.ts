@@ -42,16 +42,6 @@
  */
 import type { PickACardCardItem, PickACardEntry } from "@/data/pick-a-card";
 
-/** ผลการจั่วหนึ่งรอบ — เก็บแยกตามตำแหน่ง ไม่ได้ผูกเป็นกองอีกแล้ว */
-export interface PickACardDraw {
-  /** ช่องกองที่ N ได้ "ไพ่หลัก" จากคลังชิ้นไหน — ในรอบเดียวกันทุกช่องได้คนละชิ้น */
-  anchorOrder: number[];
-  /** คลังใบที่ 2 (สิ่งที่ซ่อนอยู่) ที่จั่วได้รอบนี้ */
-  hiddenPick: number;
-  /** คลังใบที่ 3 (คำแนะนำ) ที่จั่วได้รอบนี้ */
-  advicePick: number;
-}
-
 /** คำอ่านที่ประกอบเสร็จแล้วสำหรับกองที่ผู้ใช้เลือก (ภาษาเดียว) */
 export interface ComposedReading {
   cards: [PickACardCardItem, PickACardCardItem, PickACardCardItem];

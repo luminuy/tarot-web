@@ -34,8 +34,8 @@ import { Ui2Showcase, Ui2ShowcaseStarter, type Ui2ShowcaseSection } from "@/comp
  * ภาพไพ่ทุกใบผ่าน <CardImage sizes> (กฎเหล็กข้อ 8) · ไพ่ตัวอย่างเป็น "ตัวอย่าง" ติดป้ายชัด ไม่ใช่คำทำนายของใคร
  */
 
-export const QUESTIONS_HUB_PATH = "/questions";
-export const questionPath = (slug: string) => `/questions/${slug}`;
+const QUESTIONS_HUB_PATH = "/questions";
+const questionPath = (slug: string) => `/questions/${slug}`;
 
 const HUB_COPY = {
   th: {

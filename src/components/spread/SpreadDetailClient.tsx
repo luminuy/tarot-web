@@ -15,6 +15,7 @@ import type { Article } from "@/data/articles";
 import { getArticleTitle } from "@/data/article-helpers";
 import { mapLayout, MAP_CARD_ASPECT, MAP_CARD_MIN_PX } from "@/lib/tarot/spread-map-geometry";
 import { useLocale } from "@/lib/i18n";
+import { buildSpreadFaqs, SPREAD_CATEGORY_TH } from "@/lib/seo/faq";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { Ui2Crumbs, Ui2SectionHead } from "@/components/ui2/Ui2PageHero";
 
@@ -24,17 +25,6 @@ interface Props {
   relatedArticles: Article[];
   fallbackSpreads: Spread[];
 }
-
-const CATEGORY_TH: Record<string, string> = {
-  general: "ทั่วไป",
-  love: "ความรัก",
-  career: "การงาน",
-  work: "การงาน",
-  money: "การเงิน",
-  finance: "การเงิน",
-  spiritual: "จิตวิญญาณ",
-  decision: "การตัดสินใจ",
-};
 
 const CATEGORY_EN: Record<string, string> = {
   general: "General Inquiries",
@@ -60,7 +50,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
   const spreadDesc = getSpreadDescription(spread, isEnglish);
   const categoryLabel = isEnglish
     ? CATEGORY_EN[spread.defaultCategory] ?? spread.defaultCategory
-    : CATEGORY_TH[spread.defaultCategory] ?? spread.defaultCategory;
+    : SPREAD_CATEGORY_TH[spread.defaultCategory] ?? spread.defaultCategory;
 
   const topicPhrase = isEnglish
     ? (spread.defaultCategory === "general" ? "your core question" : `matters of ${categoryLabel.toLowerCase()}`)
@@ -101,32 +91,8 @@ export const SpreadDetailClient: React.FC<Props> = ({
     },
   ];
 
-  const faqs = [
-    {
-      question: isEnglish
-        ? `What types of questions suit the ${spreadName}?`
-        : `ผัง${spread.nameTh} เหมาะกับคำถามแบบไหน`,
-      answer: isEnglish
-        ? `${spreadDesc} It is designed to reveal hidden dynamics and offer practical guidance.`
-        : `${spread.description} ${spread.defaultCategory !== "general" ? `จึงเหมาะกับเรื่อง${categoryLabel}ที่อยากเห็นภาพรวมและปัจจัยรอบด้าน` : ""}`.trim(),
-    },
-    {
-      question: isEnglish
-        ? "How many cards are drawn in this spread?"
-        : "ผังนี้ใช้ไพ่กี่ใบ",
-      answer: isEnglish
-        ? `This layout uses ${spread.positions.length} cards arranged in a deliberate geometric pattern.`
-        : `ผังนี้ใช้ไพ่ ${spread.positions.length} ใบ วางตามตำแหน่งที่กำหนดไว้`,
-    },
-    {
-      question: standard
-        ? (isEnglish ? "Is this spread available on the standard tier?" : "ผังนี้เปิดใช้ฟรีได้ไหม")
-        : (isEnglish ? "Why is this spread designated as a Grand Spread?" : "ทำไมผังนี้เป็นผังพิเศษ"),
-      answer: standard
-        ? (isEnglish ? "Yes, this is an open spread available to all seekers under daily quota." : "ได้ ผังนี้เป็นผังมาตรฐานที่สมาชิกทุกคนเปิดได้ตามโควตาปกติ")
-        : (isEnglish ? "This layout features complex multi-card geometry and deep syntheses, unlocked for seekers with Grand Oracle access." : "ผังนี้มีจำนวนไพ่มากและตีความละเอียด จึงสงวนไว้สำหรับผู้ถือสิทธิ์ญาณพยากรณ์พิเศษ"),
-    },
-  ];
+  /* ชุดเดียวกับ FAQPage JSON-LD ของหน้า (`spread-detail.tsx`) — ตัวสร้างกลาง `buildSpreadFaqs` (A7-10) */
+  const faqs = buildSpreadFaqs(spread, isEnglish, standard);
 
   /*
    * v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — "พิมพ์เขียวผัง"

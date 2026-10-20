@@ -32,9 +32,9 @@ export const ROOT_TITLE_DEFAULT: Record<"th" | "en", string> = {
   en: "Free Online Tarot Reading With an AI Tarot Reader",
 };
 
-export const SITE_AUTHORS: Metadata["authors"] = [{ name: "SeerTarot Sanctuary" }];
-export const SITE_CREATOR = "SeerTarot Sanctuary";
-export const SITE_PUBLISHER = "SeerTarot Sanctuary";
+const SITE_AUTHORS: Metadata["authors"] = [{ name: "SeerTarot Sanctuary" }];
+const SITE_CREATOR = "SeerTarot Sanctuary";
+const SITE_PUBLISHER = "SeerTarot Sanctuary";
 
 export const SITE_ICONS: Metadata["icons"] = {
   icon: [
@@ -44,7 +44,7 @@ export const SITE_ICONS: Metadata["icons"] = {
   apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
 };
 
-export const SITE_ROBOTS: Metadata["robots"] = {
+const SITE_ROBOTS: Metadata["robots"] = {
   index: true,
   follow: true,
   googleBot: {

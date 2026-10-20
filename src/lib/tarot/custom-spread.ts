@@ -12,7 +12,7 @@
 import type { Spread, SpreadPosition } from "@/data/spreads-helpers";
 
 export const CUSTOM_SPREAD_ID = "custom";
-export const CUSTOM_MIN_CARDS = 1;
+const CUSTOM_MIN_CARDS = 1;
 export const CUSTOM_MAX_CARDS = 7;
 export const CUSTOM_NAME_MAX = 60;
 export const CUSTOM_POS_NAME_MAX = 60;

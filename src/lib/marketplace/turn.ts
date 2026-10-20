@@ -17,7 +17,7 @@
 const TURN_API = "https://rtc.live.cloudflare.com/v1/turn/keys";
 
 /** อายุรหัสผ่าน TURN — ยาวกว่าสายที่นานที่สุด (1.30 ชม.) พอสมควร แต่ไม่ค้างทั้งวัน */
-export const TURN_CREDENTIAL_TTL_SEC = 3 * 60 * 60;
+const TURN_CREDENTIAL_TTL_SEC = 3 * 60 * 60;
 
 export interface IceServerConfig {
   urls: string[];

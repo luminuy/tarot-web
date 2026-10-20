@@ -214,7 +214,7 @@ export function computePatterns(entries: readonly SavedReadingItem[]): PatternRe
 }
 
 /** คำต้องห้ามในข้อสังเกตที่ AI เรียบเรียง — เชิงพยากรณ์/ฟันธง */
-export const BANNED_REFLECTION = /จะเกิดขึ้นแน่|แน่นอน|ฟันธง|ดวงกำหนด|โชคชะตาลิขิต|destined|will definitely|guarantee|fated/i;
+const BANNED_REFLECTION = /จะเกิดขึ้นแน่|แน่นอน|ฟันธง|ดวงกำหนด|โชคชะตาลิขิต|destined|will definitely|guarantee|fated/i;
 
 export interface ReflectionObservation {
   text: string;

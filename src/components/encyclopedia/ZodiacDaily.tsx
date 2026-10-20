@@ -121,8 +121,61 @@ export function ZodiacDaily({ signs, sign }: { signs: ZodiacDailySignName[]; sig
   const message = (c: ZodiacDayCard) => (isEnglish ? c.messageEn || c.message : c.message);
   const cardName = (c: ZodiacDayCard) => (isEnglish ? c.nameEn : `${c.nameTh} (${c.nameEn})`);
 
+  /* หัวข้อหน้ารวม — ข้อความคงที่ ใช้ทั้งตอนรอข้อมูลและตอนมีข้อมูล */
+  const indexIntro = (
+    <div className="text-center space-y-1">
+      <h2 id="zodiac-daily-heading" className="text-xl sm:text-2xl font-serif-th font-bold text-ink"><ThaiPhrases>
+        {isEnglish ? "Today's card for your sign" : "ดวงรายวัน — ไพ่วันนี้ของราศีคุณ"}
+      </ThaiPhrases></h2>
+      <p className="text-xs sm:text-sm text-muted font-sans">
+        {isEnglish
+          ? "Pick a sign. Everyone in the same sign sees the same card today."
+          : "เลือกราศี ทุกคนในราศีเดียวกันเห็นไพ่ใบเดียวกันทั้งวัน เปลี่ยนใหม่ทุกเที่ยงคืน"}
+      </p>
+    </div>
+  );
+
   if (!data) {
-    return <div className="altar-panel rounded-2xl min-h-[280px] animate-pulse" aria-hidden="true" />;
+    if (sign) return <div className="altar-panel rounded-2xl min-h-[280px] animate-pulse" aria-hidden="true" />;
+    /* หน้ารวม: โครงเดียวกับของจริง (หัวข้อ · แถบ 12 ราศี · กล่องไพ่ 2 กล่องขนาดเท่าไพ่จริง)
+       กล่องจึงไม่ยืดดันส่วนข้างล่างตอนข้อมูลมาถึง (A6-06) · ยังไม่มีไพ่ใด ๆ บนจอจนกว่าข้อมูลจริงมา (กฎข้อ 14) */
+    return (
+      <section aria-labelledby="zodiac-daily-heading" aria-busy="true" className="space-y-5">
+        {indexIntro}
+        <div aria-hidden="true" className="grid grid-cols-6 gap-1.5 sm:flex sm:flex-wrap sm:justify-center sm:gap-2">
+          {signs.map((s) => (
+            <span
+              key={s.id}
+              className="rounded-full border px-1 sm:px-3 py-1.5 text-xs sm:text-sm text-center font-serif-th font-bold whitespace-nowrap bg-surface border-line-warm text-ink opacity-60"
+            >
+              {nameOf(s.id).replace("ราศี", "")}
+            </span>
+          ))}
+        </div>
+        <div aria-hidden="true" className="grid gap-5 sm:grid-cols-2 max-w-2xl mx-auto">
+          {[0, 1].map((i) => (
+            <div key={i} className="altar-panel rounded-2xl p-5 sm:p-6 flex flex-col items-center gap-4 text-center animate-pulse">
+              <span className="block w-[120px] sm:w-[130px] shrink-0 aspect-[1/1.7] rounded-lg card-back-pattern border-2 border-line-warm/60" />
+              <div className="space-y-2">
+                <p className="text-xs font-serif-th font-semibold text-gold-ink">
+                  {i === 0
+                    ? isEnglish ? "Today's card for your sign" : "ไพ่วันนี้ของราศีคุณ"
+                    : isEnglish ? "This month's season card" : "ไพ่ประจำฤดูราศีเดือนนี้"}
+                </p>
+                <p className="text-base sm:text-lg font-serif-th font-bold text-ink">
+                  {"\u00a0"}
+                  {/* ชื่อฤดูราศีภาษาไทยขึ้นสองบรรทัดเมื่อกล่องแบ่งสองคอลัมน์ — เว้นที่ไว้เท่ากัน */}
+                  {i === 1 && !isEnglish && <span className="hidden sm:block">{"\u00a0"}</span>}
+                </p>
+                <p className="text-sm text-muted font-sans leading-relaxed">
+                  {isEnglish ? "Tap the card to reveal today's card." : "แตะไพ่เพื่อพลิกดูไพ่ของวันนี้ เปลี่ยนใบใหม่ทุกเที่ยงคืน"}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
   }
 
   /* ── หน้ารายราศี: ไพ่วันนี้ของราศีเดียว ── */
@@ -184,16 +237,7 @@ export function ZodiacDaily({ signs, sign }: { signs: ZodiacDailySignName[]; sig
   const seasonOpen = !!revealed.season;
   return (
     <section aria-labelledby="zodiac-daily-heading" className="space-y-5">
-      <div className="text-center space-y-1">
-        <h2 id="zodiac-daily-heading" className="text-xl sm:text-2xl font-serif-th font-bold text-ink"><ThaiPhrases>
-          {isEnglish ? "Today's card for your sign" : "ดวงรายวัน — ไพ่วันนี้ของราศีคุณ"}
-        </ThaiPhrases></h2>
-        <p className="text-xs sm:text-sm text-muted font-sans">
-          {isEnglish
-            ? "Pick a sign. Everyone in the same sign sees the same card today."
-            : "เลือกราศี ทุกคนในราศีเดียวกันเห็นไพ่ใบเดียวกันทั้งวัน เปลี่ยนใหม่ทุกเที่ยงคืน"}
-        </p>
-      </div>
+      {indexIntro}
 
       <div role="radiogroup" aria-label={isEnglish ? "Choose a sign" : "เลือกราศี"} className="grid grid-cols-6 gap-1.5 sm:flex sm:flex-wrap sm:justify-center sm:gap-2">
         {data.signs.map((c) => {

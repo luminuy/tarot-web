@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 
-import { getNextAvailableSlot, getScheduleRules } from "@/lib/marketplace/booking.repo";
+import { getNextAvailableSlots } from "@/lib/marketplace/booking.repo";
 import { readerPriceThb } from "@/lib/marketplace/offer";
 import { listLiveReaderIds } from "@/lib/marketplace/queue.repo";
-import { listPublicApprovedReaders } from "@/lib/marketplace/readers.repo";
+import { listPublicApprovedReaders, type PublicReaderProfile } from "@/lib/marketplace/readers.repo";
+import { withEdgeCache } from "@/lib/platform/edge-cache";
 
 export const runtime = "nodejs";
 
@@ -19,33 +20,45 @@ const FEATURED_MAX = 2;
  *
  * ⚠️ ข้อมูลสาธารณะเท่านั้น (ชื่อ · รูป · ความถนัด · ราคา · เวลาว่าง) — ห้ามส่งอีเมล/LINE/กุญแจแผงแม่หมอ
  * ⚠️ ห้ามมีชื่อ/ราคาสมมุติ — อ่านไม่ได้ = 503 แล้วหน้าแรกเหลือแค่ลิงก์
- * แคชที่ขอบ 2 นาที (คำตอบเหมือนกันทุกคน) — หน้าแรกยิงเส้นนี้ก็ต่อเมื่อเลื่อนมาใกล้กล่องนี้
+ * แคชที่ขอบ 2 นาทีผ่าน Cache API (`withEdgeCache` · A9-02 · คำตอบเหมือนกันทุกคน)
+ * หน้าแรกยิงเส้นนี้ก็ต่อเมื่อเลื่อนมาใกล้กล่องนี้
+ *
+ * จำนวนคำสั่ง D1 คงที่ไม่โตตามจำนวนแม่หมอ (A9-03): คนที่เปิดคิวสดได้ที่ก่อนโดยไม่ต้องคำนวณเวลานัด
+ * (หน้าแรกโชว์ป้าย "เปิดคิวสด" แทนเวลา จึงส่ง `nextSlot: null`) · ที่เหลือคำนวณเวลาว่างแบบรวมชุดเดียว
  */
-export async function GET() {
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  return withEdgeCache(request, buildFeaturedResponse, { key: `${url.origin}${url.pathname}` });
+}
+
+type FeaturedRow = { reader: PublicReaderProfile; isLive: boolean; nextSlot: number | null };
+
+async function buildFeaturedResponse(): Promise<Response> {
   try {
     const nowMs = Date.now();
     const [readers, live] = await Promise.all([listPublicApprovedReaders(), listLiveReaderIds(nowMs)]);
-    const rows = await Promise.all(
-      readers.map(async (reader) => {
-        const isLive = live.has(reader.id);
-        const hasSchedule = (await getScheduleRules(reader.id)).length > 0;
-        const nextSlot = hasSchedule ? await getNextAvailableSlot(reader.id, nowMs) : null;
-        return { reader, isLive, nextSlot };
-      }),
-    );
-    const featured = rows
-      .filter((r) => r.isLive || r.nextSlot !== null)
-      .sort((a, b) => Number(b.isLive) - Number(a.isLive) || (a.nextSlot ?? Infinity) - (b.nextSlot ?? Infinity))
+    const rows: FeaturedRow[] = readers
+      .filter((reader) => live.has(reader.id))
       .slice(0, FEATURED_MAX)
-      .map(({ reader, isLive, nextSlot }) => ({
-        id: reader.id,
-        name: reader.displayName,
-        avatarUrl: reader.avatarUrl,
-        specialties: reader.specialties.slice(0, 3),
-        priceThb: readerPriceThb(reader),
-        live: isLive,
-        nextSlot,
-      }));
+      .map((reader) => ({ reader, isLive: true, nextSlot: null }));
+    if (rows.length < FEATURED_MAX) {
+      const others = readers.filter((reader) => !live.has(reader.id));
+      const nextSlots = await getNextAvailableSlots(others.map((reader) => reader.id), nowMs);
+      const soonest = others
+        .map((reader) => ({ reader, isLive: false, nextSlot: nextSlots.get(reader.id) ?? null }))
+        .filter((r): r is FeaturedRow & { nextSlot: number } => r.nextSlot !== null)
+        .sort((a, b) => a.nextSlot - b.nextSlot);
+      rows.push(...soonest.slice(0, FEATURED_MAX - rows.length));
+    }
+    const featured = rows.map(({ reader, isLive, nextSlot }) => ({
+      id: reader.id,
+      name: reader.displayName,
+      avatarUrl: reader.avatarUrl,
+      specialties: reader.specialties.slice(0, 3),
+      priceThb: readerPriceThb(reader),
+      live: isLive,
+      nextSlot,
+    }));
     return NextResponse.json(
       { readers: featured },
       {

@@ -13,6 +13,10 @@ import { ZODIAC_ASPECTS, zodiacDistance } from "../../src/data/zodiac-compat";
 import { computeZodiacDaily } from "../../src/lib/tarot/zodiac-daily";
 import { CARD_SUMMARIES } from "../../src/data/cards/summary";
 import { decanRanges, findThaiZodiacByDate, findZodiacByDate, thaiRanges } from "../../src/lib/tarot/zodiac";
+import { DECK } from "../../src/data/cards";
+import { buildYesNoAnswer } from "../../src/data/cards/yes-no";
+import { cardDetailFaqJsonLd } from "../../src/app/_shared/pages/card-detail";
+import { cardYesNoQuestion } from "../../src/lib/seo/faq";
 
 console.log("\n🧪 กำลังทดสอบระบบ SEO Wave 4: Differentiators (Birth Card, Positions Table, Learn Tarot & Readers)\n");
 
@@ -520,6 +524,36 @@ assert(
   assert(articlesWithToc >= ARTICLES.length, `สารบัญบทความต้องมีรายการลิงก์ได้อย่างน้อยหนึ่งรายการต่อบทความ (พบ ${articlesWithToc} จาก ${ARTICLES.length * 2} หน้า)`);
   assert(deadLinks === 0, "สารบัญบทความ: ทุกลิงก์ #id ต้องมี <h2 id> รองรับ");
   assert(dupIds === 0, "สารบัญบทความ: id ของหัวข้อในบทความเดียวกันต้องไม่ซ้ำ");
+}
+
+// ── FAQPage ตรงกับข้อความบนหน้า (A7-10) ──
+{
+  // หน้าผัง: หน้าเซิร์ฟเวอร์และ island ใช้ตัวสร้าง FAQ ตัวเดียว ห้ามมีชุดคำถามเขียนเองในไฟล์
+  const page = fs.readFileSync(path.join(process.cwd(), "src/app/_shared/pages/spread-detail.tsx"), "utf8");
+  const island = fs.readFileSync(path.join(process.cwd(), "src/components/spread/SpreadDetailClient.tsx"), "utf8");
+  assert(
+    [page, island].every((src) => src.includes("buildSpreadFaqs(spread, isEnglish, standard)") && !/\bquestion:\s*[`"]/.test(src)),
+    "FAQ หน้าผัง: spread-detail.tsx และ SpreadDetailClient.tsx ใช้ buildSpreadFaqs ตัวเดียว (ไม่มีชุดคำถามซ้ำในไฟล์)",
+  );
+  // หน้าไพ่: FAQPage มีเฉพาะคำถามที่เป็นหัวข้อบนหน้า (h2 ของ CardYesNoAnswer) และคำตอบคือข้อความที่แสดงจริง
+  const yesNoView = fs.readFileSync(path.join(process.cwd(), "src/components/encyclopedia/CardYesNoAnswer.tsx"), "utf8");
+  let mismatched = 0;
+  for (const card of DECK) {
+    for (const locale of ["th", "en"] as const) {
+      const isEnglish = locale === "en";
+      const ld = cardDetailFaqJsonLd(card, locale);
+      const qs = ld.mainEntity;
+      if (
+        qs.length !== 1 ||
+        qs[0].name !== cardYesNoQuestion(card, isEnglish) ||
+        qs[0].acceptedAnswer.text !== buildYesNoAnswer(card, true, isEnglish).body
+      ) mismatched += 1;
+    }
+  }
+  assert(
+    mismatched === 0 && yesNoView.includes("{cardYesNoQuestion(card, isEnglish)}"),
+    `FAQ หน้าไพ่: คำถามใน FAQPage ต้องเป็นหัวข้อ "ใช่หรือไม่" ที่แสดงบนหน้าเท่านั้น (ไม่ตรง ${mismatched} หน้า)`,
+  );
 }
 
 console.log(`\n📊 ผลสรุปการทดสอบ: ผ่าน ${passed} ด่าน | ล้มเหลว ${failed} ด่าน\n`);

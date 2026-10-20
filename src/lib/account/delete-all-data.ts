@@ -23,7 +23,7 @@ const CONFIRM_EN =
   "Confirm permanent deletion of all data?\n\nThis action will delete:\n- All reading history (both local and cloud)\n- User account details and personal reflection notes\n- All preferences and settings\n\nThis action cannot be undone.";
 
 /** ข้อความยืนยันก่อนลบ — แยกออกมาให้ทั้งสองปลายทางถามคำถามเดียวกันเป๊ะ */
-export function deleteAllDataConfirmMessage(isEn: boolean): string {
+function deleteAllDataConfirmMessage(isEn: boolean): string {
   return isEn ? CONFIRM_EN : CONFIRM_TH;
 }
 

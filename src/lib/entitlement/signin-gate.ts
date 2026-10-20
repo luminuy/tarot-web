@@ -30,7 +30,7 @@ export function isSignInRequired(viewer: SignInGateViewer): boolean {
 export const SIGN_IN_GATE_REASON = GUEST_BLOCK_REASON;
 
 /** ข้อความสำหรับด่านเปิดไพ่ */
-export const SIGN_IN_GATE_MESSAGE = `สมัครสมาชิกฟรีหรือเข้าสู่ระบบก่อนเปิดไพ่ แล้วดูดวงได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง`;
+const SIGN_IN_GATE_MESSAGE = `สมัครสมาชิกฟรีหรือเข้าสู่ระบบก่อนเปิดไพ่ แล้วดูดวงได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง`;
 
 export function getSignInGateMessage(lang?: "th" | "en"): string {
   return lang === "en"
@@ -39,7 +39,7 @@ export function getSignInGateMessage(lang?: "th" | "en"): string {
 }
 
 /** ข้อความสำหรับด่านคุยต่อกับแม่หมอ (สมาชิกเท่านั้นมาแต่ไหนแต่ไร) */
-export const MEMBERS_ONLY_CHAT_MESSAGE =
+const MEMBERS_ONLY_CHAT_MESSAGE =
   "สมัครสมาชิกเพื่อถามแม่หมอต่อ และเก็บดวงไว้ดูย้อนหลังได้ทุกเครื่อง";
 
 export function getMembersOnlyChatMessage(lang?: "th" | "en"): string {

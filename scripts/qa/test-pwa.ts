@@ -1,4 +1,5 @@
 import { readFileSync, existsSync } from "node:fs";
+import { runInNewContext } from "node:vm";
 import manifest from "@/app/manifest";
 import { b64urlDecode, b64urlEncode, encryptPayload, isAllowedPushEndpoint, vapidJwt } from "@/lib/push/webpush";
 import { encyclopediaPaths, goodNetworkForPrefetch, shouldOfferInstall } from "@/lib/pwa/pwa-client";
@@ -89,6 +90,35 @@ async function main() {
   check("SW มี push + notificationclick", /addEventListener\("push"/.test(sw) && /addEventListener\("notificationclick"/.test(sw));
   check("SW กันลิงก์แจ้งเตือนพาออกนอกเว็บ", /msg\.url\.startsWith\("\/"\) && !msg\.url\.startsWith\("\/\/"\)/.test(sw));
   check("SW ยัง network-only กับ /api/", /url\.pathname\.startsWith\("\/api\/"\)/.test(sw));
+
+  // ── กดแจ้งเตือน: ไม่ยึดแท็บที่ใช้อยู่ (A5-04) — รัน handler จริงของ sw.js ในกล่องจำลอง ──
+  const clickSw = async (tabs: string[], dataUrl: string, focusFails = false) => {
+    const handlers: Record<string, (e: unknown) => void> = {};
+    const log = { navigated: 0, focused: [] as string[], opened: [] as string[] };
+    const wins = tabs.map((u) => ({
+      url: u,
+      focus: () => (focusFails ? Promise.reject(new Error("x")) : (log.focused.push(u), Promise.resolve())),
+      navigate: () => (log.navigated++, Promise.resolve(null)),
+    }));
+    const self = {
+      location: new URL("https://seertarot.net/sw.js"),
+      addEventListener: (t: string, fn: (e: unknown) => void) => (handlers[t] = fn),
+      clients: { matchAll: async () => wins, openWindow: async (u: string) => (log.opened.push(u), null) },
+      registration: {},
+      skipWaiting: () => undefined,
+    };
+    runInNewContext(sw, { self, URL, caches: {}, fetch: () => Promise.reject(new Error("offline")), console, Promise, setTimeout });
+    let job: Promise<unknown> = Promise.resolve();
+    handlers.notificationclick?.({ notification: { close: () => undefined, data: { url: dataUrl } }, waitUntil: (p: Promise<unknown>) => (job = p) });
+    await job;
+    return log;
+  };
+  const busy = await clickSw(["https://seertarot.net/reading/chat"], "/daily?utm_source=push");
+  check("กดแจ้งเตือนไม่ยึดแท็บที่ใช้อยู่ (เปิดแท็บใหม่)", busy.navigated === 0 && busy.focused.length === 0 && busy.opened[0] === "https://seertarot.net/daily?utm_source=push");
+  const same = await clickSw(["https://seertarot.net/reading/chat", "https://seertarot.net/daily"], "/daily?utm_source=push");
+  check("มีแท็บหน้าปลายทางอยู่แล้ว ➔ โฟกัสแท็บนั้นอย่างเดียว", same.navigated === 0 && same.focused[0] === "https://seertarot.net/daily" && same.opened.length === 0);
+  const failed = await clickSw(["https://seertarot.net/daily"], "/daily", true);
+  check("โฟกัสไม่ได้ ➔ เปิดแท็บใหม่แทน (ไม่เงียบ)", failed.opened.length === 1);
 
   // ── manifest ──
   const m = manifest();

@@ -60,7 +60,7 @@ function timingSafeEqualBytes(a: Uint8Array, b: Uint8Array): boolean {
  * ผู้ใช้เห็นข้อความ "อีเมลหรือรหัสผ่านไม่ถูกต้อง" ทั้งที่รหัสผ่านถูกทุกตัวอักษร
  * เจ้าของระบบไล่หาสาเหตุไม่เจอเพราะหน้าเว็บโทษรหัสผ่านของผู้ใช้แทนที่จะบอกว่าตัวเองตั้งค่าไม่ครบ
  */
-export class PasswordConfigError extends Error {
+class PasswordConfigError extends Error {
   readonly isConfigError = true;
   constructor(message: string) {
     super(message);

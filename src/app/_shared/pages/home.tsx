@@ -50,7 +50,7 @@ export function buildHomeMetadata(locale: Locale): Metadata {
   };
 }
 
-export function buildWebAppJsonLd(locale: Locale) {
+function buildWebAppJsonLd(locale: Locale) {
   const isEnglish = locale === "en";
   return {
     "@context": "https://schema.org",

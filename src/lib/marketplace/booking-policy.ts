@@ -19,7 +19,7 @@ const DAY = 24 * HOUR;
 /** ความยาวหนึ่งนัด = ความยาวการปรึกษา */
 export const SLOT_MINUTES = CONSULTATION_MINUTES;
 /** จองได้ล่วงหน้าอย่างน้อยกี่ชั่วโมง (แม่หมอต้องมีเวลาอ่านบรีฟ) — ค่าเริ่มต้นของแม่หมอที่ยังไม่ได้ตั้งเอง */
-export const BOOKING_LEAD_HOURS = 2;
+const BOOKING_LEAD_HOURS = 2;
 /** ค่าเริ่มต้นของ "รับนัดล่วงหน้าอย่างน้อย" (นาที) — เจ้าของเคาะ 2 ชม. ไว้ 2026-10-03 */
 export const DEFAULT_LEAD_MIN = BOOKING_LEAD_HOURS * 60;
 /**
@@ -52,7 +52,7 @@ export const MAX_RESCHEDULES = 1;
  */
 export const PAID_GRACE_MINUTES = 10;
 /** ช่วงผ่อนผันใช้ได้เฉพาะนัดที่ยังห่างอย่างน้อยกี่นาที — ใกล้กว่านี้แม่หมอเตรียมรับลูกค้าแล้ว */
-export const PAID_GRACE_MIN_LEAD_MINUTES = 60;
+const PAID_GRACE_MIN_LEAD_MINUTES = 60;
 /**
  * คิวสด "เปิดจริง" ต้องเห็นแผงแม่หมอภายในกี่นาที (migrations/0031 · แผน CONSULT_FLOW ข้อ 3.2)
  * ลืมปิดสวิตช์แล้วล็อกจอ/ปิดหน้า ➔ เกินนี้ระบบถือว่าปิดคิวสดเอง ลูกค้าไม่จ่ายแล้วรอเก้อ · เปิดแผงกลับมา = เปิดต่อเอง
@@ -417,7 +417,7 @@ export function formatMinutes(min: number): string {
 }
 
 /** "ศุกร์ 10 ต.ค." */
-export function formatDayLabel(ms: number): string {
+function formatDayLabel(ms: number): string {
   const p = bkkParts(ms);
   return `${TH_WEEKDAY[p.weekday]} ${p.day} ${TH_MONTH_SHORT[p.month]}`;
 }

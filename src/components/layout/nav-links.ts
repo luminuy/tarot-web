@@ -13,18 +13,7 @@ export interface NavLinkItem {
   href: string;
 }
 
-export interface FooterColumn {
-  title: string;
-  links?: readonly NavLinkItem[];
-  specialItems?: readonly {
-    title: string;
-    description: string;
-    href?: string;
-    badgeColor?: string;
-  }[];
-}
-
-export const FOOTER_COLUMNS = [
+const FOOTER_COLUMNS = [
   {
     title: "ผังการเปิดไพ่",
     links: [

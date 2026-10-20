@@ -10,7 +10,9 @@
  * ตอนเพดานโควตาเปลี่ยนจาก 3 เป็น 1 — เทสต์ที่ CI ไม่รัน มีค่าเท่ากับไม่มี
  */
 
-import { pathToFileURL } from "node:url";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import {
   getRedeemCodeInfo,
@@ -37,6 +39,29 @@ import { getAppDB } from "../../src/lib/platform/db";
 type AppDB = Awaited<ReturnType<typeof getAppDB>>;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+
+/** รหัสที่เคยอยู่ในไฟล์ migration ของรีโปสาธารณะ — ถือว่าเปิดเผยแล้ว ต้องใช้งานไม่ได้ (A10-01) */
+const SEEDED_REPO_CODES = ["VIP3-TAROT-2026", "SEER3PASS"] as const;
+
+/** ไล่หาสตริงรหัสในไฟล์ซอร์สของหน้าเว็บ — คืนรายการ path ที่เจอ */
+function scanForCodes(dirs: string[], codes: readonly string[]): string[] {
+  const found: string[] = [];
+  const walk = (dir: string) => {
+    if (!fs.existsSync(dir)) return;
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const abs = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (entry.name !== "node_modules") walk(abs);
+      } else if (/\.(tsx?|astro|js|html|json)$/.test(entry.name)) {
+        const text = fs.readFileSync(abs, "utf8").toUpperCase();
+        if (codes.some((c) => text.includes(c))) found.push(path.relative(ROOT, abs));
+      }
+    }
+  };
+  for (const d of dirs) walk(path.join(ROOT, d));
+  return found;
+}
 
 async function makeUser(db: AppDB, id: string): Promise<void> {
   await db
@@ -103,14 +128,32 @@ export async function runRedeemTests(): Promise<{ passed: number; total: number 
   const stamp = Date.now();
 
   // ── 1. อ่านข้อมูลรหัส + ชนิดของรหัส ──
-  const defaultCode = await getRedeemCodeInfo("VIP3-TAROT-2026");
-  assert(defaultCode !== null, "พบรหัสเริ่มต้น 'VIP3-TAROT-2026' ในฐานข้อมูล");
-  assert(defaultCode?.credits === 3, "รหัสเริ่มต้นมีโควตา 3 เครดิต");
-  assert(defaultCode?.isActive === true, "รหัสเริ่มต้นมีสถานะใช้งานได้ (is_active = 1)");
-  assert(defaultCode?.kind === "premium", "รหัสเริ่มต้นเป็นชนิด premium (purchase_*)");
-  // ช่องโหว่ที่ปิดไปแล้ว: รหัสที่ seed ไว้ในรีโปต้องไม่ใช่ "ใครก็แลกได้ไม่จำกัดคน"
-  assert(defaultCode?.maxUses !== -1, "รหัสที่ seed ไว้ในรีโปต้องมีเพดานจำนวนคน (ไม่ใช่ -1)");
-  assert(defaultCode?.expiresAt !== null, "รหัสที่ seed ไว้ในรีโปต้องมีวันหมดอายุ");
+  // รหัสที่เคย seed ไว้ในรีโปสาธารณะ (migrations/0012) ต้องปิดใช้งานแล้วทุกตัว (migrations/0034 · A10-01)
+  const premiumUser = `usr_test_redeem_${stamp}`;
+  await makeUser(db, premiumUser);
+  for (const seeded of SEEDED_REPO_CODES) {
+    const info = await getRedeemCodeInfo(seeded);
+    assert(info === null || info.isActive === false, `รหัสที่อยู่ในรีโป '${seeded}' ต้องปิดใช้งาน (is_active = 0)`);
+    const res = await redeemCodeForUser(premiumUser, seeded);
+    assert(res.ok === false, `แลกรหัสที่อยู่ในรีโป '${seeded}' ไม่ได้`);
+  }
+  const migration0034 = fs.readFileSync(path.join(ROOT, "migrations/0034_retire_seeded_redeem_codes.sql"), "utf8");
+  assert(
+    SEEDED_REPO_CODES.every((c) => migration0034.includes(`'${c}'`)) && /SET\s+is_active\s*=\s*0/i.test(migration0034),
+    "migrations/0034 ปิดรหัสที่ seed ไว้ครบทุกตัวบน production",
+  );
+  // รหัสที่อยู่ในไฟล์ migration ห้ามโผล่ในหน้าเว็บ (เช่นเป็นตัวอย่างในช่องกรอก)
+  const leaked = scanForCodes(["src/components", "src/app", "astro", "public"], SEEDED_REPO_CODES);
+  assert(leaked.length === 0, `รหัสที่อยู่ในรีโปไม่โผล่ในโค้ดหน้าเว็บ${leaked.length ? ` (เจอที่ ${leaked.join(", ")})` : ""}`);
+
+  // รหัส premium ของชุดทดสอบเอง (สร้างแล้วลบทิ้งท้ายข้อ 4)
+  const premiumCode = `PREMIUM-QA-${stamp}`;
+  await makeCode(db, { code: premiumCode, prefix: PREMIUM_REASON_PREFIX, credits: 3, maxUses: 50, expiresAt: Date.now() + DAY_MS });
+  const defaultCode = await getRedeemCodeInfo(premiumCode);
+  assert(defaultCode !== null, "พบรหัส premium ของชุดทดสอบในฐานข้อมูล");
+  assert(defaultCode?.credits === 3, "รหัส premium มีโควตา 3 เครดิต");
+  assert(defaultCode?.isActive === true, "รหัส premium มีสถานะใช้งานได้ (is_active = 1)");
+  assert(defaultCode?.kind === "premium", "รหัส premium เป็นชนิด premium (purchase_*)");
 
   assert((await getRedeemCodeInfo("NON_EXISTENT_CODE")) === null, "รหัสที่ไม่มีอยู่จริงคืนค่า null");
 
@@ -127,13 +170,10 @@ export async function runRedeemTests(): Promise<{ passed: number; total: number 
   );
 
   // ── 3. แลกรหัส premium: ได้รอบ + ปลดสิทธิ์พรีเมียม ──
-  const premiumUser = `usr_test_redeem_${stamp}`;
-  await makeUser(db, premiumUser);
-
   const entBefore = await getEntitlement({ kind: "member", userId: premiumUser });
   assert(entBefore.hasPaidCredits === false, "ก่อนแลกรหัส: ยังไม่มีสิทธิ์พรีเมียม");
 
-  const redeemRes = await redeemCodeForUser(premiumUser, "vip3-tarot-2026"); // ตัวพิมพ์เล็ก
+  const redeemRes = await redeemCodeForUser(premiumUser, premiumCode.toLowerCase()); // ตัวพิมพ์เล็ก
   assert(redeemRes.ok === true, "แลกรับสิทธิ์สำเร็จด้วยตัวพิมพ์เล็ก (case-insensitive)");
   if (redeemRes.ok) {
     assert(redeemRes.credits === 3, "ได้รับสิทธิ์ 3 ครั้งถูกต้อง");
@@ -144,7 +184,7 @@ export async function runRedeemTests(): Promise<{ passed: number; total: number 
   assert(entAfter.hasPaidCredits === true, "หลังแลกรหัส VIP: ปลดล็อกสิทธิ์พรีเมียมสำเร็จ");
   assert(entAfter.bonusRemaining === 3, "หลังแลกรหัส: ได้รับโควตาโบนัส 3 ครั้ง");
 
-  const duplicateRes = await redeemCodeForUser(premiumUser, "VIP3-TAROT-2026");
+  const duplicateRes = await redeemCodeForUser(premiumUser, premiumCode);
   assert(duplicateRes.ok === false, "ป้องกันการแลกซ้ำสำเร็จ");
   if (!duplicateRes.ok) {
     assert(duplicateRes.error.includes("เคยใช้"), "ข้อความ error ระบุว่าเคยใช้รหัสนี้ไปแล้ว");
@@ -172,7 +212,7 @@ export async function runRedeemTests(): Promise<{ passed: number; total: number 
   }
 
   await dropUser(db, premiumUser);
-  await db.prepare(`UPDATE redeem_codes SET used_count = 0 WHERE code = 'VIP3-TAROT-2026'`).run();
+  await dropCode(db, premiumCode);
 
   // ── 5. รหัสแจก (gift) ต้องไม่ปลดฟีเจอร์พรีเมียม ──
   const giftCode = `GIFT-QA-${stamp}`;

@@ -128,7 +128,7 @@ const DAILY_LINKS = [
 ];
 
 /** ไพ่ตกแต่งรอบหัวหน้า (ภาพประกอบ ไม่ใช่ผลสุ่ม) — ไพ่ของแสงเช้า */
-export const DAILY_DECO_CARDS = ["major-19", "major-17", "major-01", "major-14", "major-21", "major-03"] as const;
+const DAILY_DECO_CARDS = ["major-19", "major-17", "major-01", "major-14", "major-21", "major-03"] as const;
 
 /** `ritual` = พิธีเปิดไพ่ (island ตัวเดียวของหน้านี้) ส่งเข้ามาจากข้างนอก */
 export function DailyBodyTh({ ritual }: { ritual: ReactNode }) {

@@ -15,7 +15,7 @@ const DEFAULT_DAILY_CAP = 2000;
 /** ผู้เยี่ยมชมถูกตัดที่สัดส่วนนี้ของเพดาน สมาชิกใช้ได้ถึง 100% (ENTITLEMENT_PLAN ข้อ 6) */
 const GUEST_CAP_RATIO = 0.7;
 
-export function getAiDailyCap(): number {
+function getAiDailyCap(): number {
   const n = Number(process.env.AI_DAILY_CALL_CAP);
   return Number.isFinite(n) && n > 0 ? n : DEFAULT_DAILY_CAP;
 }

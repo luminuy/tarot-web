@@ -63,7 +63,7 @@ export async function signAdminSession(): Promise<string> {
 }
 
 /** อ่าน `sid` ออกจากคุกกี้โดยไม่ตรวจลายเซ็น — ใช้ตอนออกจากระบบเท่านั้น */
-export function readAdminSessionId(token: string | undefined | null): string | undefined {
+function readAdminSessionId(token: string | undefined | null): string | undefined {
   if (!token) return undefined;
   const dot = token.lastIndexOf(".");
   if (dot === -1) return undefined;

@@ -25,11 +25,11 @@ const ROLE_COLUMNS = {
 } as const;
 
 /** อีกฝ่ายถือว่า "อยู่ในห้อง" ถ้ายังถามสถานะมาภายในช่วงนี้ */
-export const CALL_PRESENCE_WINDOW_MS = 15_000;
+const CALL_PRESENCE_WINDOW_MS = 15_000;
 /** ไม่เขียนเวลาล่าสุดถี่กว่านี้ — ฝั่งเบราว์เซอร์ถามทุก 1.5–4 วินาที */
 const PRESENCE_WRITE_EVERY_MS = 8_000;
 /** SDP ของเสียง+ภาพหนึ่งชุดราว 3–8 KB — เผื่อไว้แต่ไม่ให้ใช้ D1 เป็นที่ฝากของ */
-export const MAX_SDP_LENGTH = 32_000;
+const MAX_SDP_LENGTH = 32_000;
 
 interface RawCallRow {
   ticket_id: string;

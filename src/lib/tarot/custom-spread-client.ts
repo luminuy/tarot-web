@@ -24,7 +24,7 @@ export interface MyCustomSpread extends CustomSpreadInput {
   local: boolean;
 }
 
-export const LOCAL_CUSTOM_SPREADS_MAX = 10;
+const LOCAL_CUSTOM_SPREADS_MAX = 10;
 
 function pick(input: CustomSpreadInput): CustomSpreadInput {
   return { name: input.name, layout: input.layout, positions: input.positions };
@@ -108,7 +108,7 @@ const toMine = (s: Remote): MyCustomSpread => ({ ...s, local: false });
  * `null` = ยังไม่ได้ล็อกอิน (ให้ใช้ผังในเครื่องแทน)
  * ผู้ชมที่ไม่มีคุกกี้ใบ้ไม่มีบัญชีให้ถาม ➔ คืน `null` เลยโดยไม่ยิง `/api/*` (กฎ INC-0104 · ผู้ชมไม่ล็อกอิน = 0 เส้น)
  */
-export async function fetchMySpreads(): Promise<MyCustomSpread[] | null> {
+async function fetchMySpreads(): Promise<MyCustomSpread[] | null> {
   if (isKnownAnonymous()) return null;
   try {
     const res = await fetch("/api/spreads/custom", { cache: "no-store" });

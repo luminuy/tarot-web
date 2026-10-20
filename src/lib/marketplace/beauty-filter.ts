@@ -21,7 +21,7 @@
 
 export type BeautyLevel = "off" | "natural" | "smooth" | "glow";
 
-export const BEAUTY_LEVELS: readonly BeautyLevel[] = ["off", "natural", "smooth", "glow"];
+const BEAUTY_LEVELS: readonly BeautyLevel[] = ["off", "natural", "smooth", "glow"];
 
 export function isBeautyLevel(value: unknown): value is BeautyLevel {
   return typeof value === "string" && (BEAUTY_LEVELS as readonly string[]).includes(value);
@@ -39,7 +39,7 @@ interface BeautyParams {
 }
 
 /** ค่าที่ใช้จริงของแต่ละระดับ — ปรับให้ "ยังดูเป็นคนจริง" แม้ระดับสูงสุด */
-export const BEAUTY_PRESETS: Record<Exclude<BeautyLevel, "off">, BeautyParams> = {
+const BEAUTY_PRESETS: Record<Exclude<BeautyLevel, "off">, BeautyParams> = {
   natural: { smooth: 0.55, brighten: 0.035, warm: 0.008, rosy: 0.35 },
   smooth: { smooth: 0.85, brighten: 0.06, warm: 0.014, rosy: 0.55 },
   glow: { smooth: 1, brighten: 0.1, warm: 0.02, rosy: 0.75 },

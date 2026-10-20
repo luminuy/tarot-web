@@ -24,7 +24,7 @@ const LAYOUT_IDS = ["row", "arc", "pyramid", "diamond", "grid", "cross", "rows"]
 
 const text = (max: number) => z.string().max(max * 2);
 
-export const CustomSpreadInputSchema = z.object({
+const CustomSpreadInputSchema = z.object({
   name: text(CUSTOM_NAME_MAX),
   layout: z.enum(LAYOUT_IDS),
   positions: z

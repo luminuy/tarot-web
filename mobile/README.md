@@ -45,7 +45,8 @@ CI: `.github/workflows/mobile.yml` (typecheck · jest · expo-doctor) รัน�
 ## ยังไม่ทำ (รอบัญชี Apple Developer / เจ้าของ)
 
 - Sign in with Apple (บังคับข้อ 4.8 ของ Apple ก่อนส่งตรวจ) · App Attest · ล็อกอิน Google/LINE
-- ล็อกอินอีเมลจากแอปยังผ่านไม่ได้เมื่อหลังบ้านเปิด Turnstile (แอปไม่มี widget) — ต้องรอ App Attest แทน
+- ล็อกอินอีเมลจากแอป: ด่าน Origin (`isRequestAuthorizedOrigin`) รับคำขอ `X-Client: ios` ที่ไม่มี Bearer เฉพาะ `POST /api/auth/email/login` (และต้องไม่มีหัวของเบราว์เซอร์) — ด่านถัดไปคือ Turnstile: เมื่อหลังบ้านตั้ง `TURNSTILE_SECRET_KEY` ไว้ แอปซึ่งไม่มี widget จะได้ 403 "ไม่ใช่การใช้งานจากคนจริง" จนกว่า App Attest (แผน 4.2) จะพร้อม · ด่าน Origin ไม่ใช่ด่านกันบอท ห้ามขยายรายการเส้นทางนี้ไปเส้นที่เรียกโมเดลหรือใช้เงิน
+- เปิดไพ่จากแอปต้องล็อกอินก่อน (ส่ง Bearer) — ผู้เยี่ยมชมที่ยังไม่ล็อกอินโดนด่าน Origin ตอบ 403 ตั้งแต่ `/api/reading/start` แอปจึงนับ 403 ตอนไม่มีโทเคนเป็น "ต้องเข้าสู่ระบบ" (`isSignInReason` ใน `lib/useReadingFlow.ts`) และขึ้นปุ่มเข้าสู่ระบบแทนข้อความดิบ
 - IAP ซื้อเครดิต · Push · Widget · Universal Links
 - ไอคอนแอป / splash (`app.json` ยังไม่ตั้ง `icon`) · ภาพหน้าร้าน · Bundle ID ยืนยัน `net.seertarot.app`
 - ⚠️ ออกจากระบบในแอปล้างแค่ Keychain — โทเคนฝั่งเซิร์ฟเวอร์ยังใช้ได้จนหมดอายุ 30 วัน (เว็บก็เป็นแบบเดียวกัน) ก่อนขึ้น App Store ควรมีทางเพิกถอนโทเคนของเครื่องเดียว

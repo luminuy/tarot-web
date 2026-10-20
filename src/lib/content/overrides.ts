@@ -14,8 +14,8 @@ import { KEY, kvGetJSON } from "@/lib/platform/kv-store";
  *    เพราะ cardIndex คือ load-bearing (ดู src/data/cards/index.ts) และ gate 3/6 ตรวจ DECK static
  */
 
-export const CATEGORIES: Category[] = ["general", "love", "work", "money", "self"];
-export const YESNO_VALUES: YesNo[] = ["yes", "no", "maybe"];
+const CATEGORIES: Category[] = ["general", "love", "work", "money", "self"];
+const YESNO_VALUES: YesNo[] = ["yes", "no", "maybe"];
 
 export interface CardOverride {
   meanings?: Partial<Record<Category, Partial<Interpretation>>>;
