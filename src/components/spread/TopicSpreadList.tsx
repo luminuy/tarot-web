@@ -6,6 +6,7 @@ import { mapLayout, MAP_CARD_ASPECT } from "@/lib/tarot/spread-map-geometry";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { CardImage } from "@/components/card/CardImage";
+import { TOPIC_DECK } from "@/data/spread-topic-deck";
 
 interface TopicSpreadListProps {
   spreads: Spread[];
@@ -13,18 +14,7 @@ interface TopicSpreadListProps {
   topic: string;
 }
 
-/*
- * ภาพย่อผังใช้ภาพไพ่ 1909 จริง (เจ้าของ 2026-10-20 "ทำไมไม่ใช่รูปไพ่จริง" — เดิมเป็นกรอบสี่เหลี่ยมว่าง)
- * ⚠️ เป็นภาพประดับตามหมวด ไม่ใช่ผลสุ่มหรือคำทำนาย (กฎเหล็ก 14) · ใบละไม่ซ้ำในผังเดียว (ชุดละ ≥ 7 ใบ > ผังใหญ่สุดของหมวด 6 ใบ)
- */
-const TOPIC_DECK: Record<string, string[]> = {
-  love: ["major-06", "cups-02", "cups-10", "major-03", "major-17", "cups-01", "major-19"],
-  career: ["major-07", "wands-03", "pentacles-08", "major-01", "wands-06", "pentacles-03", "major-21"],
-  money: ["pentacles-01", "pentacles-10", "major-10", "pentacles-07", "major-19", "pentacles-09", "wands-06"],
-  health: ["major-14", "major-17", "major-19", "cups-04", "major-11", "wands-04", "major-21"],
-  family: ["cups-10", "pentacles-10", "major-03", "wands-04", "cups-06", "major-04", "major-19"],
-  study: ["pentacles-08", "major-02", "major-05", "swords-01", "pentacles-03", "major-01", "major-17"],
-};
+/* ภาพย่อผังใช้ภาพไพ่ 1909 จริงตามหมวด (เจ้าของ 2026-10-20 "ทำไมไม่ใช่รูปไพ่จริง" — เดิมเป็นกรอบสี่เหลี่ยมว่าง) · ชุดไพ่ดู `TOPIC_DECK` */
 
 /**
  * 📐 การ์ดผังพยากรณ์ในหน้าหมวดชีวิต — **ไม่ต้อง hydrate** (2026-09-18)
