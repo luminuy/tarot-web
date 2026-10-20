@@ -6,7 +6,8 @@ run-name: "🩺 Uptime ${{ github.event_name == 'workflow_dispatch' && format('(
 # ทุก 10 นาทียิง 4 จุด แต่ละจุดลองซ้ำได้ 3 ครั้ง (ห่าง 20 วินาที) ก่อนนับว่าล่ม
 #   1. หน้าแรก `/`                    — หน้า Astro (ไฟล์นิ่ง)
 #   2. `/readers`                     — หน้าที่ Worker เรนเดอร์ (ล่มพร้อม /api ใน INC-0285)
-#   3. `/api/admin/session`           — API ของ Next ต้องตอบ JSON ที่มี "configured"
+#   3. `POST /api/cron/daily-digest`  — API ของ Next ไม่แนบ Bearer ต้องได้ 401/403 (route fail-closed ตอบจากโค้ดจริง · ไม่ส่งอีเมล)
+#      ใช้เส้น cron เพราะ `/api/*` อื่นบน workers.dev ถูกส่งกลับโดเมนหลักแล้ว (A10-07 · #706) · แบบเดียวกับ worker-smoke.sh
 #   4. โดเมนหลัก seertarot.net        — DNS · โซน · ใบรับรอง (200 หรือ 403 หน้า challenge ถือว่าขอบยังอยู่)
 #
 # ⚠️ จุด 1–3 ยิงเข้า `*.workers.dev` ไม่ใช่ `seertarot.net` — เจตนา (ดู daily-digest.yml)
@@ -44,11 +45,11 @@ jobs:
           UA="SeerTarot-Uptime/1.0"
           FAILS=""
 
-          # $1 ชื่อ · $2 URL · $3 รหัสที่ยอมรับ (regex) · $4 ข้อความที่ต้องมีในเนื้อหา (ว่าง = ไม่ตรวจ)
+          # $1 ชื่อ · $2 URL · $3 รหัสที่ยอมรับ (regex) · $4 ข้อความที่ต้องมีในเนื้อหา (ว่าง = ไม่ตรวจ) · $5 เมทอด (ค่าเริ่ม GET)
           check() {
-            local name="$1" url="$2" ok="$3" must="$4" code="" i
+            local name="$1" url="$2" ok="$3" must="$4" method="${5:-GET}" code="" i
             for i in 1 2 3; do
-              code=$(curl -sS -o body.txt -w "%{http_code}" -A "$UA" --max-time 25 "$url" 2>/dev/null || echo "000")
+              code=$(curl -sS -o body.txt -w "%{http_code}" -X "$method" -A "$UA" --max-time 25 "$url" 2>/dev/null || echo "000")
               if [[ "$code" =~ ^($ok)$ ]] && { [ -z "$must" ] || grep -q "$must" body.txt; }; then
                 echo "ปกติ  $name ($code)"
                 return 0
@@ -61,7 +62,7 @@ jobs:
 
           check "หน้าแรก" "$WORKER/" "200" ""
           check "หน้ารวมแม่หมอ (Worker เรนเดอร์)" "$WORKER/readers" "200" ""
-          check "API (Next)" "$WORKER/api/admin/session" "200" '"configured"'
+          check "API (Next · ไม่มีรหัสต้องถูกปฏิเสธ)" "$WORKER/api/cron/daily-digest" "401|403" "" "POST"
           check "โดเมนหลัก seertarot.net" "https://seertarot.net/" "200|403" ""
 
           {
