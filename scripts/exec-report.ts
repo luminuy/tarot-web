@@ -11,7 +11,7 @@
  *
  * ต้องมี env:
  *   ADMIN_REPORT_TOKEN       รหัสอ่านรายงาน (ตัวเดียวกับ secret บน Cloudflare · ยาว ≥ 32 ตัว)
- *   EXEC_REPORT_BASE_URL     (ไม่บังคับ) ค่าเริ่ม https://tarot-web.bankjack10452.workers.dev (ดู DEFAULT_BASE) — ใช้ http://localhost:3000 ตอนทดสอบในเครื่อง
+ *   EXEC_REPORT_BASE_URL     (ไม่บังคับ) ค่าเริ่ม https://seertarot.net (ดู DEFAULT_BASE) — ใช้ http://localhost:3000 ตอนทดสอบในเครื่อง
  *
  * ⚠️ ขอบเขตของรหัสนี้: อ่านได้แค่ `GET /api/admin/executive` กับ `GET /api/admin/nav-badges`
  *    ซึ่งมีแต่ตัวเลขรวม ไม่มีอีเมล ชื่อ หรือรหัสผู้ใช้ · เขียนอะไรไม่ได้เลย (`requireAdminOrReportToken`)
@@ -26,11 +26,13 @@ import type { StripeAdminSummary } from "../src/lib/marketplace/payment-gateway"
 
 const TIMEOUT_MS = 45_000;
 /**
- * ⚠️ ยิงเข้า `*.workers.dev` ไม่ใช่ `seertarot.net` — เจตนา (เหตุผลเดียวกับ `.github/workflows/daily-digest.yml`)
- * โดเมนหลักเปิด Bot Fight Mode ซึ่งตอบหน้า challenge ให้ IP ดาต้าเซ็นเตอร์ (container ของผู้ช่วย · GitHub runner)
- * `workers.dev` เป็น Worker ตัวเดียวกันแต่อยู่นอกโซน · ตั้ง User-Agent เองเพราะกฎ WAF บล็อก UA ของเครื่องมือที่ /api/
+ * ⚠️ ยิงเข้าโดเมนหลัก ไม่ใช่ `*.workers.dev` — ตั้งแต่ 2026-10-19 (A10-07 · #706) `/api/*` บนโฮสต์ workers.dev
+ *    ถูกส่งกลับโดเมนหลักด้วย 307 (ยกเว้น `/api/cron/*`) ให้ทุกคำขอผ่านกฎ WAF/เพดานถี่ของโซน · ห้ามเพิ่มข้อยกเว้นให้เส้นรายงาน
+ *    วัดจริง 2026-10-20: container ของ Claude Code ยิง seertarot.net/api/admin/nav-badges ได้ตรง ไม่โดน challenge
+ *    ตั้ง User-Agent เองเพราะกฎ WAF ของโซนบล็อก UA ของเครื่องมือ (curl ฯลฯ) ที่ /api/
+ *    ถ้าวันหนึ่งได้หน้า "Just a moment..." (403) แปลว่า Bot Fight Mode เริ่มท้าทาย IP ของ container — ต้องตั้งกฎข้ามบน Cloudflare (เจ้าของ)
  */
-const DEFAULT_BASE = "https://tarot-web.bankjack10452.workers.dev";
+const DEFAULT_BASE = "https://seertarot.net";
 const RANGES = [7, 28, 90] as const;
 
 type Report = ExecutiveReport & { stripe: StripeAdminSummary };
