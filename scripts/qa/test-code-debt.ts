@@ -990,6 +990,15 @@ check(
       !/"ล็อกลำดับ \+ /.test(src("src/components/home2/Ui2StaticSections.tsx")) &&
       !/nameTh: "[^"]* & [^"]*"|tagline: "[^"]* vs [^"]*"/.test(src("src/data/spreads.ts")),
   );
+  // B1: สคริปต์หน้าแรกห้ามแตะ DOM ของ island ก่อน React hydrate เสร็จ (เดิม #418 ทุกครั้งที่เปิดหน้าแรก)
+  const ui2Home = stripComments(fs.readFileSync(path.join(ROOT, "astro/scripts/ui2-home.ts"), "utf-8"));
+  const flowRoot = fs.readFileSync(path.join(ROOT, "astro/islands/TarotFlowRoot.tsx"), "utf-8");
+  check(
+    "B1: ui2-home เริ่มสแกน/นับเลข/โน้ตหลังสัญญาณ ui2:hydrated จาก TarotFlowRoot เท่านั้น",
+    /afterHydrate\(scan\)/.test(ui2Home) && /afterHydrate\(watchNotes\)/.test(ui2Home) && /afterHydrate\(\(\) => \{\s*watchCounts\(\);/.test(ui2Home) &&
+      !/^(scan|watchNotes|watchCounts|setupScrolly)\(\);/m.test(ui2Home) &&
+      /setAttribute\("data-ui2-hydrated", ""\)/.test(flowRoot) && /new Event\("ui2:hydrated"\)/.test(flowRoot),
+  );
   // B1: ผังไพ่ 1 ใบ ห้ามขึ้น "1 cards" — จำนวนที่เป็น 1 ได้ต้องผ่าน cardsEn()
   const pluralHits = sources.filter((f) => /\$\{[\w.]*positions\.length\} cards/.test(stripComments(fs.readFileSync(f, "utf-8"))));
   check("B1: ไม่มี `${…positions.length} cards` (ใช้ cardsEn กัน \"1 cards\")", pluralHits.length === 0, pluralHits.map(rel).join(" · "));

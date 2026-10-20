@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0296 · 2026-10-21 02:43 · 🟠 High · หน้าแรกโยน React #418 ทุกครั้ง สคริปต์หน้าแรกแก้ DOM ของ island ก่อน hydrate
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | เปิดหน้าแรก (ทั้งลดและไม่ลดการเคลื่อนไหว) ขึ้น Minified React error 418 แล้ว React ทิ้ง HTML ของ TarotFlowRoot ทั้งก้อนมาวาดใหม่ |
+| **สาเหตุราก** | astro/scripts/ui2-home.ts รันก่อน React hydrate แล้วตั้ง data-inview เปลี่ยนตัวหนังสือนาฬิกา ตัวเลขนับขึ้น และคลาสโน้ต ใน HTML ที่ React กำลังรับช่วง · การแก้ B1-01 รอบแรกแก้แค่ use-session ไม่ครอบจุดนี้ |
+| **การแก้ไข** | TarotFlowRoot ตั้ง data-ui2-hydrated และส่ง ui2:hydrated จาก effect · ui2-home เริ่มสแกน นับเลข โน้ต และวัดแผงหลังสัญญาณนั้น (สำรอง 10 วินาทีถ้า island ไม่ hydrate) |
+| **🛡️ กฎป้องกันถาวร** | **สคริปต์ธรรมดาที่แตะ element ใน island ต้องรอสัญญาณ hydrate จาก effect ของ island ไม่ใช้การถอด ssr ของ Astro · ด่าน test-code-debt เฝ้า · ยืนยันการแก้ hydration ด้วย astro dev (React ไม่ย่อ) ทุกครั้ง** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/zen-mendel-dvuvm3` · commit `fd3e2d6` |
+
+
 ### INC-0295 · 2026-10-21 02:37 · 🟡 Medium · หน้าบัญชีแจ้งที่เก็บข้อมูลไม่ตรงนโยบาย และคำตอบใช่หรือไม่ขัดกับตัวเอง
 
 | หัวข้อ | รายละเอียด |

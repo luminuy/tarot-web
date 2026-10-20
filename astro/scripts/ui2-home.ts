@@ -29,6 +29,30 @@ import { bangkokNextMidnightISO } from "@/lib/time/bangkok";
 
 const root = document.documentElement;
 
+/*
+ * ⚠️ ห้ามแตะ DOM ใน island ก่อน React hydrate เสร็จ (B1 2026-10-20)
+ * ส่วนต่าง ๆ ของหน้าแรกอยู่ใน island `TarotFlowRoot` — สคริปต์นี้รันก่อน React ทำงาน แล้วเปลี่ยนตัวหนังสือ
+ * (นาฬิกา · ตัวเลขนับขึ้น · รายชื่อแม่หมอ) และ attribute ใน HTML ที่ React กำลังจะรับช่วง ➔ React 19 โยน #418
+ * แล้วทิ้ง HTML ทั้งก้อนมาวาดใหม่ฝั่งเบราว์เซอร์ (หน้ากระพริบ · เสีย TBT · อนิเมชันเข้าฉากเล่นซ้ำ)
+ * `TarotFlowRoot` ตั้ง `data-ui2-hydrated` + ส่ง `ui2:hydrated` จาก effect (effect รันหลัง hydrate commit เท่านั้น)
+ * — Astro ถอด `ssr` ออกตั้งแต่สั่ง hydrateRoot ซึ่งเร็วกว่าตอน React ทำเสร็จจริง จึงใช้สัญญาณนั้นไม่ได้
+ * island ไม่ hydrate เลย (สคริปต์โหลดไม่ขึ้น) ➔ เริ่มเองหลัง 10 วินาที (ไม่มี React ให้ชนแล้ว)
+ */
+function afterHydrate(run: () => void): void {
+  if (root.hasAttribute("data-ui2-hydrated") || !document.querySelector("astro-island")) {
+    run();
+    return;
+  }
+  let done = false;
+  const go = () => {
+    if (done) return;
+    done = true;
+    run();
+  };
+  addEventListener("ui2:hydrated", go, { once: true });
+  setTimeout(go, 10_000);
+}
+
 /* ── 1. ตัวกันพัง FPS ─────────────────────────────────────────────────── */
 function guardFps(): void {
   if (root.getAttribute("data-fx") !== "full") return;
@@ -233,7 +257,7 @@ function scan(): void {
   paint();
   syncSticky();
 }
-scan();
+afterHydrate(scan);
 addEventListener("scroll", syncSticky, { passive: true });
 
 let pendingScan = 0;
@@ -398,11 +422,13 @@ function watchCounts(): void {
     if (!counted.has(el)) countObserver?.observe(el);
   });
 }
-watchCounts();
-setupScrolly();
+afterHydrate(() => {
+  watchCounts();
+  setupScrolly();
+});
 // ฟอนต์/ภาพโหลดเสร็จแล้วความสูงแผงเปลี่ยน ➔ วัดใหม่
-document.fonts?.ready.then(setupScrolly);
-addEventListener("load", setupScrolly, { once: true });
+document.fonts?.ready.then(() => afterHydrate(setupScrolly));
+addEventListener("load", () => afterHydrate(setupScrolly), { once: true });
 // ส่วนนี้อยู่ใน island ที่ถอด/ใส่ DOM ใหม่ได้ — สนใจเฉพาะตอนส่วนคลังไพ่/ตัวเลขถูกใส่เข้ามา (ไม่สแกนทุกการเปลี่ยนแปลงระหว่างสตรีมคำทำนาย)
 new MutationObserver((ms) => {
   const hit = ms.some((m) =>
@@ -524,7 +550,7 @@ function watchNotes(): void {
     notesObserver.observe(el);
   });
 }
-watchNotes();
+afterHydrate(watchNotes);
 new MutationObserver((ms) => {
   if (ms.some((m) => Array.from(m.addedNodes).some((n) => n instanceof Element && (n.matches(".ui2-notes") || n.querySelector(".ui2-notes") !== null)))) watchNotes();
 }).observe(document.body, { childList: true, subtree: true });
