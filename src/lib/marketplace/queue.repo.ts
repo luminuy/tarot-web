@@ -491,8 +491,13 @@ const TICKET_REFUND_OPEN = `EXISTS (SELECT 1 FROM payments p WHERE p.ticket_id =
 export async function cleanupExpiredTickets(): Promise<number> {
   const db = await getAppDB();
   const now = Date.now();
-  const dropIds = `SELECT t.id FROM queue_tickets t WHERE t.expires_at < ? AND NOT ${TICKET_HAS_MONEY}`;
-  const scrubIds = `SELECT t.id FROM queue_tickets t WHERE t.expires_at < ? AND ${TICKET_HAS_MONEY} AND NOT ${TICKET_REFUND_OPEN}`;
+  /*
+   * ⚡ B2-01: อ่านเฉพาะตั๋วที่ "ยังไม่เคยล้าง" (`pii_cleared_at IS NULL` · partial index idx_tickets_pii_pending)
+   * ตั๋วที่จ่ายเงินแล้วถูกเก็บไว้ตลอดไป (หลักฐานบัญชี) — เดิมทุกรอบ (ทุก 15 นาที) ไล่อ่านตั๋วจ่ายแล้วทั้งประวัติซ้ำ 10 คำสั่ง
+   * ทั้งที่ล้างไปตั้งแต่รอบแรกแล้ว ➔ งานต่อรอบโตตามจำนวนตั๋วสะสมไม่มีเพดาน · ตอนนี้เท่ากับตั๋วที่หมดอายุใหม่เท่านั้น
+   */
+  const dropIds = `SELECT t.id FROM queue_tickets t WHERE t.expires_at < ? AND t.pii_cleared_at IS NULL AND NOT ${TICKET_HAS_MONEY}`;
+  const scrubIds = `SELECT t.id FROM queue_tickets t WHERE t.expires_at < ? AND t.pii_cleared_at IS NULL AND ${TICKET_HAS_MONEY} AND NOT ${TICKET_REFUND_OPEN}`;
 
   // ── ตั๋วที่ไม่มีเงินผ่านมือ: ลบทั้งชุด (ปลด ai_screen_id ก่อน — กรณีเปิด PRAGMA foreign_keys)
   await db.prepare(`UPDATE queue_tickets SET ai_screen_id = NULL WHERE id IN (${dropIds})`).bind(now).run();
@@ -503,20 +508,23 @@ export async function cleanupExpiredTickets(): Promise<number> {
   await db.prepare(`DELETE FROM bookings WHERE ticket_id IN (${dropIds})`).bind(now).run();
   const dropped = await db.prepare(`DELETE FROM queue_tickets WHERE id IN (${dropIds})`).bind(now).run();
 
-  // ── ตั๋วที่มีเงินผ่านมือ: เก็บแถวการเงิน ล้างข้อมูลส่วนบุคคล (เฉพาะแถวที่ยังไม่เคยล้าง)
-  const scrubbed = await db
-    .prepare(
-      `UPDATE queue_tickets SET nickname = '', question = '', reading_snapshot = NULL, ai_screen_id = NULL
-        WHERE id IN (${scrubIds})
-          AND (COALESCE(nickname, '') != '' OR COALESCE(question, '') != '' OR reading_snapshot IS NOT NULL OR ai_screen_id IS NOT NULL)`
-    )
-    .bind(now)
-    .run();
+  // ── ตั๋วที่มีเงินผ่านมือ: เก็บแถวการเงิน ล้างข้อมูลส่วนบุคคล
+  // ⚠️ ลำดับสำคัญ: ล้างตารางที่ผูกอยู่ "ก่อน" แล้วค่อยประทับ `pii_cleared_at` ที่ตัวตั๋วเป็นคำสั่งสุดท้าย
+  //    (ประทับก่อน = scrubIds ของคำสั่งถัดไปว่างทันที อีเมลติดต่อ/ห้องวิดีโอจะไม่ถูกล้าง)
+  //    ปลด ai_screen_id ก่อนลบผลคัดกรอง — กรณีเปิด PRAGMA foreign_keys (เหมือนฝั่งลบทั้งแถวด้านบน)
+  await db.prepare(`UPDATE queue_tickets SET ai_screen_id = NULL WHERE ai_screen_id IS NOT NULL AND id IN (${scrubIds})`).bind(now).run();
   await db.prepare(`DELETE FROM ai_screening WHERE ticket_id IN (${scrubIds})`).bind(now).run();
   await db.prepare(`DELETE FROM call_sessions WHERE ticket_id IN (${scrubIds})`).bind(now).run();
   await db
     .prepare(`UPDATE bookings SET contact_email = NULL WHERE contact_email IS NOT NULL AND ticket_id IN (${scrubIds})`)
     .bind(now)
+    .run();
+  const scrubbed = await db
+    .prepare(
+      `UPDATE queue_tickets SET nickname = '', question = '', reading_snapshot = NULL, ai_screen_id = NULL, pii_cleared_at = ?
+        WHERE id IN (${scrubIds})`
+    )
+    .bind(now, now)
     .run();
 
   // ── ผลคัดกรอง AI ที่ไม่มีตั๋วแล้ว (เช่นตั๋วถูกลบไปตามแม่หมอ) — เว้นแถวที่เพิ่งสร้าง (ตั๋วอาจกำลังถูกสร้างตามมา)

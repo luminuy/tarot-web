@@ -560,6 +560,18 @@ async function runTest() {
     if (kept.nickname || kept.question || kept.reading_snapshot || keptBooking.contact_email) {
       throw new Error("❌ A2-01: ตั๋วหมดอายุที่เก็บแถวการเงินไว้ต้องล้างข้อมูลส่วนบุคคลออก");
     }
+    // B2-01: ตั๋วที่ล้างแล้วถูกประทับ pii_cleared_at ➔ รอบถัดไปไม่อ่านซ้ำ (งานต่อรอบไม่โตตามประวัติ)
+    const stamped = await one("SELECT pii_cleared_at FROM queue_tickets WHERE id = ?", `tkt_ret_money_${run}`);
+    if (typeof stamped?.pii_cleared_at !== "number") throw new Error("❌ B2-01: ตั๋วที่ล้างข้อมูลแล้วต้องประทับ pii_cleared_at");
+    const plan = (await db
+      .prepare(
+        "EXPLAIN QUERY PLAN SELECT t.id FROM queue_tickets t WHERE t.expires_at < ? AND t.pii_cleared_at IS NULL AND EXISTS (SELECT 1 FROM payments p WHERE p.ticket_id = t.id AND p.status = 'paid')",
+      )
+      .bind(t0)
+      .all<{ detail: string }>()).results.map((r) => r.detail).join(" | ");
+    if (!/idx_tickets_pii_pending/.test(plan) || /idx_payments_status\b/.test(plan)) {
+      throw new Error(`❌ B2-01/B2-04: แผนคำสั่งต้องใช้ idx_tickets_pii_pending และไม่ใช้ idx_payments_status ใน subquery (ได้: ${plan})`);
+    }
 
     await addTicket(`tkt_dup_refund_${run}`, "waiting", t0 + 86_400_000);
     await addPayment(`pay_dup_first_${run}`, `tkt_dup_refund_${run}`, "paid");

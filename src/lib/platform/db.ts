@@ -437,6 +437,14 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec("CREATE INDEX IF NOT EXISTS idx_users_created ON users(created_at DESC, id DESC)");
     safeExec("CREATE INDEX IF NOT EXISTS idx_bookings_status_hold ON bookings(status, hold_expires_at)");
     safeExec("CREATE INDEX IF NOT EXISTS idx_bookings_status_slot ON bookings(status, kind, slot_start)");
+    // migrations/0035 (B2-01..04) — ต้องตรงกับไฟล์ migration (reader_reviews สร้างด้านล่าง จึงสร้าง index ของมันตามหลังตาราง)
+    safeExec("ALTER TABLE queue_tickets ADD COLUMN pii_cleared_at INTEGER");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_tickets_pii_pending ON queue_tickets(expires_at) WHERE pii_cleared_at IS NULL");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_tickets_status ON queue_tickets(status)");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_payments_ticket_paid ON payments(ticket_id, status, updated_at)");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_payments_created ON payments(created_at DESC)");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_payments_status_created ON payments(status, created_at)");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_rq_created ON reading_quality(created_at DESC)");
     safeExec(
       "CREATE TABLE IF NOT EXISTS reader_blocked_dates (reader_id TEXT NOT NULL REFERENCES readers(id), date_key TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (reader_id, date_key))"
     );
@@ -444,6 +452,7 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
       "CREATE TABLE IF NOT EXISTS reader_reviews (id TEXT PRIMARY KEY, ticket_id TEXT NOT NULL UNIQUE, reader_id TEXT NOT NULL REFERENCES readers(id), rating INTEGER NOT NULL, comment TEXT, nickname TEXT, hidden INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL)"
     );
     safeExec("CREATE INDEX IF NOT EXISTS idx_reviews_reader ON reader_reviews(reader_id, hidden, created_at DESC)");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_reviews_reader_rating ON reader_reviews(reader_id, hidden, rating)"); // 0035 · B2-02
     safeExec(
       "CREATE TABLE IF NOT EXISTS booking_waitlist (id TEXT PRIMARY KEY, reader_id TEXT NOT NULL REFERENCES readers(id), email TEXT NOT NULL, created_at INTEGER NOT NULL, UNIQUE (reader_id, email))"
     );
@@ -472,6 +481,8 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec(
       "CREATE INDEX IF NOT EXISTS idx_rj_checkin_due ON reading_journal(checkin_at, checkin_sent_at) WHERE checkin_at IS NOT NULL"
     );
+    // 0035 · B2-03 — ตามหลัง ALTER ที่เพิ่ม checkin_sent_at
+    safeExec("CREATE INDEX IF NOT EXISTS idx_rj_checkin_sent ON reading_journal(checkin_sent_at) WHERE checkin_sent_at IS NOT NULL");
     // ✦ แคชข้อสังเกตจากสมุด (migrations/0028)
     safeExec(
       "CREATE TABLE IF NOT EXISTS reflection_cache (cache_key TEXT PRIMARY KEY, user_id TEXT NOT NULL, lang TEXT NOT NULL, result_json TEXT NOT NULL, created_at INTEGER NOT NULL)"

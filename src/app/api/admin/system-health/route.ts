@@ -108,20 +108,27 @@ export async function GET(request: Request) {
     d1PingOk = true;
 
     // Fetch user counts safely
-    const [uAll, uGoogle, uLine, uEmail, rTotal, rUsage] = await Promise.all([
-      db.prepare("SELECT count(*) as c FROM users WHERE deleted_at IS NULL").first<{ c: number }>().catch(() => null),
-      db.prepare("SELECT count(*) as c FROM users WHERE provider = 'google' AND deleted_at IS NULL").first<{ c: number }>().catch(() => null),
-      db.prepare("SELECT count(*) as c FROM users WHERE provider = 'line' AND deleted_at IS NULL").first<{ c: number }>().catch(() => null),
-      db.prepare("SELECT count(*) as c FROM users WHERE provider = 'email' AND deleted_at IS NULL").first<{ c: number }>().catch(() => null),
+    // นับสมาชิกทุกช่องทางในคำสั่งเดียว — เดิม 4 คำสั่งอ่านตาราง users ซ้ำ 4 รอบ (D1 คิดเงินตามแถวที่อ่าน · A9-05/B2-03)
+    const [uRow, rTotal, rUsage] = await Promise.all([
+      db
+        .prepare(
+          `SELECT count(*) AS total,
+                  SUM(CASE WHEN provider = 'google' THEN 1 ELSE 0 END) AS google,
+                  SUM(CASE WHEN provider = 'line' THEN 1 ELSE 0 END) AS line,
+                  SUM(CASE WHEN provider = 'email' THEN 1 ELSE 0 END) AS email
+             FROM users WHERE deleted_at IS NULL`,
+        )
+        .first<{ total: number; google: number | null; line: number | null; email: number | null }>()
+        .catch(() => null),
       db.prepare("SELECT count(*) as c FROM reading_journal").first<{ c: number }>().catch(() => null),
       db.prepare("SELECT count(*) as c FROM reading_usage").first<{ c: number }>().catch(() => null),
     ]);
 
     d1Metrics = {
-      totalUsers: uAll?.c ?? 0,
-      googleUsers: uGoogle?.c ?? 0,
-      lineUsers: uLine?.c ?? 0,
-      emailUsers: uEmail?.c ?? 0,
+      totalUsers: uRow?.total ?? 0,
+      googleUsers: uRow?.google ?? 0,
+      lineUsers: uRow?.line ?? 0,
+      emailUsers: uRow?.email ?? 0,
       totalReadings: rTotal?.c ?? 0,
       readingUsage: rUsage?.c ?? 0,
     };
