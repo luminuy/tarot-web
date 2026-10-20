@@ -93,7 +93,8 @@ export function ZodiacDaily({ signs, sign }: { signs: ZodiacDailySignName[]; sig
     const today = bangkokDayKey();
     const load = (bypass: boolean): Promise<ZodiacDailyData> =>
       fetch(bypass ? `/api/daily-card/zodiac?d=${today}` : "/api/daily-card/zodiac", {
-        credentials: "same-origin",
+        // ไม่แนบคุกกี้ — เส้นนี้เหมือนกันทุกคน และแคชที่ขอบเก็บเฉพาะคำขอที่ไม่มีคุกกี้ (withEdgeCache · A9-02)
+        credentials: "omit",
         ...(bypass ? { cache: "no-store" as const } : {}),
       }).then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))));
     load(false)

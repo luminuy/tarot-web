@@ -364,7 +364,7 @@ export interface Reader { id: string; displayName: string; bio: string; avatarUr
 - `src/lib/marketplace/payments.repo.ts`: จัดการ CRUD, Transition สถานะ, คำนวณส่วนแบ่งแม่หมอ
 - `/api/marketplace/payments`: สร้างรายการชำระเงิน
 - `/api/marketplace/payments/webhook`: รับ Webhook ยืนยันการชำระเงิน
-- `/api/admin/payouts`: แผงแอดมินดูสรุปรายได้และค่าคอมมิชชั่นแพลตฟอร์ม
+- ~~`/api/admin/payouts`~~ (ลบแล้ว 2026-10-19 · ไม่มีผู้เรียก — A8): สรุปรายได้/ค่าคอมมิชชั่นอยู่ที่หน้าโอนเงินแม่หมอในแผงแอดมิน
 
 ---
 
@@ -405,7 +405,7 @@ M7 Payments & Commission Ledger
   [x] migrations/0003_marketplace_payments.sql
   [x] src/lib/marketplace/payment-gateway.ts (Omise + Test-mode simulator)
   [x] /api/marketplace/payments + /api/marketplace/payments/webhook
-  [x] /api/admin/payouts + commission calculation
+  [x] ~~/api/admin/payouts~~ (ลบแล้ว 2026-10-19) + commission calculation
   [x] QA Test Suite (13/13 passing gates)
 ```
 

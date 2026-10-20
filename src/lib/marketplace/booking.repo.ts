@@ -679,7 +679,9 @@ export interface CancelResult {
 export async function cancelConsultation(
   ticket: QueueTicket,
   actor: CancelActor,
-  nowMs = Date.now()
+  nowMs = Date.now(),
+  /** ระบบปิดนัดเอง (ห้องที่แม่หมอไม่เข้า) — นโยบายเงินใช้ของฝั่งลูกค้า แต่ถ้อยคำในอีเมลต้องไม่บอกว่า "ลูกค้ายกเลิก" */
+  opts: { mailAs?: "system" } = {},
 ): Promise<CancelResult> {
   const db = await getAppDB();
   const booking = await getBookingByTicketId(ticket.id);
@@ -726,7 +728,7 @@ export async function cancelConsultation(
     payments.filter((p) => p.status === "pending" && p.providerRef).map((p) => expireGatewayCharge(p.providerRef as string))
   );
   // แจ้งเฉพาะรายการที่จ่ายแล้ว (ยกเลิกก่อนจ่าย ไม่มีอะไรต้องบอก)
-  if (paidPayment) await sendBookingCancelled(ticket.id, actor, refundStatus);
+  if (paidPayment) await sendBookingCancelled(ticket.id, opts.mailAs ?? actor, refundStatus);
   return { ok: true, reason: decision.reason, refundStatus };
 }
 

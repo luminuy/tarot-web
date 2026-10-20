@@ -3594,6 +3594,8 @@ npm error Invalid: lock file's eslint@9.39.5 does not satisfy eslint@10.11.0   (
 
 ### 🗓️ 2026-09-19 (รอบ 105): 🚀 ยกระดับประสิทธิภาพ Mobile Lighthouse (ลด LCP จาก 3.3s สู่ <2.0s & ขจัดคอขวด /api/daily-card 4,987ms)
 
+> ⚠️ **แก้ข้อความ 2026-10-20 (A9-01 · ผลตรวจ 2026-10-18)**: ข้ออ้างในรอบนี้ว่า `s-maxage` ทำให้ "Edge ตอบเองไม่ต้องปลุก Worker" ไม่จริง — `/api/*` อยู่ใน `run_worker_first` ทุกคำขอวิ่งเข้า Worker และหัว `s-maxage` ของคำตอบจาก Worker ไม่ถูกแคชที่ CDN · แคชที่ขอบใช้ได้จริงตั้งแต่ `withEdgeCache` (Cache API · คลื่น 2) และคำขอต้องไม่มีคุกกี้
+
 **ที่มาและเหตุผล (มิติความเร็วและประสิทธิภาพ Core Web Vitals)**:
 จากผลการตรวจ Mobile Lighthouse ของ `seertarot.net` ที่ได้คะแนนประสิทธิภาพรวม 88 พบว่ามีคอขวดวิกฤตบนเส้นทางนำทาง (Critical Path Latency 4,987 ms):
 1. `DailyCardStrip.tsx` ใช้ `requestIdleCallback(..., { timeout: 2000 })` ทำให้แถบไพ่ด้านบนสุดเหนือเส้นพับแสดง skeleton ค้างไว้กว่า 2 วินาทีบนมือถือ

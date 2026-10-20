@@ -66,7 +66,7 @@ async function closeAbandonedRooms(now: number): Promise<number> {
     if (!ticket || ticket.status !== "ready") continue;
     // ตรวจซ้ำด้วยเกณฑ์กลางของนโยบาย — เงินคืนผ่านเฉพาะเมื่อ `decideCancellation` ยอมรับหลักฐานนี้
     if (!readerMissedRoom(await getRoomAttendance(ticket.id), now)) continue;
-    const result = await cancelConsultation(ticket, "customer", now);
+    const result = await cancelConsultation(ticket, "customer", now, { mailAs: "system" });
     if (!result.ok) continue;
     await db
       .prepare("UPDATE bookings SET cancelled_by = 'system' WHERE ticket_id = ? AND status = 'cancelled'")

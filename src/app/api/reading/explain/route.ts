@@ -9,6 +9,7 @@ import type { Category, TarotCard } from "@/data/cards/types";
 import { analyzeRelations } from "@/lib/tarot/relations";
 import { CUSTOM_MAX_CARDS, CUSTOM_SPREAD_ID } from "@/lib/tarot/custom-spread";
 import type { ExplainCard, ExplainResponse } from "@/lib/tarot/explain-types";
+import { withEdgeCache } from "@/lib/platform/edge-cache";
 
 export const runtime = "nodejs";
 
@@ -46,7 +47,14 @@ export async function GET(request: Request) {
   if (!isRequestAuthorizedOrigin(request)) {
     return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403, headers: NO_STORE });
   }
+  /*
+   * คำตอบขึ้นกับ query ล้วน (ไพ่ · ผัง · หมวด · ภาษา) ไม่อ่านผู้ใช้ — แคชที่ขอบด้วย Cache API (A9-02 follow-up)
+   * คีย์ = URL เต็มรวม query · ด่าน Origin อยู่นอกแคชเสมอ (คำขอข้ามโดเมนไม่ได้คำตอบจากแคช)
+   */
+  return withEdgeCache(request, () => buildExplainResponse(request));
+}
 
+async function buildExplainResponse(request: Request): Promise<Response> {
   const url = new URL(request.url);
   const lang: "th" | "en" = url.searchParams.get("lang") === "en" ? "en" : "th";
   const isEn = lang === "en";

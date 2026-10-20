@@ -289,7 +289,7 @@ console.log("\n── 4. redirect ของ URL เก่า ──");
   walkApi(apiDir);
   const declaring = routeFiles.filter((f) => /s-maxage|CDN-Cache-Control/.test(fs.readFileSync(f, "utf8")));
   // หนี้ที่รู้แล้ว: ยังไม่ห่อ (แคชได้แค่ฝั่งเบราว์เซอร์) — ห่อแล้วให้ลบออกจากรายการนี้ (ด่านเตือนถ้าค้าง)
-  const PENDING = new Set(["src/app/api/reading/explain/route.ts", "src/app/api/spreads/shared/[slug]/route.ts"]);
+  const PENDING = new Set<string>();
   const usesEdgeCache = (f: string) => /\bwithEdgeCache\(/.test(fs.readFileSync(f, "utf8"));
   const uncached = declaring.filter((f) => !usesEdgeCache(f) && !PENDING.has(path.relative(ROOT, f)));
   const stalePending = [...PENDING].filter((rel) => {

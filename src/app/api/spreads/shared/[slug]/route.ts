@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSharedCustomSpread } from "@/lib/tarot/custom-spread.repo";
+import { withEdgeCache } from "@/lib/platform/edge-cache";
 import { checkRateLimit, createRateLimitResponse, getClientIdentifier } from "@/lib/utils/rate-limit";
 
 export const runtime = "nodejs";
@@ -14,7 +15,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
   if (!/^[0-9a-f]{12}$/.test(slug)) return NextResponse.json({ error: "ไม่พบผังนี้" }, { status: 404 });
   const gate = checkRateLimit(`shared_spread:${getClientIdentifier(request)}`, { maxRequests: 30, windowSeconds: 60 });
   if (!gate.allowed) return createRateLimitResponse(gate.retryAfterSeconds, "เรียกถี่เกินไป กรุณารอสักครู่");
-  const spread = await getSharedCustomSpread(slug);
-  if (!spread) return NextResponse.json({ error: "ลิงก์นี้ถูกปิดแล้วหรือไม่มีอยู่" }, { status: 404, headers: { "Cache-Control": "no-store" } });
-  return NextResponse.json({ spread }, { headers: { "Cache-Control": "public, max-age=60, s-maxage=60" } });
+  // คำตอบเหมือนกันทุกคน (ไม่มีเจ้าของ/สถิติ) — แคชที่ขอบ 60 วินาที · 404 เป็น no-store จึงไม่ถูกเก็บ (ปิดลิงก์แล้วหายภายใน 1 นาที)
+  return withEdgeCache(request, async () => {
+    const spread = await getSharedCustomSpread(slug);
+    if (!spread) return NextResponse.json({ error: "ลิงก์นี้ถูกปิดแล้วหรือไม่มีอยู่" }, { status: 404, headers: { "Cache-Control": "no-store" } });
+    return NextResponse.json({ spread }, { headers: { "Cache-Control": "public, max-age=60, s-maxage=60" } });
+  });
 }
