@@ -84,6 +84,8 @@ const metaTags = renderMetadata(
   },
   {
     titleTemplate: TITLE_TEMPLATE,
+    siteName: "SeerTarot",
+    ogLocale: isEnglish ? "en_US" : "th_TH",
     /* หน้าที่ไม่ได้ประกาศ title เอง ได้ `title.default` ของราก **โดยไม่ผ่านแม่แบบ** */
     defaultTitle: ROOT_TITLE_DEFAULT[locale],
   },
@@ -93,7 +95,10 @@ const metaTags = renderMetadata(
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "SeerTarot Sanctuary",
+  /* B3-12: ชื่อเดียวทั้ง Organization / WebSite / publisher ("SeerTarot") — ชื่อยาวย้ายไป alternateName
+     sameAs = โปรไฟล์แบรนด์เท่านั้น (repo โค้ดไม่ใช่โปรไฟล์แบรนด์) */
+  name: "SeerTarot",
+  alternateName: ["SeerTarot Sanctuary", "วิหารพยากรณ์ไพ่ทาโรต์"],
   url: SITE_ORIGIN,
   logo: {
     "@type": "ImageObject",
@@ -101,7 +106,7 @@ const organizationJsonLd = {
     width: 512,
     height: 512,
   },
-  sameAs: [...BRAND_SOCIAL_PROFILES, "https://github.com/luminuy/tarot-web"],
+  sameAs: [...BRAND_SOCIAL_PROFILES],
   email: DEFAULT_SUPPORT_EMAIL,
   contactPoint: {
     "@type": "ContactPoint",
@@ -119,7 +124,8 @@ const webSiteJsonLd = {
   "@type": "WebSite",
   name: "SeerTarot",
   alternateName: isEnglish ? "SeerTarot Sanctuary" : "วิหารพยากรณ์ไพ่ทาโรต์",
-  url: isEnglish ? `${SITE_ORIGIN}/en` : SITE_ORIGIN,
+  // ไซต์เนมของ Google อ่านจาก WebSite ที่ชี้รากโดเมน — หน้าอังกฤษก็ต้องเป็นรากเดียวกัน (B3-12)
+  url: SITE_ORIGIN,
   inLanguage: locale,
 };
 

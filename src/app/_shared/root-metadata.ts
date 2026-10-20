@@ -32,9 +32,10 @@ export const ROOT_TITLE_DEFAULT: Record<"th" | "en", string> = {
   en: "Free Online Tarot Reading With an AI Tarot Reader",
 };
 
-const SITE_AUTHORS: Metadata["authors"] = [{ name: "SeerTarot Sanctuary" }];
-const SITE_CREATOR = "SeerTarot Sanctuary";
-const SITE_PUBLISHER = "SeerTarot Sanctuary";
+// ชื่อเดียวกับ Organization/WebSite ใน JSON-LD (B3-12)
+const SITE_AUTHORS: Metadata["authors"] = [{ name: "SeerTarot" }];
+const SITE_CREATOR = "SeerTarot";
+const SITE_PUBLISHER = "SeerTarot";
 
 export const SITE_ICONS: Metadata["icons"] = {
   icon: [

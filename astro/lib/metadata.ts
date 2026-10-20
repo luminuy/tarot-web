@@ -106,6 +106,10 @@ function robotsTags(robots: NonNullable<Metadata["robots"]>): string[] {
 export interface RenderMetadataOptions {
   /** แม่แบบ title ของ root layout — `"%s · SeerTarot"` */
   titleTemplate: string;
+  /** og:site_name เมื่อหน้าไม่ได้ระบุเอง (B3-10) */
+  siteName?: string;
+  /** og:locale เมื่อหน้าไม่ได้ระบุเอง (`th_TH` / `en_US` · B3-10) */
+  ogLocale?: string;
   /**
    * title ที่ใช้เมื่อหน้าไม่ได้ประกาศเอง (`title.default` ของ root layout)
    *
@@ -201,9 +205,19 @@ export function renderMetadata(metadata: Metadata, options: RenderMetadataOption
     );
     tags.push(...prop("og:title", og.title as string));
     tags.push(...prop("og:description", og.description as string));
-    tags.push(...prop("og:url", og.url as string));
-    tags.push(...prop("og:site_name", og.siteName as string));
-    tags.push(...prop("og:locale", og.locale as string));
+    /*
+     * B3-10: หน้าที่ประกาศ openGraph เองแต่ลืม url/siteName/locale (หน้าแรก · หน้าไพ่ 156 หน้า · birth-card · privacy)
+     * เคยขาดแท็กพวกนี้ ทั้งที่หน้าอื่น 245 หน้ามีครบ ➔ เติมค่ากลางที่นี่จุดเดียว
+     * og:url ใช้ canonical ของหน้าเอง (หน้า noindex ไม่มี canonical จึงไม่ได้ og:url ที่ชี้ที่อื่น)
+     */
+    const canonicalHref = (() => {
+      const c = metadata.alternates?.canonical;
+      if (!c) return undefined;
+      return typeof c === "string" ? c : String((c as { url: string }).url);
+    })();
+    tags.push(...prop("og:url", (og.url as string | undefined) ?? canonicalHref));
+    tags.push(...prop("og:site_name", (og.siteName as string | undefined) ?? options.siteName));
+    tags.push(...prop("og:locale", (og.locale as string | undefined) ?? options.ogLocale));
     for (const img of normalizeImages(og.images)) {
       tags.push(...prop("og:image", img.url));
       if (img.width !== undefined) tags.push(...prop("og:image:width", String(img.width)));

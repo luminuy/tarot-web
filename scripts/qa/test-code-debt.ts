@@ -950,6 +950,19 @@ check(
     (share.match(/if \(found === "missing"\) notFound\(\);/g) ?? []).length === 2 &&
       /htmlLimitedBots:\s*\n?\s*\/Googlebot\|/.test(fs.readFileSync(path.join(ROOT, "next.config.ts"), "utf-8")),
   );
+  const blogDetail = src("src/app/_shared/pages/blog-detail.tsx");
+  check(
+    "B3-11: ภาพแชร์บทความใช้ไพ่ประจำบทความ (getArticleCardArt) ไม่ใช่ไพ่ประจำหมวด",
+    (blogDetail.match(/cardImage: getArticleCardArt\(article\)\.image/g) ?? []).length === 2 && !/getCategoryCardImage\(article\.category\)/.test(blogDetail),
+  );
+  const baseLayout = fs.readFileSync(path.join(ROOT, "astro/layouts/BaseLayout.astro"), "utf-8");
+  const rootHtml = src("src/app/_shared/RootHtml.tsx");
+  check(
+    "B3-12: Organization ชื่อ \"SeerTarot\" · ไม่มี repo ใน sameAs · WebSite.url เป็นรากโดเมนทั้งสองเครื่องเรนเดอร์",
+    [baseLayout, rootHtml].every(
+      (f) => /"@type": "Organization",[\s\S]{0,300}name: "SeerTarot",/.test(f) && !/github\.com\/luminuy/.test(f) && !/url: isEnglish \? `\$\{SITE_ORIGIN\}\/en`/.test(f),
+    ),
+  );
   const robots = src("src/app/robots.ts");
   check(
     "A7-06: robots.txt เปิด /api/share/image/ (ภาพแชร์คำทำนาย) ในทุกกลุ่มที่ปิด /api/",

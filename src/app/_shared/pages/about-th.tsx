@@ -79,8 +79,8 @@ export function AboutBodyTh() {
     inLanguage: "th",
     mainEntity: {
       "@type": "Organization",
-      name: "SeerTarot Sanctuary",
-      alternateName: "วิหารพยากรณ์ไพ่ทาโรต์",
+      name: "SeerTarot",
+      alternateName: ["SeerTarot Sanctuary", "วิหารพยากรณ์ไพ่ทาโรต์"],
       url: SITE_ORIGIN,
       email: DEFAULT_SUPPORT_EMAIL,
       contactPoint: {

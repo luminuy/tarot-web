@@ -10,7 +10,7 @@ import {
 import { getArticleAuthor } from "@/data/article-helpers";
 import { buildAlternates, localizedUrl, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
-import { getCategoryCardImage } from "@/lib/media/og-card-art";
+import { getArticleCardArt } from "@/data/article-art";
 import type { Locale } from "@/lib/i18n/types";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
@@ -57,7 +57,7 @@ export function blogDetailMetadata(slug: string, locale: Locale): Metadata {
   const ogImages = buildPageOgImage({
     title: articleTitle,
     eyebrow: isEnglish ? "TAROT WISDOM & GUIDE" : "บทความไพ่ทาโรต์",
-    cardImage: getCategoryCardImage(article.category),
+    cardImage: getArticleCardArt(article).image, // ไพ่ประจำบทความ (ชุดเดียวกับหน้า /blog) ไม่ใช่ไพ่ประจำหมวด 5 ใบ (B3-11)
     alt: articleTitle,
   });
 
@@ -116,7 +116,7 @@ export function BlogDetailContent({
     buildPageOgImage({
       title: articleHeadline,
       eyebrow: isEnglish ? "TAROT WISDOM & GUIDE" : "บทความไพ่ทาโรต์",
-      cardImage: getCategoryCardImage(article.category),
+      cardImage: getArticleCardArt(article).image, // ไพ่ประจำบทความ (ชุดเดียวกับหน้า /blog) ไม่ใช่ไพ่ประจำหมวด 5 ใบ (B3-11)
       alt: articleHeadline,
     })[0]?.url ?? OG_IMAGE_URL;
 
