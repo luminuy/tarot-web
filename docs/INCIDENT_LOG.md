@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0300 · 2026-10-21 08:53 · 🔵 Low · URL ทับสแลชท้ายเด้ง 307 แทน 301
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | /cards/ · /en/ · /index.html ตอบ 307 ชั่วคราว Google อาจเก็บทั้งสอง URL |
+| **สาเหตุราก** | ชั้น assets ของ Cloudflare (html_handling auto-trailing-slash) ตอบ 307 ตายตัว และ _redirects ไม่มีกฎดักทับสแลช |
+| **การแก้ไข** | กฎ placeholder ท้าย public/_redirects ลึก 4 ชั้น + /index.html + /en/ เป็น 301 · ลองกับ wrangler dev แล้ว |
+| **🛡️ กฎป้องกันถาวร** | **redirect ของเส้นทางสาธารณะต้องเป็น 301/308 เสมอ วัดด้วย curl --max-redirs 0 ทุกครั้งที่แก้ _redirects หรือ html_handling** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/zen-mendel-dvuvm3` · commit `c698292` |
+
+
 ### INC-0299 · 2026-10-21 08:02 · 🔵 Low · หน้าแรกคอมขยับตอนเลื่อนถึงตัวเลข 1909
 
 | หัวข้อ | รายละเอียด |

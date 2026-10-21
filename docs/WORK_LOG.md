@@ -38,6 +38,12 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-21 (รอบ 309): ข้อ 7 ของคำตอบเจ้าของ — หลัง #710 ขึ้น production
+- B3-14: ทับสแลชท้าย · `/index.html` · `/en/` ตอบ 301 แล้ว (เดิม 307 จาก `html_handling` ของ Cloudflare) — กฎ placeholder ท้าย `public/_redirects` ลึกถึง 4 ชั้น · ลองกับ Workers Assets จริงด้วย `wrangler dev` (เก็บ query string · กฎ `/spreads/topic/` เดิมยังชนะ)
+- B4-05: กฎเหล็กข้อ 3 และ 9 ใน `CLAUDE.md` + `AI_COLLABORATION_GUIDELINES.md` ระบุข้อยกเว้นที่เจ้าของอนุมัติ (รางเลื่อน SpreadBoard บนมือถือ · จอกว้างวางตาม `mapLayout` · INC-0219) กันเอเจนท์รุ่นถัดไปแก้กลับ
+- B3-13: FAQ ของหน้าไพ่ 156 หน้าบน production ตรงกับเนื้อหาหน้าแล้วหลัง #710 · คง FAQPage/HowTo ที่ตรงกับเนื้อหาไว้ (Google ไม่แสดงผลพิเศษแต่ไม่เสียหาย และบอต AI ยังอ่าน)
+- B3-08: PerplexityBot ถูกบล็อกที่ Cloudflare — อยู่นอกโค้ด ต้องดูที่แดชบอร์ด Security › Events (ส่งขั้นตอนให้เจ้าของ)
+
 ### 🗓️ 2026-10-21 (รอบ 308): ทำตามคำตอบนโยบายของเจ้าของ (ข้อ 2 · 3 · 4 · 6) แล้วขึ้น production
 - ข้อ 1 แชทเพดาน 20 คำถาม · ข้อ 5 หมุดบนโน้ต/Pick a Card เลื่อนข้าง — คงไว้ตามเดิม (เจ้าของ "เอาแบบนี้ก่อน")
 - ข้อ 2 สิทธิ์ถามฟรี 2 ข้อต่อไพ่หนึ่งชุดนับฝั่งเซิร์ฟเวอร์ (`chat:free` ใน `edge_rate_buckets` · อ่านก่อนเรียก AI · นับเมื่อ AI ตอบสำเร็จ · เกณฑ์ไม่จำกัดตรงกับหน้าจอ) · หน้าจอขึ้นปุ่มเติมรอบเมื่อเซิร์ฟเวอร์ตอบว่าหมด · ค่าคงที่ `CHAT_FREE_TURNS_PER_READING` ใช้ร่วมกัน · ด่าน `test-chat-history-schema` Test 8

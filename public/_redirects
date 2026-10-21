@@ -15,3 +15,12 @@
 /spreads/topic/ /spreads#topics 301
 /en/spreads/topic /en/spreads#topics 301
 /en/spreads/topic/ /en/spreads#topics 301
+# B3-14: ทับสแลชท้าย + /index.html ➔ URL สะอาดแบบถาวร (เดิมชั้น assets ของ Cloudflare ตอบ 307 = ชั่วคราว)
+# กฎเหล่านี้ทำงานก่อน html_handling · ลองกับ Workers Assets จริงด้วย wrangler dev แล้ว (เก็บ query string · ลึกถึง 4 ชั้นพอสำหรับทุกหน้า)
+# ⚠️ ต้องอยู่ท้ายไฟล์เสมอ — กฎแรกที่ตรงชนะ (/spreads/topic/ ข้างบนต้องไปหน้าคลังผัง ไม่ใช่ /spreads/topic)
+/index.html / 301
+/en/ /en 301
+/:a/ /:a 301
+/:a/:b/ /:a/:b 301
+/:a/:b/:c/ /:a/:b/:c 301
+/:a/:b/:c/:d/ /:a/:b/:c/:d 301
