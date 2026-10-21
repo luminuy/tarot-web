@@ -307,9 +307,8 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
     const fallback = typeof window !== "undefined" ? window.location.origin : "https://seertarot.net";
     try {
       const blob = await createReadingImageBlob("post");
-      const titleText = isEnglish
-        ? `Tarot Reading "${question || defaultQuestion}" — SeerTarot`
-        : `คำทำนายไพ่ทาโรต์ "${question || "ภาพรวมดวงชะตา"}" — SeerTarot`;
+      // ชื่อเรื่องของลิงก์ /s/<id> เป็นข้อมูลสาธารณะ (พรีวิวลิงก์ · บอท) — ไม่ใส่คำถามของผู้ใช้ (เจ้าของ 2026-10-21)
+      const titleText = isEnglish ? `Tarot Reading: ${spreadName} — SeerTarot` : `คำทำนายไพ่ทาโรต์ ${spreadName} — SeerTarot`;
       const qs = new URLSearchParams({
         title: titleText,
         spread: spreadName,
@@ -395,14 +394,14 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
       const rawSummary = reading?.summary ?? "";
       const tweetSummary = rawSummary ? `${sliceThaiSafe(rawSummary, 90)}…` : "";
       const tweetText = isEnglish
-        ? `1909 Rider-Waite Tarot Reading by SeerTarot\nSpread: ${spreadName}\nQuestion: "${question || defaultQuestion}"\nOracle insight from ${personaName}: "${tweetSummary}"\n\n#tarot #oracle #archetypes #SeerTarot`
-        : `ดูดวงไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot\nผัง: ${spreadName}\nคำถาม: "${question || "ภาพรวมดวงชะตา"}"\nคำทำนายจากแม่หมอ ${persona.nameTh}: "${tweetSummary}"\n\n#ไพ่ทาโรต์ #ดูดวง #SeerTarot`;
+        ? `1909 Rider-Waite Tarot Reading by SeerTarot\nSpread: ${spreadName}\nOracle insight from ${personaName}: "${tweetSummary}"\n\n#tarot #oracle #archetypes #SeerTarot`
+        : `ดูดวงไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot\nผัง: ${spreadName}\nคำทำนายจากแม่หมอ ${persona.nameTh}: "${tweetSummary}"\n\n#ไพ่ทาโรต์ #ดูดวง #SeerTarot`;
       return `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`;
     }
     if (brand === "threads") {
       const threadsText = isEnglish
-        ? `1909 Rider-Waite Tarot Reading by SeerTarot\nSpread: ${spreadName}\nQuestion: "${question || defaultQuestion}"\nInsight: "${reading?.summary || ""}"\n${shareUrl}`
-        : `คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot\nผัง: ${spreadName}\nคำถาม: "${question || "ภาพรวมดวงชะตา"}"\nคำทำนาย: "${reading?.summary || ""}"\n${shareUrl}`;
+        ? `1909 Rider-Waite Tarot Reading by SeerTarot\nSpread: ${spreadName}\nInsight: "${reading?.summary || ""}"\n${shareUrl}`
+        : `คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot\nผัง: ${spreadName}\nคำทำนาย: "${reading?.summary || ""}"\n${shareUrl}`;
       return `https://www.threads.net/intent/post?text=${encodeURIComponent(threadsText)}`;
     }
     return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;

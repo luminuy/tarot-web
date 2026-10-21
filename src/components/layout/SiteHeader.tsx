@@ -7,7 +7,6 @@ import { requestFreshStart } from "@/lib/utils/flow-persistence";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { HeaderAccount } from "@/components/layout/HeaderAccount";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { useLocale } from "@/lib/i18n";
 import { stripLocalePrefix } from "@/lib/i18n/paths";
 import { useCurrentPath } from "@/components/layout/current-path";
@@ -175,7 +174,6 @@ export function SiteHeader({
                   {isEnglish ? "Start a reading" : "เริ่มดูดวง"}
                 </a>
               )}
-              <ThemeToggle isEnglish={isEnglish} />
               <LanguageSwitcher />
               {/* ไม่มีใครส่ง toolbar มา (หน้าเนื้อหาทั่วไป) ➔ ใส่ปุ่มบัญชีให้เอง หัวเว็บทุกหน้าจะได้เหมือนหน้าแรก */}
               {toolbar ?? <HeaderAccount />}

@@ -8,7 +8,8 @@ import { getContentOverrides, resolveCardByIndex, resolvePersona, resolveSystemC
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
-import { CHAT_TURNS_PER_READING, isReadingFinished } from "@/lib/reading/chat-limits";
+import { CHAT_FREE_TURNS_PER_READING, CHAT_TURNS_PER_READING, isReadingFinished } from "@/lib/reading/chat-limits";
+import { bumpEdgeCounter, peekEdgeCounter } from "@/lib/security/edge-ratelimit";
 import { looksLikePromptInjection, sanitizePromptValue } from "@/lib/ai/prompt-guard";
 import { redactPii } from "@/lib/security/pii";
 import { detectPromptLeak } from "@/lib/ai/leak-guard";
@@ -45,6 +46,8 @@ const noInjection = (label: string) =>
  * (8 เท่าของเพดาน 500 ที่บังคับกับคำถามตอนเปิดไพ่) โดยไม่ผ่านการกรองเช่นกัน
  * คำสั่งที่ฉีดไว้ตาแรกจึงอยู่ยาวไปทุกตาถัดไป และไม่มีเพดานรวมของขนาด prompt เลย
  */
+/** อายุตัวนับสิทธิ์ถามฟรีต่อไพ่หนึ่งชุด — นานกว่าอายุของคำอ่าน จึงรีเซ็ตไม่ได้ด้วยการรอ */
+const FREE_CHAT_WINDOW_SEC = 60 * 60 * 24 * 30;
 const CHAT_MESSAGE_MAX = 800;
 const CHAT_HISTORY_TURN_MAX = 800;
 /** จำนวนตาที่ replay กลับเข้าโมเดล — ตัดจากท้ายสุด (ตาล่าสุดมีค่าที่สุด) */
@@ -137,6 +140,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const privileged = await isPrivilegedTestRequest(request);
 
   // ── การคุยต่อกับแม่หมอ = สมาชิกเท่านั้น (ENTITLEMENT_PLAN ข้อ 4) · ไม่กินโควตาเปิดไพ่ ──
+  /** ตัวนับสิทธิ์ถามฟรีของไพ่ชุดนี้ · null = ถามได้ไม่จำกัด (ปิดระบบสิทธิ์ · มีรอบโบนัส/รอบที่ซื้อ · บัญชีทดสอบ) */
+  let freeChatKey: string | null = null;
   if (!privileged) {
     const { isEntitlementEnabled } = await import("@/lib/entitlement/flag");
     const { getViewer } = await import("@/lib/entitlement/viewer");
@@ -148,6 +153,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         { error: getMembersOnlyChatMessage(initialLang), reason: "members_only" },
         { status: 403 },
       );
+    }
+    // สิทธิ์ถามฟรี 2 ข้อต่อไพ่หนึ่งชุด — เดิมนับที่หน้าจออย่างเดียว ยิง API ตรงหรือรีโหลดหน้าก็ถามฟรีได้ไม่จำกัด (เจ้าของ 2026-10-21)
+    // เกณฑ์ "ไม่จำกัด" ต้องตรงกับ `FollowUpChat.tsx` (`isUnlimited`): มีรอบโบนัส/รอบที่ซื้อเหลือ
+    if (enforced && viewer.kind === "member") {
+      const { getEntitlement } = await import("@/lib/entitlement/entitlement");
+      const ent = await getEntitlement(viewer);
+      if (!(ent.bonusRemaining > 0)) freeChatKey = edgeRateLimitKey("chat:free", id);
     }
   }
 
@@ -358,6 +370,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           { status: 429 },
         );
       }
+      if (freeChatKey && (await peekEdgeCounter(freeChatKey, FREE_CHAT_WINDOW_SEC)) >= CHAT_FREE_TURNS_PER_READING) {
+        recordEvent("chat_blocked_free_cap");
+        return NextResponse.json(
+          {
+            error:
+              initialLang === "en"
+                ? `You have used the ${CHAT_FREE_TURNS_PER_READING} free follow-up questions for this spread. Refill readings to keep asking.`
+                : `ใช้สิทธิ์ถามฟรีของไพ่ชุดนี้ครบ ${CHAT_FREE_TURNS_PER_READING} ข้อแล้ว เติมรอบดูดวงเพื่อถามต่อได้ไม่จำกัด`,
+            reason: "chat_free_exhausted",
+          },
+          { status: 403 },
+        );
+      }
     }
 
     const activeLang: "th" | "en" = parsed.data.lang || record.lang || initialLang;
@@ -530,6 +555,7 @@ ${guardSection}
           if (leakedGroq) recordEvent("ai_prompt_leak:chat");
           if (cleanReply && !leakedGroq) {
             await recordAiCall(1);
+            if (freeChatKey) await bumpEdgeCounter(freeChatKey, FREE_CHAT_WINDOW_SEC);
             await noteChatCost(chatCostSubj, systemInstruction, history, userQuestion, cleanReply);
             return NextResponse.json({
               reply: cleanReply,
@@ -617,6 +643,7 @@ ${guardSection}
                 continue;
               }
               await recordAiCall(1);
+              if (freeChatKey) await bumpEdgeCounter(freeChatKey, FREE_CHAT_WINDOW_SEC);
               await noteChatCost(chatCostSubj, systemInstruction, history, userQuestion, cleanReply);
               return NextResponse.json({
                 reply: cleanReply,
