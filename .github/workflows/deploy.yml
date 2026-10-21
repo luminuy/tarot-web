@@ -46,8 +46,17 @@ jobs:
       # คนละชุดกับที่ทดสอบในเครื่อง — ใน job ที่ถือ `CLOUDFLARE_API_TOKEN` และคีย์ AI
       # `npm ci` ล้มทันทีถ้า lockfile ไม่ตรงกับ package.json ซึ่งเป็นสิ่งที่เราต้องการ
       # และแคชของ setup-node ใช้ได้เลยเพราะ `package-lock.json` มีอยู่จริง (กับดักเดิมหายไปเอง)
+      #
+      # 🔒 A10-04: `--ignore-scripts` — job นี้ถือโทเคน Cloudflare/คีย์ AI จึงไม่ให้แพ็กเกจรัน lifecycle script ตอนติดตั้ง
+      #    แพ็กเกจที่ lockfile ประกาศว่ามี install script มีแค่ `esbuild` · `workerd` (และ `fsevents` เฉพาะ macOS) — พิสูจน์แล้วว่า
+      #    ติดตั้งแบบข้ามสคริปต์ได้ไฟล์ชุดเดียวกับแบบรันสคริปต์ทุกไฟล์ (ไบนารีมากับแพ็กเกจแพลตฟอร์ม · `sharp` ใช้ไบนารีสำเร็จรูป)
+      #    บรรทัดล่างตรวจว่าเครื่องมือเหล่านี้ยังรันได้ — ถ้าวันหนึ่งขึ้นรุ่นที่ต้องพึ่งสคริปต์ จะล้มตรงนี้ ไม่ใช่กลางการ deploy
       - name: 📦 Install dependencies
-        run: npm ci
+        run: |
+          npm ci --ignore-scripts
+          node_modules/.bin/esbuild --version
+          node_modules/.bin/workerd --version
+          node -e "require('sharp')"
 
       # ⚠️ **build ต้องอยู่ก่อน repo:verify เสมอ** (บทเรียน R-06)
       # ของเดิมรันชุดตรวจก่อน ด่านที่ตรวจไฟล์จากการ build จึงไปตรวจของที่ยังไม่มี
@@ -97,8 +106,17 @@ jobs:
       # คนละชุดกับที่ทดสอบในเครื่อง — ใน job ที่ถือ `CLOUDFLARE_API_TOKEN` และคีย์ AI
       # `npm ci` ล้มทันทีถ้า lockfile ไม่ตรงกับ package.json ซึ่งเป็นสิ่งที่เราต้องการ
       # และแคชของ setup-node ใช้ได้เลยเพราะ `package-lock.json` มีอยู่จริง (กับดักเดิมหายไปเอง)
+      #
+      # 🔒 A10-04: `--ignore-scripts` — job นี้ถือโทเคน Cloudflare/คีย์ AI จึงไม่ให้แพ็กเกจรัน lifecycle script ตอนติดตั้ง
+      #    แพ็กเกจที่ lockfile ประกาศว่ามี install script มีแค่ `esbuild` · `workerd` (และ `fsevents` เฉพาะ macOS) — พิสูจน์แล้วว่า
+      #    ติดตั้งแบบข้ามสคริปต์ได้ไฟล์ชุดเดียวกับแบบรันสคริปต์ทุกไฟล์ (ไบนารีมากับแพ็กเกจแพลตฟอร์ม · `sharp` ใช้ไบนารีสำเร็จรูป)
+      #    บรรทัดล่างตรวจว่าเครื่องมือเหล่านี้ยังรันได้ — ถ้าวันหนึ่งขึ้นรุ่นที่ต้องพึ่งสคริปต์ จะล้มตรงนี้ ไม่ใช่กลางการ deploy
       - name: 📦 Install dependencies
-        run: npm ci
+        run: |
+          npm ci --ignore-scripts
+          node_modules/.bin/esbuild --version
+          node_modules/.bin/workerd --version
+          node -e "require('sharp')"
 
       # รัน migration ที่ยังไม่ apply ทั้งหมดใส่ D1 remote ก่อน deploy โค้ดใหม่ขึ้นไป
       # (idempotent — wrangler เช็ก migration ที่ apply แล้วจาก D1_migrations table เอง ข้ามอันที่ทำไปแล้วอัตโนมัติ)

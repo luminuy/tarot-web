@@ -273,13 +273,6 @@
   background: var(--ui2-glass-day-solid);
   box-shadow: 0 0 0 1px var(--ui2-line-day), 0 1px 0 var(--ui2-glass-edge-day) inset;
 }
-.ui2-chip .ui2-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: var(--ui2-teal);
-  box-shadow: 0 0 0 3px rgba(79, 209, 193, 0.18);
-}
 .ui2-night .ui2-chip {
   color: var(--ui2-on-night-soft);
   background: var(--ui2-glass-night-solid);

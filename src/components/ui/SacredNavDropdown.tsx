@@ -236,6 +236,10 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       <nav
         id="sacred-nav-panel"
         ref={drawerRef}
+        /* ลิ้นชักเปิด = หน้าต่างลอยที่กักโฟกัสอยู่แล้ว — ต้องบอกโปรแกรมอ่านจอด้วยว่าหน้าหลังฉากใช้ไม่ได้ (B1)
+           เดิมไม่มี role/aria-modal ผู้ใช้โปรแกรมอ่านจอเลื่อนอ่านเนื้อหาหลังลิ้นชักต่อได้ทั้งที่มองไม่เห็น */
+        role="dialog"
+        aria-modal={isOpen ? true : undefined}
         aria-label={isEnglish ? "Site menu" : "เมนูเว็บไซต์"}
         aria-hidden={!isOpen}
         tabIndex={isOpen ? 0 : -1}

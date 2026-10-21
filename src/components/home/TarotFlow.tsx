@@ -69,6 +69,7 @@ import { describePurchaseError, safeCreditCount } from "@/lib/account/purchase-n
 import { START_SITUATION_MAX } from "@/lib/reading/start-limits";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { RitualRail, SpreadSummaryCard, SealChip, SpreadSwitcher } from "@/components/home/RitualChrome";
+import { cardsEn } from "@/lib/text/plural-en";
 
 /**
  * ✦ Dynamic Code-Splitting — คอมโพเนนต์หนักทั้งหมดโหลดเมื่อถึงขั้นที่ใช้จริง
@@ -1166,9 +1167,12 @@ export default function TarotFlow({
     const defaultQ = (isEnglish && topic.defaultQuestionEn) ? topic.defaultQuestionEn : topic.defaultQuestion;
     const quickSpread = PUBLIC_SPREADS.find((s) => s.id === "quick") || selectedSpread;
     const missing = isEnglish ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง";
-    setSelectedSpread(quickSpread);
-    setSelectedCategory(topic.category);
-    setQuestion(defaultQ);
+    /*
+     * ⚠️ ห้ามตั้งผัง/หมวด/คำถามของพิธีหลักตรงนี้ (B4-06) — ไพ่ด่วนถือค่าของตัวเองใน `quickDrawRef`
+     * เดิมเขียนทับคำถามที่ผู้ใช้พิมพ์ค้างไว้ในผังของตัวเองเงียบ ๆ (และถูกบันทึกลง flow state)
+     * กลับไปกดเริ่มผังเดิมจึงส่งคำถามของหัวข้อด่วน + หมวดที่มองไม่เห็นไป /start แทน
+     * ค่าเหล่านี้ถูกตั้งตอนผู้ใช้กด "ให้แม่หมอ AI อ่านต่อ" (`continueQuickReading`) เท่านั้น
+     */
     dispatchRead({ type: "clearError" });
     soundManager.playCardSelectSound();
 
@@ -1310,6 +1314,10 @@ export default function TarotFlow({
     const pending = quickDrawRef.current;
     if (!pending) return;
     quickDrawRef.current = null;
+    // ผู้ใช้เลือกอ่านไพ่ด่วนจริงแล้ว ➔ ขั้นอ่านต้องแสดงผัง/หมวด/คำถามของไพ่ด่วน (B4-06: ตั้งตรงนี้ ไม่ใช่ตอนแตะไพ่)
+    setSelectedSpread(pending.spread);
+    setSelectedCategory(pending.category);
+    setQuestion(pending.question);
     dispatchDeck({ type: "deal", cards: pending.cards });
     // ผู้ใช้พลิกใบนี้เองแล้วบนผ้าปู (กฎเหล็ก 4) — ไม่ต้องให้พลิกซ้ำในขั้นอ่าน
     dispatchDeck({ type: "revealAll" });
@@ -2097,7 +2105,7 @@ export default function TarotFlow({
                   <p className="v2-rt-bar-hint" aria-live="polite">
                     {question.trim()
                       ? isEnglish
-                        ? `${selectedSpread.positions.length} cards · read by ${selectedPersona.nameEn || selectedPersona.nameTh}`
+                        ? `${cardsEn(selectedSpread.positions.length)} · read by ${selectedPersona.nameEn || selectedPersona.nameTh}`
                         : `${selectedSpread.positions.length} ใบ · ${selectedPersona.nameTh} อ่านให้`
                       : isEnglish
                         ? "Type your question to continue"
@@ -2193,7 +2201,15 @@ export default function TarotFlow({
                   จอเล็กเรียงบนลงล่าง · จอ lg ขึ้นไปแบ่ง 3:1 */}
               <div className="v2-rd-grid">
                 <section aria-label={isEnglish ? "Tarot reading interpretation" : "คำทำนายไพ่ทาโรต์"} className="v2-rd-main">
-                  {selectedSpread.resultStyle === "quick" ? (
+                  {selectedSpread.resultStyle === "quick" &&
+                  !drawnCards.every((c) => revealedOrders.includes(c.order)) ? (
+                    /* 🃏 กฎเหล็กข้อ 4 — คำอ่านสตรีมมาแล้วแต่ไพ่ยังคว่ำ ห้ามเฉลยชื่อ/ภาพ/คำอ่านก่อนผู้ใช้พลิกเอง */
+                    <p className="v2-sr-wait">
+                      {isEnglish
+                        ? "Tap the card on the spread to turn it over yourself — the reading appears here once it is face up."
+                        : "แตะไพ่บนผ้าปูเพื่อพลิกดูเอง พอหงายหน้าแล้วคำอ่านของแม่หมอจะขึ้นตรงนี้"}
+                    </p>
+                  ) : selectedSpread.resultStyle === "quick" ? (
                     <QuickChatResult
                       readingId={readingId}
                       persona={selectedPersona}
@@ -2223,6 +2239,8 @@ export default function TarotFlow({
                       activeCardIndex={activeCardIndex}
                       onSelectCardIndex={(order) => dispatchDeck({ type: "focus", order })}
                       drawnCards={drawnCards}
+                      revealedOrders={revealedOrders}
+                      onRevealCard={handleFlipCard}
                       proof={proof}
                       errorMsg={errorMsg}
                       question={question}
@@ -2242,7 +2260,8 @@ export default function TarotFlow({
 
                 {/* แถบข้าง: แชทต่อกับแม่หมอ · แชร์ · ดูเรื่องอื่น — ติดจอบนเดสก์ท็อป */}
                 <aside className="v2-rd-side">
-                  {readingId && (
+                  {/* คำอ่านสำรอง (AI ไม่ว่าง · ไม่หักสิทธิ์) ยังถามต่อไม่ได้ — เซิร์ฟเวอร์ตอบ 409 (B4-01) · ให้กด "ให้แม่หมอ AI อ่านใหม่" ในป้ายด้านบนก่อน */}
+                  {readingId && !read.fallback && (
                     <Link
                       href="/reading/chat"
                       onClick={() => soundManager.playCardSelectSound()}

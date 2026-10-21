@@ -560,6 +560,18 @@ async function runTest() {
     if (kept.nickname || kept.question || kept.reading_snapshot || keptBooking.contact_email) {
       throw new Error("❌ A2-01: ตั๋วหมดอายุที่เก็บแถวการเงินไว้ต้องล้างข้อมูลส่วนบุคคลออก");
     }
+    // B2-01: ตั๋วที่ล้างแล้วถูกประทับ pii_cleared_at ➔ รอบถัดไปไม่อ่านซ้ำ (งานต่อรอบไม่โตตามประวัติ)
+    const stamped = await one("SELECT pii_cleared_at FROM queue_tickets WHERE id = ?", `tkt_ret_money_${run}`);
+    if (typeof stamped?.pii_cleared_at !== "number") throw new Error("❌ B2-01: ตั๋วที่ล้างข้อมูลแล้วต้องประทับ pii_cleared_at");
+    const plan = (await db
+      .prepare(
+        "EXPLAIN QUERY PLAN SELECT t.id FROM queue_tickets t WHERE t.expires_at < ? AND t.pii_cleared_at IS NULL AND EXISTS (SELECT 1 FROM payments p WHERE p.ticket_id = t.id AND p.status = 'paid')",
+      )
+      .bind(t0)
+      .all<{ detail: string }>()).results.map((r) => r.detail).join(" | ");
+    if (!/idx_tickets_pii_pending/.test(plan) || /idx_payments_status\b/.test(plan)) {
+      throw new Error(`❌ B2-01/B2-04: แผนคำสั่งต้องใช้ idx_tickets_pii_pending และไม่ใช้ idx_payments_status ใน subquery (ได้: ${plan})`);
+    }
 
     await addTicket(`tkt_dup_refund_${run}`, "waiting", t0 + 86_400_000);
     await addPayment(`pay_dup_first_${run}`, `tkt_dup_refund_${run}`, "paid");
@@ -949,7 +961,20 @@ async function testBookingCare(readerId: string) {
   if (!byUser.some((x) => x.id === t.id) || byStranger.some((x) => x.id === t.id) || (await listTicketsForOwner({})).length !== 0) {
     throw new Error("❌ นัดของฉัน: ต้องเห็นเฉพาะตั๋วของบัญชีตัวเอง");
   }
-  console.log("  ✓ 18.4 เงินเข้า ➔ เก็บอีเมลจากหน้าจ่าย + ยืนยันครั้งเดียว · นัดของฉันเห็นเฉพาะของบัญชีตัวเอง");
+  // A1-04: บัญชีอีเมลต้องยืนยันอีเมลแล้วจึงนับเป็นเจ้าของตั๋วที่ผูก user id · OAuth ผ่านทันที
+  {
+    const { verifiedOwnerUserId } = await import("../../src/lib/marketplace/ticket-owner");
+    const { createEmailUser, markEmailVerified } = await import("../../src/lib/users/users.repo");
+    const mailUser = await createEmailUser({ email: `own_${crypto.randomUUID().slice(0, 8)}@example.com`, name: "ทดสอบเจ้าของ", passwordHash: "x" });
+    const before = await verifiedOwnerUserId({ id: mailUser.id, provider: "email" });
+    await markEmailVerified(mailUser.id);
+    const after = await verifiedOwnerUserId({ id: mailUser.id, provider: "email" });
+    if (before !== null || after !== mailUser.id || (await verifiedOwnerUserId({ id: "usr_g", provider: "google" })) !== "usr_g" || (await verifiedOwnerUserId(null)) !== null) {
+      throw new Error(`❌ A1-04: เจ้าของตั๋วผ่านบัญชีอีเมลต้องยืนยันอีเมลก่อน (${before}/${after})`);
+    }
+    await db.prepare("DELETE FROM users WHERE id = ?").bind(mailUser.id).run();
+  }
+  console.log("  ✓ 18.4 เงินเข้า ➔ เก็บอีเมลจากหน้าจ่าย + ยืนยันครั้งเดียว · นัดของฉันเห็นเฉพาะของบัญชีตัวเอง · บัญชีอีเมลที่ยังไม่ยืนยันไม่นับเป็นเจ้าของ");
 
   // ── 18.5 รีวิว: เฉพาะคุยจบ+จ่ายแล้ว · ครั้งเดียว · ซ่อนชื่อเล่น ───────────────────
   const { POST: postReview } = await import("../../src/app/api/marketplace/tickets/[id]/review/route");
@@ -1013,6 +1038,51 @@ async function testBookingCare(readerId: string) {
       throw new Error(`❌ cron: ${res.status} ${JSON.stringify(json)} waitlist_left=${left?.c}`);
     }
     if ((await getQueueTicketById(tl.id))?.status !== "expired") throw new Error("❌ cron ต้องปิดตั๋วที่หมดเวลาจ่าย");
+
+    // A2-10: แม่หมอกดเริ่มแล้วไม่เคยเข้าห้อง — ปิด + คืนเงินอัตโนมัติ "เฉพาะ" ห้องวิดีโอที่มีหลักฐานว่าลูกค้ารอแล้วไปแล้ว
+    const paidReady = async (ref: string) => {
+      const tk = await createQueueTicket({ readerId, kind: "walkup", customerRef: ref, nickname: "ห้อง", question: "ห้องร้าง", initialStatus: "pending_payment" });
+      const hd = await repo.holdBooking({ ticketId: tk.id, readerId, kind: "walkup", slotStart: Date.now() });
+      if (!hd.ok) throw new Error("❌ เตรียมเคสห้องร้าง: hold ล้ม");
+      const py = await createPaymentRecord({ bookingId: hd.booking.id, ticketId: tk.id, provider: "simulator", providerRef: `chrg_${ref}`, amountSatang: 29900 });
+      await repo.settleConsultationPayment(py.id);
+      await updateTicketStatus(tk.id, "ready", readerId);
+      return tk.id;
+    };
+    const room = (id: string, openedMinAgo: number, customerSeenMinAgo: number | null, readerSeenMinAgo: number | null) => {
+      const at = (m: number | null) => (m === null ? null : Date.now() - m * 60_000);
+      return db
+        .prepare(
+          `INSERT OR REPLACE INTO call_sessions (ticket_id, round, customer_seen_at, reader_seen_at, created_at, updated_at)
+           VALUES (?, 1, ?, ?, ?, ?)`
+        )
+        .bind(id, at(customerSeenMinAgo), at(readerSeenMinAgo), at(openedMinAgo), Date.now())
+        .run();
+    };
+    const gone = await paidReady("cust_room_gone"); // ลูกค้ารอ 20 นาทีแล้วออกไปนาน ➔ ปิด
+    const waiting = await paidReady("cust_room_wait"); // ลูกค้ายังรออยู่ในห้อง ➔ ไม่แตะ
+    const met = await paidReady("cust_room_met"); // แม่หมอเข้าห้องแล้ว ➔ ไม่แตะ
+    const lineOnly = await paidReady("cust_room_line"); // ไม่มีห้องวิดีโอ (คุยทาง LINE) ➔ ไม่มีหลักฐาน ไม่แตะ
+    await room(gone, 60, 40, null);
+    await room(waiting, 60, 0, null);
+    await room(met, 60, 40, 50);
+    const res2 = await cron(
+      new Request("https://x/api/cron/booking-reminders", { method: "POST", headers: { authorization: "Bearer cron_test_secret_value" } }),
+    );
+    const json2 = (await res2.json()) as { abandonedRooms: number };
+    const st = async (id: string) => (await getQueueTicketById(id))?.status;
+    const closedRow = await db
+      .prepare("SELECT status, cancelled_by, refund_status FROM bookings WHERE ticket_id = ?")
+      .bind(gone)
+      .first<{ status: string; cancelled_by: string | null; refund_status: string | null }>();
+    if (
+      res2.status !== 200 || json2.abandonedRooms !== 1 ||
+      (await st(gone)) !== "cancelled" || closedRow?.status !== "cancelled" || closedRow.cancelled_by !== "system" || closedRow.refund_status !== "refunded" ||
+      (await st(waiting)) !== "ready" || (await st(met)) !== "ready" || (await st(lineOnly)) !== "ready"
+    ) {
+      throw new Error(`❌ A2-10 cron ปิดห้องร้าง: ${res2.status} ${JSON.stringify(json2)} ${JSON.stringify(closedRow)} ${await st(gone)}/${await st(waiting)}/${await st(met)}/${await st(lineOnly)}`);
+    }
+    console.log("  ✓ 18.6b cron ปิดนัดวิดีโอที่แม่หมอไม่เคยเข้าห้อง + คืนเงินเต็ม · ไม่แตะห้องที่ลูกค้ายังรอ/แม่หมอเข้าแล้ว/ไม่มีห้องวิดีโอ (LINE)");
   } finally {
     if (savedSecret === undefined) delete process.env.CRON_SECRET;
     else process.env.CRON_SECRET = savedSecret;
@@ -1428,6 +1498,38 @@ async function testVideoCall(readerId: string, sessionSecret: string) {
     throw new Error("❌ VideoCallRoom ต้องต่อสายใหม่อัตโนมัติจากฝั่งลูกค้า + ฟังเน็ตกลับมา + มีปุ่มต่อเองสำรอง");
   }
   console.log(`  ✓ 16.6 ต่อสายใหม่อัตโนมัติ ${cases.length} สถานการณ์ถูกต้อง · ระยะเว้น 0/10/20/30 วิ · ป้ายคุณภาพสาย 3 ระดับ`);
+
+  // 16.6b กล้องที่ได้มาหลังวางสาย/ออกจากหน้า (รออนุญาตกล้อง · สลับกล้อง) ต้องถูกปิดทันที — ไม่งั้นไฟกล้องค้าง
+  const genGuards = room.match(/gen !== mediaGenRef\.current/g)?.length ?? 0;
+  if (
+    !/const releaseMedia = useCallback\(\(\) => \{\s*mediaGenRef\.current \+= 1;/.test(room) ||
+    !/if \(gen !== mediaGenRef\.current\) \{\s*stream\.getTracks\(\)\.forEach\(\(t\) => t\.stop\(\)\);/.test(room) ||
+    !/if \(gen !== mediaGenRef\.current\) \{\s*track\?\.stop\(\);/.test(room) ||
+    genGuards < 5
+  ) {
+    throw new Error("❌ VideoCallRoom ต้องปิดกล้องที่ได้มาหลังปล่อยกล้องแล้ว (เทียบ mediaGenRef ทุกจุดที่ await กล้อง/เข้าห้อง)");
+  }
+  console.log(`  ✓ 16.6b กล้องที่ได้มาหลังวางสาย/ออกจากหน้าถูกปิดทันที (${genGuards} จุดเทียบรุ่น)`);
+  // 16.6c (B4-08) กดวางสายระหว่างเข้าห้อง ➔ บอกเลิกสายที่ join ไปแล้ว · ตัวคุมสายไม่ถามสถานะซ้อนสองโซ่
+  if (
+    !/if \(res\.ok && hangUpRequestedRef\.current\)/.test(room) ||
+    !/if \(this\.stopped \|\| this\.ticking\) return;/.test(room) ||
+    !/if \(this\.timer\) clearTimeout\(this\.timer\);\s*this\.timer = setTimeout/.test(room)
+  ) {
+    throw new Error("❌ VideoCallRoom: วางสายระหว่างเข้าห้องต้องส่ง end · tick ห้ามซ้อน · schedule ต้องล้างตัวจับเวลาเก่า (B4-08)");
+  }
+  console.log("  ✓ 16.6c วางสายระหว่างเข้าห้องบอกเลิกสาย · ตัวคุมสายถามสถานะโซ่เดียว (B4-08)");
+  // 16.6d (B4-09) ถามสถานะพลาดชั่วคราวกลางคิว ➔ ห้ามล้างหน้า/ถอดห้องวิดีโอ ทั้งฝั่งลูกค้าและแม่หมอ
+  const queuePage = fs.readFileSync(path.join(process.cwd(), "src/app/(th)/readers/queue/[id]/page.tsx"), "utf-8");
+  const consolePage = fs.readFileSync(path.join(process.cwd(), "src/app/(th)/readers/console/page.tsx"), "utf-8");
+  if (
+    !/else if \(res\.status === 404 \|\| res\.status === 403\) \{[\s\S]{0,200}setError\(/.test(queuePage) ||
+    !/setUnstable\(true\);/.test(queuePage) ||
+    !/\(res\.status >= 500 \|\| res\.status === 429\) && hasData\.current\) \{[\s\S]{0,200}setUnstable\(true\);/.test(consolePage)
+  ) {
+    throw new Error("❌ หน้าคิว/แผงแม่หมอ: 5xx/429/เน็ตสะดุดต้องเก็บข้อมูลเดิม (setUnstable) ไม่ใช่ setError ที่ถอดห้องวิดีโอ (B4-09)");
+  }
+  console.log("  ✓ 16.6d ถามสถานะพลาดชั่วคราวไม่ถอดห้องวิดีโอ ทั้งหน้าคิวลูกค้าและแผงแม่หมอ (B4-09)");
 }
 
 /**

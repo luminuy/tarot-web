@@ -179,7 +179,7 @@ function thaiOnly(text: string, where: string): string {
  *
  * ถ้าค่านี้ถูกปฏิเสธด้วย 400 ระบบจะยิงซ้ำโดยไม่ส่งเพดานเลย (ดู `fetchGeminiStream`)
  */
-export const GEMINI_OUTPUT_BUDGET = { ceiling: 8000, multiplier: 3, floor: 8192 } as const;
+const GEMINI_OUTPUT_BUDGET = { ceiling: 8000, multiplier: 3, floor: 8192 } as const;
 
 /** ผลของการขอสตรีมหนึ่งครั้ง */
 interface GeminiFetchResult {

@@ -272,6 +272,40 @@ console.log("\n── 4. redirect ของ URL เก่า ──");
   }
 }
 
+// ── เส้น /api/* ที่ประกาศอายุแคชที่ขอบ ต้องแคชเองผ่าน Cache API (A9-02) ─────────────
+// `/api/*` อยู่ใน run_worker_first — response ที่ Worker สร้างไม่ผ่านแคช CDN หัว `s-maxage`
+// อย่างเดียวจึงไม่มีผลที่ขอบ (วัด production 2026-10-19: ไม่มี cf-cache-status · s-maxage ลดลงทุกคำขอ)
+// เส้นที่ประกาศ s-maxage / CDN-Cache-Control จึงต้องผ่าน `withEdgeCache` (src/lib/platform/edge-cache.ts)
+{
+  const apiDir = path.join(ROOT, "src/app/api");
+  const routeFiles: string[] = [];
+  const walkApi = (dir: string) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const abs = path.join(dir, entry.name);
+      if (entry.isDirectory()) walkApi(abs);
+      else if (entry.name === "route.ts") routeFiles.push(abs);
+    }
+  };
+  walkApi(apiDir);
+  const declaring = routeFiles.filter((f) => /s-maxage|CDN-Cache-Control/.test(fs.readFileSync(f, "utf8")));
+  // หนี้ที่รู้แล้ว: ยังไม่ห่อ (แคชได้แค่ฝั่งเบราว์เซอร์) — ห่อแล้วให้ลบออกจากรายการนี้ (ด่านเตือนถ้าค้าง)
+  const PENDING = new Set<string>();
+  const usesEdgeCache = (f: string) => /\bwithEdgeCache\(/.test(fs.readFileSync(f, "utf8"));
+  const uncached = declaring.filter((f) => !usesEdgeCache(f) && !PENDING.has(path.relative(ROOT, f)));
+  const stalePending = [...PENDING].filter((rel) => {
+    const abs = path.join(ROOT, rel);
+    return !fs.existsSync(abs) || usesEdgeCache(abs) || !declaring.includes(abs);
+  });
+  check("รายการหนี้แคชที่ขอบ (PENDING) ไม่มีเส้นที่แก้แล้วค้างอยู่", stalePending.length === 0, stalePending.join(" · "));
+  check(
+    `เส้น /api ที่ประกาศ s-maxage ใช้ withEdgeCache ครบ (${declaring.length} เส้น)`,
+    declaring.length > 0 && uncached.length === 0,
+    uncached.length
+      ? `${uncached.map((f) => path.relative(ROOT, f)).join(" · ")} — ห่อด้วย withEdgeCache หรือเอา s-maxage ออก`
+      : "ไม่เจอเส้นที่ประกาศ s-maxage เลย = การสแกนพัง",
+  );
+}
+
 // ── สรุป ──────────────────────────────────────────────────────────────────
 if (failed > 0) {
   console.log(`\n❌ ไม่ผ่าน ${failed} ข้อ\n`);

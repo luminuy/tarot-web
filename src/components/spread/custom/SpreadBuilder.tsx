@@ -39,6 +39,7 @@ import { SpreadLayoutGlyph } from "./SpreadLayoutGlyph";
 import { loadMyAndMigrate } from "./load-mine";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
+import { cardsEn } from "@/lib/text/plural-en";
 
 /**
  * ✦ ห้องออกแบบผัง `/spreads/create` (REFLECTION_JOURNAL_PLAN 1.8 · คลื่น 5)
@@ -499,7 +500,7 @@ export const SpreadBuilder: React.FC = () => {
               L("ยังไม่มีไพ่บนผ้าปู", "The mat is empty")
             ) : (
               <>
-                <b>{draft.name || L("ผังไม่มีชื่อ", "Untitled spread")}</b> · {L(`${n} ใบ`, `${n} cards`)}
+                <b>{draft.name || L("ผังไม่มีชื่อ", "Untitled spread")}</b> · {L(`${n} ใบ`, cardsEn(n))}
               </>
             )}
           </p>
@@ -532,7 +533,7 @@ export const SpreadBuilder: React.FC = () => {
                 <div>
                   <p className="v2-sb-saved-name">{s.name}</p>
                   <p className="v2-sb-saved-meta">
-                    {L(`${s.positions.length} ใบ`, `${s.positions.length} cards`)}
+                    {L(`${s.positions.length} ใบ`, cardsEn(s.positions.length))}
                     {s.useCount ? ` · ${L(`ใช้แล้ว ${s.useCount} ครั้ง`, `used ${s.useCount}×`)}` : ""}
                     {s.shareSlug ? ` · ${L("เปิดลิงก์แบ่งปันอยู่", "shared by link")}` : ""}
                   </p>

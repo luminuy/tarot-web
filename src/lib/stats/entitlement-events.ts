@@ -26,7 +26,7 @@ const FLAT_EVENTS = [
   "upsell_card_click:credits",
 ] as const;
 
-export const ENTITLEMENT_EVENTS: readonly string[] = [
+const ENTITLEMENT_EVENTS: readonly string[] = [
   ...FLAT_EVENTS,
   ...DIALOG_STAGES.flatMap((stage) => REASONS.map((r) => `access_dialog_${stage}:${r}`)),
 ];

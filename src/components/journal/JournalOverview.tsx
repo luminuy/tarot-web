@@ -6,6 +6,7 @@ import { THEME_LABEL } from "@/data/cards/themes";
 import { computeJournalStats, MIN_CARDS_FOR_STATS, type RatioStat } from "@/lib/journal/stats";
 import type { SavedReadingItem } from "@/lib/utils/history";
 import { stripEmojiDeep } from "@/lib/text/no-emoji";
+import { cardsEn } from "@/lib/text/plural-en";
 
 /**
  * ✦ ภาพรวมสมุดดวง — "บัญชีไพ่แบบซื่อตรง" (REFLECTION_JOURNAL_PLAN 1.3)
@@ -80,7 +81,7 @@ export const JournalOverview: React.FC<{ items: SavedReadingItem[]; isEnglish: b
           <p className="text-sm font-serif-th text-ink-deep">
             {L({
               th: `ตอนนี้มีไพ่ ${stats.cardsDrawn} ใบ — ขอสัก ${MIN_CARDS_FOR_STATS} ใบขึ้นไปก่อนถึงจะเริ่มเห็นภาพที่ไม่ใช่ความบังเอิญ`,
-              en: `You have ${stats.cardsDrawn} cards so far — we need at least ${MIN_CARDS_FOR_STATS} before anything beyond chance can show.`,
+              en: `You have ${cardsEn(stats.cardsDrawn)} so far — we need at least ${MIN_CARDS_FOR_STATS} before anything beyond chance can show.`,
             })}
           </p>
         ) : stats.topCards.length === 0 ? (

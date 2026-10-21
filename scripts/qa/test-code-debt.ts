@@ -15,6 +15,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { assertNonEmptyCorpus } from "./lib/corpus";
+import { collectRenderedPages } from "./lib/rendered-pages";
 
 const ROOT = process.cwd();
 
@@ -810,6 +811,14 @@ check(
     fs.readFileSync(path.join(ROOT, "src/app/globals.css"), "utf-8").includes('html:has(> body[style*="overflow: hidden"])'),
   );
   check("A6-07: ไม่มี list-disc (จุดนำรายการ) ในเว็บ — ใช้ .list-rule เส้นซ้ายแทน", discHits.length === 0, discHits.map(rel).join(" · "));
+  // B4-04: จุดเรืองแสงกะพริบ (`animate-ping` บนจุดกลมเล็ก) = "จุดเรืองแสง" ตกแต่งที่กฎข้อ 2 ห้าม — ป้ายมีข้อความอยู่แล้ว
+  //   วงกระเพื่อมรอบรูปแม่หมอในห้องวิดีโอ (h-28) สื่อสถานะ "กำลังเรียก" ไม่ใช่จุดเล็ก จึงไม่เข้าเกณฑ์นี้ (รอเจ้าของตัดสิน)
+  const pingDots = sources.filter((f) =>
+    /className="[^"]*\b(?:w|h)-(?:0\.5|1|1\.5|2|2\.5|3)\b[^"]*\banimate-ping\b|className="[^"]*\banimate-ping\b[^"]*\b(?:w|h)-(?:0\.5|1|1\.5|2|2\.5|3)\b/.test(
+      stripComments(fs.readFileSync(f, "utf-8")),
+    ),
+  );
+  check("B4-04: ไม่มีจุดเรืองแสงกะพริบ (animate-ping บนจุดเล็ก) ในเว็บ", pingDots.length === 0, pingDots.map(rel).join(" · "));
   /*
    * A5-03b: ข้อความที่ AI เขียน ด่านตรวจโค้ดมองไม่เห็น ➔ ต้องกวาดตรงทางออก
    * ยิงเคสจริงผ่าน stripEmoji() + ยืนยันว่าทางออกหลักทุกเส้นเรียกใช้อยู่
@@ -937,6 +946,90 @@ check(
     "A7-03: หน้าแชร์ /s/[id] (noindex) ไม่มี canonical ชี้หน้าแรก · og:url เป็นลิงก์ของตัวเอง",
     /alternates:\s*noindexAlternates\(\)/.test(share) && !/buildAlternates\(/.test(share) && /\$\{SITE_ORIGIN\}\/s\/\$\{id\}/.test(share),
   );
+  check(
+    "B3-09: ลิงก์แชร์ที่ไม่มีจริงตอบ 404 (notFound) ทั้ง metadata และหน้า · Googlebot ได้ metadata ใน <head>",
+    (share.match(/if \(found === "missing"\) notFound\(\);/g) ?? []).length === 2 &&
+      /htmlLimitedBots:\s*\n?\s*\/Googlebot\|/.test(fs.readFileSync(path.join(ROOT, "next.config.ts"), "utf-8")),
+  );
+  const blogDetail = src("src/app/_shared/pages/blog-detail.tsx");
+  check(
+    "B3-11: ภาพแชร์บทความใช้ไพ่ประจำบทความ (getArticleCardArt) ไม่ใช่ไพ่ประจำหมวด",
+    (blogDetail.match(/cardImage: getArticleCardArt\(article\)\.image/g) ?? []).length === 2 && !/getCategoryCardImage\(article\.category\)/.test(blogDetail),
+  );
+  const baseLayout = fs.readFileSync(path.join(ROOT, "astro/layouts/BaseLayout.astro"), "utf-8");
+  const rootHtml = src("src/app/_shared/RootHtml.tsx");
+  check(
+    "B3-12: Organization ชื่อ \"SeerTarot\" · ไม่มี repo ใน sameAs · WebSite.url เป็นรากโดเมนทั้งสองเครื่องเรนเดอร์",
+    [baseLayout, rootHtml].every(
+      (f) => /"@type": "Organization",[\s\S]{0,300}name: "SeerTarot",/.test(f) && !/github\.com\/luminuy/.test(f) && !/url: isEnglish \? `\$\{SITE_ORIGIN\}\/en`/.test(f),
+    ),
+  );
+  // B1: ลิ้นชักเมนูมือถือเป็นหน้าต่างลอย (role=dialog + aria-modal ตอนเปิด) ทั้ง React และสคริปต์หน้า static
+  check(
+    "B1: ลิ้นชักเมนูมือถือประกาศ role=dialog + aria-modal ตอนเปิด (React และหน้า static)",
+    /role="dialog"\s*\n\s*aria-modal=\{isOpen \? true : undefined\}/.test(src("src/components/ui/SacredNavDropdown.tsx")) &&
+      /panel\.setAttribute\("aria-modal", "true"\)/.test(fs.readFileSync(path.join(ROOT, "astro/scripts/site-header.ts"), "utf-8")),
+  );
+  // B1: แถบเส้นทางหน้าไทยชื่อ "เส้นทางนำทาง" (ไม่ให้โปรแกรมอ่านจอพูดคำอังกฤษ) — ตัวซ่อนใน globals.css ต้องครอบทั้งสองชื่อ
+  const crumbLabels = new Set<string>();
+  for (const f of sources) {
+    for (const m of stripComments(fs.readFileSync(f, "utf-8")).matchAll(/<nav aria-label=(?:"([^"]+)"|\{[^}]*?"([^"]+)"\s*:\s*"([^"]+)"\})[^>]*className="[^"]*crumb/g)) {
+      for (const v of [m[1], m[2], m[3]]) if (v) crumbLabels.add(v);
+    }
+  }
+  const globalsCss = src("src/app/globals.css");
+  check(
+    "B1: ทุกชื่อแถบเส้นทาง (Breadcrumb · เส้นทางนำทาง) ถูกซ่อนจากตาใน globals.css",
+    crumbLabels.has("เส้นทางนำทาง") && [...crumbLabels].every((l) => globalsCss.includes(`nav[aria-label="${l}"]:not(:focus-within)`)),
+    [...crumbLabels].join(" · "),
+  );
+  // B1: ถ้อยคำบนหน้าไทยไม่ใช้สัญลักษณ์แทนคำ ("&" "≈" "+" "vs") ในของกลางที่โชว์ทุกหน้า
+  check(
+    "B1: ป้ายท้ายเว็บ/ราคา/หน้าแรก/ชื่อผังไม่ใช้ & ≈ + vs แทนคำไทย",
+    !/title: "ปลอดภัย & /.test(src("src/components/layout/nav-links.ts")) &&
+      !/ตกครั้งละ ≈/.test(src("src/components/entitlement/PackageParts.tsx")) &&
+      !/"ล็อกลำดับ \+ /.test(src("src/components/home2/Ui2StaticSections.tsx")) &&
+      !/nameTh: "[^"]* & [^"]*"|tagline: "[^"]* vs [^"]*"/.test(src("src/data/spreads.ts")),
+  );
+  // B1: สคริปต์หน้าแรกห้ามแตะ DOM ของ island ก่อน React hydrate เสร็จ (เดิม #418 ทุกครั้งที่เปิดหน้าแรก)
+  const ui2Home = stripComments(fs.readFileSync(path.join(ROOT, "astro/scripts/ui2-home.ts"), "utf-8"));
+  const flowRoot = fs.readFileSync(path.join(ROOT, "astro/islands/TarotFlowRoot.tsx"), "utf-8");
+  check(
+    "B1: ui2-home เริ่มสแกน/นับเลข/โน้ตหลังสัญญาณ ui2:hydrated จาก TarotFlowRoot เท่านั้น",
+    /afterHydrate\(scan\)/.test(ui2Home) && /afterHydrate\(watchNotes\)/.test(ui2Home) && /afterHydrate\(\(\) => \{\s*watchCounts\(\);/.test(ui2Home) &&
+      !/^(scan|watchNotes|watchCounts|setupScrolly)\(\);/m.test(ui2Home) &&
+      /setAttribute\("data-ui2-hydrated", ""\)/.test(flowRoot) && /new Event\("ui2:hydrated"\)/.test(flowRoot) &&
+      /afterHydrate\(scan\)/.test(stripComments(fs.readFileSync(path.join(ROOT, "astro/scripts/home-track.ts"), "utf-8"))),
+  );
+  // B2-05: ตัวนับ "1909" อยู่ในคอลัมน์กว้างตามเนื้อหา — นับจาก 0 ต้องล็อกความกว้างไว้ ไม่งั้นคอลัมน์ข้าง ๆ ขยับ (CLS ตอนเลื่อน)
+  check(
+    "B2-05: ตัวนับเลขหน้าแรกล็อก min-width ระหว่างนับ แล้วปลดเมื่อนับเสร็จ",
+    /el\.style\.minWidth = `\$\{el\.offsetWidth\}px`/.test(ui2Home) && /el\.style\.minWidth = ""/.test(ui2Home),
+  );
+  // หน้าไทยไม่ใช้หัวเล็กภาษาอังกฤษ (เจ้าของ 2026-10-21) — ยกเว้นชื่อเฉพาะ (Rider–Waite · Pick a Card · SeerTarot) และตัวย่อกฎหมาย
+  // ชื่อไพ่ภาษาอังกฤษใต้ชื่อไทย (`v3-tile-en`) เป็นชื่อเฉพาะที่ตั้งใจแสดง ไม่ใช่หัวเล็ก
+  const KICKER_CLASS = /class="((?![^"]*tile-en)[^"]*\b(?:ui2-accent|ui2-kicker|ui2-bk-kicker|ui2-fr-kicker|ui2-sx-start-k)\b[^"]*)"[^>]*>([^<]{2,60})</g;
+  const KICKER_OK = /^(?:Rider[–-]Waite|Pick a Card|SeerTarot|PDPA[ ·A-Z]*)$/;
+  const thaiPages = collectRenderedPages().filter((pg) => !/^\/en(\/|$)/.test(pg.route) && pg.file.endsWith(".html"));
+  const kickerHits: string[] = [];
+  for (const pg of thaiPages) {
+    for (const m of fs.readFileSync(pg.file, "utf-8").matchAll(KICKER_CLASS)) {
+      const t = m[2].trim();
+      if (/[\u0E00-\u0E7F]/.test(t) || !/[A-Za-z]{3}/.test(t) || KICKER_OK.test(t)) continue;
+      kickerHits.push(`${pg.route}: ${t}`);
+    }
+  }
+  check(
+    "หน้าไทยไม่มีหัวเล็กภาษาอังกฤษ (ui2-accent · ui2-kicker ฯลฯ)",
+    thaiPages.length > 100 && kickerHits.length === 0,
+    `หน้าไทย ${thaiPages.length} หน้า · ${kickerHits.slice(0, 6).join(" · ")}`,
+  );
+  // B1: จุดตกแต่ง (จุดคั่นกลม · จุดเรืองแสงในชิปล็อกไพ่) ถูกถอด — ห้ามกลับมา (กฎเหล็กข้อ 2)
+  const dotHits = sources.filter((f) => /className="(?:ui2-dot|v2-ar-dot|v2-tp-dot)"/.test(fs.readFileSync(f, "utf-8")));
+  check("B1: ไม่มีจุดตกแต่ง ui2-dot · v2-ar-dot · v2-tp-dot", dotHits.length === 0, dotHits.map(rel).join(" · "));
+  // B1: ผังไพ่ 1 ใบ ห้ามขึ้น "1 cards" — จำนวนที่เป็น 1 ได้ต้องผ่าน cardsEn()
+  const pluralHits = sources.filter((f) => /\$\{[\w.]*positions\.length\} cards/.test(stripComments(fs.readFileSync(f, "utf-8"))));
+  check("B1: ไม่มี `${…positions.length} cards` (ใช้ cardsEn กัน \"1 cards\")", pluralHits.length === 0, pluralHits.map(rel).join(" · "));
   const robots = src("src/app/robots.ts");
   check(
     "A7-06: robots.txt เปิด /api/share/image/ (ภาพแชร์คำทำนาย) ในทุกกลุ่มที่ปิด /api/",

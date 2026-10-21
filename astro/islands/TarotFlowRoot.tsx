@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 import TarotFlow from "@/components/home/TarotFlow";
 import { CurrentPathProvider } from "@/components/layout/current-path";
@@ -36,6 +36,11 @@ export function TarotFlowRoot({
   /** `Astro.url.pathname` — หัวเว็บรู้ว่าอยู่หน้าไหนตั้งแต่ HTML (ไฮไลต์เมนู · ลิงก์ฝาแฝดของตัวเลือกภาษา) */
   pathname?: string;
 }) {
+  // บอกสคริปต์หน้าแรก (`astro/scripts/ui2-home.ts`) ว่า hydrate เสร็จแล้ว แตะ DOM ได้ — effect รันหลัง commit เท่านั้น
+  useEffect(() => {
+    document.documentElement.setAttribute("data-ui2-hydrated", "");
+    window.dispatchEvent(new Event("ui2:hydrated"));
+  }, []);
   return (
     <LocaleProvider forcedLocale={locale}>
       <CurrentPathProvider pathname={pathname}>

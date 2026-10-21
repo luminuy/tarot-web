@@ -15,8 +15,10 @@ import type { Article } from "@/data/articles";
 import { getArticleTitle } from "@/data/article-helpers";
 import { mapLayout, MAP_CARD_ASPECT, MAP_CARD_MIN_PX } from "@/lib/tarot/spread-map-geometry";
 import { useLocale } from "@/lib/i18n";
+import { buildSpreadFaqs, SPREAD_CATEGORY_TH } from "@/lib/seo/faq";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { Ui2Crumbs, Ui2SectionHead } from "@/components/ui2/Ui2PageHero";
+import { cardsEn } from "@/lib/text/plural-en";
 
 interface Props {
   spread: Spread;
@@ -26,17 +28,6 @@ interface Props {
   /** หมวดที่ผังนี้สังกัด (คำนวณฝั่งเซิร์ฟเวอร์ใน `spreadDetailProps`) — ห้าม import คลังหมวดเข้า island นี้ */
   topicCrumb?: { label: string; path: string };
 }
-
-const CATEGORY_TH: Record<string, string> = {
-  general: "ทั่วไป",
-  love: "ความรัก",
-  career: "การงาน",
-  work: "การงาน",
-  money: "การเงิน",
-  finance: "การเงิน",
-  spiritual: "จิตวิญญาณ",
-  decision: "การตัดสินใจ",
-};
 
 const CATEGORY_EN: Record<string, string> = {
   general: "General Inquiries",
@@ -63,7 +54,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
   const spreadDesc = getSpreadDescription(spread, isEnglish);
   const categoryLabel = isEnglish
     ? CATEGORY_EN[spread.defaultCategory] ?? spread.defaultCategory
-    : CATEGORY_TH[spread.defaultCategory] ?? spread.defaultCategory;
+    : SPREAD_CATEGORY_TH[spread.defaultCategory] ?? spread.defaultCategory;
 
   const topicPhrase = isEnglish
     ? (spread.defaultCategory === "general" ? "your core question" : `matters of ${categoryLabel.toLowerCase()}`)
@@ -91,7 +82,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
         : "ตั้งสมาธิที่คำถามระหว่างสับไพ่ แล้วหยุดเมื่อรู้สึกว่าพอ",
     },
     {
-      name: isEnglish ? `Draw ${spread.positions.length} cards` : `เลือกไพ่ ${spread.positions.length} ใบ`,
+      name: isEnglish ? `Draw ${cardsEn(spread.positions.length)}` : `เลือกไพ่ ${spread.positions.length} ใบ`,
       text: isEnglish
         ? `Select cards one by one into positions 1 through ${spread.positions.length} without flipping them yet.`
         : `เลือกไพ่ทีละใบวางตามตำแหน่งที่ 1 ถึง ${spread.positions.length} โดยไม่เปิดดูหน้าไพ่`,
@@ -104,32 +95,8 @@ export const SpreadDetailClient: React.FC<Props> = ({
     },
   ];
 
-  const faqs = [
-    {
-      question: isEnglish
-        ? `What types of questions suit the ${spreadName}?`
-        : `ผัง${spread.nameTh} เหมาะกับคำถามแบบไหน`,
-      answer: isEnglish
-        ? `${spreadDesc} It is designed to reveal hidden dynamics and offer practical guidance.`
-        : `${spread.description} ${spread.defaultCategory !== "general" ? `จึงเหมาะกับเรื่อง${categoryLabel}ที่อยากเห็นภาพรวมและปัจจัยรอบด้าน` : ""}`.trim(),
-    },
-    {
-      question: isEnglish
-        ? "How many cards are drawn in this spread?"
-        : "ผังนี้ใช้ไพ่กี่ใบ",
-      answer: isEnglish
-        ? `This layout uses ${spread.positions.length} cards arranged in a deliberate geometric pattern.`
-        : `ผังนี้ใช้ไพ่ ${spread.positions.length} ใบ วางตามตำแหน่งที่กำหนดไว้`,
-    },
-    {
-      question: standard
-        ? (isEnglish ? "Is this spread available on the standard tier?" : "ผังนี้เปิดใช้ฟรีได้ไหม")
-        : (isEnglish ? "Why is this spread designated as a Grand Spread?" : "ทำไมผังนี้เป็นผังพิเศษ"),
-      answer: standard
-        ? (isEnglish ? "Yes, this is an open spread available to all seekers under daily quota." : "ได้ ผังนี้เป็นผังมาตรฐานที่สมาชิกทุกคนเปิดได้ตามโควตาปกติ")
-        : (isEnglish ? "This layout features complex multi-card geometry and deep syntheses, unlocked for seekers with Grand Oracle access." : "ผังนี้มีจำนวนไพ่มากและตีความละเอียด จึงสงวนไว้สำหรับผู้ถือสิทธิ์ญาณพยากรณ์พิเศษ"),
-    },
-  ];
+  /* ชุดเดียวกับ FAQPage JSON-LD ของหน้า (`spread-detail.tsx`) — ตัวสร้างกลาง `buildSpreadFaqs` (A7-10) */
+  const faqs = buildSpreadFaqs(spread, isEnglish, standard);
 
   /*
    * v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — "พิมพ์เขียวผัง"
@@ -199,7 +166,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
                 type="button"
                 className="v2-sd-slot card-back-pattern"
                 aria-pressed={active === idx}
-                aria-label={`${idx + 1}. ${getPositionName(pos, isEnglish)}`}
+                aria-label={`${idx + 1}. ${posLabel(pos)}`}
                 style={{
                   left: `${pos.x * 100}%`,
                   top: `${(((pos.y * map.yScale + map.offsetY) / map.boxHeight) * 100).toFixed(3)}%`,
@@ -229,7 +196,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
       <section id="sd-positions" className="v2-sd-sec" aria-labelledby="sd-pos-h">
         <Ui2SectionHead
           n="01"
-          word="Positions"
+          word={isEnglish ? "Positions" : "ตำแหน่งไพ่"}
           id="sd-pos-h"
           title={isEnglish ? "Positional Roles & Interpretations" : `ตำแหน่งไพ่ทั้ง ${spread.positions.length} ใบและความหมาย`}
           lede={
@@ -263,7 +230,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
       </section>
 
       <section className="v2-sd-sec" aria-labelledby="sd-how-h">
-        <Ui2SectionHead n="02" word="How to read" id="sd-how-h" title={isEnglish ? "How to Read this Spread" : "วิธีอ่านผังนี้"} />
+        <Ui2SectionHead n="02" word={isEnglish ? "How to read" : "วิธีอ่าน"} id="sd-how-h" title={isEnglish ? "How to Read this Spread" : "วิธีอ่านผังนี้"} />
         <ol className="v2-sd-steps">
           {howToSteps.map((step, idx) => (
             <li key={idx}>
@@ -281,7 +248,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
 
       <section className="v2-sd-sec v2-sd-split">
         <div aria-labelledby="sd-faq-h">
-          <Ui2SectionHead n="03" word="FAQ" id="sd-faq-h" title={isEnglish ? "Frequently Asked Questions" : "คำถามที่พบบ่อย"} />
+          <Ui2SectionHead n="03" word={isEnglish ? "FAQ" : "ถามบ่อย"} id="sd-faq-h" title={isEnglish ? "Frequently Asked Questions" : "คำถามที่พบบ่อย"} />
           <div className="v2-sd-faq">
             {faqs.map((faq, idx) => (
               <details key={idx}>
@@ -294,7 +261,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
 
         {relatedArticles.length > 0 && (
           <div aria-labelledby="sd-art-h">
-            <Ui2SectionHead n="04" word="Read more" id="sd-art-h" title={isEnglish ? "Related Wisdom Articles" : "บทความที่เกี่ยวข้อง"} />
+            <Ui2SectionHead n="04" word={isEnglish ? "Read more" : "อ่านต่อ"} id="sd-art-h" title={isEnglish ? "Related Wisdom Articles" : "บทความที่เกี่ยวข้อง"} />
             <ul className="v2-sd-articles">
               {relatedArticles.map((a) => (
                 <li key={a.slug}>
@@ -307,7 +274,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
       </section>
 
       <section className="v2-sd-sec" aria-labelledby="sd-more-h">
-        <Ui2SectionHead n={relatedArticles.length > 0 ? "05" : "04"} word="More spreads" id="sd-more-h" title={isEnglish ? "Explore Other Spreads" : "ผังอื่นที่น่าสนใจ"} />
+        <Ui2SectionHead n={relatedArticles.length > 0 ? "05" : "04"} word={isEnglish ? "More spreads" : "ผังอื่น"} id="sd-more-h" title={isEnglish ? "Explore Other Spreads" : "ผังอื่นที่น่าสนใจ"} />
         <ul className="v2-sd-more">
           {fallbackSpreads.map((s) => {
             const m = mapLayout(s.positions);

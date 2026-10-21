@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PURGE_CONFIRM_TEXT } from "@/lib/studio/dpa";
 import { layoutsFor } from "@/lib/tarot/custom-spread";
 import { APP_TIME_ZONE } from "@/lib/time/bangkok";
@@ -66,9 +66,24 @@ export function StudioApp({ token }: { token: string | null }) {
   const [openReading, setOpenReading] = useState<ReadingT | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
+  /** โหลดสตูดิโอสำเร็จแล้วอย่างน้อยครั้งหนึ่ง — โหลดซ้ำที่ล้มชั่วคราวต้องไม่ล้างหน้า (B4-11) */
+  const bootedRef = useRef(false);
   const load = useCallback(async () => {
     const res = await call<Boot>("");
-    if (!res.ok) return setFatal({ text: res.error, code: res.code });
+    if (!res.ok) {
+      /*
+       * ทางตันจริงมีแค่ "ไม่มีสิทธิ์" (401/403 · สตูดิโอปิด) — เดิมเน็ตสะดุดตอนโหลดซ้ำหลังบันทึก
+       * ก็กลายเป็นหน้า "เข้าสตูดิโอไม่ได้" ทั้งหน้า ไม่มีปุ่มลองใหม่ และของที่แก้ค้างในแท็บอื่นหายไปด้วย
+       */
+      const denied = res.status === 401 || res.status === 403 || res.code === "studio_disabled";
+      if (bootedRef.current && !denied) {
+        setNotice(`${res.error} — ข้อมูลบนหน้านี้ยังเป็นชุดล่าสุดที่โหลดได้`);
+        return;
+      }
+      setFatal({ text: res.error, code: res.code });
+      return;
+    }
+    bootedRef.current = true;
     setFatal(null);
     setBoot(res.data);
   }, [call]);
@@ -115,6 +130,11 @@ export function StudioApp({ token }: { token: string | null }) {
       <div className={`${card} mx-auto max-w-lg space-y-3 text-center`}>
                 <h1 className="text-xl font-bold text-ink-deep">{fatal.code === "studio_disabled" ? "สตูดิโอแม่หมอยังไม่เปิดให้ใช้งาน" : "เข้าสตูดิโอไม่ได้"}</h1>
         <p className="text-sm leading-relaxed text-muted">{fatal.code === "studio_disabled" ? "เรากำลังเตรียมข้อตกลงการดูแลข้อมูลลูกค้าให้รัดกุมก่อนเปิดใช้ แล้วจะแจ้งให้ทราบ" : fatal.text}</p>
+        {token && fatal.code !== "studio_disabled" && (
+          <button type="button" onClick={() => void load()} className={btnGhost}>
+            ลองอีกครั้ง
+          </button>
+        )}
       </div>
     );
   }

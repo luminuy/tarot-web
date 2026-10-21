@@ -2,8 +2,6 @@
 /* 🎨 SeerTarot UI 2.0 — ส่วนที่ใช้ทั้งเว็บ (โทเคน · ตัวเอียงโลโก้ · ปุ่มดำหัวเว็บ)
    สไตล์หน้าแรก (ui2.css + ui2-fx-full.css) โหลดเฉพาะหน้าที่มี TarotFlow — ห้ามย้ายมาที่นี่ (งบ CSS ต่อหน้า · ด่าน test-bundle-budget) */
 @import "../styles/ui2-base.css";
-/* 🌙 โหมดมืด — ทับเฉพาะตอน <html data-theme="dark"> · โหมดสว่างไม่ถูกแตะ (รายละเอียดอยู่ในไฟล์) */
-@import "./theme-dark.css";
 
 /*
  * 🔍 ขอบเขตที่ Tailwind ใช้ "สแกนหาชื่อคลาส" (Source Detection)
@@ -2488,9 +2486,11 @@ html[data-consent-ask] [data-consent-banner] {
      • โปรแกรมอ่านหน้าจอยังอ่านเส้นทางได้ · บอทยังเห็นลิงก์ภายใน (ห้าม display:none)
      • ผลค้นหา Google ใช้ BreadcrumbList ใน JSON-LD อยู่แล้ว ไม่พึ่ง <nav> นี้
      • กด Tab มาถึงลิงก์ในแถบ ➔ แถบโผล่ให้เห็น ไม่งั้นโฟกัสหายไปกับของที่มองไม่เห็น
-   ทุก <nav> เส้นทางในเว็บใช้ aria-label="Breadcrumb" (ตรวจกับ HTML ที่บิลด์แล้ว 2026-09-24)
+   ทุก <nav> เส้นทางในเว็บใช้ aria-label="Breadcrumb" (หน้าอังกฤษ) หรือ "เส้นทางนำทาง" (หน้าไทย · B1 2026-10-20)
+   ⚠️ เพิ่ม/เปลี่ยนชื่อ aria-label ของแถบเส้นทางต้องแก้ตัวเลือกนี้ด้วย ไม่งั้นแถบโผล่บนจอ (ด่าน test-code-debt เฝ้า)
    ═════════════════════════════════════════════════════════════════════════ */
-nav[aria-label="Breadcrumb"]:not(:focus-within) {
+nav[aria-label="Breadcrumb"]:not(:focus-within),
+nav[aria-label="เส้นทางนำทาง"]:not(:focus-within) {
   position: absolute;
   width: 1px;
   height: 1px;

@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 
 import { DECK, cardById } from "@/data/cards";
-import { CARD_MEANINGS_EN } from "@/data/cards/meanings-en";
 import type { TarotCard } from "@/data/cards/types";
 import { type CardNavRef } from "@/components/encyclopedia/CardDetailView";
 import { RelatedCards } from "@/components/encyclopedia/RelatedCards";
 import { CardSpreadLinks } from "@/components/encyclopedia/CardSpreadLinks";
 import { CARD_GROUPS } from "@/data/cards/group-seo";
 import { buildYesNoAnswer } from "@/data/cards/yes-no";
+import { buildFaqPageJsonLd, cardYesNoQuestion } from "@/lib/seo/faq";
 import { buildAlternates, localizedUrl, SITE_ORIGIN, noindexAlternates } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { clampDescription, pickTitle } from "@/lib/config/meta-length";
@@ -188,7 +188,7 @@ export function cardDetailJsonLd(card: TarotCard, locale: Locale) {
     inDefinedTermSet: localizedUrl("/cards", locale),
     url: localizedUrl(`/cards/${card.id}`, locale),
     image: `${SITE_ORIGIN}/cards/${card.image}`,
-    inLanguage: locale,
+    // ไม่มี inLanguage — ไม่ใช่คุณสมบัติของ DefinedTerm (validator.schema.org เตือนทั้ง 156 หน้า · B3-06)
   };
 }
 
@@ -197,92 +197,15 @@ export function cardDetailBreadcrumbJsonLd(card: TarotCard, locale: Locale) {
   return buildBreadcrumbJsonLd(locale, buildCardCrumbs(card, locale));
 }
 
-/** JSON-LD `FAQPage` สำหรับหน้าไพ่รายใบ (ชิงพื้นที่ Rich Snippet Accordion บน Google) */
+/**
+ * JSON-LD `FAQPage` สำหรับหน้าไพ่รายใบ — ใส่เฉพาะคำถามที่ผู้ใช้เห็นบนหน้าเป็นข้อความจริง (A7-10)
+ * ตอนนี้มีข้อเดียวคือ "ใช่หรือไม่" (หัวข้อ h2 ของ `CardYesNoAnswer` · คำตอบคือคำอธิบายฝั่งหัวตั้งที่แสดงใต้หัวข้อ)
+ * ความหมายรายด้าน (ความรัก · การงาน · กลับหัว) มีบนหน้าเป็นหัวข้อหมวด ไม่ใช่คำถาม จึงไม่ใส่ใน FAQPage
+ */
 export function cardDetailFaqJsonLd(card: TarotCard, locale: Locale) {
   const isEnglish = locale === "en";
   const yn = buildYesNoAnswer(card, true, isEnglish);
-
-  if (isEnglish) {
-    const en = CARD_MEANINGS_EN[card.id]?.meanings ?? card.meanings;
-    const cardSubject = card.nameEn.toLowerCase().startsWith("the ") ? card.nameEn : `the ${card.nameEn}`;
-    return {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: [
-        {
-          "@type": "Question",
-          name: `Is ${card.nameEn} a Yes or No card?`,
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: `${yn.headline}. ${yn.body}`,
-          },
-        },
-        {
-          "@type": "Question",
-          name: `What does ${cardSubject} mean in love?`,
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: en.love.upright,
-          },
-        },
-        {
-          "@type": "Question",
-          name: `What does ${cardSubject} mean in career and finances?`,
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: `${en.work.upright} ${en.money.upright}`,
-          },
-        },
-        {
-          "@type": "Question",
-          name: `What does reversed ${card.nameEn} mean?`,
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: en.general.reversed,
-          },
-        },
-      ],
-    };
-  }
-
-  return {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: `ไพ่ ${card.nameEn} (${card.nameTh}) ใช่หรือไม่?`,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: `${yn.headline}. ${yn.body}`,
-        },
-      },
-      {
-        "@type": "Question",
-        name: `ไพ่ ${card.nameEn} (${card.nameTh}) ความหมายเรื่องความรักคืออะไร?`,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: card.meanings.love.upright,
-        },
-      },
-      {
-        "@type": "Question",
-        name: `ไพ่ ${card.nameEn} (${card.nameTh}) เรื่องการงานและการเงิน บอกอะไร?`,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: `${card.meanings.work.upright} ${card.meanings.money.upright}`,
-        },
-      },
-      {
-        "@type": "Question",
-        name: `ไพ่ ${card.nameEn} (${card.nameTh}) กลับหัว (Reversed) มีความหมายอย่างไร?`,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: card.meanings.general.reversed,
-        },
-      },
-    ],
-  };
+  return buildFaqPageJsonLd([{ question: cardYesNoQuestion(card, isEnglish), answer: yn.body }]);
 }
 
 /** ลิงก์ท้ายหน้า (ไพ่พลังงานใกล้เคียง + ผังที่เหมาะกับไพ่ใบนี้) — ไม่มีสถานะ ไม่ต้องใช้ JS */

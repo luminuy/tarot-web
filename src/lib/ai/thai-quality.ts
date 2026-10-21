@@ -478,7 +478,7 @@ export function checkThaiQuality(
  * รวบรวมข้อความไทยทุกชิ้นในวัตถุซ้อนชั้นมาต่อกัน (ใช้ตรวจทั้ง Reading ในครั้งเดียว)
  * คั่นด้วย `\n` เพื่อไม่ให้คำท้ายฟิลด์กับคำต้นฟิลด์ถัดไปติดกันจนเกิดผลบวกลวง
  */
-export function collectThaiText(value: unknown): string {
+function collectThaiText(value: unknown): string {
   if (typeof value === "string") return value;
   if (Array.isArray(value)) return value.map(collectThaiText).join("\n");
   if (value && typeof value === "object") {
@@ -500,7 +500,7 @@ export function checkThaiQualityDeep(value: unknown, opts?: ThaiQualityOptions):
  * ═══════════════════════════════════════════════════════════════════ */
 
 /** รหัสปัญหาที่ `polishThai()` แก้ให้เองได้ 100% ➔ แก้เงียบ ๆ ไม่ต้อง failover */
-export const AUTOFIXABLE_CODES: ThaiIssueCode[] = [
+const AUTOFIXABLE_CODES: ThaiIssueCode[] = [
   "DOUBLE_SARA_E",
   "PARTICLE_MISMATCH",
   "DUP_DIACRITIC",

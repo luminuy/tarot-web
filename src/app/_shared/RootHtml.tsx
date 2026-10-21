@@ -8,7 +8,6 @@ import { LocaleProvider } from "@/lib/i18n";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { BRAND_SOCIAL_PROFILES, DEFAULT_SUPPORT_EMAIL, SITE_ORIGIN } from "@/lib/config/site";
 import { CONSENT_STORAGE_KEY } from "@/lib/analytics-consent";
-import { THEME_SCRIPT } from "@/lib/theme/theme-script";
 import { getImageKitOrigin } from "@/lib/tarot/card-image";
 import type { Locale } from "@/lib/i18n/types";
 
@@ -79,7 +78,9 @@ export function RootHtml({
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "SeerTarot Sanctuary",
+    // ชื่อเดียวกับ WebSite/publisher — ชื่อยาวอยู่ใน alternateName (B3-12 · ตรงกับ BaseLayout.astro)
+    name: "SeerTarot",
+    alternateName: ["SeerTarot Sanctuary", "วิหารพยากรณ์ไพ่ทาโรต์"],
     url: SITE_ORIGIN,
     // ต้องเป็นตราสัญลักษณ์จริง ไม่ใช่ภาพหน้าไพ่ (Google ใช้ช่องนี้แสดงโลโก้แบรนด์ใน Knowledge Panel)
     logo: {
@@ -91,7 +92,7 @@ export function RootHtml({
     /* sameAs = ช่องที่ Google/AI ใช้ผูก "เว็บนี้" เข้ากับ "บัญชีนั้น" ว่าเป็นเจ้าเดียวกัน
        เดิมมีแต่ลิงก์ repo บน GitHub ซึ่งไม่ได้บอกตัวตนของแบรนด์เลย
        เติมโปรไฟล์โซเชียลจริงจาก `BRAND_SOCIAL_PROFILES` (แหล่งความจริงเดียวกับปุ่มลอย TikTok) */
-    sameAs: [...BRAND_SOCIAL_PROFILES, "https://github.com/luminuy/tarot-web"],
+    sameAs: [...BRAND_SOCIAL_PROFILES], // repo โค้ดไม่ใช่โปรไฟล์แบรนด์ (B3-12)
     /* ช่องทางติดต่อที่ใช้ได้จริง — Quality Rater Guidelines มองหา "ติดต่อใครได้"
        เป็นสัญญาณความน่าเชื่อถือหลักของเว็บที่ให้คำแนะนำเกี่ยวกับชีวิต
        ⚠️ ใส่ได้เฉพาะช่องทางที่ตรวจแล้วว่าส่งถึงจริง ห้ามใส่ที่อยู่/เบอร์ที่ไม่มีอยู่จริง */
@@ -112,7 +113,7 @@ export function RootHtml({
     "@type": "WebSite",
     name: "SeerTarot",
     alternateName: isEnglish ? "SeerTarot Sanctuary" : "วิหารพยากรณ์ไพ่ทาโรต์",
-    url: isEnglish ? `${SITE_ORIGIN}/en` : SITE_ORIGIN,
+    url: SITE_ORIGIN, // รากโดเมนเสมอ — ไซต์เนมของ Google อ่านจากตัวนี้ (B3-12)
     inLanguage: locale,
   };
 
@@ -128,10 +129,6 @@ export function RootHtml({
         {/* 🎨 ระดับเอฟเฟกต์ UI 2.0 (full · lite · off) — ฝาแฝดของ BaseLayout.astro · ต้องรันก่อนเฟรมแรก
             ตั้งแอตทริบิวต์บน <html> จึงพึ่ง suppressHydrationWarning ข้างบน (เหตุผลเดียวกับสวิตช์แถบยินยอม) */}
         <script dangerouslySetInnerHTML={{ __html: UI2_FX_SCRIPT }} />
-
-        {/* 🌙 โหมดมืด/สว่าง — ต้องรันก่อนเฟรมแรก ห้ามใส่ defer/async (เหตุผลอยู่ที่ src/lib/theme/theme-script.ts)
-            ตั้ง `data-theme` บน <html> ก่อน React ไฮเดรต — `suppressHydrationWarning` ของ <html> ครอบไว้แล้ว */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
 
         {/*
           🔌 เปิดสายไปยัง CDN ของภาพไพ่ล่วงหน้า — โฮสต์เดียวที่เบราว์เซอร์ต้องต่อจริงตอนวาดหน้า

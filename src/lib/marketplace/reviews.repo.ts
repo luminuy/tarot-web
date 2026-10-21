@@ -92,6 +92,7 @@ export async function createReview(input: {
       )
       .bind(review.id, review.ticketId, review.readerId, review.rating, review.comment, review.nickname, review.createdAt)
       .run();
+    invalidateRatingsCache();
   } catch (err) {
     if (/UNIQUE constraint failed|SQLITE_CONSTRAINT/i.test(String((err as Error)?.message ?? err))) {
       return { ok: false, error: "คุณรีวิวการปรึกษาครั้งนี้ไปแล้ว", status: 409 };
@@ -134,14 +135,28 @@ export async function getReaderReviewSummary(readerId: string, limit = 6): Promi
   };
 }
 
+/**
+ * ⚡ B2-02: หน้า `/readers` เป็น force-dynamic (บอตค้นหาเปิดซ้ำได้) แต่คะแนนรวมอ่านรีวิว "ทุกแถวในระบบ" (โตตลอด)
+ * ➔ จำผลไว้ 5 นาทีต่อ isolate (คะแนนเฉลี่ยช้า 5 นาทีไม่มีใครเห็นต่าง) + index ครอบ rating (migrations/0035)
+ * ซ่อน/เพิ่มรีวิวล้างแคชทันที (`invalidateRatingsCache`)
+ */
+const RATINGS_TTL_MS = 5 * 60 * 1000;
+let ratingsCache: { at: number; value: Map<string, { count: number; average: number }> } | null = null;
+
+export function invalidateRatingsCache(): void {
+  ratingsCache = null;
+}
+
 /** สรุปคะแนนทุกแม่หมอในครั้งเดียว (หน้ารวมแม่หมอ) */
 export async function getAllReaderRatings(): Promise<Map<string, { count: number; average: number }>> {
+  if (ratingsCache && Date.now() - ratingsCache.at < RATINGS_TTL_MS) return ratingsCache.value;
   const db = await getAppDB();
   const { results } = await db
     .prepare("SELECT reader_id, COUNT(*) AS c, AVG(rating) AS a FROM reader_reviews WHERE hidden = 0 GROUP BY reader_id")
     .all<{ reader_id: string; c: number; a: number }>();
   const out = new Map<string, { count: number; average: number }>();
   for (const r of results || []) out.set(r.reader_id, { count: Number(r.c), average: Math.round(Number(r.a) * 10) / 10 });
+  ratingsCache = { at: Date.now(), value: out };
   return out;
 }
 
@@ -159,5 +174,6 @@ export async function listRecentReviews(limit = 30): Promise<(ReaderReview & { r
 export async function setReviewHidden(reviewId: string, hidden: boolean): Promise<boolean> {
   const db = await getAppDB();
   const res = await db.prepare("UPDATE reader_reviews SET hidden = ? WHERE id = ?").bind(hidden ? 1 : 0, reviewId).run();
+  invalidateRatingsCache();
   return (res.meta?.changes ?? 0) > 0;
 }

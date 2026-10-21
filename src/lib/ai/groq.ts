@@ -47,7 +47,7 @@ export const WORKING_GROQ_MODELS = [
   "openai/gpt-oss-20b",
 ] as const;
 
-export const GROQ_DEFAULT_TIMEOUT_MS = 12000;
+const GROQ_DEFAULT_TIMEOUT_MS = 12000;
 
 /**
  * เพดานโทเค็นผลลัพธ์ฝั่ง Groq
@@ -56,7 +56,7 @@ export const GROQ_DEFAULT_TIMEOUT_MS = 12000;
  * บีบให้ผลลัพธ์เหลือราว 3,000 อยู่แล้ว — แต่ต้องมีไว้เป็นตัวเลขของ "เจ้านี้"
  * ห้ามให้ผู้ให้บริการรายอื่นมายืมเลขนี้ไปใช้ (เพดานเป็นของใครของมัน)
  */
-export const GROQ_OUTPUT_CEILING = 7000;
+const GROQ_OUTPUT_CEILING = 7000;
 
 export interface GroqChatMessage {
   role: "system" | "user" | "assistant";

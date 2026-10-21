@@ -7,7 +7,6 @@ import { requestFreshStart } from "@/lib/utils/flow-persistence";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { HeaderAccount } from "@/components/layout/HeaderAccount";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { useLocale } from "@/lib/i18n";
 import { stripLocalePrefix } from "@/lib/i18n/paths";
 import { useCurrentPath } from "@/components/layout/current-path";
@@ -145,7 +144,8 @@ export function SiteHeader({
               // กดโลโก้ = เริ่มใหม่จากหน้าแรกจริง ไม่ใช่กู้คืนรอบที่ค้างกลับมา (requestFreshStart)
               onClick={() => requestFreshStart()}
               aria-label={isEnglish ? "SeerTarot — Return to Home" : "ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"}
-              className="group flex min-w-0 shrink items-center gap-2.5 sm:gap-3 select-none rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
+              /* โลโก้ห้ามหด (ตัวหนังสือ nowrap) — เดิม `min-w-0 shrink` ทำให้ชื่อ SEERTAROT ไหลไปทับเมนู "Readings" ที่จอ 1024 หน้าอังกฤษ (B1 2026-10-20) */
+              className="group flex min-w-0 shrink-0 items-center gap-2.5 sm:gap-3 select-none rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
             >
               <img
                 src="/logo.webp"
@@ -174,7 +174,6 @@ export function SiteHeader({
                   {isEnglish ? "Start a reading" : "เริ่มดูดวง"}
                 </a>
               )}
-              <ThemeToggle isEnglish={isEnglish} />
               <LanguageSwitcher />
               {/* ไม่มีใครส่ง toolbar มา (หน้าเนื้อหาทั่วไป) ➔ ใส่ปุ่มบัญชีให้เอง หัวเว็บทุกหน้าจะได้เหมือนหน้าแรก */}
               {toolbar ?? <HeaderAccount />}
@@ -213,7 +212,8 @@ function DesktopNav({ isEnglish }: { isEnglish: boolean }) {
   return (
     <nav
       aria-label={isEnglish ? "Main menu" : "เมนูหลัก"}
-      className="hidden items-center gap-7 font-serif-th text-[15px] text-ink lg:flex"
+      /* 1024–1279: เมนูอังกฤษยาวกว่าไทย — ระยะห่าง/ขนาดตัวหนังสือแคบลงให้พอดีแคปซูล (B1 2026-10-20) */
+      className="hidden min-w-0 items-center gap-4 font-serif-th text-[14px] text-ink lg:flex xl:gap-7 xl:text-[15px]"
     >
       {/*
         แผงเมนูใหญ่แบบ apple.com (เจ้าของสั่ง 2026-10-13): แผงมืดเต็มกว้างตั้งแต่ขอบบนจอ (แคปซูลลอยอยู่บนแผง)

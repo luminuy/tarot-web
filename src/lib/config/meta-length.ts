@@ -25,7 +25,7 @@ export const TITLE_MAX = 60;
 export const DESCRIPTION_MAX = 155;
 
 /** ตัดข้อความที่ขอบคำ (ช่องว่าง) ไม่ให้เกิน `max` — ไม่ตัดกลางคำ */
-export function clampText(text: string, max: number): string {
+function clampText(text: string, max: number): string {
   const clean = text.replace(/\s+/g, " ").trim();
   if (clean.length <= max) return clean;
 

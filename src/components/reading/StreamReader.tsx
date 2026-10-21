@@ -56,6 +56,14 @@ interface StreamReaderProps {
   spreadId?: string;
   category?: string;
   basis?: ReadingBasis | null;
+  /**
+   * 🃏 กฎเหล็กข้อ 4 — `order` ของไพ่ที่ผู้ใช้พลิกเองแล้วบนผ้าปู
+   * คำอ่านสตรีมมาตั้งแต่ไพ่ยังคว่ำ แผงนี้จึงต้องไม่เฉลยภาพ/ชื่อ/คำอ่านของใบที่ยังไม่ได้พลิก
+   * ไม่ส่งค่า = ถือว่าพลิกครบแล้ว (ผู้เรียกที่พลิกให้ผู้ใช้ก่อนเข้าขั้นอ่าน)
+   */
+  revealedOrders?: number[];
+  /** ผู้ใช้แตะ "พลิกไพ่ใบนี้" จากแผงคำอ่าน — ส่งต่อให้ผ้าปูพลิกใบนั้น (ผู้ใช้เป็นคนกดเอง) */
+  onRevealCard?: (order: number) => void;
 }
 
 /**
@@ -123,6 +131,8 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
   spreadId,
   category,
   basis,
+  revealedOrders,
+  onRevealCard,
 }) => {
   const { isEnglish } = useLocale();
   // สำรับตามภาษาของหน้า — ไม่ลากคำทำนายอังกฤษมาให้ผู้ใช้ไทย (A8-02)
@@ -139,6 +149,10 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       ? cardByIndex(activeDrawnCard.cardIndex)
       : undefined) || activeDrawnCard?.card;
   const activeCardReading = reading?.cards?.find((c) => c.position === activeCardIndex);
+  const isOrderRevealed = (order: number) => !revealedOrders || revealedOrders.includes(order);
+  const activeRevealed = isOrderRevealed(activeCardIndex);
+  /** ภาพรวม/หลักฐาน/ธาตุ/Provably Fair พูดถึงไพ่ทุกใบ — แสดงได้เมื่อพลิกครบแล้วเท่านั้น */
+  const allRevealed = drawnCards.every((d) => isOrderRevealed(d.order));
 
   /*
    * ✦ ลิงก์หลักฐานของคำอ่าน — สร้างเฉพาะเมื่อไพ่ครบทุกใบและอ่านจบแล้ว (คำอ่านสำรองก็แสดงได้ เพราะหลักฐานมาจากสารานุกรม)
@@ -168,8 +182,8 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
    * ต้องล้างเป็นค่าว่างก่อนเสมอ ไม่งั้นโปรแกรมอ่านหน้าจอที่เห็นสตริงเดิมจะไม่ประกาศซ้ำ
    */
   const [announcement, setAnnouncement] = useState("");
-  const finishedReading = !isStreaming ? activeCardReading?.reading ?? "" : "";
-  const finishedHeadline = !isStreaming ? activeCardReading?.headline ?? "" : "";
+  const finishedReading = !isStreaming && activeRevealed ? activeCardReading?.reading ?? "" : "";
+  const finishedHeadline = !isStreaming && activeRevealed ? activeCardReading?.headline ?? "" : "";
 
   useEffect(() => {
     if (!finishedReading) {
@@ -318,6 +332,33 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       {/* TAB 1: อ่านทีละใบ — หน้าหนังสือ */}
       {activeTab === "card" && (
         <div id="chamber-panel-card" role="tabpanel" aria-labelledby="chamber-tab-card" tabIndex={0} className="v2-sr-panel">
+          {!activeRevealed ? (
+            <article key={`hidden-${activeCardIndex}`} className="v2-sr-page anim-page-transition">
+              <div className="v2-sr-art">
+                <div className="v2-sr-art-img">
+                  <span className="v2-sr-art-none">{isEnglish ? "Face down" : "ไพ่ยังคว่ำอยู่"}</span>
+                </div>
+              </div>
+              <div className="v2-sr-copy">
+                <p className="v2-sr-pos">
+                  {isEnglish
+                    ? `Position ${activeCardIndex + 1} · ${(activeDrawnCard?.position.nameEn || activeDrawnCard?.position.nameTh || "Energy Point").replace(/^\d+\.\s*/, "")}`
+                    : `ตำแหน่งที่ ${activeCardIndex + 1} · ${(activeDrawnCard?.position.nameTh || "ตำแหน่งพลังงาน").replace(/^\d+\.\s*/, "")}`}
+                </p>
+                <h3 className="v2-sr-name">{isEnglish ? "You have not turned this card yet" : "คุณยังไม่ได้พลิกไพ่ใบนี้"}</h3>
+                <p className="v2-sr-wait">
+                  {isEnglish
+                    ? "Tap this card on the spread to turn it over yourself — the reading appears here once it is face up."
+                    : "แตะไพ่ตำแหน่งนี้บนผ้าปูเพื่อพลิกดูเอง พอหงายหน้าแล้วคำอ่านของแม่หมอจะขึ้นตรงนี้"}
+                </p>
+                {onRevealCard && (
+                  <button type="button" onClick={() => onRevealCard(activeCardIndex)} className="v2-sr-btn is-gold">
+                    {isEnglish ? "Turn this card" : "พลิกไพ่ใบนี้"}
+                  </button>
+                )}
+              </div>
+            </article>
+          ) : (
           <article key={activeCardIndex} className="v2-sr-page anim-page-transition">
             <div className="v2-sr-art">
               <div className={`v2-sr-art-img${activeDrawnCard?.isReversed ? " is-rev" : ""}`}>
@@ -445,6 +486,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               )}
             </div>
           </article>
+          )}
 
           {/* ใบก่อน / ใบถัดไป + จุดบอกตำแหน่ง */}
           <nav className="v2-sr-nav" aria-label={isEnglish ? "Cards" : "เลือกไพ่"}>
@@ -459,7 +501,8 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
             <span className="v2-sr-dots">
               {drawnCards.map((d, i) => {
                 const card = d.card || (d.cardIndex !== undefined ? cardByIndex(d.cardIndex) : undefined);
-                const label = `${isEnglish ? `Card ${i + 1}` : `ใบที่ ${i + 1}`}${card ? ` (${isEnglish ? card.nameEn || card.nameTh : card.nameTh})` : ""}`;
+                // ใบที่ยังคว่ำ ห้ามบอกชื่อผ่าน aria-label/title (กฎเหล็กข้อ 4)
+                const label = `${isEnglish ? `Card ${i + 1}` : `ใบที่ ${i + 1}`}${card && isOrderRevealed(d.order) ? ` (${isEnglish ? card.nameEn || card.nameTh : card.nameTh})` : ""}`;
                 return (
                   <button
                     key={d.order}
@@ -489,6 +532,14 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       {/* TAB 2: ภาพรวม & คำแนะนำ */}
       {activeTab === "summary" && (
         <div id="chamber-panel-summary" role="tabpanel" aria-labelledby="chamber-tab-summary" tabIndex={0} className="v2-sr-panel">
+          {!allRevealed ? (
+            <p className="v2-sr-wait">
+              {isEnglish
+                ? "Turn every card on the spread first — the overview speaks about all of them."
+                : "พลิกไพ่บนผ้าปูให้ครบทุกใบก่อน ภาพรวมพูดถึงไพ่ทั้งชุด จึงจะขึ้นเมื่อหงายครบแล้ว"}
+            </p>
+          ) : (
+          <>
           {reading?.summary ? (
             <section className="v2-sr-answer">
               <div className="v2-sr-answer-top">
@@ -606,6 +657,8 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 isReversed: !!c.isReversed,
               }))}
           />
+          </>
+          )}
 
           {/* ปรึกษาแม่หมอตัวจริง */}
           <section className="v2-sr-human">

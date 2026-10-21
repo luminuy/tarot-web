@@ -28,7 +28,7 @@ const noInjection = (label: string, max: number) =>
     .max(max, `${label}ยาวเกินไป`)
     .refine((v) => !looksLikePromptInjection(v), { message: `${label}มีอักขระที่ไม่อนุญาต` });
 
-export const JournalCardSchema = z.object({
+const JournalCardSchema = z.object({
   order: z.number().int().min(0).max(77),
   positionName: z.string().max(120),
   cardIndex: z.number().int().min(0).max(77),
@@ -38,10 +38,10 @@ export const JournalCardSchema = z.object({
   element: z.string().max(20).optional(),
 });
 
-export const JournalOutcomeSchema = z.enum(["PENDING", "ACCURATE", "PARTIAL", "NOT_HAPPENED"]);
+const JournalOutcomeSchema = z.enum(["PENDING", "ACCURATE", "PARTIAL", "NOT_HAPPENED"]);
 
 /** ใจตอนนี้ 1..5 (ดู `mood.ts`) · `null` = ล้างค่าที่เคยเลือก */
-export const JournalMoodSchema = z
+const JournalMoodSchema = z
   .number()
   .int()
   .min(1)
@@ -49,18 +49,18 @@ export const JournalMoodSchema = z
   .transform((v) => v as MoodLevel);
 
 /** แท็กส่วนตัว 1 อัน — สั้น ไม่มีขึ้นบรรทัดใหม่ ไม่มีคำสั่งแฝง */
-export const JournalTagSchema = noInjection("แท็ก", MAX_TAG_LENGTH)
+const JournalTagSchema = noInjection("แท็ก", MAX_TAG_LENGTH)
   .refine((v) => v.trim().length > 0, { message: "แท็กว่างเปล่า" })
   .refine((v) => !/[\r\n\t<>{}]/.test(v), { message: "แท็กมีอักขระที่ไม่อนุญาต" });
 
 /** ≤ 5 แท็ก — ตัดซ้ำ/ช่องว่างให้เป็นมาตรฐานเดียวกับฝั่งเบราว์เซอร์ (`normalizeTags`) */
-export const JournalTagsSchema = z
+const JournalTagsSchema = z
   .array(JournalTagSchema)
   .max(MAX_TAGS_PER_ENTRY, `แท็กได้ไม่เกิน ${MAX_TAGS_PER_ENTRY} อัน`)
   .transform((tags) => normalizeTags(tags));
 
 /** เฟรม `basis` ของคำอ่าน — บูลีนล้วน ไม่มีเนื้อหาส่วนตัว (`explain-types.ts`) */
-export const JournalBasisSchema = z
+const JournalBasisSchema = z
   .object({
     history: z.boolean(),
     member: z.boolean(),
@@ -68,9 +68,9 @@ export const JournalBasisSchema = z
     question: z.boolean(),
   });
 
-export const JournalRitualKindSchema = z.enum(["morning", "evening"]);
+const JournalRitualKindSchema = z.enum(["morning", "evening"]);
 
-export const JournalRitualSchema = z
+const JournalRitualSchema = z
   .object({
     focus: z.enum(RITUAL_FOCUS_IDS).optional(),
     morningNote: noInjection("บันทึกเช้านี้", MAX_RITUAL_NOTE_LENGTH).optional(),
@@ -145,8 +145,6 @@ export const ThreadPatchSchema = z
     closingNote: noInjection("บทสรุปปิดเรื่อง", 1000).nullable().optional(),
   })
   .refine((v) => Object.values(v).some((x) => x !== undefined), { message: "ไม่มีข้อมูลให้แก้ไข" });
-
-export type JournalPatch = z.infer<typeof JournalPatchSchema>;
 
 /** คำค้นฝั่งเซิร์ฟเวอร์ — สั้น ไม่มีอักขระควบคุม (ใช้กับ LIKE เท่านั้น ไม่เข้า prompt) */
 export const JournalSearchQuerySchema = z

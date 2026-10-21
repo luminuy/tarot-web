@@ -119,7 +119,7 @@ export default async function ReaderDetailPage({
         />
 
         <div className="mx-auto max-w-5xl space-y-6 relative z-10">
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 overflow-x-auto whitespace-nowrap text-[13px] text-muted">
+          <nav aria-label="เส้นทางนำทาง" className="flex items-center gap-2 overflow-x-auto whitespace-nowrap text-[13px] text-muted">
             <Link href="/" className="hover:text-gold-ink transition-colors">
               หน้าแรก
             </Link>

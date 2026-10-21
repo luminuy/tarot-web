@@ -76,9 +76,9 @@ export function ContactBodyEn() {
     inLanguage: "en",
     mainEntity: {
       "@type": "Organization",
-      name: "SeerTarot Sanctuary",
-      alternateName: "Online Rider-Waite Tarot Sanctuary",
-      url: `${SITE_ORIGIN}/en`,
+      name: "SeerTarot",
+      alternateName: ["SeerTarot Sanctuary", "Online Rider-Waite Tarot Sanctuary"],
+      url: SITE_ORIGIN,
       email: DEFAULT_SUPPORT_EMAIL,
       sameAs: [...BRAND_SOCIAL_PROFILES],
       contactPoint: {

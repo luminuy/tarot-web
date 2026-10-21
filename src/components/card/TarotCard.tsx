@@ -269,7 +269,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
           {/* Top Frame Gold Header */}
           <div className="w-full flex justify-center items-center opacity-85 z-10">
             <span className="text-[12px] font-serif-th text-surface tracking-[0.25em] uppercase font-bold">
-              SACRED ORACLE
+              SEERTAROT
             </span>
           </div>
 
@@ -290,7 +290,6 @@ export const TarotCard: React.FC<TarotCardProps> = ({
                * จำนวนไพ่บนจอจึงไม่มีผลกับเฟรมเรตอีกต่อไป (ดู globals.css)
                */
               <div className="anim-badge-pulse px-2.5 py-1 rounded-full bg-surface border border-line-warm z-20 flex items-center gap-1 text-[12px] text-ink-deep font-serif-th font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-gold-ink animate-ping" />
                 <span>{isEnglish ? "Tap to reveal" : "แตะเพื่อเปิด"}</span>
               </div>
             )}
@@ -314,7 +313,12 @@ export const TarotCard: React.FC<TarotCardProps> = ({
         {/* ========================================================= */}
         {/* 2. ด้านหน้าไพ่ (Card Face - Pure 1909 Rider-Waite Luxury) */}
         {/* ========================================================= */}
+        {/*
+          ⚠️ หน้าไพ่ถูกวาดไว้ล่วงหน้าเพื่อให้พลิกได้ลื่น (ภาพโหลดเสร็จก่อนแตะ) แต่ opacity-0 ไม่ได้ซ่อนจากโปรแกรมอ่านจอ
+          ต้อง aria-hidden ตอนยังคว่ำ — ไม่งั้นชื่อไพ่ (alt) และป้าย "กลับหัว" ถูกอ่านออกเสียงก่อนผู้ใช้พลิกเอง (กฎเหล็กข้อ 4)
+        */}
         <div
+          aria-hidden={isRevealed ? undefined : true}
           className={`card-face card-face--back absolute inset-0 rounded-lg overflow-hidden border-2 bg-inset-warm transition-opacity duration-300 ${
             !isRevealed ? "pointer-events-none opacity-0" : "opacity-100"
           } ${isHighlighted ? "ring-2 ring-gold-ink ring-offset-2 ring-offset-[#F3EDE2]" : ""}`}
@@ -360,7 +364,8 @@ export const TarotCard: React.FC<TarotCardProps> = ({
             (วัดจริงที่ 320 · 360 · 390 · 430px — จอ ≥640px ไพ่กว้างขึ้นจึงไม่ทับ จึงไม่มีใครเห็น)
             ⚠️ ห้ามย้ายกลับไปไว้แถวบนของไพ่ ถ้าไม่ได้ย้ายปุ่มขยายออกจากมุมบนขวาพร้อมกัน
           */}
-          {isReversed && (
+          {/* โผล่หลังพลิกเท่านั้น — ตอนคว่ำหน้าไพ่แค่ opacity-0 ข้อความยังอยู่ในหน้า (คัดลอก/ค้นหาในหน้าเจอ) */}
+          {isReversed && isRevealed && (
             <div className="absolute bottom-2 left-2 z-20 pointer-events-none">
               <span className="text-[12px] font-bold font-serif-th bg-ink-deep/90 text-surface border border-line-warm/80 px-2 py-0.5 rounded-full ">
                 {isEnglish ? "Reversed" : "กลับหัว"}

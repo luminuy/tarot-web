@@ -12,7 +12,7 @@ import { TTSReaderButton } from "./TTSReaderButton";
 import { trackEvent } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
-import { CHAT_MESSAGE_MAX, clampChatHistory } from "@/lib/reading/chat-limits";
+import { CHAT_FREE_TURNS_PER_READING, CHAT_MESSAGE_MAX, clampChatHistory } from "@/lib/reading/chat-limits";
 import { CheckIcon, ChevronIcon, RefreshIcon } from "@/components/ui/LineIcons";
 
 interface Message {
@@ -35,7 +35,7 @@ interface FollowUpChatProps {
 }
 
 /** id ของส่วน "คุยต่อกับแม่หมอ" — ใช้เป็นจุดหมายของปุ่มเลื่อนลงมาจากแผงคำทำนาย */
-export const ASK_ORACLE_SECTION_ID = "ask-oracle";
+const ASK_ORACLE_SECTION_ID = "ask-oracle";
 
 const SUGGESTED_QUESTIONS_TH = [
   "ไพ่แนะนำให้ฉันระวังเรื่องอะไรมากที่สุด?",
@@ -200,8 +200,11 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
     ent.role === "admin" ||
     ent.role === "unlimited" ||
     (typeof ent.bonusRemaining === "number" && ent.bonusRemaining > 0);
-  const userQuestionsCount = messages.filter((m) => m.sender === "user").length;
-  const freeChatLimitReached = !isUnlimited && userQuestionsCount >= 2;
+  // นับเฉพาะคำถามที่แม่หมอตอบได้จริง — ตาที่ล้ม (เน็ตหลุด · เซิร์ฟเวอร์ปฏิเสธ) ไม่กินสิทธิ์ถามฟรี
+  const userQuestionsCount = messages.filter((m) => m.sender === "bot" && !m.isError).length;
+  // เซิร์ฟเวอร์นับสิทธิ์ถามฟรีต่อไพ่ชุดนี้ด้วย (รีโหลดหน้าแล้วตัวนับบนจอเริ่ม 0 ใหม่) — ตอบว่าหมดแล้วต้องขึ้นปุ่มเติมรอบทันที
+  const [serverFreeExhausted, setServerFreeExhausted] = useState(false);
+  const freeChatLimitReached = !isUnlimited && (serverFreeExhausted || userQuestionsCount >= CHAT_FREE_TURNS_PER_READING);
   const chatLogRef = React.useRef<HTMLDivElement>(null);
 
   const personaName = isEnglish ? (persona.nameEn || persona.nameTh) : persona.nameTh;
@@ -294,6 +297,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
         };
         setMessages((prev) => [...prev, botMsg]);
       } else {
+        if (data.reason === "chat_free_exhausted") setServerFreeExhausted(true);
         const errMsg: Message = {
           id: (Date.now() + 1).toString(),
           sender: "bot",
@@ -707,8 +711,8 @@ isEnglish
               <div className="flex justify-between items-center px-2 text-[13px] text-muted font-serif-th">
                 <span>
                   {isEnglish
-                    ? `Complimentary inquiries: ${Math.max(0, 2 - userQuestionsCount)} remaining`
-                    : `สิทธิ์ถามฟรี: เหลืออีก ${Math.max(0, 2 - userQuestionsCount)} ข้อ`}
+                    ? `Complimentary inquiries: ${Math.max(0, CHAT_FREE_TURNS_PER_READING - userQuestionsCount)} remaining`
+                    : `สิทธิ์ถามฟรี: เหลืออีก ${Math.max(0, CHAT_FREE_TURNS_PER_READING - userQuestionsCount)} ข้อ`}
                 </span>
                 <button
                   type="button"

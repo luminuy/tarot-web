@@ -11,6 +11,7 @@ import { ExpandTabIcon } from "@/components/ui/TarotArtIcons";
 import { useMotionSafe } from "@/lib/use-motion-safe";
 import { useNarrowViewport } from "@/lib/use-narrow-viewport";
 import { mapLayout, boxOf } from "@/lib/tarot/spread-map-geometry";
+import { cardsEn } from "@/lib/text/plural-en";
 
 export interface DrawnSlotCard {
   order: number;
@@ -229,14 +230,19 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
         className={`v2-sb-slot is-${mode}${isCurrentReading ? " is-now" : ""}${isRevealed ? " is-open" : ""} group ${
           useRail ? "snap-center flex-shrink-0" : ""
         } ${oneUp ? "basis-[74%] max-w-[74%]" : ""}`}
-        onClick={() => handleCardClick(pos.index)}
+        /*
+          ไพ่ที่เปิดแล้ว ➔ แตะ = อ่านใบนั้น (ตามป้าย "แตะไพ่เพื่ออ่านใบนั้น") ไม่คว่ำกลับ (B4-03)
+          เดิมทำไว้เฉพาะรายการใต้โต๊ะซึ่งถูกซ่อนบนมือถือ ผู้ใช้มือถือแตะตามป้ายแล้วไพ่คว่ำกลับ ดูเหมือนรีเซ็ต
+        */
+        onClick={() => (isRevealed && onFocusCard ? onFocusCard(pos.index) : handleCardClick(pos.index))}
         onKeyDown={(e) => {
           // กดปุ่มลูก (เช่น "ขยาย") ต้องไม่ถูกช่องไพ่กลืน (A5-17) — preventDefault ตรงนี้ยกเลิก
           // การ activate ปุ่มลูก Enter/Space บนปุ่มขยายจึงกลายเป็นเลือกไพ่ใบนั้นแทน
           if (e.target !== e.currentTarget) return;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            handleCardClick(pos.index);
+            if (isRevealed && onFocusCard) onFocusCard(pos.index);
+            else handleCardClick(pos.index);
           }
         }}
       >
@@ -361,7 +367,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
             role="group"
             aria-label={
               isEnglish
-                ? `All ${spread.positions.length} cards in ${spreadNameLocalized} — swipe to browse`
+                ? `All ${cardsEn(spread.positions.length)} in ${spreadNameLocalized} — swipe to browse`
                 : `ไพ่ทั้ง ${spread.positions.length} ใบในผัง ${spread.nameTh} — ปัดซ้ายขวาเพื่อดูใบอื่น`
             }
           >
@@ -393,7 +399,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
             className="v2-sb-area"
             style={{ paddingBottom: `${(bounds.height * 100).toFixed(2)}%` }}
             role="group"
-            aria-label={isEnglish ? `${spreadNameLocalized} — ${spread.positions.length} cards` : `ผัง${spread.nameTh} — ${spread.positions.length} ใบ`}
+            aria-label={isEnglish ? `${spreadNameLocalized} — ${cardsEn(spread.positions.length)}` : `ผัง${spread.nameTh} — ${spread.positions.length} ใบ`}
           >
             {spread.positions.map((pos) => renderSlot(pos, "table"))}
           </div>

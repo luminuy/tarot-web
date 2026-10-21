@@ -15,22 +15,21 @@ export interface HomeFaqItem {
 export interface HomeHowToStep {
   name: string;
   text: string;
-  url: string;
   image: string;
 }
 
-export const HOME_FAQS: HomeFaqItem[] = [
+const HOME_FAQS: HomeFaqItem[] = [
   {
     id: "faq-free-reading",
     question: "ดูดวงไพ่ทาโรต์ออนไลน์ที่ SeerTarot มีค่าใช้จ่ายหรือไม่?",
     answer:
-      "ดูดวงไพ่ทาโรต์ที่ SeerTarot ฟรีทั้งหมด เพียงสมัครสมาชิกฟรีหรือเข้าสู่ระบบก่อนเปิดไพ่ (สมัครด้วยอีเมล Google หรือ LINE ไม่ต้องผูกบัตร) จากนั้นจะได้โควตาเปิดไพ่ฟรีทุกวัน คุยถามแม่หมอต่อได้ และเก็บประวัติคำทำนายไว้ดูย้อนหลังได้ทุกเครื่อง ส่วนความหมายไพ่ 78 ใบ คลังผัง และบทความทั้งหมด อ่านได้ฟรีโดยไม่ต้องสมัคร หากต้องการเปิดผังพยากรณ์ขนาดใหญ่พิเศษหรือปรึกษาเจาะลึกเพิ่มเติม จึงค่อยเลือกเติมรอบเปิดไพ่ตามต้องการ",
+      "ดูดวงไพ่ทาโรต์ที่ SeerTarot เริ่มได้ฟรี เพียงสมัครสมาชิกฟรีหรือเข้าสู่ระบบก่อนเปิดไพ่ (สมัครด้วยอีเมล Google หรือ LINE ไม่ต้องผูกบัตร) จากนั้นจะได้โควตาเปิดไพ่ฟรีทุกวัน คุยถามแม่หมอต่อได้ และเก็บประวัติคำทำนายไว้ดูย้อนหลังได้ทุกเครื่อง ส่วนความหมายไพ่ 78 ใบ คลังผัง และบทความทั้งหมด อ่านได้ฟรีโดยไม่ต้องสมัคร หากต้องการเปิดผังพยากรณ์ขนาดใหญ่พิเศษหรือปรึกษาเจาะลึกเพิ่มเติม จึงค่อยเลือกเติมรอบเปิดไพ่ตามต้องการ",
   },
   {
     id: "faq-accuracy",
     question: "การเปิดไพ่ทาโรต์บนระบบออนไลน์ มีความแม่นยำเทียบเท่ากับการไปพบหมอดูจริงหรือไม่?",
     answer:
-      "ความแม่นยำของไพ่ทาโรต์ขึ้นอยู่กับสมาธิ ความตั้งใจ และเจตจำนงของผู้ถามในขณะเปิดไพ่ ระบบ SeerTarot ออกแบบให้คุณเป็นผู้สับไพ่และเลือกจับไพ่ 78 ใบด้วยมือของคุณเองจริง ๆ ไม่ใช่การสุ่มอัตโนมัติจากคอมพิวเตอร์ จากนั้นแม่หมอ AI ซึ่งได้รับการเทรนด้วยคัมภีร์สัญลักษณ์วิทยา 1909 Rider-Waite ดั้งเดิมและจิตวิทยาเชิงลึกจะทำหน้าที่แปลความหมายและสะท้อนสภาวะจิตใจให้อย่างแม่นยำตรงไปตรงมา",
+      "ความแม่นยำของไพ่ทาโรต์ขึ้นอยู่กับสมาธิ ความตั้งใจ และเจตจำนงของผู้ถามในขณะเปิดไพ่ ที่ SeerTarot คุณเป็นคนเลือกหยิบไพ่จากสำรับ 78 ใบเอง ส่วนลำดับไพ่ทั้งสำรับถูกสุ่มและล็อกไว้ก่อนคุณเลือก ตรวจย้อนหลังได้ว่าไม่มีใครเปลี่ยนระหว่างทาง จากนั้นแม่หมอ AI อ่านจากความหมายไพ่และภาพบนหน้าไพ่ 1909 Rider-Waite แล้วเล่าให้ฟังตรงไปตรงมา คำอ่านเป็นแนวทางให้คิดต่อ ไม่ใช่คำตัดสินแทนคุณ",
   },
   {
     id: "faq-provably-fair",
@@ -69,13 +68,13 @@ export const HOME_FAQS_EN: HomeFaqItem[] = [
     id: "faq-free-reading",
     question: "Is online tarot divination on SeerTarot free of charge?",
     answer:
-      "Yes — readings are free. Simply create a free account or sign in before drawing (email, Google, or LINE; no credit card required) and you receive a free daily reading allowance, follow-up questions with your reader, and a reading journal synced across devices. The 78-card encyclopedia, spread library, and articles stay open to everyone without an account. For expansive grand spreads or in-depth counseling sessions, quota unlocks are available according to your needs.",
+      "Yes — you can start for free. Simply create a free account or sign in before drawing (email, Google, or LINE; no credit card required) and you receive a free daily reading allowance, follow-up questions with your reader, and a reading journal synced across devices. The 78-card encyclopedia, spread library, and articles stay open to everyone without an account. For expansive grand spreads or in-depth counseling sessions, quota unlocks are available according to your needs.",
   },
   {
     id: "faq-accuracy",
     question: "Is an online tarot reading as accurate as visiting an in-person reader?",
     answer:
-      "Tarot accuracy hinges upon the querent's mindfulness, intentionality, and focus. SeerTarot is engineered so that you physically shuffle and draw from all 78 cards with your own touch—never through arbitrary computer automation. Our AI oracles, trained in 1909 Rider-Waite symbolism and depth psychology, translate and mirror your psychological state with unfiltered resonance.",
+      "Tarot accuracy hinges upon the querent's mindfulness, intentionality, and focus. On SeerTarot you pick your own cards from the full 78-card deck, while the order of the whole deck is shuffled and locked before you choose, so you can verify afterwards that nothing changed in between. The AI reader then reads from each card's meaning and the imagery of the 1909 Rider-Waite deck and tells you plainly what it sees. Treat the reading as guidance to reflect on, not a verdict.",
   },
   {
     id: "faq-provably-fair",
@@ -114,35 +113,30 @@ export function getHomeFaqs(isEnglishOrLocale?: boolean | string): HomeFaqItem[]
   return isEn ? HOME_FAQS_EN : HOME_FAQS;
 }
 
-export const HOME_HOW_TO_STEPS: HomeHowToStep[] = [
+const HOME_HOW_TO_STEPS: HomeHowToStep[] = [
   {
     name: "1. เลือกผังการเปิดไพ่",
     text: "เลือกรูปแบบการวางไพ่ที่ตรงกับเรื่องที่ต้องการถาม เช่น ผัง 1 ใบสำหรับดวงประจำวัน, ผัง 3 ใบสำหรับอดีต-ปัจจุบัน-อนาคต, หรือผังเซลติกครอส 10 ใบสำหรับส่องชะตาชีวิตเจาะลึก",
-    url: `${SITE_ORIGIN}/#spread-select`,
     image: `${SITE_ORIGIN}/cards/major-01.jpg`,
   },
   {
     name: "2. สงบจิตใจและตั้งเจตจำนง",
     text: "สูดลมหายใจลึก ๆ พิมพ์ชื่อ คำถาม และบริบทสั้น ๆ พร้อมเลือกแม่หมอ AI ที่มีแนวทางการให้คำปรึกษาตรงกับใจคุณ",
-    url: `${SITE_ORIGIN}/#intention-select`,
     image: `${SITE_ORIGIN}/cards/major-02.jpg`,
   },
   {
     name: "3. สับไพ่ด้วยตนเอง",
     text: "กดปุ่มสับไพ่ด้วยมือคุณเอง ระบบจะสุ่มลำดับไพ่ 78 ใบและล็อกไว้ก่อนเปิด ตรวจสอบย้อนหลังได้",
-    url: `${SITE_ORIGIN}/#shuffle`,
     image: `${SITE_ORIGIN}/cards/major-10.jpg`,
   },
   {
     name: "4. สัมผัสและเลือกหยิบไพ่",
     text: "แผ่สำรับไพ่ 78 ใบ แล้วใช้มือของคุณแตะเลือกไพ่ทีละใบตามจำนวนที่ผังกำหนดด้วยความตั้งใจ",
-    url: `${SITE_ORIGIN}/#pick-cards`,
     image: `${SITE_ORIGIN}/cards/major-17.jpg`,
   },
   {
     name: "5. รับคำพยากรณ์และสนทนาต่อเนื่อง",
     text: "แตะพลิกหน้าไพ่ 1909 Rider-Waite ด้วยตนเอง อ่านคำพยากรณ์ที่สตรีมสด และสามารถพิมพ์แชทถามตอบเจาะลึกกับแม่หมอ AI ได้ทันที",
-    url: `${SITE_ORIGIN}/#reading`,
     image: `${SITE_ORIGIN}/cards/major-19.jpg`,
   },
 ];
@@ -151,31 +145,26 @@ export const HOME_HOW_TO_STEPS_EN: HomeHowToStep[] = [
   {
     name: "1. Choose Your Spread",
     text: "Choose a layout that fits your question, from a 1-card daily compass and 3-card temporal spread to the 10-card Celtic Cross.",
-    url: `${SITE_ORIGIN}/#spread-select`,
     image: `${SITE_ORIGIN}/cards/major-01.jpg`,
   },
   {
     name: "2. Set Your Intention & Focus",
     text: "Take a deep breath, ask your question honestly, and choose the AI reader whose tone suits you best.",
-    url: `${SITE_ORIGIN}/#intention-select`,
     image: `${SITE_ORIGIN}/cards/major-02.jpg`,
   },
   {
     name: "3. Shuffle with Your Own Touch",
     text: "Shuffle the full 78-card deck yourself. The order is locked before you draw, so you can check it afterwards.",
-    url: `${SITE_ORIGIN}/#shuffle`,
     image: `${SITE_ORIGIN}/cards/major-10.jpg`,
   },
   {
     name: "4. Select and Draw Cards",
     text: "The deck fans out across an illuminated altar. Use your fingertips to deliberately select each card, infusing your energy into the draw.",
-    url: `${SITE_ORIGIN}/#pick-cards`,
     image: `${SITE_ORIGIN}/cards/major-17.jpg`,
   },
   {
     name: "5. Receive Wisdom & Converse",
     text: "Turn over authentic 1909 Rider-Waite cards, listen to streaming interpretations, and converse in depth with your AI oracle.",
-    url: `${SITE_ORIGIN}/#reading`,
     image: `${SITE_ORIGIN}/cards/major-19.jpg`,
   },
 ];
@@ -236,7 +225,7 @@ export function generateHowToJsonLd(isEnglishOrLocale?: boolean | string) {
       position: index + 1,
       name: s.name,
       text: s.text,
-      url: s.url,
+      // ไม่มี url — anchor ขั้นตอน (#spread-select ฯลฯ) ไม่มีอยู่จริงในหน้า และฝั่งอังกฤษเคยชี้หน้าไทย (B3-07)
       image: s.image,
     })),
   };

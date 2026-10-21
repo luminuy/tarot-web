@@ -120,7 +120,7 @@ export const PERSONAS: Persona[] = [
 
 export const PERSONA_BY_ID = new Map(PERSONAS.map((p) => [p.id, p]));
 
-export const DEFAULT_PERSONA = PERSONAS[0];
+const DEFAULT_PERSONA = PERSONAS[0];
 
 export function getPersona(id: string | null | undefined): Persona {
   return (id && PERSONA_BY_ID.get(id)) || DEFAULT_PERSONA;

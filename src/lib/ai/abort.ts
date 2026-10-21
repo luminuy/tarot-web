@@ -23,7 +23,7 @@ export function linkAbortSignal(
 }
 
 /** ไม่มี chunk ใหม่นานเท่านี้ = ผู้ให้บริการค้างกลางสตรีม ➔ ตัดทิ้งแล้วลองโมเดลถัดไป */
-export const STREAM_IDLE_TIMEOUT_MS = 20_000;
+const STREAM_IDLE_TIMEOUT_MS = 20_000;
 
 export class StreamIdleTimeoutError extends Error {
   constructor(idleMs: number) {

@@ -14,7 +14,8 @@ import {
   relatedQuestions,
   type QuestionPage,
 } from "@/data/questions";
-import { buildAlternates, localizedUrl, noindexAlternates } from "@/lib/config/site";
+import { buildAlternates, localizedUrl, noindexAlternates, SITE_ORIGIN } from "@/lib/config/site";
+import { questionModifiedAt } from "@/lib/seo/lastmod";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { getCategoryCardImage } from "@/lib/media/og-card-art";
 import { hasEnglishTwin } from "@/lib/i18n/paths";
@@ -34,8 +35,8 @@ import { Ui2Showcase, Ui2ShowcaseStarter, type Ui2ShowcaseSection } from "@/comp
  * ภาพไพ่ทุกใบผ่าน <CardImage sizes> (กฎเหล็กข้อ 8) · ไพ่ตัวอย่างเป็น "ตัวอย่าง" ติดป้ายชัด ไม่ใช่คำทำนายของใคร
  */
 
-export const QUESTIONS_HUB_PATH = "/questions";
-export const questionPath = (slug: string) => `/questions/${slug}`;
+const QUESTIONS_HUB_PATH = "/questions";
+const questionPath = (slug: string) => `/questions/${slug}`;
 
 const HUB_COPY = {
   th: {
@@ -126,17 +127,30 @@ export function QuestionPageContent({ question: q, locale, askBox }: { question:
     return card ? (isEn ? card.nameEn : card.nameTh) : id;
   };
 
+  /* B3-05: ภาพของ Article = ภาพเดียวกับ og:image · วันที่มีเวลา+เขตเวลา · dateModified จากแหล่งเดียวกับ sitemap */
+  const articleImage = buildPageOgImage({
+    title: c.question,
+    eyebrow: isEn ? "TAROT QUESTION" : "คำถามดูดวงไพ่ยิปซี",
+    cardImage: getCategoryCardImage(q.topic === "general" ? null : q.topic),
+    alt: c.title,
+  })[0]?.url;
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: c.question,
     description: c.description,
     inLanguage: locale,
-    datePublished: q.updatedAt,
-    dateModified: q.updatedAt,
+    ...(articleImage ? { image: [articleImage] } : {}),
+    datePublished: `${q.updatedAt}T12:00:00+07:00`,
+    dateModified: questionModifiedAt(q),
     mainEntityOfPage: url,
     author: { "@type": "Organization", name: "SeerTarot", url: localizedUrl("/about", hasEnglishTwin("/about") ? locale : "th") }, // `/about` ยังไม่มีฉบับอังกฤษ — ห้ามชี้ /en/about (A7-02)
-    publisher: { "@type": "Organization", name: "SeerTarot" },
+    publisher: {
+      "@type": "Organization",
+      name: "SeerTarot",
+      url: SITE_ORIGIN,
+      logo: { "@type": "ImageObject", url: `${SITE_ORIGIN}/icons/icon-512x512.png` },
+    },
     about: { "@type": "Thing", name: isEn ? "Tarot reading" : "การดูดวงไพ่ยิปซี" },
   };
   const breadcrumbJsonLd = buildBreadcrumbJsonLd(locale, crumbs(q, locale));
@@ -149,7 +163,7 @@ export function QuestionPageContent({ question: q, locale, askBox }: { question:
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbJsonLd) }} />
 
       <article className="max-w-3xl mx-auto space-y-10 py-6">
-        <nav aria-label="Breadcrumb" className="text-xs font-serif-th text-muted">
+        <nav aria-label={isEn ? "Breadcrumb" : "เส้นทางนำทาง"} className="text-xs font-serif-th text-muted">
           <ol className="flex items-center gap-2 flex-wrap">
             <li><Link href="/" className="hover:text-ink">{isEn ? "Home" : "หน้าแรก"}</Link></li>
             <li aria-hidden="true">/</li>
@@ -398,7 +412,7 @@ function hubSections(isEn: boolean): Ui2ShowcaseSection[] {
     return [
       {
         id: `topic-${topic}`,
-        kicker: parent.en,
+        kicker: isEn ? parent.en : `คำถามเรื่อง${parent.th}`,
         title: isEn ? parent.en : parent.th,
         tone,
         count: items.length,

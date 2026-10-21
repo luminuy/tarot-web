@@ -15,6 +15,9 @@
  *      และต้องเติมผู้ใช้เข้าแคชเซสชันให้ด้วย เพื่อไม่ให้มีใครไปยิง `/api/auth/me` ซ้ำ
  *   4. `loadMySpreads()` (แถว "ผังของฉัน" ในหน้าแรก) → ไม่มีคุกกี้ใบ้ต้องไม่ยิงอะไรเลย
  *      และต้องได้ผังในเครื่องแทน · มีคุกกี้ใบ้ → ยิง `/api/spreads/custom` ครั้งเดียว (A9-01)
+ *   5. แคชที่ขอบของ GET สาธารณะ (`withEdgeCache` · A9-02) → คำขอซ้ำไม่สร้างคำตอบใหม่
+ *      (ไม่แตะ D1/KV) · เก็บเฉพาะคำขอไม่มีคุกกี้ · `Authorization` ไม่แตะแคช · ไม่เก็บ 503/no-store/Set-Cookie
+ *      · เสิร์ฟจากแคชคืน Cache-Control เดิม + หัว `Age` และ `/api/daily-card` ต่อ query ยังใช้คีย์เดียวกัน
  */
 import { fileURLToPath } from "node:url";
 
@@ -120,6 +123,82 @@ async function run() {
     }
   }
 
+  // ── เกณฑ์ 5: แคชที่ขอบของ GET สาธารณะ (A9-02) ─────────────────────────
+  {
+    const edge = await import("../../src/lib/platform/edge-cache");
+    const stored = new Map<string, { body: string; status: number; headers: [string, string][] }>();
+    edge.setEdgeCacheStoreForTests({
+      async match(req) {
+        const hit = stored.get(req.url);
+        return hit ? new Response(hit.body, { status: hit.status, headers: hit.headers }) : undefined;
+      },
+      async put(req, res) {
+        stored.set(req.url, { body: await res.text(), status: res.status, headers: [...res.headers.entries()] });
+      },
+    });
+    const flush = () => new Promise((r) => setTimeout(r, 10));
+    let produced = 0;
+    const make = (cc: string, extra: Record<string, string> = {}, status = 200) => async () => {
+      produced++;
+      return new Response(JSON.stringify({ n: produced }), { status, headers: { "Cache-Control": cc, ...extra } });
+    };
+    const CC = "public, max-age=600, s-maxage=3600, stale-while-revalidate=600";
+    const get = (url: string, headers: Record<string, string> = {}) => new Request(url, { headers });
+
+    const first = await edge.withEdgeCache(get("https://seertarot.net/api/stats/public"), make(CC));
+    await flush();
+    const second = await edge.withEdgeCache(get("https://seertarot.net/api/stats/public"), make(CC));
+    if (produced !== 1) errors.push(`withEdgeCache: คำขอซ้ำยังสร้างคำตอบใหม่ (สร้าง ${produced} ครั้ง ควรเป็น 1)`);
+    if (first.headers.get(edge.EDGE_CACHE_STATUS_HEADER) !== "MISS" || second.headers.get(edge.EDGE_CACHE_STATUS_HEADER) !== "HIT") {
+      errors.push("withEdgeCache: หัว x-edge-cache ต้องเป็น MISS แล้ว HIT");
+    }
+    if (second.headers.get("Cache-Control") !== CC) errors.push(`withEdgeCache: เสิร์ฟจากแคชต้องคืน Cache-Control เดิม (ได้ ${second.headers.get("Cache-Control")})`);
+    if (second.headers.get("Age") === null) errors.push("withEdgeCache: เสิร์ฟจากแคชต้องมีหัว Age");
+    if ([...second.headers.keys()].some((k) => k.startsWith("x-edge-") && k !== edge.EDGE_CACHE_STATUS_HEADER)) {
+      errors.push("withEdgeCache: หัวภายในของแคชหลุดออกไปถึงผู้เรียก");
+    }
+    if ((await second.json()).n !== 1) errors.push("withEdgeCache: เนื้อหาจากแคชไม่ตรงกับที่เก็บไว้");
+
+    // คำขอที่มีคุกกี้ได้คำตอบจากแคชได้ แต่ห้ามเป็นคนเก็บลงแคช
+    produced = 0;
+    await edge.withEdgeCache(get("https://seertarot.net/api/x-cookie", { cookie: "a=1" }), make(CC));
+    await flush();
+    await edge.withEdgeCache(get("https://seertarot.net/api/x-cookie"), make(CC));
+    if (produced !== 2) errors.push("withEdgeCache: คำขอที่มีคุกกี้ต้องไม่ถูกเก็บลงแคช");
+    produced = 0;
+    const cookieHit = await edge.withEdgeCache(get("https://seertarot.net/api/stats/public", { cookie: "a=1" }), make(CC));
+    if (produced !== 0 || cookieHit.headers.get(edge.EDGE_CACHE_STATUS_HEADER) !== "HIT") {
+      errors.push("withEdgeCache: คำขอที่มีคุกกี้ควรได้คำตอบสาธารณะจากแคชที่มีอยู่แล้ว");
+    }
+
+    // Authorization ไม่แตะแคช · คำตอบที่ห้ามเก็บต้องไม่ถูกเก็บ
+    produced = 0;
+    await edge.withEdgeCache(get("https://seertarot.net/api/stats/public", { authorization: "Bearer t" }), make(CC));
+    if (produced !== 1) errors.push("withEdgeCache: คำขอที่มี Authorization ต้องไม่ได้คำตอบจากแคช");
+    for (const [label, producer] of [
+      ["503", make(CC, {}, 503)],
+      ["no-store", make("no-store")],
+      ["private", make("private, max-age=60")],
+      ["Set-Cookie", make(CC, { "Set-Cookie": "s=1" })],
+    ] as const) {
+      const url = `https://seertarot.net/api/x-${label}`;
+      await edge.withEdgeCache(get(url), producer);
+      await flush();
+      if (stored.has(url)) errors.push(`withEdgeCache: คำตอบแบบ ${label} ต้องไม่ถูกเก็บลงแคช`);
+    }
+    if (edge.edgeTtlSeconds("public, max-age=60, s-maxage=120") !== 120) errors.push("edgeTtlSeconds ต้องใช้ s-maxage ก่อน max-age");
+
+    // เส้นจริง: /api/daily-card คีย์ผูกวันไทย ไม่รวม query — ?d= ของไคลเอนต์ยังได้จากแคชเดียวกัน
+    const route = await import("../../src/app/api/daily-card/route");
+    const a = await route.GET(get("https://seertarot.net/api/daily-card"));
+    await flush();
+    const b = await route.GET(get("https://seertarot.net/api/daily-card?d=2099-01-01"));
+    if (a.status !== 200 || b.headers.get(edge.EDGE_CACHE_STATUS_HEADER) !== "HIT") {
+      errors.push(`/api/daily-card ต้องตอบคำขอที่สองจากแคชที่ขอบ (ได้ ${a.status} · ${b.headers.get(edge.EDGE_CACHE_STATUS_HEADER)})`);
+    }
+    edge.setEdgeCacheStoreForTests(undefined);
+  }
+
   if (errors.length > 0) {
     console.error(`❌ QA FAILED — งบคำขอเกินที่ตั้งไว้ ${errors.length} ข้อ:`);
     for (const e of errors) console.error(`  - ${e}`);
@@ -129,6 +208,7 @@ async function run() {
   console.log("✅ ผ่าน — ผู้ชมที่ไม่ล็อกอินเปิดหน้าโดยไม่ยิง /api/* เลยสักเส้น");
   console.log("   - ผู้ใช้ที่ล็อกอินอยู่ใช้ /api/bootstrap เส้นเดียวแทนสองเส้นเดิม");
   console.log("   - แถว \"ผังของฉัน\" ของผู้ชมที่ไม่ล็อกอินไม่ยิง /api/spreads/custom");
+  console.log("   - GET สาธารณะตอบซ้ำจากแคชที่ขอบ (ไม่เก็บคำขอที่มีคุกกี้/Authorization)");
   process.exit(0);
 }
 

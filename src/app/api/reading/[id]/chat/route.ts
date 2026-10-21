@@ -8,6 +8,8 @@ import { getContentOverrides, resolveCardByIndex, resolvePersona, resolveSystemC
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
+import { CHAT_FREE_TURNS_PER_READING, CHAT_TURNS_PER_READING, isReadingFinished } from "@/lib/reading/chat-limits";
+import { bumpEdgeCounter, peekEdgeCounter } from "@/lib/security/edge-ratelimit";
 import { looksLikePromptInjection, sanitizePromptValue } from "@/lib/ai/prompt-guard";
 import { redactPii } from "@/lib/security/pii";
 import { detectPromptLeak } from "@/lib/ai/leak-guard";
@@ -44,6 +46,8 @@ const noInjection = (label: string) =>
  * (8 เท่าของเพดาน 500 ที่บังคับกับคำถามตอนเปิดไพ่) โดยไม่ผ่านการกรองเช่นกัน
  * คำสั่งที่ฉีดไว้ตาแรกจึงอยู่ยาวไปทุกตาถัดไป และไม่มีเพดานรวมของขนาด prompt เลย
  */
+/** อายุตัวนับสิทธิ์ถามฟรีต่อไพ่หนึ่งชุด — นานกว่าอายุของคำอ่าน จึงรีเซ็ตไม่ได้ด้วยการรอ */
+const FREE_CHAT_WINDOW_SEC = 60 * 60 * 24 * 30;
 const CHAT_MESSAGE_MAX = 800;
 const CHAT_HISTORY_TURN_MAX = 800;
 /** จำนวนตาที่ replay กลับเข้าโมเดล — ตัดจากท้ายสุด (ตาล่าสุดมีค่าที่สุด) */
@@ -136,6 +140,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const privileged = await isPrivilegedTestRequest(request);
 
   // ── การคุยต่อกับแม่หมอ = สมาชิกเท่านั้น (ENTITLEMENT_PLAN ข้อ 4) · ไม่กินโควตาเปิดไพ่ ──
+  /** ตัวนับสิทธิ์ถามฟรีของไพ่ชุดนี้ · null = ถามได้ไม่จำกัด (ปิดระบบสิทธิ์ · มีรอบโบนัส/รอบที่ซื้อ · บัญชีทดสอบ) */
+  let freeChatKey: string | null = null;
   if (!privileged) {
     const { isEntitlementEnabled } = await import("@/lib/entitlement/flag");
     const { getViewer } = await import("@/lib/entitlement/viewer");
@@ -147,6 +153,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         { error: getMembersOnlyChatMessage(initialLang), reason: "members_only" },
         { status: 403 },
       );
+    }
+    // สิทธิ์ถามฟรี 2 ข้อต่อไพ่หนึ่งชุด — เดิมนับที่หน้าจออย่างเดียว ยิง API ตรงหรือรีโหลดหน้าก็ถามฟรีได้ไม่จำกัด (เจ้าของ 2026-10-21)
+    // เกณฑ์ "ไม่จำกัด" ต้องตรงกับ `FollowUpChat.tsx` (`isUnlimited`): มีรอบโบนัส/รอบที่ซื้อเหลือ
+    if (enforced && viewer.kind === "member") {
+      const { getEntitlement } = await import("@/lib/entitlement/entitlement");
+      const ent = await getEntitlement(viewer);
+      if (!(ent.bonusRemaining > 0)) freeChatKey = edgeRateLimitKey("chat:free", id);
     }
   }
 
@@ -201,11 +214,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         : []),
     ]);
     if (!edge.allowed) {
+      /*
+       * B4-02: เพดานต่อนาทีกับเพดานรายวันใช้ข้อความเดียวกันมาตลอด — ผู้ใช้ที่พิมพ์ถี่เห็น "ครบโควตาวันนี้"
+       * ทั้งที่รอ 1 นาทีก็ถามต่อได้ จึงเลิกใช้ · แยกจากเวลาที่ต้องรอจริง
+       */
+      const shortWait = edge.retryAfterSec <= 120;
       return createRateLimitResponse(
         edge.retryAfterSec,
-        initialLang === "en"
-          ? "You have reached today's follow-up chat limit. Please come back tomorrow."
-          : "วันนี้คุณถามต่อครบโควตาแล้ว กลับมาใหม่พรุ่งนี้นะ",
+        shortWait
+          ? initialLang === "en"
+            ? "You are asking a little too fast. Wait a moment, then you can keep asking."
+            : "ส่งคำถามเร็วไปนิด รอสักครู่แล้วถามต่อได้เลยนะ"
+          : initialLang === "en"
+            ? "You have reached today's follow-up chat limit. Please come back tomorrow."
+            : "วันนี้คุณถามต่อครบโควตาแล้ว กลับมาใหม่พรุ่งนี้นะ",
       );
     }
 
@@ -296,6 +318,71 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         },
         { status: 404 },
       );
+    }
+
+    /*
+     * 🎟 B4-01: ถามต่อได้เฉพาะไพ่ชุดที่แม่หมออ่านจบแล้ว (`/read` หักสิทธิ์ + เก็บผลจริง) เท่านั้น
+     * เดิมขอแค่ `record.drawn` — ยิง /start ➔ /shuffle ➔ /chat ได้คำอ่านผังใหญ่/ปรมาจารย์ลับครบชุด
+     * โดยโควตาและสิทธิ์ลองผังใหญ่ไม่ลดเลย (โควตาถูกหักที่ /read ที่เดียว)
+     * record ในหน่วยความจำของ isolate นี้อาจเป็นสำเนาตอน /shuffle (ยัง DRAWING) ขณะที่ /read จบบนอีก isolate
+     * แล้วเขียนลงที่เก็บถาวร ➔ ถามที่เก็บถาวรซ้ำก่อนตัดสิน
+     */
+    if (!privileged) {
+      if (!isReadingFinished(record)) {
+        const { loadReadingFromKV, saveReading } = await import("@/server/store");
+        const fresher = await loadReadingFromKV(id);
+        if (isReadingFinished(fresher) && fresher?.drawn?.length) {
+          record = fresher;
+          saveReading(fresher);
+        }
+      }
+      if (!isReadingFinished(record)) {
+        recordEvent("chat_blocked_unfinished");
+        // FAILED = ผู้ใช้เห็นคำอ่านสำรองจากคลังความหมายไพ่ (AI ไม่ว่าง · ไม่หักสิทธิ์) — บอกทางไปต่อให้ตรงกับที่เห็นบนจอ
+        const fromFallback = record?.status === "FAILED";
+        return NextResponse.json(
+          {
+            error: fromFallback
+              ? initialLang === "en"
+                ? "This reading came from our card-meaning library while the AI oracle was busy. Go back and tap \"Ask the AI oracle again\" first, then you can ask follow-up questions."
+                : "คำอ่านชุดนี้มาจากคลังความหมายไพ่ตอนแม่หมอ AI ไม่ว่าง กลับไปกด \"ให้แม่หมอ AI อ่านใหม่\" ก่อน แล้วค่อยถามต่อได้เลยนะ"
+              : initialLang === "en"
+                ? "Let the Oracle finish reading this spread first, then you can ask follow-up questions."
+                : "ให้แม่หมออ่านไพ่ชุดนี้ให้จบก่อน แล้วค่อยถามต่อได้เลยนะ",
+            reason: "reading_not_finished",
+          },
+          { status: 409 },
+        );
+      }
+      const perReading = await consumeEdgeRateLimits([
+        { key: edgeRateLimitKey("chat:reading", id), config: { max: CHAT_TURNS_PER_READING, windowSec: 86400 } },
+      ]);
+      if (!perReading.allowed) {
+        recordEvent("chat_blocked_turn_cap");
+        return NextResponse.json(
+          {
+            error:
+              initialLang === "en"
+                ? `You have asked ${CHAT_TURNS_PER_READING} follow-up questions about this spread. Draw a new reading to ask about something new.`
+                : `ถามต่อเรื่องไพ่ชุดนี้ครบ ${CHAT_TURNS_PER_READING} คำถามแล้ว เปิดไพ่รอบใหม่เพื่อถามเรื่องต่อไปได้เลย`,
+            reason: "chat_turns_exhausted",
+          },
+          { status: 429 },
+        );
+      }
+      if (freeChatKey && (await peekEdgeCounter(freeChatKey, FREE_CHAT_WINDOW_SEC)) >= CHAT_FREE_TURNS_PER_READING) {
+        recordEvent("chat_blocked_free_cap");
+        return NextResponse.json(
+          {
+            error:
+              initialLang === "en"
+                ? `You have used the ${CHAT_FREE_TURNS_PER_READING} free follow-up questions for this spread. Refill readings to keep asking.`
+                : `ใช้สิทธิ์ถามฟรีของไพ่ชุดนี้ครบ ${CHAT_FREE_TURNS_PER_READING} ข้อแล้ว เติมรอบดูดวงเพื่อถามต่อได้ไม่จำกัด`,
+            reason: "chat_free_exhausted",
+          },
+          { status: 403 },
+        );
+      }
     }
 
     const activeLang: "th" | "en" = parsed.data.lang || record.lang || initialLang;
@@ -468,6 +555,7 @@ ${guardSection}
           if (leakedGroq) recordEvent("ai_prompt_leak:chat");
           if (cleanReply && !leakedGroq) {
             await recordAiCall(1);
+            if (freeChatKey) await bumpEdgeCounter(freeChatKey, FREE_CHAT_WINDOW_SEC);
             await noteChatCost(chatCostSubj, systemInstruction, history, userQuestion, cleanReply);
             return NextResponse.json({
               reply: cleanReply,
@@ -555,6 +643,7 @@ ${guardSection}
                 continue;
               }
               await recordAiCall(1);
+              if (freeChatKey) await bumpEdgeCounter(freeChatKey, FREE_CHAT_WINDOW_SEC);
               await noteChatCost(chatCostSubj, systemInstruction, history, userQuestion, cleanReply);
               return NextResponse.json({
                 reply: cleanReply,

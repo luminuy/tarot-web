@@ -66,7 +66,7 @@ export function getGoogleAdsId(): string | undefined {
 }
 
 /** ดึง Google Ads Conversion Label จาก Environment Variable (ถ้ามี) */
-export function getGoogleAdsConversionLabel(): string | undefined {
+function getGoogleAdsConversionLabel(): string | undefined {
   const label = process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL?.trim();
   return isValidGoogleAdsConversionLabel(label) ? label : undefined;
 }

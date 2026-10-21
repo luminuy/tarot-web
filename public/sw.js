@@ -285,14 +285,28 @@ self.addEventListener("push", (event) => {
   );
 });
 
+/*
+ * กดการแจ้งเตือน: ไม่ยึดแท็บที่ผู้ใช้กำลังใช้อยู่ (แชท · ห้องวิดีโอ · คำถามที่พิมพ์ค้าง)
+ * มีแท็บที่อยู่หน้าปลายทางแล้ว ➔ โฟกัสแท็บนั้นอย่างเดียว · ไม่มี ➔ เปิดแท็บใหม่
+ * เทียบแค่ path (ไม่สน query เช่น utm_source) · โฟกัสไม่ได้ ➔ เปิดแท็บใหม่แทน
+ */
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = (event.notification.data && event.notification.data.url) || "/";
+  const raw = (event.notification.data && event.notification.data.url) || "/";
+  const target = new URL(raw, self.location.origin);
+  const url = target.origin === self.location.origin ? target.href : self.location.origin + "/";
+  const targetPath = new URL(url).pathname;
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
       for (const w of wins) {
-        if (new URL(w.url).origin === self.location.origin && "focus" in w) {
-          return w.navigate(url).then((nw) => (nw || w).focus());
+        let here;
+        try {
+          here = new URL(w.url);
+        } catch {
+          continue;
+        }
+        if (here.origin === self.location.origin && here.pathname === targetPath && "focus" in w) {
+          return w.focus().catch(() => self.clients.openWindow(url));
         }
       }
       return self.clients.openWindow(url);

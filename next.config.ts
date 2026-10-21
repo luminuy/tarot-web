@@ -17,6 +17,13 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
+  /*
+   * บอตที่ได้ metadata แบบ "ไม่สตรีม" (อยู่ใน <head> ตั้งแต่ไบต์แรก) — ค่าเริ่มต้นของ Next + Googlebot
+   * B3-09: ค่าเริ่มต้นไม่รวม Googlebot ➔ หน้า Next แบบ dynamic (`/s/<id>` · `/readers/*`) ส่ง `robots noindex`/og
+   * ไว้ใน <body> ต้องรอ JS ย้ายเข้า head · หน้าเหล่านี้อ่านข้อมูลเร็วอยู่แล้ว การรอ metadata ก่อนส่งไม่เสียอะไร
+   */
+  htmlLimitedBots:
+    /Googlebot|Google-InspectionTool|Mediapartners-Google|Slurp|DuckDuckBot|baiduspider|yandex|sogou|bitlybot|tumblr|vkShare|quora link preview|redditbot|ia_archiver|Bingbot|BingPreview|applebot|facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview/i,
   experimental: {
     // การอ่านไพ่เป็น streaming ที่ใช้เวลานาน จึงต้องกันไม่ให้ถูกตัดกลางคัน
     proxyTimeout: 120_000,

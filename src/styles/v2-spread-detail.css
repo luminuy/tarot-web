@@ -119,6 +119,11 @@
   font-size: clamp(12px, 1.4vw, 20px);
   font-weight: 700;
   color: var(--ui2-gold-solid);
+  /* เลขตำแหน่งวางบนลายหลังไพ่ — ทองบนลายเหลือ ~3.6:1 ➔ รองพื้นทึบให้อ่านออกทุกจุดของลาย (B1 2026-10-20) */
+  padding: 0 0.35em;
+  border-radius: 6px;
+  line-height: 1.35;
+  background: rgba(12, 10, 15, 0.78);
 }
 .v2-sd-slot[aria-pressed="true"] {
   border-color: var(--ui2-gold-solid);
@@ -418,7 +423,10 @@ tr.is-active .v2-sd-n {
   background: rgba(255, 217, 143, 0.12);
 }
 .v2-sd-all {
-  display: inline-block;
+  /* เป้าแตะ ≥ 44px บนมือถือ — เดิมสูงเท่าบรรทัด 24px (B1 2026-10-20) */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   margin-top: 18px;
   margin-inline-end: 20px;
   font-size: 14px;

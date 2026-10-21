@@ -6,7 +6,7 @@ import { normalizeTags } from "@/lib/journal/journal-types";
 import { isMoodLevel } from "@/lib/journal/mood";
 import { createHash } from "node:crypto";
 
-export function computeContentHash(question: string, cards: SavedCardDetail[]): string {
+function computeContentHash(question: string, cards: SavedCardDetail[]): string {
   const cardKey = (cards || [])
     .map((c) => `${c.cardIndex}:${c.isReversed ? "rev" : "up"}`)
     .sort()

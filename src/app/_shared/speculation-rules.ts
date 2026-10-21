@@ -51,8 +51,8 @@ export const MAX_PRERENDER_LIST_URLS = 6;
  * หน้ายอดนิยมสำหรับ prerender — ตั้งเป็นว่าง เพื่อป้องกันไม่ให้ Chrome แอบดาวน์โหลด 
  * และรัน React ซ้ำซ้อนใน background โดยใช้ prefetch แบบ conservative แทน
  */
-export const PRERENDER_URLS_TH: string[] = [];
-export const PRERENDER_URLS_EN: string[] = [];
+const PRERENDER_URLS_TH: string[] = [];
+const PRERENDER_URLS_EN: string[] = [];
 
 type Eagerness = "conservative" | "moderate" | "eager";
 

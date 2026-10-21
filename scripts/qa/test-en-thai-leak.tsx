@@ -260,6 +260,30 @@ export function runQa() {
     )
   );
 
+  // ไพ่ยังคว่ำ (กฎข้อ 4) — กิ่ง JSX "ยังไม่ได้พลิก" แยกจากกิ่งปกติ ต้องเรนเดอร์แยก
+  // และต้องไม่มีชื่อ/คำอ่านของไพ่ใบนั้นหลุดออกมาเลย (ทั้งแท็บอ่านทีละใบและจุดเลือกไพ่)
+  const faceDown = (
+    <StreamReader
+      reading={reading}
+      persona={persona}
+      isStreaming={false}
+      activeCardIndex={0}
+      onSelectCardIndex={() => {}}
+      drawnCards={drawnCards}
+      question="How are my finances?"
+      revealedOrders={[]}
+      onRevealCard={() => {}}
+    />
+  );
+  errors.push(...thaiLeakedFrom("StreamReader · ไพ่ยังคว่ำ", faceDown));
+  {
+    const html = renderToStaticMarkup(<LocaleProvider forcedLocale="en">{faceDown}</LocaleProvider>);
+    for (const secret of ["Six of Wands", "Riding the Wave of Recognition", "Celebrate this win"]) {
+      if (html.includes(secret)) errors.push(`[StreamReader · ไพ่ยังคว่ำ] เฉลย "${secret}" ก่อนผู้ใช้พลิก (กฎเหล็กข้อ 4)`);
+    }
+    if (!html.includes("Turn this card")) errors.push("[StreamReader · ไพ่ยังคว่ำ] ไม่มีปุ่มพลิกไพ่ใบนี้");
+  }
+
   errors.push(
     ...thaiLeakedFrom(
       "ElementalBalanceWidget",

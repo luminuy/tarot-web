@@ -3179,6 +3179,10 @@ details[open] > .ui2-faq-a {
 .ui2-verify .ui2-vs-b {
   font-size: clamp(30px, 22.57px + 1.905vw, 50px);
 }
+/* บรรทัดจาง "เว็บอื่นสุ่มให้ดู" บนแผ่นครีม — เทาเดิม 2.3:1 ต่ำกว่าเกณฑ์ตัวใหญ่ 3:1 (B1 2026-10-20) */
+.ui2-verify .ui2-vs-a {
+  color: #8c8070;
+}
 /* ตัวเลข 1909 (ตัวตรง): 112 ➔ 190px */
 .ui2-verify .ui2-1909 {
   font-size: clamp(112px, 83.03px + 7.429vw, 190px);

@@ -183,7 +183,7 @@ function ShelfSection({
       <div className="ui2-sp-win-bar" aria-hidden="true">
         <span className="ui2-sp-win-name">
           <span className="ui2-sp-win-n ui2-num">{String(order).padStart(2, "0")}</span>
-          <span className="ui2-accent">{isEnglish ? "Category" : shelf.nameEn}</span>
+          <span className="ui2-accent">{isEnglish ? "Category" : "หมวด"}</span>
         </span>
         <span className="ui2-sp-win-steps">
           {Array.from({ length: total }, (_, k) => (
@@ -256,7 +256,7 @@ function ShelfSection({
                     <span className="ui2-sc-free">{isEnglish ? "Free" : "ฟรี"}</span>
                   )}
                   <span className="ui2-sc-count">
-                    <span className="ui2-num">{spread.positions.length}</span> {isEnglish ? "cards" : "ใบ"}
+                    <span className="ui2-num">{spread.positions.length}</span> {isEnglish ? (spread.positions.length === 1 ? "card" : "cards") : "ใบ"}
                   </span>
                 </span>
                 <SpreadMap spread={spread} />
@@ -370,7 +370,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
         </span>
         <div className="ui2-wrap ui2-sp-hero-inner">
           {/* เส้นทางหน้าไม่แสดงบนจอ (เจ้าของ 2026-10-17) — nav Breadcrumb ถูกซ่อนแบบ sr-only ทั้งเว็บ */}
-          <nav aria-label="Breadcrumb" className="ui2-sp-crumb">
+          <nav aria-label={isEnglish ? "Breadcrumb" : "เส้นทางนำทาง"} className="ui2-sp-crumb">
             <Link href="/">{isEnglish ? "Home" : "หน้าแรก"}</Link>
             <span aria-hidden="true"> / </span>
             <span>{isEnglish ? "Tarot Spreads" : `ผังพยากรณ์ ${spreads.length} แบบ`}</span>

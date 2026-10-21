@@ -123,6 +123,8 @@ function ReaderConsoleInner() {
   const [now, setNow] = useState(() => Date.now());
   /** ลิงก์หมดอายุระหว่างเปิดแผงค้างไว้ — แจ้งเป็นแถบด้านบน ไม่ล้างหน้าทิ้ง (ห้องวิดีโอที่คุยอยู่ต้องไม่ดับ) */
   const [linkExpired, setLinkExpired] = useState(false);
+  /** ถามคิวรอบล่าสุดล้มชั่วคราว (เน็ต/5xx/429) — แถบเล็ก ไม่ล้างแผง (B4-09) */
+  const [unstable, setUnstable] = useState(false);
   const hasData = useRef(false);
   const linkExpiresAt = useMemo(() => tokenExpiry(token), [token]);
 
@@ -154,16 +156,21 @@ function ReaderConsoleInner() {
         setNow(Date.now());
         setError(null);
         setLinkExpired(false);
+        setUnstable(false);
         hasData.current = true;
       } else if (res.status === 401 && hasData.current) {
         // เดิม: ลิงก์หมดอายุกลางคิว ➔ ทั้งหน้ากลายเป็นหน้า error ห้องวิดีโอที่กำลังคุยดับไปด้วย
         setLinkExpired(true);
         setNow(Date.now());
+      } else if ((res.status >= 500 || res.status === 429) && hasData.current) {
+        // B4-09: เซิร์ฟเวอร์สะดุดชั่วคราวกลางคิว ➔ เก็บแผงเดิม (ห้องวิดีโอที่คุยอยู่ไม่ถูกถอด) แล้วลองรอบถัดไป
+        setUnstable(true);
       } else {
         setError(consoleAccessError(res.status));
       }
     } catch {
-      // transient failure
+      // เน็ตสะดุดชั่วคราว — เก็บแผงเดิม รอรอบถัดไป
+      if (hasData.current) setUnstable(true);
     } finally {
       setLoading(false);
     }
@@ -296,6 +303,11 @@ function ReaderConsoleInner() {
     <main id="main-content" tabIndex={-1} className="min-h-screen text-ink-deep p-4 sm:p-8 font-sans relative overflow-hidden">
       <div className="max-w-5xl mx-auto space-y-6 relative z-10">
         {/* ลิงก์แผงมีวันหมดอายุ (1–30 วันตามที่แอดมินเลือก) — เตือนก่อนหมด 3 ชม. แม่หมอจะได้ขอลิงก์ใหม่ทันก่อนนัด */}
+        {unstable && !linkExpired && (
+          <p role="status" className="rounded-xl border border-line-warm bg-inset-warm px-4 py-3 text-sm leading-relaxed text-ink">
+            เชื่อมต่อไม่เสถียร กำลังลองใหม่อัตโนมัติ — ห้องวิดีโอที่คุยอยู่ยังต่ออยู่ ไม่ต้องรีเฟรชหน้า
+          </p>
+        )}
         {(linkExpired || (linkExpiresAt !== null && linkExpiresAt - now < LINK_WARN_MS)) && (
           <div
             role="status"

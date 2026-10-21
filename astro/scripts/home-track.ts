@@ -12,6 +12,7 @@
  *    (เหตุผลเดียวกับ `home-rails.ts`) คลิกจึงดักที่ document ส่วนการเฝ้าดูจอสแกนหา element ใหม่ทุกครั้งที่ DOM เปลี่ยน
  */
 import { trackEvent } from "@/lib/analytics";
+import { afterHydrate } from "./after-hydrate";
 
 const SECTION = "[data-home-section]";
 const COUNTER = "[data-reading-counter]";
@@ -127,7 +128,8 @@ function scan(): void {
   });
 }
 
-scan();
+// ตัวนับคำทำนายอยู่ใน island — เติมตัวเลขก่อน hydrate = React #418 (B1 2026-10-20)
+afterHydrate(scan);
 let pendingScan = 0;
 const WATCHED = `${SECTION}, ${COUNTER}`;
 // ระหว่างสตรีมคำทำนาย DOM เปลี่ยนถี่มาก — สแกนเฉพาะเมื่อมี element ที่เกี่ยวข้องถูกใส่เข้ามาจริง

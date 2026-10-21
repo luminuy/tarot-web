@@ -11,7 +11,7 @@ import { z } from "zod";
  * จึงเขียนให้เป็นคำสั่งไปในตัว ไม่ใช่แค่คอมเมนต์สำหรับคน
  */
 
-export const CardReadingSchema = z.object({
+const CardReadingSchema = z.object({
   position: z
     .number()
     .int()
@@ -128,6 +128,5 @@ export const ReadingSchema = z.object({
   ),
 });
 
-export type CardReading = z.infer<typeof CardReadingSchema>;
 export type Reading = z.infer<typeof ReadingSchema>;
 

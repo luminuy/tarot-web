@@ -294,6 +294,25 @@ async function run() {
   if (isRequestAuthorizedOrigin(bearer(undefined, { origin: "https://evil.example" }))) {
     throw new Error("❌ Origin ต่างโดเมนผ่านด่านโดยไม่มี Bearer");
   }
+  // 8.3b แอปก่อนล็อกอิน (A10-09): `X-Client: ios` ไม่มี Bearer ผ่านได้เฉพาะ POST ล็อกอินอีเมล
+  //      ที่ไม่มีหัวของเบราว์เซอร์ — เส้นเปิดไพ่/เส้นอื่นยังต้องมี Bearer · เบราว์เซอร์ยังโดนตรวจ origin ตามเดิม
+  const appPre = (path: string, extra: Record<string, string> = {}, method = "POST") =>
+    new Request(`${SITE_ORIGIN}${path}`, { method, headers: { "x-client": "ios", ...extra } });
+  if (!isRequestAuthorizedOrigin(appPre("/api/auth/email/login"))) {
+    throw new Error("❌ แอปก่อนล็อกอินถูกด่าน Origin ปฏิเสธที่เส้นล็อกอินอีเมล — ล็อกอินจากแอปไม่ได้เลย");
+  }
+  if (isRequestAuthorizedOrigin(appPre("/api/reading/start")) || isRequestAuthorizedOrigin(appPre("/api/auth/email/signup"))) {
+    throw new Error("❌ `X-Client: ios` เปิดด่าน Origin นอกเส้นล็อกอิน — ต้องผูกกับเส้นที่มี Turnstile + เพดานครั้งที่ลองเท่านั้น");
+  }
+  const browserHeaders: Record<string, string>[] = [{ origin: "https://evil.example" }, { referer: "https://evil.example/x" }, { "sec-fetch-site": "cross-site" }];
+  for (const browserHeader of browserHeaders) {
+    if (isRequestAuthorizedOrigin(appPre("/api/auth/email/login", browserHeader))) {
+      throw new Error(`❌ คำขอที่มีหัวของเบราว์เซอร์ (${Object.keys(browserHeader)[0]}) ข้ามด่าน Origin ได้ด้วย X-Client`);
+    }
+  }
+  if (isRequestAuthorizedOrigin(appPre("/api/auth/email/login", { "x-client": "web" }))) {
+    throw new Error("❌ หัว X-Client ค่าอื่นเปิดด่าน Origin ได้");
+  }
   // 8.4 readBearerToken คืนโทเคนเปล่า (ไม่มีคำนำหน้า) ที่ verifyUserSession ถอดได้
   const extracted = readBearerToken(new Headers({ authorization: `Bearer ${appToken}` }));
   const decodedApp = extracted ? await verifyUserSession(extracted) : null;

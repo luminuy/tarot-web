@@ -30,7 +30,7 @@ interface PersonalCard {
 }
 
 /** ไพ่ประจำตัวทั้งหมดของผู้ถาม (ไม่ซ้ำใบ) — ใบแรกที่เจอได้บทบาทนั้นไป */
-export function personalZodiacCards(zodiac: SeekerZodiac): PersonalCard[] {
+function personalZodiacCards(zodiac: SeekerZodiac): PersonalCard[] {
   const out: PersonalCard[] = [];
   const push = (cardId: string, roleTh: string, roleEn: string) => {
     if (!out.some((c) => c.cardId === cardId)) out.push({ cardId, roleTh, roleEn });

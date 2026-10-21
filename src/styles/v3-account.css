@@ -171,6 +171,13 @@
   cursor: pointer;
 }
 
+/* ระหว่างโหลด: วาดทั้งแบบผู้เยี่ยมชมและแบบสมาชิก แล้วเลือกตามคุกกี้ใบ้ที่ account.astro ติดไว้บน <html>
+   (ไม่มีแอตทริบิวต์ = แบบสมาชิกตามเดิม) — โครงตอนโหลดจึงสูงเท่าของจริงทั้งสองกรณี (A6-06) */
+html[data-ac-hint="guest"] .v3-ac-when-member,
+html:not([data-ac-hint="guest"]) .v3-ac-when-guest {
+  display: none;
+}
+
 /* โครงร่างระหว่างโหลด */
 .v3-ac-card.is-skel {
   grid-template-columns: auto minmax(0, 1fr);

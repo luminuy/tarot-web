@@ -18,6 +18,7 @@
 import type { TarotCard } from "@/data/cards/types";
 import { THEME_LABEL, themesOf, type ThemeId } from "@/data/cards/themes";
 import { CURATED_COMBOS, comboKey, reviewedCombos, type CuratedCombo } from "@/data/cards/combos";
+import { cardsEn } from "@/lib/text/plural-en";
 
 type Element = TarotCard["element"];
 
@@ -214,7 +215,7 @@ export function analyzeRelations(inputs: readonly RelationInput[], options: Anal
         signals.push({
           id: "suit-dominant",
           noteTh: `ชุด${SUIT_TH[suit]}เด่น ${positions.length} ใบ — เรื่องหลักอยู่ที่${ELEMENT_FOCUS_TH[suit]}`,
-          noteEn: `${SUIT_EN[suit]} dominate (${positions.length} cards) — the heart of this is ${ELEMENT_FOCUS_EN[suit]}`,
+          noteEn: `${SUIT_EN[suit]} dominate (${cardsEn(positions.length)}) — the heart of this is ${ELEMENT_FOCUS_EN[suit]}`,
           positions,
         });
       }

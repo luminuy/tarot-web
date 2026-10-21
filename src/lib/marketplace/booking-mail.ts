@@ -280,7 +280,12 @@ export async function sendBookingCancelled(
           : refundStatus === "none"
             ? `ยกเลิกน้อยกว่า ${FREE_CANCEL_HOURS} ชม. ก่อนนัด จึงไม่มีการคืนเงินตามเงื่อนไข`
             : "ไม่มีการตัดเงิน";
-    const title = by === "reader" ? "แม่หมอยกเลิกนัดของคุณ" : "ยกเลิกนัดเรียบร้อย";
+    const title =
+      by === "reader"
+        ? "แม่หมอยกเลิกนัดของคุณ"
+        : by === "system"
+          ? "แม่หมอไม่ได้เข้าห้อง ระบบยกเลิกนัดให้แล้ว"
+          : "ยกเลิกนัดเรียบร้อย";
     const rebook = `${SITE_ORIGIN}/readers/${encodeURIComponent(ctx.readerId)}`;
     const html = baseLayout(
       `<h1>${title}</h1>
@@ -295,7 +300,7 @@ export async function sendBookingCancelled(
     );
     const text = [`${title} — SeerTarot`, "", `แม่หมอ: ${ctx.readerName}`, whenText(ctx), money, "", `จองใหม่: ${rebook}`].join("\n");
     await safeSend("cancel", ctx.contactEmail, `${title} · ${whenText(ctx)}`, html, text);
-    if (by !== "reader") await notifyReader(ctx, "cancelled");
+    if (by !== "reader") await notifyReader(ctx, by === "system" ? "auto_closed" : "cancelled");
   } catch (err) {
     recordCaughtError("booking-mail:cancel", err);
   }
@@ -357,7 +362,11 @@ export async function sendBookingRescheduled(ticketId: string, previousSlot: num
 }
 
 /** แจ้งแม่หมอ — ไม่มีคำถามของลูกค้าในอีเมล (PDPA: อ่านในแผงแม่หมอที่ล็อกอินแล้วเท่านั้น) */
-async function notifyReader(ctx: MailContext, event: "new" | "cancelled" | "rescheduled", previousSlot?: number): Promise<void> {
+async function notifyReader(
+  ctx: MailContext,
+  event: "new" | "cancelled" | "auto_closed" | "rescheduled",
+  previousSlot?: number,
+): Promise<void> {
   if (!ctx.readerEmail) return;
   const consoleUrl = `${SITE_ORIGIN}/readers/console`;
   const title =
@@ -369,7 +378,9 @@ async function notifyReader(ctx: MailContext, event: "new" | "cancelled" | "resc
           : "มีลูกค้าเข้าคิวสด (ชำระเงินแล้ว)"
       : event === "cancelled"
         ? "ลูกค้ายกเลิกนัด"
-        : "ลูกค้าเลื่อนนัด";
+        : event === "auto_closed"
+          ? "ระบบปิดนัดและคืนเงินลูกค้า เพราะไม่มีแม่หมอเข้าห้องวิดีโอ"
+          : "ลูกค้าเลื่อนนัด";
   const rows: [string, string][] = [
     ["ลูกค้า", `คุณ${ctx.nickname}`],
     [ctx.slotStart ? "เวลานัด" : "รูปแบบ", whenText(ctx)],

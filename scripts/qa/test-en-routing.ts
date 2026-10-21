@@ -249,6 +249,26 @@ for (const route of EN_TWIN_ROUTES) {
 const entries = sitemap();
 const urls = new Set(entries.map((entry) => entry.url));
 check("sitemap ไม่มี ?lang= หลงเหลือ", !entries.some((entry) => entry.url.includes("?lang=")));
+{
+  // B3-03: คู่ไทย/อังกฤษที่ hreflang ผูกกันต้องมี lastmod เท่ากัน · B3-02: ไม่มีหน้าไหนเก่ากว่าแม่แบบทั้งเว็บ
+  const { SITE_TEMPLATE_UPDATED_AT, formatPageDate } = await import("../../src/lib/seo/lastmod");
+  check(
+    "B3-04: วันที่ที่มองเห็นตามนาฬิกาไทย (ข้ามเที่ยงคืน UTC ถูกวัน · เดือนถูก)",
+    formatPageDate("2026-10-16T18:00:00Z", false) === "17 ต.ค. 2569" && formatPageDate("2026-01-31T16:59:00Z", true) === "Jan 31, 2026",
+  );
+  const byUrl = new Map(entries.map((e) => [e.url, e.lastModified ? new Date(e.lastModified).getTime() : 0]));
+  const mismatched = entries
+    .filter((e) => e.url.startsWith(`${SITE_ORIGIN}/en`))
+    .filter((e) => {
+      const th = e.url.replace(`${SITE_ORIGIN}/en`, SITE_ORIGIN) || SITE_ORIGIN;
+      return byUrl.has(th) && byUrl.get(th) !== byUrl.get(e.url);
+    })
+    .map((e) => e.url.replace(SITE_ORIGIN, ""));
+  check("B3-03: คู่ไทย/อังกฤษใน sitemap มี lastmod เท่ากันทุกคู่", mismatched.length === 0, mismatched.slice(0, 5).join(" · "));
+  const floor = new Date(SITE_TEMPLATE_UPDATED_AT).getTime();
+  const stale = entries.filter((e) => (e.lastModified ? new Date(e.lastModified).getTime() : 0) < floor).map((e) => e.url.replace(SITE_ORIGIN, ""));
+  check("B3-02: ไม่มี lastmod เก่ากว่าวันแม่แบบทั้งเว็บ (UI 2.0)", stale.length === 0, stale.slice(0, 5).join(" · "));
+}
 
 let reciprocal = true;
 let missingTwin: string | null = null;

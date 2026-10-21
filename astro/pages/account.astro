@@ -2,6 +2,7 @@
 import { accountMetadataTh } from "@/app/_shared/pages/account-th";
 
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { AUTH_HINT_COOKIE_NAME } from "@/lib/auth/cookie-names";
 import { AccountRoot } from "../islands/AccountRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
 import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
@@ -26,6 +27,14 @@ const locale = "th" as const;
 <BaseLayout locale={locale} metadata={accountMetadataTh}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
   <div class="ui2-pg" data-ui2-page-dark="">
+  {/* ติดใบ้ "ผู้เยี่ยมชม" บน <html> ก่อนวาดหน้า (คุกกี้ใบ้ตัวเดียวกับ isKnownAnonymous) — CSS เลือกโครงตอนโหลดให้ขนาดเท่าของจริง (A6-06) */}
+  <script is:inline define:vars={{ hintCookie: AUTH_HINT_COOKIE_NAME }}>
+    try {
+      if (!document.cookie.split("; ").some(function (c) { return c.indexOf(hintCookie + "=1") === 0; })) {
+        document.documentElement.setAttribute("data-ac-hint", "guest");
+      }
+    } catch (e) {}
+  </script>
   <AccountRoot locale={locale} client:load />
   <Ui2NextSteps isEn={false} keys={["journal", "spreads", "daily", "readers"]} />
   </div>

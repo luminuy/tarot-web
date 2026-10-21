@@ -1,15 +1,25 @@
 import { NextResponse } from "next/server";
 
+import { withEdgeCache } from "@/lib/platform/edge-cache";
 import { getGlobalDailyCard } from "@/lib/tarot/daily-card";
-import { bangkokNextMidnightISO } from "@/lib/time/bangkok";
+import { bangkokDayKey, bangkokNextMidnightISO } from "@/lib/time/bangkok";
 
 export const runtime = "nodejs";
 
 /**
  * GET /api/daily-card — ไพ่ประจำวันของทุกคน (deterministic + แคช KV)
- * แคชที่ Cloudflare Edge CDN จนถึงเที่ยงคืนเวลาไทย (s-maxage) เพื่อให้ขอบโลกตอบใน ~15ms ไม่ปลุก Worker
+ * `/api/*` วิ่งเข้า Worker เสมอ (run_worker_first) หัว s-maxage อย่างเดียวจึงไม่แคชที่ขอบ —
+ * คำตอบเก็บใน Cache API ของ data center ผ่าน `withEdgeCache` จนถึงเที่ยงคืนเวลาไทย (A9-02)
+ * คีย์แคชผูกกับวันไทย และไม่อ่าน query (`?d=` ของไคลเอนต์มีไว้ข้ามแคชเบราว์เซอร์เท่านั้น)
  */
-export async function GET() {
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  return withEdgeCache(request, buildDailyCardResponse, {
+    key: `${url.origin}${url.pathname}?day=${bangkokDayKey()}`,
+  });
+}
+
+async function buildDailyCardResponse(): Promise<Response> {
   try {
     const daily = await getGlobalDailyCard();
     const secondsUntilMidnight = Math.min(

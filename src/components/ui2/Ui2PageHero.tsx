@@ -80,8 +80,10 @@ function TitleWithAccent({ title, accent }: { title: string; accent?: string }) 
  * ⚠️ ห้ามกลับไปเป็น `<p>` หัวเล็กสีทองที่มองเห็น
  */
 export function Ui2Crumbs({ crumbs }: { crumbs: Ui2Crumb[] }) {
+  // ชื่อของแถบนำทางตามภาษาของหน้า (อ่านจากป้ายเอง) — หน้าไทยห้ามให้โปรแกรมอ่านจอพูดคำอังกฤษ
+  const isThai = crumbs.some((c) => /[\u0E00-\u0E7F]/.test(c.label));
   return (
-    <nav aria-label="Breadcrumb" className="ui2-ph-crumb">
+    <nav aria-label={isThai ? "เส้นทางนำทาง" : "Breadcrumb"} className="ui2-ph-crumb">
       {crumbs.map((crumb, i) => {
         const last = i === crumbs.length - 1;
         return (

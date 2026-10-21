@@ -304,21 +304,21 @@ export function ZodiacIndexBody({
         {/* ห่อ div ทุกช่อง — <astro-island> เป็น display:contents จึงไม่รับ margin จาก space-y
             ถ้าไม่ห่อ ส่วนต่าง ๆ จะชิดกันจนหัวข้อทับขอบกล่องข้างบน (เจ้าของเห็นจากภาพหน้าจอ) */}
         {/* v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): ทุกส่วนเป็นหน้าต่างเลขกำกับแบบ /spreads */}
-        <Ui2Window n="01" kicker={isEnglish ? "Find your sign" : "Find your sign"} tone={7}>
+        <Ui2Window n="01" kicker={isEnglish ? "Find your sign" : "หาราศีของคุณ"} tone={7}>
           {finder}
         </Ui2Window>
 
-        <Ui2Window n="02" kicker="Today" tone={4}>
+        <Ui2Window n="02" kicker={isEnglish ? "Today" : "วันนี้"} tone={4}>
           {/* จุดหมายของลิงก์ `#zodiac-daily-title` จากหน้าแรก — ต้องอยู่ใน HTML ตั้งแต่เซิร์ฟเวอร์ (ตัว island วาดหัวข้อหลังโหลดข้อมูล) · A7-08 */}
           <div id="zodiac-daily-title">{daily}</div>
         </Ui2Window>
 
-        <Ui2Window n="03" kicker="Compatibility" tone={3}>
+        <Ui2Window n="03" kicker={isEnglish ? "Compatibility" : "ความเข้ากัน"} tone={3}>
           {compat}
         </Ui2Window>
 
         {/* รายชื่อ 12 ราศีพร้อมช่วงวันเกิด — กะทัดรัด (วงล้อด้านบนมีภาพไพ่ครบแล้ว) */}
-        <Ui2Window n="04" kicker="All twelve signs" tone={5}>
+        <Ui2Window n="04" kicker={isEnglish ? "All twelve signs" : "ครบ 12 ราศี"} tone={5}>
         <section aria-labelledby="zodiac-list-title" className="space-y-4">
           <h2 id="zodiac-list-title" className="text-xl sm:text-2xl font-serif-th font-bold text-ink text-center"><ThaiPhrases>
             {isEnglish ? "All 12 signs and their dates" : "12 ราศีและช่วงวันเกิด"}

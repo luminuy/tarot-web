@@ -49,7 +49,7 @@ export function statDayKey(d = new Date()): string {
   return d.toISOString().slice(0, 10);
 }
 
-export function shiftDay(day: string, by: number): string {
+function shiftDay(day: string, by: number): string {
   const d = new Date(`${day}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() + by);
   return statDayKey(d);

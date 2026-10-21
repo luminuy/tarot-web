@@ -96,8 +96,14 @@ export function useSessionUser(): {
   loading: boolean;
   refresh: () => Promise<SessionUser | null>;
 } {
-  const [user, setUser] = useState<SessionUser | null>(() => cached?.user ?? null);
-  const [loading, setLoading] = useState(!cached);
+  /*
+   * ⚠️ ค่าเริ่มต้นต้องเท่ากับฝั่งเซิร์ฟเวอร์เสมอ (ยังไม่รู้ว่าใคร · กำลังโหลด) — ห้ามอ่าน `cached` ตรงนี้
+   * `/api/bootstrap` เติมแคชได้ก่อนส่วนนี้ hydrate ➔ render แรกฝั่งเบราว์เซอร์ไม่ตรง HTML
+   * React 19 โยน #418 แล้วสร้างทั้ง island ใหม่ (หน้าแรก `TarotFlowRoot` ทั้งก้อน · B1-01)
+   * แคชถูกใช้ทันทีใน effect ด้านล่างแทน (ช้ากว่าเดิมหนึ่งเฟรม)
+   */
+  const [user, setUser] = useState<SessionUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
     const next = await fetchSessionUser({ force: true });
@@ -108,6 +114,10 @@ export function useSessionUser(): {
   useEffect(() => {
     let alive = true;
     listeners.add(setUser);
+    if (cached) {
+      setUser(cached.user);
+      setLoading(false);
+    }
 
     fetchSessionUser()
       .then((next) => {

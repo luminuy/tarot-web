@@ -1326,7 +1326,9 @@ html .v2-rt .v2-qr {
   border-color: rgba(74, 47, 16, 0.14);
   box-shadow: none;
 }
-.v2-rt .v2-qr .font-mystic-gold {
+/* ทองบนแผงครีม — ทองอ่อนเดิม (#A58A5C) เหลือ ~3.2:1 · แผงตั้งคำถาม (ชื่อแม่หมอเหนือช่องคำถาม) ด้วย (B1 2026-10-20) */
+.v2-rt .v2-qr .font-mystic-gold,
+.v2-rt .v2-in .font-mystic-gold {
   color: #8A4F10;
 }
 

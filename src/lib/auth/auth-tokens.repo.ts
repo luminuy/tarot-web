@@ -12,7 +12,7 @@ const CLEANUP_GRACE_MS = 24 * 60 * 60 * 1000;
  * จาก `issueToken` ~5% ของครั้ง ผ่าน `waitUntil` (ไม่บล็อกผู้ใช้)
  * export ไว้ให้ endpoint แอดมิน/สคริปต์เรียกตรงได้ด้วย
  */
-export async function pruneExpiredAuthTokens(limit = 200): Promise<number> {
+async function pruneExpiredAuthTokens(limit = 200): Promise<number> {
   const db = await getAppDB();
   const cutoff = Date.now() - CLEANUP_GRACE_MS;
   const res = await db

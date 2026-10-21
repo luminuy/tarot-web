@@ -243,12 +243,20 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
      * คัดลอก "ของจริงที่อยู่บนหน้าจอ" — ชื่อไพ่ที่เซิร์ฟเวอร์เปิด + คำอ่านของแม่หมอเท่าที่มาถึงแล้ว
      * (เดิมคัดลอกคำอ่านที่เขียนไว้ล่วงหน้า ซึ่งตอนนี้เป็นแค่บทเสริม ไม่ใช่คำอ่านหลักอีกแล้ว)
      */
+    // คัดลอกเฉพาะใบที่ผู้ใช้พลิกแล้ว — ใบที่ยังคว่ำห้ามเฉลยชื่อผ่านคลิปบอร์ด (กฎเหล็กข้อ 4)
     const cardLines = drawnCards
-      .map((card, i) => `${positionLabels[i] ?? i + 1}: ${isEnglish ? card.nameEn : `${card.nameTh} (${card.nameEn})`}`)
-      .join("\n");
-    const oracleText = [oracle.state.reading?.opening, oracle.state.reading?.summary]
+      .map((card, i) =>
+        revealedIndices.has(i)
+          ? `${positionLabels[i] ?? i + 1}: ${isEnglish ? card.nameEn : `${card.nameTh} (${card.nameEn})`}`
+          : null,
+      )
       .filter(Boolean)
-      .join("\n\n");
+      .join("\n");
+    // คำอ่านของแม่หมอพูดถึงไพ่ทั้งกอง — แนบได้เมื่อพลิกครบแล้วเท่านั้น (เกณฑ์เดียวกับที่หน้าจอแสดง)
+    const oracleText =
+      revealedIndices.size === drawnCards.length
+        ? [oracle.state.reading?.opening, oracle.state.reading?.summary].filter(Boolean).join("\n\n")
+        : "";
     const closing = isEnglish
       ? "Open your own cards: https://seertarot.net/en/pick-a-card"
       : "เปิดไพ่พยากรณ์: https://seertarot.net/pick-a-card";
@@ -465,7 +473,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                 >
                   {/* Number & Crystal Badge */}
                   <div className="glass-chip flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-mono font-medium text-ink mb-4">
-                    <span className={`w-1.5 h-1.5 rounded-full ${styling.dot}`} aria-hidden="true" />
+                    <span className={`h-1 w-3 rounded-sm ${styling.dot}`} aria-hidden="true" />
                     <span>{isEnglish ? `Pile ${pile.number}` : `กองที่ ${pile.number}`}</span>
                   </div>
 
@@ -489,7 +497,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                     <div className="relative w-full h-full rounded-lg card-back-pattern border-2 border-line-warm/60 p-3 flex flex-col items-center justify-between shadow-md group-hover:scale-105 transition-transform duration-200">
                       <div className="w-full flex justify-center items-center opacity-85">
                         <span className="text-[9px] sm:text-[10px] font-serif-th text-surface tracking-[0.18em] uppercase font-bold whitespace-nowrap">
-                          Sacred Oracle
+                          SeerTarot
                         </span>
                       </div>
                       <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-line-warm bg-ink-deep/90 flex items-center justify-center text-sm font-serif-th font-bold text-surface">

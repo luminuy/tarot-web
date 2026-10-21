@@ -177,12 +177,12 @@ export function Ui2NotesSection({ isEnglish, href }: { isEnglish: boolean; href:
   );
 }
 
-/* ── ส่วน 5 · เว็บอื่นสุ่มให้ดู / เราให้คุณตรวจได้ (แผ่นขาว) ─────────────────── */
+/* ── ส่วน 5 · สุ่มจริง / เราให้คุณตรวจได้ (แผ่นขาว · ไม่พาดพิงเว็บอื่น — เจ้าของ 2026-10-21) ─────────── */
 
 const VERIFY_STEPS = {
   th: [
     ["สับครบ 78 ใบ", "สำรับเต็มทั้งชุด ไม่มีใบไหนถูกคัดออกหรือแอบเพิ่ม"],
-    ["ล็อกลำดับ + โชว์รหัส", "ระบบล็อกลำดับไพ่แล้วโชว์รหัสให้คุณเห็นก่อนเลือก"],
+    ["ล็อกลำดับแล้วโชว์รหัส", "ระบบล็อกลำดับไพ่แล้วโชว์รหัสให้คุณเห็นก่อนเลือก"],
     ["คุณแตะไพ่เอง", "ใบที่ได้มาจากตำแหน่งที่คุณแตะ ไม่มีใครเลือกแทน"],
     ["เฉลยลำดับให้เทียบรหัส", "อ่านจบแล้วเฉลยลำดับจริง เอาไปเทียบกับรหัสได้เอง"],
   ],
@@ -201,7 +201,7 @@ export function Ui2VerifySection({ isEnglish }: { isEnglish: boolean }) {
       <div className="ui2-wrap ui2-sheet">
         <h2 id="ui2-verify-title" className="ui2-vs ui2-reveal">
           <span className="ui2-vs-a">
-            <ThaiPhrases>{isEnglish ? "Other sites shuffle for show." : "เว็บอื่นสุ่มให้ดู"}</ThaiPhrases>
+            <ThaiPhrases>{isEnglish ? "Truly random, not just for show." : "สุ่มจริง ไม่ใช่แค่ให้ดู"}</ThaiPhrases>
           </span>
           <span className="ui2-vs-b">
             <ThaiPhrases>
@@ -638,6 +638,9 @@ export function Ui2ShowcaseSection({ isEnglish, href }: { isEnglish: boolean; hr
             </ThaiPhrases>
           </p>
         </div>
+        {/* หมุดวัดระยะเลื่อนของคลังไพ่ (ui2-home.ts · setupScrolly) — อยู่ใน HTML ตั้งแต่แรก
+            เดิมสคริปต์สร้างแทรกเองซึ่งอาจเกิดก่อน React hydrate ส่วนนี้เสร็จ = #418 บนจอ ≥ 1024 (B1 2026-10-20) */}
+        <div data-show-marker="" aria-hidden="true" />
         <div className="ui2-show">
           <div className="ui2-show-tabs" role="tablist" aria-label={t("หัวข้อในคลังไพ่", "Library topics")} aria-orientation="vertical">
             {SHOW_TABS.map((tab, i) => (
@@ -995,7 +998,7 @@ export function Ui2ExploreSection({ isEnglish }: { isEnglish: boolean; href: Hre
         <div className="ui2-wrap">
           <div className="ui2-fq-head">
             <span className="ui2-kicker">
-              FAQ
+              {isEnglish ? "FAQ" : "ถามบ่อย"}
             </span>
             <h2 id="ui2-faq-title" className="ui2-h2">
               <ThaiPhrases>{isEnglish ? "Frequently asked questions" : "คำถามที่พบบ่อย"}</ThaiPhrases>

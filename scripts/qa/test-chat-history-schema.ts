@@ -7,6 +7,8 @@ import {
   CHAT_HISTORY_MAX_TURNS,
   CHAT_HISTORY_REPLAY_TURNS,
   clampChatHistory,
+  isReadingFinished,
+  CHAT_TURNS_PER_READING,
 } from "../../src/lib/reading/chat-limits";
 
 const CHAT_ROUTE = path.join(process.cwd(), "src/app/api/reading/[id]/chat/route.ts");
@@ -140,6 +142,68 @@ export function runChatSchemaTests() {
     throw new Error("Test 4 Failed: chat/route.ts must return reading_not_found when cards are missing!");
   }
   console.log("  ✓ Test 4: Provably Fair Guard - No fake card fallback (The Fool) in chat route, 404 returned on missing cards");
+
+  // Test 5 (B4-01): แชทถามต่อได้เฉพาะไพ่ชุดที่ /read อ่านจบ (หักสิทธิ์) แล้ว + เพดานคำถามต่อรอบ
+  // เดิมขอแค่ record.drawn — /start ➔ /shuffle ➔ /chat ได้คำอ่านผังใหญ่ครบชุดโดยโควตาไม่ลด
+  const gateCases: Array<[unknown, boolean, string]> = [
+    [{ status: "DRAWING", drawn: [{}] }, false, "หลัง /shuffle (ยังไม่ /read)"],
+    [{ status: "READING", drawn: [{}] }, false, "กำลังสตรีม /read"],
+    [{ status: "FAILED", drawn: [{}] }, false, "คำอ่านสำรอง (คืนสิทธิ์แล้ว)"],
+    [{ status: "COMPLETED" }, false, "COMPLETED แต่ไม่มีผล"],
+    [{ status: "COMPLETED", result: { summary: "x" } }, true, "อ่านจบ + เก็บผลแล้ว"],
+    [null, false, "ไม่มี record"],
+  ];
+  for (const [rec, want, label] of gateCases) {
+    if (isReadingFinished(rec as never) !== want) throw new Error(`Test 5 Failed (B4-01): isReadingFinished ${label} ควรได้ ${want}`);
+  }
+  const gateAt = chatRouteSrc.indexOf("if (!isReadingFinished(record)) {\n        recordEvent(");
+  const capAt = chatRouteSrc.indexOf('edgeRateLimitKey("chat:reading", id)');
+  const modelAt = chatRouteSrc.indexOf("const priorReading = formatPriorReadingForChat(");
+  if (gateAt < 0 || capAt < gateAt || modelAt < capAt || !/status: 409/.test(chatRouteSrc.slice(gateAt, capAt))) {
+    throw new Error("Test 5 Failed (B4-01): chat/route.ts ต้องตรวจ isReadingFinished (409) แล้วนับเพดานต่อรอบ ก่อนประกอบ prompt");
+  }
+  if (!(CHAT_TURNS_PER_READING > 0 && CHAT_TURNS_PER_READING <= 30)) {
+    throw new Error("Test 5 Failed (B4-01): CHAT_TURNS_PER_READING ต้องอยู่ในช่วง 1–30");
+  }
+  console.log(`  ✓ Test 5: แชทเปิดเฉพาะไพ่ที่อ่านจบแล้ว (409 ก่อนนั้น) + เพดาน ${CHAT_TURNS_PER_READING} คำถามต่อรอบ (B4-01)`);
+  // Test 6 (B4-02): เพดานต่อนาทีห้ามบอก "ครบโควตาวันนี้"
+  if (!/const shortWait = edge\.retryAfterSec <= 120;/.test(chatRouteSrc)) {
+    throw new Error("Test 6 Failed (B4-02): ข้อความเพดานแชทต้องแยกรอสั้น/ครบวัน ตาม retryAfterSec");
+  }
+  console.log("  ✓ Test 6: ข้อความเพดานแชทแยกระหว่าง 'รอสักครู่' กับ 'ครบโควตาวันนี้' (B4-02)");
+
+  // Test 7: คำอ่านสำรอง (FAILED) ถูกบล็อกแชท — ปุ่ม "ถามแม่หมอต่อ" ต้องไม่โผล่บนคำอ่านสำรอง
+  // และตาแชทที่ล้มต้องไม่กินสิทธิ์ถามฟรี (เจอจากการเปิดไพ่จริงในเครื่อง: ตอบ 409 สองครั้ง ➔ "ใช้สิทธิ์ฟรีครบ 2 ข้อแล้ว")
+  const root = process.cwd();
+  const flowSrc = fs.readFileSync(path.join(root, "src/components/home/TarotFlow.tsx"), "utf8");
+  const quickSrc = fs.readFileSync(path.join(root, "src/components/reading/QuickChatResult.tsx"), "utf8");
+  const chatUiSrc = fs.readFileSync(path.join(root, "src/components/reading/FollowUpChat.tsx"), "utf8");
+  if (!/readingId && !read\.fallback && \(\s*<Link\s+href="\/reading\/chat"/.test(flowSrc) || !/readingId && !isFallback && \(\s*<Link\s+href="\/reading\/chat"/.test(quickSrc)) {
+    throw new Error("Test 7 Failed: ลิงก์ /reading/chat ต้องซ่อนเมื่อเป็นคำอ่านสำรอง (fallback) ทั้งใน TarotFlow และ QuickChatResult");
+  }
+  if (!/const fromFallback = record\?\.status === "FAILED";/.test(chatRouteSrc)) {
+    throw new Error("Test 7 Failed: 409 ของคำอ่านสำรองต้องบอกให้กด 'ให้แม่หมอ AI อ่านใหม่' ไม่ใช่ 'ให้อ่านจบก่อน'");
+  }
+  if (!/userQuestionsCount = messages\.filter\(\(m\) => m\.sender === "bot" && !m\.isError\)\.length/.test(chatUiSrc)) {
+    throw new Error("Test 7 Failed: สิทธิ์ถามฟรีต้องนับเฉพาะคำถามที่ได้คำตอบจริง (ไม่นับตาที่ล้ม)");
+  }
+  console.log("  ✓ Test 7: คำอ่านสำรองไม่มีปุ่มแชท + 409 บอกทางไปต่อ + ตาที่ล้มไม่กินสิทธิ์ถามฟรี");
+
+  // Test 8: สิทธิ์ถามฟรีนับฝั่งเซิร์ฟเวอร์ด้วย (เดิมนับที่หน้าจออย่างเดียว · รีโหลด/ยิง API ตรง = ถามฟรีไม่จำกัด)
+  // อ่านก่อนเรียก AI · นับเพิ่มเฉพาะตาที่ AI ตอบสำเร็จ (ทั้ง Groq และ Gemini) · หน้าจอกับเซิร์ฟเวอร์ใช้ค่าคงที่ตัวเดียว
+  const peekAt = chatRouteSrc.indexOf("peekEdgeCounter(freeChatKey");
+  const firstAiAt = chatRouteSrc.indexOf("isAiCapReached(\"member\")");
+  const bumps = chatRouteSrc.match(/await recordAiCall\(1\);\s*if \(freeChatKey\) await bumpEdgeCounter\(freeChatKey, FREE_CHAT_WINDOW_SEC\);/g) ?? [];
+  if (peekAt < 0 || firstAiAt < 0 || peekAt > firstAiAt || bumps.length !== 2) {
+    throw new Error(`Test 8 Failed: ด่านสิทธิ์ถามฟรีฝั่งเซิร์ฟเวอร์ต้องอ่านก่อนเรียก AI และนับเพิ่มหลังตอบสำเร็จทั้ง 2 ผู้ให้บริการ (เจอ ${bumps.length})`);
+  }
+  if (!/if \(!\(ent\.bonusRemaining > 0\)\) freeChatKey = edgeRateLimitKey\("chat:free", id\)/.test(chatRouteSrc)) {
+    throw new Error("Test 8 Failed: เกณฑ์ 'ถามได้ไม่จำกัด' ฝั่งเซิร์ฟเวอร์ต้องตรงกับหน้าจอ (มีรอบโบนัส/รอบที่ซื้อเหลือ)");
+  }
+  if (/>= 2\b|2 - userQuestionsCount/.test(chatUiSrc) || !/CHAT_FREE_TURNS_PER_READING/.test(chatUiSrc) || !/data\.reason === "chat_free_exhausted"/.test(chatUiSrc)) {
+    throw new Error("Test 8 Failed: หน้าจอต้องใช้ CHAT_FREE_TURNS_PER_READING และขึ้นปุ่มเติมรอบเมื่อเซิร์ฟเวอร์ตอบ chat_free_exhausted");
+  }
+  console.log("  ✓ Test 8: สิทธิ์ถามฟรี 2 ข้อนับฝั่งเซิร์ฟเวอร์ (อ่านก่อนเรียก AI · นับหลังตอบสำเร็จ)");
 
   console.log("✨ All Chat BodySchema tests passed successfully!");
 }

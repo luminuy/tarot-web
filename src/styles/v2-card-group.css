@@ -43,7 +43,9 @@
   box-shadow: none;
 }
 .v3-cg-switch a[aria-current="page"] span {
-  color: rgba(12, 10, 15, 0.7);
+  /* ตามสีตัวหนังสือของเม็ดที่เลือก — บนแถบครีมเม็ดเป็นน้ำตาลเข้มตัวขาว ตัวเลขดำเดิมเหลือ 2.4:1 (B1 2026-10-20) */
+  color: inherit;
+  opacity: 0.9;
 }
 .v3-cg-switch a:focus-visible {
   outline: 2px solid var(--ui2-gold-solid);

@@ -94,7 +94,7 @@ export function RedeemCodeForm({
           onChange={(e) => setCode(e.target.value)}
           placeholder={isEn ? "e.g. SEER-XXXX-XXXX" : "เช่น SEER-XXXX-XXXX"}
           disabled={loading}
-          className="glass-field min-h-[44px] min-w-0 flex-1 rounded-xl border border-line-interactive-warm px-3 font-mono text-sm uppercase tracking-wider text-ink-deep focus:border-gold-ink focus:outline-none"
+          className="bg-surface placeholder:text-muted min-h-[44px] min-w-0 flex-1 rounded-xl border border-line-interactive-warm px-3 font-mono text-sm uppercase tracking-wider text-ink-deep focus:border-gold-ink focus:outline-none"
         />
         <button
           type="submit"

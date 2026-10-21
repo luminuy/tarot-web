@@ -59,7 +59,7 @@ let runtimeConfigPromise: Promise<RuntimeAnalyticsConfig | null> | null = null;
  * ที่นี่รวมเป็นคำขอเดียวต่อแท็บ แล้วจำคำตอบไว้ใน sessionStorage — ยังรองรับการตั้งค่า
  * ตอน runtime ด้วย `wrangler secret` เหมือนเดิม (แค่ต้องเปิดแท็บใหม่ถึงจะเห็นค่าใหม่)
  */
-export function loadRuntimeAnalyticsConfig(): Promise<RuntimeAnalyticsConfig | null> {
+function loadRuntimeAnalyticsConfig(): Promise<RuntimeAnalyticsConfig | null> {
   if (runtimeConfigPromise) return runtimeConfigPromise;
 
   try {
@@ -98,7 +98,7 @@ export function loadRuntimeAnalyticsConfig(): Promise<RuntimeAnalyticsConfig | n
  * ⚠️ ตัวถอยหลังใช้ 15–18 วินาที ไม่ใช่ 5–8 วินาที เพราะจะชนกับรอบวัดประสิทธิภาพ
  * ของ Lighthouse / PageSpeed ที่รันราว 10 วินาที
  */
-export function scheduleWhenUserEngages(run: () => void): () => void {
+function scheduleWhenUserEngages(run: () => void): () => void {
   if (typeof window === "undefined") return () => {};
 
   let timer: ReturnType<typeof setTimeout> | undefined;

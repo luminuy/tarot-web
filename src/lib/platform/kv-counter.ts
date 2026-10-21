@@ -181,7 +181,7 @@ async function doFlush(): Promise<void> {
  * เขียน delta ที่สะสมไว้ทั้งหมดลง KV (read-modify-write ทีละคีย์)
  * ถ้าคีย์ไหนเขียนไม่สำเร็จ จะคืน delta กลับ buffer เพื่อรวมไปกับรอบถัดไป
  */
-export async function flushCounters(): Promise<void> {
+async function flushCounters(): Promise<void> {
   const gg = g();
   const buf = buffer();
   if (buf.size === 0 || gg.__tarot_kvcount_flushing__) return;

@@ -125,7 +125,6 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
         {/* Live Status Pill */}
         {isStreaming ? (
           <span className="glass-chip text-xs font-semibold text-ink-deep px-3.5 py-1.5 flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-gold-ink animate-ping" />{" "}
             {isEnglish ? "Oracle is channeling the tarot..." : "แม่หมอกำลังอ่านคำทำนาย..."}
           </span>
         ) : (
@@ -415,8 +414,8 @@ isEnglish
             )}
           </div>
 
-          {/* ⚡ DIRECT FAST-CHAT CTA BUTTON */}
-          {readingId && (
+          {/* ⚡ DIRECT FAST-CHAT CTA BUTTON — คำอ่านสำรองยังถามต่อไม่ได้ (เซิร์ฟเวอร์ตอบ 409 · B4-01) */}
+          {readingId && !isFallback && (
             <Link
               href="/reading/chat"
               className="group relative overflow-hidden flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-line-warm bg-gradient-to-r from-inset-warm via-surface-warm to-inset-warm hover:bg-surface p-4 text-left transition hover:border-gold-ink hover:shadow-md cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink active:scale-[0.99] lg:hidden"

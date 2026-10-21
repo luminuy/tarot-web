@@ -55,7 +55,7 @@ export function RowText({ label, hint }: { label: ReactNode; hint?: ReactNode })
   );
 }
 
-export function ChevronRight() {
+function ChevronRight() {
   return (
     <svg
       viewBox="0 0 24 24"

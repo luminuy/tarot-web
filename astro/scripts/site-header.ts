@@ -52,6 +52,9 @@ function installNavDrawer(): void {
     trigger.classList.toggle("bg-inset", next);
 
     panel.setAttribute("aria-hidden", String(!next));
+    // เปิดอยู่ = หน้าต่างลอย (React ฝั่ง island ตั้งค่าเดียวกัน) — โปรแกรมอ่านจอไม่หลุดไปอ่านหน้าหลังฉาก (B1)
+    if (next) panel.setAttribute("aria-modal", "true");
+    else panel.removeAttribute("aria-modal");
     panel.classList.toggle("nav-drawer-panel-entering", next);
     panel.classList.toggle("nav-drawer-panel-exiting", !next);
     scrim?.classList.toggle("nav-drawer-scrim-entering", next);

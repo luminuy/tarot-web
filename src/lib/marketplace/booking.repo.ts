@@ -163,16 +163,20 @@ export async function replaceScheduleRules(readerId: string, rules: ScheduleRule
   }
 }
 
+/** เงื่อนไข "เวลาที่ไม่ว่างแล้ว" ชุดเดียวที่ทั้งแบบรายคนและแบบหลายคน (getNextAvailableSlots) ใช้ร่วมกัน */
+const TAKEN_SLOT_CONDITION = `kind = 'scheduled' AND slot_start >= ? AND slot_start <= ?
+          AND (status = 'confirmed' OR (status = 'reserved' AND hold_expires_at >= ?))`;
+
+function takenSlotBinds(nowMs: number): number[] {
+  return [nowMs - slotMs, nowMs + (BOOKING_HORIZON_DAYS + 1) * 86_400_000, nowMs];
+}
+
 /** เวลาที่ไม่ว่างแล้ว: นัดที่ยืนยัน + ที่ที่ยังกันไว้ (ยังไม่หมดเวลา) */
 export async function listTakenSlots(readerId: string, nowMs: number): Promise<Set<number>> {
   const db = await getAppDB();
   const { results } = await db
-    .prepare(
-      `SELECT slot_start FROM bookings
-        WHERE reader_id = ? AND kind = 'scheduled' AND slot_start >= ? AND slot_start <= ?
-          AND (status = 'confirmed' OR (status = 'reserved' AND hold_expires_at >= ?))`
-    )
-    .bind(readerId, nowMs - slotMs, nowMs + (BOOKING_HORIZON_DAYS + 1) * 86_400_000, nowMs)
+    .prepare(`SELECT slot_start FROM bookings WHERE reader_id = ? AND ${TAKEN_SLOT_CONDITION}`)
+    .bind(readerId, ...takenSlotBinds(nowMs))
     .all<{ slot_start: number }>();
   return new Set((results || []).map((r) => Number(r.slot_start)));
 }
@@ -209,9 +213,15 @@ export async function getSlotOptions(readerId: string, nowMs = Date.now()): Prom
   const row = await db
     .prepare("SELECT buffer_min, daily_cap, lead_min FROM readers WHERE id = ? LIMIT 1")
     .bind(readerId)
-    .first<{ buffer_min: number | null; daily_cap: number | null; lead_min: number | null }>();
+    .first<SlotOptionRow>();
+  return toSlotOptions(row, await getBlockedDates(readerId, nowMs));
+}
+
+type SlotOptionRow = { buffer_min: number | null; daily_cap: number | null; lead_min: number | null };
+
+function toSlotOptions(row: SlotOptionRow | null | undefined, blockedDates: Iterable<string>): SlotOptions {
   return {
-    blockedDates: new Set(await getBlockedDates(readerId, nowMs)),
+    blockedDates: new Set(blockedDates),
     bufferMin: Number(row?.buffer_min ?? 0) || 0,
     dailyCap: row?.daily_cap && row.daily_cap > 0 ? Number(row.daily_cap) : null,
     // ค่าแปลก/ไม่ได้ตั้ง ➔ generateSlots ตกไปใช้ DEFAULT_LEAD_MIN เอง (normalizeLeadMin)
@@ -244,6 +254,85 @@ export async function checkSlotBookable(
 export async function getNextAvailableSlot(readerId: string, nowMs = Date.now()): Promise<number | null> {
   const days = await getAvailableSlots(readerId, nowMs);
   return days[0]?.slots[0] ?? null;
+}
+
+/** id ต่อหนึ่งคำสั่ง `IN (...)` — D1 รับตัวแปรผูกได้จำกัดต่อคำสั่ง */
+const READER_ID_CHUNK = 50;
+
+/**
+ * เวลาว่างใกล้สุดของแม่หมอหลายคนพร้อมกัน (กล่องแม่หมอในหน้าแรก — A9-03)
+ * อ่านตาราง · เวลาที่ไม่ว่าง · ตั้งค่าเวลาว่าง · วันหยุด เป็นชุดเดียวต่อก้อน id แทนการวนทีละคน
+ * (เดิม 5 คำสั่ง D1 ต่อคน) · ผลต้องเท่ากับ getNextAvailableSlot รายคน — ใช้เงื่อนไข SQL
+ * และการแปลงตั้งค่าชุดเดียวกัน · คนที่ไม่มีตารางหรือเต็มทุกช่องใน 14 วัน = null
+ */
+export async function getNextAvailableSlots(
+  readerIds: readonly string[],
+  nowMs = Date.now()
+): Promise<Map<string, number | null>> {
+  const ids = [...new Set(readerIds)];
+  const out = new Map<string, number | null>(ids.map((id) => [id, null]));
+  if (ids.length === 0) return out;
+  const db = await getAppDB();
+  const marks = (n: number) => Array.from({ length: n }, () => "?").join(", ");
+
+  for (let i = 0; i < ids.length; i += READER_ID_CHUNK) {
+    const chunk = ids.slice(i, i + READER_ID_CHUNK);
+    const { results: ruleRows } = await db
+      .prepare(
+        `SELECT reader_id, weekday, start_min, end_min FROM reader_availability
+          WHERE mode = 'scheduled' AND reader_id IN (${marks(chunk.length)}) ORDER BY weekday, start_min`
+      )
+      .bind(...chunk)
+      .all<{ reader_id: string; weekday: number; start_min: number; end_min: number }>();
+    const rules = new Map<string, ScheduleRule[]>();
+    for (const r of ruleRows || []) {
+      const list = rules.get(r.reader_id) ?? [];
+      list.push({ weekday: Number(r.weekday), startMin: Number(r.start_min), endMin: Number(r.end_min) });
+      rules.set(r.reader_id, list);
+    }
+    // ไม่มีตาราง = ไม่มีเวลาว่าง ไม่ต้องอ่านส่วนที่เหลือ
+    const scheduled = chunk.filter((id) => rules.has(id));
+    if (scheduled.length === 0) continue;
+
+    const inList = marks(scheduled.length);
+    const [takenRes, optionRes, blockedRes] = await Promise.all([
+      db
+        .prepare(`SELECT reader_id, slot_start FROM bookings WHERE reader_id IN (${inList}) AND ${TAKEN_SLOT_CONDITION}`)
+        .bind(...scheduled, ...takenSlotBinds(nowMs))
+        .all<{ reader_id: string; slot_start: number }>(),
+      db
+        .prepare(`SELECT id, buffer_min, daily_cap, lead_min FROM readers WHERE id IN (${inList})`)
+        .bind(...scheduled)
+        .all<SlotOptionRow & { id: string }>(),
+      db
+        .prepare(`SELECT reader_id, date_key FROM reader_blocked_dates WHERE reader_id IN (${inList}) AND date_key >= ?`)
+        .bind(...scheduled, bkkDateKey(nowMs))
+        .all<{ reader_id: string; date_key: string }>(),
+    ]);
+    const taken = new Map<string, Set<number>>();
+    for (const r of takenRes.results || []) {
+      const set = taken.get(r.reader_id) ?? new Set<number>();
+      set.add(Number(r.slot_start));
+      taken.set(r.reader_id, set);
+    }
+    const optionRows = new Map((optionRes.results || []).map((r) => [r.id, r]));
+    const blocked = new Map<string, string[]>();
+    for (const r of blockedRes.results || []) {
+      const list = blocked.get(r.reader_id) ?? [];
+      list.push(r.date_key);
+      blocked.set(r.reader_id, list);
+    }
+    for (const id of scheduled) {
+      const days = generateSlots(
+        rules.get(id) ?? [],
+        nowMs,
+        taken.get(id) ?? new Set<number>(),
+        toSlotOptions(optionRows.get(id), blocked.get(id) ?? [])
+      );
+      out.set(id, days[0]?.slots[0] ?? null);
+    }
+  }
+  return out;
 }
 
 /**
@@ -590,7 +679,9 @@ export interface CancelResult {
 export async function cancelConsultation(
   ticket: QueueTicket,
   actor: CancelActor,
-  nowMs = Date.now()
+  nowMs = Date.now(),
+  /** ระบบปิดนัดเอง (ห้องที่แม่หมอไม่เข้า) — นโยบายเงินใช้ของฝั่งลูกค้า แต่ถ้อยคำในอีเมลต้องไม่บอกว่า "ลูกค้ายกเลิก" */
+  opts: { mailAs?: "system" } = {},
 ): Promise<CancelResult> {
   const db = await getAppDB();
   const booking = await getBookingByTicketId(ticket.id);
@@ -637,7 +728,7 @@ export async function cancelConsultation(
     payments.filter((p) => p.status === "pending" && p.providerRef).map((p) => expireGatewayCharge(p.providerRef as string))
   );
   // แจ้งเฉพาะรายการที่จ่ายแล้ว (ยกเลิกก่อนจ่าย ไม่มีอะไรต้องบอก)
-  if (paidPayment) await sendBookingCancelled(ticket.id, actor, refundStatus);
+  if (paidPayment) await sendBookingCancelled(ticket.id, opts.mailAs ?? actor, refundStatus);
   return { ok: true, reason: decision.reason, refundStatus };
 }
 

@@ -26,8 +26,11 @@
 import { trackEvent } from "@/lib/analytics";
 import { UI2_FX_STORAGE_KEY } from "@/app/_shared/ui2-fx";
 import { bangkokNextMidnightISO } from "@/lib/time/bangkok";
+import { afterHydrate } from "./after-hydrate";
 
 const root = document.documentElement;
+
+// ห้ามแตะ DOM ใน island ก่อน React hydrate เสร็จ — ดู after-hydrate.ts (B1 2026-10-20)
 
 /* ── 1. ตัวกันพัง FPS ─────────────────────────────────────────────────── */
 function guardFps(): void {
@@ -233,7 +236,7 @@ function scan(): void {
   paint();
   syncSticky();
 }
-scan();
+afterHydrate(scan);
 addEventListener("scroll", syncSticky, { passive: true });
 
 let pendingScan = 0;
@@ -289,10 +292,16 @@ document.addEventListener("keydown", (e) => {
 const calm = () => root.getAttribute("data-fx") === "off" || matchMedia("(prefers-reduced-motion: reduce)").matches;
 let scrolly: { sec: HTMLElement; card: HTMLElement; marker: HTMLElement; tabs: HTMLElement[]; bar: HTMLElement; top: number; range: number; enter: string } | null = null;
 let lockUntil = 0;
-function setupScrolly(): void {
+/** ส่วนคลังไพ่ที่ตัดสินโหมดเลื่อนไปแล้วอย่างน้อยหนึ่งครั้ง (ทั้งเปิดและไม่เปิด) */
+let scrollyDecided: HTMLElement | null = null;
+function setupScrolly(opts: { resize?: boolean } = {}): void {
   const sec = document.querySelector<HTMLElement>(".ui2-show-sec");
   if (scrolly && scrolly.sec !== sec) scrolly = null;
   if (!sec) return;
+  // วัดซ้ำตอนฟอนต์/ภาพโหลดเสร็จ ขณะผู้ใช้เลื่อนผ่านส่วนนี้ไปแล้ว — สลับโหมดตอนนั้นทำให้รางยาวหดหายใต้สายตา
+  // เนื้อหาข้างล่างกระโดดขึ้นหลายร้อยพิกเซล (CLS 0.4+ · B1 2026-10-20) ➔ คงโหมดเดิมไว้ ยกเว้นตอนเปลี่ยนขนาดจอ
+  if (!opts.resize && scrollyDecided === sec && sec.getBoundingClientRect().bottom < 0) return;
+  scrollyDecided = sec;
   sec.classList.remove("is-scrolly");
   sec.querySelector<HTMLElement>(".ui2-show-card")?.style.removeProperty("translate");
   scrolly = null;
@@ -313,12 +322,9 @@ function setupScrolly(): void {
   panels.forEach((p, i) => (p.hidden = was[i]));
   const top = (document.querySelector<HTMLElement>("[data-site-header]")?.offsetHeight ?? 78) + 20;
   if (max > innerHeight - top - 24) return;
-  let marker = sec.querySelector<HTMLElement>("[data-show-marker]");
-  if (!marker) {
-    marker = document.createElement("div");
-    marker.setAttribute("data-show-marker", "");
-    show.before(marker);
-  }
+  // หมุดอยู่ใน HTML ของ island แล้ว (Ui2StaticSections) — ห้ามสร้างแทรกเอง (โครง DOM ต้องตรงกับที่ React รับช่วง)
+  const marker = sec.querySelector<HTMLElement>("[data-show-marker]");
+  if (!marker) return;
   sec.style.setProperty("--show-h", `${max}px`);
   sec.style.setProperty("--steps", String(tabs.length));
   sec.classList.add("is-scrolly");
@@ -362,7 +368,7 @@ addEventListener("scroll", () => {
 let resizeT = 0;
 addEventListener("resize", () => {
   clearTimeout(resizeT);
-  resizeT = window.setTimeout(setupScrolly, 200);
+  resizeT = window.setTimeout(() => setupScrolly({ resize: true }), 200);
 });
 
 /* ── 9. ตัวเลขนับขึ้น ───────────────────────────────────────────────────── */
@@ -382,10 +388,13 @@ const countObserver =
             const end = Number(text);
             const t0 = performance.now();
             const dur = end > 100 ? 1400 : 900;
+            // ล็อกความกว้างไว้ระหว่างนับ — "1909" อยู่ในคอลัมน์กว้างตามเนื้อหา นับจาก 0 หลักหายไป คอลัมน์ข้าง ๆ ขยับ (CLS · B2 2026-10-21)
+            el.style.minWidth = `${el.offsetWidth}px`;
             const step = (t: number) => {
               const k = Math.min(1, (t - t0) / dur);
               el.textContent = String(Math.round(end * (1 - Math.pow(1 - k, 3))));
               if (k < 1) requestAnimationFrame(step);
+              else el.style.minWidth = "";
             };
             requestAnimationFrame(step);
           }
@@ -398,11 +407,13 @@ function watchCounts(): void {
     if (!counted.has(el)) countObserver?.observe(el);
   });
 }
-watchCounts();
-setupScrolly();
+afterHydrate(() => {
+  watchCounts();
+  setupScrolly();
+});
 // ฟอนต์/ภาพโหลดเสร็จแล้วความสูงแผงเปลี่ยน ➔ วัดใหม่
-document.fonts?.ready.then(setupScrolly);
-addEventListener("load", setupScrolly, { once: true });
+document.fonts?.ready.then(() => afterHydrate(() => setupScrolly()));
+addEventListener("load", () => afterHydrate(() => setupScrolly()), { once: true });
 // ส่วนนี้อยู่ใน island ที่ถอด/ใส่ DOM ใหม่ได้ — สนใจเฉพาะตอนส่วนคลังไพ่/ตัวเลขถูกใส่เข้ามา (ไม่สแกนทุกการเปลี่ยนแปลงระหว่างสตรีมคำทำนาย)
 new MutationObserver((ms) => {
   const hit = ms.some((m) =>
@@ -524,7 +535,7 @@ function watchNotes(): void {
     notesObserver.observe(el);
   });
 }
-watchNotes();
+afterHydrate(watchNotes);
 new MutationObserver((ms) => {
   if (ms.some((m) => Array.from(m.addedNodes).some((n) => n instanceof Element && (n.matches(".ui2-notes") || n.querySelector(".ui2-notes") !== null)))) watchNotes();
 }).observe(document.body, { childList: true, subtree: true });

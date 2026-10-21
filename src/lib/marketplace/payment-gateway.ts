@@ -95,7 +95,7 @@ export function isStripeTestModeOnProduction(): boolean {
  * ⚠️ ถ้าบัญชี Stripe ใช้ API รุ่นเก่าที่ไม่รู้จัก `branding_settings` ระบบจะยิงซ้ำโดยไม่ส่งส่วนนี้
  *    (ดู `createGatewayCharge`) — หน้าจ่ายเงินต้องไม่ล่มเพราะเรื่องหน้าตา
  */
-export function checkoutBranding(origin: string | null): Record<string, unknown> {
+function checkoutBranding(origin: string | null): Record<string, unknown> {
   const isPublic = !!origin && origin.startsWith("https://");
   return {
     display_name: "SeerTarot",
@@ -378,7 +378,7 @@ export interface GatewayChargeStatus {
 }
 
 /** ข้อมูลสถานะของ Checkout Session ไม่ว่าจะมาจาก webhook หรือจากการถาม Stripe เอง */
-export function readCheckoutSession(session: Record<string, unknown>): GatewayChargeStatus {
+function readCheckoutSession(session: Record<string, unknown>): GatewayChargeStatus {
   const metadata: Record<string, string> = {};
   const raw = session.metadata;
   if (raw && typeof raw === "object") {

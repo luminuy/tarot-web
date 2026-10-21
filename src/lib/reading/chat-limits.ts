@@ -14,6 +14,25 @@ export const CHAT_HISTORY_TURN_MAX = 800;
 export const CHAT_HISTORY_MAX_TURNS = 50;
 /** จำนวนตาท้ายสุดที่เซิร์ฟเวอร์ replay เข้าโมเดลจริง — ส่งเกินนี้ไม่มีประโยชน์ */
 export const CHAT_HISTORY_REPLAY_TURNS = 12;
+/**
+ * จำนวนคำถามต่อยอดสูงสุดต่อ "ไพ่หนึ่งชุด" (ต่อ readingId) — นับฝั่งเซิร์ฟเวอร์ใน `edge_rate_buckets` (B4-01)
+ * ไม่มีเพดานนี้ แชทหนึ่งรอบใช้แทนการเปิดไพ่ใหม่ได้ไม่จำกัด (คำตอบไล่ไพ่ทุกใบตามตำแหน่ง)
+ */
+export const CHAT_TURNS_PER_READING = 20;
+
+/**
+ * สิทธิ์ถามฟรีต่อไพ่หนึ่งชุดของสมาชิกที่ไม่มีรอบโบนัส/รอบที่ซื้อ — นับเฉพาะคำถามที่แม่หมอ AI ตอบสำเร็จ
+ * หน้าจอ (`FollowUpChat.tsx`) และเซิร์ฟเวอร์ (`chat/route.ts` · `edge_rate_buckets` คีย์ `chat:free`) ใช้ค่าเดียวกันนี้
+ */
+export const CHAT_FREE_TURNS_PER_READING = 2;
+
+/**
+ * ไพ่ชุดนี้ "อ่านจบแล้ว" หรือยัง — แชทถามต่อเปิดให้เฉพาะรอบที่ `/read` เก็บผลจริงแล้ว (ซึ่งหักสิทธิ์ไปแล้ว · B4-01)
+ * คำอ่านสำรองตอน AI ล่ม (`FAILED` · คืนสิทธิ์) และรอบที่ยังไม่เรียก `/read` (`DRAWING`) ไม่นับ
+ */
+export function isReadingFinished(record: { status?: string; result?: unknown } | null | undefined): boolean {
+  return record?.status === "COMPLETED" && !!record.result;
+}
 
 /**
  * ตัดประวัติแชทให้พอดีเพดานของเซิร์ฟเวอร์: เก็บเฉพาะตาท้ายสุดที่ replay จริง และตัดข้อความยาวเกินเพดานต่อตา

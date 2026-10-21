@@ -188,7 +188,7 @@ export function SpreadsIndexBody({ locale, library }: { locale: Locale; library:
         <nav aria-label={copy.directoryTitle} className="ui2-wrap">
           <span className="ui2-sp-rule" aria-hidden="true" />
           <div className="ui2-sp-dir-head">
-            <SectionBadge n="07" word="Directory" />
+            <SectionBadge n="07" word={isEnglish ? "Directory" : "รวมทุกผัง"} />
             <h2 className="ui2-h2 ui2-sp-dir-h2"><ThaiPhrases>{copy.directoryTitle}</ThaiPhrases></h2>
             <p className="ui2-lede">{copy.directoryLead}</p>
           </div>
@@ -244,7 +244,7 @@ export function SpreadsIndexBody({ locale, library }: { locale: Locale; library:
           <span className="ui2-sp-rule" aria-hidden="true" />
           {/* id="topics" = ปลายทางของ `/spreads/topic` (ไม่มีหน้าของตัวเอง · public/_redirects) */}
           <div id="topics" className="ui2-sp-dir-head">
-            <SectionBadge n="08" word="By topic" />
+            <SectionBadge n="08" word={isEnglish ? "By topic" : "ตามเรื่อง"} />
             <h2 className="ui2-h2 ui2-sp-dir-h2"><ThaiPhrases>{copy.topicsTitle}</ThaiPhrases></h2>
             <p className="ui2-lede">{copy.topicsLead}</p>
           </div>
@@ -269,7 +269,7 @@ export function SpreadsIndexBody({ locale, library }: { locale: Locale; library:
 
           <span className="ui2-sp-rule" aria-hidden="true" />
           <div className="ui2-sp-dir-head">
-            <SectionBadge n="09" word="Shortcuts" />
+            <SectionBadge n="09" word={isEnglish ? "Shortcuts" : "ทางลัด"} />
             <h2 className="ui2-h2 ui2-sp-dir-h2"><ThaiPhrases>{copy.shortcutsTitle}</ThaiPhrases></h2>
             <p className="ui2-lede">{copy.shortcutsLead}</p>
           </div>

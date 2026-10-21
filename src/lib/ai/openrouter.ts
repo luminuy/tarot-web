@@ -65,7 +65,7 @@ export function stripCodeFence(text: string): string {
   return m ? m[1] : text;
 }
 
-export function getOpenRouterApiKey(): string | undefined {
+function getOpenRouterApiKey(): string | undefined {
   return process.env.OPENROUTER_API_KEY;
 }
 

@@ -100,7 +100,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
         */}
         {/*
           🪗 มือถือ: คอลัมน์ที่เป็นลิงก์ล้วนพับได้ (แตะชื่อคอลัมน์เพื่อกาง) — ดู `footer-accordion.ts`
-          ⚠️ คอลัมน์ "ปลอดภัย & โปร่งใส" ไม่พับเด็ดขาด — มีสายด่วน 1323/1669 ต้องเห็นทันที (กฎเหล็กข้อ 6)
+          ⚠️ คอลัมน์ "ปลอดภัยและโปร่งใส" ไม่พับเด็ดขาด — มีสายด่วน 1323/1669 ต้องเห็นทันที (กฎเหล็กข้อ 6)
           ⚠️ ไม่มีสคริปต์ = ปุ่มพับไม่แสดง ลิงก์กางครบเหมือนเดิม (CSS ผูกกับคลาส `footer-collapsible` บน <html>)
         */}
         {/* 2) ลิงก์ 4 คอลัมน์ */}
@@ -121,7 +121,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                     data-footer-toggle
                     aria-expanded="false"
                     aria-controls={listId}
-                    className="footer-col-toggle w-full items-center justify-between gap-3 border-b pb-2.5 text-left"
+                    className="footer-col-toggle min-h-[44px] w-full items-center justify-between gap-3 border-b pb-2.5 text-left"
                   >
                     <span>{col.title}</span>
                     <svg

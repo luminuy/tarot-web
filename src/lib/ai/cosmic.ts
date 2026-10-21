@@ -69,7 +69,7 @@ const REF_NEW_MOON_EPOCH_MS = 947182440000;
 /**
  * คำนวณดิถีพระจันทร์ตามเวลาจริง
  */
-export function calculateMoonPhase(date: Date = new Date()): MoonPhaseInfo {
+function calculateMoonPhase(date: Date = new Date()): MoonPhaseInfo {
   const diffMs = date.getTime() - REF_NEW_MOON_EPOCH_MS;
   const diffDays = diffMs / (1000 * 60 * 60 * 24);
   const cycleDay = ((diffDays % SYNODIC_MONTH_DAYS) + SYNODIC_MONTH_DAYS) % SYNODIC_MONTH_DAYS;
@@ -153,7 +153,7 @@ export function calculateMoonPhase(date: Date = new Date()): MoonPhaseInfo {
 /**
  * คำนวณดาวครองวันและธาตุประจำวันตามศาสตร์โบราณ
  */
-export function calculateDayRuler(date: Date = new Date()): DayRulerInfo {
+function calculateDayRuler(date: Date = new Date()): DayRulerInfo {
   /*
    * ⚠️ "วันไหน" ต้องเป็นวันตามเวลาไทยเสมอ (A2-05) — Workers รันเป็น UTC
    * เดิมใช้ `date.getDay()` ช่วง 00:00–06:59 น. ไทยจึงได้วันของเมื่อวาน แม่หมอพูดชื่อวัน/ธาตุผิดทุกคืน

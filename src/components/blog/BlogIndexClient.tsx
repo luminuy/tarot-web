@@ -51,11 +51,11 @@ export interface BlogIndexClientProps {
 
 /** หมวดบทความ = หน้าต่างโชว์เคส (สีหมวด · คำอังกฤษเอียง) — เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง" */
 const CATEGORIES = [
-  { id: "love", labelTh: "ความรัก & เนื้อคู่", labelEn: "Love & Soulmates", kicker: "Love", tone: 3, leadTh: "ใจเขา ใจเรา คนคุย แฟนเก่า และวิธีอ่านไพ่ความรักให้ตรง", leadEn: "Their feelings, yours, exes and reading love spreads well" },
-  { id: "career", labelTh: "การงาน & การเงิน", labelEn: "Career & Abundance", kicker: "Work · Money", tone: 1, leadTh: "งาน เงิน การตัดสินใจ และจังหวะชีวิตที่จับต้องได้", leadEn: "Work, money, decisions and the timing of real life" },
-  { id: "spreads", labelTh: "ผังการเปิดไพ่", labelEn: "Tarot Spreads", kicker: "Spreads", tone: 4, leadTh: "เลือกผังให้ตรงคำถาม และอ่านแต่ละตำแหน่งให้เป็น", leadEn: "Pick the right spread and read every position" },
-  { id: "cards", labelTh: "ความหมายไพ่", labelEn: "Card Meanings", kicker: "Card Meanings", tone: 2, leadTh: "เจาะไพ่รายใบและรายชุด ภาพ สัญลักษณ์ และเรื่องเล่าเบื้องหลัง", leadEn: "Cards and suits in depth: imagery, symbols and their stories" },
-  { id: "wisdom", labelTh: "จิตวิทยา & AI", labelEn: "Psychology & AI", kicker: "Wisdom", tone: 5, leadTh: "ไพ่กับจิตวิทยาเชิงลึก ความเชื่อ และการอ่านไพ่ร่วมกับ AI", leadEn: "Tarot, depth psychology, belief and reading with AI" },
+  { id: "love", labelTh: "ความรัก & เนื้อคู่", labelEn: "Love & Soulmates", kicker: "Love", kickerTh: "ความรัก", tone: 3, leadTh: "ใจเขา ใจเรา คนคุย แฟนเก่า และวิธีอ่านไพ่ความรักให้ตรง", leadEn: "Their feelings, yours, exes and reading love spreads well" },
+  { id: "career", labelTh: "การงาน & การเงิน", labelEn: "Career & Abundance", kicker: "Work · Money", kickerTh: "งาน · เงิน", tone: 1, leadTh: "งาน เงิน การตัดสินใจ และจังหวะชีวิตที่จับต้องได้", leadEn: "Work, money, decisions and the timing of real life" },
+  { id: "spreads", labelTh: "ผังการเปิดไพ่", labelEn: "Tarot Spreads", kicker: "Spreads", kickerTh: "ผังไพ่", tone: 4, leadTh: "เลือกผังให้ตรงคำถาม และอ่านแต่ละตำแหน่งให้เป็น", leadEn: "Pick the right spread and read every position" },
+  { id: "cards", labelTh: "ความหมายไพ่", labelEn: "Card Meanings", kicker: "Card Meanings", kickerTh: "ความหมายไพ่", tone: 2, leadTh: "เจาะไพ่รายใบและรายชุด ภาพ สัญลักษณ์ และเรื่องเล่าเบื้องหลัง", leadEn: "Cards and suits in depth: imagery, symbols and their stories" },
+  { id: "wisdom", labelTh: "จิตวิทยา & AI", labelEn: "Psychology & AI", kicker: "Wisdom", kickerTh: "จิตวิทยา", tone: 5, leadTh: "ไพ่กับจิตวิทยาเชิงลึก ความเชื่อ และการอ่านไพ่ร่วมกับ AI", leadEn: "Tarot, depth psychology, belief and reading with AI" },
 ] as const;
 
 /** ไพ่ลอยรอบหัวข้อ (ตกแต่ง · ไม่ใช่ผลสุ่ม) */
@@ -118,7 +118,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
     const clipped = !q && !expanded.has(cat.id) && list.length > 3;
     return {
       id: `cat-${cat.id}`,
-      kicker: cat.kicker,
+      kicker: isEnglish ? cat.kicker : cat.kickerTh,
       title: isEnglish ? cat.labelEn : cat.labelTh,
       tone: cat.tone,
       count: q ? list.length : all.length,
