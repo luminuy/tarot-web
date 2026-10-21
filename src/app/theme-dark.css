@@ -184,7 +184,8 @@ html[data-theme="dark"] .site-header-glass {
   box-shadow: 0 16px 34px -24px rgba(0, 0, 0, 0.8);
 }
 
-html[data-theme="dark"] .font-mystic-gold:not(.v2-qr *) {
+/* แผงครีมของพิธีเปิดไพ่ (.v2-qr · .v2-in) ครีมทั้งสองโหมด — ทองเข้มเดิมต้องคงไว้ (B1 2026-10-20) */
+html[data-theme="dark"] .font-mystic-gold:not(.v2-qr *, .v2-in *) {
   color: var(--color-gold);
 }
 
