@@ -74,7 +74,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const personaName = isEnglish ? (persona.nameEn || persona.nameTh) : persona.nameTh;
-  const defaultQuestion = isEnglish ? "General life overview" : "ภาพรวมดวงชะตา";
   const defaultSummary = isEnglish ? "Trust your inner wisdom and proceed with mindful intention." : "จงเชื่อมั่นในตนเองและก้าวต่อไปอย่างมีสติ";
 
   const showToast = (msg: string) => {
@@ -85,7 +84,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   const shareText = isEnglish
     ? `1909 Rider-Waite Tarot Reading by SeerTarot
 Spread: ${spreadName}
-Sacred Question: "${question || defaultQuestion}"
 Cards Drawn: ${cards
         .map((c) => {
           const card = c.card || (c.cardIndex !== undefined ? cardByIndex(c.cardIndex) : null);
@@ -98,7 +96,6 @@ Oracle Insight from ${personaName}: "${reading?.summary || defaultSummary}"
 Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin : "https://seertarot.net"}`
     : `คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot
 ผังการวางไพ่: ${spreadName}
-คำถามอธิษฐาน: "${question || "ภาพรวมดวงชะตา"}"
 ไพ่ที่เปิดได้: ${cards
         .map((c) => {
           const card = c.card || (c.cardIndex !== undefined ? cardByIndex(c.cardIndex) : null);
@@ -132,7 +129,6 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
       mime,
       isEnglish,
       spreadName,
-      question,
       personaName,
       summary: reading?.summary || "",
       cards: shareCardItems(),

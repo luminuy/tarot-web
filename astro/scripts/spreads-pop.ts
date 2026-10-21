@@ -3,7 +3,10 @@
  * แผน: docs/plans/UI_2_0_SPREADS_PLAN_2026-10-13.md หัวข้อ 5
  *
  * 1. หยุดของวนเมื่อส่วนพ้นจอ — สลับ `data-inview` ของ `[data-anim-section]` (กติกาเดียวกับหน้าแรก)
- * 2. แตะไพ่ผัง ➔ เปิด `<dialog>` ตัวเดียวด้วย showModal() · ไพ่ใหญ่คัดลอกจากไพ่ใบที่แตะ (cloneNode)
+ * 2. แตะไพ่ผัง ➔ เปิด `<dialog>` ตัวเดียวด้วย show() + ฉากหลังของเราเอง · ไพ่ใหญ่คัดลอกจากไพ่ใบที่แตะ (cloneNode)
+ *    ⚠️ ไม่ใช้ showModal(): เนื้อหาข้างหลังทั้งหน้ากลายเป็น inert ➔ คำนวณสไตล์ใหม่ทั้งหน้าทุกครั้งที่เปิด/ปิด
+ *       วัดที่ CPU ×4: เปิด 149 ms (modal) เทียบ 20 ms (show) — แตะแล้วสะดุดบนมือถือกลางล่าง (B2 · 2026-10-21)
+ *       พฤติกรรมแบบ modal ทำเอง: ฉากหลังกดปิด · Esc ปิด · Tab วนในหน้าต่าง · aria-modal · ล็อกเลื่อน (CSS `html:has`)
  *    กดพร้อม Ctrl / ⌘ / Shift / Alt หรือคลิกกลาง = ปล่อยให้ลิงก์ทำงานตามปกติ (เปิดหน้าคู่มือ)
  * 3. ลิงก์ลึก `/spreads#spread-<id>` เปิดหน้าต่างของผังนั้นเอง · เปิด/ปิดใช้ history.replaceState (ไม่เพิ่มประวัติ)
  *
@@ -221,8 +224,20 @@ if (show) {
 const dialog = document.querySelector<HTMLDialogElement>("[data-spread-pop]");
 const CARD = "a.ui2-spread-card[data-spread-id]";
 
-if (dialog && typeof dialog.showModal === "function") {
+if (dialog && typeof dialog.show === "function") {
   const pop = dialog;
+  /*
+   * หน้าต่างแบบไม่ modal ไม่ขึ้น top layer เอง — ย้ายไปไว้ใต้ <body> ตรง ๆ ไม่ให้ติด stacking context
+   * ของ `div.relative.z-10` ที่ครอบหน้าอยู่ (บทเรียน INC-0243 · หัวเว็บ z-50 จะทับหน้าต่าง)
+   * กล่องครอบมีคลาส `ui2-sp` ให้กฎ CSS ที่ขึ้นต้นด้วย `.ui2-sp` ยังใช้กับไพ่ใหญ่ที่คัดลอกมาได้เหมือนเดิม
+   */
+  const layer = Object.assign(document.createElement("div"), { className: "ui2-sp ui2-pop-layer" });
+  // `data-floating` = ข้อยกเว้นของกฎที่ให้ลูกตรงของ <body> เป็น z-index 1 (ไม่งั้นหัวเว็บ z-50 ทับฉากหลัง)
+  layer.setAttribute("data-floating", "");
+  const scrim = Object.assign(document.createElement("div"), { className: "ui2-pop-scrim", hidden: true });
+  layer.append(scrim, pop);
+  document.body.append(layer);
+  pop.setAttribute("aria-modal", "true");
   const $ = <T extends Element = HTMLElement>(sel: string, root: ParentNode = pop) => root.querySelector(sel) as T;
   const big = $("[data-pop-card]");
   const list = $("[data-pop-list]");
@@ -251,8 +266,14 @@ if (dialog && typeof dialog.showModal === "function") {
     $("[data-pop-guide]").setAttribute("href", card.getAttribute("href") ?? "");
 
     from = card;
-    if (!pop.open) pop.showModal();
-    pop.scrollTop = 0;
+    if (!pop.open) {
+      scrim.hidden = false;
+      pop.show();
+    } else {
+      // เปิดอยู่แล้ว (สลับไพ่ผ่านลิงก์ลึก) — เลื่อนกลับบนสุด · เปิดใหม่ไม่ต้อง: กล่องเพิ่งถูกสร้างใหม่ อยู่บนสุดเอง (ไม่บังคับคำนวณเลย์เอาต์)
+      pop.scrollTop = 0;
+    }
+    if (!pop.contains(document.activeElement)) $("[data-pop-close]").focus({ preventScroll: true });
     history.replaceState(history.state, "", `#${card.id}`);
   };
 
@@ -276,8 +297,37 @@ if (dialog && typeof dialog.showModal === "function") {
       done();
     }
   });
-  pop.addEventListener("cancel", () => setTimeout(done));
+  scrim.addEventListener("click", () => {
+    pop.close();
+    done();
+  });
+  // แบบไม่ modal ไม่มี Esc / กันโฟกัสหลุดให้ — ทำเองตรงนี้
+  document.addEventListener("keydown", (e) => {
+    if (!pop.open) return;
+    if (e.key === "Escape") {
+      e.preventDefault();
+      pop.close();
+      done();
+      return;
+    }
+    if (e.key !== "Tab") return;
+    const items = Array.from(
+      pop.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'),
+    ).filter((el) => !el.hidden && el.getClientRects().length > 0);
+    if (items.length === 0) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    const active = document.activeElement;
+    if (e.shiftKey && (active === first || !pop.contains(active))) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && (active === last || !pop.contains(active))) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
   pop.addEventListener("close", () => {
+    scrim.hidden = true;
     if (!pop.open) done();
   });
 

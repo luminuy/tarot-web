@@ -200,8 +200,9 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
     ent.role === "admin" ||
     ent.role === "unlimited" ||
     (typeof ent.bonusRemaining === "number" && ent.bonusRemaining > 0);
-  // นับเฉพาะคำถามที่แม่หมอตอบได้จริง — ตาที่ล้ม (เน็ตหลุด · เซิร์ฟเวอร์ปฏิเสธ) ไม่กินสิทธิ์ถามฟรี
-  const userQuestionsCount = messages.filter((m) => m.sender === "bot" && !m.isError).length;
+  // นับเฉพาะคำถามที่แม่หมอ AI ตอบได้จริง — ตาที่ล้ม (เน็ตหลุด · เซิร์ฟเวอร์ปฏิเสธ) และคำตอบสำรองตอน AI ไม่ว่าง
+  // ไม่กินสิทธิ์ถามฟรี · ต้องตรงกับตัวนับฝั่งเซิร์ฟเวอร์ (`chat/route.ts` นับเฉพาะตอน AI ตอบสำเร็จ)
+  const userQuestionsCount = messages.filter((m) => m.sender === "bot" && !m.isError && !m.isFallback).length;
   // เซิร์ฟเวอร์นับสิทธิ์ถามฟรีต่อไพ่ชุดนี้ด้วย (รีโหลดหน้าแล้วตัวนับบนจอเริ่ม 0 ใหม่) — ตอบว่าหมดแล้วต้องขึ้นปุ่มเติมรอบทันที
   const [serverFreeExhausted, setServerFreeExhausted] = useState(false);
   const freeChatLimitReached = !isUnlimited && (serverFreeExhausted || userQuestionsCount >= CHAT_FREE_TURNS_PER_READING);

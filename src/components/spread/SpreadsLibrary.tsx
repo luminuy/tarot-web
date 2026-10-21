@@ -285,7 +285,7 @@ function ShelfSection({
 }
 
 /**
- * หน้าต่างไพ่เด้ง — ตัวเดียวของทั้งหน้า (INC-0243: ไม่ติด stacking context ของส่วนไหน · showModal() ขึ้นชั้นบนสุดเอง)
+ * หน้าต่างไพ่เด้ง — ตัวเดียวของทั้งหน้า (INC-0243: สคริปต์ย้ายไปไว้ใต้ <body> จึงไม่ติด stacking context ของส่วนไหน)
  * ช่องว่างทั้งหมดเติมโดย `astro/scripts/spreads-pop.ts` จากไพ่ใบที่แตะ
  */
 function SpreadPopDialog({ isEnglish }: { isEnglish: boolean }) {

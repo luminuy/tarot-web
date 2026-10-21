@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, startTransition } from "react";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CardImage } from "@/components/card/CardImage";
@@ -45,6 +45,22 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
    * ลิงก์ชุดเดียวกันยังอยู่ใน HTML ผ่านแผงเมนูใหญ่บนคอม (SiteHeader) และฟุตเตอร์ — บอทค้นหายังเห็นครบ
    */
   const [hasOpened, setHasOpened] = useState(eagerBody);
+  /*
+   * เตรียมรายการไว้ล่วงหน้าตอนเครื่องว่างหลังโหลด — เดิมสร้างตอนกดเปิดครั้งแรก ทำให้แตะแล้วค้าง ~160–200 ms
+   * บนมือถือกลางล่าง (CPU ×4) เทียบ ~70 ms ตอนเปิดครั้งต่อไป (B2 · 2026-10-21)
+   * HTML ตอนโหลดยังเล็กเท่าเดิม (งบ DOM วัดจาก HTML) · startTransition ให้ React แบ่งงานเป็นชิ้นเล็ก ไม่เกิดงานยาว
+   * Safari ไม่มี requestIdleCallback ➔ รอ 2.5 วินาทีแทน
+   */
+  useEffect(() => {
+    if (hasOpened) return;
+    const prepare = () => startTransition(() => setHasOpened(true));
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(prepare, { timeout: 8000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const t = window.setTimeout(prepare, 2500);
+    return () => window.clearTimeout(t);
+  }, [hasOpened]);
   const isOpenRef = useRef(isOpen);
   useEffect(() => {
     isOpenRef.current = isOpen;
@@ -106,8 +122,11 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
     };
   }, [isOpen]);
 
+  // เสียงแตะเล่นหลังเฟรมที่ลิ้นชักขึ้นจอ — ครั้งแรกต้องสร้างระบบเสียงของเบราว์เซอร์ (10–50 ms ที่ CPU ×4) ไม่ให้หน่วงการเปิด
+  const tapSound = () => requestAnimationFrame(() => setTimeout(() => soundManager.playMenuTapSound()));
+
   const toggleDropdown = () => {
-    soundManager.playMenuTapSound();
+    tapSound();
 
     // ⚠️ ห้ามยิง event / side effect ใด ๆ ข้างใน setState updater (ISSUE-028)
     // updater ต้องเป็น pure function — React เรียกซ้ำได้หลายครั้ง
@@ -124,7 +143,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
   const nav = headerNav(isEnglish);
 
   const close = () => {
-    soundManager.playMenuTapSound();
+    tapSound();
     setIsOpen(false);
   };
   const isActivePath = (href?: string) =>
