@@ -32,7 +32,6 @@ export interface ShareCardInput {
   format: "story" | "post";
   isEnglish: boolean;
   spreadName: string;
-  question: string;
   personaName: string;
   summary: string;
   cards: ShareCardItem[];
@@ -284,18 +283,7 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
   y += story ? 58 : 44;
   drawPill(ctx, fit(ctx, input.spreadName, 700), W / 2, y, C.gold, story ? 24 : 22);
 
-  const question = input.question.trim();
-  if (question) {
-    y += story ? 92 : 74;
-    ctx.fillStyle = C.cream;
-    font(ctx, 700, story ? 50 : 42, SERIF);
-    const qLines = wrap(ctx, `“${question}”`, W - 220, 2);
-    for (const line of qLines) {
-      drawCentered(ctx, line, W / 2, y);
-      y += story ? 66 : 56;
-    }
-    y -= story ? 66 : 56;
-  }
+  // ภาพนี้คือภาพพรีวิวลิงก์ /s/<id> ด้วย (สาธารณะ) — ไม่ใส่คำถามของผู้ใช้ (เจ้าของ 2026-10-21)
   const headerBottom = y + (story ? 40 : 30);
 
   /* ── ท้ายภาพ: ชวนเปิดไพ่ + ความโปร่งใส ───────────────────────────── */

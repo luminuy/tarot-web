@@ -741,10 +741,12 @@
 }
 
 /* ── ไพ่เด้ง (dialog) ──────────────────────────────────────────────────────
-   ตัวเดียวท้าย <main> · เปิดด้วย showModal() (`astro/scripts/spreads-pop.ts`)
+   ตัวเดียว · สคริปต์ย้ายไปไว้ใต้ <body> ใน `.ui2-pop-layer` แล้วเปิดด้วย show() + ฉากหลัง `.ui2-pop-scrim`
+   (ไม่ใช้ showModal() เพราะทำให้คำนวณสไตล์ใหม่ทั้งหน้าทุกครั้งที่เปิด — `astro/scripts/spreads-pop.ts`)
    มือถือ: แผ่นเลื่อนขึ้นจากล่าง · คอม/iPad: ไพ่ใหญ่ซ้าย + แผงข้อมูลขวา */
 .ui2-spread-pop {
   position: fixed;
+  z-index: var(--z-modal);
   inset: auto 0 0;
   width: 100%;
   max-width: 100%;
@@ -759,8 +761,14 @@
   background: linear-gradient(180deg, #1E1822 0%, var(--ui2-night) 100%);
   box-shadow: 0 0 0 1px var(--ui2-line-night), 0 -30px 60px -20px rgba(0, 0, 0, 0.8);
 }
-.ui2-spread-pop::backdrop {
+.ui2-pop-scrim {
+  position: fixed;
+  z-index: var(--z-modal);
+  inset: 0;
   background: rgba(8, 6, 10, 0.86);
+}
+.ui2-pop-scrim[hidden] {
+  display: none;
 }
 .ui2-spread-pop[open] {
   display: block;
@@ -1134,7 +1142,7 @@ html:has(.ui2-spread-pop[open]) {
     margin: auto;
     border-radius: 30px;
   }
-  .ui2-spread-pop::backdrop {
+  .ui2-pop-scrim {
     background: rgba(8, 6, 10, 0.72);
   }
   .ui2-pop-inner {

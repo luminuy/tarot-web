@@ -184,8 +184,8 @@ export function runChatSchemaTests() {
   if (!/const fromFallback = record\?\.status === "FAILED";/.test(chatRouteSrc)) {
     throw new Error("Test 7 Failed: 409 ของคำอ่านสำรองต้องบอกให้กด 'ให้แม่หมอ AI อ่านใหม่' ไม่ใช่ 'ให้อ่านจบก่อน'");
   }
-  if (!/userQuestionsCount = messages\.filter\(\(m\) => m\.sender === "bot" && !m\.isError\)\.length/.test(chatUiSrc)) {
-    throw new Error("Test 7 Failed: สิทธิ์ถามฟรีต้องนับเฉพาะคำถามที่ได้คำตอบจริง (ไม่นับตาที่ล้ม)");
+  if (!/userQuestionsCount = messages\.filter\(\(m\) => m\.sender === "bot" && !m\.isError && !m\.isFallback\)\.length/.test(chatUiSrc)) {
+    throw new Error("Test 7 Failed: สิทธิ์ถามฟรีต้องนับเฉพาะคำถามที่ AI ตอบจริง (ไม่นับตาที่ล้มและคำตอบสำรอง · ตรงกับเซิร์ฟเวอร์)");
   }
   console.log("  ✓ Test 7: คำอ่านสำรองไม่มีปุ่มแชท + 409 บอกทางไปต่อ + ตาที่ล้มไม่กินสิทธิ์ถามฟรี");
 

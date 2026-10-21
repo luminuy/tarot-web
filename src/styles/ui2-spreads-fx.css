@@ -159,7 +159,7 @@
   /* ไพ่ผังบนโต๊ะนิ่ง — ลอยเฉพาะตอนชี้ (hover ยกขึ้น) · เดิมทุกใบลอยขึ้นลงไม่หยุด 26+ ใบ = หน้าหนัก (2026-10-17) */
 
   /* พื้นหลังหน้าต่างไพ่เด้ง: มืด + เบลอบาง ๆ */
-  [data-fx="full"] .ui2-spread-pop::backdrop {
+  [data-fx="full"] .ui2-pop-scrim {
     -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
   }
