@@ -1000,6 +1000,11 @@ check(
       /setAttribute\("data-ui2-hydrated", ""\)/.test(flowRoot) && /new Event\("ui2:hydrated"\)/.test(flowRoot) &&
       /afterHydrate\(scan\)/.test(stripComments(fs.readFileSync(path.join(ROOT, "astro/scripts/home-track.ts"), "utf-8"))),
   );
+  // B2-05: ตัวนับ "1909" อยู่ในคอลัมน์กว้างตามเนื้อหา — นับจาก 0 ต้องล็อกความกว้างไว้ ไม่งั้นคอลัมน์ข้าง ๆ ขยับ (CLS ตอนเลื่อน)
+  check(
+    "B2-05: ตัวนับเลขหน้าแรกล็อก min-width ระหว่างนับ แล้วปลดเมื่อนับเสร็จ",
+    /el\.style\.minWidth = `\$\{el\.offsetWidth\}px`/.test(ui2Home) && /el\.style\.minWidth = ""/.test(ui2Home),
+  );
   // B1: จุดตกแต่ง (จุดคั่นกลม · จุดเรืองแสงในชิปล็อกไพ่) ถูกถอด — ห้ามกลับมา (กฎเหล็กข้อ 2)
   const dotHits = sources.filter((f) => /className="(?:ui2-dot|v2-ar-dot|v2-tp-dot)"/.test(fs.readFileSync(f, "utf-8")));
   check("B1: ไม่มีจุดตกแต่ง ui2-dot · v2-ar-dot · v2-tp-dot", dotHits.length === 0, dotHits.map(rel).join(" · "));

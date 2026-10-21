@@ -388,10 +388,13 @@ const countObserver =
             const end = Number(text);
             const t0 = performance.now();
             const dur = end > 100 ? 1400 : 900;
+            // ล็อกความกว้างไว้ระหว่างนับ — "1909" อยู่ในคอลัมน์กว้างตามเนื้อหา นับจาก 0 หลักหายไป คอลัมน์ข้าง ๆ ขยับ (CLS · B2 2026-10-21)
+            el.style.minWidth = `${el.offsetWidth}px`;
             const step = (t: number) => {
               const k = Math.min(1, (t - t0) / dur);
               el.textContent = String(Math.round(end * (1 - Math.pow(1 - k, 3))));
               if (k < 1) requestAnimationFrame(step);
+              else el.style.minWidth = "";
             };
             requestAnimationFrame(step);
           }
