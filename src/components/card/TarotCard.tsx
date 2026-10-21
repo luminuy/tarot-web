@@ -269,7 +269,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
           {/* Top Frame Gold Header */}
           <div className="w-full flex justify-center items-center opacity-85 z-10">
             <span className="text-[12px] font-serif-th text-surface tracking-[0.25em] uppercase font-bold">
-              SACRED ORACLE
+              SEERTAROT
             </span>
           </div>
 

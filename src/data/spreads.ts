@@ -1220,7 +1220,7 @@ export const SPREADS: Spread[] = [
   },
   {
     id: "family",
-    nameTh: "ดวงบริวารและคนรอบข้าง (ไพ่ 5 ใบ)",
+    nameTh: "ดวงครอบครัวและคนรอบข้าง (ไพ่ 5 ใบ)",
     nameEn: "Circle & Kinship (5 Cards)",
     seoTitleTh: "ดูดวงไพ่ยิปซี บริวาร ครอบครัว เพื่อนฝูง 5 ใบ",
     tagline: "คนรอบตัวคิดยังไงกับเรา ใครหนุนใครฉุด",

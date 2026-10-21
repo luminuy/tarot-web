@@ -183,7 +183,7 @@ function ShelfSection({
       <div className="ui2-sp-win-bar" aria-hidden="true">
         <span className="ui2-sp-win-name">
           <span className="ui2-sp-win-n ui2-num">{String(order).padStart(2, "0")}</span>
-          <span className="ui2-accent">{isEnglish ? "Category" : shelf.nameEn}</span>
+          <span className="ui2-accent">{isEnglish ? "Category" : "หมวด"}</span>
         </span>
         <span className="ui2-sp-win-steps">
           {Array.from({ length: total }, (_, k) => (

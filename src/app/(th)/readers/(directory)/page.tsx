@@ -148,7 +148,7 @@ export default async function ReadersPage() {
 
           {/* ── รายชื่อแม่หมอ (ข้อมูลจริง) ── */}
           <div id="readers" className="scroll-mt-24">
-            <Ui2Window n="01" kicker="Readers" note={`ตัวต่อตัว ${CONSULTATION_MINUTES} นาที`} tone={4}>
+            <Ui2Window n="01" kicker="แม่หมอตัวจริง" note={`ตัวต่อตัว ${CONSULTATION_MINUTES} นาที`} tone={4}>
               <ReadersDirectory initialReaders={readers} liveReaderIds={liveReaderIds} ratings={ratings} />
             </Ui2Window>
           </div>
@@ -245,7 +245,7 @@ export default async function ReadersPage() {
 
           {/* ── คำถามที่พบบ่อย — แผงพับแบบหน้าแรก (คำตอบอยู่ใน HTML ครบ) ── */}
           <div className="ui2-next">
-            <Ui2FeatureRows id="readers-faq" kicker="FAQ" title="คำถามที่พบบ่อย" rows={[]} rest={faqs} />
+            <Ui2FeatureRows id="readers-faq" kicker="ถามบ่อย" title="คำถามที่พบบ่อย" rows={[]} rest={faqs} />
           </div>
 
           <Ui2NextSteps isEn={false} keys={["spreads", "daily", "journal", "cards"]} />

@@ -143,7 +143,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
   const sections: Ui2ShowcaseSection[] = [
     {
       id: "meanings",
-      kicker: "Five Dimensions",
+      kicker: isEnglish ? "Five Dimensions" : "ความหมาย 5 ด้าน",
       title: isEnglish ? "Meaning in 5 areas of life" : "ความหมาย 5 ด้านของชีวิต",
       short: isEnglish ? "5 meanings" : "ความหมาย 5 ด้าน",
       tone: 4,
@@ -187,7 +187,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
     },
     {
       id: "yes-no",
-      kicker: "Yes or No",
+      kicker: isEnglish ? "Yes or No" : "ใช่หรือไม่",
       title: isEnglish ? "Yes or no?" : "ไพ่ใบนี้ตอบใช่หรือไม่",
       short: isEnglish ? "Yes or no" : "ใช่หรือไม่",
       tone: 2,
@@ -199,7 +199,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
     },
     {
       id: "ask",
-      kicker: "Your turn",
+      kicker: isEnglish ? "Your turn" : "ถึงตาคุณ",
       title: isEnglish ? `Ask ${card.nameEn} your question` : `ไพ่${card.nameTh}ตอบเรื่องของคุณได้`,
       short: isEnglish ? "Ask the cards" : "ถามไพ่ใบนี้",
       tone: 3,

@@ -55,7 +55,7 @@ export function DailyArticle({
           <div className="ui2-dy-split-head">
             <span className="ui2-sp-badge ui2-sp-badge-gold">
               <span className="ui2-num">01</span>
-              <span className="ui2-accent">{isEnglish ? "The practice" : "Daily practice"}</span>
+              <span className="ui2-accent">{isEnglish ? "The practice" : "ทำทุกวัน"}</span>
             </span>
             <p className="ui2-dy-eyebrow">{eyebrow}</p>
             <h2 id="daily-learn-title" className="ui2-h2 ui2-dy-h2"><ThaiPhrases>{title}</ThaiPhrases></h2>
@@ -86,7 +86,7 @@ export function DailyArticle({
           <div className="ui2-dy-split-head">
             <span className="ui2-sp-badge ui2-sp-badge-gold">
               <span className="ui2-num">02</span>
-              <span className="ui2-accent">FAQ</span>
+              <span className="ui2-accent">{isEnglish ? "FAQ" : "ถามบ่อย"}</span>
             </span>
             <h2 className="ui2-h2 ui2-dy-h2"><ThaiPhrases>
               {isEnglish ? "Frequently asked questions" : "คำถามที่พบบ่อย"}
@@ -109,7 +109,7 @@ export function DailyArticle({
         <div className="ui2-dy-split-head ui2-dy-more-head">
           <span className="ui2-sp-badge ui2-sp-badge-gold">
             <span className="ui2-num">03</span>
-            <span className="ui2-accent">{isEnglish ? "Keep exploring" : "Keep exploring"}</span>
+            <span className="ui2-accent">{isEnglish ? "Keep exploring" : "ดูต่อ"}</span>
           </span>
           <h2 className="ui2-h2 ui2-dy-h2"><ThaiPhrases>
             {isEnglish ? "More ways to read your cards" : "อ่านไพ่ต่อได้อีกหลายทาง"}

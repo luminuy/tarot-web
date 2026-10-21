@@ -268,7 +268,7 @@ export function LoveOneCardClient() {
       />
 
       {/* Main Ritual Panel — v3 (2026-10-17): อยู่ในหน้าต่างเลขกำกับแบบ /spreads */}
-      <Ui2Window kicker="Love · One card" note={isEnglish ? "1909 deck · 78 cards" : "สำรับ 1909 · 78 ใบ"} tone={3} className="v3-love-win">
+      <Ui2Window kicker={isEnglish ? "Love · One card" : "ความรัก · ไพ่ 1 ใบ"} note={isEnglish ? "1909 deck · 78 cards" : "สำรับ 1909 · 78 ใบ"} tone={3} className="v3-love-win">
       <OneCardRitual
         spreadId="love-one"
         category="love"

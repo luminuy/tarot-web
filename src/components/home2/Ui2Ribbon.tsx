@@ -53,7 +53,7 @@ export function Ui2Ribbon({ isEnglish }: { isEnglish: boolean }) {
           {[0, 1, 2, 3].map((round) =>
             WORDS.map((w) => (
               <span key={`${round}-${w.accent}`} className="ui2-track-word">
-                <span className="ui2-accent">{w.accent}</span>
+                {(isEnglish || w.num) && <span className="ui2-accent">{w.accent}</span>}
                 {w.num && <span className="ui2-num">{w.num}</span>}
                 <span className="ui2-track-th">{isEnglish ? w.en : w.th}</span>
                 <span className="ui2-diamond" />

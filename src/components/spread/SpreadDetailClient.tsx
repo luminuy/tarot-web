@@ -196,7 +196,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
       <section id="sd-positions" className="v2-sd-sec" aria-labelledby="sd-pos-h">
         <Ui2SectionHead
           n="01"
-          word="Positions"
+          word={isEnglish ? "Positions" : "ตำแหน่งไพ่"}
           id="sd-pos-h"
           title={isEnglish ? "Positional Roles & Interpretations" : `ตำแหน่งไพ่ทั้ง ${spread.positions.length} ใบและความหมาย`}
           lede={
@@ -230,7 +230,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
       </section>
 
       <section className="v2-sd-sec" aria-labelledby="sd-how-h">
-        <Ui2SectionHead n="02" word="How to read" id="sd-how-h" title={isEnglish ? "How to Read this Spread" : "วิธีอ่านผังนี้"} />
+        <Ui2SectionHead n="02" word={isEnglish ? "How to read" : "วิธีอ่าน"} id="sd-how-h" title={isEnglish ? "How to Read this Spread" : "วิธีอ่านผังนี้"} />
         <ol className="v2-sd-steps">
           {howToSteps.map((step, idx) => (
             <li key={idx}>
@@ -248,7 +248,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
 
       <section className="v2-sd-sec v2-sd-split">
         <div aria-labelledby="sd-faq-h">
-          <Ui2SectionHead n="03" word="FAQ" id="sd-faq-h" title={isEnglish ? "Frequently Asked Questions" : "คำถามที่พบบ่อย"} />
+          <Ui2SectionHead n="03" word={isEnglish ? "FAQ" : "ถามบ่อย"} id="sd-faq-h" title={isEnglish ? "Frequently Asked Questions" : "คำถามที่พบบ่อย"} />
           <div className="v2-sd-faq">
             {faqs.map((faq, idx) => (
               <details key={idx}>
@@ -261,7 +261,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
 
         {relatedArticles.length > 0 && (
           <div aria-labelledby="sd-art-h">
-            <Ui2SectionHead n="04" word="Read more" id="sd-art-h" title={isEnglish ? "Related Wisdom Articles" : "บทความที่เกี่ยวข้อง"} />
+            <Ui2SectionHead n="04" word={isEnglish ? "Read more" : "อ่านต่อ"} id="sd-art-h" title={isEnglish ? "Related Wisdom Articles" : "บทความที่เกี่ยวข้อง"} />
             <ul className="v2-sd-articles">
               {relatedArticles.map((a) => (
                 <li key={a.slug}>
@@ -274,7 +274,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
       </section>
 
       <section className="v2-sd-sec" aria-labelledby="sd-more-h">
-        <Ui2SectionHead n={relatedArticles.length > 0 ? "05" : "04"} word="More spreads" id="sd-more-h" title={isEnglish ? "Explore Other Spreads" : "ผังอื่นที่น่าสนใจ"} />
+        <Ui2SectionHead n={relatedArticles.length > 0 ? "05" : "04"} word={isEnglish ? "More spreads" : "ผังอื่น"} id="sd-more-h" title={isEnglish ? "Explore Other Spreads" : "ผังอื่นที่น่าสนใจ"} />
         <ul className="v2-sd-more">
           {fallbackSpreads.map((s) => {
             const m = mapLayout(s.positions);

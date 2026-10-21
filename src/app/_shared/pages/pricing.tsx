@@ -327,7 +327,7 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
 
         {/* ── แพ็ก (island) ───────────────────────────────────────── */}
         {/* แถบสีสลับแบบหน้าแรก (`page-band`): แพ็ก (อ่อน) · ตารางเทียบ (ใส) · คำถาม (อ่อน) · ปิดท้าย (ใส) */}
-        <Ui2Window n="01" kicker="Top-up packages" note={isEn ? "Pay once · never expires" : "จ่ายครั้งเดียว · ไม่มีวันหมดอายุ"} tone={4}>
+        <Ui2Window n="01" kicker={isEn ? "Top-up packages" : "แพ็กเติมรอบ"} note={isEn ? "Pay once · never expires" : "จ่ายครั้งเดียว · ไม่มีวันหมดอายุ"} tone={4}>
           <h2 id="pricing-packages" className="sr-only">
             {isEn ? "Plans and packages" : "แพ็กเกจทั้งหมด"}
           </h2>
@@ -335,7 +335,7 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
         </Ui2Window>
 
         {/* ── ตารางเทียบสิทธิ์ ────────────────────────────────────── */}
-        <Ui2Window n="02" kicker="Compare" tone={2}>
+        <Ui2Window n="02" kicker={isEn ? "Compare" : "เทียบสิทธิ์"} tone={2}>
         <section aria-labelledby="pricing-compare" className="space-y-6">
           <h2 id="pricing-compare" className="v2-pr-h2">
             <ThaiPhrases>{isEn ? "Compare plans" : "เทียบสิทธิ์ทั้งหมด"}</ThaiPhrases>
@@ -380,7 +380,7 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
             สามข้อแรกมีภาพจำลอง · ที่เหลือเป็นรายการพับ (คำตอบอยู่ใน HTML ครบ ตรงกับ JSON-LD FAQPage) ── */}
         <Ui2FeatureRows
           id="pricing-faq"
-          kicker="FAQ"
+          kicker={isEn ? "FAQ" : "ถามบ่อย"}
           title={isEn ? "Frequently asked questions" : "คำถามที่พบบ่อย"}
           rows={faqs.slice(0, 3).map((f, i) => ({ title: f.q, body: <p>{f.a}</p>, mock: faqMocks[i] }))}
           rest={faqs.slice(3)}

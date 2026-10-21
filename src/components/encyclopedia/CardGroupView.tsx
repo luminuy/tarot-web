@@ -32,16 +32,18 @@ const NAV_TABS = [
 
 /** สีหมวด (ชุดเดียวกับหน้า /cards) */
 const SUIT_TONE: Record<string, Ui2ShowcaseSection["tone"]> = { major: 4, wands: 3, cups: 2, swords: 7, pentacles: 1 };
-const SUIT_NAME: Record<string, { th: string; en: string; kicker: string }> = {
-  wands: { th: "ไม้เท้า", en: "Wands", kicker: "Wands · Fire" },
-  cups: { th: "ถ้วย", en: "Cups", kicker: "Cups · Water" },
-  swords: { th: "ดาบ", en: "Swords", kicker: "Swords · Air" },
-  pentacles: { th: "เหรียญ", en: "Pentacles", kicker: "Pentacles · Earth" },
+const SUIT_NAME: Record<string, { th: string; en: string; kicker: string; kickerTh: string }> = {
+  wands: { th: "ไม้เท้า", en: "Wands", kicker: "Wands · Fire", kickerTh: "ไม้เท้า · ธาตุไฟ" },
+  cups: { th: "ถ้วย", en: "Cups", kicker: "Cups · Water", kickerTh: "ถ้วย · ธาตุน้ำ" },
+  swords: { th: "ดาบ", en: "Swords", kicker: "Swords · Air", kickerTh: "ดาบ · ธาตุลม" },
+  pentacles: { th: "เหรียญ", en: "Pentacles", kicker: "Pentacles · Earth", kickerTh: "เหรียญ · ธาตุดิน" },
 };
 
 interface Chapter {
   id: string;
   kicker: string;
+  /** หัวเล็กบนหน้าไทย (หน้าไทยไม่ใช้หัวเล็กภาษาอังกฤษ · เจ้าของ 2026-10-21) */
+  kickerTh: string;
   th: string;
   en: string;
   leadTh: string;
@@ -58,15 +60,16 @@ function chaptersOf(groupId: CardGroupInfo["id"], cards: readonly CardSummary[])
   if (groupId === "major") {
     const act = (from: number, to: number) => cards.filter((c) => c.number >= from && c.number <= to);
     return [
-      { id: "act-1", kicker: "The Fool's Journey · I", th: "องก์ 1 ก้าวออกสู่โลก", en: "Act I · Into the world", leadTh: "ไพ่ 0–7 คนเขลาเรียนรู้จากโลกภายนอก ครู พ่อแม่ ความรัก และชัยชนะแรก", leadEn: "Cards 0–7: the Fool learns from the outer world, teachers, family, love and a first victory", tone: 4, cards: act(0, 7) },
-      { id: "act-2", kicker: "The Fool's Journey · II", th: "องก์ 2 หันกลับมามองข้างใน", en: "Act II · Looking within", leadTh: "ไพ่ 8–14 แรงใจ ความเงียบ โชคชะตา และการปล่อยวาง", leadEn: "Cards 8–14: inner strength, solitude, fate and letting go", tone: 2, cards: act(8, 14) },
-      { id: "act-3", kicker: "The Fool's Journey · III", th: "องก์ 3 สู่ความสมบูรณ์", en: "Act III · Toward wholeness", leadTh: "ไพ่ 15–21 เงามืด การพังทลาย ความหวัง และโลกที่ครบรอบ", leadEn: "Cards 15–21: shadow, upheaval, hope and the completed world", tone: 5, cards: act(15, 21) },
+      { id: "act-1", kicker: "The Fool's Journey · I", kickerTh: "การเดินทางของคนเขลา 1", th: "องก์ 1 ก้าวออกสู่โลก", en: "Act I · Into the world", leadTh: "ไพ่ 0–7 คนเขลาเรียนรู้จากโลกภายนอก ครู พ่อแม่ ความรัก และชัยชนะแรก", leadEn: "Cards 0–7: the Fool learns from the outer world, teachers, family, love and a first victory", tone: 4, cards: act(0, 7) },
+      { id: "act-2", kicker: "The Fool's Journey · II", kickerTh: "การเดินทางของคนเขลา 2", th: "องก์ 2 หันกลับมามองข้างใน", en: "Act II · Looking within", leadTh: "ไพ่ 8–14 แรงใจ ความเงียบ โชคชะตา และการปล่อยวาง", leadEn: "Cards 8–14: inner strength, solitude, fate and letting go", tone: 2, cards: act(8, 14) },
+      { id: "act-3", kicker: "The Fool's Journey · III", kickerTh: "การเดินทางของคนเขลา 3", th: "องก์ 3 สู่ความสมบูรณ์", en: "Act III · Toward wholeness", leadTh: "ไพ่ 15–21 เงามืด การพังทลาย ความหวัง และโลกที่ครบรอบ", leadEn: "Cards 15–21: shadow, upheaval, hope and the completed world", tone: 5, cards: act(15, 21) },
     ];
   }
   if (groupId === "minor") {
     return (["wands", "cups", "swords", "pentacles"] as const).map((suit) => ({
       id: `suit-${suit}`,
       kicker: SUIT_NAME[suit].kicker,
+      kickerTh: SUIT_NAME[suit].kickerTh,
       th: SUIT_NAME[suit].th,
       en: SUIT_NAME[suit].en,
       leadTh: "ไพ่ตัวเลข 1–10 และไพ่ราชสำนัก 4 ใบ",
@@ -77,8 +80,8 @@ function chaptersOf(groupId: CardGroupInfo["id"], cards: readonly CardSummary[])
   }
   const tone = SUIT_TONE[groupId] ?? 4;
   return [
-    { id: "pips", kicker: "Ace to Ten", th: "ไพ่ตัวเลข 1–10", en: "Ace to Ten", leadTh: "เรื่องราวของธาตุนี้ตั้งแต่เมล็ดแรกจนถึงจุดสุดทาง", leadEn: "The story of this element from the first seed to its fullest", tone, cards: cards.filter((c) => c.number <= 10) },
-    { id: "court", kicker: "Court Cards", th: "ไพ่ราชสำนัก", en: "Court cards", leadTh: "เด็กรับใช้ อัศวิน ราชินี และราชา บุคลิกของคนหรือท่าทีของเรา", leadEn: "Page, Knight, Queen and King: people, or the stance you take", tone: 6, cards: cards.filter((c) => c.number > 10) },
+    { id: "pips", kicker: "Ace to Ten", kickerTh: "ไพ่ตัวเลข", th: "ไพ่ตัวเลข 1–10", en: "Ace to Ten", leadTh: "เรื่องราวของธาตุนี้ตั้งแต่เมล็ดแรกจนถึงจุดสุดทาง", leadEn: "The story of this element from the first seed to its fullest", tone, cards: cards.filter((c) => c.number <= 10) },
+    { id: "court", kicker: "Court Cards", kickerTh: "ไพ่ราชสำนัก", th: "ไพ่ราชสำนัก", en: "Court cards", leadTh: "เด็กรับใช้ อัศวิน ราชินี และราชา บุคลิกของคนหรือท่าทีของเรา", leadEn: "Page, Knight, Queen and King: people, or the stance you take", tone: 6, cards: cards.filter((c) => c.number > 10) },
   ];
 }
 
@@ -142,7 +145,7 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
   const sections: Ui2ShowcaseSection[] = [
     ...chapters.map((ch) => ({
       id: ch.id,
-      kicker: ch.kicker,
+      kicker: isEnglish ? ch.kicker : ch.kickerTh,
       title: isEnglish ? ch.en : ch.th,
       tone: ch.tone,
       count: ch.cards.length,
@@ -161,7 +164,7 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
     })),
     {
       id: "guide",
-      kicker: "Guide",
+      kicker: isEnglish ? "Guide" : "คู่มือ",
       title: isEnglish ? `About ${groupInfo.nameEn}` : `รู้จัก${groupInfo.nameTh}`,
       short: isEnglish ? "Guide" : "คู่มืออ่าน",
       tone: 6,

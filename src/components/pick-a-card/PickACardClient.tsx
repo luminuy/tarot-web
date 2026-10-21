@@ -497,7 +497,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                     <div className="relative w-full h-full rounded-lg card-back-pattern border-2 border-line-warm/60 p-3 flex flex-col items-center justify-between shadow-md group-hover:scale-105 transition-transform duration-200">
                       <div className="w-full flex justify-center items-center opacity-85">
                         <span className="text-[9px] sm:text-[10px] font-serif-th text-surface tracking-[0.18em] uppercase font-bold whitespace-nowrap">
-                          Sacred Oracle
+                          SeerTarot
                         </span>
                       </div>
                       <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-line-warm bg-ink-deep/90 flex items-center justify-center text-sm font-serif-th font-bold text-surface">

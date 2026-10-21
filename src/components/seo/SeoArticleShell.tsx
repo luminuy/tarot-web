@@ -49,7 +49,7 @@ export function SeoArticleShell({
         <div className="ui2-sx-bar v3-sa-bar" aria-hidden="true">
           <span className="ui2-sx-name">
             <span className="ui2-sx-n ui2-num">{isEnglish ? "Read" : "อ่าน"}</span>
-            <span className="ui2-accent">Guide</span>
+            <span className="ui2-accent">{isEnglish ? "Guide" : "คู่มือ"}</span>
           </span>
         </div>
       )}

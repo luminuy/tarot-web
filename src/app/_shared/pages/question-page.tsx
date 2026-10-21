@@ -412,7 +412,7 @@ function hubSections(isEn: boolean): Ui2ShowcaseSection[] {
     return [
       {
         id: `topic-${topic}`,
-        kicker: parent.en,
+        kicker: isEn ? parent.en : `คำถามเรื่อง${parent.th}`,
         title: isEn ? parent.en : parent.th,
         tone,
         count: items.length,

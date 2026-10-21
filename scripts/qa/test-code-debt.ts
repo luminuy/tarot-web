@@ -15,6 +15,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { assertNonEmptyCorpus } from "./lib/corpus";
+import { collectRenderedPages } from "./lib/rendered-pages";
 
 const ROOT = process.cwd();
 
@@ -1004,6 +1005,24 @@ check(
   check(
     "B2-05: ตัวนับเลขหน้าแรกล็อก min-width ระหว่างนับ แล้วปลดเมื่อนับเสร็จ",
     /el\.style\.minWidth = `\$\{el\.offsetWidth\}px`/.test(ui2Home) && /el\.style\.minWidth = ""/.test(ui2Home),
+  );
+  // หน้าไทยไม่ใช้หัวเล็กภาษาอังกฤษ (เจ้าของ 2026-10-21) — ยกเว้นชื่อเฉพาะ (Rider–Waite · Pick a Card · SeerTarot) และตัวย่อกฎหมาย
+  // ชื่อไพ่ภาษาอังกฤษใต้ชื่อไทย (`v3-tile-en`) เป็นชื่อเฉพาะที่ตั้งใจแสดง ไม่ใช่หัวเล็ก
+  const KICKER_CLASS = /class="((?![^"]*tile-en)[^"]*\b(?:ui2-accent|ui2-kicker|ui2-bk-kicker|ui2-fr-kicker|ui2-sx-start-k)\b[^"]*)"[^>]*>([^<]{2,60})</g;
+  const KICKER_OK = /^(?:Rider[–-]Waite|Pick a Card|SeerTarot|PDPA[ ·A-Z]*)$/;
+  const thaiPages = collectRenderedPages().filter((pg) => !/^\/en(\/|$)/.test(pg.route) && pg.file.endsWith(".html"));
+  const kickerHits: string[] = [];
+  for (const pg of thaiPages) {
+    for (const m of fs.readFileSync(pg.file, "utf-8").matchAll(KICKER_CLASS)) {
+      const t = m[2].trim();
+      if (/[\u0E00-\u0E7F]/.test(t) || !/[A-Za-z]{3}/.test(t) || KICKER_OK.test(t)) continue;
+      kickerHits.push(`${pg.route}: ${t}`);
+    }
+  }
+  check(
+    "หน้าไทยไม่มีหัวเล็กภาษาอังกฤษ (ui2-accent · ui2-kicker ฯลฯ)",
+    thaiPages.length > 100 && kickerHits.length === 0,
+    `หน้าไทย ${thaiPages.length} หน้า · ${kickerHits.slice(0, 6).join(" · ")}`,
   );
   // B1: จุดตกแต่ง (จุดคั่นกลม · จุดเรืองแสงในชิปล็อกไพ่) ถูกถอด — ห้ามกลับมา (กฎเหล็กข้อ 2)
   const dotHits = sources.filter((f) => /className="(?:ui2-dot|v2-ar-dot|v2-tp-dot)"/.test(fs.readFileSync(f, "utf-8")));

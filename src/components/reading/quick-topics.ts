@@ -91,7 +91,7 @@ export const QUICK_TOPICS: QuickTopic[] = [
     category: "money",
     title: "การเงิน & โชคลาภ",
     titleEn: "Finances & Abundance",
-    tagline: "ประเมินกระแสเงินสด ความคล่องตัว และจังหวะลงทุน",
+    tagline: "เงินเข้าออก จังหวะใช้ จังหวะเก็บ และจังหวะลงทุน",
     taglineEn: "Financial flow, material grounding, investments, and prosperity",
     defaultQuestion: "สภาพคล่องทางการเงินและโชคลาภช่วงนี้เป็นอย่างไร ควรบริหารจัดการอย่างไร",
     defaultQuestionEn: "What is the financial current around me at this time, and how can I best cultivate grounded stability?",

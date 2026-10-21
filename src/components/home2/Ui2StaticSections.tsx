@@ -177,7 +177,7 @@ export function Ui2NotesSection({ isEnglish, href }: { isEnglish: boolean; href:
   );
 }
 
-/* ── ส่วน 5 · เว็บอื่นสุ่มให้ดู / เราให้คุณตรวจได้ (แผ่นขาว) ─────────────────── */
+/* ── ส่วน 5 · สุ่มจริง / เราให้คุณตรวจได้ (แผ่นขาว · ไม่พาดพิงเว็บอื่น — เจ้าของ 2026-10-21) ─────────── */
 
 const VERIFY_STEPS = {
   th: [
@@ -201,7 +201,7 @@ export function Ui2VerifySection({ isEnglish }: { isEnglish: boolean }) {
       <div className="ui2-wrap ui2-sheet">
         <h2 id="ui2-verify-title" className="ui2-vs ui2-reveal">
           <span className="ui2-vs-a">
-            <ThaiPhrases>{isEnglish ? "Other sites shuffle for show." : "เว็บอื่นสุ่มให้ดู"}</ThaiPhrases>
+            <ThaiPhrases>{isEnglish ? "Truly random, not just for show." : "สุ่มจริง ไม่ใช่แค่ให้ดู"}</ThaiPhrases>
           </span>
           <span className="ui2-vs-b">
             <ThaiPhrases>
@@ -998,7 +998,7 @@ export function Ui2ExploreSection({ isEnglish }: { isEnglish: boolean; href: Hre
         <div className="ui2-wrap">
           <div className="ui2-fq-head">
             <span className="ui2-kicker">
-              FAQ
+              {isEnglish ? "FAQ" : "ถามบ่อย"}
             </span>
             <h2 id="ui2-faq-title" className="ui2-h2">
               <ThaiPhrases>{isEnglish ? "Frequently asked questions" : "คำถามที่พบบ่อย"}</ThaiPhrases>

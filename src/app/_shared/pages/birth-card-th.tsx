@@ -212,7 +212,7 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
 
         {/* สูตรสามขั้น — ตัวอย่างจริงทีละขั้น แทนย่อหน้ายาวของ v1 */}
         <section className="v2-bcp-sec" aria-labelledby="bc-how">
-          <Ui2SectionHead n="01" word="How it works" title="สูตรไพ่ประจำตัว 3 ขั้น" id="bc-how" />
+          <Ui2SectionHead n="01" word="วิธีคำนวณ" title="สูตรไพ่ประจำตัว 3 ขั้น" id="bc-how" />
           <ol className="v2-bcp-steps">
             {BIRTH_STEPS.map((step, i) => (
               <li key={step.title} className="v2-bcp-stepcard">
@@ -231,7 +231,7 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
         <section className="v2-bcp-sec" aria-labelledby="bc-pairs">
           <Ui2SectionHead
             n="02"
-            word="Card pairs"
+            word="คู่ไพ่"
             title="ไพ่สองใบของคุณ บอกอะไร"
             lede="คู่ไพ่ประจำตัวช่วยให้เข้าใจความขัดแย้งและความสมดุลในตัวเอง ทั้งหมดมี 12 แบบ"
             id="bc-pairs"
