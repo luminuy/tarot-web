@@ -205,7 +205,7 @@ async function main() {
   await deleteAllCustomSpreads(other);
 
   const mig = src("migrations/0024_custom_spreads.sql");
-  check("migration 0024 ตรงกับตารางในเครื่อง", mig.includes("share_slug      TEXT UNIQUE") && src("src/lib/platform/db.ts").includes("CREATE TABLE IF NOT EXISTS custom_spreads"));
+  check("migration 0024 มี share_slug และฐานในเครื่องสร้างจาก migrations/ ชุดเดียวกัน", mig.includes("share_slug      TEXT UNIQUE") && src("src/lib/platform/db.ts").includes('LOCAL_MIGRATIONS_DIR = "migrations"'));
   const api = src("src/app/api/spreads/custom/[id]/route.ts");
   check("API แก้/ลบ: ตรวจ origin + เจ้าของ", api.includes("isRequestAuthorizedOrigin") && api.includes("g.userId"));
   check("API สร้าง: ตรวจด้วยด่านเดียวกับ /start", src("src/app/api/spreads/custom/route.ts").includes("parseCustomSpread(body.spread"));

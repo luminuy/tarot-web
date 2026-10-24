@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0303 · 2026-10-25 02:10 · 🟡 Medium · ฐานข้อมูลในเครื่องสร้างจาก migrations/ แทนสคีมาที่เขียนซ้ำด้วยมือ
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ด่านทดสอบในเครื่องรันบนฐานที่ขาด 9 index เมื่อเทียบกับ D1 จริง (idx_avail_open · idx_payments_ticket · idx_uf_* ฯลฯ) แผนคำสั่งและพฤติกรรมในเครื่องจึงไม่ตรงกับ production |
+| **สาเหตุราก** | src/lib/platform/db.ts เขียนสคีมาซ้ำด้วยมือราว 150 คำสั่งคู่กับไฟล์ใน migrations/ ทุก migration ใหม่ต้องจำไปคัดลอกอีกที่ด้วยมือ ตกหล่นได้โดยไม่มีอะไรเตือน และ safeExec กลืน error ทุกตัวเงียบ |
+| **การแก้ไข** | ถอดสคีมาเขียนมือออกทั้งหมด ให้ createLocalSQLiteDB อ่านไฟล์ใน migrations/ เรียงชื่อแล้วรันทีละไฟล์ในธุรกรรม BEGIN IMMEDIATE จดชื่อที่รันแล้วใน d1_migrations · ฐานเก่าที่ไม่มีตารางจดถูกย้ายไป .dev-marketplace.db.legacy-* แล้วสร้างใหม่ · migration ล้มโยน LocalMigrationError ไม่ถอยไปฐานจำลอง |
+| **🛡️ กฎป้องกันถาวร** | **ฐานในเครื่องรันไฟล์ใน migrations/ ตามลำดับ (จดในตาราง d1_migrations แบบเดียวกับ wrangler) migration ล้ม = ด่านล้มพร้อมชื่อไฟล์ · test-code-debt ข้อ 14 ห้าม CREATE INDEX / ALTER TABLE / CREATE TABLE ตารางแอปใน db.ts** |
+| **การพิสูจน์ว่าแก้ได้จริง** | เทียบสคีมาฐานใหม่กับ migrations ด้วย PRAGMA table_xinfo + sqlite_master ตรงทุกตาราง/คอลัมน์/index · ทดสอบฐานใหม่ เปิดซ้ำ ฐานเก่า เปิดพร้อมกัน 4 โปรเซส และ migration เสีย (ล้มพร้อมชื่อไฟล์ ถอยธุรกรรม) · repo:verify 94/94 |
+| **บันทึกโดย** | claude-storage · branch `claude/storage-hardening-d1-backup` · commit `bb14dae` |
+
+
 ### INC-0302 · 2026-10-21 13:50 · 🔵 Low · คำตอบสำรองในแชทถูกนับเป็นสิทธิ์ถามฟรีบนหน้าจอ แต่เซิร์ฟเวอร์ไม่นับ
 
 | หัวข้อ | รายละเอียด |
