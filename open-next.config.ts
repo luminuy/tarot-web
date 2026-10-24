@@ -20,7 +20,7 @@ import staticAssetsIncrementalCache from "@opennextjs/cloudflare/overrides/incre
  *    R2 incremental cache (ไม่ใช่ KV) พร้อม d1TagCache + doQueue
  *
  *    คีย์เก่าที่ค้างใน KV ถูกลบโดย `scripts/cf-kv-prune-inc-cache.ts` (รันท้าย deploy.yml)
- *    KV `NEXT_INC_CACHE_KV` ยังอยู่ — ใช้เก็บข้อมูลแอป `app:*` (ตัวนับ · ธง · session backstop)
+ *    namespace KV เดิมยังอยู่ ผูกชื่อใหม่ว่า `APP_KV` — ใช้เก็บข้อมูลแอป `app:*` (ตัวนับ · ธง · session backstop)
  *
  * docs: https://opennext.js.org/cloudflare/caching
  */

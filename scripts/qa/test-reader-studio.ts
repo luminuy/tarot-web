@@ -676,8 +676,12 @@ async function main() {
   for (const f of ["src/components/studio/StudioApp.tsx", "src/components/studio/ReadingEditor.tsx", "src/components/studio/SharedReadingParts.tsx", "src/app/(th)/r/[token]/page.tsx", "src/lib/studio/dpa.ts"]) {
     check(`${f}: ไม่มีอิโมจิ/สัญลักษณ์ตกแต่ง (กฎเหล็กข้อ 2)`, !EMOJI.test(src(f).replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "")));
   }
-  const mirror = src("src/lib/platform/db.ts");
-  check("ตาราง 0027 มีใน mirror ฐานข้อมูลในเครื่อง", ["reader_studio_settings", "reader_clients", "reader_readings", "reader_templates"].every((t) => mirror.includes(t)));
+  const mig0027 = src("migrations/0027_reader_studio.sql");
+  check(
+    "ตาราง 0027 อยู่ใน migration และฐานในเครื่องสร้างจาก migrations/ ชุดเดียวกัน",
+    ["reader_studio_settings", "reader_clients", "reader_readings", "reader_templates"].every((t) => mig0027.includes(t)) &&
+      src("src/lib/platform/db.ts").includes('LOCAL_MIGRATIONS_DIR = "migrations"'),
+  );
   check("ลบบัญชีแม่หมอลบตารางสตูดิโอด้วย", src("src/lib/marketplace/readers.repo.ts").includes("DELETE FROM reader_readings WHERE reader_id"));
   const dpaDoc = src("docs/legal/READER_STUDIO_DPA_DRAFT.md");
   check("มีร่างข้อตกลง DPA ให้ทนายตรวจ (รุ่นตรงกับโค้ด)", dpaDoc.includes(STUDIO_DPA_VERSION));

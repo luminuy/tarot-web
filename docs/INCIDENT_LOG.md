@@ -62,6 +62,30 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0304 · 2026-10-25 02:14 · 🟡 Medium · กฎลบการ์ดแชร์ 90 วันตั้งเองทุก deploy ไม่ครอบโลโก้แม่หมอ + สำรอง D1 รายสัปดาห์ + KV binding ชื่อ APP_KV
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | กฎลบการ์ดแชร์ 90 วันของ R2 seertarot-share ถูกบันทึกขัดกันสองที่ (PENDING_SETUP ว่ายังไม่ตั้ง · CLOUDFLARE_FREE_STACK ว่าตั้ง auto-delete-90d ใน dashboard แล้ว) และทั้งสองแบบลบทั้ง bucket ซึ่งตอนนี้มีโลโก้สตูดิโอแม่หมอ studio-logo/ อยู่ด้วย · ฐาน D1 ไม่มีไฟล์สำรองนอกฐาน |
+| **สาเหตุราก** | กฎ lifecycle ตั้งด้วยมือใน dashboard ตอน bucket มีแต่การ์ดแชร์ ไม่มีโค้ดดูแลหรือตรวจซ้ำ เมื่อ Reader Studio เริ่มเก็บโลโก้ใน bucket เดียวกันจึงไม่มีอะไรเตือนว่ากฎเดิมครอบของที่ต้องเก็บถาวร และ R2 กรองได้แค่ prefix |
+| **การแก้ไข** | scripts/cf-r2-lifecycle.ts ตั้งกฎ 16 ข้อตาม prefix 0-9 a-f ของ id การ์ดแชร์ทุก deploy แทน auto-delete-90d ในการเขียนเดียว และล้มถ้าเจอกฎอื่นครอบ studio-logo/ · d1-backup.yml + scripts/cf-d1-backup.ts สำรอง D1 ลง bucket ส่วนตัวพร้อมพิสูจน์ว่ากู้ได้ · KV binding เปลี่ยนชื่อเป็น APP_KV และหน้าสุขภาพระบบแจ้งเมื่อหา binding ไม่เจอ |
+| **🛡️ กฎป้องกันถาวร** | **กฎ lifecycle ทุกข้อของ R2 อยู่ในโค้ดที่ deploy.yml รันซ้ำทุกรอบ ห้ามตั้งด้วยมือ · test-ci-supply-chain 4c บังคับ MUST_KEEP studio-logo/ และขั้นใน deploy.yml · 4b บังคับ workflow สำรองมีอยู่ ไม่แนบ artifact เปิด issue เมื่อล้ม · test-prefetch-loop 1c เทียบชื่อ KV binding กับโค้ด** |
+| **การพิสูจน์ว่าแก้ได้จริง** | ทดสอบตัวช่วย R2 กับ API จำลอง (กฎเดิมไม่หาย รันซ้ำไม่เขียน แทน auto-delete-90d ได้ บล็อกกฎที่ครอบ studio-logo/) · cf:d1-backup --local --dry-run กับ D1 ในเครื่องของ wrangler ได้ 39 ตาราง integrity ok · ด่าน 1c ล้มจริงเมื่อแกล้งเปลี่ยนชื่อ binding · repo:verify 94/94 |
+| **บันทึกโดย** | claude-storage · branch `claude/storage-hardening-d1-backup` · commit `8228d3c` |
+
+
+### INC-0303 · 2026-10-25 02:10 · 🟡 Medium · ฐานข้อมูลในเครื่องสร้างจาก migrations/ แทนสคีมาที่เขียนซ้ำด้วยมือ
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ด่านทดสอบในเครื่องรันบนฐานที่ขาด 9 index เมื่อเทียบกับ D1 จริง (idx_avail_open · idx_payments_ticket · idx_uf_* ฯลฯ) แผนคำสั่งและพฤติกรรมในเครื่องจึงไม่ตรงกับ production |
+| **สาเหตุราก** | src/lib/platform/db.ts เขียนสคีมาซ้ำด้วยมือราว 150 คำสั่งคู่กับไฟล์ใน migrations/ ทุก migration ใหม่ต้องจำไปคัดลอกอีกที่ด้วยมือ ตกหล่นได้โดยไม่มีอะไรเตือน และ safeExec กลืน error ทุกตัวเงียบ |
+| **การแก้ไข** | ถอดสคีมาเขียนมือออกทั้งหมด ให้ createLocalSQLiteDB อ่านไฟล์ใน migrations/ เรียงชื่อแล้วรันทีละไฟล์ในธุรกรรม BEGIN IMMEDIATE จดชื่อที่รันแล้วใน d1_migrations · ฐานเก่าที่ไม่มีตารางจดถูกย้ายไป .dev-marketplace.db.legacy-* แล้วสร้างใหม่ · migration ล้มโยน LocalMigrationError ไม่ถอยไปฐานจำลอง |
+| **🛡️ กฎป้องกันถาวร** | **ฐานในเครื่องรันไฟล์ใน migrations/ ตามลำดับ (จดในตาราง d1_migrations แบบเดียวกับ wrangler) migration ล้ม = ด่านล้มพร้อมชื่อไฟล์ · test-code-debt ข้อ 14 ห้าม CREATE INDEX / ALTER TABLE / CREATE TABLE ตารางแอปใน db.ts** |
+| **การพิสูจน์ว่าแก้ได้จริง** | เทียบสคีมาฐานใหม่กับ migrations ด้วย PRAGMA table_xinfo + sqlite_master ตรงทุกตาราง/คอลัมน์/index · ทดสอบฐานใหม่ เปิดซ้ำ ฐานเก่า เปิดพร้อมกัน 4 โปรเซส และ migration เสีย (ล้มพร้อมชื่อไฟล์ ถอยธุรกรรม) · repo:verify 94/94 |
+| **บันทึกโดย** | claude-storage · branch `claude/storage-hardening-d1-backup` · commit `bb14dae` |
+
+
 ### INC-0302 · 2026-10-21 13:50 · 🔵 Low · คำตอบสำรองในแชทถูกนับเป็นสิทธิ์ถามฟรีบนหน้าจอ แต่เซิร์ฟเวอร์ไม่นับ
 
 | หัวข้อ | รายละเอียด |

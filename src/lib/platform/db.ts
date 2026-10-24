@@ -3,7 +3,7 @@
  * ----------------------------------------------------------------------
  * - บน Cloudflare Worker (production / opennextjs-cloudflare): คืน binding จริง (APP_DB)
  * - บน local dev / test: ใช้ node:sqlite (Node 22+) เก็บใน `.dev-marketplace.db`
- *   พร้อม auto-migrate ตาราง readers และ admin_audit
+ *   สร้างสคีมาจากไฟล์ใน `migrations/` ชุดเดียวกับ production
  */
 
 // ตัวเข้าถึง Cloudflare context อยู่ที่ `cf.ts` ที่เดียว (เดิมมีสำเนาเหมือนกันเป๊ะอยู่ที่นี่ด้วย)
@@ -34,6 +34,69 @@ export interface AppDB {
 let cachedDB: AppDB | null = null;
 
 /**
+ * ฐานข้อมูลในเครื่องสร้างจากไฟล์ใน `migrations/` ชุดเดียวกับที่ `deploy.yml` รันใส่ D1 จริง (`npm run db:migrate`)
+ * เดิมไฟล์นี้เขียนสคีมาซ้ำเองด้วยมือราว 150 คำสั่ง ซึ่งหลุดไป 9 index (ตรวจ 2026-10-24)
+ * ด่านในเครื่องจึงรันบนสคีมาคนละชุดกับ production — ห้ามกลับไปเขียนสคีมาซ้ำในไฟล์นี้อีก
+ * ตารางใหม่/คอลัมน์ใหม่ให้เพิ่มไฟล์ migration อย่างเดียว ฐานในเครื่องได้ตามไปเองตอนเปิดครั้งถัดไป
+ */
+const LOCAL_MIGRATIONS_DIR = "migrations";
+/** ตารางจดว่า migration ไหนรันแล้ว — ชื่อและโครงเดียวกับที่ wrangler ใช้บน D1 */
+const LOCAL_MIGRATIONS_TABLE = "d1_migrations";
+
+type LocalSqlite = import("node:sqlite").DatabaseSync;
+
+/** migration ในเครื่องล้ม = ต้องล้มดัง ๆ ให้เห็นในด่าน ไม่ถอยไปฐานจำลองที่คืนค่าว่างเงียบ ๆ */
+class LocalMigrationError extends Error {}
+
+/**
+ * ฐานในเครื่องรุ่นก่อน (สร้างจากสคีมาเขียนมือ ยังไม่มีตาราง d1_migrations) รัน migration ทับไม่ได้
+ * เพราะตารางมีอยู่แล้วและ ALTER เพิ่มคอลัมน์ซ้ำ — ผู้เรียกจะย้ายไฟล์ไปไว้ข้าง ๆ แล้วสร้างใหม่
+ */
+function isLegacyLocalDb(db: LocalSqlite): boolean {
+  const ledger = db
+    .prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?")
+    .get(LOCAL_MIGRATIONS_TABLE);
+  if (ledger) return false;
+  const row = db
+    .prepare("SELECT count(*) AS n FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'")
+    .get() as { n: number };
+  return row.n > 0;
+}
+
+/**
+ * รัน migration ที่ยังไม่เคยรันตามลำดับชื่อไฟล์ ไฟล์ละหนึ่งธุรกรรม (`BEGIN IMMEDIATE`)
+ * ด่านหลายตัวเปิดไฟล์ฐานเดียวกันพร้อมกันได้ — ตัวที่ได้ล็อกก่อนรัน อีกตัวรอแล้วเห็นว่ารันแล้วจึงข้าม
+ * ไฟล์ไหนล้ม = ถอยธุรกรรมแล้วโยน error พร้อมชื่อไฟล์ ไม่กลืนเงียบ
+ */
+function applyLocalMigrations(db: LocalSqlite, files: { name: string; sql: string }[]): void {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS ${LOCAL_MIGRATIONS_TABLE} (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      name       TEXT UNIQUE,
+      applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+    );
+  `);
+  const isApplied = db.prepare(`SELECT 1 FROM ${LOCAL_MIGRATIONS_TABLE} WHERE name = ?`);
+  const markApplied = db.prepare(`INSERT INTO ${LOCAL_MIGRATIONS_TABLE} (name) VALUES (?)`);
+  for (const file of files) {
+    if (isApplied.get(file.name)) continue;
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      if (!isApplied.get(file.name)) {
+        db.exec(file.sql);
+        markApplied.run(file.name);
+      }
+      db.exec("COMMIT");
+    } catch (err) {
+      db.exec("ROLLBACK");
+      throw new LocalMigrationError(
+        `migration ${file.name} รันในเครื่องไม่ผ่าน: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+}
+
+/**
  * สร้าง Local SQLite Adapter ด้วย node:sqlite สำหรับ Local Dev และ Automated Tests
  */
 async function createLocalSQLiteDB(): Promise<AppDB> {
@@ -43,523 +106,38 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
   try {
     const sqlite = await import("node:sqlite");
     const path = await import("node:path");
+    const fs = await import("node:fs");
     const dbPath = path.resolve(process.cwd(), ".dev-marketplace.db");
-    const db = new sqlite.DatabaseSync(dbPath);
-    db.exec("PRAGMA journal_mode = WAL;");
-    db.exec("PRAGMA busy_timeout = 5000;");
+    const migrationsDir = path.resolve(process.cwd(), LOCAL_MIGRATIONS_DIR);
+    if (!fs.existsSync(migrationsDir)) {
+      throw new LocalMigrationError(`ไม่พบโฟลเดอร์ ${migrationsDir} — รันจากรากของรีโปเท่านั้น`);
+    }
+    const files = fs
+      .readdirSync(migrationsDir)
+      .filter((name) => name.endsWith(".sql"))
+      .sort()
+      .map((name) => ({ name, sql: fs.readFileSync(path.join(migrationsDir, name), "utf-8") }));
+    if (files.length === 0) throw new LocalMigrationError(`ไม่พบไฟล์ migration ใน ${migrationsDir}`);
 
-    // Auto-migrate local sqlite schema
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS readers (
-        id             TEXT PRIMARY KEY,
-        display_name   TEXT NOT NULL,
-        bio            TEXT NOT NULL DEFAULT '',
-        avatar_url     TEXT,
-        specialties    TEXT NOT NULL DEFAULT '[]',
-        line_url       TEXT NOT NULL,
-        status         TEXT NOT NULL DEFAULT 'pending',
-        commission_pct INTEGER NOT NULL DEFAULT 20,
-        session_secret TEXT NOT NULL,
-        created_at     INTEGER NOT NULL,
-        updated_at     INTEGER NOT NULL
-      );
-      CREATE INDEX IF NOT EXISTS idx_readers_status ON readers(status);
-      CREATE INDEX IF NOT EXISTS idx_readers_created ON readers(created_at DESC);
-
-      CREATE TABLE IF NOT EXISTS admin_audit (
-        id         INTEGER PRIMARY KEY AUTOINCREMENT,
-        ts         INTEGER NOT NULL,
-        actor      TEXT NOT NULL,
-        action     TEXT NOT NULL,
-        detail     TEXT
-      );
-      CREATE INDEX IF NOT EXISTS idx_audit_ts ON admin_audit(ts DESC);
-
-      CREATE TABLE IF NOT EXISTS reader_availability (
-        id           TEXT PRIMARY KEY,
-        reader_id    TEXT NOT NULL REFERENCES readers(id),
-        mode         TEXT NOT NULL,
-        weekday      INTEGER,
-        start_min    INTEGER,
-        end_min      INTEGER,
-        slot_minutes INTEGER DEFAULT 30,
-        timezone     TEXT NOT NULL DEFAULT 'Asia/Bangkok',
-        is_open      INTEGER NOT NULL DEFAULT 0,
-        created_at   INTEGER NOT NULL,
-        updated_at   INTEGER NOT NULL
-      );
-      CREATE INDEX IF NOT EXISTS idx_avail_reader ON reader_availability(reader_id);
-
-      CREATE TABLE IF NOT EXISTS ai_screening (
-        id               TEXT PRIMARY KEY,
-        ticket_id        TEXT,
-        verdict          TEXT NOT NULL,
-        category         TEXT,
-        urgency          TEXT,
-        in_scope         INTEGER DEFAULT 1,
-        brief            TEXT,
-        suggested_spread TEXT,
-        flags            TEXT DEFAULT '[]',
-        created_at       INTEGER NOT NULL
-      );
-      CREATE INDEX IF NOT EXISTS idx_screening_ticket ON ai_screening(ticket_id);
-
-      CREATE TABLE IF NOT EXISTS queue_tickets (
-        id               TEXT PRIMARY KEY,
-        reader_id        TEXT NOT NULL REFERENCES readers(id),
-        kind             TEXT NOT NULL,
-        status           TEXT NOT NULL DEFAULT 'screening',
-        position         INTEGER,
-        slot_start       INTEGER,
-        customer_ref     TEXT NOT NULL,
-        nickname         TEXT,
-        question         TEXT,
-        reading_snapshot TEXT,
-        ai_screen_id     TEXT REFERENCES ai_screening(id),
-        created_at       INTEGER NOT NULL,
-        expires_at       INTEGER NOT NULL
-      );
-      CREATE INDEX IF NOT EXISTS idx_tickets_reader_status ON queue_tickets(reader_id, status);
-      CREATE INDEX IF NOT EXISTS idx_tickets_cust ON queue_tickets(customer_ref);
-
-      -- 📹 ห้องวิดีโอคอลตัวต่อตัว (migrations/0019)
-      CREATE TABLE IF NOT EXISTS call_sessions (
-        ticket_id          TEXT PRIMARY KEY REFERENCES queue_tickets(id),
-        round              INTEGER NOT NULL DEFAULT 1,
-        offer_sdp          TEXT,
-        answer_sdp         TEXT,
-        customer_seen_at   INTEGER,
-        reader_seen_at     INTEGER,
-        customer_turn_user TEXT,
-        reader_turn_user   TEXT,
-        ended_at           INTEGER,
-        ended_by           TEXT,
-        created_at         INTEGER NOT NULL,
-        updated_at         INTEGER NOT NULL
-      );
-
-      CREATE TABLE IF NOT EXISTS bookings (
-        id          TEXT PRIMARY KEY,
-        ticket_id   TEXT NOT NULL REFERENCES queue_tickets(id),
-        reader_id   TEXT NOT NULL REFERENCES readers(id),
-        slot_start  INTEGER NOT NULL,
-        slot_end    INTEGER NOT NULL,
-        status      TEXT NOT NULL DEFAULT 'confirmed',
-        created_at  INTEGER NOT NULL
-      );
-      CREATE INDEX IF NOT EXISTS idx_bookings_reader ON bookings(reader_id, slot_start);
-
-      -- ไม่มี FK ไป bookings อีกแล้ว (migrations/0015 · T-09): เส้นทางเติมเครดิตไม่สร้างแถว
-      -- bookings เลย FK เดิมจึงเป็นจริงไม่ได้และ PRAGMA foreign_key_check รายงานแถวค้างทุกครั้ง
-      CREATE TABLE IF NOT EXISTS payments (
-        id            TEXT PRIMARY KEY,
-        booking_id    TEXT,
-        order_id      TEXT,
-        user_id       TEXT,
-        ticket_id     TEXT,
-        provider      TEXT NOT NULL DEFAULT 'omise',
-        provider_ref  TEXT,
-        amount_satang INTEGER NOT NULL,
-        currency      TEXT NOT NULL DEFAULT 'THB',
-        status        TEXT NOT NULL DEFAULT 'pending',
-        webhook_log   TEXT,
-        created_at    INTEGER NOT NULL,
-        updated_at    INTEGER NOT NULL
-      );
-      CREATE INDEX IF NOT EXISTS idx_payments_booking ON payments(booking_id);
-      CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
-
-      CREATE TABLE IF NOT EXISTS payouts (
-        id                TEXT PRIMARY KEY,
-        reader_id         TEXT NOT NULL REFERENCES readers(id),
-        period            TEXT NOT NULL,
-        gross_satang      INTEGER NOT NULL,
-        commission_satang INTEGER NOT NULL,
-        net_satang        INTEGER NOT NULL,
-        status            TEXT NOT NULL DEFAULT 'pending',
-        created_at        INTEGER NOT NULL
-      );
-      CREATE INDEX IF NOT EXISTS idx_payouts_reader ON payouts(reader_id, period);
-
-      CREATE TABLE IF NOT EXISTS users (
-        id                TEXT PRIMARY KEY,
-        provider          TEXT NOT NULL,
-        email             TEXT,
-        email_lower       TEXT,
-        password_hash     TEXT,
-        email_verified    INTEGER NOT NULL DEFAULT 0,
-        token_version     INTEGER NOT NULL DEFAULT 0,
-        name              TEXT NOT NULL,
-        avatar_url        TEXT,
-        locale            TEXT NOT NULL DEFAULT 'th',
-        marketing_consent INTEGER NOT NULL DEFAULT 0,
-        consent_at        INTEGER,
-        created_at        INTEGER NOT NULL,
-        last_seen_at      INTEGER NOT NULL,
-        deleted_at        INTEGER
-      );
-      CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-      CREATE INDEX IF NOT EXISTS idx_users_consent ON users(marketing_consent, deleted_at);
-
-      CREATE TABLE IF NOT EXISTS auth_tokens (
-        id          TEXT PRIMARY KEY,
-        user_id     TEXT NOT NULL REFERENCES users(id),
-        kind        TEXT NOT NULL,
-        token_hash  TEXT NOT NULL,
-        expires_at  INTEGER NOT NULL,
-        used_at     INTEGER,
-        created_at  INTEGER NOT NULL
-      );
-      CREATE INDEX IF NOT EXISTS idx_authtok_hash ON auth_tokens(token_hash);
-      CREATE INDEX IF NOT EXISTS idx_authtok_user ON auth_tokens(user_id, kind);
-
-      CREATE TABLE IF NOT EXISTS oauth_identities (
-        provider         TEXT NOT NULL,
-        provider_user_id TEXT NOT NULL,
-        user_id          TEXT NOT NULL REFERENCES users(id),
-        created_at       INTEGER NOT NULL,
-        PRIMARY KEY (provider, provider_user_id)
-      );
-      CREATE INDEX IF NOT EXISTS idx_oauthid_user ON oauth_identities(user_id);
-
-      CREATE TABLE IF NOT EXISTS reading_journal (
-        id                 TEXT PRIMARY KEY,
-        user_id            TEXT NOT NULL REFERENCES users(id),
-        content_hash       TEXT NOT NULL,
-        question           TEXT NOT NULL,
-        nickname           TEXT,
-        spread_id          TEXT NOT NULL,
-        spread_name        TEXT NOT NULL,
-        category           TEXT NOT NULL,
-        persona_id         TEXT NOT NULL,
-        persona_name       TEXT NOT NULL,
-        cards_json         TEXT NOT NULL,
-        summary            TEXT NOT NULL DEFAULT '',
-        advice_json        TEXT NOT NULL DEFAULT '[]',
-        timing             TEXT,
-        outcome            TEXT NOT NULL DEFAULT 'PENDING',
-        user_note          TEXT,
-        outcome_updated_at INTEGER,
-        created_at         INTEGER NOT NULL
-      );
-      CREATE UNIQUE INDEX IF NOT EXISTS idx_rj_user_hash ON reading_journal(user_id, content_hash);
-      CREATE INDEX IF NOT EXISTS idx_rj_user_created ON reading_journal(user_id, created_at DESC);
-      CREATE INDEX IF NOT EXISTS idx_rj_pending ON reading_journal(user_id, outcome, created_at);
-
-      CREATE TABLE IF NOT EXISTS reading_usage (
-        id          TEXT PRIMARY KEY,
-        user_id     TEXT NOT NULL REFERENCES users(id),
-        reading_id  TEXT NOT NULL,
-        week_key    TEXT NOT NULL,
-        source      TEXT NOT NULL,
-        consumed_at INTEGER NOT NULL
-      );
-      CREATE UNIQUE INDEX IF NOT EXISTS idx_ru_reading ON reading_usage(reading_id);
-      CREATE INDEX IF NOT EXISTS idx_ru_user_week ON reading_usage(user_id, week_key, source);
-
-      CREATE TABLE IF NOT EXISTS user_bonus (
-        id         TEXT PRIMARY KEY,
-        user_id    TEXT NOT NULL REFERENCES users(id),
-        granted    INTEGER NOT NULL DEFAULT 0,
-        reason     TEXT NOT NULL,
-        granted_at INTEGER NOT NULL
-      );
-      CREATE UNIQUE INDEX IF NOT EXISTS idx_ub_user_reason ON user_bonus(user_id, reason);
-      CREATE INDEX IF NOT EXISTS idx_ub_user ON user_bonus(user_id);
-
-      CREATE TABLE IF NOT EXISTS daily_readings (
-        id          TEXT PRIMARY KEY,
-        user_key    TEXT NOT NULL,
-        date_key    TEXT NOT NULL,
-        reading_id  TEXT NOT NULL,
-        created_at  INTEGER NOT NULL
-      );
-      CREATE UNIQUE INDEX IF NOT EXISTS idx_daily_user_date ON daily_readings(user_key, date_key);
-      CREATE INDEX IF NOT EXISTS idx_daily_user ON daily_readings(user_key, created_at);
-
-      CREATE TABLE IF NOT EXISTS digest_log (
-        user_id    TEXT NOT NULL,
-        send_date  TEXT NOT NULL,
-        channel    TEXT NOT NULL,
-        status     TEXT NOT NULL,
-        reason     TEXT,
-        created_at INTEGER NOT NULL,
-        PRIMARY KEY (user_id, send_date, channel)
-      );
-      CREATE INDEX IF NOT EXISTS idx_digest_log_date ON digest_log(send_date, status);
-
-      CREATE TABLE IF NOT EXISTS reading_quality (
-        reading_id      TEXT PRIMARY KEY,
-        provider        TEXT NOT NULL,
-        model           TEXT NOT NULL,
-        persona_id      TEXT NOT NULL,
-        spread_id       TEXT NOT NULL,
-        card_count      INTEGER NOT NULL,
-        category        TEXT NOT NULL,
-        prompt_version  TEXT NOT NULL,
-        elapsed_ms      INTEGER,
-        output_tokens   INTEGER,
-        had_failover    INTEGER NOT NULL DEFAULT 0,
-        consistency_ok  INTEGER,
-        judge_score     INTEGER,
-        outcome         TEXT,
-        created_at      INTEGER NOT NULL,
-        thai_score        INTEGER,
-        thai_issue_codes  TEXT,
-        thai_fix_count    INTEGER
-      );
-      CREATE INDEX IF NOT EXISTS idx_rq_version  ON reading_quality(prompt_version, created_at);
-      CREATE INDEX IF NOT EXISTS idx_rq_provider ON reading_quality(provider, model);
-      CREATE INDEX IF NOT EXISTS idx_rq_persona  ON reading_quality(persona_id, spread_id);
-
-      CREATE TABLE IF NOT EXISTS user_feedback (
-        id              TEXT PRIMARY KEY,
-        rating          INTEGER,
-        category        TEXT NOT NULL,
-        comment         TEXT,
-        reading_id      TEXT,
-        persona_id      TEXT,
-        page_url        TEXT,
-        user_agent      TEXT,
-        created_at      INTEGER NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS redeem_codes (
-        code           TEXT PRIMARY KEY,
-        title          TEXT NOT NULL,
-        credits        INTEGER NOT NULL DEFAULT 3,
-        max_uses       INTEGER NOT NULL DEFAULT -1,
-        used_count     INTEGER NOT NULL DEFAULT 0,
-        reason_prefix  TEXT NOT NULL DEFAULT 'purchase_redeem',
-        expires_at     INTEGER,
-        is_active      INTEGER NOT NULL DEFAULT 1,
-        created_at     INTEGER NOT NULL
-      );
-
-      CREATE TABLE IF NOT EXISTS redeem_redemptions (
-        id             TEXT PRIMARY KEY,
-        code           TEXT NOT NULL REFERENCES redeem_codes(code),
-        user_id        TEXT NOT NULL REFERENCES users(id),
-        credits        INTEGER NOT NULL,
-        redeemed_at    INTEGER NOT NULL
-      );
-      CREATE UNIQUE INDEX IF NOT EXISTS idx_rdm_code_user ON redeem_redemptions(code, user_id);
-      CREATE INDEX IF NOT EXISTS idx_rdm_user ON redeem_redemptions(user_id);
-
-      -- 🚦 ถังกันเดารหัสผ่านแบบ atomic (migrations/0016 · A1-02)
-      CREATE TABLE IF NOT EXISTS auth_rate_buckets (
-        key       TEXT PRIMARY KEY,
-        count     INTEGER NOT NULL,
-        reset_at  INTEGER NOT NULL
-      );
-      CREATE INDEX IF NOT EXISTS idx_auth_rate_reset ON auth_rate_buckets(reset_at);
-
-      -- 🚦 เพดานถี่เส้นทางเปิดไพ่/แชทแบบ atomic ข้าม isolate (migrations/0018)
-      CREATE TABLE IF NOT EXISTS edge_rate_buckets (
-        key       TEXT PRIMARY KEY,
-        count     INTEGER NOT NULL,
-        reset_at  INTEGER NOT NULL
-      );
-      CREATE INDEX IF NOT EXISTS idx_edge_rate_reset ON edge_rate_buckets(reset_at);
-
-      -- 📊 ตัวนับสถิติแบบ atomic (migrations/0017 · A2-16)
-      CREATE TABLE IF NOT EXISTS stat_counters (
-        day     TEXT NOT NULL,
-        metric  TEXT NOT NULL,
-        n       INTEGER NOT NULL DEFAULT 0,
-        PRIMARY KEY (day, metric)
-      );
-    `);
-
-    // Safe Alter & Index for local SQLite migration
-    const safeExec = (sql: string) => {
-      try {
-        db.exec(sql);
-      } catch {
-        // Ignore errors if already present or column exists
-      }
+    const open = (): LocalSqlite => {
+      const conn = new sqlite.DatabaseSync(dbPath);
+      conn.exec("PRAGMA journal_mode = WAL;");
+      conn.exec("PRAGMA busy_timeout = 5000;");
+      return conn;
     };
-    safeExec("ALTER TABLE users ADD COLUMN email_lower TEXT");
-    safeExec("ALTER TABLE users ADD COLUMN password_hash TEXT");
-    safeExec("ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0");
-    safeExec("ALTER TABLE users ADD COLUMN token_version INTEGER NOT NULL DEFAULT 0");
-    safeExec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_lower ON users(email_lower) WHERE email_lower IS NOT NULL");
-    // 📬 สมัครใจรับดวงประจำวันทางอีเมล (migrations/0014) — ค่าเริ่มต้น 0 เสมอ (opt-in เท่านั้น)
-    safeExec("ALTER TABLE users ADD COLUMN digest_email INTEGER NOT NULL DEFAULT 0");
-    safeExec("ALTER TABLE users ADD COLUMN digest_last_sent_at INTEGER");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_users_digest ON users(digest_email, marketing_consent, deleted_at)");
-    // ✍️ คอลัมน์คุณภาพภาษาไทย (migrations/0011) — ฐานข้อมูลเครื่องที่สร้างไว้ก่อนหน้านี้
-    // ผ่าน CREATE TABLE IF NOT EXISTS จะไม่ได้คอลัมน์ใหม่ ถ้าไม่ ALTER ตรงนี้เทสต์จะพังแบบงง ๆ
-    safeExec("ALTER TABLE reading_quality ADD COLUMN thai_score INTEGER");
-    safeExec("ALTER TABLE reading_quality ADD COLUMN thai_issue_codes TEXT");
-    safeExec("ALTER TABLE reading_quality ADD COLUMN thai_fix_count INTEGER");
-    // 💳 เจ้าของรายการชำระเงิน + เลขออร์เดอร์ (migrations/0015 · T-07/T-09)
-    // เครื่องที่มี .dev-marketplace.db อยู่ก่อนแล้วจะไม่ได้คอลัมน์ใหม่จาก CREATE TABLE IF NOT EXISTS
-    safeExec("ALTER TABLE payments ADD COLUMN order_id TEXT");
-    safeExec("ALTER TABLE payments ADD COLUMN user_id TEXT");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_payments_order ON payments(order_id)");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_payments_user ON payments(user_id)");
-    // 📅 นัดเวลาล่วงหน้า + จ่ายก่อนคุย (migrations/0020) — unique index แบบมีเงื่อนไขคือด่านกันจองซ้อน
-    safeExec("ALTER TABLE bookings ADD COLUMN kind TEXT NOT NULL DEFAULT 'scheduled'");
-    safeExec("ALTER TABLE bookings ADD COLUMN hold_expires_at INTEGER");
-    safeExec("ALTER TABLE bookings ADD COLUMN cancelled_at INTEGER");
-    safeExec("ALTER TABLE bookings ADD COLUMN cancelled_by TEXT");
-    safeExec("ALTER TABLE bookings ADD COLUMN refund_status TEXT");
-    safeExec("ALTER TABLE bookings ADD COLUMN reschedule_count INTEGER NOT NULL DEFAULT 0");
-    safeExec("ALTER TABLE payments ADD COLUMN refund_due INTEGER NOT NULL DEFAULT 0");
-    safeExec(
-      "CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_slot_active ON bookings(reader_id, slot_start) WHERE kind = 'scheduled' AND status IN ('reserved', 'confirmed')"
-    );
-    safeExec("CREATE INDEX IF NOT EXISTS idx_bookings_ticket ON bookings(ticket_id)");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_payments_provider_ref ON payments(provider_ref)");
-    // 💌 ระบบจองรอบสอง: อีเมลยืนยัน/เตือน · นัดของฉัน · ตั้งค่าแม่หมอ · วันหยุด · รีวิว · รอคิวว่าง (migrations/0021)
-    safeExec("ALTER TABLE bookings ADD COLUMN contact_email TEXT");
-    safeExec("ALTER TABLE bookings ADD COLUMN confirm_email_at INTEGER");
-    safeExec("ALTER TABLE bookings ADD COLUMN reminder_24h_at INTEGER");
-    safeExec("ALTER TABLE bookings ADD COLUMN reminder_1h_at INTEGER");
-    safeExec("ALTER TABLE queue_tickets ADD COLUMN user_id TEXT");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_tickets_user ON queue_tickets(user_id)");
-    // ความยินยอมโดยชัดแจ้ง ม.26 สำหรับคำถามที่มีข้อมูลอ่อนไหว (migrations/0029)
-    safeExec("ALTER TABLE queue_tickets ADD COLUMN sensitive_consent_at INTEGER");
-    safeExec("ALTER TABLE readers ADD COLUMN notify_email TEXT");
-    safeExec("ALTER TABLE readers ADD COLUMN price_thb INTEGER");
-    safeExec("ALTER TABLE readers ADD COLUMN buffer_min INTEGER NOT NULL DEFAULT 0");
-    safeExec("ALTER TABLE readers ADD COLUMN daily_cap INTEGER");
-    // รับนัดล่วงหน้าอย่างน้อยกี่นาที — แม่หมอตั้งเอง · NULL = ค่าเริ่มต้น 2 ชม. (migrations/0030)
-    safeExec("ALTER TABLE readers ADD COLUMN lead_min INTEGER");
-    safeExec("ALTER TABLE reader_availability ADD COLUMN last_seen_at INTEGER");
-    // ลิงก์ห้องส่วนตัวที่แม่หมอสร้างให้ลูกค้าคนเดียว (migrations/0032) — ต้องตรงกับไฟล์ migration ทุกคอลัมน์
-    safeExec(
-      "CREATE TABLE IF NOT EXISTS reader_invites (id TEXT PRIMARY KEY, code TEXT NOT NULL UNIQUE, reader_id TEXT NOT NULL REFERENCES readers(id), label TEXT, ticket_id TEXT, created_at INTEGER NOT NULL, expires_at INTEGER NOT NULL, cancelled_at INTEGER)"
-    );
-    safeExec("CREATE INDEX IF NOT EXISTS idx_reader_invites_reader ON reader_invites(reader_id, created_at)");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_reader_invites_ticket ON reader_invites(ticket_id)");
-    // index ของคำสั่งที่เดิมอ่านทั้งตาราง (migrations/0033 · A9-05) — ต้องตรงกับไฟล์ migration
-    safeExec("CREATE INDEX IF NOT EXISTS idx_users_created ON users(created_at DESC, id DESC)");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_bookings_status_hold ON bookings(status, hold_expires_at)");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_bookings_status_slot ON bookings(status, kind, slot_start)");
-    // migrations/0035 (B2-01..04) — ต้องตรงกับไฟล์ migration (reader_reviews สร้างด้านล่าง จึงสร้าง index ของมันตามหลังตาราง)
-    safeExec("ALTER TABLE queue_tickets ADD COLUMN pii_cleared_at INTEGER");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_tickets_pii_pending ON queue_tickets(expires_at) WHERE pii_cleared_at IS NULL");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_tickets_status ON queue_tickets(status)");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_payments_ticket_paid ON payments(ticket_id, status, updated_at)");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_payments_created ON payments(created_at DESC)");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_payments_status_created ON payments(status, created_at)");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_rq_created ON reading_quality(created_at DESC)");
-    safeExec(
-      "CREATE TABLE IF NOT EXISTS reader_blocked_dates (reader_id TEXT NOT NULL REFERENCES readers(id), date_key TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (reader_id, date_key))"
-    );
-    safeExec(
-      "CREATE TABLE IF NOT EXISTS reader_reviews (id TEXT PRIMARY KEY, ticket_id TEXT NOT NULL UNIQUE, reader_id TEXT NOT NULL REFERENCES readers(id), rating INTEGER NOT NULL, comment TEXT, nickname TEXT, hidden INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL)"
-    );
-    safeExec("CREATE INDEX IF NOT EXISTS idx_reviews_reader ON reader_reviews(reader_id, hidden, created_at DESC)");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_reviews_reader_rating ON reader_reviews(reader_id, hidden, rating)"); // 0035 · B2-02
-    safeExec(
-      "CREATE TABLE IF NOT EXISTS booking_waitlist (id TEXT PRIMARY KEY, reader_id TEXT NOT NULL REFERENCES readers(id), email TEXT NOT NULL, created_at INTEGER NOT NULL, UNIQUE (reader_id, email))"
-    );
-    // 📓 สมุดดวง v2 + พิธีเช้า-เย็น (migrations/0022) — ต้องตรงกับไฟล์ migration ทุกคอลัมน์
-    safeExec("ALTER TABLE reading_journal ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0");
-    safeExec("ALTER TABLE reading_journal ADD COLUMN tags_json TEXT NOT NULL DEFAULT '[]'");
-    safeExec("ALTER TABLE reading_journal ADD COLUMN mood_before INTEGER");
-    safeExec("ALTER TABLE reading_journal ADD COLUMN mood_after INTEGER");
-    safeExec("ALTER TABLE reading_journal ADD COLUMN thread_id TEXT");
-    safeExec("ALTER TABLE reading_journal ADD COLUMN checkin_at INTEGER");
-    safeExec("ALTER TABLE reading_journal ADD COLUMN share_with_ai INTEGER NOT NULL DEFAULT 0");
-    safeExec("ALTER TABLE reading_journal ADD COLUMN basis_json TEXT");
-    safeExec("ALTER TABLE reading_journal ADD COLUMN ritual_kind TEXT");
-    safeExec("ALTER TABLE reading_journal ADD COLUMN ritual_json TEXT");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_rj_user_thread ON reading_journal(user_id, thread_id, created_at)");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_rj_checkin ON reading_journal(checkin_at) WHERE checkin_at IS NOT NULL");
-    safeExec(
-      "CREATE INDEX IF NOT EXISTS idx_rj_user_ritual ON reading_journal(user_id, ritual_kind, created_at) WHERE ritual_kind IS NOT NULL"
-    );
-    // 🧵 เส้นเรื่อง + นัดกลับมาเช็ก (migrations/0023) — ต้องตรงกับไฟล์ migration ทุกคอลัมน์
-    safeExec(
-      "CREATE TABLE IF NOT EXISTS journal_threads (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, title TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'open', closing_note TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, closed_at INTEGER)"
-    );
-    safeExec("CREATE INDEX IF NOT EXISTS idx_jt_user_status ON journal_threads(user_id, status, updated_at DESC)");
-    safeExec("ALTER TABLE reading_journal ADD COLUMN checkin_sent_at INTEGER");
-    safeExec(
-      "CREATE INDEX IF NOT EXISTS idx_rj_checkin_due ON reading_journal(checkin_at, checkin_sent_at) WHERE checkin_at IS NOT NULL"
-    );
-    // 0035 · B2-03 — ตามหลัง ALTER ที่เพิ่ม checkin_sent_at
-    safeExec("CREATE INDEX IF NOT EXISTS idx_rj_checkin_sent ON reading_journal(checkin_sent_at) WHERE checkin_sent_at IS NOT NULL");
-    // ✦ แคชข้อสังเกตจากสมุด (migrations/0028)
-    safeExec(
-      "CREATE TABLE IF NOT EXISTS reflection_cache (cache_key TEXT PRIMARY KEY, user_id TEXT NOT NULL, lang TEXT NOT NULL, result_json TEXT NOT NULL, created_at INTEGER NOT NULL)"
-    );
-    safeExec("CREATE INDEX IF NOT EXISTS idx_reflection_cache_user ON reflection_cache(user_id, created_at)");
-    // 🔔 Web Push (migrations/0025)
-    safeExec(
-      "CREATE TABLE IF NOT EXISTS push_subscriptions (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, endpoint TEXT NOT NULL UNIQUE, p256dh TEXT NOT NULL, auth TEXT NOT NULL, lang TEXT NOT NULL DEFAULT 'th', morning_hour INTEGER, checkins INTEGER NOT NULL DEFAULT 1, last_morning_day TEXT, fail_count INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)"
-    );
-    safeExec("CREATE INDEX IF NOT EXISTS idx_push_user ON push_subscriptions(user_id)");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_push_morning ON push_subscriptions(morning_hour) WHERE morning_hour IS NOT NULL");
-    // ✦ ผังที่สมาชิกออกแบบเอง (migrations/0024)
-    safeExec(
-      "CREATE TABLE IF NOT EXISTS custom_spreads (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, name TEXT NOT NULL, layout TEXT NOT NULL, positions_json TEXT NOT NULL, share_slug TEXT UNIQUE, use_count INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)"
-    );
-    safeExec("CREATE INDEX IF NOT EXISTS idx_custom_spreads_user ON custom_spreads(user_id, updated_at DESC)");
-    // 🛡️ บัญชีต้นทุน AI ต่อผู้ใช้ต่อวัน (migrations/0026)
-    safeExec(
-      "CREATE TABLE IF NOT EXISTS ai_usage_daily (day TEXT NOT NULL, subject TEXT NOT NULL, calls INTEGER NOT NULL DEFAULT 0, tokens_in INTEGER NOT NULL DEFAULT 0, tokens_out INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, subject))"
-    );
-    safeExec("CREATE INDEX IF NOT EXISTS idx_ai_usage_subject ON ai_usage_daily(subject, day)");
-    // ✦ Reader Studio (migrations/0027)
-    safeExec(
-      "CREATE TABLE IF NOT EXISTS reader_studio_settings ( reader_id TEXT PRIMARY KEY, brand_name TEXT, logo_url TEXT, brand_color TEXT, contact_line TEXT, show_ai_disclosure INTEGER NOT NULL DEFAULT 1, ai_assist INTEGER NOT NULL DEFAULT 0, dpa_version TEXT, dpa_accepted_at INTEGER, pro_until INTEGER, pass_price_thb INTEGER, updated_at INTEGER NOT NULL )"
-    );
-    safeExec(
-      "CREATE TABLE IF NOT EXISTS reader_clients ( id TEXT PRIMARY KEY, reader_id TEXT NOT NULL, display_name TEXT NOT NULL, contact TEXT, note TEXT, source_customer_hash TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL )"
-    );
-    safeExec(
-      "CREATE INDEX IF NOT EXISTS idx_reader_clients_reader ON reader_clients(reader_id, updated_at DESC)"
-    );
-    safeExec(
-      "CREATE TABLE IF NOT EXISTS reader_readings ( id TEXT PRIMARY KEY, reader_id TEXT NOT NULL, client_id TEXT, title TEXT NOT NULL, question TEXT, spread_id TEXT NOT NULL, custom_spread_json TEXT, card_source TEXT, cards_json TEXT, commitment TEXT, server_seed TEXT, client_seed TEXT, notes_json TEXT NOT NULL DEFAULT '{}', draft_json TEXT, body_json TEXT, show_ai_disclosure INTEGER NOT NULL DEFAULT 1, status TEXT NOT NULL DEFAULT 'draft', share_token_hash TEXT UNIQUE, share_expires_at INTEGER, share_password_hash TEXT, share_revoked_at INTEGER, view_count INTEGER NOT NULL DEFAULT 0, sent_at INTEGER, source_ticket_id TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL )"
-    );
-    safeExec(
-      "CREATE INDEX IF NOT EXISTS idx_reader_readings_reader ON reader_readings(reader_id, updated_at DESC)"
-    );
-    safeExec(
-      "CREATE INDEX IF NOT EXISTS idx_reader_readings_client ON reader_readings(client_id)"
-    );
-    // ฐานข้อมูลในเครื่องที่สร้างตาราง 0027 รุ่นแรกไว้แล้ว — เติมคอลัมน์ที่มาทีหลัง (มีแล้ว = error เงียบ)
-    safeExec("ALTER TABLE reader_clients ADD COLUMN source_customer_hash TEXT");
-    safeExec("ALTER TABLE reader_readings ADD COLUMN source_ticket_id TEXT");
-    safeExec("ALTER TABLE reader_studio_settings ADD COLUMN pro_until INTEGER");
-    safeExec("ALTER TABLE reader_studio_settings ADD COLUMN pass_price_thb INTEGER");
-    safeExec("ALTER TABLE reader_studio_settings ADD COLUMN ai_assist INTEGER NOT NULL DEFAULT 0");
-    safeExec(
-      "CREATE TABLE IF NOT EXISTS reader_studio_passes ( order_id TEXT PRIMARY KEY, reader_id TEXT NOT NULL, days INTEGER NOT NULL, created_at INTEGER NOT NULL, granted_at INTEGER, revoked_at INTEGER )"
-    );
-    safeExec("CREATE INDEX IF NOT EXISTS idx_reader_studio_passes_reader ON reader_studio_passes(reader_id, created_at DESC)");
-    safeExec("CREATE INDEX IF NOT EXISTS idx_reader_clients_source ON reader_clients(reader_id, source_customer_hash)");
-    safeExec(
-      "CREATE UNIQUE INDEX IF NOT EXISTS idx_reader_readings_ticket ON reader_readings(reader_id, source_ticket_id) WHERE source_ticket_id IS NOT NULL"
-    );
-    safeExec(
-      "CREATE TABLE IF NOT EXISTS reader_templates ( id TEXT PRIMARY KEY, reader_id TEXT NOT NULL, name TEXT NOT NULL, intro TEXT, closing TEXT, created_at INTEGER NOT NULL )"
-    );
-    safeExec(
-      "CREATE INDEX IF NOT EXISTS idx_reader_templates_reader ON reader_templates(reader_id)"
-    );
-    // 🎟 รหัสแลกสิทธิ์ 2 ตัวที่ migrations/0012 เคย seed — ปิดใช้งานแล้ว (migrations/0034 · A10-01)
-    // รหัสที่เขียนไว้ในรีโปสาธารณะแปลว่าใครอ่านซอร์สเจอก็แลกได้ จึงคงแถวไว้ให้ตรงกับ production แต่ is_active = 0
-    // รหัสสำหรับแจกจริงให้สร้างจากแผงแอดมินซึ่งสุ่มรหัสใหม่ทุกครั้ง — อย่า seed รหัสที่ใช้งานได้ลงไฟล์
-    // ชุดทดสอบสร้างรหัสของตัวเอง (scripts/qa/test-redeem-code.ts)
-    safeExec(`
-      INSERT OR IGNORE INTO redeem_codes (code, title, credits, max_uses, used_count, reason_prefix, expires_at, is_active, created_at)
-      VALUES 
-        ('VIP3-TAROT-2026', 'สิทธิ์ญาณพยากรณ์พิเศษ 3 ครั้ง (เปิดได้ทุกผังและปรมาจารย์ลับ)', 3, 50, 0, 'purchase_redeem', 1798736399000, 0, 1726000000000),
-        ('SEER3PASS', 'สิทธิ์ญาณพยากรณ์พิเศษ 3 ครั้ง (เปิดได้ทุกผังและปรมาจารย์ลับ)', 3, 50, 0, 'purchase_redeem', 1798736399000, 0, 1726000000000)
-    `);
-    // เครื่องที่มี local.db อยู่ก่อนแล้วจะไม่โดน INSERT OR IGNORE ด้านบน — ต้องปิดย้อนหลังให้ด้วย (ตรงกับ migrations/0034)
-    safeExec(`
-      UPDATE redeem_codes
-         SET is_active = 0, max_uses = 50, expires_at = 1798736399000
-       WHERE code IN ('VIP3-TAROT-2026', 'SEER3PASS')
-    `);
-
+    let db = open();
+    if (isLegacyLocalDb(db)) {
+      db.close();
+      const aside = `${dbPath}.legacy-${Date.now()}`;
+      for (const suffix of ["", "-wal", "-shm"]) {
+        if (fs.existsSync(dbPath + suffix)) fs.renameSync(dbPath + suffix, aside + suffix);
+      }
+      console.warn(
+        `[Platform DB] ฐานในเครื่องรุ่นเก่า (สคีมาเขียนมือ) ย้ายไปไว้ที่ ${path.basename(aside)} แล้วสร้างใหม่จาก migrations/`,
+      );
+      db = open();
+    }
+    applyLocalMigrations(db, files);
 
     const adapter: AppDB = {
       prepare(query: string) {
@@ -618,6 +196,7 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     g.__tarot_d1_shim__ = adapter;
     return adapter;
   } catch (err) {
+    if (err instanceof LocalMigrationError) throw err;
     console.warn("[Platform DB] Failed to init node:sqlite, using memory mock fallback:", err);
     // In-memory fallback if node:sqlite fails
     return createMemoryDBFallback();

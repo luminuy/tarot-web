@@ -20,7 +20,7 @@
 
 | ชั้น | ใช้เก็บอะไร | หมายเหตุ |
 | :-- | :-- | :-- |
-| **KV** (`NEXT_INC_CACHE_KV`, prefix `app:`) | config overrides, feature flags, stat counters, audit log | reuse namespace เดิม — eventually-consistent (~60s) |
+| **KV** (`APP_KV`, prefix `app:`) | config overrides, feature flags, stat counters, audit log | reuse namespace เดิม — eventually-consistent (~60s) |
 | **D1** (`APP_DB`) | users, reading_journal, reading_usage, user_bonus, marketplace | ใช้งานจริงบน Cloudflare D1 (database_id: `560fdbe7...`) |
 | in-memory (`src/server/store.ts`) | reading state ระหว่างขั้นตอน (อายุสั้น 2 ชม. มี KV backstop) | ไม่เกี่ยวกับแอดมิน |
 

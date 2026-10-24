@@ -246,7 +246,7 @@ async function main() {
   check("ถามกลับ (clarify): ข้อความผู้ใช้ผ่าน sanitize", src("src/lib/ai/clarify.ts").includes("sanitizePromptValue(situation"));
   check("Groq/Gemini: เคารพงบลองใหม่", src("src/lib/ai/groq.ts").includes("ctx.retryBudget.take()") && src("src/lib/ai/gemini.ts").includes("ctx.retryBudget.take()"));
   check("ด่านความสอดคล้อง: มี PROMPT_LEAK", src("src/lib/ai/consistency.ts").includes('"PROMPT_LEAK"'));
-  check("migration 0026 ตรงกับตารางในเครื่อง", src("migrations/0026_ai_usage_ledger.sql").includes("ai_usage_daily") && src("src/lib/platform/db.ts").includes("ai_usage_daily"));
+  check("migration 0026 มีตาราง ai_usage_daily และฐานในเครื่องสร้างจาก migrations/ ชุดเดียวกัน", src("migrations/0026_ai_usage_ledger.sql").includes("ai_usage_daily") && src("src/lib/platform/db.ts").includes('LOCAL_MIGRATIONS_DIR = "migrations"'));
   check("ไม่เก็บ prompt ลงที่ใดเลย (คงนโยบายเดิม)", !/prompt_json|prompt_text|INSERT INTO .*prompt/i.test(src("src/lib/security/cost-ledger.ts")));
 
   console.log(`\n${fail === 0 ? "✅" : "❌"} ai security: ${pass} passed, ${fail} failed`);

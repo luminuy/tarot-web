@@ -32,7 +32,7 @@
 ### Platform layer — `src/lib/platform/`
 | ไฟล์ | export | ใช้ทำอะไร |
 | :-- | :-- | :-- |
-| `cf.ts` | `getAppKV()`, `getWaitUntil()` | เข้าถึง Cloudflare KV binding (`NEXT_INC_CACHE_KV`) + shim ตอน dev · `getWaitUntil` สำหรับ background task |
+| `cf.ts` | `getAppKV()`, `getWaitUntil()` | เข้าถึง Cloudflare KV binding (`APP_KV`) + shim ตอน dev · `getWaitUntil` สำหรับ background task |
 | `kv-store.ts` | `kvGetJSON/kvPutJSON/kvDelete/kvIncr/kvListKeys`, `KEY`, `invalidateMemo` | typed JSON + isolate memo cache · key prefix `app:` |
 
 **⚠️ ห้ามเพิ่ม `initOpenNextCloudflareForDev()` ใน `next.config.ts`** — สตาร์ท workerd ที่พังบน macOS 12.6 (ISSUE-004)

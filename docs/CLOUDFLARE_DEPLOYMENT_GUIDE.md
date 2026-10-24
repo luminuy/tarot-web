@@ -22,26 +22,28 @@
 
 ## 🧊 1.5 สถาปัตยกรรม Edge Caching (OpenNext) — ตั้งครั้งเดียว
 
-เว็บนี้เป็น **SSG ล้วน** (ทุกหน้า prerender ตอน build · ไม่มี `export const revalidate` · ไม่มี `revalidateTag()` / `revalidatePath()` ที่ไหนเลย) จึงใช้ OpenNext edge caching แบบ **มินิมอล** — แค่ KV + cache interception พอ
+เว็บนี้เป็น **SSG ล้วน** (ทุกหน้า prerender ตอน build · ไม่มี `export const revalidate` · ไม่มี `revalidateTag()` / `revalidatePath()` ที่ไหนเลย) จึงใช้ OpenNext edge caching แบบ **มินิมอล** — แคชหน้าอยู่ใน Workers Static Assets (`static-assets-incremental-cache` · INC-0287) ไม่ใช้ KV
 
 | Binding | ประเภท | หน้าที่ |
 | :--- | :--- | :--- |
-| `NEXT_INC_CACHE_KV` | KV Namespace | Stat Counters, Content Overrides, Session Backstop (คีย์ `app:*`) — แคช HTML/RSC ของหน้า SSG ย้ายไป static assets แล้ว (2026-10-19 · ห้ามกลับมาใช้ KV เพราะ seed ทุก deploy ไม่เคยลบ) |
+| `APP_KV` | KV Namespace | (เดิมชื่อ `NEXT_INC_CACHE_KV` · namespace เดิม) Stat Counters, Content Overrides, Session Backstop (คีย์ `app:*`) — แคช HTML/RSC ของหน้า SSG ย้ายไป static assets แล้ว (2026-10-19 · ห้ามกลับมาใช้ KV เพราะ seed ทุก deploy ไม่เคยลบ) |
 | `ASSETS` | Static Assets | ภาพไพ่ 1909, `_next/static` |
 | `APP_DB` | D1 Database | เก็บข้อมูล users, reading_journal, reading_usage, user_bonus, marketplace |
 | `AI` | Workers AI | ตัวคัดกรองความปลอดภัยฉุกเฉินชั้น 3 |
 | `VECTORIZE` | Vectorize Index | ค้นหาความหมายไพ่และบทความเชิงความหมาย (`card-meanings` 1024d) |
 | `SHARE_BUCKET` | R2 Bucket | จัดเก็บภาพการ์ดแชร์ที่ผู้ใช้สร้างเอง (`seertarot-share` auto-delete 90 วัน) |
+| *(ไม่ผูกกับ Worker)* | R2 Bucket | `seertarot-d1-backups` — ไฟล์สำรองฐาน D1 รายสัปดาห์ (ส่วนตัว · ลบเองเมื่อครบ 35 วัน · ดูหัวข้อ 8.5) |
 
 config อยู่ใน [`wrangler.jsonc`](../wrangler.jsonc) + [`open-next.config.ts`](../open-next.config.ts)
-`enableCacheInterception: true` ทำให้หน้า SSG ตอบจาก KV ที่ edge โดยไม่ boot Next runtime (ยืนยันด้วย header `x-opennext-cache: HIT`)
+`enableCacheInterception` ต้องเป็น `false` เสมอ (INC-0106 · เปิดแล้ว segment prefetch ของ Next 16 วนยิงไม่รู้จบ)
 
 ### สิทธิ์ของ API Token (CI)
 
 `CLOUDFLARE_API_TOKEN` ใน GitHub Secrets สำหรับ deploy อัตโนมัติ:
 - **Account › Workers Scripts › Edit**
 - **Account › Workers KV Storage › Edit**
-- **Account › Workers R2 Storage › Edit**
+- **Account › Workers R2 Storage › Edit** (binding R2 · สร้าง bucket สำรอง · ตั้งกฎลบไฟล์อัตโนมัติ)
+- **Account › D1 › Edit** (รัน migration ก่อน deploy · export ไฟล์สำรอง)
 
 ---
 
@@ -260,6 +262,40 @@ npm run incident -- --title "..." --severity high \
 ```
 
 กฎเหล็กข้อ 0 ของโปรเจกต์นี้: **ถอยกลับโดยไม่บันทึกบทเรียน = รอบหน้าจะพังแบบเดิมอีก**
+
+### 8.5 สำรองและกู้คืน D1
+
+**สำรอง:** `.github/workflows/d1-backup.yml` สำรองฐาน `tarot-app-db` ทั้งฐานทุกวันอาทิตย์ 03:17 น. (เวลาไทย)
+ลง R2 bucket ส่วนตัว `seertarot-d1-backups` ที่ `d1/tarot-app-db/<ปี>/<เดือน>/tarot-app-db-<เวลา UTC>Z.sql.gz`
+ทุกรอบโหลดไฟล์ลองกู้ + `integrity_check` ก่อนอัปโหลด แล้วดาวน์โหลดกลับเทียบ SHA-256 · ไฟล์อายุเกิน 35 วัน R2 ลบเอง
+ล้มเมื่อไหร่เปิด issue `[สำรองข้อมูลล้ม]` · ก่อนรัน migration ที่เสี่ยงให้กดสำรองเองที่ Actions ➔ D1 Backup ➔ Run workflow
+
+> ⚠️ ระหว่าง export ฐานจะไม่รับคำขออื่นชั่วครู่ (ข้อจำกัดของ D1) — อย่ากดสำรองเองช่วงคนใช้เยอะ
+> ⚠️ ไฟล์สำรองมีข้อมูลส่วนบุคคล — ห้ามเปิดลิงก์สาธารณะของ bucket นี้ (สคริปต์ตรวจและไม่ยอมอัปโหลดถ้าเปิด) และห้ามแนบเป็น artifact ของ GitHub
+
+**กู้คืน** — เลือกทางตามสถานการณ์:
+
+| สถานการณ์ | ทางที่ใช้ |
+| :--- | :--- |
+| ฐานยังอยู่ แค่ข้อมูลเสีย/ลบผิด ภายใน 30 วัน | **Time Travel** (ละเอียดระดับนาที): `npx wrangler d1 time-travel restore tarot-app-db --timestamp=<ISO เวลา UTC ก่อนเกิดเหตุ>` |
+| ฐานถูกลบ · เกิน 30 วัน · Time Travel ใช้ไม่ได้ | กู้จากไฟล์สำรองตามขั้นด้านล่าง |
+
+```bash
+# 1. หาไฟล์ล่าสุดที่ Dashboard ➔ R2 ➔ seertarot-d1-backups ➔ d1/tarot-app-db/ แล้วดาวน์โหลด
+npx wrangler r2 object get seertarot-d1-backups/d1/tarot-app-db/<ปี>/<เดือน>/<ไฟล์>.sql.gz --remote --file backup.sql.gz
+gunzip backup.sql.gz
+
+# 2. กู้ลงฐาน "ใหม่" เสมอ — ห้ามรันทับฐาน production ที่ยังมีข้อมูลอยู่
+npx wrangler d1 create tarot-app-db-restore
+npx wrangler d1 execute tarot-app-db-restore --remote --file backup.sql
+
+# 3. เทียบจำนวนแถวกับตารางใน step summary ของรอบสำรองนั้น
+npx wrangler d1 execute tarot-app-db-restore --remote --command "SELECT count(*) FROM users"
+```
+
+4. เปลี่ยน `database_id` ของ `APP_DB` ใน `wrangler.jsonc` เป็นฐานใหม่แล้วเปิด PR ตามปกติ
+   (ไฟล์สำรองมีตาราง `d1_migrations` ติดมา `db:migrate` ตอน deploy จึงรันเฉพาะ migration ที่ใหม่กว่าไฟล์สำรอง)
+5. ข้อมูลหลังเวลาสำรองหายไป — เทียบรายการจ่ายเงินกับ Stripe / Omise ช่วงนั้นด้วยมือ แล้วบันทึก incident ตามข้อ 8.4
 
 ---
 

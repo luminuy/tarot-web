@@ -74,7 +74,6 @@ check(
 /** ไฟล์ที่ได้รับอนุญาตให้เขียนเขตเวลา/ออฟเซ็ตเองได้ — ทุกบรรทัดต้องมีเหตุผล */
 const TZ_EXEMPT: Record<string, string> = {
   "src/lib/time/bangkok.ts": "โมดูลกลางเอง",
-  "src/lib/platform/db.ts": "ค่า DEFAULT ของคอลัมน์ในสคีมา SQL — ไม่ใช่ตรรกะเส้นแบ่งวัน",
   "src/lib/marketplace/queue.repo.ts": "ค่าที่เขียนลงคอลัมน์ `timezone` ของแม่หมอ — เป็นข้อมูล ไม่ใช่ตรรกะ",
 };
 
@@ -1041,6 +1040,21 @@ check(
     "A7-04: โปรไฟล์แม่หมอมี openGraph/twitter ของตัวเอง + sitemap โปรไฟล์ประกาศใน robots.txt",
     /openGraph:\s*\{[^\n]*\burl\b/.test(readerPage) && /twitter:/.test(readerPage) &&
       fs.existsSync(path.join(ROOT, "src/app/(th)/readers/sitemap.ts")) && robots.includes("/readers/sitemap.xml"),
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 14. ฐานข้อมูลในเครื่องต้องสร้างจาก migrations/ เท่านั้น (ตรวจ 2026-10-24)
+//     db.ts เคยเขียนสคีมาซ้ำเองราว 150 คำสั่งแล้วหลุดไป 9 index — ด่านในเครื่องรันบนสคีมาคนละชุดกับ D1 จริง
+// ─────────────────────────────────────────────────────────────────────────────
+{
+  const dbSrc = stripComments(fs.readFileSync(path.join(ROOT, "src/lib/platform/db.ts"), "utf-8"));
+  check(
+    "db.ts ไม่เขียนสคีมาซ้ำเอง (ไม่มี CREATE INDEX · ALTER TABLE · CREATE TABLE มีแค่ตารางจด migration)",
+    !/CREATE\s+(?:UNIQUE\s+)?INDEX|ALTER\s+TABLE/i.test(dbSrc) &&
+      (dbSrc.match(/CREATE\s+TABLE/gi) ?? []).length === 1 &&
+      /LOCAL_MIGRATIONS_DIR = "migrations"/.test(dbSrc),
+    "   ➔ ตาราง/คอลัมน์/index ใหม่ให้เพิ่มไฟล์ใน migrations/ อย่างเดียว ฐานในเครื่องรันตามให้เอง",
   );
 }
 

@@ -88,7 +88,7 @@
 | **Static SSG & Edge Assets** | **Astro 7.3 + React 19.2 Islands** | เรนเดอร์ 305 หน้าสาธารณะเป็น Zero-Runtime HTML บน Cloudflare Assets ลดน้ำหนัก JS 36–53% |
 | **Dynamic App & APIs** | **Next.js 16.3 (App Router)** | รองรับเส้นทาง Dynamic (`/account`, `/admin`, `/readers`, `/api/*`) และ SSE Streaming |
 | **Edge Compute & Serverless** | **Cloudflare Workers (OpenNext v1.20)** | V8 Isolate Serverless ตอบสนอง <50ms ทั่วโลก ไร้ Cold-Start |
-| **Database & Cache** | **Cloudflare D1 (`APP_DB`) + KV (`NEXT_INC_CACHE_KV`)** | Relational Database (ผู้ใช้, บันทึกดวง, สิทธิ์) + Key-Value Edge Cache |
+| **Database & Cache** | **Cloudflare D1 (`APP_DB`) + KV (`APP_KV`)** | Relational Database (ผู้ใช้, บันทึกดวง, สิทธิ์) + Key-Value ข้อมูลแอปขนาดเล็ก (คีย์ `app:*`) |
 | **Media Storage & Search** | **Cloudflare R2 (`SHARE_BUCKET`) + Vectorize** | จัดเก็บภาพการ์ดแชร์ 90 วัน + เอนจินค้นหาความหมายไพ่เชิงความหมาย 1024 มิติ |
 | **AI LLM Dual-Engine** | **Groq LPU (Qwen 2.5) + Google Gemini (3.7/2.5)** | สตรีมคำทำนายสองประสานความเร็วสูง พร้อม Failover อัตโนมัติผ่าน Cloudflare AI Gateway |
 | **Styling & Motion** | **Tailwind CSS v4 + Motion 13** | Obsidian & Gold Luxury Editorial Design System พร้อม Hardware GPU Acceleration |
