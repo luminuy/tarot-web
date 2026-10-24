@@ -18,7 +18,7 @@
 | 2-4 | **Workers AI** — safety guard ชั้น 3 (กฎ 6) | ✅ **LIVE** (auto) | #192 |
 | 2-5 | **KV ไพ่ประจำวันของทุกคน** | ✅ **LIVE** (deterministic + KV, ไม่ต้อง cron) | #198 |
 | — | Cron cleanup jobs | 🟢 ทำเป็น **lazy prune** แทน cron — `issueToken` เรียก `pruneExpiredAuthTokens()` ~5% ผ่าน `waitUntil` (OpenNext ไม่มี `scheduled()` · worker แยกไม่คุ้ม) | #206 |
-| 3-6 | **R2** — ลิงก์แชร์การ์ดมี OG image | ✅ **LIVE** (verified — round-trip PNG) · lifecycle 90 วันตั้งแล้ว | #201 #202 #203 |
+| 3-6 | **R2** — ลิงก์แชร์การ์ดมี OG image | ✅ **LIVE** (verified — round-trip PNG) · lifecycle 90 วัน (2026-10-24 ย้ายเป็นกฎราย prefix ที่ deploy.yml ตั้งเอง) | #201 #202 #203 |
 | 3-7 | **Vectorize** — ค้นหาเชิงความหมาย + "ไพ่ที่พลังงานใกล้เคียง" | ✅ **LIVE** (verified — `?q=` + related cards) · index มี 102 รายการ | #199 #200 |
 | 4-8 | **Durable Objects** | 🔴 บล็อก — payoff คือห้องสด Marketplace · Marketplace ยังไม่เปิด (D1 provisioning + PDPA sign-off — `docs/specs/MARKETPLACE.md`) | — |
 | 4-9 | **Realtime (SFU/TURN)** | 🔴 บล็อก — ต้องมี Marketplace + Durable Objects ก่อน | — |
@@ -32,7 +32,7 @@
 | AI Gateway | `CF_AI_GATEWAY_ACCOUNT_ID` = `f5af6f66302ba6872d8f51aebf43d3fe` · `CF_AI_GATEWAY_ID` = `seertarot-ai` (Unauthenticated · Cache 60s · Logs on) |
 | Turnstile | `TURNSTILE_SITE_KEY` `0x4AAAAAAEl-wIjxl3hSrWTn` · `TURNSTILE_SECRET_KEY` (Managed widget) |
 | Vectorize | index `card-meanings` 1024d/cosine · CI token ได้สิทธิ์ Vectorize (ไม่จำเป็น — ไม่ validate ตอน deploy) |
-| R2 | bucket `seertarot-share` · CI token `tarot-web deploy` เพิ่ม **Workers R2 Storage: Edit** · lifecycle `auto-delete-90d` |
+| R2 | bucket `seertarot-share` · CI token `tarot-web deploy` เพิ่ม **Workers R2 Storage: Edit** · lifecycle `expire-share-0`…`expire-share-f` (deploy.yml ตั้งทุกรอบ · แทน `auto-delete-90d` แบบทั้ง bucket ตั้งแต่ 2026-10-24) |
 
 ### 🔁 ต้องรันซ้ำเมื่อแก้ข้อมูลไพ่/บทความ
 - `/admin` → แท็บสุขภาพระบบ → การ์ด Cloudflare Free Stack → ปุ่ม **"สร้าง index ใหม่"** (rebuild Vectorize)
@@ -150,7 +150,7 @@
 - `GET /api/share/image/<id>` — Worker อ่าน R2 คืนรูป (ไม่เปิด public bucket)
 - `GET /s/<id>` — หน้า OG จิ๋ว (`og:image` + `twitter:card`) + redirect ไปหน้าแรก · `robots: noindex`
 - `ShareModal` — Twitter/Facebook/Threads อัปโหลด canvas → แชร์ `/s/<id>` (ขึ้นรูปพรีวิว) · IG/TikTok ยังใช้ native share + ดาวน์โหลดเหมือนเดิม
-- **PDPA**: id สุ่ม (UUID) · meta เก็บแค่หัวข้อ+ชื่อผัง · lifecycle `auto-delete-90d` (Delete objects after 90 days) **ตั้งใน dashboard แล้ว**
+- **PDPA**: id สุ่ม (UUID) · meta เก็บแค่หัวข้อ+ชื่อผัง · lifecycle 90 วัน — เดิม `auto-delete-90d` ตั้งใน dashboard แบบทั้ง bucket ซึ่งครอบโลโก้สตูดิโอแม่หมอ `studio-logo/` ด้วย · 2026-10-24 แทนด้วยกฎ 16 ข้อราย prefix 0-9 a-f ที่ `scripts/cf-r2-lifecycle.ts` ตั้งทุก deploy
 - verified บน production: POST PNG → 200 · GET กลับ byte ตรงเป๊ะ · `/s/<id>` มี `og:image` + `twitter:card`
 
 ### 3-7 Vectorize — ค้นหาเชิงความหมาย 🟢 (LIVE)

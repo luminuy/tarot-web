@@ -1,0 +1,81 @@
+name: 🗄️ D1 Backup — สำรองฐานข้อมูลลง R2
+run-name: "🗄️ D1 Backup ${{ github.event_name == 'workflow_dispatch' && format('(กดเองโดย {0})', github.actor) || '(ตามเวลา)' }}"
+
+# สำรองฐาน D1 `tarot-app-db` ทั้งฐานลง R2 bucket ส่วนตัว `seertarot-d1-backups` (ตรวจ 2026-10-24)
+# ------------------------------------------------------------------------------
+# เดิมพึ่ง Time Travel ของ Cloudflare อย่างเดียว ซึ่งหายไปพร้อมฐานถ้าฐานถูกลบ
+# ขั้นตอนทั้งหมดอยู่ใน `scripts/cf-d1-backup.ts`: export ➔ โหลดลอง + integrity_check ➔ gzip
+# ➔ อัปโหลด ➔ ดาวน์โหลดกลับเทียบ SHA-256 · ไฟล์เก่ากว่า 35 วันถูก R2 ลบเองตามกฎของ bucket
+#
+# ⚠️ ระหว่าง export ฐานจะไม่รับคำขออื่น (เอกสาร D1) จึงตั้งเวลาช่วงคนใช้น้อยที่สุด
+#    cron ของ GitHub เป็น UTC และดีเลย์ได้ 5–15 นาที — 20:17 UTC วันเสาร์ = 03:17 น. วันอาทิตย์ เวลาไทย
+# ⚠️ ไฟล์สำรองมีข้อมูลส่วนบุคคล — ห้ามเพิ่มขั้น upload-artifact ใน workflow นี้เด็ดขาด
+#    (artifact ของ GitHub เปิดให้ทุกคนที่อ่าน Actions ของรีโปดาวน์โหลดได้)
+#
+# ล้มเมื่อไหร่ = เปิด issue "[สำรองข้อมูลล้ม]" ให้เห็น (สำรองที่ล้มเงียบคือไม่มีสำรอง) · รอบถัดไปสำเร็จ = ปิดให้เอง
+# วิธีกู้คืน: docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md หัวข้อ "สำรองและกู้คืน D1"
+
+on:
+  schedule:
+    - cron: "17 20 * * 6" # เสาร์ 20:17 UTC = อาทิตย์ 03:17 น. เวลาไทย
+  workflow_dispatch: # กดสำรองเองได้ เช่นก่อนรัน migration ที่เสี่ยง
+
+concurrency:
+  group: d1-backup
+  cancel-in-progress: false
+
+# 🔒 R-17: อ่านรีโปเพื่อรันสคริปต์ + เปิด/ปิด issue แจ้งเตือน · ไม่เขียนอะไรกลับเข้ารีโป
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  backup:
+    name: สำรอง tarot-app-db
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: ⚙️ Setup Node.js 22
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+          cache: npm
+
+      # 🔒 A10-04: job นี้ถือโทเคน Cloudflare จึงไม่ให้แพ็กเกจรัน lifecycle script ตอนติดตั้ง (เหมือน deploy.yml)
+      - name: 📦 Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: 🗄️ Export ➔ ตรวจ ➔ อัปโหลด
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npm run cf:d1-backup
+
+      - name: เปิด/ปิด issue แจ้งสำรองข้อมูลล้ม
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          NOW=$(TZ=Asia/Bangkok date '+%Y-%m-%d %H:%M น. (เวลาไทย)')
+          OPEN=$(gh issue list --state open --search "in:title [สำรองข้อมูลล้ม]" --json number --jq '.[0].number // empty')
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          if [ "$JOB_STATUS" != "success" ]; then
+            BODY=$(printf "สำรองฐาน D1 ไม่สำเร็จเมื่อ %s\n\nรอบที่ล้ม: %s\n\nดูขั้น \"Export ➔ ตรวจ ➔ อัปโหลด\" ใน log ว่าล้มตรงไหน · กดรันซ้ำได้ที่ Actions ➔ D1 Backup ➔ Run workflow\nระหว่างนี้ Time Travel ของ Cloudflare ยังย้อนได้ราว 30 วัน\n\n---\n_ตัวสำรองข้อมูลอัตโนมัติ (.github/workflows/d1-backup.yml)_" "$NOW" "$RUN_URL")
+            if [ -n "$OPEN" ]; then
+              gh issue comment "$OPEN" --body "$BODY"
+            else
+              gh issue create --title "[สำรองข้อมูลล้ม] สำรองฐาน D1 ไม่สำเร็จ $NOW" --body "$BODY"
+            fi
+            exit 0
+          fi
+
+          if [ -n "$OPEN" ]; then
+            gh issue comment "$OPEN" --body "สำรองกลับมาสำเร็จเมื่อ $NOW · รอบที่สำเร็จ: $RUN_URL"
+            gh issue close "$OPEN" --reason completed
+          fi

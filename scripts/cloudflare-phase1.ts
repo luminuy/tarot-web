@@ -44,7 +44,7 @@
  *    ➔ แปลว่า Worker ยังถูกปลุกทุกคำขอหน้า HTML · ตัวเลข "ลด Worker 85–90%" ในคู่มือ
  *      **ยังไม่เกิดขึ้นจากเฟส 1** ของที่ลดได้จริงคือแบนด์วิดท์/คำขอของไฟล์ static เท่านั้น
  *    ➔ ทางแก้จริงอยู่ที่โค้ด (เฟส 2): ทำให้หน้า SSG ส่ง Cache-Control ที่แคชได้
- *      และ/หรือพึ่ง cache interception ของ OpenNext (`NEXT_INC_CACHE_KV` ที่ตั้งไว้แล้ว)
+ *      และ/หรือพึ่ง cache interception ของ OpenNext (ปิดไว้ตาม INC-0106 · แคชหน้าย้ายไป static assets แล้ว INC-0287)
  *      ต้นตอที่ทำให้ทุกหน้ากลายเป็น dynamic คือ `src/proxy.ts` ที่รันบนทุก page route
  */
 

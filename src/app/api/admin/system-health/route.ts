@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { SITE_DOMAIN, DEFAULT_EMAIL_FROM } from "@/lib/config/site";
 import { resolveAppOrigin } from "@/lib/security/app-origin";
 import { getAppDB } from "@/lib/platform/db";
-import { getAppKV } from "@/lib/platform/cf";
+import { APP_KV_BINDING, getAppKV, getAppKVSource } from "@/lib/platform/cf";
 
 export const runtime = "nodejs";
 
@@ -154,7 +154,12 @@ export async function GET(request: Request) {
     const startKv = Date.now();
     await kv.get("app:stat:all");
     kvLatencyMs = Date.now() - startKv;
-    kvPingOk = true;
+    // ตัวจำลองในหน่วยความจำตอบได้เสมอ — ถ้ารันบน Cloudflare แต่ไม่เจอ binding ต้องนับว่าล้ม
+    if (getAppKVSource() === "missing-binding") {
+      kvError = `ไม่พบ binding ${APP_KV_BINDING} ใน Worker — ระบบใช้ KV จำลองในหน่วยความจำ ข้อมูลไม่ถูกเก็บจริง`;
+    } else {
+      kvPingOk = true;
+    }
   } catch (err) {
     kvError = err instanceof Error ? err.message : "เข้าถึง KV ล้มเหลว";
   }

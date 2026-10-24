@@ -36,7 +36,7 @@ graph TD
 | Layer | เทคโนโลยี | วัตถุประสงค์และจุดเด่น |
 | :--- | :--- | :--- |
 | **Edge Compute** | **Cloudflare Workers (OpenNext v1.20)** | Zero-Cold-Start Serverless Edge Network ทั่วโลก |
-| **Database & Cache** | **Cloudflare D1 (`APP_DB`) + KV (`NEXT_INC_CACHE_KV`)** | Relational Database (users, journal, usage) และ Edge Key-Value Store |
+| **Database & Cache** | **Cloudflare D1 (`APP_DB`) + KV (`APP_KV`)** | Relational Database (users, journal, usage) และ Edge Key-Value Store (คีย์ `app:*`) |
 | **Storage & Vectors** | **Cloudflare R2 (`SHARE_BUCKET`) + Vectorize (`VECTORIZE`)** | R2 เก็บการ์ดภาพแชร์ 90 วัน + ค้นหาเชิงความหมาย 1024-dim |
 | **Framework** | **Astro 7 (SSG 305 หน้า + React 19 Islands) + Next.js 16.3 (App Router)** | Hybrid Static SSG ตอบตรงจาก Cloudflare Edge Assets + Dynamic Auth/Admin/SSE Worker |
 | **Language** | **TypeScript 7 (Strict Mode)** | ความปลอดภัยระดับ 0 Type Errors 100% |
@@ -215,7 +215,7 @@ docs/
 | **`TESTER_PASSWORD`** | รหัสผ่านปลดล็อกโหมดผู้ทดสอบไม่จำกัด (`/tester`) | 🟢 **สำหรับทดสอบระบบ** | Cloudflare Secret / `.env.local` | `src/app/api/tester/login` |
 | **`UNLIMITED_EMAILS`** | รายชื่ออีเมล Allowlist ที่ได้รับสิทธิ์ดูดวงไม่จำกัด | 🟢 **สำหรับทีมงาน** | Cloudflare Secret / `.env.local` | `src/lib/entitlement/entitlement.ts` |
 | **`APP_DB`** *(D1 Binding)* | Cloudflare D1 Relational DB สำหรับเก็บ users, journal, usage, bonus | 🔴 **จำเป็นบน Production** | `wrangler.jsonc` (`d1_databases`) | `src/lib/platform/db.ts` |
-| **`NEXT_INC_CACHE_KV`** *(KV Binding)* | Cloudflare KV สำหรับ OpenNext Edge Caching, Overrides, Session Backstop | 🔴 **จำเป็นบน Production** | `wrangler.jsonc` (`kv_namespaces`) | `src/lib/platform/cf.ts`<br>`src/lib/platform/kv-store.ts` |
+| **`APP_KV`** *(KV Binding)* | Cloudflare KV ข้อมูลแอป `app:*` — Overrides, Flags, Session Backstop (เดิมชื่อ `NEXT_INC_CACHE_KV` · แคชหน้า Next ย้ายไป static assets แล้ว) | 🔴 **จำเป็นบน Production** | `wrangler.jsonc` (`kv_namespaces`) | `src/lib/platform/cf.ts`<br>`src/lib/platform/kv-store.ts` |
 | **`AI`** *(Workers AI Binding)* | Cloudflare Workers AI สำหรับตัวคัดกรองความปลอดภัยฉุกเฉินชั้น 3 | 🟢 **ฟรี 10k neurons/วัน** | `wrangler.jsonc` (`ai`) | `src/lib/safety/ai-classifier.ts` |
 | **`VECTORIZE`** *(Binding)* | Cloudflare Vectorize Index (`card-meanings`) ค้นหาไพ่และความหมายเชิงความหมาย 1024d | 🟢 **ฟรี 30M queries/เดือน** | `wrangler.jsonc` (`vectorize`) | `src/lib/search/vectorize.ts` |
 | **`SHARE_BUCKET`** *(R2 Binding)* | Cloudflare R2 Bucket (`seertarot-share`) เก็บภาพการ์ดแชร์ที่สร้างจาก Canvas | 🟢 **ฟรี 10GB ไม่มี egress** | `wrangler.jsonc` (`r2_buckets`) | `src/app/api/share/card/route.ts` |

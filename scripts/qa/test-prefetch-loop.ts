@@ -99,6 +99,28 @@ async function run(): Promise<void> {
     );
   }
 
+  // ── กฎ 1c: KV ข้อมูลแอปผูกชื่อ APP_KV ตรงกันทั้ง wrangler.jsonc และโค้ด (2026-10-24) ──
+  // getAppKV() ถอยไปใช้ KV จำลองในหน่วยความจำเงียบ ๆ เมื่อหา binding ไม่เจอ — ชื่อไม่ตรงกัน
+  // จึงไม่ทำให้อะไรล้ม แต่ธง/โควตาผู้เยี่ยมชม/ตัวนับจะหายทุก isolate บน production
+  {
+    const wrangler = fs.readFileSync(path.join(process.cwd(), "wrangler.jsonc"), "utf-8");
+    const cfSrc = fs.readFileSync(path.join(process.cwd(), "src/lib/platform/cf.ts"), "utf-8");
+    const codeName = /export const APP_KV_BINDING = "([A-Z_]+)"/.exec(cfSrc)?.[1];
+    const kvBlock = /"kv_namespaces"\s*:\s*\[([\s\S]*?)\]/.exec(wrangler)?.[1] ?? "";
+    const bindings = [...kvBlock.matchAll(/"binding"\s*:\s*"([A-Za-z_]+)"/g)].map((m) => m[1]);
+    if (!codeName || bindings.length !== 1 || bindings[0] !== codeName) {
+      errors.push(
+        `ชื่อ KV binding ไม่ตรงกัน: wrangler.jsonc = ${JSON.stringify(bindings)} · src/lib/platform/cf.ts APP_KV_BINDING = ${codeName ?? "(ไม่พบ)"}\n` +
+          "    💡 ต้องมี KV binding เดียวชื่อเดียวกับ APP_KV_BINDING ไม่งั้นแอปใช้ KV จำลองโดยไม่มีใครรู้",
+      );
+    }
+    if (/NEXT_INC_CACHE_KV"/.test(wrangler) || /env\.NEXT_INC_CACHE_KV\b/.test(cfSrc)) {
+      errors.push(
+        "พบชื่อ binding เก่า `NEXT_INC_CACHE_KV` — ชื่อนี้พาเข้าใจผิดว่าเป็นแคชของ OpenNext (INC-0287) ใช้ `APP_KV`",
+      );
+    }
+  }
+
   // ── กฎ 2: ห้ามเขียน prefetch={true} ตรง ๆ ───────────────────────────────
   for (const file of tsxFiles) {
     const source = codeOnly(fs.readFileSync(file, "utf-8"));

@@ -73,13 +73,13 @@
     ]
   },
 
-  // ── OpenNext Edge Caching ────────────────────────────────────────────────────
-  // หน้า SSG ทั้งหมดถูก seed ลง KV ตอน `opennextjs-cloudflare deploy` (populateCache)
-  // แล้ว cache interception เสิร์ฟจาก KV ที่ edge โดยไม่ boot Next runtime
+  // ── KV ข้อมูลแอป (คีย์ `app:*` · ตัวนับ · ธง · โควตาผู้เยี่ยมชม · session backstop) ──────────
+  // namespace เดิมที่เคยผูกชื่อ `NEXT_INC_CACHE_KV` — เปลี่ยนชื่อ 2026-10-24 ข้อมูลไม่ย้าย (id เดิม)
+  // แคชหน้า Next ไม่อยู่ที่นี่แล้ว (static assets · INC-0287) — ชื่อ binding ต้องตรงกับ APP_KV_BINDING ใน src/lib/platform/cf.ts
   // ⚠️ id ต้องเป็นของจริงจาก `npx wrangler kv namespace list`
   "kv_namespaces": [
     {
-      "binding": "NEXT_INC_CACHE_KV",
+      "binding": "APP_KV",
       "id": "3b06e256c46948949fc17ac6641cafa3"
     }
   ],
@@ -114,7 +114,8 @@
 
   // ── R2 (ฟรี 10GB · ไม่มีค่า egress) ──────────────────────────────────────────
   // เก็บภาพการ์ดแชร์ที่ผู้ใช้สร้างเอง (client canvas) → OG image ให้ลิงก์แชร์
-  // bucket `seertarot-share` · ควรตั้ง lifecycle ลบอัตโนมัติ ~90 วัน (PDPA)
+  // bucket `seertarot-share` · การ์ดแชร์ลบเองเมื่อครบ 90 วัน (PDPA) — deploy.yml ตั้งกฎทุกรอบ (scripts/cf-r2-lifecycle.ts)
+  // ⚠️ โลโก้สตูดิโอแม่หมอ `studio-logo/` อยู่ bucket นี้ด้วยและต้องอยู่ถาวร — ห้ามตั้งกฎลบทั้ง bucket
   // schema: RawConfig.r2_buckets = [{ binding, bucket_name }] (ตรวจ config-schema.json — INC-0034)
   // ⚠️ wrangler validate bucket ผ่าน R2 API ตอน deploy → `CLOUDFLARE_API_TOKEN` ใน CI
   //    ต้องมี permission "Account · Workers R2 Storage · Edit" (เติมแล้ว 2026-09-03 · ดู INC hotfix #202)

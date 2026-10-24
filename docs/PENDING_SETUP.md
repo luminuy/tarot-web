@@ -42,7 +42,7 @@
 | **🔒 ระบบเข้ารหัสผ่าน (PBKDF2)** | ✅ **พร้อมใช้งาน** | `PASSWORD_PEPPER` ขนาด 32 ไบต์ ติดตั้งบน Worker เรียบร้อย สมัครและล็อกอินด้วยอีเมลได้สมบูรณ์ |
 | **🤖 เครื่องยนต์ AI (Gemini)** | ✅ **พร้อมใช้งาน** | `GEMINI_API_KEY` ติดตั้งแล้ว สตรีมคำทำนายจริง 3 องก์ และคุยต่อเนื่องในห้องแชทได้ 100% |
 | **🗄️ ฐานข้อมูล Cloudflare D1** | ✅ **พร้อมใช้งาน** | รัน Migration 0001–0006 บน Remote DB เรียบร้อย รองรับตาราง `users`, `reading_journal`, `reading_usage` |
-| **⚡ Cloudflare KV Edge Cache** | ✅ **พร้อมใช้งาน** | ผูก `NEXT_INC_CACHE_KV` (prefix `app:`) สำหรับ Stat Counters, Config Overrides และ Session Backstop |
+| **⚡ Cloudflare KV ข้อมูลแอป** | ✅ **พร้อมใช้งาน** | ผูก `APP_KV` (prefix `app:` · namespace เดิมของ `NEXT_INC_CACHE_KV`) สำหรับ Stat Counters, Config Overrides และ Session Backstop |
 | **🏛️ แผงควบคุมแอดมิน (`/admin`)** | ✅ **พร้อมใช้งาน** | รหัสผ่าน `ADMIN_PASSWORD` ติดตั้งแล้ว พร้อมแท็บใหม่ **"✦ สถานะระบบ (Cloud Health)"** ตรวจสัญญาณสดแบบ Real-time |
 
 ---
@@ -311,17 +311,17 @@ workflow `.github/workflows/setup-vapid.yml` สร้างคู่กุญ�
    - โควตาร่างต่อวันของผู้ถือบัตร (ไม่บังคับ · ค่าเริ่ม 300): `npx wrangler secret put STUDIO_PRO_DRAFTS_PER_DAY`
    ใช้ webhook Stripe เส้นเดิม (`/api/marketplace/payments/webhook`) — ไม่ต้องเพิ่ม event · คืนเงินเต็มในแดชบอร์ด = หักวันคืนอัตโนมัติ
 
-### ⏳ รอตั้งเพิ่ม — Vectorize / R2 (Wave 3)
+### ⏳ รอตั้งเพิ่ม — Vectorize (Wave 3) · R2 ตั้งอัตโนมัติแล้ว
 
 **Vectorize** (binding อยู่ใน `wrangler.jsonc` แล้ว — deploy รอบถัดไปทำงานเลย):
 - หลัง deploy → `/admin` → แท็บสุขภาพระบบ → การ์ด Cloudflare Free Stack → ปุ่ม **"สร้าง index ใหม่"** (รันครั้งเดียว)
 
-**R2** (bucket `seertarot-share` + binding พร้อม — deploy รอบถัดไปทำงานเลย):
-- ตั้ง lifecycle ลบภาพแชร์อัตโนมัติ ~90 วัน (PDPA):
-  ```
-  npx wrangler r2 bucket lifecycle add seertarot-share --prefix "" --expire-days 90
-  ```
-  (หรือ Dashboard → R2 → seertarot-share → Settings → Object lifecycle rules)
+**R2** (bucket `seertarot-share` + binding พร้อม):
+- ✅ กฎลบการ์ดแชร์อัตโนมัติ 90 วัน (PDPA) — **ไม่ต้องตั้งด้วยมือแล้ว** (2026-10-24)
+  `deploy.yml` รัน `npm run cf:r2-lifecycle` ทุกรอบ ตั้งกฎ 16 ข้อ `expire-share-0` … `expire-share-f` เฉพาะ key การ์ดแชร์
+  ⛔ **ห้ามใช้คำสั่งเดิม** `wrangler r2 bucket lifecycle add seertarot-share --prefix ""` — กฎทั้ง bucket ลบโลโก้สตูดิโอแม่หมอ (`studio-logo/`) ทิ้งด้วย
+  สคริปต์จะล้มถ้าเจอกฎที่ครอบ `studio-logo/` (ตรวจที่ Dashboard → R2 → seertarot-share → Settings → Object lifecycle rules)
+- ✅ bucket `seertarot-d1-backups` (ไฟล์สำรองฐาน D1) — สร้างและตั้งกฎลบ 35 วันโดย `d1-backup.yml` เอง ห้ามเปิดลิงก์สาธารณะ
 
 ---
 

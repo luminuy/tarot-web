@@ -9,10 +9,13 @@
  *    มันสตาร์ท workerd ซึ่งพังบน macOS < 13.5 (ISSUE-004) และจะทำให้ `npm run dev` ใช้ไม่ได้ทั้งหมด
  *    การตรวจ path KV จริงให้ทำหลัง deploy ด้วย curl บน production (แนวเดียวกับ INC-0010/0016)
  *
- * หมายเหตุ: reuse KV namespace `NEXT_INC_CACHE_KV` ที่ผูกไว้แล้วใน wrangler.jsonc
- * (ของ OpenNext incremental cache) โดยใช้ key prefix `app:` แยกโซนกันชัดเจน —
- * ไม่ต้อง provision namespace ใหม่ ไม่ต้องแตะ wrangler.jsonc (กัน INC-0034)
+ * KV ข้อมูลแอปผูกชื่อ `APP_KV` (namespace เดิมที่เคยชื่อ `NEXT_INC_CACHE_KV`) · คีย์ทุกตัวขึ้นต้น `app:`
+ * เปลี่ยนชื่อ 2026-10-24 เพราะชื่อเดิมพาเข้าใจผิดว่าเป็นแคชของ OpenNext — แคชหน้า Next ย้ายไป static assets แล้ว (INC-0287)
+ * แต่ข้อมูลแอปยังอยู่ใต้ชื่อแคช คีย์ขยะ 14 GB จึงซ่อนอยู่ในที่ที่ดูเหมือนปกติ
  */
+
+/** ชื่อ binding ของ KV ข้อมูลแอปใน wrangler.jsonc — ด่าน test-prefetch-loop กฎ 1c เทียบสองไฟล์ให้ตรงกัน */
+export const APP_KV_BINDING = "APP_KV";
 
 /** ส่วนของ KVNamespace API ที่แอปนี้ใช้จริง (structural — ไม่ต้องพึ่ง @cloudflare/workers-types) */
 export interface AppKV {
@@ -93,19 +96,34 @@ export async function safelyGetCloudflareContext() {
 let cachedKV: AppKV | null = null;
 
 /**
+ * KV ที่ getAppKV() ได้มา — binding จริง · ตัวจำลองตอน dev/test · หรือรันบน Cloudflare แต่ไม่เจอ binding
+ * กรณีหลังคือตั้งค่าผิด: แอปยังทำงานต่อด้วยตัวจำลองในหน่วยความจำ (ข้อมูลหายทุก isolate) จึงต้องโผล่ในหน้าสุขภาพระบบ
+ */
+export type AppKVSource = "binding" | "dev-shim" | "missing-binding";
+let kvSource: AppKVSource | null = null;
+
+/** แหล่งของ KV ที่ใช้อยู่ (null = ยังไม่เคยเรียก getAppKV) */
+export function getAppKVSource(): AppKVSource | null {
+  return kvSource;
+}
+
+/**
  * คืน KV store สำหรับข้อมูลแอป (config overrides / stat counters / feature flags)
  * เรียกได้จาก route handler หรือ server util — ปลอดภัยทั้ง edge และ dev
  */
 export async function getAppKV(): Promise<AppKV> {
   if (cachedKV) return cachedKV;
 
+  let onCloudflare = false;
   try {
     const ctx = await safelyGetCloudflareContext();
     if (ctx) {
+      onCloudflare = true;
       const env = ctx.env as Record<string, unknown>;
-      const binding = env.NEXT_INC_CACHE_KV;
+      const binding = env[APP_KV_BINDING];
       if (binding && typeof (binding as AppKV).get === "function") {
         cachedKV = binding as AppKV;
+        kvSource = "binding";
         return cachedKV;
       }
     }
@@ -113,6 +131,10 @@ export async function getAppKV(): Promise<AppKV> {
     // ไม่มี Cloudflare context (เช่น `next dev`) — ตกไปใช้ shim
   }
 
+  kvSource = onCloudflare ? "missing-binding" : "dev-shim";
+  if (onCloudflare) {
+    console.error(`[Platform KV] ไม่พบ binding ${APP_KV_BINDING} — ใช้ KV จำลองในหน่วยความจำแทน (ข้อมูลไม่ถูกเก็บจริง)`);
+  }
   cachedKV = createMemoryKV();
   return cachedKV;
 }

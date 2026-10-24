@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0304 · 2026-10-25 02:14 · 🟡 Medium · กฎลบการ์ดแชร์ 90 วันตั้งเองทุก deploy ไม่ครอบโลโก้แม่หมอ + สำรอง D1 รายสัปดาห์ + KV binding ชื่อ APP_KV
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | กฎลบการ์ดแชร์ 90 วันของ R2 seertarot-share ถูกบันทึกขัดกันสองที่ (PENDING_SETUP ว่ายังไม่ตั้ง · CLOUDFLARE_FREE_STACK ว่าตั้ง auto-delete-90d ใน dashboard แล้ว) และทั้งสองแบบลบทั้ง bucket ซึ่งตอนนี้มีโลโก้สตูดิโอแม่หมอ studio-logo/ อยู่ด้วย · ฐาน D1 ไม่มีไฟล์สำรองนอกฐาน |
+| **สาเหตุราก** | กฎ lifecycle ตั้งด้วยมือใน dashboard ตอน bucket มีแต่การ์ดแชร์ ไม่มีโค้ดดูแลหรือตรวจซ้ำ เมื่อ Reader Studio เริ่มเก็บโลโก้ใน bucket เดียวกันจึงไม่มีอะไรเตือนว่ากฎเดิมครอบของที่ต้องเก็บถาวร และ R2 กรองได้แค่ prefix |
+| **การแก้ไข** | scripts/cf-r2-lifecycle.ts ตั้งกฎ 16 ข้อตาม prefix 0-9 a-f ของ id การ์ดแชร์ทุก deploy แทน auto-delete-90d ในการเขียนเดียว และล้มถ้าเจอกฎอื่นครอบ studio-logo/ · d1-backup.yml + scripts/cf-d1-backup.ts สำรอง D1 ลง bucket ส่วนตัวพร้อมพิสูจน์ว่ากู้ได้ · KV binding เปลี่ยนชื่อเป็น APP_KV และหน้าสุขภาพระบบแจ้งเมื่อหา binding ไม่เจอ |
+| **🛡️ กฎป้องกันถาวร** | **กฎ lifecycle ทุกข้อของ R2 อยู่ในโค้ดที่ deploy.yml รันซ้ำทุกรอบ ห้ามตั้งด้วยมือ · test-ci-supply-chain 4c บังคับ MUST_KEEP studio-logo/ และขั้นใน deploy.yml · 4b บังคับ workflow สำรองมีอยู่ ไม่แนบ artifact เปิด issue เมื่อล้ม · test-prefetch-loop 1c เทียบชื่อ KV binding กับโค้ด** |
+| **การพิสูจน์ว่าแก้ได้จริง** | ทดสอบตัวช่วย R2 กับ API จำลอง (กฎเดิมไม่หาย รันซ้ำไม่เขียน แทน auto-delete-90d ได้ บล็อกกฎที่ครอบ studio-logo/) · cf:d1-backup --local --dry-run กับ D1 ในเครื่องของ wrangler ได้ 39 ตาราง integrity ok · ด่าน 1c ล้มจริงเมื่อแกล้งเปลี่ยนชื่อ binding · repo:verify 94/94 |
+| **บันทึกโดย** | claude-storage · branch `claude/storage-hardening-d1-backup` · commit `8228d3c` |
+
+
 ### INC-0303 · 2026-10-25 02:10 · 🟡 Medium · ฐานข้อมูลในเครื่องสร้างจาก migrations/ แทนสคีมาที่เขียนซ้ำด้วยมือ
 
 | หัวข้อ | รายละเอียด |

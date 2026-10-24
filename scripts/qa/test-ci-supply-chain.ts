@@ -265,6 +265,41 @@ if (!fs.existsSync(guide)) {
     "คู่มือเตือนว่า migration ของ D1 ไม่ย้อนตามการถอยกลับ",
     /migration/i.test(guideSrc) && /ไม่.{0,4}ย้อน/.test(guideSrc),
   );
+  check(
+    "คู่มือ deploy มีขั้นตอนกู้คืน D1 จากไฟล์สำรอง",
+    /สำรองและกู้คืน D1/.test(guideSrc) && /seertarot-d1-backups/.test(guideSrc),
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 4b. สำรองฐาน D1 นอกฐาน (ตรวจ 2026-10-24) — สำรองที่ไม่รันหรือรั่วออกนอก bucket ส่วนตัว = ไม่มีสำรอง
+// ─────────────────────────────────────────────────────────────────────────────
+const backupWf = workflows.find((wf) => wf.name === "d1-backup.yml");
+check("มี workflow สำรองฐาน `.github/workflows/d1-backup.yml`", !!backupWf);
+if (backupWf) {
+  check(
+    "d1-backup.yml รันตามเวลาและกดเองได้ (`schedule` + `workflow_dispatch`)",
+    /schedule:\s*\n\s*- cron:/.test(backupWf.src) && /workflow_dispatch:/.test(backupWf.src),
+  );
+  check("d1-backup.yml เรียกสคริปต์สำรอง `npm run cf:d1-backup`", /npm run cf:d1-backup/.test(backupWf.src));
+  check(
+    "d1-backup.yml ไม่แนบไฟล์สำรองเป็น artifact (มีข้อมูลส่วนบุคคล)",
+    !/actions\/upload-artifact/.test(backupWf.src),
+    "   ➔ artifact ของ GitHub ดาวน์โหลดได้ทุกคนที่อ่าน Actions ของรีโป — ไฟล์สำรองอยู่ใน R2 ส่วนตัวเท่านั้น",
+  );
+  check("d1-backup.yml เปิด issue เมื่อสำรองล้ม (ไม่ล้มเงียบ)", /if: always\(\)/.test(backupWf.src) && /gh issue create/.test(backupWf.src));
+}
+
+// 4c. กฎลบการ์ดแชร์ 90 วันใน R2 (PDPA) — ตั้งซ้ำทุก deploy และห้ามครอบโลโก้สตูดิโอแม่หมอใน bucket เดียวกัน
+{
+  const deployWf = workflows.find((wf) => wf.name === "deploy.yml");
+  check("deploy.yml ตั้งกฎลบการ์ดแชร์ทุกรอบ (`npm run cf:r2-lifecycle`)", /npm run cf:r2-lifecycle/.test(deployWf?.src ?? ""));
+  const lc = fs.readFileSync(path.join(ROOT, "scripts/cf-r2-lifecycle.ts"), "utf-8");
+  check(
+    "กฎลบการ์ดแชร์ตั้งราย prefix ฐานสิบหก และกันไม่ให้ครอบ `studio-logo/`",
+    /SHARE_ID_FIRST_CHARS = "0123456789abcdef"/.test(lc) && /MUST_KEEP = \["studio-logo\/"\]/.test(lc),
+    "   ➔ กฎทั้ง bucket (prefix ว่าง) ลบโลโก้สตูดิโอแม่หมอทิ้งใน 90 วัน",
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -23,7 +23,7 @@
  *
  * ต้องมี env: CLOUDFLARE_API_TOKEN (สิทธิ์ Workers KV Storage · Edit — ชุดเดียวกับที่ deploy ใช้อยู่)
  *             CLOUDFLARE_ACCOUNT_ID
- * namespace id อ่านจาก `wrangler.jsonc` (binding `NEXT_INC_CACHE_KV`) หรือ override ด้วย CF_KV_NAMESPACE_ID
+ * namespace id อ่านจาก `wrangler.jsonc` (binding `APP_KV` — namespace เดียวกับที่ OpenNext เคยใช้) หรือ override ด้วย CF_KV_NAMESPACE_ID
  */
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -31,7 +31,7 @@ import path from "node:path";
 const API_BASE = "https://api.cloudflare.com/client/v4";
 /** prefix ค่าเริ่มต้นของ OpenNext (`DEFAULT_PREFIX` ใน overrides/internal) — โปรเจกต์นี้ไม่เคยตั้ง NEXT_INC_CACHE_KV_PREFIX */
 const PREFIX = "incremental-cache/";
-const BINDING = "NEXT_INC_CACHE_KV";
+const BINDING = "APP_KV";
 /** เพดาน bulk delete ของ Cloudflare ต่อคำขอ */
 const DELETE_BATCH = 10_000;
 
