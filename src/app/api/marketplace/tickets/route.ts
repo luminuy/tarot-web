@@ -258,9 +258,9 @@ export async function POST(request: Request) {
       if (state !== "confirmed") {
         console.error("[API Tickets POST] ยืนยันการจองฟรีไม่สำเร็จ", { ticketId: ticket.id, state });
         await releaseHold(ticket.id, "cancelled", "system");
-        return NextResponse.json({ error: "ยืนยันการจองไม่สำเร็จ กรุณาลองใหม่อีกครั้ง" }, { status: 409 });
+        return apiFail("ยืนยันการจองไม่สำเร็จ กรุณาลองใหม่อีกครั้ง", 409, "free_confirm_failed");
       }
-      const free = NextResponse.json({ success: true, ticket: toPublicTicket(ticket), redirectUrl, free: true });
+      const free = apiOk({ ticket: toPublicTicket(ticket), redirectUrl, free: true });
       return await attachCustomerRefCookie(free, customerRef);
     }
 
