@@ -12,6 +12,12 @@ import { bangkokDayStartMs, bangkokParts } from "@/lib/time/bangkok";
 export const CONSULTATION_PRICE_SATANG = CONSULTATION_PRICE_THB * 100;
 
 export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
+
+/**
+ * `payments.provider` ของการจองแม่หมอฟรี (บัญชีที่ได้สิทธิ์ · `free-consult.ts`) — ยอด 0 ไม่ผ่านเกตเวย์
+ * คืนเงินไม่ต้องเรียก Stripe · ไม่นับเป็นยอดขายหรือผู้จ่ายเงินในแดชบอร์ด
+ */
+export const COMP_PROVIDER = "comp";
 export type PayoutStatus = "pending" | "completed" | "cancelled";
 
 export interface PaymentRecord {

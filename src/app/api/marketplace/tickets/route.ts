@@ -11,6 +11,7 @@ import {
 import { checkSlotBookable, expireLapsedHold, holdBooking, releaseHold } from "@/lib/marketplace/booking.repo";
 import { HOLD_MINUTES, MAX_ACTIVE_PER_CUSTOMER } from "@/lib/marketplace/booking-policy";
 import { openConsultationCheckout } from "@/lib/marketplace/consultation-checkout";
+import { confirmComplimentaryConsultation, hasFreeConsult } from "@/lib/marketplace/free-consult";
 import { isStripeTestModeOnProduction, PAYMENTS_NOT_OPEN_MESSAGE } from "@/lib/marketplace/payment-gateway";
 import { isPrivilegedTestRequest } from "@/lib/security/privileged";
 import { getSessionUser } from "@/lib/auth/session";
@@ -73,6 +74,7 @@ export async function GET(request: Request) {
  * ➔ กันที่ (unique index ตัดสิน) ➔ หน้าจ่ายเงิน Stripe
  *
  * ตั๋วเกิดในสถานะ `pending_payment` — แม่หมอเห็นตั๋วก็ต่อเมื่อเงินเข้าแล้วเท่านั้น
+ * บัญชีที่ได้สิทธิ์ปรึกษาฟรี (`free-consult.ts`) ยืนยันทันทีด้วยรายการยอด 0 แทนหน้าจ่ายเงิน
  * คำถามที่ AI บล็อก (สัญญาณทำร้ายตัวเอง) ไม่ถูกเก็บเงิน และหน้าคิวแสดงสายด่วน 1323
  */
 export async function POST(request: Request) {
@@ -130,6 +132,8 @@ export async function POST(request: Request) {
 
     // ล็อกอินอยู่ = ผูกตั๋วกับบัญชี (เห็น "นัดของฉัน" ทุกเครื่อง) · ไม่ล็อกอินก็จองได้ตามปกติ
     const user = await getSessionUser().catch(() => null);
+    // บัญชีที่ได้สิทธิ์ปรึกษาฟรี (free-consult.ts) ➔ ข้ามหน้าจ่ายเงิน · ด่านอื่น (โควตา · AI คัดกรอง · กันที่) ยังตรวจครบ
+    const freeConsult = await hasFreeConsult(user);
 
     const now = Date.now();
     // ✦ ลิงก์ห้องส่วนตัว — ตัดสินก่อนด่านแพง (AI คัดกรอง · หน้าจ่ายเงิน): ลิงก์ยังใช้ได้ไหม มีคนอื่นกำลังจ่ายไหม
@@ -176,7 +180,7 @@ export async function POST(request: Request) {
     }
 
     // คีย์ทดสอบบนเว็บจริง = เปิดให้เฉพาะผู้ทดสอบ (บัตร 4242 ห้ามได้คิวแม่หมอฟรี)
-    if (isStripeTestModeOnProduction() && !(await isPrivilegedTestRequest(request))) {
+    if (!freeConsult && isStripeTestModeOnProduction() && !(await isPrivilegedTestRequest(request))) {
       return NextResponse.json({ error: PAYMENTS_NOT_OPEN_MESSAGE }, { status: 503 });
     }
 
@@ -241,6 +245,23 @@ export async function POST(request: Request) {
     if (invite && !(await attachInviteTicket(invite.id, invite.ticketId, ticket.id))) {
       await releaseHold(ticket.id, "cancelled", "system");
       return apiFail("มีคนกำลังชำระเงินผ่านลิงก์นี้อยู่ ถ้าไม่ใช่คุณ ทักแม่หมอขอลิงก์ใหม่ได้เลย", 409, "invite_busy");
+    }
+
+    // ✦ ปรึกษาฟรี ➔ ยืนยันผ่านจุดเดียวกับเงินจริงทันที แล้วพาไปหน้าคิว/นัด (ไม่มีหน้าจ่ายเงิน)
+    if (freeConsult && user?.email) {
+      const state = await confirmComplimentaryConsultation({
+        ticketId: ticket.id,
+        bookingId: hold.booking.id,
+        userId: user.id,
+        email: user.email,
+      });
+      if (state !== "confirmed") {
+        console.error("[API Tickets POST] ยืนยันการจองฟรีไม่สำเร็จ", { ticketId: ticket.id, state });
+        await releaseHold(ticket.id, "cancelled", "system");
+        return apiFail("ยืนยันการจองไม่สำเร็จ กรุณาลองใหม่อีกครั้ง", 409, "free_confirm_failed");
+      }
+      const free = apiOk({ ticket: toPublicTicket(ticket), redirectUrl, free: true });
+      return await attachCustomerRefCookie(free, customerRef);
     }
 
     let checkoutUrl: string;

@@ -39,6 +39,11 @@ interface BookingFlowProps {
    * (เซิร์ฟเวอร์ตรวจรหัสลิงก์เองทุกครั้ง — ค่านี้แค่บอกหน้าจอว่าต้องส่งรหัสไปด้วย)
    */
   invite?: { code: string; customerLabel: string | null };
+  /**
+   * บัญชีที่ล็อกอินอยู่ได้สิทธิ์ปรึกษาฟรี (`free-consult.ts`) — แค่เปลี่ยนข้อความปุ่ม/ยอด
+   * เซิร์ฟเวอร์ตัดสินเองอีกครั้งตอนจอง (`POST /api/marketplace/tickets`) ค่านี้ปลอมแล้วก็ไม่ได้ฟรี
+   */
+  free?: boolean;
 }
 
 const QUESTION_MAX = 1000;
@@ -79,7 +84,7 @@ function initialStepOf(p: BookingFlowProps, mode: ConsultMode): Step {
  * - ราคา/ความถูกต้องของเวลา เซิร์ฟเวอร์ตัดสินเอง (`POST /api/marketplace/tickets`) — หน้านี้แค่ส่งสิ่งที่ลูกค้าเลือก
  */
 export function BookingFlow(props: BookingFlowProps) {
-  const { reader, priceThb, isLiveOpen, hasSchedule, initialSlot, invite } = props;
+  const { reader, priceThb, isLiveOpen, hasSchedule, initialSlot, invite, free = false } = props;
   const bothModes = isLiveOpen && hasSchedule && !invite;
 
   const [mode, setMode] = useState<ConsultMode>(() => initialModeOf(props));
@@ -620,8 +625,14 @@ export function BookingFlow(props: BookingFlowProps) {
               </button>
             ) : (
               <span className="shrink-0 text-right leading-none">
-                <span className="text-xl font-bold text-ink-deep">{priceThb}</span>
-                <span className="ml-1 text-sm font-semibold text-ink-deep">บาท</span>
+                {free ? (
+                  <span className="text-base font-bold text-ink-deep">ฟรี</span>
+                ) : (
+                  <>
+                    <span className="text-xl font-bold text-ink-deep">{priceThb}</span>
+                    <span className="ml-1 text-sm font-semibold text-ink-deep">บาท</span>
+                  </>
+                )}
               </span>
             )}
           </div>
@@ -636,10 +647,18 @@ export function BookingFlow(props: BookingFlowProps) {
         ) : (
           <div className="space-y-2">
             <div className="flex items-baseline justify-between gap-3">
-              <span className="text-[13px] text-muted">ยอดชำระ · ตัวต่อตัว {CONSULTATION_MINUTES} นาที</span>
+              <span className="text-[13px] text-muted">
+                {free ? "บัญชีนี้ปรึกษาฟรี" : "ยอดชำระ"} · ตัวต่อตัว {CONSULTATION_MINUTES} นาที
+              </span>
               <span className="leading-none">
-                <span className="text-xl font-bold text-ink-deep">{priceThb}</span>
-                <span className="ml-1 text-sm font-semibold text-ink-deep">บาท</span>
+                {free ? (
+                  <span className="text-xl font-bold text-ink-deep">ฟรี</span>
+                ) : (
+                  <>
+                    <span className="text-xl font-bold text-ink-deep">{priceThb}</span>
+                    <span className="ml-1 text-sm font-semibold text-ink-deep">บาท</span>
+                  </>
+                )}
               </span>
             </div>
             <button
@@ -648,11 +667,17 @@ export function BookingFlow(props: BookingFlowProps) {
               aria-disabled={submitting}
               className="btn-gold-glass flex min-h-[52px] w-full items-center justify-center gap-2 px-6 text-base font-bold cursor-pointer aria-disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2"
             >
-              <LockIcon />
-              {submitting ? "กำลังไปหน้าชำระเงิน…" : `ชำระเงิน ${priceThb} บาท`}
+              {free ? (
+                submitting ? "กำลังยืนยันการจอง…" : "ยืนยันการจอง (ฟรี)"
+              ) : (
+                <>
+                  <LockIcon />
+                  {submitting ? "กำลังไปหน้าชำระเงิน…" : `ชำระเงิน ${priceThb} บาท`}
+                </>
+              )}
             </button>
             <p className="text-center text-[12px] leading-relaxed text-muted">
-              ชำระผ่าน Stripe อย่างปลอดภัย · บัตรหรือพร้อมเพย์
+              {free ? "บัญชีนี้ได้สิทธิ์ปรึกษาแม่หมอฟรี ไม่ต้องชำระเงิน" : "ชำระผ่าน Stripe อย่างปลอดภัย · บัตรหรือพร้อมเพย์"}
             </p>
           </div>
         )}

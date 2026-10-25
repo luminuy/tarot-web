@@ -632,6 +632,9 @@ async function runTest() {
   // ── ✦ ลิงก์ห้องส่วนตัว (คลื่น 7 · migrations/0032) ───────────────────────────────
   await testPrivateRoom(created.id);
 
+  // ── ✦ บัญชีที่ปรึกษาแม่หมอได้ฟรี (เจ้าของสั่ง 2026-10-25) ─────────────────────────
+  await testFreeConsult(created.id);
+
   // Cleanup test reader
   {
     const { getAppDB } = await import("../../src/lib/platform/db");
@@ -1929,6 +1932,96 @@ async function testConsultFlowUx(readerId: string, sessionSecret: string) {
  * สัญญาที่ห้ามหลุด: ข้ามสวิตช์คิวสดได้เฉพาะลิงก์ที่ใช้ได้จริง · ลิงก์เดียวลูกค้าคนเดียว · จ่ายก่อนเสมอ
  * · ยกเลิกระหว่างมีคนจ่ายต้องปล่อยที่ · แผงแม่หมอไม่เห็นตัวตนลูกค้า (A2-13)
  */
+/**
+ * ✦ บัญชีที่ปรึกษาแม่หมอได้ฟรี (free-consult.ts · เจ้าของสั่ง 2026-10-25 "ดูแม่หมอจริงไม่จ่ายตังค์")
+ * ยืนยันผ่านจุดเดียวกับเงินจริง (ได้คิว · แม่หมอเรียกได้) · ยอด 0 · ยกเลิกแล้วไม่ยิงเกตเวย์ · ต้องยืนยันอีเมลแล้ว
+ */
+async function testFreeConsult(readerId: string) {
+  const fc = await import("../../src/lib/marketplace/free-consult");
+  const repo = await import("../../src/lib/marketplace/booking.repo");
+  const policy = await import("../../src/lib/marketplace/booking-policy");
+  const { getPaymentById } = await import("../../src/lib/marketplace/payments.repo");
+  const { createQueueTicket, getQueueTicketById } = await import("../../src/lib/marketplace/queue.repo");
+  const { getAppDB } = await import("../../src/lib/platform/db");
+  const fsMod = await import("node:fs");
+  const db = await getAppDB();
+  const HOUR = 3_600_000;
+
+  // 20.1 รายชื่อ: ตรงตัว/ตัวพิมพ์ใหญ่ได้ · อีเมลอื่นไม่ได้
+  if (!fc.isFreeConsultEmail("seerada.tarot@gmail.com") || !fc.isFreeConsultEmail(" Seerada.Tarot@Gmail.com ")) {
+    throw new Error("❌ 20.1 อีเมลที่ได้สิทธิ์ปรึกษาฟรีต้องผ่าน (ไม่สนตัวพิมพ์/ช่องว่าง)");
+  }
+  if (fc.isFreeConsultEmail("someone@example.com") || fc.isFreeConsultEmail(null)) {
+    throw new Error("❌ 20.1 อีเมลอื่นต้องไม่ได้สิทธิ์ปรึกษาฟรี");
+  }
+
+  // 20.2 ต้องยืนยันอีเมลแล้วตามฐานข้อมูล — สมัครด้วยอีเมลนี้แต่ยังไม่ยืนยันไม่ได้สิทธิ์
+  const stamp = Date.now();
+  const verifiedId = `email_freeconsult_ok_${stamp}`;
+  const unverifiedId = `email_freeconsult_no_${stamp}`;
+  for (const [id, verified] of [[verifiedId, 1], [unverifiedId, 0]] as const) {
+    await db
+      .prepare(
+        `INSERT INTO users (id, provider, email, email_lower, name, locale, marketing_consent, email_verified, token_version, created_at, last_seen_at)
+         VALUES (?, 'email', 'seerada.tarot@gmail.com', NULL, 'ทดสอบ', 'th', 0, ?, 0, ?, ?)`,
+      )
+      .bind(id, verified, stamp, stamp)
+      .run();
+  }
+  const okUser = { id: verifiedId, email: "seerada.tarot@gmail.com" };
+  if (!(await fc.hasFreeConsult(okUser)) || (await fc.hasFreeConsult({ id: unverifiedId, email: okUser.email }))) {
+    throw new Error("❌ 20.2 สิทธิ์ปรึกษาฟรีต้องได้เฉพาะบัญชีที่ยืนยันอีเมลแล้ว");
+  }
+  if (await fc.hasFreeConsult(null)) throw new Error("❌ 20.2 ไม่ล็อกอินต้องไม่ได้สิทธิ์ปรึกษาฟรี");
+
+  // 20.3 ยืนยันการจองฟรี ➔ ได้นัด/เข้าคิวเหมือนจ่ายแล้ว · แถว payments ยอด 0 provider comp
+  const slotStart = policy.bkkDayStart(Date.now()) + 9 * 86_400_000 + 3 * HOUR; // อีก 9 วัน (เวลาไทย 10:00)
+  const t = await createQueueTicket({
+    userId: verifiedId, readerId, kind: "booking", customerRef: `cust_free_${stamp}`, nickname: "ฟรี",
+    question: "อยากรู้เรื่องงานช่วงนี้", slotStart, initialStatus: "pending_payment",
+  });
+  const h = await repo.holdBooking({ ticketId: t.id, readerId, kind: "scheduled", slotStart, contactEmail: okUser.email });
+  if (!h.ok) throw new Error("❌ 20.3 กันที่ไม่ได้");
+  const state = await fc.confirmComplimentaryConsultation({ ticketId: t.id, bookingId: h.booking.id, userId: verifiedId, email: okUser.email });
+  const ticket = await getQueueTicketById(t.id);
+  const booking = await repo.getBookingByTicketId(t.id);
+  const payments = await repo.listPaymentsForTicket(t.id);
+  if (state !== "confirmed" || ticket?.status !== "waiting" || !repo.isPaidBooking(booking)) {
+    throw new Error(`❌ 20.3 จองฟรีต้องได้นัดทันที (state=${state} ticket=${ticket?.status} booking=${booking?.status})`);
+  }
+  if (payments.length !== 1 || payments[0].provider !== "comp" || payments[0].amountSatang !== 0 || payments[0].status !== "paid") {
+    throw new Error(`❌ 20.3 แถว payments ของการจองฟรีต้องเป็น comp ยอด 0 (${JSON.stringify(payments)})`);
+  }
+
+  // 20.4 ยกเลิกก่อน 24 ชม. ➔ "คืนเงิน" สำเร็จโดยไม่ยิงเกตเวย์ (มีคีย์ Stripe อยู่ ถ้ายิงจริงจะได้ failed)
+  const prevKey = process.env.STRIPE_SECRET_KEY;
+  process.env.STRIPE_SECRET_KEY = "sk_test_free_consult_gate";
+  try {
+    const c = await repo.cancelConsultation(ticket!, "customer");
+    if (!c.ok || c.refundStatus !== "refunded" || (await getPaymentById(payments[0].id))?.status !== "refunded") {
+      throw new Error(`❌ 20.4 ยกเลิกการจองฟรีต้องปิดได้โดยไม่เรียก Stripe (${JSON.stringify(c)})`);
+    }
+  } finally {
+    if (prevKey === undefined) delete process.env.STRIPE_SECRET_KEY;
+    else process.env.STRIPE_SECRET_KEY = prevKey;
+  }
+
+  // 20.5 เส้นจอง: ตัดสินสิทธิ์ฝั่งเซิร์ฟเวอร์ก่อนเปิดหน้าจ่ายเงิน · การจองฟรีไม่นับเป็นยอดขาย/ผู้จ่ายเงิน
+  const route = fsMod.readFileSync("src/app/api/marketplace/tickets/route.ts", "utf-8");
+  const freeAt = route.indexOf("confirmComplimentaryConsultation(");
+  const checkoutAt = route.indexOf("openConsultationCheckout({");
+  if (!route.includes("await hasFreeConsult(user)") || freeAt < 0 || checkoutAt < 0 || freeAt > checkoutAt) {
+    throw new Error("❌ 20.5 POST /api/marketplace/tickets ต้องตัดสินสิทธิ์ปรึกษาฟรีฝั่งเซิร์ฟเวอร์ก่อนเปิดหน้าจ่ายเงิน");
+  }
+  const exec = fsMod.readFileSync("src/lib/admin/executive-data.ts", "utf-8");
+  if (!exec.includes("provider NOT IN ('simulator', 'comp')") || !exec.includes("AND provider != 'comp'")) {
+    throw new Error("❌ 20.5 แดชบอร์ดผู้บริหารต้องไม่นับการจองฟรีเป็นยอดขายหรือผู้จ่ายเงิน");
+  }
+
+  await db.prepare("DELETE FROM users WHERE id IN (?, ?)").bind(verifiedId, unverifiedId).run();
+  console.log("  ✓ 20. ปรึกษาฟรี: เฉพาะอีเมลในรายชื่อที่ยืนยันแล้ว · ได้นัดทันที (comp ยอด 0) · ยกเลิกไม่ยิง Stripe · ไม่นับยอดขาย");
+}
+
 async function testPrivateRoom(readerId: string) {
   const fs = await import("node:fs");
   const path = await import("node:path");

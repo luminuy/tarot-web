@@ -24,7 +24,7 @@ function safeEqual(a: string, b: string): boolean {
  *    ใครก็สมัครด้วยอีเมลหุ้นส่วนที่ยังไม่เคยสมัคร (หรือเคยลบบัญชีไป) แล้วได้สิทธิ์ข้ามเพดาน
  *    ค่า AI รายวันทันที = เผาโควตา Groq/Gemini ของเว็บได้ไม่จำกัด
  */
-async function ownsVerifiedEmail(userId: string, email: string): Promise<boolean> {
+export async function ownsVerifiedEmail(userId: string, email: string): Promise<boolean> {
   try {
     const [{ getCachedUser }, { getUserById, normalizeEmail }] = await Promise.all([
       import("@/lib/auth/user-cache"),

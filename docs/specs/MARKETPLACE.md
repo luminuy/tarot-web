@@ -100,6 +100,7 @@ npx wrangler d1 create tarot-app-db
 | คุยลูกค้า↔แม่หมอ | ~~ส่งต่อไป LINE/ภายนอกอย่างเดียว~~ ➔ **วิดีโอคอลตัวต่อตัวในเว็บ** + LINE เป็นทางสำรอง (เคาะ 2026-10-02 · ดูหัวข้อ "วิดีโอคอลตัวต่อตัว" ด้านล่าง) |
 | Payment | **milestone แยกท้ายสุด (M7)** ต้องมี แต่ทำหลังสุด |
 | Storage | D1 (relational) + reuse KV (config/counter) — แยกตามความเหมาะสม |
+| ปรึกษาฟรี | บัญชีในรายชื่อ `FREE_CONSULT_EMAILS` (`src/lib/marketplace/free-consult.ts` · ตอนนี้ `seerada.tarot@gmail.com`) ที่ยืนยันอีเมลแล้ว จองแม่หมอได้โดยไม่ผ่านหน้าจ่ายเงิน — บันทึก `payments` ยอด 0 `provider = comp` · ไม่นับรายได้แม่หมอ/ยอดขาย · แยกจาก `UNLIMITED_EMAILS` (บัญชี VIP ข้ามแค่ค่า AI) · เพิ่ม/ถอดอีเมลต้องแก้โค้ดผ่าน PR (เคาะ 2026-10-25) |
 
 ---
 

@@ -164,7 +164,7 @@ export default function PaymentsPanel() {
                           เปิดใน Stripe
                         </a>
                       ) : (
-                        <span className="text-muted">{r.provider === "simulator" ? "ตัวจำลอง" : "—"}</span>
+                        <span className="text-muted">{r.provider === "simulator" ? "ตัวจำลอง" : r.provider === "comp" ? "จองฟรี (บัญชีที่ได้สิทธิ์)" : "—"}</span>
                       )}
                     </td>
                   </tr>

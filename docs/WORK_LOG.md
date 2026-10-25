@@ -38,6 +38,12 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-25 (รอบ 312): บัญชี seerada.tarot@gmail.com ปรึกษาแม่หมอคนจริงได้ฟรี (เจ้าของ "ดูแม่หมอจริงไม่จ่ายตังค์")
+- `src/lib/marketplace/free-consult.ts`: รายชื่อ `FREE_CONSULT_EMAILS` + `hasFreeConsult()` (ต้องยืนยันอีเมลแล้ว — ใช้ `ownsVerifiedEmail` ตัวเดียวกับบัญชี VIP) + `confirmComplimentaryConsultation()`
+- `POST /api/marketplace/tickets`: บัญชีที่ได้สิทธิ์ข้ามหน้าจ่ายเงิน — บันทึก `payments` ยอด 0 `provider = comp` แล้วยืนยันผ่าน `settleConsultationPayment` จุดเดียวกับเงินจริง (ได้คิว/นัด · อีเมลยืนยัน · แม่หมอเรียกคิวได้) · ด่านอื่น (โควตา · AI คัดกรอง · กันที่) ยังตรวจครบ
+- ยกเลิกการจองฟรีไม่ยิง Stripe (`refundPaymentRecord`) · แดชบอร์ดผู้บริหารไม่นับเป็นยอดขาย/ผู้จ่ายเงิน · แผงรายการเงินแสดง "จองฟรี (บัญชีที่ได้สิทธิ์)" · หน้าจอง/ห้องส่วนตัวขึ้นปุ่ม "ยืนยันการจอง (ฟรี)"
+- แยกจาก `UNLIMITED_EMAILS` โดยตั้งใจ (สิทธิ์ VIP = ค่า AI ของเว็บ · สิทธิ์นี้ = เวลาแม่หมอคนจริง) · ด่าน `test-marketplace-readers` ข้อ 20
+
 ### 🗓️ 2026-10-24 (รอบ 311): ปรับที่เก็บข้อมูล 4 ข้อ (เจ้าของ "ทำ 1-4 เลย และทำข้ออื่นให้เสร็จก่อนแล้วทำ 2 ต่อ")
 - ข้อ 1 สำรอง D1 รายสัปดาห์ลง R2 ส่วนตัว `seertarot-d1-backups` (`.github/workflows/d1-backup.yml` + `scripts/cf-d1-backup.ts`): export ➔ โหลดลอง + `integrity_check` ➔ gzip ➔ อัปโหลด ➔ ดาวน์โหลดกลับเทียบ SHA-256 · เก็บ 35 วัน · ล้มแล้วเปิด issue `[สำรองข้อมูลล้ม]` · ขั้นกู้คืนอยู่ในคู่มือ deploy หัวข้อ 8.5 · ทดสอบกับ D1 ในเครื่องของ wrangler ผ่าน (39 ตาราง) — รอบจริงกับ D1 บน Cloudflare รันหลัง merge
 - ข้อ 3 ฐานในเครื่อง (`src/lib/platform/db.ts`) สร้างจาก `migrations/` แทนสคีมาที่เขียนซ้ำด้วยมือ ~150 คำสั่ง — เทียบแล้วของเดิมหลุด 9 index · migration ล้ม = ด่านล้มดัง ๆ (เดิมกลืนเงียบ) · ฐานเก่าในเครื่องย้ายไป `.dev-marketplace.db.legacy-*` เอง · ด่าน `test-code-debt` ข้อ 14 กันเขียนสคีมาซ้ำกลับมา

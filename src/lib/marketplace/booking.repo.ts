@@ -28,7 +28,7 @@ import {
   sendBookingRescheduled,
 } from "@/lib/marketplace/booking-mail";
 import { getRoomAttendance } from "@/lib/marketplace/call.repo";
-import { getPaymentById, type PaymentRecord } from "@/lib/marketplace/payments.repo";
+import { COMP_PROVIDER, getPaymentById, type PaymentRecord } from "@/lib/marketplace/payments.repo";
 import { getQueueTicketById, ticketExpiresAt, type QueueTicket } from "@/lib/marketplace/queue.repo";
 
 /**
@@ -519,6 +519,14 @@ export async function expireLapsedHold(ticket: QueueTicket, nowMs = Date.now()):
 async function refundPaymentRecord(payment: PaymentRecord): Promise<boolean> {
   const db = await getAppDB();
   if (payment.status === "refunded") return true;
+  // การจองฟรี (ยอด 0 · ไม่ผ่านเกตเวย์) — ไม่มีเงินให้คืน ห้ามยิง Stripe (เลขรายการไม่ใช่ cs_ จะถูกนับว่าคืนไม่สำเร็จ)
+  if (payment.provider === COMP_PROVIDER) {
+    await db
+      .prepare("UPDATE payments SET status = 'refunded', refund_due = 0, updated_at = ? WHERE id = ? AND status = 'paid'")
+      .bind(Date.now(), payment.id)
+      .run();
+    return true;
+  }
   await db.prepare("UPDATE payments SET refund_due = 1, updated_at = ? WHERE id = ?").bind(Date.now(), payment.id).run();
   const result = await refundGatewayCharge(payment.providerRef ?? "", `refund_${payment.id}`);
   if (!result.ok) return false;
