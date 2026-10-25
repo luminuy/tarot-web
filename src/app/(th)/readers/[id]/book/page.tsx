@@ -6,6 +6,8 @@ import { getPublicReaderById } from "@/lib/marketplace/readers.repo";
 import { getReaderLiveAvailability } from "@/lib/marketplace/queue.repo";
 import { getNextAvailableSlot } from "@/lib/marketplace/booking.repo";
 import { readerPriceThb } from "@/lib/marketplace/offer";
+import { hasFreeConsult } from "@/lib/marketplace/free-consult";
+import { getSessionUser } from "@/lib/auth/session";
 import { noindexAlternates } from "@/lib/config/site";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -55,9 +57,12 @@ export default async function ReaderBookPage({ params, searchParams }: PageProps
   const rawSlot = Number(first(query.slot));
   const initialSlot = Number.isSafeInteger(rawSlot) && rawSlot > 0 ? rawSlot : null;
 
-  const [isLiveOpen, nextSlot] = await Promise.all([
+  const [isLiveOpen, nextSlot, free] = await Promise.all([
     getReaderLiveAvailability(id),
     getNextAvailableSlot(id, Date.now()),
+    getSessionUser()
+      .catch(() => null)
+      .then((user) => hasFreeConsult(user)),
   ]);
 
   return (
@@ -77,6 +82,7 @@ export default async function ReaderBookPage({ params, searchParams }: PageProps
             hasSchedule={nextSlot !== null}
             initialMode={initialMode}
             initialSlot={initialSlot}
+            free={free}
           />
         </div>
       </main>

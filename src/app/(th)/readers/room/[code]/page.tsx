@@ -11,6 +11,7 @@ import { getPublicReaderById } from "@/lib/marketplace/readers.repo";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { BookingFlow } from "@/components/marketplace/BookingFlow";
+import { hasFreeConsult } from "@/lib/marketplace/free-consult";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 
 export const runtime = "nodejs";
@@ -75,6 +76,7 @@ export default async function PrivateRoomPage({ params }: PageProps) {
   if (claim.kind === "own") redirect(`/readers/queue/${encodeURIComponent(claim.ticketId)}`);
 
   const unavailable = claim.kind === "refused" ? (UNAVAILABLE[claim.code] ?? UNAVAILABLE.invite_expired) : null;
+  const free = await hasFreeConsult(user);
 
   return (
     <>
@@ -123,6 +125,7 @@ export default async function PrivateRoomPage({ params }: PageProps) {
               initialMode="now"
               initialSlot={null}
               invite={{ code, customerLabel: invite.label }}
+              free={free}
             />
           )}
           <p className="pb-4 text-center text-[12px] leading-relaxed text-muted">

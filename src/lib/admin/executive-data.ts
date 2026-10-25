@@ -50,6 +50,7 @@ async function readD1(today: string, days: number): Promise<ExecutiveD1Input> {
   const payments = await safe(async () => {
     // เติมเครดิต = `ord_` · AI ช่วยเขียนของแม่หมอ = `stp_` · ที่เหลือคือค่าปรึกษาแม่หมอ
     // ทดสอบ = ตัวจำลอง (`simulator`) หรือ Stripe โหมดทดสอบ (`cs_test_`) — ไม่ใช่เงินจริง
+    // การจองฟรี (`comp` · free-consult.ts) ไม่ใช่ยอดขาย จึงไม่นับเป็นคำสั่งซื้อเลย
     const { results } = await db
       .prepare(
         `SELECT ${DAY_SQL} AS day,
@@ -61,7 +62,7 @@ async function readD1(today: string, days: number): Promise<ExecutiveD1Input> {
                 COUNT(*) AS n,
                 COALESCE(SUM(amount_satang), 0) AS satang
            FROM payments
-          WHERE created_at >= ? AND created_at < ? AND status IN ('paid', 'refunded')
+          WHERE created_at >= ? AND created_at < ? AND status IN ('paid', 'refunded') AND provider != 'comp'
           GROUP BY day, product, status, test`,
       )
       .bind(`${STUDIO_PASS_ORDER_PREFIX.replace(/_/g, "\\_")}%`, b.prevStartMs, b.endMs)
@@ -76,7 +77,8 @@ async function readD1(today: string, days: number): Promise<ExecutiveD1Input> {
     }));
   });
 
-  const realOnly = "provider != 'simulator' AND (provider_ref IS NULL OR provider_ref NOT LIKE 'cs\\_test\\_%' ESCAPE '\\')";
+  // การจองฟรี (`comp` · free-consult.ts) ไม่ใช่การขาย — ไม่นับเป็นผู้จ่ายเงิน
+  const realOnly = "provider NOT IN ('simulator', 'comp') AND (provider_ref IS NULL OR provider_ref NOT LIKE 'cs\\_test\\_%' ESCAPE '\\')";
 
   const [signups, payersCur, payersPrev, members, refundDue, pending, fbCur, fbPrev] = await Promise.all([
     safe(async () => {
