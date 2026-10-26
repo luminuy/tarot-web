@@ -1,4 +1,4 @@
-import { getShareBucket } from "@/lib/platform/cf";
+import { getStudioBucket } from "@/lib/platform/cf";
 import { logoKeyFromPath } from "@/lib/studio/logo";
 
 export const runtime = "nodejs";
@@ -11,7 +11,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ readerI
   const { readerId, file } = await params;
   const key = logoKeyFromPath(`/api/studio/logo/${readerId}/${file}`);
   if (!key) return new Response("ไม่พบรูป", { status: 404 });
-  const bucket = await getShareBucket();
+  const bucket = await getStudioBucket();
   if (!bucket) return new Response("ระบบรูปยังไม่พร้อม", { status: 503 });
   const obj = await bucket.get(key).catch(() => null);
   if (!obj || !obj.body) return new Response("ไม่พบรูป", { status: 404 });
