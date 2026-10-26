@@ -16,7 +16,9 @@ import { decanRanges, findThaiZodiacByDate, findZodiacByDate, thaiRanges } from 
 import { DECK } from "../../src/data/cards";
 import { buildYesNoAnswer } from "../../src/data/cards/yes-no";
 import { cardDetailFaqJsonLd } from "../../src/app/_shared/pages/card-detail";
-import { cardYesNoQuestion } from "../../src/lib/seo/faq";
+import { buildSpreadFaqs, cardYesNoQuestion } from "../../src/lib/seo/faq";
+import { getSpreadGuide } from "../../src/data/spread-guides";
+import { isStandardSpread } from "../../src/lib/entitlement/limits";
 
 console.log("\n🧪 กำลังทดสอบระบบ SEO Wave 4: Differentiators (Birth Card, Positions Table, Learn Tarot & Readers)\n");
 
@@ -553,6 +555,42 @@ assert(
   assert(
     mismatched === 0 && yesNoView.includes("{cardYesNoQuestion(card, isEnglish)}"),
     `FAQ หน้าไพ่: คำถามใน FAQPage ต้องเป็นหัวข้อ "ใช่หรือไม่" ที่แสดงบนหน้าเท่านั้น (ไม่ตรง ${mismatched} หน้า)`,
+  );
+}
+
+// ── คู่มือเนื้อหายาวรายผัง (spread-guides.ts · GSC 2026-10-26) ──
+{
+  // ไพ่ตัวอย่างต้องมีจริงและชื่อไทยตรงสำรับ · ลิงก์ในคู่มือต้องเป็นหน้าที่มีจริง · ต้นไม้อังกฤษไม่มีคู่มือ
+  const deckById = new Map(DECK.map((c) => [c.id, c]));
+  const astroPage = (href: string) =>
+    ["", "/index"].some((suffix) => fs.existsSync(path.join(process.cwd(), "astro/pages", `${href}${suffix}.astro`)));
+  const spreadIds = new Set(PUBLIC_SPREADS.map((s) => s.id));
+  let guides = 0;
+  const problems: string[] = [];
+  for (const spread of PUBLIC_SPREADS) {
+    const guide = getSpreadGuide(spread.id, false);
+    if (!guide) continue;
+    guides += 1;
+    if (getSpreadGuide(spread.id, true)) problems.push(`${spread.id}: มีคู่มือฝั่งอังกฤษ`);
+    for (const block of guide.blocks) {
+      for (const c of block.example?.cards ?? []) {
+        if (deckById.get(c.cardId)?.nameTh !== c.cardName) problems.push(`${spread.id}: ${c.cardId} ชื่อไม่ตรงสำรับ`);
+      }
+      for (const id of block.mock.fan ?? []) {
+        if (!deckById.has(id)) problems.push(`${spread.id}: ภาพประกอบใช้ไพ่ ${id} ที่ไม่มีในสำรับ`);
+      }
+      for (const pt of block.points ?? []) {
+        if (!pt.href) continue;
+        const m = pt.href.match(/^\/spreads\/([a-z0-9-]+)$/);
+        if (m ? !spreadIds.has(m[1]) : !astroPage(pt.href)) problems.push(`${spread.id}: ลิงก์ ${pt.href} ไม่มีหน้า`);
+      }
+    }
+    const faqs = buildSpreadFaqs(spread, false, isStandardSpread(spread.id));
+    if (faqs !== guide.faqs || faqs.length < 3) problems.push(`${spread.id}: FAQ ไม่ได้มาจากคู่มือ`);
+  }
+  assert(
+    guides > 0 && problems.length === 0,
+    `คู่มือรายผัง: ไพ่ตัวอย่าง/ลิงก์/FAQ ถูกต้อง (${guides} ผัง)${problems.length ? ` — ${problems.join(" · ")}` : ""}`,
   );
 }
 

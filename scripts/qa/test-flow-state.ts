@@ -640,6 +640,27 @@ console.log("\n\n── 15. ปุ่ม \"เริ่มดูดวงด้�
     missing.length ? `ไม่มีหน้า: ${missing.join(", ")}` : undefined,
   );
 
+  // ทางลัดเปิดไพ่บนหัวบทความ (`quickSpreads` · GSC 2026-10-26) ติดป้าย "ฟรี" — ทุกผังต้องเป็นผังมาตรฐานที่เปิดฟรีได้จริง
+  {
+    const { ARTICLES } = await import("../../src/data/articles");
+    const { STANDARD_SPREAD_IDS } = await import("../../src/data/spreads/standard-ids.generated");
+    const { DECK } = await import("../../src/data/cards");
+    const deckIds = new Set(DECK.map((c) => c.id));
+    const quick = ARTICLES.flatMap((a) => (a.quickSpreads ?? []).map((q) => ({ slug: a.slug, id: q.spreadId, cardId: q.cardId })));
+    const paid = quick.filter((q) => !STANDARD_SPREAD_IDS.has(q.id) || !publicIds.has(q.id));
+    const noArt = quick.filter((q) => !deckIds.has(q.cardId));
+    check(
+      `ทางลัดเปิดไพ่บนหัวบทความเป็นผังเปิดฟรีที่มีหน้าจริงทุกตัว และภาพไพ่ตัวแทนมีในสำรับ (${quick.length} ทางลัด)`,
+      quick.length > 0 && paid.length === 0 && noArt.length === 0,
+      paid.length || noArt.length
+        ? [
+            ...paid.map((q) => `ไม่ใช่ผังฟรี/ไม่มีหน้า ${q.slug} ➔ ${q.id}`),
+            ...noArt.map((q) => `ไม่มีไพ่ ${q.cardId} (${q.slug})`),
+          ].join(", ")
+        : undefined,
+    );
+  }
+
   // หน้า `/read/<ผัง>` ต้อง noindex และไม่มี canonical (เคาะกับเจ้าของแล้ว — ห้ามแย่งอันดับหน้าคู่มือผัง)
   const allNoindex = [...publicIds].every((id) =>
     (["th", "en"] as const).every((locale) => {
