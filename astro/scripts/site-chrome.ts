@@ -36,6 +36,7 @@ import {
 import { STORAGE_KEYS } from "@/lib/storage/keys";
 import { SITE_NAME_TH, SITE_ORIGIN } from "@/lib/config/site-constants";
 import { installFooterAccordion } from "@/components/layout/footer-accordion";
+import { loadInpReporter } from "@/lib/observability/inp-loader";
 
 /* ── 1 · เกราะกันดูดเนื้อหา ─────────────────────────────────────────────────
    แปะเครดิตเมื่อคัดลอกคำทำนายยาว ๆ และกันลากภาพไพ่ 1909 ออกไปตรง ๆ */
@@ -126,3 +127,6 @@ bootstrapAnalytics();
 
 /* ── ท้ายเว็บบนมือถือพับคอลัมน์ลิงก์ได้ (ดู footer-accordion.ts) ── */
 installFooterAccordion();
+
+/* ── INP ผู้ใช้จริงพร้อมตัวการ — ก้อนแยกโหลดตอนว่าง · ส่งเฉพาะหน้าที่ช้ากว่า 200 ms (ดู inp-loader.ts) ── */
+loadInpReporter();

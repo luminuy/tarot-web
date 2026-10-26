@@ -26,7 +26,13 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { FONT_PRELOADS, FONT_PRELOADS_LOW, SITE_THEME_COLOR, VIEWPORT_CONTENT } from "../../src/app/_shared/root-metadata";
+import {
+  FONT_PRELOADS,
+  FONT_PRELOADS_LOW,
+  FONT_PRELOADS_LOW_SKIP_ROUTES,
+  SITE_THEME_COLOR,
+  VIEWPORT_CONTENT,
+} from "../../src/app/_shared/root-metadata";
 import { collectRenderedPages, ROOT } from "./lib/rendered-pages";
 
 let failed = 0;
@@ -100,8 +106,12 @@ for (const page of pages) {
   const where = `${page.route} [${page.renderer}]`;
 
   if (!FONT_PRELOADS.every((href) => html.includes(`href="${href}"`))) missing.fontPreload.push(where);
-  /* น้ำหนักหนาต้องมาพร้อม `fetchpriority="low"` ทั้งสองเครื่องมือ (INC-0244 · ไม่แย่งคิวภาพ LCP) */
-  if (
+  /* น้ำหนักหนาต้องมาพร้อม `fetchpriority="low"` ทั้งสองเครื่องมือ (INC-0244 · ไม่แย่งคิวภาพ LCP)
+     ยกเว้นหน้าใน FONT_PRELOADS_LOW_SKIP_ROUTES ซึ่งต้อง "ไม่มี" เลยสักไฟล์ (หน้าแรก · ตัวเลขวัดอยู่ที่ค่าคงที่นั้น) */
+  if (FONT_PRELOADS_LOW_SKIP_ROUTES.includes(page.route)) {
+    if (FONT_PRELOADS_LOW.some((href) => html.includes(`href="${href}"`)))
+      missing.fontPreload.push(`${where} (หน้าแรกต้องไม่พรีโหลดน้ำหนักหนา)`);
+  } else if (
     !FONT_PRELOADS_LOW.every((href) =>
       new RegExp(`<link[^>]*href="${href}"[^>]*fetchpriority="low"|<link[^>]*fetchpriority="low"[^>]*href="${href}"`, "i").test(html),
     )

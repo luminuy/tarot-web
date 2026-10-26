@@ -216,31 +216,50 @@ export interface AppAnalyticsDataset {
   writeDataPoint(point: { indexes?: string[]; blobs?: string[]; doubles?: number[] }): void;
 }
 
-let cachedCallMetrics: AppAnalyticsDataset | null | undefined;
+const cachedDatasets = new Map<string, AppAnalyticsDataset | null>();
 
-/**
- * คืน Analytics Engine dataset สถิติวิดีโอคอล (`env.CALL_METRICS`)
- * dev / test / ยังไม่ deploy = ไม่มี binding → คืน `null` (ผู้เรียกข้ามการบันทึกเอง)
- */
-export async function getCallMetricsDataset(): Promise<AppAnalyticsDataset | null> {
-  if (cachedCallMetrics !== undefined) return cachedCallMetrics;
+/** dev / test / ยังไม่ deploy = ไม่มี binding → คืน `null` (ผู้เรียกข้ามการบันทึกเอง) */
+async function getAnalyticsDataset(binding: string): Promise<AppAnalyticsDataset | null> {
+  const cached = cachedDatasets.get(binding);
+  if (cached !== undefined) return cached;
+  let dataset: AppAnalyticsDataset | null = null;
   try {
     const ctx = await safelyGetCloudflareContext();
-    const binding = (ctx?.env as Record<string, unknown> | undefined)?.CALL_METRICS;
-    if (binding && typeof (binding as AppAnalyticsDataset).writeDataPoint === "function") {
-      cachedCallMetrics = binding as AppAnalyticsDataset;
-      return cachedCallMetrics;
+    const value = (ctx?.env as Record<string, unknown> | undefined)?.[binding];
+    if (value && typeof (value as AppAnalyticsDataset).writeDataPoint === "function") {
+      dataset = value as AppAnalyticsDataset;
     }
   } catch {
     // ไม่มี Cloudflare context
   }
-  cachedCallMetrics = null;
-  return null;
+  cachedDatasets.set(binding, dataset);
+  return dataset;
+}
+
+/** ชุดทดสอบเท่านั้น — ใส่ dataset ในหน่วยความจำแทนของจริง (`undefined` = กลับไปอ่าน binding ใหม่) */
+function setDatasetForTests(binding: string, dataset: AppAnalyticsDataset | null | undefined): void {
+  if (dataset === undefined) cachedDatasets.delete(binding);
+  else cachedDatasets.set(binding, dataset);
+}
+
+/** Analytics Engine dataset สถิติวิดีโอคอล (`env.CALL_METRICS`) */
+export function getCallMetricsDataset(): Promise<AppAnalyticsDataset | null> {
+  return getAnalyticsDataset("CALL_METRICS");
 }
 
 /** ชุดทดสอบเท่านั้น — ใส่ dataset ในหน่วยความจำแทนของจริง */
 export function setCallMetricsForTests(dataset: AppAnalyticsDataset | null | undefined): void {
-  cachedCallMetrics = dataset;
+  setDatasetForTests("CALL_METRICS", dataset);
+}
+
+/** Analytics Engine dataset INP ผู้ใช้จริง (`env.RUM_METRICS` · `src/lib/observability/inp-metrics.ts`) */
+export function getRumMetricsDataset(): Promise<AppAnalyticsDataset | null> {
+  return getAnalyticsDataset("RUM_METRICS");
+}
+
+/** ชุดทดสอบเท่านั้น — ใส่ dataset ในหน่วยความจำแทนของจริง */
+export function setRumMetricsForTests(dataset: AppAnalyticsDataset | null | undefined): void {
+  setDatasetForTests("RUM_METRICS", dataset);
 }
 
 /** ส่วนของ R2 bucket ที่แอปนี้ใช้จริง (structural) */

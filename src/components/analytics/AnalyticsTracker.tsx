@@ -6,6 +6,7 @@ import { ConsentBanner } from "@/components/analytics/ConsentBanner";
 import { usePathname, useSearchParams } from "next/navigation";
 import { bootstrapAnalytics } from "@/lib/analytics-bootstrap";
 import { trackPageView } from "@/lib/analytics";
+import { loadInpReporter } from "@/lib/observability/inp-loader";
 
 /**
  * 📊 เครื่องมือวัดผลฝั่งหน้าที่ **Next** เรนเดอร์
@@ -61,6 +62,8 @@ function PageViewTracker() {
 
 export function AnalyticsTracker() {
   useEffect(() => bootstrapAnalytics(), []);
+  /* INP ผู้ใช้จริง — ตัวเดียวกับ `site-chrome.ts` ของหน้าที่ Astro เรนเดอร์ (ดู inp-loader.ts) */
+  useEffect(() => loadInpReporter(), []);
 
   return (
     <>
