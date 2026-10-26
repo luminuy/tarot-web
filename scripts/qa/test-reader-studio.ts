@@ -5,7 +5,7 @@ import { signReaderToken } from "@/lib/auth/reader-auth";
 import { createReader, deleteReader } from "@/lib/marketplace/readers.repo";
 import { getAppDB } from "@/lib/platform/db";
 import { contrastRatio, ensureReadableColor, normalizeHex, sanitizeLogoUrl, STUDIO_COLOR_PRESETS, STUDIO_PAPER } from "@/lib/studio/brand";
-import { setShareBucketForTests, type AppR2Bucket } from "@/lib/platform/cf";
+import { setShareBucketForTests, setStudioBucketForTests, type AppR2Bucket } from "@/lib/platform/cf";
 import { logoKeyFromPath, sniffLogoKind } from "@/lib/studio/logo";
 import { assembleOfflineDraft, buildDraftPrompt, cardLabelTh, expectedKeys, validateDraft, type DraftContext } from "@/lib/studio/draft";
 import { STUDIO_DPA_VERSION, hasAcceptedDpa, isStudioEnabled } from "@/lib/studio/dpa";
@@ -568,7 +568,7 @@ async function main() {
           body: new Blob([bytes as BlobPart]),
         }),
       );
-    setShareBucketForTests(null);
+    setStudioBucketForTests(null);
     let lr = await sendLogo(A.token, new Uint8Array(200).fill(1));
     check("โลโก้: ไม่มีที่เก็บไฟล์ ➔ 503 ให้หน้าเว็บเสนอวางลิงก์แทน", lr.status === 503 && ((await lr.json()) as { code?: string }).code === "storage_unavailable");
     const store = new Map<string, { data: ArrayBuffer; ct?: string }>();
@@ -588,7 +588,23 @@ async function main() {
         store.delete(key);
       },
     };
-    setShareBucketForTests(fakeBucket);
+    setStudioBucketForTests(fakeBucket);
+    // bucket การ์ดแชร์ลบเองทั้ง bucket ทุก 90 วัน — โลโก้ต้องไม่ไปลงที่นั่นเด็ดขาด
+    const shareWrites: string[] = [];
+    setShareBucketForTests({
+      async put(key) {
+        shareWrites.push(key);
+      },
+      async get() {
+        return null;
+      },
+      async head() {
+        return null;
+      },
+      async delete(key) {
+        shareWrites.push(`delete:${key}`);
+      },
+    });
     const pngPadded = new Uint8Array(400);
     pngPadded.set(PNG1);
     lr = await sendLogo(null, pngPadded, "https://evil.example");
@@ -630,6 +646,8 @@ async function main() {
     const afterPurge = await tdb.prepare(`SELECT dpa_version, brand_name, pro_until, ai_assist FROM reader_studio_settings WHERE reader_id = ?`).bind(A.id).first<{ dpa_version: string | null; brand_name: string | null; pro_until: number | null; ai_assist: number }>();
     check("ลบทั้งสตูดิโอ: ล้างแบรนด์ + การยอมรับข้อตกลง + ปิดตัวช่วย AI แต่คงวันแพ็กเกจ", afterPurge?.dpa_version === null && afterPurge.brand_name === null && afterPurge.pro_until === proBefore && afterPurge.ai_assist === 0);
     check("ลบทั้งสตูดิโอ: ลบไฟล์โลโก้ใน R2 ด้วย", !store.has(logoKeyFromPath(up3.logoUrl)!));
+    check("โลโก้: อยู่ bucket ของสตูดิโอเท่านั้น ไม่แตะ bucket การ์ดแชร์ที่ลบเองทุก 90 วัน", shareWrites.length === 0, shareWrites);
+    setStudioBucketForTests(undefined);
     setShareBucketForTests(undefined);
     check("ลบทั้งสตูดิโอ: แม่หมอ B ไม่ถูกแตะ (ยังยอมรับข้อตกลงอยู่)", (await tdb.prepare(`SELECT dpa_version FROM reader_studio_settings WHERE reader_id = ?`).bind(B.id).first<{ dpa_version: string | null }>())?.dpa_version === STUDIO_DPA_VERSION);
     await api(dpa, "POST", "/api/marketplace/studio/dpa", A.token, { version: STUDIO_DPA_VERSION, agree: true });
