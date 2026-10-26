@@ -116,10 +116,35 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
         </p>
         {/* GSC 2026-10-19: คำค้นแบบ "เปิดไพ่ 4 ใบ" ~300 แสดงผลมาลงบทความ ได้ 0 คลิก — คนค้นอยากเปิดไพ่ ไม่ใช่อ่าน
             ปุ่มเข้าพิธีเปิดไพ่ของผังประจำบทความต้องเห็นตั้งแต่หัวหน้า ไม่ใช่รอเลื่อนถึงท้ายบทความ */}
-        {readHref && (
-          <Link href={readHref} className="ui2-btn v2-ar-go v2-ar-try">
-            {isEnglish ? "Try this spread free" : "เปิดไพ่ผังนี้ฟรี"}
-          </Link>
+        {/* GSC 2026-10-26: คำค้น "เปิดไพ่ 4 ใบ" ~760 แสดงผล/เดือนยังกดแค่ ~0.5% — บทความที่คนค้นมาเพื่อเปิดไพ่
+            ให้เลือกเรื่องแล้วเข้าพิธีเปิดไพ่ได้ทันทีหลายผัง (`quickSpreads`) แทนปุ่มผังเดียว */}
+        {article.quickSpreads && article.quickSpreads.length > 0 ? (
+          <nav className="v2-ar-quick" aria-labelledby="v2-ar-quick-h">
+            <p id="v2-ar-quick-h" className="v2-ar-quick-h">
+              {isEnglish ? "Pick a topic and draw your cards now, free" : "เลือกเรื่องแล้วเปิดไพ่ได้ทันที ฟรี"}
+            </p>
+            <ul>
+              {article.quickSpreads.map((q) => (
+                <li key={q.spreadId}>
+                  <Link href={`/read/${q.spreadId}`} className="v2-ar-quick-btn">
+                    {/* ภาพไพ่ตัวแทนหัวข้อ (ความหมายดั้งเดิม ไม่ใช่ผลเปิดไพ่) */}
+                    <CardImage cardId={q.cardId} alt="" thumb sizes="40px" className="v2-ar-quick-card" />
+                    <span className="v2-ar-quick-t">
+                      <b>{isEnglish ? q.labelEn : q.label}</b>
+                      <small>{isEnglish ? q.hintEn : q.hint}</small>
+                    </span>
+                    <span className="v2-ar-quick-go">{isEnglish ? "Draw" : "เปิดไพ่"}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ) : (
+          readHref && (
+            <Link href={readHref} className="ui2-btn v2-ar-go v2-ar-try">
+              {isEnglish ? "Try this spread free" : "เปิดไพ่ผังนี้ฟรี"}
+            </Link>
+          )
         )}
       </header>
       </div>

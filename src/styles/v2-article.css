@@ -336,6 +336,107 @@
 .v2-ar .v2-ar-try {
   margin-top: 22px;
 }
+/* ── ทางลัดเปิดไพ่หลายผังบนหัวบทความ (`quickSpreads` · GSC 2026-10-26) ──
+   แผงกระดาษแบบ "เริ่มง่ายที่สุดในหมวดนี้" ของหน้า /spreads: ภาพไพ่จริงย่อ + ชื่อเรื่อง + ปุ่มดำเล็ก
+   มือถือเรียงทีละแถว (ปุ่มดำอยู่ขวา) · จอกว้างเรียง 3 ช่องในแถวเดียว (ซ่อนปุ่มดำ ทั้งช่องกดได้อยู่แล้ว) */
+.v2-ar-quick {
+  max-width: 680px;
+  margin: 24px auto 0;
+}
+.v2-ar-quick-h {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ui2-on-night);
+}
+.v2-ar-quick ul {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2-ar .v2-ar-quick-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 76px;
+  padding: 10px 12px 10px 16px;
+  border-radius: 22px;
+  background: var(--ui2-paper);
+  color: var(--ui2-ink);
+  text-align: left;
+  text-decoration: none;
+  box-shadow: 0 0 0 1px var(--ui2-line-day), 0 22px 40px -28px rgba(74, 47, 16, 0.55);
+  transition: translate var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.v2-ar .v2-ar-quick-card {
+  flex: none;
+  width: 34px;
+  aspect-ratio: 0.58;
+  object-fit: cover;
+  border-radius: 5px;
+  rotate: -5deg;
+  box-shadow: 0 0 0 1px rgba(30, 25, 20, 0.14), 0 10px 16px -8px rgba(30, 25, 20, 0.6);
+}
+.v2-ar-quick-t {
+  display: grid;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.v2-ar .v2-ar-quick-t b {
+  font-family: var(--ui2-font-display);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.v2-ar .v2-ar-quick-t small {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ui2-muted);
+}
+.v2-ar-quick-go {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--ui2-button);
+  color: var(--ui2-button-text);
+}
+@media (min-width: 640px) {
+  .v2-ar-quick ul {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .v2-ar .v2-ar-quick-btn {
+    padding: 12px 14px;
+  }
+  .v2-ar .v2-ar-quick-card {
+    width: 40px;
+  }
+  .v2-ar-quick-go {
+    display: none;
+  }
+}
+@media (hover: hover) {
+  .v2-ar .v2-ar-quick-btn:hover {
+    translate: 0 -3px;
+    box-shadow: 0 0 0 1px rgba(184, 105, 28, 0.35), 0 26px 44px -26px rgba(74, 47, 16, 0.6);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2-ar .v2-ar-quick-btn {
+    transition: none;
+  }
+}
+.v2-ar .v2-ar-quick-btn:focus-visible {
+  outline: 3px solid var(--ui2-gold-ink);
+  outline-offset: 3px;
+}
 .v2-ar-related h2 {
   margin: 0 0 16px;
   font-family: var(--ui2-font-display);
