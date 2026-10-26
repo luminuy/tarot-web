@@ -11,7 +11,8 @@
     "build": "next build --webpack && ASTRO_TELEMETRY_DISABLED=1 astro build",
     "build:astro": "ASTRO_TELEMETRY_DISABLED=1 astro build",
     "start": "next start",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "node node_modules/typescript-native/bin/tsc --noEmit",
+    "typecheck:ts6": "node node_modules/typescript/bin/tsc --noEmit",
     "lint": "eslint --cache .",
     "deps:relock": "npm install --package-lock-only",
     "log:sync": "tsx scripts/sync-worklog.ts",
@@ -98,6 +99,7 @@
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.2",
+    "typescript-native": "npm:typescript@7.0.2",
     "wrangler": "^4.151.0"
   },
   "browserslist": [
