@@ -38,6 +38,15 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-26 (รอบ 314): แยก bucket โลโก้แม่หมอ + หน้านโยบายบอกอายุสำเนาสำรอง (เจ้าของตอบ "ทำเลย" สองข้อที่ค้างจากรอบ 311)
+- โลโก้สตูดิโอแม่หมอย้ายไป R2 bucket ของตัวเอง `seertarot-studio` (`STUDIO_BUCKET` · `getStudioBucket()`) — เดิมอยู่ `seertarot-share` ซึ่งลบเองทุก 90 วัน ต้องตั้งกฎหลบ 16 ข้อ
+  ไม่มีโลโก้ต้องย้าย: production ตอบ `studio_disabled` (ตรวจ 2026-10-26 · สตูดิโอยังไม่เคยเปิด)
+- bucket การ์ดแชร์กลับมาเป็นกฎเดียวทั้ง bucket `expire-share-90d` (แทนกฎ 16 ข้อ) · bucket โลโก้ห้ามมีกฎลบ — `scripts/cf-r2-lifecycle.ts` ตรวจทุก deploy
+- `npm run cf:r2-buckets` (ใหม่) สร้าง bucket ที่ขาดตาม `wrangler.jsonc` ก่อน `wrangler deploy` ใน deploy.yml / preview.yml (ไม่มี bucket = deploy ล้มทั้งรอบ) · bucket โลโก้ต้องเป็นส่วนตัว · จำลอง Cloudflare API ทดสอบครบ 3 ทาง (สร้างใหม่ · สลับกฎ · เจอกฎลบใน bucket โลโก้ = ล้ม)
+- หน้านโยบายความเป็นส่วนตัวไทย/อังกฤษข้อ 3 เพิ่มย่อหน้า "สำเนาสำรองเพื่อกู้ระบบ" (สำรองรายสัปดาห์เก็บ 35 วัน · Time Travel 30 วัน · ข้อมูลที่ลบค้างในสำเนาได้นานสุด 35 วัน · ใช้เพื่อกู้ระบบเท่านั้น) + ข้อ 4 สิทธิลบอ้างถึง — เดิมเขียนว่าลบ "อย่างสมบูรณ์ทันที" ซึ่งไม่ตรงความจริง
+- ด่าน `test-ci-supply-chain` 4b เทียบเลขวันในหน้านโยบายกับ `BACKUP_RETENTION_DAYS` · 4c ตรวจ bucket แยก + ขั้นสร้าง bucket มาก่อน deploy · `test-reader-studio` ตรวจว่าโลโก้ไม่แตะ bucket การ์ดแชร์
+- คู่มือกู้ D1 (หัวข้อ 8.5) เพิ่มข้อควรระวัง: บัญชีที่ถูกลบหลังเวลาสำรองจะกลับมาในฐานที่กู้
+
 ### 🗓️ 2026-10-25 (รอบ 312): บัญชี seerada.tarot@gmail.com ปรึกษาแม่หมอคนจริงได้ฟรี (เจ้าของ "ดูแม่หมอจริงไม่จ่ายตังค์")
 - `src/lib/marketplace/free-consult.ts`: รายชื่อ `FREE_CONSULT_EMAILS` + `hasFreeConsult()` (ต้องยืนยันอีเมลแล้ว — ใช้ `ownsVerifiedEmail` ตัวเดียวกับบัญชี VIP) + `confirmComplimentaryConsultation()`
 - `POST /api/marketplace/tickets`: บัญชีที่ได้สิทธิ์ข้ามหน้าจ่ายเงิน — บันทึก `payments` ยอด 0 `provider = comp` แล้วยืนยันผ่าน `settleConsultationPayment` จุดเดียวกับเงินจริง (ได้คิว/นัด · อีเมลยืนยัน · แม่หมอเรียกคิวได้) · ด่านอื่น (โควตา · AI คัดกรอง · กันที่) ยังตรวจครบ
