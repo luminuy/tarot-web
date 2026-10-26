@@ -38,6 +38,15 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-26 (รอบ 313): หน้าแรกมือถือ PSI 75 — ตัดพรีโหลดฟอนต์น้ำหนักหนาเฉพาะหน้าแรก (เจ้าของ "แก้ด่วน อย่าพึ่งเอาขึ้น ตรวจสอบรอบเดียวก่อนขึ้น" · ยังไม่ขึ้น production)
+- อาการ (PSI มือถือ 2026-10-26): Performance 75 · FCP 2.7s · LCP 4.7s · ตัว LCP = h1 `#ui2-hero-title` · Load Delay 0 · **Render Delay กินเกือบทั้งหมด** · CrUX ผู้ใช้จริง: LCP 1.4s ผ่าน — ที่ทำ CWV ตกคือ **INP 215 ms** ตัวเดียว
+- วัดแยกตัวแปรบน production (Chromium มือถือ 412px · CPU ×4 · 4G ช้า · แก้ HTML ทีละอย่าง): ตัด JS ทั้งหมด = LCP เท่าเดิม (ไม่ใช่ JS) · ย้าย CSS ขึ้นก่อนพรีโหลด / ตั้งฟอนต์ทุกไฟล์ `low` / ถอดแสงทอง = ไม่ช่วย · **เฟรมแรกเป็นงานก้อนเดียว ~790–1,300 ms (Layout + Style)** ที่เริ่มหลัง CSS มาครบแล้ว
+- ต้นเหตุ: `FONT_PRELOADS_LOW` (noto-serif-thai 400/700 · sarabun 600) ถูกขอพร้อม CSS ตั้งแต่ ms แรกทั้งที่ตั้ง `fetchpriority="low"` แล้วมาถึงกลางเฟรมแรก — สมมติฐาน "low = ไม่แย่งคิว" ในคอมเมนต์เดิมไม่จริงบนหน้าแรก
+- แก้: `FONT_PRELOADS_LOW_SKIP_ROUTES = ["/", "/en"]` (`root-metadata.ts`) · `BaseLayout.astro` ข้ามชุด low เฉพาะสองหน้านั้น (ทำ pathname ให้อยู่รูปเดียวก่อนเทียบ — ตอนบิลด์เป็น `/index.html` · `/en.html`) · หน้าอื่นคงชุด low ตาม INC-0244
+- ผลวัด median 5 รอบ: FCP 2,440 ➔ 1,556 · LCP 2,440 ➔ 1,860 · งานเฟรมแรก 787 ➔ 469 ms · CLS 0.003 ➔ 0.003 · เปลี่ยนหน้า `/cards` ➔ `/` (ฟอนต์ในแคช) CLS 0.004 เท่ากัน
+- ด่าน `test-render-parity`: หน้าใน SKIP ต้อง "ไม่มี" ชุด low · หน้าอื่นต้องมีครบ (ลองบิลด์ที่ยังพรีโหลดอยู่ ➔ ด่านตก 2 หน้าตามคาด)
+- ยังไม่แก้ (รายงานเจ้าของ): INP — แตะปุ่มบนหน้าแรกที่ CPU ×4 ได้ 150–470 ms ส่วนใหญ่เป็น presentation delay (Commit/Raster) ไม่ใช่โค้ดจัดการคลิก · หน้าแรกมี 134 เลเยอร์ (66 มาจากอนิเมชันผูกการเลื่อนที่เจ้าของสั่ง) · ปิดอนิเมชันทั้งหมดลดได้แค่ ~20% · ต้องเก็บ INP จากผู้ใช้จริงพร้อมตัวการ (attribution) ก่อนตัดสินใจ · forced reflow ใน `ui2-home` วัดได้รวม ~42 ms (ไม่ใช่ 131 ms อย่างที่ PSI แสดง) ไม่แตะ
+
 ### 🗓️ 2026-10-25 (รอบ 312): บัญชี seerada.tarot@gmail.com ปรึกษาแม่หมอคนจริงได้ฟรี (เจ้าของ "ดูแม่หมอจริงไม่จ่ายตังค์")
 - `src/lib/marketplace/free-consult.ts`: รายชื่อ `FREE_CONSULT_EMAILS` + `hasFreeConsult()` (ต้องยืนยันอีเมลแล้ว — ใช้ `ownsVerifiedEmail` ตัวเดียวกับบัญชี VIP) + `confirmComplimentaryConsultation()`
 - `POST /api/marketplace/tickets`: บัญชีที่ได้สิทธิ์ข้ามหน้าจ่ายเงิน — บันทึก `payments` ยอด 0 `provider = comp` แล้วยืนยันผ่าน `settleConsultationPayment` จุดเดียวกับเงินจริง (ได้คิว/นัด · อีเมลยืนยัน · แม่หมอเรียกคิวได้) · ด่านอื่น (โควตา · AI คัดกรอง · กันที่) ยังตรวจครบ
