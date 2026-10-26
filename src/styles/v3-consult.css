@@ -1,0 +1,267 @@
+/*
+ * 🛎️ หน้าย่อยระบบแม่หมอ — UI 2.0 (เจ้าของ 2026-10-26 "ทำเลย" · ขึ้น preview ก่อน)
+ * ===========================================================================
+ * โปรไฟล์ /readers/<id> · หน้าจอง /readers/<id>/book · หน้าคิว /readers/queue/<id> · นัดของฉัน /readers/bookings
+ * ห้องส่วนตัว /readers/room/<code> · แผงแม่หมอ /readers/console
+ * นำเข้าต่อจาก ui2-page.css (โทเคนกลางคืน `.ui2-pg` · แถบครีมหัวหน้า ui2-dawn.css · หน้าต่างครีม `.page-band-tint`)
+ * ชิ้น markup: src/components/marketplace/ConsultUi2.tsx
+ * ⚠️ ไม่มีของหนัก (backdrop-filter · filter: blur · ของวน) — ด่าน test-ui2-fx / test-motion-quality
+ * ⚠️ ไม่มีรูปทรงตกแต่ง (กฎเหล็ก 2) — รายการใช้เส้นซ้ายแทนจุด/ติ๊ก
+ */
+
+.v3-cs {
+  width: 100%;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 20px 16px 56px;
+}
+.v3-cs.is-narrow {
+  max-width: 760px;
+}
+
+/* ── หัวหน้าแถบครีม ── */
+.v3-cs-hero {
+  display: grid;
+  gap: 22px;
+  padding: 16px 0 6px;
+}
+@media (min-width: 960px) {
+  .v3-cs-hero.has-aside {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+    align-items: center;
+    gap: 48px;
+  }
+  .v3-cs-hero {
+    padding: 32px 0 12px;
+  }
+  .v3-cs-hero.is-compact {
+    padding: 28px 0 4px;
+  }
+}
+.v3-cs-kicker {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ui2-gold-ink);
+}
+.v3-cs-title {
+  margin: 8px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(34px, 5.4vw, 58px);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  color: var(--ui2-on-night);
+  overflow-wrap: anywhere;
+}
+.v3-cs-hero.is-compact .v3-cs-title {
+  font-size: clamp(28px, 4vw, 40px);
+}
+.v3-cs-lede {
+  max-width: 560px;
+  margin: 12px 0 0;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--ui2-on-night-soft);
+}
+.v3-cs-hero-side {
+  min-width: 0;
+}
+
+/* ป้ายเล็กใต้หัวข้อ (ความถนัด · ยืนยันตัวตน) */
+.v3-cs-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.v3-cs-chips > li {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(74, 47, 16, 0.14);
+  background: rgba(255, 252, 246, 0.78);
+  font-size: 14px;
+  color: var(--ui2-on-night);
+}
+.v3-cs-chips > li.is-ok {
+  border-color: rgba(47, 107, 58, 0.28);
+  color: #2F6B3A;
+  font-weight: 600;
+}
+.v3-cs-rating {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+  font-size: 15px;
+  color: var(--ui2-on-night-soft);
+  text-decoration: none;
+}
+.v3-cs-rating strong {
+  color: var(--ui2-on-night);
+  font-weight: 700;
+}
+.v3-cs-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ui2-gold-ink);
+  text-decoration: none;
+}
+.v3-cs-back:hover {
+  text-decoration: underline;
+}
+/* ลิงก์บนท้องฟ้ากลางคืน (นอกแถบครีม) = ทองสว่าง */
+.ui2-pg .v3-cs-night-link {
+  color: var(--ui2-gold-solid);
+}
+
+/* บัตรแม่หมอ (ขวาหัวหน้าโปรไฟล์) — กระดาษขาวบนครีม ขอบทองบาง แบบบัตรสมาชิกหน้าบัญชี */
+.v3-cs-card {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 26px 22px 22px;
+  border-radius: 26px;
+  border: 1px solid rgba(74, 47, 16, 0.12);
+  background: #FFFCF6;
+  text-align: center;
+  box-shadow: 0 0 0 6px rgba(255, 252, 246, 0.45), 0 0 0 7px rgba(184, 105, 28, 0.16), 0 30px 50px -34px rgba(74, 47, 16, 0.6);
+}
+/* บัตรแนวนอน (สวิตช์คิวสดในแผงแม่หมอ) */
+.v3-cs-card.is-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  text-align: left;
+}
+.v3-cs-avatar {
+  display: grid;
+  place-items: center;
+  width: 132px;
+  height: 132px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #F3EADB;
+  box-shadow: 0 0 0 5px #FFFCF6, 0 0 0 6px rgba(184, 105, 28, 0.3);
+  font-family: var(--ui2-font-display);
+  font-size: 48px;
+  font-weight: 600;
+  color: #8A5512;
+}
+.v3-cs-avatar.is-sm {
+  width: 64px;
+  height: 64px;
+  font-size: 26px;
+  box-shadow: 0 0 0 3px #FFFCF6, 0 0 0 4px rgba(184, 105, 28, 0.3);
+}
+.v3-cs-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.v3-cs-card-name {
+  margin: 4px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: #2B2118;
+}
+.v3-cs-card-meta {
+  margin: 0;
+  font-size: 14px;
+  color: #5A4A3A;
+}
+@media (max-width: 959px) {
+  .v3-cs-hero.has-aside:not(.is-compact) .v3-cs-hero-side {
+    order: -1;
+  }
+  .v3-cs-card {
+    grid-template-columns: auto minmax(0, 1fr);
+    justify-items: start;
+    align-items: center;
+    padding: 16px;
+    text-align: left;
+  }
+  .v3-cs-card .v3-cs-avatar {
+    width: 72px;
+    height: 72px;
+    font-size: 28px;
+    box-shadow: 0 0 0 3px #FFFCF6, 0 0 0 4px rgba(184, 105, 28, 0.3);
+  }
+}
+
+/* ── หน้าต่างครีม ── */
+.ui2-pg .v3-cs-win {
+  padding-block: 22px;
+  /* ui2-dawn.css สลับ --color-inset แต่ไม่สลับ --color-inset-warm (พื้นช่องย่อยเดิม bg-inset-warm) ➔ เทามืดบนครีม */
+  --color-inset-warm: #F3EADB;
+}
+@media (min-width: 768px) {
+  .ui2-pg .v3-cs-win {
+    padding-block: 34px;
+  }
+}
+.v3-cs-win + .v3-cs-win {
+  margin-top: 28px;
+}
+/* หัวข้อในหน้าต่าง = ฟอนต์หัวข้อ UI 2.0 */
+.ui2-pg .v3-cs-win :is(h2, h3) {
+  font-family: var(--ui2-font-display);
+  font-weight: 600;
+}
+
+/* รายการเงื่อนไข — เส้นซ้ายแทนติ๊ก (กฎเหล็ก 2) */
+.v3-cs-lines {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v3-cs-lines > li {
+  padding-left: 12px;
+  border-left: 2px solid rgba(138, 85, 18, 0.45);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--color-muted);
+}
+
+/* แถบล่างติดจอของปุ่มจอง (มือถือ) — อยู่ใน DOM ของหน้าต่างครีม (โทเคนกลางวัน) ➔ กระดาษขาวทึบ ตัวหมึก ปุ่มดำ */
+.ui2-pg .v3-cs-bar {
+  background: #FFFCF6;
+  border-top-color: rgba(184, 105, 28, 0.28);
+  box-shadow: 0 -16px 36px -20px rgba(0, 0, 0, 0.7);
+}
+
+/* หน้าต่างระบบแม่หมอไม่ลอยเข้า (ui2-page.css หัวข้อ 8 ใส่ `ui2-pg-rise` ให้ `.page-band-tint` ทุกก้อน):
+   อนิเมชัน fill both ค้าง transform ไว้ ➔ แผงกลายเป็น containing block ของ `position: fixed`
+   แถบจองติดล่างจอ (ReaderDetailClient) จึงไปติดท้ายแผงแทนท้ายจอบนมือถือ · ฟอร์มจอง/สถานะคิวก็ไม่ควรขยับตอนเลื่อน */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    :root:not([data-fx="off"]) .ui2-pg .page-band-tint.v3-cs-win:not(:has(.card-tile-cv)) {
+      animation: none;
+    }
+  }
+}
+
+/* ช่องกรอกแบบกระจกมืด (`.glass-field` ➔ ui2-page.css ทำเป็นแผ่นมืดสำหรับพื้นกลางคืน) ในหน้าต่างครีม = กระดาษขาว ตัวหมึก */
+.ui2-pg .v3-cs-win .glass-field {
+  color: #29261F;
+  background-color: #FFFCF6;
+  box-shadow: none;
+}
+.ui2-pg .v3-cs-win .glass-field::placeholder {
+  color: #6E604F;
+}
+.ui2-pg .v3-cs-win select.glass-field option {
+  color: #29261F;
+  background: #FFFCF6;
+}

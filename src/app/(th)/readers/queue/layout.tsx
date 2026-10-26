@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { noindexAlternates } from "@/lib/config/site";
+import "@/styles/ui2-page.css";
+import "@/styles/v3-consult.css";
 
 /**
  * หน้าในกลุ่มนี้เป็น Client Component จึง `export const metadata` เองไม่ได้
@@ -24,7 +26,10 @@ export default function ReaderQueueLayout({ children }: { children: React.ReactN
   return (
     <>
       <SiteHeader />
-      {children}
+      {/* UI 2.0 (เจ้าของ 2026-10-26): ท้องฟ้ากลางคืน + โทเคน `.ui2-pg` — หัวครีม/หน้าต่างครีมอยู่ในหน้า (ConsultUi2) */}
+      <div className="ui2-pg" data-ui2-page-dark="">
+        {children}
+      </div>
       <SiteFooter spacing="tight" />
     </>
   );

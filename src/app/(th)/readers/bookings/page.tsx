@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { formatSlotRange, formatCountdown } from "@/lib/marketplace/booking-policy";
+import { ConsultHero, ConsultWindow } from "@/components/marketplace/ConsultUi2";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { ChevronIcon } from "@/components/ui/LineIcons";
 
 interface MyBookingItem {
   ticketId: string;
@@ -72,12 +75,20 @@ export default function MyBookingsPage() {
   const past = (items ?? []).filter((i) => !active.includes(i));
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-[70vh] px-4 py-8 font-serif-th text-ink sm:py-12">
-      <div className="mx-auto w-full max-w-xl space-y-6">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold text-ink-deep sm:text-3xl">นัดของฉัน</h1>
-          <p className="text-sm text-muted">คิวและนัดปรึกษาแม่หมอทั้งหมดของคุณ</p>
-        </div>
+    <main id="main-content" tabIndex={-1} className="v3-cs is-narrow font-sans text-ink">
+      {/* v3 UI 2.0 (เจ้าของ 2026-10-26): หัวหน้าแถบครีมเตี้ย ➔ รายการนัดในหน้าต่างครีม */}
+      <ConsultHero
+        compact
+        kicker="ปรึกษาแม่หมอ"
+        title={<span className="tp">นัดของฉัน</span>}
+        lede={<ThaiPhrases>คิวและนัดปรึกษาแม่หมอทั้งหมดของคุณ</ThaiPhrases>}
+      >
+        <Link href="/readers" className="v3-cs-back">
+          แม่หมอทั้งหมด
+        </Link>
+      </ConsultHero>
+      <ConsultWindow narrow label="รายการนัด">
+      <div className="w-full space-y-6">
 
         {items === null ? (
           <div className="space-y-3" aria-busy="true">
@@ -143,7 +154,7 @@ export default function MyBookingsPage() {
                                   {status.label}
                                 </span>
                               </span>
-                              <span aria-hidden="true" className="text-muted">›</span>
+                              <ChevronIcon direction="right" className="h-4 w-4 shrink-0 text-muted" />
                             </a>
                           </li>
                         );
@@ -160,6 +171,7 @@ export default function MyBookingsPage() {
           </>
         )}
       </div>
+      </ConsultWindow>
     </main>
   );
 }

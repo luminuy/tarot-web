@@ -5,13 +5,18 @@ import type { Metadata } from "next";
 import { getPublicReaderById } from "@/lib/marketplace/readers.repo";
 import { getReaderLiveAvailability } from "@/lib/marketplace/queue.repo";
 import { getNextAvailableSlot } from "@/lib/marketplace/booking.repo";
-import { readerPriceThb } from "@/lib/marketplace/offer";
+import { CONSULTATION_MINUTES, readerPriceThb } from "@/lib/marketplace/offer";
 import { hasFreeConsult } from "@/lib/marketplace/free-consult";
 import { getSessionUser } from "@/lib/auth/session";
 import { noindexAlternates } from "@/lib/config/site";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { BookingFlow, type ConsultMode } from "@/components/marketplace/BookingFlow";
+import { ConsultHero, ConsultWindow } from "@/components/marketplace/ConsultUi2";
+import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { FREE_CANCEL_HOURS } from "@/lib/marketplace/booking-policy";
+import "@/styles/ui2-page.css";
+import "@/styles/v3-consult.css";
 
 export const dynamic = "force-dynamic";
 
@@ -68,24 +73,40 @@ export default async function ReaderBookPage({ params, searchParams }: PageProps
   return (
     <>
       <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="min-h-screen px-4 pt-3 text-ink-deep font-serif-th sm:px-6 sm:pt-8">
-        <div className="mx-auto w-full max-w-xl space-y-3.5">
-          <Link
-            href={`/readers/${encodeURIComponent(reader.id)}`}
-            className="tap-overlay-y inline-flex items-center gap-1.5 text-sm text-gold-ink transition-colors hover:text-gold-ink-deep"
-          > กลับไปหน้าแม่หมอ
-          </Link>
-          <BookingFlow
-            reader={{ id: reader.id, displayName: reader.displayName, avatarUrl: reader.avatarUrl }}
-            priceThb={readerPriceThb(reader)}
-            isLiveOpen={isLiveOpen}
-            hasSchedule={nextSlot !== null}
-            initialMode={initialMode}
-            initialSlot={initialSlot}
-            free={free}
-          />
-        </div>
-      </main>
+      {/*
+        v3 UI 2.0 (เจ้าของ 2026-10-26): หัวหน้าแถบครีมเตี้ย ➔ ฟอร์มจองในหน้าต่างครีมบนท้องฟ้ากลางคืน
+        h1 อยู่ใน BookingFlow (เปลี่ยนตามขั้น) ➔ หัวข้อของหัวหน้าเป็น <p>
+      */}
+      <div className="ui2-pg" data-ui2-page-dark="">
+        <main id="main-content" tabIndex={-1} className="v3-cs is-narrow font-sans">
+          <ConsultHero
+            compact
+            titleAs="p"
+            kicker="จองเวลาปรึกษา"
+            title={<ThaiPhrases>{`คุยกับ ${reader.displayName}`}</ThaiPhrases>}
+            lede={
+              <ThaiPhrases>{`ตัวต่อตัว ${CONSULTATION_MINUTES} นาที ยกเลิกก่อนนัด ${FREE_CANCEL_HOURS} ชม. คืนเงินเต็ม`}</ThaiPhrases>
+            }
+          >
+            <Link href={`/readers/${encodeURIComponent(reader.id)}`} className="v3-cs-back">
+              กลับไปหน้าแม่หมอ
+            </Link>
+          </ConsultHero>
+          <ConsultWindow narrow label="ขั้นตอนจองเวลาปรึกษา">
+            <div className="space-y-3.5">
+              <BookingFlow
+                reader={{ id: reader.id, displayName: reader.displayName, avatarUrl: reader.avatarUrl }}
+                priceThb={readerPriceThb(reader)}
+                isLiveOpen={isLiveOpen}
+                hasSchedule={nextSlot !== null}
+                initialMode={initialMode}
+                initialSlot={initialSlot}
+                free={free}
+              />
+            </div>
+          </ConsultWindow>
+        </main>
+      </div>
       <SiteFooter spacing="tight" />
     </>
   );

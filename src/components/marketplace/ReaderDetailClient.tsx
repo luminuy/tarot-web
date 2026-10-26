@@ -136,27 +136,14 @@ export const ReaderDetailClient: React.FC<ReaderDetailClientProps> = ({ reader, 
           <WaitlistForm readerId={reader.id} compact />
         )}
 
-        <ul className="space-y-2 text-[13px] text-muted">
+        {/* เงื่อนไขย่อ — เส้นซ้ายแทนไอคอนติ๊ก (กฎเหล็ก 2 · `.v3-cs-lines` ใน v3-consult.css) */}
+        <ul className="v3-cs-lines">
           {[
             `ยกเลิกก่อนนัด ${FREE_CANCEL_HOURS} ชม. คืนเงินเต็มจำนวน`,
             "ชำระก่อนคุย ผ่าน Stripe · บัตรหรือพร้อมเพย์",
             "คุยผ่านวิดีโอคอลในเว็บ หรือ LINE · ไม่ต้องลงแอป",
           ].map((line) => (
-            <li key={line} className="flex items-center gap-2">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-4 w-4 shrink-0 text-ok"
-                aria-hidden="true"
-              >
-                <path d="m5 12.5 4.5 4.5L19 7.5" />
-              </svg>
-              {line}
-            </li>
+            <li key={line}>{line}</li>
           ))}
         </ul>
       </section>
@@ -165,7 +152,7 @@ export const ReaderDetailClient: React.FC<ReaderDetailClientProps> = ({ reader, 
       {primary && (
         <div
           aria-hidden={!showBar}
-          className={`fixed inset-x-0 bottom-0 z-30 border-t border-line-warm bg-surface px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] pt-3 shadow-[0_-10px_30px_-24px_rgba(46,33,26,0.6)] transition-transform duration-200 lg:hidden ${
+          className={`v3-cs-bar fixed inset-x-0 bottom-0 z-30 border-t border-line-warm bg-surface px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] pt-3 shadow-[0_-10px_30px_-24px_rgba(46,33,26,0.6)] transition-transform duration-200 lg:hidden ${
             showBar ? "translate-y-0" : "pointer-events-none translate-y-full"
           }`}
         >
