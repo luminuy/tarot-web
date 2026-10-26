@@ -134,6 +134,12 @@
     {
       "binding": "CALL_METRICS",
       "dataset": "seertarot_calls"
+    },
+    // INP ผู้ใช้จริงพร้อมตัวการ — 1 จุดต่อหน้าที่ INP ≥ 200 ms (src/lib/observability/inp-metrics.ts)
+    // ไม่มีข้อมูลส่วนตัว: เส้นทาง · ตัวระบุ element · ชนิดเครื่อง · ตัวเลขเวลา · อ่านผลด้วย `npm run cf:inp-stats`
+    {
+      "binding": "RUM_METRICS",
+      "dataset": "seertarot_rum"
     }
   ],
 

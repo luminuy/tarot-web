@@ -98,10 +98,15 @@ function tick(): void {
 /* ── 2 + 4. ผู้สังเกตการณ์ตัวเดียว ───────────────────────────────────────── */
 const sticky = () => document.querySelector<HTMLElement>("[data-ui2-sticky]");
 const hidesSticky = new Set<Element>(); // ส่วนที่มีปุ่มเดียวกันอยู่แล้ว (เปิดไพ่ · ปิดท้าย) + หัวหน้า
+/* ตำแหน่งเลื่อนล่าสุด — อัปเดตจาก event `scroll` เท่านั้น
+   ⚠️ callback ของ IntersectionObserver ห้ามอ่าน `scrollY` เอง: ตอน callback รันหน้ามักมีสไตล์ค้างคำนวณอยู่แล้ว
+   การอ่านจึงบังคับคำนวณสไตล์+เลย์เอาต์ทั้งหน้าหนึ่งรอบ แล้วการสลับ `data-inview` ต่อจากนั้นทำให้ต้องคำนวณซ้ำอีกรอบตอนวาด
+   (วัดด้วย Long Animation Frames ที่ CPU ×4: callback 24 ms เป็นเลย์เอาต์ที่ถูกบังคับ 20 ms · ย้ายไปอ่านก่อนเขียนก็ยังโดน · รอบ 314) */
+let lastScrollY = 0;
 function syncSticky(): void {
   const bar = sticky();
   if (!bar) return;
-  const show = hidesSticky.size === 0 && scrollY > 400;
+  const show = hidesSticky.size === 0 && lastScrollY > 400;
   if (show !== bar.hasAttribute("data-show")) bar.toggleAttribute("data-show", show);
 }
 
@@ -126,7 +131,7 @@ const observer =
             }
           }
           if (visibleClocks.size > 0 && !timer) tick();
-          syncSticky();
+          syncSticky(); // ไม่อ่านเลย์เอาต์ — ใช้ lastScrollY
         },
         { rootMargin: "120px 0px" },
       )
@@ -234,10 +239,18 @@ function scan(): void {
     if (el.hasAttribute("data-ui2-dark")) headerObserver?.observe(el);
   });
   paint();
+  lastScrollY = scrollY; // เปิดหน้ากลางทาง (ย้อนกลับ/ลิงก์ #) ยังไม่มี event scroll — อ่านหนึ่งครั้งตอนเริ่ม
   syncSticky();
 }
 afterHydrate(scan);
-addEventListener("scroll", syncSticky, { passive: true });
+addEventListener(
+  "scroll",
+  () => {
+    lastScrollY = scrollY;
+    syncSticky();
+  },
+  { passive: true },
+);
 
 let pendingScan = 0;
 new MutationObserver((mutations) => {
