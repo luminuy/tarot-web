@@ -202,7 +202,7 @@ async function run() {
     edge.setEdgeCacheStoreForTests(undefined);
   }
 
-  // ── เกณฑ์ 6: ตัวเก็บ INP ผู้ใช้จริง — หน้าที่เร็วไม่ยิงอะไรเลย · หน้าที่ช้ายิงครั้งเดียว (รอบ 314) ─
+  // ── เกณฑ์ 6: ตัวเก็บ INP ผู้ใช้จริง — หน้าที่เร็วไม่ยิงอะไรเลย · หน้าที่ช้ายิงครั้งเดียว (รอบ 315) ─
   {
     const beacons: string[] = [];
     const listeners = new Map<string, ((e: unknown) => void)[]>();

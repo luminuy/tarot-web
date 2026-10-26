@@ -218,7 +218,8 @@ docs/
 | **`APP_KV`** *(KV Binding)* | Cloudflare KV ข้อมูลแอป `app:*` — Overrides, Flags, Session Backstop (เดิมชื่อ `NEXT_INC_CACHE_KV` · แคชหน้า Next ย้ายไป static assets แล้ว) | 🔴 **จำเป็นบน Production** | `wrangler.jsonc` (`kv_namespaces`) | `src/lib/platform/cf.ts`<br>`src/lib/platform/kv-store.ts` |
 | **`AI`** *(Workers AI Binding)* | Cloudflare Workers AI สำหรับตัวคัดกรองความปลอดภัยฉุกเฉินชั้น 3 | 🟢 **ฟรี 10k neurons/วัน** | `wrangler.jsonc` (`ai`) | `src/lib/safety/ai-classifier.ts` |
 | **`VECTORIZE`** *(Binding)* | Cloudflare Vectorize Index (`card-meanings`) ค้นหาไพ่และความหมายเชิงความหมาย 1024d | 🟢 **ฟรี 30M queries/เดือน** | `wrangler.jsonc` (`vectorize`) | `src/lib/search/vectorize.ts` |
-| **`SHARE_BUCKET`** *(R2 Binding)* | Cloudflare R2 Bucket (`seertarot-share`) เก็บภาพการ์ดแชร์ที่สร้างจาก Canvas | 🟢 **ฟรี 10GB ไม่มี egress** | `wrangler.jsonc` (`r2_buckets`) | `src/app/api/share/card/route.ts` |
+| **`SHARE_BUCKET`** *(R2 Binding)* | Cloudflare R2 Bucket (`seertarot-share`) เก็บภาพการ์ดแชร์ที่สร้างจาก Canvas · ลบเองทั้ง bucket เมื่อครบ 90 วัน | 🟢 **ฟรี 10GB ไม่มี egress** | `wrangler.jsonc` (`r2_buckets`) | `src/app/api/share/image/route.ts` |
+| **`STUDIO_BUCKET`** *(R2 Binding)* | Cloudflare R2 Bucket (`seertarot-studio`) เก็บโลโก้สตูดิโอแม่หมอ · ส่วนตัว · เก็บถาวร (แยกจาก bucket การ์ดแชร์ 2026-10-26) | 🟢 **ฟรี 10GB ไม่มี egress** | `wrangler.jsonc` (`r2_buckets`) | `src/lib/studio/logo.ts` |
 
 ---
 

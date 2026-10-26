@@ -147,6 +147,12 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
               service you request. You
               retain continuous, unilateral authority to export or irrevocably erase your stored records at any time.
             </p>
+            <p>
+              <strong>Recovery Backups:</strong> We back up the database once a week to private storage on Cloudflare
+              and keep each backup for 35 days. Cloudflare also keeps a 30-day history of database changes. Data you
+              delete leaves the live system immediately, but may remain in these copies for up to 35 days before it
+              expires automatically. We use these copies only to restore the service after a failure.
+            </p>
           </div>
         </section>
 
@@ -158,7 +164,8 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
           <ul className="space-y-2 text-sm text-ink list-rule leading-relaxed">
             <li>
               <strong>Right to Erasure / &quot;Right to be Forgotten&quot;</strong> — Delete your complete reading history,
-              reflections, and registered account permanently via the self-service controls below.
+              reflections, and registered account permanently via the self-service controls below
+              (recovery backups expire on their own within 35 days, see section 3).
             </li>
             <li>
               <strong>Right to Data Portability</strong> — Instantly download an exhaustive, machine-readable JSON copy

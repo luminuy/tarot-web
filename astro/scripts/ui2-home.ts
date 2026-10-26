@@ -101,7 +101,7 @@ const hidesSticky = new Set<Element>(); // ส่วนที่มีปุ่�
 /* ตำแหน่งเลื่อนล่าสุด — อัปเดตจาก event `scroll` เท่านั้น
    ⚠️ callback ของ IntersectionObserver ห้ามอ่าน `scrollY` เอง: ตอน callback รันหน้ามักมีสไตล์ค้างคำนวณอยู่แล้ว
    การอ่านจึงบังคับคำนวณสไตล์+เลย์เอาต์ทั้งหน้าหนึ่งรอบ แล้วการสลับ `data-inview` ต่อจากนั้นทำให้ต้องคำนวณซ้ำอีกรอบตอนวาด
-   (วัดด้วย Long Animation Frames ที่ CPU ×4: callback 24 ms เป็นเลย์เอาต์ที่ถูกบังคับ 20 ms · ย้ายไปอ่านก่อนเขียนก็ยังโดน · รอบ 314) */
+   (วัดด้วย Long Animation Frames ที่ CPU ×4: callback 24 ms เป็นเลย์เอาต์ที่ถูกบังคับ 20 ms · ย้ายไปอ่านก่อนเขียนก็ยังโดน · รอบ 315) */
 let lastScrollY = 0;
 function syncSticky(): void {
   const bar = sticky();

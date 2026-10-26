@@ -113,9 +113,11 @@
   ],
 
   // ── R2 (ฟรี 10GB · ไม่มีค่า egress) ──────────────────────────────────────────
-  // เก็บภาพการ์ดแชร์ที่ผู้ใช้สร้างเอง (client canvas) → OG image ให้ลิงก์แชร์
-  // bucket `seertarot-share` · การ์ดแชร์ลบเองเมื่อครบ 90 วัน (PDPA) — deploy.yml ตั้งกฎทุกรอบ (scripts/cf-r2-lifecycle.ts)
-  // ⚠️ โลโก้สตูดิโอแม่หมอ `studio-logo/` อยู่ bucket นี้ด้วยและต้องอยู่ถาวร — ห้ามตั้งกฎลบทั้ง bucket
+  // แยก bucket ตามอายุข้อมูล (2026-10-26) — กฎลบอัตโนมัติของ R2 กรองได้แค่ prefix จึงห้ามปนของชั่วคราวกับของถาวร
+  // - `SHARE_BUCKET` (`seertarot-share`): ภาพการ์ดแชร์ที่ผู้ใช้สร้างเอง (client canvas) → OG image ให้ลิงก์แชร์
+  //   ลบเองทั้ง bucket เมื่อครบ 90 วัน (PDPA) — deploy.yml ตั้งกฎทุกรอบ (scripts/cf-r2-lifecycle.ts)
+  // - `STUDIO_BUCKET` (`seertarot-studio`): โลโก้สตูดิโอแม่หมอ (`studio-logo/`) — เก็บถาวร ห้ามมีกฎลบ (สคริปต์เดียวกันตรวจ)
+  // bucket ใหม่ต้องมีอยู่ก่อน `wrangler deploy` (wrangler validate) — deploy.yml สร้างให้ก่อนด้วย `npm run cf:r2-buckets`
   // schema: RawConfig.r2_buckets = [{ binding, bucket_name }] (ตรวจ config-schema.json — INC-0034)
   // ⚠️ wrangler validate bucket ผ่าน R2 API ตอน deploy → `CLOUDFLARE_API_TOKEN` ใน CI
   //    ต้องมี permission "Account · Workers R2 Storage · Edit" (เติมแล้ว 2026-09-03 · ดู INC hotfix #202)
@@ -123,6 +125,10 @@
     {
       "binding": "SHARE_BUCKET",
       "bucket_name": "seertarot-share"
+    },
+    {
+      "binding": "STUDIO_BUCKET",
+      "bucket_name": "seertarot-studio"
     }
   ],
 

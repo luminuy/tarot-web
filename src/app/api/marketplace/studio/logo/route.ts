@@ -1,5 +1,5 @@
 import { apiFail, apiOk } from "@/lib/api/envelope";
-import { getShareBucket } from "@/lib/platform/cf";
+import { getStudioBucket } from "@/lib/platform/cf";
 import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
 import { STUDIO_LOGO_PATH_RE } from "@/lib/studio/brand";
 import { studioGate } from "@/lib/studio/gate";
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   ]);
   if (!limit.allowed) return apiFail("เปลี่ยนโลโก้บ่อยเกินไป รอสักครู่แล้วลองใหม่", 429, "rate_limited");
 
-  const bucket = await getShareBucket();
+  const bucket = await getStudioBucket();
   if (!bucket) return apiFail("อัปโหลดรูปยังไม่พร้อม ลองวางลิงก์รูปแทน", 503, "storage_unavailable");
 
   const buf = await request.arrayBuffer().catch(() => null);

@@ -280,31 +280,56 @@ export interface AppR2Bucket {
   delete(key: string): Promise<void>;
 }
 
-let cachedShareBucket: AppR2Bucket | null | undefined;
+/**
+ * R2 bucket ที่ Worker ผูกไว้ (ชื่อ binding ต้องตรง `r2_buckets` ใน wrangler.jsonc)
+ * - `SHARE_BUCKET` (`seertarot-share`) — ภาพการ์ดแชร์ · ลบเองทั้ง bucket เมื่อครบ 90 วัน
+ * - `STUDIO_BUCKET` (`seertarot-studio`) — โลโก้สตูดิโอแม่หมอ · เก็บถาวร ห้ามมีกฎลบอัตโนมัติ
+ * แยก bucket ตามอายุข้อมูล (2026-10-26) — เดิมโลโก้อยู่ bucket การ์ดแชร์ ต้องตั้งกฎลบหลบ prefix 16 ข้อ
+ */
+type R2BindingName = "SHARE_BUCKET" | "STUDIO_BUCKET";
+const cachedBuckets = new Map<R2BindingName, AppR2Bucket | null>();
+
+async function getR2Bucket(name: R2BindingName): Promise<AppR2Bucket | null> {
+  const hit = cachedBuckets.get(name);
+  if (hit !== undefined) return hit;
+  let bucket: AppR2Bucket | null = null;
+  try {
+    const ctx = await safelyGetCloudflareContext();
+    const binding = (ctx?.env as Record<string, unknown> | undefined)?.[name];
+    if (binding && typeof (binding as AppR2Bucket).put === "function") bucket = binding as AppR2Bucket;
+  } catch {
+    // ไม่มี Cloudflare context
+  }
+  cachedBuckets.set(name, bucket);
+  return bucket;
+}
+
+function setBucketForTests(name: R2BindingName, bucket: AppR2Bucket | null | undefined): void {
+  if (bucket === undefined) cachedBuckets.delete(name);
+  else cachedBuckets.set(name, bucket);
+}
 
 /**
  * คืน R2 bucket สำหรับภาพการ์ดแชร์ (`env.SHARE_BUCKET`)
  * dev / test / ยังไม่ deploy = ไม่มี binding → คืน `null` (ผู้เรียกต้อง degrade เอง)
  */
-export async function getShareBucket(): Promise<AppR2Bucket | null> {
-  if (cachedShareBucket !== undefined) return cachedShareBucket;
-  try {
-    const ctx = await safelyGetCloudflareContext();
-    const binding = (ctx?.env as Record<string, unknown> | undefined)?.SHARE_BUCKET;
-    if (binding && typeof (binding as AppR2Bucket).put === "function") {
-      cachedShareBucket = binding as AppR2Bucket;
-      return cachedShareBucket;
-    }
-  } catch {
-    // ไม่มี Cloudflare context
-  }
-  cachedShareBucket = null;
-  return null;
+export function getShareBucket(): Promise<AppR2Bucket | null> {
+  return getR2Bucket("SHARE_BUCKET");
+}
+
+/** คืน R2 bucket สำหรับโลโก้สตูดิโอแม่หมอ (`env.STUDIO_BUCKET`) · ไม่มี binding → `null` เหมือนกัน */
+export function getStudioBucket(): Promise<AppR2Bucket | null> {
+  return getR2Bucket("STUDIO_BUCKET");
 }
 
 /** ชุดทดสอบเท่านั้น — ใส่ bucket ในหน่วยความจำแทน R2 (`undefined` = กลับไปหา binding จริงรอบถัดไป) */
 export function setShareBucketForTests(bucket: AppR2Bucket | null | undefined): void {
-  cachedShareBucket = bucket;
+  setBucketForTests("SHARE_BUCKET", bucket);
+}
+
+/** ชุดทดสอบเท่านั้น — เหมือน `setShareBucketForTests` แต่เป็น bucket โลโก้แม่หมอ */
+export function setStudioBucketForTests(bucket: AppR2Bucket | null | undefined): void {
+  setBucketForTests("STUDIO_BUCKET", bucket);
 }
 
 /**

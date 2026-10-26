@@ -1,5 +1,5 @@
 /**
- * ตัวช่วยเรียก Cloudflare API ฝั่ง R2 สำหรับสคริปต์ใน CI (สำรอง D1 · กฎลบอัตโนมัติ)
+ * ตัวช่วยเรียก Cloudflare API ฝั่ง R2 สำหรับสคริปต์ใน CI (สำรอง D1 · เตรียม bucket ก่อน deploy · กฎลบอัตโนมัติ)
  * ===========================================================================
  *
  * ใช้ `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` ชุดเดียวกับที่ deploy ใช้
@@ -64,17 +64,17 @@ export async function ensureR2Bucket(bucket: string): Promise<boolean> {
 
 /**
  * ยืนยันว่า bucket ไม่มีทางเข้าสาธารณะ (ลิงก์ r2.dev ปิด และไม่มีโดเมนของเราผูกอยู่)
- * ใช้กับ bucket ที่เก็บข้อมูลส่วนบุคคล เช่นไฟล์สำรองฐานข้อมูล — เปิดอยู่ = โยน error ห้ามอัปโหลดต่อ
+ * ใช้กับ bucket ที่ต้องเป็นส่วนตัว (ไฟล์สำรองฐานข้อมูล · โลโก้แม่หมอที่เสิร์ฟผ่าน Worker) — เปิดอยู่ = โยน error ห้ามทำต่อ
  */
 export async function assertR2BucketPrivate(bucket: string): Promise<void> {
   const managed = await cf<{ enabled: boolean; domain?: string }>(`/r2/buckets/${bucket}/domains/managed`);
   if (managed.enabled) {
-    throw new Error(`bucket ${bucket} เปิดลิงก์สาธารณะ r2.dev (${managed.domain ?? "?"}) อยู่ — ปิดก่อนจึงจะเก็บไฟล์สำรองได้`);
+    throw new Error(`bucket ${bucket} เปิดลิงก์สาธารณะ r2.dev (${managed.domain ?? "?"}) อยู่ — bucket นี้ต้องเป็นส่วนตัว ปิดที่ R2 › ${bucket} › Settings ก่อน`);
   }
   const custom = await cf<{ domains?: Array<{ domain: string }> }>(`/r2/buckets/${bucket}/domains/custom`);
   if ((custom.domains ?? []).length > 0) {
     const names = (custom.domains ?? []).map((d) => d.domain).join(", ");
-    throw new Error(`bucket ${bucket} ผูกโดเมนสาธารณะอยู่ (${names}) — ถอดก่อนจึงจะเก็บไฟล์สำรองได้`);
+    throw new Error(`bucket ${bucket} ผูกโดเมนสาธารณะอยู่ (${names}) — bucket นี้ต้องเป็นส่วนตัว ถอดที่ R2 › ${bucket} › Settings ก่อน`);
   }
 }
 
