@@ -1,9 +1,9 @@
 /**
- * ภาพไพ่ประดับประจำหมวด `/spreads/topic/*` — ใช้ทั้งภาพย่อผัง (`TopicSpreadList`) และกล่อง/แผงของหน้าหมวด
+ * ภาพไพ่ประดับประจำหมวด `/spreads/topic/*` — ใช้กับกล่อง/แผงของหน้าหมวด (รายการผังใช้ไพ่ผังกลาง `SpreadCard` แล้ว · 2026-10-26)
  * ⚠️ เป็นภาพประดับตามความหมายดั้งเดิมของไพ่ ไม่ใช่ผลสุ่มหรือคำทำนาย (กฎเหล็ก 14)
  *    ชุดละ ≥ 7 ใบ > ผังใหญ่สุดของหมวด (6 ใบ) ➔ ใบไม่ซ้ำในผังเดียว
  */
-export const TOPIC_DECK: Record<string, readonly string[]> = {
+const TOPIC_DECK: Record<string, readonly string[]> = {
   love: ["major-06", "cups-02", "cups-10", "major-03", "major-17", "cups-01", "major-19"],
   career: ["major-07", "wands-03", "pentacles-08", "major-01", "wands-06", "pentacles-03", "major-21"],
   money: ["pentacles-01", "pentacles-10", "major-10", "pentacles-07", "major-19", "pentacles-09", "wands-06"],

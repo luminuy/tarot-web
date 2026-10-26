@@ -100,36 +100,54 @@
     padding: 34px;
   }
 }
-.v2-sd-board-area {
-  position: relative;
-  width: 100%;
+/* ไพ่ผังงาช้างกลางกระดาน (`SpreadHeroCard` · ui2-spread-card.css) — ใบเดียวกับคลังผัง /spreads (เจ้าของ 2026-10-26)
+   เดิมเป็นช่องไพ่คว่ำลายเฉียงวางบนกระดานตรง ๆ (`.v2-sd-board-area`) · ไม่ใช่ลิงก์ จึงไม่ยก/ไม่ขยายตามเมาส์ */
+.v2-sd-board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-.v2-sd-slot {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  border-radius: 6px;
-  border: 1.5px solid rgba(255, 217, 143, 0.55);
-  box-shadow: 0 12px 20px -12px rgba(0, 0, 0, 0.95);
+.ui2-sd-card,
+.ui2-sd-card:hover {
+  --card-w: min(300px, 100%);
+  --tilt: -1.5deg;
+  translate: none;
+  scale: none;
+  box-shadow: var(--ui2-card-shadow);
+}
+@media (min-width: 960px) {
+  .ui2-sd-card,
+  .ui2-sd-card:hover {
+    --card-w: 340px;
+  }
+}
+.ui2-sd-card .ui2-sc-band {
+  font-size: 16px;
+  min-height: 56px;
+}
+/* ตำแหน่งบนผ้าปูเป็นปุ่ม — ถอดหน้าตาปุ่มของเบราว์เซอร์ · ตำแหน่งที่เลือกยกขึ้นเรืองทอง */
+.ui2-sd-card .v2-sd-slot {
+  padding: 0;
+  border: 0;
   cursor: pointer;
-  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
 }
-.v2-sd-slot span {
-  font-family: var(--ui2-font-display);
-  font-size: clamp(12px, 1.4vw, 20px);
-  font-weight: 700;
-  color: var(--ui2-gold-solid);
-  /* เลขตำแหน่งวางบนลายหลังไพ่ — ทองบนลายเหลือ ~3.6:1 ➔ รองพื้นทึบให้อ่านออกทุกจุดของลาย (B1 2026-10-20) */
-  padding: 0 0.35em;
-  border-radius: 6px;
-  line-height: 1.35;
-  background: rgba(12, 10, 15, 0.78);
+.ui2-sd-card .v2-sd-slot[aria-pressed="true"] {
+  z-index: 3;
+  scale: 1.16;
+  box-shadow: 0 0 0 1.5px var(--ui2-gold-solid), 0 0 16px rgba(255, 217, 143, 0.85);
 }
-.v2-sd-slot[aria-pressed="true"] {
-  border-color: var(--ui2-gold-solid);
-  box-shadow: 0 0 0 3px rgba(255, 217, 143, 0.35), 0 0 30px rgba(255, 217, 143, 0.45), 0 12px 20px -12px rgba(0, 0, 0, 0.95);
+.ui2-sd-card .v2-sd-slot:focus-visible {
+  outline: 2px solid var(--ui2-gold-solid);
+  outline-offset: 2px;
+}
+@media (hover: hover) {
+  .ui2-sd-card .v2-sd-slot:hover {
+    z-index: 4;
+    scale: 1.12;
+  }
 }
 .v2-sd-cap {
+  align-self: stretch;
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -379,48 +397,37 @@ tr.is-active .v2-sd-n {
 
 .v2-sd-more {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 12px;
   margin: 22px 0 0;
   padding: 0;
   list-style: none;
 }
-.v2-sd-more-card {
-  display: grid;
-  gap: 6px;
-  height: 100%;
-  padding: 16px;
-  border-radius: 22px;
-  border: 1px solid rgba(255, 217, 143, 0.18);
-  background: rgba(28, 23, 30, 0.7);
-  transition: border-color var(--dur-fast) var(--ease-out), translate var(--dur-fast) var(--ease-out);
+@media (min-width: 760px) {
+  .v2-sd-more {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px 24px;
+  }
 }
-.v2-sd-more-card:hover {
-  translate: 0 -2px;
-  border-color: rgba(255, 217, 143, 0.5);
+/* ผังอื่น = ไพ่ผังกลาง (`SpreadCard`) เรียงเอียงสลับแบบวางบนโต๊ะ + คำโปรยใต้ไพ่ */
+.v2-sd-more-item {
+  --card-w: min(168px, 92%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding-top: 18px;
 }
-.v2-sd-more-card b {
-  margin-top: 6px;
-  font-size: 15px;
-  color: var(--ui2-on-night);
+.v2-sd-more-item:nth-child(even) .ui2-spread-card {
+  --tilt: 3deg;
 }
-.v2-sd-more-card small {
+.v2-sd-more-tag {
+  max-width: 240px;
+  margin: 0;
   font-size: 12.5px;
   line-height: 1.55;
+  text-align: center;
   color: var(--ui2-on-night-dim);
-}
-.v2-sd-mini {
-  position: relative;
-  display: block;
-  width: 100%;
-  border-radius: 14px;
-  background: radial-gradient(80% 80% at 50% 40%, #1B2A4A 0%, #121C33 100%);
-}
-.v2-sd-mini span {
-  position: absolute;
-  border-radius: 3px;
-  border: 1px solid rgba(255, 217, 143, 0.6);
-  background: rgba(255, 217, 143, 0.12);
 }
 .v2-sd-all {
   /* เป้าแตะ ≥ 44px บนมือถือ — เดิมสูงเท่าบรรทัด 24px (B1 2026-10-20) */

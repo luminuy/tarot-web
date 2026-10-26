@@ -91,6 +91,14 @@ export const SPREAD_SHELVES: readonly SpreadShelf[] = [
   },
 ];
 
+/**
+ * หมวดของผังหนึ่งแบบ — ไพ่ผังทุกที่ในเว็บ (คลังผัง · หน้าหมวดเรื่อง · หน้าคู่มือ) ใช้สีหมวดชุดเดียวกัน
+ * (เจ้าของ 2026-10-26 ตอบคำถามเปิดข้อ 1 ของแผน UI_2_0_SPREADS) · ด่าน test-spreads บังคับว่าทุกผังสาธารณะมีหมวดพอดีหนึ่งหมวด
+ */
+export function shelfOf(spreadId: string): SpreadShelf | undefined {
+  return SPREAD_SHELVES.find((shelf) => shelf.ids.includes(spreadId));
+}
+
 /** ป้าย "ยอดนิยม" บนไพ่ผัง — ผังที่คนเลือกบ่อยที่สุด (ช่วยคนที่เลือกไม่ถูก · แผน UX 2026-10-13) */
 export const POPULAR_SPREAD_IDS: readonly string[] = ["three-card", "love", "celtic-cross"];
 

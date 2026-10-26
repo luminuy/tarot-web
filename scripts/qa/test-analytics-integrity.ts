@@ -409,9 +409,54 @@ async function runTests() {
     { name: "blog_read", params: { slug: "tarot-guide", title: "คู่มือทาโรต์" } },
     { name: "upgrade_dialog_open", params: { reason: "daily_exhausted" } },
     { name: "auth_modal_open", params: { mode: "signin" } },
+    {
+      name: "spread_card_tap",
+      params: { spread_id: "love", category: "love", surface: "topic", locale: "th", page_path: "/spreads/topic/love", action: "pop" },
+    },
   ];
 
-  check("All 20 event schemas pass TypeScript runtime contract", sampleEvents.length === 20);
+  check("All 21 event schemas pass TypeScript runtime contract", sampleEvents.length === 21);
+
+  /*
+   * 🃏 spread_card_tap (เจ้าของ 2026-10-26 ตอบคำถามเปิดข้อ 2 ของแผน UI_2_0_SPREADS "นับว่าคนแตะไพ่ผังใบไหน")
+   *   1. ส่งเฉพาะฟิลด์ที่ตกลงไว้ — id ผัง · หมวด · ที่มา · ภาษา · path · action (ไม่มีข้อมูลระบุตัวคน/ข้อความที่ผู้ใช้พิมพ์)
+   *   2. ยิง **หลัง** เปิดหน้าต่าง ผ่าน requestIdleCallback — ห้ามแย่งเฟรมเปิดหน้าต่าง (INC-0301 วัดไว้ 63–135 ms ที่ CPU ×4)
+   *   3. ทุกหน้าที่มีไพ่ผังเปิดสคริปต์ไพ่เด้ง (ไม่งั้นแตะแล้วไม่ถูกนับเงียบ ๆ)
+   */
+  {
+    const popSrc = readFileSync(resolve("astro/scripts/spread-pop.ts"), "utf8");
+    const call = /trackEvent\("spread_card_tap",\s*\{([^}]*)\}/.exec(popSrc)?.[1] ?? "";
+    const keys = [...call.matchAll(/^\s*([a-z_]+)\s*[:,]/gm)].map((m) => m[1]).sort();
+    const allowed = ["action", "category", "locale", "page_path", "spread_id", "surface"];
+    check(
+      "spread_card_tap ส่งเฉพาะ id ผัง · หมวด · ที่มา · ภาษา · path · action (ไม่มีข้อมูลส่วนตัว)",
+      keys.join(",") === allowed.join(","),
+      `เจอ: ${keys.join(", ") || "(ไม่พบการเรียก trackEvent)"}`,
+    );
+    check("spread_card_tap ไม่ส่ง query/hash ของ URL (ใช้ location.pathname)", /page_path:\s*location\.pathname\b/.test(call));
+    const clickStart = popSrc.indexOf("e.preventDefault();\n    open(card);");
+    const trackAt = popSrc.indexOf('trackTap(card, "pop")');
+    check(
+      "spread_card_tap ยิงหลังเปิดหน้าต่าง และคิวไว้ตอนเครื่องว่าง (ไม่แย่งเฟรมเปิด · INC-0301)",
+      clickStart > 0 && trackAt > clickStart && /requestIdleCallback\(send/.test(popSrc),
+    );
+    const astroPages = [
+      "astro/pages/spreads/[id].astro",
+      "astro/pages/spreads/topic/[category].astro",
+      "astro/pages/en/spreads/[id].astro",
+      "astro/pages/en/spreads/topic/[category].astro",
+    ];
+    const missing = astroPages.filter((f) => !readFileSync(resolve(f), "utf8").includes("initSpreadPop();"));
+    const indexPop = readFileSync(resolve("astro/scripts/spreads-pop.ts"), "utf8");
+    const indexOk = ["astro/pages/spreads/index.astro", "astro/pages/en/spreads/index.astro"].every((f) =>
+      readFileSync(resolve(f), "utf8").includes("scripts/spreads-pop"),
+    ) && indexPop.includes("initSpreadPop();");
+    check(
+      "ทุกหน้าที่มีไพ่ผัง (คลังผัง · หน้าคู่มือผัง · หน้าหมวดเรื่อง ทั้งสองภาษา) เปิดสคริปต์ไพ่เด้ง + นับการแตะ",
+      missing.length === 0 && indexOk,
+      `ขาด: ${[...missing, ...(indexOk ? [] : ["คลังผัง /spreads"])].join(", ")}`,
+    );
+  }
 
   // A4-10: ข้อความค้นหาของผู้ใช้ห้ามเข้า GA4/Meta — ส่งได้แค่ความยาว
   {

@@ -5,6 +5,7 @@
  *    (ด่าน test-motion-quality กฎ 2b · test-ui2-fx) — มือถือ / ลดการเคลื่อนไหว / เครื่องช้า ไม่มีวันได้ไฟล์นี้ทำงาน
  * ⚠️ ของวนทุกชิ้นมีคลาส `ui2-loop` และอยู่ใต้ `[data-anim-section]` (หยุดเองเมื่อพ้นจอ)
  */
+@import "./ui2-spread-card-fx.css";
 @media (min-width: 768px) {
   /* ดาวนิ่ง (INC-0273): ชั้นดาวสูงเต็มส่วนที่กะพริบ/เลื่อน = เลเยอร์ GPU หลายล้านพิกเซล และของทุกชิ้นที่วาดทับต้องถูกยกเป็นเลเยอร์ตาม */
 
@@ -158,15 +159,7 @@
 
   /* ไพ่ผังบนโต๊ะนิ่ง — ลอยเฉพาะตอนชี้ (hover ยกขึ้น) · เดิมทุกใบลอยขึ้นลงไม่หยุด 26+ ใบ = หน้าหนัก (2026-10-17) */
 
-  /* พื้นหลังหน้าต่างไพ่เด้ง: มืด + เบลอบาง ๆ */
-  [data-fx="full"] .ui2-pop-scrim {
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
-  }
-  /* วงแสงทองหลังไพ่ใหญ่เต้น */
-  [data-fx="full"] .ui2-pop-glow {
-    animation: ui2-sp-glow 2.4s ease-in-out infinite;
-  }
+  /* หน้าต่างไพ่เด้ง (เบลอฉากหลัง · วงแสงเต้น) ย้ายไป ui2-spread-card-fx.css — ของกลางกับหน้าหมวดเรื่อง/หน้าคู่มือผัง */
 }
 
 
@@ -243,8 +236,4 @@
 @keyframes ui2-sp-bob {
   0%, 100% { translate: 0 0; }
   50% { translate: 0 -10px; }
-}
-@keyframes ui2-sp-glow {
-  0%, 100% { opacity: 0.7; scale: 1; }
-  50% { opacity: 1; scale: 1.08; }
 }

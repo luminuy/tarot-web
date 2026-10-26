@@ -1,110 +1,44 @@
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import type { Spread } from "@/data/spreads-helpers";
-import { isStandardSpread } from "@/lib/entitlement/limits";
-import { mapLayout, MAP_CARD_ASPECT } from "@/lib/tarot/spread-map-geometry";
 import { useLocale } from "@/lib/i18n";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
-import { CardImage } from "@/components/card/CardImage";
-import { TOPIC_DECK } from "@/data/spread-topic-deck";
+import { SpreadCard, SpreadPopDialog } from "@/components/spread/SpreadCard";
 
 interface TopicSpreadListProps {
   spreads: Spread[];
-  /** หมวดของหน้า — เลือกชุดภาพไพ่ประดับภาพย่อผัง */
-  topic: string;
 }
 
-/* ภาพย่อผังใช้ภาพไพ่ 1909 จริงตามหมวด (เจ้าของ 2026-10-20 "ทำไมไม่ใช่รูปไพ่จริง" — เดิมเป็นกรอบสี่เหลี่ยมว่าง) · ชุดไพ่ดู `TOPIC_DECK` */
-
 /**
- * 📐 การ์ดผังพยากรณ์ในหน้าหมวดชีวิต — **ไม่ต้อง hydrate** (2026-09-18)
+ * 📐 รายการผังในหน้าหมวดเรื่อง `/spreads/topic/*` — **ไม่ต้อง hydrate** (2026-09-18)
  * ---------------------------------------------------------------------------
- * ของเดิมมี `useState` ตัวเดียวคือ "การ์ดใบไหนกางแผงตำแหน่งไพ่อยู่" แล้วต้องแลกด้วย
- * การโหลด React ทั้งก้อนลงหน้าหมวดทั้ง 12 หน้า (6 ไทย + 6 อังกฤษ)
+ * v3 (เจ้าของ 2026-10-26 ตอบคำถามเปิดข้อ 1 ของแผน UI_2_0_SPREADS "ใช้ไพ่ผังแบบเดียวกับ /spreads"):
+ * ภาพย่อผังของแต่ละแถวเป็นไพ่ผังงาช้างใบเดียวกับคลังผัง (`SpreadCard`) — แตะแล้วเด้งหน้าต่างผังแบบเดียวกัน
+ * (`astro/scripts/spread-pop.ts`) · ไม่มี JS = ไพ่เป็นลิงก์ไปหน้าคู่มือผัง
+ * ข้อความในแถว (ชื่อผัง h2 · คำโปรย · คำอธิบาย · ชื่อตำแหน่ง · ปุ่มสองปุ่ม) คงเดิมทั้งหมด — เนื้อหาที่ Google เห็นอยู่
  *
- * ตอนนี้ใช้ `<details>` ของเบราว์เซอร์แทน ได้ของเท่าเดิมโดยไม่ใช้ JS สักบรรทัด:
- * เปิด/ปิดด้วยคีย์บอร์ดเอง · ประกาศสถานะให้โปรแกรมอ่านหน้าจอเอง (ไม่ต้องเขียน `aria-expanded`)
- * · และยังกางได้ตั้งแต่เฟรมแรกก่อน JS ใด ๆ จะโหลด (ท่าเดียวกับ `ChangePasswordCard`)
- *
- * ⚠️ พฤติกรรมที่เปลี่ยนโดยตั้งใจ: เดิมกางได้ทีละใบ (กางใบใหม่ = ใบเก่าพับ)
- *    ตอนนี้กางพร้อมกันหลายใบได้ — การ์ดแต่ละใบมีความสูงของตัวเอง ไม่มีใบไหนดันใบอื่น
- *    และไม่มีใครเคยขอให้มันพับกันเอง (ถ้าต้องบังคับทีละใบต้องใช้ `name=` ซึ่ง Safari < 17.2 ไม่รองรับ)
+ * v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย"): แถวเมนูผัง เห็นชื่อตำแหน่งทันที ไม่ต้องกด "ขยาย"
+ * ยังเป็น HTML ล้วน ไม่ hydrate (ไม่มี state)
  */
-/**
- * ขยายไพ่ในภาพย่อให้ใหญ่ที่สุดที่ยังไม่ทับกันและไม่ล้นกรอบ (เพดาน 1.6 เท่า)
- * ขนาดตั้งต้นจาก `mapLayout` ออกแบบไว้สำหรับกรอบสี่เหลี่ยมว่าง — พอเป็นภาพไพ่จริงจะเล็กจนดูไม่ออก
- */
-function cardScale(spread: Spread, map: ReturnType<typeof mapLayout>): number {
-  const w = map.cardW;
-  const h = map.cardW * MAP_CARD_ASPECT;
-  const pts = spread.positions.map((p) => ({ x: p.x, y: p.y * map.yScale + map.offsetY }));
-  let k = 1.6;
-  for (let a = 0; a < pts.length; a++) {
-    for (let b = a + 1; b < pts.length; b++) {
-      const gap = Math.max(Math.abs(pts[a].x - pts[b].x) / w, Math.abs(pts[a].y - pts[b].y) / h);
-      k = Math.min(k, gap * 0.92);
-    }
-    k = Math.min(k, ((Math.min(pts[a].x, 1 - pts[a].x) - 0.02) * 2) / w);
-    k = Math.min(k, ((Math.min(pts[a].y, map.boxHeight - pts[a].y) - 0.01) * 2) / h);
-  }
-  return Math.max(1, k);
-}
-
-export function TopicSpreadList({ spreads, topic }: TopicSpreadListProps) {
+export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
   const { isEnglish } = useLocale();
-  const deck = TOPIC_DECK[topic] ?? TOPIC_DECK.love;
 
-  /*
-   * v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — แถวเมนูผัง: ภาพย่อผังจริง · ชื่อ + คำโปรย · ชื่อตำแหน่งเป็นชิป · ปุ่มสองปุ่ม
-   * v1: การ์ดสูงสามคอลัมน์ ภาพประกอบเล็ก ต้องกด "ขยาย" ถึงจะรู้ว่าผังถามอะไรบ้าง ➔ v2 เห็นชื่อตำแหน่งทันที
-   * ยังเป็น HTML ล้วน ไม่ hydrate (ไม่มี state)
-   */
   return (
+    <>
     <ol className="v2-tp-list">
       {spreads.map((spread, i) => {
-        const isStandard = isStandardSpread(spread.id);
-        const map = mapLayout(spread.positions);
-        const cardW = map.cardW * cardScale(spread, map);
         const names = spread.positions.map((pos) => (isEnglish ? pos.nameEn || pos.nameTh : pos.nameTh).replace(/^\d+\.\s*/, ""));
         return (
           <li key={spread.id} className="v2-tp-row">
             <span className="v2-tp-rank" aria-hidden="true">
               {String(i + 1).padStart(2, "0")}
             </span>
-            <span className="v2-tp-map" aria-hidden="true">
-              <span className="v2-tp-map-area" style={{ paddingBottom: `${(map.boxHeight * 100).toFixed(2)}%` }}>
-                {spread.positions.map((pos, j) => (
-                  <span
-                    key={j}
-                    style={{
-                      left: `${pos.x * 100}%`,
-                      top: `${(((pos.y * map.yScale + map.offsetY) / map.boxHeight) * 100).toFixed(3)}%`,
-                      width: `${(cardW * 100).toFixed(2)}%`,
-                      aspectRatio: `1 / ${MAP_CARD_ASPECT}`,
-                      transform: `translate(-50%, -50%) rotate(${pos.rotate ?? 0}deg)`,
-                    }}
-                  >
-                    <CardImage
-                      cardId={deck[(i * 2 + j) % deck.length]}
-                      alt=""
-                      thumb
-                      sizes="40px"
-                      loading="lazy"
-                      fetchPriority="low"
-                    />
-                  </span>
-                ))}
-              </span>
-            </span>
+            {/* ไพ่ผังกลาง (ชื่อผังบนแถบเป็นข้อความธรรมดา — หัวข้อ h2 ของแถวอยู่ข้าง ๆ แล้ว) */}
+            <div className="v2-tp-card">
+              <SpreadCard spread={spread} isEnglish={isEnglish} surface="topic" band="p" />
+            </div>
             <div className="v2-tp-body">
-              <p className="v2-tp-meta">
-                <span>
-                  {spread.positions.length} {isEnglish ? "cards" : "ใบ"}
-                </span>
-                <span className={isStandard ? "is-free" : "is-grand"}>
-                  {isStandard ? (isEnglish ? "Free" : "เปิดฟรี") : isEnglish ? "Deep Vision" : "ผังญาณลึก"}
-                </span>
-              </p>
+              {/* จำนวนใบ + ฟรี/ผังพิเศษ อยู่บนหัวไพ่ผังแล้ว (เดิมมีแถวป้ายซ้ำ "ผังญาณลึก" ที่เรียกคนละคำกับคลังผัง) */}
               <h2 className="v2-tp-name">
                 <ThaiPhrases>{isEnglish ? spread.nameEn || spread.nameTh : spread.nameTh}</ThaiPhrases>
               </h2>
@@ -131,5 +65,7 @@ export function TopicSpreadList({ spreads, topic }: TopicSpreadListProps) {
         );
       })}
     </ol>
+    <SpreadPopDialog isEnglish={isEnglish} />
+    </>
   );
 }
