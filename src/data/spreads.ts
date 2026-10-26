@@ -780,7 +780,8 @@ export const SPREADS: Spread[] = [
     id: "weekly",
     nameTh: "ดวงรายสัปดาห์ 7 วัน (ไพ่ 7 ใบ)",
     nameEn: "7-Day Weekly Forecast (7 Cards)",
-    seoTitleTh: "ดูดวงไพ่ยิปซีรายสัปดาห์ 7 ใบ ฟรี",
+    // GSC 2026-10-26: "ดูดวงไพ่ยิปซี 7 วันข้างหน้า" 139 แสดงผล อันดับ 6.7 CTR 2.9% ➔ วลีที่คนค้นขึ้นต้น
+    seoTitleTh: "ดูดวงไพ่ยิปซี 7 วันข้างหน้า รายสัปดาห์ 7 ใบ ฟรี",
     tagline: "ส่องพลังงานจันทร์ถึงอาทิตย์ วางแผนล่วงหน้า",
     taglineEn: "Map energetic tides Monday through Sunday to plan proactively",
     description:
@@ -1284,7 +1285,8 @@ export const SPREADS: Spread[] = [
     id: "luck",
     nameTh: "ดวงโชคลาภและการเสี่ยงโชค (ไพ่ 4 ใบ)",
     nameEn: "Fortune & Serendipity (4 Cards)",
-    seoTitleTh: "ดูดวงไพ่ยิปซี โชคลาภ เสี่ยงโชค 4 ใบ",
+    // GSC 2026-10-26: "ไพ่ยิปซีโชคลาภ" 42 แสดงผล อันดับ 9.7 ➔ วลีที่คนค้นขึ้นต้น
+    seoTitleTh: "ไพ่ยิปซีโชคลาภ ดูดวงเสี่ยงโชค 4 ใบ",
     tagline: "จังหวะเสี่ยงโชค โอกาสฟลุก และลาภลอย",
     taglineEn: "Auspicious timing, windfalls, and serendipitous opportunities",
     description:

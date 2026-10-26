@@ -69,7 +69,59 @@ GA4 ยังไม่มีอีเวนต์ซื้อแพ็กเก�
 
 ---
 
-## 🇹🇭 2026-10-20 — คิวใหม่จาก API: 118 หน้าไทยที่ยังไม่เข้าดัชนี (4 ชุด) ⭐ **ใช้ชุดนี้แทนคิว 5 ชุดของ 2026-09-09**
+## 🇹🇭 2026-10-26 — คิวใหม่จาก API: 76 หน้าไทยที่ยังไม่เข้าดัชนี (3 ชุด) ⭐ **ใช้ชุดนี้แทนคิว 2026-10-20**
+
+> ที่มา: `npm run seo:gsc -- inspect` ใน workflow run [40287477998](https://github.com/luminuy/tarot-web/actions/runs/40287477998) (2026-10-26 · รายสัปดาห์)
+> เข้าดัชนีแล้ว **126 / 202** หน้าไทย (2026-10-19 = 84 · +42 ใน 1 สัปดาห์) · ยังไม่เข้า 76 = Google ไม่รู้จัก 21 · พบแล้วแต่ไม่เคยคลาน 53 · คลานแล้วไม่เก็บ 2
+> ✅ ตรวจความพร้อมแล้ว 2026-10-26 ยิงจริงบน production ครบ 76 เส้น: HTTP 200 · ไม่มี `noindex` · `canonical` ชี้ตัวเอง — **กดได้ทันที**
+> คิว 2026-10-20 ด้านล่างไม่มีชุดไหนถูกติ๊กว่ากดแล้ว (42 หน้าในคิวนั้นเข้าดัชนีเอง) — **อย่าไล่ตามคิวเก่า**
+> ⚠️ เซสชัน Claude บนคลาวด์ที่ทำคิวนี้ **ไม่ได้กดขอ** (ไม่มีเบราว์เซอร์ที่ล็อกอิน GSC · API ไม่มีปุ่มนี้) — เจ้าของกดมือตามขั้นตอนมาตรฐานท้ายไฟล์ แล้วติ๊ก `[x]` พร้อมวันที่
+
+### [ ] ชุด 1 — 21 หน้าที่ Google ไม่รู้จัก URL + ผังพยากรณ์ 5 + ไพ่ชุดใหญ่ 4 (30 หน้า) ⭐ **ทำก่อน**
+
+`/blog/how-to-ask-tarot-questions` `/blog/tarot-history-1909-rider-waite` `/blog/tarot-job-interview-one-card` `/blog/tarot-single-timing-love` `/blog/the-fool-journey-meaning` `/blog/the-wheel-of-fortune-meaning` `/cards/cups-02` `/cards/cups-04` `/cards/cups-14` `/cards/pentacles-06` `/cards/pentacles-08` `/cards/pentacles-09` `/cards/pentacles-11` `/cards/pentacles-14` `/cards/swords-01` `/cards/swords-09` `/cards/swords-13` `/cards/wands-12` `/contact` `/spreads/career-switch` `/spreads/topic/study` `/spreads/inner-potential` `/spreads/mind-body-spirit` `/spreads/situation-solution` `/spreads/study` `/spreads/topic/health` `/cards/major-05` `/cards/major-09` `/cards/major-11` `/cards/major-13`
+
+### [ ] ชุด 2 — ไพ่ชุดใหญ่ที่เหลือ + บทความ 10 + ไพ่ถ้วย/เหรียญ/ดาบ (30 หน้า)
+
+`/cards/major-20` `/blog/ai-tarot-oracle-vs-human-reader` `/blog/tarot-7-chakras-spread` `/blog/tarot-daily-card-guide` `/blog/tarot-ex-return-signs` `/blog/tarot-love-3-cards-feelings` `/blog/tarot-wealth-money-cards` `/blog/tarot-yes-no-spread-guide` `/blog/the-devil-love-tarot-guide` `/blog/the-tower-and-death-meaning` `/blog/top-10-soulmate-tarot-cards` `/cards/cups-01` `/cards/cups-03` `/cards/cups-05` `/cards/cups-06` `/cards/cups-07` `/cards/cups-08` `/cards/cups-09` `/cards/cups-11` `/cards/cups-12` `/cards/cups-13` `/cards/pentacles-02` `/cards/pentacles-05` `/cards/pentacles-07` `/cards/pentacles-10` `/cards/swords-02` `/cards/swords-06` `/cards/swords-07` `/cards/swords-08` `/cards/swords-11`
+
+### [ ] ชุด 3 — ไพ่ไม้เท้า + หน้าข้อมูลเว็บ + 2 หน้าที่คลานแล้วไม่เก็บ (16 หน้า)
+
+`/cards/swords-14` `/cards/wands-01` `/cards/wands-02` `/cards/wands-03` `/cards/wands-04` `/cards/wands-05` `/cards/wands-06` `/cards/wands-07` `/cards/wands-08` `/cards/wands-09` `/cards/wands-11` `/cards/wands-14` `/about` `/privacy` `/cards/minor` `/spreads/ex-reconciliation`
+
+> 📌 `/cards/minor` (คลานล่าสุด 2026-09-14) และ `/spreads/ex-reconciliation` (2026-09-29) "รวบรวมข้อมูลแล้ว - ยังไม่ได้จัดทำดัชนี" ติดต่อกันหลายรอบ = Google เลือกไม่เก็บ กดซ้ำอาจไม่ช่วย ต้องดูเนื้อหาหน้า (ซ้ำกับหน้ารวม/หน้าผังอื่นมากไปไหม)
+> 📌 หลังกิ่ง `claude/hopeful-knuth-j66hv9` (PR #721) ขึ้น production: หน้าผัง `/spreads/<id>` และหน้าหมวด `/spreads/topic/*` เนื้อหา/ลิงก์บนหน้าเปลี่ยนจริง (ไพ่ผังกลาง) ➔ รัน `npm run seo:ping` (IndexNow · Bing/Yandex) อีกรอบ
+
+## 📊 2026-10-26 — ผล GSC รายสัปดาห์ + สิ่งที่แก้ (run [40287477998](https://github.com/luminuy/tarot-web/actions/runs/40287477998) · 28 วัน)
+
+| ตัวชี้วัด | 2026-10-19 | **2026-10-26** |
+|---|---:|---:|
+| ทั้งเว็บ (รายหน้า) | คลิก 539 · แสดงผล 13,523 · 154 หน้า | **คลิก 877 · แสดงผล 21,546 · 210 หน้า** |
+| หน้าอันดับ ≤ 3 / ≤ 10 | 14 / 112 | **17 / 169** |
+| คู่คำค้นไทย ➔ หน้า | 372 คู่ · คลิก 81 · แสดงผล 2,821 | **611 คู่ · คลิก 146 · แสดงผล 5,397** |
+| หน้าไทยที่เข้าดัชนี | 84 / 202 | **126 / 202** |
+
+> หน้าต่าง 28 วันสองรอบซ้อนกัน 21 วัน — บอกทิศทาง ไม่ใช่การเติบโตรายสัปดาห์
+
+**คำที่ขยับ**: `ดูดวงไพ่ยิปซี ai` 4.6 ➔ 3.3 · `ไพ่ยิปซีรายเดือน` 25.1 ➔ 13.0 · `ไพ่ยิปซีรายวัน` 20.5 ➔ 16.6 · `ดูดวงครอบครัว` 8.6 ➔ 7.2 · `ดูดวงไพ่ยิปซี อดีต ปัจจุบัน อนาคต ฟรี` อันดับ 8.9 เท่าเดิม แต่แสดงผล 287 ➔ 707
+**ยังไม่ขยับ**: `ดูดวงไพ่ยิปซีความรัก` 39.5 ➔ 38.9 — งานดันหน้า (รอบ 304 · PR #709) ขึ้น production ~2026-10-21 หลังช่วงข้อมูลส่วนใหญ่ของรอบนี้ ➔ **ไม่แก้ซ้ำ** วัดอีกครั้งรายงาน 2026-11-09 · ฝั่งโค้ดครบแล้ว (หน้าแรกลิงก์คำนี้ 3 จุด · ท้ายเว็บทุกหน้า · ผังลูก) ทางที่เหลือเป็นลิงก์จากนอกเว็บ (TikTok · Facebook · LINE OA ชี้มาที่ `/spreads/topic/love`)
+**คำใหญ่** `ดูดวง` · `ดูดวงไพ่ยิปซี` · `ดูดวงฟรี` ไม่อยู่ใน 50 คำแรกตามจำนวนแสดงผล — ยังแข่งเจ้าใหญ่ไม่ได้
+
+**title ที่แก้รอบนี้** (หน้าที่ไม่ได้อยู่ในชุดรอบ 244 — 9 หน้าของรอบ 244 ยังอยู่ในช่วงรอวัดผล ไม่แตะซ้ำ):
+
+| หน้า | คำค้นที่มาขึ้น (แสดงผล · อันดับ · CTR) | title ใหม่ |
+|---|---|---|
+| `/love/1-card` | ไพ่ยิปซี ความรัก 1 ใบ 77 · 9.1 · 2.6% + ไพ่ยิปซีความรัก 1 ใบ 29 · 0% | ไพ่ยิปซีความรัก 1 ใบ ดูดวงความรักแม่น ๆ ไขคำตอบหัวใจ (+ description ขึ้นต้นวลีเดียวกัน) |
+| `/spreads/weekly` | ดูดวงไพ่ยิปซี 7 วันข้างหน้า 139 · 6.7 · 2.9% | ดูดวงไพ่ยิปซี 7 วันข้างหน้า รายสัปดาห์ 7 ใบ ฟรี |
+| `/spreads/luck` | ไพ่ยิปซีโชคลาภ 42 · 9.7 · 4.8% | ไพ่ยิปซีโชคลาภ ดูดวงเสี่ยงโชค 4 ใบ |
+
+- sitemap: lastModified 2026-10-26 ให้หน้าผัง 26 + หน้าหมวด 6 (สองภาษา) เพราะไพ่ผังกลางเปลี่ยนภาพผัง/ลิงก์บนหน้าจริง · หน้าที่แก้แค่ title ไม่ขยับ lastModified (กติกาใน `src/app/sitemap.ts`)
+- อยู่ในกิ่ง `claude/hopeful-knuth-j66hv9` (PR #721 · draft รอเจ้าของดู preview) — **ยังไม่ขึ้น production**
+- **วัดผล**: รายงาน 2026-11-09 และ 2026-11-16 ดู `pairs` ของ 3 หน้านี้ + 9 หน้าของรอบ 244
+
+---
+
+## 🇹🇭 2026-10-20 — คิวใหม่จาก API: 118 หน้าไทยที่ยังไม่เข้าดัชนี (4 ชุด) (เก่า — ใช้คิว 2026-10-26 ด้านบนแทน)
 
 > ที่มา: `npm run seo:gsc -- inspect` ใน workflow run [39217517780](https://github.com/luminuy/tarot-web/actions/runs/39217517780) (2026-10-19)
 > เข้าดัชนีแล้ว **84 / 202** หน้าไทย (รอบ 2026-10-16 = 76) · ยังไม่เข้า 118 = Google ไม่รู้จัก 20 · พบแล้วแต่ไม่เคยคลาน 96 · คลานแล้วไม่เก็บ 2
