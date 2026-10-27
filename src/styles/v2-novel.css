@@ -252,23 +252,129 @@
   border-radius: 3px;
 }
 
-/* ตัวบท — คอลัมน์อ่านของหน้าบทความ ขยายตัวอักษรเล็กน้อยสำหรับอ่านยาว */
-.v2-nv-body {
-  margin-top: 32px;
-  font-size: 18px;
+/* ── หน้าอ่าน: แผ่นกระดาษครีม + ฟอนต์มีหัวแบบหนังสือ (เจ้าของ "เนื้ออ่านนิยายอ่านยาก ไม่สวยเลย ออกแบบใหม่") ──
+ * ตัวหนังสือเข้มบนกระดาษสว่าง อ่านยาวไม่ล้าเท่าตัวอ่อนบนพื้นดาว · บรรทัดไม่เกินราว 60 ตัวอักษร
+ * ขนาดตัวอักษร (data-size) และพื้นกลางคืน (data-theme) ผู้อ่านเลือกเองใน NovelReader */
+.v2-nv-reader {
+  --nv-size: 19px;
+  margin-top: 28px;
 }
-.v2-nv-body p {
-  margin: 0 0 1.15em;
+.v2-nv-reader[data-size="s"] {
+  --nv-size: 17px;
 }
-/* ความคิดในใจ (`*ตัวเอียง*` ในต้นฉบับ) — ภาษาไทยไม่มีตัวเอียงจริง ใช้สีอ่อนลงแทน */
-.v2-nv-body em {
-  font-weight: 500;
-  color: var(--ui2-gold-light);
+.v2-nv-reader[data-size="l"] {
+  --nv-size: 22px;
+}
+@media (max-width: 639px) {
+  .v2-nv-reader {
+    --nv-size: 18px;
+  }
+  .v2-nv-reader[data-size="s"] {
+    --nv-size: 16px;
+  }
+  .v2-nv-reader[data-size="l"] {
+    --nv-size: 21px;
+  }
+}
+
+/* แถบตั้งค่า: ขนาดตัวอักษร (ก สามขนาด) · พื้นกระดาษ/กลางคืน */
+.v2-nv-tools {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 14px;
+}
+.v2-nv-seg {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--ui2-line-night);
+  border-radius: 999px;
+  background: var(--ui2-glass-night-solid);
+}
+.v2-nv-seg-b {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--ui2-on-night-soft);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.v2-nv-seg-b[aria-pressed="true"] {
+  background: var(--ui2-gold-solid);
+  color: var(--ui2-ink);
+  font-weight: 700;
+}
+.v2-nv-seg-s {
+  font-size: 13px;
+}
+.v2-nv-seg-m {
+  font-size: 16px;
+}
+.v2-nv-seg-l {
+  font-size: 20px;
+}
+
+.v2-nv-paper {
+  padding: 44px 56px 48px;
+  border-radius: var(--ui2-radius-lg);
+  background: var(--ui2-paper);
+  box-shadow: var(--ui2-card-shadow);
+  font-family: var(--font-serif-th);
+  font-size: var(--nv-size);
+  line-height: 1.95;
+  color: var(--ui2-ink);
+  overflow-wrap: anywhere;
+}
+.v2-nv-paper p {
+  margin: 0 0 1em;
+}
+.v2-nv-paper p:last-child {
+  margin-bottom: 0;
+}
+.v2-nv-paper strong {
+  font-weight: 700;
+}
+/* ความคิดในใจ (`*ตัวเอียง*` ในต้นฉบับ) — ภาษาไทยไม่มีตัวเอียงจริง ใช้สีหมึกทองแทน */
+.v2-nv-paper em {
+  font-style: normal;
+  color: var(--ui2-gold-ink);
 }
 /* เสียงประกอบ / ความคิดบรรทัดเดียว — จัดกลางเป็นจังหวะแยก */
-.v2-nv-body .v2-nv-beat {
-  margin: 1.6em 0;
+.v2-nv-paper .v2-nv-beat {
+  margin: 1.5em 0;
   text-align: center;
+  color: var(--ui2-gold-ink);
+}
+.v2-nv-reader[data-theme="night"] .v2-nv-paper {
+  background: var(--ui2-night-2);
+  box-shadow: none;
+  border: 1px solid var(--ui2-line-night);
+  color: var(--ui2-on-night-soft);
+}
+.v2-nv-reader[data-theme="night"] .v2-nv-paper strong {
+  color: var(--ui2-on-night);
+}
+.v2-nv-reader[data-theme="night"] .v2-nv-paper em,
+.v2-nv-reader[data-theme="night"] .v2-nv-paper .v2-nv-beat {
+  color: var(--ui2-gold-solid);
+}
+/* มือถือ: กระดาษเต็มกว้างจอ ให้บรรทัดยาวพอ ไม่เหลือแค่คอลัมน์แคบกลางจอ */
+@media (max-width: 639px) {
+  .v2-nv-paper {
+    margin-inline: -16px;
+    padding: 30px 20px 34px;
+    border-radius: 0;
+  }
+  .v2-nv-tools {
+    justify-content: center;
+  }
 }
 .v2-nv-end {
   margin: 40px 0 0;
@@ -344,8 +450,18 @@
 
 /* ── ตัวบทสำหรับสมาชิก (island NovelReader) ── */
 .v2-nv-teaser {
-  /* ย่อหน้าตัวอย่าง — จางกว่าตัวบทจริงเล็กน้อย (ห้าม mask-image นอกระดับ full · ด่าน test-ui2-fx) */
-  opacity: 0.8;
+  position: relative;
+  padding-bottom: 24px;
+}
+/* ย่อหน้าตัวอย่างค่อย ๆ จางหายลงไปในกระดาษ — ไล่สีทับด้วยชั้นเปล่า (ห้าม mask-image นอกระดับ full · ด่าน test-ui2-fx) */
+.v2-nv-teaser::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 65%;
+  border-radius: inherit;
+  background: linear-gradient(to bottom, transparent, var(--ui2-paper) 85%);
+  pointer-events: none;
 }
 .v2-nv-gate {
   display: grid;
