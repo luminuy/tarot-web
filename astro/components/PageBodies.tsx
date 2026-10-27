@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { AboutBodyTh } from "@/app/_shared/pages/about-th";
+import { NatalChartBody } from "@/app/_shared/pages/natal-chart";
 import { NotFoundMain } from "@/app/_shared/pages/not-found";
 import { DailyBodyEn } from "@/app/_shared/pages/daily-en";
 import { DailyBodyTh } from "@/app/_shared/pages/daily-th";
@@ -74,6 +75,15 @@ export function CardGroupBodyRoot({
   return (
     <LocaleProvider forcedLocale={locale}>
       <CardGroupBody groupId={groupId} locale={locale} />
+    </LocaleProvider>
+  );
+}
+
+/** 🪐 ผังดวงกำเนิด — เนื้อหาคงที่ทั้งสองภาษา · เครื่องคำนวณเข้ามาทาง slot `app` */
+export function NatalChartBodyRoot({ locale, app }: { locale: Locale; app: ReactNode }) {
+  return (
+    <LocaleProvider forcedLocale={locale}>
+      <NatalChartBody locale={locale} app={app} />
     </LocaleProvider>
   );
 }

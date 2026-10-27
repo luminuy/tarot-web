@@ -1,0 +1,31 @@
+---
+import { natalChartMetadata, NATAL_CARDS } from "@/app/_shared/pages/natal-chart";
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { NatalChartBodyRoot } from "../components/PageBodies";
+import { NatalChartRoot } from "../islands/NatalChartRoot";
+import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
+import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
+import "@/styles/v2-natal.css";
+
+/** 🪐 ผังดวงกำเนิด (ต้นไม้ภาษาไทย) — คำนวณในเครื่องผู้ใช้ทั้งหมด */
+const locale = "th" as const;
+---
+
+<BaseLayout locale={locale} metadata={natalChartMetadata(locale)}>
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
+  <NatalChartBodyRoot locale={locale}>
+    <Fragment slot="app">
+      <NatalChartRoot cards={NATAL_CARDS} locale={locale} client:idle />
+    </Fragment>
+  </NatalChartBodyRoot>
+  </div>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../scripts/ui2-inview";
+</script>

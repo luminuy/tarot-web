@@ -44,6 +44,8 @@ for (const [href, expected] of [
   ["/cards", true],
   ["/cards/major-00", true],
   ["/cards/birth-card", true],
+  ["/natal-chart", true],
+  ["/en/natal-chart", true],
   ["/en/cards", true],
   ["/en/cards/major-00", true],
   ["/cards/major-00?x=1#y", true],
