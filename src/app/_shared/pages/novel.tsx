@@ -308,12 +308,13 @@ export function NovelChapterContent({ chapter, reader }: { chapter: NovelChapter
               {NOVEL.title}
             </Link>
           </p>
+          <p className="v2-nv-chcast-k">ตัวละครในบทนี้</p>
           <ul className="v2-nv-chcast" aria-label="ไพ่ของตัวละครในบทนี้">
             {chapter.cards.map((id) => (
               <li key={id}>
                 <Link href={`/cards/${id}`} className="v2-nv-chcast-a">
-                  <CardImage cardId={id} image={cardById(id)?.image} alt="" thumb sizes="40px" className="v2-nv-chcast-card" />
-                  <span>{cardName(id)}</span>
+                  <CardImage cardId={id} image={cardById(id)?.image} alt="" thumb sizes="64px" className="v2-nv-chcast-card" />
+                  <span className="v2-nv-chcast-n">{cardName(id)}</span>
                 </Link>
               </li>
             ))}

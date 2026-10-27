@@ -97,6 +97,9 @@ export const STORAGE_KEYS = {
 
   /** ระดับเอฟเฟกต์ UI 2.0 ที่ตัวกันพัง FPS ลดเครื่องนี้ลงเป็น `lite` แล้วในแท็บนี้ (sessionStorage · `src/app/_shared/ui2-fx.ts`) */
   ui2Fx: "tarot_ui2_fx",
+
+  /** ค่าตั้งหน้าอ่านนิยายของเครื่องนี้ — ขนาดตัวอักษร + พื้นกระดาษ/กลางคืน (`NovelReader` · ไม่ใช่ข้อมูลส่วนตัว) */
+  novelReader: "tarot_novel_reader_v1",
 } as const;
 
 /**
