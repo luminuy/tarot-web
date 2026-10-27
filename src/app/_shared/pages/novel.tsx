@@ -191,32 +191,33 @@ export function NovelHubContent() {
           </h2>
           {NOVEL_PARTS.map((part) => {
             const chapters = novelPartChapters(part);
+            const minutes = chapters.reduce((sum, c) => sum + c.readingMinutes, 0);
             return (
-              <div key={part.number} className="v2-nv-act">
-                <h3 className="v2-nv-act-h">
-                  <span>
-                    <ThaiPhrases>{novelPartLabel(part)}</ThaiPhrases>
-                  </span>
-                  <span className="v2-nv-act-s">
-                    <ThaiPhrases>{`${part.complete ? "จบแล้ว" : "กำลังเขียน"} · ${chapters.length} บท`}</ThaiPhrases>
-                  </span>
-                </h3>
-                <ol className="v2-nv-toc">
+              <div key={part.number} className="v2-nv-part">
+                <p className="v2-nv-part-k">ภาคที่ {part.number}</p>
+                <h3 className="v2-nv-part-t">{part.title || <ThaiPhrases>{novelPartLabel(part)}</ThaiPhrases>}</h3>
+                <p className="v2-nv-part-s">
+                  {part.complete ? "จบแล้ว" : "กำลังเขียน"} · {chapters.length} บท · อ่านรวมราว {minutes} นาที
+                </p>
+                <ol className="v2-nv-grid">
                   {chapters.map((c) => (
                     <li key={c.number}>
-                      <Link href={novelChapterPath(c.number)} className="v2-nv-toc-a">
-                        <CardImage
-                          cardId={c.cards[0]}
-                          image={cardById(c.cards[0])?.image}
-                          alt=""
-                          thumb
-                          sizes="44px"
-                          loading="lazy"
-                          className="v2-nv-toc-card"
-                        />
-                        <span className="v2-nv-toc-n">บทที่ {c.number}</span>
-                        <span className="v2-nv-toc-t">{c.title}</span>
-                        <span className="v2-nv-toc-m">{c.readingMinutes} นาที</span>
+                      <Link href={novelChapterPath(c.number)} className="v2-nv-ch">
+                        <span className="v2-nv-ch-n" aria-hidden="true">
+                          {String(c.number).padStart(2, "0")}
+                        </span>
+                        <span className="v2-nv-ch-body">
+                          <span className="sr-only">บทที่ {c.number} </span>
+                          <span className="v2-nv-ch-k">อ่านราว {c.readingMinutes} นาที</span>
+                          <span className="v2-nv-ch-t">
+                            <ThaiPhrases>{c.title}</ThaiPhrases>
+                          </span>
+                        </span>
+                        <span className="v2-nv-ch-fan" aria-hidden="true">
+                          {c.cards.slice(0, 3).map((id) => (
+                            <CardImage key={id} cardId={id} image={cardById(id)?.image} alt="" thumb sizes="40px" loading="lazy" className="v2-nv-ch-card" />
+                          ))}
+                        </span>
                       </Link>
                     </li>
                   ))}
