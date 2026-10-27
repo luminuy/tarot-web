@@ -32,6 +32,15 @@
   font-family: var(--font-sans, inherit);
   user-select: none;
 }
+.v2-nt-wheel .nw-outer-band {
+  fill: rgba(255, 222, 150, 0.22);
+  stroke: var(--nt-line);
+}
+.v2-nt-wheel .nw-outer {
+  fill: #FFF4DC;
+  stroke: rgba(138, 85, 18, 0.55);
+  stroke-width: 1.4;
+}
 .v2-nt-wheel .nw-bg {
   fill: var(--nt-paper);
   stroke: var(--nt-line);

@@ -234,7 +234,7 @@ export function angularDistance(a: number, b: number): number {
 }
 
 /** a − b ในช่วง −180..180 */
-function signedDiff(a: number, b: number): number {
+export function signedDiff(a: number, b: number): number {
   return norm360(a - b + 180) - 180;
 }
 
@@ -260,12 +260,12 @@ const BODY_OF: Record<PlanetId, Body> = {
   pluto: Body.Pluto,
 };
 
-function planetLon(id: PlanetId, time: AstroTime): number {
+export function planetLon(id: PlanetId, time: AstroTime): number {
   return norm360(Ecliptic(GeoVector(BODY_OF[id], time, true)).elon);
 }
 
 /** ลองจิจูด + ความเร็ว (ผลต่างกลาง ±6 ชม.) */
-function planetLonSpeed(id: PlanetId, utcMs: number): { lon: number; speed: number } {
+export function planetLonSpeed(id: PlanetId, utcMs: number): { lon: number; speed: number } {
   const h = 6 * 3600000;
   const lon = planetLon(id, MakeTime(new Date(utcMs)));
   const before = planetLon(id, MakeTime(new Date(utcMs - h)));
@@ -281,13 +281,13 @@ function centuriesTT(time: AstroTime): number {
 }
 
 /** โหนดเหนือเฉลี่ย (Mean Node) — Meeus, Astronomical Algorithms บทที่ 47 */
-function meanNode(time: AstroTime): number {
+export function meanNode(time: AstroTime): number {
   const T = centuriesTT(time);
   return norm360(125.0445479 - 1934.1362891 * T + 0.0020754 * T * T + (T * T * T) / 467441 - (T * T * T * T) / 60616000);
 }
 
 /** โหนดเหนือจริง (True Node · แบบ osculating) จากเวกเตอร์ตำแหน่ง-ความเร็วของดวงจันทร์ บนสุริยวิถี ณ วันนั้น */
-function trueNode(time: AstroTime): number {
+export function trueNode(time: AstroTime): number {
   const st = GeoMoonState(time);
   const rot = Rotation_EQJ_ECT(time);
   const r = RotateVector(rot, { x: st.x, y: st.y, z: st.z, t: time } as never);
@@ -775,7 +775,7 @@ function dominantPlanetsOf(bodies: readonly BodyPosition[], aspects: readonly As
 
 // ─────────────────────────── ตัวคำนวณหลัก ───────────────────────────
 
-function position(id: BodyId, lon: number, speed: number, cusps: readonly number[] | null): BodyPosition {
+export function position(id: BodyId, lon: number, speed: number, cusps: readonly number[] | null): BodyPosition {
   const L = norm360(lon);
   const sign = Math.floor(L / 30) % 12;
   const degInSign = L - sign * 30;

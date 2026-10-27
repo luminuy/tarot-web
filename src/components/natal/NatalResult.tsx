@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import React, { Suspense, useMemo, useState } from "react";
 import { CardImage } from "@/components/card/CardImage";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { ZODIAC_SIGNS } from "@/data/zodiac";
@@ -34,6 +34,10 @@ import { aspectTitle, bodyName, cardsFor, chartSummary, describeAspect, describe
 import { zodiacSignPath } from "@/lib/tarot/zodiac";
 import { NatalWheel } from "./NatalWheel";
 import type { NatalCardItem, NatalMeta } from "./NatalChartApp";
+import type { TimeMode } from "./NatalTimeTools";
+
+/* ⏳ แท็บตามเวลา (ดาวจร · ก้าวหน้า · รีเทิร์น) โหลดเมื่อกดแท็บเท่านั้น */
+const NatalTimeTools = React.lazy(() => import("./NatalTimeTools"));
 
 /**
  * 🪐 ผลผังดวงทั้งหมด — โหลดแบบ lazy พร้อมตัวคำนวณ (ไม่อยู่ในบันเดิลแรกของหน้า)
@@ -136,6 +140,7 @@ export default function NatalResult({
   const [focus, setFocus] = useState<BodyId | null>(null);
   const [showMinor, setShowMinor] = useState(false);
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
+  const [view, setView] = useState<"natal" | TimeMode>("natal");
   const cardById = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards]);
   const cardName = (id: string | undefined) => {
     const c = id ? cardById.get(id) : undefined;
@@ -224,6 +229,7 @@ export default function NatalResult({
               : `Birth time unknown: calculated for noon. That day the Moon moved from ${signName(Math.floor(chart.moonRange.from / 30), lang)} ${formatDegree(chart.moonRange.from % 30)} to ${signName(Math.floor(chart.moonRange.to / 30), lang)} ${formatDegree(chart.moonRange.to % 30)}. No Ascendant or houses.`}
           </p>
         )}
+        {view === "natal" && (
         <nav aria-label={isTh ? "ไปยังส่วนของผัง" : "Jump to"} className="v2-nt-noprint flex flex-wrap gap-1.5">
           {nav.map(([id, text]) => (
             <a key={id} href={`#${id}`} className="rounded-full border border-line-warm bg-surface px-3 py-1.5 text-xs text-ink hover:border-gold-ink">
@@ -231,8 +237,34 @@ export default function NatalResult({
             </a>
           ))}
         </nav>
+        )}
       </section>
 
+      {/* ── แท็บ: ผังเกิด / ตามเวลา ── */}
+      <div className="v2-nt-seg v2-nt-noprint" role="tablist" aria-label={isTh ? "มุมมองของผัง" : "Chart views"}>
+        {(
+          [
+            ["natal", isTh ? "ผังเกิด" : "Birth chart"],
+            ["transit", isTh ? "ดาวจร" : "Transits"],
+            ["progress", isTh ? "ดาวก้าวหน้า" : "Progressions"],
+            ["solar", isTh ? "ผังวันเกิดปีนี้" : "Solar return"],
+            ["lunar", isTh ? "ผังจันทร์คืน" : "Lunar return"],
+          ] as const
+        ).map(([k, t]) => (
+          <button key={k} type="button" role="tab" aria-selected={view === k} aria-pressed={view === k} onClick={() => setView(k)}>
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {view !== "natal" && (
+        <Suspense fallback={<p className="text-sm text-muted text-center">{isTh ? "กำลังคำนวณ..." : "Calculating..."}</p>}>
+          <NatalTimeTools chart={chart} lang={lang} meta={meta} mode={view} />
+        </Suspense>
+      )}
+
+      {view === "natal" && (
+      <>
       {/* ── วงผัง ── */}
       <section aria-labelledby="natal-wheel" className="space-y-3">
         <SectionTitle id="natal-wheel">{isTh ? "วงผังดวง" : "Chart wheel"}</SectionTitle>
@@ -615,6 +647,8 @@ export default function NatalResult({
           </li>
         </ul>
       </details>
+      </>
+      )}
     </div>
   );
 }

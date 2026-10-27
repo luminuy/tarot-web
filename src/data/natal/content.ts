@@ -523,3 +523,40 @@ export const DOMINANT_REASON_TEXT: Record<string, T> = {
   debilitated: { th: "ประ/นิจ", en: "detriment/fall" },
   aspects: { th: "มุมสัมพันธ์หลัก", en: "major aspects" },
 };
+
+// ─────────────────────────── ตามเวลา: ดาวจร · ดาวก้าวหน้า · รีเทิร์น ───────────────────────────
+
+/** ดาวจรทำอะไรกับจุดที่ไปกระทบ — ต่อท้ายด้วย "เรื่อง…" / "your …" */
+export const TRANSIT_TEXT: Record<"sun" | "moon" | "mercury" | "venus" | "mars" | "jupiter" | "saturn" | "uranus" | "neptune" | "pluto" | "chiron" | "node", { effect: T; span: T }> = {
+  sun: { effect: { th: "ส่องไฟให้", en: "spotlights" }, span: { th: "ราว 2 ถึง 3 วัน", en: "about 2 to 3 days" } },
+  moon: { effect: { th: "แต่งอารมณ์ของวันนี้ให้กับ", en: "colours today's mood around" }, span: { th: "ไม่กี่ชั่วโมง", en: "a few hours" } },
+  mercury: { effect: { th: "ชวนให้คิด คุย และตัดสินใจเรื่อง", en: "gets you thinking and talking about" }, span: { th: "ราว 1 ถึง 3 วัน (นานขึ้นช่วงถอยหลัง)", en: "about 1 to 3 days (longer when retrograde)" } },
+  venus: { effect: { th: "นำความรัก ความสุข และความง่ายมาให้", en: "brings warmth, pleasure and ease to" }, span: { th: "ราว 2 ถึง 4 วัน", en: "about 2 to 4 days" } },
+  mars: { effect: { th: "ปลุกแรงผลัก ความกล้า หรือความหงุดหงิดให้", en: "fires up drive, courage or friction in" }, span: { th: "ราว 3 ถึง 7 วัน", en: "about 3 to 7 days" } },
+  jupiter: { effect: { th: "ขยาย เปิดโอกาส และเพิ่มความมั่นใจให้", en: "expands and opens opportunities for" }, span: { th: "หลายสัปดาห์", en: "several weeks" } },
+  saturn: { effect: { th: "ทดสอบ วางกรอบ และให้บทเรียนจริงจังกับ", en: "tests, structures and matures" }, span: { th: "หลายสัปดาห์ถึงหลายเดือน", en: "weeks to months" } },
+  uranus: { effect: { th: "เขย่าให้เปลี่ยนแปลงฉับพลันและหาอิสระใน", en: "shakes up and frees" }, span: { th: "หลายเดือน", en: "several months" } },
+  neptune: { effect: { th: "ทำให้ฝัน อ่อนไหว หรือสับสน และเปิดแรงบันดาลใจให้", en: "softens, inspires or blurs" }, span: { th: "หลายเดือน", en: "several months" } },
+  pluto: { effect: { th: "รื้อและเปลี่ยนแปลงถึงรากให้", en: "transforms from the roots" }, span: { th: "หลายเดือนถึงเป็นปี", en: "months to a year or more" } },
+  chiron: { effect: { th: "เปิดแผลเก่าขึ้นมาเพื่อเยียวยา", en: "reopens and heals old wounds around" }, span: { th: "หลายเดือน", en: "several months" } },
+  node: { effect: { th: "ชี้ทิศทางชีวิตใหม่ผ่าน", en: "points a new life direction through" }, span: { th: "หลายเดือน", en: "several months" } },
+};
+
+/** น้ำเสียงของมุมเมื่อเป็นดาวจร */
+export const TRANSIT_TONE: Record<"harmonious" | "tense" | "neutral", T> = {
+  harmonious: { th: "ไปทางราบรื่น ลงมือเรื่องนี้ได้ง่ายกว่าปกติ", en: "in a flowing way; this is a good time to act on it" },
+  tense: { th: "ผ่านแรงกดดันหรือความท้าทาย ซึ่งผลักให้คุณปรับตัวและเติบโต", en: "through pressure or challenge that pushes you to adjust and grow" },
+  neutral: { th: "แบบตรงตัวและเข้มข้น", en: "directly and intensely" },
+};
+
+/** ข้างขึ้นข้างแรมก้าวหน้า: วงจรชีวิตราว 30 ปี แบ่งเป็น 8 ช่วง ช่วงละราว 3.5 ปี */
+export const PROG_PHASE_TEXT: readonly T[] = [
+  { th: "ช่วงเริ่มรอบใหม่ของชีวิต เมล็ดพันธุ์ของเรื่องใหม่ถูกปลูก ยังไม่ต้องเห็นภาพชัด ทำตามใจก่อน", en: "A new cycle begins. Seeds are planted; follow your instincts before the picture is clear." },
+  { th: "ช่วงตั้งตัว เรื่องที่เริ่มไว้ต้องสู้กับแรงต้านจากของเก่า ต้องยืนหยัด", en: "Establishing yourself: what you began meets resistance from the past. Hold your ground." },
+  { th: "ช่วงลงมือและตัดสินใจ เจออุปสรรคที่ต้องเลือกทางให้ชัด", en: "A time of action and decisions, when obstacles force clear choices." },
+  { th: "ช่วงขัดเกลา ปรับปรุงสิ่งที่ทำให้ดีขึ้นก่อนถึงจุดสุกงอม", en: "Refining and improving before things reach full bloom." },
+  { th: "ช่วงเห็นผล สิ่งที่ทำมาปรากฏชัด และความสัมพันธ์สะท้อนตัวคุณ", en: "Culmination: results become visible and relationships mirror you." },
+  { th: "ช่วงแบ่งปัน ถ่ายทอดสิ่งที่เรียนรู้ให้คนอื่น", en: "Sharing what you have learned with others." },
+  { th: "ช่วงปรับทิศ ทิ้งความเชื่อหรือบทบาทที่ไม่ใช่แล้ว", en: "Reorienting: letting go of beliefs or roles that no longer fit." },
+  { th: "ช่วงปิดรอบ พักใจ ปล่อยวาง และฟังเสียงข้างใน ก่อนรอบใหม่จะเริ่ม", en: "Closing the cycle: rest, release and listen inward before the next one begins." },
+];
