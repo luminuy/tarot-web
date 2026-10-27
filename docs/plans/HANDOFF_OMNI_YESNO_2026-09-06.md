@@ -17,7 +17,7 @@
 | :-: | :--- | :--- |
 | 1 | [`docs/INCIDENT_LOG.md`](../INCIDENT_LOG.md) | บทเรียนความผิดพลาด — ทำผิดซ้ำ = บกพร่องร้ายแรงสุด |
 | 2 | [`docs/KNOWN_ISSUES.md`](../KNOWN_ISSUES.md) | **ISSUE-003** (ยิปซี yesNo เอนเอียง) เกี่ยวตรงกับงาน A |
-| 3 | [`docs/plans/TRAFFIC_CAPTURE_PLAN_2026-09-05.md`](TRAFFIC_CAPTURE_PLAN_2026-09-05.md) | หลักฐาน SERP จริงที่เป็นเหตุผลของงาน A |
+| 3 | [`docs/plans/archive/TRAFFIC_CAPTURE_PLAN_2026-09-05.md`](archive/TRAFFIC_CAPTURE_PLAN_2026-09-05.md) | หลักฐาน SERP จริงที่เป็นเหตุผลของงาน A |
 | 4 | [`docs/PENDING_SETUP.md`](../PENDING_SETUP.md) | ทะเบียน secrets — งาน B และ C ต้องเพิ่มรายการ |
 
 ```bash

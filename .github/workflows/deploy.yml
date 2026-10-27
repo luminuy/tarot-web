@@ -121,8 +121,9 @@ jobs:
       # รัน migration ที่ยังไม่ apply ทั้งหมดใส่ D1 remote ก่อน deploy โค้ดใหม่ขึ้นไป
       # (idempotent — wrangler เช็ก migration ที่ apply แล้วจาก D1_migrations table เอง ข้ามอันที่ทำไปแล้วอัตโนมัติ)
       # ⚠️ CLOUDFLARE_API_TOKEN ต้องมีสิทธิ์ D1:Edit ด้วย ไม่งั้นขั้นนี้จะ fail แบบระบุชัดว่าขาดสิทธิ์อะไร
+      # ⚠️ ต้องมี `--remote` — ค่าเริ่มต้นของ `db:migrate` เป็นฐานในเครื่อง (2026-10-27) ถอดออก = ฐานจริงไม่ได้ migration ใหม่
       - name: 🗄️ Apply D1 Migrations (remote)
-        run: npm run db:migrate
+        run: npm run db:migrate -- --remote
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

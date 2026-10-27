@@ -39,7 +39,7 @@ tools: Read, Grep, Glob, Bash, WebSearch, WebFetch, Skill
 | คอนเทนต์โซเชียลสั้น | `small-business:social-content-engine` | สถานะช่องทางใน `docs/plans/HANDOFF_OMNI_YESNO_2026-09-06.md` |
 | วางแคมเปญ | `marketing:campaign-plan` | ปฏิทินงานใน `docs/WORK_LOG.md` |
 | อีเมลวนผู้ใช้กลับมา | `marketing:email-sequence` | `docs/plans/RETENTION_PLAN.md` (Daily Digest) |
-| วิเคราะห์คู่แข่ง | `marketing:competitive-brief` | `docs/plans/TRAFFIC_CAPTURE_PLAN_2026-09-05.md` |
+| วิเคราะห์คู่แข่ง | `marketing:competitive-brief` | `docs/plans/archive/TRAFFIC_CAPTURE_PLAN_2026-09-05.md` |
 | รายงานผลรายสัปดาห์/เดือน | `marketing:performance-report`, `product-management:metrics-review` | GSC + สถิติแอดมิน รอบล่าสุดเทียบรอบก่อน |
 | สรุปเสียงผู้ใช้ (ความเห็น · รีวิว) | `product-management:synthesize-research` | ข้อมูลที่เจ้าของส่งให้ (ตัดข้อมูลส่วนตัวออกก่อน) |
 | ระดมไอเดียและทดสอบสมมติฐาน | `product-management:brainstorm` | ตัวชี้วัดหลักหัวข้อ 4.3 |
@@ -251,4 +251,4 @@ Ahrefs · Similarweb (คีย์เวิร์ด ลิงก์ย้อน
 - บทความจากบริษัท SEO และ vendor เป็นแค่ความเห็น ไม่ใช่ข้อเท็จจริง
 
 **ข้อมูลภายใน**
-- `docs/SEO_INDEXING_LOG.md` · `docs/PENDING_SETUP.md` · `docs/ADMIN_PANEL.md` · `docs/plans/TRAFFIC_CAPTURE_PLAN_2026-09-05.md` · `docs/plans/HANDOFF_EN_ROUTING_2026-09-06.md` · `docs/plans/CONSULT_FLOW_UX_PLAN_2026-10-11.md` · `docs/specs/MARKETPLACE.md` · `docs/plans/RETENTION_PLAN.md`
+- `docs/SEO_INDEXING_LOG.md` · `docs/PENDING_SETUP.md` · `docs/ADMIN_PANEL.md` · `docs/plans/archive/TRAFFIC_CAPTURE_PLAN_2026-09-05.md` · `docs/plans/HANDOFF_EN_ROUTING_2026-09-06.md` · `docs/plans/CONSULT_FLOW_UX_PLAN_2026-10-11.md` · `docs/specs/MARKETPLACE.md` · `docs/plans/RETENTION_PLAN.md`

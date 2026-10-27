@@ -23,7 +23,7 @@
 4. **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**: สถาปัตยกรรมระดับองค์กร (Enterprise Architecture), กลไกการเข้ารหัสความโปร่งใส (Provably Fair Flow)
 5. **[docs/ADMIN_PANEL.md](docs/ADMIN_PANEL.md)**: คู่มือและสถาปัตยกรรมแผงควบคุมผู้ดูแลระบบ (Admin Panel & Cloud Health)
 6. **[docs/specs/INTERACTIVE_CARD_PICKING.md](docs/specs/INTERACTIVE_CARD_PICKING.md)**: รายละเอียดระบบและ Component สำหรับการให้คนจับไพ่ด้วยตนเอง
-7. **[docs/plans/AGENTS_TASK_PLAN.md](docs/plans/AGENTS_TASK_PLAN.md)**: แผนการกระจายงาน 5 เอเจนท์เฉพาะทาง และ Milestone การพัฒนา
+7. **[docs/plans/archive/AGENTS_TASK_PLAN.md](docs/plans/archive/AGENTS_TASK_PLAN.md)**: แผนการกระจายงาน 5 เอเจนท์เฉพาะทาง และ Milestone การพัฒนา
 8. **[docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md](docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md)**: 🪶 แผนสถาปัตยกรรม Astro 7 + React 19 Islands (ทุกหน้าสาธารณะา SSG Zero-Runtime ตอบจาก Edge)
 9. **[docs/plans/HANDOFF_CARD_TILE_CV_2026-09-15.md](docs/plans/HANDOFF_CARD_TILE_CV_2026-09-15.md)**: 📐 สูตรความสูงการ์ดไพ่และกฎ content-visibility ต่อ breakpoint (ด่านที่ 62)
 10. **[docs/TAROT_CARD_FEATURES.md](docs/TAROT_CARD_FEATURES.md)**: 🃏 **(CANONICAL SPEC)** สเปกระบบและสารบบไพ่ทาโรต์ 78 ใบ, 5 มิติความหมาย, ผัง 26 แบบ, Pick A Card 8 หัวข้อ, Provably Fair Flow
