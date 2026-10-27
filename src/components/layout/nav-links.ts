@@ -44,6 +44,8 @@ const FOOTER_COLUMNS = [
       { label: "ดูดวงความรัก 3 ใบ: เขารู้สึกอย่างไร", href: "/blog/tarot-love-3-cards-feelings" },
       { label: "คู่มือผังเซลติกครอส 10 ตำแหน่ง", href: "/blog/celtic-cross-spread-guide" },
       { label: "จิตวิทยาของ Carl Jung กับไพ่ทาโรต์", href: "/blog/tarot-and-carl-jung-psychology" },
+      /* นิยายของบ้าน (ภาษาไทยอย่างเดียว — ไม่ใส่ในคอลัมน์ฝั่งอังกฤษ) */
+      { label: "นิยายไพ่ทาโรต์ อ่านฟรีทุกบท", href: "/novel" },
     ],
   },
   {

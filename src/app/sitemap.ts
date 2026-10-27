@@ -5,6 +5,7 @@ import { PUBLIC_SPREADS } from "@/data/spreads";
 import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
 import { ZODIAC_SIGNS } from "@/data/zodiac";
 import { QUESTIONS } from "@/data/questions";
+import { NOVEL, NOVEL_CHAPTERS, NOVEL_PATH, novelChapterPath } from "@/data/novel";
 import { localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
 import { hasEnglishTwin } from "@/lib/i18n/paths";
 import { articleModifiedAt, questionModifiedAt, SITE_TEMPLATE_UPDATED_AT } from "@/lib/seo/lastmod";
@@ -235,9 +236,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ];
 
+  /** 📖 นิยาย — หน้ารวม + รายบท (ภาษาไทยอย่างเดียว ไม่มีฝาแฝด) · lastModified ตามวันที่แก้ตัวบทจริง */
+  const novelUpdated = new Date(NOVEL.updatedAt);
+  const novelRoutes: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}${NOVEL_PATH}`, lastModified: novelUpdated, changeFrequency: "weekly", priority: 0.7 },
+    ...NOVEL_CHAPTERS.map((c) => ({
+      url: `${baseUrl}${novelChapterPath(c.number)}`,
+      lastModified: novelUpdated,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
+  ];
+
   const thaiRoutes = [
     ...staticRoutes,
     ...questionRoutes,
+    ...novelRoutes,
     ...zodiacRoutes,
     ...cardRoutes,
     ...blogRoutes,

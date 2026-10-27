@@ -1,0 +1,31 @@
+---
+import { novelHubMetadata } from "@/app/_shared/pages/novel";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { NovelHubContentRoot } from "../../components/PageBodies";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
+import "@/styles/v2-article.css";
+import "@/styles/v2-novel.css";
+
+/**
+ * 📖 หน้ารวมนิยาย — เรื่องย่อ · คำเตือนเนื้อหา · สารบัญ · ตัวละครจากไพ่ (ไม่มี JS)
+ * ภาษาไทยอย่างเดียว: ไม่มี `/en/novel` และไม่ประกาศ hreflang (เจ้าของ 2026-10-27)
+ * ⚠️ `/novel` อยู่ใน ASTRO_ROUTE_PREFIXES
+ */
+const locale = "th" as const;
+---
+
+<BaseLayout locale={locale} metadata={novelHubMetadata()}>
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
+  <NovelHubContentRoot />
+  </div>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../scripts/ui2-inview";
+</script>
