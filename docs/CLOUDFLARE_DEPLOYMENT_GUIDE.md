@@ -67,7 +67,7 @@ Worker ชื่อ `tarot-web` (Next ผ่าน `@opennextjs/cloudflare`) + �
 | :-: | :--- | :--- |
 | 1 | job `quality-check`: `npm ci` ➔ `npm run build` ➔ `npm run repo:verify` | ไม่ deploy |
 | 2 | `npm ci --ignore-scripts` + ตรวจว่า `esbuild` · `workerd` · `sharp` ยังรันได้ | ไม่ deploy |
-| 3 | `npm run db:migrate` (D1 remote · ข้าม migration ที่ลงแล้วเอง) | ไม่ deploy |
+| 3 | `npm run db:migrate -- --remote` (D1 remote · ข้าม migration ที่ลงแล้วเอง · ถอด `--remote` = ลงแค่ฐานในเครื่อง) | ไม่ deploy |
 | 4 | เตือนถ้าค่าวัดผลที่ใช้อยู่ (`NEXT_PUBLIC_GA_ID`) ยังไม่ตั้ง | เตือนอย่างเดียว |
 | 4b | `npm run cf:r2-buckets` สร้าง bucket R2 ใน `wrangler.jsonc` ที่ยังไม่มี (`wrangler deploy` ล้มถ้า bucket ไม่มี) · bucket โลโก้ต้องเป็นส่วนตัว | ไม่ deploy |
 | 5 | จด version id ของ Worker ที่ใช้อยู่ (`PREV_VERSION_ID`) | อ่านไม่ได้ = ไม่ถอยอัตโนมัติ |
@@ -91,7 +91,7 @@ Worker ชื่อ `tarot-web` (Next ผ่าน `@opennextjs/cloudflare`) + �
 ## 3. Migration ของ D1
 
 - ไฟล์อยู่ที่ `migrations/NNNN_ชื่อ.sql` · ลง production อัตโนมัติในขั้น 3 ของ `deploy.yml` **ก่อน** โค้ดใหม่ขึ้น
-- ลงในเครื่อง: `npm run db:migrate -- --local`
+- ลงในเครื่อง: `npm run db:migrate` (ค่าเริ่มต้นเป็นฐานในเครื่องตั้งแต่ 2026-10-27 · ฐานจริงต้อง `-- --remote`)
 - เขียนให้โค้ดรุ่นก่อนยังทำงานได้: เพิ่มคอลัมน์แบบ nullable / มีค่าเริ่มต้น · ไม่ลบหรือเปลี่ยนชื่อคอลัมน์ในรอบเดียวกับโค้ดที่เลิกใช้
 - การถอย Worker **ไม่ย้อน** migration (หัวข้อ 6.3) · migration ที่เสี่ยงให้กดสำรองฐานก่อน (หัวข้อ 7)
 - ลิงก์ทดลอง (หัวข้อ 5) ไม่รัน migration — กิ่งที่มี migration ใหม่ต้องรอ deploy จริง
@@ -102,7 +102,7 @@ Worker ชื่อ `tarot-web` (Next ผ่าน `@opennextjs/cloudflare`) + �
 
 ```bash
 npx wrangler login               # หรือ export CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID
-npm run db:migrate               # D1 remote
+npm run db:migrate -- --remote   # D1 remote
 npm run deploy
 bash .github/scripts/worker-smoke.sh
 ```

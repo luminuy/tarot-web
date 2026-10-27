@@ -12,15 +12,15 @@
 
 ---
 
-### 🗓️ 2026-10-27 (รอบ 320): ISSUE-048 — แยกฟอนต์ไทย/ละติน + `unicode-range` (เจ้าของ "ISSUE-048 แก้")
+### 🗓️ 2026-10-27 (รอบ 321): ISSUE-048 — แยกฟอนต์ไทย/ละติน + `unicode-range` (เจ้าของ "ISSUE-048 แก้")
 - `scripts/subset-fonts.py` ตัด Sarabun · Noto Serif Thai · Anuphan เป็น `<ชื่อ>-thai.woff2` (บล็อกไทย) + `<ชื่อ>-latin.woff2` (ASCII + เครื่องหมาย) จากต้นฉบับ Google Fonts ตัวเดิม · ลบไฟล์รวมเดิม 5 ไฟล์
 - `src/app/globals.css` ประกาศสองหน้าฟอนต์ต่อหนึ่งน้ำหนักพร้อม `unicode-range` (ชุดไม่ทับกัน) · `FONT_PRELOADS` / `FONT_PRELOADS_LOW` (`src/app/_shared/root-metadata.ts`) แยกตามภาษา ใช้ทั้ง `RootHtml.tsx` และ `astro/layouts/BaseLayout.astro` · `scripts/generate-checkout-art.mjs` ใช้ไฟล์แยก
 - ผล: `/en` พรีโหลดฟอนต์ลำดับปกติ 36,068 ➔ 19,832 B (−45%) · หน้าไทย 36,068 ➔ 36,972 B (+904 B · คำขอ 2 ➔ 4) · ไฟล์ไทยของหน้าอังกฤษถูกโหลดทีหลังเฉพาะตัวอักษรไทยที่มีจริง (ปุ่ม "ภาษาไทย" ใช้ Noto Serif Thai ไทย 9 KB นอกคิวเปิดหน้า)
 - ด่าน `test-render-parity` เพิ่ม: unicode-range ตรงกับชุดที่ตัดใน `subset-fonts.py` · ชุดไทย/ละตินไม่ทับกัน · หน้าอังกฤษห้ามพรีโหลดไฟล์ไทย · พรีโหลดครบตามภาษาของหน้า
 - ตรวจ: เทียบไฟล์ใหม่กับไฟล์รวมเดิมทุกตัวอักษร (198 ตัว × 5 ไฟล์) เมตริก · ความกว้าง · เส้นตัวอักษรตรงกันทั้งหมด · Chromium เปิด `/` `/en` `/cards/major-00` `/en/cards/major-00` `/privacy` `/en/privacy` วัดความกว้างข้อความไทย/อังกฤษเทียบฟอนต์เดิม ต่าง 0 · `test-render-parity` · `test-bundle-budget` ผ่าน · KNOWN_ISSUES ย้าย ISSUE-048 ไปคลัง
-- ค้าง/รอ: ยังไม่ขึ้น production ตามคำสั่งเจ้าของ (กิ่ง `claude/affectionate-davinci-4wne6s` รวมกับงานรอบ 319)
+- ค้าง/รอ: ยังไม่ขึ้น production ตามคำสั่งเจ้าของ (กิ่ง `claude/affectionate-davinci-4wne6s` รวมกับงานรอบ 320)
 
-### 🗓️ 2026-10-27 (รอบ 319): จัดระเบียบเอกสาร md ทั้งเว็บ (เจ้าของ "ปรับปรุง md ทั้งเว็บ ให้ตรงกับล่าสุด กำจัดจุดอ่อน ทำให้เป็นระเบียบ ลดความซ้ำซ้อน" · "อย่าพึ่งเอาขึ้น")
+### 🗓️ 2026-10-27 (รอบ 320): จัดระเบียบเอกสาร md ทั้งเว็บ (เจ้าของ "ปรับปรุง md ทั้งเว็บ ให้ตรงกับล่าสุด กำจัดจุดอ่อน ทำให้เป็นระเบียบ ลดความซ้ำซ้อน" · "อย่าพึ่งเอาขึ้น")
 - ตรวจทุกไฟล์กับโค้ดจริง/`git log` แล้วเขียนใหม่: CLAUDE.md (53 ➔ 27 KB · ตารางแผนเหลือเฉพาะงานเปิด + ตาราง "อ่านก่อนแตะ") · README · GEMINI · AGENTS (ชี้ไป CLAUDE.md ไม่คัดลอกกฎ) · INDEX · AI_COLLABORATION · ARCHITECTURE · LOCAL_SETUP · TAROT_CARD_FEATURES · ปฏิบัติการ (DEPLOYMENT · OPTIMIZATION 73 ➔ 13 KB · PENDING_SETUP · ADMIN_PANEL) · สเปก/ADR · ผู้ช่วย cmo/coo/cto · mobile
 - KNOWN_ISSUES เหลือเรื่องที่เปิด 5 เรื่อง (เพิ่ม ISSUE-062 PerplexityBot · ISSUE-061 INP มาจาก #724) ที่ปิดแล้วย้ายไป `docs/archive/KNOWN_ISSUES_CLOSED.md` · หัวสถานะแผน 49 ไฟล์สั้นลงและตรงของจริง (AUDIT_2026-10-18 ➔ ✅ · REFLECTION · IOS · OMNI ➔ ⏸️ · AI_INTELLIGENCE ➔ 📚)
 - INCIDENT_LOG มี "กฎถาวรสรุป" 140 ข้อจาก 318 เหตุการณ์ · WORK_LOG / INCIDENT_LOG เก็บ 31 วัน ของเก่าไป `docs/archive/` รายเดือน (`npm run docs:archive` ใหม่)
@@ -28,6 +28,13 @@
 - ด่าน `test-docs-numbers` เพิ่ม: ลิงก์สัมพัทธ์ใน .md ทุกไฟล์ต้องชี้ไฟล์ที่มีอยู่ (เดิมพัง 124 จุด) · ห้ามลิงก์ `file://` · ALLOWLIST ห้ามค้าง · เพดานขนาด WORK_LOG/INCIDENT_LOG · อ่านเลข INC จากคลังด้วย · `docs:index` จำกัดสรุปแผน 300 / อ่านก่อนแตะ 200 ตัวอักษร · `log:sync` ใช้ตัวเลขจากโค้ด
 - ตรวจ: `test-docs-numbers` ผ่านทุกข้อ · ลิงก์พัง 0 · `docs:status` ผ่าน · typecheck ผ่าน · `repo:verify` รันตอน push
 - ค้าง/รอ: ยังไม่ขึ้น production ตามคำสั่งเจ้าของ (อยู่บนกิ่ง `claude/affectionate-davinci-4wne6s`) · ข้อเสนอที่ยังไม่ทำ: ลบ `pnpm-workspace.yaml` ที่ค้าง · `db:migrate` ค่าเริ่มต้นชี้ production · สคริปต์สี `scripts/design/*.py` ล้าสมัย · คอมเมนต์ `sizes` ใน `CardImage.tsx`
+
+### 🗓️ 2026-10-27 (รอบ 319): เก็บกวาด 4 ข้อที่ค้างรอเจ้าของตัดสิน (เจ้าของ "ทำเลย ทุกข้อ")
+- ลบ `pnpm-workspace.yaml` — CI ใช้ npm + `package-lock.json` แล้ว ไม่มี workflow ไหนเรียก pnpm · ด่าน `test-ci-supply-chain` กันไฟล์ตั้งค่า pnpm ค้างถ้าไม่มี `pnpm-lock.yaml` · BACKLOG ข้อ "อย่าลบ" (สมัยใช้ pnpm) ขีดฆ่าพร้อมเหตุผล
+- `npm run db:migrate` ค่าเริ่มต้นเป็นฐานในเครื่อง (`--local`) · ฐานจริงต้องสั่ง `-- --remote` เอง · `deploy.yml` สั่ง `--remote` แล้ว · ด่าน 4d ตรวจทั้งสองฝั่ง (เดิมพิมพ์เปล่า ๆ บนเครื่องตัวเองก็แก้ฐาน production)
+- ลบ `scripts/design/` (สคริปต์ Python 7 ตัวที่กวาดสีทั้งเว็บเป็นชุด V2 เก่า · README บอก "รันซ้ำได้ ปลอดภัย" แต่ตอนนี้รันแล้วสี UI 2.0 จะถูกแทนด้วยชุดเก่า · ไม่มีที่ไหนเรียกใช้ · ดึงคืนได้จากประวัติ git)
+- ย้ายแผนประวัติล้วน 4 ไฟล์ไป `docs/plans/archive/` (`UX_PERF_PLAN` · `TRAFFIC_CAPTURE_PLAN_2026-09-05` · `AUDIT_2026-09-01` · `AGENTS_TASK_PLAN`) แก้ลิงก์ทุกที่ที่อ้าง (ผู้ช่วย cmo · GEMINI.md · KNOWN_ISSUES · แผนอื่น) + ตารางแผนสร้างใหม่ด้วย `docs:index`
+  ไม่ย้าย `HANDOFF_CF_REQUEST_REVIEW` (ยังมีข้อห้ามตั้งค่า Cloudflare 5 ข้อที่ต้องขึ้นในตาราง · สคริปต์และผู้ช่วย coo อ้างอยู่) และ `BACKLOG` (คิวงานที่ยังใช้)
 
 ### 🗓️ 2026-10-26 (รอบ 318): ทำต่อ — Lighthouse มือถือ + กันแย่งคำ "ดูดวงไพ่ยิปซีความรัก" (เจ้าของ "ทำต่อแต่ อย่าพึ่งเอาขึ้น" · ยังไม่ขึ้น production)
 - Lighthouse มือถือ (จำลอง · 2026-10-26 · 2 รอบต่อหน้า เทียบเว็บจริงกับ preview): `/spreads` 83–88 ➔ 90–97 · `/spreads/celtic-cross` 98–99 ➔ 93–97 · `/spreads/topic/love` 98–100 ➔ 97–99 · `/readers` 87–92 ➔ 84–90 · โปรไฟล์แม่หมอ 92–93 ➔ 85–87 (TTFB ของลิงก์ workers.dev 1.6 vs 0.98 วินาที · เวลาวาดเท่ากัน 1.56 vs 1.52) · a11y 96–100 · CLS ≤ 0.004 — ไม่ช้าลงจากงานรอบนี้

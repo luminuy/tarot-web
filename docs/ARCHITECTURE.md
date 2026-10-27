@@ -45,7 +45,7 @@ flowchart LR
 2. `astro build` ➔ `dist/` (`srcDir: astro/` · `build.format: "file"` ได้ไฟล์แบบ `cards/major-00.html` · ไม่มี adapter)
 3. `opennextjs-cloudflare build` ➔ `.open-next/` (ล้างโฟลเดอร์ทุกครั้ง จึงต้องมาก่อนขั้นถัดไป)
 4. `scripts/merge-astro-assets.ts` — คัดลอก `dist/` ลง `.open-next/assets` · ถ้ามีไฟล์ชื่อซ้ำแต่เนื้อหาต่างกันจะหยุดบิลด์ (แปลว่ามีหน้าเดียวถูกเรนเดอร์สองที่) · เติมหัว `Link: rel=preload` ของ CSS ให้ Early Hints
-5. CI เท่านั้น (`deploy.yml` หลังบิลด์และ `repo:verify` ผ่าน): `npm run db:migrate` (รัน `migrations/` ใส่ D1 remote) ➔ deploy ➔ ตรวจ Worker หลัง deploy (ไม่ผ่าน = ถอยรุ่นเอง) ➔ ขั้นเก็บงานอื่น (secret ของ Stripe · ล้างแคชขอบ · กฎ `www` · กฎลบการ์ดแชร์ใน R2)
+5. CI เท่านั้น (`deploy.yml` หลังบิลด์และ `repo:verify` ผ่าน): `npm run db:migrate -- --remote` (รัน `migrations/` ใส่ D1 remote) ➔ deploy ➔ ตรวจ Worker หลัง deploy (ไม่ผ่าน = ถอยรุ่นเอง) ➔ ขั้นเก็บงานอื่น (secret ของ Stripe · ล้างแคชขอบ · กฎ `www` · กฎลบการ์ดแชร์ใน R2)
 
 แคชหน้าของ Next อยู่ใน static assets (`staticAssetsIncrementalCache` ใน `open-next.config.ts`) ไม่ได้อยู่ใน KV แล้ว (INC-0287)
 

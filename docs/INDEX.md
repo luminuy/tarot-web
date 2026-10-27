@@ -114,13 +114,9 @@ docs/plans/
         ├── CLOUDFLARE_FREE_STACK.md                # ✅ ☁️ แผนใช้บริการฟรีของ Cloudflare ต่อยอด SeerTarot
         ├── AUDIT_2026-10-18.md                     # ✅ 🔍 แผนตรวจใหญ่ทั้งระบบ รอบ 2026-10-18 — บั๊ก · ความปลอดภัย · โค้ดตาย · SEO · UX/UI · ประสิทธิภาพ
         ├── AI_COST_CONTROL_PLAN.md                 # ✅ 💸 แผนคุมต้นทุน AI + รหัสทดสอบข้าม rate limit — handoff ให้ทีม Gemini
-        ├── UX_PERF_PLAN.md                         # 📚 🎯 แผนยกเครื่อง UX · ความไว · ความสมูท — 2026-09-01
-        ├── TRAFFIC_CAPTURE_PLAN_2026-09-05.md      # 📚 🎯 แผนแย่งทราฟฟิกจาก MyHora และเจ้าตลาดดูดวงไทย (Traffic Capture Plan)
         ├── HANDOFF_CF_REQUEST_REVIEW_2026-09-08.md # 📚 🔍 ตรวจข้อเสนอ 12 ข้อ "ลด Request บน Cloudflare" (2026-09-08)
         ├── BACKLOG.md                              # 📚 📋 Backlog — งานที่ยังเหลือ (2026-09-04)
-        ├── AUDIT_2026-09-01.md                     # 📚 🔍 รายงานตรวจสอบเต็มรูปแบบ (Full Audit) — 2026-09-01
-        ├── AI_INTELLIGENCE_PLAN.md                 # 📚 🧠 แผนแม่บทยกระดับความฉลาดของแม่หมอ AI
-        └── AGENTS_TASK_PLAN.md                     # 📚 🤖 แผนงานและการแบ่งหน้าที่สำหรับ AI Agents (Multi-Agent Task Orchestration)
+        └── AI_INTELLIGENCE_PLAN.md                 # 📚 🧠 แผนแม่บทยกระดับความฉลาดของแม่หมอ AI
 <!-- PLANS_TREE_END -->
 ```
 
@@ -145,5 +141,6 @@ docs/plans/
 | `archive/work-log/WORK_LOG_YYYY-MM.md` | รอบงานใน WORK_LOG ที่เก่ากว่า 31 วัน แยกตามเดือน | `npm run docs:archive` (ดูก่อนด้วย `-- --dry-run`) |
 | `archive/incidents/INCIDENT_LOG_YYYY-MM.md` | เหตุการณ์ใน INCIDENT_LOG ที่เก่ากว่า 31 วัน แยกตามเดือน — เลข INC ในนี้ยังอ้างได้ (ด่านเลข INC อ่านทั้งไฟล์หลักและคลังเก่า) · บทเรียนของทุกเหตุการณ์สรุปอยู่ใน "กฎถาวรสรุป" ของ INCIDENT_LOG | `npm run docs:archive` |
 | [archive/KNOWN_ISSUES_CLOSED.md](archive/KNOWN_ISSUES_CLOSED.md) | ISSUE ที่ปิดแล้ว | ย้ายด้วยมือตอนปิดบั๊ก |
+| [plans/archive/](plans/archive/) | แผนที่เป็นประวัติล้วน — ไม่มีงานค้าง ไม่มีข้อห้ามที่ยังใช้ (`UX_PERF_PLAN` · `TRAFFIC_CAPTURE_PLAN_2026-09-05` · `AUDIT_2026-09-01` · `AGENTS_TASK_PLAN` · ย้าย 2026-10-27 #729) · ไม่อยู่ในตารางแผน | ย้ายด้วยมือ · แผนที่ยังมี "อ่านก่อนแตะ" ห้ามย้าย |
 
 > ไฟล์ที่ไม่ใช่เอกสาร: `docs/WORK_LOG.status.md` (เขียนโดย `npm run log:sync`) และ `docs/AUDIT_LOG.md` (เขียนโดยเครื่องมือ commit) ถูกสร้างในเครื่องและไม่อยู่ใน git — ประวัติจริงคือ `git log` กับ INCIDENT_LOG

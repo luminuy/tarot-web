@@ -9736,7 +9736,7 @@ code-splitting ใน `TarotFlow` ทำได้ดีอยู่แล้ว 
   - **แผนธุรกิจฉบับเดิมมีข้อเท็จจริงผิด** — MyHora ใช้ URL อังกฤษ `/horoscope/tarot-love.aspx` ไม่ใช่ slug ไทยอย่างที่เขียนไว้ · มีโฆษณา 2 ช่องไม่ใช่ "หนาแน่น" · มี viewport responsive ไม่ใช่ layout ตารางปี 2005
 
 - **เอกสารที่สร้าง**:
-  - [`docs/plans/TRAFFIC_CAPTURE_PLAN_2026-09-05.md`](../../plans/TRAFFIC_CAPTURE_PLAN_2026-09-05.md) — แผนแม่บท: สนามรบจริง, ผ่า MyHora 9 หน้าพร้อมจุดตาย 5 ข้อ, ยุทธศาสตร์ 4 คลื่น, สิ่งที่ยังไม่รู้
+  - [`docs/plans/TRAFFIC_CAPTURE_PLAN_2026-09-05.md`](../../plans/archive/TRAFFIC_CAPTURE_PLAN_2026-09-05.md) — แผนแม่บท: สนามรบจริง, ผ่า MyHora 9 หน้าพร้อมจุดตาย 5 ข้อ, ยุทธศาสตร์ 4 คลื่น, สิ่งที่ยังไม่รู้
   - [`docs/plans/HANDOFF_SEO_WAVE1_2026-09-05.md`](../../plans/HANDOFF_SEO_WAVE1_2026-09-05.md) — แผนลงมือคลื่น 1: 6 งาน 8 ไฟล์ พร้อมโค้ด before/after ทุกบรรทัด และตาราง `seoTitleTh` ครบ 20 ผัง
   - [`docs/plans/HANDOFF_SEO_WAVE2-4_2026-09-05.md`](../../plans/HANDOFF_SEO_WAVE2-4_2026-09-05.md) — แผนลงมือคลื่น 2-4: ยึด `/cards` (พบว่าตัวกรอง ชุดใหญ่/ดอกไพ่ ใน `CardsExplorer` เป็น client state ไม่มี URL แยก = มีเนื้อหาพอทำ 6 หน้าแต่ส่งแข่งได้หน้าเดียว), สร้างผังใหม่ 5 ผังชนกับ MyHora 1:1, ไพ่ประจำตัว, และเกณฑ์วัดผลจาก GSC
 
@@ -11826,7 +11826,7 @@ code-splitting ใน `TarotFlow` ทำได้ดีอยู่แล้ว 
    - บันทึกการตัดสินใจเชิงสถาปัตยกรรม (ADR) อธิบายเหตุผลที่เลือกใช้ `React 19.2`, `Next.js 16.3`, และ `Motion 13`
    - ชี้แจงที่มาและมาตรการบริหารความเสี่ยงสำหรับ ISSUE-001 (Peer Dependencies) และ Edge Runtime Parity
 4. **Cross-Link เชื่อมโยงเอกสาร AI และปัญหาค้าง**:
-   - ใส่ Cross-link ระหว่าง [`docs/plans/AGENTS_TASK_PLAN.md`](../../plans/AGENTS_TASK_PLAN.md) ↔ [`docs/KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md) ที่หัวไฟล์ทั้งสอง
+   - ใส่ Cross-link ระหว่าง [`docs/plans/AGENTS_TASK_PLAN.md`](../../plans/archive/AGENTS_TASK_PLAN.md) ↔ [`docs/KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md) ที่หัวไฟล์ทั้งสอง
 5. **อัปเดตทะเบียนปัญหา (`docs/KNOWN_ISSUES.md`)**:
    - ขีดฆ่าและทำเครื่องหมาย ✅ ผ่านครบทุกช่องในตาราง Documentation Gaps พร้อมแนบลิงก์เอกสารอ้างอิงตรงจุด
 

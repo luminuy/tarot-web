@@ -65,7 +65,7 @@
 | งานจากรอบตรวจใหญ่ 2026-10-18 | ผลรายด้านอยู่นอก repo (ขอจากเจ้าของ) · กติกาและสถานะรวมอยู่ในกระดาน `docs/audits/2026-10-18/PROGRESS.md` | [AUDIT_2026-10-18](docs/plans/AUDIT_2026-10-18.md) |
 | การตั้งค่า Cloudflare | ข้อเสนอที่ห้ามทำ 5 ข้อ (เช่น Block AI Scrapers) | [HANDOFF_CF_REQUEST_REVIEW_2026-09-08](docs/plans/HANDOFF_CF_REQUEST_REVIEW_2026-09-08.md) |
 
-แผนที่ปิดแล้ว ✅ 36 ไฟล์ · เอกสารอ้างอิง 📚 7 ไฟล์ — รายชื่อเต็มทุกแผนอยู่ใน [docs/INDEX.md](docs/INDEX.md)
+แผนที่ปิดแล้ว ✅ 36 ไฟล์ · เอกสารอ้างอิง 📚 3 ไฟล์ — รายชื่อเต็มทุกแผนอยู่ใน [docs/INDEX.md](docs/INDEX.md)
 
 <!-- PLANS_INDEX_END -->
 

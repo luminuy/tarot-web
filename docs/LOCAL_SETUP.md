@@ -42,7 +42,7 @@ cp .env.example .env.local  # แล้วเติมเฉพาะค่า�
 - ไม่ต้องตั้งอะไร — ครั้งแรกที่โค้ดเปิดฐาน จะสร้างไฟล์ `.dev-marketplace.db` (SQLite) แล้วรันทุกไฟล์ใน `migrations/` ให้เอง ชุดเดียวกับ D1 บน production
 - มี migration ใหม่ ➔ รันให้เองตอนเปิดฐานครั้งถัดไป · ฐานรุ่นเก่า (สร้างก่อน 2026-10-25 จากสคีมาเขียนมือ) ถูกย้ายไปไว้ข้าง ๆ เป็น `.dev-marketplace.db.legacy-*` แล้วสร้างใหม่
 - migration ไฟล์ไหนรันไม่ผ่าน = error พร้อมชื่อไฟล์ ไม่ถอยไปฐานเปล่าเงียบ ๆ
-- ⚠️ **อย่ารัน `npm run db:migrate` เปล่า ๆ ในเครื่อง** — ค่าเริ่มต้นของคำสั่งนี้คือ `--remote` (D1 ตัวจริงบน production) · ใช้ `npm run db:migrate -- --local` เฉพาะเมื่อจะลอง `preview:worker` (ฐานของ wrangler คนละไฟล์กับ `.dev-marketplace.db`)
+- `npm run db:migrate` เปล่า ๆ = ฐานในเครื่องของ wrangler (ใช้เมื่อจะลอง `preview:worker` · คนละไฟล์กับ `.dev-marketplace.db`) · ฐานจริงต้องสั่ง `-- --remote` เอง ซึ่ง `deploy.yml` ทำให้ทุกรอบ — ไม่ต้องรันเองจากเครื่อง (เปลี่ยนค่าเริ่มต้น 2026-10-27 · #729)
 
 ## 5. dev server
 

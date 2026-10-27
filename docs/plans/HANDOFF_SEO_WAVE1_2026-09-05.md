@@ -3,7 +3,7 @@
 > **สถานะ**: ✅ เสร็จแล้ว — เติมคำ "ไพ่ยิปซี" ใน title · description · h1 ทั่วเว็บแล้ว · ไม่มีงานค้าง · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: PR #282
 
 > **ผู้จัดทำ**: Claude · 2026-09-05 · **ผู้รับช่วง**: ทีม/เอเจนต์ตัวถัดไป
-> **ที่มา**: คลื่นที่ 1 ของ [`TRAFFIC_CAPTURE_PLAN_2026-09-05.md`](TRAFFIC_CAPTURE_PLAN_2026-09-05.md)
+> **ที่มา**: คลื่นที่ 1 ของ [`TRAFFIC_CAPTURE_PLAN_2026-09-05.md`](archive/TRAFFIC_CAPTURE_PLAN_2026-09-05.md)
 > **โค้ดอ้างอิง**: `main` ที่ commit `ba167ee` — ถ้าเลขบรรทัดเลื่อน ให้ค้นด้วยสตริงที่ยกมาแทน
 > **ขนาดงาน**: ~3-4 ชม. · **1 PR** · แตะ 8 ไฟล์ · **ไม่สร้างหน้าใหม่ ไม่แตะ logic ใด ๆ**
 
@@ -15,7 +15,7 @@
 | :-: | :--- | :--- |
 | 1 | [`docs/INCIDENT_LOG.md`](../INCIDENT_LOG.md) | บทเรียนความผิดพลาด |
 | 2 | [`docs/KNOWN_ISSUES.md`](../KNOWN_ISSUES.md) | ISSUE-024 ถึง 030 ค้างอยู่ **อย่าแก้ทับ** |
-| 3 | [`docs/plans/TRAFFIC_CAPTURE_PLAN_2026-09-05.md`](TRAFFIC_CAPTURE_PLAN_2026-09-05.md) | เหตุผลเบื้องหลังงานนี้ + หลักฐานที่วัดมา |
+| 3 | [`docs/plans/archive/TRAFFIC_CAPTURE_PLAN_2026-09-05.md`](archive/TRAFFIC_CAPTURE_PLAN_2026-09-05.md) | เหตุผลเบื้องหลังงานนี้ + หลักฐานที่วัดมา |
 
 ```bash
 npm run agent:status
@@ -380,7 +380,7 @@ done
 
 # 📌 ขอบเขตที่ **ไม่** ทำในรอบนี้
 
-งานพวกนี้อยู่ในคลื่นที่ 2-4 ของ [`TRAFFIC_CAPTURE_PLAN`](TRAFFIC_CAPTURE_PLAN_2026-09-05.md) — **แยก PR ทั้งหมด**
+งานพวกนี้อยู่ในคลื่นที่ 2-4 ของ [`TRAFFIC_CAPTURE_PLAN`](archive/TRAFFIC_CAPTURE_PLAN_2026-09-05.md) — **แยก PR ทั้งหมด**
 
 - ❌ สร้างหน้าใหม่ใด ๆ
 - ❌ ผังใหม่: ความรัก 6 ใบ · การเรียน · บริวาร/ครอบครัว · โชคลาภ · รายเดือน 10 ใบ

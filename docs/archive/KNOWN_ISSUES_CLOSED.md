@@ -248,7 +248,7 @@ $ curl -sS -v --http2 -o /dev/null https://seertarot.net/spreads
 
 ### ISSUE-048 (ข) ข้อ T-24 · ฟอนต์ยังไม่มี `unicode-range` — ปิด 2026-10-27
 
-- **แก้แล้ว (2026-10-27 · WORK_LOG รอบ 320)**: `scripts/subset-fonts.py` ตัดฟอนต์ไทย+ละตินเป็น `<ชื่อ>-thai.woff2` / `<ชื่อ>-latin.woff2` (10 ไฟล์จากต้นฉบับ Google Fonts ชุดเดิม) · `globals.css` ประกาศ `unicode-range` ให้ทุกหน้าฟอนต์ · `FONT_PRELOADS` / `FONT_PRELOADS_LOW` แยกตามภาษา
+- **แก้แล้ว (2026-10-27 · WORK_LOG รอบ 321)**: `scripts/subset-fonts.py` ตัดฟอนต์ไทย+ละตินเป็น `<ชื่อ>-thai.woff2` / `<ชื่อ>-latin.woff2` (10 ไฟล์จากต้นฉบับ Google Fonts ชุดเดิม) · `globals.css` ประกาศ `unicode-range` ให้ทุกหน้าฟอนต์ · `FONT_PRELOADS` / `FONT_PRELOADS_LOW` แยกตามภาษา
 - **ผล**: หน้า `/en` พรีโหลดฟอนต์ลำดับปกติ 36,068 ➔ 19,832 B (−45%) · หน้าไทย 36,068 ➔ 36,972 B (+904 B · คำขอ 2 ➔ 4) · ตัวอักษร 198 ตัว เมตริก ความกว้าง เส้นตัวอักษร ตรงกับไฟล์รวมเดิมทุกตัว
 - **ด่าน**: `test-render-parity` ตรวจ unicode-range ตรงกับชุดที่ตัด · ชุดไทย/ละตินไม่ทับกัน · หน้าอังกฤษไม่พรีโหลดไฟล์ไทย
 
@@ -877,7 +877,7 @@ Google หมดตั้งแต่ก่อนเริ่มรอบนี�
 > 🎯 **สำหรับ AI Agent ทุกตัว**: นี่คือรายการปัญหาที่ **ตรวจสอบยืนยันแล้วว่ามีจริง** แต่ยังไม่ได้แก้
 >
 > - **ก่อนเริ่มงานใหม่** ให้ดูก่อนว่ามีงานในนี้ที่เกี่ยวข้องกับสิ่งที่กำลังจะแก้หรือไม่
-> - **แผนงานและบทบาทของ AI แต่ละตัว**: ดูที่ [`docs/plans/AGENTS_TASK_PLAN.md`](../plans/AGENTS_TASK_PLAN.md)
+> - **แผนงานและบทบาทของ AI แต่ละตัว**: ดูที่ [`docs/plans/AGENTS_TASK_PLAN.md`](../plans/archive/AGENTS_TASK_PLAN.md)
 > - **ก่อนลงมือ** ให้ตรวจว่ามี Agent อื่นจับงานนี้อยู่หรือยัง (`npm run agent:status`) และล็อคไฟล์ก่อนเสมอ
 > - **เมื่อแก้เสร็จ** ให้ย้ายรายการนั้นออกจากไฟล์นี้ แล้วบันทึกลง [`docs/INCIDENT_LOG.md`](../INCIDENT_LOG.md) แทน
 >
@@ -914,4 +914,4 @@ Google หมดตั้งแต่ก่อนเริ่มรอบนี�
 | ~~**แผนที่ env var จริง**~~ ✅ | ควรมีตารางว่าคีย์ไหนใช้ที่ไฟล์ไหน จำเป็น/ไม่จำเป็น | **เสร็จสมบูรณ์** | ตาราง Section 10 ใน [`docs/ARCHITECTURE.md`](../ARCHITECTURE.md#10-แผนที่ตัวแปรแวดล้อมระบบจริง-environment-variables-map) |
 | ~~**บันทึกเหตุผลที่ใช้ stack ล้ำเวอร์ชัน**~~ ✅ | `react@19.2`, `next@16.3`, `motion@13` เป็นต้นเหตุ ISSUE-001 ควรมี ADR ว่าตั้งใจและรับความเสี่ยงอะไร | **เสร็จสมบูรณ์** | [`docs/adr/ADR-003-cutting-edge-stack-rationale.md`](../adr/ADR-003-cutting-edge-stack-rationale.md) |
 | ~~**มาตรฐานคุณภาพ INCIDENT_LOG**~~ ✅ | ~~INC-0008/0009/0010/0014 ช่อง "อาการ" ก็อป "การแก้ไข"~~ | **เสร็จสมบูรณ์** | `validateIncident()` ใน `scripts/incident-log.ts` บล็อก entry ที่ก็อปกันมา + เรียบเรียง INC-0008/9/10/14 ใหม่ |
-| ~~**cross-link `AGENTS_TASK_PLAN.md` ↔ KNOWN_ISSUES**~~ ✅ | มี roadmap แยกแต่ไม่อ้างถึงกัน | **เสร็จสมบูรณ์** | หัวไฟล์ทั้งสอง: [`AGENTS_TASK_PLAN.md`](../plans/AGENTS_TASK_PLAN.md) และ [`KNOWN_ISSUES.md`](../KNOWN_ISSUES.md) |
+| ~~**cross-link `AGENTS_TASK_PLAN.md` ↔ KNOWN_ISSUES**~~ ✅ | มี roadmap แยกแต่ไม่อ้างถึงกัน | **เสร็จสมบูรณ์** | หัวไฟล์ทั้งสอง: [`AGENTS_TASK_PLAN.md`](../plans/archive/AGENTS_TASK_PLAN.md) และ [`KNOWN_ISSUES.md`](../KNOWN_ISSUES.md) |
