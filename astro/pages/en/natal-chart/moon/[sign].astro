@@ -1,0 +1,33 @@
+---
+import { natalSignMetadata, natalSignStaticParams } from "@/app/_shared/pages/natal-sign";
+
+import BaseLayout from "../../../../layouts/BaseLayout.astro";
+import { NatalSignBodyRoot } from "../../../../components/PageBodies";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../../../islands/SiteShell";
+import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
+import "@/styles/v2-natal.css";
+
+/** 📄 ดวงจันทร์ราศี 12 หน้า (en) — HTML คงที่ ไม่มี island */
+const locale = "en" as const;
+const kind = "moon" as const;
+
+export function getStaticPaths() {
+  return natalSignStaticParams().map(({ sign }) => ({ params: { sign } }));
+}
+
+const signId = Astro.params.sign!;
+---
+
+<BaseLayout locale={locale} metadata={natalSignMetadata(kind, signId, locale)}>
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
+    <NatalSignBodyRoot kind={kind} signId={signId} locale={locale} />
+  </div>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../../../../scripts/ui2-inview";
+</script>

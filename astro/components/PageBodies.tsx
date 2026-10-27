@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { AboutBodyTh } from "@/app/_shared/pages/about-th";
 import { NatalChartBody } from "@/app/_shared/pages/natal-chart";
+import { NatalSignBody, type NatalSignKind } from "@/app/_shared/pages/natal-sign";
 import { NotFoundMain } from "@/app/_shared/pages/not-found";
 import { DailyBodyEn } from "@/app/_shared/pages/daily-en";
 import { DailyBodyTh } from "@/app/_shared/pages/daily-th";
@@ -84,6 +85,15 @@ export function NatalChartBodyRoot({ locale, app }: { locale: Locale; app: React
   return (
     <LocaleProvider forcedLocale={locale}>
       <NatalChartBody locale={locale} app={app} />
+    </LocaleProvider>
+  );
+}
+
+/** 📄 ลัคนา/ดวงจันทร์รายราศี — เนื้อหาคงที่ ไม่มี island */
+export function NatalSignBodyRoot({ kind, signId, locale }: { kind: NatalSignKind; signId: string; locale: Locale }) {
+  return (
+    <LocaleProvider forcedLocale={locale}>
+      <NatalSignBody kind={kind} signId={signId} locale={locale} />
     </LocaleProvider>
   );
 }

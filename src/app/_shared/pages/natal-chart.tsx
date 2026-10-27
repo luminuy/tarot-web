@@ -5,6 +5,7 @@ import { RitualHero } from "@/components/reading/one-card/RitualHero";
 import { Ui2Window } from "@/components/ui2/Ui2Showcase";
 import { SeoArticleShell, type SeoFaqItem } from "@/components/seo/SeoArticleShell";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 import { ZODIAC_SIGNS } from "@/data/zodiac";
@@ -232,6 +233,33 @@ export function NatalChartBody({ locale, app }: { locale: Locale; app: ReactNode
                 </ul>
               </div>
             </div>
+          </section>
+        </Ui2Window>
+
+        <Ui2Window n="03" kicker={isEnglish ? "By sign" : "รายราศี"} tone={5}>
+          <section aria-labelledby="natal-by-sign" className="space-y-4">
+            <h2 id="natal-by-sign" className="text-xl sm:text-2xl font-serif-th font-bold text-ink text-center">
+              <ThaiPhrases>{isEnglish ? "Rising and Moon signs, sign by sign" : "ลัคนาและดวงจันทร์ ครบ 12 ราศี"}</ThaiPhrases>
+            </h2>
+            {(["rising", "moon"] as const).map((kind) => (
+              <div key={kind} className="space-y-2">
+                <h3 className="font-serif-th font-bold text-ink text-center">
+                  {kind === "rising" ? (isEnglish ? "Rising sign (Ascendant)" : "ลัคนา") : isEnglish ? "Moon sign" : "ราศีจันทร์"}
+                </h3>
+                <ul className="flex flex-wrap justify-center gap-2">
+                  {ZODIAC_SIGNS.map((s) => (
+                    <li key={s.id}>
+                      <Link
+                        href={localeHref(`/natal-chart/${kind}/${s.id}`, locale)}
+                        className="inline-block rounded-full border border-line-warm bg-surface px-3 py-1.5 text-sm text-ink hover:border-gold-ink"
+                      >
+                        {kind === "rising" ? (isEnglish ? `${s.nameEn} Rising` : `ลัคนา${s.nameTh}`) : isEnglish ? `Moon in ${s.nameEn}` : `จันทร์${s.nameTh}`}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </section>
         </Ui2Window>
 

@@ -602,6 +602,19 @@ export default function NatalResult({
                     {describeBody(chart, b, lang).map((p, i) => (
                       <p key={i}>{p}</p>
                     ))}
+                    {(b.id === "asc" || b.id === "moon") && (
+                      <p className="text-sm">
+                        <Link href={`/natal-chart/${b.id === "asc" ? "rising" : "moon"}/${ZODIAC_SIGNS[b.sign].id}`} className="underline text-gold-ink">
+                          {b.id === "asc"
+                            ? isTh
+                              ? `อ่านเรื่องลัคนา${ZODIAC_SIGNS[b.sign].nameTh}แบบละเอียด`
+                              : `Full guide to ${ZODIAC_SIGNS[b.sign].nameEn} rising`
+                            : isTh
+                              ? `อ่านเรื่องดวงจันทร์${ZODIAC_SIGNS[b.sign].nameTh}แบบละเอียด`
+                              : `Full guide to the Moon in ${ZODIAC_SIGNS[b.sign].nameEn}`}
+                        </Link>
+                      </p>
+                    )}
                     {(PLANET_IDS as readonly string[]).includes(b.id) || personal ? (
                       <p className="text-xs text-muted border-l-2 border-line-warm pl-2">
                         {showCards
