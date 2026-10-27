@@ -231,7 +231,7 @@
   color: var(--ui2-on-night-dim);
 }
 
-/* ── องก์ในสารบัญ ── */
+/* ── ภาคในสารบัญ ── */
 .v2-nv-act + .v2-nv-act {
   margin-top: 28px;
 }

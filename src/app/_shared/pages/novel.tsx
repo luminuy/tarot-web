@@ -10,12 +10,13 @@ import {
   NOVEL,
   NOVEL_CHAPTERS,
   NOVEL_CONTENT_NOTE,
-  NOVEL_ACTS,
+  NOVEL_PARTS,
   NOVEL_PATH,
   getNovelChapter,
-  isNovelActFinale,
-  novelActChapters,
-  novelActOf,
+  isNovelPartFinale,
+  novelPartChapters,
+  novelPartLabel,
+  novelPartOf,
   novelChapterLead,
   novelChapterPath,
   type NovelChapter,
@@ -162,7 +163,7 @@ export function NovelHubContent() {
             เริ่มอ่านบทที่ 1
           </Link>
         }
-        note={`${NOVEL_CHAPTERS.length} บท${NOVEL_ACTS.some((a) => a.complete) ? ` · จบองก์ที่ ${NOVEL_ACTS.filter((a) => a.complete).length} แล้ว` : ""} · อ่านฟรีทุกบท ไม่ต้องสมัคร`}
+        note={`${NOVEL_CHAPTERS.length} บท${NOVEL_PARTS.some((p) => p.complete) ? ` · จบภาคที่ ${NOVEL_PARTS.filter((p) => p.complete).length} แล้ว` : ""} · อ่านฟรีทุกบท ไม่ต้องสมัคร`}
         cards={HUB_CARDS}
       />
 
@@ -186,14 +187,16 @@ export function NovelHubContent() {
           <h2 id="v2-nv-toc-h" className="v2-nv-h2">
             สารบัญ
           </h2>
-          {NOVEL_ACTS.map((act) => {
-            const chapters = novelActChapters(act);
+          {NOVEL_PARTS.map((part) => {
+            const chapters = novelPartChapters(part);
             return (
-              <div key={act.number} className="v2-nv-act">
+              <div key={part.number} className="v2-nv-act">
                 <h3 className="v2-nv-act-h">
-                  <ThaiPhrases>{`องก์ที่ ${act.number}`}</ThaiPhrases>
+                  <span>
+                    <ThaiPhrases>{novelPartLabel(part)}</ThaiPhrases>
+                  </span>
                   <span className="v2-nv-act-s">
-                    <ThaiPhrases>{`${act.complete ? "จบแล้ว" : "กำลังเขียน"} · ${chapters.length} บท`}</ThaiPhrases>
+                    <ThaiPhrases>{`${part.complete ? "จบแล้ว" : "กำลังเขียน"} · ${chapters.length} บท`}</ThaiPhrases>
                   </span>
                 </h3>
                 <ol className="v2-nv-toc">
@@ -286,7 +289,7 @@ export function NovelChapterContent({ chapter }: { chapter: NovelChapter }) {
             ]}
           />
           <p className="v2-ar-kicker">
-            <span>องก์ที่ {novelActOf(chapter.number).number}</span>
+            <span>ภาคที่ {novelPartOf(chapter.number).number}</span>
             <span aria-hidden="true" className="v2-ar-sep" />
             <span>
               บทที่ {chapter.number} จาก {NOVEL_CHAPTERS.length}
@@ -329,10 +332,10 @@ export function NovelChapterContent({ chapter }: { chapter: NovelChapter }) {
           ))}
         </div>
 
-        {isNovelActFinale(chapter) ? (
+        {isNovelPartFinale(chapter) ? (
           <p className="v2-nv-end">
-            จบองก์ที่ {novelActOf(chapter.number).number}
-            {!next && <span className="v2-nv-end-s">องก์ต่อไปกำลังมา ติดตามได้ที่หน้านี้</span>}
+            จบ{novelPartLabel(novelPartOf(chapter.number))}
+            {!next && <span className="v2-nv-end-s">ภาคต่อไปกำลังมา ติดตามได้ที่หน้านี้</span>}
           </p>
         ) : (
           !next && <p className="v2-nv-end">บทต่อไปกำลังมา ติดตามได้ที่หน้านี้</p>
