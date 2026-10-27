@@ -39,7 +39,7 @@ async function runAudit(): Promise<SystemAudit> {
   let typecheckPassed = true;
   let typecheckOutput = "0 Errors";
   try {
-    execSync("npx tsc --noEmit", { stdio: "pipe" });
+    execSync("npm run typecheck", { stdio: "pipe" });
   } catch (error: any) {
     typecheckPassed = false;
     typecheckOutput = error.stdout ? error.stdout.toString() : "Error occurred";

@@ -1,0 +1,23 @@
+/*
+ * 🃏 หน้าต่างไพ่เด้ง — เอฟเฟกต์ระดับ full (คอม · iPad) เท่านั้น · ของกลางทุกหน้าที่มีไพ่ผัง
+ * นำเข้าโดย `ui2-spreads-fx.css` (คลังผัง) · หน้าหมวดเรื่อง `/spreads/topic/*` · หน้าคู่มือผัง `/spreads/<id>`
+ * ⚠️ ทุกกฎขึ้นต้น `[data-fx="full"]` และอยู่ใต้ `@media (min-width: 768px)` · หนึ่งตัวเลือกต่อบรรทัด
+ *    (ด่าน test-motion-quality กฎ 2b · test-ui2-fx) — มือถือ / ลดการเคลื่อนไหว / เครื่องช้า ไม่มีวันได้ไฟล์นี้ทำงาน
+ * ⚠️ ของวนทุกชิ้นมีคลาส `ui2-loop` และอยู่ใต้ `[data-anim-section]` (หยุดเองเมื่อพ้นจอ)
+ */
+@media (min-width: 768px) {
+  /* พื้นหลังหน้าต่างไพ่เด้ง: มืด + เบลอบาง ๆ */
+  [data-fx="full"] .ui2-pop-scrim {
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+  /* วงแสงทองหลังไพ่ใหญ่เต้น */
+  [data-fx="full"] .ui2-pop-glow {
+    animation: ui2-sp-glow 2.4s ease-in-out infinite;
+  }
+}
+
+@keyframes ui2-sp-glow {
+  0%, 100% { opacity: 0.7; scale: 1; }
+  50% { opacity: 1; scale: 1.08; }
+}

@@ -263,6 +263,23 @@ export type TarotAnalyticsEvent =
       };
     }
   /**
+   * 🃏 แตะไพ่ผัง (คลังผัง `/spreads` · หน้าหมวดเรื่อง · "ผังอื่น" ท้ายหน้าคู่มือผัง) — เจ้าของ 2026-10-26 "อยากรู้ว่าคนแตะไพ่ใบไหนบ่อย"
+   * ยิงจาก `astro/scripts/spread-pop.ts` หลังหน้าต่างไพ่เด้งเปิดแล้ว ตอนเครื่องว่าง (ห้ามแย่งเฟรมเปิด · INC-0301)
+   * `category` = หมวดใน `spread-shelves.ts` · `action` pop = เปิดหน้าต่าง · link = เปิดหน้าคู่มือในแท็บใหม่
+   * ⚠️ ไม่มีข้อมูลระบุตัวคน ไม่มีข้อความที่ผู้ใช้พิมพ์ — `page_path` คือ path ของหน้า (ไม่มี query/hash)
+   */
+  | {
+      name: "spread_card_tap";
+      params: {
+        spread_id: string;
+        category: string;
+        surface: "library" | "topic" | "detail_more";
+        locale: "th" | "en";
+        page_path: string;
+        action: "pop" | "link";
+      };
+    }
+  /**
    * 🎨 UI 2.0: ตัวกันพัง FPS ลดเครื่องนี้จาก full ➔ lite (ค่ากลางเวลาเฟรม 2 วินาทีแรก > 22ms)
    * ไว้ดูว่าเกิดกับเครื่องแบบไหน — ส่งแค่ตัวเลขและความกว้างจอ ไม่มีข้อมูลระบุตัวคน
    */

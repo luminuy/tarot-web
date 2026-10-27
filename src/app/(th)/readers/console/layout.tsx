@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { noindexAlternates } from "@/lib/config/site";
+import "@/styles/ui2-page.css";
+import "@/styles/v3-consult.css";
 
 /**
  * หน้าในกลุ่มนี้เป็น Client Component จึง `export const metadata` เองไม่ได้
@@ -14,5 +16,10 @@ export const metadata: Metadata = {
 };
 
 export default function ReaderConsoleLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  // UI 2.0 (เจ้าของ 2026-10-26): ท้องฟ้ากลางคืน + โทเคน `.ui2-pg` — หัวครีม/หน้าต่างครีมอยู่ในหน้า (ConsultUi2)
+  return (
+    <div className="ui2-pg" data-ui2-page-dark="">
+      {children}
+    </div>
+  );
 }

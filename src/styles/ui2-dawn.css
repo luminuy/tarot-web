@@ -14,7 +14,7 @@
  */
 
 /* หัวหน้าที่เป็นแถบรุ่งอรุณ (หัวหน้ากลาง 3 แบบ + หัวหน้าเฉพาะหน้าที่เป็นข้อความบนพื้น) */
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head),
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head, .v3-cs-hero),
 :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) {
   --ui2-on-night: #2B2118;
   --ui2-on-night-soft: #5A4A3A;
@@ -51,7 +51,7 @@
 }
 
 /* แถบครีมเต็มจอ — ขยายขึ้นไปใต้หัวเว็บ (หัวเว็บแคปซูลมืดลอยบนครีมแบบหน้าแรก) · ขอบล่างโค้งเป็นขอบฟ้า */
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head)::after {
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head, .v3-cs-hero)::after {
   content: "";
   position: absolute;
   z-index: -2;
@@ -72,21 +72,21 @@
 }
 
 /* ตัวหนังสือ/ป้ายที่เขียนสีตายตัวไว้สำหรับพื้นมืด */
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) :is(h1, .ui2-ph-title) {
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head, .v3-cs-hero) :is(h1, .ui2-ph-title) {
   text-shadow: none;
 }
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) .ui2-gold-night,
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head, .v3-cs-hero) .ui2-gold-night,
 :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-gold-night {
   color: var(--ui2-gold-ink);
 }
 /* ปุ่มหลักบนครีม = ปุ่มดำแบบหน้าแรก */
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) .ui2-btn-gold,
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head, .v3-cs-hero) .ui2-btn-gold,
 :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-btn-gold {
   color: var(--ui2-button-text);
   background: var(--ui2-button);
   box-shadow: 0 14px 30px -14px rgba(23, 17, 12, 0.7);
 }
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) .ui2-btn-ghost,
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head, .v3-cs-hero) .ui2-btn-ghost,
 :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-btn-ghost {
   background: rgba(255, 252, 246, 0.7);
 }
@@ -127,14 +127,14 @@
 }
 
 /* เว้นระยะจากขอบฟ้า — เนื้อหาถัดไปไม่ชนเส้นโค้ง */
-:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) {
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head, .v3-cs-hero) {
   margin-bottom: 64px;
 }
 @media (max-width: 767px) {
-  :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) {
+  :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head, .v3-cs-hero) {
     margin-bottom: 52px;
   }
-  :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head)::after {
+  :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head, .v3-cs-hero)::after {
     border-radius: 0 0 50% 50% / 0 0 32px 32px;
   }
 }
@@ -229,7 +229,7 @@
 /* ── หน้าเปิดไพ่ /read/* (TarotFlow · 26 ผัง) — ขั้น "ตั้งคำถาม": แถบครีมใต้หัวข้อ "อยากรู้เรื่องอะไร"
    ครอบแถบขั้นตอนด้านบนด้วย (แถบขยายขึ้น 320px) ➔ แถบขั้นตอนใช้สีกลางวันเฉพาะตอนอยู่ขั้นนี้ (ขั้นอื่นไม่มีหัวข้อ = ท้องฟ้ามืดเหมือนเดิม)
    (เจ้าของ 2026-10-17 "/read/three-card · /read/love · /read/celtic-cross สีใหม่ยังไม่มี") ── */
-.ui2-pg:has(.v2-rt-head, .v2-pick-head, .v2-rd-head) .v2-rail {
+.ui2-pg:has(.v2-rt-head, .v2-pick-head, .v2-rd-head, .v3-cs-hero) .v2-rail {
   --ui2-on-night: #2B2118;
   --ui2-on-night-dim: #6E604F;
   --rt-line: rgba(74, 47, 16, 0.2);
@@ -425,7 +425,7 @@ html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > se
 }
 /* ปุ่มทองเดิม (.btn-gold-glass น้ำตาลเข้มของธีมสว่าง) บนครีม = ปุ่มดำขอบทองแบบปุ่มหลักหน้าแรก
    (เจ้าของ 2026-10-17 ส่งภาพปุ่ม "เข้าสู่ระบบเพื่อซื้อ" — "สีปุ่มไม่สวยเลย") */
-html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head) :is(.btn-gold-glass, .btn-glass-primary),
+html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-ph, .v2-th, .v2-doc-head, .v3-pr-hero, .v2-ca-head, .v2-bcp-head, .v2-zs-head, .v2-qp-head, .v2-tp-head, .v2-sb-head, .v2-nf, .v2-cd-stage, .v2-sd-top, .v3-ar-hero, .v2-jr-cover, .ui2-sp-hero, .ui2-dy-hero, .v2-rt-head, .v3-ac-hero, .v2-pick-head, .v2-rd-head, .v3-cs-hero) :is(.btn-gold-glass, .btn-glass-primary),
 html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.btn-gold-glass, .btn-glass-primary) {
   color: var(--ui2-button-text);
   background-image: none;

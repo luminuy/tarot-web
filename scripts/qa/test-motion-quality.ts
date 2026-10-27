@@ -362,8 +362,9 @@ function checkCss(violations: Violation[]): void {
  *    และตัวกันพัง FPS (`astro/scripts/ui2-home.ts`) ลดเป็น lite เองเมื่อค่ากลาง > 22ms
  * ด่าน `test-ui2-fx` ตรวจซ้ำบน CSS ที่บิลด์แล้ว (ตัวย่ออาจย้ายกฎ)
  */
-/** ไฟล์เอฟเฟกต์ระดับ full — หน้าแรก + คลังผัง /spreads (แต่ละหน้าโหลดไฟล์ของตัวเอง · กติกาล็อกสองชั้นเดียวกันทุกไฟล์) */
-const UI2_FULL_FX_FILES = ["src/styles/ui2-fx-full.css", "src/styles/ui2-spreads-fx.css", "src/styles/ui2-daily-fx.css", "src/styles/ui2-page-fx.css"];
+/** ไฟล์เอฟเฟกต์ระดับ full — หน้าแรก + คลังผัง /spreads (แต่ละหน้าโหลดไฟล์ของตัวเอง · กติกาล็อกสองชั้นเดียวกันทุกไฟล์)
+ *  `ui2-spread-card-fx.css` = หน้าต่างไพ่เด้งที่แยกออกมาใช้ร่วมกับหน้าหมวดเรื่อง/หน้าคู่มือผัง (2026-10-26) */
+const UI2_FULL_FX_FILES = ["src/styles/ui2-fx-full.css", "src/styles/ui2-spreads-fx.css", "src/styles/ui2-spread-card-fx.css", "src/styles/ui2-daily-fx.css", "src/styles/ui2-page-fx.css"];
 
 function checkUi2FullFx(violations: Violation[]): void {
   for (const file of UI2_FULL_FX_FILES) checkUi2FullFxFile(file, violations);

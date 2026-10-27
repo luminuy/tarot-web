@@ -8,6 +8,9 @@ import { TopicSpreadListRoot } from "../../../../islands/SpreadIslands";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../../../islands/SiteShell";
 import "@/styles/ui2-page.css";
 import "@/styles/ui2-page-fx.css";
+/* ไพ่ผังกลางแบบคลังผัง /spreads + หน้าต่างไพ่เด้ง (เจ้าของ 2026-10-26) — ไฟล์เล็กแยก ไม่โหลดคลังผังทั้งไฟล์ · นำเข้าก่อนสไตล์ของหน้า */
+import "@/styles/ui2-spread-card.css";
+import "@/styles/ui2-spread-card-fx.css";
 import "@/styles/v2-spread-topic.css";
 
 /**
@@ -31,14 +34,16 @@ const spreads = getSpreadsForTopic(topic);
   <div class="ui2-pg" data-ui2-page-dark="">
   <SpreadTopicContentRoot topic={topic} locale={locale}>
     <Fragment slot="list">
-      <TopicSpreadListRoot spreads={spreads} topic={topic.slug} locale={locale} />
+      <TopicSpreadListRoot spreads={spreads} locale={locale} />
     </Fragment>
   </SpreadTopicContentRoot>
   </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>
 
-<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ · ไพ่ผังเด้ง + นับการแตะ (สคริปต์ธรรมดา ไม่ลาก React) -->
 <script>
   import "../../../../scripts/ui2-inview";
+  import { initSpreadPop } from "../../../../scripts/spread-pop";
+  initSpreadPop();
 </script>

@@ -13,7 +13,8 @@ import {
 } from "@/data/spreads-helpers";
 import type { Article } from "@/data/articles";
 import { getArticleTitle } from "@/data/article-helpers";
-import { mapLayout, MAP_CARD_ASPECT, MAP_CARD_MIN_PX } from "@/lib/tarot/spread-map-geometry";
+// ไพ่ผังกลางแบบคลังผัง /spreads (เจ้าของ 2026-10-26 ตอบคำถามเปิดข้อ 1) — ผังวางตาม mapLayout() ใน SpreadCard.tsx
+import { SpreadCard, SpreadHeroCard, SpreadPopDialog } from "@/components/spread/SpreadCard";
 import { useLocale } from "@/lib/i18n";
 import { buildSpreadFaqs, SPREAD_CATEGORY_TH } from "@/lib/seo/faq";
 import { getSpreadGuide } from "@/data/spread-guides";
@@ -111,7 +112,6 @@ export const SpreadDetailClient: React.FC<Props> = ({
   const active = 0;
   /** ชื่อตำแหน่งบางผังขึ้นต้นด้วยเลขอยู่แล้ว ("1. แก่นของเรื่อง") — ตัดออกเพราะมีป้ายเลขข้างหน้าแล้ว */
   const posLabel = (pos: (typeof spread.positions)[number]) => getPositionName(pos, isEnglish).replace(/^\d+\.\s*/, "");
-  const map = mapLayout(spread.positions);
   const activePos = spread.positions[active];
   const tags = [
     `${spread.positions.length} ${isEnglish ? "cards" : "ใบ"}`,
@@ -161,29 +161,10 @@ export const SpreadDetailClient: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* กระดานพิมพ์เขียว */}
+        {/* กระดานพิมพ์เขียว — ตรงกลางคือไพ่ผังงาช้างใบเดียวกับคลังผัง /spreads (เจ้าของ 2026-10-26)
+            ทุกตำแหน่งบนผ้าปูเป็นปุ่ม แตะ/ชี้แล้วป้ายใต้ไพ่ + แถวในตารางสว่างตาม (`astro/scripts/spread-board.ts`) */}
         <figure className="v2-sd-board">
-          <div className="v2-sd-board-area" style={{ paddingBottom: `${(map.boxHeight * 100).toFixed(2)}%` }}>
-            {spread.positions.map((pos, idx) => (
-              <button
-                key={idx}
-                type="button"
-                className="v2-sd-slot card-back-pattern"
-                aria-pressed={active === idx}
-                aria-label={`${idx + 1}. ${posLabel(pos)}`}
-                style={{
-                  left: `${pos.x * 100}%`,
-                  top: `${(((pos.y * map.yScale + map.offsetY) / map.boxHeight) * 100).toFixed(3)}%`,
-                  width: `${(map.cardW * 100).toFixed(2)}%`,
-                  minWidth: MAP_CARD_MIN_PX,
-                  aspectRatio: `1 / ${MAP_CARD_ASPECT}`,
-                  transform: `translate(-50%, -50%) rotate(${pos.rotate ?? 0}deg)`,
-                }}
-              >
-                <span style={{ transform: `rotate(${-(pos.rotate ?? 0)}deg)` }}>{idx + 1}</span>
-              </button>
-            ))}
-          </div>
+          <SpreadHeroCard spread={spread} isEnglish={isEnglish} slots={spread.positions.map(posLabel)} />
           {activePos && (
             <figcaption className="v2-sd-cap" aria-live="polite">
               <span className="v2-sd-cap-n">{active + 1}</span>
@@ -336,32 +317,14 @@ export const SpreadDetailClient: React.FC<Props> = ({
 
       <section className="v2-sd-sec" aria-labelledby="sd-more-h">
         <Ui2SectionHead n={relatedArticles.length > 0 ? "05" : "04"} word={isEnglish ? "More spreads" : "ผังอื่น"} id="sd-more-h" title={isEnglish ? "Explore Other Spreads" : "ผังอื่นที่น่าสนใจ"} />
+        {/* ไพ่ผังกลาง — แตะแล้วเด้งหน้าต่างผังแบบคลังผัง (`spread-pop.ts`) · ไม่มี JS = ลิงก์ไปหน้าคู่มือผังนั้น */}
         <ul className="v2-sd-more">
-          {fallbackSpreads.map((s) => {
-            const m = mapLayout(s.positions);
-            return (
-              <li key={s.id}>
-                <Link href={`/spreads/${s.id}`} className="v2-sd-more-card">
-                  <span className="v2-sd-mini" aria-hidden="true" style={{ paddingBottom: `${(m.boxHeight * 100).toFixed(2)}%` }}>
-                    {s.positions.map((pos, i) => (
-                      <span
-                        key={i}
-                        style={{
-                          left: `${pos.x * 100}%`,
-                          top: `${(((pos.y * m.yScale + m.offsetY) / m.boxHeight) * 100).toFixed(3)}%`,
-                          width: `${(m.cardW * 100).toFixed(2)}%`,
-                          aspectRatio: `1 / ${MAP_CARD_ASPECT}`,
-                          transform: `translate(-50%, -50%) rotate(${pos.rotate ?? 0}deg)`,
-                        }}
-                      />
-                    ))}
-                  </span>
-                  <b>{getSpreadName(s, isEnglish)}</b>
-                  <small>{getSpreadTagline(s, isEnglish)}</small>
-                </Link>
-              </li>
-            );
-          })}
+          {fallbackSpreads.map((s) => (
+            <li key={s.id} className="v2-sd-more-item">
+              <SpreadCard spread={s} isEnglish={isEnglish} surface="detail_more" band="p" />
+              <p className="v2-sd-more-tag">{getSpreadTagline(s, isEnglish)}</p>
+            </li>
+          ))}
         </ul>
         {/* ลิงก์ขึ้นหมวดที่มองเห็นได้ (breadcrumb ด้านบนซ่อนจากสายตา) — ข้อความเป็นคำที่คนค้น */}
         {topicCrumb && (
@@ -373,6 +336,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
           {isEnglish ? "View all tarot spreads" : "ดูคลังผังพยากรณ์ทั้งหมด"}
         </Link>
       </section>
+      <SpreadPopDialog isEnglish={isEnglish} />
     </div>
   );
 };

@@ -25,6 +25,7 @@ import {
 } from "@/lib/marketplace/booking-policy";
 import { questionCategoryLabel, questionUrgencyLabel, suggestedSpreadLabel } from "@/lib/marketplace/offer";
 import { PrivateRoomCard } from "@/components/marketplace/PrivateRoomCard";
+import { ConsultHero, ConsultWindow } from "@/components/marketplace/ConsultUi2";
 import { STORAGE_KEYS } from "@/lib/storage/keys";
 import type { InviteView } from "@/lib/marketplace/invites.repo";
 
@@ -252,7 +253,7 @@ function ReaderConsoleInner() {
   if (loading && !data) {
     return (
       <main id="main-content" tabIndex={-1} className="min-h-screen text-ink-deep flex items-center justify-center p-4">
-        <div className="altar-panel rounded-2xl p-8 text-center space-y-3 z-10">
+        <div className="page-band-tint v3-cs-win text-center space-y-3 z-10">
           {/*
         ⚠️ ทุกหน้าต้องมี <h1> หนึ่งอันเสมอ — มันคือ "ชื่อของหน้า" ที่ screen reader
         ใช้บอกผู้ใช้ว่าตอนนี้อยู่หน้าไหน และเป็นรากของสารบัญหัวข้อทั้งหน้า
@@ -270,7 +271,7 @@ function ReaderConsoleInner() {
   if (error || !data) {
     return (
       <main id="main-content" tabIndex={-1} className="min-h-screen text-ink-deep flex items-center justify-center p-4">
-        <div className="altar-panel rounded-2xl p-8 text-center space-y-4 max-w-md z-10 border border-err/40">
+        <div className="page-band-tint v3-cs-win text-center space-y-4 max-w-md z-10">
           <h1 className="sr-only">แผงควบคุมแม่หมอ</h1>
           <h2 className="text-base font-bold text-err">เข้าแผงแม่หมอไม่ได้</h2>
           <p className="text-sm text-ink">{error || "เปิดแผงนี้จากลิงก์ที่แอดมินส่งให้"}</p>
@@ -300,8 +301,56 @@ function ReaderConsoleInner() {
     : null;
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink-deep p-4 sm:p-8 font-sans relative overflow-hidden">
-      <div className="max-w-5xl mx-auto space-y-6 relative z-10">
+    <main id="main-content" tabIndex={-1} className="v3-cs text-ink-deep font-sans">
+      {/* v3 UI 2.0 (เจ้าของ 2026-10-26): หัวหน้าแถบครีม (ชื่อแม่หมอ | สวิตช์คิวสด) ➔ งานทั้งหมดในหน้าต่างครีม */}
+      <ConsultHero
+        compact
+        kicker="แผงแม่หมอ"
+        title={reader.displayName}
+        lede={<>LINE: {reader.lineUrl}</>}
+        aside={
+          <div className="v3-cs-card is-row">
+            <div className="min-w-0 flex-1 text-left">
+              <p className="text-sm font-semibold text-ink flex items-center gap-1.5">
+                <span className={`inline-block w-2 h-2 shrink-0 rounded-full ${isLiveOpen ? "bg-ok" : "bg-muted"}`} />
+                {isLiveOpen ? "เปิดรับคิวสดอยู่" : "ปิดรับคิวสด"}
+              </p>
+              <p className="mt-0.5 text-[13px] leading-snug text-muted">
+                {isLiveOpen
+                  ? `ลูกค้ากด "คุยตอนนี้" ได้ · ไม่ได้เปิดหน้านี้เกิน ${LIVE_PRESENCE_TIMEOUT_MINUTES} นาที ระบบปิดให้เอง`
+                  : "รับเฉพาะคิวที่นัดล่วงหน้า"}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleToggleLive}
+              disabled={actionLoading === "toggle"}
+              role="switch"
+              aria-checked={isLiveOpen}
+              aria-label="เปิดรับคิวสด"
+              className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
+                isLiveOpen ? "bg-emerald-700" : "bg-[#CFC3B2]"
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  isLiveOpen ? "translate-x-5" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+        }
+      >
+        {data.studioEnabled && token && (
+          <a href={`/readers/studio?token=${encodeURIComponent(token)}`} className="v3-cs-back">
+            สตูดิโอคำอ่าน — ทำคำอ่านให้ลูกค้าของคุณเอง
+          </a>
+        )}
+      </ConsultHero>
+
+      <ConsultWindow label="งานของแม่หมอ">
+      <div className="space-y-6">
         {/* ลิงก์แผงมีวันหมดอายุ (1–30 วันตามที่แอดมินเลือก) — เตือนก่อนหมด 3 ชม. แม่หมอจะได้ขอลิงก์ใหม่ทันก่อนนัด */}
         {unstable && !linkExpired && (
           <p role="status" className="rounded-xl border border-line-warm bg-inset-warm px-4 py-3 text-sm leading-relaxed text-ink">
@@ -343,71 +392,6 @@ function ReaderConsoleInner() {
             </button>
           </div>
         )}
-
-        {/* Header Console Bar */}
-        <div className="altar-card-porcelain altar-panel p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4 text-center sm:text-left">
-            <div className="h-16 w-16 rounded-full border-2 border-gold-ink/40 bg-surface-warm overflow-hidden flex items-center justify-center text-2xl font-bold text-gold-ink shrink-0">
-              {reader.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={reader.avatarUrl} alt="" /* ภาพประกอบล้วน — <h1> ข้าง ๆ พิมพ์ชื่อแม่หมออยู่แล้ว (INC-0125) */ className="h-full w-full object-cover" />
-              ) : (
-                reader.displayName.charAt(0)
-              )}
-            </div>
-            <div>
-              {/* จอแคบ: ป้ายตกบรรทัดใหม่ทั้งก้อน — เดิมบีบจนชื่อ "seerada.taro/t" และ "แผงแม่/หมอ" หักกลางคำ */}
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 justify-center sm:justify-start">
-                <h1 className="font-serif-th text-xl font-bold text-ink">{reader.displayName}</h1>
-                <span className="whitespace-nowrap text-[13px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
-                  แผงแม่หมอ
-                </span>
-              </div>
-              <p className="text-xs text-muted mt-0.5">LINE: {reader.lineUrl}</p>
-              {data.studioEnabled && token && (
-                <a
-                  href={`/readers/studio?token=${encodeURIComponent(token)}`}
-                  className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold text-gold-ink hover:underline"
-                >
-                  สตูดิโอคำอ่าน — ทำคำอ่านให้ลูกค้าของคุณเอง
-                </a>
-              )}
-            </div>
-          </div>
-
-          {/* Live Queue Switch */}
-          <div className="altar-card-porcelain flex items-center gap-3 p-3">
-            <div className="text-right">
-              <p className="text-xs font-semibold text-ink flex items-center justify-end gap-1.5">
-                <span className={`inline-block w-2 h-2 rounded-full ${isLiveOpen ? "bg-emerald-500" : "bg-muted"}`} />
-                {isLiveOpen ? "เปิดรับคิวสดอยู่" : "ปิดรับคิวสด"}
-              </p>
-              <p className="text-[13px] text-muted">
-                {isLiveOpen
-                  ? `ลูกค้ากด "คุยตอนนี้" ได้ · ไม่ได้เปิดหน้านี้เกิน ${LIVE_PRESENCE_TIMEOUT_MINUTES} นาที ระบบปิดให้เอง`
-                  : "รับเฉพาะคิวที่นัดล่วงหน้า"}
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleToggleLive}
-              disabled={actionLoading === "toggle"}
-              role="switch"
-              aria-checked={isLiveOpen}
-              aria-label="เปิดรับคิวสด"
-              className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                isLiveOpen ? "bg-emerald-600" : "bg-line"
-              }`}
-            >
-              <span
-                className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                  isLiveOpen ? "translate-x-5" : "translate-x-0"
-                }`}
-              />
-            </button>
-          </div>
-        </div>
 
         {/* ✦ ห้องคุยส่วนตัว — ลิงก์ให้ลูกค้าคนเดียว จ่ายแล้วรอแม่หมอรับเข้าห้อง (แผน CONSULT_FLOW คลื่น 7) */}
         <PrivateRoomCard
@@ -695,6 +679,7 @@ function ReaderConsoleInner() {
           }}
         />
       </div>
+      </ConsultWindow>
     </main>
   );
 }
@@ -719,7 +704,7 @@ export default function ReaderConsolePage() {
           เพราะเนื้อหาจริงอยู่หลัง Suspense ส่วนที่ prerender คือ fallback นี้เท่านั้น
           ⚠️ ห้ามลบ h1 — ด่าน `test-a11y-critical` ตรวจทั้ง 309 หน้าแล้ว
         */}
-          <div className="altar-panel rounded-2xl p-8 text-center space-y-3 z-10">
+          <div className="page-band-tint v3-cs-win text-center space-y-3 z-10">
             <h1 className="sr-only">แผงควบคุมแม่หมอ</h1>
             <div className="h-8 w-8 mx-auto border-2 border-gold-ink border-t-transparent rounded-full animate-spin" />
             <p className="text-xs text-muted">กำลังโหลดแผงควบคุมแม่หมอ…</p>

@@ -13,6 +13,9 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { BookingFlow } from "@/components/marketplace/BookingFlow";
 import { hasFreeConsult } from "@/lib/marketplace/free-consult";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { ConsultHero, ConsultWindow } from "@/components/marketplace/ConsultUi2";
+import "@/styles/ui2-page.css";
+import "@/styles/v3-consult.css";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -81,8 +84,18 @@ export default async function PrivateRoomPage({ params }: PageProps) {
   return (
     <>
       <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="min-h-screen px-4 pt-3 text-ink-deep font-serif-th sm:px-6 sm:pt-8">
-        <div className="mx-auto w-full max-w-xl space-y-3.5">
+      {/* v3 UI 2.0 (เจ้าของ 2026-10-26): หัวหน้าแถบครีมเตี้ย ➔ ฟอร์มเข้าห้องในหน้าต่างครีม · h1 อยู่ในเนื้อหา (ตามสถานะ) */}
+      <div className="ui2-pg" data-ui2-page-dark="">
+      <main id="main-content" tabIndex={-1} className="v3-cs is-narrow font-sans text-ink-deep">
+        <ConsultHero
+          compact
+          titleAs="p"
+          kicker="ห้องคุยส่วนตัว"
+          title={<ThaiPhrases>{`คุยกับ ${reader.displayName}`}</ThaiPhrases>}
+          lede={<ThaiPhrases>ลิงก์นี้สำหรับคุณคนเดียว แม่หมอส่งให้เพื่อคุยกันตัวต่อตัว</ThaiPhrases>}
+        />
+        <ConsultWindow narrow label="ห้องคุยส่วนตัว">
+        <div className="w-full space-y-3.5">
           {unavailable ? (
             <section className="altar-card-porcelain !rounded-3xl space-y-4 p-5 text-center sm:p-6" aria-labelledby="room-unavailable-heading">
               <div className="mx-auto grid h-16 w-16 place-items-center overflow-hidden rounded-full bg-canvas text-2xl font-bold text-gold-ink ring-4 ring-surface">
@@ -128,11 +141,13 @@ export default async function PrivateRoomPage({ params }: PageProps) {
               free={free}
             />
           )}
-          <p className="pb-4 text-center text-[12px] leading-relaxed text-muted">
+          <p className="text-center text-[12px] leading-relaxed text-muted">
             ตัวต่อตัว {CONSULTATION_MINUTES} นาที · วิดีโอคอลในเว็บ ไม่ต้องลงแอป · ลิงก์นี้สำหรับคุณคนเดียว
           </p>
         </div>
+        </ConsultWindow>
       </main>
+      </div>
       <SiteFooter spacing="tight" />
     </>
   );
