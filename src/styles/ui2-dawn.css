@@ -450,6 +450,40 @@ html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > se
 html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) :is(.v3-tile-frame, .ui2-qn-note, .v2-qp-note, .v3-at-art, .ui2-sp-topic-art, .ui2-zw-card, .v3-bl-cover-art) {
   box-shadow: 0 0 0 1px rgba(201, 161, 90, 0.45), 0 14px 22px -18px rgba(74, 47, 16, 0.5);
 }
+/* ช่องกรอก/ช่องเลือก (`.glass-field` ➔ ui2-page.css เป็นแผ่นมืดสำหรับพื้นกลางคืน) ในกรอบครีมกลายเป็นก้อนเทาตัวหมึกจม
+   (เจ้าของ 2026-10-27 ส่งภาพช่องวันเกิด/ช่องราศีหน้า /zodiac "ทำไมมืด ไม่สวย") ➔ กระดาษขาวตัวหมึก แบบหน้าต่างปรึกษาแม่หมอ */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .glass-field {
+  color: #29261F;
+  background-color: #FFFCF6;
+  box-shadow: 0 1px 2px rgba(74, 47, 16, 0.08) inset;
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .glass-field:not(:focus) {
+  border-color: rgba(184, 105, 28, 0.32);
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .glass-field::placeholder {
+  color: #6E604F;
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) select.glass-field option {
+  color: #29261F;
+  background: #FFFCF6;
+}
+/* หน้าปัดราศี (ui2-page.css ข้อ 17 ออกแบบบนพื้นมืด) ในกรอบครีม: วงนอกขอบดำหนา + กลางวงเป็นหลุมเทาเข้ม
+   (ภาพเดียวกัน) ➔ หน้าปัดกระดาษครีม วงทองเข้มบาง ขีด 12 ช่องทองจาง กลางวงแสงทองอุ่น */
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-zw-ring {
+  border-color: rgba(184, 105, 28, 0.38);
+  background:
+    radial-gradient(closest-side, rgba(255, 222, 150, 0.3) 0%, rgba(255, 222, 150, 0.08) 60%, rgba(255, 222, 150, 0) 100%),
+    repeating-conic-gradient(from -15deg, rgba(184, 105, 28, 0.2) 0deg 0.6deg, rgba(184, 105, 28, 0) 0.6deg 30deg),
+    rgba(255, 252, 246, 0.6);
+  box-shadow:
+    0 0 0 6px rgba(255, 252, 246, 0.75),
+    0 0 0 7px rgba(184, 105, 28, 0.22),
+    0 30px 60px -36px rgba(74, 47, 16, 0.45);
+}
+:is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .ui2-zw-inner {
+  border-color: rgba(184, 105, 28, 0.32);
+  background: radial-gradient(closest-side, rgba(255, 222, 150, 0.45) 0%, rgba(255, 236, 200, 0.25) 60%, rgba(255, 252, 246, 0.7) 100%);
+}
 @media (hover: hover) {
   html :is(.ui2-pg, .ui2-sp, .ui2-dy) :is(.ui2-sx-win, .ui2-sp-shelf, .v2-doc > section, .page-band-tint) .v3-tile:hover .v3-tile-frame {
     box-shadow: 0 0 0 1px rgba(184, 105, 28, 0.6), 0 22px 34px -20px rgba(74, 47, 16, 0.55);
