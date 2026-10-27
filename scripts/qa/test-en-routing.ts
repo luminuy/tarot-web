@@ -302,6 +302,7 @@ const MUST_USE_LOCALE_LINK = [
   "src/components/encyclopedia/AllCardsTable.tsx",
   "src/components/encyclopedia/CardDetailView.tsx",
   "src/components/spread/SpreadsLibrary.tsx",
+  "src/components/spread/SpreadCard.tsx",
   "src/components/spread/SpreadDetailClient.tsx",
   "src/components/home/TarotFlow.tsx",
   "src/components/blog/BlogIndexClient.tsx",

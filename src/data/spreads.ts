@@ -250,7 +250,9 @@ export const SPREADS: Spread[] = [
     id: "love",
     nameTh: "ดวงความรักสองหัวใจ (ไพ่ 5 ใบ)",
     nameEn: "Two Hearts In-Depth Love Spread (5 Cards)",
-    seoTitleTh: "ดูดวงไพ่ยิปซีความรัก 5 ใบ สองหัวใจ ฟรี",
+    // 2026-10-26: ผังลูกหมวดความรักไม่ขึ้นต้นด้วย "ดูดวงไพ่ยิปซีความรัก" แล้ว — คำหลักนี้ให้หน้าหมวด /spreads/topic/love คนเดียว
+    // (5 หน้าขึ้นต้นเหมือนกันแย่งคำกันเอง · หน้าหมวดอันดับ 39) · ผังลูกขึ้นต้นด้วยเรื่องที่คนค้นจริง (GSC: "เขาคิด ยัง ไง กับเรา" · "แฟนเก่าจะกลับมาไหม")
+    seoTitleTh: "ดูดวงความรักสองหัวใจ ไพ่ยิปซี 5 ใบ ฟรี",
     tagline: "ใจเรา ใจเขา และอนาคตความสัมพันธ์",
     taglineEn: "Your heart, their heart, and relationship outlook",
     description:
@@ -312,7 +314,7 @@ export const SPREADS: Spread[] = [
     id: "how-they-feel",
     nameTh: "ความในใจของเขา (ไพ่ 4 ใบ)",
     nameEn: "How They Truly Feel (4 Cards)",
-    seoTitleTh: "ดูดวงไพ่ยิปซีความรัก 4 ใบ เขาคิดยังไงกับเรา",
+    seoTitleTh: "เขาคิดยังไงกับเรา ดูดวงไพ่ยิปซี 4 ใบ",
     tagline: "ส่องความรู้สึกจริงและสิ่งที่เขาคิดกับเรา",
     taglineEn: "Peek into their true intentions and thoughts toward you",
     description:
@@ -365,7 +367,7 @@ export const SPREADS: Spread[] = [
     id: "ex-reconciliation",
     nameTh: "แฟนเก่าจะกลับมาไหม (ไพ่ 4 ใบ)",
     nameEn: "Past Love & Reconciliation (4 Cards)",
-    seoTitleTh: "ดูดวงไพ่ยิปซีความรัก 4 ใบ แฟนเก่าจะกลับมาไหม",
+    seoTitleTh: "แฟนเก่าจะกลับมาไหม ดูดวงไพ่ยิปซี 4 ใบ",
     tagline: "เช็กโอกาสคืนดี ถ่านไฟเก่า และคำแนะนำ",
     taglineEn: "Examine reconciliation prospects, rekindled flames, and counsel",
     description:
@@ -780,7 +782,8 @@ export const SPREADS: Spread[] = [
     id: "weekly",
     nameTh: "ดวงรายสัปดาห์ 7 วัน (ไพ่ 7 ใบ)",
     nameEn: "7-Day Weekly Forecast (7 Cards)",
-    seoTitleTh: "ดูดวงไพ่ยิปซีรายสัปดาห์ 7 ใบ ฟรี",
+    // GSC 2026-10-26: "ดูดวงไพ่ยิปซี 7 วันข้างหน้า" 139 แสดงผล อันดับ 6.7 CTR 2.9% ➔ วลีที่คนค้นขึ้นต้น
+    seoTitleTh: "ดูดวงไพ่ยิปซี 7 วันข้างหน้า รายสัปดาห์ 7 ใบ ฟรี",
     tagline: "ส่องพลังงานจันทร์ถึงอาทิตย์ วางแผนล่วงหน้า",
     taglineEn: "Map energetic tides Monday through Sunday to plan proactively",
     description:
@@ -1041,7 +1044,7 @@ export const SPREADS: Spread[] = [
     id: "love-six",
     nameTh: "ดวงความรักเจาะลึก (ไพ่ 6 ใบ)",
     nameEn: "Deep Love & Soul Connection (6 Cards)",
-    seoTitleTh: "ดูดวงไพ่ยิปซีความรัก 6 ใบ เจาะลึกหัวใจ",
+    seoTitleTh: "ดูดวงความรักเจาะลึก ไพ่ยิปซี 6 ใบ",
     tagline: "เปิดมิติความรัก 6 ด้าน ความรู้สึก ปัญหา และอนาคต",
     taglineEn: "Unveil 6 dimensions of romantic feelings, obstacles, and true destiny",
     description:
@@ -1284,7 +1287,8 @@ export const SPREADS: Spread[] = [
     id: "luck",
     nameTh: "ดวงโชคลาภและการเสี่ยงโชค (ไพ่ 4 ใบ)",
     nameEn: "Fortune & Serendipity (4 Cards)",
-    seoTitleTh: "ดูดวงไพ่ยิปซี โชคลาภ เสี่ยงโชค 4 ใบ",
+    // GSC 2026-10-26: "ไพ่ยิปซีโชคลาภ" 42 แสดงผล อันดับ 9.7 ➔ วลีที่คนค้นขึ้นต้น
+    seoTitleTh: "ไพ่ยิปซีโชคลาภ ดูดวงเสี่ยงโชค 4 ใบ",
     tagline: "จังหวะเสี่ยงโชค โอกาสฟลุก และลาภลอย",
     taglineEn: "Auspicious timing, windfalls, and serendipitous opportunities",
     description:

@@ -26,6 +26,11 @@ const STRUCTURAL_CONTENT_UPDATED_AT = new Date(SITE_TEMPLATE_UPDATED_AT);
 const CONTENT_UPDATED_AT: Record<string, Date> = Object.fromEntries([
   // 2026-10-20: ป้ายชุดไพ่บนหัวหน้าไพ่รายใบเป็นภาษาคน ("ชุดถ้วย" แทน "cups Suit" · B1-02)
   ...DECK.map((card) => [`/cards/${card.id}`, new Date("2026-10-20T17:00:00+07:00")] as const),
+  // 2026-10-26: หน้าคู่มือผัง + หน้าหมวดเรื่องใช้ไพ่ผังกลาง (SpreadCard) — ภาพผัง · การ์ด "ผังอื่นที่น่าสนใจ" · ลิงก์ /read/<id> ในไพ่เด้งเปลี่ยนจริง
+  ...PUBLIC_SPREADS.map((spread) => [`/spreads/${spread.id}`, new Date("2026-10-26T17:00:00+07:00")] as const),
+  ...["love", "career", "money", "health", "family", "study"].map(
+    (slug) => [`/spreads/topic/${slug}`, new Date("2026-10-26T17:00:00+07:00")] as const
+  ),
 ]);
 
 export default function sitemap(): MetadataRoute.Sitemap {

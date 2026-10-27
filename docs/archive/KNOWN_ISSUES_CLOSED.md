@@ -64,6 +64,18 @@
 
 ---
 
+### ISSUE-053 · อัปเกรด TypeScript 7 — ปิด 2026-10-27
+
+- **ปิดเมื่อ**: PR #721 merge (2026-10-27) ตามคำสั่งเจ้าของ "เอาแบบที่ดีที่สุดสำหรับเรา" — ติดตั้ง TS 7.0.2 ใต้ชื่อแฝง `typescript-native` ให้ `npm run typecheck` ใช้ (20.7 ➔ 2.8 วินาที · 0 errors) ส่วน `typescript` ตัวหลักคงรุ่น 6 ให้ lint/Next/Astro (`npm run typecheck:ts6` ยังมี)
+- **งานต่อในอนาคต (ไม่ใช่บั๊ก)**: เมื่อ `typescript-eslint` รองรับ TS 7 ให้ยก `typescript` กับ `typescript-eslint` พร้อมกันแล้วถอดชื่อแฝง `typescript-native`
+
+- **อาการ**: ยก `typescript` เป็น 7 ไม่ได้ เพราะ `typescript-eslint` ประกาศ peer `typescript ">=4.8.4 <6.1.0"` ➔ `npm ci` ตกด้วย ERESOLVE ตั้งแต่ขั้นติดตั้ง
+- **ผลกระทบ**: ไม่กระทบผู้ใช้ · เสียแค่ความเร็ว typecheck ของ TS 7
+- **ทำไมยังไม่แก้**: รอต้นทาง — ดัน `--legacy-peer-deps` ได้ แต่กฎ lint ที่อ่านชนิดข้อมูลจะเพี้ยนเงียบ ๆ จึงปิด PR #544 ไป (2026-09-21 · ตอนนั้นวัดว่าโค้ดเราผ่าน `tsc` 7.0.2 แบบ 0 errors)
+- **กำลังทำ**: PR #721 (draft · ยังไม่ merge) ติดตั้ง TS 7.0.2 ใต้ชื่อแฝง `typescript-native` ให้ `npm run typecheck` ใช้ ส่วน `typescript` ตัวหลักคงรุ่น 6 ให้ lint/Next/Astro — ถ้า #721 merge ให้ย้ายข้อนี้ไปคลังแล้วจดงานต่อไว้ในคลังด้วย
+- **ขั้นต่อไป**: เมื่อ `typescript-eslint` ออกรุ่นที่รองรับ TS 7 ให้ยก `typescript` กับ `typescript-eslint` พร้อมกัน (และถอดชื่อแฝงถ้า #721 merge ไปแล้ว)
+- **หลักฐาน (2026-10-26)**: `package.json` — `typescript ~6.0.3` (ติดตั้งจริง 6.0.3) · `typescript-eslint ^8.71.2` · `npm view typescript-eslint@latest` = 8.72.0 ยังตรึง `<6.1.0` · `npm view typescript dist-tags` → `latest` 7.0.2 · `docs/WORK_LOG.md` บันทึกการปิด PR #544
+
 ### ISSUE-052 · กฎ "www ➔ โดเมนหลัก" บนชั้นขอบ — ปิด 2026-09-21
 
 #### ISSUE-052 · ✅ กฎ "www ➔ โดเมนหลัก" บนชั้นขอบ — ปิดเคสแล้ว 2026-09-21

@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { VideoCallRoom } from "@/components/marketplace/VideoCallRoom";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { ConsultHero, ConsultWindow } from "@/components/marketplace/ConsultUi2";
 import { useVisibleInterval } from "@/lib/utils/use-visible-interval";
 import type { QueueTicket } from "@/lib/marketplace/queue.repo";
 import { CONSULTATION_MINUTES, CONSULTATION_PRICE_THB, questionCategoryLabel } from "@/lib/marketplace/offer";
@@ -172,7 +173,7 @@ export default function CustomerQueuePage() {
   if ((loading || unstable) && !data && !error) {
     return (
       <main id="main-content" tabIndex={-1} className="min-h-[70vh] text-ink flex items-center justify-center p-4">
-        <div className="altar-card-porcelain p-8 text-center space-y-3 z-10">
+        <div className="page-band-tint v3-cs-win text-center space-y-3 z-10">
           <div className="h-8 w-8 mx-auto border-2 border-gold-ink border-t-transparent rounded-full animate-spin" />
           <p className="text-xs text-muted font-serif-th">
             {unstable ? "เชื่อมต่อไม่เสถียร กำลังลองใหม่อัตโนมัติ…" : "กำลังตรวจสอบข้อมูลคิวของคุณ…"}
@@ -190,7 +191,7 @@ export default function CustomerQueuePage() {
      */
     return (
       <main id="main-content" tabIndex={-1} className="min-h-[70vh] text-ink flex items-center justify-center p-4 font-serif-th">
-        <div className="altar-card-porcelain !rounded-3xl max-w-md w-full z-10 space-y-4 p-6 text-left sm:p-8">
+        <div className="page-band-tint v3-cs-win max-w-md w-full z-10 space-y-4 text-left">
           <h1 className="text-lg font-bold text-ink-deep">
             <ThaiPhrases>เปิดนัดนี้จากที่นี่ไม่ได้</ThaiPhrases>
           </h1>
@@ -261,24 +262,25 @@ export default function CustomerQueuePage() {
                 : "ถ้ายังอยากปรึกษา เลือกแม่หมอแล้วจองใหม่ได้เลย";
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-[70vh] text-ink px-4 py-6 sm:py-10 font-serif-th">
-      <div className="max-w-xl w-full mx-auto space-y-5">
-        <h1 className="sr-only">สถานะคิวปรึกษาแม่หมอ</h1>
-
-        <div className="flex items-center justify-between">
-          <Link
-            href="/readers"
-            className="tap-overlay-y inline-flex items-center gap-1.5 text-sm text-gold-ink hover:text-gold-ink-deep transition-colors"
-          > แม่หมอทั้งหมด
-          </Link>
-          <Link
-            href="/readers/bookings"
-            className="tap-overlay-y inline-flex items-center gap-1.5 text-sm font-semibold text-gold-ink hover:text-gold-ink-deep transition-colors"
-          >
+    <main id="main-content" tabIndex={-1} className="v3-cs is-narrow text-ink font-sans">
+      {/* v3 UI 2.0 (เจ้าของ 2026-10-26): หัวหน้าแถบครีมเตี้ย ➔ สถานะคิวในหน้าต่างครีมบนท้องฟ้ากลางคืน */}
+      <ConsultHero
+        compact
+        kicker={privateRoom ? "ห้องคุยส่วนตัว" : isScheduled ? "นัดปรึกษาแม่หมอ" : "คิวปรึกษาแม่หมอ"}
+        title={<ThaiPhrases>สถานะคิวของคุณ</ThaiPhrases>}
+        lede={<ThaiPhrases>เปิดหน้านี้ทิ้งไว้ได้ ระบบอัปเดตสถานะให้เอง ถึงคิวแล้วจะมีปุ่มเข้าห้องขึ้นที่นี่</ThaiPhrases>}
+      >
+        <div className="flex flex-wrap gap-x-6">
+          <Link href="/readers/bookings" className="v3-cs-back">
             นัดของฉัน
           </Link>
+          <Link href="/readers" className="v3-cs-back">
+            แม่หมอทั้งหมด
+          </Link>
         </div>
-
+      </ConsultHero>
+      <ConsultWindow narrow label="รายละเอียดคิว">
+      <div className="w-full space-y-5">
         <section className="rounded-[28px] border border-line bg-surface overflow-hidden shadow-[0_20px_40px_-28px_rgba(46,33,26,0.45)]">
           {/* แถบกำมะหยี่ — ภาษาภาพเดียวกับการ์ดแม่หมอในหน้ารวม */}
           <div className="consult-stage h-20 !rounded-none !border-0 !shadow-none" aria-hidden="true" />
@@ -611,6 +613,7 @@ export default function CustomerQueuePage() {
           />
         )}
       </div>
+      </ConsultWindow>
     </main>
   );
 }

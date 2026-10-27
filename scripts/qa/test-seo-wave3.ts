@@ -65,10 +65,13 @@ assert(
 
 // 3. แผนผังตำแหน่งไพ่ของผังใหม่ — ตรวจสิ่งที่ผู้ใช้เห็นจริง (`mapLayout` ที่ `SpreadsLibrary` วาด)
 // ภาพ SVG รายผังรุ่นก่อน UI 2.0 ถูกถอดแล้ว ด่านนี้จึงไม่ตรวจ "การมีอยู่" ของภาพนั้นอีก
+// 2026-10-26: ไพ่ผังย้ายไปเป็นของกลาง `SpreadCard.tsx` (คลังผัง · หน้าหมวดเรื่อง · หน้าคู่มือผังใช้ใบเดียวกัน)
+// ด่านจึงตรวจสองชั้น: ของกลางวาดจาก mapLayout() จริง (ไม่ใช่แค่คำในคอมเมนต์) + คลังผังเรียกของกลางนั้นจริง
 const libraryContent = fs.readFileSync(path.join(process.cwd(), "src/components/spread/SpreadsLibrary.tsx"), "utf-8");
+const spreadCardContent = fs.readFileSync(path.join(process.cwd(), "src/components/spread/SpreadCard.tsx"), "utf-8");
 assert(
-  libraryContent.includes("mapLayout"),
-  "SpreadsLibrary.tsx ต้องวาดแผนผังจากเรขาคณิตกลาง mapLayout() (ไม่ใช่ภาพนิ่งแยกรายผัง)",
+  /=\s*mapLayout\(spread\.positions\)/.test(spreadCardContent) && /<SpreadCard\b/.test(libraryContent),
+  "ไพ่ผัง (SpreadCard.tsx) ต้องวาดแผนผังจากเรขาคณิตกลาง mapLayout() และ SpreadsLibrary.tsx ต้องใช้ <SpreadCard> (ไม่ใช่ภาพนิ่งแยกรายผัง)",
 );
 for (const id of expectedNewSpreads) {
   const spread = SPREADS.find((s) => s.id === id);

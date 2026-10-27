@@ -13,8 +13,11 @@ import type { Metadata } from "next";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
-import { BriefIcon, ClockIcon, ShieldIcon, VideoIcon } from "@/components/marketplace/ConsultIcons";
+import { BriefIcon, ClockIcon, VideoIcon } from "@/components/marketplace/ConsultIcons";
+import { ConsultHero, ConsultWindow } from "@/components/marketplace/ConsultUi2";
 import { CONSULTATION_MINUTES } from "@/lib/marketplace/offer";
+import "@/styles/ui2-page.css";
+import "@/styles/v3-consult.css";
 
 export const dynamic = "force-dynamic";
 
@@ -102,12 +105,20 @@ export default async function ReaderDetailPage({
   };
 
   const bio = reader.bio?.trim();
+  /** คำโปรยหัวหน้า = บรรทัดแรกของคำแนะนำตัว (ฉบับเต็มอยู่ในส่วน "เกี่ยวกับ") */
+  const bioLead = bio?.split("\n")[0]?.trim();
 
   return (
     <>
       <SiteHeader />
+      {/*
+        v3 UI 2.0 (เจ้าของ 2026-10-26 "ทำเลย" · ขึ้น preview ก่อน): ภาษาภาพเดียวกับหน้ารวม /readers
+        หัวหน้าแถบครีม (ชื่อ · ความถนัด · คะแนน | บัตรแม่หมอ) ➔ หน้าต่างครีมบนท้องฟ้ากลางคืน
+        ซ้าย = เกี่ยวกับ + วิธีคุย + ขั้นตอน + รีวิว + นโยบาย · ขวา = การ์ดจองติดจอ (มือถือขึ้นก่อนเนื้อหา)
+      */}
+      <div className="ui2-pg" data-ui2-page-dark="">
       {/* pb-28 บนมือถือ: เว้นที่ให้แถบจองติดล่างจอ (ReaderDetailClient) ไม่บังเนื้อหาท้ายหน้า */}
-      <main id="main-content" tabIndex={-1} className="min-h-screen text-ink-deep px-4 pb-28 pt-5 sm:px-8 sm:pt-8 lg:pb-16 font-serif-th relative overflow-x-clip">
+      <main id="main-content" tabIndex={-1} className="v3-cs pb-28 lg:pb-16 font-sans">
         {/* Schema.org Structured Data */}
         <script
           type="application/ld+json"
@@ -118,71 +129,55 @@ export default async function ReaderDetailPage({
           dangerouslySetInnerHTML={{ __html: jsonLdScript(personJsonLd) }}
         />
 
-        <div className="mx-auto max-w-5xl space-y-6 relative z-10">
-          <nav aria-label="เส้นทางนำทาง" className="flex items-center gap-2 overflow-x-auto whitespace-nowrap text-[13px] text-muted">
-            <Link href="/" className="hover:text-gold-ink transition-colors">
-              หน้าแรก
-            </Link>
-            <span aria-hidden="true">/</span>
-            <Link href="/readers" className="hover:text-gold-ink transition-colors">
-              ปรึกษาแม่หมอ
-            </Link>
-            <span aria-hidden="true">/</span>
-            <span className="font-semibold text-ink-deep">{reader.displayName}</span>
-          </nav>
+        {/* เส้นทางหน้า — ซ่อนจากตาแบบ sr-only (globals.css) · โปรแกรมอ่านหน้าจอยังอ่านได้ */}
+        <nav aria-label="เส้นทางนำทาง">
+          <Link href="/">หน้าแรก</Link> / <Link href="/readers">ปรึกษาแม่หมอ</Link> / <span>{reader.displayName}</span>
+        </nav>
 
-          {/*
-            ✦ หน้าโปรไฟล์แม่หมอแบบหน้าโปรไฟล์ผู้ให้บริการของเว็บระดับโลก (เจ้าของสั่ง 2026-10-03)
-            หัวโปรไฟล์ (แถบกำมะหยี่ชุดเดียวกับหน้ารวม/หน้าคิว) · ซ้าย = เกี่ยวกับ + วิธีคุย + ขั้นตอน · ขวา = การ์ดจองติดจอ
-            มือถือ: การ์ดจองขึ้นต่อจากหัวโปรไฟล์ทันที (ไม่ต้องเลื่อนหา) · ข้อความ PDPA อยู่ในหน้าต่างจองที่เดียว (เดิมซ้ำ 3 ที่)
-          */}
-          <section className="overflow-hidden rounded-[28px] border border-line bg-surface shadow-[0_20px_40px_-28px_rgba(46,33,26,0.45)]">
-            <div className="consult-stage h-24 !rounded-none !border-0 !shadow-none sm:h-32" aria-hidden="true" />
-            <div className="flex flex-col items-center gap-4 px-5 pb-6 text-center sm:flex-row sm:items-end sm:px-8 sm:text-left">
-              <div className="-mt-12 grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-full bg-canvas text-3xl font-bold text-gold-ink shadow-md ring-4 ring-surface sm:-mt-14 sm:h-28 sm:w-28">
+        <ConsultHero
+          kicker="แม่หมอตัวจริง"
+          title={<ThaiPhrases>{reader.displayName}</ThaiPhrases>}
+          lede={bioLead ? <ThaiPhrases>{bioLead}</ThaiPhrases> : undefined}
+          aside={
+            <div className="v3-cs-card">
+              <div className="v3-cs-avatar">
                 {reader.avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={reader.avatarUrl}
                     /* ภาพประกอบล้วน — <h1> ข้าง ๆ พิมพ์ชื่อแม่หมออยู่แล้ว (INC-0125) */
                     alt=""
-                    className="h-full w-full object-cover"
                   />
                 ) : (
                   reader.displayName.charAt(0).toUpperCase()
                 )}
               </div>
-              <div className="min-w-0 flex-1 space-y-2.5 sm:pb-1 sm:pt-4">
-                <div className="flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap">
-                  <h1 className="break-words text-2xl font-bold leading-snug text-ink-deep sm:text-3xl">{reader.displayName}</h1>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-ok/30 bg-ok/10 px-2.5 py-0.5 text-[13px] font-semibold text-ok">
-                    <ShieldIcon width={14} height={14} />
-                    ยืนยันตัวตนแล้ว
-                  </span>
-                </div>
-                {reviews.average !== null && (
-                  <a href="#reader-reviews" className="inline-flex items-center gap-1.5 text-sm text-ink hover:text-gold-ink">
-                    <span className="text-muted">คะแนน</span>
-                    <strong className="font-bold">{reviews.average.toFixed(1)}/5</strong>
-                    <span className="text-muted">· {reviews.count} รีวิวจากผู้ที่ปรึกษาจริง</span>
-                  </a>
-                )}
-                {reader.specialties.length > 0 && (
-                  <ul className="flex flex-wrap justify-center gap-1.5 sm:justify-start" aria-label="ความถนัด">
-                    {reader.specialties.map((s) => (
-                      <li key={s} className="rounded-full border border-line-warm bg-inset-warm px-3 py-1 text-[13px] text-ink-deep">
-                        {s}
-                      </li>
-                    ))}
-                  </ul>
-                )}
+              <div>
+                <p className="v3-cs-card-name">ตัวต่อตัว {CONSULTATION_MINUTES} นาที</p>
+                <p className="v3-cs-card-meta">วิดีโอคอลในเว็บ หรือคุยทาง LINE</p>
               </div>
             </div>
-          </section>
+          }
+        >
+          <ul className="v3-cs-chips" aria-label="ความถนัด">
+            <li className="is-ok">ยืนยันตัวตนแล้ว</li>
+            {reader.specialties.map((s) => (
+              <li key={s}>{s}</li>
+            ))}
+          </ul>
+          {reviews.average !== null && (
+            <a href="#reader-reviews" className="v3-cs-rating">
+              <span>คะแนน</span>
+              <strong>{reviews.average.toFixed(1)}/5</strong>
+              <span>จาก {reviews.count} รีวิวของผู้ที่ปรึกษาจริง</span>
+            </a>
+          )}
+        </ConsultHero>
 
+        <ConsultWindow label={`ปรึกษา ${reader.displayName}`}>
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
             {/* การ์ดจอง — มือถือขึ้นก่อนเนื้อหา · จอใหญ่ติดขวาและติดจอตอนเลื่อน */}
-            <div className="lg:order-2 lg:sticky lg:top-[calc(var(--site-header-h)+20px)]">
+            <div id="book" className="scroll-mt-24 lg:order-2 lg:sticky lg:top-[calc(var(--site-header-h)+20px)]">
               <ReaderDetailClient reader={reader} isLiveOpen={isLiveOpen} quickSlots={quickSlots} nowMs={nowMs} />
             </div>
 
@@ -310,8 +305,15 @@ export default async function ReaderDetailPage({
               </section>
             </div>
           </div>
-        </div>
+        </ConsultWindow>
+
+        <p className="mt-6 text-center">
+          <Link href="/readers" className="v3-cs-back v3-cs-night-link">
+            ดูแม่หมอคนอื่น
+          </Link>
+        </p>
       </main>
+      </div>
       <SiteFooter />
     </>
   );

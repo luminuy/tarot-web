@@ -1,6 +1,6 @@
 # 🗺️ แผนแม่บทรวม — ทุกงานที่ค้างอยู่
 
-> **สถานะ**: 🚧 ทำแล้วบางส่วน — เปิดอยู่ 9 เรื่องในตารางข้อ 1 · โค้ดที่รอ merge มีชุดเดียว (UI 2.0 หน้าย่อยแม่หมอ + ไพ่ผังกลาง ใน PR #721) · INP ผู้ใช้จริงรอข้อมูลราว 1 สัปดาห์ (ISSUE-061) · ที่เหลือรอเจ้าของหรือคนนอก: คีย์ผู้ตัดสิน AI · แม่หมอตรวจเนื้อหา · ทนายรับรอง Reader Studio · บัญชีโซเชียล · บัญชี Apple · เคาะ SEO อังกฤษ · **ตรวจล่าสุด**: 2026-10-27
+> **สถานะ**: 🚧 ทำแล้วบางส่วน — เปิดอยู่ 8 เรื่องในตารางข้อ 1 · ไม่มีโค้ดรอ merge (UI 2.0 หน้าแม่หมอ + ไพ่ผังกลางเข้า main ใน #721) · INP ผู้ใช้จริงรอข้อมูลราว 1 สัปดาห์ (ISSUE-061) · ที่เหลือรอเจ้าของหรือคนนอก: คีย์ผู้ตัดสิน AI · แม่หมอตรวจเนื้อหา · ทนายรับรอง Reader Studio · บัญชีโซเชียล · บัญชี Apple · เคาะ SEO อังกฤษ · **ตรวจล่าสุด**: 2026-10-27
 > **อ่านก่อนแตะ**: ภาพรวมงานค้างทั้งเว็บ — เริ่มที่ตารางข้อ 1 (งานที่เปิดจริง ณ วันตรวจ) แล้วค่อยเปิดแผนย่อยที่ลิงก์ไว้
 
 > **ตรวจใหม่ทั้งแผ่น 2026-10-26** (ทวนอีกรอบ 2026-10-27) · **ฐานที่ตรวจ**: `main` ที่ `573d0258` (หลัง PR #724)
@@ -56,15 +56,14 @@
 
 | # | งาน | รอใคร | ตอนนี้ | แผน |
 | :-: | :--- | :--- | :--- | :--- |
-| **1** | UI 2.0 หน้าย่อยระบบแม่หมอ (โปรไฟล์ · จอง · คิว · นัดของฉัน · ห้องส่วนตัว · แผงแม่หมอ) + ไพ่ผังกลางในหน้า `/spreads/<id>` และ `/spreads/topic/*` | เจ้าของดู preview แล้วสั่ง merge | ลงโค้ดแล้วใน PR #721 ยังไม่ merge · บน `main` มีแค่หน้ารวมแม่หมอที่เป็น UI 2.0 | [`UI_2_0_PLAN`](UI_2_0_PLAN_2026-10-12.md) · [`UI_2_0_SPREADS`](UI_2_0_SPREADS_PLAN_2026-10-13.md) |
-| **2** | INP ผู้ใช้จริง 215 ms (CrUX มือถือ) — ตัวเดียวที่ทำ Core Web Vitals ตก | ทีมพัฒนา หลังมีข้อมูล | ตัวเก็บ INP พร้อมตัวการขึ้น production 2026-10-26 · อ่านผล `npm run cf:inp-stats` หลังราว 1 สัปดาห์ แล้วแก้ตามตัวการ (แทนการวัดบนเครื่องจริงได้) | [`KNOWN_ISSUES`](../KNOWN_ISSUES.md) ISSUE-061 · [`UI_2_0_SPREADS`](UI_2_0_SPREADS_PLAN_2026-10-13.md) หัวข้อ 8 |
-| **3** | รัน `ai:judge` ด้วยคีย์ผู้ตัดสินแยก แล้วตัดสินคลื่น C และสวิตช์ `RELATIONS_IN_PROMPT` | เจ้าของตั้ง secret `JUDGE_GEMINI_API_KEY` / `JUDGE_GROQ_API_KEY` | รันล่าสุด 2026-10-11 ได้ 4.51/5 ยังแยกดีขึ้น/แย่ลงไม่ออก | [`HANDOFF_AI_JUDGE_BASELINE`](HANDOFF_AI_JUDGE_BASELINE_2026-09-11.md) · [`HANDOFF_AI_ACCURACY_THAI`](HANDOFF_AI_ACCURACY_THAI_2026-09-07.md) |
-| **4** | ตรวจเนื้อหาที่ร่างไว้: มุมอ่านกลับหัว 78 ใบ (`reversal-angles.ts`) · แก่นเรื่องไพ่ (`themes.ts`) | แม่หมอ | ร่างเสร็จ แถว `pending` ไม่ถึงผู้ใช้และไม่เข้า prompt · ชีทอยู่ใน `docs/review/` | [`REFLECTION_JOURNAL`](REFLECTION_JOURNAL_PLAN_2026-10-05.md) |
-| **5** | เปิด Reader Studio | ทนายรับรอง DPA · เจ้าของเปิด billing Gemini · ทำ DPA กับ Cloudflare · 2FA | โค้ดพร้อม ปิดด้วยสวิตช์ `READER_STUDIO_ENABLED` | [`REFLECTION_JOURNAL`](REFLECTION_JOURNAL_PLAN_2026-10-05.md) · [`PENDING_SETUP`](../PENDING_SETUP.md) |
-| **6** | Omnichannel อีก 3 ช่อง (IG · Threads · X) | เจ้าของเปิดบัญชีแล้วส่งลิงก์ | 3/6 ช่องทาง (`BRAND_SOCIAL_PROFILES`) | [`HANDOFF_OMNI_YESNO`](HANDOFF_OMNI_YESNO_2026-09-06.md) |
-| **7** | แอป iOS เฟสถัดไป (Sign in with Apple · IAP · Push · TestFlight) | เจ้าของเปิดบัญชี Apple Developer | แอป MVP อยู่ใน `mobile/` ยังไม่ลองบน iPhone จริง | [`IOS_APP_PLAN`](IOS_APP_PLAN_2026-09-29.md) |
-| **8** | จะลงทุน SEO อังกฤษต่อแค่ไหน | เจ้าของ | หน้า `/en` เปิดครบ แปลครบ · ยังไม่มีผล Search Console แยกหน้า `/en` ใน repo | [`HANDOFF_EN_ROUTING`](HANDOFF_EN_ROUTING_2026-09-06.md) |
-| **9** | PerplexityBot ถูกบล็อกที่ Cloudflare (B3-08) | เจ้าของดู Security › Events | อยู่นอกโค้ด | [`AUDIT_2026-10-18`](AUDIT_2026-10-18.md) |
+| **1** | INP ผู้ใช้จริง 215 ms (CrUX มือถือ) — ตัวเดียวที่ทำ Core Web Vitals ตก | ทีมพัฒนา หลังมีข้อมูล | ตัวเก็บ INP พร้อมตัวการขึ้น production 2026-10-26 · อ่านผล `npm run cf:inp-stats` หลังราว 1 สัปดาห์ แล้วแก้ตามตัวการ (แทนการวัดบนเครื่องจริงได้) | [`KNOWN_ISSUES`](../KNOWN_ISSUES.md) ISSUE-061 · [`UI_2_0_SPREADS`](UI_2_0_SPREADS_PLAN_2026-10-13.md) หัวข้อ 8 |
+| **2** | รัน `ai:judge` ด้วยคีย์ผู้ตัดสินแยก แล้วตัดสินคลื่น C และสวิตช์ `RELATIONS_IN_PROMPT` | เจ้าของตั้ง secret `JUDGE_GEMINI_API_KEY` / `JUDGE_GROQ_API_KEY` | รันล่าสุด 2026-10-11 ได้ 4.51/5 ยังแยกดีขึ้น/แย่ลงไม่ออก | [`HANDOFF_AI_JUDGE_BASELINE`](HANDOFF_AI_JUDGE_BASELINE_2026-09-11.md) · [`HANDOFF_AI_ACCURACY_THAI`](HANDOFF_AI_ACCURACY_THAI_2026-09-07.md) |
+| **3** | ตรวจเนื้อหาที่ร่างไว้: มุมอ่านกลับหัว 78 ใบ (`reversal-angles.ts`) · แก่นเรื่องไพ่ (`themes.ts`) | แม่หมอ | ร่างเสร็จ แถว `pending` ไม่ถึงผู้ใช้และไม่เข้า prompt · ชีทอยู่ใน `docs/review/` | [`REFLECTION_JOURNAL`](REFLECTION_JOURNAL_PLAN_2026-10-05.md) |
+| **4** | เปิด Reader Studio | ทนายรับรอง DPA · เจ้าของเปิด billing Gemini · ทำ DPA กับ Cloudflare · 2FA | โค้ดพร้อม ปิดด้วยสวิตช์ `READER_STUDIO_ENABLED` | [`REFLECTION_JOURNAL`](REFLECTION_JOURNAL_PLAN_2026-10-05.md) · [`PENDING_SETUP`](../PENDING_SETUP.md) |
+| **5** | Omnichannel อีก 3 ช่อง (IG · Threads · X) | เจ้าของเปิดบัญชีแล้วส่งลิงก์ | 3/6 ช่องทาง (`BRAND_SOCIAL_PROFILES`) | [`HANDOFF_OMNI_YESNO`](HANDOFF_OMNI_YESNO_2026-09-06.md) |
+| **6** | แอป iOS เฟสถัดไป (Sign in with Apple · IAP · Push · TestFlight) | เจ้าของเปิดบัญชี Apple Developer | แอป MVP อยู่ใน `mobile/` ยังไม่ลองบน iPhone จริง | [`IOS_APP_PLAN`](IOS_APP_PLAN_2026-09-29.md) |
+| **7** | จะลงทุน SEO อังกฤษต่อแค่ไหน | เจ้าของ | หน้า `/en` เปิดครบ แปลครบ · ยังไม่มีผล Search Console แยกหน้า `/en` ใน repo | [`HANDOFF_EN_ROUTING`](HANDOFF_EN_ROUTING_2026-09-06.md) |
+| **8** | PerplexityBot ถูกบล็อกที่ Cloudflare (B3-08 · ISSUE-062) | เจ้าของดู Security › Events | อยู่นอกโค้ด | [`AUDIT_2026-10-18`](AUDIT_2026-10-18.md) |
 
 ---
 
@@ -72,6 +71,7 @@
 
 | เรื่อง | ผล |
 | :--- | :--- |
+| UI 2.0 หน้าย่อยระบบแม่หมอ + ไพ่ผังกลางในหน้าคู่มือผัง/หมวดเรื่อง + นับการแตะไพ่ | ✅ เข้า main ผ่าน PR #721 (2026-10-27) — [`UI_2_0_PLAN`](UI_2_0_PLAN_2026-10-12.md) · [`UI_2_0_SPREADS_PLAN`](UI_2_0_SPREADS_PLAN_2026-10-13.md) |
 | Marketplace แม่หมอตัวจริง เฟส 2 | ✅ M4–M7 ครบตาม [`specs/MARKETPLACE`](../specs/MARKETPLACE.md) หัวข้อ 10 · ขั้นตอนปรึกษาแม่หมอใหม่ขึ้น production 2026-10-12 ([`CONSULT_FLOW_UX_PLAN`](CONSULT_FLOW_UX_PLAN_2026-10-11.md)) |
 | SeerTarot UI 2.0 ทั้งเว็บ | ✅ ขึ้น production 2026-10-17 · ที่เหลือคือข้อ 1–2 ด้านบน |
 | ระบบสมุดดวงและการสะท้อนตัวเอง | ✅ ขึ้น production 2026-10-07 · ที่เหลือคือข้อ 3–5 ด้านบน |

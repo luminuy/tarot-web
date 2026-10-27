@@ -16,9 +16,10 @@ const loveOgImages = buildPageOgImage({
 
 export const loveOneCardMetadataTh: Metadata = {
   // layout เติมท้าย " · SeerTarot" ให้เองอยู่แล้ว — เขียน "| SeerTarot" เองอีกจะซ้ำสองรอบ
-  title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่น ๆ ไขคำตอบหัวใจ",
+  // GSC 2026-10-26: "ไพ่ยิปซี ความรัก 1 ใบ" 77 · "ไพ่ยิปซีความรัก 1 ใบ" 29 แสดงผล อันดับ ~9 ➔ วลีที่คนค้นจริงขึ้นต้น
+  title: "ไพ่ยิปซีความรัก 1 ใบ ดูดวงความรักแม่น ๆ ไขคำตอบหัวใจ",
   description:
-    "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแท้ Rider-Waite 78 ใบ ไขทุกข้อสงสัยหัวใจ ทั้งคนโสด คนคุยสถานะไม่ชัด มีคู่ หรือเพิ่งเลิกรา สับไพ่ด้วยตนเอง",
+    "ไพ่ยิปซีความรัก 1 ใบ ดูดวงความรักฟรีด้วยไพ่ Rider-Waite 78 ใบ ไขทุกข้อสงสัยหัวใจ ทั้งคนโสด คนคุยสถานะไม่ชัด มีคู่ หรือเพิ่งเลิกรา สับไพ่ด้วยตนเอง",
   keywords: [
     "ดูดวงความรัก 1 ใบ",
     "ดูดวงความรัก",
@@ -31,7 +32,7 @@ export const loveOneCardMetadataTh: Metadata = {
   ],
   alternates: buildAlternates("/love/1-card", { locale: "th", englishTwin: true }),
   openGraph: {
-    title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่น ๆ ไขคำตอบหัวใจ · SeerTarot",
+    title: "ไพ่ยิปซีความรัก 1 ใบ ดูดวงความรักแม่น ๆ ไขคำตอบหัวใจ · SeerTarot",
     description:
       "เปิดไพ่ยิปซี 1 ใบตอบคำถามหัวใจ แม่นยำทุกสถานะ: โสดสนิท มีคนคุย มีคนรัก หรือคิดถึงคนเก่า ไร้โฆษณาคั่น",
     url: `${SITE_ORIGIN}/love/1-card`,
@@ -42,7 +43,7 @@ export const loveOneCardMetadataTh: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่น ๆ ไขคำตอบหัวใจ · SeerTarot",
+    title: "ไพ่ยิปซีความรัก 1 ใบ ดูดวงความรักแม่น ๆ ไขคำตอบหัวใจ · SeerTarot",
     description:
       "เปิดไพ่ยิปซี 1 ใบตอบคำถามหัวใจ แม่นยำทุกสถานะ โสด/มีคนคุย/มีแฟน/คนเก่า ฟรี 100%",
     images: [loveOgImages[0].url],

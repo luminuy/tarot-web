@@ -25,6 +25,11 @@ updates:
       - dependency-name: "next"
         update-types: ["version-update:semver-minor", "version-update:semver-major"]
       - dependency-name: "@opennextjs/*"
+      # ISSUE-053: typescript-eslint 8.x ยังตรึง peer typescript "<6.1.0" ➔ ยก typescript เป็น 7 = npm ci ตก ERESOLVE
+      #    typecheck ใช้ TS 7 ผ่านชื่อแฝง `typescript-native` อยู่แล้ว (`npm run typecheck`) ส่วน `typescript` คง 6 ให้ lint/Next/Astro
+      #    ปลดบรรทัดนี้เมื่อ typescript-eslint รองรับ TS 7 แล้วยกสองตัวพร้อมกัน
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     groups:
       worker-runtime:
         patterns:

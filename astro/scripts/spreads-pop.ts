@@ -3,7 +3,7 @@
  * แผน: docs/plans/UI_2_0_SPREADS_PLAN_2026-10-13.md หัวข้อ 5
  *
  * 1. หยุดของวนเมื่อส่วนพ้นจอ — สลับ `data-inview` ของ `[data-anim-section]` (กติกาเดียวกับหน้าแรก)
- * 2. แตะไพ่ผัง ➔ เปิด `<dialog>` ตัวเดียวด้วย show() + ฉากหลังของเราเอง · ไพ่ใหญ่คัดลอกจากไพ่ใบที่แตะ (cloneNode)
+ * 2. แตะไพ่ผัง ➔ เปิด `<dialog>` (ของกลาง `./spread-pop.ts` — หน้าหมวดเรื่องกับหน้าคู่มือผังใช้ตัวเดียวกัน) · ไพ่ใหญ่คัดลอกจากไพ่ใบที่แตะ (cloneNode)
  *    ⚠️ ไม่ใช้ showModal(): เนื้อหาข้างหลังทั้งหน้ากลายเป็น inert ➔ คำนวณสไตล์ใหม่ทั้งหน้าทุกครั้งที่เปิด/ปิด
  *       วัดที่ CPU ×4: เปิด 149 ms (modal) เทียบ 20 ms (show) — แตะแล้วสะดุดบนมือถือกลางล่าง (B2 · 2026-10-21)
  *       พฤติกรรมแบบ modal ทำเอง: ฉากหลังกดปิด · Esc ปิด · Tab วนในหน้าต่าง · aria-modal · ล็อกเลื่อน (CSS `html:has`)
@@ -15,6 +15,7 @@
 
 /* ── 1. ของวนหยุดนอกจอ (สคริปต์กลาง) ─────────────────────────────────── */
 import "./ui2-inview";
+import { initSpreadPop } from "./spread-pop";
 
 /* ── 1a. ไพ่ตกแต่งหัวหน้าโผล่เมื่อภาพโหลดเสร็จ (ไม่เห็นกรอบขาวเปล่าแวบ · INC-0271) ── */
 for (const card of document.querySelectorAll<HTMLElement>(".ui2-sp-deco-card")) {
@@ -220,129 +221,5 @@ if (show) {
   if (hashed >= 0 && scrolly()) goTo(hashed, false);
 }
 
-/* ── 2. ไพ่เด้ง ────────────────────────────────────────────────────────── */
-const dialog = document.querySelector<HTMLDialogElement>("[data-spread-pop]");
-const CARD = "a.ui2-spread-card[data-spread-id]";
-
-if (dialog && typeof dialog.show === "function") {
-  const pop = dialog;
-  /*
-   * หน้าต่างแบบไม่ modal ไม่ขึ้น top layer เอง — ย้ายไปไว้ใต้ <body> ตรง ๆ ไม่ให้ติด stacking context
-   * ของ `div.relative.z-10` ที่ครอบหน้าอยู่ (บทเรียน INC-0243 · หัวเว็บ z-50 จะทับหน้าต่าง)
-   * กล่องครอบมีคลาส `ui2-sp` ให้กฎ CSS ที่ขึ้นต้นด้วย `.ui2-sp` ยังใช้กับไพ่ใหญ่ที่คัดลอกมาได้เหมือนเดิม
-   */
-  const layer = Object.assign(document.createElement("div"), { className: "ui2-sp ui2-pop-layer" });
-  // `data-floating` = ข้อยกเว้นของกฎที่ให้ลูกตรงของ <body> เป็น z-index 1 (ไม่งั้นหัวเว็บ z-50 ทับฉากหลัง)
-  layer.setAttribute("data-floating", "");
-  const scrim = Object.assign(document.createElement("div"), { className: "ui2-pop-scrim", hidden: true });
-  layer.append(scrim, pop);
-  document.body.append(layer);
-  pop.setAttribute("aria-modal", "true");
-  const $ = <T extends Element = HTMLElement>(sel: string, root: ParentNode = pop) => root.querySelector(sel) as T;
-  const big = $("[data-pop-card]");
-  const list = $("[data-pop-list]");
-  let from: HTMLElement | null = null;
-
-  const open = (card: HTMLAnchorElement) => {
-    const slot = card.parentElement as HTMLElement;
-    const data = $("[data-pop]", slot);
-    const shelf = card.closest("section") as HTMLElement;
-    for (const v of ["--cat", "--cat-ink"]) pop.style.setProperty(v, shelf.style.getPropertyValue(v));
-
-    big.replaceChildren(...Array.from(card.children, (n) => n.cloneNode(true)));
-    big.querySelector("h3")?.replaceWith(Object.assign(document.createElement("p"), {
-      className: "ui2-sc-band",
-      textContent: card.querySelector("h3")?.textContent ?? "",
-    }));
-    $("[data-pop-cat]").textContent = data.dataset.cat ?? "";
-    $("[data-pop-count]").textContent = $(".ui2-sc-count", card).textContent;
-    $("[data-pop-premium]").hidden = !card.querySelector(".ui2-sc-lock");
-    $("[data-pop-title]").textContent = data.dataset.name ?? "";
-    $("[data-pop-tagline]").textContent = $("p", data).textContent;
-    list.replaceChildren(...Array.from(data.querySelectorAll("li"), (li) => li.cloneNode(true)));
-    list.classList.toggle("is-long", list.children.length > 6);
-    // คัดลอกค่า href ดิบ (ไม่ใช่ `.href` ซึ่งเป็น URL เต็ม) — ลิงก์ในหน้าต่างหน้าตาเหมือนลิงก์อื่นในหน้า
-    $("[data-pop-start]").setAttribute("href", $("[data-start]", data).getAttribute("href") ?? "");
-    $("[data-pop-guide]").setAttribute("href", card.getAttribute("href") ?? "");
-
-    from = card;
-    if (!pop.open) {
-      scrim.hidden = false;
-      pop.show();
-    } else {
-      // เปิดอยู่แล้ว (สลับไพ่ผ่านลิงก์ลึก) — เลื่อนกลับบนสุด · เปิดใหม่ไม่ต้อง: กล่องเพิ่งถูกสร้างใหม่ อยู่บนสุดเอง (ไม่บังคับคำนวณเลย์เอาต์)
-      pop.scrollTop = 0;
-    }
-    if (!pop.contains(document.activeElement)) $("[data-pop-close]").focus({ preventScroll: true });
-    history.replaceState(history.state, "", `#${card.id}`);
-  };
-
-  document.addEventListener("click", (e) => {
-    const card = (e.target as Element | null)?.closest?.<HTMLAnchorElement>(CARD);
-    if (!card || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    e.preventDefault();
-    open(card);
-  });
-
-  // ปิด: กากบาท · ปุ่มกลับ (มือถือ) · แตะพื้นหลัง (คลิกโดนตัว <dialog> เอง = นอกเนื้อหา) · Esc (เบราว์เซอร์ทำให้)
-  // เก็บกวาดทันทีที่สั่งปิด (ไม่รออีเวนต์ close ซึ่งมาช้ากว่า) · เรียกซ้ำได้ไม่มีผล
-  const done = () => {
-    if (location.hash) history.replaceState(history.state, "", location.pathname + location.search);
-    from?.focus({ preventScroll: true });
-  };
-  pop.addEventListener("click", (e) => {
-    const t = e.target as Element;
-    if (t === pop || t.closest("[data-pop-close]")) {
-      pop.close();
-      done();
-    }
-  });
-  scrim.addEventListener("click", () => {
-    pop.close();
-    done();
-  });
-  // แบบไม่ modal ไม่มี Esc / กันโฟกัสหลุดให้ — ทำเองตรงนี้
-  document.addEventListener("keydown", (e) => {
-    if (!pop.open) return;
-    if (e.key === "Escape") {
-      e.preventDefault();
-      pop.close();
-      done();
-      return;
-    }
-    if (e.key !== "Tab") return;
-    const items = Array.from(
-      pop.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'),
-    ).filter((el) => !el.hidden && el.getClientRects().length > 0);
-    if (items.length === 0) return;
-    const first = items[0];
-    const last = items[items.length - 1];
-    const active = document.activeElement;
-    if (e.shiftKey && (active === first || !pop.contains(active))) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && (active === last || !pop.contains(active))) {
-      e.preventDefault();
-      first.focus();
-    }
-  });
-  pop.addEventListener("close", () => {
-    scrim.hidden = true;
-    if (!pop.open) done();
-  });
-
-  // ชี้แถวตำแหน่ง ➔ ไพ่ใบนั้นในผ้าปูเรืองทอง
-  const hot = (i: number) => {
-    list.querySelectorAll("li").forEach((li, k) => li.toggleAttribute("data-hot", k === i));
-    big.querySelectorAll(".ui2-sc-spot").forEach((s, k) => s.toggleAttribute("data-hot", k === i));
-  };
-  list.addEventListener("pointerover", (e) => {
-    const li = (e.target as Element).closest("li");
-    if (li) hot(Array.prototype.indexOf.call(list.children, li));
-  });
-  list.addEventListener("pointerleave", () => hot(-1));
-
-  /* ── 3. ลิงก์ลึก ─────────────────────────────────────────────────────── */
-  const deep = location.hash.startsWith("#spread-") && document.getElementById(location.hash.slice(1));
-  if (deep instanceof HTMLAnchorElement && deep.matches(CARD)) open(deep);
-}
+/* ── 2. ไพ่เด้ง + ลิงก์ลึก + นับการแตะ — ของกลางทุกหน้าที่มีไพ่ผัง (`./spread-pop.ts`) ── */
+initSpreadPop();
