@@ -471,6 +471,15 @@ check(
   const live = dep.split("\n").filter((l) => !/^\s*#/.test(l)).join("\n");
   check("dependabot ไม่ยกรุ่น @opennextjs/* เอง (ตัวแปลงต้องยกด้วยมือคู่กับ next)", /dependency-name:\s*"@opennextjs\/\*"/.test(live));
   check("dependabot ตั้ง cooldown (รอก่อนเปิด PR รุ่นใหม่)", /cooldown:\s*\n\s+default-days:\s*\d+/.test(live));
+  // 📱 แอป iOS: มีคนยกแพ็กเกจให้ (ไม่งั้น expo-doctor แดงทุกครั้งที่ Expo ออกรุ่นย่อย · 2026-10-27)
+  //    แต่ยกได้แค่ patch ของตระกูล Expo — SDK ใหม่/react-native ต้องยกทั้งชุดด้วยมือ
+  const mobileBlock = /directory:\s*"\/mobile"[\s\S]*?(?=\n\s*- package-ecosystem:|$)/.exec(live)?.[0] ?? "";
+  check(
+    "dependabot ดูแล `mobile/` เฉพาะ patch ของตระกูล Expo (ไม่ยก minor/major · ไม่ยก react-native เอง)",
+    /dependency-name:\s*"expo-\*"/.test(mobileBlock) &&
+      /dependency-name:\s*"\*"\s*\n\s*update-types:\s*\["version-update:semver-minor",\s*"version-update:semver-major"\]/.test(mobileBlock) &&
+      /cooldown:/.test(mobileBlock),
+  );
 }
 
 // ── pr.yml: สิทธิ์แคบ + ไม่ auto-merge ของที่ประกอบเป็น Worker (A10-02 · A10-04) ─────
@@ -486,6 +495,10 @@ check(
   check(
     "pr.yml: ไม่ auto-merge PR ของ dependabot ที่แตะ next / wrangler / @opennextjs",
     /dependabot\[bot\]/.test(prWf) && /opennextjs/.test(prWf) && /touchesWorker/.test(prWf),
+  );
+  check(
+    "pr.yml: PR ของ dependabot ที่แตะ `mobile/` ต้องรอด่านแอป iOS ผ่านก่อน auto-merge (ด่านนั้นไม่ใช่ required check)",
+    /startsWith\('mobile\/'\)/.test(prWf) && /📱 typecheck · jest · expo-doctor/.test(prWf) && /checks:\s*read/.test(prWf),
   );
 }
 

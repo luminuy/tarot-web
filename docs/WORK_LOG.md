@@ -12,6 +12,13 @@
 
 ---
 
+### 🗓️ 2026-10-27 (รอบ 322): ด่านแอป iOS แดงเพราะ expo-asset ตกรุ่น + ให้ Dependabot ดูแล `mobile/` (เจ้าของ "ทำเลย")
+- อาการ: `📱 Mobile App Checks` ของ PR #730 ล้มที่ `expo-doctor` — Expo ออก `expo-asset` 12.0.14 (21 ต.ค.) แต่ lockfile ของแอปตรึง 12.0.13 · ไม่ใช่ความผิดของ #730 และไม่ใช่ด่านบังคับ (เว็บไม่โดน)
+- แก้: `npx expo install expo-asset` ➔ `~12.0.14` · ในเครื่อง expo-doctor 18/18 · typecheck ผ่าน · jest 19/19
+- ต้นเหตุที่ทำให้เกิดซ้ำ: dependabot ดูแค่รากรีโป ➔ เพิ่มรายการ `/mobile` ยกเฉพาะ patch ของ `expo` · `expo-*` · `@expo/*` รวมเป็น PR เดียว (ห้าม minor/major · ไม่ยก react-native เอง · cooldown 7 วันเหมือนเว็บ — ช่วง 7 วันหลัง Expo ออกรุ่นย่อย ด่านนี้ยังแดงได้แต่ไม่บังคับ)
+- `pr.yml`: PR ของ dependabot ที่แตะ `mobile/` รอผลด่าน `📱 typecheck · jest · expo-doctor` ของ commit เดียวกันผ่านก่อน auto-merge (สูงสุด ~10 นาที · ไม่ผ่านคอมเมนต์ใน PR แล้วไม่ merge) — ด่านแอปไม่ใช่ required check จึงต้องรอเอง
+- ด่าน `test-ci-supply-chain` เฝ้าทั้งสองเรื่อง
+
 ### 🗓️ 2026-10-27 (รอบ 321): ISSUE-048 — แยกฟอนต์ไทย/ละติน + `unicode-range` (เจ้าของ "ISSUE-048 แก้")
 - `scripts/subset-fonts.py` ตัด Sarabun · Noto Serif Thai · Anuphan เป็น `<ชื่อ>-thai.woff2` (บล็อกไทย) + `<ชื่อ>-latin.woff2` (ASCII + เครื่องหมาย) จากต้นฉบับ Google Fonts ตัวเดิม · ลบไฟล์รวมเดิม 5 ไฟล์
 - `src/app/globals.css` ประกาศสองหน้าฟอนต์ต่อหนึ่งน้ำหนักพร้อม `unicode-range` (ชุดไม่ทับกัน) · `FONT_PRELOADS` / `FONT_PRELOADS_LOW` (`src/app/_shared/root-metadata.ts`) แยกตามภาษา ใช้ทั้ง `RootHtml.tsx` และ `astro/layouts/BaseLayout.astro` · `scripts/generate-checkout-art.mjs` ใช้ไฟล์แยก

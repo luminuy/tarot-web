@@ -47,3 +47,31 @@ updates:
     #    (อัปเดตความปลอดภัยไม่โดน cooldown จึงยังมาทันที)
     cooldown:
       default-days: 7
+
+  # 📱 แอป iOS (`mobile/` · Expo) — 2026-10-27: Expo ออก expo-asset 12.0.14 แล้วด่าน expo-doctor ของ PR ที่แตะ mobile/
+  #    แดงทุกใบ เพราะไม่มีใครยกแพ็กเกจของแอปให้ (dependabot เดิมดูแค่รากรีโป)
+  #    ยกเฉพาะ patch ของตระกูล Expo ภายใน SDK เดิม (ตรงกับที่ expo-doctor คาด) รวมเป็น PR เดียว
+  #    ห้ามยก minor/major เอง: เปลี่ยน SDK ต้องยกทั้งชุดด้วย `npx expo install --fix` · react / react-native ต้องตรงรุ่นที่ SDK ระบุเป๊ะ
+  #    pr.yml รอด่าน `📱 typecheck · jest · expo-doctor` ผ่านก่อน auto-merge PR ของ dependabot ที่แตะ mobile/
+  - package-ecosystem: "npm"
+    directory: "/mobile"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+    commit-message:
+      prefix: "chore(deps-mobile)"
+    allow:
+      - dependency-name: "expo"
+      - dependency-name: "expo-*"
+      - dependency-name: "@expo/*"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
+    groups:
+      expo-sdk:
+        patterns:
+          - "expo"
+          - "expo-*"
+          - "@expo/*"
+    cooldown:
+      default-days: 7
