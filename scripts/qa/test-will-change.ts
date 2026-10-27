@@ -2,7 +2,7 @@
  * QA — ยามเฝ้ากฎ will-change ใน CSS (Will-Change GPU Layer Guard)
  *
  * ⚠️ ทำไมต้องมีไฟล์นี้
- * กฎใน globals.css:367 และบทเรียน INC-0056 เขียนไว้ชัดว่า:
+ * กฎใน globals.css:367 และบทเรียน INC-0061 เขียนไว้ชัดว่า:
  * "ห้ามตั้ง will-change ถาวรบน element ที่ไม่ได้กำลังอนิเมต เพราะมันจอง GPU layer ค้างไว้
  * ทำให้กินหน่วยความจำ GPU และเฟรมเรตตก (fps ตกจาก 58 -> 30)"
  * แต่กฎที่เป็นเพียงคอมเมนต์ก็ยังถูกละเมิดใน globals.css:486 (.dropdown-panel-base) (ISSUE-027)

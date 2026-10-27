@@ -1,6 +1,6 @@
 # ⚡ แผนยกเครื่องประสิทธิภาพ · โค้ดตาย · SEO — รอบตรวจใหญ่ 2026-09-06
 
-> **สถานะ**: ✅ เสร็จแล้ว — P-01 ถึง P-04 · S-01 ถึง S-04 · D-02 · D-05 ลงแล้ว · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: PR #301 · #302 · #303 · #307 · 23b8053 · 1a46b3a
+> **สถานะ**: ✅ เสร็จแล้ว — P-01 ถึง P-04 · S-01 ถึง S-04 · D-02 (linter) · D-05 ลงแล้ว · ไม่มีงานค้าง · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: PR #301 · #307
 
 > **สถานะตอนเขียนแผน**: แผน (ยังไม่ลงมือ) · **ฐานที่วัด**: `a69293e` (main) · **ผู้ตรวจ**: Claude Opus 5
 > **ผลตรวจย่อ**: TypeScript 0 error · `next build` ผ่าน · **แต่** ทุกหน้าส่ง JavaScript ให้เบราว์เซอร์
@@ -116,7 +116,7 @@ assert(COUNTS.cards === DECK.length && COUNTS.articles === ARTICLES.length && CO
 
 ### P-02 · `/cards` ส่งเฉพาะข้อมูลที่หน้านั้นใช้จริง 🔴
 
-**ปัญหา** — [`src/app/cards/page.tsx:71`](../../src/app/cards/page.tsx) ส่ง `<CardsExplorer cards={DECK} />`
+**ปัญหา** — `src/app/cards/page.tsx:71` ส่ง `<CardsExplorer cards={DECK} />`
 React ต้อง serialize ไพ่ทั้ง 78 ใบพร้อม `meanings` (5 หมวด × หัวตั้ง/หัวกลับ) และ `meaningsEn` ลง RSC payload
 
 แต่ `CardsExplorer` ใช้จริงแค่ 10 ฟิลด์: `id · arcana · suit · number · nameTh · nameEn · keywords · element · astrology · image`

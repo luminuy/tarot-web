@@ -1,9 +1,9 @@
 # 📋 Backlog — งานที่ยังเหลือ (2026-09-04)
 
-> **สถานะ**: 📚 เอกสารอ้างอิง — คลังงานรอคิว — รายการที่เสร็จถูกขีดฆ่าในไฟล์ · ก่อนหยิบงานให้เช็กโค้ดจริงก่อน · **ตรวจล่าสุด**: 2026-09-23
+> **สถานะ**: 📚 เอกสารอ้างอิง — คลังงานยุคแรก (2026-09-04) ไม่ได้ไล่ปิดรายข้อแล้ว · ข้อ P0 Marketplace เฟส 2 ขึ้น production แล้ว · ก่อนหยิบข้อไหนให้ตรวจโค้ดจริง · งานที่ยังเปิดจริงดูที่ MASTER_PLAN · **ตรวจล่าสุด**: 2026-10-26
 
 > เอกสารนี้คือ **แผนงานเดี่ยว** สำหรับ Agent ที่จะทำงานต่อ — อ่านให้จบก่อนแตะโค้ด
-> อัปเดตทุกครั้งที่ปิดงาน: ย้ายรายการที่เสร็จไป [`docs/INCIDENT_LOG.md`](INCIDENT_LOG.md) (ถ้าเป็น fix) หรือขีดฆ่าทิ้ง
+> อัปเดตทุกครั้งที่ปิดงาน: ย้ายรายการที่เสร็จไป [`docs/INCIDENT_LOG.md`](../INCIDENT_LOG.md) (ถ้าเป็น fix) หรือขีดฆ่าทิ้ง
 
 ---
 
@@ -22,7 +22,7 @@
 ## 🔮 P0 · Marketplace แม่หมอตัวจริง (Phase 2) — ดูเอกสารแยก
 
 งาน M4–M7 (D1 + reader profiles → คิว → AI screening → payments) มีเอกสารส่งต่อละเอียดที่
-**[`docs/MARKETPLACE.md`](MARKETPLACE.md)** — SQL schema, code pattern, verification playbook, checklist ครบ
+**[`docs/MARKETPLACE.md`](../specs/MARKETPLACE.md)** — SQL schema, code pattern, verification playbook, checklist ครบ
 
 **ติดอยู่ 1 จุด (ต้องให้เจ้าของทำก่อน):**
 1. ~~`npx wrangler d1 create tarot-app-db` → ส่ง `database_id` กลับมา~~
@@ -30,7 +30,7 @@
 2. ⬜ ADR + PDPA sign-off (marketplace เก็บ PII ลูกค้า + ส่ง LINE — ขัดกฎเดิม)
 
 Phase 1 (แผงแอดมิน M0–M3) เสร็จแล้ว: PR #57 (auth+platform), #59 (stats), #60 (live content overrides)
-→ ดู [`docs/ADMIN_PANEL.md`](ADMIN_PANEL.md) · เจ้าของต้อง `wrangler secret put ADMIN_PASSWORD` ให้ `/admin` ใช้งานได้บน prod
+→ ดู [`docs/ADMIN_PANEL.md`](../ADMIN_PANEL.md) · เจ้าของต้อง `wrangler secret put ADMIN_PASSWORD` ให้ `/admin` ใช้งานได้บน prod
 
 ---
 
@@ -86,7 +86,7 @@ Phase 1 (แผงแอดมิน M0–M3) เสร็จแล้ว: PR #5
 2. `pnpm-lock.yaml` — รัน `pnpm install` ให้ lockfile sync กับ `package.json` แล้ว **commit เข้าไป**
 3. `.gitignore` — เพิ่ม `package-lock.json`, `yarn.lock`
 4. `pr.yml` + `deploy.yml` — `pnpm/action-setup@v4` (version ตรง packageManager) + `setup-node` `cache: "pnpm"` + `run: pnpm install --frozen-lockfile` + `pnpm run ...`
-5. `pnpm-workspace.yaml` — มี `packages: - .` แล้ว (INC-0018) อย่าลบ
+5. ~~`pnpm-workspace.yaml` — มี `packages: - .` แล้ว (INC-0018) อย่าลบ~~ ลบแล้ว 2026-10-27 — CI เลิกใช้ pnpm ไปใช้ npm + `package-lock.json` (ด่าน `test-ci-supply-chain` กันไฟล์ตั้งค่า pnpm ค้าง)
 6. `scripts/github-auto.ts` CHECKS + hooks — ถ้ามีที่ไหนเรียก `npm` แข็งๆ ให้เป็น `pnpm`
 7. **ทดสอบก่อน push:** `rm -rf node_modules && pnpm install --frozen-lockfile && npm run repo:verify` (ต้องผ่าน) · `pnpm store path` ต้องไม่ error
 

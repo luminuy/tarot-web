@@ -1,102 +1,78 @@
-# 🎴 การออกแบบระบบ "ผู้ใช้จับไพ่ด้วยตัวเอง" (Interactive Self-Draw & Card Fan Engine)
+# 🎴 ระบบ "ผู้ใช้จับไพ่ด้วยตัวเอง" (Interactive Self-Draw & Card Fan)
 
-## 1. ที่มาและหัวใจของประสบการณ์ (UX Philosophy)
-การดูดวงไพ่ทาโรต์ สิ่งที่สร้าง **พลังใจ ความเชื่อมั่น และความผูกพัน (Immersion & Agency)** สูงสุดไม่ใช่การกดปุ่มสุ่มแบบตู้สล็อต แต่คือ **"จังหวะที่ผู้ถามใช้จิตนิ่ง อธิษฐาน และยื่นมือออกไปสัมผัสเลือกไพ่ทีละใบด้วยตัวเอง"**
-
-ระบบนี้ออกแบบมาเพื่อให้ผู้ใช้มีปฏิสัมพันธ์ (Interactivity) กับสำรับไพ่ 78 ใบอย่างแท้จริง ทั้งบนมือถือ (Touch Gestures) และคอมพิวเตอร์ (Mouse & Wheel Interaction)
-
----
-
-## 2. ลำดับขั้นตอนการจับไพ่ (Step-by-Step User Flow)
-
-```
-[ ขั้นที่ 1: สับไพ่และตั้งจิต (Shuffling & Focusing) ]
-   - ผู้ใช้วางนิ้ว/เมาส์เพื่อแตะสับไพ่ หรือกดปุ่ม "เริ่มสับไพ่"
-   - สำรับไพ่ 78 ใบตัดสลับไปมา มีเสียงสับไพ่เบาๆ (Haptic/Audio Feedback)
-   - แฮช Commitment ถูกแสดงให้เห็นอย่างสง่างาม ("ชะตาของคุณถูกปิดผนึกไว้แล้ว")
-
-[ ขั้นที่ 2: คลี่สำรับไพ่ (The Arc / Ribbon Fan) ]
-   - ไพ่ 78 ใบคลี่ออกเป็นรูปพัดโค้ง (Arc Fan) สวยงามแบบ 3D
-   - ผู้ใช้สามารถเลื่อนสไลด์ (Drag / Scroll) ดูไพ่ตลอดสำรับได้แบบไร้รอยต่อ
-   - เมื่อนำนิ้ว/เมาส์ไปชี้ ไพ่ใบนั้นจะลอยยกตัวขึ้นเล็กน้อย (Hover Lift & Glow)
-
-[ ขั้นที่ 3: ผู้ใช้เลือกไพ่ทีละใบ (Self-Picking Action) ]
-   - ระบบแจ้งตำแหน่งปัจจุบันที่กำลังเลือก เช่น:
-     "กรุณาเลือกใบที่ 1 สำหรับ: อดีต / รากของเรื่องนี้"
-   - ผู้ใช้แตะ/คลิกเลือกไพ่ใบที่รู้สึกดึงดูดใจ
-   - ไพ่ที่ถูกเลือกจะลอยออกจากพัด หมุน และเคลื่อนตัวบินไปวางคว่ำหน้าลงในช่อง Spread บนกระดาน
-   - ทำซ้ำจนครบตามจำนวนของ Spread (เช่น 1 ใบ, 3 ใบ, 5 ใบ หรือ 10 ใบ)
-
-[ ขั้นที่ 4: ยืนยันการวางไพ่และเริ่มเปิดชะตา (Reveal & Reading) ]
-   - สำรับไพ่ส่วนที่เหลือค่อยๆ เฟดออก
-   - ผู้ใช้แตะที่หน้าไพ่บนกระดานเพื่อ "พลิกเปิดทีละใบ" (Flip 3D) 
-   - หรือปล่อยให้แม่หมอ AI เริ่มร่ายคำอ่านแบบ Real-time Streaming
-```
+> **สถานะ**: ใช้งานจริง — พิธีเปิดไพ่ของหน้าแรก `/` และหน้าผัง `/read/[id]` (`/en/...` ด้วย) · สับไพ่อัตโนมัติ v2 ตั้งแต่ 2026-10-16 · **ตรวจกับโค้ดล่าสุด**: 2026-10-26
+> สูตร Provably Fair ฉบับเต็มอยู่ที่ [`TAROT_CARD_FEATURES.md`](../TAROT_CARD_FEATURES.md) และ [`ARCHITECTURE.md`](../ARCHITECTURE.md) — ไฟล์นี้อธิบายเฉพาะส่วนที่ผู้ใช้เลือกไพ่เอง
+> กฎเหล็กที่ผูกกับหน้านี้ (ใน [`CLAUDE.md`](../../CLAUDE.md)): ข้อ 3 Zero-Clipping · ข้อ 4 ไพ่คว่ำจนผู้ใช้พลิกเอง · ข้อ 9 ผังกว้าง · ข้อ 14 ห้ามกุไพ่
 
 ---
 
-## 3. สถาปัตยกรรมทางเทคนิค (Technical Architecture)
+## 1. หัวใจของประสบการณ์
 
-### 3.1 การผสานความสุ่มที่ตรวจสอบได้ (Provably Fair + User Selection)
-เพื่อให้ผู้ใช้เลือกตำแหน่งไพ่เองได้อย่างแท้จริง แต่ยังคงความโปร่งใสแบบ Provably Fair:
-1. **Commitment Phase**:
-   - เซิร์ฟเวอร์สร้าง `serverSeed` สุ่มลำดับสำรับ 78 ใบ (Shuffled Deck: `D = [c_0, c_1, ..., c_77]`) และ Reversal flags
-   - เซิร์ฟเวอร์ส่ง `commitment = SHA-256(serverSeed + ":" + clientSeed)` ให้ Client บันทึกไว้ก่อนเริ่มเลือกไพ่
-2. **Interactive Pick Phase**:
-   - ผู้ใช้เลือก index ในพัด เช่น เลือกไพ่ใบที่ `[14, 38, 7]`
-   - Client รวบรวมข้อมูล:
-     - `pickedIndices`: `[14, 38, 7]`
-     - `clientSeed`: ข้อมูล Gesture/Timestamp ของผู้ใช้
-3. **Resolve Phase (`/api/reading/[id]/shuffle` หรือ `pick`)**:
-   - Client ส่ง `pickedIndices` และ `clientSeed` กลับมาที่เซิร์ฟเวอร์
-   - เซิร์ฟเวอร์หยิบไพ่จาก Shuffled Deck ตาม `pickedIndices` ที่ผู้ใช้เลือกจริง
-   - บันทึก `drawnCards = [D[14], D[38], D[7]]`
-4. **Reveal Phase**:
-   - หลังอ่านจบ เซิร์ฟเวอร์เฉลย `serverSeed`
-   - ผู้ใช้สามารถกดปุ่ม "ตรวจสอบความโปร่งใส" เพื่อดูว่า Deck เรียงอย่างไร และไพ่ที่ตำแหน่ง 14, 38, 7 คือไพ่ใบที่ตนได้จริง
+สิ่งที่ทำให้ผู้ถามรู้สึกมีส่วนร่วมไม่ใช่การกดปุ่มสุ่ม แต่คือจังหวะที่ได้ตั้งจิตแล้วแตะเลือกไพ่ทีละใบด้วยตัวเอง
+ระบบนี้ให้ผู้ใช้เลือกตำแหน่งในสำรับ 78 ใบเองทั้งบนมือถือ (แตะ) และคอม (คลิก/คีย์บอร์ด) โดยที่ผลยังตรวจสอบย้อนหลังได้
 
 ---
 
-## 4. โครงสร้าง Component หน้าบ้าน (Frontend Components Spec)
+## 2. ลำดับขั้นตอน (ของจริงตอนนี้)
 
-### 1. `<InteractiveCardFan />`
-- **หน้าที่**: แสดงผลสำรับไพ่ 78 ใบในรูปแบบพัดโค้ง (Arc Fan / 3D Cylinder Curve)
-- **Props**:
-  - `totalCards`: 78
-  - `pickedCount`: จำนวนที่เลือกไปแล้ว
-  - `requiredCount`: จำนวนที่ Spread ต้องการ
-  - `onCardPick`: `(index: number) => void`
-  - `disabled`: boolean
-- **Interaction & Performance**:
-  - Dragging/Pannable สำรับซ้าย-ขวาบนมือถือ
-  - Smooth Elastic Physics ด้วย `motion` (Motion 13)
-  - วินัยการใช้ GPU: กำหนด `will-change: transform` เฉพาะช่วงที่กำลังขยับ (Active Dragging/Animating) และปลดออกเมื่อหยุดนิ่ง (ป้องกัน GPU Layer ค้างถาวรตามกฎ INC-0027)
-  - Sound effect เบาๆ ตอน Hover และ Pick ผ่าน Web Audio API Synthesizer (Zero MP3 Assets)
+ขั้นของพิธีอยู่ใน `src/components/home/ritual-step.ts`: `SPREAD_SELECT` ➔ `INTENTION_SELECT` ➔ `SHUFFLE` ➔ `PICK_CARDS` ➔ `READING` ➔ `SUMMARY`
 
-### 2. `<CardSlot />` และ `<SpreadBoard />`
-- **หน้าที่**: แสดงผังการวางไพ่ตามพิกัด $(x, y, rotate)$ ที่กำหนดใน `spreads.ts`
-- **ความสามารถ**:
-  - รองรับอนิเมชั่นไพ่บินจากพัดมาลงช่อง (`layoutId` shared transition)
-  - พลิกไพ่ 3D Flip (Perspective 1400px, 3D transform preserve)
-  - แสดงสถานะ: ว่าง (Empty slot) -> คว่ำหน้า (Facedown) -> กำลังพลิก (Flipping) -> เปิดหน้า (Revealed) -> ไฮไลต์ (Highlighted by AI stream)
+| ขั้น | สิ่งที่เกิด |
+| :-- | :-- |
+| เริ่ม (`/api/reading/start`) | เซิร์ฟเวอร์สร้าง `serverSeed` + `commitment` · ไคลเอนต์สร้าง `clientSeed` ด้วย crypto (`createClientSeed` ใน `TarotFlow`) แล้วผูกกับเซสชันตั้งแต่ขั้นนี้ |
+| สับไพ่ | `ShuffleRitual` สับเองอัตโนมัติ ~1.7 วินาที (0.5 วินาทีเมื่อผู้ใช้ตั้งลดการเคลื่อนไหว) บนโต๊ะเดียวกับพัด — เจ้าของสั่งตัดขั้น "แตะเพื่อสับ" 2026-10-16 · การขยับเมาส์/นิ้วระหว่างนี้เป็นเมล็ดสำรองเท่านั้น |
+| เลือกไพ่ | `InteractiveCardFan` กางไพ่ 78 ใบเป็นแถวโค้ง: จอกว้าง 3 แถว × 26 ใบ · จอ < 640px 6 แถว × 13 ใบ (ใหญ่พอจิ้ม) · บอกชื่อตำแหน่งที่กำลังเลือก + ช่องวางไพ่ใต้พัด · ไพ่ที่เลือกหายจากพัดไปลงช่องตำแหน่ง · ทำซ้ำจนครบจำนวนของผัง |
+| วางบนโต๊ะ | `SpreadBoard` — จอ ≥ 640px วางตามพิกัดผังจริง (`mapLayout()` ใน `src/lib/tarot/spread-map-geometry.ts`) · จอ < 640px ผัง 6 ใบขึ้นไปเป็นรางเลื่อนทีละใบ (ข้อยกเว้นกฎข้อ 3 · INC-0219) |
+| พลิกไพ่ | ไพ่คว่ำทุกใบ ผู้ใช้แตะพลิกเอง (3D · `TarotCard`) หรือกด "เปิดทั้งหมด" · แผงคำอ่าน (`StreamReader`) ไม่แสดงภาพ/ชื่อ/คำอ่านของใบที่ยังคว่ำ (`revealedOrders` · แก้ใน #710) |
+| คำอ่าน + ตรวจสอบ | คำอ่านสตรีมจาก `/api/reading/[id]/read` · จบแล้วเซิร์ฟเวอร์เฉลย `serverSeed` · `ProvablyFairPanel` ให้ผู้ใช้ตรวจเอง |
 
-### 3. `<ShuffleGesture />`
-- **หน้าที่**: หน้าจอสร้างสมาธิและให้ผู้ใช้มีส่วนร่วมในการสับไพ่
-- **ตัวเลือกปฏิสัมพันธ์**:
-  - กดค้าง / ลากนิ้ววนเพื่อสับไพ่
-  - ตัดไพ่ (Cut Deck) แบ่งเป็น 2-3 กองแล้วรวมใหม่
-  - แสดงคลื่นพลังงาน/ละอองดาว (Golden Dust Particle Effect)
+หน้า one-card (`OneCardRitual` · ไพ่ประจำวัน ความรัก 1 ใบ ฯลฯ) ใช้พิธีย่อ 2 จังหวะ ไม่มีพัด — ดู [`HANDOFF_THEME_THREE_PAGES_2026-09-06.md`](../plans/HANDOFF_THEME_THREE_PAGES_2026-09-06.md)
 
 ---
 
-## 5. แผนการปรับปรุง API Endpoint
+## 3. ความสุ่มที่ตรวจสอบได้ + การเลือกของผู้ใช้
 
-### ปรับปรุง `POST /api/reading/[id]/shuffle`
-รองรับ payload:
+ที่อยู่: `src/lib/tarot/shuffle.ts` (`createCommitment` · `verifyCommitment` · `drawCards`)
+
+1. **ผูกมัดก่อน**: `serverSeed` = สุ่ม 32 ไบต์ · `commitment = SHA-256(serverSeed)` ส่งให้ไคลเอนต์ก่อนผู้ใช้แตะอะไร
+2. **สับทั้งสำรับ**: สายเลขสุ่มจาก `SHA-256(serverSeed + "|" + clientSeed)` ➔ Fisher–Yates สับ 78 ใบ (rejection sampling ไม่เอนเอียง) ➔ ได้ลำดับสำรับ `deck`
+3. **หยิบตามที่ผู้ใช้เลือก**: `pickedIndices` คือตำแหน่งในพัดที่ผู้ใช้แตะ ➔ ไพ่ = `deck[pickedIndices[i]]` · ไพ่กลับหัวสุ่มจากสายเดียวกัน (โอกาส 40%)
+4. **เฉลย**: หลังอ่านจบเซิร์ฟเวอร์ส่ง `serverSeed` ผู้ใช้คำนวณซ้ำได้ว่าแฮชตรงและได้ไพ่ชุดเดิม
+
+ด่านในโค้ด:
+- `clientSeed` ต้องมาจากผู้ใช้เสมอ — ไม่มีเมล็ดทั้งในเซสชันและใน body = ปฏิเสธ (`CLIENT_SEED_REQUIRED`) ไม่สุ่มแทนให้ฝั่งเซิร์ฟเวอร์
+- `pickedIndices` ต้องยาวเท่าจำนวนตำแหน่งของผัง ไม่ซ้ำ และอยู่ในช่วง 0–77 · ไม่ส่งมา = หยิบจากบนสุดของสำรับที่สับแล้ว
+- เรียก `/shuffle` ซ้ำได้ผลเดิมเสมอ (ไพ่ถูกตรึงครั้งเดียว) — กันการรีเฟรชเพื่อสุ่มใหม่
+- เซสชันที่ไพ่ "คำนวณได้" (ไพ่ประจำตัวจากวันเกิด · กอง Pick a Card ประจำวัน · `derived-draw.ts`) ไม่รับ `pickedIndices` (`DERIVED_SESSION_NO_PICK`)
+- ข้อมูลไพ่หาย = ขอให้ผู้ใช้โหลดใหม่ ห้ามหยิบไพ่ใบไหนมาแทน (กฎข้อ 14 · `CARD_DATA_NOT_FOUND`)
+
+---
+
+## 4. คอมโพเนนต์
+
+| คอมโพเนนต์ | ที่อยู่ | หมายเหตุ |
+| :-- | :-- | :-- |
+| `TarotFlow` | `src/components/home/TarotFlow.tsx` (+ `flow-*.ts`) | ตัวคุมพิธีทั้งหมด · mount ผ่าน `astro/islands/TarotFlowRoot.tsx` |
+| `ShuffleRitual` | `src/components/deck/ShuffleRitual.tsx` | สับอัตโนมัติ · props `spreadName` · `onShuffleComplete(clientSeed)` |
+| `InteractiveCardFan` | `src/components/deck/InteractiveCardFan.tsx` | props `pickedIndices` · `targetCount` · `currentPositionName` · `positionNames` · `onPickCard(fanIndex)` · `disabled` · Tab หยุดที่ใบเดียวแล้วใช้ลูกศรเลื่อน (roving tabindex) · เสียงแตะจาก `src/lib/utils/audio.ts` (Web Audio ไม่มีไฟล์เสียง) |
+| `SpreadBoard` | `src/components/spread/SpreadBoard.tsx` | props `spread` · `drawnCards` · `revealedOrders` · `onFlipCard` · `onRevealAll` · `onZoomCard` · `onFocusCard` |
+| `TarotCard` / `CardImage` | `src/components/card/` | พลิก 3D · ภาพไพ่ต้องผ่าน `CardImage` (กฎข้อ 8) |
+| `StreamReader` · `ProvablyFairPanel` | `src/components/reading/` | คำอ่านตามไพ่ที่พลิกแล้ว · แผงตรวจสอบความโปร่งใส |
+
+วินัยประสิทธิภาพ: `will-change` ใส่เฉพาะตอนกำลังขยับ (INC-0061) · ห้าม `backdrop-filter` (INC-0060)
+
+---
+
+## 5. API
+
+`POST /api/reading/[id]/shuffle`
+
 ```json
 {
-  "clientSeed": "a8f9c...gesture_hash",
-  "pickedIndices": [12, 45, 3]  // ลำดับไพ่ที่ผู้ใช้จิ้มเลือกเองจากสำรับ 78 ใบ
+  "clientSeed": "ใช้เฉพาะเซสชันเก่าที่ยังไม่ได้ผูกเมล็ดตอน /start",
+  "pickedIndices": [12, 45, 3],
+  "sessionToken": "ไม่บังคับ"
 }
 ```
-หากไม่ได้ส่ง `pickedIndices` มา (เช่น fallback สำหรับโหมดด่วน) จะใช้ `[0, 1, 2, ...]` จากบนสุดของสำรับเป็นค่าเริ่มต้น
+
+ตอบกลับ `clientSeed` · `drawn` (ลำดับ · index ไพ่ · กลับหัว) · `cards` (ข้อมูลไพ่ที่จั่วได้) · `sessionToken` · `derived` (เฉพาะเซสชันไพ่คำนวณได้) · เพดานถี่ข้าม isolate ดู [`ENTITLEMENT_ABUSE_MODEL.md`](ENTITLEMENT_ABUSE_MODEL.md) หัวข้อ 3

@@ -1,129 +1,79 @@
-# 💻 คู่มือการติดตั้งและรันระบบในเครื่อง (Local Development Setup Guide)
+# รันในเครื่อง (Local Setup)
 
-> เอกสารแนะนำการตั้งค่าสภาพแวดล้อม พอร์ตที่ใช้งาน ตัวแปรแวดล้อม (Environment Variables) และแนวปฏิบัติสำหรับวิศวกรและ AI ที่ทำงานบนเครื่อง Local
+> ตรวจกับโค้ดล่าสุด: 2026-10-26 (`package.json` · `src/lib/platform/db.ts` · `astro.config.mjs` · `.env.example`)
+> ภาพรวมระบบดู [ARCHITECTURE.md](ARCHITECTURE.md) · กติกาการทำงานและคำสั่งทั้งหมดดู [CLAUDE.md](../CLAUDE.md)
 
----
+## 1. สิ่งที่ต้องมี
 
-## 📋 1. ข้อกำหนดขั้นต่ำของระบบ (Prerequisites)
+| อะไร | รุ่น | เหตุผล |
+| :--- | :--- | :--- |
+| Node.js | **22.12 ขึ้นไป** | Astro ต้องการ ≥ 22.12 · ฐานข้อมูลในเครื่องใช้ `node:sqlite` ของ Node 22 · CI ใช้ Node 22 |
+| npm | ที่มากับ Node | รีโปล็อกด้วย `package-lock.json` และ CI ติดตั้งด้วย `npm ci` — อย่าใช้ pnpm/yarn |
+| Git | รุ่นใดก็ได้ที่รองรับ `core.hooksPath` | hook ใน `.githooks/` รัน `repo:verify` ก่อน commit/push |
+| GitHub CLI (`gh`) | ไม่บังคับ | ใช้กับ `npm run pr:auto` |
 
-* **Node.js**: เวอร์ชัน `>= 20.9.0` (แนะนำ **Node 20 LTS** หรือ **Node 22 LTS**)
-* **Package Manager**: **`npm`** (ใช้ `npm` เท่านั้น — **ห้ามใช้ `pnpm` หรือ `yarn`** เนื่องจากโปรเจกต์ผูกมัดกับ `package-lock.json` และ Cloudflare OpenNext Adapter ทำงานเข้ากันได้สูงสุดกับ `npm`)
-* **Git**: เวอร์ชัน `>= 2.30` พร้อมติดตั้ง GitHub CLI (`gh`) หากต้องการใช้งานระบบ Auto-Merge (`npm run pr:auto`)
-* **OS**: รองรับทั้ง **macOS** (Apple Silicon M1/M2/M3/M4 & Intel), Linux (Ubuntu/Debian) และ Windows (ผ่าน WSL2)
+## 2. ติดตั้ง
 
----
-
-## 🚀 2. ขั้นตอนการติดตั้ง (Installation)
-
-### 2.1 Clone Repository
 ```bash
 git clone https://github.com/luminuy/tarot-web.git
-cd เว็บไพ่  # หรือชื่อโฟลเดอร์ที่คุณ clone ไว้
+cd tarot-web
+npm ci                      # ติดตั้งตาม lockfile · ตั้ง git hooks ให้เอง (สคริปต์ prepare)
+cp .env.example .env.local  # แล้วเติมเฉพาะค่าที่ต้องใช้ (ดูหัวข้อ 3)
 ```
 
-### 2.2 ติดตั้ง Dependencies
-```bash
-npm install
-```
+## 3. ตัวแปรแวดล้อม (`.env.local`)
 
-> 💡 **หมายเหตุ**: โปรเจกต์ใช้ React 19.2, Astro 7 และ Next.js 16.3 ล่าสุด หากพบคำเตือน peer dependencies ทั่วไป `npm install` จะจัดการโครงสร้างให้อย่างถูกต้องตาม `package-lock.json` โดยไม่ต้องใส่ `--force` หรือ `--legacy-peer-deps`
+รายชื่อทุกตัวพร้อมคำอธิบายอยู่ใน [`.env.example`](../.env.example) · ค่าบน production และสถานะการตั้งค่าอยู่ใน [PENDING_SETUP.md](PENDING_SETUP.md)
 
----
+**ไม่ต้องตั้งอะไรเลยก็รันได้** — สิ่งที่เกิดเมื่อไม่มีค่า:
 
-## 🔑 3. การตั้งค่า Environment Variables (`.env.local`)
-
-โปรเจกต์ออกแบบให้สามารถ **รันในเครื่องได้ทันทีแม้ยังไม่มี API Key ใดๆ** (ระบบมีคลังคำทำนายสำรองระดับปรมาจารย์รองรับเสมอ) แต่หากต้องการทดสอบพลัง AI แบบเต็มพิกัด ให้สร้างไฟล์ `.env.local` ที่ Root Directory:
-
-```env
-# ==========================================
-# 🔮 AI Interpretation Engines
-# ==========================================
-# 1. Google Gemini (คีย์หลักสำหรับอ่านคำทำนาย & แชท)
-GEMINI_API_KEY="AIzaSy..."
-# หรือใช้ชื่อ GOOGLE_API_KEY สำรอง
-# GOOGLE_API_KEY="AIzaSy..."
-
-# 2. Groq Cloud LPU (คีย์สำรองความเร็วสูงพิเศษ 400ms เมื่อ Gemini ชนโควตา)
-GROQ_API_KEY="gsk_..."
-
-# ==========================================
-# 🔐 Security & Authentication
-# ==========================================
-# Secret สำหรับลงนาม Session Token (ความยาว ≥ 32 ตัวอักษร)
-TAROT_SESSION_SECRET="your-super-secret-random-key-at-least-32-chars"
-PASSWORD_PEPPER="your-super-secret-pepper-32-bytes"
-
-# รหัสผ่านแอดมินสำหรับเข้าสู่แผงควบคุม /admin
-ADMIN_PASSWORD="your-secure-admin-password"
-
-# ==========================================
-# ⚙️ Platform & Simulation Flags (Optional for Dev)
-# ==========================================
-# บังคับใช้ SQLite Local Mock แทน Cloudflare D1 เมื่อไม่ได้รัน wrangler
-# NODE_ENV="development"
-```
-
----
-
-## 🏃 4. การรัน Development Server
-
-### 4.1 เริ่มเซิร์ฟเวอร์
-```bash
-npm run dev
-```
-* หน้าเว็บจะเปิดที่: **`http://localhost:3000`**
-* แผงควบคุมผู้ดูแลระบบ: **`http://localhost:3000/admin`**
-* หน้าตรวจสอบความพร้อมระบบ: **`http://localhost:3000/health`**
-
-### 4.2 การเปลี่ยนพอร์ต (Port Conflict)
-หากพอร์ต `3000` ถูกโปรแกรมอื่นใช้งานอยู่ ให้รันด้วย:
-```bash
-PORT=3001 npm run dev
-```
-
----
-
-## 🍏 5. ข้อควรระวังเฉพาะระบบปฏิบัติการ (macOS & Platform Quirks)
-
-1. **พอร์ตที่ต้องหลีกเลี่ยงบน macOS (AirPlay Receiver Conflict)**:
-   * **พอร์ต 5000 และ 7000**: บน macOS Monterey (12.x) ขึ้นไป ฟีเจอร์ *AirPlay Receiver* ของระบบจะจองพอร์ต `5000` และ `7000` ไว้เป็นค่าเริ่มต้น ทำให้ไม่สามารถรัน dev server บนพอร์ตเหล่านี้ได้ (แนะนำให้ใช้ `3000`, `3001`, หรือ `8080`)
-2. **การสังเคราะห์เสียงอ่านคำทำนาย (Web Speech API)**:
-   * บน macOS Safari และ Chrome จะมีเสียงภาษาไทย (เช่น "Kanya", "Narisa") มาให้ในเครื่องโดยอัตโนมัติ ไม่ต้องติดตั้งโปรแกรมเพิ่ม
-3. **ประสิทธิภาพบน Apple Silicon**:
-   * การประมวลผล Next.js Compiler (Turbopack) และ TypeScript ทำงานแบบ Native ARM64 รวดเร็ว ไม่ต้องผ่าน Rosetta 2
-
----
-
-## 🧪 6. คำสั่งสำคัญในกระบวนการพัฒนา (Essential Commands)
-
-| คำสั่ง | วัตถุประสงค์ |
+| ไม่ได้ตั้ง | ผลในเครื่อง |
 | :--- | :--- |
-| `npm run repo:verify` | **(สำคัญที่สุด)** รันชุดตรวจความสมบูรณ์ 94 ด่าน (Typecheck, ไพ่ 78 ใบ, ผัง 26 แบบ, Provably Fair, Agent Lock ฯลฯ) |
-| `npm run typecheck` | ตรวจสอบความถูกต้องของ TypeScript Typecheck อย่างเดียว (ต้องได้ 0 errors เสมอ) |
-| `npm run build:astro` | คอมไพล์หน้าสแตติก Astro 305 หน้า (cards, spreads, blog, about, privacy, contact) เข้า `dist/` |
-| `npm run build:worker` | บิลด์ระบบทั้งหมดรวมกัน (Astro + OpenNext Worker) พร้อมรวม assets เตรียม deploy |
-| `npm run cards:variants` | สร้างรูปภาพไพ่ WebP หลายขนาด (`w128`, `w256`, `w512`, `w1024`) อัตโนมัติ (รันเมื่อมีการเพิ่มภาพใหม่ใน `/public/cards/`) |
-| `npm run agent:status` | ตรวจสอบสถานะการล็อคไฟล์ของ AI Agent เพื่อป้องกันการแก้ไขชนกัน |
-| `npm run agent:lock` | ล็อคไฟล์ก่อนเริ่มทำงาน `npm run agent:lock -- --agent <ชื่อ> --domain <หมวด> --files <ไฟล์>` |
-| `npm run agent:unlock` | ปลดล็อคไฟล์เมื่อทำงานเสร็จ |
-| `npm run commit` | บันทึก Commit ผ่านระบบ Git Author Guard |
-| `npm run pr:auto` | ตรวจ 94 ด่าน ➔ Push ➔ สร้าง PR ➔ Auto-Merge ➔ Deploy อัตโนมัติ |
-| `npm run git:tidy` | เก็บกวาด Branch ที่ถูก Merge ไปแล้วออกจากเครื่องและ Remote |
+| `GROQ_API_KEY` · `GEMINI_API_KEY` | คำอ่านทุกชิ้นเป็นคำอ่านสำรองออฟไลน์ (ไม่ใช่ AI จริง) |
+| `RESEND_API_KEY` | อีเมล (ลิงก์ยืนยัน · รีเซ็ตรหัส) ถูกพิมพ์ลง console แทนการส่งจริง |
+| `TAROT_SESSION_SECRET` · `PASSWORD_PEPPER` | ใช้ค่าสำหรับ dev ในโค้ด — บน production ไม่ตั้ง = เริ่มทำงานไม่ได้ |
+| `ADMIN_PASSWORD` | เข้า `/admin` ไม่ได้ |
+| `TURNSTILE_*` · `CF_AI_GATEWAY_*` · `UPSTASH_*` | ข้ามด่าน/ยิงตรงไปผู้ให้บริการ/ใช้ KV ตามเดิม |
 
----
+> เปิดไพ่ต้องลงชื่อก่อนเสมอ (`GUEST_LIMIT = 0`) — ในเครื่องให้สมัครด้วยอีเมล แล้วคัดลอกลิงก์ยืนยันจาก console
 
-## 🌐 7. การจำลองสภาพแวดล้อม Cloudflare Edge (Wrangler Dev)
+## 4. ฐานข้อมูลในเครื่อง
 
-หากต้องการทดสอบระบบในสภาพแวดล้อม Cloudflare Workers เสมือนจริง (รวม Cloudflare D1 และ KV):
+- ไม่ต้องตั้งอะไร — ครั้งแรกที่โค้ดเปิดฐาน จะสร้างไฟล์ `.dev-marketplace.db` (SQLite) แล้วรันทุกไฟล์ใน `migrations/` ให้เอง ชุดเดียวกับ D1 บน production
+- มี migration ใหม่ ➔ รันให้เองตอนเปิดฐานครั้งถัดไป · ฐานรุ่นเก่า (สร้างก่อน 2026-10-25 จากสคีมาเขียนมือ) ถูกย้ายไปไว้ข้าง ๆ เป็น `.dev-marketplace.db.legacy-*` แล้วสร้างใหม่
+- migration ไฟล์ไหนรันไม่ผ่าน = error พร้อมชื่อไฟล์ ไม่ถอยไปฐานเปล่าเงียบ ๆ
+- `npm run db:migrate` เปล่า ๆ = ฐานในเครื่องของ wrangler (ใช้เมื่อจะลอง `preview:worker` · คนละไฟล์กับ `.dev-marketplace.db`) · ฐานจริงต้องสั่ง `-- --remote` เอง ซึ่ง `deploy.yml` ทำให้ทุกรอบ — ไม่ต้องรันเองจากเครื่อง (เปลี่ยนค่าเริ่มต้น 2026-10-27 · #729)
+
+## 5. dev server
+
+เว็บมีสองเครื่องเรนเดอร์ จึงมี dev server สองตัวที่ทำงานแยกกัน:
+
+| คำสั่ง | พอร์ต | เสิร์ฟอะไร | ข้อจำกัด |
+| :--- | :--- | :--- | :--- |
+| `npm run dev` | 3000 | Next.js — `/api/*` · `/admin` · `/readers/*` · `/tester` · `/reset-password` · `/r/*` · `/s/*` | ไม่มีหน้าเนื้อหา (`/` · `/cards` ฯลฯ ไม่มีใน Next) |
+| `npm run dev:astro` | 4321 | Astro — หน้าเนื้อหาสาธารณะทั้งหมด | ไม่มี proxy ไป API — ส่วนที่เรียก `/api/*` (ลงชื่อ · เปิดไพ่) ได้ 404 |
+
+ต้องการทั้งเว็บพร้อม API ในที่เดียว (ใกล้ production ที่สุด):
+
 ```bash
-# พรีวิวสภาพแวดล้อม Worker จำลอง (.open-next)
-npm run preview:worker
-# หรือรันผ่าน wrangler
-npx wrangler dev
+npm run build:worker     # บิลด์ Astro + Next แล้วรวมไฟล์ (ใช้เวลาหลายนาที)
+npm run preview:worker   # Worker จำลองด้วย wrangler ที่ http://localhost:8787
 ```
-คีย์ Secret บน Cloudflare Workers จริงจะตั้งค่าผ่าน:
+
+ถ้าเครื่องรัน wrangler ไม่ได้ (macOS ต่ำกว่า 13.5) ใช้ลิงก์ทดลองบน Cloudflare แทน — ดู [CLOUDFLARE_DEPLOYMENT_GUIDE.md](CLOUDFLARE_DEPLOYMENT_GUIDE.md) หัวข้อลิงก์ทดลอง
+
+## 6. ตรวจก่อนส่งงาน
+
 ```bash
-npx wrangler secret put GEMINI_API_KEY
-npx wrangler secret put GROQ_API_KEY
-npx wrangler secret put ADMIN_PASSWORD
+npm run typecheck     # TypeScript อย่างเดียว
+npm run repo:verify   # ด่านตรวจทั้งชุด 94 ด่าน — hook รันให้เองก่อน commit/push
 ```
+
+ด่านบางตัวอ่านผลบิลด์ (`dist/` · `.open-next/`) — ถ้าไม่ได้บิลด์มาก่อน ผลของด่านกลุ่มนั้นจะไม่ตรงกับ CI ซึ่งบิลด์ก่อนตรวจเสมอ
+ขั้นตอน commit · PR · ล็อกไฟล์ ดู [AI_COLLABORATION_GUIDELINES.md](AI_COLLABORATION_GUIDELINES.md) หัวข้อ 0.4
+
+## 7. ข้อควรรู้เฉพาะเครื่อง
+
+- macOS: พอร์ต 5000 และ 7000 ถูก AirPlay Receiver จองไว้ — อย่าตั้ง dev server ไปพอร์ตนั้น
+- เสียงอ่านคำทำนาย (Web Speech API) ใช้เสียงภาษาไทยที่มากับระบบปฏิบัติการ/เบราว์เซอร์ — ถ้าเครื่องไม่มีเสียงไทย ปุ่มอ่านออกเสียงจะไม่มีเสียงไทยให้เลือก
+- `.claude/launch.json` มีชุดคำสั่งเปิด dev server ทั้งสองตัวสำหรับ preview ของ Claude Code

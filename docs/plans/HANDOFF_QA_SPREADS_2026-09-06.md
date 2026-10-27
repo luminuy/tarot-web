@@ -1,6 +1,6 @@
 # 🧪 แผนส่งต่องาน QA — พิสูจน์ผังใหม่ทั้ง 5 ด้วยการใช้งานจริง + ปิดช่องโหว่ `guestAllowed` ที่ไม่มีผลบังคับ
 
-> **สถานะ**: ✅ เสร็จแล้ว — ปิดครบ · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: 0a6e881
+> **สถานะ**: ✅ เสร็จแล้ว — ทดลองใช้ผังที่เพิ่มในรอบนั้นจริงครบ และปิดช่องโหว่ `guestAllowed` ที่ไม่มีผลบังคับแล้ว · ไม่มีงานค้าง · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: `0a6e881`
 
 > **ผู้จัดทำ**: Claude · 2026-09-06 · **ผู้รับช่วง**: ทีม/เอเจนต์ตัวถัดไป
 > **ต่อจาก**: [`HANDOFF_DOCS_TRUTH_2026-09-06.md`](HANDOFF_DOCS_TRUTH_2026-09-06.md) — งาน A/B/C ✅ **ปิดครบแล้ว** ใน commit `0a6e881`
@@ -74,7 +74,7 @@ npm run dev        # http://localhost:3000
 
 ## ต้องเดินให้ครบ 5 ขั้นในทุกผัง
 
-ตามสถาปัตยกรรมใน [`src/app/TarotFlow.tsx`](../../src/app/TarotFlow.tsx):
+ตามสถาปัตยกรรมใน [`src/app/TarotFlow.tsx`](../../src/components/home/TarotFlow.tsx):
 
 ```
 ขั้น 1 เลือกผัง → ขั้น 2 ตั้งจิต/คำถาม → ขั้น 3 สับไพ่ 3D → ขั้น 4 แผ่ไพ่ 78 ใบ แล้วหยิบ → ขั้น 5 ผังผลลัพธ์ + คำทำนาย AI
@@ -197,7 +197,7 @@ grep -rn "guestAllowed" src/ scripts/ | grep -v "data/spreads.ts"
 
 ตัวที่บังคับจริงคือ `STANDARD_SPREAD_IDS` ใน [`src/lib/entitlement/limits.ts`](../../src/lib/entitlement/limits.ts)
 ซึ่งถูกอ่านที่ [`src/app/api/reading/start/route.ts:122`](../../src/app/api/reading/start/route.ts) และ
-[`src/app/TarotFlow.tsx:478`](../../src/app/TarotFlow.tsx)
+[`src/app/TarotFlow.tsx:478`](../../src/components/home/TarotFlow.tsx)
 
 ## ผลที่ตามมา — 5 ผังปัจจุบันขัดกันเองอยู่
 
@@ -318,7 +318,7 @@ grep -rn "isEntitlementEnabled" scripts/qa/
 > *"ผังใหญ่/ปรมาจารย์ลับค้างล็อกแม้ปิดระบบสิทธิ์จาก /admin — `describeEntitlement()` คืน `null`
 > ทันทีเมื่อ `enabled=false` ทำให้ `isPassHolder` เป็น false ค้าง แม้เซิร์ฟเวอร์อนุญาตแล้ว"*
 
-ตัวแก้อยู่ที่ [`TarotFlow.tsx:153`](../../src/app/TarotFlow.tsx):
+ตัวแก้อยู่ที่ [`TarotFlow.tsx:153`](../../src/components/home/TarotFlow.tsx):
 
 ```ts
 const isPassHolder = Boolean(

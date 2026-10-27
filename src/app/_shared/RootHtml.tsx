@@ -63,11 +63,11 @@ export function RootHtml({
    * ⚠️ รายการนี้ต้องตรงกับ `@font-face` ใน globals.css และกับ `astro/layouts/BaseLayout.astro`
    *    ทั้งสามที่เสมอ — ด่าน `test-font-pipeline.ts` ตรวจให้อัตโนมัติ
    */
-  for (const file of FONT_PRELOADS) {
+  for (const file of FONT_PRELOADS[locale]) {
     ReactDOM.preload(file, { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
   }
   /* น้ำหนักหนา — ลำดับต่ำ ไม่แย่งคิวภาพ LCP แต่ทันเฟรมแรกเมื่ออยู่ในแคช (INC-0244 · ดู root-metadata.ts) */
-  for (const file of FONT_PRELOADS_LOW) {
+  for (const file of FONT_PRELOADS_LOW[locale]) {
     ReactDOM.preload(file, { as: "font", type: "font/woff2", crossOrigin: "anonymous", fetchPriority: "low" });
   }
 

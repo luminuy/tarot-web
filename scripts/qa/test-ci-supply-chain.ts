@@ -155,6 +155,11 @@ check(
   pnpmUsers.length === 0 || hasPnpmLock,
   pnpmUsers.join("\n"),
 );
+// ไฟล์ตั้งค่า pnpm ค้างทั้งที่ใช้ npm = ชวนคน/เครื่องมือเข้าใจผิดว่ายังใช้ pnpm (ลบแล้ว 2026-10-27)
+check(
+  "ไม่มี pnpm-workspace.yaml ค้าง เมื่อรีโปไม่ได้ใช้ pnpm",
+  hasPnpmLock || !fs.existsSync(path.join(ROOT, "pnpm-workspace.yaml")),
+);
 
 /*
  * 🤖 `packageManager` ใน package.json ต้องชี้ไปที่ npm (INC-0258)
@@ -296,6 +301,17 @@ if (backupWf) {
     `หน้านโยบายความเป็นส่วนตัวทั้งสองภาษาบอกอายุสำเนาสำรอง ${keepDays ?? "?"} วันตรงกับสคริปต์สำรอง`,
     !!keepDays && privacyTh.includes(`${keepDays} วัน`) && privacyEn.includes(`${keepDays} days`),
     "   ➔ แก้ BACKUP_RETENTION_DAYS แล้วต้องแก้ข้อ 3 ของ privacy-th.tsx / privacy-en.tsx ด้วย",
+  );
+}
+
+// 4d. migration ฐานจริงต้องสั่งชัด ๆ (2026-10-27) — `db:migrate` เปล่า ๆ = ฐานในเครื่อง · deploy.yml ส่ง `--remote` เอง
+{
+  const deployWf = workflows.find((wf) => wf.name === "deploy.yml")?.src ?? "";
+  const migrate = fs.readFileSync(path.join(ROOT, "scripts/db-migrate.ts"), "utf-8");
+  check(
+    "`npm run db:migrate` ค่าเริ่มต้นเป็นฐานในเครื่อง และ deploy.yml สั่ง `-- --remote` เอง",
+    /const isRemote = process\.argv\.includes\("--remote"\)/.test(migrate) && /npm run db:migrate -- --remote/.test(deployWf),
+    "   ➔ ค่าเริ่มต้นเป็น remote = เผลอรันบนเครื่องตัวเองก็แก้ฐาน production · deploy ลืม --remote = ฐานจริงไม่ได้ migration ใหม่",
   );
 }
 

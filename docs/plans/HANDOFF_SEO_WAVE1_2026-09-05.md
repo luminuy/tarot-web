@@ -1,9 +1,9 @@
 # 🌊 แผนส่งต่องาน SEO คลื่นที่ 1 — เติมคำว่า "ไพ่ยิปซี" ทั่วเว็บ
 
-> **สถานะ**: ✅ เสร็จแล้ว — เติมคำ "ไพ่ยิปซี" ทั่วเว็บแล้ว · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: PR #282
+> **สถานะ**: ✅ เสร็จแล้ว — เติมคำ "ไพ่ยิปซี" ใน title · description · h1 ทั่วเว็บแล้ว · ไม่มีงานค้าง · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: PR #282
 
 > **ผู้จัดทำ**: Claude · 2026-09-05 · **ผู้รับช่วง**: ทีม/เอเจนต์ตัวถัดไป
-> **ที่มา**: คลื่นที่ 1 ของ [`TRAFFIC_CAPTURE_PLAN_2026-09-05.md`](TRAFFIC_CAPTURE_PLAN_2026-09-05.md)
+> **ที่มา**: คลื่นที่ 1 ของ [`TRAFFIC_CAPTURE_PLAN_2026-09-05.md`](archive/TRAFFIC_CAPTURE_PLAN_2026-09-05.md)
 > **โค้ดอ้างอิง**: `main` ที่ commit `ba167ee` — ถ้าเลขบรรทัดเลื่อน ให้ค้นด้วยสตริงที่ยกมาแทน
 > **ขนาดงาน**: ~3-4 ชม. · **1 PR** · แตะ 8 ไฟล์ · **ไม่สร้างหน้าใหม่ ไม่แตะ logic ใด ๆ**
 
@@ -15,7 +15,7 @@
 | :-: | :--- | :--- |
 | 1 | [`docs/INCIDENT_LOG.md`](../INCIDENT_LOG.md) | บทเรียนความผิดพลาด |
 | 2 | [`docs/KNOWN_ISSUES.md`](../KNOWN_ISSUES.md) | ISSUE-024 ถึง 030 ค้างอยู่ **อย่าแก้ทับ** |
-| 3 | [`docs/plans/TRAFFIC_CAPTURE_PLAN_2026-09-05.md`](TRAFFIC_CAPTURE_PLAN_2026-09-05.md) | เหตุผลเบื้องหลังงานนี้ + หลักฐานที่วัดมา |
+| 3 | [`docs/plans/archive/TRAFFIC_CAPTURE_PLAN_2026-09-05.md`](archive/TRAFFIC_CAPTURE_PLAN_2026-09-05.md) | เหตุผลเบื้องหลังงานนี้ + หลักฐานที่วัดมา |
 
 ```bash
 npm run agent:status
@@ -147,7 +147,7 @@ export interface Spread {
 
 ## ✅ งานที่ 3 · ต่อ `seoTitleTh` เข้ากับหน้า `/spreads/[id]`
 
-### 3.1 `<title>` — [`src/app/spreads/[id]/page.tsx:34`](../../src/app/spreads/[id]/page.tsx)
+### 3.1 `<title>` — `src/app/spreads/[id]/page.tsx:34`
 
 ```ts
 // เดิม
@@ -183,7 +183,7 @@ keywords: [
 ],
 ```
 
-### 3.3 `<h1>` — [`src/app/spreads/[id]/SpreadDetailClient.tsx:159-161`](../../src/app/spreads/[id]/SpreadDetailClient.tsx)
+### 3.3 `<h1>` — [`src/app/spreads/[id]/SpreadDetailClient.tsx:159-161`](../../src/components/spread/SpreadDetailClient.tsx)
 
 ```tsx
 // เดิม
@@ -203,7 +203,7 @@ keywords: [
 
 ## ✅ งานที่ 4 · หน้าแรก
 
-### 4.1 metadata — [`src/app/layout.tsx:28-49`](../../src/app/layout.tsx)
+### 4.1 metadata — [`src/app/layout.tsx:28-49`](../../src/app/%28th%29/layout.tsx)
 
 ```ts
 // เดิม
@@ -246,7 +246,7 @@ keywords: [
 
 **อย่าลืม** `openGraph.title` (บรรทัด ~87) และ `twitter.title` (บรรทัด ~101) ให้ใช้ข้อความเดียวกับ `title.default`
 
-### 4.2 `<h1>` — [`src/app/TarotFlow.tsx:1143-1150`](../../src/app/TarotFlow.tsx)
+### 4.2 `<h1>` — [`src/app/TarotFlow.tsx:1143-1150`](../../src/components/home/TarotFlow.tsx)
 
 ```tsx
 // เดิม
@@ -272,7 +272,7 @@ keywords: [
 
 ## ✅ งานที่ 5 · หน้ารวม `/cards` และ `/spreads`
 
-### 5.1 [`src/app/cards/page.tsx:7-15`](../../src/app/cards/page.tsx)
+### 5.1 `src/app/cards/page.tsx:7-15`
 
 ```ts
 // เดิม
@@ -286,7 +286,7 @@ description:
 
 แก้ `openGraph.title` (บรรทัด 14) ให้สอดคล้องด้วย
 
-### 5.2 [`src/app/spreads/page.tsx:7-15`](../../src/app/spreads/page.tsx)
+### 5.2 `src/app/spreads/page.tsx:7-15`
 
 ```ts
 // เดิม
@@ -298,7 +298,7 @@ description:
   "รวมผังดูดวงไพ่ยิปซี ไพ่ทาโรต์ 20 แบบ ตั้งแต่ไพ่ 1 ใบ 3 ใบ 5 ใบ ถึงเซลติกครอส 10 ใบ ครบทั้งรายวัน รายเดือน ความรัก การงาน การเงิน พร้อมภาพจัดวางจริงและความหมายทุกตำแหน่ง",
 ```
 
-### 5.3 [`src/app/cards/[id]/page.tsx:29-30`](../../src/app/cards/[id]/page.tsx) — ไพ่ 78 ใบ
+### 5.3 `src/app/cards/[id]/page.tsx:29-30` — ไพ่ 78 ใบ
 
 ```ts
 // เดิม
@@ -380,7 +380,7 @@ done
 
 # 📌 ขอบเขตที่ **ไม่** ทำในรอบนี้
 
-งานพวกนี้อยู่ในคลื่นที่ 2-4 ของ [`TRAFFIC_CAPTURE_PLAN`](TRAFFIC_CAPTURE_PLAN_2026-09-05.md) — **แยก PR ทั้งหมด**
+งานพวกนี้อยู่ในคลื่นที่ 2-4 ของ [`TRAFFIC_CAPTURE_PLAN`](archive/TRAFFIC_CAPTURE_PLAN_2026-09-05.md) — **แยก PR ทั้งหมด**
 
 - ❌ สร้างหน้าใหม่ใด ๆ
 - ❌ ผังใหม่: ความรัก 6 ใบ · การเรียน · บริวาร/ครอบครัว · โชคลาภ · รายเดือน 10 ใบ

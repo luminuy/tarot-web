@@ -25,12 +25,14 @@ const ART = [
 ];
 
 const cardUrl = (name) => pathToFileURL(path.join(ROOT, "public", "cards", name)).href;
-const fontUrl = pathToFileURL(path.join(ROOT, "public", "fonts", "noto-serif-thai-700.woff2")).href;
+/* ฟอนต์แยกไทย/ละติน (ISSUE-048) — ประกาศสองหน้าฟอนต์ตระกูลเดียวกัน ตัวอักษรเลือกไฟล์เองตาม unicode-range */
+const fontUrl = (part) => pathToFileURL(path.join(ROOT, "public", "fonts", `noto-serif-thai-700-${part}.woff2`)).href;
 
 function html(cards) {
   const [left, center, right] = cards.map(cardUrl);
   return `<!doctype html><html><head><meta charset="utf-8"><style>
-  @font-face { font-family: Brand; src: url("${fontUrl}") format("woff2"); font-weight: 700; }
+  @font-face { font-family: Brand; src: url("${fontUrl("thai")}") format("woff2"); font-weight: 700; unicode-range: U+0E00-0E7F; }
+  @font-face { font-family: Brand; src: url("${fontUrl("latin")}") format("woff2"); font-weight: 700; unicode-range: U+0000-0DFF, U+0E80-FFFF; }
   * { margin: 0; box-sizing: border-box; }
   body { width: ${SIZE}px; height: ${SIZE}px; overflow: hidden; }
   .stage {

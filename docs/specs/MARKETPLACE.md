@@ -1,110 +1,71 @@
-# 🔮 Marketplace แม่หมอตัวจริง — เอกสารส่งต่องาน (Phase 2 Handoff)
+# 🔮 Marketplace แม่หมอตัวจริง — สเปกระบบ
 
-> **เอกสารนี้เขียนไว้ให้ AI Agent หรือนักพัฒนาคนต่อไปทำ Phase 2 ต่อได้ทันทีโดยไม่ต้องเดา**
-> Phase 1 (แผงแอดมิน M0–M3) เสร็จและ merge แล้ว (PR #57, #59, #60) — ดู [`docs/ADMIN_PANEL.md`](ADMIN_PANEL.md)
-> แผนภาพรวมทั้งโปรเจกต์: `~/.claude/plans/breezy-percolating-llama.md` (ถ้ายังเข้าถึงได้)
-
-**อัปเดตล่าสุด:** 2026-09-01 · โดย Claude Sonnet 5 · หลัง merge M3
-
----
-
-## 0. อ่านก่อนแตะโค้ด (บังคับ)
-
-1. [`docs/INCIDENT_LOG.md`](INCIDENT_LOG.md) — ทุกความผิดพลาดที่เคยเกิด + กฎป้องกันถาวร (INC-0001..0034)
-2. [`docs/KNOWN_ISSUES.md`](KNOWN_ISSUES.md) — บั๊กค้าง + ISSUE-004 (macOS 12.6 รัน wrangler dev ไม่ได้) + ISSUE-007 (ยังไม่มี DB)
-3. [`docs/BACKLOG.md`](BACKLOG.md) — กติกาการทำงาน (ห้าม push main, 1 milestone = 1 PR)
-4. [`docs/ADMIN_PANEL.md`](ADMIN_PANEL.md) — ระบบที่ Phase 2 จะต่อยอด
-5. [`CLAUDE.md`](../CLAUDE.md) — กฎเหล็ก 13 ข้อ
-
-### กติกาที่ agent ก่อนหน้าทำผิดซ้ำบ่อย (INC-0015/0017/0020) — **ห้ามละเมิด**
-- **ห้าม `git push origin main`** — ทุก commit ผ่าน `npm run pr:auto` เท่านั้น
-- **1 milestone = 1 branch = 1 PR** — ห้ามแตกกิ่งย่อยค้าง
-- ก่อนเริ่มทุกครั้ง: `git fetch origin && git checkout -B <branch> origin/main` (อย่าทำงานบน base เก่า)
-- commit ผ่าน `npm run commit -- --agent "<ชื่อ>" --type feat --scope marketplace --msg "..."` (ไม่ใช่ `git commit` ตรง)
-- **มี AI agent อื่นทำงานคู่ขนานใน repo นี้** (เช่น PR #58 "Round 6 ux-navigation") — เจอ rebase conflict บ่อยที่ไฟล์ tooling
-  (`.ai-locks.json`, `.audit-history.json`, `docs/AUDIT_LOG.md` — พวกนี้ gitignore แล้ว, ถ้า conflict ให้ `git rm` ทิ้ง)
-- จบงาน: `npm run repo:verify` (ต้องผ่านทุก gate) → `npm run pr:auto -- "<title>" "<body>"` → รอ merge → `git:tidy`
+> **สถานะ**: ใช้งานจริงบน production · M4–M7 ครบ + วิดีโอคอล (#644) · นัดล่วงหน้าและจ่ายก่อนคุย (#648) · ขั้นตอนปรึกษาแบบใหม่ (#666) · ต่อสายใหม่อัตโนมัติ (#703) · แก้ผลตรวจ 2026-10-18 (#706 · #710) · ปรึกษาฟรีสำหรับบัญชีที่ได้สิทธิ์ (#720) · **ตรวจกับโค้ดล่าสุด**: 2026-10-26
+>
+> เอกสารนี้บอก "ระบบตอนนี้เป็นอย่างไร" (ไฟล์ · ตาราง · กติกา · กับดัก) · ประวัติการสร้างทีละขั้นดู `git log` และ [`WORK_LOG.md`](../WORK_LOG.md)
+> Reader Studio (เครื่องมือจดลูกค้า/ร่างคำอ่านของแม่หมอ · `/readers/studio`) เป็นอีกระบบ อยู่ในแผน [`REFLECTION_JOURNAL_PLAN_2026-10-05.md`](../plans/REFLECTION_JOURNAL_PLAN_2026-10-05.md) หัวข้อ 1.13 — ปิดไว้ด้วย `READER_STUDIO_ENABLED` รอทนายรับรองร่างใน [`docs/legal/`](../legal/)
 
 ---
 
-## 1. สถานะปัจจุบัน (Phase 1 เสร็จแล้ว — ของที่ใช้ต่อได้)
+## 0. อ่านก่อนแตะโค้ด
 
-### Platform layer — `src/lib/platform/`
-| ไฟล์ | export | ใช้ทำอะไร |
-| :-- | :-- | :-- |
-| `cf.ts` | `getAppKV()`, `getWaitUntil()` | เข้าถึง Cloudflare KV binding (`APP_KV`) + shim ตอน dev · `getWaitUntil` สำหรับ background task |
-| `kv-store.ts` | `kvGetJSON/kvPutJSON/kvDelete/kvIncr/kvListKeys`, `KEY`, `invalidateMemo` | typed JSON + isolate memo cache · key prefix `app:` |
-
-**⚠️ ห้ามเพิ่ม `initOpenNextCloudflareForDev()` ใน `next.config.ts`** — สตาร์ท workerd ที่พังบน macOS 12.6 (ISSUE-004)
-จะทำให้ `npm run dev` ใช้ไม่ได้ทั้งหมด → verify binding จริงเฉพาะบน production หลัง deploy (curl)
-
-### Auth — `src/lib/auth/`
-| ไฟล์ | export | หมายเหตุ |
-| :-- | :-- | :-- |
-| `admin-auth.ts` | `signAdminSession/verifyAdminSession/verifyAdminPassword/isAdminConfigured`, `ADMIN_COOKIE_NAME` | HMAC-SHA256 `node:crypto` · cookie `tarot_admin` 8 ชม. |
-| `require-admin.ts` | `requireAdmin()` (คืน `NextResponse\|null`), `isAdminRequest()` | ใช้กับทุก `/api/admin/*` |
-| `edge-auth.ts` | `verifyUserSession()`, `signUserSession()`, OAuth URL helpers | ระบบ login ผู้ใช้ทั่วไป (Google/LINE) · cookie `tarot_auth_session` 30 วัน · `UserProfile` **ไม่มี field role** |
-
-**pattern การทำ session ใหม่ (reader) ให้ลอก `admin-auth.ts`:** `createHmac("sha256", secret).update(base64url(payload)).digest("base64url")` + `timingSafeEqual`
-
-### Stats — `src/lib/stats/`
-`recordEvent(metric, amount?)` / `recordEvents([...])` — buffer ระดับ isolate + flush debounce 20 วิ ผ่าน `waitUntil`
-metric marketplace ที่ควรเพิ่ม: `reader_created`, `queue_ticket_created`, `queue_handed_off`, `booking_created`, `screening_passed/blocked`, `payment_succeeded/failed`
-
-### Admin — `src/app/api/admin/{login,logout,session,stats,content}` + `src/components/admin/{StatsDashboard,ContentEditor}.tsx` + `src/app/admin/page.tsx` (client shell, แท็บ `stats`/`content`)
-**เพิ่มแท็บ marketplace:** แก้ `TABS` array ใน `src/app/admin/page.tsx` + `dynamic()` import component ใหม่
-
-### Content overrides — `src/lib/content/overrides.ts`
-`getContentOverrides()` + resolver — ไม่เกี่ยวกับ marketplace โดยตรง แต่เป็น pattern ที่ดี (KV JSON doc + memo 60 วิ + deep merge)
-
-### UI primitives — `src/components/ui/`
-`Button.tsx` (variant gold/ghost/pill/outline) · `Modal.tsx` (a11y ครบ) · `Input.tsx` (`Input`, `Textarea`) · `Field.tsx` (label wrapper) · `SacredNavDropdown.tsx` (เมนู)
-**ยังไม่มี:** `Select`, `Checkbox`, table component, date picker — สร้างเพิ่มใน `src/components/ui/` ถ้าจำเป็น (match design tokens ด้านล่าง)
-
-### Design tokens (จาก `src/app/globals.css` `@theme`)
-- Tailwind v4 (CSS-first, ไม่มี `tailwind.config`) · สี hex literal ใช้ตรง ๆ เยอะกว่า token
-- พื้นหลัง `#05040a` · การ์ด `.altar-panel` (obsidian+gold glass) · ทอง `#e5c07b`/`#f5deaa`/`#ffd700` · ข้อความรอง `#9c93b8` · ผิดพลาด `#f0a0a0`
-- heading: `.font-mystic-gold` · **สัญลักษณ์ `✦` `✨` เท่านั้น ห้าม emoji การ์ตูน** (กฎเหล็กข้อ 2)
-- font: `font-sans` (Sarabun) · `font-serif-th` (Noto Serif Thai) · `font-mono`
-
-### Verify gates (8 ด่าน — `scripts/github-auto.ts` `CHECKS` array)
-agent:check · typecheck · verify-cards · test-spreads · test-safety · test-shuffle · test-image-paths · **test-overrides-safety**
-→ ถ้าเพิ่ม `scripts/qa/test-*.ts` ใหม่ **ต้องเพิ่มใน `CHECKS` array ด้วย** (INC-0005)
-
----
-
-## 2. Phase 2 — ภาพรวม + สิ่งที่ยังบล็อก
-
-**เป้าหมาย:** ให้ "แม่หมอตัวจริง" (มนุษย์) มาเปิดคิวรับดูดวง โดย **AI เป็นตัวกรอง/สรุปบรีฟลูกค้า** ก่อนส่งเข้าหาแม่หมอจริง — คุยกันต่อทาง **LINE/ช่องทางภายนอก** (ไม่มีแชทในเว็บ)
-
-### 🚧 บล็อก 2 จุด — ต้องให้เจ้าของโปรเจกต์ทำก่อน M4
-
-**บล็อก 1 — Provision Cloudflare D1** (AI ทำเองไม่ได้ ต้องมี `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`)
-```bash
-npx wrangler d1 create tarot-app-db
-# คัดลอก database_id ที่ได้มาใส่ wrangler.jsonc (ดูขั้นตอนใน M4)
-```
-
-**บล็อก 2 — PDPA / ADR** (marketplace เก็บ PII ลูกค้า + ส่งต่อทาง LINE ซึ่งขัดกฎเดิม "ห้ามเก็บข้อมูลผู้ใช้ถาวรบน server")
-ต้องมีก่อนเขียนโค้ด M4:
-- ADR ใน `docs/` (เช่น `docs/ADR-001-marketplace-pdpa.md`) — ระบุว่าเก็บอะไร, นานเท่าไหร่, ใครเข้าถึง, ฐานทางกฎหมาย (consent)
-- consent gate ในหน้าจองคิว — ผู้ใช้ต้องกดยอมรับก่อนข้อมูลถูกส่งให้แม่หมอ
-- แก้ [`src/app/privacy/page.tsx`](../src/app/privacy/page.tsx) เพิ่มหัวข้อ marketplace
-- **data minimization**: เก็บเฉพาะที่จำเป็น (ชื่อเล่น + คำถาม + ไพ่ที่จับ) · auto-delete ticket/booking หลัง 30–90 วัน · ห้ามนำไป train model
-- **ไฟเขียวจากหัวหน้าทีม** ก่อนเริ่ม
-
-### การตัดสินใจที่เจ้าของเคาะแล้ว
-| หัวข้อ | ค่า |
+| ไฟล์ | อ่านเพื่อ |
 | :-- | :-- |
-| เปิดคิว | **ทั้ง 2 แบบ** — walk-up live queue + จอง slot ล่วงหน้า |
-| คุยลูกค้า↔แม่หมอ | ~~ส่งต่อไป LINE/ภายนอกอย่างเดียว~~ ➔ **วิดีโอคอลตัวต่อตัวในเว็บ** + LINE เป็นทางสำรอง (เคาะ 2026-10-02 · ดูหัวข้อ "วิดีโอคอลตัวต่อตัว" ด้านล่าง) |
-| Payment | **milestone แยกท้ายสุด (M7)** ต้องมี แต่ทำหลังสุด |
-| Storage | D1 (relational) + reuse KV (config/counter) — แยกตามความเหมาะสม |
-| ปรึกษาฟรี | บัญชีในรายชื่อ `FREE_CONSULT_EMAILS` (`src/lib/marketplace/free-consult.ts` · ตอนนี้ `seerada.tarot@gmail.com`) ที่ยืนยันอีเมลแล้ว จองแม่หมอได้โดยไม่ผ่านหน้าจ่ายเงิน — บันทึก `payments` ยอด 0 `provider = comp` · ไม่นับรายได้แม่หมอ/ยอดขาย · แยกจาก `UNLIMITED_EMAILS` (บัญชี VIP ข้ามแค่ค่า AI) · เพิ่ม/ถอดอีเมลต้องแก้โค้ดผ่าน PR (เคาะ 2026-10-25) |
+| [`CLAUDE.md`](../../CLAUDE.md) | กฎเหล็ก + วิธีเปิด PR (ที่เดียวที่เป็นทางการ — ไม่คัดลอกมาไว้ที่นี่) |
+| [`INCIDENT_LOG.md`](../INCIDENT_LOG.md) · [`KNOWN_ISSUES.md`](../KNOWN_ISSUES.md) | บทเรียนเก่า + บั๊กที่ยังเปิด |
+| [`CONSULT_FLOW_UX_PLAN_2026-10-11.md`](../plans/CONSULT_FLOW_UX_PLAN_2026-10-11.md) | หลักออกแบบหน้าจอง/คิว/แผงแม่หมอ 7 ข้อ (หัวข้อ 2) + กับดัก (หัวข้อ 7) |
+| [`ADR-001`](../adr/ADR-001-marketplace-pdpa.md) | การตัดสินใจเรื่อง PDPA ตอนเริ่มเฟสนี้ (บางข้อเปลี่ยนแล้ว — ดูหัวสถานะของไฟล์) |
+| [`ADMIN_PANEL.md`](../ADMIN_PANEL.md) | แผงแอดมินที่ใช้จัดการแม่หมอ การจอง และการเงิน |
+| [`PENDING_SETUP.md`](../PENDING_SETUP.md) | ค่าลับที่ระบบนี้ใช้ (Stripe · TURN) และอาการเมื่อยังไม่ตั้ง |
 
 ---
 
-### 📹 วิดีโอคอลตัวต่อตัว (เคาะ 2026-10-02)
+## 1. ภาพรวม + การตัดสินใจที่เจ้าของเคาะแล้ว
+
+ลูกค้าจองแม่หมอที่เป็นคนจริง → AI คัดกรองคำถามและสรุปบรีฟให้แม่หมอ → จ่ายเงินก่อนเสมอ → คุยทางวิดีโอคอลในเว็บ (LINE เป็นทางสำรอง)
+
+| หัวข้อ | ค่าที่ใช้อยู่ |
+| :-- | :-- |
+| รูปแบบคิว | ทั้งคิวสด (walk-up) และนัดเวลาล่วงหน้า |
+| ช่องทางคุย | วิดีโอคอลตัวต่อตัวในเว็บ + LINE เป็นทางสำรอง (เคาะ 2026-10-02 · เดิมส่งต่อ LINE อย่างเดียว) |
+| การจ่ายเงิน | Stripe Checkout · จ่ายก่อนคุยทุกครั้ง (คิวสดด้วย) · ราคาคิดฝั่งเซิร์ฟเวอร์เท่านั้น |
+| ราคา | ค่ากลาง 299 บาท / 30 นาที (`CONSULTATION_PRICE_THB` · `CONSULTATION_MINUTES` ใน `offer.ts`) · แอดมินตั้งรายแม่หมอได้ 99–5,000 บาท (`readers.price_thb`) |
+| ส่วนแบ่ง | ค่าคอมมิชชันแพลตฟอร์มต่อแม่หมอ `readers.commission_pct` (ค่าเริ่มต้น 20%) |
+| ที่เก็บข้อมูล | D1 `APP_DB` (ตารางทั้งหมดของระบบนี้) · KV `APP_KV` เฉพาะตัวนับ/ค่าตั้ง |
+| ปรึกษาฟรี | บัญชีในรายชื่อ `FREE_CONSULT_EMAILS` (`free-consult.ts` · ตอนนี้ `seerada.tarot@gmail.com`) ที่ยืนยันอีเมลแล้ว จองได้โดยไม่ผ่านหน้าจ่ายเงิน — บันทึก `payments` ยอด 0 `provider = comp` · ไม่นับเป็นยอดขายหรือรายได้แม่หมอ · แยกจาก `UNLIMITED_EMAILS` (บัญชี VIP ข้ามแค่ค่า AI) · เพิ่ม/ถอดอีเมลต้องแก้โค้ดผ่าน PR (เคาะ 2026-10-25) |
+
+---
+
+## 2. แผนที่โค้ด
+
+| ชั้น | ที่อยู่ |
+| :-- | :-- |
+| หน้าเว็บ (Next · ไม่ใช่ Astro) | `src/app/(th)/readers/` — `(directory)` รายชื่อ · `[id]` โปรไฟล์ · `[id]/book` หน้าจองเต็มจอ · `queue/[id]` ห้องรอ/ห้องวิดีโอของลูกค้า · `console` แผงแม่หมอ · `room/[code]` ลิงก์ห้องส่วนตัว · `bookings` นัดของฉัน · `studio` Reader Studio · `sitemap.ts` sitemap โปรไฟล์แม่หมอ |
+| คอมโพเนนต์ | `src/components/marketplace/` — `BookingFlow` · `SlotPicker` · `ReaderDetailClient` · `QueueBookingParts` · `ConsoleBookingParts` · `PrivateRoomCard` · `VideoCallRoom` · `WaitlistForm` · `ConsultStage` |
+| API ลูกค้า/แม่หมอ | `src/app/api/marketplace/` — `tickets` (จอง + เปิดหน้าจ่าย) · `tickets/[id]` (+ `access` · `review`) · `payments` (จ่ายต่อ) · `payments/confirm` · `payments/webhook` · `calls/[ticketId]` · `console/{queue,schedule,settings,invites}` · `readers/[id]/{slots,waitlist}` · `readers/featured` · `my-bookings` · `studio/**` |
+| API แอดมิน | `src/app/api/admin/{readers,readers/[id],bookings,payments,studio-pass}` + `src/components/admin/{ReadersManager,BookingsAdmin,PaymentsPanel}.tsx` |
+| งานรอบ | `src/app/api/cron/booking-reminders` — ทุก 15 นาทีผ่าน `.github/workflows/booking-reminders.yml` (cron ของ GitHub ไม่ตรงเวลา ปลายทางจึงไม่พึ่งการรันตรงเวลา) |
+| ตรรกะ | `src/lib/marketplace/` — ดูตารางแต่ละหัวข้อด้านล่าง · ยืนยันตัวแม่หมอ `src/lib/auth/reader-auth.ts` (HMAC เซ็นด้วย `readers.session_secret`) · คัดกรองความปลอดภัย `src/lib/safety/guardrails.ts` |
+| ฐานข้อมูล | `migrations/0001` readers · admin_audit · `0002` reader_availability · ai_screening · queue_tickets · bookings · `0003` payments · payouts · `0015` payments (เจ้าของรายการ) · `0019` call_sessions · `0020` นัดล่วงหน้า · `0021` reader_blocked_dates · reader_reviews · booking_waitlist · `0029` ยินยอมข้อมูลอ่อนไหว · `0030` lead_min · `0031` last_seen_at · `0032` reader_invites · `0035` pii_cleared_at + index · Reader Studio `0027` |
+| ฐานในเครื่อง | `src/lib/platform/db.ts` สร้างฐาน SQLite จาก `migrations/` เอง (ห้ามเขียนสคีมาซ้ำในโค้ด — ด่าน `test-code-debt` ข้อ 14) |
+
+---
+
+## 3. คิวสด + AI คัดกรอง
+
+| เรื่อง | ไฟล์ / กติกา |
+| :-- | :-- |
+| ตั๋วคิว | `queue.repo.ts` — สถานะ `pending_payment` ➔ `waiting` ➔ `ready` ➔ `handed_off` (หรือ `cancelled` / `expired`) · ตั๋วเข้าคิวเมื่อจ่ายเงินแล้วเท่านั้น |
+| คิวสด "เปิดจริง" | สวิตช์เปิด + เห็นแผงแม่หมอภายใน 15 นาที (`LIVE_PRESENCE_TIMEOUT_MINUTES` · `reader_availability.last_seen_at`) |
+| AI คัดกรอง | `screening.ts` — ด่าน 1 `checkQuestion()` บล็อกสัญญาณทำร้ายตัวเอง + สายด่วน 1323 · ด่าน 2 แยกหมวด (ความรัก · งาน · เงิน · ตัวเอง · ทั่วไป) · ด่าน 3 บรีฟสั้นให้แม่หมอ + ผังที่แนะนำ |
+| ลำดับด่านตอนจอง | `POST /api/marketplace/tickets`: รูปแบบข้อมูล ➔ แม่หมอ ➔ เปิดรับ/เวลาว่างจริง ➔ โควตาต่อลูกค้า ➔ ระบบจ่ายเงินพร้อม ➔ AI คัดกรอง (เสียเงิน ทำหลังสุด) ➔ กันที่ ➔ หน้าจ่าย Stripe |
+| เพดานต่อลูกค้า | ถือคิว/นัดที่ยังไม่จบได้พร้อมกัน 3 ใบ (`MAX_ACTIVE_PER_CUSTOMER`) |
+| ห้องรอลูกค้า | `/readers/queue/[id]` ถามสถานะทุก 4 วินาทีเมื่อแท็บมองเห็น · ลิงก์ LINE ของแม่หมอโผล่เมื่อถึงคิว (`ready` / `handed_off`) เท่านั้น |
+| ความเป็นเจ้าของตั๋ว | `ticket-owner.ts` (`isTicketOwner`: คุกกี้ `tarot_customer_ref` หรือ `user_id` ของบัญชี) — ห้ามเทียบ `customerRef` เองที่อื่น · `customerRef` อ่านจากคุกกี้ที่เซ็นเองเท่านั้น ห้ามรับจาก query/body (`customer-ref.ts`) |
+
+---
+
+## 4. 📹 วิดีโอคอลตัวต่อตัว (เคาะ 2026-10-02)
 
 | หัวข้อ | ค่าที่เคาะ | เหตุผล |
 | :-- | :-- | :-- |
@@ -112,232 +73,59 @@ npx wrangler d1 create tarot-app-db
 | เส้นทางภาพ | WebRTC แบบ P2P แต่ **บังคับผ่าน TURN ทุกสาย** (`iceTransportPolicy: "relay"`) | ลูกค้า↔แม่หมอเป็นคนแปลกหน้า — **ห้ามเห็น IP ของกันและกัน** |
 | คุณภาพ | ล็อก **720p** · เพดาน 1.5 Mbps | ตัวต่อตัว ~1.35 GB/ชม. ➔ 50 คน × 1.5 ชม. ≈ 100 GB/เดือน (~10% ของโควตาฟรี) |
 | นัดเชื่อมสาย | D1 `call_sessions` (migrations/0019) + ถามสถานะเป็นระยะ ไม่ใช้ WebSocket | ICE แบบไม่ trickle = เขียน 2 ครั้งต่อการต่อสาย |
-| บันทึก | **ไม่บันทึกภาพ เสียง หรือบทสนทนา** · ล้าง SDP ทันทีที่วางสาย · ลบแถวพร้อมตั๋ว (7 วัน) | PDPA |
+| บันทึก | **ไม่บันทึกภาพ เสียง หรือบทสนทนา** · ล้าง SDP ทันทีที่วางสาย · ลบแถวพร้อมตั๋ว | PDPA |
+| ต่อสายใหม่อัตโนมัติ | `call-recovery.ts` — ฝั่งลูกค้าสั่งต่อใหม่ฝั่งเดียว · รอ ICE ฟื้น 5 วิ · เว้น 10/20/30 วิ แล้วหยุดให้คนกดเอง (เจ้าของสั่ง 2026-10-19) | เน็ตสะดุดแล้วลูกค้าไม่กดต่อใหม่เอง |
+| สถิติสาย | `call-metrics.ts` ➔ Analytics Engine (binding `CALL_METRICS` · dataset `seertarot_calls`) · ดูด้วย `npm run cf:call-stats` | วัดว่าการต่อสายใหม่ได้ผลไหม · ไม่มีชื่อ/อีเมล/IP |
 
-**ไฟล์**: `src/lib/marketplace/turn.ts` (ออก/เพิกถอนรหัสผ่าน TURN) · `src/lib/marketplace/call.repo.ts` (ห้อง + `sanitizeRelaySdp`) ·
-`src/app/api/marketplace/calls/[ticketId]/route.ts` · `src/components/marketplace/VideoCallRoom.tsx` (ใช้ทั้ง `/readers/queue/[id]` และ `/readers/console`)
+**ไฟล์**: `turn.ts` (ออก/เพิกถอนรหัสผ่าน TURN อายุ 3 ชม.) · `call.repo.ts` (ห้อง + `sanitizeRelaySdp`) · `src/app/api/marketplace/calls/[ticketId]/route.ts` · `VideoCallRoom.tsx` (ใช้ทั้ง `/readers/queue/[id]` และ `/readers/console`) · `beauty-filter.ts` (ฟิลเตอร์หน้าแม่หมอ ทำในเครื่องแม่หมอ)
 
 **กับดักที่ห้ามพลาด**
-- ทั้งเว็บปิดกล้อง/ไมค์ (`Permissions-Policy: camera=()`) — เปิด `camera=(self)` **เฉพาะสองหน้านี้** ผ่าน `CALL_PAGE_SOURCES` ใน `security-headers.ts` (Next ให้ค่าที่ประกาศทีหลังชนะ)
+- ทั้งเว็บปิดกล้อง/ไมค์ (`Permissions-Policy: camera=()`) — เปิด `camera=(self)` **เฉพาะสองหน้านี้** ผ่าน `CALL_PAGE_SOURCES` ใน `src/lib/config/security-headers.ts` (Next ให้ค่าที่ประกาศทีหลังชนะ)
 - เซิร์ฟเวอร์ล้าง SDP ซ้ำ: ตัด candidate ที่ไม่ใช่ `typ relay` + แทน `raddr` เป็น `0.0.0.0` — ไคลเอนต์ที่ถูกดัดแปลงส่ง IP จริงข้ามฝั่งไม่ได้
-- ยังไม่ตั้ง `CLOUDFLARE_TURN_KEY_ID` / `CLOUDFLARE_TURN_KEY_API_TOKEN` = ปุ่มวิดีโอไม่โผล่ ลูกค้าคุยผ่าน LINE ได้ตามเดิม (ดู `docs/PENDING_SETUP.md`)
-- ด่านตรวจ: `test-marketplace-readers` ข้อ 16.1–16.5
-
-## 3. สถาปัตยกรรม Storage สำหรับ Phase 2
-
-| ชั้น | เก็บอะไร | เหตุผล |
-| :-- | :-- | :-- |
-| **D1** (`APP_DB`, ใหม่) | readers, reader_availability, queue_tickets, bookings, ai_screening, payments, admin_audit (ย้ายจาก KV ได้) | ต้อง query/join/consistency · transactional (คิว, การจอง, เงิน) |
-| **KV** (`app:` prefix, มีแล้ว) | feature flags, stat counters, config | อ่านบ่อย เขียนน้อย · eventual-consistency รับได้ |
-| in-memory `src/server/store.ts` | reading state ระหว่างขั้นตอน (เดิม) | ไม่แตะ |
-
-### วิธีเข้าถึง D1 จากโค้ด — สร้าง `src/lib/platform/db.ts` (pattern เดียวกับ `cf.ts`)
-```ts
-import { getCloudflareContext } from "@opennextjs/cloudflare";
-
-export interface AppDB {
-  prepare(query: string): {
-    bind(...values: unknown[]): {
-      first<T = unknown>(): Promise<T | null>;
-      all<T = unknown>(): Promise<{ results: T[] }>;
-      run(): Promise<{ success: boolean; meta: { changes: number; last_row_id: number } }>;
-    };
-    first<T = unknown>(): Promise<T | null>;
-    all<T = unknown>(): Promise<{ results: T[] }>;
-    run(): Promise<{ success: boolean }>;
-  };
-  batch(statements: unknown[]): Promise<unknown[]>;
-}
-
-let cached: AppDB | null = null;
-
-export async function getAppDB(): Promise<AppDB | null> {
-  if (cached) return cached;
-  try {
-    const ctx = await getCloudflareContext({ async: true });
-    const binding = (ctx.env as Record<string, unknown>).APP_DB;
-    if (binding && typeof (binding as AppDB).prepare === "function") {
-      cached = binding as AppDB;
-      return cached;
-    }
-  } catch { /* ไม่มี context (dev) */ }
-  return null; // dev: return null → route ต้องจัดการ (503 "marketplace ยังไม่พร้อมใน dev")
-}
-```
-**dev fallback:** D1 ไม่มี in-memory shim ง่าย ๆ เหมือน KV — ทางเลือก:
-1. return `null` แล้ว route คืน 503 ใน dev (ง่ายสุด, marketplace UI จะโชว์ "โหมด dev ไม่รองรับ")
-2. เขียน SQLite shim ด้วย `node:sqlite` (Node 22+ มี `node:sqlite` แล้ว — เครื่องนี้ Node 24) เก็บไฟล์ `.dev-marketplace.db` (gitignore)
-   → ทำถ้าต้องการ dev/verify เต็มรูปแบบ · **แนะนำตัวเลือกนี้** เพราะ verify บน production ยากมาก (deploy ทุกครั้ง)
+- ยังไม่ตั้ง `CLOUDFLARE_TURN_KEY_ID` / `CLOUDFLARE_TURN_KEY_API_TOKEN` = ปุ่มวิดีโอไม่โผล่ ลูกค้าคุยผ่าน LINE ได้ตามเดิม (ดู [`PENDING_SETUP.md`](../PENDING_SETUP.md))
+- ด่านตรวจ: `test-marketplace-readers` ข้อ 16.x
 
 ---
 
-## 4. M4 · D1 Foundation + Reader Profiles (เสร็จสมบูรณ์ 100% ✅)
-
-### 4.1 Provision + binding (เจ้าของทำ / AI เขียน config)
-1. `npx wrangler d1 create tarot-app-db` → ได้ `database_id`
-2. เพิ่มใน `wrangler.jsonc` (**เทียบกับ `node_modules/wrangler/config-schema.json` ก่อน — INC-0034**):
-   ```jsonc
-   "d1_databases": [
-     { "binding": "APP_DB", "database_name": "tarot-app-db", "database_id": "<ที่ได้จาก create>" }
-   ]
-   ```
-3. อย่าแตะ `kv_namespaces` เดิม · อย่าเพิ่ม `initOpenNextCloudflareForDev`
-4. **verify config parse:** `npx wrangler deploy --dry-run` (ควรผ่านขั้น config, fail แค่ entry-point) + `npx opennextjs-cloudflare build` (ต้องจบด้วย "OpenNext build complete")
-
-### 4.2 Migrations — `migrations/0001_marketplace_init.sql` + `scripts/db-migrate.ts`
-```sql
--- migrations/0001_marketplace_init.sql
-CREATE TABLE readers (
-  id            TEXT PRIMARY KEY,           -- nanoid/uuid
-  display_name  TEXT NOT NULL,
-  bio           TEXT NOT NULL DEFAULT '',
-  avatar_url    TEXT,
-  specialties   TEXT NOT NULL DEFAULT '[]', -- JSON array ["ความรัก","การงาน"]
-  line_url      TEXT NOT NULL,              -- https://line.me/ti/p/~xxxx หรือ LINE OA
-  status        TEXT NOT NULL DEFAULT 'pending', -- pending|approved|suspended
-  commission_pct INTEGER NOT NULL DEFAULT 20,
-  session_secret TEXT NOT NULL,             -- ต่อ reader — ใช้เซ็น reader cookie
-  created_at    INTEGER NOT NULL,
-  updated_at    INTEGER NOT NULL
-);
-CREATE INDEX idx_readers_status ON readers(status);
-
-CREATE TABLE admin_audit (
-  id         INTEGER PRIMARY KEY AUTOINCREMENT,
-  ts         INTEGER NOT NULL,
-  actor      TEXT NOT NULL,   -- 'admin' | reader_id
-  action     TEXT NOT NULL,
-  detail     TEXT
-);
-```
-`scripts/db-migrate.ts` — ห่อ `npx wrangler d1 migrations apply tarot-app-db --remote` (+ `--local` option)
-เพิ่ม npm script: `"db:migrate": "tsx scripts/db-migrate.ts"`
-
-> **หมายเหตุ:** wrangler รองรับ `migrations/` folder + `wrangler d1 migrations` อยู่แล้ว — ใช้ convention นั้น
-> ตั้ง `"migrations_dir": "migrations"` ใน d1_databases entry ถ้าจำเป็น (เช็ค schema)
-
-### 4.3 Repository layer — `src/lib/marketplace/readers.repo.ts`
-```ts
-import { getAppDB } from "@/lib/platform/db";
-export interface Reader { id: string; displayName: string; bio: string; avatarUrl: string | null;
-  specialties: string[]; lineUrl: string; status: "pending"|"approved"|"suspended";
-  commissionPct: number; createdAt: number; updatedAt: number; }
-// listReaders(status?), getReader(id), createReader(input), updateReader(id, patch), setStatus(id, status)
-// แปลง row.specialties (TEXT) <-> string[] ด้วย JSON.parse/stringify ตรงนี้ที่เดียว
-```
-
-### 4.4 Admin API — `src/app/api/admin/readers/route.ts` (+ `[id]/route.ts`)
-- ทุก handler เริ่มด้วย `const denied = await requireAdmin(); if (denied) return denied;`
-- `GET` → list · `POST` → create (Zod validate, gen `id` + `session_secret` = `crypto.randomUUID()`) · `PATCH [id]` → update/approve/suspend · `recordAudit(...)` ทุกครั้ง
-- ตอน create/approve คืน **secret link** ให้ reader: `https://<domain>/readers/console?token=<signed>` (เซ็นด้วย reader.session_secret — ดู M5)
-
-### 4.5 Admin UI — `src/components/admin/ReadersManager.tsx`
-- reuse `Input`/`Textarea`/`Field`/`Button` · ตาราง reader + ปุ่ม approve/suspend + form เพิ่ม
-- wire เข้า `src/app/admin/page.tsx`: เพิ่ม `{ id: "readers", label: "แม่หมอ (marketplace)" }` ใน `TABS` + `dynamic()` import
-
-### 4.6 Public — `src/app/readers/page.tsx` + `src/app/readers/[id]/page.tsx`
-- list เฉพาะ `status = 'approved'` · **ต้อง dynamic (อ่าน D1 ตอน request)** — ใส่ `export const dynamic = "force-dynamic"` หรือ `revalidate`
-- reader detail: โปรไฟล์ + specialties + ปุ่ม "จองคิว" (ไป M5) · **ยังไม่มีลิงก์ LINE โชว์ตรง ๆ** (เผยหลังจับคู่เท่านั้น — กัน scrape + PDPA)
-- `robots.ts`: เพิ่ม disallow `/readers/console`
-
-### 4.7 Verify M4
-- `npm run repo:verify` 8/8 · `npm run build:worker` (route `/readers`, `/api/admin/readers` ต้อง build)
-- ถ้าใช้ SQLite dev shim: `npm run db:migrate -- --local` → สร้าง reader ผ่าน admin UI → เห็นใน `/readers` → suspend → หาย
-- ถ้าไม่มี dev shim: verify บน production หลัง deploy (curl `/api/admin/readers` พร้อม cookie)
-
-### 4.8 Docs M4
-- อัปเดต `docs/WORK_LOG.md` (changelog entry ใหม่บนสุด, ดู format จาก entry M3)
-- `docs/ARCHITECTURE.md` — เพิ่ม env var table (`APP_DB` binding)
-- ไฟล์นี้ (`docs/MARKETPLACE.md`) — mark M4 ✅
-
----
-
-## 5. M5 · Availability + Queue (เสร็จสมบูรณ์ 100% ✅)
-
-### 5.1 Migrations — `migrations/0002_marketplace_queue_screening.sql`
-- ตาราง `reader_availability` (สลับเปิด/ปิด Live Queue และเวลาว่างล่วงหน้า)
-- ตาราง `queue_tickets` (คิวรับคำปรึกษา พร้อมคำนวณตำแหน่งคิว)
-- ตาราง `bookings` (รอบนัดหมายและสถานะการจอง)
-- Auto-delete PDPA retention: ลบตั๋วคิวที่หมดอายุภายใน 7 วัน
-
-### 5.2 Reader Auth — `src/lib/auth/reader-auth.ts`
-- HMAC-SHA256 Token เซ็นด้วย `session_secret` ประจำตัวแม่หมอ
-- Guard `requireReader()` ตรวจสอบสิทธิ์สำหรับ API และ Console
-
-### 5.3 Reader Console — `src/app/readers/console/page.tsx`
-- สลับเปิด/ปิดรับงานสด (Live Toggle)
-- รายการคิวรอรับคำปรึกษา พร้อมสรุปประเด็น AI Brief ใน 5 วินาที
-- ปุ่มเรียกคิว (Ready) และปุ่มส่งต่อไปยัง LINE เมื่อสนทนาเสร็จ
-
-### 5.4 Customer Queue Room — `src/app/readers/queue/[id]/page.tsx`
-- หน้าแสดงลำดับคิวและสถานะ Real-time Polling ทุก 4 วินาที
-- เผยปุ่มเปิด LINE ของแม่หมอเมื่อถึงคิว (`ready` / `handed_off`)
-- บล็อกคำถามอันตราย/วิกฤต พร้อมแสดงสายด่วนสุขภาพจิต 1323
-
----
-
-## 6. M6 · AI Customer Pre-Screening Filter (เสร็จสมบูรณ์ 100% ✅)
-
-### 6.1 Migration — `migrations/0002_marketplace_queue_screening.sql`
-- ตาราง `ai_screening` เก็บผลการวิเคราะห์เจตนา, ระดับความด่วน, สรุปบรีฟ และผังแนะนำ
-
-### 6.2 Screening Engine — `src/lib/marketplace/screening.ts`
-- ด่าน 1: `checkQuestion()` กรองวิกฤตทำร้ายตัวเอง (Self-harm / Crisis) ➔ บล็อกทันที
-- ด่าน 2: แยกหมวดหมู่คำถาม (ความรัก, การงาน, การเงิน, จิตใจ, ทั่วไป)
-- ด่าน 3: สรุปบรีฟ 2-3 บรรทัด (Synthesized Brief) และเลือกผังที่เหมาะสมให้แม่หมอ
-
----
-
-## 7. M7 · Payments & Revenue Ledger (เสร็จสมบูรณ์ 100% ✅)
-
-### 7.1 Migration — `migrations/0003_marketplace_payments.sql`
-- ตาราง `payments` (บันทึก charge, สถานะ `pending` ➔ `paid`, ยอดเงินเป็นจำนวนเต็มสตางค์)
-- ตาราง `payouts` (บันทึกประวัติส่วนแบ่งรายได้แม่หมอและค่าคอมมิชชั่นแพลตฟอร์ม)
-
-### 7.2 Gateway Adapter & Test Mode — `src/lib/marketplace/payment-gateway.ts`
-- รองรับ Omise Payment Gateway (PromptPay / Credit Card)
-- เมื่อยังไม่ได้ใส่ Secret Key ระบบจะรันในโหมด **Deterministic Test Mode Simulator** โดยอัตโนมัติ
-- ระบบตรวจสอบความถูกต้องของ Webhook Signature ป้องกันการปลอมแปลง Event
-
----
-
-### 📅 นัดเวลาล่วงหน้า + จ่ายก่อนคุย (เคาะ 2026-10-03)
+## 5. 📅 นัดเวลาล่วงหน้า + จ่ายก่อนคุย (เคาะ 2026-10-03)
 
 | หัวข้อ | ค่าที่เคาะ |
 | :-- | :-- |
-| ตารางรับนัด | แม่หมอตั้งรายสัปดาห์ในแผงแม่หมอ (`reader_availability.mode = 'scheduled'`) · ช่องละ 30 นาที · จองล่วงหน้า ≥ 2 ชม. · ไกลสุด 14 วัน · เวลาไทย |
+| ตารางรับนัด | แม่หมอตั้งรายสัปดาห์ในแผงแม่หมอ (`reader_availability.mode = 'scheduled'`) · ช่องละ 30 นาที · จองล่วงหน้าอย่างน้อยตาม `readers.lead_min` (ค่าเริ่มต้น 2 ชม.) · ไกลสุด 14 วัน · เวลาไทย |
 | จ่ายเงิน | ทุกการปรึกษาจ่ายก่อน (คิวสดด้วย) ผ่าน Stripe Checkout · ราคาจากเซิร์ฟเวอร์เท่านั้น |
-| กันที่ | 36 นาที · หน้าจ่ายหมดอายุ 31 นาที (หน้าจ่ายต้องหมดก่อนที่นั่งเสมอ) |
+| กันที่ | 36 นาที (`HOLD_MINUTES`) · หน้าจ่ายหมดอายุ 31 นาที (`CHECKOUT_EXPIRES_MINUTES` — หน้าจ่ายต้องหมดก่อนที่นั่งเสมอ) |
 | กันจองซ้อน | unique index `idx_bookings_slot_active` (reader_id, slot_start) เฉพาะ `kind='scheduled'` และสถานะ `reserved/confirmed` |
-| ยกเลิก/คืนเงิน | ก่อนนัด ≥ 24 ชม. คืนเต็ม · < 24 ชม. ไม่คืน · แม่หมอยกเลิก/ไม่มาภายใน 15 นาที คืนเต็ม · คิวสดระหว่างรอ คืนเต็ม · เลื่อนได้ 1 ครั้ง (≥ 24 ชม.) · **ภายใน 10 นาทีหลังจ่าย (นัดห่าง ≥ 1 ชม.) ยกเลิกคืนเต็ม/เลื่อนได้** (เคาะ 2026-10-12 · `PAID_GRACE_MINUTES`) |
+| ยกเลิก/คืนเงิน | ก่อนนัด ≥ 24 ชม. คืนเต็ม · < 24 ชม. ไม่คืน · แม่หมอยกเลิก/ไม่เริ่มนัดภายใน 15 นาที คืนเต็ม · คิวสดระหว่างรอ คืนเต็ม · เลื่อนได้ 1 ครั้ง (≥ 24 ชม.) · **ภายใน 10 นาทีหลังจ่าย (นัดห่าง ≥ 1 ชม.) ยกเลิกคืนเต็ม/เลื่อนได้** (เคาะ 2026-10-12 · `PAID_GRACE_MINUTES`) |
+| ลูกค้าไม่มา (`no_show`) | แม่หมอแจ้งได้เมื่อมีหลักฐานจากห้องวิดีโอฝั่งเซิร์ฟเวอร์เท่านั้น: เลยเวลานัด 15 นาที · แม่หมอเริ่มนัดแล้ว · แม่หมออยู่ในห้องรอครบ 15 นาทีและลูกค้าไม่เคยเข้า (`customerMissedRoom`) · ไม่คืนเงิน · กลับด้านกัน (แม่หมอเริ่มนัดแต่ไม่เข้าห้อง ลูกค้ารอครบเวลา) = ลูกค้ายกเลิกได้เงินคืนเต็ม (`readerMissedRoom`) และงานรอบปิดนัดให้เอง |
 
-**ไฟล์**: `src/lib/marketplace/booking-policy.ts` (กติกา — ไม่มี I/O ใช้ร่วมหน้าเว็บ/API) · `booking.repo.ts` (วงจรใบจอง + `settleConsultationPayment` จุดเดียวที่เปลี่ยนเงินเข้าเป็นนัด) ·
-`consultation-checkout.ts` · `SlotPicker.tsx` · `BookingFlow.tsx` (หน้าจองเต็มจอ `/readers/[id]/book` — แทน `BookQueueModal` ที่ถอดแล้ว 2026-10-11) · `QueueBookingParts.tsx` · `ConsoleBookingParts.tsx` · migrations/0020
+**ไฟล์**: `booking-policy.ts` (กติกา — ไม่มี I/O ใช้ร่วมหน้าเว็บ/API) · `booking.repo.ts` (วงจรใบจอง + `settleConsultationPayment` จุดเดียวที่เปลี่ยนเงินเข้าเป็นนัด) · `consultation-checkout.ts` · `SlotPicker.tsx` · `BookingFlow.tsx` (หน้าจองเต็มจอ `/readers/[id]/book` — แทน `BookQueueModal` ที่ถอดแล้ว 2026-10-11) · `QueueBookingParts.tsx` · `ConsoleBookingParts.tsx` · migrations/0020
 
 **กับดักที่ห้ามพลาด**
 - ห้ามยืนยันนัดที่อื่นนอก `settleConsultationPayment` (เดิม `updatePaymentStatus` ตั้ง bookings = 'paid' เองโดยไม่ดูว่าที่ว่างไหม — ถอดแล้ว)
-- อายุตั๋ว (PDPA) = 7 วันหลังเวลานัด ไม่ใช่หลังวันสร้าง (`ticketExpiresAt`) — นัดไกล 14 วัน ถ้านับจากวันสร้างตั๋วจะถูกลบก่อนถึงวันนัด
+- อายุตั๋ว (PDPA) นับจากเวลานัด ไม่ใช่วันสร้าง (`ticketExpiresAt`) — นัดไกล 14 วัน ถ้านับจากวันสร้างตั๋วจะถูกลบก่อนถึงวันนัด
 - เวลาที่ไคลเอนต์ส่งมาไม่เชื่อ: `slotRejection` ตรวจกับตารางจริงทุกครั้ง แล้ว unique index เป็นด่านสุดท้าย
-- ด่านตรวจ: `test-marketplace-readers` ข้อ 17.1–17.8
+- ด่านตรวจ: `test-marketplace-readers` ข้อ 17.x
 
-### 💌 ระบบจองรอบสอง — ดูแลลูกค้าครบวงจร (2026-10-03)
+---
+
+## 6. 💌 ดูแลลูกค้าครบวงจร (2026-10-03)
 
 | เรื่อง | ไฟล์ / กติกา |
 | :-- | :-- |
-| อีเมลทุกชนิด | `src/lib/marketplace/booking-mail.ts` — never throw · ส่งครั้งเดียว (`bookings.confirm_email_at` · `reminder_24h_at` · `reminder_1h_at`) |
+| อีเมลทุกชนิด | `booking-mail.ts` — never throw · ส่งครั้งเดียว (`bookings.confirm_email_at` · `reminder_24h_at` · `reminder_1h_at`) |
 | ลิงก์เปิดนัดทุกเครื่อง | `/api/marketplace/tickets/[id]/access?k=` · `signBookingAccess` / `verifyBookingAccess` |
-| ความเป็นเจ้าของตั๋ว | `src/lib/marketplace/ticket-owner.ts` (`isTicketOwner`: คุกกี้ หรือ `user_id` ของบัญชี) — ห้ามเขียนเทียบ `customerRef` เองที่อื่น |
 | วันหยุด · พัก · เพดานต่อวัน | `reader_blocked_dates` · `readers.buffer_min` · `readers.daily_cap` ➔ `generateSlots(..., SlotOptions)` · ด่านเซิร์ฟเวอร์ `checkSlotBookable` |
 | ราคาต่อแม่หมอ | `readers.price_thb` · `readerPriceThb()` ใน `offer.ts` (ทั้งหน้าเว็บและตอนเรียกเก็บ) |
-| รีวิว | `reviews.repo.ts` · `POST /api/marketplace/tickets/[id]/review` — handed_off + จ่ายแล้ว + UNIQUE(ticket_id) |
-| รอคิวว่าง | `booking_waitlist` · `POST /api/marketplace/readers/[id]/waitlist` · cron แจ้งครั้งเดียวแล้วลบ |
-| งานรอบ | `/api/cron/booking-reminders` (ทุก 15 นาที ผ่าน GitHub Actions) |
+| รีวิว | `reviews.repo.ts` · ตาราง `reader_reviews` · `POST /api/marketplace/tickets/[id]/review` — `handed_off` + จ่ายแล้ว + UNIQUE(ticket_id) · ห้ามมีทางเขียนรีวิวจากที่อื่น (ไม่มีรีวิวตั้งต้น/จากแอดมิน) · แอดมินซ่อนได้ แก้ไม่ได้ · คะแนนรวมแคช 5 นาที |
+| รอคิวว่าง | `booking_waitlist` · `POST /api/marketplace/readers/[id]/waitlist` · งานรอบแจ้งครั้งเดียวแล้วลบ |
 | แอดมิน | `/api/admin/bookings` + `BookingsAdmin.tsx` (แท็บ "การจอง & การเงิน") |
 
 **กับดัก**: เวลาพัก/เพดานต่อวันเป็น "ความสะดวก" — สองคนจองช่องติดกันพร้อมกันเป๊ะอาจหลุดได้ ส่วนการจองเวลาเดียวกันซ้อน unique index กันไว้แล้ว ·
-อย่าใส่คำถามลูกค้าลงอีเมลแม่หมอ (อีเมลไม่ใช่ช่องทางที่ล็อกอิน) · ด่าน `test-marketplace-readers` 18.1–18.6
+อย่าใส่คำถามลูกค้าลงอีเมลแม่หมอ (อีเมลไม่ใช่ช่องทางที่ล็อกอิน) · ด่าน `test-marketplace-readers` 18.x
 
-### 🛎️ ขั้นตอนปรึกษาแม่หมอแบบใหม่ (2026-10-11 · แผน `docs/plans/CONSULT_FLOW_UX_PLAN_2026-10-11.md`)
+---
+
+## 7. 🛎️ ขั้นตอนปรึกษาแม่หมอแบบใหม่ (2026-10-11 · แผน [`CONSULT_FLOW_UX_PLAN_2026-10-11.md`](../plans/CONSULT_FLOW_UX_PLAN_2026-10-11.md))
 
 ที่มา: ลูกค้าจริงเปิดลิงก์แม่หมอในแอป LINE แล้วจองไม่ได้ ("เข้าไม่ได้ค่ะ · ทำไมยากจัง · มันเลือกเวลาอื่นอ่ะ")
 
@@ -346,74 +134,67 @@ export interface Reader { id: string; displayName: string; bio: string; avatarUr
 | หน้าจองเต็มจอ | `/readers/[id]/book` (noindex) · `BookingFlow.tsx` — ขั้น "เวลา ➔ ชื่อและคำถาม" · ย้อนกลับ = ถอยขั้น · ปุ่มชำระเงินกดได้เสมอ ขาดอะไรพาไปช่องนั้น |
 | เลือกเวลา | `SlotPicker.tsx` — เวลาว่างเร็วที่สุด 3 ช่อง · แถววันแบ่งหน้า (ไม่เลื่อนแนวนอน) · วันที่แตะล่าสุดชนะเสมอ (`resolveVisibleDay`) |
 | รับนัดล่วงหน้าอย่างน้อย | `readers.lead_min` (migrations/0030) · ตัวเลือก `LEAD_OPTIONS_MIN` · ค่าเริ่มต้น 2 ชม. · `generateSlots` และ `slotRejection` ใช้ค่าเดียวกัน |
-| ลิงก์นัดส่วนตัว | `accessUrl` ใน `GET /api/marketplace/tickets/[id]` — **เจ้าของตั๋วเท่านั้น** (แม่หมอ = null · A2-13) |
+| ลิงก์นัดส่วนตัว | `accessUrl` ใน `GET /api/marketplace/tickets/[id]` — **เจ้าของตั๋วเท่านั้น** (แม่หมอ = null) |
 | เบราว์เซอร์ในแอป | `in-app-browser.ts` — LINE ใช้ `openExternalBrowser=1` · แอปอื่นบอกวิธีเปิดเอง + คัดลอกลิงก์ |
 | แผงแม่หมอ | การ์ด "ส่งลิงก์ให้ลูกค้า" บอกว่าลูกค้าที่เปิดตอนนี้จะคุยได้เลย/ได้แค่นัด/จองไม่ได้ · เตือนก่อนลิงก์แผงหมดอายุ 3 ชม. · หมดกลางคิวไม่ล้างหน้า · ค่าจาก AI เป็นคำไทย |
 | ห้องวิดีโอ | จัดจอ 3 แบบ (เห็นเท่ากัน · ภาพฉันใหญ่ · อีกฝั่งใหญ่) · `object-contain` · แม่หมอเริ่มไม่กลับด้าน · สลับกล้องด้วย `replaceTrack` |
 | แอดมิน "หมอดูพาร์ทเนอร์" | `ReadersManager.tsx` — สถานะงานของแม่หมอแต่ละคน · ส่งลิงก์แผงพร้อมเวลาหมดอายุ · พักงาน/ลบต้องยืนยันในหน้า · API ไม่ส่ง `sessionSecret` (`toAdminReader`) |
 | ลิงก์แผงแม่หมอ | อายุ 1 · 7 · 30 วัน (`console-link.ts` · ค่าเริ่มต้น 30) · "ยกเลิกลิงก์เก่าทั้งหมด" = หมุน `session_secret` (`POST /api/admin/readers/[id]` `revoke_links`) |
-| คิวสดตามการออนไลน์ | เปิดจริง = สวิตช์เปิด + เห็นแผงภายใน 15 นาที (`reader_availability.last_seen_at` · migrations/0031) · ใช้ทั้งหน้าเว็บ แอดมิน และด่านสร้างคิวสด |
 | ฟิลเตอร์หน้าสวย (แม่หมอ) | `beauty-filter.ts` — WebGL ในเครื่องแม่หมอ เกลี่ยเฉพาะผิวแบบรักษาขอบ · ส่งภาพที่แต่งแล้วด้วย `replaceTrack` · ไม่บันทึก/ไม่ส่งภาพไปประมวลผลที่ไหน |
 | แถบคุกกี้ในกลุ่ม /readers | แถบย่อใต้หัวเว็บ (`ConsentBanner` `COMPACT_PATH`) — ไม่บังปุ่มจอง/ชำระเงินที่ขอบล่าง |
 | ห้องคุยส่วนตัว (ลิงก์แบบห้องประชุมออนไลน์) | `reader_invites` (migrations/0032) · `invites.repo.ts` — แม่หมอสร้างลิงก์ `/readers/room/<code>` ให้ลูกค้าคนเดียว (24 ชม. · ยกเลิกได้ · เพดาน 10 ลิงก์ที่ยังไม่มีใครใช้) · **จ่ายบนเว็บก่อนเข้าห้องเสมอ** (เจ้าของเคาะ 2026-10-12) ผ่าน `POST /api/marketplace/tickets` + `inviteCode` ซึ่งข้ามแค่สวิตช์คิวสดกับคำถามขั้นต่ำ · การ์ด `PrivateRoomCard` ในแผง + ปุ่ม "รับเข้าห้อง" (เรียกคิว + เปิดห้องวิดีโอ) · จัดการลิงก์ที่ `POST/PATCH /api/marketplace/console/invites` |
 
 **กับดัก**: ห้ามเชื่อเวลา `?slot=` จากไคลเอนต์ (ตรวจด้วย `checkSlotBookable` เสมอ) · ห้ามส่ง `accessUrl` / `customerRef` ให้แม่หมอ · ห้ามให้ `sessionSecret` ออกนอกเซิร์ฟเวอร์ ·
 ลิงก์ห้องส่วนตัวห้ามข้ามการจ่ายเงิน/โควตา/AI คัดกรอง (ข้ามได้แค่สวิตช์คิวสด) และรหัสห้องไม่ใช่ตัวตนลูกค้า ·
-ด่าน `test-marketplace-readers` 19.1–19.17
-
-### 7.3 Repository & APIs
-- `src/lib/marketplace/payments.repo.ts`: จัดการ CRUD, Transition สถานะ, คำนวณส่วนแบ่งแม่หมอ
-- `/api/marketplace/payments`: สร้างรายการชำระเงิน
-- `/api/marketplace/payments/webhook`: รับ Webhook ยืนยันการชำระเงิน
-- ~~`/api/admin/payouts`~~ (ลบแล้ว 2026-10-19 · ไม่มีผู้เรียก — A8): สรุปรายได้/ค่าคอมมิชชั่นอยู่ที่หน้าโอนเงินแม่หมอในแผงแอดมิน
+ด่าน `test-marketplace-readers` 19.x
 
 ---
 
-## 8. Verification Playbook
+## 8. 💳 เงิน — จ่าย · คืนเงิน · โอนให้แม่หมอ
 
-- **ตรวจความสมบูรณ์ 9 ด่าน**: `npm run repo:verify`
-- **TypeScript Typecheck**: `npm run typecheck`
-- **Next.js Production Build**: `npm run build`
-
----
-
-## 10. Checklist สรุปสถานะโครงการ Phase 2 (Marketplace)
-
-```
-M4 D1 + Readers Directory
-  [x] D1 database tarot-app-db + binding APP_DB
-  [x] migrations/0001_marketplace_init.sql
-  [x] src/lib/marketplace/readers.repo.ts + security projection
-  [x] /api/admin/readers + /api/readers
-  [x] components/admin/ReadersManager.tsx + admin tab
-  [x] /readers + /readers/[id]
-  [x] ADR-001 PDPA Compliance Documentation
-
-M5 Live Queue + Reader Console
-  [x] migrations/0002_marketplace_queue_screening.sql
-  [x] src/lib/auth/reader-auth.ts
-  [x] /readers/console + /api/marketplace/console/queue
-  [x] /readers/queue/[id] + /api/marketplace/tickets/[id]
-  [x] BookQueueModal + ReaderDetailClient (2026-10-11: หน้าต่างลอยถูกแทนด้วยหน้าจองเต็มจอ `/readers/[id]/book`)
-
-M6 AI Pre-Screening Engine
-  [x] src/lib/marketplace/screening.ts
-  [x] Safety guardrails crisis block (1323 hotline)
-  [x] Intent classification + synthesized brief in 5s
-  [x] Suggested spread pairing
-
-M7 Payments & Commission Ledger
-  [x] migrations/0003_marketplace_payments.sql
-  [x] src/lib/marketplace/payment-gateway.ts (Omise + Test-mode simulator)
-  [x] /api/marketplace/payments + /api/marketplace/payments/webhook
-  [x] ~~/api/admin/payouts~~ (ลบแล้ว 2026-10-19) + commission calculation
-  [x] QA Test Suite (13/13 passing gates)
-```
+| เรื่อง | ไฟล์ / กติกา |
+| :-- | :-- |
+| เกตเวย์ | `payment-gateway.ts` — **Stripe Checkout** (บัตร · PromptPay · ช่องทางที่เปิดในแดชบอร์ด Stripe) · เว็บไม่เก็บข้อมูลบัตร · ไม่ตั้ง `STRIPE_SECRET_KEY` = ตัวจำลอง (`provider = simulator`) ผ่านด่านยืนยันได้เฉพาะนอก production |
+| หลักฐานการจ่าย | มีสองทางเท่านั้น: webhook ที่ลายเซ็น `Stripe-Signature` ผ่าน (`STRIPE_WEBHOOK_SECRET`) หรือเซิร์ฟเวอร์ถาม Stripe เองด้วยคีย์ลับ · `POST /api/marketplace/payments/confirm` (ลูกค้ากลับมาพร้อม `?paid=1`) **ไม่ใช่หลักฐาน** — ยอด · สกุลเงิน · เลขตั๋วต้องตรงแถวของเราทุกตัว |
+| จ่ายต่อ | `POST /api/marketplace/payments` — หน้าจ่ายเดิมยังเปิด = ส่งลิงก์เดิม · หมดอายุแต่ยังกันที่ = เปิดใบใหม่ (ไม่เกิน 3 ครั้งต่อการจอง) · ที่นั่งหลุด = 409 |
+| จ่ายซ้ำ/จ่ายหลังที่หลุด | `settleConsultationPayment` คืนเงินอัตโนมัติ ไม่ยืนยันนัดซ้อน · คืนเงินรายการที่ซ้ำไม่ยกเลิกนัดของรายการที่จ่ายถูกต้อง |
+| คืนเงินจากแดชบอร์ด Stripe | `refund-sync.ts` (event `charge.refunded`) — นัด/คิวที่ยังไม่จบถูกยกเลิก (`cancelled_by = system`) + อีเมลแจ้งลูกค้า · คืนบางส่วนไม่ถอนอัตโนมัติ |
+| ปรึกษาฟรี | `confirmComplimentaryConsultation()` — `payments` ยอด 0 `provider = comp` (`COMP_PROVIDER`) แล้วยืนยันผ่าน `settleConsultationPayment` จุดเดียวกับเงินจริง · ยกเลิกไม่ยิง Stripe · ด่านโควตา/AI คัดกรอง/กันที่ยังตรวจครบ |
+| ยอดโอนแม่หมอรายงวด | `calculateReaderEarnings` / `settleReaderPayout` ใน `payments.repo.ts` · งวด = เดือนตามเวลาไทย (`YYYY-MM`) ตาม**เวลานัด** · นับเฉพาะ `paid` ที่ไม่ค้างคืน + ใบจอง `done` · `no_show` · ลูกค้ายกเลิกช้าแบบไม่คืนเงิน · หักค่าคอมมิชชัน แล้วหักยอดที่บันทึกโอนแล้วในงวดเดียวกัน (กดซ้ำไม่โอนซ้ำ) · แอดมินกด `record_payout` ที่ `POST /api/admin/bookings` — ยอดคำนวณฝั่งเซิร์ฟเวอร์ ไม่รับตัวเลขเงินจากหน้าเว็บ (แก้ผลตรวจ 2026-10-18 · #710) |
+| เส้นที่ถอดแล้ว | `/api/admin/payouts` และ `/api/readers` (ลบใน #706 · ไม่มีผู้เรียก) |
 
 ---
 
-## 11. ข้อมูลเพิ่มเติมและการติดต่อ
-- repo: `luminuy/tarot-web` (private) · domain: `https://tarot.luminuy.com`
-- deploy: auto ผ่าน `.github/workflows/deploy.yml` เมื่อ merge เข้า main
-- CI auto-merge: `.github/workflows/pr.yml`
+## 9. 🔒 ข้อมูลส่วนบุคคล (PDPA)
 
+| เรื่อง | ของจริงตอนนี้ |
+| :-- | :-- |
+| ข้อมูลที่ส่งให้แม่หมอ | ชื่อเล่น · คำถาม · ไพ่/คำทำนายที่แนบ (ถ้ามี) · บรีฟจาก AI — เฉพาะแม่หมอที่ลูกค้าเลือก · ช่องยินยอมข้อมูลอ่อนไหวแยก ไม่บังคับ (`sensitive_consent_at` · migrations/0029) |
+| ข้อมูลที่ไม่ออกหน้าสาธารณะ | อีเมลแจ้งเตือนแม่หมอ (`notify_email`) · LINE ของแม่หมอ (โผล่เมื่อถึงคิว) · `session_secret` · `customerRef` |
+| อายุตั๋ว | `ticketExpiresAt` = 7 วันหลังสร้างหรือหลังเวลานัด (อันที่ช้ากว่า) · งานรอบ `cleanupExpiredTickets()` ใน `booking-reminders` |
+| ตั๋วที่ไม่มีเงินผ่านมือ | ลบทั้งแถวพร้อมข้อมูลที่ผูกอยู่ |
+| ตั๋วที่มีเงินผ่านมือ | เก็บแถว `queue_tickets` / `bookings` / `payments` เป็นหลักฐานบัญชีและยอดโอนแม่หมอ แต่ล้างชื่อเล่น · คำถาม · ไพ่ · ผลคัดกรอง AI · ห้องวิดีโอ · อีเมลติดต่อ แล้วประทับ `pii_cleared_at` · ตั๋วที่ยังค้างคืนเงิน รอเรื่องเงินปิดก่อน |
+| วิดีโอคอล | ไม่บันทึกภาพ/เสียง/บทสนทนา · SDP ล้างเมื่อวางสาย |
+| นโยบายที่ผู้ใช้เห็น | `src/app/_shared/pages/privacy-th.tsx` (+ `privacy-en.tsx`) แสดงที่ `/privacy` · `/en/privacy` — มีหัวข้อวิดีโอคอลและการจองแม่หมอแล้ว |
+
+---
+
+## 10. วิธีตรวจ
+
+- ด่านหลักของระบบนี้: `npx tsx scripts/qa/test-marketplace-readers.ts` (ข้อ 16 วิดีโอ · 17 นัด/จ่าย · 18 ดูแลลูกค้า · 19 ขั้นตอนใหม่/ห้องส่วนตัว · 20 ปรึกษาฟรี) · Reader Studio `test-reader-studio`
+- ก่อนเปิด PR: `npm run repo:verify` (ครบทุกด่าน) + `npm run typecheck`
+- ของที่ด่านในเครื่องตรวจไม่ได้: จ่ายเงินจริง + วิดีโอจริงบนมือถือสองเครื่อง (รอบตรวจใช้ตัวจำลอง) — แผน CONSULT_FLOW แนะนำให้ลองห้องส่วนตัวจริง 1 ครั้ง
+
+---
+
+## 11. ประวัติ (ย่อ)
+
+| ช่วง | สิ่งที่ลง |
+| :-- | :-- |
+| 2026-09-01 | Phase 1 แผงแอดมิน (M0–M3) · Phase 2 เริ่ม: M4 D1 + โปรไฟล์แม่หมอ · M5 คิวสด + แผงแม่หมอ · M6 AI คัดกรอง · M7 การจ่ายเงิน (เดิมเป็น Omise) |
+| 2026-10-02 | เปลี่ยนเกตเวย์ Omise ➔ Stripe Checkout (#640) · วิดีโอคอลผ่าน TURN (#644) |
+| 2026-10-03 | นัดล่วงหน้า · จ่ายก่อนคุย · อีเมล · รีวิว · waitlist (#648) · คืนเงินจากแดชบอร์ด Stripe (#649) |
+| 2026-10-11 – 2026-10-12 | ขั้นตอนปรึกษาแบบใหม่ · ห้องคุยส่วนตัว · ผ่อนผัน 10 นาที · ลิงก์แผงอายุยาว (#666) |
+| 2026-10-19 | ต่อสายใหม่อัตโนมัติ + สถิติสายบน Analytics Engine (#703) |
+| 2026-10-20 – 2026-10-21 | แก้ผลตรวจใหญ่: ยอดโอนรายงวด · หลักฐานลูกค้าไม่มา · ลบตั๋วตาม PDPA · index (#706 · #710) |
+| 2026-10-25 | ปรึกษาฟรีสำหรับบัญชีที่ได้สิทธิ์ (#720) |

@@ -124,8 +124,16 @@ function bangkokTimestamp(): string {
   return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}`;
 }
 
+/** เลขถัดไปนับรวมไฟล์เก็บถาวร (`npm run docs:archive` ย้ายเดือนเก่าออกไป) — กันเลขซ้ำถ้าไฟล์หลักว่าง */
 function nextIncidentId(content: string): string {
-  const ids = [...content.matchAll(/### INC-(\d{4})/g)].map((m) => Number(m[1]));
+  const archiveDir = path.join(path.dirname(LOG_PATH), "archive", "incidents");
+  const archived = fs.existsSync(archiveDir)
+    ? fs
+        .readdirSync(archiveDir)
+        .filter((n) => n.endsWith(".md"))
+        .map((n) => fs.readFileSync(path.join(archiveDir, n), "utf-8"))
+    : [];
+  const ids = [content, ...archived].flatMap((text) => [...text.matchAll(/### INC-(\d{4})/g)].map((m) => Number(m[1])));
   const next = ids.length ? Math.max(...ids) + 1 : 1;
   return `INC-${String(next).padStart(4, "0")}`;
 }

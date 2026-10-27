@@ -1,59 +1,85 @@
-# 🧭 แผนที่นำทางเอกสารแม่บท (Engineering Documentation Index & Sitemap)
+# แผนที่เอกสาร SeerTarot
 
-ยินดีต้อนรับสู่ศูนย์รวมเอกสารวิศวกรรมแม่บทของ **SeerTarot (วิหารพยากรณ์ไพ่ทาโรต์ออนไลน์ระดับพรีเมียม · seertarot.net)**  
-เอกสารทั้งหมดถูกจัดระเบียบตามมาตรฐานวิศวกรรมระดับโลก เพื่อให้ทั้งนักพัฒนาที่เป็นมนุษย์ (Human Engineers) และปัญญาประดิษฐ์ (AI Agents) สามารถค้นหา บริบท ทำความเข้าใจ และส่งต่องานกันได้อย่างแม่นยำ ไร้รอยต่อ 100%
+หน้านี้คือรายชื่อเอกสารทุกไฟล์ แบ่งตามหน้าที่ · กติกาการทำงานและคำสั่งหลักอยู่ที่ [CLAUDE.md](../CLAUDE.md) ที่เดียว
 
----
+> **หลักของเอกสารชุดนี้**
+> - เรื่องหนึ่งมีบ้านเดียว — ไฟล์อื่นลิงก์มา ไม่คัดลอก (ข้อความที่คัดลอกไปหลายที่จะเพี้ยนจากกันเสมอ)
+> - เอกสารเป็นปากทาง ไม่ใช่หลักฐาน — ก่อนบอกว่างานไหนเสร็จหรือค้าง ให้ยืนยันกับโค้ดหรือ `git log` (INC-0229)
+> - ตัวเลขในเอกสารแม่บท (จำนวนด่าน · ผัง · ตำแหน่ง) มีด่าน `scripts/qa/test-docs-numbers.ts` เทียบกับโค้ดทุก PR
 
-## 🏛️ โครงสร้างสารบบเอกสาร (Documentation Tree)
+## อ่านอะไรก่อน (ตามบทบาท)
+
+| บทบาท | ลำดับการอ่าน |
+| :--- | :--- |
+| **AI ที่จะแก้โค้ด** | [CLAUDE.md](../CLAUDE.md) ➔ [INCIDENT_LOG.md](INCIDENT_LOG.md) ส่วน "กฎถาวรสรุป" ➔ [KNOWN_ISSUES.md](KNOWN_ISSUES.md) ➔ [AI_COLLABORATION_GUIDELINES.md](AI_COLLABORATION_GUIDELINES.md) หัวข้อ 0 ➔ แผนที่ครอบงานนั้น (ดูช่อง "อ่านก่อนแตะ" ในตารางแผนของ CLAUDE.md) |
+| **เจ้าของโปรเจกต์** | งานที่ยังเปิด: ตารางแผนใน [CLAUDE.md](../CLAUDE.md) หรือ `npm run docs:status` ➔ สิ่งที่รอเจ้าของตั้งค่า: [PENDING_SETUP.md](PENDING_SETUP.md) ➔ แผงแอดมิน: [ADMIN_PANEL.md](ADMIN_PANEL.md) ➔ การตัดสินใจที่ผ่านมา: [exec/DECISIONS.md](exec/DECISIONS.md) ➔ งานล่าสุด: [WORK_LOG.md](WORK_LOG.md) |
+| **นักพัฒนาคนใหม่** | [README.md](../README.md) ➔ [LOCAL_SETUP.md](LOCAL_SETUP.md) ➔ [ARCHITECTURE.md](ARCHITECTURE.md) ➔ [CLOUDFLARE_DEPLOYMENT_GUIDE.md](CLOUDFLARE_DEPLOYMENT_GUIDE.md) ➔ [CLAUDE.md](../CLAUDE.md) |
+
+## 1. เริ่มที่นี่
+
+| ไฟล์ | ใช้ทำอะไร |
+| :--- | :--- |
+| [README.md](../README.md) | ภาพรวมเว็บ · เทคโนโลยี · โครงสร้างรีโป |
+| [CLAUDE.md](../CLAUDE.md) | กฎเหล็ก (ข้อ 0–14) · ต้องจดอะไรที่ไหน · คำสั่งหลัก · แผนที่ยังเปิด + ตาราง "อ่านก่อนแตะ" — ใช้กับ AI ทุกตัว |
+| [GEMINI.md](../GEMINI.md) · [AGENTS.md](../AGENTS.md) | ทางเข้าของ Gemini/Antigravity และเอเจนต์อื่น — ชี้กลับ CLAUDE.md พร้อมข้อต่างเฉพาะเครื่องมือ |
+| [LOCAL_SETUP.md](LOCAL_SETUP.md) | ติดตั้งและรันในเครื่อง |
+
+## 2. กติกาและมาตรฐาน
+
+| ไฟล์ | ใช้ทำอะไร |
+| :--- | :--- |
+| [AI_COLLABORATION_GUIDELINES.md](AI_COLLABORATION_GUIDELINES.md) | วิธีทำงาน (หัวข้อ 0 บังคับ) · รายละเอียดและเหตุผลของกฎเหล็ก · แผนที่ไฟล์ตามหน้าที่ · ความปลอดภัย |
+| [exec/DECISIONS.md](exec/DECISIONS.md) | การตัดสินใจและการทดลองของผู้บริหาร — ผู้ช่วย `cmo` · `coo` · `cto` อ่านก่อนเสนอ |
+| [exec/AGENT_EVALS.md](exec/AGENT_EVALS.md) | ชุดคำถามทดสอบผู้ช่วย `cmo` · `coo` · `cto` — รันก่อนและหลังแก้ไฟล์ใน `.claude/agents/` |
+
+## 3. บันทึกและทะเบียน
+
+| ไฟล์ | ใช้ทำอะไร |
+| :--- | :--- |
+| [INCIDENT_LOG.md](INCIDENT_LOG.md) | เปิดด้วย "กฎถาวรสรุป" (อ่านส่วนนี้ก่อนเสมอ) ตามด้วยเหตุการณ์ 31 วันล่าสุด · commit ประเภท `fix` เขียนให้เอง · ของเก่าอยู่ใน [คลังเก่า](#8-คลังเก่า-docsarchive) |
+| [KNOWN_ISSUES.md](KNOWN_ISSUES.md) | บั๊กที่ยังเปิดอยู่เท่านั้น — กันแก้ซ้ำกับเอเจนต์อื่น |
+| [WORK_LOG.md](WORK_LOG.md) | งานที่ทำใน 31 วันล่าสุด — ต้องเติมทุกครั้งที่ทำงานเสร็จ |
+| [SEO_INDEXING_LOG.md](SEO_INDEXING_LOG.md) | ทะเบียน URL ที่ส่งเข้า Google Search Console — จดทุกครั้งที่ส่ง กันยิงซ้ำ |
+
+## 4. ระบบและการปฏิบัติการ
+
+| ไฟล์ | ใช้ทำอะไร |
+| :--- | :--- |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Astro + Next บน Cloudflare Workers · เส้นทางไหนเสิร์ฟจากไหน · binding · AI · Provably Fair · ความปลอดภัย |
+| [CLOUDFLARE_DEPLOYMENT_GUIDE.md](CLOUDFLARE_DEPLOYMENT_GUIDE.md) | deploy · โดเมน · CI/CD · ถอยกลับ · สำรองและกู้ D1 |
+| [CLOUDFLARE_OPTIMIZATION_GUIDE.md](CLOUDFLARE_OPTIMIZATION_GUIDE.md) | การตั้งค่าขอบ Cloudflare · คุมต้นทุน · วิธีวัด |
+| [PENDING_SETUP.md](PENDING_SETUP.md) | ทะเบียน secret และบริการภายนอก — อะไรตั้งแล้ว อะไรยังรอเจ้าของ |
+| [ADMIN_PANEL.md](ADMIN_PANEL.md) | แผงแอดมิน `/admin` และหน้าตรวจสุขภาพระบบ |
+
+## 5. สเปกและการตัดสินใจทางสถาปัตยกรรม
+
+| ไฟล์ | ใช้ทำอะไร |
+| :--- | :--- |
+| [TAROT_CARD_FEATURES.md](TAROT_CARD_FEATURES.md) | สเปกหลักของโดเมนไพ่ — สำรับ 78 ใบ · ความหมาย 5 หมวด · ผัง · Pick a Card · การสับไพ่ |
+| [specs/INTERACTIVE_CARD_PICKING.md](specs/INTERACTIVE_CARD_PICKING.md) | การให้ผู้ใช้จับไพ่เองจากพัด 78 ใบ |
+| [specs/MARKETPLACE.md](specs/MARKETPLACE.md) | ระบบแม่หมอตัวจริง — โปรไฟล์ · จอง · คิว · ห้องวิดีโอ |
+| [specs/ENTITLEMENT_ABUSE_MODEL.md](specs/ENTITLEMENT_ABUSE_MODEL.md) | สิทธิ์เปิดไพ่ฟรีและวิธีกันโกง (threat model) |
+| [specs/DESIGN_SYSTEM_V2.md](specs/DESIGN_SYSTEM_V2.md) | **ถูกแทนแล้วด้วย UI 2.0** — ระบบดีไซน์รุ่น 2026-09-03 เก็บเป็นประวัติ · ของปัจจุบันคือ `plans/UI_2_0_PLAN_2026-10-12.md` + โทเคน `--ui2-*` ใน `src/styles/ui2-base.css` |
+| [adr/ADR-001-marketplace-pdpa.md](adr/ADR-001-marketplace-pdpa.md) | ADR-001 — ข้อมูลส่วนบุคคลในระบบแม่หมอ (PDPA) |
+| [adr/ADR-002-bot-challenge.md](adr/ADR-002-bot-challenge.md) | ADR-002 — กันบอทและคุมต้นทุน AI โดยไม่ใช้ captcha ระหว่างเปิดไพ่ |
+| [adr/ADR-003-cutting-edge-stack-rationale.md](adr/ADR-003-cutting-edge-stack-rationale.md) | ADR-003 — เหตุผลที่ใช้ไลบรารีรุ่นใหม่และวิธีรับความเสี่ยง (เลขรุ่นในไฟล์เป็นของวันที่ 2026-09-02) |
+
+## 6. แผนงาน (`docs/plans/`)
+
+สถานะของแต่ละแผนอยู่ที่บรรทัด `> **สถานะ**:` ใต้หัวเรื่องของไฟล์แผนนั้นที่เดียว · รายการข้างล่างและตารางใน CLAUDE.md สร้างจากบรรทัดนั้นด้วย `npm run docs:index` (ห้ามแก้มือ — ด่าน CI เทียบทุกไบต์)
+🚧 ทำแล้วบางส่วน · ⏸️ รอคนนอก/เจ้าของ · ⏳ ยังไม่เริ่ม · ✅ เสร็จแล้ว · 📚 เอกสารอ้างอิง — เนื้อหาในตัวแผนเป็นบันทึก ณ วันที่เขียน
 
 ```
-docs/
-├── 🛡️ ระเบียบปฏิบัติการและกฎแม่บท (Core Operating Protocols)
-│   ├── AI_COLLABORATION_GUIDELINES.md   # กฎเหล็ก AI, การแบ่ง Domain, 14 Golden Design Rules
-│   ├── INCIDENT_LOG.md                  # บันทึกบทเรียนความผิดพลาด (Blameless Post-Mortem)
-│   ├── KNOWN_ISSUES.md                  # ดัชนีสถานะบั๊กค้างและข้อจำกัดระบบ
-│   ├── SEO_INDEXING_LOG.md              # ทะเบียนส่ง URL เข้า Google Search Console (กันส่งซ้ำ/เปลืองโควตา)
-│   ├── WORK_LOG.md                      # บันทึกประวัติการพัฒนาและสถานะส่งต่องาน (Live Handoff)
-│   ├── exec/DECISIONS.md                # บันทึกการตัดสินใจและการทดลองของผู้บริหาร (ผู้ช่วย cmo · coo · cto อ่านก่อนเสนอ)
-│   └── exec/AGENT_EVALS.md              # ชุดคำถามทดสอบผู้ช่วย cmo · coo · cto (รันก่อน/หลังแก้ไฟล์ผู้ช่วย)
-│
-├── 🏛️ สถาปัตยกรรมและคู่มือระบบ (Architecture & System Manuals)
-│   ├── ARCHITECTURE.md                  # สถาปัตยกรรมระบบ Edge, Provably Fair, Data Flow, แผนที่ Env Vars
-│   ├── LOCAL_SETUP.md                   # คู่มือติดตั้งและเริ่มรัน Development Server ในเครื่อง
-│   ├── CLOUDFLARE_DEPLOYMENT_GUIDE.md   # คู่มือนำระบบขึ้น Cloudflare Workers & Custom Domain
-│   ├── CLOUDFLARE_OPTIMIZATION_GUIDE.md # คู่มือแม่บทลดภาระ Cloudflare และสเกลระบบสู่ระดับมหาชน (60 มหาโซลูชันระดับตำนาน)
-│   ├── ADMIN_PANEL.md                   # คู่มือแผงควบคุมแอดมินและการมอนิเตอร์สถานะระบบ
-│   ├── PENDING_SETUP.md                 # เช็กลิสต์ความพร้อมบริการภายนอก (เสร็จสมบูรณ์ 100%)
-│   └── AUDIT_LOG.md                     # บันทึกประวัติกิจกรรมและ Audit Trail
-│
-├── ⚖️ บันทึกการตัดสินใจทางสถาปัตยกรรม (Architecture Decision Records)
-│   └── adr/
-│       ├── ADR-001-marketplace-pdpa.md # ข้อตกลงความยินยอมข้อมูลส่วนบุคคล (PDPA Consent)
-│       ├── ADR-002-bot-challenge.md     # กลยุทธ์ป้องกันบอทและควบคุมต้นทุน AI
-│       └── ADR-003-cutting-edge-stack-rationale.md # เหตุผลการใช้ React 19.2 + Next 16.3 + Motion 13
-│
-├── 📐 ข้อกำหนดเชิงฟังก์ชัน (Functional Specifications)
-│   ├── TAROT_CARD_FEATURES.md           # สเปกระบบและสารบบไพ่ทาโรต์ 78 ใบ, 5 มิติ, ผัง 26 แบบ, Pick A Card 8 หัวข้อ
-│   └── specs/
-│       ├── DESIGN_SYSTEM_V2.md          # สเปกระบบดีไซน์ V2 — พื้นหลังและพาเลตต์สี (Warm Minimal Sanctuary)
-│       ├── INTERACTIVE_CARD_PICKING.md   # ระบบแผ่ไพ่ 78 ใบและการแตะเลือกไพ่ 3D
-│       ├── MARKETPLACE.md               # สถาปัตยกรรมระบบ Marketplace แม่หมอตัวจริง
-│       └── ENTITLEMENT_ABUSE_MODEL.md   # แบบจำลองการป้องกันการละเมิดโควตาดูดวง
-│
-└── 📦 แผนพัฒนาตามหมุดหมาย (Milestone Plans Archive)
-    └── plans/
+docs/plans/
 <!-- PLANS_TREE_START · สร้างด้วย npm run docs:index — ห้ามแก้มือ -->
         ├── MASTER_PLAN_2026-09-06.md               # 🚧 🗺️ แผนแม่บทรวม — ทุกงานที่ค้างอยู่
-        ├── UI_2_0_SPREADS_PLAN_2026-10-13.md       # 🚧 🃏 SeerTarot UI 2.0 — หน้าผังพยากรณ์ `/spreads` แบบ "ไพ่กระจาย 6 หมวด แตะแล้วเด้ง" (แผนส่งต่อให้ทีมลงมือ)
-        ├── UI_2_0_PLAN_2026-10-12.md               # 🚧 🎨 SeerTarot UI 2.0 — หน้าแรกแบบ D+ และภาษาดีไซน์ใหม่ (แผนส่งต่อให้ทีมลงมือ)
-        ├── REFLECTION_JOURNAL_PLAN_2026-10-05.md   # 🚧 🪞 แผนออกแบบ 14 ระบบ — จากเว็บดูดวงสู่เครื่องมือสะท้อนตัวเอง (สมุดดวง · ความเชื่อมโยงไพ่ · หลักฐานคำอ่าน · พิธีเช้าเย็น · PWA · หน้าคำถาม · Reader Studio · ความปลอดภัย AI · วัดคุณภาพ AI)
-        ├── IOS_APP_PLAN_2026-09-29.md              # 🚧 📱 แผนออกแบบระบบ — แอป SeerTarot บน iPhone (iOS App Store)
-        ├── HANDOFF_OMNI_YESNO_2026-09-06.md        # 🚧 🎯 แผนส่งต่องาน 3 ชิ้น — Yes/No 78 หน้า · Omnichannel · Daily Digest
         ├── HANDOFF_AI_ACCURACY_THAI_2026-09-07.md  # 🚧 🧠 แผนยกระดับ "ความแม่น" ของคำอ่าน + "ภาษาไทยที่ถูกต้อง" ของแม่หมอ AI
-        ├── AUDIT_2026-10-18.md                     # 🚧 🔍 แผนตรวจใหญ่ทั้งระบบ รอบ 2026-10-18 — บั๊ก · ความปลอดภัย · โค้ดตาย · SEO · UX/UI · ประสิทธิภาพ
-        ├── AI_INTELLIGENCE_PLAN.md                 # 🚧 🧠 แผนแม่บทยกระดับความฉลาดของแม่หมอ AI
+        ├── REFLECTION_JOURNAL_PLAN_2026-10-05.md   # ⏸️ 🪞 แผนออกแบบ 14 ระบบ — จากเว็บดูดวงสู่เครื่องมือสะท้อนตัวเอง (สมุดดวง · ความเชื่อมโยงไพ่ · หลักฐานคำอ่าน · พิธีเช้าเย็น · PWA · หน้าคำถาม · Reader Studio · ความปลอดภัย AI · วัดคุณภาพ AI)
+        ├── IOS_APP_PLAN_2026-09-29.md              # ⏸️ 📱 แผนออกแบบระบบ — แอป SeerTarot บน iPhone (iOS App Store)
+        ├── HANDOFF_OMNI_YESNO_2026-09-06.md        # ⏸️ 🎯 แผนส่งต่องาน 3 ชิ้น — Yes/No 78 หน้า · Omnichannel · Daily Digest
         ├── HANDOFF_AI_JUDGE_BASELINE_2026-09-11.md # ⏸️ 🔑 ชีทส่งต่อ — รัน `ai:judge` เก็บ baseline `20260911-1` แล้วลุยคลื่น B ต่อ
+        ├── UI_2_0_SPREADS_PLAN_2026-10-13.md       # ✅ 🃏 SeerTarot UI 2.0 — หน้าผังพยากรณ์ `/spreads` แบบ "ไพ่กระจาย 6 หมวด แตะแล้วเด้ง" (แผนส่งต่อให้ทีมลงมือ)
+        ├── UI_2_0_PLAN_2026-10-12.md               # ✅ 🎨 SeerTarot UI 2.0 — หน้าแรกแบบ D+ และภาษาดีไซน์ใหม่ (แผนส่งต่อให้ทีมลงมือ)
         ├── SITE_SHELL_SEO_PLAN.md                  # ✅ 🏛️ แผนลงมือ: Site Shell กลาง + Internal Link ที่บอทมองเห็น
         ├── RETENTION_PLAN.md                       # ✅ 👤 แผนสร้าง Consumer Retention Infra — handoff ให้ทีม Gemini
         ├── QUICK_FORTUNE_PLAN.md                   # ✅ ⚡ แผนฟีเจอร์ "ทำนายด่วน" (Quick Fortune — 1 ใบ ไม่ต้องเลือกไพ่)
@@ -86,50 +112,35 @@ docs/
         ├── EMAIL_AUTH_PLAN.md                      # ✅ 📧 แผนเพิ่ม "เข้าสู่ระบบด้วยอีเมล + รหัสผ่าน" — handoff ให้ทีมอีกทีม
         ├── CONSULT_FLOW_UX_PLAN_2026-10-11.md      # ✅ 🛎️ แผนยกเครื่องขั้นตอน "ปรึกษาแม่หมอ" ให้ใช้ง่ายแบบเว็บจองระดับโลก
         ├── CLOUDFLARE_FREE_STACK.md                # ✅ ☁️ แผนใช้บริการฟรีของ Cloudflare ต่อยอด SeerTarot
+        ├── AUDIT_2026-10-18.md                     # ✅ 🔍 แผนตรวจใหญ่ทั้งระบบ รอบ 2026-10-18 — บั๊ก · ความปลอดภัย · โค้ดตาย · SEO · UX/UI · ประสิทธิภาพ
         ├── AI_COST_CONTROL_PLAN.md                 # ✅ 💸 แผนคุมต้นทุน AI + รหัสทดสอบข้าม rate limit — handoff ให้ทีม Gemini
-        ├── UX_PERF_PLAN.md                         # 📚 🎯 แผนยกเครื่อง UX · ความไว · ความสมูท — 2026-09-01
-        ├── TRAFFIC_CAPTURE_PLAN_2026-09-05.md      # 📚 🎯 แผนแย่งทราฟฟิกจาก MyHora และเจ้าตลาดดูดวงไทย (Traffic Capture Plan)
         ├── HANDOFF_CF_REQUEST_REVIEW_2026-09-08.md # 📚 🔍 ตรวจข้อเสนอ 12 ข้อ "ลด Request บน Cloudflare" (2026-09-08)
         ├── BACKLOG.md                              # 📚 📋 Backlog — งานที่ยังเหลือ (2026-09-04)
-        ├── AUDIT_2026-09-01.md                     # 📚 🔍 รายงานตรวจสอบเต็มรูปแบบ (Full Audit) — 2026-09-01
-        └── AGENTS_TASK_PLAN.md                     # 📚 🤖 แผนงานและการแบ่งหน้าที่สำหรับ AI Agents (Multi-Agent Task Orchestration)
+        └── AI_INTELLIGENCE_PLAN.md                 # 📚 🧠 แผนแม่บทยกระดับความฉลาดของแม่หมอ AI
 <!-- PLANS_TREE_END -->
 ```
 
----
+## 7. ผลตรวจ รีวิว กฎหมาย และงานแปล
 
-## 🎯 คำแนะนำการอ่านตามบทบาท (Role-Based Reading Guide)
-
-### 🤖 สำหรับ AI Agent (Gemini / Claude / Cursor / Copilot)
-> ⚠️ **ก่อนแก้ไขโค้ดใดๆ ต้องอ่าน 3 ไฟล์นี้ตามลำดับเสมอ**:
-1. **[`docs/INCIDENT_LOG.md`](INCIDENT_LOG.md)**: **(สำคัญที่สุด)** ทุกบทเรียนความผิดพลาดที่เคยเกิดขึ้นพร้อมกฎป้องกันถาวร (ทำผิดซ้ำเรื่องเดิม = ข้อบกพร่องร้ายแรง)
-2. **[`docs/KNOWN_ISSUES.md`](KNOWN_ISSUES.md)**: ดูก่อนเริ่มงานใหม่เพื่อไม่แก้ซ้ำซ้อนกับ Agent ตัวอื่น
-3. **[`docs/AI_COLLABORATION_GUIDELINES.md`](AI_COLLABORATION_GUIDELINES.md)**: คู่มือแม่บทระเบียบวิศวกรรม, กฎดีไซน์ 14 ข้อ, และระบบ Agent Lock
-
----
-
-### 👑 สำหรับเจ้าของโปรเจกต์ (Product Owner / Creator)
-* **[`docs/WORK_LOG.md`](WORK_LOG.md)**: ดูสถานะงานล่าสุดว่าฟีเจอร์ไหนเสร็จแล้ว อะไรกำลังพัฒนาอยู่
-* **[`docs/PENDING_SETUP.md`](PENDING_SETUP.md)**: ตรวจสอบความพร้อมของบริการภายนอก (โดเมน, OAuth, อีเมล, Secrets)
-* **[`docs/ADMIN_PANEL.md`](ADMIN_PANEL.md)**: วิธีการเข้าใช้งานแผงควบคุมแอดมินที่ `/admin` เพื่อดูสถิติและตรวจสุขภาพระบบ
-
----
-
-### 🚀 สำหรับทีม DevOps และ Infrastructure
-* **[`docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md`](CLOUDFLARE_DEPLOYMENT_GUIDE.md)**: การตั้งค่า Cloudflare Workers, Custom Domain (`seertarot.net`), D1 Database, KV Bindings และ SSL
-* **[`docs/ARCHITECTURE.md`](ARCHITECTURE.md)**: โครงสร้าง Network Edge, OpenNext Cache, และ Provably Fair Flow
-
----
-
-## 🛠️ สรุปคำสั่งสำคัญสำหรับวิศวกร (Standard Command Cheat Sheet)
-
-| คำสั่ง | หน้าที่และวัตถุประสงค์ |
+| ไฟล์ | ใช้ทำอะไร |
 | :--- | :--- |
-| `npm run repo:verify` | **ตรวจครบทั้ง 94 ด่านในคำสั่งเดียว** (Typecheck, ไพ่ 78 ใบ, ผัง 26 แบบ, Provably-Fair, D1, Failover, PDPA ฯลฯ) |
-| `npm run typecheck` | ตรวจสอบความถูกต้องของ TypeScript Types (ต้องผ่าน 0 Errors) |
-| `npm run agent:status` | ตรวจสอบว่ามี Agent ตัวไหนกำลังทำงานหรือล็อคไฟล์อยู่หรือไม่ |
-| `npm run agent:lock` | ล็อคไฟล์ก่อนเริ่มทำงานป้องกันการชนกันของ AI หลายตัว |
-| `npm run agent:unlock` | ปลดล็อคไฟล์เมื่อทำงานเสร็จสมบูรณ์ |
-| `npm run pr:auto` | ตรวจครบ 94 ด่าน ➔ Push ➔ เปิด PR ➔ Auto-Merge ➔ Deploy Cloudflare Workers ในคำสั่งเดียว |
-| `npm run git:tidy` | เก็บกวาดกิ่งงานที่ Merge ไปแล้วทั้งในเครื่องและบน Remote ตามกฎ Zero Leftovers |
-| `npm run dev` | รันเซิร์ฟเวอร์จำลองสำหรับพัฒนา (Next.js Local Server) |
+| [audits/2026-09-23/PROGRESS.md](audits/2026-09-23/PROGRESS.md) | กระดานตรวจใหญ่รอบ 2026-09-23 (ปิดครบ) · ผลรายด้าน `A1`–`A8` อยู่โฟลเดอร์เดียวกัน |
+| [audits/2026-10-18/PROGRESS.md](audits/2026-10-18/PROGRESS.md) | กระดานตรวจใหญ่รอบ 2026-10-18 · ผลรายด้านไม่อยู่ใน repo (มีรายละเอียดช่องโหว่) — ขอจากเจ้าของ · แผนคู่กันคือ `plans/AUDIT_2026-10-18.md` |
+| [review/READER_REVIEW_2026-10-10.md](review/READER_REVIEW_2026-10-10.md) | ชีทแม่หมอตรวจคำแนะนำรายใบ 78 ใบ + คู่ไพ่ 65 คู่ — ตรวจแล้ว |
+| [review/READER_REVIEW_2026-10-11.md](review/READER_REVIEW_2026-10-11.md) | ชีทแม่หมอตรวจมุมอ่านกลับหัวรายใบ (รอบ 4) — รอตรวจ |
+| [legal/READER_STUDIO_DPA_DRAFT.md](legal/READER_STUDIO_DPA_DRAFT.md) | ร่างข้อตกลงประมวลผลข้อมูลของสตูดิโอแม่หมอ — รอทนายรับรอง |
+| [legal/READER_TERMS_DRAFT.md](legal/READER_TERMS_DRAFT.md) | ร่างเงื่อนไขการใช้บริการสำหรับแม่หมอ — รอทนายรับรอง |
+| `i18n/pending-en.json` | คิวข้อความที่ยังไม่มีฉบับอังกฤษ — สร้างด้วย `npm run i18n:export` นำเข้าด้วย `npm run i18n:import` |
+
+## 8. คลังเก่า (`docs/archive/`)
+
+ของเก่าเก็บแบบคำต่อคำ ค้นด้วย `grep -rn "<คำ>" docs/archive/` · ห้ามแก้เนื้อหาย้อนหลัง · รายละเอียดอยู่ใน [archive/README.md](archive/README.md)
+
+| ที่เก็บ | มีอะไร | ย้ายมาอย่างไร |
+| :--- | :--- | :--- |
+| `archive/work-log/WORK_LOG_YYYY-MM.md` | รอบงานใน WORK_LOG ที่เก่ากว่า 31 วัน แยกตามเดือน | `npm run docs:archive` (ดูก่อนด้วย `-- --dry-run`) |
+| `archive/incidents/INCIDENT_LOG_YYYY-MM.md` | เหตุการณ์ใน INCIDENT_LOG ที่เก่ากว่า 31 วัน แยกตามเดือน — เลข INC ในนี้ยังอ้างได้ (ด่านเลข INC อ่านทั้งไฟล์หลักและคลังเก่า) · บทเรียนของทุกเหตุการณ์สรุปอยู่ใน "กฎถาวรสรุป" ของ INCIDENT_LOG | `npm run docs:archive` |
+| [archive/KNOWN_ISSUES_CLOSED.md](archive/KNOWN_ISSUES_CLOSED.md) | ISSUE ที่ปิดแล้ว | ย้ายด้วยมือตอนปิดบั๊ก |
+| [plans/archive/](plans/archive/) | แผนที่เป็นประวัติล้วน — ไม่มีงานค้าง ไม่มีข้อห้ามที่ยังใช้ (`UX_PERF_PLAN` · `TRAFFIC_CAPTURE_PLAN_2026-09-05` · `AUDIT_2026-09-01` · `AGENTS_TASK_PLAN` · ย้าย 2026-10-27 #729) · ไม่อยู่ในตารางแผน | ย้ายด้วยมือ · แผนที่ยังมี "อ่านก่อนแตะ" ห้ามย้าย |
+
+> ไฟล์ที่ไม่ใช่เอกสาร: `docs/WORK_LOG.status.md` (เขียนโดย `npm run log:sync`) และ `docs/AUDIT_LOG.md` (เขียนโดยเครื่องมือ commit) ถูกสร้างในเครื่องและไม่อยู่ใน git — ประวัติจริงคือ `git log` กับ INCIDENT_LOG

@@ -15,6 +15,10 @@
  *    ใต้หัวเรื่อง `#` ของไฟล์แผน (ถัดลงมาไม่เกิน 8 บรรทัด)
  * 2. ตารางใน CLAUDE.md / INDEX.md **สร้างจากไฟล์แผนเท่านั้น** — ห้ามแก้มือ
  * 3. ด่าน `test-docs-numbers.ts` เทียบตารางกับผลของสคริปต์นี้ทุกครั้ง ไม่ตรง = CI ตก
+ * 4. สรุปสถานะ ≤ 300 ตัวอักษร · "อ่านก่อนแตะ" ≤ 200 ตัวอักษร รูป `<ส่วนที่แตะ> — <อ่านอะไร>` (2026-10-26)
+ *    เดิมสรุปบวมจนแถวเดียวยาวกว่า 1,500 ตัวอักษร CLAUDE.md ทั้งไฟล์ 53 KB ที่ทุกเซสชันต้องโหลด
+ *    ประวัติงานอยู่ใน WORK_LOG — สรุปในหัวแผนบอกแค่ "เสร็จอะไร เหลืออะไร รอใคร"
+ * 5. CLAUDE.md แสดงเฉพาะแผนที่ยังเปิด + ตาราง "อ่านก่อนแตะ" · รายชื่อเต็มทุกแผนอยู่ใน docs/INDEX.md
  *
  * ใช้งาน: `npm run docs:index` (เขียนทับตาราง) · `npm run docs:status` (รายงานงานค้าง + อายุการตรวจ)
  */
@@ -52,6 +56,10 @@ export const INDEX_END = "<!-- PLANS_TREE_END -->";
 const STATUS_RE =
   /^>\s*\*\*สถานะ\*\*:\s*(🚧|⏸️|⏳|✅|📚)\s+(\S[^—]*?)\s+—\s+(.+?)\s+·\s+\*\*ตรวจล่าสุด\*\*:\s*(\d{4}-\d{2}-\d{2})(?:\s+·.*)?$/u;
 
+export const SUMMARY_MAX = 300;
+export const READ_BEFORE_MAX = 200;
+const len = (s: string) => Array.from(s).length;
+
 /** อ่านหัวสถานะของไฟล์แผนหนึ่งไฟล์ — คืนข้อผิดพลาดเป็นสตริงเมื่อรูปแบบไม่ถูก */
 export function readPlanStatus(absFile: string): PlanStatus | string {
   const rel = path.relative(ROOT, absFile);
@@ -76,14 +84,26 @@ export function readPlanStatus(absFile: string): PlanStatus | string {
   if (emoji === "✅" && /ยังไม่ลงมือ|รอทีมรับไปทำ|ยังไม่เริ่ม/.test(summary)) {
     return `${rel}: สถานะ ✅ แต่สรุปยังพูดว่ายังไม่ได้ทำ — ขัดกันเอง`;
   }
+  if (len(summary) > SUMMARY_MAX) {
+    return `${rel}: สรุปสถานะยาว ${len(summary)} ตัวอักษร (เพดาน ${SUMMARY_MAX}) — บอกแค่เสร็จอะไร เหลืออะไร รอใคร · ประวัติไปอยู่ใน WORK_LOG`;
+  }
   const readBeforeLine = head.find((l) => /^>\s*\*\*อ่านก่อนแตะ\*\*:/.test(l));
+  const readBefore = readBeforeLine?.replace(/^>\s*\*\*อ่านก่อนแตะ\*\*:\s*/, "").trim();
+  if (readBefore !== undefined) {
+    if (len(readBefore) > READ_BEFORE_MAX) {
+      return `${rel}: "อ่านก่อนแตะ" ยาว ${len(readBefore)} ตัวอักษร (เพดาน ${READ_BEFORE_MAX})`;
+    }
+    if (readBefore.split(" — ").length !== 2) {
+      return `${rel}: "อ่านก่อนแตะ" ต้องเป็น "<ส่วนที่แตะ> — <อ่านอะไร>" มีตัวคั่น " — " ตัวเดียว`;
+    }
+  }
   return {
     file: path.basename(absFile),
     title: lines[h1].replace(/^#\s+/, "").trim(),
     emoji,
     summary,
     checkedAt: m[4],
-    readBefore: readBeforeLine?.replace(/^>\s*\*\*อ่านก่อนแตะ\*\*:\s*/, "").trim(),
+    readBefore,
   };
 }
 
@@ -107,20 +127,38 @@ export function readAllPlans(): { plans: PlanStatus[]; errors: string[] } {
 
 const cell = (s: string) => s.replace(/\|/g, "\\|");
 
+const isOpen = (p: PlanStatus) => p.emoji !== "✅" && p.emoji !== "📚";
+
 export function renderClaudeBlock(plans: PlanStatus[]): string {
-  const rows = plans.map((p) => {
-    const extra = p.readBefore ? ` · 📌 **อ่านก่อนแตะ**: ${p.readBefore}` : "";
-    return `| ${p.emoji} | [${cell(p.title)}](docs/plans/${p.file}) | ${cell(p.summary)}${cell(extra)} · _ตรวจ ${p.checkedAt}_ |`;
+  const open = plans.filter(isOpen);
+  const guides = plans.filter((p) => p.readBefore);
+  const done = plans.filter((p) => p.emoji === "✅").length;
+  const reference = plans.filter((p) => p.emoji === "📚").length;
+  const openRows = open.map(
+    (p) => `| ${p.emoji} | [${cell(p.title)}](docs/plans/${p.file}) | ${cell(p.summary)} | ${p.checkedAt} |`,
+  );
+  const guideRows = guides.map((p) => {
+    const [area, what] = (p.readBefore ?? "").split(" — ");
+    return `| ${cell(area)} | ${cell(what ?? "")} | [${p.file.replace(/\.md$/, "")}](docs/plans/${p.file}) |`;
   });
   return [
     CLAUDE_START,
     "",
-    "> สถานะมาจากบรรทัด `> **สถานะ**:` ใต้หัวเรื่องของแต่ละไฟล์เท่านั้น — ทำงานตามแผนไหนเสร็จ ให้แก้บรรทัดนั้นแล้วรัน `npm run docs:index` ใน PR เดียวกัน (ด่าน CI ตรวจ)",
-    `> ${STATUS_EMOJI.map((e) => `${e} ${STATUS_WORD[e]}`).join(" · ")}`,
+    "> สร้างจากบรรทัด `> **สถานะ**:` และ `> **อ่านก่อนแตะ**:` ของไฟล์แผน — แก้ที่ไฟล์แผนแล้วรัน `npm run docs:index` (ห้ามแก้ตารางนี้มือ · ด่าน CI ตรวจ)",
     "",
-    "| สถานะ | แผน | สรุปสถานะ |",
+    `**งานที่ยังเปิด** (${open.length} แผน · ${(["🚧", "⏸️", "⏳"] as const).map((e) => `${e} ${STATUS_WORD[e]}`).join(" · ")}) — ยืนยันกับโค้ด/\`git log\` ก่อนรายงานเจ้าของเสมอ`,
+    "",
+    "| สถานะ | แผน | สรุป | ตรวจล่าสุด |",
+    "|---|---|---|---|",
+    ...openRows,
+    "",
+    "**อ่านก่อนแตะ** — จะแก้ส่วนไหน อ่านแผนนั้นก่อน",
+    "",
+    "| ส่วนที่แตะ | อ่านอะไร | แผน |",
     "|---|---|---|",
-    ...rows,
+    ...guideRows,
+    "",
+    `แผนที่ปิดแล้ว ✅ ${done} ไฟล์ · เอกสารอ้างอิง 📚 ${reference} ไฟล์ — รายชื่อเต็มทุกแผนอยู่ใน [docs/INDEX.md](docs/INDEX.md)`,
     "",
     CLAUDE_END,
   ].join("\n");

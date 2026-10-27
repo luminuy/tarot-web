@@ -203,7 +203,7 @@ if (!headerRule) {
   }
   if (/will-change/.test(body)) {
     failures.push(
-      "globals.css: `[data-site-header]` ห้ามใช้ `will-change` — จองเลเยอร์ GPU ค้างตลอด session (INC-0056) ใช้ translate3d แทน",
+      "globals.css: `[data-site-header]` ห้ามใช้ `will-change` — จองเลเยอร์ GPU ค้างตลอด session (INC-0061) ใช้ translate3d แทน",
     );
   }
 }

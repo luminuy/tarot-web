@@ -1,6 +1,6 @@
 # 🎂 แผนเปิดหน้าอังกฤษ `/en/cards/birth-card` (ขั้น C ก้อนสุดท้ายของเส้นทางสองภาษา)
 
-> **สถานะ**: ✅ เสร็จแล้ว — `/en/cards/birth-card` เปิดแล้ว · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: PR #459
+> **สถานะ**: ✅ เสร็จแล้ว — หน้า `/en/cards/birth-card` เปิดแล้ว (`astro/pages/en/cards/birth-card.astro`) · ไม่มีงานค้าง · **ตรวจล่าสุด**: 2026-10-26 · **หลักฐาน**: PR #459
 
 > **สถานะตอนเขียนแผน**: ✅ **เสร็จสมบูรณ์แล้วใน PR #459 (2026-09-14)** — สร้างหน้า `/en/cards/birth-card` พร้อม Structured Data 3 ชุด, คู่แฝดสองภาษา (Bilingual Twin) และคำอธิบายเชิงจิตวิทยา C.G. Jung & Mary K. Greer
 > **ขนาดงาน**: 1 PR · แตะ 4 ไฟล์ · Deploy สู่ Cloudflare Workers Edge สำเร็จ 100%
@@ -28,7 +28,7 @@
 ทั้งชื่อเดือน (`nameTh`/`nameEn`) · ข้อความผลลัพธ์ · ข้อความแชร์
 
 และต้นไม้ `/en` **ตรึงภาษาไว้ตั้งแต่ระดับ layout แล้ว**:
-[`src/app/(en)/layout.tsx:88`](../../src/app/\(en\)/layout.tsx) เรียก `<RootHtml locale="en" pinLocale>`
+[`src/app/(en)/layout.tsx:88`](../../src/app/%28en%29/layout.tsx) เรียก `<RootHtml locale="en" pinLocale>`
 ซึ่งส่งต่อเป็น `<LocaleProvider forcedLocale="en">`
 ➔ **คอมโพเนนต์ใดก็ตามที่วางใต้ `/en` จะได้ `isEnglish === true` ทันทีตั้งแต่ HTML ดิบ**
 
@@ -74,7 +74,7 @@ for (const withoutTwin of ["/privacy", "/cards/birth-card", "/account"]) {
 ### ✍️ งานที่ 1 (ใหญ่สุด — 90% ของงาน) เขียนเนื้อหาอังกฤษ
 
 **ห้ามแปลตรงตัวจากฉบับไทย** — ทำตามที่ `/en/daily` วางบรรทัดฐานไว้
-(ดูคอมเมนต์หัวไฟล์ [`src/app/(en)/en/daily/page.tsx`](../../src/app/\(en\)/en/daily/page.tsx)):
+(ดูคอมเมนต์หัวไฟล์ `src/app/(en)/en/daily/page.tsx`):
 _"เนื้อบทความ SEO ของหน้านี้เขียนขึ้นใหม่เป็นภาษาอังกฤษโดยตรง เพราะกลุ่มคำค้นและวิธีเล่าเรื่องของสองภาษาต่างกัน"_
 
 ต้องมี:
@@ -95,7 +95,7 @@ Light aspect / Shadow aspect · วิธีเอาไปใช้ใคร่
 
 ### 🧱 งานที่ 2 สร้างไฟล์ `src/app/(en)/en/cards/birth-card/page.tsx`
 
-ลอกโครงจาก [`src/app/(en)/en/daily/page.tsx`](../../src/app/\(en\)/en/daily/page.tsx) (179 บรรทัด — ตรงแบบที่สุด) โดย:
+ลอกโครงจาก `src/app/(en)/en/daily/page.tsx` (179 บรรทัด — ตรงแบบที่สุด) โดย:
 
 ```ts
 const PATH = "/cards/birth-card";
