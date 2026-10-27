@@ -364,10 +364,10 @@ export function NovelHubContentRoot() {
   );
 }
 
-export function NovelChapterContentRoot({ chapter }: { chapter: NovelChapter }) {
+export function NovelChapterContentRoot({ chapter, reader }: { chapter: NovelChapter; reader: ReactNode }) {
   return (
     <LocaleProvider forcedLocale="th">
-      <NovelChapterContent chapter={chapter} />
+      <NovelChapterContent chapter={chapter} reader={reader} />
     </LocaleProvider>
   );
 }

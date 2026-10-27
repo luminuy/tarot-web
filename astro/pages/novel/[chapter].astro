@@ -1,17 +1,19 @@
 ---
 import { novelChapterMetadata, novelChapterStaticParams } from "@/app/_shared/pages/novel";
-import { getNovelChapter } from "@/data/novel";
+import { getNovelChapter, novelChapterLead } from "@/data/novel";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { NovelChapterContentRoot } from "../../components/PageBodies";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+import { NovelReaderRoot } from "../../islands/NovelReaderRoot";
 import "@/styles/ui2-page.css";
 import "@/styles/ui2-page-fx.css";
 import "@/styles/v2-article.css";
 import "@/styles/v2-novel.css";
 
 /**
- * 📖 นิยายรายบท `/novel/<เลขบท>` — ตัวบทเป็น HTML ล้วน ไม่มี island (ตัวบทไม่ถูกส่งไปเป็น JS)
+ * 📖 นิยายรายบท `/novel/<เลขบท>` — อ่านได้เฉพาะสมาชิก (เจ้าของ 2026-10-27 "ต้องล็อกอิน")
+ * HTML static มีแค่หัวบท · ไพ่ตัวละคร · ย่อหน้าตัวอย่าง · ตัวบทมาจาก `/api/novel/<เลขบท>` ผ่าน island `NovelReaderRoot`
  * ⚠️ `/novel` อยู่ใน ASTRO_ROUTE_PREFIXES · ภาษาไทยอย่างเดียว
  */
 const locale = "th" as const;
@@ -26,7 +28,11 @@ const chapter = getNovelChapter(Number(Astro.params.chapter))!;
 <BaseLayout locale={locale} metadata={novelChapterMetadata(chapter.number)}>
   <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
   <div class="ui2-pg" data-ui2-page-dark="">
-  <NovelChapterContentRoot chapter={chapter} />
+  <NovelChapterContentRoot chapter={chapter}>
+    <Fragment slot="reader">
+      <NovelReaderRoot number={chapter.number} teaser={novelChapterLead(chapter)} client:load />
+    </Fragment>
+  </NovelChapterContentRoot>
   </div>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>

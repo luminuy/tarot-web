@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 
 import { CardImage } from "@/components/card/CardImage";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
@@ -24,7 +25,6 @@ import {
 import { clampDescription, pickTitle } from "@/lib/config/meta-length";
 import { buildAlternates, localizedUrl, noindexAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
-import { renderNovelBody } from "@/lib/novel/render";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 
@@ -55,7 +55,7 @@ const CAST = [
 
 const cardName = (id: string) => cardById(id)?.nameEn ?? id;
 const hubTitle = () =>
-  pickTitle([`${NOVEL.title} นิยายแฟนตาซีไพ่ทาโรต์ อ่านฟรีทุกบท`, `${NOVEL.title} อ่านฟรีทุกบท`, NOVEL.title]);
+  pickTitle([`${NOVEL.title} นิยายแฟนตาซีไพ่ทาโรต์ สมาชิกอ่านฟรี`, `${NOVEL.title} สมาชิกอ่านฟรี`, NOVEL.title]);
 
 function Hotline() {
   return (
@@ -102,6 +102,8 @@ export function novelChapterMetadata(number: number): Metadata {
   return {
     title,
     description,
+    // ตัวบทอ่านได้เฉพาะสมาชิก — หน้ารายบทมีแค่ย่อหน้าตัวอย่าง จึงไม่ให้ค้นหาเก็บ (หน้ารวม /novel ยังเก็บตามปกติ)
+    robots: { index: false, follow: true },
     alternates: buildAlternates(path, { locale }),
     openGraph: { title, description, url: localizedUrl(path, locale), siteName: "SeerTarot", type: "article", locale: "th_TH", images },
     twitter: { card: "summary_large_image", title, description, images: [images[0].url] },
@@ -163,7 +165,7 @@ export function NovelHubContent() {
             เริ่มอ่านบทที่ 1
           </Link>
         }
-        note={`${NOVEL_CHAPTERS.length} บท${NOVEL_PARTS.some((p) => p.complete) ? ` · จบภาคที่ ${NOVEL_PARTS.filter((p) => p.complete).length} แล้ว` : ""} · อ่านฟรีทุกบท ไม่ต้องสมัคร`}
+        note={`${NOVEL_CHAPTERS.length} บท${NOVEL_PARTS.some((p) => p.complete) ? ` · จบภาคที่ ${NOVEL_PARTS.filter((p) => p.complete).length} แล้ว` : ""} · อ่านฟรีทุกบทสำหรับสมาชิก`}
         cards={HUB_CARDS}
       />
 
@@ -249,11 +251,11 @@ export function NovelHubContent() {
 
 /* ── หน้ารายบท ────────────────────────────────────────────────────────── */
 
-export function NovelChapterContent({ chapter }: { chapter: NovelChapter }) {
+/** `reader` = island `NovelReaderRoot` (ตัวบทสำหรับสมาชิก) ที่หน้า Astro ส่งเข้ามาทาง slot — ตัวบทไม่อยู่ใน HTML static */
+export function NovelChapterContent({ chapter, reader }: { chapter: NovelChapter; reader: ReactNode }) {
   const path = novelChapterPath(chapter.number);
   const prev = getNovelChapter(chapter.number - 1);
   const next = getNovelChapter(chapter.number + 1);
-  const paragraphs = renderNovelBody(chapter.body);
   const chapterName = `บทที่ ${chapter.number} ${chapter.title}`;
 
   const chapterJsonLd = {
@@ -326,11 +328,7 @@ export function NovelChapterContent({ chapter }: { chapter: NovelChapter }) {
           </aside>
         )}
 
-        <div className="v2-ar-body v2-nv-body">
-          {paragraphs.map((p, i) => (
-            <p key={i} className={p.kind === "beat" ? "v2-nv-beat" : undefined} dangerouslySetInnerHTML={{ __html: p.html }} />
-          ))}
-        </div>
+        {reader}
 
         {isNovelPartFinale(chapter) ? (
           <p className="v2-nv-end">

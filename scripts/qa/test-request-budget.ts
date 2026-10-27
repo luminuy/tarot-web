@@ -21,6 +21,8 @@
  *   6. ตัวเก็บ INP (`inp-reporter.ts`) → หน้าที่ INP < 200 ms ไม่ยิงอะไรเลย · หน้าที่ช้ายิง `/api/stats/inp` ครั้งเดียว
  *      ข้อมูลที่ส่งผ่านสคีมาฝั่งเซิร์ฟเวอร์ และแยกช่วงเวลาถูก (ไม่นับ pointerdown ที่วาดไปก่อน) · localhost/Safari ไม่ฟังเลย
  *   7. เส้น `/api/stats/inp` → origin ภายนอก / ข้อความอิสระ / INP ต่ำกว่าเกณฑ์ ถูกปฏิเสธ · เกินเพดานถี่ทิ้งเงียบ
+ *   8. ตัวบทนิยาย (`loadNovelChapter` · สมาชิกเท่านั้น) → ไม่มีคุกกี้ใบ้ต้องไม่ยิงอะไรเลยและได้หน้าชวนเข้าสู่ระบบ
+ *      · มีคุกกี้ใบ้ → ยิง `/api/novel/<เลขบท>` ครั้งเดียว
  */
 import { fileURLToPath } from "node:url";
 
@@ -123,6 +125,23 @@ async function run() {
     const spreadCalls = calls.filter((c) => c.includes("/api/spreads/custom"));
     if (spreadCalls.length !== 1) {
       errors.push(`ผู้ใช้ที่ล็อกอินอยู่ต้องยิง /api/spreads/custom พอดี 1 ครั้ง (ยิงจริง ${spreadCalls.length} · ทั้งหมด: ${calls.join(", ") || "ไม่มี"})`);
+    }
+  }
+
+  // ── เกณฑ์ 8: ตัวบทนิยาย (สมาชิกเท่านั้น) — ผู้ชมไม่ล็อกอินต้องไม่ปลุก Worker ─────
+  {
+    const calls = installBrowserStubs("");
+    const { loadNovelChapter } = await import("../../src/lib/novel/client");
+    const anon = await loadNovelChapter(1);
+    if (calls.length !== 0) errors.push(`loadNovelChapter() ของผู้ชมที่ไม่ล็อกอินยังยิง ${calls.length} คำขอ: ${calls.join(", ")}`);
+    if (anon.status !== "login") errors.push(`loadNovelChapter() ของผู้ชมที่ไม่ล็อกอินต้องได้ status "login" (ได้ ${anon.status})`);
+  }
+  {
+    const calls = installBrowserStubs(`${AUTH_HINT_COOKIE}=1`);
+    const { loadNovelChapter } = await import("../../src/lib/novel/client");
+    await loadNovelChapter(3);
+    if (calls.length !== 1 || !calls[0].endsWith("/api/novel/3")) {
+      errors.push(`สมาชิกต้องยิง /api/novel/3 พอดี 1 ครั้ง (ทั้งหมด: ${calls.join(", ") || "ไม่มี"})`);
     }
   }
 
