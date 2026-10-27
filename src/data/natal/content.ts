@@ -560,3 +560,91 @@ export const PROG_PHASE_TEXT: readonly T[] = [
   { th: "ช่วงปรับทิศ ทิ้งความเชื่อหรือบทบาทที่ไม่ใช่แล้ว", en: "Reorienting: letting go of beliefs or roles that no longer fit." },
   { th: "ช่วงปิดรอบ พักใจ ปล่อยวาง และฟังเสียงข้างใน ก่อนรอบใหม่จะเริ่ม", en: "Closing the cycle: rest, release and listen inward before the next one begins." },
 ];
+
+// ─────────────────────────── ผังคู่ ───────────────────────────
+
+export const SYN_CATEGORY_TEXT: Record<"bond" | "attraction" | "talk" | "stability" | "growth", { name: T; about: T }> = {
+  bond: { name: { th: "ความผูกพันทางใจ", en: "Emotional bond" }, about: { th: "อาทิตย์ จันทร์ ศุกร์ ลัคนา ของสองคนต่อกัน: รู้สึกปลอดภัยและเป็นตัวเองได้แค่ไหน", en: "Sun, Moon, Venus and Ascendant links: how safe and at home you feel together" } },
+  attraction: { name: { th: "แรงดึงดูด", en: "Attraction" }, about: { th: "ศุกร์ อังคาร พลูโต: ความหลงใหลและเคมี มุมตึงก็สร้างแรงดึงดูดได้ แต่ต้องจัดการให้ดี", en: "Venus, Mars and Pluto links: chemistry and desire. Tense aspects also attract, but need care" } },
+  talk: { name: { th: "การสื่อสาร", en: "Communication" }, about: { th: "ดาวพุธกับดาวสำคัญของอีกคน: คุยกันรู้เรื่องแค่ไหน", en: "Mercury links: how easily you understand each other" } },
+  stability: { name: { th: "ความมั่นคงระยะยาว", en: "Long-term stability" }, about: { th: "เสาร์และพฤหัสกับดวงสว่าง: ความรับผิดชอบ ความเชื่อใจ และการพากันโต", en: "Saturn and Jupiter links: commitment, trust and growing together" } },
+  growth: { name: { th: "การเติบโตร่วมกัน", en: "Growing together" }, about: { th: "โหนด พฤหัส ไครอน: ความรู้สึกว่าพบกันด้วยเหตุผลบางอย่าง และช่วยเยียวยากัน", en: "Node, Jupiter and Chiron links: a sense of purpose and healing together" } },
+};
+
+/** คู่ดาวสำคัญในผังคู่ (เรียงชื่อตามตัวอักษร คั่นด้วย "-") — ประโยคเฉพาะเมื่อกลมกลืน/ตึง */
+export const SYN_PAIR_TEXT: Record<string, { harmonious: T; tense: T }> = {
+  "moon-sun": {
+    harmonious: { th: "คู่คลาสสิกของความเข้ากัน คนหนึ่งให้ทิศทาง อีกคนให้ความอบอุ่น รู้สึกเหมือนรู้จักกันมานาน", en: "A classic sign of compatibility: one gives direction, the other warmth. It feels like you have known each other for years." },
+    tense: { th: "ดึงดูดกันแรงแต่จังหวะไม่ตรง สิ่งที่คนหนึ่งต้องการกับสิ่งที่อีกคนเป็นต้องหาจุดกลาง", en: "A strong pull with mismatched timing: what one needs and what the other is must meet halfway." },
+  },
+  "moon-moon": {
+    harmonious: { th: "ใจตรงกัน ต้องการสิ่งคล้ายกันเวลาเหนื่อยหรือเศร้า อยู่ด้วยกันแล้วสบายใจ", en: "Your hearts are in tune; you need similar things when tired or sad, and feel at ease together." },
+    tense: { th: "วิธีดูแลใจไม่เหมือนกัน สิ่งที่ปลอบคนหนึ่งได้อาจไม่ได้ผลกับอีกคน ต้องถามกันตรง ๆ", en: "You soothe yourselves differently. Ask each other directly what helps." },
+  },
+  "sun-sun": {
+    harmonious: { th: "เป้าหมายชีวิตไปทางเดียวกัน เชียร์กันได้โดยไม่ต้องพยายาม", en: "Your life goals point the same way, so supporting each other comes easily." },
+    tense: { th: "อัตตาสองคนชนกันได้ง่าย ผลัดกันเป็นผู้นำแล้วความต่างจะกลายเป็นจุดแข็ง", en: "Egos can clash. Take turns leading and the difference becomes a strength." },
+  },
+  "mars-venus": {
+    harmonious: { th: "เคมีลงตัว ความโรแมนติกกับความกล้าเข้าหากันพอดี", en: "Natural chemistry: romance and courage meet in balance." },
+    tense: { th: "แรงดึงดูดแรงมาก แต่หวานกับร้อนสลับกันเร็ว ต้องพูดความต้องการให้ชัด", en: "Very strong attraction that swings between sweet and heated. Say what you want clearly." },
+  },
+  "mars-mars": {
+    harmonious: { th: "ลุยด้วยกันได้ดี จังหวะการลงมือตรงกัน", en: "You act well as a team; your pace matches." },
+    tense: { th: "พลังสองคนแรงทั้งคู่ เถียงกันง่าย หากิจกรรมให้ปล่อยพลังด้วยกัน", en: "Two strong drives that argue easily. Find activities to burn energy together." },
+  },
+  "venus-venus": {
+    harmonious: { th: "รสนิยมและวิธีแสดงความรักคล้ายกัน มีความสุขกับสิ่งเดียวกัน", en: "Similar taste and love language; you enjoy the same things." },
+    tense: { th: "ให้คุณค่ากับคนละเรื่อง ลองเรียนรู้ภาษารักของอีกฝ่าย", en: "You value different things. Learn each other's love language." },
+  },
+  "moon-venus": {
+    harmonious: { th: "อ่อนโยนต่อกันโดยธรรมชาติ รู้สึกเป็นที่รักและได้รับการดูแล", en: "Naturally tender; you feel loved and cared for." },
+    tense: { th: "ความรักมีแต่แสดงออกไม่ตรงกับที่อีกคนต้องการ บอกกันว่าแบบไหนที่ใช่", en: "Love is there but expressed in ways the other may not need. Tell each other what works." },
+  },
+  "mercury-mercury": {
+    harmonious: { th: "คุยกันรู้เรื่อง ความคิดต่อกันติด", en: "Easy conversation; your minds connect." },
+    tense: { th: "คิดและพูดคนละสไตล์ ฟังให้จบก่อนตอบจะช่วยได้มาก", en: "Different thinking styles. Listening fully before replying helps a lot." },
+  },
+  "sun-venus": {
+    harmonious: { th: "ชื่นชมกันและกัน คนหนึ่งทำให้อีกคนรู้สึกมีเสน่ห์", en: "Mutual admiration; one makes the other feel attractive." },
+    tense: { th: "ชอบกันแต่คาดหวังต่างกัน ระวังการเอาใจจนลืมตัวเอง", en: "Fondness with different expectations. Avoid pleasing at your own expense." },
+  },
+  "moon-saturn": {
+    harmonious: { th: "ให้ความรู้สึกมั่นคง พึ่งพากันได้ในระยะยาว", en: "A sense of security and long-term reliability." },
+    tense: { th: "อาจรู้สึกถูกจำกัดหรือเย็นชา ความอบอุ่นต้องตั้งใจแสดงออก", en: "One may feel restricted or chilled. Warmth needs to be shown on purpose." },
+  },
+  "saturn-sun": {
+    harmonious: { th: "มีความรับผิดชอบต่อกัน สร้างสิ่งที่ยั่งยืนด้วยกันได้", en: "Commitment and the ability to build something lasting." },
+    tense: { th: "คนหนึ่งอาจรู้สึกถูกตัดสินหรือกดดัน ชมกันให้บ่อยขึ้น", en: "One may feel judged or pressured. Praise each other more often." },
+  },
+  "saturn-venus": {
+    harmonious: { th: "ความรักแบบจริงจังและซื่อสัตย์", en: "Serious, loyal love." },
+    tense: { th: "ความรักมาพร้อมความกังวลหรือระยะห่าง ให้เวลากันและกันมากขึ้น", en: "Love mixed with worry or distance. Give it time." },
+  },
+  "jupiter-sun": {
+    harmonious: { th: "ทำให้กันและกันมองโลกในแง่ดีและกล้าฝันใหญ่", en: "You make each other optimistic and brave enough to dream big." },
+    tense: { th: "เชียร์กันจนเกินตัวได้ ช่วยกันเตือนเรื่องความพอดี", en: "You may encourage each other to overdo things. Keep each other grounded." },
+  },
+  "jupiter-venus": {
+    harmonious: { th: "ความสุขและความใจกว้างต่อกัน ใช้เวลาด้วยกันแล้วสนุก", en: "Generosity and joy; time together feels abundant." },
+    tense: { th: "สนุกด้วยกันแต่ระวังใช้จ่ายหรือตามใจกันเกินพอดี", en: "Fun together, but watch overspending and indulgence." },
+  },
+  "node-sun": {
+    harmonious: { th: "ความรู้สึกว่าพบกันด้วยเหตุผลบางอย่าง ช่วยกันไปในทิศทางชีวิต", en: "A feeling of meeting for a reason; you help each other's life direction." },
+    tense: { th: "ความสัมพันธ์ท้าทายให้ออกจากนิสัยเดิม", en: "The relationship challenges old habits." },
+  },
+  "moon-node": {
+    harmonious: { th: "ผูกพันทางใจลึก เหมือนรู้จักกันมาก่อน", en: "A deep emotional familiarity, as if you met before." },
+    tense: { th: "ความผูกพันที่ต้องเลือกระหว่างความคุ้นเคยกับการเติบโต", en: "A bond that asks you to choose growth over comfort." },
+  },
+};
+
+/** ความหมายของมุมเมื่อเป็นมุมระหว่างสองคน (ประโยคกลาง ใช้เมื่อคู่ดาวไม่มีประโยคเฉพาะ) */
+export const SYN_ASPECT_MEANING: Partial<Record<AspectType, T>> = {
+  conjunction: { th: "สองเรื่องนี้ของสองคนหลอมเข้าหากัน รู้สึกได้ชัดตั้งแต่แรกพบ", en: "these merge strongly between you and are felt from the first meeting" },
+  opposition: { th: "ดึงดูดกันเพราะต่างกัน ต้องหาจุดสมดุลระหว่างสองฝั่ง", en: "you are drawn together by difference and need to find a balance" },
+  trine: { th: "ไหลเข้าหากันง่าย เข้าใจกันโดยไม่ต้องอธิบาย", en: "this flows easily; you understand each other without explaining" },
+  square: { th: "เสียดสีกันบ้าง แต่แรงเสียดทานนี้ทำให้ทั้งคู่เติบโต", en: "there is friction here, and it makes you both grow" },
+  sextile: { th: "เกื้อหนุนกันเมื่อลงมือทำอะไรด้วยกัน", en: "you support each other when you do things together" },
+  quincunx: { th: "จังหวะไม่ค่อยตรงกัน ต้องปรับเข้าหากันเรื่อย ๆ", en: "your rhythms do not quite match, so you keep adjusting to each other" },
+};
