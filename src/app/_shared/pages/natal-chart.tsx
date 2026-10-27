@@ -94,7 +94,7 @@ const FAQ_TH: SeoFaqItem[] = [
   },
   {
     q: "ข้อมูลวันเกิดของฉันถูกเก็บไว้ไหม?",
-    a: "ไม่ การคำนวณทั้งหมดทำในเบราว์เซอร์ของคุณ วันเวลาและสถานที่เกิดไม่ถูกส่งไปที่เซิร์ฟเวอร์ และไม่ถูกบันทึกไว้ที่ไหน ปิดหน้าเมื่อไหร่ข้อมูลก็หายไปด้วย",
+    a: "ไม่ส่งไปที่ไหน การคำนวณทั้งหมดทำในเบราว์เซอร์ของคุณ วันเวลาและสถานที่เกิดไม่ถูกส่งไปที่เซิร์ฟเวอร์ ถ้าคุณกด \"บันทึกผังนี้ไว้ในเครื่องนี้\" ข้อมูลจะเก็บอยู่ในเบราว์เซอร์ของเครื่องนั้นเท่านั้น และลบได้ทุกเมื่อ",
   },
   {
     q: "ควรเลือกระบบเรือนแบบไหน?",
@@ -117,7 +117,7 @@ const FAQ_EN: SeoFaqItem[] = [
   },
   {
     q: "Is my birth data stored?",
-    a: "No. Everything is calculated in your browser. Your birth date, time and place are never sent to our server or saved anywhere.",
+    a: "No. Everything is calculated in your browser and your birth date, time and place are never sent to our server. If you press \"Save this chart on this device\", it is stored only in that browser and you can delete it any time.",
   },
   {
     q: "Which house system should I choose?",
