@@ -1,4 +1,4 @@
-import { NOVEL_CHAPTER_TEXT } from "./novel-chapters";
+import { NOVEL_CHAPTER_TEXT, NOVEL_PARTS, type NovelPartText } from "./novel-chapters";
 import { NOVEL_PATH, NOVEL_TITLE } from "./novel-title";
 
 export { NOVEL_PATH };
@@ -6,8 +6,8 @@ export { NOVEL_PATH };
 /**
  * 📖 นิยายของ SeerTarot — ข้อมูลเรื่อง (เขียนมือ) · ตัวบทอยู่ที่ `novel-chapters.ts` (สร้างจากสคริปต์)
  * ===========================================================================
- * เจ้าของสั่ง 2026-10-27 "อยากเปิดให้อ่านนิยายสำหรับ seertarot ที่แต่งไว้" · อ่านฟรีทุกบท · ภาษาไทยอย่างเดียว
- * ต้นฉบับ: Google Docs "นิยาย" 15 บท ➔ `npx tsx scripts/novel-import.ts <ไฟล์.md>`
+ * เจ้าของสั่ง 2026-10-27 "อยากเปิดให้อ่านนิยายสำหรับ seertarot ที่แต่งไว้" · อ่านฟรีทุกบทสำหรับสมาชิก ("ต้องล็อกอิน" · ตัวบทผ่าน `/api/novel/<เลขบท>`) · ภาษาไทยอย่างเดียว
+ * ต้นฉบับ: Google Docs "The Broken Arcana" ➔ `npx tsx scripts/novel-import.ts <ไฟล์.md>` (ตัวบท + ภาค)
  *
  * ตัวละครทุกตัวคือไพ่ในสำรับ Rider-Waite — ภาพประกอบใช้ภาพไพ่ 1909 ของตัวละครนั้น (กฎเหล็ก 5 · 8)
  * ห้ามใช้ภาพตัวละครที่ AI วาด (มีในเอกสารสตอรี่บอร์ดของเจ้าของ แต่ผิดกฎภาพไพ่ของเว็บ)
@@ -46,22 +46,24 @@ const CHAPTER_CARDS: Record<number, readonly string[]> = {
   14: ["major-02", "major-00", "major-01"],
   15: ["swords-14", "major-01", "major-00", "major-02"],
   16: ["swords-14", "major-01", "major-00", "major-02"],
+  17: ["major-01", "major-00", "swords-14", "major-02"],
+  18: ["major-00", "major-01"],
+  19: ["major-05", "major-01"],
+  20: ["major-04", "wands-12"],
+  21: ["major-00", "major-01"],
 };
 
-/**
- * องก์ของเรื่อง — สารบัญจัดกลุ่มตามนี้ · บทสุดท้ายขององก์ที่ `complete` บอกผู้อ่านว่าจบองก์แล้ว
- * องก์ใหม่: เพิ่มระเบียน `{ number: 2, from: 17, complete: false }` แล้วรัน `novel-import` ตามปกติ
- */
-export const NOVEL_ACTS: readonly { number: number; from: number; complete: boolean }[] = [
-  { number: 1, from: 1, complete: true },
-];
+export { NOVEL_PARTS };
+export type NovelPart = NovelPartText;
 
 /**
  * คำเตือนเนื้อหารายบท (กฎเหล็ก 6 · Safety Guard) — แสดงก่อนตัวบทพร้อมสายด่วน 1323
- * บทที่ 12 มีฉากตัวละครกรีดข้อมือตัวเองชัดเจน · บทอื่นมีเลือดและการต่อสู้ ซึ่งบอกไว้ที่หน้ารวมแล้ว
+ * บทที่ 12 · 17 ตัวละครทำร้ายร่างกายตัวเองเพื่อเวทมนตร์ · บทที่ 18 ยืนริมหน้าผาหลังความสูญเสีย · บทอื่นมีเลือดและการต่อสู้ ซึ่งบอกไว้ที่หน้ารวมแล้ว
  */
 const CHAPTER_CONTENT_NOTES: Record<number, string> = {
   12: "บทนี้มีฉากที่ตัวละครทำร้ายร่างกายตัวเองเพื่อแลกกับเวทมนตร์",
+  17: "บทนี้มีฉากที่ตัวละครทำร้ายร่างกายตัวเองเพื่อแลกกับเวทมนตร์ และฉากเสียสละชีวิต",
+  18: "บทนี้มีฉากความสูญเสีย และตัวละครยืนอยู่ริมหน้าผาในห้วงความเศร้า",
 };
 
 /** คำเตือนเนื้อหาทั้งเรื่อง — หน้ารวม */
@@ -98,20 +100,25 @@ export function novelChapterLead(chapter: NovelChapter): string {
   return first.replace(/\*+/g, "").replace(/\s+/g, " ").trim();
 }
 
-/** องก์ของบทนี้ */
-export function novelActOf(number: number): (typeof NOVEL_ACTS)[number] {
-  return [...NOVEL_ACTS].reverse().find((a) => number >= a.from) ?? NOVEL_ACTS[0];
+/** ภาคของบทนี้ */
+export function novelPartOf(number: number): NovelPart {
+  return [...NOVEL_PARTS].reverse().find((p) => number >= p.from) ?? NOVEL_PARTS[0];
 }
 
-/** บทในองก์นี้ (เรียงตามเลขบท) */
-export function novelActChapters(act: (typeof NOVEL_ACTS)[number]): NovelChapter[] {
-  const next = NOVEL_ACTS.find((a) => a.from > act.from);
-  return NOVEL_CHAPTERS.filter((c) => c.number >= act.from && (!next || c.number < next.from));
+/** บทในภาคนี้ (เรียงตามเลขบท) */
+export function novelPartChapters(part: NovelPart): NovelChapter[] {
+  const next = NOVEL_PARTS.find((p) => p.from > part.from);
+  return NOVEL_CHAPTERS.filter((c) => c.number >= part.from && (!next || c.number < next.from));
 }
 
-/** บทนี้คือบทสุดท้ายขององก์ที่จบแล้ว */
-export function isNovelActFinale(chapter: NovelChapter): boolean {
-  const act = novelActOf(chapter.number);
-  const chapters = novelActChapters(act);
-  return act.complete && chapters[chapters.length - 1]?.number === chapter.number;
+/** บทนี้คือบทสุดท้ายของภาคที่จบแล้ว */
+export function isNovelPartFinale(chapter: NovelChapter): boolean {
+  const part = novelPartOf(chapter.number);
+  const chapters = novelPartChapters(part);
+  return part.complete && chapters[chapters.length - 1]?.number === chapter.number;
+}
+
+/** "ภาคที่ 1: The Awakening" (ไม่มีชื่อภาค = "ภาคที่ 1") */
+export function novelPartLabel(part: NovelPart): string {
+  return part.title ? `ภาคที่ ${part.number}: ${part.title}` : `ภาคที่ ${part.number}`;
 }

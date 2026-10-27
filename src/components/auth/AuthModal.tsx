@@ -90,8 +90,8 @@ function afterEmailAuthUrl(isEn: boolean, query: string): string {
   if (typeof window !== "undefined" && hasPendingCheckout()) {
     return `${pricingPathFor(window.location.pathname)}?${query}`;
   }
-  // หน้าดูดวงรายผัง / หน้าราคา: ล็อกอินเสร็จต้องกลับมาทำต่อที่เดิม (ไม่เด้งไปหน้าแรก)
-  if (typeof window !== "undefined" && /^(\/en)?\/(read\/[a-z0-9-]+|pricing)\/?$/.test(window.location.pathname)) {
+  // หน้าดูดวงรายผัง / หน้าราคา / นิยายรายบท (สมาชิกเท่านั้น): ล็อกอินเสร็จต้องกลับมาทำต่อที่เดิม (ไม่เด้งไปหน้าแรก)
+  if (typeof window !== "undefined" && /^(\/en)?\/(read\/[a-z0-9-]+|pricing|novel\/\d+)\/?$/.test(window.location.pathname)) {
     return `${window.location.pathname}?${query}`;
   }
   return isEn ? `/en?${query}` : `/?${query}`;

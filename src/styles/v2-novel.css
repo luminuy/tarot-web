@@ -231,7 +231,7 @@
   color: var(--ui2-on-night-dim);
 }
 
-/* ── องก์ในสารบัญ ── */
+/* ── ภาคในสารบัญ ── */
 .v2-nv-act + .v2-nv-act {
   margin-top: 28px;
 }
@@ -305,4 +305,42 @@
     grid-row: 2;
     justify-self: center;
   }
+}
+
+/* ── ตัวบทสำหรับสมาชิก (island NovelReader) ── */
+.v2-nv-teaser {
+  /* ย่อหน้าตัวอย่าง — จางกว่าตัวบทจริงเล็กน้อย (ห้าม mask-image นอกระดับ full · ด่าน test-ui2-fx) */
+  opacity: 0.8;
+}
+.v2-nv-gate {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin: 28px 0 0;
+  padding: 28px 20px;
+  border: 1px solid var(--ui2-line-night);
+  border-radius: var(--ui2-radius-lg);
+  background: var(--ui2-glass-night-solid);
+  text-align: center;
+}
+/* จองที่ระหว่างรอตัวบท ให้ส่วนท้ายบทไม่กระโดดขึ้นลง */
+.v2-nv-gate-wait {
+  min-height: 60vh;
+  align-content: start;
+  border: 0;
+  background: none;
+}
+.v2-nv-gate-t {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ui2-on-night);
+}
+.v2-nv-gate-s {
+  margin: 0;
+  max-width: 34em;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ui2-on-night-soft);
 }

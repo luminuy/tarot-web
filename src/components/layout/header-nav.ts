@@ -194,7 +194,7 @@ export function headerNav(isEn: boolean): HeaderNav {
             {
               label: "นิยาย",
               href: NOVEL_PATH,
-              sublabel: `${NOVEL_TITLE} · อ่านฟรีทุกบท`,
+              sublabel: `${NOVEL_TITLE} · สมาชิกอ่านฟรีทุกบท`,
               cardId: "major-00",
             },
           ]),

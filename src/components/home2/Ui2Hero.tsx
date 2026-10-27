@@ -129,7 +129,7 @@ export function Ui2Hero({ isEnglish, streak = 0 }: { isEnglish: boolean; streak?
         {!isEnglish && (
           <Link href={NOVEL_PATH} prefetch={false} className="ui2-hero-novel">
             <span className="ui2-hero-novel-k">ใหม่</span>
-            <span>นิยาย {NOVEL_TITLE} อ่านฟรีทุกบท</span>
+            <span>นิยาย {NOVEL_TITLE} สมาชิกอ่านฟรี</span>
           </Link>
         )}
       </div>
