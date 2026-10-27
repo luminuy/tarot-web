@@ -1,4 +1,7 @@
 import { NOVEL_CHAPTER_TEXT } from "./novel-chapters";
+import { NOVEL_PATH, NOVEL_TITLE } from "./novel-title";
+
+export { NOVEL_PATH };
 
 /**
  * 📖 นิยายของ SeerTarot — ข้อมูลเรื่อง (เขียนมือ) · ตัวบทอยู่ที่ `novel-chapters.ts` (สร้างจากสคริปต์)
@@ -10,11 +13,9 @@ import { NOVEL_CHAPTER_TEXT } from "./novel-chapters";
  * ห้ามใช้ภาพตัวละครที่ AI วาด (มีในเอกสารสตอรี่บอร์ดของเจ้าของ แต่ผิดกฎภาพไพ่ของเว็บ)
  */
 
-export const NOVEL_PATH = "/novel";
-
 export const NOVEL = {
-  /** ⚠️ ชื่อชั่วคราว — เจ้าของจะตั้งชื่อเรื่องเอง (2026-10-27 "เดี๋ยวมาบอกชื่อเรื่อง") เปลี่ยนที่นี่ที่เดียว */
-  title: "นิยายไพ่ทาโรต์",
+  /** ชื่อเรื่องที่เจ้าของตั้ง (2026-10-27) — แก้ที่ `novel-title.ts` ที่เดียว */
+  title: NOVEL_TITLE,
   /** คำโปรยสั้นใต้ชื่อเรื่อง (หัวหน้า · meta description หน้ารวม) */
   tagline: "เด็กหนุ่มไร้ชะตากับนักมายากลจอมโกหก ในโลกที่ไพ่ทาโรต์ทุกใบมีชีวิต",
   synopsis: [
@@ -44,7 +45,16 @@ const CHAPTER_CARDS: Record<number, readonly string[]> = {
   13: ["major-02", "major-00", "major-01"],
   14: ["major-02", "major-00", "major-01"],
   15: ["swords-14", "major-01", "major-00", "major-02"],
+  16: ["swords-14", "major-01", "major-00", "major-02"],
 };
+
+/**
+ * องก์ของเรื่อง — สารบัญจัดกลุ่มตามนี้ · บทสุดท้ายขององก์ที่ `complete` บอกผู้อ่านว่าจบองก์แล้ว
+ * องก์ใหม่: เพิ่มระเบียน `{ number: 2, from: 17, complete: false }` แล้วรัน `novel-import` ตามปกติ
+ */
+export const NOVEL_ACTS: readonly { number: number; from: number; complete: boolean }[] = [
+  { number: 1, from: 1, complete: true },
+];
 
 /**
  * คำเตือนเนื้อหารายบท (กฎเหล็ก 6 · Safety Guard) — แสดงก่อนตัวบทพร้อมสายด่วน 1323
@@ -86,4 +96,22 @@ export function getNovelChapter(number: number): NovelChapter | undefined {
 export function novelChapterLead(chapter: NovelChapter): string {
   const first = chapter.body.split(/\n{2,}/).find((p) => p.replace(/[*\s]/g, "").length > 40) ?? chapter.body;
   return first.replace(/\*+/g, "").replace(/\s+/g, " ").trim();
+}
+
+/** องก์ของบทนี้ */
+export function novelActOf(number: number): (typeof NOVEL_ACTS)[number] {
+  return [...NOVEL_ACTS].reverse().find((a) => number >= a.from) ?? NOVEL_ACTS[0];
+}
+
+/** บทในองก์นี้ (เรียงตามเลขบท) */
+export function novelActChapters(act: (typeof NOVEL_ACTS)[number]): NovelChapter[] {
+  const next = NOVEL_ACTS.find((a) => a.from > act.from);
+  return NOVEL_CHAPTERS.filter((c) => c.number >= act.from && (!next || c.number < next.from));
+}
+
+/** บทนี้คือบทสุดท้ายขององก์ที่จบแล้ว */
+export function isNovelActFinale(chapter: NovelChapter): boolean {
+  const act = novelActOf(chapter.number);
+  const chapters = novelActChapters(act);
+  return act.complete && chapters[chapters.length - 1]?.number === chapter.number;
 }

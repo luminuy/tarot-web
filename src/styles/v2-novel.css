@@ -215,9 +215,40 @@
   text-align: center;
 }
 .v2-nv-end {
-  margin: 36px 0 0;
-  font-size: 15px;
+  margin: 40px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: 20px;
+  font-weight: 700;
   text-align: center;
+  color: var(--ui2-gold-solid);
+}
+.v2-nv-end-s {
+  display: block;
+  margin-top: 6px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ui2-on-night-dim);
+}
+
+/* ── องก์ในสารบัญ ── */
+.v2-nv-act + .v2-nv-act {
+  margin-top: 28px;
+}
+.v2-nv-act-h {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0 0 10px;
+  font-family: var(--ui2-font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ui2-gold-solid);
+}
+.v2-nv-act-s {
+  font-size: 13px;
+  font-weight: 500;
   color: var(--ui2-on-night-dim);
 }
 

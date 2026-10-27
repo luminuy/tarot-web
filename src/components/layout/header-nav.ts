@@ -1,4 +1,5 @@
 import { COUNTS } from "@/components/layout/nav-links";
+import { NOVEL_PATH, NOVEL_TITLE } from "@/data/novel-title";
 
 /**
  * 🧭 เมนูหลักของหัวเว็บ — ข้อมูลชุดเดียวที่แถบเมนูเดสก์ท็อปและลิ้นชักมือถือใช้ร่วมกัน
@@ -186,6 +187,17 @@ export function headerNav(isEn: boolean): HeaderNav {
         sublabel: isEn ? "Tarot guides and reading tips" : "ความรู้ไพ่ทาโรต์และเคล็ดลับการดูดวง",
         cardId: "major-09",
       },
+      /* นิยาย The Broken Arcana (เจ้าของ 2026-10-27 "ทำยังไงให้เค้าเข้ามาแล้วรู้ว่ามี") — ภาษาไทยอย่างเดียว จึงไม่มีในเมนูอังกฤษ */
+      ...(isEn
+        ? []
+        : [
+            {
+              label: "นิยาย",
+              href: NOVEL_PATH,
+              sublabel: `${NOVEL_TITLE} · อ่านฟรีทุกบท`,
+              cardId: "major-00",
+            },
+          ]),
       {
         label: isEn ? "Consult a reader" : "ปรึกษาแม่หมอ",
         href: "/readers",

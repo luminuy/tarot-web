@@ -10,8 +10,12 @@ import {
   NOVEL,
   NOVEL_CHAPTERS,
   NOVEL_CONTENT_NOTE,
+  NOVEL_ACTS,
   NOVEL_PATH,
   getNovelChapter,
+  isNovelActFinale,
+  novelActChapters,
+  novelActOf,
   novelChapterLead,
   novelChapterPath,
   type NovelChapter,
@@ -151,13 +155,14 @@ export function NovelHubContent() {
       <Ui2PageHero
         crumbs={[{ label: "หน้าแรก", href: "/" }, { label: "นิยาย" }]}
         title={NOVEL.title}
+        accent="Arcana"
         lede={<ThaiPhrases>{NOVEL.tagline}</ThaiPhrases>}
         actions={
           <Link href={novelChapterPath(1)} className="ui2-btn ui2-btn-gold">
             เริ่มอ่านบทที่ 1
           </Link>
         }
-        note={`${NOVEL_CHAPTERS.length} บท · อ่านฟรีทุกบท ไม่ต้องสมัคร`}
+        note={`${NOVEL_CHAPTERS.length} บท${NOVEL_ACTS.some((a) => a.complete) ? ` · จบองก์ที่ ${NOVEL_ACTS.filter((a) => a.complete).length} แล้ว` : ""} · อ่านฟรีทุกบท ไม่ต้องสมัคร`}
         cards={HUB_CARDS}
       />
 
@@ -181,26 +186,39 @@ export function NovelHubContent() {
           <h2 id="v2-nv-toc-h" className="v2-nv-h2">
             สารบัญ
           </h2>
-          <ol className="v2-nv-toc">
-            {NOVEL_CHAPTERS.map((c) => (
-              <li key={c.number}>
-                <Link href={novelChapterPath(c.number)} className="v2-nv-toc-a">
-                  <CardImage
-                    cardId={c.cards[0]}
-                    image={cardById(c.cards[0])?.image}
-                    alt=""
-                    thumb
-                    sizes="44px"
-                    loading="lazy"
-                    className="v2-nv-toc-card"
-                  />
-                  <span className="v2-nv-toc-n">บทที่ {c.number}</span>
-                  <span className="v2-nv-toc-t">{c.title}</span>
-                  <span className="v2-nv-toc-m">{c.readingMinutes} นาที</span>
-                </Link>
-              </li>
-            ))}
-          </ol>
+          {NOVEL_ACTS.map((act) => {
+            const chapters = novelActChapters(act);
+            return (
+              <div key={act.number} className="v2-nv-act">
+                <h3 className="v2-nv-act-h">
+                  <ThaiPhrases>{`องก์ที่ ${act.number}`}</ThaiPhrases>
+                  <span className="v2-nv-act-s">
+                    <ThaiPhrases>{`${act.complete ? "จบแล้ว" : "กำลังเขียน"} · ${chapters.length} บท`}</ThaiPhrases>
+                  </span>
+                </h3>
+                <ol className="v2-nv-toc">
+                  {chapters.map((c) => (
+                    <li key={c.number}>
+                      <Link href={novelChapterPath(c.number)} className="v2-nv-toc-a">
+                        <CardImage
+                          cardId={c.cards[0]}
+                          image={cardById(c.cards[0])?.image}
+                          alt=""
+                          thumb
+                          sizes="44px"
+                          loading="lazy"
+                          className="v2-nv-toc-card"
+                        />
+                        <span className="v2-nv-toc-n">บทที่ {c.number}</span>
+                        <span className="v2-nv-toc-t">{c.title}</span>
+                        <span className="v2-nv-toc-m">{c.readingMinutes} นาที</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            );
+          })}
         </section>
 
         <section aria-labelledby="v2-nv-cast-h">
@@ -268,6 +286,8 @@ export function NovelChapterContent({ chapter }: { chapter: NovelChapter }) {
             ]}
           />
           <p className="v2-ar-kicker">
+            <span>องก์ที่ {novelActOf(chapter.number).number}</span>
+            <span aria-hidden="true" className="v2-ar-sep" />
             <span>
               บทที่ {chapter.number} จาก {NOVEL_CHAPTERS.length}
             </span>
@@ -309,7 +329,14 @@ export function NovelChapterContent({ chapter }: { chapter: NovelChapter }) {
           ))}
         </div>
 
-        {!next && <p className="v2-nv-end">บทต่อไปกำลังมา ติดตามได้ที่หน้านี้</p>}
+        {isNovelActFinale(chapter) ? (
+          <p className="v2-nv-end">
+            จบองก์ที่ {novelActOf(chapter.number).number}
+            {!next && <span className="v2-nv-end-s">องก์ต่อไปกำลังมา ติดตามได้ที่หน้านี้</span>}
+          </p>
+        ) : (
+          !next && <p className="v2-nv-end">บทต่อไปกำลังมา ติดตามได้ที่หน้านี้</p>
+        )}
 
         <nav className="v2-nv-pager" aria-label="ไปบทอื่น">
           {prev ? (
