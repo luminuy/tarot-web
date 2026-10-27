@@ -256,7 +256,7 @@ npx wrangler secret put ADMIN_REPORT_TOKEN  # 1) Worker
 | Vectorize index | Vectorize | `card-meanings` 1024 มิติ cosine · แก้ข้อมูลไพ่/บทความแล้วกด "สร้าง index ใหม่" ที่ `/admin` ➔ สุขภาพระบบ |
 | TURN · แจ้งเตือนค่าใช้จ่าย | ดูหัวข้อ 6 · 7 | |
 
-ตั้งอัตโนมัติแล้ว ไม่ต้องทำมือ: migration ของ D1 (`deploy.yml`) · กฎลบการ์ดแชร์ 90 วันใน R2 (`npm run cf:r2-lifecycle` · ⛔ ห้ามตั้งกฎลบทั้ง bucket `seertarot-share` เพราะลบโลโก้สตูดิโอใต้ `studio-logo/` ด้วย) · bucket `seertarot-d1-backups` และกฎลบ 35 วัน (`d1-backup.yml`)
+ตั้งอัตโนมัติแล้ว ไม่ต้องทำมือ: migration ของ D1 (`deploy.yml`) · bucket R2 ทุกตัวใน `wrangler.jsonc` (`npm run cf:r2-buckets`) · กฎลบการ์ดแชร์ 90 วันทั้ง bucket `seertarot-share` (`npm run cf:r2-lifecycle` · โลโก้แม่หมอแยกไป `seertarot-studio` แล้ว ⛔ ห้ามตั้งกฎลบใน bucket นั้น) · bucket `seertarot-d1-backups` และกฎลบ 35 วัน (`d1-backup.yml`)
 
 **ปิดหนี้ข้อนี้ถาวร** — ประกาศโดเมนใน `wrangler.jsonc`:
 

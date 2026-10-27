@@ -16,8 +16,10 @@ import { getArticleTitle } from "@/data/article-helpers";
 import { mapLayout, MAP_CARD_ASPECT, MAP_CARD_MIN_PX } from "@/lib/tarot/spread-map-geometry";
 import { useLocale } from "@/lib/i18n";
 import { buildSpreadFaqs, SPREAD_CATEGORY_TH } from "@/lib/seo/faq";
+import { getSpreadGuide } from "@/data/spread-guides";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { Ui2Crumbs, Ui2SectionHead } from "@/components/ui2/Ui2PageHero";
+import { FrFan, FrInput, FrList, FrMock, FrPanel, Ui2FeatureRows } from "@/components/ui2/Ui2Blocks";
 import { cardsEn } from "@/lib/text/plural-en";
 
 interface Props {
@@ -97,6 +99,8 @@ export const SpreadDetailClient: React.FC<Props> = ({
 
   /* ชุดเดียวกับ FAQPage JSON-LD ของหน้า (`spread-detail.tsx`) — ตัวสร้างกลาง `buildSpreadFaqs` (A7-10) */
   const faqs = buildSpreadFaqs(spread, isEnglish, standard);
+  /* คู่มือเนื้อหายาว (ไทยเท่านั้น · มีเฉพาะผังที่มีคนค้นจริง) — FAQ ของคู่มือมาทาง `buildSpreadFaqs` แล้ว */
+  const guide = getSpreadGuide(spread.id, isEnglish);
 
   /*
    * v2 (เจ้าของ 2026-10-16 "สร้างใหม่เลย") — "พิมพ์เขียวผัง"
@@ -245,6 +249,63 @@ export const SpreadDetailClient: React.FC<Props> = ({
           ))}
         </ol>
       </section>
+
+      {/* คู่มือ = แถวสลับซ้ายขวาแบบหน้าแรก/หน้าราคา (แผงครีมไพ่จริง ↔ ข้อความ) · ข้อความจริงอยู่ฝั่งตัวหนังสือครบ */}
+      {guide && (
+        <Ui2FeatureRows
+          id="sd-guide-h"
+          kicker="คู่มือ"
+          title={guide.title}
+          lede={guide.lede}
+          className="v2-sd-guide"
+          rows={guide.blocks.map((block) => ({
+            title: block.heading,
+            kicker: block.kicker,
+            mock: (
+              <FrMock tint={block.mock.tint}>
+                {block.mock.fan && <FrFan cards={block.mock.fan} />}
+                {block.mock.input && <FrInput title={block.mock.input.title} text={block.mock.input.text} />}
+                {block.mock.panel && (
+                  <FrPanel label={block.mock.panel.label}>
+                    <FrList items={block.mock.panel.items} />
+                  </FrPanel>
+                )}
+              </FrMock>
+            ),
+            body: (
+              <>
+                {block.paragraphs?.map((p) => <p key={p}>{p}</p>)}
+                {block.points && (
+                  <dl className="v2-sd-gpoints">
+                    {block.points.map((pt) => (
+                      <div key={pt.term}>
+                        <dt>{pt.href ? <Link href={pt.href}>{pt.term}</Link> : pt.term}</dt>
+                        <dd>{pt.text}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+                {block.example && (
+                  <>
+                    <ol className="v2-sd-gex">
+                      {block.example.cards.map((c) => (
+                        <li key={c.position}>
+                          <span className="v2-sd-gex-pos">{c.position}</span>
+                          <Link href={`/cards/${c.cardId}`}>{c.cardName}</Link>
+                          <span className="v2-sd-gex-t">{c.text}</span>
+                        </li>
+                      ))}
+                    </ol>
+                    <p className="v2-sd-gex-sum">
+                      <strong>อ่านรวมเป็นเรื่องเดียว</strong> {block.example.summary}
+                    </p>
+                  </>
+                )}
+              </>
+            ),
+          }))}
+        />
+      )}
 
       <section className="v2-sd-sec v2-sd-split">
         <div aria-labelledby="sd-faq-h">

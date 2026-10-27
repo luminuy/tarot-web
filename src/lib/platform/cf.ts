@@ -216,31 +216,50 @@ export interface AppAnalyticsDataset {
   writeDataPoint(point: { indexes?: string[]; blobs?: string[]; doubles?: number[] }): void;
 }
 
-let cachedCallMetrics: AppAnalyticsDataset | null | undefined;
+const cachedDatasets = new Map<string, AppAnalyticsDataset | null>();
 
-/**
- * คืน Analytics Engine dataset สถิติวิดีโอคอล (`env.CALL_METRICS`)
- * dev / test / ยังไม่ deploy = ไม่มี binding → คืน `null` (ผู้เรียกข้ามการบันทึกเอง)
- */
-export async function getCallMetricsDataset(): Promise<AppAnalyticsDataset | null> {
-  if (cachedCallMetrics !== undefined) return cachedCallMetrics;
+/** dev / test / ยังไม่ deploy = ไม่มี binding → คืน `null` (ผู้เรียกข้ามการบันทึกเอง) */
+async function getAnalyticsDataset(binding: string): Promise<AppAnalyticsDataset | null> {
+  const cached = cachedDatasets.get(binding);
+  if (cached !== undefined) return cached;
+  let dataset: AppAnalyticsDataset | null = null;
   try {
     const ctx = await safelyGetCloudflareContext();
-    const binding = (ctx?.env as Record<string, unknown> | undefined)?.CALL_METRICS;
-    if (binding && typeof (binding as AppAnalyticsDataset).writeDataPoint === "function") {
-      cachedCallMetrics = binding as AppAnalyticsDataset;
-      return cachedCallMetrics;
+    const value = (ctx?.env as Record<string, unknown> | undefined)?.[binding];
+    if (value && typeof (value as AppAnalyticsDataset).writeDataPoint === "function") {
+      dataset = value as AppAnalyticsDataset;
     }
   } catch {
     // ไม่มี Cloudflare context
   }
-  cachedCallMetrics = null;
-  return null;
+  cachedDatasets.set(binding, dataset);
+  return dataset;
+}
+
+/** ชุดทดสอบเท่านั้น — ใส่ dataset ในหน่วยความจำแทนของจริง (`undefined` = กลับไปอ่าน binding ใหม่) */
+function setDatasetForTests(binding: string, dataset: AppAnalyticsDataset | null | undefined): void {
+  if (dataset === undefined) cachedDatasets.delete(binding);
+  else cachedDatasets.set(binding, dataset);
+}
+
+/** Analytics Engine dataset สถิติวิดีโอคอล (`env.CALL_METRICS`) */
+export function getCallMetricsDataset(): Promise<AppAnalyticsDataset | null> {
+  return getAnalyticsDataset("CALL_METRICS");
 }
 
 /** ชุดทดสอบเท่านั้น — ใส่ dataset ในหน่วยความจำแทนของจริง */
 export function setCallMetricsForTests(dataset: AppAnalyticsDataset | null | undefined): void {
-  cachedCallMetrics = dataset;
+  setDatasetForTests("CALL_METRICS", dataset);
+}
+
+/** Analytics Engine dataset INP ผู้ใช้จริง (`env.RUM_METRICS` · `src/lib/observability/inp-metrics.ts`) */
+export function getRumMetricsDataset(): Promise<AppAnalyticsDataset | null> {
+  return getAnalyticsDataset("RUM_METRICS");
+}
+
+/** ชุดทดสอบเท่านั้น — ใส่ dataset ในหน่วยความจำแทนของจริง */
+export function setRumMetricsForTests(dataset: AppAnalyticsDataset | null | undefined): void {
+  setDatasetForTests("RUM_METRICS", dataset);
 }
 
 /** ส่วนของ R2 bucket ที่แอปนี้ใช้จริง (structural) */
@@ -261,31 +280,56 @@ export interface AppR2Bucket {
   delete(key: string): Promise<void>;
 }
 
-let cachedShareBucket: AppR2Bucket | null | undefined;
+/**
+ * R2 bucket ที่ Worker ผูกไว้ (ชื่อ binding ต้องตรง `r2_buckets` ใน wrangler.jsonc)
+ * - `SHARE_BUCKET` (`seertarot-share`) — ภาพการ์ดแชร์ · ลบเองทั้ง bucket เมื่อครบ 90 วัน
+ * - `STUDIO_BUCKET` (`seertarot-studio`) — โลโก้สตูดิโอแม่หมอ · เก็บถาวร ห้ามมีกฎลบอัตโนมัติ
+ * แยก bucket ตามอายุข้อมูล (2026-10-26) — เดิมโลโก้อยู่ bucket การ์ดแชร์ ต้องตั้งกฎลบหลบ prefix 16 ข้อ
+ */
+type R2BindingName = "SHARE_BUCKET" | "STUDIO_BUCKET";
+const cachedBuckets = new Map<R2BindingName, AppR2Bucket | null>();
+
+async function getR2Bucket(name: R2BindingName): Promise<AppR2Bucket | null> {
+  const hit = cachedBuckets.get(name);
+  if (hit !== undefined) return hit;
+  let bucket: AppR2Bucket | null = null;
+  try {
+    const ctx = await safelyGetCloudflareContext();
+    const binding = (ctx?.env as Record<string, unknown> | undefined)?.[name];
+    if (binding && typeof (binding as AppR2Bucket).put === "function") bucket = binding as AppR2Bucket;
+  } catch {
+    // ไม่มี Cloudflare context
+  }
+  cachedBuckets.set(name, bucket);
+  return bucket;
+}
+
+function setBucketForTests(name: R2BindingName, bucket: AppR2Bucket | null | undefined): void {
+  if (bucket === undefined) cachedBuckets.delete(name);
+  else cachedBuckets.set(name, bucket);
+}
 
 /**
  * คืน R2 bucket สำหรับภาพการ์ดแชร์ (`env.SHARE_BUCKET`)
  * dev / test / ยังไม่ deploy = ไม่มี binding → คืน `null` (ผู้เรียกต้อง degrade เอง)
  */
-export async function getShareBucket(): Promise<AppR2Bucket | null> {
-  if (cachedShareBucket !== undefined) return cachedShareBucket;
-  try {
-    const ctx = await safelyGetCloudflareContext();
-    const binding = (ctx?.env as Record<string, unknown> | undefined)?.SHARE_BUCKET;
-    if (binding && typeof (binding as AppR2Bucket).put === "function") {
-      cachedShareBucket = binding as AppR2Bucket;
-      return cachedShareBucket;
-    }
-  } catch {
-    // ไม่มี Cloudflare context
-  }
-  cachedShareBucket = null;
-  return null;
+export function getShareBucket(): Promise<AppR2Bucket | null> {
+  return getR2Bucket("SHARE_BUCKET");
+}
+
+/** คืน R2 bucket สำหรับโลโก้สตูดิโอแม่หมอ (`env.STUDIO_BUCKET`) · ไม่มี binding → `null` เหมือนกัน */
+export function getStudioBucket(): Promise<AppR2Bucket | null> {
+  return getR2Bucket("STUDIO_BUCKET");
 }
 
 /** ชุดทดสอบเท่านั้น — ใส่ bucket ในหน่วยความจำแทน R2 (`undefined` = กลับไปหา binding จริงรอบถัดไป) */
 export function setShareBucketForTests(bucket: AppR2Bucket | null | undefined): void {
-  cachedShareBucket = bucket;
+  setBucketForTests("SHARE_BUCKET", bucket);
+}
+
+/** ชุดทดสอบเท่านั้น — เหมือน `setShareBucketForTests` แต่เป็น bucket โลโก้แม่หมอ */
+export function setStudioBucketForTests(bucket: AppR2Bucket | null | undefined): void {
+  setBucketForTests("STUDIO_BUCKET", bucket);
 }
 
 /**

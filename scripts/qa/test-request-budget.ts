@@ -18,6 +18,9 @@
  *   5. แคชที่ขอบของ GET สาธารณะ (`withEdgeCache` · A9-02) → คำขอซ้ำไม่สร้างคำตอบใหม่
  *      (ไม่แตะ D1/KV) · เก็บเฉพาะคำขอไม่มีคุกกี้ · `Authorization` ไม่แตะแคช · ไม่เก็บ 503/no-store/Set-Cookie
  *      · เสิร์ฟจากแคชคืน Cache-Control เดิม + หัว `Age` และ `/api/daily-card` ต่อ query ยังใช้คีย์เดียวกัน
+ *   6. ตัวเก็บ INP (`inp-reporter.ts`) → หน้าที่ INP < 200 ms ไม่ยิงอะไรเลย · หน้าที่ช้ายิง `/api/stats/inp` ครั้งเดียว
+ *      ข้อมูลที่ส่งผ่านสคีมาฝั่งเซิร์ฟเวอร์ และแยกช่วงเวลาถูก (ไม่นับ pointerdown ที่วาดไปก่อน) · localhost/Safari ไม่ฟังเลย
+ *   7. เส้น `/api/stats/inp` → origin ภายนอก / ข้อความอิสระ / INP ต่ำกว่าเกณฑ์ ถูกปฏิเสธ · เกินเพดานถี่ทิ้งเงียบ
  */
 import { fileURLToPath } from "node:url";
 
@@ -199,6 +202,224 @@ async function run() {
     edge.setEdgeCacheStoreForTests(undefined);
   }
 
+  // ── เกณฑ์ 6: ตัวเก็บ INP ผู้ใช้จริง — หน้าที่เร็วไม่ยิงอะไรเลย · หน้าที่ช้ายิงครั้งเดียว (รอบ 315) ─
+  {
+    const beacons: string[] = [];
+    const listeners = new Map<string, ((e: unknown) => void)[]>();
+    const on = (name: string, fn: (e: unknown) => void) => listeners.set(name, [...(listeners.get(name) ?? []), fn]);
+    const off = (name: string, fn: (e: unknown) => void) => listeners.set(name, (listeners.get(name) ?? []).filter((f) => f !== fn));
+    const fire = (name: string, event: unknown = {}) => (listeners.get(name) ?? []).forEach((fn) => fn(event));
+    type List = { getEntries(): unknown[] };
+    const observers: { type: string; cb: (list: List) => void }[] = [];
+    let supported = ["event", "long-animation-frame"];
+    class FakeObserver {
+      static get supportedEntryTypes() {
+        return supported;
+      }
+      constructor(private cb: (list: List) => void) {}
+      observe(opts: { type: string }) {
+        observers.push({ type: opts.type, cb: this.cb });
+      }
+      takeRecords() {
+        return [];
+      }
+      disconnect() {}
+    }
+    const doc = {
+      readyState: "complete",
+      visibilityState: "visible",
+      documentElement: { getAttribute: () => "full" },
+      addEventListener: on,
+      removeEventListener: off,
+    };
+    const win = { location: { hostname: "seertarot.net", pathname: "/" }, addEventListener: on, removeEventListener: off };
+    const g = globalThis as Record<string, unknown>;
+    g.PerformanceObserver = FakeObserver;
+    g.window = win;
+    g.document = doc;
+    Object.defineProperty(globalThis, "navigator", {
+      configurable: true,
+      value: {
+        hardwareConcurrency: 8,
+        sendBeacon: (url: string, body: Blob) => {
+          void body.text().then((text) => beacons.push(`${url} ${text}`));
+          return true;
+        },
+      },
+    });
+    const flush = () => new Promise((r) => setTimeout(r, 10));
+    const emit = (type: string, entries: unknown[]) => observers.filter((o) => o.type === type).forEach((o) => o.cb({ getEntries: () => entries }));
+    const hide = async () => {
+      doc.visibilityState = "hidden";
+      fire("visibilitychange");
+      doc.visibilityState = "visible";
+      await flush();
+    };
+
+    const { installInpReporter } = await import("../../src/lib/observability/inp-reporter");
+    const { InpReportSchema } = await import("../../src/lib/observability/inp-metrics");
+    const target = {
+      tagName: "A",
+      id: "",
+      classList: ["px-4", "ui2-btn", "hover:bg-ink"],
+      parentElement: { tagName: "SECTION", id: "", classList: ["ui2-hero"], parentElement: { tagName: "BODY" } },
+    };
+
+    // หน้าโหลดเสร็จที่ 1,100 ms — การแตะที่นิ้วลงก่อนนั้นต้องได้ beforeLoad = true (ตัวเก็บโหลดทีหลัง จึงต้องคิดจากเวลาของ entry)
+    const realEntriesByType = performance.getEntriesByType.bind(performance);
+    performance.getEntriesByType = ((type: string) =>
+      type === "navigation" ? [{ loadEventEnd: 1100 }] : realEntriesByType(type)) as typeof performance.getEntriesByType;
+
+    const stop = installInpReporter();
+    emit("event", [{ name: "click", interactionId: 1, startTime: 100, duration: 120, processingStart: 110, processingEnd: 150, target }]);
+    await hide();
+    if (beacons.length !== 0) errors.push(`INP: หน้าที่เร็ว (120 ms) ต้องไม่ส่งอะไรเลย (ส่ง ${beacons.length} ครั้ง)`);
+
+    // การแตะที่ช้า: pointerdown วาดไปก่อนแล้ว (ไม่นับ) · pointerup + click วาดเฟรมเดียวกันที่ 1520
+    emit("event", [
+      { name: "pointerdown", interactionId: 2, startTime: 1000, duration: 48, processingStart: 1004, processingEnd: 1010, target },
+      { name: "pointerup", interactionId: 2, startTime: 1200, duration: 320, processingStart: 1210, processingEnd: 1260, target },
+      { name: "click", interactionId: 2, startTime: 1201, duration: 319, processingStart: 1260, processingEnd: 1290, target },
+    ]);
+    emit("long-animation-frame", [
+      { startTime: 900, duration: 120, renderStart: 0, styleAndLayoutStart: 0, scripts: [] },
+      // เฟรมที่กำลังรันตอนนิ้วแตะ (1200) = ตัวการของ "รอคิว" — จบก่อนโค้ดจัดการเริ่ม จึงไม่ใช่เฟรมที่วาดผล
+      {
+        startTime: 1150,
+        duration: 58,
+        renderStart: 1185,
+        styleAndLayoutStart: 1190,
+        scripts: [{ duration: 30, invokerType: "user-callback", invoker: "FrameRequestCallback", sourceURL: "https://seertarot.net/_astro/home.js" }],
+      },
+      {
+        startTime: 1205,
+        duration: 300,
+        renderStart: 1300,
+        styleAndLayoutStart: 1350,
+        scripts: [
+          { duration: 20, invokerType: "user-callback", invoker: "FrameRequestCallback" },
+          { duration: 70, invokerType: "event-listener", invoker: "A.ui2-btn.onclick", sourceURL: "https://seertarot.net/_astro/x.js?v=1" },
+        ],
+      },
+    ]);
+    await hide();
+    fire("pagehide");
+    await hide();
+    if (beacons.length !== 1) errors.push(`INP: หน้าที่ช้าต้องส่งพอดี 1 ครั้งต่อหน้า (ส่ง ${beacons.length} ครั้ง)`);
+    const [url, json] = (beacons[0] ?? " {}").split(/ (.*)/s);
+    const report = InpReportSchema.safeParse(JSON.parse(json || "{}"));
+    if (url !== "/api/stats/inp") errors.push(`INP: ต้องส่งไป /api/stats/inp (ได้ ${url})`);
+    if (!report.success) {
+      errors.push(`INP: ข้อมูลที่ส่งไม่ผ่านสคีมาฝั่งเซิร์ฟเวอร์ — ${report.error.issues.map((i) => i.path.join(".")).join(", ")}`);
+    } else {
+      const r = report.data;
+      const expect: Partial<typeof r> = {
+        route: "/",
+        target: "section.ui2-hero>a.ui2-btn",
+        event: "pointerup",
+        fx: "full",
+        duration: 320,
+        inputDelay: 10,
+        processing: 80,
+        presentation: 230,
+        loaf: "hit",
+        styleLayout: 155,
+        renderMain: 205,
+        loafScript: "event-listener:A.ui2-btn.onclick@x.js",
+        interactions: 2,
+        beforeLoad: true,
+        cpuCores: 8,
+        blockScript: "user-callback:FrameRequestCallback@home.js",
+        blockRemaining: 8,
+        blockStyleLayout: 18,
+      };
+      for (const [k, v] of Object.entries(expect)) {
+        if (r[k as keyof typeof r] !== v) errors.push(`INP: ${k} ควรเป็น ${JSON.stringify(v)} (ได้ ${JSON.stringify(r[k as keyof typeof r])})`);
+      }
+    }
+
+    // กลับมาจาก bfcache = เปิดหน้าใหม่ในสายตาผู้ใช้ — เริ่มนับใหม่ ยังไม่มีการแตะก็ต้องไม่ส่ง
+    fire("pageshow", { persisted: true });
+    await hide();
+    if (beacons.length !== 1) errors.push("INP: กลับจาก bfcache แล้วยังไม่แตะอะไร ต้องไม่ส่งซ้ำ");
+    stop();
+    performance.getEntriesByType = realEntriesByType;
+
+    // นอกโดเมนจริง (dev/preview) และเบราว์เซอร์ที่ไม่มี Event Timing ต้องไม่ฟังอะไรเลย
+    observers.length = 0;
+    win.location.hostname = "localhost";
+    installInpReporter()();
+    win.location.hostname = "seertarot.net";
+    supported = ["paint"];
+    installInpReporter()();
+    if (observers.length !== 0) errors.push(`INP: localhost / เบราว์เซอร์ที่ไม่รองรับต้องไม่สร้าง observer (สร้าง ${observers.length})`);
+  }
+
+  // ── เกณฑ์ 7: เส้นรับ INP — ด่าน origin · สคีมาเข้ม (ไม่มีข้อความอิสระ) · เพดานถี่ทิ้งเงียบ ─────────
+  {
+    const cf = await import("../../src/lib/platform/cf");
+    const points: { indexes?: string[]; blobs?: string[]; doubles?: number[] }[] = [];
+    cf.setRumMetricsForTests({ writeDataPoint: (p) => void points.push(p) });
+    const route = await import("../../src/app/api/stats/inp/route");
+    const good = {
+      route: "/cards/major-00",
+      target: "section.ui2-hero>a.ui2-btn",
+      event: "click",
+      fx: "lite",
+      duration: 264,
+      inputDelay: 12,
+      processing: 40,
+      presentation: 212,
+      loaf: "miss",
+      styleLayout: -1,
+      renderMain: -1,
+      loafScript: "",
+      interactions: 3,
+      beforeLoad: false,
+      deviceMemory: 4,
+      cpuCores: 8,
+      blockScript: "",
+      blockRemaining: -1,
+      blockStyleLayout: -1,
+    };
+    const post =(body: unknown, headers: Record<string, string> = {}) =>
+      route.POST(
+        new Request("https://seertarot.net/api/stats/inp", {
+          method: "POST",
+          headers: {
+            origin: "https://seertarot.net",
+            "user-agent": "Mozilla/5.0 (Linux; Android 14) Chrome/130.0 Mobile Safari/537.36",
+            "x-real-ip": "10.0.0.7",
+            ...headers,
+          },
+          body: JSON.stringify(body),
+        }),
+      );
+
+    const ok = await post(good);
+    const p = points[0];
+    if (ok.status !== 200 || points.length !== 1) errors.push(`/api/stats/inp: ข้อมูลถูกต้องต้องบันทึก 1 จุด (ได้ ${ok.status} · ${points.length} จุด)`);
+    else if (p.indexes?.[0] !== good.route || p.blobs?.[1] !== good.target || p.blobs?.[6] !== "android-chrome" || p.doubles?.[0] !== 264 || p.doubles?.[3] !== 212 || p.doubles?.length !== 12 || p.blobs?.length !== 8) {
+      errors.push(`/api/stats/inp: คอลัมน์ผิดตำแหน่ง ${JSON.stringify(p)}`);
+    }
+    const rejected: [string, Response][] = [
+      ["origin ภายนอก", await post(good, { origin: "https://evil.example" })],
+      ["ช่องข้อมูลเกิน (ข้อความอิสระ)", await post({ ...good, text: "ความรักของฉัน" })],
+      ["target มีข้อความบนจอ", await post({ ...good, target: "button ดูดวงฟรี" })],
+      ["INP ต่ำกว่าเกณฑ์", await post({ ...good, duration: 150 })],
+      ["route มี query", await post({ ...good, route: "/read?token=abc" })],
+      ["ใหญ่เกิน 2 KB", await post("x".repeat(3000))],
+    ];
+    for (const [label, res] of rejected) {
+      if (res.status < 400) errors.push(`/api/stats/inp: ${label} ต้องถูกปฏิเสธ (ได้ ${res.status})`);
+    }
+    if (points.length !== 1) errors.push(`/api/stats/inp: คำขอที่ถูกปฏิเสธต้องไม่บันทึกอะไร (มี ${points.length} จุด)`);
+
+    for (let i = 0; i < 25; i++) await post(good, { "x-real-ip": "10.0.0.8" });
+    if (points.length !== 21) errors.push(`/api/stats/inp: เกินเพดาน 20 ครั้ง/10 นาทีต่อเครื่องต้องทิ้งเงียบ (บันทึก ${points.length - 1} จาก 25)`);
+    cf.setRumMetricsForTests(undefined);
+  }
+
   if (errors.length > 0) {
     console.error(`❌ QA FAILED — งบคำขอเกินที่ตั้งไว้ ${errors.length} ข้อ:`);
     for (const e of errors) console.error(`  - ${e}`);
@@ -209,6 +430,7 @@ async function run() {
   console.log("   - ผู้ใช้ที่ล็อกอินอยู่ใช้ /api/bootstrap เส้นเดียวแทนสองเส้นเดิม");
   console.log("   - แถว \"ผังของฉัน\" ของผู้ชมที่ไม่ล็อกอินไม่ยิง /api/spreads/custom");
   console.log("   - GET สาธารณะตอบซ้ำจากแคชที่ขอบ (ไม่เก็บคำขอที่มีคุกกี้/Authorization)");
+  console.log("   - ตัวเก็บ INP ยิงเฉพาะหน้าที่ช้ากว่า 200 ms ครั้งเดียวต่อหน้า · เส้นรับตรวจ origin/สคีมา/เพดานถี่");
   process.exit(0);
 }
 

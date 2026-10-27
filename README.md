@@ -28,7 +28,7 @@
 | :--- | :--- |
 | หน้าเนื้อหาสาธารณะ | Astro + React island — สร้างเป็น HTML ตอนบิลด์ เสิร์ฟเป็นไฟล์ static จากขอบ Cloudflare ไม่ปลุก Worker |
 | API และหน้าแอป (`/api/*` · `/admin` · `/readers/*` ฯลฯ) | Next.js ผ่าน `@opennextjs/cloudflare` บน Cloudflare Workers |
-| ข้อมูล | Cloudflare D1 (`APP_DB`) · KV (`APP_KV`) · R2 (`SHARE_BUCKET`) · Vectorize · Workers AI |
+| ข้อมูล | Cloudflare D1 (`APP_DB`) · KV (`APP_KV`) · R2 (`SHARE_BUCKET` · `STUDIO_BUCKET`) · Vectorize · Workers AI |
 | AI | Groq · Google Gemini (สองเจ้านี้วิ่งผ่าน Cloudflare AI Gateway เมื่อตั้งค่าไว้) · OpenRouter (โมเดลฟรี) · Workers AI (ตัวคัดกรองความปลอดภัย · ค้นหาเชิงความหมาย) |
 | ภาษาและสไตล์ | TypeScript · Tailwind CSS · Zod |
 

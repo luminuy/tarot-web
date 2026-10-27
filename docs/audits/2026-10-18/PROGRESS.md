@@ -2,7 +2,7 @@
 
 > 📌 **สถานะล่าสุด (2026-10-27)**: ✔ **ปิดกระดานแล้ว** — ตรวจ 10 ด้าน 86 ข้อ (2026-10-19) และรอบตรวจเต็ม B1–B5 แก้ครบ ขึ้น production แล้ว:
 > คลื่น 1 = PR #706 (2026-10-20) · คลื่น 2 + B1–B5 + นโยบายเจ้าของ = PR #710 · ข้อตามหลัง = PR #711 · #713 (2026-10-21)
-> ไม่มีงานโค้ดค้าง · นอกโค้ดเหลือ B3-08 (เจ้าของดู PerplexityBot ใน Cloudflare Security › Events) · INP บนมือถือจริงต่อที่ ISSUE-061 ใน `docs/KNOWN_ISSUES.md`
+> ไม่มีงานโค้ดค้าง · นอกโค้ดเหลือ B3-08 (เจ้าของดู PerplexityBot ใน Cloudflare Security › Events · ISSUE-062) · INP บนมือถือจริงต่อที่ ISSUE-061 ใน `docs/KNOWN_ISSUES.md`
 >
 > 🔒 **ผลรายข้ออยู่ที่ไหน**: ไฟล์ผลรายด้าน (`A*.md` · `B*.md`) และรายงานรวมเก็บนอก repo (`.git/info/exclude`) เพราะ `luminuy/tarot-web` เป็น repo สาธารณะ — ขอจากเจ้าของ
 > สรุปที่ขึ้น repo ได้: แผน [`docs/plans/AUDIT_2026-10-18.md`](../../plans/AUDIT_2026-10-18.md) · `docs/WORK_LOG.md` รอบ 294–310 · บทเรียนใน `docs/INCIDENT_LOG.md`

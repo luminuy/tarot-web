@@ -41,6 +41,13 @@ export interface Article {
   keywords: string[];
   keywordsEn?: string[];
   targetSpreadId?: string;
+  /**
+   * ทางลัดเปิดไพ่หลายผังบนหัวบทความ (แทนปุ่มผังเดียวของ `targetSpreadId`)
+   * ใช้กับบทความที่คนค้นเพื่อ "เปิดไพ่" ไม่ใช่เพื่ออ่าน — GSC 2026-10-26: "เปิดไพ่ 4 ใบ" ~760 แสดงผล/เดือน
+   * อันดับ ~9 คนกด ~0.5% เพราะเจอบทความแทนที่จะเปิดไพ่ได้ทันที
+   * ทุกผังต้องเป็นผังมาตรฐาน (เปิดฟรี) เพราะป้ายบนหน้าบอกว่า "เปิดฟรี" — ด่าน test-flow-state ตรวจ
+   */
+  quickSpreads?: { spreadId: string; label: string; labelEn: string; hint: string; hintEn: string; cardId: string }[];
   targetCardId?: string;
   cardNameTh?: string;
   cardNameEn?: string;
@@ -55,7 +62,7 @@ export interface Article {
 /** สรุปข้อมูลบทความตัดฟิลด์เนื้อหาหนัก (content/faqs/toc) เพื่อส่งให้หน้ารวม /blog โดยไม่เปลืองงบน้ำหนัก */
 export type ArticleSummary = Omit<
   Article,
-  "content" | "contentEn" | "toc" | "tocEn" | "faqs" | "faqsEn"
+  "content" | "contentEn" | "toc" | "tocEn" | "faqs" | "faqsEn" | "quickSpreads"
 >;
 
 const RAW_ARTICLES: Article[] = [
@@ -1346,6 +1353,11 @@ Waite ได้ร่วมงานกับ **Pamela Colman Smith (Pixie)** �
     author: "แม่หมอแห่งวิหาร SeerTarot",
     keywords: ["เปิดไพ่ 4 ใบ", "ดูดวงไพ่ยิปซี 4 ใบ", "ไพ่ยิปซี 4 ใบ", "ไพ่ยิปซี 4 ใบ ความรัก", "ดูดวง 4 ใบ", "สุ่มไพ่ 4 ใบ", "ไพ่ 4 ใบ"],
     targetSpreadId: "how-they-feel",
+    quickSpreads: [
+      { spreadId: "how-they-feel", label: "ความรัก", labelEn: "Love", hint: "ความในใจของเขา 4 ใบ", hintEn: "How they feel, 4 cards", cardId: "cups-02" },
+      { spreadId: "luck", label: "โชคลาภ", labelEn: "Luck", hint: "ดวงเสี่ยงโชค 4 ใบ", hintEn: "Luck spread, 4 cards", cardId: "pentacles-01" },
+      { spreadId: "study", label: "การเรียน", labelEn: "Study", hint: "ดวงการสอบ 4 ใบ", hintEn: "Study spread, 4 cards", cardId: "pentacles-11" },
+    ],
     toc: [
       { id: "why-4-cards", title: "ทำไมผังไพ่ยิปซี 4 ใบถึงแม่นยำและตอบโจทย์รอบด้าน" },
       { id: "positions-meaning", title: "ความหมายของแต่ละตำแหน่งในผัง 4 ใบ" },
@@ -1652,7 +1664,7 @@ export function getRelatedArticles(currentSlug: string, limit: number = 3): Arti
 
 export function getArticleSummaries(): ArticleSummary[] {
   return ARTICLES.map(
-    ({ content: _c, contentEn: _ce, toc: _t, tocEn: _te, faqs: _f, faqsEn: _fe, ...summary }) =>
+    ({ content: _c, contentEn: _ce, toc: _t, tocEn: _te, faqs: _f, faqsEn: _fe, quickSpreads: _q, ...summary }) =>
       summary,
   );
 }

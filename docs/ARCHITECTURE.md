@@ -22,7 +22,7 @@ flowchart LR
     E -->|ไม่ตรงอะไรเลย| N[404.html จากขอบ]
     W --> D[(D1 · APP_DB)]
     W --> K[(KV · APP_KV)]
-    W --> R[(R2 · SHARE_BUCKET)]
+    W --> R[(R2 · SHARE_BUCKET · STUDIO_BUCKET)]
     W --> V[(Vectorize · Workers AI)]
     W --> G["AI ภายนอก<br/>Groq · Gemini (ผ่าน AI Gateway) · OpenRouter"]
 ```
@@ -80,7 +80,8 @@ mobile/           แอป iPhone (Expo) — ใช้ API ชุดเดี�
 | `ASSETS` | Static Assets (`.open-next/assets`) | หน้า Astro · ไฟล์ของ Next · ภาพไพ่ · ฟอนต์ |
 | `APP_DB` | D1 (`tarot-app-db`) | ผู้ใช้ · สมุดดวง · สิทธิ์/โควตา · ระบบแม่หมอ · ตัวนับเพดานถี่ (`edge_rate_buckets`) ฯลฯ — สคีมาอยู่ใน `migrations/` · สำรองทุกสัปดาห์ลง R2 (`d1-backup.yml`) |
 | `APP_KV` | KV | ข้อมูลแอปคีย์ `app:*` — ธง · ค่าที่แอดมินแก้ · ตัวนับ · เซสชันเปิดไพ่สำรอง (เดิมชื่อ `NEXT_INC_CACHE_KV` · เปลี่ยน 2026-10-24) |
-| `SHARE_BUCKET` | R2 (`seertarot-share`) | ภาพการ์ดแชร์ (ลบเองเมื่อครบ 90 วัน · ตั้งกฎทุก deploy) · โลโก้สตูดิโอแม่หมอ `studio-logo/` (เก็บถาวร) |
+| `SHARE_BUCKET` | R2 (`seertarot-share`) | ภาพการ์ดแชร์ — ลบเองทั้ง bucket เมื่อครบ 90 วัน (ตั้งกฎทุก deploy) · ห้ามเก็บของถาวรในนี้ |
+| `STUDIO_BUCKET` | R2 (`seertarot-studio`) | โลโก้สตูดิโอแม่หมอ `studio-logo/` — ส่วนตัว · เก็บถาวร ห้ามมีกฎลบ (แยกจาก bucket การ์ดแชร์ 2026-10-26 · #723) |
 | `VECTORIZE` | Vectorize (`card-meanings` · 1024 มิติ) | ค้นหาเชิงความหมายในหน้า `/cards` (`src/lib/search/vectorize.ts`) |
 | `AI` | Workers AI | ตัวจำแนกสัญญาณวิกฤตชั้น 3 (`src/lib/safety/ai-classifier.ts`) · สร้าง embedding ให้ Vectorize |
 | `CALL_METRICS` | Analytics Engine (`seertarot_calls`) | สถิติความเสถียรวิดีโอคอลแม่หมอ (`npm run cf:call-stats`) |

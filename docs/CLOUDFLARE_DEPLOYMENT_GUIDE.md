@@ -32,7 +32,8 @@ Worker ชื่อ `tarot-web` (Next ผ่าน `@opennextjs/cloudflare`) + �
 | `APP_DB` | D1 `tarot-app-db` | ผู้ใช้ · สมุดดวง · สิทธิ์ · การจ่ายเงิน · Marketplace · audit · ตัวนับสถิติ |
 | `AI` | Workers AI | ตัวคัดกรองความปลอดภัยชั้น 3 · embedding ของการค้นหา |
 | `VECTORIZE` | Vectorize `card-meanings` | ค้นหาเชิงความหมาย (1024 มิติ · cosine) |
-| `SHARE_BUCKET` | R2 `seertarot-share` | ภาพการ์ดแชร์ (ลบเองเมื่อครบ 90 วัน) · โลโก้สตูดิโอแม่หมอ `studio-logo/` (ถาวร) |
+| `SHARE_BUCKET` | R2 `seertarot-share` | ภาพการ์ดแชร์ (ลบเองทั้ง bucket เมื่อครบ 90 วัน · ห้ามเก็บของถาวร) |
+| `STUDIO_BUCKET` | R2 `seertarot-studio` | โลโก้สตูดิโอแม่หมอ `studio-logo/` (ส่วนตัว · ถาวร · ห้ามมีกฎลบ) |
 | `CALL_METRICS` | Analytics Engine `seertarot_calls` | สถิติวิดีโอคอล · อ่านด้วย `npm run cf:call-stats` |
 | — | R2 `seertarot-d1-backups` | ไฟล์สำรอง D1 (ไม่ผูกกับ Worker · ดูหัวข้อ 7) |
 
@@ -68,6 +69,7 @@ Worker ชื่อ `tarot-web` (Next ผ่าน `@opennextjs/cloudflare`) + �
 | 2 | `npm ci --ignore-scripts` + ตรวจว่า `esbuild` · `workerd` · `sharp` ยังรันได้ | ไม่ deploy |
 | 3 | `npm run db:migrate` (D1 remote · ข้าม migration ที่ลงแล้วเอง) | ไม่ deploy |
 | 4 | เตือนถ้าค่าวัดผลที่ใช้อยู่ (`NEXT_PUBLIC_GA_ID`) ยังไม่ตั้ง | เตือนอย่างเดียว |
+| 4b | `npm run cf:r2-buckets` สร้าง bucket R2 ใน `wrangler.jsonc` ที่ยังไม่มี (`wrangler deploy` ล้มถ้า bucket ไม่มี) · bucket โลโก้ต้องเป็นส่วนตัว | ไม่ deploy |
 | 5 | จด version id ของ Worker ที่ใช้อยู่ (`PREV_VERSION_ID`) | อ่านไม่ได้ = ไม่ถอยอัตโนมัติ |
 | 6 | `npm run deploy` | ไม่ขึ้น |
 | 7 | `bash .github/scripts/worker-smoke.sh` | **ถอยกลับไป `PREV_VERSION_ID` เอง** แล้ว job แดง |
@@ -75,7 +77,7 @@ Worker ชื่อ `tarot-web` (Next ผ่าน `@opennextjs/cloudflare`) + �
 | 9 | ล้างแคชขอบทั้งโซน (ต้องมี `CLOUDFLARE_ZONE_ID`) | แดง (โค้ดขึ้นแล้ว) |
 | 10 | `npm run cf:canonical-host` ดันกฎ www ➔ โดเมนหลัก แล้วยิงจริงยืนยัน (INC-0203) | แดงเฉพาะเมื่อ www ยังตอบ 200 |
 | 11 | `npm run cf:kv-prune` ลบคีย์แคชหน้า Next รุ่นเก่าใน KV | ไม่ทำให้แดง |
-| 12 | `npm run cf:r2-lifecycle` ตั้งกฎลบการ์ดแชร์ 90 วัน (ราย prefix · ไม่ครอบ `studio-logo/`) | แดง (โค้ดขึ้นแล้ว) |
+| 12 | `npm run cf:r2-lifecycle` ตั้งกฎ `expire-share-90d` ทั้ง bucket `seertarot-share` · ตรวจว่า `seertarot-studio` ไม่มีกฎลบ | แดง (โค้ดขึ้นแล้ว) |
 
 **`npm run deploy`** = `bump-sw-version.ts` ➔ `build:astro` ➔ `opennextjs-cloudflare build` ➔ `merge-astro-assets.ts` (คัดลอก HTML ของ Astro ลง `.open-next/assets`) ➔ `opennextjs-cloudflare deploy` (คัดลอกแคชหน้า Next เข้า assets แล้ว `wrangler deploy`)
 
@@ -198,6 +200,7 @@ npx wrangler d1 execute tarot-app-db-restore --remote --command "SELECT count(*)
 4. เปลี่ยน `database_id` ของ `APP_DB` ใน `wrangler.jsonc` เป็นฐานใหม่แล้วเปิด PR ตามปกติ
    (ไฟล์สำรองมีตาราง `d1_migrations` ติดมา `db:migrate` ตอน deploy จึงรันเฉพาะ migration ที่ใหม่กว่าไฟล์สำรอง)
 5. ข้อมูลหลังเวลาสำรองหายไป — เทียบรายการจ่ายเงินกับ Stripe ช่วงนั้นด้วยมือ แล้วบันทึก incident ตามหัวข้อ 6.4
+6. ⚠️ บัญชีที่ผู้ใช้สั่งลบ**หลัง**เวลาสำรองจะกลับมาในฐานที่กู้ — ระบบยังไม่มีบันทึกการลบให้ลบซ้ำอัตโนมัติ · หน้านโยบายความเป็นส่วนตัวข้อ 3 สัญญาว่าใช้สำเนาเพื่อกู้ระบบเท่านั้นและสำเนาหมดอายุใน 35 วัน (#723) — ถ้ากู้จริงต้องไล่ลบคำขอลบช่วงนั้นซ้ำ
 
 ---
 
@@ -239,7 +242,7 @@ npx wrangler d1 execute tarot-app-db-restore --remote --command "SELECT count(*)
 | :--- | :--- |
 | Account · Workers Scripts · Edit | deploy · rollback · secret put · preview |
 | Account · Workers KV Storage · Edit | deploy · `cf:kv-prune` |
-| Account · Workers R2 Storage · Edit | ตรวจ binding R2 ตอน deploy · `cf:r2-lifecycle` · `cf:d1-backup` |
+| Account · Workers R2 Storage · Edit | ตรวจ binding R2 ตอน deploy · `cf:r2-buckets` · `cf:r2-lifecycle` · `cf:d1-backup` |
 | Account · D1 · Edit | `db:migrate` · `cf:d1-backup` |
 | Zone · Cache Purge · Purge | ล้างแคชขอบหลัง deploy |
 | Zone · Single Redirect · Edit | `cf:canonical-host` (ไม่มี = เตือน ถ้ากฎตั้งด้วยมือไว้แล้ว) — ไม่ใช่ "Transform Rules" (INC-0204) |

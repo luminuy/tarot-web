@@ -32,7 +32,7 @@
 | AI Gateway | `CF_AI_GATEWAY_ACCOUNT_ID` = `f5af6f66302ba6872d8f51aebf43d3fe` · `CF_AI_GATEWAY_ID` = `seertarot-ai` (Unauthenticated · Cache 60s · Logs on) |
 | Turnstile | `TURNSTILE_SITE_KEY` `0x4AAAAAAEl-wIjxl3hSrWTn` · `TURNSTILE_SECRET_KEY` (Managed widget) |
 | Vectorize | index `card-meanings` 1024d/cosine · CI token ได้สิทธิ์ Vectorize (ไม่จำเป็น — ไม่ validate ตอน deploy) |
-| R2 | bucket `seertarot-share` · CI token `tarot-web deploy` เพิ่ม **Workers R2 Storage: Edit** · lifecycle `expire-share-0`…`expire-share-f` (deploy.yml ตั้งทุกรอบ · แทน `auto-delete-90d` แบบทั้ง bucket ตั้งแต่ 2026-10-24) |
+| R2 | bucket `seertarot-share` (การ์ดแชร์) + `seertarot-studio` (โลโก้แม่หมอ · แยก 2026-10-26) · CI token `tarot-web deploy` เพิ่ม **Workers R2 Storage: Edit** · lifecycle `expire-share-90d` ทั้ง bucket การ์ดแชร์ (deploy.yml ตั้งทุกรอบ) |
 
 ### 🔁 ต้องรันซ้ำเมื่อแก้ข้อมูลไพ่/บทความ
 - `/admin` → แท็บสุขภาพระบบ → การ์ด Cloudflare Free Stack → ปุ่ม **"สร้าง index ใหม่"** (rebuild Vectorize)
@@ -150,7 +150,7 @@
 - `GET /api/share/image/<id>` — Worker อ่าน R2 คืนรูป (ไม่เปิด public bucket)
 - `GET /s/<id>` — หน้า OG จิ๋ว (`og:image` + `twitter:card`) + redirect ไปหน้าแรก · `robots: noindex`
 - `ShareModal` — Twitter/Facebook/Threads อัปโหลด canvas → แชร์ `/s/<id>` (ขึ้นรูปพรีวิว) · IG/TikTok ยังใช้ native share + ดาวน์โหลดเหมือนเดิม
-- **PDPA**: id สุ่ม (UUID) · meta เก็บแค่หัวข้อ+ชื่อผัง · lifecycle 90 วัน — เดิม `auto-delete-90d` ตั้งใน dashboard แบบทั้ง bucket ซึ่งครอบโลโก้สตูดิโอแม่หมอ `studio-logo/` ด้วย · 2026-10-24 แทนด้วยกฎ 16 ข้อราย prefix 0-9 a-f ที่ `scripts/cf-r2-lifecycle.ts` ตั้งทุก deploy
+- **PDPA**: id สุ่ม (UUID) · meta เก็บแค่หัวข้อ+ชื่อผัง · lifecycle 90 วัน — เดิม `auto-delete-90d` ตั้งใน dashboard แบบทั้ง bucket ซึ่งครอบโลโก้สตูดิโอแม่หมอ `studio-logo/` ด้วย · 2026-10-24 แทนด้วยกฎ 16 ข้อราย prefix 0-9 a-f ที่ `scripts/cf-r2-lifecycle.ts` ตั้งทุก deploy · 2026-10-26 ย้ายโลโก้ไป bucket `seertarot-studio` แล้วกลับมาใช้กฎเดียวทั้ง bucket `expire-share-90d`
 - verified บน production: POST PNG → 200 · GET กลับ byte ตรงเป๊ะ · `/s/<id>` มี `og:image` + `twitter:card`
 
 ### 3-7 Vectorize — ค้นหาเชิงความหมาย 🟢 (LIVE)

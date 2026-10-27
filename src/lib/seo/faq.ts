@@ -7,10 +7,12 @@
  *
  * ⚠️ ไฟล์นี้ถูก import จาก island (`SpreadDetailClient` · `CardYesNoAnswer`) — ห้าม import ข้อมูลก้อนใหญ่
  *    (สำรับ 78 ใบ · รายการผังทั้งหมด) เข้ามา รับเป็นพารามิเตอร์แทน
+ *    (`spread-guides.ts` เป็นข้อความล้วนของผังไม่กี่ผัง จึง import ได้)
  */
 
 import type { Spread } from "@/data/spreads-helpers";
 import { getSpreadDescription, getSpreadName } from "@/data/spreads-helpers";
+import { getSpreadGuide } from "@/data/spread-guides";
 import { cardsEn } from "@/lib/text/plural-en";
 
 export interface FaqItem {
@@ -30,8 +32,13 @@ export const SPREAD_CATEGORY_TH: Record<string, string> = {
   decision: "การตัดสินใจ",
 };
 
-/** FAQ ของหน้าผังรายผัง (`/spreads/[id]` · `/en/spreads/[id]`) — ชุดที่แสดงบนหน้าและชุดใน JSON-LD เป็นชุดเดียวกัน */
+/**
+ * FAQ ของหน้าผังรายผัง (`/spreads/[id]` · `/en/spreads/[id]`) — ชุดที่แสดงบนหน้าและชุดใน JSON-LD เป็นชุดเดียวกัน
+ * ผังที่มีคู่มือเนื้อหายาว (`spread-guides.ts`) ใช้ชุดคำถามของคู่มือแทนชุดทั่วไปทั้งชุด
+ */
 export function buildSpreadFaqs(spread: Spread, isEnglish: boolean, standard: boolean): FaqItem[] {
+  const guide = getSpreadGuide(spread.id, isEnglish);
+  if (guide) return guide.faqs;
   const cardCount = spread.positions.length;
   if (isEnglish) {
     return [

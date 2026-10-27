@@ -7,6 +7,7 @@ import { buildSpeculationRules } from "@/app/_shared/speculation-rules";
 import {
   FONT_PRELOADS,
   FONT_PRELOADS_LOW,
+  FONT_PRELOADS_LOW_SKIP_ROUTES,
   GOOGLE_SITE_VERIFICATION,
   ROOT_ALTERNATES,
   ROOT_DESCRIPTION,
@@ -69,6 +70,10 @@ interface Props {
 const { locale, metadata, preloadImages = [], hasSiteHeader = true } = Astro.props;
 
 const isEnglish = locale === "en";
+/* หน้าแรกไม่พรีโหลดฟอนต์น้ำหนักหนา — ตัวเลขวัดอยู่ที่ FONT_PRELOADS_LOW_SKIP_ROUTES
+   ⚠️ ตอนบิลด์ (build.format "file") pathname คือ `/index.html` · `/en.html` ไม่ใช่ `/` · `/en` เหมือนตอน dev ➔ ทำให้อยู่รูปเดียวก่อนเทียบ */
+const route = Astro.url.pathname.replace(/\.html$/, "").replace(/\/index$/, "") || "/";
+const fontPreloadsLow = FONT_PRELOADS_LOW_SKIP_ROUTES.includes(route) ? [] : FONT_PRELOADS_LOW;
 const imageCdnOrigin = getImageKitOrigin();
 /* ผสาน metadata ของรากกับของหน้าแบบทีละฟิลด์ — หน้าย่อยทับได้ (พฤติกรรมเดียวกับ Next) */
 const metaTags = renderMetadata(
@@ -159,7 +164,7 @@ const consentScript = `try{if(!localStorage.getItem(${JSON.stringify(CONSENT_STO
       <link rel="preload" href={href} as="font" type="font/woff2" crossorigin="anonymous" />
     ))}
     {/* น้ำหนักหนา — ลำดับต่ำ: ไม่แย่งคิวภาพ LCP แต่ทันเฟรมแรกเมื่ออยู่ในแคช หัวข้อจึงไม่กระโดดตอนเปลี่ยนหน้า (INC-0244) */}
-    {FONT_PRELOADS_LOW.map((href) => (
+    {fontPreloadsLow.map((href) => (
       <link rel="preload" href={href} as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="low" />
     ))}
     {/*

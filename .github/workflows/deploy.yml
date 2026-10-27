@@ -169,6 +169,14 @@ jobs:
       # ⚠️ ต้องจด version id เจาะจง ห้ามถอยแบบเว้นว่าง — ขั้น Stripe `secret put` ด้านล่างสร้างเวอร์ชันใหม่ที่ใช้โค้ดชุดเดียวกัน
       #    ถอยแบบเว้นว่างจึงอาจถอยไปหาโค้ดชุดที่พังเอง (กับดักที่ INC-0285 บันทึกไว้)
       # อ่านไม่ได้ (เช่น deploy ครั้งแรกสุด) = ไม่ถอยอัตโนมัติ แต่ขั้นยืนยันยังทำให้ job แดงเตือนเหมือนเดิม
+      # ── R2 bucket ทุกตัวใน wrangler.jsonc ต้องมีอยู่ก่อน `wrangler deploy` (ไม่มี = deploy ล้มทั้งรอบ) ──
+      # เพิ่ม bucket ใหม่แล้วไม่ต้องกดสร้างใน dashboard เอง · bucket โลโก้แม่หมอต้องเป็นส่วนตัว (scripts/cf-r2-buckets.ts)
+      - name: 🪣 เตรียม R2 bucket ก่อน deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npm run cf:r2-buckets
+
       - name: 📌 จดเวอร์ชัน Worker ที่ใช้อยู่ก่อน deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -339,7 +347,7 @@ jobs:
 
       # ── กฎลบการ์ดแชร์อัตโนมัติเมื่อครบ 90 วันใน R2 (PDPA · ตรวจ 2026-10-24) ──────────────
       # กฎนี้ค้างเป็นงานมือใน PENDING_SETUP มาตั้งแต่ 2026-09 — ตั้งและยืนยันซ้ำทุก deploy แทน (รันซ้ำได้ ไม่สร้างกฎซ้อน)
-      # ตั้งเฉพาะ key ของการ์ดแชร์ ไม่ใช่ทั้ง bucket: โลโก้สตูดิโอแม่หมอ `studio-logo/` อยู่ bucket เดียวกันและต้องอยู่ถาวร
+      # bucket การ์ดแชร์ลบทั้ง bucket · bucket โลโก้แม่หมอ (`seertarot-studio` · แยก 2026-10-26) ต้องไม่มีกฎลบ — สคริปต์ตรวจทั้งสองอย่าง
       # ล้ม = ขั้นนี้แดงให้เห็น (โค้ดขึ้นแล้ว) — รายละเอียดอยู่ใน scripts/cf-r2-lifecycle.ts
       - name: 🧹 กฎลบการ์ดแชร์อายุเกิน 90 วัน (R2)
         env:
