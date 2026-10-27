@@ -87,14 +87,14 @@ docs/
         ├── CONSULT_FLOW_UX_PLAN_2026-10-11.md      # ✅ 🛎️ แผนยกเครื่องขั้นตอน "ปรึกษาแม่หมอ" ให้ใช้ง่ายแบบเว็บจองระดับโลก
         ├── CLOUDFLARE_FREE_STACK.md                # ✅ ☁️ แผนใช้บริการฟรีของ Cloudflare ต่อยอด SeerTarot
         ├── AI_COST_CONTROL_PLAN.md                 # ✅ 💸 แผนคุมต้นทุน AI + รหัสทดสอบข้าม rate limit — handoff ให้ทีม Gemini
-        ├── UX_PERF_PLAN.md                         # 📚 🎯 แผนยกเครื่อง UX · ความไว · ความสมูท — 2026-09-01
-        ├── TRAFFIC_CAPTURE_PLAN_2026-09-05.md      # 📚 🎯 แผนแย่งทราฟฟิกจาก MyHora และเจ้าตลาดดูดวงไทย (Traffic Capture Plan)
         ├── HANDOFF_CF_REQUEST_REVIEW_2026-09-08.md # 📚 🔍 ตรวจข้อเสนอ 12 ข้อ "ลด Request บน Cloudflare" (2026-09-08)
-        ├── BACKLOG.md                              # 📚 📋 Backlog — งานที่ยังเหลือ (2026-09-04)
-        ├── AUDIT_2026-09-01.md                     # 📚 🔍 รายงานตรวจสอบเต็มรูปแบบ (Full Audit) — 2026-09-01
-        └── AGENTS_TASK_PLAN.md                     # 📚 🤖 แผนงานและการแบ่งหน้าที่สำหรับ AI Agents (Multi-Agent Task Orchestration)
+        └── BACKLOG.md                              # 📚 📋 Backlog — งานที่ยังเหลือ (2026-09-04)
 <!-- PLANS_TREE_END -->
 ```
+
+> 🗄️ แผนที่เป็นประวัติล้วน (ไม่มีงานค้าง ไม่มีข้อห้ามที่ยังใช้) ย้ายไป [`docs/plans/archive/`](plans/archive/) — ไม่ขึ้นในตารางแผนงาน
+> (2026-10-27: `UX_PERF_PLAN` · `TRAFFIC_CAPTURE_PLAN_2026-09-05` · `AUDIT_2026-09-01` · `AGENTS_TASK_PLAN`)
+> แผนที่ยังมีข้อห้ามให้อ่านก่อนแตะ เช่น `HANDOFF_CF_REQUEST_REVIEW` ต้องอยู่ในตาราง ห้ามย้ายมาที่นี่
 
 ---
 

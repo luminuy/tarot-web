@@ -1,7 +1,0 @@
-packages:
-  - .
-onlyBuiltDependencies:
-  - esbuild
-  - '@tailwindcss/oxide'
-  - sharp
-

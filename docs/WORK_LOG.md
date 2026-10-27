@@ -38,6 +38,13 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-10-27 (รอบ 319): เก็บกวาด 4 ข้อที่ค้างรอเจ้าของตัดสิน (เจ้าของ "ทำเลย ทุกข้อ")
+- ลบ `pnpm-workspace.yaml` — CI ใช้ npm + `package-lock.json` แล้ว ไม่มี workflow ไหนเรียก pnpm · ด่าน `test-ci-supply-chain` กันไฟล์ตั้งค่า pnpm ค้างถ้าไม่มี `pnpm-lock.yaml` · BACKLOG ข้อ "อย่าลบ" (สมัยใช้ pnpm) ขีดฆ่าพร้อมเหตุผล
+- `npm run db:migrate` ค่าเริ่มต้นเป็นฐานในเครื่อง (`--local`) · ฐานจริงต้องสั่ง `-- --remote` เอง · `deploy.yml` สั่ง `--remote` แล้ว · ด่าน 4d ตรวจทั้งสองฝั่ง (เดิมพิมพ์เปล่า ๆ บนเครื่องตัวเองก็แก้ฐาน production)
+- ลบ `scripts/design/` (สคริปต์ Python 7 ตัวที่กวาดสีทั้งเว็บเป็นชุด V2 เก่า · README บอก "รันซ้ำได้ ปลอดภัย" แต่ตอนนี้รันแล้วสี UI 2.0 จะถูกแทนด้วยชุดเก่า · ไม่มีที่ไหนเรียกใช้ · ดึงคืนได้จากประวัติ git)
+- ย้ายแผนประวัติล้วน 4 ไฟล์ไป `docs/plans/archive/` (`UX_PERF_PLAN` · `TRAFFIC_CAPTURE_PLAN_2026-09-05` · `AUDIT_2026-09-01` · `AGENTS_TASK_PLAN`) แก้ลิงก์ทุกที่ที่อ้าง (ผู้ช่วย cmo · GEMINI.md · KNOWN_ISSUES · แผนอื่น) + ตารางแผนสร้างใหม่ด้วย `docs:index`
+  ไม่ย้าย `HANDOFF_CF_REQUEST_REVIEW` (ยังมีข้อห้ามตั้งค่า Cloudflare 5 ข้อที่ต้องขึ้นในตาราง · สคริปต์และผู้ช่วย coo อ้างอยู่) และ `BACKLOG` (คิวงานที่ยังใช้)
+
 ### 🗓️ 2026-10-26 (รอบ 318): ทำต่อ — Lighthouse มือถือ + กันแย่งคำ "ดูดวงไพ่ยิปซีความรัก" (เจ้าของ "ทำต่อแต่ อย่าพึ่งเอาขึ้น" · ยังไม่ขึ้น production)
 - Lighthouse มือถือ (จำลอง · 2026-10-26 · 2 รอบต่อหน้า เทียบเว็บจริงกับ preview): `/spreads` 83–88 ➔ 90–97 · `/spreads/celtic-cross` 98–99 ➔ 93–97 · `/spreads/topic/love` 98–100 ➔ 97–99 · `/readers` 87–92 ➔ 84–90 · โปรไฟล์แม่หมอ 92–93 ➔ 85–87 (TTFB ของลิงก์ workers.dev 1.6 vs 0.98 วินาที · เวลาวาดเท่ากัน 1.56 vs 1.52) · a11y 96–100 · CLS ≤ 0.004 — ไม่ช้าลงจากงานรอบนี้
 - title ผังลูกหมวดความรัก 4 หน้าไม่ขึ้นต้นด้วย "ดูดวงไพ่ยิปซีความรัก" แล้ว (ให้หน้าหมวดคนเดียว) — รายละเอียดใน `SEO_INDEXING_LOG.md`
@@ -11342,7 +11349,7 @@ code-splitting ใน `TarotFlow` ทำได้ดีอยู่แล้ว 
   - **แผนธุรกิจฉบับเดิมมีข้อเท็จจริงผิด** — MyHora ใช้ URL อังกฤษ `/horoscope/tarot-love.aspx` ไม่ใช่ slug ไทยอย่างที่เขียนไว้ · มีโฆษณา 2 ช่องไม่ใช่ "หนาแน่น" · มี viewport responsive ไม่ใช่ layout ตารางปี 2005
 
 - **เอกสารที่สร้าง**:
-  - [`docs/plans/TRAFFIC_CAPTURE_PLAN_2026-09-05.md`](plans/TRAFFIC_CAPTURE_PLAN_2026-09-05.md) — แผนแม่บท: สนามรบจริง, ผ่า MyHora 9 หน้าพร้อมจุดตาย 5 ข้อ, ยุทธศาสตร์ 4 คลื่น, สิ่งที่ยังไม่รู้
+  - [`docs/plans/archive/TRAFFIC_CAPTURE_PLAN_2026-09-05.md`](plans/archive/TRAFFIC_CAPTURE_PLAN_2026-09-05.md) — แผนแม่บท: สนามรบจริง, ผ่า MyHora 9 หน้าพร้อมจุดตาย 5 ข้อ, ยุทธศาสตร์ 4 คลื่น, สิ่งที่ยังไม่รู้
   - [`docs/plans/HANDOFF_SEO_WAVE1_2026-09-05.md`](plans/HANDOFF_SEO_WAVE1_2026-09-05.md) — แผนลงมือคลื่น 1: 6 งาน 8 ไฟล์ พร้อมโค้ด before/after ทุกบรรทัด และตาราง `seoTitleTh` ครบ 20 ผัง
   - [`docs/plans/HANDOFF_SEO_WAVE2-4_2026-09-05.md`](plans/HANDOFF_SEO_WAVE2-4_2026-09-05.md) — แผนลงมือคลื่น 2-4: ยึด `/cards` (พบว่าตัวกรอง ชุดใหญ่/ดอกไพ่ ใน `CardsExplorer` เป็น client state ไม่มี URL แยก = มีเนื้อหาพอทำ 6 หน้าแต่ส่งแข่งได้หน้าเดียว), สร้างผังใหม่ 5 ผังชนกับ MyHora 1:1, ไพ่ประจำตัว, และเกณฑ์วัดผลจาก GSC
 
@@ -13422,7 +13429,7 @@ code-splitting ใน `TarotFlow` ทำได้ดีอยู่แล้ว 
    - บันทึกการตัดสินใจเชิงสถาปัตยกรรม (ADR) อธิบายเหตุผลที่เลือกใช้ `React 19.2`, `Next.js 16.3`, และ `Motion 13`
    - ชี้แจงที่มาและมาตรการบริหารความเสี่ยงสำหรับ ISSUE-001 (Peer Dependencies) และ Edge Runtime Parity
 4. **Cross-Link เชื่อมโยงเอกสาร AI และปัญหาค้าง**:
-   - ใส่ Cross-link ระหว่าง [`docs/plans/AGENTS_TASK_PLAN.md`](plans/AGENTS_TASK_PLAN.md) ↔ [`docs/KNOWN_ISSUES.md`](KNOWN_ISSUES.md) ที่หัวไฟล์ทั้งสอง
+   - ใส่ Cross-link ระหว่าง [`docs/plans/archive/AGENTS_TASK_PLAN.md`](plans/archive/AGENTS_TASK_PLAN.md) ↔ [`docs/KNOWN_ISSUES.md`](KNOWN_ISSUES.md) ที่หัวไฟล์ทั้งสอง
 5. **อัปเดตทะเบียนปัญหา (`docs/KNOWN_ISSUES.md`)**:
    - ขีดฆ่าและทำเครื่องหมาย ✅ ผ่านครบทุกช่องในตาราง Documentation Gaps พร้อมแนบลิงก์เอกสารอ้างอิงตรงจุด
 

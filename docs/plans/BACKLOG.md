@@ -86,7 +86,7 @@ Phase 1 (แผงแอดมิน M0–M3) เสร็จแล้ว: PR #5
 2. `pnpm-lock.yaml` — รัน `pnpm install` ให้ lockfile sync กับ `package.json` แล้ว **commit เข้าไป**
 3. `.gitignore` — เพิ่ม `package-lock.json`, `yarn.lock`
 4. `pr.yml` + `deploy.yml` — `pnpm/action-setup@v4` (version ตรง packageManager) + `setup-node` `cache: "pnpm"` + `run: pnpm install --frozen-lockfile` + `pnpm run ...`
-5. `pnpm-workspace.yaml` — มี `packages: - .` แล้ว (INC-0018) อย่าลบ
+5. ~~`pnpm-workspace.yaml` — มี `packages: - .` แล้ว (INC-0018) อย่าลบ~~ ลบแล้ว 2026-10-27 — CI เลิกใช้ pnpm ไปใช้ npm + `package-lock.json` (ด่าน `test-ci-supply-chain` กันไฟล์ตั้งค่า pnpm ค้าง)
 6. `scripts/github-auto.ts` CHECKS + hooks — ถ้ามีที่ไหนเรียก `npm` แข็งๆ ให้เป็น `pnpm`
 7. **ทดสอบก่อน push:** `rm -rf node_modules && pnpm install --frozen-lockfile && npm run repo:verify` (ต้องผ่าน) · `pnpm store path` ต้องไม่ error
 

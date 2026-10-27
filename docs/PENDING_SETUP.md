@@ -207,7 +207,7 @@ npx wrangler secret put CRON_SECRET
 > ตั้งแต่ 2026-10-19 (A10-07) `/api/*` อื่นทั้งหมดบนโฮสต์นี้ถูกส่งกลับไปโดเมนหลักด้วย 307 (`redirects()` ใน `next.config.ts`)
 > เหลือเปิดตรงแค่ `/api/cron/*` · เพิ่มเส้น cron ใหม่ต้องตรวจ `CRON_SECRET` เองทุกเส้น
 
-> ⚠️ ต้องรัน `npm run db:migrate` (migration `0014_digest_prefs.sql`) ก่อน ไม่งั้นเส้นนี้จะล้มเพราะไม่มีตาราง `digest_log`
+> ⚠️ ต้องรัน `npm run db:migrate -- --remote` (migration `0014_digest_prefs.sql` · deploy.yml รันให้ทุกรอบอยู่แล้ว) ก่อน ไม่งั้นเส้นนี้จะล้มเพราะไม่มีตาราง `digest_log`
 > ⚠️ เพดานส่ง 80 ฉบับ/รอบ เพราะ Resend แผนฟรีให้ 100 ฉบับ/วัน และต้องเหลือโควตาให้อีเมลยืนยันตัวตนกับรีเซ็ตรหัสผ่านด้วย
 
 > **เอนจินคำอ่าน**: GROQ + GEMINI ตั้งครบ → Tier 1 Groq Qwen3-27B ทำงาน (`src/lib/ai/groq.ts` · fallback → Gemini `src/lib/ai/gemini.ts`) · เฝ้าเมตริก `ai_foreign_trip` / `ai_groq_failover` ใน `/admin`
@@ -262,7 +262,8 @@ workflow `.github/workflows/setup-vapid.yml` สร้างคู่กุญ�
 
 ### 🗄️ migration ของแผนสมุดดวง 0022–0029 — **ไม่ต้องทำเอง**
 
-`deploy.yml` รัน `npm run db:migrate` ใส่ D1 remote ให้ทุกครั้งก่อน deploy (wrangler จำว่าไฟล์ไหน apply แล้ว ข้ามให้เอง)
+`deploy.yml` รัน `npm run db:migrate -- --remote` ใส่ D1 remote ให้ทุกครั้งก่อน deploy (wrangler จำว่าไฟล์ไหน apply แล้ว ข้ามให้เอง)
+· `npm run db:migrate` เปล่า ๆ = ฐานในเครื่องเท่านั้น (เปลี่ยนค่าเริ่มต้น 2026-10-27 กันเผลอแก้ฐานจริงจากเครื่องตัวเอง)
 จึงลงพร้อมโค้ดอัตโนมัติเมื่อ merge กิ่งนี้เข้า `main` · ต้องการแค่ `CLOUDFLARE_API_TOKEN` มีสิทธิ์ D1:Edit (มีอยู่แล้วเพราะ deploy ก่อนหน้าใช้ขั้นนี้)
 
 ### 🛡️ ตั้งได้ภายหลัง (มีค่าเริ่มต้นแล้ว) — เพดานโทเคน AI ต่อคนต่อวัน (แทร็ก S · 2026-10-06)
