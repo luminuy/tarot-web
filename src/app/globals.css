@@ -43,22 +43,46 @@
  *    ถ้าตัวสำรองโหลดไม่สำเร็จ ค่าชดเชยทั้งชุดจะไม่ถูกใช้เลย แล้ว CLS จะกลับมาทันที
  *
  * ⚠️ ไฟล์ .woff2 ถูกตัดเองด้วย `npm run fonts:subset` และ commit ไว้ในรีโป
- *    สายพานบิลด์ไม่ได้สร้างใหม่ · ชื่อไฟล์ไม่มี hash จึงตั้งอายุแคชไว้ 7 วัน
+ *    สายพานบิลด์ไม่ได้สร้างใหม่ · ชื่อไฟล์ไม่มี hash จึงไม่ตั้ง `immutable`
  *    (ดูเหตุผลที่ `public/_headers`) ห้ามตั้ง `immutable` กับพาธนี้เด็ดขาด
+ *
+ * ✂️ ฟอนต์ไทย+ละตินแยกเป็นสองไฟล์ต่อหนึ่งน้ำหนัก (2026-10-27 · ISSUE-048)
+ *    `-thai.woff2` = บล็อกไทย · `-latin.woff2` = ASCII + เครื่องหมาย · `unicode-range` บอกเบราว์เซอร์ว่าไฟล์ไหนมีอะไร
+ *    หน้า `/en` จึงโหลดแค่ไฟล์ละติน · หน้าไทยโหลดทั้งสอง (ช่องว่าง ตัวเลข คำอังกฤษ อยู่ในไฟล์ละติน)
+ *    ⚠️ ช่วงอักขระต้องตรงกับค่าคงที่ THAI / LATIN ใน `scripts/subset-fonts.py` และห้ามทับกัน
+ *       (ตัวที่ทับ เบราว์เซอร์เลือกหน้าฟอนต์ที่ประกาศทีหลัง ➔ หน้าอังกฤษกลับไปโหลดไฟล์ไทย) · ด่าน `test-render-parity` เทียบให้
  */
 @font-face {
   font-family: "notoSerifThai";
-  src: url(/fonts/noto-serif-thai-400.woff2) format("woff2");
+  src: url(/fonts/noto-serif-thai-400-thai.woff2) format("woff2");
   font-display: swap;
   font-weight: 400;
   font-style: normal;
+  unicode-range: U+0E00-0E7F;
 }
 @font-face {
   font-family: "notoSerifThai";
-  src: url(/fonts/noto-serif-thai-700.woff2) format("woff2");
+  src: url(/fonts/noto-serif-thai-400-latin.woff2) format("woff2");
+  font-display: swap;
+  font-weight: 400;
+  font-style: normal;
+  unicode-range: U+0020-007E, U+00A0, U+00A7, U+00A9, U+00B0, U+00B7, U+00D7, U+2013-2014, U+2018-2019, U+201C-201D, U+2022, U+2026, U+203A;
+}
+@font-face {
+  font-family: "notoSerifThai";
+  src: url(/fonts/noto-serif-thai-700-thai.woff2) format("woff2");
   font-display: swap;
   font-weight: 700;
   font-style: normal;
+  unicode-range: U+0E00-0E7F;
+}
+@font-face {
+  font-family: "notoSerifThai";
+  src: url(/fonts/noto-serif-thai-700-latin.woff2) format("woff2");
+  font-display: swap;
+  font-weight: 700;
+  font-style: normal;
+  unicode-range: U+0020-007E, U+00A0, U+00A7, U+00A9, U+00B0, U+00B7, U+00D7, U+2013-2014, U+2018-2019, U+201C-201D, U+2022, U+2026, U+203A;
 }
 @font-face {
   font-family: "notoSerifThai Fallback";
@@ -70,17 +94,35 @@
 }
 @font-face {
   font-family: "sarabun";
-  src: url(/fonts/sarabun-400.woff2) format("woff2");
+  src: url(/fonts/sarabun-400-thai.woff2) format("woff2");
   font-display: swap;
   font-weight: 400;
   font-style: normal;
+  unicode-range: U+0E00-0E7F;
 }
 @font-face {
   font-family: "sarabun";
-  src: url(/fonts/sarabun-600.woff2) format("woff2");
+  src: url(/fonts/sarabun-400-latin.woff2) format("woff2");
+  font-display: swap;
+  font-weight: 400;
+  font-style: normal;
+  unicode-range: U+0020-007E, U+00A0, U+00A7, U+00A9, U+00B0, U+00B7, U+00D7, U+2013-2014, U+2018-2019, U+201C-201D, U+2022, U+2026, U+203A;
+}
+@font-face {
+  font-family: "sarabun";
+  src: url(/fonts/sarabun-600-thai.woff2) format("woff2");
   font-display: swap;
   font-weight: 600;
   font-style: normal;
+  unicode-range: U+0E00-0E7F;
+}
+@font-face {
+  font-family: "sarabun";
+  src: url(/fonts/sarabun-600-latin.woff2) format("woff2");
+  font-display: swap;
+  font-weight: 600;
+  font-style: normal;
+  unicode-range: U+0020-007E, U+00A0, U+00A7, U+00A9, U+00B0, U+00B7, U+00D7, U+2013-2014, U+2018-2019, U+201C-201D, U+2022, U+2026, U+203A;
 }
 @font-face {
   font-family: "sarabun Fallback";
@@ -97,10 +139,19 @@
  */
 @font-face {
   font-family: "anuphan";
-  src: url(/fonts/anuphan-500.woff2) format("woff2");
+  src: url(/fonts/anuphan-500-thai.woff2) format("woff2");
   font-display: swap;
   font-weight: 500;
   font-style: normal;
+  unicode-range: U+0E00-0E7F;
+}
+@font-face {
+  font-family: "anuphan";
+  src: url(/fonts/anuphan-500-latin.woff2) format("woff2");
+  font-display: swap;
+  font-weight: 500;
+  font-style: normal;
+  unicode-range: U+0020-007E, U+00A0, U+00A7, U+00A9, U+00B0, U+00B7, U+00D7, U+2013-2014, U+2018-2019, U+201C-201D, U+2022, U+2026, U+203A;
 }
 @font-face {
   font-family: "anuphan Fallback";

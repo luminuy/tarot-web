@@ -246,6 +246,22 @@ $ curl -sS -v --http2 -o /dev/null https://seertarot.net/spreads
 
 ---
 
+### ISSUE-048 (ข) ข้อ T-24 · ฟอนต์ยังไม่มี `unicode-range` — ปิด 2026-10-27
+
+- **แก้แล้ว (2026-10-27 · WORK_LOG รอบ 320)**: `scripts/subset-fonts.py` ตัดฟอนต์ไทย+ละตินเป็น `<ชื่อ>-thai.woff2` / `<ชื่อ>-latin.woff2` (10 ไฟล์จากต้นฉบับ Google Fonts ชุดเดิม) · `globals.css` ประกาศ `unicode-range` ให้ทุกหน้าฟอนต์ · `FONT_PRELOADS` / `FONT_PRELOADS_LOW` แยกตามภาษา
+- **ผล**: หน้า `/en` พรีโหลดฟอนต์ลำดับปกติ 36,068 ➔ 19,832 B (−45%) · หน้าไทย 36,068 ➔ 36,972 B (+904 B · คำขอ 2 ➔ 4) · ตัวอักษร 198 ตัว เมตริก ความกว้าง เส้นตัวอักษร ตรงกับไฟล์รวมเดิมทุกตัว
+- **ด่าน**: `test-render-parity` ตรวจ unicode-range ตรงกับชุดที่ตัด · ชุดไทย/ละตินไม่ทับกัน · หน้าอังกฤษไม่พรีโหลดไฟล์ไทย
+
+> ข้อความด้านล่างคือบันทึก ณ วันที่ยังเปิด
+
+> เลข 048 ถูกใช้ซ้ำสองเรื่องในอดีต — อีกเรื่อง (หน้า `/cards` · ปิด 2026-09-15) และข้อ T-23 · T-25 ของชุดนี้ปิดแล้ว ดูในคลัง
+
+- **อาการ**: `@font-face` ใน `src/app/globals.css` ไม่มี `unicode-range` และไฟล์ฟอนต์ไทยเป็นไฟล์รวมไทย+ละติน ➔ หน้า `/en` ก็พรีโหลดฟอนต์ที่มีอักษรไทยทั้งบล็อก (`FONT_PRELOADS` = `anuphan-500` + `sarabun-400` · 36,068 B ใน `src/app/_shared/root-metadata.ts`)
+- **ผลกระทบ**: ต่ำ — ยังอยู่ในงบฟอนต์พรีโหลด `MAX_PRELOADED_FONT_BYTES` 40,000 B ของ `scripts/qa/test-bundle-budget.ts`
+- **ทำไมยังไม่แก้**: ต้องแยกไฟล์ `.woff2` เป็นชุดไทยกับชุดละตินจริงก่อน — `scripts/subset-fonts.py` (`npm run fonts:subset`) ตอนนี้สร้างไฟล์รวมไทย+ละติน และต้องใช้ `fonttools` + `brotli` ซึ่งไม่มีในสภาพแวดล้อมที่ตรวจ · **ทำครึ่งทางไม่ได้**: ประกาศ `unicode-range` โดยไม่แยกไฟล์ = หน้า `/en` ไม่มีฟอนต์ละตินใช้
+- **ขั้นต่อไป**: บนเครื่องที่มี `fonttools` — เพิ่มโหมดแยกไทย/ละตินใน `scripts/subset-fonts.py` ➔ สร้างไฟล์ใหม่ ➔ แก้ `@font-face` · `FONT_PRELOADS` / `FONT_PRELOADS_LOW` · `public/_headers` แล้ว commit พร้อมกันในครั้งเดียว
+- **หลักฐาน (2026-10-26)**: ค้น `unicode-range` ใน `src/` · `astro/` · `public/` ไม่เจอเลย · `python3 -c "import fontTools"` ➔ ModuleNotFoundError · เหตุผลเดิมอยู่ในหัวไฟล์ `scripts/qa/test-bundle-budget.ts`
+
 ### ISSUE-047 · สคริปต์ตรวจบอตของ Cloudflare (`/cdn-cgi/challenge-platform/scripts/jsd/main.js`) กินเธรดหลักมากกว่าโค้ดทั้งเว็บรวมกัน — ปิด 2026-09-15
 
 - **ทะเบียนหลัก (ตารางดัชนีเดิม)** — ระดับ: 🟢 Resolved · ไฟล์หลัก: `scripts/cloudflare-phase1.ts` (`fight_mode` · `enable_js`)

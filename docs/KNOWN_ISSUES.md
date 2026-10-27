@@ -4,7 +4,7 @@
 > เรื่องที่ปิดแล้วอยู่ใน [`docs/archive/KNOWN_ISSUES_CLOSED.md`](archive/KNOWN_ISSUES_CLOSED.md) · บทเรียนและกฎป้องกันถาวรอยู่ใน [`docs/INCIDENT_LOG.md`](INCIDENT_LOG.md)
 > เพิ่มเรื่องใหม่ใช้เลข `ISSUE-NNN` ตัวถัดไป (**ว่างตัวถัดไป: ISSUE-063** · ห้ามใช้เลขซ้ำ) · ปิดเรื่องเมื่อไหร่ ให้ย้ายหัวข้อทั้งก้อนไปคลังในรูป `### ISSUE-NNN · ชื่อเรื่อง — ปิด YYYY-MM-DD` พร้อมเลข PR/INC ที่ปิด แล้วลบแถวในตารางข้างล่าง
 
-**อัปเดตล่าสุด: 2026-10-26** — ทุกข้อในไฟล์นี้ตรวจกับโค้ด · `git log origin/main` · GitHub API ในวันนั้น (เอกสารเป็นแค่ปากทาง ไม่ใช่หลักฐาน — INC-0229)
+**อัปเดตล่าสุด: 2026-10-27** — ทุกข้อในไฟล์นี้ตรวจกับโค้ด · `git log origin/main` · GitHub API ในวันนั้น (เอกสารเป็นแค่ปากทาง ไม่ใช่หลักฐาน — INC-0229)
 
 ## สรุปเรื่องที่ยังเปิด
 
@@ -12,7 +12,6 @@
 | :-- | :--- | :-- | :-- | :--- | :-: |
 | ISSUE-061 | INP ผู้ใช้จริง 215 ms (CrUX มือถือ) — ตัวเดียวที่ทำ Core Web Vitals ตก · ยังไม่รู้ตัวการ | กลาง | ประสิทธิภาพ | รอข้อมูลตัวเก็บ INP ~1 สัปดาห์ (`npm run cf:inp-stats`) | ไม่ |
 | ISSUE-062 | PerplexityBot โดน 403 ที่ Cloudflare ทั้งที่ `robots.txt` อนุญาต | กลาง | SEO · Cloudflare | รอเจ้าของดูแดชบอร์ด | ใช่ |
-| ISSUE-048 | ฟอนต์ยังไม่มี `unicode-range` — หน้า `/en` โหลดอักษรไทยที่ไม่ได้ใช้ | ต่ำ | ประสิทธิภาพ | ตั้งใจเลื่อน | ไม่ |
 | ISSUE-004 | รัน Worker ในเครื่อง (`preview:worker` / `wrangler dev`) บน macOS ต่ำกว่า 13.5 ไม่ได้ | ต่ำ | เครื่องมือพัฒนา | ข้อจำกัดเครื่อง | ใช่ |
 
 ---
@@ -33,16 +32,6 @@
 - **ข้อจำกัดของหลักฐาน**: ยิงทดสอบจากเครื่องที่ไม่ใช่ IP ของ Perplexity — Cloudflare อาจบล็อกเฉพาะ "บอตปลอม UA" ก็ได้ ต้องดูคำขอของบอตตัวจริงใน Security › Events ถึงจะสรุปได้
 - **ขั้นต่อไป**: เจ้าของเปิด Security › Events กรอง user-agent `PerplexityBot` ➔ ถ้าบอตตัวจริง (verified) โดนบล็อก ให้ดูว่ากฎหรือสวิตช์ไหนบล็อก แล้วเปิดข้อยกเว้นเฉพาะบอต AI search · จุดที่ควรดูก่อนคือสวิตช์บล็อกบอต AI ระดับโซน (ประวัติใน ISSUE-047 บันทึกว่าเปิด `ai_bots_protection=block` ไว้) · ห้ามเปิดให้บอตเทรนโมเดล (`GPTBot` · `ClaudeBot` ฯลฯ ยังต้องปิดตาม ISSUE-019)
 - **หลักฐาน (2026-10-26)**: `curl -A "<UA ของ PerplexityBot>" https://seertarot.net/cards` ➔ 403 · UA เบราว์เซอร์ ➔ 200 · `https://seertarot.net/robots.txt` มี `User-Agent: PerplexityBot` + `Allow: /` · ที่มา: [`docs/plans/AUDIT_2026-10-18.md`](plans/AUDIT_2026-10-18.md) (บรรทัดสถานะ) · `docs/WORK_LOG.md` รอบ 309
-
-## ISSUE-048 · ฟอนต์ยังไม่มี `unicode-range` (ข้อ T-24)
-
-> เลข 048 ถูกใช้ซ้ำสองเรื่องในอดีต — อีกเรื่อง (หน้า `/cards` · ปิด 2026-09-15) และข้อ T-23 · T-25 ของชุดนี้ปิดแล้ว ดูในคลัง
-
-- **อาการ**: `@font-face` ใน `src/app/globals.css` ไม่มี `unicode-range` และไฟล์ฟอนต์ไทยเป็นไฟล์รวมไทย+ละติน ➔ หน้า `/en` ก็พรีโหลดฟอนต์ที่มีอักษรไทยทั้งบล็อก (`FONT_PRELOADS` = `anuphan-500` + `sarabun-400` · 36,068 B ใน `src/app/_shared/root-metadata.ts`)
-- **ผลกระทบ**: ต่ำ — ยังอยู่ในงบฟอนต์พรีโหลด `MAX_PRELOADED_FONT_BYTES` 40,000 B ของ `scripts/qa/test-bundle-budget.ts`
-- **ทำไมยังไม่แก้**: ต้องแยกไฟล์ `.woff2` เป็นชุดไทยกับชุดละตินจริงก่อน — `scripts/subset-fonts.py` (`npm run fonts:subset`) ตอนนี้สร้างไฟล์รวมไทย+ละติน และต้องใช้ `fonttools` + `brotli` ซึ่งไม่มีในสภาพแวดล้อมที่ตรวจ · **ทำครึ่งทางไม่ได้**: ประกาศ `unicode-range` โดยไม่แยกไฟล์ = หน้า `/en` ไม่มีฟอนต์ละตินใช้
-- **ขั้นต่อไป**: บนเครื่องที่มี `fonttools` — เพิ่มโหมดแยกไทย/ละตินใน `scripts/subset-fonts.py` ➔ สร้างไฟล์ใหม่ ➔ แก้ `@font-face` · `FONT_PRELOADS` / `FONT_PRELOADS_LOW` · `public/_headers` แล้ว commit พร้อมกันในครั้งเดียว
-- **หลักฐาน (2026-10-26)**: ค้น `unicode-range` ใน `src/` · `astro/` · `public/` ไม่เจอเลย · `python3 -c "import fontTools"` ➔ ModuleNotFoundError · เหตุผลเดิมอยู่ในหัวไฟล์ `scripts/qa/test-bundle-budget.ts`
 
 ## ISSUE-004 · รัน Worker ในเครื่องบน macOS ต่ำกว่า 13.5 ไม่ได้
 

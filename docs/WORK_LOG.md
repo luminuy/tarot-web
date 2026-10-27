@@ -12,6 +12,14 @@
 
 ---
 
+### 🗓️ 2026-10-27 (รอบ 320): ISSUE-048 — แยกฟอนต์ไทย/ละติน + `unicode-range` (เจ้าของ "ISSUE-048 แก้")
+- `scripts/subset-fonts.py` ตัด Sarabun · Noto Serif Thai · Anuphan เป็น `<ชื่อ>-thai.woff2` (บล็อกไทย) + `<ชื่อ>-latin.woff2` (ASCII + เครื่องหมาย) จากต้นฉบับ Google Fonts ตัวเดิม · ลบไฟล์รวมเดิม 5 ไฟล์
+- `src/app/globals.css` ประกาศสองหน้าฟอนต์ต่อหนึ่งน้ำหนักพร้อม `unicode-range` (ชุดไม่ทับกัน) · `FONT_PRELOADS` / `FONT_PRELOADS_LOW` (`src/app/_shared/root-metadata.ts`) แยกตามภาษา ใช้ทั้ง `RootHtml.tsx` และ `astro/layouts/BaseLayout.astro` · `scripts/generate-checkout-art.mjs` ใช้ไฟล์แยก
+- ผล: `/en` พรีโหลดฟอนต์ลำดับปกติ 36,068 ➔ 19,832 B (−45%) · หน้าไทย 36,068 ➔ 36,972 B (+904 B · คำขอ 2 ➔ 4) · ไฟล์ไทยของหน้าอังกฤษถูกโหลดทีหลังเฉพาะตัวอักษรไทยที่มีจริง (ปุ่ม "ภาษาไทย" ใช้ Noto Serif Thai ไทย 9 KB นอกคิวเปิดหน้า)
+- ด่าน `test-render-parity` เพิ่ม: unicode-range ตรงกับชุดที่ตัดใน `subset-fonts.py` · ชุดไทย/ละตินไม่ทับกัน · หน้าอังกฤษห้ามพรีโหลดไฟล์ไทย · พรีโหลดครบตามภาษาของหน้า
+- ตรวจ: เทียบไฟล์ใหม่กับไฟล์รวมเดิมทุกตัวอักษร (198 ตัว × 5 ไฟล์) เมตริก · ความกว้าง · เส้นตัวอักษรตรงกันทั้งหมด · Chromium เปิด `/` `/en` `/cards/major-00` `/en/cards/major-00` `/privacy` `/en/privacy` วัดความกว้างข้อความไทย/อังกฤษเทียบฟอนต์เดิม ต่าง 0 · `test-render-parity` · `test-bundle-budget` ผ่าน · KNOWN_ISSUES ย้าย ISSUE-048 ไปคลัง
+- ค้าง/รอ: ยังไม่ขึ้น production ตามคำสั่งเจ้าของ (กิ่ง `claude/affectionate-davinci-4wne6s` รวมกับงานรอบ 319)
+
 ### 🗓️ 2026-10-27 (รอบ 319): จัดระเบียบเอกสาร md ทั้งเว็บ (เจ้าของ "ปรับปรุง md ทั้งเว็บ ให้ตรงกับล่าสุด กำจัดจุดอ่อน ทำให้เป็นระเบียบ ลดความซ้ำซ้อน" · "อย่าพึ่งเอาขึ้น")
 - ตรวจทุกไฟล์กับโค้ดจริง/`git log` แล้วเขียนใหม่: CLAUDE.md (53 ➔ 27 KB · ตารางแผนเหลือเฉพาะงานเปิด + ตาราง "อ่านก่อนแตะ") · README · GEMINI · AGENTS (ชี้ไป CLAUDE.md ไม่คัดลอกกฎ) · INDEX · AI_COLLABORATION · ARCHITECTURE · LOCAL_SETUP · TAROT_CARD_FEATURES · ปฏิบัติการ (DEPLOYMENT · OPTIMIZATION 73 ➔ 13 KB · PENDING_SETUP · ADMIN_PANEL) · สเปก/ADR · ผู้ช่วย cmo/coo/cto · mobile
 - KNOWN_ISSUES เหลือเรื่องที่เปิด 5 เรื่อง (เพิ่ม ISSUE-062 PerplexityBot · ISSUE-061 INP มาจาก #724) ที่ปิดแล้วย้ายไป `docs/archive/KNOWN_ISSUES_CLOSED.md` · หัวสถานะแผน 49 ไฟล์สั้นลงและตรงของจริง (AUDIT_2026-10-18 ➔ ✅ · REFLECTION · IOS · OMNI ➔ ⏸️ · AI_INTELLIGENCE ➔ 📚)
