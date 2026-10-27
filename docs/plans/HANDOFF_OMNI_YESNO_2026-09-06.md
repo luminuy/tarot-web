@@ -1,6 +1,6 @@
 # 🎯 แผนส่งต่องาน 3 ชิ้น — Yes/No 78 หน้า · Omnichannel · Daily Digest
 
-> **สถานะ**: 🚧 ทำแล้วบางส่วน — เซกชัน "ใช่หรือไม่" 78 หน้า ✅ (`CardYesNoAnswer`) · Daily Digest ✅ · Omnichannel 🚧 3/6 ช่องทาง (TikTok · Facebook · LINE OA ใน `BRAND_SOCIAL_PROFILES` ➔ sameAs · ท้ายเว็บ · หน้าติดต่อ) — IG · Threads · X รอเจ้าของเปิดบัญชี · **ตรวจล่าสุด**: 2026-09-30 · **หลักฐาน**: PR digest 2026-09-13
+> **สถานะ**: ⏸️ รอคนนอก/เจ้าของ — เซกชัน "ใช่หรือไม่" ในหน้าไพ่ 78 ใบ และ Daily Digest ใช้งานจริง · Omnichannel ได้ 3 จาก 6 ช่องทาง (TikTok · Facebook · LINE OA ใน `BRAND_SOCIAL_PROFILES`) · IG · Threads · X รอเจ้าของเปิดบัญชีแล้วส่งลิงก์ · **ตรวจล่าสุด**: 2026-10-26 · **หลักฐาน**: `src/lib/config/site.ts`
 
 > **ผู้จัดทำ**: Claude · 2026-09-06 · **ผู้รับช่วง**: ทีม/เอเจนต์ตัวถัดไป
 > **ที่มา**: กลั่นจากเอกสารวิเคราะห์คู่แข่งของทีมภายนอก — **เก็บมาเฉพาะ 3 ข้อที่ยังไม่มีในเว็บจริง**
@@ -69,7 +69,7 @@ yesNo: YesNo;          // "yes" | "no" | "maybe" — ครบทั้ง 78 �
 
 | ไฟล์ | ใช้ทำอะไร |
 | :--- | :--- |
-| [`src/app/love/1-card/LoveOneCardClient.tsx:167`](../../src/app/love/1-card/LoveOneCardClient.tsx) | แสดงผลตอนเปิดไพ่ความรัก |
+| [`src/app/love/1-card/LoveOneCardClient.tsx:167`](../../src/components/love/LoveOneCardClient.tsx) | แสดงผลตอนเปิดไพ่ความรัก |
 | [`src/app/api/admin/content/route.ts:74`](../../src/app/api/admin/content/route.ts) | ให้แอดมิน override |
 
 → **หน้าสารานุกรม 78 ใบไม่เคยแสดงค่านี้เลย** ทั้งที่เป็นหน้าที่ Google เก็บดัชนีจริง
@@ -250,7 +250,7 @@ sameAs: ["https://github.com/luminuy/tarot-web"],
 | :--- | :--- |
 | ลิงก์โซเชียลที่ผู้ใช้กดได้ทั้งเว็บ | **0 จุด** ([`SiteFooter.tsx`](../../src/components/layout/SiteFooter.tsx) มีแต่ลิงก์ภายใน) |
 | `sameAs` ใน Organization JSON-LD | มีแต่ลิงก์ GitHub — Google ผูก Knowledge Panel กับบัญชีเราไม่ได้ |
-| `twitter.site` / `twitter.creator` | **ไม่มี** ([`layout.tsx:100`](../../src/app/layout.tsx) มีแต่ card/title/description) |
+| `twitter.site` / `twitter.creator` | **ไม่มี** ([`layout.tsx:100`](../../src/app/%28th%29/layout.tsx) มีแต่ card/title/description) |
 | UTM ในลิงก์ที่แชร์ออก | `grep -rn "utm_" src/` → **0 บรรทัด** — วัดไม่ได้เลยว่าคนกลับมาจากช่องไหน |
 | @handle ในแคปชันที่ระบบเขียนให้ | **ไม่มี** — คนเห็นโพสต์แล้วตามบัญชีเราต่อไม่ได้ |
 

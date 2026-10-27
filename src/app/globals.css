@@ -390,7 +390,7 @@
 
 :root {
   /* ═══ ธีมกระจกอุ่น (Warm Liquid Glass) — ค่าทั้งหมดคำนวณคอนทราสต์มาแล้ว ดูหัวข้อ 2.4 ═══
-     🚨 ห้ามเติม backdrop-filter / backdrop-blur ที่ใดก็ตามในธีมนี้ (INC-0056 · ด่านที่ 43)
+     🚨 ห้ามเติม backdrop-filter / backdrop-blur ที่ใดก็ตามในธีมนี้ (INC-0060 · ด่านที่ 43)
         ความเป็น "กระจก" มาจากความโปร่ง + ขอบสะท้อนแสง ไม่ได้มาจากการเบลอ */
 
   /* พื้นของแผงกระจก — ขาวอมครีม ไม่ใช่ขาวบริสุทธิ์
@@ -550,7 +550,7 @@ body {
   background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
   /* 🚨 ห้ามใช้ background-attachment: fixed เด็ดขาด
      `fixed` บังคับให้เบราว์เซอร์วาดพื้นหลังใหม่ทุกเฟรมที่เลื่อนจอ
-     ซึ่งเป็นความผิดพลาดแบบเดียวกับ backdrop-filter ใน INC-0056 เป๊ะ ๆ
+     ซึ่งเป็นความผิดพลาดแบบเดียวกับ backdrop-filter ใน INC-0060 เป๊ะ ๆ
      ค่าเริ่มต้น `scroll` วาดครั้งเดียวตามความสูงเอกสาร = ฟรีสำหรับ compositor */
 }
 
@@ -655,7 +655,7 @@ body > *:not(.fixed):not([data-floating]):not([data-site-header]) {
  * หัวเว็บกลายเป็น containing block ของมัน แผงเมนูทั้งหมดจึงต้องเป็น `absolute` เท่านั้น
  * (ปัจจุบัน SacredNavDropdown / UserProfileBadge เป็น absolute ทั้งคู่ — ตรวจก่อนเปลี่ยน)
  *
- * ⚠️ `will-change` ห้ามใช้ตรงนี้ (INC-0056 + ด่าน test-will-change) เพราะจองเลเยอร์ค้าง
+ * ⚠️ `will-change` ห้ามใช้ตรงนี้ (INC-0061 + ด่าน test-will-change) เพราะจองเลเยอร์ค้าง
  * ตลอด session — `translateZ(0)` ให้ผลเลเยอร์แยกเหมือนกันโดยไม่ประกาศ hint ถาวร
  *
  * `padding-top: env(safe-area-inset-top)` — manifest ตั้ง `display: standalone`
@@ -727,7 +727,7 @@ body > *:not(.fixed):not([data-floating]):not([data-site-header]) {
  * ทึบกว่าแผงกระจกเล็กน้อย (0.62 > --glass-fill 0.58) เพราะเป็นแถบที่เนื้อหาเลื่อนลอดใต้
  * ตลอดเวลา ถ้าโปร่งเท่ากันตัวหนังสือในหัวเว็บจะอ่านยากตอนมีภาพไพ่เลื่อนผ่านใต้พอดี
  *
- * 🚨 ห้ามเติม backdrop-filter ที่นี่เด็ดขาด (INC-0056 · ด่านที่ 43)
+ * 🚨 ห้ามเติม backdrop-filter ที่นี่เด็ดขาด (INC-0060 · ด่านที่ 43)
  */
 
 /*
@@ -741,7 +741,7 @@ body > *:not(.fixed):not([data-floating]):not([data-site-header]) {
  * ทึบกว่าแผงกระจกทั่วไป (0.78 > --glass-fill 0.62) เพราะเนื้อหาเลื่อนลอดใต้ตลอดเวลา
  * ถ้าโปร่งเท่ากัน ตัวหนังสือในหัวเว็บจะอ่านยากตอนภาพไพ่เลื่อนผ่านใต้พอดี
  *
- * 🚨 ห้ามเติม backdrop-filter ที่นี่เด็ดขาด (INC-0056 · ด่านที่ 43)
+ * 🚨 ห้ามเติม backdrop-filter ที่นี่เด็ดขาด (INC-0060 · ด่านที่ 43)
  * 🚨 ห้ามใส่ overflow: hidden ที่นี่หรือที่ <header> — จะตัดโล่กันเนื้อหาโผล่ทิ้ง (INC-0108)
  */
 .site-header-glass {
@@ -797,7 +797,7 @@ html[data-ui2-over-dark] .site-header-glass nav:not(.absolute *, .absolute, .nv-
  * แผงมืดเต็มกว้างตั้งแต่ขอบบนจอ วางใต้แคปซูล (z-index ติดลบในบริบทซ้อนของ <header>) · แคปซูลเปลี่ยนเป็นมืดตามแผง
  * สองกลุ่มแรก = ลิงก์ตัวใหญ่ · กลุ่มที่เหลือ = ตัวเล็ก · หัวกลุ่มเทาเล็ก
  * หน้าที่เหลือ: ทุกระดับมืดลง (`.mega-scrim`) · ระดับ full เบลอเพิ่มด้วย `filter` บนลูกตรงของ body
- *   (ไม่ใช้ backdrop-filter — INC-0056 · ด่าน test-motion-quality กฎ 2)
+ *   (ไม่ใช้ backdrop-filter — INC-0060 · ด่าน test-motion-quality กฎ 2)
  * ⚠️ แผง/ฉากมืดต้องเป็น `absolute` (ห้าม `fixed` — หัวเว็บมี transform จึงเป็น containing block · ด่าน test-sticky-header)
  */
 .mega-panel,
@@ -1114,7 +1114,7 @@ html[data-ui2-over-dark] .site-header-glass nav:not(.absolute *, .absolute, .nv-
  * แต่ตัวหนังสือของหน้าที่อยู่ข้างหลังไม่ทะลุขึ้นมาเป็นเงาซ้อน (ลอง 0.94 แล้วเห็นหัวข้อ
  * ของหน้าลอยอยู่ในแผงชัดจนดูเลอะ) — **ห้ามลดต่ำกว่านี้**
  *
- * 🚨 ห้ามเติม backdrop-filter ที่นี่เด็ดขาด (INC-0056 · ด่านที่ 43)
+ * 🚨 ห้ามเติม backdrop-filter ที่นี่เด็ดขาด (INC-0060 · ด่านที่ 43)
  */
 .altar-modal {
   background-color: rgba(255, 252, 246, 0.97);
@@ -1195,7 +1195,7 @@ html[data-ui2-over-dark] .site-header-glass nav:not(.absolute *, .absolute, .nv-
 /*
  * 📹 เวทีปรึกษาแม่หมอ — ผืนกำมะหยี่สีหมึก ขอบทองบาง (หน้ารวมแม่หมอ · ห้องรอวิดีโอคอล)
  * ตัวอักษรบนเวทีนี้ใช้ `text-surface` / `text-gold-on-dark` เท่านั้น (ทอง-หมึกบนพื้นมืดตกเกณฑ์ AA)
- * ไม่มี backdrop-filter (INC-0056) — ความลึกมาจากไล่เฉดกับเงาล้วน
+ * ไม่มี backdrop-filter (INC-0060) — ความลึกมาจากไล่เฉดกับเงาล้วน
  */
 .consult-stage {
   background-color: var(--color-ink-deep);
@@ -1839,7 +1839,7 @@ html {
 /* ─────────────────────────────────────────────────────────────────────────────
    ✦ ฉากหลังโมดัล (Modal Scrim) — พื้นทึบล้วน ห้ามมี backdrop-filter
    ─────────────────────────────────────────────────────────────────────────────
-   🚨 นี่คือกฎป้องกันถาวรจาก INC-0056 ที่เคยวัดผลจริงแล้ว:
+   🚨 นี่คือกฎป้องกันถาวรจาก INC-0060 ที่เคยวัดผลจริงแล้ว:
    "ห้ามใช้ backdrop-blur กับพื้นที่ใหญ่ที่มีของลอยทับหรือมีอนิเมชันวิ่งอยู่
     (หัวเว็บ sticky · ฉากหลังโมดัล · การ์ดเต็มจอ) ให้ใช้พื้นหลังทึบแทน"
    ตอนนั้นวัดได้ว่าปิด backdrop-filter แล้ว fps เด้งจาก 30 → 58 ทันที
@@ -2509,7 +2509,7 @@ nav[aria-label="เส้นทางนำทาง"]:not(:focus-within) {
       (แบบ apple.com: ขาว ↔ เทาอ่อน · ของเราคือ ครีมเดิม ↔ งาช้างโปร่ง)
       วาดสีด้วย ::before กว้าง 100vw จึงไม่ต้องรื้อ max-width / padding ของแต่ละส่วน
       ⚠️ ห้ามทาสีทึบ — พื้นไล่สีอุ่นของ body ต้องโปร่งทะลุได้ (ดูคอมเมนต์ใน TarotFlow)
-      ⚠️ ห้าม backdrop-filter (INC-0056)
+      ⚠️ ห้าม backdrop-filter (INC-0060)
    2) ปุ่มลูกศรสไลด์ (`.home-rail-btn`) — ใช้โดย `RailArrows` · ชุดกฎแถวปัด `.home-rail` ถูกถอดแล้ว
       (หน้าแรก UI 2.0 เลิกใช้แถวปัด)
    ═════════════════════════════════════════════════════════════════════════ */

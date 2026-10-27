@@ -1,489 +1,61 @@
-# 🐛 บั๊กและงานค้างที่รู้แล้วแต่ยังไม่ได้แก้ (Known Issues Registry)
+# ทะเบียนบั๊กที่ยังเปิดอยู่ (Known Issues)
 
-> 🎯 **สำหรับ AI Agent ทุกตัว**: นี่คือรายการปัญหาที่ **ตรวจสอบยืนยันแล้วว่ามีจริง** แต่ยังไม่ได้แก้
->
-> - **ก่อนเริ่มงานใหม่** ให้ดูก่อนว่ามีงานในนี้ที่เกี่ยวข้องกับสิ่งที่กำลังจะแก้หรือไม่
-> - **แผนงานและบทบาทของ AI แต่ละตัว**: ดูที่ [`docs/plans/AGENTS_TASK_PLAN.md`](plans/AGENTS_TASK_PLAN.md)
-> - **ก่อนลงมือ** ให้ตรวจว่ามี Agent อื่นจับงานนี้อยู่หรือยัง (`npm run agent:status`) และล็อคไฟล์ก่อนเสมอ
-> - **เมื่อแก้เสร็จ** ให้ย้ายรายการนั้นออกจากไฟล์นี้ แล้วบันทึกลง [`docs/INCIDENT_LOG.md`](INCIDENT_LOG.md) แทน
->
-> ปัญหาที่ **แก้ไปแล้ว** อยู่ใน [`docs/INCIDENT_LOG.md`](INCIDENT_LOG.md) พร้อมกฎป้องกันถาวร — อ่านที่นั่นก่อนเริ่มงานทุกครั้ง
->
-> 🔒 **หมายเหตุ**: `npm run repo:verify` มีด่าน **"การอ้างอิง path ภาพไพ่ถูกต้อง"** (ด่านที่ 7)
-> ซึ่งจะบล็อกทันทีถ้ามีการเขียน path ภาพไพ่เองในจุดใหม่ (บทเรียนจาก ISSUE-008 ที่ละเมิดกฎซึ่งมีเขียนไว้แล้วใน INC-0002)
+> ไฟล์นี้เก็บ **เฉพาะเรื่องที่ยังไม่ได้แก้** และยืนยันแล้วว่ามีจริง — อ่านก่อนเริ่มงาน กันแก้ซ้ำกับ Agent อื่น
+> เรื่องที่ปิดแล้วอยู่ใน [`docs/archive/KNOWN_ISSUES_CLOSED.md`](archive/KNOWN_ISSUES_CLOSED.md) · บทเรียนและกฎป้องกันถาวรอยู่ใน [`docs/INCIDENT_LOG.md`](INCIDENT_LOG.md)
+> เพิ่มเรื่องใหม่ใช้เลข `ISSUE-NNN` ตัวถัดไป (**ว่างตัวถัดไป: ISSUE-062** · ห้ามใช้เลขซ้ำ) · ปิดเรื่องเมื่อไหร่ ให้ย้ายหัวข้อทั้งก้อนไปคลังในรูป `### ISSUE-NNN · ชื่อเรื่อง — ปิด YYYY-MM-DD` พร้อมเลข PR/INC ที่ปิด แล้วลบแถวในตารางข้างล่าง
 
----
+**อัปเดตล่าสุด: 2026-10-26** — ทุกข้อในไฟล์นี้ตรวจกับโค้ด · `git log origin/main` · GitHub API ในวันนั้น (เอกสารเป็นแค่ปากทาง ไม่ใช่หลักฐาน — INC-0229)
 
-## 📅 การตรวจซ้ำครั้งล่าสุด (Last Full Re-Audit)
+## สรุปเรื่องที่ยังเปิด
 
-| หัวข้อ | ค่า |
-| :--- | :--- |
-| **วันที่** | 2026-09-10 (รอบแก้บั๊กเจาะจง: หน้าต่างเข้าสู่ระบบตกขอบจอทั้งบนและล่าง — ISSUE-042) |
-| **commit ฐาน** | `claude/login-page-margin-issue-5z20wu` (แตกจาก `main` — Production Live `edda543`) |
-| **วิธีตรวจ** | `npm run repo:verify` (46/46 ด่าน) + เปิดหน้าต่างเข้าสู่ระบบด้วย Chromium headless บน **production build** (`next build` + `next start` ไม่ใช่ dev) ครบ 6 ขนาดจอ × 3 สถานะ = 18 เคส (1280×720 · 1440×800 · 1280×640 · 1280×520 · 390×844 · 390×667 × เข้าสู่ระบบ / เข้าสู่ระบบ+Turnstile / สมัครสมาชิก+Turnstile+แถบวัดรหัส) แล้วอ่าน `getBoundingClientRect()` ของแผงเทียบขอบจอทุกเคส + เลื่อนชั้นในสุดจนสุดทางเพื่อพิสูจน์ว่าปุ่ม Google/LINE ใบล่างสุดยังกดได้ + ตรวจ CSS ที่ build ออกมาจริงว่า `calc(100dvh - 1.5rem)` รอด Lightning CSS ไม่ถูกยุบ (กับดักเดิมของ INC-0108) + ทดสอบด่านใหม่ด้วยการทำให้พังจริง 8 เคส<br>(รอบก่อน 2026-09-09 · 43 ด่านในวันนั้น) เปิดด้วย Chromium headless บน **production build** 5 หน้า (`/` · `/cards` · `/daily` · `/spreads` · `/cards/major-00`) ทั้งโหมดปกติและโหมดลดการเคลื่อนไหว แล้วอ่าน `getComputedStyle` ของทุก element หา `backdrop-filter` ที่ยังทำงาน · `transition` ที่แตะ layout · และ `document.getAnimations()` เพื่อนับว่าอนิเมชันที่วิ่งอยู่เป็น transform/opacity ล้วนหรือไม่ (มีด่านกันผลลวง — ถ้า stylesheet โหลดไม่ติด ผลตรวจถูกทิ้ง) + วัดขนาด CSS/JS เทียบกับ build ของ `origin/main` จริง + ทดสอบด่านใหม่ด้วยการทำให้พังจริง 7 เคส<br>(รอบก่อน) สแกน HTML ที่ build ออกมาทั้ง 309 ไฟล์หา `data-site-header="` + เปิดด้วย Chromium headless บน production build นับหัวเว็บ/ฟุตเตอร์รายหน้า (รวม URL ที่ไม่มีอยู่จริง) + ทดสอบด่านด้วยการทำให้พังจริง 5 เคส<br>(รอบก่อน) + วัดตำแหน่งหัวเว็บด้วย Chromium mobile 390px ตลอดทุกหน้า **บน production build** (ไม่ใช่ dev) + เทียบความสูงตัวกันที่กับหัวเว็บ + สแกนเนื้อหาที่ถูกหัวเว็บทับ + `LayerTree.compositingReasons` ผ่าน CDP + ทดสอบด่านด้วยการทำให้พังจริง 6 เคส |
-| **ผลสรุป** | ✅ **ISSUE-042 ปิดแล้ว** — หน้าต่างลอยทุกบานทั้งเว็บมีเพดานความสูงผูกกับจอและมีชั้นที่เลื่อนได้ครบ · ตรวจสอบ 46 ด่าน ผ่านครบ · (รอบก่อน) ISSUE-001 ถึง ISSUE-030 ปิดครบสมบูรณ์ 100% · ทุกหน้าที่ผู้ใช้เปิดได้มีหัวเว็บครบแล้ว (เหลือเฉพาะ 7 หน้าที่ตั้งใจไม่มี ซึ่งขึ้นทะเบียนไว้ในด่านตรวจแล้ว) |
-| **รอบก่อนหน้า (ประวัติ)** | 2026-09-09 · `npm run repo:verify` (43/43 ด่าน) · ปิดงานค้างทั้งทะเบียน — แผนผังไพ่ทับกัน 4 แบบ · แถบยุบ/ขยาย · ธงสิทธิ์ที่มองไม่เห็น (INC-0118)<br>2026-09-06 · `npm run repo:verify` (38/38 ด่าน) · SEO Wave 2–4 + ความจริงเชิงตัวเลขในเอกสาร<br>2026-09-04 · dev server + `npm run repo:verify` (24/24 ด่าน) · ตรวจสอบ 24 ด่าน ผ่าน 24/24 |
-
-### 🗂️ ดัชนีสถานะปัญหาและข้อจำกัดของระบบ
-
-| # | ระดับ | หัวข้อย่อ | ไฟล์หลัก | สถานะ |
-| :-- | :-- | :--- | :--- | :-- |
-| **060** | 🟢 Resolved | **หน้าที่ Next เรนเดอร์ (`/reset-password` · `/tester` · แผงแอดมิน ฯลฯ) ขึ้นหน้า error กลาง — chunk ใต้ `(th)` วน 307 จน `ERR_TOO_MANY_REDIRECTS`** | `next.config.ts`, `scripts/qa/test-worker-first-routes.ts` | ✅ **แก้แล้วในโค้ด (2026-10-17)** — asset-worker ของ Cloudflare เด้ง 307 ทุก path ที่ไม่ตรง `encodeURIComponent` ของตัวมันเอง (`%28th%29` ➔ `(th)`) ไคลเอนต์ที่เข้ารหัสวงเล็บเองจึงวน ➔ ชื่อ chunk ฝั่งเบราว์เซอร์ไม่มี `( ) [ ]` แล้ว (`app/_th_/...`) · ด่านตรวจชื่อไฟล์ใต้ `.next/static` (INC-0264b) |
-| **059** | 🟡 Open | **คลังผัง `/spreads`: แท็บ "ผังใหญ่เจาะลึก" ขึ้นเลข 5 แต่มีผัง 6 ใบ · การ์ด "ดวงบริวารและคนรอบข้าง" ขึ้นว่า `หมวด: self` / `Category: self`** | `src/components/spread/SpreadsLibrary.tsx` | ⏳ **พบระหว่างออกแบบ UI 2.0 (2026-10-13 · ยืนยันบน production ด้วย `curl` แล้ว)** — ต้นเหตุ: เลขบนแท็บพิมพ์ค้างไว้ใน `categories` (`count: 5`) ขณะที่ `TAB_MEMBERS.master` มี 6 id · `CATEGORY_MAP_TH` / `CATEGORY_MAP_EN` ไม่มีคีย์ `self` (`defaultCategory` ของผัง `family`) จึงถอยไปแสดงคีย์ดิบ · **ทางแก้อยู่ในแผน [`UI_2_0_SPREADS_PLAN_2026-10-13.md`](plans/UI_2_0_SPREADS_PLAN_2026-10-13.md)** (เลิกแท็บ ใช้ 6 หมวดที่นับจาก `ids.length` และไม่มีป้ายหมวดดิบ) · ถ้าแผนนั้นยังไม่เริ่มภายใน 2 สัปดาห์ ให้แก้เฉพาะจุดก่อน: นับเลขแท็บจาก `TAB_MEMBERS[id].length` + เติม `self` ในตารางแปลทั้งสองภาษา |
-| **058** | 🟢 Resolved | **ลิงก์แผงแม่หมออายุ 24 ชม. และยกเลิกลิงก์เก่าไม่ได้ — ร่างข้อตกลงแม่หมอข้อ 4.1 สัญญาว่า "ยกเลิกลิงก์เดิม" ได้** | `src/lib/marketplace/console-link.ts`, `src/app/api/admin/readers/[id]/route.ts`, `src/lib/marketplace/readers.repo.ts`, `src/components/admin/ReadersManager.tsx` | ✅ **แก้แล้วในโค้ด (2026-10-12 · Draft PR #666 ยังไม่ขึ้น production)** — เจ้าของสั่ง "ทำให้หมดเลย" ➔ แอดมินเลือกอายุลิงก์ 1 · 7 · 30 วัน (ค่าเริ่มต้น 30 วัน · ค่าอื่นถูกปัดเป็น 30) · ปุ่ม "ยกเลิกลิงก์เก่าทั้งหมด" หมุน `readers.session_secret` แล้วได้ลิงก์ใหม่ทันที (ลิงก์เก่าตรวจลายเซ็นไม่ผ่าน · แผงที่เปิดค้างขึ้นแถบ "ใช้ไม่ได้แล้ว" โดยไม่ล้างหน้า · บันทึก `revoke_reader_links` ในประวัติแอดมิน) · ด่าน test-marketplace-readers 19.12 |
-| **057** | 🟢 Resolved | **`Input` / `Textarea` กลางของเว็บ: สตริงคลาสต่อกันไม่มีช่องว่าง ➔ `text-ink-deep` กับ `placeholder:text-muted` ไม่เคยทำงาน** | `src/components/ui/Input.tsx`, `scripts/qa/test-code-debt.ts` | ✅ **แก้แล้วในโค้ด (2026-10-12 · Draft PR #666)** — เติมช่องว่าง · วัดในเบราว์เซอร์: ตัวอักษร `rgb(46,33,26)` (ink-deep) · placeholder `rgb(99,91,78)` (muted) · ด่าน test-code-debt จับสตริงคลาสที่ต่อกันไม่มีช่องว่างใน `src/components/ui` (ลองใส่บั๊กกลับ ➔ ด่านตกจริง) |
-| **056** | 🟢 Resolved | **หน้าแม่หมอที่ไม่มีอยู่จริง (`/readers/<id>` · `/readers/<id>/book`) ตอบ HTTP 200 แทน 404 (soft 404)** | `src/app/(th)/readers/(directory)/loading.tsx` | ✅ **แก้แล้วในโค้ด (2026-10-12 · Draft PR #666)** — ต้นเหตุคือ `readers/loading.tsx` ครอบทุกหน้าใต้ `/readers/*` Next จึงเริ่มสตรีม (สถานะ 200) ก่อน `notFound()` ➔ ย้ายหน้ารวม + loading เข้ากลุ่ม `readers/(directory)/` (URL เดิม) · วัดแล้ว: ไม่มีอยู่ ➔ 404 · มีอยู่ ➔ 200 · ด่าน test-marketplace-readers 19.14 |
-| **055** | 🟢 Resolved | **prompt คำอ่านภาษาอังกฤษ (`/en`) มีบล็อกวิเคราะห์เป็นภาษาไทยปนทั้งก้อน** | `src/lib/ai/prompt.ts`, `src/lib/ai/{alchemy,gaze,numerology,intent,karmic,ritual,cosmic}.ts` | ✅ **แก้แล้วในโค้ด (2026-10-03 · `PROMPT_VERSION` 20261003-1)** — ทุกโมดูลมีฉบับอังกฤษ (`*En`) · ป้ายบริบทผู้ถาม · ข้อพึงระวัง · ห้วงเวลาจักรวาล · โหมดใช่/ไม่ใช่เป็นอังกฤษ · คำสำคัญอังกฤษในตัววินิจฉัยคำถาม (เดิมคำถามอังกฤษตกค่าปริยายทุกครั้ง) · ด่านตรวจทุกผัง × 5 หมวด ไม่มีไทยหลุด **ยกเว้น 1 อย่างที่ตั้งใจ**: รหัสค่า `yesNoAnswer` (Gemini บังคับ enum ไทย) · ✅ **บันทึกภาพ 1909 อังกฤษครบ 78 ใบแล้ว (2026-10-11 · `visual-lore-en.ts` · `PROMPT_VERSION` 20261011-1)** — prompt `/en` และแชทต่อ `/en` ใช้ฉบับอังกฤษ ไม่มีไทยปนทั้งก้อน · ด่านเทียบ `visualAnchor` เทียบกับทั้งสองภาษา (เดิมคำอ่านอังกฤษโดนเตือน VISUAL_ANCHOR_UNGROUNDED ทุกใบ) · ผล `ai:judge` 20261011-1 (run 38127736710 · golden 30 เคส): สำเร็จ 30/30 · ตัดสิน 21 · รวม 4.51/5 · เคสที่ไพ่เปลี่ยน Δ 0.00 · ⚠️ ชุด golden เป็นไทยล้วน ฝั่งอังกฤษยังไม่ได้วัดด้วย judge (ใช้ `set: eval` ถ้าจะวัด) |
-| **054** | 🟢 Resolved | **ผังใช่/ไม่ใช่: AI ไม่ได้รับแนวโน้ม "ใช่/ไม่ใช่" ประจำไพ่ ทั้งที่มีครบ 78 ใบ** | `src/data/cards/yes-no.ts`, `src/lib/ai/prompt.ts`, `src/lib/ai/mock-reading.ts`, `src/lib/ai/consistency.ts` | ✅ **แก้แล้วในโค้ด (2026-10-03 · `PROMPT_VERSION` 20261003-1)** — prompt ส่งแนวโน้มรายใบ + น้ำหนักรวมจาก `tallyYesNo()` ตัวเดียวกับคำอ่านสำรอง · **กติกาไพ่กลับหัวรวมเป็นหนึ่ง ยึดหน้าสารานุกรม**: ไม่กลับขั้ว แต่แรงลดครึ่ง (เดิมคำอ่านสำรองกลับขั้ว) · ใบ "คำตอบสรุป" นับสองเท่า · AI ตอบต่างได้ถ้าอธิบายเหตุผล — นับสถิติด้วยคำเตือน `YESNO_AGAINST_CARDS` · ⚠️ ยังไม่มีผล `ai:judge` |
-| **053** | 🟡 Open | **อัปเกรด TypeScript 7 ยังทำไม่ได้ — `typescript-eslint` ตรึง peer ไว้ที่ `<6.1.0`** | `package.json` | ⏸️ **รอต้นทาง (2026-09-21)** — โค้ดเราเองพร้อมแล้ว: `npx -p typescript@7.0.2 tsc --noEmit` ➔ **0 errors** ทั้งรีโป · ที่ติดคือ `typescript-eslint@8.70.0` (เวอร์ชันเสถียรล่าสุด) ประกาศ `peer typescript ">=4.8.4 <6.1.0"` ➔ `npm ci` ตกด้วย ERESOLVE ตั้งแต่ขั้นติดตั้ง · มีแต่ `8.70.1-alpha.*` ที่ยังไม่เสถียร · ดัน `--legacy-peer-deps` ได้ก็จริงแต่กฎ lint ที่อ่านชนิดข้อมูลจะเพี้ยนเงียบ ๆ จึงปิด PR #544 ไว้ก่อน **รอ `typescript-eslint` ออกรุ่นที่รองรับ TS 7 แล้วอัปสองตัวพร้อมกัน** |
-| **051** | 🟢 Resolved | **`npm run dev` คอมไพล์ไม่ผ่านทั้งเว็บ — `not-found.tsx doesn't have a root layout`** | `next.config.ts`, `src/app/global-not-found.tsx` | ✅ **ปิดแล้ว (2026-09-19)** — เปิด `experimental.globalNotFound: true` ใน `next.config.ts` และสร้าง `src/app/global-not-found.tsx` ห่อ `RootHtml` + `NotFoundBody` ตามข้อกำหนด Next 16 multi-root-layout architecture · ทดสอบ dev server (`next dev --webpack`) ตอบ 200/404 ปกติสมบูรณ์ทั้งเว็บ |
-| **050** | 🟢 Resolved | **คลังคำอ่านสำเร็จรูปของ Pick A Card ถูกลากเข้าบันเดิลตั้งแต่เปิดหน้า ทั้งที่ใช้หลังเปิดกองแล้วเท่านั้น** | `src/data/pick-a-card-readings.ts`, `src/lib/reading/derived-draw.ts`, `src/components/pick-a-card/PickACardClient.tsx` | ✅ **ปิดแล้ว (2026-09-21)** — แยกคลังคำอ่าน (≈1,600 บรรทัด) ออกเป็นไฟล์ของตัวเองที่ **ฝั่งเซิร์ฟเวอร์เท่านั้นโหลด** และให้เซิร์ฟเวอร์ประกอบย่อหน้าให้ตรงกับไพ่ที่เปิดจริงแล้วส่งมากับคำตอบของ `/shuffle` (`derived.script`) ➔ วัดจากบิลด์จริง **143 ➔ 101 KB gzip (−42 KB · −29%)** · รัดเพดานด่านงบบันเดิลลงเป็น 115 KB แล้ว · ด่าน `test-pick-a-card.ts` เพิ่ม 3 ข้อกันพังแบบใหม่ (คลังหายรายหัวข้อ · คลังกำพร้า · ไฟล์ฝั่งหน้าจอเผลอ import คลัง) |
-| **049** | 🟢 Resolved | **ผลตรวจรอบ 2 — ปิดครบทุกข้อแล้ว** | `scripts/merge-astro-assets.ts`, `public/_headers` | ✅ **ปิดแล้ว (2026-09-17)** — ข้อ 9 · R-26 · R-31 · R-10 · **R-02** (`/spreads` TBT ของโค้ดเราเอง 701 ➔ 72–107 ms · perf 67 ➔ 96) · **R-11/R-12**: เจ้าของเปิด **Early Hints** ที่ Cloudflare แล้ว และบิลด์เติมส่วนหัว `Link: rel=preload` ของสไตล์ชีตให้หน้า HTML **22 เส้นทาง** อัตโนมัติ (ชื่อไฟล์มีแฮชจึงเขียนมือไม่ได้ · ด่าน `test-static-headers.ts` เฝ้าสัญญานี้อยู่) |
-| **048** | 🟢 Resolved | **หน้า `/cards` แลกความเร็วไปกับความนิ่ง — ถอด `content-visibility` แล้วจอไม่กระตุกแต่ style&layout โตเท่าตัว** | `src/components/encyclopedia/CardsExplorer.tsx`, `src/components/encyclopedia/CardGroupView.tsx`, `src/app/globals.css` | ✅ **ปิดแล้ว (2026-09-15) — ได้ทั้งสองอย่าง ไม่ต้องเลือก** · เอา `content-visibility` กลับมาได้โดยไม่กระตุก ด้วยการแก้ต้นเหตุสองข้อพร้อมกัน: **(1)** ล็อกแถวคีย์เวิร์ดไว้ 2 บรรทัดเสมอ (`h-[3.8125rem]`) ➔ การ์ดทุกใบสูงเท่ากัน (เดิมต่างกัน 31px เพราะบางใบคีย์เวิร์ดตกบรรทัด) **(2)** เปลี่ยน `contain-intrinsic-size` จากตัวเลขเดาค่าเดียว (406px) เป็น **`calc(vw)` ต่อ breakpoint** ที่คำนวณจากความกว้างจอ (การ์ด = ภาพ 7:12 + กล่องข้อความคงที่ ➔ สูง = กว้าง × 12/7 + ค่าคงที่) · **ผลวัดจริงบน production หลัง deploy**: TBT **3,995–4,446 ➔ 100–117 ms** · perf 50 ➔ **82–83** (ดีกว่าตอนก่อนเจอบั๊กซึ่งอยู่ที่ 79) · **CLS 0** · (บนบิลด์ในเครื่องวัดได้ 14–42 ms) · กระตุกเหลือ 4 ครั้ง ครั้งละ **1px** (เดิม 14 ครั้ง ครั้งละ 45px) · ความสูงที่จองไว้ตรงกับของจริง **0–1px ทั้ง 9 ความกว้างจอที่วัด** · ⚠️ **กับดักที่เสียเวลาไปหนึ่งรอบ**: `contain-intrinsic-size` กำหนดความสูงของ **content box** ➔ ต้องหัก `p-3` + เส้นขอบ = 26px ออกจากความสูงจริง (จับได้เพราะคลาดเกินเท่ากันเป๊ะ 26px ทุกจอ) · 🛡️ ด่านใหม่ `test-card-tile-height.ts` (ด่านที่ 62) เฝ้าของที่สูตรพึ่งพา · คู่มือวัดใหม่: [`HANDOFF_CARD_TILE_CV_2026-09-15.md`](plans/HANDOFF_CARD_TILE_CV_2026-09-15.md) |
-| **047** | 🟢 Resolved | **สคริปต์ตรวจบอตของ Cloudflare (`/cdn-cgi/challenge-platform/scripts/jsd/main.js`) กินเธรดหลักมากกว่าโค้ดทั้งเว็บรวมกัน** | `scripts/cloudflare-phase1.ts` (`fight_mode` · `enable_js`) | ✅ **ปิดแล้วบน production จริง (2026-09-15)** — เจ้าของสั่งปิด ➔ ปิดทั้ง `fight_mode` และ **`enable_js`** (ตัวหลังคือตัวที่ฉีดสคริปต์จริง และ**ไม่โผล่เป็นสวิตช์ในหน้า Settings เลย**) · **วัดหลังปิดบน production**: หน้าแรก perf **52 ➔ 81** (TBT 1,730 ➔ 106 ms) · `/cards` **56 ➔ 81** (1,544 ➔ 190 ms) · `/blog` **52 ➔ 84** (2,461 ➔ 56 ms) · `curl` ยืนยันไม่มี `challenge-platform` ในหน้าใดแล้ว · **ของที่เพิ่มมาแทน**: กฎ WAF ข้อที่ 4 (ใช้ไป 4/5) — ท้าทาย (managed challenge) คำขอที่เปลี่ยนสถานะเข้า `/api/` ซึ่งไม่มี `Origin` ของเว็บเรา · ทดสอบจริงแล้ว: POST พร้อม Origin ➔ ถึงแอป · POST ไม่มี Origin ➔ 403 · GET ปกติ ➔ 200 · หน้าเว็บ ➔ 200 · ⚠️ **กับดักที่เหยียบจริงระหว่างทำ (INC-0179)**: ปุ่ม toggle ในแดชบอร์ดกดแล้วไม่บันทึก (กด 2 ครั้ง รีโหลดแล้วยังเปิด) ต้องสั่งผ่าน API · และ PUT ของ `bot_management` **แทนที่ทั้งก้อน** เผลอรีเซ็ต `ai_bots_protection` กับ `ai_training` จาก block เป็น disabled (คืนค่าแล้ว ยืนยันตรงสแนปช็อตเดิมทุกฟิลด์) |
-| **046** | 🟢 Resolved | จุด/เหรียญทรงกลมใช้สีพื้นเดียวกับกล่องที่ครอบอยู่ จึงล่องหนสนิท (3 จุด) | `src/components/reading/StreamReader.tsx`, `src/components/reading/ProvablyFairPanel.tsx` | ✅ **ปิดแล้ว (2026-09-13)** — `StreamReader` จุดสถานะ `bg-[#EBF3ED]` บนแถบ `bg-[#EBF3ED]` (พี่น้องของมัน `QuickChatResult` ใช้ `bg-ok` ถูกอยู่แล้ว = หลักฐานว่าลอกผิด) · `ProvablyFairPanel` เหรียญ ✓ และเหรียญ ✕ ซ้ำรูปแบบเดียวกัน (เหรียญ ✕ **ด่านใหม่เป็นคนจับ ไม่ใช่ตาคน**) · เพิ่มด่านที่ 51 `test-invisible-element.ts` พิสูจน์ 2 ทางแล้ว (ตกกับ snapshot ที่พังจริง · ผ่านกับโค้ดที่แก้แล้ว) |
-| **045** | 🟢 Resolved | `TarotEncyclopediaModal` เปิดไม่ได้เลยทั้งเว็บ — ไม่มีใครเรียก `setIsEncyclopediaOpen(true)` สักจุด | `src/components/home/TarotFlow.tsx` | ✅ **ปิดแล้ว (2026-09-13)** — เจ้าของสั่งลบ · ถอดทั้งก้อน: lazy import · state · `useOnceOpen` · บล็อกที่เรนเดอร์ และลบไฟล์ `TarotEncyclopediaModal.tsx` (382 บรรทัด) ทิ้ง · สารานุกรมตัวจริงคือหน้า `/cards` ซึ่งเปิดใช้งานอยู่แล้ว · ถอดชื่อออกจาก `MODAL_COMPONENTS` ของด่าน a11y และคอมเมนต์ใน `use-dialog-behavior.ts` ให้ตรงกันแล้ว |
-| **044** | 🟢 Resolved | หน้าต่างลอยอีก 4 บานไม่มีอนิเมชันขาออก — `return null` อยู่เหนือ `AnimatePresence` เหมือนกันหมด | `src/components/reading/ShareModal.tsx`, `src/components/history/ReadingHistoryModal.tsx`, `src/components/encyclopedia/TarotEncyclopediaModal.tsx`, `src/components/card/CardZoomModal.tsx` | ✅ **แก้แล้ว (2026-09-11 รอบ 32)** — ย้ายเงื่อนไข `isOpen` เข้าไปข้างใน `AnimatePresence` ครบทั้ง 4 บาน + เปลี่ยนฉากหลังเป็น `motion.div` ที่ไล่ opacity · สารานุกรมมีสองชั้น ชั้นรายละเอียดไพ่ไม่มี `AnimatePresence` ของตัวเองเลยจึงเพิ่มให้ด้วย · `CardZoomModal` แยก `!card` ออกจาก `!isOpen` แล้ว · **`ALLOWLIST` ของกฎข้อ 9 ว่างเปล่าแล้ว** · วัดจริง: `ReadingHistoryModal` ขาออก 264ms/13 ขั้น (เดิม 41ms/1 ขั้น) · ของแถมที่เจอระหว่างกวาด: คลาสอนิเมชันผีของ `tailwindcss-animate` ที่ไม่ได้ติดตั้ง 3 จุด → INC-0127 + กฎข้อ 10 |
-| **043** | 🟢 Resolved | **หน้า `/blog` มี TBT 660 ms · perf 59 แย่กว่าทุกหน้าในเว็บ 4.1 เท่า** | `src/components/blog/BlogIndexClient.tsx`, `astro/src/pages/blog/index.astro` | ✅ **ปิดแล้ว (วัดยืนยัน 2026-09-15)** — ยิง Lighthouse 12.8.2 บน production จริง (mobile · simulate) แล้ว **`/blog` กลายเป็นหน้าที่เบาที่สุดในสี่หน้าที่วัด**: TBT **24 ms** (ยิงซ้ำ 3 รอบได้ 14 · 24 · 40 ms) · perf **85** · เทียบ `/` 120 ms · `/cards` 232 ms · `/spreads` 335 ms ➔ จากเดิมแย่กว่าหน้าถัดไป 4.1 เท่า ตอนนี้**ดีที่สุด** · ที่แก้ให้หายคือ PR #453 (6 จุด) + ย้ายหน้าไป Astro ใน PR #484 (HTML 35 ➔ 23 KB · บนเน็ตจริง 22.6 KB zstd · ไม่มีเพย์โหลด RSC/router ของ Next แล้ว) · ⚠️ **ตัวเลขข้างบนคือค่าของโค้ดเราเอง วัดโดยบล็อกสคริปต์ตรวจบอตของ Cloudflare** — ถ้าปล่อยให้มันทำงาน TBT ของ **ทุกหน้า** จะพุ่งเป็น 1,256–2,206 ms (ดู ISSUE-047 · INC-0172) · หมายเหตุ: PSI ของ Google โควตารายวันหมดตั้งแต่ก่อนเริ่มรอบนี้ จึงวัดด้วย Lighthouse CLI ตัวเดียวกันบนเครื่องแทน ตัวเลขดิบจึงเทียบกับฐาน 660 ms ของ 2026-09-11 ตรง ๆ ไม่ได้ (คนละ CPU) **แต่การจัดอันดับเทียบหน้าอื่นในรอบเดียวกันตัดข้อจำกัดนี้ทิ้งไปแล้ว** |
-| **042** | 🟢 Resolved | หน้าต่างเข้าสู่ระบบ (และหน้าต่างลอยอีก 2 บาน) ตกขอบจอทั้งบนและล่าง — ขอบบนเลื่อนตามไม่ได้ | `src/components/auth/AuthModal.tsx`, `src/components/card/CardZoomModal.tsx`, `src/components/reading/QuickFortunePicker.tsx`, `scripts/qa/test-modal-viewport-fit.ts` | ✅ **แก้แล้ว** — แผงวางอยู่ใน `fixed inset-0 flex items-center` โดย**ไม่มีเพดานความสูงและไม่มีชั้นที่เลื่อนได้เลย** พอเนื้อหาสูงกว่าจอ `items-center` จะดันแผงล้นออกไปพร้อมกันทั้งสองด้าน — ขอบล่างถูกตัด ส่วนขอบบน**หายแบบเข้าถึงไม่ได้ถาวร** เพราะตัวครอบเป็น `fixed` จึงเลื่อนตามไม่ได้ · วัดจริงด้วย Chromium บน production build ก่อนแก้: สมัครสมาชิก+Turnstile+แถบวัดรหัส = แผงสูง 904px ➔ 1280×720 ได้ `top=-92 bottom=812` · 1280×640 ได้ `top=-132 bottom=772` · 390×844 ได้ `top=-16 bottom=860` · เข้าสู่ระบบ+Turnstile (สภาพที่เจ้าของถ่ายมา) = 691px ➔ 1280×640 ได้ `top=-26 bottom=666` · แก้ด้วย `max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2rem)]` ที่แผง + ย้ายเนื้อหาไปไว้ในชั้น `min-h-0 overflow-y-auto overscroll-contain` (ปุ่มปิดอยู่นอกชั้นนี้จึงค้างที่เดิมเสมอ) · ตรวจซ้ำ 18 เคสหลังแก้: ไม่ตกขอบสักเคส และเลื่อนถึงปุ่ม Google/LINE ได้ทุกเคสแม้จอสูงแค่ 520px · **สาเหตุที่หลุดมานาน**: ไม่มีด่านไหนตรวจเรื่องนี้เลย — เพิ่มด่านที่ 30 `test-modal-viewport-fit.ts` ตรวจหน้าต่างลอยทุกบานทั้งเว็บ (ทดสอบด้วยการทำให้พังจริง 8 เคส) |
-| **039** | 🟢 Resolved | หน้าที่ไม่มีหัวเว็บที่เหลือทั้งเว็บ — รวมถึง URL ที่พิมพ์ผิดทุกเส้นที่ตกไปหน้า 404 ดีฟอลต์ของ Next | `src/app/not-found.tsx`, `src/app/_shared/pages/not-found.tsx`, `src/app/(th)/reset-password/layout.tsx`, `src/app/(th)/readers/queue/layout.tsx`, `scripts/qa/test-sticky-header.ts` | ✅ **แก้แล้ว** — ด่านของ INC-0110 ตรวจเฉพาะ `.next/server/app/en/**` ฝั่งไทยจึงไม่มีใครตรวจเลย · เจอเพิ่ม 3 หน้า (404 · ตั้งรหัสผ่านใหม่ · สถานะคิวของลูกค้า) และเจอว่า **URL ที่ไม่ตรง route ไหนเลยได้หน้า 404 ดีฟอลต์ของ Next** เพราะ root layout ทั้งสองอยู่ใน route group จึงไม่มี root not-found · เพิ่ม `src/app/not-found.tsx` + ขยายด่านที่ 39 ให้ตรวจทุกหน้าทั้งเว็บพร้อมทะเบียนหน้าที่ตั้งใจไม่มีหัวเว็บ (INC-0112) · **รอบเสริม**: ด่านเดียวกันตรวจ **ฟุตเตอร์** ควบคู่ทุกหน้าแล้ว (เดิมตรวจแต่หัวเว็บ ทั้งที่ INC-0110 หายไปพร้อมกันทั้งคู่) |
-| **037** | 🟢 Resolved | หน้าอังกฤษทุกหน้ายกเว้น `/en` ไม่มีหัวเว็บและไม่มีฟุตเตอร์ (115 หน้า) | `src/app/(en)/en/*/layout.tsx`, `scripts/qa/test-en-routing.ts` | ✅ **แก้แล้ว** — ต้นไม้ `(en)` เป็น root layout คนละตัวกับ `(th)` ตอนสร้างก๊อปมาแต่ `page.tsx` ไม่ได้ก๊อป section layout ที่แขวนหัวเว็บ/ฟุตเตอร์ไว้ · เพิ่ม layout 5 ไฟล์ + ด่านตรวจว่าทุกหน้าอังกฤษที่ build ออกมาต้องมี `data-site-header="` (INC-0110) |
-| **036** | 🟢 Resolved | หัวเว็บขยับ/สั่นตอนเลื่อนหน้าจอบนมือถือ มีแถบเนื้อหาแวบเหนือหัวเว็บ | `src/components/layout/SiteHeader.tsx`, `src/app/globals.css`, `scripts/qa/test-sticky-header.ts` | ✅ **แก้แล้ว (3 รอบ · ปิดเคส)** — รอบ 1 บังคับเลเยอร์ compositor + `safe-area-inset-top` (INC-0107) · รอบ 2 พบว่า Lightning CSS ยุบ `translate3d(0,0,0)` เหลือ 2D ทำให้รอบแรกไร้ผล จึงเปลี่ยนเป็น `translateZ(0)` + เพิ่มโล่ `::before` ➔ ช่องว่างหาย แต่ยังสั่น (INC-0108) · **รอบ 3 พบว่าต้นเหตุคือ `position: sticky` เอง** ซึ่งต้องคำนวณระยะเยื้องใหม่ทุกเฟรมเทียบ layout viewport ที่ iOS Safari ขยับเองระหว่างเลื่อน จึงเปลี่ยนเป็น `position: fixed` + `[data-site-header-spacer]` (INC-0109) |
-| **032** | 🟢 Resolved | `monthly-ten` วางไพ่ใบที่ 6 ทับกับใบไขว้ที่หมุน 90° | `src/data/spreads.ts`, `scripts/qa/test-spreads.ts` | ✅ **แก้แล้ว** — เลื่อนใบที่ 6 จาก `x: 0.5` → `0.53` และเพิ่มด่านตรวจใบไขว้เบียดคอลัมน์ |
-| **034** | 🔵 Low | ไพ่ซ้อนกันแนวตั้งในแผนผัง SEO — รายงานไว้ 2 แบบ แต่**ของจริงมี 4 แบบ** | `src/lib/tarot/spread-map-geometry.ts`, `src/components/spread/SpreadPositionMap.tsx` (ไฟล์ถูกลบแล้ว 2026-10-19 · A8 โค้ดตาย — แผนผังใช้ `mapLayout()` แทน), `scripts/qa/test-spreads.ts` | ✅ **แก้แล้ว** — เป็นบั๊ก ไม่ใช่ดีไซน์ · ตรวจด้วยเรขาคณิตจริงแล้วพบว่ากว้างกว่าที่บันทึกไว้: `chakra` ทับกัน 6 คู่ ลึก 48–52% · `year-ahead` 8 คู่ ลึก 24–44% · `celtic-cross` และ `monthly-ten` ผังละ 3 คู่ ลึก 20% · ต้นเหตุคือสเกลแกน y ถูกตรึงไว้ที่ 0.78 ตายตัว ขณะที่ไพ่สูง 0.195 และผังเหล่านี้วางไพ่ห่างกันแค่ 0.20 (0.20 × 0.78 = 0.156 < 0.195) · ย้ายตัวเลขทั้งชุดมาอยู่ที่ `spread-map-geometry.ts` ที่เดียว แล้วคำนวณสเกล y + ขนาดการ์ดจากพิกัดจริงของแต่ละผัง (ผังที่ปกติดีอยู่แล้วอีก 21 แบบไม่ขยับสักพิกเซล) · **สาเหตุที่หลุดมานาน**: ด่านเดิมคัดลอกตัวเลขไปเขียนไว้เอง และตรวจเฉพาะ "ใบไขว้" เทียบใบอื่น ไพ่ธรรมดาที่เรียงลงคอลัมน์เดียวกันจึงไม่เคยถูกตรวจ · ตอนนี้ด่านตรวจ **ทุกคู่** ด้วยโมดูลเดียวกับที่วาดจริง (541 → 1,295 assertion) และยืนยันด้วย Chromium บน production build แล้ว |
-| **038** | 🟢 Resolved | ธง `entitlement.enforced` บน production ถูกตั้งเป็น `false` ค้างไว้ — ระบบสิทธิ์ทั้งชุดไม่ทำงาน | KV `app:flag:entitlement.enforced` · `/admin` แท็บ "สิทธิ์เปิดไพ่" | ✅ **ปิดแล้ว (2026-09-13)** — เขียนค่าเข้า KV production ตรง ๆ ด้วย `wrangler kv key put` (ไม่ต้องผ่าน `/admin` จึงไม่ติด WAF ที่เคยตอบ 403) อ่านกลับยืนยันได้ `{"value":true}` · **สิ่งที่ยังต้องให้เจ้าของยืนยันเอง**: ล็อกอินบัญชีสมาชิกจริงแล้วเช็กว่าเปิดไพ่ครั้งที่ 2 ของวันถูกกั้น และผังพรีเมียม 15 แบบขึ้นสถานะล็อก (จากตรงนี้ไม่มีเซสชันสมาชิกจึงพิสูจน์ขั้นนั้นไม่ได้) |
-| **035** | 🟢 Resolved | CSP บล็อก Cloudflare Web Analytics beacon ทุกครั้งที่โหลดหน้า | `next.config.ts` | ✅ **แก้แล้ว** — เติม `https://static.cloudflareinsights.com` เข้า `script-src` และเติม `https://cloudflareinsights.com` เข้า `connect-src` ด้วย (beacon ยิงผลกลับด้วย POST ถ้าเปิดแต่ `script-src` สคริปต์จะโหลดผ่านแต่ส่งข้อมูลไม่ออก = ดูเหมือนแก้แล้วแต่ยังไม่มีข้อมูล) |
-| **040** | 🟡 Medium | `www.seertarot.net` ตอบ 200 ไม่ redirect — เนื้อหาเดียวกันอยู่สองโฮสต์ | `next.config.ts` | ✅ **แก้แล้ว** — เพิ่มกฎ 301 `www` ➔ apex ไว้บนสุดของ `redirects()` · ทางที่ถูกกว่าคือ Redirect Rule ที่ Cloudflare (เด้งที่ขอบ ไม่ปลุก Worker) แต่ต้องใช้สิทธิ์ dashboard ของเจ้าของ ทั้งสองอย่างอยู่ร่วมกันได้ |
-| **041** | ⚪ Not a bug | Meta Pixel ไม่ทำงานบน production (`fbq` เป็น `undefined`) | — | ⚪ **ไม่ใช่บั๊ก — เจ้าของยังไม่ได้ใช้ Meta Pixel** (ยืนยันเมื่อ 2026-09-09) · `AnalyticsTracker.tsx` เขียนกำกับไว้ตั้งแต่ต้นแล้วว่า "เว็บนี้ตั้งแค่ GA4" แต่รอบตรวจ 2026-09-09 อ่านข้ามไป จึงรายงานผิดว่าเป็นของค้าง · **ถ้าจะเริ่มใช้จริงต้องตั้งเป็น secret ของ GitHub เท่านั้น** ตั้งด้วย `wrangler secret` อย่างเดียวไม่ทำงาน (ดู `docs/PENDING_SETUP.md` หัวข้อ 0) |
-| **024** | 🟢 Resolved | แผงเมนูค้าง `visibility: hidden` ทั้งที่ React สั่งเปิดแล้ว | `src/app/globals.css` | ✅ **แก้แล้ว** — ถอด `visibility` ออกจาก base transition ให้ `visible` ทันทีตอนเปิด |
-| **025** | 🟢 Resolved | กด TH/EN แล้วหัวเว็บนิ่ง ไม่มี visual feedback (353ms) | `src/lib/i18n/context.tsx`, `src/components/layout/LanguageSwitcher.tsx` | ✅ **แก้แล้ว** — เพิ่ม `pendingLocale` urgent update และ `aria-busy` feedback |
-| **026** | 🟢 Resolved | `LocaleProvider` ไม่ memoize value ทำให้ทั้งเว็บ re-render | `src/lib/i18n/context.tsx` | ✅ **แก้แล้ว** — ครอบ `useMemo` และ `useCallback` |
-| **027** | 🟢 Resolved | `will-change` จอง GPU layer ค้างถาวรบนแผงที่ปิด | `src/app/globals.css` | ✅ **แก้แล้ว** — ย้ายไปไว้เฉพาะ `.dropdown-panel-entering` พร้อมด่านตรวจอัตโนมัติ `test-will-change.ts` |
-| **028** | 🟢 Resolved | `window.dispatchEvent` ยิงใน setState updater ซึ่งต้องเป็น pure function | `src/components/ui/SacredNavDropdown.tsx`, `src/components/auth/UserProfileBadge.tsx` | ✅ **แก้แล้ว** — ย้าย side-effect ออกมานอก updater ผ่าน ref state |
-| **029** | 🟢 Resolved | `AuthModal` มี `onClose` ใน effect dependencies ดึงโฟกัสหลุดขณะพิมพ์ | `src/components/auth/AuthModal.tsx` | ✅ **แก้แล้ว** — ใช้ `onCloseRef` และถอด `onClose` ออกจาก deps พร้อมด่านตรวจ `test-modal-effect-deps.ts` |
-| **030** | 🟢 Resolved | ไม่มี `scroll-padding-top` ทั้งโปรเจกต์ ลิงก์ hash จอดใต้หัวเว็บ | `src/app/globals.css`, `src/components/reading/FollowUpChat.tsx` | ✅ **แก้แล้ว** — ตั้ง `--site-header-h` และ `scroll-padding-top` บน `html` และถอด `scroll-mt-24` |
-| **018** | 🟢 Resolved | ตั๋วคิวแม่หมออ่านได้ด้วย `customerRef` ใน URL (PDPA) | `src/lib/marketplace/customer-ref.ts`, `src/app/api/marketplace/tickets/**` | ✅ **แก้แล้ว** — ย้ายไปเป็น Signed HttpOnly Cookie และส่ง 404 ป้องกัน ID enumeration |
-| **017** | 🟢 Resolved | โควตาเปิดไพ่ถูกใช้ซ้อนได้ถ้ายิงขนาน (Double-Spend) | `src/lib/entitlement/entitlement.ts` | ✅ **แก้แล้ว** — Conditional Atomic INSERT เช็ค `meta.changes > 0` ป้องกันขนาน 100% |
-| **019** | 🟢 Resolved | `robots.txt` ปิดบอตค้นหา AI ทั้งหมด | `src/app/robots.ts` | ✅ **แก้แล้ว** — เปิดให้ AI Search & Live Citation Bots นำทางผู้ใช้เข้าเว็บ |
-| **020** | 🟢 Resolved | `isSevereForeignLeak()` ไม่เคยถูกต่อใช้งาน | `src/lib/ai/groq.ts` | ✅ **แก้แล้ว** — ต่อเป็น Circuit Breaker สลับไป Gemini ทันทีเมื่ออักษรต่างด้าว $\ge 20$ |
-| **022** | 🟢 Resolved | Poll ต่อเนื่องแม้แท็บถูกซ่อน | `src/lib/utils/use-visible-interval.ts` | ✅ **แก้แล้ว** — ใช้ `useVisibleInterval` หยุด Poll เมื่อแท็บซ่อนและยิงทันทีเมื่อแท็บกลับมา |
-| **023** | 🟢 Resolved | `/readers` และ `/readers/[id]` ไม่มี BreadcrumbList | `src/app/readers/page.tsx`, `src/app/readers/[id]/page.tsx` | ✅ **แก้แล้ว** — เพิ่ม BreadcrumbList JSON-LD และ `<nav aria-label="Breadcrumb">` |
-| **021** | 🟢 Resolved | `EntitlementGate` รับ props มาแล้วไม่ใช้เลย | `src/app/TarotFlow.tsx`, `docs/plans/ENTITLEMENT_PLAN.md` | ✅ **แก้แล้ว** — ย้ายประวัติการออกแบบไปบันทึกในเอกสารและขจัด Dead Code |
-| **003** | 🟢 Resolved | สมดุลไพ่ Yes/No 78 ใบ (ใช่ 38 / ไม่ใช่ 22 / ไม่แน่ 18) | `src/data/cards/*.ts` | ✅ **แก้แล้ว** (ผ่าน 0 คำเตือน) |
-| **010b** | 🟢 Resolved | session-token hard-throw error ใน Production | `src/lib/security/session-token.ts` | ✅ **แก้แล้ว** (Hard fail loud) |
-| **011** | 🟢 Resolved | pnpm-workspace.yaml schema & CI package manager | `pnpm-workspace.yaml`, `.github/*` | ✅ **แก้แล้ว** (Schema สมบูรณ์ 100%) |
-| **005** | 🟢 Resolved | ระบบ CI Auto-Merge อัตโนมัติ 100% | `.github/workflows/pr.yml` | ✅ **แก้แล้ว** (Autonomous review & squash) |
-| **004** | 🔵 Note | รัน `wrangler dev` บน macOS 12.6 ไม่ได้ | (สภาพแวดล้อมเครื่อง) | 🔵 ข้อจำกัด OS เครื่อง (ใช้ dev server แทน) |
-| **006** | 🔵 Note | GitHub Actions runner configuration | `.github/workflows/*.yml` | 🟢 อัปเกรด Node 22 รองรับครบ |
-| **007** | 🟢 Resolved | ~~Prisma schema พร้อมต่อ PostgreSQL~~ → ย้ายไป Cloudflare D1 แล้ว | `wrangler.jsonc`, `migrations/`, `src/lib/platform/db.ts` | ✅ **ปิดแล้ว** — ไม่ใช้ Prisma · D1 ใช้งานจริง |
-| **012** | 🟢 Resolved | อีเมล/โดเมน/LINE ตั้งค่าครบถ้วนสมบูรณ์ (seertarot.net, LINE, Resend) | secrets, `src/lib/config/site.ts` | ✅ **แก้แล้ว** — ผูกโดเมน seertarot.net, LINE, Resend ครบ 100% |
-| **016** | 🟢 Resolved | คำอ่าน AI ตกไป mock/fallback → `usage=0` → ระบบสิทธิ์ไม่หักโควตา ทุกคนเปิดไพ่ไม่จำกัด | `src/lib/ai/gemini.ts`, secrets | ✅ **แก้แล้ว** (PR #104–110) |
+| เลข | เรื่อง | ระดับ | ด้าน | สถานะ | ต้องใช้เจ้าของ |
+| :-- | :--- | :-- | :-- | :--- | :-: |
+| ISSUE-061 | PerplexityBot โดน 403 ที่ Cloudflare ทั้งที่ `robots.txt` อนุญาต | กลาง | SEO · Cloudflare | รอเจ้าของดูแดชบอร์ด | ใช่ |
+| ISSUE-053 | อัปเกรด TypeScript 7 ยังทำไม่ได้ (`typescript-eslint` ตรึง peer `<6.1.0`) | ต่ำ | เครื่องมือ · dependency | รอต้นทาง · มีทางเลี่ยงใน PR #721 (draft) | ไม่ |
+| ISSUE-048 | ฟอนต์ยังไม่มี `unicode-range` — หน้า `/en` โหลดอักษรไทยที่ไม่ได้ใช้ | ต่ำ | ประสิทธิภาพ | ตั้งใจเลื่อน | ไม่ |
+| ISSUE-004 | รัน Worker ในเครื่อง (`preview:worker` / `wrangler dev`) บน macOS ต่ำกว่า 13.5 ไม่ได้ | ต่ำ | เครื่องมือพัฒนา | ข้อจำกัดเครื่อง | ใช่ |
 
 ---
 
-## 🟢 แก้ไขเสร็จสิ้นล่าสุด 2026-09-04 (ISSUE-017 ถึง ISSUE-023)
+## ISSUE-061 · PerplexityBot โดน 403 ที่ Cloudflare
 
-| # | ระดับ | ปัญหาเดิม | แนวทางการแก้ไขที่ดำเนินการแล้ว | การทดสอบยืนยัน (Verification) |
-| :-- | :--- | :--- | :--- | :--- |
-| **018** | 🔴 High | ตั๋วคิวแม่หมออ่านได้ด้วย `customerRef` ใน URL | ย้ายเป็น Signed HttpOnly Cookie ผ่าน `src/lib/marketplace/customer-ref.ts` และส่ง 404 เมื่อไม่ได้รับอนุญาต (Zero Info Leakage) | ผ่าน `test-marketplace-readers.ts` ด่าน 12 |
-| **017** | 🟠 Med | โควตาเปิดไพ่ถูกใช้ซ้อนได้ถ้ายิงขนาน (Double-Spend) | ปรับปรุง `consumeReading()` เป็น Conditional Atomic INSERT เช็ค `meta.changes > 0` | ผ่าน `test-entitlement.ts` ยิงขนาน 5 ครั้งสำเร็จ 1 |
-| **019** | 🟡 Biz | robots.txt ปิดบอตค้นหา AI ทั้งหมด | เพิ่มกฎอนุญาตเฉพาะ Search & Citation Bots ใน `src/app/robots.ts` | ยืนยันโครงสร้าง metadata robots ผ่าน |
-| **020** | 🟡 Med | `isSevereForeignLeak()` ไม่ถูกเรียกใช้งาน | เชื่อมต่อเป็น Circuit Breaker ในลูปโมเดล Groq เพื่อตัดข้ามไป Gemini เมื่อพบอักษรต่างด้าวสะสม $\ge 20$ ตัว | ผ่าน typecheck และ regex verification |
-| **022** | 🔵 Low | Poll ต่อเนื่องแม้แท็บถูกซ่อน | สร้าง `src/lib/utils/use-visible-interval.ts` และนำไปปรับใช้ในหน้า console และ queue | ผ่านโค้ดและ browser API verification |
-| **023** | 🔵 Low | `/readers` และ `/readers/[id]` ไม่มี BreadcrumbList | เพิ่ม Schema.org BreadcrumbList JSON-LD และ visible `<nav aria-label="Breadcrumb">` | ผ่าน 24 ด่าน repo:verify |
-| **021** | 🔵 Low | `EntitlementGate` รับ props มาแล้วไม่ใช้ | ลบคอมโพเนนต์ Dead Code ทิ้ง บันทึกประวัติการออกแบบลง `ENTITLEMENT_PLAN.md` และ inline children | ผ่าน `npm run typecheck` สะอาด 0 errors |
+- **อาการ**: คำขอที่ใช้ user-agent ของ PerplexityBot ได้ 403 จากชั้น Cloudflare ส่วนเบราว์เซอร์ปกติได้ 200 ทั้งที่ `src/app/robots.ts` เปิดให้ PerplexityBot (`Allow: /`) ตามมติเจ้าของใน ISSUE-019 (เปิดรับบอตค้นหาของ AI ที่ลิงก์กลับมาหาเรา)
+- **ผลกระทบ**: Perplexity ดึงหน้าเว็บไปอ้างอิงไม่ได้ — เสียทราฟฟิกจาก AI search ที่ตั้งใจเปิดรับไว้
+- **ทำไมยังไม่แก้**: ต้นเหตุอยู่นอกโค้ด อยู่ในการตั้งค่า Cloudflare ซึ่งเจ้าของเป็นคนเข้าแดชบอร์ด · พบในรอบตรวจ 2026-10-18 ข้อ B3-08
+- **ข้อจำกัดของหลักฐาน**: ยิงทดสอบจากเครื่องที่ไม่ใช่ IP ของ Perplexity — Cloudflare อาจบล็อกเฉพาะ "บอตปลอม UA" ก็ได้ ต้องดูคำขอของบอตตัวจริงใน Security › Events ถึงจะสรุปได้
+- **ขั้นต่อไป**: เจ้าของเปิด Security › Events กรอง user-agent `PerplexityBot` ➔ ถ้าบอตตัวจริง (verified) โดนบล็อก ให้ดูว่ากฎหรือสวิตช์ไหนบล็อก แล้วเปิดข้อยกเว้นเฉพาะบอต AI search · จุดที่ควรดูก่อนคือสวิตช์บล็อกบอต AI ระดับโซน (ประวัติใน ISSUE-047 บันทึกว่าเปิด `ai_bots_protection=block` ไว้) · ห้ามเปิดให้บอตเทรนโมเดล (`GPTBot` · `ClaudeBot` ฯลฯ ยังต้องปิดตาม ISSUE-019)
+- **หลักฐาน (2026-10-26)**: `curl -A "<UA ของ PerplexityBot>" https://seertarot.net/cards` ➔ 403 · UA เบราว์เซอร์ ➔ 200 · `https://seertarot.net/robots.txt` มี `User-Agent: PerplexityBot` + `Allow: /` · ที่มา: [`docs/plans/AUDIT_2026-10-18.md`](plans/AUDIT_2026-10-18.md) (บรรทัดสถานะ) · `docs/WORK_LOG.md` รอบ 309
 
----
+## ISSUE-053 · อัปเกรด TypeScript 7 ยังทำไม่ได้
 
-## ✅ แก้เสร็จแล้ว + verify แล้ว (Merged into `main`)
+- **อาการ**: ยก `typescript` เป็น 7 ไม่ได้ เพราะ `typescript-eslint` ประกาศ peer `typescript ">=4.8.4 <6.1.0"` ➔ `npm ci` ตกด้วย ERESOLVE ตั้งแต่ขั้นติดตั้ง
+- **ผลกระทบ**: ไม่กระทบผู้ใช้ · เสียแค่ความเร็ว typecheck ของ TS 7
+- **ทำไมยังไม่แก้**: รอต้นทาง — ดัน `--legacy-peer-deps` ได้ แต่กฎ lint ที่อ่านชนิดข้อมูลจะเพี้ยนเงียบ ๆ จึงปิด PR #544 ไป (2026-09-21 · ตอนนั้นวัดว่าโค้ดเราผ่าน `tsc` 7.0.2 แบบ 0 errors)
+- **กำลังทำ**: PR #721 (draft · ยังไม่ merge) ติดตั้ง TS 7.0.2 ใต้ชื่อแฝง `typescript-native` ให้ `npm run typecheck` ใช้ ส่วน `typescript` ตัวหลักคงรุ่น 6 ให้ lint/Next/Astro — ถ้า #721 merge ให้ย้ายข้อนี้ไปคลังแล้วจดงานต่อไว้ในคลังด้วย
+- **ขั้นต่อไป**: เมื่อ `typescript-eslint` ออกรุ่นที่รองรับ TS 7 ให้ยก `typescript` กับ `typescript-eslint` พร้อมกัน (และถอดชื่อแฝงถ้า #721 merge ไปแล้ว)
+- **หลักฐาน (2026-10-26)**: `package.json` — `typescript ~6.0.3` (ติดตั้งจริง 6.0.3) · `typescript-eslint ^8.71.2` · `npm view typescript-eslint@latest` = 8.72.0 ยังตรึง `<6.1.0` · `npm view typescript dist-tags` → `latest` 7.0.2 · `docs/WORK_LOG.md` บันทึกการปิด PR #544
 
-| # | อาการเดิม | วิธีการแก้ไขระดับวิศวกรรม | การพิสูจน์ (Verification Result) |
-| :-- | :--- | :--- | :--- |
-| **001** 🔴 | flow ดูดวงติดตายขั้น 1 (AnimatePresence deadlock) | ปรับมาใช้ Conditional Rendering + GPU CSS | ✅ ผ่านฉลุย 1→2→3→4→5 |
-| **002** 🟠 | Hydration mismatch จากทศนิยมตรีโกณมิติ | ปัดทศนิยม 2 ตำแหน่ง (`.toFixed(2)`) | ✅ SSR และ Client DOM ตรงกัน 100% |
-| **003** 🟡 | ฐานข้อมูลไพ่เอนเอียง Yes มากเกินไป | ปรับค่า `yesNo` 78 ใบตามตำรา 1909 แท้จริง | ✅ `verify-cards.ts` ผ่าน 0 warnings |
-| **008** 🟠 | โหลดภาพจาก path เก่า 404 | Single Source of Truth `getCardImageSrc()` | ✅ 0 Network Error 404 |
-| **009** 🟠 | พรีโหลดไฟล์เสียง mp3 ที่ไม่มีอยู่จริง 404 | ใช้ Web Audio API Synthesizer ล้วนๆ | ✅ 0 Audio 404 |
-| **010b** 🟡 | Session secret fallback ใน production | เพิ่ม `getSessionSecret()` บังคับ throw ใน production | ✅ Security Hard-Fail Guard |
-| **011** 🟡 | `pnpm-workspace.yaml` ขาดฟิลด์ packages | ใส่ `packages: - .` และตัด `allowBuilds` | ✅ Schema compliant pnpm 9.15 |
-| **012** 🟢 | ขาด Client-side Provably-Fair Verifier & KV Persistence | พอร์ต Web Crypto, สร้าง ProvablyFairPanel, 1000-case parity test, KV session backstop | ✅ ตรวจสอบได้อิสระในเบราว์เซอร์ 100% |
-| **013** 🟢 | ขาด Consumer Retention & Reading Journal D1 Persistence | ตาราง `users`, `reading_journal`, dual-mode history sync, auto-merge on login | ✅ ซิงก์ประวัติข้ามอุปกรณ์และสำรอง D1 สมบูรณ์ |
-| **014** 🟢 | Edge OAuth Hardening & State CSRF Guard | บังคับ throw ใน production สำหรับ AUTH_SECRET, ตรวจสอบ state cookie ป้องกัน CSRF, sanitize host header | ✅ ป้องกัน Login CSRF และ Host Injection 100% |
-| **015** 🟢 | ขาดระบบป้องกันต้นทุน AI และการถูกยิง API ซ้ำซ้อน | กลยุทธ์ 7 ชั้น: Rate Limit Bypass, AI Daily Budget Cap, Origin Guard, KV per-IP Quota, WAF Rules (ADR-002) | ✅ ควบคุมต้นทุนและตัดวงจรอัตโนมัติสมบูรณ์ 100% |
-| **016** 🟢 | **ผู้เยี่ยมชมเสียสิทธิ์ทดลองฟรีถาวรถ้า AI ล้มกลางคัน** — คุกกี้ `used=1` ถูกแนบไปกับ response header ซึ่งส่งออก **ก่อน** สตรีมเริ่มทำงาน · `refundReading()` ลบได้แค่แถวใน `reading_usage` (ตารางสมาชิก) เรียกคืนคุกกี้ไม่ได้ → คนเข้าเว็บครั้งแรกเจอ AI ล้มแล้วลองใหม่ไม่ได้อีกเลย | ย้ายการปั๊มคุกกี้ออกจาก response header ไปเป็น `POST /api/entitlement/guest-consume` ที่ client ยิงหลังได้ event `done` เท่านั้น (PR #98) | ✅ คืนสิทธิ์ครบทั้งสมาชิกและผู้เยี่ยมชม — ตรงเกณฑ์ผ่านข้อ 3 ของ `ENTITLEMENT_PLAN` |
+## ISSUE-048 · ฟอนต์ยังไม่มี `unicode-range` (ข้อ T-24)
 
-> ✅ **BACKLOG P1 (ลด JS หน้าแรก)**: Code-split `@/data/cards` 780 ข้อความออกจาก Initial Chunk ของ `page.tsx` เรียบร้อย (PR #40)
-> ✅ **BACKLOG P3 (pnpm CI)**: อัปเกรด GitHub Actions Workflows สู่ pnpm 9.15 + Cache เรียบร้อย (PR #39)
-> ✅ **PROVABLY-FAIR (PR 1-4)**: Web Crypto client verifier, interactive ProvablyFairPanel, pre-shuffle commitment, 410 seed guard, and KV resilience (PR #68, #69, #70, #71)
-> ✅ **RETENTION INFRA (PR 0-4)**: Edge auth hardening, D1 users table, server journal, retention loop & consent, and PDPA account export/deletion (PR #72, #73, #74, #75)
-> ✅ **AI COST CONTROL & BOT DEFENSE (PR 1-5)**: Rate limit bypass token, daily AI spend cap circuit breaker, read origin guard, edge per-IP soft quota, ADR-002 bot challenge decision (PR #77, #78, #79, #80)
+> เลข 048 ถูกใช้ซ้ำสองเรื่องในอดีต — อีกเรื่อง (หน้า `/cards` · ปิด 2026-09-15) และข้อ T-23 · T-25 ของชุดนี้ปิดแล้ว ดูในคลัง
 
----
+- **อาการ**: `@font-face` ใน `src/app/globals.css` ไม่มี `unicode-range` และไฟล์ฟอนต์ไทยเป็นไฟล์รวมไทย+ละติน ➔ หน้า `/en` ก็พรีโหลดฟอนต์ที่มีอักษรไทยทั้งบล็อก (`FONT_PRELOADS` = `anuphan-500` + `sarabun-400` · 36,068 B ใน `src/app/_shared/root-metadata.ts`)
+- **ผลกระทบ**: ต่ำ — ยังอยู่ในงบฟอนต์พรีโหลด `MAX_PRELOADED_FONT_BYTES` 40,000 B ของ `scripts/qa/test-bundle-budget.ts`
+- **ทำไมยังไม่แก้**: ต้องแยกไฟล์ `.woff2` เป็นชุดไทยกับชุดละตินจริงก่อน — `scripts/subset-fonts.py` (`npm run fonts:subset`) ตอนนี้สร้างไฟล์รวมไทย+ละติน และต้องใช้ `fonttools` + `brotli` ซึ่งไม่มีในสภาพแวดล้อมที่ตรวจ · **ทำครึ่งทางไม่ได้**: ประกาศ `unicode-range` โดยไม่แยกไฟล์ = หน้า `/en` ไม่มีฟอนต์ละตินใช้
+- **ขั้นต่อไป**: บนเครื่องที่มี `fonttools` — เพิ่มโหมดแยกไทย/ละตินใน `scripts/subset-fonts.py` ➔ สร้างไฟล์ใหม่ ➔ แก้ `@font-face` · `FONT_PRELOADS` / `FONT_PRELOADS_LOW` · `public/_headers` แล้ว commit พร้อมกันในครั้งเดียว
+- **หลักฐาน (2026-10-26)**: ค้น `unicode-range` ใน `src/` · `astro/` · `public/` ไม่เจอเลย · `python3 -c "import fontTools"` ➔ ModuleNotFoundError · เหตุผลเดิมอยู่ในหัวไฟล์ `scripts/qa/test-bundle-budget.ts`
 
-## 🟡 ระดับ Medium — ทำงานผิดแต่ไม่บล็อกผู้ใช้
+## ISSUE-004 · รัน Worker ในเครื่องบน macOS ต่ำกว่า 13.5 ไม่ได้
 
-### ~~ISSUE-051 · `npm run dev` คอมไพล์ไม่ผ่านทั้งเว็บ~~ — 🟢 **ปิดแล้ว (2026-09-19)**
-
-- **อาการเดิม**: เปิด `npm run dev` แล้วทุกคำขอ (หน้าเว็บและ `/api/*`) ตอบ 500 พร้อมข้อความ
-  `not-found.tsx doesn't have a root layout. To fix this error, make sure every page has a root layout.`
-- **สาเหตุ**: root layout ของเว็บนี้อยู่ใน route group ทั้งคู่ (`src/app/(th)/layout.tsx` · `src/app/(en)/layout.tsx`)
-  จึงไม่มี `src/app/layout.tsx` คู่กับ `src/app/not-found.tsx` ที่เพิ่มเข้ามาตอนแก้ ISSUE-039
-- **การแก้ไข**:
-  1. เปิดแฟล็ก Next 16 ใน `next.config.ts`: `experimental: { globalNotFound: true }`
-  2. สร้าง `src/app/global-not-found.tsx` ห่อ `RootHtml` + `NotFoundBody` ซึ่งคืนค่า `<html>` และ `<body>` ครบถ้วนตามมาตรฐาน Next.js 16 สำหรับโปรเจกต์ที่มีหลาย Root Layout
-  3. ทดสอบการคอมไพล์ในโหมด Dev (`next dev --webpack`) ทั้ง URL ปกติ (HTTP 200) และ URL ผิด (HTTP 404) ทำงานถูกต้อง 100% รวดเร็ว ไร้ Error 500
-
-### ~~ISSUE-050 · คลังคำอ่านสำเร็จรูปของ Pick A Card อยู่ในบันเดิลตั้งแต่ไบต์แรก~~ — 🟢 **ปิดแล้ว (2026-09-21)**
-
-- **อาการ**: `/pick-a-card` วัดได้ **JS 143 KB gzip** (หน้าที่หนักที่สุดของเว็บ เทียบ `/daily` 112 · `/cards/birth-card` 94)
-- **สาเหตุ**: `PICK_A_CARD_TOPICS` เป็นก้อนเดียวที่มีทั้ง "ตัวตนของหัวข้อ/กอง" (ต้องใช้ทันทีตอนเรนเดอร์)
-  และ "คลังคำอ่านไทย+อังกฤษ" ของทั้ง 8 หัวข้อ (ใช้เป็นบทเสริม **หลัง** เซิร์ฟเวอร์เปิดกองให้แล้วเท่านั้น)
-- **ทางแก้ที่เห็นแล้ว**: แยกสองส่วนออกจากกัน แล้ว `import()` คลังคำอ่านตอนที่ `/shuffle` ตอบกลับ
-  (จังหวะนั้นผู้ใช้รอเซิร์ฟเวอร์อยู่แล้ว การโหลดเพิ่มจึงไม่หน่วงสิ่งที่ผู้ใช้กำลังมอง)
-- **การแก้ไข (2026-09-21)**:
-  1. ผ่าไฟล์ข้อมูลเป็นสองก้อน — `pick-a-card.ts` เหลือแต่ตัวตนของหัวข้อ/กอง (451 บรรทัด)
-     ส่วนคลังคำอ่านย้ายไป `pick-a-card-readings.ts` (1,647 บรรทัด) ที่ **ฝั่งเซิร์ฟเวอร์เท่านั้นโหลด**
-  2. **เซิร์ฟเวอร์ประกอบย่อหน้าให้เลย** แล้วส่งมากับคำตอบของ `/api/reading/[id]/shuffle`
-     ในรูป `derived.script` (ประกอบตามภาษาของเซสชัน) ➔ เบราว์เซอร์ไม่ต้องรู้จักคลังคำอ่านอีกเลยสักบรรทัด
-     (ดีกว่า `import()` แบบ chunk แยก เพราะไม่ต้องยิงไฟล์เพิ่มอีกก้อนตอนผู้ใช้กำลังรออยู่)
-  3. หน้าเว็บยัง **เทียบรหัสไพ่ของบทเสริมกับไพ่ที่เปิดจริงทั้งสามใบก่อนแสดงเสมอ** (กฎเหล็กข้อ 14 คงเดิม)
-- **ผลวัดจริงจากบิลด์**: `/pick-a-card` **143 ➔ 101 KB gzip (−42 KB · −29%)** · HTML คงเดิมที่ 16 KB
-  · รัดเพดานด่านงบบันเดิลลงจาก 158 ➔ **115 KB** ทันทีตามหลัก ratchet
-- **กันพังแบบใหม่ที่การแยกไฟล์สร้างขึ้น** (ด่าน `test-pick-a-card.ts` เพิ่ม 3 ข้อ · พิสูจน์ด้วยการทำให้พังจริงแล้ว):
-  หัวข้อที่ไม่มีคลังคู่กัน (คอมไพล์ผ่านแต่ผู้ใช้เปิดกองไม่ได้เลย) · คลังกำพร้าที่ไม่มีหัวข้อรองรับ ·
-  ไฟล์ฝั่งหน้าจอเผลอ `import` คลังคำอ่านกลับเข้าบันเดิล
-
-### ISSUE-049 · ผลตรวจรอบ 2 — เหลือลูกบิดเดียวที่อยู่นอกรีโป (พบ 2026-09-17 · อัปเดต 2026-09-17)
-
-บันทึกเต็มพร้อมตัวเลขทุกตัว: [`plans/HANDOFF_ROUND2_CLOSEOUT_2026-09-17.md`](plans/HANDOFF_ROUND2_CLOSEOUT_2026-09-17.md)
-
-| ข้อ | สถานะ |
-| :--- | :--- |
-| **ข้อ 9** ธง `entitlement.enforced` | ✅ ปิด — KV บอกว่า `{"value":true}` = บังคับใช้อยู่จริง · ถามซ้ำได้ด้วย `npm run flags:show` |
-| **R-26** ยุบสถานะ `TarotFlow` | ✅ ปิด — `useState` 28 ➔ 16 · ด่าน `test-flow-state.ts` 37 ข้อ (ผ่าน mutation test 5 แบบ) |
-| **R-31** โค้ดตาย | ✅ ปิด — `knip.jsonc` แก้ต้นตอรายงานผิด · ต่อสายฮุกกำพร้าเข้า 6 แผงแอดมิน (INC-0195) · รอบต่อมาลบ UI ที่ไม่มีใครเรนเดอร์ครบทุกตัว |
-| **R-10** `unused-javascript` | ✅ ปิด — เหลือ 20–270 ms และเป็น runtime React ของ Astro ซึ่งตัดเองไม่ได้ |
-| **R-02** `/spreads` ช้าที่สุดในเว็บ | ✅ **ปิดแล้ว — วัดบน production หลัง deploy แล้ว**: TBT ของโค้ดเราเอง **701 ➔ 72–107 ms (−85–90%)** · perf (ไม่นับสคริปต์ตรวจบอต) **67 ➔ 96** · วิธี: เลิก hydrate คลังผัง ➔ การ์ด 25 ใบเป็น HTML ตั้งแต่ตอนบิลด์ · แท็บใช้สคริปต์ ~1 KB · ปุ่มขยายใช้ `<details>` ➔ JS **124.4 ➔ 100.1 KB gzip** · รวมที่ผู้ใช้โหลด **−10.5 KB** |
-
-**R-11 · R-12 — ปิดแล้ว (2026-09-17)**
-
-เจ้าของเปิด **Early Hints** ที่ Cloudflare Dashboard แล้ว (Speed ➔ Optimization)
-ฝั่งโค้ดจึงเติมของที่ขาดให้ครบ: `scripts/merge-astro-assets.ts` สร้างส่วนหัว
-
-```
-Link: </_astro/BaseLayout.<hash>.css>; rel=preload; as=style
-```
-
-ให้หน้า HTML ทั้ง **22 เส้นทาง** ตอนบิลด์ทุกครั้ง — ขอบจะอ่านส่วนหัวนี้แล้วส่งเป็น `103 Early Hints`
-ให้เบราว์เซอร์เริ่มโหลดสไตล์ชีต **ก่อน** HTML จะมาถึง
-
-**ทำไมต้องสร้างตอนบิลด์**: ชื่อไฟล์ CSS มีแฮชและเปลี่ยนทุกครั้งที่สไตล์เปลี่ยน
-เขียนมือลง `public/_headers` = ค้างเป็นชื่อเก่าทันทีที่แก้ CSS ครั้งถัดไป ➔ พรีโหลดไฟล์ที่ไม่มีอยู่จริง
-(แย่กว่าไม่ทำอะไรเลย) · เส้นทางไม่ต้องเขียนซ้ำสองที่เช่นกัน — ตัวสร้างอ่านจากบล็อกที่มี `s-maxage`
-ใน `_headers` เอง เพิ่มหน้าใหม่เมื่อไหร่ก็ตามไปเอง
-
-**ด่านที่เฝ้าอยู่**: `test-static-headers.ts` หัวข้อ 3 — ตรวจว่าตัวสร้างยังอยู่จริง และ
-`public/_headers` ยังมีบล็อกหน้า HTML ให้มันเจอ (ถ้าเหลือศูนย์ = พรีโหลดหายทั้งเว็บแบบเงียบ ๆ)
-
-**พิสูจน์แล้วบน production ว่าทำงานจริง** (2026-09-17 · `curl -v --http2`):
-
-```
-$ curl -sS -v --http2 -o /dev/null https://seertarot.net/spreads
-< HTTP/2 103
-< link: </_astro/BaseLayout.C4MwRXdL.css>; as=style; rel=preload
-< HTTP/2 200
-< cf-cache-status: HIT
-```
-
-ยิงครบทุกกลุ่มหน้าแล้วได้ `103` ทุกเส้น: `/` · `/cards` · `/cards/major-00` · `/blog` ·
-`/spreads` · `/daily` · `/en/spreads` · และ URL ที่อยู่ในส่วนหัวคือไฟล์ CSS ที่หน้านั้นใช้จริง (ตอบ 200)
-
-⚠️ **ต้องอุ่นแคชก่อนถึงจะเห็น `103`** — Cloudflare จำส่วนหัว `Link` จากคำตอบที่เคยผ่านขอบ
-แล้วค่อยส่ง `103` ในคำขอถัดไป · ยิงครั้งแรกหลัง deploy จะเห็นแค่ `200` ซึ่ง**ไม่ได้แปลว่าพัง**
-
-**ตัวเลข Lighthouse หลังเปิดใช้** (`simulate` · มือถือ): `/spreads` perf **90** · `/blog` **84**
-— ไม่ต่างจากก่อนเปิดอย่างมีนัย และ **ตรงกับที่คาดไว้**: โหมด `simulate` จำลองเครือข่ายเอง
-จึงไม่สะท้อนประโยชน์ของ `103` ที่เกิดตอนรอคำตอบจริง · ผลของจริงต้องดูจาก **CrUX/PSI ภาคสนาม**
-เมื่อข้อมูลสะสมพอ (เร็วสุดราว 28 วันสำหรับค่ากลางของเดือน)
+- **อาการ**: `npm run preview:worker` / `npx wrangler dev` ล้มด้วย `Unsupported macOS version ... minimum requirement is macOS 13.5.0` — บันทึกครั้งล่าสุดว่าเครื่องที่ใช้เป็น macOS 12.6 (`docs/WORK_LOG.md` รอบ 63 · 2026-09-14)
+- **ผลกระทบ**: เครื่องนั้นทดสอบพฤติกรรมฝั่ง Worker ไม่ได้ · สำคัญตอน PR ของ dependabot แตะ `next` / `wrangler` / `@opennextjs/*` ซึ่ง `pr.yml` ไม่ auto-merge และให้คนลอง `npm run build:worker` + `npx wrangler dev` ก่อนกด merge (INC-0285)
+- **ทำไมยังไม่แก้**: เป็นข้อจำกัดของเครื่อง ไม่ใช่ของโค้ด · ยืนยันจากที่นี่ไม่ได้ว่าเครื่องเจ้าของยังเป็น macOS 12.6 อยู่หรือไม่
+- **ทางเลี่ยง**: ใช้เครื่อง Linux / DevContainer / เซสชัน Claude Code บนคลาวด์ (ตัว `workerd` ของ Linux รันได้) · งานฝั่ง Next อย่างเดียวใช้ `npm run dev` ได้ตามปกติ
+- **ขั้นต่อไป**: เจ้าของอัปเกรด macOS เป็น 13.5 ขึ้นไป หรือยืนยันว่าเลิกใช้เครื่องนั้นแล้ว ➔ ปิดข้อนี้
+- **หลักฐาน (2026-10-26)**: `node_modules/wrangler/wrangler-dist/cli.js` มี `MINIMUM_MACOS_VERSION = "13.5.0"` (wrangler 4.151) · `node_modules/.bin/workerd --version` บน Linux ➔ `workerd 2026-10-12` · ส่วนเดิมเรื่อง `.claude/launch.json` ใช้ path สัมพัทธ์ไม่มีแล้ว (ตอนนี้สั่ง `npm run dev` / `npm run dev:astro`)
 
 ---
 
-### ISSUE-052 · ✅ กฎ "www ➔ โดเมนหลัก" บนชั้นขอบ — ปิดเคสแล้ว 2026-09-21
+## ปิดแล้ว
 
-ตั้งกฎขึ้นชั้นขอบสำเร็จแล้วด้วย `npm run cf:canonical-host` (ขั้นในสายพาน deploy เป็นคนดันให้เอง
-หลังเจ้าของเติมสิทธิ์ให้ token) — ยิงจริงยืนยันครบทุกรูปแบบ:
-
-| URL ที่ยิง | ผล |
-| :--- | :--- |
-| `https://www.seertarot.net/` | **301** ➔ `https://seertarot.net/` |
-| `https://www.seertarot.net/cards/major-00` | **301** ➔ เส้นทางเดิมของโดเมนหลัก |
-| `https://www.seertarot.net/en/blog` | **301** ➔ เส้นทางเดิมของโดเมนหลัก |
-| `https://www.seertarot.net/cards?utm_source=fb&x=1` | **301** ➔ **query string ติดไปครบ** |
-| `http://www.seertarot.net/spreads` | **301** ➔ https + โดเมนหลัก ในกระโดดเดียว |
-
-**สิทธิ์ที่ token ต้องมี** (เผื่อวันหนึ่งต้องออก token ใหม่): `Zone · Single Redirect · Edit`
-
-> ⚠️ **กับดักชื่อสิทธิ์ที่เหยียบมาแล้ว (INC-0204)** — ต้องเป็น **Single Redirect**
-> (บาง dashboard เรียก "Dynamic Redirect") **ไม่ใช่ "Transform Rules"** ทั้งสองชื่ออยู่ใต้หมวด Rules
-> เหมือนกัน แต่ `Transform Rules` คุมแค่ URL Rewrite กับ Header Transform
-> ให้ผิดตัวจะ **อ่าน ruleset ได้แต่เขียนไม่ได้** แล้วล้มด้วย `request is not authorized`
-
-ตรวจซ้ำได้ทุกเมื่อ (ไม่ต้องใช้ token): `npm run cf:canonical-host -- --check`
-ที่มาของเรื่องทั้งหมดอยู่ใน `docs/INCIDENT_LOG.md` INC-0203 · INC-0204 · INC-0205
-
----
-
-### ISSUE-048 · สามข้อจากผลตรวจ 2026-09-16 ที่ตั้งใจยังไม่ทำ (พบ 2026-09-16)
-
-รอบปิดผลตรวจ `HANDOFF_FULL_AUDIT_2026-09-16` แก้ไป 45 จาก 48 ข้อ · สามข้อนี้เหลือไว้**โดยตั้งใจ**
-พร้อมเหตุผลที่วัดมาแล้ว — ขึ้นทะเบียนไว้ที่นี่เพื่อไม่ให้หายไปเฉย ๆ และกัน Agent ตัวถัดไปแก้ซ้ำ
-(เหตุผลฉบับเต็มอยู่ในหัวไฟล์ `scripts/qa/test-bundle-budget.ts`)
-
-| ข้อ | เรื่อง | ทำไมยังไม่ทำ | ต้องมีอะไรถึงจะทำได้ |
-| :--- | :--- | :--- | :--- |
-| **T-23** | แยก CSS ต่อหน้า (ตอนนี้ 145 KB ดิบ / 23 KB gzip ก้อนเดียวทุกเส้นทาง) | Tailwind v4 สร้าง "สไตล์ชีตยูทิลิตี้ก้อนเดียว" จากการสแกนซอร์สทั้งโปรเจกต์ Astro จึงไม่มีอะไรให้แยก · ทางเลือกที่เหลือคือสกัด critical CSS ซึ่งต้องรันเบราว์เซอร์ตอนบิลด์และแลกด้วยความเสี่ยง FOUC ถาวร | ค่าปัจจุบันยังอยู่ในงบ `MAX_CSS_GZIP_KB` (32 KB) สบาย ๆ · ทำเมื่อตัวเลขเริ่มชนเพดานจริงเท่านั้น |
-| **T-24** | ใส่ `unicode-range` ให้ฟอนต์ (หน้า `/en` โหลดสระวรรณยุกต์ไทยที่ไม่มีวันได้เรนเดอร์) | ต้องสร้างไฟล์ `.woff2` ชุดใหม่ 8 ไฟล์ (ไทย/ละติน × 4 น้ำหนัก) ด้วย `pyftsubset` จาก fonttools ซึ่งไม่มีในสภาพแวดล้อมที่ทำรอบนี้ · **ทำครึ่งทางไม่ได้**: ประกาศ `unicode-range` โดยไม่แยกไฟล์จริง = หน้า `/en` ไม่มีฟอนต์ละตินใช้เลย ซึ่งแย่กว่าเดิมมาก | เครื่องที่ติดตั้ง fonttools แล้วรัน `npm run fonts:subset` · ต้อง commit ไฟล์ฟอนต์ใหม่มาพร้อมกับการแก้ `@font-face` · `FONT_PRELOADS` · `public/_headers` |
-| **T-25** | ให้ Cloudflare เสิร์ฟหน้า 404 จากขอบ (ตอนนี้ปลุก Worker 7,978 B ต่อครั้ง) | ต้องเปลี่ยน `not_found_handling` ใน `wrangler.jsonc` จาก `"none"` เป็น `"404-page"` ซึ่งจะทำให้ **ทุกเส้นทางที่ไม่มีไฟล์ static ตรงกันได้หน้า 404 แทนที่จะวิ่งไปหา Worker** = `/account` · `/admin` · `/s/[id]` · `/api/**` พังทั้งหมด · ค่านั้นคือสิ่งเดียวที่ทำให้สถาปัตยกรรมสองเครื่องเรนเดอร์นี้ทำงานได้ | **ห้ามแก้ที่โค้ด** · ถ้าต้องการลด Worker invocation จากบอทไล่ URL ตาย ให้ทำที่กฎ WAF บน Cloudflare Dashboard แนวเดียวกับที่ปิด Bot Fight Mode ใน ISSUE-047 |
-
-> 📌 หมายเหตุสำหรับผู้ตรวจ — **T-20 ในผลตรวจคลาดเคลื่อนจากวิธีวัด ไม่ใช่บั๊ก**
-> React 19 เรนเดอร์ prop `fetchPriority` ออกมาเป็น `fetchPriority="high"` (ตัวพิมพ์ผสม)
-> ชื่อแอตทริบิวต์ใน HTML **ไม่สนตัวพิมพ์เล็กใหญ่** เบราว์เซอร์จึงอ่านถูกต้องมาตลอด
-> `grep 'fetchpriority="high"'` แบบสนตัวพิมพ์จึงได้ 0 และทำให้สรุปผิดว่า "ทั้งเว็บไม่มีเลย"
-> วัดใหม่แบบไม่สนตัวพิมพ์: `/` = 1 · `/cards` = 1 · `/blog` = 1 — มีอยู่แล้วและทำงานอยู่จริง
-> ด่าน `test-bundle-budget.ts` เทียบแบบไม่สนตัวพิมพ์แล้ว และบันทึกกับดักนี้ไว้ในไฟล์
-
----
-
-### ISSUE-047 · สคริปต์ตรวจบอตของ Cloudflare กินเธรดหลักมากกว่าโค้ดทั้งเว็บรวมกัน (พบ 2026-09-15)
-
-Cloudflare ฉีด `/cdn-cgi/challenge-platform/scripts/jsd/main.js` เข้าไปใน HTML **ทุกหน้า** ที่เสิร์ฟให้ผู้ใช้จริง
-(ยืนยันด้วย `curl --compressed` พร้อม UA มือถือ ไม่ใช่เห็นเฉพาะตอนรัน headless)
-
-วัดด้วย Lighthouse 12.8.2 บน production · mobile · `--throttling-method=simulate` ยิงหน้าเดียวกันสองรอบ
-ต่างกันแค่ `--blocked-url-patterns="*challenge-platform*"`:
-
-| หน้า | TBT (ปล่อยทำงาน) | TBT (บล็อกทิ้ง) | ส่วนต่าง | perf |
-| :--- | :-- | :-- | :-- | :-- |
-| `/blog` | 2,206 ms | **24 ms** | −2,182 ms | 53 ➔ **85** |
-| `/spreads` | 1,952 ms | **335 ms** | −1,617 ms | 56 ➔ **76** |
-| `/cards` | 1,256 ms | **232 ms** | −1,024 ms | 59 ➔ **79** |
-
-`bootup-time` ชี้ว่าสคริปต์นี้กิน scripting **3,707–4,953 ms** ต่อหน้า และ `long-tasks` แสดงงานก้อนเดียวยาว
-**1,190–1,282 ms** สองก้อนติดกัน — ก้อนเดียวก็ใหญ่กว่างานทั้งหมดของโค้ดเราในหน้านั้นรวมกันแล้ว
-
-**✅ ปิดเคสแล้ว (2026-09-15) — ย่อหน้าด้านล่างนี้เคยเขียนว่า "ยังไม่ลงมือแก้" และค้างอยู่จนถึง 2026-09-17**
-ตารางสรุปด้านบนของไฟล์นี้ถูกต้องมาตลอด แต่บล็อกรายละเอียดนี้ไม่ได้ถูกอัปเดตตาม จึงหลอกคนอ่าน
-(และหลอก AI ที่มาอ่านรอบถัดไปจริง ๆ มาแล้วหนึ่งตัว) ว่ายังเป็นงานค้างที่รอเจ้าของกดสวิตช์
-
-**สิ่งที่ทำไปจริง**: ปิดทั้ง `fight_mode` และ `enable_js` ผ่าน API (ตัวหลังคือตัวที่ฉีดสคริปต์
-และไม่โผล่เป็นสวิตช์ในหน้า Settings) · **ยืนยันซ้ำเมื่อ 2026-09-17** ด้วย `curl --compressed`
-พร้อม UA มือถือจริงบนสามกลุ่มหน้า: `/` (Astro) · `/daily` (Astro) · `/account` (Worker/Next)
-➔ **ไม่มี `challenge-platform` เหลือสักหน้า**
-
-**ของที่กันแทนอยู่ตอนนี้** (ไม่ได้ปิดตามไปด้วย): `ai_bots_protection=block` · `ai_training=block` ·
-`crawler_protection=enabled` · rate limit 20 ครั้ง/10 วินาที บน `/api/reading/*/read` · `/chat` · `/start` ·
-กฎ WAF บล็อก UA เครื่องมือสคริปต์บน `/api/` (curl · python-requests · scrapy · go-http-client ·
-node-fetch · axios · okhttp · guzzle · httpx · aiohttp) · URL ขยะและสแกนเนอร์ SEO = 403 ·
-managed challenge สำหรับคำขอเปลี่ยนสถานะที่ไม่มี `Origin` ของเว็บเรา · ฝั่งแอป: Turnstile ที่หน้า
-เข้าสู่ระบบ/สมัคร + rate limit ฝั่งเซิร์ฟเวอร์ตอบ 429 ครบทั้ง 5 เส้นของ email auth
-
-> 📌 **กฎระดับโซนข้างบนทั้งหมด (WAF · rate limit · managed challenge) ใช้กับ `seertarot.net` เท่านั้น**
-> โฮสต์ `tarot-web.<บัญชี>.workers.dev` อยู่นอกโซน กฎเหล่านี้จึงไม่ครอบ (A10-07 · ตรวจ 2026-10-19)
-> ตั้งแต่รอบแก้ 2026-10-19: บนโฮสต์ workers.dev ทุกคำขอ `/api/*` ถูกส่งกลับไป `seertarot.net` ด้วย 307
-> (`redirects()` ใน `next.config.ts`) **ยกเว้น `/api/cron/*`** ที่ตัวจับเวลาของ GitHub ยิงเข้าโฮสต์นี้โดยตั้งใจ
-> (INC-0142) — ทุกเส้นใต้ `/api/cron/` ตรวจ Bearer `CRON_SECRET` เองแบบ fail-closed
-> ยังเปิด `workers_dev` ไว้เพราะ cron พึ่งโฮสต์นี้ · ถ้าวันหนึ่งย้าย cron ไปเรียกผ่านโดเมนหลักได้ ค่อยพิจารณาปิด
-
-**ความเสี่ยงที่ยอมรับไว้**: headless browser ที่ปลอม UA เป็นเบราว์เซอร์ปกติ กฎ UA จับไม่ได้ —
-เหลือ rate limit + Turnstile + การตรวจสิทธิ์ฝั่งเซิร์ฟเวอร์รับไว้ · แพ็กเกจฟรีตั้ง rate limit ได้กฎเดียว
-➔ ถ้า Security Events เริ่มเห็นทราฟฟิกอัตโนมัติยิง `/api/*` ให้เพิ่ม **managed challenge เฉพาะ path**
-ไม่ใช่เปิด Bot Fight Mode ทั้งเว็บกลับมา (ด่านที่ 37 กฎ 6 บังคับให้ `fight_mode` เป็น `false`
-ใครเปิดกลับต้องแนบตัวเลขสองด้านก่อน)
-
-<details>
-<summary>บันทึกเดิมตอนที่ยังเป็นงานค้าง (เก็บไว้ให้เห็นที่มา)</summary>
-
-**ทำไมตอนนั้นยังไม่ลงมือแก้เอง**: ต้นตอไม่ได้อยู่ในรีโปเลยสักบรรทัด มันคือสวิตช์ **Bot Fight Mode / JavaScript
-Detections** ใน Cloudflare Dashboard (Security ➔ Bots) ซึ่ง**เจ้าของเท่านั้นที่กดได้** และการปิดมันคือการ
-แลกความปลอดภัยกับความเร็ว — ต้องให้เจ้าของตัดสิน
-
-**ถ้าจะปิด ให้ทำคู่กับ**: ตั้ง WAF rule กันบอตแทน (แนวทางที่ [`HANDOFF_CF_REQUEST_REVIEW_2026-09-08.md`](plans/HANDOFF_CF_REQUEST_REVIEW_2026-09-08.md) สรุปไว้แล้ว)
-⚠️ **ห้ามเผลอเปิด "Block AI Scrapers"** — เจ้าของตั้งใจเปิดรับบอตของ AI search ไว้ (ISSUE-019)
-
-**ข้อจำกัดของตัวเลขชุดนี้**: วัดจาก Lighthouse CLI บนเครื่อง dev ที่หน่วง CPU 4 เท่า ➔ บอกได้แน่ว่า
-"สคริปต์นี้คือตัวกินเวลาที่ใหญ่ที่สุด" แต่ **ยังไม่รู้ว่าบนมือถือจริงของผู้ใช้หนักกี่ ms** · โควตา PSI ของ
-Google หมดตั้งแต่ก่อนเริ่มรอบนี้ (HTTP 429) ➔ **งานถัดไปคือยิง PSI ยืนยันเมื่อโควตาคืน** แล้วค่อยเสนอเจ้าของ
-
-</details>
-
-
-### ISSUE-010b · session-token fallback เป็นสตริงตายตัวถ้าลืมตั้ง env → Provably-Fair พังเงียบ
-
-| หัวข้อ | รายละเอียด |
-| :--- | :--- |
-| **อาการ** | [`src/lib/security/session-token.ts`](../src/lib/security/session-token.ts) — เดิมเคยมี fallback ไปใช้สตริงตายตัวถ้าไม่ได้ตั้ง `TAROT_SESSION_SECRET` |
-| **ผลกระทบ** | ในอดีตหาก deploy โดยลืมตั้ง `TAROT_SESSION_SECRET` อาจเสี่ยงต่อการปลอมแปลง token |
-| **การแก้ไข** | อัปเกรด `getSessionSecret()` ให้ **Hard-throw ทันทีใน Production** หากไม่มี `TAROT_SESSION_SECRET` หรือความยาวน้อยกว่า 32 ตัวอักษร หรือใช้ค่า default พร้อมตัด fallback เงียบออก 100% |
-| **สถานะ** | ✅ **แก้ไขและผ่านการทดสอบ Hard Fail สมบูรณ์ 100%** |
-
-### ~~ISSUE-003 · ฐานข้อมูลไพ่เอนเอียงด้าน "ใช่" มากเกินไป~~ — 🟢 **ปิดแล้ว (ตรวจ 2026-09-04)**
-
-| หัวข้อ | รายละเอียด |
-| :--- | :--- |
-| **สรุป** | `npm run verify:cards` ตอบ `yesNo — ใช่ 38 / ไม่ใช่ 22 / ไม่แน่ 18` และ **ไม่ขึ้นคำเตือนแล้ว** ส่วนรายละเอียดเดิมในไฟล์นี้ยังอ้างตัวเลข 43/18/17 ของ 2026-08-31 ซึ่งล้าสมัยไปแล้ว |
-| **ข้อควรระวังที่ยังใช้อยู่** | ⚠️ ห้ามแก้ `structure` ของไพ่ 78 ใบ · รัน `verify-cards.ts` ทุกครั้งหลังแก้ค่า `yesNo` |
-
----
-
-## 🔵 พบจากการวัดจริงบน production เมื่อ 2026-09-06
-
-> 📐 วัดด้วย `getBoundingClientRect()` ของทุกใบบน `https://seertarot.net/spreads/<id>` ที่ viewport 320px และ 375px
-> เทียบกับ `celtic-cross` เป็นกลุ่มควบคุม — ไม่ได้ดูด้วยตาอย่างเดียว
-
-### ISSUE-032 · ✅ `monthly-ten` วางไพ่ใบที่ 6 ทับกับใบไขว้ (แก้แล้ว)
-
-| หัวข้อ | รายละเอียด |
-| :--- | :--- |
-| **อาการ** | บน `/spreads/monthly-ten` ไพ่ใบที่ 2 (หมุน 90°) เบียดทับไพ่ใบที่ 6 — วัดได้ **3.6px บนจอ 320px** และ **4.3px บนจอ 375px** |
-| **ต้นเหตุ** | ผังนี้ลอกพิกัดจาก `celtic-cross` แล้วเลื่อนแกนไขว้ `x: 0.32 → 0.35` **แต่ลืมเลื่อนใบที่ 6 ตาม** (ค้างที่ `x: 0.5` เท่าเดิม) · ใบไขว้หมุน 90° จึงกว้าง 19.5% แทน 13% ระยะปลอดภัยเดิม `0.0175` เลยกลายเป็นทับกัน `0.0125` |
-| **จุดที่เอกสารเคยเข้าใจผิด** | รอบก่อนบันทึกว่าใบที่ 6 อยู่ที่ `x: 0.55` และช่องว่างแคบลง 23% — **ไม่ตรงกับโค้ดจริง** ใบที่ 6 อยู่ที่ `x: 0.5` ทั้งสองผัง ตัวที่ขยับคือแกนไขว้ฝั่งซ้าย |
-| **ทางแก้** | เลื่อนใบที่ 6 เป็น `x: 0.53` ได้ระยะปลอดภัย `0.0175` เท่ากับ `celtic-cross` พอดี |
-| **ด่านกันซ้ำ** | `scripts/qa/test-spreads.ts` — ใบที่ `rotate: 90/270` ต้องไม่ทับใบอื่นที่ไม่ได้วางพิกัดเดียวกัน (คู่ไขว้ที่ตั้งใจได้รับการยกเว้น) ตรวจครบทั้ง 25 ผัง |
-
-### ✅ ผังใหม่อีก 4 ผังผ่านหมด — ไม่มีทับ ไม่มีล้นกรอบ
-
-| ผัง | จำนวนไพ่ | ทับกัน | ล้นกรอบแนวนอน |
-| :--- | :-: | :-: | :-: |
-| `love-six` | 6 | 0 คู่ | ไม่มี |
-| `family` | 5 | 0 คู่ | ไม่มี |
-| `luck` | 4 | 0 คู่ | ไม่มี |
-| `study` | 4 | 0 คู่ | ไม่มี |
-
-ทุกหน้ามี `document.scrollWidth === clientWidth` ทั้งที่ 320px และ 375px — **ไม่มีการเลื่อนแนวนอนหลุดกรอบเลย**
-
-### ISSUE-034 · ไพ่ใบที่ 7–10 ซ้อนกันแนวตั้งในแผนผัง SEO
-
-| หัวข้อ | รายละเอียด |
-| :--- | :--- |
-| **อาการ** | คอลัมน์ขวา (ใบ 7-10) ของทั้ง `celtic-cross` และ `monthly-ten` ซ้อนกันแนวตั้ง **11.1px บนจอ 320px** (สูงใบละ 55.8px ≈ ซ้อน 20%) |
-| **ต้นเหตุ** | ระยะ y ระหว่างใบคือ `0.2` แต่ความสูงกรอบเป็นแค่ 78% ของความกว้าง ระยะจริงจึงเหลือ 44.9px ซึ่งน้อยกว่าความสูงไพ่ 55.8px |
-| **ขอบเขต** | **มีมาแต่เดิมทั้งสองผัง ไม่ใช่ของใหม่** — `celtic-cross` เป็นแบบนี้มานาน |
-| **ต้องให้เจ้าของเคาะ** | ถ้าเป็นดีไซน์เรียงซ้อนตั้งใจ = ปิดเคส · ถ้าไม่ใช่ ต้องเพิ่มความสูงกรอบ (ปรับ `78%` ใน `SpreadPositionMap.tsx`) ซึ่งกระทบทุกผัง |
-
-### ISSUE-035 · CSP บล็อก Cloudflare Web Analytics ทั้งเว็บ — ✅ ปิดเคสแล้ว 2026-09-09
-
-| หัวข้อ | รายละเอียด |
-| :--- | :--- |
-| **สถานะ** | ✅ **แก้แล้ว** — เติมทั้ง `script-src` และ `connect-src` ใน `next.config.ts` |
-| **อาการ** | ทุกครั้งที่โหลดหน้าบน production คอนโซลขึ้น `Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/...' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com https://connect.facebook.net"` |
-| **ผลกระทบ** | Cloudflare แทรก beacon ให้อัตโนมัติ แต่ CSP ของเราบล็อกทิ้ง → **Cloudflare Web Analytics ไม่ได้เก็บข้อมูลอะไรเลย** ทั้งที่บริการเปิดอยู่ |
-| **ทางแก้** | เติม `https://static.cloudflareinsights.com` เข้า `script-src` หรือปิด Web Analytics ที่ฝั่ง Cloudflare ไปเลยถ้าไม่ได้ใช้ |
-| **สิ่งที่เกือบพลาด** | แก้แต่ `script-src` อย่างเดียวไม่พอ — beacon ยิงผลกลับเป็น **POST** ไป `cloudflareinsights.com` ถ้า `connect-src` ไม่เปิดด้วย สคริปต์จะโหลดผ่าน (คอนโซลเงียบ) แต่ข้อมูลไม่เคยถึงปลายทาง กลายเป็น "แก้แล้วแต่ยังไม่มีข้อมูล" ที่หาสาเหตุยากกว่าเดิม |
-
----
-
-## 🟢 ระดับ Medium — แก้ไขเสร็จสิ้นแล้ว (ISSUE-017, ISSUE-018)
-
-### ISSUE-017 · โควตาเปิดไพ่ถูกใช้ซ้อนได้ถ้ายิงพร้อมกันหลายคำขอ (double-spend)
-
-| หัวข้อ | รายละเอียด |
-| :--- | :--- |
-| **อาการ** | สมาชิกที่เหลือโควตา 1 ครั้ง เรียก `POST /api/reading/start` 3 ครั้งให้ได้ id A, B, C แล้วยิง `POST /api/reading/{A,B,C}/read` พร้อมกัน — ทั้งสามผ่านหมด ใช้ AI 3 รอบโดยหักโควตาแค่ 1 |
-| **ต้นเหตุ** | [`consumeReading()`](../src/lib/entitlement/entitlement.ts) เป็น read-check-then-insert ที่ไม่มี transaction · `UNIQUE(reading_id)` กันได้แค่การหักซ้ำของ **reading เดียวกัน** ไม่ได้กันคนละ reading · ตัวจำกัด `maxConcurrent` ใน `rate-limit.ts` เก็บ state ใน Map ระดับโมดูล คนละ isolate จึงเห็น `concurrent = 0` เหมือนกันหมด |
-| **การแก้ไข** | เปลี่ยนเป็น Conditional Atomic INSERT เช็ค `meta.changes > 0` ป้องกันขนาน 100% (ผ่าน `test-entitlement.ts` ยิงขนาน 5 ครั้งสำเร็จ 1) |
-| **สถานะ** | ✅ **แก้ไขเสร็จสิ้นแล้ว (2026-09-04)** |
-
-### ISSUE-018 · ข้อมูลตั๋วคิวแม่หมออ่านได้ด้วย `customerRef` ที่ส่งมาใน query string (PDPA)
-
-| หัวข้อ | รายละเอียด |
-| :--- | :--- |
-| **อาการ** | `GET /api/marketplace/tickets?customerRef=...` และ `GET /api/marketplace/tickets/<id>` ไม่ตรวจ session เลย · `customerRef` เป็นความลับแบบ bearer แต่ถูกส่งใน URL จึงไปโผล่ใน log ของ CDN/proxy และ referrer ได้ |
-| **ผลกระทบ** | คำถามดูดวงคือข้อมูลอ่อนไหวตรงตามที่ PDPA คุ้มครอง (สุขภาพ ความสัมพันธ์ การเงิน) · ถ้า `customerRef` รั่ว คนนอกอ่าน `nickname` `question` `readingSnapshot` และบทสรุป AI ได้ทั้งหมด |
-| **การแก้ไข** | ย้าย `customerRef` ไปเป็น Signed HttpOnly Cookie ผ่าน `src/lib/marketplace/customer-ref.ts` และส่ง 404 ป้องกัน ID enumeration (Zero Info Leakage) ผ่าน `test-marketplace-readers.ts` |
-| **สถานะ** | ✅ **แก้ไขเสร็จสิ้นแล้ว (2026-09-04)** |
-
-### ~~ISSUE-019 · robots.txt ปิดบอตค้นหา AI ทั้งหมด~~ — 🟢 **ตัดสินใจและแก้แล้ว (2026-09-04)**
-
-| หัวข้อ | รายละเอียด |
-| :--- | :--- |
-| **มติเจ้าของโปรเจกต์** | **เอาทราฟฟิกเป็นหลัก** — ยอมให้เนื้อหาถูกอ่าน เพื่อแลกกับการถูกอ้างอิงจาก AI search |
-| **สิ่งที่เปิด** | `OAI-SearchBot` · `ChatGPT-User` · `Claude-SearchBot` · `Claude-User` · `PerplexityBot` — บอตกลุ่มนี้อ่านหน้าเว็บเพื่อเอาไปตอบ **พร้อมอ้างอิงลิงก์กลับมาหาเรา** ทำหน้าที่เดียวกับ Googlebot |
-| **สิ่งที่ยังปิด** | `GPTBot` · `ClaudeBot` · `CCBot` · `Google-Extended` · `Applebot-Extended` · `Bytespider` · `Amazonbot` · `meta-externalagent` · `Diffbot` — กลุ่มเก็บไปเทรนโมเดล **ไม่มีลิงก์กลับ ไม่มีทราฟฟิกคืนมาเลย** จึงไม่มีเหตุผลทางธุรกิจให้เปิด |
-| **จุดที่พลาดง่าย** | กฎ robots.txt ใช้เฉพาะบล็อกที่ตรงกับ user-agent นั้นที่สุด — บอตที่มีบล็อกของตัวเองจะ **ไม่อ่าน** `User-agent: *` เลย จึงต้องประกาศ `disallow` หน้าส่วนตัวซ้ำในบล็อกของบอต AI search ด้วย (ใช้ค่าคงที่ `PRIVATE_PATHS` ร่วมกันกันลืม) |
-| **การพิสูจน์** | `curl /robots.txt` แล้วเห็นบล็อกบอตค้นหาได้ `Allow: /` พร้อม `Disallow:` หน้าส่วนตัวครบ 12 บรรทัด ส่วนบล็อกบอตเทรนได้ `Disallow: /` |
-| **ยังต้องทำต่อ** | Cloudflare แทรก Managed Content Signals (`ai-train=no`) ไว้หัวไฟล์ให้เองอีกชั้น — ถ้าจะเปลี่ยนนโยบายเรื่องการเทรนในอนาคต ต้องแก้ที่ Cloudflare dashboard ด้วย ไม่ใช่แค่ในโค้ด |
-
----
-
-## 🔵 ระดับ Low — หนี้เล็ก ๆ ที่บันทึกไว้ (ตรวจ 2026-09-04)
-
-| # | เรื่อง | ไฟล์ | รายละเอียด |
-| :-- | :--- | :--- | :--- |
-| **020** | `isSevereForeignLeak()` เขียนไว้เป็น circuit breaker สลับไป Gemini เมื่อคำอ่านหลุดภาษาต่างด้าว แต่**ไม่เคยถูกเรียกใช้เลย** | [`src/lib/ai/language.ts`](../src/lib/ai/language.ts) | คงไว้โดยตั้งใจ (ไม่ลบทิ้งเหมือน dead code ตัวอื่น) เพราะเป็นกลไกความปลอดภัยที่ตั้งใจทำ — ต้องต่อเข้ากับ `streamGroqReading` ให้ครบ |
-| **021** | `EntitlementGate` รับ props มาแล้วไม่ใช้เลย คืน `<>{children}</>` เฉย ๆ | [`src/components/entitlement/EntitlementGate.tsx`](../src/components/entitlement/EntitlementGate.tsx) | คอมเมนต์ในไฟล์อธิบายประวัติการออกแบบไว้ดี จึงยังไม่ลบ — ให้ตัดสินใจว่าจะคืนบทบาทให้มันหรือ inline children ไปเลย |
-| **022** | หน้าแผงคิวแม่หมอและหน้าสถานะคิว poll ทุก 4-5 วินาทีโดยไม่ดู `document.visibilityState` | [`readers/console`](../src/app/readers/console/page.tsx) · [`readers/queue/[id]`](../src/app/readers/queue/[id]/page.tsx) | แท็บที่เปิดค้างไว้เบื้องหลังจะยิง D1 ทั้งวัน — ควรหยุด poll เมื่อแท็บถูกซ่อน |
-| **023** | `MarketplaceReaderNavIcon` และหน้า `/readers/[id]` ยังไม่มี BreadcrumbList | [`src/app/readers/[id]/page.tsx`](../src/app/readers/[id]/page.tsx) | หน้าอื่นมีครบแล้ว (blog, spreads, cards) เหลือกลุ่ม readers |
-
----
-
-## 🔵 ระดับ Low — ข้อจำกัดสภาพแวดล้อม / หนี้ทางเทคนิค
-
-### ISSUE-004 · รัน Cloudflare Workers ในเครื่อง (`preview:worker` / `wrangler dev`) ไม่ได้
-
-| หัวข้อ | รายละเอียด |
-| :--- | :--- |
-| **อาการ** | `✘ [ERROR] Unsupported macOS version: ... minimum requirement is macOS 13.5.0+` (เครื่องนี้ 12.6.0) |
-| **ผลกระทบ** | ทดสอบพฤติกรรมฝั่ง Worker ในเครื่องไม่ได้ ต้องรอตรวจบน production หลัง deploy |
-| **สิ่งที่ยังทำได้ปกติ** | `next dev` · `npm run build:worker` (`opennextjs-cloudflare build`) — deploy ผ่าน GitHub Actions ไม่มีปัญหา |
-| **ทางแก้** | อัปเกรด macOS ≥ 13.5 หรือใช้ DevContainer (Linux glibc 2.35+) |
-| **วิธีตรวจแทน** | `curl -D- https://tarot-web.bankjack10452.workers.dev/cards/major-00 \| grep x-opennext-cache` (คาดหวัง `HIT`) |
-| **หมายเหตุ setup dev** | `.claude/launch.json` ตั้ง `runtimeExecutable` เป็น path relative `node_modules/.bin/next` ซึ่ง preview sandbox บางตัวรันไม่ได้ (`Operation not permitted`) — ถ้าเปิด preview ไม่ขึ้น ให้สตาร์ท `next dev` เองผ่าน terminal แล้วชี้เบราว์เซอร์ไปพอร์ตนั้น |
-
-### ISSUE-005 · GitHub native auto-merge ใช้ไม่ได้ — repo เป็น private บนบัญชีฟรี
-
-| หัวข้อ | รายละเอียด |
-| :--- | :--- |
-| **อาการ** | หน้า Settings ช่อง **"Allow auto-merge"** เป็นสีเทากดไม่ได้ · `gh pr merge --auto` ล้มด้วย `GraphQL: Auto merge is not allowed for this repository` |
-| **สาเหตุที่แท้จริง** | `luminuy/tarot-web` เป็น repo **private** บน **บัญชีส่วนตัวแพลนฟรี** — GitHub เปิด auto-merge ให้เฉพาะ repo **public** (ทุกแพลน) หรือ repo **private** บนแพลน **Pro / Team / Enterprise**<br>ยืนยัน 2026-08-31: `PATCH ... allow_auto_merge=true` → ตอบ 200 แต่ค่ายังเป็น `false` (ปฏิเสธเงียบ) |
-| **ผลกระทบ** | ไม่กระทบงานจริง — `.github/workflows/pr.yml` squash-merge ให้เองหลัง CI ผ่าน แล้วลบ branch (INC-0011) · `npm run git:tidy` เก็บกวาดต่อ<br>⚠️ **automation เริ่มทำงานเมื่อ PR ถูกเปิดเท่านั้น** — push commit เฉยๆ ไม่มี PR = ไม่มีอะไร auto ต้องรัน `npm run pr:auto` เปิด PR ก่อน (draft PR ก็ถูกข้าม `pr.yml` เพราะ `if: draft == false`) |
-| **ทางแก้ (ถ้าจะเปิดจริง — AI ทำเองไม่ได้)** | 1. อัปเกรด `luminuy` เป็น **GitHub Pro** (~$4/เดือน) · 2. เปลี่ยน repo เป็น **public** |
-| **สรุป** | **ปล่อยไว้แบบนี้ได้** — automation ปัจจุบันครบวงจร ไม่ต้องเสียเงิน |
-
-### ~~ISSUE-006 · GitHub Actions เตือน Node.js 20 กำลังเลิกรองรับ~~ — 🟢 **แก้แล้ว (2026-09-04)**
-
-| หัวข้อ | รายละเอียด |
-| :--- | :--- |
-| **การแก้ไข** | อัปเป็น `actions/checkout@v5` + `actions/setup-node@v5` + `actions/github-script@v8` ครบทั้ง 4 ไฟล์ (`pr.yml`, `deploy.yml`, `auto-release.yml`, `dependabot-automerge.yml`) |
-| **ที่ยังเหลือ** | `pnpm/action-setup@v4` · `softprops/action-gh-release@v2` · `dependabot/fetch-metadata@v2` ยังรันบน node20 — เป็น action ของบุคคลที่สาม รอต้นทางอัปเดตเอง เราบังคับไม่ได้ |
-
-### ~~ISSUE-008 · Hydration mismatch ที่หน้าแรก~~ — 🟢 **แก้แล้ว (2026-09-04, INC-0075)**
-
-| หัวข้อ | รายละเอียด |
-| :--- | :--- |
-| **สาเหตุรากที่แท้จริง** | ไม่ใช่แค่ `stepDirectionRef` — `useReducedMotion()` ของ motion **คืน `null` ตอน SSR** แต่คืน `true`/`false` จริงบนเบราว์เซอร์ ผู้ใช้ที่เปิด prefers-reduced-motion จึงได้ HTML คนละแบบกับฝั่งเซิร์ฟเวอร์ · ซ้ำร้าย motion เขียนค่า `initial` ลงเป็น inline style ตั้งแต่ใน HTML ทำให้เนื้อหาหลักถูกส่งออกไปเป็น `opacity:0` (หน้า `/blog` ส่งการ์ดบทความ **ทั้ง 24 ใบ** ออกไปแบบมองไม่เห็น) |
-| **การแก้ไข** | ย้ายทิศทางไป `useState` · ใส่ `initial={false}` ให้ทุก `AnimatePresence` ที่ถูก SSR · เพิ่ม hook `useHasMounted()` ใน `src/lib/motion.ts` สำหรับ motion component ที่ไม่ได้อยู่ใน AnimatePresence |
-| **การพิสูจน์** | reproduce ได้จริงบนเบราว์เซอร์ที่เปิด Reduced Motion — ก่อนแก้ console แสดง diff `opacity:0 / translateX(-40px)` เทียบกับ `opacity:1 / none` · หลังแก้ console สะอาด 0 error และ `curl` ทุกหน้าหลักไม่พบ `opacity:0` ใน HTML ฝั่งเซิร์ฟเวอร์อีก |
-| 🛡️ **กฎถาวร** | ห้ามอ่านค่าที่ขึ้นกับเบราว์เซอร์ระหว่างเรนเดอร์ของคอมโพเนนต์ที่ถูก SSR · motion component ที่ถูก SSR ต้องเรนเดอร์แรกออกมาที่สถานะปลายทางเสมอ |
-
-### ~~ISSUE-007 · Prisma ออกแบบ schema ไว้แล้วแต่ยังไม่ได้ต่อใช้จริง~~ — 🟢 **ปิดแล้ว (ตรวจ 2026-09-01)**
-
-| หัวข้อ | รายละเอียด |
-| :--- | :--- |
-| **สรุป** | ระบบ **ย้ายไป Cloudflare D1 เรียบร้อยแล้ว** ไม่ได้ใช้ Prisma และ **ไม่มีโฟลเดอร์ `prisma/` ในโปรเจกต์แล้ว** — ประเด็น Prisma 7 `datasource.url` จึงหมดความหมาย |
-| **ของจริงตอนนี้** | binding `APP_DB` ใน `wrangler.jsonc` (`database_id: 560fdbe7…`) · migrations `0001`–`0006` · ตัวช่วย `getAppDB()` ที่ `src/lib/platform/db.ts` |
-| **ตารางที่ใช้จริง** | `users` (0004) · `reading_journal` (0005) · `reading_usage` + `user_bonus` (0006) · marketplace (0001–0003) |
-| **`src/server/store.ts` ยังอยู่ไหม** | ยังอยู่ แต่เปลี่ยนบทบาทเป็น **session ระหว่างเปิดไพ่** (อายุสั้น มี KV เป็น durable backstop) ไม่ใช่ที่เก็บข้อมูลถาวรอีกแล้ว — ตั้งใจให้เป็นแบบนี้ ไม่ใช่หนี้ทางเทคนิค |
-| **ข้อควรระวังที่ยังใช้อยู่** | ⚠️ กฎ PDPA เดิมยังบังคับ — `softDeleteUser()` ต้องลบ `reading_usage`/`user_bonus` ตามไปด้วย และห้ามนำข้อมูลผู้ใช้ไปเทรนโมเดล |
-
----
-
-## 📌 ช่องว่างของเอกสาร (Documentation Gaps — แก้ไขครบถ้วน 100% แล้ว)
-
-| ช่องว่าง | ทำไมถึงต้องมี | สถานะและการแก้ไข | ลิงก์เอกสารที่จัดทำ |
-| :--- | :--- | :---: | :--- |
-| ~~**คู่มือตั้งเครื่อง dev (Local Setup)**~~ ✅ | ต้องเดาเอง: pnpm/npm, env อะไรบ้าง, พอร์ตอะไร, dev server บน macOS 12 ต้องเลี่ยงอะไร | **เสร็จสมบูรณ์** | [`docs/LOCAL_SETUP.md`](LOCAL_SETUP.md) |
-| ~~**แผนที่ env var จริง**~~ ✅ | ควรมีตารางว่าคีย์ไหนใช้ที่ไฟล์ไหน จำเป็น/ไม่จำเป็น | **เสร็จสมบูรณ์** | ตาราง Section 10 ใน [`docs/ARCHITECTURE.md`](ARCHITECTURE.md#10-แผนที่ตัวแปรแวดล้อมระบบจริง-environment-variables-map) |
-| ~~**บันทึกเหตุผลที่ใช้ stack ล้ำเวอร์ชัน**~~ ✅ | `react@19.2`, `next@16.3`, `motion@13` เป็นต้นเหตุ ISSUE-001 ควรมี ADR ว่าตั้งใจและรับความเสี่ยงอะไร | **เสร็จสมบูรณ์** | [`docs/adr/ADR-003-cutting-edge-stack-rationale.md`](adr/ADR-003-cutting-edge-stack-rationale.md) |
-| ~~**มาตรฐานคุณภาพ INCIDENT_LOG**~~ ✅ | ~~INC-0008/0009/0010/0014 ช่อง "อาการ" ก็อป "การแก้ไข"~~ | **เสร็จสมบูรณ์** | `validateIncident()` ใน `scripts/incident-log.ts` บล็อก entry ที่ก็อปกันมา + เรียบเรียง INC-0008/9/10/14 ใหม่ |
-| ~~**cross-link `AGENTS_TASK_PLAN.md` ↔ KNOWN_ISSUES**~~ ✅ | มี roadmap แยกแต่ไม่อ้างถึงกัน | **เสร็จสมบูรณ์** | หัวไฟล์ทั้งสอง: [`AGENTS_TASK_PLAN.md`](plans/AGENTS_TASK_PLAN.md) และ [`KNOWN_ISSUES.md`](KNOWN_ISSUES.md) |
-
+เรื่องที่ปิดแล้วทั้งหมด (ISSUE-001 ถึง 060 ยกเว้น 004 · 048 ข้อ T-24 · 053) พร้อมข้อความ ณ วันที่ปิด อยู่ใน [`docs/archive/KNOWN_ISSUES_CLOSED.md`](archive/KNOWN_ISSUES_CLOSED.md)

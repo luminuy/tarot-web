@@ -1,6 +1,6 @@
 # 🖼️ แผนแก้ท่อสื่อและกับดักที่เหลือ — ตรวจหลัง PR #319–#325 (2026-09-06)
 
-> **สถานะ**: ✅ เสร็จแล้ว — M-01 ถึง M-06 ปิดครบ (M-06 ต่อ UI แล้วที่ `SemanticSearchPanel`) · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: PR #328 · #330 · #333 · #338
+> **สถานะ**: ✅ เสร็จแล้ว — M-01 ถึง M-06 ปิดครบ (M-06 กลายเป็นช่องค้นหาเชิงความหมายในหน้า `/cards`) · ไม่มีงานค้าง · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: PR #328 · #338
 
 > **สถานะตอนเขียนแผน**: 🟢 **ลงมือไปแล้ว 5/6 ข้อ** (อัปเดต 2026-09-06 หลัง PR #328 · #330 · #333)
 > **ฐานที่ตรวจครั้งแรก**: `a72968b` (main หลัง #325) · **ผู้ตรวจ**: Claude Opus 5
@@ -156,7 +156,7 @@ return `https://res.cloudinary.com/${cloudName}/image/upload/${transforms.join("
 
 ### ปัญหา
 
-[`src/app/s/[id]/page.tsx:41`](../../src/app/s/[id]/page.tsx)
+[`src/app/s/[id]/page.tsx:41`](../../src/app/%28th%29/s/[id]/page.tsx)
 
 ```ts
 const imageUrl = cloudinaryUrl || (ID_RE.test(id) ? `${SITE_ORIGIN}/api/share/image/${id}` : `${SITE_ORIGIN}/cards/major-01.jpg`);

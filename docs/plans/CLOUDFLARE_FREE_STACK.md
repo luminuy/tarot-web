@@ -1,6 +1,6 @@
 # ☁️ แผนใช้บริการฟรีของ Cloudflare ต่อยอด SeerTarot
 
-> **สถานะ**: ✅ เสร็จแล้ว — 6 บริการใช้งานจริงบน production + 2026-10-19 เพิ่ม Workers Logs · Analytics Engine (สถิติวิดีโอคอล `npm run cf:call-stats`) · ย้ายแคชหน้า Next ออกจาก KV (INC-0287) · **ตรวจล่าสุด**: 2026-10-19 · **หลักฐาน**: ตรวจ production 2026-09-03
+> **สถานะ**: ✅ เสร็จแล้ว — ใช้งานจริง: AI Gateway · Email Routing · Turnstile · Workers AI · KV · R2 (การ์ดแชร์ลบเองใน 90 วัน) · Vectorize · TURN ของ Realtime (วิดีโอคอลแม่หมอ) · Workers Logs · Analytics Engine · ไม่ได้ใช้ Durable Objects · ไม่มีงานค้าง · **ตรวจล่าสุด**: 2026-10-26 · **หลักฐาน**: `wrangler.jsonc` · `src/lib/marketplace/turn.ts`
 
 > **สถานะ (2026-09-03):** ✅ **6 บริการ LIVE + verified บน production แล้ว** — เหลือ 3 ตัวที่บล็อกจริง
 > ทุกตัวออกแบบให้ **degrade เงียบ** — ไม่มี binding/config = ระบบเดิมทำงานปกติ

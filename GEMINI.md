@@ -1,75 +1,19 @@
-# 🔮 คู่มือแม่บทและระเบียบวิศวกรรมระดับโลก (World-Class AI Operating Guidelines)
+# SeerTarot — คู่มือสำหรับ Gemini / Antigravity
 
-ยินดีต้อนรับ! โปรเจกต์นี้คือ **เว็บดูดวงไพ่ทาโรต์ออนไลน์ระดับพรีเมียม (Interactive Provably-Fair Tarot Web)**
+กติกาทั้งหมดของโปรเจกต์อยู่ที่ **[CLAUDE.md](CLAUDE.md)** ไฟล์เดียว — กฎเหล็ก (ข้อ 0–14) · เอกสารที่ต้องอ่านก่อนแก้โค้ด · คำสั่งหลัก · ตารางแผนงาน
+ใช้กับ AI ทุกตัว ไม่ใช่เฉพาะ Claude **อ่านไฟล์นั้นก่อนเริ่มงานทุกครั้ง แล้วทำตามทุกข้อ**
 
-> ⚠️ **กฎเหล็กสำคัญ**: ก่อนแก้ไขโค้ดใดๆ ต้องอ่าน 3 ไฟล์นี้เสมอ
-> 1. **[docs/INCIDENT_LOG.md](docs/INCIDENT_LOG.md)** — ความผิดพลาดที่เคยเกิดขึ้นพร้อมกฎป้องกันถาวร **ทำผิดซ้ำเรื่องที่มีบันทึกแล้ว = ความบกพร่องร้ายแรงที่สุด**
-> 2. **[docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)** — บั๊กที่ยืนยันแล้วแต่ยังไม่ได้แก้ กันแก้ซ้ำซ้อนกับ Agent อื่น
-> 3. **[docs/AI_COLLABORATION_GUIDELINES.md](docs/AI_COLLABORATION_GUIDELINES.md)** — คู่มือแม่บท (หัวข้อ 0 คือมาตรฐานการทำงานที่บังคับใช้เสมอ)
->
-> 🔎 **สถานะแผนงานทุกแผน** ดูที่ตาราง "📋 แผนงานทั้งหมด" ใน [CLAUDE.md](CLAUDE.md) (สร้างอัตโนมัติจากหัวไฟล์แผน) หรือรัน `npm run docs:status`
-> ก่อนบอกเจ้าของว่างานไหนค้าง/เสร็จ **ต้องยืนยันกับโค้ดจริงหรือ `git log` ทุกครั้ง** (INC-0229)
+ไฟล์นี้มีไว้เพราะ Gemini CLI / Antigravity อ่าน `GEMINI.md` อัตโนมัติ แต่ไม่อ่าน `CLAUDE.md` เอง — ห้ามคัดลอกกฎมาไว้ที่นี่ (เคยคัดลอกแล้วเลขด่านกับกฎเพี้ยนจากต้นฉบับ)
 
----
+## สิ่งที่ต่างจาก Claude Code
 
-## 🧭 เอกสารสำคัญในโปรเจกต์ (Documentation Index & Sitemap)
+| เรื่อง | ทำอย่างไร |
+| :--- | :--- |
+| ชื่อในล็อกไฟล์ | `npm run agent:lock -- --agent Gemini --domain <หมวด> --files "<ไฟล์>" --task "<งาน>"` · เสร็จแล้ว `npm run agent:unlock -- --agent Gemini` |
+| commit | `npm run commit -- --agent Gemini ...` (commit ประเภท `fix` ต้องมี `--symptom` `--cause` `--prevention`) — รายละเอียดใน [docs/AI_COLLABORATION_GUIDELINES.md](docs/AI_COLLABORATION_GUIDELINES.md) หัวข้อ 0.3–0.4 |
+| ผู้ช่วย `cmo` · `coo` · `cto` | เป็น subagent ของ Claude Code (`.claude/agents/`) — Gemini เรียกใช้ไม่ได้ ถ้าเจ้าของสั่งด้วยคำเหล่านี้ ให้บอกว่าต้องสั่งผ่าน Claude Code |
+| เปิด PR | `npm run pr:auto` เหมือนกัน · ถ้าไม่มี `gh` ให้เปิด PR ผ่าน GitHub API แทน (CLAUDE.md กฎข้อ 13) |
 
-- 🌟 **[docs/INDEX.md](docs/INDEX.md)**: **(ศูนย์รวมแผนที่นำทางเอกสารทั้งหมด)** แผนผังภาพรวมและคำแนะนำการอ่านตามบทบาท
-0. **[docs/INCIDENT_LOG.md](docs/INCIDENT_LOG.md)**: **(บทเรียนจากความผิดพลาด — อ่านก่อนเสมอ)** ทุกความผิดพลาดที่เคยเกิดขึ้นพร้อมกฎป้องกันถาวร (INC-0001 เป็นต้นไป)
-0.5 **[docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)**: **(บั๊กค้างและสถานะระบบ)** ดูก่อนเริ่มงานใหม่เพื่อไม่แก้ซ้ำซ้อนกับ Agent ตัวอื่น
-1. **[docs/WORK_LOG.md](docs/WORK_LOG.md)**: **(MANDATORY WORK LOG)** บันทึกประวัติสิ่งที่ทำเสร็จแล้ว อะไรแก้ไปแล้ว และอะไรค้างอยู่ (ต้องอัปเดตทุกครั้งหลังทำงานเสร็จ)
-2. **[docs/AI_COLLABORATION_GUIDELINES.md](docs/AI_COLLABORATION_GUIDELINES.md)**: **(MASTER RULEBOOK)** กฎเหล็กการทำงานร่วมกันของ AI, การแบ่ง Domain, กฎดีไซน์ทองคำ
-3. **[docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md](docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md)**: **(DEPLOY GUIDE)** ขั้นตอนการนำเว็บขึ้น Cloudflare Workers พร้อมระบบ Secret & Custom Domain
-4. **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**: สถาปัตยกรรมระดับองค์กร (Enterprise Architecture), กลไกการเข้ารหัสความโปร่งใส (Provably Fair Flow)
-5. **[docs/ADMIN_PANEL.md](docs/ADMIN_PANEL.md)**: คู่มือและสถาปัตยกรรมแผงควบคุมผู้ดูแลระบบ (Admin Panel & Cloud Health)
-6. **[docs/specs/INTERACTIVE_CARD_PICKING.md](docs/specs/INTERACTIVE_CARD_PICKING.md)**: รายละเอียดระบบและ Component สำหรับการให้คนจับไพ่ด้วยตนเอง
-7. **[docs/plans/AGENTS_TASK_PLAN.md](docs/plans/AGENTS_TASK_PLAN.md)**: แผนการกระจายงาน 5 เอเจนท์เฉพาะทาง และ Milestone การพัฒนา
-8. **[docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md](docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md)**: 🪶 แผนสถาปัตยกรรม Astro 7 + React 19 Islands (ทุกหน้าสาธารณะา SSG Zero-Runtime ตอบจาก Edge)
-9. **[docs/plans/HANDOFF_CARD_TILE_CV_2026-09-15.md](docs/plans/HANDOFF_CARD_TILE_CV_2026-09-15.md)**: 📐 สูตรความสูงการ์ดไพ่และกฎ content-visibility ต่อ breakpoint (ด่านที่ 62)
-10. **[docs/TAROT_CARD_FEATURES.md](docs/TAROT_CARD_FEATURES.md)**: 🃏 **(CANONICAL SPEC)** สเปกระบบและสารบบไพ่ทาโรต์ 78 ใบ, 5 มิติความหมาย, ผัง 26 แบบ, Pick A Card 8 หัวข้อ, Provably Fair Flow
+## แผนที่เอกสาร
 
-> 🪶 **หมายเหตุด้านสถาปัตยกรรม (Astro + Next.js Hybrid)**:
-> หน้าสาธารณะและเนื้อหาทั้งหมด (`/cards/**`, `/spreads/**`, `/blog/**`, `/about`, `/privacy`, `/contact` ฯลฯ) ถูกสร้างด้วย Astro SSG เป็น Zero-Runtime HTML ใน `.open-next/assets` ตอบจาก Cloudflare Edge โดยตรงโดยไม่ปลุก Worker
-> ส่วนหน้าที่ต้องการเซสชัน/ระบบสมาชิก/แผงควบคุมหลังบ้าน (`/account`, `/admin`, `/readers`, `/api/*`) ทำงานบน Next.js 16.3 (OpenNext on Cloudflare Workers)
-> **กติกา Island**: ห้ามนำเข้าชุดข้อมูลก้อนใหญ่ลง Island, ใช้ `client:idle` เป็นหลัก และแยก Static HTML ออกจาก Island เสมอ
-
----
-
-## 🏛️ สรุปกฎเหล็ก 14 ประการสำหรับวิศวกรและ AI ทุกตัว
-
-0. **บันทึกบทเรียนทุกครั้งที่แก้บั๊ก (สำคัญที่สุด)**: commit ประเภท `fix` **ต้องมี `--cause` และ `--prevention`** ไม่งั้นระบบจะบล็อกให้อัตโนมัติ ระบบจะเขียนบันทึกลง `docs/INCIDENT_LOG.md` ให้เอง เพื่อไม่ให้ AI ตัวไหนทำผิดซ้ำเรื่องเดิม
-1. **บันทึกงานทุกครั้ง**: ทำอะไรเสร็จ แก้บั๊ก หรือเพิ่มฟีเจอร์ ต้องอัปเดต `docs/WORK_LOG.md` ทันที · **งานนั้นอยู่ในแผนไหน → แก้บรรทัด `> **สถานะ**:` ของแผนนั้น + รัน `npm run docs:index` ใน PR เดียวกัน** (ด่าน CI ตรวจ · INC-0229)
-2. **ห้ามใช้อิโมจิหรือสัญลักษณ์ดวงดาวแฟนซี (✦, ✨, ✧, ฯลฯ)**: ออกแบบด้วยตัวพิมพ์ Editorial Luxury Typography ระดับสากลที่สะอาด เรียบหรู ไร้สิ่งรบกวนสายตา ห้ามใส่อิโมจิการ์ตูนหรือสัญลักษณ์ดวงดาวในหัวข้อ ปุ่มกด ป้ายแท็ก หรือข้อความ UI เด็ดขาด เพื่อคงมาตรฐานความน่าเชื่อถือระดับพรีเมียม
-3. **Zero-Clipping Architecture**: ห้ามใส่ `overflow-hidden` หรือ `overflow-x-auto` ย่อยในแต่ละแถวของการ์ด ต้องใช้ Unified Altar Canvas
-4. **Manual Self-Reveal**: ไพ่บนผังพยากรณ์เริ่มต้นในสถานะคว่ำหน้าเสมอ ผู้ใช้แตะพลิก 3D ด้วยตนเอง
-5. **1909 Rider-Waite Only**: ภาพหน้าไพ่ต้องใช้ภาพดั้งเดิม 1909 จาก `/public/cards/` เท่านั้น ห้ามเปลี่ยนเป็นสไตล์อื่น
-6. **Safety Guard**: บล็อกสัญญาณทำร้ายตัวเองทันที และแสดงสายด่วนสุขภาพจิต **1323**
-7. **Pure 1909 Spread Artworks**: ใน `TarotArtIcons.tsx` พรีวิวผัง 26 แบบ **ต้องแสดงเฉพาะภาพหน้าไพ่ 1909 ล้วนๆ ห้ามมีกล่องดำหรือตัวหนังสือปิดทับหน้าไพ่เด็ดขาด** (ให้แสดงรายละเอียดใน Accordion ด้านล่าง)
-8. **Single Card Image Pipeline**: ทุกจุดที่ Render ภาพหน้าไพ่ **ต้องใช้คอมโพเนนต์ `<CardImage />`** (`src/components/card/CardImage.tsx`) พร้อมส่ง prop `sizes` ตามความกว้างจริงที่แสดง **ห้ามเขียน `<img src="/cards/..." />` เองเด็ดขาด** เพราะจะทั้ง resolve path ผิดใน sub-route และโหลดไฟล์ต้นฉบับ 280KB มาแสดงที่ 34px โดยไม่จำเป็น (ถ้าเพิ่มภาพไพ่ใหม่ ต้องรัน `npm run cards:variants` ด้วย)
-9. **Horizontal Spread Bounds**: ผังที่มีไพ่ 7 ใบขึ้นไป (ผัง 7 วัน และ 7 จักระ) **ต้องจัดวางแบบ 2 ชั้นสมดุล (4+3 ใบ)** คุมความกว้างไม่เกิน 150px ป้องกันไพ่ล้นขอบซ้ายขวาออกนอกกรอบการ์ด
-10. **Human-First Natural Copywriting**: ใช้คำภาษาไทยที่เป็นธรรมชาติ เข้าใจง่าย ตรงไปตรงมาเหมือนมนุษย์คุยกัน ห้ามใช้ศัพท์หุ่นยนต์/AI แข็งทื่อ เช่น ใช้ "เมนู", "ผังการเปิดไพ่ (26 แบบ)", "ความหมายไพ่ (78 ใบ)", "ประวัติการดูดวง" แทนศัพท์ซับซ้อน
-11. **Multi-Agent Collision Guard**: ก่อนเริ่มงานให้ตรวจสอบ `npm run agent:status` และล็อคไฟล์ด้วย `npm run agent:lock` เสมอ หลังทำเสร็จให้ปลดล็อคด้วย `npm run agent:unlock` เพื่อไม่ให้ AI หลายตัวแก้งานชนกัน
-12. **One Unified Branch per Milestone & Zero Leftovers**: ห้ามแตกกิ่งย่อยกระจัดกระจายโดยไม่เปิด PR ทันที ต้อง Rebase บน `origin/main` ล่าสุดเสมอ และเมื่อทำงานเสร็จต้องรัน `npm run pr:auto` ➔ `npm run git:tidy` ให้จบสมบูรณ์ 100% ห้ามทิ้งกิ่งค้างหรือปล่อยภาระให้ผู้อื่นตามแก้
-13. **Auto-Merge Workflow Enforcement**: เมื่อเปิด PR ให้ใช้ `npm run pr:auto` เสมอ เพื่อให้ CI ตรวจ 94 ด่าน ➔ Auto-Merge (Squash) ➔ Auto-Deploy Cloudflare Workers จบในคำสั่งเดียว
-14. **Zero Fabricated Cards Policy (ห้ามกุไพ่ปลอมทุกใบเด็ดขาด)**: ในทุกขั้นตอนการสับไพ่, เลือกไพ่, กู้คืนเซสชัน, สตรีมคำทำนาย, และแชทถามตอบ **ห้ามเขียนโค้ด fallback มโนหรือกุไพ่ใบใดใบหนึ่งในสำรับ 78 ใบขึ้นมาเองเด็ดขาด** (ไม่ว่าจะ The Fool, The Magician หรือใบใดๆ ทั้งสิ้น) หากข้อมูลไพ่สูญหายหรือไม่สมบูรณ์ ระบบต้องคืนค่า `undefined` หรือส่ง Error แจ้งเตือนให้ผู้ใช้ **'โหลดใหม่อีกครั้ง'** ทันที เพื่อรักษาหลักการความโปร่งใส (Provably Fair) 100%
-
----
-
-## 🛠️ คำสั่งสำหรับทดสอบและรันระบบ
-
-- **ตรวจความปลอดภัยไม่ให้ชนกับ Agent อื่น**: `npm run agent:check`
-- **ดูสถานะ Agent ที่กำลังทำงาน**: `npm run agent:status`
-- **ล็อคไฟล์ก่อนเริ่มแก้**: `npm run agent:lock -- --agent <ชื่อ> --domain <หมวด> --files <ไฟล์>`
-- **ปลดล็อคไฟล์เมื่อทำเสร็จ**: `npm run agent:unlock -- --agent <ชื่อ>`
-- **ตรวจครบ 94 ด่านในคำสั่งเดียว (ใช้ตัวนี้เป็นหลัก)**: `npm run repo:verify`
-- **ตรวจ Typecheck อย่างเดียว**: `npm run typecheck`
-- **ซิงก์สถานะและบันทึกงานอัตโนมัติ (Mandatory)**: `npm run log:sync`
-- **สร้างภาพไพ่ย่อ WebP หลายขนาด (รันเมื่อเปลี่ยนภาพต้นฉบับ)**: `npm run cards:variants`
-- **บันทึกความผิดพลาดด้วยมือ**: `npm run incident -- --title "..." --severity high --symptom "..." --cause "..." --fix "..." --prevention "..."`
-- **ดูสถานะ repo, PR และ CI ล่าสุด**: `npx tsx scripts/github-auto.ts status`
-- **ตรวจ + push + สร้าง PR**: `npm run pr:auto -- "<title>" "<body>"`
-  เติม `--wait` เพื่อให้รอจน PR merge เสร็จแล้วเก็บกวาด branch ให้อัตโนมัติ
-- **เก็บกวาด branch ที่ merge ไปแล้ว (ในเครื่อง + บน remote)**: `npm run git:tidy` (ใส่ `--dry-run` เพื่อดูก่อน)
-- **ตรวจว่าโฮสต์ `www` เด้ง 301 กลับโดเมนหลักหรือยัง**: `npm run cf:canonical-host -- --check`
-  ถอด `--check` = ดันกฎขึ้นชั้นขอบของ Cloudflare (ต้องมี `CLOUDFLARE_API_TOKEN` สิทธิ์ `Zone · Single Redirect · Edit`)
-- **รันเซิร์ฟเวอร์สำหรับพัฒนา**: `npm run dev`
+ดู [docs/INDEX.md](docs/INDEX.md) — รวมเอกสารทุกไฟล์ แบ่งตามหน้าที่ และลำดับการอ่านตามบทบาท

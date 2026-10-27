@@ -1,6 +1,6 @@
 # ⚡ แผนฟีเจอร์ "ทำนายด่วน" (Quick Fortune — 1 ใบ ไม่ต้องเลือกไพ่)
 
-> **สถานะ**: ✅ เสร็จแล้ว — พัฒนาและตรวจสอบเสร็จสมบูรณ์ · **ตรวจล่าสุด**: 2026-09-23
+> **สถานะ**: ✅ เสร็จแล้ว — ทำนายด่วน 1 ใบใช้งานจริง · ตัวเลือกเดิม `QuickFortunePicker` ถูกถอดเมื่อหน้าแรกเป็น UI 2.0 แทนด้วยส่วนเปิดไพ่ด่วน (`Ui2PickSection`) · ไม่มีงานค้าง · **ตรวจล่าสุด**: 2026-10-26
 
 > **สถานะตอนเขียนแผน**: ✅ พัฒนาและตรวจสอบเสร็จสมบูรณ์ 100% ตามมติรอบที่ 4 (บล็อก 4 การ์ดบนสุด ต่อด้วยของเดิมต่อเนื่อง ไม่มีปุ่มคั่นกลาง)
 > **ผู้วางแผนและพัฒนา**: Claude & Antigravity AI — 2026-09-05
@@ -68,20 +68,20 @@ npm run agent:unlock -- --agent <ชื่อคุณ>
 
 ## 2. Flow ปัจจุบัน (สิ่งที่จะถูกแทนที่)
 
-State machine ทั้งหมดอยู่ใน [`src/app/TarotFlow.tsx`](../../src/app/TarotFlow.tsx) ควบคุมด้วย `RitualStep`:
+State machine ทั้งหมดอยู่ใน [`src/app/TarotFlow.tsx`](../../src/components/home/TarotFlow.tsx) ควบคุมด้วย `RitualStep`:
 
 ```
 SPREAD_SELECT → INTENTION_SELECT → SHUFFLE → PICK_CARDS → READING → SUMMARY
 ```
-(ประกาศชนิดที่ [`RitualStepProgress.tsx:6`](../../src/components/ui/RitualStepProgress.tsx))
+(ประกาศชนิดที่ `RitualStepProgress.tsx:6`)
 
 | Step | ทำอะไร | ไฟล์ |
 | :--- | :--- | :--- |
-| `SPREAD_SELECT` | โชว์ hero กองไพ่ 3D + กริดเลือกผัง 20 แบบ | [`TarotFlow.tsx:947-1052`](../../src/app/TarotFlow.tsx), `SpreadCardSelector.tsx` |
-| `INTENTION_SELECT` | กรอกชื่อเล่น + คำถาม + เลือกแม่หมอ → เรียก `POST /api/reading/start` (`handleStartSession`) | [`TarotFlow.tsx:459-538`](../../src/app/TarotFlow.tsx) |
-| `SHUFFLE` | ริชวลสับไพ่ ~หลายวินาที เก็บ mouse entropy เป็น `clientSeed` | `ShuffleRitual.tsx`, `handleShuffleComplete` ที่ [`TarotFlow.tsx:541`](../../src/app/TarotFlow.tsx) |
-| `PICK_CARDS` | แผ่ไพ่ 78 ใบให้แตะเลือกทีละใบ (`InteractiveCardFan`) → เรียก `POST /api/reading/[id]/shuffle` | `handlePickCard` / `handleFinalizePickedCards` ที่ [`TarotFlow.tsx:554-661`](../../src/app/TarotFlow.tsx) |
-| `READING`/`SUMMARY` | โชว์ไพ่คว่ำหน้าให้แตะพลิกเอง (`SpreadBoard`) + สตรีมคำทำนาย (`StreamReader`) + การ์ด CTA แชทแม่หมอ | [`TarotFlow.tsx:1190-1306`](../../src/app/TarotFlow.tsx) |
+| `SPREAD_SELECT` | โชว์ hero กองไพ่ 3D + กริดเลือกผัง 20 แบบ | [`TarotFlow.tsx:947-1052`](../../src/components/home/TarotFlow.tsx), `SpreadCardSelector.tsx` |
+| `INTENTION_SELECT` | กรอกชื่อเล่น + คำถาม + เลือกแม่หมอ → เรียก `POST /api/reading/start` (`handleStartSession`) | [`TarotFlow.tsx:459-538`](../../src/components/home/TarotFlow.tsx) |
+| `SHUFFLE` | ริชวลสับไพ่ ~หลายวินาที เก็บ mouse entropy เป็น `clientSeed` | `ShuffleRitual.tsx`, `handleShuffleComplete` ที่ [`TarotFlow.tsx:541`](../../src/components/home/TarotFlow.tsx) |
+| `PICK_CARDS` | แผ่ไพ่ 78 ใบให้แตะเลือกทีละใบ (`InteractiveCardFan`) → เรียก `POST /api/reading/[id]/shuffle` | `handlePickCard` / `handleFinalizePickedCards` ที่ [`TarotFlow.tsx:554-661`](../../src/components/home/TarotFlow.tsx) |
+| `READING`/`SUMMARY` | โชว์ไพ่คว่ำหน้าให้แตะพลิกเอง (`SpreadBoard`) + สตรีมคำทำนาย (`StreamReader`) + การ์ด CTA แชทแม่หมอ | [`TarotFlow.tsx:1190-1306`](../../src/components/home/TarotFlow.tsx) |
 
 **"ทำนายด่วน" ไม่ตัดของเดิมออกเลยแม้แต่ส่วนเดียว** (ดูคำเตือนแก้มติในข้อ 0) — สิ่งที่ทำนายด่วน**ข้าม**เฉพาะตอนที่ผู้ใช้กด**เข้าเส้นทางด่วนเท่านั้น** คือ: ขั้นกรอกคำถามเต็มรูปแบบ, ริชวลสับไพ่แบบยาว, และหน้าพัดไพ่ 78 ใบให้แตะเลือก (ข้อ 3 ในโจทย์) — ส่วน `SPREAD_SELECT` เดิมทั้งบล็อก (hero + กริด 20 ผัง) ยังคงอยู่ที่เดิม แค่ถูกดันลงมาอยู่ใต้บล็อกทำนายด่วนที่เพิ่มเข้ามาใหม่
 
@@ -95,9 +95,9 @@ SPREAD_SELECT → INTENTION_SELECT → SHUFFLE → PICK_CARDS → READING → SU
 - `normalizeClientSeed()` ([`shuffle.ts:159-163`](../../src/lib/tarot/shuffle.ts)) ถ้าไม่ส่ง `clientSeed` มา จะ fallback เป็น `randomBytes(16)` ที่ปลอดภัยอยู่แล้ว — ไม่จำเป็นต้องมีริชวลสับไพ่ยาว ๆ เพื่อเก็บ entropy จากผู้ใช้
 - ระบบ Provably-Fair (commit-reveal SHA-256) **ยังคงทำงานสมบูรณ์** แม้ข้ามสองขั้นตอนนี้ไป เพราะความยุติธรรมมาจาก `serverSeed` ที่ commit ไว้ล่วงหน้า ไม่ได้ขึ้นกับว่าผู้ใช้ "แตะเลือก" ไพ่ใบไหนในพัด
 - Spread ไพ่ใบเดียวมีอยู่แล้วในระบบสิทธิ์ฟรี (`STANDARD_SPREAD_IDS` มี `"daily"`, `"quick"` — [`limits.ts:33-40`](../../src/lib/entitlement/limits.ts)) และ `credits: 0, guestAllowed: true` อยู่แล้วใน [`spreads.ts:44-62`](../../src/data/spreads.ts)
-- ปุ่ม/การ์ด "แชทกับแม่หมอ" หลังอ่านไพ่จบ **มีอยู่แล้ว** ที่ [`TarotFlow.tsx:1237-1269`](../../src/app/TarotFlow.tsx) ลิงก์ตรงไป `/reading/chat` — ข้อ 4 ในโจทย์แทบไม่ต้องทำอะไรเพิ่ม แค่ทำให้เด่นขึ้นสำหรับ flow นี้
+- ปุ่ม/การ์ด "แชทกับแม่หมอ" หลังอ่านไพ่จบ **มีอยู่แล้ว** ที่ [`TarotFlow.tsx:1237-1269`](../../src/components/home/TarotFlow.tsx) ลิงก์ตรงไป `/reading/chat` — ข้อ 4 ในโจทย์แทบไม่ต้องทำอะไรเพิ่ม แค่ทำให้เด่นขึ้นสำหรับ flow นี้
 - **ระบบ "กลับมาอ่าน + ตอบว่าแม่นไหม" (ข้อ 6 ในโจทย์) มีอยู่แล้วทั้งชุด ใช้ได้ทันทีโดยไม่ต้องสร้างใหม่**:
-  - ทุกครั้งที่อ่านไพ่จบ ระบบ auto-save เข้า **Reading Journal** อยู่แล้วที่ [`TarotFlow.tsx:761-783`](../../src/app/TarotFlow.tsx) (`saveReading({...})` — เก็บคำถาม, หัวข้อ (`category`), ไพ่, บทสรุป) เป็น generic ไม่ผูกกับ spread ใดเป็นพิเศษ ⇒ ไพ่ทำนายด่วนจะถูกบันทึกอัตโนมัติเหมือนกัน **ถ้า** flow ใหม่เดินผ่าน `startAIStreaming` เส้นทางเดิม (ตามข้อ 6.4)
+  - ทุกครั้งที่อ่านไพ่จบ ระบบ auto-save เข้า **Reading Journal** อยู่แล้วที่ [`TarotFlow.tsx:761-783`](../../src/components/home/TarotFlow.tsx) (`saveReading({...})` — เก็บคำถาม, หัวข้อ (`category`), ไพ่, บทสรุป) เป็น generic ไม่ผูกกับ spread ใดเป็นพิเศษ ⇒ ไพ่ทำนายด่วนจะถูกบันทึกอัตโนมัติเหมือนกัน **ถ้า** flow ใหม่เดินผ่าน `startAIStreaming` เส้นทางเดิม (ตามข้อ 6.4)
   - เก็บทั้ง **LocalStorage** (`tarot_reading_journal_v1` ใน [`history.ts:35`](../../src/lib/utils/history.ts) — ใช้ได้แม้เป็น guest ไม่ล็อกอิน) และ **sync ขึ้นเซิร์ฟเวอร์** ผ่าน `/api/journal` เมื่อมีบัญชี
   - หน้าจอ **"ประวัติ"** ([`ReadingHistoryModal.tsx`](../../src/components/history/ReadingHistoryModal.tsx)) เปิดจาก `SacredNavDropdown` ในเฮดเดอร์ทุกหน้าอยู่แล้ว — โชว์คำถาม/ไพ่/บทสรุปย้อนหลังครบ พร้อม**ปุ่มตอบผลจริงในตัว 4 สถานะ**: `PENDING` (รอผล) / `ACCURATE` (✨ เกิดขึ้นจริง) / `PARTIAL` (✦ จริงบางส่วน) / `NOT_HAPPENED` — เขียนผ่าน `updateReadingOutcome()` ที่ [`ReadingHistoryModal.tsx:88-98`](../../src/components/history/ReadingHistoryModal.tsx) และ sync ต่อไปยังตาราง `reading_quality` เพื่อใช้ปรับปรุงคุณภาพ AI ในอนาคต ([`api/journal/[id]/route.ts:41-43`](../../src/app/api/journal/[id]/route.ts))
   - นอกจากนี้ยังมี **`AccuracyRatingWidget`** ([`AccuracyRatingWidget.tsx`](../../src/components/reading/AccuracyRatingWidget.tsx)) ให้ให้คะแนนความแม่น 1-5 ทันทีท้ายหน้า `SUMMARY` อยู่แล้ว (ต่ออยู่ใน `StreamReader.tsx:550` เป็น generic เช่นกัน)
@@ -187,33 +187,33 @@ navigateStep("READING") ตรง ๆ → READING → SUMMARY (โค้ดเ�
 ### 6.1 ข้อมูล — `src/data/spreads.ts`
 - เพิ่ม spread ไพ่ 1 ใบ 4 อัน (หรือ reuse โครงจาก `"quick"`/`"daily"`) ผูก `defaultCategory` ตรงหัวข้อ + คำถาม default ต่อหัวข้อ (ดูตารางหัวข้อ 4)
 - `credits: 0, guestAllowed: true` เหมือนเดิม (ฟรีไม่กินโควตา หรือให้ทีมตัดสินใจว่ากินโควตาเหมือน `"quick"` เดิมหรือไม่ — **ควรสอบถามเจ้าของโปรเจกต์อีกครั้งถ้าจะต่างจาก `"quick"` เดิม**)
-- เพิ่ม id ใหม่เข้า `STANDARD_SPREAD_IDS` ที่ [`limits.ts:33`](../../src/lib/entitlement/limits.ts) ไม่งั้นจะโดนเด้งหน้าปลดล็อกสิทธิ์ (`isStandardSpread` เช็กที่ [`TarotFlow.tsx:466,1030,1042`](../../src/app/TarotFlow.tsx) และ [`api/reading/start/route.ts:121`](../../src/app/api/reading/start/route.ts))
+- เพิ่ม id ใหม่เข้า `STANDARD_SPREAD_IDS` ที่ [`limits.ts:33`](../../src/lib/entitlement/limits.ts) ไม่งั้นจะโดนเด้งหน้าปลดล็อกสิทธิ์ (`isStandardSpread` เช็กที่ [`TarotFlow.tsx:466,1030,1042`](../../src/components/home/TarotFlow.tsx) และ [`api/reading/start/route.ts:121`](../../src/app/api/reading/start/route.ts))
 
 ### 6.2 Component ใหม่ — `src/components/reading/QuickFortunePicker.tsx` (ชื่อเสนอ)
 - การ์ดหัวข้อ 4 ใบ **ไม่มีภาพไพ่/กองไพ่** — ใช้ไอคอน/สัญลักษณ์ `✦` `✨` เท่านั้น (กฎข้อ 2)
 - กดแล้ว trigger callback เดียว `onPickTopic(category)` ให้ `TarotFlow.tsx` จัดการต่อ
 - **ไม่มีปุ่ม/ลิงก์ท้ายบล็อกใด ๆ** (ตัดสินใจสุดท้ายแล้ว ดูข้อ 4.1) — component จบแค่การ์ดหัวข้อ 4 ใบ ไม่ต้องมี `viewMode` toggle/state สลับการแสดงผล ไม่ต้องมี anchor scroll ใด ๆ ทั้งสิ้น
-- วางไว้ที่ [`TarotFlow.tsx:947-957`](../../src/app/TarotFlow.tsx) **ก่อน** `<DailyCardStrip />` — ของเดิมทั้งหมด (`DailyCardStrip`, hero กองไพ่ 3D, `SpreadCardSelector`) อยู่ต่อท้ายด้านล่างเหมือนเดิมทุกประการ ไม่มีเงื่อนไข `if` ใด ๆ มาซ่อนมัน
+- วางไว้ที่ [`TarotFlow.tsx:947-957`](../../src/components/home/TarotFlow.tsx) **ก่อน** `<DailyCardStrip />` — ของเดิมทั้งหมด (`DailyCardStrip`, hero กองไพ่ 3D, `SpreadCardSelector`) อยู่ต่อท้ายด้านล่างเหมือนเดิมทุกประการ ไม่มีเงื่อนไข `if` ใด ๆ มาซ่อนมัน
 
 ### 6.3 Popover ชื่อเล่นครั้งเดียว
 - เช็ก `localStorage` key เช่น `seertarot_nickname` — ถ้ามีแล้วข้ามไปเลย
 - ถ้ายังไม่มี โชว์ popover เล็ก (ไม่ใช่เปลี่ยนหน้า) ถามครั้งเดียว บันทึกแล้วใช้ต่อทุกครั้ง (ผู้ใช้แก้ชื่อเล่นทีหลังได้จากบัญชี/prompt เดิมถ้ามี)
 
 ### 6.4 State machine — `src/app/TarotFlow.tsx`
-- เพิ่ม branch: เมื่อ `onPickTopic(category)` ถูกเรียก → set `selectedSpread`, `selectedCategory`, `question` (auto-fill) → เรียก `handleStartSession` แบบย่อ (ข้าม validation ที่บังคับให้ผู้ใช้พิมพ์คำถามเองที่ [`TarotFlow.tsx:479-487`](../../src/app/TarotFlow.tsx) เพราะ auto-fill ไว้แล้ว)
+- เพิ่ม branch: เมื่อ `onPickTopic(category)` ถูกเรียก → set `selectedSpread`, `selectedCategory`, `question` (auto-fill) → เรียก `handleStartSession` แบบย่อ (ข้าม validation ที่บังคับให้ผู้ใช้พิมพ์คำถามเองที่ [`TarotFlow.tsx:479-487`](../../src/components/home/TarotFlow.tsx) เพราะ auto-fill ไว้แล้ว)
 - หลัง `/api/reading/start` สำเร็จ → **ข้าม** `navigateStep("SHUFFLE")` เดิม แล้วเรียก `/api/reading/[id]/shuffle` ทันทีโดย **ไม่ส่ง** `pickedIndices` (ตามข้อค้นพบข้อ 3) → ได้ `drawnCards` 1 ใบ → `navigateStep("READING")` ตรง ๆ + `startAIStreaming(...)` เหมือน flow เดิม
 - คง `RitualStep` type เดิมไว้ไม่ต้องเพิ่ม state ใหม่ (แค่ไม่ผ่าน `SHUFFLE`/`PICK_CARDS` ในเส้นทางนี้) — ตรวจสอบว่า `flow-persistence.ts` resume คืนค่าได้ถูกต้องถ้า user รีเฟรชกลางทาง (ต้องมี `drawnCards` อยู่แล้วก่อนเข้า `READING`)
 - **ไม่ต้องมี state `viewMode`/เงื่อนไขซ่อนของเดิม** — `QuickFortunePicker` render อยู่ก่อน block `SPREAD_SELECT` เดิมแบบ unconditional เสมอ (ดูข้อ 6.2) เพราะของเดิมต้องโชว์ตลอดตามมติแก้ไขรอบ 2
 
 ### 6.5 CTA แชทกับแม่หมอ (ทำให้เด่นขึ้น)
-- การ์ดที่ [`TarotFlow.tsx:1237-1269`](../../src/app/TarotFlow.tsx) มีอยู่แล้ว — สำหรับ flow ทำนายด่วน ให้พิจารณาขยับขึ้นเหนือ `StreamReader` หรือเพิ่มปุ่มลอย sticky บนมือถือ เพราะโจทย์เน้น "เข้าแชทได้เลยหลังอ่านไพ่เสร็จ"
+- การ์ดที่ [`TarotFlow.tsx:1237-1269`](../../src/components/home/TarotFlow.tsx) มีอยู่แล้ว — สำหรับ flow ทำนายด่วน ให้พิจารณาขยับขึ้นเหนือ `StreamReader` หรือเพิ่มปุ่มลอย sticky บนมือถือ เพราะโจทย์เน้น "เข้าแชทได้เลยหลังอ่านไพ่เสร็จ"
 
 ### 6.6 คำทำนายสรุปท้ายให้สั้นลง (ถ้าจำเป็น)
 - ถ้า prompt ปัจจุบันสำหรับ spread 1 ใบ (`daily`/`quick`) ยาวเกินไปอยู่แล้ว ให้ตรวจ `depth` ใน `src/lib/ai/prompt.ts` ว่าควบคุมความยาวตามจำนวนไพ่จริง — ถ้าพบว่ายาวเกินคาด ค่อยปรับ ไม่ต้องแก้ prompt ล่วงหน้าถ้ายังไม่เห็นปัญหาจริง
 
 ### 6.7 Nudge ชี้ทางไปหน้าประวัติ/ให้คะแนนแม่นไหม (ของมีอยู่แล้ว แค่ทำให้เจอง่ายขึ้น)
 ผู้ใช้ทำนายด่วนส่วนใหญ่เป็นผู้ใช้ทั่วไป/มือใหม่ที่ไม่คุ้นเมนู `SacredNavDropdown` มาก่อน จึงเสี่ยงไม่รู้ว่ากลับมาดูย้อนหลัง/ให้ feedback ได้ที่ไหน — ให้เพิ่ม (ไม่ต้องสร้างระบบใหม่ แค่ต่อ UI ชี้ทาง):
-- ที่ "Bottom Quick Luxury Actions Deck" บนหน้า `SUMMARY` ([`TarotFlow.tsx:1273-1300`](../../src/app/TarotFlow.tsx)) เพิ่มข้อความสั้น ๆ เช่น "✨ บันทึกไว้ในประวัติแล้ว — กลับมาดูอีกครั้งพร้อมบอกว่าแม่นไหมได้ที่เมนู 'ประวัติ' มุมขวาบน"
+- ที่ "Bottom Quick Luxury Actions Deck" บนหน้า `SUMMARY` ([`TarotFlow.tsx:1273-1300`](../../src/components/home/TarotFlow.tsx)) เพิ่มข้อความสั้น ๆ เช่น "✨ บันทึกไว้ในประวัติแล้ว — กลับมาดูอีกครั้งพร้อมบอกว่าแม่นไหมได้ที่เมนู 'ประวัติ' มุมขวาบน"
 - ตรวจให้แน่ใจว่า `AccuracyRatingWidget` (ให้คะแนน 1-5 ทันที) ยังโชว์ปกติสำหรับ spread ทำนายด่วนใน `StreamReader.tsx:550` (ไม่ต้องแก้โค้ด แค่ทดสอบว่าไม่มีเงื่อนไขซ่อนตาม spread id)
 - (ถ้าอยากทำเพิ่ม ไม่บังคับ): ไอคอนเมนู "ประวัติ" ใน `SacredNavDropdown` เด่นขึ้นเป็นพิเศษหลัง flow ทำนายด่วนจบครั้งแรก (เช่น badge จุดแดงเตือนครั้งเดียว) — เป็นงาน nice-to-have ไม่ใช่ core
 
@@ -223,7 +223,7 @@ navigateStep("READING") ตรง ๆ → READING → SUMMARY (โค้ดเ�
 
 **ขอบเขต** — แบ่งชัดเป็น 2 ส่วนไม่ให้ทีมสับสน:
 
-1. **บันทึกฝั่งคำทำนายหลัก (ทำ)**: ตอนเรียก `saveReading({...})` ในข้อ 6.4 (เส้นทางเดียวกับ [`TarotFlow.tsx:761-783`](../../src/app/TarotFlow.tsx)) ต้องส่งค่า `question` เป็น **ข้อความคำถามเต็มจริง ๆ** ที่ระบบใช้ยิงเข้า AI ตอนอ่านไพ่ (เช่น `"ภาพรวมความรักตอนนี้เป็นอย่างไร"`) ไม่ใช่แค่ชื่อหัวข้อสั้น ๆ อย่าง `"ความรัก"` — และส่ง `category` (`love`/`work`/`money`/`general`) ตรงหัวข้อที่กด เพื่อให้ `ReadingHistoryModal` แสดงทั้ง **หัวข้อ** (ผ่าน `CATEGORY_MAP_TH`) และ **คำถามเต็มที่ถาม** ให้ผู้ใช้เห็นชัดเจนตอนย้อนกลับมาดู — โครงสร้างข้อมูล (`SavedReadingItem`) มีฟิลด์นี้พร้อมอยู่แล้ว ไม่ต้องเพิ่ม field ใหม่
+1. **บันทึกฝั่งคำทำนายหลัก (ทำ)**: ตอนเรียก `saveReading({...})` ในข้อ 6.4 (เส้นทางเดียวกับ [`TarotFlow.tsx:761-783`](../../src/components/home/TarotFlow.tsx)) ต้องส่งค่า `question` เป็น **ข้อความคำถามเต็มจริง ๆ** ที่ระบบใช้ยิงเข้า AI ตอนอ่านไพ่ (เช่น `"ภาพรวมความรักตอนนี้เป็นอย่างไร"`) ไม่ใช่แค่ชื่อหัวข้อสั้น ๆ อย่าง `"ความรัก"` — และส่ง `category` (`love`/`work`/`money`/`general`) ตรงหัวข้อที่กด เพื่อให้ `ReadingHistoryModal` แสดงทั้ง **หัวข้อ** (ผ่าน `CATEGORY_MAP_TH`) และ **คำถามเต็มที่ถาม** ให้ผู้ใช้เห็นชัดเจนตอนย้อนกลับมาดู — โครงสร้างข้อมูล (`SavedReadingItem`) มีฟิลด์นี้พร้อมอยู่แล้ว ไม่ต้องเพิ่ม field ใหม่
 2. **บทสนทนาห้องแชทกับแม่หมอ (ไม่ทำ / คงพฤติกรรมเดิม)**: **ไม่บันทึก**ข้อความแชทถาม-ตอบใน `/reading/chat` ลงที่ไหนทั้งสิ้น (localStorage/D1/ไฟล์) — เป็นการตัดสินใจเดิมของระบบเพื่อความเป็นส่วนตัว (PDPA) ตามที่ระบุไว้ใน [`flow-persistence.ts:14-15`](../../src/lib/utils/flow-persistence.ts) แผนนี้**ไม่เปลี่ยนพฤติกรรมนี้** — ถ้าในอนาคตอยากเก็บบทสนทนาแชทด้วย ต้องเปิดเป็นดีไซน์ใหม่แยกต่างหาก (ต้องผ่านกระบวนการยินยอม PDPA ตาม [`ADR-001-marketplace-pdpa.md`](../adr/ADR-001-marketplace-pdpa.md) ก่อน) — **ไม่รวมอยู่ในสโคปนี้**
 
 ---

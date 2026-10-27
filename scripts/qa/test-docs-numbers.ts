@@ -11,6 +11,7 @@
  * รันด้วย: npx tsx scripts/qa/test-docs-numbers.ts
  */
 
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -72,41 +73,6 @@ const ALLOWLIST: AllowItem[] = [
     file: "docs/plans/MASTER_PLAN_2026-09-06.md",
     match: 'เขียนว่า "35/35 ด่าน',
     reason: "อ้างถึงตัวเลขที่ฉบับ 2026-09-07 เขียนผิดไว้ เพื่ออธิบายว่าทำไมต้องมีด่านนี้ — ห้ามแก้ย้อนหลัง",
-  },
-  {
-    file: "docs/KNOWN_ISSUES.md",
-    match: "24/24 ด่าน",
-    reason: "บันทึกผลตรวจ ณ 2026-09-04 ซึ่งวันนั้นมี 24 ด่านจริง — ห้ามแก้ย้อนหลัง",
-  },
-  {
-    file: "docs/KNOWN_ISSUES.md",
-    match: "ตรวจสอบ 24 ด่าน ผ่าน 24/24",
-    reason: "บันทึกผลตรวจ ณ 2026-09-04 ซึ่งวันนั้นมี 24 ด่านจริง — ห้ามแก้ย้อนหลัง",
-  },
-  {
-    file: "docs/KNOWN_ISSUES.md",
-    match: "ผ่าน 24 ด่าน repo:verify",
-    reason: "บันทึกผลตรวจ ณ 2026-09-04 สำหรับ ISSUE-023 ซึ่งวันนั้นมี 24 ด่านจริง — ห้ามแก้ย้อนหลัง",
-  },
-  {
-    file: "docs/KNOWN_ISSUES.md",
-    match: "ตรวจสอบ 46 ด่าน ผ่านครบ",
-    reason: "บันทึกผลตรวจ ISSUE-042 ณ 2026-09-11 ซึ่งวันนั้นมี 46 ด่านจริง — ห้ามแก้ย้อนหลัง",
-  },
-  {
-    file: "docs/KNOWN_ISSUES.md",
-    match: "(38/38 ด่าน)",
-    reason: "แถว 'รอบก่อนหน้า (ประวัติ)' — บันทึกผลตรวจ ณ 2026-09-06 ซึ่งวันนั้นมี 38 ด่านจริง — ห้ามแก้ย้อนหลัง",
-  },
-  {
-    file: "docs/KNOWN_ISSUES.md",
-    match: "(43/43 ด่าน)",
-    reason: "แถว 'รอบก่อนหน้า (ประวัติ)' — บันทึกผลตรวจ ณ 2026-09-09 ซึ่งวันนั้นมี 43 ด่านจริง — ห้ามแก้ย้อนหลัง",
-  },
-  {
-    file: "docs/KNOWN_ISSUES.md",
-    match: "(รอบก่อน 2026-09-09 · 43 ด่านในวันนั้น)",
-    reason: "แถว 'วิธีตรวจ' ท่อนประวัติ — อ้างจำนวนด่าน ณ 2026-09-09 ซึ่งวันนั้นมี 43 ด่านจริง — ห้ามแก้ย้อนหลัง",
   },
 ];
 
@@ -269,35 +235,44 @@ function checkDocs() {
  */
 function checkIncidentIds() {
   const LOG = "docs/INCIDENT_LOG.md";
+  /* ไฟล์หลักเก็บเฉพาะของล่าสุด ของเก่าย้ายไปเก็บรายเดือนด้วย `npm run docs:archive` — ทะเบียนคือทั้งสองที่รวมกัน */
+  const ARCHIVE = "docs/archive/incidents";
   const logPath = path.join(ROOT, LOG);
   if (!fs.existsSync(logPath)) {
     /* 🔴 R-07: ไม่มีทะเบียน = กฎ "ห้ามอ้างเลข INC ที่ไม่มีจริง" กลายเป็น no-op เงียบ ๆ */
     console.error(`❌ ไม่พบ ${LOG} — ตรวจทะเบียนเลข INC ไม่ได้เลย (กฎเหล็กข้อ 0 บังคับให้ไฟล์นี้มีอยู่)`);
     process.exit(1);
   }
+  const archiveDir = path.join(ROOT, ARCHIVE);
+  const registry = [
+    LOG,
+    ...(fs.existsSync(archiveDir)
+      ? fs.readdirSync(archiveDir).filter((n) => n.endsWith(".md")).sort().map((n) => `${ARCHIVE}/${n}`)
+      : []),
+  ];
 
-  const raw = fs.readFileSync(logPath, "utf8");
-  const lines = raw.split("\n");
+  const seen = new Map<string, string>();
+  const dupes: { id: string; at: string; first: string }[] = [];
 
-  const seen = new Map<string, number>();
-  const dupes: { id: string; line: number; firstLine: number }[] = [];
-
-  for (let i = 0; i < lines.length; i++) {
-    const m = /^### (INC-\d{4}[a-z]?) /.exec(lines[i]);
-    if (!m) continue;
-    const id = m[1];
-    const prev = seen.get(id);
-    if (prev !== undefined) {
-      dupes.push({ id, line: i + 1, firstLine: prev });
-      continue;
+  for (const rel of registry) {
+    const lines = fs.readFileSync(path.join(ROOT, rel), "utf8").split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const m = /^### (INC-\d{4}[a-z]?) /.exec(lines[i]);
+      if (!m) continue;
+      const id = m[1];
+      const prev = seen.get(id);
+      if (prev !== undefined) {
+        dupes.push({ id, at: `${rel}:${i + 1}`, first: prev });
+        continue;
+      }
+      seen.set(id, `${rel}:${i + 1}`);
     }
-    seen.set(id, i + 1);
   }
 
   if (dupes.length > 0) {
-    console.error(`❌ เลข INC ซ้ำใน ${LOG} (${dupes.length} รายการ):`);
+    console.error(`❌ เลข INC ซ้ำในทะเบียน (${dupes.length} รายการ):`);
     for (const d of dupes) {
-      console.error(`  - ${LOG}:${d.line} ใช้เลข ${d.id} ซ้ำกับบรรทัด ${d.firstLine}`);
+      console.error(`  - ${d.at} ใช้เลข ${d.id} ซ้ำกับ ${d.first}`);
     }
     console.error(`\n💡 วิธีแก้: ให้รายการที่บันทึกทีหลังเติมท้ายด้วย b (เช่น ${dupes[0].id}b) แล้วตามแก้จุดที่อ้างถึงให้ตรง\n`);
     process.exit(1);
@@ -321,7 +296,7 @@ function checkIncidentIds() {
       return;
     }
     if (!/\.(md|ts|tsx)$/.test(rel)) return;
-    if (rel === LOG) return;
+    if (registry.includes(rel)) return;
     scannedRefFiles.push(rel);
     const content = fs.readFileSync(abs, "utf8").split("\n");
     for (let i = 0; i < content.length; i++) {
@@ -337,7 +312,7 @@ function checkIncidentIds() {
   assertNonEmptyCorpus("ไฟล์ที่สแกนหาเลข INC", scannedRefFiles, "ตรวจว่า REF_GLOBS ยังชี้ไปที่โฟลเดอร์ที่มีอยู่จริง");
 
   if (dangling.length > 0) {
-    console.error(`❌ มีการอ้างเลข INC ที่ไม่มีอยู่จริงใน ${LOG} (${dangling.length} จุด):`);
+    console.error(`❌ มีการอ้างเลข INC ที่ไม่มีอยู่จริงใน ${LOG} หรือ ${ARCHIVE}/ (${dangling.length} จุด):`);
     for (const d of dangling) console.error(`  - ${d.file}:${d.line} → ${d.id}`);
     console.error(`\n💡 วิธีแก้: แก้เลขให้ตรงกับรายการจริง หรือบันทึกเหตุการณ์นั้นลง ${LOG} ให้ครบ\n`);
     process.exit(1);
@@ -418,6 +393,99 @@ function checkAgentFiles() {
   console.log(`✅ ไฟล์ผู้ช่วยผู้บริหาร ${files.length} ไฟล์ชี้ไฟล์และคำสั่งที่มีอยู่จริงครบ`);
 }
 
+/**
+ * ALLOWLIST ต้องไม่ค้างของที่ไม่มีแล้ว — ข้อความประวัติถูกย้ายไปไฟล์เก็บถาวร (ซึ่งด่านนี้ไม่ตรวจ)
+ * แต่รายการยกเว้นยังอยู่ = ช่องโหว่รอวันมีคนเขียนเลขผิดซ้ำประโยคเดิมแล้วหลุดผ่าน (2026-10-26)
+ */
+function checkStaleAllowlist() {
+  const stale = ALLOWLIST.filter((al) => {
+    const abs = path.join(ROOT, al.file);
+    if (!fs.existsSync(abs)) return true;
+    return !fs
+      .readFileSync(abs, "utf8")
+      .split("\n")
+      .some((line) => (typeof al.match === "string" ? line.includes(al.match) : al.match.test(line)));
+  });
+  if (stale.length > 0) {
+    console.error("❌ ALLOWLIST มีรายการที่ไม่ตรงกับบรรทัดไหนแล้ว — ลบออกจาก test-docs-numbers.ts:");
+    for (const al of stale) console.error(`  - ${al.file}: ${String(al.match)}`);
+    process.exit(1);
+  }
+  console.log(`✅ ALLOWLIST ${ALLOWLIST.length} รายการยังชี้บรรทัดที่มีอยู่จริงทุกตัว`);
+}
+
+/**
+ * 🔗 ลิงก์สัมพัทธ์ในไฟล์ .md ทุกไฟล์ต้องชี้ไฟล์ที่มีอยู่จริง (2026-10-26)
+ * รอบจัดระเบียบเอกสารพบลิงก์พัง 124 จุดใน 26 ไฟล์ — ส่วนใหญ่ชี้ไฟล์ที่ย้ายไปตอนย้ายสถาปัตยกรรม
+ * (`src/app/TarotFlow.tsx` ฯลฯ) ผู้อ่านกดแล้วไปไม่ถึง และเอเจนท์ที่ตามลิงก์ได้ข้อมูลผิดที่
+ * ไม่ตรวจลิงก์ในโค้ดบล็อก · ไม่ตรวจ anchor (#…) · ข้ามไฟล์ที่ git ไม่ติดตาม (ผลตรวจส่วนตัว)
+ */
+function checkMarkdownLinks() {
+  let files: string[];
+  try {
+    files = execFileSync("git", ["ls-files", "-co", "--exclude-standard", "*.md"], { cwd: ROOT, encoding: "utf8" })
+      .split("\n")
+      .filter((f) => f && !f.startsWith("node_modules/") && fs.existsSync(path.join(ROOT, f)));
+  } catch {
+    console.error("❌ เรียก git ls-files ไม่ได้ — ตรวจลิงก์ในเอกสารไม่ได้");
+    process.exit(1);
+  }
+  assertNonEmptyCorpus("ไฟล์ .md ที่ตรวจลิงก์", files, "git ls-files ไม่คืนไฟล์ .md เลย");
+  const broken: string[] = [];
+  for (const rel of files) {
+    const body = fs.readFileSync(path.join(ROOT, rel), "utf8").replace(/```[\s\S]*?```/g, "");
+    for (const m of body.matchAll(/\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g)) {
+      const target = m[1];
+      // file:// ชี้เครื่องของคนเขียน ไม่มีใครเปิดได้ (เคยหลุดมา 4 จุด ชี้ /Users/<ชื่อ>/Desktop/...)
+      if (/^file:/i.test(target)) {
+        broken.push(`${rel} ➔ ${target}`);
+        continue;
+      }
+      if (/^(?:[a-z]+:|#)/i.test(target)) continue;
+      let p = target.split("#")[0];
+      if (!p) continue;
+      try {
+        p = decodeURIComponent(p);
+      } catch {
+        /* ใช้ตามที่เขียน */
+      }
+      const abs = p.startsWith("/") ? path.join(ROOT, p) : path.join(ROOT, path.dirname(rel), p);
+      if (!fs.existsSync(abs)) broken.push(`${rel} ➔ ${target}`);
+    }
+  }
+  if (broken.length > 0) {
+    console.error(`❌ ลิงก์ในเอกสารชี้ไฟล์ที่ไม่มีอยู่ (${broken.length} จุด):`);
+    for (const b of broken) console.error(`  - ${b}`);
+    console.error("\n💡 วิธีแก้: ชี้ไปที่อยู่ปัจจุบันของไฟล์ หรือเปลี่ยนเป็นข้อความ `code` ธรรมดาถ้าไฟล์ถูกลบแล้ว\n");
+    process.exit(1);
+  }
+  console.log(`✅ ลิงก์สัมพัทธ์ในเอกสาร ${files.length} ไฟล์ชี้ไฟล์ที่มีอยู่จริงครบ`);
+}
+
+/**
+ * 📏 ไฟล์บันทึกหลักต้องอ่านไหว (2026-10-26)
+ * WORK_LOG เคยโตถึง 2.7 MB · INCIDENT_LOG 1 MB — CLAUDE.md สั่งให้อ่านก่อนแก้โค้ด แต่ไม่มีใครอ่านจบได้
+ * เกินเพดาน = ถึงรอบย้ายของเก่าไป docs/archive/ ด้วย `npm run docs:archive`
+ */
+function checkLogSize() {
+  const LIMITS: [string, number][] = [
+    ["docs/WORK_LOG.md", 1_500_000],
+    ["docs/INCIDENT_LOG.md", 500_000],
+  ];
+  const over = LIMITS.filter(([rel, max]) => fs.statSync(path.join(ROOT, rel)).size > max);
+  if (over.length > 0) {
+    for (const [rel, max] of over) {
+      console.error(`❌ ${rel} ใหญ่ ${fs.statSync(path.join(ROOT, rel)).size.toLocaleString()} ไบต์ (เพดาน ${max.toLocaleString()})`);
+    }
+    console.error("💡 วิธีแก้: `npm run docs:archive` ย้ายรายการเกิน 31 วันไป docs/archive/ (ยังเกินให้ใช้ `-- --days 14`)\n");
+    process.exit(1);
+  }
+  console.log("✅ ไฟล์บันทึกหลักขนาดอยู่ในเพดาน (WORK_LOG ≤ 1.5 MB · INCIDENT_LOG ≤ 500 KB)");
+}
+
 checkDocs();
+checkStaleAllowlist();
+checkLogSize();
 await checkPlanStatusIndex();
 checkAgentFiles();
+checkMarkdownLinks();

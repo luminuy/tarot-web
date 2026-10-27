@@ -1,6 +1,6 @@
 # ⚡ แผนฟีเจอร์ "หน้าผลลัพธ์ทำนายด่วน" (Quick Chat Result — แยกจากหน้าฝังใหญ่)
 
-> **สถานะ**: ✅ เสร็จแล้ว — หน้าผลลัพธ์ทำนายด่วน (`QuickChatResult`) ใช้งานจริงในหน้าแรก · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: a573780
+> **สถานะ**: ✅ เสร็จแล้ว — หน้าผลทำนายด่วน (`QuickChatResult`) ใช้งานจริงในหน้าแรก ทั้งฟอร์มหลักและส่วนเปิดไพ่ด่วนของ UI 2.0 · ไม่มีงานค้าง · **ตรวจล่าสุด**: 2026-10-26 · **หลักฐาน**: a573780
 
 > **สถานะตอนเขียนแผน**: 📝 วางแผนแล้ว รอทีมรับไปทำ (ยังไม่ลงมือแก้โค้ด)
 > **ผู้วางแผน**: Claude — 2026-09-05
@@ -64,7 +64,7 @@ npm run agent:unlock -- --agent <ชื่อคุณ>
 
 ## 2. ปัญหาปัจจุบัน (ทำไมหน้าทำนายด่วนถึงยาว)
 
-Flow ทำนายด่วนปัจจุบัน (จาก `handleQuickFortuneSelect` ที่ [`TarotFlow.tsx:542`](../../src/app/TarotFlow.tsx)) เดินเข้า step `READING`/`SUMMARY` **เส้นทางเดียวกับผังใหญ่ 100%** ที่ [`TarotFlow.tsx:1310-1395`](../../src/app/TarotFlow.tsx):
+Flow ทำนายด่วนปัจจุบัน (จาก `handleQuickFortuneSelect` ที่ [`TarotFlow.tsx:542`](../../src/components/home/TarotFlow.tsx)) เดินเข้า step `READING`/`SUMMARY` **เส้นทางเดียวกับผังใหญ่ 100%** ที่ [`TarotFlow.tsx:1310-1395`](../../src/components/home/TarotFlow.tsx):
 
 ```
 SpreadBoard (ไพ่คว่ำหน้า แตะพลิกเอง) ─┐
@@ -92,12 +92,12 @@ SpreadBoard (ไพ่คว่ำหน้า แตะพลิกเอง) �
 
 ## 3. 🔑 การค้นพบสำคัญ
 
-- **ทำนายด่วนใช้ spread id `"quick"` ตัวเดียวทั้ง 4 หัวข้อเสมอ** ([`TarotFlow.tsx:548`](../../src/app/TarotFlow.tsx): `SPREADS.find((s) => s.id === "quick")`) — แยกหัวข้อกันด้วย `category`/`question` เท่านั้น ไม่ใช่แยกด้วย spread คนละอัน ⇒ **แก้ที่จุดเดียว (`spread.id === "quick"`) ครอบคลุมทั้ง 4 หัวข้อทันที** ไม่ต้องแก้ 4 จุด
+- **ทำนายด่วนใช้ spread id `"quick"` ตัวเดียวทั้ง 4 หัวข้อเสมอ** ([`TarotFlow.tsx:548`](../../src/components/home/TarotFlow.tsx): `SPREADS.find((s) => s.id === "quick")`) — แยกหัวข้อกันด้วย `category`/`question` เท่านั้น ไม่ใช่แยกด้วย spread คนละอัน ⇒ **แก้ที่จุดเดียว (`spread.id === "quick"`) ครอบคลุมทั้ง 4 หัวข้อทันที** ไม่ต้องแก้ 4 จุด
 - **`ReadingContext` ที่ส่งเข้า `buildReadingMessage()` มี `spread` เต็มอ็อบเจกต์อยู่แล้ว** ([`prompt.ts:124-135`](../../src/lib/ai/prompt.ts)) ⇒ เพิ่ม field ใหม่บน `Spread` แล้วอ่านจาก `ctx.spread` ได้เลย ไม่ต้องเพิ่ม parameter ใหม่ผ่าน chain ของฟังก์ชัน
 - **`connections`/`advice` render แบบ conditional อยู่แล้ว** ใน `StreamReader.tsx` (`reading?.connections &&`, `reading?.advice && reading.advice.length > 0 &&`) ⇒ ถ้าสั่ง AI ให้คืนค่าว่างสำหรับ `connections` ตอนโหมดด่วน **ไม่ต้องแก้ component ใดเลยเพื่อซ่อนบล็อกนั้น**
-- **`SpreadBoard` (กลไกพลิกไพ่คว่ำหน้าด้วยมือ) แยกเป็นคนละ component กับ `StreamReader` (กลไกโชว์ข้อความ) อยู่แล้ว** ที่ [`TarotFlow.tsx:1323`](../../src/app/TarotFlow.tsx) และ `1338` ⇒ **ไม่ต้องแตะ/สร้างใหม่กลไกพลิกไพ่เลย** (เสี่ยงชนกฎข้อ 4 น้อยที่สุดถ้าใช้ของเดิม) งานนี้แค่สลับสิ่งที่อยู่ในคอลัมน์ข้อความ (StreamReader ↔ component ใหม่) เท่านั้น
+- **`SpreadBoard` (กลไกพลิกไพ่คว่ำหน้าด้วยมือ) แยกเป็นคนละ component กับ `StreamReader` (กลไกโชว์ข้อความ) อยู่แล้ว** ที่ [`TarotFlow.tsx:1323`](../../src/components/home/TarotFlow.tsx) และ `1338` ⇒ **ไม่ต้องแตะ/สร้างใหม่กลไกพลิกไพ่เลย** (เสี่ยงชนกฎข้อ 4 น้อยที่สุดถ้าใช้ของเดิม) งานนี้แค่สลับสิ่งที่อยู่ในคอลัมน์ข้อความ (StreamReader ↔ component ใหม่) เท่านั้น
 - **`CollapsibleCard`** ([`CollapsibleCard.tsx`](../../src/components/reading/CollapsibleCard.tsx)) มีอยู่แล้วและถูกใช้ใน `StreamReader.tsx:490,497` สำหรับ "ยุบส่วนรองไม่ให้หน้ายาวเกินไป" พอดีกับโจทย์นี้เป๊ะ ⇒ **reuse ได้ทันที ไม่ต้องสร้าง accordion ใหม่**
-- **การ์ดสติกกี้ "แชทออนไลน์กับแม่หมอ" ฝั่งขวา** ([`TarotFlow.tsx:1358-1385`](../../src/app/TarotFlow.tsx)) เป็น markup ที่อยู่ **นอก** `StreamReader` (อยู่ใน `TarotFlow.tsx` โดยตรง คนละ column) ⇒ **ใช้ต่อได้ทั้งสอง flow โดยไม่ต้องแตะ** — งานที่ต้องเพิ่มคือแค่ปุ่มลัดตัวที่สองในคอลัมน์ซ้ายสำหรับจอมือถือ (ดูข้อ 6.6)
+- **การ์ดสติกกี้ "แชทออนไลน์กับแม่หมอ" ฝั่งขวา** ([`TarotFlow.tsx:1358-1385`](../../src/components/home/TarotFlow.tsx)) เป็น markup ที่อยู่ **นอก** `StreamReader` (อยู่ใน `TarotFlow.tsx` โดยตรง คนละ column) ⇒ **ใช้ต่อได้ทั้งสอง flow โดยไม่ต้องแตะ** — งานที่ต้องเพิ่มคือแค่ปุ่มลัดตัวที่สองในคอลัมน์ซ้ายสำหรับจอมือถือ (ดูข้อ 6.6)
 - **ระบบประวัติ/ให้คะแนนแม่นไหม (`saveReading`, `AccuracyRatingWidget`)** ทำงานอยู่ใน `TarotFlow.tsx` และเป็น generic ไม่ผูกกับ component แสดงผล ⇒ **สลับ StreamReader → component ใหม่ ไม่กระทบระบบนี้เลย** (ตราบใดที่ยังคง import + render `<AccuracyRatingWidget>` ในหน้าใหม่)
 
 **สรุป**: งานนี้เป็น **frontend + prompt-only** เช่นเดียวกับแผนก่อนหน้า ไม่ต้องแตะ backend/schema การจั่วไพ่/entitlement เลย
@@ -175,7 +175,7 @@ const depth =
 
 ### 4.4 ปุ่มแชทกับแม่หมอ — เพิ่มจุดเข้าที่สองสำหรับมือถือ
 
-การ์ดสติกกี้ฝั่งขวาที่มีอยู่แล้ว ([`TarotFlow.tsx:1358-1385`](../../src/app/TarotFlow.tsx)) ใช้ grid `lg:col-span-1` ⇒ **บนจอมือถือมันจะตกไปอยู่ใต้เนื้อหาทั้งหมดของคอลัมน์ซ้าย** (จอเล็ก `grid-cols-1` เรียงบนลงล่าง) ซึ่งเดิมทีคอลัมน์ซ้ายยาวมาก (StreamReader) ผู้ใช้กว่าจะเลื่อนไปเจอปุ่มแชทต้องผ่านเนื้อหายาว ๆ ก่อน — พอ `QuickChatResult` สั้นลงมากแล้ว ปัญหานี้เบาลงเองส่วนหนึ่ง แต่เพื่อให้ตรงกับโจทย์ **"แชทกับแม่หมอได้เลย"** ให้เพิ่มปุ่มลัดขนาดกะทัดรัดต่อท้ายบล็อก "คำแนะนำ" ใน `QuickChatResult` เอง (ก่อนถึง `AccuracyRatingWidget`) ลิงก์ไป `/reading/chat` เหมือนกับของเดิม — **ไม่ใช่การซ้ำซ้อนที่ไร้เหตุผล** เพราะการ์ดฝั่งขวาบนจอ desktop ก็ยังอยู่ sticky ให้เห็นตลอดอยู่ดี ปุ่มนี้เสริมเฉพาะเคสจอมือถือที่มันหลุดจอ
+การ์ดสติกกี้ฝั่งขวาที่มีอยู่แล้ว ([`TarotFlow.tsx:1358-1385`](../../src/components/home/TarotFlow.tsx)) ใช้ grid `lg:col-span-1` ⇒ **บนจอมือถือมันจะตกไปอยู่ใต้เนื้อหาทั้งหมดของคอลัมน์ซ้าย** (จอเล็ก `grid-cols-1` เรียงบนลงล่าง) ซึ่งเดิมทีคอลัมน์ซ้ายยาวมาก (StreamReader) ผู้ใช้กว่าจะเลื่อนไปเจอปุ่มแชทต้องผ่านเนื้อหายาว ๆ ก่อน — พอ `QuickChatResult` สั้นลงมากแล้ว ปัญหานี้เบาลงเองส่วนหนึ่ง แต่เพื่อให้ตรงกับโจทย์ **"แชทกับแม่หมอได้เลย"** ให้เพิ่มปุ่มลัดขนาดกะทัดรัดต่อท้ายบล็อก "คำแนะนำ" ใน `QuickChatResult` เอง (ก่อนถึง `AccuracyRatingWidget`) ลิงก์ไป `/reading/chat` เหมือนกับของเดิม — **ไม่ใช่การซ้ำซ้อนที่ไร้เหตุผล** เพราะการ์ดฝั่งขวาบนจอ desktop ก็ยังอยู่ sticky ให้เห็นตลอดอยู่ดี ปุ่มนี้เสริมเฉพาะเคสจอมือถือที่มันหลุดจอ
 
 ---
 
@@ -206,7 +206,7 @@ const depth =
 - **ห้าม hardcode/mock ไพ่หรือข้อความคำทำนายใด ๆ** — ทุกอย่างอ่านจาก `reading`/`drawnCards` ที่ส่งเข้ามาเท่านั้น ถ้า `cardData` ว่าง ให้โชว์ปุ่ม "โหลดใหม่อีกครั้ง" เหมือน `StreamReader` (กฎข้อ 14)
 
 ### 6.4 Wiring — `src/app/TarotFlow.tsx`
-- ที่บล็อก `STEP 5 & 6` (~[`TarotFlow.tsx:1336-1352`](../../src/app/TarotFlow.tsx)) เปลี่ยนจาก render `<StreamReader ... />` แบบตรง ๆ เป็น:
+- ที่บล็อก `STEP 5 & 6` (~[`TarotFlow.tsx:1336-1352`](../../src/components/home/TarotFlow.tsx)) เปลี่ยนจาก render `<StreamReader ... />` แบบตรง ๆ เป็น:
   ```tsx
   {selectedSpread.resultStyle === "quick" ? (
     <QuickChatResult {...sharedProps} />

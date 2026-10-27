@@ -1,6 +1,6 @@
 # 🎯 แผนยกเครื่อง UX · ความไว · ความสมูท — 2026-09-01
 
-> **สถานะ**: 📚 เอกสารอ้างอิง — แผนยุคแรก — ถูกแทนด้วย HANDOFF_SMOOTH_FAST และผลตรวจ UX/UI รุ่นหลัง · **ตรวจล่าสุด**: 2026-09-23
+> **สถานะ**: 📚 เอกสารอ้างอิง — แผนยุคแรก ถูกแทนด้วย HANDOFF_SMOOTH_FAST และผลตรวจ UX/UI รุ่นหลัง · เก็บเป็นประวัติ · **ตรวจล่าสุด**: 2026-09-23
 
 > สแกนโดย 3 เอเจนต์ขนาน: **Runtime perf** (profile บน dev server จริง) · **UX/interaction** (Web Interface Guidelines) · **Motion/animation**
 > ฐานโค้ด `origin/main` @ `8ac58b0` · รายงานดิบเต็มที่ `scratchpad/uxperf-{runtime,ux,motion}.md`

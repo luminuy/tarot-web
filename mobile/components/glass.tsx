@@ -28,7 +28,7 @@ import { motion, night as N, radius as R, shadow } from "@/lib/theme";
  *   4. เนื้อหา
  * เงาอยู่บนกล่องนอก (เพราะกล่องใน `overflow: hidden` ตัดเงา)
  *
- * ⚠️ ข้อห้าม `backdrop-filter` ของเว็บ (INC-0056) เป็นเรื่องประสิทธิภาพเบราว์เซอร์ ไม่เกี่ยวกับ native
+ * ⚠️ ข้อห้าม `backdrop-filter` ของเว็บ (INC-0060) เป็นเรื่องประสิทธิภาพเบราว์เซอร์ ไม่เกี่ยวกับ native
  * ⚠️ ตัวอักษรบนกระจกต้องคอนทราสต์ผ่าน AA — แผ่นสีโปร่ง (wash) มี alpha ≥ 0.55 เสมอ ห้ามลดจนอ่านยาก
  */
 export type GlassTone = "light" | "night" | "ivory" | "ink";

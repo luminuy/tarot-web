@@ -1,6 +1,6 @@
 # 🧭 บันทึกส่งต่อและผลการแก้ไข "แถบ header ค้าง" (Header Hang — Resolved & Verified Record)
 
-> **สถานะ**: ✅ เสร็จแล้ว — ISSUE-024 ถึง 030 ปิดครบ · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: PR #277 · #280
+> **สถานะ**: ✅ เสร็จแล้ว — ISSUE-024 ถึง ISSUE-030 (แถบหัวเว็บค้าง) ปิดครบ · ไม่มีงานค้าง · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: PR #277 · #280
 
 > **ผู้ตรวจและส่งมอบการวิเคราะห์**: Claude · 2026-09-05 · branch `claude/header-hang-issue-0c30b9`
 > **ผู้รับช่วงและดำเนินการแก้ไข**: Antigravity AI · 2026-09-05 · branch `fix/header-hang-and-ui-latency` (PR #277 · commit `82efa0b`)
@@ -17,7 +17,7 @@
 
 | ลำดับ | เอกสาร | อ่านเพื่ออะไร |
 | :-: | :--- | :--- |
-| 1 | [`docs/INCIDENT_LOG.md`](../INCIDENT_LOG.md) | **INC-0067** (overflow บน ancestor ฆ่า sticky) · **INC-0081** (`body > *` ทับ z-index หัวเว็บ) · **INC-0056** (backdrop-blur + will-change ทำเฟรมตก) |
+| 1 | [`docs/INCIDENT_LOG.md`](../INCIDENT_LOG.md) | **INC-0067** (overflow บน ancestor ฆ่า sticky) · **INC-0081** (`body > *` ทับ z-index หัวเว็บ) · **INC-0060** (backdrop-blur + will-change ทำเฟรมตก) |
 | 2 | [`docs/KNOWN_ISSUES.md`](../KNOWN_ISSUES.md) | กันแก้ซ้ำกับเอเจนต์อื่น |
 | 3 | [`docs/AI_COLLABORATION_GUIDELINES.md`](../AI_COLLABORATION_GUIDELINES.md) | หัวข้อ 0 = วิธีทำงานที่บังคับใช้ |
 
@@ -130,7 +130,7 @@ elementFromPoint : ตอบเป็น element ในแผง ทั้ง 4 
 
 ## สาเหตุราก
 
-[`src/app/globals.css:484-506`](../../src/app/globals.css#L484)
+[`src/app/globals.css:484-506`](../../src/app/globals.css)
 
 ```css
 .dropdown-panel-base {
@@ -147,7 +147,7 @@ elementFromPoint : ตอบเป็น element ในแผง ทั้ง 4 
 .dropdown-panel-exiting  { opacity: 0; visibility: hidden;   pointer-events: none; ... }
 ```
 
-[`src/components/ui/SacredNavDropdown.tsx:157-165`](../../src/components/ui/SacredNavDropdown.tsx#L157) — แผงถูก render อยู่ใน DOM **ตลอดเวลา** ไม่เคย unmount:
+[`src/components/ui/SacredNavDropdown.tsx:157-165`](../../src/components/ui/SacredNavDropdown.tsx) — แผงถูก render อยู่ใน DOM **ตลอดเวลา** ไม่เคย unmount:
 
 ```tsx
 className={`... dropdown-panel-base ${isOpen ? "dropdown-panel-entering" : "dropdown-panel-exiting"}`}
@@ -210,8 +210,8 @@ transition ไม่เริ่ม → แผงค้างที่ `hidden` 
 
 | ไฟล์ | บรรทัด | หมายเหตุ |
 | :--- | :-- | :--- |
-| [`src/components/ui/SacredNavDropdown.tsx`](../../src/components/ui/SacredNavDropdown.tsx#L162) | 162-164 | เมนูหลัก |
-| [`src/components/auth/UserProfileBadge.tsx`](../../src/components/auth/UserProfileBadge.tsx#L237) | 237-239 | เมนูโปรไฟล์ |
+| [`src/components/ui/SacredNavDropdown.tsx`](../../src/components/ui/SacredNavDropdown.tsx) | 162-164 | เมนูหลัก |
+| [`src/components/auth/UserProfileBadge.tsx`](../../src/components/auth/UserProfileBadge.tsx) | 237-239 | เมนูโปรไฟล์ |
 
 ทั้งคู่ใช้คลาสเดียวกัน → **แก้ที่ CSS ที่เดียวได้ทั้งสองตัว ไม่ต้องแตะ `.tsx` เลย**
 
@@ -250,7 +250,7 @@ setTimeout(() => console.assert(getComputedStyle(p).visibility === 'hidden',  'F
 
 ## 📋 สถานะการดำเนินการจริง (Implementation Result)
 
-- **ไฟล์ที่แก้ไข**: [`src/app/globals.css:508-533`](../../src/app/globals.css#L508)
+- **ไฟล์ที่แก้ไข**: [`src/app/globals.css:508-533`](../../src/app/globals.css)
 - **การเปลี่ยนแปลง**:
   1. ถอด `visibility 160ms` ออกจาก `.dropdown-panel-base`
   2. กำหนด `visibility: visible` ใน `.dropdown-panel-entering` ให้แสดงผลทันที ไม่ต้องรอ transition
@@ -282,7 +282,7 @@ commit latency = 353 ms   (เครื่อง desktop, Chrome 148)
 
 ## สาเหตุราก
 
-[`src/lib/i18n/context.tsx:72-93`](../../src/lib/i18n/context.tsx#L72)
+[`src/lib/i18n/context.tsx:72-93`](../../src/lib/i18n/context.tsx)
 
 ```tsx
 const [, startTransition] = useTransition();     // ← บรรทัด 72: ทิ้ง isPending ทั้งดุ้น
@@ -382,7 +382,7 @@ export function LocaleProvider({ children, initialLocale }: {...}) {
 ```
 
 > ⚠️ อย่าลืมเติม `pendingLocale: null` และ `isSwitchingLocale: false` ใน fallback object
-> ของ `useLocale()` ([`context.tsx:117-124`](../../src/lib/i18n/context.tsx#L117)) ไม่งั้น type ไม่ผ่าน
+> ของ `useLocale()` ([`context.tsx:117-124`](../../src/lib/i18n/context.tsx)) ไม่งั้น type ไม่ผ่าน
 
 ### 2.2 `src/components/layout/LanguageSwitcher.tsx`
 
@@ -396,7 +396,7 @@ const shownLocale = pendingLocale ?? locale;
 ```
 
 แล้วเปลี่ยนทุกจุดที่เช็ก `locale === "th"` / `locale === "en"` ให้ใช้ `shownLocale` แทน
-([`LanguageSwitcher.tsx:32,35,46,49`](../../src/components/layout/LanguageSwitcher.tsx#L32))
+([`LanguageSwitcher.tsx:32,35,46,49`](../../src/components/layout/LanguageSwitcher.tsx))
 พร้อมเติมสัญญาณบอกสถานะบนกล่องครอบ:
 
 ```tsx
@@ -444,8 +444,8 @@ requestAnimationFrame(() => {
 ## 📋 สถานะการดำเนินการจริง (Implementation Result)
 
 - **ไฟล์ที่แก้ไข**:
-  - [`src/lib/i18n/context.tsx:75-135`](../../src/lib/i18n/context.tsx#L75)
-  - [`src/components/layout/LanguageSwitcher.tsx:11-34`](../../src/components/layout/LanguageSwitcher.tsx#L11)
+  - [`src/lib/i18n/context.tsx:75-135`](../../src/lib/i18n/context.tsx)
+  - [`src/components/layout/LanguageSwitcher.tsx:11-34`](../../src/components/layout/LanguageSwitcher.tsx)
 - **การเปลี่ยนแปลง**:
   1. เพิ่ม `pendingLocale` (urgent update state) และ `isSwitchingLocale` (`isPending` จาก `useTransition`) ใน `LocaleContext`
   2. ใน `LanguageSwitcher.tsx` กำหนด `shownLocale = pendingLocale ?? locale` ทำให้ปุ่ม TH/EN แสดงการไฮไลต์ทันทีในเฟรมถัดไป (< 16ms เทียบกับเดิม 353ms)
@@ -461,7 +461,7 @@ requestAnimationFrame(() => {
 
 ## สาเหตุราก
 
-[`src/lib/i18n/context.tsx:104-111`](../../src/lib/i18n/context.tsx#L104)
+[`src/lib/i18n/context.tsx:104-111`](../../src/lib/i18n/context.tsx)
 
 ```tsx
 const value: LocaleContextValue = {     // ← สร้าง object ใหม่ทุก render
@@ -473,17 +473,17 @@ const value: LocaleContextValue = {     // ← สร้าง object ใหม�
 };
 ```
 
-`LocaleProvider` ครอบทั้งเว็บใน [`src/app/layout.tsx:158`](../../src/app/layout.tsx#L158)
+`LocaleProvider` ครอบทั้งเว็บใน [`src/app/layout.tsx:158`](../../src/app/%28th%29/layout.tsx)
 → **`value` เปลี่ยน identity ทุก render = consumer ทุกตัวทั้งเว็บ re-render ทุกครั้ง**
 
 หัวเว็บอย่างเดียวเรียก `useLocale()` ถึง **4 จุด**:
 
 | ไฟล์ | บรรทัด |
 | :--- | :-- |
-| [`SiteHeader.tsx`](../../src/components/layout/SiteHeader.tsx#L33) | 33 |
-| [`SacredNavDropdown.tsx`](../../src/components/ui/SacredNavDropdown.tsx#L31) | 31 |
-| [`LanguageSwitcher.tsx`](../../src/components/layout/LanguageSwitcher.tsx#L11) | 11 |
-| [`UserProfileBadge.tsx`](../../src/components/auth/UserProfileBadge.tsx#L18) | 18 |
+| [`SiteHeader.tsx`](../../src/components/layout/SiteHeader.tsx) | 33 |
+| [`SacredNavDropdown.tsx`](../../src/components/ui/SacredNavDropdown.tsx) | 31 |
+| [`LanguageSwitcher.tsx`](../../src/components/layout/LanguageSwitcher.tsx) | 11 |
+| [`UserProfileBadge.tsx`](../../src/components/auth/UserProfileBadge.tsx) | 18 |
 
 นี่คือ **ตัวขยายของ ISSUE-025 โดยตรง** — ยิ่ง consumer เยอะ transition ยิ่งนาน
 
@@ -504,7 +504,7 @@ const value: LocaleContextValue = {     // ← สร้าง object ใหม�
 
 ## 📋 สถานะการดำเนินการจริง (Implementation Result)
 
-- **ไฟล์ที่แก้ไข**: [`src/lib/i18n/context.tsx:79, 121-132`](../../src/lib/i18n/context.tsx#L79)
+- **ไฟล์ที่แก้ไข**: [`src/lib/i18n/context.tsx:79, 121-132`](../../src/lib/i18n/context.tsx)
 - **การเปลี่ยนแปลง**:
   1. ห่อหุ้ม `setLocale` ด้วย `useCallback`
   2. ห่อหุ้ม `value` ด้วย `useMemo` โดยอิง dependencies `[locale, setLocale, pendingLocale, isPending]`
@@ -518,7 +518,7 @@ const value: LocaleContextValue = {     // ← สร้าง object ใหม�
 
 ## สาเหตุราก
 
-[`src/app/globals.css:486`](../../src/app/globals.css#L486)
+[`src/app/globals.css:486`](../../src/app/globals.css)
 
 ```css
 .dropdown-panel-base {
@@ -532,7 +532,7 @@ const value: LocaleContextValue = {     // ← สร้าง object ใหม�
 
 ## นี่คือการละเมิดกฎที่โปรเจกต์เขียนเตือนตัวเองไว้แล้ว
 
-[`src/app/globals.css:367-370`](../../src/app/globals.css#L367) เขียนไว้ชัดเจน:
+[`src/app/globals.css:367-370`](../../src/app/globals.css) เขียนไว้ชัดเจน:
 
 > ```
 > ⚠️ ห้ามตั้ง `will-change: transform` ถาวรตรงนี้ (ของเดิมตั้งไว้)
@@ -543,7 +543,7 @@ const value: LocaleContextValue = {     // ← สร้าง object ใหม�
 กฎเขียนไว้ที่บรรทัด 367 แต่ถูกละเมิดที่บรรทัด 486 **ในไฟล์เดียวกัน ห่างกัน 119 บรรทัด**
 ตรงกับกฎ 0.2 ข้อ 8: *"กฎที่ไม่มีเครื่องตรวจ คือกฎที่จะถูกละเมิดอีกแน่นอน"*
 
-เกี่ยวโยงกับ **INC-0056** ที่เคยวัดได้ว่า fps เด้งจาก 30 → 58 หลังถอดเลเยอร์ที่ไม่จำเป็นออก
+เกี่ยวโยงกับ **INC-0060** ที่เคยวัดได้ว่า fps เด้งจาก 30 → 58 หลังถอดเลเยอร์ที่ไม่จำเป็นออก
 
 ## วิธีแก้
 
@@ -571,12 +571,12 @@ console.assert(getComputedStyle(p).willChange.includes('opacity'), 'FAIL: ไม
 ```
 
 **บวก**: วัด fps ด้วย `requestAnimationFrame` ตอนเลื่อนหน้าแรกบนมือถือจริง **ก่อน/หลังแก้**
-(กฎป้องกันถาวรจาก INC-0056: *"ทุกครั้งที่แตะเลเยอร์ลอย ต้องวัด fps ด้วย rAF ก่อน/หลัง ไม่ใช่ดูด้วยตา"*)
+(กฎป้องกันถาวรจาก INC-0060: *"ทุกครั้งที่แตะเลเยอร์ลอย ต้องวัด fps ด้วย rAF ก่อน/หลัง ไม่ใช่ดูด้วยตา"*)
 
 ## 📋 สถานะการดำเนินการจริง (Implementation Result)
 
 - **ไฟล์ที่แก้ไข**:
-  - [`src/app/globals.css:521`](../../src/app/globals.css#L521)
+  - [`src/app/globals.css:521`](../../src/app/globals.css)
   - [`scripts/qa/test-will-change.ts`](../../scripts/qa/test-will-change.ts)
 - **การเปลี่ยนแปลง**:
   1. ย้าย `will-change: opacity, transform;` ออกจาก `.dropdown-panel-base` ไปไว้เฉพาะใน `.dropdown-panel-entering`
@@ -596,7 +596,7 @@ console.assert(getComputedStyle(p).willChange.includes('opacity'), 'FAIL: ไม
 
 โค้ดชุดเดียวกันซ้ำ 2 ที่:
 
-[`src/components/ui/SacredNavDropdown.tsx:71-80`](../../src/components/ui/SacredNavDropdown.tsx#L71)
+[`src/components/ui/SacredNavDropdown.tsx:71-80`](../../src/components/ui/SacredNavDropdown.tsx)
 
 ```tsx
 const toggleDropdown = () => {
@@ -611,7 +611,7 @@ const toggleDropdown = () => {
 };
 ```
 
-[`src/components/auth/UserProfileBadge.tsx:80-89`](../../src/components/auth/UserProfileBadge.tsx#L80) — โครงเดียวกันเป๊ะ (`except: "user-badge"`)
+[`src/components/auth/UserProfileBadge.tsx:80-89`](../../src/components/auth/UserProfileBadge.tsx) — โครงเดียวกันเป๊ะ (`except: "user-badge"`)
 
 **ผิดหลักการ React**: updater function ที่ส่งให้ `setState` **ต้องเป็น pure function**
 React สงวนสิทธิ์เรียกซ้ำได้หลายครั้ง (replay queue ตอน re-render, StrictMode ใน dev)
@@ -664,8 +664,8 @@ useEffect(() => { isOpenRef.current = isOpen; }, [isOpen]);
 ## 📋 สถานะการดำเนินการจริง (Implementation Result)
 
 - **ไฟล์ที่แก้ไข**:
-  - [`src/components/ui/SacredNavDropdown.tsx:75-86`](../../src/components/ui/SacredNavDropdown.tsx#L75)
-  - [`src/components/auth/UserProfileBadge.tsx:87-98`](../../src/components/auth/UserProfileBadge.tsx#L87)
+  - [`src/components/ui/SacredNavDropdown.tsx:75-86`](../../src/components/ui/SacredNavDropdown.tsx)
+  - [`src/components/auth/UserProfileBadge.tsx:87-98`](../../src/components/auth/UserProfileBadge.tsx)
 - **การเปลี่ยนแปลง**:
   1. เพิ่ม `isOpenRef` / `menuOpenRef` เพื่อ sync ค่ากับสถานะ `isOpen` / `menuOpen` ผ่าน `useEffect`
   2. ย้ายคำสั่ง `window.dispatchEvent(new CustomEvent("tarot:close-menus", ...))` ออกจาก `setIsOpen((prev) => ...)` และ `setMenuOpen((prev) => ...)` มาไว้ใน handler function โดยตรง
@@ -680,7 +680,7 @@ useEffect(() => { isOpenRef.current = isOpen; }, [isOpen]);
 
 ## สาเหตุราก
 
-[`src/components/ui/Modal.tsx:33-47`](../../src/components/ui/Modal.tsx#L33) เขียนคอมเมนต์เตือนไว้ยาวเหยียด
+[`src/components/ui/Modal.tsx:33-47`](../../src/components/ui/Modal.tsx) เขียนคอมเมนต์เตือนไว้ยาวเหยียด
 พร้อมชื่ออาการ 3 ข้อ และแก้ด้วย `onCloseRef`:
 
 ```tsx
@@ -696,7 +696,7 @@ useEffect(() => { onCloseRef.current = onClose; });
 2. **โฟกัสถูกดึงกลับไปที่ปุ่มปิดทุกครั้งที่พิมพ์** (ฟอร์มพิมพ์ได้ทีละตัวอักษร)
 3. `previousActiveElement` ถูกเขียนทับ คืนโฟกัสผิดที่
 
-**แต่ [`src/components/auth/AuthModal.tsx:114`](../../src/components/auth/AuthModal.tsx#L114) ไม่เคยได้รับการแก้นี้**:
+**แต่ [`src/components/auth/AuthModal.tsx:114`](../../src/components/auth/AuthModal.tsx) ไม่เคยได้รับการแก้นี้**:
 
 ```tsx
 useEffect(() => {
@@ -714,7 +714,7 @@ useEffect(() => {
 }, [isOpen, onClose]);                           // ← ❌ onClose อยู่ใน deps
 ```
 
-และ [`src/app/TarotFlow.tsx:1495-1503`](../../src/app/TarotFlow.tsx#L1495) ส่ง arrow function ใหม่ทุก render:
+และ [`src/app/TarotFlow.tsx:1495-1503`](../../src/components/home/TarotFlow.tsx) ส่ง arrow function ใหม่ทุก render:
 
 ```tsx
 <AuthModal
@@ -758,7 +758,7 @@ useEffect(() => {
 }, [isOpen]);                       // ← deps เหลือแค่ isOpen เท่านั้น
 ```
 
-จุดที่ต้องเปลี่ยนเป็น `onCloseRef.current()`: [`AuthModal.tsx:84`](../../src/components/auth/AuthModal.tsx#L84) (ใน `onKeyDown` ตอนกด Escape)
+จุดที่ต้องเปลี่ยนเป็น `onCloseRef.current()`: [`AuthModal.tsx:84`](../../src/components/auth/AuthModal.tsx) (ใน `onKeyDown` ตอนกด Escape)
 
 ## 🔒 ต้องเพิ่มด่านตรวจอัตโนมัติ (กฎ 0.2 ข้อ 8)
 
@@ -780,7 +780,7 @@ useEffect(() => {
 ## 📋 สถานะการดำเนินการจริง (Implementation Result)
 
 - **ไฟล์ที่แก้ไข**:
-  - [`src/components/auth/AuthModal.tsx:78-82, 123`](../../src/components/auth/AuthModal.tsx#L78)
+  - [`src/components/auth/AuthModal.tsx:78-82, 123`](../../src/components/auth/AuthModal.tsx)
   - [`scripts/qa/test-modal-effect-deps.ts`](../../scripts/qa/test-modal-effect-deps.ts)
 - **การเปลี่ยนแปลง**:
   1. นำรูปแบบ `onCloseRef` มาใช้ sync ค่า `onClose` ล่าสุด
@@ -804,7 +804,7 @@ useEffect(() => {
 ผลคือ anchor `#hash` และ `scrollIntoView({ block: 'start' })` ทุกจุด **จะไปจอดใต้หัวเว็บ**
 ผู้ใช้เห็นเป็น "หัวเว็บบังเนื้อหา / ค้างทับอยู่"
 
-**หลักฐานว่าปัญหามีจริง**: [`src/components/reading/FollowUpChat.tsx:338`](../../src/components/reading/FollowUpChat.tsx#L338)
+**หลักฐานว่าปัญหามีจริง**: [`src/components/reading/FollowUpChat.tsx:338`](../../src/components/reading/FollowUpChat.tsx)
 ต้องแปะ `scroll-mt-24` แก้เฉพาะจุดเอง — คือการรักษาอาการทีละจุดแทนที่จะแก้ที่ราก
 
 ## วิธีแก้
@@ -834,10 +834,10 @@ html {
 }
 ```
 
-จากนั้นถอด `scroll-mt-24` ที่ [`FollowUpChat.tsx:338`](../../src/components/reading/FollowUpChat.tsx#L338) ออก
+จากนั้นถอด `scroll-mt-24` ที่ [`FollowUpChat.tsx:338`](../../src/components/reading/FollowUpChat.tsx) ออก
 เพราะกฎกลางครอบให้แล้ว (ทดสอบยืนยันก่อนถอด)
 
-> ⚠️ **ห้ามแตะบรรทัด `overflow-x: clip`** ที่ [`globals.css:135`](../../src/app/globals.css#L135)
+> ⚠️ **ห้ามแตะบรรทัด `overflow-x: clip`** ที่ [`globals.css:135`](../../src/app/globals.css)
 > นั่นคือกฎป้องกันถาวรจาก INC-0067 — เปลี่ยนเป็น `hidden` เมื่อไหร่ sticky ตายทันที
 
 ## เกณฑ์ผ่าน
@@ -855,8 +855,8 @@ console.assert(
 ## 📋 สถานะการดำเนินการจริง (Implementation Result)
 
 - **ไฟล์ที่แก้ไข**:
-  - [`src/app/globals.css:113-120, 151`](../../src/app/globals.css#L113)
-  - [`src/components/reading/FollowUpChat.tsx:338`](../../src/components/reading/FollowUpChat.tsx#L338)
+  - [`src/app/globals.css:113-120, 151`](../../src/app/globals.css)
+  - [`src/components/reading/FollowUpChat.tsx:338`](../../src/components/reading/FollowUpChat.tsx)
 - **การเปลี่ยนแปลง**:
   1. ประกาศตัวแปร CSS `:root { --site-header-h: 76px; }` และสำหรับหน้าจอขนาดใหญ่ `@media (min-width: 640px) { :root { --site-header-h: 88px; } }`
   2. กำหนด `scroll-padding-top: var(--site-header-h);` บน `html` โดยคงกฎ `overflow-x: clip;` ไว้อย่างเคร่งครัดตาม INC-0067
