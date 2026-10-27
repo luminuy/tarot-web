@@ -57,67 +57,123 @@
   text-underline-offset: 3px;
 }
 
-/* ── สารบัญ ── */
-.v2-nv-toc {
+/* ── สารบัญ: หัวภาค + การ์ดรายบท (เลขบทใหญ่ · ชื่อบท · ไพ่ตัวละครในบทแบบพัด) ── */
+.v2-nv-part + .v2-nv-part {
+  margin-top: 40px;
+}
+.v2-nv-part-k {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--ui2-gold-solid);
+}
+.v2-nv-part-t {
+  margin: 2px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(28px, 3.6vw, 40px);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ui2-on-night);
+}
+.v2-nv-part-s {
+  margin: 6px 0 20px;
+  font-size: 14px;
+  color: var(--ui2-on-night-dim);
+}
+.v2-nv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 12px;
   margin: 0;
   padding: 0;
   list-style: none;
-  border-top: 1px solid var(--ui2-line-night);
 }
-.v2-nv-toc li {
-  border-bottom: 1px solid var(--ui2-line-night);
-}
-.v2-nv-toc-a {
+.v2-nv-ch {
   display: grid;
-  grid-template-columns: 44px auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 4px 14px;
-  min-height: 44px;
-  padding: 10px 6px;
+  gap: 14px;
+  height: 100%;
+  min-height: 92px;
+  padding: 14px 18px 14px 16px;
+  border: 1px solid var(--ui2-line-night);
+  border-radius: var(--ui2-radius-lg);
+  background: var(--ui2-glass-night-solid);
   color: var(--ui2-on-night);
   text-decoration: none;
+  transition: border-color var(--dur-fast) var(--ease-out), translate var(--dur-base) var(--ease-out);
 }
-.v2-nv-toc-a:hover .v2-nv-toc-t,
-.v2-nv-toc-a:focus-visible .v2-nv-toc-t {
+.v2-nv-ch:hover,
+.v2-nv-ch:focus-visible {
+  border-color: var(--ui2-gold-solid);
+  translate: 0 -2px;
+}
+.v2-nv-ch-n {
+  min-width: 2ch;
+  font-family: var(--ui2-font-display);
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
   color: var(--ui2-gold-solid);
 }
-.v2-nv-toc-card {
-  width: 44px;
-  height: auto;
-  border-radius: 4px;
+.v2-nv-ch-body {
+  display: grid;
+  gap: 2px;
 }
-.v2-nv-toc-n {
-  font-size: 13px;
+.v2-nv-ch-k {
+  font-size: 12px;
   font-weight: 600;
-  color: var(--ui2-gold-solid);
-  white-space: nowrap;
+  color: var(--ui2-on-night-dim);
 }
-.v2-nv-toc-t {
+.v2-nv-ch-t {
   font-size: 16px;
   font-weight: 600;
   line-height: 1.6;
 }
-.v2-nv-toc-m {
-  font-size: 13px;
-  color: var(--ui2-on-night-dim);
-  white-space: nowrap;
+.v2-nv-ch-fan {
+  display: flex;
+  align-items: center;
+  padding: 6px 4px;
+}
+.v2-nv-ch-card {
+  width: 40px;
+  height: auto;
+  border-radius: 4px;
+  box-shadow: var(--ui2-card-shadow);
+  transition: rotate var(--dur-base) var(--ease-out), translate var(--dur-base) var(--ease-out);
+}
+.v2-nv-ch-card + .v2-nv-ch-card {
+  margin-left: -22px;
+}
+.v2-nv-ch-card:first-child:not(:only-child) {
+  rotate: -8deg;
+}
+.v2-nv-ch-card:nth-child(3) {
+  rotate: 8deg;
+}
+.v2-nv-ch:hover .v2-nv-ch-card:first-child:not(:only-child) {
+  rotate: -14deg;
+  translate: -4px 0;
+}
+.v2-nv-ch:hover .v2-nv-ch-card:nth-child(3) {
+  rotate: 14deg;
+  translate: 4px 0;
 }
 @media (max-width: 639px) {
-  .v2-nv-toc-a {
-    grid-template-columns: 44px 1fr;
-    grid-template-areas: "card n" "card t" "card m";
+  .v2-nv-ch {
+    gap: 12px;
+    padding: 12px 14px 12px 14px;
   }
-  .v2-nv-toc-card {
-    grid-area: card;
+  .v2-nv-ch-n {
+    font-size: 28px;
   }
-  .v2-nv-toc-n {
-    grid-area: n;
-  }
-  .v2-nv-toc-t {
-    grid-area: t;
-  }
-  .v2-nv-toc-m {
-    grid-area: m;
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2-nv-ch,
+  .v2-nv-ch-card {
+    transition: none;
   }
 }
 
@@ -228,27 +284,6 @@
   font-family: inherit;
   font-size: 15px;
   font-weight: 400;
-  color: var(--ui2-on-night-dim);
-}
-
-/* ── ภาคในสารบัญ ── */
-.v2-nv-act + .v2-nv-act {
-  margin-top: 28px;
-}
-.v2-nv-act-h {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 12px;
-  margin: 0 0 10px;
-  font-family: var(--ui2-font-display);
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--ui2-gold-solid);
-}
-.v2-nv-act-s {
-  font-size: 13px;
-  font-weight: 500;
   color: var(--ui2-on-night-dim);
 }
 
