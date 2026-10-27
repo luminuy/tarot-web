@@ -16,10 +16,15 @@ import {
   PATTERN_TEXT,
   RISING_TEXT,
   SIGN_TEXT,
+  TRANSIT_TEXT,
+  TRANSIT_TONE,
   type Lang,
 } from "@/data/natal/content";
 import {
+  ASPECT_DEFS,
+  PLANET_IDS,
   formatDegree,
+  type AspectType,
   type Aspect,
   type BodyId,
   type BodyPosition,
@@ -212,4 +217,66 @@ export function chartSummary(chart: NatalChart, lang: Lang): string[] {
     );
   }
   return out.map(cap);
+}
+
+// ─────────────────────────── ตามเวลา ───────────────────────────
+
+/** ประโยคของดาวจร (หรือดาวก้าวหน้า) ที่ทำมุมกับจุดในผังเกิด */
+export function describeTimedAspect(t: BodyId, n: BodyId, type: AspectType, lang: Lang): string {
+  const tt = TRANSIT_TEXT[t as keyof typeof TRANSIT_TEXT];
+  const tone = ASPECT_DEFS.find((d) => d.type === type)?.tone ?? "neutral";
+  const noun = BODY_TEXT[n].noun[lang];
+  if (!tt) return "";
+  return lang === "th"
+    ? `${tt.effect.th}เรื่อง${thw(noun)}ของคุณ ${TRANSIT_TONE[tone].th}`
+    : `${cap(tt.effect.en)} your ${noun} ${TRANSIT_TONE[tone].en}.`;
+}
+
+/** ดาวจรอยู่เรือนไหนของผังเกิด */
+export function describeTransitHouse(t: BodyId, house: number, lang: Lang): string {
+  const tt = TRANSIT_TEXT[t as keyof typeof TRANSIT_TEXT];
+  if (!tt) return "";
+  const arena = HOUSE_TEXT[house - 1].arena[lang];
+  return lang === "th" ? `${tt.effect.th}เรื่อง${arena}` : `${cap(tt.effect.en)} ${arena}.`;
+}
+
+/** จุดเด่นของผังวันเกิดปีนี้ / ผังจันทร์คืน */
+export function returnHighlights(ret: NatalChart, kind: "solar" | "lunar", lang: Lang): string[] {
+  const get = (id: BodyId) => ret.bodies.find((b) => b.id === id);
+  const asc = get("asc");
+  const sun = get("sun")!;
+  const moon = get("moon")!;
+  const out: string[] = [];
+  const period = kind === "solar" ? (lang === "th" ? "ปีนี้" : "this year") : lang === "th" ? "เดือนนี้" : "this month";
+  if (asc) {
+    out.push(
+      lang === "th"
+        ? `ลัคนาของผัง${signName(asc.sign, lang)}: ${period}คุณเข้าหาชีวิตแบบคน${SIGN_TEXT[asc.sign].keywords.th}`
+        : `${signName(asc.sign, lang)} rising: ${period} you meet life in a ${SIGN_TEXT[asc.sign].keywords.en} way.`,
+    );
+  }
+  const focus = kind === "solar" ? sun : moon;
+  if (focus.house) {
+    out.push(
+      lang === "th"
+        ? `${kind === "solar" ? "ดวงอาทิตย์" : "ดวงจันทร์"}อยู่เรือน ${focus.house}: เรื่องเด่นของ${period}คือ${HOUSE_TEXT[focus.house - 1].arena.th}`
+        : `${kind === "solar" ? "Sun" : "Moon"} in house ${focus.house}: the main theme ${period} is ${HOUSE_TEXT[focus.house - 1].arena.en}.`,
+    );
+  }
+  if (kind === "solar" && moon.house) {
+    out.push(
+      lang === "th"
+        ? `ดวงจันทร์อยู่${signName(moon.sign, lang)} เรือน ${moon.house}: ใจของคุณปีนี้ผูกกับเรื่อง${HOUSE_TEXT[moon.house - 1].arena.th}`
+        : `Moon in ${signName(moon.sign, lang)}, house ${moon.house}: your heart this year is tied to ${HOUSE_TEXT[moon.house - 1].arena.en}.`,
+    );
+  }
+  const angular = ret.bodies.filter((b) => (PLANET_IDS as readonly string[]).includes(b.id) && b.house && [1, 4, 7, 10].includes(b.house) && b.id !== focus.id);
+  if (angular.length) {
+    out.push(
+      lang === "th"
+        ? `ดาวที่อยู่เรือนมุม (เด่นเป็นพิเศษ${period}): ${angular.map((b) => `${bodyName(b.id, lang)} เรือน ${b.house}`).join(" · ")}`
+        : `Planets on the angles (extra strong ${period}): ${angular.map((b) => `${bodyName(b.id, lang)} in house ${b.house}`).join(", ")}.`,
+    );
+  }
+  return out;
 }

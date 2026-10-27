@@ -29,6 +29,10 @@ export interface NatalMeta {
   timeText: string;
   placeText: string;
   offsetText: string;
+  /** ปีเกิด ค.ศ. ตามเวลาท้องถิ่น (ใช้หาผังวันเกิดปีต่อ ๆ ไป) */
+  birthYear: number;
+  /** เขตเวลา IANA ของสถานที่เกิด (ระบุพิกัดเอง = ไม่มี) */
+  zone?: string;
 }
 
 const NatalResult = React.lazy(() => import("./NatalResult"));
@@ -146,6 +150,8 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
           timeText: timeKnown ? `${pad(hour)}:${pad(minute)}${isEnglish ? "" : " น."}` : isEnglish ? "time unknown" : "ไม่ทราบเวลาเกิด",
           placeText: place.label,
           offsetText: formatUtcOffset(at.offsetMinutes),
+          birthYear: yearCe,
+          zone: place.zone,
         },
       });
       requestAnimationFrame(() => resultRef.current?.scrollIntoView({ behavior: smoothScrollBehavior(), block: "start" }));

@@ -2,7 +2,7 @@
 
 import { ZODIAC_SIGNS } from "@/data/zodiac";
 import { BODY_TEXT, type Lang } from "@/data/natal/content";
-import { ASPECT_DEFS, SIGN_ELEMENT, norm360, type BodyId, type NatalChart } from "@/lib/astro/natal";
+import { ASPECT_DEFS, SIGN_ELEMENT, norm360, type AspectType, type BodyId, type BodyPosition, type NatalChart } from "@/lib/astro/natal";
 
 /**
  * 🪐 วงผังดวง (SVG) — ลัคนาอยู่ซ้าย (9 นาฬิกา) ราศีเดินทวนเข็มนาฬิกาแบบผังโหราสากล
@@ -68,12 +68,15 @@ export function NatalWheel({
   focus,
   onFocus,
   showMinor,
+  outer,
 }: {
   chart: NatalChart;
   lang: Lang;
   focus: BodyId | null;
   onFocus: (id: BodyId | null) => void;
   showMinor: boolean;
+  /** วงนอก (ดาวจร/ดาวก้าวหน้า) — วาดเป็นแถบรอบวงราศี · เส้นมุมเปลี่ยนเป็นมุมระหว่างวงนอกกับผังเกิด */
+  outer?: { bodies: readonly BodyPosition[]; aspects: readonly { a: BodyId; b: BodyId; type: AspectType; orb: number; maxOrb: number }[] };
 }) {
   const asc = chart.bodies.find((b) => b.id === "asc");
   const mc = chart.bodies.find((b) => b.id === "mc");
@@ -85,7 +88,14 @@ export function NatalWheel({
   if (mc) posOf.set("mc", mc.lon);
   const majorTypes = new Set(ASPECT_DEFS.filter((d) => d.major).map((d) => d.type));
   const toneOf = new Map(ASPECT_DEFS.map((d) => [d.type, d.tone]));
-  const aspects = chart.aspects.filter((a) => posOf.has(a.a) && posOf.has(a.b) && (showMinor || majorTypes.has(a.type)) && a.type !== "conjunction");
+  const aspects = outer
+    ? []
+    : chart.aspects.filter((a) => posOf.has(a.a) && posOf.has(a.b) && (showMinor || majorTypes.has(a.type)) && a.type !== "conjunction");
+  const R_OUT2 = R_OUT + 52;
+  const outerBodies = outer ? outer.bodies.filter((b) => WHEEL_BODIES.includes(b.id)) : [];
+  const outerLabelLon = spread(outerBodies.map((b) => b.lon));
+  const outerPos = new Map(outerBodies.map((b) => [b.id, b.lon]));
+  const axisR = outer ? R_OUT2 : R_OUT;
 
   const label =
     lang === "th"
@@ -93,7 +103,8 @@ export function NatalWheel({
       : `Natal chart wheel, ${chart.houses ? "Ascendant on the left" : "no houses because the birth time is unknown"}. Full details are in the tables below.`;
 
   return (
-    <svg viewBox="-36 0 712 640" className="v2-nt-wheel" role="img" aria-label={label}>
+    <svg viewBox={outer ? "-90 -48 820 736" : "-36 0 712 640"} className="v2-nt-wheel" role="img" aria-label={label}>
+      {outer && <circle cx={C} cy={C} r={R_OUT2} className="nw-outer-band" />}
       <circle cx={C} cy={C} r={R_OUT} className="nw-bg" />
       {/* วงราศี 12 ช่อง สีตามธาตุ */}
       {ZODIAC_SIGNS.map((s, i) => {
@@ -149,7 +160,7 @@ export function NatalWheel({
             // ป้ายแกนซ้าย/ขวาชิดขอบด้านนอก (ไม่ให้ตัวหนังสือล้นกรอบภาพ) · บน/ล่างจัดกลาง
             const [px] = pt(R_OUT, ax.lon, ref);
             const side = px < C - 60 ? "end" : px > C + 60 ? "start" : "middle";
-            const [tx, ty] = pt(side === "middle" ? R_OUT + 18 : R_OUT + 6, ax.lon, ref);
+            const [tx, ty] = pt(side === "middle" ? axisR + 18 : axisR + 6, ax.lon, ref);
             return (
               <g key={ax.text}>
                 <line x1={x1} y1={y1} x2={x2} y2={y2} className="nw-axis" />
@@ -178,6 +189,42 @@ export function NatalWheel({
             className={`nw-asp nw-asp-${toneOf.get(a.type)}${minor ? " nw-asp-minor" : ""}${dim ? " is-dim" : ""}`}
             opacity={Math.max(0.35, 1 - a.orb / (a.maxOrb + 0.01))}
           />
+        );
+      })}
+
+      {/* วงนอก: ดาวจร/ดาวก้าวหน้า + เส้นมุมไปหาดาวเกิด */}
+      {outer?.aspects.map((a) => {
+        const lonA = outerPos.get(a.a);
+        const lonB = posOf.get(a.b);
+        if (lonA === undefined || lonB === undefined) return null;
+        const [x1, y1] = pt(R_ASP, lonA, ref);
+        const [x2, y2] = pt(R_ASP, lonB, ref);
+        const dim = focus !== null && a.b !== focus;
+        return (
+          <line
+            key={`o-${a.a}-${a.b}`}
+            x1={x1}
+            y1={y1}
+            x2={x2}
+            y2={y2}
+            className={`nw-asp nw-asp-${toneOf.get(a.type)}${dim ? " is-dim" : ""}`}
+            opacity={Math.max(0.4, 1 - a.orb / (a.maxOrb + 0.01))}
+          />
+        );
+      })}
+      {outerBodies.map((b, i) => {
+        const [tx1, ty1] = pt(R_OUT, b.lon, ref);
+        const [tx2, ty2] = pt(R_OUT + 8, b.lon, ref);
+        const [lx, ly] = pt(R_OUT + 28, outerLabelLon[i], ref);
+        const short = BODY_TEXT[b.id].short[lang];
+        return (
+          <g key={`o-${b.id}`} aria-hidden="true">
+            <line x1={tx1} y1={ty1} x2={tx2} y2={ty2} className="nw-pos-tick" />
+            <circle cx={lx} cy={ly} r={17} className="nw-planet-bg nw-outer" />
+            <text x={lx} y={ly} className="nw-planet-label" style={{ fontSize: short.length > 3 ? 10 : short.length > 2 ? 12 : 16 }}>
+              {short}
+            </text>
+          </g>
         );
       })}
 

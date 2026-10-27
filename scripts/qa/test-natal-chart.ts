@@ -29,6 +29,7 @@ import {
 import { localToUtc, formatUtcOffset } from "../../src/lib/astro/timezone";
 import { THAI_PROVINCES, WORLD_CITIES } from "../../src/data/natal/places";
 import { assertNonEmptyCorpus } from "./lib/corpus";
+import { computeProgressions, computeTransits, lunarReturn, solarReturn, transitCalendar } from "../../src/lib/astro/techniques";
 
 let pass = 0;
 let fail = 0;
@@ -249,6 +250,44 @@ console.log("\n6) รายชื่อสถานที่");
   check("เขตเวลาของทุกเมืองเป็นชื่อ IANA ที่ใช้ได้", zonesOk);
 }
 
+console.log("\n6.5) เครื่องมือตามเวลา (ดาวจร · ปฏิทิน · ก้าวหน้า · รีเทิร์น)");
+{
+  const natal = computeNatalChart(input(Date.UTC(1969, 11, 31, 23, 5), { lat: 13.7525, lon: 100.4942 }));
+  const sunN = natal.bodies.find((b) => b.id === "sun")!;
+  const moonN = natal.bodies.find((b) => b.id === "moon")!;
+  const sr = solarReturn(natal, 56, { lat: 13.7525, lon: 100.4942 });
+  const srSun = sr.bodies.find((b) => b.id === "sun")!;
+  check(`ผังวันเกิดปีที่ 56: ดวงอาทิตย์กลับมาที่องศาเดิม (ห่าง ${(angularDistance(srSun.lon, sunN.lon) * 3600).toFixed(2)}″)`, angularDistance(srSun.lon, sunN.lon) < 1 / 3600);
+  const srDate = new Date(sr.input.utcMs);
+  check("ผังวันเกิดปีที่ 56 ตกช่วงวันเกิดปี 2026 (31 ธ.ค. 2025 ถึง 2 ม.ค. 2026 UTC)", srDate >= new Date("2025-12-30") && srDate <= new Date("2026-01-02"));
+  const after = Date.UTC(2026, 9, 27);
+  const lr = lunarReturn(natal, after, { lat: 13.7525, lon: 100.4942 });
+  const lrMoon = lr.bodies.find((b) => b.id === "moon")!;
+  check(
+    "ผังจันทร์คืน: ดวงจันทร์กลับองศาเดิม ภายใน 28 วันหลังวันที่เลือก",
+    angularDistance(lrMoon.lon, moonN.lon) < 2 / 3600 && lr.input.utcMs > after && lr.input.utcMs - after < 28 * 86400000,
+  );
+  const prog = computeProgressions(natal, Date.UTC(2026, 9, 27));
+  check(`ดาวก้าวหน้า: อายุ ${prog.age.toFixed(2)} ปี (ควรราว 56.8) · Solar Arc ราว 1 องศาต่อปี`, Math.abs(prog.age - 56.82) < 0.02 && prog.solarArc > 50 && prog.solarArc < 62);
+  check("ดาวก้าวหน้าไม่นับดาวเดินช้ากุมตัวเอง", !prog.aspects.some((a) => a.t === a.n && ["jupiter", "saturn", "uranus", "neptune", "pluto"].includes(a.t)));
+  const tr = computeTransits(natal, Date.UTC(2026, 9, 27, 5));
+  const satSq = tr.aspects.find((a) => a.t === "saturn" && a.n === "sun" && a.type === "square");
+  check(
+    "ดาวจร: เสาร์จรจตุโกณอาทิตย์เกิดมีช่วงเวลาและวันตรงพอดีอยู่ในช่วงนั้น",
+    !!satSq?.period && satSq.period.exact.every((x) => x >= satSq.period!.start && x <= satSq.period!.end) && satSq.period.start <= tr.utcMs && satSq.period.end >= tr.utcMs,
+  );
+  check("ดาวจร: orb ทุกมุมไม่เกินเกณฑ์", tr.aspects.every((a) => a.orb <= a.maxOrb + 1e-9));
+  const cal = transitCalendar(natal, Date.UTC(2026, 9, 27), 365);
+  let calOk = cal.length > 0;
+  for (const e of cal) {
+    if (e.kind !== "exact") continue;
+    // ณ วันที่ของเหตุการณ์ ดาวจรต้องห่างจากมุมพอดีไม่เกินระยะที่เดินได้ใน 1 วัน
+    const t = computeTransits(natal, e.utcMs, 3).aspects.find((a) => a.t === e.t && a.n === e.n && a.type === e.type);
+    if (!t || t.orb > 0.5) calOk = false;
+  }
+  check(`ปฏิทินดาวจร: ทุกวันที่ "ตรงพอดี" ตรงจริงเมื่อคำนวณซ้ำ (${cal.filter((e) => e.kind === "exact").length} เหตุการณ์)`, calOk);
+}
+
 console.log("\n7) กติกา island — ตัวคำนวณ/คำอธิบาย/ผลผังโหลดแบบ dynamic import เท่านั้น");
 {
   const root = process.cwd();
@@ -267,6 +306,12 @@ console.log("\n7) กติกา island — ตัวคำนวณ/คำอ�
     "ไฟล์ island และหน้าฟอร์มผังดวงไม่ import ของหนักแบบ static",
     offenders.length === 0,
     offenders.map((f) => `    ${path.relative(root, f)}`).join("\n"),
+  );
+  const resultSrc = fs.readFileSync(path.join(root, "src/components/natal/NatalResult.tsx"), "utf8");
+  check(
+    "แท็บตามเวลาโหลดแบบ React.lazy (ผลผังเกิดไม่ลาก techniques.ts มาด้วย)",
+    /React\.lazy\(\s*\(\)\s*=>\s*import\(\s*["']\.\/NatalTimeTools["']\s*\)\s*\)/.test(resultSrc) &&
+      !/^\s*import\s+(?!type\b)[^;]*from\s+["'](@\/lib\/astro\/techniques|\.\/NatalTimeTools)["']/m.test(resultSrc),
   );
   const src = fs.existsSync(entry) ? fs.readFileSync(entry, "utf8") : "";
   check("ฟอร์มโหลดตัวคำนวณด้วย import() ตอนกดสร้างผัง", /import\(\s*["']@\/lib\/astro\/natal["']\s*\)/.test(src));
