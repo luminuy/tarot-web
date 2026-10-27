@@ -34,6 +34,8 @@ import type { CardGroupInfo } from "@/data/cards/group-seo";
 import { LocaleProvider } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/types";
 import { QuestionPageContent, QuestionsHubContent } from "@/app/_shared/pages/question-page";
+import { NovelChapterContent, NovelHubContent } from "@/app/_shared/pages/novel";
+import type { NovelChapter } from "@/data/novel";
 
 /**
  * 📄 เปลือกบาง ๆ ของ "เนื้อหาหน้า" ที่ Astro เรนเดอร์เป็น HTML **โดยไม่ hydrate**
@@ -348,6 +350,24 @@ export function QuestionsHubContentRoot({ locale }: { locale: Locale }) {
   return (
     <LocaleProvider forcedLocale={locale}>
       <QuestionsHubContent locale={locale} />
+    </LocaleProvider>
+  );
+}
+
+/* ── นิยาย (ภาษาไทยอย่างเดียว) ─────────────────────────────────────────── */
+
+export function NovelHubContentRoot() {
+  return (
+    <LocaleProvider forcedLocale="th">
+      <NovelHubContent />
+    </LocaleProvider>
+  );
+}
+
+export function NovelChapterContentRoot({ chapter }: { chapter: NovelChapter }) {
+  return (
+    <LocaleProvider forcedLocale="th">
+      <NovelChapterContent chapter={chapter} />
     </LocaleProvider>
   );
 }

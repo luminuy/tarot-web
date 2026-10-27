@@ -48,11 +48,13 @@ import { collectRenderedPages, renderedOutputDirs } from "./lib/rendered-pages";
 import { assertNonEmptyCorpus } from "./lib/corpus";
 import { headerNav } from "../../src/components/layout/header-nav";
 
-/** 7.5 ลิงก์ที่ลิ้นชักเมนูมือถือต้องมีครบ — อ่านจากข้อมูลเมนูชุดเดียวกับที่หัวเว็บใช้ (เพิ่มเมนูแล้วด่านตามเอง) */
-const DRAWER_HREFS = (() => {
-  const nav = headerNav(false);
+/** 7.5 ลิงก์ที่ลิ้นชักเมนูมือถือต้องมีครบ — อ่านจากข้อมูลเมนูชุดเดียวกับที่หัวเว็บใช้ (เพิ่มเมนูแล้วด่านตามเอง)
+ *  แยกตามภาษา: เมนูบางข้อมีภาษาเดียว (เช่น "นิยาย" ภาษาไทยอย่างเดียว) */
+const drawerHrefs = (isEn: boolean) => {
+  const nav = headerNav(isEn);
   return [...new Set([...nav.reading.groups.flatMap((g) => g.links.map((l) => l.href)), nav.reading.all.href, ...nav.links.map((l) => l.href), "/account"])];
-})();
+};
+const DRAWER_HREFS = { th: drawerHrefs(false), en: drawerHrefs(true) };
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(__filename), "../..");
@@ -681,11 +683,12 @@ if (outputDirs.every((dir) => fs.existsSync(dir))) {
         const panelEnd = html.indexOf("</nav>", panelAt);
         const panelHtml = html.slice(panelAt, panelEnd === -1 ? undefined : panelEnd);
         const isEn = route === "en" || route.startsWith("en/");
-        const missing = DRAWER_HREFS.filter((href) => {
+        const expected = isEn ? DRAWER_HREFS.en : DRAWER_HREFS.th;
+        const missing = expected.filter((href) => {
           const localized = isEn ? (href === "/" ? "/en" : `/en${href}`) : href;
           return !panelHtml.includes(`href="${localized}"`) && !panelHtml.includes(`href="${href}"`);
         });
-        if (missing.length > 0) emptyDrawer.push(`/${route} (ขาด ${missing.length}/${DRAWER_HREFS.length} เช่น ${missing[0]})`);
+        if (missing.length > 0) emptyDrawer.push(`/${route} (ขาด ${missing.length}/${expected.length} เช่น ${missing[0]})`);
       }
     }
 

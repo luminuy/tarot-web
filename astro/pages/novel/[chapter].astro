@@ -1,0 +1,32 @@
+---
+import { novelChapterMetadata, novelChapterStaticParams } from "@/app/_shared/pages/novel";
+import { getNovelChapter } from "@/data/novel";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { NovelChapterContentRoot } from "../../components/PageBodies";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
+import "@/styles/v2-article.css";
+import "@/styles/v2-novel.css";
+
+/**
+ * 📖 นิยายรายบท `/novel/<เลขบท>` — ตัวบทเป็น HTML ล้วน ไม่มี island (ตัวบทไม่ถูกส่งไปเป็น JS)
+ * ⚠️ `/novel` อยู่ใน ASTRO_ROUTE_PREFIXES · ภาษาไทยอย่างเดียว
+ */
+const locale = "th" as const;
+
+export function getStaticPaths() {
+  return novelChapterStaticParams().map(({ chapter }) => ({ params: { chapter } }));
+}
+
+const chapter = getNovelChapter(Number(Astro.params.chapter))!;
+---
+
+<BaseLayout locale={locale} metadata={novelChapterMetadata(chapter.number)}>
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
+  <NovelChapterContentRoot chapter={chapter} />
+  </div>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>

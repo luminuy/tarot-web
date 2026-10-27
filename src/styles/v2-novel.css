@@ -1,0 +1,308 @@
+/*
+ * 📖 นิยาย SeerTarot (/novel · /novel/<เลขบท>) — นำเข้าต่อจาก ui2-page.css + v2-article.css (หัวบท · คอลัมน์อ่าน)
+ * พื้นมืดแบบหน้าบทความ · ใช้โทเคน --ui2-* เท่านั้น ไม่มีสีฮาร์ดโค้ด · ไม่มี filter/backdrop/อนิเมชันวน
+ * ไม่มีจุดนำหน้ารายการหรือรูปทรงตกแต่ง (กฎเหล็ก 2) — ใช้เส้นบางแทน
+ */
+
+.v2-nv-wrap {
+  display: grid;
+  gap: 44px;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 8px 16px 48px;
+}
+.v2-nv-h2 {
+  margin: 0 0 14px;
+  font-family: var(--ui2-font-display);
+  font-size: clamp(22px, 2.6vw, 30px);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ui2-on-night);
+}
+.v2-nv-sub,
+.v2-nv-intro p {
+  margin: 0 0 14px;
+  font-size: 17px;
+  line-height: 1.9;
+  color: var(--ui2-on-night-soft);
+}
+.v2-nv-sub {
+  font-size: 15px;
+}
+
+/* คำเตือนเนื้อหา + สายด่วน 1323 (กฎเหล็ก 6) */
+.v2-nv-note {
+  margin: 20px 0 0;
+  padding: 14px 16px;
+  border-left: 2px solid var(--ui2-gold-solid);
+  border-radius: 0 var(--ui2-radius-lg) var(--ui2-radius-lg) 0;
+  background: var(--ui2-glass-night-solid);
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ui2-on-night-soft);
+}
+.v2-nv-chapter .v2-nv-note {
+  margin: 24px 0 0;
+}
+.v2-nv-note p {
+  margin: 0;
+}
+.v2-nv-note p + p {
+  margin-top: 6px;
+}
+.v2-nv-tel {
+  font-weight: 700;
+  color: var(--ui2-gold-solid);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── สารบัญ ── */
+.v2-nv-toc {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--ui2-line-night);
+}
+.v2-nv-toc li {
+  border-bottom: 1px solid var(--ui2-line-night);
+}
+.v2-nv-toc-a {
+  display: grid;
+  grid-template-columns: 44px auto 1fr auto;
+  align-items: center;
+  gap: 4px 14px;
+  min-height: 44px;
+  padding: 10px 6px;
+  color: var(--ui2-on-night);
+  text-decoration: none;
+}
+.v2-nv-toc-a:hover .v2-nv-toc-t,
+.v2-nv-toc-a:focus-visible .v2-nv-toc-t {
+  color: var(--ui2-gold-solid);
+}
+.v2-nv-toc-card {
+  width: 44px;
+  height: auto;
+  border-radius: 4px;
+}
+.v2-nv-toc-n {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+  white-space: nowrap;
+}
+.v2-nv-toc-t {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+.v2-nv-toc-m {
+  font-size: 13px;
+  color: var(--ui2-on-night-dim);
+  white-space: nowrap;
+}
+@media (max-width: 639px) {
+  .v2-nv-toc-a {
+    grid-template-columns: 44px 1fr;
+    grid-template-areas: "card n" "card t" "card m";
+  }
+  .v2-nv-toc-card {
+    grid-area: card;
+  }
+  .v2-nv-toc-n {
+    grid-area: n;
+  }
+  .v2-nv-toc-t {
+    grid-area: t;
+  }
+  .v2-nv-toc-m {
+    grid-area: m;
+  }
+}
+
+/* ── ตัวละครจากไพ่ ── */
+.v2-nv-cast {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 18px 12px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.v2-nv-cast-a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--ui2-on-night-soft);
+  text-decoration: none;
+}
+.v2-nv-cast-a:hover,
+.v2-nv-cast-a:focus-visible {
+  color: var(--ui2-gold-solid);
+}
+.v2-nv-cast-card {
+  width: 72px;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: var(--ui2-card-shadow);
+}
+
+/* ── หน้ารายบท ── */
+.v2-nv-chapter {
+  max-width: 760px;
+  margin: 0 auto;
+  padding-bottom: 32px;
+}
+.v2-nv-book {
+  color: var(--ui2-on-night-soft);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.v2-nv-chcast {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.v2-nv-chcast-a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 4px 14px 4px 6px;
+  border: 1px solid var(--ui2-line-night);
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--ui2-on-night-soft);
+  text-decoration: none;
+}
+.v2-nv-chcast-a:hover,
+.v2-nv-chcast-a:focus-visible {
+  border-color: var(--ui2-gold-solid);
+  color: var(--ui2-gold-solid);
+}
+.v2-nv-chcast-card {
+  width: 22px;
+  height: auto;
+  border-radius: 3px;
+}
+
+/* ตัวบท — คอลัมน์อ่านของหน้าบทความ ขยายตัวอักษรเล็กน้อยสำหรับอ่านยาว */
+.v2-nv-body {
+  margin-top: 32px;
+  font-size: 18px;
+}
+.v2-nv-body p {
+  margin: 0 0 1.15em;
+}
+/* ความคิดในใจ (`*ตัวเอียง*` ในต้นฉบับ) — ภาษาไทยไม่มีตัวเอียงจริง ใช้สีอ่อนลงแทน */
+.v2-nv-body em {
+  font-weight: 500;
+  color: var(--ui2-gold-light);
+}
+/* เสียงประกอบ / ความคิดบรรทัดเดียว — จัดกลางเป็นจังหวะแยก */
+.v2-nv-body .v2-nv-beat {
+  margin: 1.6em 0;
+  text-align: center;
+}
+.v2-nv-end {
+  margin: 40px 0 0;
+  font-family: var(--ui2-font-display);
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--ui2-gold-solid);
+}
+.v2-nv-end-s {
+  display: block;
+  margin-top: 6px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ui2-on-night-dim);
+}
+
+/* ── องก์ในสารบัญ ── */
+.v2-nv-act + .v2-nv-act {
+  margin-top: 28px;
+}
+.v2-nv-act-h {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0 0 10px;
+  font-family: var(--ui2-font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ui2-gold-solid);
+}
+.v2-nv-act-s {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ui2-on-night-dim);
+}
+
+/* ── บทก่อน · สารบัญ · บทถัดไป ── */
+.v2-nv-pager {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 14px;
+  margin: 40px 0 0;
+  padding-top: 22px;
+  border-top: 1px solid var(--ui2-line-night);
+}
+.v2-nv-pager-a {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 44px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ui2-on-night);
+  text-decoration: none;
+}
+.v2-nv-pager-a:hover,
+.v2-nv-pager-a:focus-visible {
+  color: var(--ui2-gold-solid);
+}
+.v2-nv-pager-next {
+  align-items: flex-end;
+  text-align: right;
+}
+.v2-nv-pager-k {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ui2-gold-solid);
+}
+.v2-nv-pager-toc {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--ui2-line-night);
+  border-radius: 999px;
+  font-size: 14px;
+  color: var(--ui2-on-night-soft);
+  text-decoration: none;
+}
+@media (max-width: 639px) {
+  .v2-nv-pager {
+    grid-template-columns: 1fr 1fr;
+  }
+  .v2-nv-pager-toc {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: center;
+  }
+}

@@ -79,6 +79,34 @@
 .ui2-daily-btn {
   max-width: min(100%, 320px);
 }
+/* ลิงก์นิยายใต้ปุ่มหลัก (ไทยอย่างเดียว) — แคปซูลบาง ไม่แย่งสายตาจากปุ่มเปิดไพ่ */
+.ui2-hero-novel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(100%, 360px);
+  min-height: 44px;
+  margin-top: 4px;
+  padding: 0 16px 0 6px;
+  border: 1px solid var(--ui2-line-day);
+  border-radius: 999px;
+  background: var(--ui2-glass-day-solid);
+  font-size: 14px;
+  color: var(--ui2-ink);
+  text-decoration: none;
+}
+.ui2-hero-novel:hover,
+.ui2-hero-novel:focus-visible {
+  border-color: var(--ui2-gold-ink);
+}
+.ui2-hero-novel-k {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--ui2-button);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ui2-button-text);
+}
 .ui2-daily-btn .ui2-daily-name {
   overflow: hidden;
   text-overflow: ellipsis;

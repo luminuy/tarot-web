@@ -3,6 +3,7 @@
 import { CardImage } from "@/components/card/CardImage";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { NOVEL_PATH, NOVEL_TITLE } from "@/data/novel-title";
 
 import { Ui2Clock } from "./Ui2Clock";
 import { useDailyCard } from "./use-daily-card";
@@ -123,6 +124,14 @@ export function Ui2Hero({ isEnglish, streak = 0 }: { isEnglish: boolean; streak?
           </Link>
         </div>
 
+        {/* นิยาย (เจ้าของ 2026-10-27 "ทำยังไงให้เค้าเข้ามาแล้วรู้ว่ามี") — อยู่ใต้ปุ่มหลักจึงไม่ดันหัวข้อ/ปุ่มเดิม
+            ภาษาไทยอย่างเดียว เพราะนิยายไม่มีฉบับอังกฤษ */}
+        {!isEnglish && (
+          <Link href={NOVEL_PATH} prefetch={false} className="ui2-hero-novel">
+            <span className="ui2-hero-novel-k">ใหม่</span>
+            <span>นิยาย {NOVEL_TITLE} อ่านฟรีทุกบท</span>
+          </Link>
+        )}
       </div>
     </section>
   );
