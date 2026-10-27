@@ -30,6 +30,7 @@ import { localToUtc, formatUtcOffset } from "../../src/lib/astro/timezone";
 import { THAI_PROVINCES, WORLD_CITIES } from "../../src/data/natal/places";
 import { assertNonEmptyCorpus } from "./lib/corpus";
 import { searchCities, cityCount } from "../../src/lib/astro/city-search";
+import { computeSynastry, nearMidpoint } from "../../src/lib/astro/synastry";
 import { computeProgressions, computeTransits, lunarReturn, solarReturn, transitCalendar } from "../../src/lib/astro/techniques";
 
 let pass = 0;
@@ -316,6 +317,24 @@ console.log("\n6.6) ค้นหาเมืองทั่วโลก + ผั
   check("ผังที่บันทึกใช้คีย์จากทะเบียน (STORAGE_KEYS.natalCharts)", savedSrc.includes("STORAGE_KEYS.natalCharts") && !/fetch\(/.test(savedSrc));
 }
 
+console.log("\n6.7) ผังคู่ (Synastry + Composite)");
+{
+  check("จุดกึ่งกลางที่ใกล้กว่า: 350 กับ 10 = 0 (ไม่ใช่ 180)", Math.abs(nearMidpoint(350, 10)) < 1e-9 || Math.abs(nearMidpoint(350, 10) - 360) < 1e-9);
+  check("จุดกึ่งกลาง 280 กับ 112 = 196 (ข้ามทางสั้น)", Math.abs(nearMidpoint(280, 112) - 196) < 1e-9);
+  const A = computeNatalChart(input(Date.UTC(1969, 11, 31, 23, 5)));
+  const B = computeNatalChart(input(Date.UTC(1972, 6, 15, 3, 30), { lat: 18.79, lon: 98.98 }));
+  const s1 = computeSynastry(A, B);
+  const s2 = computeSynastry(B, A);
+  check("มุมระหว่างผังนับเท่ากันไม่ว่าใครเป็น A หรือ B", s1.aspects.length === s2.aspects.length);
+  check("orb ทุกมุมอยู่ในเกณฑ์", s1.aspects.every((a) => a.orb <= a.maxOrb + 1e-9));
+  check("ไม่นับดาวนอกกับดาวนอก (คนรุ่นเดียวกันได้มุมเดียวกันทุกคู่)", !s1.aspects.some((a) => ["uranus", "neptune", "pluto"].includes(a.a) && ["uranus", "neptune", "pluto"].includes(a.b)));
+  check("คะแนนทุกหมวดอยู่ระหว่าง 0 ถึง 10", s1.categories.every((c) => c.score >= 0 && c.score <= 10));
+  const cSun = s1.composite.bodies.find((b) => b.id === "sun")!;
+  check("ดวงอาทิตย์ของผังรวม = จุดกึ่งกลางของสองคน", Math.abs(cSun.lon - nearMidpoint(A.bodies[0].lon, B.bodies[0].lon)) < 1e-9);
+  check("ผังรวมมีเรือนวนครบ 360 องศาเมื่อรู้เวลาเกิดทั้งคู่", !!s1.composite.houses && Math.abs(s1.composite.houses.reduce((t, c, i, arr) => t + norm360(arr[(i + 1) % 12] - c), 0) - 360) < 1e-6);
+  check("ดาวของอีกคนตกเรือนของเรา: ครบทุกดวง", (s1.bInA?.length ?? 0) >= 11 && s1.bInA!.every((o) => o.house >= 1 && o.house <= 12));
+}
+
 console.log("\n7) กติกา island — ตัวคำนวณ/คำอธิบาย/ผลผังโหลดแบบ dynamic import เท่านั้น");
 {
   const root = process.cwd();
@@ -338,9 +357,10 @@ console.log("\n7) กติกา island — ตัวคำนวณ/คำอ�
   );
   const resultSrc = fs.readFileSync(path.join(root, "src/components/natal/NatalResult.tsx"), "utf8");
   check(
-    "แท็บตามเวลาโหลดแบบ React.lazy (ผลผังเกิดไม่ลาก techniques.ts มาด้วย)",
+    "แท็บตามเวลาและผังคู่โหลดแบบ React.lazy (ผลผังเกิดไม่ลาก techniques/synastry มาด้วย)",
     /React\.lazy\(\s*\(\)\s*=>\s*import\(\s*["']\.\/NatalTimeTools["']\s*\)\s*\)/.test(resultSrc) &&
-      !/^\s*import\s+(?!type\b)[^;]*from\s+["'](@\/lib\/astro\/techniques|\.\/NatalTimeTools)["']/m.test(resultSrc),
+      /React\.lazy\(\s*\(\)\s*=>\s*import\(\s*["']\.\/NatalSynastry["']\s*\)\s*\)/.test(resultSrc) &&
+      !/^\s*import\s+(?!type\b)[^;]*from\s+["'](@\/lib\/astro\/(techniques|synastry)|\.\/(NatalTimeTools|NatalSynastry))["']/m.test(resultSrc),
   );
   const src = fs.existsSync(entry) ? fs.readFileSync(entry, "utf8") : "";
   check("ฟอร์มโหลดตัวคำนวณด้วย import() ตอนกดสร้างผัง", /import\(\s*["']@\/lib\/astro\/natal["']\s*\)/.test(src));

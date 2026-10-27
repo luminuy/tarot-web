@@ -16,6 +16,8 @@ import {
   PATTERN_TEXT,
   RISING_TEXT,
   SIGN_TEXT,
+  SYN_ASPECT_MEANING,
+  SYN_PAIR_TEXT,
   TRANSIT_TEXT,
   TRANSIT_TONE,
   type Lang,
@@ -279,4 +281,26 @@ export function returnHighlights(ret: NatalChart, kind: "solar" | "lunar", lang:
     );
   }
   return out;
+}
+
+// ─────────────────────────── ผังคู่ ───────────────────────────
+
+/** ประโยคของมุมระหว่างดาวของ A กับดาวของ B */
+export function describeSynAspect(a: BodyId, b: BodyId, type: AspectType, aName: string, bName: string, lang: Lang): string {
+  const key = [a, b].sort().join("-");
+  const tone = ASPECT_DEFS.find((d) => d.type === type)?.tone ?? "neutral";
+  const pair = SYN_PAIR_TEXT[key];
+  if (pair) return (tone === "tense" ? pair.tense : pair.harmonious)[lang];
+  const A = BODY_TEXT[a].noun[lang];
+  const B = BODY_TEXT[b].noun[lang];
+  const meaning = SYN_ASPECT_MEANING[type] ?? ASPECT_TEXT[type].meaning;
+  return lang === "th" ? `${thw(A)}ของ${aName} กับ${thw(B)}ของ${bName}: ${meaning.th}` : `${aName}'s ${A} and ${bName}'s ${B}: ${meaning.en}.`;
+}
+
+/** ดาวของ guest ตกเรือนของ host */
+export function describeOverlay(body: BodyId, house: number, guest: string, host: string, lang: Lang): string {
+  const arena = HOUSE_TEXT[house - 1].arena[lang];
+  return lang === "th"
+    ? `${guest}นำ${thw(BODY_TEXT[body].noun.th)}เข้ามาในเรื่อง${thw(arena)}ของ${host}`
+    : `${guest} brings ${BODY_TEXT[body].noun.en} into ${host}'s ${arena}.`;
 }

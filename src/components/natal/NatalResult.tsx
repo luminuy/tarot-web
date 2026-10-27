@@ -38,6 +38,8 @@ import type { TimeMode } from "./NatalTimeTools";
 
 /* ⏳ แท็บตามเวลา (ดาวจร · ก้าวหน้า · รีเทิร์น) โหลดเมื่อกดแท็บเท่านั้น */
 const NatalTimeTools = React.lazy(() => import("./NatalTimeTools"));
+/* 💞 แท็บผังคู่ โหลดเมื่อกดแท็บเท่านั้น */
+const NatalSynastry = React.lazy(() => import("./NatalSynastry"));
 
 /**
  * 🪐 ผลผังดวงทั้งหมด — โหลดแบบ lazy พร้อมตัวคำนวณ (ไม่อยู่ในบันเดิลแรกของหน้า)
@@ -140,7 +142,7 @@ export default function NatalResult({
   const [focus, setFocus] = useState<BodyId | null>(null);
   const [showMinor, setShowMinor] = useState(false);
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
-  const [view, setView] = useState<"natal" | TimeMode>("natal");
+  const [view, setView] = useState<"natal" | TimeMode | "synastry">("natal");
   const cardById = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards]);
   const cardName = (id: string | undefined) => {
     const c = id ? cardById.get(id) : undefined;
@@ -249,6 +251,7 @@ export default function NatalResult({
             ["progress", isTh ? "ดาวก้าวหน้า" : "Progressions"],
             ["solar", isTh ? "ผังวันเกิดปีนี้" : "Solar return"],
             ["lunar", isTh ? "ผังจันทร์คืน" : "Lunar return"],
+            ["synastry", isTh ? "ผังคู่" : "Synastry"],
           ] as const
         ).map(([k, t]) => (
           <button key={k} type="button" role="tab" aria-selected={view === k} aria-pressed={view === k} onClick={() => setView(k)}>
@@ -259,7 +262,7 @@ export default function NatalResult({
 
       {view !== "natal" && (
         <Suspense fallback={<p className="text-sm text-muted text-center">{isTh ? "กำลังคำนวณ..." : "Calculating..."}</p>}>
-          <NatalTimeTools chart={chart} lang={lang} meta={meta} mode={view} />
+          {view === "synastry" ? <NatalSynastry chart={chart} lang={lang} meta={meta} /> : <NatalTimeTools chart={chart} lang={lang} meta={meta} mode={view} />}
         </Suspense>
       )}
 

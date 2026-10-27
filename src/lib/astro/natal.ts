@@ -546,7 +546,7 @@ export function aspectMaxOrb(def: AspectDef, a: BodyId, b: BodyId, orbScale: num
   return orb * orbScale;
 }
 
-function findAspects(bodies: readonly BodyPosition[], orbScale: number): Aspect[] {
+export function findAspects(bodies: readonly BodyPosition[], orbScale: number): Aspect[] {
   const list = bodies.filter((b) => ASPECT_BODIES.includes(b.id));
   const out: Aspect[] = [];
   for (let i = 0; i < list.length; i++) {
@@ -582,7 +582,7 @@ function hasAspect(aspects: readonly Aspect[], a: BodyId, b: BodyId, type: Aspec
   return aspects.some((x) => x.type === type && ((x.a === a && x.b === b) || (x.a === b && x.b === a)));
 }
 
-function findPatterns(bodies: readonly BodyPosition[], aspects: readonly Aspect[]): ChartPattern[] {
+export function findPatterns(bodies: readonly BodyPosition[], aspects: readonly Aspect[]): ChartPattern[] {
   const planets = bodies.filter((b) => (PLANET_IDS as readonly string[]).includes(b.id));
   const ids = planets.map((p) => p.id);
   const out: ChartPattern[] = [];
@@ -684,7 +684,7 @@ const WEIGHT: Partial<Record<BodyId, number>> = {
   pluto: 0.5,
 };
 
-function distributionOf(bodies: readonly BodyPosition[], timeKnown: boolean): Distribution {
+export function distributionOf(bodies: readonly BodyPosition[], timeKnown: boolean): Distribution {
   const counted = bodies.filter((b) => (PLANET_IDS as readonly string[]).includes(b.id) || (timeKnown && (b.id === "asc" || b.id === "mc")));
   const elements: Record<Element, BodyId[]> = { fire: [], earth: [], air: [], water: [] };
   const modalities: Record<Modality, BodyId[]> = { cardinal: [], fixed: [], mutable: [] };
@@ -726,7 +726,7 @@ function distributionOf(bodies: readonly BodyPosition[], timeKnown: boolean): Di
  * เจ้าเรือนลัคนา +3 · อาทิตย์/จันทร์ +2 · อยู่เรือนมุม (1 4 7 10) +2 · กุมลัคนา/กลางฟ้าในระยะ 8 องศา +3 ·
  * เกษตร +2 · อุจจ์ +1.5 · ประ/นิจ −1 · มุมสัมพันธ์หลักแต่ละมุม +0.5
  */
-function dominantPlanetsOf(bodies: readonly BodyPosition[], aspects: readonly Aspect[], chartRuler: PlanetId | null): PlanetScore[] {
+export function dominantPlanetsOf(bodies: readonly BodyPosition[], aspects: readonly Aspect[], chartRuler: PlanetId | null): PlanetScore[] {
   const asc = bodies.find((b) => b.id === "asc");
   const mc = bodies.find((b) => b.id === "mc");
   const scores: PlanetScore[] = [];
