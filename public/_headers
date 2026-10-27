@@ -156,6 +156,9 @@
 /natal-chart
   Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
 
+/natal-chart/*
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
 # 🃏 หน้าไพ่รายใบ 78 หน้า (`/cards/major-00` ฯลฯ)
 # ---------------------------------------------------------------------------
 # ⚠️ ข้อแลกเปลี่ยนที่ตั้งใจรับ: ไวยากรณ์ `_headers` ไม่มีวิธีเขียน "เส้นทางที่ไม่มีนามสกุล"

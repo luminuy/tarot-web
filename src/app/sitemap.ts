@@ -130,6 +130,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.85,
     },
+    // ลัคนา/ดวงจันทร์รายราศี 24 หน้า (ฝาแฝดอังกฤษเติมด้วยกฎ EN twin เดียวกับหน้าอื่น)
+    ...ZODIAC_SIGNS.flatMap((sign) =>
+      (["rising", "moon"] as const).map((kind) => ({
+        url: `${baseUrl}/natal-chart/${kind}/${sign.id}`,
+        lastModified: now,
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
+      })),
+    ),
     {
       url: `${baseUrl}/blog`,
       lastModified: now,
