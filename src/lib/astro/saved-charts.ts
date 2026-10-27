@@ -35,6 +35,8 @@ export interface SavedChart {
   houseSystem: HouseSystem;
   nodeType: NodeType;
   orbScale: number;
+  /** แสดงดาวเคราะห์น้อย 4 ดวง (ผังที่บันทึกก่อนมีตัวเลือกนี้ = ไม่มีฟิลด์ = ปิด) */
+  asteroids?: boolean;
   savedAt: number;
 }
 

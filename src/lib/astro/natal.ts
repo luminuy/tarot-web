@@ -44,7 +44,9 @@ export const PLANET_IDS = [
 ] as const;
 export type PlanetId = (typeof PLANET_IDS)[number];
 
-export type PointId = "chiron" | "node" | "southNode" | "lilith" | "fortune" | "vertex";
+export type AsteroidId = "ceres" | "pallas" | "juno" | "vesta";
+export const ASTEROID_IDS: readonly AsteroidId[] = ["ceres", "pallas", "juno", "vesta"];
+export type PointId = "chiron" | "node" | "southNode" | "lilith" | "fortune" | "vertex" | AsteroidId;
 export type AngleId = "asc" | "mc" | "dsc" | "ic";
 export type BodyId = PlanetId | PointId | AngleId;
 
@@ -80,6 +82,8 @@ export interface NatalInput {
   nodeType: NodeType;
   /** ตัวคูณ orb ของมุมสัมพันธ์ (0.5 แคบ – 1.5 กว้าง · ค่าปกติ 1) */
   orbScale: number;
+  /** ดาวเคราะห์น้อย 4 ดวง (ผู้ใช้เปิดเอง · ตารางโหลดแยกจาก `asteroid-tables.ts`) — ไม่ส่ง = ไม่คำนวณ */
+  asteroids?: Partial<Record<AsteroidId, LonTable>>;
 }
 
 export interface BodyPosition {
@@ -305,32 +309,34 @@ function meanLilith(time: AstroTime): number {
   return norm360(perigee + 180);
 }
 
-/** ไครอนจากตาราง JPL (ประมาณค่าด้วยพหุนามลากรองจ์ 4 จุด) · นอกช่วงตาราง = null */
-let chironCenti: Int32Array | null = null;
-function chironTable(): Int32Array {
-  if (!chironCenti) {
-    const parts = CHIRON_DELTAS.split(",");
-    const arr = new Int32Array(parts.length);
-    let acc = 0;
-    for (let i = 0; i < parts.length; i++) {
-      acc += Number(parts[i]);
-      arr[i] = acc;
-    }
-    chironCenti = arr;
-  }
-  return chironCenti;
+/** ตารางลองจิจูดจาก JPL (ไครอน · ดาวเคราะห์น้อย) ที่คลายแล้ว — หน่วย 1/100 องศาแบบต่อเนื่อง (ไม่วนกลับ 0) */
+export interface LonTable {
+  startJd: number;
+  stepDays: number;
+  centi: Int32Array;
 }
 
-export function chironLon(jdUt: number): number | null {
-  const table = chironTable();
-  const x = (jdUt - CHIRON_START_JD_UT) / CHIRON_STEP_DAYS;
+export function decodeTable(deltas: string, startJd: number, stepDays: number): LonTable {
+  const parts = deltas.split(",");
+  const centi = new Int32Array(parts.length);
+  let acc = 0;
+  for (let i = 0; i < parts.length; i++) {
+    acc += Number(parts[i]);
+    centi[i] = acc;
+  }
+  return { startJd, stepDays, centi };
+}
+
+/** ประมาณค่าด้วยพหุนามลากรองจ์ 4 จุด · นอกช่วงตาราง = null (ห้ามเดาค่า) */
+export function tableLon(t: LonTable, jdUt: number): number | null {
+  const x = (jdUt - t.startJd) / t.stepDays;
   const i = Math.floor(x) - 1;
-  if (i < 0 || i + 3 >= table.length) return null;
+  if (i < 0 || i + 3 >= t.centi.length) return null;
   const f = x - (i + 1); // 0..1 ระหว่างจุด i+1 กับ i+2
-  const p0 = table[i] / 100;
-  const p1 = table[i + 1] / 100;
-  const p2 = table[i + 2] / 100;
-  const p3 = table[i + 3] / 100;
+  const p0 = t.centi[i] / 100;
+  const p1 = t.centi[i + 1] / 100;
+  const p2 = t.centi[i + 2] / 100;
+  const p3 = t.centi[i + 3] / 100;
   // ลากรองจ์ที่ t = −1, 0, 1, 2
   const v =
     (p0 * (-f * (f - 1) * (f - 2))) / 6 +
@@ -338,6 +344,13 @@ export function chironLon(jdUt: number): number | null {
     (p2 * (-(f + 1) * f * (f - 2))) / 2 +
     (p3 * ((f + 1) * f * (f - 1))) / 6;
   return norm360(v);
+}
+
+/** ไครอนจากตาราง JPL ทุก 10 วัน */
+let chironT: LonTable | null = null;
+export function chironLon(jdUt: number): number | null {
+  if (!chironT) chironT = decodeTable(CHIRON_DELTAS, CHIRON_START_JD_UT, CHIRON_STEP_DAYS);
+  return tableLon(chironT, jdUt);
 }
 
 // ─────────────────────────── มุมฟ้าและเรือน ───────────────────────────
@@ -535,9 +548,9 @@ export function dignitiesOf(id: BodyId, sign: number): Dignity[] {
 // ─────────────────────────── มุมสัมพันธ์ ───────────────────────────
 
 /** จุดที่ร่วมคำนวณมุมสัมพันธ์ (โหนดใต้ · กลางฟ้าคู่ตรงข้าม · ส่วนแห่งโชค · เวอร์เท็กซ์ ไม่นับ) */
-const ASPECT_BODIES: readonly BodyId[] = [...PLANET_IDS, "chiron", "node", "lilith", "asc", "mc"];
+const ASPECT_BODIES: readonly BodyId[] = [...PLANET_IDS, "chiron", "node", "lilith", "asc", "mc", ...ASTEROID_IDS];
 const LUMINARIES = new Set<BodyId>(["sun", "moon"]);
-const MINOR_POINTS = new Set<BodyId>(["chiron", "node", "lilith", "asc", "mc"]);
+const MINOR_POINTS = new Set<BodyId>(["chiron", "node", "lilith", "asc", "mc", ...ASTEROID_IDS]);
 
 export function aspectMaxOrb(def: AspectDef, a: BodyId, b: BodyId, orbScale: number): number {
   let orb = def.orb;
@@ -821,6 +834,16 @@ export function computeNatalChart(input: NatalInput): NatalChart {
     bodies.push(position("chiron", ch, ch2 === null ? 0 : signedDiff(ch2, ch), cusps));
   } else {
     warnings.push({ code: "chiron-out-of-range" });
+  }
+
+  // ดาวเคราะห์น้อย (เมื่อผู้ใช้เปิด) — นอกช่วงตารางก็ไม่แสดง ไม่เดาค่า
+  for (const id of ASTEROID_IDS) {
+    const t = input.asteroids?.[id];
+    if (!t) continue;
+    const a = tableLon(t, jdUt);
+    if (a === null) continue;
+    const a2 = tableLon(t, jdUt + 1);
+    bodies.push(position(id, a, a2 === null ? 0 : signedDiff(a2, a), cusps));
   }
 
   // โหนดและลิลิธ (ความเร็วจากผลต่าง 1 วัน)

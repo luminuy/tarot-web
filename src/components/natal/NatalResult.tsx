@@ -53,12 +53,16 @@ const TABLE_ORDER: readonly BodyId[] = [
   "node",
   "southNode",
   "lilith",
+  "ceres",
+  "pallas",
+  "juno",
+  "vesta",
   "fortune",
   "vertex",
   "asc",
   "mc",
 ];
-const GRID_ORDER: readonly BodyId[] = [...PLANET_IDS, "chiron", "node", "lilith", "asc", "mc"];
+const GRID_ORDER: readonly BodyId[] = [...PLANET_IDS, "chiron", "node", "lilith", "ceres", "pallas", "juno", "vesta", "asc", "mc"];
 
 const ASPECT_SHORT: Record<AspectType, { th: string; en: string }> = {
   conjunction: { th: "กุม", en: "Cnj" },
@@ -287,7 +291,9 @@ export default function NatalResult({
           {isTh ? "แตะดาวในวงเพื่อเน้นมุมสัมพันธ์ของดาวดวงนั้น · เส้นน้ำเงิน = กลมกลืน · เส้นแดง = ตึง · เส้นประ = มุมรอง" : "Tap a planet to highlight its aspects. Blue = harmonious, red = tense, dashed = minor."}
         </p>
         <ul className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-muted">
-          {(["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron", "node", "lilith"] as const).map((id) => (
+          {(["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron", "node", "lilith", "ceres", "pallas", "juno", "vesta"] as const)
+            .filter((id) => get(id))
+            .map((id) => (
             <li key={id}>
               <span className="font-bold text-ink">{BODY_TEXT[id].short[lang]}</span> {BODY_TEXT[id].name[lang]}
             </li>

@@ -89,6 +89,7 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
   const [houseSystem, setHouseSystem] = useState<HouseSystem>("placidus");
   const [nodeType, setNodeType] = useState<NodeType>("true");
   const [orbScale, setOrbScale] = useState(1);
+  const [asteroids, setAsteroids] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ chart: NatalChart; meta: NatalMeta; spec: ChartSpec } | null>(null);
@@ -136,7 +137,7 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
       if (!p) return null;
       place = { mode: "thai", lat: p.lat, lon: p.lon, label: p.th, labelEn: p.en, zone: p.zone, refId: p.id };
     }
-    return { name: name.trim().slice(0, 40), day, month, yearCe, hour, minute, timeKnown, place, houseSystem, nodeType, orbScale };
+    return { name: name.trim().slice(0, 40), day, month, yearCe, hour, minute, timeKnown, place, houseSystem, nodeType, orbScale, asteroids };
   }
 
   async function runChart(spec: ChartSpec) {
@@ -150,7 +151,10 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
     setSaveState("idle");
     try {
       const { computeNatalChart } = await import("@/lib/astro/natal");
+      // ดาวเคราะห์น้อย: ตาราง ~59 KB โหลดเฉพาะเมื่อผู้ใช้เปิดตัวเลือก
+      const tables = spec.asteroids ? (await import("@/lib/astro/asteroids")).asteroidTables() : undefined;
       const chart = computeNatalChart({
+        asteroids: tables,
         utcMs: at.utcMs,
         timeKnown: spec.timeKnown,
         dayStartUtcMs: spec.timeKnown ? undefined : toUtc(0, 0).utcMs,
@@ -213,6 +217,7 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
     setHouseSystem(c.houseSystem);
     setNodeType(c.nodeType);
     setOrbScale(c.orbScale);
+    setAsteroids(!!c.asteroids);
     void runChart(c);
   }
 
@@ -422,6 +427,10 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
               </select>
             </div>
           </div>
+          <label className="inline-flex items-center gap-2 text-sm text-ink min-h-[44px] cursor-pointer pt-1">
+            <input type="checkbox" checked={asteroids} onChange={(e) => setAsteroids(e.target.checked)} className="w-4 h-4" />
+            {isEnglish ? "Show asteroids (Ceres, Pallas, Juno, Vesta)" : "แสดงดาวเคราะห์น้อย 4 ดวง (ซีรีส พัลลัส จูโน เวสต้า)"}
+          </label>
         </details>
 
         {error && (

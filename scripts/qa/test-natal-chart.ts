@@ -31,6 +31,7 @@ import { THAI_PROVINCES, WORLD_CITIES } from "../../src/data/natal/places";
 import { assertNonEmptyCorpus } from "./lib/corpus";
 import { searchCities, cityCount } from "../../src/lib/astro/city-search";
 import { computeSynastry, nearMidpoint } from "../../src/lib/astro/synastry";
+import { asteroidTables } from "../../src/lib/astro/asteroids";
 import { computeProgressions, computeTransits, lunarReturn, solarReturn, transitCalendar } from "../../src/lib/astro/techniques";
 
 let pass = 0;
@@ -335,6 +336,36 @@ console.log("\n6.7) ผังคู่ (Synastry + Composite)");
   check("ดาวของอีกคนตกเรือนของเรา: ครบทุกดวง", (s1.bInA?.length ?? 0) >= 11 && s1.bInA!.every((o) => o.house >= 1 && o.house <= 12));
 }
 
+console.log("\n6.8) ดาวเคราะห์น้อย 4 ดวงเทียบ NASA JPL (จุดนอกตาราง = ทดสอบการประมาณค่า)");
+{
+  // ค่าอ้างอิง JPL Horizons ที่ 10 วันที่เดียวกับข้อ 1 (ดึง 2026-10-27 · COMMAND 1; 2; 3; 4;)
+  const REF: Record<"ceres" | "pallas" | "juno" | "vesta", number[]> = {
+    ceres: [320.3504029, 115.599879, 274.517975, 321.1057935, 76.7194536, 129.0495597, 244.5611232, 277.5899255, 131.1930413, 67.4714565],
+    pallas: [306.047522, 82.2543312, 255.9921731, 298.056139, 29.345847, 86.1543845, 217.7821596, 245.6769841, 82.2472703, 331.1140262],
+    juno: [10.007117, 303.1047475, 220.9918255, 304.6611657, 177.6122917, 237.1662883, 4.4290425, 164.4401416, 154.269212, 226.3660548],
+    vesta: [185.475055, 150.4434404, 40.5523521, 146.1226568, 204.0655485, 171.9349804, 156.6282598, 83.306946, 166.1615417, 224.5441655],
+  };
+  const tables = asteroidTables();
+  let worst = 0;
+  let where = "";
+  JPL.forEach((row, i) => {
+    const chart = computeNatalChart(input(Date.parse(row.utc), { asteroids: tables }));
+    for (const id of Object.keys(REF) as (keyof typeof REF)[]) {
+      const b = chart.bodies.find((x) => x.id === id);
+      const err = b ? angularDistance(b.lon, REF[id][i]) * 3600 : Infinity;
+      if (err > worst) {
+        worst = err;
+        where = `${id} ${row.utc}`;
+      }
+    }
+  });
+  check(`ดาวเคราะห์น้อยคลาดจาก JPL ไม่เกิน 60 ฟิลิปดา (แย่สุด ${worst.toFixed(1)}″ · ${where})`, worst <= 60);
+  const off = computeNatalChart(input(Date.UTC(1990, 0, 1)));
+  check("ไม่เปิดตัวเลือก = ไม่มีดาวเคราะห์น้อยในผัง", !off.bodies.some((b) => ["ceres", "pallas", "juno", "vesta"].includes(b.id)));
+  const natalSrc = fs.readFileSync(path.join(process.cwd(), "src/lib/astro/natal.ts"), "utf8");
+  check("ตัวคำนวณหลักไม่ import ตารางดาวเคราะห์น้อย (โหลดแยกเมื่อผู้ใช้เปิดเท่านั้น)", !/from\s+["']\.\/asteroid-tables["']|from\s+["']\.\/asteroids["']/.test(natalSrc));
+}
+
 console.log("\n7) กติกา island — ตัวคำนวณ/คำอธิบาย/ผลผังโหลดแบบ dynamic import เท่านั้น");
 {
   const root = process.cwd();
@@ -348,7 +379,7 @@ console.log("\n7) กติกา island — ตัวคำนวณ/คำอ�
   ].filter((f) => fs.existsSync(f) && /\.(tsx?|astro)$/.test(f));
   assertNonEmptyCorpus("ไฟล์ island + ฟอร์มผังดวง", files, "ต้องเจออย่างน้อย NatalChartApp.tsx และ astro/islands/*");
   // ของหนักที่ห้ามติดบันเดิลแรกของหน้า: ตัวคำนวณดาว (~50 KB) · ตารางไครอน · คำอธิบายสองภาษา · ผลผังทั้งหมด
-  const heavy = /^\s*import\s+(?!type\b)[^;]*from\s+["'](@\/lib\/astro\/natal(-text)?|astronomy-engine|@\/lib\/astro\/chiron-table|@\/data\/natal\/content|\.\/NatalResult|\.\/NatalWheel|@\/components\/natal\/(NatalResult|NatalWheel)|@\/data\/natal\/cities-world|@\/lib\/astro\/city-search)["']/m;
+  const heavy = /^\s*import\s+(?!type\b)[^;]*from\s+["'](@\/lib\/astro\/natal(-text)?|astronomy-engine|@\/lib\/astro\/chiron-table|@\/data\/natal\/content|\.\/NatalResult|\.\/NatalWheel|@\/components\/natal\/(NatalResult|NatalWheel)|@\/data\/natal\/cities-world|@\/lib\/astro\/city-search|@\/lib\/astro\/asteroids|@\/lib\/astro\/asteroid-tables)["']/m;
   const offenders = files.filter((f) => heavy.test(fs.readFileSync(f, "utf8")));
   check(
     "ไฟล์ island และหน้าฟอร์มผังดวงไม่ import ของหนักแบบ static",

@@ -18,7 +18,7 @@ const R_DEG = 172;
 const R_ASP = 132;
 const R_HOUSE_N = 146;
 
-const WHEEL_BODIES: readonly BodyId[] = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron", "node", "lilith"];
+const WHEEL_BODIES: readonly BodyId[] = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron", "node", "lilith", "ceres", "pallas", "juno", "vesta"];
 const MIN_SEP = 10.5;
 
 function pt(r: number, lon: number, ref: number): [number, number] {
