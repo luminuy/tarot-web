@@ -31,7 +31,8 @@
 | `APP_DB` | D1 Database | เก็บข้อมูล users, reading_journal, reading_usage, user_bonus, marketplace |
 | `AI` | Workers AI | ตัวคัดกรองความปลอดภัยฉุกเฉินชั้น 3 |
 | `VECTORIZE` | Vectorize Index | ค้นหาความหมายไพ่และบทความเชิงความหมาย (`card-meanings` 1024d) |
-| `SHARE_BUCKET` | R2 Bucket | จัดเก็บภาพการ์ดแชร์ที่ผู้ใช้สร้างเอง (`seertarot-share` auto-delete 90 วัน) |
+| `SHARE_BUCKET` | R2 Bucket | จัดเก็บภาพการ์ดแชร์ที่ผู้ใช้สร้างเอง (`seertarot-share` · ลบเองทั้ง bucket เมื่อครบ 90 วัน · ห้ามเก็บของถาวรในนี้) |
+| `STUDIO_BUCKET` | R2 Bucket | โลโก้สตูดิโอแม่หมอ (`seertarot-studio` · ส่วนตัว · เก็บถาวร ห้ามมีกฎลบ · deploy สร้าง bucket ให้เองด้วย `npm run cf:r2-buckets`) |
 | *(ไม่ผูกกับ Worker)* | R2 Bucket | `seertarot-d1-backups` — ไฟล์สำรองฐาน D1 รายสัปดาห์ (ส่วนตัว · ลบเองเมื่อครบ 35 วัน · ดูหัวข้อ 8.5) |
 
 config อยู่ใน [`wrangler.jsonc`](../wrangler.jsonc) + [`open-next.config.ts`](../open-next.config.ts)
@@ -296,6 +297,8 @@ npx wrangler d1 execute tarot-app-db-restore --remote --command "SELECT count(*)
 4. เปลี่ยน `database_id` ของ `APP_DB` ใน `wrangler.jsonc` เป็นฐานใหม่แล้วเปิด PR ตามปกติ
    (ไฟล์สำรองมีตาราง `d1_migrations` ติดมา `db:migrate` ตอน deploy จึงรันเฉพาะ migration ที่ใหม่กว่าไฟล์สำรอง)
 5. ข้อมูลหลังเวลาสำรองหายไป — เทียบรายการจ่ายเงินกับ Stripe / Omise ช่วงนั้นด้วยมือ แล้วบันทึก incident ตามข้อ 8.4
+6. ⚠️ บัญชีที่ผู้ใช้สั่งลบ**หลัง**เวลาสำรองจะกลับมาในฐานที่กู้ — ระบบยังไม่มีบันทึกการลบให้ลบซ้ำอัตโนมัติ
+   หน้านโยบายความเป็นส่วนตัวข้อ 3 สัญญาว่าใช้สำเนาเพื่อกู้ระบบเท่านั้นและสำเนาหมดอายุใน 35 วัน — ถ้ากู้จริงต้องไล่ลบคำขอลบช่วงนั้นซ้ำ
 
 ---
 

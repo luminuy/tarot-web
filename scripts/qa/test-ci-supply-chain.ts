@@ -288,17 +288,47 @@ if (backupWf) {
     "   ➔ artifact ของ GitHub ดาวน์โหลดได้ทุกคนที่อ่าน Actions ของรีโป — ไฟล์สำรองอยู่ใน R2 ส่วนตัวเท่านั้น",
   );
   check("d1-backup.yml เปิด issue เมื่อสำรองล้ม (ไม่ล้มเงียบ)", /if: always\(\)/.test(backupWf.src) && /gh issue create/.test(backupWf.src));
+  // นโยบายความเป็นส่วนตัวบอกอายุสำเนาสำรองตามจริง — ข้อมูลที่ผู้ใช้สั่งลบยังค้างในสำเนาจนหมดอายุ (เจ้าของสั่ง 2026-10-26)
+  const keepDays = fs.readFileSync(path.join(ROOT, "scripts/cf-d1-backup.ts"), "utf-8").match(/BACKUP_RETENTION_DAYS = (\d+);/)?.[1];
+  const privacyTh = fs.readFileSync(path.join(ROOT, "src/app/_shared/pages/privacy-th.tsx"), "utf-8");
+  const privacyEn = fs.readFileSync(path.join(ROOT, "src/app/_shared/pages/privacy-en.tsx"), "utf-8");
+  check(
+    `หน้านโยบายความเป็นส่วนตัวทั้งสองภาษาบอกอายุสำเนาสำรอง ${keepDays ?? "?"} วันตรงกับสคริปต์สำรอง`,
+    !!keepDays && privacyTh.includes(`${keepDays} วัน`) && privacyEn.includes(`${keepDays} days`),
+    "   ➔ แก้ BACKUP_RETENTION_DAYS แล้วต้องแก้ข้อ 3 ของ privacy-th.tsx / privacy-en.tsx ด้วย",
+  );
 }
 
-// 4c. กฎลบการ์ดแชร์ 90 วันใน R2 (PDPA) — ตั้งซ้ำทุก deploy และห้ามครอบโลโก้สตูดิโอแม่หมอใน bucket เดียวกัน
+// 4c. R2 แยกตามอายุข้อมูล (PDPA · 2026-10-26) — การ์ดแชร์ลบทั้ง bucket ทุก 90 วัน · โลโก้แม่หมออยู่ bucket ถาวรของตัวเอง
 {
-  const deployWf = workflows.find((wf) => wf.name === "deploy.yml");
-  check("deploy.yml ตั้งกฎลบการ์ดแชร์ทุกรอบ (`npm run cf:r2-lifecycle`)", /npm run cf:r2-lifecycle/.test(deployWf?.src ?? ""));
+  const deployWf = workflows.find((wf) => wf.name === "deploy.yml")?.src ?? "";
+  const previewWf = workflows.find((wf) => wf.name === "preview.yml")?.src ?? "";
+  check("deploy.yml ตั้งกฎลบการ์ดแชร์ทุกรอบ (`npm run cf:r2-lifecycle`)", /npm run cf:r2-lifecycle/.test(deployWf));
+  const deployAt = (src: string, re: RegExp) => src.search(re);
+  check(
+    "deploy.yml / preview.yml สร้าง R2 bucket ที่ขาดก่อน `wrangler deploy` (`npm run cf:r2-buckets`)",
+    [
+      [deployWf, /name: 🚀 Build & Deploy to Cloudflare Workers/],
+      [previewWf, /opennextjs-cloudflare deploy/],
+    ].every(([src, re]) => {
+      const prep = deployAt(src as string, /npm run cf:r2-buckets/);
+      return prep >= 0 && prep < deployAt(src as string, re as RegExp);
+    }),
+    "   ➔ bucket ใหม่ใน wrangler.jsonc ที่ยังไม่มีจริง = wrangler deploy ล้มทั้งรอบ",
+  );
+  const wrangler = fs.readFileSync(path.join(ROOT, "wrangler.jsonc"), "utf-8");
   const lc = fs.readFileSync(path.join(ROOT, "scripts/cf-r2-lifecycle.ts"), "utf-8");
   check(
-    "กฎลบการ์ดแชร์ตั้งราย prefix ฐานสิบหก และกันไม่ให้ครอบ `studio-logo/`",
-    /SHARE_ID_FIRST_CHARS = "0123456789abcdef"/.test(lc) && /MUST_KEEP = \["studio-logo\/"\]/.test(lc),
-    "   ➔ กฎทั้ง bucket (prefix ว่าง) ลบโลโก้สตูดิโอแม่หมอทิ้งใน 90 วัน",
+    "โลโก้แม่หมออยู่ bucket แยก (`STUDIO_BUCKET`) และสคริปต์กฎลบยืนยันว่าไม่มีกฎครอบ `studio-logo/`",
+    /"binding"\s*:\s*"STUDIO_BUCKET"/.test(wrangler) && /STUDIO_MUST_KEEP = \["studio-logo\/"\]/.test(lc),
+    "   ➔ โลโก้ปนกับ bucket การ์ดแชร์ = กฎลบ 90 วันลบโลโก้ทิ้ง",
+  );
+  const studioSrc = ["src/lib/studio/logo.ts", "src/app/api/marketplace/studio/logo/route.ts", "src/app/api/studio/logo/[readerId]/[file]/route.ts"]
+    .map((f) => fs.readFileSync(path.join(ROOT, f), "utf-8"))
+    .join("\n");
+  check(
+    "โค้ดโลโก้แม่หมออ่าน/เขียน/ลบผ่าน `getStudioBucket()` เท่านั้น (ไม่แตะ bucket การ์ดแชร์)",
+    /getStudioBucket\(\)/.test(studioSrc) && !/getShareBucket/.test(studioSrc),
   );
 }
 

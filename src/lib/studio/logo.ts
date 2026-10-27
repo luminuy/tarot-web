@@ -1,11 +1,12 @@
-import { getShareBucket } from "@/lib/platform/cf";
+import { getStudioBucket } from "@/lib/platform/cf";
 import { STUDIO_LOGO_PATH_RE } from "@/lib/studio/brand";
 
 /**
  * 🖼️ โลโก้ของแม่หมอที่อัปโหลดจากเครื่อง (แทนการให้วางลิงก์รูปเอง)
  * ---------------------------------------------------------------------------
  * • หน้าเว็บย่อรูปเป็นสี่เหลี่ยมจัตุรัส 256px ก่อนส่ง — เซิร์ฟเวอร์รับแค่ PNG/WebP/JPEG ไม่เกิน 400 KB (ตรวจ magic bytes)
- * • เก็บใน R2 (`SHARE_BUCKET`) ใต้ `studio-logo/<readerId>/<id>.<ext>` · เสิร์ฟผ่าน `/api/studio/logo/...` (ไม่เปิด bucket สาธารณะ)
+ * • เก็บใน R2 (`STUDIO_BUCKET` · bucket ของโลโก้โดยเฉพาะ ไม่มีกฎลบอัตโนมัติ) ใต้ `studio-logo/<readerId>/<id>.<ext>`
+ *   เสิร์ฟผ่าน `/api/studio/logo/...` (ไม่เปิด bucket สาธารณะ) · ห้ามย้ายกลับไปไว้ bucket การ์ดแชร์ที่ลบเองทุก 90 วัน
  * • เปลี่ยน/เอาออก/ลบข้อมูลสตูดิโอ ➔ ลบไฟล์เก่าทิ้ง (ไม่ทิ้งรูปค้างใน R2)
  */
 
@@ -47,6 +48,6 @@ export async function deleteOwnLogo(path: string | null | undefined, readerId: s
   if (!m || !readerId || m[1] !== readerId) return;
   const key = logoKeyFromPath(path);
   if (!key) return;
-  const bucket = await getShareBucket();
+  const bucket = await getStudioBucket();
   await bucket?.delete(key).catch((err) => console.error("[Studio logo] ลบไฟล์เก่าไม่สำเร็จ", { key, err }));
 }

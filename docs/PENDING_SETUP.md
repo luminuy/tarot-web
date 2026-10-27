@@ -316,11 +316,12 @@ workflow `.github/workflows/setup-vapid.yml` สร้างคู่กุญ�
 **Vectorize** (binding อยู่ใน `wrangler.jsonc` แล้ว — deploy รอบถัดไปทำงานเลย):
 - หลัง deploy → `/admin` → แท็บสุขภาพระบบ → การ์ด Cloudflare Free Stack → ปุ่ม **"สร้าง index ใหม่"** (รันครั้งเดียว)
 
-**R2** (bucket `seertarot-share` + binding พร้อม):
-- ✅ กฎลบการ์ดแชร์อัตโนมัติ 90 วัน (PDPA) — **ไม่ต้องตั้งด้วยมือแล้ว** (2026-10-24)
-  `deploy.yml` รัน `npm run cf:r2-lifecycle` ทุกรอบ ตั้งกฎ 16 ข้อ `expire-share-0` … `expire-share-f` เฉพาะ key การ์ดแชร์
-  ⛔ **ห้ามใช้คำสั่งเดิม** `wrangler r2 bucket lifecycle add seertarot-share --prefix ""` — กฎทั้ง bucket ลบโลโก้สตูดิโอแม่หมอ (`studio-logo/`) ทิ้งด้วย
-  สคริปต์จะล้มถ้าเจอกฎที่ครอบ `studio-logo/` (ตรวจที่ Dashboard → R2 → seertarot-share → Settings → Object lifecycle rules)
+**R2** (ไม่ต้องกดสร้างหรือตั้งกฎเองแล้ว):
+- ✅ bucket ทุกตัวใน `wrangler.jsonc` — `deploy.yml` สร้างให้ก่อน deploy (`npm run cf:r2-buckets` · 2026-10-26)
+- ✅ กฎลบการ์ดแชร์อัตโนมัติ 90 วัน (PDPA) — `deploy.yml` รัน `npm run cf:r2-lifecycle` ทุกรอบ ตั้งกฎ `expire-share-90d` ทั้ง bucket `seertarot-share`
+  (2026-10-26 แทนกฎ 16 ข้อ `expire-share-0` … `expire-share-f` ของรุ่น 2026-10-24 หลังแยกโลโก้แม่หมอออกไป)
+- ✅ โลโก้สตูดิโอแม่หมออยู่ bucket แยก `seertarot-studio` (`STUDIO_BUCKET` · ส่วนตัว · เก็บถาวร)
+  ⛔ **ห้ามตั้งกฎลบใด ๆ ใน `seertarot-studio`** — สคริปต์ล้มทุก deploy ถ้าเจอกฎที่ครอบ `studio-logo/` · ⛔ ห้ามเก็บของถาวรใน `seertarot-share`
 - ✅ bucket `seertarot-d1-backups` (ไฟล์สำรองฐาน D1) — สร้างและตั้งกฎลบ 35 วันโดย `d1-backup.yml` เอง ห้ามเปิดลิงก์สาธารณะ
 
 ---
