@@ -215,6 +215,7 @@ jobs:
       contents: write
       pull-requests: write
       actions: write
+      checks: read
     steps:
       - name: 🔀 Auto-Merge Verified PR into main
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
@@ -249,6 +250,35 @@ jobs:
                   body: '🛑 PR นี้ยกแพ็กเกจที่ประกอบเป็น Worker (`next` / `wrangler` / `@opennextjs/*`) จึงไม่ถูก merge อัตโนมัติ (A10-02 · INC-0285)\n\nก่อนกด merge: รัน `npm run build:worker` แล้ว `npx wrangler dev` ยิง `/api/auth/me` และ `/readers` ให้ตอบปกติ · ถ้าเป็นคู่ `next` ↔ `@opennextjs/cloudflare` ให้ยกสองตัวพร้อมกันและอัปเดต `PROVEN_PAIR` ใน `scripts/qa/test-next-adapter-pair.ts`'
                 });
                 return;
+              }
+
+              // 📱 PR ของ dependabot ที่ยกแพ็กเกจแอป iOS (`mobile/`) — ด่านแอปไม่ใช่ required check ของ main
+              // ถ้าไม่รอ PR ที่ทำให้แอปพังจะถูก merge ทันทีที่ด่านเว็บผ่าน ➔ รอผล `📱 typecheck · jest · expo-doctor`
+              // ของ commit เดียวกันให้ผ่านก่อน (สูงสุด ~10 นาที) ไม่ผ่าน/ไม่จบ = ไม่ merge แล้วบอกไว้ใน PR
+              if (prFiles.some((f) => f.filename.startsWith('mobile/'))) {
+                const MOBILE_CHECK = '📱 typecheck · jest · expo-doctor';
+                let verdict = null;
+                for (let i = 0; i < 30 && verdict === null; i++) {
+                  const { data } = await github.rest.checks.listForRef({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    ref: pr.head.sha,
+                    check_name: MOBILE_CHECK
+                  });
+                  const run = data.check_runs.find((c) => c.status === 'completed');
+                  if (run) verdict = run.conclusion;
+                  else await new Promise((r) => setTimeout(r, 20000));
+                }
+                if (verdict !== 'success') {
+                  console.log(`🛑 ด่านแอป iOS ได้ผล ${verdict ?? 'ยังไม่จบใน 10 นาที'} — ไม่ auto-merge`);
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    body: `🛑 PR นี้ยกแพ็กเกจของแอป iOS (\`mobile/\`) แต่ด่าน \`${MOBILE_CHECK}\` ได้ผล **${verdict ?? 'ยังไม่จบใน 10 นาที'}** จึงไม่ถูก merge อัตโนมัติ — ดูผลด่านแอปก่อน แล้วกด merge เองถ้าผ่าน`
+                  });
+                  return;
+                }
               }
             }
 
