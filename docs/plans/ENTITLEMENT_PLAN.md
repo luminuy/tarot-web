@@ -1,6 +1,6 @@
 # 🎟 ระบบสมาชิกและโควตาเปิดไพ่ — แผนลงมือสำหรับทีม Antigravity
 
-> **สถานะ**: ✅ เสร็จแล้ว — ระบบสิทธิ์และโควตาใช้งานจริง (`entitlement.enforced` = เปิด) · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: HANDOFF_ROUND2_CLOSEOUT ข้อ 9
+> **สถานะ**: ✅ เสร็จแล้ว — สิทธิ์และโควตาเปิดไพ่ใช้งานจริง: ต้องลงชื่อก่อนเปิดไพ่ · ฟรีวันละ 1 ครั้ง · ธง `entitlement.enforced` เปิดเป็นค่าเริ่มต้น ปิดฉุกเฉินได้ในแอดมิน · ไม่มีงานค้าง · **ตรวจล่าสุด**: 2026-10-26 · **หลักฐาน**: `src/lib/entitlement/limits.ts`
 
 > **สถานะ:** 🟢 **ใช้งานจริงบน production แล้ว** — PR A–F เสร็จ + เปิดธงเป็นค่าเริ่มต้นตั้งแต่ PR #101
 > **ฐานอ้างอิง:** commit `75bc1f9` (ตรวจซ้ำ 2026-09-01)
@@ -37,7 +37,7 @@
 จุดแทรกในแต่ละ route และเช็กลิสต์ราย PR
 
 > ⚠️ ก่อนเริ่มให้อ่าน [`docs/BACKLOG.md`](BACKLOG.md) หัวข้อกติกาการทำงาน และ
-> [`docs/INCIDENT_LOG.md`](INCIDENT_LOG.md) ตามกฎโปรเจกต์ · commit ผ่าน `npm run commit` เท่านั้น
+> [`docs/INCIDENT_LOG.md`](../INCIDENT_LOG.md) ตามกฎโปรเจกต์ · commit ผ่าน `npm run commit` เท่านั้น
 
 ---
 
@@ -86,7 +86,7 @@
 เป้าหมายของสิทธิ์ฟรีคือทำให้คนได้ลองแล้วอยากสมัคร ไม่ใช่ระบบป้องกันการโกง
 การไล่อุดทุกช่องจะพาไปสู่ fingerprint ซึ่งขัดกับ PDPA และนโยบายที่ประกาศไว้แล้ว
 
-> 🛡️ **ระบบกันโกงเชิงลึก + threat model:** ดู [`ENTITLEMENT_ABUSE_MODEL.md`](ENTITLEMENT_ABUSE_MODEL.md)
+> 🛡️ **ระบบกันโกงเชิงลึก + threat model:** ดู [`ENTITLEMENT_ABUSE_MODEL.md`](../specs/ENTITLEMENT_ABUSE_MODEL.md)
 > — P0 (server-authoritative gid marker) + P1 (guest IP/subnet quota) ลงแล้ว · P2 (PoW) / P3 (velocity alert) เลื่อนแบบ metric-driven
 
 **ข้อ 4 — ทำไมแชทไม่กินโควตา**

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 
 import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL } from "@/lib/config/site";
+import type { Locale } from "@/lib/i18n/types";
 
 /**
  * 🏷️ metadata ระดับรากที่ "จริงกับทุกหน้าในเว็บ" — แหล่งความจริงเดียว
@@ -193,7 +194,7 @@ export const VIEWPORT_CONTENT =
   "width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover";
 
 /**
- * ฟอนต์ที่ทุกหน้าพรีโหลด — ต้องเป็นชุดย่อยของ `@font-face` ใน `globals.css`
+ * ฟอนต์ที่ทุกหน้าพรีโหลด (แยกตามภาษาของหน้า) — ต้องเป็นชุดย่อยของ `@font-face` ใน `globals.css`
  *
  * 🔴 บทเรียน T-22: ของเดิมพรีโหลดครบทั้ง 4 ไฟล์ (รวม 67,828 B) ทุกหน้า
  * ทั้งสี่ถูกขอด้วยลำดับความสำคัญสูงสุด **ก่อนภาพทุกใบ** บนการเชื่อมต่อที่ต้องโหลด
@@ -205,15 +206,23 @@ export const VIEWPORT_CONTENT =
  * ⚠️ `globals.css` ประกาศฟอนต์สำรองที่ชดเชยเมตริกไว้ (`ascent-override` · `size-adjust`)
  * แต่ค่าชุดนั้นคำนวณจาก **น้ำหนักปกติ** เท่านั้น — น้ำหนักหนาจึงอยู่ใน `FONT_PRELOADS_LOW` ข้างล่าง
  */
-export const FONT_PRELOADS = [
+export const FONT_PRELOADS: Record<Locale, readonly string[]> = {
   /*
    * 🎨 SeerTarot UI 2.0 (คลื่น 3 · 2026-10-12): หัวข้อ h1–h3 ทั้งเว็บใช้ Anuphan 500 — h1 คือตัว LCP ของหลายหน้า
    * จึงพรีโหลดลำดับปกติ · Noto Serif Thai 400 ย้ายไป `FONT_PRELOADS_LOW` (เหลือเป็นฟอนต์เนื้อความบางจุด)
-   * รวม Anuphan 19,384 + Sarabun 16,684 = 36,068 B ≤ งบ 40,000 B (`test-bundle-budget`)
+   *
+   * ✂️ แยกไฟล์ไทย/ละติน (2026-10-27 · ISSUE-048) — เหตุผลอยู่ใน `globals.css` และ `scripts/subset-fonts.py`
+   * หน้าไทยต้องมีทั้งสองไฟล์ (ช่องว่าง ตัวเลข คำอังกฤษอยู่ในไฟล์ละติน) · หน้าอังกฤษพรีโหลดแค่ละติน
+   * ไทย 7,824 + 12,016 + 9,316 + 7,816 = 36,972 B · อังกฤษ 12,016 + 7,816 = 19,832 B ≤ งบ 40,000 B (`test-bundle-budget`)
    */
-  "/fonts/anuphan-500.woff2",
-  "/fonts/sarabun-400.woff2",
-] as const;
+  th: [
+    "/fonts/anuphan-500-thai.woff2",
+    "/fonts/anuphan-500-latin.woff2",
+    "/fonts/sarabun-400-thai.woff2",
+    "/fonts/sarabun-400-latin.woff2",
+  ],
+  en: ["/fonts/anuphan-500-latin.woff2", "/fonts/sarabun-400-latin.woff2"],
+};
 
 /**
  * ฟอนต์น้ำหนักหนา (หัวข้อ · ปุ่ม) — พรีโหลดด้วย `fetchpriority="low"` (INC-0244)
@@ -230,11 +239,21 @@ export const FONT_PRELOADS = [
  * (ด่าน `test-bundle-budget` ไม่นับรายการ `low` ในงบฟอนต์ที่แย่งคิว LCP)
  * ⚠️ ห้ามถอดออกโดยไม่วัดการกระพริบตอนเปลี่ยนหน้าบนมือถือมาเทียบ
  */
-export const FONT_PRELOADS_LOW = [
-  "/fonts/noto-serif-thai-400.woff2",
-  "/fonts/noto-serif-thai-700.woff2",
-  "/fonts/sarabun-600.woff2",
-] as const;
+export const FONT_PRELOADS_LOW: Record<Locale, readonly string[]> = {
+  th: [
+    "/fonts/noto-serif-thai-400-thai.woff2",
+    "/fonts/noto-serif-thai-400-latin.woff2",
+    "/fonts/noto-serif-thai-700-thai.woff2",
+    "/fonts/noto-serif-thai-700-latin.woff2",
+    "/fonts/sarabun-600-thai.woff2",
+    "/fonts/sarabun-600-latin.woff2",
+  ],
+  en: [
+    "/fonts/noto-serif-thai-400-latin.woff2",
+    "/fonts/noto-serif-thai-700-latin.woff2",
+    "/fonts/sarabun-600-latin.woff2",
+  ],
+};
 
 /**
  * หน้าที่ **ไม่** พรีโหลด `FONT_PRELOADS_LOW` — หน้าแรกสองภาษาเท่านั้น (2026-10-26)

@@ -1,240 +1,189 @@
-# 🔮 สถาปัตยกรรมระบบเว็บดูดวงไพ่ทาโรต์ระดับองค์กร (Enterprise Architecture Blueprint)
+# สถาปัตยกรรมระบบ SeerTarot
 
-เอกสารฉบับนี้สรุปภาพรวมทางสถาปัตยกรรมระดับองค์กร (Enterprise Architecture), กลไกการเข้ารหัสความโปร่งใส (Cryptographic Provably-Fair Security), ระบบประมวลผล Edge Computing บน Cloudflare Workers, และระเบียบวิศวกรรมระดับโลก เพื่อให้ทีมวิศวกรและ AI Agents สามารถต่อยอดระบบได้อย่างไร้รอยต่อ
+> ตรวจกับโค้ดล่าสุด: 2026-10-26 (`wrangler.jsonc` · `astro.config.mjs` · `open-next.config.ts` · `scripts/merge-astro-assets.ts` · `src/lib/tarot/shuffle.ts` · `src/lib/ai/` · `src/lib/security/`)
+> เลขรุ่นของไลบรารีดูที่ `package.json` · secret และบริการภายนอกดูที่ [PENDING_SETUP.md](PENDING_SETUP.md) · ขั้นตอน deploy ดูที่ [CLOUDFLARE_DEPLOYMENT_GUIDE.md](CLOUDFLARE_DEPLOYMENT_GUIDE.md)
 
----
+## 1. หลักที่ระบบยึด
 
-## 1. ปรัชญาและกฎเหล็กของระบบ (Core Engineering Philosophy)
+| หลัก | อยู่ในโค้ดตรงไหน |
+| :--- | :--- |
+| **AI ไม่เคยเป็นคนจั่วไพ่** — ไพ่มาจากเมล็ดของเซิร์ฟเวอร์ + เมล็ดของผู้ใช้ หรือคำนวณจากข้อมูลตั้งต้นที่ตรวจซ้ำได้ (วันเกิด · วันที่) เท่านั้น โมเดลแค่อ่านไพ่ที่ออกแล้ว | `src/lib/tarot/shuffle.ts` · `src/lib/reading/derived-draw.ts` |
+| **ห้ามกุไพ่** — หาไพ่ไม่เจอให้คืน `undefined` หรือ error แล้วให้ผู้ใช้โหลดใหม่ (CLAUDE.md กฎข้อ 14) | ทุกเส้นทางเปิดไพ่ |
+| **ผู้ใช้เลือกและพลิกไพ่เอง** — ไพ่บนผังเริ่มคว่ำหน้าเสมอ | `src/components/home/TarotFlow.tsx` · `src/components/spread/SpreadBoard.tsx` |
+| **ความปลอดภัยมาก่อนคำทำนาย** — คำถามที่มีสัญญาณทำร้ายตัวเองถูกหยุดก่อนถึงโมเดล | `src/lib/safety/` |
+
+## 2. ภาพรวม: สองเครื่องเรนเดอร์ บน Worker ตัวเดียว
 
 ```mermaid
-graph TD
-    User([ผู้ใช้: ตั้งจิตอธิษฐาน & ส่งคำถาม]) --> Safety[1. Safety Guardrails Engine]
-    Safety -->|ผ่านการตรวจ| Commit[2. Provably-Fair SHA-256 Commitment]
-    Commit --> Fan[3. 3D Interactive Card Fan 78 ใบ]
-    Fan -->|ผู้ใช้สัมผัสแตะเลือกด้วยตนเอง| Pick[4. User Card Selection & Shuffle Verification]
-    Pick --> Spread[5. 26 Golden Ratio Spreads Engine]
-    Spread --> AI[6. Real-Time Gemini AI SSE Streamer]
-    AI --> Persona[7. 5 Distinct Human-Like Personas]
-    Persona --> Reveal[8. Cryptographic Proof Reveal & Audio Synth]
+flowchart LR
+    U([เบราว์เซอร์ / แอป iPhone]) --> E{Cloudflare ขอบ}
+    E -->|ตรงไฟล์ static| A["Static Assets<br/>HTML จาก Astro · /_astro · /_next/static · ภาพไพ่"]
+    E -->|อยู่ใน run_worker_first| W["Worker (Next.js ผ่าน OpenNext)<br/>/api/* · /admin · /readers/* ฯลฯ"]
+    E -->|ไม่ตรงอะไรเลย| N[404.html จากขอบ]
+    W --> D[(D1 · APP_DB)]
+    W --> K[(KV · APP_KV)]
+    W --> R[(R2 · SHARE_BUCKET · STUDIO_BUCKET)]
+    W --> V[(Vectorize · Workers AI)]
+    W --> G["AI ภายนอก<br/>Groq · Gemini (ผ่าน AI Gateway) · OpenRouter"]
 ```
 
-1. **AI ไม่เคยเป็นคนจั่วไพ่ (AI Never Draws Cards)**:
-   - ลำดับไพ่ถูกกำหนดโดยการกระทำจริงของผู้ใช้ (สัมผัส/เลือกไพ่/สับไพ่) ร่วมกับระบบสุ่มที่พิสูจน์ได้ทางคณิตศาสตร์ (Provably Fair)
-   - โมเดล AI ทำหน้าที่เป็น **"ผู้อ่านและตีความ (Interpreter/Reader)"** ตามตำแหน่งและหน้าไพ่จริงเท่านั้น ห้ามสลับไพ่หรือแต่งไพ่ขึ้นมาเอง
-2. **สัมผัสและเลือกไพ่ด้วยตนเอง (Manual Self-Reveal & Interactive Fan)**:
-   - ผู้ใช้เป็นผู้เลือกและพลิกไพ่ 3D ด้วยตนเองเพื่อสร้างความรู้สึกสมจริงและเป็นธรรมชาติ
-3. **ความโปร่งใสที่ตรวจสอบได้ด้วยวิทยาการรหัสลับ (SHA-256 Commit-Reveal)**:
-   - เซิร์ฟเวอร์สร้าง `serverSeed` และส่งแฮช `commitment = SHA256(serverSeed + ":" + clientSeed)` ให้เบราว์เซอร์ก่อนเริ่มแตะไพ่
-   - เมื่ออ่านเสร็จ เซิร์ฟเวอร์เฉลย `serverSeed` ให้ผู้ใช้ตรวจคำนวณย้อนหลังได้ 100% ว่าไม่มีการบิดเบือนผล
-4. **ความปลอดภัยและจริยธรรม (Safety & Compassionate Guardrails)**:
-   - กรองคำถามอันตราย (ความรุนแรง/การแพทย์/การพนัน/ทำร้ายตัวเอง) และแสดงสายด่วนสุขภาพจิต **1323** ทันที
+### 2.1 เส้นทางไหนเสิร์ฟจากไหน
 
----
-
-## 2. โครงสร้าง Tech Stack & Infrastructure
-
-| Layer | เทคโนโลยี | วัตถุประสงค์และจุดเด่น |
+| เส้นทาง | เสิร์ฟโดย | โค้ดอยู่ที่ |
 | :--- | :--- | :--- |
-| **Edge Compute** | **Cloudflare Workers (OpenNext v1.20)** | Zero-Cold-Start Serverless Edge Network ทั่วโลก |
-| **Database & Cache** | **Cloudflare D1 (`APP_DB`) + KV (`APP_KV`)** | Relational Database (users, journal, usage) และ Edge Key-Value Store (คีย์ `app:*`) |
-| **Storage & Vectors** | **Cloudflare R2 (`SHARE_BUCKET`) + Vectorize (`VECTORIZE`)** | R2 เก็บการ์ดภาพแชร์ 90 วัน + ค้นหาเชิงความหมาย 1024-dim |
-| **Framework** | **Astro 7 (SSG 305 หน้า + React 19 Islands) + Next.js 16.3 (App Router)** | Hybrid Static SSG ตอบตรงจาก Cloudflare Edge Assets + Dynamic Auth/Admin/SSE Worker |
-| **Language** | **TypeScript 7 (Strict Mode)** | ความปลอดภัยระดับ 0 Type Errors 100% |
-| **Design & UI** | **Tailwind CSS v4 + Hardware GPU Compositor** | Mystical Warm Minimal Sanctuary Theme + 60fps GPU Transitions |
-| **Asset Pipeline** | **4-Tier WebP/AVIF Remastered (`w128`, `w256`, `w512`, `w1024`)** | ลดขนาด Asset 85% คมชัดระดับ Retina |
-| **AI LLM Engine** | **Groq LPU (Qwen 2.5 Tier 1) + Google Gemini (Tier 2 Failover)** | คำอ่านความเร็วสูง 400ms พร้อมระบบสลับอัตโนมัติผ่าน Cloudflare AI Gateway |
-| **Validation** | **Zod v4** | Schema Validation แบบ Strict ป้องกันความผิดพลาดของ Input/Output |
+| หน้าเนื้อหาสาธารณะทั้งหมด: `/` · `/cards/**` · `/spreads/**` · `/blog/**` · `/pick-a-card/**` · `/questions/**` · `/love/**` · `/read/<ผัง>` · `/reading` · `/daily` · `/journal` · `/account` · `/pricing` · `/about` · `/contact` · `/privacy` และฉบับ `/en/...` | ไฟล์ HTML static ที่ Astro สร้างตอนบิลด์ — ขอบตอบเอง **ไม่ปลุก Worker** | `astro/pages/` |
+| `/api/*` (118 route) · `/admin` · `/readers/*` · `/r/*` · `/s/*` · `/reset-password` · `/tester` · `/sitemap.xml` · `/robots.txt` · `/manifest.webmanifest` · `/_next/image*` | Worker — Next.js App Router ผ่าน `@opennextjs/cloudflare` | `src/app/` (หน้าแอปอยู่ใต้ `src/app/(th)/`) |
+| เส้นทางที่ไม่ตรงไฟล์และไม่อยู่ในรายการข้างบน | `404.html` จากขอบ (`not_found_handling: "404-page"`) | — |
 
----
+> ⚠️ **เพิ่มหน้าใหม่ที่ Next เป็นคนเรนเดอร์ (มี `page.tsx` หรือ `route.ts` นอก `/api`) ต้องเติมเส้นทางใน `assets.run_worker_first` ของ `wrangler.jsonc` ด้วยเสมอ** ไม่งั้นหน้านั้น 404 บน production · กลับกัน หน้าที่ย้ายไป Astro แล้ว (เช่น `/account`) ห้ามอยู่ในรายการนั้น ไม่งั้น Worker จะแย่งเส้นทางคืนจากไฟล์ static
 
-## 3. แผนผังการทำงานของ 5 บุคลิกแม่หมอ (5 Tarot Reader Personas)
+### 2.2 บิลด์และ deploy
 
-ระบบมีแม่หมอ 5 บุคลิกที่ตอบโจทย์ความต้องการของผู้ใช้ทุกกลุ่ม พร้อมระบบตรวจจับเจตนาของผู้ใช้ (Intent Classification Engine):
+`npm run build:worker` (และ `deploy.yml` บน CI) ทำตามลำดับนี้:
 
-| บุคลิก (Persona) | ฉายา / อาร์คิไทป์ | ภาพไพ่ประจำตัว | สไตล์และน้ำเสียง |
-| :--- | :--- | :--- | :--- |
-| **`warm`** | **แม่หมอใจดี** (The High Priestess) | `major-02.jpg` | อบอุ่น นุ่มนวล โอบกอดความรู้สึกเหมือนพี่สาวคนสนิท |
-| **`playful`** | **แม่หมอเพื่อนซี้** (The Magician) | `major-01.jpg` | คุยสนุก เป็นกันเอง มีอารมณ์ขัน เม้าท์มันส์ ให้กำลังใจแบบเพื่อนสนิท |
-| **`direct`** | **แม่หมอพูดตรง** (Justice & Truth) | `major-11.jpg` | ตรงไปตรงมา กระชับ เด็ดขาด ชี้จุดที่ต้องตื่นรู้เพื่อให้ชีวิตไปต่อได้จริง |
-| **`master`** | **อาจารย์สายฟันธง** (The Master Strategist) | `major-09.jpg` | จริงจัง สุขุม ทรงภูมิ ให้กลยุทธ์และ Action Plan 1-2-3 ชัดเจน |
-| **`mystic`** | **แม่หมอสายพลัง** (The Astral Star) | `major-17.jpg` | สุขุม ลึกซึ้ง อ่านคลื่นพลังงาน จังหวะจักรวาล และบทเรียนจิตวิญญาณ |
+1. `scripts/bump-sw-version.ts` — เปลี่ยนรุ่น service worker
+2. `astro build` ➔ `dist/` (`srcDir: astro/` · `build.format: "file"` ได้ไฟล์แบบ `cards/major-00.html` · ไม่มี adapter)
+3. `opennextjs-cloudflare build` ➔ `.open-next/` (ล้างโฟลเดอร์ทุกครั้ง จึงต้องมาก่อนขั้นถัดไป)
+4. `scripts/merge-astro-assets.ts` — คัดลอก `dist/` ลง `.open-next/assets` · ถ้ามีไฟล์ชื่อซ้ำแต่เนื้อหาต่างกันจะหยุดบิลด์ (แปลว่ามีหน้าเดียวถูกเรนเดอร์สองที่) · เติมหัว `Link: rel=preload` ของ CSS ให้ Early Hints
+5. CI เท่านั้น (`deploy.yml` หลังบิลด์และ `repo:verify` ผ่าน): `npm run db:migrate -- --remote` (รัน `migrations/` ใส่ D1 remote) ➔ deploy ➔ ตรวจ Worker หลัง deploy (ไม่ผ่าน = ถอยรุ่นเอง) ➔ ขั้นเก็บงานอื่น (secret ของ Stripe · ล้างแคชขอบ · กฎ `www` · กฎลบการ์ดแชร์ใน R2)
 
----
+แคชหน้าของ Next อยู่ใน static assets (`staticAssetsIncrementalCache` ใน `open-next.config.ts`) ไม่ได้อยู่ใน KV แล้ว (INC-0287)
 
-## 4. 26 ผังพยากรณ์ยอดนิยม (Golden Ratio 26 Spreads Architecture)
+### 2.3 คอมโพเนนต์ที่ใช้ร่วมกันสองฝั่ง
 
-ระบบรองรับผังการเปิดไพ่ 26 แบบ ครอบคลุม 4 หมวดหมู่ จัดวางด้วยสัดส่วนทองคำแบบ **Zero-Clipping Unified Altar Canvas**:
+- คอมโพเนนต์ React ใน `src/components/` ถูกใช้ทั้งหน้า Next และ island ของ Astro
+- ตอนบิลด์ด้วย Astro `next/link` · `next/navigation` · `next/script` · `next/dynamic` ถูกชี้ไปที่ `astro/shims/` (ตั้งใน `astro.config.mjs`) — ห้ามแก้คอมโพเนนต์ให้เลิกใช้ `next/*` เพื่อเรื่องนี้
+- island อยู่ใน `astro/islands/` · กติกา island และกับดัก (เช่น import ข้อมูลก้อนใหญ่เข้า island แล้วบันเดิลพุ่ง) อยู่ใน [plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md](plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md)
+- พิธีเปิดไพ่หลักคือ `src/components/home/TarotFlow.tsx` (island `TarotFlowRoot` บนหน้า `/` และ `/read/<ผัง>`)
 
-1. **ผัง 1 ใบ**: ไพ่ประจำวัน (Daily Card), คำแนะนำด่วน (Quick Oracle), ใช่หรือไม่ (Yes/No Single)
-2. **ผัง 2 ใบ**: ทางแยกสองทาง (Two Paths), ความรักสองหัวใจ (Two Hearts)
-3. **ผัง 3 ใบ**: อดีต-ปัจจุบัน-อนาคต (Past-Present-Future), จิตใจ-ร่างกาย-วิญญาณ (Mind-Body-Spirit), สถานการณ์-อุปสรรค-ทางออก (Situation-Challenge-Advice), ใช่หรือไม่ 3 ใบ (Yes/No Triad)
-4. **ผัง 4 ใบ**: 4 ทิศทางชีวิต (Four Directions), แฟนเก่าจะกลับมาไหม (Reunion Path), เช็คดวงการงาน (Career Outlook)
-5. **ผัง 5 ใบ**: กางเขนธาตุทั้งห้า (Elemental Cross), การเงินมหาเศรษฐี (Wealth & Abundance), ความในใจของเขา (Inner Thoughts)
-6. **ผัง 6 ใบ**: พลังงานรายสัปดาห์ (Weekly Energy)
-7. **ผัง 7 ใบ**: ดวงชะตา 7 วัน (7-Day Forecast), สแกนสมดุล 7 จักระ (7 Chakras Balance)
-8. **ผัง 10 ใบ**: เคลติกครอสโบราณ (Celtic Cross Grand Spread), ส่องเส้นทางชีวิต 10 มิติ (Tree of Life)
+### 2.4 โครงสร้างโฟลเดอร์
 
----
+```text
+astro/            หน้า Astro (pages/) · islands/ · components/ · layouts/BaseLayout.astro · shims/ · scripts/ (สคริปต์ฝั่งเบราว์เซอร์ขนาดเล็ก)
+src/app/          Next.js — api/ (118 route) · (th)/ หน้าแอป · (en)/ · _shared/pages/ (ตัวหน้าที่ Astro เรียกใช้) · sitemap.ts · robots.ts · manifest.ts
+src/components/   คอมโพเนนต์ React — home/ (TarotFlow) · spread/ · deck/ · card/ · reading/ · journal/ · readers/ · admin/ · ui/ ฯลฯ
+src/lib/          ตรรกะ — ai/ · tarot/ · reading/ · safety/ · security/ · auth/ · entitlement/ · platform/ (D1 · KV) · journal/ · marketplace/ ฯลฯ
+src/data/         ข้อมูล — cards/ (78 ใบ) · spreads.ts · pick-a-card*.ts · personas.ts · articles.ts · zodiac.ts
+src/server/       ที่เก็บเซสชันเปิดไพ่ (store.ts)
+migrations/       สคีมา D1 (0001 … 0035) — ใช้ทั้ง production และฐานในเครื่อง
+scripts/          เครื่องมือ CLI · scripts/qa/ = ด่านตรวจ (นิยามรวมที่ CHECKS ใน scripts/github-auto.ts)
+public/           ภาพไพ่ (public/cards/ + ไฟล์ย่อ WebP) · ฟอนต์ · _headers
+mobile/           แอป iPhone (Expo) — ใช้ API ชุดเดียวกับเว็บ
+```
 
-## 5. การเข้ารหัสความโปร่งใส (Provably Fair Cryptographic Flow)
+## 3. Binding และที่เก็บข้อมูล
+
+ทั้งหมดประกาศใน `wrangler.jsonc` · ตัวเข้าถึงอยู่ที่ `src/lib/platform/cf.ts` (KV) และ `src/lib/platform/db.ts` (D1)
+
+| Binding | ชนิด | ใช้ทำอะไร |
+| :--- | :--- | :--- |
+| `ASSETS` | Static Assets (`.open-next/assets`) | หน้า Astro · ไฟล์ของ Next · ภาพไพ่ · ฟอนต์ |
+| `APP_DB` | D1 (`tarot-app-db`) | ผู้ใช้ · สมุดดวง · สิทธิ์/โควตา · ระบบแม่หมอ · ตัวนับเพดานถี่ (`edge_rate_buckets`) ฯลฯ — สคีมาอยู่ใน `migrations/` · สำรองทุกสัปดาห์ลง R2 (`d1-backup.yml`) |
+| `APP_KV` | KV | ข้อมูลแอปคีย์ `app:*` — ธง · ค่าที่แอดมินแก้ · ตัวนับ · เซสชันเปิดไพ่สำรอง (เดิมชื่อ `NEXT_INC_CACHE_KV` · เปลี่ยน 2026-10-24) |
+| `SHARE_BUCKET` | R2 (`seertarot-share`) | ภาพการ์ดแชร์ — ลบเองทั้ง bucket เมื่อครบ 90 วัน (ตั้งกฎทุก deploy) · ห้ามเก็บของถาวรในนี้ |
+| `STUDIO_BUCKET` | R2 (`seertarot-studio`) | โลโก้สตูดิโอแม่หมอ `studio-logo/` — ส่วนตัว · เก็บถาวร ห้ามมีกฎลบ (แยกจาก bucket การ์ดแชร์ 2026-10-26 · #723) |
+| `VECTORIZE` | Vectorize (`card-meanings` · 1024 มิติ) | ค้นหาเชิงความหมายในหน้า `/cards` (`src/lib/search/vectorize.ts`) |
+| `AI` | Workers AI | ตัวจำแนกสัญญาณวิกฤตชั้น 3 (`src/lib/safety/ai-classifier.ts`) · สร้าง embedding ให้ Vectorize |
+| `CALL_METRICS` | Analytics Engine (`seertarot_calls`) | สถิติความเสถียรวิดีโอคอลแม่หมอ (`npm run cf:call-stats`) |
+
+- **Workers Logs** เปิดอยู่ (`observability`) และตัด query string ออกจาก log
+- **ในเครื่อง** ไม่มี binding จริง: D1 ถูกแทนด้วยไฟล์ SQLite `.dev-marketplace.db` ที่สร้างจาก `migrations/` อัตโนมัติ — ดู [LOCAL_SETUP.md](LOCAL_SETUP.md)
+- ตาราง/คอลัมน์ใหม่ให้เพิ่มไฟล์ migration อย่างเดียว ห้ามเขียนสคีมาซ้ำในโค้ด (INC-0303)
+
+## 4. Provably Fair — การสับไพ่ที่ตรวจได้
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as ผู้ใช้ (Client Browser)
-    participant Server as วิหารพยากรณ์ (Edge Server)
-    participant KV as Cloudflare KV (2h Session Store)
-    participant AI as Gemini AI Engine
+    actor U as เบราว์เซอร์
+    participant S as Worker
+    participant K as ที่เก็บเซสชัน (หน่วยความจำ + KV · 2 ชม.)
+    participant AI as ผู้ให้บริการ AI
 
-    User->>Server: POST /api/reading/start (คำถาม + ผัง + แม่หมอ)
-    Server->>Server: สร้าง serverSeed = CSPRNG(32 bytes)
-    Server->>Server: commitment = SHA256(serverSeed + ":" + clientSeed)
-    Server->>KV: Persist reading session (KEY.reading, 2h TTL)
-    Server-->>User: ส่ง sessionToken + commitment (แสดง SHA-256 ให้ผู้ใช้เห็นก่อนสับ)
-    
-    User->>Server: POST /api/reading/[id]/shuffle (clientSeed + pickedIndices)
-    Server->>KV: Load / Verify serverSeed & verifyCommitment()
-    Server->>Server: Deterministic Fisher-Yates Shuffle ด้วย seed (serverSeed | clientSeed)
-    Server->>KV: Persist drawn cards & clientSeed
-    Server-->>User: ยืนยันการวางตำแหน่งไพ่บนผัง
-    
-    User->>Server: POST /api/reading/[id]/read (SSE Streaming)
-    Server->>AI: ส่งตำแหน่งไพ่ + บริบทคำถาม + กฎแม่หมอ
-    AI-->>Server: สตรีมคำทำนาย Real-time JSON chunk
-    Server-->>User: สตรีมข้อความคำทำนายสด SSE
-    
-    Server-->>User: เฉลย serverSeed + Proof (pickedIndices, deckSize) ใน done event
-    User->>User: Client Web Crypto (crypto.subtle) verifyReading() คำนวณซ้ำในเบราว์เซอร์ 100%
+    U->>S: POST /api/reading/start (คำถาม · ผัง · บุคลิก)
+    S->>S: ตรวจความปลอดภัย · ตรวจสิทธิ์
+    S->>S: serverSeed = สุ่ม 32 ไบต์ · commitment = SHA-256(serverSeed)
+    S->>K: เก็บเซสชัน
+    S-->>U: commitment + sessionToken (ลงนาม HMAC)
+    U->>S: POST /api/reading/[id]/shuffle (clientSeed + ตำแหน่งที่แตะในพัด)
+    S->>S: สับ Fisher–Yates ด้วยเมล็ด SHA-256(serverSeed|clientSeed) แล้วหยิบตามตำแหน่งที่ผู้ใช้แตะ
+    S-->>U: ไพ่ที่ได้
+    U->>S: POST /api/reading/[id]/read (SSE)
+    S->>AI: ไพ่จริง + ตำแหน่ง + คำถาม
+    AI-->>S: คำอ่านแบบสตรีม
+    S-->>U: สตรีมคำอ่าน · เหตุการณ์ done แนบ proof (serverSeed · clientSeed · commitment · pickedIndices · deckSize)
+    U->>U: คำนวณซ้ำในเบราว์เซอร์ด้วย Web Crypto
 ```
 
----
+| ส่วน | รายละเอียด | ไฟล์ |
+| :--- | :--- | :--- |
+| คำมั่น | `commitment = SHA-256(serverSeed)` เป็น hex · ส่งให้ผู้ใช้ก่อนแตะไพ่ | `src/lib/tarot/shuffle.ts` |
+| เมล็ดของผู้ใช้ | ต้องมาจากการขยับจริงของผู้ใช้และต้องไม่ว่าง — เซิร์ฟเวอร์ห้ามสุ่มแทน (`normalizeClientSeed` โยน error) | `shuffle.ts` |
+| การสับ | สายเลขสุ่ม `SHA-256(seed:counter)` · Fisher–Yates · rejection sampling กันความเอนเอียง · โอกาสกลับหัว 40% | `shuffle.ts` |
+| การตรวจ | ตัวตรวจฝั่งเบราว์เซอร์ให้ผลตรงกับฝั่งเซิร์ฟเวอร์ทุกไบต์ · แผงตรวจบนหน้าเว็บ | `src/lib/tarot/verify-client.ts` · `src/components/reading/ProvablyFairPanel.tsx` |
+| เซสชัน | เก็บในหน่วยความจำ + KV (หรือ Upstash Redis เมื่อตั้งค่า) อายุ 2 ชั่วโมง · `sessionToken` ลงนามด้วย `TAROT_SESSION_SECRET` ใช้กู้เซสชันข้าม isolate | `src/server/store.ts` · `src/lib/security/session-token.ts` |
+| ไพ่ที่คำนวณได้ | Pick a Card (สำรับประจำวัน) และไพ่วันเกิด **ไม่ได้มาจากการจั่ว** — เซิร์ฟเวอร์คำนวณจากข้อมูลตั้งต้นที่ตรึงไว้ตอน `/start` · proof แนบ `derivation` บอกเสมอ ห้ามแสดงคู่กับแผงตรวจการจั่ว | `src/lib/reading/derived-draw.ts` |
 
-## 6. สถาปัตยกรรมโครงสร้างไฟล์ในโปรเจกต์ (Codebase Topology)
+## 5. AI อ่านไพ่
 
-```text
-astro/
-├── src/
-│   ├── pages/                       # 305 หน้า SSG (cards, spreads, blog, about, privacy, contact, account)
-│   ├── components/                  # Astro static presentation components & layouts
-│   ├── islands/                     # React Island wrappers (client:idle hydration)
-│   ├── layouts/                     # BaseLayout.astro (SEO, fonts, metadata, locale)
-│   └── shims/                       # Shims สำหรับ next/link, next/navigation, next/script
-src/
-├── app/
-│   ├── api/reading/
-│   │   ├── start/route.ts           # เริ่มต้นรอบ ตรวจ Safety และสร้าง SHA-256 Commitment
-│   │   ├── [id]/shuffle/route.ts    # คำนวณ Shuffle ตาม pickedIndices
-│   │   ├── [id]/read/route.ts       # สตรีมคำอ่านผ่าน Server-Sent Events (SSE)
-│   │   └── [id]/chat/route.ts       # ถามคุยต่อยอดตามบริบทไพ่และ 5 บุคลิก
-│   ├── (th)/, (en)/                 # Next.js App Router (หน้าที่ต้องมี Auth/Admin/Dynamic)
-│   ├── account/, admin/, readers/   # บัญชีสมาชิก, แผงควบคุมแอดมิน, คิวแม่หมอ
-│   ├── pick-a-card/                 # หน้าเลือกกองไพ่พยากรณ์ 8 หัวข้อ
-│   ├── page.tsx                     # วิหารพยากรณ์หลัก (5-Step Ritual Flow)
-│   └── globals.css                  # Obsidian Velvet & Gold Design System + GPU Classes
-├── components/
-│   ├── card/                        # TarotCard 3D, CardImage (WebP/AVIF), CardZoomModal
-│   ├── deck/                        # InteractiveCardFan (78 ใบ), ShuffleRitual
-│   ├── spread/                      # SpreadBoard, SpreadCardSelector (26 ผัง)
-│   ├── pick-a-card/                 # PickACardClient, TouchCarousel, CrystalPileSelector
-│   ├── reading/                     # StreamReader, FollowUpChat, ShareModal, PersonaCardSelector
-│   ├── history/, encyclopedia/      # ReadingHistoryModal, CardsExplorer
-│   └── ui/                          # MysticAltarCanvas, TarotArtIcons, Modal, Button
-├── data/
-│   ├── cards/                       # ข้อมูลไพ่ 78 ใบ (780 ข้อความความหมาย 5 มิติ)
-│   ├── spreads.ts                   # ข้อมูล 26 ผังพยากรณ์และ 136 ตำแหน่ง
-│   ├── pick-a-card.ts               # ระบบ Pick A Card 8 หัวข้อ, 4 หินคริสตัล, สำรับหมุนเวียนเที่ยงคืน
-│   └── personas.ts                  # แม่หมอ 5 บุคลิก (warm, playful, direct, master, mystic)
-├── lib/
-│   ├── ai/                          # Dual-Engine Failover (Groq Qwen 2.5 + Gemini) SSE Streaming
-│   ├── reading/                     # Derived Draw Engine, AI Reading Hook, Telemetry
-│   ├── safety/                      # Guardrails กรองคำถามอันตราย & 1323
-│   ├── security/                    # Session Token & Stateless HMAC Signature
-│   └── tarot/                       # Provably Fair Shuffle & Single Source Card Resolver
-docs/
-├── TAROT_CARD_FEATURES.md           # สเปกระบบและสารบบไพ่ทาโรต์ 78 ใบ, 5 มิติ, ผัง 26 แบบ, Pick A Card 8 หัวข้อ
-├── ARCHITECTURE.md                  # สถาปัตยกรรมระดับองค์กร (Enterprise Architecture Blueprint)
-├── INCIDENT_LOG.md                  # บันทึกบทเรียนความผิดพลาดและกฎป้องกันถาวร
-└── KNOWN_ISSUES.md                  # ดัชนีสถานะบั๊กค้างและข้อจำกัดระบบ
-```
+| ลำดับ | ผู้ให้บริการ | โมเดล (ตามโค้ด 2026-10-26) | หมายเหตุ |
+| :-: | :--- | :--- | :--- |
+| 1 | Groq | `qwen/qwen3.8-27b` ➔ `openai/gpt-oss-120b` ➔ `openai/gpt-oss-20b` | ผังตั้งแต่ 4 ใบเกินเพดาน token ต่อนาทีของ Groq จึงข้ามไปลำดับ 2 ทันที · มีด่านกันอักษรต่างชาติหลุดในคำตอบ |
+| 2 | Google Gemini | `gemini-3.5-flash-lite` ➔ `gemini-3.6-flash` (`WORKING_GEMINI_MODELS`) | รายชื่อมาจากผลวัดในแท็บ "สุขภาพ AI" ของแอดมินเท่านั้น ห้ามเดา (INC-0053) |
+| 3 | OpenRouter | โมเดลฟรีเท่านั้น (`OPENROUTER_FREE_MODELS` · ตอนนี้ว่าง) | รายชื่อมาจาก `ai-probe-openrouter.yml` |
+| 4 | คำอ่านสำรองออฟไลน์ | — | ใช้เมื่อทุกเจ้าล่มหรือไม่มีคีย์ (`src/lib/ai/mock-reading.ts`) |
 
----
+- Groq และ Gemini วิ่งผ่าน Cloudflare AI Gateway เมื่อตั้ง `CF_AI_GATEWAY_*` (`src/lib/ai/gateway.ts`)
+- สตรีมไปเบราว์เซอร์ด้วย Server-Sent Events · ผู้ใช้ปิดแท็บ = ยกเลิกคำขอไปยังผู้ให้บริการทันที
+- prompt สร้างที่ `src/lib/ai/prompt.ts` (รุ่นใน `prompt-version.ts`) · กันการฉีดคำสั่งที่ `prompt-guard.ts` · ตรวจภาษาไทยที่ `thai-quality.ts` · คำตอบทุกชิ้นผ่าน `stripEmoji()` ก่อนถึงจอ
+- คำอ่านทุกชิ้นแนบข้อความบอกว่าเขียนโดย AI (`AI_DISCLOSURE`)
+- เส้นทางอื่นที่เรียก AI: แชทถามต่อ (`/api/reading/[id]/chat`) · ขอรายละเอียดเพิ่ม (`clarify`) · อธิบายเหตุผล (`explain`) · มุมมองเพิ่ม (`perspective`)
 
-## 8. ระบบความปลอดภัยและการควบคุมต้นทุน AI 7 ชั้น (7-Layer Defense-in-Depth & Cost Control)
+### 5.1 บุคลิกแม่หมอ (`src/data/personas.ts`)
 
-เพื่อป้องกันการยิง API ซ้ำซ้อน, การถูก Bot Scraping และการสูญเสียงบประมาณโมเดล AI (Gemini 3.7 Flash) โดยไม่ทำลายบรรยากาศการเปิดไพ่ด้วย Captcha (ADR-002):
+| id | ชื่อ | น้ำเสียง |
+| :--- | :--- | :--- |
+| `warm` | แม่หมอใจดี | อบอุ่น โอบกอดความรู้สึก |
+| `playful` | แม่หมอเพื่อนซี้ | คุยสนุก เป็นกันเอง |
+| `direct` | แม่หมอพูดตรง | ไม่อ้อมค้อม ชี้จุดที่ต้องแก้ |
+| `master` | อาจารย์สายฟันธง | จริงจัง ให้แผน 1-2-3 — เฉพาะผู้มีสิทธิ์พิเศษ |
+| `mystic` | แม่หมอสายพลัง | อ่านพลังงานและจังหวะชีวิต — เฉพาะผู้มีสิทธิ์พิเศษ |
 
-1. **Provably Fair Entropy Binding**: การสับไพ่ผูกกับ `clientSeed` และ `pickedIndices` ของผู้ใช้จริง บอทไม่สามารถยิงลัดขั้นตอนได้
-2. **Strict Origin & Anti-Theft Guard (`anti-theft.ts`)**: ตรวจสอบ `Sec-Fetch-Site` และ `Origin` ป้องกันการขโมย API ไปใช้ในเว็บภายนอก
-3. **Privileged Testing Bypass (`privileged.ts`)**: รองรับการทดสอบอัตโนมัติของทีมและ CI ผ่าน Admin Cookie และ Header `X-Tarot-Bypass: RATE_LIMIT_BYPASS_TOKEN`
-4. **Sliding Window Rate Limiter (`rate-limit.ts`)**: จำกัดความถี่คำขอต่อ IP แบบ Sliding Window พร้อม Single-Flight Concurrency Lock
-5. **Edge KV Cross-Fleet Soft Quota (`ai-budget.ts`)**: จำกัดโควตารายวันต่อ IP (40 ครั้ง/วัน) ซิงก์ข้าม Edge isolate ด้วย SHA-256 IP Hash
-6. **AI Daily Spend Cap & Circuit Breaker (`ai-budget.ts`)**: เพดานงบประมาณ Gemini ประจำวัน (`AI_DAILY_CALL_CAP`) พร้อมตัดวงจรคืนค่า HTTP 503 บน `/read` และ fallback สู่ Local Synthesis อัตโนมัติบน `/chat`
-7. **Cloudflare Native WAF Rate Limiting**: บล็อกสแปมและทราฟฟิกผิดปกติตั้งแต่ระดับ DNS Edge ก่อนเข้าถึง Cloudflare Worker
+`master` และ `mystic` สงวนไว้ตาม `MASTER_PERSONA_IDS` ใน `src/lib/entitlement/limits.ts`
 
----
+## 6. ความปลอดภัยและการคุมต้นทุน
 
-## 9. ระบบยืนยันตัวตนด้วยอีเมลและรหัสผ่าน (Email & Password Authentication Architecture)
+| ชั้น | ทำอะไร | ไฟล์ |
+| :--- | :--- | :--- |
+| ด่านวิกฤต | regex จับประโยคตรง ➔ Workers AI จับประโยคอ้อม (ข้อความในกลุ่มเสี่ยงที่ตัวจำแนกล่ม = บล็อกไว้ก่อน) ➔ แสดงสายด่วน 1323 · สะมาริตันส์ · 1669 | `src/lib/safety/guardrails.ts` · `ai-classifier.ts` |
+| กันเว็บอื่นยิง API | ตรวจ `Origin` / Fetch Metadata | `src/lib/security/anti-theft.ts` |
+| เพดานความถี่ | ด่านเร็วในหน่วยความจำ + เพดานข้าม isolate แบบ atomic บน D1 (`edge_rate_buckets`) ทุกเส้นทางเปิดไพ่ | `src/lib/utils/rate-limit.ts` · `src/lib/security/edge-ratelimit.ts` |
+| เพดานงบ AI รายวัน | `AI_DAILY_CALL_CAP` (ค่าเริ่มต้น 2,000 ครั้ง/วัน) · ผู้ไม่เป็นสมาชิกถูกตัดที่ 70% | `src/lib/security/ai-budget.ts` |
+| สิทธิ์เปิดไพ่ | ต้องลงชื่อก่อน (`GUEST_LIMIT = 0`) · ผังมาตรฐานวันละ 1 ครั้ง (`DAILY_LIMIT`) · ผังใหญ่ใช้แพ็กเกจ | `src/lib/entitlement/` · [specs/ENTITLEMENT_ABUSE_MODEL.md](specs/ENTITLEMENT_ABUSE_MODEL.md) |
+| กันบอทตอนสมัคร/ลงชื่อ | Cloudflare Turnstile (เมื่อตั้งคีย์) | `src/lib/security/turnstile.ts` |
+| ทางข้ามสำหรับทดสอบ | ทีมงานและ CI ข้ามเพดานได้ด้วยรหัสลับเท่านั้น | `src/lib/security/privileged.ts` |
+| ขอบ Cloudflare | กฎ WAF/Rate Limiting ตั้งที่ Dashboard — ไม่อยู่ในโค้ด | [CLOUDFLARE_DEPLOYMENT_GUIDE.md](CLOUDFLARE_DEPLOYMENT_GUIDE.md) หัวข้อ 6 |
 
-เพื่อมอบทางเลือกให้กับผู้ใช้ที่ไม่ได้ใช้งาน Google หรือ LINE OAuth ระบบรองรับ Email/Password Authentication ภายใต้มาตรฐานความปลอดภัยระดับสูง:
+เหตุผลที่ไม่ใช้ captcha ระหว่างเปิดไพ่: [adr/ADR-002-bot-challenge.md](adr/ADR-002-bot-challenge.md)
 
-1. **PBKDF2-HMAC-SHA256 Password Hashing (`password.ts`)**:
-   - 150,000 iterations, 32-byte derived key, 16-byte random salt ต่อผู้ใช้
-   - ผสม Server-side Pepper (`PASSWORD_PEPPER`) บน Web Crypto API ทำงานได้รวดเร็วบน Cloudflare Workers
-   - Constant-time verification (`timingSafeEqualBytes`) ป้องกัน Timing Attack
-2. **NIST 2024 Password Policy (`password-policy.ts`)**:
-   - ความยาว 10–200 ตัวอักษร, ปฏิเสธรหัสผ่านยอดนิยม (Common Passwords) และรหัสผ่านที่ซ้ำกับชื่ออีเมล
-3. **Single-Use Token Lifecycle (`auth-tokens.repo.ts`)**:
-   - จัดเก็บเฉพาะ SHA-256 Hash ของ Token ในฐานข้อมูล D1 (`auth_tokens`)
-   - Verification Token (TTL 24 ชม.), Reset Token (TTL 15 นาที)
-   - ป้องกัน Replay Attack โดยทำเครื่องหมาย `used_at` ทันทีเมื่อถูกใช้งาน
-4. **Anti-Enumeration Protection**:
-   - API endpoints ตอบข้อความมาตรฐานแบบ generic แม้อีเมลจะไม่มีอยู่ในระบบ เพื่อป้องกันการกวาดรายชื่อผู้ใช้
-5. **OAuth Account Linking (`oauth_identities`)**:
-   - เมื่อผู้ใช้เข้าสู่ระบบด้วย Google หรือ LINE ที่มีอีเมลตรงกับบัญชีเดิม ระบบจะเชื่อมโยง Provider Identity เข้ากับบัญชีเดิมให้อัตโนมัติโดยไม่สร้างบัญชีซ้ำซ้อน
-6. **Session Invalidation via `token_version`**:
-   - ทุกครั้งที่มีการเปลี่ยนหรือรีเซ็ตรหัสผ่าน ค่า `token_version` ในฐานข้อมูลจะถูกเพิ่มขึ้น 1 ทำให้เซสชันเดิมบนอุปกรณ์อื่นทั้งหมดถูกเพิกถอนทันที
+## 7. บัญชีผู้ใช้
 
-## 10. แผนที่ตัวแปรแวดล้อมระบบจริง (Environment Variables Map)
+| เรื่อง | รายละเอียด | ไฟล์ |
+| :--- | :--- | :--- |
+| ลงชื่อ | Google · LINE (`/api/auth/[provider]`) · อีเมล + รหัสผ่าน (`/api/auth/email/*`) | `src/app/api/auth/` |
+| แฮชรหัสผ่าน | PBKDF2-HMAC-SHA256 100,000 รอบ (เพดานของ Web Crypto บน Workers) + pepper ฝั่งเซิร์ฟเวอร์ (`PASSWORD_PEPPER`) · เทียบแบบเวลาคงที่ | `src/lib/auth/password.ts` |
+| นโยบายรหัสผ่าน | ยาว 10–200 ตัว · ปฏิเสธรหัสยอดนิยมและรหัสที่มีชื่ออีเมล | `src/lib/auth/password-policy.ts` |
+| token ยืนยัน/รีเซ็ต | เก็บเฉพาะแฮช · ใช้ได้ครั้งเดียว · ยืนยันอีเมล 24 ชม. · รีเซ็ตรหัส 15 นาที | `src/lib/auth/auth-tokens.repo.ts` |
+| เพิกถอนเซสชัน | เปลี่ยน/รีเซ็ตรหัสผ่านแล้ว `token_version` เพิ่ม เซสชันเดิมทุกเครื่องหลุด | `src/lib/auth/resolve-session.ts` |
+| ส่งอีเมล | Resend (`RESEND_API_KEY`) · ไม่มีคีย์ในเครื่อง = พิมพ์อีเมลลง console | `src/lib/email/send.ts` |
+| ข้อมูลส่วนบุคคล | ขอสำเนา `/api/account/export` · ลบ `DELETE /api/account` · ตารางใหม่ที่มี `user_id` ต้องลงทะเบียนที่เดียว | `src/lib/privacy/user-data.ts` |
 
-ตารางต่อไปนี้แสดงรายการตัวแปรแวดล้อม (Environment Variables & Cloudflare Secrets) ทั้งหมดที่ใช้งานจริงในระบบ ความสำคัญ แหล่งจัดเก็บ และไฟล์ที่เรียกใช้งาน:
+## 8. การตัดสินใจทางสถาปัตยกรรม (ADR) และเอกสารที่เกี่ยวข้อง
 
-| ตัวแปร / Secret / Binding | บทบาทหน้าที่ | ระดับความสำคัญ | แหล่งจัดเก็บ (Production / Local) | ไฟล์ที่เรียกใช้งานจริง |
-| :--- | :--- | :---: | :--- | :--- |
-| **`GROQ_API_KEY`** | คีย์เชื่อมต่อ Groq Cloud LPU เอนจินหลักความเร็วสูง (Qwen 2.5 72B/32B Tier 1, ~400ms) | 🔴 **จำเป็นสำหรับ AI ปฐมภูมิ** | Cloudflare Secret / `.env.local` | `src/lib/ai/groq.ts`<br>`src/app/api/reading/[id]/chat/route.ts`<br>`src/app/api/admin/ai-health/route.ts` |
-| **`GEMINI_API_KEY`**<br>`(หรือ GOOGLE_API_KEY)` | คีย์เชื่อมต่อ Google Gemini (3.7 / 2.5 Flash Tier 2) สำรองเมื่อ Groq ชนโควตา | 🔴 **จำเป็นสำหรับ AI สำรอง** | Cloudflare Secret / `.env.local` | `src/app/api/reading/[id]/read/route.ts`<br>`src/app/api/reading/[id]/chat/route.ts`<br>`src/lib/ai/gemini.ts` |
-| **`TAROT_SESSION_SECRET`** | กุญแจลับลงนาม Session Token ในการสับไพ่และกู้คืนเซสชัน (บังคับ ≥32 bytes) | 🔴 **จำเป็นสำหรับ Provably-Fair** | Cloudflare Secret / `.env.local` | `src/lib/security/session-token.ts`<br>`src/lib/auth/admin-auth.ts` |
-| **`PASSWORD_PEPPER`** | ค่า Server-side Pepper ผสมในการแฮชรหัสผ่าน PBKDF2-HMAC-SHA256 (32 bytes) | 🔴 **จำเป็นสำหรับ Email Auth** | Cloudflare Secret / `.env.local` | `src/lib/auth/password.ts` |
-| **`ADMIN_PASSWORD`** | รหัสผ่านสำหรับเข้าสู่แผงควบคุมระบบหลังบ้าน (`/admin`) | 🔴 **จำเป็นสำหรับแอดมิน** | Cloudflare Secret / `.env.local` | `src/lib/auth/admin-auth.ts`<br>`src/app/api/admin/login/route.ts` |
-| **`APP_ORIGIN`** | Base URL ระบบ (`https://seertarot.net`) สำหรับ Callback และลิงก์อีเมล | 🔴 **จำเป็นบน Production** | Cloudflare Secret / `.env.local` | `src/lib/config/site.ts`<br>`src/app/api/auth/*` |
-| **`RESEND_API_KEY`** | API Key จาก Resend สำหรับส่งอีเมลยืนยันตัวตนและรีเซ็ตรหัสผ่าน | 🔴 **จำเป็นสำหรับระบบอีเมล** | Cloudflare Secret / `.env.local` | `src/lib/email/resend.ts` |
-| **`EMAIL_FROM`** | ชื่อและที่อยู่อีเมลผู้ส่ง (`แม่หมอทาโรต์ <noreply@seertarot.net>`) | 🟡 **จำเป็นสำหรับระบบอีเมล** | Cloudflare Secret / `.env.local` | `src/lib/email/resend.ts` |
-| **`GOOGLE_CLIENT_ID` / `_SECRET`** | คีย์เชื่อมต่อ Google OAuth Sign-in | 🟡 **จำเป็นสำหรับ Google Login** | Cloudflare Secret / `.env.local` | `src/app/api/auth/google/*` |
-| **`LINE_CHANNEL_ID` / `_SECRET`** | คีย์เชื่อมต่อ LINE Login Channel | 🟡 **จำเป็นสำหรับ LINE Login** | Cloudflare Secret / `.env.local` | `src/app/api/auth/line/*` |
-| **`TURNSTILE_SITE_KEY` / `_SECRET_KEY`** | Cloudflare Turnstile ป้องกันบอทหน้าลงทะเบียน/เข้าสู่ระบบ | 🟡 **จำเป็นสำหรับ Bot Defense** | Cloudflare Secret / `.env.local` | `src/app/api/config/turnstile`<br>`src/lib/security/turnstile.ts` |
-| **`CF_AI_GATEWAY_ACCOUNT_ID` / `_ID`** | Cloudflare AI Gateway สำหรับรวม log, retry, และวัดผล AI ทุกค่าย | 🟢 **เพิ่มความเสถียร AI** | Cloudflare Secret / `.env.local` | `src/lib/ai/gateway.ts` |
-| **`TESTER_PASSWORD`** | รหัสผ่านปลดล็อกโหมดผู้ทดสอบไม่จำกัด (`/tester`) | 🟢 **สำหรับทดสอบระบบ** | Cloudflare Secret / `.env.local` | `src/app/api/tester/login` |
-| **`UNLIMITED_EMAILS`** | รายชื่ออีเมล Allowlist ที่ได้รับสิทธิ์ดูดวงไม่จำกัด | 🟢 **สำหรับทีมงาน** | Cloudflare Secret / `.env.local` | `src/lib/entitlement/entitlement.ts` |
-| **`APP_DB`** *(D1 Binding)* | Cloudflare D1 Relational DB สำหรับเก็บ users, journal, usage, bonus | 🔴 **จำเป็นบน Production** | `wrangler.jsonc` (`d1_databases`) | `src/lib/platform/db.ts` |
-| **`APP_KV`** *(KV Binding)* | Cloudflare KV ข้อมูลแอป `app:*` — Overrides, Flags, Session Backstop (เดิมชื่อ `NEXT_INC_CACHE_KV` · แคชหน้า Next ย้ายไป static assets แล้ว) | 🔴 **จำเป็นบน Production** | `wrangler.jsonc` (`kv_namespaces`) | `src/lib/platform/cf.ts`<br>`src/lib/platform/kv-store.ts` |
-| **`AI`** *(Workers AI Binding)* | Cloudflare Workers AI สำหรับตัวคัดกรองความปลอดภัยฉุกเฉินชั้น 3 | 🟢 **ฟรี 10k neurons/วัน** | `wrangler.jsonc` (`ai`) | `src/lib/safety/ai-classifier.ts` |
-| **`VECTORIZE`** *(Binding)* | Cloudflare Vectorize Index (`card-meanings`) ค้นหาไพ่และความหมายเชิงความหมาย 1024d | 🟢 **ฟรี 30M queries/เดือน** | `wrangler.jsonc` (`vectorize`) | `src/lib/search/vectorize.ts` |
-| **`SHARE_BUCKET`** *(R2 Binding)* | Cloudflare R2 Bucket (`seertarot-share`) เก็บภาพการ์ดแชร์ที่สร้างจาก Canvas · ลบเองทั้ง bucket เมื่อครบ 90 วัน | 🟢 **ฟรี 10GB ไม่มี egress** | `wrangler.jsonc` (`r2_buckets`) | `src/app/api/share/image/route.ts` |
-| **`STUDIO_BUCKET`** *(R2 Binding)* | Cloudflare R2 Bucket (`seertarot-studio`) เก็บโลโก้สตูดิโอแม่หมอ · ส่วนตัว · เก็บถาวร (แยกจาก bucket การ์ดแชร์ 2026-10-26) | 🟢 **ฟรี 10GB ไม่มี egress** | `wrangler.jsonc` (`r2_buckets`) | `src/lib/studio/logo.ts` |
-
----
-
-## 11. บันทึกการตัดสินใจทางสถาปัตยกรรม (Architecture Decision Records - ADR Index)
-
-การตัดสินใจสำคัญด้านโครงสร้างและเทคโนโลยีทั้งหมดได้รับการบันทึกอย่างเป็นทางการในโฟลเดอร์ [`docs/adr/`](adr/):
-
-* **[ADR-001: สถาปัตยกรรม Marketplace แม่หมอและการคุ้มครองข้อมูลส่วนบุคคล (PDPA Architecture & Compliance)](adr/ADR-001-marketplace-pdpa.md)** — การแยกชั้นข้อมูลอ่อนไหว, Data Minimization, และการส่งต่อ Off-Platform
-* **[ADR-002: กลยุทธ์ป้องกันบอทและการควบคุมต้นทุน AI โดยไม่ทำลายประสบการณ์ผู้ใช้](adr/ADR-002-bot-challenge.md)** — การควบคุมค่าใช้จ่ายและการป้องกันบอท 7 ชั้นโดยไม่ใช้ Captcha รบกวนผู้ใช้
-* **[ADR-003: เหตุผลการเลือกใช้เทคโนโลยีเวอร์ชันล้ำสมัยและการบริหารความเสี่ยง (Cutting-Edge Stack Rationale & Risk Management)](adr/ADR-003-cutting-edge-stack-rationale.md)** — การเลือกใช้ `React 19.2`, `Next.js 16.3`, และ `Motion 13` เพื่อ 60fps Animation บน Edge พร้อมมาตรการรับมือความเสี่ยง
-* **[Astro Migration Blueprint: สถาปัตยกรรมไฮบริด Astro 7 + React 19 Islands](../docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md)** — การย้าย 305 หน้าสู่ Zero-Runtime SSG ตอบตรงจาก Cloudflare Edge Assets ลดขนาด JS ลง 36–53% และ TBT เหลือ 14–42 ms
-* **[Card Tile Height & Layout Stability: การคุมความเสถียรของกริดไพ่และ content-visibility](../docs/plans/HANDOFF_CARD_TILE_CV_2026-09-15.md)** — สูตรคำนวณความสูงคงที่และการแบ่งชั้น responsive ป้องกัน Layout Shift / Jittering 100%
-
----
-
-ระบบถูกออกแบบภายใต้มาตรฐานความน่าเชื่อถือระดับสูง (High Reliability & Fault Tolerance) เพื่อมอบประสบการณ์ดูดวงไพ่ทาโรต์ออนไลน์ที่ดีที่สุดในระดับสากล ✦
-
-
+- [ADR-001](adr/ADR-001-marketplace-pdpa.md) — ข้อมูลส่วนบุคคลในระบบแม่หมอ
+- [ADR-002](adr/ADR-002-bot-challenge.md) — กันบอทและคุมต้นทุน AI โดยไม่ใช้ captcha
+- [ADR-003](adr/ADR-003-cutting-edge-stack-rationale.md) — เหตุผลที่ใช้ไลบรารีรุ่นใหม่ (เลขรุ่นในไฟล์เป็นของวันที่เขียน)
+- [plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md](plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md) — ย้ายหน้าเนื้อหาไป Astro · กติกา island
+- [plans/HANDOFF_CARD_TILE_CV_2026-09-15.md](plans/HANDOFF_CARD_TILE_CV_2026-09-15.md) — สูตรความสูงการ์ดไพ่ในกริด
+- [specs/MARKETPLACE.md](specs/MARKETPLACE.md) — ระบบแม่หมอตัวจริง
+- [TAROT_CARD_FEATURES.md](TAROT_CARD_FEATURES.md) — สเปกโดเมนไพ่ (สำรับ · ผัง · Pick a Card)

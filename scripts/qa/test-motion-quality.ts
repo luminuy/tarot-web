@@ -5,7 +5,7 @@
  * เว็บนี้เสียเฟรมมาแล้ว 3 รอบใหญ่จาก "อนิเมชันที่ดูไม่มีพิษภัย" และทุกรอบจบด้วย
  * กฎป้องกันถาวรที่เขียนไว้ในเอกสาร แล้วก็ถูกละเมิดซ้ำอยู่ดีเพราะไม่มีเครื่องตรวจ:
  *
- *   INC-0056 — backdrop-blur พื้นที่ใหญ่ (หัวเว็บ · ฉากหลังโมดัล) วัดจริง fps 30 → 58 เมื่อถอดออก
+ *   INC-0060 — backdrop-blur พื้นที่ใหญ่ (หัวเว็บ · ฉากหลังโมดัล) วัดจริง fps 30 → 58 เมื่อถอดออก
  *              กฎเขียนไว้แล้ว แต่ตอนตรวจรอบนี้ยังพบ backdrop-blur ค้างอยู่ 10 จุด
  *   INC-0108 — `translate3d(0,0,0)` ถูก Lightning CSS ยุบเหลือ transform 2D
  *              เลเยอร์ GPU ที่ตั้งใจบังคับจึงไม่เคยเกิดขึ้นจริงเลย ต้องเขียน `translateZ(0)` เท่านั้น
@@ -23,7 +23,7 @@
  *     ถ้าจงใจอนิเมตคุณสมบัติเชิง layout จริง ๆ ให้ระบุชื่อตรง ๆ เช่น `transition-[width]`
  *     เพื่อให้คนอ่านโค้ดเห็นว่า "ตั้งใจ" ไม่ใช่เผลอ
  *
- *  2. ห้ามใช้ backdrop-filter / backdrop-blur ที่ใดก็ตามใน src (INC-0056)
+ *  2. ห้ามใช้ backdrop-filter / backdrop-blur ที่ใดก็ตามใน src (INC-0060)
  *     ทุกจุดที่เคยใช้ในเว็บนี้เป็นพื้นที่ใหญ่ที่มีของลอยทับหรือมีอนิเมชันวิ่งอยู่ทั้งหมด
  *     ถ้าอนาคตมีเคสที่ "เล็กจริงและนิ่งจริง" ให้เพิ่มลง ALLOWLIST พร้อมตัวเลข fps ที่วัดมา
  *
@@ -41,7 +41,7 @@
  *  7. ห้าม `<AnimatePresence mode="wait">` ที่ไม่มี `exit` อยู่ข้างในเลยสักตัว
  *     `mode="wait"` มีหน้าที่เดียวคือ "รอตัวเก่าเล่นอนิเมชันขาออกให้จบก่อนค่อยเข้าตัวใหม่"
  *     ถ้าไม่มีขาออก มันจึงไม่ได้ทำอะไรเลย นอกจากแบกความเสี่ยงมาเปล่า ๆ —
- *     `AnimatePresence mode="wait"` คือสาเหตุรากของ INC-0015 ที่ทำให้พิธีดูดวงค้างตายทั้งขั้น
+ *     `AnimatePresence mode="wait"` คือสาเหตุรากของ INC-0014 ที่ทำให้พิธีดูดวงค้างตายทั้งขั้น
  *     (exit-transition deadlock กับ motion@13 + React 19.2)
  *
  *  8. `transform` ที่ประกอบจาก custom property และมี `transition` อยู่ด้วย
@@ -191,7 +191,7 @@ function checkTsx(violations: Violation[]): void {
       if (/backdrop-blur|backdropFilter|backdrop-filter/.test(line) && !isAllowed(r, "backdrop")) {
         violations.push({
           ...at,
-          rule: "2 · backdrop-filter (INC-0056)",
+          rule: "2 · backdrop-filter (INC-0060)",
           hint: "ใช้พื้นทึบแทน (เช่นคลาส `.modal-scrim`) — เบลอพื้นหลังบังคับให้เบราว์เซอร์วาดทั้งจอใหม่ทุกเฟรม",
         });
       }
@@ -254,7 +254,7 @@ function checkWaitWithoutExit(violations: Violation[]): void {
       if (/\bexit=/.test(block)) continue;
 
       violations.push({
-        rule: "7 · mode=\"wait\" ที่ไม่มี exit (INC-0015)",
+        rule: "7 · mode=\"wait\" ที่ไม่มี exit (INC-0014)",
         file: r,
         line: i + 1,
         code: lines[i].trim().slice(0, 160),
@@ -341,7 +341,7 @@ function checkCss(violations: Violation[]): void {
       if (/backdrop-filter\s*:/.test(line) && !UI2_FULL_FX_FILES.includes(r)) {
         violations.push({
           ...at,
-          rule: "2 · backdrop-filter (INC-0056)",
+          rule: "2 · backdrop-filter (INC-0060)",
           hint: "ใช้พื้นทึบแทน",
         });
       }
@@ -406,7 +406,7 @@ function checkUi2FullFxFile(UI2_FULL_FX_FILE: string, violations: Violation[]): 
             file: UI2_FULL_FX_FILE,
             line: i + 1,
             code: t.slice(0, 160),
-            hint: 'ทุกกฎต้องขึ้นต้น [data-fx="full"] และอยู่ใต้ @media (min-width: 768px) — ไม่งั้นมือถือได้ของหนักไปด้วย (INC-0056)',
+            hint: 'ทุกกฎต้องขึ้นต้น [data-fx="full"] และอยู่ใต้ @media (min-width: 768px) — ไม่งั้นมือถือได้ของหนักไปด้วย (INC-0060)',
           });
         }
       }

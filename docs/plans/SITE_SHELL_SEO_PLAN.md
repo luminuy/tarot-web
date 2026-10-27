@@ -1,6 +1,6 @@
 # 🏛️ แผนลงมือ: Site Shell กลาง + Internal Link ที่บอทมองเห็น
 
-> **สถานะ**: ✅ เสร็จแล้ว — Header/Footer กลาง + RelatedCards ฝั่งเซิร์ฟเวอร์ · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: PR #248
+> **สถานะ**: ✅ เสร็จแล้ว — หัวเว็บและท้ายเว็บกลางทั้งเว็บ · `RelatedCards` เรนเดอร์ฝั่งเซิร์ฟเวอร์ให้บอทเห็นลิงก์ภายใน · ไม่มีงานค้าง · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: PR #248
 
 > **เอกสารสั่งงานสำหรับทีมที่รับช่วงต่อ** — อ่านจบแล้วลงมือได้เลย ไม่ต้องกลับมาถาม
 > อ้างอิงโค้ดจริงบน branch `claude/header-footer-seo-plan-860c20` (ฐาน `main` commit `e76bb34`)
@@ -65,22 +65,22 @@ find src -iname "*footer*" -o -iname "*header*"
 
 | หน้า | ไฟล์:บรรทัด | โลโก้ | ปุ่มซ้าย | เมนูขวา | sticky |
 | :--- | :--- | :---: | :--- | :--- | :---: |
-| `/` | [`TarotFlow.tsx:883`](../../src/app/TarotFlow.tsx#L883) | ✅ `/logo.webp` + ชื่อแบรนด์ + `1909 RIDER-WAITE TAROT` | โลโก้ = ลิงก์กลับ `/` | `UserProfileBadge` + `SacredNavDropdown` + ปุ่ม "เริ่มดูดวงใหม่" | ✅ `sticky top-0 z-50` |
-| `/cards` | [`cards/page.tsx:73`](../../src/app/cards/page.tsx#L73) | ❌ | pill `← กลับหน้าดูดวงหลัก` | `SacredNavDropdown` | ❌ |
-| `/spreads` | [`spreads/page.tsx:73`](../../src/app/spreads/page.tsx#L73) | ❌ | pill `← กลับหน้าดูดวงหลัก` | `SacredNavDropdown` | ❌ |
-| `/blog` | [`blog/page.tsx:94`](../../src/app/blog/page.tsx#L94) | ❌ | pill `← กลับหน้าดูดวงหลัก` (คนละคลาสกับ 2 หน้าบน: `shadow-2xs`, hover `#8F5C1A`) | ลิงก์ลัด 2 อัน (`/spreads`, `/cards`) + `SacredNavDropdown` | ❌ |
-| `/readers` | [`readers/page.tsx:62`](../../src/app/readers/page.tsx#L62) | ❌ | breadcrumb `หน้าแรก / ปรึกษาแม่หมอตัวจริง` (ไม่ใช่ pill) — เส้นขอบใช้สี `#E4D8C4` ต่างจากหน้าอื่นที่ใช้ `#D5CEC2` | `SacredNavDropdown` | ❌ |
-| `/readers/[id]` | [`readers/[id]/page.tsx:60`](../../src/app/readers/[id]/page.tsx#L60) | ❌ | breadcrumb 3 ชั้น | `SacredNavDropdown` | ❌ |
+| `/` | [`TarotFlow.tsx:883`](../../src/components/home/TarotFlow.tsx) | ✅ `/logo.webp` + ชื่อแบรนด์ + `1909 RIDER-WAITE TAROT` | โลโก้ = ลิงก์กลับ `/` | `UserProfileBadge` + `SacredNavDropdown` + ปุ่ม "เริ่มดูดวงใหม่" | ✅ `sticky top-0 z-50` |
+| `/cards` | `cards/page.tsx:73` | ❌ | pill `← กลับหน้าดูดวงหลัก` | `SacredNavDropdown` | ❌ |
+| `/spreads` | `spreads/page.tsx:73` | ❌ | pill `← กลับหน้าดูดวงหลัก` | `SacredNavDropdown` | ❌ |
+| `/blog` | `blog/page.tsx:94` | ❌ | pill `← กลับหน้าดูดวงหลัก` (คนละคลาสกับ 2 หน้าบน: `shadow-2xs`, hover `#8F5C1A`) | ลิงก์ลัด 2 อัน (`/spreads`, `/cards`) + `SacredNavDropdown` | ❌ |
+| `/readers` | [`readers/page.tsx:62`](../../src/app/%28th%29/readers/%28directory%29/page.tsx) | ❌ | breadcrumb `หน้าแรก / ปรึกษาแม่หมอตัวจริง` (ไม่ใช่ pill) — เส้นขอบใช้สี `#E4D8C4` ต่างจากหน้าอื่นที่ใช้ `#D5CEC2` | `SacredNavDropdown` | ❌ |
+| `/readers/[id]` | [`readers/[id]/page.tsx:60`](../../src/app/%28th%29/readers/[id]/page.tsx) | ❌ | breadcrumb 3 ชั้น | `SacredNavDropdown` | ❌ |
 
 #### หน้าที่ **ไม่มีเมนูหลักเลย** (คลิกเข้าจาก Google แล้วไปต่อไม่ได้)
 
 | หน้า | จำนวน URL | ไฟล์:บรรทัด | มีแค่ |
 | :--- | ---: | :--- | :--- |
-| `/cards/[id]` | **78** | [`CardDetailView.tsx:83`](../../src/components/encyclopedia/CardDetailView.tsx#L83) | pill `← กลับหน้ารวมไพ่ 78 ใบ` + ตัวนับ `n/78` |
-| `/blog/[slug]` | **24** | [`blog/[slug]/page.tsx:154`](../../src/app/blog/[slug]/page.tsx#L154) | breadcrumb 3 ชั้น |
-| `/spreads/[id]` | **20** | [`spreads/[id]/page.tsx:166`](../../src/app/spreads/[id]/page.tsx#L166) | breadcrumb 3 ชั้น |
-| `/privacy` | 1 | [`privacy/page.tsx:18`](../../src/app/privacy/page.tsx#L18) | หัวข้อกลางหน้า ไม่มีลิงก์อะไรเลยจนถึงบรรทัด 175 |
-| `/account` | 1 (noindex) | [`account/page.tsx:20`](../../src/app/account/page.tsx#L20) | pill `← กลับสู่วิหารพยากรณ์` |
+| `/cards/[id]` | **78** | [`CardDetailView.tsx:83`](../../src/components/encyclopedia/CardDetailView.tsx) | pill `← กลับหน้ารวมไพ่ 78 ใบ` + ตัวนับ `n/78` |
+| `/blog/[slug]` | **24** | `blog/[slug]/page.tsx:154` | breadcrumb 3 ชั้น |
+| `/spreads/[id]` | **20** | `spreads/[id]/page.tsx:166` | breadcrumb 3 ชั้น |
+| `/privacy` | 1 | `privacy/page.tsx:18` | หัวข้อกลางหน้า ไม่มีลิงก์อะไรเลยจนถึงบรรทัด 175 |
+| `/account` | 1 (noindex) | `account/page.tsx:20` | pill `← กลับสู่วิหารพยากรณ์` |
 
 > **สรุป**: **123 จาก 128 หน้าที่ index ได้** ไม่มี header เดียวกับหน้าแรก และ **122 หน้า** ไม่มีโลโก้แบรนด์ให้กดกลับหน้าแรก
 
@@ -92,10 +92,10 @@ grep -rn "<footer" src --include='*.tsx'
 # src/components/seo/HomeSeoContent.tsx:616  ← Fat Footer สีเข้ม #171512
 ```
 
-- **Fat Footer** ([`HomeSeoContent.tsx:616`](../../src/components/seo/HomeSeoContent.tsx#L616)–817) — พื้น `#171512`, การ์ด AI Disclosure, กริดลิงก์ภายใน 4 คอลัมน์, แถบลิขสิทธิ์
-  ➜ **แสดงเฉพาะตอน `currentStep === "SPREAD_SELECT"` บนหน้าแรกเท่านั้น** ([`TarotFlow.tsx:1393`](../../src/app/TarotFlow.tsx#L1393))
+- **Fat Footer** ([`HomeSeoContent.tsx:616`](../../src/components/seo/HomeSeoContent.tsx)–817) — พื้น `#171512`, การ์ด AI Disclosure, กริดลิงก์ภายใน 4 คอลัมน์, แถบลิขสิทธิ์
+  ➜ **แสดงเฉพาะตอน `currentStep === "SPREAD_SELECT"` บนหน้าแรกเท่านั้น** ([`TarotFlow.tsx:1393`](../../src/components/home/TarotFlow.tsx))
   ➜ ฝังตายอยู่กลางไฟล์ SEO 817 บรรทัด **ยกไปใช้ที่อื่นไม่ได้**
-- **Footer บาง** ([`TarotFlow.tsx:1396`](../../src/app/TarotFlow.tsx#L1396)) — โผล่เฉพาะหน้าแรกตอนอยู่ขั้นที่ 2-5 ของพิธีกรรม
+- **Footer บาง** ([`TarotFlow.tsx:1396`](../../src/components/home/TarotFlow.tsx)) — โผล่เฉพาะหน้าแรกตอนอยู่ขั้นที่ 2-5 ของพิธีกรรม
 - **อีก 127 หน้าไม่มี `<footer>` ใด ๆ ทั้งสิ้น**
 
 ### 1.3 `RelatedCards` เป็น client-only — 312 ลิงก์หายจาก HTML
@@ -108,9 +108,9 @@ grep -rn "<footer" src --include='*.tsx'
 | :--- | :--- | :--- |
 | 1 | ลิงก์ไม่อยู่ใน HTML ที่เซิร์ฟเวอร์ส่ง — บอทที่ไม่รัน JS มองไม่เห็น 78 × 4 = **312 ลิงก์** | `useEffect` + `setState` |
 | 2 | ต่อให้ Googlebot รัน JS ก็อยู่คิว render รอบสอง ค้นพบช้าและไม่การันตี | — |
-| 3 | ต้องเรียก **Workers AI embedding ทุกครั้งที่มีคนเปิดหน้าไพ่** เพราะ `relatedTo()` embed ข้อความใหม่ทุก request | [`vectorize.ts:186`](../../src/lib/search/vectorize.ts#L186) `const [embedding] = await embedTexts([doc.text])` |
-| 4 | ถ้า Vectorize index ยังไม่ถูก rebuild → `getVectorizeBinding()` คืน `null` → `[]` → **ทั้ง section หายไปเงียบ ๆ** ไม่มีใครรู้ | [`vectorize.ts:180-181`](../../src/lib/search/vectorize.ts#L180) |
-| 5 | index ต้องรัน `POST /api/admin/rebuild-search-index` ด้วยมือหลัง deploy — ลืมเมื่อไหร่ ลิงก์หายเมื่อนั้น | [`api/admin/rebuild-search-index/route.ts:12`](../../src/app/api/admin/rebuild-search-index/route.ts#L12) |
+| 3 | ต้องเรียก **Workers AI embedding ทุกครั้งที่มีคนเปิดหน้าไพ่** เพราะ `relatedTo()` embed ข้อความใหม่ทุก request | [`vectorize.ts:186`](../../src/lib/search/vectorize.ts) `const [embedding] = await embedTexts([doc.text])` |
+| 4 | ถ้า Vectorize index ยังไม่ถูก rebuild → `getVectorizeBinding()` คืน `null` → `[]` → **ทั้ง section หายไปเงียบ ๆ** ไม่มีใครรู้ | [`vectorize.ts:180-181`](../../src/lib/search/vectorize.ts) |
+| 5 | index ต้องรัน `POST /api/admin/rebuild-search-index` ด้วยมือหลัง deploy — ลืมเมื่อไหร่ ลิงก์หายเมื่อนั้น | [`api/admin/rebuild-search-index/route.ts:12`](../../src/app/api/admin/rebuild-search-index/route.ts) |
 
 > **ผลกระทบ SEO มากกว่าข้อ 1 จริงตามที่วินิจฉัยไว้** — เพราะหน้าไพ่ 78 ใบคือชุดหน้าที่ใหญ่ที่สุดของเว็บ และ 312 ลิงก์นี้คือ **โครงข่ายเชื่อมโยงเชิงความหมายชั้นเดียวที่มี** ระหว่างหน้าไพ่ด้วยกัน (นอกจากปุ่ม prev/next ที่เชื่อมแบบเส้นตรงตามลำดับสำรับเท่านั้น)
 
@@ -151,7 +151,7 @@ scripts/
 ### 2.3 หลักการที่ห้ามละเมิด
 
 1. **`SiteHeader` / `SiteFooter` / `SiteShell` เป็น Server Component** — ห้ามใส่ `"use client"` ที่ไฟล์เหล่านี้ ไม่งั้นลิงก์ในฟุตเตอร์จะกลับไปเป็นปัญหาเดียวกับ `RelatedCards`
-   ส่วนที่ต้องโต้ตอบ (`SacredNavDropdown`, `UserProfileBadge`) เป็น **client island** ที่ถูก import เข้ามา — Next.js เรนเดอร์ลิงก์ข้างในเป็น HTML ให้อยู่แล้วเพราะ dropdown เรนเดอร์ DOM ตลอด (ใช้ `aria-hidden` + CSS ซ่อน ไม่ใช่ conditional unmount — ดู [`SacredNavDropdown.tsx:152-158`](../../src/components/ui/SacredNavDropdown.tsx#L152))
+   ส่วนที่ต้องโต้ตอบ (`SacredNavDropdown`, `UserProfileBadge`) เป็น **client island** ที่ถูก import เข้ามา — Next.js เรนเดอร์ลิงก์ข้างในเป็น HTML ให้อยู่แล้วเพราะ dropdown เรนเดอร์ DOM ตลอด (ใช้ `aria-hidden` + CSS ซ่อน ไม่ใช่ conditional unmount — ดู [`SacredNavDropdown.tsx:152-158`](../../src/components/ui/SacredNavDropdown.tsx))
 2. **ลิงก์ในฟุตเตอร์ต้องเป็น `<Link>` จริง** ห้าม `<button onClick={router.push}>`
 3. **ห้ามใส่ `overflow-hidden` หรือ `overflow-x-hidden`** ให้ ancestor ใดของ `SiteHeader` — sticky จะพังเงียบ (**INC-0067**) ใช้ `overflow-x-clip` เท่านั้น
 4. **รูปไพ่ทุกใบใน shell ต้องผ่าน `<CardImage />` พร้อม `sizes`** (กฎเหล็กข้อ 8) — Fat Footer เดิมใช้ `CardImage` อยู่แล้ว 2 จุด (`major-02.jpg`, `major-01.jpg`) แต่โลโก้ใช้ `<img src="/logo.webp">` ซึ่ง **ถูกต้องแล้ว** เพราะไม่ใช่ภาพไพ่ — ห้ามเผลอเปลี่ยนเป็น `CardImage`
@@ -202,7 +202,7 @@ interface SiteHeaderProps {
 ```
 
 **เหตุผลที่ใช้ `slot props` แทน `boolean` หลายตัว**: หน้าแรกต้องส่ง callback (`onOpenHistory`, `onReset`, `canReset`) เข้า `SacredNavDropdown` ซึ่งเป็นฟังก์ชัน — ส่งจาก Server Component ไม่ได้ การรับเป็น `ReactNode` ให้ `TarotFlow` (client) ประกอบเองแล้วยัดเข้ามาจึงเป็นทางเดียวที่ทำงานได้ทั้งสองฝั่ง
-**มีตัวอย่างในโปรเจกต์อยู่แล้ว**: [`src/app/page.tsx:83`](../../src/app/page.tsx#L83) `<TarotFlow seoContent={<HomeSeoContent />} />` — ส่ง Server Component เป็น prop เข้า Client Component
+**มีตัวอย่างในโปรเจกต์อยู่แล้ว**: `src/app/page.tsx:83` `<TarotFlow seoContent={<HomeSeoContent />} />` — ส่ง Server Component เป็น prop เข้า Client Component
 
 ### 3.3 โครง DOM ที่ต้องได้ (ยึดจากหน้าแรกเป็นต้นแบบ)
 
@@ -248,14 +248,14 @@ interface SiteHeaderProps {
 | `/blog` | หน้าแรก / คัมภีร์บทความ |
 | `/privacy` | หน้าแรก / นโยบายความเป็นส่วนตัว |
 
-> `/cards/[id]` มี `BreadcrumbList` JSON-LD อยู่แล้ว ([`cards/[id]/page.tsx:88`](../../src/app/cards/[id]/page.tsx#L88)) แต่**ไม่มี breadcrumb ที่มองเห็นบนหน้าจอ** — Google ระบุว่าโครงสร้างที่มองเห็นได้ควรตรงกับ structured data การเพิ่มครั้งนี้ทำให้ทั้งสองฝั่งตรงกันครบ
+> `/cards/[id]` มี `BreadcrumbList` JSON-LD อยู่แล้ว (`cards/[id]/page.tsx:88`) แต่**ไม่มี breadcrumb ที่มองเห็นบนหน้าจอ** — Google ระบุว่าโครงสร้างที่มองเห็นได้ควรตรงกับ structured data การเพิ่มครั้งนี้ทำให้ทั้งสองฝั่งตรงกันครบ
 
 ### 3.5 ปุ่ม "กลับหน้าดูดวงหลัก" ที่หายไป
 
 pill ปุ่มกลับใน `/cards`, `/spreads`, `/blog`, `/account` (4 แบบที่คลาสไม่ตรงกัน) และ pill `← กลับหน้ารวมไพ่ 78 ใบ` ใน `CardDetailView` **ให้ลบทิ้ง** เพราะ:
 - โลโก้ใน header คือทางกลับหน้าแรกอยู่แล้ว (มาตรฐานสากล)
 - breadcrumb คือทางกลับหน้าแม่อยู่แล้ว
-- ปุ่ม CTA `✦ ไปหน้าดูดวงหลัก` ที่ [`CardDetailView.tsx:265`](../../src/components/encyclopedia/CardDetailView.tsx#L265) **ให้เก็บไว้** เพราะเป็น conversion CTA ไม่ใช่ navigation
+- ปุ่ม CTA `✦ ไปหน้าดูดวงหลัก` ที่ [`CardDetailView.tsx:265`](../../src/components/encyclopedia/CardDetailView.tsx) **ให้เก็บไว้** เพราะเป็น conversion CTA ไม่ใช่ navigation
 
 ### 3.6 เกณฑ์ผ่าน PR-A
 
@@ -363,7 +363,7 @@ export function RelatedCards({ cardId }: { cardId: string }) {
 
 ### 4.6 ย้ายจุดเรนเดอร์ออกจาก Client Component
 
-`RelatedCards` ถูกเรียกใน [`CardDetailView.tsx:276`](../../src/components/encyclopedia/CardDetailView.tsx#L276) ซึ่งเป็น `"use client"` — Server Component จะถูกเรียกจากตรงนั้นไม่ได้ ต้องส่งเป็น prop:
+`RelatedCards` ถูกเรียกใน [`CardDetailView.tsx:276`](../../src/components/encyclopedia/CardDetailView.tsx) ซึ่งเป็น `"use client"` — Server Component จะถูกเรียกจากตรงนั้นไม่ได้ ต้องส่งเป็น prop:
 
 ```tsx
 // src/app/cards/[id]/page.tsx (Server Component)
@@ -388,7 +388,7 @@ interface CardDetailViewProps {
 {related}
 ```
 
-> รูปแบบนี้มีใช้ในโปรเจกต์อยู่แล้ว — [`src/app/page.tsx:83`](../../src/app/page.tsx#L83) ส่ง `<HomeSeoContent />` เข้า `<TarotFlow>` ด้วยเหตุผลเดียวกัน (ดูคอมเมนต์ที่ `page.tsx:24`)
+> รูปแบบนี้มีใช้ในโปรเจกต์อยู่แล้ว — `src/app/page.tsx:83` ส่ง `<HomeSeoContent />` เข้า `<TarotFlow>` ด้วยเหตุผลเดียวกัน (ดูคอมเมนต์ที่ `page.tsx:24`)
 > **ตำแหน่งใน DOM ต้องเหมือนเดิมเป๊ะ** — อยู่ระหว่างกริดหลักกับแถบ prev/next
 
 ### 4.7 ผลที่ต้องวัดได้
@@ -417,7 +417,7 @@ interface CardDetailViewProps {
 
 ### 5.1 ยก Fat Footer ออกมาเป็นคอมโพเนนต์เดี่ยว
 
-ตัด [`HomeSeoContent.tsx:610`](../../src/components/seo/HomeSeoContent.tsx#L610)–817 (ตั้งแต่คอมเมนต์ `SECTION 6: FAT FOOTER` ถึงปิด `</footer>`) ไปไว้ที่ `src/components/layout/SiteFooter.tsx`
+ตัด [`HomeSeoContent.tsx:610`](../../src/components/seo/HomeSeoContent.tsx)–817 (ตั้งแต่คอมเมนต์ `SECTION 6: FAT FOOTER` ถึงปิด `</footer>`) ไปไว้ที่ `src/components/layout/SiteFooter.tsx`
 
 **ต้องยกไปให้ครบทุกก้อน**
 1. เส้นทองบน (`absolute top-0 left-1/2 …`)
@@ -475,7 +475,7 @@ export default function CardsLayout({ children }: { children: React.ReactNode })
 }
 ```
 
-**หน้าแรก**: [`TarotFlow.tsx:1393-1416`](../../src/app/TarotFlow.tsx#L1393) เปลี่ยนเป็น
+**หน้าแรก**: [`TarotFlow.tsx:1393-1416`](../../src/components/home/TarotFlow.tsx) เปลี่ยนเป็น
 
 ```tsx
 {currentStep === "SPREAD_SELECT" ? seoContent : null}
@@ -587,11 +587,11 @@ curl -s localhost:3000/cards/major-00 | grep -o 'href="/cards/[a-z0-9-]*"' | sor
 
 ### 8.1 sticky header พังเพราะ ancestor มี overflow (**INC-0067** — ความเสี่ยงสูงสุดของ PR-A)
 
-`<main>` ของหน้าเนื้อหาหลายหน้าใช้ `overflow-hidden` เช่น [`cards/[id]/page.tsx:104`](../../src/app/cards/[id]/page.tsx#L104) `relative overflow-hidden`
+`<main>` ของหน้าเนื้อหาหลายหน้าใช้ `overflow-hidden` เช่น `cards/[id]/page.tsx:104` `relative overflow-hidden`
 **ถ้าเอา `SiteHeader` ไปวางไว้ข้างใน `<main>` นั้น sticky จะตายเงียบ**
 
 **วิธีที่ถูก**: layout วาง `<SiteHeader />` ไว้ **นอก** `<main>` (เป็นพี่น้องกัน ไม่ใช่ลูก) — โครงจาก `layout.tsx` ทำแบบนี้อยู่แล้วตามตัวอย่าง §5.3
-**เพิ่มเติม**: ไล่เปลี่ยน `overflow-hidden` → `overflow-x-clip` ในไฟล์ page ที่พบ (หน้าแรกทำแล้ว ดูคอมเมนต์ [`TarotFlow.tsx:873`](../../src/app/TarotFlow.tsx#L873))
+**เพิ่มเติม**: ไล่เปลี่ยน `overflow-hidden` → `overflow-x-clip` ในไฟล์ page ที่พบ (หน้าแรกทำแล้ว ดูคอมเมนต์ [`TarotFlow.tsx:873`](../../src/components/home/TarotFlow.tsx))
 
 ### 8.2 `/readers` มีหน้าแอปซ่อนอยู่ข้างใน — ห้ามใช้ `readers/layout.tsx`
 

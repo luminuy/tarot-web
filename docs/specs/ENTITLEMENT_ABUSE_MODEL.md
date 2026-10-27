@@ -1,13 +1,14 @@
 # 🛡️ ระบบกันโกงของสิทธิ์ฟรีผู้เยี่ยมชม (Guest Entitlement — Abuse Model)
 
-> **สถานะ:** P0 + P1 ลงแล้ว (2026-09-01, PR harden-guest-entitlement) · P2/P3 เลื่อนโดยตั้งใจ — สร้างเมื่อ metric บอกว่าจำเป็น
+> **สถานะ:** P0 + P1 ลงแล้ว (2026-09-01, PR harden-guest-entitlement) · P2/P3 เลื่อนโดยตั้งใจ — สร้างเมื่อ metric บอกว่าจำเป็น · **ตรวจกับโค้ดล่าสุด**: 2026-10-26
 >
 > 🔐 **อัปเดต 2026-09-09 — เอกสารนี้กลายเป็นชั้นสำรอง ไม่ใช่ด่านหน้าแล้ว**
-> ตั้งแต่ `GUEST_LIMIT = 0` (ต้องสมัครสมาชิกก่อนเปิดไพ่) ผู้เยี่ยมชมไม่มีสิทธิ์ฟรีให้โกงตั้งแต่ต้น
+> ตั้งแต่ `GUEST_LIMIT = 0` (`src/lib/entitlement/limits.ts` · ด่าน `signin-gate.ts` ทำงานแม้ปิดธงนับโควตา) ผู้เยี่ยมชมไม่มีสิทธิ์ฟรีให้โกงตั้งแต่ต้น
 > ช่องทาง "ล้างคุกกี้/incognito เพื่อขอสิทธิ์ใหม่" จึงถูกปิดโดยการออกแบบ ไม่ใช่โดยการไล่อุด
 > **ชั้นป้องกันทุกชั้นในเอกสารนี้ยังต้องอยู่ครบ** เพราะยังกันสคริปต์เผางบ AI และการดูดคอนเทนต์อยู่
 > และเป็นตาข่ายรองทันทีถ้าวันหนึ่งเปิดสิทธิ์ทดลองฟรีกลับมา
-> **อ่านคู่กับ:** [`ENTITLEMENT_PLAN.md`](ENTITLEMENT_PLAN.md) (ข้อ 3 = ปรัชญา "กันไม่ได้ 100% ไม่ไล่อุด") · [`INCIDENT_LOG.md`](INCIDENT_LOG.md) INC-0038
+> ด่านหน้าตอนนี้จึงเป็นฝั่งสมาชิก — ดูหัวข้อ 3.1
+> **อ่านคู่กับ:** [`ENTITLEMENT_PLAN.md`](../plans/ENTITLEMENT_PLAN.md) (ข้อ 3 = ปรัชญา "กันไม่ได้ 100% ไม่ไล่อุด") · [`AI_COST_CONTROL_PLAN.md`](../plans/AI_COST_CONTROL_PLAN.md) (เพดานงบ AI + เพดานถี่ข้าม isolate) · [`INCIDENT_LOG.md`](../INCIDENT_LOG.md) INC-0038
 
 ---
 
@@ -19,7 +20,7 @@
 | **B. กัน automation** (สคริปต์เผางบ AI / ดูดคอนเทนต์) | ปกป้องเงินค่า AI และ IP ของคอนเทนต์ | **มาก** — นี่คือที่ที่วิศวกรรมควรอยู่ |
 
 **คุกกี้ `tarot_guest` ไม่ใช่ระบบกันโกง** — มันคือ UX state marker
-การกัน automation ทั้งหมดอยู่ที่: origin guard + rate limit + per-IP quota + AI daily cap + (ใหม่) server-authoritative gid marker + guest IP/subnet quota
+การกัน automation ทั้งหมดอยู่ที่: origin guard + เพดานถี่ข้าม isolate (D1) + per-IP quota + AI daily cap + เพดานโทเคนต่อตัวตน + server-authoritative gid marker + guest IP/subnet quota
 
 ---
 
@@ -38,12 +39,31 @@
 
 ```
 Layer 0  origin guard (isRequestAuthorizedOrigin)         — บล็อก off-site fetch
-Layer 1  rate limit ต่อ IP (checkRateLimit)               — 15/600s, concurrent 1 · in-memory ต่อ isolate
-Layer 2  per-IP read quota (checkPerIpReadQuota)          — 40/วัน/IP · KV ข้าม fleet · IP hash SHA-256
-Layer 3  AI daily cap สองชั้น (isAiCapReached)            — guest 70% / member 100% ของ AI_DAILY_CALL_CAP
-Layer 4  🆕 server-authoritative guest marker             — KV app:guest:used:<gid> · start เช็คเอง
-Layer 5  🆕 guest IP + subnet quota                       — IP 5/วัน · /24|/64 20/วัน · KV · นับเฉพาะอ่านจบจริง
+Layer 1  เพดานถี่ข้าม isolate (consumeEdgeRateLimits)     — D1 edge_rate_buckets (migrations/0018) · ถอยไปหน่วยความจำเมื่อ D1 ล่ม
+         + checkRateLimit ในหน่วยความจำ                    — เหลือหน้าที่กันกดซ้อน (concurrent 1)
+Layer 2  per-IP read quota (checkPerIpReadQuota)          — 40/วัน/IP · bumpCounter (Redis ถ้าตั้ง · ไม่งั้น KV แบบสะสมใน isolate) · IP hash SHA-256
+Layer 3  AI daily cap สองชั้น (isAiCapReached)            — guest 70% / member 100% ของ AI_DAILY_CALL_CAP (ค่าเริ่มต้น 2,000 ครั้ง/วัน)
+Layer 3b เพดานโทเคนต่อตัวตนต่อวัน (cost-ledger.ts)        — D1 ai_usage_ledger (migrations/0026) · สมาชิก = บัญชี · ผู้เยี่ยมชม = ซับเน็ต
+Layer 4  server-authoritative guest marker                — KV app:guest:used:<gid> · start เช็คเอง
+Layer 5  guest IP + subnet quota                          — IP 5/วัน · /24|/64 20/วัน · KV · นับเฉพาะอ่านจบจริง
 ```
+
+ค่าเพดานถี่ที่ใช้อยู่ (ตรวจ 2026-10-26 · ค่าจริงอยู่ใน route แต่ละเส้น):
+
+| เส้น | คีย์ | เพดาน |
+| :-- | :-- | :-- |
+| `POST /api/reading/start` | `start:ip` | 20 ครั้ง/ชม. |
+| `POST /api/reading/[id]/read` | `read:ip` · `read:reading` | 15 ครั้ง/10 นาที · ไพ่ชุดเดียวกันขอคำอ่านได้ 3 ครั้ง/2 ชม. |
+| `POST /api/reading/[id]/chat` | `chat:ip` · `chat:ip:day` · `chat:user:day` · `chat:free` | 30/นาที · 200/วัน ต่อ IP · 150/วัน ต่อบัญชี · ถามฟรี 2 ข้อต่อไพ่หนึ่งชุด (`CHAT_FREE_TURNS_PER_READING`) |
+| `shuffle` · `clarify` · `perspective` | ตามไฟล์ route | ใช้ `consumeEdgeRateLimits` เหมือนกัน |
+
+### 3.1 ด่านฝั่งสมาชิก (ด่านหน้าตั้งแต่ `GUEST_LIMIT = 0`)
+
+| ด่าน | ที่อยู่ |
+| :-- | :-- |
+| ต้องล็อกอินก่อนเปิดไพ่ที่เรียก AI | `src/lib/entitlement/signin-gate.ts` (`isSignInRequired`) · สมาชิกฟรีวันละ `DAILY_LIMIT` ครั้ง |
+| กันฟาร์มบัญชี | Turnstile เฉพาะหน้าอีเมลสมัคร/ล็อกอิน/ลืมรหัส (`src/lib/security/turnstile.ts` · ไม่ตั้งคีย์ = ผ่านตลอด) + เพดานเดารหัส D1 `auth_rate_buckets` (`auth-ratelimit.ts` · migrations/0016) |
+| ต้นทุนต่อคน | Layer 3b + `chat:user:day` ด้านบน |
 
 ### จุดอ่อนที่รู้ตัว (ยอมรับ)
 
@@ -51,7 +71,7 @@ Layer 5  🆕 guest IP + subnet quota                       — IP 5/วัน �
 | :-- | :-- | :-- |
 | ล้างคุกกี้ / incognito → gid ใหม่ | สิทธิ์ฟรีใหม่ | ENTITLEMENT_PLAN ข้อ 3 · การไล่อุดต้องใช้ fingerprint = ขัด PDPA |
 | KV eventually-consistent (~60s global) | double-`start` จากคนละ POP ผ่านได้ 1–2 ครั้ง | bounded ด้วย Layer 5 (IP 5/วัน) · same-POP อ่านสด (memo) |
-| `checkRateLimit` in-memory ต่อ isolate | patient/distributed abuse เลี่ยง Layer 1 ได้ | Layer 2/5 (KV) คือ ceiling จริง · Layer 1 แค่กันกดรัว |
+| D1 ล่ม ➔ Layer 1 ถอยไปหน่วยความจำต่อ isolate | ช่วงที่ D1 ล่ม abuse แบบกระจายเลี่ยง Layer 1 ได้ | fail-closed ไม่ได้ (ทั้งเว็บจะใช้ไม่ได้) · ยิง metric ทุกครั้งที่ถอย · Layer 2/3 ยังกันอยู่ |
 | headless browser บน origin เราเอง | scrape คอนเทนต์ได้ทีละน้อย | bounded ด้วย Layer 5 · P2 (PoW) ถ้า metric แย่ |
 
 ---
@@ -98,7 +118,7 @@ Layer 5  🆕 guest IP + subnet quota                       — IP 5/วัน �
 | Canvas/WebGL/font fingerprint · fingerprint SDK | ขัด PDPA + นโยบายที่ประกาศแล้ว (ENTITLEMENT_PLAN ข้อ 3) |
 | IP+UA hash เป็น identity | quasi-fingerprint · household ชนกันเยอะเกินไป |
 | Hard CAPTCHA (reCAPTCHA v2) | UX พัง + reCAPTCHA ส่งข้อมูลให้ Google (ประเด็น PDPA) |
-| verify เบอร์/อีเมลก่อนได้สิทธิ์ฟรี | ฆ่า funnel "ทดลองฟรี 1 ครั้ง" |
+| verify เบอร์/อีเมลก่อนได้สิทธิ์ฟรี | ฆ่า funnel "ทดลองฟรี 1 ครั้ง" (เหตุผลของยุคทดลองฟรี — ตั้งแต่ 2026-09-09 ต้องสมัครสมาชิกก่อนเปิดไพ่แล้ว ดูหัวข้อ 3.1) |
 
 ---
 
@@ -109,7 +129,7 @@ Layer 5  🆕 guest IP + subnet quota                       — IP 5/วัน �
 `start` คืน `{ prefix, difficulty }` → client หา nonce ที่ `sha256(prefix+nonce)` มี N bit นำเป็น 0 (~200ms) → `read` verify
 - scraper จ่าย CPU จริงทุก reading · มนุษย์ไม่รู้สึก · **zero third-party, zero data — PDPA สะอาด**
 - ถ้าไม่พอ → fallback Cloudflare Turnstile (privacy-preserving กว่า reCAPTCHA)
-- แทนที่ ADR-002 ที่ค้าง
+- ถ้าทำ ต้องทบทวน [ADR-002](../adr/ADR-002-bot-challenge.md) (ตอนนี้ไม่มี challenge ในขั้นเปิดไพ่ · Turnstile ใช้แค่หน้าอีเมลสมัคร/ล็อกอิน/ลืมรหัส)
 
 ### P3 · Velocity alert + auto-degrade
 

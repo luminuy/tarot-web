@@ -73,7 +73,7 @@ const isEnglish = locale === "en";
 /* หน้าแรกไม่พรีโหลดฟอนต์น้ำหนักหนา — ตัวเลขวัดอยู่ที่ FONT_PRELOADS_LOW_SKIP_ROUTES
    ⚠️ ตอนบิลด์ (build.format "file") pathname คือ `/index.html` · `/en.html` ไม่ใช่ `/` · `/en` เหมือนตอน dev ➔ ทำให้อยู่รูปเดียวก่อนเทียบ */
 const route = Astro.url.pathname.replace(/\.html$/, "").replace(/\/index$/, "") || "/";
-const fontPreloadsLow = FONT_PRELOADS_LOW_SKIP_ROUTES.includes(route) ? [] : FONT_PRELOADS_LOW;
+const fontPreloadsLow = FONT_PRELOADS_LOW_SKIP_ROUTES.includes(route) ? [] : FONT_PRELOADS_LOW[locale];
 const imageCdnOrigin = getImageKitOrigin();
 /* ผสาน metadata ของรากกับของหน้าแบบทีละฟิลด์ — หน้าย่อยทับได้ (พฤติกรรมเดียวกับ Next) */
 const metaTags = renderMetadata(
@@ -160,7 +160,7 @@ const consentScript = `try{if(!localStorage.getItem(${JSON.stringify(CONSENT_STO
     <meta name="theme-color" content={SITE_THEME_COLOR} />
 
     {/* ✒️ ฟอนต์ไทยที่ตัดเอง — เหตุผลที่ต้องพรีโหลดครบทุกไฟล์อยู่ใน src/app/globals.css */}
-    {FONT_PRELOADS.map((href) => (
+    {FONT_PRELOADS[locale].map((href) => (
       <link rel="preload" href={href} as="font" type="font/woff2" crossorigin="anonymous" />
     ))}
     {/* น้ำหนักหนา — ลำดับต่ำ: ไม่แย่งคิวภาพ LCP แต่ทันเฟรมแรกเมื่ออยู่ในแคช หัวข้อจึงไม่กระโดดตอนเปลี่ยนหน้า (INC-0244) */}

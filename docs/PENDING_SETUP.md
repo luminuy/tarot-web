@@ -1,357 +1,264 @@
-# ⚙️ บันทึกการตั้งค่าระบบและการเชื่อมต่อภายนอก (Production Configuration Registry)
+# ทะเบียนการตั้งค่าและ Secrets บน Production
 
-> อัปเดตล่าสุด: **2026-09-09**  
-> สถานะรวม: ✅ **บริการภายนอกที่เว็บนี้ "ใช้งานอยู่" ตั้งค่าครบและทำงานจริงทั้งหมด**
-
----
-
-## ⚪ 0. เครื่องมือวัดผลที่ "ยังไม่ได้ใช้งาน" (ตั้งใจ · ไม่ใช่ของค้าง)
-
-> ⚠️ **อย่ารายงานว่านี่คือบั๊ก** — ตรวจเจอซ้ำมาแล้วสองรอบโดยคนละคน
-> `AnalyticsTracker.tsx` เขียนกำกับไว้ตั้งแต่ต้นว่า **"เว็บนี้ตั้งแค่ GA4"**
-
-| เครื่องมือ | สถานะ | หมายเหตุ |
-| :--- | :---: | :--- |
-| **📊 Google Analytics 4** | ✅ **ใช้งานอยู่** | `NEXT_PUBLIC_GA_ID` ตั้งใน GitHub แล้ว · ยืนยันว่ารหัส `G-LT8YMJNT2R` **ถูกฝังในบันเดิลตอน build จริง** (พบใน `/_next/static/chunks/*.js` บน production) |
-| **📘 Meta Pixel** | ⚪ **ยังไม่ได้ใช้** | ตัดสินใจโดยเจ้าของ · โค้ดรองรับไว้แล้วครบ รอวันที่จะใช้จริง |
-| **🎯 Google Ads** | ⚪ **ยังไม่ได้ใช้** | เหมือนกัน |
-
-### 📌 ถ้าวันหนึ่งจะเริ่มใช้ Meta Pixel หรือ Google Ads
-
-**ต้องตั้งเป็น secret/variable ของ GitHub เท่านั้น** ที่ `Settings ➔ Secrets and variables ➔ Actions`
-แล้ว deploy ใหม่หนึ่งรอบ (ค่า `NEXT_PUBLIC_*` ถูกฝังตอน build)
-
-> ⛔ **ตั้งด้วย `wrangler secret` ฝั่ง Cloudflare Worker อย่างเดียว "จะไม่ทำงาน"**
-> เพราะเมื่อ `NEXT_PUBLIC_GA_ID` ติดมากับ build แล้ว เงื่อนไข `if (gaId || metaPixelId || googleAdsId) return;`
-> ใน `AnalyticsTracker` จะตัดตั้งแต่ต้น ➔ **ไม่ยิง `/api/config/analytics` อีกเลย**
-> ทางสำรอง runtime เส้นนั้นมีไว้เผื่อกรณี "ไม่มีรหัสสักตัวติดมากับ build" เท่านั้น
-
-จากนั้นย้ายชื่อค่าจาก `UNUSED` มาไว้ที่ `IN_USE` ในขั้น `📊 ตรวจว่าตั้งค่าวัดผลที่ใช้อยู่ครบไหม` ของ `deploy.yml`
+> รายชื่อตรวจกับโค้ดล่าสุด: 2026-10-26 (`process.env.*` ใน `src/` · `wrangler.jsonc` · `secrets.*` ใน `.github/workflows/`)
+> ⛔ ห้ามเขียนค่าของ secret ลงไฟล์นี้ ลงไฟล์อื่นในรีโป หรือในแชท
+>
+> **วิธีอ่านคอลัมน์สถานะ** — repo ตรวจค่า secret ไม่ได้ สถานะจึงมี 3 แบบ:
+> - **ยืนยันจาก Actions (วันที่)** = มีการรัน workflow ที่สำเร็จได้ก็ต่อเมื่อค่านั้นตั้งไว้ (ดูได้ที่แท็บ Actions)
+> - **บันทึกว่าตั้งแล้ว (วันที่)** = มีคนตรวจแล้วจดไว้ — ตรวจจาก repo ไม่ได้ ต้องเช็กใน Cloudflare/GitHub
+> - **ไม่ตั้ง (ตั้งใจ)** / **รอเจ้าของ** = ตามที่เขียน
+>
+> ดูของจริง: `npx wrangler secret list` (Worker) · GitHub ➔ Settings ➔ Secrets and variables ➔ Actions · `/admin` ➔ สุขภาพระบบ
+> วิธี deploy / ถอยกลับ / สิทธิ์ของ API token ➔ [`CLOUDFLARE_DEPLOYMENT_GUIDE.md`](CLOUDFLARE_DEPLOYMENT_GUIDE.md)
 
 ---
 
-## 🟢 1. บริการภายนอกที่เปิดใช้งานและทดสอบสำเร็จแล้ว (100% Active)
+## 0. งานที่ยังรอเจ้าของ
 
-| บริการ / ระบบ | สถานะ | รายละเอียดและการตั้งค่าที่เสร็จสิ้น |
-| :--- | :---: | :--- |
-| **🌐 โดเมนจริง (`seertarot.net`)** | ✅ **พร้อมใช้งาน** | ผูก DNS Cloudflare เรียบร้อย, SSL Mode: Full, TLS 1.2+, Always Use HTTPS: ON, Route: `*seertarot.net/*` ชี้ไปที่ Worker `tarot-web` |
-| **🔑 Google OAuth** | ✅ **พร้อมใช้งาน** | Authorized Origins: `https://seertarot.net`, Redirect URI: `https://seertarot.net/api/auth/google/callback`, Client ID & Secret ใส่ใน Worker แล้ว |
-| **💬 LINE Login** | ✅ **พร้อมใช้งาน** | LINE Channel: `SeerTarot` (Status: Published 🟢), Channel ID: `2011389525`, Callback URL: `https://seertarot.net/api/auth/line/callback` |
-| **✉️ Resend Email Service** | ✅ **พร้อมใช้งาน** | โดเมน `seertarot.net` ผ่านการ Verify DKIM/SPF ครบ 100%, ผู้ส่ง: `แม่หมอทาโรต์ <noreply@seertarot.net>`, โควตาฟรี 3,000 ฉบับ/เดือน · อีเมลระบบส่ง HTML + plain-text ควบคู่ และตั้ง `Reply-To: support@seertarot.net` (#207) |
-| **📨 Cloudflare Email Routing** | ✅ **พร้อมใช้งาน** | Enabled · `support@` / `noreply@seertarot.net` → forward `bankjack10452@gmail.com` (Verified) · DNS Enabled (MX ×3 + DKIM + SPF root · ไม่ชนกับ Resend) · Catch-all = Drop · ผูกกับ Reply-To (#207) |
-| **🔒 ระบบเข้ารหัสผ่าน (PBKDF2)** | ✅ **พร้อมใช้งาน** | `PASSWORD_PEPPER` ขนาด 32 ไบต์ ติดตั้งบน Worker เรียบร้อย สมัครและล็อกอินด้วยอีเมลได้สมบูรณ์ |
-| **🤖 เครื่องยนต์ AI (Gemini)** | ✅ **พร้อมใช้งาน** | `GEMINI_API_KEY` ติดตั้งแล้ว สตรีมคำทำนายจริง 3 องก์ และคุยต่อเนื่องในห้องแชทได้ 100% |
-| **🗄️ ฐานข้อมูล Cloudflare D1** | ✅ **พร้อมใช้งาน** | รัน Migration 0001–0006 บน Remote DB เรียบร้อย รองรับตาราง `users`, `reading_journal`, `reading_usage` |
-| **⚡ Cloudflare KV ข้อมูลแอป** | ✅ **พร้อมใช้งาน** | ผูก `APP_KV` (prefix `app:` · namespace เดิมของ `NEXT_INC_CACHE_KV`) สำหรับ Stat Counters, Config Overrides และ Session Backstop |
-| **🏛️ แผงควบคุมแอดมิน (`/admin`)** | ✅ **พร้อมใช้งาน** | รหัสผ่าน `ADMIN_PASSWORD` ติดตั้งแล้ว พร้อมแท็บใหม่ **"✦ สถานะระบบ (Cloud Health)"** ตรวจสัญญาณสดแบบ Real-time |
-
----
-
-## 🟡 1.5 รอเจ้าของตั้งค่า — วิดีโอคอลแม่หมอ (Cloudflare Realtime TURN · เพิ่ม 2026-10-02)
-
-โค้ดพร้อมแล้ว แต่ **ยังไม่ตั้ง = ปุ่มวิดีโอคอลไม่โผล่** (ลูกค้ายังคุยผ่าน LINE ได้ตามเดิม ไม่มีอะไรพัง)
-
-1. Cloudflare Dashboard ➔ **Realtime** ➔ **TURN Server** ➔ **Create** (ตั้งชื่อเช่น `seertarot-call`)
-2. คัดลอก **Turn Token ID** และ **API Token** (API Token เห็นได้ครั้งเดียว)
-3. ใส่เป็น secret ของ Worker:
-   ```
-   npx wrangler secret put CLOUDFLARE_TURN_KEY_ID
-   npx wrangler secret put CLOUDFLARE_TURN_KEY_API_TOKEN
-   ```
-4. ตรวจ: เรียกคิวในแผงแม่หมอ ➔ ต้องเห็นปุ่ม "เข้าห้องวิดีโอ" และหน้าคิวลูกค้าต้องเห็นกล่องวิดีโอคอล
-
-ค่าใช้จ่าย: ฟรี 1,000 GB/เดือน (TURN + SFU ใช้โควตาร่วมกัน) เกินคิด $0.05/GB · ประมาณการ 50 คน × 1.5 ชม. ที่ 720p ≈ 100 GB/เดือน
-
----
-
-## 🟡 1.6 รอเจ้าของตั้งค่า — แจ้งเตือนค่าใช้จ่าย Cloudflare (เพิ่ม 2026-10-19 · หลังเหตุ KV Storage 14 GB INC-0287)
-
-ทำใน Dashboard เท่านั้น (ไม่มีในโค้ด) · ฟรี:
-1. Cloudflare Dashboard ➔ **Manage Account ➔ Notifications** ➔ **Add**
-2. เลือก **Usage Based Billing** ➔ เลือกบริการ (ทำซ้ำทีละตัว): **Workers KV Storage** · **Workers Standard Requests** · **Workers CPU ms** · **Realtime (TURN)** · **Workers Logs**
-3. ตั้งเกณฑ์ = ใกล้เพดานโควตาฟรีของแต่ละตัว (เช่น KV Storage 0.8 GB · Realtime 800 GB) ➔ อีเมล `bankjack10452@gmail.com`
-4. (เสริม) **Billing ➔ Billable Usage** ดูยอดรายวันได้ตลอด
-
-อ่านสถิติวิดีโอคอล (`npm run cf:call-stats`) ต้องใช้ token อีกตัวที่มีสิทธิ์ **Account · Account Analytics · Read** (token deploy ไม่ต้องเพิ่มสิทธิ์)
-
----
-
-## 📋 2. รายการ Secrets ทั้งหมดบน Cloudflare Worker (`tarot-web`)
-
-สามารถตรวจสอบได้ด้วยคำสั่ง: `npx wrangler secret list`
-
-ยืนยันจาก `npx wrangler secret list` (2026-09-04) — **ตั้งครบ 18 ตัว**:
-
-```
-├── ADMIN_PASSWORD            # รหัสผ่านเข้าแผงควบคุม /admin
-├── APP_ORIGIN                # https://seertarot.net (Callback + ลิงก์รีเซ็ตรหัสผ่าน)
-├── CF_AI_GATEWAY_ACCOUNT_ID  # Cloudflare Account ID (AI Gateway)
-├── CF_AI_GATEWAY_ID          # ชื่อ gateway = seertarot-ai
-├── EMAIL_FROM                # แม่หมอทาโรต์ <noreply@seertarot.net>
-├── GEMINI_API_KEY            # Google Gemini — เอนจินคำอ่าน Tier 2 (fallback)
-├── GOOGLE_CLIENT_ID          # Google OAuth Client ID
-├── GOOGLE_CLIENT_SECRET      # Google OAuth Client Secret
-├── GROQ_API_KEY              # Groq LPU — เอนจินคำอ่าน Tier 1 (Qwen3-27B · โควตาฟรี 14.4k/วัน)
-├── LINE_CHANNEL_ID           # LINE Login Channel ID (2011389525)
-├── LINE_CHANNEL_SECRET       # LINE Login Channel Secret
-├── PASSWORD_PEPPER           # กุญแจลับ PBKDF2 Password Hashing
-├── RESEND_API_KEY            # Resend API Key (re_...) ส่งอีเมล
-├── TAROT_SESSION_SECRET      # กุญแจเซ็น Session Token (Provably Fair & Auth)
-├── TESTER_PASSWORD           # รหัสผ่านโหมดผู้ทดสอบไม่จำกัด (/tester)
-├── TURNSTILE_SECRET_KEY      # Turnstile — กันบอท signup/login/forgot
-├── TURNSTILE_SITE_KEY        # Turnstile Site Key (client ดึงผ่าน /api/config/turnstile)
-└── UNLIMITED_EMAILS          # allowlist อีเมลดูดวงไม่จำกัด
-```
-
-**ส่งผ่าน `deploy.yml` จาก GitHub Actions secrets (ไม่ได้ตั้งด้วย `wrangler secret put`):**
-- `OPENROUTER_API_KEY` — ชั้นสำรองที่ 3 ของคำอ่าน (หลัง Gemini ก่อนคำอ่านสำรองออฟไลน์) · **ใช้เฉพาะโมเดลฟรี `:free`** · ห้ามเติมเครดิตในบัญชี OpenRouter · ตั้งใน GitHub แล้ว 2026-09-23
-
-**ตัวเลือก (ยังไม่ได้ตั้ง — ไม่บังคับ):**
-- `SUPPORT_EMAIL` — ทับ Reply-To ของอีเมลระบบ (ค่าเริ่มต้น `support@seertarot.net`)
-- `CF_AI_GATEWAY_TOKEN` — ใส่เมื่อเปิด Authenticated Gateway
-
-### 💳 ยังไม่ได้ตั้ง — คีย์ระบบรับชำระเงิน (T-37 · บังคับก่อนเปิดขายจริง)
-
-> ⚠️ **บทเรียน T-37** — โค้ด production อ่านตัวแปรกลุ่มนี้ใช้จริงมาตลอด
-> แต่ grep ทั้งรีโปแล้ว **ไม่มีใน `.env.example` · `wrangler.jsonc` · เอกสารนี้เลยสักที่**
-> คนที่มาตั้งค่าต่อจึงไม่มีทางรู้ว่าต้องตั้งอะไรบ้าง และโหมดล้มเหลวเป็นแค่บรรทัด log
-
-| ชื่อ | ใช้ทำอะไร | ไม่ตั้งแล้วเกิดอะไร |
+| งาน | หัวข้อ | ไม่ทำแล้วเป็นอย่างไร |
 | :--- | :--- | :--- |
-| `STRIPE_SECRET_KEY` | คีย์ลับของ Stripe (`sk_live_...` / `sk_test_...` หรือ restricted key `rk_...`) สำหรับสร้างหน้าจ่ายเงิน Stripe Checkout | ระบบใช้ "ตัวจำลอง" (`provider = simulator`) ซึ่งผ่านด่านยืนยันได้เฉพาะนอก production — บน production คือขายของไม่ได้เลย |
-| `STRIPE_WEBHOOK_SECRET` | ตรวจลายเซ็น `Stripe-Signature` ของ webhook (`whsec_...`) | **ปฏิเสธ webhook ทุกใบ** (ตั้งแต่ T-18) → จ่ายเงินสำเร็จแต่สถานะไม่เคยขึ้นเป็น `paid` |
-| `PAYMENT_WEBHOOK_SECRET` | ตัวสำรองของตัวบน (ใช้เมื่อยังไม่ได้ตั้ง `STRIPE_WEBHOOK_SECRET`) | เหมือนข้างบน — ต้องตั้งอย่างน้อยหนึ่งในสองตัว |
+| ตั้ง TURN ของ Cloudflare Realtime (วิดีโอคอลแม่หมอ) | 6 | ปุ่มวิดีโอคอลไม่โผล่ · ลูกค้ายังคุยทาง LINE ได้ — บันทึก 2026-10-02 ว่ายังไม่ตั้ง · ตรวจจาก repo ไม่ได้ |
+| ตั้งแจ้งเตือนค่าใช้จ่าย Cloudflare | 7 | ไม่รู้ตัวเมื่อบิลพุ่ง (เคยเกิดกับ KV Storage · INC-0287) — บันทึก 2026-10-19 ว่ายังไม่ตั้ง · ตรวจจาก repo ไม่ได้ |
+| เพิ่ม event `charge.refunded` ใน Stripe webhook | 3 | คืนเงินในแดชบอร์ด Stripe แล้วเว็บไม่หักรอบ/ยกเลิกนัดให้เอง — ตรวจจาก repo ไม่ได้ |
+| คีย์ผู้ตัดสิน AI แยก (`JUDGE_GEMINI_API_KEY` / `JUDGE_GROQ_API_KEY`) ใน GitHub | 2.4 | `ai:judge` ใช้คีย์ของเว็บและแย่งโควตากับผู้ใช้ |
+| เปิด Reader Studio | 5 | สตูดิโอแม่หมอและลิงก์ `/r/*` ตอบ 404 (ตั้งใจ จนกว่าทนายรับรอง) |
+| ย้าย `routes` เข้า `wrangler.jsonc` | 8 | ย้ายบัญชี/สร้าง Worker ใหม่แล้วต้องจำเองว่าผูกโดเมนอะไร |
 
-ตั้งด้วย:
+---
+
+## 1. Secrets ของ Worker `tarot-web`
+
+ตั้งด้วย `npx wrangler secret put <ชื่อ>` (ยกเว้นที่ระบุว่าส่งผ่าน `deploy.yml`) · ไม่ตั้ง = ค่าเริ่มต้นหรือฟีเจอร์ปิด ตามคอลัมน์ "ไม่ตั้งแล้ว"
+
+### 1.1 แกนระบบและการเข้าสู่ระบบ
+
+| ชื่อ | ใช้ทำอะไร | ไม่ตั้งแล้ว | สถานะ |
+| :--- | :--- | :--- | :--- |
+| `TAROT_SESSION_SECRET` | เซ็น session และโทเคน Provably Fair (`openssl rand -hex 32`) | production ใช้ไม่ได้ | บันทึกว่าตั้งแล้ว (2026-09-04) |
+| `AUTH_SECRET` | กุญแจของ `src/lib/auth/edge-auth.ts` | ใช้ `TAROT_SESSION_SECRET` แทน | ไม่บังคับ |
+| `PASSWORD_PEPPER` | กุญแจลับของการแฮชรหัสผ่าน (PBKDF2) | สมัคร/ล็อกอินด้วยอีเมลไม่ได้ | บันทึกว่าตั้งแล้ว (2026-09-04) |
+| `APP_ORIGIN` | โดเมนจริงสำหรับ callback และลิงก์ในอีเมล | ใช้ `SITE_ORIGIN` ในโค้ด | บันทึกว่าตั้งแล้ว (2026-09-04) |
+| `GOOGLE_CLIENT_ID` · `GOOGLE_CLIENT_SECRET` | Google OAuth (callback `/api/auth/google/callback`) | ปุ่ม Google ใช้ไม่ได้ | บันทึกว่าตั้งแล้ว (2026-09-04) |
+| `LINE_CHANNEL_ID` · `LINE_CHANNEL_SECRET` | LINE Login (callback `/api/auth/line/callback`) | ปุ่ม LINE ใช้ไม่ได้ | บันทึกว่าตั้งแล้ว (2026-09-04) |
+| `TURNSTILE_SITE_KEY` · `TURNSTILE_SECRET_KEY` | กันบอทตอนสมัคร/ล็อกอิน/ลืมรหัส | ไม่มีด่าน Turnstile | บันทึกว่าตั้งแล้ว (2026-09-04) |
+| `ADMIN_PASSWORD` | รหัสเข้า `/admin` (อย่างน้อย 12 ตัว · เปลี่ยน = ทุก session แอดมินหลุด) | เข้าแอดมินไม่ได้ | บันทึกว่าตั้งแล้ว (2026-09-04) |
+| `ADMIN_REPORT_TOKEN` | รหัสอ่านรายงานผู้บริหาร (หัวข้อ 4) | `npm run exec:report` ใช้ไม่ได้ | ยืนยันจากเว็บจริง (2026-10-20) |
+| `TESTER_PASSWORD` | รหัสโหมดผู้ทดสอบ `/tester` | โหมดผู้ทดสอบปิด | บันทึกว่าตั้งแล้ว (2026-09-04) |
+| `UNLIMITED_EMAILS` | อีเมลที่เปิดไพ่ได้ไม่จำกัด (คั่นด้วย comma) | ไม่มีใครได้สิทธิ์นี้ | บันทึกว่าตั้งแล้ว (2026-09-04) |
+| `RATE_LIMIT_BYPASS_TOKEN` | header `X-Tarot-Bypass` สำหรับโหลดเทสต์ (`src/lib/security/privileged.ts`) | ไม่มีทางข้ามเพดานถี่ | ไม่บังคับ |
+
+### 1.2 อีเมล
+
+| ชื่อ | ใช้ทำอะไร | ไม่ตั้งแล้ว | สถานะ |
+| :--- | :--- | :--- | :--- |
+| `RESEND_API_KEY` | ส่งอีเมลผ่าน Resend (โดเมน `seertarot.net` verify DKIM/SPF แล้ว) | ไม่ส่งอีเมลเลย | บันทึกว่าตั้งแล้ว (2026-09-04) |
+| `EMAIL_FROM` | ชื่อและที่อยู่ผู้ส่ง | ใช้ `DEFAULT_EMAIL_FROM` ใน `src/lib/config/site.ts` | บันทึกว่าตั้งแล้ว (2026-09-04) |
+| `SUPPORT_EMAIL` | ทับ Reply-To ของอีเมลระบบ | `support@seertarot.net` | ไม่ตั้ง (ตั้งใจ) |
+
+> โควตา Resend แผนฟรีใช้ร่วมกันทุกงาน — เพดานในโค้ด: ดวงประจำวัน 80 ฉบับ/วัน · เตือนนัด 40 ฉบับ/รอบ และ 60 ฉบับ/วัน (รายชื่อรอเวลาว่างไม่เกิน 20) · เช็กอิน 15 ฉบับ/วัน (ค่าอยู่หัวไฟล์ `src/app/api/cron/*/route.ts`)
+
+### 1.3 AI
+
+| ชื่อ | ใช้ทำอะไร | ไม่ตั้งแล้ว | สถานะ |
+| :--- | :--- | :--- | :--- |
+| `GROQ_API_KEY` | คำอ่านชั้นแรก (รายชื่อโมเดลใน `WORKING_GROQ_MODELS` ของ `src/lib/ai/groq.ts`) | ข้ามไป Gemini | ส่งผ่าน `deploy.yml` · ตรวจจาก repo ไม่ได้ — ดูหมายเหตุ |
+| `GEMINI_API_KEY` (หรือ `GOOGLE_API_KEY`) | คำอ่านชั้นสอง · สรุปรายเดือน | ข้ามไป OpenRouter | ส่งผ่าน `deploy.yml` · ตรวจจาก repo ไม่ได้ — ดูหมายเหตุ |
+| `OPENROUTER_API_KEY` | คำอ่านชั้นสาม — **ใช้เฉพาะโมเดล `:free`** ห้ามเติมเครดิต | ข้ามไปคำอ่านสำรองออฟไลน์ | ส่งผ่าน `deploy.yml` · บันทึกว่าตั้งใน GitHub แล้ว (2026-09-23) |
+| `CF_AI_GATEWAY_ACCOUNT_ID` · `CF_AI_GATEWAY_ID` | ส่งทุกการเรียก AI ผ่าน AI Gateway (log ค่าใช้จ่าย/latency) | ยิงตรงไปผู้ให้บริการ | บันทึกว่าตั้งแล้ว (2026-09-03) |
+| `CF_AI_GATEWAY_TOKEN` | ใช้เมื่อเปิด Authenticated Gateway | — | ไม่ตั้ง (ตั้งใจ · gateway เป็นแบบไม่ยืนยันตัว) |
+| `STUDIO_AI_PAID_TIER` | `1` = ยืนยันว่า Gemini เป็นแบบเสียเงิน (เปิดตัวช่วย AI ในสตูดิโอ) | ตัวช่วยประกอบร่างจากโน้ตแม่หมอโดยไม่ส่ง AI | รอเจ้าของ (หัวข้อ 5) |
+| `RELATIONS_IN_PROMPT` | `1` = ส่งความสัมพันธ์ระหว่างไพ่เข้า prompt | ไม่ส่ง | ไม่ตั้ง (รอผล `ai:judge`) |
+
+> คีย์ AI ทั้งสามตัวถูกส่งเข้า Worker ในขั้น `npm run deploy` ของ `deploy.yml` ทีละชื่อ — เพิ่มผู้ให้บริการใหม่ต้องเติมชื่อในขั้นนั้นด้วย (INC-0152)
+> การ deploy ผ่าน (2026-10-25) ไม่ได้พิสูจน์ว่าคีย์ AI มีค่า เพราะขั้นนั้นไม่ล้มเมื่อคีย์ว่าง — ดูสถานะจริงที่ `/admin` ➔ สุขภาพระบบ ➔ AI
+
+### 1.4 เพดานการใช้งาน (มีค่าเริ่มต้นในโค้ด · ตั้งเมื่ออยากปรับเท่านั้น)
+
+| ชื่อ | ค่าเริ่มต้น | ใช้กับ |
+| :--- | :--- | :--- |
+| `AI_DAILY_CALL_CAP` | 2000 | เพดานเรียก AI รวมทั้งระบบต่อวัน (`src/lib/security/ai-budget.ts`) |
+| `GUEST_IP_DAILY_READS` · `GUEST_SUBNET_DAILY_READS` | 5 · 20 | ผู้เยี่ยมชมต่อ IP / ซับเน็ต |
+| `AI_GUEST_DAILY_TOKENS` · `AI_MEMBER_DAILY_TOKENS` · `AI_PAID_DAILY_TOKENS` · `AI_READER_DAILY_TOKENS` | 60000 · 300000 · 1500000 · 800000 | โทเคน AI ต่อคนต่อวัน (`src/lib/security/cost-ledger.ts`) |
+| `SEARCH_DAILY_CAP` | 1500 | ค้นหาเชิงความหมายรวมต่อวัน (`/api/search`) |
+| `STUDIO_DRAFTS_PER_DAY` · `STUDIO_PRO_DRAFTS_PER_DAY` | 40 · 300 | ร่างคำอ่านด้วย AI ของแม่หมอต่อวัน (ปกติ · ผู้ถือแพ็กเกจ) |
+
+### 1.5 การจ่ายเงิน (Stripe)
+
+| ชื่อ | ใช้ทำอะไร | ไม่ตั้งแล้ว | สถานะ |
+| :--- | :--- | :--- | :--- |
+| `STRIPE_SECRET_KEY` | สร้างหน้าจ่ายเงิน Stripe Checkout (`sk_live_` · `sk_test_` · `rk_`) | ใช้ตัวจำลองที่ผ่านได้เฉพาะนอก production = ขายไม่ได้ | ยืนยันจาก Actions (deploy 2026-10-25 ดันเข้า Worker แล้ว) |
+| `STRIPE_WEBHOOK_SECRET` | ตรวจลายเซ็น webhook (`whsec_`) | ปฏิเสธ webhook ทุกใบ = จ่ายแล้วสถานะไม่ขึ้น `paid` | ยืนยันจาก Actions (deploy 2026-10-25) |
+| `PAYMENT_WEBHOOK_SECRET` | ตัวสำรองของ `STRIPE_WEBHOOK_SECRET` | — | ไม่ตั้ง (ตั้งใจ) |
+| `ALLOW_UNSIGNED_WEBHOOKS_DEV` | รับ webhook ไม่เซ็น — **เครื่องพัฒนาเท่านั้น** | — | ⛔ ห้ามตั้งบน production / preview |
+
+ทั้งสองตัวแรกเก็บที่ GitHub Secrets แล้ว `deploy.yml` ดันเข้า Worker ทุกรอบ (ไม่ได้ตั้งที่ GitHub = ข้าม ไม่แตะค่าใน Cloudflare) · คีย์เป็นโหมดทดสอบหรือจริงดูได้จากป้ายบนหัวแผงแอดมิน — วิธีตั้งฝั่ง Stripe อยู่หัวข้อ 3
+
+### 1.6 งานตั้งเวลา · Web Push · วิดีโอคอล · สตูดิโอ · อื่น ๆ
+
+| ชื่อ | ใช้ทำอะไร | ไม่ตั้งแล้ว | สถานะ |
+| :--- | :--- | :--- | :--- |
+| `CRON_SECRET` | Bearer ของ `/api/cron/*` — ต้องตั้ง **ค่าเดียวกัน** ทั้งบน Worker และ GitHub | ทุกเส้น cron ตอบ 401 (fail-closed) | ยืนยันจาก Actions (Daily Digest สำเร็จ 2026-10-26) |
+| `VAPID_PUBLIC_KEY` · `VAPID_PRIVATE_KEY` · `VAPID_SUBJECT` | Web Push | ปุ่ม "เปิดการเตือน" ถูกซ่อน (`/api/push/public-key` ตอบ `enabled: false`) | ยืนยันจาก Actions (`setup-vapid.yml` 2026-10-07) |
+| `CLOUDFLARE_TURN_KEY_ID` · `CLOUDFLARE_TURN_KEY_API_TOKEN` | วิดีโอคอลแม่หมอ | ไม่มีปุ่มวิดีโอคอล | รอเจ้าของ (หัวข้อ 6) |
+| `READER_STUDIO_ENABLED` · `STUDIO_VIEW_SECRET` | เปิดสตูดิโอแม่หมอ · กุญแจลิงก์ `/r/*` | สตูดิโอและ `/r/*` ตอบ 404 · ใช้ `TAROT_SESSION_SECRET` แทน | ไม่ตั้ง (ตั้งใจ · หัวข้อ 5) |
+| `UPSTASH_REDIS_REST_URL` · `UPSTASH_REDIS_REST_TOKEN` | ตัวนับ/เซสชันเปิดไพ่แบบ atomic (`src/lib/platform/redis.ts`) | ใช้ KV แทน | ตรวจจาก repo ไม่ได้ — ดู `/admin` ➔ สุขภาพระบบ |
+| `APP_MIN_VERSION` · `APP_LATEST_VERSION` | เวอร์ชันแอปมือถือที่ `/api/config/app` บอก | ค่าว่าง | ไม่ตั้ง (แอปยังไม่ขึ้นสโตร์) |
+| `GA_MEASUREMENT_ID` / `GA_ID` · `META_PIXEL_ID` · `GOOGLE_ADS_ID` / `AW_CONVERSION_ID` | ทางสำรองตอนรันของ `/api/config/analytics` | — | ไม่ใช้ (ดูหัวข้อ 2.2) |
+
+### 1.7 `vars` ใน `wrangler.jsonc` (ไม่ใช่ความลับ · ห้ามตั้งชื่อซ้ำเป็น secret — ชื่อชนกันแล้ว deploy ล้ม)
+
+`NODE_ENV` · `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT` · `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` · `STUDIO_PRO_PRICE_THB` (ราคาตั้งต้นแพ็กเกจ AI ช่วยเขียน 30 วัน — ปกติแก้ที่แผงแอดมิน แท็บ "แม่หมอพาร์ทเนอร์" ➔ ราคา AI ช่วยเขียน)
+
+ค่าสำหรับเครื่องพัฒนาเท่านั้น: `AUTH_SECRET_DEV` · `TAROT_SESSION_SECRET_DEV` (ดู [`LOCAL_SETUP.md`](LOCAL_SETUP.md))
+
+---
+
+## 2. Secrets / Variables ของ GitHub Actions
+
+### 2.1 Cloudflare และ deploy
+
+| ชื่อ | ใช้ใน | สถานะ |
+| :--- | :--- | :--- |
+| `CLOUDFLARE_API_TOKEN` · `CLOUDFLARE_ACCOUNT_ID` | `deploy.yml` · `rollback.yml` · `preview.yml` · `preview-down.yml` · `d1-backup.yml` · `setup-vapid.yml` | ยืนยันจาก Actions (deploy 2026-10-25 · สำรอง D1 2026-10-24) |
+| `CLOUDFLARE_ZONE_ID` | ล้างแคชขอบ · กฎ www ใน `deploy.yml` | ยืนยันจาก Actions (deploy 2026-10-25 ล้างแคชสำเร็จ) |
+
+สิทธิ์ที่ token ต้องมี ➔ [`CLOUDFLARE_DEPLOYMENT_GUIDE.md`](CLOUDFLARE_DEPLOYMENT_GUIDE.md) หัวข้อ 9 · log deploy 2026-10-25 ยืนยันว่ามีสิทธิ์ล้างแคชและเขียนกฎ redirect แล้ว
+
+### 2.2 ค่าวัดผล (ฝังตอน build)
+
+| ชื่อ | สถานะ |
+| :--- | :--- |
+| `NEXT_PUBLIC_GA_ID` (secret หรือ variable) | ยืนยันจาก Actions (deploy 2026-10-25: "ค่าวัดผลที่ใช้อยู่ตั้งครบแล้ว") |
+| `NEXT_PUBLIC_META_PIXEL_ID` · `NEXT_PUBLIC_GOOGLE_ADS_ID` · `NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL` | ไม่ใช้ (ตั้งใจ · เจ้าของตัดสินใจ) — **อย่ารายงานว่าเป็นบั๊ก** |
+| `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT` · `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | ไม่บังคับ — ค่าจริงอยู่ใน `vars` ของ `wrangler.jsonc` แล้ว |
+
+เริ่มใช้ Meta Pixel / Google Ads วันไหน:
+1. ตั้งเป็น secret/variable ของ **GitHub** (ค่า `NEXT_PUBLIC_*` ฝังตอน build) แล้ว deploy ใหม่
+2. ย้ายชื่อจาก `UNUSED` ไป `IN_USE` ในขั้น "📊 ตรวจว่าตั้งค่าวัดผลที่ใช้อยู่ครบไหม" ของ `deploy.yml`
+
+> ⛔ ตั้งด้วย `wrangler secret` อย่างเดียว **ไม่ทำงาน** — เมื่อ `NEXT_PUBLIC_GA_ID` ติดมากับ build แล้ว `AnalyticsTracker` จะไม่เรียก `/api/config/analytics` อีกเลย
+
+### 2.3 งานตั้งเวลาและรายงาน
+
+| ชื่อ | ใช้ใน | สถานะ |
+| :--- | :--- | :--- |
+| `CRON_SECRET` | `daily-digest.yml` · `booking-reminders.yml` · `push-reminders.yml` | ยืนยันจาก Actions (2026-10-26) |
+| `GSC_SERVICE_ACCOUNT_JSON` | `seo-gsc.yml` · `seo-ga4.yml` | ยืนยันจาก Actions (SEO GSC 2026-10-26) |
+| `GEMINI_API_KEY` · `GROQ_API_KEY` · `OPENROUTER_API_KEY` | `deploy.yml` · `ai-judge.yml` · `ai-probe-openrouter.yml` | ตรวจจาก repo ไม่ได้ — ต้องเช็กใน GitHub |
+| `STRIPE_SECRET_KEY` · `STRIPE_WEBHOOK_SECRET` | `deploy.yml` | ยืนยันจาก Actions (2026-10-25) |
+
+### 2.4 ผู้ตัดสินคุณภาพ AI (`ai:judge`) — ไม่ต้องตั้งบน Worker
+
+| ชื่อ | สถานะ |
+| :--- | :--- |
+| `JUDGE_GEMINI_API_KEY` · `JUDGE_GROQ_API_KEY` | รอเจ้าของ (บันทึก 2026-10-07 ว่ายังไม่มี) — ไม่ตั้ง = ใช้คีย์ของเว็บ และสลับผู้ตัดสินเองเมื่อโดน 429/5xx |
+
+`ai-judge.yml` รับชื่อสำรองอีกหลายแบบ (เช่น `GEMINI_JUDGE_API_KEY` · `JUDGE_API_KEY` · `GEMINI_API_KEY_2`) ทั้งแบบ secret และ variable — ใช้ชื่อในตารางเป็นหลัก · รันในเครื่องใส่ใน `.env.local`
+
+### 2.5 environment ของ Claude Code บนเว็บ (ไม่ใช่ GitHub)
+
+`ADMIN_REPORT_TOKEN` (ค่าเดียวกับบน Worker) ให้ผู้ช่วย `cmo` · `coo` · `cto` เรียก `npm run exec:report` · `EXEC_REPORT_BASE_URL` (ไม่บังคับ · ค่าเริ่ม `https://seertarot.net`)
+
+---
+
+## 3. Stripe — ตั้งฝั่ง Stripe Dashboard (ครั้งเดียว)
+
+1. Settings ➔ Payment methods: เปิด Cards + PromptPay
+2. Developers ➔ Webhooks ➔ endpoint `https://seertarot.net/api/marketplace/payments/webhook` เลือก event:
+   `checkout.session.completed` · `checkout.session.async_payment_succeeded` · `checkout.session.async_payment_failed` · `checkout.session.expired` · **`charge.refunded`**
+   (คืนเงินก่อนเพิ่ม `charge.refunded` ➔ แผงแอดมิน "การจองและการเงิน" ➔ ตรวจรายการคืนเงินจาก Stripe)
+3. Settings ➔ Customer emails ➔ เปิด "Successful payments" (ใบเสร็จ)
+4. ทดสอบด้วย `sk_test_` + บัตร `4242 4242 4242 4242` ก่อนสลับเป็น `sk_live_`
+   - ระหว่างที่ production ยังใช้คีย์ทดสอบ เฉพาะผู้ทดสอบซื้อได้ (คุกกี้ `/tester` หรืออีเมลใน `UNLIMITED_EMAILS`) คนอื่นได้ 503 (`isStripeTestModeOnProduction()`)
+5. ก่อนเปิดขายจริง ทดสอบ 1 รอบเต็ม: จอง ➔ จ่าย ➔ อีเมลยืนยัน ➔ ยกเลิกก่อน 24 ชม. ➔ Stripe คืนเงินจริง ➔ อีเมลแจ้งคืนเงิน
+
+---
+
+## 4. รหัสอ่านรายงานผู้บริหาร (`ADMIN_REPORT_TOKEN`)
+
+ให้ผู้ช่วยผู้บริหารและรายงานเช้าวันจันทร์ดึงตัวเลขจริงด้วย `npm run exec:report` · ไม่ตั้ง = ช่องนี้ปิด (หน้าแอดมินใช้ได้ปกติ)
+
+- อ่านได้แค่ `GET /api/admin/executive` และ `GET /api/admin/nav-badges` — ตัวเลขรวม ไม่มีอีเมล/ชื่อ/รหัสผู้ใช้ · เขียนอะไรไม่ได้ (ด่าน `test-admin-stats-keys` กันไม่ให้รหัสนี้เปิด route อื่น)
+- ยาวอย่างน้อย 32 ตัว · ไม่เกี่ยวกับรหัสผ่านแอดมิน · เปลี่ยนค่า = รหัสเก่าใช้ไม่ได้ทันที
+
+ตั้งสองที่ด้วยค่าเดียวกัน:
 
 ```bash
-npx wrangler secret put STRIPE_SECRET_KEY
-npx wrangler secret put STRIPE_WEBHOOK_SECRET
+openssl rand -hex 32                      # สร้างค่า
+npx wrangler secret put ADMIN_REPORT_TOKEN  # 1) Worker
+# 2) environment ของ Claude Code บนเว็บ: เมนู cloud environment ➔ Edit ➔ ตัวแปร ADMIN_REPORT_TOKEN (เซสชันใหม่จึงเห็นค่า)
 ```
 
-หรือ (ทางที่เจ้าของใช้) ใส่ทั้งสองชื่อไว้ที่ GitHub **Settings ➔ Secrets and variables ➔ Actions** —
-ขั้น `💳 Sync Stripe secrets to Worker` ใน `deploy.yml` ดันเข้า Worker ให้ทุกครั้งที่ deploy
-(ไม่ได้ตั้งที่ GitHub = ข้าม ไม่แตะค่าใน Cloudflare)
+ตรวจ: เซสชันใหม่รัน `npm run exec:report -- --days 7`
 
-ฝั่ง Stripe Dashboard (ทำครั้งเดียว):
-1. **Settings ➔ Payment methods** เปิด Cards + **PromptPay** (หน้า Checkout จะโชว์ตามที่เปิดไว้)
-2. **Developers ➔ Webhooks ➔ Add endpoint** `https://seertarot.net/api/marketplace/payments/webhook`
-   เลือก 4 event: `checkout.session.completed` · `checkout.session.async_payment_succeeded` ·
-   `checkout.session.async_payment_failed` · `checkout.session.expired` ➔ คัดลอก Signing secret (`whsec_...`) ไปตั้งข้างบน
-3. ทดสอบด้วยคีย์ `sk_test_...` + บัตร `4242 4242 4242 4242` ก่อนสลับเป็น `sk_live_...`
-   - ⚠️ ระหว่างเว็บจริงใช้คีย์ทดสอบ **เฉพาะผู้ทดสอบ** ซื้อได้ (คุกกี้ `/tester` หรืออีเมลใน `UNLIMITED_EMAILS` ที่ยืนยันแล้ว)
-     คนอื่นได้ 503 "ระบบชำระเงินยังไม่เปิดให้บริการ" — กันบัตร 4242 ได้เครดิตฟรี (`isStripeTestModeOnProduction`)
-   - ใส่ `sk_live_...` เมื่อไหร่ ด่านนี้ปลดเองทันที
+| ผล | แปลว่า |
+| :--- | :--- |
+| ได้รายงานภาษาไทย | ใช้ได้ |
+| `401 รหัสอ่านรายงานไม่ถูกต้อง` | ค่าสองฝั่งไม่ตรงกัน |
+| `401 ยังไม่ได้ตั้งรหัสอ่านรายงาน` | ฝั่ง Worker ยังไม่ตั้ง (หรือสั้นกว่า 32 ตัว) |
+| `ยังไม่มี ADMIN_REPORT_TOKEN` (ก่อนยิง) | ฝั่ง environment ยังไม่ตั้ง |
 
-> 🚫 `ALLOW_UNSIGNED_WEBHOOKS_DEV=1` เป็นธงสำหรับ **เครื่องพัฒนาเท่านั้น**
-> ห้ามตั้งบน production / preview / staging เด็ดขาด — เท่ากับเปิดให้ใครก็ได้แจกเครดิตให้ตัวเอง
+---
 
-### 📅 ระบบจองแม่หมอ — ใช้ความลับชุดเดิม ไม่ต้องตั้งเพิ่ม (2026-10-03)
+## 5. Reader Studio — ปิดไว้จนกว่าทนายรับรอง
 
-- **เตือนนัด / แจ้งเวลาว่าง / ปล่อยที่ที่หมดเวลาจ่าย**: workflow `📅 Booking Reminders` ยิง `/api/cron/booking-reminders` (ตั้งไว้ทุก 15 นาที แต่ GitHub รันจริงห่างกว่านั้นได้หลายชั่วโมง — ปลายทางตามส่งย้อนหลังเอง)
-  ใช้ `CRON_SECRET` ตัวเดียวกับ Daily Digest (หัวข้อถัดไป) — ตั้งครั้งเดียวได้ทั้งสองงาน
-- **อีเมลยืนยัน/เตือนนัด/คืนเงิน**: ใช้ `RESEND_API_KEY` เดิม · ⚠️ แผนฟรี 100 ฉบับ/วันใช้ร่วมกับอีเมลยืนยันตัวตน — เพดานของ cron จองตั้งไว้ 40 ฉบับ/รอบ และ 60 ฉบับ/วัน (รายชื่อรอเวลาว่างไม่เกิน 20 ฉบับ/วัน)
-- **ใบเสร็จ Stripe**: เปิดที่ Stripe Dashboard → Settings → Customer emails → "Successful payments" (ระบบส่ง `receipt_email` ให้เมื่อรู้อีเมลอยู่แล้ว)
-- **Webhook**: ⚠️ **ต้องเพิ่ม event `charge.refunded`** ใน Stripe Dashboard → Developers → Webhooks → endpoint `/api/marketplace/payments/webhook`
-  (คืนเงินในแดชบอร์ดแล้วเว็บจะหักรอบดูดวงที่ซื้อ / ยกเลิกนัดให้เอง) · คืนเงินที่ทำไปก่อนเพิ่ม event นี้ ➔ แผงแอดมิน → "การจอง & การเงิน" → "ตรวจรายการคืนเงินจาก Stripe"
-- **ทดสอบจ่ายจริง 1 รอบก่อนเปิด**: จองนัดจริง → จ่าย → ได้อีเมลยืนยัน → กดยกเลิก (ก่อน 24 ชม.) → เช็กว่า Stripe คืนเงินจริง → อีเมลแจ้งคืนเงินมาถึง
+ไม่ตั้ง `READER_STUDIO_ENABLED` = สตูดิโอแม่หมอและลิงก์ `/r/*` ตอบ 404 (ตั้งใจ)
 
-### 📬 รอตั้งเพิ่ม — `CRON_SECRET` (ดวงประจำวันทางอีเมล)
-
-ระบบส่งดวงประจำวันเขียนเสร็จและ deploy ไปแล้ว แต่ **ยังส่งไม่ออกจนกว่าจะตั้งความลับนี้**
-เส้น `/api/cron/daily-digest` เป็นแบบ fail-closed — ไม่มี `CRON_SECRET` = ตอบ 401 ทุกคำขอ
-(ตั้งใจให้เป็นแบบนี้ เพื่อไม่ให้ใครก็ได้ยิงให้ระบบส่งอีเมลหาผู้ใช้ของเรา)
-
-ต้องตั้ง **สองที่ ด้วยค่าเดียวกัน**:
-
-```bash
-# 1) ฝั่ง Cloudflare Worker (ตัวที่ตรวจว่าคำขอมาจากเรา)
-npx wrangler secret put CRON_SECRET
-
-# 2) ฝั่ง GitHub (ตัวจับเวลาที่ยิงเข้ามา)
-#    Settings → Secrets and variables → Actions → New repository secret
-#    Name: CRON_SECRET   Value: <ค่าเดียวกับข้อ 1>
-```
-
-สร้างค่าสุ่มด้วย `openssl rand -base64 32`
-
-**ตรวจว่าใช้ได้จริง**: Actions → `📬 Daily Digest` → Run workflow → ดูผลลัพธ์
-ต้องได้ HTTP 200 พร้อม JSON สรุป `{ scanned, sent, skipped, failed }`
-กดซ้ำในวันเดียวกันต้องได้ `sent = 0` (กันส่งซ้ำทำงาน ไม่ใช่ระบบพัง)
-
-**อ่านรหัสผลลัพธ์ให้ถูก** — workflow แยกให้แล้วว่าต้องแก้ตรงไหน:
-
-| รหัส | แปลว่า | แก้ที่ไหน |
-| :-- | :--- | :--- |
-| `200` | สำเร็จ | — |
-| `401` | ค่า `CRON_SECRET` สองฝั่งไม่ตรงกัน (หรือฝั่ง Worker ยังไม่ได้ตั้ง) | ตั้งใหม่ให้ตรงกันทั้งสองที่ |
-| `403` | **คำขอถูกกฎ WAF ปัดตกที่ชั้น edge ก่อนถึง Worker** — ไม่เกี่ยวกับความลับเลย | ดูกฎ Custom Rule ของ Cloudflare |
-
-> ⚠️ **กับดักที่เหยียบมาแล้ว 2 ชั้น — อย่าเปลี่ยน URL ใน workflow กลับเป็นโดเมนหลัก**
->
-> **ชั้นที่ 1 (INC-0141)**: กฎ WAF ข้อ 5 ของโซนนี้บล็อก User-Agent ที่เป็น
-> `curl` / `python` / `Postman` / `Scrapy` ที่เส้น `/api/` ➔ workflow จึงส่ง `-A "SeerTarot-Cron/1.0"`
->
-> **ชั้นที่ 2 (INC-0142) — ตัวที่ร้ายกว่า**: โดเมน `seertarot.net` เปิด **Bot Fight Mode** อยู่
-> ซึ่งตอบ managed challenge (หน้า `Just a moment...` ที่ต้องมี JavaScript + คุกกี้)
-> ให้กับคำขอจาก IP ดาต้าเซ็นเตอร์ — IP ของ GitHub runner เข้าข่ายเต็ม ๆ
-> **เปลี่ยน User-Agent ไม่ช่วยเลย** เพราะ Cloudflare ตัดสินจาก IP ไม่ใช่ชื่อ UA
->
-> ✅ **ทางออกที่ใช้อยู่**: ยิงเข้า `https://tarot-web.bankjack10452.workers.dev/api/cron/daily-digest`
-> ซึ่งเป็นโดเมนของ Cloudflare เอง **ไม่ได้อยู่ในโซน** `seertarot.net` การตั้งค่าระดับโซนจึงไม่มีผล
-> โค้ดที่รันคือ Worker ตัวเดียวกันเป๊ะ · ลิงก์ในอีเมลยังชี้ `seertarot.net` เพราะสร้างจาก
-> `SITE_ORIGIN` ในโค้ด ไม่ได้เอามาจาก host ของคำขอ · มีด่านตรวจกำกับไม่ให้เปลี่ยนกลับ
->
-> 🔒 เส้น cron บน workers.dev เป็น fail-closed — ไม่มี Bearer ที่ตรงกับ `CRON_SECRET` ได้ 401 เปล่า ๆ เสมอ
-> ⚠️ แต่โฮสต์ workers.dev อยู่นอกโซน กฎ WAF / rate limit ของ `seertarot.net` **ไม่ครอบ** โฮสต์นี้ —
-> ตั้งแต่ 2026-10-19 (A10-07) `/api/*` อื่นทั้งหมดบนโฮสต์นี้ถูกส่งกลับไปโดเมนหลักด้วย 307 (`redirects()` ใน `next.config.ts`)
-> เหลือเปิดตรงแค่ `/api/cron/*` · เพิ่มเส้น cron ใหม่ต้องตรวจ `CRON_SECRET` เองทุกเส้น
-
-> ⚠️ ต้องรัน `npm run db:migrate -- --remote` (migration `0014_digest_prefs.sql` · deploy.yml รันให้ทุกรอบอยู่แล้ว) ก่อน ไม่งั้นเส้นนี้จะล้มเพราะไม่มีตาราง `digest_log`
-> ⚠️ เพดานส่ง 80 ฉบับ/รอบ เพราะ Resend แผนฟรีให้ 100 ฉบับ/วัน และต้องเหลือโควตาให้อีเมลยืนยันตัวตนกับรีเซ็ตรหัสผ่านด้วย
-
-> **เอนจินคำอ่าน**: GROQ + GEMINI ตั้งครบ → Tier 1 Groq Qwen3-27B ทำงาน (`src/lib/ai/groq.ts` · fallback → Gemini `src/lib/ai/gemini.ts`) · เฝ้าเมตริก `ai_foreign_trip` / `ai_groq_failover` ใน `/admin`
-> **AI Gateway / Turnstile**: ตั้งครบแล้ว ไม่ใช่รายการค้างอีกต่อไป
-
-### 📊 ✅ ตั้งแล้ว 2026-10-20 — `ADMIN_REPORT_TOKEN` (รหัสอ่านรายงานผู้บริหาร · เพิ่ม 2026-10-19)
-
-> ฝั่ง Cloudflare ยืนยันแล้ว 2026-10-20 (เว็บจริงตอบ "รหัสอ่านรายงานไม่ถูกต้อง" กับรหัสทดสอบ = ตั้งค่าแล้ว) · ฝั่ง environment เจ้าของแจ้งว่าตั้งแล้ว ยืนยันได้ในเซสชันใหม่ด้วย `npm run exec:report`
-
-ให้ผู้ช่วย `cmo` · `coo` · `cto` และรายงานอัตโนมัติเช้าวันจันทร์ดึงตัวเลขจริงด้วย `npm run exec:report`
-โดยไม่ต้องรอเจ้าของส่งภาพหน้าแอดมิน · **ไม่ตั้ง = ช่องนี้ปิดสนิท** (หน้าแอดมินใช้ได้ตามปกติ)
-
-- อ่านได้แค่ `GET /api/admin/executive` กับ `GET /api/admin/nav-badges` — ตัวเลขรวม ไม่มีอีเมล ชื่อ หรือรหัสผู้ใช้ · เขียนอะไรไม่ได้
-  (ด่าน `test-admin-stats-keys` หัวข้อ จ. กันไม่ให้รหัสนี้ไปเปิด route อื่น)
-- ต้องยาวอย่างน้อย 32 ตัว · ไม่เกี่ยวกับรหัสผ่านแอดมิน · เปลี่ยนค่า = รหัสเก่าใช้ไม่ได้ทันที
-
-ต้องตั้ง **สองที่ ด้วยค่าเดียวกัน**:
-
-```bash
-# สร้างค่าสุ่ม (64 ตัวอักษร)
-openssl rand -hex 32
-
-# 1) ฝั่ง Cloudflare Worker (ตัวที่ตรวจรหัส)
-npx wrangler secret put ADMIN_REPORT_TOKEN
-
-# 2) ฝั่ง environment ของ Claude Code บนเว็บ (ตัวที่ผู้ช่วยใช้ดึงรายงาน)
-#    เมนู cloud environment บนแถบชื่อเซสชัน → Edit → ตัวแปร environment
-#    Name: ADMIN_REPORT_TOKEN   Value: <ค่าเดียวกับข้อ 1>
-#    เซสชันใหม่จึงจะเห็นค่า (รวมถึงรายงานเช้าวันจันทร์)
-```
-
-⚠️ ห้ามวางค่ารหัสลงในแชทหรือไฟล์ในรีโป
-
-**ตรวจว่าใช้ได้จริง**: เปิดเซสชันใหม่แล้วรัน `npm run exec:report -- --days 7`
-- ได้รายงานภาษาไทย = ใช้ได้
-- `401 รหัสอ่านรายงานไม่ถูกต้อง` = ค่าสองฝั่งไม่ตรงกัน
-- `401 ยังไม่ได้ตั้งรหัสอ่านรายงาน` = ฝั่ง Cloudflare ยังไม่ได้ตั้ง (หรือสั้นกว่า 32 ตัว)
-- `ยังไม่มี ADMIN_REPORT_TOKEN` (ก่อนยิง) = ฝั่ง environment ยังไม่ได้ตั้ง
-
-### 🔔 Web Push (`VAPID_*`) — ✅ ตั้งแล้ว 2026-10-07 ผ่าน GitHub Actions (run 37568597441)
-
-workflow `.github/workflows/setup-vapid.yml` สร้างคู่กุญแจใน runner แล้วส่งเข้า `wrangler secret put` ตรง ๆ
-— กุญแจลับไม่ถูกพิมพ์ลง log และไม่มีใครต้องเห็น · ใช้ `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID` ชุดเดียวกับ deploy
-- ทำงานเองหนึ่งครั้งเมื่อไฟล์ workflow ถูก push · ทำซ้ำได้ปลอดภัย: มี `VAPID_PRIVATE_KEY` บน Worker แล้ว = ข้าม
-- หมุนกุญแจ: GitHub ➔ Actions ➔ "🔑 Setup Web Push keys (VAPID)" ➔ Run workflow ➔ ติ๊ก `rotate` (ผู้ใช้ทุกคนต้องกดเปิดการเตือนใหม่)
-- `VAPID_SUBJECT` = `mailto:support@seertarot.net` (เปลี่ยนได้ตอนกด Run workflow)
-- ทางสำรองในเครื่อง: `npx tsx scripts/gen-vapid.ts` แล้ว `npx wrangler secret put VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT`
-- workflow `push-reminders.yml` (ทุกชั่วโมง) ใช้ `CRON_SECRET` ชุดเดียวกับ digest — ไม่ต้องตั้งเพิ่ม
-
-ยังไม่ตั้ง = ปุ่ม "เปิดการเตือน" ถูกซ่อนเอง (`/api/push/public-key` ตอบ `enabled: false`) · อีเมลนัดเช็กยังทำงานตามปกติ
-⚠️ iPhone รับแจ้งเตือนได้เฉพาะเมื่อเพิ่มเว็บไปยังหน้าจอโฮมแล้ว (iOS 16.4+) — หน้าเว็บบอกผู้ใช้เองแล้ว
-
-### 🗄️ migration ของแผนสมุดดวง 0022–0029 — **ไม่ต้องทำเอง**
-
-`deploy.yml` รัน `npm run db:migrate -- --remote` ใส่ D1 remote ให้ทุกครั้งก่อน deploy (wrangler จำว่าไฟล์ไหน apply แล้ว ข้ามให้เอง)
-· `npm run db:migrate` เปล่า ๆ = ฐานในเครื่องเท่านั้น (เปลี่ยนค่าเริ่มต้น 2026-10-27 กันเผลอแก้ฐานจริงจากเครื่องตัวเอง)
-จึงลงพร้อมโค้ดอัตโนมัติเมื่อ merge กิ่งนี้เข้า `main` · ต้องการแค่ `CLOUDFLARE_API_TOKEN` มีสิทธิ์ D1:Edit (มีอยู่แล้วเพราะ deploy ก่อนหน้าใช้ขั้นนี้)
-
-### 🛡️ ตั้งได้ภายหลัง (มีค่าเริ่มต้นแล้ว) — เพดานโทเคน AI ต่อคนต่อวัน (แทร็ก S · 2026-10-06)
-
-ไม่ตั้ง = ใช้ค่าเริ่มต้น · ตั้งเป็นตัวเลขจำนวนโทเคนต่อวัน (เข้า+ออก)
-| ตัวแปร | ค่าเริ่มต้น | ใช้กับ |
-|---|---|---|
-| `AI_GUEST_DAILY_TOKENS` | 60000 | ผู้เยี่ยมชม (นับต่อซับเน็ตแบบแฮช) |
-| `AI_MEMBER_DAILY_TOKENS` | 300000 | สมาชิกฟรี |
-| `AI_PAID_DAILY_TOKENS` | 1500000 | ผู้ถือรอบที่ซื้อ/ไม่จำกัด |
-| `AI_READER_DAILY_TOKENS` | 800000 | แม่หมอใน Reader Studio (ร่างคำอ่าน) |
-| `STUDIO_DRAFTS_PER_DAY` | 40 | จำนวนครั้งที่แม่หมอกด "ให้ AI ช่วยเกลา" ต่อวัน |
-
-### ⚖️ รอผู้ตัดสินแยกโควตา — `JUDGE_GEMINI_API_KEY` / `JUDGE_GROQ_API_KEY` (แทร็ก E · 2026-10-06)
-
-ใช้เฉพาะสคริปต์ในเครื่อง/CI (`npm run ai:judge` · `ai:judge:ab` · `ai:judge:calibrate`) — **ไม่ต้องตั้งบน Worker**
-- คีย์แยกจากเว็บจริง = ผู้ตัดสินไม่แย่งโควตา 429 กับผู้ใช้ (ต้นเหตุที่ baseline ค้างใน HANDOFF_AI_JUDGE_BASELINE)
-- ไม่ตั้ง = ใช้ `GEMINI_API_KEY` / `GROQ_API_KEY` เดิม และสลับไปผู้ตัดสินอีกตระกูลอัตโนมัติเมื่อโดน 429/5xx
-- ตั้งใน `.env.local` หรือ GitHub Actions secret ถ้าจะรันใน CI
-
-### 🪶 ปิดไว้จนกว่าทนายรับรอง — Reader Studio (`READER_STUDIO_ENABLED` · `STUDIO_VIEW_SECRET` · 2026-10-06)
-
-ไม่ตั้ง = สตูดิโอแม่หมอและลิงก์ `/r/*` ตอบ 404 ทั้งหมด (ตั้งใจ — ยังไม่มีข้อตกลง PDPA ฉบับจริง)
-1. ให้ทนายความไทยรับรองร่าง `docs/legal/READER_STUDIO_DPA_DRAFT.md` (`draft-2026-10-07-r2`) และ `docs/legal/READER_TERMS_DRAFT.md` (เงื่อนไขการใช้บริการสำหรับแม่หมอ `draft-2026-10-07-r1`) ➔ ตัดคำว่า `draft-` ออกจาก `STUDIO_DPA_VERSION` และให้ `STUDIO_DPA_POINTS_TH` ใน `src/lib/studio/dpa.ts` ตรงกับภาคผนวก 6 (ด่านตรวจ)
-   - ✅ เติมแล้ว (2026-10-07): อีเมล support@seertarot.net · เพดานความรับผิด = เงินที่ได้รับจากแม่หมอใน 12 เดือน · ศาลไทยที่มีเขตอำนาจ · โอนส่วนแบ่งรายเดือนภายในวันที่ 15
-   - ⏸️ **ยังต้องเติมก่อนรับแม่หมอภายนอกคนแรก**: ชื่อ ที่อยู่ เลขผู้เสียภาษีของผู้ให้บริการ (หัวสัญญาทั้งสองฉบับ + ประกาศความเป็นส่วนตัว) — ตอนนี้แม่หมอมีแค่เจ้าของคนเดียว
-   - ⏸️ ยังไม่มีหน้าให้อ่านข้อตกลงฉบับเต็มจากหน้ายอมรับ (B-7) และยังไม่มีหน้าให้แม่หมอกดยอมรับเงื่อนไขการใช้บริการในแผงแม่หมอ
-   - เปิดการยืนยันตัวตนสองขั้นตอนในบัญชี Cloudflare, GitHub, Google AI Studio และ Stripe (ภาคผนวก 2 อ้างถึง)
-1.2 **ทำข้อตกลงประมวลผลข้อมูล (DPA) กับ Cloudflare** — ตรวจแล้ว (2026-10-07): ข้อกำหนด Self-Serve ของ Cloudflare นำ DPA มาใช้เฉพาะข้อมูลของคนใน EU/UK และตาม CCPA **ข้อมูลลูกค้าคนไทยจึงไม่อยู่ใต้ DPA โดยอัตโนมัติ**
-   ขอทำ/ยอมรับ DPA กับ Cloudflare สำหรับบัญชีนี้ (ติดต่อฝ่ายขาย/ฝ่ายกฎหมายของ Cloudflare ตามหน้า https://www.cloudflare.com/cloudflare-customer-dpa/) แล้วจดวันที่ลงในภาคผนวก 3 ของร่าง DPA
-   ทำไม่ได้ = ข้อตกลงยังใช้ได้ด้วยฐาน ม.28(3) (จำเป็นต่อการให้บริการ) แต่ไม่มีชั้นคุ้มครองตามสัญญาของ Cloudflare — ภาคผนวก 3 เขียนสถานะนี้ตามจริงไว้แล้ว
-1.5 **เปิดการเรียบเรียงด้วย AI ในสตูดิโอ** — ต้องใช้ Gemini แบบ **เสียเงิน** เท่านั้น (แบบฟรี Google นำข้อมูลไปพัฒนาผลิตภัณฑ์และอาจให้คนอ่าน ซึ่งขัดข้อตกลงข้อ 7):
-   ตามข้อกำหนด Gemini API (มีผล 23 มี.ค. 2569) คีย์จะเป็น Paid Service **เฉพาะเมื่อโปรเจกต์ Google Cloud ที่ออกคีย์มีบัญชีเรียกเก็บเงินที่ใช้งานอยู่** และเมื่อนั้น DPA ของ Google มีผลเอง ไม่ต้องลงนามแยก
-   Google AI Studio ➔ API keys ➔ ดูว่าคีย์ใน `GEMINI_API_KEY` อยู่โปรเจกต์ไหน ➔ Google Cloud Console ➔ Billing ➔ ผูกบัญชีเรียกเก็บเงินกับโปรเจกต์นั้น (สถานะต้องเป็น Active) ➔ ตั้ง `npx wrangler secret put STUDIO_AI_PAID_TIER` = `1`
-   ไม่ตั้ง = ปุ่ม "ให้ AI ช่วยเกลา" ประกอบร่างจากโน้ตของแม่หมอเองโดยไม่ส่งอะไรให้ AI
-2. รัน migration `0027_reader_studio.sql` (อยู่ในชุดข้างบนแล้ว)
-3. ตั้ง secret:
+ลำดับก่อนเปิด:
+1. ทนายความไทยรับรอง [`legal/READER_STUDIO_DPA_DRAFT.md`](legal/READER_STUDIO_DPA_DRAFT.md) และ [`legal/READER_TERMS_DRAFT.md`](legal/READER_TERMS_DRAFT.md) (รุ่นร่างดูที่หัวแต่ละไฟล์) ➔ ตัดคำว่า `draft-` ออกจาก `STUDIO_DPA_VERSION` ใน `src/lib/studio/dpa.ts` (ด่านตรวจว่า `STUDIO_DPA_POINTS_TH` ตรงกับภาคผนวก)
+2. เติมตัวตนผู้ให้บริการ (ชื่อ · ที่อยู่ · เลขผู้เสียภาษี) ในสัญญาทั้งสองฉบับและประกาศความเป็นส่วนตัว — ต้องทำก่อนรับแม่หมอภายนอกคนแรก
+3. ทำหน้าอ่านข้อตกลงฉบับเต็มจากหน้ายอมรับ (B-7) และหน้ายอมรับเงื่อนไขในแผงแม่หมอ
+4. เปิดยืนยันตัวตนสองขั้นในบัญชี Cloudflare · GitHub · Google AI Studio · Stripe
+5. DPA กับ Cloudflare: ข้อกำหนด Self-Serve ครอบเฉพาะข้อมูล EU/UK และ CCPA — ขอทำ DPA ตาม https://www.cloudflare.com/cloudflare-customer-dpa/ แล้วจดวันที่ในภาคผนวก 3 ของร่าง DPA
+6. (ถ้าจะเปิดตัวช่วย AI) ผูกบัญชีเรียกเก็บเงินกับโปรเจกต์ Google Cloud ที่ออก `GEMINI_API_KEY` ให้เป็น Active แล้วตั้ง `STUDIO_AI_PAID_TIER=1` — Gemini แบบฟรีนำข้อมูลไปใช้พัฒนาผลิตภัณฑ์ ขัดข้อตกลงข้อ 7
+7. ตั้ง secret:
    ```bash
-   npx wrangler secret put STUDIO_VIEW_SECRET     # สุ่ม ≥ 32 ตัว: openssl rand -base64 48 (ไม่ตั้ง = ใช้ TAROT_SESSION_SECRET)
+   npx wrangler secret put STUDIO_VIEW_SECRET     # openssl rand -base64 48
    npx wrangler secret put READER_STUDIO_ENABLED  # 1
    ```
-4. ✅ **แพ็กเกจ AI ช่วยเขียน 30 วัน** (ในโค้ดเรียก studio pass) (จ่ายครั้งเดียว ไม่ตัดเงินอัตโนมัติ) — **แก้ราคาที่แผงแอดมิน แท็บ "หมอดูพาร์ทเนอร์"** ไม่ต้อง deploy
-   - ลำดับ: ราคาเฉพาะแม่หมอคนนั้น ➔ ราคากลางที่แอดมินตั้ง ➔ ค่าตั้งต้น **299 บาท** ใน `wrangler.jsonc` → `vars.STUDIO_PRO_PRICE_THB`
-   - เปลี่ยนราคามีผลกับการกดซื้อครั้งถัดไป · คำสั่งซื้อที่เริ่มแล้วตรวจยอดตามราคาเดิม · **ห้าม** `wrangler secret put STUDIO_PRO_PRICE_THB` (ชื่อชนกับ var ➔ deploy ล้ม)
-   - ปุ่มซื้อโผล่เมื่อสตูดิโอเปิด (`READER_STUDIO_ENABLED`) เท่านั้น
-   - โควตาร่างต่อวันของผู้ถือบัตร (ไม่บังคับ · ค่าเริ่ม 300): `npx wrangler secret put STUDIO_PRO_DRAFTS_PER_DAY`
-   ใช้ webhook Stripe เส้นเดิม (`/api/marketplace/payments/webhook`) — ไม่ต้องเพิ่ม event · คืนเงินเต็มในแดชบอร์ด = หักวันคืนอัตโนมัติ
 
-### ⏳ รอตั้งเพิ่ม — Vectorize (Wave 3) · R2 ตั้งอัตโนมัติแล้ว
-
-**Vectorize** (binding อยู่ใน `wrangler.jsonc` แล้ว — deploy รอบถัดไปทำงานเลย):
-- หลัง deploy → `/admin` → แท็บสุขภาพระบบ → การ์ด Cloudflare Free Stack → ปุ่ม **"สร้าง index ใหม่"** (รันครั้งเดียว)
-
-**R2** (ไม่ต้องกดสร้างหรือตั้งกฎเองแล้ว):
-- ✅ bucket ทุกตัวใน `wrangler.jsonc` — `deploy.yml` สร้างให้ก่อน deploy (`npm run cf:r2-buckets` · 2026-10-26)
-- ✅ กฎลบการ์ดแชร์อัตโนมัติ 90 วัน (PDPA) — `deploy.yml` รัน `npm run cf:r2-lifecycle` ทุกรอบ ตั้งกฎ `expire-share-90d` ทั้ง bucket `seertarot-share`
-  (2026-10-26 แทนกฎ 16 ข้อ `expire-share-0` … `expire-share-f` ของรุ่น 2026-10-24 หลังแยกโลโก้แม่หมอออกไป)
-- ✅ โลโก้สตูดิโอแม่หมออยู่ bucket แยก `seertarot-studio` (`STUDIO_BUCKET` · ส่วนตัว · เก็บถาวร)
-  ⛔ **ห้ามตั้งกฎลบใด ๆ ใน `seertarot-studio`** — สคริปต์ล้มทุก deploy ถ้าเจอกฎที่ครอบ `studio-logo/` · ⛔ ห้ามเก็บของถาวรใน `seertarot-share`
-- ✅ bucket `seertarot-d1-backups` (ไฟล์สำรองฐาน D1) — สร้างและตั้งกฎลบ 35 วันโดย `d1-backup.yml` เอง ห้ามเปิดลิงก์สาธารณะ
+แพ็กเกจ AI ช่วยเขียน 30 วัน (จ่ายครั้งเดียว): ราคาเฉพาะแม่หมอ ➔ ราคากลางที่แอดมินตั้ง ➔ `STUDIO_PRO_PRICE_THB` ใน `wrangler.jsonc` · ใช้ webhook Stripe เส้นเดิม · ปุ่มซื้อโผล่เมื่อสตูดิโอเปิดเท่านั้น
 
 ---
 
-## 🧪 3. การตรวจสอบความพร้อมด้วย Live Diagnostics
+## 6. วิดีโอคอลแม่หมอ — Cloudflare Realtime TURN
 
-แอดมินสามารถตรวจสอบสถานะการเชื่อมต่อของทุกบริการข้างต้นแบบ Real-time ได้ตลอดเวลา:
-1. เข้าสู่ระบบที่ **[https://seertarot.net/admin](https://seertarot.net/admin)**
-2. ไปที่แท็บ **"✦ สถานะระบบ (Cloud Health)"**
-3. กดปุ่ม **"✦ ยิงตรวจสัญญาณสดทั้งหมด"** ระบบจะทดสอบและรายงานสถานะ Latency (ms) ของทุกระบบทันที
+1. Cloudflare Dashboard ➔ Realtime ➔ TURN Server ➔ Create
+2. คัดลอก Turn Token ID และ API Token (API Token เห็นครั้งเดียว)
+3. `npx wrangler secret put CLOUDFLARE_TURN_KEY_ID` และ `npx wrangler secret put CLOUDFLARE_TURN_KEY_API_TOKEN`
+4. ตรวจ: เรียกคิวในแผงแม่หมอ ➔ ต้องเห็นปุ่ม "เข้าห้องวิดีโอ" และหน้าคิวลูกค้าต้องเห็นกล่องวิดีโอคอล
+
+ค่าใช้จ่าย: ฟรี 1,000 GB/เดือน (TURN + SFU รวมกัน) เกินคิด $0.05/GB · สถิติคุณภาพสาย: `npm run cf:call-stats` (token แยกที่มีสิทธิ์ Account · Account Analytics · Read)
 
 ---
 
-## 🗺️ 4. ค่าที่อยู่บน Dashboard เท่านั้น — ไม่มีในไฟล์ config (R-18)
+## 7. แจ้งเตือนค่าใช้จ่าย Cloudflare (Dashboard เท่านั้น · ฟรี)
 
-> ย้ายบัญชี Cloudflare · สร้าง Worker ใหม่ · กู้คืนจากศูนย์ ➔ **รายการนี้คือสิ่งที่ `wrangler deploy` ไม่ตั้งให้**
-> เพราะ `wrangler.jsonc` ไม่ได้ประกาศ `routes` / `custom_domain` ไว้เลย
+1. Manage Account ➔ Notifications ➔ Add ➔ **Usage Based Billing**
+2. ทำทีละบริการ: Workers KV Storage · Workers Standard Requests · Workers CPU ms · Realtime (TURN) · Workers Logs
+3. เกณฑ์ = ใกล้เพดานโควตาฟรีของแต่ละตัว (เช่น KV Storage 0.8 GB · Realtime 800 GB) ➔ อีเมลเจ้าของ
+4. ยอดรายวันดูได้ที่ Billing ➔ Billable Usage
 
-| สิ่งที่ต้องตั้ง | ตั้งที่ไหน | ค่าที่ใช้อยู่จริง |
+---
+
+## 8. ค่าที่อยู่บน Dashboard เท่านั้น — `wrangler deploy` ไม่ตั้งให้
+
+ย้ายบัญชี Cloudflare · สร้าง Worker ใหม่ · กู้จากศูนย์ ➔ ต้องตั้งรายการนี้เอง
+
+| สิ่งที่ต้องตั้ง | ตั้งที่ไหน | ค่าที่ใช้อยู่ |
 | :--- | :--- | :--- |
-| **Custom Domain** | Workers & Pages ➔ `tarot-web` ➔ Settings ➔ Domains & Routes | `seertarot.net` และ `www.seertarot.net` |
-| **DNS ของโซน** | DNS ➔ Records | Cloudflare ออกให้เองตอน Add Custom Domain (proxied) |
-| **WAF Rate Limiting** | Security ➔ WAF ➔ Rate limiting rules | ดูกฎทั้งชุดที่ [`CLOUDFLARE_DEPLOYMENT_GUIDE.md`](CLOUDFLARE_DEPLOYMENT_GUIDE.md) หัวข้อ 6 |
-| **Bot Fight Mode / Managed Challenge** | Security ➔ Bots | ⚠️ ดู ISSUE-047 — สคริปต์ตรวจบอตถูกฉีดเข้าทุกหน้าและกินเธรดหลัก 3.7–5.0 วินาที |
-| **AI Gateway** | AI ➔ AI Gateway | ใช้เป็นทางผ่านของ Workers AI (ชื่อ gateway อยู่ใน secret) |
+| Custom Domain | Workers & Pages ➔ `tarot-web` ➔ Settings ➔ Domains & Routes | `seertarot.net` และ `www.seertarot.net` (www ถูกเด้ง 301 ไปโดเมนหลักด้วยกฎที่ `deploy.yml` ดันขึ้นทุกรอบ) |
+| DNS ของโซน | DNS ➔ Records | Cloudflare สร้างเองตอนผูก Custom Domain · MX/DKIM/SPF ของ Email Routing และ Resend |
+| SSL/TLS | SSL/TLS ➔ Overview | Full (Strict) |
+| WAF · rate limit · บอต · Cache Rules · Tiered Cache · HTTP/3 | Security / Caching / Speed | ตั้งด้วย `npm run cf:phase1` — รายการและเหตุผลใน [`CLOUDFLARE_OPTIMIZATION_GUIDE.md`](CLOUDFLARE_OPTIMIZATION_GUIDE.md) (Bot Fight Mode **ปิด** โดยตั้งใจ · INC-0177) |
+| AI Gateway | AI ➔ AI Gateway | gateway แบบไม่ยืนยันตัว · ชื่อ gateway อยู่ใน secret `CF_AI_GATEWAY_ID` |
+| Email Routing | Email ➔ Email Routing | `support@` / `noreply@seertarot.net` ส่งต่อเข้าอีเมลเจ้าของ · Catch-all = Drop |
+| Vectorize index | Vectorize | `card-meanings` 1024 มิติ cosine · แก้ข้อมูลไพ่/บทความแล้วกด "สร้าง index ใหม่" ที่ `/admin` ➔ สุขภาพระบบ |
+| TURN · แจ้งเตือนค่าใช้จ่าย | ดูหัวข้อ 6 · 7 | |
 
-### วิธีทำให้หายเป็นหนี้ถาวร
+ตั้งอัตโนมัติแล้ว ไม่ต้องทำมือ: migration ของ D1 (`deploy.yml`) · bucket R2 ทุกตัวใน `wrangler.jsonc` (`npm run cf:r2-buckets`) · กฎลบการ์ดแชร์ 90 วันทั้ง bucket `seertarot-share` (`npm run cf:r2-lifecycle` · โลโก้แม่หมอแยกไป `seertarot-studio` แล้ว ⛔ ห้ามตั้งกฎลบใน bucket นั้น) · bucket `seertarot-d1-backups` และกฎลบ 35 วัน (`d1-backup.yml`)
 
-ย้าย `routes` เข้าไปประกาศใน `wrangler.jsonc` ได้เลยเมื่อสะดวก:
+**ปิดหนี้ข้อนี้ถาวร** — ประกาศโดเมนใน `wrangler.jsonc`:
 
 ```jsonc
 "routes": [
@@ -360,4 +267,18 @@ workflow `.github/workflows/setup-vapid.yml` สร้างคู่กุญ�
 ]
 ```
 
-⚠️ ทำแล้วต้องทดสอบบน Worker ชื่ออื่นก่อนเสมอ — ประกาศ route ผิดแล้ว deploy ทับได้ทั้งโซน
+⚠️ ทดสอบกับ Worker ชื่ออื่นก่อนเสมอ — ประกาศ route ผิดแล้ว deploy ทับได้ทั้งโซน
+
+---
+
+## 9. งานตั้งเวลา — อ่านรหัสผลลัพธ์
+
+ตารางเวลาของทุก workflow ➔ [`CLOUDFLARE_DEPLOYMENT_GUIDE.md`](CLOUDFLARE_DEPLOYMENT_GUIDE.md) หัวข้อ 8
+
+| รหัส | แปลว่า | แก้ที่ไหน |
+| :-- | :--- | :--- |
+| `200` | สำเร็จ (กดซ้ำในวันเดียวกันได้ `sent = 0` = กันส่งซ้ำทำงาน) | — |
+| `401` | `CRON_SECRET` สองฝั่งไม่ตรงกัน หรือฝั่ง Worker ยังไม่ตั้ง | ตั้งใหม่ให้ตรงกันทั้งสองที่ |
+| `403` | ถูกกฎที่ขอบปัดตกก่อนถึง Worker — ไม่เกี่ยวกับความลับ | ตรวจว่า URL ยังเป็น `*.workers.dev` และ User-Agent ยังตั้งเอง (INC-0141 · INC-0142) |
+
+> ⚠️ อย่าเปลี่ยน URL ใน workflow กลับเป็นโดเมนหลัก · บนโฮสต์ `*.workers.dev` เปิดตรงแค่ `/api/cron/*` (`/api/*` อื่นถูกส่งกลับโดเมนหลัก) · เส้น cron ใหม่ต้องตรวจ `CRON_SECRET` เองทุกเส้น

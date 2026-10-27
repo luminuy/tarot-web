@@ -1,6 +1,6 @@
 # 🔍 แผนส่งต่อ — ผลตรวจ UX/UI ทั้งเว็บ (รอบ 2026-09-11)
 
-> **สถานะ**: ✅ เสร็จแล้ว — ปิดครบ 20 ข้อ · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: PR #416 · #422 · #423 · #427 · #429 · #431 · #436
+> **สถานะ**: ✅ เสร็จแล้ว — ปิดครบ 20 ข้อ (คอนทราสต์ · ขนาดปุ่ม · สีฮาร์ดโค้ด) · ไม่มีงานค้าง · เก็บไว้อ่านวิธีตรวจ · **ตรวจล่าสุด**: 2026-09-23 · **หลักฐาน**: PR #416 · #436
 > **อ่านก่อนแตะ**: สี/คอนทราสต์/ปุ่ม — วิธีตรวจ + หนี้ที่ตั้งใจเหลือไว้ 3 ข้อ
 
 > **สถานะตอนเขียนแผน**: 🟢 **ปิดครบทั้ง 20 ข้อแล้ว** (P0 ใน PR #416 · P1–P3 ใน PR #422 · #423 · #427 · #429 · #431 · #436)
@@ -180,9 +180,9 @@ h3  ดวงรายวัน (ไพ่ 1 ใบ) …
 
 ## UX-05 · เมนูหลักและ footer ไม่ใช่ landmark `navigation`
 
-- [`SiteHeader.tsx:91`](../../src/components/layout/SiteHeader.tsx#L91) ใช้ `<header>` เปล่า ไม่มี `<nav>` ข้างใน
+- [`SiteHeader.tsx:91`](../../src/components/layout/SiteHeader.tsx) ใช้ `<header>` เปล่า ไม่มี `<nav>` ข้างใน
 - แผงเมนูใน `SacredNavDropdown` ประกาศเป็น `role="region"` ไม่ใช่ `navigation`
-- [`SiteFooter.tsx:28`](../../src/components/layout/SiteFooter.tsx#L28) ลิงก์ 3 คอลัมน์ ไม่มี `<nav>`
+- [`SiteFooter.tsx:28`](../../src/components/layout/SiteFooter.tsx) ลิงก์ 3 คอลัมน์ ไม่มี `<nav>`
 
 วัดจริง: หน้า `/`, `/cards`, `/blog`, `/cards/major-00` มี `<nav>` = **0 อัน**
 (หน้า `/daily`, `/spreads`, `/love/1-card` มี 1 อัน แต่นั่นคือ breadcrumb ไม่ใช่เมนูหลัก)
@@ -207,7 +207,7 @@ h3  ดวงรายวัน (ไพ่ 1 ใบ) …
 
 จุดพวกนี้เป็น `<button>` จริงและมี `aria-label` ครบ (ทำได้ดีแล้ว) — ปัญหาอยู่ที่ **นิ้วกดไม่โดน** เท่านั้น
 
-**ต้นเหตุ**: [`QuickFortunePicker.tsx:384`](../../src/components/reading/QuickFortunePicker.tsx#L384) · [`SpreadCardSelector.tsx:368`](../../src/components/spread/SpreadCardSelector.tsx#L368) · [`PersonaCardSelector.tsx:279`](../../src/components/reading/PersonaCardSelector.tsx#L279) ทั้งสามใช้แพตเทิร์น `h-1.5 rounded-full` เหมือนกัน
+**ต้นเหตุ**: `QuickFortunePicker.tsx:384` · `SpreadCardSelector.tsx:368` · [`PersonaCardSelector.tsx:279`](../../src/components/reading/PersonaCardSelector.tsx) ทั้งสามใช้แพตเทิร์น `h-1.5 rounded-full` เหมือนกัน
 
 **สิ่งที่ต้องทำ**: ห่อจุดด้วยปุ่มโปร่งใสขนาด 24×24 โดย **ไม่เปลี่ยนหน้าตาที่ตาเห็นแม้แต่พิกเซลเดียว**
 
@@ -257,7 +257,7 @@ h3  ดวงรายวัน (ไพ่ 1 ใบ) …
 
 ## UX-08 · 5 หน้าต่างจาก 7 หน้าต่าง ไม่มี Esc · ไม่มี focus trap · ไม่ล็อกการเลื่อนหน้า
 
-มี `Modal.tsx` กลางที่ทำครบทุกอย่างถูกต้องอยู่แล้ว ([`Modal.tsx:52-103`](../../src/components/ui/Modal.tsx#L52) — Esc · focus trap วน Tab/Shift+Tab · body scroll lock · คืนโฟกัสให้ element เดิม พร้อมคอมเมนต์อธิบายกับดัก `deps` ไว้ละเอียด)
+มี `Modal.tsx` กลางที่ทำครบทุกอย่างถูกต้องอยู่แล้ว ([`Modal.tsx:52-103`](../../src/components/ui/Modal.tsx) — Esc · focus trap วน Tab/Shift+Tab · body scroll lock · คืนโฟกัสให้ element เดิม พร้อมคอมเมนต์อธิบายกับดัก `deps` ไว้ละเอียด)
 แต่ **มีแค่ 2 จาก 7 หน้าต่างที่ใช้มัน**
 
 | หน้าต่าง | `role=dialog` | Esc ปิด | focus trap | ล็อกสกรอลล์ | คืนโฟกัส |
@@ -284,7 +284,7 @@ h3  ดวงรายวัน (ไพ่ 1 ใบ) …
 
 ## UX-09 · `Field.tsx` วาง `aria-describedby` ผิดที่ → คำอธิบายและข้อความ error ไม่เคยถูกอ่านออกมาเลย
 
-[`Field.tsx:25`](../../src/components/ui/Field.tsx#L25):
+[`Field.tsx:25`](../../src/components/ui/Field.tsx):
 
 ```tsx
 <div aria-describedby={describedBy}>{children(id)}</div>
@@ -315,14 +315,14 @@ children: (props: { id: string; "aria-describedby"?: string; "aria-invalid"?: bo
 
 | ไฟล์ | บรรทัด | ช่องอะไร |
 |---|---|---|
-| [`ChangePasswordCard.tsx`](../../src/components/account/ChangePasswordCard.tsx#L117) | 117 · 141 · 169 | **รหัสผ่านเดิม · รหัสผ่านใหม่ · ยืนยันรหัสผ่าน — ทั้งฟอร์มไม่มี label สักช่อง** |
-| [`FollowUpChat.tsx`](../../src/components/reading/FollowUpChat.tsx#L663) | 663 | ช่องแชทถามต่อกับแม่หมอ (หัวใจของฟีเจอร์) |
-| [`ClarificationCard.tsx`](../../src/components/reading/ClarificationCard.tsx#L62) | 62 | ช่องตอบคำถามย้อนกลับ |
-| [`LoveOneCardClient.tsx`](../../src/components/love/LoveOneCardClient.tsx#L332) | 332 · 344 | ชื่อคุณ · ชื่ออีกฝ่าย |
-| [`CardsExplorer.tsx`](../../src/components/encyclopedia/CardsExplorer.tsx#L161) | 161 | ค้นหาไพ่ 78 ใบ |
-| [`BlogIndexClient.tsx`](../../src/app/(th)/blog/BlogIndexClient.tsx#L134) | 134 | ค้นหาบทความ |
-| [`ReadersDirectory.tsx`](../../src/components/readers/ReadersDirectory.tsx#L49) | 49 | ค้นหาแม่หมอ |
-| [`AllCardsTable.tsx`](../../src/components/encyclopedia/AllCardsTable.tsx#L87) · [`TarotEncyclopediaModal.tsx`](../../src/components/encyclopedia/TarotEncyclopediaModal.tsx#L131) · [`ReadingHistoryModal.tsx`](../../src/components/history/ReadingHistoryModal.tsx#L394) · [`BookQueueModal.tsx`](../../src/components/marketplace/BookQueueModal.tsx#L177) · [`ContentEditor.tsx`](../../src/components/admin/ContentEditor.tsx#L238) ×2 | — | ค้นหา · checkbox ยินยอม · select แอดมิน |
+| [`ChangePasswordCard.tsx`](../../src/components/account/ChangePasswordCard.tsx) | 117 · 141 · 169 | **รหัสผ่านเดิม · รหัสผ่านใหม่ · ยืนยันรหัสผ่าน — ทั้งฟอร์มไม่มี label สักช่อง** |
+| [`FollowUpChat.tsx`](../../src/components/reading/FollowUpChat.tsx) | 663 | ช่องแชทถามต่อกับแม่หมอ (หัวใจของฟีเจอร์) |
+| [`ClarificationCard.tsx`](../../src/components/reading/ClarificationCard.tsx) | 62 | ช่องตอบคำถามย้อนกลับ |
+| [`LoveOneCardClient.tsx`](../../src/components/love/LoveOneCardClient.tsx) | 332 · 344 | ชื่อคุณ · ชื่ออีกฝ่าย |
+| [`CardsExplorer.tsx`](../../src/components/encyclopedia/CardsExplorer.tsx) | 161 | ค้นหาไพ่ 78 ใบ |
+| [`BlogIndexClient.tsx`](../../src/components/blog/BlogIndexClient.tsx) | 134 | ค้นหาบทความ |
+| [`ReadersDirectory.tsx`](../../src/components/readers/ReadersDirectory.tsx) | 49 | ค้นหาแม่หมอ |
+| [`AllCardsTable.tsx`](../../src/components/encyclopedia/AllCardsTable.tsx) · `TarotEncyclopediaModal.tsx` · [`ReadingHistoryModal.tsx`](../../src/components/history/ReadingHistoryModal.tsx) · `BookQueueModal.tsx` · [`ContentEditor.tsx`](../../src/components/admin/ContentEditor.tsx) ×2 | — | ค้นหา · checkbox ยินยอม · select แอดมิน |
 
 > ⚠️ `placeholder` **ไม่ใช่ label** — มันหายไปทันทีที่ผู้ใช้เริ่มพิมพ์ และ screen reader หลายตัวไม่อ่านมันเลย
 
@@ -336,11 +336,11 @@ children: (props: { id: string; "aria-describedby"?: string; "aria-invalid"?: bo
 
 | ไฟล์ | มี `aria-controls` |
 |---|:---:|
-| [`StreamReader.tsx:149,168`](../../src/components/reading/StreamReader.tsx#L149) | ✅ ทำถูกแล้ว — ใช้เป็นต้นแบบ |
-| [`SpreadCardSelector.tsx:172`](../../src/components/spread/SpreadCardSelector.tsx#L172) | ❌ |
-| [`SpreadsLibrary.tsx:134`](../../src/components/spread/SpreadsLibrary.tsx#L134) | ❌ |
-| [`CardsExplorer.tsx:256`](../../src/components/encyclopedia/CardsExplorer.tsx#L256) | ❌ |
-| [`TarotEncyclopediaModal.tsx:116`](../../src/components/encyclopedia/TarotEncyclopediaModal.tsx#L116) | ❌ |
+| [`StreamReader.tsx:149,168`](../../src/components/reading/StreamReader.tsx) | ✅ ทำถูกแล้ว — ใช้เป็นต้นแบบ |
+| `SpreadCardSelector.tsx:172` | ❌ |
+| [`SpreadsLibrary.tsx:134`](../../src/components/spread/SpreadsLibrary.tsx) | ❌ |
+| [`CardsExplorer.tsx:256`](../../src/components/encyclopedia/CardsExplorer.tsx) | ❌ |
+| `TarotEncyclopediaModal.tsx:116` | ❌ |
 
 ตรวจบน production: แท็บหมวดผังบนหน้าแรกมี `aria-selected` และ roving `tabindex` ครบถูกต้อง (ทำได้ดี) แต่ **ไม่มี `aria-controls` สักตัว** — screen reader จึงบอกไม่ได้ว่าแท็บนี้คุมแผงไหน
 
@@ -401,10 +401,10 @@ children: (props: { id: string; "aria-describedby"?: string; "aria-invalid"?: bo
 | [`AiHealthPanel.tsx`](../../src/components/admin/AiHealthPanel.tsx) | 12 | แอดมินเท่านั้น |
 | [`SystemHealthPanel.tsx`](../../src/components/admin/SystemHealthPanel.tsx) | 5 | แอดมินเท่านั้น |
 | [`StatsDashboard.tsx`](../../src/components/admin/StatsDashboard.tsx) | 4 | แอดมินเท่านั้น |
-| [`AuthModal.tsx:416,439,475`](../../src/components/auth/AuthModal.tsx#L416) | 3 | 🔴 **ผู้ใช้ทุกคน** — `placeholder-[#756F66]/50` ใน 3 ช่องกรอก |
-| [`admin/page.tsx`](../../src/app/(th)/admin/page.tsx) | 3 | แอดมินเท่านั้น |
-| [`CardsExplorer.tsx:166`](../../src/components/encyclopedia/CardsExplorer.tsx#L166) | 1 | 🔴 **ผู้ใช้ทุกคน** — placeholder ค้นหาไพ่ |
-| [`ReadersDirectory.tsx:54`](../../src/components/readers/ReadersDirectory.tsx#L54) | 1 | 🔴 **ผู้ใช้ทุกคน** — placeholder ค้นหาแม่หมอ |
+| [`AuthModal.tsx:416,439,475`](../../src/components/auth/AuthModal.tsx) | 3 | 🔴 **ผู้ใช้ทุกคน** — `placeholder-[#756F66]/50` ใน 3 ช่องกรอก |
+| [`admin/page.tsx`](../../src/app/%28th%29/admin/page.tsx) | 3 | แอดมินเท่านั้น |
+| [`CardsExplorer.tsx:166`](../../src/components/encyclopedia/CardsExplorer.tsx) | 1 | 🔴 **ผู้ใช้ทุกคน** — placeholder ค้นหาไพ่ |
+| [`ReadersDirectory.tsx:54`](../../src/components/readers/ReadersDirectory.tsx) | 1 | 🔴 **ผู้ใช้ทุกคน** — placeholder ค้นหาแม่หมอ |
 | [`AdminOverview.tsx`](../../src/components/admin/AdminOverview.tsx) | 1 | แอดมินเท่านั้น |
 
 **หนักกว่าที่คิด**: 5 จุดที่ผู้ใช้เห็นเป็น `placeholder-[#756F66]/50` และ `/60` — คือสีที่ตกเกณฑ์อยู่แล้ว **ยังถูกลดความทึบลงอีกครึ่งหนึ่ง**
@@ -441,7 +441,7 @@ children: (props: { id: string; "aria-describedby"?: string; "aria-invalid"?: bo
 
 และตัว `Button.tsx` เองก็มีปัญหา 3 ข้อ:
 1. **ใช้พาเลตเงา** (`#8F5C1A` `#D9C8AC` `#2E211A` `#F3EDE2`) ไม่ใช่โทเคนที่ระบบประกาศ — คือแหล่งกำเนิดของ UX-12 นั่นเอง
-2. **ข้อความ loading ฮาร์ดโค้ดภาษาไทย** `"กำลังดำเนินการ…"` ([บรรทัด 39](../../src/components/ui/Button.tsx#L39)) → โผล่ภาษาไทยในหน้า `/en/*`
+2. **ข้อความ loading ฮาร์ดโค้ดภาษาไทย** `"กำลังดำเนินการ…"` ([บรรทัด 39](../../src/components/ui/Button.tsx)) → โผล่ภาษาไทยในหน้า `/en/*`
 3. **`size="sm"` สูงประมาณ 33 px** — ต่ำกว่าเกณฑ์ตาม UX-07 ตั้งแต่ต้นทาง
 
 **สิ่งที่ต้องทำ**
@@ -478,13 +478,13 @@ children: (props: { id: string; "aria-describedby"?: string; "aria-invalid"?: bo
 
 | ไฟล์ | จำนวน | ตัวอย่าง |
 |---|---:|---|
-| [`TarotEncyclopediaModal.tsx`](../../src/components/encyclopedia/TarotEncyclopediaModal.tsx) | 18 | `ทั้งหมด (78)` · `ชุดหลัก Major (22)` · `ปิดความหมายไพ่ทาโรต์` |
+| `TarotEncyclopediaModal.tsx` | 18 | `ทั้งหมด (78)` · `ชุดหลัก Major (22)` · `ปิดความหมายไพ่ทาโรต์` |
 | [`ReadersDirectory.tsx`](../../src/components/readers/ReadersDirectory.tsx) | 6 | `ค้นหาแม่หมอ…` · `ไม่พบแม่หมอที่ตรงกับเงื่อนไข` |
-| [`BookQueueModal.tsx`](../../src/components/marketplace/BookQueueModal.tsx) | 10 | `ค่าบริการ / บูชาครู` |
-| [`RitualStepProgress.tsx:32,87`](../../src/components/ui/RitualStepProgress.tsx#L32) | 2 | `aria-label="ความคืบหน้าการดูดวง"` — **อยู่ในเส้นทางหลักของ EN** |
-| [`Button.tsx:39`](../../src/components/ui/Button.tsx#L39) | 1 | `กำลังดำเนินการ…` |
-| [`Modal.tsx:122`](../../src/components/ui/Modal.tsx#L122) | 1 | fallback `aria-label="หน้าต่างรายละเอียด"` |
-| [`SpreadPositionMap.tsx:13`](../../src/components/spread/SpreadPositionMap.tsx#L13) | 1 | `aria-label="แผนผังการวางไพ่ …"` |
+| `BookQueueModal.tsx` | 10 | `ค่าบริการ / บูชาครู` |
+| `RitualStepProgress.tsx:32,87` | 2 | `aria-label="ความคืบหน้าการดูดวง"` — **อยู่ในเส้นทางหลักของ EN** |
+| [`Button.tsx:39`](../../src/components/ui/Button.tsx) | 1 | `กำลังดำเนินการ…` |
+| [`Modal.tsx:122`](../../src/components/ui/Modal.tsx) | 1 | fallback `aria-label="หน้าต่างรายละเอียด"` |
+| `SpreadPositionMap.tsx:13` | 1 | `aria-label="แผนผังการวางไพ่ …"` |
 
 **อีกเรื่องที่ควรทำพร้อมกัน**: หน้า `/en` มีข้อความไทยที่ตั้งใจไว้ (คำว่า "ไพ่ยิปซี") อยู่ใน `<html lang="en">` โดยไม่มี `<span lang="th">` ครอบ → screen reader ภาษาอังกฤษจะอ่านออกเสียงเพี้ยน ควรครอบให้เรียบร้อย
 
@@ -506,7 +506,7 @@ $ npm run repo:verify
 
 | ด่าน | วิธีตรวจ | รูรั่ว |
 |---|---|---|
-| [`test-en-routing.ts:324`](../../scripts/qa/test-en-routing.ts#L324) | นับ**สัดส่วน**อักขระไทยต่อเนื้อหาทั้งหน้า แล้ว fail เมื่อ **เกิน 1.5%** | หัวข้อไทยหนึ่งบรรทัดบนหน้าอังกฤษยาว ๆ คิดเป็น ~0.1% → **ผ่านตลอดกาลไม่ว่าจะรั่วกี่จุด** ตราบใดที่ยังไม่ถึง 1.5% |
+| [`test-en-routing.ts:324`](../../scripts/qa/test-en-routing.ts) | นับ**สัดส่วน**อักขระไทยต่อเนื้อหาทั้งหน้า แล้ว fail เมื่อ **เกิน 1.5%** | หัวข้อไทยหนึ่งบรรทัดบนหน้าอังกฤษยาว ๆ คิดเป็น ~0.1% → **ผ่านตลอดกาลไม่ว่าจะรั่วกี่จุด** ตราบใดที่ยังไม่ถึง 1.5% |
 | [`test-en-thai-leak.tsx`](../../scripts/qa/test-en-thai-leak.tsx) | เรนเดอร์ **คอมโพเนนต์ที่ระบุไว้ในลิสต์ `screens`** แล้วหาอักขระไทย | ตรวจเฉพาะคอมโพเนนต์ในลิสต์ · บล็อก FAQ ของหน้า `/en/daily` และ `aria-label` ในหัวเว็บ **ไม่อยู่ในลิสต์** |
 
 สรุป: ด่านแรกวัดถูกที่แต่ตั้งเกณฑ์ไว้จนตกไม่ได้ · ด่านที่สองวัดละเอียดแต่ไม่ครอบคลุมหน้าจริง
@@ -550,7 +550,7 @@ find src/app -name "not-found.tsx" →  3 ไฟล์
 
 ## UX-19 · แถบขอความยินยอมทับหน้าต่างทุกบาน และเป็นจุด Tab แรกทั้งที่อยู่ล่างจอ
 
-[`ConsentBanner.tsx:42`](../../src/components/analytics/ConsentBanner.tsx#L42):
+[`ConsentBanner.tsx:42`](../../src/components/analytics/ConsentBanner.tsx):
 ```
 fixed bottom-3 left-3 right-3 … z-100
 ```
@@ -574,7 +574,7 @@ fixed bottom-3 left-3 right-3 … z-100
 
 ## UX-20 · พัดไพ่ 78 ใบ = 78 จุด Tab
 
-[`InteractiveCardFan.tsx:48-49`](../../src/components/deck/InteractiveCardFan.tsx#L48) ให้ `tabIndex={0}` กับไพ่**ทุกใบ**
+[`InteractiveCardFan.tsx:48-49`](../../src/components/deck/InteractiveCardFan.tsx) ให้ `tabIndex={0}` กับไพ่**ทุกใบ**
 ผู้ใช้คีย์บอร์ดต้องกด Tab **78 ครั้ง** เพื่อผ่านสำรับ และไม่มีทางลัดใด ๆ
 
 ส่วนที่ทำถูกแล้ว: `role="button"` + `aria-label` + `aria-disabled` + รองรับ Enter/Space ครบ ✅

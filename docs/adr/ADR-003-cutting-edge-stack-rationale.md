@@ -1,9 +1,15 @@
 # ADR-003: เหตุผลการเลือกใช้เทคโนโลยีเวอร์ชันล้ำสมัยและการบริหารความเสี่ยง (Cutting-Edge Stack Rationale & Risk Management)
 
-> **สถานะ**: อนุมัติ (Approved)  
+> **สถานะ**: อนุมัติแล้ว (Accepted) · หลักการ "ใช้เวอร์ชันใหม่ + ล็อกเวอร์ชัน + ผ่านด่าน CI ก่อนอัปเกรด" ยังใช้ · ส่วนหน้าเว็บถูกแทนด้วย Astro + React island ([`HANDOFF_ASTRO_MIGRATION_2026-09-15.md`](../plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md)) · **ตรวจกับโค้ดล่าสุด**: 2026-10-26  
 > **วันที่**: 2026-09-02  
 > **ผู้จัดทำ**: ทีมวิศวกรรมสถาปัตยกรรมระบบ (Claude & Antigravity AI)  
-> **อ้างอิง**: [`docs/ARCHITECTURE.md`](../ARCHITECTURE.md), [`docs/KNOWN_ISSUES.md`](../KNOWN_ISSUES.md) (ISSUE-001)
+> **อ้างอิง**: [`docs/ARCHITECTURE.md`](../ARCHITECTURE.md), [`docs/archive/KNOWN_ISSUES_CLOSED.md`](../archive/KNOWN_ISSUES_CLOSED.md) (ISSUE-001 ปิดแล้ว)
+>
+> **ของจริงตอนนี้** (เนื้อหาการตัดสินใจด้านล่างคงไว้ตามวันที่เขียน — ตัวเลขเวอร์ชันและจำนวนด่านในนั้นเป็นของ 2026-09-02)
+> - หน้าสาธารณะทุกหน้าเป็น Astro 7.4 + React 19.3 island · Next 16.4.2 ผ่าน `@opennextjs/cloudflare` 1.20.12 เหลือเฉพาะ API และหน้าไดนามิก (แอดมิน · ระบบแม่หมอ · ลิงก์แชร์ · ตั้งรหัสผ่านใหม่) · `motion` 14.3
+> - API ทุกเส้นประกาศ `runtime = "nodejs"` (รันบน Workers ผ่าน `nodejs_compat`) ไม่ใช่ Edge Runtime
+> - ด่าน `npm run repo:verify` มีมากกว่าตอนเขียนหลายเท่า — ตัวเลขปัจจุบันดู [`CLAUDE.md`](../../CLAUDE.md)
+> - เวอร์ชันจริงดู `package.json` · ภาพรวมสถาปัตยกรรมดู [`ARCHITECTURE.md`](../ARCHITECTURE.md)
 
 ---
 

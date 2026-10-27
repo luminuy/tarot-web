@@ -53,7 +53,10 @@ console.log("── 1. ท่อฟอนต์ (ไฟล์ · @font-face · �
 
 const globalsCss = fs.readFileSync(path.join(ROOT, "src/app/globals.css"), "utf-8");
 
-for (const href of [...FONT_PRELOADS, ...FONT_PRELOADS_LOW]) {
+const allFontPreloads = [
+  ...new Set([...Object.values(FONT_PRELOADS).flat(), ...Object.values(FONT_PRELOADS_LOW).flat()]),
+];
+for (const href of allFontPreloads) {
   check(`มีไฟล์ฟอนต์จริงที่ public${href}`, fs.existsSync(path.join(ROOT, "public", href)));
   check(
     `globals.css มี @font-face ชี้ไปที่ ${href}`,
@@ -61,6 +64,49 @@ for (const href of [...FONT_PRELOADS, ...FONT_PRELOADS_LOW]) {
     "ถ้าไม่มี ฟอนต์จะถูกพรีโหลดมาแล้วไม่มีใครใช้ — เปลืองแบนด์วิดท์และเสียคิวโหลด",
   );
 }
+
+/*
+ * ✂️ ไฟล์ไทย/ละติน (ISSUE-048): `unicode-range` ของแต่ละหน้าฟอนต์ต้องตรงกับชุดอักขระที่ตัดไฟล์มาจริง
+ * ไม่ตรง = เบราว์เซอร์ขอไฟล์ผิดตัว (ตัวอักษรที่ไม่มีในไฟล์ถอยไปฟอนต์สำรอง) · ชุดทับกัน = หน้าอังกฤษโหลดไฟล์ไทย
+ * และหน้าอังกฤษห้ามพรีโหลดไฟล์ไทย — นั่นคือเหตุผลเดียวที่แยกไฟล์
+ */
+const subsetScript = fs.readFileSync(path.join(ROOT, "scripts/subset-fonts.py"), "utf-8");
+const pyConst = (name: string) => subsetScript.match(new RegExp(`^${name} = "([^"]+)"`, "m"))?.[1] ?? "";
+const pyPunct = (subsetScript.match(/^PUNCT = \(\s*([\s\S]*?)\)/m)?.[1] ?? "").replace(/["\s]/g, "");
+/** "U+0020-007E,U+00A0,..." ➔ ชุดจุดรหัสที่ครอบคลุม */
+const codepoints = (ranges: string) => {
+  const set = new Set<number>();
+  for (const part of ranges.split(",").map((r) => r.trim()).filter(Boolean)) {
+    const [a, b] = part.replace(/^U\+/i, "").split("-");
+    const start = parseInt(a, 16);
+    const end = b ? parseInt(b, 16) : start;
+    for (let cp = start; cp <= end; cp++) set.add(cp);
+  }
+  return set;
+};
+const sameSet = (x: Set<number>, y: Set<number>) => x.size === y.size && [...x].every((cp) => y.has(cp));
+const thaiSet = codepoints(pyConst("THAI"));
+const latinSet = codepoints(`${pyConst("ASCII")},${pyPunct}`);
+check(
+  "ชุดอักขระไทย/ละตินใน subset-fonts.py อ่านได้และไม่ทับกัน",
+  thaiSet.size > 100 && latinSet.size > 90 && ![...thaiSet].some((cp) => latinSet.has(cp)),
+  `ไทย ${thaiSet.size} ตัว · ละติน ${latinSet.size} ตัว`,
+);
+const fontFaces = globalsCss.match(/@font-face\s*\{[^}]*\}/g) ?? [];
+const splitFaces = fontFaces.filter((f) => /-(?:thai|latin)\.woff2/.test(f));
+check("globals.css มีหน้าฟอนต์แบบแยกไทย/ละติน", splitFaces.length >= 10, `พบ ${splitFaces.length} หน้า`);
+const badRange = splitFaces.filter((f) => {
+  const range = f.match(/unicode-range:\s*([^;]+);/)?.[1];
+  if (!range) return true;
+  return !sameSet(codepoints(range), /-thai\.woff2/.test(f) ? thaiSet : latinSet);
+});
+check(
+  "unicode-range ของทุกหน้าฟอนต์ไทย/ละตินตรงกับชุดที่ตัดไฟล์จริง",
+  badRange.length === 0,
+  badRange.map((f) => f.match(/url\(([^)]+)\)/)?.[1]).join(" · "),
+);
+const enThai = [...FONT_PRELOADS.en, ...FONT_PRELOADS_LOW.en].filter((href) => href.includes("-thai."));
+check("หน้าอังกฤษไม่พรีโหลดไฟล์ฟอนต์ไทย", enThai.length === 0, enThai.join(" · "));
 
 check(
   "ไม่มีใครกลับไปใช้ next/font อีก (สองเครื่องมือต้องชี้ไฟล์ฟอนต์ชุดเดียวกัน)",
@@ -104,15 +150,23 @@ for (const page of pages) {
   if (isShell(html)) continue;
   scanned += 1;
   const where = `${page.route} [${page.renderer}]`;
+  const locale = page.route === "/en" || page.route.startsWith("/en/") ? "en" : "th";
+  const preloads = FONT_PRELOADS[locale];
+  const preloadsLow = FONT_PRELOADS_LOW[locale];
 
-  if (!FONT_PRELOADS.every((href) => html.includes(`href="${href}"`))) missing.fontPreload.push(where);
+  if (!preloads.every((href) => html.includes(`href="${href}"`))) missing.fontPreload.push(where);
+  /* ชุดของอีกภาษาต้องไม่โผล่ (หน้าอังกฤษพรีโหลดไฟล์ไทย = แยกไฟล์ไปเปล่า ๆ) */
+  const foreign = [...FONT_PRELOADS[locale === "en" ? "th" : "en"], ...FONT_PRELOADS_LOW[locale === "en" ? "th" : "en"]].filter(
+    (href) => !preloads.includes(href) && !preloadsLow.includes(href) && html.includes(`href="${href}"`),
+  );
+  if (foreign.length > 0) missing.fontPreload.push(`${where} (พรีโหลดฟอนต์ของอีกภาษา: ${foreign.join(" · ")})`);
   /* น้ำหนักหนาต้องมาพร้อม `fetchpriority="low"` ทั้งสองเครื่องมือ (INC-0244 · ไม่แย่งคิวภาพ LCP)
      ยกเว้นหน้าใน FONT_PRELOADS_LOW_SKIP_ROUTES ซึ่งต้อง "ไม่มี" เลยสักไฟล์ (หน้าแรก · ตัวเลขวัดอยู่ที่ค่าคงที่นั้น) */
   if (FONT_PRELOADS_LOW_SKIP_ROUTES.includes(page.route)) {
-    if (FONT_PRELOADS_LOW.some((href) => html.includes(`href="${href}"`)))
+    if (preloadsLow.some((href) => html.includes(`href="${href}"`)))
       missing.fontPreload.push(`${where} (หน้าแรกต้องไม่พรีโหลดน้ำหนักหนา)`);
   } else if (
-    !FONT_PRELOADS_LOW.every((href) =>
+    !preloadsLow.every((href) =>
       new RegExp(`<link[^>]*href="${href}"[^>]*fetchpriority="low"|<link[^>]*fetchpriority="low"[^>]*href="${href}"`, "i").test(html),
     )
   )
@@ -132,7 +186,7 @@ const LABELS: Record<keyof typeof missing, string> = {
   charset: "<meta charset=utf-8>",
   viewport: `<meta name="viewport"> ตรงกับ SITE_VIEWPORT`,
   themeColor: `<meta name="theme-color"> ตรงกับค่ากลาง`,
-  fontPreload: "พรีโหลดฟอนต์ครบทั้ง 4 ไฟล์",
+  fontPreload: "พรีโหลดฟอนต์ครบตามภาษาของหน้า (ไทย: ไฟล์ไทย+ละติน · อังกฤษ: ละตินเท่านั้น)",
   organizationJsonLd: "JSON-LD Organization",
   webSiteJsonLd: "JSON-LD WebSite",
   consentSwitch: "สวิตช์แถบขอความยินยอม PDPA",
