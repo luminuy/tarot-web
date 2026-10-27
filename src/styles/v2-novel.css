@@ -220,36 +220,79 @@
   text-decoration: underline;
   text-underline-offset: 4px;
 }
+/* ตัวละครในบท — ไพ่วางเรียงแบบผังเล็ก ๆ เอียงสลับซ้ายขวา ชื่อใต้ใบ (เจ้าของ "ตรงนี้ยังไม่สวย ปรับหน่อย") */
+.v2-nv-chcast-k {
+  margin: 26px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-align: center;
+  color: var(--ui2-gold-solid);
+}
 .v2-nv-chcast {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 8px;
-  margin: 20px 0 0;
+  align-items: flex-start;
+  gap: 14px 18px;
+  margin: 14px 0 0;
   padding: 0;
   list-style: none;
 }
 .v2-nv-chcast-a {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 4px 14px 4px 6px;
-  border: 1px solid var(--ui2-line-night);
-  border-radius: 999px;
-  font-size: 13px;
-  color: var(--ui2-on-night-soft);
+  gap: 10px;
+  width: 84px;
+  padding-top: 6px;
   text-decoration: none;
-}
-.v2-nv-chcast-a:hover,
-.v2-nv-chcast-a:focus-visible {
-  border-color: var(--ui2-gold-solid);
-  color: var(--ui2-gold-solid);
+  color: var(--ui2-on-night-soft);
 }
 .v2-nv-chcast-card {
-  width: 22px;
+  width: 64px;
   height: auto;
-  border-radius: 3px;
+  border-radius: 6px;
+  outline: 1px solid var(--ui2-card-frame);
+  outline-offset: 2px;
+  box-shadow: var(--ui2-card-shadow);
+  transition: rotate var(--dur-base) var(--ease-out), translate var(--dur-base) var(--ease-out);
+}
+.v2-nv-chcast li:nth-child(odd) .v2-nv-chcast-card {
+  rotate: -4deg;
+}
+.v2-nv-chcast li:nth-child(even) .v2-nv-chcast-card {
+  rotate: 4deg;
+}
+.v2-nv-chcast-a:hover .v2-nv-chcast-card,
+.v2-nv-chcast-a:focus-visible .v2-nv-chcast-card {
+  rotate: 0deg;
+  translate: 0 -4px;
+}
+.v2-nv-chcast-n {
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: center;
+}
+.v2-nv-chcast-a:hover .v2-nv-chcast-n,
+.v2-nv-chcast-a:focus-visible .v2-nv-chcast-n {
+  color: var(--ui2-gold-solid);
+}
+@media (max-width: 639px) {
+  .v2-nv-chcast {
+    gap: 12px 10px;
+  }
+  .v2-nv-chcast-a {
+    width: 76px;
+  }
+  .v2-nv-chcast-card {
+    width: 58px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2-nv-chcast-card {
+    transition: none;
+  }
 }
 
 /* ── หน้าอ่าน: แผ่นกระดาษครีม + ฟอนต์มีหัวแบบหนังสือ (เจ้าของ "เนื้ออ่านนิยายอ่านยาก ไม่สวยเลย ออกแบบใหม่") ──
