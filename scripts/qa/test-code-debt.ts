@@ -75,6 +75,7 @@ check(
 const TZ_EXEMPT: Record<string, string> = {
   "src/lib/time/bangkok.ts": "โมดูลกลางเอง",
   "src/lib/marketplace/queue.repo.ts": "ค่าที่เขียนลงคอลัมน์ `timezone` ของแม่หมอ — เป็นข้อมูล ไม่ใช่ตรรกะ",
+  "src/data/natal/cities-world.ts": "ไฟล์สร้างอัตโนมัติจาก GeoNames — รายชื่อเขตเวลาของเมืองทั่วโลก 356 เขต (ข้อมูล ไม่ใช่ตรรกะเส้นแบ่งวัน)",
 };
 
 const tzLiterals: string[] = [];

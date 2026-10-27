@@ -1,8 +1,10 @@
 "use client";
 
-import React, { Suspense, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { useLocale } from "@/lib/i18n";
-import { THAI_PROVINCES, WORLD_CITIES, type BirthPlace } from "@/data/natal/places";
+import { THAI_PROVINCES, type BirthPlace } from "@/data/natal/places";
+import { deleteSavedChart, loadSavedCharts, saveChart, type SavedChart, type SavedPlace } from "@/lib/astro/saved-charts";
+import { CitySearch, type PickedCity } from "./CitySearch";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 import { formatUtcOffset, localToUtc, localToUtcFixed } from "@/lib/astro/timezone";
 import type { HouseSystem, NatalChart, NodeType } from "@/lib/astro/natal";
@@ -36,6 +38,9 @@ export interface NatalMeta {
 }
 
 const NatalResult = React.lazy(() => import("./NatalResult"));
+
+/** ทุกอย่างที่ใช้สร้างผังซ้ำได้ (= ข้อมูลที่บันทึกลงเครื่องเมื่อผู้ใช้กดบันทึก) */
+type ChartSpec = Omit<SavedChart, "id" | "savedAt">;
 
 const MONTHS_TH = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
 const MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -75,7 +80,9 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
   const [minute, setMinute] = useState(0);
   const [placeMode, setPlaceMode] = useState<PlaceMode>("thai");
   const [thaiId, setThaiId] = useState(THAI_PROVINCES[0].id);
-  const [worldId, setWorldId] = useState(WORLD_CITIES[0].id);
+  const [worldCity, setWorldCity] = useState<PickedCity | null>(null);
+  const [saved, setSaved] = useState<SavedChart[]>([]);
+  const [saveState, setSaveState] = useState<"idle" | "saved" | "failed">("idle");
   const [lat, setLat] = useState("13.7525");
   const [lon, setLon] = useState("100.4942");
   const [offsetH, setOffsetH] = useState("7");
@@ -84,73 +91,87 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
   const [orbScale, setOrbScale] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<{ chart: NatalChart; meta: NatalMeta } | null>(null);
+  const [result, setResult] = useState<{ chart: NatalChart; meta: NatalMeta; spec: ChartSpec } | null>(null);
+  // ผังที่บันทึกไว้อ่านหลัง hydrate เท่านั้น (HTML จากเซิร์ฟเวอร์ต้องตรงกับรอบแรกของเบราว์เซอร์)
+  useEffect(() => setSaved(loadSavedCharts()), []);
   const resultRef = useRef<HTMLDivElement>(null);
 
   const yearNum = Number.parseInt(yearInput, 10);
   const yearCe = Number.isFinite(yearNum) ? (era === "be" ? yearNum - 543 : yearNum) : NaN;
   const maxDay = Number.isFinite(yearCe) ? daysIn(yearCe, month) : 31;
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
+  /** ข้อมูลเกิดจากฟอร์ม ➔ สเปกผัง (ตรวจค่าแล้ว) · ผิดเมื่อไหร่ตั้งข้อความแล้วคืน null */
+  function specFromForm(): ChartSpec | null {
     if (!Number.isFinite(yearCe) || yearCe < MIN_YEAR || yearCe > MAX_YEAR) {
       setError(
         isEnglish
           ? `Please enter a year between ${MIN_YEAR} and ${MAX_YEAR}.`
           : `กรุณาใส่ปีเกิดระหว่าง พ.ศ. ${MIN_YEAR + 543} ถึง ${MAX_YEAR + 543} (ค.ศ. ${MIN_YEAR} ถึง ${MAX_YEAR})`,
       );
-      return;
+      return null;
     }
     if (day > maxDay) {
       setError(isEnglish ? "That date does not exist." : "วันที่นี้ไม่มีในเดือนที่เลือก");
-      return;
+      return null;
     }
-
-    let place: { lat: number; lon: number; label: string; zone?: string; fixedOffset?: number };
+    let place: SavedPlace;
     if (placeMode === "custom") {
       const la = Number.parseFloat(lat);
       const lo = Number.parseFloat(lon);
       const off = Number.parseFloat(offsetH);
       if (!(Math.abs(la) <= 89.9) || !(Math.abs(lo) <= 180) || !(Math.abs(off) <= 14)) {
         setError(isEnglish ? "Check the latitude (-90 to 90), longitude (-180 to 180) and UTC offset (-14 to 14)." : "ตรวจละติจูด (-90 ถึง 90) ลองจิจูด (-180 ถึง 180) และเขตเวลา (-14 ถึง 14) อีกครั้ง");
-        return;
+        return null;
       }
-      place = { lat: la, lon: lo, label: `${la.toFixed(4)}, ${lo.toFixed(4)}`, fixedOffset: off * 60 };
+      const label = `${la.toFixed(4)}, ${lo.toFixed(4)}`;
+      place = { mode: "custom", lat: la, lon: lo, label, labelEn: label, fixedOffset: off * 60 };
+    } else if (placeMode === "world") {
+      if (!worldCity) {
+        setError(isEnglish ? "Search and pick your birth city first." : "ค้นหาแล้วเลือกเมืองเกิดก่อน");
+        return null;
+      }
+      place = { mode: "world", lat: worldCity.lat, lon: worldCity.lon, label: worldCity.label, labelEn: worldCity.labelEn, zone: worldCity.zone };
     } else {
-      const p: BirthPlace | undefined = (placeMode === "thai" ? THAI_PROVINCES : WORLD_CITIES).find((x) => x.id === (placeMode === "thai" ? thaiId : worldId));
-      if (!p) return;
-      place = { lat: p.lat, lon: p.lon, label: isEnglish ? p.en : p.th, zone: p.zone };
+      const p: BirthPlace | undefined = THAI_PROVINCES.find((x) => x.id === thaiId);
+      if (!p) return null;
+      place = { mode: "thai", lat: p.lat, lon: p.lon, label: p.th, labelEn: p.en, zone: p.zone, refId: p.id };
     }
+    return { name: name.trim().slice(0, 40), day, month, yearCe, hour, minute, timeKnown, place, houseSystem, nodeType, orbScale };
+  }
 
+  async function runChart(spec: ChartSpec) {
+    const { place } = spec;
     const toUtc = (h: number, m: number) =>
-      place.zone ? localToUtc(place.zone, yearCe, month, day, h, m) : { utcMs: localToUtcFixed(place.fixedOffset!, yearCe, month, day, h, m), offsetMinutes: place.fixedOffset! };
-    const at = timeKnown ? toUtc(hour, minute) : toUtc(12, 0);
-
+      place.zone
+        ? localToUtc(place.zone, spec.yearCe, spec.month, spec.day, h, m)
+        : { utcMs: localToUtcFixed(place.fixedOffset ?? 0, spec.yearCe, spec.month, spec.day, h, m), offsetMinutes: place.fixedOffset ?? 0 };
+    const at = spec.timeKnown ? toUtc(spec.hour, spec.minute) : toUtc(12, 0);
     setBusy(true);
+    setSaveState("idle");
     try {
       const { computeNatalChart } = await import("@/lib/astro/natal");
       const chart = computeNatalChart({
         utcMs: at.utcMs,
-        timeKnown,
-        dayStartUtcMs: timeKnown ? undefined : toUtc(0, 0).utcMs,
-        dayEndUtcMs: timeKnown ? undefined : toUtc(23, 59).utcMs,
+        timeKnown: spec.timeKnown,
+        dayStartUtcMs: spec.timeKnown ? undefined : toUtc(0, 0).utcMs,
+        dayEndUtcMs: spec.timeKnown ? undefined : toUtc(23, 59).utcMs,
         lat: place.lat,
         lon: place.lon,
-        houseSystem,
-        nodeType,
-        orbScale,
+        houseSystem: spec.houseSystem,
+        nodeType: spec.nodeType,
+        orbScale: spec.orbScale,
       });
       const pad = (n: number) => String(n).padStart(2, "0");
       setResult({
         chart,
+        spec,
         meta: {
-          name: name.trim().slice(0, 40),
-          dateText: isEnglish ? `${day} ${MONTHS_EN[month - 1]} ${yearCe}` : `${day} ${MONTHS_TH[month - 1]} พ.ศ. ${yearCe + 543}`,
-          timeText: timeKnown ? `${pad(hour)}:${pad(minute)}${isEnglish ? "" : " น."}` : isEnglish ? "time unknown" : "ไม่ทราบเวลาเกิด",
-          placeText: place.label,
+          name: spec.name,
+          dateText: isEnglish ? `${spec.day} ${MONTHS_EN[spec.month - 1]} ${spec.yearCe}` : `${spec.day} ${MONTHS_TH[spec.month - 1]} พ.ศ. ${spec.yearCe + 543}`,
+          timeText: spec.timeKnown ? `${pad(spec.hour)}:${pad(spec.minute)}${isEnglish ? "" : " น."}` : isEnglish ? "time unknown" : "ไม่ทราบเวลาเกิด",
+          placeText: isEnglish ? (place.labelEn ?? place.label) : place.label,
           offsetText: formatUtcOffset(at.offsetMinutes),
-          birthYear: yearCe,
+          birthYear: spec.yearCe,
           zone: place.zone,
         },
       });
@@ -162,11 +183,80 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
     }
   }
 
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    const spec = specFromForm();
+    if (spec) await runChart(spec);
+  }
+
+  /** เปิดผังที่บันทึกไว้: เติมฟอร์มให้ตรง (แก้ต่อได้) แล้วคำนวณทันที */
+  function openSaved(c: SavedChart) {
+    setError(null);
+    setName(c.name);
+    setDay(c.day);
+    setMonth(c.month);
+    setEra(isEnglish ? "ce" : "be");
+    setYearInput(String(isEnglish ? c.yearCe : c.yearCe + 543));
+    setTimeKnown(c.timeKnown);
+    setHour(c.hour);
+    setMinute(c.minute);
+    setPlaceMode(c.place.mode);
+    if (c.place.mode === "thai" && c.place.refId) setThaiId(c.place.refId);
+    if (c.place.mode === "world" && c.place.zone)
+      setWorldCity({ label: c.place.label, labelEn: c.place.labelEn ?? c.place.label, lat: c.place.lat, lon: c.place.lon, zone: c.place.zone });
+    if (c.place.mode === "custom") {
+      setLat(String(c.place.lat));
+      setLon(String(c.place.lon));
+      setOffsetH(String((c.place.fixedOffset ?? 0) / 60));
+    }
+    setHouseSystem(c.houseSystem);
+    setNodeType(c.nodeType);
+    setOrbScale(c.orbScale);
+    void runChart(c);
+  }
+
+  function handleSave() {
+    if (!result) return;
+    const next = saveChart(result.spec);
+    if (next) {
+      setSaved(next);
+      setSaveState("saved");
+    } else {
+      setSaveState("failed");
+    }
+  }
+
   const years = era === "be" ? `${MIN_YEAR + 543}–${MAX_YEAR + 543}` : `${MIN_YEAR}–${MAX_YEAR}`;
 
   return (
     <div className="v2-nt space-y-8">
       <form onSubmit={handleSubmit} className="v2-nt-noprint space-y-5" noValidate>
+        {saved.length > 0 && (
+          <div className="space-y-2">
+            <p className={labelClass}>{isEnglish ? "Charts saved on this device" : "ผังที่บันทึกไว้ในเครื่องนี้"}</p>
+            <ul className="flex flex-wrap gap-2">
+              {saved.map((c) => (
+                <li key={c.id} className="inline-flex items-stretch rounded-full border border-line-warm bg-surface overflow-visible">
+                  <button type="button" onClick={() => openSaved(c)} className="tap-target px-3 py-1.5 text-sm text-ink">
+                    {c.name || (isEnglish ? "Unnamed" : "ไม่มีชื่อ")}{" "}
+                    <span className="text-xs text-muted">
+                      {c.day}/{c.month}/{isEnglish ? c.yearCe : c.yearCe + 543}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSaved(deleteSavedChart(c.id))}
+                    aria-label={isEnglish ? `Delete saved chart ${c.name}` : `ลบผังที่บันทึกไว้ ${c.name}`}
+                    className="tap-target border-l border-line-warm px-3 text-xs text-err"
+                  >
+                    {isEnglish ? "Delete" : "ลบ"}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <div>
           <label htmlFor="nt-name" className={labelClass}>
             {isEnglish ? "Name (optional, stays on this page)" : "ชื่อ (ไม่บังคับ ใช้แสดงบนผังเท่านั้น)"}
@@ -247,7 +337,7 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
             {(
               [
                 ["thai", isEnglish ? "Thailand" : "จังหวัดในไทย"],
-                ["world", isEnglish ? "Abroad" : "ต่างประเทศ"],
+                ["world", isEnglish ? "Search any city" : "ค้นหาเมือง"],
                 ["custom", isEnglish ? "Coordinates" : "ระบุพิกัดเอง"],
               ] as const
             ).map(([m, t]) => (
@@ -265,15 +355,7 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
               ))}
             </select>
           )}
-          {placeMode === "world" && (
-            <select aria-label={isEnglish ? "City" : "เมือง"} value={worldId} onChange={(e) => setWorldId(e.target.value)} className={fieldClass}>
-              {WORLD_CITIES.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {isEnglish ? p.en : p.th}
-                </option>
-              ))}
-            </select>
-          )}
+          {placeMode === "world" && <CitySearch lang={lang} value={worldCity} onPick={setWorldCity} fieldClass={fieldClass} />}
           {placeMode === "custom" && (
             <div className="grid grid-cols-3 gap-2">
               <div>
@@ -357,8 +439,8 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
         </button>
         <p className="text-xs text-muted text-center">
           {isEnglish
-            ? "Calculated entirely in your browser. Your birth data is never sent or saved."
-            : "คำนวณในเครื่องของคุณทั้งหมด ข้อมูลวันเกิดไม่ถูกส่งออกไปและไม่ถูกบันทึก"}
+            ? "Calculated entirely in your browser. Your birth data is never sent anywhere, and is only kept on this device if you press save."
+            : "คำนวณในเครื่องของคุณทั้งหมด ข้อมูลวันเกิดไม่ถูกส่งออกไปไหน และจะเก็บไว้ในเครื่องนี้ก็ต่อเมื่อคุณกดบันทึกเอง"}
         </p>
       </form>
 
@@ -367,6 +449,15 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
           <Suspense fallback={<p className="text-sm text-muted text-center">{isEnglish ? "Drawing your chart..." : "กำลังวาดผังดวง..."}</p>}>
             <NatalResult chart={result.chart} lang={lang} meta={result.meta} cards={cards} />
             <div className="v2-nt-noprint flex flex-wrap justify-center gap-2 pt-6">
+              <button type="button" onClick={handleSave} disabled={saveState === "saved"} className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px] disabled:opacity-70">
+                {saveState === "saved"
+                  ? isEnglish
+                    ? "Saved on this device"
+                    : "บันทึกไว้ในเครื่องนี้แล้ว"
+                  : isEnglish
+                    ? "Save this chart on this device"
+                    : "บันทึกผังนี้ไว้ในเครื่องนี้"}
+              </button>
               <button type="button" onClick={() => window.print()} className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]">
                 {isEnglish ? "Print or save as PDF" : "พิมพ์ หรือบันทึกเป็น PDF"}
               </button>
@@ -378,6 +469,18 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
                 {isEnglish ? "Edit birth details" : "แก้ข้อมูลเกิด"}
               </button>
             </div>
+            {saveState === "failed" && (
+              <p role="alert" className="text-sm text-err text-center pt-2">
+                {isEnglish ? "Could not save: this browser blocks local storage (private mode?)." : "บันทึกไม่ได้ เบราว์เซอร์นี้ปิดการเก็บข้อมูลในเครื่อง (อาจเป็นโหมดส่วนตัว)"}
+              </p>
+            )}
+            {saveState === "saved" && (
+              <p className="text-xs text-muted text-center pt-2">
+                {isEnglish
+                  ? "Saved only in this browser. Delete it any time from the list above the form."
+                  : "เก็บไว้ในเบราว์เซอร์นี้เท่านั้น ลบได้ทุกเมื่อจากรายการเหนือฟอร์ม"}
+              </p>
+            )}
           </Suspense>
         )}
       </div>

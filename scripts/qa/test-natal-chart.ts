@@ -29,6 +29,7 @@ import {
 import { localToUtc, formatUtcOffset } from "../../src/lib/astro/timezone";
 import { THAI_PROVINCES, WORLD_CITIES } from "../../src/data/natal/places";
 import { assertNonEmptyCorpus } from "./lib/corpus";
+import { searchCities, cityCount } from "../../src/lib/astro/city-search";
 import { computeProgressions, computeTransits, lunarReturn, solarReturn, transitCalendar } from "../../src/lib/astro/techniques";
 
 let pass = 0;
@@ -288,19 +289,47 @@ console.log("\n6.5) เครื่องมือตามเวลา (ดา�
   check(`ปฏิทินดาวจร: ทุกวันที่ "ตรงพอดี" ตรงจริงเมื่อคำนวณซ้ำ (${cal.filter((e) => e.kind === "exact").length} เหตุการณ์)`, calOk);
 }
 
+console.log("\n6.6) ค้นหาเมืองทั่วโลก + ผังที่บันทึกไว้");
+{
+  check(`ฐานข้อมูลเมืองมีมากกว่า 30,000 เมือง (มี ${cityCount()})`, cityCount() > 30000);
+  const hy = searchCities("หาดใหญ่", 3)[0];
+  check("พิมพ์ไทย \"หาดใหญ่\" เจอ Hat Yai เขตเวลา Asia/Bangkok", hy?.name === "Hat Yai" && hy.zone === "Asia/Bangkok");
+  check("พิมพ์ไทย \"เชียง\" เมืองไทยขึ้นก่อนเมืองต่างประเทศ", searchCities("เชียง", 1)[0]?.country === "TH");
+  const sp = searchCities("springfield, illinois", 3);
+  check("\"springfield, illinois\" กรองด้วยรัฐได้", sp.length > 0 && sp.every((c) => c.admin === "Illinois"));
+  check("ไม่สนเครื่องหมายเสียง (\"sao paulo\" เจอ São Paulo)", searchCities("sao paulo", 1)[0]?.name === "São Paulo");
+  let zonesOk = true;
+  for (const c of searchCities("a", 200).concat(searchCities("san", 200))) {
+    try {
+      new Intl.DateTimeFormat("en-US", { timeZone: c.zone });
+    } catch {
+      zonesOk = false;
+    }
+  }
+  check("เขตเวลาของเมืองที่สุ่มตรวจเป็นชื่อ IANA ที่ใช้ได้", zonesOk);
+
+  const app = fs.readFileSync(path.join(process.cwd(), "src/components/natal/NatalChartApp.tsx"), "utf8");
+  const saveCalls = app.match(/\bsaveChart\(/g)?.length ?? 0;
+  const handleSave = app.match(/function handleSave\(\)[\s\S]*?\n  \}/)?.[0] ?? "";
+  check("บันทึกผังลงเครื่องเกิดจากปุ่มที่ผู้ใช้กดเท่านั้น (saveChart อยู่ใน handleSave ที่เดียว)", saveCalls === 1 && handleSave.includes("saveChart("));
+  const savedSrc = fs.readFileSync(path.join(process.cwd(), "src/lib/astro/saved-charts.ts"), "utf8");
+  check("ผังที่บันทึกใช้คีย์จากทะเบียน (STORAGE_KEYS.natalCharts)", savedSrc.includes("STORAGE_KEYS.natalCharts") && !/fetch\(/.test(savedSrc));
+}
+
 console.log("\n7) กติกา island — ตัวคำนวณ/คำอธิบาย/ผลผังโหลดแบบ dynamic import เท่านั้น");
 {
   const root = process.cwd();
   const entry = path.join(root, "src/components/natal/NatalChartApp.tsx");
   const files = [
     entry,
+    path.join(root, "src/components/natal/CitySearch.tsx"),
     ...fs
       .readdirSync(path.join(root, "astro/islands"))
       .map((f) => path.join(root, "astro/islands", f)),
   ].filter((f) => fs.existsSync(f) && /\.(tsx?|astro)$/.test(f));
   assertNonEmptyCorpus("ไฟล์ island + ฟอร์มผังดวง", files, "ต้องเจออย่างน้อย NatalChartApp.tsx และ astro/islands/*");
   // ของหนักที่ห้ามติดบันเดิลแรกของหน้า: ตัวคำนวณดาว (~50 KB) · ตารางไครอน · คำอธิบายสองภาษา · ผลผังทั้งหมด
-  const heavy = /^\s*import\s+(?!type\b)[^;]*from\s+["'](@\/lib\/astro\/natal(-text)?|astronomy-engine|@\/lib\/astro\/chiron-table|@\/data\/natal\/content|\.\/NatalResult|\.\/NatalWheel|@\/components\/natal\/(NatalResult|NatalWheel))["']/m;
+  const heavy = /^\s*import\s+(?!type\b)[^;]*from\s+["'](@\/lib\/astro\/natal(-text)?|astronomy-engine|@\/lib\/astro\/chiron-table|@\/data\/natal\/content|\.\/NatalResult|\.\/NatalWheel|@\/components\/natal\/(NatalResult|NatalWheel)|@\/data\/natal\/cities-world|@\/lib\/astro\/city-search)["']/m;
   const offenders = files.filter((f) => heavy.test(fs.readFileSync(f, "utf8")));
   check(
     "ไฟล์ island และหน้าฟอร์มผังดวงไม่ import ของหนักแบบ static",

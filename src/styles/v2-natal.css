@@ -241,6 +241,21 @@
   opacity: 0.8;
 }
 
+/* ── รายการผลค้นหาเมือง (กระดาษครีม ตัวหมึก · แถวที่เลือกอยู่ไฮไลต์ทองอ่อน) ── */
+.v2-nt-listbox {
+  background: var(--nt-paper);
+  border: 1px solid var(--nt-line);
+  box-shadow: 0 18px 36px -18px rgba(74, 47, 16, 0.45);
+  color: var(--nt-ink);
+}
+.v2-nt-listbox [role="option"] {
+  color: var(--nt-ink);
+}
+.v2-nt-listbox [role="option"][aria-selected="true"],
+.v2-nt-listbox [role="option"]:hover {
+  background: rgba(255, 222, 150, 0.4);
+}
+
 /* ── กล่องพับได้: บอกด้วยคำว่ากดอ่าน/ย่อ (ไม่ใช้ลูกศร — กฎเหล็ก 2) ── */
 .v2-nt-more {
   margin-left: auto;
