@@ -482,6 +482,11 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "📏 วัดคุณภาพ AI (ชั้นตรวจด้วยโค้ด · snapshot · ผู้ตัดสินสลับ · gate)", cmd: TSX, args: ["scripts/qa/test-ai-eval.ts"] },
   { label: "❓ หน้าคำถาม 20 หน้า × 2 ภาษา", cmd: TSX, args: ["scripts/qa/test-question-pages.ts"] },
   { label: "🪶 Reader Studio (แยกข้อมูลรายแม่หมอ · DPA · ลิงก์ส่วนตัว · ส่งออก/ลบ)", cmd: TSX, args: ["scripts/qa/test-reader-studio.ts"] },
+  {
+    label: "🪐 ผังดวงกำเนิด (ดาวเทียบ NASA JPL · ลัคนา/เรือนตรวจด้วยเรขาคณิต · เขตเวลาย้อนหลัง · ตัวคำนวณไม่ติดบันเดิลแรก · ข้อมูลเกิดไม่ออกจากเครื่อง)",
+    cmd: TSX,
+    args: ["scripts/qa/test-natal-chart.ts"],
+  },
 ];
 
 /**

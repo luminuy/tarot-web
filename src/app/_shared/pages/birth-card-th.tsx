@@ -262,6 +262,7 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
           faqs={BIRTH_CARD_FAQS}
           links={[
             { label: "สารานุกรมไพ่ 78 ใบ", href: "/cards" },
+            { label: "ผังดวงกำเนิด (ลัคนา ดาว 10 ดวง)", href: "/natal-chart" },
             { label: "ดูดวงไพ่ยิปซีรายวัน", href: "/daily" },
             { label: "ดูดวงความรัก 1 ใบ", href: "/love/1-card" },
             { label: "ผังพยากรณ์ 26 แบบ", href: "/spreads" },

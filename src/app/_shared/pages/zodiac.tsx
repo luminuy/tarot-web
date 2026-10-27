@@ -306,6 +306,22 @@ export function ZodiacIndexBody({
         {/* v3 (เจ้าของ 2026-10-17 "ทำแบบหน้าแรกกับหน้าผัง"): ทุกส่วนเป็นหน้าต่างเลขกำกับแบบ /spreads */}
         <Ui2Window n="01" kicker={isEnglish ? "Find your sign" : "หาราศีของคุณ"} tone={7}>
           {finder}
+          {/* 🪐 ราศีเกิดคือดวงอาทิตย์ดวงเดียว — ทางไปผังดวงเต็ม (ลัคนา · จันทร์ · ดาวทุกดวง) */}
+          <Link
+            href="/natal-chart"
+            className="mt-6 block rounded-2xl border border-line-warm bg-surface/80 px-4 py-3 text-center hover:border-gold-ink transition-colors"
+          >
+            <span className="block font-serif-th font-bold text-ink">
+              <ThaiPhrases>{isEnglish ? "Want more than your Sun sign?" : "อยากรู้มากกว่าราศีเกิด?"}</ThaiPhrases>
+            </span>
+            <span className="block text-sm text-muted">
+              <ThaiPhrases>
+                {isEnglish
+                  ? "Make your full natal chart: Rising sign, Moon sign, every planet and its tarot card"
+                  : "สร้างผังดวงกำเนิด รู้ลัคนา ราศีจันทร์ ดาวทุกดวง และไพ่ทาโรต์ประจำแต่ละดาว"}
+              </ThaiPhrases>
+            </span>
+          </Link>
         </Ui2Window>
 
         <Ui2Window n="02" kicker={isEnglish ? "Today" : "วันนี้"} tone={4}>
@@ -368,6 +384,7 @@ export function ZodiacIndexBody({
           faqs={faqs}
           /* ⚠️ SeoArticleShell ไม่เติม /en ให้เอง (A6-09) — ต้องแปลงเส้นทางตามภาษาก่อนส่งเข้าไป */
           links={[
+            { label: isEnglish ? "Full natal chart" : "ผังดวงกำเนิดแบบละเอียด", href: "/natal-chart" },
             { label: isEnglish ? "Twelve Houses spread" : "ผังไพ่ 12 เรือนชะตา", href: "/spreads/twelve-houses" },
             { label: isEnglish ? "Tarot Birth Card" : "คำนวณไพ่ประจำตัว (Birth Card)", href: "/cards/birth-card" },
             { label: isEnglish ? "All 78 cards" : "สารานุกรมไพ่ 78 ใบ", href: "/cards" },

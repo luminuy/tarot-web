@@ -437,6 +437,21 @@ export const BUDGETS: RouteBudget[] = [
     maxJsGzipKb: 118, // 127 ➔ 118 (2026-10-19 · A9-04): วัดจริง 107 KB + ระยะหายใจ ~10%
     maxHtmlGzipKb: 26, // วัดจริง 2026-09-15: 20 KB
   },
+  {
+    route: "/natal-chart",
+    /*
+     * 🪐 ผังดวงกำเนิด (2026-10-27) — บันเดิลแรกมีแค่ฟอร์ม · ตัวคำนวณดาว (~33 KB gzip) + ผลผัง
+     *    โหลดด้วย import() ตอนกดสร้างผังเท่านั้น (ด่าน test-natal-chart ข้อ 7 กันไม่ให้หลุดเข้าบันเดิลแรก)
+     *    HTML มีรายการไพ่ 58 ใบที่ผังใช้ (prop ของ island) + ตาราง "อ่านผังยังไง"
+     */
+    maxJsGzipKb: 105, // วัดจริง 2026-10-27: 95 KB + ระยะหายใจ ~10%
+    maxHtmlGzipKb: 28, // วัดจริง 2026-10-27: 25 KB
+  },
+  {
+    route: "/en/natal-chart",
+    maxJsGzipKb: 105, // วัดจริง 2026-10-27: 95 KB
+    maxHtmlGzipKb: 25, // วัดจริง 2026-10-27: 22 KB
+  },
 ];
 
 function ensureBuildExists(): void {

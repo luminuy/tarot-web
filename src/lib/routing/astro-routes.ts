@@ -46,6 +46,8 @@ export const ASTRO_ROUTE_PREFIXES = [
   "/read",
   /* 📖 นิยาย `/novel` + รายบท `/novel/<เลขบท>` — ภาษาไทยอย่างเดียว (เจ้าของ 2026-10-27) */
   "/novel",
+  /* 🪐 ผังดวงกำเนิด `/natal-chart` + `/en/natal-chart` (คำนวณในเครื่องผู้ใช้) */
+  "/natal-chart",
 ] as const;
 
 /** ตัด `/en` นำหน้าออก เพื่อเทียบกับรายการฝั่งไทยชุดเดียว */

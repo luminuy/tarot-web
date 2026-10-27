@@ -1,0 +1,297 @@
+/*
+ * 🪐 ผังดวงกำเนิด `/natal-chart` — วงผัง SVG · ตาราง · ตารางมุมสัมพันธ์
+ * ===========================================================================
+ * ผังอยู่ในหน้าต่างครีม (ui2-dawn.css) ➔ สีทั้งหมดออกแบบบนพื้นครีม ตัวหมึกเข้ม
+ * ไม่มีรูปทรงตกแต่ง/สัญลักษณ์ (กฎเหล็ก 2) — ดาวใช้ตัวย่อภาษาไทย/อังกฤษ มีคำอธิบายใต้ผัง
+ * ไม่มี backdrop-filter (INC-0060)
+ */
+
+.v2-nt {
+  --nt-ink: #29261F;
+  --nt-muted: #5E5547;
+  --nt-line: rgba(74, 47, 16, 0.22);
+  --nt-line-soft: rgba(74, 47, 16, 0.1);
+  --nt-gold: #8A5512;
+  --nt-paper: #FFFCF6;
+  --nt-fire: rgba(214, 104, 52, 0.16);
+  --nt-earth: rgba(96, 128, 62, 0.16);
+  --nt-air: rgba(196, 160, 54, 0.18);
+  --nt-water: rgba(58, 116, 168, 0.16);
+  --nt-harm: rgba(38, 104, 168, 0.75);
+  --nt-tense: rgba(178, 54, 42, 0.75);
+  --nt-neutral: rgba(138, 85, 18, 0.75);
+}
+
+/* ── วงผัง ── */
+.v2-nt-wheel {
+  display: block;
+  width: 100%;
+  max-width: 620px;
+  height: auto;
+  margin: 0 auto;
+  font-family: var(--font-sans, inherit);
+  user-select: none;
+}
+.v2-nt-wheel .nw-bg {
+  fill: var(--nt-paper);
+  stroke: var(--nt-line);
+}
+.v2-nt-wheel .nw-sign {
+  stroke: var(--nt-line);
+  stroke-width: 1;
+}
+.v2-nt-wheel .nw-fire { fill: var(--nt-fire); }
+.v2-nt-wheel .nw-earth { fill: var(--nt-earth); }
+.v2-nt-wheel .nw-air { fill: var(--nt-air); }
+.v2-nt-wheel .nw-water { fill: var(--nt-water); }
+.v2-nt-wheel .nw-sign-label {
+  fill: var(--nt-ink);
+  font-size: 18px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.v2-nt-wheel .nw-tick {
+  stroke: var(--nt-line);
+  stroke-width: 1;
+}
+.v2-nt-wheel .nw-tick-10 {
+  stroke: rgba(74, 47, 16, 0.4);
+}
+.v2-nt-wheel .nw-ring {
+  fill: none;
+  stroke: var(--nt-line);
+}
+.v2-nt-wheel .nw-cusp {
+  stroke: rgba(74, 47, 16, 0.32);
+  stroke-width: 1;
+}
+.v2-nt-wheel .nw-axis {
+  stroke: var(--nt-ink);
+  stroke-width: 2;
+}
+.v2-nt-wheel .nw-axis-label {
+  fill: var(--nt-gold);
+  font-size: 16px;
+  font-weight: 800;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.v2-nt-wheel .nw-house-n {
+  fill: var(--nt-muted);
+  font-size: 15px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.v2-nt-wheel .nw-pos-tick {
+  stroke: var(--nt-ink);
+  stroke-width: 1.6;
+}
+.v2-nt-wheel .nw-leader {
+  stroke: rgba(74, 47, 16, 0.35);
+  stroke-width: 0.8;
+}
+.v2-nt-wheel .nw-planet {
+  cursor: pointer;
+}
+.v2-nt-wheel .nw-planet-bg {
+  fill: var(--nt-paper);
+  stroke: var(--nt-line);
+}
+.v2-nt-wheel .nw-planet.is-focus .nw-planet-bg {
+  stroke: var(--nt-gold);
+  stroke-width: 2;
+}
+.v2-nt-wheel .nw-planet-label {
+  fill: var(--nt-ink);
+  font-size: 19px;
+  font-weight: 800;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.v2-nt-wheel .nw-planet-deg {
+  fill: var(--nt-muted);
+  font-size: 14px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.v2-nt-wheel .nw-retro {
+  fill: rgba(178, 54, 42, 0.95);
+}
+.v2-nt-wheel .nw-asp {
+  stroke-width: 1.2;
+  transition: opacity var(--dur-base, 0.2s) ease;
+}
+.v2-nt-wheel .nw-asp-harmonious { stroke: var(--nt-harm); }
+.v2-nt-wheel .nw-asp-tense { stroke: var(--nt-tense); }
+.v2-nt-wheel .nw-asp-neutral { stroke: var(--nt-neutral); }
+.v2-nt-wheel .nw-asp-minor { stroke-dasharray: 4 3; stroke-width: 1; }
+.v2-nt-wheel .is-dim { opacity: 0.08; }
+
+/* ── ตาราง ── */
+.v2-nt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.v2-nt-table th,
+.v2-nt-table td {
+  padding: 7px 6px;
+  border-bottom: 1px solid var(--nt-line-soft);
+  text-align: left;
+  vertical-align: top;
+}
+.v2-nt-table th {
+  color: var(--nt-muted);
+  font-weight: 600;
+  font-size: 12px;
+}
+.v2-nt-table tbody tr {
+  cursor: pointer;
+}
+.v2-nt-table tbody tr.is-focus {
+  background: rgba(255, 222, 150, 0.28);
+}
+.v2-nt-retro {
+  color: #9A2E22;
+  font-weight: 700;
+}
+.v2-nt-dig {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0 7px;
+  font-size: 11px;
+  line-height: 18px;
+  border: 1px solid var(--nt-line);
+  color: var(--nt-ink);
+  background: var(--nt-paper);
+  margin-right: 3px;
+}
+.v2-nt-dig-domicile,
+.v2-nt-dig-exaltation {
+  border-color: rgba(47, 107, 58, 0.45);
+  color: #2F6B3A;
+}
+.v2-nt-dig-detriment,
+.v2-nt-dig-fall {
+  border-color: rgba(154, 46, 34, 0.4);
+  color: #9A2E22;
+}
+
+/* ── ตารางมุมสัมพันธ์แบบสามเหลี่ยม ── */
+/* ความกว้างช่องคงที่ (table-layout: fixed + <col>) — ป้ายหัวแถวยาว ๆ ("ลัคนา") ล้นไปทางขวาที่ว่างอยู่
+   แทนที่จะดันทั้งคอลัมน์ให้กว้าง (มือถือ 15 ช่อง × 19px ยังพอดีจอ 360) */
+.v2-nt-grid {
+  --nt-cell: 19px;
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: calc(var(--nt-n) * var(--nt-cell));
+  font-size: 9px;
+  margin: 0 auto 0 0;
+  font-variant-numeric: tabular-nums;
+}
+@media (min-width: 640px) {
+  .v2-nt-grid {
+    --nt-cell: 27px;
+    font-size: 10px;
+    margin: 0 auto;
+  }
+}
+.v2-nt-grid col {
+  width: var(--nt-cell);
+}
+.v2-nt-grid th,
+.v2-nt-grid td {
+  height: var(--nt-cell);
+  padding: 0;
+  overflow: visible;
+  text-align: center;
+  border: 1px solid var(--nt-line-soft);
+  line-height: 1.05;
+}
+.v2-nt-grid th {
+  color: var(--nt-ink);
+  font-weight: 700;
+  font-size: 10.5px;
+  background: var(--nt-paper);
+  /* ป้ายไทยห้ามหักกลางคำ ("โหน|ด") — ล้นไปทางขวาแทน */
+  white-space: nowrap;
+  padding: 0 2px;
+  text-align: left;
+}
+.v2-nt-grid td.is-empty {
+  border: none;
+}
+.v2-nt-grid td.harmonious { background: rgba(38, 104, 168, 0.12); color: #1D4F80; }
+.v2-nt-grid td.tense { background: rgba(178, 54, 42, 0.11); color: #8A2A1F; }
+.v2-nt-grid td.neutral { background: rgba(138, 85, 18, 0.12); color: #6E430D; }
+.v2-nt-grid td .o {
+  display: block;
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+
+/* ── กล่องพับได้: บอกด้วยคำว่ากดอ่าน/ย่อ (ไม่ใช้ลูกศร — กฎเหล็ก 2) ── */
+.v2-nt-more {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--nt-gold);
+  font-weight: 600;
+}
+details[open] > summary .v2-nt-more-open,
+details:not([open]) > summary .v2-nt-more-close {
+  display: none;
+}
+
+/* ── แท่งธาตุ ── */
+.v2-nt-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--nt-line-soft);
+  overflow: hidden;
+}
+.v2-nt-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+.v2-nt-bar .fire { background: rgba(214, 104, 52, 0.75); }
+.v2-nt-bar .earth { background: rgba(96, 128, 62, 0.75); }
+.v2-nt-bar .air { background: rgba(196, 160, 54, 0.8); }
+.v2-nt-bar .water { background: rgba(58, 116, 168, 0.75); }
+.v2-nt-bar .mod { background: rgba(138, 85, 18, 0.6); }
+
+/* ── สลับแท็บเล็ก (โหมดสถานที่) ── */
+.v2-nt-seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.v2-nt-seg button {
+  border-radius: 999px;
+  border: 1px solid var(--nt-line);
+  background: var(--nt-paper);
+  color: var(--nt-ink);
+  padding: 6px 14px;
+  font-size: 13px;
+  min-height: 36px;
+}
+.v2-nt-seg button[aria-pressed="true"] {
+  background: #17110C;
+  border-color: #17110C;
+  color: #FFF8EC;
+}
+
+/* ── พิมพ์ / บันทึก PDF: เอาเฉพาะผลผัง ── */
+@media print {
+  .v2-nt-noprint {
+    display: none !important;
+  }
+  .v2-nt details {
+    display: block;
+  }
+  .v2-nt details > *:not(summary) {
+    display: block;
+  }
+}
