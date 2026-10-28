@@ -12,6 +12,15 @@
 
 ---
 
+### 🗓️ 2026-10-28 (รอบ 339): Claude เป็นตัวหลักของทุกเส้น AI ที่ผู้ใช้เห็น — เลือกรุ่นตามงาน
+- เจ้าของสั่ง: "เลือกใช้โมเดลตามความเหมาะสม แต่ใช้ Claude เป็นหลัก" · ไม่มี `ANTHROPIC_API_KEY` / พัก / ล้ม / แกะ JSON ไม่ได้ = ไหลลงลำดับเดิมทุกเส้น
+- `/chat` คุยต่อหลังเปิดไพ่: Claude ➔ Groq ➔ Gemini ➔ คำตอบสำรอง · รุ่นตามจำนวนไพ่แบบคำอ่าน (1-3 ใบ Haiku · 4 ใบขึ้นไป Sonnet) · effort low · ผ่านด่านกันรั่ว prompt เดิม
+- `/perspective` อ่านอีกมุม: `streamClaudeReading` ➔ Groq ➔ Gemini (รุ่นตามจำนวนไพ่)
+- `/journal/reflect` · `/journal/monthly-summary`: `generateAiJson()` ใหม่ใน `json-call.ts` (Claude Sonnet effort low ➔ Gemini) · สรุปรายเดือนเลิกยิง Gemini เองแล้วใช้ตัวช่วยกลาง
+- ตั้งใจไม่เปลี่ยน: `/reading/clarify` คง Groq (หน้าเว็บตัดที่ 2.5 วินาที) · Reader Studio คง Gemini (ร่าง DPA ระบุ Gemini เป็นผู้ประมวลผลช่วงรายเดียว — เปลี่ยนต้องแก้ DPA ก่อน) · รายงานผังดวงคำนวณด้วยโค้ด
+- ด่าน `test-claude-reading` 33 ➔ 40 ข้อ (รันด้วย `tsconfig.scripts.json` เพื่อทดสอบทางสำรอง Gemini จริง) · ยังไม่ได้ลองกับ API จริง (รอคีย์)
+- ค้าง: เจ้าของสั่ง "อย่าพึ่งเอาขึ้น" ➔ อยู่บนกิ่ง `claude/happy-mayer-3u6eo8` + PR แบบ draft · เจ้าของตั้ง `ANTHROPIC_API_KEY` + spend limit
+
 ### 🗓️ 2026-10-28 (รอบ 338): ถามแม่หมอเรื่องผังดวง (`/natal-chart`) ใช้ Claude Sonnet 5.5
 - เจ้าของสั่ง: "หน้านี้ต้องใช้ Sonnet อ่าน เพราะต้องการความแม่นยำ ละเอียด" · `/api/natal/chat` ลำดับใหม่ Sonnet ➔ Groq ➔ Gemini · ไม่มี `ANTHROPIC_API_KEY` = ลำดับเดิม
 - `generateClaudeReply()` ใน `claude.ts`: ไม่สตรีม · เปิดโหมดคิด adaptive ระดับ medium (ผู้ใช้รอคำตอบทั้งก้อนอยู่แล้ว แลกไม่กี่วินาทีกับความละเอียด) · โดนตัดที่ max_tokens/ถูกปฏิเสธ = ให้ตัวสำรองตอบ ไม่ส่งคำตอบขาด · ผ่านด่านกันรั่ว prompt ชุดเดิม

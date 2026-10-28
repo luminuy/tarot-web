@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
-import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
+import { generateAiJson } from "@/lib/ai/json-call";
+import { CLAUDE_SONNET_MODEL } from "@/lib/ai/claude";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { getSessionUser } from "@/lib/auth/session";
-import { isAiCapReached, recordAiCall } from "@/lib/security/ai-budget";
+import { isAiCapReached } from "@/lib/security/ai-budget";
 import { listJournal } from "@/lib/journal/journal.repo";
 import { cardByIndex } from "@/data/cards";
 import { sanitizePromptValue } from "@/lib/ai/prompt-guard";
@@ -153,13 +154,14 @@ export async function POST(request: Request) {
       })
       .join("\n");
 
-    const apiKey = aiCapReached ? undefined : process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    const hasAiKey =
+      !aiCapReached && !!(process.env.ANTHROPIC_API_KEY?.trim() || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
 
     /*
      * 🛟 สรุปจากประวัติจริงโดยไม่เรียก AI — ใช้ทั้งตอนไม่มีคีย์ · ทุกโมเดลล่ม · และเติมช่องที่โมเดลตอบขาด
      * (เดิม: ไม่มีคีย์ = ประโยคเหมารวม · โมเดลล่ม = error 500 · JSON ขาด = เติมประโยคเหมารวมเงียบ ๆ)
      */
-    if (!apiKey) {
+    if (!hasAiKey) {
       recordEvent(aiCapReached ? "monthly_offline_fallback:ai_cap" : "monthly_offline_fallback:no_api_key");
       return NextResponse.json(offline);
     }
@@ -212,78 +214,17 @@ ${historyText}
   "empowermentQuote": "คำคมพลังใจศักดิ์สิทธิ์ประจำเดือนที่ประทับใจ"
 }`;
 
-    const {
-      WORKING_GEMINI_MODELS,
-      GEMINI_FIRST_MODEL_TIMEOUT_MS,
-      GEMINI_FALLBACK_MODEL_TIMEOUT_MS,
-      extractGeminiAnswer,
-    } = await import("@/lib/ai/gemini");
-    let res: Response | null = null;
-    for (const [modelIdx, model] of WORKING_GEMINI_MODELS.entries()) {
-      // เพดานเวลาเหมือนเส้นทางอื่น — ไม่มี timeout = ถ้าโมเดลค้าง คำขอค้างยาว (บทเรียน INC-0053)
-      const controller = new AbortController();
-      const timeoutId = setTimeout(
-        () => controller.abort(),
-        modelIdx === 0 ? GEMINI_FIRST_MODEL_TIMEOUT_MS : GEMINI_FALLBACK_MODEL_TIMEOUT_MS,
-      );
-      let r: Response;
-      try {
-        void recordAiCall(1);
-        r = await fetch(
-          geminiEndpoint(model, "generateContent"),
-          {
-            method: "POST",
-            signal: controller.signal,
-            headers: { "Content-Type": "application/json", "X-goog-api-key": apiKey, ...aiGatewayHeaders({ cacheTtl: 21600 }) },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: {
-                responseMimeType: "application/json",
-                temperature: 0.7,
-              },
-            }),
-          }
-        );
-      } catch (e) {
-        console.warn(`[Monthly Summary] model ${model} → ${e instanceof Error ? e.name : String(e)}`);
-        continue;
-      } finally {
-        clearTimeout(timeoutId);
-      }
-      if (r.ok) {
-        res = r;
-        break;
-      }
-      console.warn(
-        `[Monthly Summary] model ${model} → ${r.status} · ${(await r.text().catch(() => "")).slice(0, 200)}`,
-      );
-    }
-
-    if (!res) {
+    // Claude Sonnet ก่อน (สังเคราะห์หลายคำอ่าน · เรียกไม่บ่อย + แคช 6 ชม.) ➔ Gemini ตามเดิม
+    // อ่านคำตอบ Gemini ผ่าน extractGeminiAnswer ใน generateGeminiJson (บทเรียน INC-0052)
+    const parsedAI = await generateAiJson<any>(prompt, {
+      label: "Monthly Summary",
+      temperature: 0.7,
+      cacheTtl: 21600,
+      claude: { model: CLAUDE_SONNET_MODEL, effort: "low", maxTokens: 6000, timeoutMs: 30000 },
+    });
+    if (!parsedAI) {
       recordEvent("monthly_offline_fallback:models_down");
       return NextResponse.json(offline);
-    }
-
-    const resJson = (await res.json()) as any;
-    // ห้ามอ่าน parts[0].text ตรง ๆ — Gemini 3.x แทรก part ความคิดไว้ด้วย (บทเรียน INC-0052)
-    const responseText = extractGeminiAnswer(resJson) || "{}";
-    const cleanedText = responseText
-      .replace(/^```(?:json)?\s*/i, "")
-      .replace(/\s*```$/, "")
-      .trim();
-
-    let parsedAI: any = {};
-    try {
-      parsedAI = JSON.parse(cleanedText);
-    } catch {
-      const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        try {
-          parsedAI = JSON.parse(jsonMatch[0]);
-        } catch {
-          parsedAI = {};
-        }
-      }
     }
 
     // โมเดลตอบแต่ไม่มีเนื้อหลัก (synthesis) = ใช้ไม่ได้ทั้งก้อน ➔ สรุปออฟไลน์ทั้งฉบับ พร้อมธง fallback
