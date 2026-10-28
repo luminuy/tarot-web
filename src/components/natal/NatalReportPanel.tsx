@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import type { ChartSpec } from "@/lib/astro/chart-spec";
 import type { Lang } from "@/data/natal/content";
 import type { NatalReport } from "@/lib/astro/natal-report";
+import { stripEmoji } from "@/lib/text/no-emoji";
 
 /**
  * 📄 รายงานผังดวงฉบับเต็ม (โหลดแบบ lazy เมื่อกดปุ่ม) — ใช้รอบดูดวงที่เติมไว้ 1 รอบ (เจ้าของสั่ง "รายงาน PDF แบบเสียเงิน")
@@ -50,15 +51,15 @@ export default function NatalReportPanel({ spec, lang, onClose }: { spec: ChartS
       <p className="font-semibold">{isTh ? "รายงานผังดวงฉบับเต็ม (บันทึกเป็น PDF)" : "Full natal chart report (save as PDF)"}</p>
       <p className="text-xs text-muted">
         {isTh
-          ? "รวมทุกอย่างในเล่มเดียว: ตำแหน่งดาว คำอธิบายทุกดวง มุมสัมพันธ์ ดาวฤกษ์ จุด Lots โหราไทย พร้อมพยากรณ์ดาวเดินช้า 12 เดือนข้างหน้า และผังวันเกิดปีนี้ ใช้รอบดูดวงที่เติมไว้ 1 รอบ ผังเดิมโหลดซ้ำไม่หักซ้ำ"
-          : "Everything in one document: positions, every placement explained, aspects, fixed stars, lots, Thai astrology, plus the next 12 months of slow-planet transits and this year's solar return. Uses 1 refilled reading; re-opening the same chart is free."}
+          ? "รวมทุกอย่างในเล่มเดียว: ภาพรวมผังที่แม่หมอ AI (Claude Sonnet) เรียบเรียงจากเรื่องเด่นของผัง เรื่องเด่นเรียงตามน้ำหนัก ความแม่นของเวลาเกิด ตำแหน่งดาว คำอธิบายทุกดวง มุมสัมพันธ์ ดาวฤกษ์ จุด Lots โหราไทย พร้อมพยากรณ์ดาวเดินช้า 12 เดือนข้างหน้า และผังวันเกิดปีนี้ ใช้รอบดูดวงที่เติมไว้ 1 รอบ ผังเดิมโหลดซ้ำไม่หักซ้ำ"
+          : "Everything in one document: an overview written by the AI reader (Claude Sonnet) from your chart's strongest themes, those themes ranked, birth-time accuracy, positions, every placement explained, aspects, fixed stars, lots, Thai astrology, plus the next 12 months of slow-planet transits and this year's solar return. Uses 1 refilled reading; re-opening the same chart is free."}
       </p>
       <label className="flex items-start gap-2 text-xs cursor-pointer">
         <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 w-4 h-4 shrink-0" />
         <span>
           {isTh
-            ? "ยินยอมส่งวันเวลาสถานที่เกิดและชื่อของผังนี้ไปให้เซิร์ฟเวอร์ของเว็บคำนวณรายงาน เว็บไม่บันทึกข้อมูลเกิดไว้"
-            : "I agree to send this chart's birth data and name to the site's server to build the report. The birth data is not stored."}
+            ? "ยินยอมส่งวันเวลาสถานที่เกิดและชื่อของผังนี้ไปให้เซิร์ฟเวอร์ของเว็บคำนวณรายงาน และให้ผู้ให้บริการ AI ภายนอกเขียนภาพรวมผัง เว็บไม่บันทึกข้อมูลเกิดไว้"
+            : "I agree to send this chart's birth data and name to the site's server to build the report, and to an external AI provider to write the overview. The birth data is not stored."}
         </span>
       </label>
       <div className="flex flex-wrap gap-2">
@@ -127,6 +128,51 @@ function ReportView({ report, onClose }: { report: NatalReport; onClose: () => v
               {p}
             </p>
           ))}
+        </section>
+
+        <section>
+          <H>{isTh ? "ภาพรวมผังจากแม่หมอ AI" : "Your chart overview from the AI reader"}</H>
+          {report.aiOverview ? (
+            <>
+              {report.aiOverview.paragraphs.map((p, i) => (
+                <div key={i} className="nt-report-block">
+                  <h3 className="font-semibold text-ink text-sm">{p.title}</h3>
+                  <p className="text-sm leading-relaxed">{stripEmoji(p.text)}</p>
+                </div>
+              ))}
+              <p className="text-xs text-muted">
+                {isTh
+                  ? "เรียบเรียงโดย AI จากเรื่องเด่นที่ SeerTarot คำนวณด้านล่าง ตำแหน่งดาวทุกตัวมาจากตัวคำนวณ ไม่ได้มาจาก AI"
+                  : "Written by AI from the strongest themes SeerTarot calculated below. Every position comes from the calculator, not from the AI."}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-muted">
+              {isTh
+                ? "ส่วนนี้ยังสร้างไม่สำเร็จเพราะ AI ไม่ว่างตอนนี้ ปิดรายงานแล้วกดสร้างรายงานใหม่ได้โดยไม่หักรอบซ้ำ"
+                : "This part could not be written because the AI is busy. Close the report and create it again; you will not be charged twice."}
+            </p>
+          )}
+        </section>
+
+        <section>
+          <H>{isTh ? "เรื่องเด่นของผัง (เรียงจากสำคัญที่สุด)" : "Your chart's strongest themes (most important first)"}</H>
+          {report.highlights.map((h) => (
+            <div key={h.title} className="nt-report-block">
+              <h3 className="font-semibold text-ink text-sm">{h.title}</h3>
+              <p className="text-sm leading-relaxed">{h.text}</p>
+            </div>
+          ))}
+          {report.timeSensitivity.length > 0 && (
+            <>
+              <h3 className="font-semibold text-ink text-sm pt-2">{isTh ? "เวลาเกิดต้องแม่นแค่ไหน" : "How exact does the birth time need to be?"}</h3>
+              {report.timeSensitivity.map((t, i) => (
+                <p key={i} className="text-sm leading-relaxed">
+                  {t}
+                </p>
+              ))}
+            </>
+          )}
         </section>
 
         <section>

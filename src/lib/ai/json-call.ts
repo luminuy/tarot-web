@@ -36,6 +36,8 @@ export async function generateAiJson<T = unknown>(
   prompt: string,
   opts: Parameters<typeof generateGeminiJson>[1] & {
     claude: { model: string; effort: "low" | "medium" | "high"; maxTokens: number; timeoutMs: number };
+    /** ตรวจเนื้อหาของคำตอบ Claude — ไม่ผ่าน = ไปให้ Gemini ตอบแทน (ไม่ใช่แค่ JSON แกะได้) */
+    accept?: (parsed: T) => boolean;
   },
 ): Promise<T | null> {
   const { generateClaudeReply, getClaudeApiKey, isClaudePaused } = await import("@/lib/ai/claude");
@@ -52,7 +54,7 @@ export async function generateAiJson<T = unknown>(
       collectLog: opts.collectLog,
     });
     const parsed = r?.reply ? parseJsonObject<T>(r.reply) : null;
-    if (parsed) return parsed;
+    if (parsed && (!opts.accept || opts.accept(parsed))) return parsed;
     recordEvent(`ai_claude_failover:${opts.label}`);
   }
   return generateGeminiJson<T>(prompt, opts);
