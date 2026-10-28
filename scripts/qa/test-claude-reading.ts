@@ -18,6 +18,7 @@ import {
   isClaudePaused,
   streamClaudeReading,
 } from "../../src/lib/ai/claude";
+import { generateAiJson } from "../../src/lib/ai/json-call";
 import { streamMockGeminiReading } from "../../src/lib/ai/mock-reading";
 import type { ReadingContext } from "../../src/lib/ai/prompt";
 import type { ReadingEvent } from "../../src/lib/ai/types";
@@ -240,6 +241,70 @@ async function main() {
     "/api/natal/chat: Claude Sonnet ก่อน Groq ➔ Gemini · ผ่านด่านกันรั่ว prompt เหมือนตัวอื่น",
     nClaude > 0 && nClaude < nGroq && /model: CLAUDE_SONNET_MODEL/.test(natalRoute) && /return await finish\(reply, "claude"\)/.test(natalRoute),
   );
+
+  console.log("\n5.6) เส้นอื่นใช้ Claude เป็นหลัก (เจ้าของสั่ง 2026-10-28: เลือกรุ่นตามงาน)");
+  const claudeText = (text: string) =>
+    new Response(JSON.stringify({ stop_reason: "end_turn", content: [{ type: "text", text }], usage: { input_tokens: 10, output_tokens: 10 } }), { status: 200 });
+  const geminiText = (text: string) => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text }] } }] }), { status: 200 });
+  const urls: string[] = [];
+  const routeFetch = (claudeOut: string) =>
+    mockFetch(() => (lastReq!.url.endsWith("/v1/messages") ? claudeText(claudeOut) : geminiText('{"from":"gemini"}')));
+  const trackUrls = () => {
+    const inner = globalThis.fetch;
+    globalThis.fetch = (async (url: string, init?: RequestInit) => {
+      urls.push(String(url));
+      return inner(url, init);
+    }) as typeof fetch;
+  };
+  process.env.GEMINI_API_KEY = "gem-test";
+  routeFetch('ได้เลย ```json\n{"from":"claude"}\n```');
+  trackUrls();
+  const j1 = await generateAiJson<{ from: string }>("prompt", {
+    label: "QA",
+    temperature: 0.6,
+    cacheTtl: 21600,
+    claude: { model: CLAUDE_SONNET_MODEL, effort: "low", maxTokens: 6000, timeoutMs: 5000 },
+  });
+  check("generateAiJson: Claude ตอบได้ ➔ ใช้ของ Claude (แกะ code fence ได้) ไม่ยิง Gemini", j1?.from === "claude" && urls.every((u) => u.endsWith("/v1/messages")));
+  check(
+    "generateAiJson: รุ่น/effort ตามผู้เรียก · ไม่ส่ง temperature ให้ Claude",
+    lastReq?.body.model === CLAUDE_SONNET_MODEL && lastReq?.body.output_config?.effort === "low" && !("temperature" in (lastReq?.body ?? {})),
+  );
+  urls.length = 0;
+  routeFetch("ขอโทษ ตอบเป็น JSON ไม่ได้");
+  trackUrls();
+  const j2 = await generateAiJson<{ from: string }>("prompt", {
+    label: "QA",
+    claude: { model: CLAUDE_SONNET_MODEL, effort: "low", maxTokens: 6000, timeoutMs: 5000 },
+  });
+  check("generateAiJson: Claude แกะ JSON ไม่ได้ ➔ ไหลไป Gemini", j2?.from === "gemini" && urls.some((u) => !u.endsWith("/v1/messages")));
+  delete process.env.GEMINI_API_KEY;
+  globalThis.fetch = realFetch;
+
+  const chatRoute = fs.readFileSync(path.resolve("src/app/api/reading/[id]/chat/route.ts"), "utf-8");
+  const cClaude = chatRoute.indexOf("generateClaudeReply(");
+  const cGroq = chatRoute.indexOf("generateGroqChatReply(");
+  const cGemini = chatRoute.indexOf("extractGeminiAnswer(data)");
+  check(
+    "/chat: Claude ➔ Groq ➔ Gemini · รุ่นตามจำนวนไพ่ · effort low · ผ่านด่านกันรั่ว prompt",
+    cClaude > 0 &&
+      cClaude < cGroq &&
+      cGroq < cGemini &&
+      /model: claudeReadingModel\(record\.drawn\?\.length \?\? 0\)/.test(chatRoute) &&
+      /effort: "low"/.test(chatRoute) &&
+      /detectPromptLeak\(cleanReply\)[\s\S]{0,400}provider: "claude"/.test(chatRoute),
+  );
+  const perspRoute = fs.readFileSync(path.resolve("src/app/api/reading/[id]/perspective/route.ts"), "utf-8");
+  const pClaude = perspRoute.indexOf("streamClaudeReading(ctx)");
+  const pGroq = perspRoute.indexOf("streamGroqReading(ctx)");
+  check("/perspective: Claude ➔ Groq ➔ Gemini (Groq ไม่ทับผลของ Claude)", pClaude > 0 && pClaude < pGroq && /if \(!got && process\.env\.GROQ_API_KEY\)/.test(perspRoute));
+  for (const [name, file] of [
+    ["/journal/reflect", "src/app/api/journal/reflect/route.ts"],
+    ["/journal/monthly-summary", "src/app/api/journal/monthly-summary/route.ts"],
+  ] as const) {
+    const src = fs.readFileSync(path.resolve(file), "utf-8");
+    check(`${name}: ใช้ generateAiJson + Sonnet (ไม่เรียก Gemini ตรง)`, /generateAiJson</.test(src) && /model: CLAUDE_SONNET_MODEL/.test(src) && !/geminiEndpoint\(|generateGeminiJson\(/.test(src));
+  }
 
   console.log("\n6) เครดิตหมด/คีย์ผิด ➔ พักเรียก Claude ไม่ให้ทุกคำอ่านเสียเวลายิงคำขอที่ล้มแน่");
   mockFetch(() => new Response('{"type":"error","error":{"type":"invalid_request_error","message":"credit balance is too low"}}', { status: 400 }));

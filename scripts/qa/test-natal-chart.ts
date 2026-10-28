@@ -915,6 +915,111 @@ console.log("\n6.16) รายงานฉบับเต็มแบบเส�
   check("หน้ารายงาน: portal ใต้ body มี data-floating (ไม่งั้นกฎ layout บังคับ position: relative)", /id="nt-report-root"\s+data-floating=/.test(panel));
 }
 
+console.log("\n6.17) ความแม่นของคำอธิบาย — เรื่องเด่นเรียงตามน้ำหนัก · เวลาเกิดคลาดแล้วอะไรเปลี่ยน · ภาพรวมจาก AI (ปุ่มฟรี Haiku · รายงาน Sonnet)");
+{
+  const root = process.cwd();
+  const rd = (f: string) => fs.readFileSync(path.join(root, f), "utf8");
+  const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  const { chartHighlights, birthTimeSensitivity, describeTimeSensitivity } = await import("../../src/lib/astro/natal-insight");
+  const { validateOverview, buildOverviewPrompt } = await import("../../src/lib/astro/natal-overview");
+
+  // ผังทดสอบหลายแบบ: กรุงเทพ 4 เวลา + ลอนดอน (ละติจูดสูง) — ไม่ใช่ค่าที่โค้ดเราเคยคำนวณ แต่เทียบกับการคำนวณผังใหม่ทั้งผัง
+  const samples: NatalInput[] = [
+    input(Date.UTC(1969, 11, 31, 23, 5)),
+    input(Date.UTC(1990, 4, 17, 3, 42)),
+    input(Date.UTC(2001, 8, 11, 12, 0)),
+    input(Date.UTC(1985, 1, 2, 18, 30), { houseSystem: "whole" }),
+    input(Date.UTC(1978, 6, 21, 9, 15), { lat: 51.5, lon: -0.12, houseSystem: "koch" }),
+  ];
+  let sortedOk = true;
+  let capOk = true;
+  let cleanOk = true;
+  let enOk = true;
+  for (const inp of samples) {
+    const c = computeNatalChart(inp);
+    const th = chartHighlights(c, "th");
+    const en = chartHighlights(c, "en");
+    sortedOk &&= th.length > 0 && th.every((h, i) => i === 0 || th[i - 1].weight >= h.weight) && th.length <= 7;
+    capOk &&= th.filter((h) => h.kind === "aspect").length <= 3 && th.filter((h) => h.kind === "dignity").length <= 2 && new Set(th.map((h) => h.key)).size === th.length;
+    cleanOk &&= !/undefined|NaN|ๆ[^\s"]/.test(JSON.stringify(th));
+    enOk &&= !/[฀-๿]/.test(JSON.stringify(en));
+  }
+  check("เรื่องเด่น: เรียงจากน้ำหนักมากไปน้อย · ไม่เกิน 7 ข้อ", sortedOk);
+  check("เรื่องเด่น: มุมสัมพันธ์ไม่เกิน 3 · ศักดิ์ดาวไม่เกิน 2 · ไม่ซ้ำ", capOk);
+  check("เรื่องเด่น: ไม่มี undefined/NaN · ไม้ยมกมีวรรคตามหลัง · อังกฤษไม่มีอักษรไทย", cleanOk && enOk);
+  const bkk = chartHighlights(computeNatalChart(samples[0]), "th");
+  check("เรื่องเด่น: ดาวชิดแกนผังมาก่อนเรื่องอื่น (ผัง 1970 ดวงจันทร์ชิดกลางฟ้า)", bkk[0]?.kind === "angle" && bkk[0].bodies.includes("moon"));
+  const gen = chartHighlights(computeNatalChart(samples[1]), "th");
+  check("เรื่องเด่น: ไม่นับมุมระหว่างดาวรุ่นด้วยกัน (ยูเรนัส เนปจูน พลูโต)", !gen.some((h) => h.kind === "aspect" && h.bodies.every((b) => ["uranus", "neptune", "pluto"].includes(b))));
+
+  // ความไวต่อเวลาเกิด: ทุกข้อที่รายงานต้องตรงกับการคำนวณผังใหม่ทั้งผัง ณ เวลานั้น (และนาทีก่อนหน้ายังไม่เปลี่ยน)
+  let tsChecked = 0;
+  let tsOk = true;
+  for (const inp of samples) {
+    const c = computeNatalChart(inp);
+    const ts = birthTimeSensitivity(c);
+    if (!ts) {
+      tsOk = false;
+      continue;
+    }
+    const at = (min: number) => computeNatalChart({ ...inp, utcMs: inp.utcMs + min * 60000 });
+    const signed = (s: { minutes: number; dir: string }) => s.minutes * (s.dir === "earlier" ? -1 : 1);
+    for (const [id, shift] of [["asc", ts.asc], ["mc", ts.mc]] as const) {
+      if (!shift) continue;
+      const m = signed(shift);
+      tsChecked++;
+      tsOk &&= at(m).bodies.find((b) => b.id === id)!.sign === shift.to && at(m - Math.sign(m)).bodies.find((b) => b.id === id)!.sign === c.bodies.find((b) => b.id === id)!.sign;
+    }
+    for (const h of ts.houses) {
+      const m = signed(h.shift);
+      tsChecked++;
+      tsOk &&= at(m).bodies.find((b) => b.id === h.id)!.house === h.shift.to && at(m - Math.sign(m)).bodies.find((b) => b.id === h.id)!.house === h.from;
+    }
+    tsOk &&= describeTimeSensitivity(ts, "th").length > 0 && !/[฀-๿]/.test(describeTimeSensitivity(ts, "en").join(" "));
+  }
+  check(`เวลาเกิดคลาด: ทุกข้อตรงกับการคำนวณผังใหม่ทั้งผัง (ตรวจ ${tsChecked} ข้อ)`, tsOk && tsChecked >= 5, `checked=${tsChecked}`);
+  check("เวลาเกิดคลาด: ไม่รู้เวลาเกิด = ไม่คำนวณ (null)", birthTimeSensitivity(computeNatalChart(input(Date.UTC(1990, 4, 17, 5), { timeKnown: false }))) === null);
+
+  // ตัวตรวจคำตอบ AI
+  const hl = chartHighlights(computeNatalChart(samples[0]), "th");
+  const goodPara = (refs: string[], text = "ดวงจันทร์ที่อยู่บนกลางฟ้าทำให้อารมณ์ของคุณกลายเป็นส่วนหนึ่งของงานและภาพที่สังคมจดจำ") => ({ title: "ใจที่คนเห็น", text, refs });
+  const good = validateOverview({ paragraphs: [goodPara(["h1"]), goodPara(["h2", "h3"])] }, hl, "th");
+  check("ตัวตรวจ AI: ย่อหน้าที่อ้างรหัสจริงผ่าน · แปลงรหัสเป็นชื่อเรื่องเด่น", good?.length === 2 && good[0].basedOn[0] === hl[0].title);
+  check("ตัวตรวจ AI: อ้างรหัสที่ไม่มีจริงถูกตัด (เหลือไม่ถึง 2 ย่อหน้า = null)", validateOverview({ paragraphs: [goodPara(["h1"]), goodPara(["h99"])] }, hl, "th") === null);
+  const leakCode = validateOverview({ paragraphs: [goodPara(["h1"]), goodPara(["h2"]), goodPara(["h3"], "ตามข้อ h1 ดวงจันทร์บนกลางฟ้าทำให้อารมณ์ของคุณเป็นที่จดจำในที่ทำงาน")] }, hl, "th");
+  const fated = validateOverview({ paragraphs: [goodPara(["h1"]), goodPara(["h2"]), goodPara(["h3"], "ปีหน้าเรื่องงานจะเกิดขึ้นแน่ เพราะดวงจันทร์บนกลางฟ้าของคุณส่งแรงเต็มที่")] }, hl, "th");
+  check("ตัวตรวจ AI: ย่อหน้าที่รหัสหลุดลงเนื้อความถูกตัด · ย่อหน้าฟันธงถูกตัด (ย่อหน้าดีอยู่ครบ)", leakCode?.length === 2 && fated?.length === 2 && !JSON.stringify(fated).includes("เกิดขึ้นแน่"));
+  check("ตัวตรวจ AI: หน้าอังกฤษที่ตอบไทยถูกตัด · คำตอบไม่ใช่วัตถุ = null", validateOverview({ paragraphs: [goodPara(["h1"]), goodPara(["h2"])] }, hl, "en") === null && validateOverview("x", hl, "th") === null);
+  const prompt = buildOverviewPrompt(computeNatalChart(samples[0]), "th", "x", hl);
+  const promptUnknown = buildOverviewPrompt(computeNatalChart(input(Date.UTC(1990, 4, 17, 5), { timeKnown: false })), "en", "x", chartHighlights(computeNatalChart(input(Date.UTC(1990, 4, 17, 5), { timeKnown: false })), "en"));
+  check("prompt ภาพรวม: มีเรื่องเด่น h1.. จากโค้ด · ไม่มี undefined · ไม่รู้เวลาเกิดสั่งห้ามพูดถึงเรือน", prompt.includes(`h1: ${hl[0].title}`) && !/undefined|NaN/.test(prompt + promptUnknown) && promptUnknown.includes("never mention the Ascendant"));
+
+  // ต่อสาย
+  const ov = strip(rd("src/app/api/natal/overview/route.ts"));
+  check(
+    "API ภาพรวม: Origin · ต้องยินยอม · Haiku · เพดานถี่/ต่อวัน/ต่อผัง + เพดานโทเคน + งบ AI รวม · AI ล้ม = 503 ไม่มีคำตอบสำเร็จรูป",
+    ov.includes("isRequestAuthorizedOrigin(request)") && /consent:\s*z\.literal\(true\)/.test(ov) && /model: CLAUDE_HAIKU_MODEL/.test(ov) && ov.includes("natal-overview:chart:day") && ov.includes("isUserTokenCapReached(") && ov.includes("isAiCapReached(") && ov.includes('reason: "ai_unavailable"') && !/console\.(log|warn|error)\([^)]*(spec|raw|parsed)/.test(ov),
+  );
+  const ovLib = strip(rd("src/lib/astro/natal-overview.ts"));
+  check("ภาพรวม: ส่งตัวตรวจให้ generateAiJson (Claude ตอบไม่ผ่าน ➔ Gemini) · ไม่แคช · ไม่เก็บ log ที่ Gateway", /accept: \(x\) => validateOverview\(/.test(ovLib) && ovLib.includes("cacheTtl: 0") && ovLib.includes("collectLog: false"));
+  const rep = strip(rd("src/app/api/natal/report/route.ts"));
+  const iBuilt = rep.indexOf("buildNatalReport(spec");
+  const iAi = rep.indexOf("generateNatalOverview(");
+  check(
+    "รายงานเสียเงิน: ภาพรวมโดย Sonnet หลังประกอบรายงานเสร็จ · ส่วน AI อยู่ใน try ของตัวเอง (AI ล้มไม่คืนสิทธิ์ ไม่ทำรายงานล้ม)",
+    iBuilt > 0 && iAi > iBuilt && /model: CLAUDE_SONNET_MODEL/.test(rep) && /try \{\s*const \{ isAiCapReached \}/.test(rep) && rep.includes('recordEvent("natal_report_ai_failed")'),
+  );
+  check("ถามแม่หมอ: prompt มีเรื่องเด่นที่โค้ดจัดลำดับ (ยังใช้ Sonnet)", /formatChartForPrompt\([^)]*chartHighlights\(chart, lang/.test(rd("src/app/api/natal/chat/route.ts")) && /model: CLAUDE_SONNET_MODEL/.test(rd("src/app/api/natal/chat/route.ts")));
+  const btn = strip(rd("src/components/natal/NatalOverview.tsx"));
+  check(
+    "ปุ่มภาพรวม: โหลดแบบ lazy · ยิง API เฉพาะหลังยินยอม · ไม่เขียนที่เก็บ · ตัดอีโมจิ · import แค่ชนิดข้อมูลของฝั่งเซิร์ฟเวอร์",
+    /React\.lazy\(\s*\(\)\s*=>\s*import\(\s*["']\.\/NatalOverview["']\s*\)\s*\)/.test(rd("src/components/natal/NatalResult.tsx")) &&
+      (btn.match(/fetch\(/g) ?? []).length === 1 && btn.includes("if (!consent || busy) return;") && btn.includes("consent: true") && !/localStorage|sessionStorage/.test(btn) && btn.includes("stripEmoji(") &&
+      !/^\s*import\s+(?!type\b)[^;]*natal-overview["']/m.test(btn),
+  );
+  check("นโยบายความเป็นส่วนตัวทั้งสองภาษาบอกเรื่องปุ่มภาพรวมผังและรายงาน", rd("src/app/_shared/pages/privacy-th.tsx").includes("เขียนภาพรวมผัง") && rd("src/app/_shared/pages/privacy-en.tsx").includes("Write my overview"));
+}
+
 console.log("\n7) กติกา island — ตัวคำนวณ/คำอธิบาย/ผลผังโหลดแบบ dynamic import เท่านั้น");
 {
   const root = process.cwd();

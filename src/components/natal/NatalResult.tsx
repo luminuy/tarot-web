@@ -30,6 +30,7 @@ import {
   type NatalChart,
 } from "@/lib/astro/natal";
 import { aspectTitle, bodyName, cardsFor, chartSummary, describeAspect, describeBody, describePattern, placement, signName } from "@/lib/astro/natal-text";
+import { birthTimeSensitivity, chartHighlights, describeTimeSensitivity } from "@/lib/astro/natal-insight";
 import { zodiacSignPath } from "@/lib/tarot/zodiac";
 import { NatalWheel } from "./NatalWheel";
 import { FlipCard } from "./NatalFlipCard";
@@ -46,6 +47,8 @@ const NatalTimeTools = React.lazy(() => import("./NatalTimeTools"));
 const NatalSynastry = React.lazy(() => import("./NatalSynastry"));
 /** ถามแม่หมอ AI — ส่งข้อมูลเกิดออกจากเครื่องเมื่อผู้ใช้กดยินยอมในแท็บนั้นเท่านั้น */
 const NatalAsk = React.lazy(() => import("./NatalAsk"));
+/** ภาพรวมผังจาก AI (Haiku) — ส่งข้อมูลเกิดเมื่อผู้ใช้ติ๊กยินยอมแล้วกดเองเท่านั้น */
+const NatalOverview = React.lazy(() => import("./NatalOverview"));
 /** ภาพแชร์ Big Three — วาดในเครื่อง โหลดเมื่อผู้ใช้กดสร้างภาพเท่านั้น */
 const NatalShare = React.lazy(() => import("./NatalShare"));
 /** โหราไทย (ทักษา · มหาทักษา · เลข 7 ตัว) — ตัวคำนวณปฏิทินจันทรคติโหลดเมื่อเปิดแท็บเท่านั้น */
@@ -135,6 +138,12 @@ export default function NatalResult({
   const toneOf = new Map(ASPECT_DEFS.map((d) => [d.type, d.tone]));
   const visibleAspects = chart.aspects.filter((a) => showMinor || majorTypes.has(a.type));
   const summary = chartSummary(chart, lang);
+  // เรื่องเด่นเรียงตามน้ำหนัก + เวลาเกิดคลาดแล้วอะไรเปลี่ยน (โค้ดล้วน · คำนวณครั้งเดียวต่อผัง)
+  const highlights = useMemo(() => chartHighlights(chart, lang), [chart, lang]);
+  const timeLines = useMemo(() => {
+    const ts = birthTimeSensitivity(chart);
+    return ts ? describeTimeSensitivity(ts, lang) : [];
+  }, [chart, lang]);
   const gridIds = GRID_ORDER.filter((id) => get(id));
 
   const bigThree = [
@@ -215,6 +224,17 @@ export default function NatalResult({
               </li>
             ))}
           </ul>
+        )}
+        {timeLines.length > 0 && (
+          <div className="text-sm text-ink border-l-2 border-line-warm pl-2 space-y-1">
+            <p className="font-semibold">{isTh ? "เวลาเกิดต้องแม่นแค่ไหน" : "How exact does your birth time need to be?"}</p>
+            {timeLines.map((t, i) => (
+              <p key={i}>{t}</p>
+            ))}
+            <p className="text-xs text-muted">
+              {isTh ? "เวลาที่จดในสูติบัตรมักปัดเป็น 5 ถึง 15 นาที ถ้ามีข้อใดข้างบนอยู่ในช่วงนั้น ให้อ่านส่วนที่เกี่ยวข้องอย่างเผื่อใจ" : "Recorded birth times are often rounded to 5 to 15 minutes. If anything above falls in that range, read the related parts with some caution."}
+            </p>
+          </div>
         )}
         {!chart.input.timeKnown && chart.moonRange && (
           <p className="text-sm text-ink border-l-2 border-line-warm pl-2">
@@ -675,6 +695,29 @@ export default function NatalResult({
       {/* ── คำอธิบาย ── */}
       <section aria-labelledby="natal-reading" className="space-y-4">
         <SectionTitle id="natal-reading">{isTh ? "คำอธิบายผังของคุณ" : "Your chart, explained"}</SectionTitle>
+        {highlights.length > 0 && (
+          <div className="altar-card-porcelain rounded-xl p-4 space-y-3 text-sm leading-relaxed">
+            <p className="font-serif-th font-bold text-ink">{isTh ? "เรื่องเด่นที่สุดของผัง (เรียงจากสำคัญที่สุด)" : "Your chart's strongest themes (most important first)"}</p>
+            <ol className="space-y-2">
+              {highlights.map((h) => (
+                <li key={h.key} className="border-l-2 border-gold-ink pl-2">
+                  <p className="font-semibold text-ink">{h.title}</p>
+                  <p className="text-ink">{h.text}</p>
+                </li>
+              ))}
+            </ol>
+            <p className="text-xs text-muted">
+              {isTh
+                ? "จัดลำดับด้วยหลักโหราสากล: ดาวชิดแกนผัง รูปแบบผัง เจ้าเรือนลัคนา มุมที่แนบสนิท ดาวเด่น ธาตุ และศักดิ์ดาว คำนวณจากผังของคุณ ไม่ใช้ AI"
+                : "Ranked by standard astrological weight: planets on the angles, chart patterns, the chart ruler, tight aspects, the dominant planet, elements and dignities. Calculated from your chart, no AI."}
+            </p>
+          </div>
+        )}
+        <div className="v2-nt-noprint">
+          <Suspense fallback={null}>
+            <NatalOverview spec={spec} lang={lang} />
+          </Suspense>
+        </div>
         <div className="altar-card-porcelain rounded-xl p-4 space-y-2 text-sm leading-relaxed">
           {summary.map((p, i) => (
             <p key={i} className={i === 0 ? "text-ink font-semibold" : "text-ink"}>

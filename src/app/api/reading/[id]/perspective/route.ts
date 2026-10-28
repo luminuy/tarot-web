@@ -207,7 +207,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     } as import("@/lib/ai/prompt").ReadingContext;
 
     let got: Collected | null = null;
-    if (process.env.GROQ_API_KEY) {
+    // Claude ก่อน (เจ้าของสั่ง 2026-10-28) — รุ่นตามจำนวนไพ่แบบเดียวกับ /read ➔ Groq ➔ Gemini
+    if (process.env.ANTHROPIC_API_KEY?.trim()) {
+      const { streamClaudeReading } = await import("@/lib/ai/claude");
+      got = await collect(streamClaudeReading(ctx)).catch(() => null);
+      if (!got) recordEvent("ai_claude_failover:perspective");
+    }
+    if (!got && process.env.GROQ_API_KEY) {
       const { streamGroqReading } = await import("@/lib/ai/groq");
       got = await collect(streamGroqReading(ctx)).catch(() => null);
     }

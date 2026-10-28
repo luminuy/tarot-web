@@ -10,6 +10,7 @@ import { cardById } from "@/data/cards";
 import { ASPECT_TEXT, BODY_TEXT, DIGNITY_TEXT, ELEMENT_TEXT, HOUSE_TEXT, MODALITY_TEXT, MOON_PHASE_TEXT, PATTERN_TEXT, type Lang } from "@/data/natal/content";
 import { formatDegree, type BodyId, type NatalChart } from "./natal";
 import { bodyName, cardsFor, signName } from "./natal-text";
+import type { Highlight } from "./natal-insight";
 import type { TransitResult } from "./techniques";
 
 const MAIN: readonly BodyId[] = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron", "node", "lilith", "asc", "mc", "fortune", "vertex", "ceres", "pallas", "juno", "vesta"];
@@ -24,8 +25,9 @@ function cardName(id: string | undefined, lang: Lang): string | null {
 /**
  * ผังดวง ➔ ข้อความบริบทสำหรับ prompt (ข้อมูลล้วน ไม่มีคำสั่ง)
  * `birthLine` = บรรทัดข้อมูลเกิดที่ผ่าน sanitize แล้ว · `transit` = ดาวจร ณ ตอนถาม (ไม่ส่ง = ไม่ใส่)
+ * `highlights` = เรื่องเด่นที่โค้ดจัดลำดับแล้ว (`chartHighlights`) พร้อมรหัส h1… ให้โมเดลตอบตามน้ำหนักจริงของผัง
  */
-export function formatChartForPrompt(chart: NatalChart, lang: Lang, birthLine: string, transit?: TransitResult): string {
+export function formatChartForPrompt(chart: NatalChart, lang: Lang, birthLine: string, transit?: TransitResult, highlights?: readonly Highlight[]): string {
   const th = lang === "th";
   const L: string[] = [];
   const get = (id: BodyId) => chart.bodies.find((b) => b.id === id);
@@ -86,6 +88,11 @@ export function formatChartForPrompt(chart: NatalChart, lang: Lang, birthLine: s
   if (chart.dominantPlanets.length) L.push(th ? `ดาวเด่น: ${chart.dominantPlanets.slice(0, 3).map((p) => bodyName(p.id, lang)).join(", ")}` : `Dominant planets: ${chart.dominantPlanets.slice(0, 3).map((p) => bodyName(p.id, lang)).join(", ")}`);
   L.push(th ? `ข้างขึ้นข้างแรมตอนเกิด: ${MOON_PHASE_TEXT[chart.moonPhase.phase].name.th}` : `Birth moon phase: ${MOON_PHASE_TEXT[chart.moonPhase.phase].name.en}`);
 
+  if (highlights?.length) {
+    L.push(th ? "\nเรื่องเด่นที่สุดของผัง (SeerTarot คำนวณและเรียงจากน้ำหนักมากไปน้อย):" : "\nThe chart's strongest themes (calculated by SeerTarot, most important first):");
+    highlights.forEach((h, i) => L.push(`h${i + 1}: ${h.title} | ${h.text}`));
+  }
+
   // ไพ่ประจำตำแหน่ง (Golden Dawn) — ไพ่ที่คุยถึงได้มีแค่ชุดนี้ ไม่ใช่ไพ่ที่เปิด
   L.push(th ? "\nไพ่ทาโรต์ประจำตำแหน่ง (ระบบ Golden Dawn ไม่ใช่ไพ่ที่สุ่มเปิด):" : "\nTarot correspondences (Golden Dawn system, not drawn cards):");
   for (const id of ["sun", "moon", "asc"] as const) {
@@ -122,7 +129,8 @@ export function natalAnswerRules(lang: Lang): string {
 5. โหราศาสตร์คือกระจกสะท้อนแนวโน้ม คนยังเลือกทางเองได้เสมอ ให้คำแนะนำที่ทำได้จริง 1 ถึง 2 ข้อ
 6. ภาษาไทยธรรมชาติแบบคนคุยกัน ไม่ใช้ศัพท์หุ่นยนต์ ไม่ใช้อีโมจิหรือสัญลักษณ์ตกแต่ง ศัพท์โหราศาสตร์ให้อธิบายสั้น ๆ ในวงเล็บเมื่อจำเป็น
 7. ยาว 3 ถึง 4 ย่อหน้าสั้น เว้นบรรทัดว่างระหว่างย่อหน้า ปิดท้ายด้วยคำถามชวนคุยต่อ 1 ประโยค
-8. ถ้าคำถามไม่เกี่ยวกับผังดวงหรือชีวิตของผู้ถาม ให้ชวนกลับมาที่ผังอย่างสุภาพ`
+8. ถ้าคำถามไม่เกี่ยวกับผังดวงหรือชีวิตของผู้ถาม ให้ชวนกลับมาที่ผังอย่างสุภาพ
+9. ให้น้ำหนักตาม "เรื่องเด่นที่สุดของผัง" (h1 สำคัญที่สุด) ถ้าคำถามกว้างให้เริ่มจากเรื่องอันดับต้น ๆ ห้ามพิมพ์รหัส h ในคำตอบ`
     : `## How to answer about the natal chart
 1. Answer only from the chart above and cite real placements (for example "Venus in Cancer in the 7th house"). Never invent placements or aspects.
 2. If the birth time is unknown, do not mention the Ascendant, Midheaven or houses; briefly say the birth time is needed for that.
@@ -131,5 +139,6 @@ export function natalAnswerRules(lang: Lang): string {
 5. Astrology shows tendencies; the person always chooses. Give one or two practical suggestions.
 6. Warm, natural American English. No emoji or decorative symbols. Briefly explain jargon in parentheses when needed.
 7. Three to four short paragraphs separated by blank lines, ending with one caring follow-up question.
-8. If the question is unrelated to the chart or the person's life, gently steer back to the chart.`;
+8. If the question is unrelated to the chart or the person's life, gently steer back to the chart.
+9. Weigh your answer by "the chart's strongest themes" (h1 matters most). For broad questions, start from the top themes. Never print the h codes in your answer.`;
 }

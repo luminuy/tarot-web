@@ -7,7 +7,8 @@ import { listJournal, listThreadEntries } from "@/lib/journal/journal.repo";
 import { getThread } from "@/lib/journal/threads.repo";
 import { computePatterns, MIN_ENTRIES_FOR_PATTERNS, validateObservations, type ReflectionObservation } from "@/lib/journal/patterns";
 import { getReflection, putReflection } from "@/lib/journal/reflection.repo";
-import { generateGeminiJson } from "@/lib/ai/json-call";
+import { generateAiJson } from "@/lib/ai/json-call";
+import { CLAUDE_SONNET_MODEL } from "@/lib/ai/claude";
 import { sanitizePromptValue } from "@/lib/ai/prompt-guard";
 import { checkQuestion } from "@/lib/safety/guardrails";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
@@ -142,7 +143,12 @@ ${noteLines ? `\nบันทึกที่ผู้ใช้ยินยอม
 เขียนข้อสังเกตสั้น ๆ 3–5 ข้อ ภาษาไทยธรรมชาติ อบอุ่น ไม่สั่งสอน ที่ร้อยข้อเท็จจริงข้างบนให้มีความหมายกับผู้ใช้ ทุกข้อต้องอ้างรหัสอ้างอิงจากรายการข้างบนอย่างน้อย 1 รหัสในช่อง "refs" ใช้คำว่า "รูปแบบ · สะท้อน · ชวนสังเกต" ห้ามพูดว่าอะไร "จะเกิดขึ้นแน่" ห้ามอ้างโชคชะตา ห้ามให้คำแนะนำทางการแพทย์/การเงิน/กฎหมาย ปิดท้ายด้วยคำถามชวนคิด 1 ข้อ (ไม่ใช่คำทำนาย)
 ตอบเป็น JSON เท่านั้น: {"observations":[{"text":"...","refs":["r1","r3"]}],"question":"..."}`;
 
-  const ai = await generateGeminiJson<{ observations?: unknown; question?: unknown }>(prompt, { label: "Reflect", temperature: 0.6 });
+  // Claude Sonnet ก่อน (ร้อยข้อเท็จจริงหลายรายการเป็นภาษาคน · เรียกไม่บ่อย + แคชต่อขอบเขต) ➔ Gemini
+  const ai = await generateAiJson<{ observations?: unknown; question?: unknown }>(prompt, {
+    label: "Reflect",
+    temperature: 0.6,
+    claude: { model: CLAUDE_SONNET_MODEL, effort: "low", maxTokens: 6000, timeoutMs: 30000 },
+  });
   const validRefs = new Set(patterns.refs.map((r) => r.ref));
   const observations = validateObservations(ai?.observations, validRefs, isEn);
   if (observations.length === 0) {
