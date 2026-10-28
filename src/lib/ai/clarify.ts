@@ -118,7 +118,8 @@ export async function evaluateClarification(input: ClarifyInput): Promise<Clarif
   }
 
   const apiKey = getGroqApiKey();
-  if (!apiKey) {
+  const hasClaude = !!process.env.ANTHROPIC_API_KEY?.trim();
+  if (!apiKey && !hasClaude) {
     return { needsClarification: false, skipped: true };
   }
 
@@ -132,51 +133,78 @@ export async function evaluateClarification(input: ClarifyInput): Promise<Clarif
     ? `Seeker: ${safeNick || "Querent"}\nCategory: ${category}\nQuestion: "${safeQuestion}"${safeSituation ? `\nAdditional Context: "${safeSituation}"` : ""}`
     : `ผู้ถาม: ${safeNick || "ผู้มาขอคำทำนาย"}\nหมวดคำทำนาย: ${category}\nคำถาม: "${safeQuestion}"${safeSituation ? `\nบริบทเดิมที่มี: "${safeSituation}"` : ""}`;
 
-  // 4. เรียกโมเดล Groq พร้อมคุม Timeout ไม่เกิน 2.5 วินาที
+  // 4. ยิง Claude Haiku (ปิดโหมดคิด) คู่กับ Groq พร้อมกัน — หน้าเว็บตัดที่ 2.5 วินาที
+  //    (เจ้าของสั่ง 2026-10-28 "ใช้ claude เป็นแกนหลัก") ใช้คำตอบ Claude ถ้ามาทันและอ่านได้ ไม่ทัน/อ่านไม่ได้ใช้ Groq ที่ยิงไปพร้อมกันแล้ว
+  //    ยิงคู่แทนยิงต่อกัน เพราะรอ Claude หมดเวลาก่อนแล้วค่อยยิง Groq จะเกิน 2.5 วินาที
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 2500);
+  const parseClarify = (raw: unknown): Record<string, unknown> | null => {
+    if (typeof raw !== "string" || !raw.trim()) return null;
+    try {
+      const start = raw.indexOf("{");
+      const end = raw.lastIndexOf("}");
+      const obj = JSON.parse(start >= 0 && end > start ? raw.slice(start, end + 1) : raw) as unknown;
+      return obj && typeof obj === "object" && typeof (obj as { needsClarification?: unknown }).needsClarification === "boolean" ? (obj as Record<string, unknown>) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const groqP: Promise<Record<string, unknown> | null> = apiKey
+    ? (async () => {
+        const model = WORKING_GROQ_MODELS[0] || "qwen/qwen3.8-27b";
+        const res = await fetch(groqChatCompletionsEndpoint(), {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+            ...aiGatewayHeaders({ cacheTtl: 0 }),
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: "system", content: systemInstruction },
+              { role: "user", content: userMessage },
+            ],
+            temperature: 0.3,
+            response_format: { type: "json_object" },
+            max_tokens: 300,
+          }),
+        });
+        if (!res.ok) return null;
+        const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+        return parseClarify(data.choices?.[0]?.message?.content);
+      })().catch(() => null)
+    : Promise.resolve(null);
+
+  const claudeP: Promise<Record<string, unknown> | null> = hasClaude
+    ? (async () => {
+        const { generateClaudeReply, CLAUDE_HAIKU_MODEL } = await import("@/lib/ai/claude");
+        const got = await generateClaudeReply({
+          model: CLAUDE_HAIKU_MODEL,
+          system: `${systemInstruction}\n\n${isEn ? "Reply with the JSON object only." : "ตอบเป็นออบเจกต์ JSON อย่างเดียว ไม่มีข้อความอื่น"}`,
+          messages: [{ role: "user", content: userMessage }],
+          maxTokens: 300,
+          timeoutMs: 1800,
+          thinking: "off",
+        });
+        return parseClarify(got?.reply);
+      })().catch(() => null)
+    : Promise.resolve(null);
 
   try {
-    const model = WORKING_GROQ_MODELS[0] || "qwen/qwen3.8-27b";
-    const res = await fetch(groqChatCompletionsEndpoint(), {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        ...aiGatewayHeaders({ cacheTtl: 0 }),
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: systemInstruction },
-          { role: "user", content: userMessage },
-        ],
-        temperature: 0.3,
-        response_format: { type: "json_object" },
-        max_tokens: 300,
-      }),
-    });
-
+    const fromClaude = await claudeP;
+    const parsed = fromClaude ?? (await groqP);
     clearTimeout(timeoutId);
+    recordEvent(fromClaude ? "ai_clarify_provider:claude" : "ai_clarify_provider:groq");
 
-    if (!res.ok) {
-      return { needsClarification: false, skipped: true };
-    }
-
-    const data = (await res.json()) as any;
-    const rawContent = data.choices?.[0]?.message?.content;
-    if (!rawContent) {
-      return { needsClarification: false, skipped: true };
-    }
-
-    const parsed = JSON.parse(rawContent);
-    if (!parsed || typeof parsed.needsClarification !== "boolean") {
+    if (!parsed) {
       return { needsClarification: false, skipped: true };
     }
 
     if (!parsed.needsClarification || !parsed.question || typeof parsed.question !== "string") {
-      return { needsClarification: false, reason: parsed.reason };
+      return { needsClarification: false, reason: typeof parsed.reason === "string" ? parsed.reason : undefined };
     }
 
     // 5. ขัดเกลาและตรวจสอบคุณภาพภาษาไทย (A-01 / B-04)
@@ -206,7 +234,7 @@ export async function evaluateClarification(input: ClarifyInput): Promise<Clarif
     return {
       needsClarification: true,
       question: finalQuestion,
-      reason: typeof parsed.reason === "string" ? stripEmoji(parsed.reason) : parsed.reason,
+      reason: typeof parsed.reason === "string" ? stripEmoji(parsed.reason) : undefined,
     };
   } catch {
     // Timeout หรือ Abort หรือ Network error -> ข้ามเงียบตามสเปก

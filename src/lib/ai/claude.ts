@@ -23,14 +23,14 @@
  *
  * 🗺️ เส้นที่ใช้ Claude เป็นตัวแรก (เจ้าของสั่ง 2026-10-28: "เลือกโมเดลตามความเหมาะสม แต่ใช้ Claude เป็นหลัก")
  * | เส้น | รุ่น | เหตุผล |
- * | `/read` คำอ่านไพ่ · `/perspective` อ่านอีกมุม | 1-3 ใบ Haiku · 4 ใบขึ้นไป Sonnet | `claudeReadingModel()` |
- * | `/chat` คุยต่อหลังเปิดไพ่ | ตามจำนวนไพ่แบบเดียวกัน · effort `low` | ผังใหญ่ต้องโยงไพ่หลายใบ · แชทไม่ต้องคิดลึก |
+ * | `/read` คำอ่านไพ่ · `/perspective` อ่านอีกมุม | 1-3 ใบ Haiku · 4 ใบขึ้นไป Sonnet · โหมดคิด adaptive | `claudeReadingModel()` · `claudeReadingThinking()` |
+ * | `/chat` คุยต่อหลังเปิดไพ่ | ตามจำนวนไพ่แบบเดียวกัน · effort `medium` | ตอบให้ตรงไพ่ที่เปิด (เดิม low · เจ้าของสั่ง 2026-10-28 ให้แม่นขึ้น) |
  * | `/natal/chat` ถามแม่หมอเรื่องผังดวง | Sonnet · effort `medium` | ต้องไล่ดาว/มุม/เรือนให้ครบ |
  * | `/natal/overview` ปุ่มภาพรวมผัง (ฟรีทุกคน) | Haiku · effort `low` | โค้ดคำนวณและจัดลำดับแล้ว โมเดลแค่เรียบเรียง |
  * | `/natal/report` ภาพรวมในรายงานเสียเงิน | Sonnet · effort `medium` | ของที่ผู้ใช้จ่ายเงิน |
  * | `/journal/reflect` · `/journal/monthly-summary` | Sonnet · effort `low` | เรียบเรียงจากข้อเท็จจริงหลายรายการ · เรียกไม่บ่อย + มีแคช |
+ * | `/reading/clarify` ถามกลับก่อนสับไพ่ | Haiku · ปิดโหมดคิด · ยิงคู่กับ Groq | หน้าเว็บตัดที่ 2.5 วินาที ใช้คำตอบ Claude ถ้ามาทัน ไม่ทันใช้ Groq |
  * ที่ไม่ใช้ Claude โดยตั้งใจ:
- * - `/reading/clarify` ถามกลับก่อนสับไพ่ ➔ Groq — หน้าเว็บตัดที่ 2.5 วินาที ต้องเร็วที่สุด
  * - Reader Studio ร่างคำอ่าน ➔ Gemini — ร่าง DPA (`docs/legal/READER_STUDIO_DPA_DRAFT.md`) ระบุ Gemini เป็นผู้ประมวลผลช่วงรายเดียว
  */
 
@@ -64,6 +64,23 @@ const CLAUDE_HEADERS_TIMEOUT_MS = 15000;
 export function claudeReadingModel(cardCount: number): string {
   return cardCount >= CLAUDE_SONNET_FROM_CARDS ? CLAUDE_SONNET_MODEL : CLAUDE_HAIKU_MODEL;
 }
+
+/**
+ * 🧠 โหมดคิดของคำอ่านไพ่ (เจ้าของสั่ง 2026-10-28 "ใช้ claude เป็นแกนหลัก ให้อ่านตรงแม่นกว่านี้ ไม่ต้องวัด ทำเลย")
+ * เปิด adaptive thinking ทุกขนาดผัง ให้โมเดลไล่ตำแหน่ง ทิศไพ่ และความเชื่อมโยงก่อนเขียนคำอ่าน
+ * - 1-3 ใบ (Haiku) effort `low` — ไพ่น้อย คิดสั้น ผู้ใช้ไม่ต้องรอนาน
+ * - 4-9 ใบ (Sonnet) effort `medium` · 10 ใบขึ้นไป `high` — ผังใหญ่ต้องโยงหลายตำแหน่ง
+ * - ความคิดนับรวมใน `max_tokens` ➔ บวกที่เผื่อ (`headroom`) เพิ่มจากงบคำอ่านเดิม ไม่งั้นคำอ่านถูกตัดกลางทาง
+ * - บล็อก thinking สตรีมมาเป็น `thinking_delta`/`signature_delta` ตัวอ่านสตรีมรับเฉพาะ `text_delta` อยู่แล้ว
+ */
+export function claudeReadingThinking(cardCount: number): { effort: "low" | "medium" | "high"; headroom: number } {
+  if (cardCount >= 10) return { effort: "high", headroom: 16000 };
+  if (cardCount >= CLAUDE_SONNET_FROM_CARDS) return { effort: "medium", headroom: 8000 };
+  return { effort: "low", headroom: 3000 };
+}
+
+/** ระหว่างคิด สตรีมอาจเงียบนานกว่าปกติ (ความคิดไม่ส่งข้อความออกมา) ➔ รอช่วงเงียบได้นานกว่าเพดานกลาง 20 วินาที */
+const CLAUDE_THINKING_IDLE_MS = 60_000;
 
 /** ปิดโหมดคิดให้ตรงรุ่น — Sonnet 5.5 คืน 400 ถ้าส่ง `disabled` */
 export function claudeThinkingOff(model: string): { type: "disabled" } | { type: "between_tools" } {
@@ -127,7 +144,8 @@ export async function* streamClaudeReading(ctx: ReadingContext): AsyncGenerator<
   if (ctx.usageMeter) ctx.usageMeter.promptChars = systemInstruction.length + userMessage.length;
 
   const model = claudeReadingModel(ctx.drawn.length);
-  const maxTokens = resolveMaxReadingTokens(ctx.drawn.length, CLAUDE_OUTPUT_CEILING);
+  const thinking = claudeReadingThinking(ctx.drawn.length);
+  const maxTokens = resolveMaxReadingTokens(ctx.drawn.length, CLAUDE_OUTPUT_CEILING) + thinking.headroom;
   const state = createReadingStreamState();
   const usage = createEmptyUsage();
   let stopReason: string | null = null;
@@ -151,7 +169,8 @@ export async function* streamClaudeReading(ctx: ReadingContext): AsyncGenerator<
         model,
         max_tokens: maxTokens,
         stream: true,
-        thinking: claudeThinkingOff(model),
+        thinking: { type: "adaptive" },
+        output_config: { effort: thinking.effort },
         system: [{ type: "text", text: systemInstruction, cache_control: { type: "ephemeral" } }],
         messages: [{ role: "user", content: userMessage }],
       }),
@@ -172,7 +191,10 @@ export async function* streamClaudeReading(ctx: ReadingContext): AsyncGenerator<
     let streamError = false;
 
     while (true) {
-      const { value, done } = await readWithIdleTimeout(reader, { signal: ctx.abortSignal });
+      const { value, done } = await readWithIdleTimeout(reader, {
+        signal: ctx.abortSignal,
+        idleMs: clampToBudget(CLAUDE_THINKING_IDLE_MS, ctx.retryBudget),
+      });
       if (done) break;
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split("\n");
@@ -265,6 +287,8 @@ export async function generateClaudeReply(opts: {
   maxTokens: number;
   timeoutMs: number;
   effort?: "low" | "medium" | "high";
+  /** `off` = ปิดโหมดคิด (งานสั้นที่ต้องเร็ว เช่น ถามกลับก่อนสับไพ่) · ค่าเริ่มต้น adaptive */
+  thinking?: "adaptive" | "off";
   /** ส่งต่อให้ AI Gateway (`aiGatewayHeaders`) — ค่าเริ่มต้น: ห้ามแคช · เก็บ log ตามปกติ */
   cacheTtl?: number;
   collectLog?: boolean;
@@ -295,8 +319,9 @@ export async function generateClaudeReply(opts: {
       body: JSON.stringify({
         model: opts.model,
         max_tokens: opts.maxTokens,
-        thinking: { type: "adaptive" },
-        output_config: { effort: opts.effort ?? "medium" },
+        ...(opts.thinking === "off"
+          ? { thinking: claudeThinkingOff(opts.model) }
+          : { thinking: { type: "adaptive" }, output_config: { effort: opts.effort ?? "medium" } }),
         system: [{ type: "text", text: opts.system, cache_control: { type: "ephemeral" } }],
         messages,
       }),
