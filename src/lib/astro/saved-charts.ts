@@ -6,7 +6,7 @@
  * - เก็บเฉพาะข้อมูลที่ใช้สร้างผังซ้ำ (วันเวลาสถานที่ + ค่าตั้ง) ไม่เก็บผลคำนวณ
  */
 import { STORAGE_KEYS } from "@/lib/storage/keys";
-import type { HouseSystem, NodeType } from "./natal";
+import type { HouseSystem, NodeType, Zodiac } from "./natal";
 
 export interface SavedPlace {
   mode: "thai" | "world" | "custom";
@@ -37,6 +37,8 @@ export interface SavedChart {
   orbScale: number;
   /** แสดงดาวเคราะห์น้อย 4 ดวง (ผังที่บันทึกก่อนมีตัวเลือกนี้ = ไม่มีฟิลด์ = ปิด) */
   asteroids?: boolean;
+  /** ระบบราศี (ผังที่บันทึกก่อนมีตัวเลือกนี้ = ไม่มีฟิลด์ = สายนะ) */
+  zodiac?: Zodiac;
   savedAt: number;
 }
 

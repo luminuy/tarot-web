@@ -84,6 +84,8 @@ export interface NatalInput {
   orbScale: number;
   /** ดาวเคราะห์น้อย 4 ดวง (ผู้ใช้เปิดเอง · ตารางโหลดแยกจาก `asteroid-tables.ts`) — ไม่ส่ง = ไม่คำนวณ */
   asteroids?: Partial<Record<AsteroidId, LonTable>>;
+  /** ระบบราศี: สายนะ (สากล · ค่าเริ่มต้น) หรือนิรายนะแบบ Lahiri (ไทย/อินเดีย) — ไม่ส่ง = สายนะ */
+  zodiac?: Zodiac;
 }
 
 export interface BodyPosition {
@@ -218,6 +220,8 @@ export interface NatalChart {
   obliquity: number;
   /** เวลาดาราคติท้องถิ่น (องศา) */
   ramc: number;
+  /** ค่าที่ลบออกจากลองจิจูดสายนะ (นิรายนะ Lahiri ≈ 24 องศา · สายนะ = 0) */
+  ayanamsa: number;
   warnings: ChartWarning[];
 }
 
@@ -805,18 +809,43 @@ export function position(id: BodyId, lon: number, speed: number, cusps: readonly
   };
 }
 
+export type Zodiac = "tropical" | "lahiri";
+
+/**
+ * อายนางศ์ Lahiri เฉลี่ย (องศา) — นิยามเดียวกับ Swiss Ephemeris (SE_SIDM_LAHIRI):
+ * 23.245524743° ณ JD 2435553.5 (21 มี.ค. 1956) แล้วบวกการหมุนควงในลองจิจูดแบบ IAU 2006 (p_A)
+ */
+export function lahiriAyanamsa(jdUt: number): number {
+  const pA = (jd: number) => {
+    const T = (jd - 2451545) / 36525;
+    return (5028.796195 * T + 1.1054348 * T * T) / 3600;
+  };
+  return 23.245524743 + pA(jdUt) - pA(2435553.5);
+}
+
+/**
+ * ค่าที่ต้องลบออกจากลองจิจูด "สุริยวิถีจริงของวันนั้น" เพื่อได้ตำแหน่งนิรายนะ ณ ขณะ `utcMs`
+ * = อายนางศ์เฉลี่ย + nutation ในลองจิจูด (ตำแหน่งนิรายนะแบบ Swiss Ephemeris ไม่รวม nutation) · สายนะ = 0
+ */
+export function zodiacShift(zodiac: Zodiac | undefined, utcMs: number): number {
+  if (zodiac !== "lahiri") return 0;
+  return lahiriAyanamsa(utcMs / 86400000 + 2440587.5) + e_tilt(MakeTime(new Date(utcMs))).dpsi / 3600;
+}
+
 export function computeNatalChart(input: NatalInput): NatalChart {
   const time = MakeTime(new Date(input.utcMs));
   const jdUt = input.utcMs / 86400000 + 2440587.5;
   const eps = e_tilt(time).tobl;
   const ramc = norm360(SiderealTime(time) * 15 + input.lon);
   const warnings: ChartWarning[] = [];
+  // นิรายนะ: คำนวณแบบสายนะแล้วเลื่อนทุกลองจิจูดเท่ากัน (มุมระหว่างดาวและเรือนที่ดาวตกไม่เปลี่ยน · ราศีเปลี่ยน)
+  const ay = zodiacShift(input.zodiac, input.utcMs);
 
   let cusps: number[] | null = null;
   let houseSystemUsed: HouseSystem | null = null;
   if (input.timeKnown) {
     const h = computeHouses(input.houseSystem, ramc, input.lat, eps);
-    cusps = h.cusps;
+    cusps = h.cusps.map((c) => norm360(c - ay));
     houseSystemUsed = h.used;
     if (h.used !== input.houseSystem) warnings.push({ code: "polar-house-fallback" });
   }
@@ -824,14 +853,14 @@ export function computeNatalChart(input: NatalInput): NatalChart {
   const bodies: BodyPosition[] = [];
   for (const id of PLANET_IDS) {
     const { lon, speed } = planetLonSpeed(id, input.utcMs);
-    bodies.push(position(id, lon, speed, cusps));
+    bodies.push(position(id, lon - ay, speed, cusps));
   }
 
   // ไครอน
   const ch = chironLon(jdUt);
   if (ch !== null) {
     const ch2 = chironLon(jdUt + 1);
-    bodies.push(position("chiron", ch, ch2 === null ? 0 : signedDiff(ch2, ch), cusps));
+    bodies.push(position("chiron", ch - ay, ch2 === null ? 0 : signedDiff(ch2, ch), cusps));
   } else {
     warnings.push({ code: "chiron-out-of-range" });
   }
@@ -843,7 +872,7 @@ export function computeNatalChart(input: NatalInput): NatalChart {
     const a = tableLon(t, jdUt);
     if (a === null) continue;
     const a2 = tableLon(t, jdUt + 1);
-    bodies.push(position(id, a, a2 === null ? 0 : signedDiff(a2, a), cusps));
+    bodies.push(position(id, a - ay, a2 === null ? 0 : signedDiff(a2, a), cusps));
   }
 
   // โหนดและลิลิธ (ความเร็วจากผลต่าง 1 วัน)
@@ -851,10 +880,10 @@ export function computeNatalChart(input: NatalInput): NatalChart {
   const node = nodeFn(time);
   const nodeNext = nodeFn(MakeTime(new Date(input.utcMs + 86400000)));
   const nodeSpeed = signedDiff(nodeNext, node);
-  bodies.push(position("node", node, nodeSpeed, cusps));
-  bodies.push(position("southNode", node + 180, nodeSpeed, cusps));
+  bodies.push(position("node", node - ay, nodeSpeed, cusps));
+  bodies.push(position("southNode", node + 180 - ay, nodeSpeed, cusps));
   const lil = meanLilith(time);
-  bodies.push(position("lilith", lil, signedDiff(meanLilith(MakeTime(new Date(input.utcMs + 86400000))), lil), cusps));
+  bodies.push(position("lilith", lil - ay, signedDiff(meanLilith(MakeTime(new Date(input.utcMs + 86400000))), lil), cusps));
 
   const sun = bodies[0];
   const moon = bodies[1];
@@ -862,8 +891,8 @@ export function computeNatalChart(input: NatalInput): NatalChart {
   let chartRuler: PlanetId | null = null;
 
   if (input.timeKnown && cusps) {
-    const asc = ascAt(ramc, input.lat, eps);
-    const mc = mcAt(ramc, eps);
+    const asc = norm360(ascAt(ramc, input.lat, eps) - ay);
+    const mc = norm360(mcAt(ramc, eps) - ay);
     bodies.push(position("asc", asc, 0, cusps));
     bodies.push(position("mc", mc, 0, cusps));
     bodies.push(position("dsc", asc + 180, 0, cusps));
@@ -875,7 +904,7 @@ export function computeNatalChart(input: NatalInput): NatalChart {
     bodies.push(position("fortune", fortune, 0, cusps));
     // เวอร์เท็กซ์: จุดตัดเส้นเมริเดียนแรกด้านตะวันตกกับสุริยวิถี
     const colat = input.lat >= 0 ? 90 - input.lat : -90 - input.lat;
-    bodies.push(position("vertex", ascAt(ramc + 180, colat, eps), 0, cusps));
+    bodies.push(position("vertex", ascAt(ramc + 180, colat, eps) - ay, 0, cusps));
     chartRuler = TRADITIONAL_RULER[Math.floor(asc / 30) % 12];
   }
 
@@ -885,12 +914,12 @@ export function computeNatalChart(input: NatalInput): NatalChart {
   if (!input.timeKnown && input.dayStartUtcMs !== undefined && input.dayEndUtcMs !== undefined) {
     const t0 = MakeTime(new Date(input.dayStartUtcMs));
     const t1 = MakeTime(new Date(input.dayEndUtcMs));
-    const m0 = planetLon("moon", t0);
-    const m1 = planetLon("moon", t1);
+    const m0 = norm360(planetLon("moon", t0) - ay);
+    const m1 = norm360(planetLon("moon", t1) - ay);
     moonRange = { from: m0, to: m1 };
     for (const id of PLANET_IDS) {
-      const a = Math.floor(planetLon(id, t0) / 30);
-      const b = Math.floor(planetLon(id, t1) / 30);
+      const a = Math.floor(norm360(planetLon(id, t0) - ay) / 30);
+      const b = Math.floor(norm360(planetLon(id, t1) - ay) / 30);
       if (a !== b) signChangesOnDay.push(id);
     }
     if (signChangesOnDay.includes("moon")) warnings.push({ code: "moon-sign-uncertain" });
@@ -930,6 +959,7 @@ export function computeNatalChart(input: NatalInput): NatalChart {
     signChangesOnDay,
     obliquity: eps,
     ramc,
+    ayanamsa: ay,
     warnings,
   };
 }

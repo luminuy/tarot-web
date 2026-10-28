@@ -23,9 +23,12 @@ import {
   mcAt,
   norm360,
   angularDistance,
+  lahiriAyanamsa,
+  zodiacShift,
   type NatalInput,
   type PlanetId,
 } from "../../src/lib/astro/natal";
+import { Body, DefineStar, Ecliptic, GeoVector, MakeTime } from "astronomy-engine";
 import { localToUtc, formatUtcOffset } from "../../src/lib/astro/timezone";
 import { THAI_PROVINCES, WORLD_CITIES } from "../../src/data/natal/places";
 import { assertNonEmptyCorpus } from "./lib/corpus";
@@ -658,6 +661,69 @@ console.log("\n6.9) ดวงวันนี้จากผังที่บั
   check(
     "ดวงวันนี้ไม่ยิง API ไม่เขียนที่เก็บ ไม่ใส่ URL และไม่สุ่มไพ่",
     !/\bfetch\(|localStorage|sessionStorage|history\.(push|replace)State|Math\.random/.test(todaySrc)
+  );
+}
+
+console.log("\n6.10) ราศีนิรายนะแบบ Lahiri (ไทย/อินเดีย)");
+{
+  // ค่าอ้างอิง Swiss Ephemeris (SE_SIDM_LAHIRI) ณ J2000 = 23°51′25.5″
+  check(
+    "อายนางศ์ Lahiri ณ J2000 ตรง Swiss Ephemeris (คลาดไม่เกิน 1 ฟิลิปดา)",
+    Math.abs(lahiriAyanamsa(2451545) - 23.85708) * 3600 < 1
+  );
+  // นิยามของ Lahiri (จิตราปักษ์): ดาวจิตรา (Spica) อยู่ราว 180 องศานิรายนะ
+  DefineStar(Body.Star1, 13 + 25 / 60 + 11.579 / 3600, -(11 + 9 / 60 + 40.75 / 3600), 250);
+  const spicaOk = ["1960-01-01T00:00Z", "2000-01-01T12:00Z", "2050-01-01T00:00Z"].every((d) => {
+    const t = Date.parse(d);
+    const sid = norm360(Ecliptic(GeoVector(Body.Star1, MakeTime(new Date(t)), true)).elon - zodiacShift("lahiri", t));
+    return Math.abs(sid - 180) < 0.05;
+  });
+  check("ดาวจิตรา (Spica) อยู่ 180 องศานิรายนะ ±3 ลิปดา ทุกยุค", spicaOk);
+  const at = Date.UTC(1969, 11, 31, 23, 5);
+  const trop = computeNatalChart(input(at));
+  const sid = computeNatalChart(input(at, { zodiac: "lahiri" }));
+  const ay = zodiacShift("lahiri", at);
+  check(
+    "ทุกจุดในผังนิรายนะ = สายนะ ลบอายนางศ์ของขณะเกิด",
+    trop.bodies.every((b) => {
+      const s2 = sid.bodies.find((x) => x.id === b.id);
+      return !!s2 && angularDistance(s2.lon, norm360(b.lon - ay)) < 1e-6;
+    }) &&
+      Math.abs(sid.ayanamsa - ay) < 1e-12 &&
+      trop.ayanamsa === 0
+  );
+  check(
+    "นิรายนะ: ดาวอยู่เรือนเดิมและมุมสัมพันธ์ชุดเดิม (เลื่อนทั้งผังเท่ากัน)",
+    trop.bodies.every((b) => sid.bodies.find((x) => x.id === b.id)?.house === b.house) &&
+      trop.aspects.length === sid.aspects.length &&
+      sid.houses!.every((c, i) => angularDistance(c, norm360(trop.houses![i] - ay)) < 1e-6)
+  );
+  check(
+    "ตัวอย่าง: ลัคนาสายนะมังกร ➔ นิรายนะธนู · อาทิตย์สายนะมังกร ➔ นิรายนะธนู",
+    sid.bodies.find((b) => b.id === "asc")!.sign === 8 && sid.bodies.find((b) => b.id === "sun")!.sign === 8
+  );
+  const sr = solarReturn(sid, 30, { lat: 13.75, lon: 100.5 });
+  check(
+    "ผังวันเกิดแบบนิรายนะ: ดวงอาทิตย์กลับมาที่ตำแหน่งนิรายนะเดิม",
+    angularDistance(sr.bodies.find((b) => b.id === "sun")!.lon, sid.bodies.find((b) => b.id === "sun")!.lon) < 1e-4
+  );
+  const t1 = Date.UTC(2026, 9, 28);
+  const trS = computeTransits(sid, t1);
+  const trT = computeTransits(trop, t1);
+  // มุมจรไม่จำเป็นต้องชุดเดิม: อายนางศ์ ณ วันนี้มากกว่าวันเกิด (การหมุนควงราว 0.8 องศาใน 57 ปี) — นี่คือความต่างจริงของสองระบบ
+  check(
+    "ดาวจรของผังนิรายนะใช้อายนางศ์ของวันนั้น (ไม่ใช่ของวันเกิด)",
+    angularDistance(
+      trS.bodies.find((b) => b.id === "moon")!.lon,
+      norm360(trT.bodies.find((b) => b.id === "moon")!.lon - zodiacShift("lahiri", t1))
+    ) < 1e-6 && trS.aspects.every((a) => a.orb <= a.maxOrb + 1e-9)
+  );
+  const pS = computeProgressions(sid, t1);
+  const pT = computeProgressions(trop, t1);
+  const pAsc = (p: typeof pS) => p.bodies.find((b) => b.id === "asc")!.lon;
+  check(
+    "ลัคนาก้าวหน้าแบบนิรายนะ = แบบสายนะ ลบอายนางศ์",
+    angularDistance(pAsc(pS), norm360(pAsc(pT) - zodiacShift("lahiri", pS.progUtcMs))) < 1e-6
   );
 }
 

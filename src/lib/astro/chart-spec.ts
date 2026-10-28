@@ -21,5 +21,6 @@ export function buildChart(spec: ChartSpec): NatalChart {
     houseSystem: spec.houseSystem,
     nodeType: spec.nodeType,
     orbScale: spec.orbScale,
+    zodiac: spec.zodiac,
   });
 }

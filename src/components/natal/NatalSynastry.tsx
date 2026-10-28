@@ -47,7 +47,8 @@ export default function NatalSynastry({ chart, lang, meta }: { chart: NatalChart
   function applySpec(spec: ChartSpec, name: string) {
     setError(null);
     try {
-      setPartner({ chart: buildChart(spec), name: name || (isTh ? "อีกคน" : "Partner") });
+      // อีกคนใช้ระบบราศีเดียวกับผังของเราเสมอ (ผังที่บันทึกไว้อาจตั้งต่างกัน)
+      setPartner({ chart: buildChart({ ...spec, zodiac: chart.input.zodiac }), name: name || (isTh ? "อีกคน" : "Partner") });
     } catch {
       setError(isTh ? "คำนวณผังของอีกคนไม่สำเร็จ กรุณาโหลดหน้าใหม่อีกครั้ง" : "Could not calculate the other chart. Please reload the page.");
     }
