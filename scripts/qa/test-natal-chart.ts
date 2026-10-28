@@ -752,6 +752,21 @@ console.log("\n6.11) ถามแม่หมอ AI เรื่องผัง 
   check("นโยบายความเป็นส่วนตัวทั้งสองภาษาบอกเรื่องส่งข้อมูลเกิดให้ AI เมื่อยินยอม", rd("src/app/_shared/pages/privacy-th.tsx").includes("ถามแม่หมอ") && rd("src/app/_shared/pages/privacy-en.tsx").includes("Ask the reader"));
 }
 
+console.log("\n6.12) ภาพแชร์ Big Three (วาดในเครื่อง · ไม่มีข้อมูลเกิด)");
+{
+  const root = process.cwd();
+  const share = fs.readFileSync(path.join(root, "src/components/natal/NatalShare.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  check("ภาพแชร์ไม่ยิง API ไม่อัปโหลด", !/\bfetch\(|\/api\//.test(share));
+  // รับแค่ผัง ภาษา และรายการไพ่ — ไม่รับ meta/spec (ชื่อ วันเวลา สถานที่) และไม่อ่านเวลา/พิกัดเกิดจากผัง
+  check(
+    "ภาพแชร์ไม่มีชื่อ วันเวลา หรือสถานที่เกิด",
+    /export default function NatalShare\(\{ chart, lang, cards \}/.test(share) && !/meta|spec|input\.(utcMs|lat|lon)|dateText|placeText/.test(share),
+  );
+  check("ไพ่ในภาพหาไม่เจอ = ข้าม ไม่หยิบใบอื่นแทน (กฎเหล็ก 14)", /if \(!card\) continue;/.test(share));
+  const res = fs.readFileSync(path.join(root, "src/components/natal/NatalResult.tsx"), "utf8");
+  check("ภาพแชร์โหลดแบบ lazy และกดสร้างภาพ = พลิกไพ่ประจำราศีบนหน้าเว็บด้วย (กฎเหล็ก 4)", /React\.lazy\(\s*\(\)\s*=>\s*import\(\s*["']\.\/NatalShare["']\s*\)\s*\)/.test(res) && /`\$\{key\}:sign`, true\]/.test(res));
+}
+
 console.log("\n7) กติกา island — ตัวคำนวณ/คำอธิบาย/ผลผังโหลดแบบ dynamic import เท่านั้น");
 {
   const root = process.cwd();

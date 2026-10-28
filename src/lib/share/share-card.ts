@@ -40,6 +40,8 @@ export interface ShareCardInput {
    * และบางแอปบีบซ้ำอยู่ดี) · ภาพที่อัปโหลดขึ้นเซิร์ฟเวอร์ (`/api/share/image`) ยังเป็น PNG ตามที่ route รับ
    */
   mime?: "image/png" | "image/jpeg";
+  /** แทนถ้อยคำมาตรฐานของภาพคำทำนาย — ใช้กับภาพที่ไม่ใช่การเปิดไพ่ (เช่น Big Three ของผังดวง) */
+  copy?: Partial<Record<"tagline" | "from" | "cta" | "fair", string>>;
 }
 
 const W = 1080;
@@ -240,7 +242,7 @@ function drawCard(ctx: Ctx, img: HTMLImageElement | null, x: number, y: number, 
 export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
   const H = input.format === "story" ? 1920 : 1350;
   const story = input.format === "story";
-  const t = input.isEnglish
+  const base = input.isEnglish
     ? {
         tagline: "1909 Rider-Waite Tarot · AI Oracle",
         upright: "Upright",
@@ -257,6 +259,7 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
         cta: "เปิดไพ่ฟรีที่ seertarot.net",
         fair: "สุ่มโปร่งใส Provably-Fair SHA-256",
       };
+  const t = { ...base, ...input.copy };
 
   const canvas = document.createElement("canvas");
   canvas.width = W;
