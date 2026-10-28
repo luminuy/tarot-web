@@ -152,10 +152,23 @@ export default function NatalResult({
             {meta.dateText} · {meta.timeText} · {meta.placeText} · {meta.offsetText}
           </p>
           <p className="text-xs text-muted">
-            {isTh ? "ระบบสากล (Tropical)" : "Tropical zodiac"}
+            {chart.input.zodiac === "lahiri"
+              ? isTh
+                ? `ราศีนิรายนะ (Lahiri · อายนางศ์ ${formatDegree(chart.ayanamsa)})`
+                : `Sidereal zodiac (Lahiri, ayanamsa ${formatDegree(chart.ayanamsa)})`
+              : isTh
+                ? "ราศีสายนะ (สากล)"
+                : "Tropical zodiac"}
             {chart.houseSystemUsed ? ` · ${isTh ? "เรือน" : "Houses"}: ${HOUSE_SYSTEM_TEXT[chart.houseSystemUsed].name[lang]}` : ""}
             {` · ${isTh ? "โหนด" : "Node"}: ${chart.input.nodeType === "true" ? (isTh ? "จริง" : "true") : isTh ? "เฉลี่ย" : "mean"}`}
           </p>
+          {chart.input.zodiac === "lahiri" && (
+            <p className="text-xs text-muted border-l-2 border-line-warm pl-2">
+              {isTh
+                ? "นิรายนะยึดกลุ่มดาวจริงบนฟ้า ตำแหน่งดาวจึงถอยจากแบบสากลราว 24 องศา ราศีที่ได้มักใกล้เคียงหมอดูไทย แต่อาจต่างได้ราว 1 องศาตามตำราที่ใช้ คำอธิบายและไพ่ประจำตำแหน่งในหน้านี้อิงระบบตะวันตก ใช้ราศีนิรายนะแทนที่"
+                : "The sidereal zodiac follows the actual constellations, so positions sit about 24 degrees behind the tropical ones. Thai astrologers may differ by about a degree depending on their method. Interpretations and tarot cards here are Western and are applied to the sidereal signs."}
+            </p>
+          )}
         </div>
         <div className="grid grid-cols-3 gap-2 text-center">
           {[

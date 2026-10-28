@@ -7,7 +7,7 @@ import { deleteSavedChart, loadSavedCharts, saveChart, type SavedChart, type Sav
 import { CitySearch, type PickedCity } from "./CitySearch";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 import { formatUtcOffset, localToUtc, localToUtcFixed } from "@/lib/astro/timezone";
-import type { HouseSystem, NatalChart, NodeType } from "@/lib/astro/natal";
+import type { HouseSystem, NatalChart, NodeType, Zodiac } from "@/lib/astro/natal";
 
 /**
  * 🪐 เครื่องสร้างผังดวงกำเนิด (island ของ `/natal-chart`)
@@ -92,6 +92,7 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
   const [nodeType, setNodeType] = useState<NodeType>("true");
   const [orbScale, setOrbScale] = useState(1);
   const [asteroids, setAsteroids] = useState(false);
+  const [zodiac, setZodiac] = useState<Zodiac>("tropical");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ chart: NatalChart; meta: NatalMeta; spec: ChartSpec } | null>(null);
@@ -139,7 +140,7 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
       if (!p) return null;
       place = { mode: "thai", lat: p.lat, lon: p.lon, label: p.th, labelEn: p.en, zone: p.zone, refId: p.id };
     }
-    return { name: name.trim().slice(0, 40), day, month, yearCe, hour, minute, timeKnown, place, houseSystem, nodeType, orbScale, asteroids };
+    return { name: name.trim().slice(0, 40), day, month, yearCe, hour, minute, timeKnown, place, houseSystem, nodeType, orbScale, asteroids, zodiac };
   }
 
   async function runChart(spec: ChartSpec) {
@@ -166,6 +167,7 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
         houseSystem: spec.houseSystem,
         nodeType: spec.nodeType,
         orbScale: spec.orbScale,
+        zodiac: spec.zodiac,
       });
       const pad = (n: number) => String(n).padStart(2, "0");
       setResult({
@@ -220,6 +222,7 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
     setNodeType(c.nodeType);
     setOrbScale(c.orbScale);
     setAsteroids(!!c.asteroids);
+    setZodiac(c.zodiac ?? "tropical");
     void runChart(c);
   }
 
@@ -403,7 +406,16 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
 
         <details className="rounded-xl border border-line-warm px-3 py-2">
           <summary className="cursor-pointer text-sm font-semibold text-ink min-h-[36px] flex items-center">{isEnglish ? "Advanced settings" : "ตั้งค่าขั้นสูง"}</summary>
-          <div className="grid gap-3 sm:grid-cols-3 pt-2">
+          <div className="grid gap-3 sm:grid-cols-2 pt-2">
+            <div>
+              <label htmlFor="nt-zodiac" className={labelClass}>
+                {isEnglish ? "Zodiac" : "ระบบราศี"}
+              </label>
+              <select id="nt-zodiac" value={zodiac} onChange={(e) => setZodiac(e.target.value as Zodiac)} className={fieldClass}>
+                <option value="tropical">{isEnglish ? "Tropical (Western)" : "สายนะ (สากล)"}</option>
+                <option value="lahiri">{isEnglish ? "Sidereal, Lahiri (Thai/Indian)" : "นิรายนะ แบบไทย/อินเดีย (Lahiri)"}</option>
+              </select>
+            </div>
             <div>
               <label htmlFor="nt-house" className={labelClass}>
                 {isEnglish ? "House system" : "ระบบเรือน"}

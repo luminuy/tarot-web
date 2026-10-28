@@ -231,6 +231,7 @@ export function compositeChart(A: NatalChart, B: NatalChart): NatalChart {
     signChangesOnDay: [],
     obliquity: (A.obliquity + B.obliquity) / 2,
     ramc: ascB ? nearMidpoint(A.ramc, B.ramc) : 0,
+    ayanamsa: A.ayanamsa,
     warnings: [],
   };
 }

@@ -27,12 +27,14 @@ import {
   position,
   signedDiff,
   trueNode,
+  zodiacShift,
   type AspectType,
   type BodyId,
   type BodyPosition,
   type NatalChart,
   type NatalInput,
   type PlanetId,
+  type Zodiac,
 } from "./natal";
 
 const DAY = 86400000;
@@ -55,22 +57,27 @@ export const SLOW_IDS: readonly MovingId[] = ["jupiter", "saturn", "uranus", "ne
 const NATAL_TARGETS: readonly BodyId[] = [...PLANET_IDS, "chiron", "node", "asc", "mc"];
 
 /** ลองจิจูดของดาวที่เดินได้ ณ ขณะหนึ่ง (null = นอกช่วงตารางไครอน) */
-function movingLon(id: MovingId, utcMs: number, nodeType: NatalInput["nodeType"]): number | null {
-  if (id === "chiron") return chironLon(utcMs / DAY + 2440587.5);
-  if (id === "node") return (nodeType === "true" ? trueNode : meanNode)(MakeTime(new Date(utcMs)));
-  return planetLon(id, MakeTime(new Date(utcMs)));
+function movingLon(id: MovingId, utcMs: number, nodeType: NatalInput["nodeType"], zodiac?: Zodiac): number | null {
+  const ay = zodiacShift(zodiac, utcMs);
+  if (id === "chiron") {
+    const c = chironLon(utcMs / DAY + 2440587.5);
+    return c === null ? null : norm360(c - ay);
+  }
+  if (id === "node") return norm360((nodeType === "true" ? trueNode : meanNode)(MakeTime(new Date(utcMs))) - ay);
+  return norm360(planetLon(id, MakeTime(new Date(utcMs))) - ay);
 }
 
-function movingPositions(utcMs: number, nodeType: NatalInput["nodeType"], cusps: readonly number[] | null): BodyPosition[] {
+function movingPositions(utcMs: number, nodeType: NatalInput["nodeType"], cusps: readonly number[] | null, zodiac?: Zodiac): BodyPosition[] {
   const out: BodyPosition[] = [];
+  const ay = zodiacShift(zodiac, utcMs);
   for (const id of MOVING_IDS) {
     if ((PLANET_IDS as readonly string[]).includes(id)) {
       const { lon, speed } = planetLonSpeed(id as PlanetId, utcMs);
-      out.push(position(id, lon, speed, cusps));
+      out.push(position(id, lon - ay, speed, cusps));
       continue;
     }
-    const lon = movingLon(id, utcMs, nodeType);
-    const next = movingLon(id, utcMs + DAY, nodeType);
+    const lon = movingLon(id, utcMs, nodeType, zodiac);
+    const next = movingLon(id, utcMs + DAY, nodeType, zodiac);
     if (lon === null) continue;
     out.push(position(id, lon, next === null ? 0 : signedDiff(next, lon), cusps));
   }
@@ -104,9 +111,9 @@ function transitOrb(t: MovingId, scale: number): number {
 }
 
 /** ลองจิจูดรายวันของดาวเดินช้า ±400 วัน (แคชต่อการคำนวณหนึ่งครั้ง) */
-function dailySeries(id: MovingId, center: number, nodeType: NatalInput["nodeType"], days: number): (number | null)[] {
+function dailySeries(id: MovingId, center: number, nodeType: NatalInput["nodeType"], days: number, zodiac?: Zodiac): (number | null)[] {
   const out: (number | null)[] = [];
-  for (let k = -days; k <= days; k++) out.push(movingLon(id, center + k * DAY, nodeType));
+  for (let k = -days; k <= days; k++) out.push(movingLon(id, center + k * DAY, nodeType, zodiac));
   return out;
 }
 
@@ -116,7 +123,8 @@ function aspectDeviation(tLon: number, nLon: number, angle: number): number {
 
 export function computeTransits(natal: NatalChart, utcMs: number, orbScale = 1): TransitResult {
   const nodeType = natal.input.nodeType;
-  const bodies = movingPositions(utcMs, nodeType, natal.houses);
+  const zodiac = natal.input.zodiac;
+  const bodies = movingPositions(utcMs, nodeType, natal.houses, zodiac);
   const targets = natal.bodies.filter((b) => NATAL_TARGETS.includes(b.id));
   const aspects: TransitAspect[] = [];
   const SCAN = 400;
@@ -139,7 +147,7 @@ export function computeTransits(natal: NatalChart, utcMs: number, orbScale = 1):
       if (SLOW_IDS.includes(t)) {
         let s = series.get(t);
         if (!s) {
-          s = dailySeries(t, utcMs, nodeType, SCAN);
+          s = dailySeries(t, utcMs, nodeType, SCAN, zodiac);
           series.set(t, s);
         }
         const angle = MAJOR.find((m) => m.type === best!.type)!.angle;
@@ -226,7 +234,7 @@ export function transitCalendar(natal: NatalChart, fromUtcMs: number, days = 365
   const events: TransitEvent[] = [];
   for (const t of ids) {
     const lons: (number | null)[] = [];
-    for (let k = 0; k <= days; k++) lons.push(movingLon(t, fromUtcMs + k * DAY, nodeType));
+    for (let k = 0; k <= days; k++) lons.push(movingLon(t, fromUtcMs + k * DAY, nodeType, natal.input.zodiac));
     for (let k = 1; k <= days; k++) {
       const p = lons[k - 1];
       const c = lons[k];
@@ -274,7 +282,7 @@ export interface ProgressionResult {
 export function computeProgressions(natal: NatalChart, targetUtcMs: number): ProgressionResult {
   const age = (targetUtcMs - natal.input.utcMs) / (TROPICAL_YEAR_DAYS * DAY);
   const progUtcMs = natal.input.utcMs + age * DAY;
-  const moving = movingPositions(progUtcMs, natal.input.nodeType, natal.houses).filter((b) => (PLANET_IDS as readonly string[]).includes(b.id));
+  const moving = movingPositions(progUtcMs, natal.input.nodeType, natal.houses, natal.input.zodiac).filter((b) => (PLANET_IDS as readonly string[]).includes(b.id));
   const natalSun = natal.bodies.find((b) => b.id === "sun")!;
   const progSun = moving.find((b) => b.id === "sun")!;
   const solarArc = norm360(progSun.lon - natalSun.lon);
@@ -283,11 +291,13 @@ export function computeProgressions(natal: NatalChart, targetUtcMs: number): Pro
   if (mc && natal.houses) {
     const eps = e_tilt(MakeTime(new Date(progUtcMs))).tobl;
     const progMc = norm360(mc.lon + solarArc);
-    // RAMC ของกลางฟ้าก้าวหน้า = ไรต์แอสเซนชันของจุดนั้นบนสุริยวิถี
+    // RAMC ของกลางฟ้าก้าวหน้า = ไรต์แอสเซนชันของจุดนั้นบนสุริยวิถี (คิดบนพิกัดสายนะ แล้วเลื่อนกลับถ้าเป็นนิรายนะ)
+    const ay = zodiacShift(natal.input.zodiac, progUtcMs);
+    const mcTrop = progMc + ay;
     const r = Math.PI / 180;
-    const ramc = norm360(Math.atan2(Math.sin(progMc * r) * Math.cos(eps * r), Math.cos(progMc * r)) / r);
+    const ramc = norm360(Math.atan2(Math.sin(mcTrop * r) * Math.cos(eps * r), Math.cos(mcTrop * r)) / r);
     bodies.push(position("mc", progMc, 0, natal.houses));
-    bodies.push(position("asc", ascAt(ramc, natal.input.lat, eps), 0, natal.houses));
+    bodies.push(position("asc", ascAt(ramc, natal.input.lat, eps) - ay, 0, natal.houses));
   }
   const targets = natal.bodies.filter((b) => NATAL_TARGETS.includes(b.id));
   const aspects: TransitAspect[] = [];
@@ -313,12 +323,13 @@ export function computeProgressions(natal: NatalChart, targetUtcMs: number): Pro
 // ─────────────────────────── รีเทิร์น ───────────────────────────
 
 /** หาขณะที่ดาว `id` กลับมาที่ลองจิจูด `targetLon` ใกล้ `guessUtcMs` (นิวตัน + ป้องกันกระโดด) */
-function findReturn(id: "sun" | "moon", targetLon: number, guessUtcMs: number): number {
+function findReturn(id: "sun" | "moon", targetLon: number, guessUtcMs: number, zodiac?: Zodiac): number {
   let t = guessUtcMs;
   const meanSpeed = id === "sun" ? 0.9856 : 13.176;
   for (let i = 0; i < 30; i++) {
     const { lon, speed } = planetLonSpeed(id, t);
-    const d = signedDiff(targetLon, lon);
+    // นิรายนะ: กลับมาที่ตำแหน่งนิรายนะเดิม (ดวงอาทิตย์ช้ากว่าแบบสายนะราว 20 นาทีต่อปีที่ผ่านไป)
+    const d = signedDiff(targetLon, lon - zodiacShift(zodiac, t));
     if (Math.abs(d) < 1e-6) break;
     t += (d / (speed > 0.1 ? speed : meanSpeed)) * DAY;
   }
@@ -336,15 +347,15 @@ export interface ReturnPlace {
  */
 export function solarReturn(natal: NatalChart, nth: number, place: ReturnPlace): NatalChart {
   const sun = natal.bodies.find((b) => b.id === "sun")!;
-  const utcMs = findReturn("sun", sun.lon, natal.input.utcMs + nth * TROPICAL_YEAR_DAYS * DAY);
+  const utcMs = findReturn("sun", sun.lon, natal.input.utcMs + nth * TROPICAL_YEAR_DAYS * DAY, natal.input.zodiac);
   return computeNatalChart({ ...natal.input, ...place, utcMs, timeKnown: true, dayStartUtcMs: undefined, dayEndUtcMs: undefined });
 }
 
 /** ผังจันทร์คืนครั้งแรกหลัง `afterUtcMs` ณ สถานที่ที่เลือก */
 export function lunarReturn(natal: NatalChart, afterUtcMs: number, place: ReturnPlace): NatalChart {
   const moon = natal.bodies.find((b) => b.id === "moon")!;
-  const now = planetLon("moon", MakeTime(new Date(afterUtcMs)));
+  const now = planetLon("moon", MakeTime(new Date(afterUtcMs))) - zodiacShift(natal.input.zodiac, afterUtcMs);
   const ahead = norm360(moon.lon - now);
-  const utcMs = findReturn("moon", moon.lon, afterUtcMs + (ahead / 13.176) * DAY);
+  const utcMs = findReturn("moon", moon.lon, afterUtcMs + (ahead / 13.176) * DAY, natal.input.zodiac);
   return computeNatalChart({ ...natal.input, ...place, utcMs, timeKnown: true, dayStartUtcMs: undefined, dayEndUtcMs: undefined });
 }
