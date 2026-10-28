@@ -309,6 +309,21 @@ check(
   );
 }
 
+// ── 10. กระจกครีมของ globals.css ในห้องพิธีมืด (.v2-rt) ต้องถูกทับเป็นกระจกมืด (เจ้าของ 2026-10-28 "แก้ด่วน") ──
+// `.glass-tile` / `.glass-chip` ฮาร์ดโค้ดพื้นครีมโปร่ง แต่ `.v2-rt` ตั้งตัวหนังสือเป็นสีสว่าง ➔ ชิปอารมณ์หลังอ่าน
+// และการ์ดติดตามเรื่องนี้กลายเป็นตัวขาวบนครีม มองไม่เห็น · กล่องคำถามด่วน .v2-qr ยังต้องเป็นกระดาษครีม
+{
+  const ritual = fs.readFileSync(path.join(ROOT, "src/styles/v2-ritual.css"), "utf-8");
+  const darkTile = /\.v2-rt \.glass-tile\s*\{[^}]*background-color:\s*rgba\(246, 238, 226, 0\.0\d+\)/.test(ritual);
+  const darkChip = /\.v2-rt \.glass-chip\s*\{[^}]*background-color:\s*rgba\(246, 238, 226, 0\.0\d+\)/.test(ritual);
+  const qrCream = /\.v2-rt \.v2-qr :is\(\.altar-card-porcelain, \.glass-tile\)\s*\{[^}]*background:\s*#FFFCF6/.test(ritual);
+  check(
+    "ห้องพิธี .v2-rt ทับ .glass-tile/.glass-chip เป็นกระจกมืด (ตัวหนังสือสว่างอ่านออก) · กล่อง .v2-qr ยังเป็นกระดาษครีม",
+    darkTile && darkChip && qrCream,
+    `tile มืด=${darkTile} chip มืด=${darkChip} qr ครีม=${qrCream}\n      ➔ ดู src/styles/v2-ritual.css หัวข้อ "กระจกกลางของ globals.css ในห้องพิธี"`,
+  );
+}
+
 if (failed > 0) {
   console.log(`\n❌ ไม่ผ่าน ${failed} ข้อ\n`);
   process.exit(1);
