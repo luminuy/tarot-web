@@ -204,13 +204,11 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          # ทัพหน้าของคำอ่าน (src/lib/ai/claude.ts) — 1-3 ใบ Haiku · 4 ใบขึ้นไป Sonnet · ว่าง = ข้ามไป Groq
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           # ชั้นสำรองที่ 3 ของคำอ่าน — โมเดลฟรีบน OpenRouter เท่านั้น (src/lib/ai/openrouter.ts)
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          # ⚠️ เพิ่มผู้ให้บริการ AI รายใหม่ ต้องมาเติมชื่อคีย์ที่รายการนี้ด้วยเสมอ
-          #    ขั้นนี้ส่งตัวแปรเข้า Worker แบบระบุรายชื่อทีละตัว ไม่ได้ส่งทั้งก้อน
-          #    ลืมแล้ว = ต่อให้ตั้ง secret ไว้ Worker ก็ไม่มีวันเห็นคีย์ (INC-0152)
+          # ⚠️ ตัวแปรในรายการนี้มีผลแค่ตอนบิลด์ — Worker ตอนรันอ่าน process.env จาก vars/secret ของ Worker เท่านั้น
+          #    (OpenNext ฝังเฉพาะค่าจากไฟล์ .env* · พิสูจน์ 2026-10-28: ANTHROPIC_API_KEY ใส่ตรงนี้แล้วแอดมินยังเห็นว่าไม่มีคีย์)
+          #    คีย์ AI ใหม่ต้องมีขั้นตั้ง secret ของ Worker แบบ "🤖 Sync Claude key to Worker" ด้านล่าง (INC-0152)
           NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID || vars.NEXT_PUBLIC_GA_ID || '' }}
           NEXT_PUBLIC_META_PIXEL_ID: ${{ secrets.NEXT_PUBLIC_META_PIXEL_ID || vars.NEXT_PUBLIC_META_PIXEL_ID || '' }}
           NEXT_PUBLIC_GOOGLE_ADS_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_ADS_ID || vars.NEXT_PUBLIC_GOOGLE_ADS_ID || '' }}
@@ -268,6 +266,25 @@ jobs:
             printf '%s' "${!name}" | npx wrangler secret put "$name"
             echo "✅ ตั้ง $name ใน Worker แล้ว"
           done
+
+      # ── 🤖 คีย์ Claude ➔ secret ของ Worker (2026-10-28) ──────────────────────────────────
+      # ⚠️ ตัวแปรที่ส่งเข้าขั้น `npm run deploy` "ไม่ถึง" Worker ตอนรันจริง — OpenNext ฝังเฉพาะค่าจากไฟล์ .env*
+      #    (compile-env-files) ส่วน process.env ตอนรันมาจาก vars/secret ของ Worker เท่านั้น
+      #    เดิมใส่ ANTHROPIC_API_KEY ไว้ใน env ของขั้น deploy ➔ แผงแอดมินขึ้น "ยังไม่ได้ตั้ง ANTHROPIC_API_KEY บน Worker"
+      #    ทั้งที่ตั้ง GitHub Secret แล้ว ➔ ต้อง `wrangler secret put` แบบเดียวกับ Stripe
+      # ไม่ได้ตั้งใน GitHub = ข้าม (secret เดิมบน Worker ถ้ามี ยังอยู่) · คำอ่านไหลไป Groq/Gemini ตามเดิม
+      - name: 🤖 Sync Claude key to Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "ℹ️  ไม่ได้ตั้ง ANTHROPIC_API_KEY ใน GitHub Secrets — ข้าม"
+            exit 0
+          fi
+          printf '%s' "$ANTHROPIC_API_KEY" | npx wrangler secret put ANTHROPIC_API_KEY
+          echo "✅ ตั้ง ANTHROPIC_API_KEY ใน Worker แล้ว"
 
       # ── ล้างแคช Edge หลัง deploy (จำเป็นตั้งแต่เปิด Cache Rules เฟส 1) ──────────
       # Cache Rule `[phase1]` ตั้ง edge TTL หน้า SSG ไว้ 7 วัน ถ้าไม่ purge หลังปล่อยเวอร์ชันใหม่

@@ -12,6 +12,12 @@
 
 ---
 
+### 🗓️ 2026-10-28 (รอบ 343): คีย์ Claude ไปไม่ถึง Worker — เพิ่มขั้น `wrangler secret put` ใน deploy.yml
+- อาการ: เจ้าของตั้ง `ANTHROPIC_API_KEY` ใน GitHub Secrets แล้ว แต่แผงแอดมินขึ้น "ยังไม่ได้ตั้ง ANTHROPIC_API_KEY บน Worker" · Console ยอดใช้ $0
+- สาเหตุ: ใส่คีย์ไว้ใน env ของขั้น `npm run deploy` ซึ่งมีผลแค่ตอนบิลด์ · OpenNext ฝังเฉพาะค่าจากไฟล์ .env* (`compile-env-files`) Worker ตอนรันอ่านจาก secret ของ Worker เท่านั้น
+- แก้: ขั้นใหม่ "🤖 Sync Claude key to Worker" (แบบเดียวกับ Stripe) · แก้คอมเมนต์ใน deploy.yml และ PENDING_SETUP ที่เขียนผิดว่า env ในขั้น deploy ถึง Worker · ด่าน `test-claude-reading` ตรวจขั้นใหม่
+- หลัง merge: deploy รอบนี้ตั้ง secret ให้เอง ดูผลที่แผงแอดมิน ➔ สุขภาพ AI แถว claude
+
 ### 🗓️ 2026-10-28 (รอบ 342): แท็บ "สุขภาพ AI" ใน /admin ตรวจ Claude ได้
 - เจ้าของตั้ง `ANTHROPIC_API_KEY` แล้วแต่หน้า Cost ของ Console ยังว่าง (ข้อมูลล่าช้าหลายชั่วโมง) และ "/admin ยังไม่มี Claude เลย"
 - `probeClaudeHealth()` ใน `claude.ts`: ยิง Haiku + Sonnet ผ่าน endpoint เดียวกับคำอ่านจริง คำถามสั้นสุด · คืน HTTP status + ข้อความ error จริง (ตัดคีย์ออก)
