@@ -43,6 +43,8 @@ const NatalTimeTools = React.lazy(() => import("./NatalTimeTools"));
 const NatalSynastry = React.lazy(() => import("./NatalSynastry"));
 /** ถามแม่หมอ AI — ส่งข้อมูลเกิดออกจากเครื่องเมื่อผู้ใช้กดยินยอมในแท็บนั้นเท่านั้น */
 const NatalAsk = React.lazy(() => import("./NatalAsk"));
+/** ภาพแชร์ Big Three — วาดในเครื่อง โหลดเมื่อผู้ใช้กดสร้างภาพเท่านั้น */
+const NatalShare = React.lazy(() => import("./NatalShare"));
 
 /**
  * 🪐 ผลผังดวงทั้งหมด — โหลดแบบ lazy พร้อมตัวคำนวณ (ไม่อยู่ในบันเดิลแรกของหน้า)
@@ -108,6 +110,7 @@ export default function NatalResult({
   const [showMinor, setShowMinor] = useState(false);
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   const [view, setView] = useState<"natal" | TimeMode | "synastry" | "ask">("natal");
+  const [shareOpen, setShareOpen] = useState(false);
   const cardById = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards]);
   const cardName = (id: string | undefined) => {
     const c = id ? cardById.get(id) : undefined;
@@ -314,6 +317,28 @@ export default function NatalResult({
               </div>
             );
           })}
+        </div>
+        <div className="v2-nt-noprint flex flex-col items-center gap-2">
+          {shareOpen ? (
+            <Suspense fallback={<p className="text-sm text-muted">{isTh ? "กำลังสร้างภาพ..." : "Creating the image..."}</p>}>
+              <NatalShare chart={chart} lang={lang} cards={cards} />
+            </Suspense>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  // ภาพแชร์มีไพ่ประจำราศี ➔ พลิกไพ่ใบนั้นบนหน้าเว็บไปพร้อมกัน (กฎเหล็กข้อ 4: ผู้ใช้เป็นคนเปิดเอง)
+                  setRevealed((r) => ({ ...r, ...Object.fromEntries(bigThree.map(({ key }) => [`${key}:sign`, true])) }));
+                  setShareOpen(true);
+                }}
+                className="rounded-full btn-gold-glass px-5 min-h-[44px] text-sm font-bold"
+              >
+                {isTh ? "สร้างภาพแชร์ Big Three" : "Create a Big Three image"}
+              </button>
+              <p className="text-xs text-muted">{isTh ? "กดแล้วไพ่ประจำราศีจะถูกพลิกและใส่ในภาพ" : "This turns over your sign cards and puts them in the image."}</p>
+            </>
+          )}
         </div>
       </section>
 
