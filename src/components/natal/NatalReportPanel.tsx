@@ -47,15 +47,23 @@ export default function NatalReportPanel({ spec, lang, onClose }: { spec: ChartS
   }
 
   return (
-    <div className="mx-auto mt-3 max-w-xl rounded-xl border border-line-warm bg-surface/70 p-3 space-y-3 text-sm text-ink">
-      <p className="font-semibold">{isTh ? "รายงานผังดวงฉบับเต็ม (บันทึกเป็น PDF)" : "Full natal chart report (save as PDF)"}</p>
-      <p className="text-xs text-muted">
-        {isTh
-          ? "รวมทุกอย่างในเล่มเดียว: ภาพรวมผังที่แม่หมอ AI (Claude Sonnet) เรียบเรียงจากเรื่องเด่นของผัง เรื่องเด่นเรียงตามน้ำหนัก ความแม่นของเวลาเกิด ตำแหน่งดาว คำอธิบายทุกดวง มุมสัมพันธ์ ดาวฤกษ์ จุด Lots โหราไทย พร้อมพยากรณ์ดาวเดินช้า 12 เดือนข้างหน้า และผังวันเกิดปีนี้ ใช้รอบดูดวงที่เติมไว้ 1 รอบ ผังเดิมโหลดซ้ำไม่หักซ้ำ"
-          : "Everything in one document: an overview written by the AI reader (Claude Sonnet) from your chart's strongest themes, those themes ranked, birth-time accuracy, positions, every placement explained, aspects, fixed stars, lots, Thai astrology, plus the next 12 months of slow-planet transits and this year's solar return. Uses 1 refilled reading; re-opening the same chart is free."}
+    <div className="v2-nr-box mx-auto mt-4 max-w-xl text-ink">
+      <p className="v2-nr-box-t">{isTh ? "รายงานผังดวงฉบับเต็ม (บันทึกเป็น PDF)" : "Full natal chart report (save as PDF)"}</p>
+      <ul className="v2-nr-items">
+        {(isTh
+          ? ["ภาพรวมผังที่แม่หมอ AI (Claude Sonnet) เรียบเรียงจากเรื่องเด่นของผัง", "เรื่องเด่นเรียงตามน้ำหนัก และความแม่นของเวลาเกิด", "ตำแหน่งดาวและคำอธิบายทุกดวง มุมสัมพันธ์ ดาวฤกษ์ และจุด Lots", "โหราไทย: ทักษา มหาทักษา เลข 7 ตัว", "ดาวเดินช้า 12 เดือนข้างหน้า และผังวันเกิดปีนี้"]
+          : ["An overview written by the AI reader (Claude Sonnet) from your chart's strongest themes", "Those themes ranked, and how exact your birth time needs to be", "Every position explained, aspects, fixed stars and lots", "Thai astrology: Taksa, life periods, Seven Numbers", "Slow planets for the next 12 months and this year's solar return"]
+        ).map((t) => (
+          <li key={t}>
+            <span className="v2-nr-item-d">{t}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="v2-nr-note">
+        {isTh ? "ใช้รอบดูดวงที่เติมไว้ 1 รอบ ผังเดิมโหลดซ้ำไม่หักซ้ำ" : "Uses 1 refilled reading; re-opening the same chart is free."}
       </p>
-      <label className="flex items-start gap-2 text-xs cursor-pointer">
-        <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 w-4 h-4 shrink-0" />
+      <label className="flex items-start gap-3 text-sm leading-relaxed cursor-pointer min-h-[44px]">
+        <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 w-5 h-5 shrink-0 accent-ink" />
         <span>
           {isTh
             ? "ยินยอมส่งวันเวลาสถานที่เกิดและชื่อของผังนี้ไปให้เซิร์ฟเวอร์ของเว็บคำนวณรายงาน และให้ผู้ให้บริการ AI ภายนอกเขียนภาพรวมผัง เว็บไม่บันทึกข้อมูลเกิดไว้"
@@ -63,15 +71,16 @@ export default function NatalReportPanel({ spec, lang, onClose }: { spec: ChartS
         </span>
       </label>
       <div className="flex flex-wrap gap-2">
-        <button type="button" onClick={() => void create()} disabled={!consent || busy} className="rounded-full btn-gold-glass px-4 min-h-[44px] text-sm font-bold disabled:opacity-50">
+        <button type="button" onClick={() => void create()} disabled={!consent || busy} className="rounded-full btn-gold-glass px-5 min-h-[44px] text-sm font-bold disabled:cursor-not-allowed">
           {busy ? (isTh ? "กำลังสร้างรายงาน..." : "Creating...") : isTh ? "สร้างรายงาน" : "Create report"}
         </button>
-        <button type="button" onClick={onClose} className="rounded-full border border-line-warm px-4 min-h-[44px] text-sm text-ink">
+        <button type="button" onClick={onClose} className="rounded-full border border-line-warm bg-surface px-5 min-h-[44px] text-sm text-ink">
           {isTh ? "ปิด" : "Close"}
         </button>
       </div>
+      {!consent && <p className="v2-nr-note">{isTh ? "ติ๊กยินยอมก่อน ปุ่มสร้างรายงานจึงจะกดได้" : "Tick the box first to create the report."}</p>}
       {error && (
-        <div role="alert" className="text-xs text-err space-y-1">
+        <div role="alert" className="text-sm text-err border-l-2 border-err pl-2 space-y-1">
           <p>{error.text}</p>
           {error.reason === "members_only" && (
             <a href="/account" className="underline text-gold-ink">
@@ -92,204 +101,396 @@ export default function NatalReportPanel({ spec, lang, onClose }: { spec: ChartS
 
 function ReportView({ report, onClose }: { report: NatalReport; onClose: () => void }) {
   const isTh = report.lang === "th";
-  const H = ({ children }: { children: React.ReactNode }) => <h2 className="nt-report-h2">{children}</h2>;
+  const t = (th: string, en: string) => (isTh ? th : en);
+  // หัวข้อแต่ละส่วน: เลขในวงกลม + ชื่อ + คำอธิบายบรรทัดเดียว (ชุดเดียวกับผลผังบนหน้าเว็บ)
+  const sections = [
+    { id: "ai", th: "ภาพรวมผังจากแม่หมอ AI", en: "Your chart overview from the AI reader", dTh: "เรียบเรียงจากเรื่องเด่นที่ SeerTarot คำนวณ ตำแหน่งดาวทุกตัวมาจากตัวคำนวณ", dEn: "Written from the themes SeerTarot calculated; every position comes from the calculator" },
+    { id: "themes", th: "เรื่องเด่นของผัง", en: "Your chart's strongest themes", dTh: "เรียงจากสำคัญที่สุด คำนวณจากผัง ไม่ใช้ AI", dEn: "Most important first, calculated without AI" },
+    { id: "pos", th: "ตำแหน่งดาวและเรือน", en: "Positions and houses", dTh: "ดาวแต่ละดวงอยู่ราศีไหน และตกเรือนไหนของชีวิต", dEn: "Where each planet sits, by sign and by house" },
+    { id: "body", th: "ดาวแต่ละดวงบอกอะไร", en: "What each placement says", dTh: "ดาวคือเรื่อง ราศีคือสไตล์ เรือนคือด้านของชีวิต", dEn: "Planet = what, sign = how, house = where" },
+    { id: "asp", th: "ดาวที่คุยกันแรงที่สุด", en: "Your strongest aspects", dTh: "เส้นซ้ายสีน้ำเงินคือไหลลื่น สีแดงคือตึง", dEn: "Blue edge = flowing, red edge = tense" },
+    { id: "star", th: "ดาวฤกษ์และจุด Lots", en: "Fixed stars and lots", dTh: "ดาวฤกษ์ที่ทับดาวในผัง และจุดโชคทั้ง 7 ของ Hermes", dEn: "Fixed stars on your planets, and the seven Hermetic lots" },
+    { id: "thai", th: "โหราไทย", en: "Thai astrology", dTh: "วันเกิดแบบไทย ทักษา มหาทักษา และเลข 7 ตัว", dEn: "Thai birth day, Taksa, life periods and the Seven Numbers" },
+    { id: "year", th: "12 เดือนข้างหน้า", en: "The next 12 months", dTh: "วันที่ดาวเดินช้าทำมุมตรงกับผังของคุณ", dEn: "Dates when slow planets make exact contact with your chart" },
+    ...(report.solarReturn.length ? [{ id: "sr", th: "ผังวันเกิดปีนี้", en: "This year's solar return", dTh: "ธีมของปีนับจากวันเกิดครั้งล่าสุด", dEn: "The theme of the year since your last birthday" }] : []),
+  ];
+  const H = ({ id }: { id: string }) => {
+    const i = sections.findIndex((x) => x.id === id);
+    const sec = sections[i];
+    return (
+      <header className="nr-h">
+        <span className="nr-h-n ui2-num" aria-hidden="true">
+          {i + 1}
+        </span>
+        <div>
+          <h2 className="nr-h-t">{isTh ? sec.th : sec.en}</h2>
+          <p className="nr-h-d">{isTh ? sec.dTh : sec.dEn}</p>
+        </div>
+      </header>
+    );
+  };
+  const [srHead, ...srRest] = report.solarReturn;
+
   return (
     // data-floating: หลบกฎ body > :not(...) { position: relative } ของ layout ไม่งั้นรายงานไม่ทับเต็มจอ
     <div id="nt-report-root" data-floating="" role="dialog" aria-modal="true" aria-labelledby="nt-report-title" className="nt-report">
       <div className="nt-report-bar">
         <button type="button" onClick={() => window.print()} className="rounded-full btn-gold-glass px-4 min-h-[44px] text-sm font-bold">
-          {isTh ? "บันทึกเป็น PDF / พิมพ์" : "Save as PDF / Print"}
+          {t("บันทึกเป็น PDF / พิมพ์", "Save as PDF / Print")}
         </button>
         <button type="button" onClick={onClose} className="rounded-full border border-line-warm bg-surface px-4 min-h-[44px] text-sm text-ink">
-          {isTh ? "ปิดรายงาน" : "Close report"}
+          {t("ปิดรายงาน", "Close report")}
         </button>
       </div>
       <article className="nt-report-page">
-        <header className="space-y-1">
-          <p className="text-xs tracking-widest text-gold-ink">SEERTAROT</p>
-          <h1 id="nt-report-title" className="font-serif-th font-bold text-2xl text-ink">
-            {report.title}
-          </h1>
-          <p className="text-sm text-ink">{report.birthLine}</p>
-          <p className="text-xs text-muted">{report.systemLine}</p>
-        </header>
+        {/* ── หน้าแรก: ปก + สามราศีหลัก + สรุป + ความรัก/งาน/เงิน + สารบัญ ── */}
+        <section className="nr-cover">
+          <header className="nr-cover-head">
+            <p className="nr-kicker">SeerTarot · {t("รายงานผังดวงกำเนิด", "Natal chart report")}</p>
+            <h1 id="nt-report-title" className="nr-title">
+              {report.title}
+            </h1>
+            <p className="nr-birth">{report.birthLine}</p>
+            <p className="nr-system">{report.systemLine}</p>
+          </header>
 
-        <section>
-          <H>{isTh ? "อาทิตย์ จันทร์ ลัคนา" : "Sun, Moon and Rising"}</H>
-          <ul className="space-y-1 text-sm">
+          <ul className="nr-big3">
             {report.bigThree.map((b) => (
               <li key={b.label}>
-                <strong>{b.label}</strong> {b.value} · {isTh ? "ไพ่ประจำ" : "cards"}: {b.cards.join(" + ")}
+                <span className="nr-big3-role">
+                  {b.role}
+                  <span>{b.label}</span>
+                </span>
+                <span className="nr-big3-sign">{b.sign}</span>
+                <span className="nr-big3-deg ui2-num">{b.deg}</span>
+                <span className="nr-big3-cards">
+                  {b.cards.map((c) => (
+                    <span key={c}>{c}</span>
+                  ))}
+                </span>
               </li>
             ))}
           </ul>
-          {report.summary.map((p, i) => (
-            <p key={i} className="text-sm leading-relaxed">
-              {p}
-            </p>
-          ))}
-        </section>
 
-        <section>
-          <H>{isTh ? "ภาพรวมผังจากแม่หมอ AI" : "Your chart overview from the AI reader"}</H>
-          {report.aiOverview ? (
-            <>
-              {report.aiOverview.paragraphs.map((p, i) => (
-                <div key={i} className="nt-report-block">
-                  <h3 className="font-semibold text-ink text-sm">{p.title}</h3>
-                  <p className="text-sm leading-relaxed">{stripEmoji(p.text)}</p>
+          <div className="nr-sum">
+            <p className="nr-sum-t">{t("สรุปผังของคุณ", "Your chart at a glance")}</p>
+            <dl>
+              {report.glance.map((r) => (
+                <div key={r.label}>
+                  <dt>{r.label}</dt>
+                  <dd>
+                    {r.lines.map((l) => (
+                      <span key={l}>{l}</span>
+                    ))}
+                  </dd>
                 </div>
               ))}
-              <p className="text-xs text-muted">
-                {isTh
-                  ? "เรียบเรียงโดย AI จากเรื่องเด่นที่ SeerTarot คำนวณด้านล่าง ตำแหน่งดาวทุกตัวมาจากตัวคำนวณ ไม่ได้มาจาก AI"
-                  : "Written by AI from the strongest themes SeerTarot calculated below. Every position comes from the calculator, not from the AI."}
-              </p>
-            </>
+            </dl>
+          </div>
+
+          <ul className="nr-life">
+            {report.life.map((x) => (
+              <li key={x.key}>
+                <span className="nr-life-t">{x.title}</span>
+                <span className="nr-life-from">{x.from}</span>
+                <span className="nr-life-d">{x.text}</span>
+              </li>
+            ))}
+          </ul>
+
+          <nav className="nr-toc" aria-label={t("สารบัญ", "Contents")}>
+            <p className="nr-toc-t">{t("ในเล่มนี้", "In this report")}</p>
+            <ol>
+              {sections.map((x, i) => (
+                <li key={x.id}>
+                  <span className="ui2-num">{i + 1}</span>
+                  {isTh ? x.th : x.en}
+                </li>
+              ))}
+            </ol>
+          </nav>
+        </section>
+
+        {/* ── ภาพรวมจาก AI (Sonnet · route เติม · ล้ม = null) ── */}
+        <section className="nr-sec">
+          <H id="ai" />
+          {report.aiOverview ? (
+            <div className="nr-box">
+              {report.aiOverview.paragraphs.map((p, i) => (
+                <p key={i} className="nr-line">
+                  <b>{stripEmoji(p.title)}</b>
+                  <span>{stripEmoji(p.text)}</span>
+                </p>
+              ))}
+            </div>
           ) : (
-            <p className="text-sm text-muted">
-              {isTh
-                ? "ส่วนนี้ยังสร้างไม่สำเร็จเพราะ AI ไม่ว่างตอนนี้ ปิดรายงานแล้วกดสร้างรายงานใหม่ได้โดยไม่หักรอบซ้ำ"
-                : "This part could not be written because the AI is busy. Close the report and create it again; you will not be charged twice."}
+            <p className="nr-muted">
+              {t(
+                "ส่วนนี้ยังสร้างไม่สำเร็จเพราะ AI ไม่ว่างตอนนี้ ปิดรายงานแล้วกดสร้างรายงานใหม่ได้โดยไม่หักรอบซ้ำ",
+                "This part could not be written because the AI is busy. Close the report and create it again; you will not be charged twice.",
+              )}
             </p>
           )}
         </section>
 
-        <section>
-          <H>{isTh ? "เรื่องเด่นของผัง (เรียงจากสำคัญที่สุด)" : "Your chart's strongest themes (most important first)"}</H>
-          {report.highlights.map((h) => (
-            <div key={h.title} className="nt-report-block">
-              <h3 className="font-semibold text-ink text-sm">{h.title}</h3>
-              <p className="text-sm leading-relaxed">{h.text}</p>
-            </div>
-          ))}
+        {/* ── เรื่องเด่น + ความแม่นของเวลาเกิด ── */}
+        <section className="nr-sec">
+          <H id="themes" />
+          <ol className="nr-aspects">
+            {report.highlights.map((h, i) => (
+              <li key={h.title}>
+                <span className="nr-asp-pair">
+                  <b>
+                    {i + 1}. {h.title}
+                  </b>
+                </span>
+                <span className="nr-asp-text">{h.text}</span>
+              </li>
+            ))}
+          </ol>
           {report.timeSensitivity.length > 0 && (
-            <>
-              <h3 className="font-semibold text-ink text-sm pt-2">{isTh ? "เวลาเกิดต้องแม่นแค่ไหน" : "How exact does the birth time need to be?"}</h3>
-              {report.timeSensitivity.map((t, i) => (
-                <p key={i} className="text-sm leading-relaxed">
-                  {t}
+            <div className="nr-box">
+              <p className="nr-box-t">{t("เวลาเกิดต้องแม่นแค่ไหน", "How exact does the birth time need to be?")}</p>
+              {report.timeSensitivity.map((x, i) => (
+                <p key={i} className="nr-line">
+                  <span>{x}</span>
                 </p>
               ))}
-            </>
+            </div>
           )}
         </section>
 
-        <section>
-          <H>{isTh ? "ตำแหน่งดาว" : "Positions"}</H>
-          <table className="v2-nt-table">
+        {/* ── ตำแหน่งดาวและเรือน ── */}
+        <section className="nr-sec">
+          <H id="pos" />
+          <table className="nr-table">
+            <thead>
+              <tr>
+                <th scope="col">{t("ดาว/จุด", "Body")}</th>
+                <th scope="col">{t("ราศี", "Sign")}</th>
+                <th scope="col">{t("องศา", "Degree")}</th>
+                <th scope="col">{t("เรือน", "House")}</th>
+                <th scope="col">{t("สถานะ", "Notes")}</th>
+              </tr>
+            </thead>
             <tbody>
               {report.positions.map((p) => (
                 <tr key={p.body}>
-                  <td>{p.body}</td>
-                  <td>{p.value}</td>
-                  <td>{p.house}</td>
-                  <td className="whitespace-normal">{p.notes}</td>
+                  <td>
+                    <span className="nr-abbr" aria-hidden="true">
+                      {p.short}
+                    </span>
+                    <b>{p.body}</b>
+                  </td>
+                  <td>{p.sign}</td>
+                  <td className="ui2-num">{p.deg}</td>
+                  <td className="ui2-num">{p.house}</td>
+                  <td>{p.notes && <span className="nr-note-tag">{p.notes}</span>}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {report.houses && <p className="text-xs text-muted">{report.houses.join(" · ")}</p>}
+          {report.houseCells && (
+            <>
+              <p className="nr-sub">{t("12 เรือนของชีวิต", "The 12 houses")}</p>
+              <ol className="nr-houses">
+                {report.houseCells.map((h) => (
+                  <li key={h.n} className={h.bodies.length >= 3 ? "is-busy" : undefined}>
+                    <span className="nr-house-top">
+                      <span className="nr-house-n ui2-num">{h.n}</span>
+                      <span className="nr-house-sign">
+                        {h.sign} {h.deg}
+                      </span>
+                    </span>
+                    <span className="nr-house-t">{h.title}</span>
+                    <span className="nr-house-b">{h.bodies.length ? h.bodies.join(isTh ? " " : ", ") : t("ไม่มีดาว", "No planets")}</span>
+                  </li>
+                ))}
+              </ol>
+            </>
+          )}
         </section>
 
-        <section>
-          <H>{isTh ? "คำอธิบายแต่ละตำแหน่ง" : "Each placement explained"}</H>
-          {report.bodies.map((b) => (
-            <div key={b.title} className="nt-report-block">
-              <h3 className="font-semibold text-ink text-sm">{b.title}</h3>
-              {b.paras.map((p, i) => (
-                <p key={i} className="text-sm leading-relaxed">
-                  {p}
+        {/* ── 2. ดาวแต่ละดวง ── */}
+        <section className="nr-sec nr-break">
+          <H id="body" />
+          <div className="nr-bodies">
+            {report.bodies.map((b) => (
+              <div key={b.title} className="nr-body">
+                <p className="nr-body-head">
+                  <b>{b.name}</b>
+                  <span>{b.where}</span>
+                </p>
+                <p className="nr-body-theme">{b.theme}</p>
+                {b.paras.map((p, i) => (
+                  <p key={i} className="nr-body-p">
+                    {p}
+                  </p>
+                ))}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── 3. มุมสัมพันธ์ + รูปแบบ + สมดุล ── */}
+        <section className="nr-sec nr-break">
+          <H id="asp" />
+          <ul className="nr-aspects">
+            {report.aspects.map((a) => (
+              <li key={a.title} className={`is-${a.tone}`}>
+                <span className="nr-asp-pair">
+                  <b>{a.a}</b>
+                  <span className="nr-asp-type">{a.type}</span>
+                  <b>{a.b}</b>
+                </span>
+                <span className="nr-asp-text">{a.text}</span>
+              </li>
+            ))}
+          </ul>
+          {report.patterns.length > 0 && (
+            <div className="nr-box">
+              <p className="nr-box-t">{t("รูปแบบพิเศษในผัง", "Chart patterns")}</p>
+              {report.patterns.map((p) => (
+                <p key={p.title} className="nr-line">
+                  <b>{p.title}</b>
+                  <span>{p.text}</span>
                 </p>
               ))}
             </div>
-          ))}
+          )}
+          <div className="nr-box">
+            <p className="nr-box-t">{t("สมดุลพลัง", "Balance of energy")}</p>
+            {report.balance.map((b, i) => (
+              <p key={i} className="nr-line">
+                <span>{b}</span>
+              </p>
+            ))}
+          </div>
         </section>
 
-        <section>
-          <H>{isTh ? "มุมสัมพันธ์สำคัญ" : "Key aspects"}</H>
-          {report.aspects.map((a) => (
-            <div key={a.title} className="nt-report-block">
-              <h3 className="font-semibold text-ink text-sm">{a.title}</h3>
-              <p className="text-sm leading-relaxed">{a.text}</p>
+        {/* ── 4. ดาวฤกษ์ + Lots ── */}
+        <section className="nr-sec">
+          <H id="star" />
+          {report.stars.length ? (
+            <div className="nr-box">
+              {report.stars.map((s, i) => (
+                <p key={i} className="nr-line">
+                  <span>{s}</span>
+                </p>
+              ))}
             </div>
-          ))}
-          {report.patterns.map((p) => (
-            <div key={p.title} className="nt-report-block">
-              <h3 className="font-semibold text-ink text-sm">{p.title}</h3>
-              <p className="text-sm leading-relaxed">{p.text}</p>
-            </div>
-          ))}
-          {report.balance.map((b, i) => (
-            <p key={i} className="text-sm leading-relaxed">
-              {b}
-            </p>
-          ))}
+          ) : (
+            <p className="nr-muted">{t("ไม่มีดาวฤกษ์สำคัญทับดาวในผัง", "No major star contacts.")}</p>
+          )}
+          {report.lots && (
+            <table className="nr-table">
+              <thead>
+                <tr>
+                  <th scope="col">Lot</th>
+                  <th scope="col">{t("ตำแหน่ง", "Position")}</th>
+                  <th scope="col">{t("ความหมาย", "Meaning")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {report.lots.map((l) => (
+                  <tr key={l.name}>
+                    <td>
+                      <b>{l.name}</b>
+                    </td>
+                    <td>{l.value}</td>
+                    <td className="nr-wrap">{l.meaning}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </section>
 
-        <section>
-          <H>{isTh ? "ดาวฤกษ์และจุด Lots" : "Fixed stars and lots"}</H>
-          {report.stars.length ? report.stars.map((s, i) => <p key={i} className="text-sm leading-relaxed">{s}</p>) : <p className="text-sm text-muted">{isTh ? "ไม่มีดาวฤกษ์สำคัญทับดาวในผัง" : "No major star contacts."}</p>}
-          {report.lots?.map((l) => (
-            <p key={l.name} className="text-sm leading-relaxed">
-              <strong>{l.name}</strong> {l.value}: {l.meaning}
-            </p>
-          ))}
-        </section>
-
-        <section>
-          <H>{isTh ? "โหราไทย" : "Thai astrology"}</H>
-          <p className="text-sm">{report.thai.day}</p>
-          <p className="text-sm">{report.thai.taksa.map((t) => `${t.pos}: ${t.planet}`).join(" · ")}</p>
-          {report.thai.maha.map((m, i) => (
-            <p key={i} className="text-sm leading-relaxed">
-              {m}
-            </p>
-          ))}
-          <table className="v2-nt-table text-center">
+        {/* ── 5. โหราไทย ── */}
+        <section className="nr-sec nr-break">
+          <H id="thai" />
+          <p className="nr-thai-day">{report.thai.day}</p>
+          <ul className="nr-taksa">
+            {report.thai.taksa.map((x) => (
+              <li key={x.pos}>
+                <span className="nr-taksa-pos">{x.pos}</span>
+                <b>{x.planet}</b>
+                <span className="nr-taksa-m">{x.meaning}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="nr-box">
+            <p className="nr-box-t">{t("มหาทักษา (ดาวเสวยอายุ)", "Life periods (Maha Taksa)")}</p>
+            {report.thai.maha.map((m, i) => (
+              <p key={i} className="nr-line">
+                <span>{m}</span>
+              </p>
+            ))}
+          </div>
+          <p className="nr-sub">{t("เลข 7 ตัว 4 ฐาน", "The Seven Numbers")}</p>
+          <table className="nr-table nr-seven">
             <tbody>
               {report.thai.seven.map((row, r) => (
-                <tr key={r}>
+                <tr key={r} className={r === report.thai.seven.length - 1 ? "is-sum" : undefined}>
                   {row.map((v, c) => (
-                    <td key={c}>{v}</td>
+                    <td key={c} className="ui2-num">
+                      {v}
+                    </td>
                   ))}
                 </tr>
               ))}
             </tbody>
           </table>
-          <p className="text-xs text-muted">{report.thai.sevenNotes.join(" · ")}</p>
+          <p className="nr-muted">{report.thai.sevenNotes.join(" · ")}</p>
         </section>
 
-        <section>
-          <H>{isTh ? "12 เดือนข้างหน้า (ดาวเดินช้า)" : "The next 12 months (slow planets)"}</H>
+        {/* ── 6. 12 เดือนข้างหน้า ── */}
+        <section className="nr-sec nr-break">
+          <H id="year" />
           {report.yearAhead.length ? (
-            <ul className="space-y-1">
+            <ol className="nr-timeline">
               {report.yearAhead.map((e, i) => (
-                <li key={i} className="text-sm leading-relaxed border-l-2 border-line-warm pl-2">
-                  <strong>{e.date}</strong> {e.text}
+                <li key={i}>
+                  <span className="nr-tl-date">{e.date}</span>
+                  <span className="nr-tl-text">{e.text}</span>
                 </li>
               ))}
-            </ul>
+            </ol>
           ) : (
-            <p className="text-sm text-muted">{isTh ? "ไม่มีเหตุการณ์ดาวเดินช้าที่ตรงพอดีในช่วงนี้" : "No exact slow-planet events in this period."}</p>
+            <p className="nr-muted">{t("ไม่มีเหตุการณ์ดาวเดินช้าที่ตรงพอดีในช่วงนี้", "No exact slow-planet events in this period.")}</p>
           )}
         </section>
 
+        {/* ── 7. ผังวันเกิดปีนี้ ── */}
         {report.solarReturn.length > 0 && (
-          <section>
-            <H>{isTh ? "ผังวันเกิดปีนี้" : "This year's solar return"}</H>
-            {report.solarReturn.map((s, i) => (
-              <p key={i} className="text-sm leading-relaxed">
-                {s}
-              </p>
-            ))}
+          <section className="nr-sec">
+            <H id="sr" />
+            <div className="nr-box">
+              <p className="nr-box-t">{srHead}</p>
+              {srRest.map((s, i) => {
+                const k = s.indexOf(": ");
+                return (
+                  <p key={i} className="nr-line">
+                    {k > 0 ? (
+                      <>
+                        <b>{s.slice(0, k)}</b>
+                        <span>{s.slice(k + 2)}</span>
+                      </>
+                    ) : (
+                      <span>{s}</span>
+                    )}
+                  </p>
+                );
+              })}
+            </div>
           </section>
         )}
 
-        <footer className="text-xs text-muted pt-4">
-          {isTh
-            ? "คำนวณโดย SeerTarot จากตำแหน่งดาวจริง (เทียบ NASA JPL) · เป็นแนวทางทำความเข้าใจตัวเอง ไม่ใช่คำตัดสินชีวิต · seertarot.net/natal-chart"
-            : "Calculated by SeerTarot from real planetary positions (checked against NASA JPL). A guide to self-understanding, not a verdict. seertarot.net/natal-chart"}
+        <footer className="nr-foot">
+          {t(
+            "คำนวณโดย SeerTarot จากตำแหน่งดาวจริง (เทียบ NASA JPL) · เป็นแนวทางทำความเข้าใจตัวเอง ไม่ใช่คำตัดสินชีวิต · seertarot.net/natal-chart",
+            "Calculated by SeerTarot from real planetary positions (checked against NASA JPL). A guide to self-understanding, not a verdict. seertarot.net/natal-chart",
+          )}
         </footer>
       </article>
     </div>

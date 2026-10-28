@@ -24,6 +24,8 @@ export interface NatalCardItem {
   nameTh: string;
   nameEn: string;
   image: string;
+  /** คำสำคัญหน้าตรง 3 คำ — มีเฉพาะฝั่งบิลด์ (NATAL_CARDS) ไม่ส่งเข้า island · หน้าเว็บอ่านจาก src/data/natal/card-keywords.ts */
+  kw?: { th: string; en: string };
 }
 
 export interface NatalMeta {
@@ -64,8 +66,9 @@ const HOUSE_OPTIONS: { id: HouseSystem; th: string; en: string }[] = [
 const MIN_YEAR = 1900;
 const MAX_YEAR = 2100;
 
+/* ช่องกรอก 16px กัน iPhone ซูมตอนแตะ (แผน UI 2.0 ข้อ 5.2) */
 const fieldClass =
-  "glass-field w-full rounded-xl border border-line-interactive-warm px-3 py-2.5 text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors";
+  "glass-field w-full min-h-[48px] rounded-xl border border-line-interactive-warm px-3 py-2.5 text-base font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors";
 const labelClass = "block text-xs font-serif-th font-semibold text-ink mb-1";
 
 function daysIn(year: number, month: number): number {
@@ -279,9 +282,9 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
           </Suspense>
         </div>
       )}
-      <form onSubmit={handleSubmit} className="v2-nt-noprint space-y-5" noValidate>
+      <form onSubmit={handleSubmit} className="v2-nt-noprint v2-nt-form" noValidate>
         {saved.length > 0 && (
-          <div className="space-y-2">
+          <div className="v2-nt-saved">
             <p className={labelClass}>{isEnglish ? "Charts saved on this device" : "ผังที่บันทึกไว้ในเครื่องนี้"}</p>
             <ul className="flex flex-wrap gap-2">
               {saved.map((c) => (
@@ -305,139 +308,205 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
             </ul>
           </div>
         )}
-        <div>
-          <label htmlFor="nt-name" className={labelClass}>
-            {isEnglish ? "Name (optional, stays on this page)" : "ชื่อ (ไม่บังคับ ใช้แสดงบนผังเท่านั้น)"}
-          </label>
-          <input id="nt-name" type="text" maxLength={40} value={name} onChange={(e) => setName(e.target.value)} className={fieldClass} autoComplete="off" />
-        </div>
 
-        <fieldset className="space-y-2">
-          <legend className={labelClass}>{isEnglish ? "Date of birth" : "วันเดือนปีเกิด"}</legend>
-          <div className="grid grid-cols-3 gap-2">
-            <select aria-label={isEnglish ? "Day" : "วัน"} value={day} onChange={(e) => setDay(Number(e.target.value))} className={fieldClass}>
-              {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-                <option key={d} value={d} disabled={d > maxDay}>
-                  {d}
-                </option>
-              ))}
-            </select>
-            <select aria-label={isEnglish ? "Month" : "เดือน"} value={month} onChange={(e) => setMonth(Number(e.target.value))} className={fieldClass}>
-              {(isEnglish ? MONTHS_EN : MONTHS_TH).map((m, i) => (
-                <option key={m} value={i + 1}>
-                  {m}
-                </option>
-              ))}
-            </select>
-            <input
-              aria-label={isEnglish ? `Year (${years})` : `ปี (${years})`}
-              inputMode="numeric"
-              value={yearInput}
-              onChange={(e) => setYearInput(e.target.value.replace(/[^0-9]/g, "").slice(0, 4))}
-              className={fieldClass}
-            />
-          </div>
-          <div className="v2-nt-seg" role="group" aria-label={isEnglish ? "Year format" : "รูปแบบปี"}>
-            {(["be", "ce"] as const).map((x) => (
-              <button
-                key={x}
-                type="button"
-                aria-pressed={era === x}
-                onClick={() => {
-                  if (x === era) return;
-                  if (Number.isFinite(yearNum)) setYearInput(String(x === "be" ? yearNum + 543 : yearNum - 543));
-                  setEra(x);
-                }}
-              >
-                {x === "be" ? (isEnglish ? "Buddhist Era" : "พ.ศ.") : isEnglish ? "AD (CE)" : "ค.ศ."}
-              </button>
-            ))}
-          </div>
-        </fieldset>
-
-        <fieldset className="space-y-2">
-          <legend className={labelClass}>{isEnglish ? "Time of birth (local clock time)" : "เวลาเกิด (ตามเวลาท้องถิ่น)"}</legend>
-          <div className="grid grid-cols-2 gap-2">
-            <select aria-label={isEnglish ? "Hour" : "ชั่วโมง"} value={hour} disabled={!timeKnown} onChange={(e) => setHour(Number(e.target.value))} className={fieldClass}>
-              {Array.from({ length: 24 }, (_, i) => i).map((h) => (
-                <option key={h} value={h}>
-                  {String(h).padStart(2, "0")} {isEnglish ? "h" : "นาฬิกา"}
-                </option>
-              ))}
-            </select>
-            <select aria-label={isEnglish ? "Minute" : "นาที"} value={minute} disabled={!timeKnown} onChange={(e) => setMinute(Number(e.target.value))} className={fieldClass}>
-              {Array.from({ length: 60 }, (_, i) => i).map((m) => (
-                <option key={m} value={m}>
-                  {String(m).padStart(2, "0")} {isEnglish ? "min" : "นาที"}
-                </option>
-              ))}
-            </select>
-          </div>
-          <label className="inline-flex items-center gap-2 text-sm text-ink min-h-[44px] cursor-pointer">
-            <input type="checkbox" checked={!timeKnown} onChange={(e) => setTimeKnown(!e.target.checked)} className="w-4 h-4" />
-            {isEnglish ? "I don't know my birth time" : "ไม่ทราบเวลาเกิด"}
-          </label>
-        </fieldset>
-
-        <fieldset className="space-y-2">
-          <legend className={labelClass}>{isEnglish ? "Place of birth" : "สถานที่เกิด"}</legend>
-          <div className="v2-nt-seg" role="group" aria-label={isEnglish ? "Place type" : "ประเภทสถานที่"}>
-            {(
-              [
-                ["thai", isEnglish ? "Thailand" : "จังหวัดในไทย"],
-                ["world", isEnglish ? "Search any city" : "ค้นหาเมือง"],
-                ["custom", isEnglish ? "Coordinates" : "ระบุพิกัดเอง"],
-              ] as const
-            ).map(([m, t]) => (
-              <button key={m} type="button" aria-pressed={placeMode === m} onClick={() => setPlaceMode(m)}>
-                {t}
-              </button>
-            ))}
-          </div>
-          {placeMode === "thai" && (
-            <select aria-label={isEnglish ? "Province" : "จังหวัด"} value={thaiId} onChange={(e) => setThaiId(e.target.value)} className={fieldClass}>
-              {THAI_PROVINCES.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {isEnglish ? p.en : p.th}
-                </option>
-              ))}
-            </select>
-          )}
-          {placeMode === "world" && <CitySearch lang={lang} value={worldCity} onPick={setWorldCity} fieldClass={fieldClass} />}
-          {placeMode === "custom" && (
-            <div className="grid grid-cols-3 gap-2">
+        <div className="v2-nt-sheet">
+          <div className="v2-nt-row">
+            <div className="v2-nt-row-head">
+              <span className="v2-nt-row-n ui2-num" aria-hidden="true">1</span>
               <div>
-                <label htmlFor="nt-lat" className="block text-[11px] text-muted mb-0.5">
-                  {isEnglish ? "Latitude (N +)" : "ละติจูด (เหนือ +)"}
+                <label htmlFor="nt-name" className="v2-nt-row-t">
+                  {isEnglish ? "Name" : "ชื่อ"}
                 </label>
-                <input id="nt-lat" inputMode="decimal" value={lat} onChange={(e) => setLat(e.target.value)} className={fieldClass} />
-              </div>
-              <div>
-                <label htmlFor="nt-lon" className="block text-[11px] text-muted mb-0.5">
-                  {isEnglish ? "Longitude (E +)" : "ลองจิจูด (ตะวันออก +)"}
-                </label>
-                <input id="nt-lon" inputMode="decimal" value={lon} onChange={(e) => setLon(e.target.value)} className={fieldClass} />
-              </div>
-              <div>
-                <label htmlFor="nt-off" className="block text-[11px] text-muted mb-0.5">
-                  {isEnglish ? "UTC offset (hours)" : "เขตเวลา UTC (ชม.)"}
-                </label>
-                <input id="nt-off" inputMode="decimal" value={offsetH} onChange={(e) => setOffsetH(e.target.value)} className={fieldClass} />
+                <p className="v2-nt-row-hint">{isEnglish ? "Optional, only shown on your chart" : "ไม่บังคับ ใช้แสดงบนผังเท่านั้น"}</p>
               </div>
             </div>
-          )}
-          {placeMode !== "custom" && (
-            <p className="text-xs text-muted">
-              {isEnglish
-                ? "Daylight saving time and historical time zones are applied automatically."
-                : "ระบบปรับเวลาออมแสงและเขตเวลาในอดีตให้เอง (เช่น ไทยก่อนปี 2463 ใช้เวลา +6:42)"}
-            </p>
-          )}
-        </fieldset>
+            <div className="v2-nt-row-body">
+              <input
+                id="nt-name"
+                type="text"
+                maxLength={40}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className={fieldClass}
+                autoComplete="off"
+                placeholder={isEnglish ? "e.g. Mia" : "เช่น มายด์"}
+              />
+            </div>
+          </div>
 
-        <details className="rounded-xl border border-line-warm px-3 py-2">
-          <summary className="cursor-pointer text-sm font-semibold text-ink min-h-[36px] flex items-center">{isEnglish ? "Advanced settings" : "ตั้งค่าขั้นสูง"}</summary>
-          <div className="grid gap-3 sm:grid-cols-2 pt-2">
+          <div className="v2-nt-row" role="group" aria-labelledby="nt-date-t">
+            <div className="v2-nt-row-head">
+              <span className="v2-nt-row-n ui2-num" aria-hidden="true">2</span>
+              <div>
+                <p id="nt-date-t" className="v2-nt-row-t">
+                  {isEnglish ? "Date of birth" : "วันเดือนปีเกิด"}
+                </p>
+                <p className="v2-nt-row-hint">{isEnglish ? `Year ${years}` : `ปี ${years}`}</p>
+              </div>
+            </div>
+            <div className="v2-nt-row-body space-y-2">
+              <div className="v2-nt-date">
+                <select aria-label={isEnglish ? "Day" : "วัน"} value={day} onChange={(e) => setDay(Number(e.target.value))} className={fieldClass}>
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                    <option key={d} value={d} disabled={d > maxDay}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+                <select aria-label={isEnglish ? "Month" : "เดือน"} value={month} onChange={(e) => setMonth(Number(e.target.value))} className={fieldClass}>
+                  {(isEnglish ? MONTHS_EN : MONTHS_TH).map((m, i) => (
+                    <option key={m} value={i + 1}>
+                      {m}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  aria-label={isEnglish ? `Year (${years})` : `ปี (${years})`}
+                  inputMode="numeric"
+                  value={yearInput}
+                  onChange={(e) => setYearInput(e.target.value.replace(/[^0-9]/g, "").slice(0, 4))}
+                  className={fieldClass}
+                />
+              </div>
+              <div className="v2-nt-seg" role="group" aria-label={isEnglish ? "Year format" : "รูปแบบปี"}>
+                {(["be", "ce"] as const).map((x) => (
+                  <button
+                    key={x}
+                    type="button"
+                    aria-pressed={era === x}
+                    onClick={() => {
+                      if (x === era) return;
+                      if (Number.isFinite(yearNum)) setYearInput(String(x === "be" ? yearNum + 543 : yearNum - 543));
+                      setEra(x);
+                    }}
+                  >
+                    {x === "be" ? (isEnglish ? "Buddhist Era" : "พ.ศ.") : isEnglish ? "AD (CE)" : "ค.ศ."}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="v2-nt-row" role="group" aria-labelledby="nt-time-t">
+            <div className="v2-nt-row-head">
+              <span className="v2-nt-row-n ui2-num" aria-hidden="true">3</span>
+              <div>
+                <p id="nt-time-t" className="v2-nt-row-t">
+                  {isEnglish ? "Time of birth" : "เวลาเกิด"}
+                </p>
+                <p className="v2-nt-row-hint">{isEnglish ? "Local clock time. Needed for the Ascendant and houses" : "ตามเวลาท้องถิ่น ใช้หาลัคนาและเรือนชะตา"}</p>
+              </div>
+            </div>
+            <div className="v2-nt-row-body space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <select aria-label={isEnglish ? "Hour" : "ชั่วโมง"} value={hour} disabled={!timeKnown} onChange={(e) => setHour(Number(e.target.value))} className={fieldClass}>
+                  {Array.from({ length: 24 }, (_, i) => i).map((h) => (
+                    <option key={h} value={h}>
+                      {String(h).padStart(2, "0")} {isEnglish ? "h" : "นาฬิกา"}
+                    </option>
+                  ))}
+                </select>
+                <select aria-label={isEnglish ? "Minute" : "นาที"} value={minute} disabled={!timeKnown} onChange={(e) => setMinute(Number(e.target.value))} className={fieldClass}>
+                  {Array.from({ length: 60 }, (_, i) => i).map((m) => (
+                    <option key={m} value={m}>
+                      {String(m).padStart(2, "0")} {isEnglish ? "min" : "นาที"}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <label className="v2-nt-check">
+                <input type="checkbox" checked={!timeKnown} onChange={(e) => setTimeKnown(!e.target.checked)} />
+                {isEnglish ? "I don't know my birth time" : "ไม่ทราบเวลาเกิด"}
+              </label>
+            </div>
+          </div>
+
+          <div className="v2-nt-row" role="group" aria-labelledby="nt-place-t">
+            <div className="v2-nt-row-head">
+              <span className="v2-nt-row-n ui2-num" aria-hidden="true">4</span>
+              <div>
+                <p id="nt-place-t" className="v2-nt-row-t">
+                  {isEnglish ? "Place of birth" : "สถานที่เกิด"}
+                </p>
+                <p className="v2-nt-row-hint">
+                  {placeMode !== "custom"
+                    ? isEnglish
+                      ? "Daylight saving and historical time zones are applied automatically"
+                      : "ระบบปรับเวลาออมแสงและเขตเวลาในอดีตให้เอง (เช่น ไทยก่อนปี 2463 ใช้เวลา +6:42)"
+                    : isEnglish
+                      ? "North and east are positive numbers"
+                      : "ทิศเหนือและทิศตะวันออกเป็นค่าบวก"}
+                </p>
+              </div>
+            </div>
+            <div className="v2-nt-row-body space-y-2">
+              <div className="v2-nt-seg v2-nt-seg-fill" role="group" aria-label={isEnglish ? "Place type" : "ประเภทสถานที่"}>
+                {(
+                  [
+                    ["thai", isEnglish ? "Thailand" : "จังหวัดในไทย"],
+                    ["world", isEnglish ? "Any city" : "ค้นหาเมือง"],
+                    ["custom", isEnglish ? "Coordinates" : "ระบุพิกัด"],
+                  ] as const
+                ).map(([m, t]) => (
+                  <button key={m} type="button" aria-pressed={placeMode === m} onClick={() => setPlaceMode(m)}>
+                    {t}
+                  </button>
+                ))}
+              </div>
+              {placeMode === "thai" && (
+                <select aria-label={isEnglish ? "Province" : "จังหวัด"} value={thaiId} onChange={(e) => setThaiId(e.target.value)} className={fieldClass}>
+                  {THAI_PROVINCES.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {isEnglish ? p.en : p.th}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {placeMode === "world" && <CitySearch lang={lang} value={worldCity} onPick={setWorldCity} fieldClass={fieldClass} />}
+              {placeMode === "custom" && (
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label htmlFor="nt-lat" className="block text-xs text-muted mb-1">
+                      {isEnglish ? "Latitude" : "ละติจูด"}
+                    </label>
+                    <input id="nt-lat" inputMode="decimal" value={lat} onChange={(e) => setLat(e.target.value)} className={fieldClass} />
+                  </div>
+                  <div>
+                    <label htmlFor="nt-lon" className="block text-xs text-muted mb-1">
+                      {isEnglish ? "Longitude" : "ลองจิจูด"}
+                    </label>
+                    <input id="nt-lon" inputMode="decimal" value={lon} onChange={(e) => setLon(e.target.value)} className={fieldClass} />
+                  </div>
+                  <div>
+                    <label htmlFor="nt-off" className="block text-xs text-muted mb-1">
+                      {isEnglish ? "UTC offset (h)" : "เขตเวลา UTC (ชม.)"}
+                    </label>
+                    <input id="nt-off" inputMode="decimal" value={offsetH} onChange={(e) => setOffsetH(e.target.value)} className={fieldClass} />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <details className="v2-nt-adv">
+          <summary>
+            <span className="min-w-0">
+              <span className="v2-nt-row-t">{isEnglish ? "Advanced settings" : "ตั้งค่าขั้นสูง"}</span>
+              <span className="v2-nt-adv-sum">
+                {[
+                  zodiac === "tropical" ? (isEnglish ? "Tropical" : "สายนะ") : isEnglish ? "Sidereal" : "นิรายนะ",
+                  HOUSE_OPTIONS.find((h) => h.id === houseSystem)?.[isEnglish ? "en" : "th"],
+                  nodeType === "true" ? (isEnglish ? "True node" : "โหนดจริง") : isEnglish ? "Mean node" : "โหนดเฉลี่ย",
+                ].join(", ")}
+              </span>
+            </span>
+            <span className="v2-nt-adv-tog" aria-hidden="true">
+              <span className="v2-nt-adv-closed">{isEnglish ? "Change" : "ปรับ"}</span>
+              <span className="v2-nt-adv-open">{isEnglish ? "Close" : "ปิด"}</span>
+            </span>
+          </summary>
+          <div className="grid gap-3 sm:grid-cols-2 pt-3">
             <div>
               <label htmlFor="nt-zodiac" className={labelClass}>
                 {isEnglish ? "Zodiac" : "ระบบราศี"}
@@ -479,8 +548,8 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
               </select>
             </div>
           </div>
-          <label className="inline-flex items-center gap-2 text-sm text-ink min-h-[44px] cursor-pointer pt-1">
-            <input type="checkbox" checked={asteroids} onChange={(e) => setAsteroids(e.target.checked)} className="w-4 h-4" />
+          <label className="v2-nt-check pt-1">
+            <input type="checkbox" checked={asteroids} onChange={(e) => setAsteroids(e.target.checked)} />
             {isEnglish ? "Show asteroids (Ceres, Pallas, Juno, Vesta)" : "แสดงดาวเคราะห์น้อย 4 ดวง (ซีรีส พัลลัส จูโน เวสต้า)"}
           </label>
         </details>
@@ -491,115 +560,128 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
           </p>
         )}
 
-        <button
-          type="submit"
-          disabled={busy}
-          className="btn-gold-glass w-full py-3 px-6 text-sm font-serif-th font-bold duration-200 cursor-pointer active:scale-95 tracking-wide disabled:opacity-70"
-        >
-          {busy ? (isEnglish ? "Calculating..." : "กำลังคำนวณ...") : result ? (isEnglish ? "Recalculate chart" : "คำนวณผังใหม่") : isEnglish ? "Create my chart" : "สร้างผังดวงของฉัน"}
-        </button>
-        <p className="text-xs text-muted text-center">
-          {isEnglish
-            ? "Calculated entirely in your browser. Your birth data is never sent anywhere, and is only kept on this device if you press save."
-            : "คำนวณในเครื่องของคุณทั้งหมด ข้อมูลวันเกิดไม่ถูกส่งออกไปไหน และจะเก็บไว้ในเครื่องนี้ก็ต่อเมื่อคุณกดบันทึกเอง"}
-        </p>
+        <div className="v2-nt-submit">
+          <button
+            type="submit"
+            disabled={busy}
+            className="btn-gold-glass w-full py-3.5 px-6 text-base font-serif-th font-bold duration-200 cursor-pointer active:scale-95 tracking-wide disabled:opacity-70"
+          >
+            {busy ? (isEnglish ? "Calculating..." : "กำลังคำนวณ...") : result ? (isEnglish ? "Recalculate chart" : "คำนวณผังใหม่") : isEnglish ? "Create my chart" : "สร้างผังดวงของฉัน"}
+          </button>
+          <p className="v2-nt-privacy">
+            <span className="font-semibold text-ink">{isEnglish ? "Private by design." : "ข้อมูลไม่ออกจากเครื่อง"}</span>{" "}
+            {isEnglish
+              ? "Calculated entirely in your browser. Your birth data is never sent anywhere, and is only kept on this device if you press save."
+              : "คำนวณในเครื่องของคุณทั้งหมด ข้อมูลวันเกิดไม่ถูกส่งออกไปไหน และจะเก็บไว้ในเครื่องนี้ก็ต่อเมื่อคุณกดบันทึกเอง"}
+          </p>
+        </div>
       </form>
 
       <div ref={resultRef} className="scroll-mt-24" aria-live="polite">
         {result && (
           <Suspense fallback={<p className="text-sm text-muted text-center">{isEnglish ? "Drawing your chart..." : "กำลังวาดผังดวง..."}</p>}>
-            <NatalResult chart={result.chart} lang={lang} meta={result.meta} cards={cards} spec={result.spec} />
-            <div className="v2-nt-noprint flex flex-wrap justify-center gap-2 pt-6">
-              <button type="button" onClick={handleSave} disabled={saveState === "saved"} className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px] disabled:opacity-70">
-                {saveState === "saved"
-                  ? isEnglish
-                    ? "Saved on this device"
-                    : "บันทึกไว้ในเครื่องนี้แล้ว"
-                  : isEnglish
-                    ? "Save this chart on this device"
-                    : "บันทึกผังนี้ไว้ในเครื่องนี้"}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShareStep("confirm");
-                  setShareNote(null);
-                }}
-                className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]"
-              >
-                {isEnglish ? "Send this chart to a friend" : "ส่งผังนี้ให้เพื่อน"}
-              </button>
-              <button type="button" onClick={() => setReportOpen(true)} className="rounded-full border border-gold-ink bg-surface px-4 py-2 text-sm font-semibold text-ink min-h-[44px]">
-                {isEnglish ? "Full report (PDF)" : "รายงานฉบับเต็ม (PDF)"}
-              </button>
-              <button type="button" onClick={() => window.print()} className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]">
-                {isEnglish ? "Print this page" : "พิมพ์หน้านี้"}
-              </button>
-              <button
-                type="button"
-                onClick={() => document.getElementById("natal-app")?.scrollIntoView({ behavior: smoothScrollBehavior() })}
-                className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]"
-              >
-                {isEnglish ? "Edit birth details" : "แก้ข้อมูลเกิด"}
-              </button>
-            </div>
-            {reportOpen && (
-              <Suspense fallback={null}>
-                <NatalReportPanel spec={result.spec} lang={lang} onClose={() => setReportOpen(false)} />
-              </Suspense>
-            )}
-            {shareStep !== "idle" && (
-              <div className="mx-auto mt-3 max-w-xl rounded-xl border border-line-warm bg-surface/70 p-3 space-y-2 text-sm text-ink">
-                <p>
-                  {isEnglish
-                    ? "The link contains the birth date, time, place and name of this chart, so your friend can open it and compare charts. It goes straight from you to them and is not stored by the site. Only send it to people you trust."
-                    : "ลิงก์นี้มีวันเวลาสถานที่เกิดและชื่อของผังนี้ เพื่อนเปิดแล้วเทียบผังกันได้ทันที ข้อมูลส่งจากคุณถึงเพื่อนตรง ๆ เว็บไม่ได้เก็บไว้ ส่งให้เฉพาะคนที่ไว้ใจเท่านั้น"}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      const url = `${window.location.origin}${isEnglish ? "/en" : ""}/natal-chart#add=${encodeChartShare(result.spec)}`;
-                      try {
-                        if (navigator.share) {
-                          await navigator.share({ title: isEnglish ? "My natal chart" : "ผังดวงของฉัน", url });
-                          setShareStep("done");
-                          return;
-                        }
-                      } catch (err) {
-                        if ((err as { name?: string })?.name === "AbortError") return;
-                      }
-                      try {
-                        await navigator.clipboard.writeText(url);
-                        setShareNote(isEnglish ? "Link copied. Paste it into a chat with your friend." : "คัดลอกลิงก์แล้ว วางในแชทกับเพื่อนได้เลย");
-                      } catch {
-                        setShareNote(url);
-                      }
-                      setShareStep("done");
-                    }}
-                    className="rounded-full btn-gold-glass px-4 min-h-[44px] text-sm font-bold"
-                  >
-                    {isEnglish ? "Create the link" : "สร้างลิงก์"}
-                  </button>
-                  <button type="button" onClick={() => setShareStep("idle")} className="rounded-full border border-line-warm px-4 min-h-[44px] text-sm text-ink">
-                    {isEnglish ? "Cancel" : "ยกเลิก"}
-                  </button>
+            <NatalResult
+              chart={result.chart}
+              lang={lang}
+              meta={result.meta}
+              cards={cards}
+              spec={result.spec}
+              actions={
+                <div className="v2-nt-noprint space-y-2">
+                  <div className="v2-nr-actions">
+                    <button type="button" onClick={handleSave} disabled={saveState === "saved"} className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px] disabled:opacity-70">
+                      {saveState === "saved"
+                        ? isEnglish
+                          ? "Saved"
+                          : "บันทึกแล้ว"
+                        : isEnglish
+                          ? "Save on this device"
+                          : "บันทึกในเครื่องนี้"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShareStep("confirm");
+                        setShareNote(null);
+                      }}
+                      className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]"
+                    >
+                      {isEnglish ? "Send to a friend" : "ส่งให้เพื่อน"}
+                    </button>
+                    <button type="button" onClick={() => setReportOpen(true)} className="rounded-full border border-gold-ink bg-surface px-4 py-2 text-sm font-semibold text-ink min-h-[44px]">
+                      {isEnglish ? "Full report (PDF)" : "รายงานเต็ม (PDF)"}
+                    </button>
+                    <button type="button" onClick={() => window.print()} className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]">
+                      {isEnglish ? "Print" : "พิมพ์"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById("natal-app")?.scrollIntoView({ behavior: smoothScrollBehavior() })}
+                      className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]"
+                    >
+                      {isEnglish ? "Edit birth details" : "แก้ข้อมูลเกิด"}
+                    </button>
+                  </div>
+                  {reportOpen && (
+                    <Suspense fallback={null}>
+                      <NatalReportPanel spec={result.spec} lang={lang} onClose={() => setReportOpen(false)} />
+                    </Suspense>
+                  )}
+                  {shareStep !== "idle" && (
+                    <div className="mx-auto mt-3 max-w-xl rounded-xl border border-line-warm bg-surface/70 p-3 space-y-2 text-sm text-ink">
+                      <p>
+                        {isEnglish
+                          ? "The link contains the birth date, time, place and name of this chart, so your friend can open it and compare charts. It goes straight from you to them and is not stored by the site. Only send it to people you trust."
+                          : "ลิงก์นี้มีวันเวลาสถานที่เกิดและชื่อของผังนี้ เพื่อนเปิดแล้วเทียบผังกันได้ทันที ข้อมูลส่งจากคุณถึงเพื่อนตรง ๆ เว็บไม่ได้เก็บไว้ ส่งให้เฉพาะคนที่ไว้ใจเท่านั้น"}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const url = `${window.location.origin}${isEnglish ? "/en" : ""}/natal-chart#add=${encodeChartShare(result.spec)}`;
+                            try {
+                              if (navigator.share) {
+                                await navigator.share({ title: isEnglish ? "My natal chart" : "ผังดวงของฉัน", url });
+                                setShareStep("done");
+                                return;
+                              }
+                            } catch (err) {
+                              if ((err as { name?: string })?.name === "AbortError") return;
+                            }
+                            try {
+                              await navigator.clipboard.writeText(url);
+                              setShareNote(isEnglish ? "Link copied. Paste it into a chat with your friend." : "คัดลอกลิงก์แล้ว วางในแชทกับเพื่อนได้เลย");
+                            } catch {
+                              setShareNote(url);
+                            }
+                            setShareStep("done");
+                          }}
+                          className="rounded-full btn-gold-glass px-4 min-h-[44px] text-sm font-bold"
+                        >
+                          {isEnglish ? "Create the link" : "สร้างลิงก์"}
+                        </button>
+                        <button type="button" onClick={() => setShareStep("idle")} className="rounded-full border border-line-warm px-4 min-h-[44px] text-sm text-ink">
+                          {isEnglish ? "Cancel" : "ยกเลิก"}
+                        </button>
+                      </div>
+                      {shareNote && <p className="text-xs text-muted break-all">{shareNote}</p>}
+                    </div>
+                  )}
+                  {saveState === "failed" && (
+                    <p role="alert" className="text-sm text-err text-center pt-2">
+                      {isEnglish ? "Could not save: this browser blocks local storage (private mode?)." : "บันทึกไม่ได้ เบราว์เซอร์นี้ปิดการเก็บข้อมูลในเครื่อง (อาจเป็นโหมดส่วนตัว)"}
+                    </p>
+                  )}
+                  {saveState === "saved" && (
+                    <p className="text-xs text-muted text-center pt-2">
+                      {isEnglish
+                        ? "Saved only in this browser. Delete it any time from the list above the form."
+                        : "เก็บไว้ในเบราว์เซอร์นี้เท่านั้น ลบได้ทุกเมื่อจากรายการเหนือฟอร์ม"}
+                    </p>
+                  )}
                 </div>
-                {shareNote && <p className="text-xs text-muted break-all">{shareNote}</p>}
-              </div>
-            )}
-            {saveState === "failed" && (
-              <p role="alert" className="text-sm text-err text-center pt-2">
-                {isEnglish ? "Could not save: this browser blocks local storage (private mode?)." : "บันทึกไม่ได้ เบราว์เซอร์นี้ปิดการเก็บข้อมูลในเครื่อง (อาจเป็นโหมดส่วนตัว)"}
-              </p>
-            )}
-            {saveState === "saved" && (
-              <p className="text-xs text-muted text-center pt-2">
-                {isEnglish
-                  ? "Saved only in this browser. Delete it any time from the list above the form."
-                  : "เก็บไว้ในเบราว์เซอร์นี้เท่านั้น ลบได้ทุกเมื่อจากรายการเหนือฟอร์ม"}
-              </p>
-            )}
+              }
+            />
           </Suspense>
         )}
       </div>

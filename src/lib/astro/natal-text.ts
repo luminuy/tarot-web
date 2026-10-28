@@ -145,11 +145,46 @@ export function describeBody(chart: NatalChart, b: BodyPosition, lang: Lang): st
   return out;
 }
 
+/**
+ * ประโยคของมุมหลัก 5 แบบ ใช้ทั้งชื่อเรื่อง (noun) และการกระทำ (verb) ของดาวทั้งสองดวง
+ * (เจ้าของ 2026-10-28 "สื่อความหมายไม่ชัด" — แบบเดิมใช้ประโยคเดียวกันทุกคู่ดาว) · มุมรองยังใช้ความหมายกลางของมุม
+ */
 export function describeAspect(a: Aspect, lang: Lang): string {
   const A = BODY_TEXT[a.a];
   const B = BODY_TEXT[a.b];
   const meaning = ASPECT_TEXT[a.type].meaning[lang];
-  return lang === "th" ? `${A.noun.th} กับ${thw(B.noun.th)}ของคุณ: ${meaning}` : `Your ${A.noun.en} with your ${B.noun.en}: ${meaning}.`;
+  if (lang === "th") {
+    const an = thw(A.noun.th);
+    const bn = thw(B.noun.th);
+    switch (a.type) {
+      case "conjunction":
+        return `เรื่อง${an}กับเรื่อง${bn}ของคุณผูกกันแน่น ขยับเรื่องหนึ่ง อีกเรื่องก็ขยับตาม`;
+      case "trine":
+        return `เรื่อง${an}ช่วยหนุนเรื่อง${bn}ของคุณอย่างเป็นธรรมชาติ เป็นพรสวรรค์ที่ใช้ได้โดยไม่ต้องพยายาม อย่ามองข้ามเพราะมันง่ายเกินไป`;
+      case "sextile":
+        return `เมื่อคุณลงมือ เรื่อง${an}จะเปิดทางให้เรื่อง${bn} เป็นโอกาสที่ต้องคว้าเอง`;
+      case "square":
+        return `ใจหนึ่งอยาก${A.verb.th} อีกใจอยาก${B.verb.th} สองอย่างนี้มักขัดกันจนหงุดหงิด แต่แรงเสียดทานนี้ทำให้คุณเก่งขึ้น`;
+      case "opposition":
+        return `คุณมักแกว่งระหว่างการ${A.verb.th} กับการ${B.verb.th} และมักเห็นเรื่องนี้ผ่านคนใกล้ตัว ทางออกคือหาจุดกลาง ไม่ต้องเลือกข้าง`;
+      default:
+        return `${A.noun.th} กับ${bn}ของคุณ: ${meaning}`;
+    }
+  }
+  switch (a.type) {
+    case "conjunction":
+      return `Your ${A.noun.en} and your ${B.noun.en} are tightly bound: when one moves, the other follows.`;
+    case "trine":
+      return `Your ${A.noun.en} naturally supports your ${B.noun.en}. It is a gift that works without effort, so don't overlook it just because it comes easily.`;
+    case "sextile":
+      return `When you take action, your ${A.noun.en} opens doors for your ${B.noun.en}, an opportunity you have to seize.`;
+    case "square":
+      return `Part of you wants to ${A.verb.en}, another part wants to ${B.verb.en}. They often clash and frustrate you, but the friction makes you stronger.`;
+    case "opposition":
+      return `You swing between wanting to ${A.verb.en} and wanting to ${B.verb.en}, often seeing it through the people close to you. The answer is a middle path, not picking a side.`;
+    default:
+      return `Your ${A.noun.en} with your ${B.noun.en}: ${meaning}.`;
+  }
 }
 
 export function aspectTitle(a: Aspect, lang: Lang): string {
@@ -219,6 +254,97 @@ export function chartSummary(chart: NatalChart, lang: Lang): string[] {
     );
   }
   return out.map(cap);
+}
+
+// ─────────────────────────── สรุปสั้น (หน้าเว็บ + รายงานฉบับเต็มใช้ชุดเดียวกัน) ───────────────────────────
+
+export interface SummaryRow {
+  label: string;
+  /** แยกบรรทัดละข้อ อ่านไล่ตาง่ายกว่าประโยคยาวที่ต่อด้วย "และ" หลายครั้ง */
+  lines: string[];
+}
+
+const afterColon = (s: string) => (s.includes(": ") ? s.slice(s.indexOf(": ") + 2) : s);
+
+/** จุดแข็ง · ต้องระวัง · ธาตุเด่น · รูปแบบพิเศษ (เจ้าของ 2026-10-28 "อยากให้มีสรุป") */
+export function chartGlance(chart: NatalChart, lang: Lang): SummaryRow[] {
+  const th = lang === "th";
+  const get = (id: BodyId) => chart.bodies.find((b) => b.id === id);
+  const sun = get("sun")!;
+  const moon = get("moon")!;
+  const asc = get("asc");
+  const uniq = (xs: string[]) => [...new Set(xs)].map(cap);
+  const el: Element = topKey(chart.distribution.elementScore);
+  const rows: SummaryRow[] = [
+    { label: th ? "จุดแข็ง" : "Strengths", lines: uniq([SIGN_TEXT[sun.sign].gift[lang], SIGN_TEXT[moon.sign].gift[lang], ...(asc ? [SIGN_TEXT[asc.sign].gift[lang]] : [])]) },
+    { label: th ? "ต้องระวัง" : "Watch out for", lines: uniq([SIGN_TEXT[sun.sign].watch[lang], SIGN_TEXT[moon.sign].watch[lang]]) },
+    { label: th ? `ธาตุเด่น: ${ELEMENT_TEXT[el].name.th}` : `Strongest element: ${ELEMENT_TEXT[el].name.en}`, lines: [afterColon(ELEMENT_TEXT[el].strong[lang])] },
+  ];
+  // "ดาวรวมกลุ่มในราศีเดียว: ราศีมังกร" ×2 ➔ "ดาวรวมกลุ่มในราศีเดียว: ราศีมังกร ราศีกุมภ์"
+  const groups = new Map<string, string[]>();
+  for (const p of chart.patterns) {
+    const t = describePattern(chart, p, lang).title;
+    const i = t.indexOf(": ");
+    const head = i < 0 ? t : t.slice(0, i);
+    if (!groups.has(head)) groups.set(head, []);
+    if (i >= 0) groups.get(head)!.push(t.slice(i + 2));
+  }
+  if (groups.size) {
+    rows.push({
+      label: th ? "รูปแบบพิเศษ" : "Chart pattern",
+      lines: [...groups].map(([head, parts]) => (parts.length ? `${head}: ${parts.join(th ? " " : ", ")}` : head)),
+    });
+  }
+  return rows;
+}
+
+export interface LifeArea {
+  key: "love" | "work" | "money";
+  title: string;
+  /** ดาว/จุดที่ใช้อ่าน เช่น "ดาวศุกร์ราศีพิจิก" */
+  from: string;
+  text: string;
+}
+
+/** ความรัก · การงาน · การเงิน — จากดาวศุกร์ ดาวอังคาร ดาวพฤหัส และจุดเริ่มเรือน 2 / 7 / 10 (คำนวณ ไม่ใช้ AI) */
+export function lifeAreas(chart: NatalChart, lang: Lang): LifeArea[] {
+  const th = lang === "th";
+  const get = (id: BodyId) => chart.bodies.find((b) => b.id === id)!;
+  const venus = get("venus");
+  const mars = get("mars");
+  const jupiter = get("jupiter");
+  const cuspSign = (n: number) => (chart.houses ? Math.floor(chart.houses[n - 1] / 30) % 12 : null);
+  const in10 = chart.bodies.filter((b) => b.house === 10 && (PLANET_IDS as readonly string[]).includes(b.id));
+  const names = in10.map((b) => bodyName(b.id, lang)).join(th ? " " : ", ");
+  const dsc = cuspSign(7);
+  const mc = cuspSign(10);
+  const h2 = cuspSign(2);
+  return [
+    {
+      key: "love",
+      title: th ? "ความรัก" : "Love",
+      from: th ? `ดาวศุกร์${signName(venus.sign, lang)}` : `Venus in ${signName(venus.sign, lang)}`,
+      text: th
+        ? `คุณรัก${SIGN_TEXT[venus.sign].style.th}${dsc !== null ? ` คนที่ดึงดูดคุณมักเป็นคน${SIGN_TEXT[dsc].keywords.th}` : ""}`
+        : `You love ${SIGN_TEXT[venus.sign].style.en}.${dsc !== null ? ` You are drawn to people who are ${SIGN_TEXT[dsc].keywords.en}.` : ""}`,
+    },
+    {
+      key: "work",
+      title: th ? "การงาน" : "Work",
+      from: mc !== null ? (th ? `กลางฟ้า${signName(mc, lang)}` : `Midheaven in ${signName(mc, lang)}`) : th ? `ดาวอังคาร${signName(mars.sign, lang)}` : `Mars in ${signName(mars.sign, lang)}`,
+      text: th
+        ? `${mc !== null ? `งานที่ใช่คืองานที่คุณได้เป็นคน${SIGN_TEXT[mc].keywords.th} ` : ""}คุณลงมือทำงาน${SIGN_TEXT[mars.sign].style.th}${in10.length ? ` มี${names}อยู่เรือนงาน งานจึงเป็นเรื่องใหญ่ของชีวิต` : ""}`
+        : `${mc !== null ? `The right work lets you be ${SIGN_TEXT[mc].keywords.en}. ` : ""}You get things done ${SIGN_TEXT[mars.sign].style.en}.${in10.length ? ` With ${names} in your career house, work is a big part of your life.` : ""}`,
+    },
+    {
+      key: "money",
+      title: th ? "การเงิน" : "Money",
+      from: h2 !== null ? (th ? `เรือน 2 ${signName(h2, lang)}` : `2nd house in ${signName(h2, lang)}`) : th ? `ดาวพฤหัสบดี${signName(jupiter.sign, lang)}` : `Jupiter in ${signName(jupiter.sign, lang)}`,
+      text: th
+        ? `${h2 !== null ? `คุณจัดการเงิน${SIGN_TEXT[h2].style.th} ` : ""}${jupiter.house ? `โชคและโอกาสมักมาทาง${HOUSE_TEXT[jupiter.house - 1].arena.th}` : `โชคและโอกาสมาเมื่อคุณใช้ชีวิต${SIGN_TEXT[jupiter.sign].style.th}`}`
+        : `${h2 !== null ? `You handle money ${SIGN_TEXT[h2].style.en}. ` : ""}${jupiter.house ? `Luck and opportunity tend to come through ${HOUSE_TEXT[jupiter.house - 1].arena.en}.` : `Luck comes when you live ${SIGN_TEXT[jupiter.sign].style.en}.`}`,
+    },
+  ];
 }
 
 // ─────────────────────────── ตามเวลา ───────────────────────────

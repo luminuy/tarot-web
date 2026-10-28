@@ -7,7 +7,7 @@
  * มีเฉพาะส่วนที่ไม่มีในหน้าเว็บแบบฟรี: ภาพรวมผังจาก Sonnet · พยากรณ์ดาวเดินช้า 12 เดือนข้างหน้า และผังวันเกิดปีนี้ รวมในเล่มเดียว
  */
 import { cardById } from "@/data/cards";
-import { ASPECT_TEXT, DIGNITY_TEXT, ELEMENT_TEXT, HOUSE_SYSTEM_TEXT, MODALITY_TEXT, type Lang } from "@/data/natal/content";
+import { ASPECT_TEXT, BODY_TEXT, DIGNITY_TEXT, ELEMENT_TEXT, HOUSE_SYSTEM_TEXT, HOUSE_TEXT, MODALITY_TEXT, type Lang } from "@/data/natal/content";
 import { LOT_TEXT, STAR_TEXT } from "@/data/natal/stars-content";
 import { MAHA_TAKSA_TONE, SEVEN_COLUMNS, TAKSA_TEXT, THAI_DAY_NAME, THAI_PLANET_NAME } from "@/data/natal/thai-content";
 import { buildChart, type ChartSpec } from "./chart-spec";
@@ -15,8 +15,8 @@ import { birthTimeSensitivity, chartHighlights, describeTimeSensitivity } from "
 import type { NatalOverview } from "./natal-overview";
 import { starContacts } from "./fixed-stars";
 import { hermeticLots } from "./lots";
-import { formatDegree, type BodyId, type NatalChart } from "./natal";
-import { aspectTitle, bodyName, cardsFor, chartSummary, describeAspect, describeBody, describePattern, describeTimedAspect, describeTransitHouse, placement, returnHighlights, signName } from "./natal-text";
+import { ASPECT_DEFS, PLANET_IDS, formatDegree, type BodyId, type NatalChart } from "./natal";
+import { aspectTitle, bodyName, cardsFor, chartGlance, chartSummary, describeAspect, describeBody, describePattern, describeTimedAspect, describeTransitHouse, lifeAreas, placement, returnHighlights, signName, type LifeArea, type SummaryRow } from "./natal-text";
 import { solarReturn, transitCalendar } from "./techniques";
 import { mahaTaksa, sevenNumbers, taksa, TAKSA_POSITIONS, thaiBirthDay } from "./thai-astro";
 import { LUNAR_MONTH_TH, NAKSAT_EN, NAKSAT_TH } from "./thai-lunar";
@@ -26,7 +26,7 @@ export interface NatalReport {
   title: string;
   birthLine: string;
   systemLine: string;
-  bigThree: { label: string; value: string; cards: string[] }[];
+  bigThree: { label: string; value: string; cards: string[]; role: string; sign: string; deg: string }[];
   /** ภาพรวมผังที่ Claude Sonnet เรียบเรียง — route เติมหลังประกอบรายงาน · AI ล้ม = null (รายงานส่วนอื่นยังครบ) */
   aiOverview: NatalOverview | null;
   /** เรื่องเด่นของผังเรียงตามน้ำหนัก (โค้ดคำนวณ) */
@@ -34,10 +34,15 @@ export interface NatalReport {
   /** เวลาเกิดคลาดกี่นาทีแล้วอะไรเปลี่ยน (ไม่รู้เวลาเกิด = ว่าง) */
   timeSensitivity: string[];
   summary: string[];
-  positions: { body: string; value: string; house: string; notes: string }[];
+  /** สรุปสั้นแบบป้าย + บรรทัด (ชุดเดียวกับหน้าเว็บ) */
+  glance: SummaryRow[];
+  /** ความรัก · การงาน · การเงิน */
+  life: LifeArea[];
+  positions: { body: string; value: string; house: string; notes: string; short: string; sign: string; deg: string }[];
   houses: string[] | null;
-  bodies: { title: string; paras: string[] }[];
-  aspects: { title: string; text: string }[];
+  houseCells: { n: number; sign: string; deg: string; title: string; bodies: string[] }[] | null;
+  bodies: { title: string; paras: string[]; name: string; where: string; theme: string }[];
+  aspects: { title: string; text: string; a: string; b: string; type: string; tone: "harmonious" | "tense" | "neutral" }[];
   patterns: { title: string; text: string }[];
   balance: string[];
   stars: string[];
@@ -63,11 +68,22 @@ export function buildNatalReport(spec: ChartSpec, lang: Lang, nowMs: number): Na
   const pad = (n: number) => String(n).padStart(2, "0");
   const place = th ? spec.place.label : spec.place.labelEn ?? spec.place.label;
 
+  const shortSign = (sign: number) => signName(sign, lang).replace(th ? "ราศี" : "", "");
   const bigThree = (["sun", "moon", "asc"] as const).flatMap((id) => {
     const b = get(id);
     if (!b) return [];
     const c = cardsFor(b);
-    return [{ label: bodyName(id, lang), value: placement(b, lang), cards: [cardName(c.sign, lang), cardName(c.decan, lang)].filter((x): x is string => !!x) }];
+    const role = { sun: th ? "ตัวตน" : "Core self", moon: th ? "ใจ" : "Heart", asc: th ? "ภาพที่คนเห็น" : "First impression" }[id];
+    return [
+      {
+        label: bodyName(id, lang),
+        value: placement(b, lang),
+        cards: [cardName(c.sign, lang), cardName(c.decan, lang)].filter((x): x is string => !!x),
+        role,
+        sign: shortSign(b.sign),
+        deg: formatDegree(b.degInSign),
+      },
+    ];
   });
 
   const positions = chart.bodies
@@ -77,6 +93,9 @@ export function buildNatalReport(spec: ChartSpec, lang: Lang, nowMs: number): Na
       value: placement(b, lang),
       house: b.house ? String(b.house) : "-",
       notes: [b.retrograde && b.id !== "node" ? (th ? "ถอยหลัง" : "retrograde") : "", ...b.dignities.map((d) => DIGNITY_TEXT[d].name[lang])].filter(Boolean).join(" · "),
+      short: BODY_TEXT[b.id].short[lang],
+      sign: shortSign(b.sign),
+      deg: formatDegree(b.degInSign),
     }));
 
   const es = chart.distribution.elementScore;
@@ -134,10 +153,39 @@ export function buildNatalReport(spec: ChartSpec, lang: Lang, nowMs: number): Na
       return ts ? describeTimeSensitivity(ts, lang) : [];
     })(),
     summary: chartSummary(chart, lang),
+    glance: chartGlance(chart, lang),
+    life: lifeAreas(chart, lang),
+    houseCells: chart.houses
+      ? chart.houses.map((c, i) => ({
+          n: i + 1,
+          sign: shortSign(Math.floor(c / 30) % 12),
+          deg: formatDegree(c % 30),
+          title: HOUSE_TEXT[i].title[lang],
+          bodies: chart.bodies.filter((b) => b.house === i + 1 && (PLANET_IDS as readonly string[]).includes(b.id)).map((b) => bodyName(b.id, lang)),
+        }))
+      : null,
     positions,
     houses: chart.houses ? chart.houses.map((c, i) => `${i + 1}: ${signName(Math.floor(c / 30) % 12, lang)} ${formatDegree(c % 30)}`) : null,
-    bodies: chart.bodies.filter((b) => MAIN.includes(b.id)).map((b) => ({ title: `${bodyName(b.id, lang)} ${placement(b, lang)}${b.house ? (th ? ` เรือน ${b.house}` : `, house ${b.house}`) : ""}`, paras: describeBody(chart, b, lang) })),
-    aspects: [...chart.aspects].sort((a, b) => a.orb - b.orb).slice(0, 20).map((a) => ({ title: aspectTitle(a, lang), text: describeAspect(a, lang) })),
+    bodies: chart.bodies
+      .filter((b) => MAIN.includes(b.id))
+      .map((b) => ({
+        title: `${bodyName(b.id, lang)} ${placement(b, lang)}${b.house ? (th ? ` เรือน ${b.house}` : `, house ${b.house}`) : ""}`,
+        paras: describeBody(chart, b, lang),
+        name: bodyName(b.id, lang),
+        where: `${placement(b, lang)}${b.house ? (th ? ` เรือน ${b.house}` : `, house ${b.house}`) : ""}`,
+        theme: BODY_TEXT[b.id].theme[lang],
+      })),
+    aspects: [...chart.aspects]
+      .sort((a, b) => a.orb - b.orb)
+      .slice(0, 20)
+      .map((a) => ({
+        title: aspectTitle(a, lang),
+        text: describeAspect(a, lang),
+        a: bodyName(a.a, lang),
+        b: bodyName(a.b, lang),
+        type: ASPECT_TEXT[a.type].name[lang].replace(/\s*\(.*\)$/, ""),
+        tone: ASPECT_DEFS.find((d) => d.type === a.type)?.tone ?? "neutral",
+      })),
     patterns: chart.patterns.map((p) => describePattern(chart, p, lang)),
     balance: [ELEMENT_TEXT[topEl[0]].strong[lang], ELEMENT_TEXT[topEl[3]].weak[lang], MODALITY_TEXT[topMo[0]].strong[lang]],
     stars: starContacts(chart).map((c) => `${th ? STAR_TEXT[c.star.name]?.th ?? c.star.name : c.star.name} ${th ? "ทับ" : "on"} ${bodyName(c.body, lang)} (orb ${formatDegree(c.orb)}): ${STAR_TEXT[c.star.name]?.meaning[lang] ?? ""}`),
