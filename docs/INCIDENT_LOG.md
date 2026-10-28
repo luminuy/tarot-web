@@ -238,7 +238,7 @@ npm run commit -- --agent <ชื่อ> --type fix --scope <หมวด> \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
-### INC-0308 · 2026-10-28 22:47 · 🟡 Medium · ด่าน marketplace 18.6 ไม่ขึ้นกับ .dev-marketplace.db ที่ค้างข้ามรอบ
+### INC-0309 · 2026-10-28 22:47 · 🟡 Medium · ด่าน marketplace 18.6 ไม่ขึ้นกับ .dev-marketplace.db ที่ค้างข้ามรอบ
 
 | หัวข้อ | รายละเอียด |
 | :--- | :--- |
