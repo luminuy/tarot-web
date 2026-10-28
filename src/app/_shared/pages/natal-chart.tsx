@@ -10,6 +10,8 @@ import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 import { ZODIAC_SIGNS } from "@/data/zodiac";
 import { ASPECT_TEXT, BODY_TEXT, HOUSE_TEXT, SIGN_TEXT } from "@/data/natal/content";
+import { CardImage } from "@/components/card/CardImage";
+import { ASPECT_DEFS } from "@/lib/astro/natal";
 import { clampDescription, pickTitle } from "@/lib/config/meta-length";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
@@ -133,6 +135,39 @@ function JsonLd({ data }: { data: unknown }) {
 const PLANET_KEYS = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron", "node", "lilith", "asc"] as const;
 const MAJOR_ASPECTS = ["conjunction", "sextile", "square", "trine", "opposition"] as const;
 
+const LAYERS = [
+  { th: "ดาว", en: "Planet", qTh: "เรื่องอะไร", qEn: "what part of you" },
+  { th: "ราศี", en: "Sign", qTh: "แสดงออกแบบไหน", qEn: "how it shows" },
+  { th: "เรือน", en: "House", qTh: "เกิดในเรื่องไหนของชีวิต", qEn: "where in life" },
+  { th: "มุมสัมพันธ์", en: "Aspect", qTh: "ดาวคุยกันแบบไหน", qEn: "how planets talk" },
+] as const;
+
+/** สีช่องธาตุเดียวกับวงผัง (`--nt-fire` ฯลฯ ใน v2-natal.css) */
+const ELEMENTS = [
+  { id: "fire", th: "ธาตุไฟ", en: "Fire", noteTh: "ลงมือ กระตือรือร้น", noteEn: "action and drive" },
+  { id: "earth", th: "ธาตุดิน", en: "Earth", noteTh: "จับต้องได้ มั่นคง", noteEn: "practical and steady" },
+  { id: "air", th: "ธาตุลม", en: "Air", noteTh: "ความคิด การสื่อสาร", noteEn: "ideas and talk" },
+  { id: "water", th: "ธาตุน้ำ", en: "Water", noteTh: "อารมณ์ ความรู้สึก", noteEn: "feelings and intuition" },
+] as const;
+
+const TONE_LABEL = {
+  harmonious: { th: "ไหลลื่น", en: "flowing" },
+  tense: { th: "ตึง", en: "tense" },
+  neutral: { th: "หลอมรวม", en: "fusing" },
+} as const;
+
+/** ตัวอย่างไพ่สามใบของหนึ่งตำแหน่ง: ดวงอาทิตย์ 15 องศาราศีสิงห์ (ช่วงที่ 2) — ดึงจากข้อมูลจริง ไม่ฮาร์ดโค้ดรหัสไพ่ */
+const EXAMPLE_LEO = ZODIAC_SIGNS[4];
+const EXAMPLE_CARDS = [
+  { roleTh: "ไพ่ประจำดาว", roleEn: "Planet card", whyTh: "ดวงอาทิตย์", whyEn: "the Sun", id: BODY_TEXT.sun.cardId },
+  { roleTh: "ไพ่ประจำราศี", roleEn: "Sign card", whyTh: EXAMPLE_LEO.nameTh, whyEn: EXAMPLE_LEO.nameEn, id: EXAMPLE_LEO.majorCardId },
+  { roleTh: "ไพ่ประจำช่วงองศา", roleEn: "Decan card", whyTh: "ช่วง 10 ถึง 20 องศา", whyEn: "10 to 20 degrees", id: EXAMPLE_LEO.decans[1].cardId },
+].map((x) => {
+  const card = CARD_SUMMARIES.find((c) => c.id === x.id);
+  if (!card) throw new Error(`natal-chart: ไม่พบไพ่ ${x.id} ในตัวอย่างไพ่สามใบ`);
+  return { ...x, card };
+});
+
 export function NatalChartBody({ locale, app }: { locale: Locale; app: ReactNode }) {
   const isEnglish = locale === "en";
   const lang = isEnglish ? "en" : "th";
@@ -187,79 +222,212 @@ export function NatalChartBody({ locale, app }: { locale: Locale; app: ReactNode
         </Ui2Window>
 
         <Ui2Window n="02" kicker={isEnglish ? "How to read it" : "อ่านผังยังไง"} tone={4}>
-          <section aria-labelledby="natal-howto" className="space-y-6">
-            <h2 id="natal-howto" className="text-xl sm:text-2xl font-serif-th font-bold text-ink text-center">
-              <ThaiPhrases>{isEnglish ? "Four layers of a birth chart" : "ผังดวงมี 4 ชั้น อ่านทีละชั้น"}</ThaiPhrases>
-            </h2>
-            <div className="grid gap-4 md:grid-cols-2 text-sm leading-relaxed">
-              <div className="altar-card-porcelain rounded-xl p-4 space-y-2">
-                <h3 className="font-serif-th font-bold text-ink"><ThaiPhrases>{isEnglish ? "1. Planets: what" : "1. ดาว: เรื่องอะไร"}</ThaiPhrases></h3>
-                <ul className="space-y-1.5 text-muted">
-                  {PLANET_KEYS.map((k) => (
-                    <li key={k} className="border-l-2 border-line-warm pl-2">
-                      <span className="font-semibold text-ink">{BODY_TEXT[k].name[lang]}</span> {BODY_TEXT[k].theme[lang]}
-                    </li>
-                  ))}
-                </ul>
+          <section aria-labelledby="natal-howto" className="v2-ng space-y-8">
+            <div className="space-y-2 text-center">
+              <h2 id="natal-howto" className="text-xl sm:text-2xl font-serif-th font-bold text-ink">
+                <ThaiPhrases>{isEnglish ? "Four layers of a birth chart" : "ผังดวงมี 4 ชั้น อ่านทีละชั้น"}</ThaiPhrases>
+              </h2>
+              <p className="text-sm text-muted max-w-xl mx-auto">
+                <ThaiPhrases>
+                  {isEnglish
+                    ? "Every placement answers four questions. Put the answers together and you have a sentence about your life."
+                    : "ทุกตำแหน่งในผังตอบคำถาม 4 ข้อ เอาคำตอบมาต่อกันก็ได้หนึ่งประโยคที่เล่าเรื่องชีวิตคุณ"}
+                </ThaiPhrases>
+              </p>
+            </div>
+
+            <ol className="v2-ng-layers">
+              {LAYERS.map((l, i) => (
+                <li key={l.th}>
+                  <span className="v2-ng-layer-n ui2-num">{i + 1}</span>
+                  <span className="v2-ng-layer-t">{isEnglish ? l.en : l.th}</span>
+                  <span className="v2-ng-layer-q">{isEnglish ? l.qEn : l.qTh}</span>
+                </li>
+              ))}
+            </ol>
+
+            <figure className="v2-ng-example">
+              <figcaption>{isEnglish ? "Try reading one placement" : "ลองอ่านหนึ่งตำแหน่ง"}</figcaption>
+              <p className="v2-ng-example-head">{isEnglish ? "Venus in Taurus in the 7th house" : "ดาวศุกร์ ในราศีพฤษภ อยู่เรือน 7"}</p>
+              <dl className="v2-ng-example-parts">
+                <div>
+                  <dt>{isEnglish ? "Planet: what" : "ดาว: เรื่องอะไร"}</dt>
+                  <dd>{BODY_TEXT.venus.theme[lang]}</dd>
+                </div>
+                <div>
+                  <dt>{isEnglish ? "Sign: how" : "ราศี: แบบไหน"}</dt>
+                  <dd>{SIGN_TEXT[1].keywords[lang]}</dd>
+                </div>
+                <div>
+                  <dt>{isEnglish ? "House: where" : "เรือน: เรื่องไหนของชีวิต"}</dt>
+                  <dd>{HOUSE_TEXT[6].arena[lang]}</dd>
+                </div>
+              </dl>
+              <p className="v2-ng-example-sum">
+                <ThaiPhrases>
+                  {isEnglish
+                    ? "Read together: you love steadily and slowly, value comfort and beauty, and this shows most with a long-term partner."
+                    : "อ่านรวมกัน: คุณรักแบบค่อยเป็นค่อยไปแต่มั่นคง ชอบความสบายและของสวยงาม และเห็นชัดที่สุดกับคู่ชีวิตหรือคนที่ผูกพันกันยาว ๆ"}
+                </ThaiPhrases>
+              </p>
+            </figure>
+
+            <div className="space-y-3">
+              <h3 className="v2-ng-h3">
+                <span className="v2-ng-h3-n ui2-num">1</span>
+                <ThaiPhrases>{isEnglish ? "Planets: what part of you" : "ดาว: เรื่องอะไร"}</ThaiPhrases>
+              </h3>
+              <p className="v2-ng-note">
+                {isEnglish ? "The short code is the label used on the chart wheel." : "ตัวย่อในกรอบคือชื่อที่ใช้บนวงผัง"}
+              </p>
+              <ul className="v2-ng-planets">
+                {PLANET_KEYS.map((k) => (
+                  <li key={k}>
+                    <span className="v2-ng-abbr" aria-hidden="true">{BODY_TEXT[k].short[lang]}</span>
+                    <span>
+                      <span className="v2-ng-term">{BODY_TEXT[k].name[lang]}</span>
+                      <span className="v2-ng-def">{BODY_TEXT[k].theme[lang]}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="v2-ng-h3">
+                <span className="v2-ng-h3-n ui2-num">2</span>
+                <ThaiPhrases>{isEnglish ? "Signs: how it shows" : "ราศี: แสดงออกแบบไหน"}</ThaiPhrases>
+              </h3>
+              <p className="v2-ng-note">
+                {isEnglish ? "Grouped by element, in the same colours as the chart wheel." : "แบ่งตามธาตุ สีเดียวกับช่องราศีบนวงผัง"}
+              </p>
+              <div className="v2-ng-elements">
+                {ELEMENTS.map((el) => (
+                  <div key={el.id} className={`v2-ng-element is-${el.id}`}>
+                    <p className="v2-ng-element-t">
+                      {isEnglish ? el.en : el.th} <span>{isEnglish ? el.noteEn : el.noteTh}</span>
+                    </p>
+                    <ul>
+                      {ZODIAC_SIGNS.map((s, i) =>
+                        s.element === el.id ? (
+                          <li key={s.id}>
+                            <span className="v2-ng-term">{isEnglish ? s.nameEn : s.nameTh}</span>
+                            <span className="v2-ng-def">{SIGN_TEXT[i].keywords[lang]}</span>
+                          </li>
+                        ) : null,
+                      )}
+                    </ul>
+                  </div>
+                ))}
               </div>
-              <div className="altar-card-porcelain rounded-xl p-4 space-y-2">
-                <h3 className="font-serif-th font-bold text-ink"><ThaiPhrases>{isEnglish ? "2. Signs: how" : "2. ราศี: แสดงออกแบบไหน"}</ThaiPhrases></h3>
-                <ul className="space-y-1.5 text-muted">
-                  {ZODIAC_SIGNS.map((s, i) => (
-                    <li key={s.id} className="border-l-2 border-line-warm pl-2">
-                      <span className="font-semibold text-ink">{isEnglish ? s.nameEn : s.nameTh}</span> {SIGN_TEXT[i].keywords[lang]}
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="v2-ng-h3">
+                <span className="v2-ng-h3-n ui2-num">3</span>
+                <ThaiPhrases>{isEnglish ? "Houses: where in life" : "เรือน: เกิดในเรื่องไหนของชีวิต"}</ThaiPhrases>
+              </h3>
+              <ol className="v2-ng-houses">
+                {HOUSE_TEXT.map((h, i) => (
+                  <li key={i}>
+                    <span className="v2-ng-house-n ui2-num" aria-hidden="true">{i + 1}</span>
+                    <span className="v2-ng-term">
+                      <span className="sr-only">{isEnglish ? `House ${i + 1}: ` : `เรือน ${i + 1} `}</span>
+                      {h.title[lang]}
+                    </span>
+                    <span className="v2-ng-def">{h.arena[lang]}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="v2-ng-h3">
+                <span className="v2-ng-h3-n ui2-num">4</span>
+                <ThaiPhrases>{isEnglish ? "Aspects: how planets talk" : "มุมสัมพันธ์: ดาวคุยกันแบบไหน"}</ThaiPhrases>
+              </h3>
+              <p className="v2-ng-note">
+                {isEnglish
+                  ? "On the wheel, blue lines flow easily and red lines create friction."
+                  : "บนวงผัง เส้นสีน้ำเงินคือมุมที่ไหลลื่น เส้นสีแดงคือมุมที่ตึง"}
+              </p>
+              <ul className="v2-ng-aspects">
+                {MAJOR_ASPECTS.map((a) => {
+                  const def = ASPECT_DEFS.find((d) => d.type === a);
+                  return (
+                    <li key={a} className={`is-${def?.tone ?? "neutral"}`}>
+                      <span className="v2-ng-deg" aria-hidden="true">
+                        <span className="ui2-num">{def?.angle}</span>
+                        <span>{isEnglish ? "deg" : "องศา"}</span>
+                      </span>
+                      <span>
+                        <span className="v2-ng-term">
+                          {/* ชื่อมุมในข้อมูลมีองศาในวงเล็บ ตัดออกเพราะช่องซ้ายแสดงองศาแล้ว */}
+                          {ASPECT_TEXT[a].name[lang].replace(/\s*\(.*\)$/, "")} <span className="v2-ng-tone">{TONE_LABEL[def?.tone ?? "neutral"][lang]}</span>
+                        </span>
+                        <span className="v2-ng-def">{ASPECT_TEXT[a].meaning[lang]}</span>
+                      </span>
                     </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="altar-card-porcelain rounded-xl p-4 space-y-2">
-                <h3 className="font-serif-th font-bold text-ink"><ThaiPhrases>{isEnglish ? "3. Houses: where in life" : "3. เรือน: เกิดในเรื่องไหนของชีวิต"}</ThaiPhrases></h3>
-                <ol className="space-y-1.5 text-muted">
-                  {HOUSE_TEXT.map((h, i) => (
-                    <li key={i} className="border-l-2 border-line-warm pl-2">
-                      <span className="font-semibold text-ink">{isEnglish ? `House ${i + 1}` : `เรือน ${i + 1}`}</span> {h.arena[lang]}
-                    </li>
-                  ))}
-                </ol>
-              </div>
-              <div className="altar-card-porcelain rounded-xl p-4 space-y-2">
-                <h3 className="font-serif-th font-bold text-ink"><ThaiPhrases>{isEnglish ? "4. Aspects: how they talk" : "4. มุมสัมพันธ์: ดาวคุยกันแบบไหน"}</ThaiPhrases></h3>
-                <ul className="space-y-1.5 text-muted">
-                  {MAJOR_ASPECTS.map((a) => (
-                    <li key={a} className="border-l-2 border-line-warm pl-2">
-                      <span className="font-semibold text-ink">{ASPECT_TEXT[a].name[lang]}</span> {ASPECT_TEXT[a].meaning[lang]}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                  );
+                })}
+              </ul>
             </div>
           </section>
         </Ui2Window>
 
         <Ui2Window n="03" kicker={isEnglish ? "By sign" : "รายราศี"} tone={5}>
-          <section aria-labelledby="natal-by-sign" className="space-y-4">
-            <h2 id="natal-by-sign" className="text-xl sm:text-2xl font-serif-th font-bold text-ink text-center">
-              <ThaiPhrases>{isEnglish ? "Rising and Moon signs, sign by sign" : "ลัคนาและดวงจันทร์ ครบ 12 ราศี"}</ThaiPhrases>
-            </h2>
-            {(["rising", "moon"] as const).map((kind) => (
-              <div key={kind} className="space-y-2">
-                <h3 className="font-serif-th font-bold text-ink text-center">
-                  {kind === "rising" ? (isEnglish ? "Rising sign (Ascendant)" : "ลัคนา") : isEnglish ? "Moon sign" : "ราศีจันทร์"}
-                </h3>
-                <ul className="flex flex-wrap justify-center gap-2">
-                  {ZODIAC_SIGNS.map((s) => (
-                    <li key={s.id}>
-                      <Link
-                        href={localeHref(`/natal-chart/${kind}/${s.id}`, locale)}
-                        className="inline-block rounded-full border border-line-warm bg-surface px-3 py-1.5 text-sm text-ink hover:border-gold-ink"
-                      >
-                        {kind === "rising" ? (isEnglish ? `${s.nameEn} Rising` : `ลัคนา${s.nameTh}`) : isEnglish ? `Moon in ${s.nameEn}` : `จันทร์${s.nameTh}`}
+          <section aria-labelledby="natal-by-sign" className="v2-ng space-y-5">
+            <div className="space-y-2 text-center">
+              <h2 id="natal-by-sign" className="text-xl sm:text-2xl font-serif-th font-bold text-ink">
+                <ThaiPhrases>{isEnglish ? "Rising and Moon signs, sign by sign" : "ลัคนาและดวงจันทร์ ครบ 12 ราศี"}</ThaiPhrases>
+              </h2>
+              <p className="text-sm text-muted max-w-xl mx-auto">
+                <ThaiPhrases>
+                  {isEnglish
+                    ? "Already know your signs? Open the full reading for your Rising sign or Moon sign."
+                    : "รู้ราศีของตัวเองแล้ว เปิดอ่านคำทำนายเต็มของลัคนาหรือราศีจันทร์ได้เลย"}
+                </ThaiPhrases>
+              </p>
+            </div>
+            <ul className="v2-ng-signs">
+              {ZODIAC_SIGNS.map((s, i) => {
+                const signName = isEnglish ? s.nameEn : s.nameTh;
+                const el = ELEMENTS.find((e) => e.id === s.element);
+                return (
+                  <li key={s.id} className={`v2-ng-sign is-${s.element}`}>
+                    <p className="v2-ng-sign-name">{signName}</p>
+                    <p className="v2-ng-sign-meta">
+                      {isEnglish ? el?.en : el?.th}
+                      <span>{SIGN_TEXT[i].keywords[lang]}</span>
+                    </p>
+                    <div className="v2-ng-sign-links">
+                      <Link href={localeHref(`/natal-chart/rising/${s.id}`, locale)}>
+                        {isEnglish ? (
+                          <>
+                            <span className="sr-only">{signName} </span>Rising
+                          </>
+                        ) : (
+                          <>
+                            ลัคนา<span className="sr-only">{signName}</span>
+                          </>
+                        )}
                       </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+                      <Link href={localeHref(`/natal-chart/moon/${s.id}`, locale)}>
+                        {isEnglish ? (
+                          <>
+                            Moon<span className="sr-only"> in {signName}</span>
+                          </>
+                        ) : (
+                          <>
+                            จันทร์<span className="sr-only">{signName}</span>
+                          </>
+                        )}
+                      </Link>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           </section>
         </Ui2Window>
 
@@ -283,31 +451,33 @@ export function NatalChartBody({ locale, app }: { locale: Locale; app: ReactNode
                 ]
           ).map((l) => ({ ...l, href: localeHref(l.href, locale) }))}
         >
-          <div className="space-y-4 text-xs sm:text-sm text-muted font-sans leading-relaxed">
-            {isEnglish ? (
-              <>
-                <p>
-                  The 1909 Rider-Waite deck was designed by members of the Hermetic Order of the Golden Dawn, who assigned every Major Arcana card to a
-                  planet or zodiac sign and every numbered Minor Arcana card (2 to 10) to a ten-degree slice of the zodiac called a decan. Because of
-                  this, any point in your birth chart can be read as a tarot card.
-                </p>
-                <p>
-                  This calculator shows three cards for each placement: the card of the planet, the card of the sign it sits in, and the decan card for
-                  its exact degree. Your Sun, Moon and Ascendant cards are the most personal, so they appear face down first for you to turn over.
-                </p>
-              </>
-            ) : (
-              <>
-                <p>
-                  ไพ่ทาโรต์ 1909 Rider-Waite ออกแบบโดยสมาชิกสมาคม Golden Dawn ซึ่งผูกไพ่ชุดใหญ่ทุกใบเข้ากับดาวหรือราศี และผูกไพ่เลข 2 ถึง 10
-                  ของไพ่ชุดเล็กเข้ากับช่วงละ 10 องศาของจักรราศี (Decan) จุดใดก็ตามในผังดวงของคุณจึงอ่านเป็นไพ่ทาโรต์ได้
-                </p>
-                <p>
-                  เครื่องคำนวณนี้แสดงไพ่สามใบต่อหนึ่งตำแหน่ง คือไพ่ประจำดาว ไพ่ประจำราศีที่ดาวอยู่ และไพ่ประจำช่วงองศาที่ดาวอยู่พอดี
-                  ไพ่ของดวงอาทิตย์ ดวงจันทร์ และลัคนาเป็นไพ่ที่บอกตัวคุณมากที่สุด จึงคว่ำไว้ให้คุณพลิกเอง
-                </p>
-              </>
-            )}
+          <div className="v2-ng space-y-6">
+            <p className="text-sm sm:text-base text-ink leading-relaxed">
+              {isEnglish
+                ? "The 1909 Rider-Waite deck was designed by members of the Hermetic Order of the Golden Dawn, who assigned every Major Arcana card to a planet or zodiac sign and every numbered Minor Arcana card (2 to 10) to a ten-degree slice of the zodiac called a decan. Because of this, any point in your birth chart can be read as a tarot card."
+                : "ไพ่ทาโรต์ 1909 Rider-Waite ออกแบบโดยสมาชิกสมาคม Golden Dawn ซึ่งผูกไพ่ชุดใหญ่ทุกใบเข้ากับดาวหรือราศี และผูกไพ่เลข 2 ถึง 10 ของไพ่ชุดเล็กเข้ากับช่วงละ 10 องศาของจักรราศี (Decan) จุดใดก็ตามในผังดวงของคุณจึงอ่านเป็นไพ่ทาโรต์ได้"}
+            </p>
+            <figure className="v2-ng-trio">
+              <figcaption>
+                <span className="v2-ng-trio-k">{isEnglish ? "Example" : "ตัวอย่าง"}</span>
+                {isEnglish ? "Sun at 15 degrees Leo gives three cards" : "ดวงอาทิตย์อยู่ 15 องศาราศีสิงห์ ได้ไพ่สามใบ"}
+              </figcaption>
+              <ol>
+                {EXAMPLE_CARDS.map((x) => (
+                  <li key={x.id}>
+                    <CardImage image={x.card.image} cardId={x.card.id} alt={isEnglish ? x.card.nameEn : x.card.nameTh} sizes="(min-width: 640px) 112px, 84px" loading="lazy" className="v2-ng-trio-img" />
+                    <span className="v2-ng-trio-role">{isEnglish ? x.roleEn : x.roleTh}</span>
+                    <span className="v2-ng-trio-name">{isEnglish ? x.card.nameEn : x.card.nameTh}</span>
+                    <span className="v2-ng-trio-why">{isEnglish ? `from ${x.whyEn}` : `มาจาก${x.whyTh}`}</span>
+                  </li>
+                ))}
+              </ol>
+            </figure>
+            <p className="text-sm sm:text-base text-ink leading-relaxed">
+              {isEnglish
+                ? "The calculator shows these three cards for every placement in your chart. Your Sun, Moon and Ascendant cards are the most personal, so they appear face down first for you to turn over."
+                : "เครื่องคำนวณด้านบนแสดงไพ่สามใบแบบนี้ให้ทุกตำแหน่งในผังของคุณ ไพ่ของดวงอาทิตย์ ดวงจันทร์ และลัคนาเป็นไพ่ที่บอกตัวคุณมากที่สุด จึงคว่ำไว้ให้คุณพลิกเอง"}
+            </p>
           </div>
         </SeoArticleShell>
       </div>

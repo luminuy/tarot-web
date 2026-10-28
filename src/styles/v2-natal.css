@@ -6,7 +6,8 @@
  * ไม่มี backdrop-filter (INC-0060)
  */
 
-.v2-nt {
+.v2-nt,
+.v2-ng {
   --nt-ink: #29261F;
   --nt-muted: #5E5547;
   --nt-line: rgba(74, 47, 16, 0.22);
@@ -287,24 +288,629 @@ details:not([open]) > summary .v2-nt-more-close {
 .v2-nt-bar .mod { background: rgba(138, 85, 18, 0.6); }
 
 /* ── สลับแท็บเล็ก (โหมดสถานที่) ── */
+/* ── ฟอร์มสร้างผัง: แผ่นกระดาษแถวละคำถาม (หัวข้อ+คำอธิบายซ้าย · ช่องกรอกขวา · จอเล็กซ้อนกัน) ── */
+.v2-nt-form {
+  max-width: 48rem;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.v2-nt-sheet {
+  background: var(--nt-paper);
+  border: 1px solid var(--nt-line);
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(74, 47, 16, 0.06), 0 12px 28px -18px rgba(74, 47, 16, 0.35);
+}
+.v2-nt-row {
+  display: grid;
+  gap: 12px;
+  padding: 18px 16px;
+}
+.v2-nt-row + .v2-nt-row {
+  border-top: 1px solid var(--nt-line-soft);
+}
+@media (min-width: 640px) {
+  .v2-nt-row {
+    grid-template-columns: 14rem minmax(0, 1fr);
+    gap: 24px;
+    padding: 22px 24px;
+  }
+}
+.v2-nt-row-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  min-width: 0;
+}
+.v2-nt-row-n {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  color: var(--nt-gold);
+  border: 1px solid var(--nt-line);
+  background: rgba(196, 160, 54, 0.12);
+}
+.v2-nt-row-t {
+  display: block;
+  font-family: var(--font-serif-th);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--nt-ink);
+}
+.v2-nt-row-hint {
+  margin-top: 2px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--nt-muted);
+}
+.v2-nt-date {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 8px;
+}
+.v2-nt-saved {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ปุ่มสลับแบบแถบเดียว (พ.ศ./ค.ศ. · ประเภทสถานที่) */
 .v2-nt-seg {
   display: inline-flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid var(--nt-line);
+  background: rgba(74, 47, 16, 0.05);
 }
 .v2-nt-seg button {
   border-radius: 999px;
-  border: 1px solid var(--nt-line);
-  background: var(--nt-paper);
+  border: 0;
+  background: transparent;
   color: var(--nt-ink);
   padding: 6px 14px;
-  font-size: 13px;
-  min-height: 36px;
+  font-size: 14px;
+  line-height: 1.4;
+  min-height: 38px;
+  transition: background-color 0.15s, color 0.15s;
 }
 .v2-nt-seg button[aria-pressed="true"] {
   background: #17110C;
-  border-color: #17110C;
   color: #FFF8EC;
+}
+.v2-nt-seg-fill {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  width: 100%;
+}
+.v2-nt-seg-fill button {
+  padding-inline: 6px;
+}
+
+.v2-nt-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-size: 14px;
+  color: var(--nt-ink);
+  cursor: pointer;
+}
+.v2-nt-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: #17110C;
+}
+
+/* ตั้งค่าขั้นสูง: แถบพับ บอกค่าที่เลือกอยู่ตอนพับไว้ */
+.v2-nt-adv {
+  border: 1px solid var(--nt-line);
+  border-radius: 16px;
+  background: rgba(255, 252, 246, 0.6);
+  padding: 4px 16px;
+}
+.v2-nt-adv[open] {
+  padding-bottom: 16px;
+}
+.v2-nt-adv summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  cursor: pointer;
+  list-style: none;
+}
+.v2-nt-adv summary::-webkit-details-marker {
+  display: none;
+}
+.v2-nt-adv-sum {
+  display: block;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--nt-muted);
+}
+.v2-nt-adv-tog {
+  flex: none;
+  border: 1px solid var(--nt-line);
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-size: 13px;
+  color: var(--nt-ink);
+  background: var(--nt-paper);
+}
+.v2-nt-adv-open,
+.v2-nt-adv[open] .v2-nt-adv-closed {
+  display: none;
+}
+.v2-nt-adv[open] .v2-nt-adv-open {
+  display: inline;
+}
+
+.v2-nt-submit {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.v2-nt-privacy {
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--nt-muted);
+  text-align: center;
+  max-width: 34rem;
+  margin-inline: auto;
+}
+
+/* ── ส่วนอ่านผัง / รายราศี / ไพ่สามใบ (HTML นิ่งของหน้า ไม่ใช่ island) ── */
+.v2-ng-layers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+@media (min-width: 768px) {
+  .v2-ng-layers {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.v2-ng-layers li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--nt-line);
+  background: var(--nt-paper);
+}
+.v2-ng-layer-n {
+  font-size: 26px;
+  line-height: 1.1;
+  color: var(--nt-gold);
+}
+.v2-ng-layer-t {
+  font-family: var(--font-serif-th);
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--nt-ink);
+}
+.v2-ng-layer-q {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--nt-muted);
+}
+
+.v2-ng-example {
+  border-radius: 18px;
+  border: 1px solid var(--nt-line);
+  background: linear-gradient(180deg, rgba(196, 160, 54, 0.12), rgba(255, 252, 246, 0.7));
+  padding: 18px 16px;
+}
+@media (min-width: 640px) {
+  .v2-ng-example {
+    padding: 22px 26px;
+  }
+}
+.v2-ng-example figcaption {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--nt-gold);
+}
+.v2-ng-example-head {
+  font-family: var(--font-serif-th);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--nt-ink);
+}
+.v2-ng-example-parts {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+@media (min-width: 640px) {
+  .v2-ng-example-parts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.v2-ng-example-parts > div {
+  border-left: 2px solid var(--nt-gold);
+  padding: 2px 0 2px 10px;
+}
+.v2-ng-example-parts dt {
+  font-size: 12px;
+  color: var(--nt-muted);
+}
+.v2-ng-example-parts dd {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--nt-ink);
+}
+.v2-ng-example-sum {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--nt-line-soft);
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--nt-ink);
+}
+
+.v2-ng-h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-serif-th);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--nt-ink);
+}
+.v2-ng-h3-n {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  color: #FFF8EC;
+  background: #17110C;
+}
+.v2-ng-note {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--nt-muted);
+}
+.v2-ng-term {
+  display: block;
+  font-weight: 600;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--nt-ink);
+}
+.v2-ng-def {
+  display: block;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--nt-muted);
+}
+
+.v2-ng-planets {
+  display: grid;
+  gap: 8px;
+}
+@media (min-width: 640px) {
+  .v2-ng-planets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.v2-ng-planets li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--nt-paper);
+  border: 1px solid var(--nt-line-soft);
+}
+/* จอเล็กรวมเป็นแผ่นเดียวมีเส้นคั่น ไม่ให้ 14 กล่องยาวเป็นหาง */
+@media (max-width: 639px) {
+  .v2-ng-planets {
+    gap: 0;
+    border-radius: 14px;
+    border: 1px solid var(--nt-line-soft);
+    background: var(--nt-paper);
+  }
+  .v2-ng-planets li {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+  .v2-ng-planets li + li {
+    border-top: 1px solid var(--nt-line-soft);
+  }
+}
+.v2-ng-abbr {
+  flex: none;
+  min-width: 38px;
+  height: 30px;
+  padding-inline: 6px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--nt-gold);
+  border: 1px solid var(--nt-line);
+}
+
+.v2-ng-elements {
+  display: grid;
+  gap: 10px;
+}
+@media (min-width: 640px) {
+  .v2-ng-elements {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.v2-ng-element {
+  border-radius: 16px;
+  border: 1px solid var(--nt-line-soft);
+  padding: 14px 16px;
+  background: var(--el-bg) var(--nt-paper);
+}
+.v2-ng-element ul {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+.v2-ng-element-t {
+  font-family: var(--font-serif-th);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--nt-ink);
+}
+.v2-ng-element-t span {
+  font-family: var(--font-sans-th, inherit);
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--nt-muted);
+  margin-left: 6px;
+}
+.v2-ng .is-fire { --el-bg: linear-gradient(var(--nt-fire), var(--nt-fire)); }
+.v2-ng .is-earth { --el-bg: linear-gradient(var(--nt-earth), var(--nt-earth)); }
+.v2-ng .is-air { --el-bg: linear-gradient(var(--nt-air), var(--nt-air)); }
+.v2-ng .is-water { --el-bg: linear-gradient(var(--nt-water), var(--nt-water)); }
+
+.v2-ng-houses {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+@media (min-width: 768px) {
+  .v2-ng-houses {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .v2-ng-houses {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.v2-ng-houses li {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--nt-paper);
+  border: 1px solid var(--nt-line-soft);
+}
+.v2-ng-house-n {
+  font-size: 24px;
+  line-height: 1.2;
+  color: var(--nt-gold);
+}
+
+.v2-ng-aspects {
+  display: grid;
+  gap: 8px;
+}
+.v2-ng-aspects li {
+  --tone: var(--nt-neutral);
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--nt-paper);
+  border: 1px solid var(--nt-line-soft);
+  border-left: 3px solid var(--tone);
+}
+.v2-ng-aspects li.is-harmonious { --tone: var(--nt-harm); }
+.v2-ng-aspects li.is-tense { --tone: var(--nt-tense); }
+.v2-ng-deg {
+  flex: none;
+  width: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--nt-muted);
+}
+.v2-ng-deg .ui2-num {
+  font-size: 22px;
+  line-height: 1.2;
+  color: var(--nt-ink);
+}
+.v2-ng-tone {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.7;
+  color: var(--nt-ink);
+  border: 1px solid var(--tone);
+}
+
+/* รายราศี: กล่องละราศี สีธาตุเดียวกับวงผัง · ลิงก์สองปุ่มสูง 44px */
+.v2-ng-signs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+@media (min-width: 768px) {
+  .v2-ng-signs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .v2-ng-signs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.v2-ng-sign {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 12px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--nt-line-soft);
+  background: var(--el-bg) var(--nt-paper);
+}
+.v2-ng-sign-name {
+  font-family: var(--font-serif-th);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--nt-ink);
+}
+.v2-ng-sign-meta {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--nt-muted);
+  flex: 1;
+}
+.v2-ng-sign-meta span {
+  display: block;
+}
+.v2-ng-sign-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 10px;
+}
+.v2-ng-sign-links a {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--nt-line);
+  background: var(--nt-paper);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--nt-ink);
+  transition: border-color 0.15s, background-color 0.15s;
+}
+.v2-ng-sign-links a:hover {
+  border-color: var(--nt-gold);
+  background: #FFF7E8;
+}
+
+/* ไพ่สามใบของหนึ่งตำแหน่ง */
+.v2-ng-trio {
+  border-radius: 18px;
+  border: 1px solid var(--nt-line);
+  background: var(--nt-paper);
+  padding: 16px 12px 18px;
+}
+@media (min-width: 640px) {
+  .v2-ng-trio {
+    padding: 20px 24px 24px;
+  }
+}
+.v2-ng-trio figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  font-family: var(--font-serif-th);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--nt-ink);
+}
+.v2-ng-trio-k {
+  font-family: var(--font-sans-th, inherit);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--nt-gold);
+  border: 1px solid var(--nt-line);
+  border-radius: 999px;
+  padding: 0 10px;
+}
+.v2-ng-trio ol {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+@media (min-width: 640px) {
+  .v2-ng-trio ol {
+    gap: 24px;
+    max-width: 34rem;
+    margin-inline: auto;
+  }
+}
+.v2-ng-trio li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 0;
+}
+.v2-ng-trio-img {
+  width: 84px;
+  aspect-ratio: 848 / 1459;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--nt-line);
+  box-shadow: 0 8px 18px -10px rgba(41, 38, 31, 0.5);
+  margin-bottom: 10px;
+}
+@media (min-width: 640px) {
+  .v2-ng-trio-img {
+    width: 112px;
+  }
+}
+.v2-ng-trio-role {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--nt-gold);
+}
+.v2-ng-trio-name {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--nt-ink);
+}
+.v2-ng-trio-why {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--nt-muted);
 }
 
 /* ── พิมพ์ / บันทึก PDF: เอาเฉพาะผลผัง ── */
