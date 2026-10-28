@@ -1,5 +1,5 @@
 ---
-import { natalChartMetadata, NATAL_CARDS } from "@/app/_shared/pages/natal-chart";
+import { natalChartMetadata, packNatalCards } from "@/app/_shared/pages/natal-chart";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { NatalChartBodyRoot } from "../../components/PageBodies";
@@ -18,7 +18,7 @@ const locale = "en" as const;
   <div class="ui2-pg" data-ui2-page-dark="">
   <NatalChartBodyRoot locale={locale}>
     <Fragment slot="app">
-      <NatalChartRoot cards={NATAL_CARDS} locale={locale} client:idle />
+      <NatalChartRoot cardsPacked={packNatalCards(locale)} locale={locale} client:idle />
     </Fragment>
   </NatalChartBodyRoot>
   </div>
