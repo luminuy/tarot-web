@@ -12,6 +12,7 @@ import {
   CLAUDE_HAIKU_MODEL,
   CLAUDE_SONNET_MODEL,
   claudeReadingModel,
+  claudeReadingThinking,
   claudeThinkingOff,
   extractJsonObject,
   generateClaudeReply,
@@ -91,18 +92,29 @@ function sse(events: unknown[]): Response {
   return new Response(body, { status: 200, headers: { "content-type": "text/event-stream" } });
 }
 
-function claudeStream(json: string, stopReason = "end_turn"): Response {
+function claudeStream(json: string, stopReason = "end_turn", withThinking = false): Response {
   const text = "```json\n" + json + "\n```";
+  const ti = withThinking ? 1 : 0;
   const deltas = [];
   for (let i = 0; i < text.length; i += 40) {
-    deltas.push({ type: "content_block_delta", index: 0, delta: { type: "text_delta", text: text.slice(i, i + 40) } });
+    deltas.push({ type: "content_block_delta", index: ti, delta: { type: "text_delta", text: text.slice(i, i + 40) } });
   }
+  // โหมดคิด: บล็อก thinking มาก่อน (ข้อความว่างเพราะ display ค่าเริ่มต้นคือ omitted) แล้วตามด้วย signature
+  const thinking = withThinking
+    ? [
+        { type: "content_block_start", index: 0, content_block: { type: "thinking", thinking: "", signature: "" } },
+        { type: "content_block_delta", index: 0, delta: { type: "thinking_delta", thinking: "" } },
+        { type: "content_block_delta", index: 0, delta: { type: "signature_delta", signature: "sig" } },
+        { type: "content_block_stop", index: 0 },
+      ]
+    : [];
   return sse([
     { type: "message_start", message: { usage: { input_tokens: 120, cache_read_input_tokens: 4000, cache_creation_input_tokens: 0, output_tokens: 1 } } },
-    { type: "content_block_start", index: 0, content_block: { type: "text", text: "" } },
+    ...thinking,
+    { type: "content_block_start", index: ti, content_block: { type: "text", text: "" } },
     { type: "ping" },
     ...deltas,
-    { type: "content_block_stop", index: 0 },
+    { type: "content_block_stop", index: ti },
     { type: "message_delta", delta: { stop_reason: stopReason }, usage: { output_tokens: 1800 } },
     { type: "message_stop" },
   ]);
@@ -155,7 +167,11 @@ async function main() {
   const ev3 = await collect(ctx3);
   const done3 = ev3.find((e) => e.type === "done");
   check("ยิงไป /v1/messages", !!lastReq && lastReq.url.endsWith("/v1/messages"));
-  check("รุ่น Haiku 5.5 + ปิดโหมดคิด", lastReq?.body.model === CLAUDE_HAIKU_MODEL && lastReq?.body.thinking?.type === "disabled");
+  // เจ้าของสั่ง 2026-10-28 "ใช้ claude เป็นแกนหลัก ให้อ่านตรงแม่นกว่านี้" ➔ คำอ่านเปิดโหมดคิดทุกขนาดผัง
+  check(
+    "รุ่น Haiku 5.5 + โหมดคิด adaptive · effort low",
+    lastReq?.body.model === CLAUDE_HAIKU_MODEL && lastReq?.body.thinking?.type === "adaptive" && lastReq?.body.output_config?.effort === "low",
+  );
   check(
     `header anthropic-version ${CLAUDE_API_VERSION} + x-api-key`,
     lastReq?.headers["anthropic-version"] === CLAUDE_API_VERSION && lastReq?.headers["x-api-key"] === "sk-ant-test",
@@ -165,7 +181,7 @@ async function main() {
     !!lastReq && !("temperature" in lastReq.body) && !("top_p" in lastReq.body) && !("top_k" in lastReq.body),
   );
   check("system prompt ติด cache_control", lastReq?.body.system?.[0]?.cache_control?.type === "ephemeral");
-  check("stream: true · max_tokens = 1,600 + 480/ใบ", lastReq?.body.stream === true && lastReq?.body.max_tokens === 1600 + 3 * 480);
+  check("stream: true · max_tokens = 1,600 + 480/ใบ + ที่เผื่อความคิด 3,000", lastReq?.body.stream === true && lastReq?.body.max_tokens === 1600 + 3 * 480 + 3000);
   check("ได้ opening + การ์ดครบ 3 ใบระหว่างสตรีม", ev3.some((e) => e.type === "opening") && ev3.filter((e) => e.type === "card").length === 3);
   check("จบด้วย done จากรุ่น Haiku", done3?.type === "done" && done3.model === CLAUDE_HAIKU_MODEL);
   check(
@@ -178,8 +194,41 @@ async function main() {
   const json5 = await validReadingJson(ctx5);
   mockFetch(() => claudeStream(json5));
   const ev5 = await collect(ctx5);
-  check("รุ่น Sonnet 5.5 + between_tools", lastReq?.body.model === CLAUDE_SONNET_MODEL && lastReq?.body.thinking?.type === "between_tools");
+  check(
+    "รุ่น Sonnet 5.5 + โหมดคิด adaptive · effort medium · เผื่อความคิด 8,000",
+    lastReq?.body.model === CLAUDE_SONNET_MODEL &&
+      lastReq?.body.thinking?.type === "adaptive" &&
+      lastReq?.body.output_config?.effort === "medium" &&
+      lastReq?.body.max_tokens === 1600 + 5 * 480 + 8000,
+  );
   check("จบด้วย done จากรุ่น Sonnet", ev5.some((e) => e.type === "done" && e.model === CLAUDE_SONNET_MODEL));
+  mockFetch(() => claudeStream(json5, "end_turn", true));
+  const ev5t = await collect(ctx5);
+  check(
+    "สตรีมที่มีบล็อก thinking นำหน้า ➔ ข้ามความคิด อ่านเฉพาะข้อความ ได้การ์ดครบและ done",
+    ev5t.filter((e) => e.type === "card").length === 5 && ev5t.some((e) => e.type === "done"),
+  );
+  const big = claudeReadingThinking(12);
+  check(
+    "ผัง 10 ใบขึ้นไป ➔ effort high เผื่อความคิด 16,000 · 4-9 ใบ medium · 1-3 ใบ low",
+    big.effort === "high" && big.headroom === 16000 && claudeReadingThinking(9).effort === "medium" && claudeReadingThinking(3).effort === "low",
+  );
+
+  console.log("\n4.5) ความเชื่อมโยงไพ่เข้า prompt (เจ้าของสั่งเปิด 2026-10-28 โดยไม่รอผลวัด)");
+  {
+    const wranglerSrc = fs.readFileSync(path.resolve("wrangler.jsonc"), "utf-8");
+    check('wrangler.jsonc ตั้ง vars "RELATIONS_IN_PROMPT": "1" (Worker อ่านผ่าน process.env)', /"RELATIONS_IN_PROMPT":\s*"1"/.test(wranglerSrc));
+    const { buildReadingMessage } = await import("../../src/lib/ai/prompt");
+    const prev = process.env.RELATIONS_IN_PROMPT;
+    const ctx10 = goldenContext(10);
+    delete process.env.RELATIONS_IN_PROMPT;
+    const off = buildReadingMessage(ctx10);
+    process.env.RELATIONS_IN_PROMPT = "1";
+    const on = buildReadingMessage(ctx10);
+    if (prev === undefined) delete process.env.RELATIONS_IN_PROMPT;
+    else process.env.RELATIONS_IN_PROMPT = prev;
+    check("สวิตช์เปิด ➔ ข้อความคำอ่านมีบล็อก \"ความเชื่อมโยงที่คำนวณได้\" · ปิด ➔ ไม่มี", on.includes("ความเชื่อมโยงที่คำนวณได้") && !off.includes("ความเชื่อมโยงที่คำนวณได้"));
+  }
 
   console.log("\n5) ล้มแบบไหนก็ไม่มีคำอ่านกุขึ้นเอง (กฎเหล็กข้อ 14) ให้สายสำรองรับต่อ");
   mockFetch(() => claudeStream(validReadingJson3, "refusal"));
@@ -287,12 +336,12 @@ async function main() {
   const cGroq = chatRoute.indexOf("generateGroqChatReply(");
   const cGemini = chatRoute.indexOf("extractGeminiAnswer(data)");
   check(
-    "/chat: Claude ➔ Groq ➔ Gemini · รุ่นตามจำนวนไพ่ · effort low · ผ่านด่านกันรั่ว prompt",
+    "/chat: Claude ➔ Groq ➔ Gemini · รุ่นตามจำนวนไพ่ · effort medium · ผ่านด่านกันรั่ว prompt",
     cClaude > 0 &&
       cClaude < cGroq &&
       cGroq < cGemini &&
       /model: claudeReadingModel\(record\.drawn\?\.length \?\? 0\)/.test(chatRoute) &&
-      /effort: "low"/.test(chatRoute) &&
+      /effort: "medium"/.test(chatRoute) &&
       /detectPromptLeak\(cleanReply\)[\s\S]{0,400}provider: "claude"/.test(chatRoute),
   );
   const perspRoute = fs.readFileSync(path.resolve("src/app/api/reading/[id]/perspective/route.ts"), "utf-8");

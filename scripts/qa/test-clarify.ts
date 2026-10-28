@@ -79,6 +79,56 @@ async function runTests() {
   check("กรณีไม่มี API key คืนค่าสุภาพ ไม่โยน Error", typeof shortQuestionRes.needsClarification === "boolean");
 
   // ─────────────────────────────────────────────────────────────────
+  // 2.5 Claude เป็นตัวหลัก ยิงคู่กับ Groq (เจ้าของสั่ง 2026-10-28 "ใช้ claude เป็นแกนหลัก")
+  // ─────────────────────────────────────────────────────────────────
+  console.log("\n🟠 2.5 Claude Haiku ก่อน · Groq ยิงคู่ไว้รับแทน");
+  {
+    const realFetch = globalThis.fetch;
+    const prevA = process.env.ANTHROPIC_API_KEY;
+    const prevG = process.env.GROQ_API_KEY;
+    process.env.ANTHROPIC_API_KEY = "sk-ant-test";
+    process.env.GROQ_API_KEY = "gsk-test";
+    const claudeQ = "เรื่องนี้คุณอยากรู้ว่าเขาคิดยังไง หรืออยากรู้ว่าควรทำยังไงต่อ";
+    const groqQ = "ช่วยเล่าเพิ่มอีกนิดได้ไหมว่าตอนนี้ความสัมพันธ์เป็นแบบไหน";
+    const calls: string[] = [];
+    let claudeBody: { model?: string; thinking?: { type?: string } } = {};
+    const mock = (claudeOk: boolean) =>
+      (async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        if (url.includes("anthropic")) {
+          calls.push("claude");
+          claudeBody = JSON.parse(String(init?.body ?? "{}"));
+          if (!claudeOk) return new Response("overloaded", { status: 529 });
+          return new Response(
+            JSON.stringify({ stop_reason: "end_turn", content: [{ type: "text", text: JSON.stringify({ needsClarification: true, question: claudeQ, reason: "ok" }) }] }),
+            { status: 200 },
+          );
+        }
+        calls.push("groq");
+        return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ needsClarification: true, question: groqQ }) } }] }), { status: 200 });
+      }) as typeof fetch;
+
+    globalThis.fetch = mock(true);
+    const viaClaude = await evaluateClarification({ question: "เขาจะกลับมาไหม", category: "love" });
+    check(
+      "มีคีย์ Claude ➔ ใช้คำถามจาก Claude Haiku (ปิดโหมดคิด) · ยิง Groq คู่กันไว้แล้ว",
+      viaClaude.needsClarification === true && viaClaude.question === claudeQ && calls.includes("groq") && claudeBody.model === "claude-haiku-5-5" && claudeBody.thinking?.type === "disabled",
+      JSON.stringify(viaClaude),
+    );
+
+    calls.length = 0;
+    globalThis.fetch = mock(false);
+    const viaGroq = await evaluateClarification({ question: "เขาจะกลับมาไหม", category: "love" });
+    check("Claude ล้ม ➔ ใช้คำตอบ Groq ที่ยิงไปพร้อมกัน (ไม่ข้ามการถามกลับ)", viaGroq.needsClarification === true && viaGroq.question === groqQ, JSON.stringify(viaGroq));
+
+    globalThis.fetch = realFetch;
+    if (prevA === undefined) delete process.env.ANTHROPIC_API_KEY;
+    else process.env.ANTHROPIC_API_KEY = prevA;
+    if (prevG === undefined) delete process.env.GROQ_API_KEY;
+    else process.env.GROQ_API_KEY = prevG;
+  }
+
+  // ─────────────────────────────────────────────────────────────────
   // 3. Prompt & Codebase Discipline (Rule 2: No Fancy Emojis / Stars)
   // ─────────────────────────────────────────────────────────────────
   console.log("\n📐 3. Prompt Discipline & Quality Standards");
