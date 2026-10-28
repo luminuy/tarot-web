@@ -1031,7 +1031,12 @@ async function testBookingCare(readerId: string) {
     });
     await repo.holdBooking({ ticketId: tl.id, readerId, kind: "scheduled", slotStart: lapsedSlot, nowMs: Date.now() - 2 * HOUR });
     await repo.replaceScheduleRules(readerId, [0, 1, 2, 3, 4, 5, 6].map((weekday) => ({ weekday, startMin: 0, endMin: 1440 })));
-    await db.prepare("INSERT OR IGNORE INTO booking_waitlist (id, reader_id, email, created_at) VALUES (?, ?, ?, ?)").bind("wait_test_1", readerId, "wait@example.com", Date.now()).run();
+    // id ต้องไม่ซ้ำรอบก่อน — .dev-marketplace.db ค้างข้ามรอบ ถ้าใช้ id ตายตัว + OR IGNORE แถวของรอบที่ล้มกลางทางจะทำให้แถวรอบนี้ถูกข้ามเงียบ ๆ
+    // ใช้ INSERT ธรรมดา ชนเมื่อไรให้ล้มดัง ๆ ที่บรรทัดนี้ ไม่ใช่ไปล้มที่ผล cron
+    await db
+      .prepare("INSERT INTO booking_waitlist (id, reader_id, email, created_at) VALUES (?, ?, ?, ?)")
+      .bind(`wait_test_${crypto.randomUUID().slice(0, 8)}`, readerId, "wait@example.com", Date.now())
+      .run();
     const res = await cron(
       new Request("https://x/api/cron/booking-reminders", { method: "POST", headers: { authorization: "Bearer cron_test_secret_value" } }),
     );
