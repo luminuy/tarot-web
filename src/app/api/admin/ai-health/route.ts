@@ -12,6 +12,7 @@ import {
 import { buildSystemPrompt } from "@/lib/ai/prompt";
 import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
 import { stripThinkingTags } from "@/lib/ai/language";
+import { CLAUDE_HAIKU_MODEL, generateClaudeReply, getClaudeApiKey, isClaudePaused, probeClaudeHealth } from "@/lib/ai/claude";
 
 export const runtime = "nodejs";
 
@@ -21,7 +22,8 @@ export const runtime = "nodejs";
  * ทำไมต้องมี: เวลาแม่หมอ "ตอบไม่ฉลาด" มันมีได้หลายสาเหตุที่หน้าเว็บแยกไม่ออก
  * (ไม่มีคีย์ · คีย์ผิด · โควตา Google หมด · ชนเพดานค่าใช้จ่ายรายวันของเราเอง · โมเดลถูกปลด)
  * เดิมต้องไปไล่อ่าน Worker log ซึ่งเจ้าของเว็บทำเองไม่ได้ (บทเรียน INC-0052)
- * เส้นทางนี้ยิง Gemini จริง 1 ครั้งต่อโมเดล แล้วรายงานสาเหตุตรง ๆ
+ * เส้นทางนี้ยิง Claude · Groq · Gemini จริง 1 ครั้งต่อโมเดล แล้วรายงานสาเหตุตรง ๆ
+ * (Claude เพิ่ม 2026-10-28 — เป็นตัวแรกของทุกเส้น AI แล้ว เจ้าของต้องเห็นว่าคีย์ใช้ได้โดยไม่ต้องรอหน้า Cost ของ Console)
  *
  * 🔒 ไม่คืนค่าคีย์เด็ดขาด — บอกแค่ว่า "ตั้งไว้ไหม / ยาวกี่ตัว / ขึ้นต้นถูกรูปแบบไหม"
  *    และ scrub ค่าคีย์ออกจากข้อความ error ก่อนส่งกลับเสมอ
@@ -38,12 +40,14 @@ export async function GET() {
   const apiKey = keyFromEnv ? process.env[keyFromEnv] : undefined;
 
   const groqKey = process.env.GROQ_API_KEY;
+  const claudeKey = getClaudeApiKey();
 
   /** ตัดค่าคีย์ออกจากข้อความก่อนส่งกลับหน้าเว็บ ป้องกันคีย์หลุดผ่านข้อความ error */
   const scrub = (text: string) => {
     let s = text;
     if (apiKey) s = s.split(apiKey).join("***");
     if (groqKey) s = s.split(groqKey).join("***");
+    if (claudeKey) s = s.split(claudeKey).join("***");
     return s.slice(0, 400);
   };
 
@@ -63,14 +67,16 @@ export async function GET() {
     // เป็นแค่ข้อสังเกต ไม่ใช่คำตัดสิน — Google ออกคีย์หลายรูปแบบและมีคีย์ที่ไม่ขึ้นต้น AIza
     // แต่เรียกงานได้จริง · ตัวชี้ขาดคือผลยิงจริงในตาราง models ด้านล่างเท่านั้น
     startsWithAIza: !!apiKey && apiKey.startsWith("AIza"),
+    // Claude แยกช่อง: ตัวแรกของทุกเส้น AI · `paused` = หน่วยประมวลผลนี้พักเรียก Claude อยู่หลังเจอ 400/401/403/429
+    claude: { configured: !!claudeKey, length: claudeKey?.length ?? 0, startsWithSkAnt: !!claudeKey && claudeKey.startsWith("sk-ant-"), paused: isClaudePaused() },
   };
 
-  if (!apiKey && !groqKey) {
+  if (!apiKey && !groqKey && !claudeKey) {
     return NextResponse.json({
       ok: false,
       verdict: "no_api_key",
       summary:
-        "ยังไม่ได้ตั้ง GEMINI_API_KEY หรือ GROQ_API_KEY บน Worker — คำอ่านและห้องคุยจะตกไปใช้คำตอบสำเร็จรูปทั้งหมด",
+        "ยังไม่ได้ตั้ง ANTHROPIC_API_KEY · GROQ_API_KEY หรือ GEMINI_API_KEY บน Worker — คำอ่านและห้องคุยจะตกไปใช้คำตอบสำเร็จรูปทั้งหมด",
       nextStep: "รัน: npx wrangler secret put GEMINI_API_KEY หรือ GROQ_API_KEY แล้ว deploy ใหม่ (ดู docs/PENDING_SETUP.md)",
       key,
       budget,
@@ -81,6 +87,22 @@ export async function GET() {
 
   // ยิงจริงทีละโมเดล ด้วย prompt สั้นที่สุดเท่าที่จะสั้นได้ (ค่าใช้จ่ายแทบเป็นศูนย์)
   const models: Array<Record<string, unknown>> = [];
+  // Claude ก่อน — ลำดับเดียวกับเส้นจริง (Claude ➔ Groq ➔ Gemini)
+  if (claudeKey) {
+    for (const r of await probeClaudeHealth(claudeKey)) {
+      models.push({
+        model: `claude · ${r.model}`,
+        ok: r.ok,
+        status: r.status,
+        elapsedMs: r.elapsedMs,
+        finishReason: r.ok ? "end_turn" : null,
+        partCount: r.ok ? 1 : 0,
+        thoughtPartCount: 0,
+        answerPreview: r.answerPreview,
+        error: r.error ? scrub(r.error) : null,
+      });
+    }
+  }
   if (apiKey) {
     for (const model of CANDIDATE_GEMINI_MODELS) {
       const startedAt = Date.now();
@@ -178,27 +200,38 @@ export async function GET() {
   let verdict: string;
   let summary: string;
   let nextStep: string;
-  if (ok && budget.memberCapReached) {
+  if (ok && claudeKey && !working.some((m) => String(m.model).startsWith("claude"))) {
+    // ยังไม่ถือว่าปกติ: ตั้งคีย์ Claude แล้วแต่ไม่ได้ใช้ (ห้ามรายงานว่า "ปกติดี" ทั้งที่ตัวแรกล้ม)
+    verdict = "claude_unavailable";
+    summary = `ตั้ง ANTHROPIC_API_KEY ไว้แต่เรียก Claude ไม่สำเร็จ — ตอนนี้แม่หมอตอบผ่านตัวสำรอง (${working.map((m) => m.model).join(", ")}) ดูช่อง error ของแถว claude ด้านล่าง`;
+    nextStep = "400 + credit balance = เติมเครดิต/ตั้ง spend limit ใน Claude Console · 401 = คีย์ผิด ตั้ง secret ใหม่แล้ว deploy · 429 = ติดเพดาน รอสักครู่";
+  } else if (ok && budget.memberCapReached) {
     verdict = "ai_daily_cap";
     summary = `AI เรียกได้ปกติ แต่วันนี้ใช้ครบเพดานแล้ว (${budget.usedToday}/${budget.dailyCap} ครั้ง) ระบบจึงตัดไปใช้คำตอบสำรอง`;
     nextStep = "ขยายเพดานด้วย env AI_DAILY_CALL_CAP หรือรอรีเซ็ตเที่ยงคืน UTC";
   } else if (ok) {
     verdict = "healthy";
+    const hasClaudeWorking = working.some((m) => String(m.model).startsWith("claude"));
     const hasGroqWorking = working.some((m) => String(m.model).startsWith("groq"));
-    const hasGeminiWorking = working.some((m) => !String(m.model).startsWith("groq"));
-    if (hasGroqWorking && hasGeminiWorking) {
+    const hasGeminiWorking = working.some((m) => !String(m.model).startsWith("groq") && !String(m.model).startsWith("claude"));
+    if (hasClaudeWorking) {
+      summary = `Claude ตอบได้ปกติ (${working.filter((m) => String(m.model).startsWith("claude")).length} รุ่น) — แม่หมอใช้ Claude เป็นตัวแรก${hasGroqWorking || hasGeminiWorking ? " และมีตัวสำรองพร้อม" : ""} (${working.length}/${models.length} โมเดลผ่าน)`;
+    } else if (hasGroqWorking && hasGeminiWorking) {
       summary = `เชื่อมต่อ AI ได้ปกติทั้ง Gemini และ Groq LPU (${working.length}/${models.length} โมเดล) — ระบบสลับอัตโนมัติพร้อมทำงาน 100%`;
     } else if (hasGroqWorking) {
       summary = `เชื่อมต่อ Groq LPU สำเร็จ (${working.length}/${models.length} โมเดล) — แม่หมอตอบด้วย AI ผ่าน Groq LPU ได้ปกติ`;
     } else {
       summary = `เชื่อมต่อ Gemini ได้ปกติ ${working.length}/${models.length} โมเดล — แม่หมอตอบด้วย AI จริงได้แล้ว`;
     }
-    nextStep = "ถ้าหน้าเว็บยังขึ้นแถบคำตอบสำรองอยู่ ให้ลองรีเฟรชหน้าและถามใหม่อีกครั้ง";
+    if (!claudeKey) summary += " · ยังไม่ได้ตั้ง ANTHROPIC_API_KEY บน Worker จึงยังไม่ได้ใช้ Claude";
+    nextStep = claudeKey
+      ? "ถ้าหน้าเว็บยังขึ้นแถบคำตอบสำรองอยู่ ให้ลองรีเฟรชหน้าและถามใหม่อีกครั้ง"
+      : "ตั้ง ANTHROPIC_API_KEY ใน GitHub Secrets แล้ว deploy ใหม่ (deploy.yml ส่งเข้า Worker ให้เอง)";
   } else {
     verdict = "gemini_unavailable";
     summary = "มีคีย์อยู่ แต่เรียก AI ไม่สำเร็จสักโมเดล — ดูช่อง error ของแต่ละโมเดลด้านล่าง";
     nextStep =
-      "status 400 = คีย์/พารามิเตอร์ผิด · 403 = คีย์ถูกปิดหรือไม่ได้เปิด API · 429 = โควตาหมด · 404 = ชื่อโมเดลถูกปลดแล้ว";
+      "status 400 = คีย์/พารามิเตอร์ผิด (Claude: credit balance = เครดิตหมด) · 401/403 = คีย์ผิดหรือถูกปิด · 429 = โควตาหมด · 404 = ชื่อโมเดลถูกปลดแล้ว";
   }
 
   return NextResponse.json({
@@ -209,7 +242,7 @@ export async function GET() {
     key,
     budget,
     models,
-    chatProbe: await probeRealChatPayload(apiKey, groqKey, scrub),
+    chatProbe: await probeRealChatPayload(apiKey, groqKey, scrub, claudeKey),
     checkedAt: new Date().toISOString(),
   });
 }
@@ -224,6 +257,7 @@ async function probeRealChatPayload(
   apiKey: string | undefined,
   groqKey: string | undefined,
   scrub: (t: string) => string,
+  claudeKey?: string,
 ): Promise<Array<Record<string, unknown>>> {
   const personaId = "warm";
   let systemInstruction: string;
@@ -245,6 +279,30 @@ async function probeRealChatPayload(
   }
 
   const out: Array<Record<string, unknown>> = [];
+  // Claude ก่อน (เหมือนแชทจริงผังเล็ก: Haiku · effort low) — ตอบได้แล้วจบ ไม่ยิงตัวสำรอง
+  if (claudeKey) {
+    const startedAt = Date.now();
+    const r = await generateClaudeReply({
+      model: CLAUDE_HAIKU_MODEL,
+      system: systemInstruction,
+      messages: [{ role: "user", content: "ขยายความไพ่ใบนี้ให้หน่อย" }],
+      maxTokens: 4000,
+      timeoutMs: 25000,
+      effort: "low",
+    });
+    const reply = r?.reply ? stripThinkingTags(r.reply) : "";
+    out.push({
+      model: `claude · ${CLAUDE_HAIKU_MODEL}`,
+      ok: reply.length > 0,
+      status: reply ? 200 : null,
+      elapsedMs: Date.now() - startedAt,
+      promptChars: systemInstruction.length,
+      finishReason: reply ? "end_turn" : null,
+      answerPreview: reply.slice(0, 160),
+      error: reply ? null : "Claude ไม่ตอบ (ดูสาเหตุในข้อ 1) — แชทจริงจะไหลไป Groq/Gemini",
+    });
+    if (reply) return out;
+  }
   if (apiKey) {
     for (const [idx, model] of WORKING_GEMINI_MODELS.entries()) {
       const startedAt = Date.now();
