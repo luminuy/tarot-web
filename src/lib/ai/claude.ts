@@ -20,6 +20,18 @@
  *   กันกรณีโมเดลห่อด้วย ``` ไว้ที่ `extractJsonObject()` ก่อนส่งเข้า `finalizeReading()`
  *
  * ⚠️ กฎเหล็กข้อ 14: ไม่มีโค้ดกุไพ่ — JSON ไม่ผ่าน `ReadingSchema` = return ให้สายสำรองอ่านใหม่ทั้งหมด
+ *
+ * 🗺️ เส้นที่ใช้ Claude เป็นตัวแรก (เจ้าของสั่ง 2026-10-28: "เลือกโมเดลตามความเหมาะสม แต่ใช้ Claude เป็นหลัก")
+ * | เส้น | รุ่น | เหตุผล |
+ * | `/read` คำอ่านไพ่ · `/perspective` อ่านอีกมุม | 1-3 ใบ Haiku · 4 ใบขึ้นไป Sonnet | `claudeReadingModel()` |
+ * | `/chat` คุยต่อหลังเปิดไพ่ | ตามจำนวนไพ่แบบเดียวกัน · effort `low` | ผังใหญ่ต้องโยงไพ่หลายใบ · แชทไม่ต้องคิดลึก |
+ * | `/natal/chat` ถามแม่หมอเรื่องผังดวง | Sonnet · effort `medium` | ต้องไล่ดาว/มุม/เรือนให้ครบ |
+ * | `/natal/overview` ปุ่มภาพรวมผัง (ฟรีทุกคน) | Haiku · effort `low` | โค้ดคำนวณและจัดลำดับแล้ว โมเดลแค่เรียบเรียง |
+ * | `/natal/report` ภาพรวมในรายงานเสียเงิน | Sonnet · effort `medium` | ของที่ผู้ใช้จ่ายเงิน |
+ * | `/journal/reflect` · `/journal/monthly-summary` | Sonnet · effort `low` | เรียบเรียงจากข้อเท็จจริงหลายรายการ · เรียกไม่บ่อย + มีแคช |
+ * ที่ไม่ใช้ Claude โดยตั้งใจ:
+ * - `/reading/clarify` ถามกลับก่อนสับไพ่ ➔ Groq — หน้าเว็บตัดที่ 2.5 วินาที ต้องเร็วที่สุด
+ * - Reader Studio ร่างคำอ่าน ➔ Gemini — ร่าง DPA (`docs/legal/READER_STUDIO_DPA_DRAFT.md`) ระบุ Gemini เป็นผู้ประมวลผลช่วงรายเดียว
  */
 
 import {
@@ -237,7 +249,7 @@ export async function* streamClaudeReading(ctx: ReadingContext): AsyncGenerator<
 }
 
 /**
- * 💬 คำตอบแบบไม่สตรีม (ถามแม่หมอเรื่องผังดวงกำเนิด · `/api/natal/chat`)
+ * 💬 คำตอบแบบไม่สตรีม (ผังดวง `/api/natal/chat` · แชทหลังเปิดไพ่ · JSON ของสมุดดวงผ่าน `generateAiJson`)
  * ---------------------------------------------------------------------------
  * เจ้าของสั่ง 2026-10-28: หน้าผังดวงใช้ Sonnet "เพราะต้องการความแม่นยำ ละเอียด"
  * - เปิดโหมดคิดแบบ adaptive (ระดับ `medium`) — คำตอบไม่ได้สตรีมทีละคำ ผู้ใช้รอคำตอบทั้งก้อนอยู่แล้ว
@@ -253,6 +265,9 @@ export async function generateClaudeReply(opts: {
   maxTokens: number;
   timeoutMs: number;
   effort?: "low" | "medium" | "high";
+  /** ส่งต่อให้ AI Gateway (`aiGatewayHeaders`) — ค่าเริ่มต้น: ห้ามแคช · เก็บ log ตามปกติ */
+  cacheTtl?: number;
+  collectLog?: boolean;
 }): Promise<{ reply: string; model: string; usage: { inputTokens: number; outputTokens: number } } | null> {
   const apiKey = getClaudeApiKey();
   if (!apiKey) return null;
@@ -275,7 +290,7 @@ export async function generateClaudeReply(opts: {
         "x-api-key": apiKey,
         "anthropic-version": CLAUDE_API_VERSION,
         "content-type": "application/json",
-        ...aiGatewayHeaders({ cacheTtl: 0 }),
+        ...aiGatewayHeaders({ cacheTtl: opts.cacheTtl ?? 0, collectLog: opts.collectLog }),
       },
       body: JSON.stringify({
         model: opts.model,

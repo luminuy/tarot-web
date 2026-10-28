@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import type { ChartSpec } from "@/lib/astro/chart-spec";
 import type { Lang } from "@/data/natal/content";
 import type { NatalReport } from "@/lib/astro/natal-report";
+import { stripEmoji } from "@/lib/text/no-emoji";
 
 /**
  * 📄 รายงานผังดวงฉบับเต็ม (โหลดแบบ lazy เมื่อกดปุ่ม) — ใช้รอบดูดวงที่เติมไว้ 1 รอบ (เจ้าของสั่ง "รายงาน PDF แบบเสียเงิน")
@@ -50,8 +51,8 @@ export default function NatalReportPanel({ spec, lang, onClose }: { spec: ChartS
       <p className="v2-nr-box-t">{isTh ? "รายงานผังดวงฉบับเต็ม (บันทึกเป็น PDF)" : "Full natal chart report (save as PDF)"}</p>
       <ul className="v2-nr-items">
         {(isTh
-          ? ["ตำแหน่งดาวและคำอธิบายทุกดวง", "มุมสัมพันธ์ ดาวฤกษ์ และจุด Lots", "โหราไทย: ทักษา มหาทักษา เลข 7 ตัว", "ดาวเดินช้า 12 เดือนข้างหน้า และผังวันเกิดปีนี้"]
-          : ["Every position, each one explained", "Aspects, fixed stars and lots", "Thai astrology: Taksa, life periods, Seven Numbers", "Slow planets for the next 12 months and this year's solar return"]
+          ? ["ภาพรวมผังที่แม่หมอ AI (Claude Sonnet) เรียบเรียงจากเรื่องเด่นของผัง", "เรื่องเด่นเรียงตามน้ำหนัก และความแม่นของเวลาเกิด", "ตำแหน่งดาวและคำอธิบายทุกดวง มุมสัมพันธ์ ดาวฤกษ์ และจุด Lots", "โหราไทย: ทักษา มหาทักษา เลข 7 ตัว", "ดาวเดินช้า 12 เดือนข้างหน้า และผังวันเกิดปีนี้"]
+          : ["An overview written by the AI reader (Claude Sonnet) from your chart's strongest themes", "Those themes ranked, and how exact your birth time needs to be", "Every position explained, aspects, fixed stars and lots", "Thai astrology: Taksa, life periods, Seven Numbers", "Slow planets for the next 12 months and this year's solar return"]
         ).map((t) => (
           <li key={t}>
             <span className="v2-nr-item-d">{t}</span>
@@ -65,8 +66,8 @@ export default function NatalReportPanel({ spec, lang, onClose }: { spec: ChartS
         <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 w-5 h-5 shrink-0 accent-ink" />
         <span>
           {isTh
-            ? "ยินยอมส่งวันเวลาสถานที่เกิดและชื่อของผังนี้ไปให้เซิร์ฟเวอร์ของเว็บคำนวณรายงาน เว็บไม่บันทึกข้อมูลเกิดไว้"
-            : "I agree to send this chart's birth data and name to the site's server to build the report. The birth data is not stored."}
+            ? "ยินยอมส่งวันเวลาสถานที่เกิดและชื่อของผังนี้ไปให้เซิร์ฟเวอร์ของเว็บคำนวณรายงาน และให้ผู้ให้บริการ AI ภายนอกเขียนภาพรวมผัง เว็บไม่บันทึกข้อมูลเกิดไว้"
+            : "I agree to send this chart's birth data and name to the site's server to build the report, and to an external AI provider to write the overview. The birth data is not stored."}
         </span>
       </label>
       <div className="flex flex-wrap gap-2">
@@ -103,6 +104,8 @@ function ReportView({ report, onClose }: { report: NatalReport; onClose: () => v
   const t = (th: string, en: string) => (isTh ? th : en);
   // หัวข้อแต่ละส่วน: เลขในวงกลม + ชื่อ + คำอธิบายบรรทัดเดียว (ชุดเดียวกับผลผังบนหน้าเว็บ)
   const sections = [
+    { id: "ai", th: "ภาพรวมผังจากแม่หมอ AI", en: "Your chart overview from the AI reader", dTh: "เรียบเรียงจากเรื่องเด่นที่ SeerTarot คำนวณ ตำแหน่งดาวทุกตัวมาจากตัวคำนวณ", dEn: "Written from the themes SeerTarot calculated; every position comes from the calculator" },
+    { id: "themes", th: "เรื่องเด่นของผัง", en: "Your chart's strongest themes", dTh: "เรียงจากสำคัญที่สุด คำนวณจากผัง ไม่ใช้ AI", dEn: "Most important first, calculated without AI" },
     { id: "pos", th: "ตำแหน่งดาวและเรือน", en: "Positions and houses", dTh: "ดาวแต่ละดวงอยู่ราศีไหน และตกเรือนไหนของชีวิต", dEn: "Where each planet sits, by sign and by house" },
     { id: "body", th: "ดาวแต่ละดวงบอกอะไร", en: "What each placement says", dTh: "ดาวคือเรื่อง ราศีคือสไตล์ เรือนคือด้านของชีวิต", dEn: "Planet = what, sign = how, house = where" },
     { id: "asp", th: "ดาวที่คุยกันแรงที่สุด", en: "Your strongest aspects", dTh: "เส้นซ้ายสีน้ำเงินคือไหลลื่น สีแดงคือตึง", dEn: "Blue edge = flowing, red edge = tense" },
@@ -172,7 +175,7 @@ function ReportView({ report, onClose }: { report: NatalReport; onClose: () => v
           <div className="nr-sum">
             <p className="nr-sum-t">{t("สรุปผังของคุณ", "Your chart at a glance")}</p>
             <dl>
-              {report.highlights.map((r) => (
+              {report.glance.map((r) => (
                 <div key={r.label}>
                   <dt>{r.label}</dt>
                   <dd>
@@ -208,8 +211,57 @@ function ReportView({ report, onClose }: { report: NatalReport; onClose: () => v
           </nav>
         </section>
 
-        {/* ── 1. ตำแหน่งดาวและเรือน ── */}
-        <section className="nr-sec nr-break">
+        {/* ── ภาพรวมจาก AI (Sonnet · route เติม · ล้ม = null) ── */}
+        <section className="nr-sec">
+          <H id="ai" />
+          {report.aiOverview ? (
+            <div className="nr-box">
+              {report.aiOverview.paragraphs.map((p, i) => (
+                <p key={i} className="nr-line">
+                  <b>{stripEmoji(p.title)}</b>
+                  <span>{stripEmoji(p.text)}</span>
+                </p>
+              ))}
+            </div>
+          ) : (
+            <p className="nr-muted">
+              {t(
+                "ส่วนนี้ยังสร้างไม่สำเร็จเพราะ AI ไม่ว่างตอนนี้ ปิดรายงานแล้วกดสร้างรายงานใหม่ได้โดยไม่หักรอบซ้ำ",
+                "This part could not be written because the AI is busy. Close the report and create it again; you will not be charged twice.",
+              )}
+            </p>
+          )}
+        </section>
+
+        {/* ── เรื่องเด่น + ความแม่นของเวลาเกิด ── */}
+        <section className="nr-sec">
+          <H id="themes" />
+          <ol className="nr-aspects">
+            {report.highlights.map((h, i) => (
+              <li key={h.title}>
+                <span className="nr-asp-pair">
+                  <b>
+                    {i + 1}. {h.title}
+                  </b>
+                </span>
+                <span className="nr-asp-text">{h.text}</span>
+              </li>
+            ))}
+          </ol>
+          {report.timeSensitivity.length > 0 && (
+            <div className="nr-box">
+              <p className="nr-box-t">{t("เวลาเกิดต้องแม่นแค่ไหน", "How exact does the birth time need to be?")}</p>
+              {report.timeSensitivity.map((x, i) => (
+                <p key={i} className="nr-line">
+                  <span>{x}</span>
+                </p>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* ── ตำแหน่งดาวและเรือน ── */}
+        <section className="nr-sec">
           <H id="pos" />
           <table className="nr-table">
             <thead>

@@ -83,8 +83,9 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
             <li>
               <strong>Natal Chart (birth date, time and place)</strong> — Calculated in your browser and never sent to
               our servers. Saved charts stay on your device. Only when you <strong>tick the consent box</strong> in the
-              &quot;Ask the reader&quot; tab do we send your birth data, the name you entered and your question to
-              calculate the chart and have an external AI provider answer. We do not store the birth data or questions
+              &quot;Ask the reader&quot; tab, the &quot;Write my overview&quot; button or the full chart report do we send your
+              birth data, the name you entered and your question (if any) to calculate the chart and have an external AI
+              provider answer or write the overview. We do not store the birth data or questions
               (only a count of questions, to apply your allowance). If you turn on the daily chart reminder, we store only
               this device&apos;s push subscription and the hour you chose, never your chart. A &quot;Send to a
               friend&quot; link carries the birth data after the # sign, which browsers never send to our servers.

@@ -16,6 +16,7 @@ export const runtime = "nodejs";
  *   หักจากรอบที่ซื้อเท่านั้น ไม่กินโควตาฟรีรายวัน) · ผังเดียวกันโหลดซ้ำไม่หักซ้ำ (รหัสรายการคงที่ต่อบัญชี+ข้อมูลเกิด)
  * - สมาชิกเท่านั้น · ต้องยินยอมส่งข้อมูลเกิด (`consent: true`) · ไม่บันทึกข้อมูลเกิด (บันทึกแค่แถวหักสิทธิ์ที่มีรหัสแฮช)
  * - ประกอบรายงานล้มเหลว = คืนสิทธิ์ทันที (`refundReading`) · ปิดระบบสิทธิ์อยู่ (flag) = ไม่หัก เหมือนแชท
+ * - ภาพรวมผังในรายงานเขียนโดย Claude Sonnet (effort medium) ➔ Gemini · AI ล้มไม่ทำให้รายงานล้ม (ส่วนอื่นเป็นโค้ดล้วน)
  */
 const BodySchema = z.object({
   chart: SpecSchema,
@@ -87,6 +88,31 @@ export async function POST(request: Request) {
       const { buildNatalReport } = await import("@/lib/astro/natal-report");
       const report = buildNatalReport(spec, lang, Date.now());
       recordEvent(charged ? "natal_report_created" : "natal_report_reopened");
+      // ภาพรวมผังจาก Claude Sonnet (เจ้าของสั่ง: ของที่จ่ายเงินใช้ Sonnet) ➔ Gemini
+      // ส่วน AI พัง/งบ AI เต็ม ต้องไม่ลากรายงานที่ประกอบเสร็จแล้วให้ล้ม และไม่คืนสิทธิ์ (ผู้ใช้ได้รายงานส่วนอื่นครบ)
+      try {
+        const { isAiCapReached } = await import("@/lib/security/ai-budget");
+        if (privileged || !(await isAiCapReached("member"))) {
+          const [{ buildChart }, { generateNatalOverview }, { CLAUDE_SONNET_MODEL }] = await Promise.all([
+            import("@/lib/astro/chart-spec"),
+            import("@/lib/astro/natal-overview"),
+            import("@/lib/ai/claude"),
+          ]);
+          const ai = await generateNatalOverview(buildChart({ ...spec, asteroids: false }), spec, lang, { model: CLAUDE_SONNET_MODEL, effort: "medium", maxTokens: 8000, timeoutMs: 45000 }, "NatalReport");
+          if (ai) {
+            report.aiOverview = ai.overview;
+            if (!privileged && viewer.kind === "member") {
+              const { costSubject, estimateTokens, recordAiUsage } = await import("@/lib/security/cost-ledger");
+              const outChars = ai.overview.paragraphs.reduce((n, p) => n + p.title.length + p.text.length, 0);
+              await recordAiUsage(costSubject(viewer.userId, getClientIdentifier(request)), estimateTokens(ai.promptChars), estimateTokens(outChars)).catch(() => undefined);
+            }
+          } else {
+            recordEvent("natal_report_ai_failed");
+          }
+        }
+      } catch {
+        recordEvent("natal_report_ai_failed");
+      }
       return NextResponse.json({ report, charged: !!charged }, { headers: { "Cache-Control": "no-store, private" } });
     } catch {
       if (charged) {

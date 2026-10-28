@@ -2139,6 +2139,7 @@ body.nt-report-open {
   font-size: 15px;
   color: var(--nt-ink);
   padding-top: 6px;
+  break-after: avoid;
 }
 .nr-muted {
   font-size: 12.5px;

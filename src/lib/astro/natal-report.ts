@@ -3,17 +3,20 @@
  * ---------------------------------------------------------------------------
  * หน้าเว็บ (`NatalReport.tsx`) จัดหน้าพิมพ์ให้ผู้ใช้กด "บันทึกเป็น PDF" จากเบราว์เซอร์ (ภาษาไทยแสดงถูกต้องด้วยฟอนต์ของเว็บ)
  * ตัวประกอบรายงานไม่ถูกส่งไปเบราว์เซอร์ (import เฉพาะใน route) · ทุกข้อความมาจากตัวคำนวณ + เนื้อหาที่เขียนไว้ ไม่ใช้ AI
- * มีเฉพาะส่วนที่ไม่มีในหน้าเว็บแบบฟรี: พยากรณ์ดาวเดินช้า 12 เดือนข้างหน้า และผังวันเกิดปีนี้ รวมในเล่มเดียว
+ * ยกเว้นช่อง `aiOverview` ที่ route เติมทีหลัง (Claude Sonnet เรียบเรียงจากเรื่องเด่นที่โค้ดคำนวณ · เจ้าของสั่ง 2026-10-28)
+ * มีเฉพาะส่วนที่ไม่มีในหน้าเว็บแบบฟรี: ภาพรวมผังจาก Sonnet · พยากรณ์ดาวเดินช้า 12 เดือนข้างหน้า และผังวันเกิดปีนี้ รวมในเล่มเดียว
  */
 import { cardById } from "@/data/cards";
 import { ASPECT_TEXT, BODY_TEXT, DIGNITY_TEXT, ELEMENT_TEXT, HOUSE_SYSTEM_TEXT, HOUSE_TEXT, MODALITY_TEXT, type Lang } from "@/data/natal/content";
 import { LOT_TEXT, STAR_TEXT } from "@/data/natal/stars-content";
 import { MAHA_TAKSA_TONE, SEVEN_COLUMNS, TAKSA_TEXT, THAI_DAY_NAME, THAI_PLANET_NAME } from "@/data/natal/thai-content";
 import { buildChart, type ChartSpec } from "./chart-spec";
+import { birthTimeSensitivity, chartHighlights, describeTimeSensitivity } from "./natal-insight";
+import type { NatalOverview } from "./natal-overview";
 import { starContacts } from "./fixed-stars";
 import { hermeticLots } from "./lots";
 import { ASPECT_DEFS, PLANET_IDS, formatDegree, type BodyId, type NatalChart } from "./natal";
-import { aspectTitle, bodyName, cardsFor, chartHighlights, chartSummary, describeAspect, describeBody, describePattern, describeTimedAspect, describeTransitHouse, lifeAreas, placement, returnHighlights, signName, type LifeArea, type SummaryRow } from "./natal-text";
+import { aspectTitle, bodyName, cardsFor, chartGlance, chartSummary, describeAspect, describeBody, describePattern, describeTimedAspect, describeTransitHouse, lifeAreas, placement, returnHighlights, signName, type LifeArea, type SummaryRow } from "./natal-text";
 import { solarReturn, transitCalendar } from "./techniques";
 import { mahaTaksa, sevenNumbers, taksa, TAKSA_POSITIONS, thaiBirthDay } from "./thai-astro";
 import { LUNAR_MONTH_TH, NAKSAT_EN, NAKSAT_TH } from "./thai-lunar";
@@ -24,9 +27,15 @@ export interface NatalReport {
   birthLine: string;
   systemLine: string;
   bigThree: { label: string; value: string; cards: string[]; role: string; sign: string; deg: string }[];
+  /** ภาพรวมผังที่ Claude Sonnet เรียบเรียง — route เติมหลังประกอบรายงาน · AI ล้ม = null (รายงานส่วนอื่นยังครบ) */
+  aiOverview: NatalOverview | null;
+  /** เรื่องเด่นของผังเรียงตามน้ำหนัก (โค้ดคำนวณ) */
+  highlights: { title: string; text: string }[];
+  /** เวลาเกิดคลาดกี่นาทีแล้วอะไรเปลี่ยน (ไม่รู้เวลาเกิด = ว่าง) */
+  timeSensitivity: string[];
   summary: string[];
   /** สรุปสั้นแบบป้าย + บรรทัด (ชุดเดียวกับหน้าเว็บ) */
-  highlights: SummaryRow[];
+  glance: SummaryRow[];
   /** ความรัก · การงาน · การเงิน */
   life: LifeArea[];
   positions: { body: string; value: string; house: string; notes: string; short: string; sign: string; deg: string }[];
@@ -137,8 +146,14 @@ export function buildNatalReport(spec: ChartSpec, lang: Lang, nowMs: number): Na
       .filter(Boolean)
       .join(" · "),
     bigThree,
+    aiOverview: null,
+    highlights: chartHighlights(chart, lang, 8).map((h) => ({ title: h.title, text: h.text })),
+    timeSensitivity: (() => {
+      const ts = birthTimeSensitivity(chart);
+      return ts ? describeTimeSensitivity(ts, lang) : [];
+    })(),
     summary: chartSummary(chart, lang),
-    highlights: chartHighlights(chart, lang),
+    glance: chartGlance(chart, lang),
     life: lifeAreas(chart, lang),
     houseCells: chart.houses
       ? chart.houses.map((c, i) => ({

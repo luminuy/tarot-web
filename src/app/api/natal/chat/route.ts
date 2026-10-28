@@ -162,10 +162,11 @@ export async function POST(request: Request) {
     }
 
     // ── คำนวณผังฝั่งเซิร์ฟเวอร์ ──
-    const [{ buildChart }, { computeTransits }, { formatChartForPrompt, natalAnswerRules }] = await Promise.all([
+    const [{ buildChart }, { computeTransits }, { formatChartForPrompt, natalAnswerRules }, { chartHighlights }] = await Promise.all([
       import("@/lib/astro/chart-spec"),
       import("@/lib/astro/techniques"),
       import("@/lib/astro/natal-ai"),
+      import("@/lib/astro/natal-insight"),
     ]);
     let context: string;
     try {
@@ -182,7 +183,7 @@ export async function POST(request: Request) {
       ]
         .filter(Boolean)
         .join(" · ");
-      context = formatChartForPrompt(chart, lang, birthLine, transit);
+      context = formatChartForPrompt(chart, lang, birthLine, transit, chartHighlights(chart, lang, 8));
     } catch {
       return NextResponse.json({ error: msg(lang, "คำนวณผังไม่สำเร็จ กรุณาโหลดหน้าใหม่อีกครั้ง", "Could not calculate the chart. Please reload the page.") }, { status: 400 });
     }

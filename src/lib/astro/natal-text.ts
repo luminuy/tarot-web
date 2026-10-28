@@ -267,7 +267,7 @@ export interface SummaryRow {
 const afterColon = (s: string) => (s.includes(": ") ? s.slice(s.indexOf(": ") + 2) : s);
 
 /** จุดแข็ง · ต้องระวัง · ธาตุเด่น · รูปแบบพิเศษ (เจ้าของ 2026-10-28 "อยากให้มีสรุป") */
-export function chartHighlights(chart: NatalChart, lang: Lang): SummaryRow[] {
+export function chartGlance(chart: NatalChart, lang: Lang): SummaryRow[] {
   const th = lang === "th";
   const get = (id: BodyId) => chart.bodies.find((b) => b.id === id);
   const sun = get("sun")!;

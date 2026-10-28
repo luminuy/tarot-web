@@ -530,21 +530,48 @@ ${guardSection}
       );
     }
 
-    // ── Tier 1: Groq LPU AI Engine (Qwen 3.8 27B) — ทัพหน้าความเร็ว 300+ tok/s ตอบใน 0.5-1s รองรับ 14,400 req/day ──
+    const replayMessages = [
+      // ประวัติถูกกรอง ตัดความยาว และจำกัดงบอักขระรวมมาแล้วที่ selectReplayHistory()
+      ...history.map((h) => ({
+        role: (h.sender === "user" ? "user" : "assistant") as "user" | "assistant",
+        content: h.text,
+      })),
+      { role: "user" as const, content: userQuestion },
+    ];
+
+    // ── Tier 0: Claude (เจ้าของสั่ง 2026-10-28 "ใช้ Claude เป็นหลัก") — รุ่นตามจำนวนไพ่แบบเดียวกับคำอ่าน
+    //    1-3 ใบ Haiku · 4 ใบขึ้นไป Sonnet (ต้องโยงไพ่หลายใบ) · effort low เพราะแชทไม่ต้องคิดลึกและผู้ใช้รออยู่
+    //    ไม่มีคีย์ / พัก / ล้ม / เผย prompt ➔ ไหลลง Groq ➔ Gemini ตามเดิม
+    if (process.env.ANTHROPIC_API_KEY?.trim()) {
+      const { generateClaudeReply, claudeReadingModel } = await import("@/lib/ai/claude");
+      const claudeResult = await generateClaudeReply({
+        model: claudeReadingModel(record.drawn?.length ?? 0),
+        system: systemInstruction,
+        messages: replayMessages,
+        maxTokens: 4000,
+        timeoutMs: 25000,
+        effort: "low",
+      });
+      const cleanReply = claudeResult?.reply ? sanitizeTarotText(stripThinkingTags(claudeResult.reply)) : "";
+      const leakedClaude = cleanReply ? detectPromptLeak(cleanReply) : null;
+      if (leakedClaude) recordEvent("ai_prompt_leak:chat");
+      if (cleanReply && !leakedClaude) {
+        await recordAiCall(1);
+        if (freeChatKey) await bumpEdgeCounter(freeChatKey, FREE_CHAT_WINDOW_SEC);
+        await noteChatCost(chatCostSubj, systemInstruction, history, userQuestion, cleanReply);
+        return NextResponse.json({ reply: cleanReply, provider: "claude", model: claudeResult?.model });
+      }
+      recordEvent("ai_claude_failover:chat");
+    }
+
+    // ── Tier 1: Groq LPU AI Engine (Qwen 3.8 27B) — ความเร็ว 300+ tok/s ตอบใน 0.5-1s รองรับ 14,400 req/day ──
     const groqKey = process.env.GROQ_API_KEY;
     if (groqKey) {
       try {
         const { generateGroqChatReply } = await import("@/lib/ai/groq");
         const groqResult = await generateGroqChatReply({
           systemInstruction,
-          messages: [
-            // ประวัติถูกกรอง ตัดความยาว และจำกัดงบอักขระรวมมาแล้วที่ selectReplayHistory()
-            ...history.map((h) => ({
-              role: (h.sender === "user" ? "user" : "assistant") as "user" | "assistant",
-              content: h.text,
-            })),
-            { role: "user", content: userQuestion },
-          ],
+          messages: replayMessages,
           apiKey: groqKey,
         });
 
@@ -666,7 +693,7 @@ ${guardSection}
       }
     }
 
-    // ── มาถึงตรงนี้ = ไม่ได้คำตอบจากทั้ง Gemini และ Groq ต้องใช้คลังคำตอบสำรองออฟไลน์ ──
+    // ── มาถึงตรงนี้ = ไม่ได้คำตอบจาก Claude · Groq · Gemini ต้องใช้คลังคำตอบสำรองออฟไลน์ ──
     // เดิมส่งคืนเหมือนคำตอบ AI ทุกประการ ผู้ใช้จึงแยกไม่ออกว่ากำลังคุยกับข้อความสำเร็จรูป
     // (เจ้าของโปรเจกต์เจอเองว่า 2 คำถามคนละเรื่องได้คำตอบเดียวกันเป๊ะ)
     // ต่อไปนี้ต้องติดธง `fallback` กลับไปเสมอ ให้หน้าเว็บบอกผู้ใช้ตรง ๆ

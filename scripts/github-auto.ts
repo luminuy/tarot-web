@@ -163,9 +163,10 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
     args: ["scripts/qa/test-groq-failover.ts"],
   },
   {
-    label: "🟠 Claude ทัพหน้าคำอ่าน (1-3 ใบ Haiku · 4 ใบขึ้นไป Sonnet · ล้มแล้วไหลลง Groq/Gemini · ไม่กุคำอ่าน)",
+    label: "🟠 Claude ทัพหน้า AI (คำอ่าน · แชท · อ่านอีกมุม · สมุดดวง · ผังดวง · ล้มแล้วไหลลง Groq/Gemini · ไม่กุคำอ่าน)",
     cmd: TSX,
-    args: ["scripts/qa/test-claude-reading.ts"],
+    // tsconfig สคริปต์ = stub `server-only` ให้ทดสอบทางสำรอง Gemini ของ generateAiJson ได้จริง
+    args: ["--tsconfig", "tsconfig.scripts.json", "scripts/qa/test-claude-reading.ts"],
   },
   {
     label: "🛟 คำอ่านสำรองออฟไลน์ (ครบ 5 บุคลิก · อังกฤษไม่มีไทยหลุด · ฟันธง ใช่/ไม่ใช่ · จดสถิติ)",

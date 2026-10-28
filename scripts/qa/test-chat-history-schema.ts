@@ -190,12 +190,12 @@ export function runChatSchemaTests() {
   console.log("  ✓ Test 7: คำอ่านสำรองไม่มีปุ่มแชท + 409 บอกทางไปต่อ + ตาที่ล้มไม่กินสิทธิ์ถามฟรี");
 
   // Test 8: สิทธิ์ถามฟรีนับฝั่งเซิร์ฟเวอร์ด้วย (เดิมนับที่หน้าจออย่างเดียว · รีโหลด/ยิง API ตรง = ถามฟรีไม่จำกัด)
-  // อ่านก่อนเรียก AI · นับเพิ่มเฉพาะตาที่ AI ตอบสำเร็จ (ทั้ง Groq และ Gemini) · หน้าจอกับเซิร์ฟเวอร์ใช้ค่าคงที่ตัวเดียว
+  // อ่านก่อนเรียก AI · นับเพิ่มเฉพาะตาที่ AI ตอบสำเร็จ (ทั้ง Claude · Groq · Gemini) · หน้าจอกับเซิร์ฟเวอร์ใช้ค่าคงที่ตัวเดียว
   const peekAt = chatRouteSrc.indexOf("peekEdgeCounter(freeChatKey");
   const firstAiAt = chatRouteSrc.indexOf("isAiCapReached(\"member\")");
   const bumps = chatRouteSrc.match(/await recordAiCall\(1\);\s*if \(freeChatKey\) await bumpEdgeCounter\(freeChatKey, FREE_CHAT_WINDOW_SEC\);/g) ?? [];
-  if (peekAt < 0 || firstAiAt < 0 || peekAt > firstAiAt || bumps.length !== 2) {
-    throw new Error(`Test 8 Failed: ด่านสิทธิ์ถามฟรีฝั่งเซิร์ฟเวอร์ต้องอ่านก่อนเรียก AI และนับเพิ่มหลังตอบสำเร็จทั้ง 2 ผู้ให้บริการ (เจอ ${bumps.length})`);
+  if (peekAt < 0 || firstAiAt < 0 || peekAt > firstAiAt || bumps.length !== 3) {
+    throw new Error(`Test 8 Failed: ด่านสิทธิ์ถามฟรีฝั่งเซิร์ฟเวอร์ต้องอ่านก่อนเรียก AI และนับเพิ่มหลังตอบสำเร็จทั้ง 3 ผู้ให้บริการ (เจอ ${bumps.length})`);
   }
   if (!/if \(!\(ent\.bonusRemaining > 0\)\) freeChatKey = edgeRateLimitKey\("chat:free", id\)/.test(chatRouteSrc)) {
     throw new Error("Test 8 Failed: เกณฑ์ 'ถามได้ไม่จำกัด' ฝั่งเซิร์ฟเวอร์ต้องตรงกับหน้าจอ (มีรอบโบนัส/รอบที่ซื้อเหลือ)");
