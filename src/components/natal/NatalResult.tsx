@@ -43,6 +43,7 @@ import { hermeticLots } from "@/lib/astro/lots";
 import { LOT_TEXT, STAR_TEXT } from "@/data/natal/stars-content";
 import type { NatalCardItem, NatalMeta } from "./NatalChartApp";
 import { NATAL_CARD_KEYWORDS } from "@/data/natal/card-keywords";
+import { PLANET_DEPTH } from "@/data/natal/depth";
 import type { ChartSpec } from "@/lib/astro/chart-spec";
 import type { TimeMode } from "./NatalTimeTools";
 
@@ -193,7 +194,7 @@ export default function NatalResult({
 
   /* สรุปสั้น: ป้ายซ้าย ข้อความขวา — คำนวณจากผังทั้งหมด ไม่ใช้ AI */
   /* สรุปสั้น + ความรัก/งาน/เงิน — ฟังก์ชันเดียวกับรายงานฉบับเต็ม (natal-text.ts) */
-  const glance = chartGlance(chart, lang).map((r) => ({
+  const glance = chartGlance(chart, lang, themes).map((r) => ({
     label: r.label,
     text: (
       <>
@@ -529,16 +530,25 @@ export default function NatalResult({
       {/* ── เรื่องเด่นที่สุดของผัง (โค้ดจัดลำดับ) + ภาพรวมจากแม่หมอ AI (กดเองหลังยินยอม) ── */}
       <section aria-labelledby="natal-themes" className="v2-nr-sec">
         <SectionHead id="natal-themes" n={nextN()} title={isTh ? "เรื่องเด่นที่สุดของผัง" : "Your chart's strongest themes"}>
-          {isTh ? "เรียงจากสำคัญที่สุด คำนวณจากผังของคุณ ไม่ใช้ AI" : "Most important first, calculated from your chart without AI."}
+          {isTh
+            ? "เรียงจากสำคัญที่สุด แต่ละข้อบอกว่าแปลว่าอะไร มาจากตรงไหนของผัง และใช้ให้ดีอย่างไร คำนวณจากผังของคุณ ไม่ใช้ AI"
+            : "Most important first. Each one says what it means, where it comes from in your chart and how to make it work. Calculated from your chart without AI."}
         </SectionHead>
         {themes.length > 0 && (
           <ol className="v2-nr-items">
             {themes.map((h, i) => (
-              <li key={h.key}>
+              <li key={h.key} className={`is-${h.tone}`}>
                 <span className="v2-nr-item-t">
                   <span className="ui2-num text-gold-ink">{i + 1}.</span> {h.title}
                 </span>
+                <span className="v2-nr-item-basis">{h.basis}</span>
                 <span className="v2-nr-item-d">{h.text}</span>
+                {h.advice && (
+                  <span className="v2-nr-item-key">
+                    <b>{isTh ? "ใช้ให้ดี" : "Make it work"}</b>
+                    {h.advice}
+                  </span>
+                )}
               </li>
             ))}
           </ol>
@@ -733,13 +743,7 @@ export default function NatalResult({
           </div>
           <div className="v2-nr-box">
             <p className="v2-nr-box-t">{isTh ? "ดาวเด่นในผัง" : "Most prominent planets"}</p>
-            {topPlanet && (
-              <p className="v2-nr-item-d">
-                {isTh
-                  ? `เรื่อง${BODY_TEXT[topPlanet.id].noun.th}เป็นแกนสำคัญของชีวิตคุณ`
-                  : `Your ${BODY_TEXT[topPlanet.id].noun.en} sits at the centre of your life.`}
-              </p>
-            )}
+            {topPlanet && <p className="v2-nr-item-d">{PLANET_DEPTH[topPlanet.id].loud[lang]}</p>}
             <ol className="v2-nr-dom">
               {chart.dominantPlanets.slice(0, 3).map((d, i) => (
                 <li key={d.id}>

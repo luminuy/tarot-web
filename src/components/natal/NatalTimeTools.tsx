@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { BODY_TEXT, MOON_SIGN_TEXT, MOON_PHASE_TEXT, PROG_PHASE_TEXT, ASPECT_TEXT, SIGN_TEXT, TRANSIT_TEXT, type Lang } from "@/data/natal/content";
 import { THAI_PROVINCES, WORLD_CITIES } from "@/data/natal/places";
 import { ASPECT_DEFS, formatDegree, type AspectType, type BodyId, type BodyPosition, type NatalChart } from "@/lib/astro/natal";
-import { bodyName, describeTimedAspect, describeTransitHouse, returnHighlights, signName } from "@/lib/astro/natal-text";
+import { bodyName, describeTimedAspect, describeTransitHouse, returnHighlights, signName, thw } from "@/lib/astro/natal-text";
 import {
   SLOW_IDS,
   computeProgressions,
@@ -405,7 +405,7 @@ export default function NatalTimeTools({ chart, lang, meta, mode }: { chart: Nat
                   <span className="v2-nr-item-d">
                     {/* ดาวก้าวหน้าเป็นพัฒนาการระยะยาว — ห้ามใช้ประโยคดาวจร ("อารมณ์ของวันนี้") */}
                     {isTh
-                      ? `${BODY_TEXT[a.t].noun.th}ที่พัฒนามาถึงตอนนี้ ${ASPECT_TEXT[a.type].meaning.th} กับ${BODY_TEXT[a.n].noun.th}ตั้งแต่เกิด`
+                      ? `${thw(BODY_TEXT[a.t].noun.th)}ที่พัฒนามาถึงตอนนี้ กับ${thw(BODY_TEXT[a.n].noun.th)}ตั้งแต่เกิด: ${ASPECT_TEXT[a.type].meaning.th}`
                       : `Your developing ${BODY_TEXT[a.t].noun.en} and your natal ${BODY_TEXT[a.n].noun.en}: ${ASPECT_TEXT[a.type].meaning.en}.`}
                   </span>
                   <span className="v2-nr-item-meta tabular-nums">orb {formatDegree(a.orb)}</span>

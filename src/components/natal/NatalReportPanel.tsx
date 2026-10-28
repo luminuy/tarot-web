@@ -244,7 +244,13 @@ function ReportView({ report, onClose }: { report: NatalReport; onClose: () => v
                     {i + 1}. {h.title}
                   </b>
                 </span>
+                {h.basis && <span className="nr-hl-basis">{h.basis}</span>}
                 <span className="nr-asp-text">{h.text}</span>
+                {h.advice && (
+                  <span className="nr-hl-key">
+                    <b>{t("ใช้ให้ดี", "Make it work")}</b> {h.advice}
+                  </span>
+                )}
               </li>
             ))}
           </ol>
