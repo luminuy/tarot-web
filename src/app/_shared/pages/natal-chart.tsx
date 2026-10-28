@@ -8,6 +8,7 @@ import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { Ui2NextSteps } from "@/components/ui2/Ui2NextSteps";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
+import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { ZODIAC_SIGNS } from "@/data/zodiac";
 import { ASPECT_TEXT, BODY_TEXT, HOUSE_TEXT, SIGN_TEXT } from "@/data/natal/content";
 import { CardImage } from "@/components/card/CardImage";
@@ -34,11 +35,22 @@ export const NATAL_PATH = "/natal-chart";
 
 /**
  * ไพ่ที่ผังดวงใช้: ไพ่ชุดใหญ่ 22 ใบ (ไพ่ประจำดาว/ราศี) + ไพ่เลข 2–10 ทั้ง 4 ชุด (ไพ่ประจำช่วง 10 องศา)
- * ส่งเฉพาะฟิลด์ที่ใช้จริง — ก้อนนี้เป็น prop ของ island ถูกฝังลง HTML
+ * ส่งเฉพาะฟิลด์ที่ใช้จริง — ก้อนนี้เป็น prop ของ island ถูกฝังลง HTML (คำสำคัญ 3 คำต่อภาษา ใช้บอกความหมายไพ่หลังพลิก)
  */
 export const NATAL_CARDS: NatalCardItem[] = CARD_SUMMARIES.filter(
   (c) => c.arcana === "major" || (c.number >= 2 && c.number <= 10),
-).map((c) => ({ id: c.id, nameTh: c.nameTh, nameEn: c.nameEn, image: c.image }));
+).map((c) => {
+  const en = CARD_KEYWORDS_EN[c.id];
+  // ไม่มีคำสำคัญอังกฤษ = ให้บิลด์ล้ม ไม่ปล่อยไพ่ใบนั้นไปโดยไม่มีความหมาย (กฎถาวร: ห้ามทางถอยเงียบ)
+  if (!en) throw new Error(`natal-chart: ไพ่ ${c.id} ไม่มีคำสำคัญภาษาอังกฤษใน keywords-en.ts`);
+  return {
+    id: c.id,
+    nameTh: c.nameTh,
+    nameEn: c.nameEn,
+    image: c.image,
+    kw: { th: c.keywords.upright.slice(0, 3).join(" "), en: en.upright.slice(0, 3).join(", ") },
+  };
+});
 
 export function natalChartMetadata(locale: Locale): Metadata {
   const isEnglish = locale === "en";
@@ -97,7 +109,7 @@ const FAQ_TH: SeoFaqItem[] = [
   },
   {
     q: "ข้อมูลวันเกิดของฉันถูกเก็บไว้ไหม?",
-    a: "ไม่ส่งไปที่ไหน การคำนวณทั้งหมดทำในเบราว์เซอร์ของคุณ วันเวลาและสถานที่เกิดไม่ถูกส่งไปที่เซิร์ฟเวอร์ ถ้าคุณกด \"บันทึกผังนี้ไว้ในเครื่องนี้\" ข้อมูลจะเก็บอยู่ในเบราว์เซอร์ของเครื่องนั้นเท่านั้น และลบได้ทุกเมื่อ",
+    a: "ไม่ส่งไปที่ไหน การคำนวณทั้งหมดทำในเบราว์เซอร์ของคุณ วันเวลาและสถานที่เกิดไม่ถูกส่งไปที่เซิร์ฟเวอร์ ถ้าคุณกด \"บันทึกในเครื่องนี้\" ข้อมูลจะเก็บอยู่ในเบราว์เซอร์ของเครื่องนั้นเท่านั้น และลบได้ทุกเมื่อ",
   },
   {
     q: "ควรเลือกระบบเรือนแบบไหน?",
@@ -120,7 +132,7 @@ const FAQ_EN: SeoFaqItem[] = [
   },
   {
     q: "Is my birth data stored?",
-    a: "No. Everything is calculated in your browser and your birth date, time and place are never sent to our server. If you press \"Save this chart on this device\", it is stored only in that browser and you can delete it any time.",
+    a: "No. Everything is calculated in your browser and your birth date, time and place are never sent to our server. If you press \"Save on this device\", it is stored only in that browser and you can delete it any time.",
   },
   {
     q: "Which house system should I choose?",

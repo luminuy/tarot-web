@@ -24,6 +24,8 @@ export interface NatalCardItem {
   nameTh: string;
   nameEn: string;
   image: string;
+  /** คำสำคัญหน้าตรง 3 คำ (ไทย · อังกฤษ) — แสดงหลังผู้ใช้พลิกไพ่ประจำตัวแล้วเท่านั้น */
+  kw?: { th: string; en: string };
 }
 
 export interface NatalMeta {
@@ -578,98 +580,108 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
       <div ref={resultRef} className="scroll-mt-24" aria-live="polite">
         {result && (
           <Suspense fallback={<p className="text-sm text-muted text-center">{isEnglish ? "Drawing your chart..." : "กำลังวาดผังดวง..."}</p>}>
-            <NatalResult chart={result.chart} lang={lang} meta={result.meta} cards={cards} spec={result.spec} />
-            <div className="v2-nt-noprint flex flex-wrap justify-center gap-2 pt-6">
-              <button type="button" onClick={handleSave} disabled={saveState === "saved"} className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px] disabled:opacity-70">
-                {saveState === "saved"
-                  ? isEnglish
-                    ? "Saved on this device"
-                    : "บันทึกไว้ในเครื่องนี้แล้ว"
-                  : isEnglish
-                    ? "Save this chart on this device"
-                    : "บันทึกผังนี้ไว้ในเครื่องนี้"}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShareStep("confirm");
-                  setShareNote(null);
-                }}
-                className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]"
-              >
-                {isEnglish ? "Send this chart to a friend" : "ส่งผังนี้ให้เพื่อน"}
-              </button>
-              <button type="button" onClick={() => setReportOpen(true)} className="rounded-full border border-gold-ink bg-surface px-4 py-2 text-sm font-semibold text-ink min-h-[44px]">
-                {isEnglish ? "Full report (PDF)" : "รายงานฉบับเต็ม (PDF)"}
-              </button>
-              <button type="button" onClick={() => window.print()} className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]">
-                {isEnglish ? "Print this page" : "พิมพ์หน้านี้"}
-              </button>
-              <button
-                type="button"
-                onClick={() => document.getElementById("natal-app")?.scrollIntoView({ behavior: smoothScrollBehavior() })}
-                className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]"
-              >
-                {isEnglish ? "Edit birth details" : "แก้ข้อมูลเกิด"}
-              </button>
-            </div>
-            {reportOpen && (
-              <Suspense fallback={null}>
-                <NatalReportPanel spec={result.spec} lang={lang} onClose={() => setReportOpen(false)} />
-              </Suspense>
-            )}
-            {shareStep !== "idle" && (
-              <div className="mx-auto mt-3 max-w-xl rounded-xl border border-line-warm bg-surface/70 p-3 space-y-2 text-sm text-ink">
-                <p>
-                  {isEnglish
-                    ? "The link contains the birth date, time, place and name of this chart, so your friend can open it and compare charts. It goes straight from you to them and is not stored by the site. Only send it to people you trust."
-                    : "ลิงก์นี้มีวันเวลาสถานที่เกิดและชื่อของผังนี้ เพื่อนเปิดแล้วเทียบผังกันได้ทันที ข้อมูลส่งจากคุณถึงเพื่อนตรง ๆ เว็บไม่ได้เก็บไว้ ส่งให้เฉพาะคนที่ไว้ใจเท่านั้น"}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      const url = `${window.location.origin}${isEnglish ? "/en" : ""}/natal-chart#add=${encodeChartShare(result.spec)}`;
-                      try {
-                        if (navigator.share) {
-                          await navigator.share({ title: isEnglish ? "My natal chart" : "ผังดวงของฉัน", url });
-                          setShareStep("done");
-                          return;
-                        }
-                      } catch (err) {
-                        if ((err as { name?: string })?.name === "AbortError") return;
-                      }
-                      try {
-                        await navigator.clipboard.writeText(url);
-                        setShareNote(isEnglish ? "Link copied. Paste it into a chat with your friend." : "คัดลอกลิงก์แล้ว วางในแชทกับเพื่อนได้เลย");
-                      } catch {
-                        setShareNote(url);
-                      }
-                      setShareStep("done");
-                    }}
-                    className="rounded-full btn-gold-glass px-4 min-h-[44px] text-sm font-bold"
-                  >
-                    {isEnglish ? "Create the link" : "สร้างลิงก์"}
-                  </button>
-                  <button type="button" onClick={() => setShareStep("idle")} className="rounded-full border border-line-warm px-4 min-h-[44px] text-sm text-ink">
-                    {isEnglish ? "Cancel" : "ยกเลิก"}
-                  </button>
+            <NatalResult
+              chart={result.chart}
+              lang={lang}
+              meta={result.meta}
+              cards={cards}
+              spec={result.spec}
+              actions={
+                <div className="v2-nt-noprint space-y-2">
+                  <div className="v2-nr-actions">
+                    <button type="button" onClick={handleSave} disabled={saveState === "saved"} className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px] disabled:opacity-70">
+                      {saveState === "saved"
+                        ? isEnglish
+                          ? "Saved"
+                          : "บันทึกแล้ว"
+                        : isEnglish
+                          ? "Save on this device"
+                          : "บันทึกในเครื่องนี้"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShareStep("confirm");
+                        setShareNote(null);
+                      }}
+                      className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]"
+                    >
+                      {isEnglish ? "Send to a friend" : "ส่งให้เพื่อน"}
+                    </button>
+                    <button type="button" onClick={() => setReportOpen(true)} className="rounded-full border border-gold-ink bg-surface px-4 py-2 text-sm font-semibold text-ink min-h-[44px]">
+                      {isEnglish ? "Full report (PDF)" : "รายงานเต็ม (PDF)"}
+                    </button>
+                    <button type="button" onClick={() => window.print()} className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]">
+                      {isEnglish ? "Print" : "พิมพ์"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById("natal-app")?.scrollIntoView({ behavior: smoothScrollBehavior() })}
+                      className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]"
+                    >
+                      {isEnglish ? "Edit birth details" : "แก้ข้อมูลเกิด"}
+                    </button>
+                  </div>
+                  {reportOpen && (
+                    <Suspense fallback={null}>
+                      <NatalReportPanel spec={result.spec} lang={lang} onClose={() => setReportOpen(false)} />
+                    </Suspense>
+                  )}
+                  {shareStep !== "idle" && (
+                    <div className="mx-auto mt-3 max-w-xl rounded-xl border border-line-warm bg-surface/70 p-3 space-y-2 text-sm text-ink">
+                      <p>
+                        {isEnglish
+                          ? "The link contains the birth date, time, place and name of this chart, so your friend can open it and compare charts. It goes straight from you to them and is not stored by the site. Only send it to people you trust."
+                          : "ลิงก์นี้มีวันเวลาสถานที่เกิดและชื่อของผังนี้ เพื่อนเปิดแล้วเทียบผังกันได้ทันที ข้อมูลส่งจากคุณถึงเพื่อนตรง ๆ เว็บไม่ได้เก็บไว้ ส่งให้เฉพาะคนที่ไว้ใจเท่านั้น"}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const url = `${window.location.origin}${isEnglish ? "/en" : ""}/natal-chart#add=${encodeChartShare(result.spec)}`;
+                            try {
+                              if (navigator.share) {
+                                await navigator.share({ title: isEnglish ? "My natal chart" : "ผังดวงของฉัน", url });
+                                setShareStep("done");
+                                return;
+                              }
+                            } catch (err) {
+                              if ((err as { name?: string })?.name === "AbortError") return;
+                            }
+                            try {
+                              await navigator.clipboard.writeText(url);
+                              setShareNote(isEnglish ? "Link copied. Paste it into a chat with your friend." : "คัดลอกลิงก์แล้ว วางในแชทกับเพื่อนได้เลย");
+                            } catch {
+                              setShareNote(url);
+                            }
+                            setShareStep("done");
+                          }}
+                          className="rounded-full btn-gold-glass px-4 min-h-[44px] text-sm font-bold"
+                        >
+                          {isEnglish ? "Create the link" : "สร้างลิงก์"}
+                        </button>
+                        <button type="button" onClick={() => setShareStep("idle")} className="rounded-full border border-line-warm px-4 min-h-[44px] text-sm text-ink">
+                          {isEnglish ? "Cancel" : "ยกเลิก"}
+                        </button>
+                      </div>
+                      {shareNote && <p className="text-xs text-muted break-all">{shareNote}</p>}
+                    </div>
+                  )}
+                  {saveState === "failed" && (
+                    <p role="alert" className="text-sm text-err text-center pt-2">
+                      {isEnglish ? "Could not save: this browser blocks local storage (private mode?)." : "บันทึกไม่ได้ เบราว์เซอร์นี้ปิดการเก็บข้อมูลในเครื่อง (อาจเป็นโหมดส่วนตัว)"}
+                    </p>
+                  )}
+                  {saveState === "saved" && (
+                    <p className="text-xs text-muted text-center pt-2">
+                      {isEnglish
+                        ? "Saved only in this browser. Delete it any time from the list above the form."
+                        : "เก็บไว้ในเบราว์เซอร์นี้เท่านั้น ลบได้ทุกเมื่อจากรายการเหนือฟอร์ม"}
+                    </p>
+                  )}
                 </div>
-                {shareNote && <p className="text-xs text-muted break-all">{shareNote}</p>}
-              </div>
-            )}
-            {saveState === "failed" && (
-              <p role="alert" className="text-sm text-err text-center pt-2">
-                {isEnglish ? "Could not save: this browser blocks local storage (private mode?)." : "บันทึกไม่ได้ เบราว์เซอร์นี้ปิดการเก็บข้อมูลในเครื่อง (อาจเป็นโหมดส่วนตัว)"}
-              </p>
-            )}
-            {saveState === "saved" && (
-              <p className="text-xs text-muted text-center pt-2">
-                {isEnglish
-                  ? "Saved only in this browser. Delete it any time from the list above the form."
-                  : "เก็บไว้ในเบราว์เซอร์นี้เท่านั้น ลบได้ทุกเมื่อจากรายการเหนือฟอร์ม"}
-              </p>
-            )}
+              }
+            />
           </Suspense>
         )}
       </div>

@@ -86,7 +86,7 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
               &quot;Ask the reader&quot; tab do we send your birth data, the name you entered and your question to
               calculate the chart and have an external AI provider answer. We do not store the birth data or questions
               (only a count of questions, to apply your allowance). If you turn on the daily chart reminder, we store only
-              this device&apos;s push subscription and the hour you chose, never your chart. A &quot;Send this chart to a
+              this device&apos;s push subscription and the hour you chose, never your chart. A &quot;Send to a
               friend&quot; link carries the birth data after the # sign, which browsers never send to our servers.
             </li>
             <li>
