@@ -540,7 +540,7 @@ ${guardSection}
     ];
 
     // ── Tier 0: Claude (เจ้าของสั่ง 2026-10-28 "ใช้ Claude เป็นหลัก") — รุ่นตามจำนวนไพ่แบบเดียวกับคำอ่าน
-    //    1-3 ใบ Haiku · 4 ใบขึ้นไป Sonnet (ต้องโยงไพ่หลายใบ) · effort low เพราะแชทไม่ต้องคิดลึกและผู้ใช้รออยู่
+    //    1-3 ใบ Haiku · 4 ใบขึ้นไป Sonnet (ต้องโยงไพ่หลายใบ) · effort medium ให้ตอบตรงไพ่ที่เปิด (เจ้าของสั่ง 2026-10-28 ให้แม่นขึ้น)
     //    ไม่มีคีย์ / พัก / ล้ม / เผย prompt ➔ ไหลลง Groq ➔ Gemini ตามเดิม
     if (process.env.ANTHROPIC_API_KEY?.trim()) {
       const { generateClaudeReply, claudeReadingModel } = await import("@/lib/ai/claude");
@@ -548,9 +548,10 @@ ${guardSection}
         model: claudeReadingModel(record.drawn?.length ?? 0),
         system: systemInstruction,
         messages: replayMessages,
-        maxTokens: 4000,
+        // ความคิดนับรวมใน max_tokens ➔ เผื่อจากคำตอบ ~1,500 โทเคน ไม่งั้นโดนตัดแล้วไหลลง Groq เงียบ ๆ
+        maxTokens: 8000,
         timeoutMs: 25000,
-        effort: "low",
+        effort: "medium",
       });
       const cleanReply = claudeResult?.reply ? sanitizeTarotText(stripThinkingTags(claudeResult.reply)) : "";
       const leakedClaude = cleanReply ? detectPromptLeak(cleanReply) : null;
