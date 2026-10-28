@@ -330,8 +330,8 @@ async function main() {
   check("Claude ไม่จบ ➔ นับ failover แล้วไหลลงตัวถัดไป", route.includes('recordEvent("ai_claude_failover")'));
   const deploy = fs.readFileSync(path.resolve(".github/workflows/deploy.yml"), "utf-8");
   check(
-    "deploy.yml ส่ง ANTHROPIC_API_KEY เข้า Worker (INC-0152: ลืม = Worker ไม่มีวันเห็นคีย์)",
-    deploy.includes("ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}"),
+    "deploy.yml ตั้ง ANTHROPIC_API_KEY เป็น secret ของ Worker ด้วย wrangler secret put (env ของขั้น build ไม่ถึง Worker ตอนรัน)",
+    /- name: 🤖 Sync Claude key to Worker[\s\S]{0,1200}ANTHROPIC_API_KEY: \$\{\{ secrets\.ANTHROPIC_API_KEY \}\}[\s\S]{0,600}npx wrangler secret put ANTHROPIC_API_KEY/.test(deploy),
   );
   const claudeSrc = fs.readFileSync(path.resolve("src/lib/ai/claude.ts"), "utf-8");
   check("ไม่ log คีย์หรือ prompt", !/console\.\w+\([^)]*(apiKey|systemInstruction|userMessage)/.test(claudeSrc));

@@ -237,6 +237,17 @@ npm run commit -- --agent <ชื่อ> --type fix --scope <หมวด> \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0307 · 2026-10-28 15:56 · 🟠 High · คีย์ Claude ตั้งใน GitHub แล้วแต่ Worker ไม่เห็น
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | เจ้าของตั้ง ANTHROPIC_API_KEY ใน GitHub Secrets และ deploy ผ่าน แต่แผงแอดมินขึ้นว่ายังไม่ได้ตั้งคีย์บน Worker คำอ่านไม่ใช้ Claude ยอดใน Console เป็นศูนย์ |
+| **สาเหตุราก** | ผมใส่คีย์ไว้ใน env ของขั้น npm run deploy ตามความเข้าใจเดิมใน INC-0152 แต่ env ตรงนั้นมีผลแค่ตอนบิลด์ OpenNext ฝังเฉพาะค่าจากไฟล์ .env และ Worker ตอนรันอ่านคีย์จาก secret ของ Worker เท่านั้น |
+| **การแก้ไข** | เพิ่มขั้น Sync Claude key to Worker ใน deploy.yml ที่ส่งคีย์จาก GitHub Secrets เข้า wrangler secret put แบบเดียวกับขั้น Stripe แล้วแก้คอมเมนต์และ PENDING_SETUP ที่บอกผิดว่า env ในขั้น deploy ถึง Worker |
+| **🛡️ กฎป้องกันถาวร** | **คีย์ที่โค้ดอ่านตอนรันต้องเป็น secret ของ Worker เสมอ ต้องมีขั้น wrangler secret put หรือให้เจ้าของตั้งเอง ห้ามพึ่ง env ของขั้น build ด่าน test-claude-reading ตรวจขั้น sync นี้ และหลังเพิ่มคีย์ใหม่ต้องดูแผงสุขภาพ AI บน production ยืนยันทุกครั้ง** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/sync-anthropic-secret` · commit `d529d8ae` |
+
+
 ### INC-0306 · 2026-10-28 14:25 · 🟡 Medium · การ์ดใต้คำอ่าน (ใจหลังอ่าน · ติดตามเรื่องนี้ · นัดกลับมาเช็ก) อ่านออกแล้วในห้องพิธีมืด
 
 | หัวข้อ | รายละเอียด |
