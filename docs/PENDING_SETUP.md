@@ -20,7 +20,7 @@
 | ตั้ง TURN ของ Cloudflare Realtime (วิดีโอคอลแม่หมอ) | 6 | ปุ่มวิดีโอคอลไม่โผล่ · ลูกค้ายังคุยทาง LINE ได้ — บันทึก 2026-10-02 ว่ายังไม่ตั้ง · ตรวจจาก repo ไม่ได้ |
 | ตั้งแจ้งเตือนค่าใช้จ่าย Cloudflare | 7 | ไม่รู้ตัวเมื่อบิลพุ่ง (เคยเกิดกับ KV Storage · INC-0287) — บันทึก 2026-10-19 ว่ายังไม่ตั้ง · ตรวจจาก repo ไม่ได้ |
 | เพิ่ม event `charge.refunded` ใน Stripe webhook | 3 | คืนเงินในแดชบอร์ด Stripe แล้วเว็บไม่หักรอบ/ยกเลิกนัดให้เอง — ตรวจจาก repo ไม่ได้ |
-| ตั้ง `ANTHROPIC_API_KEY` ใน GitHub secrets + spend limit $40 ใน Claude Console | 1.3 | คำอ่าน แชท สมุดดวง ผังดวง ไม่ใช้ Claude (ไหลไป Groq/Gemini ตามเดิม) · ไม่ตั้ง limit = ใช้เกินเครดิตฟรีแล้วอาจโดนเก็บเงิน |
+| ตั้ง spend limit $40 ใน Claude Console (คีย์ `ANTHROPIC_API_KEY` ตั้งแล้ว 2026-10-28) · กดตรวจที่ `/admin` แท็บสุขภาพ AI ว่าแถว claude ผ่าน | 1.3 | ไม่ตั้ง limit = ใช้เกินเครดิตฟรีแล้วอาจโดนเก็บเงิน · แถว claude ไม่ผ่าน = ทุกเส้นไหลไป Groq/Gemini |
 | คีย์ผู้ตัดสิน AI แยก (`JUDGE_GEMINI_API_KEY` / `JUDGE_GROQ_API_KEY`) ใน GitHub | 2.4 | `ai:judge` ใช้คีย์ของเว็บและแย่งโควตากับผู้ใช้ |
 | เปิด Reader Studio | 5 | สตูดิโอแม่หมอและลิงก์ `/r/*` ตอบ 404 (ตั้งใจ จนกว่าทนายรับรอง) |
 | ย้าย `routes` เข้า `wrangler.jsonc` | 8 | ย้ายบัญชี/สร้าง Worker ใหม่แล้วต้องจำเองว่าผูกโดเมนอะไร |
@@ -62,7 +62,7 @@
 
 | ชื่อ | ใช้ทำอะไร | ไม่ตั้งแล้ว | สถานะ |
 | :--- | :--- | :--- | :--- |
-| `ANTHROPIC_API_KEY` | ตัวหลักของทุกเส้น AI ยกเว้นถามกลับก่อนสับไพ่และ Reader Studio (ตารางรุ่นต่อเส้นอยู่หัวไฟล์ `src/lib/ai/claude.ts`) · คำอ่าน/แชท/อ่านอีกมุม: 1-3 ใบ `claude-haiku-5-5` · 4 ใบขึ้นไป `claude-sonnet-5-5` · ผังดวงและสมุดดวง: `claude-sonnet-5-5` — ตั้งใน **GitHub secrets** แล้ว `deploy.yml` ส่งเข้า Worker · ใช้เครดิต API ที่มากับ Team plan เดือนละ $40 ควรตั้ง spend limit ใน Console | ข้ามไป Groq | รอเจ้าของยืนยันว่าตั้งแล้ว (2026-10-28) |
+| `ANTHROPIC_API_KEY` | ตัวหลักของทุกเส้น AI ยกเว้นถามกลับก่อนสับไพ่และ Reader Studio (ตารางรุ่นต่อเส้นอยู่หัวไฟล์ `src/lib/ai/claude.ts`) · คำอ่าน/แชท/อ่านอีกมุม: 1-3 ใบ `claude-haiku-5-5` · 4 ใบขึ้นไป `claude-sonnet-5-5` · ผังดวงและสมุดดวง: `claude-sonnet-5-5` — ตั้งใน **GitHub secrets** แล้ว `deploy.yml` ส่งเข้า Worker · ใช้เครดิต API ที่มากับ Team plan เดือนละ $40 ควรตั้ง spend limit ใน Console | ข้ามไป Groq | ตั้งใน GitHub แล้ว (เจ้าของยืนยัน 2026-10-28) · ตรวจว่าใช้ได้ที่ `/admin` แท็บสุขภาพ AI |
 | `GROQ_API_KEY` | คำอ่านชั้นสอง (รายชื่อโมเดลใน `WORKING_GROQ_MODELS` ของ `src/lib/ai/groq.ts`) | ข้ามไป Gemini | ส่งผ่าน `deploy.yml` · ตรวจจาก repo ไม่ได้ — ดูหมายเหตุ |
 | `GEMINI_API_KEY` (หรือ `GOOGLE_API_KEY`) | คำอ่านชั้นสาม · สรุปรายเดือน | ข้ามไป OpenRouter | ส่งผ่าน `deploy.yml` · ตรวจจาก repo ไม่ได้ — ดูหมายเหตุ |
 | `OPENROUTER_API_KEY` | คำอ่านชั้นสี่ — **ใช้เฉพาะโมเดล `:free`** ห้ามเติมเครดิต | ข้ามไปคำอ่านสำรองออฟไลน์ | ส่งผ่าน `deploy.yml` · บันทึกว่าตั้งใน GitHub แล้ว (2026-09-23) |

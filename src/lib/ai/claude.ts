@@ -343,3 +343,63 @@ export async function generateClaudeReply(opts: {
     clearTimeout(timer);
   }
 }
+
+export interface ClaudeProbeResult {
+  model: string;
+  ok: boolean;
+  status: number | null;
+  elapsedMs: number;
+  answerPreview: string;
+  error: string | null;
+}
+
+/**
+ * 🩺 ตรวจสุขภาพ Claude สำหรับแท็บ "สุขภาพ AI" ใน /admin — ยิงจริง 1 ครั้งต่อรุ่น ด้วยคำถามสั้นที่สุด (ค่าใช้จ่ายไม่ถึงเซ็นต์)
+ * - ยิงผ่าน endpoint เดียวกับคำอ่านจริง (AI Gateway ถ้าเปิด) จึงจับปัญหา gateway ได้ด้วย
+ * - ไม่สนโหมดพัก (`isClaudePaused`) — แอดมินกดตรวจเพื่อดูสถานะจริง ณ ตอนนี้
+ * - ข้อความ error ตัดค่าคีย์ออกก่อนคืนเสมอ · 400 "credit balance" = เครดิตหมด · 401 = คีย์ผิด · 429 = ติดเพดาน
+ */
+export async function probeClaudeHealth(apiKey: string, models: readonly string[] = [CLAUDE_HAIKU_MODEL, CLAUDE_SONNET_MODEL]): Promise<ClaudeProbeResult[]> {
+  const scrub = (s: string) => s.split(apiKey).join("***").slice(0, 400);
+  const out: ClaudeProbeResult[] = [];
+  for (const model of models) {
+    const startedAt = Date.now();
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+    try {
+      const res = await fetch(anthropicMessagesEndpoint(), {
+        method: "POST",
+        signal: controller.signal,
+        headers: {
+          "x-api-key": apiKey,
+          "anthropic-version": CLAUDE_API_VERSION,
+          "content-type": "application/json",
+          ...aiGatewayHeaders({ cacheTtl: 0 }),
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 32,
+          thinking: claudeThinkingOff(model),
+          messages: [{ role: "user", content: "ตอบกลับคำเดียวว่า: พร้อม" }],
+        }),
+      });
+      const elapsedMs = Date.now() - startedAt;
+      if (!res.ok) {
+        out.push({ model, ok: false, status: res.status, elapsedMs, answerPreview: "", error: scrub(await res.text().catch(() => "")) });
+        continue;
+      }
+      const data = (await res.json()) as { stop_reason?: string; content?: Array<{ type: string; text?: string }> };
+      const answer = (data.content ?? [])
+        .filter((b) => b.type === "text" && typeof b.text === "string")
+        .map((b) => b.text)
+        .join("")
+        .trim();
+      out.push({ model, ok: !!answer, status: 200, elapsedMs, answerPreview: answer.slice(0, 120), error: answer ? null : `ตอบ 200 แต่ไม่มีข้อความ (stop_reason ${data.stop_reason ?? "-"})` });
+    } catch (err) {
+      out.push({ model, ok: false, status: null, elapsedMs: Date.now() - startedAt, answerPreview: "", error: scrub(err instanceof Error ? `${err.name}: ${err.message}` : String(err)) });
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  return out;
+}
