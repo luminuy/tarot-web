@@ -38,6 +38,8 @@ export interface NatalMeta {
 }
 
 const NatalResult = React.lazy(() => import("./NatalResult"));
+/** ดวงวันนี้ — โหลดเมื่อมีผังบันทึกไว้ในเครื่องเท่านั้น (ดึงตัวคำนวณตามมา) */
+const NatalToday = React.lazy(() => import("./NatalToday"));
 
 /** ทุกอย่างที่ใช้สร้างผังซ้ำได้ (= ข้อมูลที่บันทึกลงเครื่องเมื่อผู้ใช้กดบันทึก) */
 type ChartSpec = Omit<SavedChart, "id" | "savedAt">;
@@ -236,6 +238,13 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
 
   return (
     <div className="v2-nt space-y-8">
+      {saved.length > 0 && (
+        <div className="v2-nt-noprint">
+          <Suspense fallback={null}>
+            <NatalToday charts={saved} cards={cards} lang={lang} onOpen={openSaved} />
+          </Suspense>
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="v2-nt-noprint space-y-5" noValidate>
         {saved.length > 0 && (
           <div className="space-y-2">

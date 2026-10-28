@@ -13,6 +13,7 @@
  */
 import { MakeTime, e_tilt } from "astronomy-engine";
 import {
+  ASPECT_DEFS,
   PLANET_IDS,
   angularDistance,
   ascAt,
@@ -173,6 +174,41 @@ export function computeTransits(natal: NatalChart, utcMs: number, orbScale = 1):
   const weight = (t: MovingId) => (SLOW_IDS.includes(t) ? 0 : 1);
   aspects.sort((a, b) => weight(a.t) - weight(b.t) || a.orb - b.orb);
   return { utcMs, bodies, aspects };
+}
+
+// ─────────────────────────── ดวงวันนี้ ───────────────────────────
+
+export type DayTone = "flow" | "friction" | "mixed" | "intense" | "quiet";
+
+export interface DailyOverview {
+  utcMs: number;
+  /** ดวงจันทร์จร (`house` = เรือนของผังเกิด ถ้ารู้เวลาเกิด) */
+  moon: BodyPosition;
+  /** ข้างขึ้นข้างแรมของวันนี้ 0–7 (0 = จันทร์ดับ · 4 = เต็มดวง) */
+  moonPhase: number;
+  /** มุมดาวจรเดินเร็วที่แน่นที่สุด (ไม่เกิน 4) */
+  fast: TransitAspect[];
+  /** มุมดาวเดินช้าที่เป็นพื้นหลังช่วงนี้ (ไม่เกิน 2) */
+  slow: TransitAspect[];
+  tone: DayTone;
+}
+
+/**
+ * สรุปดวงของวันจากผังเกิด — คำนวณในเครื่อง ไม่ใช้ AI (กฎ "ไม่ใช้ AI ในที่ที่คำนวณได้")
+ * ภาพรวมของวันนับจากมุมของดาวเดินเร็ว: กุม (0 องศา) นับเป็นกลาง · มีแต่กุม = วันเข้มข้น
+ */
+export function dailyOverview(natal: NatalChart, utcMs: number): DailyOverview {
+  const tr = computeTransits(natal, utcMs);
+  const moon = tr.bodies.find((b) => b.id === "moon")!;
+  const sun = tr.bodies.find((b) => b.id === "sun")!;
+  const moonPhase = Math.floor(norm360(norm360(moon.lon - sun.lon) + 22.5) / 45) % 8;
+  const fast = tr.aspects.filter((a) => !SLOW_IDS.includes(a.t)).sort((a, b) => a.orb - b.orb).slice(0, 4);
+  const slow = tr.aspects.filter((a) => SLOW_IDS.includes(a.t)).sort((a, b) => a.orb - b.orb).slice(0, 2);
+  const tone = (a: TransitAspect) => ASPECT_DEFS.find((d) => d.type === a.type)?.tone ?? "neutral";
+  const soft = fast.filter((a) => tone(a) === "harmonious").length;
+  const hard = fast.filter((a) => tone(a) === "tense").length;
+  const dayTone: DayTone = soft && hard ? "mixed" : soft ? "flow" : hard ? "friction" : fast.length ? "intense" : "quiet";
+  return { utcMs, moon, moonPhase, fast, slow, tone: dayTone };
 }
 
 // ─────────────────────────── ปฏิทินดาวจร ───────────────────────────
