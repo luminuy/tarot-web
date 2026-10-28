@@ -121,7 +121,8 @@ function aspectDeviation(tLon: number, nLon: number, angle: number): number {
   return angularDistance(tLon, nLon) - angle;
 }
 
-export function computeTransits(natal: NatalChart, utcMs: number, orbScale = 1): TransitResult {
+/** `withPeriods = false` = ข้ามการไล่หาช่วงเวลาของดาวเดินช้า (ไล่ ±400 วัน) — ใช้ฝั่งเซิร์ฟเวอร์ที่ต้องการแค่ภาพ ณ ขณะนั้น */
+export function computeTransits(natal: NatalChart, utcMs: number, orbScale = 1, withPeriods = true): TransitResult {
   const nodeType = natal.input.nodeType;
   const zodiac = natal.input.zodiac;
   const bodies = movingPositions(utcMs, nodeType, natal.houses, zodiac);
@@ -144,7 +145,7 @@ export function computeTransits(natal: NatalChart, utcMs: number, orbScale = 1):
         }
       }
       if (!best) continue;
-      if (SLOW_IDS.includes(t)) {
+      if (withPeriods && SLOW_IDS.includes(t)) {
         let s = series.get(t);
         if (!s) {
           s = dailySeries(t, utcMs, nodeType, SCAN, zodiac);

@@ -34,12 +34,15 @@ import { zodiacSignPath } from "@/lib/tarot/zodiac";
 import { NatalWheel } from "./NatalWheel";
 import { FlipCard } from "./NatalFlipCard";
 import type { NatalCardItem, NatalMeta } from "./NatalChartApp";
+import type { ChartSpec } from "@/lib/astro/chart-spec";
 import type { TimeMode } from "./NatalTimeTools";
 
 /* ⏳ แท็บตามเวลา (ดาวจร · ก้าวหน้า · รีเทิร์น) โหลดเมื่อกดแท็บเท่านั้น */
 const NatalTimeTools = React.lazy(() => import("./NatalTimeTools"));
 /* 💞 แท็บผังคู่ โหลดเมื่อกดแท็บเท่านั้น */
 const NatalSynastry = React.lazy(() => import("./NatalSynastry"));
+/** ถามแม่หมอ AI — ส่งข้อมูลเกิดออกจากเครื่องเมื่อผู้ใช้กดยินยอมในแท็บนั้นเท่านั้น */
+const NatalAsk = React.lazy(() => import("./NatalAsk"));
 
 /**
  * 🪐 ผลผังดวงทั้งหมด — โหลดแบบ lazy พร้อมตัวคำนวณ (ไม่อยู่ในบันเดิลแรกของหน้า)
@@ -91,17 +94,20 @@ export default function NatalResult({
   lang,
   meta,
   cards,
+  spec,
 }: {
   chart: NatalChart;
   lang: Lang;
   meta: NatalMeta;
   cards: readonly NatalCardItem[];
+  /** ข้อมูลเกิดที่ใช้สร้างผังนี้ — ส่งให้แท็บถามแม่หมอ (เซิร์ฟเวอร์คำนวณผังเองจากข้อมูลนี้) */
+  spec: ChartSpec;
 }) {
   const isTh = lang === "th";
   const [focus, setFocus] = useState<BodyId | null>(null);
   const [showMinor, setShowMinor] = useState(false);
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
-  const [view, setView] = useState<"natal" | TimeMode | "synastry">("natal");
+  const [view, setView] = useState<"natal" | TimeMode | "synastry" | "ask">("natal");
   const cardById = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards]);
   const cardName = (id: string | undefined) => {
     const c = id ? cardById.get(id) : undefined;
@@ -224,6 +230,7 @@ export default function NatalResult({
             ["solar", isTh ? "ผังวันเกิดปีนี้" : "Solar return"],
             ["lunar", isTh ? "ผังจันทร์คืน" : "Lunar return"],
             ["synastry", isTh ? "ผังคู่" : "Synastry"],
+            ["ask", isTh ? "ถามแม่หมอ" : "Ask the reader"],
           ] as const
         ).map(([k, t]) => (
           <button key={k} type="button" role="tab" aria-selected={view === k} aria-pressed={view === k} onClick={() => setView(k)}>
@@ -234,7 +241,13 @@ export default function NatalResult({
 
       {view !== "natal" && (
         <Suspense fallback={<p className="text-sm text-muted text-center">{isTh ? "กำลังคำนวณ..." : "Calculating..."}</p>}>
-          {view === "synastry" ? <NatalSynastry chart={chart} lang={lang} meta={meta} /> : <NatalTimeTools chart={chart} lang={lang} meta={meta} mode={view} />}
+          {view === "synastry" ? (
+            <NatalSynastry chart={chart} lang={lang} meta={meta} />
+          ) : view === "ask" ? (
+            <NatalAsk spec={spec} lang={lang} timeKnown={chart.input.timeKnown} />
+          ) : (
+            <NatalTimeTools chart={chart} lang={lang} meta={meta} mode={view} />
+          )}
         </Suspense>
       )}
 

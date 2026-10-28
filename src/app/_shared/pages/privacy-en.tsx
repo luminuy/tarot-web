@@ -81,6 +81,13 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
               empirical outcome records stored to help you evaluate the qualitative resonance of your readings over time.
             </li>
             <li>
+              <strong>Natal Chart (birth date, time and place)</strong> — Calculated in your browser and never sent to
+              our servers. Saved charts stay on your device. Only when you <strong>tick the consent box</strong> in the
+              &quot;Ask the reader&quot; tab do we send your birth data, the name you entered and your question to
+              calculate the chart and have an external AI provider answer. We do not store the birth data or questions
+              (only a count of questions, to apply your allowance).
+            </li>
+            <li>
               <strong>Video Calls with a Reader (only after you consent)</strong> — Video and audio are relayed through
               Cloudflare&apos;s servers so the reader never sees your IP address (and you never see theirs). We do not
               record any video, audio or conversation, and connection data is deleted as soon as the call ends.

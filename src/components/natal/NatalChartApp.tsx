@@ -477,7 +477,7 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
       <div ref={resultRef} className="scroll-mt-24" aria-live="polite">
         {result && (
           <Suspense fallback={<p className="text-sm text-muted text-center">{isEnglish ? "Drawing your chart..." : "กำลังวาดผังดวง..."}</p>}>
-            <NatalResult chart={result.chart} lang={lang} meta={result.meta} cards={cards} />
+            <NatalResult chart={result.chart} lang={lang} meta={result.meta} cards={cards} spec={result.spec} />
             <div className="v2-nt-noprint flex flex-wrap justify-center gap-2 pt-6">
               <button type="button" onClick={handleSave} disabled={saveState === "saved"} className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px] disabled:opacity-70">
                 {saveState === "saved"

@@ -727,6 +727,31 @@ console.log("\n6.10) ราศีนิรายนะแบบ Lahiri (ไท�
   );
 }
 
+console.log("\n6.11) ถามแม่หมอ AI เรื่องผัง (ยินยอมก่อนส่ง · สิทธิ์ AI เดิม)");
+{
+  const root = process.cwd();
+  const rd = (f: string) => fs.readFileSync(path.join(root, f), "utf8");
+  const { formatChartForPrompt } = await import("../../src/lib/astro/natal-ai");
+  const at = Date.UTC(1969, 11, 31, 23, 5);
+  const known = computeNatalChart(input(at));
+  const unknown = computeNatalChart(input(at, { timeKnown: false }));
+  const tk = formatChartForPrompt(known, "th", "x", computeTransits(known, Date.UTC(2026, 9, 28), 1, false));
+  const tu = formatChartForPrompt(unknown, "en", "x", computeTransits(unknown, Date.UTC(2026, 9, 28), 1, false));
+  check("บริบทผังใน prompt ไม่มี undefined/NaN และมีดาวครบ 10 ดวง", !/undefined|NaN/.test(tk + tu) && ["ดวงอาทิตย์", "ดวงจันทร์", "ดาวพุธ", "ดาวศุกร์", "ดาวอังคาร", "ดาวพฤหัสบดี", "ดาวเสาร์", "ดาวยูเรนัส", "ดาวเนปจูน", "ดาวพลูโต"].every((n) => tk.includes(n)));
+  check("ไม่ทราบเวลาเกิด: บริบทไม่มีเรือน/ลัคนา และบอกโมเดลห้ามพูดถึง", !/house \d|Ascendant:/.test(tu.replace("no Ascendant", "")) && tu.includes("Birth time unknown"));
+  const route = rd("src/app/api/natal/chat/route.ts");
+  const code = route.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  check("API: ตรวจ Origin · ต้องมี consent: true · สมาชิกเท่านั้น", code.includes("isRequestAuthorizedOrigin(request)") && /consent:\s*z\.literal\(true\)/.test(code) && code.includes('reason: "members_only"'));
+  check("API: สิทธิ์ฟรีรายวัน + เพดานต่อบัญชี + เพดานโทเคน + เพดานงบ AI รวม", code.includes("NATAL_AI_FREE_PER_DAY") && code.includes("NATAL_AI_USER_DAY_MAX") && code.includes("isUserTokenCapReached(") && code.includes("isAiCapReached(") && code.includes("recordAiUsage("));
+  check("API: กันฉีดคำสั่ง + สัญญาณวิกฤต (สายด่วน) + ด่านขาออกทั้งสองผู้ให้บริการ", code.includes("noteInjectionAttempt(") && code.includes("checkQuestion(") && code.includes("assessCrisisRisk(") && (code.match(/detectPromptLeak\(/g) ?? []).length >= 2);
+  check("API: คำนวณผังเองฝั่งเซิร์ฟเวอร์ · ชื่อ/สถานที่ผ่าน sanitize · ตัดอีโมจิ", code.includes("buildChart(") && /sanitizePromptValue\(spec\.name/.test(code) && code.includes("sanitizePromptValue(lang === \"en\" ? spec.place.labelEn") && code.includes("stripEmoji("));
+  check("API: ไม่ log ข้อมูลเกิด/คำถาม และไม่มีคำตอบสำเร็จรูปตอน AI ล่ม", !/console\.(log|warn|error)\([^)]*(spec|question|rawBody|parsed)/.test(code) && code.includes('reason: "ai_unavailable"'));
+  const ask = rd("src/components/natal/NatalAsk.tsx").replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  check("แท็บถามแม่หมอ: ยิง API เฉพาะเมื่อยินยอม · ส่ง consent: true · ไม่เขียนที่เก็บ", (ask.match(/fetch\(/g) ?? []).length === 1 && /if \(!question \|\| busy \|\| !consent\) return;/.test(ask) && ask.includes("consent: true") && !/localStorage|sessionStorage/.test(ask));
+  check("แท็บถามแม่หมอโหลดแบบ React.lazy จากผลผัง", /React\.lazy\(\s*\(\)\s*=>\s*import\(\s*["']\.\/NatalAsk["']\s*\)\s*\)/.test(rd("src/components/natal/NatalResult.tsx")));
+  check("นโยบายความเป็นส่วนตัวทั้งสองภาษาบอกเรื่องส่งข้อมูลเกิดให้ AI เมื่อยินยอม", rd("src/app/_shared/pages/privacy-th.tsx").includes("ถามแม่หมอ") && rd("src/app/_shared/pages/privacy-en.tsx").includes("Ask the reader"));
+}
+
 console.log("\n7) กติกา island — ตัวคำนวณ/คำอธิบาย/ผลผังโหลดแบบ dynamic import เท่านั้น");
 {
   const root = process.cwd();
