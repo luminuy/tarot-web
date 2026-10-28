@@ -14,6 +14,7 @@ import {
   claudeReadingModel,
   claudeThinkingOff,
   extractJsonObject,
+  generateClaudeReply,
   isClaudePaused,
   streamClaudeReading,
 } from "../../src/lib/ai/claude";
@@ -188,6 +189,57 @@ async function main() {
   mockFetch(() => sse([{ type: "message_start", message: { usage: { input_tokens: 10 } } }, { type: "error", error: { type: "overloaded_error" } }]));
   const evErr = await collect(ctx3);
   check("error กลางสตรีม ➔ ไม่มี done", !evErr.some((e) => e.type === "done"));
+
+  console.log("\n5.5) ถามแม่หมอเรื่องผังดวง (/natal-chart) ➔ Sonnet + โหมดคิด (เจ้าของสั่ง: ต้องแม่นและละเอียด)");
+  mockFetch(
+    () =>
+      new Response(
+        JSON.stringify({
+          stop_reason: "end_turn",
+          content: [
+            { type: "thinking", thinking: "", signature: "x" },
+            { type: "text", text: "ดวงอาทิตย์ราศีมังกร" },
+            { type: "text", text: "ในเรือนที่ 1" },
+          ],
+          usage: { input_tokens: 50, cache_read_input_tokens: 3000, output_tokens: 900 },
+        }),
+        { status: 200 },
+      ),
+  );
+  const rep = await generateClaudeReply({
+    model: CLAUDE_SONNET_MODEL,
+    system: "ระบบ",
+    messages: [
+      { role: "assistant", content: "สวัสดี" },
+      { role: "user", content: "ลัคนาฉันคืออะไร" },
+    ],
+    maxTokens: 8000,
+    timeoutMs: 5000,
+    effort: "medium",
+  });
+  check("คืนเฉพาะข้อความ (ไม่รวมบล็อกความคิด)", rep?.reply === "ดวงอาทิตย์ราศีมังกรในเรือนที่ 1");
+  check(
+    "Sonnet 5.5 · adaptive thinking · effort medium · ไม่ส่ง temperature · ไม่สตรีม",
+    lastReq?.body.model === CLAUDE_SONNET_MODEL &&
+      lastReq?.body.thinking?.type === "adaptive" &&
+      lastReq?.body.output_config?.effort === "medium" &&
+      !("temperature" in (lastReq?.body ?? {})) &&
+      !lastReq?.body.stream,
+  );
+  check("ตัดข้อความแรกที่ไม่ใช่ของผู้ใช้ทิ้ง (API บังคับให้ผู้ใช้เริ่ม)", lastReq?.body.messages?.[0]?.role === "user" && lastReq?.body.messages.length === 1);
+  check("โทเคนเข้ารวมส่วนที่อ่านจากแคช", rep?.usage.inputTokens === 3050 && rep?.usage.outputTokens === 900);
+  mockFetch(() => new Response(JSON.stringify({ stop_reason: "max_tokens", content: [{ type: "text", text: "ครึ่งประโยค" }] }), { status: 200 }));
+  check(
+    "โดนตัดที่ max_tokens ➔ null (ไม่ส่งคำตอบขาดกลางประโยค)",
+    (await generateClaudeReply({ model: CLAUDE_SONNET_MODEL, system: "s", messages: [{ role: "user", content: "q" }], maxTokens: 10, timeoutMs: 5000 })) === null,
+  );
+  const natalRoute = fs.readFileSync(path.resolve("src/app/api/natal/chat/route.ts"), "utf-8");
+  const nClaude = natalRoute.indexOf("generateClaudeReply(");
+  const nGroq = natalRoute.indexOf("generateGroqChatReply(");
+  check(
+    "/api/natal/chat: Claude Sonnet ก่อน Groq ➔ Gemini · ผ่านด่านกันรั่ว prompt เหมือนตัวอื่น",
+    nClaude > 0 && nClaude < nGroq && /model: CLAUDE_SONNET_MODEL/.test(natalRoute) && /return await finish\(reply, "claude"\)/.test(natalRoute),
+  );
 
   console.log("\n6) เครดิตหมด/คีย์ผิด ➔ พักเรียก Claude ไม่ให้ทุกคำอ่านเสียเวลายิงคำขอที่ล้มแน่");
   mockFetch(() => new Response('{"type":"error","error":{"type":"invalid_request_error","message":"credit balance is too low"}}', { status: 400 }));

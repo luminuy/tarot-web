@@ -237,6 +237,24 @@ ${natalAnswerRules("th")}`;
     };
     const clean = (t: string) => stripEmoji(sanitizeTarotText(stripThinkingTags(t))).trim();
 
+    // Claude Sonnet ก่อน (เจ้าของสั่ง 2026-10-28: หน้าผังดวงต้องแม่นและละเอียด) · ไม่มีคีย์/ล้ม ➔ Groq ➔ Gemini ตามเดิม
+    if (process.env.ANTHROPIC_API_KEY?.trim()) {
+      const { generateClaudeReply, CLAUDE_SONNET_MODEL } = await import("@/lib/ai/claude");
+      const r = await generateClaudeReply({
+        model: CLAUDE_SONNET_MODEL,
+        system: systemInstruction,
+        messages: [...history.map((h) => ({ role: (h.sender === "user" ? "user" : "assistant") as "user" | "assistant", content: h.text })), { role: "user", content: question }],
+        maxTokens: 8000,
+        timeoutMs: 60000,
+        effort: "medium",
+      });
+      const reply = r?.reply ? clean(r.reply) : "";
+      const leaked = reply ? detectPromptLeak(reply) : null;
+      if (leaked) recordEvent("ai_prompt_leak:natal");
+      if (reply && !leaked) return await finish(reply, "claude");
+      recordEvent("ai_claude_failover:natal");
+    }
+
     const groqKey = process.env.GROQ_API_KEY;
     if (groqKey) {
       try {
