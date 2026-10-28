@@ -235,3 +235,96 @@ export async function* streamClaudeReading(ctx: ReadingContext): AsyncGenerator<
     unlinkAbort?.();
   }
 }
+
+/**
+ * 💬 คำตอบแบบไม่สตรีม (ถามแม่หมอเรื่องผังดวงกำเนิด · `/api/natal/chat`)
+ * ---------------------------------------------------------------------------
+ * เจ้าของสั่ง 2026-10-28: หน้าผังดวงใช้ Sonnet "เพราะต้องการความแม่นยำ ละเอียด"
+ * - เปิดโหมดคิดแบบ adaptive (ระดับ `medium`) — คำตอบไม่ได้สตรีมทีละคำ ผู้ใช้รอคำตอบทั้งก้อนอยู่แล้ว
+ *   แลกเวลาอีกไม่กี่วินาทีกับการไล่ดูตำแหน่งดาว/มุม/เรือนให้ครบก่อนตอบ
+ * - `max_tokens` ต้องเผื่อโทเคนความคิด (ความคิดนับรวมในงบผลลัพธ์)
+ * - คืน null เมื่อไม่มีคีย์ · พักอยู่ · ล้ม · ถูกปฏิเสธ · โดนตัดที่ max_tokens ➔ ผู้เรียกไปต่อ Groq/Gemini
+ * - อ่านเฉพาะบล็อก `text` (บล็อก thinking ว่างเปล่าโดยค่าเริ่มต้นอยู่แล้ว ไม่ส่งถึงผู้ใช้)
+ */
+export async function generateClaudeReply(opts: {
+  model: string;
+  system: string;
+  messages: Array<{ role: "user" | "assistant"; content: string }>;
+  maxTokens: number;
+  timeoutMs: number;
+  effort?: "low" | "medium" | "high";
+}): Promise<{ reply: string; model: string; usage: { inputTokens: number; outputTokens: number } } | null> {
+  const apiKey = getClaudeApiKey();
+  if (!apiKey) return null;
+  if (isClaudePaused()) {
+    recordEvent("ai_claude_paused_skip");
+    return null;
+  }
+  // ข้อความแรกต้องเป็นของผู้ใช้ · ข้อความติดกันบทบาทเดียวกัน API รวมให้เอง
+  const messages = [...opts.messages];
+  while (messages.length && messages[0].role !== "user") messages.shift();
+  if (!messages.length) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), opts.timeoutMs);
+  try {
+    const res = await fetch(anthropicMessagesEndpoint(), {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": CLAUDE_API_VERSION,
+        "content-type": "application/json",
+        ...aiGatewayHeaders({ cacheTtl: 0 }),
+      },
+      body: JSON.stringify({
+        model: opts.model,
+        max_tokens: opts.maxTokens,
+        thinking: { type: "adaptive" },
+        output_config: { effort: opts.effort ?? "medium" },
+        system: [{ type: "text", text: opts.system, cache_control: { type: "ephemeral" } }],
+        messages,
+      }),
+    });
+    if (!res.ok) {
+      recordEvent(`ai_claude_http:${res.status}`);
+      pauseClaudeAfterStatus(res.status, res.headers.get("retry-after"));
+      return null;
+    }
+    const data = (await res.json()) as {
+      stop_reason?: string;
+      content?: Array<{ type: string; text?: string }>;
+      usage?: { input_tokens?: number; output_tokens?: number; cache_read_input_tokens?: number; cache_creation_input_tokens?: number };
+    };
+    if (data.stop_reason === "refusal") {
+      recordEvent("ai_claude_refusal");
+      return null;
+    }
+    if (data.stop_reason === "max_tokens") {
+      // คำตอบขาดกลางประโยค ห้ามส่งให้ผู้ใช้ — ให้ตัวสำรองตอบใหม่ทั้งหมด
+      recordEvent(`ai_claude_max_tokens:${opts.model}`);
+      return null;
+    }
+    const reply = (data.content ?? [])
+      .filter((b) => b.type === "text" && typeof b.text === "string")
+      .map((b) => b.text)
+      .join("")
+      .trim();
+    if (!reply) return null;
+    const u = data.usage ?? {};
+    return {
+      reply,
+      model: opts.model,
+      usage: {
+        inputTokens: (u.input_tokens ?? 0) + (u.cache_read_input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0),
+        outputTokens: u.output_tokens ?? 0,
+      },
+    };
+  } catch (err) {
+    console.warn(`[Claude Reply ${opts.model}] error:`, err instanceof Error ? err.name : "unknown");
+    recordEvent("ai_claude_error");
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
