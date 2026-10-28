@@ -90,7 +90,7 @@ export function formatChartForPrompt(chart: NatalChart, lang: Lang, birthLine: s
 
   if (highlights?.length) {
     L.push(th ? "\nเรื่องเด่นที่สุดของผัง (SeerTarot คำนวณและเรียงจากน้ำหนักมากไปน้อย):" : "\nThe chart's strongest themes (calculated by SeerTarot, most important first):");
-    highlights.forEach((h, i) => L.push(`h${i + 1}: ${h.title} | ${h.text}`));
+    highlights.forEach((h, i) => L.push(`h${i + 1}: ${h.title} (${h.basis}) | ${h.text}`));
   }
 
   // ไพ่ประจำตำแหน่ง (Golden Dawn) — ไพ่ที่คุยถึงได้มีแค่ชุดนี้ ไม่ใช่ไพ่ที่เปิด

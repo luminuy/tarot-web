@@ -1020,6 +1020,134 @@ console.log("\n6.17) ความแม่นของคำอธิบาย �
   check("นโยบายความเป็นส่วนตัวทั้งสองภาษาบอกเรื่องปุ่มภาพรวมผังและรายงาน", rd("src/app/_shared/pages/privacy-th.tsx").includes("เขียนภาพรวมผัง") && rd("src/app/_shared/pages/privacy-en.tsx").includes("Write my overview"));
 }
 
+console.log("\n6.18) เนื้อหาเข้าใจง่ายแต่ลึก — หัวข้อภาษาคน · ที่มาในผัง · ใช้ให้ดี · ไม่พูดซ้ำ · ดาวในราศีเขียนแยกครบ");
+{
+  // เจ้าของ 2026-10-28 "อยากปรับปรุงเนื้อหา เข้าใจง่ายแต่ลึกซึ้ง · อัปเกรดทั้งหน้า"
+  const rd = (f: string) => fs.readFileSync(path.join(process.cwd(), f), "utf8");
+  const { chartHighlights } = await import("../../src/lib/astro/natal-insight");
+  const { describeBody, describeAspect, chartGlance, lifeAreas, chartSummary, describePattern, describeTimedAspect } = await import("../../src/lib/astro/natal-text");
+  const depth = await import("../../src/data/natal/depth");
+  const samples: NatalInput[] = [
+    input(Date.UTC(1969, 11, 31, 23, 5)),
+    input(Date.UTC(1990, 4, 17, 3, 42)),
+    input(Date.UTC(2001, 8, 11, 12, 0)),
+    input(Date.UTC(1998, 0, 15, 2, 30)),
+    // ผังที่ดาว 6 ดวงกองบนกลางฟ้า (ยูเรนัส-เนปจูนกุมกันในมังกร 1994) — เดิมขึ้นซ้ำ 6 ข้อประโยคเดียวกัน
+    input(Date.UTC(1994, 0, 12, 5, 30)),
+    input(Date.UTC(1978, 6, 21, 9, 15), { lat: 51.5, lon: -0.12, houseSystem: "koch" }),
+    input(Date.UTC(1995, 2, 3, 5), { timeKnown: false }),
+  ];
+  const badThai = /undefined|NaN|[฀-๿]ๆ|ๆ[฀-๿]/;
+  let fieldsOk = true;
+  let titleOk = true;
+  let adviceOk = true;
+  let repeatOk = true;
+  let textOk = true;
+  for (const inp of samples) {
+    const c = computeNatalChart(inp);
+    for (const lang of ["th", "en"] as const) {
+      const hl = chartHighlights(c, lang, 8);
+      fieldsOk &&= hl.length > 0 && hl.every((h) => h.title && h.basis && h.text && ["harmonious", "tense", "neutral"].includes(h.tone));
+      // หัวข้อเป็นภาษาคน: ไม่มีองศา ไม่มีศัพท์ orb · ตัวเลขและศัพท์อยู่ในบรรทัดที่มา
+      titleOk &&= hl.every((h) => !/°|′|\borb\b|องศา/.test(h.title));
+      const advice = hl.map((h) => h.advice).filter(Boolean);
+      adviceOk &&= new Set(advice).size === advice.length;
+      // ประโยคเชิงลึกของเรือนเดียวกันห้ามขึ้นซ้ำสองข้อ (กลุ่มดาว · ดาวชิดแกน · เจ้าเรือนลัคนา)
+      const all = hl.map((h) => h.text).join("\n");
+      repeatOk &&= depth.HOUSE_DEPTH.every((d) => all.split(d.why[lang]).length <= 2);
+      const pieces = [
+        ...hl.flatMap((h) => [h.title, h.basis, h.text, h.advice]),
+        ...c.bodies.flatMap((b) => describeBody(c, b, lang)),
+        ...c.aspects.map((a) => describeAspect(a, lang)),
+        ...c.patterns.map((p) => describePattern(c, p, lang).text),
+        ...chartGlance(c, lang, hl).flatMap((r) => [r.label, ...r.lines]),
+        ...lifeAreas(c, lang).flatMap((x) => [x.from, x.text]),
+        ...chartSummary(c, lang),
+      ];
+      textOk &&= pieces.every((x) => typeof x === "string" && !badThai.test(x) && (lang === "th" || !/[฀-๿]/.test(x)));
+    }
+  }
+  check("เรื่องเด่น: ทุกข้อมีหัวข้อ ที่มาในผัง ความหมาย และโทน", fieldsOk);
+  check("เรื่องเด่น: หัวข้อเป็นภาษาคน (องศาและ orb อยู่ในบรรทัดที่มา ไม่อยู่ในหัวข้อ)", titleOk);
+  check("เรื่องเด่น: \"ใช้ให้ดี\" ไม่ซ้ำกันในรายการเดียว", adviceOk);
+  check("เรื่องเด่น: ประโยคเชิงลึกของเรือนเดียวกันไม่ขึ้นซ้ำสองข้อ", repeatOk);
+  check("ทั้งหน้า (เรื่องเด่น ดาว มุม รูปแบบ สรุป ความรัก/งาน/เงิน): ไม่มี undefined · ไม้ยมกเว้นวรรค · อังกฤษไม่มีอักษรไทย", textOk);
+
+  const stacked = chartHighlights(computeNatalChart(samples[4]), "th", 8);
+  const mcItems = stacked.filter((h) => h.key === "angle:mc");
+  check("ดาวหลายดวงชิดแกนเดียวกันรวมเป็นข้อเดียว (ผัง 1994 ดาวกองบนกลางฟ้า)", mcItems.length === 1 && mcItems[0].bodies.length >= 4, `mc=${mcItems.length}`);
+  const aspectTypes = (() => {
+    let ok = true;
+    for (const inp of samples) {
+      const hl = chartHighlights(computeNatalChart(inp), "th", 8).filter((h) => h.kind === "aspect");
+      const types = hl.map((h) => h.basis.split(" ")[1]);
+      ok &&= new Set(types).size === types.length;
+    }
+    return ok;
+  })();
+  check("เรื่องเด่น: มุมชนิดเดียวกันขึ้นข้อเดียว (ไม่มี \"คุณแกว่งระหว่าง…\" สองข้อติดกัน)", aspectTypes);
+
+  // เนื้อหาชั้นลึกครบทุกช่อง สองภาษา · ดาวในราศีเขียนแยกไม่ซ้ำกัน
+  const allT = (o: unknown): { th: string; en: string }[] =>
+    o && typeof o === "object" ? ("th" in (o as object) && "en" in (o as object) ? [o as { th: string; en: string }] : Object.values(o as object).flatMap(allT)) : [];
+  const tables = [depth.BODY_VOICE, depth.PLANET_DEPTH, depth.HOUSE_DEPTH, depth.ANGLE_DEPTH, depth.ELEMENT_DEPTH, depth.DIGNITY_DEPTH, depth.PLANET_SIGN_TEXT, depth.MC_CAREER, depth.CHIRON_SIGN, depth.ASPECT_KEY, depth.TRANSIT_KEY];
+  const ts = tables.flatMap(allT);
+  check(
+    `depth.ts: ทุกข้อความมีทั้งไทยและอังกฤษ · อังกฤษไม่มีอักษรไทย (${ts.length} ข้อความ)`,
+    ts.length > 300 && ts.every((t) => t.th.trim() && t.en.trim() && !/[฀-๿]/.test(t.en) && !badThai.test(t.th)),
+  );
+  const signSets = Object.values(depth.PLANET_SIGN_TEXT);
+  check(
+    "ดาวพุธถึงเสาร์: ราศีละย่อหน้าครบ 12 และไม่ซ้ำกัน · เรือน 12 · งานตามกลางฟ้า 12 · แผลใจตามราศี 12",
+    signSets.length === 5 &&
+      signSets.every((list) => list.length === 12 && new Set(list.map((x) => x.core.th)).size === 12) &&
+      depth.HOUSE_DEPTH.length === 12 &&
+      depth.MC_CAREER.length === 12 &&
+      depth.CHIRON_SIGN.length === 12,
+  );
+  const venusTexts = new Set(Array.from({ length: 12 }, (_, s) => describeBody(computeNatalChart(samples[0]), { ...computeNatalChart(samples[0]).bodies.find((b) => b.id === "venus")!, sign: s, dignities: [] }, "th")[0]));
+  check("ดาวศุกร์ 12 ราศีได้คำอธิบายต่างกันทุกราศี (เดิมดาวในราศีเดียวกันพูดประโยคเดียวกัน)", venusTexts.size === 12);
+  check(
+    "ดาวจรเดินช้าบอกว่าควรใช้ช่วงนี้อย่างไร (ดาวเร็วไม่บอก)",
+    describeTimedAspect("saturn", "sun", "square", "th").includes(depth.TRANSIT_KEY.saturn.push.th) && describeTimedAspect("jupiter", "venus", "trine", "en").includes(depth.TRANSIT_KEY.jupiter.flow.en) && !describeTimedAspect("mars", "sun", "square", "th").includes("ช่วงนี้"),
+  );
+  const res = rd("src/components/natal/NatalResult.tsx");
+  const rep = rd("src/components/natal/NatalReportPanel.tsx");
+  check(
+    "หน้าเว็บและรายงานแสดงที่มาในผังและ \"ใช้ให้ดี\" ของเรื่องเด่น · สรุปผังขึ้นเรื่องเด่น 3 ข้อแรก",
+    res.includes("{h.basis}") && res.includes("{h.advice}") && rep.includes("h.basis") && rep.includes("h.advice") && res.includes("chartGlance(chart, lang, themes)") && rd("src/lib/astro/natal-report.ts").includes("chartGlance(chart, lang, themes)"),
+  );
+  check("prompt ของแม่หมอ AI ได้ที่มาในผังของเรื่องเด่นด้วย", /h\$\{i \+ 1\}: \$\{h\.title\} \(\$\{h\.basis\}\) \| \$\{h\.text\}/.test(rd("src/lib/astro/natal-ai.ts")));
+
+  // ส่วนล่างของหน้า: เรือนว่างอ่านจากเจ้าเรือน · มุมสำคัญไม่นับดาวรุ่นกันเอง · สมดุลพลังบอกความหมาย
+  const { keyAspects, emptyHouseNote } = await import("../../src/lib/astro/natal-text");
+  const { PLANET_IDS: PLANET_IDS_LIST } = await import("../../src/lib/astro/natal");
+  let houseOk = true;
+  let houseCount = 0;
+  let genOk = true;
+  for (const inp of samples) {
+    const c = computeNatalChart(inp);
+    genOk &&= keyAspects(c, 5).every((a) => !(["uranus", "neptune", "pluto"].includes(a.a) && ["uranus", "neptune", "pluto"].includes(a.b)));
+    for (let h = 1; h <= 12; h++) {
+      const occupied = c.bodies.some((b) => b.house === h && (PLANET_IDS_LIST as readonly string[]).includes(b.id));
+      for (const lang of ["th", "en"] as const) {
+        const note = emptyHouseNote(c, h, lang);
+        if (!c.houses || occupied) houseOk &&= note === null;
+        else {
+          houseCount++;
+          houseOk &&= !!note && !badThai.test(note) && (lang === "th" || !/[฀-๿]/.test(note));
+        }
+      }
+    }
+  }
+  check(`เรือนว่างบอกเจ้าเรือนว่าอยู่เรือนไหน · เรือนที่มีดาวหรือไม่รู้เวลาเกิดไม่บอก (ตรวจ ${houseCount} ข้อความ)`, houseOk && houseCount > 20);
+  check("ดาวที่คุยกันแรงที่สุด: ไม่นับมุมระหว่างดาวรุ่นกันเอง (ยูเรนัส เนปจูน พลูโต)", genOk && /keyAspectsOf\(chart, 5\)/.test(res));
+  check(
+    "สมดุลพลัง: ธาตุที่ขาดบอกวิธีเติม · ธาตุน้อยสุดบอกวิธีเติม · ดาวส่วนใหญ่อยู่ฝั่งไหนบอกความหมาย · เกิดกลางวัน/คืนบอกความหมาย",
+    res.includes("ELEMENT_DEPTH[e].missKey[lang]") && res.includes("lowElement") && /HEMISPHERE_TEXT\.south : HEMISPHERE_TEXT\.north\)\.meaning/.test(res) && res.includes("SECT_TEXT[chart.dayChart"),
+  );
+}
+
 console.log("\n6.20) คำสำคัญไพ่ประจำตัว — ไม่ฝังลง HTML · ตรงกับข้อมูลไพ่ต้นทางทุกใบ");
 {
   const { NATAL_CARDS, packNatalCards } = await import("../../src/app/_shared/pages/natal-chart");
