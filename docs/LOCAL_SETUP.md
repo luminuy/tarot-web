@@ -66,7 +66,7 @@ npm run preview:worker   # Worker จำลองด้วย wrangler ที่
 
 ```bash
 npm run typecheck     # TypeScript อย่างเดียว
-npm run repo:verify   # ด่านตรวจทั้งชุด 95 ด่าน — hook รันให้เองก่อน commit/push
+npm run repo:verify   # ด่านตรวจทั้งชุด 96 ด่าน — hook รันให้เองก่อน commit/push
 ```
 
 ด่านบางตัวอ่านผลบิลด์ (`dist/` · `.open-next/`) — ถ้าไม่ได้บิลด์มาก่อน ผลของด่านกลุ่มนั้นจะไม่ตรงกับ CI ซึ่งบิลด์ก่อนตรวจเสมอ

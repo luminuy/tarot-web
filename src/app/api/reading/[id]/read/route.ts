@@ -457,7 +457,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
         const { createRetryBudget, DEFAULT_READING_RETRY } = await import("@/lib/ai/retry-budget");
         const readingCtx = {
-          // 🛡️ แทร็ก S: ทั้งสายสำรอง (Groq ➔ Gemini) ลองได้ไม่เกิน 4 ครั้ง / 90 วินาทีรวม
+          // 🛡️ แทร็ก S: ทั้งสายสำรอง (Claude ➔ Groq ➔ Gemini) ลองได้ไม่เกิน 5 ครั้ง / 120 วินาทีรวม
           retryBudget: createRetryBudget(DEFAULT_READING_RETRY),
           personaId: record.personaId,
           spread,
@@ -483,10 +483,41 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         };
 
         let activeProvider = "gemini";
+        // ผู้ให้บริการตัวแรกที่จะได้ลอง — ใช้แยกว่าคำอ่านนี้ "ตกไปตัวสำรอง" หรือไม่ (สถิติคุณภาพ)
+        const firstProvider = process.env.ANTHROPIC_API_KEY?.trim() ? "claude" : process.env.GROQ_API_KEY ? "groq" : "gemini";
 
         async function* streamMultiProviderReading(): AsyncGenerator<
-          import("@/lib/ai/types").ReadingEvent & { provider?: "groq" | "gemini" }
+          import("@/lib/ai/types").ReadingEvent & { provider?: "claude" | "groq" | "gemini" }
         > {
+          // Tier 0: Claude (เจ้าของสั่ง 2026-10-28) — 1-3 ใบ Haiku · 4 ใบขึ้นไป Sonnet (`claudeReadingModel`)
+          // ไม่มีคีย์ / เครดิตหมด / ล้ม = ไม่จบด้วย done ➔ ไหลลง Groq ➔ Gemini ตามเดิม
+          if (process.env.ANTHROPIC_API_KEY?.trim()) {
+            let emittedAny = false;
+            try {
+              const { streamClaudeReading } = await import("@/lib/ai/claude");
+              let gotDone = false;
+              for await (const event of streamClaudeReading(readingCtx)) {
+                if (event.type === "done") gotDone = true;
+                if (event.type !== "done") emittedAny = true;
+                yield { ...event, provider: "claude" };
+              }
+              if (gotDone) {
+                activeProvider = "claude";
+                return;
+              }
+              recordEvent("ai_claude_failover");
+              if (emittedAny) {
+                yield { type: "reset", provider: "groq" };
+              }
+            } catch (err) {
+              recordEvent("ai_claude_failover");
+              console.warn("[read/route] Claude stream encountered error, failing over:", err);
+              if (emittedAny) {
+                yield { type: "reset", provider: "groq" };
+              }
+            }
+          }
+
           // Tier 1: Groq Qwen (High-speed LPU, deep Thai comprehension, 14.4k req/day free quota)
           // ⚠️ ผังที่ใหญ่เกินเพดาน TPM 8,000 (4 ใบขึ้นไป) streamGroqReading() จะข้ามเองทันที
           //    โดยไม่ยิงคำขอ ➔ ตกไป Gemini ซึ่งเป็นตัวที่รับผังใหญ่อยู่จริงในตอนนี้ (INC-0136)
@@ -611,7 +642,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             void recordReadingQuality({
               readingId: id,
               provider: providerUsed,
-              model: event.model || (providerUsed === "groq" ? "qwen3.8-27b" : "gemini-2.5-flash"),
+              model: event.model || (providerUsed === "groq" ? "qwen3.8-27b" : providerUsed === "claude" ? "claude" : "gemini-2.5-flash"),
               personaId: record.personaId || "default",
               spreadId: record.spreadId,
               cardCount: record.drawn!.length,
@@ -619,7 +650,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               promptVersion: PROMPT_VERSION,
               elapsedMs: Date.now() - startedAt,
               outputTokens: event.usage?.outputTokens ?? 0,
-              hadFailover: providerUsed === "gemini" && Boolean(process.env.GROQ_API_KEY),
+              hadFailover: providerUsed !== firstProvider,
               consistencyOk: event.consistencyOk ?? true,
               thaiScore: event.thaiScore ?? null,
               thaiIssueCodes: event.thaiIssueCodes ?? null,

@@ -204,6 +204,8 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          # ทัพหน้าของคำอ่าน (src/lib/ai/claude.ts) — 1-3 ใบ Haiku · 4 ใบขึ้นไป Sonnet · ว่าง = ข้ามไป Groq
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           # ชั้นสำรองที่ 3 ของคำอ่าน — โมเดลฟรีบน OpenRouter เท่านั้น (src/lib/ai/openrouter.ts)
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           # ⚠️ เพิ่มผู้ให้บริการ AI รายใหม่ ต้องมาเติมชื่อคีย์ที่รายการนี้ด้วยเสมอ
