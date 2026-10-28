@@ -589,6 +589,44 @@ export const PROG_PHASE_TEXT: readonly T[] = [
   { th: "ช่วงปิดรอบ พักใจ ปล่อยวาง และฟังเสียงข้างใน ก่อนรอบใหม่จะเริ่ม", en: "Closing the cycle: rest, release and listen inward before the next one begins." },
 ];
 
+// ─────────────────────────── ดวงวันนี้ ───────────────────────────
+
+/** ภาพรวมของวันจากมุมดาวจรเดินเร็ว (ไม่ฟันธงดีร้าย บอกวิธีใช้วัน) */
+export const DAY_TONE_TEXT: Record<"flow" | "friction" | "mixed" | "intense" | "quiet", { title: T; text: T }> = {
+  flow: {
+    title: { th: "วันที่ลื่นไหล", en: "A flowing day" },
+    text: { th: "ดาวเดินเร็ววันนี้ทำมุมเกื้อกูลกับผังของคุณ เหมาะกับการเริ่มคุย ขอความช่วยเหลือ หรือทำเรื่องที่ค้างไว้ให้เดินหน้า", en: "Today's fast planets support your chart. A good day to start conversations, ask for help or move stalled things forward." },
+  },
+  friction: {
+    title: { th: "วันที่มีแรงเสียดทาน", en: "A day with friction" },
+    text: { th: "ดาวเดินเร็วทำมุมตึงกับผังของคุณ อาจรู้สึกถูกเร่งหรือขัดใจง่าย ใช้แรงนี้ทำงานยากให้เสร็จ และเว้นจังหวะก่อนตอบโต้", en: "Fast planets are pressing on your chart. You may feel rushed or easily irritated. Use the energy to finish hard tasks and pause before reacting." },
+  },
+  mixed: {
+    title: { th: "วันที่มีทั้งแรงส่งและแรงต้าน", en: "A day of push and pull" },
+    text: { th: "มีทั้งมุมเกื้อกูลและมุมตึงในวันเดียว เลือกใช้เรื่องที่ไหลลื่นเป็นแรงส่ง แล้วค่อย ๆ จัดการเรื่องที่ติดขัด", en: "Supportive and tense aspects arrive together. Lean on what flows and take the sticking points slowly." },
+  },
+  intense: {
+    title: { th: "วันที่เข้มข้น", en: "An intense day" },
+    text: { th: "ดาวเดินเร็วมาทับจุดสำคัญในผังของคุณพอดี เรื่องที่ดาวดวงนั้นดูแลจะเด่นชัดขึ้นมาก ตั้งใจใช้ให้ตรงจุดแล้วจะได้ผลดี", en: "A fast planet sits right on a key point in your chart, putting its themes in the spotlight. Channel it deliberately and it works for you." },
+  },
+  quiet: {
+    title: { th: "วันที่ฟ้าเงียบ", en: "A quiet sky" },
+    text: { th: "ดาวเดินเร็ววันนี้ไม่ได้ทำมุมแน่นกับผังของคุณ เป็นวันที่ใช้ชีวิตตามจังหวะตัวเองได้ เหมาะกับงานประจำและการพัก", en: "No fast planet is tightly linked to your chart today. Live at your own pace; good for routine work and rest." },
+  },
+};
+
+/** ข้างขึ้นข้างแรมของวันนี้ (ไม่ใช่ของวันเกิด) — วิธีใช้พลังของวัน */
+export const MOON_PHASE_DAY_TEXT: readonly T[] = [
+  { th: "เหมาะกับการตั้งใจเรื่องใหม่เงียบ ๆ ยังไม่ต้องประกาศให้ใครรู้", en: "set a quiet intention; no need to announce it yet." },
+  { th: "เหมาะกับการเริ่มก้าวแรกเล็ก ๆ ของเรื่องที่ตั้งใจไว้", en: "take a small first step on what you intended." },
+  { th: "อาจเจออุปสรรค เหมาะกับการตัดสินใจและลงมือ", en: "obstacles may show up; decide and act." },
+  { th: "เหมาะกับการขัดเกลา ปรับแผนให้ดีขึ้นก่อนเรื่องต่าง ๆ จะสุกงอม", en: "refine and adjust before things peak." },
+  { th: "อารมณ์ขึ้นสูง เรื่องต่าง ๆ ปรากฏชัด เหมาะกับการถอยออกมามองภาพรวม", en: "feelings run high and things come to light; step back and see the whole picture." },
+  { th: "เหมาะกับการแบ่งปันสิ่งที่ได้เรียนรู้และขอบคุณคนรอบตัว", en: "share what you learned and thank the people around you." },
+  { th: "เหมาะกับการเลิกทำสิ่งที่ไม่ได้ผล และเคลียร์เรื่องค้าง", en: "drop what is not working and clear the backlog." },
+  { th: "เหมาะกับการพัก ปล่อยวาง และฟังใจตัวเอง", en: "rest, let go and listen inward." },
+];
+
 // ─────────────────────────── ผังคู่ ───────────────────────────
 
 export const SYN_CATEGORY_TEXT: Record<"bond" | "attraction" | "talk" | "stability" | "growth", { name: T; about: T }> = {

@@ -76,6 +76,7 @@ const DAILY_FAQS_EN = [
 const DAILY_LINKS_EN = [
   { href: "/en/cards", label: "All 78 card meanings", note: "The full 1909 deck, every area of life", card: "major-21" },
   { href: "/en/spreads", label: "26 tarot spreads", note: "Need more than one card? Pick the spread that fits", card: "major-10" },
+  { href: "/en/natal-chart#today", label: "Today from your birth chart", note: "Save your natal chart on this device and see which parts of your life today's planets touch", card: "major-17" },
   { href: "/en/cards/major", label: "Major Arcana", note: "The 22 great archetypes of the journey", card: "major-00" },
   { href: "/en", label: "Start a full reading", note: "Ask one question and let the reader take you through it", card: "major-02" },
 ];
