@@ -3,7 +3,7 @@ import { recordEvent } from "@/lib/stats/record";
 /**
  * 🛡️ งบลองใหม่ต่อคำขอ (REFLECTION_JOURNAL_PLAN 1.14 · แทร็ก S)
  * ---------------------------------------------------------------------------
- * สายสำรองของคำอ่านมีได้ถึง 5 โมเดล (Groq 3 + Gemini 2) แต่ละตัวรอได้นานสุด ~55 วินาที
+ * สายสำรองของคำอ่านมีได้ถึง 6 โมเดล (Claude 1 + Groq 3 + Gemini 2) แต่ละตัวรอได้นานสุด ~55 วินาที
  * ถ้าผู้ให้บริการช้าทั้งสาย คำขอเดียวจะลองครบทุกตัว = กินงบ + ผู้ใช้นั่งรอเกือบ 5 นาที
  * งบนี้จำกัดทั้ง "จำนวนครั้งที่ลอง" และ "เวลารวม" ของทั้งสาย · ไม่ส่งงบมา = พฤติกรรมเดิมทุกอย่าง
  */
@@ -14,7 +14,11 @@ export interface RetryBudget {
   remainingMs(): number;
 }
 
-export const DEFAULT_READING_RETRY = { maxAttempts: 4, totalMs: 90_000 } as const;
+/*
+ * 2026-10-28 เพิ่ม Claude เป็นทัพหน้า (1 ครั้ง) ➔ งบครั้ง 4 ➔ 5 ไม่ให้ Claude กินที่ของ Gemini ตัวท้ายสาย
+ * และเวลารวม 90 ➔ 120 วินาที: Sonnet อ่านผังใหญ่สตรีมนานกว่า Groq ถ้าล้มกลางทาง ตัวสำรองยังมีเวลาเหลือ
+ */
+export const DEFAULT_READING_RETRY = { maxAttempts: 5, totalMs: 120_000 } as const;
 
 export function createRetryBudget(opts: { maxAttempts: number; totalMs: number }, now: () => number = Date.now): RetryBudget {
   const deadline = now() + opts.totalMs;

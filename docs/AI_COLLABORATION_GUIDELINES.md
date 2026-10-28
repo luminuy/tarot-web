@@ -132,7 +132,7 @@ npm run git:tidy
 
 ## 4. ด่านตรวจ (`npm run repo:verify`)
 
-- ชุดตรวจทั้งหมดนิยามที่เดียวคือ `CHECKS` ใน [`scripts/github-auto.ts`](../scripts/github-auto.ts) (ตอนนี้ 95 ด่าน) — ใช้ร่วมกันโดย `.githooks/pre-commit` · `.githooks/pre-push` · `npm run commit` · `pr.yml` · `deploy.yml`
+- ชุดตรวจทั้งหมดนิยามที่เดียวคือ `CHECKS` ใน [`scripts/github-auto.ts`](../scripts/github-auto.ts) (ตอนนี้ 96 ด่าน) — ใช้ร่วมกันโดย `.githooks/pre-commit` · `.githooks/pre-push` · `npm run commit` · `pr.yml` · `deploy.yml`
 - **เพิ่มสคริปต์ใน `scripts/qa/` ต้องเพิ่มเข้า `CHECKS` ด้วยเสมอ** ไม่งั้นด่านนั้นไม่เคยถูกรันอัตโนมัติ
 - CI บิลด์ก่อนรัน `repo:verify` เสมอ เพราะด่านบางตัวอ่านไฟล์ที่ได้จากการบิลด์ — รันในเครื่องโดยไม่ได้บิลด์ ผลของด่านกลุ่มนั้นอาจไม่ตรงกับ CI
 - ด่านที่เฝ้าเอกสาร: `scripts/qa/test-docs-numbers.ts` (ตัวเลขในเอกสารแม่บท · เลข INC ที่อ้างต้องมีจริง · ตารางแผนต้องตรงกับหัวสถานะ · ไฟล์ผู้ช่วยใน `.claude/agents/`)

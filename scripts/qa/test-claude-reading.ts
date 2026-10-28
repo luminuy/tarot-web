@@ -1,0 +1,228 @@
+/**
+ * scripts/qa/test-claude-reading.ts
+ * QA — Claude เป็นทัพหน้าของคำอ่าน (เจ้าของสั่ง 2026-10-28: 1-3 ใบ Haiku · 4 ใบขึ้นไป Sonnet)
+ * ไม่ยิง API จริง — แทน fetch ด้วยสตรีม SSE ปลอมที่ประกอบจากคำอ่านสำรองของไพ่ชุดจริงใน golden fixture
+ * รันด้วย: npx tsx scripts/qa/test-claude-reading.ts
+ */
+
+import fs from "node:fs";
+import path from "node:path";
+import {
+  CLAUDE_API_VERSION,
+  CLAUDE_HAIKU_MODEL,
+  CLAUDE_SONNET_MODEL,
+  claudeReadingModel,
+  claudeThinkingOff,
+  extractJsonObject,
+  isClaudePaused,
+  streamClaudeReading,
+} from "../../src/lib/ai/claude";
+import { streamMockGeminiReading } from "../../src/lib/ai/mock-reading";
+import type { ReadingContext } from "../../src/lib/ai/prompt";
+import type { ReadingEvent } from "../../src/lib/ai/types";
+import { getSpread } from "../../src/data/spreads";
+import { cardById } from "../../src/data/cards";
+import type { Category } from "../../src/data/cards/types";
+
+let pass = 0;
+let fail = 0;
+function check(name: string, cond: boolean) {
+  if (cond) {
+    pass++;
+    console.log(`  ✓ ${name}`);
+  } else {
+    fail++;
+    console.log(`  ✗ ${name}`);
+  }
+}
+
+interface GoldenCase {
+  id: string;
+  category: string;
+  spreadId: string;
+  question: string;
+  cardIds: string[];
+  reversed?: boolean[];
+  personaId?: string;
+}
+
+/** ไพ่จาก fixture เท่านั้น ไม่แต่งไพ่เอง (กฎเหล็กข้อ 14) */
+function goldenContext(cardCount: number): ReadingContext {
+  const all = JSON.parse(fs.readFileSync(path.resolve("scripts/qa/fixtures/golden-readings.json"), "utf-8")) as GoldenCase[];
+  const gold = all.find((g) => g.cardIds.length === cardCount);
+  if (!gold) throw new Error(`ไม่มีเคส ${cardCount} ใบใน golden-readings.json`);
+  const spread = getSpread(gold.spreadId);
+  const cards = gold.cardIds.map((id) => cardById(id));
+  if (!spread || cards.some((c) => !c)) throw new Error(`เคส ${gold.id} ประกอบผัง/ไพ่ไม่ได้`);
+  return {
+    personaId: gold.personaId ?? null,
+    spread,
+    category: gold.category as Category,
+    question: gold.question,
+    intake: {},
+    drawn: gold.cardIds.map((_, i) => ({ order: i, cardIndex: i, isReversed: Boolean(gold.reversed?.[i]) })),
+    cards: cards as NonNullable<ReturnType<typeof cardById>>[],
+    safety: { flag: "none", block: false },
+    lang: "th",
+  } as ReadingContext;
+}
+
+/** คำอ่านที่ผ่าน ReadingSchema แน่นอน — ใช้เป็นเนื้อหาที่ "Claude ปลอม" สตรีมกลับมา */
+async function validReadingJson(ctx: ReadingContext): Promise<string> {
+  for await (const e of streamMockGeminiReading({ ...ctx, usageMeter: undefined })) {
+    if (e.type === "done") return JSON.stringify(e.reading);
+  }
+  throw new Error("คำอ่านสำรองไม่จบ");
+}
+
+function sse(events: unknown[]): Response {
+  const text = events.map((e) => `event: ${(e as { type: string }).type}\ndata: ${JSON.stringify(e)}\n\n`).join("");
+  const bytes = new TextEncoder().encode(text);
+  const body = new ReadableStream<Uint8Array>({
+    start(c) {
+      // ส่งทีละ 97 ไบต์ — ตัดกลางบรรทัด/กลางอักษรไทย เหมือนเครือข่ายจริง
+      for (let i = 0; i < bytes.length; i += 97) c.enqueue(bytes.slice(i, i + 97));
+      c.close();
+    },
+  });
+  return new Response(body, { status: 200, headers: { "content-type": "text/event-stream" } });
+}
+
+function claudeStream(json: string, stopReason = "end_turn"): Response {
+  const text = "```json\n" + json + "\n```";
+  const deltas = [];
+  for (let i = 0; i < text.length; i += 40) {
+    deltas.push({ type: "content_block_delta", index: 0, delta: { type: "text_delta", text: text.slice(i, i + 40) } });
+  }
+  return sse([
+    { type: "message_start", message: { usage: { input_tokens: 120, cache_read_input_tokens: 4000, cache_creation_input_tokens: 0, output_tokens: 1 } } },
+    { type: "content_block_start", index: 0, content_block: { type: "text", text: "" } },
+    { type: "ping" },
+    ...deltas,
+    { type: "content_block_stop", index: 0 },
+    { type: "message_delta", delta: { stop_reason: stopReason }, usage: { output_tokens: 1800 } },
+    { type: "message_stop" },
+  ]);
+}
+
+async function collect(ctx: ReadingContext): Promise<ReadingEvent[]> {
+  const out: ReadingEvent[] = [];
+  for await (const e of streamClaudeReading(ctx)) out.push(e);
+  return out;
+}
+
+const realFetch = globalThis.fetch;
+let lastReq: { url: string; headers: Record<string, string>; body: any } | null = null;
+function mockFetch(respond: () => Response) {
+  globalThis.fetch = (async (url: string, init?: RequestInit) => {
+    lastReq = { url: String(url), headers: init?.headers as Record<string, string>, body: JSON.parse(String(init?.body ?? "{}")) };
+    return respond();
+  }) as typeof fetch;
+}
+
+async function main() {
+  console.log("🟠 Claude ทัพหน้าคำอ่าน (1-3 ใบ Haiku · 4 ใบขึ้นไป Sonnet)\n");
+
+  console.log("1) เลือกรุ่นตามจำนวนไพ่");
+  check("1 2 3 ใบ = Haiku 5.5", [1, 2, 3].every((n) => claudeReadingModel(n) === CLAUDE_HAIKU_MODEL));
+  check("4 5 7 10 12 ใบ = Sonnet 5.5", [4, 5, 7, 10, 12].every((n) => claudeReadingModel(n) === CLAUDE_SONNET_MODEL));
+  check("รหัสรุ่นตรงตามเอกสาร (ไม่มีวันที่ต่อท้าย)", CLAUDE_HAIKU_MODEL === "claude-haiku-5-5" && CLAUDE_SONNET_MODEL === "claude-sonnet-5-5");
+  check(
+    "ปิดโหมดคิดให้ตรงรุ่น: Haiku disabled · Sonnet between_tools (Sonnet 5.5 ไม่รับ disabled)",
+    claudeThinkingOff(CLAUDE_HAIKU_MODEL).type === "disabled" && claudeThinkingOff(CLAUDE_SONNET_MODEL).type === "between_tools",
+  );
+  check("ตัด code fence/ข้อความนอก JSON ออก", extractJsonObject('ok ```json\n{"a":{"b":1}}\n``` end') === '{"a":{"b":1}}');
+
+  console.log("\n2) ไม่มีคีย์ = ไม่ยิงอะไรเลย");
+  delete process.env.ANTHROPIC_API_KEY;
+  let fetched = false;
+  globalThis.fetch = (async () => {
+    fetched = true;
+    return new Response("", { status: 500 });
+  }) as typeof fetch;
+  const none = await collect(goldenContext(3));
+  check("ไม่มี ANTHROPIC_API_KEY ➔ ไม่มีเหตุการณ์ ไม่เรียก fetch", none.length === 0 && !fetched);
+
+  process.env.ANTHROPIC_API_KEY = "sk-ant-test";
+
+  console.log("\n3) ผัง 3 ใบ ➔ Haiku · สตรีมจนจบ");
+  const ctx3 = goldenContext(3);
+  const validReadingJson3 = await validReadingJson(ctx3);
+  mockFetch(() => claudeStream(validReadingJson3));
+  const ev3 = await collect(ctx3);
+  const done3 = ev3.find((e) => e.type === "done");
+  check("ยิงไป /v1/messages", !!lastReq && lastReq.url.endsWith("/v1/messages"));
+  check("รุ่น Haiku 5.5 + ปิดโหมดคิด", lastReq?.body.model === CLAUDE_HAIKU_MODEL && lastReq?.body.thinking?.type === "disabled");
+  check(
+    `header anthropic-version ${CLAUDE_API_VERSION} + x-api-key`,
+    lastReq?.headers["anthropic-version"] === CLAUDE_API_VERSION && lastReq?.headers["x-api-key"] === "sk-ant-test",
+  );
+  check(
+    "ไม่ส่ง temperature/top_p/top_k (API รุ่น 2026-10-21 คืน 400)",
+    !!lastReq && !("temperature" in lastReq.body) && !("top_p" in lastReq.body) && !("top_k" in lastReq.body),
+  );
+  check("system prompt ติด cache_control", lastReq?.body.system?.[0]?.cache_control?.type === "ephemeral");
+  check("stream: true · max_tokens = 1,600 + 480/ใบ", lastReq?.body.stream === true && lastReq?.body.max_tokens === 1600 + 3 * 480);
+  check("ได้ opening + การ์ดครบ 3 ใบระหว่างสตรีม", ev3.some((e) => e.type === "opening") && ev3.filter((e) => e.type === "card").length === 3);
+  check("จบด้วย done จากรุ่น Haiku", done3?.type === "done" && done3.model === CLAUDE_HAIKU_MODEL);
+  check(
+    "โทเคนเข้ารวมส่วนที่อ่านจากแคช (4,120) · โทเคนออก 1,800",
+    done3?.type === "done" && done3.usage.inputTokens === 4120 && done3.usage.outputTokens === 1800 && done3.usage.cacheReadTokens === 4000,
+  );
+
+  console.log("\n4) ผัง 5 ใบ ➔ Sonnet");
+  const ctx5 = goldenContext(5);
+  const json5 = await validReadingJson(ctx5);
+  mockFetch(() => claudeStream(json5));
+  const ev5 = await collect(ctx5);
+  check("รุ่น Sonnet 5.5 + between_tools", lastReq?.body.model === CLAUDE_SONNET_MODEL && lastReq?.body.thinking?.type === "between_tools");
+  check("จบด้วย done จากรุ่น Sonnet", ev5.some((e) => e.type === "done" && e.model === CLAUDE_SONNET_MODEL));
+
+  console.log("\n5) ล้มแบบไหนก็ไม่มีคำอ่านกุขึ้นเอง (กฎเหล็กข้อ 14) ให้สายสำรองรับต่อ");
+  mockFetch(() => claudeStream(validReadingJson3, "refusal"));
+  const evRef = await collect(ctx3);
+  check("stop_reason refusal ➔ ไม่มี done", !evRef.some((e) => e.type === "done"));
+  mockFetch(() => claudeStream(validReadingJson3.slice(0, Math.floor(validReadingJson3.length / 2)), "max_tokens"));
+  const evCut = await collect(ctx3);
+  check("JSON ขาดกลางทาง (max_tokens) ➔ ไม่มี done ไม่ต่อเติมเอง", !evCut.some((e) => e.type === "done"));
+  mockFetch(() => sse([{ type: "message_start", message: { usage: { input_tokens: 10 } } }, { type: "error", error: { type: "overloaded_error" } }]));
+  const evErr = await collect(ctx3);
+  check("error กลางสตรีม ➔ ไม่มี done", !evErr.some((e) => e.type === "done"));
+
+  console.log("\n6) เครดิตหมด/คีย์ผิด ➔ พักเรียก Claude ไม่ให้ทุกคำอ่านเสียเวลายิงคำขอที่ล้มแน่");
+  mockFetch(() => new Response('{"type":"error","error":{"type":"invalid_request_error","message":"credit balance is too low"}}', { status: 400 }));
+  const ev400 = await collect(ctx3);
+  check("400 ➔ ไม่มีเหตุการณ์ และเข้าโหมดพัก", ev400.length === 0 && isClaudePaused());
+  let calledWhilePaused = false;
+  globalThis.fetch = (async () => {
+    calledWhilePaused = true;
+    return new Response("", { status: 500 });
+  }) as typeof fetch;
+  await collect(ctx3);
+  check("ระหว่างพักไม่ยิงคำขอใหม่", !calledWhilePaused);
+  globalThis.fetch = realFetch;
+
+  console.log("\n7) ต่อสายใน /read: Claude ก่อน Groq ➔ Gemini");
+  const route = fs.readFileSync(path.resolve("src/app/api/reading/[id]/read/route.ts"), "utf-8");
+  const iClaude = route.indexOf("streamClaudeReading(readingCtx)");
+  const iGroq = route.indexOf("streamGroqReading(readingCtx)");
+  const iGemini = route.indexOf("streamGeminiReading(readingCtx)");
+  check("ลำดับ Claude ➔ Groq ➔ Gemini", iClaude > 0 && iClaude < iGroq && iGroq < iGemini);
+  check("เรียก Claude เฉพาะเมื่อมี ANTHROPIC_API_KEY", /if \(process\.env\.ANTHROPIC_API_KEY\?\.trim\(\)\) \{[\s\S]{0,200}streamClaudeReading/.test(route));
+  check("Claude ไม่จบ ➔ นับ failover แล้วไหลลงตัวถัดไป", route.includes('recordEvent("ai_claude_failover")'));
+  const deploy = fs.readFileSync(path.resolve(".github/workflows/deploy.yml"), "utf-8");
+  check(
+    "deploy.yml ส่ง ANTHROPIC_API_KEY เข้า Worker (INC-0152: ลืม = Worker ไม่มีวันเห็นคีย์)",
+    deploy.includes("ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}"),
+  );
+  const claudeSrc = fs.readFileSync(path.resolve("src/lib/ai/claude.ts"), "utf-8");
+  check("ไม่ log คีย์หรือ prompt", !/console\.\w+\([^)]*(apiKey|systemInstruction|userMessage)/.test(claudeSrc));
+
+  console.log(`\n📊 สรุป: ผ่าน ${pass} · ตก ${fail}`);
+  if (fail > 0) process.exit(1);
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

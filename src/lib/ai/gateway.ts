@@ -90,3 +90,13 @@ export function groqChatCompletionsEndpoint(): string {
     ? `${base}/groq/chat/completions`
     : "https://api.groq.com/openai/v1/chat/completions";
 }
+
+/**
+ * Endpoint Messages API ของ Anthropic (Claude)
+ * ผ่าน gateway ถ้าตั้งค่าไว้ ไม่งั้นยิงตรง api.anthropic.com
+ * header auth เป็น `x-api-key` + `anthropic-version` ทั้งสองทาง
+ */
+export function anthropicMessagesEndpoint(): string {
+  const base = gatewayBase();
+  return base ? `${base}/anthropic/v1/messages` : "https://api.anthropic.com/v1/messages";
+}
