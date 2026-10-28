@@ -16,6 +16,7 @@ import {
   extractJsonObject,
   generateClaudeReply,
   isClaudePaused,
+  probeClaudeHealth,
   streamClaudeReading,
 } from "../../src/lib/ai/claude";
 import { generateAiJson } from "../../src/lib/ai/json-call";
@@ -334,6 +335,24 @@ async function main() {
   );
   const claudeSrc = fs.readFileSync(path.resolve("src/lib/ai/claude.ts"), "utf-8");
   check("ไม่ log คีย์หรือ prompt", !/console\.\w+\([^)]*(apiKey|systemInstruction|userMessage)/.test(claudeSrc));
+
+  console.log("\n8) แท็บสุขภาพ AI ใน /admin ตรวจ Claude ได้ (เจ้าของถาม: ตั้งคีย์แล้วรู้ได้ยังไงว่าใช้ได้)");
+  mockFetch(() => claudeText("พร้อม"));
+  const okProbe = await probeClaudeHealth("sk-ant-test-123");
+  check("ยิงทั้ง Haiku และ Sonnet · ผ่านทั้งคู่ · ปิดโหมดคิด · max_tokens เล็ก", okProbe.length === 2 && okProbe.every((r) => r.ok && r.answerPreview === "พร้อม") && lastReq?.body.model === CLAUDE_SONNET_MODEL && lastReq?.body.thinking?.type === "between_tools" && lastReq?.body.max_tokens <= 64);
+  mockFetch(() => new Response('{"type":"error","error":{"type":"invalid_request_error","message":"credit balance is too low (key sk-ant-test-123)"}}', { status: 400 }));
+  const badProbe = await probeClaudeHealth("sk-ant-test-123", [CLAUDE_HAIKU_MODEL]);
+  check("เครดิตหมด: ได้ HTTP 400 พร้อมเหตุผลจริง และตัดค่าคีย์ออกจากข้อความ", badProbe[0].status === 400 && !badProbe[0].ok && /credit balance/.test(badProbe[0].error ?? "") && !(badProbe[0].error ?? "").includes("sk-ant-test-123"));
+  globalThis.fetch = realFetch;
+  const health = fs.readFileSync(path.resolve("src/app/api/admin/ai-health/route.ts"), "utf-8");
+  check(
+    "ai-health: ยิง Claude ก่อน Groq/Gemini · ตัดคีย์ Claude ออกจาก error · ตั้งคีย์แต่ Claude ล้ม = ไม่รายงานว่าปกติดี",
+    health.indexOf("probeClaudeHealth(claudeKey)") > 0 &&
+      health.indexOf("probeClaudeHealth(claudeKey)") < health.indexOf("probeGroqHealth(") &&
+      health.includes('if (claudeKey) s = s.split(claudeKey).join("***")') &&
+      health.includes('verdict = "claude_unavailable"'),
+  );
+  check("แผงแอดมินแสดงสถานะคีย์ Claude และป้ายสถานะ claude_unavailable", /claude_unavailable:/.test(fs.readFileSync(path.resolve("src/components/admin/AiHealthPanel.tsx"), "utf-8")) && fs.readFileSync(path.resolve("src/components/admin/AiHealthPanel.tsx"), "utf-8").includes("ANTHROPIC_API_KEY"));
 
   console.log(`\n📊 สรุป: ผ่าน ${pass} · ตก ${fail}`);
   if (fail > 0) process.exit(1);

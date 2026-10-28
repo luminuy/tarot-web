@@ -20,10 +20,16 @@ interface ModelResult {
 
 interface Health {
   ok: boolean;
-  verdict: "healthy" | "no_api_key" | "ai_daily_cap" | "gemini_unavailable";
+  verdict: "healthy" | "no_api_key" | "ai_daily_cap" | "gemini_unavailable" | "claude_unavailable";
   summary: string;
   nextStep: string;
-  key: { configured: boolean; envVar: string | null; length: number; startsWithAIza: boolean };
+  key: {
+    configured: boolean;
+    envVar: string | null;
+    length: number;
+    startsWithAIza: boolean;
+    claude?: { configured: boolean; length: number; startsWithSkAnt: boolean; paused: boolean };
+  };
   chatProbe?: Array<ModelResult & { promptChars?: number }>;
   budget: { usedToday: number; dailyCap: number; memberCapReached: boolean; guestCapReached: boolean };
   models: ModelResult[];
@@ -34,7 +40,8 @@ const VERDICT_LABEL: Record<Health["verdict"], string> = {
   healthy: "ปกติดี — แม่หมอตอบด้วย AI จริงได้",
   no_api_key: "ยังไม่ได้ตั้งคีย์ AI",
   ai_daily_cap: "ใช้ครบเพดานรายวันแล้ว",
-  gemini_unavailable: "มีคีย์ แต่เรียก Gemini ไม่สำเร็จ",
+  gemini_unavailable: "มีคีย์ แต่เรียก AI ไม่สำเร็จสักตัว",
+  claude_unavailable: "เรียก Claude ไม่สำเร็จ — กำลังใช้ตัวสำรอง",
 };
 
 interface QualityStats {
@@ -80,7 +87,7 @@ export default function AiHealthPanel() {
         <div>
           <h2 className="font-mystic-gold text-base font-bold text-ink">สุขภาพการเชื่อมต่อ AI</h2>
           <p className="mt-0.5 text-xs text-muted">
-            ยิงถาม Gemini จริง 1 ครั้งต่อโมเดล เพื่อดูว่าแม่หมอตอบด้วย AI ได้จริงหรือกำลังใช้คำตอบสำรอง
+            ยิงถาม Claude · Groq · Gemini จริง 1 ครั้งต่อโมเดล เพื่อดูว่าแม่หมอตอบด้วย AI ตัวไหน หรือกำลังใช้คำตอบสำรอง
           </p>
         </div>
         <Button
@@ -97,7 +104,7 @@ export default function AiHealthPanel() {
           ของเดิมเป็น <p> เฉย ๆ ผู้ดูแลที่ใช้โปรแกรมอ่านหน้าจอจึงไม่รู้ว่าการตรวจล้มเหลว */}
       {err && <AdminErrorBanner error={err} onRetry={run} />}
 
-      {loading && !data && <p className="text-sm text-muted">กำลังติดต่อ Gemini…</p>}
+      {loading && !data && <p className="text-sm text-muted">กำลังติดต่อ Claude · Groq · Gemini…</p>}
 
       {data && (
         <>
@@ -130,6 +137,11 @@ export default function AiHealthPanel() {
                       data.key.startsWithAIza ? " · ขึ้นต้น AIza" : ""
                     }`
                   : "ยังไม่ได้ตั้ง GEMINI_API_KEY / GOOGLE_API_KEY"}
+              </p>
+              <p className="mt-1 text-xs text-muted">
+                {data.key.claude?.configured
+                  ? `Claude: ตั้ง ANTHROPIC_API_KEY แล้ว · ยาว ${data.key.claude.length} ตัว${data.key.claude.startsWithSkAnt ? " · ขึ้นต้น sk-ant-" : " · ไม่ขึ้นต้น sk-ant- (ตรวจว่าคัดลอกครบไหม)"}${data.key.claude.paused ? " · ตอนนี้พักเรียกชั่วคราวหลังเจอ error" : ""}`
+                  : "Claude: ยังไม่ได้ตั้ง ANTHROPIC_API_KEY บน Worker"}
               </p>
             </div>
             <div className="altar-card-porcelain px-5 py-4">
