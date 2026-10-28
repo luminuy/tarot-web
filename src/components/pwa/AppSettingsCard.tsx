@@ -21,6 +21,7 @@ export const AppSettingsCard: React.FC<{ isEnglish: boolean; isMember: boolean }
   const [status, setStatus] = useState<PushStatus | null>(null);
   const [hour, setHour] = useState<number | null>(7);
   const [checkins, setCheckins] = useState(true);
+  const [target, setTarget] = useState<"daily" | "natal">("daily");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   const [offline, setOffline] = useState(false);
@@ -33,6 +34,7 @@ export const AppSettingsCard: React.FC<{ isEnglish: boolean; isMember: boolean }
       if (s.subscribed) {
         setHour(s.morningHour);
         setCheckins(s.checkins);
+        setTarget(s.morningTarget);
       }
     });
   }, [isMember]);
@@ -40,10 +42,10 @@ export const AppSettingsCard: React.FC<{ isEnglish: boolean; isMember: boolean }
   const save = async () => {
     setBusy(true);
     setMsg("");
-    const r = await enablePush({ morningHour: hour, checkins, lang: isEnglish ? "en" : "th" }).catch(() => ({ ok: false, reason: "error" }));
+    const r = await enablePush({ morningHour: hour, checkins, lang: isEnglish ? "en" : "th", morningTarget: target }).catch(() => ({ ok: false, reason: "error" }));
     setBusy(false);
     if (r.ok) {
-      setStatus((s) => (s ? { ...s, subscribed: true, permission: "granted", morningHour: hour, checkins } : s));
+      setStatus((s) => (s ? { ...s, subscribed: true, permission: "granted", morningHour: hour, checkins, morningTarget: target } : s));
       setMsg(L({ th: "บันทึกการเตือนแล้ว", en: "Reminders saved" }));
     } else {
       setMsg(
@@ -88,6 +90,19 @@ export const AppSettingsCard: React.FC<{ isEnglish: boolean; isMember: boolean }
                   ))}
                 </select>
               </label>
+              {hour !== null && (
+                <label className="flex items-center justify-between gap-3 text-xs sm:text-[13px]">
+                  <span>{L({ th: "เตือนตอนเช้าให้เปิด", en: "The morning reminder opens" })}</span>
+                  <select
+                    value={target}
+                    onChange={(e) => setTarget(e.target.value === "natal" ? "natal" : "daily")}
+                    className="min-h-[44px] rounded-full border border-line-interactive-warm bg-surface/80 px-3 text-ink-deep"
+                  >
+                    <option value="daily">{L({ th: "ไพ่ประจำวัน (พิธีเช้า)", en: "Daily card (ritual)" })}</option>
+                    <option value="natal">{L({ th: "ดวงวันนี้จากผังเกิด", en: "Today from your birth chart" })}</option>
+                  </select>
+                </label>
+              )}
               <label className="flex items-center justify-between gap-3 text-xs sm:text-[13px]">
                 <span>{L({ th: "เตือนเมื่อถึงวันนัดกลับมาเช็ก", en: "Remind me on check-in days" })}</span>
                 <input type="checkbox" checked={checkins} onChange={(e) => setCheckins(e.target.checked)} className="w-5 h-5 accent-[var(--color-gold-ink)]" />

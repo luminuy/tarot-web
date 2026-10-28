@@ -85,7 +85,9 @@ export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
               our servers. Saved charts stay on your device. Only when you <strong>tick the consent box</strong> in the
               &quot;Ask the reader&quot; tab do we send your birth data, the name you entered and your question to
               calculate the chart and have an external AI provider answer. We do not store the birth data or questions
-              (only a count of questions, to apply your allowance).
+              (only a count of questions, to apply your allowance). If you turn on the daily chart reminder, we store only
+              this device&apos;s push subscription and the hour you chose, never your chart. A &quot;Send this chart to a
+              friend&quot; link carries the birth data after the # sign, which browsers never send to our servers.
             </li>
             <li>
               <strong>Video Calls with a Reader (only after you consent)</strong> — Video and audio are relayed through

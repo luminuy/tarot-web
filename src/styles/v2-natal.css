@@ -319,3 +319,76 @@ details:not([open]) > summary .v2-nt-more-close {
     display: block;
   }
 }
+
+/* ── รายงานฉบับเต็ม (NatalReportPanel · portal ใต้ body) ──
+ * หน้าจอ: ทับเต็มจอบนพื้นกระดาษ · พิมพ์/บันทึก PDF: ซ่อนทุกอย่างใน body ยกเว้นรายงาน */
+.nt-report {
+  --nt-ink: #29261F;
+  --nt-muted: #5E5547;
+  --nt-line: rgba(74, 47, 16, 0.22);
+  --nt-line-soft: rgba(74, 47, 16, 0.1);
+  --nt-gold: #8A5512;
+  --nt-paper: #FFFCF6;
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  overflow-y: auto;
+  background: var(--nt-paper);
+  color: var(--nt-ink);
+}
+.nt-report-bar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--nt-paper);
+  border-bottom: 1px solid var(--nt-line);
+}
+.nt-report-page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.nt-report-page section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.nt-report-h2 {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: var(--nt-gold);
+  border-bottom: 1px solid var(--nt-line);
+  padding-bottom: 0.25rem;
+}
+.nt-report-block {
+  break-inside: avoid;
+}
+body.nt-report-open {
+  overflow: hidden;
+}
+@media print {
+  body.nt-report-open > *:not(#nt-report-root) {
+    display: none !important;
+  }
+  body.nt-report-open .nt-report {
+    position: static;
+    overflow: visible;
+  }
+  .nt-report-bar {
+    display: none !important;
+  }
+  .nt-report-page {
+    max-width: none;
+    padding: 0;
+  }
+  .nt-report-h2 {
+    break-after: avoid;
+  }
+}

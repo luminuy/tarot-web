@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { ASPECT_TEXT, DAY_TONE_TEXT, MOON_PHASE_DAY_TEXT, MOON_PHASE_TEXT, type Lang } from "@/data/natal/content";
 import { buildChart } from "@/lib/astro/chart-spec";
@@ -9,6 +9,9 @@ import type { SavedChart } from "@/lib/astro/saved-charts";
 import { dailyOverview, type TransitAspect } from "@/lib/astro/techniques";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 import { FlipCard } from "./NatalFlipCard";
+
+/** เตือนดวงวันนี้ทุกเช้า — ส่งแค่ subscription + ชั่วโมงขึ้นเซิร์ฟเวอร์ ไม่ส่งผัง (แยกไฟล์ให้ส่วนนี้ไม่ยิง API) */
+const NatalPushOptIn = React.lazy(() => import("./NatalPushOptIn"));
 import type { NatalCardItem } from "./NatalChartApp";
 
 /**
@@ -191,6 +194,9 @@ export default function NatalToday({
           ? "คำนวณจากผังที่บันทึกไว้ในเครื่องนี้ ข้อมูลเกิดไม่ถูกส่งออกไปไหน"
           : "Calculated from the chart saved on this device. Your birth data never leaves it."}
       </p>
+      <Suspense fallback={null}>
+        <NatalPushOptIn lang={lang} />
+      </Suspense>
       <button
         type="button"
         onClick={() => onOpen(picked)}

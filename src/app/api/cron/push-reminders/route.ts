@@ -32,8 +32,15 @@ function timingSafeEqual(a: string, b: string): boolean {
 }
 
 const COPY = {
-  th: { title: "พิธีเช้า 2 นาที", body: "เปิดไพ่ประจำวัน แล้วถามตัวเองสักข้อก่อนเริ่มวัน", url: "/daily?utm_source=push" },
-  en: { title: "Your two-minute morning ritual", body: "Draw today's card and ask yourself one question before the day begins.", url: "/en/daily?utm_source=push" },
+  daily: {
+    th: { title: "พิธีเช้า 2 นาที", body: "เปิดไพ่ประจำวัน แล้วถามตัวเองสักข้อก่อนเริ่มวัน", url: "/daily?utm_source=push" },
+    en: { title: "Your two-minute morning ritual", body: "Draw today's card and ask yourself one question before the day begins.", url: "/en/daily?utm_source=push" },
+  },
+  // ดวงวันนี้จากผังเกิด: เซิร์ฟเวอร์ไม่รู้ผังของใคร ข้อความจึงเป็นข้อความกลาง · ผังคำนวณในเครื่องตอนแตะเปิด (ผังที่บันทึกไว้)
+  natal: {
+    th: { title: "ดวงวันนี้ของคุณพร้อมแล้ว", body: "แตะดูว่าดาววันนี้แตะเรื่องไหนในผังเกิดของคุณ", url: "/natal-chart?utm_source=push#today" },
+    en: { title: "Your day in the stars is ready", body: "Tap to see which parts of your birth chart today's planets touch.", url: "/en/natal-chart?utm_source=push#today" },
+  },
 };
 
 export async function POST(request: Request) {
@@ -58,7 +65,7 @@ export async function POST(request: Request) {
       if (!(await claimMorning(sub.id, day).catch(() => false))) continue;
       claimed++;
       try {
-        const res = await sendWebPush(sub, { ...COPY[sub.lang], tag: "morning-ritual" }, { ttl: 3 * 3600, urgency: "low" });
+        const res = await sendWebPush(sub, { ...COPY[sub.morningTarget][sub.lang], tag: sub.morningTarget === "natal" ? "morning-natal" : "morning-ritual" }, { ttl: 3 * 3600, urgency: "low" });
         await recordPushResult(sub.id, res);
         if (res.ok) sent++;
         else failed++;

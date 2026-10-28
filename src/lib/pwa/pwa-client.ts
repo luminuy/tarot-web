@@ -140,6 +140,7 @@ export interface PushStatus {
   subscribed: boolean;
   morningHour: number | null;
   checkins: boolean;
+  morningTarget: "daily" | "natal";
   /** iPhone ที่ยังไม่ได้ติดตั้งบนหน้าจอโฮม — ต้องติดตั้งก่อนถึงจะเปิดได้ */
   needsInstallOnIos: boolean;
 }
@@ -153,6 +154,7 @@ export async function getPushStatus(): Promise<PushStatus> {
     subscribed: false,
     morningHour: null,
     checkins: true,
+    morningTarget: "daily",
     needsInstallOnIos: isIos() && !isStandalone(),
   };
   try {
@@ -167,15 +169,26 @@ export async function getPushStatus(): Promise<PushStatus> {
   if (!sub) return base;
   try {
     const res = await fetch(`/api/push/subscribe?endpoint=${encodeURIComponent(sub.endpoint)}`, { cache: "no-store" });
-    const data = (await res.json()) as { subscribed?: boolean; morningHour?: number | null; checkins?: boolean };
-    return { ...base, subscribed: Boolean(data.subscribed), morningHour: data.morningHour ?? null, checkins: data.checkins ?? true };
+    const data = (await res.json()) as { subscribed?: boolean; morningHour?: number | null; checkins?: boolean; morningTarget?: string };
+    return {
+      ...base,
+      subscribed: Boolean(data.subscribed),
+      morningHour: data.morningHour ?? null,
+      checkins: data.checkins ?? true,
+      morningTarget: data.morningTarget === "natal" ? "natal" : "daily",
+    };
   } catch {
     return base;
   }
 }
 
 /** เปิด/อัปเดตแจ้งเตือน — ขอสิทธิ์ตรงนี้ (ต้องเรียกจากการแตะของผู้ใช้เท่านั้น) */
-export async function enablePush(settings: { morningHour: number | null; checkins: boolean; lang: "th" | "en" }): Promise<{ ok: boolean; reason?: string }> {
+export async function enablePush(settings: {
+  morningHour: number | null;
+  checkins: boolean;
+  lang: "th" | "en";
+  morningTarget?: "daily" | "natal";
+}): Promise<{ ok: boolean; reason?: string }> {
   const cfg = (await (await fetch("/api/push/public-key")).json().catch(() => ({}))) as { enabled?: boolean; publicKey?: string };
   if (!cfg.enabled || !cfg.publicKey) return { ok: false, reason: "disabled" };
   const permission = await Notification.requestPermission();
@@ -190,7 +203,7 @@ export async function enablePush(settings: { morningHour: number | null; checkin
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ subscription: { endpoint: json.endpoint, keys: json.keys }, ...settings }),
   });
-  return res.ok ? { ok: true } : { ok: false, reason: "server" };
+  return res.ok ? { ok: true } : { ok: false, reason: res.status === 401 ? "signin" : "server" };
 }
 
 export async function disablePush(): Promise<void> {
