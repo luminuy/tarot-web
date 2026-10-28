@@ -529,9 +529,10 @@ console.log("\n6.6) ค้นหาเมืองทั่วโลก + ผั
   const app = fs.readFileSync(path.join(process.cwd(), "src/components/natal/NatalChartApp.tsx"), "utf8");
   const saveCalls = app.match(/\bsaveChart\(/g)?.length ?? 0;
   const handleSave = app.match(/function handleSave\(\)[\s\S]*?\n  \}/)?.[0] ?? "";
+  // saveChart มี 2 จุด และทั้งสองเป็นปุ่มที่ผู้ใช้กด: ปุ่มบันทึกผังของตัวเอง + ปุ่ม "บันทึกไว้ในเครื่องนี้" ของผังที่เพื่อนส่งมา
   check(
-    "บันทึกผังลงเครื่องเกิดจากปุ่มที่ผู้ใช้กดเท่านั้น (saveChart อยู่ใน handleSave ที่เดียว)",
-    saveCalls === 1 && handleSave.includes("saveChart(")
+    "บันทึกผังลงเครื่องเกิดจากปุ่มที่ผู้ใช้กดเท่านั้น (handleSave + onSave ของผังจากเพื่อน)",
+    saveCalls === 2 && handleSave.includes("saveChart(") && /onSave=\{\(spec\) => \{\s*const next = saveChart\(spec\)/.test(app)
   );
   const savedSrc = fs.readFileSync(path.join(process.cwd(), "src/lib/astro/saved-charts.ts"), "utf8");
   check(
@@ -765,6 +766,153 @@ console.log("\n6.12) ภาพแชร์ Big Three (วาดในเคร�
   check("ไพ่ในภาพหาไม่เจอ = ข้าม ไม่หยิบใบอื่นแทน (กฎเหล็ก 14)", /if \(!card\) continue;/.test(share));
   const res = fs.readFileSync(path.join(root, "src/components/natal/NatalResult.tsx"), "utf8");
   check("ภาพแชร์โหลดแบบ lazy และกดสร้างภาพ = พลิกไพ่ประจำราศีบนหน้าเว็บด้วย (กฎเหล็ก 4)", /React\.lazy\(\s*\(\)\s*=>\s*import\(\s*["']\.\/NatalShare["']\s*\)\s*\)/.test(res) && /`\$\{key\}:sign`, true\]/.test(res));
+}
+
+console.log("\n6.13) โหราไทย — ปฏิทินจันทรคติ · ทักษา · มหาทักษา · เลข 7 ตัว (เทียบตำราและวันที่ประกาศจริง)");
+{
+  const { thaiLunarDate, thaiLunarFromJdn, julianDayNumber, dateOfJdn, naksatYear } = await import("../../src/lib/astro/thai-lunar");
+  const { taksa, thaiBirthDay, sevenNumbers, mahaTaksa, checkName, TAKSA_POSITIONS } = await import("../../src/lib/astro/thai-astro");
+  const t0 = thaiLunarDate(2000, 1, 1);
+  check("1 ม.ค. 2000 = เดือนอ้าย แรม 9 ค่ำ (ตัวอย่างของ pythaidate ต้นฉบับ)", t0.month === 1 && t0.day === 24);
+  // วันวิสาขบูชาที่ประกาศจริง (เดือน 6 ขึ้น 15 ค่ำ · ปีอธิกมาสเป็นเดือน 7)
+  const visakha: [number, number, number][] = [[2020, 5, 6], [2021, 5, 26], [2022, 5, 15], [2023, 6, 3], [2024, 5, 22], [2025, 5, 11], [2026, 5, 31]];
+  check("วิสาขบูชา 7 ปีตรงวันประกาศจริงทุกปี", visakha.every(([y, m, d]) => { const t = thaiLunarDate(y, m, d); return t.day === 15 && t.month === (t.leapMonthYear ? 7 : 6); }));
+  // ตารางมาฆบูชา 36 ปีของวิกิพีเดียไทย (พ.ศ. 2539–2574): เดือนต้องถูกทุกปี วันคลาดได้ไม่เกิน 1 (ปีที่ทางการเลื่อนอธิกวาร)
+  const makha: [number, number, number][] = [[2539,3,4],[2551,2,21],[2563,2,8],[2540,2,22],[2552,2,9],[2564,2,26],[2541,2,11],[2553,2,28],[2565,2,16],[2542,3,1],[2554,2,18],[2566,3,6],[2543,2,19],[2555,3,7],[2567,2,24],[2544,2,8],[2556,2,25],[2568,2,13],[2545,2,26],[2557,2,14],[2569,3,4],[2546,2,16],[2558,3,4],[2570,2,22],[2547,3,5],[2559,2,22],[2571,2,11],[2548,2,23],[2560,2,11],[2572,2,28],[2549,2,13],[2561,3,1],[2573,2,18],[2550,3,3],[2562,2,19],[2574,3,8]];
+  let makhaExact = 0;
+  const makhaOk = makha.every(([be, m, d]) => {
+    const y = be - 543;
+    const want = thaiLunarDate(y, 6, 15).leapMonthYear ? 4 : 3;
+    const jd = julianDayNumber(y, m, d);
+    for (const k of [0, -1, 1]) {
+      const t = thaiLunarFromJdn(jd + k);
+      if (t.month === want && t.day === 15) { if (k === 0) makhaExact++; return true; }
+    }
+    return false;
+  });
+  check(`มาฆบูชา 36 ปี: เดือนถูกทุกปี วันคลาดไม่เกิน 1 (ตรงเป๊ะ ${makhaExact}/36)`, makhaOk && makhaExact >= 26);
+  const official = (y: number, m: number, d: number) => { const t = thaiLunarDate(y, m, d); return t.day === 15; };
+  check("มาฆบูชาที่ราชการประกาศ 12 ก.พ. 2568 และ 3 มี.ค. 2569 ตรงเป๊ะ", official(2025, 2, 12) && official(2026, 3, 3));
+  check("เกิด 3 ม.ค. 2552 ยังเป็นปีชวด (ปีนักษัตรเปลี่ยนวันขึ้น 1 ค่ำ เดือน 5 · ตัวอย่างในตำรา)", naksatYear(2009, 1, 3).index === 1);
+  const ny = dateOfJdn(naksatYear(2026, 10, 28).changeJdn);
+  check("ปีมะเมีย 2569 เริ่มวันขึ้น 1 ค่ำ เดือน 5 (มีนาคม 2026)", naksatYear(2026, 10, 28).index === 7 && ny.y === 2026 && ny.m === 3);
+  // ตารางภูมิทักษา 8 วันจาก thaibabyname.com (ลำดับ บริวาร อายุ เดช ศรี มูละ อุตสาหะ มนตรี กาลกิณี)
+  const TABLE: Record<number, number[]> = {
+    1: [1, 2, 3, 4, 7, 5, 8, 6], 2: [2, 3, 4, 7, 5, 8, 6, 1], 3: [3, 4, 7, 5, 8, 6, 1, 2], 4: [4, 7, 5, 8, 6, 1, 2, 3],
+    5: [5, 8, 6, 1, 2, 3, 4, 7], 6: [6, 1, 2, 3, 4, 7, 5, 8], 7: [7, 5, 8, 6, 1, 2, 3, 4], 8: [8, 6, 1, 2, 3, 4, 7, 5],
+  };
+  check("ภูมิทักษาทั้ง 8 วันตรงตารางตำรา", Object.entries(TABLE).every(([b, row]) => { const t = taksa(Number(b) as 1); return TAKSA_POSITIONS.every((pos, i) => t[pos] === row[i]); }));
+  check(
+    "วันโหร: พฤหัส 03.00 น. = พุธกลางคืน (ราหู) · พุธ 20.00 น. = ราหู · พุธ 10.00 น. = พุธ · เสาร์ 05.00 น. = ศุกร์",
+    thaiBirthDay(2026, 10, 29, 3, true).planet === 8 && thaiBirthDay(2026, 10, 28, 20, true).planet === 8 && thaiBirthDay(2026, 10, 28, 10, true).planet === 4 && thaiBirthDay(2026, 10, 31, 5, true).planet === 6,
+  );
+  // ตัวอย่างในตำรา: เกิดวันอาทิตย์ เดือนยี่ ปีขาล ➔ ฐานรวม 6 9 12 15 18 14 10
+  const sun = thaiBirthDay(2026, 11, 1, 10, true);
+  check("เลข 7 ตัว: ตัวอย่างในตำรา (อาทิตย์ · เดือนยี่ · ปีขาล) ได้ฐานรวม 6 9 12 15 18 14 10", sevenNumbers(sun, 2, 3).rows[3].join(" ") === "6 9 12 15 18 14 10");
+  const mt = mahaTaksa(1);
+  check("มหาทักษา: รวม 108 ปี · เกิดวันอาทิตย์ = อาทิตย์ 0–6 จันทร์ 6–21 · ดาวแทรกในช่วงอาทิตย์ของจันทร์ ≈ 10 เดือน", mt[7].to === 108 && mt[0].planet === 1 && mt[0].to === 6 && mt[1].planet === 2 && mt[1].to === 21 && Math.abs((mt[0].sub[1].to - mt[0].sub[1].from) * 12 - 10) < 0.01 && mt.every((p) => Math.abs(p.sub[7].to - p.to) < 1e-9));
+  check("อักษรกาลกิณี: วันอาทิตย์ = ศ ษ ส ห ฬ ฮ · วันจันทร์ = สระ", checkName("สมศักดิ์", 1).kalakini.join("") === "สศ" && checkName("กนก", 2).kalakini.length === 0 && checkName("กานดา", 2).kalakini.includes("า"));
+  const thaiSrc = fs.readFileSync(path.join(process.cwd(), "src/components/natal/NatalThai.tsx"), "utf8");
+  check("แท็บโหราไทยไม่ยิง API และโหลดแบบ lazy", !/\bfetch\(/.test(thaiSrc) && /React\.lazy\(\s*\(\)\s*=>\s*import\(\s*["']\.\/NatalThai["']\s*\)\s*\)/.test(fs.readFileSync(path.join(process.cwd(), "src/components/natal/NatalResult.tsx"), "utf8")));
+}
+
+console.log("\n6.14) ดาวฤกษ์ 35 ดวง + จุด Lots 7 จุดของ Hermes");
+{
+  const { fixedStarPositions, starContacts } = await import("../../src/lib/astro/fixed-stars");
+  const { hermeticLots } = await import("../../src/lib/astro/lots");
+  // ลองจิจูดสุริยวิถีปี 2000 จากตารางอ้างอิงโหราตะวันตก (ปัดเป็นลิปดา)
+  const REF: Record<string, number> = { Regulus: 149 + 50 / 60, Spica: 203 + 50 / 60, Aldebaran: 69 + 47 / 60, Antares: 249 + 46 / 60, Fomalhaut: 333 + 52 / 60, Algol: 56 + 10 / 60, Sirius: 104 + 5 / 60, Arcturus: 204 + 14 / 60, Vega: 285 + 19 / 60, Alcyone: 60, Betelgeuse: 88 + 45 / 60, Rigel: 76 + 50 / 60, Pollux: 113 + 13 / 60, Castor: 110 + 14 / 60, Procyon: 115 + 47 / 60, Denebola: 171 + 37 / 60, Achernar: 345 + 19 / 60, Altair: 301 + 47 / 60, "Deneb Adige": 335 + 20 / 60, Markab: 353 + 29 / 60, Scheat: 359 + 22 / 60, Capella: 81 + 51 / 60, Canopus: 104 + 58 / 60, Alphecca: 222 + 18 / 60, Polaris: 88 + 34 / 60, Zubenelgenubi: 225 + 5 / 60, Zubeneschamali: 229 + 22 / 60, "Deneb Algedi": 323 + 33 / 60, Zosma: 161 + 19 / 60, Alkaid: 176 + 56 / 60, Hamal: 37 + 40 / 60, Vindemiatrix: 189 + 56 / 60, Algorab: 193 + 27 / 60, Bellatrix: 80 + 57 / 60, Mirach: 30 + 24 / 60 };
+  const s2000 = fixedStarPositions(Date.UTC(2000, 0, 1, 12));
+  const worst = Math.max(...s2000.map((p) => angularDistance(p.lon, REF[p.name] ?? NaN) * 60));
+  check(`ดาวฤกษ์ 35 ดวง ปี 2000 ตรงตารางอ้างอิงไม่เกิน 1.5 ลิปดา (แย่สุด ${worst.toFixed(2)}′)`, s2000.length === 35 && worst <= 1.5);
+  const s1900 = fixedStarPositions(Date.UTC(1900, 0, 1)).find((p) => p.name === "Regulus")!;
+  check("การหมุนควง: เรกูลัสปี 1900 อยู่ราว 28°27′ สิงห์ (ถอยราว 1°23′ ต่อศตวรรษ)", Math.abs(s1900.lon - (148 + 27 / 60)) < 0.05);
+  const at = Date.UTC(1969, 11, 31, 23, 5);
+  const night = computeNatalChart(input(at));
+  const day = computeNatalChart(input(Date.UTC(1970, 0, 1, 5, 0)));
+  const lotOk = (c: typeof night) => {
+    const L = hermeticLots(c)!;
+    const g = (id: string) => c.bodies.find((b) => b.id === id)!.lon;
+    const f = (id: string) => L.find((l) => l.id === id)!.lon;
+    const d = c.dayChart;
+    const lot = (a: number, b: number) => norm360(d ? g("asc") + a - b : g("asc") + b - a);
+    const spirit = lot(g("sun"), g("moon"));
+    const fortune = lot(g("moon"), g("sun"));
+    return (
+      angularDistance(f("fortune"), g("fortune")) < 1e-9 &&
+      angularDistance(f("spirit"), spirit) < 1e-9 &&
+      angularDistance(f("eros"), lot(g("venus"), spirit)) < 1e-9 &&
+      angularDistance(f("victory"), lot(g("jupiter"), spirit)) < 1e-9 &&
+      angularDistance(f("necessity"), lot(fortune, g("mercury"))) < 1e-9 &&
+      angularDistance(f("courage"), lot(fortune, g("mars"))) < 1e-9 &&
+      angularDistance(f("nemesis"), lot(fortune, g("saturn"))) < 1e-9 &&
+      angularDistance(norm360(f("fortune") + f("spirit")), norm360(2 * g("asc"))) < 1e-9
+    );
+  };
+  check("Lots 7 จุดตรงสูตร Paulus ทั้งผังกลางคืนและกลางวัน · Fortune ตรงกับจุดในผัง", night.dayChart === false && day.dayChart === true && lotOk(night) && lotOk(day));
+  check("ไม่ทราบเวลาเกิด = ไม่มี Lots (ต้องใช้ลัคนา)", hermeticLots(computeNatalChart(input(at, { timeKnown: false }))) === null);
+  const contacts = starContacts(night);
+  check("ดาวฤกษ์ทับดาว: orb ไม่เกินเกณฑ์ทุกคู่", contacts.every((c) => c.orb <= 1.5));
+}
+
+console.log("\n6.15) ผังของเพื่อน — ลิงก์ส่งผัง (#add=) · ตรวจค่าทุกช่อง · จัดอันดับความเข้ากัน");
+{
+  const { encodeChartShare, decodeChartShare } = await import("../../src/lib/astro/chart-share");
+  const spec = { name: "ฝน ทดสอบ", day: 1, month: 1, yearCe: 1970, hour: 6, minute: 5, timeKnown: true, place: { mode: "thai" as const, label: "กรุงเทพมหานคร", labelEn: "Bangkok", lat: 13.7525, lon: 100.4942, zone: "Asia/Bangkok", refId: "bangkok" }, houseSystem: "placidus" as const, nodeType: "true" as const, orbScale: 1, zodiac: "lahiri" as const };
+  const code = encodeChartShare(spec);
+  const back = decodeChartShare(code);
+  check("ลิงก์ส่งผัง: เข้ารหัสแล้วถอดกลับได้ครบทุกช่อง (ชื่อภาษาไทยไม่เพี้ยน) และอักขระปลอดภัยใน URL", !!back && back.name === spec.name && back.yearCe === 1970 && back.month === 1 && back.day === 1 && back.hour === 6 && back.minute === 5 && back.timeKnown && back.zodiac === "lahiri" && back.houseSystem === "placidus" && back.place.zone === "Asia/Bangkok" && back.place.label === "กรุงเทพมหานคร" && back.place.lat === 13.7525 && back.place.lon === 100.4942 && back.place.refId === "bangkok" && /^[A-Za-z0-9_-]+$/.test(code));
+  const tamper = (patch: Record<string, unknown>) => {
+    const o = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(code.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0))));
+    const b = new TextEncoder().encode(JSON.stringify({ ...o, ...patch }));
+    let bin = "";
+    for (const x of b) bin += String.fromCharCode(x);
+    return decodeChartShare(btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""));
+  };
+  check(
+    "ลิงก์ที่ถูกแก้ค่าผิดช่วง/เขตเวลาปลอม/วันที่ไม่มีจริง/แท็ก HTML ถูกปฏิเสธทั้งก้อน",
+    tamper({ y: 1800 }) === null && tamper({ m: 13 }) === null && tamper({ d: 31, m: 2 }) === null && tamper({ n: "<script>" }) === null &&
+      tamper({ p: ["thai", "x", "", 999, 100, "Asia/Bangkok", null, ""] }) === null && tamper({ p: ["thai", "x", "", 13, 100, "Mars/Base", null, ""] }) === null &&
+      decodeChartShare("not-a-real-code!!") === null
+  );
+  const app2 = fs.readFileSync(path.join(process.cwd(), "src/components/natal/NatalChartApp.tsx"), "utf8");
+  const imp = fs.readFileSync(path.join(process.cwd(), "src/components/natal/NatalImport.tsx"), "utf8");
+  check(
+    "ผังจากเพื่อน: โหลดแบบ lazy · ลบ #add= ออกจากแถบที่อยู่ทันที · ไม่ยิง API · มีคำเตือนก่อนสร้างลิงก์",
+    /React\.lazy\(\s*\(\)\s*=>\s*import\(\s*["']\.\/NatalImport["']\s*\)\s*\)/.test(app2) && imp.includes("history.replaceState") && !/\bfetch\(/.test(imp) && app2.includes("ส่งให้เฉพาะคนที่ไว้ใจเท่านั้น")
+  );
+  const syn = fs.readFileSync(path.join(process.cwd(), "src/components/natal/NatalSynastry.tsx"), "utf8");
+  check("แท็บผังคู่จัดอันดับความเข้ากันกับทุกผังที่บันทึก (ไม่นับผังตัวเอง · ระบบราศีเดียวกัน)", syn.includes("const ranked = useMemo") && syn.includes("zodiac: chart.input.zodiac") && syn.includes("continue;"));
+}
+
+console.log("\n6.16) รายงานฉบับเต็มแบบเสียเงิน (PDF)");
+{
+  const root = process.cwd();
+  const rd = (f: string) => fs.readFileSync(path.join(root, f), "utf8");
+  const { buildNatalReport } = await import("../../src/lib/astro/natal-report");
+  const spec = { name: "ทดสอบ", day: 1, month: 1, yearCe: 1970, hour: 6, minute: 5, timeKnown: true, place: { mode: "thai" as const, label: "กรุงเทพมหานคร", lat: 13.7525, lon: 100.4942, zone: "Asia/Bangkok" }, houseSystem: "placidus" as const, nodeType: "true" as const, orbScale: 1 };
+  const rTh = buildNatalReport(spec, "th", Date.UTC(2026, 9, 28));
+  const rEn = buildNatalReport({ ...spec, timeKnown: false }, "en", Date.UTC(2026, 9, 28));
+  check(
+    "รายงาน: ครบทุกส่วน ไม่มี undefined/NaN · ดาวครบ · พยากรณ์ 12 เดือนมีวันที่เรียงกัน · ไม่รู้เวลาเกิด = ไม่มีเรือน/Lots",
+    !/undefined|NaN/.test(JSON.stringify(rTh) + JSON.stringify(rEn)) && rTh.bodies.length >= 13 && rTh.yearAhead.length > 0 && rTh.solarReturn.length > 0 && rTh.lots !== null && rEn.houses === null && rEn.lots === null && rTh.thai.seven.length === 4,
+  );
+  const route = rd("src/app/api/natal/report/route.ts").replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  check(
+    "API รายงาน: ตรวจ Origin · ต้องยินยอม · สมาชิกเท่านั้น · หักจากรอบที่ซื้อ (premium) · รหัสคงที่ต่อผัง (ไม่หักซ้ำ) · ล้มเหลว = คืนสิทธิ์",
+    route.includes("isRequestAuthorizedOrigin(request)") && /consent:\s*z\.literal\(true\)/.test(route) && route.includes('reason: "members_only"') && route.includes("{ premium: true }") && route.includes("natalpdf_") && route.includes("refundReading(charged.readingId, charged.usageId)") && route.includes('reason: "needs_credit"'),
+  );
+  check("API รายงาน: ไม่ log ข้อมูลเกิด", !/console\.(log|warn|error)\([^)]*(spec|raw|parsed)/.test(route));
+  const panel = rd("src/components/natal/NatalReportPanel.tsx").replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  check(
+    "หน้ารายงาน: ยิง API เฉพาะหลังยินยอม · โหลดแบบ lazy · ตัวประกอบรายงานไม่ถูกส่งไปเบราว์เซอร์ (import แค่ชนิดข้อมูล)",
+    (panel.match(/fetch\(/g) ?? []).length === 1 && panel.includes("if (!consent || busy) return;") && panel.includes("consent: true") &&
+      /React\.lazy\(\s*\(\)\s*=>\s*import\(\s*["']\.\/NatalReportPanel["']\s*\)\s*\)/.test(rd("src/components/natal/NatalChartApp.tsx")) &&
+      !fs.readdirSync(path.join(root, "src/components/natal")).some((f) => /^\s*import\s+(?!type\b)[^;]*natal-report["']/m.test(rd(`src/components/natal/${f}`))),
+  );
+  // layout มีกฎ body > :not(.fixed):not([data-floating]):not([data-site-header]) { position: relative } ➔ portal ที่ไม่มี
+  // data-floating จะไม่ทับเต็มจอ (เจอตอนดูหน้าจริงรอบนี้ — รายงานไปต่อท้ายหน้าแทน)
+  check("หน้ารายงาน: portal ใต้ body มี data-floating (ไม่งั้นกฎ layout บังคับ position: relative)", /id="nt-report-root"\s+data-floating=/.test(panel));
 }
 
 console.log("\n7) กติกา island — ตัวคำนวณ/คำอธิบาย/ผลผังโหลดแบบ dynamic import เท่านั้น");

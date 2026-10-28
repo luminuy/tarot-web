@@ -3,7 +3,8 @@ import { z } from "zod";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { bumpEdgeCounter, consumeEdgeRateLimits, edgeRateLimitKey, peekEdgeCounter } from "@/lib/security/edge-ratelimit";
-import { looksLikePromptInjection, sanitizePromptValue } from "@/lib/ai/prompt-guard";
+import { sanitizePromptValue } from "@/lib/ai/prompt-guard";
+import { noInjection, SpecSchema } from "@/lib/astro/natal-spec-schema";
 import { redactPii } from "@/lib/security/pii";
 import { detectPromptLeak } from "@/lib/ai/leak-guard";
 import { checkQuestion, getCrisisMessage } from "@/lib/safety/guardrails";
@@ -35,43 +36,6 @@ export const runtime = "nodejs";
  *   (ไม่ log body · บัญชีต้นทุนเก็บแค่จำนวนโทเคน)
  * - AI ไม่ว่างทั้งสองเจ้า = บอกผู้ใช้ตรง ๆ ให้ลองใหม่ ไม่มีคำตอบสำเร็จรูป
  */
-
-const noInjection = (label: string) =>
-  z.string().refine((v) => !looksLikePromptInjection(v), { message: `${label} มีอักขระที่ไม่อนุญาต กรุณาพิมพ์เป็นข้อความธรรมดา` });
-
-const isZone = (z0: string) => {
-  try {
-    new Intl.DateTimeFormat("en", { timeZone: z0 });
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-const SpecSchema = z.object({
-  name: noInjection("ชื่อ").max(40),
-  day: z.number().int().min(1).max(31),
-  month: z.number().int().min(1).max(12),
-  yearCe: z.number().int().min(1900).max(2100),
-  hour: z.number().int().min(0).max(23),
-  minute: z.number().int().min(0).max(59),
-  timeKnown: z.boolean(),
-  place: z.object({
-    mode: z.enum(["thai", "world", "custom"]),
-    label: noInjection("สถานที่").max(80),
-    labelEn: noInjection("สถานที่").max(80).optional(),
-    lat: z.number().min(-90).max(90),
-    lon: z.number().min(-180).max(180),
-    zone: z.string().max(64).refine(isZone, "เขตเวลาไม่ถูกต้อง").optional(),
-    fixedOffset: z.number().int().min(-840).max(840).optional(),
-    refId: z.string().max(40).optional(),
-  }),
-  houseSystem: z.enum(["placidus", "whole", "koch", "equal", "porphyry", "regiomontanus", "campanus"]),
-  nodeType: z.enum(["true", "mean"]),
-  orbScale: z.number().min(0.5).max(1.5),
-  asteroids: z.boolean().optional(),
-  zodiac: z.enum(["tropical", "lahiri"]).optional(),
-});
 
 const BodySchema = z.object({
   message: noInjection("คำถาม").min(1, "กรุณาพิมพ์คำถาม").max(NATAL_AI_MESSAGE_MAX, `คำถามยาวเกิน ${NATAL_AI_MESSAGE_MAX} ตัวอักษร`),

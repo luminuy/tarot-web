@@ -5,6 +5,7 @@ import { useLocale } from "@/lib/i18n";
 import { THAI_PROVINCES, type BirthPlace } from "@/data/natal/places";
 import { deleteSavedChart, loadSavedCharts, saveChart, type SavedChart, type SavedPlace } from "@/lib/astro/saved-charts";
 import { CitySearch, type PickedCity } from "./CitySearch";
+import { encodeChartShare } from "@/lib/astro/chart-share";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 import { formatUtcOffset, localToUtc, localToUtcFixed } from "@/lib/astro/timezone";
 import type { HouseSystem, NatalChart, NodeType, Zodiac } from "@/lib/astro/natal";
@@ -40,6 +41,10 @@ export interface NatalMeta {
 const NatalResult = React.lazy(() => import("./NatalResult"));
 /** ดวงวันนี้ — โหลดเมื่อมีผังบันทึกไว้ในเครื่องเท่านั้น (ดึงตัวคำนวณตามมา) */
 const NatalToday = React.lazy(() => import("./NatalToday"));
+/** ผังที่เพื่อนส่งมาทางลิงก์ `#add=` — โหลดเมื่อเปิดลิงก์แบบนั้นเท่านั้น */
+const NatalImport = React.lazy(() => import("./NatalImport"));
+/** รายงานฉบับเต็มแบบเสียเงิน (ใช้รอบที่เติมไว้ 1 รอบ) — โหลดเมื่อกดปุ่มเท่านั้น */
+const NatalReportPanel = React.lazy(() => import("./NatalReportPanel"));
 
 /** ทุกอย่างที่ใช้สร้างผังซ้ำได้ (= ข้อมูลที่บันทึกลงเครื่องเมื่อผู้ใช้กดบันทึก) */
 type ChartSpec = Omit<SavedChart, "id" | "savedAt">;
@@ -98,6 +103,15 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
   const [result, setResult] = useState<{ chart: NatalChart; meta: NatalMeta; spec: ChartSpec } | null>(null);
   // ผังที่บันทึกไว้อ่านหลัง hydrate เท่านั้น (HTML จากเซิร์ฟเวอร์ต้องตรงกับรอบแรกของเบราว์เซอร์)
   useEffect(() => setSaved(loadSavedCharts()), []);
+  // ลิงก์ผังจากเพื่อน: ข้อมูลอยู่หลัง # (ไม่ถึงเซิร์ฟเวอร์) · ไม่บันทึกจนกว่าผู้ใช้จะกดเอง
+  const [incoming, setIncoming] = useState<string | null>(null);
+  useEffect(() => {
+    const h = window.location.hash;
+    if (h.startsWith("#add=")) setIncoming(h.slice(5));
+  }, []);
+  const [shareStep, setShareStep] = useState<"idle" | "confirm" | "done">("idle");
+  const [reportOpen, setReportOpen] = useState(false);
+  const [shareNote, setShareNote] = useState<string | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
   const yearNum = Number.parseInt(yearInput, 10);
@@ -199,7 +213,7 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
   }
 
   /** เปิดผังที่บันทึกไว้: เติมฟอร์มให้ตรง (แก้ต่อได้) แล้วคำนวณทันที */
-  function openSaved(c: SavedChart) {
+  function openSaved(c: ChartSpec) {
     setError(null);
     setName(c.name);
     setDay(c.day);
@@ -241,6 +255,23 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
 
   return (
     <div className="v2-nt space-y-8">
+      {incoming && (
+        <div className="v2-nt-noprint">
+          <Suspense fallback={null}>
+            <NatalImport
+              code={incoming}
+              lang={lang}
+              onSave={(spec) => {
+                const next = saveChart(spec);
+                if (next) setSaved(next);
+                return !!next;
+              }}
+              onOpen={(spec) => openSaved(spec)}
+              onClose={() => setIncoming(null)}
+            />
+          </Suspense>
+        </div>
+      )}
       {saved.length > 0 && (
         <div className="v2-nt-noprint">
           <Suspense fallback={null}>
@@ -488,8 +519,21 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
                     ? "Save this chart on this device"
                     : "บันทึกผังนี้ไว้ในเครื่องนี้"}
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShareStep("confirm");
+                  setShareNote(null);
+                }}
+                className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]"
+              >
+                {isEnglish ? "Send this chart to a friend" : "ส่งผังนี้ให้เพื่อน"}
+              </button>
+              <button type="button" onClick={() => setReportOpen(true)} className="rounded-full border border-gold-ink bg-surface px-4 py-2 text-sm font-semibold text-ink min-h-[44px]">
+                {isEnglish ? "Full report (PDF)" : "รายงานฉบับเต็ม (PDF)"}
+              </button>
               <button type="button" onClick={() => window.print()} className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]">
-                {isEnglish ? "Print or save as PDF" : "พิมพ์ หรือบันทึกเป็น PDF"}
+                {isEnglish ? "Print this page" : "พิมพ์หน้านี้"}
               </button>
               <button
                 type="button"
@@ -499,6 +543,51 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
                 {isEnglish ? "Edit birth details" : "แก้ข้อมูลเกิด"}
               </button>
             </div>
+            {reportOpen && (
+              <Suspense fallback={null}>
+                <NatalReportPanel spec={result.spec} lang={lang} onClose={() => setReportOpen(false)} />
+              </Suspense>
+            )}
+            {shareStep !== "idle" && (
+              <div className="mx-auto mt-3 max-w-xl rounded-xl border border-line-warm bg-surface/70 p-3 space-y-2 text-sm text-ink">
+                <p>
+                  {isEnglish
+                    ? "The link contains the birth date, time, place and name of this chart, so your friend can open it and compare charts. It goes straight from you to them and is not stored by the site. Only send it to people you trust."
+                    : "ลิงก์นี้มีวันเวลาสถานที่เกิดและชื่อของผังนี้ เพื่อนเปิดแล้วเทียบผังกันได้ทันที ข้อมูลส่งจากคุณถึงเพื่อนตรง ๆ เว็บไม่ได้เก็บไว้ ส่งให้เฉพาะคนที่ไว้ใจเท่านั้น"}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const url = `${window.location.origin}${isEnglish ? "/en" : ""}/natal-chart#add=${encodeChartShare(result.spec)}`;
+                      try {
+                        if (navigator.share) {
+                          await navigator.share({ title: isEnglish ? "My natal chart" : "ผังดวงของฉัน", url });
+                          setShareStep("done");
+                          return;
+                        }
+                      } catch (err) {
+                        if ((err as { name?: string })?.name === "AbortError") return;
+                      }
+                      try {
+                        await navigator.clipboard.writeText(url);
+                        setShareNote(isEnglish ? "Link copied. Paste it into a chat with your friend." : "คัดลอกลิงก์แล้ว วางในแชทกับเพื่อนได้เลย");
+                      } catch {
+                        setShareNote(url);
+                      }
+                      setShareStep("done");
+                    }}
+                    className="rounded-full btn-gold-glass px-4 min-h-[44px] text-sm font-bold"
+                  >
+                    {isEnglish ? "Create the link" : "สร้างลิงก์"}
+                  </button>
+                  <button type="button" onClick={() => setShareStep("idle")} className="rounded-full border border-line-warm px-4 min-h-[44px] text-sm text-ink">
+                    {isEnglish ? "Cancel" : "ยกเลิก"}
+                  </button>
+                </div>
+                {shareNote && <p className="text-xs text-muted break-all">{shareNote}</p>}
+              </div>
+            )}
             {saveState === "failed" && (
               <p role="alert" className="text-sm text-err text-center pt-2">
                 {isEnglish ? "Could not save: this browser blocks local storage (private mode?)." : "บันทึกไม่ได้ เบราว์เซอร์นี้ปิดการเก็บข้อมูลในเครื่อง (อาจเป็นโหมดส่วนตัว)"}

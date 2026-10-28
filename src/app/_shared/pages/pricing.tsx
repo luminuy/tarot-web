@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { NATAL_AI_FREE_PER_DAY, NATAL_AI_USER_DAY_MAX } from "@/lib/astro/natal-ai-limits";
 import type { ReactNode } from "react";
 
 import { buildAlternates, DEFAULT_SUPPORT_EMAIL, SITE_ORIGIN, localizedUrl } from "@/lib/config/site";
@@ -146,6 +147,8 @@ function compareRows(locale: Locale): Array<{ label: string; free: Cell; paid: C
       { label: "Big 5–12 card spreads (Celtic Cross and more)", free: false, paid: true },
       { label: "Master readers", free: false, paid: true },
       { label: "Follow-up questions", free: "2 per reading", paid: "Unlimited" },
+      { label: "Ask the reader about your natal chart", free: `${NATAL_AI_FREE_PER_DAY} a day`, paid: `${NATAL_AI_USER_DAY_MAX} a day` },
+      { label: "Full natal chart report (PDF)", free: false, paid: "1 reading per chart" },
       { label: "Reading history on every device", free: true, paid: true },
       { label: "78-card meanings and articles", free: true, paid: true },
       { label: "Expiry", free: "Resets at midnight", paid: "Never expires" },
@@ -156,6 +159,8 @@ function compareRows(locale: Locale): Array<{ label: string; free: Cell; paid: C
     { label: "ผังใหญ่ 5–12 ใบ (เซลติกครอส ฯลฯ)", free: false, paid: true },
     { label: "แม่หมอพิเศษ 2 ท่าน", free: false, paid: true },
     { label: "ถามแม่หมอต่อหลังเปิดไพ่", free: "2 คำถามต่อรอบ", paid: "ไม่จำกัด" },
+    { label: "ถามแม่หมอเรื่องผังดวงกำเนิด", free: `วันละ ${NATAL_AI_FREE_PER_DAY} ข้อ`, paid: `วันละ ${NATAL_AI_USER_DAY_MAX} ข้อ` },
+    { label: "รายงานผังดวงฉบับเต็ม (PDF)", free: false, paid: "1 รอบต่อผัง" },
     { label: "เก็บประวัติคำทำนายข้ามเครื่อง", free: true, paid: true },
     { label: "ความหมายไพ่ 78 ใบและบทความ", free: true, paid: true },
     { label: "อายุของสิทธิ์", free: "รีเซ็ตทุกเที่ยงคืน", paid: "ไม่มีวันหมดอายุ" },

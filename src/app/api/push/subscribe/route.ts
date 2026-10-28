@@ -26,6 +26,8 @@ const BodySchema = z.object({
   morningHour: z.number().int().min(0).max(23).nullable(),
   checkins: z.boolean(),
   lang: z.enum(["th", "en"]).default("th"),
+  /** เตือนตอนเช้าให้เปิดพิธีเช้า หรือดวงวันนี้จากผังเกิด (ไม่ส่ง = ค่าเดิม daily) */
+  morningTarget: z.enum(["daily", "natal"]).default("daily"),
 });
 
 export async function GET(request: Request) {
@@ -34,7 +36,7 @@ export async function GET(request: Request) {
   const endpoint = new URL(request.url).searchParams.get("endpoint") ?? "";
   const sub = endpoint ? await getPushSubscription(user.id, endpoint) : null;
   return NextResponse.json(
-    sub ? { subscribed: true, morningHour: sub.morningHour, checkins: sub.checkins } : { subscribed: false },
+    sub ? { subscribed: true, morningHour: sub.morningHour, checkins: sub.checkins, morningTarget: sub.morningTarget } : { subscribed: false },
     { headers: { "Cache-Control": "no-store, private" } },
   );
 }
@@ -48,11 +50,11 @@ export async function POST(request: Request) {
   if (!gate.allowed) return createRateLimitResponse(gate.retryAfterSeconds, "ตั้งค่าถี่เกินไป กรุณารอสักครู่");
   const parsed = BodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "ข้อมูลการแจ้งเตือนไม่ถูกต้อง" }, { status: 400 });
-  const { subscription, morningHour, checkins, lang } = parsed.data;
+  const { subscription, morningHour, checkins, lang, morningTarget } = parsed.data;
   await upsertPushSubscription(
     user.id,
     { endpoint: subscription.endpoint, p256dh: subscription.keys.p256dh, auth: subscription.keys.auth },
-    { lang, morningHour, checkins },
+    { lang, morningHour, checkins, morningTarget },
   );
   return apiOk();
 }

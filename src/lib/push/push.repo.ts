@@ -9,7 +9,11 @@ export interface StoredSubscription extends PushSubscriptionData {
   lang: "th" | "en";
   morningHour: number | null;
   checkins: boolean;
+  /** เตือนตอนเช้าให้เปิดอะไร (migrations/0036) */
+  morningTarget: MorningTarget;
 }
+
+export type MorningTarget = "daily" | "natal";
 
 interface Row {
   id: string;
@@ -20,6 +24,7 @@ interface Row {
   lang: string;
   morning_hour: number | null;
   checkins: number;
+  morning_target?: string | null;
 }
 
 const map = (r: Row): StoredSubscription => ({
@@ -31,24 +36,26 @@ const map = (r: Row): StoredSubscription => ({
   lang: r.lang === "en" ? "en" : "th",
   morningHour: r.morning_hour,
   checkins: r.checkins === 1,
+  morningTarget: r.morning_target === "natal" ? "natal" : "daily",
 });
 
 /** สมัคร/อัปเดต — endpoint เดิมของอีกบัญชี (เครื่องเดียวกันสลับบัญชี) ถูกย้ายมาเป็นของบัญชีปัจจุบัน */
 export async function upsertPushSubscription(
   userId: string,
   sub: PushSubscriptionData,
-  settings: { lang: "th" | "en"; morningHour: number | null; checkins: boolean },
+  settings: { lang: "th" | "en"; morningHour: number | null; checkins: boolean; morningTarget?: MorningTarget },
 ): Promise<void> {
   const db = await getAppDB();
   const now = Date.now();
   await db
     .prepare(
-      `INSERT INTO push_subscriptions (id, user_id, endpoint, p256dh, auth, lang, morning_hour, checkins, fail_count, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
+      `INSERT INTO push_subscriptions (id, user_id, endpoint, p256dh, auth, lang, morning_hour, checkins, morning_target, fail_count, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
        ON CONFLICT(endpoint) DO UPDATE SET user_id = excluded.user_id, p256dh = excluded.p256dh, auth = excluded.auth,
-         lang = excluded.lang, morning_hour = excluded.morning_hour, checkins = excluded.checkins, fail_count = 0, updated_at = excluded.updated_at`
+         lang = excluded.lang, morning_hour = excluded.morning_hour, checkins = excluded.checkins, morning_target = excluded.morning_target,
+         fail_count = 0, updated_at = excluded.updated_at`
     )
-    .bind(`ps_${crypto.randomUUID()}`, userId, sub.endpoint, sub.p256dh, sub.auth, settings.lang, settings.morningHour, settings.checkins ? 1 : 0, now, now)
+    .bind(`ps_${crypto.randomUUID()}`, userId, sub.endpoint, sub.p256dh, sub.auth, settings.lang, settings.morningHour, settings.checkins ? 1 : 0, settings.morningTarget ?? "daily", now, now)
     .run();
 }
 
@@ -124,11 +131,12 @@ export async function recordPushResult(id: string, result: { ok: boolean; gone: 
   await db.prepare(`DELETE FROM push_subscriptions WHERE id = ? AND fail_count >= 5`).bind(id).run();
 }
 
-export async function exportPushSettings(userId: string): Promise<Array<{ lang: string; morningHour: number | null; checkins: boolean; pushService: string }>> {
+export async function exportPushSettings(userId: string): Promise<Array<{ lang: string; morningHour: number | null; checkins: boolean; morningTarget: MorningTarget; pushService: string }>> {
   return (await listUserSubscriptions(userId)).map((s) => ({
     lang: s.lang,
     morningHour: s.morningHour,
     checkins: s.checkins,
+    morningTarget: s.morningTarget,
     pushService: (() => {
       try {
         return new URL(s.endpoint).hostname;

@@ -33,6 +33,9 @@ import { aspectTitle, bodyName, cardsFor, chartSummary, describeAspect, describe
 import { zodiacSignPath } from "@/lib/tarot/zodiac";
 import { NatalWheel } from "./NatalWheel";
 import { FlipCard } from "./NatalFlipCard";
+import { fixedStarPositions, ROYAL_STARS, starContacts } from "@/lib/astro/fixed-stars";
+import { hermeticLots } from "@/lib/astro/lots";
+import { LOT_TEXT, STAR_TEXT } from "@/data/natal/stars-content";
 import type { NatalCardItem, NatalMeta } from "./NatalChartApp";
 import type { ChartSpec } from "@/lib/astro/chart-spec";
 import type { TimeMode } from "./NatalTimeTools";
@@ -45,6 +48,8 @@ const NatalSynastry = React.lazy(() => import("./NatalSynastry"));
 const NatalAsk = React.lazy(() => import("./NatalAsk"));
 /** ภาพแชร์ Big Three — วาดในเครื่อง โหลดเมื่อผู้ใช้กดสร้างภาพเท่านั้น */
 const NatalShare = React.lazy(() => import("./NatalShare"));
+/** โหราไทย (ทักษา · มหาทักษา · เลข 7 ตัว) — ตัวคำนวณปฏิทินจันทรคติโหลดเมื่อเปิดแท็บเท่านั้น */
+const NatalThai = React.lazy(() => import("./NatalThai"));
 
 /**
  * 🪐 ผลผังดวงทั้งหมด — โหลดแบบ lazy พร้อมตัวคำนวณ (ไม่อยู่ในบันเดิลแรกของหน้า)
@@ -109,9 +114,14 @@ export default function NatalResult({
   const [focus, setFocus] = useState<BodyId | null>(null);
   const [showMinor, setShowMinor] = useState(false);
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
-  const [view, setView] = useState<"natal" | TimeMode | "synastry" | "ask">("natal");
+  const [view, setView] = useState<"natal" | TimeMode | "synastry" | "thai" | "ask">("natal");
   const [shareOpen, setShareOpen] = useState(false);
   const cardById = useMemo(() => new Map(cards.map((c) => [c.id, c])), [cards]);
+  const stars = useMemo(() => {
+    const all = fixedStarPositions(chart.input.utcMs, chart.input.zodiac);
+    return { all, contacts: starContacts(chart, all) };
+  }, [chart]);
+  const lots = useMemo(() => hermeticLots(chart), [chart]);
   const cardName = (id: string | undefined) => {
     const c = id ? cardById.get(id) : undefined;
     return c ? (isTh ? `${c.nameTh} (${c.nameEn})` : c.nameEn) : "";
@@ -146,6 +156,7 @@ export default function NatalResult({
     ...(chart.houses ? [["natal-houses", isTh ? "เรือน" : "Houses"]] : []),
     ["natal-aspects", isTh ? "มุมสัมพันธ์" : "Aspects"],
     ["natal-balance", isTh ? "ธาตุและดาวเด่น" : "Balance"],
+    ["natal-stars", isTh ? "ดาวฤกษ์และ Lots" : "Stars and lots"],
     ["natal-reading", isTh ? "คำอธิบาย" : "Reading"],
   ];
 
@@ -233,6 +244,7 @@ export default function NatalResult({
             ["solar", isTh ? "ผังวันเกิดปีนี้" : "Solar return"],
             ["lunar", isTh ? "ผังจันทร์คืน" : "Lunar return"],
             ["synastry", isTh ? "ผังคู่" : "Synastry"],
+            ["thai", isTh ? "โหราไทย" : "Thai astrology"],
             ["ask", isTh ? "ถามแม่หมอ" : "Ask the reader"],
           ] as const
         ).map(([k, t]) => (
@@ -246,6 +258,8 @@ export default function NatalResult({
         <Suspense fallback={<p className="text-sm text-muted text-center">{isTh ? "กำลังคำนวณ..." : "Calculating..."}</p>}>
           {view === "synastry" ? (
             <NatalSynastry chart={chart} lang={lang} meta={meta} />
+          ) : view === "thai" ? (
+            <NatalThai spec={spec} lang={lang} />
           ) : view === "ask" ? (
             <NatalAsk spec={spec} lang={lang} timeKnown={chart.input.timeKnown} />
           ) : (
@@ -571,6 +585,90 @@ export default function NatalResult({
               })}
             </ul>
           </div>
+        )}
+      </section>
+
+      {/* ── ดาวฤกษ์ + Lots ── */}
+      <section aria-labelledby="natal-stars" className="space-y-4">
+        <SectionTitle id="natal-stars">{isTh ? "ดาวฤกษ์และจุด Lots" : "Fixed stars and lots"}</SectionTitle>
+        <p className="text-xs text-muted">
+          {isTh
+            ? "ดาวฤกษ์สำคัญ 35 ดวง (รวมดาวฤกษ์หลวง 4 ดวงและ Behenian 15 ดวง) ที่ทับดาวหรือมุมฟ้าในผังของคุณ ภายใน 1 องศา (อาทิตย์ จันทร์ ลัคนา กลางฟ้า 1.5 องศา) ตำแหน่งจากแคตตาล็อก Hipparcos เลื่อนตามการหมุนควงถึงวันเกิด"
+            : "Major fixed stars (including the four Royal stars and the fifteen Behenian stars) within 1 degree of a planet or angle in your chart (1.5 for the Sun, Moon, Ascendant and Midheaven). Positions come from the Hipparcos catalogue, precessed to your birth date."}
+        </p>
+        {stars.contacts.length ? (
+          <ul className="space-y-2">
+            {stars.contacts.map((c) => (
+              <li key={`${c.star.name}-${c.body}`} className="border-l-2 border-line-warm pl-2 text-sm">
+                <p className="font-semibold text-ink">
+                  {isTh ? STAR_TEXT[c.star.name]?.th ?? c.star.name : c.star.name} {isTh ? "ทับ" : "on"} {bodyName(c.body, lang)}{" "}
+                  <span className="text-xs font-normal text-muted tabular-nums">orb {formatDegree(c.orb)}</span>
+                </p>
+                <p className="text-ink">{STAR_TEXT[c.star.name]?.meaning[lang]}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-muted">{isTh ? "ไม่มีดาวฤกษ์สำคัญทับดาวในผังของคุณภายในเกณฑ์" : "No major fixed star sits within orb of your planets or angles."}</p>
+        )}
+        <details className="rounded-xl border border-line-warm px-3 py-2">
+          <summary className="cursor-pointer text-sm font-semibold text-ink min-h-[36px] flex items-center">{isTh ? "ตำแหน่งดาวฤกษ์ทั้งหมด ณ วันเกิด" : "All fixed star positions at birth"}</summary>
+          <table className="v2-nt-table mt-2">
+            <thead>
+              <tr>
+                <th scope="col">{isTh ? "ดาวฤกษ์" : "Star"}</th>
+                <th scope="col">{isTh ? "ราศี" : "Sign"}</th>
+                <th scope="col">{isTh ? "องศา" : "Degree"}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...stars.all].sort((a, b) => a.lon - b.lon).map((st) => (
+                <tr key={st.name}>
+                  <td>
+                    {isTh ? STAR_TEXT[st.name]?.th ?? st.name : st.name}
+                    {ROYAL_STARS.has(st.name) && <span className="block text-xs text-muted">{isTh ? "ดาวฤกษ์หลวง" : "Royal star"}</span>}
+                  </td>
+                  <td>{signName(Math.floor(st.lon / 30) % 12, lang)}</td>
+                  <td className="tabular-nums">{formatDegree(st.lon % 30)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </details>
+        {lots ? (
+          <div className="space-y-2">
+            <h3 className="font-serif-th font-bold text-ink">{isTh ? "จุด Lots 7 จุดของ Hermes" : "The seven Hermetic lots"}</h3>
+            <p className="text-xs text-muted">
+              {isTh
+                ? `สูตรของ Paulus Alexandrinus (ค.ศ. 378) ใช้ลัคนากับดาว 2 ดวง ผังของคุณเป็นผัง${chart.dayChart ? "กลางวัน" : "กลางคืน"} จึงใช้สูตร${chart.dayChart ? "กลางวัน" : "กลางคืน"}`
+                : `Formulas of Paulus Alexandrinus (378 AD) from the Ascendant and two planets. Yours is a ${chart.dayChart ? "day" : "night"} chart, so the ${chart.dayChart ? "day" : "night"} formulas apply.`}
+            </p>
+            <table className="v2-nt-table">
+              <thead>
+                <tr>
+                  <th scope="col">Lot</th>
+                  <th scope="col">{isTh ? "ตำแหน่ง" : "Position"}</th>
+                  <th scope="col">{isTh ? "เรือน" : "House"}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lots.map((l) => (
+                  <tr key={l.id}>
+                    <td>
+                      {LOT_TEXT[l.id].name[lang]}
+                      <span className="block text-xs text-muted whitespace-normal">{LOT_TEXT[l.id].meaning[lang]}</span>
+                    </td>
+                    <td className="tabular-nums">
+                      {signName(l.sign, lang)} {formatDegree(l.degInSign)}
+                    </td>
+                    <td>{l.house}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="text-xs text-muted">{isTh ? "จุด Lots ต้องใช้ลัคนา จึงต้องรู้เวลาเกิด" : "The lots need the Ascendant, so a birth time is required."}</p>
         )}
       </section>
 

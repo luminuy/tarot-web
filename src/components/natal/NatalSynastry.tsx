@@ -8,7 +8,9 @@ import { formatDegree, type BodyId, type NatalChart } from "@/lib/astro/natal";
 import { bodyName, describeOverlay, describeSynAspect, signName } from "@/lib/astro/natal-text";
 import { buildChart, type ChartSpec } from "@/lib/astro/chart-spec";
 import { loadSavedCharts, type SavedChart, type SavedPlace } from "@/lib/astro/saved-charts";
-import { computeSynastry } from "@/lib/astro/synastry";
+import { computeSynastry, type SynCategory } from "@/lib/astro/synastry";
+
+const SYN_KEYS: readonly SynCategory[] = ["bond", "attraction", "talk", "stability", "growth"];
 import { CitySearch, type PickedCity } from "./CitySearch";
 import { NatalWheel } from "./NatalWheel";
 import type { NatalMeta } from "./NatalChartApp";
@@ -43,6 +45,24 @@ export default function NatalSynastry({ chart, lang, meta }: { chart: NatalChart
   const [focus, setFocus] = useState<BodyId | null>(null);
 
   const syn = useMemo(() => (partner ? computeSynastry(chart, partner.chart) : null), [chart, partner]);
+
+  /** ความเข้ากันกับทุกคนที่บันทึกไว้ (ไม่นับผังของตัวเอง) — เรียงจากคะแนนเฉลี่ย 5 หมวด */
+  const ranked = useMemo(() => {
+    const out: { c: SavedChart; overall: number; best: (typeof SYN_KEYS)[number] }[] = [];
+    for (const c of saved) {
+      try {
+        const other = buildChart({ ...c, zodiac: chart.input.zodiac });
+        if (other.input.utcMs === chart.input.utcMs && other.input.lat === chart.input.lat && other.input.lon === chart.input.lon) continue;
+        const cats = computeSynastry(chart, other).categories;
+        const overall = cats.reduce((a, x) => a + x.score, 0) / cats.length;
+        const best = [...cats].sort((a, b) => b.score - a.score)[0].key;
+        out.push({ c, overall: Math.round(overall * 10) / 10, best });
+      } catch {
+        // ผังที่บันทึกเสีย (ค่าผิดช่วง) — ข้าม ไม่เดาค่า
+      }
+    }
+    return out.sort((a, b) => b.overall - a.overall);
+  }, [saved, chart]);
 
   function applySpec(spec: ChartSpec, name: string) {
     setError(null);
@@ -101,21 +121,33 @@ export default function NatalSynastry({ chart, lang, meta }: { chart: NatalChart
           : "Compare your chart with someone else's (synastry): how your planets meet, where theirs fall in your houses, and the composite chart of the relationship. Use it to understand each other, not as a verdict."}
       </p>
 
-      {saved.length > 0 && (
+      {ranked.length > 0 && (
         <div className="space-y-2">
-          <p className={labelClass}>{isTh ? "เลือกจากผังที่บันทึกไว้" : "Pick a saved chart"}</p>
-          <ul className="flex flex-wrap gap-2">
-            {saved.map((c) => (
+          <p className={labelClass}>{isTh ? "ความเข้ากันกับคนที่บันทึกไว้ (แตะเพื่อดูละเอียด)" : "Compatibility with your saved charts (tap for details)"}</p>
+          <ul className="space-y-2">
+            {ranked.map(({ c, overall, best }) => (
               <li key={c.id}>
-                <button type="button" onClick={() => applySpec(c, c.name)} className="tap-target rounded-full border border-line-warm bg-surface px-3 py-1.5 text-sm text-ink">
-                  {c.name || (isTh ? "ไม่มีชื่อ" : "Unnamed")}{" "}
-                  <span className="text-xs text-muted">
-                    {c.day}/{c.month}/{isTh ? c.yearCe + 543 : c.yearCe}
+                <button
+                  type="button"
+                  onClick={() => applySpec(c, c.name)}
+                  className="w-full flex items-center justify-between gap-3 rounded-xl border border-line-warm bg-surface px-3 py-2 text-left min-h-[44px]"
+                >
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold text-ink truncate leading-[1.7]">{c.name || (isTh ? "ไม่มีชื่อ" : "Unnamed")}</span>
+                    <span className="block text-xs text-muted">
+                      {isTh ? "เด่นเรื่อง" : "Strongest:"} {SYN_CATEGORY_TEXT[best].name[lang]}
+                    </span>
                   </span>
+                  <span className="shrink-0 text-sm font-bold text-ink tabular-nums">{overall.toFixed(1)}/10</span>
                 </button>
               </li>
             ))}
           </ul>
+          <p className="text-xs text-muted">
+            {isTh
+              ? "คะแนนเฉลี่ยจาก 5 หมวด (ผูกพันทางใจ แรงดึงดูด สื่อสาร มั่นคง เติบโต) เป็นแนวทางเริ่มคุยกัน ไม่ใช่คำตัดสินความสัมพันธ์ ส่งผังให้เพื่อนได้จากปุ่ม \"ส่งผังนี้ให้เพื่อน\" ใต้ผัง"
+              : "The average of five areas (bond, attraction, communication, stability, growth): a conversation starter, not a verdict. Send charts to friends with the \"Send this chart to a friend\" button below the chart."}
+          </p>
         </div>
       )}
 

@@ -139,7 +139,11 @@ async function main() {
   check("ถึงชั่วโมงที่ตั้ง = อยู่ในคิว", !!mine);
   check("จองส่งได้ครั้งเดียวต่อวัน", (await claimMorning(mine!.id, "2026-10-05")) && !(await claimMorning(mine!.id, "2026-10-05")));
   check("ส่งแล้ววันนี้ไม่โผล่ซ้ำ", !(await listMorningDue(8, "2026-10-05", 1000)).some((x) => x.endpoint === ep));
+  check("ไม่ส่ง morningTarget = ค่าเดิมพิธีเช้า (daily)", mine!.morningTarget === "daily");
+  await upsertPushSubscription(u, { endpoint: ep, p256dh: "p".repeat(87), auth: "a".repeat(22) }, { lang: "th", morningHour: 8, checkins: true, morningTarget: "natal" });
+  check("เตือนดวงวันนี้จากผังเกิด: บันทึก morningTarget = natal (migrations/0036)", (await listUserSubscriptions(u))[0]?.morningTarget === "natal");
   await recordPushResult(mine!.id, { ok: false, gone: true });
+
   check("410/404 = ลบ subscription ทิ้ง", (await listUserSubscriptions(u)).length === 0);
   check("ทะเบียน PDPA มีการแจ้งเตือน", registeredUserDataKeys().includes("pushReminders"));
   await deleteAllPushSubscriptions(u);
@@ -147,6 +151,12 @@ async function main() {
   // ── cron fail-closed + เนื้อหาไม่มีข้อมูลส่วนตัว ──
   const cron = readFileSync("src/app/api/cron/push-reminders/route.ts", "utf8");
   check("cron แจ้งเตือน fail-closed", /if \(!secret \|\| !presented/.test(cron));
+  check(
+    "cron: เตือนดวงวันนี้เปิด /natal-chart#today ด้วยข้อความกลาง (เซิร์ฟเวอร์ไม่รู้ผังเกิด)",
+    /COPY\[sub\.morningTarget\]\[sub\.lang\]/.test(cron) && cron.includes("/natal-chart?utm_source=push#today") && !/\$\{[^}]*(chart|birth|natal)[^}]*\}/i.test(cron),
+  );
+  const optIn = readFileSync("src/components/natal/NatalPushOptIn.tsx", "utf8");
+  check("ปุ่มเตือนดวงวันนี้ส่งแค่ชั่วโมง + ภาษา + morningTarget ไม่ส่งข้อมูลเกิด", optIn.includes('morningTarget: "natal"') && !/\b(spec|yearCe|utcMs|lat|lon)\b/.test(optIn.replace(/\/\*[\s\S]*?\*\//g, "")));
   const checkin = readFileSync("src/app/api/cron/checkins/route.ts", "utf8");
   check("แจ้งเตือนนัดเช็กใช้ชื่อเรื่อง ไม่ใช้คำถาม", /thread\?\.title/.test(checkin) && !/\.question/.test(checkin));
 
