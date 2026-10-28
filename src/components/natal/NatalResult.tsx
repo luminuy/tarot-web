@@ -14,6 +14,8 @@ import {
   MODALITY_TEXT,
   MOON_PHASE_TEXT,
   POLARITY_TEXT,
+  SIGN_TEXT,
+  ASPECT_TEXT,
   WARNING_TEXT,
   type Lang,
 } from "@/data/natal/content";
@@ -29,7 +31,7 @@ import {
   type Modality,
   type NatalChart,
 } from "@/lib/astro/natal";
-import { aspectTitle, bodyName, cardsFor, chartSummary, describeAspect, describeBody, describePattern, placement, signName } from "@/lib/astro/natal-text";
+import { aspectTitle, bodyName, cardsFor, describeAspect, describeBody, describePattern, signName } from "@/lib/astro/natal-text";
 import { zodiacSignPath } from "@/lib/tarot/zodiac";
 import { NatalWheel } from "./NatalWheel";
 import { FlipCard } from "./NatalFlipCard";
@@ -53,8 +55,9 @@ const NatalThai = React.lazy(() => import("./NatalThai"));
 
 /**
  * 🪐 ผลผังดวงทั้งหมด — โหลดแบบ lazy พร้อมตัวคำนวณ (ไม่อยู่ในบันเดิลแรกของหน้า)
- * ลำดับ: สรุป ➔ วงผัง ➔ ไพ่ประจำดวงกำเนิด (คว่ำ แตะพลิกเอง) ➔ ตำแหน่งดาว ➔ เรือน ➔ มุมสัมพันธ์ ➔
- *       ธาตุ/ดาวเด่น/รูปแบบ ➔ คำอธิบายรายดาว ➔ ข้อมูลการคำนวณ
+ * ลำดับ (เจ้าของ 2026-10-28 "ตัวหนังสือเยอะเกินไป อยากให้มีสรุป"): ภาพรวม (สามราศีหลัก + สรุปสั้น) ➔
+ *       ไพ่ประจำตัว (คว่ำ แตะพลิกเอง) ➔ วงผัง ➔ ดาวแต่ละดวง (แถวสั้น แตะอ่านต่อ) ➔ เรือน 12 กล่อง ➔
+ *       มุมแรงสุด 5 คู่ ➔ สมดุลพลัง ➔ ข้อมูลละเอียด (ตาราง ดาวฤกษ์ Lots การคำนวณ พับไว้)
  */
 
 const TABLE_ORDER: readonly BodyId[] = [
@@ -88,11 +91,19 @@ const ASPECT_SHORT: Record<AspectType, { th: string; en: string }> = {
   biquintile: { th: "144", en: "144" },
 };
 
-function SectionTitle({ id, children }: { id: string; children: React.ReactNode }) {
+function SectionHead({ id, n, title, children }: { id: string; n: number; title: string; children?: React.ReactNode }) {
   return (
-    <h3 id={id} className="scroll-mt-24 text-lg sm:text-xl font-serif-th font-bold text-ink">
-      {children}
-    </h3>
+    <header className="v2-nr-head">
+      <span className="v2-nr-head-n ui2-num" aria-hidden="true">
+        {n}
+      </span>
+      <div className="min-w-0">
+        <h3 id={id} className="v2-nr-head-t">
+          {title}
+        </h3>
+        {children && <p className="v2-nr-head-d">{children}</p>}
+      </div>
+    </header>
   );
 }
 
@@ -122,6 +133,13 @@ export default function NatalResult({
     return { all, contacts: starContacts(chart, all) };
   }, [chart]);
   const lots = useMemo(() => hermeticLots(chart), [chart]);
+  /** คำอธิบายราศีบางย่อหน้าเอ่ยชื่อไพ่ประจำราศี — ไพ่ของอาทิตย์/จันทร์/ลัคนายังคว่ำอยู่ห้ามเฉลยก่อน (กฎเหล็กข้อ 4) */
+  const namesHiddenCard = (text: string, ids: readonly string[]) =>
+    ids.some((id) => {
+      const c = cardById.get(id);
+      // คำอธิบายเรียกไพ่ด้วยชื่ออังกฤษ ("ไพ่ The Devil") · ไม่เทียบชื่อไทยเพราะบางใบเป็นคำทั่วไป (เช่น "พลัง")
+      return !!c && text.includes(c.nameEn);
+    });
   const cardName = (id: string | undefined) => {
     const c = id ? cardById.get(id) : undefined;
     return c ? (isTh ? `${c.nameTh} (${c.nameEn})` : c.nameEn) : "";
@@ -134,8 +152,10 @@ export default function NatalResult({
   const majorTypes = new Set(ASPECT_DEFS.filter((d) => d.major).map((d) => d.type));
   const toneOf = new Map(ASPECT_DEFS.map((d) => [d.type, d.tone]));
   const visibleAspects = chart.aspects.filter((a) => showMinor || majorTypes.has(a.type));
-  const summary = chartSummary(chart, lang);
   const gridIds = GRID_ORDER.filter((id) => get(id));
+  const shortSign = (sign: number) => signName(sign, lang).replace(isTh ? "ราศี" : "", "");
+  /** ข้อความในข้อมูลขึ้นต้นด้วยหัวข้อ "ธาตุดินเด่น: ..." — ตัดหัวออกเมื่อมีป้ายบอกอยู่แล้ว */
+  const afterColon = (s: string) => (s.includes(": ") ? s.slice(s.indexOf(": ") + 2) : s);
 
   const bigThree = [
     { key: "sun", body: sun, label: isTh ? "ดวงอาทิตย์: ตัวตน" : "Sun: your core self" },
@@ -146,96 +166,173 @@ export default function NatalResult({
 
   const elementTotal = Object.values(chart.distribution.elementScore).reduce((a, b) => a + b, 0) || 1;
   const modalityTotal = Object.values(chart.distribution.modalityScore).reduce((a, b) => a + b, 0) || 1;
-  const names = (ids: BodyId[]) => (ids.length ? ids.map((id) => BODY_TEXT[id].short[lang]).join(" ") : "-");
+  const pct = (n: number, total: number) => Math.round((n / total) * 100);
+  const topElement = (Object.keys(chart.distribution.elementScore) as Element[]).reduce((a, b) =>
+    chart.distribution.elementScore[b] > chart.distribution.elementScore[a] ? b : a,
+  );
+  const topModality = (Object.keys(chart.distribution.modalityScore) as Modality[]).reduce((a, b) =>
+    chart.distribution.modalityScore[b] > chart.distribution.modalityScore[a] ? b : a,
+  );
+  const missingElements = (Object.keys(chart.distribution.elements) as Element[]).filter((e) => chart.distribution.elements[e].length === 0);
+  const topPlanet = chart.dominantPlanets[0];
+  const keyAspects = chart.aspects.filter((a) => majorTypes.has(a.type)).slice(0, 5);
+  const majorCount = chart.aspects.filter((a) => majorTypes.has(a.type)).length;
+  const planetRows = TABLE_ORDER.filter((id) => id !== "southNode" && id !== "fortune" && id !== "vertex")
+    .map((id) => get(id))
+    .filter((b): b is BodyPosition => !!b);
 
-  const nav = [
-    ["natal-summary", isTh ? "สรุป" : "Summary"],
-    ["natal-wheel", isTh ? "วงผัง" : "Wheel"],
-    ["natal-cards", isTh ? "ไพ่ประจำดวง" : "Tarot"],
-    ["natal-positions", isTh ? "ตำแหน่งดาว" : "Positions"],
-    ...(chart.houses ? [["natal-houses", isTh ? "เรือน" : "Houses"]] : []),
-    ["natal-aspects", isTh ? "มุมสัมพันธ์" : "Aspects"],
-    ["natal-balance", isTh ? "ธาตุและดาวเด่น" : "Balance"],
-    ["natal-stars", isTh ? "ดาวฤกษ์และ Lots" : "Stars and lots"],
-    ["natal-reading", isTh ? "คำอธิบาย" : "Reading"],
+  /* สรุปสั้น: ป้ายซ้าย ข้อความขวา ไม่เกิน 6 แถว — คำนวณจากผังทั้งหมด ไม่ใช้ AI */
+  const highlights: { label: string; text: string }[] = [
+    {
+      label: isTh ? `ธาตุเด่น: ${ELEMENT_TEXT[topElement].name.th}` : `Strongest element: ${ELEMENT_TEXT[topElement].name.en}`,
+      text: afterColon(ELEMENT_TEXT[topElement].strong[lang]),
+    },
+    {
+      label: isTh ? "วิธีลงมือ" : "How you act",
+      text: afterColon(MODALITY_TEXT[topModality].strong[lang]),
+    },
+    ...(topPlanet
+      ? [
+          {
+            label: isTh ? `ดาวเด่น: ${BODY_TEXT[topPlanet.id].name.th}` : `Key planet: ${BODY_TEXT[topPlanet.id].name.en}`,
+            text: isTh
+              ? `เรื่อง${BODY_TEXT[topPlanet.id].noun.th}เป็นแกนสำคัญของชีวิตคุณ`
+              : `Your ${BODY_TEXT[topPlanet.id].noun.en} sits at the centre of your life.`,
+          },
+        ]
+      : []),
+    ...missingElements.map((e) => ({
+      label: isTh ? `ธาตุที่ขาด: ${ELEMENT_TEXT[e].name.th}` : `Missing element: ${ELEMENT_TEXT[e].name.en}`,
+      text: afterColon(ELEMENT_TEXT[e].weak[lang]),
+    })),
+    {
+      label: isTh ? "เกิดช่วงดวงจันทร์" : "Moon phase",
+      text: `${MOON_PHASE_TEXT[chart.moonPhase.phase].name[lang]}: ${MOON_PHASE_TEXT[chart.moonPhase.phase].meaning[lang]}`,
+    },
   ];
 
+  /* "ดาวรวมกลุ่มในราศีเดียว: ราศีมังกร" ×2 ➔ "ดาวรวมกลุ่มในราศีเดียว: ราศีมังกร ราศีกุมภ์" */
+  const patternGroups = [
+    ...chart.patterns
+      .map((p) => describePattern(chart, p, lang).title)
+      .reduce((m, t) => {
+        const i = t.indexOf(": ");
+        const head = i < 0 ? t : t.slice(0, i);
+        if (!m.has(head)) m.set(head, []);
+        if (i >= 0) m.get(head)!.push(t.slice(i + 2));
+        return m;
+      }, new Map<string, string[]>()),
+  ];
+
+  const nav = [
+    ["natal-cards", isTh ? "ไพ่ประจำตัว" : "Tarot"],
+    ["natal-wheel", isTh ? "วงผัง" : "Wheel"],
+    ["natal-planets", isTh ? "ดาวแต่ละดวง" : "Planets"],
+    ...(chart.houses ? [["natal-houses", isTh ? "เรือน" : "Houses"]] : []),
+    ["natal-aspects", isTh ? "มุมสำคัญ" : "Aspects"],
+    ["natal-balance", isTh ? "สมดุลพลัง" : "Balance"],
+    ["natal-deep", isTh ? "ลงลึก" : "In depth"],
+  ];
+
+  const tone = (t: string | undefined) => (t === "harmonious" ? "harmonious" : t === "tense" ? "tense" : "neutral");
+
   return (
-    <div className="space-y-8">
-      {/* ── สรุป ── */}
-      <section aria-labelledby="natal-summary" className="altar-card-porcelain rounded-2xl p-4 sm:p-6 space-y-4">
-        <div className="space-y-1">
-          <SectionTitle id="natal-summary">
-            {meta.name ? (isTh ? `ผังดวงกำเนิดของ ${meta.name}` : `${meta.name}'s natal chart`) : isTh ? "ผังดวงกำเนิดของคุณ" : "Your natal chart"}
-          </SectionTitle>
-          <p className="text-sm text-muted">
-            {meta.dateText} · {meta.timeText} · {meta.placeText} · {meta.offsetText}
+    <div className="v2-nr space-y-6 sm:space-y-8">
+      {/* ── ภาพรวม: ข้อมูลเกิด · สามราศีหลัก · สรุปสั้น ── */}
+      <section aria-labelledby="natal-summary" className="v2-nr-hero">
+        <header className="v2-nr-hero-head">
+          <p className="v2-nr-kicker">{isTh ? "ผังดวงกำเนิด" : "Natal chart"}</p>
+          <h3 id="natal-summary" className="v2-nr-name">
+            {meta.name ? meta.name : isTh ? "ผังของคุณ" : "Your chart"}
+          </h3>
+          <p className="v2-nr-birth">
+            {meta.dateText} · {meta.timeText} · {meta.placeText}
           </p>
-          <p className="text-xs text-muted">
-            {chart.input.zodiac === "lahiri"
-              ? isTh
-                ? `ราศีนิรายนะ (Lahiri · อายนางศ์ ${formatDegree(chart.ayanamsa)})`
-                : `Sidereal zodiac (Lahiri, ayanamsa ${formatDegree(chart.ayanamsa)})`
-              : isTh
-                ? "ราศีสายนะ (สากล)"
-                : "Tropical zodiac"}
-            {chart.houseSystemUsed ? ` · ${isTh ? "เรือน" : "Houses"}: ${HOUSE_SYSTEM_TEXT[chart.houseSystemUsed].name[lang]}` : ""}
-            {` · ${isTh ? "โหนด" : "Node"}: ${chart.input.nodeType === "true" ? (isTh ? "จริง" : "true") : isTh ? "เฉลี่ย" : "mean"}`}
-          </p>
-          {chart.input.zodiac === "lahiri" && (
-            <p className="text-xs text-muted border-l-2 border-line-warm pl-2">
-              {isTh
-                ? "นิรายนะยึดกลุ่มดาวจริงบนฟ้า ตำแหน่งดาวจึงถอยจากแบบสากลราว 24 องศา ราศีที่ได้มักใกล้เคียงหมอดูไทย แต่อาจต่างได้ราว 1 องศาตามตำราที่ใช้ คำอธิบายและไพ่ประจำตำแหน่งในหน้านี้อิงระบบตะวันตก ใช้ราศีนิรายนะแทนที่"
-                : "The sidereal zodiac follows the actual constellations, so positions sit about 24 degrees behind the tropical ones. Thai astrologers may differ by about a degree depending on their method. Interpretations and tarot cards here are Western and are applied to the sidereal signs."}
-            </p>
-          )}
-        </div>
-        <div className="grid grid-cols-3 gap-2 text-center">
+        </header>
+
+        <ul className="v2-nr-big3">
           {[
-            { id: "sun" as const, label: isTh ? "อาทิตย์" : "Sun" },
-            { id: "moon" as const, label: isTh ? "จันทร์" : "Moon" },
-            { id: "asc" as const, label: isTh ? "ลัคนา" : "Rising" },
+            { id: "sun" as const, role: isTh ? "ตัวตน" : "Core self" },
+            { id: "moon" as const, role: isTh ? "ใจ" : "Heart" },
+            { id: "asc" as const, role: isTh ? "ภาพที่คนเห็น" : "First impression" },
           ].map((x) => {
             const b = get(x.id);
             return (
-              <div key={x.id} className="rounded-xl border border-line-warm bg-surface/70 p-2 sm:p-3">
-                <p className="text-xs text-muted">{x.label}</p>
-                <p className="font-serif-th font-bold text-ink text-sm sm:text-base">{b ? signName(b.sign, lang).replace(isTh ? "ราศี" : "", "") : isTh ? "ต้องรู้เวลาเกิด" : "Needs birth time"}</p>
-                {b && <p className="text-xs text-muted tabular-nums">{formatDegree(b.degInSign)}</p>}
-              </div>
+              <li key={x.id}>
+                <span className="v2-nr-big3-role">
+                  {x.role} <span>{BODY_TEXT[x.id].name[lang]}</span>
+                </span>
+                <span className="v2-nr-big3-sign">{b ? shortSign(b.sign) : isTh ? "ไม่ทราบ" : "Unknown"}</span>
+                <span className="v2-nr-big3-kw">{b ? SIGN_TEXT[b.sign].keywords[lang] : isTh ? "ต้องรู้เวลาเกิด" : "Needs birth time"}</span>
+              </li>
             );
           })}
+        </ul>
+
+        <div className="v2-nr-sum">
+          <p className="v2-nr-sum-t">{isTh ? "สรุปผังของคุณ" : "Your chart at a glance"}</p>
+          <dl>
+            {highlights.map((h) => (
+              <div key={h.label}>
+                <dt>{h.label}</dt>
+                <dd>{h.text}</dd>
+              </div>
+            ))}
+            {chart.patterns.length > 0 && (
+              <div>
+                <dt>{isTh ? "รูปแบบพิเศษ" : "Chart pattern"}</dt>
+                <dd>
+                  {patternGroups.map(([head, parts]) => (
+                    <span key={head} className="block">
+                      {parts.length ? `${head}: ${parts.join(isTh ? " " : ", ")}` : head}
+                    </span>
+                  ))}
+                </dd>
+              </div>
+            )}
+          </dl>
         </div>
-        {chart.warnings.length > 0 && (
-          <ul className="space-y-1.5 text-sm">
+
+        {(chart.warnings.length > 0 || (!chart.input.timeKnown && chart.moonRange)) && (
+          <ul className="v2-nr-warn">
             {chart.warnings.map((w) => (
-              <li key={w.code} className="border-l-2 border-gold-ink pl-2 text-ink">
+              <li key={w.code}>
                 {WARNING_TEXT[w.code][lang]}
                 {w.bodies?.length ? ` (${w.bodies.map((id) => bodyName(id, lang)).join(isTh ? " " : ", ")})` : ""}
               </li>
             ))}
+            {!chart.input.timeKnown && chart.moonRange && (
+              <li>
+                {isTh
+                  ? `ไม่ทราบเวลาเกิด: คำนวณที่เที่ยงวัน วันนั้นดวงจันทร์เดินจาก${signName(Math.floor(chart.moonRange.from / 30), lang)} ${formatDegree(chart.moonRange.from % 30)} ถึง${signName(Math.floor(chart.moonRange.to / 30), lang)} ${formatDegree(chart.moonRange.to % 30)} ไม่มีลัคนาและเรือนชะตา`
+                  : `Birth time unknown: calculated for noon. That day the Moon moved from ${signName(Math.floor(chart.moonRange.from / 30), lang)} ${formatDegree(chart.moonRange.from % 30)} to ${signName(Math.floor(chart.moonRange.to / 30), lang)} ${formatDegree(chart.moonRange.to % 30)}. No Ascendant or houses.`}
+              </li>
+            )}
           </ul>
         )}
-        {!chart.input.timeKnown && chart.moonRange && (
-          <p className="text-sm text-ink border-l-2 border-line-warm pl-2">
+
+        <p className="v2-nr-settings">
+          {chart.input.zodiac === "lahiri"
+            ? isTh
+              ? `ราศีนิรายนะ (Lahiri · อายนางศ์ ${formatDegree(chart.ayanamsa)})`
+              : `Sidereal zodiac (Lahiri, ayanamsa ${formatDegree(chart.ayanamsa)})`
+            : isTh
+              ? "ราศีสายนะ (สากล)"
+              : "Tropical zodiac"}
+          {chart.houseSystemUsed ? ` · ${isTh ? "เรือน" : "Houses"} ${HOUSE_SYSTEM_TEXT[chart.houseSystemUsed].name[lang]}` : ""}
+          {` · ${meta.offsetText}`}
+        </p>
+        {chart.input.zodiac === "lahiri" && (
+          <p className="v2-nr-settings">
             {isTh
-              ? `ไม่ทราบเวลาเกิด: คำนวณที่เที่ยงวัน วันนั้นดวงจันทร์เดินจาก${signName(Math.floor(chart.moonRange.from / 30), lang)} ${formatDegree(chart.moonRange.from % 30)} ถึง${signName(Math.floor(chart.moonRange.to / 30), lang)} ${formatDegree(chart.moonRange.to % 30)} ไม่มีลัคนาและเรือนชะตา`
-              : `Birth time unknown: calculated for noon. That day the Moon moved from ${signName(Math.floor(chart.moonRange.from / 30), lang)} ${formatDegree(chart.moonRange.from % 30)} to ${signName(Math.floor(chart.moonRange.to / 30), lang)} ${formatDegree(chart.moonRange.to % 30)}. No Ascendant or houses.`}
+              ? "นิรายนะยึดกลุ่มดาวจริงบนฟ้า ตำแหน่งดาวจึงถอยจากแบบสากลราว 24 องศา ราศีที่ได้มักใกล้เคียงหมอดูไทย แต่อาจต่างได้ราว 1 องศาตามตำราที่ใช้ คำอธิบายและไพ่ประจำตำแหน่งในหน้านี้อิงระบบตะวันตก ใช้ราศีนิรายนะแทนที่"
+              : "The sidereal zodiac follows the actual constellations, so positions sit about 24 degrees behind the tropical ones. Thai astrologers may differ by about a degree depending on their method. Interpretations and tarot cards here are Western and are applied to the sidereal signs."}
           </p>
-        )}
-        {view === "natal" && (
-        <nav aria-label={isTh ? "ไปยังส่วนของผัง" : "Jump to"} className="v2-nt-noprint flex flex-wrap gap-1.5">
-          {nav.map(([id, text]) => (
-            <a key={id} href={`#${id}`} className="rounded-full border border-line-warm bg-surface px-3 py-1.5 text-xs text-ink hover:border-gold-ink">
-              {text}
-            </a>
-          ))}
-        </nav>
         )}
       </section>
 
       {/* ── แท็บ: ผังเกิด / ตามเวลา ── */}
-      <div className="v2-nt-seg v2-nt-noprint" role="tablist" aria-label={isTh ? "มุมมองของผัง" : "Chart views"}>
+      <div className="v2-nr-tabs v2-nt-noprint" role="tablist" aria-label={isTh ? "มุมมองของผัง" : "Chart views"}>
         {(
           [
             ["natal", isTh ? "ผังเกิด" : "Birth chart"],
@@ -270,63 +367,44 @@ export default function NatalResult({
 
       {view === "natal" && (
       <>
-      {/* ── วงผัง ── */}
-      <section aria-labelledby="natal-wheel" className="space-y-3">
-        <SectionTitle id="natal-wheel">{isTh ? "วงผังดวง" : "Chart wheel"}</SectionTitle>
-        <NatalWheel chart={chart} lang={lang} focus={focus} onFocus={setFocus} showMinor={showMinor} />
-        <div className="v2-nt-noprint flex flex-wrap items-center justify-center gap-3 text-sm">
-          <label className="inline-flex items-center gap-2 min-h-[44px] cursor-pointer">
-            <input type="checkbox" checked={showMinor} onChange={(e) => setShowMinor(e.target.checked)} className="w-4 h-4" />
-            {isTh ? "แสดงมุมสัมพันธ์รอง" : "Show minor aspects"}
-          </label>
-          {focus && (
-            <button type="button" onClick={() => setFocus(null)} className="tap-target rounded-full border border-line-warm px-3 py-1.5 text-xs">
-              {isTh ? `เลิกเน้น${bodyName(focus, lang)}` : `Clear ${bodyName(focus, lang)}`}
-            </button>
-          )}
-        </div>
-        <p className="text-xs text-muted text-center">
-          {isTh ? "แตะดาวในวงเพื่อเน้นมุมสัมพันธ์ของดาวดวงนั้น · เส้นน้ำเงิน = กลมกลืน · เส้นแดง = ตึง · เส้นประ = มุมรอง" : "Tap a planet to highlight its aspects. Blue = harmonious, red = tense, dashed = minor."}
-        </p>
-        <ul className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-muted">
-          {(["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron", "node", "lilith", "ceres", "pallas", "juno", "vesta"] as const)
-            .filter((id) => get(id))
-            .map((id) => (
-            <li key={id}>
-              <span className="font-bold text-ink">{BODY_TEXT[id].short[lang]}</span> {BODY_TEXT[id].name[lang]}
-            </li>
-          ))}
-        </ul>
-      </section>
+      <nav aria-label={isTh ? "ไปยังส่วนของผัง" : "Jump to"} className="v2-nr-jump v2-nt-noprint">
+        {nav.map(([id, text]) => (
+          <a key={id} href={`#${id}`}>
+            {text}
+          </a>
+        ))}
+      </nav>
 
       {/* ── ไพ่ประจำดวงกำเนิด ── */}
-      <section aria-labelledby="natal-cards" className="space-y-4">
-        <SectionTitle id="natal-cards">{isTh ? "ไพ่ประจำดวงกำเนิด" : "Your natal tarot cards"}</SectionTitle>
-        <p className="text-sm text-muted">
-          {isTh
-            ? "ระบบ Golden Dawn ผูกไพ่ชุดใหญ่กับราศี และผูกไพ่เลข 2 ถึง 10 กับช่วงละ 10 องศา จุดสำคัญสามจุดของคุณจึงมีไพ่ประจำจุดละสองใบ แตะเพื่อพลิกทีละใบ"
-            : "In the Golden Dawn system each sign has a Major Arcana card and each ten-degree decan a numbered Minor card. Your three key points each have two cards. Tap to turn them over."}
-        </p>
-        <div className="grid gap-4 sm:grid-cols-3">
+      <section aria-labelledby="natal-cards" className="v2-nr-sec">
+        <SectionHead id="natal-cards" n={1} title={isTh ? "ไพ่ประจำตัวคุณ" : "Your tarot cards"}>
+          {isTh ? "จุดละ 2 ใบ: ไพ่ประจำราศี และไพ่ประจำช่วงองศา แตะเพื่อพลิกทีละใบ" : "Two cards for each point: the sign card and the decan card. Tap to turn them over."}
+        </SectionHead>
+        <div className="grid gap-3 sm:grid-cols-3">
           {bigThree.map(({ key, body, label }) => {
             const c = cardsFor(body);
             const both = bigRevealed(key);
             return (
-              <div key={key} className="altar-card-porcelain rounded-xl p-3 space-y-3 text-center">
-                <p className="font-serif-th font-bold text-ink text-sm">{label}</p>
+              <div key={key} className="v2-nr-card">
+                <p className="v2-nr-card-t">{label}</p>
                 <div className="flex justify-center gap-2">
                   <FlipCard card={cardById.get(c.sign)} revealed={!!revealed[`${key}:sign`]} onReveal={() => setRevealed((r) => ({ ...r, [`${key}:sign`]: true }))} label={isTh ? `ไพ่ประจำราศีของ${label}` : `Sign card for ${label}`} lang={lang} />
                   <FlipCard card={cardById.get(c.decan)} revealed={!!revealed[`${key}:decan`]} onReveal={() => setRevealed((r) => ({ ...r, [`${key}:decan`]: true }))} label={isTh ? `ไพ่ประจำช่วงองศาของ${label}` : `Decan card for ${label}`} lang={lang} />
                 </div>
                 {both && (
-                  <p className="text-xs text-muted text-left leading-relaxed">
-                    {isTh
-                      ? `${signName(body.sign, lang)} คือ ${cardName(c.sign)} · ช่วงที่ ${body.decan + 1} ของราศี (${body.decan * 10} ถึง ${body.decan * 10 + 10} องศา) คือ ${cardName(c.decan)}`
-                      : `${signName(body.sign, lang)} is ${cardName(c.sign)}. Decan ${body.decan + 1} (${body.decan * 10} to ${body.decan * 10 + 10} degrees) is ${cardName(c.decan)}.`}{" "}
-                    <Link href={zodiacSignPath(ZODIAC_SIGNS[body.sign].id)} className="underline text-gold-ink">
+                  <dl className="v2-nr-card-names">
+                    <div>
+                      <dt>{signName(body.sign, lang)}</dt>
+                      <dd>{cardName(c.sign)}</dd>
+                    </div>
+                    <div>
+                      <dt>{isTh ? `${body.decan * 10} ถึง ${body.decan * 10 + 10} องศา` : `${body.decan * 10} to ${body.decan * 10 + 10} degrees`}</dt>
+                      <dd>{cardName(c.decan)}</dd>
+                    </div>
+                    <Link href={zodiacSignPath(ZODIAC_SIGNS[body.sign].id)} className="v2-nr-link">
                       {isTh ? "อ่านไพ่ประจำราศีนี้" : "Read about this sign"}
                     </Link>
-                  </p>
+                  </dl>
                 )}
               </div>
             );
@@ -356,230 +434,274 @@ export default function NatalResult({
         </div>
       </section>
 
-      {/* ── ตำแหน่งดาว ── */}
-      <section aria-labelledby="natal-positions" className="space-y-3">
-        <SectionTitle id="natal-positions">{isTh ? "ตำแหน่งดาว" : "Planet positions"}</SectionTitle>
-        <table className="v2-nt-table">
-          <thead>
-            <tr>
-              <th scope="col">{isTh ? "ดาว/จุด" : "Body"}</th>
-              <th scope="col">{isTh ? "ราศี" : "Sign"}</th>
-              <th scope="col">{isTh ? "องศา" : "Degree"}</th>
-              {chart.houses && <th scope="col">{isTh ? "เรือน" : "House"}</th>}
-              <th scope="col">{isTh ? "สถานะ" : "Notes"}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {TABLE_ORDER.map((id) => get(id))
-              .filter((b): b is BodyPosition => !!b)
-              .map((b) => (
-                <tr key={b.id} className={focus === b.id ? "is-focus" : undefined} onClick={() => setFocus(focus === b.id ? null : b.id)}>
-                  <td className="font-semibold text-ink">{BODY_TEXT[b.id].name[lang]}</td>
-                  <td>{signName(b.sign, lang).replace(isTh ? "ราศี" : "", "")}</td>
-                  <td className="tabular-nums">{formatDegree(b.degInSign)}</td>
-                  {chart.houses && <td className="tabular-nums">{b.house}</td>}
-                  <td>
-                    {b.retrograde && !["node", "southNode", "lilith"].includes(b.id) && <span className="v2-nt-retro mr-1">{isTh ? "ถอยหลัง" : "Rx"}</span>}
-                    {b.dignities.map((d) => (
-                      <span key={d} className={`v2-nt-dig v2-nt-dig-${d}`}>
-                        {DIGNITY_TEXT[d].name[lang]}
-                      </span>
-                    ))}
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
+      {/* ── วงผัง ── */}
+      <section aria-labelledby="natal-wheel" className="v2-nr-sec">
+        <SectionHead id="natal-wheel" n={2} title={isTh ? "วงผังดวง" : "Chart wheel"}>
+          {isTh ? "แตะดาวในวงเพื่อดูว่าดาวดวงนั้นทำมุมกับดาวไหนบ้าง" : "Tap a planet to see which planets it connects with."}
+        </SectionHead>
+        <NatalWheel chart={chart} lang={lang} focus={focus} onFocus={setFocus} showMinor={showMinor} />
+        <div className="v2-nr-legend">
+          <span className="is-harmonious">{isTh ? "เส้นน้ำเงิน ไหลลื่น" : "Blue: flowing"}</span>
+          <span className="is-tense">{isTh ? "เส้นแดง ตึง" : "Red: tense"}</span>
+          <span className="is-minor">{isTh ? "เส้นประ มุมรอง" : "Dashed: minor"}</span>
+        </div>
+        <div className="v2-nt-noprint flex flex-wrap items-center justify-center gap-3 text-sm">
+          <label className="v2-nt-check">
+            <input type="checkbox" checked={showMinor} onChange={(e) => setShowMinor(e.target.checked)} />
+            {isTh ? "แสดงมุมรอง" : "Show minor aspects"}
+          </label>
+          {focus && (
+            <button type="button" onClick={() => setFocus(null)} className="tap-target rounded-full border border-line-warm px-3 py-1.5 text-xs">
+              {isTh ? `เลิกเน้น${bodyName(focus, lang)}` : `Clear ${bodyName(focus, lang)}`}
+            </button>
+          )}
+        </div>
+        <ul className="v2-nr-keys" aria-label={isTh ? "ตัวย่อบนวงผัง" : "Wheel labels"}>
+          {(["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron", "node", "lilith", "ceres", "pallas", "juno", "vesta"] as const)
+            .filter((id) => get(id))
+            .map((id) => (
+              <li key={id}>
+                <b>{BODY_TEXT[id].short[lang]}</b>
+                {BODY_TEXT[id].name[lang]}
+              </li>
+            ))}
+        </ul>
       </section>
 
-      {/* ── เรือน ── */}
+      {/* ── ดาวแต่ละดวง: แถวสั้น แตะอ่านต่อ ── */}
+      <section aria-labelledby="natal-planets" className="v2-nr-sec">
+        <SectionHead id="natal-planets" n={3} title={isTh ? "ดาวแต่ละดวงบอกอะไร" : "What each planet says"}>
+          {isTh ? "ดาวคือเรื่อง ราศีคือสไตล์ เรือนคือด้านของชีวิต แตะแถวเพื่ออ่านคำอธิบาย" : "Planet = what, sign = how, house = where. Tap a row to read more."}
+        </SectionHead>
+        <div className="v2-nr-planets">
+          {planetRows.map((b) => {
+            const c = cardsFor(b);
+            const personal = b.id === "sun" || b.id === "moon" || b.id === "asc";
+            const showCards = !personal || bigRevealed(b.id);
+            const retro = b.retrograde && !["node", "southNode", "lilith"].includes(b.id);
+            return (
+              <details key={b.id} className={`v2-nr-planet${focus === b.id ? " is-focus" : ""}`}>
+                <summary>
+                  <span className="v2-nr-abbr" aria-hidden="true">{BODY_TEXT[b.id].short[lang]}</span>
+                  <span className="v2-nr-planet-main">
+                    <span className="v2-nr-planet-name">
+                      {BODY_TEXT[b.id].name[lang]}
+                      <span className="v2-nr-planet-where">
+                        {shortSign(b.sign)}
+                        {b.house ? (isTh ? ` เรือน ${b.house}` : `, house ${b.house}`) : ""}
+                      </span>
+                    </span>
+                    <span className="v2-nr-planet-theme">{BODY_TEXT[b.id].theme[lang]}</span>
+                    {(retro || b.dignities.length > 0) && (
+                      <span className="v2-nr-planet-tags">
+                        {retro && <span className="v2-nt-retro">{isTh ? "ถอยหลัง" : "Retrograde"}</span>}
+                        {b.dignities.map((d) => (
+                          <span key={d} className={`v2-nt-dig v2-nt-dig-${d}`}>
+                            {DIGNITY_TEXT[d].name[lang]}
+                          </span>
+                        ))}
+                      </span>
+                    )}
+                  </span>
+                  <span className="v2-nt-more">
+                    <span className="v2-nt-more-open">{isTh ? "อ่าน" : "Read"}</span>
+                    <span className="v2-nt-more-close">{isTh ? "ย่อ" : "Close"}</span>
+                  </span>
+                </summary>
+                <div className="v2-nr-planet-body">
+                  {describeBody(chart, b, lang)
+                    .filter((p) => showCards || !namesHiddenCard(p, [c.sign, c.decan]))
+                    .map((p, i) => (
+                      <p key={i}>{p}</p>
+                    ))}
+                  {(b.id === "asc" || b.id === "moon") && (
+                    <p>
+                      <Link href={`/natal-chart/${b.id === "asc" ? "rising" : "moon"}/${ZODIAC_SIGNS[b.sign].id}`} className="v2-nr-link">
+                        {b.id === "asc"
+                          ? isTh
+                            ? `อ่านเรื่องลัคนา${ZODIAC_SIGNS[b.sign].nameTh}แบบละเอียด`
+                            : `Full guide to ${ZODIAC_SIGNS[b.sign].nameEn} rising`
+                          : isTh
+                            ? `อ่านเรื่องดวงจันทร์${ZODIAC_SIGNS[b.sign].nameTh}แบบละเอียด`
+                            : `Full guide to the Moon in ${ZODIAC_SIGNS[b.sign].nameEn}`}
+                      </Link>
+                    </p>
+                  )}
+                  {(PLANET_IDS as readonly string[]).includes(b.id) || personal ? (
+                    <p className="v2-nr-planet-cards">
+                      {showCards
+                        ? [
+                            c.planet ? `${isTh ? "ไพ่ประจำดาว" : "Planet card"}: ${cardName(c.planet)}` : null,
+                            `${isTh ? "ไพ่ประจำราศี" : "Sign card"}: ${cardName(c.sign)}`,
+                            `${isTh ? "ไพ่ประจำช่วงองศา" : "Decan card"}: ${cardName(c.decan)}`,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")
+                        : isTh
+                          ? "พลิกไพ่ในส่วนไพ่ประจำตัวก่อน แล้วคำอธิบายเต็มและไพ่ของจุดนี้จะขึ้นที่นี่"
+                          : "Turn over the cards in the tarot section first to see the full reading and this point's cards."}
+                    </p>
+                  ) : null}
+                </div>
+              </details>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ── เรือน 12: กล่องละเรือน บอกดาวที่อยู่ข้างใน ── */}
       {chart.houses && (
-        <section aria-labelledby="natal-houses" className="space-y-3">
-          <SectionTitle id="natal-houses">{isTh ? "จุดเริ่มเรือน 12 เรือน" : "House cusps"}</SectionTitle>
-          <p className="text-xs text-muted">{chart.houseSystemUsed && HOUSE_SYSTEM_TEXT[chart.houseSystemUsed].note[lang]}</p>
-          <table className="v2-nt-table">
-            <thead>
-              <tr>
-                <th scope="col">{isTh ? "เรือน" : "House"}</th>
-                <th scope="col">{isTh ? "เริ่มที่" : "Cusp"}</th>
-                <th scope="col">{isTh ? "เรื่อง" : "Area of life"}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {chart.houses.map((cusp, i) => (
-                <tr key={i}>
-                  <td className="font-semibold tabular-nums">{i + 1}</td>
-                  <td className="whitespace-nowrap">
-                    {signName(Math.floor(cusp / 30), lang).replace(isTh ? "ราศี" : "", "")} {formatDegree(cusp % 30)}
-                  </td>
-                  <td className="text-muted">{HOUSE_TEXT[i].title[lang]}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <section aria-labelledby="natal-houses" className="v2-nr-sec">
+          <SectionHead id="natal-houses" n={4} title={isTh ? "ดาวอยู่เรือนไหนของชีวิต" : "Where your planets live"}>
+            {isTh ? "เรือนที่มีดาวหลายดวงคือด้านของชีวิตที่คุณทุ่มพลังมาก" : "Houses with several planets are the parts of life where you put the most energy."}
+          </SectionHead>
+          <ol className="v2-nr-houses">
+            {chart.houses.map((cusp, i) => {
+              const inside = planetRows.filter((b) => b.house === i + 1 && b.id !== "asc" && b.id !== "mc");
+              return (
+                <li key={i} className={inside.length >= 3 ? "is-busy" : undefined}>
+                  <span className="v2-nr-house-top">
+                    <span className="v2-nr-house-n ui2-num">{i + 1}</span>
+                    <span className="v2-nr-house-sign">{shortSign(Math.floor(cusp / 30))}</span>
+                  </span>
+                  <span className="v2-nr-house-t">{HOUSE_TEXT[i].title[lang]}</span>
+                  {inside.length > 0 ? (
+                    <span className="v2-nr-house-bodies">
+                      {inside.map((b) => (
+                        <span key={b.id}>{BODY_TEXT[b.id].name[lang]}</span>
+                      ))}
+                    </span>
+                  ) : (
+                    <span className="v2-nr-house-empty">{isTh ? "ไม่มีดาว" : "No planets"}</span>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
         </section>
       )}
 
-      {/* ── มุมสัมพันธ์ ── */}
-      <section aria-labelledby="natal-aspects" className="space-y-3">
-        <SectionTitle id="natal-aspects">{isTh ? "มุมสัมพันธ์" : "Aspects"}</SectionTitle>
-        <p className="text-xs text-muted">
+      {/* ── มุมสำคัญ 5 อันดับ ── */}
+      <section aria-labelledby="natal-aspects" className="v2-nr-sec">
+        <SectionHead id="natal-aspects" n={chart.houses ? 5 : 4} title={isTh ? "ดาวที่คุยกันแรงที่สุด" : "Your strongest aspects"}>
           {isTh
-            ? "ตัวเลขใต้ชื่อมุมคือ orb (องศาที่ห่างจากมุมพอดี) ยิ่งน้อยยิ่งแรง · กุม 0 · โยค 60 · จตุ 90 · ตรี 120 · เล็ง 180"
-            : "The small number is the orb (distance from exact); smaller means stronger."}
-        </p>
-        <table className="v2-nt-grid" aria-label={isTh ? "ตารางมุมสัมพันธ์" : "Aspect grid"} style={{ "--nt-n": gridIds.length } as React.CSSProperties}>
-          <colgroup>
-            {gridIds.map((id) => (
-              <col key={id} />
-            ))}
-          </colgroup>
-          <tbody>
-            {gridIds.map((rowId, r, rows) => (
-              <tr key={rowId}>
-                {rows.slice(0, r).map((colId) => {
-                  const a = visibleAspects.find((x) => (x.a === rowId && x.b === colId) || (x.a === colId && x.b === rowId));
-                  return (
-                    <td key={colId} className={a ? toneOf.get(a.type) : undefined} title={a ? aspectTitle(a, lang) : undefined}>
-                      {a && (
-                        <>
-                          {ASPECT_SHORT[a.type][lang]}
-                          <span className="o">{a.orb.toFixed(0)}</span>
-                        </>
-                      )}
-                    </td>
-                  );
-                })}
-                <th scope="row">{BODY_TEXT[rowId].short[lang]}</th>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <details className="rounded-xl border border-line-warm px-3 py-2">
-          <summary className="cursor-pointer list-none flex items-center min-h-[36px] text-sm font-semibold text-ink">
-            {isTh ? `รายการมุมสัมพันธ์ทั้งหมด (${visibleAspects.length})` : `All aspects (${visibleAspects.length})`}
-            <span className="v2-nt-more"><span className="v2-nt-more-open">{isTh ? "อ่าน" : "Read"}</span><span className="v2-nt-more-close">{isTh ? "ย่อ" : "Close"}</span></span>
-          </summary>
-        <ul className="space-y-1.5 text-sm pt-2">
-          {visibleAspects.map((a) => (
-            <li key={`${a.a}-${a.b}`} className="flex flex-wrap items-baseline gap-x-2 border-b border-line-warm/50 pb-1.5">
-              <span className="font-semibold text-ink">{aspectTitle(a, lang)}</span>
-              <span className="text-xs text-muted tabular-nums">
-                orb {formatDegree(a.orb)}
-                {a.applying === null ? "" : a.applying ? (isTh ? " · กำลังเข้า" : " · applying") : isTh ? " · กำลังแยก" : " · separating"}
+            ? `มุมหลักที่แม่นที่สุด ${keyAspects.length} คู่จากทั้งหมด ${majorCount} คู่ ยิ่งอยู่บนยิ่งรู้สึกชัด`
+            : `The ${keyAspects.length} tightest of your ${majorCount} major aspects. The higher, the stronger.`}
+        </SectionHead>
+        <ol className="v2-nr-aspects">
+          {keyAspects.map((a) => (
+            <li key={`${a.a}-${a.b}`} className={`is-${tone(toneOf.get(a.type))}`}>
+              <span className="v2-nr-asp-pair">
+                <b>{bodyName(a.a, lang)}</b>
+                <span className="v2-nr-asp-type">{ASPECT_TEXT[a.type].name[lang].replace(/\s*\(.*\)$/, "")}</span>
+                <b>{bodyName(a.b, lang)}</b>
               </span>
+              <span className="v2-nr-asp-text">{describeAspect(a, lang)}</span>
             </li>
           ))}
-        </ul>
-        </details>
+        </ol>
       </section>
 
-      {/* ── ธาตุ ดาวเด่น รูปแบบ ── */}
-      <section aria-labelledby="natal-balance" className="space-y-4">
-        <SectionTitle id="natal-balance">{isTh ? "ธาตุ คุณภาพ และดาวเด่น" : "Balance and dominants"}</SectionTitle>
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="altar-card-porcelain rounded-xl p-4 space-y-2.5">
-            <h4 className="font-serif-th font-bold text-ink text-sm">{isTh ? "ธาตุ (คะแนนถ่วงน้ำหนัก)" : "Elements (weighted)"}</h4>
+      {/* ── สมดุลพลัง ── */}
+      <section aria-labelledby="natal-balance" className="v2-nr-sec">
+        <SectionHead id="natal-balance" n={chart.houses ? 6 : 5} title={isTh ? "สมดุลพลังในผัง" : "Your balance of energy"}>
+          {isTh ? "นับจากดาวทุกดวง ดวงอาทิตย์ ดวงจันทร์ และลัคนามีน้ำหนักมากที่สุด" : "Counted across all planets; the Sun, Moon and Ascendant weigh the most."}
+        </SectionHead>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="v2-nr-box">
+            <p className="v2-nr-box-t">{isTh ? "ธาตุ" : "Elements"}</p>
             {(["fire", "earth", "air", "water"] as Element[]).map((e) => (
-              <div key={e} className="space-y-1">
-                <div className="flex justify-between text-xs">
-                  <span className="text-ink font-semibold">{ELEMENT_TEXT[e].name[lang]}</span>
-                  <span className="text-muted">{names(chart.distribution.elements[e])}</span>
-                </div>
-                <div className="v2-nt-bar">
-                  <span className={e} style={{ width: `${(chart.distribution.elementScore[e] / elementTotal) * 100}%` }} />
-                </div>
+              <div key={e} className="v2-nr-meter">
+                <span className="v2-nr-meter-l">{ELEMENT_TEXT[e].name[lang]}</span>
+                <span className="v2-nt-bar">
+                  <span className={e} style={{ width: `${pct(chart.distribution.elementScore[e], elementTotal)}%` }} />
+                </span>
+                <span className="v2-nr-meter-v ui2-num">{pct(chart.distribution.elementScore[e], elementTotal)}%</span>
               </div>
             ))}
-            <h4 className="font-serif-th font-bold text-ink text-sm pt-2">{isTh ? "คุณภาพราศี" : "Modalities"}</h4>
+            <p className="v2-nr-box-t pt-2">{isTh ? "วิธีลงมือ" : "Modes"}</p>
             {(["cardinal", "fixed", "mutable"] as Modality[]).map((m) => (
-              <div key={m} className="space-y-1">
-                <div className="flex justify-between text-xs">
-                  <span className="text-ink font-semibold">{MODALITY_TEXT[m].name[lang]}</span>
-                  <span className="text-muted">{names(chart.distribution.modalities[m])}</span>
-                </div>
-                <div className="v2-nt-bar">
-                  <span className="mod" style={{ width: `${(chart.distribution.modalityScore[m] / modalityTotal) * 100}%` }} />
-                </div>
+              <div key={m} className="v2-nr-meter">
+                <span className="v2-nr-meter-l">{MODALITY_TEXT[m].name[lang].replace(/\s*\(.*\)$/, "")}</span>
+                <span className="v2-nt-bar">
+                  <span className="mod" style={{ width: `${pct(chart.distribution.modalityScore[m], modalityTotal)}%` }} />
+                </span>
+                <span className="v2-nr-meter-v ui2-num">{pct(chart.distribution.modalityScore[m], modalityTotal)}%</span>
               </div>
             ))}
-            <p className="text-xs text-muted pt-1">
-              {isTh ? "คะแนน: อาทิตย์ จันทร์ ลัคนา 3 · กลางฟ้า พุธ ศุกร์ อังคาร 2 · พฤหัส เสาร์ 1 · ดาวนอก 0.5" : "Weights: Sun, Moon, Ascendant 3; MC, Mercury, Venus, Mars 2; Jupiter, Saturn 1; outer planets 0.5."}
+            <p className="v2-nr-note">
+              {isTh ? "จรราศี = ผู้ริเริ่ม · สถิรราศี = ผู้ยืนหยัด · อุภยราศี = ผู้ปรับตัว" : "Cardinal = starter, fixed = sustainer, mutable = adapter."}
             </p>
           </div>
-          <div className="altar-card-porcelain rounded-xl p-4 space-y-3 text-sm">
-            <div>
-              <h4 className="font-serif-th font-bold text-ink">{isTh ? "หยิน-หยาง" : "Polarity"}</h4>
-              {(["yang", "yin"] as const).map((p) => (
-                <p key={p} className="text-muted">
-                  <span className="text-ink font-semibold">{POLARITY_TEXT[p].name[lang]}</span> {chart.distribution.polarity[p].length}: {names(chart.distribution.polarity[p])}
-                </p>
+          <div className="v2-nr-box">
+            <p className="v2-nr-box-t">{isTh ? "ดาวเด่นในผัง" : "Most prominent planets"}</p>
+            <ol className="v2-nr-dom">
+              {chart.dominantPlanets.slice(0, 3).map((d, i) => (
+                <li key={d.id}>
+                  <span className="v2-nr-dom-n ui2-num">{i + 1}</span>
+                  <span>
+                    <b>{BODY_TEXT[d.id].name[lang]}</b>
+                    <span className="v2-nr-note">
+                      {d.reasons
+                        .map((r) => {
+                          const [k] = r.split(":");
+                          return DOMINANT_REASON_TEXT[k]?.[lang] ?? k;
+                        })
+                        .join(isTh ? " · " : ", ")}
+                    </span>
+                  </span>
+                </li>
               ))}
-            </div>
-            {chart.distribution.hemispheres && (
+            </ol>
+            <dl className="v2-nr-facts">
+              {chart.chartRuler && (
+                <div>
+                  <dt>{isTh ? "เจ้าเรือนลัคนา" : "Chart ruler"}</dt>
+                  <dd>{BODY_TEXT[chart.chartRuler].name[lang]}</dd>
+                </div>
+              )}
               <div>
-                <h4 className="font-serif-th font-bold text-ink">{isTh ? "ซีกของผัง (ดาว 10 ดวง)" : "Hemispheres (10 planets)"}</h4>
-                {(["north", "south", "east", "west"] as const).map((h) => (
-                  <p key={h} className="text-muted">
-                    <span className="text-ink font-semibold">{HEMISPHERE_TEXT[h].name[lang]}</span> {chart.distribution.hemispheres![h].length}: {names(chart.distribution.hemispheres![h])}
-                  </p>
-                ))}
+                <dt>{isTh ? "หยาง : หยิน" : "Yang : yin"}</dt>
+                <dd>
+                  {chart.distribution.polarity.yang.length} : {chart.distribution.polarity.yin.length}{" "}
+                  <span className="v2-nr-note">
+                    {chart.distribution.polarity.yang.length >= chart.distribution.polarity.yin.length ? POLARITY_TEXT.yang.meaning[lang] : POLARITY_TEXT.yin.meaning[lang]}
+                  </span>
+                </dd>
               </div>
-            )}
-            <div>
-              <h4 className="font-serif-th font-bold text-ink">{isTh ? "ข้างขึ้นข้างแรมตอนเกิด" : "Lunar phase at birth"}</h4>
-              <p className="text-muted">
-                <span className="text-ink font-semibold">{MOON_PHASE_TEXT[chart.moonPhase.phase].name[lang]}</span> ({Math.round(chart.moonPhase.elongation)}°){" "}
-                {MOON_PHASE_TEXT[chart.moonPhase.phase].meaning[lang]}
-              </p>
-            </div>
-            {chart.dayChart !== null && (
-              <p className="text-muted">
-                <span className="text-ink font-semibold">{isTh ? "ผังกลางวัน/กลางคืน:" : "Day or night chart:"}</span>{" "}
-                {chart.dayChart ? (isTh ? "กลางวัน (ดวงอาทิตย์อยู่เหนือขอบฟ้า)" : "day (Sun above the horizon)") : isTh ? "กลางคืน (ดวงอาทิตย์อยู่ใต้ขอบฟ้า)" : "night (Sun below the horizon)"}
-              </p>
-            )}
+              {chart.distribution.hemispheres && (
+                <div>
+                  <dt>{isTh ? "ดาวส่วนใหญ่อยู่" : "Most planets"}</dt>
+                  <dd>
+                    {chart.distribution.hemispheres.south.length >= chart.distribution.hemispheres.north.length
+                      ? HEMISPHERE_TEXT.south.name[lang]
+                      : HEMISPHERE_TEXT.north.name[lang]}
+                    {isTh ? " และ" : " and "}
+                    {chart.distribution.hemispheres.east.length >= chart.distribution.hemispheres.west.length
+                      ? HEMISPHERE_TEXT.east.name[lang]
+                      : HEMISPHERE_TEXT.west.name[lang]}
+                  </dd>
+                </div>
+              )}
+              {chart.dayChart !== null && (
+                <div>
+                  <dt>{isTh ? "เกิดตอน" : "Born by"}</dt>
+                  <dd>{chart.dayChart ? (isTh ? "กลางวัน (อาทิตย์อยู่เหนือขอบฟ้า)" : "day (Sun above the horizon)") : isTh ? "กลางคืน (อาทิตย์อยู่ใต้ขอบฟ้า)" : "night (Sun below the horizon)"}</dd>
+                </div>
+              )}
+            </dl>
           </div>
         </div>
-
-        <div className="altar-card-porcelain rounded-xl p-4 space-y-2">
-          <h4 className="font-serif-th font-bold text-ink text-sm">{isTh ? "ดาวเด่นในผัง" : "Dominant planets"}</h4>
-          <ol className="space-y-1 text-sm">
-            {chart.dominantPlanets.slice(0, 5).map((d, i) => (
-              <li key={d.id} className="flex flex-wrap gap-x-2 border-l-2 border-line-warm pl-2">
-                <span className="font-semibold text-ink">
-                  {i + 1}. {BODY_TEXT[d.id].name[lang]}
-                </span>
-                <span className="tabular-nums text-muted">{d.score.toFixed(1)}</span>
-                <span className="text-xs text-muted">
-                  {d.reasons
-                    .map((r) => {
-                      const [k, n] = r.split(":");
-                      return `${DOMINANT_REASON_TEXT[k]?.[lang] ?? k}${n ? ` ${n}` : ""}`;
-                    })
-                    .join(" · ")}
-                </span>
-              </li>
-            ))}
-          </ol>
-          {chart.chartRuler && (
-            <p className="text-sm text-muted">
-              {isTh ? "เจ้าเรือนลัคนา: " : "Chart ruler: "}
-              <span className="text-ink font-semibold">{BODY_TEXT[chart.chartRuler].name[lang]}</span>
-            </p>
-          )}
-        </div>
-
         {chart.patterns.length > 0 && (
-          <div className="altar-card-porcelain rounded-xl p-4 space-y-2">
-            <h4 className="font-serif-th font-bold text-ink text-sm">{isTh ? "รูปแบบพิเศษในผัง" : "Chart patterns"}</h4>
-            <ul className="space-y-2 text-sm">
+          <div className="v2-nr-box">
+            <p className="v2-nr-box-t">{isTh ? "รูปแบบพิเศษในผัง" : "Chart patterns"}</p>
+            <ul className="space-y-2">
               {chart.patterns.map((p, i) => {
                 const d = describePattern(chart, p, lang);
                 return (
-                  <li key={i} className="border-l-2 border-gold-ink pl-2">
-                    <span className="font-semibold text-ink">{d.title}</span>
-                    <span className="block text-muted">{d.text}</span>
+                  <li key={i} className="v2-nr-pattern">
+                    <b>{d.title}</b>
+                    <span>{d.text}</span>
                   </li>
                 );
               })}
@@ -588,193 +710,256 @@ export default function NatalResult({
         )}
       </section>
 
-      {/* ── ดาวฤกษ์ + Lots ── */}
-      <section aria-labelledby="natal-stars" className="space-y-4">
-        <SectionTitle id="natal-stars">{isTh ? "ดาวฤกษ์และจุด Lots" : "Fixed stars and lots"}</SectionTitle>
-        <p className="text-xs text-muted">
-          {isTh
-            ? "ดาวฤกษ์สำคัญ 35 ดวง (รวมดาวฤกษ์หลวง 4 ดวงและ Behenian 15 ดวง) ที่ทับดาวหรือมุมฟ้าในผังของคุณ ภายใน 1 องศา (อาทิตย์ จันทร์ ลัคนา กลางฟ้า 1.5 องศา) ตำแหน่งจากแคตตาล็อก Hipparcos เลื่อนตามการหมุนควงถึงวันเกิด"
-            : "Major fixed stars (including the four Royal stars and the fifteen Behenian stars) within 1 degree of a planet or angle in your chart (1.5 for the Sun, Moon, Ascendant and Midheaven). Positions come from the Hipparcos catalogue, precessed to your birth date."}
-        </p>
-        {stars.contacts.length ? (
-          <ul className="space-y-2">
-            {stars.contacts.map((c) => (
-              <li key={`${c.star.name}-${c.body}`} className="border-l-2 border-line-warm pl-2 text-sm">
-                <p className="font-semibold text-ink">
-                  {isTh ? STAR_TEXT[c.star.name]?.th ?? c.star.name : c.star.name} {isTh ? "ทับ" : "on"} {bodyName(c.body, lang)}{" "}
-                  <span className="text-xs font-normal text-muted tabular-nums">orb {formatDegree(c.orb)}</span>
-                </p>
-                <p className="text-ink">{STAR_TEXT[c.star.name]?.meaning[lang]}</p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-muted">{isTh ? "ไม่มีดาวฤกษ์สำคัญทับดาวในผังของคุณภายในเกณฑ์" : "No major fixed star sits within orb of your planets or angles."}</p>
-        )}
-        <details className="rounded-xl border border-line-warm px-3 py-2">
-          <summary className="cursor-pointer text-sm font-semibold text-ink min-h-[36px] flex items-center">{isTh ? "ตำแหน่งดาวฤกษ์ทั้งหมด ณ วันเกิด" : "All fixed star positions at birth"}</summary>
-          <table className="v2-nt-table mt-2">
-            <thead>
-              <tr>
-                <th scope="col">{isTh ? "ดาวฤกษ์" : "Star"}</th>
-                <th scope="col">{isTh ? "ราศี" : "Sign"}</th>
-                <th scope="col">{isTh ? "องศา" : "Degree"}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[...stars.all].sort((a, b) => a.lon - b.lon).map((st) => (
-                <tr key={st.name}>
-                  <td>
-                    {isTh ? STAR_TEXT[st.name]?.th ?? st.name : st.name}
-                    {ROYAL_STARS.has(st.name) && <span className="block text-xs text-muted">{isTh ? "ดาวฤกษ์หลวง" : "Royal star"}</span>}
-                  </td>
-                  <td>{signName(Math.floor(st.lon / 30) % 12, lang)}</td>
-                  <td className="tabular-nums">{formatDegree(st.lon % 30)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </details>
-        {lots ? (
-          <div className="space-y-2">
-            <h3 className="font-serif-th font-bold text-ink">{isTh ? "จุด Lots 7 จุดของ Hermes" : "The seven Hermetic lots"}</h3>
-            <p className="text-xs text-muted">
-              {isTh
-                ? `สูตรของ Paulus Alexandrinus (ค.ศ. 378) ใช้ลัคนากับดาว 2 ดวง ผังของคุณเป็นผัง${chart.dayChart ? "กลางวัน" : "กลางคืน"} จึงใช้สูตร${chart.dayChart ? "กลางวัน" : "กลางคืน"}`
-                : `Formulas of Paulus Alexandrinus (378 AD) from the Ascendant and two planets. Yours is a ${chart.dayChart ? "day" : "night"} chart, so the ${chart.dayChart ? "day" : "night"} formulas apply.`}
-            </p>
+      {/* ── ลงลึก: ตารางสำหรับคนที่อ่านผังเป็น ── */}
+      <section aria-labelledby="natal-deep" className="v2-nr-sec">
+        <SectionHead id="natal-deep" n={chart.houses ? 7 : 6} title={isTh ? "ข้อมูลละเอียด" : "In depth"}>
+          {isTh ? "ตารางตัวเลขสำหรับคนที่อ่านผังเป็น แตะหัวข้อเพื่อเปิด" : "Tables for experienced chart readers. Tap a heading to open it."}
+        </SectionHead>
+        <div className="v2-nr-deep">
+          <details>
+            <summary>
+              {isTh ? "ตำแหน่งดาวทั้งหมด" : "All positions"}
+              <MoreLabel isTh={isTh} />
+            </summary>
             <table className="v2-nt-table">
               <thead>
                 <tr>
-                  <th scope="col">Lot</th>
-                  <th scope="col">{isTh ? "ตำแหน่ง" : "Position"}</th>
-                  <th scope="col">{isTh ? "เรือน" : "House"}</th>
+                  <th scope="col">{isTh ? "ดาว/จุด" : "Body"}</th>
+                  <th scope="col">{isTh ? "ราศี" : "Sign"}</th>
+                  <th scope="col">{isTh ? "องศา" : "Degree"}</th>
+                  {chart.houses && <th scope="col">{isTh ? "เรือน" : "House"}</th>}
+                  <th scope="col">{isTh ? "สถานะ" : "Notes"}</th>
                 </tr>
               </thead>
               <tbody>
-                {lots.map((l) => (
-                  <tr key={l.id}>
-                    <td>
-                      {LOT_TEXT[l.id].name[lang]}
-                      <span className="block text-xs text-muted whitespace-normal">{LOT_TEXT[l.id].meaning[lang]}</span>
-                    </td>
-                    <td className="tabular-nums">
-                      {signName(l.sign, lang)} {formatDegree(l.degInSign)}
-                    </td>
-                    <td>{l.house}</td>
+                {TABLE_ORDER.map((id) => get(id))
+                  .filter((b): b is BodyPosition => !!b)
+                  .map((b) => (
+                    <tr key={b.id} className={focus === b.id ? "is-focus" : undefined} onClick={() => setFocus(focus === b.id ? null : b.id)}>
+                      <td className="font-semibold text-ink">{BODY_TEXT[b.id].name[lang]}</td>
+                      <td>{shortSign(b.sign)}</td>
+                      <td className="tabular-nums">{formatDegree(b.degInSign)}</td>
+                      {chart.houses && <td className="tabular-nums">{b.house}</td>}
+                      <td>
+                        {b.retrograde && !["node", "southNode", "lilith"].includes(b.id) && <span className="v2-nt-retro mr-1">{isTh ? "ถอยหลัง" : "Rx"}</span>}
+                        {b.dignities.map((d) => (
+                          <span key={d} className={`v2-nt-dig v2-nt-dig-${d}`}>
+                            {DIGNITY_TEXT[d].name[lang]}
+                          </span>
+                        ))}
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </details>
+
+          {chart.houses && (
+            <details>
+              <summary>
+                {isTh ? "จุดเริ่มเรือน" : "House cusps"}
+                <MoreLabel isTh={isTh} />
+              </summary>
+              <p className="v2-nr-note">{chart.houseSystemUsed && HOUSE_SYSTEM_TEXT[chart.houseSystemUsed].note[lang]}</p>
+              <table className="v2-nt-table">
+                <thead>
+                  <tr>
+                    <th scope="col">{isTh ? "เรือน" : "House"}</th>
+                    <th scope="col">{isTh ? "เริ่มที่" : "Cusp"}</th>
+                    <th scope="col">{isTh ? "เรื่อง" : "Area of life"}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {chart.houses.map((cusp, i) => (
+                    <tr key={i}>
+                      <td className="font-semibold tabular-nums">{i + 1}</td>
+                      <td className="whitespace-nowrap">
+                        {shortSign(Math.floor(cusp / 30))} {formatDegree(cusp % 30)}
+                      </td>
+                      <td className="text-muted">{HOUSE_TEXT[i].title[lang]}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </details>
+          )}
+
+          <details>
+            <summary>
+              {isTh ? `ตารางมุมสัมพันธ์ (${visibleAspects.length})` : `Aspect grid (${visibleAspects.length})`}
+              <MoreLabel isTh={isTh} />
+            </summary>
+            <p className="v2-nr-note">
+              {isTh
+                ? "ตัวเลขเล็กคือ orb (องศาที่ห่างจากมุมพอดี) ยิ่งน้อยยิ่งแรง · กุม 0 · โยค 60 · จตุ 90 · ตรี 120 · เล็ง 180"
+                : "The small number is the orb (distance from exact); smaller means stronger."}
+            </p>
+            <table className="v2-nt-grid" aria-label={isTh ? "ตารางมุมสัมพันธ์" : "Aspect grid"} style={{ "--nt-n": gridIds.length } as React.CSSProperties}>
+              <colgroup>
+                {gridIds.map((id) => (
+                  <col key={id} />
+                ))}
+              </colgroup>
+              <tbody>
+                {gridIds.map((rowId, r, rows) => (
+                  <tr key={rowId}>
+                    {rows.slice(0, r).map((colId) => {
+                      const a = visibleAspects.find((x) => (x.a === rowId && x.b === colId) || (x.a === colId && x.b === rowId));
+                      return (
+                        <td key={colId} className={a ? toneOf.get(a.type) : undefined} title={a ? aspectTitle(a, lang) : undefined}>
+                          {a && (
+                            <>
+                              {ASPECT_SHORT[a.type][lang]}
+                              <span className="o">{a.orb.toFixed(0)}</span>
+                            </>
+                          )}
+                        </td>
+                      );
+                    })}
+                    <th scope="row">{BODY_TEXT[rowId].short[lang]}</th>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-        ) : (
-          <p className="text-xs text-muted">{isTh ? "จุด Lots ต้องใช้ลัคนา จึงต้องรู้เวลาเกิด" : "The lots need the Ascendant, so a birth time is required."}</p>
-        )}
-      </section>
-
-      {/* ── คำอธิบาย ── */}
-      <section aria-labelledby="natal-reading" className="space-y-4">
-        <SectionTitle id="natal-reading">{isTh ? "คำอธิบายผังของคุณ" : "Your chart, explained"}</SectionTitle>
-        <div className="altar-card-porcelain rounded-xl p-4 space-y-2 text-sm leading-relaxed">
-          {summary.map((p, i) => (
-            <p key={i} className={i === 0 ? "text-ink font-semibold" : "text-ink"}>
-              {p}
-            </p>
-          ))}
-        </div>
-        <div className="space-y-2">
-          {TABLE_ORDER.filter((id) => id !== "southNode")
-            .map((id) => get(id))
-            .filter((b): b is BodyPosition => !!b)
-            .map((b) => {
-              const c = cardsFor(b);
-              const personal = b.id === "sun" || b.id === "moon" || b.id === "asc";
-              const showCards = !personal || bigRevealed(b.id);
-              return (
-                <details key={b.id} className="altar-card-porcelain rounded-xl px-4 py-3 group" open={b.id === "sun"}>
-                  <summary className="cursor-pointer list-none flex flex-wrap items-baseline gap-x-2 min-h-[32px]">
-                    <span className="font-serif-th font-bold text-ink">{BODY_TEXT[b.id].name[lang]}</span>
-                    <span className="text-sm text-muted">
-                      {placement(b, lang)}
-                      {b.house ? (isTh ? ` · เรือน ${b.house}` : ` · house ${b.house}`) : ""}
-                      {b.retrograde && !["node", "lilith"].includes(b.id) ? (isTh ? " · ถอยหลัง" : " · retrograde") : ""}
-                    </span>
-                    <span className="v2-nt-more"><span className="v2-nt-more-open">{isTh ? "อ่าน" : "Read"}</span><span className="v2-nt-more-close">{isTh ? "ย่อ" : "Close"}</span></span>
-                  </summary>
-                  <div className="pt-2 space-y-2 text-sm leading-relaxed text-ink">
-                    <p className="text-xs text-muted">{BODY_TEXT[b.id].theme[lang]}</p>
-                    {describeBody(chart, b, lang).map((p, i) => (
-                      <p key={i}>{p}</p>
-                    ))}
-                    {(b.id === "asc" || b.id === "moon") && (
-                      <p className="text-sm">
-                        <Link href={`/natal-chart/${b.id === "asc" ? "rising" : "moon"}/${ZODIAC_SIGNS[b.sign].id}`} className="underline text-gold-ink">
-                          {b.id === "asc"
-                            ? isTh
-                              ? `อ่านเรื่องลัคนา${ZODIAC_SIGNS[b.sign].nameTh}แบบละเอียด`
-                              : `Full guide to ${ZODIAC_SIGNS[b.sign].nameEn} rising`
-                            : isTh
-                              ? `อ่านเรื่องดวงจันทร์${ZODIAC_SIGNS[b.sign].nameTh}แบบละเอียด`
-                              : `Full guide to the Moon in ${ZODIAC_SIGNS[b.sign].nameEn}`}
-                        </Link>
-                      </p>
-                    )}
-                    {(PLANET_IDS as readonly string[]).includes(b.id) || personal ? (
-                      <p className="text-xs text-muted border-l-2 border-line-warm pl-2">
-                        {showCards
-                          ? [
-                              c.planet ? `${isTh ? "ไพ่ประจำดาว" : "Planet card"}: ${cardName(c.planet)}` : null,
-                              `${isTh ? "ไพ่ประจำราศี" : "Sign card"}: ${cardName(c.sign)}`,
-                              `${isTh ? "ไพ่ประจำช่วงองศา" : "Decan card"}: ${cardName(c.decan)}`,
-                            ]
-                              .filter(Boolean)
-                              .join(" · ")
-                          : isTh
-                            ? "พลิกไพ่ในส่วนไพ่ประจำดวงกำเนิดเพื่อดูไพ่ของจุดนี้"
-                            : "Turn over the cards in the tarot section to see this point's cards."}
-                      </p>
-                    ) : null}
-                  </div>
-                </details>
-              );
-            })}
-        </div>
-        <div className="space-y-2">
-          <h4 className="font-serif-th font-bold text-ink">{isTh ? "มุมสัมพันธ์หลัก (เรียงจากแรงสุด)" : "Major aspects (tightest first)"}</h4>
-          <ul className="space-y-2 text-sm leading-relaxed">
-            {chart.aspects
-              .filter((a) => majorTypes.has(a.type))
-              .map((a) => (
-                <li key={`${a.a}-${a.b}`} className="border-l-2 border-line-warm pl-2">
-                  <span className="font-semibold text-ink">{aspectTitle(a, lang)}</span>{" "}
-                  <span className="text-xs text-muted tabular-nums">orb {formatDegree(a.orb)}</span>
-                  <span className="block text-ink">{describeAspect(a, lang)}</span>
+            <ul className="v2-nr-asplist">
+              {visibleAspects.map((a) => (
+                <li key={`${a.a}-${a.b}`}>
+                  <b>{aspectTitle(a, lang)}</b>
+                  <span>
+                    orb {formatDegree(a.orb)}
+                    {a.applying === null ? "" : a.applying ? (isTh ? " · กำลังเข้า" : " · applying") : isTh ? " · กำลังแยก" : " · separating"}
+                  </span>
                 </li>
               ))}
-          </ul>
+            </ul>
+          </details>
+
+          <details>
+            <summary>
+              {isTh ? `ดาวฤกษ์ที่ทับดาวในผัง (${stars.contacts.length})` : `Fixed stars on your chart (${stars.contacts.length})`}
+              <MoreLabel isTh={isTh} />
+            </summary>
+            <p className="v2-nr-note">
+              {isTh
+                ? "ดาวฤกษ์สำคัญ 35 ดวง (รวมดาวฤกษ์หลวง 4 ดวงและ Behenian 15 ดวง) ที่ทับดาวหรือมุมฟ้าในผังของคุณ ภายใน 1 องศา (อาทิตย์ จันทร์ ลัคนา กลางฟ้า 1.5 องศา) ตำแหน่งจากแคตตาล็อก Hipparcos เลื่อนตามการหมุนควงถึงวันเกิด"
+                : "Major fixed stars (including the four Royal stars and the fifteen Behenian stars) within 1 degree of a planet or angle in your chart (1.5 for the Sun, Moon, Ascendant and Midheaven). Positions come from the Hipparcos catalogue, precessed to your birth date."}
+            </p>
+            {stars.contacts.length ? (
+              <ul className="space-y-2">
+                {stars.contacts.map((c) => (
+                  <li key={`${c.star.name}-${c.body}`} className="v2-nr-pattern">
+                    <b>
+                      {isTh ? STAR_TEXT[c.star.name]?.th ?? c.star.name : c.star.name} {isTh ? "ทับ" : "on"} {bodyName(c.body, lang)}{" "}
+                      <span className="v2-nr-note tabular-nums">orb {formatDegree(c.orb)}</span>
+                    </b>
+                    <span>{STAR_TEXT[c.star.name]?.meaning[lang]}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted">{isTh ? "ไม่มีดาวฤกษ์สำคัญทับดาวในผังของคุณภายในเกณฑ์" : "No major fixed star sits within orb of your planets or angles."}</p>
+            )}
+            <p className="v2-nr-sub">{isTh ? "ตำแหน่งดาวฤกษ์ทั้งหมด ณ วันเกิด" : "All fixed star positions at birth"}</p>
+            <table className="v2-nt-table">
+              <thead>
+                <tr>
+                  <th scope="col">{isTh ? "ดาวฤกษ์" : "Star"}</th>
+                  <th scope="col">{isTh ? "ราศี" : "Sign"}</th>
+                  <th scope="col">{isTh ? "องศา" : "Degree"}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...stars.all].sort((a, b) => a.lon - b.lon).map((st) => (
+                  <tr key={st.name}>
+                    <td>
+                      {isTh ? STAR_TEXT[st.name]?.th ?? st.name : st.name}
+                      {ROYAL_STARS.has(st.name) && <span className="block text-xs text-muted">{isTh ? "ดาวฤกษ์หลวง" : "Royal star"}</span>}
+                    </td>
+                    <td>{shortSign(Math.floor(st.lon / 30) % 12)}</td>
+                    <td className="tabular-nums">{formatDegree(st.lon % 30)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </details>
+
+          <details>
+            <summary>
+              {isTh ? "จุด Lots 7 จุดของ Hermes" : "The seven Hermetic lots"}
+              <MoreLabel isTh={isTh} />
+            </summary>
+            {lots ? (
+              <>
+                <p className="v2-nr-note">
+                  {isTh
+                    ? `สูตรของ Paulus Alexandrinus (ค.ศ. 378) ใช้ลัคนากับดาว 2 ดวง ผังของคุณเป็นผัง${chart.dayChart ? "กลางวัน" : "กลางคืน"} จึงใช้สูตร${chart.dayChart ? "กลางวัน" : "กลางคืน"}`
+                    : `Formulas of Paulus Alexandrinus (378 AD) from the Ascendant and two planets. Yours is a ${chart.dayChart ? "day" : "night"} chart, so the ${chart.dayChart ? "day" : "night"} formulas apply.`}
+                </p>
+                <table className="v2-nt-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Lot</th>
+                      <th scope="col">{isTh ? "ตำแหน่ง" : "Position"}</th>
+                      <th scope="col">{isTh ? "เรือน" : "House"}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lots.map((l) => (
+                      <tr key={l.id}>
+                        <td>
+                          {LOT_TEXT[l.id].name[lang]}
+                          <span className="block text-xs text-muted whitespace-normal">{LOT_TEXT[l.id].meaning[lang]}</span>
+                        </td>
+                        <td className="tabular-nums">
+                          {shortSign(l.sign)} {formatDegree(l.degInSign)}
+                        </td>
+                        <td>{l.house}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            ) : (
+              <p className="v2-nr-note">{isTh ? "จุด Lots ต้องใช้ลัคนา จึงต้องรู้เวลาเกิด" : "The lots need the Ascendant, so a birth time is required."}</p>
+            )}
+          </details>
+
+          <details>
+            <summary>
+              {isTh ? "ข้อมูลการคำนวณ" : "Calculation details"}
+              <MoreLabel isTh={isTh} />
+            </summary>
+            <ul className="v2-nr-calc tabular-nums">
+              <li>UTC: {new Date(chart.input.utcMs).toISOString().replace("T", " ").slice(0, 16)}</li>
+              <li>Julian Day (UT): {chart.jdUt.toFixed(5)}</li>
+              <li>
+                {isTh ? "พิกัด" : "Coordinates"}: {chart.input.lat.toFixed(4)}, {chart.input.lon.toFixed(4)}
+              </li>
+              <li>
+                {isTh ? "โหนด" : "Node"}: {chart.input.nodeType === "true" ? (isTh ? "โหนดจริง" : "true node") : isTh ? "โหนดเฉลี่ย" : "mean node"}
+              </li>
+              <li>RAMC: {chart.ramc.toFixed(4)}° · {isTh ? "ความเอียงสุริยวิถี" : "Obliquity"}: {chart.obliquity.toFixed(4)}°</li>
+              <li>{isTh ? "ธาตุของราศีลัคนา" : "Ascendant element"}: {asc ? ELEMENT_TEXT[SIGN_ELEMENT[asc.sign]].name[lang] : "-"}</li>
+              <li>
+                {isTh
+                  ? "ตำแหน่งดาว: astronomy-engine (ตรวจกับ NASA JPL Horizons คลาดไม่เกิน 1 ลิปดา) · ไครอน: ตาราง NASA JPL · เรือน: สูตรมาตรฐานชุดเดียวกับ Swiss Ephemeris"
+                  : "Planets: astronomy-engine (checked against NASA JPL Horizons, within 1 arcminute). Chiron: NASA JPL table. Houses: standard formulas as used by Swiss Ephemeris."}
+              </li>
+            </ul>
+          </details>
         </div>
       </section>
-
-      {/* ── ข้อมูลการคำนวณ ── */}
-      <details className="text-xs text-muted">
-        <summary className="cursor-pointer min-h-[32px]">{isTh ? "ข้อมูลการคำนวณ" : "Calculation details"}</summary>
-        <ul className="pt-2 space-y-1 tabular-nums">
-          <li>UTC: {new Date(chart.input.utcMs).toISOString().replace("T", " ").slice(0, 16)}</li>
-          <li>Julian Day (UT): {chart.jdUt.toFixed(5)}</li>
-          <li>
-            {isTh ? "พิกัด" : "Coordinates"}: {chart.input.lat.toFixed(4)}, {chart.input.lon.toFixed(4)}
-          </li>
-          <li>RAMC: {chart.ramc.toFixed(4)}° · {isTh ? "ความเอียงสุริยวิถี" : "Obliquity"}: {chart.obliquity.toFixed(4)}°</li>
-          <li>{isTh ? "ธาตุของราศีลัคนา" : "Ascendant element"}: {asc ? ELEMENT_TEXT[SIGN_ELEMENT[asc.sign]].name[lang] : "-"}</li>
-          <li>
-            {isTh
-              ? "ตำแหน่งดาว: astronomy-engine (ตรวจกับ NASA JPL Horizons คลาดไม่เกิน 1 ลิปดา) · ไครอน: ตาราง NASA JPL · เรือน: สูตรมาตรฐานชุดเดียวกับ Swiss Ephemeris"
-              : "Planets: astronomy-engine (checked against NASA JPL Horizons, within 1 arcminute). Chiron: NASA JPL table. Houses: standard formulas as used by Swiss Ephemeris."}
-          </li>
-        </ul>
-      </details>
       </>
       )}
     </div>
+  );
+}
+
+function MoreLabel({ isTh }: { isTh: boolean }) {
+  return (
+    <span className="v2-nt-more">
+      <span className="v2-nt-more-open">{isTh ? "เปิด" : "Open"}</span>
+      <span className="v2-nt-more-close">{isTh ? "ย่อ" : "Close"}</span>
+    </span>
   );
 }
