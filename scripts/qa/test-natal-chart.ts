@@ -1118,6 +1118,34 @@ console.log("\n6.18) เนื้อหาเข้าใจง่ายแต�
     res.includes("{h.basis}") && res.includes("{h.advice}") && rep.includes("h.basis") && rep.includes("h.advice") && res.includes("chartGlance(chart, lang, themes)") && rd("src/lib/astro/natal-report.ts").includes("chartGlance(chart, lang, themes)"),
   );
   check("prompt ของแม่หมอ AI ได้ที่มาในผังของเรื่องเด่นด้วย", /h\$\{i \+ 1\}: \$\{h\.title\} \(\$\{h\.basis\}\) \| \$\{h\.text\}/.test(rd("src/lib/astro/natal-ai.ts")));
+
+  // ส่วนล่างของหน้า: เรือนว่างอ่านจากเจ้าเรือน · มุมสำคัญไม่นับดาวรุ่นกันเอง · สมดุลพลังบอกความหมาย
+  const { keyAspects, emptyHouseNote } = await import("../../src/lib/astro/natal-text");
+  const { PLANET_IDS: PLANET_IDS_LIST } = await import("../../src/lib/astro/natal");
+  let houseOk = true;
+  let houseCount = 0;
+  let genOk = true;
+  for (const inp of samples) {
+    const c = computeNatalChart(inp);
+    genOk &&= keyAspects(c, 5).every((a) => !(["uranus", "neptune", "pluto"].includes(a.a) && ["uranus", "neptune", "pluto"].includes(a.b)));
+    for (let h = 1; h <= 12; h++) {
+      const occupied = c.bodies.some((b) => b.house === h && (PLANET_IDS_LIST as readonly string[]).includes(b.id));
+      for (const lang of ["th", "en"] as const) {
+        const note = emptyHouseNote(c, h, lang);
+        if (!c.houses || occupied) houseOk &&= note === null;
+        else {
+          houseCount++;
+          houseOk &&= !!note && !badThai.test(note) && (lang === "th" || !/[฀-๿]/.test(note));
+        }
+      }
+    }
+  }
+  check(`เรือนว่างบอกเจ้าเรือนว่าอยู่เรือนไหน · เรือนที่มีดาวหรือไม่รู้เวลาเกิดไม่บอก (ตรวจ ${houseCount} ข้อความ)`, houseOk && houseCount > 20);
+  check("ดาวที่คุยกันแรงที่สุด: ไม่นับมุมระหว่างดาวรุ่นกันเอง (ยูเรนัส เนปจูน พลูโต)", genOk && /keyAspectsOf\(chart, 5\)/.test(res));
+  check(
+    "สมดุลพลัง: ธาตุที่ขาดบอกวิธีเติม · ธาตุน้อยสุดบอกวิธีเติม · ดาวส่วนใหญ่อยู่ฝั่งไหนบอกความหมาย · เกิดกลางวัน/คืนบอกความหมาย",
+    res.includes("ELEMENT_DEPTH[e].missKey[lang]") && res.includes("lowElement") && /HEMISPHERE_TEXT\.south : HEMISPHERE_TEXT\.north\)\.meaning/.test(res) && res.includes("SECT_TEXT[chart.dayChart"),
+  );
 }
 
 console.log("\n6.20) คำสำคัญไพ่ประจำตัว — ไม่ฝังลง HTML · ตรงกับข้อมูลไพ่ต้นทางทุกใบ");

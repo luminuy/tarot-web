@@ -310,6 +310,7 @@ function ReportView({ report, onClose }: { report: NatalReport; onClose: () => v
                     </span>
                     <span className="nr-house-t">{h.title}</span>
                     <span className="nr-house-b">{h.bodies.length ? h.bodies.join(isTh ? " " : ", ") : t("ไม่มีดาว", "No planets")}</span>
+                    {h.note && <span className="nr-house-note">{h.note}</span>}
                   </li>
                 ))}
               </ol>

@@ -31,7 +31,7 @@ import {
   type Modality,
   type NatalChart,
 } from "@/lib/astro/natal";
-import { aspectTitle, bodyName, cardsFor, chartGlance, describeAspect, describeBody, describePattern, lifeAreas, signName } from "@/lib/astro/natal-text";
+import { aspectTitle, bodyName, cardsFor, chartGlance, describeAspect, describeBody, describePattern, emptyHouseNote, keyAspects as keyAspectsOf, lifeAreas, signName } from "@/lib/astro/natal-text";
 import { birthTimeSensitivity, chartHighlights, describeTimeSensitivity } from "@/lib/astro/natal-insight";
 import { zodiacSignPath } from "@/lib/tarot/zodiac";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
@@ -43,7 +43,7 @@ import { hermeticLots } from "@/lib/astro/lots";
 import { LOT_TEXT, STAR_TEXT } from "@/data/natal/stars-content";
 import type { NatalCardItem, NatalMeta } from "./NatalChartApp";
 import { NATAL_CARD_KEYWORDS } from "@/data/natal/card-keywords";
-import { PLANET_DEPTH } from "@/data/natal/depth";
+import { ELEMENT_DEPTH, PLANET_DEPTH, SECT_TEXT } from "@/data/natal/depth";
 import type { ChartSpec } from "@/lib/astro/chart-spec";
 import type { TimeMode } from "./NatalTimeTools";
 
@@ -185,8 +185,11 @@ export default function NatalResult({
     chart.distribution.modalityScore[b] > chart.distribution.modalityScore[a] ? b : a,
   );
   const missingElements = (Object.keys(chart.distribution.elements) as Element[]).filter((e) => chart.distribution.elements[e].length === 0);
+  const lowElement = (["fire", "earth", "air", "water"] as Element[])
+    .filter((e) => pct(chart.distribution.elementScore[e], elementTotal) <= 20)
+    .sort((a, b) => chart.distribution.elementScore[a] - chart.distribution.elementScore[b])[0];
   const topPlanet = chart.dominantPlanets[0];
-  const keyAspects = chart.aspects.filter((a) => majorTypes.has(a.type)).slice(0, 5);
+  const keyAspects = keyAspectsOf(chart, 5);
   const majorCount = chart.aspects.filter((a) => majorTypes.has(a.type)).length;
   const planetRows = TABLE_ORDER.filter((id) => id !== "southNode" && id !== "fortune" && id !== "vertex")
     .map((id) => get(id))
@@ -656,11 +659,14 @@ export default function NatalResult({
       {chart.houses && (
         <section aria-labelledby="natal-houses" className="v2-nr-sec">
           <SectionHead id="natal-houses" n={nextN()} title={isTh ? "ดาวอยู่เรือนไหนของชีวิต" : "Where your planets live"}>
-            {isTh ? "เรือนที่มีดาวหลายดวงคือด้านของชีวิตที่คุณทุ่มพลังมาก" : "Houses with several planets are the parts of life where you put the most energy."}
+            {isTh
+              ? "เรือนที่มีดาวหลายดวงคือด้านของชีวิตที่คุณทุ่มพลังมาก เรือนที่ไม่มีดาวไม่ได้แปลว่าไม่มีเรื่อง ให้ดูว่าดาวเจ้าเรือนไปอยู่ไหน"
+              : "Houses with several planets are where you put the most energy. An empty house still matters: look at where its ruling planet sits."}
           </SectionHead>
           <ol className="v2-nr-houses">
             {chart.houses.map((cusp, i) => {
               const inside = planetRows.filter((b) => b.house === i + 1 && b.id !== "asc" && b.id !== "mc");
+              const ruled = inside.length ? null : emptyHouseNote(chart, i + 1, lang);
               return (
                 <li key={i} className={inside.length >= 3 ? "is-busy" : undefined}>
                   <span className="v2-nr-house-top">
@@ -675,7 +681,10 @@ export default function NatalResult({
                       ))}
                     </span>
                   ) : (
-                    <span className="v2-nr-house-empty">{isTh ? "ไม่มีดาว" : "No planets"}</span>
+                    <span className="v2-nr-house-empty">
+                      {isTh ? "ไม่มีดาว" : "No planets"}
+                      {ruled && <span className="v2-nr-house-ruler">{ruled}</span>}
+                    </span>
                   )}
                 </li>
               );
@@ -688,8 +697,8 @@ export default function NatalResult({
       <section aria-labelledby="natal-aspects" className="v2-nr-sec">
         <SectionHead id="natal-aspects" n={nextN()} title={isTh ? "ดาวที่คุยกันแรงที่สุด" : "Your strongest aspects"}>
           {isTh
-            ? `มุมหลักที่แม่นที่สุด ${keyAspects.length} คู่จากทั้งหมด ${majorCount} คู่ ยิ่งอยู่บนยิ่งรู้สึกชัด`
-            : `The ${keyAspects.length} tightest of your ${majorCount} major aspects. The higher, the stronger.`}
+            ? `มุมหลักที่แม่นที่สุด ${keyAspects.length} คู่จากทั้งหมด ${majorCount} คู่ ยิ่งอยู่บนยิ่งรู้สึกชัด ไม่นับมุมระหว่างดาวเดินช้าที่คนรุ่นเดียวกันมีเหมือนกัน`
+            : `The ${keyAspects.length} tightest of your ${majorCount} major aspects. The higher, the stronger. Aspects between slow planets that your whole generation shares are left out.`}
         </SectionHead>
         <ol className="v2-nr-aspects">
           {keyAspects.map((a) => (
@@ -724,9 +733,17 @@ export default function NatalResult({
             ))}
             {missingElements.map((e) => (
               <p key={e} className="v2-nr-item-meta">
-                {ELEMENT_TEXT[e].weak[lang]}
+                {ELEMENT_DEPTH[e].miss[lang]} {ELEMENT_DEPTH[e].missKey[lang]}
               </p>
             ))}
+            {/* ไม่มีธาตุที่ขาด: บอกธาตุที่น้อยที่สุด (ไม่เกิน 20%) ว่าควรเติมอย่างไร */}
+            {missingElements.length === 0 && lowElement && (
+              <p className="v2-nr-item-meta">
+                {isTh
+                  ? `ธาตุ${ELEMENT_TEXT[lowElement].name.th}น้อยที่สุด (${pct(chart.distribution.elementScore[lowElement], elementTotal)}%) ด้านนี้คือสิ่งที่ควรเติม: ${ELEMENT_DEPTH[lowElement].missKey.th}`
+                  : `${ELEMENT_TEXT[lowElement].name.en} is your lowest element (${pct(chart.distribution.elementScore[lowElement], elementTotal)}%), the side worth building: ${ELEMENT_DEPTH[lowElement].missKey.en}`}
+              </p>
+            )}
             <p className="v2-nr-box-t pt-2">{isTh ? "วิธีลงมือ" : "Modes"}</p>
             {(["cardinal", "fixed", "mutable"] as Modality[]).map((m) => (
               <div key={m} className="v2-nr-meter">
@@ -800,13 +817,22 @@ export default function NatalResult({
                     {chart.distribution.hemispheres.east.length >= chart.distribution.hemispheres.west.length
                       ? HEMISPHERE_TEXT.east.name[lang]
                       : HEMISPHERE_TEXT.west.name[lang]}
+                    <span className="v2-nr-note block">
+                      {afterColon(
+                        (chart.distribution.hemispheres.south.length >= chart.distribution.hemispheres.north.length ? HEMISPHERE_TEXT.south : HEMISPHERE_TEXT.north).meaning[lang],
+                      )}{" "}
+                      {afterColon((chart.distribution.hemispheres.east.length >= chart.distribution.hemispheres.west.length ? HEMISPHERE_TEXT.east : HEMISPHERE_TEXT.west).meaning[lang])}
+                    </span>
                   </dd>
                 </div>
               )}
               {chart.dayChart !== null && (
                 <div>
                   <dt>{isTh ? "เกิดตอน" : "Born by"}</dt>
-                  <dd>{chart.dayChart ? (isTh ? "กลางวัน (อาทิตย์อยู่เหนือขอบฟ้า)" : "day (Sun above the horizon)") : isTh ? "กลางคืน (อาทิตย์อยู่ใต้ขอบฟ้า)" : "night (Sun below the horizon)"}</dd>
+                  <dd>
+                    {chart.dayChart ? (isTh ? "กลางวัน (อาทิตย์อยู่เหนือขอบฟ้า)" : "day (Sun above the horizon)") : isTh ? "กลางคืน (อาทิตย์อยู่ใต้ขอบฟ้า)" : "night (Sun below the horizon)"}
+                    <span className="v2-nr-note block">{SECT_TEXT[chart.dayChart ? "day" : "night"][lang]}</span>
+                  </dd>
                 </div>
               )}
             </dl>

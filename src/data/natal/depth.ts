@@ -625,3 +625,12 @@ export const TRANSIT_KEY: Record<"jupiter" | "saturn" | "uranus" | "neptune" | "
     push: { th: "ชีวิตกำลังชวนให้ออกจากนิสัยเดิม ความอึดอัดช่วงนี้คือสัญญาณว่าถึงเวลาเปลี่ยนทิศ", en: "Life is nudging you out of old habits; the discomfort is a sign it is time to change direction." },
   },
 };
+
+/**
+ * เกิดกลางวัน/กลางคืน (sect): ดวงสว่างที่นำผัง — กลางวันคือดวงอาทิตย์ กลางคืนคือดวงจันทร์ (หลักโหราดั้งเดิม)
+ * เขียนเป็นภาษาคน: คุณรู้จักตัวเองผ่านอะไรเป็นหลัก
+ */
+export const SECT_TEXT: Record<"day" | "night", T> = {
+  day: { th: "ดวงอาทิตย์นำผัง คุณมักรู้จักตัวเองผ่านสิ่งที่ลงมือทำ เป้าหมาย และสิ่งที่สร้างให้โลกเห็น", en: "The Sun leads your chart: you tend to know yourself through what you do, your goals and what you build for the world to see." },
+  night: { th: "ดวงจันทร์นำผัง คุณมักรู้จักตัวเองผ่านความรู้สึก ความสัมพันธ์ใกล้ชิด และโลกภายใน", en: "The Moon leads your chart: you tend to know yourself through feelings, close bonds and your inner world." },
+};

@@ -26,6 +26,7 @@ import { BODY_VOICE, CHIRON_SIGN, HOUSE_DEPTH, MC_CAREER, PLANET_DEPTH, PLANET_S
 import {
   ASPECT_DEFS,
   PLANET_IDS,
+  TRADITIONAL_RULER,
   formatDegree,
   type AspectType,
   type Aspect,
@@ -218,6 +219,35 @@ export function describeAspect(a: Aspect, lang: Lang): string {
     default:
       return `Your ${BODY_TEXT[a.a].noun.en} with your ${BODY_TEXT[a.b].noun.en}: ${meaning}.`;
   }
+}
+
+/** ดาวรุ่น 3 ดวง: มุมระหว่างกันเองคนเกิดช่วงเดียวกันมีเหมือนกันทั้งรุ่น */
+const GENERATION = new Set<BodyId>(["uranus", "neptune", "pluto"]);
+
+/**
+ * มุมหลักที่แม่นที่สุดของผัง (ส่วน "ดาวที่คุยกันแรงที่สุด") — ไม่นับมุมระหว่างดาวรุ่นกันเอง
+ * (ยูเรนัส-พลูโตเป็นต้น อยู่ในผังของทุกคนที่เกิดช่วงเดียวกัน ไม่ได้บอกอะไรเฉพาะตัว · เรื่องเด่นใช้กติกาเดียวกัน)
+ */
+export function keyAspects(chart: NatalChart, n = 5): Aspect[] {
+  const major = new Set(ASPECT_DEFS.filter((d) => d.major).map((d) => d.type));
+  return chart.aspects.filter((a) => major.has(a.type) && !(GENERATION.has(a.a) && GENERATION.has(a.b))).slice(0, n);
+}
+
+/**
+ * เรือนที่ไม่มีดาว: อ่านจากดาวเจ้าเรือน (เจ้าของราศีที่จุดเริ่มเรือน แบบดั้งเดิม ชุดเดียวกับเจ้าเรือนลัคนา) ว่าไปอยู่เรือนไหน
+ * เรือนว่างไม่ได้แปลว่าไม่มีเรื่อง — เรื่องของเรือนนั้นผูกกับเรือนที่เจ้าเรือนไปอยู่ · คืน null เมื่อไม่รู้เวลาเกิดหรือเรือนนั้นมีดาว
+ */
+export function emptyHouseNote(chart: NatalChart, house: number, lang: Lang): string | null {
+  if (!chart.houses) return null;
+  const occupied = chart.bodies.some((b) => b.house === house && (PLANET_IDS as readonly string[]).includes(b.id));
+  if (occupied) return null;
+  const ruler = TRADITIONAL_RULER[Math.floor(chart.houses[house - 1] / 30) % 12];
+  const rb = chart.bodies.find((b) => b.id === ruler);
+  if (!rb?.house || rb.house === house) return null;
+  const topic = HOUSE_DEPTH[rb.house - 1].topic[lang];
+  return lang === "th"
+    ? `เจ้าเรือนคือ${bodyName(ruler, lang)} อยู่เรือน ${rb.house} เรื่องนี้จึงผูกกับเรื่อง${topic}`
+    : `Ruled by ${prose(ruler, lang)} in house ${rb.house}, so this area is tied to ${topic}.`;
 }
 
 export function aspectTitle(a: Aspect, lang: Lang): string {
