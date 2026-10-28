@@ -1020,6 +1020,27 @@ console.log("\n6.17) ความแม่นของคำอธิบาย �
   check("นโยบายความเป็นส่วนตัวทั้งสองภาษาบอกเรื่องปุ่มภาพรวมผังและรายงาน", rd("src/app/_shared/pages/privacy-th.tsx").includes("เขียนภาพรวมผัง") && rd("src/app/_shared/pages/privacy-en.tsx").includes("Write my overview"));
 }
 
+console.log("\n6.20) คำสำคัญไพ่ประจำตัว — ไม่ฝังลง HTML · ตรงกับข้อมูลไพ่ต้นทางทุกใบ");
+{
+  const { NATAL_CARDS, packNatalCards } = await import("../../src/app/_shared/pages/natal-chart");
+  const { NATAL_CARD_KEYWORDS } = await import("../../src/data/natal/card-keywords");
+  const mismatch = NATAL_CARDS.filter((c) => {
+    const k = NATAL_CARD_KEYWORDS[c.id];
+    return !k || !c.kw || k.th !== c.kw.th || k.en !== c.kw.en || !k.th || !k.en;
+  }).map((c) => c.id);
+  check(
+    `card-keywords.ts ครบ ${NATAL_CARDS.length} ใบและตรงกับ summary.ts/keywords-en.ts${mismatch.length ? ` (ไม่ตรง: ${mismatch.slice(0, 5).join(", ")})` : ""}`,
+    mismatch.length === 0 && Object.keys(NATAL_CARD_KEYWORDS).length === NATAL_CARDS.length,
+  );
+  const packed = JSON.parse(packNatalCards()) as unknown[][];
+  check(
+    "prop ของ island (ฝังลง HTML) มีแค่ id ชื่อไทย ชื่ออังกฤษ — ไม่มีคำสำคัญ (งบ HTML ของหน้า)",
+    packed.length === NATAL_CARDS.length && packed.every((r) => r.length === 3),
+  );
+  const resultSrc = fs.readFileSync(path.join(process.cwd(), "src/components/natal/NatalResult.tsx"), "utf8");
+  check("NatalResult (โหลดแบบ lazy) อ่านคำสำคัญจาก card-keywords.ts", /NATAL_CARD_KEYWORDS\[card\.id\]/.test(resultSrc));
+}
+
 console.log("\n7) กติกา island — ตัวคำนวณ/คำอธิบาย/ผลผังโหลดแบบ dynamic import เท่านั้น");
 {
   const root = process.cwd();

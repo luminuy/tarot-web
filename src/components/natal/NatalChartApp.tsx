@@ -24,7 +24,7 @@ export interface NatalCardItem {
   nameTh: string;
   nameEn: string;
   image: string;
-  /** คำสำคัญหน้าตรง 3 คำ (ไทย · อังกฤษ) — แสดงหลังผู้ใช้พลิกไพ่ประจำตัวแล้วเท่านั้น */
+  /** คำสำคัญหน้าตรง 3 คำ — มีเฉพาะฝั่งบิลด์ (NATAL_CARDS) ไม่ส่งเข้า island · หน้าเว็บอ่านจาก src/data/natal/card-keywords.ts */
   kw?: { th: string; en: string };
 }
 

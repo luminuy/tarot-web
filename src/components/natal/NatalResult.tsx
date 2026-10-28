@@ -42,6 +42,7 @@ import { fixedStarPositions, ROYAL_STARS, starContacts } from "@/lib/astro/fixed
 import { hermeticLots } from "@/lib/astro/lots";
 import { LOT_TEXT, STAR_TEXT } from "@/data/natal/stars-content";
 import type { NatalCardItem, NatalMeta } from "./NatalChartApp";
+import { NATAL_CARD_KEYWORDS } from "@/data/natal/card-keywords";
 import type { ChartSpec } from "@/lib/astro/chart-spec";
 import type { TimeMode } from "./NatalTimeTools";
 
@@ -428,7 +429,7 @@ export default function NatalResult({
                             <Link href={`/cards/${x.id}`} className="v2-nr-cardlink">
                               {cardName(x.id)}
                             </Link>
-                            {card?.kw && <span className="v2-nr-card-kw">{card.kw[lang]}</span>}
+                            {card && NATAL_CARD_KEYWORDS[card.id] && <span className="v2-nr-card-kw">{NATAL_CARD_KEYWORDS[card.id][lang]}</span>}
                           </dd>
                         </div>
                       );

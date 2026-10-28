@@ -17,13 +17,12 @@ export function NatalChartRoot({ cardsPacked, locale }: { cardsPacked: string; l
   );
 }
 
-/** แกะ `[id, ชื่อไทย, ชื่ออังกฤษ, คำสำคัญภาษาของหน้า][]` กลับเป็น NatalCardItem (หน้าใช้ `kw[lang]` ภาษาเดียว) */
+/** แกะ `[id, ชื่อไทย, ชื่ออังกฤษ][]` กลับเป็น NatalCardItem (คำสำคัญโหลดแยกพร้อมผลผัง) */
 export function unpackNatalCards(packed: string): NatalCardItem[] {
-  return (JSON.parse(packed) as Array<[string, string, string, string]>).map(([id, nameTh, nameEn, kw]) => ({
+  return (JSON.parse(packed) as Array<[string, string, string]>).map(([id, nameTh, nameEn]) => ({
     id,
     nameTh,
     nameEn,
     image: `${id}.jpg`,
-    kw: kw ? { th: kw, en: kw } : undefined,
   }));
 }

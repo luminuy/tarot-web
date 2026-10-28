@@ -53,16 +53,16 @@ export const NATAL_CARDS: NatalCardItem[] = CARD_SUMMARIES.filter(
 });
 
 /**
- * ก้อนไพ่สำหรับ prop ของ island แบบอัด — สตริง JSON เดียว `[id, ชื่อไทย, ชื่ออังกฤษ, คำสำคัญภาษาของหน้า][]`
- * เหตุผล: prop ถูกฝังลง HTML · Astro ห่อทุกฟิลด์เป็น `[0, …]` และเดิมส่งคำสำคัญทั้งสองภาษา
- * ➔ HTML หน้านี้เกินงบ (30 > 28 KB gzip · ด่าน test-bundle-budget) · แบบอัดเหลือราวครึ่ง
+ * ก้อนไพ่สำหรับ prop ของ island แบบอัด — สตริง JSON เดียว `[id, ชื่อไทย, ชื่ออังกฤษ][]`
+ * เหตุผล: prop ถูกฝังลง HTML · Astro ห่อทุกฟิลด์เป็น `[0, …]` ➔ หน้านี้เคยเกินงบ HTML (ด่าน test-bundle-budget)
+ * คำสำคัญของไพ่ไม่อยู่ในก้อนนี้ — อยู่ที่ `src/data/natal/card-keywords.ts` โหลดพร้อมผลผัง (lazy)
  * ชื่อไฟล์ภาพ = `${id}.jpg` เสมอ (ตรวจตอนบิลด์ ไม่ตรง = บิลด์ล้ม) · แกะกลับที่ `astro/islands/NatalChartRoot.tsx`
  */
-export function packNatalCards(locale: Locale): string {
+export function packNatalCards(): string {
   return JSON.stringify(
     NATAL_CARDS.map((c) => {
       if (c.image !== `${c.id}.jpg`) throw new Error(`natal-chart: ภาพไพ่ ${c.id} ไม่ใช่ ${c.id}.jpg — แก้ unpackNatalCards ก่อน`);
-      return [c.id, c.nameTh, c.nameEn, locale === "en" ? c.kw?.en ?? "" : c.kw?.th ?? ""];
+      return [c.id, c.nameTh, c.nameEn];
     }),
   );
 }

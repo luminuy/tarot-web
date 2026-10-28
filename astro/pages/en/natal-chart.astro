@@ -18,7 +18,7 @@ const locale = "en" as const;
   <div class="ui2-pg" data-ui2-page-dark="">
   <NatalChartBodyRoot locale={locale}>
     <Fragment slot="app">
-      <NatalChartRoot cardsPacked={packNatalCards(locale)} locale={locale} client:idle />
+      <NatalChartRoot cardsPacked={packNatalCards()} locale={locale} client:idle />
     </Fragment>
   </NatalChartBodyRoot>
   </div>
