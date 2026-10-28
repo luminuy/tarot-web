@@ -16,7 +16,7 @@ import type { NatalOverview } from "./natal-overview";
 import { starContacts } from "./fixed-stars";
 import { hermeticLots } from "./lots";
 import { ASPECT_DEFS, PLANET_IDS, formatDegree, type BodyId, type NatalChart } from "./natal";
-import { aspectTitle, bodyName, cardsFor, chartGlance, chartSummary, describeAspect, describeBody, describePattern, describeTimedAspect, describeTransitHouse, lifeAreas, placement, returnHighlights, signName, type LifeArea, type SummaryRow } from "./natal-text";
+import { aspectTitle, bodyName, cardsFor, chartGlance, chartSummary, describeAspect, describeBody, describePattern, describeTimedAspect, emptyHouseNote, describeTransitHouse, lifeAreas, placement, returnHighlights, signName, type LifeArea, type SummaryRow } from "./natal-text";
 import { solarReturn, transitCalendar } from "./techniques";
 import { mahaTaksa, sevenNumbers, taksa, TAKSA_POSITIONS, thaiBirthDay } from "./thai-astro";
 import { LUNAR_MONTH_TH, NAKSAT_EN, NAKSAT_TH } from "./thai-lunar";
@@ -29,8 +29,8 @@ export interface NatalReport {
   bigThree: { label: string; value: string; cards: string[]; role: string; sign: string; deg: string }[];
   /** ภาพรวมผังที่ Claude Sonnet เรียบเรียง — route เติมหลังประกอบรายงาน · AI ล้ม = null (รายงานส่วนอื่นยังครบ) */
   aiOverview: NatalOverview | null;
-  /** เรื่องเด่นของผังเรียงตามน้ำหนัก (โค้ดคำนวณ) */
-  highlights: { title: string; text: string }[];
+  /** เรื่องเด่นของผังเรียงตามน้ำหนัก (โค้ดคำนวณ) · หัวข้อภาษาคน + ที่มาในผัง + ความหมาย + ใช้ให้ดี */
+  highlights: { title: string; basis: string; text: string; advice: string }[];
   /** เวลาเกิดคลาดกี่นาทีแล้วอะไรเปลี่ยน (ไม่รู้เวลาเกิด = ว่าง) */
   timeSensitivity: string[];
   summary: string[];
@@ -40,7 +40,8 @@ export interface NatalReport {
   life: LifeArea[];
   positions: { body: string; value: string; house: string; notes: string; short: string; sign: string; deg: string }[];
   houses: string[] | null;
-  houseCells: { n: number; sign: string; deg: string; title: string; bodies: string[] }[] | null;
+  /** `note` = เรือนว่างอ่านจากเจ้าเรือน (ไม่มีดาวในเรือน) */
+  houseCells: { n: number; sign: string; deg: string; title: string; bodies: string[]; note?: string }[] | null;
   bodies: { title: string; paras: string[]; name: string; where: string; theme: string }[];
   aspects: { title: string; text: string; a: string; b: string; type: string; tone: "harmonious" | "tense" | "neutral" }[];
   patterns: { title: string; text: string }[];
@@ -67,6 +68,7 @@ export function buildNatalReport(spec: ChartSpec, lang: Lang, nowMs: number): Na
   const fmt = new Intl.DateTimeFormat(th ? "th-TH" : "en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: spec.place.zone ?? "UTC" });
   const pad = (n: number) => String(n).padStart(2, "0");
   const place = th ? spec.place.label : spec.place.labelEn ?? spec.place.label;
+  const themes = chartHighlights(chart, lang, 8);
 
   const shortSign = (sign: number) => signName(sign, lang).replace(th ? "ราศี" : "", "");
   const bigThree = (["sun", "moon", "asc"] as const).flatMap((id) => {
@@ -147,13 +149,13 @@ export function buildNatalReport(spec: ChartSpec, lang: Lang, nowMs: number): Na
       .join(" · "),
     bigThree,
     aiOverview: null,
-    highlights: chartHighlights(chart, lang, 8).map((h) => ({ title: h.title, text: h.text })),
+    highlights: themes.map((h) => ({ title: h.title, basis: h.basis, text: h.text, advice: h.advice })),
     timeSensitivity: (() => {
       const ts = birthTimeSensitivity(chart);
       return ts ? describeTimeSensitivity(ts, lang) : [];
     })(),
     summary: chartSummary(chart, lang),
-    glance: chartGlance(chart, lang),
+    glance: chartGlance(chart, lang, themes),
     life: lifeAreas(chart, lang),
     houseCells: chart.houses
       ? chart.houses.map((c, i) => ({
@@ -162,6 +164,7 @@ export function buildNatalReport(spec: ChartSpec, lang: Lang, nowMs: number): Na
           deg: formatDegree(c % 30),
           title: HOUSE_TEXT[i].title[lang],
           bodies: chart.bodies.filter((b) => b.house === i + 1 && (PLANET_IDS as readonly string[]).includes(b.id)).map((b) => bodyName(b.id, lang)),
+          note: emptyHouseNote(chart, i + 1, lang) ?? undefined,
         }))
       : null,
     positions,

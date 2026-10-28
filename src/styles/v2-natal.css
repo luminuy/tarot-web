@@ -1450,6 +1450,14 @@ details:not([open]) > summary .v2-nt-more-close {
   line-height: 1.8;
   color: var(--nt-muted);
 }
+/* เรือนว่าง: อ่านจากเจ้าเรือนว่าไปอยู่เรือนไหน */
+.v2-nr-house-ruler {
+  display: block;
+  margin-top: 2px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--nt-ink);
+}
 
 /* มุมสำคัญ */
 .v2-nr-aspects {
@@ -1665,6 +1673,29 @@ details:not([open]) > summary .v2-nt-more-close {
   font-size: 12.5px;
   line-height: 1.6;
   color: var(--nt-muted);
+}
+/* เรื่องเด่น: ที่มาทางโหรา (ดาว ราศี เรือน มุม) ใต้หัวข้อภาษาคน */
+.v2-nr-item-basis {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--nt-gold);
+}
+/* เรื่องเด่น: ใช้ให้ดีอย่างไร — กล่องอ่อนแยกจากความหมาย ป้ายอยู่บรรทัดบน */
+.v2-nr-item-key {
+  display: block;
+  margin-top: 6px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--nt-line-soft);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--nt-ink);
+}
+.v2-nr-item-key b {
+  display: block;
+  font-size: 12.5px;
+  color: var(--nt-gold);
 }
 .v2-nr-lead {
   font-size: 14.5px;
@@ -2249,6 +2280,11 @@ body.nt-report-open {
   line-height: 1.55;
   color: var(--nt-muted);
 }
+.nr-house-note {
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--nt-ink);
+}
 .nr-bodies {
   display: grid;
   gap: 10px;
@@ -2322,6 +2358,20 @@ body.nt-report-open {
   font-size: 13.5px;
   line-height: 1.65;
   color: var(--nt-muted);
+}
+/* รายงาน: เรื่องเด่น — ที่มาในผัง + ใช้ให้ดี */
+.nr-hl-basis {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--nt-gold);
+}
+.nr-hl-key {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--nt-ink);
+}
+.nr-hl-key b {
+  color: var(--nt-gold);
 }
 .nr-box {
   padding: 14px 16px;
