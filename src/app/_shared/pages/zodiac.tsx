@@ -666,6 +666,36 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
           </ol>
         </section>
 
+        {/* 🪐 ราศีเกิดคือดวงอาทิตย์ดวงเดียว — ทางไปหน้าลัคนา/ดวงจันทร์ราศีเดียวกัน และผังดวงเต็ม
+            (เดิมหน้าลัคนา/จันทร์ลิงก์มาหน้านี้ทางเดียว · เจ้าของ 2026-10-29 "ยังไม่มีจุดเชื่อมโยงในเว็บ") */}
+        <section aria-labelledby="zodiac-natal" className="page-band space-y-4">
+          <div className="space-y-1.5">
+            <h2 id="zodiac-natal" className="text-lg sm:text-xl font-serif-th font-bold text-ink"><ThaiPhrases>
+              {isEnglish ? `${sign.nameEn} in your natal chart` : `${sign.nameTh}ในผังดวงกำเนิด`}
+            </ThaiPhrases></h2>
+            <p className="text-sm text-muted font-sans leading-relaxed">
+              {isEnglish
+                ? `Your birthday only gives your Sun sign. ${sign.nameEn} can also be your Rising sign, the first impression you give, or your Moon sign, your inner emotional world. Enter your birth date, time and place to see where every planet falls.`
+                : `ราศีจากวันเกิดคือตำแหน่งของดวงอาทิตย์ดวงเดียว ${sign.nameTh}ยังอาจเป็นลัคนา (ภาพแรกที่คนอื่นเห็น) หรือราศีของดวงจันทร์ (โลกในใจ) ของคุณได้ด้วย ใส่วัน เวลา และที่เกิด แล้วดูว่าดาวแต่ละดวงอยู่ราศีไหน`}
+            </p>
+          </div>
+          <p className="flex flex-wrap gap-2">
+            {[
+              { href: `/natal-chart/rising/${sign.id}`, label: isEnglish ? `${sign.nameEn} Rising` : `ลัคนา${sign.nameTh}` },
+              { href: `/natal-chart/moon/${sign.id}`, label: isEnglish ? `Moon in ${sign.nameEn}` : `ดวงจันทร์${sign.nameTh}` },
+              { href: "/natal-chart", label: isEnglish ? "Make my natal chart" : "ทำผังดวงกำเนิดของฉัน" },
+            ].map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="glass-chip px-3 py-1 text-xs font-serif-th font-semibold text-ink hover:text-gold-ink transition-colors"
+              >
+                {l.label}
+              </Link>
+            ))}
+          </p>
+        </section>
+
         {/* ชวนเปิดไพ่ + ราศีข้างเคียง */}
         <section className="page-band page-band-tint space-y-5 text-center">
           <p className="text-sm text-ink font-sans leading-relaxed">

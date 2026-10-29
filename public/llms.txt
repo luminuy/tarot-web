@@ -17,6 +17,7 @@ The primary audience is Thai. Thai is the default language at the site root; Eng
 - **In-Depth Articles**: Guides on reading method, card meanings, and spread interpretation — every article available in both Thai and English.
 - **Question Guides**: Pages that answer common life questions (love, work, money, an ex) with the cards and spreads that fit each one.
 - **Zodiac Cards**: The tarot card linked to each of the 12 zodiac signs, with a daily reading per sign.
+- **Natal Chart Calculator**: A free Western birth chart (Ascendant, Moon, all planets, houses, aspects) with the tarot card behind every placement, calculated in the browser and checked against NASA JPL data.
 - **Reading Journal**: Signed-in users keep their readings, real-life outcomes and private notes in one place.
 - **Bilingual**: Public pages exist in Thai and English with reciprocal hreflang, except `/about` and the human-reader marketplace (`/readers`), which are Thai only.
 
@@ -30,6 +31,7 @@ The primary audience is Thai. Thai is the default language at the site root; Eng
 - [Pick a Card / เลือกไพ่](https://seertarot.net/pick-a-card): Quick pick-a-card readings by topic.
 - [Questions / คำถามยอดฮิต](https://seertarot.net/questions): Answers to common questions with the right spread for each.
 - [Zodiac Cards / ไพ่ประจำราศี](https://seertarot.net/cards/zodiac): The tarot card of each zodiac sign.
+- [Natal Chart / ผังดวงกำเนิด](https://seertarot.net/natal-chart): Free birth chart calculator with a tarot card for every planet, plus a page for each Rising sign and Moon sign.
 - [Pricing / ราคา](https://seertarot.net/pricing): Free readings and paid reading packs.
 - [Readers / แม่หมอตัวจริง](https://seertarot.net/readers): Directory for live human consultations.
 
@@ -47,6 +49,7 @@ SeerTarot คือเว็บ **ดูดวงไพ่ยิปซี** แ�
 - **ดูดวงเฉพาะเรื่อง** — ความรัก เนื้อคู่ คนเก่า การงาน การเงิน การเรียน ครอบครัว และโชคลาภ
 - **ไพ่ประจำวัน** — ไพ่ประจำวันที่ทุกคนได้ใบเดียวกันในวันเดียวกัน ตรวจสอบย้อนหลังได้
 - **คำถามยอดฮิต · ไพ่ประจำราศี · Pick a Card** — คำตอบของคำถามที่คนถามบ่อย ไพ่ประจำ 12 ราศี และเลือกไพ่ตามหัวข้อ
+- **ผังดวงกำเนิด** — คำนวณลัคนา ราศีจันทร์ ดาว 10 ดวง เรือนชะตา และมุมสัมพันธ์ฟรี พร้อมไพ่ทาโรต์ประจำทุกตำแหน่ง คำนวณในเครื่องผู้ใช้ ไม่ส่งข้อมูลวันเกิดออกไป
 - **สมุดดวง** — สมาชิกเก็บคำอ่าน ผลที่เกิดขึ้นจริง และบันทึกส่วนตัวไว้ในที่เดียว
 - **ระบบสุ่มที่พิสูจน์ได้ (Provably Fair)** — ทุกครั้งที่เปิดไพ่จะมีค่าแฮช SHA-256 ให้ตรวจว่าไพ่ถูกสุ่มไว้ก่อนแล้วจริง ไม่ได้เลือกให้ทีหลัง
 

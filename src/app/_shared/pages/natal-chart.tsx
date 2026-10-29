@@ -508,7 +508,7 @@ export function NatalChartBody({ locale, app }: { locale: Locale; app: ReactNode
           </div>
         </SeoArticleShell>
       </div>
-      <Ui2NextSteps isEn={isEnglish} keys={["spreads", "daily", "journal", "cards"]} />
+      <Ui2NextSteps isEn={isEnglish} keys={["spreads", "birth", "journal", "cards"]} />
     </main>
   );
 }

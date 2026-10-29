@@ -131,8 +131,16 @@ export function headerNav(isEn: boolean): HeaderNav {
           ],
         },
         {
-          title: isEn ? "Your personal cards" : "ไพ่ประจำตัว",
+          // ✦ ผังดวงกำเนิด `/natal-chart` (ขึ้น 2026-10-27) — เดิมไม่มีในเมนู (เจ้าของ 2026-10-29 "ยังไม่มีในเมนู")
+          //   อยู่กลุ่มเดียวกับไพ่วันเกิด/ไพ่ราศี เพราะเป็นเครื่องมือจากวันเกิดเหมือนกัน
+          title: isEn ? "Your chart & cards" : "ดวงและไพ่ประจำตัว",
           links: [
+            {
+              label: isEn ? "Natal chart" : "ผังดวงกำเนิด",
+              href: "/natal-chart",
+              sublabel: isEn ? "Rising sign, planets and houses, each with its tarot card" : "ลัคนา ดาว 10 ดวง เรือนชะตา พร้อมไพ่ประจำทุกตำแหน่ง",
+              cardId: "major-21",
+            },
             {
               label: isEn ? "Birth card" : "ไพ่ประจำวันเกิด",
               href: "/cards/birth-card",

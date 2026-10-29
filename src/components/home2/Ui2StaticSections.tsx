@@ -514,6 +514,8 @@ const ZODIAC_TOOLS: ExploreLink[] = [
   { path: ZODIAC_INDEX_PATH, th: "หาราศีจากวันเกิด", en: "Find your sign by birthday" },
   { path: `${ZODIAC_INDEX_PATH}#zodiac-daily-title`, th: "ดวงรายวัน 12 ราศี", en: "Daily card for all 12 signs" },
   { path: `${ZODIAC_INDEX_PATH}#zodiac-compat-title`, th: "ความเข้ากันสองราศี", en: "Two-sign compatibility" },
+  /* ราศีเกิดคือดวงอาทิตย์ดวงเดียว — ผังเต็มบอกลัคนา ดวงจันทร์ และดาวทุกดวง (เจ้าของ 2026-10-29 "ยังไม่มีจุดเชื่อมโยง") */
+  { path: "/natal-chart", th: "ผังดวงกำเนิดแบบละเอียด", en: "Full natal chart" },
 ];
 /** ผังที่โชว์เป็นแถว — ลิงก์/ข้อความลิงก์มาจาก POPULAR_SPREADS (ห้ามเปลี่ยนคำค้น) · จำนวนใบ/คำโปรยมาจากผังจริง */
 const SHOW_SPREAD_IDS = ["celtic-cross", "three-card", "decision", "daily", "twelve-houses"] as const;

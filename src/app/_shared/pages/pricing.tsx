@@ -138,17 +138,18 @@ function faqItems(locale: Locale): Array<{ q: string; a: string }> {
   ];
 }
 
-/** ตารางเทียบสิทธิ์ — แถว: สิ่งที่ได้ · คอลัมน์: สมาชิกฟรี / แพ็กเติมรอบ (true = มี · false = ไม่มี · ข้อความ = มีแบบมีเงื่อนไข) */
+/** ตารางเทียบสิทธิ์ — แถว: สิ่งที่ได้ · คอลัมน์: สมาชิกฟรี / แพ็กเติมรอบ (true = มี · false = ไม่มี · ข้อความ = มีแบบมีเงื่อนไข)
+ *  `href` = หน้าที่ใช้สิทธิ์นั้น (ชื่อแถวเป็นลิงก์) — ใส่ตามภาษาของตารางแล้ว */
 type Cell = boolean | string;
-function compareRows(locale: Locale): Array<{ label: string; free: Cell; paid: Cell }> {
+function compareRows(locale: Locale): Array<{ label: string; free: Cell; paid: Cell; href?: string }> {
   if (locale === "en") {
     return [
       { label: "Standard 1–4 card spreads", free: `${DAILY_LIMIT} a day`, paid: true },
       { label: "Big 5–12 card spreads (Celtic Cross and more)", free: false, paid: true },
       { label: "Master readers", free: false, paid: true },
       { label: "Follow-up questions", free: "2 per reading", paid: "Unlimited" },
-      { label: "Ask the reader about your natal chart", free: `${NATAL_AI_FREE_PER_DAY} a day`, paid: `${NATAL_AI_USER_DAY_MAX} a day` },
-      { label: "Full natal chart report (PDF)", free: false, paid: "1 reading per chart" },
+      { label: "Ask the reader about your natal chart", free: `${NATAL_AI_FREE_PER_DAY} a day`, paid: `${NATAL_AI_USER_DAY_MAX} a day`, href: "/en/natal-chart" },
+      { label: "Full natal chart report (PDF)", free: false, paid: "1 reading per chart", href: "/en/natal-chart" },
       { label: "Reading history on every device", free: true, paid: true },
       { label: "78-card meanings and articles", free: true, paid: true },
       { label: "Expiry", free: "Resets at midnight", paid: "Never expires" },
@@ -159,8 +160,8 @@ function compareRows(locale: Locale): Array<{ label: string; free: Cell; paid: C
     { label: "ผังใหญ่ 5–12 ใบ (เซลติกครอส ฯลฯ)", free: false, paid: true },
     { label: "แม่หมอพิเศษ 2 ท่าน", free: false, paid: true },
     { label: "ถามแม่หมอต่อหลังเปิดไพ่", free: "2 คำถามต่อรอบ", paid: "ไม่จำกัด" },
-    { label: "ถามแม่หมอเรื่องผังดวงกำเนิด", free: `วันละ ${NATAL_AI_FREE_PER_DAY} ข้อ`, paid: `วันละ ${NATAL_AI_USER_DAY_MAX} ข้อ` },
-    { label: "รายงานผังดวงฉบับเต็ม (PDF)", free: false, paid: "1 รอบต่อผัง" },
+    { label: "ถามแม่หมอเรื่องผังดวงกำเนิด", free: `วันละ ${NATAL_AI_FREE_PER_DAY} ข้อ`, paid: `วันละ ${NATAL_AI_USER_DAY_MAX} ข้อ`, href: "/natal-chart" },
+    { label: "รายงานผังดวงฉบับเต็ม (PDF)", free: false, paid: "1 รอบต่อผัง", href: "/natal-chart" },
     { label: "เก็บประวัติคำทำนายข้ามเครื่อง", free: true, paid: true },
     { label: "ความหมายไพ่ 78 ใบและบทความ", free: true, paid: true },
     { label: "อายุของสิทธิ์", free: "รีเซ็ตทุกเที่ยงคืน", paid: "ไม่มีวันหมดอายุ" },
@@ -365,7 +366,13 @@ export function PricingBody({ locale, plans }: { locale: Locale; plans: ReactNod
                 {rows.map((r) => (
                   <tr key={r.label} className="border-b border-line-warm/40 last:border-0">
                     <th scope="row" className="px-4 py-3.5 font-serif-th text-sm font-normal text-ink-deep sm:px-5">
-                      {r.label}
+                      {r.href ? (
+                        <a href={r.href} className="underline underline-offset-4 transition-colors hover:text-gold-ink">
+                          {r.label}
+                        </a>
+                      ) : (
+                        r.label
+                      )}
                     </th>
                     <td className="px-2 py-3.5 text-center sm:px-3">
                       <CompareCell value={r.free} isEn={isEn} />
