@@ -124,14 +124,21 @@ export function Ui2Hero({ isEnglish, streak = 0 }: { isEnglish: boolean; streak?
           </Link>
         </div>
 
-        {/* นิยาย (เจ้าของ 2026-10-27 "ทำยังไงให้เค้าเข้ามาแล้วรู้ว่ามี") — อยู่ใต้ปุ่มหลักจึงไม่ดันหัวข้อ/ปุ่มเดิม
-            ภาษาไทยอย่างเดียว เพราะนิยายไม่มีฉบับอังกฤษ */}
-        {!isEnglish && (
-          <Link href={NOVEL_PATH} prefetch={false} className="ui2-hero-novel">
-            <span className="ui2-hero-novel-k">ใหม่</span>
-            <span>นิยาย {NOVEL_TITLE} สมาชิกอ่านฟรี</span>
+        {/* ทางเข้าของใหม่ใต้ปุ่มหลัก (ไม่ดันหัวข้อ/ปุ่มเดิม) — คอมเรียงแถวเดียว มือถือซ้อนกัน
+            ผังดวงกำเนิดมาก่อนและขอบทอง (เจ้าของ 2026-10-29 "ต้องเด่น เพราะตัวทำเงินเลย")
+            นิยาย (เจ้าของ 2026-10-27 "ทำยังไงให้เค้าเข้ามาแล้วรู้ว่ามี") ภาษาไทยอย่างเดียว เพราะนิยายไม่มีฉบับอังกฤษ */}
+        <div className="ui2-hero-news">
+          <Link href="/natal-chart" prefetch={false} className="ui2-hero-novel ui2-hero-natal" data-home-target="hero:natal">
+            <span className="ui2-hero-novel-k">{isEnglish ? "Free" : "ฟรี"}</span>
+            <span>{isEnglish ? "Natal chart and your tarot cards" : "ผังดวงกำเนิด พร้อมไพ่ประจำตัว"}</span>
           </Link>
-        )}
+          {!isEnglish && (
+            <Link href={NOVEL_PATH} prefetch={false} className="ui2-hero-novel">
+              <span className="ui2-hero-novel-k">ใหม่</span>
+              <span>นิยาย {NOVEL_TITLE} สมาชิกอ่านฟรี</span>
+            </Link>
+          )}
+        </div>
       </div>
     </section>
   );

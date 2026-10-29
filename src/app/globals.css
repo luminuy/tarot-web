@@ -2173,6 +2173,20 @@ html {
   font-weight: 600;
   line-height: 1.4;
 }
+/* ป้าย "ใหม่" ของหัวข้อเด่นในลิ้นชัก (ผังดวงกำเนิด) — สีชุดเดียวกับขอบโฟกัสลิ้นชัก · ตัวครีมบนน้ำตาลเข้ม */
+.nv-new {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  vertical-align: 2px;
+  font-family: var(--ui2-font-display);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #FFFCF6;
+  background: #8A4F10;
+}
 .nv-row-t small {
   display: block;
   margin-top: 1px;

@@ -1464,6 +1464,47 @@ console.log("\n8) ทางเข้า /natal-chart — เมนูหัว�
     ] as const) {
       check(`${route}: ลิงก์กลับไปไพ่ประจำวันเกิด ${birth}`, linksTo(region(html(route), "<main", "</main>"), birth), missingPage(route));
     }
+
+    /* 8.2 ทางเข้าเด่น (เจ้าของ 2026-10-29 "ผังดวงกำเนิด ต้องเด่น เพราะตัวทำเงินเลย")
+       หัวข้อหลักบนแถบเมนู (นอกแผงดูดวง) · ป้าย "ใหม่" ในลิ้นชัก · ปุ่มจอแรกของหน้าแรก · ส่วนแนะนำก่อนส่วนอื่นทั้งหมด · กล่องไปต่อของหน้าไพ่/บทความ */
+    for (const [route, natal, menu, tag] of [
+      ["/cards", "/natal-chart", 'aria-label="เมนูหลัก"', "ใหม่"],
+      ["/en/cards", "/en/natal-chart", 'aria-label="Main menu"', "New"],
+    ] as const) {
+      const src = html(route);
+      const bar = region(src, menu, "</nav>");
+      const mega = region(bar, 'class="mega-panel"', 'class="mega-foot"');
+      check(`${route}: ${natal} เป็นหัวข้อหลักบนแถบเมนูคอม (นอกแผงดูดวง)`, linksTo(bar.replace(mega, ""), natal), missingPage(route));
+      const drawer = region(src, 'id="sacred-nav-panel"', "</nav>");
+      check(`${route}: ลิ้นชักมือถือมีป้าย "${tag}" ที่แถวผังดวงกำเนิด`, new RegExp(`href="${natal}"[^>]*>(?:(?!</a>).)*class="nv-new">${tag}<`, "s").test(drawer), missingPage(route));
+    }
+    for (const [route, natal] of [
+      ["/", "/natal-chart"],
+      ["/en", "/en/natal-chart"],
+    ] as const) {
+      const src = html(route);
+      check(`${route}: จอแรก (ส่วน hero) มีลิงก์ ${natal}`, linksTo(region(src, 'data-home-section="hero"', "</section>"), natal), missingPage(route));
+      const sec = region(src, 'data-home-section="natal"', "</section>");
+      const order = ["natal", "notes", "verify", "showcase", "features", "faq"].map((k) => src.indexOf(`data-home-section="${k}"`));
+      check(
+        `${route}: ส่วนแนะนำผังดวงเป็นส่วนนิ่งส่วนแรก (ก่อนเรื่องที่ค้างอยู่ในใจ) และมีปุ่มไป ${natal}`,
+        linksTo(sec, natal) && order.every((v, i) => v > 0 && (i === 0 || v > order[i - 1])),
+        missingPage(route) || `    ตำแหน่ง ${order.join(" · ")}`,
+      );
+    }
+    const tileGaps: string[] = [];
+    let tilePages = 0;
+    for (const route of routes.keys()) {
+      if (!/^(\/en)?\/(cards\/(major|wands|cups|swords|pentacles)-\d\d|blog\/[^/]+)$/.test(route)) continue;
+      tilePages++;
+      const natal = route.startsWith("/en/") ? "/en/natal-chart" : "/natal-chart";
+      if (!linksTo(region(html(route), 'class="ui2-next-wrap"', "</section>"), natal)) tileGaps.push(`    ${route}`);
+    }
+    check(
+      `กล่อง "ไปต่อจากตรงนี้" ของหน้าไพ่รายใบและบทความลิงก์ผังดวงกำเนิด (${tilePages} หน้า)`,
+      tilePages >= 78 * 2 + 30 * 2 && tileGaps.length === 0,
+      tileGaps.slice(0, 10).join("\n"),
+    );
   }
 }
 
