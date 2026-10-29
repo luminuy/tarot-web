@@ -11,7 +11,7 @@ import type { ReactNode } from "react";
 
 import { BxBack, BxChips, BxFan, BxStat, BxStrip, Ui2Bento, type Ui2BentoTile } from "@/components/ui2/Ui2Blocks";
 
-export type Ui2NextKey = "spreads" | "daily" | "journal" | "questions" | "cards" | "birth" | "pick" | "readers";
+export type Ui2NextKey = "spreads" | "daily" | "journal" | "questions" | "cards" | "birth" | "natal" | "pick" | "readers";
 
 type Size = NonNullable<Ui2BentoTile["size"]>;
 
@@ -115,6 +115,18 @@ function tile(key: Ui2NextKey, isEn: boolean, size: Size): Ui2BentoTile {
         title: t("ประจำตัวของคุณ", "birth card"),
         href: p("/cards/birth-card"),
         visual: back(t("ใส่วันเกิด แล้วรู้ทันทีว่าไพ่ใบไหนเป็นของคุณ", "Enter your birthday to find the card that is yours.")),
+      };
+    case "natal":
+      return {
+        key,
+        size,
+        glow: "teal",
+        center: tall,
+        label: t("จากวัน เวลา และที่เกิด", "From your birth time"),
+        lead: t("ผัง", "Your"),
+        title: t("ดวงกำเนิดของคุณ", "natal chart"),
+        href: p("/natal-chart"),
+        visual: back(t("รู้ลัคนา ดาวทุกดวง และไพ่ทาโรต์ประจำแต่ละตำแหน่ง", "See your rising sign, every planet and the tarot card behind each one.")),
       };
     case "pick":
       return {

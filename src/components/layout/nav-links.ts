@@ -34,6 +34,8 @@ const FOOTER_COLUMNS = [
       { label: "The Magician · พลังเจตจำนงและความคิดสร้างสรรค์", href: "/cards/major-01" },
       { label: "The High Priestess · ปัญญาญาณและความเงียบ", href: "/cards/major-02" },
       { label: "The World · ความสมบูรณ์และการสิ้นสุดที่งดงาม", href: "/cards/major-21" },
+      /* ผังดวงกำเนิด (เจ้าของ 2026-10-29 "ยังไม่มีในเมนู และจุดเชื่อมโยงในเว็บ") — ไพ่ทาโรต์ประจำดาวทุกดวงในผังเกิด */
+      { label: "ผังดวงกำเนิด · ไพ่ประจำดาวทุกดวง", href: "/natal-chart" },
     ],
   },
   {
@@ -98,6 +100,7 @@ export function getFooterColumns(isEnglish: boolean) {
         { label: "The Magician · Willpower & Creativity", href: "/cards/major-01" },
         { label: "The High Priestess · Intuition & Silence", href: "/cards/major-02" },
         { label: "The World · Wholeness & Completion", href: "/cards/major-21" },
+        { label: "Natal Chart · A Tarot Card for Every Planet", href: "/natal-chart" },
       ],
     },
     {

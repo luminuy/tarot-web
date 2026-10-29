@@ -314,7 +314,7 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
         </SeoArticleShell>
       </div>
       {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
-      <Ui2NextSteps isEn={false} keys={["spreads", "daily", "journal", "cards"]} />
+      <Ui2NextSteps isEn={false} keys={["spreads", "natal", "journal", "cards"]} />
     </main>
   );
 }

@@ -98,6 +98,7 @@ const BIRTH_CARD_FAQS_EN = [
 
 const BIRTH_CARD_LINKS_EN = [
   { href: "/en/cards", label: "78 Card Encyclopedia" },
+  { href: "/en/natal-chart", label: "Natal Chart (Rising Sign & 10 Planets)" },
   { href: "/en/daily", label: "Daily Tarot Card" },
   { href: "/en/love/1-card", label: "One Card Love Tarot" },
   { href: "/en/spreads", label: "26 Tarot Spreads" },
@@ -302,7 +303,7 @@ export function BirthCardBodyEn({ calculator }: { calculator: ReactNode }) {
         </SeoArticleShell>
       </div>
       {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
-      <Ui2NextSteps isEn={true} keys={["spreads", "daily", "journal", "cards"]} />
+      <Ui2NextSteps isEn={true} keys={["spreads", "natal", "journal", "cards"]} />
     </main>
   );
 }

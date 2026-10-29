@@ -12,6 +12,7 @@
  * 4. ที่เส้นศูนย์สูตร Placidus = Koch = Regiomontanus = Campanus (คุณสมบัติทางเรขาคณิต)
  * 5. เขตเวลาย้อนหลัง/เวลาออมแสง · ไม่รู้เวลาเกิด · ละติจูดขั้วโลก · ศักดิ์ดาว · รายชื่อจังหวัด
  * 6. กติกา island: ตัวคำนวณ (มีข้อมูลดาว ~50 KB) ต้องโหลดแบบ dynamic import เท่านั้น
+ * 8. ทางเข้าหน้า: เมนูหัวเว็บ · ลิ้นชักมือถือ · ท้ายเว็บ · หน้าแรก · หน้าพี่น้อง ลิงก์ถึง /natal-chart (อ่าน HTML ที่ build แล้ว)
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -32,6 +33,8 @@ import { Body, DefineStar, Ecliptic, GeoVector, MakeTime } from "astronomy-engin
 import { localToUtc, formatUtcOffset } from "../../src/lib/astro/timezone";
 import { THAI_PROVINCES, WORLD_CITIES } from "../../src/data/natal/places";
 import { assertNonEmptyCorpus } from "./lib/corpus";
+import { renderedRouteMap, type RenderedPage } from "./lib/rendered-pages";
+import { ZODIAC_SIGNS } from "../../src/data/zodiac";
 import { searchCities, cityCount } from "../../src/lib/astro/city-search";
 import { computeSynastry, nearMidpoint } from "../../src/lib/astro/synastry";
 import { asteroidTables } from "../../src/lib/astro/asteroids";
@@ -1383,6 +1386,85 @@ console.log("\n7) กติกา island — ตัวคำนวณ/คำอ�
       src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "")
     )
   );
+}
+
+console.log("\n8) ทางเข้า /natal-chart — เมนูหัวเว็บ · ลิ้นชักมือถือ · ท้ายเว็บ · หน้าแรก · หน้าพี่น้อง (ตรวจจาก HTML ที่ build จริง)");
+{
+  /* เจ้าของ 2026-10-29: "หน้าใหม่ที่ทำมา ยังไม่มีในเมนู และจุดเชื่อมโยงในเว็บ" — หน้าขึ้นแล้วสองวันโดยไม่มีทางเข้าจากเมนูหรือท้ายเว็บ
+     ตรวจ HTML ที่ build ออกมา ไม่ใช่ข้อมูลเมนู: ลิงก์ต้องไปถึงหัวเว็บ/ลิ้นชัก/ท้ายเว็บที่ผู้ใช้เห็นจริง */
+  let pages: Map<string, RenderedPage> | null = null;
+  try {
+    pages = renderedRouteMap();
+  } catch (e) {
+    check("มีผล build ให้ตรวจทางเข้าหน้าผังดวง (รัน npm run build ก่อน)", false, `    ${(e as Error).message}`);
+  }
+  if (pages) {
+    const routes = pages;
+    const html = (route: string) => {
+      const p = routes.get(route);
+      return p ? fs.readFileSync(p.file, "utf8") : "";
+    };
+    /** ช่วง HTML ตั้งแต่เครื่องหมายเปิดถึงเครื่องหมายปิดตัวแรกหลังจากนั้น · หาไม่เจอ = สตริงว่าง (ด่านตก) */
+    const region = (src: string, start: string, end: string) => {
+      const i = src.indexOf(start);
+      const j = i < 0 ? -1 : src.indexOf(end, i);
+      return j < 0 ? "" : src.slice(i, j);
+    };
+    const linksTo = (src: string, href: string) => src.includes(`href="${href}"`);
+    const missingPage = (route: string) => (routes.has(route) ? "" : `    ไม่พบหน้า ${route} ในผล build`);
+
+    for (const [route, natal] of [
+      ["/", "/natal-chart"],
+      ["/en", "/en/natal-chart"],
+      ["/cards", "/natal-chart"],
+      ["/en/cards", "/en/natal-chart"],
+    ] as const) {
+      const src = html(route);
+      check(`${route}: แผงเมนู "ดูดวง" บนคอมมีลิงก์ ${natal}`, linksTo(region(src, 'class="mega-panel"', 'class="mega-foot"'), natal), missingPage(route));
+      check(`${route}: ท้ายเว็บมีลิงก์ ${natal}`, linksTo(region(src, "<footer", "</footer>"), natal), missingPage(route));
+    }
+    /* หน้า Astro เรนเดอร์รายการลิ้นชักไว้ใน HTML ตั้งแต่แรก (eagerBody) — หน้าแรกเรนเดอร์ตอนเปิดครั้งแรกจึงไม่อยู่ในชุดนี้ */
+    for (const [route, natal] of [
+      ["/cards", "/natal-chart"],
+      ["/en/cards", "/en/natal-chart"],
+    ] as const) {
+      check(`${route}: ลิ้นชักเมนูมือถือมีลิงก์ ${natal}`, linksTo(region(html(route), 'id="sacred-nav-panel"', "</nav>"), natal), missingPage(route));
+    }
+    for (const [route, natal] of [
+      ["/", "/natal-chart"],
+      ["/en", "/en/natal-chart"],
+    ] as const) {
+      const show = region(html(route), 'data-home-section="showcase"', "</section>");
+      const n = show.split(`href="${natal}"`).length - 1;
+      check(`${route}: ส่วนคลังไพ่ของหน้าแรกลิงก์ ${natal} ทั้งแท็บราศีและแท็บทางลัด (เจอ ${n} จุด)`, n >= 2, missingPage(route));
+    }
+    /* หน้าพี่น้อง: ไพ่ราศีรายตัว ➔ ลัคนา/ดวงจันทร์ราศีเดียวกัน (เดิมลิงก์ทางเดียวจากหน้าลัคนา/จันทร์) · ไพ่วันเกิด · ราคา */
+    const signGaps: string[] = [];
+    for (const sign of ZODIAC_SIGNS) {
+      for (const pre of ["", "/en"]) {
+        const route = `${pre}/cards/zodiac/${sign.id}`;
+        const src = html(route);
+        for (const href of [`${pre}/natal-chart/rising/${sign.id}`, `${pre}/natal-chart/moon/${sign.id}`, `${pre}/natal-chart`]) {
+          if (!linksTo(src, href)) signGaps.push(`    ${route} ไม่มีลิงก์ ${href}${src ? "" : " (ไม่พบหน้า)"}`);
+        }
+      }
+    }
+    check(`หน้าไพ่ราศี ${ZODIAC_SIGNS.length * 2} หน้าลิงก์ลัคนา/ดวงจันทร์ราศีเดียวกันและผังดวงกำเนิด`, ZODIAC_SIGNS.length === 12 && signGaps.length === 0, signGaps.join("\n"));
+    for (const [route, natal] of [
+      ["/cards/birth-card", "/natal-chart"],
+      ["/en/cards/birth-card", "/en/natal-chart"],
+      ["/pricing", "/natal-chart"],
+      ["/en/pricing", "/en/natal-chart"],
+    ] as const) {
+      check(`${route}: มีลิงก์ ${natal}`, linksTo(region(html(route), "<main", "</main>"), natal), missingPage(route));
+    }
+    for (const [route, birth] of [
+      ["/natal-chart", "/cards/birth-card"],
+      ["/en/natal-chart", "/en/cards/birth-card"],
+    ] as const) {
+      check(`${route}: ลิงก์กลับไปไพ่ประจำวันเกิด ${birth}`, linksTo(region(html(route), "<main", "</main>"), birth), missingPage(route));
+    }
+  }
 }
 
 console.log(`\n📊 สรุป: ผ่าน ${pass} · ตก ${fail}`);

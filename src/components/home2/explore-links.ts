@@ -21,6 +21,7 @@ export const MORE_WAYS: ExploreLink[] = [
   { path: "/daily", th: "ดูดวงไพ่ยิปซีรายวัน", en: "Daily tarot" },
   { path: "/love/1-card", th: "ดูดวงความรัก 1 ใบ", en: "One-card love reading" },
   { path: "/cards/birth-card", th: "ไพ่ประจำตัวจากวันเกิด", en: "Your tarot birth card" },
+  { path: "/natal-chart", th: "ผังดวงกำเนิด ลัคนา ดาว 10 ดวง", en: "Natal chart calculator" },
 ];
 
 /** คำที่คนค้นจริง (ย้ายมาจาก HomeMoreWaysSection เดิม — ข้อความทุกตัวเหมือนเดิม) */
