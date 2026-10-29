@@ -290,6 +290,8 @@ export const DIGNITY_DEPTH: Record<Dignity, { head: T; term: T; flow: T; key: T 
 };
 
 export interface PlanetSignText {
+  /** หัวข้อสั้นในแถวดาวที่ยังไม่เปิด (ไม่เกินราว 40 ตัวอักษร) */
+  head: T;
   /** ดาวนี้ในราศีนี้แสดงออกอย่างไร (1–2 ประโยค) */
   core: T;
   /** ด้านเงาและทางเติบโต (1 ประโยค) */
@@ -300,250 +302,310 @@ export interface PlanetSignText {
 export const PLANET_SIGN_TEXT: Record<"mercury" | "venus" | "mars" | "jupiter" | "saturn", readonly PlanetSignText[]> = {
   mercury: [
     {
+      head: { th: "คิดเร็ว พูดตรง ตัดสินใจไว", en: "Quick thinking, direct speech, fast decisions" },
       core: { th: "คุณคิดเร็ว พูดตรง และตัดสินใจไว ชอบถกเพื่อหาคำตอบมากกว่าเพื่อเอาชนะ และมักเป็นคนแรกที่กล้าพูดสิ่งที่คนอื่นคิดอยู่ในใจ", en: "You think fast, speak directly and decide quickly. You debate to find answers rather than to win, and you are often the first to say what others are only thinking." },
       edge: { th: "ถ้าใจร้อน คำพูดจะแรงกว่าที่ตั้งใจ ลองหายใจสักครั้งก่อนตอบเรื่องที่สำคัญ", en: "When impatient, your words land harder than you meant. Take a breath before answering anything important." },
     },
     {
+      head: { th: "คิดช้าแต่ลึก พูดน้อยแต่หนักแน่น", en: "Slow, deep thinking; few but weighty words" },
       core: { th: "คุณคิดช้าแต่ลึกและแม่น เชื่อในสิ่งที่พิสูจน์ได้ เมื่อเข้าใจอะไรแล้วจะจำได้นาน และพูดน้อยแต่มีน้ำหนัก", en: "You think slowly but deeply and accurately. You trust what can be proven, remember what you learn for a long time, and speak little but with weight." },
       edge: { th: "ถ้ายึดความคิดเดิมแน่นเกินไป อาจปิดรับข้อมูลใหม่ที่ช่วยคุณได้", en: "Holding too tightly to your views can shut out new information that would help you." },
     },
     {
+      head: { th: "สมองไว อยากรู้ไปหมด คุยได้กับทุกคน", en: "A quick, curious mind that talks with anyone" },
       core: { th: "สมองคุณไวและอยากรู้ไปหมด เชื่อมเรื่องที่ดูไม่เกี่ยวกันได้เก่ง คุยได้กับทุกคน และเรียนรู้เร็วที่สุดเมื่อได้แลกเปลี่ยน", en: "Your mind is quick and curious about everything. You connect unrelated ideas, can talk with anyone and learn fastest through conversation." },
       edge: { th: "ถ้าสนใจหลายเรื่องพร้อมกัน อาจรู้กว้างแต่ไม่ลึก เลือกบางเรื่องให้ลงลึกจริง", en: "Chasing many interests at once can leave you broad but shallow. Choose a few things to go deep in." },
     },
     {
+      head: { th: "คิดด้วยใจ จำทุกอย่างผ่านความรู้สึก", en: "Thinks with the heart, remembers through feelings" },
       core: { th: "คุณคิดด้วยใจ จำเรื่องราวผ่านความรู้สึก และอ่านอารมณ์ที่ซ่อนอยู่หลังคำพูดได้แม่น คำพูดของคุณอบอุ่นและทำให้คนรู้สึกปลอดภัย", en: "You think with your heart, remember things through feelings and read the emotion behind words accurately. Your words are warm and make people feel safe." },
       edge: { th: "ถ้าเก็บคำพูดของคนอื่นมาคิดเป็นเรื่องส่วนตัวทุกครั้ง ใจจะเหนื่อย ลองแยกข้อเท็จจริงออกจากความรู้สึก", en: "Taking every comment personally wears you out. Try separating the facts from the feelings." },
     },
     {
+      head: { th: "พูดอย่างมั่นใจ เล่าเรื่องเก่ง", en: "Speaks with confidence, a natural storyteller" },
       core: { th: "คุณพูดอย่างมั่นใจ มีสีสัน และเล่าเรื่องเก่ง ความคิดของคุณมีพลังที่สุดเมื่อได้แสดงต่อหน้าคน และคุณอยากให้ความคิดของตัวเองได้รับการยอมรับ", en: "You speak with confidence and colour and tell stories well. Your ideas come alive in front of people, and you want them to be recognised." },
       edge: { th: "ถ้ายึดความคิดตัวเองเป็นศักดิ์ศรี จะฟังคำแย้งยาก ลองมองว่าการเปลี่ยนใจคือความกล้าอีกแบบ", en: "If your ideas become a matter of pride, criticism is hard to hear. Changing your mind can be its own kind of courage." },
     },
     {
+      head: { th: "คิดเป็นระบบ ละเอียด เห็นจุดที่คนอื่นพลาด", en: "Systematic and precise, spots what others miss" },
       core: { th: "คุณคิดเป็นระบบ ละเอียด และเห็นจุดที่คนอื่นมองข้าม ถนัดแยกแยะ วิเคราะห์ และทำเรื่องยุ่งยากให้ใช้งานได้จริง", en: "You think systematically, notice what others miss, and are skilled at sorting, analysing and making complicated things workable." },
       edge: { th: "ถ้าจับผิดตัวเองหรือคนอื่นมากเกินไป จะกังวลไม่จบ บางงานแค่ดีพอก็พอแล้ว", en: "Too much fault-finding, in yourself or others, keeps you worrying. Some work only needs to be good enough." },
     },
     {
+      head: { th: "มองทุกด้าน พูดนุ่มนวล เจรจาเก่ง", en: "Sees every side, speaks gracefully, negotiates well" },
       core: { th: "คุณคิดแบบมองทุกด้าน ฟังเหตุผลของทุกฝ่าย และพูดอย่างนุ่มนวลจนคนยอมรับได้ง่าย เป็นคนไกล่เกลี่ยและเจรจาโดยธรรมชาติ", en: "You see every side, listen to everyone's reasons and speak so gracefully that people accept your view easily. You are a natural mediator and negotiator." },
       edge: { th: "ถ้าชั่งน้ำหนักนานเกินไป จะตัดสินใจไม่ได้ ลองตั้งเส้นตายให้ตัวเอง", en: "Weighing things too long leaves you unable to decide. Give yourself deadlines." },
     },
     {
+      head: { th: "คิดลึก มองทะลุสิ่งที่คนซ่อนไว้", en: "A deep thinker who sees what people hide" },
       core: { th: "คุณคิดลึกและมองทะลุสิ่งที่คนพูดไปถึงสิ่งที่เขาซ่อน ชอบค้นหาความจริง และเก็บความลับได้ดีเยี่ยม", en: "You think deeply and see past what people say to what they hide. You love uncovering the truth and keep secrets extremely well." },
       edge: { th: "ถ้าระแวงจนไม่เชื่อใครเลย จะเหนื่อยกับการอ่านใจคนตลอดเวลา บางครั้งถามตรง ๆ ง่ายกว่า", en: "If suspicion stops you trusting anyone, constantly reading minds becomes exhausting. Sometimes asking directly is easier." },
     },
     {
+      head: { th: "คิดภาพใหญ่ พูดตรงแบบมีอารมณ์ขัน", en: "Big-picture thinker, frank and funny" },
       core: { th: "คุณคิดภาพใหญ่ สนใจความหมายและปรัชญามากกว่ารายละเอียด พูดตรงไปตรงมาแบบมีอารมณ์ขัน และสอนคนได้เก่ง", en: "You think in big pictures and care more about meaning than detail. You speak frankly with humour and make a good teacher." },
       edge: { th: "ถ้ามองแต่ภาพใหญ่ อาจพูดเกินจริงหรือพลาดรายละเอียดสำคัญ ตรวจข้อเท็จจริงก่อนสรุป", en: "Seeing only the big picture can lead you to exaggerate or miss key details. Check the facts before concluding." },
     },
     {
+      head: { th: "คิดอย่างมีแผน ใช้เหตุผล มองระยะยาว", en: "Planned, logical, long-term thinking" },
       core: { th: "คุณคิดอย่างมีแผน ใช้เหตุผล และมองผลระยะยาว พูดน้อยแต่ชัด และเชื่อในความรู้ที่ใช้ได้จริงมากกว่าทฤษฎี", en: "You think in plans, use logic and look at long-term consequences. You speak little but clearly and value practical knowledge over theory." },
       edge: { th: "ถ้ามองทุกอย่างจริงจังเกินไป อาจมองโลกในแง่ร้ายหรือเครียดก่อนเรื่องจะเกิด", en: "Taking everything too seriously can make you pessimistic or anxious before anything has happened." },
     },
     {
+      head: { th: "คิดล้ำ เป็นอิสระ เห็นทางใหม่ก่อนใคร", en: "Original and independent, sees new ways first" },
       core: { th: "คุณคิดล้ำ เป็นอิสระ และมองเห็นวิธีใหม่ที่คนอื่นยังนึกไม่ถึง ชอบแลกเปลี่ยนความคิดกับคนหลากหลาย และใช้เหตุผลนำอารมณ์", en: "You think ahead, independently, and see new methods before others imagine them. You enjoy swapping ideas with all kinds of people and lead with reason over emotion." },
       edge: { th: "ถ้ามั่นใจในความคิดตัวเองเกินไป อาจกลายเป็นดื้อเงียบ ลองฟังคนที่เห็นต่างให้จบก่อนตอบ", en: "Too much certainty can turn into quiet stubbornness. Hear people who disagree all the way through before replying." },
     },
     {
+      head: { th: "คิดเป็นภาพ จินตนาการสูง เข้าใจสิ่งที่ไม่ได้พูด", en: "Thinks in images, imaginative, hears the unsaid" },
       core: { th: "คุณคิดเป็นภาพและความรู้สึก มีจินตนาการสูง เข้าใจสิ่งที่ไม่ได้พูดออกมา และสื่อสารผ่านศิลปะ ดนตรี หรือเรื่องเล่าได้ดี", en: "You think in images and feelings, with a vivid imagination. You understand what goes unsaid and communicate well through art, music or story." },
       edge: { th: "ถ้าความคิดลอยเกินไป รายละเอียดและกำหนดเวลาจะหลุดมือ จดเรื่องสำคัญไว้เสมอ", en: "When your mind drifts, details and deadlines slip away. Always write the important things down." },
     },
   ],
   venus: [
     {
+      head: { th: "รักตรงไปตรงมาและร้อนแรง", en: "Loves directly and passionately" },
       core: { th: "คุณรักแบบตรงไปตรงมาและร้อนแรง ถ้าชอบใครจะแสดงออกก่อน ชอบความตื่นเต้นของการไล่ตาม และต้องการคู่ที่มีชีวิตชีวาพอกับคุณ", en: "You love directly and passionately. If you like someone, you make the first move. You enjoy the thrill of the chase and need a partner as lively as you." },
       edge: { th: "ความรักที่เริ่มเร็วอาจหมดไฟเร็ว เมื่อความตื่นเต้นแรกผ่านไป ลองหาความท้าทายใหม่ร่วมกันแทนการมองหาคนใหม่", en: "Love that starts fast can burn out fast. When the first thrill fades, look for new challenges together instead of someone new." },
     },
     {
+      head: { th: "รักมั่นคง แสดงออกผ่านการดูแลและสัมผัส", en: "Loves steadily, through care and touch" },
       core: { th: "คุณรักอย่างมั่นคง ซื่อสัตย์ และแสดงความรักผ่านการดูแล อาหาร สัมผัส และของที่จับต้องได้ คุณให้คุณค่ากับความสบายและความสวยงามที่ยั่งยืน", en: "You love steadily and loyally, showing it through care, food, touch and tangible gifts. You value lasting comfort and beauty." },
       edge: { th: "ถ้ากลัวการเปลี่ยนแปลง อาจยึดคนหรือของไว้นานเกินกว่าที่ดีต่อตัวเอง", en: "Fear of change can make you hold on to people or things for longer than is good for you." },
     },
     {
+      head: { th: "ตกหลุมรักทางความคิดก่อน รักแบบขี้เล่น", en: "Falls for the mind first, loves playfully" },
       core: { th: "คุณตกหลุมรักทางความคิดก่อน คนที่คุยสนุก ทำให้หัวเราะ และมีเรื่องใหม่มาคุยเสมอจะชนะใจคุณ ความรักของคุณเบาสบาย ขี้เล่น และต้องการพื้นที่หายใจ", en: "You fall in love through the mind first. Someone who is fun to talk to, makes you laugh and always has something new to say wins your heart. Your love is light, playful and needs room to breathe." },
       edge: { th: "ถ้าคุณถอยออกมาทุกครั้งที่ความสัมพันธ์เริ่มลึก ลองถามตัวเองว่ากลัวความจำเจ หรือกลัวความใกล้ชิด", en: "If you pull back whenever things deepen, ask yourself whether you fear boredom or closeness." },
     },
     {
+      head: { th: "รักแบบดูแลและปกป้อง อยากมีบ้านร่วมกัน", en: "Loves by caring and protecting" },
       core: { th: "คุณรักแบบดูแลและปกป้อง อยากสร้างบ้านและความรู้สึกปลอดภัยร่วมกัน และจำรายละเอียดเล็ก ๆ ของคนที่รักได้เสมอ", en: "You love by caring and protecting. You want to build a home and a feeling of safety together, and you always remember the little things about the people you love." },
       edge: { th: "ถ้ากลัวถูกทิ้ง อาจเก็บความน้อยใจไว้แทนการพูดตรง ๆ ความต้องการที่พูดออกมาได้รับการตอบสนองง่ายกว่า", en: "Fear of being left can make you sulk instead of speaking up. Needs that are said out loud are far easier to meet." },
     },
     {
+      head: { th: "รักเต็มหัวใจ ใจกว้าง อยากให้ความรักพิเศษ", en: "Loves wholeheartedly and generously" },
       core: { th: "คุณรักอย่างเต็มหัวใจ ใจกว้าง และอยากให้ความรักเป็นเรื่องพิเศษ ชอบทำให้คนรักรู้สึกเป็นคนสำคัญที่สุด และอยากได้รับการชื่นชมแบบเดียวกัน", en: "You love wholeheartedly and generously, and want love to feel special. You make your partner feel like the most important person, and want to be admired the same way." },
       edge: { th: "ถ้าอีกฝ่ายไม่แสดงออกเท่าคุณ อาจรู้สึกว่าไม่มีค่า ลองดูความรักในแบบที่เขาถนัดด้วย", en: "If your partner is less expressive, you may feel unvalued. Learn to see love in the way they naturally show it." },
     },
     {
+      head: { th: "แสดงความรักผ่านการกระทำและการใส่ใจ", en: "Shows love through acts of care" },
       core: { th: "คุณแสดงความรักผ่านการกระทำ ช่วยเหลือ ใส่ใจรายละเอียด และทำให้ชีวิตของคนที่รักง่ายขึ้น ความรักของคุณเงียบแต่จริงใจและพึ่งพาได้", en: "You show love through action: helping, noticing details and making life easier for the people you love. Your love is quiet but sincere and dependable." },
       edge: { th: "ถ้ามาตรฐานสูงเกินไป อาจติจนอีกฝ่ายรู้สึกว่าไม่ดีพอ หรือคุณเองรู้สึกว่าไม่คู่ควร", en: "Standards that are too high can make you critical until your partner feels not good enough, or you feel unworthy yourself." },
     },
     {
+      head: { th: "รักความสมดุลและความสัมพันธ์ที่เท่าเทียม", en: "Loves balance and true partnership" },
       core: { th: "คุณรักความสวยงาม ความสมดุล และความสัมพันธ์ที่เป็นหุ้นส่วนกันจริง มีเสน่ห์ เข้าสังคมเก่ง และใส่ใจความรู้สึกของอีกฝ่ายเป็นพิเศษ", en: "You love beauty, balance and true partnership. You are charming, sociable and especially attentive to your partner's feelings." },
       edge: { th: "ถ้าเลี่ยงความขัดแย้งทุกครั้ง ความต้องการของคุณจะค่อย ๆ หายไป ความสัมพันธ์ที่ดีทนการพูดตรงได้", en: "Avoiding every conflict slowly erases your own needs. A good relationship can handle honesty." },
     },
     {
+      head: { th: "รักลึก เข้มข้น และทุ่มทั้งหัวใจ", en: "Loves deeply, intensely, all in" },
       core: { th: "คุณรักลึก เข้มข้น และทุ่มทั้งหัวใจ ไม่สนความสัมพันธ์ผิวเผิน ต้องการความไว้ใจและความจริงใจเต็มร้อย และเมื่อรักแล้วซื่อสัตย์มาก", en: "You love deeply, intensely and with your whole heart. Shallow relationships do not interest you; you need total trust and honesty, and once committed you are deeply loyal." },
       edge: { th: "ถ้ากลัวการถูกหักหลัง อาจหึงหวงหรือปิดใจจนอีกฝ่ายเข้าไม่ถึง", en: "Fear of betrayal can make you jealous or so guarded that your partner cannot reach you." },
     },
     {
+      head: { th: "รักอิสระ อยากเติบโตและผจญภัยไปด้วยกัน", en: "Loves freedom and shared adventure" },
       core: { th: "คุณรักอิสระและการผจญภัย ความรักที่ดีสำหรับคุณคือการได้เติบโต เดินทาง และเรียนรู้โลกไปด้วยกัน คุณรักแบบเปิดเผย ร่าเริง และจริงใจ", en: "You love freedom and adventure. Good love, for you, means growing, travelling and learning about the world together. You love openly, cheerfully and honestly." },
       edge: { th: "ถ้ารู้สึกว่าถูกผูกมัด อาจถอยออกมาก่อน ลองมองหาคนที่ให้ทั้งความมั่นคงและพื้นที่ไปพร้อมกัน", en: "Feeling tied down can make you back away. Look for someone who offers both stability and room to roam." },
     },
     {
+      head: { th: "รักจริงจัง มองระยะยาว แสดงด้วยความรับผิดชอบ", en: "Loves seriously and for the long term" },
       core: { th: "คุณรักอย่างจริงจังและมองระยะยาว แสดงความรักผ่านความรับผิดชอบและการสร้างอนาคตร่วมกันมากกว่าคำหวาน และให้คุณค่ากับความมั่นคงที่พิสูจน์ได้ด้วยเวลา", en: "You love seriously and for the long term. You show love through commitment and building a future together more than sweet words, and you value stability that is proven over time." },
       edge: { th: "ถ้าระวังตัวมากเกินไป คนอื่นอาจไม่รู้ว่าคุณรู้สึกอย่างไร ลองแสดงความอ่อนโยนให้เห็นบ้าง", en: "Being too guarded can leave people unsure how you feel. Let your tenderness show now and then." },
     },
     {
+      head: { th: "รักแบบเพื่อนที่เข้าใจกัน ต้องการพื้นที่ส่วนตัว", en: "Loves like a best friend, needs space" },
       core: { th: "คุณรักแบบเพื่อนที่เข้าใจกัน ต้องการคู่ที่เคารพความเป็นตัวของตัวเอง คุยกันได้ทุกเรื่อง และไม่พยายามเปลี่ยนคุณ ความรักของคุณไม่เหมือนใครและไม่ชอบกรอบ", en: "You love like a best friend. You need a partner who respects your individuality, can talk about anything and does not try to change you. Your way of loving is unconventional and dislikes rules." },
       edge: { th: "ถ้ารักษาระยะห่างทางใจมากเกินไป อีกฝ่ายอาจรู้สึกว่าเข้าไม่ถึง ความใกล้ชิดไม่ได้แปลว่าต้องเสียอิสระ", en: "Keeping too much emotional distance can leave your partner feeling shut out. Closeness does not have to cost you your freedom." },
     },
     {
+      head: { th: "รักโรแมนติก อ่อนโยน และพร้อมเสียสละ", en: "Loves romantically, tenderly, selflessly" },
       core: { th: "คุณรักแบบโรแมนติก อ่อนโยน และพร้อมเสียสละ มองเห็นด้านดีในตัวคนที่รักเสมอ และรักได้โดยไม่มีเงื่อนไข", en: "You love romantically, tenderly and selflessly. You always see the best in the people you love and love without conditions." },
       edge: { th: "ถ้ามองคนรักดีกว่าความจริง อาจให้มากเกินไปจนลืมดูแลตัวเอง ความรักที่ดีต้องมีขอบเขตด้วย", en: "Seeing a partner as better than they are can lead you to give too much and forget yourself. Healthy love needs boundaries too." },
     },
   ],
   mars: [
     {
+      head: { th: "ลงมือเร็ว กล้าเริ่มก่อนใคร", en: "Acts fast, dares to go first" },
       core: { th: "คุณมีพลังมาก ตัดสินใจเร็ว และชอบเป็นคนเริ่ม เจออุปสรรคแล้วยิ่งฮึด เหมาะกับงานที่ต้องใช้ความกล้าและความเร็ว", en: "You have abundant energy, decide fast and love to be the one who starts. Obstacles fire you up, and you suit work that needs courage and speed." },
       edge: { th: "ไฟที่แรงอาจมอดเร็วหรือปะทุเป็นความโกรธ ฝึกทำต่อให้จบหลังความตื่นเต้นแรกผ่านไป", en: "A strong flame can burn out fast or flare into anger. Practise finishing what you start once the first rush fades." },
     },
     {
+      head: { th: "ลงมือช้าแต่หนักแน่น ไม่ยอมแพ้", en: "Slow to start, hard to stop" },
       core: { th: "คุณลงมือช้าแต่หนักแน่นและไม่ยอมแพ้ เมื่อตั้งใจแล้วจะทำไปเรื่อย ๆ จนสำเร็จ และอดทนได้มากกว่าคนส่วนใหญ่", en: "You start slowly but firmly and do not give up. Once decided, you keep going until it is done, with more stamina than most." },
       edge: { th: "ถ้าถูกบังคับให้เร่ง คุณจะยิ่งดื้อ และเมื่อโกรธจริงจะหายช้า", en: "Being pushed to hurry makes you dig in, and when you finally get angry, it lasts." },
     },
     {
+      head: { th: "ลงมือด้วยไหวพริบและคำพูด", en: "Acts through wit and words" },
       core: { th: "คุณลงมือด้วยความคิดและคำพูด ทำหลายอย่างพร้อมกันได้ ไหวพริบดี และใช้การเจรจาแก้ปัญหาแทนการปะทะ", en: "You act through ideas and words, handle many things at once, think on your feet and solve problems by talking rather than fighting." },
       edge: { th: "ถ้ากระจายพลังไปหลายเรื่อง อาจเริ่มเยอะแต่จบน้อย เลือกเรื่องสำคัญให้ทำจนเสร็จก่อน", en: "Spreading your energy thin can mean starting a lot and finishing little. Complete the important things first." },
     },
     {
+      head: { th: "สู้สุดตัวเพื่อปกป้องคนที่รัก", en: "Fights hardest for the people you love" },
       core: { th: "คุณลงมือเพราะใจ และสู้สุดตัวเมื่อต้องปกป้องคนที่รักหรือบ้าน แรงขับของคุณขึ้นลงตามอารมณ์และความรู้สึกปลอดภัย", en: "You act from the heart and fight hardest to protect the people you love or your home. Your drive rises and falls with your mood and sense of safety." },
       edge: { th: "ถ้าเก็บความโกรธไว้ อาจออกมาเป็นการประชดหรือเงียบใส่ ลองบอกตรง ๆ ว่าอะไรทำให้ไม่พอใจ", en: "Bottled-up anger may come out as sarcasm or silence. Say plainly what upset you." },
     },
     {
+      head: { th: "ลงมืออย่างมั่นใจแบบผู้นำ", en: "Acts with a leader's confidence" },
       core: { th: "คุณลงมืออย่างมั่นใจ มีพลังแบบผู้นำ และทำงานได้ดีที่สุดเมื่อได้แสดงฝีมือและได้รับการยอมรับ ความกล้าและความใจกว้างทำให้คนอยากตาม", en: "You act with confidence and a leader's energy, and work best when you can show your skill and be recognised. Your courage and generosity make people want to follow." },
       edge: { th: "ถ้าศักดิ์ศรีถูกแตะ อาจสู้เพื่อชนะมากกว่าสู้เพื่อสิ่งที่ถูก", en: "When your pride is hurt, you may fight to win rather than for what is right." },
     },
     {
+      head: { th: "ลงมืออย่างแม่นยำและมีแผน", en: "Acts precisely, with a plan" },
       core: { th: "คุณลงมืออย่างแม่นยำ มีแผน และใส่ใจทุกรายละเอียด ทำงานหนักได้นาน และมีพลังที่สุดเมื่อได้แก้ปัญหาที่จับต้องได้", en: "You act precisely, with a plan and attention to every detail. You can work hard for a long time, and your energy is at its best solving practical problems." },
       edge: { th: "ถ้ากังวลว่าจะไม่สมบูรณ์แบบ อาจไม่เริ่มสักที หรือหงุดหงิดกับความผิดพลาดเล็กน้อยของคนอื่น", en: "Worrying about perfection can stop you from starting, or make you irritated by other people's small mistakes." },
     },
     {
+      head: { th: "ทำได้ดีที่สุดเมื่อมีทีมหรือคู่", en: "At your best working with others" },
       core: { th: "คุณลงมือได้ดีที่สุดเมื่อมีคู่หรือทีม ชอบความยุติธรรม สู้เพื่อคนอื่นได้ดีกว่าสู้เพื่อตัวเอง และเลือกเจรจามากกว่าปะทะ", en: "You act best with a partner or team. You care about fairness, fight better for others than for yourself, and prefer negotiation to confrontation." },
       edge: { th: "ถ้าลังเลเพราะกลัวคนไม่พอใจ ความโกรธจะสะสมเงียบ ๆ ยอมขัดแย้งบ้างเพื่อสิ่งที่คุณต้องการ", en: "Hesitating so no one is upset lets anger build quietly. Accept some conflict for what you want." },
     },
     {
+      head: { th: "มุ่งมั่น เข้มข้น และไม่ยอมแพ้", en: "Intense, focused, unyielding" },
       core: { th: "คุณมีพลังเข้มข้น มุ่งมั่น และไม่ยอมแพ้ ทำทีละเรื่องแต่ทำถึงที่สุด และมีพลังที่สุดในยามวิกฤต", en: "Your energy is intense, focused and unyielding. You work on one thing at a time, all the way, and you are at your most powerful in a crisis." },
       edge: { th: "ถ้าเก็บความโกรธหรือความแค้นไว้ จะกัดกินใจตัวเอง การปล่อยวางคือพลังอีกแบบ", en: "Holding on to anger or grudges eats away at you. Letting go is another kind of strength." },
     },
     {
+      head: { th: "ลงมือด้วยไฟและความเชื่อ", en: "Acts with fire and conviction" },
       core: { th: "คุณลงมือด้วยความกระตือรือร้นและความเชื่อ พลังดีที่สุดเมื่อมีเป้าหมายที่มีความหมาย และชอบการผจญภัย การเดินทาง และการเรียนรู้สิ่งใหม่", en: "You act with enthusiasm and conviction, and your energy peaks with a meaningful goal. You love adventure, travel and learning new things." },
       edge: { th: "ถ้าเบื่อเร็ว อาจทิ้งงานไว้กลางทาง หรือรับปากเกินแรงที่มี", en: "Getting bored quickly can leave work half done, or lead you to promise more than you can deliver." },
     },
     {
+      head: { th: "มีวินัย ไต่ขึ้นทีละขั้นจนถึงยอด", en: "Disciplined, climbs step by step" },
       core: { th: "คุณลงมืออย่างมีวินัย มีแผน และมองเป้าหมายระยะยาว ทำงานหนักได้ คุมพลังตัวเองได้ดี และไต่ขึ้นทีละขั้นจนถึงจุดสูงสุด", en: "You act with discipline, planning and long-term goals. You work hard, control your energy well and climb step by step to the top." },
       edge: { th: "ถ้าวัดตัวเองจากผลงานอย่างเดียว อาจทำงานจนลืมพักหรือลืมความสุขระหว่างทาง", en: "If you measure yourself only by results, you may work without rest and forget to enjoy the journey." },
     },
     {
+      head: { th: "ลงมือในแบบของตัวเอง ไม่ชอบถูกสั่ง", en: "Acts your own way, dislikes orders" },
       core: { th: "คุณลงมือในแบบของตัวเอง ไม่ชอบถูกสั่ง และมีพลังที่สุดเมื่อได้ทำเพื่อแนวคิดหรือกลุ่มคนที่เชื่อในสิ่งเดียวกัน ถนัดหาวิธีใหม่ที่ยังไม่มีใครลอง", en: "You act in your own way, dislike being told what to do and are most energised working for an idea or a group that shares your values. You find new methods nobody has tried." },
       edge: { th: "ถ้าต่อต้านกฎทุกข้อ อาจเสียแรงสู้ในเรื่องที่ไม่จำเป็น เลือกสู้เฉพาะเรื่องที่สำคัญจริง", en: "Rebelling against every rule wastes energy on needless fights. Pick only the battles that truly matter." },
     },
     {
+      head: { th: "ลงมือตามแรงบันดาลใจและความรู้สึก", en: "Acts on inspiration and feeling" },
       core: { th: "คุณลงมือตามความรู้สึกและแรงบันดาลใจ มีพลังมากเมื่อได้ช่วยคนอื่นหรือทำงานสร้างสรรค์ และมักไปถึงเป้าหมายด้วยการไหลตามจังหวะมากกว่าการบุกตรง", en: "You act on feeling and inspiration, with the most energy when helping others or creating. You often reach your goals by going with the flow rather than charging ahead." },
       edge: { th: "ถ้าเลี่ยงการเผชิญหน้า ความโกรธอาจกลายเป็นความเหนื่อยที่ไม่รู้สาเหตุ เป้าหมายที่ชัดช่วยให้พลังไม่กระจาย", en: "Avoiding confrontation can turn anger into unexplained tiredness. Clear goals keep your energy from scattering." },
     },
   ],
   jupiter: [
     {
+      head: { th: "โอกาสมาจากความกล้าเริ่มก่อน", en: "Luck comes from going first" },
       core: { th: "โอกาสของคุณมาจากความกล้าเริ่มก่อน คุณเติบโตเมื่อได้บุกเบิก ลองสิ่งใหม่ และเชื่อมั่นในตัวเอง", en: "Your opportunities come from daring to go first. You grow by pioneering, trying new things and believing in yourself." },
       edge: { th: "ระวังความมั่นใจกลายเป็นความประมาท หรือรีบคว้าทุกโอกาสโดยไม่อ่านรายละเอียด", en: "Beware of confidence turning into recklessness, or grabbing every chance without reading the details." },
     },
     {
+      head: { th: "โอกาสงอกงามช้าแต่มั่นคง", en: "Growth that is slow but solid" },
       core: { th: "โอกาสของคุณงอกงามช้าแต่มั่นคง คุณเติบโตผ่านการสะสมทั้งเงิน ทักษะ และความสัมพันธ์ที่ยืนยาว และมักมีโชคกับทรัพย์สินที่จับต้องได้", en: "Your opportunities grow slowly but surely. You prosper by accumulating money, skills and lasting relationships, and often have luck with tangible assets." },
       edge: { th: "ระวังสบายจนไม่อยากขยับ หรือใช้จ่ายเพื่อความสุขเกินตัว", en: "Beware of getting so comfortable you stop moving, or overspending on pleasure." },
     },
     {
+      head: { th: "โอกาสมาจากการพูดคุยและเครือข่าย", en: "Luck through conversation and networks" },
       core: { th: "โอกาสของคุณมาจากการพูดคุย การเรียนรู้ และเครือข่าย ยิ่งรู้จักคนมากและรู้หลายเรื่อง ประตูใหม่ก็ยิ่งเปิด", en: "Your opportunities come through conversation, learning and networks. The more people you know and the more you learn, the more doors open." },
       edge: { th: "ระวังรู้กว้างจนไม่ได้ลงลึก หรือรับข้อมูลมากจนตัดสินใจไม่ได้", en: "Beware of knowing a little about everything and nothing in depth, or drowning decisions in information." },
     },
     {
+      head: { th: "โอกาสมาจากความอบอุ่นและครอบครัว", en: "Luck through warmth and family" },
       core: { th: "โอกาสของคุณมาจากความอบอุ่นและการดูแลคน คุณเติบโตผ่านครอบครัว บ้าน และคนที่ไว้ใจ และมักได้รับความช่วยเหลือเมื่อคุณช่วยคนอื่นก่อน", en: "Your opportunities come from warmth and caring for others. You grow through family, home and trusted people, and help tends to come when you help first." },
       edge: { th: "ระวังปกป้องคนที่รักมากเกินไป หรือติดอยู่กับความปลอดภัยแบบเดิม", en: "Beware of over-protecting the people you love, or staying stuck in familiar safety." },
     },
     {
+      head: { th: "โอกาสมาเมื่อกล้าแสดงตัว", en: "Luck comes when you dare to be seen" },
       core: { th: "โอกาสของคุณมาเมื่อคุณกล้าแสดงตัว ความใจกว้างและความคิดสร้างสรรค์ทำให้คนอยากสนับสนุน และคุณเติบโตเมื่อได้นำหรือได้อยู่บนเวที", en: "Your opportunities arrive when you dare to be seen. Your generosity and creativity make people want to back you, and you grow by leading or being on stage." },
       edge: { th: "ระวังอยากได้การยอมรับจนทำเกินตัว หรือใจกว้างเกินกำลัง", en: "Beware of overreaching for applause, or being generous beyond your means." },
     },
     {
+      head: { th: "โอกาสมาจากฝีมือและความใส่ใจ", en: "Luck through skill and care" },
       core: { th: "โอกาสของคุณมาจากฝีมือและความใส่ใจในรายละเอียด คุณเติบโตผ่านงานที่ทำได้ดีขึ้นทุกวัน และการช่วยแก้ปัญหาให้คนอื่น", en: "Your opportunities come from skill and attention to detail. You grow through work you keep improving and by solving problems for others." },
       edge: { th: "ระวังมองแต่จุดเล็กจนพลาดภาพใหญ่ หรือรู้สึกว่าตัวเองยังไม่พร้อมเสียที", en: "Beware of focusing on small things and missing the big picture, or never feeling ready." },
     },
     {
+      head: { th: "โอกาสมาผ่านคู่และหุ้นส่วน", en: "Luck through partners" },
       core: { th: "โอกาสของคุณมาผ่านคนอื่น ทั้งคู่ หุ้นส่วน และเครือข่าย คุณเติบโตเมื่อร่วมมือ และมีโชคเรื่องการเจรจาและความสัมพันธ์", en: "Your opportunities come through other people: partners, collaborators and networks. You grow through cooperation and are lucky in negotiation and relationships." },
       edge: { th: "ระวังพึ่งคนอื่นมากจนไม่กล้าตัดสินใจเอง", en: "Beware of relying on others so much that you stop deciding for yourself." },
     },
     {
+      head: { th: "โอกาสซ่อนอยู่ในเรื่องที่คนอื่นไม่กล้าแตะ", en: "Luck where others fear to look" },
       core: { th: "โอกาสของคุณซ่อนอยู่ในเรื่องที่คนอื่นไม่กล้าแตะ คุณเติบโตผ่านการลงลึก การเปลี่ยนแปลงครั้งใหญ่ และทรัพยากรที่ใช้ร่วมกับคนอื่น", en: "Your opportunities hide in places others are afraid to look. You grow by going deep, through major transformations and through resources shared with others." },
       edge: { th: "ระวังอยากคุมผลลัพธ์ทั้งหมด หรือเสี่ยงหนักเกินไปเพราะมั่นใจ", en: "Beware of needing to control every outcome, or taking big risks out of overconfidence." },
     },
     {
+      head: { th: "มีโชคและความหวังเป็นทุนเดิม", en: "Luck and hope come naturally" },
       core: { th: "คุณมีโชคและความหวังเป็นทุนเดิม เติบโตผ่านการเดินทาง การเรียน และการแสวงหาความหมายของชีวิต และโอกาสมักมาหาเมื่อคุณเปิดใจ", en: "Luck and hope come naturally to you. You grow through travel, study and the search for meaning, and opportunities appear when you stay open." },
       edge: { th: "ระวังมองโลกดีจนประมาท หรือรับปากหลายเรื่องเกินกว่าที่จะทำได้", en: "Beware of optimism turning careless, or promising more than you can do." },
     },
     {
+      head: { th: "โอกาสมาช้าแต่มั่นคงตามประสบการณ์", en: "Luck that grows with experience" },
       core: { th: "โอกาสของคุณมาช้าแต่มั่นคง คุณเติบโตผ่านความรับผิดชอบ การทำงานหนัก และการสร้างชื่อเสียงทีละขั้น ความสำเร็จมักมาพร้อมประสบการณ์", en: "Your opportunities come slowly but solidly. You grow through responsibility, hard work and building a reputation step by step, and success often comes with experience." },
       edge: { th: "ระวังรอบคอบจนปล่อยโอกาสดีหลุดมือ", en: "Beware of being so cautious that good chances slip away." },
     },
     {
+      head: { th: "โอกาสมาจากความคิดใหม่และกลุ่มคน", en: "Luck through new ideas and groups" },
       core: { th: "โอกาสของคุณมาจากความคิดใหม่ เพื่อน และกลุ่มคน คุณเติบโตเมื่อกล้าแตกต่าง และมีโชคกับงานที่ช่วยคนหมู่มากหรือใช้เทคโนโลยี", en: "Your opportunities come from new ideas, friends and communities. You grow by daring to be different and are lucky with work that serves many people or uses technology." },
       edge: { th: "ระวังยึดอุดมการณ์จนมองข้ามความต้องการของคนใกล้ตัว", en: "Beware of holding ideals so tightly that you overlook the needs of people close to you." },
     },
     {
+      head: { th: "โอกาสมาจากความเมตตาและสัญชาตญาณ", en: "Luck through compassion and intuition" },
       core: { th: "โอกาสของคุณมาจากความเมตตาและสัญชาตญาณ คุณเติบโตผ่านศิลปะ จิตวิญญาณ และการช่วยเหลือคน และมักได้รับความช่วยเหลือในจังหวะที่ไม่คาดคิด", en: "Your opportunities come from compassion and intuition. You grow through art, spirituality and helping others, and help often arrives at unexpected moments." },
       edge: { th: "ระวังใจดีจนถูกเอาเปรียบ หรือหวังโดยไม่ลงมือ", en: "Beware of your kindness being exploited, or hoping without acting." },
     },
   ],
   saturn: [
     {
+      head: { th: "บทเรียนเรื่องความอดทนและการรอจังหวะ", en: "Lesson: patience and timing" },
       core: { th: "บทเรียนของคุณคือความอดทน คุณอยากได้ผลเร็วและอยากเป็นตัวของตัวเอง แต่ชีวิตสอนให้รอจังหวะ คิดก่อนทำ และยืนด้วยตัวเองอย่างมีวินัย", en: "Your lesson is patience. You want quick results and independence, but life teaches you to wait for the right moment, think before acting and stand on your own with discipline." },
       edge: { th: "เมื่อผ่านบทเรียนนี้ คุณจะเป็นผู้นำที่ทั้งกล้าและรอบคอบ", en: "Once learned, it makes you a leader who is both brave and careful." },
     },
     {
+      head: { th: "บทเรียนเรื่องความมั่นคงและคุณค่าในตัวเอง", en: "Lesson: security and self-worth" },
       core: { th: "บทเรียนของคุณเกี่ยวกับความมั่นคงและคุณค่าในตัวเอง คุณอาจกังวลเรื่องเงินหรือกลัวว่าจะไม่พอ จึงตั้งใจสร้างฐานให้มั่นคงด้วยความอดทน", en: "Your lesson concerns security and self-worth. You may worry about money or never having enough, so you patiently build a firm foundation." },
       edge: { th: "เมื่อผ่านบทเรียนนี้ คุณจะรู้ว่าความมั่นคงที่แท้อยู่ในตัวเอง ไม่ใช่ในบัญชีธนาคาร", en: "Once you pass this lesson, you learn that true security lives inside you, not in a bank account." },
     },
     {
+      head: { th: "บทเรียนเรื่องการคิดและการสื่อสาร", en: "Lesson: thinking and speaking" },
       core: { th: "บทเรียนของคุณเกี่ยวกับการคิดและการสื่อสาร คุณอาจเคยรู้สึกว่าพูดไม่เก่งหรือไม่ฉลาดพอ จึงตั้งใจเรียนรู้อย่างจริงจังและคิดอย่างเป็นระบบ", en: "Your lesson concerns thinking and communication. You may once have felt you were not articulate or clever enough, so you learn seriously and think systematically." },
       edge: { th: "เมื่อฝึกได้ คำพูดของคุณจะมีน้ำหนักและน่าเชื่อถือกว่าคนที่พูดเก่งโดยธรรมชาติ", en: "With practice, your words carry more weight and trust than those of natural talkers." },
     },
     {
+      head: { th: "บทเรียนเรื่องอารมณ์และครอบครัว", en: "Lesson: emotions and family" },
       core: { th: "บทเรียนของคุณเกี่ยวกับอารมณ์และครอบครัว คุณอาจต้องโตเร็วหรือแบกความรับผิดชอบในบ้าน จึงเรียนรู้ที่จะดูแลคนอื่นก่อนดูแลใจตัวเอง", en: "Your lesson concerns emotions and family. You may have had to grow up early or carry responsibility at home, learning to care for others before yourself." },
       edge: { th: "บทเรียนนี้ชวนให้คุณยอมอ่อนแอให้คนที่ไว้ใจเห็นบ้าง และสร้างความอบอุ่นที่คุณต้องการขึ้นมาเอง", en: "This lesson invites you to let trusted people see your soft side, and to build the warmth you need." },
     },
     {
+      head: { th: "บทเรียนเรื่องความมั่นใจในตัวเอง", en: "Lesson: confidence and self-expression" },
       core: { th: "บทเรียนของคุณเกี่ยวกับการแสดงตัวตนและความมั่นใจ คุณอยากเป็นที่ยอมรับ แต่ลึก ๆ อาจกลัวว่าไม่เก่งพอ จึงทำงานหนักเพื่อพิสูจน์ตัวเอง", en: "Your lesson concerns self-expression and confidence. You want recognition, but deep down may fear you are not good enough, so you work hard to prove yourself." },
       edge: { th: "เมื่อผ่านบทเรียนนี้ คุณจะเปล่งประกายได้โดยไม่ต้องรอให้ใครอนุญาต", en: "Once you pass it, you can shine without waiting for anyone's permission." },
     },
     {
+      head: { th: "บทเรียนเรื่องงานและความสมบูรณ์แบบ", en: "Lesson: work and perfectionism" },
       core: { th: "บทเรียนของคุณเกี่ยวกับงาน สุขภาพ และความสมบูรณ์แบบ คุณรับผิดชอบสูง ละเอียด และพึ่งพาได้ แต่มักกดดันตัวเองว่าห้ามผิดพลาด", en: "Your lesson concerns work, health and perfection. You are responsible, precise and reliable, but you pressure yourself never to make mistakes." },
       edge: { th: "บทเรียนนี้ชวนให้คุณรู้ว่าดีพอก็มีค่า และการดูแลร่างกายคือส่วนหนึ่งของงาน", en: "This lesson teaches that good enough has value, and that caring for your body is part of the work." },
     },
     {
+      head: { th: "บทเรียนเรื่องความสัมพันธ์และคำสัญญา", en: "Lesson: relationships and promises" },
       core: { th: "บทเรียนของคุณเกี่ยวกับความสัมพันธ์และความยุติธรรม คุณจริงจังกับคำสัญญา ให้คุณค่ากับความเท่าเทียม และสร้างความสัมพันธ์ที่ยืนยาวได้เก่ง", en: "Your lesson concerns relationships and fairness. You take promises seriously, value equality and are good at building lasting bonds." },
       edge: { th: "ระวังเลือกคู่หรือหุ้นส่วนด้วยหน้าที่มากกว่าหัวใจ หรือกลัวความผูกมัดเพราะรู้ว่ามันหนัก", en: "Beware of choosing partners out of duty rather than heart, or fearing commitment because you know its weight." },
     },
     {
+      head: { th: "บทเรียนเรื่องความไว้ใจและการควบคุม", en: "Lesson: trust and control" },
       core: { th: "บทเรียนของคุณเกี่ยวกับความไว้ใจและการควบคุม คุณระวังตัวสูงและไม่เปิดใจง่าย แต่เมื่อไว้ใจแล้วจะผูกพันลึกและยาวนาน", en: "Your lesson concerns trust and control. You are guarded and slow to open up, but once you trust, the bond is deep and lasting." },
       edge: { th: "บทเรียนนี้ชวนให้คุณปล่อยสิ่งที่ควบคุมไม่ได้ และรู้ว่าการเปิดใจไม่ใช่ความอ่อนแอ", en: "This lesson invites you to release what you cannot control, and to see that openness is not weakness." },
     },
     {
+      head: { th: "บทเรียนเรื่องความเชื่อและความหมาย", en: "Lesson: belief and meaning" },
       core: { th: "บทเรียนของคุณเกี่ยวกับความเชื่อและความหมายของชีวิต คุณจริงจังกับการเรียนรู้และหลักการ และค่อย ๆ สร้างปรัชญาชีวิตของตัวเองจากประสบการณ์จริง", en: "Your lesson concerns belief and life's meaning. You take learning and principles seriously and gradually build your own philosophy from real experience." },
       edge: { th: "ระวังยึดความเชื่อแบบตายตัว หรือสงสัยจนไม่กล้าเชื่ออะไรเลย", en: "Beware of rigid beliefs, or doubting so much that you dare not believe anything." },
     },
     {
+      head: { th: "มีวินัยและรับผิดชอบเป็นธรรมชาติ", en: "Natural discipline and responsibility" },
       core: { th: "คุณมีวินัย อดทน และรับผิดชอบเป็นธรรมชาติ รู้ว่าสิ่งที่มีค่าต้องใช้เวลา และสร้างผลงานที่ยืนได้นานจากความพยายาม", en: "You are disciplined, patient and responsible by nature. You know that what is valuable takes time, and you build lasting work through effort." },
       edge: { th: "ระวังแบกทุกอย่างไว้คนเดียวจนลืมว่าชีวิตไม่ได้มีแค่หน้าที่", en: "Beware of carrying everything alone until you forget life is more than duty." },
     },
     {
+      head: { th: "สร้างระบบใหม่ที่ใช้ได้จริง", en: "Builds new systems that work" },
       core: { th: "คุณใช้วินัยกับความคิดใหม่ได้ดี สร้างระบบที่ทั้งล้ำและใช้ได้จริง และรับผิดชอบต่อกลุ่มหรือส่วนรวมอย่างจริงจัง", en: "You apply discipline to new ideas well, building systems that are both innovative and practical, and you take responsibility for groups and the common good seriously." },
       edge: { th: "ระวังยึดหลักการตัวเองจนแข็งตัว หรือรู้สึกโดดเดี่ยวเพราะคิดต่างจากคนส่วนใหญ่", en: "Beware of hardening around your principles, or feeling isolated for thinking differently." },
     },
     {
+      head: { th: "บทเรียนเรื่องเส้นแบ่งระหว่างฝันกับจริง", en: "Lesson: the line between dream and reality" },
       core: { th: "บทเรียนของคุณเกี่ยวกับเส้นแบ่งระหว่างความฝันกับความจริง คุณมีใจเมตตาและอ่อนไหว และค่อย ๆ เรียนรู้ที่จะให้ความฝันมีโครงสร้างพอจะเป็นจริงได้", en: "Your lesson concerns the line between dreams and reality. You are compassionate and sensitive, and you gradually learn to give your dreams enough structure to come true." },
       edge: { th: "ระวังรับความทุกข์ของคนอื่นมาแบกเอง หรือหนีความรับผิดชอบเมื่อรู้สึกหนักเกินไป", en: "Beware of carrying other people's pain, or escaping responsibility when it feels too heavy." },
     },
@@ -633,4 +695,50 @@ export const TRANSIT_KEY: Record<"jupiter" | "saturn" | "uranus" | "neptune" | "
 export const SECT_TEXT: Record<"day" | "night", T> = {
   day: { th: "ดวงอาทิตย์นำผัง คุณมักรู้จักตัวเองผ่านสิ่งที่ลงมือทำ เป้าหมาย และสิ่งที่สร้างให้โลกเห็น", en: "The Sun leads your chart: you tend to know yourself through what you do, your goals and what you build for the world to see." },
   night: { th: "ดวงจันทร์นำผัง คุณมักรู้จักตัวเองผ่านความรู้สึก ความสัมพันธ์ใกล้ชิด และโลกภายใน", en: "The Moon leads your chart: you tend to know yourself through feelings, close bonds and your inner world." },
+};
+
+/** ดวงจันทร์ 12 ราศี: หัวข้อสั้นในแถวดาว (สรุปจาก `MOON_SIGN_TEXT` ของ content.ts) */
+export const MOON_HEAD: readonly T[] = [
+  { th: "ใจร้อนเร็วหายเร็ว ต้องได้ลงมือเอง", en: "A quick-burning heart that needs to act for itself" },
+  { th: "ใจสงบเมื่อชีวิตมั่นคงและสบาย", en: "A heart at peace when life is stable and comfortable" },
+  { th: "ใจต้องการได้คุยและมีเรื่องใหม่ให้คิด", en: "A heart that needs conversation and new things to think about" },
+  { th: "ใจลึก อ่อนโยน ผูกพันกับคนใกล้ชิด", en: "A deep, tender heart, close to family" },
+  { th: "ใจต้องการการยอมรับและความอบอุ่นที่แสดงออก", en: "A heart that needs warmth and recognition shown openly" },
+  { th: "ใจสงบเมื่อทุกอย่างเป็นระเบียบ", en: "A heart at peace when things are in order" },
+  { th: "ใจต้องการความสงบและความสัมพันธ์ที่ราบรื่น", en: "A heart that needs peace and smooth relationships" },
+  { th: "ใจลึก เข้มข้น และไว้ใจคนยาก", en: "A deep, intense heart that trusts slowly" },
+  { th: "ใจต้องการอิสระและเรื่องที่ให้ความหวัง", en: "A heart that needs freedom and hope" },
+  { th: "ใจแข็งแรงและพึ่งตัวเองได้", en: "A strong, self-reliant heart" },
+  { th: "ใจต้องการพื้นที่ส่วนตัวและเพื่อนที่เข้าใจ", en: "A heart that needs space and friends who get you" },
+  { th: "ใจอ่อนไหว รับรู้ความรู้สึกคนรอบตัวได้ไว", en: "A sensitive heart that feels what others feel" },
+];
+
+/**
+ * ลักษณะราศี (จร · สถิร · อุภย) ที่มากหรือน้อยเกินไป — `strong` เมื่อแบบหนึ่งเกินครึ่งของผัง · `weak` เมื่อเหลือไม่ถึง 15%
+ * (สมดุลพลังเดิมมีแค่เปอร์เซ็นต์ ผู้ใช้ที่มีสถิรราศี 78% ไม่รู้ว่าแปลว่าอะไร)
+ */
+export const MODALITY_DEPTH: Record<"cardinal" | "fixed" | "mutable", { strong: T; weak: T }> = {
+  cardinal: {
+    strong: { th: "จรราศีมากเกินครึ่ง: คุณถนัดเริ่มและผลักให้เกิดสิ่งใหม่ แต่ระวังเริ่มหลายอย่างจนจบไม่ครบ", en: "Over half cardinal: you are a natural starter, but watch out for starting more than you finish." },
+    weak: { th: "จรราศีน้อย: การเริ่มเรื่องใหม่อาจต้องใช้แรงมากกว่าคนอื่น ตั้งวันเริ่มให้ชัดช่วยได้", en: "Little cardinal: starting something new may take extra effort; setting a clear start date helps." },
+  },
+  fixed: {
+    strong: { th: "สถิรราศีมากเกินครึ่ง: คุณหนักแน่นและทำต่อเนื่องได้นานกว่าคนส่วนใหญ่ แต่ระวังดื้อหรือปรับตัวช้าเมื่อสถานการณ์เปลี่ยน", en: "Over half fixed: you are steadier and more persistent than most, but watch out for stubbornness or adapting slowly when things change." },
+    weak: { th: "สถิรราศีน้อย: การทำเรื่องเดิมต่อเนื่องนาน ๆ อาจไม่ใช่ธรรมชาติ ใช้กิจวัตรหรือคนช่วยเตือนเป็นตัวช่วย", en: "Little fixed: sticking with one thing for a long time may not come naturally; routines or a reminder buddy help." },
+  },
+  mutable: {
+    strong: { th: "อุภยราศีมากเกินครึ่ง: คุณปรับตัวเก่งมาก แต่ระวังลังเลหรือเปลี่ยนใจบ่อยจนไม่ได้ลงหลัก", en: "Over half mutable: you adapt brilliantly, but watch out for indecision or changing course so often you never settle." },
+    weak: { th: "อุภยราศีน้อย: การเปลี่ยนแผนกะทันหันอาจทำให้อึดอัด เผื่อแผนสำรองไว้เสมอ", en: "Little mutable: sudden changes of plan may feel uncomfortable; always keep a plan B." },
+  },
+};
+
+/** เรือนที่มีแต่จุดคำนวณ (ไม่มีดาวเคราะห์): บอกว่าจุดนั้นทำอะไรในเรือนนี้ */
+export const POINT_HOUSE_LINE: Partial<Record<BodyId, T>> = {
+  node: { th: "ทิศทางที่ชีวิตชวนให้คุณเติบโต", en: "Where life invites you to grow" },
+  chiron: { th: "แผลใจเรื่องนี้กลายเป็นพลังเยียวยาได้", en: "An old wound here can become a gift for healing" },
+  lilith: { th: "เรื่องที่คุณไม่ยอมให้ใครควบคุม", en: "An area where you refuse to be controlled" },
+  ceres: { th: "ที่ที่คุณดูแลและอยากได้รับการดูแล", en: "Where you nurture and want to be nurtured" },
+  pallas: { th: "ที่ที่ปัญญาและกลยุทธ์ของคุณทำงาน", en: "Where your strategic mind works" },
+  juno: { th: "เรื่องที่ผูกกับความผูกมัดระยะยาว", en: "An area tied to long-term commitment" },
+  vesta: { th: "เรื่องที่คุณทุ่มเทอย่างตั้งใจ", en: "Something you devote yourself to" },
 };

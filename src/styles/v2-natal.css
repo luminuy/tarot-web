@@ -1371,6 +1371,12 @@ details:not([open]) > summary .v2-nt-more-close {
     padding-left: 16px;
   }
 }
+/* แถวดาวที่เปิดแล้ว: บรรทัดแรกบอกว่าดาวนี้ดูแลเรื่องอะไร (ความหมายกลาง ย้ายมาจากแถวที่ยังไม่เปิด) */
+.v2-nr-planet-about {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--nt-muted);
+}
 .v2-nr-planet-cards {
   font-size: 13px;
   line-height: 1.6;
@@ -1450,8 +1456,8 @@ details:not([open]) > summary .v2-nt-more-close {
   line-height: 1.8;
   color: var(--nt-muted);
 }
-/* เรือนว่าง: อ่านจากเจ้าเรือนว่าไปอยู่เรือนไหน */
-.v2-nr-house-ruler {
+/* บรรทัดสั้นของทุกเรือน: มีดาว ➔ ได้พลังจากเรื่องอะไร · ไม่มีดาว ➔ อ่านจากเจ้าเรือน */
+.v2-nr-house-line {
   display: block;
   margin-top: 2px;
   font-size: 12.5px;

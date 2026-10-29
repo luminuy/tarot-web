@@ -57,6 +57,15 @@ export interface Highlight {
   advice: string;
   /** โทนของเรื่อง (สีเส้นซ้ายบนหน้าเว็บ) */
   tone: HighlightTone;
+  /** รูปแบบผังที่ข้อนี้อธิบายไปแล้ว (`patternKey`) — กล่องรูปแบบพิเศษไม่ต้องอธิบายซ้ำ */
+  covers?: string[];
+}
+
+/** คีย์คงที่ของรูปแบบผัง ใช้จับคู่กับ `Highlight.covers` */
+export function patternKey(p: ChartPattern): string {
+  if (p.type === "stellium-house") return `stellium-house:${p.house}`;
+  if (p.type === "stellium-sign") return `stellium-sign:${p.sign}`;
+  return `${p.type}:${p.bodies.join("-")}`;
 }
 
 /**
@@ -173,6 +182,7 @@ export function chartHighlights(chart: NatalChart, lang: Lang, max = 7): Highlig
       parts,
       advice: [...(stellium ? [hd.key[lang]] : []), PLANET_DEPTH[lead.planet].key[lang]],
       tone: "neutral",
+      covers: stellium ? [patternKey(stellium)] : undefined,
     });
   }
 
@@ -205,6 +215,7 @@ export function chartHighlights(chart: NatalChart, lang: Lang, max = 7): Highlig
         ],
         advice: [hd.key[lang]],
         tone: "neutral",
+        covers: [patternKey(p), ...(twin ? [patternKey(twin)] : [])],
       });
     }
   }
@@ -238,13 +249,14 @@ export function chartHighlights(chart: NatalChart, lang: Lang, max = 7): Highlig
             : `To balance it, borrow from ${sign(opp)}, the opposite sign: ${SIGN_TEXT[opp].gift.en}.`,
         ],
         tone: "neutral",
+        covers: [patternKey(p)],
       });
       continue;
     }
     const c = patternCandidate(chart, p, lang);
     if (c) {
       const { text, ...rest } = c;
-      out.push({ ...rest, parts: [text] });
+      out.push({ ...rest, parts: [text], covers: [patternKey(p)] });
     }
   }
 

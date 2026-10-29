@@ -1148,6 +1148,81 @@ console.log("\n6.18) เนื้อหาเข้าใจง่ายแต�
   );
 }
 
+console.log("\n6.19) ส่วน 4–7 ของผลผัง — แถวดาวบอกเรื่องของผังนี้ · ทุกเรือนมีบรรทัด · มุมสำคัญเป็นดาวจริง · สมดุลพลังบอกความหมาย · ไม่เฉลยไพ่ที่คว่ำ");
+{
+  // เจ้าของ 2026-10-29 ส่งภาพส่วน 4–8 "พวกนี้ต้องปรับปรุงให้ดีขึ้นไหม"
+  const rd = (f: string) => fs.readFileSync(path.join(process.cwd(), f), "utf8");
+  const { bodyHeadline, houseLine, keyAspects, describeAspect } = await import("../../src/lib/astro/natal-text");
+  const { BODY_TEXT } = await import("../../src/data/natal/content");
+  const { PLANET_IDS: PLANET_IDS_ALL } = await import("../../src/lib/astro/natal");
+  const { chartHighlights, patternKey } = await import("../../src/lib/astro/natal-insight");
+  const depth = await import("../../src/data/natal/depth");
+  const badThai = /undefined|NaN|[฀-๿]ๆ|ๆ[฀-๿]/;
+  const samples: NatalInput[] = [
+    input(Date.UTC(1969, 11, 31, 23, 5)),
+    input(Date.UTC(1990, 4, 17, 3, 42)),
+    input(Date.UTC(2001, 8, 11, 12, 0)),
+    input(Date.UTC(1998, 0, 15, 2, 30)),
+    input(Date.UTC(1994, 0, 12, 5, 30)),
+    input(Date.UTC(1978, 6, 21, 9, 15), { lat: 51.5, lon: -0.12, houseSystem: "koch" }),
+    input(Date.UTC(1995, 2, 3, 5), { timeKnown: false }),
+  ];
+  const ROW_IDS = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron", "node", "lilith", "asc", "mc"];
+  let headOk = true;
+  let houseOk = true;
+  let houseChecked = 0;
+  let aspectOk = true;
+  let coverOk = true;
+  for (const inp of samples) {
+    const c = computeNatalChart(inp);
+    for (const lang of ["th", "en"] as const) {
+      // แถวดาว: หัวข้อเฉพาะผังนี้ ไม่ใช่ความหมายกลาง · ไม่เอ่ยชื่อไพ่ (แถวอาทิตย์/จันทร์/ลัคนาแสดงก่อนผู้ใช้พลิก)
+      for (const b of c.bodies.filter((x) => ROW_IDS.includes(x.id))) {
+        const h = bodyHeadline(b, lang);
+        headOk &&= !!h && h !== BODY_TEXT[b.id].theme[lang] && !badThai.test(h) && !/ไพ่|The [A-Z]/.test(h) && (lang === "th" || !/[฀-๿]/.test(h));
+      }
+      if (c.houses) {
+        for (let n = 1; n <= 12; n++) {
+          const line = houseLine(c, n, lang);
+          houseChecked++;
+          const hasPlanet = c.bodies.some((b) => b.house === n && (PLANET_IDS_ALL as readonly string[]).includes(b.id));
+          houseOk &&= !!line && !badThai.test(line) && (!hasPlanet || line.startsWith(lang === "th" ? "เรื่องนี้ได้พลังจาก" : "Powered by your")) && (lang === "th" || !/[฀-๿]/.test(line));
+        }
+      } else houseOk &&= houseLine(c, 1, lang) === null;
+      const hl = chartHighlights(c, lang, 8);
+      coverOk &&= hl.filter((h) => h.kind === "pattern").every((h) => !!h.covers?.length) && hl.flatMap((h) => h.covers ?? []).every((k) => c.patterns.some((p) => patternKey(p) === k));
+    }
+    // มุมสำคัญ: เฉพาะดาวเคราะห์ + ลัคนา/กลางฟ้า · ไม่มีลัคนากับกลางฟ้าคู่กัน · ไม่มีดาวรุ่นคู่กัน
+    const top = new Set<string>([...PLANET_IDS_ALL, "asc", "mc"]);
+    aspectOk &&= keyAspects(c, 5).every((a) => top.has(a.a) && top.has(a.b) && !(["asc", "mc"].includes(a.a) && ["asc", "mc"].includes(a.b)));
+  }
+  check("แถวดาว: บรรทัดที่สองเป็นเรื่องของผังนี้ (ไม่ใช่ความหมายกลาง) · ไม่เอ่ยชื่อไพ่ · ไม้ยมกเว้นวรรค · อังกฤษไม่มีอักษรไทย", headOk);
+  check(
+    "ดาวพุธถึงเสาร์มีหัวข้อสั้นครบ 12 ราศีไม่ซ้ำ · ดวงจันทร์ 12",
+    Object.values(depth.PLANET_SIGN_TEXT).every((list) => new Set(list.map((x) => x.head.th)).size === 12 && list.every((x) => x.head.en && !/[฀-๿]/.test(x.head.en))) && depth.MOON_HEAD.length === 12,
+  );
+  check(`เรือน: ทุกเรือนมีบรรทัด (มีดาว ➔ ได้พลังจากเรื่องอะไร · ไม่มีดาว ➔ เจ้าเรือน) · ไม่รู้เวลาเกิด = ไม่มี (${houseChecked} เรือน)`, houseOk && houseChecked > 100);
+  check("ดาวที่คุยกันแรงที่สุด: เฉพาะดาวจริงกับลัคนา/กลางฟ้า (จุดคำนวณอยู่ในตารางมุม)", aspectOk);
+  const sample = computeNatalChart(samples[0]);
+  const shortOk = (["conjunction", "trine", "sextile", "square", "opposition"] as const).every((type) => {
+    const a = { ...sample.aspects[0], a: "sun" as const, b: "moon" as const, type };
+    const full = describeAspect(a, "th");
+    const short = describeAspect(a, "th", { short: true });
+    return short.length > 20 && short.length < full.length && describeAspect(a, "en", { short: true }).length < describeAspect(a, "en").length;
+  });
+  check("ประโยคมุมแบบสั้นสำหรับมุมชนิดเดียวกันที่ขึ้นซ้ำ (หน้าเว็บและรายงาน)", shortOk && rd("src/lib/astro/natal-report.ts").includes("short: list.slice(0, i).some("));
+  check("เรื่องเด่นบอกว่าอธิบายรูปแบบผังไหนไปแล้ว ➔ กล่องรูปแบบพิเศษไม่อธิบายซ้ำ", coverOk && rd("src/components/natal/NatalResult.tsx").includes("coveredBy.get(patternKey(p))"));
+  const res = rd("src/components/natal/NatalResult.tsx");
+  check(
+    "ISSUE-063: แถวดาวอื่นและแผงใต้วงผังไม่เฉลยไพ่ราศี/ช่วงองศาของอาทิตย์ จันทร์ ลัคนาที่ยังคว่ำ (กฎเหล็ก 4)",
+    res.includes("const hiddenBigCards = new Set(") && /const showCards = cardsVisible\(b\);/.test(res) && /const ok = cardsVisible\(focusBody\);/.test(res),
+  );
+  check(
+    "สมดุลพลัง: ธาตุนำบอกความหมาย · ลักษณะราศีที่เกินครึ่ง/ไม่ถึง 15% บอกความหมาย · แถวดาวที่เปิดแล้วบอกว่าดาวดูแลเรื่องอะไร",
+    res.includes("ELEMENT_DEPTH[topElement].head") && res.includes("MODALITY_DEPTH[topModality].strong[lang]") && res.includes("MODALITY_DEPTH[m].weak[lang]") && res.includes("v2-nr-planet-about") && res.includes("{bodyHeadline(b, lang)}"),
+  );
+}
+
 console.log("\n6.20) คำสำคัญไพ่ประจำตัว — ไม่ฝังลง HTML · ตรงกับข้อมูลไพ่ต้นทางทุกใบ");
 {
   const { NATAL_CARDS, packNatalCards } = await import("../../src/app/_shared/pages/natal-chart");

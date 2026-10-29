@@ -22,7 +22,7 @@ import {
   TRANSIT_TONE,
   type Lang,
 } from "@/data/natal/content";
-import { BODY_VOICE, CHIRON_SIGN, HOUSE_DEPTH, MC_CAREER, PLANET_DEPTH, PLANET_SIGN_TEXT, TRANSIT_KEY } from "@/data/natal/depth";
+import { BODY_VOICE, CHIRON_SIGN, HOUSE_DEPTH, MC_CAREER, MOON_HEAD, PLANET_DEPTH, PLANET_SIGN_TEXT, POINT_HOUSE_LINE, TRANSIT_KEY } from "@/data/natal/depth";
 import {
   ASPECT_DEFS,
   PLANET_IDS,
@@ -87,6 +87,36 @@ export function cardsFor(b: BodyPosition): BodyCards {
 
 /** ดาวที่มีคำอธิบายรายราศีเขียนแยกไว้ (`PLANET_SIGN_TEXT`) */
 const SIGN_WRITTEN = new Set<BodyId>(["mercury", "venus", "mars", "jupiter", "saturn"]);
+
+/**
+ * หัวข้อสั้นของดาวในผังนี้ — บรรทัดที่สองของแถวดาวที่ยังไม่เปิด
+ * (เจ้าของ 2026-10-29 ส่งภาพส่วนดาวแต่ละดวง: เดิมบรรทัดนี้เป็นความหมายกลางของดาว "ตัวตนแกนกลาง เป้าหมาย และพลังชีวิต" เหมือนกันทุกคน)
+ * ห้ามเอ่ยชื่อไพ่ (แถวอาทิตย์/จันทร์/ลัคนาแสดงก่อนผู้ใช้พลิกไพ่ · กฎเหล็ก 4)
+ */
+export function bodyHeadline(b: BodyPosition, lang: Lang): string {
+  const th = lang === "th";
+  const st = SIGN_TEXT[b.sign];
+  const kw = st.keywords[lang];
+  if (SIGN_WRITTEN.has(b.id)) return PLANET_SIGN_TEXT[b.id as "mercury"][b.sign].head[lang];
+  switch (b.id) {
+    case "sun":
+      return th ? `ตัวตนของคุณเป็นคน${kw}` : `At your core: ${kw}`;
+    case "moon":
+      return MOON_HEAD[b.sign][lang];
+    case "asc":
+      return th ? `คนเห็นคุณเป็นคน${kw}` : `People see you as ${kw}`;
+    case "mc":
+      return th ? `งานที่ภูมิใจคือได้เป็นคน${kw}` : `Proud work lets you be ${kw}`;
+    case "node":
+      return th ? `เติบโตด้วยการฝึก${st.gift.th}` : `Grow by practising ${st.gift.en}`;
+    case "lilith":
+      return th ? `ไม่ยอมให้ใครกดความเป็นคน${kw}` : `Refuses to let anyone tame your ${kw} side`;
+    case "chiron":
+      return th ? `แผลใจมักเกี่ยวกับ${CHIRON_SIGN[b.sign].th}` : `Old wounds around ${CHIRON_SIGN[b.sign].en}`;
+  }
+  if (BODY_TEXT[b.id].generational) return th ? `คนรุ่นคุณ: ${kw}` : `Your generation: ${kw}`;
+  return th ? `${BODY_VOICE[b.id].word.th}แบบคน${kw}` : `Your ${BODY_VOICE[b.id].word.en}: ${kw}`;
+}
 
 /**
  * ย่อหน้าคำอธิบายของดาว/จุดหนึ่งดวง
@@ -185,10 +215,26 @@ export function describeBody(chart: NatalChart, b: BodyPosition, lang: Lang): st
  * เช่น "อีกใจอยากไม่ยอมให้ใครกด" ➔ รอบสอง "เข้าใจง่ายแต่ลึกซึ้ง" ใช้ความต้องการ + มุมมองว่ามุมนี้ทำงานในใจอย่างไร)
  * มุมรองยังใช้ความหมายกลางของมุม
  */
-export function describeAspect(a: Aspect, lang: Lang): string {
+export function describeAspect(a: Aspect, lang: Lang, opts: { short?: boolean } = {}): string {
   const A = BODY_VOICE[a.a];
   const B = BODY_VOICE[a.b];
   const meaning = ASPECT_TEXT[a.type].meaning[lang];
+  // แบบสั้น: เฉพาะส่วนที่เป็นของคู่ดาวนี้ ไม่มีประโยคอธิบายชนิดมุม — ใช้กับมุมชนิดเดียวกันที่ขึ้นซ้ำในรายการ
+  if (opts.short) {
+    const th = lang === "th";
+    switch (a.type) {
+      case "conjunction":
+        return th ? `ความต้องการที่จะ${A.want.th}กับความต้องการที่จะ${B.want.th}ในตัวคุณหลอมเป็นแรงเดียวกัน` : `Your need ${A.want.en} and your need ${B.want.en} are fused into one drive.`;
+      case "trine":
+        return th ? `${A.word.th}กับ${B.word.th}ของคุณหนุนกันเองโดยไม่ต้องฝืน ยิ่งคุณ${A.want.th} ก็ยิ่ง${B.want.th}ง่ายขึ้น` : `Your ${A.word.en} and ${B.word.en} support each other: the more you manage ${A.want.en}, the easier it is ${B.want.en}.`;
+      case "sextile":
+        return th ? `${A.word.th}กับ${B.word.th}ของคุณพร้อมช่วยกัน เมื่อคุณเป็นฝ่ายเริ่มก่อน` : `Your ${A.word.en} and ${B.word.en} help each other once you make the first move.`;
+      case "square":
+        return th ? `ใจหนึ่งต้องการ${A.want.th} อีกใจต้องการ${B.want.th} สองอย่างนี้มักชนกันในจังหวะสำคัญ` : `Part of you wants ${A.want.en}; another part wants ${B.want.en}, and they tend to collide at key moments.`;
+      case "opposition":
+        return th ? `คุณแกว่งไปมาระหว่างความต้องการที่จะ${A.want.th} กับความต้องการที่จะ${B.want.th}` : `You swing between the need ${A.want.en} and the need ${B.want.en}.`;
+    }
+  }
   if (lang === "th") {
     switch (a.type) {
       case "conjunction":
@@ -223,6 +269,12 @@ export function describeAspect(a: Aspect, lang: Lang): string {
 
 /** ดาวรุ่น 3 ดวง: มุมระหว่างกันเองคนเกิดช่วงเดียวกันมีเหมือนกันทั้งรุ่น */
 const GENERATION = new Set<BodyId>(["uranus", "neptune", "pluto"]);
+const PERSONAL_IDS = new Set<BodyId>(["sun", "moon", "mercury", "venus", "mars"]);
+const ANGLES = new Set<BodyId>(["asc", "mc"]);
+/** "ดาวที่คุยกันแรงที่สุด" นับเฉพาะดาวเคราะห์กับลัคนา/กลางฟ้า — จุดคำนวณ (โหนด ลิลิธ ไครอน ฯลฯ) อยู่ในตารางมุมครบแล้ว */
+const TOP_ASPECT_BODIES = new Set<BodyId>([...PLANET_IDS, "asc", "mc"]);
+/** จุดที่ไม่นับเป็น "ผู้อยู่ในเรือน" (แกนผังและจุดคำนวณที่ไม่แสดงในกล่องเรือน) */
+const HOUSE_LINE_SKIP = new Set<BodyId>(["asc", "mc", "dsc", "ic", "fortune", "vertex", "southNode"]);
 
 /**
  * มุมหลักที่แม่นที่สุดของผัง (ส่วน "ดาวที่คุยกันแรงที่สุด") — ไม่นับมุมระหว่างดาวรุ่นกันเอง
@@ -230,7 +282,39 @@ const GENERATION = new Set<BodyId>(["uranus", "neptune", "pluto"]);
  */
 export function keyAspects(chart: NatalChart, n = 5): Aspect[] {
   const major = new Set(ASPECT_DEFS.filter((d) => d.major).map((d) => d.type));
-  return chart.aspects.filter((a) => major.has(a.type) && !(GENERATION.has(a.a) && GENERATION.has(a.b))).slice(0, n);
+  const lum = (id: BodyId) => Number(id === "sun" || id === "moon");
+  const personal = (id: BodyId) => Number(PERSONAL_IDS.has(id));
+  // เรียงด้วยระยะคลาด แต่ให้ดวงอาทิตย์/จันทร์และดาวส่วนตัวมาก่อนเมื่อแม่นใกล้เคียงกัน
+  const score = (a: Aspect) => a.orb - 0.6 * (lum(a.a) + lum(a.b)) - 0.3 * (personal(a.a) + personal(a.b));
+  return chart.aspects
+    .filter(
+      (a) =>
+        major.has(a.type) &&
+        TOP_ASPECT_BODIES.has(a.a) &&
+        TOP_ASPECT_BODIES.has(a.b) &&
+        !(ANGLES.has(a.a) && ANGLES.has(a.b)) &&
+        !(GENERATION.has(a.a) && GENERATION.has(a.b)),
+    )
+    .sort((x, y) => score(x) - score(y))
+    .slice(0, n);
+}
+
+/**
+ * บรรทัดสั้นในกล่องเรือน (ส่วน "ดาวอยู่เรือนไหนของชีวิต") — ทุกเรือนมีบรรทัดเดียวกันหมด
+ * มีดาวเคราะห์ ➔ ได้พลังจากเรื่องของดาวพวกนั้น · มีแต่จุดคำนวณ (โหนด ไครอน ลิลิธ) ➔ จุดนั้นทำอะไรในเรือนนี้ · ไม่มีเลย ➔ อ่านจากเจ้าเรือน
+ * (รอบก่อนมีบรรทัดเฉพาะเรือนว่าง กล่องเรือนว่างเลยดูสำคัญกว่ากล่องที่มีดาว)
+ */
+export function houseLine(chart: NatalChart, house: number, lang: Lang): string | null {
+  if (!chart.houses) return null;
+  const inside = chart.bodies.filter((b) => b.house === house && !HOUSE_LINE_SKIP.has(b.id));
+  const planets = inside.filter((b) => (PLANET_IDS as readonly string[]).includes(b.id));
+  if (planets.length) {
+    const words = joinWords(planets.map((b) => BODY_VOICE[b.id].word[lang]), lang);
+    return lang === "th" ? `เรื่องนี้ได้พลังจาก${words}ของคุณ` : `Powered by your ${words}.`;
+  }
+  const point = inside.find((b) => POINT_HOUSE_LINE[b.id]);
+  if (point) return POINT_HOUSE_LINE[point.id]![lang];
+  return emptyHouseNote(chart, house, lang);
 }
 
 /**

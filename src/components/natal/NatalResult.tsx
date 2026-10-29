@@ -31,8 +31,8 @@ import {
   type Modality,
   type NatalChart,
 } from "@/lib/astro/natal";
-import { aspectTitle, bodyName, cardsFor, chartGlance, describeAspect, describeBody, describePattern, emptyHouseNote, keyAspects as keyAspectsOf, lifeAreas, signName } from "@/lib/astro/natal-text";
-import { birthTimeSensitivity, chartHighlights, describeTimeSensitivity } from "@/lib/astro/natal-insight";
+import { aspectTitle, bodyHeadline, bodyName, cardsFor, chartGlance, describeAspect, describeBody, describePattern, houseLine, keyAspects as keyAspectsOf, lifeAreas, signName } from "@/lib/astro/natal-text";
+import { birthTimeSensitivity, chartHighlights, describeTimeSensitivity, patternKey } from "@/lib/astro/natal-insight";
 import { zodiacSignPath } from "@/lib/tarot/zodiac";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 import { NatalWheel } from "./NatalWheel";
@@ -43,7 +43,7 @@ import { hermeticLots } from "@/lib/astro/lots";
 import { LOT_TEXT, STAR_TEXT } from "@/data/natal/stars-content";
 import type { NatalCardItem, NatalMeta } from "./NatalChartApp";
 import { NATAL_CARD_KEYWORDS } from "@/data/natal/card-keywords";
-import { ELEMENT_DEPTH, PLANET_DEPTH, SECT_TEXT } from "@/data/natal/depth";
+import { ELEMENT_DEPTH, MODALITY_DEPTH, PLANET_DEPTH, SECT_TEXT } from "@/data/natal/depth";
 import type { ChartSpec } from "@/lib/astro/chart-spec";
 import type { TimeMode } from "./NatalTimeTools";
 
@@ -176,6 +176,21 @@ export default function NatalResult({
     ...(asc ? [{ key: "asc", body: asc, label: isTh ? "ลัคนา: ภาพที่คนเห็น" : "Rising: how you come across" }] : []),
   ];
   const bigRevealed = (key: string) => !!revealed[`${key}:sign`] && !!revealed[`${key}:decan`];
+  /**
+   * ไพ่ราศี/ช่วงองศาของอาทิตย์ จันทร์ ลัคนาที่ผู้ใช้ยังไม่พลิก — ห้ามโผล่ในแถวดาวดวงอื่นหรือแผงใต้วงผัง (กฎเหล็ก 4 · ISSUE-063)
+   * ดาวที่อยู่ราศีเดียวกับดวงอาทิตย์ได้ไพ่ประจำราศีใบเดียวกัน แถวของดาวนั้นจึงเคยเฉลยไพ่ที่ยังคว่ำ
+   */
+  const hiddenBigCards = new Set(
+    bigThree.flatMap(({ key, body }) => {
+      const bc = cardsFor(body);
+      return [revealed[`${key}:sign`] ? "" : bc.sign, revealed[`${key}:decan`] ? "" : bc.decan].filter(Boolean);
+    }),
+  );
+  /** แถว/แผงของจุดนี้แสดงชื่อไพ่ได้ไหม: อาทิตย์ จันทร์ ลัคนาต้องพลิกครบสองใบ · ดาวอื่นต้องไม่ใช้ไพ่ที่ยังคว่ำ */
+  const cardsVisible = (b: BodyPosition) => {
+    const bc = cardsFor(b);
+    return b.id === "sun" || b.id === "moon" || b.id === "asc" ? bigRevealed(b.id) : !hiddenBigCards.has(bc.sign) && !hiddenBigCards.has(bc.decan);
+  };
 
   const elementTotal = Object.values(chart.distribution.elementScore).reduce((a, b) => a + b, 0) || 1;
   const modalityTotal = Object.values(chart.distribution.modalityScore).reduce((a, b) => a + b, 0) || 1;
@@ -185,11 +200,26 @@ export default function NatalResult({
     chart.distribution.modalityScore[b] > chart.distribution.modalityScore[a] ? b : a,
   );
   const missingElements = (Object.keys(chart.distribution.elements) as Element[]).filter((e) => chart.distribution.elements[e].length === 0);
+  const topElement = (["fire", "earth", "air", "water"] as Element[]).reduce((a, b) => (chart.distribution.elementScore[b] > chart.distribution.elementScore[a] ? b : a));
   const lowElement = (["fire", "earth", "air", "water"] as Element[])
     .filter((e) => pct(chart.distribution.elementScore[e], elementTotal) <= 20)
     .sort((a, b) => chart.distribution.elementScore[a] - chart.distribution.elementScore[b])[0];
   const topPlanet = chart.dominantPlanets[0];
   const keyAspects = keyAspectsOf(chart, 5);
+  /* มุมที่เรื่องเด่นอธิบายเต็มแล้ว หรือชนิดมุมที่ขึ้นไปแล้วในรายการ ➔ ใช้ประโยคแบบสั้น (ไม่ทวนประโยคอธิบายชนิดมุมซ้ำ) */
+  const themeAspects = new Set(themes.filter((h) => h.kind === "aspect").map((h) => h.bodies.join("-")));
+  const aspectRows = (() => {
+    const seen = new Set<string>();
+    return keyAspects.map((a) => {
+      const inThemes = themeAspects.has(`${a.a}-${a.b}`);
+      const short = inThemes || seen.has(a.type);
+      seen.add(a.type);
+      return { a, short, inThemes };
+    });
+  })();
+  /* รูปแบบผังที่เรื่องเด่นอธิบายไปแล้ว ➔ กล่องรูปแบบพิเศษบอกแค่ว่าอยู่ข้อไหน */
+  const coveredBy = new Map<string, number>();
+  themes.forEach((h, i) => h.covers?.forEach((k) => coveredBy.has(k) || coveredBy.set(k, i + 1)));
   const majorCount = chart.aspects.filter((a) => majorTypes.has(a.type)).length;
   const planetRows = TABLE_ORDER.filter((id) => id !== "southNode" && id !== "fortune" && id !== "vertex")
     .map((id) => get(id))
@@ -227,8 +257,7 @@ export default function NatalResult({
   const focusText = focusBody
     ? (() => {
         const fc = cardsFor(focusBody);
-        const personal = focusBody.id === "sun" || focusBody.id === "moon" || focusBody.id === "asc";
-        const ok = !personal || bigRevealed(focusBody.id);
+        const ok = cardsVisible(focusBody);
         return describeBody(chart, focusBody, lang).filter((p) => ok || !namesHiddenCard(p, [fc.sign, fc.decan]));
       })()
     : [];
@@ -577,7 +606,7 @@ export default function NatalResult({
           {planetRows.map((b) => {
             const c = cardsFor(b);
             const personal = b.id === "sun" || b.id === "moon" || b.id === "asc";
-            const showCards = !personal || bigRevealed(b.id);
+            const showCards = cardsVisible(b);
             const retro = b.retrograde && !["node", "southNode", "lilith"].includes(b.id);
             return (
               <details key={b.id} className={`v2-nr-planet${focus === b.id ? " is-focus" : ""}`}>
@@ -591,7 +620,7 @@ export default function NatalResult({
                         {b.house ? (isTh ? ` เรือน ${b.house}` : `, house ${b.house}`) : ""}
                       </span>
                     </span>
-                    <span className="v2-nr-planet-theme">{BODY_TEXT[b.id].theme[lang]}</span>
+                    <span className="v2-nr-planet-theme">{bodyHeadline(b, lang)}</span>
                     {(retro || b.dignities.length > 0) && (
                       <span className="v2-nr-planet-tags">
                         {retro && (
@@ -615,6 +644,9 @@ export default function NatalResult({
                   </span>
                 </summary>
                 <div className="v2-nr-planet-body">
+                  <p className="v2-nr-planet-about">
+                    {isTh ? `${BODY_TEXT[b.id].name.th}ดูแลเรื่อง${BODY_TEXT[b.id].theme.th}` : `What ${BODY_TEXT[b.id].name.en} governs: ${BODY_TEXT[b.id].theme.en}`}
+                  </p>
                   {describeBody(chart, b, lang)
                     .filter((p) => showCards || !namesHiddenCard(p, [c.sign, c.decan]))
                     .map((p, i) => (
@@ -666,7 +698,7 @@ export default function NatalResult({
           <ol className="v2-nr-houses">
             {chart.houses.map((cusp, i) => {
               const inside = planetRows.filter((b) => b.house === i + 1 && b.id !== "asc" && b.id !== "mc");
-              const ruled = inside.length ? null : emptyHouseNote(chart, i + 1, lang);
+              const line = houseLine(chart, i + 1, lang);
               return (
                 <li key={i} className={inside.length >= 3 ? "is-busy" : undefined}>
                   <span className="v2-nr-house-top">
@@ -681,11 +713,9 @@ export default function NatalResult({
                       ))}
                     </span>
                   ) : (
-                    <span className="v2-nr-house-empty">
-                      {isTh ? "ไม่มีดาว" : "No planets"}
-                      {ruled && <span className="v2-nr-house-ruler">{ruled}</span>}
-                    </span>
+                    <span className="v2-nr-house-empty">{isTh ? "ไม่มีดาว" : "No planets"}</span>
                   )}
+                  {line && <span className="v2-nr-house-line">{line}</span>}
                 </li>
               );
             })}
@@ -697,18 +727,19 @@ export default function NatalResult({
       <section aria-labelledby="natal-aspects" className="v2-nr-sec">
         <SectionHead id="natal-aspects" n={nextN()} title={isTh ? "ดาวที่คุยกันแรงที่สุด" : "Your strongest aspects"}>
           {isTh
-            ? `มุมหลักที่แม่นที่สุด ${keyAspects.length} คู่จากทั้งหมด ${majorCount} คู่ ยิ่งอยู่บนยิ่งรู้สึกชัด ไม่นับมุมระหว่างดาวเดินช้าที่คนรุ่นเดียวกันมีเหมือนกัน`
-            : `The ${keyAspects.length} tightest of your ${majorCount} major aspects. The higher, the stronger. Aspects between slow planets that your whole generation shares are left out.`}
+            ? `มุมหลักที่สำคัญที่สุด ${keyAspects.length} คู่จากทั้งหมด ${majorCount} คู่ เน้นดาวจริงที่แนบสนิท ยิ่งอยู่บนยิ่งรู้สึกชัด มุมของจุดคำนวณ (โหนด ลิลิธ ไครอน) และมุมระหว่างดาวรุ่นดูได้ในตารางมุมสัมพันธ์`
+            : `Your ${keyAspects.length} most important of ${majorCount} major aspects, favouring tight aspects between real planets. The higher, the stronger. Aspects to calculated points (Node, Lilith, Chiron) and between generational planets are in the full aspect grid.`}
         </SectionHead>
         <ol className="v2-nr-aspects">
-          {keyAspects.map((a) => (
+          {aspectRows.map(({ a, short, inThemes }) => (
             <li key={`${a.a}-${a.b}`} className={`is-${tone(toneOf.get(a.type))}`}>
               <span className="v2-nr-asp-pair">
                 <b>{bodyName(a.a, lang)}</b>
                 <span className="v2-nr-asp-type">{ASPECT_TEXT[a.type].name[lang].replace(/\s*\(.*\)$/, "")}</span>
                 <b>{bodyName(a.b, lang)}</b>
               </span>
-              <span className="v2-nr-asp-text">{describeAspect(a, lang)}</span>
+              <span className="v2-nr-asp-text">{describeAspect(a, lang, { short })}</span>
+              {inThemes && <span className="v2-nr-note">{isTh ? "อ่านแบบเต็มในเรื่องเด่นที่สุดของผัง" : "Explained in full under your strongest themes"}</span>}
             </li>
           ))}
         </ol>
@@ -731,6 +762,13 @@ export default function NatalResult({
                 <span className="v2-nr-meter-v ui2-num">{pct(chart.distribution.elementScore[e], elementTotal)}%</span>
               </div>
             ))}
+            {pct(chart.distribution.elementScore[topElement], elementTotal) >= 40 && (
+              <p className="v2-nr-item-meta">
+                {isTh
+                  ? `ธาตุ${ELEMENT_TEXT[topElement].name.th}นำ (${pct(chart.distribution.elementScore[topElement], elementTotal)}%): ${ELEMENT_DEPTH[topElement].head.th}`
+                  : `${ELEMENT_TEXT[topElement].name.en} leads (${pct(chart.distribution.elementScore[topElement], elementTotal)}%): ${ELEMENT_DEPTH[topElement].head.en}`}
+              </p>
+            )}
             {missingElements.map((e) => (
               <p key={e} className="v2-nr-item-meta">
                 {ELEMENT_DEPTH[e].miss[lang]} {ELEMENT_DEPTH[e].missKey[lang]}
@@ -754,6 +792,15 @@ export default function NatalResult({
                 <span className="v2-nr-meter-v ui2-num">{pct(chart.distribution.modalityScore[m], modalityTotal)}%</span>
               </div>
             ))}
+            {/* ลักษณะราศีที่เกินครึ่ง หรือเหลือไม่ถึง 15% บอกว่าแปลว่าอะไร (เดิมมีแค่เปอร์เซ็นต์) */}
+            {pct(chart.distribution.modalityScore[topModality], modalityTotal) > 50 && <p className="v2-nr-item-meta">{MODALITY_DEPTH[topModality].strong[lang]}</p>}
+            {(["cardinal", "fixed", "mutable"] as Modality[])
+              .filter((m) => pct(chart.distribution.modalityScore[m], modalityTotal) < 15)
+              .map((m) => (
+                <p key={m} className="v2-nr-item-meta">
+                  {MODALITY_DEPTH[m].weak[lang]}
+                </p>
+              ))}
             <p className="v2-nr-note">
               {isTh ? "จรราศี = ผู้ริเริ่ม · สถิรราศี = ผู้ยืนหยัด · อุภยราศี = ผู้ปรับตัว" : "Cardinal = starter, fixed = sustainer, mutable = adapter."}
             </p>
@@ -844,10 +891,12 @@ export default function NatalResult({
             <ul className="space-y-2">
               {chart.patterns.map((p, i) => {
                 const d = describePattern(chart, p, lang);
+                const n = coveredBy.get(patternKey(p));
+                const names = p.bodies.map((id) => bodyName(id, lang)).join(isTh ? " " : ", ");
                 return (
                   <li key={i} className="v2-nr-pattern">
                     <b>{d.title}</b>
-                    <span>{d.text}</span>
+                    <span>{n ? (isTh ? `${names} อธิบายไว้แล้วในเรื่องเด่นข้อ ${n}` : `${names}. Explained in strongest theme ${n}.`) : d.text}</span>
                   </li>
                 );
               })}
