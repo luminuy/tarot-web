@@ -80,13 +80,25 @@
   max-width: min(100%, 320px);
 }
 /* ลิงก์นิยายใต้ปุ่มหลัก (ไทยอย่างเดียว) — แคปซูลบาง ไม่แย่งสายตาจากปุ่มเปิดไพ่ */
+/* ทางเข้าของใหม่ใต้ปุ่มหลัก (ผังดวงกำเนิด · นิยาย) — คอมเรียงแถวเดียว มือถือซ้อนกัน */
+.ui2-hero-news {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+/* ผังดวงกำเนิด = ทางเข้าหลักที่ทำเงิน (เจ้าของ 2026-10-29) — ขอบทองตลอด ไม่ใช่แค่ตอนชี้ */
+.ui2-hero-natal {
+  border-color: var(--ui2-gold-ink);
+  font-weight: 600;
+}
 .ui2-hero-novel {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   max-width: min(100%, 360px);
   min-height: 44px;
-  margin-top: 4px;
   padding: 0 16px 0 6px;
   border: 1px solid var(--ui2-line-day);
   border-radius: 999px;
@@ -100,6 +112,8 @@
   border-color: var(--ui2-gold-ink);
 }
 .ui2-hero-novel-k {
+  flex: none;
+  white-space: nowrap;
   padding: 3px 10px;
   border-radius: 999px;
   background: var(--ui2-button);
@@ -1059,6 +1073,129 @@
   font-size: 15px;
   line-height: 1.7;
   color: var(--ui2-ink-soft);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ส่วน 3.5 · ผังดวงกำเนิด (เจ้าของ 2026-10-29 "ต้องเด่น เพราะตัวทำเงินเลย")
+   มือถือ: หัวข้อ ➔ ไพ่สามใบ ➔ จุดเด่น · คอม ≥ 1024: หัวข้อซ้าย ไพ่ขวา จุดเด่น 4 คอลัมน์ใต้
+   ไม่มีแสงเรือง/อนิเมชันเพิ่ม (กฎเหล็ก 2) — หลังไพ่ใช้ `.ui2-face-back` ชุดเดียวกับกล่องพิธีเช้า
+   ═════════════════════════════════════════════════════════════════════════ */
+.ui2-natal {
+  display: grid;
+  gap: 30px;
+  align-items: center;
+}
+.ui2-natal-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+.ui2-natal-head .ui2-h2 > span {
+  display: block;
+}
+.ui2-natal-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 6px;
+}
+/* ปุ่มทองบนพื้นกลางคืน — คู่สีเดียวกับปุ่ม "เริ่มดูดวง" บนหัวเว็บตอนอยู่เหนือส่วนมืด (ui2-base.css) */
+.ui2-natal-cta .ui2-btn {
+  color: var(--ui2-night);
+  background: var(--ui2-gold-solid);
+  font-weight: 600;
+}
+.ui2-natal-trust {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-natal-fig {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.ui2-natal-cards {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 14px;
+}
+.ui2-natal-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--ui2-font-display);
+  font-size: 14px;
+  color: var(--ui2-on-night);
+}
+.ui2-natal-back {
+  width: 84px;
+  aspect-ratio: 3 / 5;
+  border-radius: 10px;
+}
+.ui2-natal-card:nth-child(2) .ui2-natal-back {
+  width: 100px;
+}
+.ui2-natal-note {
+  font-size: 13.5px;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--ui2-on-night-soft);
+}
+.ui2-natal-feats {
+  display: grid;
+  gap: 16px;
+}
+.ui2-natal-feats li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 14px;
+  border-left: 2px solid var(--ui2-gold-solid);
+}
+.ui2-natal-feats b {
+  font-family: var(--ui2-font-display);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ui2-on-night);
+}
+/* ลูกตรงเท่านั้น — หัวข้อมี `.tp` (ThaiPhrases) ซ้อนอยู่ ห้ามโดนขนาด/สีคำอธิบาย */
+.ui2-natal-feats li > span {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ui2-on-night-soft);
+}
+@media (min-width: 768px) {
+  .ui2-natal-feats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ui2-natal-back {
+    width: 104px;
+  }
+  .ui2-natal-card:nth-child(2) .ui2-natal-back {
+    width: 124px;
+  }
+}
+@media (min-width: 1024px) {
+  .ui2-natal {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: 40px 48px;
+  }
+  .ui2-natal-cta {
+    flex-direction: row;
+    align-items: center;
+    gap: 18px;
+  }
+  .ui2-natal-feats {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 /* ═════════════════════════════════════════════════════════════════════════
@@ -3219,7 +3356,8 @@ details[open] > .ui2-faq-a {
 .ui2-verify .ui2-heritage-title {
   font-size: clamp(23px, 19.66px + 0.857vw, 32px);
 }
-/* ทุกอย่างที่ต้องใช้ อยู่ในที่เดียว: 32 ➔ 52px */
+/* ทุกอย่างที่ต้องใช้ อยู่ในที่เดียว · ผังดวงกำเนิด (หัวข้อสองบรรทัดในคอลัมน์ซ้าย): 32 ➔ 52px */
+[data-home-section="natal"] .ui2-h2,
 [data-home-section="features"] .ui2-h2 {
   font-size: clamp(32px, 24.57px + 1.905vw, 52px);
 }

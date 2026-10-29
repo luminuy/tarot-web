@@ -184,7 +184,7 @@ export function BlogDetailContent({
 
       <div className="max-w-6xl mx-auto space-y-8 pb-20">{reader}</div>
       {/* ไปต่อจากตรงนี้ — กล่องหลายขนาดแบบหน้าแรก (เจ้าของ 2026-10-17) */}
-      <Ui2NextSteps isEn={isEnglish} keys={["spreads", "daily", "journal", "cards"]} />
+      <Ui2NextSteps isEn={isEnglish} keys={["spreads", "natal", "journal", "cards"]} />
     </main>
   );
 }

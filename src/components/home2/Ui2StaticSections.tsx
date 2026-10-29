@@ -14,6 +14,8 @@ import { SPREAD_TOPICS, getSpreadsForTopic } from "@/data/spread-topics";
 import { PUBLIC_SPREADS, getSpread } from "@/data/spreads";
 import { ZODIAC_ELEMENT_LABEL, ZODIAC_SIGNS } from "@/data/zodiac";
 import { ZODIAC_INDEX_PATH, zodiacSignPath } from "@/lib/tarot/zodiac";
+import { NATAL_AI_FREE_PER_DAY } from "@/lib/astro/natal-ai-limits";
+import { CHEAPEST_PACKAGE_THB } from "@/lib/entitlement/copy";
 
 import {
   MAJOR_HIGHLIGHTS,
@@ -172,6 +174,91 @@ export function Ui2NotesSection({ isEnglish, href }: { isEnglish: boolean; href:
             {isEnglish ? "See all questions" : "ดูคำถามทั้งหมด"}
           </Link>
         </p>
+      </div>
+    </section>
+  );
+}
+
+/* ── ส่วน 3.5 · ผังดวงกำเนิด (เจ้าของ 2026-10-29 "ต้องเด่น เพราะตัวทำเงินเลย") ─────────────────
+   ส่วนนิ่งส่วนแรกใต้ส่วนเปิดไพ่ด่วน · ไพ่สามใบคว่ำ = ไพ่ประจำตัวที่หน้าผังดวงคว่ำไว้ให้พลิกเอง (หลังไพ่วาดด้วย CSS ไม่ใช่ไพ่ใบใด)
+   ⚠️ ตัวเลขทุกตัวมาจากค่าจริง (`NATAL_AI_FREE_PER_DAY` · `CHEAPEST_PACKAGE_THB`) · ข้อความตรงกับสิ่งที่หน้า /natal-chart ทำจริง */
+const NATAL_COPY = {
+  th: {
+    kicker: "โหราศาสตร์กับไพ่ทาโรต์",
+    titleA: "ผังดวงกำเนิด",
+    titleB: "ท้องฟ้า ณ นาทีที่คุณเกิด",
+    lede: "ใส่วัน เวลา และที่เกิด รู้ลัคนา ราศีจันทร์ ตำแหน่งดาว 10 ดวง เรือนชะตา และไพ่ทาโรต์ประจำทุกตำแหน่ง คำนวณฟรี",
+    cards: ["ดวงอาทิตย์", "ดวงจันทร์", "ลัคนา"],
+    cardsNote: "ไพ่ประจำตัวสามใบ คว่ำไว้ให้คุณพลิกเอง",
+    cta: "ทำผังดวงของฉัน ฟรี",
+    trust: "ความแม่นเทียบข้อมูล NASA · คำนวณในเครื่องคุณ ไม่ส่งข้อมูลวันเกิดออกไป",
+    feats: [
+      ["ความรัก งาน เงิน", "อ่านจากดาวศุกร์ กลางฟ้า และเรือนการเงินในผังของคุณเอง ไม่ใช่คำทำนายกลางของราศี"],
+      ["ถามแม่หมอ AI เรื่องผังของคุณ", `สมาชิกถามฟรีวันละ ${NATAL_AI_FREE_PER_DAY} ข้อ แม่หมอตอบจากผังที่คำนวณไว้แล้ว`],
+      ["รายงานฉบับเต็ม PDF", `ราว 7 หน้า A4 เก็บไว้อ่านหรือพิมพ์ได้ ใช้รอบดูดวง 1 รอบ (เติมรอบเริ่ม ${CHEAPEST_PACKAGE_THB} บาท)`],
+      ["ดวงวันนี้จากผังของคุณ", "บันทึกผังไว้ในเครื่อง แล้วดูทุกวันว่าดาวบนฟ้าแตะเรื่องไหนในชีวิตคุณ"],
+    ],
+  },
+  en: {
+    kicker: "Astrology and tarot",
+    titleA: "Your natal chart:",
+    titleB: "the sky at the minute you were born",
+    lede: "Enter your birth date, time and place to see your rising sign, Moon sign, all 10 planets, your houses and the tarot card behind every placement. Free.",
+    cards: ["Sun", "Moon", "Rising"],
+    cardsNote: "Your three personal cards, face down for you to turn over",
+    cta: "Make my natal chart, free",
+    trust: "Checked against NASA data · calculated on your device, your birth details never leave it",
+    feats: [
+      ["Love, work and money", "Read from Venus, the Midheaven and the money houses of your own chart, not a generic sign forecast"],
+      ["Ask the AI reader about your chart", `Members ask ${NATAL_AI_FREE_PER_DAY} questions a day free, answered from the chart already calculated`],
+      ["Full PDF report", "About 7 A4 pages to keep or print, for 1 reading credit"],
+      ["Today, from your chart", "Save your chart on this device and see each day which parts of your life the planets touch"],
+    ],
+  },
+} as const;
+
+export function Ui2NatalSection({ isEnglish, href }: { isEnglish: boolean; href: Href }) {
+  const c = isEnglish ? NATAL_COPY.en : NATAL_COPY.th;
+  return (
+    <section className="ui2-sec ui2-night" data-home-section="natal" data-ui2-dark data-anim-section aria-labelledby="ui2-natal-title">
+      <div className="ui2-stars ui2-loop" aria-hidden="true" />
+      <div className="ui2-wrap ui2-natal">
+        <div className="ui2-natal-head ui2-reveal">
+          <span className="ui2-kicker">{c.kicker}</span>
+          <h2 id="ui2-natal-title" className="ui2-h2">
+            <span className="tp ui2-gold-night ui2-loop">{c.titleA}</span> <span className="tp">{c.titleB}</span>
+          </h2>
+          <p className="ui2-lede">
+            <ThaiPhrases>{c.lede}</ThaiPhrases>
+          </p>
+          <div className="ui2-natal-cta">
+            <Link href={href("/natal-chart")} prefetch={false} className="ui2-btn" data-home-target="natal:start">
+              {c.cta}
+            </Link>
+            <p className="ui2-natal-trust">{c.trust}</p>
+          </div>
+        </div>
+        <figure className="ui2-natal-fig ui2-reveal">
+          <div className="ui2-natal-cards" aria-hidden="true">
+            {c.cards.map((label) => (
+              <span key={label} className="ui2-natal-card">
+                <span className="ui2-face-back ui2-natal-back" />
+                {label}
+              </span>
+            ))}
+          </div>
+          <figcaption className="ui2-natal-note">{c.cardsNote}</figcaption>
+        </figure>
+        <ul className="ui2-natal-feats">
+          {c.feats.map(([title, desc]) => (
+            <li key={title} className="ui2-reveal">
+              <b>
+                <ThaiPhrases>{title}</ThaiPhrases>
+              </b>
+              <span>{desc}</span>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

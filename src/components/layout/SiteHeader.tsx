@@ -267,7 +267,8 @@ function DesktopNav({ isEnglish }: { isEnglish: boolean }) {
           href={link.href}
           prefetch={false}
           aria-current={isActiveNavPath(currentPath, link.href) ? "page" : undefined}
-          className={linkClass(link.href)}
+          /* หัวข้อเด่น (ผังดวงกำเนิด · เจ้าของ 2026-10-29 "ต้องเด่น") ตัวทองหนาตลอด — สีเดียวกับลิงก์หน้าปัจจุบัน คอนทราสต์ผ่านแล้ว */
+          className={`${linkClass(link.href)}${link.featured ? " font-semibold text-gold-ink" : ""}${link.wideOnly ? " max-xl:hidden" : ""}`}
         >
           {link.label}
         </Link>

@@ -30,6 +30,7 @@ interface NavItem {
   href?: string;
   cardId: string;
   onClick?: () => void;
+  featured?: boolean;
 }
 
 export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
@@ -160,7 +161,11 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
     const body = (
       <>
         <span className="nv-row-t">
-          <b>{item.label}</b>
+          <b>
+            {item.label}
+            {/* หัวข้อเด่น (header-nav.ts `featured`) — ป้ายตัวหนังสือ ไม่ใช่สัญลักษณ์ (กฎเหล็ก 2) */}
+            {item.featured && <span className="nv-new">{isEnglish ? "New" : "ใหม่"}</span>}
+          </b>
           {sub && <small>{item.sublabel}</small>}
         </span>
         <ChevronIcon direction="right" className="nv-chev" />

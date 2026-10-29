@@ -2,6 +2,7 @@ import { localeHref } from "@/lib/i18n/paths";
 import {
   Ui2BentoSection,
   Ui2ExploreSection,
+  Ui2NatalSection,
   Ui2NotesSection,
   Ui2ShowcaseSection,
   Ui2StickyCta,
@@ -12,6 +13,7 @@ import {
  * 📄 หน้าแรก ส่วน 4–8 (SeerTarot UI 2.0 · แบบ D+) — Server Component ล้วน เรนเดอร์เป็น HTML นิ่ง ไม่ hydrate
  * ===========================================================================
  * แผน: docs/plans/UI_2_0_PLAN_2026-10-12.md หัวข้อ 2
+ *   3.5 ผังดวงกำเนิด               (กลางคืน)  — ตัวทำเงิน ดันขึ้นเป็นส่วนนิ่งส่วนแรก (เจ้าของ 2026-10-29 "ต้องเด่น")
  *   4. เรื่องที่ค้างอยู่ในใจ…       (กลางคืน)  — แทน spread_select · more_ways บางส่วน
  *   5. สุ่มจริง / ตรวจได้           (แผ่นขาว)  — แทน how_it_works · heritage · proof บางส่วน
  *   6. ทุกอย่างอยู่ในที่เดียว         (กลางคืน)  — แทน proof (ตัวอย่างคำทำนาย)
@@ -28,6 +30,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
   return (
     <div className="w-full">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <Ui2NatalSection isEnglish={isEnglish} href={href} />
         <Ui2NotesSection isEnglish={isEnglish} href={href} />
         <Ui2VerifySection isEnglish={isEnglish} />
         {/* คลังไพ่ (สว่าง) มาก่อนกล่อง "ทุกอย่างในที่เดียว" (มืด) — คั่นช่วงมืดยาว 4 ส่วนติดกัน (เจ้าของสั่ง 2026-10-13 "ลองสลับ") */}
