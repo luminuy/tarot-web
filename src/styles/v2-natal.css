@@ -1006,6 +1006,150 @@ details:not([open]) > summary .v2-nt-more-close {
   line-height: 1.6;
   color: var(--nt-muted);
 }
+
+/*
+ * ปกท้องฟ้ากลางคืนบนหัวผัง (เจ้าของ 2026-10-29 "ยังสวยไม่พอ") — แบบ "เกาะกลางคืนในแถบครีม" ของ ui2-dawn.css
+ * พื้นเป็น gradient วาดครั้งเดียว ไม่มี filter/อนิเมชัน (เหมือนกันทุกระดับเอฟเฟกต์) · ไม่มีจุดดาว/รูปทรงตกแต่ง (กฎเหล็ก 2)
+ * คอนทราสต์บนพื้นมืดที่สุด #1E1A33: ครีม #FFF8EC 15.9 · ทอง #FFD98F 12.4 · ครีมหม่น #CFC3B2 9.7 (ในแสงด้านบน ≥ 6.0)
+ */
+.v2-nr-cover {
+  margin: -20px -16px 0;
+  padding: 28px 14px 22px;
+  border-radius: 23px 23px 0 0;
+  background:
+    radial-gradient(90% 75% at 50% 0%, rgba(255, 217, 143, 0.18) 0%, rgba(255, 217, 143, 0) 70%),
+    radial-gradient(70% 60% at 100% 100%, rgba(150, 140, 255, 0.16) 0%, rgba(150, 140, 255, 0) 70%),
+    linear-gradient(180deg, #1E1A33 0%, #120F1D 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+@media (min-width: 640px) {
+  .v2-nr-cover {
+    margin: -28px -32px 0;
+    padding: 40px 32px 32px;
+    gap: 28px;
+  }
+}
+.v2-nr-cover .v2-nr-kicker {
+  color: #FFD98F;
+  letter-spacing: 0.12em;
+}
+.v2-nr-cover .v2-nr-name {
+  color: #FFF8EC;
+  font-size: 28px;
+  line-height: 1.45;
+}
+@media (min-width: 640px) {
+  .v2-nr-cover .v2-nr-name {
+    font-size: 38px;
+  }
+}
+.v2-nr-cover .v2-nr-birth {
+  color: #CFC3B2;
+}
+.v2-nr-cover .v2-nr-big3 {
+  gap: 0;
+}
+.v2-nr-cover .v2-nr-big3 li {
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+.v2-nr-cover .v2-nr-big3 li + li {
+  border-left: 1px solid rgba(246, 238, 226, 0.18);
+}
+.v2-nr-cover .v2-nr-big3-role {
+  color: #FFD98F;
+  letter-spacing: 0.04em;
+}
+.v2-nr-cover .v2-nr-big3-role span {
+  color: #CFC3B2;
+  letter-spacing: 0;
+}
+.v2-nr-cover .v2-nr-big3-sign {
+  color: #FFF8EC;
+  font-size: 24px;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+@media (min-width: 640px) {
+  .v2-nr-cover .v2-nr-big3-sign {
+    font-size: 34px;
+  }
+}
+.v2-nr-cover .v2-nr-big3-kw {
+  color: #CFC3B2;
+}
+.v2-nr-cover-note {
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #CFC3B2;
+  max-width: 34rem;
+  margin: 0 auto;
+}
+
+/* เรื่องเด่นข้อ 1 เป็นหัวข้อใหญ่ใต้ปก แล้วตามด้วยสรุปสั้นแบบแบ่งเส้นบาง (แทนกล่องซ้อนกล่อง) */
+.v2-nr-lead {
+  max-width: 40rem;
+  margin: 6px auto 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.v2-nr-lead-k {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--nt-gold);
+}
+.v2-nr-lead-t {
+  font-family: var(--font-serif-th);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.55;
+  color: var(--nt-ink);
+  text-wrap: balance;
+}
+@media (min-width: 640px) {
+  .v2-nr-lead-t {
+    font-size: 27px;
+  }
+}
+.v2-nr-lead .v2-nr-link {
+  font-size: 14px;
+}
+.v2-nr-facets {
+  display: grid;
+  border-top: 1px solid var(--nt-line-soft);
+}
+@media (min-width: 640px) {
+  .v2-nr-facets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 32px;
+  }
+}
+.v2-nr-facets > div {
+  padding: 14px 2px;
+  border-bottom: 1px solid var(--nt-line-soft);
+}
+.v2-nr-facets dt {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  color: var(--nt-gold);
+  margin-bottom: 2px;
+}
+.v2-nr-facets dd {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--nt-ink);
+}
 .v2-nr-sum {
   border-radius: 18px;
   background: rgba(196, 160, 54, 0.08);
@@ -1761,32 +1905,45 @@ details:not([open]) > summary .v2-nt-more-close {
     gap: 12px;
   }
 }
+/* สีประจำกล่อง (ตัวหนังสือบนขาว: กุหลาบ 6.6 · ทอง 6.2 · เขียว 6.3) — แถบสีด้านบนเป็นเงาด้านใน ตามโค้งมุมกล่อง */
 .v2-nr-life li {
+  --life-accent: var(--nt-gold);
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 14px 16px;
-  border-radius: 18px;
-  border: 1px solid var(--nt-line);
-  background: var(--nt-paper);
+  gap: 4px;
+  padding: 18px 18px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--nt-line-soft);
+  background: #FFFFFF;
+  box-shadow: inset 0 3px 0 var(--life-accent), 0 12px 28px -22px rgba(74, 47, 16, 0.45);
+}
+.v2-nr-life li[data-area="love"] {
+  --life-accent: #A3364B;
+}
+.v2-nr-life li[data-area="money"] {
+  --life-accent: #2F6B45;
 }
 .v2-nr-life-t {
   font-family: var(--font-serif-th);
   font-weight: 700;
-  font-size: 17px;
+  font-size: 19px;
   line-height: 1.5;
-  color: var(--nt-ink);
+  color: var(--life-accent);
 }
 .v2-nr-life-from {
+  align-self: flex-start;
+  padding: 1px 10px;
+  border-radius: 999px;
+  background: rgba(74, 47, 16, 0.06);
   font-size: 12.5px;
   font-weight: 600;
-  line-height: 1.6;
-  color: var(--nt-gold);
+  line-height: 1.7;
+  color: var(--nt-muted);
 }
 .v2-nr-life-d {
-  margin-top: 4px;
-  font-size: 14.5px;
-  line-height: 1.7;
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 1.75;
   color: var(--nt-ink);
 }
 /* จอแคบ: แถบสลับความรัก/งาน/เงิน โชว์ทีละกล่อง (จอกว้างโชว์ครบสามคอลัมน์ แถบนี้ซ่อน) · พิมพ์ได้ครบทุกกล่อง */
@@ -1824,6 +1981,13 @@ details:not([open]) > summary .v2-nt-more-close {
   }
 }
 @media print {
+  .v2-nr-cover {
+    background: none !important;
+  }
+  .v2-nr-cover,
+  .v2-nr-cover * {
+    color: #29261F !important;
+  }
   .v2-nr-life li {
     display: flex !important;
   }
@@ -1932,14 +2096,17 @@ details:not([open]) > summary .v2-nt-more-close {
 }
 
 /* ── อยากรู้ลึกกว่านี้: ถามแม่หมอ + รายงานฉบับเต็ม (ก่อนตารางข้อมูลละเอียด) ── */
+/* แผ่นกลางคืนแบบเดียวกับปกหัวผัง (ตัดกับพื้นครีม ให้กล่องข้อเสนอเด่นพอ) · การ์ดข้างในเป็นพื้นขาว อ่านง่าย */
 .v2-nr-next {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 20px 16px;
+  padding: 24px 14px 16px;
   border-radius: 24px;
-  border: 1px solid var(--nt-gold);
-  background: var(--nt-paper);
+  background:
+    radial-gradient(90% 70% at 50% 0%, rgba(255, 217, 143, 0.18) 0%, rgba(255, 217, 143, 0) 70%),
+    radial-gradient(70% 60% at 100% 100%, rgba(150, 140, 255, 0.16) 0%, rgba(150, 140, 255, 0) 70%),
+    linear-gradient(180deg, #1E1A33 0%, #120F1D 100%);
 }
 @media (min-width: 640px) {
   .v2-nr-next {
@@ -1949,15 +2116,18 @@ details:not([open]) > summary .v2-nt-more-close {
 .v2-nr-next-h {
   font-family: var(--font-serif-th);
   font-weight: 700;
-  font-size: 20px;
+  font-size: 22px;
   line-height: 1.5;
-  color: var(--nt-ink);
+  color: #FFF8EC;
   text-align: center;
 }
 .v2-nr-next-sub {
+  text-wrap: balance;
+  max-width: 36rem;
+  margin: 0 auto 4px;
   font-size: 14px;
   line-height: 1.75;
-  color: var(--nt-muted);
+  color: #CFC3B2;
   text-align: center;
 }
 .v2-nr-next-grid {
@@ -1973,10 +2143,9 @@ details:not([open]) > summary .v2-nt-more-close {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 16px;
+  padding: 18px;
   border-radius: 18px;
-  border: 1px solid var(--nt-line);
-  background: rgba(74, 47, 16, 0.03);
+  background: var(--nt-paper);
 }
 .v2-nr-next-card > button {
   margin-top: auto;

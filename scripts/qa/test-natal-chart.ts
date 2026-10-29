@@ -1249,6 +1249,7 @@ console.log("\n6.21) ภาพรวมผังส่วนทำเงิน �
   // เจ้าของ 2026-10-29 "ส่วนนี้จะเป็นส่วนที่ทำเงินได้ ขอให้ทำให้ดีที่สุด ทั้งข้อมูลอะไรต่าง ๆ ด้วย"
   const rd = (f: string) => fs.readFileSync(path.join(process.cwd(), f), "utf8");
   const { lifeAreas } = await import("../../src/lib/astro/natal-text");
+  const { chartHighlights } = await import("../../src/lib/astro/natal-insight");
   const { SIGN_TEXT } = await import("../../src/data/natal/content");
   const depth = await import("../../src/data/natal/depth");
   const badThai = /undefined|NaN|[฀-๿]ๆ|ๆ[฀-๿]/;
@@ -1303,7 +1304,7 @@ console.log("\n6.21) ภาพรวมผังส่วนทำเงิน �
     "มือถือ: แท็บและปุ่มกระโดดเป็นแถวเดียวเลื่อนข้าง · ความรัก/งาน/เงินโชว์ทีละกล่อง (พิมพ์ได้ครบ)",
     /@media \(max-width: 639px\) \{\s*\.v2-nr-tabs,\s*\.v2-nr-jump \{[^}]*overflow-x: auto/.test(css) &&
       /\.v2-nr-life li:not\(\.is-on\) \{\s*display: none/.test(css) &&
-      /@media print \{\s*\.v2-nr-life li \{\s*display: flex !important/.test(css) &&
+      /@media print \{[^@]*\.v2-nr-life li \{\s*display: flex !important/.test(css) &&
       res.includes('className={lifeOn === x.key ? "is-on" : undefined}'),
   );
   check(
@@ -1312,6 +1313,25 @@ console.log("\n6.21) ภาพรวมผังส่วนทำเงิน �
       res.indexOf('className="v2-nr-next v2-nt-noprint"') < res.indexOf('id="natal-deep"') &&
       app.includes('reportOpen === "end"') &&
       app.includes('reportOpen === "top"'),
+  );
+  // เจ้าของ 2026-10-29 ส่งภาพหัวผัง "ยังสวยไม่พอ" ➔ ปกท้องฟ้ากลางคืน + เรื่องเด่นข้อ 1 เป็นหัวข้อใหญ่ + สรุปแบ่งเส้นบาง
+  const coverCss = css.slice(css.indexOf(".v2-nr-cover {"), css.indexOf(".v2-nr-cover-note {"));
+  check(
+    "หัวผัง: ปกกลางคืนมีชื่อและสามราศีหลัก · เรื่องเด่นข้อ 1 เป็นหัวข้อใหญ่ (สรุปเหลือข้อ 2–3) · ไม่มี backdrop-filter · พิมพ์แล้วเป็นหมึกบนขาว",
+    res.indexOf('className="v2-nr-cover"') > 0 &&
+      res.indexOf('className="v2-nr-cover"') < res.indexOf('id="natal-summary"') &&
+      res.indexOf('id="natal-summary"') < res.indexOf('className="v2-nr-big3"') &&
+      res.includes("{themes[0].title}") &&
+      res.includes("lines: r.lines.slice(1)") &&
+      coverCss.length > 0 &&
+      !/backdrop-filter|filter:|animation/.test(coverCss) &&
+      /@media print \{\s*\.v2-nr-cover \{\s*background: none !important/.test(css),
+  );
+  // หัวข้อเรื่องเด่นข้อ 1 ขึ้นตัวใหญ่ใต้ปก ➔ เจอ "Your dreams shows…" "Your emotions is…" (คำนามพหูพจน์ + กริยาเอกพจน์ในแม่แบบ)
+  check(
+    "อังกฤษ: คำเรียกดาว (BODY_VOICE) เป็นเอกพจน์ทุกคำ ประโยค \"Your X is/shows/steers…\" จึงถูกไวยากรณ์",
+    Object.values(depth.BODY_VOICE).every((v) => !/s$/.test(v.word.en)) &&
+      samples.every((inp) => chartHighlights(computeNatalChart(inp), "en", 10).every((h) => !/\b(emotions|dreams|wounds|habits|meetings) (is|shows|steers|sets|carries|works|takes)\b/.test(`${h.title} ${h.text}`))),
   );
   check(
     "ราคาเริ่มต้นมาจากแหล่งเดียว (CHEAPEST_PACKAGE_THB) และไม่ติดบันเดิลแรกของฟอร์ม",

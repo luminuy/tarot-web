@@ -37,7 +37,7 @@ import { zodiacSignPath } from "@/lib/tarot/zodiac";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 import { NatalWheel } from "./NatalWheel";
 import { FlipCard } from "./NatalFlipCard";
-import { MoreLabel, SectionHead, SummaryBox } from "./NatalUi";
+import { MoreLabel, SectionHead } from "./NatalUi";
 import { NATAL_AI_FREE_PER_DAY } from "@/lib/astro/natal-ai-limits";
 import { CHEAPEST_PACKAGE_THB } from "@/lib/entitlement/copy";
 import { fixedStarPositions, ROYAL_STARS, starContacts } from "@/lib/astro/fixed-stars";
@@ -238,20 +238,13 @@ export default function NatalResult({
     .map((id) => get(id))
     .filter((b): b is BodyPosition => !!b);
 
-  /* สรุปสั้น: ป้ายซ้าย ข้อความขวา — คำนวณจากผังทั้งหมด ไม่ใช้ AI */
-  /* สรุปสั้น + ความรัก/งาน/เงิน — ฟังก์ชันเดียวกับรายงานฉบับเต็ม (natal-text.ts) */
-  const glance = chartGlance(chart, lang, themes).map((r) => ({
-    label: r.label,
-    text: (
-      <>
-        {r.lines.map((l) => (
-          <span key={l} className="block">
-            {l}
-          </span>
-        ))}
-      </>
-    ),
-  }));
+  /*
+   * สรุปสั้น + ความรัก/งาน/เงิน — ฟังก์ชันเดียวกับรายงานฉบับเต็ม (natal-text.ts) · คำนวณจากผัง ไม่ใช้ AI
+   * เรื่องเด่นข้อ 1 ขึ้นเป็นหัวข้อใหญ่ใต้ปก (เจ้าของ 2026-10-29 "ยังสวยไม่พอ") ➔ แถวเรื่องเด่นในสรุปเหลือข้อ 2–3
+   */
+  const facets = chartGlance(chart, lang, themes)
+    .map((r, i) => (i === 0 && themes.length ? { label: isTh ? "เรื่องเด่นถัดมา" : "Next strongest themes", lines: r.lines.slice(1) } : r))
+    .filter((r) => r.lines.length > 0);
   const life = lifeAreas(chart, lang);
 
   const nav = [
@@ -293,6 +286,8 @@ export default function NatalResult({
     <div className="v2-nr space-y-6 sm:space-y-8">
       {/* ── ภาพรวม: ข้อมูลเกิด · สามราศีหลัก · สรุปสั้น ── */}
       <section aria-labelledby="natal-summary" className="v2-nr-hero">
+        {/* ปกท้องฟ้ากลางคืน: ชื่อ ข้อมูลเกิด และสามราศีหลักตัวใหญ่ (gradient วาดครั้งเดียว ไม่มีรูปทรงตกแต่ง · กฎเหล็ก 2) */}
+        <div className="v2-nr-cover">
         <header className="v2-nr-hero-head">
           <p className="v2-nr-kicker">{isTh ? "ผังดวงกำเนิด" : "Natal chart"}</p>
           <h3 id="natal-summary" className="v2-nr-name">
@@ -323,11 +318,12 @@ export default function NatalResult({
         </ul>
 
         {ascTimeLine && (
-          <p className="v2-nr-note text-center">
+          <p className="v2-nr-cover-note">
             {ascTimeLine}
             {isTh ? " ดูรายละเอียดในส่วนเรือน" : " See the houses section for details."}
           </p>
         )}
+        </div>
 
         {(chart.warnings.length > 0 || (!chart.input.timeKnown && chart.moonRange)) && (
           <ul className="v2-nr-warn">
@@ -347,10 +343,30 @@ export default function NatalResult({
           </ul>
         )}
 
-        <SummaryBox
-          title={isTh ? "สรุปผังของคุณ" : "Your chart at a glance"}
-          rows={glance}
-        />
+        {themes[0] && (
+          <div className="v2-nr-lead">
+            <p className="v2-nr-lead-k">{isTh ? "เรื่องเด่นที่สุดของผังคุณ" : "The strongest theme in your chart"}</p>
+            <p className="v2-nr-lead-t">{themes[0].title}</p>
+            <a href="#natal-themes" className="v2-nr-link">
+              {isTh ? "อ่านว่ามาจากไหน และใช้ให้ดีอย่างไร" : "Where it comes from, and how to make it work"}
+            </a>
+          </div>
+        )}
+
+        <dl className="v2-nr-facets" aria-label={isTh ? "สรุปผังของคุณ" : "Your chart at a glance"}>
+          {facets.map((r) => (
+            <div key={r.label}>
+              <dt>{r.label}</dt>
+              <dd>
+                {r.lines.map((l) => (
+                  <span key={l} className="block">
+                    {l}
+                  </span>
+                ))}
+              </dd>
+            </div>
+          ))}
+        </dl>
 
         <div className="v2-nr-life-tabs v2-nt-noprint" role="tablist" aria-label={isTh ? "ความรัก การงาน การเงิน" : "Love, work and money"}>
           {life.map((x) => (
@@ -361,7 +377,7 @@ export default function NatalResult({
         </div>
         <ul className="v2-nr-life">
           {life.map((x) => (
-            <li key={x.key} id={`natal-life-${x.key}`} className={lifeOn === x.key ? "is-on" : undefined}>
+            <li key={x.key} id={`natal-life-${x.key}`} data-area={x.key} className={lifeOn === x.key ? "is-on" : undefined}>
               <span className="v2-nr-life-t">{x.title}</span>
               <span className="v2-nr-life-from">{x.from}</span>
               <span className="v2-nr-life-d">{x.text}</span>
