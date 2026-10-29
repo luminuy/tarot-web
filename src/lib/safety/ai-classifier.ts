@@ -23,7 +23,7 @@
  *    - **ทุกเส้นทางที่ fail-open ต้องยิง metric** ดูได้ที่ `/admin` ไม่ใช่แค่ `console.warn`
  */
 
-import { getAiBinding } from "@/lib/platform/cf";
+import { type AppAI, getAiBinding } from "@/lib/platform/cf";
 import { recordEvent } from "@/lib/stats/record";
 
 /**
@@ -70,8 +70,20 @@ export function mayNeedDeepCrisisCheck(text: string): boolean {
   return hasSoftDistressSignal(t);
 }
 
-/** โมเดล Workers AI สำหรับจำแนก — instruct ทั่วไป รองรับไทยพอใช้ ตอบสั้น */
-const CLASSIFIER_MODEL = "@cf/meta/llama-3.1-8b-instruct";
+/**
+ * โมเดล Workers AI สำหรับจำแนก เรียงตามลำดับที่ลอง — instruct ทั่วไป รองรับไทยพอใช้ ตอบสั้น
+ * ตัวแรกพัง (ถูกปลด · ล่ม · ตอบอ่านไม่ออก) ให้ลองตัวถัดไปภายในเพดานเวลาเดียวกัน
+ *
+ * 🔴 INC-0312: `@cf/meta/llama-3.1-8b-instruct` ถูก Cloudflare ปลดเมื่อ 2026-05-30
+ *    ทุกคำขอโยน error ➔ fail-open เงียบ ๆ อยู่หลายเดือน เพราะมีโมเดลเดียวและแผงแอดมินไม่แสดงตัวนับ
+ *    ทั้งสองตัวด้านล่างอยู่ในแคตตาล็อก ณ 2026-10-29 และคืนข้อความในฟิลด์ `response` แบบเดียวกัน
+ *    เปลี่ยนโมเดล: เช็กแคตตาล็อก developers.cloudflare.com/workers-ai/models/ ก่อนทุกครั้ง
+ *    ห้ามใส่โมเดลแบบคิดก่อนตอบ (reasoning) — `max_tokens: 4` จะหมดก่อนถึงคำตอบ
+ */
+export const CLASSIFIER_MODELS = [
+  "@cf/meta/llama-3.1-8b-instruct-fp8",
+  "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+] as const;
 const CLASSIFY_TIMEOUT_MS = 3500;
 
 const SYSTEM_PROMPT =
@@ -88,6 +100,81 @@ function buildUserPrompt(text: string): string {
     'ตอบ "YES" ถ้ามีสัญญาณเช่นนั้นแม้เพียงเล็กน้อยหรือเป็นนัย',
     'ตอบ "NO" ถ้าเป็นเพียงความเครียด ความเศร้า หรือความไม่สบายใจทั่วไปที่ไม่ถึงขั้นนั้น',
   ].join("\n");
+}
+
+class ClassifierTimeout extends Error {
+  constructor() {
+    super("timeout");
+  }
+}
+
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  return Promise.race([
+    p,
+    new Promise<never>((_, reject) => {
+      timer = setTimeout(() => reject(new ClassifierTimeout()), ms);
+    }),
+  ]).finally(() => clearTimeout(timer));
+}
+
+/**
+ * ถามโมเดลใน `CLASSIFIER_MODELS` ทีละตัวจนได้คำตอบ YES/NO ที่อ่านออก
+ * คืน true = วิกฤต · โยน error เมื่อทุกตัวใช้ไม่ได้หรือหมดเวลา (ผู้เรียกตัดสิน fail-open/fail-safe)
+ * แยกจาก `assessCrisisRisk()` เพื่อให้ด่าน `test-safety` ส่ง binding ปลอมเข้ามาได้
+ */
+export async function classifyWithFallback(
+  AI: AppAI,
+  text: string,
+  timeoutMs = CLASSIFY_TIMEOUT_MS,
+): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs;
+  let lastErr: unknown = new ClassifierTimeout();
+
+  for (const model of CLASSIFIER_MODELS) {
+    const left = deadline - Date.now();
+    if (left <= 0) break;
+    try {
+      const result = await withTimeout(
+        AI.run(model, {
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: buildUserPrompt(text) },
+          ],
+          max_tokens: 4,
+          temperature: 0,
+        }),
+        left,
+      );
+      const answer = String(result?.response ?? "").toUpperCase();
+      if (/\bYES\b|ใช่/.test(answer)) return true;
+      if (/\bNO\b|ไม่/.test(answer)) return false;
+      // คำตอบว่าง/รูปแบบเปลี่ยน — ถ้าปล่อยเป็น NO จะ fail-open เงียบโดยไม่มีใครรู้
+      throw new Error(`คำตอบอ่านไม่ออก: "${answer.slice(0, 20)}"`);
+    } catch (err) {
+      lastErr = err;
+      // หมดเวลา = ผู้ใช้รออยู่ ไม่ลองตัวถัดไป
+      if (err instanceof ClassifierTimeout) break;
+      console.warn(`[safety-ai] ${model} ใช้ไม่ได้:`, err);
+      recordEvent("safety_ai_model_error");
+    }
+  }
+  throw lastErr;
+}
+
+/**
+ * ยิงตัวจำแนกจริงหนึ่งครั้งด้วยข้อความปกติ — ให้หน้าสุขภาพระบบเห็นว่าใช้ได้จริง ไม่ใช่แค่มี binding
+ * (INC-0312: binding พร้อมตลอด แต่โมเดลถูกปลดไปหลายเดือนโดยไม่มีจุดไหนบอก)
+ */
+export async function probeCrisisClassifier(): Promise<{ ok: boolean; error?: string }> {
+  const AI = await getAiBinding();
+  if (!AI) return { ok: false, error: "ไม่มี Workers AI binding" };
+  try {
+    await classifyWithFallback(AI, "อยากรู้ว่าความรักปีหน้าจะเป็นอย่างไร");
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: String(err instanceof Error ? err.message : err).slice(0, 160) };
+  }
 }
 
 /**
@@ -111,26 +198,7 @@ export async function assessCrisisRisk(text: string): Promise<boolean> {
   }
 
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), CLASSIFY_TIMEOUT_MS);
-
-    const result = await Promise.race([
-      AI.run(CLASSIFIER_MODEL, {
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: buildUserPrompt(trimmed) },
-        ],
-        max_tokens: 4,
-        temperature: 0,
-      }),
-      new Promise((_, reject) =>
-        controller.signal.addEventListener("abort", () => reject(new Error("timeout"))),
-      ),
-    ]);
-    clearTimeout(timeoutId);
-
-    const answer = String((result as { response?: string })?.response || "").toUpperCase();
-    const isCrisis = /\bYES\b|ใช่/.test(answer);
+    const isCrisis = await classifyWithFallback(AI, trimmed);
     if (isCrisis) {
       console.warn("[safety-ai] จับสัญญาณวิกฤตแบบอ้อมที่ regex ไม่จับ");
     }

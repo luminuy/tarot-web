@@ -38,7 +38,7 @@ interface HealthData {
       upstashRedis?: { enabled: boolean; reachable: boolean };
       aiGateway: { enabled: boolean };
       turnstile: { enabled: boolean };
-      workersAi: { bindingAvailable: boolean };
+      workersAi: { bindingAvailable: boolean; crisisClassifier?: { ok: boolean; error?: string } | null };
       vectorize: { bindingAvailable: boolean };
     };
   };
@@ -261,6 +261,17 @@ export default function AdminOverview({ onNavigateTab }: { onNavigateTab: (tabId
                   text={health.services.email.ok ? "ตั้งค่าแล้ว" : health.services.email.error || "ยังไม่พร้อม"}
                 />
               ) : null}
+              <StatusRow
+                name="ตัวตรวจคำถามวิกฤต (Workers AI)"
+                tone={!cf?.workersAi.crisisClassifier ? "off" : cf.workersAi.crisisClassifier.ok ? "ok" : "bad"}
+                text={
+                  !cf?.workersAi.crisisClassifier
+                    ? "ไม่มี binding"
+                    : cf.workersAi.crisisClassifier.ok
+                      ? "ตอบได้จริง"
+                      : cf.workersAi.crisisClassifier.error || "ใช้ไม่ได้"
+                }
+              />
               <StatusRow
                 name="ค้นหาความหมาย (Vectorize)"
                 tone={cf?.vectorize.bindingAvailable ? "ok" : "off"}

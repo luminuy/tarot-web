@@ -111,6 +111,20 @@ check("เวลาเฉลี่ย = 2000 ms", s.ai.avgLatencyMs === 2000, `�
 check("หมวดยอดนิยมเรียงมากไปน้อย", s.top.categories[0]?.key === "work", JSON.stringify(s.top.categories));
 check("ตัวหาร 0 ➔ null (แสดง — ไม่ใช่ 0%)", pctOf(3, 0) === null && summarize({}).ai.avgLatencyMs === null);
 check("ส่วนต่าง: 0 ➔ 5 ไม่มีเปอร์เซ็นต์ · 10 ➔ 15 = +50%", change(5, 0).pct === null && change(15, 10).pct === 50);
+{
+  // INC-0312: ตัวจำแนกวิกฤตล้มเงียบหลายเดือน เพราะตัวนับ safety_ai_* ไม่ขึ้นที่ไหนในแผงเลย
+  const sa = summarize({
+    "safety_ai_failopen:error": 4,
+    "safety_ai_failopen:no_binding": 1,
+    "safety_ai_failsafe:error": 2,
+    safety_ai_model_error: 7,
+  }).safety;
+  check(
+    "ตัวจำแนกวิกฤตใช้ไม่ได้: ปล่อยผ่าน 5 · บล็อกไว้ก่อน 2 · โมเดลล้ม 7",
+    sa.classifierFailOpen === 5 && sa.classifierFailSafe === 2 && sa.classifierModelError === 7,
+    JSON.stringify(sa),
+  );
+}
 
 // ── ง. แดชบอร์ดผู้บริหาร (executive-report.ts) ─────────────────────────────
 console.log("\nง. แดชบอร์ดผู้บริหาร — แบ่งช่วง · รายได้จริง · สิ่งที่ต้องดู");
@@ -155,6 +169,18 @@ console.log("\nง. แดชบอร์ดผู้บริหาร — แ�
   check("ชุดรายวันยาว 7 วัน เรียงเก่าไปใหม่", r.series.length === 7 && r.series[0].day === "2026-10-11" && r.series[6].started === 30);
   check("สิ่งที่ต้องดู: เงินต้องคืนขึ้นเป็นเรื่องด่วนอันดับแรก", r.insights[0]?.level === "alert" && r.insights[0].title.includes("ต้องคืน"), JSON.stringify(r.insights[0]));
   check("สิ่งที่ต้องดู: เตือนชนเพดานงบ AI", r.insights.some((i) => i.title.includes("เพดานงบ AI")));
+  check("ไม่มีตัวจำแนกวิกฤตล้ม ➔ ไม่ขึ้นเตือน", !r.insights.some((i) => i.title.includes("คำถามวิกฤต")));
+  const down = buildExecutiveReport({
+    days: 7,
+    today,
+    daily: { "2026-10-17": { reading_started: 5, "safety_ai_failopen:error": 3 } },
+    d1: { payments: null, signups: null, payers: null, members: null, refundDue: null, pending: null, feedback: null },
+  });
+  check(
+    "สิ่งที่ต้องดู: ตัวจำแนกวิกฤตล้มแม้ครั้งเดียว ➔ ขึ้นเรื่องด่วน",
+    down.insights.some((i) => i.level === "alert" && i.title.includes("คำถามวิกฤต")),
+    JSON.stringify(down.insights.map((i) => i.title)),
+  );
   const none = buildExecutiveReport({ days: 7, today, daily: {}, d1: { payments: null, signups: null, payers: null, members: null, refundDue: null, pending: null, feedback: null } });
   check("อ่าน D1 ไม่ได้ ➔ ช่วงก่อนเป็น null (ไม่ใช่ 0)", none.kpi.netRevenueThb.prev === null && none.kpi.signups === null && !none.revenue.available);
 }

@@ -2,7 +2,13 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 import { CRISIS_MESSAGE, CRISIS_MESSAGE_EN, checkQuestion, getCrisisHotlines } from "../../src/lib/safety/guardrails";
-import { hasSoftDistressSignal, mayNeedDeepCrisisCheck } from "../../src/lib/safety/ai-classifier";
+import {
+  CLASSIFIER_MODELS,
+  classifyWithFallback,
+  hasSoftDistressSignal,
+  mayNeedDeepCrisisCheck,
+} from "../../src/lib/safety/ai-classifier";
+import type { AppAI } from "../../src/lib/platform/cf";
 import { CRISIS_LEXEMES_TH } from "../../src/lib/safety/crisis-lexicon";
 import { assertNonEmptyCorpus } from "./lib/corpus";
 import { noteCrisisCareLine, noteCrisisPromptGuard, noteHasCrisisSignal } from "../../src/lib/ai/memory";
@@ -299,6 +305,73 @@ assertUi("คำสั่งเพิ่มให้ AI ไม่มีเนื
     readSrc.includes("noteCrisisPromptGuard(readingLang)") && readSrc.includes("noteCrisisCareLine(readingLang)"),
   );
   assertUi("บันทึกผลจริง: ตอบข้อความสายด่วนกลับเมื่อพบสัญญาณวิกฤต", journalSrc.includes("crisisMessage: getCrisisMessage(lang)"));
+}
+
+// 🛟 INC-0312: ตัวจำแนกชั้น 3 ต้องไม่ล้มเงียบเพราะโมเดลถูกปลด
+// `@cf/meta/llama-3.1-8b-instruct` ถูก Cloudflare ปลด 2026-05-30 ทุกคำขอโยน error แล้ว fail-open อยู่หลายเดือน
+{
+  // รายชื่อจากประกาศปลดของ Cloudflare 2026-05-30 (เฉพาะตระกูลที่เคยใช้/น่าหยิบมาใช้)
+  const REMOVED = [
+    "@cf/meta/llama-3.1-8b-instruct",
+    "@cf/meta/llama-3.1-8b-instruct-awq",
+    "@cf/meta/llama-3-8b-instruct",
+    "@cf/meta/llama-3-8b-instruct-awq",
+    "@cf/meta/llama-3.1-70b-instruct",
+    "@cf/mistral/mistral-7b-instruct-v0.1",
+    "@hf/mistral/mistral-7b-instruct-v0.2",
+    "@cf/google/gemma-3-12b-it",
+  ];
+  const models: readonly string[] = CLASSIFIER_MODELS;
+  assertUi(
+    "ตัวจำแนกวิกฤตไม่ใช้โมเดลที่ Cloudflare ปลดแล้ว",
+    !models.some((m) => REMOVED.includes(m)),
+    `   ได้: ${models.join(" · ")}`,
+  );
+  assertUi("ตัวจำแนกวิกฤตมีโมเดลสำรองอย่างน้อย 2 ตัว (ตัวหนึ่งถูกปลด ชั้น 3 ต้องไม่ดับ)", new Set(models).size >= 2);
+
+  const fakeAI = (answers: Record<string, () => Promise<{ response?: string }>>) => {
+    const called: string[] = [];
+    const ai: AppAI = {
+      run: (model) => {
+        called.push(model);
+        return (answers[model] ?? (() => Promise.reject(new Error("5007: No such model"))))();
+      },
+    };
+    return { ai, called };
+  };
+  const [first, second] = CLASSIFIER_MODELS;
+  const text = "ตื่นมาทุกเช้าแล้วรู้สึกว่าไม่มีอะไรให้ทำต่อ";
+
+  {
+    const { ai, called } = fakeAI({ [second]: async () => ({ response: "YES" }) });
+    const r = await classifyWithFallback(ai, text).catch(() => "threw");
+    assertUi("โมเดลแรกถูกปลด ➔ ได้คำตอบจากตัวสำรอง (YES = บล็อก)", r === true && called.join() === `${first},${second}`, `   ได้ ${r} · เรียก ${called.join(" ➔ ")}`);
+  }
+  {
+    const { ai } = fakeAI({ [first]: async () => ({ response: "" }), [second]: async () => ({ response: "NO" }) });
+    const r = await classifyWithFallback(ai, text).catch(() => "threw");
+    assertUi("โมเดลแรกตอบว่าง ➔ ไม่นับเป็น NO เงียบ ๆ แต่ไปถามตัวสำรอง", r === false, `   ได้ ${r}`);
+  }
+  {
+    const { ai } = fakeAI({ [first]: async () => ({ response: "YES" }) });
+    const r = await classifyWithFallback(ai, text).catch(() => "threw");
+    assertUi("โมเดลแรกตอบ YES ➔ บล็อก", r === true, `   ได้ ${r}`);
+  }
+  {
+    const { ai } = fakeAI({});
+    const r = await classifyWithFallback(ai, text).then(() => "resolved", () => "threw");
+    assertUi("ทุกโมเดลใช้ไม่ได้ ➔ โยน error ให้ผู้เรียกตัดสิน fail-open/fail-safe", r === "threw");
+  }
+  {
+    const { ai, called } = fakeAI({ [first]: () => new Promise(() => {}) });
+    const t0 = Date.now();
+    const r = await classifyWithFallback(ai, text, 80).then(() => "resolved", () => "threw");
+    assertUi(
+      "โมเดลค้าง ➔ หมดเวลาตามเพดาน และไม่ลองตัวถัดไปให้ผู้ใช้รอเพิ่ม",
+      r === "threw" && Date.now() - t0 < 1000 && called.length === 1,
+      `   ได้ ${r} · เรียก ${called.length} ตัว`,
+    );
+  }
 }
 
 console.log(`\nรวม ${pass + uiPass + corpusPass}/${cases.length + gateCases.length + uiTotal + corpusTotal} ผ่าน`);

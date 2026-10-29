@@ -111,6 +111,8 @@ export interface ExecutiveReport {
     checkoutFailed: Pair;
     purchaseGrantFailed: Pair;
     safetyBlocked: Pair;
+    /** ตัวตรวจวิกฤต AI (ชั้น 3) ใช้ไม่ได้ทั้งสายโมเดล — ปล่อยผ่าน + บล็อกไว้ก่อน */
+    safetyAiDown: Pair;
     mockServed: Pair;
   };
   top: { categories: CountRow[]; spreads: CountRow[] };
@@ -254,6 +256,10 @@ export function buildExecutiveReport(args: {
     checkoutFailed: pair(cur.business.checkoutFailed, prev.business.checkoutFailed),
     purchaseGrantFailed: pair(cur.business.purchaseGrantFailed, prev.business.purchaseGrantFailed),
     safetyBlocked: pair(cur.safety.total, prev.safety.total),
+    safetyAiDown: pair(
+      cur.safety.classifierFailOpen + cur.safety.classifierFailSafe,
+      prev.safety.classifierFailOpen + prev.safety.classifierFailSafe,
+    ),
     mockServed: pair(cur.ai.mockServed, prev.ai.mockServed),
   };
 
@@ -321,6 +327,16 @@ export function buildInsights(
       owner: "coo",
       title: `ขั้นจ่ายเงินล้มเหลว ${fmtN(payFails)} ครั้ง`,
       detail: `เปิดหน้าจ่ายไม่สำเร็จ ${fmtN(ops.checkoutFailed.cur)} · จ่ายแล้วแต่ให้สิทธิ์ไม่สำเร็จ ${fmtN(ops.purchaseGrantFailed.cur)} — ส่งให้ทีมเทคนิคตรวจ`,
+    });
+  }
+
+  // INC-0312: ตัวตรวจวิกฤตล้มเงียบอยู่หลายเดือนเพราะตัวนับไม่ขึ้นที่ไหนเลย — ล้มแม้ครั้งเดียวต้องเห็น
+  if (ops.safetyAiDown.cur > 0) {
+    out.push({
+      level: "alert",
+      owner: "coo",
+      title: `ตัวตรวจคำถามวิกฤตด้วย AI ใช้ไม่ได้ ${fmtN(ops.safetyAiDown.cur)} ครั้ง`,
+      detail: "ช่วงนั้นเหลือแค่ด่านคำตรง ประโยคอ้อมที่ส่อทำร้ายตัวเองอาจหลุด — ส่งทีมเทคนิคดู log ของ Worker ที่ขึ้นต้นด้วย safety-ai",
     });
   }
 

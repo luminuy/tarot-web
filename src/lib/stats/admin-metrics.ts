@@ -55,6 +55,7 @@ export const METRIC = {
   studioPassGranted: "studio_pass_granted",
   injectionCooldown: "ai_injection_cooldown",
   retryBudgetExhausted: "ai_retry_budget_exhausted",
+  safetyAiModelError: "safety_ai_model_error",
 } as const;
 
 /** เมตริกแบบมี prefix (ค่าหลัง prefix คือมิติ เช่น ชื่อผัง/ผู้ให้บริการ AI) */
@@ -67,6 +68,9 @@ export const PREFIX = {
   persona: "persona:",
   category: "category:",
   safetyFlag: "safety_flag:",
+  // ตัวจำแนกวิกฤตชั้น 3 ใช้ไม่ได้ทั้งสายโมเดล (มิติ = no_binding / error) — INC-0312
+  safetyAiFailOpen: "safety_ai_failopen:",
+  safetyAiFailSafe: "safety_ai_failsafe:",
   journalView: "journal_view:",
   promptLeak: "ai_prompt_leak:",
 } as const;
@@ -139,6 +143,12 @@ export interface StatsSummary {
     chatBlocked: number;
     total: number;
     flags: CountRow[];
+    /** ตัวจำแนกวิกฤต AI ใช้ไม่ได้ ➔ ปล่อยผ่าน (ข้อความทั่วไป) */
+    classifierFailOpen: number;
+    /** ตัวจำแนกวิกฤต AI ใช้ไม่ได้ ➔ บล็อกไว้ก่อน (ข้อความที่มีสัญญาณทุกข์อ่อน) */
+    classifierFailSafe: number;
+    /** โมเดลตัวหนึ่งในสายใช้ไม่ได้ (อาจยังได้คำตอบจากตัวถัดไป) */
+    classifierModelError: number;
   };
   gating: {
     total: number;
@@ -243,6 +253,9 @@ export function summarize(doc: Counters | null | undefined): StatsSummary {
       chatBlocked,
       total: readingBlocked + chatBlocked,
       flags: rows(d, PREFIX.safetyFlag),
+      classifierFailOpen: rows(d, PREFIX.safetyAiFailOpen).reduce((n, r) => n + r.count, 0),
+      classifierFailSafe: rows(d, PREFIX.safetyAiFailSafe).reduce((n, r) => n + r.count, 0),
+      classifierModelError: v(METRIC.safetyAiModelError),
     },
     gating: {
       total: blockedStart + blockedRead + blockedSignin + blockedPremium + blockedChat + guestIpCapped + aiCapHit,

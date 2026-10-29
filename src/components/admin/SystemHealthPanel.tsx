@@ -73,7 +73,7 @@ interface HealthData {
     cloudflareStack: {
       aiGateway: { enabled: boolean; accountIdSet: boolean; gatewayIdSet: boolean };
       turnstile: { enabled: boolean; siteKeySet: boolean; secretKeySet: boolean };
-      workersAi: { bindingAvailable: boolean };
+      workersAi: { bindingAvailable: boolean; crisisClassifier?: { ok: boolean; error?: string } | null };
       vectorize: { bindingAvailable: boolean };
     };
   };
@@ -462,8 +462,20 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
               </div>
               <div className="flex justify-between py-1.5 border-b border-line-soft">
                 <span className="text-muted">Workers AI (safety ชั้น 3):</span>
-                <span className={data.services.cloudflareStack.workersAi.bindingAvailable ? "text-emerald-700 font-semibold" : "text-muted"}>
-                  {data.services.cloudflareStack.workersAi.bindingAvailable ? "binding พร้อม" : "ไม่มี binding (dev / ยังไม่ deploy)"}
+                <span
+                  className={
+                    !data.services.cloudflareStack.workersAi.bindingAvailable
+                      ? "text-muted"
+                      : data.services.cloudflareStack.workersAi.crisisClassifier?.ok
+                        ? "text-emerald-700 font-semibold"
+                        : "text-rose-700 font-semibold"
+                  }
+                >
+                  {!data.services.cloudflareStack.workersAi.bindingAvailable
+                    ? "ไม่มี binding (dev / ยังไม่ deploy)"
+                    : data.services.cloudflareStack.workersAi.crisisClassifier?.ok
+                      ? "ตัวจำแนกตอบได้จริง"
+                      : `ตัวจำแนกใช้ไม่ได้: ${data.services.cloudflareStack.workersAi.crisisClassifier?.error || "ไม่ทราบสาเหตุ"}`}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-3 py-1.5">
