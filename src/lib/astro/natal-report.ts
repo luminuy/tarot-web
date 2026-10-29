@@ -16,7 +16,7 @@ import type { NatalOverview } from "./natal-overview";
 import { starContacts } from "./fixed-stars";
 import { hermeticLots } from "./lots";
 import { ASPECT_DEFS, PLANET_IDS, formatDegree, type BodyId, type NatalChart } from "./natal";
-import { aspectTitle, bodyName, cardsFor, chartGlance, chartSummary, describeAspect, describeBody, describePattern, describeTimedAspect, emptyHouseNote, describeTransitHouse, lifeAreas, placement, returnHighlights, signName, type LifeArea, type SummaryRow } from "./natal-text";
+import { aspectTitle, bodyName, cardsFor, chartGlance, chartSummary, describeAspect, describeBody, describePattern, describeTimedAspect, bodyHeadline, houseLine, describeTransitHouse, lifeAreas, placement, returnHighlights, signName, type LifeArea, type SummaryRow } from "./natal-text";
 import { solarReturn, transitCalendar } from "./techniques";
 import { mahaTaksa, sevenNumbers, taksa, TAKSA_POSITIONS, thaiBirthDay } from "./thai-astro";
 import { LUNAR_MONTH_TH, NAKSAT_EN, NAKSAT_TH } from "./thai-lunar";
@@ -40,7 +40,7 @@ export interface NatalReport {
   life: LifeArea[];
   positions: { body: string; value: string; house: string; notes: string; short: string; sign: string; deg: string }[];
   houses: string[] | null;
-  /** `note` = เรือนว่างอ่านจากเจ้าเรือน (ไม่มีดาวในเรือน) */
+  /** `note` = บรรทัดสั้นของเรือน (มีดาว ➔ ได้พลังจากเรื่องอะไร · ไม่มีดาว ➔ อ่านจากเจ้าเรือน) */
   houseCells: { n: number; sign: string; deg: string; title: string; bodies: string[]; note?: string }[] | null;
   bodies: { title: string; paras: string[]; name: string; where: string; theme: string }[];
   aspects: { title: string; text: string; a: string; b: string; type: string; tone: "harmonious" | "tense" | "neutral" }[];
@@ -164,7 +164,7 @@ export function buildNatalReport(spec: ChartSpec, lang: Lang, nowMs: number): Na
           deg: formatDegree(c % 30),
           title: HOUSE_TEXT[i].title[lang],
           bodies: chart.bodies.filter((b) => b.house === i + 1 && (PLANET_IDS as readonly string[]).includes(b.id)).map((b) => bodyName(b.id, lang)),
-          note: emptyHouseNote(chart, i + 1, lang) ?? undefined,
+          note: houseLine(chart, i + 1, lang) ?? undefined,
         }))
       : null,
     positions,
@@ -176,14 +176,16 @@ export function buildNatalReport(spec: ChartSpec, lang: Lang, nowMs: number): Na
         paras: describeBody(chart, b, lang),
         name: bodyName(b.id, lang),
         where: `${placement(b, lang)}${b.house ? (th ? ` เรือน ${b.house}` : `, house ${b.house}`) : ""}`,
-        theme: BODY_TEXT[b.id].theme[lang],
+        // หัวข้อสั้นของดาวในผังนี้ (ชุดเดียวกับแถวดาวบนหน้าเว็บ) แทนความหมายกลางที่เหมือนกันทุกคน
+        theme: bodyHeadline(b, lang),
       })),
     aspects: [...chart.aspects]
       .sort((a, b) => a.orb - b.orb)
       .slice(0, 20)
-      .map((a) => ({
+      .map((a, i, list) => ({
         title: aspectTitle(a, lang),
-        text: describeAspect(a, lang),
+        // มุมชนิดเดียวกันที่ขึ้นแล้วใช้ประโยคแบบสั้น ไม่ทวนประโยคอธิบายชนิดมุมซ้ำ 20 ครั้ง
+        text: describeAspect(a, lang, { short: list.slice(0, i).some((x) => x.type === a.type) }),
         a: bodyName(a.a, lang),
         b: bodyName(a.b, lang),
         type: ASPECT_TEXT[a.type].name[lang].replace(/\s*\(.*\)$/, ""),

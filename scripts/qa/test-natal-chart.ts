@@ -1148,6 +1148,81 @@ console.log("\n6.18) เนื้อหาเข้าใจง่ายแต�
   );
 }
 
+console.log("\n6.19) ส่วน 4–7 ของผลผัง — แถวดาวบอกเรื่องของผังนี้ · ทุกเรือนมีบรรทัด · มุมสำคัญเป็นดาวจริง · สมดุลพลังบอกความหมาย · ไม่เฉลยไพ่ที่คว่ำ");
+{
+  // เจ้าของ 2026-10-29 ส่งภาพส่วน 4–8 "พวกนี้ต้องปรับปรุงให้ดีขึ้นไหม"
+  const rd = (f: string) => fs.readFileSync(path.join(process.cwd(), f), "utf8");
+  const { bodyHeadline, houseLine, keyAspects, describeAspect } = await import("../../src/lib/astro/natal-text");
+  const { BODY_TEXT } = await import("../../src/data/natal/content");
+  const { PLANET_IDS: PLANET_IDS_ALL } = await import("../../src/lib/astro/natal");
+  const { chartHighlights, patternKey } = await import("../../src/lib/astro/natal-insight");
+  const depth = await import("../../src/data/natal/depth");
+  const badThai = /undefined|NaN|[฀-๿]ๆ|ๆ[฀-๿]/;
+  const samples: NatalInput[] = [
+    input(Date.UTC(1969, 11, 31, 23, 5)),
+    input(Date.UTC(1990, 4, 17, 3, 42)),
+    input(Date.UTC(2001, 8, 11, 12, 0)),
+    input(Date.UTC(1998, 0, 15, 2, 30)),
+    input(Date.UTC(1994, 0, 12, 5, 30)),
+    input(Date.UTC(1978, 6, 21, 9, 15), { lat: 51.5, lon: -0.12, houseSystem: "koch" }),
+    input(Date.UTC(1995, 2, 3, 5), { timeKnown: false }),
+  ];
+  const ROW_IDS = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron", "node", "lilith", "asc", "mc"];
+  let headOk = true;
+  let houseOk = true;
+  let houseChecked = 0;
+  let aspectOk = true;
+  let coverOk = true;
+  for (const inp of samples) {
+    const c = computeNatalChart(inp);
+    for (const lang of ["th", "en"] as const) {
+      // แถวดาว: หัวข้อเฉพาะผังนี้ ไม่ใช่ความหมายกลาง · ไม่เอ่ยชื่อไพ่ (แถวอาทิตย์/จันทร์/ลัคนาแสดงก่อนผู้ใช้พลิก)
+      for (const b of c.bodies.filter((x) => ROW_IDS.includes(x.id))) {
+        const h = bodyHeadline(b, lang);
+        headOk &&= !!h && h !== BODY_TEXT[b.id].theme[lang] && !badThai.test(h) && !/ไพ่|The [A-Z]/.test(h) && (lang === "th" || !/[฀-๿]/.test(h));
+      }
+      if (c.houses) {
+        for (let n = 1; n <= 12; n++) {
+          const line = houseLine(c, n, lang);
+          houseChecked++;
+          const hasPlanet = c.bodies.some((b) => b.house === n && (PLANET_IDS_ALL as readonly string[]).includes(b.id));
+          houseOk &&= !!line && !badThai.test(line) && (!hasPlanet || line.startsWith(lang === "th" ? "เรื่องนี้ได้พลังจาก" : "Powered by your")) && (lang === "th" || !/[฀-๿]/.test(line));
+        }
+      } else houseOk &&= houseLine(c, 1, lang) === null;
+      const hl = chartHighlights(c, lang, 8);
+      coverOk &&= hl.filter((h) => h.kind === "pattern").every((h) => !!h.covers?.length) && hl.flatMap((h) => h.covers ?? []).every((k) => c.patterns.some((p) => patternKey(p) === k));
+    }
+    // มุมสำคัญ: เฉพาะดาวเคราะห์ + ลัคนา/กลางฟ้า · ไม่มีลัคนากับกลางฟ้าคู่กัน · ไม่มีดาวรุ่นคู่กัน
+    const top = new Set<string>([...PLANET_IDS_ALL, "asc", "mc"]);
+    aspectOk &&= keyAspects(c, 5).every((a) => top.has(a.a) && top.has(a.b) && !(["asc", "mc"].includes(a.a) && ["asc", "mc"].includes(a.b)));
+  }
+  check("แถวดาว: บรรทัดที่สองเป็นเรื่องของผังนี้ (ไม่ใช่ความหมายกลาง) · ไม่เอ่ยชื่อไพ่ · ไม้ยมกเว้นวรรค · อังกฤษไม่มีอักษรไทย", headOk);
+  check(
+    "ดาวพุธถึงเสาร์มีหัวข้อสั้นครบ 12 ราศีไม่ซ้ำ · ดวงจันทร์ 12",
+    Object.values(depth.PLANET_SIGN_TEXT).every((list) => new Set(list.map((x) => x.head.th)).size === 12 && list.every((x) => x.head.en && !/[฀-๿]/.test(x.head.en))) && depth.MOON_HEAD.length === 12,
+  );
+  check(`เรือน: ทุกเรือนมีบรรทัด (มีดาว ➔ ได้พลังจากเรื่องอะไร · ไม่มีดาว ➔ เจ้าเรือน) · ไม่รู้เวลาเกิด = ไม่มี (${houseChecked} เรือน)`, houseOk && houseChecked > 100);
+  check("ดาวที่คุยกันแรงที่สุด: เฉพาะดาวจริงกับลัคนา/กลางฟ้า (จุดคำนวณอยู่ในตารางมุม)", aspectOk);
+  const sample = computeNatalChart(samples[0]);
+  const shortOk = (["conjunction", "trine", "sextile", "square", "opposition"] as const).every((type) => {
+    const a = { ...sample.aspects[0], a: "sun" as const, b: "moon" as const, type };
+    const full = describeAspect(a, "th");
+    const short = describeAspect(a, "th", { short: true });
+    return short.length > 20 && short.length < full.length && describeAspect(a, "en", { short: true }).length < describeAspect(a, "en").length;
+  });
+  check("ประโยคมุมแบบสั้นสำหรับมุมชนิดเดียวกันที่ขึ้นซ้ำ (หน้าเว็บและรายงาน)", shortOk && rd("src/lib/astro/natal-report.ts").includes("short: list.slice(0, i).some("));
+  check("เรื่องเด่นบอกว่าอธิบายรูปแบบผังไหนไปแล้ว ➔ กล่องรูปแบบพิเศษไม่อธิบายซ้ำ", coverOk && rd("src/components/natal/NatalResult.tsx").includes("coveredBy.get(patternKey(p))"));
+  const res = rd("src/components/natal/NatalResult.tsx");
+  check(
+    "ISSUE-063: แถวดาวอื่นและแผงใต้วงผังไม่เฉลยไพ่ราศี/ช่วงองศาของอาทิตย์ จันทร์ ลัคนาที่ยังคว่ำ (กฎเหล็ก 4)",
+    res.includes("const hiddenBigCards = new Set(") && /const showCards = cardsVisible\(b\);/.test(res) && /const ok = cardsVisible\(focusBody\);/.test(res),
+  );
+  check(
+    "สมดุลพลัง: ธาตุนำบอกความหมาย · ลักษณะราศีที่เกินครึ่ง/ไม่ถึง 15% บอกความหมาย · แถวดาวที่เปิดแล้วบอกว่าดาวดูแลเรื่องอะไร",
+    res.includes("ELEMENT_DEPTH[topElement].head") && res.includes("MODALITY_DEPTH[topModality].strong[lang]") && res.includes("MODALITY_DEPTH[m].weak[lang]") && res.includes("v2-nr-planet-about") && res.includes("{bodyHeadline(b, lang)}"),
+  );
+}
+
 console.log("\n6.20) คำสำคัญไพ่ประจำตัว — ไม่ฝังลง HTML · ตรงกับข้อมูลไพ่ต้นทางทุกใบ");
 {
   const { NATAL_CARDS, packNatalCards } = await import("../../src/app/_shared/pages/natal-chart");
@@ -1167,6 +1242,101 @@ console.log("\n6.20) คำสำคัญไพ่ประจำตัว — 
   );
   const resultSrc = fs.readFileSync(path.join(process.cwd(), "src/components/natal/NatalResult.tsx"), "utf8");
   check("NatalResult (โหลดแบบ lazy) อ่านคำสำคัญจาก card-keywords.ts", /NATAL_CARD_KEYWORDS\[card\.id\]/.test(resultSrc));
+}
+
+console.log("\n6.21) ภาพรวมผังส่วนทำเงิน — ความรัก/งาน/เงินเขียนเฉพาะเรื่อง · ถึงไพ่ประจำตัวเร็วขึ้น · กล่องอยากรู้ลึกกว่านี้");
+{
+  // เจ้าของ 2026-10-29 "ส่วนนี้จะเป็นส่วนที่ทำเงินได้ ขอให้ทำให้ดีที่สุด ทั้งข้อมูลอะไรต่าง ๆ ด้วย"
+  const rd = (f: string) => fs.readFileSync(path.join(process.cwd(), f), "utf8");
+  const { lifeAreas } = await import("../../src/lib/astro/natal-text");
+  const { chartHighlights } = await import("../../src/lib/astro/natal-insight");
+  const { SIGN_TEXT } = await import("../../src/data/natal/content");
+  const depth = await import("../../src/data/natal/depth");
+  const badThai = /undefined|NaN|[฀-๿]ๆ|ๆ[฀-๿]/;
+  const sets = { PARTNER_SIGN: depth.PARTNER_SIGN, WORK_STYLE: depth.WORK_STYLE, MONEY_SIGN: depth.MONEY_SIGN, MONEY_FROM_HOUSE: depth.MONEY_FROM_HOUSE };
+  check(
+    "เนื้อหาชุดใหม่ (คนที่ดึงดูด · วิธีทำงาน · วิธีหา/ใช้เงิน · เงินมาจากไหน) ครบ 12 ข้อ ไม่ซ้ำ · อังกฤษไม่มีอักษรไทย",
+    Object.values(sets).every((list) => list.length === 12 && new Set(list.map((x) => x.th)).size === 12 && list.every((x) => x.th && x.en && !badThai.test(x.th) && !/[฀-๿]/.test(x.en))),
+  );
+  const samples: NatalInput[] = [
+    input(Date.UTC(1995, 3, 29, 4)),
+    input(Date.UTC(1988, 7, 8, 1, 30)),
+    input(Date.UTC(2000, 0, 1, 0)),
+    input(Date.UTC(1979, 9, 5, 20, 20), { lat: 7.88, lon: 98.39 }),
+    input(Date.UTC(1990, 5, 21, 9, 45), { lat: 51.5, lon: -0.12 }),
+    input(Date.UTC(1985, 2, 3, 5), { timeKnown: false }),
+  ];
+  const styles = SIGN_TEXT.map((x) => x.style.th);
+  let lifeOk = true;
+  let rulerLine = 0;
+  for (const inp of samples) {
+    const c = computeNatalChart(inp);
+    for (const lang of ["th", "en"] as const) {
+      const [love, work, money] = lifeAreas(c, lang);
+      const all = [love.text, work.text, money.text];
+      lifeOk &&= all.every((t) => t.length > 40 && !badThai.test(t) && (lang === "th" || !/[฀-๿]/.test(t)));
+      // เดิมต่อคำคุณศัพท์กลางของราศี ("คุณจัดการเงินอย่างอบอุ่น เปิดเผย และอยากให้คนเห็นคุณค่า") ซึ่งอ่านแปลกและซ้ำกับกล่องงาน
+      if (lang === "th") lifeOk &&= !all.some((t) => styles.some((st) => t.includes(st))) && !money.text.includes("จัดการเงินอย่าง");
+      if (c.houses && lang === "th") {
+        lifeOk &&= love.text.includes("คนที่ดึงดูดคุณ") && money.text.includes("เจ้าเรือนเงินคือ");
+        rulerLine++;
+      }
+      if (!c.houses) lifeOk &&= !love.text.includes(lang === "th" ? "คนที่ดึงดูดคุณ" : "drawn to") && !money.text.includes(lang === "th" ? "เจ้าเรือนเงิน" : "money ruler");
+    }
+  }
+  check(`ความรัก/งาน/เงิน: เขียนเฉพาะเรื่อง ไม่ต่อคำคุณศัพท์กลางของราศี · มีเจ้าเรือนเงินเมื่อรู้เวลาเกิด (${rulerLine} ผัง) · ไม่รู้เวลาเกิดไม่อ้างเรือน`, lifeOk && rulerLine >= 5);
+  const res = rd("src/components/natal/NatalResult.tsx");
+  const app = rd("src/components/natal/NatalChartApp.tsx");
+  const css = rd("src/styles/v2-natal.css");
+  // แถวปุ่มใต้ภาพรวม = ตั้งแต่ `className="v2-nr-actions"` ถึงปุ่มรายงานด้านบน · พิมพ์อยู่ใน endActions (ท้ายหน้า)
+  const topRow = app.slice(app.indexOf('className="v2-nr-actions"'), app.indexOf('setReportOpen("top")'));
+  const endProp = app.slice(app.indexOf("endActions={"), app.indexOf("actions={", app.indexOf("endActions={") + 12));
+  check(
+    "ภาพรวมสั้นลง: กล่องเวลาเกิดย้ายไปส่วนเรือน · ปุ่มบนเหลือ 3 (บันทึก · ส่งให้เพื่อน · รายงาน) · พิมพ์/แก้ข้อมูลอยู่ท้ายหน้า",
+    res.indexOf("เวลาเกิดต้องแม่นแค่ไหน") > res.indexOf('id="natal-houses"') &&
+      res.indexOf("{endActions}") > res.indexOf('id="natal-deep"') &&
+      (topRow.match(/<button/g) ?? []).length === 3 &&
+      !topRow.includes("window.print") &&
+      endProp.includes("window.print()") &&
+      endProp.includes("แก้ข้อมูลเกิด"),
+  );
+  check(
+    "มือถือ: แท็บและปุ่มกระโดดเป็นแถวเดียวเลื่อนข้าง · ความรัก/งาน/เงินโชว์ทีละกล่อง (พิมพ์ได้ครบ)",
+    /@media \(max-width: 639px\) \{\s*\.v2-nr-tabs,\s*\.v2-nr-jump \{[^}]*overflow-x: auto/.test(css) &&
+      /\.v2-nr-life li:not\(\.is-on\) \{\s*display: none/.test(css) &&
+      /@media print \{[^@]*\.v2-nr-life li \{\s*display: flex !important/.test(css) &&
+      res.includes('className={lifeOn === x.key ? "is-on" : undefined}'),
+  );
+  check(
+    "กล่องอยากรู้ลึกกว่านี้ (ถามแม่หมอ + รายงานฉบับเต็ม) อยู่ก่อนข้อมูลละเอียด · แผงรายงานเปิดใต้ปุ่มที่กด",
+    res.indexOf('className="v2-nr-next v2-nt-noprint"') > 0 &&
+      res.indexOf('className="v2-nr-next v2-nt-noprint"') < res.indexOf('id="natal-deep"') &&
+      app.includes('reportOpen === "end"') &&
+      app.includes('reportOpen === "top"'),
+  );
+  // เจ้าของ 2026-10-29 ส่งภาพหัวผัง "ยังสวยไม่พอ" ➔ ปกท้องฟ้ากลางคืน + เรื่องเด่นข้อ 1 เป็นหัวข้อใหญ่ + สรุปแบ่งเส้นบาง
+  const coverCss = css.slice(css.indexOf(".v2-nr-cover {"), css.indexOf(".v2-nr-cover-note {"));
+  check(
+    "หัวผัง: ปกกลางคืนมีชื่อและสามราศีหลัก · เรื่องเด่นข้อ 1 เป็นหัวข้อใหญ่ (สรุปเหลือข้อ 2–3) · ไม่มี backdrop-filter · พิมพ์แล้วเป็นหมึกบนขาว",
+    res.indexOf('className="v2-nr-cover"') > 0 &&
+      res.indexOf('className="v2-nr-cover"') < res.indexOf('id="natal-summary"') &&
+      res.indexOf('id="natal-summary"') < res.indexOf('className="v2-nr-big3"') &&
+      res.includes("{themes[0].title}") &&
+      res.includes("lines: r.lines.slice(1)") &&
+      coverCss.length > 0 &&
+      !/backdrop-filter|filter:|animation/.test(coverCss) &&
+      /@media print \{\s*\.v2-nr-cover \{\s*background: none !important/.test(css),
+  );
+  // หัวข้อเรื่องเด่นข้อ 1 ขึ้นตัวใหญ่ใต้ปก ➔ เจอ "Your dreams shows…" "Your emotions is…" (คำนามพหูพจน์ + กริยาเอกพจน์ในแม่แบบ)
+  check(
+    "อังกฤษ: คำเรียกดาว (BODY_VOICE) เป็นเอกพจน์ทุกคำ ประโยค \"Your X is/shows/steers…\" จึงถูกไวยากรณ์",
+    Object.values(depth.BODY_VOICE).every((v) => !/s$/.test(v.word.en)) &&
+      samples.every((inp) => chartHighlights(computeNatalChart(inp), "en", 10).every((h) => !/\b(emotions|dreams|wounds|habits|meetings) (is|shows|steers|sets|carries|works|takes)\b/.test(`${h.title} ${h.text}`))),
+  );
+  check(
+    "ราคาเริ่มต้นมาจากแหล่งเดียว (CHEAPEST_PACKAGE_THB) และไม่ติดบันเดิลแรกของฟอร์ม",
+    res.includes("CHEAPEST_PACKAGE_THB") && rd("src/components/natal/NatalReportPanel.tsx").includes("CHEAPEST_PACKAGE_THB") && !/entitlement\/copy/.test(app),
+  );
 }
 
 console.log("\n7) กติกา island — ตัวคำนวณ/คำอธิบาย/ผลผังโหลดแบบ dynamic import เท่านั้น");
