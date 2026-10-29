@@ -1244,6 +1244,81 @@ console.log("\n6.20) คำสำคัญไพ่ประจำตัว — 
   check("NatalResult (โหลดแบบ lazy) อ่านคำสำคัญจาก card-keywords.ts", /NATAL_CARD_KEYWORDS\[card\.id\]/.test(resultSrc));
 }
 
+console.log("\n6.21) ภาพรวมผังส่วนทำเงิน — ความรัก/งาน/เงินเขียนเฉพาะเรื่อง · ถึงไพ่ประจำตัวเร็วขึ้น · กล่องอยากรู้ลึกกว่านี้");
+{
+  // เจ้าของ 2026-10-29 "ส่วนนี้จะเป็นส่วนที่ทำเงินได้ ขอให้ทำให้ดีที่สุด ทั้งข้อมูลอะไรต่าง ๆ ด้วย"
+  const rd = (f: string) => fs.readFileSync(path.join(process.cwd(), f), "utf8");
+  const { lifeAreas } = await import("../../src/lib/astro/natal-text");
+  const { SIGN_TEXT } = await import("../../src/data/natal/content");
+  const depth = await import("../../src/data/natal/depth");
+  const badThai = /undefined|NaN|[฀-๿]ๆ|ๆ[฀-๿]/;
+  const sets = { PARTNER_SIGN: depth.PARTNER_SIGN, WORK_STYLE: depth.WORK_STYLE, MONEY_SIGN: depth.MONEY_SIGN, MONEY_FROM_HOUSE: depth.MONEY_FROM_HOUSE };
+  check(
+    "เนื้อหาชุดใหม่ (คนที่ดึงดูด · วิธีทำงาน · วิธีหา/ใช้เงิน · เงินมาจากไหน) ครบ 12 ข้อ ไม่ซ้ำ · อังกฤษไม่มีอักษรไทย",
+    Object.values(sets).every((list) => list.length === 12 && new Set(list.map((x) => x.th)).size === 12 && list.every((x) => x.th && x.en && !badThai.test(x.th) && !/[฀-๿]/.test(x.en))),
+  );
+  const samples: NatalInput[] = [
+    input(Date.UTC(1995, 3, 29, 4)),
+    input(Date.UTC(1988, 7, 8, 1, 30)),
+    input(Date.UTC(2000, 0, 1, 0)),
+    input(Date.UTC(1979, 9, 5, 20, 20), { lat: 7.88, lon: 98.39 }),
+    input(Date.UTC(1990, 5, 21, 9, 45), { lat: 51.5, lon: -0.12 }),
+    input(Date.UTC(1985, 2, 3, 5), { timeKnown: false }),
+  ];
+  const styles = SIGN_TEXT.map((x) => x.style.th);
+  let lifeOk = true;
+  let rulerLine = 0;
+  for (const inp of samples) {
+    const c = computeNatalChart(inp);
+    for (const lang of ["th", "en"] as const) {
+      const [love, work, money] = lifeAreas(c, lang);
+      const all = [love.text, work.text, money.text];
+      lifeOk &&= all.every((t) => t.length > 40 && !badThai.test(t) && (lang === "th" || !/[฀-๿]/.test(t)));
+      // เดิมต่อคำคุณศัพท์กลางของราศี ("คุณจัดการเงินอย่างอบอุ่น เปิดเผย และอยากให้คนเห็นคุณค่า") ซึ่งอ่านแปลกและซ้ำกับกล่องงาน
+      if (lang === "th") lifeOk &&= !all.some((t) => styles.some((st) => t.includes(st))) && !money.text.includes("จัดการเงินอย่าง");
+      if (c.houses && lang === "th") {
+        lifeOk &&= love.text.includes("คนที่ดึงดูดคุณ") && money.text.includes("เจ้าเรือนเงินคือ");
+        rulerLine++;
+      }
+      if (!c.houses) lifeOk &&= !love.text.includes(lang === "th" ? "คนที่ดึงดูดคุณ" : "drawn to") && !money.text.includes(lang === "th" ? "เจ้าเรือนเงิน" : "money ruler");
+    }
+  }
+  check(`ความรัก/งาน/เงิน: เขียนเฉพาะเรื่อง ไม่ต่อคำคุณศัพท์กลางของราศี · มีเจ้าเรือนเงินเมื่อรู้เวลาเกิด (${rulerLine} ผัง) · ไม่รู้เวลาเกิดไม่อ้างเรือน`, lifeOk && rulerLine >= 5);
+  const res = rd("src/components/natal/NatalResult.tsx");
+  const app = rd("src/components/natal/NatalChartApp.tsx");
+  const css = rd("src/styles/v2-natal.css");
+  // แถวปุ่มใต้ภาพรวม = ตั้งแต่ `className="v2-nr-actions"` ถึงปุ่มรายงานด้านบน · พิมพ์อยู่ใน endActions (ท้ายหน้า)
+  const topRow = app.slice(app.indexOf('className="v2-nr-actions"'), app.indexOf('setReportOpen("top")'));
+  const endProp = app.slice(app.indexOf("endActions={"), app.indexOf("actions={", app.indexOf("endActions={") + 12));
+  check(
+    "ภาพรวมสั้นลง: กล่องเวลาเกิดย้ายไปส่วนเรือน · ปุ่มบนเหลือ 3 (บันทึก · ส่งให้เพื่อน · รายงาน) · พิมพ์/แก้ข้อมูลอยู่ท้ายหน้า",
+    res.indexOf("เวลาเกิดต้องแม่นแค่ไหน") > res.indexOf('id="natal-houses"') &&
+      res.indexOf("{endActions}") > res.indexOf('id="natal-deep"') &&
+      (topRow.match(/<button/g) ?? []).length === 3 &&
+      !topRow.includes("window.print") &&
+      endProp.includes("window.print()") &&
+      endProp.includes("แก้ข้อมูลเกิด"),
+  );
+  check(
+    "มือถือ: แท็บและปุ่มกระโดดเป็นแถวเดียวเลื่อนข้าง · ความรัก/งาน/เงินโชว์ทีละกล่อง (พิมพ์ได้ครบ)",
+    /@media \(max-width: 639px\) \{\s*\.v2-nr-tabs,\s*\.v2-nr-jump \{[^}]*overflow-x: auto/.test(css) &&
+      /\.v2-nr-life li:not\(\.is-on\) \{\s*display: none/.test(css) &&
+      /@media print \{\s*\.v2-nr-life li \{\s*display: flex !important/.test(css) &&
+      res.includes('className={lifeOn === x.key ? "is-on" : undefined}'),
+  );
+  check(
+    "กล่องอยากรู้ลึกกว่านี้ (ถามแม่หมอ + รายงานฉบับเต็ม) อยู่ก่อนข้อมูลละเอียด · แผงรายงานเปิดใต้ปุ่มที่กด",
+    res.indexOf('className="v2-nr-next v2-nt-noprint"') > 0 &&
+      res.indexOf('className="v2-nr-next v2-nt-noprint"') < res.indexOf('id="natal-deep"') &&
+      app.includes('reportOpen === "end"') &&
+      app.includes('reportOpen === "top"'),
+  );
+  check(
+    "ราคาเริ่มต้นมาจากแหล่งเดียว (CHEAPEST_PACKAGE_THB) และไม่ติดบันเดิลแรกของฟอร์ม",
+    res.includes("CHEAPEST_PACKAGE_THB") && rd("src/components/natal/NatalReportPanel.tsx").includes("CHEAPEST_PACKAGE_THB") && !/entitlement\/copy/.test(app),
+  );
+}
+
 console.log("\n7) กติกา island — ตัวคำนวณ/คำอธิบาย/ผลผังโหลดแบบ dynamic import เท่านั้น");
 {
   const root = process.cwd();

@@ -1129,6 +1129,38 @@ details:not([open]) > summary .v2-nt-more-close {
 .v2-nr-jump a:hover {
   border-color: var(--nt-gold);
 }
+/*
+ * มือถือ: แท็บ 8 อันและปุ่มกระโดด 8 อันเป็นแถวเดียวเลื่อนข้าง (เดิมซ้อนกันอย่างละ 3 แถว กินที่ราว 270px ก่อนถึงไพ่)
+ * ปุ่มท้ายแถวโผล่ครึ่งใบเป็นสัญญาณว่าเลื่อนต่อได้ · ไม่ใช่แถวการ์ดไพ่ จึงไม่อยู่ใต้กฎ Zero-Clipping
+ */
+@media (max-width: 639px) {
+  .v2-nr-tabs,
+  .v2-nr-jump {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .v2-nr-tabs::-webkit-scrollbar,
+  .v2-nr-jump::-webkit-scrollbar {
+    display: none;
+  }
+  .v2-nr-tabs {
+    border-radius: 999px;
+  }
+  .v2-nr-tabs button {
+    flex: 0 0 auto;
+    padding: 4px 14px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .v2-nr-jump a {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+}
 
 /* หัวส่วน: เลขลำดับ + หัวข้อ + คำอธิบายบรรทัดเดียว */
 .v2-nr-sec {
@@ -1757,6 +1789,48 @@ details:not([open]) > summary .v2-nt-more-close {
   line-height: 1.7;
   color: var(--nt-ink);
 }
+/* จอแคบ: แถบสลับความรัก/งาน/เงิน โชว์ทีละกล่อง (จอกว้างโชว์ครบสามคอลัมน์ แถบนี้ซ่อน) · พิมพ์ได้ครบทุกกล่อง */
+.v2-nr-life-tabs {
+  display: none;
+}
+@media (max-width: 767px) {
+  .v2-nr-life-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    padding: 4px;
+    border-radius: 999px;
+    border: 1px solid var(--nt-line);
+    background: rgba(74, 47, 16, 0.05);
+    margin-bottom: -8px;
+  }
+  .v2-nr-life-tabs button {
+    min-height: 44px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--nt-ink);
+  }
+  .v2-nr-life-tabs button[aria-selected="true"] {
+    background: #17110C;
+    color: #FFF8EC;
+  }
+  .v2-nr-life li:not(.is-on) {
+    display: none;
+  }
+  /* ชื่อกล่องซ้ำกับแถบที่เลือกอยู่ */
+  .v2-nr-life-t {
+    display: none;
+  }
+}
+@media print {
+  .v2-nr-life li {
+    display: flex !important;
+  }
+  .v2-nr-life-t {
+    display: block !important;
+  }
+}
 .v2-nr-cta {
   display: flex;
   flex-direction: column;
@@ -1772,17 +1846,14 @@ details:not([open]) > summary .v2-nt-more-close {
   padding-top: 14px;
   border-top: 1px solid var(--nt-line-soft);
 }
-/* มือถือ: ตาราง 2 ช่องเท่ากัน ไม่เป็นเม็ดยาวไม่เท่ากันกระจัดกระจาย */
+/* มือถือ: 3 ปุ่มแถวเดียวกว้างเท่ากัน (บันทึก · ส่งให้เพื่อน · รายงาน) — พิมพ์/แก้ข้อมูลเกิดอยู่ท้ายหน้า */
 @media (max-width: 639px) {
   .v2-nr-actions {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .v2-nr-actions > button {
-    padding-inline: 8px;
-  }
-  .v2-nr-actions > button:last-child:nth-child(odd) {
-    grid-column: 1 / -1;
+    padding-inline: 6px;
   }
 }
 /* ป้ายสถานะ + ความหมายสั้นติดกัน */
@@ -1856,7 +1927,60 @@ details:not([open]) > summary .v2-nt-more-close {
   }
   .v2-nr-actions > button {
     font-size: 13px;
+    padding-inline: 2px;
   }
+}
+
+/* ── อยากรู้ลึกกว่านี้: ถามแม่หมอ + รายงานฉบับเต็ม (ก่อนตารางข้อมูลละเอียด) ── */
+.v2-nr-next {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 16px;
+  border-radius: 24px;
+  border: 1px solid var(--nt-gold);
+  background: var(--nt-paper);
+}
+@media (min-width: 640px) {
+  .v2-nr-next {
+    padding: 24px 28px;
+  }
+}
+.v2-nr-next-h {
+  font-family: var(--font-serif-th);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--nt-ink);
+  text-align: center;
+}
+.v2-nr-next-sub {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--nt-muted);
+  text-align: center;
+}
+.v2-nr-next-grid {
+  display: grid;
+  gap: 12px;
+}
+@media (min-width: 640px) {
+  .v2-nr-next-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.v2-nr-next-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid var(--nt-line);
+  background: rgba(74, 47, 16, 0.03);
+}
+.v2-nr-next-card > button {
+  margin-top: auto;
+  align-self: flex-start;
 }
 
 /* ── พิมพ์ / บันทึก PDF: เอาเฉพาะผลผัง ── */

@@ -113,7 +113,8 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
     if (h.startsWith("#add=")) setIncoming(h.slice(5));
   }, []);
   const [shareStep, setShareStep] = useState<"idle" | "confirm" | "done">("idle");
-  const [reportOpen, setReportOpen] = useState(false);
+  /** แผงรายงานฉบับเต็มเปิดจากปุ่มไหน: แถวปุ่มใต้ภาพรวม หรือกล่อง "อยากรู้ลึกกว่านี้" ท้ายหน้า (แผงขึ้นใต้ปุ่มที่กด) */
+  const [reportOpen, setReportOpen] = useState<false | "top" | "end">(false);
   const [shareNote, setShareNote] = useState<string | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
@@ -586,8 +587,31 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
               meta={result.meta}
               cards={cards}
               spec={result.spec}
+              onReport={() => setReportOpen("end")}
+              reportPanel={
+                reportOpen === "end" && (
+                  <Suspense fallback={null}>
+                    <NatalReportPanel spec={result.spec} lang={lang} onClose={() => setReportOpen(false)} />
+                  </Suspense>
+                )
+              }
+              endActions={
+                <div className="v2-nt-noprint flex flex-wrap justify-center gap-2">
+                  <button type="button" onClick={() => window.print()} className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]">
+                    {isEnglish ? "Print this chart" : "พิมพ์ผังนี้"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById("natal-app")?.scrollIntoView({ behavior: smoothScrollBehavior() })}
+                    className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]"
+                  >
+                    {isEnglish ? "Edit birth details" : "แก้ข้อมูลเกิด"}
+                  </button>
+                </div>
+              }
               actions={
                 <div className="v2-nt-noprint space-y-2">
+                  {/* แถวเดียว 3 ปุ่ม (เจ้าของ 2026-10-29): พิมพ์กับแก้ข้อมูลเกิดย้ายไปท้ายหน้า ไม่คั่นระหว่างสรุปกับไพ่ */}
                   <div className="v2-nr-actions">
                     <button type="button" onClick={handleSave} disabled={saveState === "saved"} className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px] disabled:opacity-70">
                       {saveState === "saved"
@@ -595,8 +619,8 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
                           ? "Saved"
                           : "บันทึกแล้ว"
                         : isEnglish
-                          ? "Save on this device"
-                          : "บันทึกในเครื่องนี้"}
+                          ? "Save chart"
+                          : "บันทึกผังนี้"}
                     </button>
                     <button
                       type="button"
@@ -608,21 +632,11 @@ export function NatalChartApp({ cards }: { cards: readonly NatalCardItem[] }) {
                     >
                       {isEnglish ? "Send to a friend" : "ส่งให้เพื่อน"}
                     </button>
-                    <button type="button" onClick={() => setReportOpen(true)} className="rounded-full border border-gold-ink bg-surface px-4 py-2 text-sm font-semibold text-ink min-h-[44px]">
-                      {isEnglish ? "Full report (PDF)" : "รายงานเต็ม (PDF)"}
-                    </button>
-                    <button type="button" onClick={() => window.print()} className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]">
-                      {isEnglish ? "Print" : "พิมพ์"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => document.getElementById("natal-app")?.scrollIntoView({ behavior: smoothScrollBehavior() })}
-                      className="rounded-full border border-line-warm bg-surface px-4 py-2 text-sm text-ink min-h-[44px]"
-                    >
-                      {isEnglish ? "Edit birth details" : "แก้ข้อมูลเกิด"}
+                    <button type="button" onClick={() => setReportOpen("top")} className="rounded-full border border-gold-ink bg-surface px-4 py-2 text-sm font-semibold text-ink min-h-[44px]">
+                      {isEnglish ? "Full report (PDF)" : "รายงาน PDF"}
                     </button>
                   </div>
-                  {reportOpen && (
+                  {reportOpen === "top" && (
                     <Suspense fallback={null}>
                       <NatalReportPanel spec={result.spec} lang={lang} onClose={() => setReportOpen(false)} />
                     </Suspense>

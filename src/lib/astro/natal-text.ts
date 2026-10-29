@@ -22,7 +22,21 @@ import {
   TRANSIT_TONE,
   type Lang,
 } from "@/data/natal/content";
-import { BODY_VOICE, CHIRON_SIGN, HOUSE_DEPTH, MC_CAREER, MOON_HEAD, PLANET_DEPTH, PLANET_SIGN_TEXT, POINT_HOUSE_LINE, TRANSIT_KEY } from "@/data/natal/depth";
+import {
+  BODY_VOICE,
+  CHIRON_SIGN,
+  HOUSE_DEPTH,
+  MC_CAREER,
+  MONEY_FROM_HOUSE,
+  MONEY_SIGN,
+  MOON_HEAD,
+  PARTNER_SIGN,
+  PLANET_DEPTH,
+  PLANET_SIGN_TEXT,
+  POINT_HOUSE_LINE,
+  TRANSIT_KEY,
+  WORK_STYLE,
+} from "@/data/natal/depth";
 import {
   ASPECT_DEFS,
   PLANET_IDS,
@@ -470,7 +484,13 @@ export interface LifeArea {
   text: string;
 }
 
-/** ความรัก · การงาน · การเงิน — จากดาวศุกร์ ดาวอังคาร ดาวพฤหัส และจุดเริ่มเรือน 2 / 7 / 10 (คำนวณ ไม่ใช้ AI) */
+/**
+ * ความรัก · การงาน · การเงิน (คำนวณ ไม่ใช้ AI · หน้าเว็บ + รายงานฉบับเต็มใช้ชุดเดียวกัน)
+ * - ความรัก: ดาวศุกร์ตามราศี + คนที่ดึงดูดคุณตามราศีของจุดตก (เรือน 7)
+ * - การงาน: งานที่ใช่ตามกลางฟ้า + วิธีทำงานตามดาวอังคาร + ดาวในเรือน 10
+ * - การเงิน: วิธีหาและใช้เงินตามราศีเรือน 2 + เงินมาจากไหน (เรือนของเจ้าเรือน 2) + ช่องทางโชคตามเรือนของดาวพฤหัส
+ * ไม่รู้เวลาเกิด (ไม่มีเรือน): ความรักเหลือดาวศุกร์ · งานเหลือดาวอังคาร · เงินใช้ดาวพฤหัสตามราศี
+ */
 export function lifeAreas(chart: NatalChart, lang: Lang): LifeArea[] {
   const th = lang === "th";
   const get = (id: BodyId) => chart.bodies.find((b) => b.id === id)!;
@@ -479,34 +499,47 @@ export function lifeAreas(chart: NatalChart, lang: Lang): LifeArea[] {
   const jupiter = get("jupiter");
   const cuspSign = (n: number) => (chart.houses ? Math.floor(chart.houses[n - 1] / 30) % 12 : null);
   const in10 = chart.bodies.filter((b) => b.house === 10 && (PLANET_IDS as readonly string[]).includes(b.id));
-  const names = in10.map((b) => bodyName(b.id, lang)).join(th ? " " : ", ");
+  const names = joinWords(
+    in10.map((b) => (th ? bodyName(b.id, lang) : prose(b.id, lang))),
+    lang,
+  );
   const dsc = cuspSign(7);
   const mc = cuspSign(10);
   const h2 = cuspSign(2);
+  const moneyRuler = h2 !== null ? chart.bodies.find((b) => b.id === TRADITIONAL_RULER[h2]) : undefined;
   return [
     {
       key: "love",
       title: th ? "ความรัก" : "Love",
       from: th ? `ดาวศุกร์${signName(venus.sign, lang)}` : `Venus in ${signName(venus.sign, lang)}`,
-      text: th
-        ? `${PLANET_SIGN_TEXT.venus[venus.sign].core.th}${dsc !== null ? ` คนที่ดึงดูดคุณมักเป็นคน${SIGN_TEXT[dsc].keywords.th}` : ""}`
-        : `${PLANET_SIGN_TEXT.venus[venus.sign].core.en}${dsc !== null ? ` You are drawn to people who are ${SIGN_TEXT[dsc].keywords.en}.` : ""}`,
+      text: `${PLANET_SIGN_TEXT.venus[venus.sign].core[lang]}${dsc !== null ? ` ${PARTNER_SIGN[dsc][lang]}` : ""}`,
     },
     {
       key: "work",
       title: th ? "การงาน" : "Work",
       from: mc !== null ? (th ? `กลางฟ้า${signName(mc, lang)}` : `Midheaven in ${signName(mc, lang)}`) : th ? `ดาวอังคาร${signName(mars.sign, lang)}` : `Mars in ${signName(mars.sign, lang)}`,
       text: th
-        ? `${mc !== null ? `งานที่ใช่คือ${MC_CAREER[mc].th} ` : ""}คุณลงมือทำงาน${SIGN_TEXT[mars.sign].style.th}${in10.length ? ` มี${names}อยู่เรือนงาน งานจึงเป็นเรื่องใหญ่ของชีวิต` : ""}`
-        : `${mc !== null ? `The right path for you is ${MC_CAREER[mc].en}. ` : ""}You get things done ${SIGN_TEXT[mars.sign].style.en}.${in10.length ? ` With ${names} in your career house, work is a big part of your life.` : ""}`,
+        ? `${mc !== null ? `งานที่ใช่คือ${MC_CAREER[mc].th} ` : ""}${WORK_STYLE[mars.sign].th}${in10.length ? ` มี${names}อยู่เรือนงาน งานจึงเป็นเรื่องใหญ่ของชีวิต` : ""}`
+        : `${mc !== null ? `The right path for you is ${MC_CAREER[mc].en}. ` : ""}${WORK_STYLE[mars.sign].en}${in10.length ? ` With ${names} in your career house, work is a big part of your life.` : ""}`,
     },
     {
       key: "money",
       title: th ? "การเงิน" : "Money",
       from: h2 !== null ? (th ? `เรือน 2 ${signName(h2, lang)}` : `2nd house in ${signName(h2, lang)}`) : th ? `ดาวพฤหัสบดี${signName(jupiter.sign, lang)}` : `Jupiter in ${signName(jupiter.sign, lang)}`,
-      text: th
-        ? `${h2 !== null ? `คุณจัดการเงิน${SIGN_TEXT[h2].style.th} ` : ""}${PLANET_SIGN_TEXT.jupiter[jupiter.sign].core.th}${jupiter.house ? ` ช่องทางที่โชคมักมาคือ${HOUSE_TEXT[jupiter.house - 1].arena.th}` : ""}`
-        : `${h2 !== null ? `You handle money ${SIGN_TEXT[h2].style.en}. ` : ""}${PLANET_SIGN_TEXT.jupiter[jupiter.sign].core.en}${jupiter.house ? ` Luck tends to arrive through ${HOUSE_TEXT[jupiter.house - 1].arena.en}.` : ""}`,
+      text:
+        h2 === null
+          ? PLANET_SIGN_TEXT.jupiter[jupiter.sign].core[lang]
+          : [
+              MONEY_SIGN[h2][lang],
+              moneyRuler?.house
+                ? th
+                  ? `เจ้าเรือนเงินคือ${bodyName(moneyRuler.id, lang)} อยู่เรือน ${moneyRuler.house} แปลว่า${MONEY_FROM_HOUSE[moneyRuler.house - 1].th}`
+                  : `Your money ruler, ${prose(moneyRuler.id, lang)}, sits in house ${moneyRuler.house}: ${MONEY_FROM_HOUSE[moneyRuler.house - 1].en}.`
+                : "",
+              jupiter.house ? (th ? `ส่วนโชคและโอกาสมักมาทาง${HOUSE_TEXT[jupiter.house - 1].arena.th}` : `Luck and opportunity tend to arrive through ${HOUSE_TEXT[jupiter.house - 1].arena.en}.`) : "",
+            ]
+              .filter(Boolean)
+              .join(" "),
     },
   ];
 }

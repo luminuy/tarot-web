@@ -6,6 +6,7 @@ import type { ChartSpec } from "@/lib/astro/chart-spec";
 import type { Lang } from "@/data/natal/content";
 import type { NatalReport } from "@/lib/astro/natal-report";
 import { stripEmoji } from "@/lib/text/no-emoji";
+import { CHEAPEST_PACKAGE_THB } from "@/lib/entitlement/copy";
 
 /**
  * 📄 รายงานผังดวงฉบับเต็ม (โหลดแบบ lazy เมื่อกดปุ่ม) — ใช้รอบดูดวงที่เติมไว้ 1 รอบ (เจ้าของสั่ง "รายงาน PDF แบบเสียเงิน")
@@ -60,7 +61,9 @@ export default function NatalReportPanel({ spec, lang, onClose }: { spec: ChartS
         ))}
       </ul>
       <p className="v2-nr-note">
-        {isTh ? "ใช้รอบดูดวงที่เติมไว้ 1 รอบ ผังเดิมโหลดซ้ำไม่หักซ้ำ" : "Uses 1 refilled reading; re-opening the same chart is free."}
+        {isTh
+          ? `ราว 7 หน้า A4 · ใช้รอบดูดวงที่เติมไว้ 1 รอบ (เติมรอบเริ่ม ${CHEAPEST_PACKAGE_THB} บาท) · ผังเดิมโหลดซ้ำไม่หักซ้ำ · ต้องเข้าสู่ระบบ`
+          : `About 7 A4 pages · uses 1 refilled reading (refills from ${CHEAPEST_PACKAGE_THB} THB) · re-opening the same chart is free · sign-in required`}
       </p>
       <label className="flex items-start gap-3 text-sm leading-relaxed cursor-pointer min-h-[44px]">
         <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 w-5 h-5 shrink-0 accent-ink" />

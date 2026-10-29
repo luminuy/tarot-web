@@ -742,3 +742,76 @@ export const POINT_HOUSE_LINE: Partial<Record<BodyId, T>> = {
   juno: { th: "เรื่องที่ผูกกับความผูกมัดระยะยาว", en: "An area tied to long-term commitment" },
   vesta: { th: "เรื่องที่คุณทุ่มเทอย่างตั้งใจ", en: "Something you devote yourself to" },
 };
+
+/**
+ * กล่องความรัก · การงาน · การเงินในสรุปผัง (เจ้าของ 2026-10-29 "ส่วนนี้จะเป็นส่วนที่ทำเงิน ขอให้ทำให้ดีที่สุด")
+ * เดิมต่อคำคุณศัพท์กลางของราศี ("คุณจัดการเงินอย่างอบอุ่น เปิดเผย และอยากให้คนเห็นคุณค่า") ซึ่งอ่านแปลกและซ้ำกับกล่องงาน
+ * ชุดนี้เขียนเฉพาะเรื่อง ทุกข้อมีด้านเด่นและสิ่งที่ควรระวังในประโยคเดียวกัน (เรียง เมษ ➔ มีน)
+ */
+
+/** คนที่ดึงดูดคุณ ตามราศีของจุดตก (DSC · จุดเริ่มเรือน 7) */
+export const PARTNER_SIGN: readonly T[] = [
+  { th: "คนที่ดึงดูดคุณมักกล้า ตรง และมีพลัง คนแบบนี้ช่วยให้คุณกล้าบอกสิ่งที่ต้องการมากขึ้น", en: "You are drawn to bold, direct, energetic people, who help you ask for what you want." },
+  { th: "คนที่ดึงดูดคุณมักนิ่ง มั่นคง และไว้ใจได้ ความรักที่ยืนยาวสำหรับคุณคือความรักที่ค่อย ๆ โต", en: "You are drawn to calm, steady, reliable people. Lasting love, for you, is love that grows slowly." },
+  { th: "คนที่ดึงดูดคุณมักคุยสนุก ฉลาด และคล่องตัว ถ้าคุยกันได้ไม่รู้จบ ความสัมพันธ์จะไปได้ไกล", en: "You are drawn to witty, clever, lively people. If the conversation never runs dry, the relationship goes far." },
+  { th: "คนที่ดึงดูดคุณมักอบอุ่น ขี้ห่วง และให้ความรู้สึกเหมือนบ้าน คุณต้องการคู่ที่ดูแลใจกันได้", en: "You are drawn to warm, caring people who feel like home. You need a partner who looks after your heart." },
+  { th: "คนที่ดึงดูดคุณมักมั่นใจ มีเสน่ห์ และใจกว้าง คนแบบนี้ชวนให้คุณกล้าเฉิดฉายไปด้วยกัน", en: "You are drawn to confident, charismatic, generous people who invite you to shine as well." },
+  { th: "คนที่ดึงดูดคุณมักละเอียด ช่างดูแล และพึ่งพาได้ ความรักของคุณเห็นได้จากการช่วยกันในเรื่องเล็ก ๆ ทุกวัน", en: "You are drawn to thoughtful, helpful, dependable people. Your love shows in small, everyday help." },
+  { th: "คนที่ดึงดูดคุณมักสุภาพ มีรสนิยม และยุติธรรม คุณต้องการความสัมพันธ์ที่เท่าเทียมและให้เกียรติกัน", en: "You are drawn to gracious, tasteful, fair people. You need a relationship of equals built on respect." },
+  { th: "คนที่ดึงดูดคุณมักลึก เข้มข้น และมีอะไรให้ค้นหา คุณต้องการความรักที่จริงจังและซื่อสัตย์ทั้งใจ", en: "You are drawn to deep, intense people with something to discover. You want love that is serious and wholeheartedly loyal." },
+  { th: "คนที่ดึงดูดคุณมักร่าเริง รักอิสระ และเปิดโลก คนแบบนี้พาคุณไปเจอสิ่งใหม่และทำให้หัวเราะได้บ่อย", en: "You are drawn to cheerful, free-spirited people who open up the world and make you laugh." },
+  { th: "คนที่ดึงดูดคุณมักเป็นผู้ใหญ่ มีวินัย และมีเป้าหมาย คุณอยากได้คู่ที่สร้างอนาคตไปด้วยกันได้จริง", en: "You are drawn to mature, disciplined, goal-driven people. You want a partner to build a real future with." },
+  { th: "คนที่ดึงดูดคุณมักคิดไม่เหมือนใครและรักอิสระ ความสัมพันธ์ที่ไปได้ไกลของคุณต้องเป็นเพื่อนกันก่อน", en: "You are drawn to original, independent people. Your relationships that last start as friendship." },
+  { th: "คนที่ดึงดูดคุณมักอ่อนโยน ช่างฝัน และเข้าใจกันได้โดยไม่ต้องพูด คุณต้องการรักที่ทั้งอ่อนหวานและจริงใจ", en: "You are drawn to gentle, dreamy people who understand without words. You want love that is both tender and honest." },
+];
+
+/** วิธีทำงานและสิ่งที่ทำให้มีไฟ ตามราศีของดาวอังคาร */
+export const WORK_STYLE: readonly T[] = [
+  { th: "คุณทำงานได้ดีที่สุดเมื่อได้เริ่มเองและเห็นผลเร็ว เป็นคนจุดไฟให้ทีม แต่เบื่อง่ายถ้างานยืดเยื้อ", en: "You work best when you can start things yourself and see results fast. You light the fire for a team, but tire of work that drags on." },
+  { th: "คุณทำงานช้าแต่ไม่พลาด อึดกว่าใคร ยิ่งงานต้องต่อเนื่องยิ่งเก่ง แต่ไม่ชอบถูกเร่งหรือเปลี่ยนแผนกะทันหัน", en: "You work slowly but surely and outlast everyone; the more a job needs persistence, the better you are. You dislike being rushed or sudden changes of plan." },
+  { th: "คุณทำได้หลายงานพร้อมกัน คิดเร็ว พูดเก่ง เหมาะกับงานที่มีเรื่องใหม่ตลอด แต่ระวังเริ่มหลายเรื่องแล้วไม่จบ", en: "You juggle several tasks, think fast and talk well, which suits work full of new things. Watch out for starting many things and finishing few." },
+  { th: "คุณทำงานเต็มที่เมื่อรู้สึกว่าทีมเหมือนครอบครัวและได้ทำเพื่อคนที่ห่วง แต่บรรยากาศตึงเครียดทำให้พลังตกเร็ว", en: "You give your all when the team feels like family and you are working for people you care about. Tense atmospheres drain you fast." },
+  { th: "คุณทำงานเต็มที่เมื่อมีเวทีและได้รับการยอมรับ เป็นผู้นำที่ให้กำลังใจเก่ง แต่ถ้าไม่มีใครเห็นค่า แรงใจจะหายเร็ว", en: "You go all out when there is a stage and recognition. You lead by encouragement, but your drive fades if nobody notices the effort." },
+  { th: "คุณทำงานละเอียด เป็นระบบ และเก็บงานได้เนี้ยบ เป็นคนที่ทีมขาดไม่ได้ แต่ระวังแก้งานไม่จบเพราะอยากให้สมบูรณ์", en: "You work precisely and systematically and finish to a high standard, the person a team cannot do without. Watch out for endless polishing in pursuit of perfect." },
+  { th: "คุณทำงานได้ดีเมื่อมีคู่คิดหรือทีม เก่งเจรจาและหาทางที่ทุกฝ่ายรับได้ แต่ลังเลเมื่อต้องตัดสินใจคนเดียว", en: "You work best with a partner or a team and are skilled at finding outcomes everyone accepts, but you hesitate when you must decide alone." },
+  { th: "คุณทุ่มกับงานแบบสุดตัวและเงียบ ๆ เจาะเรื่องยากที่คนอื่นถอย แต่ถ้าไม่ไว้ใจคนรอบตัวจะแบกทุกอย่างไว้คนเดียว", en: "You commit fully and quietly, digging into hard problems others avoid, but when you do not trust the people around you, you carry everything alone." },
+  { th: "คุณทำงานได้ดีเมื่อเห็นภาพใหญ่และมีอิสระ เหมาะกับงานที่ได้เรียนรู้หรือเดินทาง แต่ไม่ชอบงานซ้ำซากและกฎที่ไม่มีเหตุผล", en: "You work well with a big picture and freedom, which suits work that involves learning or travel. You dislike repetitive tasks and rules without reasons." },
+  { th: "คุณทำงานแบบมีแผน มีวินัย และไต่ทีละขั้นจนถึงเป้า เป็นคนที่องค์กรไว้ใจ แต่ระวังทำงานหนักจนลืมพัก", en: "You work to a plan, with discipline, climbing step by step to the goal, and organisations trust you. Watch out for working so hard you forget to rest." },
+  { th: "คุณทำงานได้ดีที่สุดเมื่อได้คิดวิธีใหม่และไม่มีใครคุมใกล้ชิด เก่งเรื่องระบบและเทคโนโลยี แต่ต่อต้านคำสั่งที่ไม่มีเหตุผล", en: "You work best when you can invent new methods without close supervision. You are good with systems and technology, but resist orders that make no sense." },
+  { th: "คุณทำงานได้ดีเมื่องานมีความหมายและได้ใช้จินตนาการ อ่านคนและบรรยากาศเก่ง แต่ต้องมีกำหนดส่งช่วยดึงให้งานเสร็จ", en: "You work well when the work means something and uses your imagination. You read people and moods well, but deadlines help you finish." },
+];
+
+/** วิธีหาเงินและใช้เงิน ตามราศีของจุดเริ่มเรือน 2 */
+export const MONEY_SIGN: readonly T[] = [
+  { th: "คุณหาเงินเก่งเมื่อได้ริเริ่มและลงมือเอง เงินมาเร็วไปเร็ว และมักซื้อตามใจในพริบตา ควรมีบัญชีสำรองที่ตั้งกติกาว่าห้ามแตะ", en: "You earn best when you start things and act yourself. Money comes fast and goes fast, and you tend to buy on impulse, so keep a reserve account with a strict no-touch rule." },
+  { th: "คุณสร้างเงินแบบค่อยเป็นค่อยไปและเก็บเก่ง ชอบของดีที่ใช้ได้นาน เงินที่มั่นคงทำให้ใจสงบ ระวังแค่ไม่กล้าเอาเงินไปลงกับโอกาสใหม่", en: "You build money gradually and save well, and you like quality that lasts. Financial security calms you; just watch that it does not stop you backing new opportunities." },
+  { th: "เงินของคุณมาได้หลายทาง ทั้งงานหลัก งานเสริม และการซื้อมาขายไป ความรู้และการสื่อสารคือทุนสำคัญ ระวังรายจ่ายเล็ก ๆ ที่กระจายจนตามไม่ทัน", en: "Your money can come from several streams: a main job, side work, buying and selling. Knowledge and communication are your capital. Watch the small expenses scattered everywhere." },
+  { th: "คุณมองเงินเป็นความปลอดภัยของคนที่รัก เก็บออมเก่งเมื่อมีเป้าหมายเพื่อครอบครัว ระวังใช้เงินตามอารมณ์ในวันที่ใจไม่ดี", en: "To you, money means safety for the people you love, and you save well with a family goal in mind. Watch emotional spending on bad days." },
+  { th: "คุณหาเงินได้ดีเมื่อได้ใช้ความสามารถเฉพาะตัวและมีคนเห็นฝีมือ ใจกว้าง ชอบให้ และชอบของที่สะท้อนตัวตน ระวังจ่ายเพื่อภาพลักษณ์เกินกำลัง", en: "You earn well when your own talent is on show and recognised. You are generous and love things that reflect who you are; watch spending on image beyond your means." },
+  { th: "คุณดูแลเงินละเอียด จดรายรับรายจ่ายได้ และหาเงินจากฝีมือ ทักษะ และงานบริการ ระวังกังวลเรื่องเงินจนไม่กล้าใช้กับสิ่งที่ทำให้ชีวิตดีขึ้น", en: "You manage money carefully, track every expense and earn through skill, craft and service. Watch money worries stopping you from spending on what would truly improve your life." },
+  { th: "เงินของคุณมักมาผ่านคนอื่น ทั้งหุ้นส่วน ลูกค้า และความสัมพันธ์ที่ดี ชอบใช้เงินกับความสวยงามและความสุขที่แบ่งกันได้ ระวังตัดสินใจเรื่องเงินตามใจคนอื่น", en: "Your money often comes through other people: partners, clients and good relationships. You like spending on beauty and pleasures you can share; watch letting others make your money decisions." },
+  { th: "คุณเก็บเรื่องเงินเงียบและคิดเรื่องเงินลึก เก่งเรื่องลงทุนและพลิกสิ่งที่คนอื่นมองข้ามให้มีค่า ระวังทุ่มหมดหน้าตักหรือใช้เงินเป็นเครื่องมือควบคุม", en: "You keep money matters private and think about them deeply, with a gift for investing and turning overlooked things into value. Watch all-or-nothing bets and using money as control." },
+  { th: "คุณมองเงินเป็นเครื่องมือของอิสระและประสบการณ์ เงินมักมาจากการสอน การเดินทาง งานต่างประเทศ หรือการขายความคิด ระวังมองโลกดีจนใช้เกินกว่าที่หาได้", en: "Money, to you, is a tool for freedom and experience. It often comes through teaching, travel, foreign work or selling ideas. Watch optimism leading you to spend more than you earn." },
+  { th: "คุณสร้างฐานะแบบมีแผน เก็บเงินเป็น และยิ่งอายุมากยิ่งมั่นคง ชอบสิ่งที่มีมูลค่าระยะยาว ระวังเข้มงวดกับตัวเองจนไม่เคยให้รางวัลชีวิต", en: "You build wealth by plan, save well and grow more secure with age. You value long-term worth; watch being so strict that you never reward yourself." },
+  { th: "เงินของคุณมักมาจากทางที่ไม่เหมือนใคร เช่น เทคโนโลยี งานออนไลน์ หรือกลุ่มคน คุณอยากมีเงินเพื่ออิสระมากกว่าหน้าตา ระวังรายได้ขึ้นลงเพราะเปลี่ยนแผนบ่อย", en: "Your money often comes in unusual ways, such as technology, online work or groups. You want money for freedom rather than status; watch income swinging because plans change often." },
+  { th: "คุณไม่ค่อยยึดติดเงิน ใจดี ให้ง่าย และหาเงินได้จากศิลปะ การเยียวยา หรือการช่วยคน ระวังเงินรั่วไหลเพราะไม่ตั้งขอบเขตหรือเชื่อคนง่ายเกินไป", en: "You are not attached to money, give easily and can earn through art, healing or helping people. Watch money slipping away through loose boundaries or trusting too easily." },
+];
+
+/**
+ * เงินมาจากไหน: เรือนที่เจ้าเรือน 2 (ดาวเจ้าราศีของจุดเริ่มเรือน 2 แบบโบราณ) ไปอยู่ — หลักอ่านเงินพื้นฐานของโหราสากล
+ * เรียงเรือน 1 ➔ 12 · ต่อหลัง "แปลว่า" ได้
+ */
+export const MONEY_FROM_HOUSE: readonly T[] = [
+  { th: "เงินมาจากตัวคุณเอง ทั้งฝีมือ ภาพลักษณ์ และการลงมือทำด้วยตัวเอง", en: "money comes through you: your skills, your image and what you do yourself" },
+  { th: "เงินต่อเงิน คุณเก่งเรื่องเก็บ สะสม และทำให้ทรัพย์งอกเงย", en: "money makes money; you are good at saving, accumulating and growing what you have" },
+  { th: "เงินมาจากการพูด การเขียน การขาย การสอน และคนรอบตัว", en: "money comes through speaking, writing, selling, teaching and the people around you" },
+  { th: "เงินผูกกับบ้าน ที่ดิน ครอบครัว หรือธุรกิจที่ทำจากบ้าน", en: "money is tied to home, property, family or a business run from home" },
+  { th: "เงินมาจากความคิดสร้างสรรค์ งานที่สนุก งานเกี่ยวกับเด็ก หรือการเสี่ยงที่คิดมาดีแล้ว", en: "money comes through creativity, work you enjoy, work with children or well-judged risks" },
+  { th: "เงินมาจากงานประจำ ทักษะเฉพาะ และงานบริการที่ทำได้ดีทุกวัน", en: "money comes through steady work, specialist skills and service done well every day" },
+  { th: "เงินมาผ่านคู่ หุ้นส่วน และลูกค้า งานที่ทำร่วมกับคนอื่นให้ผลดีกว่าทำคนเดียว", en: "money comes through partners and clients; working with others pays better than working alone" },
+  { th: "เงินผูกกับทรัพย์ร่วม การลงทุน มรดก หรือเงินของคนอื่นที่คุณดูแล", en: "money is tied to shared resources, investment, inheritance or other people's money you manage" },
+  { th: "เงินมาจากความรู้ การสอน ต่างประเทศ การเดินทาง หรืองานสิ่งพิมพ์", en: "money comes through knowledge, teaching, foreign links, travel or publishing" },
+  { th: "เงินมาจากอาชีพ ตำแหน่ง และชื่อเสียง ยิ่งงานเติบโต เงินยิ่งตามมา", en: "money comes through your career, position and reputation; as your work grows, so does your income" },
+  { th: "เงินมาจากเครือข่าย เพื่อน กลุ่มลูกค้า และงานออนไลน์", en: "money comes through networks, friends, communities of customers and online work" },
+  { th: "เงินมาจากงานเบื้องหลัง งานที่ทำเงียบ ๆ องค์กรใหญ่ หรืองานช่วยเหลือผู้คน", en: "money comes through behind-the-scenes work, quiet work, large institutions or helping people" },
+];
