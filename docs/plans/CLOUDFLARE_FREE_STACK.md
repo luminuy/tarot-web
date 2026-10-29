@@ -118,7 +118,7 @@
 - `src/lib/safety/ai-classifier.ts` (ใหม่) — สถาปัตยกรรม 3 ชั้น:
   1. regex `checkQuestion()` จับรูปตรง (เดิม)
   2. `mayNeedDeepCrisisCheck()` — regex คำทุกข์ระดับอ่อน (คลุมเครือ) → คัดเฉพาะเคสที่ควรถามต่อ
-  3. `assessCrisisRisk()` — ถาม Workers AI (`@cf/meta/llama-3.1-8b-instruct`) YES/NO เฉพาะเคสชั้น 2 · timeout 3.5s · **fail-open** (ไม่มี binding/ล่ม = ไม่บล็อก เพราะชั้น 1+prompt ยังทำงาน)
+  3. `assessCrisisRisk()` — ถาม Workers AI (สายโมเดล `CLASSIFIER_MODELS` — เดิม `@cf/meta/llama-3.1-8b-instruct` ถูก Cloudflare ปลด 2026-05-30 ดู INC-0312) YES/NO เฉพาะเคสชั้น 2 · timeout 3.5s · **fail-open** (ไม่มี binding/ล่ม = ไม่บล็อก เพราะชั้น 1+prompt ยังทำงาน)
 - ต่อเข้า `api/reading/start` + `api/reading/[id]/chat` หลัง regex → บล็อกด้วย `CRISIS_MESSAGE` เดิม (สายด่วน 1323)
 - จำกัดจำนวนเรียก: เฉพาะเคสชั้น 2 เท่านั้น → ประหยัด neuron (ฟรี ~10k/วัน เหลือเฟือ)
 

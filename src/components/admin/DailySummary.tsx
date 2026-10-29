@@ -302,6 +302,14 @@ export default function DailySummary({ day, onDayChange }: { day: string; onDayC
                   { label: "บล็อกข้อความแชท", value: cur.safety.chatBlocked },
                 ]}
               />
+              <KeyValueList
+                alertWhenPositive
+                items={[
+                  { label: "ตัวตรวจวิกฤต AI ใช้ไม่ได้ ปล่อยผ่าน", value: cur.safety.classifierFailOpen },
+                  { label: "ตัวตรวจวิกฤต AI ใช้ไม่ได้ บล็อกไว้ก่อน", value: cur.safety.classifierFailSafe },
+                  { label: "โมเดลตัวตรวจวิกฤตล้ม (สลับตัวสำรอง)", value: cur.safety.classifierModelError },
+                ]}
+              />
               {cur.safety.flags.length === 0 ? (
                 <p className="text-xs text-emerald-700">ไม่พบสัญญาณเสี่ยง</p>
               ) : (

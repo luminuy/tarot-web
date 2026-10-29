@@ -213,10 +213,13 @@ export async function GET(request: Request) {
   const { isTurnstileConfigured } = await import("@/lib/security/turnstile");
   const { isRedisEnabled, redisPing } = await import("@/lib/platform/redis");
   const { getAiBinding, getVectorizeBinding } = await import("@/lib/platform/cf");
+  const { probeCrisisClassifier } = await import("@/lib/safety/ai-classifier");
   const [workersAiBinding, vectorizeBinding] = await Promise.all([
     getAiBinding(),
     getVectorizeBinding(),
   ]);
+  // ยิงตัวจำแนกจริง — INC-0312: binding พร้อมตลอดแต่โมเดลถูกปลดไปหลายเดือนโดยไม่มีใครรู้
+  const crisisClassifier = workersAiBinding ? await probeCrisisClassifier() : null;
 
   // Upstash Redis — ที่พักตัวนับ/เซสชันแทน KV (ข้อ 16 ในคู่มือ) · ไม่ตั้ง = ใช้ KV เหมือนเดิม
   const upstashConfigured = await isRedisEnabled();
@@ -241,6 +244,8 @@ export async function GET(request: Request) {
     },
     workersAi: {
       bindingAvailable: Boolean(workersAiBinding),
+      /** null = ไม่มี binding (ไม่ได้ยิง) */
+      crisisClassifier,
     },
     vectorize: {
       bindingAvailable: Boolean(vectorizeBinding),
