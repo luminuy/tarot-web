@@ -103,7 +103,7 @@ export async function POST(request: Request) {
       question: sanitizePromptValue(r.question, 300),
       summary: sanitizePromptValue(r.summary, 200),
       outcome: r.outcome,
-      // 🔐 บันทึกส่วนตัวเข้า prompt เฉพาะรายการที่ผู้ใช้กดยินยอมให้แม่หมอ AI อ่าน (REFLECTION_JOURNAL_PLAN ข้อ 3.1)
+      // 🔐 บันทึกส่วนตัวเข้า prompt เฉพาะรายการที่ผู้ใช้กดยินยอมให้ Selene อ่าน (REFLECTION_JOURNAL_PLAN ข้อ 3.1)
       userNote: r.shareWithAi ? sanitizePromptValue(r.userNote, 300) || undefined : undefined,
       cards: (r.cards || []).flatMap((c) => {
         const card = cardByIndex(c.cardIndex);

@@ -495,7 +495,7 @@ export default function CustomerQueuePage() {
                 )}
                 <div className="flex flex-col sm:flex-row gap-2 justify-center">
                   <Link href="/" className="btn-gold-glass inline-flex items-center justify-center px-5 py-3 text-sm font-bold">
-                    ดูดวงกับแม่หมอ AI
+                    ดูดวงกับ Selene
                   </Link>
                   <Link
                     href="/readers"

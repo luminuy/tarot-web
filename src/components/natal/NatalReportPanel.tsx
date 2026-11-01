@@ -52,8 +52,8 @@ export default function NatalReportPanel({ spec, lang, onClose }: { spec: ChartS
       <p className="v2-nr-box-t">{isTh ? "รายงานผังดวงฉบับเต็ม (บันทึกเป็น PDF)" : "Full natal chart report (save as PDF)"}</p>
       <ul className="v2-nr-items">
         {(isTh
-          ? ["ภาพรวมผังที่แม่หมอ AI (Claude Sonnet) เรียบเรียงจากเรื่องเด่นของผัง", "เรื่องเด่นเรียงตามน้ำหนัก และความแม่นของเวลาเกิด", "ตำแหน่งดาวและคำอธิบายทุกดวง มุมสัมพันธ์ ดาวฤกษ์ และจุด Lots", "โหราไทย: ทักษา มหาทักษา เลข 7 ตัว", "ดาวเดินช้า 12 เดือนข้างหน้า และผังวันเกิดปีนี้"]
-          : ["An overview written by the AI reader (Claude Sonnet) from your chart's strongest themes", "Those themes ranked, and how exact your birth time needs to be", "Every position explained, aspects, fixed stars and lots", "Thai astrology: Taksa, life periods, Seven Numbers", "Slow planets for the next 12 months and this year's solar return"]
+          ? ["ภาพรวมผังที่ Selene (Claude Sonnet) เรียบเรียงจากเรื่องเด่นของผัง", "เรื่องเด่นเรียงตามน้ำหนัก และความแม่นของเวลาเกิด", "ตำแหน่งดาวและคำอธิบายทุกดวง มุมสัมพันธ์ ดาวฤกษ์ และจุด Lots", "โหราไทย: ทักษา มหาทักษา เลข 7 ตัว", "ดาวเดินช้า 12 เดือนข้างหน้า และผังวันเกิดปีนี้"]
+          : ["An overview written by Selene (Claude Sonnet) from your chart's strongest themes", "Those themes ranked, and how exact your birth time needs to be", "Every position explained, aspects, fixed stars and lots", "Thai astrology: Taksa, life periods, Seven Numbers", "Slow planets for the next 12 months and this year's solar return"]
         ).map((t) => (
           <li key={t}>
             <span className="v2-nr-item-d">{t}</span>
@@ -107,7 +107,7 @@ function ReportView({ report, onClose }: { report: NatalReport; onClose: () => v
   const t = (th: string, en: string) => (isTh ? th : en);
   // หัวข้อแต่ละส่วน: เลขในวงกลม + ชื่อ + คำอธิบายบรรทัดเดียว (ชุดเดียวกับผลผังบนหน้าเว็บ)
   const sections = [
-    { id: "ai", th: "ภาพรวมผังจากแม่หมอ AI", en: "Your chart overview from the AI reader", dTh: "เรียบเรียงจากเรื่องเด่นที่ SeerTarot คำนวณ ตำแหน่งดาวทุกตัวมาจากตัวคำนวณ", dEn: "Written from the themes SeerTarot calculated; every position comes from the calculator" },
+    { id: "ai", th: "ภาพรวมผังจาก Selene", en: "Your chart overview from Selene", dTh: "เรียบเรียงจากเรื่องเด่นที่ SeerTarot คำนวณ ตำแหน่งดาวทุกตัวมาจากตัวคำนวณ", dEn: "Written from the themes SeerTarot calculated; every position comes from the calculator" },
     { id: "themes", th: "เรื่องเด่นของผัง", en: "Your chart's strongest themes", dTh: "เรียงจากสำคัญที่สุด คำนวณจากผัง ไม่ใช้ AI", dEn: "Most important first, calculated without AI" },
     { id: "pos", th: "ตำแหน่งดาวและเรือน", en: "Positions and houses", dTh: "ดาวแต่ละดวงอยู่ราศีไหน และตกเรือนไหนของชีวิต", dEn: "Where each planet sits, by sign and by house" },
     { id: "body", th: "ดาวแต่ละดวงบอกอะไร", en: "What each placement says", dTh: "ดาวคือเรื่อง ราศีคือสไตล์ เรือนคือด้านของชีวิต", dEn: "Planet = what, sign = how, house = where" },

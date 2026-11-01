@@ -105,7 +105,7 @@ export function RootHtml({
     },
     description: isEnglish
       ? "Online tarot with the authentic 1909 Rider-Waite-Smith deck, a shuffle you can verify, and an AI tarot reader."
-      : "ดูดวงไพ่ทาโรต์ออนไลน์ด้วยไพ่ 1909 Rider-Waite-Smith แท้ สุ่มไพ่แบบตรวจสอบได้ พร้อมแม่หมอ AI อ่านไพ่ให้",
+      : "ดูดวงไพ่ทาโรต์ออนไลน์ด้วยไพ่ 1909 Rider-Waite-Smith แท้ สุ่มไพ่แบบตรวจสอบได้ พร้อม Selene อ่านไพ่ให้",
   };
 
   const webSiteJsonLd = {

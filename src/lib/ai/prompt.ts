@@ -13,6 +13,7 @@ import { formatZodiacForPrompt, type SeekerZodiac } from "@/lib/ai/zodiac-contex
 import { analyzeRelations } from "@/lib/tarot/relations";
 import type { Spread } from "@/data/spreads";
 import { getPersona, type Persona } from "@/data/personas";
+import { readerIdentityBlock } from "./reader-name";
 import type { DrawnCard } from "@/lib/tarot/shuffle";
 import type { SafetyVerdict } from "@/lib/safety/guardrails";
 import { pickExemplar, formatExemplarForPrompt } from "@/data/ai/exemplars";
@@ -208,12 +209,16 @@ export function buildSystemPrompt(
 
     return `${core}
 
+${readerIdentityBlock("en")}
+
 ## Resident Persona & Distinct Voice for this Reading
 You are "${pName}" (${pTagline})
 ${pVoice}`;
   }
 
   return `${core}
+
+${readerIdentityBlock("th")}
 
 ## น้ำเสียงและบุคลิกเฉพาะของคุณในครั้งนี้
 คุณคือ "${persona.nameTh}" (${persona.tagline})

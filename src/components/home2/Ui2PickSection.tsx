@@ -16,7 +16,7 @@ import { PUBLIC_COUNTER_MIN } from "@/components/home2/constants";
  *    3. แตะใบหนึ่ง ➔ `onDraw` = `/api/reading/start` (ได้ commitment) ➔ `/shuffle` พร้อม `pickedIndices: [ตำแหน่งนั้น]`
  *       ➔ ไพ่ที่ได้คือ `drawn[0]` จากเซิร์ฟเวอร์เท่านั้น (ตรรกะอยู่ที่ `drawQuickCard` ใน TarotFlow)
  *    4. ระหว่างรอ ไพ่ยกขึ้น + วงแสงทองเต้น · **พลิกเมื่อได้ข้อมูลจริงแล้วเท่านั้น** · พลาด = "โหลดใหม่อีกครั้ง" ไม่มีไพ่สำรอง
- *    5. หลังพลิก ➔ ชื่อไพ่จริง + คำแนะนำที่แม่หมอตรวจแล้ว (`card-advice.ts` โหลดตอนพลิก) + ให้แม่หมอ AI อ่านต่อ / สับใหม่
+ *    5. หลังพลิก ➔ ชื่อไพ่จริง + คำแนะนำที่แม่หมอตรวจแล้ว (`card-advice.ts` โหลดตอนพลิก) + ให้ Selene อ่านต่อ / สับใหม่
  *    6. ชิปล็อก = commitment จริงของเซสชัน (ตัดหัวท้าย) — ก่อนมีเซสชันแสดง "สุ่มจริง ตรวจสอบได้" ห้ามรหัสปลอม
  * ⚠️ `/start` แค่ตรวจโควตา (หักจริงตอน `/read` จบ) จึงเรียกได้ตอนแตะไพ่ · แต่ยังเรียกตอน "แตะไพ่" ไม่ใช่ตอนเลือกเรื่อง
  *    ตามแผน — คนที่แค่เลือกเรื่องไม่ทำให้เกิดเซสชันเปล่า
@@ -319,7 +319,7 @@ export function Ui2PickSection({
                   {advice && <p className="ui2-result-advice">{advice}</p>}
                   <div className="ui2-result-actions">
                     <button type="button" className="ui2-btn" onClick={onReadWithAI} data-home-target="quick:read">
-                      {isEnglish ? "Let the AI oracle read on" : "ให้แม่หมอ AI อ่านต่อ"}
+                      {isEnglish ? "Let Selene read on" : "ให้ Selene อ่านต่อ"}
                     </button>
                     <button type="button" className="ui2-btn-ghost" onClick={() => reset(true)} data-home-target="quick:reshuffle">
                       {isEnglish ? "Shuffle again" : "สับใหม่"}

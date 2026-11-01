@@ -29,7 +29,7 @@ const HOME_FAQS: HomeFaqItem[] = [
     id: "faq-accuracy",
     question: "การเปิดไพ่ทาโรต์บนระบบออนไลน์ มีความแม่นยำเทียบเท่ากับการไปพบหมอดูจริงหรือไม่?",
     answer:
-      "ความแม่นยำของไพ่ทาโรต์ขึ้นอยู่กับสมาธิ ความตั้งใจ และเจตจำนงของผู้ถามในขณะเปิดไพ่ ที่ SeerTarot คุณเป็นคนเลือกหยิบไพ่จากสำรับ 78 ใบเอง ส่วนลำดับไพ่ทั้งสำรับถูกสุ่มและล็อกไว้ก่อนคุณเลือก ตรวจย้อนหลังได้ว่าไม่มีใครเปลี่ยนระหว่างทาง จากนั้นแม่หมอ AI อ่านจากความหมายไพ่และภาพบนหน้าไพ่ 1909 Rider-Waite แล้วเล่าให้ฟังตรงไปตรงมา คำอ่านเป็นแนวทางให้คิดต่อ ไม่ใช่คำตัดสินแทนคุณ",
+      "ความแม่นยำของไพ่ทาโรต์ขึ้นอยู่กับสมาธิ ความตั้งใจ และเจตจำนงของผู้ถามในขณะเปิดไพ่ ที่ SeerTarot คุณเป็นคนเลือกหยิบไพ่จากสำรับ 78 ใบเอง ส่วนลำดับไพ่ทั้งสำรับถูกสุ่มและล็อกไว้ก่อนคุณเลือก ตรวจย้อนหลังได้ว่าไม่มีใครเปลี่ยนระหว่างทาง จากนั้น Selene อ่านจากความหมายไพ่และภาพบนหน้าไพ่ 1909 Rider-Waite แล้วเล่าให้ฟังตรงไปตรงมา คำอ่านเป็นแนวทางให้คิดต่อ ไม่ใช่คำตัดสินแทนคุณ",
   },
   {
     id: "faq-provably-fair",
@@ -74,7 +74,7 @@ export const HOME_FAQS_EN: HomeFaqItem[] = [
     id: "faq-accuracy",
     question: "Is an online tarot reading as accurate as visiting an in-person reader?",
     answer:
-      "Tarot accuracy hinges upon the querent's mindfulness, intentionality, and focus. On SeerTarot you pick your own cards from the full 78-card deck, while the order of the whole deck is shuffled and locked before you choose, so you can verify afterwards that nothing changed in between. The AI reader then reads from each card's meaning and the imagery of the 1909 Rider-Waite deck and tells you plainly what it sees. Treat the reading as guidance to reflect on, not a verdict.",
+      "Tarot accuracy hinges upon the querent's mindfulness, intentionality, and focus. On SeerTarot you pick your own cards from the full 78-card deck, while the order of the whole deck is shuffled and locked before you choose, so you can verify afterwards that nothing changed in between. Selene then reads from each card's meaning and the imagery of the 1909 Rider-Waite deck and tells you plainly what it sees. Treat the reading as guidance to reflect on, not a verdict.",
   },
   {
     id: "faq-provably-fair",
@@ -121,7 +121,7 @@ const HOME_HOW_TO_STEPS: HomeHowToStep[] = [
   },
   {
     name: "2. สงบจิตใจและตั้งเจตจำนง",
-    text: "สูดลมหายใจลึก ๆ พิมพ์ชื่อ คำถาม และบริบทสั้น ๆ พร้อมเลือกแม่หมอ AI ที่มีแนวทางการให้คำปรึกษาตรงกับใจคุณ",
+    text: "สูดลมหายใจลึก ๆ พิมพ์ชื่อ คำถาม และบริบทสั้น ๆ พร้อมเลือกบุคลิกของ Selene ที่มีแนวทางการให้คำปรึกษาตรงกับใจคุณ",
     image: `${SITE_ORIGIN}/cards/major-02.jpg`,
   },
   {
@@ -136,7 +136,7 @@ const HOME_HOW_TO_STEPS: HomeHowToStep[] = [
   },
   {
     name: "5. รับคำพยากรณ์และสนทนาต่อเนื่อง",
-    text: "แตะพลิกหน้าไพ่ 1909 Rider-Waite ด้วยตนเอง อ่านคำพยากรณ์ที่สตรีมสด และสามารถพิมพ์แชทถามตอบเจาะลึกกับแม่หมอ AI ได้ทันที",
+    text: "แตะพลิกหน้าไพ่ 1909 Rider-Waite ด้วยตนเอง อ่านคำพยากรณ์ที่สตรีมสด และสามารถพิมพ์แชทถามตอบเจาะลึกกับ Selene ได้ทันที",
     image: `${SITE_ORIGIN}/cards/major-19.jpg`,
   },
 ];
@@ -149,7 +149,7 @@ export const HOME_HOW_TO_STEPS_EN: HomeHowToStep[] = [
   },
   {
     name: "2. Set Your Intention & Focus",
-    text: "Take a deep breath, ask your question honestly, and choose the AI reader whose tone suits you best.",
+    text: "Take a deep breath, ask your question honestly, and choose Selene whose tone suits you best.",
     image: `${SITE_ORIGIN}/cards/major-02.jpg`,
   },
   {
@@ -164,7 +164,7 @@ export const HOME_HOW_TO_STEPS_EN: HomeHowToStep[] = [
   },
   {
     name: "5. Receive Wisdom & Converse",
-    text: "Turn over authentic 1909 Rider-Waite cards, listen to streaming interpretations, and converse in depth with your AI oracle.",
+    text: "Turn over authentic 1909 Rider-Waite cards, listen to streaming interpretations, and converse in depth with Selene.",
     image: `${SITE_ORIGIN}/cards/major-19.jpg`,
   },
 ];
@@ -201,7 +201,7 @@ export function generateHowToJsonLd(isEnglishOrLocale?: boolean | string) {
       : "วิธีดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับ SeerTarot",
     description: isEn
       ? "Step by step: shuffle, pick your cards from all 78, and get a reading, with a shuffle you can verify."
-      : "ขั้นตอนการสับไพ่ เลือกไพ่ 78 ใบด้วยตนเอง และรับคำทำนายจากแม่หมอ AI สุ่มจริง ตรวจสอบได้",
+      : "ขั้นตอนการสับไพ่ เลือกไพ่ 78 ใบด้วยตนเอง และรับคำทำนายจาก Selene สุ่มจริง ตรวจสอบได้",
     totalTime: "PT3M",
     estimatedCost: {
       "@type": "MonetaryAmount",

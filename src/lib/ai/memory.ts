@@ -15,7 +15,7 @@ export function noteHasCrisisSignal(note: string | null | undefined): boolean {
   return checkQuestion(text, "th").block || checkQuestion(text, "en").block;
 }
 
-/** คำสั่งเพิ่มให้แม่หมอ AI เมื่อบันทึกล่าสุดมีสัญญาณวิกฤต — ไม่มีเนื้อหาบันทึกอยู่ในนี้ */
+/** คำสั่งเพิ่มให้ Selene เมื่อบันทึกล่าสุดมีสัญญาณวิกฤต — ไม่มีเนื้อหาบันทึกอยู่ในนี้ */
 export function noteCrisisPromptGuard(lang: "th" | "en"): string {
   return lang === "en"
     ? "The seeker's latest private note showed signs of serious distress, so it was withheld from you. Do not guess at or mention that note. Do not read any card as hopeless or as fate that cannot be changed. Keep the tone gentle, focus on caring for themselves right now and on the people around them who can help, and make the closing feel safe and supportive."

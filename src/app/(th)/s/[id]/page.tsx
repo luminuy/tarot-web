@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = meta?.title || (isEn ? "Tarot Reading 1909 Rider-Waite on SeerTarot" : "คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot");
   const description = meta?.spread
     ? (isEn ? `${meta.spread} Spread · Draw cards and receive your reading at SeerTarot` : `ผัง ${meta.spread} · เปิดไพ่และรับคำทำนายของคุณเองที่ SeerTarot`)
-    : (isEn ? "Interactive 1909 Rider-Waite tarot divination with AI readers and provably-fair shuffling." : "เปิดไพ่ทาโรต์ 1909 Rider-Waite ด้วยตัวคุณเอง พร้อมคำทำนายจากแม่หมอ AI และระบบสับไพ่โปร่งใส Provably-Fair");
+    : (isEn ? "Interactive 1909 Rider-Waite tarot divination with Selene, our AI reader, and provably-fair shuffling." : "เปิดไพ่ทาโรต์ 1909 Rider-Waite ด้วยตัวคุณเอง พร้อมคำทำนายจาก Selene และระบบสับไพ่โปร่งใส Provably-Fair");
 
   const cloudinaryUrl = isCloudinaryEnabled()
     ? buildCloudinaryShareImageUrl({ title, spreadName: meta?.spread })

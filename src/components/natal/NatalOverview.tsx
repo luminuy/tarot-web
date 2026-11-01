@@ -42,7 +42,7 @@ export default function NatalOverview({ spec, lang }: { spec: ChartSpec; lang: L
   if (overview) {
     return (
       <div className="v2-nr-box">
-        <p className="v2-nr-box-t">{isTh ? "ภาพรวมผังจากแม่หมอ AI" : "Your chart overview from the AI reader"}</p>
+        <p className="v2-nr-box-t">{isTh ? "ภาพรวมผังจาก Selene" : "Your chart overview from Selene"}</p>
         {overview.paragraphs.map((p, i) => (
           <div key={i} className="border-l-2 border-line-warm pl-3">
             <p className="v2-nr-item-t">{stripEmoji(p.title)}</p>
@@ -60,11 +60,11 @@ export default function NatalOverview({ spec, lang }: { spec: ChartSpec; lang: L
 
   return (
     <div className="v2-nr-controls">
-      <p className="v2-nr-box-t">{isTh ? "ให้แม่หมอ AI ร้อยเรื่องเด่นเป็นภาพรวมผัง" : "Let the AI reader weave these themes into an overview"}</p>
+      <p className="v2-nr-box-t">{isTh ? "ให้ Selene ร้อยเรื่องเด่นเป็นภาพรวมผัง" : "Let Selene weave these themes into an overview"}</p>
       <p className="v2-nr-lead">
         {isTh
-          ? "แม่หมอ AI อ่านเรื่องเด่นทั้งหมดของผังพร้อมกัน แล้วเขียนว่าเรื่องไหนเสริมกันหรือขัดกัน พร้อมคำแนะนำที่ทำได้จริง ฟรี ไม่ใช้รอบดูดวง"
-          : "The AI reader looks at all your strongest themes together, shows where they support or pull against each other, and gives practical suggestions. Free; it does not use a reading."}
+          ? "Selene อ่านเรื่องเด่นทั้งหมดของผังพร้อมกัน แล้วเขียนว่าเรื่องไหนเสริมกันหรือขัดกัน พร้อมคำแนะนำที่ทำได้จริง ฟรี ไม่ใช้รอบดูดวง"
+          : "Selene looks at all your strongest themes together, shows where they support or pull against each other, and gives practical suggestions. Free; it does not use a reading."}
       </p>
       <label className="flex items-start gap-3 text-sm leading-relaxed cursor-pointer min-h-[44px]">
         <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 w-5 h-5 shrink-0 accent-ink" />

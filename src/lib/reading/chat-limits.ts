@@ -21,7 +21,7 @@ export const CHAT_HISTORY_REPLAY_TURNS = 12;
 export const CHAT_TURNS_PER_READING = 20;
 
 /**
- * สิทธิ์ถามฟรีต่อไพ่หนึ่งชุดของสมาชิกที่ไม่มีรอบโบนัส/รอบที่ซื้อ — นับเฉพาะคำถามที่แม่หมอ AI ตอบสำเร็จ
+ * สิทธิ์ถามฟรีต่อไพ่หนึ่งชุดของสมาชิกที่ไม่มีรอบโบนัส/รอบที่ซื้อ — นับเฉพาะคำถามที่ Selene ตอบสำเร็จ
  * หน้าจอ (`FollowUpChat.tsx`) และเซิร์ฟเวอร์ (`chat/route.ts` · `edge_rate_buckets` คีย์ `chat:free`) ใช้ค่าเดียวกันนี้
  */
 export const CHAT_FREE_TURNS_PER_READING = 2;

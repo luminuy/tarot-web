@@ -221,7 +221,7 @@ export const LIFE_QUESTIONS: QuestionPage[] = [
         "คำว่าโชคลาภในคำค้นของคนไทยมาคู่กับการเงินเสมอ หลายคนอยากรู้ว่าช่วงนี้ดวงดีพอจะลองอะไรใหม่ไหม จะมีเงินพิเศษเข้ามาหรือเปล่า ซึ่งเป็นความหวังที่เข้าใจได้ โดยเฉพาะในช่วงที่ชีวิตตึงมือ",
         "หน้านี้อ่านโชคในความหมายที่ใช้ได้จริง คือโอกาสที่เข้ามาในชีวิต เช่นงานพิเศษ คนที่ช่วยผลักดัน หรือจังหวะที่ประตูเปิด ผังโชคลาภสี่ใบมีใบหนึ่งที่ตั้งใจไว้เตือนเรื่องความโลภโดยเฉพาะ เพราะโชคที่ดีที่สุดคือโชคที่ไม่ทำให้เราเสียสิ่งที่มีอยู่",
       ],
-      limits: "เราไม่ให้ตัวเลข หวย หรือคำแนะนำเสี่ยงโชคจากไพ่ทุกกรณี และแม่หมอ AI จะปฏิเสธส่วนนั้นเสมอ ถ้าคุณรู้สึกว่าการเสี่ยงโชคเริ่มควบคุมไม่ได้ การขอความช่วยเหลือจากคนใกล้ตัวหรือผู้เชี่ยวชาญเป็นสิ่งที่กล้าหาญและควรทำ",
+      limits: "เราไม่ให้ตัวเลข หวย หรือคำแนะนำเสี่ยงโชคจากไพ่ทุกกรณี และ Selene จะปฏิเสธส่วนนั้นเสมอ ถ้าคุณรู้สึกว่าการเสี่ยงโชคเริ่มควบคุมไม่ได้ การขอความช่วยเหลือจากคนใกล้ตัวหรือผู้เชี่ยวชาญเป็นสิ่งที่กล้าหาญและควรทำ",
       betterQuestions: [
         "ช่วงนี้มีโอกาสดี ๆ อะไรที่กำลังเข้ามาในชีวิตเรา",
         "ใครหรืออะไรที่จะช่วยเปิดทางให้เรา",
@@ -268,7 +268,7 @@ export const LIFE_QUESTIONS: QuestionPage[] = [
         "In many searches, luck and money travel together. People want to know whether their luck is good enough to try something new, or whether extra money is on its way — an understandable hope, especially when life feels tight.",
         "This page reads luck in the sense that's genuinely useful: opportunities entering your life — extra work, someone who champions you, a moment when a door opens. The four-card luck spread includes a card specifically to warn about greed, because the best luck is the kind that doesn't cost you what you already have.",
       ],
-      limits: "We never give numbers, lottery picks or gambling advice from cards, and our AI reader always declines that part. If gambling ever starts to feel out of control, reaching out to someone close or a professional is brave and worth doing.",
+      limits: "We never give numbers, lottery picks or gambling advice from cards, and Selene always declines that part. If gambling ever starts to feel out of control, reaching out to someone close or a professional is brave and worth doing.",
       betterQuestions: [
         "What good opportunities are coming into my life right now?",
         "Who or what will help open doors for me?",

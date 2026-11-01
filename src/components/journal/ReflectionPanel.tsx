@@ -128,8 +128,8 @@ export const ReflectionPanel: React.FC<{
         <>
           <p className="text-xs text-muted">
             {L({
-              th: "ตอนนี้แม่หมอ AI ไม่ว่าง — นี่คือสิ่งที่นับได้จากสมุดของคุณตรง ๆ",
-              en: "The AI reader is unavailable right now — here is what your journal shows, counted directly.",
+              th: "ตอนนี้ Selene ไม่ว่าง — นี่คือสิ่งที่นับได้จากสมุดของคุณตรง ๆ",
+              en: "Selene is unavailable right now — here is what your journal shows, counted directly.",
             })}
           </p>
           {data.facts.length === 0 ? (

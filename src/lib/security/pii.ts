@@ -101,6 +101,6 @@ export function piiNotice(kinds: PiiKind[], lang: "th" | "en"): string | null {
   if (kinds.length === 0) return null;
   const names = kinds.map((k) => LABEL[k][lang]);
   return lang === "en"
-    ? `We hid your ${names.join(" and ")} before sending your question to the AI reader — your reading isn't affected.`
-    : `เราซ่อน${names.join("และ")}ไว้ก่อนส่งคำถามให้แม่หมอ AI แล้ว คำอ่านไม่เสียอะไร`;
+    ? `We hid your ${names.join(" and ")} before sending your question to Selene — your reading isn't affected.`
+    : `เราซ่อน${names.join("และ")}ไว้ก่อนส่งคำถามให้ Selene แล้ว คำอ่านไม่เสียอะไร`;
 }

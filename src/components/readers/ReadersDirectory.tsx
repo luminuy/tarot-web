@@ -57,9 +57,9 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
     return (
       <section className="altar-card-porcelain !rounded-2xl p-8 sm:p-12 text-center space-y-3 font-serif-th">
         <h2 className="text-lg font-bold text-ink">ยังไม่มีแม่หมอเปิดให้คำปรึกษาตอนนี้</h2>
-        <p className="text-sm text-muted">ระหว่างนี้ลองเปิดไพ่กับแม่หมอ AI ได้ฟรี แล้วกลับมาดูใหม่เร็ว ๆ นี้</p>
+        <p className="text-sm text-muted">ระหว่างนี้ลองเปิดไพ่กับ Selene ได้ฟรี แล้วกลับมาดูใหม่เร็ว ๆ นี้</p>
         <Link href="/" className="btn-gold-glass inline-flex items-center gap-2 mt-2 px-6 py-3 text-sm font-bold">
-          ดูดวงกับแม่หมอ AI ฟรี
+          ดูดวงกับ Selene ฟรี
         </Link>
       </section>
     );

@@ -681,7 +681,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
               className="altar-panel p-5 sm:p-8 space-y-6"
             >
               {/*
-                คำอ่านหลักมาจากแม่หมอ AI เสมอ — ขึ้นเมื่อผู้ใช้พลิกครบทั้งสามใบ
+                คำอ่านหลักมาจาก Selene เสมอ — ขึ้นเมื่อผู้ใช้พลิกครบทั้งสามใบ
                 (กฎเหล็กข้อ 4: ไพ่ต้องถูกเปิดด้วยมือผู้ใช้ก่อน ถึงจะเฉลยคำอ่านของใบนั้นได้)
               */}
               {revealedIndices.size < drawnCards.length ? (
@@ -791,8 +791,8 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                 >
                   <span>
                     {isEnglish
-                      ? "Consult AI Oracle for Deep Spread"
-                      : "เปิดไพ่เจาะลึกเต็มรูปแบบกับแม่หมอ AI"}
+                      ? "Open a full spread with Selene"
+                      : "เปิดไพ่เจาะลึกเต็มรูปแบบกับ Selene"}
                   </span>
                 </Link>
               </div>

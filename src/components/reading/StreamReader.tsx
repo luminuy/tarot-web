@@ -47,7 +47,7 @@ interface StreamReaderProps {
   question?: string;
   nickname?: string;
   onRetry?: () => void;
-  /** คำอ่านมาจากคลังความหมายไพ่ ไม่ใช่แม่หมอ AI — ขึ้น `FallbackNotice` ให้ผู้ใช้รู้และกดอ่านใหม่ได้ */
+  /** คำอ่านมาจากคลังความหมายไพ่ ไม่ใช่ Selene — ขึ้น `FallbackNotice` ให้ผู้ใช้รู้และกดอ่านใหม่ได้ */
   isFallback?: boolean;
   /**
    * ✦ ผัง/หมวดของคำอ่านรอบนี้ + เฟรม `basis` — เปิดแผง "ทำไมแม่หมออ่านแบบนี้" และ "คำอ่านนี้ประกอบจาก"
@@ -279,7 +279,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
         </div>
       )}
 
-      {/* คำอ่านจากคลังความหมายไพ่ (AI ไม่ว่าง) — บอกผู้ใช้ตรง ๆ พร้อมปุ่มให้แม่หมอ AI อ่านไพ่ชุดเดิมอีกรอบ */}
+      {/* คำอ่านจากคลังความหมายไพ่ (AI ไม่ว่าง) — บอกผู้ใช้ตรง ๆ พร้อมปุ่มให้ Selene อ่านไพ่ชุดเดิมอีกรอบ */}
       {isFallback && !isStreaming && !errorMsg && <FallbackNotice isEn={isEnglish} onRetry={onRetry} />}
 
       {/* สลับ อ่านทีละใบ / ภาพรวม (แท็บ WAI-ARIA · A5-11) */}

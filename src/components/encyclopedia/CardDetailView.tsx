@@ -203,7 +203,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
       title: isEnglish ? `Ask ${card.nameEn} your question` : `ไพ่${card.nameTh}ตอบเรื่องของคุณได้`,
       short: isEnglish ? "Ask the cards" : "ถามไพ่ใบนี้",
       tone: 3,
-      lead: isEnglish ? "Shuffle and pick the cards yourself" : "สับและเลือกไพ่ด้วยมือคุณเอง แม่หมอ AI อ่านให้ทีละใบ",
+      lead: isEnglish ? "Shuffle and pick the cards yourself" : "สับและเลือกไพ่ด้วยมือคุณเอง Selene อ่านให้ทีละใบ",
       aside: (
         <Link href={readHref} className="ui2-btn v2-cd-go">
           {isEnglish ? "Draw now" : "เปิดไพ่เลย"}
@@ -292,7 +292,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
             ))}
           </dl>
           <Link href={readHref} data-read-cta="" className="ui2-btn v2-cd-go">
-            {isEnglish ? "Open Interactive Tarot Reading" : "เปิดไพ่พยากรณ์จริงกับแม่หมอ AI"}
+            {isEnglish ? "Open Interactive Tarot Reading" : "เปิดไพ่พยากรณ์จริงกับ Selene"}
           </Link>
           <Link href="/spreads" className="v2-cd-sub">
             {isEnglish ? "Explore 26 Spreads" : "เลือกผังพยากรณ์ (26 แบบ)"}

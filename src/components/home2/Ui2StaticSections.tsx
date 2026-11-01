@@ -194,7 +194,7 @@ const NATAL_COPY = {
     trust: "ความแม่นเทียบข้อมูล NASA · คำนวณในเครื่องคุณ ไม่ส่งข้อมูลวันเกิดออกไป",
     feats: [
       ["ความรัก งาน เงิน", "อ่านจากดาวศุกร์ กลางฟ้า และเรือนการเงินในผังของคุณเอง ไม่ใช่คำทำนายกลางของราศี"],
-      ["ถามแม่หมอ AI เรื่องผังของคุณ", `สมาชิกถามฟรีวันละ ${NATAL_AI_FREE_PER_DAY} ข้อ แม่หมอตอบจากผังที่คำนวณไว้แล้ว`],
+      ["ถาม Selene เรื่องผังของคุณ", `สมาชิกถามฟรีวันละ ${NATAL_AI_FREE_PER_DAY} ข้อ แม่หมอตอบจากผังที่คำนวณไว้แล้ว`],
       ["รายงานฉบับเต็ม PDF", `ราว 7 หน้า A4 เก็บไว้อ่านหรือพิมพ์ได้ ใช้รอบดูดวง 1 รอบ (เติมรอบเริ่ม ${CHEAPEST_PACKAGE_THB} บาท)`],
       ["ดวงวันนี้จากผังของคุณ", "บันทึกผังไว้ในเครื่อง แล้วดูทุกวันว่าดาวบนฟ้าแตะเรื่องไหนในชีวิตคุณ"],
     ],
@@ -210,7 +210,7 @@ const NATAL_COPY = {
     trust: "Checked against NASA data · calculated on your device, your birth details never leave it",
     feats: [
       ["Love, work and money", "Read from Venus, the Midheaven and the money houses of your own chart, not a generic sign forecast"],
-      ["Ask the AI reader about your chart", `Members ask ${NATAL_AI_FREE_PER_DAY} questions a day free, answered from the chart already calculated`],
+      ["Ask Selene about your chart", `Members ask ${NATAL_AI_FREE_PER_DAY} questions a day free, answered from the chart already calculated`],
       ["Full PDF report", "About 7 A4 pages to keep or print, for 1 reading credit"],
       ["Today, from your chart", "Save your chart on this device and see each day which parts of your life the planets touch"],
     ],
@@ -933,7 +933,7 @@ export function Ui2ShowcaseSection({ isEnglish, href }: { isEnglish: boolean; hr
             <ShowTop
               title={t("วิธีดูดวงไพ่ทาโรต์ออนไลน์ 5 ขั้นตอน", "How an online tarot reading works, in 5 steps")}
               desc={t(
-                "ตั้งแต่เลือกผังไพ่ยิปซีจนถึงคุยต่อกับแม่หมอ AI ทุกใบคุณสับและหยิบเองกับมือ ลำดับไพ่ถูกล็อกไว้ก่อนเริ่ม ตรวจย้อนหลังได้ทุกครั้ง",
+                "ตั้งแต่เลือกผังไพ่ยิปซีจนถึงคุยต่อกับ Selene ทุกใบคุณสับและหยิบเองกับมือ ลำดับไพ่ถูกล็อกไว้ก่อนเริ่ม ตรวจย้อนหลังได้ทุกครั้ง",
                 "From choosing a spread to talking it through with the oracle. You shuffle and pick every card with your own hand, and the deck order is locked before you start.",
               )}
             />

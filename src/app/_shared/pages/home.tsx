@@ -18,15 +18,15 @@ import type { Locale } from "@/lib/i18n/types";
 export function buildHomeMetadata(locale: Locale): Metadata {
   const isEnglish = locale === "en";
   const title = isEnglish
-    ? "Free Online Tarot Readings with AI Reader · SeerTarot"
-    : "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับแม่หมอ AI";
+    ? "Free Online Tarot Readings with Selene, AI Reader · SeerTarot"
+    : "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับ Selene";
   const description = isEnglish
     ? "Free online 1909 Rider-Waite tarot readings. Shuffle and draw cards yourself, with an AI tarot reader and a shuffle you can verify."
-    : "สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยมือคุณเอง ให้แม่หมอ AI อ่านความหมายทีละใบ สุ่มจริง ตรวจสอบได้";
+    : "สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยมือคุณเอง ให้ Selene แม่หมอ AI อ่านความหมายทีละใบ สุ่มจริง ตรวจสอบได้";
 
   const ogImages = buildPageOgImage({
     title: isEnglish ? "Online Rider-Waite Tarot Sanctuary" : "วิหารพยากรณ์ไพ่ทาโรต์ 1909",
-    eyebrow: isEnglish ? "SACRED ORACLE TAROT" : "เปิดไพ่กับแม่หมอ AI",
+    eyebrow: isEnglish ? "SACRED ORACLE TAROT" : "เปิดไพ่กับ Selene",
     cardImage: "major-19.jpg",
     alt: title,
   });
@@ -59,7 +59,7 @@ function buildWebAppJsonLd(locale: Locale) {
     url: localizedUrl("/", locale),
     description: isEnglish
       ? "Free online 1909 Rider-Waite tarot readings. Shuffle and draw the cards yourself, with an AI tarot reader and a shuffle you can verify."
-      : "เว็บดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite สับไพ่และเลือกจับไพ่ด้วยตนเอง พร้อมแม่หมอ AI สุ่มจริง ตรวจสอบได้",
+      : "เว็บดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite สับไพ่และเลือกจับไพ่ด้วยตนเอง พร้อม Selene สุ่มจริง ตรวจสอบได้",
     inLanguage: locale,
   };
 }

@@ -74,12 +74,12 @@ const TOPIC_COPY: Record<string, TopicCopy> = {
     bodyTh: [
       "คำถามที่คนไทยค้นหามากที่สุดเรื่องหนึ่งคือ &quot;เขาคิดยังไงกับเรา&quot; โดยเฉพาะในความสัมพันธ์ที่ยังไม่มีคำนิยาม คนคุยที่หายไปเงียบ ๆ แฟนที่เริ่มตอบสั้นลง หรือคนที่เพิ่งเลิกรากันไปแล้วยังมีเยื่อใย การเลือกกองไพ่แบบ Pick A Card ช่วยให้คุณหยุดเดาใจสักครู่ แล้วมองภาพความสัมพันธ์จากมุมที่ไม่ได้ใช้ความคาดหวังของตัวเองเป็นตัวตั้ง",
       "กองไพ่ทั้งสี่ในหน้านี้อ่านความรู้สึกของอีกฝ่ายผ่านสามชั้น ชั้นแรกคือความรู้สึกที่เขามีต่อคุณในตอนนี้ ชั้นที่สองคือสิ่งที่เขาเก็บซ่อนไว้และไม่กล้าพูด และชั้นที่สามคือแนวโน้มของความสัมพันธ์พร้อมคำแนะนำว่าคุณควรวางตัวอย่างไรต่อจากนี้ ทุกใบเป็นไพ่ 1909 Rider-Waite แท้ และคำอ่านของแต่ละใบถูกเขียนไว้คู่กับไพ่ใบนั้นโดยเฉพาะ",
-      "วิธีเลือกที่ให้ผลตรงที่สุดคือหลับตา หายใจเข้าลึก ๆ นึกถึงใบหน้าหรือชื่อของเขาให้ชัด แล้วเลือกกองที่สะดุดตาเป็นกองแรกโดยไม่ต้องหาเหตุผล ถ้าอยากได้คำอ่านเจาะลึกเป็นรายกรณี ให้ไปต่อที่การเปิดไพ่เต็มรูปแบบกับแม่หมอ AI ซึ่งจะถามคำถามกลับและอ่านตามสถานการณ์ของคุณโดยตรง",
+      "วิธีเลือกที่ให้ผลตรงที่สุดคือหลับตา หายใจเข้าลึก ๆ นึกถึงใบหน้าหรือชื่อของเขาให้ชัด แล้วเลือกกองที่สะดุดตาเป็นกองแรกโดยไม่ต้องหาเหตุผล ถ้าอยากได้คำอ่านเจาะลึกเป็นรายกรณี ให้ไปต่อที่การเปิดไพ่เต็มรูปแบบกับ Selene ซึ่งจะถามคำถามกลับและอ่านตามสถานการณ์ของคุณโดยตรง",
     ],
     bodyEn: [
       "&quot;What are they thinking about me?&quot; is one of the most searched questions in tarot, and it usually arrives during the undefined stretch of a relationship: the person who went quiet, the partner whose replies got shorter, the ex you have not fully closed the door on. Choosing a pile gives you a pause from guessing and a chance to see the situation without your own hopes narrating it.",
       "The four piles here read the other person across three layers. First, how they feel about you right now. Second, what they are holding back and have not said. Third, where the connection is heading, with advice on how to carry yourself next. Every card is an authentic 1909 Rider-Waite image, and each paragraph is written for that specific card in that specific position.",
-      "For the clearest result, close your eyes, breathe slowly, hold their name or face in mind, and choose the pile that pulls at you first without reasoning it out. If you want a reading shaped around your exact situation, continue to a full spread with the AI reader, which asks clarifying questions before interpreting.",
+      "For the clearest result, close your eyes, breathe slowly, hold their name or face in mind, and choose the pile that pulls at you first without reasoning it out. If you want a reading shaped around your exact situation, continue to a full spread with Selene, which asks clarifying questions before interpreting.",
     ],
     faqsTh: [
       {
@@ -91,8 +91,8 @@ const TOPIC_COPY: Record<string, TopicCopy> = {
         a: "เปิดซ้ำได้ ทุกครั้งที่กลับมาเลือกใหม่ระบบจะสับไพ่ใหม่ให้เสมอ แต่แนะนำให้เว้นระยะสักหน่อยและตั้งคำถามให้ชัดขึ้น เพราะการเปิดรัว ๆ ด้วยคำถามเดิมมักทำให้ตีความสับสนมากกว่าเดิม",
       },
       {
-        q: "ต่างจากการเปิดไพ่กับแม่หมอ AI อย่างไร?",
-        a: "หน้านี้เป็นการเลือกกองสำเร็จรูปที่อ่านได้ทันทีโดยไม่ต้องพิมพ์อะไรเลย ส่วนการเปิดไพ่กับแม่หมอ AI จะถามคำถามกลับ เลือกผังที่เหมาะกับเรื่องของคุณ และอ่านตามบริบทเฉพาะตัวมากกว่า",
+        q: "ต่างจากการเปิดไพ่กับ Selene อย่างไร?",
+        a: "หน้านี้เป็นการเลือกกองสำเร็จรูปที่อ่านได้ทันทีโดยไม่ต้องพิมพ์อะไรเลย ส่วนการเปิดไพ่กับ Selene จะถามคำถามกลับ เลือกผังที่เหมาะกับเรื่องของคุณ และอ่านตามบริบทเฉพาะตัวมากกว่า",
       },
     ],
     faqsEn: [
@@ -105,8 +105,8 @@ const TOPIC_COPY: Record<string, TopicCopy> = {
         a: "Yes. Every time you step back and choose again the piles are reshuffled. Still, leave a little space between readings and sharpen the question, because rapid repeats on the same question usually muddy the interpretation.",
       },
       {
-        q: "How is this different from a reading with the AI reader?",
-        a: "This page is an instant pile reading that needs no typing at all. The AI reader asks clarifying questions, picks a spread suited to your situation, and interprets with your specific context in mind.",
+        q: "How is this different from a reading with Selene?",
+        a: "This page is an instant pile reading that needs no typing at all. Selene asks clarifying questions, picks a spread suited to your situation, and interprets with your specific context in mind.",
       },
     ],
   },
@@ -138,12 +138,12 @@ const TOPIC_COPY: Record<string, TopicCopy> = {
     bodyTh: [
       "คนที่ค้นหาเรื่องทิศทางความรักส่วนใหญ่ไม่ได้อยากรู้แค่ว่า &quot;จะได้แต่งงานไหม&quot; แต่อยากรู้ว่าสิ่งที่กำลังทำอยู่ตอนนี้กำลังพาไปทางไหน ความสัมพันธ์ที่ยื้ออยู่ควรไปต่อหรือพอแค่นี้ และถ้าปล่อยมือแล้วข้างหน้ามีอะไรรออยู่บ้าง กองไพ่ในหน้านี้จึงวางไว้สามจังหวะ คือพลังงานตั้งต้น จุดเปลี่ยนสำคัญ และผลลัพธ์ปลายทาง",
       "สิ่งที่ควรรู้ก่อนอ่านคือ ไพ่ทาโรต์อ่าน &quot;แนวโน้มจากพลังงานปัจจุบัน&quot; ไม่ใช่อนาคตที่ถูกล็อกไว้แล้ว ถ้าคุณเปลี่ยนวิธีวางตัว เปลี่ยนสิ่งที่ยอมรับได้ หรือเปลี่ยนคนที่เลือกคบ ปลายทางก็เปลี่ยนตาม คำอ่านจึงมีประโยชน์ที่สุดเมื่อใช้เป็นแผนที่ ไม่ใช่คำพยากรณ์ที่ต้องรอให้เกิด",
-      "หลังอ่านจบ ลองจดหนึ่งประโยคที่สะกิดใจที่สุดเก็บไว้ แล้วกลับมาดูอีกครั้งในอีกสองสัปดาห์ คุณจะเห็นชัดขึ้นว่าอะไรในคำอ่านตรงกับสิ่งที่เกิดขึ้นจริง และถ้าต้องการคำตอบเฉพาะกรณีของคุณจริง ๆ ให้เปิดไพ่เต็มผังกับแม่หมอ AI ต่อได้ทันทีจากปุ่มท้ายคำทำนาย",
+      "หลังอ่านจบ ลองจดหนึ่งประโยคที่สะกิดใจที่สุดเก็บไว้ แล้วกลับมาดูอีกครั้งในอีกสองสัปดาห์ คุณจะเห็นชัดขึ้นว่าอะไรในคำอ่านตรงกับสิ่งที่เกิดขึ้นจริง และถ้าต้องการคำตอบเฉพาะกรณีของคุณจริง ๆ ให้เปิดไพ่เต็มผังกับ Selene ต่อได้ทันทีจากปุ่มท้ายคำทำนาย",
     ],
     bodyEn: [
       "Most people asking about the future of their love life are not only asking whether marriage is coming. They want to know where the current situation is actually heading, whether the relationship they are holding on to deserves more time, and what waits if they let go. These piles are laid out in three beats: the seed energy, the turning point, and the outcome.",
       "Worth knowing before you read: tarot describes a trajectory from present energy, not a locked future. Change how you show up, change what you accept, or change who you give time to, and the destination shifts with it. The reading is most useful as a map rather than a prophecy to wait for.",
-      "After reading, write down the single line that struck you hardest and revisit it in two weeks. You will see clearly which parts matched what actually happened. If you want an answer shaped entirely around your case, continue into a full spread with the AI reader from the button beneath your reading.",
+      "After reading, write down the single line that struck you hardest and revisit it in two weeks. You will see clearly which parts matched what actually happened. If you want an answer shaped entirely around your case, continue into a full spread with Selene from the button beneath your reading.",
     ],
     faqsTh: [
       {
@@ -329,12 +329,12 @@ const TOPIC_COPY: Record<string, TopicCopy> = {
     bodyTh: [
       "คำถามว่า &quot;เขาจะกลับมาไหม&quot; มักเกิดในช่วงที่ยากที่สุดของความสัมพันธ์ คือช่วงที่เรื่องจบไปแล้วแต่ใจยังไม่จบตาม บางคนเจอการหายไปเงียบ ๆ โดยไม่มีคำอธิบาย บางคนเลิกกันแบบมีเหตุผลครบแต่ยังรู้สึกว่ามีอะไรค้างอยู่ การเลือกกองไพ่ในหน้านี้ช่วยให้คุณได้พักจากการไล่หาคำตอบด้วยตัวเองทั้งวัน แล้วมองภาพรวมจากระยะที่ไกลขึ้นสักหน่อย",
       "กองไพ่ทั้งสี่อ่านสามชั้นเหมือนกัน ชั้นแรกคือใจเขาในตอนนี้จริง ๆ ไม่ใช่สิ่งที่เขาโพสต์หรือสิ่งที่คนอื่นเล่าให้ฟัง ชั้นที่สองคือสิ่งที่ขวางอยู่ตรงกลาง ซึ่งหลายครั้งไม่ใช่ความรู้สึก แต่เป็นศักดิ์ศรี เงื่อนไขชีวิต หรือคนรอบตัว และชั้นที่สามคือโอกาสกลับมาพร้อมคำแนะนำว่าควรทำอย่างไรต่อจากนี้",
-      "สิ่งที่อยากให้จำไว้คือ คำทำนายไม่ได้มีหน้าที่บอกให้คุณรอ ถ้าคำตอบที่ได้ทำให้คุณใช้ชีวิตไม่ได้ นั่นแปลว่าสิ่งที่ควรดูแลก่อนคือใจของคุณเอง ไม่ใช่การกลับมาของใคร และถ้าอยากได้คำอ่านที่เจาะจงกับเรื่องของคุณ ให้เปิดผังคืนดีเต็มรูปแบบกับแม่หมอ AI ต่อได้จากปุ่มท้ายคำทำนาย",
+      "สิ่งที่อยากให้จำไว้คือ คำทำนายไม่ได้มีหน้าที่บอกให้คุณรอ ถ้าคำตอบที่ได้ทำให้คุณใช้ชีวิตไม่ได้ นั่นแปลว่าสิ่งที่ควรดูแลก่อนคือใจของคุณเอง ไม่ใช่การกลับมาของใคร และถ้าอยากได้คำอ่านที่เจาะจงกับเรื่องของคุณ ให้เปิดผังคืนดีเต็มรูปแบบกับ Selene ต่อได้จากปุ่มท้ายคำทำนาย",
     ],
     bodyEn: [
       "&quot;Will they come back?&quot; usually arrives in the hardest stretch of a relationship — the part where the story ended but your heart has not caught up. Some people are left with silence and no explanation. Others ended with every reason stated and still feel something unfinished. Choosing a pile gives you a break from chasing the answer alone all day and a chance to see the whole shape from further back.",
       "All four piles read the same three layers. First, where their heart actually is now — not what they post, not what someone told you. Second, what stands between you, which is often not feeling at all but pride, circumstances, or the people around them. Third, the odds of a return, with advice on what to do next.",
-      "Worth remembering: a reading is not an instruction to wait. If the answer makes it impossible to live your life, the thing that needs care first is your own heart, not their return. For guidance shaped around your specific story, continue into a full reconciliation spread with the AI reader from the button beneath your reading.",
+      "Worth remembering: a reading is not an instruction to wait. If the answer makes it impossible to live your life, the thing that needs care first is your own heart, not their return. For guidance shaped around your specific story, continue into a full reconciliation spread with Selene from the button beneath your reading.",
     ],
     faqsTh: [
       {

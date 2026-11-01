@@ -7,7 +7,7 @@ import { noindexAlternates } from "@/lib/config/site";
  */
 export const spreadBuilderMetadataTh: Metadata = {
   title: "ออกแบบผังไพ่ทาโรต์ของคุณเอง",
-  description: "สร้างผังไพ่ทาโรต์ 1–7 ใบที่ถามตรงกับใจคุณ เลือกตำแหน่งจากคลังที่แม่หมอเขียนไว้หรือเขียนเอง แล้วเปิดไพ่กับแม่หมอ AI ได้ทันที",
+  description: "สร้างผังไพ่ทาโรต์ 1–7 ใบที่ถามตรงกับใจคุณ เลือกตำแหน่งจากคลังที่แม่หมอเขียนไว้หรือเขียนเอง แล้วเปิดไพ่กับ Selene ได้ทันที",
   robots: { index: false, follow: true },
   alternates: noindexAlternates(),
 };

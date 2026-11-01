@@ -122,7 +122,7 @@ export default function ContentEditor() {
             active={sub}
             onChange={setSub}
             tabs={[
-              { id: "prompt", label: "คำสั่งระบบกลาง", hint: "กติกาที่แม่หมอ AI ทุกคนใช้" },
+              { id: "prompt", label: "คำสั่งระบบกลาง", hint: "กติกาที่ Selene ใช้ทุกบุคลิก" },
               { id: "persona", label: "บุคลิกแม่หมอ", hint: "ชื่อ คำโปรย น้ำเสียง" },
               { id: "card", label: "ความหมายไพ่ 78 ใบ", hint: "คำอ่าน คีย์เวิร์ด ใช่/ไม่ใช่" },
             ]}
