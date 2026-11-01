@@ -109,7 +109,7 @@ export async function isUserTokenCapReached(
 export function tokenCapMessage(lang: "th" | "en"): string {
   return lang === "en"
     ? "You've used today's AI reading allowance. It resets tomorrow — your saved readings are still here."
-    : "วันนี้ใช้แม่หมอ AI ครบโควตาของวันแล้ว พรุ่งนี้กลับมาใช้ได้ตามปกติ คำอ่านที่บันทึกไว้ยังอยู่ครบ";
+    : "วันนี้ใช้ Selene ครบโควตาของวันแล้ว พรุ่งนี้กลับมาใช้ได้ตามปกติ คำอ่านที่บันทึกไว้ยังอยู่ครบ";
 }
 
 /* ── PDPA ── */

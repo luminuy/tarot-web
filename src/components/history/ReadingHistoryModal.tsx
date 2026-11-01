@@ -35,7 +35,7 @@ interface MonthlySummaryResult {
   synthesis: string;
   lifeLessons: string[];
   empowermentQuote: string;
-  /** สรุปจากประวัติจริงโดยไม่ผ่าน AI (แม่หมอ AI ไม่ว่าง) — ต้องบอกผู้ใช้ตรง ๆ */
+  /** สรุปจากประวัติจริงโดยไม่ผ่าน AI (Selene ไม่ว่าง) — ต้องบอกผู้ใช้ตรง ๆ */
   fallback?: boolean;
 }
 
@@ -362,8 +362,8 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
               {monthlySummary.fallback && (
                 <p role="status" className="text-[13px] text-muted font-serif-th leading-relaxed">
                   {isEn
-                    ? "The AI oracle is busy right now, so this summary was worked out directly from your saved readings. Try again later for the AI version."
-                    : "ตอนนี้แม่หมอ AI ไม่ว่าง สรุปนี้จึงคำนวณจากประวัติการเปิดไพ่ของคุณโดยตรง ลองกดสรุปใหม่ภายหลังเพื่อรับฉบับจากแม่หมอ AI"}
+                    ? "Selene is busy right now, so this summary was worked out directly from your saved readings. Try again later for the AI version."
+                    : "ตอนนี้ Selene ไม่ว่าง สรุปนี้จึงคำนวณจากประวัติการเปิดไพ่ของคุณโดยตรง ลองกดสรุปใหม่ภายหลังเพื่อรับฉบับจาก Selene"}
                 </p>
               )}
 

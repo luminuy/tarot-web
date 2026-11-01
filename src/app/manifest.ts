@@ -12,7 +12,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "SeerTarot · ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite",
     short_name: "SeerTarot",
     description:
-      "ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite สับไพ่และเลือกหยิบไพ่ด้วยมือคุณเอง พร้อมแม่หมอ AI และระบบความโปร่งใส Provably-Fair",
+      "ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite สับไพ่และเลือกหยิบไพ่ด้วยมือคุณเอง พร้อม Selene และระบบความโปร่งใส Provably-Fair",
     start_url: "/?utm_source=pwa",
     scope: "/",
     display: "standalone",

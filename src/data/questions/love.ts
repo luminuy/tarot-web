@@ -428,7 +428,7 @@ export const LOVE_QUESTIONS: QuestionPage[] = [
         "ความสงสัยว่าเขามีคนอื่นเป็นความรู้สึกที่หนักที่สุดอย่างหนึ่งในความรัก เพราะมันทำให้เราไม่ไว้ใจทั้งเขาและสัญชาตญาณของตัวเองไปพร้อมกัน หลายคนจึงหันมาหาไพ่เพื่อหาคำยืนยันสักอย่าง",
         "หน้านี้อยากให้คุณใช้ไพ่ในทางที่ช่วยตัวเองได้จริง เราจะไม่พยายามเดาว่ามือที่สามเป็นใคร หน้าตาแบบไหน หรืออยู่ที่ไหน เพราะไพ่ไม่ใช่เครื่องมือสืบสวน และการเดาผิดอาจทำลายความสัมพันธ์ที่ไม่ได้มีปัญหาแบบที่คิด สิ่งที่ผังหกใบช่วยได้คือดูว่าความไว้ใจระหว่างคุณสองคนเป็นอย่างไร และคุณควรทำอะไรกับความรู้สึกนี้",
       ],
-      limits: "ไพ่จะไม่บอกชื่อ รูปพรรณ หรือรายละเอียดที่ชี้ตัวคนได้ และเราตั้งใจให้แม่หมอ AI ปฏิเสธส่วนนั้นเสมอ ถ้าคุณมีหลักฐานจริงหรือรู้สึกไม่ปลอดภัย การคุยตรง ๆ หรือขอคำปรึกษาจากคนที่ไว้ใจจะช่วยได้มากกว่าการเปิดไพ่ซ้ำ ๆ",
+      limits: "ไพ่จะไม่บอกชื่อ รูปพรรณ หรือรายละเอียดที่ชี้ตัวคนได้ และเราตั้งใจให้ Selene ปฏิเสธส่วนนั้นเสมอ ถ้าคุณมีหลักฐานจริงหรือรู้สึกไม่ปลอดภัย การคุยตรง ๆ หรือขอคำปรึกษาจากคนที่ไว้ใจจะช่วยได้มากกว่าการเปิดไพ่ซ้ำ ๆ",
       betterQuestions: [
         "ความไว้ใจระหว่างเราตอนนี้อยู่ในสภาพไหน",
         "ความสงสัยของเรามาจากสิ่งที่เห็นจริง หรือจากความกลัวเก่า ๆ",
@@ -477,7 +477,7 @@ export const LOVE_QUESTIONS: QuestionPage[] = [
         "Suspecting there's someone else is one of the heaviest feelings in love, because it makes you doubt both your partner and your own instincts at once. Many people turn to tarot hoping for some kind of confirmation.",
         "This page wants you to use the cards in a way that actually helps you. We won't try to guess who a third person is, what they look like or where they are — tarot isn't an investigation tool, and a wrong guess can damage a relationship that isn't in the trouble you fear. What the six-card spread can do is show the state of trust between you, and what to do with this feeling.",
       ],
-      limits: "The cards won't give names, descriptions or anything that identifies a person, and our AI reader is designed to decline that part every time. If you have real evidence, or you feel unsafe, a direct conversation or advice from someone you trust will help far more than drawing again and again.",
+      limits: "The cards won't give names, descriptions or anything that identifies a person, and Selene is designed to decline that part every time. If you have real evidence, or you feel unsafe, a direct conversation or advice from someone you trust will help far more than drawing again and again.",
       betterQuestions: [
         "What is the state of trust between us right now?",
         "Does my suspicion come from what I've actually seen, or from old fears?",

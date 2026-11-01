@@ -13,7 +13,7 @@ import { useDailyCard } from "./use-daily-card";
  * ===========================================================================
  * ⚠️ ข้อความ `<h1>` ต้องเหมือนเดิมทุกตัวอักษร และเป็นหัวข้อแรกของ `<main>` (ด่าน a11y + SEO)
  *    `<wbr>` ระหว่าง "ไพ่ทาโรต์" กับ "ออนไลน์" = จุดขึ้นบรรทัดแบบภาพต้นแบบ (คอม 2 บรรทัด) ไม่เพิ่มตัวอักษร
- *    "แม่หมอ AI" ห่อ span สีทองได้ — textContent ของ h1 ยังเท่าเดิม
+ *    "Selene" ห่อ span สีทองได้ — textContent ของ h1 ยังเท่าเดิม
  * ⚠️ มือถือ: ปุ่มหลักต้องอยู่ใน ~600px แรก (ที่ 390×844) · นาฬิกากล่องอยู่เหนือปุ่มตามภาพต้นแบบ D+ ทุกจอ
  *    (เจ้าของสั่ง 2026-10-13 "ปรับให้เหมาะสมกับทุก device" — ย่อกล่องบนมือถือแทนการย้ายลงใต้ปุ่ม)
  * ⚠️ ภาพที่ใหญ่ที่สุดในจอแรกต้องไม่ใช่ภาพไพ่ — LCP คือ h1 · การ์ดลอยเป็นภาพประกอบล้วน (`aria-hidden`)
@@ -84,13 +84,13 @@ export function Ui2Hero({ isEnglish, streak = 0 }: { isEnglish: boolean; streak?
           <ThaiPhrases>
             {isEnglish ? (
               <>
-                Interactive 1909 Rider-Waite Tarot with <span className="tp ui2-gold-day ui2-loop">AI Oracle</span>
+                Interactive 1909 Rider-Waite Tarot with <span className="tp ui2-gold-day ui2-loop">Selene</span>
               </>
             ) : (
               <>
                 ดูดวงไพ่ยิปซี ไพ่ทาโรต์
                 <wbr />
-                ออนไลน์ ฟรี กับ<span className="tp ui2-gold-day ui2-loop">แม่หมอ AI</span>
+                ออนไลน์ ฟรี กับ <span className="tp ui2-gold-day ui2-loop">Selene</span>
               </>
             )}
           </ThaiPhrases>

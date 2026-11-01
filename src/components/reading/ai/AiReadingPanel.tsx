@@ -88,7 +88,7 @@ export function AiReadingPanel({
         )}
       </div>
 
-      {/* คำอ่านจากคลังความหมายไพ่ (AI ไม่ว่าง) — บอกตรง ๆ และให้แม่หมอ AI อ่านไพ่ชุดเดิมใหม่ได้ */}
+      {/* คำอ่านจากคลังความหมายไพ่ (AI ไม่ว่าง) — บอกตรง ๆ และให้ Selene อ่านไพ่ชุดเดิมใหม่ได้ */}
       {state.fallback && state.status === "done" && <FallbackNotice isEn={isEn} onRetry={onRetry} />}
 
       {reading?.opening && (

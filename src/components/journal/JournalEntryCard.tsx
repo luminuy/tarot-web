@@ -13,7 +13,7 @@ import { ChevronIcon, PinIcon } from "@/components/ui/LineIcons";
 /**
  * ✦ การ์ดบันทึกหนึ่งรายการในสมุดดวง (REFLECTION_JOURNAL_PLAN 1.3)
  * แถวบน: วันที่ · ผัง · หมวด · ปักหมุด ✦ — แถวไพ่ (ภาพ 1909 ผ่าน CardImage) — คำถาม — ใจก่อน ➔ หลัง
- * เปิดรายละเอียด: สรุปคำอ่าน · ผลจริง · บันทึก · แท็ก · ยินยอมให้แม่หมอ AI อ่าน · ลบ
+ * เปิดรายละเอียด: สรุปคำอ่าน · ผลจริง · บันทึก · แท็ก · ยินยอมให้ Selene อ่าน · ลบ
  * 🃏 รายการที่ข้อมูลไพ่พัง (`corrupted`) ➔ บอกตรง ๆ ให้โหลดใหม่ ไม่แสดงเหมือนคำอ่านที่ไม่มีไพ่ (กฎเหล็กข้อ 14)
  */
 export const JournalEntryCard: React.FC<{
@@ -292,7 +292,7 @@ export const JournalEntryCard: React.FC<{
           {isMember && (
             <section className="flex items-start justify-between gap-3 rounded-lg bg-surface/60 border border-line-warm p-3">
               <div className="space-y-0.5">
-                <p className="text-xs font-serif-th font-semibold text-ink-deep">{L({ th: "ให้แม่หมอ AI อ่านบันทึกนี้ได้", en: "Let the AI reader see this entry" })}</p>
+                <p className="text-xs font-serif-th font-semibold text-ink-deep">{L({ th: "ให้ Selene อ่านบันทึกนี้ได้", en: "Let Selene see this entry" })}</p>
                 <p className="text-[11px] text-muted font-serif-th leading-relaxed">
                   {L({
                     th: "ปิดไว้เป็นค่าเริ่มต้น — เปิดแล้วแม่หมอจะใช้บันทึก ใจ และแท็กของรายการนี้ตอนมองภาพรวมเรื่องของคุณ",
@@ -309,7 +309,7 @@ export const JournalEntryCard: React.FC<{
                   item.shareWithAi ? "bg-gold-ink border-gold-ink" : "bg-inset border-line-warm"
                 }`}
               >
-                <span className="sr-only">{L({ th: "ให้แม่หมอ AI อ่าน", en: "Share with AI reader" })}</span>
+                <span className="sr-only">{L({ th: "ให้ Selene อ่าน", en: "Share with Selene" })}</span>
                 <span
                   aria-hidden="true"
                   className={`absolute top-0.5 w-[22px] h-[22px] rounded-full bg-surface shadow transition-[left] ${item.shareWithAi ? "left-[22px]" : "left-0.5"}`}

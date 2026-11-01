@@ -53,7 +53,7 @@ import type { TimeMode } from "./NatalTimeTools";
 const NatalTimeTools = React.lazy(() => import("./NatalTimeTools"));
 /* 💞 แท็บผังคู่ โหลดเมื่อกดแท็บเท่านั้น */
 const NatalSynastry = React.lazy(() => import("./NatalSynastry"));
-/** ถามแม่หมอ AI — ส่งข้อมูลเกิดออกจากเครื่องเมื่อผู้ใช้กดยินยอมในแท็บนั้นเท่านั้น */
+/** ถาม Selene — ส่งข้อมูลเกิดออกจากเครื่องเมื่อผู้ใช้กดยินยอมในแท็บนั้นเท่านั้น */
 const NatalAsk = React.lazy(() => import("./NatalAsk"));
 /** ภาพรวมผังจาก AI (Haiku) — ส่งข้อมูลเกิดเมื่อผู้ใช้ติ๊กยินยอมแล้วกดเองเท่านั้น */
 const NatalOverview = React.lazy(() => import("./NatalOverview"));
@@ -591,7 +591,7 @@ export default function NatalResult({
         </ul>
       </section>
 
-      {/* ── เรื่องเด่นที่สุดของผัง (โค้ดจัดลำดับ) + ภาพรวมจากแม่หมอ AI (กดเองหลังยินยอม) ── */}
+      {/* ── เรื่องเด่นที่สุดของผัง (โค้ดจัดลำดับ) + ภาพรวมจาก Selene (กดเองหลังยินยอม) ── */}
       <section aria-labelledby="natal-themes" className="v2-nr-sec">
         <SectionHead id="natal-themes" n={nextN()} title={isTh ? "เรื่องเด่นที่สุดของผัง" : "Your chart's strongest themes"}>
           {isTh
@@ -963,8 +963,8 @@ export default function NatalResult({
             <p className="v2-nr-box-t">{isTh ? "ถามแม่หมอเรื่องผังนี้" : "Ask the reader about this chart"}</p>
             <p className="v2-nr-item-d">
               {isTh
-                ? "พิมพ์เรื่องที่ค้างใจ เช่น ความรัก งาน หรือจังหวะชีวิตช่วงนี้ แม่หมอ AI ตอบจากเรื่องเด่นและตำแหน่งดาวในผังของคุณเอง"
-                : "Type what is on your mind, such as love, work or timing. The AI reader answers from your own chart's themes and placements."}
+                ? "พิมพ์เรื่องที่ค้างใจ เช่น ความรัก งาน หรือจังหวะชีวิตช่วงนี้ Selene ตอบจากเรื่องเด่นและตำแหน่งดาวในผังของคุณเอง"
+                : "Type what is on your mind, such as love, work or timing. Selene answers from your own chart's themes and placements."}
             </p>
             <p className="v2-nr-note">{isTh ? `สมาชิกถามฟรีวันละ ${NATAL_AI_FREE_PER_DAY} ข้อ` : `Members get ${NATAL_AI_FREE_PER_DAY} free questions a day`}</p>
             <button type="button" onClick={openAsk} className="rounded-full btn-gold-glass px-5 min-h-[44px] text-sm font-bold">
@@ -976,8 +976,8 @@ export default function NatalResult({
               <p className="v2-nr-box-t">{isTh ? "รายงานผังดวงฉบับเต็ม (PDF)" : "Full natal chart report (PDF)"}</p>
               <p className="v2-nr-item-d">
                 {isTh
-                  ? "คำอธิบายผังทั้งหมดรวมเป็นเล่มเดียว พร้อมภาพรวมที่แม่หมอ AI เขียนให้ผังนี้โดยเฉพาะ โหราไทย และช่วงเวลาสำคัญ 12 เดือนข้างหน้า เก็บไว้อ่านหรือพิมพ์ได้"
-                  : "Your whole chart explained in one document, plus an overview the AI reader writes for this chart, Thai astrology and the key dates of the next 12 months. Keep it or print it."}
+                  ? "คำอธิบายผังทั้งหมดรวมเป็นเล่มเดียว พร้อมภาพรวมที่ Selene เขียนให้ผังนี้โดยเฉพาะ โหราไทย และช่วงเวลาสำคัญ 12 เดือนข้างหน้า เก็บไว้อ่านหรือพิมพ์ได้"
+                  : "Your whole chart explained in one document, plus an overview Selene writes for this chart, Thai astrology and the key dates of the next 12 months. Keep it or print it."}
               </p>
               <p className="v2-nr-note">
                 {isTh ? `ใช้รอบดูดวง 1 รอบ (เติมรอบเริ่ม ${CHEAPEST_PACKAGE_THB} บาท) · ผังเดิมเปิดซ้ำไม่หักซ้ำ` : `Uses 1 reading (refills from ${CHEAPEST_PACKAGE_THB} THB) · re-opening the same chart is free`}

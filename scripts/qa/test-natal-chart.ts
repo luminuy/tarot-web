@@ -731,7 +731,7 @@ console.log("\n6.10) ราศีนิรายนะแบบ Lahiri (ไท�
   );
 }
 
-console.log("\n6.11) ถามแม่หมอ AI เรื่องผัง (ยินยอมก่อนส่ง · สิทธิ์ AI เดิม)");
+console.log("\n6.11) ถาม Selene เรื่องผัง (ยินยอมก่อนส่ง · สิทธิ์ AI เดิม)");
 {
   const root = process.cwd();
   const rd = (f: string) => fs.readFileSync(path.join(root, f), "utf8");
@@ -1120,7 +1120,7 @@ console.log("\n6.18) เนื้อหาเข้าใจง่ายแต�
     "หน้าเว็บและรายงานแสดงที่มาในผังและ \"ใช้ให้ดี\" ของเรื่องเด่น · สรุปผังขึ้นเรื่องเด่น 3 ข้อแรก",
     res.includes("{h.basis}") && res.includes("{h.advice}") && rep.includes("h.basis") && rep.includes("h.advice") && res.includes("chartGlance(chart, lang, themes)") && rd("src/lib/astro/natal-report.ts").includes("chartGlance(chart, lang, themes)"),
   );
-  check("prompt ของแม่หมอ AI ได้ที่มาในผังของเรื่องเด่นด้วย", /h\$\{i \+ 1\}: \$\{h\.title\} \(\$\{h\.basis\}\) \| \$\{h\.text\}/.test(rd("src/lib/astro/natal-ai.ts")));
+  check("prompt ของ Selene ได้ที่มาในผังของเรื่องเด่นด้วย", /h\$\{i \+ 1\}: \$\{h\.title\} \(\$\{h\.basis\}\) \| \$\{h\.text\}/.test(rd("src/lib/astro/natal-ai.ts")));
 
   // ส่วนล่างของหน้า: เรือนว่างอ่านจากเจ้าเรือน · มุมสำคัญไม่นับดาวรุ่นกันเอง · สมดุลพลังบอกความหมาย
   const { keyAspects, emptyHouseNote } = await import("../../src/lib/astro/natal-text");

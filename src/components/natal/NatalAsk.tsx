@@ -98,8 +98,8 @@ export default function NatalAsk({ spec, lang, timeKnown }: { spec: ChartSpec; l
       <section aria-labelledby="nt-ask-title" className="v2-nr-sec">
         <SectionHead id="nt-ask-title" title={isTh ? "ถามแม่หมอเรื่องผังของคุณ" : "Ask the reader about your chart"}>
           {isTh
-            ? "แม่หมอ AI ตอบจากตำแหน่งดาวจริงในผังนี้และดาวจรวันนี้"
-            : "The AI reader answers from the real placements in this chart and today's transits."}
+            ? "Selene ตอบจากตำแหน่งดาวจริงในผังนี้และดาวจรวันนี้"
+            : "Selene answers from the real placements in this chart and today's transits."}
           {!timeKnown && (isTh ? " ไม่ทราบเวลาเกิด แม่หมอจึงดูเรือนและลัคนาให้ไม่ได้" : " Without a birth time the reader cannot look at houses or the rising sign.")}
         </SectionHead>
 
@@ -109,8 +109,8 @@ export default function NatalAsk({ spec, lang, timeKnown }: { spec: ChartSpec; l
             <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 w-5 h-5 shrink-0 accent-ink" />
             <span>
               {isTh
-                ? "ยินยอมส่งวันเวลาสถานที่เกิด ชื่อที่กรอก และผังนี้ ให้แม่หมอ AI (ผ่านผู้ให้บริการ AI ภายนอก) เพื่อตอบคำถาม เว็บไม่บันทึกข้อมูลเกิดหรือคำถามไว้ ถ้าไม่ติ๊ก ข้อมูลจะอยู่ในเครื่องนี้เท่านั้น"
-                : "I agree to send my birth date, time, place, the name entered and this chart to the AI reader (via an external AI provider) to answer my questions. The site does not store the birth data or questions. If unticked, everything stays on this device."}{" "}
+                ? "ยินยอมส่งวันเวลาสถานที่เกิด ชื่อที่กรอก และผังนี้ ให้ Selene (ผ่านผู้ให้บริการ AI ภายนอก) เพื่อตอบคำถาม เว็บไม่บันทึกข้อมูลเกิดหรือคำถามไว้ ถ้าไม่ติ๊ก ข้อมูลจะอยู่ในเครื่องนี้เท่านั้น"
+                : "I agree to send my birth date, time, place, the name entered and this chart to Selene (via an external AI provider) to answer my questions. The site does not store the birth data or questions. If unticked, everything stays on this device."}{" "}
               <a href={isTh ? "/privacy" : "/en/privacy"} className="underline text-gold-ink">
                 {isTh ? "นโยบายความเป็นส่วนตัว" : "Privacy policy"}
               </a>

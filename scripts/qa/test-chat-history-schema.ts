@@ -182,7 +182,7 @@ export function runChatSchemaTests() {
     throw new Error("Test 7 Failed: ลิงก์ /reading/chat ต้องซ่อนเมื่อเป็นคำอ่านสำรอง (fallback) ทั้งใน TarotFlow และ QuickChatResult");
   }
   if (!/const fromFallback = record\?\.status === "FAILED";/.test(chatRouteSrc)) {
-    throw new Error("Test 7 Failed: 409 ของคำอ่านสำรองต้องบอกให้กด 'ให้แม่หมอ AI อ่านใหม่' ไม่ใช่ 'ให้อ่านจบก่อน'");
+    throw new Error("Test 7 Failed: 409 ของคำอ่านสำรองต้องบอกให้กด 'ให้ Selene อ่านใหม่' ไม่ใช่ 'ให้อ่านจบก่อน'");
   }
   if (!/userQuestionsCount = messages\.filter\(\(m\) => m\.sender === "bot" && !m\.isError && !m\.isFallback\)\.length/.test(chatUiSrc)) {
     throw new Error("Test 7 Failed: สิทธิ์ถามฟรีต้องนับเฉพาะคำถามที่ AI ตอบจริง (ไม่นับตาที่ล้มและคำตอบสำรอง · ตรงกับเซิร์ฟเวอร์)");

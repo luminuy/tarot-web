@@ -344,8 +344,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           {
             error: fromFallback
               ? initialLang === "en"
-                ? "This reading came from our card-meaning library while the AI oracle was busy. Go back and tap \"Ask the AI oracle again\" first, then you can ask follow-up questions."
-                : "คำอ่านชุดนี้มาจากคลังความหมายไพ่ตอนแม่หมอ AI ไม่ว่าง กลับไปกด \"ให้แม่หมอ AI อ่านใหม่\" ก่อน แล้วค่อยถามต่อได้เลยนะ"
+                ? "This reading came from our card-meaning library while Selene was busy. Go back and tap \"Ask Selene again\" first, then you can ask follow-up questions."
+                : "คำอ่านชุดนี้มาจากคลังความหมายไพ่ตอน Selene ไม่ว่าง กลับไปกด \"ให้ Selene อ่านใหม่\" ก่อน แล้วค่อยถามต่อได้เลยนะ"
               : initialLang === "en"
                 ? "Let the Oracle finish reading this spread first, then you can ask follow-up questions."
                 : "ให้แม่หมออ่านไพ่ชุดนี้ให้จบก่อน แล้วค่อยถามต่อได้เลยนะ",

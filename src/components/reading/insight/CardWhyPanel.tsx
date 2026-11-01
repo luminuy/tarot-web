@@ -9,12 +9,12 @@ import { ChevronIcon } from "@/components/ui/LineIcons";
 /**
  * ✦ "ทำไมแม่หมออ่านแบบนี้?" — แผงพับได้ใต้คำอ่านรายใบ (REFLECTION_JOURNAL_PLAN 1.2)
  * ---------------------------------------------------------------------------
- * แสดง **หลักฐานชุดเดียวกับที่แม่หมอ AI ได้รับ** แยกเป็นชั้น ไม่สร้างคำอธิบายใหม่ด้วย AI
+ * แสดง **หลักฐานชุดเดียวกับที่ Selene ได้รับ** แยกเป็นชั้น ไม่สร้างคำอธิบายใหม่ด้วย AI
  * (ให้ AI อธิบายตัวเอง = แต่งเหตุผลย้อนหลังได้) · ข้อมูลโหลดตอนกดเปิดครั้งแรกเท่านั้น
  *   1. ความหมายของไพ่จากสารานุกรม (ตามหมวดคำถามและทิศของไพ่)
  *   2. ตำแหน่งนี้ถามว่าอะไร
  *   3. ความเชื่อมโยงกับไพ่ใบอื่นในผัง (คำนวณจากธาตุ + แก่นเรื่อง)
- *   4. ส่วนไหนคือ "การตีความ" ของแม่หมอ AI
+ *   4. ส่วนไหนคือ "การตีความ" ของ Selene
  */
 export const CardWhyPanel: React.FC<{
   url: string | null;
@@ -112,11 +112,11 @@ export const CardWhyPanel: React.FC<{
                 )}
               </Layer>
 
-              <Layer n={4} title={isEnglish ? "What is interpretation" : "ส่วนที่เป็นการตีความ"} source={isEnglish ? "AI reader" : "แม่หมอ AI"}>
+              <Layer n={4} title={isEnglish ? "What is interpretation" : "ส่วนที่เป็นการตีความ"} source="Selene">
                 <p>
                   {isEnglish
-                    ? "The reading above is the AI reader weaving layers 1–3 together with your question. The card does not fix your future — it is a symbol to help you think."
-                    : "คำอ่านด้านบนคือแม่หมอ AI เรียบเรียงชั้นที่ 1–3 เข้ากับคำถามของคุณ ไพ่ไม่ได้กำหนดอนาคตที่ตายตัว — เป็นสัญลักษณ์ช่วยให้คุณคิด"}
+                    ? "The reading above is Selene weaving layers 1–3 together with your question. The card does not fix your future — it is a symbol to help you think."
+                    : "คำอ่านด้านบนคือ Selene เรียบเรียงชั้นที่ 1–3 เข้ากับคำถามของคุณ ไพ่ไม่ได้กำหนดอนาคตที่ตายตัว — เป็นสัญลักษณ์ช่วยให้คุณคิด"}
                 </p>
               </Layer>
             </ol>

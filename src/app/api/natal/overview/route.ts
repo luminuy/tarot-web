@@ -99,7 +99,7 @@ export async function POST(request: Request) {
     const result = await generateNatalOverview(chart, spec, lang, { model: CLAUDE_HAIKU_MODEL, effort: "low", maxTokens: 4000, timeoutMs: 25000 }, "NatalOverview");
     if (!result) {
       recordEvent("natal_overview_failed");
-      return NextResponse.json({ error: msg(lang, "แม่หมอ AI ยังไม่ว่างตอนนี้ ลองกดใหม่อีกครั้งนะ", "The AI reader is busy right now. Please try again."), reason: "ai_unavailable" }, { status: 503 });
+      return NextResponse.json({ error: msg(lang, "Selene ยังไม่ว่างตอนนี้ ลองกดใหม่อีกครั้งนะ", "Selene is busy right now. Please try again."), reason: "ai_unavailable" }, { status: 503 });
     }
     if (costSubj) {
       const { estimateTokens, recordAiUsage } = await import("@/lib/security/cost-ledger");

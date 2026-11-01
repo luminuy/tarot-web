@@ -29,8 +29,8 @@ export const TITLE_TEMPLATE = "%s · SeerTarot";
  *    (ด่าน `test-meta-length` มีข้อตรวจ "ชื่อแบรนด์ซ้ำสองรอบใน title" ไว้แล้ว)
  */
 export const ROOT_TITLE_DEFAULT: Record<"th" | "en", string> = {
-  th: "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับแม่หมอ AI",
-  en: "Free Online Tarot Reading With an AI Tarot Reader",
+  th: "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับ Selene",
+  en: "Free Online Tarot Reading With Selene, an AI Tarot Reader",
 };
 
 // ชื่อเดียวกับ Organization/WebSite ใน JSON-LD (B3-12)
@@ -111,7 +111,7 @@ export const ROOT_KEYWORDS: Record<"th" | "en", string[]> = {
  *     ถ้าจะแก้ให้ดีขึ้นกว่าเดิม ให้แก้เป็นงานแยกที่ตั้งใจ ไม่ใช่ผลข้างเคียงของการย้าย)
  */
 export const ROOT_DESCRIPTION: Record<"th" | "en", string> = {
-  th: "ดูดวงไพ่ยิปซี (ไพ่ทาโรต์) ออนไลน์ฟรี สับไพ่และหยิบไพ่ด้วยมือคุณเอง 78 ใบ ให้แม่หมอ AI ทำนายสดทีละใบ มีผัง 26 แบบ ทั้งรายวัน ความรัก การงาน การเงิน",
+  th: "ดูดวงไพ่ยิปซี (ไพ่ทาโรต์) ออนไลน์ฟรี สับไพ่และหยิบไพ่ด้วยมือคุณเอง 78 ใบ ให้ Selene ทำนายสดทีละใบ มีผัง 26 แบบ ทั้งรายวัน ความรัก การงาน การเงิน",
   en: "Free online tarot reading with the original 1909 Rider-Waite deck. Shuffle and draw all 78 cards yourself, then read a live AI interpretation.",
 };
 
@@ -134,16 +134,16 @@ export const ROOT_OPEN_GRAPH: Record<"th" | "en", Metadata["openGraph"]> = {
     type: "website",
     locale: "th_TH",
     siteName: "SeerTarot",
-    title: "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับแม่หมอ AI",
+    title: "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับ Selene",
     description:
-      "สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยมือคุณเอง ให้แม่หมอ AI อ่านความหมายทีละใบ สุ่มจริง ตรวจสอบได้",
+      "สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยมือคุณเอง ให้ Selene แม่หมอ AI อ่านความหมายทีละใบ สุ่มจริง ตรวจสอบได้",
     images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
   },
   en: {
     type: "website",
     locale: "en_US",
     siteName: "SeerTarot",
-    title: "Free Online Tarot Reading · Shuffle & Draw With an AI Tarot Reader",
+    title: "Free Online Tarot Reading · Shuffle & Draw With Selene, an AI Tarot Reader",
     description:
       "Shuffle and draw all 78 Rider-Waite cards with your own hand, then read a live card-by-card interpretation — truly random and verifiable.",
     images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
@@ -153,13 +153,13 @@ export const ROOT_OPEN_GRAPH: Record<"th" | "en", Metadata["openGraph"]> = {
 export const ROOT_TWITTER: Record<"th" | "en", Metadata["twitter"]> = {
   th: {
     card: "summary_large_image",
-    title: "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับแม่หมอ AI",
+    title: "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับ Selene",
     description: "ดูดวงไพ่ทาโรต์ออนไลน์ สับไพ่และเลือกหยิบไพ่ด้วยมือคุณเอง สุ่มจริง ตรวจสอบได้",
     images: [OG_IMAGE_URL],
   },
   en: {
     card: "summary_large_image",
-    title: "Free Online Tarot Reading · Shuffle & Draw With an AI Tarot Reader",
+    title: "Free Online Tarot Reading · Shuffle & Draw With Selene, an AI Tarot Reader",
     description: "Draw all 78 Rider-Waite cards yourself and read a live, provably fair interpretation.",
     images: [OG_IMAGE_URL],
   },

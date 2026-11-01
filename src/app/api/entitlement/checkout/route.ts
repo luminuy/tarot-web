@@ -83,7 +83,7 @@ export async function POST(request: Request) {
       // หน้าจ่ายเงิน Stripe: ชื่อสั้น อ่านจบในบรรทัดเดียว + บรรทัดรองบอกสิ่งที่ได้ (เดิม "เติมโควตาดูดวง: <ชื่อแพ็ก> (10 ครั้ง)" ซ้ำสองรอบ)
       description: isEnglish ? `${pkg.credits} tarot readings` : `เติมรอบดูดวง ${pkg.credits} ครั้ง`,
       productDescription: isEnglish
-        ? "Readings with SeerTarot's AI readers · never expire · one-time payment, no subscription"
+        ? "Readings with Selene, the SeerTarot AI reader · never expire · one-time payment, no subscription"
         : "เปิดไพ่กับแม่หมอ SeerTarot · รอบไม่มีวันหมดอายุ · จ่ายครั้งเดียว ไม่มีรายเดือน",
       imageUrl: checkoutArtUrl(origin, "credits"),
       // อีเมลรูปแบบผิด = Stripe ตอบ 400 ทั้งรายการ — ส่งเฉพาะที่หน้าตาเป็นอีเมลจริง (บัญชี LINE อาจไม่มีอีเมล)

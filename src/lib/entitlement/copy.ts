@@ -367,7 +367,7 @@ const ACCESS_PLANS: AccessPlan[] = [
     priceNote: REQUIRE_SIGNUP_TO_READ ? "อ่านเนื้อหาได้โดยไม่ต้องสมัคร" : "ไม่ต้องสมัคร",
     features: [
       REQUIRE_SIGNUP_TO_READ
-        ? { label: "เปิดไพ่กับแม่หมอ AI (ต้องสมัครสมาชิกฟรีก่อน)", included: false }
+        ? { label: "เปิดไพ่กับ Selene (ต้องสมัครสมาชิกฟรีก่อน)", included: false }
         : { label: `เปิดไพ่ทดลอง ${GUEST_LIMIT} ครั้ง`, included: true },
       { label: "คลังความหมายไพ่ 78 ใบ", included: true },
       { label: "คลังผังและบทความทาโรต์ทั้งเว็บ", included: true },

@@ -406,7 +406,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 
-                <h3 className="font-semibold text-sm text-ink">แม่หมอ AI (ผู้ให้บริการ)</h3>
+                <h3 className="font-semibold text-sm text-ink">ผู้ให้บริการ AI ของ Selene</h3>
               </div>
               <StatusPill ok={data.services.ai.ok} />
             </div>

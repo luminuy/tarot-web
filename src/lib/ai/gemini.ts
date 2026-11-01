@@ -556,7 +556,7 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
    * ไพ่เท่าที่มาทันแล้วเติมช่องว่างด้วยข้อความสำเร็จรูป + หักสิทธิ์" ซึ่งผิดทั้งคู่
    * ตอนนี้ไม่ทำแบบนั้นแล้ว: ของที่เขียนมาครึ่งทางถูก `reset` ทิ้งไปแล้วตั้งแต่ในลูป (ไม่มีการเติม)
    * แล้วเสิร์ฟคำอ่านสำรองที่ประกอบจากไพ่ครบทุกใบจากสารานุกรม · usage = 0 ➔ route คืนสิทธิ์ให้
-   * · หน้าเว็บขึ้น `FallbackNotice` พร้อมปุ่มให้แม่หมอ AI อ่านไพ่ชุดเดิมใหม่ — ผู้ใช้ได้อ่านเสมอ ไม่ใช่จอว่าง
+   * · หน้าเว็บขึ้น `FallbackNotice` พร้อมปุ่มให้ Selene อ่านไพ่ชุดเดิมใหม่ — ผู้ใช้ได้อ่านเสมอ ไม่ใช่จอว่าง
    */
   recordEvent(`ai_incomplete_reading:${lastFailure ?? "unknown"}`);
   yield* streamMockGeminiReading(ctx, "incomplete_output");
