@@ -14,6 +14,7 @@ import {
   stripThinkingTags,
 } from "@/lib/ai/language";
 import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
+import { aiFailureContext } from "@/lib/ai/geo-block";
 import { checkReadingConsistency } from "@/lib/ai/consistency";
 import { tallyYesNo } from "@/data/cards/yes-no";
 import { enforceThaiQuality } from "@/lib/ai/thai-quality";
@@ -241,11 +242,12 @@ async function fetchGeminiStream(args: {
 
       // log body ด้วย (ไม่ใช่แค่ status) — ช่วยแยก "คีย์ผิด" / "โมเดลไม่มี" / "โควตาหมด" ได้ทันทีจาก Worker log
       const errBody = await res.text().catch(() => "");
+      const { note, geoBlocked } = await aiFailureContext("gemini", res.status, errBody);
       console.warn(
-        `Gemini Model ${args.model} returned status: ${res.status} · ${errBody.slice(0, 300)}`,
+        `Gemini Model ${args.model} returned status: ${res.status}${note} · ${errBody.slice(0, 300)}`,
       );
-      // 400 ตอนส่งเพดาน = น่าจะเป็นเพราะเพดานนั่นแหละ ลองใหม่แบบไม่ส่ง
-      if (withBudget && res.status === 400) {
+      // 400 ตอนส่งเพดาน = น่าจะเป็นเพราะเพดานนั่นแหละ ลองใหม่แบบไม่ส่ง (ยกเว้นถูกบล็อกตามเขต — ยิงซ้ำก็ไม่ผ่าน)
+      if (withBudget && res.status === 400 && !geoBlocked) {
         recordEvent("ai_gemini_budget_rejected");
         continue;
       }

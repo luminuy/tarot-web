@@ -61,6 +61,7 @@
 - งานที่ยิงเข้า production จากภายนอก (cron · webhook) ต้องยิงจริงจากเครื่องตัวจริง · cron ยิงเข้า workers.dev ตั้ง User-Agent เอง และอ่านเนื้อ 403 แยกจาก 401 (INC-0141 · INC-0142)
 - Service Worker: ตรวจ "การเปิดหน้าเว็บ" ก่อนกฎคำนำหน้าเส้นทาง · ผู้เข้าครั้งแรกต้อง reload 0 ครั้ง · เวอร์ชันแคชเปลี่ยนเองทุก deploy (`test-sw-reload`) (INC-0096 · INC-0164 · INC-0188b)
 - แคชหน้า Next ห้ามใช้ KV · ชื่อ KV binding ต้องตรงกับโค้ด · กฎ lifecycle ของ R2 อยู่ในโค้ดที่ deploy.yml รันทุกรอบ ห้ามตั้งมือ ห้ามครอบ `studio-logo/` (INC-0287 · INC-0304)
+- Worker ที่เรียก AI ต้องรันในเขตที่ผู้ให้บริการเปิดให้ใช้: ตั้ง `placement.region` ใน `wrangler.jsonc` (ห้ามเขตฮ่องกง · ผู้ใช้ไทยบางเครือข่ายถูกส่งไป HKG แล้ว Anthropic/Gemini ปฏิเสธพร้อมกัน) · log AI ที่ล้มต้องบอก colo เพื่อแยกการบล็อกตามเขตออกจากคีย์ผิด (INC-0314)
 
 ### Astro · Next · บันเดิล · ความเร็ว
 
@@ -242,6 +243,17 @@ npm run commit -- --agent <ชื่อ> --type fix --scope <หมวด> \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0314 · 2026-11-02 12:27 · 🟠 High · คำอ่านตกไปตัวสำรอง: Claude 403 Request not allowed + Gemini ล้มทุกโมเดลพร้อมกัน เพราะ Worker รันในเขตที่ผู้ให้บริการ AI บล็อก
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | log ขึ้น [Claude Reading claude-haiku-5-5] status 403 Request not allowed แล้วตามด้วย ทุก Gemini Model ไม่ตอบสนอง ในวินาทีเดียวกัน คำอ่านตกไปใช้ Local Reading Stream (2026-11-01 20:02 และ 20:40) |
+| **สาเหตุราก** | Worker รันในศูนย์ข้อมูลที่ใกล้ผู้ใช้ที่สุด ผู้ใช้ไทยบางเครือข่ายถูกส่งไปฮ่องกงซึ่ง Anthropic Gemini OpenAI ไม่เปิดให้ใช้ จึงล้มพร้อมกันทุกเจ้า และ log ไม่บอกว่ารันที่ศูนย์ไหนจึงพิสูจน์ไม่ได้ |
+| **การแก้ไข** | wrangler.jsonc placement.region = gcp:asia-southeast1 ให้ Worker รันใกล้สิงคโปร์ · src/lib/ai/geo-block.ts ต่อ colo และ geo-blocked ท้าย log AI ที่ล้มทุกเจ้า + นับ ai_geo_block · Gemini ไม่ยิงซ้ำเมื่อถูกบล็อกตามเขต |
+| **🛡️ กฎป้องกันถาวร** | **ตั้ง placement.region ใน wrangler.jsonc ให้ Worker รันในเขตที่ผู้ให้บริการ AI เปิดให้ใช้ (ด่าน test-claude-reading ห้ามเขตฮ่องกง) · log AI ที่ล้มต้องมี colo** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/gracious-maxwell-gk0ev9` · commit `5b4f31a` |
+
+
 ### INC-0313 · 2026-11-02 11:44 · 🔵 Low · สีคลุมข้อความบนแถบครีมอ่านไม่ออก + ตัวเอียงไทยในแถบหน้าต่างขาดท้ายคำ
 
 | หัวข้อ | รายละเอียด |

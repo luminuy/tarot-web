@@ -43,6 +43,7 @@ import {
   resolveMaxReadingTokens,
 } from "@/lib/ai/reading-stream";
 import { aiGatewayHeaders, anthropicMessagesEndpoint } from "@/lib/ai/gateway";
+import { aiFailureContext } from "@/lib/ai/geo-block";
 import { recordEvent } from "@/lib/stats/record";
 import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/lib/ai/prompt";
 import { linkAbortSignal, readWithIdleTimeout } from "@/lib/ai/abort";
@@ -179,7 +180,8 @@ export async function* streamClaudeReading(ctx: ReadingContext): AsyncGenerator<
 
     if (!res.ok || !res.body) {
       const errText = await res.text().catch(() => "");
-      console.warn(`[Claude Reading ${model}] status ${res.status}: ${errText.slice(0, 200)}`);
+      const { note } = await aiFailureContext("claude", res.status, errText);
+      console.warn(`[Claude Reading ${model}] status ${res.status}${note}: ${errText.slice(0, 200)}`);
       recordEvent(`ai_claude_http:${res.status}`);
       pauseClaudeAfterStatus(res.status, res.headers.get("retry-after"));
       return;
@@ -327,6 +329,9 @@ export async function generateClaudeReply(opts: {
       }),
     });
     if (!res.ok) {
+      const errText = await res.text().catch(() => "");
+      const { note } = await aiFailureContext("claude", res.status, errText);
+      console.warn(`[Claude JSON ${opts.model}] status ${res.status}${note}: ${errText.slice(0, 200)}`);
       recordEvent(`ai_claude_http:${res.status}`);
       pauseClaudeAfterStatus(res.status, res.headers.get("retry-after"));
       return null;

@@ -31,6 +31,7 @@ import { linkAbortSignal, readWithIdleTimeout } from "@/lib/ai/abort";
 import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
 import type { ReadingEvent } from "@/lib/ai/types";
 import { clampToBudget } from "@/lib/ai/retry-budget";
+import { aiFailureContext } from "@/lib/ai/geo-block";
 
 /**
  * ลำดับนี้ตั้งใจให้ Qwen มาก่อน — คุณภาพภาษาไทยดีที่สุดในสี่ตัว (มี QA test ล็อกไว้)
@@ -194,7 +195,8 @@ export async function generateGroqChatReply(options: GroqChatOptions): Promise<{
 
       if (!res.ok) {
         const errText = await res.text().catch(() => "");
-        console.warn(`[Groq ${model}] status ${res.status}: ${errText.slice(0, 200)}`);
+        const { note } = await aiFailureContext("groq", res.status, errText);
+        console.warn(`[Groq ${model}] status ${res.status}${note}: ${errText.slice(0, 200)}`);
         // 429 = โควตาเต็ม — ยิงโมเดลถัดไปทันทีคือการซ้ำเติม ไม่ใช่การกู้คืน (T-42)
         if (res.status === 429 || res.status >= 500) {
           recordEvent(`ai_groq_backoff:${res.status}`);
@@ -474,7 +476,8 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
 
       if (!res.ok || !res.body) {
         const errText = await res.text().catch(() => "");
-        console.warn(`[Groq Reading ${model}] status ${res.status}: ${errText.slice(0, 200)}`);
+        const { note } = await aiFailureContext("groq", res.status, errText);
+        console.warn(`[Groq Reading ${model}] status ${res.status}${note}: ${errText.slice(0, 200)}`);
         // หน่วงก่อนลองโมเดลถัดไปเมื่อโดนจำกัดโควตา/เซิร์ฟเวอร์ขัดข้อง (T-42)
         if (res.status === 429 || res.status >= 500) {
           recordEvent(`ai_groq_backoff:${res.status}`);
