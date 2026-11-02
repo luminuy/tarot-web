@@ -163,7 +163,9 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
                         aria-label={isEnglish ? card.nameEn : card.nameTh}
                         className="v2-ca-thumb"
                       >
-                        <CardImage image={card.image} cardId={card.id} alt="" className="w-full h-full object-cover" sizes="44px" />
+                        {/* ภาพย่อกว้าง 40px — `thumb` = <img> เดียว WebP 64w/128w แทน <picture> + srcset 6 ขนาดถึง 768w (+ AVIF บน production)
+                            × 78 แถว · ลด HTML หน้า /cards/all ราว 1.5 KB gzip ในเครื่อง และมากกว่านั้นบน CI ที่มี AVIF (2026-11-02) */}
+                        <CardImage image={card.image} cardId={card.id} alt="" thumb className="w-full h-full object-cover" sizes="40px" />
                       </Link>
                     </td>
                     <td className="is-name">
