@@ -32,6 +32,10 @@ const CONTENT_UPDATED_AT: Record<string, Date> = Object.fromEntries([
   ...["love", "career", "money", "health", "family", "study"].map(
     (slug) => [`/spreads/topic/${slug}`, new Date("2026-10-26T17:00:00+07:00")] as const
   ),
+  // 2026-11-02 (ผล GSC): หน้าไพ่รายใบมีลิงก์ "ความหมายไพ่ยิปซีทั้ง 78 ใบ" · /cards/all มีคู่มือ + คำถามที่พบบ่อย · /spreads/monthly มีคู่มือ
+  ...DECK.map((card) => [`/cards/${card.id}`, new Date("2026-11-02T17:00:00+07:00")] as const),
+  ["/cards/all", new Date("2026-11-02T17:00:00+07:00")] as const,
+  ["/spreads/monthly", new Date("2026-11-02T17:00:00+07:00")] as const,
 ]);
 
 export default function sitemap(): MetadataRoute.Sitemap {

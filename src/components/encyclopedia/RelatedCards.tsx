@@ -22,9 +22,19 @@ export function RelatedCards({ cardId }: { cardId: string }) {
 
   return (
     <section className="page-band page-band-tint">
-      <h2 className="font-serif-th text-sm font-bold text-gold-ink mb-4"><ThaiPhrases>
-        {isEnglish ? "Resonant & Harmonious Cards" : "ไพ่ที่พลังงานใกล้เคียง"}
-      </ThaiPhrases></h2>
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <h2 className="font-serif-th text-sm font-bold text-gold-ink"><ThaiPhrases>
+          {isEnglish ? "Resonant & Harmonious Cards" : "ไพ่ที่พลังงานใกล้เคียง"}
+        </ThaiPhrases></h2>
+        {/* GSC 2026-11-02: คำ "ความหมายไพ่ยิปซี/ไพ่ทาโร่" ค้างอันดับ 10–13 ที่ /cards/all
+            — หน้าไพ่ 78 ใบลิงก์กลับด้วยคำที่คนค้นจริง (ก่อนหน้านี้ไม่มีหน้าไพ่รายใบลิงก์ไปตารางเลย) */}
+        <Link
+          href="/cards/all"
+          className="text-xs font-serif-th text-muted hover:text-gold-ink transition-colors text-right"
+        >
+          {isEnglish ? "All 78 card meanings" : "ความหมายไพ่ยิปซีทั้ง 78 ใบ"}
+        </Link>
+      </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {cards.map((c) => (
           <Link

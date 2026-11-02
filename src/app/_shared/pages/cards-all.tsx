@@ -10,7 +10,10 @@ import type { Locale } from "@/lib/i18n/types";
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { Ui2Crumbs } from "@/components/ui2/Ui2PageHero";
+import { FrFan, FrList, FrMock, FrPanel, Ui2FeatureRows } from "@/components/ui2/Ui2Blocks";
 import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
+import { CARDS_ALL_GUIDE_TH } from "@/data/cards-all-guide";
+import { buildFaqPageJsonLd } from "@/lib/seo/faq";
 
 const PATH = "/cards/all";
 
@@ -103,10 +106,19 @@ export function CardsAllBody({ locale, table }: { locale: Locale; table: ReactNo
     { name: copy.crumbHere, path: PATH },
   ]);
 
+  // คู่มือ + คำถามที่พบบ่อย (ไทยเท่านั้น · ดูเหตุผลใน `src/data/cards-all-guide.ts`)
+  const guide = locale === "th" ? CARDS_ALL_GUIDE_TH : null;
+
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen text-ink p-4 sm:p-8 font-sans relative overflow-x-clip">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(collectionJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbsJsonLd) }} />
+      {guide && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(buildFaqPageJsonLd(guide.faqs)) }}
+        />
+      )}
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
         {/* v2 — หัวสั้นชิดซ้าย ให้ตารางขึ้นเร็ว (v1 หัวใหญ่ + ไพ่ลอยดันตารางลงจอที่สอง) */}
@@ -135,6 +147,48 @@ export function CardsAllBody({ locale, table }: { locale: Locale; table: ReactNo
 
         {/* Interactive Master Table — แถบสีอ่อนแบ่งจากหัวหน้าแบบหน้าแรก (`page-band`) · ห่อ div เพราะ <astro-island> เป็น display:contents */}
         <div>{table}</div>
+
+        {/* คู่มืออ่านความหมาย — แถวสลับซ้ายขวาแบบหน้าคู่มือผัง (HTML นิ่ง · คำถามพับเป็น <details>) */}
+        {guide && (
+          <Ui2FeatureRows
+            id="ca-guide-h"
+            kicker="คู่มือ"
+            title={guide.title}
+            lede={guide.lede}
+            className="v2-ca-guide"
+            rows={guide.blocks.map((block) => ({
+              title: block.heading,
+              kicker: block.kicker,
+              mock: (
+                <FrMock tint={block.mock.tint}>
+                  <FrFan cards={block.mock.fan} />
+                  <FrPanel label={block.mock.panel.label}>
+                    <FrList items={block.mock.panel.items} />
+                  </FrPanel>
+                </FrMock>
+              ),
+              body: (
+                <>
+                  {block.paragraphs.map((p) => (
+                    <p key={p}>{p}</p>
+                  ))}
+                  {block.points && (
+                    <dl className="v2-ca-gpoints">
+                      {block.points.map((pt) => (
+                        <div key={pt.term}>
+                          <dt>{pt.href ? <Link href={pt.href} prefetch={false}>{pt.term}</Link> : pt.term}</dt>
+                          <dd>{pt.text}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+                </>
+              ),
+            }))}
+            restLabel="คำถามที่พบบ่อย"
+            rest={guide.faqs.map((f) => ({ q: f.question, a: <p>{f.answer}</p> }))}
+          />
+        )}
       </div>
     </main>
   );

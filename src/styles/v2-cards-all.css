@@ -326,3 +326,34 @@
     display: none;
   }
 }
+
+/* คู่มืออ่านความหมายใต้ตาราง (`cards-all-guide.ts` · ไทยเท่านั้น) — โครงเป็น `Ui2FeatureRows` (ui2-blocks.css)
+   ไฟล์นี้แต่งเฉพาะรายการในคอลัมน์ข้อความ: เส้นทองซ้าย ไม่มีจุดนำ (กฎเหล็ก 2) · ชุดเดียวกับ `.v2-sd-gpoints` หน้าคู่มือผัง */
+.v2-ca-guide {
+  margin-top: 56px;
+  margin-bottom: 48px;
+}
+.v2-ca-gpoints {
+  display: grid;
+  gap: 14px;
+  margin: 4px 0 0;
+}
+.v2-ca-gpoints > div {
+  padding-left: 14px;
+  border-left: 2px solid rgba(255, 217, 143, 0.4);
+}
+.v2-ca-gpoints dt {
+  font-family: var(--ui2-font-display);
+  font-weight: 500;
+  font-size: 16.5px;
+  color: var(--ui2-on-night);
+}
+.v2-ca-gpoints dt a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 217, 143, 0.45);
+  text-underline-offset: 4px;
+}
+.v2-ca-gpoints dd {
+  margin: 2px 0 0;
+}
