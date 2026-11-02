@@ -125,29 +125,30 @@ export default function NatalSynastry({ chart, lang, meta }: { chart: NatalChart
     const pName = partner.name;
     const cats = [...syn.categories].sort((x, y) => y.score - x.score);
     const overall = syn.categories.reduce((t, c) => t + c.score, 0) / syn.categories.length;
+    // บอกตรง ๆ ว่าเข้ากันง่ายแค่ไหน และเรื่องไหนต้องดูแล — ไม่ฟันธงว่าไปรอด/ไม่รอด (กฎหัวไฟล์ synastry.ts)
     const verdict = isTh
       ? overall >= 7
-        ? "เข้ากันดีมาก"
+        ? "เข้ากันง่ายมาก"
         : overall >= 5.5
           ? "เข้ากันดี"
           : overall >= 4.5
-            ? "กลาง ๆ ต้องปรับเข้าหากันบ้าง"
-            : "ต่างกันมาก ต้องใช้ความเข้าใจกันสูง"
+            ? "เข้ากันได้ครึ่งทาง อีกครึ่งต้องปรับเข้าหากัน"
+            : "ต่างกันมาก ต้องตั้งใจเข้าใจกันทุกวัน"
       : overall >= 7
         ? "A very easy match"
         : overall >= 5.5
           ? "A good match"
           : overall >= 4.5
-            ? "Middle ground, some adjusting needed"
-            : "Very different, needs a lot of understanding";
+            ? "Half easy, half needs adjusting"
+            : "Very different; understanding each other takes daily effort";
     const best = cats[0];
     const weak = cats[cats.length - 1];
     const rows: { label: string; text: React.ReactNode }[] = [
       {
         label: isTh ? `โดยรวม ${overall.toFixed(1)}/10` : `Overall ${overall.toFixed(1)}/10`,
         text: isTh
-          ? `${verdict} เด่นเรื่อง${SYN_CATEGORY_TEXT[best.key].name.th} ส่วนเรื่อง${SYN_CATEGORY_TEXT[weak.key].name.th}ต้องดูแลมากกว่า`
-          : `${verdict}. Strongest in ${SYN_CATEGORY_TEXT[best.key].name.en.toLowerCase()}; ${SYN_CATEGORY_TEXT[weak.key].name.en.toLowerCase()} needs the most care.`,
+          ? `${verdict} จุดแข็งของคู่นี้คือเรื่อง${SYN_CATEGORY_TEXT[best.key].name.th} ส่วนเรื่องที่ต้องดูแลมากที่สุดคือ${SYN_CATEGORY_TEXT[weak.key].name.th}`
+          : `${verdict}. Your strongest area is ${SYN_CATEGORY_TEXT[best.key].name.en.toLowerCase()}; the one that needs the most care is ${SYN_CATEGORY_TEXT[weak.key].name.en.toLowerCase()}.`,
       },
     ];
     const good = syn.aspects.find((a) => toneOf(a.type) === "harmonious");
@@ -186,8 +187,8 @@ export default function NatalSynastry({ chart, lang, meta }: { chart: NatalChart
     <div className="space-y-6 sm:space-y-8">
       <p className="v2-nr-lead">
         {isTh
-          ? "เทียบผังของคุณกับอีกคน ดูว่าดาวของสองคนคุยกันแบบไหน ใช้เป็นแนวทางทำความเข้าใจกัน ไม่ใช่คำตัดสินว่าคู่ไหนไปรอดหรือไม่รอด"
-          : "Compare your chart with someone else's to see how your planets meet. Use it to understand each other, not as a verdict."}
+          ? "เทียบผังของคุณกับอีกคน ดูว่าเรื่องไหนเข้ากัน เรื่องไหนชนกัน แล้วใช้ดูแลกันให้ถูกจุด ผังคู่ไม่ได้ตัดสินว่าคู่ไหนไปรอดหรือไม่รอด"
+          : "Compare your chart with someone else's to see what works and what clashes, so you can look after each other in the right places. It is not a verdict on whether you will last."}
       </p>
 
       {ranked.length > 0 && (
@@ -308,8 +309,8 @@ export default function NatalSynastry({ chart, lang, meta }: { chart: NatalChart
               </ul>
               <p className="v2-nr-note">
                 {isTh
-                  ? "คะแนนเริ่มที่ 5 มุมกลมกลืนบวก มุมตึงลบครึ่งหนึ่ง (มุมตึงก็สร้างแรงดึงดูดและการเติบโต)"
-                  : "Scores start at 5; harmonious aspects add, tense ones subtract half (tension also creates attraction and growth)."}
+                  ? "คะแนนเริ่มที่ 5 มุมกลมกลืนบวก มุมตึงลบครึ่งหนึ่ง (มุมตึงสร้างแรงดึงดูดด้วย) ด้านที่ต่ำกว่า 5 คือเรื่องที่สองคนต้องคุยและตกลงกันให้ชัด"
+                  : "Scores start at 5; harmonious aspects add, tense ones subtract half (tension also creates attraction). Any area below 5 is one you two need to talk through and agree on."}
               </p>
             </div>
           </section>
@@ -438,14 +439,19 @@ export default function NatalSynastry({ chart, lang, meta }: { chart: NatalChart
                   moon: isTh ? "ใจของคู่นี้" : "Heart",
                   asc: isTh ? "ภาพที่คนอื่นเห็น" : "How others see you",
                 }[id];
-                return [
-                  {
-                    label: `${what}: ${signName(b.sign, lang)}`,
-                    text: isTh
-                      ? `คู่นี้มีพลังแบบ${SIGN_TEXT[b.sign].keywords.th}${b.house ? ` และเติบโตผ่านเรื่อง${HOUSE_TEXT[b.house - 1].arena.th}` : ""}`
-                      : `A ${SIGN_TEXT[b.sign].keywords.en} energy${b.house ? `, growing through ${HOUSE_TEXT[b.house - 1].arena.en}` : ""}.`,
-                  },
-                ];
+                const kw = SIGN_TEXT[b.sign].keywords[lang];
+                const arena = b.house ? HOUSE_TEXT[b.house - 1].arena[lang] : "";
+                /* แยกตามจุด: แก่น = อยู่ด้วยกันแบบไหน · ใจ = รู้สึกมั่นคงเมื่อไร · ลัคนา = คนอื่นเห็นคู่นี้อย่างไร */
+                const text = {
+                  sun: isTh
+                    ? `คู่นี้อยู่ด้วยกันแบบคน${kw}${arena ? ` และเติบโตผ่านเรื่อง${arena}` : ""}`
+                    : `Together you are ${kw}${arena ? `, and you grow through ${arena}` : ""}.`,
+                  moon: isTh
+                    ? `คู่นี้รู้สึกมั่นคงทางใจเมื่อได้เป็นคู่ที่${kw}${arena ? ` และใจของคู่นี้ผูกอยู่กับเรื่อง${arena}` : ""}`
+                    : `You feel emotionally secure as a couple when you can be ${kw}${arena ? `, and your shared heart is tied to ${arena}` : ""}.`,
+                  asc: isTh ? `คนอื่นเห็นคู่นี้เป็นคู่ที่${kw}` : `Others see the two of you as ${kw}.`,
+                }[id];
+                return [{ label: `${what}: ${signName(b.sign, lang)}`, text }];
               })}
             />
             <NatalWheel chart={syn.composite} lang={lang} focus={null} onFocus={() => undefined} showMinor={false} />

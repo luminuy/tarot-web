@@ -11,6 +11,7 @@ import { ASPECT_TEXT, BODY_TEXT, DIGNITY_TEXT, ELEMENT_TEXT, HOUSE_TEXT, MODALIT
 import { formatDegree, type BodyId, type NatalChart } from "./natal";
 import { bodyName, cardsFor, signName } from "./natal-text";
 import type { Highlight } from "./natal-insight";
+import { chartVerdicts } from "./natal-verdict";
 import type { TransitResult } from "./techniques";
 
 const MAIN: readonly BodyId[] = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron", "node", "lilith", "asc", "mc", "fortune", "vertex", "ceres", "pallas", "juno", "vesta"];
@@ -92,6 +93,9 @@ export function formatChartForPrompt(chart: NatalChart, lang: Lang, birthLine: s
     L.push(th ? "\nเรื่องเด่นที่สุดของผัง (SeerTarot คำนวณและเรียงจากน้ำหนักมากไปน้อย):" : "\nThe chart's strongest themes (calculated by SeerTarot, most important first):");
     highlights.forEach((h, i) => L.push(`h${i + 1}: ${h.title} (${h.basis}) | ${h.text}`));
   }
+  // ข้อสรุปฟันธงชุดเดียวกับหน้าเว็บ — AI ต้องตอบไม่สวนกับที่ผู้ใช้เห็นบนหน้า (เจ้าของ 2026-11-02)
+  L.push(th ? "\nข้อสรุปฟันธงของผัง (SeerTarot คำนวณ · ตอบให้ตรงกับข้อสรุปนี้):" : "\nThe chart's verdicts (calculated by SeerTarot; keep your answer consistent with them):");
+  for (const v of chartVerdicts(chart, lang)) L.push(`- ${v.label}: ${v.verdict}${th ? " " : ". "}${v.text}`);
 
   // ไพ่ประจำตำแหน่ง (Golden Dawn) — ไพ่ที่คุยถึงได้มีแค่ชุดนี้ ไม่ใช่ไพ่ที่เปิด
   L.push(th ? "\nไพ่ทาโรต์ประจำตำแหน่ง (ระบบ Golden Dawn ไม่ใช่ไพ่ที่สุ่มเปิด):" : "\nTarot correspondences (Golden Dawn system, not drawn cards):");

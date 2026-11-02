@@ -94,7 +94,9 @@ export default function NatalThai({ spec, lang }: { spec: ChartSpec; lang: Lang 
             : []),
           {
             label: isTh ? "เลข 7 ตัว" : "Seven Numbers",
-            text: isTh ? `ผลรวมสูงสุด: ${colName(hiCol)} ${hi} · ต่ำสุด: ${colName(loCol)} ${lo}` : `Highest sum: ${colName(hiCol)} ${hi}. Lowest: ${colName(loCol)} ${lo}.`,
+            text: isTh
+              ? `เรื่องที่มีกำลังมากที่สุดคือ${colName(hiCol)} รวม ${hi} · เรื่องที่ต้องดูแลมากที่สุดคือ${colName(loCol)} รวม ${lo}`
+              : `Strongest: ${colName(hiCol)}, sum ${hi}. Needs the most care: ${colName(loCol)}, sum ${lo}.`,
           },
         ]}
       />

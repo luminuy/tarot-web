@@ -33,6 +33,7 @@ import {
 } from "@/lib/astro/natal";
 import { aspectTitle, bodyHeadline, bodyName, cardsFor, chartGlance, describeAspect, describeBody, describePattern, houseLine, keyAspects as keyAspectsOf, lifeAreas, signName } from "@/lib/astro/natal-text";
 import { birthTimeSensitivity, chartHighlights, describeTimeSensitivity, patternKey } from "@/lib/astro/natal-insight";
+import { chartVerdicts } from "@/lib/astro/natal-verdict";
 import { zodiacSignPath } from "@/lib/tarot/zodiac";
 import { smoothScrollBehavior } from "@/lib/use-motion-safe";
 import { NatalWheel } from "./NatalWheel";
@@ -246,6 +247,8 @@ export default function NatalResult({
     .map((r, i) => (i === 0 && themes.length ? { label: isTh ? "เรื่องเด่นถัดมา" : "Next strongest themes", lines: r.lines.slice(1) } : r))
     .filter((r) => r.lines.length > 0);
   const life = lifeAreas(chart, lang);
+  // ข้อสรุปฟันธง 3 บรรทัด (เจ้าของ 2026-11-02 เลือก "ข้อสรุป 3 บรรทัดบนสุด") — ให้คะแนนจากหลายจุดในผัง ไม่ใช้ AI
+  const verdicts = chartVerdicts(chart, lang);
 
   const nav = [
     ["natal-cards", isTh ? "ไพ่ประจำตัว" : "Tarot"],
@@ -352,6 +355,17 @@ export default function NatalResult({
             </a>
           </div>
         )}
+
+        <dl className="v2-nr-facets v2-nr-verdicts" aria-label={isTh ? "ฟันธงความรัก การงาน การเงิน" : "Love, work and money in one line each"}>
+          {verdicts.map((v) => (
+            <div key={v.key}>
+              <dt>{v.label}</dt>
+              <dd>
+                <b>{v.verdict}</b> {v.text}
+              </dd>
+            </div>
+          ))}
+        </dl>
 
         <dl className="v2-nr-facets" aria-label={isTh ? "สรุปผังของคุณ" : "Your chart at a glance"}>
           {facets.map((r) => (
@@ -724,8 +738,8 @@ export default function NatalResult({
         <section aria-labelledby="natal-houses" className="v2-nr-sec">
           <SectionHead id="natal-houses" n={nextN()} title={isTh ? "ดาวอยู่เรือนไหนของชีวิต" : "Where your planets live"}>
             {isTh
-              ? "เรือนที่มีดาวหลายดวงคือด้านของชีวิตที่คุณทุ่มพลังมาก เรือนที่ไม่มีดาวไม่ได้แปลว่าไม่มีเรื่อง ให้ดูว่าดาวเจ้าเรือนไปอยู่ไหน"
-              : "Houses with several planets are where you put the most energy. An empty house still matters: look at where its ruling planet sits."}
+              ? "เรือนที่มีดาวหลายดวงคือด้านของชีวิตที่คุณทุ่มพลังมากที่สุด เรือนที่ไม่มีดาวยังมีเรื่องอยู่ บรรทัดใต้กล่องบอกว่าเรื่องนั้นผูกกับเรือนไหน"
+              : "Houses with several planets are where you put the most energy. An empty house still matters: the line under it shows which house it is tied to."}
           </SectionHead>
           <ol className="v2-nr-houses">
             {chart.houses.map((cusp, i) => {
@@ -761,7 +775,9 @@ export default function NatalResult({
                 </p>
               ))}
               <p className="v2-nr-note">
-                {isTh ? "เวลาที่จดในสูติบัตรมักปัดเป็น 5 ถึง 15 นาที ถ้ามีข้อใดข้างบนอยู่ในช่วงนั้น ให้อ่านส่วนที่เกี่ยวข้องอย่างเผื่อใจ" : "Recorded birth times are often rounded to 5 to 15 minutes. If anything above falls in that range, read the related parts with some caution."}
+                {isTh
+                  ? "เวลาในสูติบัตรส่วนใหญ่ปัดเป็น 5 ถึง 15 นาที ถ้าข้อไหนข้างบนเปลี่ยนภายในช่วงนั้น ให้ถือว่าส่วนนั้นยังไม่แน่นอน จนกว่าจะยืนยันเวลาเกิดที่แม่นกว่านี้ได้"
+                  : "Birth certificates usually round to 5 to 15 minutes. If anything above changes within that range, treat that part as unconfirmed until you can verify a more exact birth time."}
               </p>
             </div>
           )}
@@ -783,7 +799,7 @@ export default function NatalResult({
                 <span className="v2-nr-asp-type">{ASPECT_TEXT[a.type].name[lang].replace(/\s*\(.*\)$/, "")}</span>
                 <b>{bodyName(a.b, lang)}</b>
               </span>
-              <span className="v2-nr-asp-text">{describeAspect(a, lang, { short })}</span>
+              <span className="v2-nr-asp-text">{describeAspect(a, lang, { short, strength: true })}</span>
               {inThemes && <span className="v2-nr-note">{isTh ? "อ่านแบบเต็มในเรื่องเด่นที่สุดของผัง" : "Explained in full under your strongest themes"}</span>}
             </li>
           ))}

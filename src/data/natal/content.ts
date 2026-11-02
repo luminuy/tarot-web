@@ -7,7 +7,10 @@
  * โดยไม่ต้องเขียน 1,800 ย่อหน้า · ดวงจันทร์และลัคนาเขียนแยกราศีละย่อหน้า (สองจุดที่คนอ่านมากที่สุด)
  * ดวงอาทิตย์ใช้คำอธิบายราศีเดิมจาก `src/data/zodiac.ts` (ผ่านการตรวจมาแล้วในหน้าราศี)
  *
- * ⚠️ ห้ามอิโมจิ/สัญลักษณ์ (กฎเหล็ก 2) · ภาษาคน ไม่ฟันธง (กฎเหล็ก 10) · ไพ่ใช้ระบบ Golden Dawn ชุดเดียวกับหน้าราศี
+ * ⚠️ ห้ามอิโมจิ/สัญลักษณ์ (กฎเหล็ก 2) · ภาษาคน (กฎเหล็ก 10) · ไพ่ใช้ระบบ Golden Dawn ชุดเดียวกับหน้าราศี
+ * เจ้าของ 2026-11-02 "เน้นความตรงแม่นยำ ไม่เอาตอบกลาง ๆ เซฟ · เข้าใจง่าย ตรงประเด็น ไม่กำกวม" ➔ เขียนเป็นข้อเท็จจริงของผัง
+ * ไม่ใช้คำกั๊ก (อาจ · บางที · ค่อนข้าง · may · might) · ไม่เขียน "A หรือ B หรือ C" ที่ครอบทุกผล · คำแนะนำเป็นคำสั่งที่ทำได้จริง ·
+ * แต่ยังไม่ทำนายเหตุร้าย ความตาย อุบัติเหตุ โรค การตั้งครรภ์ คดี หรือผลการลงทุน
  * ⏸️ รอแม่หมอตรวจเนื้อหา (เหมือนเนื้อหาราศีชุดอื่น) — ดู docs/plans/NATAL_CHART_PLAN_2026-10-27.md
  */
 import type { AspectType, BodyId, ChartWarning, Dignity, Element, HouseSystem, Modality, PatternType } from "@/lib/astro/natal";
@@ -172,7 +175,7 @@ export const BODY_TEXT: Record<BodyId, BodyText> = {
     short: { th: "พัล", en: "Pa" },
     theme: { th: "ปัญญา กลยุทธ์ และการมองเห็นรูปแบบ", en: "wisdom, strategy and pattern recognition" },
     noun: { th: "ปัญญาและกลยุทธ์", en: "wisdom and strategy" },
-    verb: { th: "วางกลยุทธ์ แก้ปัญหา และมองเห็นภาพรวม", en: "strategise, solve problems and see patterns" },
+    verb: { th: "วางกลยุทธ์ แก้ปัญหา และมองเห็นภาพรวม", en: "strategize, solve problems and see patterns" },
   },
   juno: {
     name: { th: "จูโน", en: "Juno" },
@@ -259,7 +262,7 @@ export const SIGN_TEXT: readonly SignText[] = [
   },
   {
     style: { th: "อย่างละเอียด ใส่ใจ และหาทางทำให้ดีขึ้น", en: "carefully, precisely and always improving" },
-    gift: { th: "ความช่างสังเกตและฝีมือในการช่วยเหลือ", en: "a sharp eye and skilful service" },
+    gift: { th: "ความช่างสังเกตและฝีมือในการช่วยเหลือ", en: "a sharp eye and skillful service" },
     watch: { th: "การติตัวเองจนเหนื่อยและกังวลเกินเหตุ", en: "self-criticism and worry" },
     keywords: { th: "ละเอียด มีระบบ ช่างช่วย", en: "analytical, orderly, helpful" },
   },
@@ -323,14 +326,14 @@ export const HOUSE_TEXT: readonly HouseText[] = [
 
 export const ASPECT_TEXT: Record<AspectType, { name: T; meaning: T }> = {
   conjunction: { name: { th: "กุม (0 องศา)", en: "Conjunction (0)" }, meaning: { th: "สองพลังนี้หลอมเป็นเรื่องเดียวกัน แยกกันไม่ออก", en: "these two forces fuse into one theme you cannot separate" } },
-  opposition: { name: { th: "เล็ง (180 องศา)", en: "Opposition (180)" }, meaning: { th: "สองพลังนี้ดึงกันคนละทาง ต้องหาจุดสมดุล และมักเห็นผ่านคนรอบตัว", en: "these pull in opposite directions; balance comes through relationships" } },
-  trine: { name: { th: "ตรีโกณ (120 องศา)", en: "Trine (120)" }, meaning: { th: "สองพลังนี้ไหลเข้าหากันง่าย เป็นพรสวรรค์ที่อาจมองข้ามเพราะมันง่ายเกินไป", en: "these flow together easily, a gift you may overlook because it comes so naturally" } },
-  square: { name: { th: "จตุโกณ (90 องศา)", en: "Square (90)" }, meaning: { th: "สองพลังนี้เสียดสีกันจนเกิดแรงผลัก เป็นบทเรียนที่ทำให้คุณแกร่งขึ้น", en: "these grind against each other and create drive, a lesson that makes you stronger" } },
+  opposition: { name: { th: "เล็ง (180 องศา)", en: "Opposition (180)" }, meaning: { th: "สองพลังนี้ดึงกันคนละทาง คุณเห็นอีกด้านผ่านคนใกล้ตัว และต้องใช้ทั้งสองด้านให้สมดุล", en: "these pull opposite ways; you meet the other side in people close to you and must balance both" } },
+  trine: { name: { th: "ตรีโกณ (120 องศา)", en: "Trine (120)" }, meaning: { th: "สองพลังนี้ไหลเข้าหากันง่าย เป็นพรสวรรค์ที่มีอยู่แล้ว และให้ผลเมื่อคุณตั้งใจใช้", en: "these flow together easily, a ready-made gift that pays off when you use it on purpose" } },
+  square: { name: { th: "จตุโกณ (90 องศา)", en: "Square (90)" }, meaning: { th: "สองพลังนี้ขัดกัน ทุกครั้งที่ต้องใช้พร้อมกันคุณจะติดขัด และแรงกดดันนี้คือสิ่งที่ผลักให้คุณลงมือ", en: "these clash, so you get stuck when you need both at once, and that pressure is what drives you" } },
   sextile: { name: { th: "โยค (60 องศา)", en: "Sextile (60)" }, meaning: { th: "สองพลังนี้เกื้อหนุนกันเมื่อคุณลงมือ เป็นโอกาสที่ต้องคว้าเอง", en: "these support each other once you take action, an opportunity you have to seize" } },
-  quincunx: { name: { th: "150 องศา (Quincunx)", en: "Quincunx (150)" }, meaning: { th: "สองพลังนี้ไม่เข้าขากันโดยธรรมชาติ ต้องปรับจูนกันอยู่เรื่อย ๆ", en: "these do not naturally fit, so you keep adjusting between them" } },
-  semisextile: { name: { th: "30 องศา (Semi-sextile)", en: "Semi-sextile (30)" }, meaning: { th: "สองพลังนี้เกี่ยวข้องกันเบา ๆ ค่อย ๆ เรียนรู้จากกัน", en: "a subtle link where each slowly learns from the other" } },
-  semisquare: { name: { th: "45 องศา (Semi-square)", en: "Semi-square (45)" }, meaning: { th: "เป็นความระคายเคืองเล็ก ๆ ที่สะสมจนต้องจัดการ", en: "small irritations that build up until you deal with them" } },
-  sesquiquadrate: { name: { th: "135 องศา (Sesquiquadrate)", en: "Sesquiquadrate (135)" }, meaning: { th: "เป็นแรงตึงที่ปะทุออกมาเป็นพัก ๆ", en: "tension that flares up from time to time" } },
+  quincunx: { name: { th: "150 องศา (Quincunx)", en: "Quincunx (150)" }, meaning: { th: "สองพลังนี้ไม่เข้าขากัน วิธีที่ได้ผลกับด้านหนึ่งใช้กับอีกด้านไม่ได้ คุณต้องปรับทีละนิดตลอด", en: "these do not fit; what works for one fails the other, so you keep adjusting" } },
+  semisextile: { name: { th: "30 องศา (Semi-sextile)", en: "Semi-sextile (30)" }, meaning: { th: "สองพลังนี้อยู่ติดกันแต่ไม่คุ้นกัน คุณต้องฝึกให้ทำงานร่วมกัน", en: "these sit side by side but feel unfamiliar; you have to train them to work together" } },
+  semisquare: { name: { th: "45 องศา (Semi-square)", en: "Semi-square (45)" }, meaning: { th: "เป็นความหงุดหงิดเล็ก ๆ ที่สะสมจนต้องจัดการ", en: "small irritations that build up until you deal with them" } },
+  sesquiquadrate: { name: { th: "135 องศา (Sesquiquadrate)", en: "Sesquiquadrate (135)" }, meaning: { th: "เป็นแรงตึงที่ปะทุเป็นพัก ๆ จัดการทันทีที่เริ่มรู้สึก อย่าปล่อยให้สะสม", en: "tension that flares up now and then; deal with it early, before it builds" } },
   quintile: { name: { th: "72 องศา (Quintile)", en: "Quintile (72)" }, meaning: { th: "เป็นพรสวรรค์เชิงสร้างสรรค์ที่ยิ่งฝึกยิ่งเก่ง", en: "a creative talent that grows with practice" } },
   biquintile: { name: { th: "144 องศา (Biquintile)", en: "Biquintile (144)" }, meaning: { th: "เป็นความสามารถเฉพาะตัวที่แสดงออกแบบไม่เหมือนใคร", en: "a distinctive talent expressed in your own unique way" } },
 };
@@ -358,12 +361,12 @@ export const MOON_SIGN_TEXT: readonly T[] = [
     en: "You need warmth and recognition shown openly. You love generously and hope to be valued the same way, and sincere appreciation refuels you like nothing else.",
   },
   {
-    th: "ใจคุณสงบเมื่อทุกอย่างเป็นระเบียบและได้ช่วยใครสักคน เวลากังวลมักจัดของหรือวางแผนเพื่อให้รู้สึกควบคุมได้ อย่าลืมใจดีกับตัวเองเท่ากับที่ใจดีกับคนอื่น",
-    en: "You feel calm when things are in order and you can be useful. Worry often sends you tidying or planning to regain control. Remember to be as kind to yourself as you are to others.",
+    th: "ใจคุณสงบเมื่อทุกอย่างเป็นระเบียบและได้ช่วยใครสักคน เวลากังวลคุณจะจัดของหรือวางแผนเพื่อให้รู้สึกควบคุมได้ ใจดีกับตัวเองให้เท่ากับที่ใจดีกับคนอื่น",
+    en: "You feel calm when things are in order and you can be useful. When worried, you tidy or plan to regain control. Be as kind to yourself as you are to others.",
   },
   {
-    th: "ใจคุณต้องการความสงบและความสัมพันธ์ที่ราบรื่น การทะเลาะทำให้คุณเหนื่อยใจมาก คุณมักรู้ใจคนอื่นได้ดี แต่บางครั้งก็ลืมถามใจตัวเองว่าต้องการอะไร",
-    en: "You need harmony and smooth relationships, and conflict drains you. You read other people well but sometimes forget to ask what you yourself want.",
+    th: "ใจคุณต้องการความสงบและความสัมพันธ์ที่ราบรื่น การทะเลาะทำให้คุณเหนื่อยใจมาก คุณอ่านใจคนอื่นได้ดี แต่ลืมถามใจตัวเอง ก่อนตอบตกลงใคร ให้ถามตัวเองก่อนว่าต้องการอะไร",
+    en: "You need harmony and smooth relationships, and conflict drains you. You read others well but forget to check in with yourself. Before you say yes to anyone, ask what you want.",
   },
   {
     th: "ใจคุณลึกและเข้มข้น ไม่ไว้ใจใครง่าย ๆ แต่เมื่อไว้ใจแล้วจะผูกพันสุดใจ คุณเก็บความรู้สึกเก่ง และต้องการความจริงใจแบบไม่มีอะไรปิดบัง",
@@ -374,16 +377,16 @@ export const MOON_SIGN_TEXT: readonly T[] = [
     en: "You need freedom, travel and something to believe in. Feeling fenced in makes you restless fast, and your mood lifts when you learn something new or see more of the world.",
   },
   {
-    th: "ใจคุณแข็งแรงและพึ่งตัวเองได้ คุณไม่ค่อยแสดงอารมณ์ให้ใครเห็น ความรู้สึกปลอดภัยมาจากการมีเป้าหมายและความสำเร็จที่จับต้องได้ อย่าลืมให้ตัวเองได้พักบ้าง",
-    en: "You are emotionally self-reliant and rarely show your feelings. Security comes from goals and tangible achievement. Remember that rest is allowed too.",
+    th: "ใจคุณแข็งแรงและพึ่งตัวเองได้ คุณไม่แสดงอารมณ์ให้ใครเห็นง่าย ๆ ความรู้สึกปลอดภัยมาจากการมีเป้าหมายและความสำเร็จที่จับต้องได้ ใส่เวลาพักลงในตารางเหมือนงานอื่น",
+    en: "You are emotionally self-reliant and rarely show your feelings. Security comes from goals and tangible achievement. Put rest on your schedule like any other task.",
   },
   {
-    th: "ใจคุณต้องการพื้นที่ส่วนตัวและเพื่อนที่เข้าใจความคิดแปลก ๆ ของคุณ คุณมักมองอารมณ์ตัวเองจากระยะห่างเหมือนนักสังเกตการณ์ ซึ่งช่วยให้ใจเย็น แต่บางครั้งก็ทำให้คนใกล้ตัวรู้สึกเข้าไม่ถึง",
-    en: "You need personal space and friends who get your unusual ideas. You tend to observe your feelings from a distance, which keeps you calm but can make loved ones feel shut out.",
+    th: "ใจคุณต้องการพื้นที่ส่วนตัวและเพื่อนที่เข้าใจความคิดแปลก ๆ ของคุณ คุณมองอารมณ์ตัวเองจากระยะห่างเหมือนคนดูอยู่ข้างนอก ใจจึงเย็นเร็ว แต่คนใกล้ตัวรู้สึกเข้าไม่ถึง บอกเขาตรง ๆ ว่าคุณรู้สึกอะไร",
+    en: "You need personal space and friends who get your unusual ideas. You watch your feelings from a distance, which calms you fast but leaves loved ones feeling shut out. Tell them plainly what you feel.",
   },
   {
-    th: "ใจคุณอ่อนไหวและรับรู้ความรู้สึกคนรอบตัวได้ราวกับเป็นของตัวเอง คุณเมตตามาก แต่ต้องมีเวลาอยู่เงียบ ๆ คนเดียวเพื่อชาร์จพลัง และควรตั้งขอบเขตให้ชัด",
-    en: "You are deeply sensitive and absorb other people's feelings as if they were your own. You are compassionate, but you need quiet time alone to recharge and clear boundaries to stay well.",
+    th: "ใจคุณอ่อนไหวและรับรู้ความรู้สึกคนรอบตัวได้ราวกับเป็นของตัวเอง คุณเมตตามาก แต่ต้องมีเวลาอยู่เงียบ ๆ คนเดียวเพื่อชาร์จพลัง และต้องตั้งขอบเขตให้ชัด",
+    en: "You are deeply sensitive and absorb other people's feelings as if they were your own. You are compassionate, but you need quiet time alone to recharge and firm boundaries to stay well.",
   },
 ];
 
@@ -402,8 +405,8 @@ export const RISING_TEXT: readonly T[] = [
     en: "People see you as chatty, quick-witted and youthful. You approach life with curiosity and like having several things going at once.",
   },
   {
-    th: "คนเห็นคุณเป็นคนอบอุ่น อ่อนโยน และน่าเข้าใกล้ คุณดูท่าทีก่อนเปิดใจ และมักดูแลคนรอบตัวโดยไม่รู้ตัว",
-    en: "People see you as warm, gentle and approachable. You test the waters before opening up, and you often look after others without noticing.",
+    th: "คนเห็นคุณเป็นคนอบอุ่น อ่อนโยน และน่าเข้าใกล้ คุณดูท่าทีก่อนเปิดใจ และดูแลคนรอบตัวโดยไม่รู้ตัว",
+    en: "People see you as warm, gentle and approachable. You test the waters before opening up, and you look after others without noticing.",
   },
   {
     th: "คนเห็นคุณเป็นคนมีเสน่ห์ มั่นใจ และโดดเด่น คุณเข้าหาชีวิตอย่างเปิดเผยและอยากให้สิ่งที่ทำมีความหมายต่อคนอื่น",
@@ -414,8 +417,8 @@ export const RISING_TEXT: readonly T[] = [
     en: "People see you as neat, observant and reliable. You start new things by gathering the details first.",
   },
   {
-    th: "คนเห็นคุณเป็นคนสุภาพ มีเสน่ห์ และเข้ากับคนง่าย คุณเข้าหาชีวิตผ่านความสัมพันธ์ และมักรู้จังหวะที่เหมาะสม",
-    en: "People see you as polite, charming and easy to get along with. You approach life through relationships and have a good sense of timing.",
+    th: "คนเห็นคุณเป็นคนสุภาพ มีเสน่ห์ และเข้ากับคนง่าย คุณเข้าหาชีวิตผ่านความสัมพันธ์ และรู้ว่าเมื่อไรควรพูด เมื่อไรควรถอย",
+    en: "People see you as polite, charming and easy to get along with. You approach life through relationships and know when to speak and when to step back.",
   },
   {
     th: "คนเห็นคุณเป็นคนลึกลับ มีพลัง และอ่านยาก คุณสังเกตคนอื่นก่อนเปิดเผยตัวเอง และมีสัญชาตญาณเรื่องคนที่แม่นยำ",
@@ -427,45 +430,45 @@ export const RISING_TEXT: readonly T[] = [
   },
   {
     th: "คนเห็นคุณเป็นคนจริงจัง เป็นผู้ใหญ่ และน่าเชื่อถือ คุณเริ่มทุกอย่างอย่างมีแผน และยิ่งอายุมากยิ่งผ่อนคลายขึ้น",
-    en: "People see you as serious, mature and trustworthy. You plan before you move, and you tend to relax as you get older.",
+    en: "People see you as serious, mature and trustworthy. You plan before you move, and you relax more as you get older.",
   },
   {
     th: "คนเห็นคุณเป็นคนเป็นมิตร มีเอกลักษณ์ และคิดไม่เหมือนใคร คุณเข้าหาชีวิตแบบไม่ยึดกรอบเดิม",
-    en: "People see you as friendly, original and a little unconventional. You approach life without following the usual script.",
+    en: "People see you as friendly, original and unconventional. You approach life without following the usual script.",
   },
   {
-    th: "คนเห็นคุณเป็นคนอ่อนโยน ช่างฝัน และเข้าถึงง่าย คุณรับรู้บรรยากาศรอบตัวได้ไว และมักปรับตัวตามสถานการณ์",
-    en: "People see you as gentle, dreamy and easy to open up to. You sense the mood of a room quickly and adapt to it.",
+    th: "คนเห็นคุณเป็นคนอ่อนโยน ช่างฝัน และเข้าถึงง่าย คุณรับรู้บรรยากาศรอบตัวได้ไว และปรับตัวตามบรรยากาศนั้นทันที",
+    en: "People see you as gentle, dreamy and easy to open up to. You sense the mood of a room quickly and adapt to it right away.",
   },
 ];
 
 export const DIGNITY_TEXT: Record<Dignity, { name: T; meaning: T }> = {
   domicile: { name: { th: "เกษตร", en: "Domicile" }, meaning: { th: "อยู่ราศีบ้านของตัวเอง พลังนี้ทำงานได้เต็มที่และเป็นธรรมชาติ", en: "it is at home here, so this energy works fully and naturally" } },
-  exaltation: { name: { th: "อุจจ์", en: "Exaltation" }, meaning: { th: "อยู่ราศีที่ยกย่องดาวนี้ พลังนี้โดดเด่นและมักได้รับการยอมรับ", en: "it is exalted here, so this energy stands out and is admired" } },
-  detriment: { name: { th: "ประ", en: "Detriment" }, meaning: { th: "อยู่ราศีตรงข้ามบ้านตัวเอง ต้องปรับวิธีใช้พลังนี้ให้เข้ากับสถานการณ์ ยากกว่าแต่สอนอะไรได้มาก", en: "it is opposite its home, so you must adapt how you use it; harder, but it teaches a lot" } },
-  fall: { name: { th: "นิจ", en: "Fall" }, meaning: { th: "อยู่ราศีที่พลังนี้อ่อน อาจรู้สึกไม่มั่นใจในเรื่องนี้ และเป็นจุดที่ฝึกแล้วเติบโตมาก", en: "it is weakest here, so you may feel unsure in this area; practice brings real growth" } },
+  exaltation: { name: { th: "อุจจ์", en: "Exaltation" }, meaning: { th: "อยู่ราศีที่ยกย่องดาวนี้ พลังนี้โดดเด่นและคนรอบตัวเห็นชัด", en: "it is exalted here, so this energy stands out and others notice it" } },
+  detriment: { name: { th: "ประ", en: "Detriment" }, meaning: { th: "อยู่ราศีตรงข้ามบ้านตัวเอง วิธีที่ดาวนี้ถนัดใช้ไม่ได้ผลตรง ๆ คุณต้องหาวิธีของตัวเอง และฝึกมากกว่าคนอื่น", en: "it is opposite its home, so the usual approach misfires; you must find your own way and practice more" } },
+  fall: { name: { th: "นิจ", en: "Fall" }, meaning: { th: "อยู่ราศีที่พลังนี้อ่อน คุณไม่มั่นใจในเรื่องนี้ตั้งแต่ต้น ต้องฝึกจริงจังถึงจะใช้ได้เต็มที่", en: "it is weakest here, so you start out unsure in this area; steady practice makes it work fully" } },
 };
 
 export const ELEMENT_TEXT: Record<Element, { name: T; strong: T; weak: T }> = {
   fire: {
     name: { th: "ไฟ", en: "Fire" },
     strong: { th: "ธาตุไฟเด่น: มีพลัง กล้าเริ่ม และกระตือรือร้น ระวังหมดไฟเพราะเร่งเกินไป", en: "Strong fire: energetic, brave and enthusiastic. Watch out for burnout from pushing too hard." },
-    weak: { th: "ธาตุไฟน้อย: อาจต้องหาแรงบันดาลใจจากภายนอก การออกกำลังกายและการตั้งเป้าเล็ก ๆ ช่วยจุดไฟได้", en: "Little fire: you may need outside inspiration. Exercise and small goals help light the spark." },
+    weak: { th: "ธาตุไฟน้อย: แรงจูงใจไม่มาเอง ต้องจุดจากข้างนอก ออกกำลังกายและตั้งเป้าเล็ก ๆ ที่ทำเสร็จได้ในวันเดียว", en: "Little fire: motivation does not come on its own. Exercise and set small goals you can finish in a day." },
   },
   earth: {
     name: { th: "ดิน", en: "Earth" },
     strong: { th: "ธาตุดินเด่น: ติดดิน ทำได้จริง และสร้างความมั่นคงเก่ง ระวังยึดติดกับสิ่งที่คุ้นเคย", en: "Strong earth: grounded, practical and good at building security. Watch out for getting stuck in the familiar." },
-    weak: { th: "ธาตุดินน้อย: ความคิดดีแต่ลงมือจริงยาก ลองใช้ตารางเวลาและงบประมาณช่วยให้เรื่องต่าง ๆ เป็นรูปธรรม", en: "Little earth: great ideas but follow-through is harder. Schedules and budgets help make things real." },
+    weak: { th: "ธาตุดินน้อย: ความคิดดีแต่ลงมือจริงยาก เขียนตารางเวลาและงบประมาณเป็นตัวเลข เพื่อให้เรื่องต่าง ๆ เกิดขึ้นจริง", en: "Little earth: great ideas, weak follow-through. Write schedules and budgets in numbers to make things real." },
   },
   air: {
     name: { th: "ลม", en: "Air" },
     strong: { th: "ธาตุลมเด่น: คิดเร็ว สื่อสารเก่ง และเข้าสังคมได้ดี ระวังคิดมากจนไม่ได้ลงมือ", en: "Strong air: quick thinking, articulate and sociable. Watch out for overthinking instead of acting." },
-    weak: { th: "ธาตุลมน้อย: อาจรู้สึกก่อนแล้วค่อยหาคำอธิบาย การเขียนหรือคุยกับคนที่ไว้ใจช่วยให้มองเห็นภาพชัดขึ้น", en: "Little air: you feel first and explain later. Writing or talking things through brings clarity." },
+    weak: { th: "ธาตุลมน้อย: คุณรู้สึกก่อนแล้วค่อยหาคำอธิบาย ก่อนตัดสินใจเรื่องสำคัญ ให้เขียนออกมาหรือคุยกับคนที่ไว้ใจ", en: "Little air: you feel first and explain later. Before big decisions, write it down or talk it through." },
   },
   water: {
     name: { th: "น้ำ", en: "Water" },
     strong: { th: "ธาตุน้ำเด่น: อ่อนไหว เข้าใจคน และมีสัญชาตญาณสูง ระวังรับอารมณ์คนอื่นมาเป็นของตัวเอง", en: "Strong water: sensitive, empathic and intuitive. Watch out for absorbing other people's moods." },
-    weak: { th: "ธาตุน้ำน้อย: อาจไม่ถนัดพูดเรื่องความรู้สึก การเปิดใจกับคนใกล้ชิดทีละนิดช่วยให้ความสัมพันธ์ลึกขึ้น", en: "Little water: feelings may be hard to put into words. Opening up a little at a time deepens your bonds." },
+    weak: { th: "ธาตุน้ำน้อย: คุณไม่ถนัดพูดเรื่องความรู้สึก เล่าความรู้สึกให้คนใกล้ชิดฟังทีละเรื่อง ความสัมพันธ์จะลึกขึ้น", en: "Little water: feelings are hard for you to put into words. Share one feeling at a time with someone close and your bonds deepen." },
   },
 };
 
@@ -476,7 +479,7 @@ export const MODALITY_TEXT: Record<Modality, { name: T; strong: T }> = {
 };
 
 export const HEMISPHERE_TEXT: Record<"north" | "south" | "east" | "west", { name: T; meaning: T }> = {
-  north: { name: { th: "ครึ่งล่าง (ใต้ขอบฟ้า)", en: "Below the horizon" }, meaning: { th: "ดาวส่วนใหญ่อยู่ใต้ขอบฟ้า: ชีวิตเน้นโลกภายใน ครอบครัว และการเติบโตส่วนตัวมากกว่าภาพในสังคม", en: "Most planets below the horizon: your life centres on your inner world, family and personal growth more than public image." } },
+  north: { name: { th: "ครึ่งล่าง (ใต้ขอบฟ้า)", en: "Below the horizon" }, meaning: { th: "ดาวส่วนใหญ่อยู่ใต้ขอบฟ้า: ชีวิตเน้นโลกภายใน ครอบครัว และการเติบโตส่วนตัวมากกว่าภาพในสังคม", en: "Most planets below the horizon: your life centers on your inner world, family and personal growth more than public image." } },
   south: { name: { th: "ครึ่งบน (เหนือขอบฟ้า)", en: "Above the horizon" }, meaning: { th: "ดาวส่วนใหญ่อยู่เหนือขอบฟ้า: ชีวิตหันออกสู่โลกภายนอก งาน และบทบาทในสังคม", en: "Most planets above the horizon: your life faces outward toward work, the world and your public role." } },
   east: { name: { th: "ครึ่งตะวันออก", en: "Eastern half" }, meaning: { th: "ดาวส่วนใหญ่อยู่ฝั่งตะวันออก: คุณกำหนดชีวิตเองได้มาก ถนัดเริ่มต้นด้วยตัวเอง", en: "Most planets in the east: you shape your own life and prefer to take the initiative." } },
   west: { name: { th: "ครึ่งตะวันตก", en: "Western half" }, meaning: { th: "ดาวส่วนใหญ่อยู่ฝั่งตะวันตก: ชีวิตเดินผ่านความสัมพันธ์และการร่วมมือกับคนอื่น", en: "Most planets in the west: your life unfolds through relationships and cooperation." } },
@@ -498,7 +501,7 @@ export const PATTERN_TEXT: Record<PatternType, { name: T; meaning: T }> = {
   "stellium-house": { name: { th: "ดาวรวมกลุ่มในเรือนเดียว", en: "Stellium in a house" }, meaning: { th: "ดาวตั้งแต่ 3 ดวงขึ้นไปอยู่เรือนนี้ ชีวิตคุณทุ่มพลังไปที่เรื่องของเรือนนี้มาก", en: "Three or more planets fall in this house, so this area of life absorbs much of your energy." } },
   "grand-trine": { name: { th: "สามเหลี่ยมใหญ่ (Grand Trine)", en: "Grand Trine" }, meaning: { th: "ดาวสามดวงทำมุม 120 องศากันครบ เป็นพรสวรรค์ที่ไหลลื่นในธาตุนี้ ระวังสบายจนไม่ฝึกต่อ", en: "Three planets in mutual trine: a flowing gift in this element. Do not let ease stop you from developing it." } },
   "t-square": { name: { th: "รูปตัว T (T-square)", en: "T-square" }, meaning: { th: "ดาวสองดวงเล็งกัน และทั้งคู่ทำมุมฉากกับดาวดวงที่สาม แรงกดดันไหลมารวมที่ดาวยอด เป็นเครื่องยนต์ของความพยายามในชีวิต", en: "Two planets in opposition both square a third. Pressure converges on the apex planet and becomes the engine of your ambition." } },
-  "grand-cross": { name: { th: "กากบาทใหญ่ (Grand Cross)", en: "Grand Cross" }, meaning: { th: "ดาวสี่ดวงทำมุมฉากและเล็งกันครบสี่ทิศ ชีวิตท้าทายแต่ทำให้คุณแข็งแกร่งและมีสมดุลมาก", en: "Four planets locked in squares and oppositions. Life is challenging, but it makes you strong and balanced." } },
+  "grand-cross": { name: { th: "กากบาทใหญ่ (Grand Cross)", en: "Grand Cross" }, meaning: { th: "ดาวสี่ดวงทำมุมฉากและเล็งกันครบสี่ทิศ แรงกดดันมาจากหลายเรื่องพร้อมกัน คุณรับมือได้ด้วยการจัดลำดับให้ชัด", en: "Four planets locked in squares and oppositions: pressure comes from several sides at once. You cope by setting clear priorities." } },
   yod: { name: { th: "นิ้วพระเจ้า (Yod)", en: "Yod (Finger of God)" }, meaning: { th: "ดาวสองดวงทำมุม 60 องศากัน และทั้งคู่ทำมุม 150 องศากับดาวยอด เป็นภารกิจเฉพาะตัวที่ต้องปรับจูนไปตลอดชีวิต", en: "Two planets in sextile both quincunx an apex planet: a personal mission you keep fine-tuning throughout life." } },
   kite: { name: { th: "ว่าว (Kite)", en: "Kite" }, meaning: { th: "สามเหลี่ยมใหญ่ที่มีดาวดวงที่สี่เป็นหาง ช่วยเปลี่ยนพรสวรรค์ให้กลายเป็นผลงานจริง", en: "A Grand Trine with a fourth planet as its tail, turning natural talent into real achievement." } },
 };
@@ -506,7 +509,7 @@ export const PATTERN_TEXT: Record<PatternType, { name: T; meaning: T }> = {
 export const HOUSE_SYSTEM_TEXT: Record<HouseSystem, { name: T; note: T }> = {
   placidus: { name: { th: "Placidus (นิยมที่สุด)", en: "Placidus (most popular)" }, note: { th: "แบ่งตามเวลาที่จุดบนท้องฟ้าใช้ขึ้นถึงจุดสูงสุด เป็นค่าเริ่มต้นของเว็บโหราสากลส่วนใหญ่", en: "Divides by the time each point takes to rise to the meridian; the default on most astrology sites." } },
   koch: { name: { th: "Koch", en: "Koch" }, note: { th: "คล้าย Placidus แต่แบ่งตามเวลาขึ้นของจุดกลางฟ้า นิยมในยุโรป", en: "Similar to Placidus but based on the rising time of the Midheaven degree; popular in Europe." } },
-  regiomontanus: { name: { th: "Regiomontanus", en: "Regiomontanus" }, note: { th: "แบ่งเส้นศูนย์สูตรฟ้าเท่า ๆ กัน นิยมในโหราศาสตร์ตอบคำถาม (Horary)", en: "Divides the celestial equator evenly; favoured in horary astrology." } },
+  regiomontanus: { name: { th: "Regiomontanus", en: "Regiomontanus" }, note: { th: "แบ่งเส้นศูนย์สูตรฟ้าเท่า ๆ กัน นิยมในโหราศาสตร์ตอบคำถาม (Horary)", en: "Divides the celestial equator evenly; favored in horary astrology." } },
   campanus: { name: { th: "Campanus", en: "Campanus" }, note: { th: "แบ่งวงกลมแนวดิ่งตะวันออก-ตะวันตก (Prime Vertical) เท่า ๆ กัน", en: "Divides the prime vertical into equal parts." } },
   porphyry: { name: { th: "Porphyry", en: "Porphyry" }, note: { th: "แบ่งช่วงระหว่างลัคนากับกลางฟ้าออกเป็นสามส่วนเท่ากัน ระบบเก่าแก่ ใช้ได้ทุกละติจูด", en: "Trisects each quadrant between the angles; ancient and works at every latitude." } },
   equal: { name: { th: "Equal (เรือนละ 30 องศาจากลัคนา)", en: "Equal (30 degrees from the Ascendant)" }, note: { th: "ทุกเรือนกว้าง 30 องศาพอดี เริ่มนับจากลัคนา", en: "Every house is exactly 30 degrees, counted from the Ascendant." } },
@@ -519,20 +522,20 @@ export const WARNING_TEXT: Record<ChartWarning["code"], T> = {
     en: "The birthplace is too close to the pole for this house system, so Porphyry houses are used instead.",
   },
   "moon-sign-uncertain": {
-    th: "ดวงจันทร์ย้ายราศีในวันที่คุณเกิด ถ้าไม่รู้เวลาเกิด ราศีของดวงจันทร์อาจเป็นราศีถัดไปหรือราศีก่อนหน้า",
-    en: "The Moon changed sign on your birthday. Without a birth time, your Moon sign could be the neighbouring sign.",
+    th: "ดวงจันทร์ย้ายราศีในวันที่คุณเกิด ถ้าไม่รู้เวลาเกิด ผังนี้แสดงราศีตอนเที่ยงวัน ถ้าคุณเกิดอีกฝั่งของเวลาที่ดวงจันทร์ย้าย ราศีจันทร์ของคุณคือราศีข้างเคียง ใส่เวลาเกิดเพื่อยืนยัน",
+    en: "The Moon changed sign on your birthday. Without a birth time this shows the noon sign; if you were born on the other side of the change, yours is the neighboring sign. Add your birth time to confirm.",
   },
   "sign-change-on-day": {
-    th: "มีดาวย้ายราศีในวันที่คุณเกิด ราศีของดาวเหล่านี้ขึ้นกับเวลาเกิด",
-    en: "Some planets changed sign on your birthday, so their sign depends on your birth time.",
+    th: "มีดาวย้ายราศีในวันที่คุณเกิด ราศีของดาวเหล่านี้ขึ้นกับเวลาเกิด ใส่เวลาเกิดเพื่อยืนยัน",
+    en: "Some planets changed sign on your birthday, so their sign depends on your birth time. Add it to confirm.",
   },
   "chiron-out-of-range": {
     th: "ไครอนคำนวณได้เฉพาะ ค.ศ. 1900–2100 จึงไม่แสดงในผังนี้",
     en: "Chiron is only available for 1900–2100, so it is not shown in this chart.",
   },
   "cusp-near": {
-    th: "มีจุดสำคัญอยู่ใกล้รอยต่อราศีมาก ถ้าเวลาเกิดคลาดไปไม่กี่นาที ราศีของจุดเหล่านี้อาจเปลี่ยนได้",
-    en: "Some key points sit right on a sign boundary. A few minutes' difference in birth time could change their sign.",
+    th: "มีจุดสำคัญอยู่ใกล้รอยต่อราศีมาก ถ้าเวลาเกิดคลาดไปไม่กี่นาที ราศีของจุดเหล่านี้จะเปลี่ยน ตรวจเวลาเกิดกับสูติบัตรให้แน่",
+    en: "Some key points sit right on a sign boundary. A few minutes' difference in birth time changes their sign, so check your time against your birth certificate.",
   },
 };
 
@@ -554,163 +557,208 @@ export const DOMINANT_REASON_TEXT: Record<string, T> = {
 
 // ─────────────────────────── ตามเวลา: ดาวจร · ดาวก้าวหน้า · รีเทิร์น ───────────────────────────
 
-/** ดาวจรทำอะไรกับจุดที่ไปกระทบ — ต่อท้ายด้วย "เรื่อง…" / "your …" */
+/**
+ * ดาวจรทำอะไรกับจุดที่ไปกระทบ — ต่อท้ายด้วย "เรื่อง…" / "your …" (`describeTimedAspect` · `describeTransitHouse`)
+ * เป็นกริยาเดียวที่จริงทั้งมุมดีและมุมตึง (เจ้าของ 2026-11-02 "ไม่กำกวม") — ทางดี/ทางร้ายให้ `TRANSIT_TONE` บอก
+ * ห้ามลงท้ายด้วย "เรื่อง" (ตัวประกอบเติมให้แล้ว) · ห้ามมีคำว่า "ช่วงนี้" (ด่านทดสอบดาวเดินเร็ว)
+ */
 export const TRANSIT_TEXT: Record<"sun" | "moon" | "mercury" | "venus" | "mars" | "jupiter" | "saturn" | "uranus" | "neptune" | "pluto" | "chiron" | "node", { effect: T; span: T }> = {
   sun: { effect: { th: "ส่องไฟให้", en: "spotlights" }, span: { th: "ราว 2 ถึง 3 วัน", en: "about 2 to 3 days" } },
-  moon: { effect: { th: "แต่งอารมณ์ของวันนี้ให้กับ", en: "colours today's mood around" }, span: { th: "ไม่กี่ชั่วโมง", en: "a few hours" } },
-  mercury: { effect: { th: "ชวนให้คิด คุย และตัดสินใจเรื่อง", en: "gets you thinking and talking about" }, span: { th: "ราว 1 ถึง 3 วัน (นานขึ้นช่วงถอยหลัง)", en: "about 1 to 3 days (longer when retrograde)" } },
-  venus: { effect: { th: "นำความรัก ความสุข และความง่ายมาให้", en: "brings warmth, pleasure and ease to" }, span: { th: "ราว 2 ถึง 4 วัน", en: "about 2 to 4 days" } },
-  mars: { effect: { th: "ปลุกแรงผลัก ความกล้า หรือความหงุดหงิดให้", en: "fires up drive, courage or friction in" }, span: { th: "ราว 3 ถึง 7 วัน", en: "about 3 to 7 days" } },
-  jupiter: { effect: { th: "ขยาย เปิดโอกาส และเพิ่มความมั่นใจให้", en: "expands and opens opportunities for" }, span: { th: "หลายสัปดาห์", en: "several weeks" } },
-  saturn: { effect: { th: "ทดสอบ วางกรอบ และให้บทเรียนจริงจังกับ", en: "tests, structures and matures" }, span: { th: "หลายสัปดาห์ถึงหลายเดือน", en: "weeks to months" } },
-  uranus: { effect: { th: "เขย่าให้เปลี่ยนแปลงฉับพลันและหาอิสระใน", en: "shakes up and frees" }, span: { th: "หลายเดือน", en: "several months" } },
-  neptune: { effect: { th: "ทำให้ฝัน อ่อนไหว หรือสับสน และเปิดแรงบันดาลใจให้", en: "softens, inspires or blurs" }, span: { th: "หลายเดือน", en: "several months" } },
-  pluto: { effect: { th: "รื้อและเปลี่ยนแปลงถึงรากให้", en: "transforms from the roots" }, span: { th: "หลายเดือนถึงเป็นปี", en: "months to a year or more" } },
-  chiron: { effect: { th: "เปิดแผลเก่าขึ้นมาเพื่อเยียวยา", en: "reopens and heals old wounds around" }, span: { th: "หลายเดือน", en: "several months" } },
+  moon: { effect: { th: "ทำให้อารมณ์วันนี้วนอยู่กับ", en: "centers today's mood on" }, span: { th: "ไม่กี่ชั่วโมง", en: "a few hours" } },
+  mercury: { effect: { th: "ดึงความคิดและบทสนทนาไปที่", en: "focuses your thoughts and talks on" }, span: { th: "ราว 1 ถึง 3 วัน (นานขึ้นช่วงถอยหลัง)", en: "about 1 to 3 days (longer when retrograde)" } },
+  venus: { effect: { th: "ดึงความรักและความสุขมาที่", en: "draws love and pleasure into" }, span: { th: "ราว 2 ถึง 4 วัน", en: "about 2 to 4 days" } },
+  mars: { effect: { th: "เร่งแรงลงมือใน", en: "fires up action in" }, span: { th: "ราว 3 ถึง 7 วัน", en: "about 3 to 7 days" } },
+  jupiter: { effect: { th: "ขยายและเปิดโอกาสให้", en: "expands and opens opportunities for" }, span: { th: "หลายสัปดาห์", en: "several weeks" } },
+  saturn: { effect: { th: "นำความรับผิดชอบและบททดสอบมาให้", en: "brings duty and tests to" }, span: { th: "หลายสัปดาห์ถึงหลายเดือน", en: "weeks to months" } },
+  uranus: { effect: { th: "นำการเปลี่ยนแปลงฉับพลันมาสู่", en: "brings sudden change to" }, span: { th: "หลายเดือน", en: "several months" } },
+  neptune: { effect: { th: "พาจินตนาการและอุดมคติเข้ามาใน", en: "brings imagination and ideals into" }, span: { th: "หลายเดือน", en: "several months" } },
+  pluto: { effect: { th: "รื้อและเปลี่ยนแปลงถึงรากใน", en: "deeply overhauls" }, span: { th: "หลายเดือนถึงเป็นปี", en: "months to a year or more" } },
+  chiron: { effect: { th: "นำแผลใจเก่าขึ้นมาให้เยียวยาใน", en: "brings old wounds up for healing in" }, span: { th: "หลายเดือน", en: "several months" } },
   node: { effect: { th: "ชี้ทิศทางชีวิตใหม่ผ่าน", en: "points a new life direction through" }, span: { th: "หลายเดือน", en: "several months" } },
 };
 
-/** น้ำเสียงของมุมเมื่อเป็นดาวจร */
+/**
+ * น้ำเสียงของมุมเมื่อเป็นดาวจร — ต่อหลัง "…ของคุณ " / "your … " · บอกทางเดียวให้ชัด แล้วตามด้วยสิ่งที่ต้องทำ
+ * กลมกลืน = อะไรไปได้ดี ทำอะไร · ตึง = อะไรสะดุดจริง ทำอะไร (ไม่ปลอบว่า "ผลักให้เติบโต") · กุม = เรื่องนี้เด่นที่สุด ใช้อย่างไร
+ */
 export const TRANSIT_TONE: Record<"harmonious" | "tense" | "neutral", T> = {
-  harmonious: { th: "ไปทางราบรื่น ลงมือเรื่องนี้ได้ง่ายกว่าปกติ", en: "in a flowing way; this is a good time to act on it" },
-  tense: { th: "ผ่านแรงกดดันหรือความท้าทาย ซึ่งผลักให้คุณปรับตัวและเติบโต", en: "through pressure or challenge that pushes you to adjust and grow" },
-  neutral: { th: "แบบตรงตัวและเข้มข้น", en: "directly and intensely" },
+  harmonious: { th: "มุมนี้หนุน เรื่องนี้ราบรื่นและได้ผลจริง ลงมือทำตอนนี้เลย", en: "with support; things go smoothly and pay off, so act on it now" },
+  tense: { th: "มุมนี้ตึง สิ่งที่หวังกับสิ่งที่เกิดขึ้นจริงจะไม่ตรงกัน ปรับแผนให้ตรงกับความจริง", en: "under strain; hopes and reality will not match, so fit your plan to the facts" },
+  neutral: { th: "มุมนี้ทับจุดพอดี เรื่องนี้จะเด่นชัดเป็นพิเศษ ทุ่มแรงไปที่เป้าหมายเดียว", en: "head-on; it takes center stage, so aim it at one goal" },
+};
+
+/**
+ * น้ำเสียงเฉพาะดาว (แทน `TRANSIT_TONE` กลาง) — ดาวเดินเร็ว ดวงจันทร์ และไครอน ไม่มี `TRANSIT_KEY` ต่อท้าย
+ * ประโยคกลาง "ปรับแผนให้ตรงกับความจริง" จึงไม่ตรงเรื่อง (อังคารจรตึง = ใจร้อน/ปะทะ · ไครอน = แผลเก่าถูกสะกิด) เจ้าของ 2026-11-02 "ตรงแม่นยำ"
+ * ⚠️ ห้ามใช้คำว่า "ช่วงนี้" (ด่าน test-natal-chart ตรวจประโยคดาวจรของวันนี้) · ห้ามทำนายอุบัติเหตุ/โรค
+ */
+export const TRANSIT_TONE_BODY: Partial<Record<"sun" | "moon" | "mercury" | "venus" | "mars" | "chiron", { harmonious: T; tense: T }>> = {
+  sun: {
+    harmonious: { th: "มุมนี้หนุน คนเห็นผลงานของคุณง่าย เสนอตัวหรือขอสิ่งที่อยากได้ตอนนี้เลย", en: "with support; people notice your work easily, so put yourself forward now" },
+    tense: { th: "มุมนี้ตึง อีโก้ของคุณชนกับคนอื่นง่าย ทำงานให้เสร็จก่อนแล้วค่อยขอเครดิต", en: "under strain; your ego clashes with others easily, so finish the work before you ask for credit" },
+  },
+  moon: {
+    harmonious: { th: "มุมนี้หนุน ใจนิ่งและคุยเรื่องความรู้สึกได้ง่าย เปิดเรื่องที่ค้างในใจกับคนใกล้ตัวได้", en: "with support; you feel steady and can talk about feelings, so raise what has been on your mind" },
+    tense: { th: "มุมนี้ตึง อารมณ์ขึ้นลงเร็ว อย่าตัดสินใจเรื่องใหญ่จนกว่าใจจะนิ่ง", en: "under strain; your mood swings fast, so hold big decisions until you feel calm" },
+  },
+  mercury: {
+    harmonious: { th: "มุมนี้หนุน คุยรู้เรื่อง เจรจา เขียนงาน และเซ็นเอกสารได้ผลดี", en: "with support; talks, negotiation, writing and paperwork go well" },
+    tense: { th: "มุมนี้ตึง สื่อสารคลาดกันง่าย ทวนข้อตกลงเป็นข้อความทุกครั้งก่อนเดินต่อ", en: "under strain; messages get crossed easily, so confirm every agreement in writing" },
+  },
+  venus: {
+    harmonious: { th: "มุมนี้หนุน คนรอบตัวใจดีกับคุณ นัดเจอคนที่อยากใกล้ชิดได้เลย", en: "with support; people are warm to you, so meet the person you want to be close to" },
+    tense: { th: "มุมนี้ตึง ใจอยากได้มากกว่าที่ควร ระวังใช้เงินตามอารมณ์และตามใจคนอื่นจนเสียเอง", en: "under strain; you want more than is wise, so watch impulse spending and pleasing others at your own cost" },
+  },
+  mars: {
+    harmonious: { th: "มุมนี้หนุน แรงมาเต็ม ลงมือเรื่องที่ต้องใช้ความกล้าได้เลย", en: "with support; your energy is high, so tackle what takes courage now" },
+    tense: { th: "มุมนี้ตึง ใจร้อนและปะทะคนง่าย นับถึงสิบก่อนตอบโต้ และอย่ารีบจนพลาด", en: "under strain; you are short-tempered and clash easily, so count to ten before you react and do not rush" },
+  },
+  chiron: {
+    harmonious: { th: "มุมนี้หนุน แผลเก่าพร้อมให้เยียวยา คุยเรื่องที่เคยเจ็บกับคนที่ไว้ใจ", en: "with support; an old hurt is ready to heal, so talk it through with someone you trust" },
+    tense: { th: "มุมนี้ตึง เรื่องเก่าที่เคยเจ็บถูกสะกิด อ่อนโยนกับตัวเอง และอย่าตอบโต้ด้วยความเจ็บ", en: "under strain; an old hurt gets touched, so be gentle with yourself and do not strike back from pain" },
+  },
 };
 
 /** ข้างขึ้นข้างแรมก้าวหน้า: วงจรชีวิตราว 30 ปี แบ่งเป็น 8 ช่วง ช่วงละราว 3.5 ปี */
 export const PROG_PHASE_TEXT: readonly T[] = [
   { th: "ช่วงเริ่มรอบใหม่ของชีวิต เมล็ดพันธุ์ของเรื่องใหม่ถูกปลูก ยังไม่ต้องเห็นภาพชัด ทำตามใจก่อน", en: "A new cycle begins. Seeds are planted; follow your instincts before the picture is clear." },
-  { th: "ช่วงตั้งตัว เรื่องที่เริ่มไว้ต้องสู้กับแรงต้านจากของเก่า ต้องยืนหยัด", en: "Establishing yourself: what you began meets resistance from the past. Hold your ground." },
-  { th: "ช่วงลงมือและตัดสินใจ เจออุปสรรคที่ต้องเลือกทางให้ชัด", en: "A time of action and decisions, when obstacles force clear choices." },
+  { th: "ช่วงตั้งตัว เรื่องที่เริ่มไว้ต้องสู้กับแรงต้านจากของเก่า ยืนหยัดไว้ อย่าถอยกลับไปทางเดิม", en: "Establishing yourself: what you began meets resistance from the past. Hold your ground; do not slip back." },
+  { th: "ช่วงลงมือและตัดสินใจ อุปสรรคบังคับให้เลือกทาง เลือกให้ชัดแล้วเดินต่อ", en: "Action and decisions: obstacles force a choice. Choose clearly and keep going." },
   { th: "ช่วงขัดเกลา ปรับปรุงสิ่งที่ทำให้ดีขึ้นก่อนถึงจุดสุกงอม", en: "Refining and improving before things reach full bloom." },
-  { th: "ช่วงเห็นผล สิ่งที่ทำมาปรากฏชัด และความสัมพันธ์สะท้อนตัวคุณ", en: "Culmination: results become visible and relationships mirror you." },
+  { th: "ช่วงเห็นผล ทั้งสิ่งที่สำเร็จและสิ่งที่ยังขาดปรากฏชัด และคนใกล้ตัวสะท้อนให้เห็นว่าคุณเป็นคนแบบไหน", en: "Culmination: successes and gaps both show, and close people mirror who you are." },
   { th: "ช่วงแบ่งปัน ถ่ายทอดสิ่งที่เรียนรู้ให้คนอื่น", en: "Sharing what you have learned with others." },
-  { th: "ช่วงปรับทิศ ทิ้งความเชื่อหรือบทบาทที่ไม่ใช่แล้ว", en: "Reorienting: letting go of beliefs or roles that no longer fit." },
+  { th: "ช่วงปรับทิศ ทิ้งความเชื่อและบทบาทที่ไม่ใช่แล้ว", en: "Reorienting: drop the beliefs and roles that no longer fit." },
   { th: "ช่วงปิดรอบ พักใจ ปล่อยวาง และฟังเสียงข้างใน ก่อนรอบใหม่จะเริ่ม", en: "Closing the cycle: rest, release and listen inward before the next one begins." },
 ];
 
 // ─────────────────────────── ดวงวันนี้ ───────────────────────────
 
-/** ภาพรวมของวันจากมุมดาวจรเดินเร็ว (ไม่ฟันธงดีร้าย บอกวิธีใช้วัน) */
+/** ภาพรวมของวันจากมุมดาวจรเดินเร็ว (บอกวันนี้เป็นแบบไหนให้ชัด แล้วบอกว่าต้องทำอะไร · ไม่ทำนายเหตุร้าย) */
 export const DAY_TONE_TEXT: Record<"flow" | "friction" | "mixed" | "intense" | "quiet", { title: T; text: T }> = {
   flow: {
     title: { th: "วันที่ลื่นไหล", en: "A flowing day" },
-    text: { th: "ดาวเดินเร็ววันนี้ทำมุมเกื้อกูลกับผังของคุณ เหมาะกับการเริ่มคุย ขอความช่วยเหลือ หรือทำเรื่องที่ค้างไว้ให้เดินหน้า", en: "Today's fast planets support your chart. A good day to start conversations, ask for help or move stalled things forward." },
+    text: { th: "ดาวเดินเร็ววันนี้ทำมุมเกื้อกูลกับผังของคุณ วันนี้ขอความช่วยเหลือ เปิดเรื่องที่ค้างคุยไว้ และดันงานที่ติดอยู่ให้เดินหน้า", en: "Today's fast planets support your chart. Ask for help, raise the talk you have put off and push stalled work forward." },
   },
   friction: {
     title: { th: "วันที่มีแรงเสียดทาน", en: "A day with friction" },
-    text: { th: "ดาวเดินเร็วทำมุมตึงกับผังของคุณ อาจรู้สึกถูกเร่งหรือขัดใจง่าย ใช้แรงนี้ทำงานยากให้เสร็จ และเว้นจังหวะก่อนตอบโต้", en: "Fast planets are pressing on your chart. You may feel rushed or easily irritated. Use the energy to finish hard tasks and pause before reacting." },
+    text: { th: "ดาวเดินเร็วทำมุมตึงกับผังของคุณ วันนี้คุณจะรู้สึกถูกเร่งและขัดใจง่าย ใช้แรงนี้ปิดงานยากให้เสร็จ และเว้นจังหวะก่อนตอบโต้ทุกครั้ง", en: "Fast planets are pressing on your chart. You will feel rushed and easily irritated. Use the energy to finish hard tasks and pause before every reply." },
   },
   mixed: {
     title: { th: "วันที่มีทั้งแรงส่งและแรงต้าน", en: "A day of push and pull" },
-    text: { th: "มีทั้งมุมเกื้อกูลและมุมตึงในวันเดียว เลือกใช้เรื่องที่ไหลลื่นเป็นแรงส่ง แล้วค่อย ๆ จัดการเรื่องที่ติดขัด", en: "Supportive and tense aspects arrive together. Lean on what flows and take the sticking points slowly." },
+    text: { th: "มีทั้งมุมเกื้อกูลและมุมตึงในวันเดียว ทำเรื่องที่ลื่นไหลก่อนเพื่อสร้างแรงส่ง แล้วจัดการเรื่องที่ติดขัดทีละเรื่อง", en: "Supportive and tense aspects arrive together. Do what flows first to build momentum, then fix sticking points one by one." },
   },
   intense: {
     title: { th: "วันที่เข้มข้น", en: "An intense day" },
-    text: { th: "ดาวเดินเร็วมาทับจุดสำคัญในผังของคุณพอดี เรื่องที่ดาวดวงนั้นดูแลจะเด่นชัดขึ้นมาก ตั้งใจใช้ให้ตรงจุดแล้วจะได้ผลดี", en: "A fast planet sits right on a key point in your chart, putting its themes in the spotlight. Channel it deliberately and it works for you." },
+    text: { th: "ดาวเดินเร็วมาทับจุดสำคัญในผังของคุณพอดี เรื่องที่ดาวดวงนั้นดูแลจะเด่นที่สุดของวัน ทุ่มแรงวันนี้ไปที่เรื่องนั้นเรื่องเดียว", en: "A fast planet sits right on a key point in your chart, making its themes today's main story. Put today's energy into that one area." },
   },
   quiet: {
     title: { th: "วันที่ฟ้าเงียบ", en: "A quiet sky" },
-    text: { th: "ดาวเดินเร็ววันนี้ไม่ได้ทำมุมแน่นกับผังของคุณ เป็นวันที่ใช้ชีวิตตามจังหวะตัวเองได้ เหมาะกับงานประจำและการพัก", en: "No fast planet is tightly linked to your chart today. Live at your own pace; good for routine work and rest." },
+    text: { th: "ดาวเดินเร็ววันนี้ไม่ได้ทำมุมแน่นกับผังของคุณ ไม่มีแรงเร่งจากฟ้า ใช้วันนี้เคลียร์งานประจำและพักให้พอ", en: "No fast planet is tightly linked to your chart today, so nothing is pushing you. Clear routine work and rest well." },
   },
 };
 
-/** ข้างขึ้นข้างแรมของวันนี้ (ไม่ใช่ของวันเกิด) — วิธีใช้พลังของวัน */
+/** ข้างขึ้นข้างแรมของวันนี้ (ไม่ใช่ของวันเกิด) — วิธีใช้พลังของวัน · ต่อหลังชื่อข้างขึ้นข้างแรม (อังกฤษขึ้นต้นตัวเล็ก) */
 export const MOON_PHASE_DAY_TEXT: readonly T[] = [
-  { th: "เหมาะกับการตั้งใจเรื่องใหม่เงียบ ๆ ยังไม่ต้องประกาศให้ใครรู้", en: "set a quiet intention; no need to announce it yet." },
-  { th: "เหมาะกับการเริ่มก้าวแรกเล็ก ๆ ของเรื่องที่ตั้งใจไว้", en: "take a small first step on what you intended." },
-  { th: "อาจเจออุปสรรค เหมาะกับการตัดสินใจและลงมือ", en: "obstacles may show up; decide and act." },
-  { th: "เหมาะกับการขัดเกลา ปรับแผนให้ดีขึ้นก่อนเรื่องต่าง ๆ จะสุกงอม", en: "refine and adjust before things peak." },
-  { th: "อารมณ์ขึ้นสูง เรื่องต่าง ๆ ปรากฏชัด เหมาะกับการถอยออกมามองภาพรวม", en: "feelings run high and things come to light; step back and see the whole picture." },
-  { th: "เหมาะกับการแบ่งปันสิ่งที่ได้เรียนรู้และขอบคุณคนรอบตัว", en: "share what you learned and thank the people around you." },
-  { th: "เหมาะกับการเลิกทำสิ่งที่ไม่ได้ผล และเคลียร์เรื่องค้าง", en: "drop what is not working and clear the backlog." },
-  { th: "เหมาะกับการพัก ปล่อยวาง และฟังใจตัวเอง", en: "rest, let go and listen inward." },
+  { th: "ตั้งเป้าเรื่องใหม่เงียบ ๆ ยังไม่ต้องบอกใคร", en: "set a quiet intention and keep it to yourself for now." },
+  { th: "เริ่มก้าวแรกเล็ก ๆ ของเรื่องที่ตั้งใจไว้", en: "take a small first step on what you intended." },
+  { th: "อุปสรรคจะโผล่ขึ้นมา ตัดสินใจและลงมือแก้ทันที", en: "obstacles show up; decide and deal with them right away." },
+  { th: "ขัดเกลาและปรับแผนให้ดีขึ้นก่อนเรื่องต่าง ๆ จะสุกงอม", en: "refine and adjust your plans before things peak." },
+  { th: "อารมณ์ขึ้นสูง เรื่องต่าง ๆ ปรากฏชัด ถอยออกมามองภาพรวมก่อนตัดสินใจ", en: "feelings run high and things come to light; step back and see the whole picture before deciding." },
+  { th: "แบ่งปันสิ่งที่ได้เรียนรู้และขอบคุณคนรอบตัว", en: "share what you learned and thank the people around you." },
+  { th: "เลิกทำสิ่งที่ไม่ได้ผล และเคลียร์เรื่องค้าง", en: "drop what is not working and clear the backlog." },
+  { th: "พัก ปล่อยวาง และฟังใจตัวเอง", en: "rest, let go and listen inward." },
 ];
 
 // ─────────────────────────── ผังคู่ ───────────────────────────
 
 export const SYN_CATEGORY_TEXT: Record<"bond" | "attraction" | "talk" | "stability" | "growth", { name: T; about: T }> = {
   bond: { name: { th: "ความผูกพันทางใจ", en: "Emotional bond" }, about: { th: "อาทิตย์ จันทร์ ศุกร์ ลัคนา ของสองคนต่อกัน: รู้สึกปลอดภัยและเป็นตัวเองได้แค่ไหน", en: "Sun, Moon, Venus and Ascendant links: how safe and at home you feel together" } },
-  attraction: { name: { th: "แรงดึงดูด", en: "Attraction" }, about: { th: "ศุกร์ อังคาร พลูโต: ความหลงใหลและเคมี มุมตึงก็สร้างแรงดึงดูดได้ แต่ต้องจัดการให้ดี", en: "Venus, Mars and Pluto links: chemistry and desire. Tense aspects also attract, but need care" } },
+  attraction: { name: { th: "แรงดึงดูด", en: "Attraction" }, about: { th: "ศุกร์ อังคาร พลูโต: ความหลงใหลและเคมี มุมตึงก็ดึงดูดแรงเหมือนกัน แต่ทะเลาะง่ายกว่า", en: "Venus, Mars and Pluto links: chemistry and desire. Tense aspects attract too, but spark more fights" } },
   talk: { name: { th: "การสื่อสาร", en: "Communication" }, about: { th: "ดาวพุธกับดาวสำคัญของอีกคน: คุยกันรู้เรื่องแค่ไหน", en: "Mercury links: how easily you understand each other" } },
   stability: { name: { th: "ความมั่นคงระยะยาว", en: "Long-term stability" }, about: { th: "เสาร์และพฤหัสกับดวงสว่าง: ความรับผิดชอบ ความเชื่อใจ และการพากันโต", en: "Saturn and Jupiter links: commitment, trust and growing together" } },
-  growth: { name: { th: "การเติบโตร่วมกัน", en: "Growing together" }, about: { th: "โหนด พฤหัส ไครอน: ความรู้สึกว่าพบกันด้วยเหตุผลบางอย่าง และช่วยเยียวยากัน", en: "Node, Jupiter and Chiron links: a sense of purpose and healing together" } },
+  growth: { name: { th: "การเติบโตร่วมกัน", en: "Growing together" }, about: { th: "โหนด พฤหัส ไครอน: ช่วยกันโตและช่วยกันหายจากแผลเก่าได้แค่ไหน", en: "Node, Jupiter and Chiron links: how much you help each other grow and heal" } },
 };
 
-/** คู่ดาวสำคัญในผังคู่ (เรียงชื่อตามตัวอักษร คั่นด้วย "-") — ประโยคเฉพาะเมื่อกลมกลืน/ตึง */
+/**
+ * คู่ดาวสำคัญในผังคู่ (เรียงชื่อตามตัวอักษร คั่นด้วย "-") — ประโยคเฉพาะเมื่อกลมกลืน/ตึง (มุมกุมใช้ฝั่งกลมกลืน)
+ * แต่ละข้อ: เกิดอะไรขึ้นระหว่างสองคน + สิ่งเดียวที่ต้องทำ · ไม่ตัดสินว่า "ไปรอด/ไม่รอด" · ไม่โทษฝ่ายใด (กติกา `src/lib/astro/synastry.ts`)
+ */
 export const SYN_PAIR_TEXT: Record<string, { harmonious: T; tense: T }> = {
   "moon-sun": {
-    harmonious: { th: "คู่คลาสสิกของความเข้ากัน คนหนึ่งให้ทิศทาง อีกคนให้ความอบอุ่น รู้สึกเหมือนรู้จักกันมานาน", en: "A classic sign of compatibility: one gives direction, the other warmth. It feels like you have known each other for years." },
-    tense: { th: "ดึงดูดกันแรงแต่จังหวะไม่ตรง สิ่งที่คนหนึ่งต้องการกับสิ่งที่อีกคนเป็นต้องหาจุดกลาง", en: "A strong pull with mismatched timing: what one needs and what the other is must meet halfway." },
+    harmonious: { th: "คนหนึ่งให้ทิศทาง อีกคนให้ความอบอุ่น คุณสองคนเติมกันพอดีและอยู่ด้วยกันแล้วสบายใจ บอกกันบ่อย ๆ ว่าอีกฝ่ายช่วยคุณตรงไหน", en: "One gives direction, the other gives warmth; you complete each other and feel at ease. Tell each other often how the other helps you." },
+    tense: { th: "ดึงดูดกันแรง แต่สิ่งที่คนหนึ่งต้องการขัดกับวิถีของอีกคน เรื่องเล็ก ๆ จึงกระทบกันบ่อย บอกกันให้ชัดว่าแต่ละคนต้องการอะไร", en: "A strong pull, but one's needs clash with the other's ways, so small things grate. Spell out what each of you needs." },
   },
   "moon-moon": {
-    harmonious: { th: "ใจตรงกัน ต้องการสิ่งคล้ายกันเวลาเหนื่อยหรือเศร้า อยู่ด้วยกันแล้วสบายใจ", en: "Your hearts are in tune; you need similar things when tired or sad, and feel at ease together." },
-    tense: { th: "วิธีดูแลใจไม่เหมือนกัน สิ่งที่ปลอบคนหนึ่งได้อาจไม่ได้ผลกับอีกคน ต้องถามกันตรง ๆ", en: "You soothe yourselves differently. Ask each other directly what helps." },
+    harmonious: { th: "ใจตรงกัน ต้องการการปลอบแบบเดียวกันและอยู่ด้วยกันแล้วสบายใจ เวลาแย่พร้อมกัน ให้ผลัดกันเป็นคนตั้งหลัก", en: "In tune: you need the same comfort and relax together. When both are down, take turns being the steady one." },
+    tense: { th: "วิธีดูแลใจไม่เหมือนกัน สิ่งที่ปลอบคนหนึ่งได้ใช้กับอีกคนไม่ได้ ถามกันตรง ๆ ว่าเวลาแย่อยากให้ทำอะไร", en: "You soothe yourselves differently; what comforts one does nothing for the other. Ask directly what helps on bad days." },
   },
   "sun-sun": {
-    harmonious: { th: "เป้าหมายชีวิตไปทางเดียวกัน เชียร์กันได้โดยไม่ต้องพยายาม", en: "Your life goals point the same way, so supporting each other comes easily." },
-    tense: { th: "อัตตาสองคนชนกันได้ง่าย ผลัดกันเป็นผู้นำแล้วความต่างจะกลายเป็นจุดแข็ง", en: "Egos can clash. Take turns leading and the difference becomes a strength." },
+    harmonious: { th: "เป้าหมายชีวิตไปทางเดียวกัน เชียร์กันได้โดยไม่ต้องพยายาม เลือกเป้าหมายร่วมกันหนึ่งเรื่องแล้วลุยด้วยกัน", en: "Your goals align, so backing each other is easy. Pick one shared goal and chase it together." },
+    tense: { th: "อัตตาสองคนชนกัน ต่างคนต่างอยากเป็นคนตัดสินใจ ตกลงกันให้ชัดว่าใครนำเรื่องไหน", en: "Your egos clash and both want the final say. Agree clearly who leads on what." },
   },
   "mars-venus": {
-    harmonious: { th: "เคมีลงตัว ความโรแมนติกกับความกล้าเข้าหากันพอดี", en: "Natural chemistry: romance and courage meet in balance." },
-    tense: { th: "แรงดึงดูดแรงมาก แต่หวานกับร้อนสลับกันเร็ว ต้องพูดความต้องการให้ชัด", en: "Very strong attraction that swings between sweet and heated. Say what you want clearly." },
+    harmonious: { th: "เคมีลงตัว คนหนึ่งกล้าเข้าหา อีกคนพร้อมตอบรับ แรงดึงดูดทางกายชัดเจน จีบกันต่อไปแม้คบกันนานแล้ว", en: "Natural chemistry: one pursues, the other welcomes it, and the physical pull is clear. Keep flirting even years in." },
+    tense: { th: "แรงดึงดูดแรงมาก แต่หวานกับทะเลาะสลับกันเร็ว พูดความต้องการของตัวเองให้ชัดก่อนอารมณ์จะขึ้น", en: "Very strong attraction that flips fast between sweet and fighting. Say what you want clearly before tempers rise." },
   },
   "mars-mars": {
-    harmonious: { th: "ลุยด้วยกันได้ดี จังหวะการลงมือตรงกัน", en: "You act well as a team; your pace matches." },
-    tense: { th: "พลังสองคนแรงทั้งคู่ เถียงกันง่าย หากิจกรรมให้ปล่อยพลังด้วยกัน", en: "Two strong drives that argue easily. Find activities to burn energy together." },
+    harmonious: { th: "ลุยด้วยกันได้ดี จังหวะการลงมือตรงกัน หาโปรเจกต์ที่ต้องลงแรงทำด้วยกัน", en: "You act well as a team and move at the same pace. Take on a hands-on project together." },
+    tense: { th: "พลังแรงทั้งคู่และไม่มีใครยอมใคร จึงเถียงกันเร็ว ออกกำลังกายด้วยกันเพื่อระบายแรงก่อนคุยเรื่องยาก", en: "Two strong drives and neither backs down, so fights flare fast. Work out together before hard talks." },
   },
   "venus-venus": {
-    harmonious: { th: "รสนิยมและวิธีแสดงความรักคล้ายกัน มีความสุขกับสิ่งเดียวกัน", en: "Similar taste and love language; you enjoy the same things." },
-    tense: { th: "ให้คุณค่ากับคนละเรื่อง ลองเรียนรู้ภาษารักของอีกฝ่าย", en: "You value different things. Learn each other's love language." },
+    harmonious: { th: "รสนิยมและวิธีแสดงความรักคล้ายกัน มีความสุขกับสิ่งเดียวกัน วางแผนเดตจากสิ่งที่ชอบร่วมกัน", en: "Similar taste and love language; you enjoy the same things. Plan dates around what you both love." },
+    tense: { th: "ให้คุณค่ากับคนละเรื่อง สิ่งที่คนหนึ่งให้เป็นความรัก อีกคนไม่รู้สึกถึงมัน ถามกันตรง ๆ ว่าแบบไหนที่ทำให้รู้สึกเป็นที่รัก", en: "You value different things: what one gives as love, the other does not feel. Ask directly what makes each of you feel loved." },
   },
   "moon-venus": {
-    harmonious: { th: "อ่อนโยนต่อกันโดยธรรมชาติ รู้สึกเป็นที่รักและได้รับการดูแล", en: "Naturally tender; you feel loved and cared for." },
-    tense: { th: "ความรักมีแต่แสดงออกไม่ตรงกับที่อีกคนต้องการ บอกกันว่าแบบไหนที่ใช่", en: "Love is there but expressed in ways the other may not need. Tell each other what works." },
+    harmonious: { th: "อ่อนโยนต่อกันโดยธรรมชาติ ทั้งคู่รู้สึกเป็นที่รักและได้รับการดูแล ขอบคุณกันในเรื่องเล็ก ๆ ทุกวัน", en: "Naturally tender; you both feel loved and cared for. Thank each other for small things every day." },
+    tense: { th: "ความรักมีจริง แต่วิธีแสดงออกไม่ตรงกับที่อีกคนต้องการ บอกกันตรง ๆ ว่าแบบไหนที่ใช่", en: "The love is real, but it is shown in ways the other does not need. Tell each other plainly what works." },
   },
   "mercury-mercury": {
-    harmonious: { th: "คุยกันรู้เรื่อง ความคิดต่อกันติด", en: "Easy conversation; your minds connect." },
-    tense: { th: "คิดและพูดคนละสไตล์ ฟังให้จบก่อนตอบจะช่วยได้มาก", en: "Different thinking styles. Listening fully before replying helps a lot." },
+    harmonious: { th: "คุยกันรู้เรื่อง ความคิดต่อกันติด ใช้จุดนี้คุยเรื่องยากให้จบ", en: "Easy conversation; your minds connect. Use it to settle hard topics." },
+    tense: { th: "คิดและพูดคนละสไตล์ จึงเข้าใจผิดกันบ่อย ฟังให้จบแล้วทวนสิ่งที่ได้ยินก่อนตอบ", en: "Different styles cause frequent misunderstandings. Listen fully, then repeat back what you heard." },
   },
   "sun-venus": {
-    harmonious: { th: "ชื่นชมกันและกัน คนหนึ่งทำให้อีกคนรู้สึกมีเสน่ห์", en: "Mutual admiration; one makes the other feel attractive." },
-    tense: { th: "ชอบกันแต่คาดหวังต่างกัน ระวังการเอาใจจนลืมตัวเอง", en: "Fondness with different expectations. Avoid pleasing at your own expense." },
+    harmonious: { th: "ชื่นชมกันและกัน คนหนึ่งทำให้อีกคนรู้สึกมีเสน่ห์ ชมกันออกมาเป็นคำพูด อย่าเก็บไว้ในใจ", en: "Mutual admiration; one makes the other feel attractive. Say the compliments out loud." },
+    tense: { th: "ชอบกันแต่คาดหวังต่างกัน คนหนึ่งเอาใจจนลืมตัวเอง บอกความต้องการของตัวเองด้วย ไม่ใช่แค่ตามใจอีกฝ่าย", en: "Fondness with different expectations; one keeps pleasing and loses themselves. State your own needs too." },
   },
   "moon-saturn": {
-    harmonious: { th: "ให้ความรู้สึกมั่นคง พึ่งพากันได้ในระยะยาว", en: "A sense of security and long-term reliability." },
-    tense: { th: "อาจรู้สึกถูกจำกัดหรือเย็นชา ความอบอุ่นต้องตั้งใจแสดงออก", en: "One may feel restricted or chilled. Warmth needs to be shown on purpose." },
+    harmonious: { th: "ให้ความรู้สึกมั่นคง พึ่งพากันได้ในระยะยาว สร้างกิจวัตรร่วมกันที่ทำได้ทุกสัปดาห์", en: "A sense of security; you can rely on each other long-term. Build a weekly routine together." },
+    tense: { th: "คนหนึ่งรู้สึกว่าอีกคนเย็นชาและเข้มงวด ความอบอุ่นไม่มาเอง แสดงความห่วงใยให้เห็นทุกวัน", en: "One feels the other is cold and strict. Warmth will not come by itself; show care openly every day." },
   },
   "saturn-sun": {
-    harmonious: { th: "มีความรับผิดชอบต่อกัน สร้างสิ่งที่ยั่งยืนด้วยกันได้", en: "Commitment and the ability to build something lasting." },
-    tense: { th: "คนหนึ่งอาจรู้สึกถูกตัดสินหรือกดดัน ชมกันให้บ่อยขึ้น", en: "One may feel judged or pressured. Praise each other more often." },
+    harmonious: { th: "รับผิดชอบต่อกันและสร้างสิ่งที่ยั่งยืนด้วยกันได้ วางแผนระยะยาวร่วมกันให้ชัด", en: "Responsible toward each other and able to build something lasting. Make a clear long-term plan together." },
+    tense: { th: "คนหนึ่งรู้สึกถูกอีกคนตัดสินและกดดัน ชมกันให้บ่อยขึ้น และติเฉพาะเรื่องที่สำคัญจริง", en: "One feels judged and pressured by the other. Praise more often and criticize only what truly matters." },
   },
   "saturn-venus": {
-    harmonious: { th: "ความรักแบบจริงจังและซื่อสัตย์", en: "Serious, loyal love." },
-    tense: { th: "ความรักมาพร้อมความกังวลหรือระยะห่าง ให้เวลากันและกันมากขึ้น", en: "Love mixed with worry or distance. Give it time." },
+    harmonious: { th: "ความรักแบบจริงจังและซื่อสัตย์ ยิ่งคบนานยิ่งมั่นคง เติมความสนุกลงไปด้วย อย่าให้มีแต่หน้าที่", en: "Serious, loyal love that grows steadier with time. Add fun so it is not all duty." },
+    tense: { th: "ความรักมาพร้อมความกังวลและระยะห่าง คนหนึ่งแสดงความรักน้อยกว่าที่อีกคนต้องการ นัดเวลาคุยเรื่องความรู้สึกกันเป็นประจำ", en: "Love comes with worry and distance; one shows less affection than the other needs. Set regular time to talk about feelings." },
   },
   "jupiter-sun": {
-    harmonious: { th: "ทำให้กันและกันมองโลกในแง่ดีและกล้าฝันใหญ่", en: "You make each other optimistic and brave enough to dream big." },
-    tense: { th: "เชียร์กันจนเกินตัวได้ ช่วยกันเตือนเรื่องความพอดี", en: "You may encourage each other to overdo things. Keep each other grounded." },
+    harmonious: { th: "ทำให้กันและกันมองโลกในแง่ดีและกล้าฝันใหญ่ เปลี่ยนความฝันที่คุยกันไว้หนึ่งเรื่องให้เป็นแผนจริง", en: "You make each other optimistic and brave enough to dream big. Turn one shared dream into a real plan." },
+    tense: { th: "เชียร์กันจนเกินตัว ทั้งเรื่องเงินและคำสัญญา ตรวจตัวเลขก่อนตัดสินใจเรื่องใหญ่ร่วมกันทุกครั้ง", en: "You push each other past your limits, with money and promises. Check the numbers before every big joint decision." },
   },
   "jupiter-venus": {
-    harmonious: { th: "ความสุขและความใจกว้างต่อกัน ใช้เวลาด้วยกันแล้วสนุก", en: "Generosity and joy; time together feels abundant." },
-    tense: { th: "สนุกด้วยกันแต่ระวังใช้จ่ายหรือตามใจกันเกินพอดี", en: "Fun together, but watch overspending and indulgence." },
+    harmonious: { th: "ใจกว้างต่อกันและอยู่ด้วยกันแล้วสนุก ชวนกันทำสิ่งที่ชอบเป็นประจำ", en: "Generous with each other and fun together. Make a habit of doing what you both enjoy." },
+    tense: { th: "สนุกด้วยกันแต่ตามใจกันเกินพอดี ทั้งการกินและการใช้เงิน ตั้งงบใช้จ่ายร่วมกันให้ชัด", en: "Fun together, but you indulge each other too much, in food and spending. Set a clear shared budget." },
   },
   "node-sun": {
-    harmonious: { th: "ความรู้สึกว่าพบกันด้วยเหตุผลบางอย่าง ช่วยกันไปในทิศทางชีวิต", en: "A feeling of meeting for a reason; you help each other's life direction." },
-    tense: { th: "ความสัมพันธ์ท้าทายให้ออกจากนิสัยเดิม", en: "The relationship challenges old habits." },
+    harmonious: { th: "คนหนึ่งช่วยผลักอีกคนไปทางที่ชีวิตควรไป ความสัมพันธ์นี้ทำให้ทั้งคู่โตเร็ว คุยเป้าหมายชีวิตกันให้ชัด", en: "One pushes the other toward where life is heading, and you both grow fast. Talk openly about life goals." },
+    tense: { th: "ความสัมพันธ์นี้บังคับให้ออกจากนิสัยเดิม จึงอึดอัดในช่วงแรก บอกกันตรง ๆ เมื่อเรื่องไหนฝืนเกินไป", en: "This bond forces you out of old habits, which feels uncomfortable at first. Say plainly when something feels forced." },
   },
   "moon-node": {
-    harmonious: { th: "ผูกพันทางใจลึก เหมือนรู้จักกันมาก่อน", en: "A deep emotional familiarity, as if you met before." },
-    tense: { th: "ความผูกพันที่ต้องเลือกระหว่างความคุ้นเคยกับการเติบโต", en: "A bond that asks you to choose growth over comfort." },
+    harmonious: { th: "ผูกพันทางใจลึก เหมือนรู้จักกันมาก่อน ใช้ความคุ้นเคยนี้เป็นฐาน แล้วตั้งเป้าใหม่ร่วมกัน", en: "A deep emotional familiarity, as if you met before. Use it as a base and set new goals together." },
+    tense: { th: "ผูกพันกันแน่น แต่ความคุ้นเคยดึงทั้งคู่ให้วนอยู่ที่เดิม เลือกการเติบโตก่อนความสบายใจ", en: "A tight bond, but familiarity keeps you both going in circles. Choose growth over comfort." },
   },
 };
 
-/** ความหมายของมุมเมื่อเป็นมุมระหว่างสองคน (ประโยคกลาง ใช้เมื่อคู่ดาวไม่มีประโยคเฉพาะ) */
+/**
+ * ความหมายของมุมเมื่อเป็นมุมระหว่างสองคน (ประโยคกลาง ใช้เมื่อคู่ดาวไม่มีประโยคเฉพาะ)
+ * ต่อหลัง "…ของ A กับ…ของ B: " และ "…ของความสัมพันธ์นี้: " (ผังรวม) — ห้ามเอ่ยชื่อคน · อังกฤษขึ้นต้นตัวเล็ก ไม่มีจุดท้าย
+ */
 export const SYN_ASPECT_MEANING: Partial<Record<AspectType, T>> = {
   conjunction: { th: "สองเรื่องนี้ของสองคนหลอมเข้าหากัน รู้สึกได้ชัดตั้งแต่แรกพบ", en: "these merge strongly between you and are felt from the first meeting" },
-  opposition: { th: "ดึงดูดกันเพราะต่างกัน ต้องหาจุดสมดุลระหว่างสองฝั่ง", en: "you are drawn together by difference and need to find a balance" },
+  opposition: { th: "ดึงดูดกันเพราะต่างกัน แต่ต่างคนต่างดึงไปคนละทาง ตกลงกันให้ชัดว่าเรื่องไหนใครยอม", en: "you attract because you differ but pull opposite ways; agree clearly who gives way on what" },
   trine: { th: "ไหลเข้าหากันง่าย เข้าใจกันโดยไม่ต้องอธิบาย", en: "this flows easily; you understand each other without explaining" },
-  square: { th: "เสียดสีกันบ้าง แต่แรงเสียดทานนี้ทำให้ทั้งคู่เติบโต", en: "there is friction here, and it makes you both grow" },
-  sextile: { th: "เกื้อหนุนกันเมื่อลงมือทำอะไรด้วยกัน", en: "you support each other when you do things together" },
-  quincunx: { th: "จังหวะไม่ค่อยตรงกัน ต้องปรับเข้าหากันเรื่อย ๆ", en: "your rhythms do not quite match, so you keep adjusting to each other" },
+  square: { th: "ขัดกันตรงนี้ เรื่องนี้จะเป็นจุดที่ทะเลาะกันซ้ำ ตกลงกติกาเรื่องนี้ให้ชัดก่อนมีปัญหา", en: "this clashes and is where the same fights repeat; set clear ground rules here early" },
+  sextile: { th: "เกื้อหนุนกันเมื่อลงมือทำอะไรด้วยกัน เริ่มโปรเจกต์ร่วมกันหนึ่งเรื่อง", en: "you support each other when you do things together; start one joint project" },
+  quincunx: { th: "จังหวะไม่ตรงกัน สิ่งที่คนหนึ่งคิดว่าช่วย อีกคนรู้สึกว่าไม่ใช่ ถามก่อนทำ อย่าเดาใจ", en: "your rhythms do not match; what one thinks helps, the other does not, so ask instead of guessing" },
 };

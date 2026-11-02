@@ -196,6 +196,11 @@ function ReportView({ report, onClose }: { report: NatalReport; onClose: () => v
               <li key={x.key}>
                 <span className="nr-life-t">{x.title}</span>
                 <span className="nr-life-from">{x.from}</span>
+                {x.verdict && (
+                  <span className="nr-life-d">
+                    <b>{x.verdict}</b>
+                  </span>
+                )}
                 <span className="nr-life-d">{x.text}</span>
               </li>
             ))}
