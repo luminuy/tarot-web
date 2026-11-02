@@ -245,8 +245,8 @@ export function chartHighlights(chart: NatalChart, lang: Lang, max = 7): Highlig
         ],
         advice: [
           th
-            ? `ลองยืม${SIGN_TEXT[opp].gift.th}ของ${sign(opp)}ซึ่งเป็นราศีตรงข้ามมาใช้บ้าง พลังของราศีนี้จะสมดุลขึ้น`
-            : `To balance it, borrow from ${sign(opp)}, the opposite sign: ${SIGN_TEXT[opp].gift.en}.`,
+            ? `ฝึก${SIGN_TEXT[opp].gift.th}แบบ${sign(opp)} (ราศีตรงข้าม) เพื่อถ่วงพลัง${sign(s)}ที่เข้มเกินไป`
+            : `Practice ${SIGN_TEXT[opp].gift.en}, the strength of ${sign(opp)} (the opposite sign), to balance your heavy ${sign(s)} side.`,
         ],
         tone: "neutral",
         covers: [patternKey(p)],
@@ -273,15 +273,15 @@ export function chartHighlights(chart: NatalChart, lang: Lang, max = 7): Highlig
       kind: "ruler",
       weight: 7,
       bodies: [id],
-      title: th ? `ชีวิตคุณถูกนำด้วย${word(id)}${hd ? ` และมักพาไปที่เรื่อง${hd.topic.th}` : ""}` : `Your ${word(id)} steers your life${hd ? `, often toward ${hd.topic.en}` : ""}`,
+      title: th ? `${word(id)}เป็นตัวนำชีวิตคุณ${hd ? ` และพาไปที่เรื่อง${hd.topic.th}` : ""}` : `Your ${word(id)} steers your life${hd ? `, toward ${hd.topic.en}` : ""}`,
       basis: th
         ? `ลัคนา${sign(asc.sign)} เจ้าเรือนลัคนาคือ${name(id)} อยู่${sign(ruler.sign)}${ruler.house ? ` เรือน ${ruler.house}` : ""}`
         : `${sign(asc.sign)} rising, ruled by ${prose(id)} in ${sign(ruler.sign)}${ruler.house ? `, house ${ruler.house}` : ""}`,
       parts: [
         th
-          ? `ดาวเจ้าเรือนลัคนาเป็นเหมือนกัปตันของทั้งผัง ของคุณคือ${name(id)}ใน${sign(ruler.sign)} ${word(id)}จึงเป็นตัวกำหนดทิศทางชีวิต และคุณใช้มัน${st.style.th}`
-          : `The ruler of your rising sign acts as captain of the whole chart. Yours is ${prose(id)} in ${sign(ruler.sign)}, so your ${word(id)} sets your direction, and you use it ${st.style.en}.`,
-        ...(arena ? [th ? `ไม่ว่าจะเริ่มจากเรื่องไหน ชีวิตมักพากลับมาที่${arena.th}` : `Wherever you start, life tends to bring you back to ${arena.en}.`] : []),
+          ? `ดาวเจ้าเรือนลัคนาคุมทิศทางของทั้งผัง ของคุณคือ${name(id)}ใน${sign(ruler.sign)} ${word(id)}จึงเป็นตัวกำหนดทิศทางชีวิต และคุณใช้มัน${st.style.th}`
+          : `The ruler of your rising sign steers the whole chart. Yours is ${prose(id)} in ${sign(ruler.sign)}, so your ${word(id)} sets your direction, and you use it ${st.style.en}.`,
+        ...(arena ? [th ? `ไม่ว่าจะเริ่มจากเรื่องไหน สุดท้ายชีวิตจะพาคุณกลับมาที่${arena.th}` : `Wherever you start, life brings you back to ${arena.en}.`] : []),
         giftWatch(ruler.sign),
         ...(hd ? [hd.why[lang]] : []),
       ],
@@ -375,8 +375,8 @@ export function chartHighlights(chart: NatalChart, lang: Lang, max = 7): Highlig
         parts: [
           ed.miss[lang],
           th
-            ? "ธาตุที่ขาดไม่ได้แปลว่าคุณไม่มีด้านนี้ แต่ด้านนี้ไม่มาเอง ต้องตั้งใจสร้าง และหลายคนกลับเก่งเรื่องนั้นเพราะฝึกมาตลอดชีวิต"
-            : "A missing element does not mean you lack that side; it means it will not come by itself. Many people end up excelling at it because they practised all their lives.",
+            ? "ธาตุที่ขาดไม่ได้แปลว่าคุณไม่มีด้านนี้ แต่ด้านนี้ไม่มาเอง คุณต้องฝึกเอง และเมื่อฝึกจนเป็นนิสัย มันจะกลายเป็นจุดแข็งที่คุณสร้างขึ้นมาเอง"
+            : "A missing element does not mean you lack that side; it means it will not come by itself. You have to practice it, and once it becomes a habit, it is a strength you built yourself.",
         ],
         advice: [ed.missKey[lang]],
         tone: "neutral",
@@ -508,8 +508,8 @@ function patternCandidate(chart: NatalChart, p: ChartPattern, lang: Lang): Patte
         title: th ? (gift ? `คุณมีพรสวรรค์ด้าน${gift}ที่ไหลลื่น` : "คุณมีพรสวรรค์ที่ไหลลื่น") : gift ? `You have a flowing gift for ${gift}` : "You have a flowing natural gift",
         basis: th ? `สามเหลี่ยมใหญ่${el ? `ธาตุ${el}` : ""}: ${names(p.bodies)} ทำมุม 120 องศากันครบ` : `Grand Trine${el ? ` in ${el}` : ""}: ${names(p.bodies)}, all 120 degrees apart`,
         text: th
-          ? `ดาวสามดวงส่งพลังถึงกันเป็นวงครบ ${words(p.bodies)}ของคุณจึงทำงานด้วยกันได้ราบรื่นแทบไม่ต้องพยายาม จุดที่ต้องระวังคือความง่ายอาจทำให้คุณไม่ฝึกต่อ หรืออยู่ในพื้นที่สบายนานเกินไป`
-          : `Three planets feed each other in a closed circle, so your ${words(p.bodies)} work together almost effortlessly. The catch is that ease can stop you practising, or keep you in your comfort zone too long.`,
+          ? `ดาวสามดวงส่งพลังถึงกันเป็นวงครบ ${words(p.bodies)}ของคุณจึงทำงานด้วยกันได้ราบรื่นแทบไม่ต้องพยายาม จุดอ่อนคือความง่ายนี้ทำให้คุณหยุดฝึกและอยู่ในพื้นที่สบายนานเกินไป`
+          : `Three planets feed each other in a closed circle, so your ${words(p.bodies)} work together almost effortlessly. The weak spot is that this ease makes you stop practicing and stay in your comfort zone too long.`,
         advice: [th ? "ตั้งเป้าที่ท้าทายให้พรสวรรค์นี้ได้ทำงานจริง แล้วมันจะกลายเป็นผลงาน" : "Give this gift a challenging goal so it turns into real achievement."],
         tone: "harmonious",
       };
@@ -525,8 +525,8 @@ function patternCandidate(chart: NatalChart, p: ChartPattern, lang: Lang): Patte
         title: th ? `${word(p.apex)}คือจุดที่ชีวิตผลักให้คุณโต` : `Your ${word(p.apex)} is where life pushes you to grow`,
         basis: th ? `รูปตัว T: ${name(x)} เล็ง ${name(y)} และทั้งคู่ทำมุมฉากกับ${name(p.apex)} (ดาวยอด)` : `T-square: ${name(x)} opposite ${name(y)}, both square ${name(p.apex)} (the apex)`,
         text: th
-          ? `${word(x)}กับ${word(y)}ของคุณดึงกันคนละทาง แล้วแรงตึงนั้นไหลมารวมที่${word(p.apex)} คุณจึงรู้สึกกดดันเรื่องนี้บ่อยกว่าเรื่องอื่น และมักเป็นเรื่องที่ทำให้คุณพยายามมากที่สุดในชีวิต${release ? ` ทางคลายแรงกดดันมักอยู่ที่เรื่อง${release}` : ""}`
-          : `Your ${word(x)} and ${word(y)} pull in opposite directions, and the tension collects in your ${word(p.apex)}. You feel pressure here more often than anywhere else, and it is often where you work hardest in life.${release ? ` The release valve is usually ${release}.` : ""}`,
+          ? `${word(x)}กับ${word(y)}ของคุณดึงกันคนละทาง แล้วแรงตึงนั้นไหลมารวมที่${word(p.apex)} คุณจึงรู้สึกกดดันเรื่องนี้บ่อยกว่าเรื่องอื่น และเป็นเรื่องที่คุณทุ่มแรงมากที่สุดในชีวิต${release ? ` ทางคลายแรงกดดันอยู่ที่เรื่อง${release}` : ""}`
+          : `Your ${word(x)} and ${word(y)} pull in opposite directions, and the tension collects in your ${word(p.apex)}. You feel pressure here more often than anywhere else, and it is where you work hardest in life.${release ? ` The release valve is ${release}.` : ""}`,
         advice: [th ? `เมื่อรู้สึกถูกกดดันเรื่อง${word(p.apex)} ให้มองว่าเป็นสัญญาณให้ลงมือ ไม่ใช่สัญญาณให้ถอย` : `When you feel pressure around your ${word(p.apex)}, treat it as a signal to act, not to retreat.`],
         tone: "tense",
       };
@@ -537,8 +537,8 @@ function patternCandidate(chart: NatalChart, p: ChartPattern, lang: Lang): Patte
         title: th ? "ชีวิตท้าทายคุณจากหลายทิศ และนั่นทำให้คุณแข็งแกร่ง" : "Life challenges you from every side, and that makes you strong",
         basis: th ? `กากบาทใหญ่: ${names(p.bodies)} ทำมุมฉากและเล็งกันครบสี่ทิศ` : `Grand Cross: ${names(p.bodies)} locked in squares and oppositions`,
         text: th
-          ? `${words(p.bodies)}ของคุณดึงกันเป็นสี่ทิศ ชีวิตจึงมักมีหลายเรื่องเรียกร้องพร้อมกัน คุณอาจรู้สึกว่าไม่ค่อยได้พัก แต่คนที่มีผังแบบนี้มักแข็งแกร่ง ทนแรงกดดันได้มาก และมองเห็นทุกด้านของปัญหา`
-          : `Your ${words(p.bodies)} pull in four directions, so life often makes several demands at once. You may feel you rarely get a break, but people with this pattern tend to be resilient, handle pressure well and see every side of a problem.`,
+          ? `${words(p.bodies)}ของคุณดึงกันเป็นสี่ทิศ ชีวิตจึงมีหลายเรื่องเรียกร้องพร้อมกันเป็นประจำ และคุณรู้สึกว่าไม่ค่อยได้พัก ผลที่ได้คือคุณแข็งแกร่ง ทนแรงกดดันได้มาก และมองเห็นทุกด้านของปัญหา`
+          : `Your ${words(p.bodies)} pull in four directions, so life regularly makes several demands at once and you feel you rarely get a break. The payoff: you are resilient, handle pressure well and see every side of a problem.`,
         advice: [th ? "จัดลำดับว่าเรื่องไหนสำคัญที่สุดในแต่ละช่วง แล้วทุ่มทีละเรื่อง แทนการพยายามทำทุกอย่างพร้อมกัน" : "Decide what matters most in each season of life and focus on one thing at a time."],
         tone: "tense",
       };
@@ -550,8 +550,8 @@ function patternCandidate(chart: NatalChart, p: ChartPattern, lang: Lang): Patte
         title: th ? `${word(p.apex)}คือภารกิจเฉพาะตัวของคุณ` : `Your ${word(p.apex)} carries a personal mission`,
         basis: th ? `นิ้วพระเจ้า (Yod): ${name(x)} กับ ${name(y)} ทำมุม 60 องศา และทั้งคู่ทำมุม 150 องศากับ${name(p.apex)}` : `Yod: ${name(x)} and ${name(y)} in sextile, both quincunx ${name(p.apex)}`,
         text: th
-          ? `${word(p.apex)}เป็นเรื่องที่ชีวิตเรียกร้องให้คุณปรับจูนอยู่เสมอ มันไม่เข้าที่ง่ายเหมือนเรื่องอื่น และบางครั้งรู้สึกเหมือนต้องทำหน้าที่ที่คนอื่นไม่เข้าใจ ยิ่งคุณยอมรับความไม่เหมือนใครของเรื่องนี้ มันก็ยิ่งกลายเป็นสิ่งที่มีแต่คุณทำได้`
-          : `Life keeps asking you to fine-tune your ${word(p.apex)}. It never settles as easily as other areas, and sometimes it feels like a role others do not understand. The more you accept how unusual it is, the more it becomes something only you can do.`,
+          ? `${word(p.apex)}เป็นเรื่องที่ชีวิตเรียกร้องให้คุณปรับจูนอยู่เสมอ มันไม่เข้าที่ง่ายเหมือนเรื่องอื่น และคุณรู้สึกว่ากำลังทำหน้าที่ที่คนอื่นไม่เข้าใจ ยิ่งคุณยอมรับความไม่เหมือนใครของเรื่องนี้ มันก็ยิ่งกลายเป็นสิ่งที่มีแต่คุณทำได้`
+          : `Life keeps asking you to fine-tune your ${word(p.apex)}. It never settles as easily as other areas, and it feels like a role others do not understand. The more you accept how unusual it is, the more it becomes something only you can do.`,
         advice: [th ? "ทดลองและปรับไปเรื่อย ๆ อย่ารอคำตอบที่สมบูรณ์แบบ" : "Keep experimenting and adjusting instead of waiting for the perfect answer."],
         tone: "neutral",
       };

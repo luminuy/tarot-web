@@ -1342,6 +1342,130 @@ console.log("\n6.21) ภาพรวมผังส่วนทำเงิน �
   );
 }
 
+console.log("\n6.22) ตอบชัด ไม่กั๊ก (เจ้าของ 2026-11-02) — ไม่มีคำกั๊กในเนื้อหาผัง · ผังวันเกิดปีนี้แบบเต็ม · ความแรงตามองศาจริง · ข้อสรุปรัก/งาน/เงิน");
+{
+  const content = await import("../../src/data/natal/content");
+  const depth = await import("../../src/data/natal/depth");
+  const thai = await import("../../src/data/natal/thai-content");
+  const stars = await import("../../src/data/natal/stars-content");
+  const { describeAspect, describeTimedAspect, describeBody, lifeAreas } = await import("../../src/lib/astro/natal-text");
+  const { chartHighlights } = await import("../../src/lib/astro/natal-insight");
+  const { returnReading } = await import("../../src/lib/astro/return-reading");
+  const { chartVerdicts } = await import("../../src/lib/astro/natal-verdict");
+  const { aspectStrength } = await import("../../src/lib/astro/strength");
+  const { natalAnswerRules } = await import("../../src/lib/astro/natal-ai");
+  const { buildOverviewPrompt } = await import("../../src/lib/astro/natal-overview");
+  const rd = (f: string) => fs.readFileSync(path.join(process.cwd(), f), "utf8");
+  const samples: NatalInput[] = [
+    input(Date.UTC(1969, 11, 31, 23, 5)),
+    input(Date.UTC(1990, 4, 17, 5, 30)),
+    input(Date.UTC(2000, 7, 12, 14, 20)),
+    input(Date.UTC(1977, 9, 25, 2, 0), { lat: 51.5, lon: -0.12 }),
+    input(Date.UTC(1985, 2, 3, 5), { timeKnown: false }),
+  ];
+  // คำกั๊กที่เจ้าของไม่เอา — คำเตือนความคลาดของข้อมูล (ไม่รู้เวลาเกิด/ใกล้รอยต่อราศี) ก็เขียนแบบมีเงื่อนไขชัดได้ ไม่ต้องยกเว้น
+  const HEDGE_TH = /อาจ(?!ารย์)|บางที|ก็ได้|ค่อนข้าง|ขึ้นอยู่กับ|ไม่มากก็น้อย|ในระดับหนึ่ง/;
+  const HEDGE_EN = /\b(may|might|perhaps|maybe|tend to|tends to|somewhat)\b/i;
+  const found: string[] = [];
+  const walk = (v: unknown, where: string) => {
+    if (typeof v === "string") return;
+    if (Array.isArray(v)) return v.forEach((x, i) => walk(x, `${where}[${i}]`));
+    if (v && typeof v === "object") {
+      const o = v as Record<string, unknown>;
+      if (typeof o.th === "string" && HEDGE_TH.test(o.th)) found.push(`    ${where}.th: ${o.th.slice(0, 80)}`);
+      if (typeof o.en === "string" && HEDGE_EN.test(o.en)) found.push(`    ${where}.en: ${o.en.slice(0, 80)}`);
+      for (const [k, x] of Object.entries(o)) if (k !== "th" && k !== "en") walk(x, `${where}.${k}`);
+    }
+  };
+  for (const [name, mod] of Object.entries({ content, depth, thai, stars })) for (const [k, v] of Object.entries(mod)) walk(v, `${name}.${k}`);
+  check(`เนื้อหาผังทุกไฟล์ข้อมูลไม่มีคำกั๊ก (อาจ บางที ก็ได้ ค่อนข้าง ขึ้นอยู่กับ · may might perhaps tend to)`, found.length === 0, found.slice(0, 12).join("\n"));
+
+  // ข้อความที่ประกอบแล้วจริง (ผังตัวอย่างหลายแบบ ทั้งสองภาษา)
+  const rendered: string[] = [];
+  const charts = samples.map((inp) => computeNatalChart(inp));
+  const PLANETS_T = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron", "node"] as const;
+  for (const lang of ["th", "en"] as const) {
+    for (const c of charts) {
+      for (const h of chartHighlights(c, lang, 10)) rendered.push(h.title, h.text, h.advice);
+      for (const b of c.bodies) rendered.push(...describeBody(c, b, lang));
+      for (const a of c.aspects.slice(0, 15)) rendered.push(describeAspect(a, lang, { strength: true }));
+      for (const x of lifeAreas(c, lang)) rendered.push(x.text);
+      for (const v of chartVerdicts(c, lang)) rendered.push(v.verdict, v.text);
+    }
+    for (const t of PLANETS_T) for (const type of ["conjunction", "trine", "square", "opposition", "sextile"] as const) rendered.push(describeTimedAspect(t, "sun", type, lang));
+  }
+  const hedged = rendered.filter((t) => HEDGE_TH.test(t) || HEDGE_EN.test(t));
+  check(`ข้อความที่ประกอบแล้วจริง ${rendered.length} ชิ้น (เรื่องเด่น ดาว มุม ความรัก/งาน/เงิน ข้อสรุป ดาวจร) ไม่มีคำกั๊ก · ไม่มี undefined`, hedged.length === 0 && rendered.every((t) => !/undefined|NaN/.test(t)), hedged.slice(0, 6).map((t) => `    ${t.slice(0, 100)}`).join("\n"));
+
+  // ดาวจรเดินเร็วใช้น้ำเสียงเฉพาะดาว (อังคารตึง = ใจร้อน ไม่ใช่ประโยคกลาง "ปรับแผน")
+  check(
+    "ดาวจรเดินเร็ว/ดวงจันทร์/ไครอนใช้น้ำเสียงเฉพาะดาว · ดาวเดินช้ายังใช้ประโยคกลาง · มุมกุมใช้ประโยคกลาง",
+    describeTimedAspect("mars", "sun", "square", "th").includes(content.TRANSIT_TONE_BODY.mars!.tense.th) &&
+      describeTimedAspect("chiron", "moon", "trine", "en").includes(content.TRANSIT_TONE_BODY.chiron!.harmonious.en) &&
+      describeTimedAspect("saturn", "sun", "square", "th").includes(content.TRANSIT_TONE.tense.th) &&
+      describeTimedAspect("mars", "sun", "conjunction", "th").includes(content.TRANSIT_TONE.neutral.th),
+  );
+
+  // ความแรงตามองศาจริง
+  const tightA = { a: "sun", b: "moon", type: "trine", orb: 0.4, maxOrb: 8.75, applying: true } as const;
+  const wideA = { ...tightA, orb: 7.2 };
+  check(
+    "ความแรงตามองศา: มุมแนบ (≤ 1 องศา) กับมุมหลวม (> 60% ของ orb) ได้ข้อความต่างกัน · บอกองศาจริง",
+    aspectStrength(0.4, 8.75) === "exact" && aspectStrength(7.2, 8.75) === "loose" && aspectStrength(3, 8.75) === "clear" &&
+      describeAspect(tightA, "th", { strength: true }) !== describeAspect(wideA, "th", { strength: true }) &&
+      describeAspect(tightA, "th", { strength: true }).includes("แนบสนิท") && describeAspect(wideA, "en", { strength: true }).includes("wide") &&
+      rd("src/components/natal/NatalResult.tsx").includes("strength: true") && rd("src/lib/astro/natal-report.ts").includes("strength: true"),
+  );
+
+  // ผังวันเกิดปีนี้ / ผังจันทร์คืนแบบเต็ม
+  const natal = charts[0];
+  const sr = solarReturn(natal, 30, { lat: 13.75, lon: 100.5 });
+  const lr = lunarReturn(natal, Date.UTC(2026, 10, 2), { lat: 13.75, lon: 100.5 });
+  const srTh = returnReading(natal, sr, "solar", "th");
+  const srEn = returnReading(natal, sr, "solar", "en");
+  const lrTh = returnReading(natal, lr, "lunar", "th");
+  const unknownNatal = computeNatalChart(input(Date.UTC(1990, 4, 17, 5), { timeKnown: false }));
+  const srUnknown = returnReading(unknownNatal, solarReturn(unknownNatal, 30, { lat: 13.75, lon: 100.5 }), "solar", "th");
+  const allRet = [srTh, srEn, lrTh].flatMap((r) => [r.verdict?.title ?? "", r.verdict?.why ?? "", ...r.rows.flatMap((x) => [x.label, x.text])]);
+  const inYear = (m: { utcMs: number } | null) => !m || (m.utcMs >= sr.input.utcMs && m.utcMs <= sr.input.utcMs + 366 * 86400000);
+  check(
+    "ผังวันเกิดปีนี้: มีประโยคฟันธง \"ปีนี้คือปีของ…\" + เหตุผล · แถวไม่ซ้ำป้าย · เดือนสำคัญอยู่ใน 12 เดือนนับจากวันเกิด · ไม่มีคำกั๊ก/วรรคซ้อน/undefined",
+    !!srTh.verdict?.title.startsWith("ปีนี้คือปีของ") && !!srTh.verdict?.why.startsWith("เพราะ") && !!lrTh.verdict?.title.startsWith("เดือนนี้คือเดือนของ") &&
+      srTh.rows.length >= 2 && new Set(srTh.rows.map((r) => r.label)).size === srTh.rows.length &&
+      inYear(srTh.heavyMonth) && inYear(srTh.liftMonth) &&
+      allRet.every((t) => !HEDGE_TH.test(t) && !HEDGE_EN.test(t) && !/ {2}|undefined|NaN/.test(t)) && !/[฀-๿]/.test(srEn.rows.map((r) => r.label + r.text).join("")),
+    allRet.filter((t) => / {2}|undefined/.test(t)).slice(0, 3).join("\n"),
+  );
+  check(
+    "ผังวันเกิดปีนี้ไม่รู้เวลาเกิด: ไม่อ่านเรือน (ไม่มีประโยคฟันธงและแถวเรือน) แต่ยังมีเดือนสำคัญจากปฏิทินดาวเดินช้า · หน้าเว็บและรายงานใช้ returnReading",
+    srUnknown.verdict === null && srUnknown.rows.length === 0 &&
+      rd("src/components/natal/NatalTimeTools.tsx").includes("returnReading(chart, ret, mode, lang)") && rd("src/lib/astro/natal-report.ts").includes("returnReading(chart, sr, \"solar\", lang)"),
+  );
+
+  // ข้อสรุปรัก/งาน/เงิน
+  const venusFall = charts.map((c) => ({ c, v: c.bodies.find((b) => b.id === "venus")! })).find((x) => x.v.dignities.includes("fall") || x.v.dignities.includes("detriment"));
+  const vAll = charts.flatMap((c) => [...chartVerdicts(c, "th"), ...chartVerdicts(c, "en")]);
+  check(
+    "ข้อสรุปรัก/งาน/เงิน: ครบ 3 ด้านทุกผัง · มีเหตุผลจากผังจริง · ไม่มีระดับ \"แล้วแต่คุณ\" · หน้าเว็บ รายงาน และ prompt ของ AI ใช้ชุดเดียวกัน",
+    charts.every((c) => chartVerdicts(c, "th").map((v) => v.key).join() === "love,work,money") &&
+      vAll.every((v) => v.verdict.length > 0 && !/แล้วแต่|ตามที่คุณเลือก|your choices decide/i.test(v.verdict)) &&
+      vAll.filter((v) => v.score !== 0).every((v) => v.text.length > 10) &&
+      (!venusFall || chartVerdicts(venusFall.c, "th")[0].text.includes("ดาวศุกร์")) &&
+      rd("src/components/natal/NatalResult.tsx").includes("chartVerdicts(chart, lang)") && rd("src/lib/astro/natal-report.ts").includes("chartVerdicts(chart, lang)") && rd("src/lib/astro/natal-ai.ts").includes("chartVerdicts(chart, lang)"),
+  );
+
+  // กติกา AI: ตอบตรง ห้ามคำกั๊ก แต่ยังห้ามทำนายเหตุร้าย
+  const rulesTh = natalAnswerRules("th");
+  const rulesEn = natalAnswerRules("en");
+  const ov = buildOverviewPrompt(charts[0], "th", "x", chartHighlights(charts[0], "th"));
+  check(
+    "prompt ผังดวง (ถามแม่หมอ · ภาพรวม · รายงาน): สั่งตอบตรง ห้ามคำกั๊ก · ยังห้ามทำนายความตาย อุบัติเหตุ โรค และห้ามรับรองผลการลงทุน",
+    /ห้ามคำกั๊ก/.test(rulesTh) && /ประโยคแรกตอบคำถามทันที/.test(rulesTh) && /No hedging/.test(rulesEn) &&
+      /ห้ามทำนายความตาย อุบัติเหตุ โรค/.test(rulesTh) && /never predict death, accidents, illness/.test(rulesEn) && /การลงทุน/.test(rulesTh) &&
+      /ห้ามคำกั๊ก/.test(ov) && /ห้ามทำนายความตาย/.test(ov) && /ข้อสรุปฟันธงของผัง/.test(ov),
+  );
+}
+
 console.log("\n7) กติกา island — ตัวคำนวณ/คำอธิบาย/ผลผังโหลดแบบ dynamic import เท่านั้น");
 {
   const root = process.cwd();

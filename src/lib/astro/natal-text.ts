@@ -20,6 +20,7 @@ import {
   SYN_PAIR_TEXT,
   TRANSIT_TEXT,
   TRANSIT_TONE,
+  TRANSIT_TONE_BODY,
   type Lang,
 } from "@/data/natal/content";
 import {
@@ -51,6 +52,7 @@ import {
   type Modality,
   type NatalChart,
 } from "./natal";
+import { aspectStrengthNote } from "./strength";
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 /** ไม้ยมกต้องมีวรรคตามหลังเสมอ แม้คำถัดไปจะต่อท้ายทันทีในแม่แบบประโยค */
@@ -122,11 +124,11 @@ export function bodyHeadline(b: BodyPosition, lang: Lang): string {
     case "mc":
       return th ? `งานที่ภูมิใจคือได้เป็นคน${kw}` : `Proud work lets you be ${kw}`;
     case "node":
-      return th ? `เติบโตด้วยการฝึก${st.gift.th}` : `Grow by practising ${st.gift.en}`;
+      return th ? `เติบโตด้วยการฝึก${st.gift.th}` : `Grow by practicing ${st.gift.en}`;
     case "lilith":
       return th ? `ไม่ยอมให้ใครกดความเป็นคน${kw}` : `Refuses to let anyone tame your ${kw} side`;
     case "chiron":
-      return th ? `แผลใจมักเกี่ยวกับ${CHIRON_SIGN[b.sign].th}` : `Old wounds around ${CHIRON_SIGN[b.sign].en}`;
+      return th ? `แผลใจอยู่ที่เรื่อง${CHIRON_SIGN[b.sign].th}` : `Your old wound: ${CHIRON_SIGN[b.sign].en}`;
   }
   if (BODY_TEXT[b.id].generational) return th ? `คนรุ่นคุณ: ${kw}` : `Your generation: ${kw}`;
   return th ? `${BODY_VOICE[b.id].word.th}แบบคน${kw}` : `Your ${BODY_VOICE[b.id].word.en}: ${kw}`;
@@ -156,8 +158,8 @@ export function describeBody(chart: NatalChart, b: BodyPosition, lang: Lang): st
     if (ruler) {
       out.push(
         th
-          ? `เจ้าเรือนลัคนาคือ${bodyName(ruler.id, lang)} ซึ่งอยู่${signName(ruler.sign, lang)}${ruler.house ? ` เรือน ${ruler.house}` : ""} ดาวดวงนี้จึงเป็นเหมือนกัปตันของทั้งผัง เรื่อง${thw(HOUSE_TEXT[(ruler.house ?? 1) - 1].arena.th)}มีผลต่อชีวิตคุณมาก`
-          : `Your chart ruler is ${prose(ruler.id, lang)} in ${signName(ruler.sign, lang)}${ruler.house ? `, house ${ruler.house}` : ""}. It acts as the captain of the whole chart, so ${HOUSE_TEXT[(ruler.house ?? 1) - 1].arena[lang]} weigh heavily in your life.`,
+          ? `เจ้าเรือนลัคนาคือ${bodyName(ruler.id, lang)} ซึ่งอยู่${signName(ruler.sign, lang)}${ruler.house ? ` เรือน ${ruler.house}` : ""} ดาวดวงนี้คุมทิศทางของทั้งผัง เรื่อง${thw(HOUSE_TEXT[(ruler.house ?? 1) - 1].arena.th)}จึงเป็นเรื่องหลักของชีวิตคุณ`
+          : `Your chart ruler is ${prose(ruler.id, lang)} in ${signName(ruler.sign, lang)}${ruler.house ? `, house ${ruler.house}` : ""}. It steers the whole chart, so ${HOUSE_TEXT[(ruler.house ?? 1) - 1].arena[lang]} are central to your life.`,
       );
     }
     return out;
@@ -165,8 +167,8 @@ export function describeBody(chart: NatalChart, b: BodyPosition, lang: Lang): st
     const opp = (b.sign + 6) % 12;
     out.push(
       th
-        ? `ชีวิตชวนให้คุณเติบโต${st.style.th} โดยฝึกใช้${st.gift.th} ส่วนโหนดใต้ใน${signName(opp, lang)}คือสิ่งที่ถนัดอยู่แล้วจนติดเป็นนิสัย (${SIGN_TEXT[opp].keywords.th}) ใช้เป็นฐานได้ แต่ถ้าวนอยู่ที่เดิมจะรู้สึกว่าชีวิตไม่ไปไหน`
-        : `Life invites you to grow ${st.style.en}, learning to use ${st.gift.en}. Your South Node in ${signName(opp, lang)} is your comfort zone (${SIGN_TEXT[opp].keywords.en}): a good base, but staying there too long makes life feel stuck.`,
+        ? `ทางเติบโตของคุณคือฝึกใช้${st.gift.th} และใช้ชีวิต${st.style.th}ให้มากขึ้น ส่วนโหนดใต้ใน${signName(opp, lang)}คือนิสัยที่คุณถนัดอยู่แล้ว (${SIGN_TEXT[opp].keywords.th}) ใช้เป็นฐานได้ แต่ถ้าอยู่แค่ตรงนั้น ชีวิตจะย่ำอยู่กับที่`
+        : `Your path of growth is to practice ${st.gift.en} and to live more ${st.style.en}. Your South Node in ${signName(opp, lang)} is the habit you already master (${SIGN_TEXT[opp].keywords.en}): a good base, but if you stay only there, life stalls.`,
     );
   } else if (b.id === "southNode") {
     return out;
@@ -182,20 +184,20 @@ export function describeBody(chart: NatalChart, b: BodyPosition, lang: Lang): st
   } else if (b.id === "chiron") {
     out.push(
       th
-        ? `แผลใจที่คุณพกมานานมักเกี่ยวกับ${CHIRON_SIGN[b.sign].th} เรื่องนี้อาจเจ็บซ้ำเป็นพัก ๆ แต่เมื่อคุณเข้าใจมัน มันจะกลายเป็นสิ่งที่คุณช่วยคนอื่นได้ดีที่สุด`
-        : `The old wound you carry is often about ${CHIRON_SIGN[b.sign].en}. It may ache again from time to time, but once you understand it, it becomes the very thing you are best at helping others with.`,
+        ? `แผลใจที่คุณพกมานานอยู่ที่เรื่อง${CHIRON_SIGN[b.sign].th} เรื่องนี้กลับมาเจ็บเป็นพัก ๆ และเมื่อคุณเข้าใจมัน มันกลายเป็นเรื่องที่คุณช่วยคนอื่นได้ดีที่สุด`
+        : `The old wound you carry is about ${CHIRON_SIGN[b.sign].en}. It comes back to ache now and then, and once you understand it, it becomes the thing you are best at helping others with.`,
     );
   } else if (b.id === "lilith") {
     out.push(
       th
-        ? `ด้านที่คุณเป็นคน${st.keywords.th} คือด้านที่ไม่ยอมให้ใครกดหรือควบคุม ถ้าถูกบังคับให้ซ่อนด้านนี้นานเกินไป มันจะปะทุออกมาแรงกว่าที่ตั้งใจ การยอมรับด้านนี้อย่างเปิดเผยคือพลังของคุณ`
-        : `The part of you that is ${st.keywords.en} is the part you refuse to let anyone control. Forced into hiding for too long, it bursts out harder than you intend. Owning it openly is your power.`,
+        ? `ด้านที่คุณเป็นคน${st.keywords.th} คือด้านที่คุณไม่ยอมให้ใครควบคุม ถ้าต้องเก็บด้านนี้ไว้นาน มันจะระเบิดออกมาแรงกว่าที่ตั้งใจ แสดงด้านนี้อย่างเปิดเผย แล้วมันจะเป็นพลังของคุณ`
+        : `The part of you that is ${st.keywords.en} is the part you refuse to let anyone control. Kept hidden too long, it bursts out harder than you intend. Show it openly and it becomes your power.`,
     );
   } else if (b.id === "mc") {
     out.push(
       th
-        ? `งานและบทบาทที่ทำให้คุณภูมิใจคือบทบาทที่ได้เป็นคน${st.keywords.th} งานที่ใช่มักเป็น${MC_CAREER[b.sign].th}`
-        : `The work and role that make you proud let you be ${st.keywords.en}. The right path is often ${MC_CAREER[b.sign].en}.`,
+        ? `งานและบทบาทที่ทำให้คุณภูมิใจคือบทบาทที่ได้เป็นคน${st.keywords.th} งานที่ใช่คือ${MC_CAREER[b.sign].th}`
+        : `The work and role that make you proud let you be ${st.keywords.en}. The right path is ${MC_CAREER[b.sign].en}.`,
     );
   } else {
     // ดาวเคราะห์น้อย · จุดคำนวณ (ส่วนแห่งโชค เวอร์เท็กซ์ จุดตก ก้นฟ้า)
@@ -216,8 +218,8 @@ export function describeBody(chart: NatalChart, b: BodyPosition, lang: Lang): st
   if (b.retrograde && !["node", "southNode", "lilith", "sun", "moon"].includes(b.id)) {
     out.push(
       th
-        ? `${name}ถอยหลังตอนคุณเกิด พลังนี้หันเข้าด้านใน คุณมักทบทวนเรื่องนี้กับตัวเองก่อนแสดงออก`
-        : `${cap(prose(b.id, lang))} was retrograde when you were born: this energy turns inward, and you tend to work it through privately before showing it.`,
+        ? `${name}ถอยหลังตอนคุณเกิด พลังนี้หันเข้าด้านใน คุณคิดเรื่องนี้กับตัวเองให้จบก่อน แล้วจึงแสดงออก`
+        : `${cap(prose(b.id, lang))} was retrograde when you were born: this energy turns inward, and you work it through privately before you show it.`,
     );
   }
   return out;
@@ -229,7 +231,16 @@ export function describeBody(chart: NatalChart, b: BodyPosition, lang: Lang): st
  * เช่น "อีกใจอยากไม่ยอมให้ใครกด" ➔ รอบสอง "เข้าใจง่ายแต่ลึกซึ้ง" ใช้ความต้องการ + มุมมองว่ามุมนี้ทำงานในใจอย่างไร)
  * มุมรองยังใช้ความหมายกลางของมุม
  */
-export function describeAspect(a: Aspect, lang: Lang, opts: { short?: boolean } = {}): string {
+/**
+ * `strength` = ต่อท้ายด้วยความแรงตามองศาจริง (แนบสนิท / ชัด / หลวม · `strength.ts`) — เจ้าของ 2026-11-02 "ความแรงตามตัวเลขจริง"
+ * มุมเดียวกันที่ห่าง 0°10′ กับ 6°50′ เดิมได้ข้อความเดียวกันทุกตัวอักษร
+ */
+export function describeAspect(a: Aspect, lang: Lang, opts: { short?: boolean; strength?: boolean } = {}): string {
+  const body = describeAspectBody(a, lang, opts);
+  return opts.strength ? `${body} ${aspectStrengthNote(a.orb, a.maxOrb, lang)}` : body;
+}
+
+function describeAspectBody(a: Aspect, lang: Lang, opts: { short?: boolean }): string {
   const A = BODY_VOICE[a.a];
   const B = BODY_VOICE[a.b];
   const meaning = ASPECT_TEXT[a.type].meaning[lang];
@@ -244,7 +255,7 @@ export function describeAspect(a: Aspect, lang: Lang, opts: { short?: boolean } 
       case "sextile":
         return th ? `${A.word.th}กับ${B.word.th}ของคุณพร้อมช่วยกัน เมื่อคุณเป็นฝ่ายเริ่มก่อน` : `Your ${A.word.en} and ${B.word.en} help each other once you make the first move.`;
       case "square":
-        return th ? `ใจหนึ่งต้องการ${A.want.th} อีกใจต้องการ${B.want.th} สองอย่างนี้มักชนกันในจังหวะสำคัญ` : `Part of you wants ${A.want.en}; another part wants ${B.want.en}, and they tend to collide at key moments.`;
+        return th ? `ใจหนึ่งต้องการ${A.want.th} อีกใจต้องการ${B.want.th} สองอย่างนี้ชนกันในจังหวะสำคัญ` : `Part of you wants ${A.want.en}; another part wants ${B.want.en}, and they collide at key moments.`;
       case "opposition":
         return th ? `คุณแกว่งไปมาระหว่างความต้องการที่จะ${A.want.th} กับความต้องการที่จะ${B.want.th}` : `You swing between the need ${A.want.en} and the need ${B.want.en}.`;
     }
@@ -254,13 +265,13 @@ export function describeAspect(a: Aspect, lang: Lang, opts: { short?: boolean } 
       case "conjunction":
         return `ความต้องการที่จะ${A.want.th}กับความต้องการที่จะ${B.want.th}ในตัวคุณหลอมเป็นแรงเดียวกัน เมื่อสองเรื่องนี้ไปทางเดียวกัน พลังของคุณเข้มข้นและชัดเจนมาก แต่เมื่อด้านหนึ่งสะดุด อีกด้านจะสะเทือนตามทันที`;
       case "trine":
-        return `${A.word.th}กับ${B.word.th}ของคุณหนุนกันเองโดยไม่ต้องฝืน ยิ่งคุณ${A.want.th} ก็ยิ่ง${B.want.th}ง่ายขึ้น คนรอบตัวมักมองว่านี่คือพรสวรรค์ แต่ตัวคุณเองอาจมองข้ามเพราะมันง่ายเกินไป`;
+        return `${A.word.th}กับ${B.word.th}ของคุณหนุนกันเองโดยไม่ต้องฝืน ยิ่งคุณ${A.want.th} ก็ยิ่ง${B.want.th}ง่ายขึ้น คนรอบตัวเห็นชัดว่านี่คือพรสวรรค์ของคุณ แต่คุณเองมองข้ามเพราะมันมาง่ายเกินไป เอามันมาใช้ให้เป็นผลงานจริง`;
       case "sextile":
-        return `${A.word.th}กับ${B.word.th}ของคุณพร้อมช่วยกัน แต่ประตูบานนี้ไม่เปิดเอง ต้องเป็นคุณที่เริ่มก่อน และเมื่อเริ่มแล้ว สองด้านนี้จะส่งแรงให้กันจนเกิดโอกาสใหม่`;
+        return `${A.word.th}กับ${B.word.th}ของคุณพร้อมช่วยกัน แต่โอกาสนี้ไม่เปิดเอง คุณต้องเป็นฝ่ายเริ่มก่อน พอเริ่มแล้ว สองด้านนี้ส่งแรงให้กันจนเกิดโอกาสใหม่`;
       case "square":
-        return `ใจหนึ่งต้องการ${A.want.th} อีกใจต้องการ${B.want.th} สองอย่างนี้มักชนกันในจังหวะสำคัญจนรู้สึกติดขัดหรือหงุดหงิด แต่แรงเสียดทานนี้เองที่ผลักให้คุณไม่หยุดนิ่ง และเก่งขึ้นทุกครั้งที่หาทางให้สองด้านอยู่ด้วยกันได้`;
+        return `ใจหนึ่งต้องการ${A.want.th} อีกใจต้องการ${B.want.th} สองอย่างนี้ชนกันในจังหวะสำคัญ คุณจึงติดขัดและหงุดหงิดกับตัวเองเป็นช่วง ๆ แรงเสียดทานนี้เองที่ทำให้คุณไม่หยุดนิ่ง และทุกครั้งที่หาทางให้สองด้านอยู่ด้วยกันได้ คุณเก่งขึ้นอีกขั้น`;
       case "opposition":
-        return `คุณแกว่งไปมาระหว่างความต้องการที่จะ${A.want.th} กับความต้องการที่จะ${B.want.th} และมักเห็นอีกด้านผ่านคนใกล้ตัว คนที่ทำให้คุณหงุดหงิดที่สุดอาจกำลังสะท้อนด้านที่คุณยังไม่ยอมใช้ ทางออกคือหาจุดกลาง ไม่ใช่เลือกข้าง`;
+        return `คุณแกว่งไปมาระหว่างความต้องการที่จะ${A.want.th} กับความต้องการที่จะ${B.want.th} และเห็นอีกด้านผ่านคนใกล้ตัว คนที่ทำให้คุณหงุดหงิดที่สุดคือคนที่สะท้อนด้านที่คุณยังไม่ยอมใช้ ทางออกคือให้ที่ยืนกับทั้งสองด้าน ไม่ใช่เลือกข้างเดียว`;
       default:
         return `${BODY_TEXT[a.a].noun.th} กับ${thw(BODY_TEXT[a.b].noun.th)}ของคุณ: ${meaning}`;
     }
@@ -269,13 +280,13 @@ export function describeAspect(a: Aspect, lang: Lang, opts: { short?: boolean } 
     case "conjunction":
       return `Your need ${A.want.en} and your need ${B.want.en} are fused into one drive. When they pull the same way, your energy is intense and clear; when one stumbles, the other shakes too.`;
     case "trine":
-      return `Your ${A.word.en} and ${B.word.en} support each other without effort: the more you manage ${A.want.en}, the easier it is ${B.want.en}. Others may see it as a gift, while you may overlook it because it comes so easily.`;
+      return `Your ${A.word.en} and ${B.word.en} support each other without effort: the more you manage ${A.want.en}, the easier it is ${B.want.en}. Others clearly see this as your gift, but you overlook it because it comes so easily. Turn it into real results.`;
     case "sextile":
-      return `Your ${A.word.en} and ${B.word.en} are ready to help each other, but this door does not open by itself. You have to make the first move; once you do, the two feed each other and new opportunities appear.`;
+      return `Your ${A.word.en} and ${B.word.en} are ready to help each other, but the opening does not appear by itself. You have to make the first move; once you do, the two feed each other and new opportunities appear.`;
     case "square":
-      return `Part of you wants ${A.want.en}; another part wants ${B.want.en}. They tend to collide at key moments, leaving you stuck or frustrated, but that friction keeps you moving and makes you more capable each time you find a way for both to live together.`;
+      return `Part of you wants ${A.want.en}; another part wants ${B.want.en}. They collide at key moments, so you get stuck and frustrated with yourself from time to time. That friction keeps you moving, and each time you find a way for both to live together, you get better.`;
     case "opposition":
-      return `You swing between the need ${A.want.en} and the need ${B.want.en}, often meeting the other side through people close to you. Whoever frustrates you most may be mirroring a side of you that you have not yet claimed. The answer is a middle path, not picking a side.`;
+      return `You swing between the need ${A.want.en} and the need ${B.want.en}, and you meet the other side through people close to you. Whoever frustrates you most is mirroring a side of you that you have not yet claimed. The answer is to make room for both, not to pick one.`;
     default:
       return `Your ${BODY_TEXT[a.a].noun.en} with your ${BODY_TEXT[a.b].noun.en}: ${meaning}.`;
   }
@@ -536,7 +547,7 @@ export function lifeAreas(chart: NatalChart, lang: Lang): LifeArea[] {
                   ? `เจ้าเรือนเงินคือ${bodyName(moneyRuler.id, lang)} อยู่เรือน ${moneyRuler.house} แปลว่า${MONEY_FROM_HOUSE[moneyRuler.house - 1].th}`
                   : `Your money ruler, ${prose(moneyRuler.id, lang)}, sits in house ${moneyRuler.house}: ${MONEY_FROM_HOUSE[moneyRuler.house - 1].en}.`
                 : "",
-              jupiter.house ? (th ? `ส่วนโชคและโอกาสมักมาทาง${HOUSE_TEXT[jupiter.house - 1].arena.th}` : `Luck and opportunity tend to arrive through ${HOUSE_TEXT[jupiter.house - 1].arena.en}.`) : "",
+              jupiter.house ? (th ? `ส่วนโชคและโอกาสมาทาง${HOUSE_TEXT[jupiter.house - 1].arena.th}` : `Luck and opportunity come through ${HOUSE_TEXT[jupiter.house - 1].arena.en}.`) : "",
             ]
               .filter(Boolean)
               .join(" "),
@@ -559,9 +570,12 @@ export function describeTimedAspect(t: BodyId, n: BodyId, type: AspectType, lang
   // มุมกุม (neutral) ของดาวโอกาส/ทิศทางนับเป็นไหลลื่น · ของดาวที่กดดันนับเป็นแรงผลัก
   const flow = tone === "harmonious" || (tone === "neutral" && (t === "jupiter" || t === "node"));
   const key = keySet ? ` ${(flow ? keySet.flow : keySet.push)[lang]}` : "";
+  // ดาวเดินเร็ว/ดวงจันทร์/ไครอนมีน้ำเสียงเฉพาะดาว (อังคารตึง = ใจร้อน ไม่ใช่ "ปรับแผน") · มุมกุมใช้ประโยคกลาง
+  const own = tone === "neutral" ? undefined : TRANSIT_TONE_BODY[t as keyof typeof TRANSIT_TONE_BODY]?.[tone];
+  const toneLine = own ?? TRANSIT_TONE[tone];
   return lang === "th"
-    ? `${tt.effect.th}เรื่อง${thw(noun)}ของคุณ ${TRANSIT_TONE[tone].th}${key}`
-    : `${cap(tt.effect.en)} your ${noun} ${TRANSIT_TONE[tone].en}.${key}`;
+    ? `${tt.effect.th}เรื่อง${thw(noun)}ของคุณ ${toneLine.th}${key}`
+    : `${cap(tt.effect.en)} your ${noun} ${toneLine.en}.${key}`;
 }
 
 /** ดาวจรอยู่เรือนไหนของผังเกิด */
@@ -572,46 +586,7 @@ export function describeTransitHouse(t: BodyId, house: number, lang: Lang): stri
   return lang === "th" ? `${tt.effect.th}เรื่อง${arena}` : `${cap(tt.effect.en)} ${arena}.`;
 }
 
-/** จุดเด่นของผังวันเกิดปีนี้ / ผังจันทร์คืน */
-export function returnHighlights(ret: NatalChart, kind: "solar" | "lunar", lang: Lang): string[] {
-  const get = (id: BodyId) => ret.bodies.find((b) => b.id === id);
-  const asc = get("asc");
-  const sun = get("sun")!;
-  const moon = get("moon")!;
-  const out: string[] = [];
-  const period = kind === "solar" ? (lang === "th" ? "ปีนี้" : "this year") : lang === "th" ? "เดือนนี้" : "this month";
-  if (asc) {
-    out.push(
-      lang === "th"
-        ? `ลัคนาของผัง${signName(asc.sign, lang)}: ${period}คุณเข้าหาชีวิตแบบคน${SIGN_TEXT[asc.sign].keywords.th}`
-        : `${signName(asc.sign, lang)} rising: ${period} you meet life in a ${SIGN_TEXT[asc.sign].keywords.en} way.`,
-    );
-  }
-  const focus = kind === "solar" ? sun : moon;
-  if (focus.house) {
-    out.push(
-      lang === "th"
-        ? `${kind === "solar" ? "ดวงอาทิตย์" : "ดวงจันทร์"}อยู่เรือน ${focus.house}: เรื่องเด่นของ${period}คือ${HOUSE_TEXT[focus.house - 1].arena.th}`
-        : `${kind === "solar" ? "Sun" : "Moon"} in house ${focus.house}: the main theme ${period} is ${HOUSE_TEXT[focus.house - 1].arena.en}.`,
-    );
-  }
-  if (kind === "solar" && moon.house) {
-    out.push(
-      lang === "th"
-        ? `ดวงจันทร์อยู่${signName(moon.sign, lang)} เรือน ${moon.house}: ใจของคุณปีนี้ผูกกับเรื่อง${HOUSE_TEXT[moon.house - 1].arena.th}`
-        : `Moon in ${signName(moon.sign, lang)}, house ${moon.house}: your heart this year is tied to ${HOUSE_TEXT[moon.house - 1].arena.en}.`,
-    );
-  }
-  const angular = ret.bodies.filter((b) => (PLANET_IDS as readonly string[]).includes(b.id) && b.house && [1, 4, 7, 10].includes(b.house) && b.id !== focus.id);
-  if (angular.length) {
-    out.push(
-      lang === "th"
-        ? `ดาวที่อยู่เรือนมุม (เด่นเป็นพิเศษ${period}): ${angular.map((b) => `${bodyName(b.id, lang)} เรือน ${b.house}`).join(" · ")}`
-        : `Planets on the angles (extra strong ${period}): ${angular.map((b) => `${bodyName(b.id, lang)} in house ${b.house}`).join(", ")}.`,
-    );
-  }
-  return out;
-}
+// ผังวันเกิดปีนี้ / ผังจันทร์คืน ย้ายไป `return-reading.ts` (คำอ่านแบบเต็ม · เจ้าของ 2026-11-02)
 
 // ─────────────────────────── ผังคู่ ───────────────────────────
 

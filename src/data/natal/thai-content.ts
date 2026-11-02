@@ -60,7 +60,7 @@ export const SEVEN_COLUMNS: readonly { name: string; en: string; meaning: T }[][
   ],
   [
     { name: "มรณะ", en: "Morana", meaning: { th: "ความสูญเสีย การสิ้นสุด", en: "loss and endings" } },
-    { name: "ศุภะ", en: "Supha", meaning: { th: "สิ่งดีงาม เกียรติยศ", en: "blessings and honour" } },
+    { name: "ศุภะ", en: "Supha", meaning: { th: "สิ่งดีงาม เกียรติยศ", en: "blessings and honor" } },
     { name: "กัมมะ", en: "Kamma", meaning: { th: "การงาน หน้าที่", en: "work and duty" } },
     { name: "ลาภะ", en: "Labha", meaning: { th: "โชคลาภ วาสนา", en: "fortune and gains" } },
     { name: "พยายะ", en: "Phayaya", meaning: { th: "ความเจ็บป่วย อุปสรรค", en: "illness and setbacks" } },
@@ -69,14 +69,17 @@ export const SEVEN_COLUMNS: readonly { name: string; en: string; meaning: T }[][
   ],
 ];
 
-/** ดาวเสวยอายุ: บรรยากาศทั่วไปของช่วงนั้นตามธรรมชาติของดาว (ไม่ฟันธงเหตุการณ์) */
+/**
+ * ดาวเสวยอายุ: เรื่องที่เด่นของช่วงนั้นตามธรรมชาติของดาว + สิ่งที่ควรทำ (ไม่ทำนายเหตุการณ์ร้าย)
+ * ต่อหลัง "ดาว…เสวยอายุ ถึงอายุ … · " และ "… rules until age …: " — อังกฤษขึ้นต้นตัวเล็ก ไม่มีจุดท้าย
+ */
 export const MAHA_TAKSA_TONE: Record<ThaiPlanet, T> = {
-  1: { th: "ช่วงที่เรื่องตัวตน เกียรติ และความรับผิดชอบเด่น", en: "a time when self, honour and responsibility come forward" },
-  2: { th: "ช่วงที่เรื่องอารมณ์ ความรัก และคนรอบตัวเด่น", en: "a time when feelings, love and the people around you come forward" },
-  3: { th: "ช่วงที่ต้องใช้แรง ความกล้า และการแข่งขัน", en: "a time that calls for energy, courage and competition" },
-  4: { th: "ช่วงของการเรียน การสื่อสาร และการค้า", en: "a time of learning, communication and trade" },
-  5: { th: "ช่วงของความรู้ ผู้ใหญ่อุปถัมภ์ และการเติบโต", en: "a time of knowledge, mentors and growth" },
-  6: { th: "ช่วงของความสุข ศิลปะ ความรัก และทรัพย์", en: "a time of pleasure, art, love and wealth" },
-  7: { th: "ช่วงที่ต้องอดทน รับผิดชอบหนัก และสร้างความมั่นคง", en: "a time of patience, heavy duty and building stability" },
-  8: { th: "ช่วงที่มีความเปลี่ยนแปลง ความอยากได้ และเรื่องไม่คาดฝัน", en: "a time of change, desire and the unexpected" },
+  1: { th: "ช่วงที่คุณต้องยืนเป็นผู้นำ เรื่องเกียรติและความรับผิดชอบมาก่อนเรื่องอื่น", en: "a time to step up and lead, with honor and responsibility first" },
+  2: { th: "ช่วงที่อารมณ์ ความรัก และคนใกล้ตัวเป็นเรื่องหลัก ใจอ่อนไหวกว่าปกติ ดูแลใจตัวเองให้ดี", en: "a time when feelings, love and close people lead; you feel more, so look after your heart" },
+  3: { th: "ช่วงที่ต้องสู้และแข่งขัน ได้ผลเมื่อลงมือเร็วและกล้าตัดสินใจ", en: "a time to compete; it pays to act fast and decide boldly" },
+  4: { th: "ช่วงที่การเรียน การเจรจา และการค้าขายเป็นเรื่องหลัก ใช้ฝีมือพูดและเขียนให้เต็มที่", en: "a time when study, deals and trade lead; use your speaking and writing to the full" },
+  5: { th: "ช่วงที่ความรู้และผู้ใหญ่อุปถัมภ์พาคุณเติบโต เรียนเพิ่มและเข้าหาคนที่เก่งกว่า", en: "a time when knowledge and mentors help you grow; study more and seek out people ahead of you" },
+  6: { th: "ช่วงที่ความรัก ความสุข ศิลปะ และเรื่องเงินเด่น ใช้เสน่ห์ให้เป็นประโยชน์ แต่คุมการใช้จ่ายด้วย", en: "a time when love, pleasure, art and money stand out; use your charm, but watch your spending" },
+  7: { th: "ช่วงที่งานหนักและความรับผิดชอบเพิ่มขึ้น อดทนทำทีละขั้น สิ่งที่สร้างไว้จะมั่นคง", en: "a time of heavy work and duty; go step by step, and what you build will last" },
+  8: { th: "ช่วงที่มีความเปลี่ยนแปลงและเรื่องไม่คาดฝัน ความอยากได้พุ่งสูง ตั้งสติก่อนตัดสินใจเรื่องเงินและความสัมพันธ์", en: "a time of change and surprises when wants run high; think twice before money or relationship decisions" },
 };

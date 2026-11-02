@@ -141,9 +141,11 @@
   outline: 2px solid var(--ui2-gold-solid);
   outline-offset: 3px;
 }
+/* สีคลุมข้อความ = ทองอ่อน + หมึกเข้ม ตายตัวทั้งพื้นกลางคืนและแถบครีม (คอนทราสต์ ~11:1)
+   เดิมอ่าน `--ui2-gold-solid` ซึ่งแถบครีม (ui2-dawn.css) สลับเป็นทองเข้ม #8A4F10 ➔ ตัวหมึกดำบนน้ำตาลเข้ม อ่านไม่ออก (เจ้าของ 2026-11-02) */
 .ui2-pg ::selection {
-  color: var(--ui2-night);
-  background: var(--ui2-gold-solid);
+  color: #1F1B15;
+  background: #FFCB6B;
 }
 
 /* ── 4. แผงกระจกมืด (บทความ SEO · กล่องเนื้อหา) ─────────────────────────────── */

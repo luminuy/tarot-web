@@ -1137,6 +1137,16 @@ details:not([open]) > summary .v2-nt-more-close {
   padding: 14px 2px;
   border-bottom: 1px solid var(--nt-line-soft);
 }
+/* ข้อสรุปฟันธง รัก/งาน/เงิน: เต็มความกว้างทีละบรรทัด (3 แถวในตาราง 2 คอลัมน์จะเหลือช่องว่าง) */
+@media (min-width: 640px) {
+  .v2-nr-facets.v2-nr-verdicts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.v2-nr-verdicts dd b {
+  font-weight: 700;
+  color: var(--nt-ink);
+}
 .v2-nr-facets dt {
   font-size: 13px;
   font-weight: 700;

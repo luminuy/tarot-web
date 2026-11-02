@@ -11,6 +11,7 @@ import { ASPECT_TEXT, BODY_TEXT, DIGNITY_TEXT, ELEMENT_TEXT, HOUSE_TEXT, MODALIT
 import { formatDegree, type BodyId, type NatalChart } from "./natal";
 import { bodyName, cardsFor, signName } from "./natal-text";
 import type { Highlight } from "./natal-insight";
+import { chartVerdicts } from "./natal-verdict";
 import type { TransitResult } from "./techniques";
 
 const MAIN: readonly BodyId[] = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron", "node", "lilith", "asc", "mc", "fortune", "vertex", "ceres", "pallas", "juno", "vesta"];
@@ -92,6 +93,9 @@ export function formatChartForPrompt(chart: NatalChart, lang: Lang, birthLine: s
     L.push(th ? "\nเรื่องเด่นที่สุดของผัง (SeerTarot คำนวณและเรียงจากน้ำหนักมากไปน้อย):" : "\nThe chart's strongest themes (calculated by SeerTarot, most important first):");
     highlights.forEach((h, i) => L.push(`h${i + 1}: ${h.title} (${h.basis}) | ${h.text}`));
   }
+  // ข้อสรุปฟันธงชุดเดียวกับหน้าเว็บ — AI ต้องตอบไม่สวนกับที่ผู้ใช้เห็นบนหน้า (เจ้าของ 2026-11-02)
+  L.push(th ? "\nข้อสรุปฟันธงของผัง (SeerTarot คำนวณ · ตอบให้ตรงกับข้อสรุปนี้):" : "\nThe chart's verdicts (calculated by SeerTarot; keep your answer consistent with them):");
+  for (const v of chartVerdicts(chart, lang)) L.push(`- ${v.label}: ${v.verdict}${th ? " " : ". "}${v.text}`);
 
   // ไพ่ประจำตำแหน่ง (Golden Dawn) — ไพ่ที่คุยถึงได้มีแค่ชุดนี้ ไม่ใช่ไพ่ที่เปิด
   L.push(th ? "\nไพ่ทาโรต์ประจำตำแหน่ง (ระบบ Golden Dawn ไม่ใช่ไพ่ที่สุ่มเปิด):" : "\nTarot correspondences (Golden Dawn system, not drawn cards):");
@@ -118,27 +122,32 @@ export function formatChartForPrompt(chart: NatalChart, lang: Lang, birthLine: s
   return L.join("\n");
 }
 
-/** กติกาการตอบของแม่หมอเมื่อคุยเรื่องผังดวง (ส่วนท้ายของ system prompt) */
+/** กติกาการตอบของแม่หมอเมื่อคุยเรื่องผังดวง (ส่วนท้ายของ system prompt)
+ * เจ้าของ 2026-11-02 "ตอบชัดจัดเต็ม ไม่เอาตอบกลาง ๆ เซฟ" ➔ ข้อ 4–5 ตอบตรง ฟันธงได้ ห้ามคำกั๊ก · ข้อ 6 คือเส้นที่ยังห้ามข้าม (ตาย อุบัติเหตุ โรค ตั้งครรภ์ ผลสุขภาพ กฎหมาย ลงทุน พนัน) */
 export function natalAnswerRules(lang: Lang): string {
   return lang === "th"
     ? `## วิธีตอบเรื่องผังดวงกำเนิด
 1. ตอบจากผังด้านบนเท่านั้น อ้างตำแหน่งจริงทุกครั้ง เช่น "ดาวศุกร์ราศีกรกฎในเรือน 7" ห้ามแต่งตำแหน่งหรือมุมที่ไม่มีในรายการ
 2. ถ้าไม่ทราบเวลาเกิด ห้ามพูดถึงลัคนา กลางฟ้า หรือเรือน และบอกผู้ถามสั้น ๆ ว่าต้องรู้เวลาเกิดถึงจะดูเรื่องนั้นได้
 3. ไพ่ทาโรต์ที่พูดถึงได้มีแค่ไพ่ประจำตำแหน่งในรายการ (ระบบ Golden Dawn) ห้ามพูดว่าเปิดไพ่ สุ่มไพ่ หรือได้ไพ่ใบอื่น
-4. ห้ามฟันธงชะตา ห้ามขู่ ห้ามทำนายความตาย อุบัติเหตุ หรือโรค ห้ามรับรองผลสุขภาพ กฎหมาย การลงทุน หรือการพนัน ให้แนะนำผู้เชี่ยวชาญเมื่อเกี่ยวข้อง
-5. โหราศาสตร์คือกระจกสะท้อนแนวโน้ม คนยังเลือกทางเองได้เสมอ ให้คำแนะนำที่ทำได้จริง 1 ถึง 2 ข้อ
-6. ภาษาไทยธรรมชาติแบบคนคุยกัน ไม่ใช้ศัพท์หุ่นยนต์ ไม่ใช้อีโมจิหรือสัญลักษณ์ตกแต่ง ศัพท์โหราศาสตร์ให้อธิบายสั้น ๆ ในวงเล็บเมื่อจำเป็น
-7. ยาว 3 ถึง 4 ย่อหน้าสั้น เว้นบรรทัดว่างระหว่างย่อหน้า ปิดท้ายด้วยคำถามชวนคุยต่อ 1 ประโยค
-8. ถ้าคำถามไม่เกี่ยวกับผังดวงหรือชีวิตของผู้ถาม ให้ชวนกลับมาที่ผังอย่างสุภาพ
-9. ให้น้ำหนักตาม "เรื่องเด่นที่สุดของผัง" (h1 สำคัญที่สุด) ถ้าคำถามกว้างให้เริ่มจากเรื่องอันดับต้น ๆ ห้ามพิมพ์รหัส h ในคำตอบ`
+4. ตอบตรงและชัด: ประโยคแรกตอบคำถามทันทีเป็นข้อสรุปเดียว แล้วค่อยให้เหตุผลจากตำแหน่งดาว พูดเรื่องนิสัย จุดแข็ง จุดอ่อน ความรัก งาน เงิน และจังหวะเวลาแบบฟันธงได้เต็มที่ ถ้ามีวันที่ของดาวจรในข้อมูลให้บอกช่วงเวลาจริง
+5. ห้ามคำกั๊ก เช่น "อาจจะ" "บางที" "ก็เป็นได้" "ขึ้นอยู่กับหลายปัจจัย" "ไม่มากก็น้อย" ห้ามประโยคกลาง ๆ ที่ใช้ได้กับทุกคน ถ้าผังมีทั้งแรงหนุนและแรงต้าน ให้บอกว่าฝั่งไหนหนักกว่าและเพราะดาวอะไร
+6. ข้อยกเว้นเดียวที่ห้ามฟันธง: ห้ามทำนายความตาย อุบัติเหตุ โรค หรือการตั้งครรภ์ ห้ามรับรองผลสุขภาพ กฎหมาย การลงทุน หรือการพนัน ห้ามขู่ ให้แนะนำผู้เชี่ยวชาญเมื่อเกี่ยวข้อง
+7. ปิดด้วยคำแนะนำที่ทำได้จริง 1 ถึง 2 ข้อ บอกให้ชัดว่าทำอะไร กับใคร หรือเมื่อไร
+8. ภาษาไทยธรรมชาติแบบคนคุยกัน ประโยคสั้น เข้าใจง่าย ไม่ใช้ศัพท์หุ่นยนต์ ไม่ใช้อีโมจิหรือสัญลักษณ์ตกแต่ง ศัพท์โหราศาสตร์ให้อธิบายสั้น ๆ ในวงเล็บเมื่อจำเป็น
+9. ยาว 3 ถึง 4 ย่อหน้าสั้น เว้นบรรทัดว่างระหว่างย่อหน้า ปิดท้ายด้วยคำถามชวนคุยต่อ 1 ประโยค
+10. ถ้าคำถามไม่เกี่ยวกับผังดวงหรือชีวิตของผู้ถาม ให้ชวนกลับมาที่ผังอย่างสุภาพ
+11. ให้น้ำหนักตาม "เรื่องเด่นที่สุดของผัง" (h1 สำคัญที่สุด) ถ้าคำถามกว้างให้เริ่มจากเรื่องอันดับต้น ๆ ห้ามพิมพ์รหัส h ในคำตอบ`
     : `## How to answer about the natal chart
 1. Answer only from the chart above and cite real placements (for example "Venus in Cancer in the 7th house"). Never invent placements or aspects.
 2. If the birth time is unknown, do not mention the Ascendant, Midheaven or houses; briefly say the birth time is needed for that.
 3. The only tarot cards you may mention are the listed Golden Dawn correspondences. Never say you drew, shuffled or pulled any card.
-4. No fatalistic predictions, no threats, never predict death, accidents or illness, and never guarantee health, legal, investment or gambling outcomes. Suggest a professional when relevant.
-5. Astrology shows tendencies; the person always chooses. Give one or two practical suggestions.
-6. Warm, natural American English. No emoji or decorative symbols. Briefly explain jargon in parentheses when needed.
-7. Three to four short paragraphs separated by blank lines, ending with one caring follow-up question.
-8. If the question is unrelated to the chart or the person's life, gently steer back to the chart.
-9. Weigh your answer by "the chart's strongest themes" (h1 matters most). For broad questions, start from the top themes. Never print the h codes in your answer.`;
+4. Be direct: the first sentence answers the question with one clear conclusion, then back it with the placements. Speak decisively about character, strengths, weak spots, love, work, money and timing. When transit dates are in the data, name the real time window.
+5. No hedging such as "maybe", "perhaps", "it could be", "it depends on many factors", and no generic lines that would fit anyone. If the chart has both support and friction, say which side is stronger and which planet makes it so.
+6. The only things you must not call: never predict death, accidents, illness or pregnancy, never guarantee health, legal, investment or gambling outcomes, and never threaten. Suggest a professional when relevant.
+7. End with one or two practical actions, saying clearly what to do, with whom or when.
+8. Warm, natural American English in short, plain sentences. No emoji or decorative symbols. Briefly explain jargon in parentheses when needed.
+9. Three to four short paragraphs separated by blank lines, ending with one caring follow-up question.
+10. If the question is unrelated to the chart or the person's life, gently steer back to the chart.
+11. Weigh your answer by "the chart's strongest themes" (h1 matters most). For broad questions, start from the top themes. Never print the h codes in your answer.`;
 }

@@ -16,7 +16,9 @@ import type { NatalOverview } from "./natal-overview";
 import { starContacts } from "./fixed-stars";
 import { hermeticLots } from "./lots";
 import { ASPECT_DEFS, PLANET_IDS, formatDegree, type BodyId, type NatalChart } from "./natal";
-import { aspectTitle, bodyName, cardsFor, chartGlance, chartSummary, describeAspect, describeBody, describePattern, describeTimedAspect, bodyHeadline, houseLine, describeTransitHouse, lifeAreas, placement, returnHighlights, signName, type LifeArea, type SummaryRow } from "./natal-text";
+import { aspectTitle, bodyName, cardsFor, chartGlance, chartSummary, describeAspect, describeBody, describePattern, describeTimedAspect, bodyHeadline, houseLine, describeTransitHouse, lifeAreas, placement, signName, type LifeArea, type SummaryRow } from "./natal-text";
+import { chartVerdicts } from "./natal-verdict";
+import { returnReading } from "./return-reading";
 import { solarReturn, transitCalendar } from "./techniques";
 import { mahaTaksa, sevenNumbers, taksa, TAKSA_POSITIONS, thaiBirthDay } from "./thai-astro";
 import { LUNAR_MONTH_TH, NAKSAT_EN, NAKSAT_TH } from "./thai-lunar";
@@ -37,7 +39,8 @@ export interface NatalReport {
   /** สรุปสั้นแบบป้าย + บรรทัด (ชุดเดียวกับหน้าเว็บ) */
   glance: SummaryRow[];
   /** ความรัก · การงาน · การเงิน */
-  life: LifeArea[];
+  /** `verdict` = ข้อสรุปฟันธงชุดเดียวกับหน้าเว็บ (`natal-verdict.ts`) · รายงานเก่าที่เก็บไว้ไม่มีช่องนี้ */
+  life: (LifeArea & { verdict?: string })[];
   positions: { body: string; value: string; house: string; notes: string; short: string; sign: string; deg: string }[];
   houses: string[] | null;
   /** `note` = บรรทัดสั้นของเรือน (มีดาว ➔ ได้พลังจากเรื่องอะไร · ไม่มีดาว ➔ อ่านจากเจ้าเรือน) */
@@ -64,6 +67,7 @@ function cardName(id: string | undefined, lang: Lang): string | null {
 export function buildNatalReport(spec: ChartSpec, lang: Lang, nowMs: number): NatalReport {
   const th = lang === "th";
   const chart: NatalChart = buildChart({ ...spec, asteroids: false });
+  const verdicts = chartVerdicts(chart, lang);
   const get = (id: BodyId) => chart.bodies.find((b) => b.id === id);
   const fmt = new Intl.DateTimeFormat(th ? "th-TH" : "en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: spec.place.zone ?? "UTC" });
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -131,7 +135,15 @@ export function buildNatalReport(spec: ChartSpec, lang: Lang, nowMs: number): Na
   try {
     const nth = Math.max(0, Math.floor(age));
     const sr = solarReturn(chart, nth, { lat: spec.place.lat, lon: spec.place.lon });
-    srLines = [th ? `ผังวันเกิดครั้งที่ ${nth} (${fmt.format(sr.input.utcMs)})` : `Solar return no. ${nth} (${fmt.format(sr.input.utcMs)})`, ...returnHighlights(sr, "solar", lang)];
+    const r = returnReading(chart, sr, "solar", lang);
+    const month = (m: NonNullable<typeof r.heavyMonth>) => `${fmt.format(m.utcMs)}`;
+    srLines = [
+      th ? `ผังวันเกิดครั้งที่ ${nth} (${fmt.format(sr.input.utcMs)})` : `Solar return no. ${nth} (${fmt.format(sr.input.utcMs)})`,
+      ...(r.verdict ? [`${r.verdict.title} ${r.verdict.why}`] : []),
+      ...r.rows.map((x) => `${x.label}: ${x.text}`),
+      ...(r.heavyMonth ? [th ? `ช่วงที่หนักที่สุดของปีเริ่มราว ${month(r.heavyMonth)} ปิดงานใหญ่ให้เสร็จก่อน และอย่าเริ่มเรื่องเสี่ยงในช่วงนั้น` : `The heaviest stretch of the year starts around ${month(r.heavyMonth)}. Finish big tasks before it and do not start risky ventures then.`] : []),
+      ...(r.liftMonth ? [th ? `ช่วงที่มีแรงหนุนมากที่สุดเริ่มราว ${month(r.liftMonth)} ใช้ช่วงนั้นเริ่มเรื่องใหม่ ยื่นขอ หรือเปิดตัว` : `The best-supported stretch starts around ${month(r.liftMonth)}. Use it to start something new, apply or launch.`] : []),
+    ];
   } catch {
     srLines = [];
   }
@@ -156,7 +168,10 @@ export function buildNatalReport(spec: ChartSpec, lang: Lang, nowMs: number): Na
     })(),
     summary: chartSummary(chart, lang),
     glance: chartGlance(chart, lang, themes),
-    life: lifeAreas(chart, lang),
+    life: lifeAreas(chart, lang).map((x) => {
+      const v = verdicts.find((y) => y.key === x.key);
+      return v ? { ...x, verdict: `${v.verdict}${th ? " " : ". "}${v.text}` } : x;
+    }),
     houseCells: chart.houses
       ? chart.houses.map((c, i) => ({
           n: i + 1,
@@ -185,7 +200,7 @@ export function buildNatalReport(spec: ChartSpec, lang: Lang, nowMs: number): Na
       .map((a, i, list) => ({
         title: aspectTitle(a, lang),
         // มุมชนิดเดียวกันที่ขึ้นแล้วใช้ประโยคแบบสั้น ไม่ทวนประโยคอธิบายชนิดมุมซ้ำ 20 ครั้ง
-        text: describeAspect(a, lang, { short: list.slice(0, i).some((x) => x.type === a.type) }),
+        text: describeAspect(a, lang, { short: list.slice(0, i).some((x) => x.type === a.type), strength: true }),
         a: bodyName(a.a, lang),
         b: bodyName(a.b, lang),
         type: ASPECT_TEXT[a.type].name[lang].replace(/\s*\(.*\)$/, ""),

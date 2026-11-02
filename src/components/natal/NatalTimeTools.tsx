@@ -1,10 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { BODY_TEXT, MOON_SIGN_TEXT, MOON_PHASE_TEXT, PROG_PHASE_TEXT, ASPECT_TEXT, SIGN_TEXT, TRANSIT_TEXT, type Lang } from "@/data/natal/content";
+import { BODY_TEXT, HOUSE_TEXT, MOON_SIGN_TEXT, MOON_PHASE_TEXT, PROG_PHASE_TEXT, ASPECT_TEXT, SIGN_TEXT, TRANSIT_TEXT, type Lang } from "@/data/natal/content";
 import { THAI_PROVINCES, WORLD_CITIES } from "@/data/natal/places";
 import { ASPECT_DEFS, formatDegree, type AspectType, type BodyId, type BodyPosition, type NatalChart } from "@/lib/astro/natal";
-import { bodyName, describeTimedAspect, describeTransitHouse, returnHighlights, signName, thw } from "@/lib/astro/natal-text";
+import { bodyName, describeTimedAspect, describeTransitHouse, signName, thw } from "@/lib/astro/natal-text";
+import { returnReading, type ReturnMonth } from "@/lib/astro/return-reading";
+import { transitExactNote } from "@/lib/astro/strength";
 import {
   SLOW_IDS,
   computeProgressions,
@@ -81,10 +83,26 @@ function PositionsTable({ bodies, lang, houses, houseLabel }: { bodies: readonly
   );
 }
 
+function toneOf(type: AspectType): "harmonious" | "tense" | "neutral" {
+  return ASPECT_DEFS.find((d) => d.type === type)?.tone ?? "neutral";
+}
+
 /** สีเส้นซ้ายของการ์ดตามโทนมุม (ชุดเดียวกับเส้นบนวงผัง) */
 function toneClass(type: AspectType): string {
-  return `is-${ASPECT_DEFS.find((d) => d.type === type)?.tone ?? "neutral"}`;
+  return `is-${toneOf(type)}`;
 }
+
+/**
+ * ความหมายของมุมดาวก้าวหน้า (มุมหลัก 5 แบบ) — เป็นพัฒนาการระยะ 1 ถึง 2 ปี ไม่ใช่อารมณ์รายวันแบบดาวจร
+ * เจ้าของ 2026-11-02 "ตอบชัด ตรงประเด็น" ➔ บอกผลของมุมแต่ละแบบตรง ๆ แทนความหมายกลางของมุม
+ */
+const PROG_ASPECT_TEXT: Partial<Record<AspectType, { th: string; en: string }>> = {
+  conjunction: { th: "สองเรื่องนี้มาบรรจบกันพอดี เรื่องนี้กำลังเปิดบทใหม่ในชีวิตคุณ และเด่นชัดกว่าช่วงอื่น", en: "The two meet exactly: this part of your life is opening a new chapter and stands out more than usual." },
+  trine: { th: "สองเรื่องนี้หนุนกัน สิ่งที่คุณสร้างไว้ให้ผลง่ายขึ้น ใช้จังหวะนี้ต่อยอด", en: "They support each other: what you have built pays off more easily. Build on it now." },
+  sextile: { th: "สองเรื่องนี้เปิดโอกาสให้กัน แต่โอกาสจะเกิดเมื่อคุณเป็นฝ่ายเริ่มก่อน", en: "They open doors for each other, but only once you make the first move." },
+  square: { th: "สองเรื่องนี้ขัดกัน วิธีเดิมที่เคยได้ผลกำลังใช้ไม่ได้ ปรับวิธีแล้วคุณจะโตขึ้นชัดเจน", en: "They clash: an approach that used to work has stopped working. Change it and you will grow noticeably." },
+  opposition: { th: "สองเรื่องนี้ดึงกันคนละทาง และมาถึงคุณผ่านคนใกล้ตัว หาทางให้ทั้งสองด้านอยู่ด้วยกันได้", en: "They pull in opposite directions, and it reaches you through someone close. Find a way for both sides to coexist." },
+};
 
 /** ชื่อมุมแบบสั้น ("จตุโกณ") — ตัดองศาในวงเล็บที่ข้อมูลใส่ไว้ */
 function aspectShort(type: AspectType, lang: Lang): string {
@@ -99,10 +117,10 @@ function aspectTitle(a: { t: BodyId; n: BodyId; type: AspectType }, lang: Lang, 
   return `${bodyName(a.t, lang)}${tLabel} ${aspectShort(a.type, lang)} ${natal}${isTh ? `${natal.endsWith(")") ? " " : ""}เกิด` : " (natal)"}`;
 }
 
-/** "ลัคนาของผังราศีสิงห์: ปีนี้คุณ..." ➔ แถวสรุป ป้ายซ้าย ข้อความขวา */
-function splitHighlight(h: string): { label: string; text: string } {
-  const i = h.indexOf(": ");
-  return i < 0 ? { label: h, text: "" } : { label: h.slice(0, i), text: h.slice(i + 2) };
+/** เดือนสำคัญของผังวันเกิดปีนี้: "มี.ค. 2570 ดาวเสาร์จร… ตรงพอดี และ…" */
+function monthText(m: ReturnMonth, lang: Lang, zone?: string): string {
+  const month = new Intl.DateTimeFormat(lang === "th" ? "th-TH" : "en-GB", { month: "long", year: "numeric", ...(zone ? { timeZone: zone } : {}) }).format(new Date(m.utcMs));
+  return `${month}: ${m.events.slice(0, 3).map((e) => eventText(e, lang)).join(lang === "th" ? " และ " : "; ")}`;
 }
 
 function AspectItem({ a, lang, zone, tLabel }: { a: TransitAspect; lang: Lang; zone?: string; tLabel: string }) {
@@ -120,7 +138,7 @@ function AspectItem({ a, lang, zone, tLabel }: { a: TransitAspect; lang: Lang; z
                 ? ` · ${isTh ? "ตรงพอดี" : "exact"} ${p.exact.map((x) => fmtDate(x, lang, zone)).join(", ")}`
                 : ` · ${isTh ? "ใกล้สุด" : "closest"} ${fmtDate(p.closest.utcMs, lang, zone)}`
             }`
-          : `orb ${formatDegree(a.orb)}${a.applying === null ? "" : a.applying ? (isTh ? " · กำลังเข้า" : " · applying") : isTh ? " · กำลังแยก" : " · separating"}`}
+          : `${transitExactNote(a.orb, lang) ? `${transitExactNote(a.orb, lang)} · ` : ""}orb ${formatDegree(a.orb)}${a.applying === null ? "" : a.applying ? (isTh ? " · กำลังแรงขึ้น" : " · building") : isTh ? " · กำลังคลายลง" : " · easing"}`}
       </span>
     </li>
   );
@@ -185,6 +203,8 @@ export default function NatalTimeTools({ chart, lang, meta, mode }: { chart: Nat
     if (mode === "lunar") return lunarReturn(chart, atMs - DAY / 2, { lat: where.lat, lon: where.lon });
     return null;
   }, [mode, chart, srYear, meta.birthYear, where.lat, where.lon, atMs]);
+  // ผังปีสแกนปฏิทินดาวเดินช้า 365 วันหาเดือนสำคัญ (~0.2 วินาที) ➔ คำนวณเมื่อผังเปลี่ยนเท่านั้น
+  const reading = useMemo(() => (ret && (mode === "solar" || mode === "lunar") ? returnReading(chart, ret, mode, lang) : null), [chart, ret, mode, lang]);
 
   const dateField = (
     <div className="grid gap-2 grid-cols-[minmax(0,1fr)_auto] items-end">
@@ -222,13 +242,56 @@ export default function NatalTimeTools({ chart, lang, meta, mode }: { chart: Nat
     const tLabel = isTh ? "จร" : " (transit)";
     const slowInHouses = chart.houses ? transit.bodies.filter((b) => SLOW_IDS.includes(b.id as MovingId) && b.id !== "node" && b.house) : [];
     const jupiterHouse = slowInHouses.find((b) => b.id === "jupiter");
+    /* เรื่องระยะยาวแยกตามโทน ➔ บอกตรง ๆ ว่าช่วงนี้แรงกดดันหรือแรงหนุนมากกว่า และควรทำอะไร */
+    const hard = slow.filter((a) => toneOf(a.type) === "tense").length;
+    const soft = slow.filter((a) => toneOf(a.type) === "harmonious").length;
+    const even = slow.length - hard - soft;
+    const mix = (
+      isTh
+        ? [hard ? `ตึง ${hard}` : "", soft ? `ไหลลื่น ${soft}` : "", even ? `เข้มข้น ${even}` : ""]
+        : [hard ? `${hard} tense` : "", soft ? `${soft} flowing` : "", even ? `${even} intense` : ""]
+    )
+      .filter(Boolean)
+      .join(" · ");
+    const pace =
+      hard > soft
+        ? isTh
+          ? "ช่วงนี้แรงกดดันมากกว่าแรงหนุน ทำทีละเรื่อง และอย่ารับภาระใหม่เพิ่ม"
+          : "More pressure than support right now: take one thing at a time and do not take on new commitments."
+        : soft > hard
+          ? isTh
+            ? "ช่วงนี้แรงหนุนมากกว่าแรงกดดัน เป็นจังหวะที่ดีสำหรับเริ่มเรื่องใหม่"
+            : "More support than pressure right now: a good time to start something new."
+          : hard
+            ? isTh
+              ? "แรงหนุนกับแรงกดดันพอ ๆ กัน ลงมือเรื่องที่ไหลลื่นก่อน แล้วค่อยแก้เรื่องที่ตึง"
+              : "Support and pressure are even: act first on what flows, then work through what is tense."
+            : isTh
+              ? "ดาวเดินช้ากำลังทับจุดในผังของคุณโดยตรง เรื่องนั้นจะเด่นชัดกว่าเรื่องอื่น ให้ความสำคัญกับมันก่อน"
+              : "Slow planets sit right on points in your chart, so those areas stand out. Give them your attention first.";
+    const lasts = strongest?.period
+      ? isTh
+        ? ` มีผล${strongest.period.openEnd ? "เกิน" : "ถึง"} ${fmtDate(strongest.period.end, lang)}`
+        : ` Lasts ${strongest.period.openEnd ? "past" : "until"} ${fmtDate(strongest.period.end, lang)}.`
+      : "";
     const summary = [
       strongest
-        ? { label: isTh ? "เรื่องใหญ่ที่สุดช่วงนี้" : "Biggest theme now", text: `${aspectTitle(strongest, lang, tLabel)}: ${describeTimedAspect(strongest.t, strongest.n, strongest.type, lang)}` }
-        : { label: isTh ? "เรื่องใหญ่ที่สุดช่วงนี้" : "Biggest theme now", text: isTh ? "ช่วงนี้ไม่มีดาวเดินช้าทำมุมใกล้กับจุดสำคัญในผังเกิด ชีวิตค่อนข้างนิ่ง" : "No slow planet is close to a key point in your chart, so life is fairly steady." },
+        ? { label: isTh ? "เรื่องใหญ่ที่สุดช่วงนี้" : "Biggest theme now", text: `${aspectTitle(strongest, lang, tLabel)}: ${describeTimedAspect(strongest.t, strongest.n, strongest.type, lang)}${lasts}` }
+        : {
+            label: isTh ? "เรื่องใหญ่ที่สุดช่วงนี้" : "Biggest theme now",
+            text: isTh
+              ? "ช่วงนี้ไม่มีดาวเดินช้าแตะจุดสำคัญในผังเกิด ไม่มีแรงผลักใหญ่จากฟ้า ใช้ช่วงนี้ทำเรื่องที่วางแผนไว้ให้เสร็จ"
+              : "No slow planet is touching a key point in your chart. There is no big outside push, so use this time to finish what you planned.",
+          },
       {
         label: isTh ? "ช่วงนี้มีกี่เรื่อง" : "How much is going on",
-        text: isTh ? `เรื่องระยะยาว ${slow.length} เรื่อง (มีผลเป็นสัปดาห์ถึงเดือน) · เรื่องสั้นของวันนี้ ${fast.length} เรื่อง` : `${slow.length} long-running (weeks to months) and ${fast.length} quick ones for today`,
+        text: slow.length
+          ? isTh
+            ? `เรื่องระยะยาว ${slow.length} เรื่อง (${mix}) · เรื่องสั้นของวันนี้ ${fast.length} เรื่อง ${pace}`
+            : `${slow.length} long-running (${mix}) and ${fast.length} quick ones today. ${pace}`
+          : isTh
+            ? `ไม่มีเรื่องระยะยาว · เรื่องสั้นของวันนี้ ${fast.length} เรื่อง`
+            : `No long-running transits; ${fast.length} quick ones today.`,
       },
       ...(jupiterHouse
         ? [{ label: isTh ? `โอกาสอยู่เรือน ${jupiterHouse.house}` : `Luck in house ${jupiterHouse.house}`, text: describeTransitHouse("jupiter", jupiterHouse.house!, lang) }]
@@ -240,15 +303,17 @@ export default function NatalTimeTools({ chart, lang, meta, mode }: { chart: Nat
       <div className="v2-nr space-y-6">
         <p className="v2-nr-lead">
           {isTh
-            ? "ดาวบนฟ้าวันที่เลือก (วงนอก) ทับผังเกิดของคุณ (วงใน) บอกว่าช่วงนี้ชีวิตด้านไหนกำลังถูกกระตุ้น"
-            : "The sky on the chosen date (outer ring) over your birth chart (inner), showing which parts of life are being stirred."}
+            ? "วงนอกคือดาวบนฟ้าวันที่เลือก วงในคือผังเกิดของคุณ หน้านี้บอกว่าช่วงนี้เรื่องไหนในชีวิตถูกกระตุ้น และควรรับมืออย่างไร"
+            : "Outer ring: the sky on the chosen date. Inner ring: your birth chart. This shows which parts of your life are stirred now, and how to handle them."}
         </p>
         <div className="v2-nr-controls">{dateField}</div>
         <SummaryBox title={isTh ? "สรุปช่วงนี้" : "This period at a glance"} rows={summary} />
         <NatalWheel chart={chart} lang={lang} focus={focus} onFocus={setFocus} showMinor={false} outer={{ bodies: transit.bodies, aspects: transit.aspects.map((a) => ({ a: a.t, b: a.n, type: a.type, orb: a.orb, maxOrb: a.maxOrb })) }} />
         <section className="v2-nr-sec">
           <SectionHead n={++n} title={isTh ? "เรื่องระยะยาว" : "Long-running transits"}>
-            {isTh ? "ดาวเดินช้า มีผลเป็นสัปดาห์ถึงเดือน เส้นซ้ายสีน้ำเงินคือไหลลื่น สีแดงคือตึง" : "Slow planets, felt for weeks to months. Blue edge = flowing, red = tense."}
+            {isTh
+              ? "ดาวเดินช้า มีผลเป็นสัปดาห์ถึงเดือน ใช้วางแผนเรื่องใหญ่ เส้นซ้ายสีน้ำเงินคือจังหวะให้ลงมือ สีแดงคือเรื่องที่ต้องรับมือ"
+              : "Slow planets, felt for weeks to months; use them to plan big moves. Blue edge = time to act, red = something to handle."}
           </SectionHead>
           {slow.length ? (
             <ul className="v2-nr-items">
@@ -257,13 +322,17 @@ export default function NatalTimeTools({ chart, lang, meta, mode }: { chart: Nat
               ))}
             </ul>
           ) : (
-            <p className="v2-nr-lead">{isTh ? "ช่วงนี้ไม่มีดาวเดินช้าทำมุมตรงกับจุดสำคัญในผังเกิด" : "No slow planet is making a close aspect right now."}</p>
+            <p className="v2-nr-lead">
+              {isTh
+                ? "ช่วงนี้ไม่มีดาวเดินช้าแตะจุดสำคัญในผังเกิด ไม่มีเรื่องใหญ่ที่ต้องรับมือ เดินตามแผนเดิมต่อได้เลย"
+                : "No slow planet is touching a key point in your chart right now. Nothing big to handle; carry on with your plans."}
+            </p>
           )}
         </section>
         {fast.length > 0 && (
           <section className="v2-nr-sec">
             <SectionHead n={++n} title={isTh ? "เรื่องสั้นของวันนี้" : "Today's quick transits"}>
-              {isTh ? "ดาวเดินเร็ว มีผลไม่กี่ชั่วโมงถึงไม่กี่วัน" : "Fast planets, felt for hours to a few days."}
+              {isTh ? "ดาวเดินเร็ว มีผลไม่กี่ชั่วโมงถึงไม่กี่วัน ใช้เลือกจังหวะของเรื่องเล็กในวันนี้" : "Fast planets, felt for hours to a few days. Use them to time small things today."}
             </SectionHead>
             <ul className="v2-nr-items">
               {fast.map((a) => (
@@ -275,7 +344,7 @@ export default function NatalTimeTools({ chart, lang, meta, mode }: { chart: Nat
         {slowInHouses.length > 0 && (
           <section className="v2-nr-sec">
             <SectionHead n={++n} title={isTh ? "ดาวเดินช้าอยู่เรือนไหนของคุณ" : "Where the slow planets fall"}>
-              {isTh ? "ด้านของชีวิตที่ดาวแต่ละดวงกำลังทำงานด้วย" : "The part of life each slow planet is working on."}
+              {isTh ? "เรื่องในชีวิตที่ดาวแต่ละดวงกำลังทำงานอยู่ และจะอยู่อีกนานแค่ไหน" : "The part of life each slow planet is working on, and for how long."}
             </SectionHead>
             <ul className="v2-nr-items">
               {slowInHouses.map((b) => (
@@ -290,10 +359,12 @@ export default function NatalTimeTools({ chart, lang, meta, mode }: { chart: Nat
         )}
         <section className="v2-nr-sec">
           <SectionHead n={++n} title={isTh ? "ปฏิทิน 12 เดือนข้างหน้า" : "The next 12 months"}>
-            {isTh ? "วันที่ดาวเดินช้าทำมุมตรงพอดีหรือย้ายราศี/เรือน มีผลก่อนและหลังวันนั้นหลายสัปดาห์" : "Dates when slow planets hit your chart exactly or change sign/house; felt for weeks around each date."}
+            {isTh
+              ? "วันที่ดาวเดินช้าแตะผังของคุณตรงพอดี หรือย้ายราศี/เรือน ผลเริ่มก่อนวันนั้นและอยู่ต่อหลายสัปดาห์ จดวันไว้วางแผนเรื่องใหญ่"
+              : "Dates when slow planets hit your chart exactly or change sign/house. The effect starts weeks before and lasts weeks after; mark them when planning big things."}
           </SectionHead>
           {calendar.length === 0 ? (
-            <p className="v2-nr-lead">{isTh ? "ไม่มีเหตุการณ์สำคัญในช่วงนี้" : "No major events in this period."}</p>
+            <p className="v2-nr-lead">{isTh ? "ไม่มีเหตุการณ์สำคัญใน 12 เดือนข้างหน้า" : "No major events in the next 12 months."}</p>
           ) : (
             <div className="grid gap-3 md:grid-cols-2 items-start">
               {monthList.slice(0, 4).map(([month, evs]) => (
@@ -355,17 +426,17 @@ export default function NatalTimeTools({ chart, lang, meta, mode }: { chart: Nat
     const sunText =
       pSun.sign === natalSun.sign
         ? isTh
-          ? `ยังอยู่ราศีเดียวกับตอนเกิด ตัวตนกำลังลึกซึ้งขึ้นในแบบ${SIGN_TEXT[pSun.sign].keywords.th}`
-          : `Still in your birth sign, deepening a ${SIGN_TEXT[pSun.sign].keywords.en} identity.`
+          ? `ยังอยู่ราศีเดียวกับตอนเกิด ช่วงนี้ความเป็นคน${SIGN_TEXT[pSun.sign].keywords.th}ของคุณชัดและลึกขึ้นกว่าเดิม`
+          : `Still in your birth sign: your ${SIGN_TEXT[pSun.sign].keywords.en} nature is growing clearer and deeper.`
         : isTh
-          ? `ตัวตนเติบโตออกจากราศีเกิด ไปทางคน${SIGN_TEXT[pSun.sign].keywords.th}`
-          : `Your identity has grown beyond your birth sign toward being ${SIGN_TEXT[pSun.sign].keywords.en}.`;
+          ? `ตัวตนของคุณเติบโตออกจากราศีเกิดแล้ว ตอนนี้คุณเป็นคน${SIGN_TEXT[pSun.sign].keywords.th}มากกว่าเดิม`
+          : `Your identity has grown past your birth sign: you are now more ${SIGN_TEXT[pSun.sign].keywords.en} than before.`;
     const summary = [
       {
         label: isTh ? `ใจช่วงนี้: ${signName(pMoon.sign, lang)}` : `Heart now: ${signName(pMoon.sign, lang)}`,
         text: isTh
-          ? `ดวงจันทร์ก้าวหน้าอยู่${signName(pMoon.sign, lang)}${pMoon.house ? ` เรือน ${pMoon.house}` : ""} ช่วงนี้ใจคุณเอนไปทาง${SIGN_TEXT[pMoon.sign].keywords.th}`
-          : `Progressed Moon in ${signName(pMoon.sign, lang)}${pMoon.house ? `, house ${pMoon.house}` : ""}: right now your heart leans toward being ${SIGN_TEXT[pMoon.sign].keywords.en}.`,
+          ? `ดวงจันทร์ก้าวหน้าอยู่${signName(pMoon.sign, lang)}${pMoon.house ? ` เรือน ${pMoon.house}` : ""} ช่วงนี้คุณรู้สึกและตอบสนองแบบคน${SIGN_TEXT[pMoon.sign].keywords.th}${pMoon.house ? ` และใจจดจ่ออยู่กับเรื่อง${HOUSE_TEXT[pMoon.house - 1].arena.th}` : ""}`
+          : `Progressed Moon in ${signName(pMoon.sign, lang)}${pMoon.house ? `, house ${pMoon.house}` : ""}: right now your feelings and reactions are ${SIGN_TEXT[pMoon.sign].keywords.en}${pMoon.house ? `, and your heart is focused on ${HOUSE_TEXT[pMoon.house - 1].arena.en}` : ""}.`,
       },
       { label: isTh ? `ตัวตน: ${signName(pSun.sign, lang)}` : `Identity: ${signName(pSun.sign, lang)}`, text: sunText },
       { label: isTh ? "จังหวะชีวิต" : "Life rhythm", text: `${MOON_PHASE_TEXT[prog.moonPhase.phase].name[lang]}: ${PROG_PHASE_TEXT[prog.moonPhase.phase][lang]}` },
@@ -374,8 +445,8 @@ export default function NatalTimeTools({ chart, lang, meta, mode }: { chart: Nat
       <div className="v2-nr space-y-6">
         <p className="v2-nr-lead">
           {isTh
-            ? "ดาวก้าวหน้าใช้หลัก 1 วันหลังเกิด = 1 ปีของชีวิต บอกว่าข้างในคุณค่อย ๆ เปลี่ยนไปทางไหน"
-            : "Progressions use one day after birth for each year of life, showing how you are slowly changing inside."}
+            ? "ดาวก้าวหน้าใช้หลัก 1 วันหลังเกิด = 1 ปีของชีวิต บอกว่าตอนนี้ข้างในคุณเปลี่ยนไปถึงไหนแล้ว และเรื่องไหนกำลังสุกงอม"
+            : "Progressions count one day after birth as one year of life. They show how far you have changed inside and what is ripening now."}
         </p>
         <div className="v2-nr-controls">
           {dateField}
@@ -387,7 +458,9 @@ export default function NatalTimeTools({ chart, lang, meta, mode }: { chart: Nat
         <NatalWheel chart={chart} lang={lang} focus={focus} onFocus={setFocus} showMinor={false} outer={{ bodies: prog.bodies, aspects: prog.aspects.map((a) => ({ a: a.t, b: a.n, type: a.type, orb: a.orb, maxOrb: a.maxOrb })) }} />
         <section className="v2-nr-sec">
           <SectionHead n={1} title={isTh ? "อารมณ์ของช่วงชีวิตนี้" : "The mood of this chapter"}>
-            {isTh ? "ดวงจันทร์ก้าวหน้าย้ายราศีทุกราว 2 ปีครึ่ง" : "The progressed Moon changes sign about every two and a half years."}
+            {isTh
+              ? "ดวงจันทร์ก้าวหน้าย้ายราศีทุกราว 2 ปีครึ่ง ข้อความนี้คือสิ่งที่ใจคุณต้องการในช่วงนี้"
+              : "The progressed Moon changes sign about every two and a half years. This is what your heart needs in this stretch."}
           </SectionHead>
           <div className="v2-nr-box">
             <p className="v2-nr-item-d">{MOON_SIGN_TEXT[pMoon.sign][lang]}</p>
@@ -395,7 +468,9 @@ export default function NatalTimeTools({ chart, lang, meta, mode }: { chart: Nat
         </section>
         <section className="v2-nr-sec">
           <SectionHead n={2} title={isTh ? "เรื่องที่กำลังสุกงอม" : "What is ripening"}>
-            {isTh ? "มุมของดาวก้าวหน้ากับผังเกิด (orb 1 องศา) แต่ละมุมมีผลราว 1 ถึง 2 ปี" : "Progressed aspects to your birth chart (1 degree orb), each felt for a year or two."}
+            {isTh
+              ? "มุมของดาวก้าวหน้ากับผังเกิด (orb 1 องศา) แต่ละข้อคือเรื่องที่เห็นผลภายใน 1 ถึง 2 ปีนี้"
+              : "Progressed aspects to your birth chart (1 degree orb). Each one plays out over the next year or two."}
           </SectionHead>
           {prog.aspects.length ? (
             <ul className="v2-nr-items">
@@ -405,15 +480,19 @@ export default function NatalTimeTools({ chart, lang, meta, mode }: { chart: Nat
                   <span className="v2-nr-item-d">
                     {/* ดาวก้าวหน้าเป็นพัฒนาการระยะยาว — ห้ามใช้ประโยคดาวจร ("อารมณ์ของวันนี้") */}
                     {isTh
-                      ? `${thw(BODY_TEXT[a.t].noun.th)}ที่พัฒนามาถึงตอนนี้ กับ${thw(BODY_TEXT[a.n].noun.th)}ตั้งแต่เกิด: ${ASPECT_TEXT[a.type].meaning.th}`
-                      : `Your developing ${BODY_TEXT[a.t].noun.en} and your natal ${BODY_TEXT[a.n].noun.en}: ${ASPECT_TEXT[a.type].meaning.en}.`}
+                      ? `${thw(BODY_TEXT[a.t].noun.th)}ที่พัฒนามาถึงตอนนี้ กับ${thw(BODY_TEXT[a.n].noun.th)}ตั้งแต่เกิด: ${PROG_ASPECT_TEXT[a.type]?.th ?? ASPECT_TEXT[a.type].meaning.th}`
+                      : `Your developing ${BODY_TEXT[a.t].noun.en} and your natal ${BODY_TEXT[a.n].noun.en}: ${PROG_ASPECT_TEXT[a.type]?.en ?? `${ASPECT_TEXT[a.type].meaning.en}.`}`}
                   </span>
                   <span className="v2-nr-item-meta tabular-nums">orb {formatDegree(a.orb)}</span>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="v2-nr-lead">{isTh ? "ช่วงนี้ไม่มีดาวก้าวหน้าทำมุมตรงกับผังเกิด" : "No progressed aspects are exact right now."}</p>
+            <p className="v2-nr-lead">
+              {isTh
+                ? "ช่วงนี้ไม่มีดาวก้าวหน้าทำมุมตรงกับผังเกิด ไม่มีเรื่องใดกำลังสุกงอมเป็นพิเศษ ให้ดูอารมณ์ของช่วงชีวิตด้านบนเป็นหลัก"
+                : "No progressed aspects are exact right now, so nothing is coming to a head. Go by the mood of this chapter above."}
+            </p>
           )}
         </section>
         <div className="v2-nr-deep">
@@ -429,25 +508,33 @@ export default function NatalTimeTools({ chart, lang, meta, mode }: { chart: Nat
     );
   }
 
-  if ((mode === "solar" || mode === "lunar") && ret) {
-    const highlights = returnHighlights(ret, mode, lang).map(splitHighlight);
+  if ((mode === "solar" || mode === "lunar") && ret && reading) {
+    const rows = [
+      ...reading.rows,
+      ...(reading.heavyMonth
+        ? [{ label: isTh ? "เดือนที่หนักที่สุดของปี" : "The heaviest month", text: `${monthText(reading.heavyMonth, lang, where.zone)} ${isTh ? "ปิดงานใหญ่ให้เสร็จก่อนเดือนนี้ และอย่าเริ่มเรื่องเสี่ยงในเดือนนี้" : "Finish big tasks before it and do not start risky ventures during it."}` }]
+        : []),
+      ...(reading.liftMonth
+        ? [{ label: isTh ? "เดือนที่มีแรงหนุนมากที่สุด" : "The best-supported month", text: `${monthText(reading.liftMonth, lang, where.zone)} ${isTh ? "ใช้เดือนนี้เริ่มเรื่องใหม่ ยื่นขอ หรือเปิดตัว" : "Use it to start something new, apply or launch."}` }]
+        : []),
+    ];
     const maxYear = Math.min(2100, meta.birthYear + 110);
     return (
       <div className="v2-nr space-y-6">
         <p className="v2-nr-lead">
           {mode === "solar"
             ? isTh
-              ? "ผังของขณะที่ดวงอาทิตย์กลับมาที่องศาเดิมตอนคุณเกิด บอกธีมของปีตั้งแต่วันเกิดปีนี้ถึงปีหน้า"
-              : "The chart for the moment the Sun returns to its birth degree, describing the year from this birthday to the next."
+              ? "ผังของนาทีที่ดวงอาทิตย์กลับมาที่องศาเดิมตอนคุณเกิด ใช้อ่านปีของคุณตั้งแต่วันเกิดปีนี้ถึงวันเกิดปีหน้า แถวแรกของสรุปคือเรื่องที่ควรทุ่มแรงมากที่สุด"
+              : "The chart for the minute the Sun returns to its birth degree. It reads your year from this birthday to the next; the first row of the summary is where to put the most effort."
             : isTh
-              ? "ผังของขณะที่ดวงจันทร์กลับมาที่องศาเดิมตอนคุณเกิด (ทุกราว 27 วัน) บอกบรรยากาศใจของเดือนนั้น"
-              : "The chart for the moment the Moon returns to its birth degree (about every 27 days), describing that month's emotional tone."}
+              ? "ผังของนาทีที่ดวงจันทร์กลับมาที่องศาเดิมตอนคุณเกิด (ทุกราว 27 วัน) ใช้อ่านเดือนของคุณ แถวแรกของสรุปคือเรื่องที่ใจคุณจดจ่อที่สุด"
+              : "The chart for the minute the Moon returns to its birth degree (about every 27 days). It reads your month; the first row of the summary is what your heart is most focused on."}
         </p>
         {!chart.input.timeKnown && (
           <p className="v2-nr-item-d border-l-2 border-gold-ink pl-3">
             {isTh
-              ? "ไม่ทราบเวลาเกิด: เวลาของผังนี้อาจคลาดได้ถึงครึ่งวัน ลัคนาและเรือนจึงยังเชื่อไม่ได้"
-              : "Birth time unknown: this chart's time may be off by up to half a day, so its Ascendant and houses are not reliable."}
+              ? "ไม่ทราบเวลาเกิด: เวลาของผังนี้คลาดได้ถึงครึ่งวัน สรุปด้านล่างอิงลัคนาและเรือนทั้งหมด จึงยังใช้ไม่ได้จนกว่าจะรู้เวลาเกิด"
+              : "Birth time unknown: this chart's time can be off by up to half a day. The summary below depends on the Ascendant and houses, so do not rely on it until you know your birth time."}
           </p>
         )}
         <div className="v2-nr-controls">
@@ -483,14 +570,18 @@ export default function NatalTimeTools({ chart, lang, meta, mode }: { chart: Nat
             </span>
             {mode === "solar" &&
               (isTh
-                ? " (อาจตรงกับวันก่อนหรือหลังวันเกิดหนึ่งวัน เพราะปีหนึ่งยาวไม่เท่ากับจำนวนวันเต็มพอดี)"
+                ? " (ตรงกับวันก่อนหรือหลังวันเกิดได้หนึ่งวัน เพราะหนึ่งปีไม่ได้ยาวเป็นจำนวนวันเต็ม)"
                 : " (it can fall a day before or after your birthday because a year is not a whole number of days)")}
           </p>
         </div>
-        <SummaryBox
-          title={mode === "solar" ? (isTh ? "ธีมของปี" : "Themes of the year") : isTh ? "บรรยากาศของเดือน" : "Mood of the month"}
-          rows={highlights.map((h) => ({ label: h.label, text: h.text }))}
-        />
+        {reading.verdict && (
+          <div className="v2-nr-lead">
+            <p className="v2-nr-lead-k">{mode === "solar" ? (isTh ? "ปีนี้ของคุณในประโยคเดียว" : "Your year in one line") : isTh ? "เดือนนี้ของคุณในประโยคเดียว" : "Your month in one line"}</p>
+            <p className="v2-nr-lead-t">{reading.verdict.title}</p>
+            <p className="v2-nr-note">{reading.verdict.why}</p>
+          </div>
+        )}
+        <SummaryBox title={mode === "solar" ? (isTh ? "ธีมของปี" : "Themes of the year") : isTh ? "บรรยากาศของเดือน" : "Mood of the month"} rows={rows} />
         <NatalWheel chart={ret} lang={lang} focus={focus} onFocus={setFocus} showMinor={false} />
         <div className="v2-nr-deep">
           <details>
