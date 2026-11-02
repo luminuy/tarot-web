@@ -5,6 +5,14 @@
   "compatibility_date": "2026-09-15",
   "compatibility_flags": ["nodejs_compat"],
 
+  // ── ที่ตั้งการรัน Worker (INC-0314 · 2026-11-02) ──
+  // ปกติ Worker รันในศูนย์ข้อมูลที่ใกล้ผู้ใช้ที่สุด ผู้ใช้ไทยบางเครือข่ายถูกส่งไปฮ่องกง (HKG) ซึ่ง Anthropic / Gemini / OpenAI
+  // ไม่เปิดให้ใช้ ➔ Claude ตอบ 403 "Request not allowed" และ Gemini ล้มทุกโมเดลพร้อมกัน คำอ่านตกไปตัวสำรองในเครื่อง
+  // ➔ บังคับให้รันใกล้ Google Cloud สิงคโปร์ (ผู้ให้บริการ AI ทุกเจ้าเปิดให้ใช้ · ใกล้ผู้ใช้ไทย)
+  // มีผลเฉพาะคำขอที่เข้า Worker (API + หน้า Next) — ไฟล์ static ยังตอบจากขอบใกล้ผู้ใช้เหมือนเดิม
+  // ตรวจหลัง deploy: log AI ที่ล้มมี " colo=..." ต่อท้าย (src/lib/ai/geo-block.ts) ต้องไม่เห็น HKG อีก
+  "placement": { "region": "gcp:asia-southeast1" },
+
 
   // ── Static assets (ภาพไพ่ 1909 · _next/static · หน้าเนื้อหาที่เรนเดอร์ด้วย Astro) ──
   //

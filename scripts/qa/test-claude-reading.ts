@@ -403,6 +403,34 @@ async function main() {
   );
   check("แผงแอดมินแสดงสถานะคีย์ Claude และป้ายสถานะ claude_unavailable", /claude_unavailable:/.test(fs.readFileSync(path.resolve("src/components/admin/AiHealthPanel.tsx"), "utf-8")) && fs.readFileSync(path.resolve("src/components/admin/AiHealthPanel.tsx"), "utf-8").includes("ANTHROPIC_API_KEY"));
 
+  console.log("\n🌏 ผู้ให้บริการ AI บล็อกเขตที่ Worker รันอยู่ (INC-0314)");
+  {
+    const { isGeoBlockedAiResponse } = await import("../../src/lib/ai/geo-block");
+    check(
+      "แยกการบล็อกตามเขตออกจากคีย์ผิด/โควตา: Anthropic 403 Request not allowed · Gemini 400 location not supported · OpenAI 403 unsupported_country",
+      isGeoBlockedAiResponse(403, '{ "error": { "type": "forbidden", "message": "Request not allowed" } }') &&
+        isGeoBlockedAiResponse(400, '{"error":{"code":400,"message":"User location is not supported for the API use.","status":"FAILED_PRECONDITION"}}') &&
+        isGeoBlockedAiResponse(403, '{"error":{"code":"unsupported_country_region_territory"}}') &&
+        !isGeoBlockedAiResponse(401, '{"type":"error","error":{"type":"authentication_error","message":"invalid x-api-key"}}') &&
+        !isGeoBlockedAiResponse(400, '{"error":{"message":"maxOutputTokens is not supported"}}') &&
+        !isGeoBlockedAiResponse(429, "Request not allowed"),
+    );
+    const rd = (f: string) => fs.readFileSync(path.join(process.cwd(), f), "utf8");
+    const wrangler = rd("wrangler.jsonc");
+    const region = /"placement"\s*:\s*\{\s*"region"\s*:\s*"([^"]+)"/.exec(wrangler)?.[1] ?? "";
+    // เขตฮ่องกงของผู้ให้บริการคลาวด์ (ปลายทาง AI ไม่เปิดให้ใช้) — ห้ามตั้ง placement ไปที่นี่
+    const HONG_KONG = new Set(["gcp:asia-east2", "aws:ap-east-1", "azure:eastasia"]);
+    check(
+      `wrangler.jsonc ตั้ง placement.region ให้ Worker รันในเขตที่ผู้ให้บริการ AI เปิดให้ใช้ (ตอนนี้ ${region || "ไม่ได้ตั้ง"})`,
+      /^(gcp|aws|azure):[a-z0-9-]+$/.test(region) && !HONG_KONG.has(region),
+    );
+    check(
+      "log ของ AI ที่ล้มทุกเจ้าบอกศูนย์ข้อมูลที่รัน (colo) · Gemini ไม่ยิงซ้ำเมื่อถูกบล็อกตามเขต",
+      ["src/lib/ai/claude.ts", "src/lib/ai/gemini.ts", "src/lib/ai/groq.ts", "src/lib/ai/openrouter.ts"].every((f) => rd(f).includes("aiFailureContext(")) &&
+        rd("src/lib/ai/gemini.ts").includes("res.status === 400 && !geoBlocked"),
+    );
+  }
+
   console.log(`\n📊 สรุป: ผ่าน ${pass} · ตก ${fail}`);
   if (fail > 0) process.exit(1);
 }

@@ -93,6 +93,16 @@ export async function safelyGetCloudflareContext() {
   return null;
 }
 
+/**
+ * รหัสศูนย์ข้อมูลของ Cloudflare ที่กำลังรันคำขอนี้ (เช่น "SIN" "BKK" "HKG") · นอก Workers = null
+ * ใช้ต่อท้าย log ของ AI ที่ล้ม — แยก "ผู้ให้บริการบล็อกประเทศ/เขตที่ Worker รันอยู่" ออกจากคีย์ผิด/โควตาหมดได้ทันที (INC-0314)
+ */
+export async function currentColo(): Promise<string | null> {
+  const ctx = (await safelyGetCloudflareContext()) as { cf?: { colo?: unknown } } | null;
+  const colo = ctx?.cf?.colo;
+  return typeof colo === "string" && colo ? colo : null;
+}
+
 let cachedKV: AppKV | null = null;
 
 /**

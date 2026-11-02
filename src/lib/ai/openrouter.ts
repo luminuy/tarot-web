@@ -30,6 +30,7 @@ import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/l
 import { linkAbortSignal, readWithIdleTimeout } from "@/lib/ai/abort";
 import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
 import type { ReadingEvent } from "@/lib/ai/types";
+import { aiFailureContext } from "@/lib/ai/geo-block";
 
 const OPENROUTER_CHAT_URL = "https://openrouter.ai/api/v1/chat/completions";
 
@@ -137,7 +138,8 @@ export async function* streamOpenRouterReading(ctx: ReadingContext): AsyncGenera
 
       if (!res.ok || !res.body) {
         const errText = await res.text().catch(() => "");
-        console.warn(`[OpenRouter Reading ${model}] status ${res.status}: ${errText.slice(0, 200)}`);
+        const { note } = await aiFailureContext("openrouter", res.status, errText);
+        console.warn(`[OpenRouter Reading ${model}] status ${res.status}${note}: ${errText.slice(0, 200)}`);
         recordEvent(`ai_openrouter_fail:${res.status}`);
         // โควตารายวันของโมเดลฟรีนับรวมทั้งบัญชี — หมดแล้วลองตัวอื่นก็หมดเหมือนกัน
         if (res.status === 429 && /per.?day/i.test(errText)) return false;
