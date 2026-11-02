@@ -181,6 +181,10 @@
 .ui2-sx-name .ui2-accent {
   overflow: hidden;
   text-overflow: ellipsis;
+  /* ฟอนต์เอียงไม่มีอักษรไทย ➔ เบราว์เซอร์เอียงฟอนต์ไทยเอง หางตัวท้าย/สระบนยื่นพ้นกล่อง แล้วโดน overflow ตัด
+     ("รายราศี" เหลือ "รายราศิ" · "คู่มือ" ขาดขวา — เจ้าของ 2026-11-02) ➔ เผื่อที่ใน padding แล้วหักคืนด้วย margin ไม่ให้แถบขยับ */
+  padding: 0.2em 0.3em 0.2em 0;
+  margin: -0.2em -0.3em -0.2em 0;
   font-size: 17px;
   color: var(--cat);
 }
