@@ -334,7 +334,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
             { href: "/cards/cups", suit: "cups", card: "cups-01", th: "ถ้วย", en: "Cups", n: "14" },
             { href: "/cards/swords", suit: "swords", card: "swords-01", th: "ดาบ", en: "Swords", n: "14" },
             { href: "/cards/pentacles", suit: "pentacles", card: "pentacles-01", th: "เหรียญ", en: "Pentacles", n: "14" },
-            { href: "/cards/all", suit: "major", card: "major-10", th: "ตารางสรุป 78 ใบ", en: "Summary Table", n: "78" },
+            { href: "/cards/all", suit: "major", card: "major-10", th: "ตารางความหมาย 78 ใบ", en: "Summary Table", n: "78" },
             { href: "/cards/birth-card", suit: "major", card: "major-19", th: "คำนวณไพ่ประจำตัว", en: "Birth Card Tool", n: "" },
             { href: "/cards/zodiac", suit: "major", card: "major-17", th: "ไพ่ประจำราศี", en: "Zodiac Cards", n: "12" },
           ].map((l) => (

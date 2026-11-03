@@ -27,9 +27,11 @@ export const TITLE_TEMPLATE = "%s · SeerTarot";
  * ⚠️ ค่านี้ไม่ผ่านแม่แบบ `TITLE_TEMPLATE` — Next ใช้ `title.default` ตรง ๆ
  *    ถ้าเผลอต่อ " · SeerTarot" ให้อีกรอบ จะกลายเป็นชื่อแบรนด์ซ้ำสองครั้งในหน้าเดียว
  *    (ด่าน `test-meta-length` มีข้อตรวจ "ชื่อแบรนด์ซ้ำสองรอบใน title" ไว้แล้ว)
+ * GSC 2026-11-03: คนค้นหน้าแรกด้วย "ไพ่ทาโร่" มากกว่า "ไพ่ทาโรต์" ราว 10 เท่า (ดูดวงไพ่ทาโร่ 40 · เว็บไพ่ทาโร่ 40 · ดูไพ่ทาโร่ 35
+ *    เทียบ ดูดวงไพ่ทาโรต์ 4) ➔ title ใช้ "ไพ่ทาโร่" · description มีทั้งสองแบบ · แก้ต้องแก้ทั้ง 4 จุด (ที่นี่ · OG · Twitter · home.tsx)
  */
 export const ROOT_TITLE_DEFAULT: Record<"th" | "en", string> = {
-  th: "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับ Selene",
+  th: "ดูดวงไพ่ยิปซี ไพ่ทาโร่ออนไลน์ ฟรี · เปิดไพ่กับ Selene",
   en: "Free Online Tarot Reading With Selene, an AI Tarot Reader",
 };
 
@@ -111,7 +113,7 @@ export const ROOT_KEYWORDS: Record<"th" | "en", string[]> = {
  *     ถ้าจะแก้ให้ดีขึ้นกว่าเดิม ให้แก้เป็นงานแยกที่ตั้งใจ ไม่ใช่ผลข้างเคียงของการย้าย)
  */
 export const ROOT_DESCRIPTION: Record<"th" | "en", string> = {
-  th: "ดูดวงไพ่ยิปซี (ไพ่ทาโรต์) ออนไลน์ฟรี สับไพ่และหยิบไพ่ด้วยมือคุณเอง 78 ใบ ให้ Selene ทำนายสดทีละใบ มีผัง 26 แบบ ทั้งรายวัน ความรัก การงาน การเงิน",
+  th: "ดูดวงไพ่ยิปซี ไพ่ทาโร่ (ไพ่ทาโรต์) ออนไลน์ฟรี สับไพ่และหยิบไพ่ด้วยมือคุณเอง 78 ใบ ให้ Selene ทำนายสดทีละใบ มีผัง 26 แบบ ทั้งรายวัน ความรัก การงาน การเงิน",
   en: "Free online tarot reading with the original 1909 Rider-Waite deck. Shuffle and draw all 78 cards yourself, then read a live AI interpretation.",
 };
 
@@ -134,7 +136,7 @@ export const ROOT_OPEN_GRAPH: Record<"th" | "en", Metadata["openGraph"]> = {
     type: "website",
     locale: "th_TH",
     siteName: "SeerTarot",
-    title: "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับ Selene",
+    title: "ดูดวงไพ่ยิปซี ไพ่ทาโร่ออนไลน์ ฟรี · เปิดไพ่กับ Selene",
     description:
       "สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยมือคุณเอง ให้ Selene แม่หมอ AI อ่านความหมายทีละใบ สุ่มจริง ตรวจสอบได้",
     images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
@@ -153,7 +155,7 @@ export const ROOT_OPEN_GRAPH: Record<"th" | "en", Metadata["openGraph"]> = {
 export const ROOT_TWITTER: Record<"th" | "en", Metadata["twitter"]> = {
   th: {
     card: "summary_large_image",
-    title: "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับ Selene",
+    title: "ดูดวงไพ่ยิปซี ไพ่ทาโร่ออนไลน์ ฟรี · เปิดไพ่กับ Selene",
     description: "ดูดวงไพ่ทาโรต์ออนไลน์ สับไพ่และเลือกหยิบไพ่ด้วยมือคุณเอง สุ่มจริง ตรวจสอบได้",
     images: [OG_IMAGE_URL],
   },

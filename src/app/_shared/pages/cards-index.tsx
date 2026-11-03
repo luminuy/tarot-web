@@ -14,9 +14,14 @@ const PATH = "/cards";
 
 const COPY = {
   th: {
-    title: "ความหมายไพ่ยิปซี ไพ่ทาโร่ ครบ 78 ใบ (ใหญ่ 22 + เล็ก 56)",
+    /*
+     * GSC 2026-11-03: title เดิม "ความหมายไพ่ยิปซี ไพ่ทาโร่ ครบ 78 ใบ" แทบเหมือน /cards/all คำเดียวกัน
+     * Google จึงสลับสองหน้า ("ความหมายไพ่ทาโร่ 78 ใบ" /cards/all 9.8 · หน้านี้ 21.5 · "ความหมายไพ่ทาโร่" /cards/all 11.8 ค้างอันดับ 12)
+     * ➔ ยกคำ "ความหมายไพ่ยิปซี/ไพ่ทาโร่ 78 ใบ" ให้ /cards/all หน้าเดียว · หน้านี้เป็นสารานุกรมค้นไพ่ตามชุด ธาตุ ราศี
+     */
+    title: "สารานุกรมไพ่ทาโร่ ไพ่ยิปซี 78 ใบ ค้นไพ่ตามชุด ธาตุ ราศี",
     description:
-      "เปิดดูความหมายไพ่ยิปซี ไพ่ทาโร่ ครบ 78 ใบ ชุดใหญ่ 22 และชุดเล็ก 56 ใบ พร้อมคำแปลไทย 5 มิติ ทั้งหัวตั้งและหัวกลับ โหราศาสตร์ ธาตุ และภาพต้นฉบับ 1909",
+      "รวมไพ่ทาโร่ ไพ่ยิปซีครบ 78 ใบ ภาพต้นฉบับ 1909 ค้นตามชุดใหญ่ ถ้วย เหรียญ ดาบ ไม้เท้า ธาตุ และราศี กดดูทีละใบ หรือเปิดตารางความหมาย 78 ใบในหน้าเดียว",
     collectionName: "ความหมายไพ่ทาโร่ ไพ่ยิปซี 78 ใบ (1909 Rider-Waite-Smith)",
     collectionDescription:
       "สารานุกรมความหมายไพ่ทาโรต์ครบ 78 ใบ ทั้ง Major Arcana และ Minor Arcana พร้อมคำแปลภาษาไทย 5 มิติ",
@@ -37,7 +42,7 @@ export function buildCardsIndexMetadata(locale: Locale): Metadata {
   const copy = COPY[locale];
   const isEnglish = locale === "en";
   const ogImages = buildPageOgImage({
-    title: isEnglish ? "Tarot Card Meanings: All 78 Cards" : "ความหมายไพ่ยิปซี ครบ 78 ใบ",
+    title: isEnglish ? "Tarot Card Meanings: All 78 Cards" : "สารานุกรมไพ่ทาโร่ 78 ใบ",
     eyebrow: isEnglish ? "TAROT ENCYCLOPEDIA" : "คัมภีร์ไพ่ทาโรต์ 1909",
     cardImage: "major-00.jpg",
     alt: copy.title,
