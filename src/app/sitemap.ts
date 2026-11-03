@@ -39,6 +39,11 @@ const CONTENT_UPDATED_AT: Record<string, Date> = Object.fromEntries([
   // 2026-11-03: สองหน้าที่ Google คลานแล้วไม่เก็บ 3 รอบติด — /cards/minor มีตารางเทียบทีละเลข · /spreads/ex-reconciliation มีคู่มือ
   ["/cards/minor", new Date("2026-11-03T17:00:00+07:00")] as const,
   ["/spreads/ex-reconciliation", new Date("2026-11-03T17:00:00+07:00")] as const,
+  // 2026-11-03 (แย่งคำกันเอง): /spreads/money ชื่อผังบนหน้าเปลี่ยน · /spreads/topic/money มีส่วน "เลือกผังตามสถานการณ์" · /cards ป้ายลิงก์ตาราง
+  // (หน้าที่แก้แค่ title/description เช่น yes-no · luck · daily · หน้าแรก ไม่อยู่ในรายการนี้ตามกติกาข้างบน)
+  ["/spreads/money", new Date("2026-11-03T21:00:00+07:00")] as const,
+  ["/spreads/topic/money", new Date("2026-11-03T21:00:00+07:00")] as const,
+  ["/cards", new Date("2026-11-03T21:00:00+07:00")] as const,
 ]);
 
 export default function sitemap(): MetadataRoute.Sitemap {

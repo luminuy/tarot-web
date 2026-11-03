@@ -19,7 +19,7 @@ export function buildHomeMetadata(locale: Locale): Metadata {
   const isEnglish = locale === "en";
   const title = isEnglish
     ? "Free Online Tarot Readings with Selene, AI Reader · SeerTarot"
-    : "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับ Selene";
+    : "ดูดวงไพ่ยิปซี ไพ่ทาโร่ออนไลน์ ฟรี · เปิดไพ่กับ Selene";
   const description = isEnglish
     ? "Free online 1909 Rider-Waite tarot readings. Shuffle and draw cards yourself, with an AI tarot reader and a shuffle you can verify."
     : "สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยมือคุณเอง ให้ Selene แม่หมอ AI อ่านความหมายทีละใบ สุ่มจริง ตรวจสอบได้";
