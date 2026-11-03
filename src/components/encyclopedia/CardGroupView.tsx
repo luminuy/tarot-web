@@ -12,6 +12,8 @@ import { ThaiPhrases } from "@/components/ui/ThaiPhrases";
 import { Ui2PageHero } from "@/components/ui2/Ui2PageHero";
 import { Ui2Showcase, type Ui2ShowcaseSection } from "@/components/ui2/Ui2Showcase";
 import { CardTile } from "@/components/encyclopedia/CardTile";
+import { MINOR_NUMBER_MEANINGS_TH } from "@/data/cards/minor-numbers";
+import { CardImage } from "@/components/card/CardImage";
 
 interface CardGroupViewProps {
   groupInfo: CardGroupInfo;
@@ -162,6 +164,24 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
         </div>
       ),
     })),
+    // เทียบไพ่เลขเดียวกันข้ามสี่ชุด — เฉพาะหน้าชุดเล็กภาษาไทย (เหตุผลใน `src/data/cards/minor-numbers.ts`)
+    ...(groupInfo.id === "minor" && !isEnglish
+      ? [
+          {
+            id: "numbers",
+            kicker: "เลขเดียวกัน ต่างชุด",
+            title: "เทียบไพ่ชุดเล็กทีละเลข",
+            short: "เทียบทีละเลข",
+            tone: 6 as Ui2ShowcaseSection["tone"],
+            lead: (
+              <ThaiPhrases>
+                ไพ่เลขเดียวกันเล่าขั้นเดียวกันของเรื่อง ต่างกันแค่ด้านของชีวิต อ่านทีละแถวจะเห็นว่าเลขเดียวกันในเรื่องงาน ความรัก ความคิด และเงินต่างกันอย่างไร
+              </ThaiPhrases>
+            ),
+            children: <MinorNumberRows cards={cards} />,
+          },
+        ]
+      : []),
     {
       id: "guide",
       kicker: isEnglish ? "Guide" : "คู่มือ",
@@ -226,6 +246,85 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
     </div>
   );
 };
+
+/**
+ * ตารางเทียบทีละเลข (หน้า `/cards/minor` ภาษาไทย) — แถวละเลข · ช่องละชุด · ชื่อไพ่ + คำสำคัญหัวตั้งคำแรกจากข้อมูลไพ่จริง
+ * จอแคบเรียงช่องเป็นรายการลงมา (ไม่มีแถบเลื่อนแนวนอน) · ลิงก์ไปหน้าไพ่ครบ 56 ใบ
+ */
+function MinorNumberRows({ cards }: { cards: readonly CardSummary[] }) {
+  const suits = ["wands", "cups", "swords", "pentacles"] as const;
+  return (
+    <div className="v2-cg-numwrap">
+      {/* หัวคอลัมน์ (จอกว้างเท่านั้น · จอแคบชื่อไพ่บอกชุดอยู่แล้ว) */}
+      <div className="v2-cg-num-legend" aria-hidden="true">
+        <span />
+        {suits.map((suit) => (
+          <span key={suit} data-suit={suit}>
+            {SUIT_NAME[suit].kickerTh}
+          </span>
+        ))}
+      </div>
+      <ol className="v2-cg-nums">
+        {Object.entries(MINOR_NUMBER_MEANINGS_TH).map(([n, info]) => {
+          const num = Number(n);
+          return (
+            <li key={n} className="v2-cg-num">
+              <div className="v2-cg-num-head">
+                {/* เลขใหญ่เป็นตัวนำสายตา · ไพ่ราชสำนักไม่มีเลข ใช้ชื่อตำแหน่งแทน */}
+                {num <= 10 ? (
+                  <span className="v2-cg-num-n ui2-num" aria-hidden="true">
+                    {num}
+                  </span>
+                ) : null}
+                <div>
+                  <h3>{info.label}</h3>
+                  <p>{info.meaning}</p>
+                </div>
+              </div>
+              <ul className="v2-cg-num-cards">
+                {suits.map((suit) => {
+                  const card = cards.find((c) => c.suit === suit && c.number === num);
+                  if (!card) return null;
+                  return (
+                    <li key={card.id} data-suit={suit}>
+                      {/* ทั้งช่องกดได้ (พื้นที่กดใหญ่) · ภาพไพ่จริง 1909 แบบภาพย่อจิ๋ว */}
+                      <Link href={`/cards/${card.id}`} prefetch={false}>
+                        <CardImage image={card.image} cardId={card.id} alt="" thumb sizes="34px" className="v2-cg-num-img" />
+                        <span className="v2-cg-num-t">
+                          <b>
+                            <CardNameBreak name={card.nameTh} />
+                          </b>
+                          <small>{card.keywords.upright[0]}</small>
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+/**
+ * ชื่อไพ่ชุดเล็กในช่องแคบ — ให้ตัดบรรทัดได้แค่หลัง "แห่ง" ("ห้าแห่ง / ไม้เท้า")
+ * ไม่งั้นเบราว์เซอร์ตัดกลางคำประสม ("ห้าแห่งไม้ / เท้า")
+ */
+function CardNameBreak({ name }: { name: string }) {
+  const at = name.indexOf("แห่ง");
+  if (at < 0) return <>{name}</>;
+  const head = name.slice(0, at + "แห่ง".length);
+  return (
+    <>
+      <span className="v2-nw">{head}</span>
+      <wbr />
+      <span className="v2-nw">{name.slice(head.length)}</span>
+    </>
+  );
+}
 
 /** ไพ่ลอยรอบหัวข้อ = ไพ่จริงของหมวดนี้ 6 ใบ (กระจายทั้งหมวด ไม่ใช่ 6 ใบแรกติดกัน) */
 function heroCards(cards: readonly CardSummary[]): string[] {

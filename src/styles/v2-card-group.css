@@ -108,3 +108,155 @@
   line-height: 1.7;
   color: var(--ui2-on-night-soft);
 }
+
+/* ตารางเทียบทีละเลข (หน้า /cards/minor ไทย · `MinorNumberRows`) — แถวละเลข ช่องละชุด
+   อยู่ในหน้าต่างโชว์เคสพื้นครีม ➔ ใช้โทเคน (ui2-dawn.css สลับเป็นหมึกบนครีมให้เอง) · สีชุดจาก `--el` ของ [data-suit]
+   จอแคบ: เลขใหญ่ + ความหมายอยู่บน ไพ่ 2 คอลัมน์ · จอ ≥ 900: เลขซ้าย ไพ่ 4 คอลัมน์ + หัวคอลัมน์ชุด · ไม่มีแถบเลื่อนแนวนอน
+   ⚠️ ไม่มีจุด/ดาว/ประกายตกแต่ง (กฎเหล็ก 2) — แยกชุดด้วยเส้นและพื้นสีอ่อนเท่านั้น */
+.v2-cg-numwrap {
+  --num-head: 220px;
+}
+.v2-cg-num-legend {
+  display: none;
+}
+@media (min-width: 900px) {
+  .v2-cg-num-legend {
+    display: grid;
+    grid-template-columns: var(--num-head) repeat(4, minmax(0, 1fr));
+    column-gap: 10px;
+    padding: 0 16px 10px;
+  }
+  .v2-cg-num-legend span[data-suit] {
+    padding-bottom: 6px;
+    border-bottom: 2px solid rgba(var(--el), 0.85);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ui2-on-night-soft);
+  }
+}
+.v2-cg-nums {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2-cg-num {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid var(--ui2-line-night);
+  background: var(--ui2-glass-night-solid);
+  box-shadow: 0 1px 2px rgba(74, 47, 16, 0.05), 0 8px 24px -16px rgba(74, 47, 16, 0.25);
+}
+@media (min-width: 900px) {
+  .v2-cg-num {
+    grid-template-columns: var(--num-head) minmax(0, 1fr);
+    column-gap: 10px;
+    align-items: center;
+  }
+}
+.v2-cg-num-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding-right: 8px;
+}
+.v2-cg-num-n {
+  flex: none;
+  width: 48px;
+  font-family: var(--ui2-font-display);
+  font-size: 42px;
+  line-height: 0.95;
+  font-weight: 400;
+  text-align: center;
+  color: var(--ui2-gold-solid);
+}
+.v2-cg-num-head h3 {
+  margin: 0;
+  font-family: var(--ui2-font-display);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ui2-on-night);
+}
+.v2-cg-num-head p {
+  margin: 2px 0 0;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--ui2-on-night-soft);
+}
+.v2-cg-num-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 900px) {
+  .v2-cg-num-cards {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+}
+.v2-cg-num-cards li {
+  min-width: 0;
+}
+.v2-cg-num-cards a {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  height: 100%;
+  padding: 8px 10px 8px 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(var(--el), 0.45);
+  background: linear-gradient(135deg, rgba(var(--el), 0.16) 0%, rgba(var(--el), 0.05) 100%);
+  text-decoration: none;
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.v2-cg-num-cards a:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--el), 0.9);
+  box-shadow: 0 10px 22px -14px rgba(74, 47, 16, 0.45);
+}
+.v2-cg-num-cards a:focus-visible {
+  outline: 2px solid var(--ui2-gold-solid);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2-cg-num-cards a {
+    transition: none;
+  }
+  .v2-cg-num-cards a:hover {
+    transform: none;
+  }
+}
+.v2-cg-num-img {
+  width: 34px;
+  height: 59px;
+  border-radius: 4px;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(43, 33, 24, 0.25);
+}
+.v2-cg-num-t {
+  display: grid;
+  min-width: 0;
+}
+.v2-cg-num-t b {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--ui2-on-night);
+}
+.v2-cg-num-t small {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ui2-on-night-soft);
+}
+.v2-cg-num-t .v2-nw {
+  white-space: nowrap;
+}

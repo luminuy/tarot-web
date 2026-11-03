@@ -121,7 +121,14 @@ GA4 ยังไม่มีอีเวนต์ซื้อแพ็กเก�
 `/cards/wands-01` `/cards/wands-02` `/cards/wands-03` `/cards/wands-04` `/cards/wands-05` `/cards/wands-06` `/cards/wands-07` `/cards/wands-08` `/cards/wands-09` `/cards/wands-11` `/cards/wands-12` `/cards/pentacles-08` `/cards/minor` `/spreads/ex-reconciliation`
 
 > 📌 `/cards/minor` และ `/spreads/ex-reconciliation` ค้าง "รวบรวมข้อมูลแล้ว - ยังไม่ได้จัดทำดัชนี" **รอบที่ 3 ติด** (2026-10-19 · 10-26 · 11-02) — กดซ้ำอย่างเดียวไม่ช่วยแล้ว
-> ต้องเติมเนื้อหาที่หน้าอื่นไม่มี (แบบคู่มือใน `src/data/spread-guides.ts`) ก่อนกดรอบหน้า · `/cards/minor` น่าจะซ้อนกับ `/cards/all` และหน้ารายชุด 4 หน้า
+> ✅ **2026-11-03 เติมเนื้อหาเฉพาะแล้ว** (PR รอบ 359): `/cards/minor` มีตาราง "เทียบไพ่ชุดเล็กทีละเลข" (14 แถว × 4 ชุด · ลิงก์ครบ 56 ใบ) · `/spreads/ex-reconciliation` มีคู่มือวิธีอ่านผัง 4 ใบ (ไม่ตอบคำถามซ้ำกับ `/questions/will-my-ex-come-back`)
+> ➔ **กดสองหน้านี้หลัง PR รอบ 359 ขึ้น production แล้วเท่านั้น**
+
+### 2026-11-03 — ส่ง sitemap ใหม่ + IndexNow (ทำแทนเจ้าของเท่าที่ทำผ่าน API ได้)
+
+- ส่ง `sitemap.xml` ให้ Google ใหม่ผ่าน workflow `seo-gsc.yml` (`submit_sitemap: true` · run [41594290952](https://github.com/luminuy/tarot-web/actions/runs/41594290952)) — Google จะเห็น lastModified 2026-11-02 ของหน้าไพ่ 78 ใบ · `/cards/all` · `/spreads/monthly` เร็วขึ้น
+- `npm run seo:ping` (IndexNow · Bing/Yandex ฯลฯ) 306 URL ➔ HTTP 200
+- ⚠️ ปุ่ม "ขอการจัดทำดัชนี" รายหน้ายังไม่มีใน API — คิว 3 ชุดด้านบน**ยังต้องกดมือใน GSC**
 
 ## 🇹🇭 2026-10-26 — คิวใหม่จาก API: 76 หน้าไทยที่ยังไม่เข้าดัชนี (3 ชุด) (เก่า — ใช้คิว 2026-11-02 ด้านบนแทน)
 
