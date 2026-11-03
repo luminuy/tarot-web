@@ -111,10 +111,16 @@ async function runReport(token: string, q: Query, days: number): Promise<Report>
   });
   const text = await res.text();
   if (!res.ok) {
+    // 403 ของ Google มีสองสาเหตุที่แก้คนละที่ — แยกจากข้อความ จะได้ไม่ต้องเดา (run 2026-10-19 · 10-26 ล้มด้วยแบบแรก)
     const hint =
-      res.status === 403
-        ? `\n   ➔ Service Account ยังไม่ได้เป็น "ผู้ดู" ในพร็อพเพอร์ตี้ ${PROPERTY} หรือยังไม่ได้เปิด Google Analytics Data API ในโปรเจกต์ Cloud`
-        : "";
+      res.status !== 403
+        ? ""
+        : /SERVICE_DISABLED|has not been used|is disabled/i.test(text)
+          ? `\n   ➔ ยังไม่ได้เปิด Google Analytics Data API ในโปรเจกต์ Cloud ของ Service Account (Cloud Console ➔ APIs & Services ➔ Enable)`
+          : /sufficient permissions for this property/i.test(text)
+            ? `\n   ➔ API เปิดแล้ว แต่ Service Account ยังไม่มีสิทธิ์ในพร็อพเพอร์ตี้ ${PROPERTY}` +
+              `\n     GA4 ➔ ผู้ดูแลระบบ ➔ คอลัมน์พร็อพเพอร์ตี้ (ไม่ใช่บัญชี) ➔ การจัดการสิทธิ์เข้าถึงพร็อพเพอร์ตี้ ➔ เพิ่มอีเมล Service Account บทบาท "ผู้ดู"`
+            : `\n   ➔ Service Account ยังไม่ได้เป็น "ผู้ดู" ในพร็อพเพอร์ตี้ ${PROPERTY} หรือยังไม่ได้เปิด Google Analytics Data API ในโปรเจกต์ Cloud`;
     throw new Error(`runReport ➔ ${res.status}: ${text.slice(0, 500)}${hint}`);
   }
   const report = JSON.parse(text) as Report;

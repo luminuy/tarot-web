@@ -18,6 +18,7 @@ import { buildYesNoAnswer } from "../../src/data/cards/yes-no";
 import { cardDetailFaqJsonLd } from "../../src/app/_shared/pages/card-detail";
 import { buildSpreadFaqs, cardYesNoQuestion } from "../../src/lib/seo/faq";
 import { getSpreadGuide } from "../../src/data/spread-guides";
+import { QUESTIONS } from "../../src/data/questions";
 import { isStandardSpread } from "../../src/lib/entitlement/limits";
 
 console.log("\n🧪 กำลังทดสอบระบบ SEO Wave 4: Differentiators (Birth Card, Positions Table, Learn Tarot & Readers)\n");
@@ -565,6 +566,14 @@ assert(
   const astroPage = (href: string) =>
     ["", "/index"].some((suffix) => fs.existsSync(path.join(process.cwd(), "astro/pages", `${href}${suffix}.astro`)));
   const spreadIds = new Set(PUBLIC_SPREADS.map((s) => s.id));
+  // หน้าที่สร้างจาก `[slug].astro` ไม่มีไฟล์ของตัวเอง — เทียบกับรายการจริง (2026-11-03: คู่มือแฟนเก่าลิงก์บทความ + หน้าคำถาม)
+  const articleSlugs = new Set(ARTICLES.map((a) => a.slug));
+  const questionSlugs = new Set(QUESTIONS.map((q) => q.slug));
+  const pageExists = (href: string) => {
+    const dyn = href.match(/^\/(blog|questions)\/([a-z0-9-]+)$/);
+    if (dyn) return (dyn[1] === "blog" ? articleSlugs : questionSlugs).has(dyn[2]);
+    return astroPage(href);
+  };
   let guides = 0;
   const problems: string[] = [];
   for (const spread of PUBLIC_SPREADS) {
@@ -582,7 +591,7 @@ assert(
       for (const pt of block.points ?? []) {
         if (!pt.href) continue;
         const m = pt.href.match(/^\/spreads\/([a-z0-9-]+)$/);
-        if (m ? !spreadIds.has(m[1]) : !astroPage(pt.href)) problems.push(`${spread.id}: ลิงก์ ${pt.href} ไม่มีหน้า`);
+        if (m ? !spreadIds.has(m[1]) : !pageExists(pt.href)) problems.push(`${spread.id}: ลิงก์ ${pt.href} ไม่มีหน้า`);
       }
     }
     const faqs = buildSpreadFaqs(spread, false, isStandardSpread(spread.id));

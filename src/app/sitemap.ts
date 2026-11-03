@@ -36,6 +36,9 @@ const CONTENT_UPDATED_AT: Record<string, Date> = Object.fromEntries([
   ...DECK.map((card) => [`/cards/${card.id}`, new Date("2026-11-02T17:00:00+07:00")] as const),
   ["/cards/all", new Date("2026-11-02T17:00:00+07:00")] as const,
   ["/spreads/monthly", new Date("2026-11-02T17:00:00+07:00")] as const,
+  // 2026-11-03: สองหน้าที่ Google คลานแล้วไม่เก็บ 3 รอบติด — /cards/minor มีตารางเทียบทีละเลข · /spreads/ex-reconciliation มีคู่มือ
+  ["/cards/minor", new Date("2026-11-03T17:00:00+07:00")] as const,
+  ["/spreads/ex-reconciliation", new Date("2026-11-03T17:00:00+07:00")] as const,
 ]);
 
 export default function sitemap(): MetadataRoute.Sitemap {
