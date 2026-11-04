@@ -2,7 +2,10 @@
  * 🟠 Claude (Anthropic) — ทัพหน้าของคำอ่านไพ่ เมื่อมี ANTHROPIC_API_KEY
  * ---------------------------------------------------------------------------
  * เจ้าของสั่ง 2026-10-28: "อ่านไพ่ 1-3 ใบใช้ Haiku ตั้งแต่ 4 ใบใช้ Sonnet เพราะต้องวิเคราะห์เยอะ"
- * - 1–3 ใบ ➔ `claude-haiku-5-5` · 4 ใบขึ้นไป ➔ `claude-sonnet-5-5` (ดู `claudeReadingModel()`)
+ * เจ้าของสั่ง 2026-11-04 "ปรับให้เหมาะสม รู้สึกแพงไป" (Console: Sonnet กินค่าใช้จ่ายเกือบทั้งหมด)
+ *   ➔ Sonnet เหลือเฉพาะผังใหญ่ 7 ใบขึ้นไป + รายงานผังดวงเสียเงิน · ที่เหลือใช้ Haiku
+ *   Haiku 5.5 ราคาต่อโทเคนราว 1/20 ของ Sonnet 5.5 ($0.10/$0.50 เทียบ $2/$10 ต่อล้านโทเคน)
+ * - 1–6 ใบ ➔ `claude-haiku-5-5` · 7 ใบขึ้นไป ➔ `claude-sonnet-5-5` (ดู `claudeReadingModel()`)
  * - ไม่มีคีย์ = ไม่ยิงอะไรเลย ผู้เรียกไปต่อ Groq ➔ Gemini ตามเดิมทุกอย่าง
  * - ล้มด้วยเหตุใดก็ตาม (เครดิตหมด · 429 · 5xx · JSON ไม่ผ่าน · ปฏิเสธ) ➔ return เงียบ ๆ ให้สายสำรองรับต่อ
  *
@@ -23,12 +26,12 @@
  *
  * 🗺️ เส้นที่ใช้ Claude เป็นตัวแรก (เจ้าของสั่ง 2026-10-28: "เลือกโมเดลตามความเหมาะสม แต่ใช้ Claude เป็นหลัก")
  * | เส้น | รุ่น | เหตุผล |
- * | `/read` คำอ่านไพ่ · `/perspective` อ่านอีกมุม | 1-3 ใบ Haiku · 4 ใบขึ้นไป Sonnet · โหมดคิด adaptive | `claudeReadingModel()` · `claudeReadingThinking()` |
- * | `/chat` คุยต่อหลังเปิดไพ่ | ตามจำนวนไพ่แบบเดียวกัน · effort `medium` | ตอบให้ตรงไพ่ที่เปิด (เดิม low · เจ้าของสั่ง 2026-10-28 ให้แม่นขึ้น) |
- * | `/natal/chat` ถามแม่หมอเรื่องผังดวง | Sonnet · effort `medium` | ต้องไล่ดาว/มุม/เรือนให้ครบ |
+ * | `/read` คำอ่านไพ่ · `/perspective` อ่านอีกมุม | 1-6 ใบ Haiku · 7 ใบขึ้นไป Sonnet · โหมดคิด adaptive | `claudeReadingModel()` · `claudeReadingThinking()` |
+ * | `/chat` คุยต่อหลังเปิดไพ่ | Haiku ทุกผัง · effort `medium` | ตอบต่อจากคำอ่านที่เขียนเสร็จแล้ว · ส่งประวัติซ้ำทุกข้อความ (เดิมผัง 4 ใบขึ้นไปใช้ Sonnet) |
+ * | `/natal/chat` ถามแม่หมอเรื่องผังดวง | Haiku · effort `high` | ต้องไล่ดาว/มุม/เรือนให้ครบ ➔ ชดเชยด้วย effort สูงแทนรุ่นใหญ่ (เดิม Sonnet medium) |
  * | `/natal/overview` ปุ่มภาพรวมผัง (ฟรีทุกคน) | Haiku · effort `low` | โค้ดคำนวณและจัดลำดับแล้ว โมเดลแค่เรียบเรียง |
  * | `/natal/report` ภาพรวมในรายงานเสียเงิน | Sonnet · effort `medium` | ของที่ผู้ใช้จ่ายเงิน |
- * | `/journal/reflect` · `/journal/monthly-summary` | Sonnet · effort `low` | เรียบเรียงจากข้อเท็จจริงหลายรายการ · เรียกไม่บ่อย + มีแคช |
+ * | `/journal/reflect` · `/journal/monthly-summary` | Haiku · effort `medium` | เรียบเรียงจากข้อเท็จจริงที่โค้ดคำนวณแล้ว (เดิม Sonnet low) |
  * | `/reading/clarify` ถามกลับก่อนสับไพ่ | Haiku · ปิดโหมดคิด · ยิงคู่กับ Groq | หน้าเว็บตัดที่ 2.5 วินาที ใช้คำตอบ Claude ถ้ามาทัน ไม่ทันใช้ Groq |
  * ที่ไม่ใช้ Claude โดยตั้งใจ:
  * - Reader Studio ร่างคำอ่าน ➔ Gemini — ร่าง DPA (`docs/legal/READER_STUDIO_DPA_DRAFT.md`) ระบุ Gemini เป็นผู้ประมวลผลช่วงรายเดียว
@@ -54,8 +57,8 @@ import { clampToBudget } from "@/lib/ai/retry-budget";
 export const CLAUDE_API_VERSION = "2026-10-21";
 export const CLAUDE_HAIKU_MODEL = "claude-haiku-5-5";
 export const CLAUDE_SONNET_MODEL = "claude-sonnet-5-5";
-/** ไพ่ตั้งแต่กี่ใบขึ้นไปใช้ Sonnet (เจ้าของสั่ง: 4 ใบขึ้นไป) */
-export const CLAUDE_SONNET_FROM_CARDS = 4;
+/** ไพ่ตั้งแต่กี่ใบขึ้นไปใช้ Sonnet — ผังใหญ่ตามกฎเหล็กข้อ 9 (เดิม 4 · เจ้าของสั่งลดค่าใช้จ่าย 2026-11-04) */
+export const CLAUDE_SONNET_FROM_CARDS = 7;
 /** เพดานผลลัพธ์ของเรา (ผัง 12 ใบต้องการ 7,360) — ทั้งสองรุ่นรับได้ถึง 128K อยู่แล้ว */
 const CLAUDE_OUTPUT_CEILING = 16000;
 /** รอ headers ได้นานสุด — หลังได้ headers แล้วใช้เพดานเวลาระหว่างก้อนของ `readWithIdleTimeout` แทน */
@@ -70,13 +73,15 @@ export function claudeReadingModel(cardCount: number): string {
  * 🧠 โหมดคิดของคำอ่านไพ่ (เจ้าของสั่ง 2026-10-28 "ใช้ claude เป็นแกนหลัก ให้อ่านตรงแม่นกว่านี้ ไม่ต้องวัด ทำเลย")
  * เปิด adaptive thinking ทุกขนาดผัง ให้โมเดลไล่ตำแหน่ง ทิศไพ่ และความเชื่อมโยงก่อนเขียนคำอ่าน
  * - 1-3 ใบ (Haiku) effort `low` — ไพ่น้อย คิดสั้น ผู้ใช้ไม่ต้องรอนาน
- * - 4-9 ใบ (Sonnet) effort `medium` · 10 ใบขึ้นไป `high` — ผังใหญ่ต้องโยงหลายตำแหน่ง
+ * - 4-6 ใบ (Haiku) · 7 ใบขึ้นไป (Sonnet) effort `medium` — ผังใหญ่ต้องโยงหลายตำแหน่ง
+ *   (เดิมผัง 10 ใบขึ้นไปใช้ `high` · ลดเหลือ `medium` 2026-11-04 เพราะความคิดคิดเงินเท่าโทเคนคำตอบ)
+ * - เพดานเผื่อความคิด (`headroom`) ยังตามขนาดผังเท่าเดิม — เพดานไม่คิดเงิน แต่ถ้าต่ำไปคำอ่านโดนตัดแล้วไหลไปตัวสำรอง
  * - ความคิดนับรวมใน `max_tokens` ➔ บวกที่เผื่อ (`headroom`) เพิ่มจากงบคำอ่านเดิม ไม่งั้นคำอ่านถูกตัดกลางทาง
  * - บล็อก thinking สตรีมมาเป็น `thinking_delta`/`signature_delta` ตัวอ่านสตรีมรับเฉพาะ `text_delta` อยู่แล้ว
  */
 export function claudeReadingThinking(cardCount: number): { effort: "low" | "medium" | "high"; headroom: number } {
-  if (cardCount >= 10) return { effort: "high", headroom: 16000 };
-  if (cardCount >= CLAUDE_SONNET_FROM_CARDS) return { effort: "medium", headroom: 8000 };
+  if (cardCount >= 10) return { effort: "medium", headroom: 16000 };
+  if (cardCount >= 4) return { effort: "medium", headroom: 8000 };
   return { effort: "low", headroom: 3000 };
 }
 
@@ -275,8 +280,8 @@ export async function* streamClaudeReading(ctx: ReadingContext): AsyncGenerator<
 /**
  * 💬 คำตอบแบบไม่สตรีม (ผังดวง `/api/natal/chat` · แชทหลังเปิดไพ่ · JSON ของสมุดดวงผ่าน `generateAiJson`)
  * ---------------------------------------------------------------------------
- * เจ้าของสั่ง 2026-10-28: หน้าผังดวงใช้ Sonnet "เพราะต้องการความแม่นยำ ละเอียด"
- * - เปิดโหมดคิดแบบ adaptive (ระดับ `medium`) — คำตอบไม่ได้สตรีมทีละคำ ผู้ใช้รอคำตอบทั้งก้อนอยู่แล้ว
+ * รุ่นและ effort ผู้เรียกเลือก (ดูตารางหัวไฟล์) · แชทผังดวงเดิมใช้ Sonnet ย้ายเป็น Haiku effort `high` 2026-11-04 (ลดค่าใช้จ่าย)
+ * - เปิดโหมดคิดแบบ adaptive (ค่าเริ่มต้น `medium`) — คำตอบไม่ได้สตรีมทีละคำ ผู้ใช้รอคำตอบทั้งก้อนอยู่แล้ว
  *   แลกเวลาอีกไม่กี่วินาทีกับการไล่ดูตำแหน่งดาว/มุม/เรือนให้ครบก่อนตอบ
  * - `max_tokens` ต้องเผื่อโทเคนความคิด (ความคิดนับรวมในงบผลลัพธ์)
  * - คืน null เมื่อไม่มีคีย์ · พักอยู่ · ล้ม · ถูกปฏิเสธ · โดนตัดที่ max_tokens ➔ ผู้เรียกไปต่อ Groq/Gemini

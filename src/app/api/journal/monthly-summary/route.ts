@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
 import { generateAiJson } from "@/lib/ai/json-call";
-import { CLAUDE_SONNET_MODEL } from "@/lib/ai/claude";
+import { CLAUDE_HAIKU_MODEL } from "@/lib/ai/claude";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { getSessionUser } from "@/lib/auth/session";
 import { isAiCapReached } from "@/lib/security/ai-budget";
@@ -214,13 +214,14 @@ ${historyText}
   "empowermentQuote": "คำคมพลังใจศักดิ์สิทธิ์ประจำเดือนที่ประทับใจ"
 }`;
 
-    // Claude Sonnet ก่อน (สังเคราะห์หลายคำอ่าน · เรียกไม่บ่อย + แคช 6 ชม.) ➔ Gemini ตามเดิม
+    // Claude Haiku ก่อน (สังเคราะห์หลายคำอ่าน · เรียกไม่บ่อย + แคช 6 ชม.) ➔ Gemini ตามเดิม
+    // เดิม Sonnet low ➔ Haiku medium (เจ้าของสั่ง 2026-11-04: แพงไป · Haiku ราคาต่อโทเคนราว 1/20)
     // อ่านคำตอบ Gemini ผ่าน extractGeminiAnswer ใน generateGeminiJson (บทเรียน INC-0052)
     const parsedAI = await generateAiJson<any>(prompt, {
       label: "Monthly Summary",
       temperature: 0.7,
       cacheTtl: 21600,
-      claude: { model: CLAUDE_SONNET_MODEL, effort: "low", maxTokens: 6000, timeoutMs: 30000 },
+      claude: { model: CLAUDE_HAIKU_MODEL, effort: "medium", maxTokens: 6000, timeoutMs: 30000 },
     });
     if (!parsedAI) {
       recordEvent("monthly_offline_fallback:models_down");

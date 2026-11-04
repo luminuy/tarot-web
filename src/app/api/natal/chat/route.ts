@@ -239,16 +239,18 @@ ${natalAnswerRules("th")}`;
     };
     const clean = (t: string) => stripEmoji(sanitizeTarotText(stripThinkingTags(t))).trim();
 
-    // Claude Sonnet ก่อน (เจ้าของสั่ง 2026-10-28: หน้าผังดวงต้องแม่นและละเอียด) · ไม่มีคีย์/ล้ม ➔ Groq ➔ Gemini ตามเดิม
+    // Claude ก่อน · ไม่มีคีย์/ล้ม ➔ Groq ➔ Gemini ตามเดิม
+    // เดิม Sonnet medium (เจ้าของสั่ง 2026-10-28: ต้องแม่นและละเอียด) ➔ Haiku high (เจ้าของสั่ง 2026-11-04: แพงไป)
+    // Haiku ราคาต่อโทเคนราว 1/20 ของ Sonnet จึงชดเชยความแม่นด้วย effort สูงได้ · ความคิดนับรวมใน max_tokens ➔ เผื่อเพดานเพิ่มจาก 8,000
     if (process.env.ANTHROPIC_API_KEY?.trim()) {
-      const { generateClaudeReply, CLAUDE_SONNET_MODEL } = await import("@/lib/ai/claude");
+      const { generateClaudeReply, CLAUDE_HAIKU_MODEL } = await import("@/lib/ai/claude");
       const r = await generateClaudeReply({
-        model: CLAUDE_SONNET_MODEL,
+        model: CLAUDE_HAIKU_MODEL,
         system: systemInstruction,
         messages: [...history.map((h) => ({ role: (h.sender === "user" ? "user" : "assistant") as "user" | "assistant", content: h.text })), { role: "user", content: question }],
-        maxTokens: 8000,
+        maxTokens: 12000,
         timeoutMs: 60000,
-        effort: "medium",
+        effort: "high",
       });
       const reply = r?.reply ? clean(r.reply) : "";
       const leaked = reply ? detectPromptLeak(reply) : null;
