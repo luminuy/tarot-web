@@ -1012,7 +1012,8 @@ console.log("\n6.17) ความแม่นของคำอธิบาย �
     "รายงานเสียเงิน: ภาพรวมโดย Sonnet หลังประกอบรายงานเสร็จ · ส่วน AI อยู่ใน try ของตัวเอง (AI ล้มไม่คืนสิทธิ์ ไม่ทำรายงานล้ม)",
     iBuilt > 0 && iAi > iBuilt && /model: CLAUDE_SONNET_MODEL/.test(rep) && /try \{\s*const \{ isAiCapReached \}/.test(rep) && rep.includes('recordEvent("natal_report_ai_failed")'),
   );
-  check("ถามแม่หมอ: prompt มีเรื่องเด่นที่โค้ดจัดลำดับ (ยังใช้ Sonnet)", /formatChartForPrompt\([^)]*chartHighlights\(chart, lang/.test(rd("src/app/api/natal/chat/route.ts")) && /model: CLAUDE_SONNET_MODEL/.test(rd("src/app/api/natal/chat/route.ts")));
+  // เดิม Sonnet (2026-10-28) ➔ Haiku effort high (เจ้าของสั่งลดค่าใช้จ่าย 2026-11-04 · ด่านรุ่น/effort ละเอียดอยู่ที่ test-claude-reading)
+  check("ถามแม่หมอ: prompt มีเรื่องเด่นที่โค้ดจัดลำดับ (Haiku effort high)", /formatChartForPrompt\([^)]*chartHighlights\(chart, lang/.test(rd("src/app/api/natal/chat/route.ts")) && /model: CLAUDE_HAIKU_MODEL/.test(rd("src/app/api/natal/chat/route.ts")) && /effort: "high"/.test(rd("src/app/api/natal/chat/route.ts")));
   const btn = strip(rd("src/components/natal/NatalOverview.tsx"));
   check(
     "ปุ่มภาพรวม: โหลดแบบ lazy · ยิง API เฉพาะหลังยินยอม · ไม่เขียนที่เก็บ · ตัดอีโมจิ · import แค่ชนิดข้อมูลของฝั่งเซิร์ฟเวอร์",

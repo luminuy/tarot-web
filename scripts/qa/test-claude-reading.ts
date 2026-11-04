@@ -1,6 +1,6 @@
 /**
  * scripts/qa/test-claude-reading.ts
- * QA — Claude เป็นทัพหน้าของคำอ่าน (เจ้าของสั่ง 2026-10-28: 1-3 ใบ Haiku · 4 ใบขึ้นไป Sonnet)
+ * QA — Claude เป็นทัพหน้าของคำอ่าน (เจ้าของสั่ง 2026-10-28 ใช้ Claude เป็นหลัก · 2026-11-04 ลดค่าใช้จ่าย: 1-6 ใบ Haiku · 7 ใบขึ้นไป Sonnet)
  * ไม่ยิง API จริง — แทน fetch ด้วยสตรีม SSE ปลอมที่ประกอบจากคำอ่านสำรองของไพ่ชุดจริงใน golden fixture
  * รันด้วย: npx tsx scripts/qa/test-claude-reading.ts
  */
@@ -136,11 +136,12 @@ function mockFetch(respond: () => Response) {
 }
 
 async function main() {
-  console.log("🟠 Claude ทัพหน้าคำอ่าน (1-3 ใบ Haiku · 4 ใบขึ้นไป Sonnet)\n");
+  console.log("🟠 Claude ทัพหน้าคำอ่าน (1-6 ใบ Haiku · 7 ใบขึ้นไป Sonnet)\n");
 
   console.log("1) เลือกรุ่นตามจำนวนไพ่");
-  check("1 2 3 ใบ = Haiku 5.5", [1, 2, 3].every((n) => claudeReadingModel(n) === CLAUDE_HAIKU_MODEL));
-  check("4 5 7 10 12 ใบ = Sonnet 5.5", [4, 5, 7, 10, 12].every((n) => claudeReadingModel(n) === CLAUDE_SONNET_MODEL));
+  // เจ้าของสั่ง 2026-11-04 "ปรับให้เหมาะสม รู้สึกแพงไป" ➔ Sonnet เฉพาะผังใหญ่ 7 ใบขึ้นไป (กฎเหล็กข้อ 9)
+  check("1 2 3 4 5 6 ใบ = Haiku 5.5", [1, 2, 3, 4, 5, 6].every((n) => claudeReadingModel(n) === CLAUDE_HAIKU_MODEL));
+  check("7 10 12 ใบ = Sonnet 5.5", [7, 10, 12].every((n) => claudeReadingModel(n) === CLAUDE_SONNET_MODEL));
   check("รหัสรุ่นตรงตามเอกสาร (ไม่มีวันที่ต่อท้าย)", CLAUDE_HAIKU_MODEL === "claude-haiku-5-5" && CLAUDE_SONNET_MODEL === "claude-sonnet-5-5");
   check(
     "ปิดโหมดคิดให้ตรงรุ่น: Haiku disabled · Sonnet between_tools (Sonnet 5.5 ไม่รับ disabled)",
@@ -189,19 +190,28 @@ async function main() {
     done3?.type === "done" && done3.usage.inputTokens === 4120 && done3.usage.outputTokens === 1800 && done3.usage.cacheReadTokens === 4000,
   );
 
-  console.log("\n4) ผัง 5 ใบ ➔ Sonnet");
+  console.log("\n4) ผัง 5 ใบ ➔ Haiku effort medium · ผัง 7 ใบ ➔ Sonnet");
   const ctx5 = goldenContext(5);
   const json5 = await validReadingJson(ctx5);
   mockFetch(() => claudeStream(json5));
   const ev5 = await collect(ctx5);
   check(
-    "รุ่น Sonnet 5.5 + โหมดคิด adaptive · effort medium · เผื่อความคิด 8,000",
-    lastReq?.body.model === CLAUDE_SONNET_MODEL &&
+    "ผัง 5 ใบ: รุ่น Haiku 5.5 + โหมดคิด adaptive · effort medium · เผื่อความคิด 8,000",
+    lastReq?.body.model === CLAUDE_HAIKU_MODEL &&
       lastReq?.body.thinking?.type === "adaptive" &&
       lastReq?.body.output_config?.effort === "medium" &&
       lastReq?.body.max_tokens === 1600 + 5 * 480 + 8000,
   );
-  check("จบด้วย done จากรุ่น Sonnet", ev5.some((e) => e.type === "done" && e.model === CLAUDE_SONNET_MODEL));
+  check("ผัง 5 ใบ: จบด้วย done จากรุ่น Haiku", ev5.some((e) => e.type === "done" && e.model === CLAUDE_HAIKU_MODEL));
+  const ctx7 = goldenContext(7);
+  const json7 = await validReadingJson(ctx7);
+  mockFetch(() => claudeStream(json7));
+  const ev7 = await collect(ctx7);
+  check(
+    "ผัง 7 ใบ: รุ่น Sonnet 5.5 + โหมดคิด adaptive · effort medium",
+    lastReq?.body.model === CLAUDE_SONNET_MODEL && lastReq?.body.thinking?.type === "adaptive" && lastReq?.body.output_config?.effort === "medium",
+  );
+  check("ผัง 7 ใบ: จบด้วย done จากรุ่น Sonnet · การ์ดครบ 7 ใบ", ev7.some((e) => e.type === "done" && e.model === CLAUDE_SONNET_MODEL) && ev7.filter((e) => e.type === "card").length === 7);
   mockFetch(() => claudeStream(json5, "end_turn", true));
   const ev5t = await collect(ctx5);
   check(
@@ -210,9 +220,10 @@ async function main() {
   );
   const big = claudeReadingThinking(12);
   check(
-    "ผัง 10 ใบขึ้นไป ➔ effort high เผื่อความคิด 16,000 · 4-9 ใบ medium · 1-3 ใบ low",
-    big.effort === "high" && big.headroom === 16000 && claudeReadingThinking(9).effort === "medium" && claudeReadingThinking(3).effort === "low",
+    "ผัง 10 ใบขึ้นไป ➔ effort medium (เดิม high · ลดค่าใช้จ่าย 2026-11-04) เพดานเผื่อความคิดคง 16,000 · 4-9 ใบ medium · 1-3 ใบ low",
+    big.effort === "medium" && big.headroom === 16000 && claudeReadingThinking(9).effort === "medium" && claudeReadingThinking(4).effort === "medium" && claudeReadingThinking(3).effort === "low",
   );
+  check("ไม่มีขนาดผังไหนใช้ effort high (ความคิดคิดเงินเท่าโทเคนคำตอบ)", [1, 3, 4, 6, 7, 9, 10, 12, 20].every((n) => claudeReadingThinking(n).effort !== "high"));
 
   console.log("\n4.5) ความเชื่อมโยงไพ่เข้า prompt (เจ้าของสั่งเปิด 2026-10-28 โดยไม่รอผลวัด)");
   {
@@ -241,7 +252,7 @@ async function main() {
   const evErr = await collect(ctx3);
   check("error กลางสตรีม ➔ ไม่มี done", !evErr.some((e) => e.type === "done"));
 
-  console.log("\n5.5) ถามแม่หมอเรื่องผังดวง (/natal-chart) ➔ Sonnet + โหมดคิด (เจ้าของสั่ง: ต้องแม่นและละเอียด)");
+  console.log("\n5.5) ถามแม่หมอเรื่องผังดวง (/natal-chart) ➔ Haiku + โหมดคิด effort high (เดิม Sonnet · ลดค่าใช้จ่าย 2026-11-04)");
   mockFetch(
     () =>
       new Response(
@@ -258,22 +269,22 @@ async function main() {
       ),
   );
   const rep = await generateClaudeReply({
-    model: CLAUDE_SONNET_MODEL,
+    model: CLAUDE_HAIKU_MODEL,
     system: "ระบบ",
     messages: [
       { role: "assistant", content: "สวัสดี" },
       { role: "user", content: "ลัคนาฉันคืออะไร" },
     ],
-    maxTokens: 8000,
+    maxTokens: 12000,
     timeoutMs: 5000,
-    effort: "medium",
+    effort: "high",
   });
   check("คืนเฉพาะข้อความ (ไม่รวมบล็อกความคิด)", rep?.reply === "ดวงอาทิตย์ราศีมังกรในเรือนที่ 1");
   check(
-    "Sonnet 5.5 · adaptive thinking · effort medium · ไม่ส่ง temperature · ไม่สตรีม",
-    lastReq?.body.model === CLAUDE_SONNET_MODEL &&
+    "Haiku 5.5 · adaptive thinking · effort high · ไม่ส่ง temperature · ไม่สตรีม",
+    lastReq?.body.model === CLAUDE_HAIKU_MODEL &&
       lastReq?.body.thinking?.type === "adaptive" &&
-      lastReq?.body.output_config?.effort === "medium" &&
+      lastReq?.body.output_config?.effort === "high" &&
       !("temperature" in (lastReq?.body ?? {})) &&
       !lastReq?.body.stream,
   );
@@ -288,8 +299,14 @@ async function main() {
   const nClaude = natalRoute.indexOf("generateClaudeReply(");
   const nGroq = natalRoute.indexOf("generateGroqChatReply(");
   check(
-    "/api/natal/chat: Claude Sonnet ก่อน Groq ➔ Gemini · ผ่านด่านกันรั่ว prompt เหมือนตัวอื่น",
-    nClaude > 0 && nClaude < nGroq && /model: CLAUDE_SONNET_MODEL/.test(natalRoute) && /return await finish\(reply, "claude"\)/.test(natalRoute),
+    "/api/natal/chat: Claude Haiku effort high ก่อน Groq ➔ Gemini · เพดาน 12,000 เผื่อความคิด · ผ่านด่านกันรั่ว prompt เหมือนตัวอื่น",
+    nClaude > 0 &&
+      nClaude < nGroq &&
+      /model: CLAUDE_HAIKU_MODEL/.test(natalRoute) &&
+      !/CLAUDE_SONNET_MODEL/.test(natalRoute) &&
+      /effort: "high"/.test(natalRoute) &&
+      /maxTokens: 12000/.test(natalRoute) &&
+      /return await finish\(reply, "claude"\)/.test(natalRoute),
   );
 
   console.log("\n5.6) เส้นอื่นใช้ Claude เป็นหลัก (เจ้าของสั่ง 2026-10-28: เลือกรุ่นตามงาน)");
@@ -336,11 +353,12 @@ async function main() {
   const cGroq = chatRoute.indexOf("generateGroqChatReply(");
   const cGemini = chatRoute.indexOf("extractGeminiAnswer(data)");
   check(
-    "/chat: Claude ➔ Groq ➔ Gemini · รุ่นตามจำนวนไพ่ · effort medium · ผ่านด่านกันรั่ว prompt",
+    "/chat: Claude ➔ Groq ➔ Gemini · Haiku ทุกผัง (ไม่ใช้ Sonnet) · effort medium · ผ่านด่านกันรั่ว prompt",
     cClaude > 0 &&
       cClaude < cGroq &&
       cGroq < cGemini &&
-      /model: claudeReadingModel\(record\.drawn\?\.length \?\? 0\)/.test(chatRoute) &&
+      /model: CLAUDE_HAIKU_MODEL/.test(chatRoute) &&
+      !/CLAUDE_SONNET_MODEL|claudeReadingModel/.test(chatRoute) &&
       /effort: "medium"/.test(chatRoute) &&
       /detectPromptLeak\(cleanReply\)[\s\S]{0,400}provider: "claude"/.test(chatRoute),
   );
@@ -353,7 +371,13 @@ async function main() {
     ["/journal/monthly-summary", "src/app/api/journal/monthly-summary/route.ts"],
   ] as const) {
     const src = fs.readFileSync(path.resolve(file), "utf-8");
-    check(`${name}: ใช้ generateAiJson + Sonnet (ไม่เรียก Gemini ตรง)`, /generateAiJson</.test(src) && /model: CLAUDE_SONNET_MODEL/.test(src) && !/geminiEndpoint\(|generateGeminiJson\(/.test(src));
+    check(
+      `${name}: ใช้ generateAiJson + Haiku effort medium (ไม่ใช้ Sonnet · ไม่เรียก Gemini ตรง)`,
+      /generateAiJson</.test(src) &&
+        /model: CLAUDE_HAIKU_MODEL, effort: "medium"/.test(src) &&
+        !/CLAUDE_SONNET_MODEL/.test(src) &&
+        !/geminiEndpoint\(|generateGeminiJson\(/.test(src),
+    );
   }
 
   console.log("\n6) เครดิตหมด/คีย์ผิด ➔ พักเรียก Claude ไม่ให้ทุกคำอ่านเสียเวลายิงคำขอที่ล้มแน่");

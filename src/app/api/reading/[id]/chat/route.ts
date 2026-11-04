@@ -539,13 +539,14 @@ ${guardSection}
       { role: "user" as const, content: userQuestion },
     ];
 
-    // ── Tier 0: Claude (เจ้าของสั่ง 2026-10-28 "ใช้ Claude เป็นหลัก") — รุ่นตามจำนวนไพ่แบบเดียวกับคำอ่าน
-    //    1-3 ใบ Haiku · 4 ใบขึ้นไป Sonnet (ต้องโยงไพ่หลายใบ) · effort medium ให้ตอบตรงไพ่ที่เปิด (เจ้าของสั่ง 2026-10-28 ให้แม่นขึ้น)
+    // ── Tier 0: Claude (เจ้าของสั่ง 2026-10-28 "ใช้ Claude เป็นหลัก") — Haiku ทุกผัง · effort medium ให้ตอบตรงไพ่ที่เปิด
+    //    เดิมผัง 4 ใบขึ้นไปใช้ Sonnet ➔ Haiku (เจ้าของสั่ง 2026-11-04: แพงไป) · แชทตอบต่อจากคำอ่านที่เขียนเสร็จแล้ว
+    //    และส่งประวัติซ้ำทุกข้อความ ยิ่งคุยยาวยิ่งแพง · Haiku ราคาต่อโทเคนราว 1/20 ของ Sonnet
     //    ไม่มีคีย์ / พัก / ล้ม / เผย prompt ➔ ไหลลง Groq ➔ Gemini ตามเดิม
     if (process.env.ANTHROPIC_API_KEY?.trim()) {
-      const { generateClaudeReply, claudeReadingModel } = await import("@/lib/ai/claude");
+      const { generateClaudeReply, CLAUDE_HAIKU_MODEL } = await import("@/lib/ai/claude");
       const claudeResult = await generateClaudeReply({
-        model: claudeReadingModel(record.drawn?.length ?? 0),
+        model: CLAUDE_HAIKU_MODEL,
         system: systemInstruction,
         messages: replayMessages,
         // ความคิดนับรวมใน max_tokens ➔ เผื่อจากคำตอบ ~1,500 โทเคน ไม่งั้นโดนตัดแล้วไหลลง Groq เงียบ ๆ
