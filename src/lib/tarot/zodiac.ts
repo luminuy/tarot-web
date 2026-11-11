@@ -10,6 +10,8 @@ import type { MonthDay } from "@/data/zodiac";
 
 /** เส้นทางหน้าราศี — ประกอบจากที่เดียว (ไม่เขียน path ของหน้าราศีกระจายหลายไฟล์) */
 export const ZODIAC_INDEX_PATH = "/cards/zodiac";
+/** หน้ารวม "ดูดวงรายวัน 12 ราศี" (ภาษาไทยอย่างเดียว) — หน้ารายราศียังเป็น `zodiacSignPath()` ไม่มีหน้าลูกใต้เส้นนี้ */
+export const HOROSCOPE_PATH = "/horoscope";
 export function zodiacSignPath(id: string): string {
   return `${ZODIAC_INDEX_PATH}/${id}`;
 }

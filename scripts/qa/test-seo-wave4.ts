@@ -12,7 +12,12 @@ import { ZODIAC_SIGNS } from "../../src/data/zodiac";
 import { ZODIAC_ASPECTS, zodiacDistance } from "../../src/data/zodiac-compat";
 import { computeZodiacDaily } from "../../src/lib/tarot/zodiac-daily";
 import { CARD_SUMMARIES } from "../../src/data/cards/summary";
-import { decanRanges, findThaiZodiacByDate, findZodiacByDate, thaiRanges } from "../../src/lib/tarot/zodiac";
+import { decanRanges, findThaiZodiacByDate, findZodiacByDate, HOROSCOPE_PATH, thaiRanges, zodiacSignPath } from "../../src/lib/tarot/zodiac";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { HOROSCOPE_ELEMENT_GUIDE, HOROSCOPE_FAQ, HoroscopeBody, horoscopeMetadata } from "../../src/app/_shared/pages/horoscope";
+import { isAstroRoute } from "../../src/lib/routing/astro-routes";
+import { hasEnglishTwin } from "../../src/lib/i18n/paths";
 import { DECK } from "../../src/data/cards";
 import { buildYesNoAnswer } from "../../src/data/cards/yes-no";
 import { cardDetailFaqJsonLd } from "../../src/app/_shared/pages/card-detail";
@@ -601,6 +606,69 @@ assert(
     guides > 0 && problems.length === 0,
     `คู่มือรายผัง: ไพ่ตัวอย่าง/ลิงก์/FAQ ถูกต้อง (${guides} ผัง)${problems.length ? ` — ${problems.join(" · ")}` : ""}`,
   );
+}
+
+// 16. 🌤️ ดูดวงรายวัน 12 ราศี `/horoscope` (ผล GSC 2026-11-09) — หน้ารวมหน้าเดียว ภาษาไทยอย่างเดียว
+//     คำ "ดูดวงราศี…วันนี้" เป็นของหน้ารายราศี `/cards/zodiac/<ราศี>` อยู่แล้ว ➔ ห้ามมีหน้าลูกใต้ /horoscope (แย่งคำกันเอง · บทเรียนรอบ 2026-11-03)
+{
+  const root = process.cwd();
+  assert(fs.existsSync(path.join(root, "astro/pages/horoscope.astro")), "ต้องมีหน้า astro/pages/horoscope.astro");
+  assert(!fs.existsSync(path.join(root, "astro/pages/horoscope")), "ห้ามมีหน้าลูกใต้ /horoscope — หน้ารายราศีคือ /cards/zodiac/<ราศี>");
+  assert(!fs.existsSync(path.join(root, "astro/pages/en/horoscope.astro")), "/horoscope เป็นภาษาไทยอย่างเดียว (เพิ่มฝาแฝดต้องแก้ paths.ts และด่านนี้พร้อมกัน)");
+  assert(sitemapUrls.has(`${SITE_ORIGIN}${HOROSCOPE_PATH}`), "sitemap ต้องมี /horoscope");
+  assert(!sitemapUrls.has(`${SITE_ORIGIN}/en${HOROSCOPE_PATH}`), "sitemap ห้ามมี /en/horoscope (ไม่มีหน้านี้จริง)");
+  assert(isAstroRoute(HOROSCOPE_PATH), "/horoscope ต้องอยู่ใน ASTRO_ROUTE_PREFIXES (ไม่งั้นลิงก์จากหน้า Next จะใช้ router ของ Next)");
+  assert(!hasEnglishTwin(HOROSCOPE_PATH), "/horoscope ต้องไม่ถูกนับว่ามีฝาแฝดอังกฤษ");
+
+  const meta = horoscopeMetadata();
+  const title = String(meta.title ?? "");
+  assert(title.startsWith("ดูดวงรายวัน 12 ราศี"), `title ของ /horoscope ต้องขึ้นต้นด้วยคำที่หน้านี้เป็นเจ้าของ (ได้ "${title}")`);
+  assert(!/ดูดวงไพ่ยิปซีรายวัน|ไพ่ประจำราศี/.test(title), "title ของ /horoscope ห้ามใช้วลีของ /daily หรือ /cards/zodiac (กันแย่งคำ)");
+  const alt = meta.alternates as { canonical?: string; languages?: unknown } | undefined;
+  assert(alt?.canonical === `${SITE_ORIGIN}${HOROSCOPE_PATH}` && !alt.languages, "/horoscope: canonical ชี้ตัวเอง และไม่ประกาศ hreflang");
+
+  // วิธีอ่านไพ่ตามธาตุ: ครบ 4 ธาตุ × 4 ชุด และความสัมพันธ์ตรงตามหลักธาตุ (คำนวณแยกจากข้อมูล ไม่ลอกค่าจากไฟล์ที่ตรวจ)
+  const suitElement = { wands: "fire", cups: "water", swords: "air", pentacles: "earth" } as const;
+  const friend = { fire: "air", air: "fire", water: "earth", earth: "water" } as const;
+  const enemy = { fire: "water", water: "fire", air: "earth", earth: "air" } as const;
+  const guideProblems: string[] = [];
+  if (new Set(HOROSCOPE_ELEMENT_GUIDE.map((g) => g.element)).size !== 4) guideProblems.push("ธาตุไม่ครบ 4");
+  for (const group of HOROSCOPE_ELEMENT_GUIDE) {
+    if (new Set(group.rows.map((r) => r.suit)).size !== 4) guideProblems.push(`${group.element}: ชุดไพ่ไม่ครบ 4`);
+    for (const row of group.rows) {
+      const el = suitElement[row.suit];
+      const want = el === group.element ? "same" : el === friend[group.element] ? "support" : el === enemy[group.element] ? "opposite" : "neutral";
+      if (row.relation !== want) guideProblems.push(`${group.element} × ${row.suit}: ต้องเป็น ${want} (ได้ ${row.relation})`);
+      if (row.text.trim().length < 40) guideProblems.push(`${group.element} × ${row.suit}: คำอธิบายสั้นเกิน`);
+    }
+  }
+  assert(guideProblems.length === 0, `/horoscope: ตารางธาตุของราศีกับชุดไพ่ถูกต้อง${guideProblems.length ? ` — ${guideProblems.join(" · ")}` : ""}`);
+  assert(HOROSCOPE_FAQ.length >= 4 && HOROSCOPE_FAQ.every((f) => f.q.trim() && f.a.trim().length >= 40), "/horoscope: คำถามที่พบบ่อยอย่างน้อย 4 ข้อ มีคำตอบจริง");
+
+  // เรนเดอร์ของจริง: ลิงก์เข้าหน้ารายราศีครบ 12 ด้วยคำที่คนค้น · ช่องไพ่รายวันอยู่ใน HTML · FAQ อยู่ใน DOM (ตรงกับ JSON-LD)
+  const html = renderToStaticMarkup(createElement(HoroscopeBody, { daily: createElement("i", { id: "daily-slot-probe" }) }));
+  const missing = ZODIAC_SIGNS.filter(
+    (s) => !new RegExp(`<a[^>]*href="${zodiacSignPath(s.id)}"[^>]*>(?:(?!</a>).)*ดูดวง${s.nameTh}วันนี้`, "s").test(html),
+  ).map((s) => s.id);
+  assert(missing.length === 0, `/horoscope ต้องลิงก์ "ดูดวงราศี…วันนี้" เข้าหน้ารายราศีครบ 12${missing.length ? ` — ขาด ${missing.join(", ")}` : ""}`);
+  assert(html.includes('id="daily-slot-probe"'), "/horoscope ต้องวางช่องไพ่รายวัน (island) ลงในหน้า");
+  assert((html.match(/<h1[\s>]/g) ?? []).length === 1 && /<h1[^>]*>(?:(?!<\/h1>).)*ดูดวงรายวัน/s.test(html), "/horoscope ต้องมี h1 เดียวที่มีคำ \"ดูดวงรายวัน\"");
+  assert(HOROSCOPE_FAQ.every((f) => html.includes(f.q)), "/horoscope: คำถามใน JSON-LD ต้องอยู่ใน DOM ด้วย");
+  // ช่องไพ่ของวันใน HTML นิ่งต้องมีแค่ island (หน้า prerender ห้ามมีไพ่ของวัน · INC-0223 · กฎข้อ 4)
+  // และไพ่ในรายการราศีต้องเป็นไพ่ประจำราศีของราศีนั้นเอง (ข้อมูลคงที่ ไม่ใช่ผลสุ่ม)
+  assert(/<div id="horoscope-today"><i id="daily-slot-probe"><\/i><\/div>/.test(html), "/horoscope: ช่องไพ่ของวันต้องมีแค่ island ห้ามมีไพ่ใน HTML นิ่ง");
+  const wrongCard = ZODIAC_SIGNS.filter((s) => {
+    const link = new RegExp(`<a[^>]*href="${zodiacSignPath(s.id)}"[^>]*>((?:(?!</a>).)*)</a>`, "s").exec(html)?.[1] ?? "";
+    const ids = [...link.matchAll(/((?:major|wands|cups|swords|pentacles)-\d{2})/g)].map((m) => m[1]);
+    return ids.length === 0 || ids.some((id) => id !== s.majorCardId);
+  }).map((s) => s.id);
+  assert(wrongCard.length === 0, `/horoscope: ภาพไพ่ในรายการราศีต้องเป็นไพ่ประจำราศีนั้น${wrongCard.length ? ` — ผิดที่ ${wrongCard.join(", ")}` : ""}`);
+
+  // ลิงก์เข้าหน้านี้จากหน้าพี่น้อง: ท้ายเว็บ (ทุกหน้า) · /daily · หน้าราศี
+  const read = (f: string) => fs.readFileSync(path.join(root, f), "utf-8");
+  assert(/href: "\/horoscope"/.test(read("src/components/layout/nav-links.ts")), "ท้ายเว็บฝั่งไทยต้องลิงก์ /horoscope");
+  assert(/href: "\/horoscope"/.test(read("src/app/_shared/pages/daily-th.tsx")), "/daily ต้องลิงก์ /horoscope");
+  assert((read("src/app/_shared/pages/zodiac.tsx").match(/href=\{HOROSCOPE_PATH\}/g) ?? []).length >= 2, "หน้ารวมราศีและหน้ารายราศีต้องลิงก์ /horoscope");
 }
 
 console.log(`\n📊 ผลสรุปการทดสอบ: ผ่าน ${passed} ด่าน | ล้มเหลว ${failed} ด่าน\n`);

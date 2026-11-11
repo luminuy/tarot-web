@@ -48,6 +48,8 @@ export const ASTRO_ROUTE_PREFIXES = [
   "/novel",
   /* 🪐 ผังดวงกำเนิด `/natal-chart` + `/en/natal-chart` (คำนวณในเครื่องผู้ใช้) */
   "/natal-chart",
+  /* 🌤️ ดูดวงรายวัน 12 ราศี `/horoscope` — หน้ารวมหน้าเดียว ภาษาไทยอย่างเดียว (ผล GSC 2026-11-09) */
+  "/horoscope",
 ] as const;
 
 /** ตัด `/en` นำหน้าออก เพื่อเทียบกับรายการฝั่งไทยชุดเดียว */

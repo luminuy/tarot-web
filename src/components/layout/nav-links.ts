@@ -24,6 +24,8 @@ const FOOTER_COLUMNS = [
       { label: "ผัง 3 ใบ อดีต-ปัจจุบัน-อนาคต", href: "/spreads/three-card" },
       { label: "ผังทางแยกการตัดสินใจ (5 ใบ)", href: "/spreads/decision" },
       { label: "ผังดวงรายวัน (Daily Guidance 1 ใบ)", href: "/spreads/daily" },
+      // ลิงก์ทุกหน้าเข้าหน้ารวมดวงรายวันด้วยคำที่คนค้น (GSC 2026-11-09: "ดูดวงรายวัน" · "ดูดวงวันนี้" ไม่มีหน้าไหนขึ้นเลย · ภาษาไทยอย่างเดียว)
+      { label: "ดูดวงรายวัน 12 ราศี", href: "/horoscope" },
     ],
   },
   {
