@@ -6,6 +6,7 @@ import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
 import { ZODIAC_SIGNS } from "@/data/zodiac";
 import { QUESTIONS } from "@/data/questions";
 import { NOVEL, NOVEL_PATH } from "@/data/novel";
+import { HOROSCOPE_PATH, ZODIAC_INDEX_PATH, zodiacSignPath } from "@/lib/tarot/zodiac";
 import { localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
 import { hasEnglishTwin } from "@/lib/i18n/paths";
 import { articleModifiedAt, questionModifiedAt, SITE_TEMPLATE_UPDATED_AT } from "@/lib/seo/lastmod";
@@ -44,6 +45,11 @@ const CONTENT_UPDATED_AT: Record<string, Date> = Object.fromEntries([
   ["/spreads/money", new Date("2026-11-03T21:00:00+07:00")] as const,
   ["/spreads/topic/money", new Date("2026-11-03T21:00:00+07:00")] as const,
   ["/cards", new Date("2026-11-03T21:00:00+07:00")] as const,
+  // 2026-11-11 (ผล GSC 2026-11-09): หน้าใหม่ /horoscope · หน้าที่มีลิงก์เข้าหน้านั้นเพิ่มบนเนื้อหา (/daily · /cards/zodiac · หน้ารายราศี 12 หน้า)
+  [HOROSCOPE_PATH, new Date("2026-11-11T21:00:00+07:00")] as const,
+  ["/daily", new Date("2026-11-11T21:00:00+07:00")] as const,
+  [ZODIAC_INDEX_PATH, new Date("2026-11-11T21:00:00+07:00")] as const,
+  ...ZODIAC_SIGNS.map((sign) => [zodiacSignPath(sign.id), new Date("2026-11-11T21:00:00+07:00")] as const),
 ]);
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -63,6 +69,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "daily",
       priority: 0.95,
+    },
+    // ดูดวงรายวัน 12 ราศี — หน้ารวมหน้าเดียว ภาษาไทยอย่างเดียว (ไม่มีฝาแฝด /en · หน้ารายราศีคือ /cards/zodiac/<ราศี>)
+    {
+      url: `${baseUrl}${HOROSCOPE_PATH}`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/love/1-card`,

@@ -21,7 +21,7 @@ import { buildAlternates, localizedUrl, noindexAlternates } from "@/lib/config/s
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { ZODIAC_ASPECTS, zodiacDistance } from "@/data/zodiac-compat";
-import { decanRanges, formatMonthDay, thaiRanges, ZODIAC_INDEX_PATH, zodiacSignPath } from "@/lib/tarot/zodiac";
+import { decanRanges, formatMonthDay, HOROSCOPE_PATH, thaiRanges, ZODIAC_INDEX_PATH, zodiacSignPath } from "@/lib/tarot/zodiac";
 import { localeHref } from "@/lib/i18n/paths";
 import type { Locale } from "@/lib/i18n/types";
 
@@ -327,6 +327,15 @@ export function ZodiacIndexBody({
         <Ui2Window n="02" kicker={isEnglish ? "Today" : "วันนี้"} tone={4}>
           {/* จุดหมายของลิงก์ `#zodiac-daily-title` จากหน้าแรก — ต้องอยู่ใน HTML ตั้งแต่เซิร์ฟเวอร์ (ตัว island วาดหัวข้อหลังโหลดข้อมูล) · A7-08 */}
           <div id="zodiac-daily-title">{daily}</div>
+          {/* หน้ารวมดวงรายวัน (ไทยอย่างเดียว — ไม่มี /en/horoscope) · ลิงก์ด้วยคำที่คนค้น */}
+          {!isEnglish && (
+            <p className="mt-5 text-center text-sm font-sans text-muted">
+              อยากอ่านวิธีดูไพ่ของวันตามธาตุของราศี{" "}
+              <Link href={HOROSCOPE_PATH} className="underline text-gold-ink">
+                ดูดวงรายวัน 12 ราศี
+              </Link>
+            </p>
+          )}
         </Ui2Window>
 
         <Ui2Window n="03" kicker={isEnglish ? "Compatibility" : "ความเข้ากัน"} tone={3}>
@@ -547,6 +556,15 @@ export function ZodiacSignBody({ sign, locale, daily }: { sign: ZodiacSign; loca
             </p>
           </div>
           {daily}
+          {/* หน้ารวมดวงรายวัน (ไทยอย่างเดียว — ไม่มี /en/horoscope) */}
+          {!isEnglish && (
+            <p className="text-sm font-sans text-muted">
+              ดูไพ่วันนี้ของราศีอื่น และวิธีอ่านไพ่ตามธาตุของราศี{" "}
+              <Link href={HOROSCOPE_PATH} className="underline text-gold-ink">
+                ดูดวงรายวัน 12 ราศี
+              </Link>
+            </p>
+          )}
         </section>
 
         {/* ในโหราศาสตร์ไทย — เจ้าเรือนต่างจากสากลเฉพาะพิจิก กุมภ์ มีน */}

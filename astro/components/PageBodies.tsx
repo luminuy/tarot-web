@@ -29,6 +29,7 @@ import { BirthCardBodyEn } from "@/app/_shared/pages/birth-card-en";
 import { BirthCardBodyTh } from "@/app/_shared/pages/birth-card-th";
 import { CardsAllBody } from "@/app/_shared/pages/cards-all";
 import { ZodiacIndexBody, ZodiacSignBody } from "@/app/_shared/pages/zodiac";
+import { HoroscopeBody } from "@/app/_shared/pages/horoscope";
 import type { ZodiacSign } from "@/data/zodiac";
 import { CardsIndexBody } from "@/app/_shared/pages/cards-index";
 import { CardGroupBody } from "@/app/_shared/pages/card-group";
@@ -138,6 +139,15 @@ export function ZodiacSignBodyRoot({ sign, locale, daily }: { sign: ZodiacSign; 
   return (
     <LocaleProvider forcedLocale={locale}>
       <ZodiacSignBody sign={sign} locale={locale} daily={daily} />
+    </LocaleProvider>
+  );
+}
+
+/** 🌤️ ดูดวงรายวัน 12 ราศี `/horoscope` (ภาษาไทยอย่างเดียว) — ส่วนเดียวที่ใช้ JS คือไพ่รายวัน (ส่งเข้ามาทาง slot) */
+export function HoroscopeBodyRoot({ daily }: { daily: ReactNode }) {
+  return (
+    <LocaleProvider forcedLocale="th">
+      <HoroscopeBody daily={daily} />
     </LocaleProvider>
   );
 }

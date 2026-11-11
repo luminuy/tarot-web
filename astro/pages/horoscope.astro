@@ -1,0 +1,35 @@
+---
+import { horoscopeMetadata } from "@/app/_shared/pages/horoscope";
+import { ZODIAC_SIGN_NAMES } from "@/app/_shared/pages/zodiac";
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { HoroscopeBodyRoot } from "../components/PageBodies";
+import { ZodiacDailyRoot } from "../islands/ZodiacFinderRoot";
+import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
+import "@/styles/ui2-page.css";
+import "@/styles/ui2-page-fx.css";
+
+/**
+ * 🌤️ ดูดวงรายวัน 12 ราศี — หน้ารวม (ภาษาไทยอย่างเดียว · ไม่มี `/en/horoscope` และไม่ประกาศ hreflang)
+ * ไพ่ของวันเป็น island ตัวเดียวกับ `/cards/zodiac` (`ZodiacDaily`) · ที่เหลือเป็น HTML ล้วน
+ * ⚠️ `/horoscope` อยู่ใน ASTRO_ROUTE_PREFIXES · หน้ารายราศีใช้ `/cards/zodiac/<ราศี>` ที่มีอยู่แล้ว ห้ามสร้างซ้ำใต้เส้นนี้
+ */
+const locale = "th" as const;
+---
+
+<BaseLayout locale={locale} metadata={horoscopeMetadata()}>
+  <SiteHeaderRoot locale={locale} pathname={Astro.url.pathname} />
+  <div class="ui2-pg" data-ui2-page-dark="">
+  <HoroscopeBodyRoot>
+    <Fragment slot="daily">
+      <ZodiacDailyRoot signs={ZODIAC_SIGN_NAMES} locale={locale} client:visible />
+    </Fragment>
+  </HoroscopeBodyRoot>
+  </div>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>
+
+<!-- หยุดของวน (ไพ่ลอยหัวหน้า UI 2.0) เมื่อพ้นจอ -->
+<script>
+  import "../scripts/ui2-inview";
+</script>

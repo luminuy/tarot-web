@@ -106,6 +106,9 @@
 /daily
   Cache-Control: public, max-age=0, s-maxage=3600, stale-while-revalidate=86400
 
+/horoscope
+  Cache-Control: public, max-age=0, s-maxage=3600, stale-while-revalidate=86400
+
 /blog
   Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
 
