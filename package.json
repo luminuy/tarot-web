@@ -89,7 +89,7 @@
     "@next/eslint-plugin-next": "^16.4.3",
     "@opennextjs/cloudflare": "1.20.12",
     "@tailwindcss/postcss": "^4.3.5",
-    "@tailwindcss/vite": "4.3.3",
+    "@tailwindcss/vite": "4.3.5",
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
